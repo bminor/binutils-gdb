@@ -27,15 +27,10 @@ static void EXFUN((*old_free_hook), (PTR ptr));
 static PTR EXFUN((*old_malloc_hook), (size_t size));
 static PTR EXFUN((*old_realloc_hook), (PTR ptr, size_t size));
 
-#ifdef sgi
-#define ABORT_RETURNS int
-#else
-#define ABORT_RETURNS void
-#endif
 
 /* Function to call when something awful happens. */
-extern ABORT_RETURNS abort();
-static ABORT_RETURNS EXFUN((*abortfunc), (void)) = abort;
+extern void abort();
+static void EXFUN((*abortfunc), (void)) = (void (*)()) abort;
 
 /* Arbitrary magical numbers.  */
 #define MAGICWORD	0xfedabeeb
@@ -47,7 +42,7 @@ struct hdr
     unsigned int magic;		/* Magic number to check header integrity.  */
   };
 
-static ABORT_RETURNS
+static void
 DEFUN(checkhdr, (hdr), CONST struct hdr *hdr)
 {
   if (hdr->magic != MAGICWORD || ((char *) &hdr[1])[hdr->size] != MAGICBYTE)
@@ -104,7 +99,7 @@ DEFUN(reallochook, (ptr, size), PTR ptr AND size_t size)
 }
 
 void
-DEFUN(mcheck, (func), ABORT_RETURNS EXFUN((*func), (void)))
+DEFUN(mcheck, (func), void EXFUN((*func), (void)))
 {
   static int mcheck_used = 0;
 
