@@ -1,3 +1,9 @@
+2004-08-23  Richard Earnshaw  <rearnsha@arm.com>
+
+	* armnbsd-tdep.c (arm_nbsd_arm_be_breakpoint): Define.
+	(arm_nbsd_thumb_[lb]e_breakpoint): Define.
+	(arm_netbsd_init_abi_common): Register them.
+
 2004-08-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/vax/vax.mh (NATDEPFILES): Add vax-nat.c.
