@@ -1,3 +1,10 @@
+2005-03-18  Julian Brown  <julian@codesourcery.com>
+
+	* scripttempl/armbpapi.sc (.rel.dyn): Add .rel.init_array,
+	.rel.fini_array.
+	(.rela.dyn): Add .rela.init_array, .rela.fini_array.
+	(SECTIONS): Add .rel.other, .rela.other, .reli.other after PLT relocs.
+
 2005-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_finish): Don't set
