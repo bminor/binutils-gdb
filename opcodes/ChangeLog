@@ -1,7 +1,11 @@
+2004-03-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* sparc-dis.c (print_insn_sparc): Update getword prototype.
+
 2004-03-12  Michal Ludvig  <mludvig@suse.cz>
 
 	* i386-dis.c (GRPPLOCK): Delete.
-	(grps): Detele GRPPLOCK entry.
+	(grps): Delete GRPPLOCK entry.
 
 2004-03-12  Alan Modra  <amodra@bigpond.net.au>
 
@@ -84,8 +88,8 @@
 	Adjust the bit patterns in a few comments.
 
 2004-02-25  Aldy Hernandez  <aldyh@redhat.com>
-                                                                                
-        * ppc-opc.c (powerpc_opcodes): Change mask for dcbt and dcbtst.
+
+	* ppc-opc.c (powerpc_opcodes): Change mask for dcbt and dcbtst.
 
 2004-02-20  Aldy Hernandez  <aldyh@redhat.com>
 
@@ -96,13 +100,13 @@
 	* ppc-opc.c (powerpc_opcodes): Add m*ivor35.
 
 2004-02-20  Aldy Hernandez  <aldyh@redhat.com>
- 
-        * ppc-opc.c (powerpc_opcodes): Add mfivor32, mfivor33, mfivor34,
-        mtivor32, mtivor33, mtivor34.
+
+	* ppc-opc.c (powerpc_opcodes): Add mfivor32, mfivor33, mfivor34,
+	mtivor32, mtivor33, mtivor34.
 
 2004-02-19  Aldy Hernandez  <aldyh@redhat.com>
- 
-        * ppc-opc.c (powerpc_opcodes): Add mfmcar.
+
+	* ppc-opc.c (powerpc_opcodes): Add mfmcar.
 
 2004-02-10  Petko Manolov  <petkan@nucleusys.com>
 
