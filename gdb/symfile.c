@@ -72,6 +72,11 @@ extern void report_transfer_performance PARAMS ((unsigned long,
 
 /* Functions this file defines */
 
+#if 0
+static int simple_read_overlay_region_table PARAMS ((void));
+static void simple_free_overlay_region_table PARAMS ((void));
+#endif
+
 static void set_initial_language PARAMS ((void));
 
 static void load_command PARAMS ((char *, int));
@@ -840,7 +845,7 @@ symfile_bfd_open (name)
 
   /* Look down path for it, allocate 2nd new malloc'd copy.  */
   desc = openp (getenv ("PATH"), 1, name, O_RDONLY | O_BINARY, 0, &absolute_name);
-#if defined(__GO32__) || defined(__WIN32__)
+#if defined(__GO32__) || defined(_WIN32)
   if (desc < 0)
     {
       char *exename = alloca (strlen (name) + 5);
@@ -1001,27 +1006,27 @@ generic_load (filename, from_tty)
 	    {
 	      char *buffer;
 	      struct cleanup *old_chain;
-	      bfd_vma vma;
+	      bfd_vma lma;
 
 	      data_count += size;
 
 	      buffer = xmalloc (size);
 	      old_chain = make_cleanup (free, buffer);
 
-	      vma = bfd_get_section_vma (loadfile_bfd, s);
-		  vma += load_offset;
+	      lma = s->lma;
+	      lma += load_offset;
 
 	      /* Is this really necessary?  I guess it gives the user something
 		 to look at during a long download.  */
-	      printf_filtered ("Loading section %s, size 0x%lx vma ",
+	      printf_filtered ("Loading section %s, size 0x%lx lma ",
 			       bfd_get_section_name (loadfile_bfd, s),
 			       (unsigned long) size);
-	      print_address_numeric (vma, 1, gdb_stdout);
+	      print_address_numeric (lma, 1, gdb_stdout);
 	      printf_filtered ("\n");
 
 	      bfd_get_section_contents (loadfile_bfd, s, buffer, 0, size);
 
-	      target_write_memory (vma, buffer, size);
+	      target_write_memory (lma, buffer, size);
 
 	      do_cleanups (old_chain);
 	    }
@@ -1374,6 +1379,8 @@ deduce_language_from_filename (filename)
   else if (STREQ (c, ".cc") || STREQ (c, ".C") || STREQ (c, ".cxx")
 	   || STREQ (c, ".cpp") || STREQ (c, ".cp") || STREQ (c, ".c++"))
     return language_cplus;
+  else if (STREQ (c, ".java"))
+    return language_java;
   else if (STREQ (c, ".ch") || STREQ (c, ".c186") || STREQ (c, ".c286"))
     return language_chill;
   else if (STREQ (c, ".f") || STREQ (c, ".F"))
@@ -1462,7 +1469,7 @@ allocate_psymtab (filename, objfile)
 
 
 /* Reset all data structures in gdb which may contain references to symbol
-   table date.  */
+   table data.  */
 
 void
 clear_symtab_users ()
@@ -1795,7 +1802,730 @@ init_psymbol_list (objfile, total_symbols)
       xmmalloc (objfile -> md, objfile -> static_psymbols.size
 			     * sizeof (struct partial_symbol *));
 }
-
+
+/* OVERLAYS:
+   The following code implements an abstraction for debugging overlay sections.
+
+   The target model is as follows:
+   1) The gnu linker will permit multiple sections to be mapped into the
+      same VMA, each with its own unique LMA (or load address).
+   2) It is assumed that some runtime mechanism exists for mapping the
+      sections, one by one, from the load address into the VMA address.
+   3) This code provides a mechanism for gdb to keep track of which 
+      sections should be considered to be mapped from the VMA to the LMA.
+      This information is used for symbol lookup, and memory read/write.
+      For instance, if a section has been mapped then its contents 
+      should be read from the VMA, otherwise from the LMA.
+
+   Two levels of debugger support for overlays are available.  One is
+   "manual", in which the debugger relies on the user to tell it which
+   overlays are currently mapped.  This level of support is
+   implemented entirely in the core debugger, and the information about
+   whether a section is mapped is kept in the objfile->obj_section table.
+
+   The second level of support is "automatic", and is only available if
+   the target-specific code provides functionality to read the target's
+   overlay mapping table, and translate its contents for the debugger
+   (by updating the mapped state information in the obj_section tables).
+
+   The interface is as follows:
+     User commands:
+       overlay map <name>	-- tell gdb to consider this section mapped
+       overlay unmap <name>	-- tell gdb to consider this section unmapped
+       overlay list		-- list the sections that GDB thinks are mapped
+       overlay read-target	-- get the target's state of what's mapped
+       overlay off/manual/auto -- set overlay debugging state
+     Functional interface:
+       find_pc_mapped_section(pc):    if the pc is in the range of a mapped
+				      section, return that section.
+       find_pc_overlay(pc):	      find any overlay section that contains 
+				      the pc, either in its VMA or its LMA
+       overlay_is_mapped(sect):       true if overlay is marked as mapped
+       section_is_overlay(sect):      true if section's VMA != LMA
+       pc_in_mapped_range(pc,sec):    true if pc belongs to section's VMA
+       pc_in_unmapped_range(...):     true if pc belongs to section's LMA
+       overlay_mapped_address(...):   map an address from section's LMA to VMA
+       overlay_unmapped_address(...): map an address from section's VMA to LMA
+       symbol_overlayed_address(...): Return a "current" address for symbol:
+				      either in VMA or LMA depending on whether
+				      the symbol's section is currently mapped
+ */
+
+/* Overlay debugging state: */
+
+int overlay_debugging = 0;	/* 0 == off, 1 == manual, -1 == auto */
+int overlay_cache_invalid = 0;	/* True if need to refresh mapped state */
+
+/* Target vector for refreshing overlay mapped state */
+static void simple_overlay_update PARAMS ((struct obj_section *));
+void (*target_overlay_update) PARAMS ((struct obj_section *)) 
+     = simple_overlay_update;
+
+/* Function: section_is_overlay (SECTION)
+   Returns true if SECTION has VMA not equal to LMA, ie. 
+   SECTION is loaded at an address different from where it will "run".  */
+
+int
+section_is_overlay (section)
+     asection *section;
+{
+  if (overlay_debugging)
+    if (section && section->lma != 0 &&
+	section->vma != section->lma)
+      return 1;
+
+  return 0;
+}
+
+/* Function: overlay_invalidate_all (void)
+   Invalidate the mapped state of all overlay sections (mark it as stale).  */
+
+static void
+overlay_invalidate_all ()
+{
+  struct objfile     *objfile;
+  struct obj_section *sect;
+
+  ALL_OBJSECTIONS (objfile, sect)
+    if (section_is_overlay (sect->the_bfd_section))
+      sect->ovly_mapped = -1;
+}
+
+/* Function: overlay_is_mapped (SECTION)
+   Returns true if section is an overlay, and is currently mapped. 
+   Private: public access is thru function section_is_mapped.
+
+   Access to the ovly_mapped flag is restricted to this function, so
+   that we can do automatic update.  If the global flag
+   OVERLAY_CACHE_INVALID is set (by wait_for_inferior), then call
+   overlay_invalidate_all.  If the mapped state of the particular
+   section is stale, then call TARGET_OVERLAY_UPDATE to refresh it.  */
+
+static int 
+overlay_is_mapped (osect)
+     struct obj_section *osect;
+{
+  if (osect == 0 || !section_is_overlay (osect->the_bfd_section))
+    return 0;
+
+  switch (overlay_debugging) 
+    {
+    default:
+    case 0:	return 0;	/* overlay debugging off */
+    case -1:			/* overlay debugging automatic */
+      /* Unles there is a target_overlay_update function, 
+	 there's really nothing useful to do here (can't really go auto)  */
+      if (target_overlay_update)
+	{
+	  if (overlay_cache_invalid)
+	    {
+	      overlay_invalidate_all ();
+	      overlay_cache_invalid = 0;
+	    }
+	  if (osect->ovly_mapped == -1)
+	    (*target_overlay_update) (osect);
+	}
+      /* fall thru to manual case */
+    case 1:			/* overlay debugging manual */
+      return osect->ovly_mapped == 1;
+    }
+}
+
+/* Function: section_is_mapped
+   Returns true if section is an overlay, and is currently mapped.  */
+
+int
+section_is_mapped (section)
+     asection *section;
+{
+  struct objfile     *objfile;
+  struct obj_section *osect;
+
+  if (overlay_debugging)
+    if (section && section_is_overlay (section))
+      ALL_OBJSECTIONS (objfile, osect)
+	if (osect->the_bfd_section == section)
+	  return overlay_is_mapped (osect);
+
+  return 0;
+}
+
+/* Function: pc_in_unmapped_range
+   If PC falls into the lma range of SECTION, return true, else false.  */
+
+CORE_ADDR
+pc_in_unmapped_range (pc, section)
+     CORE_ADDR pc;
+     asection *section;
+{
+  int size;
+
+  if (overlay_debugging)
+    if (section && section_is_overlay (section))
+      {
+	size = bfd_get_section_size_before_reloc (section);
+	if (section->lma <= pc && pc < section->lma + size)
+	  return 1;
+      }
+  return 0;
+}
+
+/* Function: pc_in_mapped_range
+   If PC falls into the vma range of SECTION, return true, else false.  */
+
+CORE_ADDR
+pc_in_mapped_range (pc, section)
+     CORE_ADDR pc;
+     asection *section;
+{
+  int size;
+
+  if (overlay_debugging)
+    if (section && section_is_overlay (section))
+      {
+	size = bfd_get_section_size_before_reloc (section);
+	if (section->vma <= pc && pc < section->vma + size)
+	  return 1;
+      }
+  return 0;
+}
+
+/* Function: overlay_unmapped_address (PC, SECTION)
+   Returns the address corresponding to PC in the unmapped (load) range.
+   May be the same as PC.  */
+
+CORE_ADDR
+overlay_unmapped_address (pc, section)
+     CORE_ADDR pc;
+     asection *section;
+{
+  if (overlay_debugging)
+    if (section && section_is_overlay (section) &&
+	pc_in_mapped_range (pc, section))
+      return pc + section->lma - section->vma;
+
+  return pc;
+}
+
+/* Function: overlay_mapped_address (PC, SECTION)
+   Returns the address corresponding to PC in the mapped (runtime) range.
+   May be the same as PC.  */
+
+CORE_ADDR
+overlay_mapped_address (pc, section)
+     CORE_ADDR pc;
+     asection *section;
+{
+  if (overlay_debugging)
+    if (section && section_is_overlay (section) &&
+	pc_in_unmapped_range (pc, section))
+      return pc + section->vma - section->lma;
+
+  return pc;
+}
+
+
+/* Function: symbol_overlayed_address 
+   Return one of two addresses (relative to the VMA or to the LMA),
+   depending on whether the section is mapped or not.  */
+
+CORE_ADDR 
+symbol_overlayed_address (address, section)
+     CORE_ADDR address;
+     asection *section;
+{
+  if (overlay_debugging)
+    {
+      /* If the symbol has no section, just return its regular address. */
+      if (section == 0)
+	return address;
+      /* If the symbol's section is not an overlay, just return its address */
+      if (!section_is_overlay (section))
+	return address;
+      /* If the symbol's section is mapped, just return its address */
+      if (section_is_mapped (section))
+	return address;
+      /*
+       * HOWEVER: if the symbol is in an overlay section which is NOT mapped,
+       * then return its LOADED address rather than its vma address!!
+       */
+      return overlay_unmapped_address (address, section);
+    }
+  return address;
+}
+
+/* Function: find_pc_overlay (PC) 
+   Return the best-match overlay section for PC:
+   If PC matches a mapped overlay section's VMA, return that section.
+   Else if PC matches an unmapped section's VMA, return that section.
+   Else if PC matches an unmapped section's LMA, return that section.  */
+
+asection *
+find_pc_overlay (pc)
+     CORE_ADDR pc;
+{
+  struct objfile     *objfile;
+  struct obj_section *osect, *best_match = NULL;
+
+  if (overlay_debugging)
+    ALL_OBJSECTIONS (objfile, osect)
+      if (section_is_overlay (osect->the_bfd_section))
+	{
+	  if (pc_in_mapped_range (pc, osect->the_bfd_section))
+	    {
+	      if (overlay_is_mapped (osect))
+		return osect->the_bfd_section;
+	      else
+		best_match = osect;
+	    }
+	  else if (pc_in_unmapped_range (pc, osect->the_bfd_section))
+	    best_match = osect;
+	}
+  return best_match ? best_match->the_bfd_section : NULL;
+}
+
+/* Function: find_pc_mapped_section (PC)
+   If PC falls into the VMA address range of an overlay section that is 
+   currently marked as MAPPED, return that section.  Else return NULL.  */
+
+asection *
+find_pc_mapped_section (pc)
+     CORE_ADDR pc;
+{
+  struct objfile     *objfile;
+  struct obj_section *osect;
+
+  if (overlay_debugging)
+    ALL_OBJSECTIONS (objfile, osect)
+      if (pc_in_mapped_range (pc, osect->the_bfd_section) &&
+	  overlay_is_mapped (osect))
+	return osect->the_bfd_section;
+
+  return NULL;
+}
+
+/* Function: list_overlays_command
+   Print a list of mapped sections and their PC ranges */
+
+void
+list_overlays_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  int                nmapped = 0;
+  struct objfile     *objfile;
+  struct obj_section *osect;
+
+  if (overlay_debugging)
+    ALL_OBJSECTIONS (objfile, osect)
+      if (overlay_is_mapped (osect))
+	{
+	  const char *name;
+	  bfd_vma     lma, vma;
+	  int         size;
+
+	  vma  = bfd_section_vma (objfile->obfd, osect->the_bfd_section);
+	  lma  = bfd_section_lma (objfile->obfd, osect->the_bfd_section);
+	  size = bfd_get_section_size_before_reloc (osect->the_bfd_section);
+	  name = bfd_section_name (objfile->obfd, osect->the_bfd_section);
+	  printf_filtered ("Section %s, loaded at %08x - %08x, ",
+			   name, lma, lma + size);
+	  printf_filtered ("mapped at %08x - %08x\n", 
+			   vma, vma + size);
+	  nmapped ++;
+	}
+  if (nmapped == 0)
+    printf_filtered ("No sections are mapped.\n");
+}
+
+/* Function: map_overlay_command
+   Mark the named section as mapped (ie. residing at its VMA address).  */
+
+void
+map_overlay_command (args, from_tty)
+     char *args;
+     int   from_tty;
+{
+  struct objfile     *objfile, *objfile2;
+  struct obj_section *sec,     *sec2;
+  asection           *bfdsec;
+
+  if (!overlay_debugging)
+    error ("Overlay debugging not enabled.  Use the 'OVERLAY ON' command.");
+
+  if (args == 0 || *args == 0)
+    error ("Argument required: name of an overlay section");
+
+  /* First, find a section matching the user supplied argument */
+  ALL_OBJSECTIONS (objfile, sec)
+    if (!strcmp (bfd_section_name (objfile->obfd, sec->the_bfd_section), args))
+      { 
+	/* Now, check to see if the section is an overlay. */
+	bfdsec = sec->the_bfd_section;
+	if (!section_is_overlay (bfdsec))
+	  continue;		/* not an overlay section */
+
+	/* Mark the overlay as "mapped" */
+	sec->ovly_mapped = 1;
+
+	/* Next, make a pass and unmap any sections that are
+	   overlapped by this new section: */
+	ALL_OBJSECTIONS (objfile2, sec2)
+	  if (sec2->ovly_mapped &&
+	      sec != sec2 &&
+	      sec->the_bfd_section != sec2->the_bfd_section &&
+	      (pc_in_mapped_range (sec2->addr,    sec->the_bfd_section) ||
+	       pc_in_mapped_range (sec2->endaddr, sec->the_bfd_section)))
+	    {
+	      if (info_verbose)
+		printf_filtered ("Note: section %s unmapped by overlap\n",
+				 bfd_section_name (objfile->obfd, 
+						   sec2->the_bfd_section));
+	      sec2->ovly_mapped = 0;	/* sec2 overlaps sec: unmap sec2 */
+	    }
+	return;
+      }
+  error ("No overlay section called %s", args);
+}
+
+/* Function: unmap_overlay_command
+   Mark the overlay section as unmapped 
+   (ie. resident in its LMA address range, rather than the VMA range).  */
+
+void
+unmap_overlay_command (args, from_tty)
+     char *args;
+     int   from_tty;
+{
+  struct objfile     *objfile;
+  struct obj_section *sec;
+
+  if (!overlay_debugging)
+    error ("Overlay debugging not enabled.  Use the 'OVERLAY ON' command.");
+
+  if (args == 0 || *args == 0)
+    error ("Argument required: name of an overlay section");
+
+  /* First, find a section matching the user supplied argument */
+  ALL_OBJSECTIONS (objfile, sec)
+    if (!strcmp (bfd_section_name (objfile->obfd, sec->the_bfd_section), args))
+      {
+	if (!sec->ovly_mapped)
+	  error ("Section %s is not mapped", args);
+	sec->ovly_mapped = 0;
+	return;
+      }
+  error ("No overlay section called %s", args);
+}
+
+/* Function: overlay_auto_command
+   A utility command to turn on overlay debugging.
+   Possibly this should be done via a set/show command. */
+
+static void
+overlay_auto_command (args, from_tty)
+{
+  overlay_debugging = -1;
+  if (info_verbose)
+    printf_filtered ("Automatic overlay debugging enabled.");
+}
+
+/* Function: overlay_manual_command
+   A utility command to turn on overlay debugging.
+   Possibly this should be done via a set/show command. */
+
+static void
+overlay_manual_command (args, from_tty)
+{
+  overlay_debugging = 1;
+  if (info_verbose)
+    printf_filtered ("Overlay debugging enabled.");
+}
+
+/* Function: overlay_off_command
+   A utility command to turn on overlay debugging.
+   Possibly this should be done via a set/show command. */
+
+static void
+overlay_off_command (args, from_tty)
+{
+  overlay_debugging = 0;
+  if (info_verbose)
+    printf_filtered ("Overlay debugging disabled.");
+}
+
+static void
+overlay_load_command (args, from_tty)
+{
+  if (target_overlay_update)
+    (*target_overlay_update) (NULL);
+  else
+    error ("This target does not know how to read its overlay state.");
+}
+
+/* Function: overlay_command
+   A place-holder for a mis-typed command */
+
+/* Command list chain containing all defined "overlay" subcommands. */
+struct cmd_list_element *overlaylist;
+
+static void
+overlay_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  printf_unfiltered 
+    ("\"overlay\" must be followed by the name of an overlay command.\n");
+  help_list (overlaylist, "overlay ", -1, gdb_stdout);
+}
+
+
+/* Target Overlays for the "Simplest" overlay manager:
+
+   This is GDB's default target overlay layer.  It works with the 
+   minimal overlay manager supplied as an example by Cygnus.  The 
+   entry point is via a function pointer "target_overlay_update", 
+   so targets that use a different runtime overlay manager can 
+   substitute their own overlay_update function and take over the
+   function pointer.
+
+   The overlay_update function pokes around in the target's data structures
+   to see what overlays are mapped, and updates GDB's overlay mapping with
+   this information.
+
+   In this simple implementation, the target data structures are as follows:
+   	unsigned _novlys;		/# number of overlay sections #/
+	unsigned _ovly_table[_novlys][4] = {
+	  {VMA, SIZE, LMA, MAPPED},	/# one entry per overlay section #/
+	  {..., ...,  ..., ...},
+	}
+	unsigned _novly_regions;	/# number of overlay regions #/
+	unsigned _ovly_region_table[_novly_regions][3] = {
+	  {VMA, SIZE, MAPPED_TO_LMA},	/# one entry per overlay region #/
+	  {..., ...,  ...},
+	}
+   These functions will attempt to update GDB's mappedness state in the
+   symbol section table, based on the target's mappedness state.
+
+   To do this, we keep a cached copy of the target's _ovly_table, and
+   attempt to detect when the cached copy is invalidated.  The main
+   entry point is "simple_overlay_update(SECT), which looks up SECT in
+   the cached table and re-reads only the entry for that section from
+   the target (whenever possible).
+ */
+
+/* Cached, dynamically allocated copies of the target data structures: */
+static unsigned  (*cache_ovly_table)[4] = 0;
+#if 0
+static unsigned  (*cache_ovly_region_table)[3] = 0;
+#endif
+static unsigned  cache_novlys = 0;
+#if 0
+static unsigned  cache_novly_regions = 0;
+#endif
+static CORE_ADDR cache_ovly_table_base = 0;
+#if 0
+static CORE_ADDR cache_ovly_region_table_base = 0;
+#endif
+enum   ovly_index { VMA, SIZE, LMA, MAPPED};
+#define TARGET_INT_BYTES (TARGET_INT_BIT / TARGET_CHAR_BIT)
+
+/* Throw away the cached copy of _ovly_table */
+static void
+simple_free_overlay_table ()
+{
+  if (cache_ovly_table)
+    free(cache_ovly_table);
+  cache_novlys     = 0;
+  cache_ovly_table = NULL;
+  cache_ovly_table_base = 0;
+}
+
+#if 0
+/* Throw away the cached copy of _ovly_region_table */
+static void
+simple_free_overlay_region_table ()
+{
+  if (cache_ovly_region_table)
+    free(cache_ovly_region_table);
+  cache_novly_regions     = 0;
+  cache_ovly_region_table = NULL;
+  cache_ovly_region_table_base = 0;
+}
+#endif
+
+/* Read an array of ints from the target into a local buffer.
+   Convert to host order.  int LEN is number of ints  */
+static void
+read_target_int_array (memaddr, myaddr, len)
+     CORE_ADDR     memaddr;
+     unsigned int *myaddr;
+     int           len;
+{
+  char *buf = alloca (len * TARGET_INT_BYTES);
+  int           i;
+
+  read_memory (memaddr, buf, len * TARGET_INT_BYTES);
+  for (i = 0; i < len; i++)
+    myaddr[i] = extract_unsigned_integer (TARGET_INT_BYTES * i + buf, 
+					  TARGET_INT_BYTES);
+}
+
+/* Find and grab a copy of the target _ovly_table
+   (and _novlys, which is needed for the table's size) */
+static int 
+simple_read_overlay_table ()
+{
+  struct minimal_symbol *msym;
+
+  simple_free_overlay_table ();
+  msym = lookup_minimal_symbol ("_novlys", 0, 0);
+  if (msym != NULL)
+    cache_novlys = read_memory_integer (SYMBOL_VALUE_ADDRESS (msym), 4);
+  else 
+    return 0;	/* failure */
+  cache_ovly_table = (void *) xmalloc (cache_novlys * sizeof(*cache_ovly_table));
+  if (cache_ovly_table != NULL)
+    {
+      msym = lookup_minimal_symbol ("_ovly_table", 0, 0);
+      if (msym != NULL)
+	{
+	  cache_ovly_table_base = SYMBOL_VALUE_ADDRESS (msym);
+	  read_target_int_array (cache_ovly_table_base, 
+				 (int *) cache_ovly_table, 
+				 cache_novlys * 4);
+	}
+      else 
+	return 0;	/* failure */
+    }
+  else 
+    return 0;	/* failure */
+  return 1;	/* SUCCESS */
+}
+
+#if 0
+/* Find and grab a copy of the target _ovly_region_table
+   (and _novly_regions, which is needed for the table's size) */
+static int 
+simple_read_overlay_region_table ()
+{
+  struct minimal_symbol *msym;
+
+  simple_free_overlay_region_table ();
+  msym = lookup_minimal_symbol ("_novly_regions", 0, 0);
+  if (msym != NULL)
+    cache_novly_regions = read_memory_integer (SYMBOL_VALUE_ADDRESS (msym), 4);
+  else 
+    return 0;	/* failure */
+  cache_ovly_region_table = (void *) xmalloc (cache_novly_regions * 12);
+  if (cache_ovly_region_table != NULL)
+    {
+      msym = lookup_minimal_symbol ("_ovly_region_table", 0, 0);
+      if (msym != NULL)
+	{
+	  cache_ovly_region_table_base = SYMBOL_VALUE_ADDRESS (msym);
+	  read_target_int_array (cache_ovly_region_table_base, 
+				 (int *) cache_ovly_region_table, 
+				 cache_novly_regions * 3);
+	}
+      else 
+	return 0;	/* failure */
+    }
+  else 
+    return 0;	/* failure */
+  return 1;	/* SUCCESS */
+}
+#endif
+
+/* Function: simple_overlay_update_1 
+   A helper function for simple_overlay_update.  Assuming a cached copy
+   of _ovly_table exists, look through it to find an entry whose vma,
+   lma and size match those of OSECT.  Re-read the entry and make sure
+   it still matches OSECT (else the table may no longer be valid).
+   Set OSECT's mapped state to match the entry.  Return: 1 for
+   success, 0 for failure.  */
+
+static int
+simple_overlay_update_1 (osect)
+     struct obj_section *osect;
+{
+  int i, size;
+
+  size = bfd_get_section_size_before_reloc (osect->the_bfd_section);
+  for (i = 0; i < cache_novlys; i++)
+    if (cache_ovly_table[i][VMA]  == osect->the_bfd_section->vma &&
+	cache_ovly_table[i][LMA]  == osect->the_bfd_section->lma &&
+	cache_ovly_table[i][SIZE] == size)
+      {
+	read_target_int_array (cache_ovly_table_base + i * TARGET_INT_BYTES,
+			       (int *) &cache_ovly_table[i], 4);
+	if (cache_ovly_table[i][VMA]  == osect->the_bfd_section->vma &&
+	    cache_ovly_table[i][LMA]  == osect->the_bfd_section->lma &&
+	    cache_ovly_table[i][SIZE] == size)
+	  {
+	    osect->ovly_mapped = cache_ovly_table[i][MAPPED];
+	    return 1;
+	  }
+	else	/* Warning!  Warning!  Target's ovly table has changed! */
+	  return 0;
+      }
+  return 0;
+}
+
+/* Function: simple_overlay_update
+   If OSECT is NULL, then update all sections' mapped state 
+   (after re-reading the entire target _ovly_table). 
+   If OSECT is non-NULL, then try to find a matching entry in the 
+   cached ovly_table and update only OSECT's mapped state.
+   If a cached entry can't be found or the cache isn't valid, then 
+   re-read the entire cache, and go ahead and update all sections.  */
+
+static void
+simple_overlay_update (osect)
+     struct obj_section *osect;
+{
+  struct objfile        *objfile;
+
+  /* Were we given an osect to look up?  NULL means do all of them. */
+  if (osect)
+    /* Have we got a cached copy of the target's overlay table? */
+    if (cache_ovly_table != NULL)
+      /* Does its cached location match what's currently in the symtab? */
+      if (cache_ovly_table_base == 
+	  SYMBOL_VALUE_ADDRESS (lookup_minimal_symbol ("_ovly_table", 0, 0)))
+	/* Then go ahead and try to look up this single section in the cache */
+	if (simple_overlay_update_1 (osect))
+	  /* Found it!  We're done. */
+	  return;
+
+  /* Cached table no good: need to read the entire table anew.
+     Or else we want all the sections, in which case it's actually
+     more efficient to read the whole table in one block anyway.  */
+
+  if (simple_read_overlay_table () == 0)	/* read failed?  No table? */
+    {
+      warning ("Failed to read the target overlay mapping table.");
+      return;
+    }
+  /* Now may as well update all sections, even if only one was requested. */
+  ALL_OBJSECTIONS (objfile, osect)
+    if (section_is_overlay (osect->the_bfd_section))
+      {
+	int i, size;
+
+	size = bfd_get_section_size_before_reloc (osect->the_bfd_section);
+	for (i = 0; i < cache_novlys; i++)
+	  if (cache_ovly_table[i][VMA]  == osect->the_bfd_section->vma &&
+	      cache_ovly_table[i][LMA]  == osect->the_bfd_section->lma &&
+	      cache_ovly_table[i][SIZE] == size)
+	    { /* obj_section matches i'th entry in ovly_table */
+	      osect->ovly_mapped = cache_ovly_table[i][MAPPED];
+	      break;	/* finished with inner for loop: break out */
+	    }
+      }
+}
+
+
 void
 _initialize_symfile ()
 {
@@ -1833,4 +2563,28 @@ for access from GDB.", &cmdlist);
 		  &setlist),
      &showlist);
 
+  add_prefix_cmd ("overlay", class_support, overlay_command, 
+		  "Commands for debugging overlays.", &overlaylist, 
+		  "overlay ", 0, &cmdlist);
+
+  add_com_alias ("ovly", "overlay", class_alias, 1);
+  add_com_alias ("ov", "overlay", class_alias, 1);
+
+  add_cmd ("map-overlay", class_support, map_overlay_command, 
+	   "Assert that an overlay section is mapped.", &overlaylist);
+
+  add_cmd ("unmap-overlay", class_support, unmap_overlay_command, 
+	   "Assert that an overlay section is unmapped.", &overlaylist);
+
+  add_cmd ("list-overlays", class_support, list_overlays_command, 
+	   "List mappings of overlay sections.", &overlaylist);
+
+  add_cmd ("manual", class_support, overlay_manual_command, 
+	   "Enable overlay debugging.", &overlaylist);
+  add_cmd ("off", class_support, overlay_off_command, 
+	   "Disable overlay debugging.", &overlaylist);
+  add_cmd ("auto", class_support, overlay_auto_command, 
+	   "Enable automatic overlay debugging.", &overlaylist);
+  add_cmd ("load-target", class_support, overlay_load_command, 
+	   "Read the overlay mapping state from the target.", &overlaylist);
 }

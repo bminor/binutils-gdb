@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "value.h"
 #include "c-lang.h"
 #include "java-lang.h"
+#include "gdbcore.h"
 
 struct type *java_int_type;
 struct type *java_byte_type;
@@ -217,7 +218,6 @@ type_from_class (clas)
   value_ptr temp;
   struct objfile *objfile = get_dynamics_objfile();
   value_ptr utf8_name, fields, field, method, methods;
-  int name_length;
   char *nptr;
   CORE_ADDR addr;
   struct block *bl;
@@ -350,7 +350,6 @@ type_from_class (clas)
     {
       int accflags;
       int boffset;
-      struct type *ftype;
       if (fields == NULL)
 	{
 	  temp = clas;
@@ -597,6 +596,8 @@ evaluate_subexp_java (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP)
 	goto nosideret;
       return java_value_string (&exp->elts[pc + 2].string, i);
+    default:
+      break;
     }
 standard:
   return evaluate_subexp_standard (expect_type, exp, pos, noside);

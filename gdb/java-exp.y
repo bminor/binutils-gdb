@@ -639,7 +639,6 @@ parse_number (p, len, parsed_float, putithere)
 
   register int c;
   register int base = input_radix;
-  int unsigned_p = 0;
 
   struct type *type;
 

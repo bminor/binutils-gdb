@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "callback.h"
 #include "remote-sim.h"
 #include "remote-utils.h"
+#include "command.h"
 
 /* Prototypes */
 
@@ -690,6 +691,10 @@ gdbsim_wait (pid, status)
       /* The signal in sigrc is a host signal.  That probably
 	 should be fixed.  */
       status->value.sig = target_signal_from_host (sigrc);
+      break;
+    case sim_running:
+    case sim_polling:
+      /* FIXME: Is this correct? */
       break;
     }
 

@@ -630,7 +630,7 @@ objfile_relocate (objfile, new_offsets)
       }
   }
 
-  if (objfile->ei.entry_point != ~0)
+  if (objfile->ei.entry_point != ~(CORE_ADDR)0)
     objfile->ei.entry_point += ANOFFSET (delta, SECT_OFF_TEXT);
 
   if (objfile->ei.entry_func_lowpc != INVALID_ENTRY_LOWPC)

@@ -2469,7 +2469,21 @@ get_cell()
   return buf[cell];
 }
 
-/* print routines to handle variable size regs, etc */
+/* print routines to handle variable size regs, etc.
+
+   FIXME: Note that t_addr is a bfd_vma, which is currently either an
+   unsigned long or unsigned long long, determined at configure time.
+   If t_addr is an unsigned long long and sizeof (unsigned long long)
+   is greater than sizeof (unsigned long), then I believe this code will
+   probably lose, at least for little endian machines.  I believe that
+   it would also be better to eliminate the switch on the absolute size
+   of t_addr and replace it with a sequence of if statements that compare
+   sizeof t_addr with sizeof the various types and do the right thing,
+   which includes knowing whether or not the host supports long long.
+   -fnf
+
+ */
+
 static int thirty_two = 32;	/* eliminate warning from compiler on 32-bit systems */
 
 char* 
@@ -2480,17 +2494,17 @@ paddr(addr)
   switch (sizeof(t_addr))
     {
       case 8:
-        sprintf(paddr_str,"%08x%08x",
-		(unsigned long)(addr>>thirty_two),(unsigned long)(addr&0xffffffff));
+        sprintf (paddr_str, "%08lx%08lx",
+		(unsigned long) (addr >> thirty_two), (unsigned long) (addr & 0xffffffff));
 	break;
       case 4:
-        sprintf(paddr_str,"%08x",(unsigned long)addr);
+        sprintf (paddr_str, "%08lx", (unsigned long) addr);
 	break;
       case 2:
-        sprintf(paddr_str,"%04x",(unsigned short)(addr&0xffff));
+        sprintf (paddr_str, "%04x", (unsigned short) (addr & 0xffff));
 	break;
       default:
-        sprintf(paddr_str,"%x",addr);
+        sprintf (paddr_str, "%lx", (unsigned long) addr);
     }
   return paddr_str;
 }
@@ -2503,17 +2517,17 @@ preg(reg)
   switch (sizeof(t_reg))
     {
       case 8:
-        sprintf(preg_str,"%08x%08x",
-		(unsigned long)(reg>>thirty_two),(unsigned long)(reg&0xffffffff));
+        sprintf (preg_str, "%08lx%08lx",
+		(unsigned long) (reg >> thirty_two), (unsigned long) (reg & 0xffffffff));
 	break;
       case 4:
-        sprintf(preg_str,"%08x",(unsigned long)reg);
+        sprintf (preg_str, "%08lx", (unsigned long) reg);
 	break;
       case 2:
-        sprintf(preg_str,"%04x",(unsigned short)(reg&0xffff));
+        sprintf (preg_str, "%04x", (unsigned short) (reg & 0xffff));
 	break;
       default:
-        sprintf(preg_str,"%x",reg);
+        sprintf (preg_str, "%lx", (unsigned long) reg);
     }
   return preg_str;
 }
@@ -2527,22 +2541,22 @@ paddr_nz(addr)
     {
       case 8:
 	{
-	  unsigned long high = (unsigned long)(addr>>thirty_two);
+	  unsigned long high = (unsigned long) (addr >> thirty_two);
 	  if (high == 0)
-	    sprintf(paddr_str,"%x", (unsigned long)(addr&0xffffffff));
+	    sprintf (paddr_str, "%lx", (unsigned long) (addr & 0xffffffff));
 	  else
-	    sprintf(paddr_str,"%x%08x",
-		    high, (unsigned long)(addr&0xffffffff));
+	    sprintf (paddr_str, "%lx%08lx",
+		    high, (unsigned long) (addr & 0xffffffff));
 	  break;
 	}
       case 4:
-        sprintf(paddr_str,"%x",(unsigned long)addr);
+        sprintf (paddr_str, "%lx", (unsigned long) addr);
 	break;
       case 2:
-        sprintf(paddr_str,"%x",(unsigned short)(addr&0xffff));
+        sprintf (paddr_str, "%x", (unsigned short) (addr & 0xffff));
 	break;
       default:
-        sprintf(paddr_str,"%x",addr);
+        sprintf (paddr_str,"%lx", (unsigned long) addr);
     }
   return paddr_str;
 }
@@ -2556,22 +2570,22 @@ preg_nz(reg)
     {
       case 8:
 	{
-	  unsigned long high = (unsigned long)(reg>>thirty_two);
+	  unsigned long high = (unsigned long) (reg >> thirty_two);
 	  if (high == 0)
-	    sprintf(preg_str,"%x", (unsigned long)(reg&0xffffffff));
+	    sprintf (preg_str, "%lx", (unsigned long) (reg & 0xffffffff));
 	  else
-	    sprintf(preg_str,"%x%08x",
-		    high, (unsigned long)(reg&0xffffffff));
+	    sprintf (preg_str, "%lx%08lx",
+		    high, (unsigned long) (reg & 0xffffffff));
 	  break;
 	}
       case 4:
-        sprintf(preg_str,"%x",(unsigned long)reg);
+        sprintf (preg_str, "%lx", (unsigned long) reg);
 	break;
       case 2:
-        sprintf(preg_str,"%x",(unsigned short)(reg&0xffff));
+        sprintf (preg_str, "%x", (unsigned short) (reg & 0xffff));
 	break;
       default:
-        sprintf(preg_str,"%x",reg);
+        sprintf (preg_str, "%lx", (unsigned long) reg);
     }
   return preg_str;
 }

@@ -1,4 +1,59 @@
-Fri Jun 13 07:30:48 1997  Fred Fish  <fnf@cygnus.com>
+Fri Jun 13 10:28:09 1997  Fred Fish  <fnf@cygnus.com>
+
+	* config/i386/nm-linux.h: Enable prototypes that were #ifdef out.
+	* config/tm-sysv4.h (in_plt_section): Add prototype.
+
+	* maint.c (maintenance_translate_address): Avoid assignment
+	inside if, per GNU coding standards.
+	* symfile.c (simple_read_overlay_table): Avoid assignments inside if, per
+	GNU coding standards.
+
+	* monitor.c (parse_register_dump): Is really a void function.
+	Add prototype.
+	(monitor_read_memory): Remove unused variable "name".
+	(monitor_read_memory): Remove unused variable "regbuf".
+	(monitor_open): Remove unused variable "i".
+	(get_hex_word): Apparently unused, #if away for now.
+	(from_hex): Ditto.
+
+	* i386v4-nat.c (supply_fpregset): Remove unused variable "regi".
+	(fill_fpregset): Remove unused variables "regi", "to", "from" and
+	"registers".
+
+	* remote-e7000.c (ctype.h): Include.
+	(e7000_insert_breakpoint): #if away unused arg used by unused expr.
+	* frame.h (generic_get_saved_register): Add prototype.
+	(enum lval_type): Add partial forward decl.
+	* dsrec.c (make_srec): Remove unused variable "type_code".
+	* remote-sim.c (gdbsim_wait): Handle sim_running and sim_polling
+	cases by just ignoring them.
+	(command.h): Include.
+
+	* java-exp.y (parse_number): Remove unused variable "unsigned_p".
+	* java-lang.c (gdbcore.h): Include for prototypes.
+	(type_from_class): Remove unused variable "ftype".
+	(type_from_class): Remove unused variable "name_length".
+	(evaluate_subexp_java): Add default case to handle remaining
+	enumerations.
+	* java-valprint.c (c-lang.h): Include for prototypes.
+
+	* symfile.c (simple_read_overlay_region_table): #if away
+	unused function.
+	(simple_free_overlay_region_table): Ditto.
+	(overlay_is_mapped): Add default case to switch.
+	(simple_read_overlay_region_table): Ditto.
+	(simple_read_overlay_region_table): Add prototype.
+
+	* symtab.c (fixup_symbol_section): Remove unused msym variable.
+	(fixup_psymbol_section): Ditto.
+	(find_pc_sect_symtab): Make distance a CORE_ADDR.
+
+	* utils.c: Add comment about t_addr being either unsigned long or
+	unsigned long long.
+	(paddr): Change formats to match actual types args are cast to.
+	(preg): Ditto.
+	(paddr_nz): Ditto.
+	(preg_nz): Ditto.
 
 	* defs.h (perror_with_name): Is a NORETURN function.
 	* utils.c (perror_with_name): Is a NORETURN function.

@@ -313,8 +313,11 @@ maintenance_translate_address (arg, from_tty)
       while (isspace (*p)) p++;	/* Skip whitespace */
 
       ALL_OBJFILES (objfile)
-	if (sect = bfd_get_section_by_name (objfile->obfd, arg))
-	  break;
+	{
+	  sect = bfd_get_section_by_name (objfile->obfd, arg);
+	  if (sect != NULL)
+	    break;
+	}
 
       if (!sect)
 	error ("Unknown section %s.", arg);

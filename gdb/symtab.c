@@ -520,8 +520,6 @@ fixup_symbol_section (sym, objfile)
      struct symbol *sym;
      struct objfile *objfile;
 {
-  struct minimal_symbol *msym;
-
   if (!sym)
     return NULL;
 
@@ -538,8 +536,6 @@ fixup_psymbol_section (psym, objfile)
      struct partial_symbol *psym;
      struct objfile *objfile;
 {
-  struct minimal_symbol *msym;
-
   if (!psym)
     return NULL;
 
@@ -1066,7 +1062,7 @@ find_pc_sect_symtab (pc, section)
   register struct symtab *best_s = NULL;
   register struct partial_symtab *ps;
   register struct objfile *objfile;
-  int distance = 0;
+  CORE_ADDR distance = 0;
 
   /* Search all symtabs for the one whose file contains our address, and which
      is the smallest of all the ones containing the address.  This is designed
