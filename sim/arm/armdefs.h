@@ -30,6 +30,7 @@ typedef char *VoidStar;
 #endif
 
 typedef unsigned long ARMword;	/* must be 32 bits wide */
+typedef unsigned long long ARMdword;	/* Must be at least 64 bits wide.  */
 typedef struct ARMul_State ARMul_State;
 
 typedef unsigned ARMul_CPInits (ARMul_State * state);
@@ -56,9 +57,13 @@ struct ARMul_State
   unsigned ErrorCode;		/* type of illegal instruction */
   ARMword Reg[16];		/* the current register file */
   ARMword RegBank[7][16];	/* all the registers */
+  /* 40 bit accumulator.  We always keep this 64 bits wide,
+     and move only 40 bits out of it in an MRA insn.  */
+  ARMdword Accumulator;
   ARMword Cpsr;			/* the current psr */
   ARMword Spsr[7];		/* the exception psr's */
   ARMword NFlag, ZFlag, CFlag, VFlag, IFFlags;	/* dummy flags for speed */
+  ARMword SFlag;
 #ifdef MODET
   ARMword TFlag;		/* Thumb state */
 #endif
@@ -125,6 +130,8 @@ struct ARMul_State
 
   unsigned is_v4;		/* Are we emulating a v4 architecture (or higher) ?  */
   unsigned is_v5;		/* Are we emulating a v5 architecture ?  */
+  unsigned is_v5e;		/* Are we emulating a v5e architecture ?  */
+  unsigned is_XScale;		/* Are we emulating an XScale architecture ?  */
   unsigned verbose;		/* Print various messages like the banner */
 };
 
@@ -150,6 +157,8 @@ struct ARMul_State
 #define ARM_Lock_Prop    0x20
 #define ARM_v4_Prop      0x40
 #define ARM_v5_Prop      0x80
+#define ARM_v5e_Prop     0x100
+#define ARM_XScale_Prop  0x200
 
 /***************************************************************************\
 *                   Macros to extract instruction fields                    *

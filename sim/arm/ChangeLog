@@ -1,3 +1,30 @@
+2000-11-29  Nick Clifton  <nickc@redhat.com>
+
+	* armdefs.h (State): Add 'v5e' and 'xscale' fields.
+	(ARM_v5e_Prop): Define.
+	(ARM_XScale_Prop): Define.
+	
+	* wrapper.c (sim_create_inferior): Select processor based on
+	machine number.
+	(SWI_vector_installed): New boolean.  Set to true if the SWI
+	vector address is written to by the executable.
+	
+	* arminit.c (ARMul_NewState): Switch default to 32 bit mode.
+	(ARMul_SelectProcessor): Initialise v5e and xscale signals.
+	(ARMul_Abort): Fix calculation of LR address.
+
+	* armos.c (ARMul_OSHandleSWI): If a SWI vector has been installed
+	and a SWI is not handled by the simulator, pass the SWI off to the
+	vector, otherwise issue a warning message and continue.
+
+	* armsupp.c (ARMul_CPSRAltered): Set S bit aswell.
+	
+	* thumbemu.c: Add v5 instruction simulation.
+	* armemu.c: Add v5, XScale and El Segundo instruction simulation.
+
+	* armcopro.c: Add XScale co-processor emulation.
+	* armemu.h: Add exported XScale co-processor functions.
+	
 2000-09-15  Nick Clifton  <nickc@redhat.com>
 
 	* armdefs.h: Rename StrongARM property to v4_ARM and add v5 ARM
@@ -188,7 +215,6 @@ Wed Mar 22 15:24:21 2000  glen mccready  <gkm@pobox.com>
 Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
-
 
 1999-05-08  Felix Lee  <flee@cygnus.com>
 

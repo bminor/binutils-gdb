@@ -70,6 +70,8 @@ extern int _fisatty (FILE *);
 
 #include "armdefs.h"
 #include "armos.h"
+#include "armemu.h"
+
 #ifndef NOOS
 #ifndef VALIDATE
 /* #ifndef ASIM */
@@ -445,11 +447,6 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
       state->Reg[0] = OSptr->ErrorNo;
       return (TRUE);
 
-    case SWI_Breakpoint:
-      state->EndCondition = RDIError_BreakpointReached;
-      state->Emulate = FALSE;
-      return (TRUE);
-
     case SWI_GetEnv:
       state->Reg[0] = ADDRCMDLINE;
       if (state->MemSize)
@@ -458,6 +455,11 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	state->Reg[1] = ADDRUSERSTACK;
 
       WriteCommandLineTo (state, state->Reg[0]);
+      return (TRUE);
+      
+    case SWI_Breakpoint:
+      state->EndCondition = RDIError_BreakpointReached;
+      state->Emulate = FALSE;
       return (TRUE);
 
       /* Handle Angel SWIs as well as Demon ones */
@@ -587,29 +589,58 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	  return TRUE;
 	}
 
+    case 0x90:
+    case 0x92:
+      /* These are used by the FPE code.  */
+      return TRUE;
+      
     default:
-      state->Emulate = FALSE;
-      return (FALSE);
+      {
+	/* If there is a SWI vector installed use it.  */
+	extern int SWI_vector_installed;
+	
+	if (SWI_vector_installed && number != SWI_Breakpoint)
+	  {
+	    ARMword cpsr;
+	    ARMword i_size;
+	    
+	    cpsr = ARMul_GetCPSR (state);
+	    i_size = INSN_SIZE;
+	    
+	    ARMul_SetSPSR (state, SVC32MODE, cpsr);
+	    
+	    cpsr &= ~0xbf;
+	    cpsr |= SVC32MODE | 0x80;
+	    ARMul_SetCPSR (state, cpsr);
+	    
+	    state->RegBank[SVCBANK][14] = state->Reg[14] = state->Reg[15] - i_size;
+	    state->NextInstr            = RESUME;
+	    state->Reg[15]              = state->pc = ARMSWIV;
+	    FLUSHPIPE;
+	  }
+	else
+	  fprintf (stderr, "unknown SWI encountered - %x - ignoring\n", number);
+	return TRUE;
+      }
     }
 }
 
 #ifndef NOOS
 #ifndef ASIM
 
-/***************************************************************************\
-* The emulator calls this routine when an Exception occurs.  The second     *
-* parameter is the address of the relevant exception vector.  Returning     *
-* FALSE from this routine causes the trap to be taken, TRUE causes it to    *
-* be ignored (so set state->Emulate to FALSE!).                             *
-\***************************************************************************/
+/* The emulator calls this routine when an Exception occurs.  The second
+   parameter is the address of the relevant exception vector.  Returning
+   FALSE from this routine causes the trap to be taken, TRUE causes it to
+   be ignored (so set state->Emulate to FALSE!).  */
 
 unsigned
-ARMul_OSException (ARMul_State * state ATTRIBUTE_UNUSED, ARMword vector ATTRIBUTE_UNUSED, ARMword pc ATTRIBUTE_UNUSED)
-{				/* don't use this here */
-  return (FALSE);
+ARMul_OSException (
+		   ARMul_State * state  ATTRIBUTE_UNUSED,
+		   ARMword       vector ATTRIBUTE_UNUSED,
+		   ARMword       pc     ATTRIBUTE_UNUSED)
+{
+  return FALSE;
 }
 
 #endif
-
-
 #endif /* NOOS */

@@ -54,6 +54,10 @@ case "${target}" in
   	sim_target=arm
 	extra_subdirs="${extra_subdirs} testsuite"
 	;;
+  xscale-*-*)
+  	sim_target=arm
+	extra_subdirs="${extra_subdirs} testsuite"
+	;;
   d10v-*-*)		sim_target=d10v ;;
   d30v-*-*)
 	sim_target=d30v

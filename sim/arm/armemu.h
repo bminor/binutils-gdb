@@ -55,6 +55,7 @@ extern ARMword isize;
 #define ZBIT (1L << 30)
 #define CBIT (1L << 29)
 #define VBIT (1L << 28)
+#define SBIT (1L << 27)
 #define IBIT (1L << 7)
 #define FBIT (1L << 6)
 #define IFBITS (3L << 6)
@@ -98,6 +99,10 @@ extern ARMword isize;
 #define CLEARV state->VFlag = 0
 #define ASSIGNV(res) state->VFlag = res
 
+#define SFLAG state->SFlag
+#define SETS state->SFlag = 1
+#define CLEARS state->SFlag = 0
+#define ASSIGNS(res) state->SFlag = res
 
 #define IFLAG (state->IFFlags >> 1)
 #define FFLAG (state->IFFlags & 1)
@@ -110,7 +115,12 @@ extern ARMword isize;
 #define PSR_XBITS (0x0000ff00L)
 #define PSR_CBITS (0x000000ffL)
 
+#if defined MODE32 || defined MODET
+#define CCBITS (0xf8000000L)
+#else
 #define CCBITS (0xf0000000L)
+#endif
+
 #define INTBITS (0xc0L)
 
 #if defined MODET && defined MODE32
@@ -149,7 +159,7 @@ extern ARMword isize;
 #define R15PCMODE (state->Reg[15] & (R15PCBITS | R15MODEBITS))
 #define R15MODE (state->Reg[15] & R15MODEBITS)
 
-#define ECC ((NFLAG << 31) | (ZFLAG << 30) | (CFLAG << 29) | (VFLAG << 28))
+#define ECC ((NFLAG << 31) | (ZFLAG << 30) | (CFLAG << 29) | (VFLAG << 28) | (SFLAG << 27))
 #define EINT (IFFLAGS << 6)
 #define ER15INT (IFFLAGS << 26)
 #define EMODE (state->Mode)
@@ -472,3 +482,14 @@ extern tdstate ARMul_ThumbDecode (ARMul_State * state, ARMword pc,
 #define UNDEF_IllegalMode
 #define UNDEF_Prog32SigChange
 #define UNDEF_Data32SigChange
+
+/* Coprocessor support functions.  */
+extern unsigned ARMul_CoProInit (ARMul_State *);
+extern void     ARMul_CoProExit (ARMul_State *);
+extern void     ARMul_CoProAttach (ARMul_State *, unsigned, ARMul_CPInits *, ARMul_CPExits *,
+				   ARMul_LDCs *, ARMul_STCs *, ARMul_MRCs *, ARMul_MCRs *,
+				   ARMul_CDPs *, ARMul_CPReads *, ARMul_CPWrites *);
+extern void     ARMul_CoProDetach (ARMul_State *, unsigned);
+extern void     write_cp15_reg (unsigned, unsigned, unsigned, ARMword);
+extern void     write_cp14_reg (unsigned, ARMword);
+extern ARMword  read_cp14_reg  (unsigned);

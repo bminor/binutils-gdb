@@ -86,7 +86,8 @@ ARMul_NewState (void)
   for (i = 0; i < 7; i++)
     state->Spsr[i] = 0;
 
-  state->Mode = USER26MODE;
+  /* state->Mode = USER26MODE;  */
+  state->Mode = USER32MODE;
 
   state->CallDebug = FALSE;
   state->Debug = FALSE;
@@ -113,19 +114,16 @@ ARMul_NewState (void)
   for (i = 0; i < EVENTLISTSIZE; i++)
     *(state->EventPtr + i) = NULL;
 
-#ifdef ARM61
-  state->prog32Sig = LOW;
-  state->data32Sig = LOW;
-#else
   state->prog32Sig = HIGH;
   state->data32Sig = HIGH;
-#endif
 
   state->lateabtSig = LOW;
   state->bigendSig = LOW;
 
   state->is_v4 = LOW;
   state->is_v5 = LOW;
+  state->is_v5e = LOW;
+  state->is_XScale = LOW;
 
   ARMul_Reset (state);
 
@@ -154,6 +152,8 @@ ARMul_SelectProcessor (ARMul_State * state, unsigned properties)
 
   state->is_v4 = (properties & (ARM_v4_Prop | ARM_v5_Prop)) ? HIGH : LOW;
   state->is_v5 = (properties & ARM_v5_Prop) ? HIGH : LOW;
+  state->is_v5e = (properties & ARM_v5e_Prop) ? HIGH : LOW;
+  state->is_XScale = (properties & ARM_XScale_Prop) ? HIGH : LOW;
 }
 
 /***************************************************************************\
@@ -261,6 +261,8 @@ ARMul_Abort (ARMul_State * state, ARMword vector)
 {
   ARMword temp;
   int isize = INSN_SIZE;
+  int esize = (TFLAG ? 0 : 4);
+  int e2size = (TFLAG ? -4 : 0);
 
   state->Aborted = FALSE;
 
@@ -288,19 +290,19 @@ ARMul_Abort (ARMul_State * state, ARMword vector)
       break;
     case ARMul_PrefetchAbortV:	/* Prefetch Abort */
       state->AbortAddr = 1;
-      SETABORT (IBIT, state->prog32Sig ? ABORT32MODE : SVC26MODE, isize);
+      SETABORT (IBIT, state->prog32Sig ? ABORT32MODE : SVC26MODE, esize);
       break;
     case ARMul_DataAbortV:	/* Data Abort */
-      SETABORT (IBIT, state->prog32Sig ? ABORT32MODE : SVC26MODE, isize);
+      SETABORT (IBIT, state->prog32Sig ? ABORT32MODE : SVC26MODE, e2size);
       break;
     case ARMul_AddrExceptnV:	/* Address Exception */
       SETABORT (IBIT, SVC26MODE, isize);
       break;
     case ARMul_IRQV:		/* IRQ */
-      SETABORT (IBIT, state->prog32Sig ? IRQ32MODE : IRQ26MODE, isize);
+      SETABORT (IBIT, state->prog32Sig ? IRQ32MODE : IRQ26MODE, esize);
       break;
     case ARMul_FIQV:		/* FIQ */
-      SETABORT (INTBITS, state->prog32Sig ? FIQ32MODE : FIQ26MODE, isize);
+      SETABORT (INTBITS, state->prog32Sig ? FIQ32MODE : FIQ26MODE, esize);
       break;
     }
   if (ARMul_MODE32BIT)
