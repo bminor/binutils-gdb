@@ -113,17 +113,8 @@ engine_run_until_stop (SIM_DESC sd,
       cia = cpu->cia;
       do
 	{
-	  if (cia.ip == -1)
-	    {
-	      /* anulled instruction */
-	      cia.ip = cia.dp;
-	      cia.dp = cia.dp + sizeof (instruction_word);
-	    }
-	  else
-	    {
-	      instruction_word insn = IMEM (cia.ip);
-	      cia = idecode_issue (sd, insn, cia);
-	    }
+	  instruction_word insn = IMEM (cia);
+	  cia = idecode_issue (sd, insn, cia);
 	}
       while (*keep_running);
       engine_halt (sd, cpu, cia, sim_stopped, SIGINT);
@@ -137,22 +128,14 @@ engine_step (SIM_DESC sd)
   if (!setjmp (sd->path_to_halt))
     {
       instruction_address cia;
+      instruction_word insn;
       sim_cpu *cpu = STATE_CPU (sd, 0);
       sd->halt_ok = 1;
       setjmp (sd->path_to_restart);
       sd->restart_ok = 1;
       cia = cpu->cia;
-      if (cia.ip == -1)
-	{
-	  /* anulled instruction */
-	  cia.ip = cia.dp;
-	  cia.dp = cia.dp + sizeof (instruction_word);
-	}
-      else
-	{
-	  instruction_word insn = IMEM (cia.ip);
-	  cia = idecode_issue (sd, insn, cia);
-	}
+      insn = IMEM (cia);
+      cia = idecode_issue (sd, insn, cia);
       engine_halt (sd, cpu, cia, sim_stopped, SIGTRAP);
     }
 }

@@ -38,8 +38,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* Bring data in from the cold */
 
-#define IMEM(EA) \
-(sim_core_read_aligned_4(STATE_CPU (sd, 0), cia, sim_core_execute_map, (EA)))
+#define IMEM(CIA) \
+(sim_core_read_aligned_4(STATE_CPU (sd, 0), CIA, sim_core_execute_map, (CIA).ip))
 
 #define MEM(SIGN, EA, NR_BYTES) \
 ((SIGN##_##NR_BYTES) sim_core_read_unaligned_##NR_BYTES (STATE_CPU (sd, 0), cia, \

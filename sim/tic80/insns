@@ -21,10 +21,31 @@
 
 // The following is called when ever an illegal instruction is encountered.
 ::internal::illegal
-	engine_error (SD, CPU, cia, "illegal instruction at 0x%lx", cia.ip);
+	engine_error (SD, CPU, cia,
+	              "illegal instruction at 0x%lx", cia.ip);
 // The following is called when ever an FP op is attempted with FPU disabled.
 ::internal::fp_unavailable
-	engine_error (SD, CPU, cia, "floating-point unavailable at 0x%lx", cia.ip);
+	engine_error (SD, CPU, cia,
+	              "floating-point unavailable at 0x%lx", cia.ip);
+
+// Handle a branch instruction
+instruction_address::function::do_branch:int annul, address_word target, int rLink_p, unsigned32 *rLink
+	instruction_address nia;
+	if (annul)
+	  {
+	    if (rLink_p)
+	      *rLink = cia.dp;
+	    nia.ip = target;
+	    nia.dp = target + 4;
+	  }
+	else
+	  {
+	    if (rLink_p)
+	      *rLink = cia.dp + sizeof (instruction_word);
+	    nia.ip = cia.dp;
+	    nia.dp = target;
+	  }
+	return nia;
 
 // Signed Integer Add - add source1, source2, dest
 void::function::do_add:signed32 *rDest, signed32 Source1, signed32 Source2
@@ -106,13 +127,11 @@ void::function::do_and:signed32 *rDest, signed32 Source1, signed32 Source2
 // bbo.[a]
 instruction_address::function::do_bbo:instruction_address nia, int bitnum, unsigned32 source, int annul, unsigned32 offset
 	int jump_p;
-	unsigned32 target = cia.ip + 4 * offset;
+	address_word target = cia.ip + 4 * offset;
 	bitnum = (~ bitnum) & 0x1f;
 	if (MASKED32 (source, bitnum, bitnum))
 	  {
-	    if (annul)
-	      nia.ip = -1;
-	    nia.dp = target;
+	    nia = do_branch (_SD, annul, target, 0, NULL);
 	    jump_p = 1;
 	  }
 	else
@@ -131,13 +150,11 @@ instruction_address::function::do_bbo:instruction_address nia, int bitnum, unsig
 // bbz[.a]
 instruction_address::function::do_bbz:instruction_address nia, int bitnum, unsigned32 source, int annul, unsigned32 offset
 	int jump_p;
-	unsigned32 target = cia.ip + 4 * offset;
+	address_word target = cia.ip + 4 * offset;
 	bitnum = (~ bitnum) & 0x1f;
 	if (!MASKED32 (source, bitnum, bitnum))
 	  {
-	    if (annul)
-	      nia.ip = -1;
-	    nia.dp = target;
+	    nia = do_branch (_SD, annul, target, 0, NULL);
 	    jump_p = 1;
 	  }
 	else
@@ -159,7 +176,7 @@ instruction_address::function::do_bcnd:instruction_address nia, int Cond, unsign
 	int size = EXTRACTED32 (Cond, 31 - 27, 30 - 27);
 	int code = EXTRACTED32 (Cond, 29 - 27, 27 - 27);
 	signed32 val = 0;
-	unsigned32 target = cia.ip + 4 * offset;
+	address_word target = cia.ip + 4 * offset;
 	switch (size)
 	  {
 	  case 0: val = SEXT32 (source, 7); break;
@@ -180,9 +197,7 @@ instruction_address::function::do_bcnd:instruction_address nia, int Cond, unsign
 	  }
 	if (condition)
 	  {
-	    if (annul)
-	      nia.ip = -1;
-	    nia.dp = target;
+	    nia = do_branch (_SD, annul, target, 0, NULL);
 	  }
 	TRACE_COND_BR(MY_INDEX, condition, source, target);
 	return nia;
@@ -226,15 +241,9 @@ sim_cia::function::do_brcr:instruction_address nia, int cr
 
 // bsr[.a]
 instruction_address::function::do_bsr:instruction_address nia, signed32 *rLink, int annul, unsigned32 offset
-	if (annul)
-	  {
-	    *rLink = nia.ip;
-	    nia.ip = -1;
-	  }
-	else
-	  *rLink = nia.ip + sizeof (instruction_word);
-	nia.dp = cia.ip + 4 * offset;
-	TRACE_UCOND_BR (MY_INDEX, nia.dp);
+	address_word target = cia.ip + 4 * offset;
+	nia = do_branch (_SD, annul, target, 1, rLink);
+	TRACE_UCOND_BR (MY_INDEX, target);
 	return nia;
 31.Link,26./,21.0b100000,15.A,14.SignedOffset::::bsr i
 	nia = do_bsr (_SD, nia, rLink, A, vSignedOffset);
@@ -606,15 +615,9 @@ void::function::do_fsub:int Dest, int PD, sim_fpu s1, sim_fpu s2
 
 // jsr[.a]
 instruction_address::function::do_jsr:instruction_address nia, signed32 *rLink, int annul, unsigned32 offset, unsigned32 base
-	TRACE_UCOND_BR (MY_INDEX, nia.ip);
-	if (annul)
-	  {
-	    *rLink = nia.ip;
-	    nia.ip = -1;
-	  }
-	else
-	  *rLink = nia.ip + sizeof (instruction_word);
-	nia.dp = offset + base;
+	address_word target = offset + base;
+	TRACE_UCOND_BR (MY_INDEX, target);
+	nia = do_branch (_SD, annul, target, 1, rLink);
 	if (nia.dp & 0x3)
 	  engine_error (SD, CPU, cia,
 	                "0x%lx: destination address 0x%lx misaligned",

@@ -1,3 +1,15 @@
+Tue May 13 16:39:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* alu.h (IMEM): Take full cia not just IP as argument.
+
+	* interp.c (engine_run_until_stop): Delete handling of annuled
+ 	instructions.
+	(engine_step): Ditto.
+
+	* insn (do_branch): New function.
+	(do_bbo, do_bbz, do_bcnd, do_bsr, do_jsr): Use do_branch to handle
+ 	annuled branches.
+
 Mon May 12 17:15:52 1997  Mike Meissner  <meissner@cygnus.com>
 
 	* insns (do_{ld,st}): Fix tracing for ld/st.
