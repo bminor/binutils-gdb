@@ -41,7 +41,7 @@ START_RELOC_NUMBERS (elf_mips_reloc_type)
   RELOC_NUMBER (R_MIPS_GOT16, 9)
   RELOC_NUMBER (R_MIPS_PC16, 10)
   RELOC_NUMBER (R_MIPS_CALL16, 11)
-  RELOC_NUMBER (R_MIPS_GPREL32	12)
+  RELOC_NUMBER (R_MIPS_GPREL32, 12)
   /* The remaining relocs are defined on Irix, although they are not
      in the MIPS ELF ABI.  */
   RELOC_NUMBER (R_MIPS_UNUSED1, 13)
