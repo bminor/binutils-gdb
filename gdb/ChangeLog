@@ -1,3 +1,10 @@
+2002-02-23  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2002-02-20 Martin Schwidefsky <schwidefsky@de.ibm.com>:
+	* config/s390/tm-s390.h (GDB_TARGET_IS_ESAME): Use renamed
+	architecture defines.
+	* s390-tdep.c (s390_gdbarch_init): Likewise.
+
 2002-02-23  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-linux-tdep.c (arm_linux_extract_return_value): Make static.

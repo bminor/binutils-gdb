@@ -109,7 +109,7 @@ int s390_register_raw_size (int reg_nr);
 
 #else /* GDBSERVER */
 
-#define GDB_TARGET_IS_ESAME (TARGET_ARCHITECTURE->mach == bfd_mach_s390_esame)
+#define GDB_TARGET_IS_ESAME (TARGET_ARCHITECTURE->mach == bfd_mach_s390_64)
 
 #endif /* GDBSERVER */
 #endif /* ifndef TM_S390_H */

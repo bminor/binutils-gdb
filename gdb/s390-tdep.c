@@ -1851,7 +1851,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   switch (info.bfd_arch_info->mach)
     {
-    case bfd_mach_s390_esa:
+    case bfd_mach_s390_31:
       set_gdbarch_register_size (gdbarch, 4);
       set_gdbarch_register_raw_size (gdbarch, s390_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, s390_register_raw_size);
@@ -1860,7 +1860,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_addr_bits_remove (gdbarch, s390_addr_bits_remove);
       set_gdbarch_register_bytes (gdbarch, S390_REGISTER_BYTES);
       break;
-    case bfd_mach_s390_esame:
+    case bfd_mach_s390_64:
       set_gdbarch_register_size (gdbarch, 8);
       set_gdbarch_register_raw_size (gdbarch, s390x_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, s390x_register_raw_size);
