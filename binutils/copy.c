@@ -148,18 +148,19 @@ bfd *obfd;
     bfd *this_element;
     /* Read each archive element in turn from the input, copy the
        contents to a temp file, and keep the temp file handle */
-    char *dir = cat("./",make_tempname(""),"copy-dir");
+    char *dir = cat("./#",make_tempname(""),"cd");
 
     /* Make a temp directory to hold the contents */
     mkdir(dir,0777);
     obfd->has_armap = ibfd->has_armap;
     this_element = bfd_openr_next_archived_file(ibfd, NULL);
+    ibfd->archive_head = this_element;
     while (this_element != (bfd *)NULL) {
 
 	/* Create an output file for this member */
 	char *output_name = cat(dir, "/",this_element->filename);
 	bfd *output_bfd = bfd_openw(output_name, output_target);
-	
+
 	if (!bfd_set_format(obfd, bfd_get_format(ibfd)))
 	    bfd_fatal(output_filename);
 
@@ -178,7 +179,8 @@ bfd *obfd;
 	*ptr = output_bfd;
 
 	ptr =&( output_bfd->next);
-	this_element = bfd_openr_next_archived_file(ibfd, this_element);
+	this_element->next = bfd_openr_next_archived_file(ibfd, this_element);
+	this_element = this_element->next;
 
     }
     *ptr = (bfd *)NULL;
@@ -186,17 +188,16 @@ bfd *obfd;
     if (!bfd_close(obfd))
 	bfd_fatal(output_filename);
 
-    /* Now delete all the files that we opened 
-      We can't use the names in the obfd list since they may have been
-      trampled by the archive output code
-      */
+    /* Now delete all the files that we opened.
+       Construct their names again, unfortunately, but so what;
+       we're about to exit anyway. */
     for (this_element = ibfd->archive_head;
 	 this_element != (bfd *)NULL;
 	 this_element = this_element->next) 
 	{
 	unlink(cat(dir,"/",this_element->filename));
     }
-    unlink(dir);
+    rmdir(dir);
     if (!bfd_close(ibfd))
 	bfd_fatal(input_filename);
 
