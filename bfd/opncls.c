@@ -51,7 +51,7 @@ FILE *bfd_open_file();
    Perhaps, since unix has so many different kinds of locking anyway,
    we should use the emacs lock scheme?... */
 
-#define obstack_chunk_alloc xmalloc
+#define obstack_chunk_alloc malloc
 #define obstack_chunk_free free
 
 /* Return a new BFD.  All BFD's are allocated through this routine.  */
