@@ -1,3 +1,7 @@
+Tue Aug 31 12:07:43 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* libhppa.h: Restore #undefs of e_fsel and other e_* symbols.
+
 Fri Aug 27 16:43:35 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* section.c (struct sec): Move position of user_set_vma, and
