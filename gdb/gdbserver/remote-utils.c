@@ -135,6 +135,8 @@ remote_open (char *name)
 	  || listen (tmp_desc, 1))
 	perror_with_name ("Can't bind address");
 
+      fprintf (stderr, "Listening on port %d\n", port);
+
       tmp = sizeof (sockaddr);
       remote_desc = accept (tmp_desc, (struct sockaddr *) &sockaddr, &tmp);
       if (remote_desc == -1)

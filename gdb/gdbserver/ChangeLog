@@ -1,4 +1,11 @@
-2004-02-28  Daniel Jacobowitz  <drow@mvista.com>
+2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* remote-utils.c (remote_open): Print a status notice after
+	opening a TCP port.
+	* server.c (attach_inferior): Print a status notice after
+	attaching.
+
+2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
 
 	* linux-arm-low.c (arm_get_pc): Print out stop PC in debug mode.
 

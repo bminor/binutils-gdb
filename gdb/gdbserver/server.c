@@ -70,6 +70,8 @@ attach_inferior (int pid, char *statusptr, unsigned char *sigptr)
   if (myattach (pid) != 0)
     return -1;
 
+  fprintf (stderr, "Attached; pid = %d\n", pid);
+
   /* FIXME - It may be that we should get the SIGNAL_PID from the
      attach function, so that it can be the main thread instead of
      whichever we were told to attach to.  */
