@@ -1,3 +1,8 @@
+Wed Aug 14 17:02:09 1996  Richard Henderson  <rth@tamu.edu>
+
+	* elf64-alpha.c (elf64_alpha_size_dynamic_sections): Correct typo
+	in section dynidx start.
+
 Tue Aug 13 14:35:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (_bfd_elf_make_section_from_shdr): Treat sections whose

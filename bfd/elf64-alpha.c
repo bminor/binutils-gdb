@@ -92,7 +92,10 @@ static boolean elf64_alpha_find_nearest_line
   PARAMS((bfd *, asection *, asymbol **, bfd_vma, const char **,
 	  const char **, unsigned int *));
 
+#if defined(__STDC__) || defined(ALMOST_STDC)
 struct alpha_elf_link_hash_entry;
+#endif
+
 static boolean elf64_alpha_output_extsym
   PARAMS((struct alpha_elf_link_hash_entry *, PTR));
 
@@ -126,6 +129,12 @@ struct alpha_elf_link_hash_entry
 
   /* External symbol information.  */
   EXTR esym;
+
+  unsigned char flags;
+  /* Contexts (LITUSE) in which a literal was referenced.  */
+#define ALPHA_ELF_LINK_HASH_LU_ADDR 01
+#define ALPHA_ELF_LINK_HASH_LU_MEM 02
+#define ALPHA_ELF_LINK_HASH_LU_FUNC 04
 };
 
 /* Alpha ELF linker hash table.  */
@@ -186,6 +195,7 @@ elf64_alpha_link_hash_newfunc (entry, table, string)
       /* We use -2 as a marker to indicate that the information has
 	 not been set.  -1 means there is no associated ifd.  */
       ret->esym.ifd = -2;
+      ret->flags = 0;
     }
 
   return (struct bfd_hash_entry *) ret;
@@ -1548,15 +1558,16 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
   for (rel = relocs; rel < relend; ++rel)
     {
       unsigned long r_symndx;
-      struct elf_link_hash_entry *h;
+      struct alpha_elf_link_hash_entry *h;
 
-      r_symndx = ELF64_R_SYM(rel->r_info);
+      r_symndx = ELF64_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
 	h = NULL;
       else
-	h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	h = ((struct alpha_elf_link_hash_entry *)
+	     sym_hashes[r_symndx - symtab_hdr->sh_info]);
 
-      switch (ELF64_R_TYPE(rel->r_info))
+      switch (ELF64_R_TYPE (rel->r_info))
 	{
 	case R_ALPHA_LITERAL:
 	  /* If this is a load of a function symbol and we are building a
@@ -1571,20 +1582,38 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 	     is an object, but it is fatal to be wrong guessing that a 
 	     symbol is a function.
 
-	     Furthermore, the .plt trampoline cannot abide by weak
-	     symbols that turn out to be undefined.  */
+	     Furthermore, the .plt trampoline does not give constant 
+	     function addresses, so if we ever see a function's address
+	     taken, we cannot do lazy binding on that function. */
 
-	  if (h
-	      && h->root.type != bfd_link_hash_undefweak
-	      && (info->shared 
-		  || !(h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
-	      && (h->type == STT_FUNC
-		  || (h->type == STT_NOTYPE
-		      && rel+1 < relend
-		      && ELF64_R_TYPE(rel[1].r_info) == R_ALPHA_LITUSE
-		      && rel[1].r_addend == 3)))
+	  if (h)
 	    {
-	      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+	      if (rel+1 < relend
+		  && ELF64_R_TYPE (rel[1].r_info) == R_ALPHA_LITUSE)
+		{
+		  switch (rel[1].r_addend)
+		    {
+		    case 1: /* Memory reference */
+		      h->flags |= ALPHA_ELF_LINK_HASH_LU_MEM;
+		      break;
+		    case 3: /* Call reference */
+		      h->flags |= ALPHA_ELF_LINK_HASH_LU_FUNC;
+		      break;
+		    }
+		}
+	      else
+		h->flags |= ALPHA_ELF_LINK_HASH_LU_ADDR;
+
+	      if (h->root.root.type != bfd_link_hash_undefweak
+		  && (info->shared 
+		      || !(h->root.elf_link_hash_flags
+			   & ELF_LINK_HASH_DEF_REGULAR))
+		  && (h->root.type == STT_FUNC
+		      || (h->root.type == STT_NOTYPE
+			  && (h->flags & ALPHA_ELF_LINK_HASH_LU_FUNC))))
+		{
+		  h->root.elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+		}
 	    }
 
 	  if (dynobj == NULL)
@@ -1601,15 +1630,15 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 
 	  if (h != NULL)
 	    {
-	      if (h->got_offset != MINUS_ONE)
+	      if (h->root.got_offset != MINUS_ONE)
 		{
 		  /* We have already allocated space in this .got.  */
 		  break;
 		}
 
 	      /* Make sure this becomes a dynamic symbol.  */
-	      if (h->dynindx == -1
-		  && !_bfd_elf_link_record_dynamic_symbol(info, h))
+	      if (h->root.dynindx == -1
+		  && ! _bfd_elf_link_record_dynamic_symbol (info, &h->root))
 		return false;
 
 	      /* Reserve space for a reloc even if we won't use it.  */
@@ -1617,7 +1646,7 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 
 	      /* Create the relocation in adjust_dynamic_symbol */
 
-	      h->got_offset = sgot->_raw_size;
+	      h->root.got_offset = sgot->_raw_size;
 	      sgot->_raw_size += 8;
 	    }
 	  else
@@ -1664,7 +1693,9 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 	case R_ALPHA_REFLONG:
 	case R_ALPHA_REFQUAD:
 	  if (info->shared
-	      || (h && !(h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+	      || (h != NULL
+		  && !(h->root.elf_link_hash_flags
+		       & ELF_LINK_HASH_DEF_REGULAR)))
 	    {
 	      /* When creating a shared object or referring to a symbol in
 		 a shared object, we must copy these relocs into the
@@ -1679,25 +1710,25 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 		  if (name == NULL)
 		    return false;
 
-		  BFD_ASSERT(strncmp(name, ".rela", 5) == 0
-			     && strcmp(bfd_get_section_name(abfd, sec),
-				       name+5) == 0);
+		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
+			      && strcmp (bfd_get_section_name (abfd, sec),
+					 name+5) == 0);
 
-		  sreloc = bfd_get_section_by_name(dynobj, name);
+		  sreloc = bfd_get_section_by_name (dynobj, name);
 		  if (sreloc == NULL)
 		    {
-		      sreloc = bfd_make_section(dynobj, name);
+		      sreloc = bfd_make_section (dynobj, name);
 		      if (sreloc == NULL
-			  || !bfd_set_section_flags(dynobj, sreloc,
-						    (SEC_ALLOC|SEC_LOAD
-						     |SEC_HAS_CONTENTS
-						     |SEC_IN_MEMORY
-						     |SEC_READONLY))
-			  || !bfd_set_section_alignment(dynobj, sreloc, 3))
+			  || !bfd_set_section_flags (dynobj, sreloc,
+						     (SEC_ALLOC|SEC_LOAD
+						      |SEC_HAS_CONTENTS
+						      |SEC_IN_MEMORY
+						      |SEC_READONLY))
+			  || !bfd_set_section_alignment (dynobj, sreloc, 3))
 			return false;
 		    }
 		}
-	      sreloc->_raw_size += sizeof(Elf64_External_Rela);
+	      sreloc->_raw_size += sizeof (Elf64_External_Rela);
 	    }
 	  break;
 	}
@@ -1728,10 +1759,12 @@ elf64_alpha_adjust_dynamic_symbol (info, h)
 
   if (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT)
     {
-      /* We hadn't seen all of the input symbols when we guessed that we
-	 needed a .plt entry.  Revise our decision.  */
-      if (!info->shared 
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
+      /* We hadn't seen all of the input symbols or all of the relocations
+	 when we guessed that we needed a .plt entry.  Revise our decision.  */
+      if ((!info->shared
+	   && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
+	  || (((struct alpha_elf_link_hash_entry *) h)->flags
+	      & ALPHA_ELF_LINK_HASH_LU_ADDR))
 	{
 	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
 	  return true;
@@ -1894,7 +1927,7 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 				      (PTR)c);
 	      elf_hash_table (info)->dynsymcount += c[1];
 
-	      for (i = 3, p = output_bfd->sections;
+	      for (i = 1, p = output_bfd->sections;
 		   p != NULL;
 		   p = p->next, i++)
 		{
