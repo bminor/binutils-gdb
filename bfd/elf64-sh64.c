@@ -139,7 +139,7 @@ static int sh64_elf64_get_symbol_type PARAMS ((Elf_Internal_Sym *, int));
 static boolean sh64_elf64_add_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
-extern boolean sh64_elf64_link_output_symbol_hook
+static boolean sh64_elf64_link_output_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
 	   asection *));
 static boolean sh64_elf64_fake_sections
@@ -3013,7 +3013,7 @@ sh64_elf64_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
    we don't need to look up and make sure to emit the main symbol for each
    DataLabel symbol.  */
 
-boolean
+static boolean
 sh64_elf64_link_output_symbol_hook (abfd, info, cname, sym, input_sec)
      bfd *abfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;

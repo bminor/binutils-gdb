@@ -1,5 +1,9 @@
 2002-06-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-sh64.c (sh64_elf64_link_output_symbol_hook): Make static.
+
+2002-06-08  Alan Modra  <amodra@bigpond.net.au>
+
 	* Makefile.am: Run "make dep-am".
 	* Makefile.in: Regenerate.
 
