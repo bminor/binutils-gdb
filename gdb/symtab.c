@@ -1604,8 +1604,28 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
    name of the type in question, so this doesn't have to get any
    smarter about namespace stuff.  */
 
+/* FIXME: carlton/2003-05-23: No, sometimes, unfortunately, the name
+   is wrong.  This function gets called when the the type in question
+   is a declaration; in that situation, our type name deduction
+   machinery doesn't work, so if the type is declared in a namespace
+   and GCC isn't giving us namespace debug info, we're screwed.  Sigh.
+   There's nothing we can do to fix this in general, I think.  */
+
 struct type *
 lookup_transparent_type (const char *name)
+{
+  struct type *retval = lookup_transparent_type_aux (name);
+
+  if (retval != NULL)
+    return retval;
+  else
+    /* See above FIXME comment: with proper debug info, this should
+       never be necessary (or even desirable).  */
+    return lookup_transparent_type_namespace (name);
+}
+
+struct type *
+lookup_transparent_type_aux (const char *name)
 {
   register struct symbol *sym;
   register struct symtab *s = NULL;
@@ -1649,9 +1669,7 @@ lookup_transparent_type (const char *name)
 	    block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 	    sym = lookup_block_symbol (block, name, NULL, STRUCT_DOMAIN);
 	    if (!sym)
-	      error ("Internal: global symbol `%s' found in %s psymtab but not in symtab.\n\
-%s may be an inlined function, or may be a template function\n\
-(if a template, try specifying an instantiation: %s<type>).",
+	      error ("Internal: global symbol `%s' found in %s psymtab but not in symtab.\n%s may be an inlined function, or may be a template function\n(if a template, try specifying an instantiation: %s<type>).",
 		     name, ps->filename, name, name);
 	  }
 	if (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
@@ -1696,9 +1714,7 @@ lookup_transparent_type (const char *name)
 	    block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	    sym = lookup_block_symbol (block, name, NULL, STRUCT_DOMAIN);
 	    if (!sym)
-	      error ("Internal: static symbol `%s' found in %s psymtab but not in symtab.\n\
-%s may be an inlined function, or may be a template function\n\
-(if a template, try specifying an instantiation: %s<type>).",
+	      error ("Internal: static symbol `%s' found in %s psymtab but not in symtab.\n%s may be an inlined function, or may be a template function\n(if a template, try specifying an instantiation: %s<type>).",
 		     name, ps->filename, name, name);
 	  }
 	if (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
@@ -1707,7 +1723,6 @@ lookup_transparent_type (const char *name)
   }
   return (struct type *) 0;
 }
-
 
 /* Find the psymtab containing main(). */
 /* FIXME:  What about languages without main() or specially linked

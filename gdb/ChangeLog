@@ -1,5 +1,19 @@
 2003-05-23  David Carlton  <carlton@bactrian.org>
 
+	* Makefile.in (cp-namespace.o): Depend on frame_h.
+	* cp-support.h: Declare lookup_transparent_type_namespace,
+	lookup_transparent_type_namespace_loop.
+	* cp-namespace.c: Include frame.h.
+	(lookup_transparent_type_namespace): New.
+	(lookup_transparent_type_namespace_loop): New.
+	* symtab.h: Declare lookup_transparent_type_aux.
+	* symtab.c (lookup_transparent_type): Add FIXME, fork off code
+	into lookup_transparent_type_aux, do backup strategy of trying to
+	look in namespaces.
+	(lookup_transparent_type_aux): New.
+
+2003-05-23  David Carlton  <carlton@bactrian.org>
+
 	* Merge with mainline; tag is carlton_dictionary-20030523-merge.
 
 2003-05-22  Ian Lance Taylor  <ian@airs.com>

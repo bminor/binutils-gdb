@@ -1123,6 +1123,8 @@ extern void reread_symbols (void);
 
 extern struct type *lookup_transparent_type (const char *);
 
+extern struct type *lookup_transparent_type_aux (const char *name);
+
 
 /* Macro for name of symbol to indicate a file compiled with gcc. */
 #ifndef GCC_COMPILED_FLAG_SYMBOL

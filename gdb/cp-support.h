@@ -104,6 +104,8 @@ extern struct symbol *cp_lookup_symbol_namespace (const char *namespace,
 						  const domain_enum domain,
 						  struct symtab **symtab);
 
+struct type *lookup_transparent_type_namespace (const char *name);
+
 /* The list of "maint cplus" commands.  */
 
 extern struct cmd_list_element *maint_cplus_cmd_list;

@@ -31,6 +31,7 @@
 #include "gdbtypes.h"
 #include "dictionary.h"
 #include "gdbcmd.h"
+#include "frame.h"
 
 /* When set, the file that we're processing seems to have debugging
    info for C++ namespaces, so cp-namespace.c shouldn't try to guess
@@ -70,6 +71,10 @@ static struct symbol *lookup_symbol_file (const char *name,
 					  const domain_enum domain,
 					  struct symtab **symtab,
 					  int anonymous_namespace);
+
+static struct type *lookup_transparent_type_namespace_loop (const char *name,
+							    const char *scope,
+							    int scope_len);
 
 /* This block exists only to store symbols associated to namespaces.
    Normally, try to avoid accessing it directly: instead, use
@@ -519,6 +524,58 @@ lookup_symbol_file (const char *name,
     }
 
   return NULL;
+}
+
+/* Try to look up the type definition associated to NAME if honest
+   methods don't work: look for NAME in the classes/namespaces that
+   are currently active, on the off chance that it might be there.  */
+
+struct type *
+lookup_transparent_type_namespace (const char *name)
+{
+  const char *scope = block_scope (get_selected_block (0));
+
+  if (strstr (scope, "::") == NULL)
+    return NULL;
+
+  return lookup_transparent_type_namespace_loop (name, scope, 0);
+}
+
+/* Lookup the the type definition associated to NAME in
+   namespaces/classes containing SCOPE other than the global
+   namespace.  */
+
+static struct type *
+lookup_transparent_type_namespace_loop (const char *name, const char *scope,
+					int scope_len)
+{
+  int new_scope_len = scope_len;
+  char *full_name;
+
+  /* If the current scope is followed by "::", skip past that.  */
+  if (new_scope_len != 0)
+    new_scope_len += 2;
+  new_scope_len += cp_find_first_component (scope + new_scope_len);
+
+  if (scope[new_scope_len] == ':')
+    {
+      struct type *retval
+	= lookup_transparent_type_namespace_loop (name, scope, new_scope_len);
+      if (retval != NULL)
+	return retval;
+    }
+
+  /* If there's no enclosing scope, lookup_transparent_type would have
+     found it. */
+  if (scope_len == 0)
+    return NULL;
+
+  full_name = alloca (scope_len + 2 + strlen (name) + 1);
+  strncpy (full_name, scope, scope_len);
+  strncpy (full_name + scope_len, "::", 2);
+  strcpy (full_name + scope_len + 2, name);
+
+  return lookup_transparent_type_aux (full_name);
 }
 
 /* Allocate everything necessary for namespace_block and
