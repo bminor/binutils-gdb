@@ -1,3 +1,9 @@
+2004-02-19  Elena Zannoni  <ezannoni@redhat.com>
+
+	* event-top.c (async_request_quit): Remove uses of REQUEST_QUIT
+	macro, which was part of the now removed Mach 3 port.
+	* utils.c (request_quit): Ditto.
+
 2004-02-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/djgpp/fnchange.lst: Rename "amd64obsd-tdep.c" and

@@ -1,5 +1,5 @@
 /* Top level stuff for GDB, the GNU debugger.
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
    This file is part of GDB.
@@ -971,11 +971,7 @@ void
 async_request_quit (gdb_client_data arg)
 {
   quit_flag = 1;
-#ifdef REQUEST_QUIT
-  REQUEST_QUIT;
-#else
   quit ();
-#endif
 }
 
 /* Tell the event loop what to do if SIGQUIT is received. 
