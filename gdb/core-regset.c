@@ -109,9 +109,8 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
       else
 	{
 	  memcpy ((char *) &fpregset, core_reg_sect, sizeof (fpregset));
-#if defined (FP0_REGNUM)
-	  supply_fpregset (&fpregset);
-#endif
+	  if (FP0_REGNUM >= 0)
+	    supply_fpregset (&fpregset);
 	}
     }
 #endif /* defined(HAVE_GREGSET_T) && defined (HAVE_FPREGSET_T) */

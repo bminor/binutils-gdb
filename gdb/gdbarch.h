@@ -264,6 +264,19 @@ extern void set_gdbarch_pc_regnum (struct gdbarch *gdbarch, int pc_regnum);
 #endif
 
 /* Default (value) for non- multi-arch platforms. */
+#if (GDB_MULTI_ARCH == 0) && !defined (FP0_REGNUM)
+#define FP0_REGNUM (-1)
+#endif
+
+extern int gdbarch_fp0_regnum (struct gdbarch *gdbarch);
+extern void set_gdbarch_fp0_regnum (struct gdbarch *gdbarch, int fp0_regnum);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > 1) || !defined (FP0_REGNUM)
+#define FP0_REGNUM (gdbarch_fp0_regnum (current_gdbarch))
+#endif
+#endif
+
+/* Default (value) for non- multi-arch platforms. */
 #if (GDB_MULTI_ARCH == 0) && !defined (NPC_REGNUM)
 #define NPC_REGNUM (-1)
 #endif

@@ -3502,19 +3502,20 @@ procfs_fetch_registers (regno)
 
   supply_gregset (gregs);
 
-#if defined (FP0_REGNUM)	/* need floating point? */
-  if ((regno >= 0 && regno < FP0_REGNUM) ||
-      regno == PC_REGNUM  ||
-      (NPC_REGNUM >= 0 && regno == NPC_REGNUM) ||
-      regno == FP_REGNUM  ||
-      regno == SP_REGNUM)
-    return;			/* not a floating point register */
+  if (FP0_REGNUM >= 0)	/* need floating point? */
+    {
+      if ((regno >= 0 && regno < FP0_REGNUM) ||
+	  regno == PC_REGNUM  ||
+	  (NPC_REGNUM >= 0 && regno == NPC_REGNUM) ||
+	  regno == FP_REGNUM  ||
+	  regno == SP_REGNUM)
+	return;			/* not a floating point register */
 
-  if ((fpregs = proc_get_fpregs (pi)) == NULL)
-    proc_error (pi, "fetch_registers, get_fpregs", __LINE__);
+      if ((fpregs = proc_get_fpregs (pi)) == NULL)
+	proc_error (pi, "fetch_registers, get_fpregs", __LINE__);
 
-  supply_fpregset (fpregs);
-#endif
+      supply_fpregset (fpregs);
+    }
 }
 
 /* Get ready to modify the registers array.  On machines which store
@@ -3576,21 +3577,22 @@ procfs_store_registers (regno)
   if (!proc_set_gregs (pi))
     proc_error (pi, "store_registers, set_gregs", __LINE__);
 
-#if defined (FP0_REGNUM)	/* need floating point? */
-  if ((regno >= 0 && regno < FP0_REGNUM) ||
-      regno == PC_REGNUM  ||
-      (NPC_REGNUM >= 0 && regno == NPC_REGNUM) ||
-      regno == FP_REGNUM  ||
-      regno == SP_REGNUM)
-    return;			/* not a floating point register */
+  if (FP0_REGNUM >= 0)		/* need floating point? */
+    {
+      if ((regno >= 0 && regno < FP0_REGNUM) ||
+	  regno == PC_REGNUM  ||
+	  (NPC_REGNUM >= 0 && regno == NPC_REGNUM) ||
+	  regno == FP_REGNUM  ||
+	  regno == SP_REGNUM)
+	return;			/* not a floating point register */
 
-  if ((fpregs = proc_get_fpregs (pi)) == NULL)
-    proc_error (pi, "store_registers, get_fpregs", __LINE__);
+      if ((fpregs = proc_get_fpregs (pi)) == NULL)
+	proc_error (pi, "store_registers, get_fpregs", __LINE__);
 
-  fill_fpregset (fpregs, regno);
-  if (!proc_set_fpregs (pi))
-    proc_error (pi, "store_registers, set_fpregs", __LINE__);
-#endif
+      fill_fpregset (fpregs, regno);
+      if (!proc_set_fpregs (pi))
+	proc_error (pi, "store_registers, set_fpregs", __LINE__);
+    }
 }
 
 /*
@@ -4111,14 +4113,13 @@ invalidate_cache (parent, pi, ptr)
       if (!proc_set_gregs (pi))	/* flush gregs cache */
 	proc_warn (pi, "target_resume, set_gregs",
 		   __LINE__);
-#ifdef FP0_REGNUM
-  if (pi->fpregs_dirty)
-    if (parent == NULL ||
-	proc_get_current_thread (parent) != pi->tid)
-      if (!proc_set_fpregs (pi))	/* flush fpregs cache */
-	proc_warn (pi, "target_resume, set_fpregs", 
-		   __LINE__);
-#endif
+  if (FP0_REGNUM >= 0)
+    if (pi->fpregs_dirty)
+      if (parent == NULL ||
+	  proc_get_current_thread (parent) != pi->tid)
+	if (!proc_set_fpregs (pi))	/* flush fpregs cache */
+	  proc_warn (pi, "target_resume, set_fpregs", 
+		     __LINE__);
 #endif
 
   if (parent != NULL)

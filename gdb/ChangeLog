@@ -1,5 +1,15 @@
 2000-05-08  Michael Snyder  <msnyder@seadog.cygnus.com>
 
+	* gdbarch.sh: Add FP0_REGNUM to list of multi-arched register numbers.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* core-regset.c: Change FP0_REGNUM to a runtime test.
+	* procfs.c: Ditto.
+	* sun3-nat.c: Ditto.
+	* sparc-tdep.c: Ditto.
+	
+	* i386mach-nat.c: Remove unnecessary ifdef for FP0_REGNUM.
+	* ptx4-nat.c: Ditto.
+
 	* sol-thread.c (sol_thread_create_inferior): only add the thread
 	to the thread list if it is not already in there.
 	(prototypes for thread_db func ptrs): pretty up formatting.

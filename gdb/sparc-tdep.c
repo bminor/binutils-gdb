@@ -44,8 +44,12 @@
 
 #ifdef GDB_TARGET_IS_SPARC64
 #define FP_REGISTER_BYTES (64 * 4)
-#else
+#else 
+#if (SPARC_HAS_FPU)
 #define FP_REGISTER_BYTES (32 * 4)
+#else
+#define FP_REGISTER_BYTES 0
+#endif
 #endif
 
 /* If not defined, assume 32 bit sparc.  */
@@ -749,16 +753,16 @@ sparc_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 	  else if (regnum >= O0_REGNUM && regnum < O0_REGNUM + 8)
 	    addr = frame1->frame + (regnum - O0_REGNUM) * SPARC_INTREG_SIZE
 	      - (FP_REGISTER_BYTES + 16 * SPARC_INTREG_SIZE);
-#ifdef FP0_REGNUM
-	  else if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM + 32)
+	  else if (FP0_REGNUM >= 0 &&
+		   regnum >= FP0_REGNUM && regnum < FP0_REGNUM + 32)
 	    addr = frame1->frame + (regnum - FP0_REGNUM) * 4
 	      - (FP_REGISTER_BYTES);
 #ifdef GDB_TARGET_IS_SPARC64
-	  else if (regnum >= FP0_REGNUM + 32 && regnum < FP_MAX_REGNUM)
+	  else if (FP0_REGNUM >= 0 &&
+		   regnum >= FP0_REGNUM + 32 && regnum < FP_MAX_REGNUM)
 	    addr = frame1->frame + 32 * 4 + (regnum - FP0_REGNUM - 32) * 8
 	      - (FP_REGISTER_BYTES);
 #endif
-#endif /* FP0_REGNUM */
 	  else if (regnum >= Y_REGNUM && regnum < NUM_REGS)
 	    addr = frame1->frame + (regnum - Y_REGNUM) * SPARC_INTREG_SIZE
 	      - (FP_REGISTER_BYTES + 24 * SPARC_INTREG_SIZE);
@@ -849,13 +853,8 @@ sparc_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 #endif
 
 /* See tm-sparc.h for how this is calculated.  */
-#ifdef FP0_REGNUM
 #define DUMMY_STACK_REG_BUF_SIZE \
-(((8+8+8) * SPARC_INTREG_SIZE) + FP_REGISTER_BYTES)
-#else
-#define DUMMY_STACK_REG_BUF_SIZE \
-(((8+8+8) * SPARC_INTREG_SIZE) )
-#endif /* FP0_REGNUM */
+     (((8+8+8) * SPARC_INTREG_SIZE) + FP_REGISTER_BYTES)
 #define DUMMY_STACK_SIZE (DUMMY_STACK_REG_BUF_SIZE + DUMMY_REG_SAVE_OFFSET)
 
 void
@@ -887,11 +886,10 @@ sparc_push_dummy_frame ()
 		       &register_temp[16 * SPARC_INTREG_SIZE],
 		       SPARC_INTREG_SIZE * 8);
 
-#ifdef FP0_REGNUM
-  read_register_bytes (REGISTER_BYTE (FP0_REGNUM),
-		       &register_temp[24 * SPARC_INTREG_SIZE],
-		       FP_REGISTER_BYTES);
-#endif /* FP0_REGNUM */
+  if (FP0_REGNUM >= 0)
+    read_register_bytes (REGISTER_BYTE (FP0_REGNUM),
+			 &register_temp[24 * SPARC_INTREG_SIZE],
+			 FP_REGISTER_BYTES);
 
   sp -= DUMMY_STACK_SIZE;
 
@@ -991,18 +989,20 @@ sparc_frame_find_saved_regs (fi, saved_regs_addr)
 	saved_regs_addr->regs[regnum] =
 	  frame_addr + (regnum - I0_REGNUM) * SPARC_INTREG_SIZE
 	  - DUMMY_STACK_REG_BUF_SIZE + 8 * SPARC_INTREG_SIZE;
-#ifdef FP0_REGNUM
-      for (regnum = FP0_REGNUM; regnum < FP0_REGNUM + 32; regnum++)
-	saved_regs_addr->regs[regnum] =
-	  frame_addr + (regnum - FP0_REGNUM) * 4
-	  - DUMMY_STACK_REG_BUF_SIZE + 24 * SPARC_INTREG_SIZE;
+      if (FP0_REGNUM >= 0)
+	{
+	  for (regnum = FP0_REGNUM; regnum < FP0_REGNUM + 32; regnum++)
+	    saved_regs_addr->regs[regnum] =
+	      frame_addr + (regnum - FP0_REGNUM) * 4
+	      - DUMMY_STACK_REG_BUF_SIZE + 24 * SPARC_INTREG_SIZE;
 #ifdef GDB_TARGET_IS_SPARC64
-      for (regnum = FP0_REGNUM + 32; regnum < FP_MAX_REGNUM; regnum++)
-	saved_regs_addr->regs[regnum] =
-	  frame_addr + 32 * 4 + (regnum - FP0_REGNUM - 32) * 4
-	  - DUMMY_STACK_REG_BUF_SIZE + 24 * SPARC_INTREG_SIZE;
+	  for (regnum = FP0_REGNUM + 32; regnum < FP_MAX_REGNUM; regnum++)
+	    saved_regs_addr->regs[regnum] =
+	      frame_addr + 32 * 4 + (regnum - FP0_REGNUM - 32) * 4
+	      - DUMMY_STACK_REG_BUF_SIZE + 24 * SPARC_INTREG_SIZE;
 #endif
-#endif /* FP0_REGNUM */
+	}
+
 #ifdef GDB_TARGET_IS_SPARC64
       for (regnum = PC_REGNUM; regnum < PC_REGNUM + 7; regnum++)
 	{
@@ -1094,26 +1094,27 @@ sparc_pop_frame ()
   int regnum;
 
   sparc_frame_find_saved_regs (frame, &fsr);
-#ifdef FP0_REGNUM
-  if (fsr.regs[FP0_REGNUM])
+  if (FP0_REGNUM >= 0)
     {
-      read_memory (fsr.regs[FP0_REGNUM], raw_buffer, FP_REGISTER_BYTES);
-      write_register_bytes (REGISTER_BYTE (FP0_REGNUM),
-			    raw_buffer, FP_REGISTER_BYTES);
-    }
+      if (fsr.regs[FP0_REGNUM])
+	{
+	  read_memory (fsr.regs[FP0_REGNUM], raw_buffer, FP_REGISTER_BYTES);
+	  write_register_bytes (REGISTER_BYTE (FP0_REGNUM),
+				raw_buffer, FP_REGISTER_BYTES);
+	}
 #ifndef GDB_TARGET_IS_SPARC64
-  if (fsr.regs[FPS_REGNUM])
-    {
-      read_memory (fsr.regs[FPS_REGNUM], raw_buffer, 4);
-      write_register_bytes (REGISTER_BYTE (FPS_REGNUM), raw_buffer, 4);
-    }
-  if (fsr.regs[CPS_REGNUM])
-    {
-      read_memory (fsr.regs[CPS_REGNUM], raw_buffer, 4);
-      write_register_bytes (REGISTER_BYTE (CPS_REGNUM), raw_buffer, 4);
-    }
+      if (fsr.regs[FPS_REGNUM])
+	{
+	  read_memory (fsr.regs[FPS_REGNUM], raw_buffer, 4);
+	  write_register_bytes (REGISTER_BYTE (FPS_REGNUM), raw_buffer, 4);
+	}
+      if (fsr.regs[CPS_REGNUM])
+	{
+	  read_memory (fsr.regs[CPS_REGNUM], raw_buffer, 4);
+	  write_register_bytes (REGISTER_BYTE (CPS_REGNUM), raw_buffer, 4);
+	}
 #endif
-#endif /* FP0_REGNUM */
+    }
   if (fsr.regs[G1_REGNUM])
     {
       read_memory (fsr.regs[G1_REGNUM], raw_buffer, 7 * SPARC_INTREG_SIZE);
@@ -1388,8 +1389,6 @@ fill_gregset (gregsetp, regno)
     }
 }
 
-#if defined (FP0_REGNUM)
-
 /*  Given a pointer to a floating point register set in /proc format
    (fpregset_t *), unpack the register contents and supply them as gdb's
    idea of the current floating point register values. */
@@ -1400,6 +1399,9 @@ supply_fpregset (fpregsetp)
 {
   register int regi;
   char *from;
+
+  if (FP0_REGNUM < 0)
+    return;
 
   for (regi = FP0_REGNUM; regi < FP_MAX_REGNUM; regi++)
     {
@@ -1424,6 +1426,9 @@ fill_fpregset (fpregsetp, regno)
   char *to;
   char *from;
 
+  if (FP0_REGNUM < 0)
+    return;
+
   for (regi = FP0_REGNUM; regi < FP_MAX_REGNUM; regi++)
     {
       if ((regno == -1) || (regno == regi))
@@ -1438,8 +1443,6 @@ fill_fpregset (fpregsetp, regno)
       fpregsetp->pr_fsr = *(int *) &registers[REGISTER_BYTE (FPS_REGNUM)];
     }
 }
-
-#endif /* defined (FP0_REGNUM) */
 
 #endif /* USE_PROC_FS */
 

@@ -146,6 +146,7 @@ struct gdbarch
   int sp_regnum;
   int fp_regnum;
   int pc_regnum;
+  int fp0_regnum;
   int npc_regnum;
   int nnpc_regnum;
   gdbarch_register_name_ftype *register_name;
@@ -283,6 +284,7 @@ struct gdbarch startup_gdbarch = {
   0,
   0,
   0,
+  0,
   generic_get_saved_register,
   0,
   0,
@@ -353,6 +355,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->sp_regnum = -1;
   gdbarch->fp_regnum = -1;
   gdbarch->pc_regnum = -1;
+  gdbarch->fp0_regnum = -1;
   gdbarch->npc_regnum = -1;
   gdbarch->nnpc_regnum = -1;
   gdbarch->register_name = legacy_register_name;
@@ -472,6 +475,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->pc_regnum == -1))
     internal_error ("gdbarch: verify_gdbarch: pc_regnum invalid");
+  /* Skip verify of fp0_regnum, invalid_p == 0 */
   /* Skip verify of npc_regnum, invalid_p == 0 */
   /* Skip verify of nnpc_regnum, invalid_p == 0 */
   /* Skip verify of register_name, invalid_p == 0 */
@@ -711,6 +715,9 @@ gdbarch_dump (void)
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: PC_REGNUM = %ld\n",
                       (long) PC_REGNUM);
+  fprintf_unfiltered (gdb_stdlog,
+                      "gdbarch_update: FP0_REGNUM = %ld\n",
+                      (long) FP0_REGNUM);
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: NPC_REGNUM = %ld\n",
                       (long) NPC_REGNUM);
@@ -1346,6 +1353,22 @@ set_gdbarch_pc_regnum (struct gdbarch *gdbarch,
                        int pc_regnum)
 {
   gdbarch->pc_regnum = pc_regnum;
+}
+
+int
+gdbarch_fp0_regnum (struct gdbarch *gdbarch)
+{
+  /* Skip verify of fp0_regnum, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_fp0_regnum called\n");
+  return gdbarch->fp0_regnum;
+}
+
+void
+set_gdbarch_fp0_regnum (struct gdbarch *gdbarch,
+                        int fp0_regnum)
+{
+  gdbarch->fp0_regnum = fp0_regnum;
 }
 
 int
