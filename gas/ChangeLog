@@ -1,5 +1,8 @@
 Wed Nov 29 23:14:27 1995  Ken Raeburn  <raeburn@cygnus.com>
 
+	* hash.c (struct hash_entry): Moved here...
+	* hash.h (struct hash_entry): ...from here.
+
 	* config/obj-elf.c (elf_frob_symbol): Don't free and clear sy_obj
 	if it's already known to be null.
 
