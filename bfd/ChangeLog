@@ -1,3 +1,14 @@
+Wed Jul 22 16:43:24 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c (ieee_find_nearest_line): Change filename_ptr and
+	functionname_ptr to be const.  Change line_ptr to be unsigned.
+
+	* coffcode.h (coff_link_output_has_begun): Simplify handling when
+	macro is not defined.  Change second parameter from bfd_link_info
+	to coff_final_link_info.  Add prototype.
+	(coff_final_link_postscript): Simplify handling when macro is not
+	defined.  Add prototype.
+
 1998-07-22 13:08  Ulrich Drepper  <drepper@cygnus.com>
 
 	* elf-mn10300.c: Before include system specific ELF header define
