@@ -77,6 +77,9 @@ struct elf_backend_data
   /* The architecture for this backend.  */
   enum bfd_architecture arch;
 
+  /* The ELF machine code (EM_xxxx) for this backend.  */
+  int elf_machine_code;
+
   /* The maximum page size for this backend.  */
   bfd_vma maxpagesize;
 
@@ -92,6 +95,14 @@ struct elf_backend_data
 
   /* The remaining functions are hooks which are called only if they
      are not NULL.  */
+
+  /* A function to permit a backend specific check on whether a
+     particular BFD format is relevant for an object file, and to
+     permit the backend to set any global information it wishes.  When
+     this is called elf_elfheader is set, but anything else should be
+     used with caution.  If this returns false, the check_format
+     routine will return a wrong_format error.  */
+  boolean (*elf_backend_object_p) PARAMS ((bfd *));
 
   /* A function to do additional symbol processing when reading the
      ELF symbol table.  This is where any processor-specific special
@@ -141,14 +152,6 @@ struct elf_sym_extra
 };
 
 typedef struct elf_sym_extra Elf_Sym_Extra;
-
-struct bfd_elf_arch_map {
-  enum bfd_architecture bfd_arch;
-  int elf_arch;
-};
-
-extern const struct bfd_elf_arch_map bfd_elf_arch_map[];
-extern const int bfd_elf_arch_map_size;
 
 struct bfd_elf_section_data {
   Elf_Internal_Shdr this_hdr;

@@ -1585,7 +1585,7 @@ DEFUN (hppa_elf_reloc, (abfd, reloc_entry, symbol_in, data, input_section, outpu
 
 }
 
-static reloc_howto_type *
+static const reloc_howto_type *
 elf_hppa_reloc_type_lookup (arch, code)
      bfd_arch_info_type *arch;
      bfd_reloc_code_real_type code;
@@ -2236,13 +2236,15 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, reloc_entry, stub_types)
   if (!stub_desc->stub_contents)
     {
       stub_desc->allocated_size = STUB_BUFFER_INCR;
-      stub_desc->stub_contents = (char *) xmalloc (STUB_BUFFER_INCR);
+      stub_desc->stub_contents = (char *) bfd_xmalloc (STUB_BUFFER_INCR);
     }
   else if ((stub_desc->allocated_size - stub_desc->real_size) < STUB_MAX_SIZE)
     {
       stub_desc->allocated_size = stub_desc->allocated_size + STUB_BUFFER_INCR;
-      stub_desc->stub_contents = (char *) xrealloc (stub_desc->stub_contents,
-						    stub_desc->allocated_size);
+      stub_desc->stub_contents = (char *) realloc (stub_desc->stub_contents,
+						   stub_desc->allocated_size);
+      if (stub_desc->stub_contents == NULL)
+	abort ();
     }
 
   stub_desc->stub_secp = (int *) (stub_desc->stub_contents + stub_desc->real_size);
@@ -3148,12 +3150,10 @@ hppa_elf_get_section_contents (abfd, section, location, offset, count)
      be generated. */
   else if (strcmp (section->name, ".hppa_symextn") == 0)
     {
-      /* If this is the first time through and there are no output 
-	 sections, then read the contents of the symbol extension section
-	 from disk.  */
-      if (! symext_chain_built
-	  || ((section->output_section == NULL)
-	      && (abfd->direction == read_direction)))
+      /* If there are no output sections, then read the contents of the 
+	 symbol extension section from disk.  */
+      if (section->output_section == NULL
+	  && abfd->direction == read_direction)
 	{
 	  return bfd_generic_get_section_contents (abfd, section, location,
 						   offset, count);
@@ -3165,17 +3165,22 @@ hppa_elf_get_section_contents (abfd, section, location, offset, count)
       else if (! symext_chain_built)
 	{
 	  int i;
-	  int *symtab_map = elf_sym_extra(section->output_section->owner);
+	  int *symtab_map =
+	    (int *) elf_sym_extra(section->output_section->owner);
 	  
 	  for (i = 0; i < section->output_section->owner->symcount; i++ )
 	    {
 	      elf_hppa_tc_symbol(section->output_section->owner,
-				 section->output_section->owner->outsymbols[i],
+				 ((elf_symbol_type *)
+				  section->output_section->owner->outsymbols[i]),
 				 symtab_map[i]);
 	    }
 	  symext_chain_built++;
 	  elf_hppa_tc_make_sections (section->output_section->owner, NULL);
 	}
+
+      /* At this point we know that the symbol extension section has been
+	 built.  We just need to copy it into the user's buffer.  */
       if (count == 0)
 	return true;
       
@@ -3501,6 +3506,7 @@ DEFUN (elf32_hppa_backend_section_from_bfd_section, (abfd, hdr, asect, retval),
 #define TARGET_BIG_SYM		bfd_elf32_hppa_vec
 #define TARGET_BIG_NAME		"elf32-hppa"
 #define ELF_ARCH		bfd_arch_hppa
+#define ELF_MACHINE_CODE	EM_HPPA
 #define ELF_MAXPAGESIZE		0x1000
 
 #include "elf32-target.h"

@@ -61,6 +61,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define ELF_MAXPAGESIZE 1
 #endif
 
+#ifndef elf_backend_object_p
+#define elf_backend_object_p		0	/* elf_backend_object_p */
+#endif
 #ifndef elf_backend_symbol_processing
 #define elf_backend_symbol_processing	0	/* elf_backend_symbol_processing */
 #endif
@@ -92,9 +95,11 @@ static CONST struct elf_backend_data elf32_bed =
 #endif
   0,				/* elf_64_p */
   ELF_ARCH,			/* arch */
+  ELF_MACHINE_CODE,		/* elf_machine_code */
   ELF_MAXPAGESIZE,		/* maxpagesize */
   elf_info_to_howto,		/* elf_info_to_howto */
   elf_info_to_howto_rel,	/* elf_info_to_howto_rel */
+  elf_backend_object_p,			/* elf_backend_object_p */
   elf_backend_symbol_processing,	/* elf_backend_symbol_processing */
   elf_backend_symbol_table_processing,	/* elf_backend_symbol_table_processing */
   elf_backend_section_processing,	/* elf_backend_section_processing */
