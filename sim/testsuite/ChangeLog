@@ -1,4 +1,8 @@
 start-sanitize-sky
+Wed Jun 24 17:35:00 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
+
+        * Updated sim/sky/t-dma.c: It missed check-in earlier today.
+
 Wed Jun 24 11:34:00 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
 
         * Updated sim/sky/t-dma.{brn|dmaexpect} because a
