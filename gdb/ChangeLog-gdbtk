@@ -1,3 +1,8 @@
+Tue Mar 31 15:42:06 1998  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* gdbtk.c (gdb_loadfile): Don't use the return result from sprintf, which
+	returns a char * under SunOS4.
+
 Tue Mar 31 17:18:43 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Add $(LIBIDETCL) as well as $(LIBIDE) if

@@ -3201,16 +3201,28 @@ gdb_loadfile (clientData, interp, objc, objv)
       if (linenumbers)
 	{
 	  if (ltable[ln >> 3] & (1 << (ln % 8)))
-	    a[0]->length = sprintf (buf,"%s insert end {-\t%d} break_tag", widget, ln);
+        {
+          sprintf (buf,"%s insert end {-\t%d} break_tag", widget, ln);
+          a[0]->length = strlen (buf);
+        }
 	  else
-	    a[0]->length = sprintf (buf,"%s insert end { \t%d} \"\"", widget, ln);
+        {
+          sprintf (buf,"%s insert end { \t%d} \"\"", widget, ln);
+          a[0]->length = strlen (buf);
+        }
 	}
       else
 	{
 	  if (ltable[ln >> 3] & (1 << (ln % 8)))
-	   a[0]->length = sprintf (buf,"%s insert end {-\t} break_tag", widget);
+        {
+          sprintf (buf,"%s insert end {-\t} break_tag", widget);
+          a[0]->length = strlen (buf);
+        }
 	  else
-	   a[0]->length = sprintf (buf,"%s insert end { \t} \"\"", widget);
+        {
+          sprintf (buf,"%s insert end { \t} \"\"", widget);
+          a[0]->length = strlen (buf);
+        }
 	}
       b[0]->length = strlen(b[0]->bytes);
       Tcl_SetListObj(a[1],2,b);
