@@ -233,7 +233,6 @@ i386nbsd_sigtramp_offset (CORE_ADDR pc)
 static int
 i386nbsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
-
   return (nbsd_pc_in_sigtramp (pc, name)
 	  || i386nbsd_sigtramp_offset (pc) >= 0);
 }
