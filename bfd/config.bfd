@@ -89,12 +89,17 @@ esac
 
 case "${targ}" in
   mips*-dec-bsd*)
-    echo "This target is obsolete and has been removed." 
+    echo "This target is obsolete and has been removed."
+    exit 1
+    ;;
+
+  mips*-*-mach3*)
+    echo "This target is obsolete and has been removed."
     exit 1
     ;;
 
   mips*-*-pe*)
-    echo "This target is obsolete and has been removed." 
+    echo "This target is obsolete and has been removed."
     exit 1
     ;;
 
@@ -762,10 +767,6 @@ case "${targ}" in
     targ_defvec=bfd_elf32_bigmips_vec
     targ_selvecs="bfd_elf32_littlemips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec ecoff_big_vec ecoff_little_vec"
     ;;
-  mips*-dec-mach3*)
-    targ_defvec=aout_mips_little_vec
-    targ_cflags=-DSTAT_FOR_EXEC
-    ;;
   mips*-dec-* | mips*el-*-ecoff*)
     targ_defvec=ecoff_little_vec
     targ_selvecs=ecoff_big_vec
@@ -791,10 +792,6 @@ case "${targ}" in
   mips*-*-lnews*)
     targ_defvec=ecoff_biglittle_vec
     targ_selvecs="ecoff_little_vec ecoff_big_vec"
-    ;;
-  mips*-*-mach3*)
-    targ_defvec=aout_mips_little_vec
-    targ_cflags=-DSTAT_FOR_EXEC
     ;;
   mips*-*-sysv4*)
     targ_defvec=bfd_elf32_tradbigmips_vec

@@ -342,7 +342,7 @@ CPU_OBJ_VALID = \
 	case $$o in \
 	aout) \
 	  case $$c in \
-	  a29k | arm | cris | i386 | m68k | mips | ns32k | pdp11 | sparc | tahoe | tic30 | vax) \
+	  a29k | arm | cris | i386 | m68k | ns32k | pdp11 | sparc | tahoe | tic30 | vax) \
 	    valid=yes ;; \
 	  esac ;; \
 	bout) \

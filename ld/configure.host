@@ -155,10 +155,6 @@ ia64-*-aix*)
   HOSTING_LIBS='-L`dirname \`${CC} --print-file-name=libc.so\`` '"$HOSTING_LIBS"' `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} --print-file-name=crtend.o; fi` `${CC} --print-file-name=crtn.o`'
   ;;
 
-mips*-dec-bsd*)
-  HOSTING_CRT0=/usr/lib/crt0.o
-  ;;
-
 mips*-sgi-irix4* | mips*-sgi-irix5*)
   HOSTING_CRT0=/usr/lib/crt1.o
   HOSTING_LIBS="$HOSTING_LIBS"' /usr/lib/crtn.o'

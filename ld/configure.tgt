@@ -408,7 +408,6 @@ mips*-sgi-irix6*)	targ_emul=elf32bmipn32
 mips*-sgi-irix*)	targ_emul=mipsbig ;;
 mips*el-*-ecoff*)	targ_emul=mipsidtl ;;
 mips*-*-ecoff*)		targ_emul=mipsidt ;;
-mips*-dec-bsd*)		targ_emul=mipsbsd ;;
 mips*el-*-netbsd*)	targ_emul=elf32lmip
 			targ_extra_emuls="elf32bmip"
 			;;

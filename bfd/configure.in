@@ -272,14 +272,6 @@ changequote([,])dnl
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/i860mach3.h"'
 	;;
-  mips-dec-bsd*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/mipsbsd.h"'
-	;;
-  mips-dec-mach3*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/mipsmach3.h"'
-	;;
   mips-*-netbsd* | mips*-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
@@ -290,10 +282,6 @@ changequote([,])dnl
   mips-sgi-irix4*)	COREFILE=irix-core.lo ;;
   mips-sgi-irix5*)	COREFILE=irix-core.lo ;;
   mips-sgi-irix6*)	COREFILE=irix-core.lo ;;
-  mips-*-mach3*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/mipsmach3.h"'
-	;;
   mips-*-sysv4*)	;;
   mips-*-sysv* | mips-*-riscos*)
 	COREFILE=trad-core.lo
@@ -583,8 +571,6 @@ do
     aout0_big_vec)		tb="$tb aout0.lo aout32.lo" ;;
     aout_arm_big_vec)		tb="$tb aout-arm.lo aout32.lo" ;;
     aout_arm_little_vec)	tb="$tb aout-arm.lo aout32.lo" ;;
-    aout_mips_big_vec)		tb="$tb mipsbsd.lo aout32.lo" ;;
-    aout_mips_little_vec)	tb="$tb mipsbsd.lo aout32.lo" ;;
     apollocoff_vec)		tb="$tb coff-apollo.lo" ;;
     arm_epoc_pe_big_vec)	tb="$tb epoc-pe-arm.lo peigen.lo cofflink.lo " ;;
     arm_epoc_pe_little_vec)	tb="$tb epoc-pe-arm.lo peigen.lo cofflink.lo " ;;
