@@ -1,3 +1,51 @@
+Tue Nov 24 14:13:10 1998  Andrew Cagney  <cagney@chook>
+
+	* breakpoint.c (memory_breakpoint_size): Delete global.
+	(read_memory_nobpt): Determine real breakpoint address and size
+ 	using BREAKPOINT_FROM_PC.
+
+	* defs.h (breakpoint_from_pc_fn): BREAKPOINT_FROM_PC function
+ 	template.
+	* target.h, mem-break.c (memory_breakpoint_from_pc):
+ 	Rewrite. Always define.  Return NULL when memory breakpoints are
+ 	not supported.
+	(memory_insert_breakpoint, memory_remove_breakpoint): Call
+ 	BREAKPOINT_FROM_PC.
+	* target.h (BREAKPOINT_FROM_PC): Provide default.
+	* gdbint.texinfo (BREAKPOINT_FROM_PC): Document.
+
+	* config/rs6000/tm-rs6000.h (BREAKPOINT): Delete macro.
+ 	(BREAKPOINT_FROM_PC): Define.
+ 	({BIG,LITTLE}_BREAKPOINT): Move macros from here.
+	* rs6000-tdep.c: To here.
+ 	(rs6000_breakpoint_from_pc): New function.
+
+	* config/mn10300/tm-mn10300.h (BREAKPOINT): Delete macro.
+ 	(BREAKPOINT_FROM_PC): Define, call.
+	* mn10300-tdep.c (mn10300_breakpoint_from_pc): New function.
+
+	* config/mips/tm-mips.h ({BIG,LITTLE}_BREAKPOINT,
+ 	IDT_{BIG,LITTLE}_BREAKPOINT, PMON_{BIG,LITTLE}_BREAKPOINT,
+ 	MIPS16_{BIG,LITTLE}_BREAKPOINT): Move macros from here.
+	* mips-tdep.c: To here.
+start-sanitize-sky
+	* txvu-tdep.c (core_break_insn): Delete variable.
+	(txvu_insert_breakpoint): Update, use BREAKPOINT_FROM_PC.
+end-sanitize-sky
+
+	* config/arm/tm-arm.h ({BIG,LITTLE}_BREAKPOINT): Delete macros.
+ 	({ARM,THUMB}_{BE,LE}_BREAKPOINT): Move macros from here.
+	* arm-tdep.c: To here.
+	
+	* remote-array.c (memory_breakpoint_size): Delete variable.
+	(array_insert_breakpoint): Obtain breakpoint size using
+ 	BREAKPOINT_FROM_PC.
+	* remote-st.c (memory_breakpoint_size, st2000_insert_breakpoint):
+ 	Ditto.
+	* remote-os9k.c (memory_breakpoint_size,
+ 	rombug_insert_breakpoint): Ditto.
+	* remote-e7000.c (memory_breakpoint_size): Ditto.
+
 Mon Nov 23 11:38:40 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* symfile.c (deduce_language_from_filename): rewrite so as to 

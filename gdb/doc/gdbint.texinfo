@@ -1140,6 +1140,26 @@ longer than the shortest instruction of the architecture.
 @item LITTLE_BREAKPOINT
 Similar to BREAKPOINT, but used for bi-endian targets.
 
+@item REMOTE_BREAKPOINT
+@item LITTLE_REMOTE_BREAKPOINT
+@item BIG_REMOTE_BREAKPOINT
+Similar to BREAKPOINT, but used for remote targets.
+
+@item BREAKPOINT_FROM_PC (pcptr, lenptr)
+
+Use the program counter to determine the contents and size of a
+breakpoint instruction.  It returns a pointer to a string of bytes that
+encode a breakpoint instruction, stores the length of the string to
+*lenptr, and adjusts pc (if necessary) to point to the actual memory
+location where the breakpoint should be inserted.
+
+Although it is common to use a trap instruction for a breakpoint, it's
+not required; for instance, the bit pattern could be an invalid
+instruction.  The breakpoint must be no longer than the shortest
+instruction of the architecture.
+
+Replaces all the other BREAKPOINTs.
+
 @item CALL_DUMMY
 valops.c
 @item CALL_DUMMY_LOCATION

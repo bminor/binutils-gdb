@@ -1,5 +1,5 @@
 /* Remote debugging interface for Array Tech RAID controller..
-   Copyright 90, 91, 92, 93, 94, 1995  Free Software Foundation, Inc.
+   Copyright 90, 91, 92, 93, 94, 1995, 1998  Free Software Foundation, Inc.
    Contributed by Cygnus Support. Written by Rob Savoye for Cygnus.
 
    This module talks to a debug monitor called 'MONITOR', which
@@ -1050,7 +1050,6 @@ array_mourn_inferior ()
 
 #define MAX_ARRAY_BREAKPOINTS 16
 
-extern int memory_breakpoint_size;
 static CORE_ADDR breakaddr[MAX_ARRAY_BREAKPOINTS] = {0};
 
 /*
@@ -1062,15 +1061,18 @@ array_insert_breakpoint (addr, shadow)
      char *shadow;
 {
   int i;
+  int bp_size = 0;
+  int bp_addr = addr;
 
   debuglogs (1, "array_insert_breakpoint() addr = 0x%x", addr);
+  BREAKPOINT_FROM_PC (&bp_addr, &bp_size);
 
   for (i = 0; i <= MAX_ARRAY_BREAKPOINTS; i++) {
     if (breakaddr[i] == 0) {
       breakaddr[i] = addr;
       if (sr_get_debug() > 4)
 	printf ("Breakpoint at %x\n", addr);
-      array_read_inferior_memory(addr, shadow, memory_breakpoint_size);
+      array_read_inferior_memory (bp_addr, shadow, bp_size);
       printf_monitor("b 0x%x\n", addr);
       expect_prompt(1);
       return 0;

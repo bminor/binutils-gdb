@@ -123,19 +123,6 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 
 #define BIG_ENDIAN 4321
 
-/* Old-style breakpoint macros.
-   The IDT board uses an unusual breakpoint value, and sometimes gets
-   confused when it sees the usual MIPS breakpoint instruction.  */
-
-#define BIG_BREAKPOINT {0, 0x5, 0, 0xd}
-#define LITTLE_BREAKPOINT {0xd, 0, 0x5, 0}
-#define PMON_BIG_BREAKPOINT {0, 0, 0, 0xd}
-#define PMON_LITTLE_BREAKPOINT {0xd, 0, 0, 0}
-#define IDT_BIG_BREAKPOINT {0, 0, 0x0a, 0xd}
-#define IDT_LITTLE_BREAKPOINT {0xd, 0x0a, 0, 0}
-#define MIPS16_BIG_BREAKPOINT {0xe8, 0xa5}
-#define MIPS16_LITTLE_BREAKPOINT {0xa5, 0xe8}
-
 /* BREAKPOINT_FROM_PC uses the program counter value to determine whether a
    16- or 32-bit breakpoint should be used.  It returns a pointer
    to a string of bytes that encode a breakpoint instruction, stores
@@ -143,7 +130,7 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
    point to the actual memory location where the breakpoint should be
    inserted.  */
 
-unsigned char *mips_breakpoint_from_pc PARAMS ((CORE_ADDR *pcptr, int *lenptr));
+extern breakpoint_from_pc_fn mips_breakpoint_from_pc;
 #define BREAKPOINT_FROM_PC(pcptr, lenptr) mips_breakpoint_from_pc(pcptr, lenptr)
 
 /* Amount PC must be decremented by after a breakpoint.

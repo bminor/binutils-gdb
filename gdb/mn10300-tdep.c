@@ -58,6 +58,23 @@ mn10300_use_struct_convention (gcc_p, type)
   return (TYPE_NFIELDS (type) > 1 || TYPE_LENGTH (type) > 8);
 }
 
+/* The breakpoint instruction must be the same size as the smallest
+   instruction in the instruction set.
+
+   The Matsushita mn10x00 processors have single byte instructions
+   so we need a single byte breakpoint.  Matsushita hasn't defined
+   one, so we defined it ourselves.  */
+
+unsigned char *
+mn10300_breakpoint_from_pc (bp_addr, bp_size)
+     CORE_ADDR *bp_addr;
+     int *bp_size;
+{
+  static char breakpoint[] = {0xff};
+  *bp_size = 1;
+  return breakpoint;
+}
+
 
 /* Fix fi->frame if it's bogus at this point.  This is a helper
    function for mn10300_analyze_prologue. */

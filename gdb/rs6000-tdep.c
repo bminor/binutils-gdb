@@ -134,6 +134,25 @@ branch_dest (opcode, instr, pc, safety)
 }
 
 
+/* Sequence of bytes for breakpoint instruction.  */
+
+#define BIG_BREAKPOINT { 0x7d, 0x82, 0x10, 0x08 }
+#define LITTLE_BREAKPOINT { 0x08, 0x10, 0x82, 0x7d }
+
+unsigned char *
+rs6000_breakpoint_from_pc (bp_addr, bp_size)
+     CORE_ADDR *bp_addr;
+     int *bp_size;
+{
+  static unsigned char *big_breakpoint = BIG_BREAKPOINT;
+  static unsigned char *little_breakpoint = LITTLE_BREAKPOINT;
+  *bp_size = 4;
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    return big_breakpoint;
+  else
+    return little_breakpoint;
+}
+
 
 /* AIX does not support PT_STEP. Simulate it. */
 

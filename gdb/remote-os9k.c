@@ -886,7 +886,6 @@ rombug_mourn_inferior ()
 
 #define MAX_MONITOR_BREAKPOINTS 16
 
-extern int memory_breakpoint_size;
 static CORE_ADDR breakaddr[MAX_MONITOR_BREAKPOINTS] = {0};
 
 static int
@@ -895,9 +894,12 @@ rombug_insert_breakpoint (addr, shadow)
      char *shadow;
 {
   int i;
+  CORE_ADDR bp_addr = addr;
+  int bp_size = 0;
 
   if (monitor_log)
     fprintf (log_file, "\nIn Insert_breakpoint (addr=%x)\n", addr);
+  BREAKPOINT_FROM_PC (&bp_addr, &bp_size);
 
   for (i = 0; i <= MAX_MONITOR_BREAKPOINTS; i++)
     if (breakaddr[i] == 0)
@@ -905,7 +907,7 @@ rombug_insert_breakpoint (addr, shadow)
 	breakaddr[i] = addr;
 	if (sr_get_debug())
 	  printf ("Breakpoint at %x\n", addr);
-	rombug_read_inferior_memory(addr, shadow, memory_breakpoint_size);
+	rombug_read_inferior_memory (bp_addr, shadow, bp_size);
 	printf_monitor(SET_BREAK_CMD, addr);
 	is_trace_mode = 0;
 	expect_prompt(1);

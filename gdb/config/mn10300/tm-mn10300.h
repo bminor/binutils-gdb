@@ -60,13 +60,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Pseudo register that contains true address of executing stack frame */
 #define FP_REGNUM 31
 
-/* The breakpoint instruction must be the same size as the smallest
-   instruction in the instruction set.
-
-   The Matsushita mn10x00 processors have single byte instructions
-   so we need a single byte breakpoint.  Matsushita hasn't defined
-   one, so we defined it ourselves.  */
-#define BREAKPOINT {0xff}
+/* BREAKPOINT_FROM_PC uses the program counter value to determine the
+   breakpoint that should be used */
+extern breakpoint_from_pc_fn mn10300_breakpoint_from_pc;
+#define BREAKPOINT_FROM_PC(pcptr, lenptr) mn10300_breakpoint_from_pc (pcptr, lenptr)
 
 #define FUNCTION_START_OFFSET 0
 
