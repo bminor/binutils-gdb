@@ -23,3 +23,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 #define	MEM_FNS_DECLARED
+
+#define USG 1
