@@ -655,9 +655,9 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
 
 		 Note - we used to check the p_paddr field as well, and
 		 refuse to set the LMA if it was 0.  This is wrong
-		 though as a perfectly valid, initialised segment can
+		 though, as a perfectly valid initialised segment can
 		 have a p_paddr of zero.  Some architectures, eg ARM,
-	         place special significance one the address 0 and
+	         place special significance on the address 0 and
 	         executables need to be able to have a segment which
 	         covers this address.  */
 	      if (phdr->p_type == PT_LOAD
@@ -668,15 +668,18 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
 		      || (phdr->p_offset + phdr->p_filesz
 			  >= hdr->sh_offset + hdr->sh_size)))
 		{
-		  /* We used to do a relative adjustment here, but
-		     that doesn't work if the segment is packed with
-		     code from multiple VMAs.  Instead we calculate
-		     the LMA absoultely, based on the LMA of the
-		     segment (it is assumed that the segment will
-		     contain sections with contiguous LMAs, even if
-		     the VMAs are not).  */
-		  newsect->lma = phdr->p_paddr
-		    + hdr->sh_offset - phdr->p_offset;
+		  if ((flags & SEC_LOAD) == 0)
+		    newsect->lma += phdr->p_paddr - phdr->p_vaddr;
+		  else
+		    /* We used to use the same adjustment for SEC_LOAD
+		       sections, but that doesn't work if the segment
+		       is packed with code from multiple VMAs.
+		       Instead we calculate the section LMA based on
+		       the segment LMA.  It is assumed that the
+		       segment will contain sections with contiguous
+		       LMAs, even if the VMAs are not.  */
+		    newsect->lma = (phdr->p_paddr
+				    + hdr->sh_offset - phdr->p_offset);
 		  break;
 		}
 	    }

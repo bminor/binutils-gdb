@@ -1,3 +1,8 @@
+2002-03-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Don't set lma based on
+	section file offset for !SEC_LOAD sections.
+
 2002-03-21  Richard Earnshaw  <rearnsha@arm.com>
 
 	* elf32-arm.h (elf32_arm_final_link_relocate case R_ARM_GOTOFF)
