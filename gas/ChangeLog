@@ -1,3 +1,91 @@
+Tue Jul 20 19:28:56 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Extensive changes to permit symbols to contain any expression
+	type and to delay the computation of the expression until the
+	value is actually needed.  This permits setting symbols to values
+	calculated based on object code size.  Expressions were changed to
+	no longer be in a section, to stop the overloading of segment and
+	expression type that previously occurred.
+
+	* as.c (big_section, pass1_section, diff_section, absent_section):
+	Removed.
+	(expr_section): Added (used for dummy symbols which hold
+	intermediate expression values).
+	(perform_an_assembly_pass): Create expr_section, do not create the
+	sections now removed.
+	* as.h (segT): Removed SEG_ABSENT, SEG_PASS1, SEG_BIG, and
+	SEG_DIFFERENCE.  Added SEG_EXPR.
+	(SEG_NORMAL): Corresponding changes.
+	* subsegs.c (seg_name, subsegs_begin): Changed accordingly.
+	* write.c (write_object_file): Ditto.
+	* config/obj-aout.c (seg_N_TYPE): Ditto.
+	* config/obj-bout.c (seg_N_TYPE): Ditto.
+	* config/obj-coff.c (seg_N_TYPE): Ditto.
+	* config/obj-coffbfd.c (seg_N_TYPE): Ditto.
+	* config/obj-vms.c (seg_N_TYPE): Ditto.
+
+	* expr.h (operatorT): Moved in from expr.c, added some values.
+	(expressionS): Added X_op field, removed X_seg field; renamed
+	X_subtract_symbol to X_op_symbol.
+	* expr.c: Extensive changes to assign expression types rather than
+	sections and to simplify the parsing.
+	* write.c (fix_new_internal): New static function.
+	(fix_new): Removed sub_symbol argument.
+	(fix_new_exp): New function, takes expression argument.
+	* write.h: Prototype changes for fix_new and fix_new_exp.
+	* cond.c (s_if): Changed accordingly.
+	* read.c (s_lsym, pseudo_set, emit_expr, parse_bitfield_cons,
+	parse_repeat_cons, get_segmented_expression,
+	get_known_segmented_expression, get_absolute_expression): Ditto.
+	* symbols.c (resolve_symbol_value, S_GET_VALUE, S_SET_VALUE):
+	Ditto.
+	* write.c (write_object_file): Ditto.
+	* config/obj-coff.c (obj_coff_def, obj_coff_val): Ditto.
+	* config/obj-coffbfd.c (obj_coff_def, obj_coff_val,
+	obj_coff_endef, yank_symbols): Ditto.
+	* config/obj-elf.c (obj_elf_stab_generic, obj_elf_size): Ditto.
+	* config/tc-a29k.c (md_assemble, parse_operand, machine_ip,
+	print_insn, md_operand): Ditto.
+	* config/tc-h8300.c (parse_exp, colonmod24, check_operand,
+	do_a_fix_imm, build_bytes): Ditto.
+	* config/tc-h8500.c (parse_exp, skip_colonthing, parse_reglist,
+	get_specific, check, insert, md_convert_frag): Ditto.
+	* config/tc-hppa.c (the_insn, fix_new_hppa, cons_fix_new_hppa,
+	md_assemble, pa_ip, getExpression, getAbsoluteExpression,
+	evaluateAbsolute, pa_build_unwind_subspace, pa_entry,
+	process_exit): Ditto.
+	* config/tc-hppa.h (STAB_FIXUP, is_DP_relative, is_PC_relative,
+	is_complex): Ditto.
+	* config/tc-i386.c (pe, md_assemble, i386_operand,
+	md_estimate_size_before_relax, md_create_long_jump): Ditto.
+	* config/tc-i860.c (md_assemble, getExpression, print_insn):
+	Ditto.
+	* config/tc-i960.c (parse_expr, subs, segs, md_convert_frag,
+	get_cdisp, mem_fmt, parse_ldconst, relax_cobr, s_sysproc,
+	i960_handle_align): Ditto.
+	* config/tc-m68k.c (struct m68k_exp, struct m68k_it, seg, op,
+	subs, add_fix, isvar, m68k_ip, md_assemble, md_convert_frag_1,
+	md_estimate_size_before_relax, md_create_long_jump, get_num):
+	Ditto.
+	* config/tc-m88k.c (md_assemble, get_imm16, get_pcr,
+	md_create_short_jump, md_create_long_jump): Ditto.
+	* config/tc-mips.c (md_assemble, append_insn, gp_reference,
+	macro_build, macro, my_getExpression): Ditto.  Also removed
+	get_optional_absolute_expression; just use get_absolute_expression
+	instead.
+	* config/tc-ns32k.c (get_addr_mode, evaluate_expr, convert_iif,
+	fix_new_ns32k, fix_new_ns32k_exp, cons_fix_new_ns32k): Ditto.
+	* config/tc-ns32k.h (fix_new_ns32k prototype): Ditto.
+	* config/tc-sh.c (parse_exp, check, insert, md_convert_frag):
+	Ditto.
+	* config/tc-sparc.c (md_assemble, sparc_ip, getExpression,
+	print_insn): Ditto.
+	* config/tc-tahoe.c (struct top, md_estimate_size_before_relax,
+	tip_op, md_assemble): Ditto.
+	* config/tc-vax.c (seg_of_operand, md_assemble,
+	md_estimate_size_before_relax, md_create_long_jump): Ditto.
+	* config/tc-z8k.c (parse_exp, check_operand, newfix): Ditto.
+
 Tue Jul 20 12:17:16 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
 	* configure.in: i386-lynx is the same as i386-coff

@@ -30,6 +30,8 @@ struct top			/* tahoe instruction operand */
 
   char *top_error;		/* Say if operand is inappropriate         */
 
+  segT seg_of_operand;		/* segment as returned by expression()*/
+
   expressionS exp_of_operand;	/* The expression as parsed by expression()*/
 
   byte top_dispsize;		/* Number of bytes in the displacement if we
@@ -665,7 +667,7 @@ md_estimate_size_before_relax (fragP, segment_type)
 	  *p |= TAHOE_PC_OR_LONG;
 	  /* We now know how big it will be, one long word. */
 	  fragP->fr_fix += 1 + 4;
-	  fix_new (fragP, old_fr_fix + 1, fragP->fr_symbol, 0,
+	  fix_new (fragP, old_fr_fix + 1, fragP->fr_symbol,
 		   fragP->fr_offset, FX_PCREL32, NULL);
 	  frag_wane (fragP);
 	}
@@ -684,7 +686,7 @@ md_estimate_size_before_relax (fragP, segment_type)
 	  *p++ = TAHOE_JMP;
 	  *p++ = TAHOE_PC_REL_LONG;
 	  fragP->fr_fix += 1 + 1 + 1 + 4;
-	  fix_new (fragP, old_fr_fix + 3, fragP->fr_symbol, 0,
+	  fix_new (fragP, old_fr_fix + 3, fragP->fr_symbol,
 		   fragP->fr_offset, FX_PCREL32, NULL);
 	  frag_wane (fragP);
 	}
@@ -705,7 +707,7 @@ md_estimate_size_before_relax (fragP, segment_type)
 	  *p++ = TAHOE_JMP;
 	  *p++ = TAHOE_PC_REL_LONG;
 	  fragP->fr_fix += 2 + 2 + 4;
-	  fix_new (fragP, old_fr_fix + 4, fragP->fr_symbol, 0,
+	  fix_new (fragP, old_fr_fix + 4, fragP->fr_symbol,
 		   fragP->fr_offset, FX_PCREL32, NULL);
 	  frag_wane (fragP);
 	}
@@ -726,7 +728,7 @@ md_estimate_size_before_relax (fragP, segment_type)
 	  *p++ = TAHOE_JMP;
 	  *p++ = TAHOE_PC_REL_LONG;
 	  fragP->fr_fix += 2 + 2 + 2 + 4;
-	  fix_new (fragP, old_fr_fix + 6, fragP->fr_symbol, 0,
+	  fix_new (fragP, old_fr_fix + 6, fragP->fr_symbol,
 		   fragP->fr_offset, FX_PCREL32, NULL);
 	  frag_wane (fragP);
 	}
@@ -743,7 +745,7 @@ md_estimate_size_before_relax (fragP, segment_type)
 	  *fragP->fr_opcode = TAHOE_JMP;
 	  *p++ = TAHOE_PC_REL_LONG;
 	  fragP->fr_fix += 1 + 4;
-	  fix_new (fragP, old_fr_fix + 1, fragP->fr_symbol, 0,
+	  fix_new (fragP, old_fr_fix + 1, fragP->fr_symbol,
 		   fragP->fr_offset, FX_PCREL32, NULL);
 	  frag_wane (fragP);
 	}
@@ -1261,63 +1263,51 @@ tip_op (optex, topP)
       /* statement has no syntax goofs yet: lets sniff the expression */
       input_line_pointer = point;
       expP = &(topP->exp_of_operand);
-      switch (expression (expP))
+      topP->seg_of_operand = expression (expP);
+      switch (expP->X_op)
 	{
-	  /* If expression == SEG_PASS1, expression() will have set
-	 need_pass_2 = 1. */
-	case SEG_ABSENT:
+	case O_absent:
 	  /* No expression. For BSD4.2 compatibility, missing expression is
-	 absolute 0 */
-	  expP->X_seg = SEG_ABSOLUTE;
+	     absolute 0 */
+	  expP->X_op = O_constant;
 	  expP->X_add_number = 0;
 	  really_none = 1;
-	case SEG_ABSOLUTE:
-	  /* for SEG_ABSOLUTE, we shouldnt need to set X_subtract_symbol,
-	 X_add_symbol to any particular value. */
+	case O_constant:
+	  /* for SEG_ABSOLUTE, we shouldnt need to set X_op_symbol,
+	     X_add_symbol to any particular value. */
 	  /* But, we will program defensively. Since this situation occurs
-	 rarely so it costs us little to do so. */
+	     rarely so it costs us little to do so. */
 	  expP->X_add_symbol = NULL;
-	  expP->X_subtract_symbol = NULL;
+	  expP->X_op_symbol = NULL;
 	  /* How many bytes are needed to express this abs value? */
 	  abs_width =
 	    ((((expP->X_add_number & 0xFFFFFF80) == 0) ||
 	      ((expP->X_add_number & 0xFFFFFF80) == 0xFFFFFF80)) ? 1 :
 	     (((expP->X_add_number & 0xFFFF8000) == 0) ||
 	      ((expP->X_add_number & 0xFFFF8000) == 0xFFFF8000)) ? 2 : 4);
-	case SEG_TEXT:
-	case SEG_DATA:
-	case SEG_BSS:
-	case SEG_UNKNOWN:
-	  break;
 
-	case SEG_DIFFERENCE:
-	  /*
-       * Major bug. We can't handle the case of a
-       * SEG_DIFFERENCE expression in a synthetic opcode
-       * variable-length instruction.
-       * We don't have a frag type that is smart enough to
-       * relax a SEG_DIFFERENCE, and so we just force all
-       * SEG_DIFFERENCEs to behave like SEG_PASS1s.
-       * Clearly, if there is a demand we can invent a new or
-       * modified frag type and then coding up a frag for this
-       * case will be easy. SEG_DIFFERENCE was invented for the
-       * .words after a CASE opcode, and was never intended for
-       * instruction operands.
-       */
-	  need_pass_2 = 1;
-	case SEG_PASS1:
-	  op_bad = "Can't relocate expression error.";
-	  break;
-
-	case SEG_BIG:
-	  /* This is an error. Tahoe doesn't allow any expressions
-	 bigger that a 32 bit long word. Any bigger has to be referenced
-	 by address. */
-	  op_bad = "Expression is too large for a 32 bits.";
+	case O_symbol:
 	  break;
 
 	default:
-	  as_fatal ("Complier Bug: I got segment %d in tip_op.", expP->X_seg);
+	  /*
+	   * Major bug. We can't handle the case of a operator
+	   * expression in a synthetic opcode variable-length
+	   * instruction.  We don't have a frag type that is smart
+	   * enough to relax a operator, and so we just force all
+	   * operators to behave like SEG_PASS1s.  Clearly, if there is
+	   * a demand we can invent a new or modified frag type and
+	   * then coding up a frag for this case will be easy.
+	   */
+	  need_pass_2 = 1;
+	  op_bad = "Can't relocate expression error.";
+	  break;
+
+	case O_big:
+	  /* This is an error. Tahoe doesn't allow any expressions
+	     bigger that a 32 bit long word. Any bigger has to be referenced
+	     by address. */
+	  op_bad = "Expression is too large for a 32 bits.";
 	  break;
 	}
       if (*input_line_pointer != '\0')
@@ -1706,7 +1696,7 @@ md_assemble (instruction_string)
 	  /* Here to make main operand frag(s). */
 	  this_add_number = expP->X_add_number;
 	  this_add_symbol = expP->X_add_symbol;
-	  to_seg = expP->X_seg;
+	  to_seg = operandP->seg_of_operand;
 	  know (to_seg == SEG_UNKNOWN || \
 		to_seg == SEG_ABSOLUTE || \
 		to_seg == SEG_DATA || \
@@ -1731,7 +1721,7 @@ md_assemble (instruction_string)
 	       branch), so I set up the frag, and let GAS do the rest. */
 		      p = frag_more (dispsize);
 		      fix_new (frag_now, p - frag_now->fr_literal,
-			       this_add_symbol, 0, this_add_number,
+			       this_add_symbol, this_add_number,
 			       size_to_fx (dispsize, 1),
 			       NULL);
 		    }
@@ -1810,7 +1800,7 @@ md_assemble (instruction_string)
 			      TAHOE_ABSOLUTE_ADDR ? TAHOE_ABSOLUTE_ADDR :
 			      TAHOE_PC_REL_LONG);
 		      fix_new (frag_now, p - frag_now->fr_literal,
-			       this_add_symbol, 0, this_add_number,
+			       this_add_symbol, this_add_number,
 		       (to_seg != SEG_ABSOLUTE) ? FX_PCREL32 : FX_32, NULL);
 		      /*
 	     * Now (eg)	BLEQ	1f
@@ -1826,7 +1816,7 @@ md_assemble (instruction_string)
 			      TAHOE_ABSOLUTE_ADDR ? TAHOE_ABSOLUTE_ADDR :
 			      TAHOE_PC_REL_LONG);
 		      fix_new (frag_now, p - frag_now->fr_literal,
-			       this_add_symbol, 0, this_add_number,
+			       this_add_symbol, this_add_number,
 		       (to_seg != SEG_ABSOLUTE) ? FX_PCREL32 : FX_32, NULL);
 		      /* Now (eg) JMP foo */
 		      break;
@@ -1840,7 +1830,7 @@ md_assemble (instruction_string)
 			      TAHOE_ABSOLUTE_ADDR ? TAHOE_ABSOLUTE_ADDR :
 			      TAHOE_PC_REL_LONG);
 		      fix_new (frag_now, p - frag_now->fr_literal,
-			       this_add_symbol, 0, this_add_number,
+			       this_add_symbol, this_add_number,
 		       (to_seg != SEG_ABSOLUTE) ? FX_PCREL32 : FX_32, NULL);
 		      /*
 	     * Now (eg)	ACBx	1f
@@ -1859,7 +1849,7 @@ md_assemble (instruction_string)
 			      TAHOE_ABSOLUTE_ADDR ? TAHOE_ABSOLUTE_ADDR :
 			      TAHOE_PC_REL_LONG);
 		      fix_new (frag_now, p - frag_now->fr_literal,
-			       this_add_symbol, 0, this_add_number,
+			       this_add_symbol, this_add_number,
 		       (to_seg != SEG_ABSOLUTE) ? FX_PCREL32 : FX_32, NULL);
 		      /*
 	     * Now (eg)	xOBxxx	1f
@@ -1916,7 +1906,7 @@ md_assemble (instruction_string)
 		      p = frag_more (5);
 		      *p++ = TAHOE_IMMEDIATE_LONGWORD;
 		      fix_new (frag_now, p - frag_now->fr_literal,
-			       this_add_symbol, 0, this_add_number,
+			       this_add_symbol, this_add_number,
 			       FX_32, NULL);
 		    }
 		  else
@@ -2009,7 +1999,7 @@ md_assemble (instruction_string)
 			  break;
 			};
 		      fix_new (frag_now, p + 1 - frag_now->fr_literal,
-			       this_add_symbol, 0, this_add_number,
+			       this_add_symbol, this_add_number,
 			       size_to_fx (dispsize, pc_rel), NULL);
 		    }
 		  break;

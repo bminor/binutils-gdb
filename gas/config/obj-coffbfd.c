@@ -1,5 +1,5 @@
 /* coff object file format with bfd
-   Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1993 Free Software Foundation, Inc.
 
 This file is part of GAS.
 
@@ -68,11 +68,8 @@ const short seg_N_TYPE[] =
   9,
   10,
   C_UNDEF_SECTION,		/* SEG_UNKNOWN */
-  C_UNDEF_SECTION,		/* SEG_ABSENT */
-  C_UNDEF_SECTION,		/* SEG_PASS1 */
   C_UNDEF_SECTION,		/* SEG_GOOF */
-  C_UNDEF_SECTION,		/* SEG_BIG */
-  C_UNDEF_SECTION,		/* SEG_DIFFERENCE */
+  C_UNDEF_SECTION,		/* SEG_EXPR */
   C_DEBUG_SECTION,		/* SEG_DEBUG */
   C_NTV_SECTION,		/* SEG_NTV */
   C_PTV_SECTION,		/* SEG_PTV */
@@ -879,6 +876,7 @@ DEFUN (obj_coff_def, (what),
   def_symbol_in_progress->sy_name_offset = ~0;
   def_symbol_in_progress->sy_number = ~0;
   def_symbol_in_progress->sy_frag = &zero_address_frag;
+  S_SET_VALUE (def_symbol_in_progress, 0);
 
   if (S_IS_STRING (def_symbol_in_progress))
     {
@@ -994,7 +992,7 @@ DEFUN_VOID (obj_coff_endef)
       || (S_GET_SEGMENT (def_symbol_in_progress) == SEG_DEBUG
 	  && !SF_GET_TAG (def_symbol_in_progress))
       || S_GET_SEGMENT (def_symbol_in_progress) == SEG_ABSOLUTE
-      || def_symbol_in_progress->sy_value.X_seg != absolute_section
+      || def_symbol_in_progress->sy_value.X_op != O_constant
       || (symbolP = symbol_find_base (S_GET_NAME (def_symbol_in_progress), DO_NOT_STRIP)) == NULL
       || (SF_GET_TAG (def_symbol_in_progress) != SF_GET_TAG (symbolP)))
     {
@@ -1242,11 +1240,11 @@ obj_coff_val ()
 	}
       else if (strcmp (S_GET_NAME (def_symbol_in_progress), symbol_name))
 	{
+	  def_symbol_in_progress->sy_value.X_op = O_symbol;
 	  def_symbol_in_progress->sy_value.X_add_symbol =
 	    symbol_find_or_make (symbol_name);
-	  def_symbol_in_progress->sy_value.X_subtract_symbol = NULL;
+	  def_symbol_in_progress->sy_value.X_op_symbol = NULL;
 	  def_symbol_in_progress->sy_value.X_add_number = 0;
-	  def_symbol_in_progress->sy_value.X_seg = undefined_section;
 
 	  /* If the segment is undefined when the forward reference is
 	     resolved, then copy the segment id from the forward
@@ -1377,7 +1375,7 @@ DEFUN_VOID (yank_symbols)
 	  /* L* and C_EFCN symbols never merge. */
 	  if (!SF_GET_LOCAL (symbolP)
 	      && S_GET_STORAGE_CLASS (symbolP) != C_LABEL
-	      && symbolP->sy_value.X_seg == absolute_section
+	      && symbolP->sy_value.X_op == O_constant
 	      && (real_symbolP = symbol_find_base (S_GET_NAME (symbolP), DO_NOT_STRIP))
 	      && real_symbolP != symbolP)
 	    {

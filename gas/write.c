@@ -58,6 +58,15 @@ int magic_number_for_object_file = DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE;
 
 #endif /* BFD_ASSEMBLER */
 
+static fixS *fix_new_internal PARAMS ((fragS *, int where, short int size,
+				       symbolS *add, symbolS *sub,
+				       offsetT offset, int pcrel,
+#ifdef BFD_ASSEMBLER
+				       bfd_reloc_code_real_type r_type
+#else
+				       int r_type
+#endif
+				       ));
 static long fixup_segment PARAMS ((fixS * fixP, segT this_segment_type));
 static relax_addressT relax_align PARAMS ((relax_addressT addr, int align));
 void relax_segment PARAMS ((struct frag * seg_frag_root, segT seg_type));
@@ -67,13 +76,14 @@ void relax_segment PARAMS ((struct frag * seg_frag_root, segT seg_type));
  *
  * Create a fixS in obstack 'notes'.
  */
-fixS *
-fix_new (frag, where, size, add_symbol, sub_symbol, offset, pcrel, r_type)
+static fixS *
+fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
+		  r_type)
      fragS *frag;		/* Which frag? */
      int where;			/* Where in that frag? */
      short int size;		/* 1, 2, or 4 usually. */
      symbolS *add_symbol;	/* X_add_symbol. */
-     symbolS *sub_symbol;	/* X_subtract_symbol. */
+     symbolS *sub_symbol;	/* X_op_symbol. */
      offsetT offset;		/* X_add_number. */
      int pcrel;			/* TRUE if PC-relative relocation. */
 #ifdef BFD_ASSEMBLER
@@ -140,6 +150,70 @@ fix_new (frag, where, size, add_symbol, sub_symbol, offset, pcrel, r_type)
   }
 
   return fixP;
+}
+
+/* Create a fixup relative to a symbol (plus a constant).  */
+
+fixS *
+fix_new (frag, where, size, add_symbol, offset, pcrel, r_type)
+     fragS *frag;		/* Which frag? */
+     int where;			/* Where in that frag? */
+     short int size;		/* 1, 2, or 4 usually. */
+     symbolS *add_symbol;	/* X_add_symbol. */
+     offsetT offset;		/* X_add_number. */
+     int pcrel;			/* TRUE if PC-relative relocation. */
+#ifdef BFD_ASSEMBLER
+     bfd_reloc_code_real_type r_type; /* Relocation type */
+#else
+     int r_type;		/* Relocation type */
+#endif
+{
+  return fix_new_internal (frag, where, size, add_symbol,
+			   (symbolS *) NULL, offset, pcrel, r_type);
+}
+
+/* Create a fixup for an expression.  Currently we only support fixups
+   for difference expressions.  That is itself more than most object
+   file formats support anyhow.  */
+
+fixS *
+fix_new_exp (frag, where, size, exp, pcrel, r_type)
+     fragS *frag;		/* Which frag? */
+     int where;			/* Where in that frag? */
+     short int size;		/* 1, 2, or 4 usually. */
+     expressionS *exp;		/* Expression.  */
+     int pcrel;			/* TRUE if PC-relative relocation. */
+#ifdef BFD_ASSEMBLER
+     bfd_reloc_code_real_type r_type; /* Relocation type */
+#else
+     int r_type;		/* Relocation type */
+#endif
+{
+  symbolS *add = NULL;
+  symbolS *sub = NULL;
+  offsetT off = 0;
+  
+  switch (exp->X_op)
+    {
+    case O_absent:
+      break;
+
+    case O_subtract:
+      sub = exp->X_op_symbol;
+      /* Fall through.  */
+    case O_symbol:
+      add = exp->X_add_symbol;
+      /* Fall through.   */
+    case O_constant:
+      off = exp->X_add_number;
+      break;
+      
+    default:
+      as_bad ("expression too complex for fixup");
+    }
+
+  return fix_new_internal (frag, where, size, add, sub, off,
+			   pcrel, r_type);
 }
 
 /* Append a string onto another string, bumping the pointer along.  */
@@ -763,11 +837,7 @@ write_object_file ()
     while (seclist && *seclist)
       {
 	sec = *seclist;
-	while (sec == big_section
-	       || sec == reg_section
-	       || sec == pass1_section
-	       || sec == diff_section
-	       || sec == absent_section)
+	while (sec == reg_section || sec == expr_section)
 	  {
 	    sec = sec->next;
 	    *seclist = sec;
@@ -975,30 +1045,30 @@ write_object_file ()
     for (lie = broken_words; lie; lie = lie->next_broken_word)
       if (!lie->added)
 	{
+	  expressionS exp;
+
+	  exp.X_op = O_subtract;
+	  exp.X_add_symbol = lie->add;
+	  exp.X_op_symbol = lie->sub;
+	  exp.X_add_number = lie->addnum;
 #ifdef BFD_ASSEMBLER
-	  fix_new (lie->frag, lie->word_goes_here - lie->frag->fr_literal,
-		   2, lie->add, lie->sub, lie->addnum, 0,
-		   BFD_RELOC_NONE);
+	  fix_new_exp (lie->frag,
+		       lie->word_goes_here - lie->frag->fr_literal,
+		       2, &exp, 0, BFD_RELOC_NONE);
 #else
 #if defined(TC_SPARC) || defined(TC_A29K) || defined(NEED_FX_R_TYPE)
-	  fix_new (lie->frag, lie->word_goes_here - lie->frag->fr_literal,
-		   2, lie->add,
-		   lie->sub, lie->addnum,
-		   0, NO_RELOC);
+	  fix_new_exp (lie->frag,
+		       lie->word_goes_here - lie->frag->fr_literal,
+		       2, &exp, 0, NO_RELOC);
 #else
 #ifdef TC_NS32K
-	  fix_new_ns32k (lie->frag,
-			 lie->word_goes_here - lie->frag->fr_literal,
-			 2,
-			 lie->add,
-			 lie->sub,
-			 lie->addnum,
-			 0, 0, 2, 0, 0);
+	  fix_new_ns32k_exp (lie->frag,
+			     lie->word_goes_here - lie->frag->fr_literal,
+			     2, &exp, 0, 0, 2, 0, 0);
 #else
-	  fix_new (lie->frag, lie->word_goes_here - lie->frag->fr_literal,
-		   2, lie->add,
-		   lie->sub, lie->addnum,
-		   0, 0);
+	  fix_new_exp (lie->frag,
+		       lie->word_goes_here - lie->frag->fr_literal,
+		       2, &exp, 0, 0);
 #endif /* TC_NS32K */
 #endif /* TC_SPARC|TC_A29K|NEED_FX_R_TYPE */
 #endif /* BFD_ASSEMBLER */
@@ -1191,7 +1261,7 @@ write_object_file ()
 
 	  if (! symp->sy_resolved)
 	    {
-	      if (symp->sy_value.X_seg == absolute_section)
+	      if (symp->sy_value.X_op == O_constant)
 		{
 		  /* This is the normal case; skip the call.  */
 		  S_SET_VALUE (symp,

@@ -269,29 +269,13 @@ DEFUN (parse_exp, (s, op),
 {
   char *save = input_line_pointer;
   char *new;
-  segT seg;
 
   input_line_pointer = s;
-  seg = expr (0, op);
+  if (expression (op) == O_absent)
+    as_bad ("missing operand");
   new = input_line_pointer;
   input_line_pointer = save;
-  if (SEG_NORMAL (seg))
-    return new;
-  switch (seg)
-    {
-    case SEG_ABSOLUTE:
-    case SEG_UNKNOWN:
-    case SEG_DIFFERENCE:
-    case SEG_BIG:
-    case SEG_REGISTER:
-      return new;
-    case SEG_ABSENT:
-      as_bad ("Missing operand");
-      return new;
-    default:
-      as_bad ("Don't understand operand of type %s", segment_name (seg));
-      return new;
-    }
+  return new;
 }
 
 static char *
@@ -365,7 +349,7 @@ colonmod24 (op, src)
 	    mode = L_16;
       }
       else if (op->exp.X_add_symbol
-	       || op->exp.X_subtract_symbol)
+	       || op->exp.X_op_symbol)
 	mode = DSYMMODE;
       else
 	mode = DMODE;
@@ -722,7 +706,7 @@ DEFUN (check_operand, (operand, width, string),
        char *string)
 {
   if (operand->exp.X_add_symbol == 0
-      && operand->exp.X_subtract_symbol == 0)
+      && operand->exp.X_op_symbol == 0)
     {
 
       /* No symbol involved, let's look at offset, it's dangerous if any of
@@ -814,14 +798,13 @@ do_a_fix_imm (offset, operand, relaxing)
 	}
 
 
-      fix_new (frag_now,
-	       offset + where,
-	       size,
-	       operand->exp.X_add_symbol,
-	       operand->exp.X_subtract_symbol,
-	       (short) (operand->exp.X_add_number),
-	       0,
-	       idx);
+      operand->exp.X_add_number = (short) operand->exp.X_add_number;
+      fix_new_exp (frag_now,
+		   offset + where,
+		   size,
+		   &operand->exp,
+		   0,
+		   idx);
     }
 
 }
@@ -970,27 +953,25 @@ build_bytes (this_try, operand)
 		       operand->exp.X_add_number);
 	    }
 
-	  fix_new (frag_now,
-		   output - frag_now->fr_literal + where,
-		   size,
-		   operand[i].exp.X_add_symbol,
-		   operand[i].exp.X_subtract_symbol,
-		   (char) (operand[i].exp.X_add_number - 1),
-		   1,
-		   type);
+	  oeprand[i].exp.X_add_number =
+	    (char) (operand[i].exp.X_add_number - 1);
+	  fix_new_exp (frag_now,
+		       output - frag_now->fr_literal + where,
+		       size,
+		       &operand[i].exp,
+		       1,
+		       type);
 	}
       else if (x & MEMIND)
 	{
 
 	  check_operand (operand + i, 0xff, "@@");
-	  fix_new (frag_now,
-		   output - frag_now->fr_literal + 1,
-		   1,
-		   operand[i].exp.X_add_symbol,
-		   operand[i].exp.X_subtract_symbol,
-		   operand[i].exp.X_add_number,
-		   0,
-		   R_RELBYTE);
+	  fix_new_exp (frag_now,
+		       output - frag_now->fr_literal + 1,
+		       1,
+		       &operand[i].exp,
+		       0,
+		       R_RELBYTE);
 	}
 
       else if (x & ABSMOV)
@@ -1009,14 +990,13 @@ build_bytes (this_try, operand)
 	      as_warn ("branch operand has odd offset (%x)\n",
 		       operand->exp.X_add_number);
 	    }
-	  fix_new (frag_now,
-		   output - frag_now->fr_literal,
-		   4,
-		   operand[i].exp.X_add_symbol,
-		   operand[i].exp.X_subtract_symbol,
-		   (short) (operand[i].exp.X_add_number),
-		   0,
-		   R_JMPL1);
+	  operand[i].exp = (short) operand[i].exp.X_add_number;
+	  fix_new_exp (frag_now,
+		       output - frag_now->fr_literal,
+		       4,
+		       &operand[i].exp,
+		       0,
+		       R_JMPL1);
 	}
     }
 

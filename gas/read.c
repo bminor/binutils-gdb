@@ -1,5 +1,5 @@
 /* read.c - read a source file -
-   Copyright (C) 1986, 1987, 1990, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1990, 1991, 1993 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -158,6 +158,7 @@ int new_broken_words;
 static char *demand_copy_string PARAMS ((int *lenP));
 int is_it_end_of_statement PARAMS ((void));
 unsigned int next_char_of_string PARAMS ((void));
+static segT get_segmented_expression PARAMS ((expressionS *expP));
 static segT get_known_segmented_expression PARAMS ((expressionS * expP));
 static void grow_bignum PARAMS ((void));
 static void pobegin PARAMS ((void));
@@ -1161,6 +1162,7 @@ s_lsym ()
   register segT segment;
   expressionS exp;
   register symbolS *symbolP;
+  valueT val;
 
   /* we permit ANY defined expression: BSD4.2 demands constants */
   name = input_line_pointer;
@@ -1177,15 +1179,7 @@ s_lsym ()
       return;
     }
   input_line_pointer++;
-  segment = expression (&exp);
-  if (segment != absolute_section
-      && segment != reg_section
-      && ! SEG_NORMAL (segment))
-    {
-      as_bad ("Bad expression: %s", segment_name (segment));
-      ignore_rest_of_line ();
-      return;
-    }
+  val = get_absolute_expression ();
   *p = 0;
   symbolP = symbol_find_or_make (name);
 
@@ -1202,7 +1196,7 @@ s_lsym ()
       /* The name might be an undefined .global symbol; be sure to
 	 keep the "external" bit. */
       S_SET_SEGMENT (symbolP, segment);
-      S_SET_VALUE (symbolP, (valueT) (exp.X_add_number));
+      S_SET_VALUE (symbolP, val);
     }
   else
     {
@@ -1421,14 +1415,12 @@ ignore_rest_of_line ()		/* For suspect lines: gives warning. */
  * Out:	Input_line_pointer->just after any whitespace after expression.
  *	Tried to set symbol to value of expression.
  *	Will change symbols type, value, and frag;
- *	May set need_pass_2 == 1.
  */
 void
 pseudo_set (symbolP)
      symbolS *symbolP;
 {
   expressionS exp;
-  register segT segment;
 #if defined(OBJ_AOUT) | defined(OBJ_BOUT)
   int ext;
 #endif /* OBJ_AOUT or OBJ_BOUT */
@@ -1439,123 +1431,76 @@ pseudo_set (symbolP)
   ext = S_IS_EXTERNAL (symbolP);
 #endif /* OBJ_AOUT or OBJ_BOUT */
 
-  if ((segment = expression (&exp)) == absent_section)
+  (void) expression (&exp);
+
+  if (exp.X_op == O_illegal)
+    as_bad ("illegal expression; zero assumed");
+  else if (exp.X_op == O_absent)
+    as_bad ("missing expression; zero assumed");
+  else if (exp.X_op == O_big)
+    as_bad ("%s number invalid; zero assumed",
+	    exp.X_add_number > 0 ? "bignum" : "floating point");
+  else if (exp.X_op == O_subtract
+	   && (S_GET_SEGMENT (exp.X_add_symbol)
+	       == S_GET_SEGMENT (exp.X_op_symbol))
+	   && SEG_NORMAL (S_GET_SEGMENT (exp.X_add_symbol))
+	   && exp.X_add_symbol->sy_frag == exp.X_op_symbol->sy_frag)
     {
-      as_bad ("Missing expression: absolute 0 assumed");
-      exp.X_seg = absolute_section;
-      exp.X_add_number = 0;
+      exp.X_op = O_constant;
+      exp.X_add_number = (S_GET_VALUE (exp.X_add_symbol)
+			  - S_GET_VALUE (exp.X_op_symbol));
     }
 
-  if (segment == reg_section)
+  switch (exp.X_op)
     {
+    case O_illegal:
+    case O_absent:
+    case O_big:
+      exp.X_add_number = 0;
+      /* Fall through.  */
+    case O_constant:
+      S_SET_SEGMENT (symbolP, absolute_section);
+#if defined(OBJ_AOUT) | defined(OBJ_BOUT)
+      /* @@ Fix this right for BFD.  */
+      if (ext)
+	S_SET_EXTERNAL (symbolP);
+      else
+	S_CLEAR_EXTERNAL (symbolP);
+#endif /* OBJ_AOUT or OBJ_BOUT */
+      S_SET_VALUE (symbolP, exp.X_add_number);
+      symbolP->sy_frag = &zero_address_frag;
+      break;
+
+    case O_register:
       S_SET_SEGMENT (symbolP, reg_section);
       S_SET_VALUE (symbolP, exp.X_add_number);
       symbolP->sy_frag = &zero_address_frag;
-    }
-  else if (segment == big_section)
-    {
-      as_bad ("%s number invalid. Absolute 0 assumed.",
-	      exp.X_add_number > 0 ? "Bignum" : "Floating-Point");
-      S_SET_SEGMENT (symbolP, absolute_section);
-#if defined(OBJ_AOUT) | defined(OBJ_BOUT)
-      /* @@ Fix this right for BFD.  */
-      ext ? S_SET_EXTERNAL (symbolP) :
-	S_CLEAR_EXTERNAL (symbolP);
-#endif /* OBJ_AOUT or OBJ_BOUT */
-      S_SET_VALUE (symbolP, 0);
-      symbolP->sy_frag = &zero_address_frag;
-    }
-  else if (segment == absent_section)
-    {
-      as_warn ("No expression:  Using absolute 0");
-      S_SET_SEGMENT (symbolP, absolute_section);
-#if defined(OBJ_AOUT) | defined(OBJ_BOUT)
-      /* @@ Fix this right for BFD.  */
-      ext ? S_SET_EXTERNAL (symbolP) :
-	S_CLEAR_EXTERNAL (symbolP);
-#endif /* OBJ_AOUT or OBJ_BOUT */
-      S_SET_VALUE (symbolP, 0);
-      symbolP->sy_frag = &zero_address_frag;
-    }
-  else if (segment == diff_section)
-    {
-      if (exp.X_add_symbol && exp.X_subtract_symbol
-	  && (S_GET_SEGMENT (exp.X_add_symbol) ==
-	      S_GET_SEGMENT (exp.X_subtract_symbol)))
-	{
-	  if (exp.X_add_symbol->sy_frag == exp.X_subtract_symbol->sy_frag)
-	    {
-	      exp.X_add_number += S_GET_VALUE (exp.X_add_symbol) -
-		S_GET_VALUE (exp.X_subtract_symbol);
-	      goto abs;
-	    }
-	  symbolP->sy_value = exp;
-	}
+      break;
+
+    case O_symbol:
+      if (S_GET_SEGMENT (exp.X_add_symbol) == undefined_section)
+	symbolP->sy_value = exp;
       else
 	{
-	  as_bad ("Complex expression. Absolute segment assumed.");
-	  goto abs;
-	}
-    }
-  else if (segment == absolute_section)
-    {
-    abs:
-      S_SET_SEGMENT (symbolP, absolute_section);
+	  S_SET_SEGMENT (symbolP, S_GET_SEGMENT (exp.X_add_symbol));
 #if defined(OBJ_AOUT) | defined(OBJ_BOUT)
-      /* @@ Fix this right for BFD.  */
-      ext ? S_SET_EXTERNAL (symbolP) :
-	S_CLEAR_EXTERNAL (symbolP);
+	  /* @@ Fix this right for BFD!  */
+	  if (ext)
+	    S_SET_EXTERNAL (symbolP);
+	  else
+	    S_CLEAR_EXTERNAL (symbolP);
 #endif /* OBJ_AOUT or OBJ_BOUT */
-      S_SET_VALUE (symbolP, exp.X_add_number);
-      symbolP->sy_frag = &zero_address_frag;
-    }
-  else if (segment == pass1_section)
-    {
-      symbolP->sy_value.X_add_symbol = exp.X_add_symbol;
-      symbolP->sy_value.X_subtract_symbol = NULL;
-      symbolP->sy_value.X_add_number = 0;
-      symbolP->sy_value.X_seg = undefined_section;
-      as_bad ("Unknown expression");
-      know (need_pass_2 == 1);
-    }
-  else if (segment == undefined_section)
-    {
-      symbolP->sy_value.X_add_symbol = exp.X_add_symbol;
-      symbolP->sy_value.X_subtract_symbol = NULL;
-      symbolP->sy_value.X_add_number = 0;
-      symbolP->sy_value.X_seg = undefined_section;
-    }
-  else
-    {
-#ifndef BFD_ASSEMBLER
-#ifndef MANY_SEGMENTS
-      switch (segment)
-	{
-	case SEG_DATA:
-	case SEG_TEXT:
-	case SEG_BSS:
-	  break;
-
-	default:
-	  as_fatal ("failed sanity check.");
-	}			/* switch on segment */
-#endif
-#endif
-      S_SET_SEGMENT (symbolP, segment);
-#if defined(OBJ_AOUT) | defined(OBJ_BOUT)
-      /* @@ Fix this right for BFD!  */
-      if (ext)
-	{
-	  S_SET_EXTERNAL (symbolP);
+	  S_SET_VALUE (symbolP,
+		       exp.X_add_number + S_GET_VALUE (exp.X_add_symbol));
+	  symbolP->sy_frag = exp.X_add_symbol->sy_frag;
 	}
-      else
-	{
-	  S_CLEAR_EXTERNAL (symbolP);
-	}			/* if external */
-#endif /* OBJ_AOUT or OBJ_BOUT */
+      break;
 
-      S_SET_VALUE (symbolP, exp.X_add_number + S_GET_VALUE (exp.X_add_symbol));
-      symbolP->sy_frag = exp.X_add_symbol->sy_frag;
+    default:
+      /* The value is some complex expression.
+	 FIXME: Should we set the segment to anything?  */
+      symbolP->sy_value = exp;
+      break;
     }
 }
 
@@ -1641,39 +1586,32 @@ emit_expr (exp, nbytes)
      expressionS *exp;
      unsigned int nbytes;
 {
-  segT segment;
+  operatorT op;
   register char *p;
 
   /* Don't do anything if we are going to make another pass.  */
   if (need_pass_2)
     return;
 
-  segment = exp->X_seg;
+  op = exp->X_op;
 
-  /* Don't call this if we are going to junk this pass anyway! */
-  know (segment != pass1_section);
-
-  if (segment == diff_section && exp->X_add_symbol == NULL)
+  if (op == O_absent || op == O_illegal)
     {
-      as_bad ("Subtracting symbol \"%s\" (segment \"%s\") is too hard.  Absolute segment assumed.",
-	      S_GET_NAME (exp->X_subtract_symbol),
-	      segment_name (S_GET_SEGMENT (exp->X_subtract_symbol)));
-      segment = absolute_section;
-      /* Leave exp->X_add_number alone. */
-    }
-  else if (segment == absent_section)
-    {
-      as_warn ("0 assumed for missing expression");
+      as_warn ("zero assumed for missing expression");
       exp->X_add_number = 0;
-      know (exp->X_add_symbol == NULL);
-      segment = absolute_section;
+      op = O_constant;
     }
-  else if (segment == big_section)
+  else if (op == O_big)
     {
-      as_bad ("%s number invalid.  Absolute 0 assumed.",
-	      exp->X_add_number > 0 ? "Bignum" : "Floating-Point");
+      as_bad ("%s number invalid; zero assumed",
+	      exp->X_add_number > 0 ? "bignum" : "floating point");
       exp->X_add_number = 0;
-      segment = absolute_section;
+      op = O_constant;
+    }
+  else if (op == O_register)
+    {
+      as_warn ("register value used as expression");
+      op = O_constant;
     }
 
   p = frag_more (nbytes);
@@ -1681,7 +1619,7 @@ emit_expr (exp, nbytes)
 #ifndef WORKING_DOT_WORD
   /* If we have the difference of two symbols in a word, save it on
      the broken_words list.  See the code in write.c.  */
-  if (segment == diff_section && nbytes == 2)
+  if (op == O_subtract && nbytes == 2)
     {
       struct broken_word *x;
 
@@ -1692,7 +1630,7 @@ emit_expr (exp, nbytes)
       x->word_goes_here = p;
       x->dispfrag = 0;
       x->add = exp->X_add_symbol;
-      x->sub = exp->X_subtract_symbol;
+      x->sub = exp->X_op_symbol;
       x->addnum = exp->X_add_number;
       x->added = 0;
       new_broken_words++;
@@ -1700,7 +1638,7 @@ emit_expr (exp, nbytes)
     }
 #endif
 
-  if (segment == absolute_section)
+  if (op == O_constant)
     {
       register long get;
       register long use;
@@ -1743,11 +1681,9 @@ emit_expr (exp, nbytes)
 	 defined, and otherwise uses 0.  */
 
 #ifdef BFD_ASSEMBLER
-      fix_new (frag_now, p - frag_now->fr_literal, nbytes,
-	       exp->X_add_symbol, exp->X_subtract_symbol,
-	       exp->X_add_number, 0,
-	       /* @@ Should look at CPU word size.  */
-	       BFD_RELOC_32);
+      fix_new_exp (frag_now, p - frag_now->fr_literal, nbytes, exp, 0,
+		   /* @@ Should look at CPU word size.  */
+		   BFD_RELOC_32);
 #else
 #ifdef TC_CONS_FIX_NEW
       TC_CONS_FIX_NEW (frag_now, p - frag_now->fr_literal, nbytes, exp);
@@ -1762,9 +1698,8 @@ emit_expr (exp, nbytes)
 #define TC_CONS_RELOC 0
 #endif
 #endif
-      fix_new (frag_now, p - frag_now->fr_literal, nbytes,
-	       exp->X_add_symbol, exp->X_subtract_symbol,
-	       exp->X_add_number, 0, TC_CONS_RELOC);
+      fix_new_exp (frag_now, p - frag_now->fr_literal, nbytes, exp, 0,
+		   TC_CONS_RELOC);
 #endif /* TC_CONS_FIX_NEW */
 #endif /* BFD_ASSEMBLER */
     }
@@ -1793,9 +1728,8 @@ parse_bitfield_cons (exp, nbytes)
 {
   unsigned int bits_available = BITS_PER_CHAR * nbytes;
   char *hold = input_line_pointer;
-  segT segment;
 
-  segment = expression (exp);
+  (void) expression (exp);
 
   if (*input_line_pointer == ':')
     {			/* bitfields */
@@ -1829,17 +1763,17 @@ parse_bitfield_cons (exp, nbytes)
 	     you can use a previous .set or
 	     .equ type symbol.  xoxorich. */
 
-	  if (segment == absent_section)
+	  if (exp->X_op == O_absent)
 	    {
-	      as_warn ("Using a bit field width of zero.");
+	      as_warn ("using a bit field width of zero");
 	      exp->X_add_number = 0;
-	      segment = absolute_section;
+	      exp->X_op = O_constant;
 	    }			/* implied zero width bitfield */
 
-	  if (segment != absolute_section)
+	  if (exp->X_op != O_constant)
 	    {
 	      *input_line_pointer = '\0';
-	      as_bad ("Field width \"%s\" too complex for a bitfield.\n", hold);
+	      as_bad ("field width \"%s\" too complex for a bitfield", hold);
 	      *input_line_pointer = ':';
 	      demand_empty_rest_of_line ();
 	      return;
@@ -1847,7 +1781,7 @@ parse_bitfield_cons (exp, nbytes)
 
 	  if ((width = exp->X_add_number) > (BITS_PER_CHAR * nbytes))
 	    {
-	      as_warn ("Field width %d too big to fit in %d bytes: truncated to %d bits.",
+	      as_warn ("field width %d too big to fit in %d bytes: truncated to %d bits",
 		       width, nbytes, (BITS_PER_CHAR * nbytes));
 	      width = BITS_PER_CHAR * nbytes;
 	    }			/* too big */
@@ -1862,19 +1796,20 @@ parse_bitfield_cons (exp, nbytes)
 
 	  hold = ++input_line_pointer; /* skip ':' */
 
-	  if ((segment = expression (exp)) != absolute_section)
+	  (void) expression (exp);
+	  if (exp->X_op != O_constant)
 	    {
 	      char cache = *input_line_pointer;
 
 	      *input_line_pointer = '\0';
-	      as_bad ("Field value \"%s\" too complex for a bitfield.\n", hold);
+	      as_bad ("field value \"%s\" too complex for a bitfield", hold);
 	      *input_line_pointer = cache;
 	      demand_empty_rest_of_line ();
 	      return;
 	    }			/* too complex */
 
-	  value |= (~(-1 << width) & exp->X_add_number)
-	    << ((BITS_PER_CHAR * nbytes) - bits_available);
+	  value |= ((~(-1 << width) & exp->X_add_number)
+		    << ((BITS_PER_CHAR * nbytes) - bits_available));
 
 	  if ((bits_available -= width) == 0
 	      || is_it_end_of_statement ()
@@ -1884,11 +1819,11 @@ parse_bitfield_cons (exp, nbytes)
 	    }			/* all the bitfields we're gonna get */
 
 	  hold = ++input_line_pointer;
-	  segment = expression (exp);
+	  (void) expression (exp);
 	}			/* forever loop */
 
       exp->X_add_number = value;
-      exp->X_seg = absolute_section;
+      exp->X_op = O_constant;
     }				/* if looks like a bitfield */
 }				/* parse_bitfield_cons() */
 
@@ -1930,9 +1865,8 @@ parse_mri_cons (exp, nbytes)
 	  scan++;
 	}
       /* Create correct expression */
-      exp->X_add_symbol = 0;
+      exp->X_op = O_constant;
       exp->X_add_number = result;
-      exp->X_seg = absolute_section;
       /* Fake it so that we can read the next char too */
       if (input_line_pointer[0] != '\'' ||
 	  (input_line_pointer[0] == '\'' && input_line_pointer[1] == '\''))
@@ -1964,7 +1898,6 @@ parse_repeat_cons (exp, nbytes)
      unsigned int nbytes;
 {
   expressionS count;
-  segT segment;
   register int i;
 
   expression (exp);
@@ -1976,8 +1909,8 @@ parse_repeat_cons (exp, nbytes)
     }
 
   ++input_line_pointer;
-  segment = expression (&count);
-  if (segment != absolute_section
+  expression (&count);
+  if (count.X_op != O_constant
       || count.X_add_number <= 0)
     {
       as_warn ("Unresolvable or nonpositive repeat count; using 1");
@@ -2218,15 +2151,14 @@ float_cons (float_type)		/* Worker to do .float etc statements. */
 #ifdef REPEAT_CONS_EXPRESSIONS
 	  if (*input_line_pointer == ':')
 	    {
-	      segT segment;
 	      expressionS count_exp;
 
 	      ++input_line_pointer;
-	      segment = expression (&count_exp);
-	      if (segment != absolute_section
+	      expression (&count_exp);
+	      if (count_exp.X_op != O_constant
 		  || count_exp.X_add_number <= 0)
 		{
-		  as_warn ("Unresolvable or nonpositive repeat count; using 1");
+		  as_warn ("unresolvable or nonpositive repeat count; using 1");
 		}
 	      else
 		count = count_exp.X_add_number;
@@ -2420,16 +2352,16 @@ get_segmented_expression (expP)
   register segT retval;
 
   retval = expression (expP);
-  if (retval == pass1_section
-      || retval == absent_section
-      || retval == big_section)
+  if (expP->X_op == O_illegal
+      || expP->X_op == O_absent
+      || expP->X_op == O_big)
     {
-      as_bad ("Expected address expression: absolute 0 assumed");
-      retval = expP->X_seg = absolute_section;
+      as_bad ("expected address expression; zero assumed");
+      expP->X_op = O_constant;
       expP->X_add_number = 0;
-      expP->X_add_symbol = expP->X_subtract_symbol = 0;
+      retval = absolute_section;
     }
-  return (retval);		/* SEG_ ABSOLUTE,UNKNOWN,DATA,TEXT,BSS */
+  return retval;
 }
 
 static segT 
@@ -2437,53 +2369,38 @@ get_known_segmented_expression (expP)
      register expressionS *expP;
 {
   register segT retval;
-  register CONST char *name1;
-  register CONST char *name2;
 
   if ((retval = get_segmented_expression (expP)) == undefined_section)
     {
-      name1 = expP->X_add_symbol ? S_GET_NAME (expP->X_add_symbol) : "";
-      name2 = expP->X_subtract_symbol ?
-	S_GET_NAME (expP->X_subtract_symbol) :
-	"";
-      if (name1 && name2)
-	{
-	  as_warn ("Symbols \"%s\" \"%s\" are undefined: absolute 0 assumed.",
-		   name1, name2);
-	}
+      /* There is no easy way to extract the undefined symbol from the
+	 expression.  */
+      if (expP->X_add_symbol != NULL
+	  && S_GET_SEGMENT (expP->X_add_symbol) != expr_section)
+	as_warn ("symbol \"%s\" undefined; zero assumed",
+		 S_GET_NAME (expP->X_add_symbol));
       else
-	{
-	  as_warn ("Symbol \"%s\" undefined: absolute 0 assumed.",
-		   name1 ? name1 : name2);
-	}
-      retval = expP->X_seg = absolute_section;
+	as_warn ("some symbol undefined; zero assumed");
+      retval = absolute_section;
+      expP->X_op = O_constant;
       expP->X_add_number = 0;
-      expP->X_add_symbol = expP->X_subtract_symbol = NULL;
     }
-  know (retval == absolute_section
-	|| retval == diff_section
-	|| SEG_NORMAL (retval));
+  know (retval == absolute_section || SEG_NORMAL (retval));
   return (retval);
-
 }				/* get_known_segmented_expression() */
-
-
 
 /* static */ long		/* JF was static, but can't be if the MD pseudos are to use it */
 get_absolute_expression ()
 {
   expressionS exp;
-  register segT s;
 
-  if ((s = expression (&exp)) != absolute_section)
+  expression (&exp);
+  if (exp.X_op != O_constant)
     {
-      if (s != absent_section)
-	{
-	  as_bad ("Bad Absolute Expression, absolute 0 assumed.");
-	}
+      if (exp.X_op != O_absent)
+	as_bad ("bad absolute expression; zero assumed");
       exp.X_add_number = 0;
     }
-  return (exp.X_add_number);
+  return exp.X_add_number;
 }
 
 char				/* return terminator */

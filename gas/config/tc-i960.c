@@ -1,5 +1,5 @@
 /* tc-i960.c - All the i80960-specific stuff
-   Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 
    This file is part of GAS.
 
@@ -113,7 +113,7 @@ static int get_regnum ();	/* Translate text to register number */
 static int i_scan ();		/* Lexical scan of instruction source */
 static void mem_fmt ();		/* Generate MEMA or MEMB instruction */
 static void mema_to_memb ();	/* Convert MEMA instruction to MEMB format */
-static segT parse_expr ();	/* Parse an expression */
+static void parse_expr ();	/* Parse an expression */
 static int parse_ldconst ();	/* Parse and replace a 'ldconst' pseudo-op */
 static void parse_memop ();	/* Parse a memory operand */
 static void parse_po ();	/* Parse machine-dependent pseudo-op */
@@ -208,9 +208,7 @@ const pseudo_typeS md_pseudo_table[] =
 
 /* Macros to extract info from an 'expressionS' structure 'e' */
 #define adds(e)	e.X_add_symbol
-#define subs(e)	e.X_subtract_symbol
 #define offs(e)	e.X_add_number
-#define segs(e)	e.X_seg
 
 
 /* Branch-prediction bits for CTRL/COBR format opcodes */
@@ -1050,7 +1048,6 @@ md_convert_frag (headers, fragP)
 		      fragP->fr_opcode - fragP->fr_literal,
 		      4,
 		      fragP->fr_symbol,
-		      0,
 		      fragP->fr_offset,
 		      1,
 		      NO_RELOC);
@@ -1237,7 +1234,6 @@ brtab_emit ()
 		      p - frag_now->fr_literal,
 		      4,
 		      symbol_find (buf),
-		      0,
 		      0,
 		      0,
 		      NO_RELOC);
@@ -1502,51 +1498,49 @@ get_cdisp (dispP, ifmtP, instr, numbits, var_frag, callj)
 
   fixP = NULL;
 
-  switch (parse_expr (dispP, &e))
+  parse_expr (dispP, &e);
+  switch (e.X_op)
     {
-
-    case SEG_GOOF:
+    case O_illegal:
       as_bad ("expression syntax error");
-      break;
 
-    case SEG_TEXT:
-    case SEG_UNKNOWN:
-      if (var_frag)
-	{
-	  outP = frag_more (8);	/* Allocate worst-case storage */
-	  md_number_to_chars (outP, instr, 4);
-	  frag_variant (rs_machine_dependent, 4, 4, 1,
-			adds (e), offs (e), outP, 0, 0);
+    case O_symbol:
+      if (S_GET_SEGMENT (e.X_add_symbol) == text_section
+	  || S_GET_SEGMENT (e.X_add_symbol) == undefined_section)
+	{	
+	  if (var_frag)
+	    {
+	      outP = frag_more (8); /* Allocate worst-case storage */
+	      md_number_to_chars (outP, instr, 4);
+	      frag_variant (rs_machine_dependent, 4, 4, 1,
+			    adds (e), offs (e), outP, 0, 0);
+	    }
+	  else
+	    {
+	      /* Set up a new fix structure, so address can be updated
+	       * when all symbol values are known.
+	       */
+	      outP = emit (instr);
+	      fixP = fix_new (frag_now,
+			      outP - frag_now->fr_literal,
+			      4,
+			      adds (e),
+			      offs (e),
+			      1,
+			      NO_RELOC);
+
+	      fixP->fx_callj = callj;
+
+	      /* We want to modify a bit field when the address is
+	       * known.  But we don't need all the garbage in the
+	       * bit_fix structure.  So we're going to lie and store
+	       * the number of bits affected instead of a pointer.
+	       */
+	      fixP->fx_bit_fixP = (bit_fixS *) numbits;
+	    }
 	}
       else
-	{
-	  /* Set up a new fix structure, so address can be updated
-	   * when all symbol values are known.
-	   */
-	  outP = emit (instr);
-	  fixP = fix_new (frag_now,
-			  outP - frag_now->fr_literal,
-			  4,
-			  adds (e),
-			  0,
-			  offs (e),
-			  1,
-			  NO_RELOC);
-
-	  fixP->fx_callj = callj;
-
-	  /* We want to modify a bit field when the address is
-	   * known.  But we don't need all the garbage in the
-	   * bit_fix structure.  So we're going to lie and store
-	   * the number of bits affected instead of a pointer.
-	   */
-	  fixP->fx_bit_fixP = (bit_fixS *) numbits;
-	}
-      break;
-
-    case SEG_DATA:
-    case SEG_BSS:
-      as_bad ("attempt to branch into different segment");
+	as_bad ("attempt to branch into different segment");
       break;
 
     default:
@@ -1722,14 +1716,14 @@ mem_fmt (args, oP, callx)
     }
 
   /* Parse and process the displacement */
-  switch (parse_expr (instr.e, &expr))
+  parse_expr (instr.e, &expr);
+  switch (expr.X_op)
     {
-
-    case SEG_GOOF:
+    case O_illegal:
       as_bad ("expression syntax error");
       break;
 
-    case SEG_ABSOLUTE:
+    case O_constant:
       if (instr.disp == 32)
 	{
 	  (void) emit (offs (expr));	/* Output displacement */
@@ -1740,28 +1734,24 @@ mem_fmt (args, oP, callx)
 	  if (offs (expr) & ~0xfff)
 	    {
 	      /* Won't fit in 12 bits: convert already-output
-				 * instruction to MEMB format, output
-				 * displacement.
-				 */
+	       * instruction to MEMB format, output
+	       * displacement.
+	       */
 	      mema_to_memb (outP);
 	      (void) emit (offs (expr));
 	    }
 	  else
 	    {
 	      /* WILL fit in 12 bits:  OR into opcode and
-				 * overwrite the binary we already put out
-				 */
+	       * overwrite the binary we already put out
+	       */
 	      instr.opcode |= offs (expr);
 	      md_number_to_chars (outP, instr.opcode, 4);
 	    }
 	}
       break;
 
-    case SEG_DIFFERENCE:
-    case SEG_TEXT:
-    case SEG_DATA:
-    case SEG_BSS:
-    case SEG_UNKNOWN:
+    default:
       if (instr.disp == 12)
 	{
 	  /* Displacement is dependent on a symbol, whose value
@@ -1775,20 +1765,14 @@ mem_fmt (args, oP, callx)
        * this symbol's value becomes known.
        */
       outP = emit ((long) 0);
-      fixP = fix_new (frag_now,
-		      outP - frag_now->fr_literal,
-		      4,
-		      adds (expr),
-		      subs (expr),
-		      offs (expr),
-		      0,
-		      NO_RELOC);
+      fixP = fix_new_exp (frag_now,
+			  outP - frag_now->fr_literal,
+			  4,
+			  &expr,
+			  0,
+			  NO_RELOC);
       fixP->fx_im_disp = 2;	/* 32-bit displacement fix */
       fixP->fx_bsr = callx;	/*SAC LD RELAX HACK *//* Mark reloc as being in i stream */
-      break;
-
-    default:
-      BAD_CASE (segs (expr));
       break;
     }
 }				/* memfmt() */
@@ -1836,19 +1820,16 @@ mema_to_memb (opcodeP)
  *
  *	An empty expression string is treated as an absolute 0.
  *
- *	Return "segment" to which the expression evaluates.
- *	Return SEG_GOOF regardless of expression evaluation if entire input
+ *	Sets O_illegal regardless of expression evaluation if entire input
  *	string is not consumed in the evaluation -- tolerate no dangling junk!
  *
  **************************************************************************** */
-static
-  segT
+static void
 parse_expr (textP, expP)
      char *textP;		/* Text of expression to be parsed */
      expressionS *expP;		/* Where to put the results of parsing */
 {
   char *save_in;		/* Save global here */
-  segT seg;			/* Segment to which expression evaluates */
   symbolS *symP;
 
   know (textP);
@@ -1856,10 +1837,9 @@ parse_expr (textP, expP)
   if (*textP == '\0')
     {
       /* Treat empty string as absolute 0 */
-      expP->X_add_symbol = expP->X_subtract_symbol = NULL;
+      expP->X_add_symbol = expP->X_op_symbol = NULL;
       expP->X_add_number = 0;
-      seg = expP->X_seg = SEG_ABSOLUTE;
-
+      exp->X_op = O_constant;
     }
   else
     {
@@ -1870,13 +1850,14 @@ parse_expr (textP, expP)
       if (input_line_pointer - textP != strlen (textP))
 	{
 	  /* Did not consume all of the input */
-	  seg = SEG_GOOF;
+	  expP->X_op = O_illegal;
 	}
       symP = expP->X_add_symbol;
       if (symP && (hash_find (reg_hash, S_GET_NAME (symP))))
 	{
 	  /* Register name in an expression */
-	  seg = SEG_GOOF;
+	  /* FIXME: this isn't much of a check any more.  */
+	  expP->X_op = O_illegal;
 	}
 
       input_line_pointer = save_in;	/* Restore global */
@@ -1914,31 +1895,27 @@ parse_ldconst (arg)
 
   arg[3] = NULL;		/* So we can tell at the end if it got used or not */
 
-  switch (parse_expr (arg[1], &e))
+  parse_expr (arg[1], &e);
+  switch (e.X_op)
     {
-
-    case SEG_TEXT:
-    case SEG_DATA:
-    case SEG_BSS:
-    case SEG_UNKNOWN:
-    case SEG_DIFFERENCE:
+    default:
       /* We're dependent on one or more symbols -- use "lda" */
       arg[0] = "lda";
       break;
 
-    case SEG_ABSOLUTE:
+    case O_constant:
       /* Try the following mappings:
-		 *	ldconst 0,<reg>  ->mov  0,<reg>
-		 * 	ldconst 31,<reg> ->mov  31,<reg>
-		 * 	ldconst 32,<reg> ->addo 1,31,<reg>
-		 * 	ldconst 62,<reg> ->addo 31,31,<reg>
-  		 *	ldconst 64,<reg> ->shlo 8,3,<reg>
-		 * 	ldconst -1,<reg> ->subo 1,0,<reg>
-		 * 	ldconst -31,<reg>->subo 31,0,<reg>
-		 *
-		 * anthing else becomes:
-		 * 	lda xxx,<reg>
-		 */
+       *	ldconst 0,<reg>  ->mov  0,<reg>
+       * 	ldconst 31,<reg> ->mov  31,<reg>
+       * 	ldconst 32,<reg> ->addo 1,31,<reg>
+       * 	ldconst 62,<reg> ->addo 31,31,<reg>
+       *	ldconst 64,<reg> ->shlo 8,3,<reg>
+       * 	ldconst -1,<reg> ->subo 1,0,<reg>
+       * 	ldconst -31,<reg>->subo 31,0,<reg>
+       *
+       * anthing else becomes:
+       * 	lda xxx,<reg>
+       */
       n = offs (e);
       if ((0 <= n) && (n <= 31))
 	{
@@ -1979,7 +1956,7 @@ parse_ldconst (arg)
 	}
       break;
 
-    default:
+    case O_illegal:
       as_bad ("invalid constant");
       return -1;
       break;
@@ -2362,7 +2339,8 @@ parse_regop (regopP, optext, opdesc)
 	}
       else
 	{			/* fixed point literal acceptable */
-	  if ((parse_expr (optext, &e) != SEG_ABSOLUTE)
+	  parse_expr (optext, &e);
+	  if (e.X_op != O_constant
 	      || (offs (e) < 0) || (offs (e) > 31))
 	    {
 	      as_bad ("illegal literal");
@@ -2537,7 +2515,6 @@ relax_cobr (fragP)
 		  iP + 4 - fragP->fr_literal,
 		  4,
 		  fragP->fr_symbol,
-		  0,
 		  fragP->fr_offset,
 		  1,
 		  NO_RELOC);
@@ -2711,7 +2688,8 @@ s_sysproc (n_ops, args)
     }				/* bad arg count */
 
   /* Parse "entry_num" argument and check it for validity. */
-  if ((parse_expr (args[2], &exp) != SEG_ABSOLUTE)
+  parse_expr (args[2], &exp);
+  if (exp.X_op != O_constant
       || (offs (exp) < 0)
       || (offs (exp) > 31))
     {
@@ -3214,7 +3192,7 @@ i960_handle_align (fragp)
     }
 
   /* alignment directive */
-  fixp = fix_new (fragp, fragp->fr_fix, fragp->fr_offset, 0, 0, 0, 0,
+  fixp = fix_new (fragp, fragp->fr_fix, fragp->fr_offset, 0, 0, 0,
 		  (int) fragp->fr_type);
 }
 

@@ -1,7 +1,7 @@
 /* m88k.c -- Assembler for the Motorola 88000
    Contributed by Devon Bowen of Buffalo University
    and Torbjorn Granlund of the Swedish Institute of Computer Science.
-   Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1993 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -274,9 +274,9 @@ md_assemble (op)
   /* try parsing this instruction into insn */
 
   insn.exp.X_add_symbol = 0;
-  insn.exp.X_subtract_symbol = 0;
+  insn.exp.X_op_symbol = 0;
   insn.exp.X_add_number = 0;
-  insn.exp.X_seg = 0;
+  insn.exp.X_op = O_illegal;
   insn.reloc = NO_RELOC;
 
   while (!calcop (format, param, &insn))
@@ -306,47 +306,39 @@ md_assemble (op)
 
     case RELOC_LO16:
     case RELOC_HI16:
-      fix_new (frag_now,
-	       thisfrag - frag_now->fr_literal + 2,
-	       2,
-	       insn.exp.X_add_symbol,
-	       insn.exp.X_subtract_symbol,
-	       insn.exp.X_add_number,
-	       0,
-	       insn.reloc);
+      fix_new_exp (frag_now,
+		   thisfrag - frag_now->fr_literal + 2,
+		   2,
+		   &insn.exp,
+		   0,
+		   insn.reloc);
       break;
 
     case RELOC_IW16:
-      fix_new (frag_now,
-	       thisfrag - frag_now->fr_literal,
-	       4,
-	       insn.exp.X_add_symbol,
-	       insn.exp.X_subtract_symbol,
-	       insn.exp.X_add_number,
-	       0,
-	       insn.reloc);
+      fix_new_exp (frag_now,
+		   thisfrag - frag_now->fr_literal,
+		   4,
+		   &insn.exp,
+		   0,
+		   insn.reloc);
       break;
 
     case RELOC_PC16:
-      fix_new (frag_now,
-	       thisfrag - frag_now->fr_literal + 2,
-	       2,
-	       insn.exp.X_add_symbol,
-	       insn.exp.X_subtract_symbol,
-	       insn.exp.X_add_number,
-	       1,
-	       insn.reloc);
+      fix_new_exp (frag_now,
+		   thisfrag - frag_now->fr_literal + 2,
+		   2,
+		   &insn.exp,
+		   1,
+		   insn.reloc);
       break;
 
     case RELOC_PC26:
-      fix_new (frag_now,
-	       thisfrag - frag_now->fr_literal,
-	       4,
-	       insn.exp.X_add_symbol,
-	       insn.exp.X_subtract_symbol,
-	       insn.exp.X_add_number,
-	       1,
-	       insn.reloc);
+      fix_new_exp (frag_now,
+		   thisfrag - frag_now->fr_literal,
+		   4,
+		   &insn.exp,
+		   1,
+		   insn.reloc);
       break;
 
     default:
@@ -542,7 +534,6 @@ get_imm16 (param, insn)
 {
   enum reloc_type reloc = NO_RELOC;
   unsigned int val;
-  segT seg;
   char *save_ptr;
 
   if (!strncmp (param, "hi16", 4) && !isalnum (param[4]))
@@ -563,13 +554,13 @@ get_imm16 (param, insn)
 
   save_ptr = input_line_pointer;
   input_line_pointer = param;
-  seg = expression (&insn->exp);
+  expression (&insn->exp);
   param = input_line_pointer;
   input_line_pointer = save_ptr;
 
   val = insn->exp.X_add_number;
 
-  if (seg == SEG_ABSOLUTE)
+  if (insn->exp.X_op == O_constant)
     {
       /* Insert the value now, and reset reloc to NO_RELOC.  */
       if (reloc == NO_RELOC)
@@ -602,17 +593,16 @@ get_pcr (param, insn, reloc)
      enum reloc_type reloc;
 {
   char *saveptr, *saveparam;
-  segT seg;
 
   saveptr = input_line_pointer;
   input_line_pointer = param;
 
-  seg = expression (&insn->exp);
+  expression (&insn->exp);
 
   saveparam = input_line_pointer;
   input_line_pointer = saveptr;
 
-  /* Botch: We should relocate now if SEG_ABSOLUTE.  */
+  /* Botch: We should relocate now if O_constant.  */
   insn->reloc = reloc;
 
   return saveparam;
@@ -1148,8 +1138,7 @@ md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
 	   ptr - frag->fr_literal,
 	   4,
 	   to_symbol,
-	   (symbolS *) 0,
-	   (long int) 0,
+	   (offsetT) 0,
 	   0,
 	   RELOC_PC26);		/* Botch: Shouldn't this be RELOC_PC16? */
 }
@@ -1171,8 +1160,7 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
 	   ptr - frag->fr_literal,
 	   4,
 	   to_symbol,
-	   (symbolS *) 0,
-	   (long int) 0,
+	   (offsetT) 0,
 	   0,
 	   RELOC_PC26);
 }

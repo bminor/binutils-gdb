@@ -161,7 +161,6 @@ static void mips_ip PARAMS ((char *str, struct mips_cl_insn * ip));
 static int my_getSmallExpression PARAMS ((expressionS * ep, char *str));
 static void my_getExpression PARAMS ((expressionS * ep, char *str));
 static symbolS *get_symbol PARAMS ((void));
-static long get_optional_absolute_expression PARAMS ((void));
 static void mips_align PARAMS ((int to, int fill));
 static void s_align PARAMS ((int));
 static void s_stringer PARAMS ((int));
@@ -336,8 +335,8 @@ md_assemble (str)
       init = 1;
     }
 
-  imm_expr.X_seg = absent_section;
-  offset_expr.X_seg = absent_section;
+  imm_expr.X_op = O_absent;
+  offset_expr.X_op = O_absent;
 
   mips_ip (str, &insn);
   if (insn_error)
@@ -351,9 +350,9 @@ md_assemble (str)
     }
   else
     {
-      if (imm_expr.X_seg != absent_section)
+      if (imm_expr.X_op != O_absent)
 	append_insn (&insn, &imm_expr, imm_reloc);
-      else if (offset_expr.X_seg != absent_section)
+      else if (offset_expr.X_op != O_absent)
 	append_insn (&insn, &offset_expr, offset_reloc);
       else
 	append_insn (&insn, NULL, BFD_RELOC_UNUSED);
@@ -571,7 +570,7 @@ append_insn (ip, address_expr, reloc_type)
   fixp = NULL;
   if (address_expr != NULL)
     {
-      if (address_expr->X_seg == &bfd_abs_section)
+      if (address_expr->X_op == O_constant)
 	{
 	  switch (reloc_type)
 	    {
@@ -595,12 +594,10 @@ append_insn (ip, address_expr, reloc_type)
 	{
 	  assert (reloc_type != BFD_RELOC_UNUSED);
 	need_reloc:
-	  fixp = fix_new (frag_now, f - frag_now->fr_literal, 4,
-			  address_expr->X_add_symbol,
-			  address_expr->X_subtract_symbol,
-			  address_expr->X_add_number,
-			  reloc_type == BFD_RELOC_16_PCREL_S2,
-			  reloc_type);
+	  fixp = fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
+			      address_expr,
+			      reloc_type == BFD_RELOC_16_PCREL_S2,
+			      reloc_type);
 	}
     }
 
@@ -816,7 +813,7 @@ gp_reference (ep)
 
   sym = ep->X_add_symbol;
   if (sym == (symbolS *) NULL
-      || ep->X_subtract_symbol != (symbolS *) NULL)
+      || ep->X_op_symbol != (symbolS *) NULL)
     return 0;
 
   /* Certain symbols can not be referenced off the GP, although it
@@ -968,7 +965,7 @@ macro_build (counter, ep, name, fmt, va_alist)
 	   * input, in which case the value is not checked for range nor
 	   * is a relocation entry generated (yuck).
 	   */
-	  if (ep->X_add_symbol == NULL && ep->X_seg == &bfd_abs_section)
+	  if (ep->X_op == O_constant)
 	    {
 	      insn.insn_opcode |= (ep->X_add_number >> 2) & 0xffff;
 	      ep = NULL;
@@ -1010,7 +1007,7 @@ macro_build_lui (counter, ep, regnum)
 
   high_expr = *ep;
 
-  if (high_expr.X_seg == &bfd_abs_section)
+  if (high_expr.X_op == O_constant)
     {
       /* we can compute the instruction now without a relocation entry */
       if (high_expr.X_add_number & 0x8000)
@@ -1112,7 +1109,7 @@ check_absolute_expr (ip, expr)
      expressionS *expr;
 {
 
-  if (expr->X_seg != &bfd_abs_section)
+  if (expr->X_op != O_constant)
     as_warn ("Instruction %s requires absolute expression", ip->insn_mo->name);
 }
 
@@ -1182,8 +1179,8 @@ macro (ip)
   sreg = breg = (ip->insn_opcode >> 21) & 0x1f;
   mask = ip->insn_mo->mask;
 
-  expr1.X_seg = &bfd_abs_section;
-  expr1.X_subtract_symbol = NULL;
+  expr1.X_op = O_constant;
+  expr1.X_op_symbol = NULL;
   expr1.X_add_symbol = NULL;
   expr1.X_add_number = 1;
 
@@ -1582,7 +1579,7 @@ macro (ip)
       return;
 
     case M_LA:
-      if (offset_expr.X_seg == &bfd_abs_section)
+      if (offset_expr.X_op == O_constant)
 	{
 	  load_register (&icnt, ip, treg, &offset_expr);
 	  return;
@@ -1598,7 +1595,7 @@ macro (ip)
 
     case M_LA_AB:
       tempreg = (breg == treg) ? AT : treg;
-      if (offset_expr.X_seg == &bfd_abs_section)
+      if (offset_expr.X_op == O_constant)
 	load_register (&icnt, ip, tempreg, &offset_expr);
       else if (gp_reference (&offset_expr))
 	macro_build (&icnt, &offset_expr, "addiu", "t,r,j", tempreg, GP);
@@ -2221,7 +2218,7 @@ macro (ip)
     case M_ULH_A:
     case M_ULHU_A:
     case M_ULW_A:
-      if (offset_expr.X_seg == &bfd_abs_section)
+      if (offset_expr.X_op == O_constant)
 	load_register (&icnt, ip, AT, &offset_expr);
       else if (gp_reference (&offset_expr))
 	macro_build (&icnt, &offset_expr, "addiu", "t,r,j", AT, GP);
@@ -2264,7 +2261,7 @@ macro (ip)
 
     case M_USH_A:
     case M_USW_A:
-      if (offset_expr.X_seg == &bfd_abs_section)
+      if (offset_expr.X_op == O_constant)
 	load_register (&icnt, ip, AT, &offset_expr);
       else if (gp_reference (&offset_expr))
 	macro_build (&icnt, &offset_expr, "addiu", "t,r,j", AT, GP);
@@ -2414,7 +2411,7 @@ mips_ip (str, ip)
 		  imm_expr.X_add_number = imm_expr.X_add_number % 32;
 		}
 	      ip->insn_opcode |= imm_expr.X_add_number << 6;
-	      imm_expr.X_seg = absent_section;
+	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
 
@@ -2424,7 +2421,7 @@ mips_ip (str, ip)
 	      if ((unsigned) imm_expr.X_add_number > 1023)
 		as_warn ("Illegal break code (%d)", imm_expr.X_add_number);
 	      ip->insn_opcode |= imm_expr.X_add_number << 16;
-	      imm_expr.X_seg = absent_section;
+	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
 
@@ -2434,7 +2431,7 @@ mips_ip (str, ip)
 	      if ((unsigned) imm_expr.X_add_number > 0xfffff)
 		as_warn ("Illegal syscall code (%d)", imm_expr.X_add_number);
 	      ip->insn_opcode |= imm_expr.X_add_number << 6;
-	      imm_expr.X_seg = absent_section;
+	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
 
@@ -2625,7 +2622,7 @@ mips_ip (str, ip)
 		{
 		  if (c != 'l')
 		    {
-		      if (imm_expr.X_seg == &bfd_abs_section)
+		      if (imm_expr.X_op == O_constant)
 			imm_expr.X_add_number =
 			  (imm_expr.X_add_number >> 16) & 0xffff;
 		      else if (c == 'h')
@@ -2668,8 +2665,8 @@ mips_ip (str, ip)
 	       * code pattern.
 	       */
 	      if ((offset_expr.X_add_symbol
-		   && offset_expr.X_seg != &bfd_abs_section)
-		  || offset_expr.X_subtract_symbol
+		   && offset_expr.X_op != O_constant)
+		  || offset_expr.X_op_symbol
 		  || offset_expr.X_add_number > 32767
 		  || offset_expr.X_add_number < -32768)
 		break;
@@ -2696,7 +2693,7 @@ mips_ip (str, ip)
 		{
 		  if (c != 'l')
 		    {
-		      if (imm_expr.X_seg == &bfd_abs_section)
+		      if (imm_expr.X_op == O_constant)
 			imm_expr.X_add_number =
 			  (imm_expr.X_add_number >> 16) & 0xffff;
 		      else if (c == 'h')
@@ -2797,16 +2794,16 @@ my_getSmallExpression (ep, str)
 		  if (c)
 		    {
 		      /* %xx(reg) is an error */
-		      ep->X_seg = absent_section;
+		      ep->X_op = O_absent;
 		      expr_end = str - 3;
 		    }
 		  else
 		    {
-		      ep->X_seg = &bfd_abs_section;
+		      ep->X_op = O_absent;
 		      expr_end = sp;
 		    }
 		  ep->X_add_symbol = NULL;
-		  ep->X_subtract_symbol = NULL;
+		  ep->X_op_symbol = NULL;
 		  ep->X_add_number = 0;
 		}
 	      else
@@ -2829,11 +2826,10 @@ my_getExpression (ep, str)
      char *str;
 {
   char *save_in;
-  asection *seg;
 
   save_in = input_line_pointer;
   input_line_pointer = str;
-  seg = expression (ep);
+  expression (ep);
   expr_end = input_line_pointer;
   input_line_pointer = save_in;
 }
@@ -3157,20 +3153,6 @@ get_symbol ()
   return p;
 }
 
-static long
-get_optional_absolute_expression ()
-{
-  expressionS exp;
-  asection *s;
-
-  s = expression (&exp);
-  if (!(s == &bfd_abs_section || s == big_section || s == absent_section))
-    {
-      as_bad ("Bad Absolute Expression.");
-    }
-  return exp.X_add_number;
-}
-
 /* Align the current frag to a given power of two.  The MIPS assembler
    also automatically adjusts any preceding label.  */
 
@@ -3325,7 +3307,7 @@ s_extern (x)
   symbolP = get_symbol ();
   if (*input_line_pointer == ',')
     input_line_pointer++;
-  size = get_optional_absolute_expression ();
+  size = get_absolute_expression ();
   S_SET_VALUE (symbolP, size);
   S_SET_EXTERNAL (symbolP);
 
@@ -3765,7 +3747,7 @@ s_frame (x)
   frame_reg = tc_get_register ();
   if (*input_line_pointer == ',')
     input_line_pointer++;
-  frame_off = get_optional_absolute_expression ();
+  frame_off = get_absolute_expression ();
   if (*input_line_pointer == ',')
     input_line_pointer++;
   pcreg = tc_get_register ();

@@ -258,7 +258,6 @@ parse_exp (s, op, page)
 {
   char *save;
   char *new;
-  segT seg;
 
   save = input_line_pointer;
 
@@ -284,26 +283,11 @@ parse_exp (s, op, page)
 
   input_line_pointer = s;
 
-  seg = expr (0, op);
+  if (expression (op) == O_absent)
+    as_bad ("missing operand");
   new = input_line_pointer;
   input_line_pointer = save;
-  if (SEG_NORMAL (seg))
-    return new;
-  switch (seg)
-    {
-    case SEG_ABSOLUTE:
-    case SEG_UNKNOWN:
-    case SEG_DIFFERENCE:
-    case SEG_BIG:
-    case SEG_REGISTER:
-      return new;
-    case SEG_ABSENT:
-      as_bad ("Missing operand");
-      return new;
-    default:
-      as_bad ("Don't understand operand of type %s", segment_name (seg));
-      return new;
-    }
+  return new;
 }
 
 typedef enum
@@ -366,7 +350,7 @@ skip_colonthing (sign, ptr, exp, def, size8, size16, size24)
 	  /* Let's work out the size from the context */
 	  int n = exp->exp.X_add_number;
 	  if (size8
-	      && exp->exp.X_seg == SEG_ABSOLUTE
+	      && exp->exp.X_op == O_constant
 	      && ((sign == exp_signed && (n >= -128 && n <= 127))
 		  || (sign == exp_unsigned && (n >= 0 && (n <= 255)))
 		  || (sign == exp_sandu && (n >= -128 && (n <= 255)))))
@@ -430,9 +414,9 @@ parse_reglist (src, op)
     }
   idx++;
   op->exp.X_add_symbol = 0;
-  op->exp.X_subtract_symbol = 0;
+  op->exp.X_op_symbol = 0;
   op->exp.X_add_number = mask;
-  op->exp.X_seg = SEG_ABSOLUTE;
+  op->exp.X_op = O_constant;
   op->type = IMM8;
   return idx;
 
@@ -795,7 +779,7 @@ get_specific (opcode, operands)
 	      break;
 	    case QIM:
 	      if (user->type == IMM8
-		  && user->exp.X_seg == SEG_ABSOLUTE
+		  && user->exp.X_op == O_constant
 		  &&
 		  (user->exp.X_add_number == -2
 		   || user->exp.X_add_number == -1
@@ -871,7 +855,7 @@ check (operand, low, high)
      int low;
      int high;
 {
-  if (operand->X_seg != SEG_ABSOLUTE
+  if (operand->X_op != O_constant
       || operand->X_add_number < low
       || operand->X_add_number > high)
     {
@@ -889,14 +873,12 @@ insert (output, index, exp, reloc, pcrel)
      int reloc;
      int pcrel;
 {
-  fix_new (frag_now,
-	   output - frag_now->fr_literal + index,
-	   4,			/* always say size is 4, but we know better */
-	   exp->X_add_symbol,
-	   exp->X_subtract_symbol,
-	   exp->X_add_number,
-	   pcrel,
-	   reloc);
+  fix_new_exp (frag_now,
+	       output - frag_now->fr_literal + index,
+	       4,	       	/* always say size is 4, but we know better */
+	       &exp,
+	       pcrel,
+	       reloc);
 }
 
 void
@@ -1399,7 +1381,6 @@ md_convert_frag (headers, fragP)
 	       fragP->fr_fix + inst_size,
 	       4,
 	       fragP->fr_symbol,
-	       0,
 	       fragP->fr_offset,
 	       0,
 	       R_H8500_PCREL16);

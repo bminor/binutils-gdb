@@ -530,7 +530,7 @@ obj_elf_stab_generic (what, secname)
       subseg_new ((char *) saved_seg->name, subseg);
 
       if ((what == 's' || what == 'n')
-	  && symbolP->sy_value.X_seg == absolute_section)
+	  && symbolP->sy_value.X_op == O_constant)
 	{
 	  /* symbol is not needed in the regular symbol table */
 	  symbol_remove (symbolP, &symbol_rootP, &symbol_lastP);
@@ -718,7 +718,6 @@ obj_elf_size ()
   char c = get_symbol_end ();
   char *p;
   expressionS exp;
-  segT sec;
   symbolS *sym;
 
   p = input_line_pointer;
@@ -733,17 +732,17 @@ obj_elf_size ()
       return;
     }
   input_line_pointer++;
-  sec = expression (&exp);
-  if (sec == absent_section)
+  expression (&exp);
+  if (exp.X_op == O_absent)
     {
       as_bad ("missing expression in .size directive");
-      exp.X_seg = absolute_section;
+      exp.X_op = O_constant;
       exp.X_add_number = 0;
     }
   *p = 0;
   sym = symbol_find_or_make (name);
   *p = c;
-  if (sec == absolute_section)
+  if (exp.X_op == O_constant)
     S_SET_SIZE (sym, exp.X_add_number);
   else
     {

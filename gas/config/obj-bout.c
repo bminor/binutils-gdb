@@ -28,11 +28,11 @@ const short			/* in: segT   out: N_TYPE bits */
   N_DATA,
   N_BSS,
   N_UNDF,			/* unknown */
-  N_UNDF,			/* absent */
-  N_UNDF,			/* pass1 */
   N_UNDF,			/* error */
-  N_UNDF,			/* bignum/flonum */
-  N_UNDF,			/* difference */
+  N_UNDF,			/* expression */
+  N_UNDF,			/* debug */
+  N_UNDF,			/* ntv */
+  N_UNDF,			/* ptv */
   N_REGISTER,			/* register */
 };
 

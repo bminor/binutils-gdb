@@ -1,5 +1,5 @@
 /* tc-a29k.c -- Assemble for the AMD 29000.
-   Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -385,16 +385,12 @@ md_assemble (str)
   /* put out the symbol-dependent stuff */
   if (the_insn.reloc != NO_RELOC)
     {
-      fix_new (
-		frag_now,	/* which frag */
-		(toP - frag_now->fr_literal + the_insn.reloc_offset),	/* where */
-		4,		/* size */
-		the_insn.exp.X_add_symbol,
-		the_insn.exp.X_subtract_symbol,
-		the_insn.exp.X_add_number,
-		the_insn.pcrel,
-		the_insn.reloc
-	);
+      fix_new_exp (frag_now,
+		   (toP - frag_now->fr_literal + the_insn.reloc_offset),
+		   4,		/* size */
+		   &the_insn.exp,
+		   the_insn.pcrel,
+		   the_insn.reloc);
     }
 }
 
@@ -405,15 +401,12 @@ parse_operand (s, operandp)
 {
   char *save = input_line_pointer;
   char *new;
-  segT seg;
 
   input_line_pointer = s;
-  seg = expr (0, operandp);
+  if (expression (operandp) == O_absent)
+    as_bad ("missing operand");
   new = input_line_pointer;
   input_line_pointer = save;
-
-  if (seg == SEG_ABSENT)
-    as_bad ("Missing operand");
   return new;
 }
 
@@ -501,7 +494,7 @@ machine_ip (str)
 	  break;
 
 	case 'v':		/* Trap numbers (immediate field) */
-	  if (operand->X_seg == SEG_ABSOLUTE)
+	  if (operand->X_op == O_constant)
 	    {
 	      if (operand->X_add_number < 256)
 		{
@@ -524,11 +517,11 @@ machine_ip (str)
 	case 'i':
 	  /* We treat the two cases identically since we mashed
 			   them together in the opcode table.  */
-	  if (operand->X_seg == SEG_REGISTER)
+	  if (operand->X_op == O_register)
 	    goto general_reg;
 
 	  opcode |= IMMEDIATE_BIT;
-	  if (operand->X_seg == SEG_ABSOLUTE)
+	  if (operand->X_op == O_constant)
 	    {
 	      if (operand->X_add_number < 256)
 		{
@@ -551,10 +544,10 @@ machine_ip (str)
 	case 'c':
 	general_reg:
 	  /* lrNNN or grNNN or %%expr or a user-def register name */
-	  if (operand->X_seg != SEG_REGISTER)
+	  if (operand->X_op != O_register)
 	    break;		/* Only registers */
 	  know (operand->X_add_symbol == 0);
-	  know (operand->X_subtract_symbol == 0);
+	  know (operand->X_op_symbol == 0);
 	  reg = operand->X_add_number;
 	  if (reg >= SREG)
 	    break;		/* No special registers */
@@ -583,7 +576,7 @@ machine_ip (str)
 
 	case 'x':		/* 16 bit constant, zero-extended */
 	case 'X':		/* 16 bit constant, one-extended */
-	  if (operand->X_seg == SEG_ABSOLUTE)
+	  if (operand->X_op == O_constant)
 	    {
 	      opcode |= (operand->X_add_number & 0xFF) << 0 |
 		((operand->X_add_number & 0xFF00) << 8);
@@ -594,7 +587,7 @@ machine_ip (str)
 	  continue;
 
 	case 'h':
-	  if (operand->X_seg == SEG_ABSOLUTE)
+	  if (operand->X_op == O_constant)
 	    {
 	      opcode |= (operand->X_add_number & 0x00FF0000) >> 16 |
 		(((unsigned long) operand->X_add_number
@@ -608,8 +601,8 @@ machine_ip (str)
 	case 'P':		/* PC-relative jump address */
 	case 'A':		/* Absolute jump address */
 	  /* These two are treated together since we folded the
-			   opcode table entries together.  */
-	  if (operand->X_seg == SEG_ABSOLUTE)
+	     opcode table entries together.  */
+	  if (operand->X_op == O_constant)
 	    {
 	      opcode |= ABSOLUTE_BIT |
 		(operand->X_add_number & 0x0003FC00) << 6 |
@@ -623,7 +616,7 @@ machine_ip (str)
 	  continue;
 
 	case 'e':		/* Coprocessor enable bit for LOAD/STORE insn */
-	  if (operand->X_seg == SEG_ABSOLUTE)
+	  if (operand->X_op == O_constant)
 	    {
 	      if (operand->X_add_number == 0)
 		continue;
@@ -636,7 +629,7 @@ machine_ip (str)
 	  break;
 
 	case 'n':		/* Control bits for LOAD/STORE instructions */
-	  if (operand->X_seg == SEG_ABSOLUTE &&
+	  if (operand->X_op == O_constant &&
 	      operand->X_add_number < 128)
 	    {
 	      opcode |= (operand->X_add_number << 16);
@@ -645,7 +638,7 @@ machine_ip (str)
 	  break;
 
 	case 's':		/* Special register number */
-	  if (operand->X_seg != SEG_REGISTER)
+	  if (operand->X_op != O_register)
 	    break;		/* Only registers */
 	  if (operand->X_add_number < SREG)
 	    break;		/* Not a special register */
@@ -653,7 +646,7 @@ machine_ip (str)
 	  continue;
 
 	case 'u':		/* UI bit of CONVERT */
-	  if (operand->X_seg == SEG_ABSOLUTE)
+	  if (operand->X_op == O_constant)
 	    {
 	      if (operand->X_add_number == 0)
 		continue;
@@ -666,7 +659,7 @@ machine_ip (str)
 	  break;
 
 	case 'r':		/* RND bits of CONVERT */
-	  if (operand->X_seg == SEG_ABSOLUTE &&
+	  if (operand->X_op == O_constant &&
 	      operand->X_add_number < 8)
 	    {
 	      opcode |= operand->X_add_number << 4;
@@ -675,7 +668,7 @@ machine_ip (str)
 	  break;
 
 	case 'd':		/* FD bits of CONVERT */
-	  if (operand->X_seg == SEG_ABSOLUTE &&
+	  if (operand->X_op == O_constant &&
 	      operand->X_add_number < 4)
 	    {
 	      opcode |= operand->X_add_number << 2;
@@ -685,7 +678,7 @@ machine_ip (str)
 
 
 	case 'f':		/* FS bits of CONVERT */
-	  if (operand->X_seg == SEG_ABSOLUTE &&
+	  if (operand->X_op == O_constant &&
 	      operand->X_add_number < 4)
 	    {
 	      opcode |= operand->X_add_number << 0;
@@ -694,7 +687,7 @@ machine_ip (str)
 	  break;
 
 	case 'C':
-	  if (operand->X_seg == SEG_ABSOLUTE &&
+	  if (operand->X_op == O_constant &&
 	      operand->X_add_number < 4)
 	    {
 	      opcode |= operand->X_add_number << 16;
@@ -703,7 +696,7 @@ machine_ip (str)
 	  break;
 
 	case 'F':
-	  if (operand->X_seg == SEG_ABSOLUTE &&
+	  if (operand->X_op == O_constant &&
 	      operand->X_add_number < 16)
 	    {
 	      opcode |= operand->X_add_number << 18;
@@ -1031,10 +1024,10 @@ print_insn (insn)
 	   insn->exp.X_add_symbol ?
 	   (S_GET_NAME (insn->exp.X_add_symbol) ?
 	    S_GET_NAME (insn->exp.X_add_symbol) : "???") : "0");
-  fprintf (stderr, "\t\tX_sub_symbol = %s\n",
-	   insn->exp.X_subtract_symbol ?
-	   (S_GET_NAME (insn->exp.X_subtract_symbol) ?
-	    S_GET_NAME (insn->exp.X_subtract_symbol) : "???") : "0");
+  fprintf (stderr, "\t\tX_op_symbol = %s\n",
+	   insn->exp.X_op_symbol ?
+	   (S_GET_NAME (insn->exp.X_op_symbol) ?
+	    S_GET_NAME (insn->exp.X_op_symbol) : "???") : "0");
   fprintf (stderr, "\t\tX_add_number = %d\n",
 	   insn->exp.X_add_number);
   fprintf (stderr, "}\n");
@@ -1141,22 +1134,22 @@ md_operand (expressionP)
       /* We have a numeric register expression.  No biggy.  */
       input_line_pointer += 2;	/* Skip %% */
       (void) expression (expressionP);
-      if (expressionP->X_seg != SEG_ABSOLUTE
+      if (expressionP->X_op != O_constant
 	  || expressionP->X_add_number > 255)
 	as_bad ("Invalid expression after %%%%\n");
-      expressionP->X_seg = SEG_REGISTER;
+      expressionP->X_op = O_register;
     }
   else if (input_line_pointer[0] == '&')
     {
       /* We are taking the 'address' of a register...this one is not
-		       in the manual, but it *is* in traps/fpsymbol.h!  What they
-		       seem to want is the register number, as an absolute number.  */
+	 in the manual, but it *is* in traps/fpsymbol.h!  What they
+	 seem to want is the register number, as an absolute number.  */
       input_line_pointer++;	/* Skip & */
       (void) expression (expressionP);
-      if (expressionP->X_seg != SEG_REGISTER)
+      if (expressionP->X_op != O_register)
 	as_bad ("Invalid register in & expression");
       else
-	expressionP->X_seg = SEG_ABSOLUTE;
+	expressionP->X_op = O_constant;
     }
 }
 

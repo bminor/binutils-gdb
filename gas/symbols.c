@@ -1,5 +1,4 @@
 /* symbols.c -symbol table-
-
    Copyright (C) 1987, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -585,12 +584,23 @@ resolve_symbol_value (symp)
     }
   else
     {
+      offsetT left, right, val;
+      segT seg_left, seg_right;
+
       symp->sy_resolving = 1;
 
-      if (symp->sy_value.X_seg == absolute_section)
-	S_SET_VALUE (symp, S_GET_VALUE (symp) + symp->sy_frag->fr_address);
-      else if (symp->sy_value.X_seg == undefined_section)
+      switch (symp->sy_value.X_op)
 	{
+	case O_absent:
+	  S_SET_VALUE (symp, 0);
+	  /* Fall through.  */
+	case O_constant:
+	  S_SET_VALUE (symp, S_GET_VALUE (symp) + symp->sy_frag->fr_address);
+	  if (S_GET_SEGMENT (symp) == expr_section)
+	    S_SET_SEGMENT (symp, absolute_section);
+	  break;
+
+	case O_symbol:
 	  resolve_symbol_value (symp->sy_value.X_add_symbol);
 
 #ifdef obj_frob_forward_symbol
@@ -602,26 +612,84 @@ resolve_symbol_value (symp)
 		       (symp->sy_value.X_add_number
 			+ symp->sy_frag->fr_address
 			+ S_GET_VALUE (symp->sy_value.X_add_symbol)));
-	}
-      else if (symp->sy_value.X_seg == diff_section)
-	{
+	  if (S_GET_SEGMENT (symp) == expr_section
+	      || S_GET_SEGMENT (symp) == undefined_section)
+	    S_SET_SEGMENT (symp,
+			   S_GET_SEGMENT (symp->sy_value.X_add_symbol));
+	  break;
+
+	case O_uminus:
+	case O_bit_not:
 	  resolve_symbol_value (symp->sy_value.X_add_symbol);
-	  resolve_symbol_value (symp->sy_value.X_subtract_symbol);
-	  if (S_GET_SEGMENT (symp->sy_value.X_add_symbol)
-	      != S_GET_SEGMENT (symp->sy_value.X_subtract_symbol))
-	    as_bad ("%s is difference of symbols in different sections",
+	  if (symp->sy_value.X_op == O_uminus)
+	    val = - S_GET_VALUE (symp->sy_value.X_add_symbol);
+	  else
+	    val = ~ S_GET_VALUE (symp->sy_value.X_add_symbol);
+	  S_SET_VALUE (symp,
+		       (val
+			+ symp->sy_value.X_add_number
+			+ symp->sy_frag->fr_address));
+	  if (S_GET_SEGMENT (symp) == expr_section
+	      || S_GET_SEGMENT (symp) == undefined_section)
+	    S_SET_SEGMENT (symp, absolute_section);
+	  break;
+
+	case O_multiply:
+	case O_divide:
+	case O_modulus:
+	case O_left_shift:
+	case O_right_shift:
+	case O_bit_inclusive_or:
+	case O_bit_or_not:
+	case O_bit_exclusive_or:
+	case O_bit_and:
+	case O_add:
+	case O_subtract:
+	  resolve_symbol_value (symp->sy_value.X_add_symbol);
+	  resolve_symbol_value (symp->sy_value.X_op_symbol);
+	  seg_left = S_GET_SEGMENT (symp->sy_value.X_add_symbol);
+	  seg_right = S_GET_SEGMENT (symp->sy_value.X_op_symbol);
+	  if (seg_left != seg_right
+	      && seg_left != undefined_section
+	      && seg_right != undefined_section)
+	    as_bad ("%s is operation on symbols in different sections",
 		    S_GET_NAME (symp));
+	  if ((S_GET_SEGMENT (symp->sy_value.X_add_symbol)
+	       != absolute_section)
+	      && symp->sy_value.X_op != O_subtract)
+	    as_bad ("%s is illegal operation on non-absolute symbols",
+		    S_GET_NAME (symp));
+	  left = S_GET_VALUE (symp->sy_value.X_add_symbol);
+	  right = S_GET_VALUE (symp->sy_value.X_op_symbol);
+	  switch (symp->sy_value.X_op)
+	    {
+	    case O_multiply:		val = left * right; break;
+	    case O_divide:		val = left / right; break;
+	    case O_modulus:		val = left % right; break;
+	    case O_left_shift:		val = left << right; break;
+	    case O_right_shift:		val = left >> right; break;
+	    case O_bit_inclusive_or:	val = left | right; break;
+	    case O_bit_or_not:		val = left |~ right; break;
+	    case O_bit_exclusive_or:	val = left ^ right; break;
+	    case O_bit_and:		val = left & right; break;
+	    case O_add:			val = left + right; break;
+	    case O_subtract:		val = left - right; break;
+	    default:			abort ();
+	    }
 	  S_SET_VALUE (symp,
 		       (symp->sy_value.X_add_number
 			+ symp->sy_frag->fr_address
-			+ S_GET_VALUE (symp->sy_value.X_add_symbol)
-			- S_GET_VALUE (symp->sy_value.X_subtract_symbol)));
-	  S_SET_SEGMENT (symp, absolute_section);
-	}
-      else
-	{
-	  /* More cases need to be added here.  */
-	  abort ();
+			+ val));
+	  if (S_GET_SEGMENT (symp) == expr_section
+	      || S_GET_SEGMENT (symp) == undefined_section)
+	    S_SET_SEGMENT (symp, absolute_section);
+   	  break;
+
+	case O_register:
+	case O_big:
+	case O_illegal:
+	  as_bad ("bad value for symbol \"%s\"", S_GET_NAME (symp));
+	  break;
 	}
     }
 
@@ -1014,7 +1082,7 @@ valueT
 S_GET_VALUE (s)
      symbolS *s;
 {
-  if (s->sy_value.X_seg != absolute_section)
+  if (s->sy_value.X_op != O_constant)
     as_bad ("Attempt to get value of unresolved symbol %s", S_GET_NAME (s));
   return (valueT) s->sy_value.X_add_number;
 }
@@ -1026,7 +1094,7 @@ S_SET_VALUE (s, val)
      symbolS *s;
      valueT val;
 {
-  s->sy_value.X_seg = absolute_section;
+  s->sy_value.X_op = O_constant;
   s->sy_value.X_add_number = (offsetT) val;
 }
 

@@ -1,5 +1,5 @@
 /* i386.c -- Assemble code for the Intel 80386
-   Copyright (C) 1989, 1991, 1992 Free Software Foundation.
+   Copyright (C) 1989, 1991, 1992, 1993 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -522,7 +522,7 @@ static void
 pe (e)
      expressionS *e;
 {
-  fprintf (stdout, "    segment       %s\n", segment_name (e->X_seg));
+  fprintf (stdout, "    operation       %d\n", e->X_op);
   fprintf (stdout, "    add_number    %d (%x)\n",
 	   e->X_add_number, e->X_add_number);
   if (e->X_add_symbol)
@@ -531,10 +531,10 @@ pe (e)
       ps (e->X_add_symbol);
       fprintf (stdout, "\n");
     }
-  if (e->X_subtract_symbol)
+  if (e->X_op_symbol)
     {
-      fprintf (stdout, "    sub_symbol    ");
-      ps (e->X_subtract_symbol);
+      fprintf (stdout, "    op_symbol    ");
+      ps (e->X_op_symbol);
       fprintf (stdout, "\n");
     }
 }
@@ -1254,10 +1254,10 @@ md_assemble (line)
 			   holds the correct displacement size. */
 			exp = &disp_expressions[i.disp_operands++];
 			i.disps[o] = exp;
-			exp->X_seg = absolute_section;
+			exp->X_op = O_constant;
 			exp->X_add_number = 0;
 			exp->X_add_symbol = (symbolS *) 0;
-			exp->X_subtract_symbol = (symbolS *) 0;
+			exp->X_op_symbol = (symbolS *) 0;
 		      }
 
 		    /* Select the correct segment for the memory operand. */
@@ -1337,11 +1337,8 @@ md_assemble (line)
     if (t->opcode_modifier & Jump)
       {
 	int n = i.disps[0]->X_add_number;
-	segT seg;
 
-	seg = i.disps[0]->X_seg;
-
-	if (seg == absolute_section)
+	if (i.disps[0]->X_op == O_constant)
 	  {
 	    if (fits_in_signed_byte (n))
 	      {
@@ -1417,7 +1414,7 @@ md_assemble (line)
 	  }
 
 	p = frag_more (size);
-	if (i.disps[0]->X_seg == absolute_section)
+	if (i.disps[0]->X_op == O_constant)
 	  {
 	    md_number_to_chars (p, n, size);
 	    if (size == 1 && !fits_in_signed_byte (n))
@@ -1428,23 +1425,20 @@ md_assemble (line)
 	  }
 	else
 	  {
-	    fix_new (frag_now, p - frag_now->fr_literal, size,
-		     i.disps[0]->X_add_symbol, i.disps[0]->X_subtract_symbol,
-		     i.disps[0]->X_add_number, 1, NO_RELOC);
+	    fix_new_exp (frag_now, p - frag_now->fr_literal, size,
+			 i.disps[0], 1, NO_RELOC);
 	  }
       }
     else if (t->opcode_modifier & JumpInterSegment)
       {
 	p = frag_more (1 + 2 + 4);	/* 1 opcode; 2 segment; 4 offset */
 	p[0] = t->base_opcode;
-	if (i.imms[1]->X_seg == absolute_section)
+	if (i.imms[1]->X_op == O_constant)
 	  md_number_to_chars (p + 1, i.imms[1]->X_add_number, 4);
 	else
-	  fix_new (frag_now, p + 1 - frag_now->fr_literal, 4,
-		   i.imms[1]->X_add_symbol,
-		   i.imms[1]->X_subtract_symbol,
-		   i.imms[1]->X_add_number, 0, NO_RELOC);
-	if (i.imms[0]->X_seg != absolute_section)
+	  fix_new_exp (frag_now, p + 1 - frag_now->fr_literal, 4,
+		       i.imms[1], 0, NO_RELOC);
+	if (i.imms[0]->X_op != O_constant)
 	  as_bad ("can't handle non absolute segment in long call/jmp");
 	md_number_to_chars (p + 5, i.imms[0]->X_add_number, 2);
       }
@@ -1510,7 +1504,7 @@ md_assemble (line)
 	      {
 		if (i.disps[n])
 		  {
-		    if (i.disps[n]->X_seg == absolute_section)
+		    if (i.disps[n]->X_op == O_constant)
 		      {
 			if (i.types[n] & (Disp8 | Abs8))
 			  {
@@ -1532,9 +1526,8 @@ md_assemble (line)
 		      {		/* not absolute_section */
 			/* need a 32-bit fixup (don't support 8bit non-absolute disps) */
 			p = frag_more (4);
-			fix_new (frag_now, p - frag_now->fr_literal, 4,
-				 i.disps[n]->X_add_symbol, i.disps[n]->X_subtract_symbol,
-				 i.disps[n]->X_add_number, 0, NO_RELOC);
+			fix_new_exp (frag_now, p - frag_now->fr_literal, 4,
+				     i.disps[n], 0, NO_RELOC);
 		      }
 		  }
 	      }
@@ -1549,7 +1542,7 @@ md_assemble (line)
 	      {
 		if (i.imms[n])
 		  {
-		    if (i.imms[n]->X_seg == absolute_section)
+		    if (i.imms[n]->X_op == O_constant)
 		      {
 			if (i.types[n] & (Imm8 | Imm8S))
 			  {
@@ -1579,9 +1572,8 @@ md_assemble (line)
 			else
 			  size = 4;
 			p = frag_more (size);
-			fix_new (frag_now, p - frag_now->fr_literal, size,
-				 i.imms[n]->X_add_symbol, i.imms[n]->X_subtract_symbol,
-				 i.imms[n]->X_add_number, 0, NO_RELOC);
+			fix_new_exp (frag_now, p - frag_now->fr_literal, size,
+				     i.imms[n], 0, NO_RELOC);
 		      }
 		  }
 	      }
@@ -1696,18 +1688,18 @@ i386_operand (operand_string)
       exp_seg = expression (exp);
       input_line_pointer = save_input_line_pointer;
 
-      if (exp_seg == absent_section)
+      if (exp.X_op == O_absent)
 	{
 	  /* missing or bad expr becomes absolute 0 */
 	  as_bad ("missing or invalid immediate expression '%s' taken as 0",
 		  operand_string);
-	  exp->X_seg = absolute_section;
+	  exp->X_op = O_constant;
 	  exp->X_add_number = 0;
 	  exp->X_add_symbol = (symbolS *) 0;
-	  exp->X_subtract_symbol = (symbolS *) 0;
+	  exp->X_op_symbol = (symbolS *) 0;
 	  i.types[this_operand] |= Imm;
 	}
-      else if (exp_seg == absolute_section)
+      else if (exp.X_op == O_constant)
 	{
 	  i.types[this_operand] |= smallest_imm_type (exp->X_add_number);
 	}
@@ -1937,18 +1929,18 @@ i386_operand (operand_string)
 	    as_bad ("Ignoring junk '%s' after expression", input_line_pointer);
 	  RESTORE_END_STRING (displacement_string_end);
 	  input_line_pointer = save_input_line_pointer;
-	  if (exp_seg == absent_section)
+	  if (exp.X_op == O_absent)
 	    {
 	      /* missing expr becomes absolute 0 */
 	      as_bad ("missing or invalid displacement '%s' taken as 0",
 		      operand_string);
 	      i.types[this_operand] |= (Disp | Abs);
-	      exp->X_seg = absolute_section;
+	      exp->X_op = O_constant;
 	      exp->X_add_number = 0;
 	      exp->X_add_symbol = (symbolS *) 0;
-	      exp->X_subtract_symbol = (symbolS *) 0;
+	      exp->X_op_symbol = (symbolS *) 0;
 	    }
-	  else if (exp_seg == absolute_section)
+	  else if (exp.X_op == O_constant)
 	    {
 	      i.types[this_operand] |= SMALLEST_DISP_TYPE (exp->X_add_number);
 	    }
@@ -2042,7 +2034,6 @@ md_estimate_size_before_relax (fragP, segment)
 	  fragP->fr_fix += 4;
 	  fix_new (fragP, old_fr_fix, 4,
 		   fragP->fr_symbol,
-		   (symbolS *) 0,
 		   fragP->fr_offset, 1, NO_RELOC);
 	  break;
 
@@ -2054,7 +2045,6 @@ md_estimate_size_before_relax (fragP, segment)
 	  fragP->fr_fix += 1 + 4;	/* we've added an opcode byte */
 	  fix_new (fragP, old_fr_fix + 1, 4,
 		   fragP->fr_symbol,
-		   (symbolS *) 0,
 		   fragP->fr_offset, 1, NO_RELOC);
 	  break;
 	}
@@ -2187,7 +2177,7 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
       md_number_to_chars (ptr, 0xe9, 1);	/* opcode for long jmp */
       md_number_to_chars (ptr + 1, offset, 4);
       fix_new (frag, (ptr + 1) - frag->fr_literal, 4,
-	       to_symbol, (symbolS *) 0, (long) 0, 0, NO_RELOC);
+	       to_symbol, (offsetT) 0, 0, NO_RELOC);
     }
   else
     {

@@ -689,7 +689,7 @@ md_assemble (str)
 
   /* See if "set" operand is absolute and small; skip sethi if so. */
   if (special_case == SPECIAL_CASE_SET
-      && the_insn.exp.X_seg == absolute_section)
+      && the_insn.exp.X_op == O_constant)
     {
       if (the_insn.exp.X_add_number >= -(1 << 12)
 	  && the_insn.exp.X_add_number < (1 << 12))
@@ -709,14 +709,12 @@ md_assemble (str)
   /* put out the symbol-dependent stuff */
   if (the_insn.reloc != BFD_RELOC_NONE)
     {
-      fix_new (frag_now,	/* which frag */
-	       (toP - frag_now->fr_literal),	/* where */
-	       4,		/* size */
-	       the_insn.exp.X_add_symbol,
-	       the_insn.exp.X_subtract_symbol,
-	       the_insn.exp.X_add_number,
-	       the_insn.pcrel,
-	       the_insn.reloc);
+      fix_new_exp (frag_now,	/* which frag */
+		   (toP - frag_now->fr_literal),	/* where */
+		   4,		/* size */
+		   &the_insn.exp,
+		   the_insn.pcrel,
+		   the_insn.reloc);
     }
 
   switch (special_case)
@@ -725,22 +723,19 @@ md_assemble (str)
       special_case = 0;
       assert (the_insn.reloc == BFD_RELOC_HI22);
       /* See if "set" operand has no low-order bits; skip OR if so. */
-      if (the_insn.exp.X_seg == absolute_section
+      if (the_insn.exp.X_op == O_constant
 	  && ((the_insn.exp.X_add_number & 0x3FF) == 0))
 	return;
       toP = frag_more (4);
       rsd = (the_insn.opcode >> 25) & 0x1f;
       the_insn.opcode = 0x80102000 | (rsd << 25) | (rsd << 14);
       md_number_to_chars (toP, (valueT) the_insn.opcode, 4);
-      fix_new (frag_now,	/* which frag */
-	       (toP - frag_now->fr_literal),	/* where */
-	       4,		/* size */
-	       the_insn.exp.X_add_symbol,
-	       the_insn.exp.X_subtract_symbol,
-	       the_insn.exp.X_add_number,
-	       the_insn.pcrel,
-	       BFD_RELOC_LO10
-	       );
+      fix_new_exp (frag_now,	/* which frag */
+		   (toP - frag_now->fr_literal),	/* where */
+		   4,		/* size */
+		   &the_insn.exp,
+		   the_insn.pcrel,
+		   BFD_RELOC_LO10);
       return;
 
     case SPECIAL_CASE_FDIV:
@@ -1545,8 +1540,8 @@ sparc_ip (str)
 #endif
 	      /* end-sanitize-v9 */
 		  && the_insn.exp.X_add_symbol == 0
-		  && the_insn.exp.X_subtract_symbol == 0
-		  && the_insn.exp.X_seg == absolute_section
+		  && the_insn.exp.X_op_symbol == 0
+		  && the_insn.exp.X_op == O_constant
 		  && (the_insn.exp.X_add_number > immediate_max
 		      || the_insn.exp.X_add_number < ~immediate_max))
 		as_bad ("constant value must be between %ld and %ld",
@@ -1574,7 +1569,8 @@ sparc_ip (str)
 
 		input_line_pointer = s;
 
-		if (expression (&e) == absolute_section)
+		expression (&e);
+		if (e.X_op == O_constant)
 		  {
 		    opcode |= e.X_add_number << 5;
 		    s = input_line_pointer;
@@ -1793,10 +1789,7 @@ getExpression (str)
       || seg == text_section
       || seg == data_section
       || seg == bss_section
-      || seg == undefined_section
-      || seg == diff_section
-      || seg == big_section
-      || seg == absent_section)
+      || seg == undefined_section)
     /* ok */;
   else
     {
@@ -2322,9 +2315,9 @@ print_insn (insn)
 	       : "???")
 	    : "0"));
   fprintf (stderr, "\t\tX_sub_symbol = %s\n",
-	   ((insn->exp.X_subtract_symbol != NULL)
-	    ? (S_GET_NAME (insn->exp.X_subtract_symbol)
-	       ? S_GET_NAME (insn->exp.X_subtract_symbol)
+	   ((insn->exp.X_op_symbol != NULL)
+	    ? (S_GET_NAME (insn->exp.X_op_symbol)
+	       ? S_GET_NAME (insn->exp.X_op_symbol)
 	       : "???")
 	    : "0"));
   fprintf (stderr, "\t\tX_add_number = %d\n",
