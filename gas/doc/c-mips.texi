@@ -28,6 +28,7 @@ Assembly Language Programming'' in the same work.
 * MIPS autoextend::	Directives for extending MIPS 16 bit instructions
 * MIPS insn::		Directive to mark data as an instruction
 * MIPS option stack::	Directives to save and restore options
+* MIPS ASE instruction generation overrides:: Directives to control generation of MIPS ASE instructions
 @end menu
 
 @node MIPS Opts

@@ -1,3 +1,7 @@
+2002-03-16  Andreas Jaeger  <aj@suse.de>
+
+	* doc/c-mips.texi (Machine Dependencies): Add new node.
+
 2002-03-15  Chris G. Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c (mips_set_options): New "ase_mips3d" member.
@@ -17,7 +21,7 @@
 	* doc/as.texinfo: Document -mips3d and -no-mips3d options.
 	* doc/c-mips.texi: Likewise, and document ".set mips3d" and ".set
 	nomips3d" directives.
-	
+
 2002-03-14  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* config/tc-mmix.c (md_estimate_size_before_relax): Don't consider
@@ -102,7 +106,7 @@
 	(parse_op_no_deferred): Support float literals.
 	(parse_op): Reject attempts to refer to float regs.
 	(parse_fop): New function, like parse_op but for float operand.
-	(md_assemble): Add cases to parse float operands.  Also fix 
+	(md_assemble): Add cases to parse float operands.  Also fix
 	IMM3, IMM6, IMM8 cases to pick up the operand from the right spot.
 
 2002-03-04  H.J. Lu <hjl@gnu.org>
@@ -293,7 +297,7 @@
 
 2002-02-11  Tom Rix  <trix@redhat.com>
 
-	* config/tc-ppc.c (md_apply_fix3): Check for insert fop invalid for 
+	* config/tc-ppc.c (md_apply_fix3): Check for insert fop invalid for
 	xcoff64.
 
 Mon Feb 11 11:23:38 2002  Alexandre Oliva  <aoliva@redhat.com>
@@ -526,7 +530,7 @@ Mon Feb 11 12:59:29 CET 2002  Jan Hubicka  <jh@suse.cz>
 	BFD_RELOC_SH_PT_16>: Set lowest bit in field to be relocated to 1.
 	(shmedia_md_convert_frag) <case C (SH64PCREL16_32, SH64PCREL16) et
 	al>: Set lowest bit of field to relocate to 1 and rest to empty,
-	if reloc is emitted. 
+	if reloc is emitted.
 	2000-12-31  Hans-Peter Nilsson	<hpn@cygnus.com>
 	New options plus bugfixes.
 	* config/tc-sh.c (md_longopts): New options "-no-expand" and
@@ -835,7 +839,7 @@ Mon Feb 11 12:59:29 CET 2002  Jan Hubicka  <jh@suse.cz>
 
 	* config/tc-sh.c (parse_at): Install the correct version of
 	2002-02-04's patch.
-	
+
 	* config/tc-sh.c (md_apply_fix3) <BFD_RELOC_32_PLT_PCREL>: Don't
 	assume fixP->fx_subsy is non-NULL.
 
@@ -892,7 +896,7 @@ Mon Feb 11 12:59:29 CET 2002  Jan Hubicka  <jh@suse.cz>
 	Support on-demand global register allocation by passing on
 	base-plus-offset relocs to the linker.
 	* config/tc-mmix.c: Tweak and fix typos in comments.
- 	(allocate_undefined_gregs_in_linker): New variable.
+	(allocate_undefined_gregs_in_linker): New variable.
 	(OPTION_LINKER_ALLOCATED_GREGS): New option macro.
 	(md_longopts): Add --linker-allocated-gregs.
 	(md_parse_option) <case 'x'>: Imply --linker-allocated-gregs.
@@ -1008,7 +1012,7 @@ Mon Feb 11 12:59:29 CET 2002  Jan Hubicka  <jh@suse.cz>
 2002-01-21  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* configure.in (ia64-*-netbsd*): New target.
-	* configure: Regenerate. 
+	* configure: Regenerate.
 
 2002-01-21  Hans-Peter Nilsson  <hp@bitrange.com>
 
@@ -1047,7 +1051,7 @@ Mon Feb 11 12:59:29 CET 2002  Jan Hubicka  <jh@suse.cz>
 
 	* NEWS: Mention new ARM command-line options and VFP support.
 
-	* config/tc-arm.c (ARM_CEXT_XSCALE): Replaces ARM_EXT_XSCALE.  All 
+	* config/tc-arm.c (ARM_CEXT_XSCALE): Replaces ARM_EXT_XSCALE.  All
 	uses changed.
 	(ARM_CEXT_MAVERICK): Similarly.
 	(ARM_ANY): Now means any core instruction.
