@@ -79,6 +79,10 @@ print_insn_arg (d, l, stream, pc)
       fprintf (stream, "0x%x", ((struct op_r_fmt *) l)->shamt);
       break;
 
+    case 'B':
+      fprintf (stream, "0x%x", ((struct op_brk_fmt *) l)->code);
+      break;
+
     case 'S':
       fprintf (stream, "$f%d", ((struct fop_r_fmt *) l)->fs);
       break;
