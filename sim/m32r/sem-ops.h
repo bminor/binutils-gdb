@@ -31,9 +31,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SUBBI(x, y) ((x) - (y))
 #define MULBI(x, y) ((x) * (y))
 #define DIVBI(x, y) ((BI) (x) / (BI) (y))
-#define UDIVBI(x, y) ((BI) (x) / (BI) (y))
+#define UDIVBI(x, y) ((UBI) (x) / (UBI) (y))
 #define MODBI(x, y) ((BI) (x) % (BI) (y))
-#define UMODBI(x, y) ((BI) (x) % (BI) (y))
+#define UMODBI(x, y) ((UBI) (x) % (UBI) (y))
 #define SRABI(x, y) ((BI) (x) >> (y))
 #define SRLBI(x, y) ((UBI) (x) >> (y))
 #define SHLBI(x, y) ((UBI) (x) << (y))
@@ -62,9 +62,9 @@ extern BI ROLBI PARAMS ((BI, int));
 #define SUBQI(x, y) ((x) - (y))
 #define MULQI(x, y) ((x) * (y))
 #define DIVQI(x, y) ((QI) (x) / (QI) (y))
-#define UDIVQI(x, y) ((QI) (x) / (QI) (y))
+#define UDIVQI(x, y) ((UQI) (x) / (UQI) (y))
 #define MODQI(x, y) ((QI) (x) % (QI) (y))
-#define UMODQI(x, y) ((QI) (x) % (QI) (y))
+#define UMODQI(x, y) ((UQI) (x) % (UQI) (y))
 #define SRAQI(x, y) ((QI) (x) >> (y))
 #define SRLQI(x, y) ((UQI) (x) >> (y))
 #define SHLQI(x, y) ((UQI) (x) << (y))
@@ -93,9 +93,9 @@ extern QI ROLQI PARAMS ((QI, int));
 #define SUBHI(x, y) ((x) - (y))
 #define MULHI(x, y) ((x) * (y))
 #define DIVHI(x, y) ((HI) (x) / (HI) (y))
-#define UDIVHI(x, y) ((HI) (x) / (HI) (y))
+#define UDIVHI(x, y) ((UHI) (x) / (UHI) (y))
 #define MODHI(x, y) ((HI) (x) % (HI) (y))
-#define UMODHI(x, y) ((HI) (x) % (HI) (y))
+#define UMODHI(x, y) ((UHI) (x) % (UHI) (y))
 #define SRAHI(x, y) ((HI) (x) >> (y))
 #define SRLHI(x, y) ((UHI) (x) >> (y))
 #define SHLHI(x, y) ((UHI) (x) << (y))
@@ -124,9 +124,9 @@ extern HI ROLHI PARAMS ((HI, int));
 #define SUBSI(x, y) ((x) - (y))
 #define MULSI(x, y) ((x) * (y))
 #define DIVSI(x, y) ((SI) (x) / (SI) (y))
-#define UDIVSI(x, y) ((SI) (x) / (SI) (y))
+#define UDIVSI(x, y) ((USI) (x) / (USI) (y))
 #define MODSI(x, y) ((SI) (x) % (SI) (y))
-#define UMODSI(x, y) ((SI) (x) % (SI) (y))
+#define UMODSI(x, y) ((USI) (x) % (USI) (y))
 #define SRASI(x, y) ((SI) (x) >> (y))
 #define SRLSI(x, y) ((USI) (x) >> (y))
 #define SHLSI(x, y) ((USI) (x) << (y))
@@ -156,9 +156,9 @@ extern DI ADDDI PARAMS ((DI, DI));
 extern DI SUBDI PARAMS ((DI, DI));
 extern DI MULDI PARAMS ((DI, DI));
 extern DI DIVDI PARAMS ((DI, DI));
-extern DI UDIVDI PARAMS ((DI, DI));
+extern UDI UDIVDI PARAMS ((UDI, UDI));
 extern DI MODDI PARAMS ((DI, DI));
-extern DI UMODDI PARAMS ((DI, DI));
+extern UDI UMODDI PARAMS ((UDI, UDI));
 extern DI SRADI PARAMS ((DI, int));
 extern UDI SRLDI PARAMS ((UDI, int));
 extern UDI SHLDI PARAMS ((UDI, int));
@@ -187,9 +187,9 @@ extern int GEUDI PARAMS ((UDI, UDI));
 #define SUBDI(x, y) ((x) - (y))
 #define MULDI(x, y) ((x) * (y))
 #define DIVDI(x, y) ((DI) (x) / (DI) (y))
-#define UDIVDI(x, y) ((DI) (x) / (DI) (y))
+#define UDIVDI(x, y) ((UDI) (x) / (UDI) (y))
 #define MODDI(x, y) ((DI) (x) % (DI) (y))
-#define UMODDI(x, y) ((DI) (x) % (DI) (y))
+#define UMODDI(x, y) ((UDI) (x) % (UDI) (y))
 #define SRADI(x, y) ((DI) (x) >> (y))
 #define SRLDI(x, y) ((UDI) (x) >> (y))
 #define SHLDI(x, y) ((UDI) (x) << (y))
