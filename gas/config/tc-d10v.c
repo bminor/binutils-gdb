@@ -152,7 +152,7 @@ check_range (num, bits, flags)
      int bits;
      int flags;
 {
-  long min, max;
+  long min, max, bit1;
   int retval=0;
 
   if (flags & OPERAND_SHIFT)
@@ -167,7 +167,14 @@ check_range (num, bits, flags)
 
   if (flags & OPERAND_SIGNED)
     {
-      max = (1 << (bits - 1)) - 1; 
+      bit1 = (1 << (bits - 1)); 
+      max = bit1 -1;
+      if (num & max)
+	{
+	  /* sign-extend */
+	  num = ((num & (bit1 | max))^(~max))+bit1;
+	}
+
       min = - (1 << (bits - 1));  
       if (((long)num > max) || ((long)num < min))
 	retval = 1;
@@ -553,13 +560,19 @@ write_1_short (opcode, insn, fx)
   number_to_chars_bigendian (f, insn, 4);
   for (i=0; i < fx->fc; i++) 
     {
-      if (get_reloc((struct d10v_operand *)&d10v_operands[fx->fix[i].reloc])) 
+      bfd_reloc_code_real_type reloc;
+      reloc = get_reloc((struct d10v_operand *)&d10v_operands[fx->fix[i].reloc]);
+      if (reloc)
 	{ 
 	  /*
 	  printf("fix_new_exp: where:%x size:4\n    ",f - frag_now->fr_literal);
 	  print_expr_1(stdout,&(fx->fix[i].exp));
 	  printf("\n");
 	  */
+
+	  /* if it's an R reloc, we may have to switch it to L */
+	  if ( (reloc == BFD_RELOC_D10V_10_PCREL_R) && (opcode->unit != IU) )
+	    fx->fix[i].reloc |= 1024;
 
 	  fix_new_exp (frag_now,
 		       f - frag_now->fr_literal, 
@@ -624,6 +637,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	    as_fatal ("Two IU instructions may not be executed in parallel");
 	  as_warn ("Swapping instruction order");
  	  insn = FM00 | (insn2 << 15) | insn1;
+	  fx = fx->next;
 	}
       else if (opcode2->unit == MU)
 	{
@@ -631,6 +645,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	    as_fatal ("Two MU instructions may not be executed in parallel");
 	  as_warn ("Swapping instruction order");
 	  insn = FM00 | (insn2 << 15) | insn1;
+	  fx = fx->next;
 	}
       else
 	insn = FM00 | (insn1 << 15) | insn2;  
