@@ -23,8 +23,6 @@ gas_test "float.s" ""   "" "simple FP constants"
 # This test is meaningless for the PA; the difference of two undefined
 # symbols is something that is (and must be) supported on the PA.
 if ![istarget hppa*-*-*] then {
-    # the h8300 fails because we skip all the logic in fixup_segment
-    setup_xfail "h8300*-*-*"
     gas_test_error "diff1.s" "" "difference of two undefined symbols"
 }
 
@@ -82,21 +80,35 @@ proc do_930509a {} {
 # This test is meaningless for the PA; the difference of two symbols
 # must not be resolved by the assembler.
 if ![istarget hppa*-*-*] then {
-    # the h8300 fails because we skip all the logic in fixup_segment
-    setup_xfail "h8300*-*-*"
     # the vax fails because VMS can apparently actually handle this
     # case in relocs, so gas doesn't handle it itself.
     setup_xfail "vax*-*-vms*"
+    setup_xfail "mn10300*-*-*"
+    setup_xfail "mn10200*-*-*"
     do_930509a
 }
 
-if ![istarget hppa*-*-*] then {
-    run_dump_test struct
+case $target_triplet in {
+    { hppa*-*-* } { }
+# start-sanitize-sky
+    { dvp-*-* } {
+	run_dump_test struct
+	;# FIXME: all we need to do is change .text to .vutext in align.d.
+	;# Instead, align testing is defered to dvp/align.[sd].
+    }
+# end-sanitize-sky
+    default {
+	run_dump_test struct
+	run_dump_test align
+    }
 }
 
 # This test is for any COFF target.
-if { [istarget *-*-coff*] \
-     || [istarget *-*-pe*] \
+# We omit m88k COFF because it uses weird pseudo-op names.
+# We omit the ARM toolchains because they define locals to
+#  start with '.', which eliminates .eos, .text etc from the output.
+if {   ([istarget *-*-coff*] && ![istarget m88*-*-*] && ![istarget arm*-*-coff] && ![istarget thumb*-*-coff]) \
+     ||([istarget *-*-pe*] && ![istarget arm*-*-pe*] && ![istarget thumb*-*-pe*]) \
      || [istarget a29k-*-udi*] \
      || [istarget a29k-*-ebmon*] \
      || [istarget a29k-*-sym*] \
@@ -110,6 +122,28 @@ if { [istarget *-*-coff*] \
      || ([istarget i960-*-vxworks5.*] && ![istarget i960-*-vxworks5.0*]) } {
     run_dump_test cofftag
 }
+
+# Test omitting conditionals from listings.
+proc test_cond {} {
+    global comp_output
+    global srcdir
+    global subdir
+
+    set testname "conditional listings"
+    gas_run cond.s -alc ">dump.out"
+    if ![string match "" $comp_output] {
+	send_log "$comp_output\n"
+	fail $testname
+    } else {
+	if { [regexp_diff dump.out $srcdir/$subdir/cond.d] } {
+	    fail $testname
+	} else {
+	    pass $testname
+	}
+    }
+}
+
+test_cond
 
 # FIXME: this is here cause of a bug in DejaGnu 1.1.1. When it is no longer
 #        in use, then this can be removed.
