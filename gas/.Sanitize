@@ -33,7 +33,8 @@ Things-to-keep:
 CONTRIBUTORS
 COPYING
 ChangeLog
-ChangeLog.1
+ChangeLog-9295
+ChangeLog-9697
 Makefile.am
 Makefile.in
 NEWS
@@ -129,7 +130,7 @@ Things-to-lose:
 
 Do-last:
 
-v850_files="ChangeLog configure.in configure"
+v850_files="ChangeLog ChangeLog-9697 configure.in configure"
 if ( echo $* | grep keep\-v850e > /dev/null ) ; then
 	for i in $v850_files ; do
 		if test ! -d $i && (grep sanitize-v850e $i > /dev/null) ; then
@@ -157,7 +158,7 @@ else
 	done
 fi
 
-r5900_files="ChangeLog configure configure.in"
+r5900_files="ChangeLog ChangeLog-9697 configure configure.in"
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
 	for i in $r5900_files ; do
 		if test ! -d $i && (grep sanitize-r5900 $i > /dev/null) ; then
@@ -185,7 +186,7 @@ else
 	done
 fi
 
-vr5400_files="ChangeLog"
+vr5400_files="ChangeLog ChangeLog-9697"
 if ( echo $* | grep keep\-vr5400 > /dev/null ) ; then
 	for i in $vr5400_files ; do
 		if test ! -d $i && (grep sanitize-vr5400 $i > /dev/null) ; then
@@ -213,7 +214,7 @@ else
 	done
 fi
 
-tx19_files="ChangeLog"
+tx19_files="ChangeLog ChangeLog-9697"
 if ( echo $* | grep keep\-tx19 > /dev/null ) ; then
 	for i in $tx19_files ; do
 		if test ! -d $i && (grep sanitize-tx19 $i > /dev/null) ; then
@@ -241,7 +242,7 @@ else
 	done
 fi
 
-tx49_files="ChangeLog"
+tx49_files="ChangeLog ChangeLog-9697"
 if ( echo $* | grep keep\-tx49 > /dev/null ) ; then
 	for i in $tx49_files ; do
 		if test ! -d $i && (grep sanitize-tx49 $i > /dev/null) ; then
@@ -269,7 +270,7 @@ else
 	done
 fi
 
-tic80_files="ChangeLog configure.in configure"
+tic80_files="ChangeLog ChangeLog-9697 configure.in configure"
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
 	for i in $tic80_files ; do
 		if test ! -d $i && (grep sanitize-tic80 $i > /dev/null) ; then
@@ -325,7 +326,7 @@ else
 	done
 fi
 
-d30v_files="ChangeLog configure configure.in"
+d30v_files="ChangeLog ChangeLog-9697 configure configure.in"
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
 	for i in $d30v_files ; do
 		if test ! -d $i && (grep sanitize-d30v $i > /dev/null) ; then
@@ -353,7 +354,7 @@ else
 	done
 fi
 
-m32rx_files="ChangeLog configure.in configure"
+m32rx_files="ChangeLog ChangeLog-9697 configure.in configure"
 if ( echo $* | grep keep\-m32rx > /dev/null ) ; then
 	for i in $m32rx_files ; do
 		if test ! -d $i && (grep sanitize-m32rx $i > /dev/null) ; then
