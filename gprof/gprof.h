@@ -30,6 +30,8 @@
    gprof config.h file.  */
 #undef PACKAGE
 #undef VERSION
+/* Also undefine BFD's `_' macro; we have our own definition.  */
+#undef _
 
 #include "gconfig.h"
 

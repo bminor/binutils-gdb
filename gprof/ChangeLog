@@ -1,3 +1,7 @@
+Tue May  5 18:28:40 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* gprof.h (_): Undefine BFD's version.
+
 Tue Apr 28 19:17:33 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* gprof.c (main): Conditionally call setlocale.
