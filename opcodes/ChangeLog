@@ -1,3 +1,7 @@
+Tue Oct  7 23:40:43 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* mips-opc.c: Three op mult is not an ISA insn.
+
 Tue Oct  7 23:37:21 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* mips-opc.c: Fix formatting.

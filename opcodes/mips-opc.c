@@ -75,6 +75,11 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define T5	INSN_5900
 /* end-sanitize-r5900 */
 
+#define G1      (T3                   \
+/* start-sanitize-r5900 */            \
+                 | T5                 \
+/* end-sanitize-r5900 */              \
+                 )
 
 
 /* The order of overloaded instructions matters.  Label arguments and
@@ -563,12 +568,12 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"mulou",   "d,v,t",	0,    (int) M_MULOU,	INSN_MACRO	},
 {"mulou",   "d,v,I",	0,    (int) M_MULOU_I,	INSN_MACRO	},
 {"mult",    "s,t",	0x00000018, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,	    I1},
-{"mult",    "d,s,t",	0x00000018, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, I1},
+{"mult",    "d,s,t",	0x00000018, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, G1},
   /* start-sanitize-r5900 */
 {"mult1",   "d,s,t",	0x70000018, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, T5},
   /* end-sanitize-r5900 */
 {"multu",   "s,t",	0x00000019, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,	    I1},
-{"multu",   "d,s,t",	0x00000019, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, I1},
+{"multu",   "d,s,t",	0x00000019, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, G1},
   /* start-sanitize-r5900 */
 {"multu1",  "d,s,t",	0x70000019, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, T5},
   /* end-sanitize-r5900 */
