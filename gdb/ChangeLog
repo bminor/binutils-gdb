@@ -1,3 +1,22 @@
+Wed May  3 17:54:47 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* monitor.c (monitor_command): Don't use PROMPT until monitor
+	target is known to be open.
+	(monitor_make_srec): Don't define size of hextab.
+
+Tue May  2 18:32:24 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* configure.in (--enable-netrom): New configuration option.
+	* Makefile.in (REMOTE_OBS): Rename from REMOTE_O, append
+	value of NETROM_OBS.
+	(NETROM_OBS): New variable.
+	* remote-nrom.c: New file, NetROM target support.
+	* config/a29k/a29k-udi.mt, config/i960/vxworks960.mt: Use
+	REMOTE_OBS instead of REMOTE_O.
+start-sanitize-arc
+	* config/arc/arc.mt: Ditto.
+end-sanitize-arc	
+
 Fri Apr 28 23:30:00 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* array-rom.c (_initialize_array array_open):  Move baud_rate
