@@ -66,6 +66,7 @@ mipsbsd.sc
 nw.sc
 pe.sc
 ppcpe.sc
+psos.sc
 riscix.sc
 sa29200.sc
 sh.sc

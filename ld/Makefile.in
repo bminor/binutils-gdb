@@ -205,7 +205,7 @@ ALL_EMULATIONS = ea29k.o ealpha.o earmaoutl.o earmaoutb.o \
 	eppcnw.o eriscix.o esa29200.o eshl.o esh.o esparclynx.o esparcnbsd.o \
 	est2000.o esun3.o esun4.o evanilla.o evax.o evsta.o \
 	ez8001.o ez8002.o ei386pe.o earmpe.o eelf32b4300.o eelf32l4300.o \
-	eaixppc.o eaixrs6.o eppcmacos.o edelta68.o eppcpe.o
+	eaixppc.o eaixrs6.o eppcmacos.o edelta68.o eppcpe.o em68kpsos.o
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
@@ -485,6 +485,9 @@ em68k4knbsd.c:	$(srcdir)/emulparams/m68k4knbsd.sh \
 em68knbsd.c:	$(srcdir)/emulparams/m68knbsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68knbsd
+em68kpsos.c:	$(srcdir)/emulparams/m68kpsos.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/psos.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} m68kpsos
 ens32knbsd.c:	$(srcdir)/emulparams/ns32knbsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} ns32knbsd

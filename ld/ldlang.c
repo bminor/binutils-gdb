@@ -1,5 +1,5 @@
 /* Linker command language support.
-   Copyright (C) 1991, 92, 93, 94, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -2248,6 +2248,9 @@ static void
 lang_set_startof ()
 {
   asection *s;
+
+  if (link_info.relocateable)
+    return;
 
   for (s = output_bfd->sections; s != NULL; s = s->next)
     {

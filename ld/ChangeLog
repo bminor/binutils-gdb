@@ -1,3 +1,20 @@
+Wed Feb 14 16:38:36 1996  Martin Anantharaman  <martin@mail.imech.uni-duisburg.de>
+
+	* ldlang.c (lang_set_startof): Don't do anything for a
+	relocateable link.
+
+	* ldgram.y (mri_script_file): Call mri_draw_tree.
+	* mri.c (mri_draw_tree): Make globally visible.  Don't bother to
+	create memory regions.
+	(mri_load): Don't call mri_draw_tree.
+	* mri.h (mri_draw_tree): Declare.
+
+	* configure.tgt (m68*-*-psos): New target.
+	* emulparams/m68kpsos.sh: New file.
+	* scripttempl/psos.sc: New file.
+	* Makefile.in (ALL_EMULATIONS): Add em68kpsos.o.
+	(em68kpsos.c): New target.
+
 Wed Feb 14 11:09:25 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse): Strip
