@@ -191,10 +191,10 @@ trap "rm -f ${dsttmp}" 0 &&
 # ignore errors from any of these, just make sure not to ignore
 # errors from the above "$doit $instcmd $src $dsttmp" command.
 
-if [ x"$chowncmd" != x ]; then $doit $chowncmd $dsttmp; fi &&
-if [ x"$chgrpcmd" != x ]; then $doit $chgrpcmd $dsttmp; fi &&
-if [ x"$stripcmd" != x ]; then $doit $stripcmd $dsttmp; fi &&
-if [ x"$chmodcmd" != x ]; then $doit $chmodcmd $dsttmp; fi &&
+if [ x"$chowncmd" != x ]; then $doit $chowncmd $dsttmp; else true ; fi &&
+if [ x"$chgrpcmd" != x ]; then $doit $chgrpcmd $dsttmp; else true ; fi &&
+if [ x"$stripcmd" != x ]; then $doit $stripcmd $dsttmp; else true ; fi &&
+if [ x"$chmodcmd" != x ]; then $doit $chmodcmd $dsttmp; else true ; fi &&
 
 # Now rename the file to the real destination.
 

@@ -171,16 +171,16 @@ case "${target}" in
   alpha-dec-osf1)
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
     configdirs=`echo ${configdirs} | sed -e 's/gdb//;s/emacs//;s/fileutils//'`
-    configdirs=`echo ${configdirs} | sed -e 's/grep//;s/libg++//'`
+    configdirs=`echo ${configdirs} | sed -e 's/grep//;s/libg++//;s/libio//'`
     ;;	
   h8300*-*-*)
-    configdirs=`echo ${configdirs} | sed -e 's/libg++//'`
+    configdirs=`echo ${configdirs} | sed -e 's/libg++//;s/libio//'`
 ## start-sanitize-chill
     configdirs=`echo ${configdirs} | sed -e 's/chillrt//'`
 ## end-sanitize-chill
     ;;
   h8500-*-*)
-    configdirs=`echo ${configdirs} | sed -e 's/libg++//'`
+    configdirs=`echo ${configdirs} | sed -e 's/libg++//;s/libio//'`
 ## start-sanitize-chill
     configdirs=`echo ${configdirs} | sed -e 's/chillrt//'`
 ## end-sanitize-chill
