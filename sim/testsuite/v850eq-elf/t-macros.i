@@ -62,3 +62,7 @@ _start:
 	PSW_S = 0x2
 	PSW_Z = 0x1
 
+
+# definitions of various interrupt addresses
+	INT_RESET = 0x0
+	INT_NMI = 0x10
