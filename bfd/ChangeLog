@@ -1,3 +1,84 @@
+Fri Oct 21 17:13:07 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	Fix the ELF linker to not require an interpreter if no dynamic
+	objects were seen, even when linking PIC code.
+	* libelf.h (ELF_LINK_HASH_NEEDS_PLT): Define.
+	(struct elf_link_hash_table): Add field dynamic_sections_created.
+	* elfcode.h (elf_link_record_dynamic_symbol): Create dynstr if it
+	doesn't already exist.
+	(elf_link_add_object_symbols): Create dynamic sections based on
+	dynamic_sections_created field, not dynobj field.  Don't bother to
+	set dynobj.
+	(elf_link_create_dynamic_sections): If dynamic sections were
+	already created, don't do anything.  If dynobj is already set, use
+	it; otherwise, set it to the bfd argument.  Don't initialize
+	dynsymcount.  Only create dynstr if it does not exist.  Set
+	dynamic_sections_created to true.
+	(NAME(bfd_elf,size_dynamic_sections)): Skip most of this function
+	if no dynamic objects were seen.
+	(elf_adjust_dynamic_symbol): If a symbol has the
+	ELF_LINK_HASH_NEEDS_PLT flag set, let the backend adjust it.
+	(elf_bfd_final_link): Change most decisions based on dynobj to
+	check dynamic_sections_created instead.
+	(elf_link_output_extsym): Only handle dynamic symbols if a dynamic
+	object was seen.
+	* elf.c (_bfd_elf_link_hash_table_init): Initialize new field
+	dynamic_sections_created.  Set dynsymcount to 1, not 0.
+	* elf32-i386.c (elf_i386_create_dynamic_sections): Call
+	elf_i386_create_got_section rather than creating the .got and
+	.got.plt sections.
+	(elf_i386_create_got_section): New static function.
+	(elf_i386_check_relocs): Just call elf_i386_create_got_section if
+	a GOT table is needed, not bfd_elf32_link_create_dynamic_sections.
+	Only create the .rel.got section, and only make space for a reloc,
+	for a global symbol or when generating a shared object.  For a
+	R_386_PLT32 reloc, just set the	ELF_LINK_HASH_NEEDS_PLT flag.
+	(elf_i386_adjust_dynamic_symbol): Rework initial assertion to
+	permit ELF_LINK_HASH_NEEDS_PLT non dynamic symbols.  Create a
+	procedure linkage table entry for such symbols.  But, if no
+	dynamic objects were seen, never create a PLT entry.
+	(elf_i386_size_dynamic_sections): If no dynamic objects were seen,
+	skip most of this function, and force the size of the .rel.got
+	section to zero.
+	(elf_i386_relocate_section): For a R_386_GOT32 reloc against a global
+	symbol when no dynamic object was seen, initialize the contents of
+	the .got section.  For a R_386_GOT32 against a local symbol, only
+	create a R_386_RELATIVE reloc when generating a shared object.
+	Treat a R_386_PLT32 reloc against a symbol for which we did not
+	create a PLT entry as a R_386_PC32 reloc.
+	(elf_i386_finish_dynamic_sections): Only fiddle with the dynamic
+	entries and the PLT if we saw a dynamic object.
+	* elf32-sparc.c (elf_sparc_howto_table): Fix R_SPARC_PC22 by
+	setting rightshift to 10.  Fix R_SPARC_WPLT20 by setting
+	rightshift to 2, size to 2, bitsize to 30, and dst_mask to
+	0x3fffffff.
+	(elf32_sparc_create_dynamic_sections): Don't set the size of the
+	.plt section.  Call elf32_sparc_create_got_section rather than
+	creating the .got section.
+	(elf32_sparc_check_relocs): Call elf32_sparc_create_got_section if
+	a GOT table is needed, not bfd_elf32_link_create_dynamic_sections.
+	Only create the .rela.got section, and only make space for a
+	reloc, for a global symbol or when generating a shared object.
+	Set the alignment of the .rela.got section to 2.  For a
+	R_SPARC_WPLT30 reloc, just set the ELF_LINK_HASH_NEEDS_PLT flag.
+	(elf32_sparc_adjust_dynamic_symbol): Rework initial assertion to
+	permit ELF_LINK_HASH_NEDS_PLT non dynamic symbols.  Create a
+	procedure linkage table for such symbols.  But, if no dynamic
+	objects were seen, never create a PLT entry.  Initialize the size
+	of the .plt section.
+	(elf32_sparc_size_dynamic_sections): If no dynamic objects were
+	seen, skip most of this function, and force the size of the
+	.rela.got section to zero.  Strip empty reloc sections, and strip
+	an empty .plt section.
+	(elf32_sparc_relocate_section): For a GOT reloc against a global
+	symbol when no dynamic object was seen, initialize the contents of
+	the .got section.  For a GOT reloc against a local symbol, only
+	create a R_SPARC_RELATIVE reloc when generating a shared object.
+	Treat a R_SPARC_WPLT30 reloc against a symbol for which we did not
+	create a PLT entry as a R_SPARC_WDISP30 reloc.
+	(elf32_sparc_finish_dynamic_sections): Only fiddle with the
+	dynamic entries and the PLT if we saw a dynamic object.
+
 Thu Oct 20 13:28:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elfcode.h (elf_map_symbols): Don't worry about section symbols

@@ -3868,21 +3868,36 @@ elf_link_add_archive_symbols (abfd, info)
 
 /* Record a new dynamic symbol.  We record the dynamic symbols as we
    read the input files, since we need to have a list of all of them
-   before we can determine the final sizes of the output sections.  */
+   before we can determine the final sizes of the output sections.
+   Note that we may actually call this function even though we are not
+   going to output any dynamic symbols; in some cases we know that a
+   symbol should be in the dynamic symbol table, but only if there is
+   one.  */
 
-INLINE boolean
+boolean
 elf_link_record_dynamic_symbol (info, h)
      struct bfd_link_info *info;
      struct elf_link_hash_entry *h;
 {
   if (h->dynindx == -1)
     {
+      struct bfd_strtab_hash *dynstr;
+
       h->dynindx = elf_hash_table (info)->dynsymcount;
       ++elf_hash_table (info)->dynsymcount;
-      h->dynstr_index =
-	(unsigned long) _bfd_stringtab_add (elf_hash_table (info)->dynstr,
-					    h->root.root.string,
-					    true, false);
+
+      dynstr = elf_hash_table (info)->dynstr;
+      if (dynstr == NULL)
+	{
+	  /* Create a strtab to hold the dynamic symbol names.  */
+	  elf_hash_table (info)->dynstr = dynstr = elf_stringtab_init ();
+	  if (dynstr == NULL)
+	    return false;
+	}
+
+      h->dynstr_index = ((unsigned long)
+			 _bfd_stringtab_add (dynstr, h->root.root.string,
+					     true, false));
       if (h->dynstr_index == (unsigned long) -1)
 	return false;
     }
@@ -3975,12 +3990,11 @@ elf_link_add_object_symbols (abfd, info)
          format.  FIXME: If there are no input BFD's of the same
          format as the output, we can't make a shared library.  */
       if (info->shared
-	  && elf_hash_table (info)->dynobj == NULL
+	  && ! elf_hash_table (info)->dynamic_sections_created
 	  && abfd->xvec == info->hash->creator)
 	{
 	  if (! elf_link_create_dynamic_sections (abfd, info))
 	    goto error_return;
-	  elf_hash_table (info)->dynobj = abfd;
 	}
     }
   else
@@ -4065,14 +4079,11 @@ elf_link_add_object_symbols (abfd, info)
       abfd->sections = NULL;
 
       /* If this is the first dynamic object found in the link, create
-	 the special sections required for dynamic linking.  We need
-	 to put them somewhere, and attaching them to the first
-	 dynamic object is as good place as any.  */
-      if (elf_hash_table (info)->dynobj == NULL)
+	 the special sections required for dynamic linking.  */
+      if (! elf_hash_table (info)->dynamic_sections_created)
 	{
 	  if (! elf_link_create_dynamic_sections (abfd, info))
 	    goto error_return;
-	  elf_hash_table (info)->dynobj = abfd;
 	}
 
       /* Add a DT_NEEDED entry for this dynamic object.  */
@@ -4464,11 +4475,11 @@ elf_link_add_object_symbols (abfd, info)
 }
 
 /* Create some sections which will be filled in with dynamic linking
-   information.  The ABFD argument is an input file which is a dynamic
-   object.  The dynamic sections take up virtual memory space when the
-   final executable is run, so we need to create them before addresses
-   are assigned to the output sections.  We work out the actual
-   contents and size of these sections later.  */
+   information.  ABFD is an input file which requires dynamic sections
+   to be created.  The dynamic sections take up virtual memory space
+   when the final executable is run, so we need to create them before
+   addresses are assigned to the output sections.  We work out the
+   actual contents and size of these sections later.  */
 
 boolean
 elf_link_create_dynamic_sections (abfd, info)
@@ -4479,6 +4490,15 @@ elf_link_create_dynamic_sections (abfd, info)
   register asection *s;
   struct elf_link_hash_entry *h;
   struct elf_backend_data *bed;
+
+  if (elf_hash_table (info)->dynamic_sections_created)
+    return true;
+
+  /* Make sure that all dynamic sections use the same input BFD.  */
+  if (elf_hash_table (info)->dynobj == NULL)
+    elf_hash_table (info)->dynobj = abfd;
+  else
+    abfd = elf_hash_table (info)->dynobj;
 
   /* Note that we set the SEC_IN_MEMORY flag for all of these
      sections.  */
@@ -4500,18 +4520,18 @@ elf_link_create_dynamic_sections (abfd, info)
       || ! bfd_set_section_alignment (abfd, s, LOG_FILE_ALIGN))
     return false;
 
-  /* The first .dynsym symbol is a dummy.  */
-  elf_hash_table (info)->dynsymcount = 1;
-
   s = bfd_make_section (abfd, ".dynstr");
   if (s == NULL
       || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY))
     return false;
 
   /* Create a strtab to hold the dynamic symbol names.  */
-  elf_hash_table (info)->dynstr = elf_stringtab_init ();
   if (elf_hash_table (info)->dynstr == NULL)
-    return false;
+    {
+      elf_hash_table (info)->dynstr = elf_stringtab_init ();
+      if (elf_hash_table (info)->dynstr == NULL)
+	return false;
+    }
 
   s = bfd_make_section (abfd, ".dynamic");
   if (s == NULL
@@ -4550,7 +4570,12 @@ elf_link_create_dynamic_sections (abfd, info)
      backend set the right flags.  The backend will normally create
      the .got and .plt sections.  */
   bed = get_elf_backend_data (abfd);
-  return (*bed->elf_backend_create_dynamic_sections) (abfd, info);
+  if (! (*bed->elf_backend_create_dynamic_sections) (abfd, info))
+    return false;
+
+  elf_hash_table (info)->dynamic_sections_created = true;
+
+  return true;
 }
 
 /* Add an entry to the .dynamic table.  */
@@ -4777,7 +4802,6 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath, info,
      asection **sinterpptr;
 {
   bfd *dynobj;
-  size_t dynsymcount;
   asection *s;
   Elf_Internal_Sym isym;
   size_t i;
@@ -4787,119 +4811,124 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath, info,
   *sinterpptr = NULL;
 
   dynobj = elf_hash_table (info)->dynobj;
-  dynsymcount = elf_hash_table (info)->dynsymcount;
 
   /* If there were no dynamic objects in the link, there is nothing to
      do here.  */
   if (dynobj == NULL)
     return true;
 
-  *sinterpptr = bfd_get_section_by_name (dynobj, ".interp");
-  BFD_ASSERT (*sinterpptr != NULL || info->shared);
-
-  /* Set the size of the .dynsym and .hash sections.  We counted the
-     number of dynamic symbols in elf_link_add_object_symbols.  We
-     will build the contents of .dynsym and .hash when we build the
-     final symbol table, because until then we do not know the correct
-     value to give the symbols.  We built the .dynstr section as we
-     went along in elf_link_add_object_symbols.  */
-  s = bfd_get_section_by_name (dynobj, ".dynsym");
-  BFD_ASSERT (s != NULL);
-  s->_raw_size = dynsymcount * sizeof (Elf_External_Sym);
-  s->contents = (bfd_byte *) bfd_alloc (output_bfd, s->_raw_size);
-  if (s->contents == NULL && s->_raw_size != 0)
+  if (elf_hash_table (info)->dynamic_sections_created)
     {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+      size_t dynsymcount;
+      bfd_size_type strsize;
 
-  /* The first entry in .dynsym is a dummy symbol.  */
-  isym.st_value = 0;
-  isym.st_size = 0;
-  isym.st_name = 0;
-  isym.st_info = 0;
-  isym.st_other = 0;
-  isym.st_shndx = 0;
-  elf_swap_symbol_out (output_bfd, &isym,
-		       (Elf_External_Sym *) s->contents);
+      *sinterpptr = bfd_get_section_by_name (dynobj, ".interp");
+      BFD_ASSERT (*sinterpptr != NULL || info->shared);
 
-  for (i = 0; elf_buckets[i] != 0; i++)
-    {
-      bucketcount = elf_buckets[i];
-      if (dynsymcount < elf_buckets[i + 1])
-	break;
-    }
+      /* Set the size of the .dynsym and .hash sections.  We counted
+	 the number of dynamic symbols in elf_link_add_object_symbols.
+	 We will build the contents of .dynsym and .hash when we build
+	 the final symbol table, because until then we do not know the
+	 correct value to give the symbols.  We built the .dynstr
+	 section as we went along in elf_link_add_object_symbols.  */
+      dynsymcount = elf_hash_table (info)->dynsymcount;
+      s = bfd_get_section_by_name (dynobj, ".dynsym");
+      BFD_ASSERT (s != NULL);
+      s->_raw_size = dynsymcount * sizeof (Elf_External_Sym);
+      s->contents = (bfd_byte *) bfd_alloc (output_bfd, s->_raw_size);
+      if (s->contents == NULL && s->_raw_size != 0)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
 
-  s = bfd_get_section_by_name (dynobj, ".hash");
-  BFD_ASSERT (s != NULL);
-  s->_raw_size = (2 + bucketcount + dynsymcount) * (ARCH_SIZE / 8);
-  s->contents = (bfd_byte *) bfd_alloc (output_bfd, s->_raw_size);
-  if (s->contents == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
-  memset (s->contents, 0, s->_raw_size);
+      /* The first entry in .dynsym is a dummy symbol.  */
+      isym.st_value = 0;
+      isym.st_size = 0;
+      isym.st_name = 0;
+      isym.st_info = 0;
+      isym.st_other = 0;
+      isym.st_shndx = 0;
+      elf_swap_symbol_out (output_bfd, &isym,
+			   (Elf_External_Sym *) s->contents);
 
-  put_word (output_bfd, bucketcount, s->contents);
-  put_word (output_bfd, dynsymcount, s->contents + (ARCH_SIZE / 8));
+      for (i = 0; elf_buckets[i] != 0; i++)
+	{
+	  bucketcount = elf_buckets[i];
+	  if (dynsymcount < elf_buckets[i + 1])
+	    break;
+	}
 
-  elf_hash_table (info)->bucketcount = bucketcount;
+      s = bfd_get_section_by_name (dynobj, ".hash");
+      BFD_ASSERT (s != NULL);
+      s->_raw_size = (2 + bucketcount + dynsymcount) * (ARCH_SIZE / 8);
+      s->contents = (bfd_byte *) bfd_alloc (output_bfd, s->_raw_size);
+      if (s->contents == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+      memset (s->contents, 0, s->_raw_size);
 
-  if (soname != NULL)
-    {
-      bfd_size_type indx;
+      put_word (output_bfd, bucketcount, s->contents);
+      put_word (output_bfd, dynsymcount, s->contents + (ARCH_SIZE / 8));
 
-      indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr, soname,
-				 true, true);
-      if (indx == (bfd_size_type) -1
-	  || ! elf_add_dynamic_entry (info, DT_SONAME, indx))
+      elf_hash_table (info)->bucketcount = bucketcount;
+
+      if (soname != NULL)
+	{
+	  bfd_size_type indx;
+
+	  indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr, soname,
+				     true, true);
+	  if (indx == (bfd_size_type) -1
+	      || ! elf_add_dynamic_entry (info, DT_SONAME, indx))
+	    return false;
+	}      
+
+      if (rpath != NULL)
+	{
+	  bfd_size_type indx;
+
+	  indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr, rpath,
+				     true, true);
+	  if (indx == (bfd_size_type) -1
+	      || ! elf_add_dynamic_entry (info, DT_RPATH, indx))
+	    return false;
+	}
+
+      s = bfd_get_section_by_name (dynobj, ".dynstr");
+      BFD_ASSERT (s != NULL);
+      s->_raw_size = _bfd_stringtab_size (elf_hash_table (info)->dynstr);
+
+      /* Find all symbols which were defined in a dynamic object and make
+	 the backend pick a reasonable value for them.  */
+      elf_link_hash_traverse (elf_hash_table (info),
+			      elf_adjust_dynamic_symbol,
+			      (PTR) info);
+
+      /* Add some entries to the .dynamic section.  We fill in some of the
+	 values later, in elf_bfd_final_link, but we must add the entries
+	 now so that we know the final size of the .dynamic section.  */
+      if (bfd_get_section_by_name (output_bfd, ".init") != NULL)
+	{
+	  if (! elf_add_dynamic_entry (info, DT_INIT, 0))
+	    return false;
+	}
+      if (bfd_get_section_by_name (output_bfd, ".fini") != NULL)
+	{
+	  if (! elf_add_dynamic_entry (info, DT_FINI, 0))
+	    return false;
+	}
+      strsize = _bfd_stringtab_size (elf_hash_table (info)->dynstr);
+      if (! elf_add_dynamic_entry (info, DT_HASH, 0)
+	  || ! elf_add_dynamic_entry (info, DT_STRTAB, 0)
+	  || ! elf_add_dynamic_entry (info, DT_SYMTAB, 0)
+	  || ! elf_add_dynamic_entry (info, DT_STRSZ, strsize)
+	  || ! elf_add_dynamic_entry (info, DT_SYMENT,
+				      sizeof (Elf_External_Sym)))
 	return false;
-    }      
-
-  if (rpath != NULL)
-    {
-      bfd_size_type indx;
-
-      indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr, rpath,
-				 true, true);
-      if (indx == (bfd_size_type) -1
-	  || ! elf_add_dynamic_entry (info, DT_RPATH, indx))
-	return false;
     }
-
-  s = bfd_get_section_by_name (dynobj, ".dynstr");
-  BFD_ASSERT (s != NULL);
-  s->_raw_size = _bfd_stringtab_size (elf_hash_table (info)->dynstr);
-
-  /* Find all symbols which were defined in a dynamic object and make
-     the backend pick a reasonable value for them.  */
-  elf_link_hash_traverse (elf_hash_table (info),
-			  elf_adjust_dynamic_symbol,
-			  (PTR) info);
-
-  /* Add some entries to the .dynamic section.  We fill in some of the
-     values later, in elf_bfd_final_link, but we must add the entries
-     now so that we know the final size of the .dynamic section.  */
-  if (bfd_get_section_by_name (output_bfd, ".init") != NULL)
-    {
-      if (! elf_add_dynamic_entry (info, DT_INIT, 0))
-	return false;
-    }
-  if (bfd_get_section_by_name (output_bfd, ".fini") != NULL)
-    {
-      if (! elf_add_dynamic_entry (info, DT_FINI, 0))
-	return false;
-    }
-  if (! elf_add_dynamic_entry (info, DT_HASH, 0)
-      || ! elf_add_dynamic_entry (info, DT_STRTAB, 0)
-      || ! elf_add_dynamic_entry (info, DT_SYMTAB, 0)
-      || ! elf_add_dynamic_entry (info, DT_STRSZ,
-				  _bfd_stringtab_size (elf_hash_table (info)
-						       ->dynstr))
-      || ! elf_add_dynamic_entry (info, DT_SYMENT,
-				  sizeof (Elf_External_Sym)))
-    return false;
 
   /* The backend must work out the sizes of all the other dynamic
      sections.  */
@@ -4907,7 +4936,13 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath, info,
   if (! (*bed->elf_backend_size_dynamic_sections) (output_bfd, info))
     return false;
 
-  return elf_add_dynamic_entry (info, DT_NULL, 0);
+  if (elf_hash_table (info)->dynamic_sections_created)
+    {
+      if (! elf_add_dynamic_entry (info, DT_NULL, 0))
+	return false;
+    }
+
+  return true;
 }
 
 /* Make the backend pick a good value for a dynamic symbol.  This is
@@ -4923,13 +4958,15 @@ elf_adjust_dynamic_symbol (h, data)
   bfd *dynobj;
   struct elf_backend_data *bed;
 
-  /* If this symbol is not defined by a dynamic object, or is not
-     referenced by a regular object, ignore it.  FIXME: Do we need to
-     worry about symbols which are defined by one dynamic object and
-     referenced by another one?  */
-  if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
-      || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
-      || (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)
+  /* If this symbol does not require a PLT entry, and it is not
+     defined by a dynamic object, or is not referenced by a regular
+     object, ignore it.  FIXME: Do we need to worry about symbols
+     which are defined by one dynamic object and referenced by another
+     one?  */
+  if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) == 0
+      && ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
+	  || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
+	  || (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0))
     return true;
 
   /* If we've already adjusted this symbol, don't do it again.  This
@@ -5069,6 +5106,7 @@ elf_bfd_final_link (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
+  boolean dynamic;
   bfd *dynobj;
   struct elf_final_link_info finfo;
   register asection *o;
@@ -5088,6 +5126,7 @@ elf_bfd_final_link (abfd, info)
   if (info->shared)
     abfd->flags |= DYNAMIC;
 
+  dynamic = elf_hash_table (info)->dynamic_sections_created;
   dynobj = elf_hash_table (info)->dynobj;
 
   finfo.info = info;
@@ -5095,7 +5134,7 @@ elf_bfd_final_link (abfd, info)
   finfo.symstrtab = elf_stringtab_init ();
   if (finfo.symstrtab == NULL)
     return false;
-  if (dynobj == NULL)
+  if (! dynamic)
     {
       finfo.dynsym_sec = NULL;
       finfo.hash_sec = NULL;
@@ -5415,7 +5454,7 @@ elf_bfd_final_link (abfd, info)
   /* The sh_info field records the index of the first non local
      symbol.  */
   symtab_hdr->sh_info = abfd->symcount;
-  if (dynobj != NULL)
+  if (dynamic)
     elf_section_data (finfo.dynsym_sec->output_section)->this_hdr.sh_info = 1;
 
   /* We get the global symbols from the hash table.  */
@@ -5500,9 +5539,9 @@ elf_bfd_final_link (abfd, info)
       o->reloc_count = 0;
     }
 
-  /* If we are linking against a dynamic object, finish up the dynamic
-     linking information.  */
-  if (dynobj != NULL)
+  /* If we are linking against a dynamic object, or generating a
+     shared library, finish up the dynamic linking information.  */
+  if (dynamic)
     {
       Elf_External_Dyn *dyncon, *dynconend;
 
@@ -5577,13 +5616,18 @@ elf_bfd_final_link (abfd, info)
 	      break;
 	    }
 	}
+    }
 
+  /* If we have created any dynamic sections, then output them.  */
+  if (dynobj != NULL)
+    {
       if (! (*bed->elf_backend_finish_dynamic_sections) (abfd, info))
 	goto error_return;
 
       for (o = dynobj->sections; o != NULL; o = o->next)
 	{
-	  if ((o->flags & SEC_HAS_CONTENTS) == 0)
+	  if ((o->flags & SEC_HAS_CONTENTS) == 0
+	      || o->_raw_size == 0)
 	    continue;
 	  if ((o->flags & SEC_IN_MEMORY) == 0)
 	    {
@@ -5859,7 +5903,8 @@ elf_link_output_extsym (h, data)
   /* If this symbol should be put in the .dynsym section, then put it
      there now.  We have already know the symbol index.  We also fill
      in the entry in the .hash section.  */
-  if (h->dynindx != -1)
+  if (h->dynindx != -1
+      && elf_hash_table (finfo->info)->dynamic_sections_created)
     {
       struct elf_backend_data *bed;
       size_t bucketcount;
@@ -5885,7 +5930,8 @@ elf_link_output_extsym (h, data)
 			    + h->dynindx));
 
       bucketcount = elf_hash_table (finfo->info)->bucketcount;
-      bucket = bfd_elf_hash ((const unsigned char *) h->root.root.string) % bucketcount;
+      bucket = (bfd_elf_hash ((const unsigned char *) h->root.root.string)
+		% bucketcount);
       bucketpos = ((bfd_byte *) finfo->hash_sec->contents
 		   + (bucket + 2) * (ARCH_SIZE / 8));
       chain = get_word (finfo->output_bfd, bucketpos);

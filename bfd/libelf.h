@@ -121,6 +121,8 @@ struct elf_link_hash_entry
 #define ELF_LINK_HASH_DEFINED_WEAK 040
   /* Symbol needs a copy reloc.  */
 #define ELF_LINK_HASH_NEEDS_COPY 0100
+  /* Symbol needs a procedure linkage table entry.  */
+#define ELF_LINK_HASH_NEEDS_PLT 0200
 };
 
 /* ELF linker hash table.  */
@@ -128,9 +130,12 @@ struct elf_link_hash_entry
 struct elf_link_hash_table
 {
   struct bfd_link_hash_table root;
-  /* The first dynamic object found during a link.  We create several
-     special input sections when linking against dynamic objects, and
-     we simply attach them to the first one found.  */
+  /* Whether we have created the special dynamic sections required
+     when linking against or generating a shared object.  */
+  boolean dynamic_sections_created;
+  /* The BFD used to hold special sections created by the linker.
+     This will be the first BFD found which requires these sections to
+     be created.  */
   bfd *dynobj;
   /* The number of symbols found in the link which must be put into
      the .dynsym section.  */
