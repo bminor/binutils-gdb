@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Support for the R_ARM_V4BX relocation as defined in the ARM AAELF
+  specification has been added via the --fix-v4bx command-line option.
+
 * New linker script construct AS_NEEDED(), which sets the --as-needed flag
   for input files listed inside of it.
 

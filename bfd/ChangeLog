@@ -1,3 +1,13 @@
+2005-01-28  Julian Brown  <julian@codesourcery.com>
+
+	* bin-in.h (bfd_elf32_arm_set_target_relocs): Update prototype.
+	* bin-in2.h (bfd_elf32_arm_set_target_relocs): Update prototype.
+	* elf32-arm.c (elf32_arm_link_hash_table): Add fix_v4bx flag.
+	(bfd_elf32_arm_set_target_relocs): Add formal parameter fix_v4bx for
+	passing flag value from ld. Set flag value in global hash table entry. 
+	(elf32_arm_final_link_relocate): Add code to implement R_ARM_V4BX
+	relocation. 
+
 2005-01-27  Andrew Cagney  <cagney@gnu.org>
 
 	* configure: Regenerate to track ../gettext.m4 change.

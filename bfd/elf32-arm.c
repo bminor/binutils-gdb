@@ -1165,6 +1165,9 @@ struct elf32_arm_link_hash_table
     /* The relocation to use for R_ARM_TARGET2 relocations.  */
     int target2_reloc;
 
+    /* Nonzero to fix BX instructions for ARMv4 targets.  */
+    int fix_v4bx;
+
     /* The number of bytes in the initial entry in the PLT.  */
     bfd_size_type plt_header_size;
 
@@ -1931,7 +1934,8 @@ error_return:
 void
 bfd_elf32_arm_set_target_relocs (struct bfd_link_info *link_info,
 				 int target1_is_rel,
-				 char * target2_type)
+				 char * target2_type,
+                                 int fix_v4bx)
 {
   struct elf32_arm_link_hash_table *globals;
 
@@ -1949,6 +1953,7 @@ bfd_elf32_arm_set_target_relocs (struct bfd_link_info *link_info,
       _bfd_error_handler (_("Invalid TARGET2 relocation type '%s'."),
 			  target2_type);
     }
+  globals->fix_v4bx = fix_v4bx;
 }
 #endif
 
@@ -2984,6 +2989,22 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
     case R_ARM_RBASE:
       return bfd_reloc_notsupported;
+
+    case R_ARM_V4BX:
+      if (globals->fix_v4bx)
+        {
+          bfd_vma insn = bfd_get_32 (input_bfd, hit_data);
+
+          /* Ensure that we have a BX instruction.  */
+          BFD_ASSERT ((insn & 0x0ffffff0) == 0x012fff10);
+
+          /* Preserve Rm (lowest four bits) and the condition code
+             (highest four bits). Other bits encode MOV PC,Rm.  */
+          insn = (insn & 0xf000000f) | 0x01a0f000;
+
+          bfd_put_32 (input_bfd, insn, hit_data);
+        }
+      return bfd_reloc_ok;
 
     default:
       return bfd_reloc_notsupported;

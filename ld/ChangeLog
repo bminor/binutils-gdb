@@ -1,3 +1,15 @@
+2005-01-28  Julian Brown  <julian@codesourcery.com>
+
+	* emultempl/armelf.em (fix_v4bx): New variable.
+	(arm_elf_create_output_section_statements): Communicate fix_v4bx flag
+	value to bfd.
+	(PARSE_AND_LIST_PROLOGUE): Add option token OPTION_FIX_V4BX.
+	(PARSE_AND_LIST_LONGOPTS): Add option --fix-v4bx.
+	(PARSE_AND_LIST_OPTIONS): Add option --fix-v4bx.
+	(PARSE_AND_LIST_ARGS_CASES): Add option OPTION_FIX_V4BX. 
+	* NEWS: Mention --fix-v4bx.
+	* ld.texinfo: Document --fix-v4bx.
+
 2005-01-25  Mark Mitchell  <mark@codesourcery.com>
 
 	* emulparams/armsymbian.sh (OTHER_READONLY_SECTIONS): Define, so

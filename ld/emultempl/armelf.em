@@ -30,6 +30,7 @@ static bfd *bfd_for_interwork;
 static int byteswap_code = 0;
 static int target1_is_rel = 0${TARGET1_IS_REL};
 static char *target2_type = "${TARGET2_TYPE}";
+static int fix_v4bx = 0;
 
 static void
 gld${EMULATION_NAME}_before_parse (void)
@@ -189,7 +190,8 @@ arm_elf_finish (void)
 static void
 arm_elf_create_output_section_statements (void)
 {
-  bfd_elf32_arm_set_target_relocs (&link_info, target1_is_rel, target2_type);
+  bfd_elf32_arm_set_target_relocs (&link_info, target1_is_rel, target2_type,
+                                   fix_v4bx);
 }
 
 EOF
@@ -203,6 +205,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_TARGET1_REL		303
 #define OPTION_TARGET1_ABS		304
 #define OPTION_TARGET2			305
+#define OPTION_FIX_V4BX                 306
 '
 
 PARSE_AND_LIST_SHORTOPTS=p
@@ -214,6 +217,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "target1-rel", no_argument, NULL, OPTION_TARGET1_REL},
   { "target1-abs", no_argument, NULL, OPTION_TARGET1_ABS},
   { "target2", required_argument, NULL, OPTION_TARGET2},
+  { "fix-v4bx", no_argument, NULL, OPTION_FIX_V4BX},
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -222,6 +226,7 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("     --target1=rel            Interpret R_ARM_TARGET1 as R_ARM_REL32\n"));
   fprintf (file, _("     --target1=abs            Interpret R_ARM_TARGET1 as R_ARM_ABS32\n"));
   fprintf (file, _("     --target2=<type>         Specify definition of R_ARM_TARGET2\n"));
+  fprintf (file, _("     --fix-v4bx               Rewrite BX rn as MOV pc, rn for ARMv4\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES='
@@ -247,6 +252,10 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_TARGET2:
       target2_type = optarg;
+      break;
+
+    case OPTION_FIX_V4BX:
+      fix_v4bx = 1;
       break;
 '
 

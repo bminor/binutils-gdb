@@ -5139,6 +5139,20 @@ meanings, and target defaults are as follows:
 @samp{R_ARM_GOT_PREL} (arm*-*-linux, arm*-*-*bsd)
 @end table
 
+@cindex FIX_V4BX
+@kindex --fix-v4bx
+The @samp{R_ARM_V4BX} relocation (defined by the ARM AAELF
+specification) enables objects compiled for the ARMv4 architecture to be
+interworking-safe when linked with other objects compiled for ARMv4t, but
+also allows pure ARMv4 binaries to be built from the same ARMv4 objects.
+
+In the latter case, the switch @option{--fix-v4bx} must be passed to the
+linker, which causes v4t @code{BX rM} instructions to be rewritten as
+@code{MOV PC,rM}, since v4 processors do not have a @code{BX} instruction.
+
+In the former case, the switch should not be used, and @samp{R_ARM_V4BX}
+relocations are ignored.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear
