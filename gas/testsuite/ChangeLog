@@ -1,3 +1,8 @@
+2003-06-24  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/h8300/h8300.exp (h8sx_disp2, h8sx_rtsl, h8sx_mov_imm): Move...
+	* gas/h8300/h8300-elf.exp: ...here.
+
 2003-06-23  H.J. Lu <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Add prescott.
