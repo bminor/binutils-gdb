@@ -1,3 +1,17 @@
+1998-12-03  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/fr30/allinsn.d: Updated to match latest assembler output.
+
+1998-12-02  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/fr30/allinsn.s: Replace illegal insns with legal versions.
+
+	* gas/fr30/allinsn.d: Update to match latest assembler output.
+
+Thu Nov 19 15:59:51 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* gas/fr30/allinsn.s: Reorder insns for better simulation.
+
 Thu Nov 19 07:50:44 1998  Doug Evans  <devans@charmed.cygnus.com>
 
 	* gas/mips/sync.[sd]: New testcase.
