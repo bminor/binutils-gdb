@@ -40,3 +40,6 @@ if [istarget arm-*-pe] {
     # Since big-endian numbers have the normal format, this doesn't exist.
     #run_dump_test "be-fpconst"
 }
+if [istarget arm9e-*] {
+    run_dump_test "maverick"
+}
