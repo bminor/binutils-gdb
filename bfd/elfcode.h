@@ -1043,10 +1043,14 @@ write_relocs (abfd, sec, xxx)
 
 	  ptr = sec->orelocation[idx];
 	  src_rela = outbound_relocas + idx;
-	  if (!(abfd->flags & EXEC_P))
-	    dst_rela.r_offset = ptr->address - sec->vma;
-	  else
+
+	  /* The address of an ELF reloc is section relative for an object
+	     file, and absolute for an executable file or shared library.
+	     The address of a BFD reloc is always section relative.  */
+	  if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
 	    dst_rela.r_offset = ptr->address;
+	  else
+	    dst_rela.r_offset = ptr->address + sec->vma;
 
 	  sym = *ptr->sym_ptr_ptr;
 	  if (sym == last_sym)
@@ -1078,10 +1082,14 @@ write_relocs (abfd, sec, xxx)
 	  ptr = sec->orelocation[idx];
 	  sym = *ptr->sym_ptr_ptr;
 	  src_rel = outbound_relocs + idx;
-	  if (!(abfd->flags & EXEC_P))
-	    dst_rel.r_offset = ptr->address - sec->vma;
-	  else
+
+	  /* The address of an ELF reloc is section relative for an object
+	     file, and absolute for an executable file or shared library.
+	     The address of a BFD reloc is always section relative.  */
+	  if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
 	    dst_rel.r_offset = ptr->address;
+	  else
+	    dst_rel.r_offset = ptr->address + sec->vma;
 
 	  if (sym == last_sym)
 	    n = last_sym_idx;
@@ -2220,6 +2228,11 @@ prep_headers (abfd)
     case bfd_arch_powerpc:
       i_ehdrp->e_machine = EM_CYGNUS_POWERPC;
       break;
+/* start-sanitize-arc */
+    case bfd_arch_arc:
+      i_ehdrp->e_machine = EM_CYGNUS_ARC;
+      break;
+/* end-sanitize-arc */
       /* also note that EM_M32, AT&T WE32100 is unknown to bfd */
     default:
       i_ehdrp->e_machine = EM_NONE;
@@ -3723,11 +3736,26 @@ elf_bfd_link_add_symbols (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
+  bfd *first;
+
   switch (bfd_get_format (abfd))
     {
     case bfd_object:
       return elf_link_add_object_symbols (abfd, info);
     case bfd_archive:
+      first = bfd_openr_next_archived_file (abfd, (bfd *) NULL);
+      if (first == NULL)
+	return false;
+      if (! bfd_check_format (first, bfd_object))
+	return false;
+      if (bfd_get_flavour (first) != bfd_target_elf_flavour)
+	{
+	  /* On Linux, we may have an a.out archive which got
+             recognized as an ELF archive.  Therefore, we treat all
+             archives as though they were actually of the flavour of
+             their first element.  */
+	  return (*first->xvec->_bfd_link_add_symbols) (abfd, info);
+	}
       return elf_link_add_archive_symbols (abfd, info);
     default:
       bfd_set_error (bfd_error_wrong_format);

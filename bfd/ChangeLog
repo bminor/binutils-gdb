@@ -1,5 +1,10 @@
 Fri Dec  9 12:43:05 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* elfcode.h (elf_bfd_link_add_symbols): If the first object in the
+	archive is not an ELF object, pass the archive to the add_symbols
+	entry point appropriate for the first object.  From Eric Youngdale
+	<eric@aib.com>.
+
 	* elf32-i386.c (elf_i386_relocate_section): Don't compute
 	relocation in cases where we won't use it.
 	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
