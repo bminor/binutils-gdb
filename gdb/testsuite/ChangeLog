@@ -1,3 +1,10 @@
+2002-03-25  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/attach.exp: Fix logic error that was suppressing this
+	test for all non hppa*-*-hpux* targets, instead of the hp target.
+	Move comments closer to the suppression point.  Also now need to
+	check that we are running natively.
+
 2002-03-22  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/default.exp: Add test for gcore.  Update copyright.

@@ -17,16 +17,6 @@
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
 
-# On HP-UX 11.0, this test is causing a process running
-# the program "attach" to be left around spinning.
-# Until we figure out why, I am commenting out the test
-# to avoid polluting tiamat (our 11.0 nightly test machine)
-# with these processes. RT
-#
-# Setting the magic bit in the target app should work.
-# I added a "kill", and also a test for the R3 register
-#  warning.           JB
-# 
 if $tracelevel then {
 	strace $tracelevel
 	}
@@ -34,9 +24,19 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
+# On HP-UX 11.0, this test is causing a process running the program
+# "attach" to be left around spinning.  Until we figure out why, I am
+# commenting out the test to avoid polluting tiamat (our 11.0 nightly
+# test machine) with these processes. RT
+#
+# Setting the magic bit in the target app should work.  I added a
+# "kill", and also a test for the R3 register warning.  JB
+if { [istarget "hppa*-*-hpux*"] } {
+    return 0
+}
 
-if { ![istarget "hppa*-*-hpux*"] } {
-    #setup_xfail "*-*-*"
+# are we on a target board
+if ![isnative] then {
     return 0
 }
 
