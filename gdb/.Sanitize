@@ -102,7 +102,7 @@ else
 	fi
 fi
 
-m32r_files="m32r-tdep.c m32r-rom.c"
+m32r_files="m32r-tdep.c m32r-rom.c m32r-stub.c"
 
 if ( echo $* | grep keep\-m32r > /dev/null ) ; then
 	keep_these_too="${m32r_files} ${keep_these_too}"
