@@ -553,7 +553,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	typeprint.c \
 	ui-out.c utils.c ui-file.h ui-file.c \
 	user-regs.c \
-	valarith.c valops.c valprint.c values.c varobj.c \
+	valarith.c valops.c valprint.c value.c varobj.c \
 	wrapper.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
@@ -892,7 +892,7 @@ COMMON_OBS = $(DEPFILES) $(YYOBJ) \
 	bfd-target.o \
 	blockframe.o breakpoint.o findvar.o regcache.o \
 	charset.o disasm.o dummy-frame.o \
-	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
+	source.o value.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	block.o symtab.o symfile.o symmisc.o linespec.o dictionary.o \
 	infcall.o \
 	infcmd.o infrun.o \
@@ -2689,7 +2689,7 @@ valops.o: valops.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(value_h) $(frame_h) \
 valprint.o: valprint.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(gdbcore_h) $(gdbcmd_h) $(target_h) $(language_h) \
 	$(annotate_h) $(valprint_h) $(floatformat_h) $(doublest_h)
-values.o: values.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
+value.o: value.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(gdbcore_h) $(command_h) $(gdbcmd_h) $(target_h) \
 	$(language_h) $(scm_lang_h) $(demangle_h) $(doublest_h) \
 	$(gdb_assert_h) $(regcache_h) $(block_h)
