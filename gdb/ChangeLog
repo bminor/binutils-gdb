@@ -1,5 +1,8 @@
 2004-08-05  Mark Kettenis  <kettenis@chello.nl>
 
+	* i386obsd-tdep.c (i386obsd_sigtramp_p): Use
+	safe_frame_unwind_memory instead of target_read_memory.
+
 	* infptrace.c: Include <sys/file.h> if HAVE_SYS_FILE_H instead of
 	!NO_SYS_FILE.
 	[KERNEL_U_ADDR_BSD]: Don't include <a.out.h>.
