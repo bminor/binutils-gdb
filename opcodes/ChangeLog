@@ -1,3 +1,10 @@
+1999-11-18  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* mips-opc.c (I5): New.
+	(abs.ps,add.ps,alnv.ps,c.COND.ps,cvt.s.pl,cvt.s.pu,cvt.ps.s
+	madd.ps,movf.ps,movt.ps,mul.ps,net.ps,nmadd.ps,nmsub.ps,
+	pll.ps,plu.ps,pul.ps,puu.ps,sub.ps,suxc1,luxc1): New.
+
 Mon Nov 15 19:34:58 1999  Donald Lindsay  <dlindsay@cygnus.com>
 
 	* arm-dis.c (print_insn_arm): Added general purpose 'X' format.
