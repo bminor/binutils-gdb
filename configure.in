@@ -29,7 +29,7 @@ host_libs="mmalloc libiberty opcodes bfd readline glob tcl tk tclX"
 # these tools are built for the host environment
 #
 host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
-	    send-pr gprof gdbtest tgas etc expect deja-gnu dejagnu sim
+	    send-pr gprof gdbtest tgas etc expect dejagnu sim
             m4 autoconf ispell grep diff rcs cvs fileutils shellutils
 	    textutils wdiff find emacs uudecode hello tar gzip indent
 	    recode package2 package"
@@ -63,8 +63,8 @@ target_tools="groff"
 
 # directories to be built in the native environment only
 #
-native_only="autoconf cvs diff emacs fileutils find grep groff ispell m4
-             rcs sed shellutils textutils wdiff"
+native_only="autoconf cvs diff emacs fileutils find grep groff gzip hello indent
+             ispell m4 rcs recode sed shellutils tar textutils tk uudecode wdiff"
 
 # directories to be built in a cross environment only
 #
