@@ -1,3 +1,9 @@
+2003-09-04  Nick Clifton  <nickc@redhat.com>
+
+	* gas/v850/v850e1.s: New test source file.
+	* gas/v850/v850e1.d: New test disassembly file.
+	* gas/v850/basic.exp: Run v850e1 test.
+
 2003-09-03  Robert Millan  <robertmh@gnu.org>
 
 	* gas/alpha/alpha.exp: Match GNU/KFreeBSD with new kfreebsd*-gnu

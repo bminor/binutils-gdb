@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Added support for v850e1.
+
 * Added -n switch for x86 assembler.  By default, x86 GAS replaces
   multiple nop instructions used for alignment within code sections
   with multi-byte nop instructions such as leal 0(%esi,1),%esi.  This

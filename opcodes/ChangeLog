@@ -1,3 +1,8 @@
+2003-09-04  Nick Clifton  <nickc@redhat.com>
+
+	* v850-dis.c (disassemble): Accept bfd_mach_v850e1.
+	* v850-opc.c (v850_opcodes): Add DBTRAP and DBRET instructions.
+	
 2003-09-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-dis.c (struct dis_private): New.

@@ -1,3 +1,7 @@
+2003-09-04  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_machine_flags): Recognise V850E1 machine type.
+
 2003-09-03  Andrew Cagney  <cagney@redhat.com>
 
 	* objdump.c: Refer to init_disassemble_info in comments.

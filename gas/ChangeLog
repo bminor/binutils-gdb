@@ -1,3 +1,13 @@
+2003-09-04  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-v850.c (set_machine): Accept v850e1 machine number.
+	(md_pseudo_table): Add .v850e1 pseudo op.
+	(md_show_usage): Document -mv850e1 switch.
+	(md_parse_option): Accept -mv850e1 switch.
+	(md_begin): Allow TARGET_CPU to be v850e1.
+	* doc/c-v850.texi: Document -mv850e1 switch and .v850e1 pseudo op.
+	* NEWS: Mention support for v850e1.
+
 2003-09-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (md_parse_option): Add PPC_OPCODE_ANY to existing

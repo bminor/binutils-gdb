@@ -1877,6 +1877,9 @@ v850_elf_object_p (abfd)
     case E_V850E_ARCH:
       bfd_default_set_arch_mach (abfd, bfd_arch_v850, bfd_mach_v850e);
       break;
+    case E_V850E1_ARCH:
+      bfd_default_set_arch_mach (abfd, bfd_arch_v850, bfd_mach_v850e1);
+      break;
     }
   return TRUE;
 }
@@ -1895,6 +1898,7 @@ v850_elf_final_write_processing (abfd, linker)
     default:
     case bfd_mach_v850:  val = E_V850_ARCH; break;
     case bfd_mach_v850e: val = E_V850E_ARCH; break;
+    case bfd_mach_v850e1: val = E_V850E1_ARCH;  break;
     }
 
   elf_elfheader (abfd)->e_flags &=~ EF_V850_ARCH;
@@ -1960,8 +1964,24 @@ v850_elf_merge_private_bfd_data (ibfd, obfd)
 
   if ((in_flags & EF_V850_ARCH) != (out_flags & EF_V850_ARCH)
       && (in_flags & EF_V850_ARCH) != E_V850_ARCH)
-    _bfd_error_handler (_("%s: Architecture mismatch with previous modules"),
-			bfd_archive_filename (ibfd));
+    {
+      /* Allow v850e1 binaries to be linked with v850e binaries.
+	 Set the output binary to v850e.  */
+      if ((in_flags & EF_V850_ARCH) == E_V850E1_ARCH
+	  && (out_flags & EF_V850_ARCH) == E_V850E_ARCH)
+	return TRUE;
+
+      if ((in_flags & EF_V850_ARCH) == E_V850E_ARCH
+	  && (out_flags & EF_V850_ARCH) == E_V850E1_ARCH)
+	{
+	  elf_elfheader (obfd)->e_flags =
+	    ((out_flags & ~ EF_V850_ARCH) | E_V850E_ARCH);
+	  return TRUE;
+	}
+
+      _bfd_error_handler (_("%s: Architecture mismatch with previous modules"),
+			  bfd_archive_filename (ibfd));
+    }
 
   return TRUE;
 }
@@ -1987,6 +2007,7 @@ v850_elf_print_private_bfd_data (abfd, ptr)
     default:
     case E_V850_ARCH: fprintf (file, _("v850 architecture")); break;
     case E_V850E_ARCH:  fprintf (file, _("v850e architecture")); break;
+    case E_V850E1_ARCH: fprintf (file, _("v850e1 architecture")); break;
     }
 
   fputc ('\n', file);

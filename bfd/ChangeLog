@@ -1,3 +1,15 @@
+2003-09-04  Nick Clifton  <nickc@redhat.com>
+
+	* archures.c (bfd_mach_v850e1): Define.
+	* bfd-in2.h: Regenerate.
+	* cpu-v850.h (scan): Accept bfd_mach_v850e1.
+	(arch_info_struct): Include an entry for bfd_mach_v850e1.
+	* elf32-v850.c (v850_elf_object_p): Accept E_V850E1_ARCH flag.
+	(v850_elf_final_write_processing): Accept bfd_mach_v850e1.
+	(v850_elf_print_private_bfd_data): Interpret E_V850E1_ARCH flag.
+	(v850_elf_merge_private_bfd_data): Allow v850e1 binaries to be
+	linked with v850e binaries.  Mark the output as v850e.
+	
 2003-09-03  Nick Clifton  <nickc@redhat.com>
 
 	* cofflink.c (_bfd_coff_link_input_bfd): Do not skip section 

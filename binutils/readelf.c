@@ -1817,6 +1817,9 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	case EM_CYGNUS_V850:
 	  switch (e_flags & EF_V850_ARCH)
 	    {
+	    case E_V850E1_ARCH:
+	      strcat (buf, ", v850e1");
+	      break;
 	    case E_V850E_ARCH:
 	      strcat (buf, ", v850e");
 	      break;

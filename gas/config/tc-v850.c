@@ -479,6 +479,7 @@ set_machine (number)
     {
     case 0:		  processor_mask = PROCESSOR_V850;   break;
     case bfd_mach_v850e:  processor_mask = PROCESSOR_V850E;  break;
+    case bfd_mach_v850e1: processor_mask = PROCESSOR_V850E;  break;
     }
 }
 
@@ -539,6 +540,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "call_table_data",	v850_seg,		CALL_TABLE_DATA_SECTION	},
   { "call_table_text",	v850_seg,		CALL_TABLE_TEXT_SECTION	},
   { "v850e",		set_machine,		bfd_mach_v850e		},
+  { "v850e1",		set_machine,		bfd_mach_v850e1 	},
   { "longcall",		v850_longcode,		1			},
   { "longjump",		v850_longcode,		2			},
   { NULL,		NULL,			0			}
@@ -1156,6 +1158,7 @@ md_show_usage (stream)
   fprintf (stream, _("  -mwarn-unsigned-overflow  Warn if unsigned immediate values overflow\n"));
   fprintf (stream, _("  -mv850                    The code is targeted at the v850\n"));
   fprintf (stream, _("  -mv850e                   The code is targeted at the v850e\n"));
+  fprintf (stream, _("  -mv850e1                  The code is targeted at the v850e1\n"));
   fprintf (stream, _("  -mv850any                 The code is generic, despite any processor specific instructions\n"));
   fprintf (stream, _("  -mrelax                   Enable relaxation\n"));
 }
@@ -1191,6 +1194,11 @@ md_parse_option (c, arg)
       machine = bfd_mach_v850e;
       processor_mask = PROCESSOR_V850E;
     }
+  else if (strcmp (arg, "v850e1") == 0)
+    {
+      machine = bfd_mach_v850e1;
+      processor_mask = PROCESSOR_V850E1;
+    }
   else if (strcmp (arg, "v850any") == 0)
     {
       /* Tell the world that this is for any v850 chip.  */
@@ -1198,6 +1206,7 @@ md_parse_option (c, arg)
 
       /* But support instructions for the extended versions.  */
       processor_mask = PROCESSOR_V850E;
+      processor_mask |= PROCESSOR_V850E1;
     }
   else if (strcmp (arg, "relax") == 0)
     v850_relax = 1;
@@ -1327,7 +1336,15 @@ md_begin ()
   char *prev_name = "";
   const struct v850_opcode *op;
 
-  if (strncmp (TARGET_CPU, "v850e", 5) == 0)
+  if (strncmp (TARGET_CPU, "v850e1", 6) == 0)
+    {
+      if (machine == -1)
+	machine = bfd_mach_v850e1;
+
+      if (processor_mask == -1)
+	processor_mask = PROCESSOR_V850E1;
+    }
+  else if (strncmp (TARGET_CPU, "v850e", 5) == 0)
     {
       if (machine == -1)
 	machine = bfd_mach_v850e;
