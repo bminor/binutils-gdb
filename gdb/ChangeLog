@@ -1,5 +1,7 @@
 2004-11-13  Eli Zaretskii  <eliz@gnu.org>
 
+	* defs.h: Fix wording of the comment before FOPEN_RB.
+
 	* config/djgpp/fnchange.lst: Group renames for opcode directory
 	together.
 
