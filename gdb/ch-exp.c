@@ -2035,6 +2035,7 @@ ch_lex ()
 		break;
 	      case LOC_TYPEDEF:
 		yylval.tsym.type = SYMBOL_TYPE (sym);
+		calculate_array_length (yylval.tsym.type);
 		return TYPENAME;
 	      case LOC_UNDEF:
 	      case LOC_CONST_BYTES:

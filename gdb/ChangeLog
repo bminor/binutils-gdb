@@ -1,3 +1,7 @@
+Thu May 30 04:24:09 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+
+	* ch-exp.c (ch_lex): In case of LOC_TYPEDEF call calculate_array_length.
+
 Tue May 28 16:15:47 1996  Geoffrey Noer  <noer@cygnus.com>
 
 	* remote-mips.c: cannot use EINVAL for breakpoint test since
