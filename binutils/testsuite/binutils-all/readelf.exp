@@ -164,12 +164,6 @@ proc readelf_find_size { binary_file } {
     pass $testname
 }
 
-# Simple proc to skip certain expected warning messages.
-proc prune_readelf_warnings { text } {
-    regsub -all "(^|\n)(.*Skipping unexpected symbol type.*)" $text "\\1" text
-    return $text
-}
-
 # Run an individual readelf test.
 # Basically readelf is run on the binary_file with the given options.
 # Readelf's output is captured and then compared against the contents
@@ -190,8 +184,6 @@ proc readelf_test { options binary_file regexp_file xfails } {
 	setup_xfail $xfail
     }
 
-    set got [prune_readelf_warnings $got]
-    
     if ![string match "" $got] then {
 	fail "readelf $options (reason: unexpected output)"
 	send_log $got
@@ -225,6 +217,89 @@ proc readelf_test { options binary_file regexp_file xfails } {
     pass "readelf $options"
 }
 
+# Simple proc to skip certain expected warning messages.
+
+proc prune_readelf_wi_warnings { text } {
+    regsub -all "(^|\n)(.*Skipping unexpected symbol type.*)" $text "\\1" text
+    return $text
+}
+
+# Testing the "readelf -wi" option is difficult because there
+# is no guaranteed order to the output, and because some ports
+# will use indirect string references, whilst others will use
+# direct references.  So instead of having an expected output
+# file, like the other readelf tests, we grep for strings that
+# really ought to be there.
+
+proc readelf_wi_test {} {
+    global READELF
+    global READELFFLAGS
+    global srcdir
+    global subdir
+    
+    # Compile the second test file.
+    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog.o object debug] != "" } {
+	verbose "Unable to compile test file."
+	untested "readelf -wi"
+	return
+    }
+
+    # Download it.
+    set tempfile [remote_download host tmpdir/testprog.o];
+
+    # Run "readelf -wi" on it.
+    send_log "exec $READELF $READELFFLAGS -wi $tempfile > readelf.out\n"
+    catch "exec $READELF $READELFFLAGS -wi $tempfile > readelf.out" got
+
+    # Upload the results.
+    set output [remote_upload host readelf.out];
+
+    file_on_host delete $tempfile;
+    
+    # Strip any superflous warnings.
+    set got [prune_readelf_wi_warnings $got]
+
+    if ![string match "" $got] then {
+	fail "readelf $options (reason: unexpected output)"
+	send_log $got
+	send_log "\n"
+	return
+    }
+
+    if ![file size $output] then {
+	# If the output file is empty, then this target does not
+	# generate dwarf2 output.  This is not a failure.
+	verbose "No output from 'readelf -wi'"
+	untested "readelf -wi"
+	return
+    }
+    
+    # Search for strings that should be in the output.
+    set sought {
+	".*DW_TAG_compile_unit.*"
+	".*DW_TAG_subprogram.*"
+	".*DW_TAG_base_type.*"
+	".*DW_AT_producer.*(GNU C|indirect string).*"
+	".*DW_AT_language.*ANSI C.*"
+	".*DW_AT_name.*(testprog.c|indirect string).*"
+	".*DW_AT_name.*fn.*"
+	".*DW_AT_name.*(main|indirect string).*"
+    }
+    
+    foreach looked_for $sought {	
+	set lines [grep $output $looked_for]
+	if ![llength $lines] then {
+	    fail "readelf -wi: missing: $looked_for"
+	    send_log readelf.out
+	    return
+	}
+    }
+
+    file_on_host delete $output;
+    
+    # All done.
+    pass "readelf -wi"
+}
 
 
 # Only ELF based toolchains need readelf.
@@ -281,20 +356,4 @@ readelf_test -S $tempfile readelf.s  {}
 readelf_test -s $tempfile readelf.ss {}
 readelf_test -r $tempfile readelf.r  {}
 
-
-# Compile the second test file.
-if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog.o object debug] != "" } {
-    untested "readelf -w"
-    return
-}
-
-if [is_remote host] {
-    set tempfile [remote_download host tmpdir/testprog.o];
-} else {
-    set tempfile tmpdir/testprog.o
-}
-
-# The xfail targets here do not default to DWARF2 format debug information
-# The symptom is that the output of 'readelf -wi' is empty.
-
-readelf_test -wi $tempfile readelf.wi {v850*-*-* cris-*-* mips*-*-elf* avr-*-* d30v-*-* h8300*-*-* i960-*-* m32r-*-* sparc-*-*}
+readelf_wi_test

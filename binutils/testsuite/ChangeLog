@@ -1,15 +1,26 @@
+2003-04-26  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/readelf.exp (prune_read_warnings): Rename to
+	prune_readelf_wi_warnings.
+        (readelf_wi_test): New proc: Test 'readelf -wi' by grepping
+        through its output.
+        Replace invocation of "readelf_test -wi" with "readelf_wi_test"
+	* binutils-all/readelf.wi: Delete.
+	
 2003-04-23  Nick Clifton  <nickc@redhat.com>
 
-	* readelf.exp (proc prune_readelf_warnings): New function.
+	* binutils-all/readelf.exp (proc prune_readelf_warnings): New
+	function.
 	(proc readelf_test): Prune warning messages.
 	(readelf_test -wi): Add more expected failures.
-	* readelf.wi: Severly reduce expected output.
-	* testprog.c (string): Explicitly use unsigned chars.
+	* binutils-all/readelf.wi: Severly reduce expected output.
+	* binutils-all/testprog.c (string): Explicitly use unsigned
+	chars.
 	(stdio.h, string.h): Remove inclusion.
 
 2003-04-23  J"orn Rennecke <joern.rennecke@superh.com>
 
-	* readelf.wi: Update.
+	* binutils-all/readelf.wi: Update.
 
 2003-04-22  Dimitrie O. Paun  <dpaun@rogers.com>
 
