@@ -1,3 +1,9 @@
+2001-12-19  Keith Seitz  <keiths@redhat.com>
+
+	* mi-var-display.exp: char* variables have a child. Update all
+	occurences.
+	* mi0-var-display.exp: Likewise.
+
 2001-08-29  Andrew Cagney  <cagney@redhat.com>
 
 	* mi-var-cmd.exp, mi0-var-cmd.exp: Variable lpcharacter has one
