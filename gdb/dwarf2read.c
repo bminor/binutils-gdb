@@ -46,6 +46,8 @@
 #include "cp-support.h"
 #include "splay-tree.h"
 #include "hashtab.h"
+#include "command.h"
+#include "gdbcmd.h"
 
 #include <fcntl.h>
 #include "gdb_string.h"
@@ -65,13 +67,6 @@
    until the objfile is released, and pointers into the section data
    can be used for any other data associated to the objfile (symbol
    names, type names, location expressions to name a few).  */
-
-/* Loaded secondary compilation units are kept in memory until they
-   have not been referenced for the processing of this many
-   compilation units.  Set this to zero to disable caching.  Cache
-   sizes of up to at least twenty will improve startup time for
-   typical inter-CU-reference binaries, at an obvious memory cost.  */
-#define MAX_CACHE_AGE 5
 
 #ifndef DWARF2_REG_TO_REGNUM
 #define DWARF2_REG_TO_REGNUM(REG) (REG)
@@ -645,6 +640,13 @@ struct field_info
     /* Number of entries in the fnfieldlists array.  */
     int nfnfields;
   };
+
+/* Loaded secondary compilation units are kept in memory until they
+   have not been referenced for the processing of this many
+   compilation units.  Set this to zero to disable caching.  Cache
+   sizes of up to at least twenty will improve startup time for
+   typical inter-CU-reference binaries, at an obvious memory cost.  */
+static unsigned int dwarf2_max_cache_age = 5;
 
 /* Various complaints about symbol reading that don't abort the process */
 
@@ -9153,7 +9155,7 @@ free_comp_units_worker (struct dwarf2_cu *target_cu, int aging)
       while (per_cu != NULL)
 	{
 	  per_cu->cu->last_used ++;
-	  if (per_cu->cu->last_used <= MAX_CACHE_AGE)
+	  if (per_cu->cu->last_used <= dwarf2_max_cache_age)
 	    dwarf2_mark (per_cu->cu);
 	  per_cu = per_cu->cu->read_in_chain;
 	}
@@ -9417,10 +9419,51 @@ partial_die_eq (const void *item_lhs, const void *item_rhs)
   return part_die_lhs->offset == part_die_rhs->offset;
 }
 
+static struct cmd_list_element *set_dwarf2_cmdlist;
+static struct cmd_list_element *show_dwarf2_cmdlist;
+
+static void
+set_dwarf2_cmd (char *args, int from_tty)
+{
+  help_list (set_dwarf2_cmdlist, "maintenance set dwarf2 ", -1, gdb_stdout);
+}
+
+static void
+show_dwarf2_cmd (char *args, int from_tty)
+{ 
+  cmd_show_list (show_dwarf2_cmdlist, from_tty, "");
+}
+
 void _initialize_dwarf2_read (void);
 
 void
 _initialize_dwarf2_read (void)
 {
   dwarf2_objfile_data_key = register_objfile_data ();
+
+  add_prefix_cmd ("dwarf2", class_maintenance, set_dwarf2_cmd,
+		  "Set DWARF 2 specific variables.\n"
+		  "Configure DWARF 2 variables such as the cache size",
+                  &set_dwarf2_cmdlist, "maintenance set dwarf2 ",
+                  0/*allow-unknown*/, &maintenance_set_cmdlist);
+
+  add_prefix_cmd ("dwarf2", class_maintenance, show_dwarf2_cmd,
+		  "Show DWARF 2 specific variables\n"
+		  "Show DWARF 2 variables such as the cache size",
+                  &show_dwarf2_cmdlist, "maintenance show dwarf2 ",
+                  0/*allow-unknown*/, &maintenance_show_cmdlist);
+
+  add_setshow_uinteger_cmd ("max-cache-age", class_obscure,
+                            &dwarf2_max_cache_age,
+			    "Set an upper bound on the age of cached "
+			    "compilation units.\n"
+			    "A higher limit means that cached "
+			    "compilation units will be stored\n"
+			    "in memory longer, and more total memory will "
+			    "be used.  Zero disables\n"
+			    "caching, which can slow down startup.",
+			    "Show the upper bound on the age of cached "
+			    "dwarf2 compilation units.",
+                            NULL, NULL, &set_dwarf2_cmdlist,
+                            &show_dwarf2_cmdlist);
 }

@@ -1,5 +1,24 @@
 2004-04-19  Daniel Jacobowitz  <drow@mvista.com>
 
+	* Makefile.in (dwarf2read.o): Update dependencies.
+	* dwarf2read.c: Include "command.h" and "gdbcmd.h".
+	(MAX_CACHE_AGE): Remove.
+	(dwarf2_max_cache_age): New variable.
+	(free_comp_units_worker): Update.
+	(set_dwarf2_cmdlist, show_dwarf2_cmdlist, set_dwarf2_cmd)
+	(show_dwarf2_cmd): New.
+	(_initialize_dwarf2_read): Provide "maint set dwarf2 max-cache-age"
+	and "maint show dwarf2 max-cache-age".
+	* gdbcmd.h (maintenance_set_cmdlist, maintenance_show_cmdlist): New
+	externs.
+	* maint.c (maintenance_set_cmdlist, maintenance_show_cmdlist): Make
+	global.
+
+	* doc/gdb.texinfo (Maintenance Commands): Document "maint set dwarf2
+	max-cache-age" and "maint show dwarf2 max-cache-age".
+
+2004-04-19  Daniel Jacobowitz  <drow@mvista.com>
+
 	* cli/cli-setshow.c (cmd_show_list): Check for "show" in the middle
 	of prefixes.  Don't print the prefix twice in the CLI.
 

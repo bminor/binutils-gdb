@@ -19499,6 +19499,19 @@ data in a @file{gmon.out} file, be sure to move it to a safe location.
 Configuring with @samp{--enable-profiling} arranges for @value{GDBN} to be
 compiled with the @samp{-pg} compiler option.
 
+@kindex maint set dwarf2 max-cache-age
+@kindex maint show dwarf2 max-cache-age
+@item maint set dwarf2 max-cache-age
+@itemx maint show dwarf2 max-cache-age
+Control the DWARF 2 compilation unit cache.
+
+In object files with inter-compilation-unit references, such as those
+produced by the GCC option @samp{-feliminate-dwarf2-dups}, the DWARF 2
+reader needs to frequently refer to previously read compilation units.
+This setting controls how long a compilation unit will remain in the cache
+if it is not referenced.  Setting it to zero disables caching, which will
+slow down @value{GDBN} startup but reduce memory consumption.
+
 @end table
 
 

@@ -609,8 +609,8 @@ maintenance_do_deprecate (char *text, int deprecate)
 
 /* Maintenance set/show framework.  */
 
-static struct cmd_list_element *maintenance_set_cmdlist;
-static struct cmd_list_element *maintenance_show_cmdlist;
+struct cmd_list_element *maintenance_set_cmdlist;
+struct cmd_list_element *maintenance_show_cmdlist;
 
 static void
 maintenance_set_cmd (char *args, int from_tty)
