@@ -1,5 +1,7 @@
 Mon Jan 16 12:13:28 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
+	* gdb.base/setvar.c (dummy): Call malloc.
+
 	* gdb.stabs/aout.sed: Enclose comments within a sed command to avoid
 	losing with the irix4 sed.
 
