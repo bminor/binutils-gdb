@@ -691,12 +691,10 @@ Fri Jan 16 11:30:37 1998  Richard Henderson  <rth@cygnus.com>
 	(r_seg): Put reglst symbols in reg_section.
 	(m68k_frob_symbol): Frob reglst symbols into absolute_section.
 
-start-sanitize-sh4
 Thu Jan 15 14:19:01 1998  Richard Henderson  <rth@cygnus.com>
 
 	* tc-sh.c (get_specific): Handle SGR & DBR.
 
-end-sanitize-sh4
 Thu Jan 15 13:46:48 1998  Richard Henderson  <rth@cygnus.com>
 
 	* tc-h8300.c (parse_reg): Take the length of the symbol into
@@ -935,12 +933,10 @@ Thu Nov 20 15:06:08 1997  Richard Earnshaw <rearnsha@arm.com>
 	* config/tc-arm.h (TARGET_FORMAT for generic a.out targets): Allow
 	run-time endian selection.
 
-start-sanitize-sh4
 Wed Nov 19 17:44:42 1997  Richard Henderson  <rth@cygnus.com>
 
         * tc-sh.c (parse_reg): Properly quote for fv4.
 
-end-sanitize-sh4
 Wed Nov 19 23:46:18 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* symbols.c (resolve_symbol_value): Add missing breaks in case on
@@ -1779,14 +1775,12 @@ Thu Aug 21 00:59:53 1997  Doug Evans  <dje@canuck.cygnus.com>
 	* config/tc-m32r.c (md_estimate_size_before_relax): Update recorded
 	insn when changing to a different instruction.
 
-start-sanitize-sh4
 Wed Aug 20 00:45:20 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* tc-sh.c (parse_reg, get_specific, build_Mytes): Add SH4
 	floating point extensions.
 	(parse_reg): parse sgr and dbr.
 
-end-sanitize-sh4
 Tue Aug 19 17:07:34 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (system_register_name): Support numbers for

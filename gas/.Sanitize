@@ -316,38 +316,6 @@ else
 	done
 fi
 
-if [ -n "${verbose}" ] ; then
-	echo Processing \"sh4\"...
-fi
-
-sh4_files="ChangeLog"
-if ( echo $* | grep keep\-sh4 > /dev/null ) ; then
-	for i in $sh4_files ; do
-		if test ! -d $i && (grep sanitize-sh4 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping sh4 stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $sh4_files ; do
-		if test ! -d $i && (grep sanitize-sh4 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"sh4\" from $i...
-			fi
-			cp $i new
-			sed -e '/start\-sanitize\-sh4/,/end-\sanitize\-sh4/d' -e 's/.*restore\-sanitize\-sh4//' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
 m32rx_files="ChangeLog configure.in configure"
 if ( echo $* | grep keep\-m32rx > /dev/null ) ; then
 	for i in $m32rx_files ; do
