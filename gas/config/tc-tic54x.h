@@ -1,5 +1,5 @@
 /* tc-tic54x.h -- Header file for tc-tic54x.c
-   Copyright (C) 1999, 2000 Free Software Foundation.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Timothy Wall (twall@alum.mit.edu)
 
    This file is part of GAS, the GNU Assembler.

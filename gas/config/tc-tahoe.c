@@ -1,42 +1,58 @@
-/* tc-tahoe.c
-   Not part of GAS yet.  */
+/* This file is tc-tahoe.c
 
+   Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1995, 2000
+   Free Software Foundation, Inc.
+
+   This file is part of GAS, the GNU Assembler.
+
+   GAS is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+
+   GAS is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 #include "as.h"
 #include "obstack.h"
 
-/* this bit glommed from tahoe-inst.h */
+/* This bit glommed from tahoe-inst.h.  */
 
 typedef unsigned char byte;
 typedef byte tahoe_opcodeT;
 
-/*
- * This is part of tahoe-ins-parse.c & friends.
- * We want to parse a tahoe instruction text into a tree defined here.
- */
+/* This is part of tahoe-ins-parse.c & friends.
+   We want to parse a tahoe instruction text into a tree defined here.  */
 
 #define TIT_MAX_OPERANDS (4)	/* maximum number of operands in one
 				   single tahoe instruction */
 
 struct top			/* tahoe instruction operand */
-{
-  int top_ndx;			/* -1, or index register. eg 7=[R7] */
-  int top_reg;			/* -1, or register number. eg 7 = R7 or (R7) */
-  byte top_mode;		/* Addressing mode byte. This byte, defines
+  {
+    int top_ndx;		/* -1, or index register. eg 7=[R7] */
+    int top_reg;		/* -1, or register number. eg 7 = R7 or (R7) */
+    byte top_mode;		/* Addressing mode byte. This byte, defines
 				   which of the 11 modes opcode is.  */
 
-  char top_access;		/* Access type wanted for this opperand
+    char top_access;		/* Access type wanted for this opperand
 				   'b'branch ' 'no-instruction 'amrvw' */
-  char top_width;		/* Operand width expected, one of "bwlq?-:!" */
+    char top_width;		/* Operand width expected, one of "bwlq?-:!" */
 
-  char *top_error;		/* Say if operand is inappropriate         */
+    char * top_error;		/* Say if operand is inappropriate         */
 
-  segT seg_of_operand;		/* segment as returned by expression()*/
+    segT seg_of_operand;	/* segment as returned by expression()*/
 
-  expressionS exp_of_operand;	/* The expression as parsed by expression()*/
+    expressionS exp_of_operand;	/* The expression as parsed by expression()*/
 
-  byte top_dispsize;		/* Number of bytes in the displacement if we
+    byte top_dispsize;		/* Number of bytes in the displacement if we
 				   can figure it out */
-};
+  };
 
 /* The addressing modes for an operand. These numbers are the acutal values
    for certain modes, so be carefull if you screw with them.  */
@@ -58,10 +74,10 @@ struct top			/* tahoe instruction operand */
 #define TAHOE_AUTO_DEC (0x7E)
 #define TAHOE_AUTO_INC (0x8E)
 #define TAHOE_AUTO_INC_DEFERRED (0x9E)
-/* INDEXED_REG is decided by the existance or lack of a [reg] */
+/* INDEXED_REG is decided by the existance or lack of a [reg].  */
 
 /* These are encoded into top_width when top_access=='b'
-   and it's a psuedo op.*/
+   and it's a psuedo op.  */
 #define TAHOE_WIDTH_ALWAYS_JUMP      '-'
 #define TAHOE_WIDTH_CONDITIONAL_JUMP '?'
 #define TAHOE_WIDTH_BIG_REV_JUMP     '!'
@@ -79,8 +95,8 @@ struct top			/* tahoe instruction operand */
 #define TAHOE_PC_OR_WORD (0xC0)
 #define TAHOE_PC_OR_LONG (0xE0)
 
-struct tit			/* get it out of the sewer, it stands for
-				   tahoe instruction tree (Geeze!) */
+struct tit			/* Get it out of the sewer, it stands for
+				   tahoe instruction tree (Geeze!).  */
 {
   tahoe_opcodeT tit_opcode;	/* The opcode.  */
   byte tit_operands;		/* How many operands are here.  */

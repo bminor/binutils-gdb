@@ -1,5 +1,5 @@
 /* tc-h8500.c -- Assemble code for the Hitachi H8/500
-   Copyright (C) 1993, 94, 95, 98, 2000 Free Software Foundation.
+   Copyright 1993, 1994, 1995, 1998, 2000 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 

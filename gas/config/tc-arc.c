@@ -1,5 +1,6 @@
 /* tc-arc.c -- Assembler for the ARC
-   Copyright (C) 1994, 1995, 1997, 2000 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1997, 1999, 2000, 2001
+   Free Software Foundation, Inc.
    Contributed by Doug Evans (dje@cygnus.com).
 
    This file is part of GAS, the GNU Assembler.

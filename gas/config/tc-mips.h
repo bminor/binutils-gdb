@@ -1,5 +1,5 @@
 /* tc-mips.h -- header file for tc-mips.c.
-   Copyright (C) 1993, 94, 95, 96, 97, 1999, 2000
+   Copyright 1993, 1994, 1995, 1996, 1997, 2000, 2001
    Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.

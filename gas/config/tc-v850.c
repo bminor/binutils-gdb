@@ -1,5 +1,5 @@
 /* tc-v850.c -- Assembler code for the NEC V850
-   Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation.
+   Copyright 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
