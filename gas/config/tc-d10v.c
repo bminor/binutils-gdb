@@ -55,6 +55,7 @@ static Fixups *fixups;
 /* local functions */
 static int reg_name_search PARAMS ((char *name));
 static int register_name PARAMS ((expressionS *expressionP));
+static int check_range PARAMS ((unsigned long num, int bits, int sign));
 static int postfix PARAMS ((char *p));
 static bfd_reloc_code_real_type get_reloc PARAMS ((struct d10v_operand *op));
 static int get_operands PARAMS ((expressionS exp[]));
@@ -400,8 +401,6 @@ d10v_insert_operand (insn, op_type, value, left)
   bits = d10v_operands[op_type].bits;
 
   /* truncate to the proper number of bits */
-  /* FIXME: overflow checking here? */
-
   if (check_range (value, bits, d10v_operands[op_type].flags & OPERAND_SIGNED))
     as_bad("operand out of range: %d",value);
 
@@ -663,51 +662,70 @@ md_assemble (str)
 {
   struct d10v_opcode *opcode;
   unsigned long insn;
-  int t=0;
+  int extype=0;			/* execution type; parallel, etc */
+  static int etype=0;		/* saved extype.  used for multiline instructions */
   char *str2;
 
   /*  printf("md_assemble: str=%s\n",str); */
 
-  /* look for the special multiple instruction seperators */
-  str2 = strstr (str, "||");
-  if (str2) 
-    t = 1;
-  else
+  if (etype == 0)
     {
-      str2 = strstr (str, "->");
+      /* look for the special multiple instruction separators */
+      str2 = strstr (str, "||");
       if (str2) 
-	t = 2;
+	extype = 1;
       else
 	{
-	  str2 = strstr (str, "<-");
+	  str2 = strstr (str, "->");
 	  if (str2) 
-	    t = 3;
+	    extype = 2;
+	  else
+	    {
+	      str2 = strstr (str, "<-");
+	      if (str2) 
+		extype = 3;
+	    }
+	}
+      /* str2 points to the separator, if one */
+      if (str2) 
+	{
+	  *str2 = 0;
+	  
+	  /* if two instructions are present and we already have one saved
+	     then first write it out */
+	  if (prev_opcode) 
+	    write_1_short (prev_opcode, prev_insn, fixups->next);
+	  
+	  /* assemble first instruction and save it */
+	  prev_insn = do_assemble (str, &prev_opcode);
+	  if (prev_insn == -1)
+	    as_fatal ("can't find opcode ");
+	  fixups = fixups->next;
+	  str = str2 + 2;
 	}
     }
 
-
-  /* str2 points to the seperator, if one */
-  if (str2) 
+  insn = do_assemble (str, &opcode);
+  if (insn == -1)
     {
-      *str2 = 0;
-
-      /* if two instructions are present and we already have one saved
-	 then first write it out */
-      if (prev_opcode) 
-	  write_1_short (prev_opcode, prev_insn, fixups->next);
-      
-      /* assemble first instruction and save it */
-      prev_insn = do_assemble (str, &prev_opcode);
-      fixups = fixups->next;
-      str = str2 + 2;
+      if (extype)
+	{
+	  etype = extype;
+	  return;
+	}
+      as_fatal ("can't find opcode ");
     }
 
-  insn = do_assemble (str, &opcode);
+  if (etype)
+    {
+      extype = etype;
+      etype = 0;
+    }
 
   /* if this is a long instruction, write it and any previous short instruction */
   if (opcode->format & LONG_OPCODE) 
     {
-      if (t) 
+      if (extype) 
 	as_fatal("Unable to mix instructions as specified");
       if (prev_opcode) 
 	{
@@ -719,14 +737,14 @@ md_assemble (str)
       return;
     }
   
-  if (prev_opcode && (write_2_short (prev_opcode, prev_insn, opcode, insn, t, fixups) == 0)) 
+  if (prev_opcode && (write_2_short (prev_opcode, prev_insn, opcode, insn, extype, fixups) == 0)) 
     {
       /* no instructions saved */
       prev_opcode = NULL;
     }
   else
     {
-      if (t) 
+      if (extype) 
 	as_fatal("Unable to mix instructions as specified");
       /* save off last instruction so it may be packed on next pass */
       prev_opcode = opcode;
@@ -737,6 +755,9 @@ md_assemble (str)
     }
 }
 
+
+/* do_assemble assembles a single instruction and returns an opcode */
+/* it returns -1 (an invalid opcode) on error */
 
 static unsigned long
 do_assemble (str, opcode) 
@@ -770,15 +791,12 @@ do_assemble (str, opcode)
   name[nlen] = 0;
 
   if (nlen == 0)
-      as_bad ("can't find opcode ");
+    return (-1);
   
   /* find the first opcode with the proper name */
   *opcode = (struct d10v_opcode *)hash_find (d10v_hash, name);
   if (*opcode == NULL)
-    {
       as_fatal ("unknown opcode: %s",name);
-      return;
-    }
 
   save = input_line_pointer;
   input_line_pointer = op_end;
@@ -821,7 +839,7 @@ do_assemble (str, opcode)
   else
     {
       /* now search the opcode table table for one with operands */
-      /* that match what we've got */
+      /* that matches what we've got */
       while (!match)
 	{
 	  match = 1;
