@@ -2223,6 +2223,20 @@ static void ppc_coff_swap_sym_in_hook PARAMS ((bfd *, PTR, PTR));
 
 #define POWERPC_LE_PE
 
+#define COFF_SECTION_ALIGNMENT_ENTRIES \
+{ COFF_SECTION_NAME_EXACT_MATCH (".idata$2"), \
+  COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 0 }, \
+{ COFF_SECTION_NAME_EXACT_MATCH (".idata$3"), \
+  COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 0 }, \
+{ COFF_SECTION_NAME_EXACT_MATCH (".idata$4"), \
+  COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 2 }, \
+{ COFF_SECTION_NAME_EXACT_MATCH (".idata$5"), \
+  COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 2 }, \
+{ COFF_SECTION_NAME_EXACT_MATCH (".idata$6"), \
+  COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 1 }, \
+{ COFF_SECTION_NAME_EXACT_MATCH (".reloc"), \
+  COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 1 }
+
 #include "coffcode.h"
 
 
@@ -2316,7 +2330,6 @@ ppc_get_last()
    where the POWERPC_LE_PE macro modifies the code. It is left in as a 
    precise form of comment. krk@cygnus.com
 */
-#define POWERPC_LE_PE
 
 
 /* Do the final link step.  */

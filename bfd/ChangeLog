@@ -1,9 +1,14 @@
 1999-09-11  Ian Lance Taylor  <ian@zembu.com>
 
+	* coff-ppc.c (COFF_SECTION_ALIGNMENT_ENTRIES): Define.
+
 	* elfcode.h (write_relocs): Handle an absolute symbol in REL
 	relocs as we do for RELA relocs.
 
 1999-09-11  Donn Terry  <donn@interix.com>
+
+	* coffcode.h (coff_set_alignment_hook): Delete POWERPC_LE_PE
+	special handling.
 
 	* cofflink.c (_bfd_coff_link_input_bfd): If a symbol is stripped,
 	don't write out the associated line numbers.

@@ -1458,37 +1458,6 @@ coff_set_alignment_hook (abfd, section, scnhdr)
   ELIFALIGN_SET (hdr->s_flags, IMAGE_SCN_ALIGN_2BYTES,  1)
   ELIFALIGN_SET (hdr->s_flags, IMAGE_SCN_ALIGN_1BYTES,  0)
 
-#ifdef POWERPC_LE_PE
-  if (strcmp (section->name, ".idata$2") == 0)
-    {
-      section->alignment_power = 0;
-    }
-  else if (strcmp (section->name, ".idata$3") == 0)
-    {
-      section->alignment_power = 0;
-    }
-  else if (strcmp (section->name, ".idata$4") == 0)
-    {
-      section->alignment_power = 2;
-    }
-  else if (strcmp (section->name, ".idata$5") == 0)
-    {
-      section->alignment_power = 2;
-    }
-  else if (strcmp (section->name, ".idata$6") == 0)
-    {
-      section->alignment_power = 1;
-    }
-  else if (strcmp (section->name, ".reloc") == 0)
-    {
-      section->alignment_power = 1;
-    }
-  else if (strncmp (section->name, ".stab", 5) == 0)
-    {
-      section->alignment_power = 2;
-    }
-#endif
-
   /* In a PE image file, the s_paddr field holds the virtual size of a
      section, while the s_size field holds the raw size.  We also keep
      the original section flag value, since not every bit can be
