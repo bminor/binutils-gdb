@@ -46,6 +46,9 @@ if [istarget "m68k*-*-hpux*"] then {
 
 proc do_steps_and_nexts {} {
     global prompt
+    global srcdir
+ 
+    gdb_reinitialize_dir $srcdir/..
 
     for {set count 0} {$count < 20} {incr count} {
 	send "list\n"
@@ -86,6 +89,18 @@ proc do_steps_and_nexts {} {
 		set description "next over init_malloc and everything it calls"
 		set command "next"
 	    }
+	    -re ".*count . 0x3.*$prompt $" {
+		set description "next over conditional stack alignment code 1"
+		set command "next"
+	    }
+	    -re ".*if .i != 0.*$prompt $" {
+		set description "next over conditional stack alignment code 2"
+		set command "next"
+	    }
+	    -re ".*alloca .i - 4.*$prompt $" {
+		set description "next over conditional stack alignment alloca"
+		set command "next"
+	    }
 	    -re ".*SET_TOP_LEVEL.*$prompt $" {
 		set description "next over SET_TOP_LEVEL call"
 		set command "next"
@@ -113,9 +128,13 @@ proc do_steps_and_nexts {} {
 		setup_xfail "mips-*-irix5*"
 		fail "$description ended up at odd location"
 	    }
-	    -re ".*main.c.*No such file or directory" {
+	    -re ".*main.c.*No such file or directory.*$prompt $" {
 		setup_xfail "rs6000-*-aix3*"
 		fail "must be able to list source lines"
+		return
+	    }
+	    -re ".*$prompt $" {
+		fail "unknown source line after $description"
 		return
 	    }
 	    default {
@@ -166,7 +185,7 @@ proc test_with_self {} {
 	verbose "Timeout is now $timeout seconds" 2
 	return -1
     }
-    set timeout 30
+    set timeout $oldtimeout
     verbose "Timeout is now $timeout seconds" 2
 
     # disassemble yourself
@@ -237,7 +256,7 @@ proc test_with_self {} {
 	}
     }
 
-    set timeout 30
+    set timeout $oldtimeout
     verbose "Timeout is now $timeout seconds" 2
 
     # do we have a version number ?

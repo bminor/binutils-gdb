@@ -1,3 +1,14 @@
+Fri Nov 22 10:13:29 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/a1-selftest.exp (do_steps_and_nexts):  Reinitialize source
+	directory to search gdb directory. Accept and step over conditional
+	stack alignment code. Consume $prompt in failure cases.
+	Reset timeout to $oldtimeout instead of some arbitrary value.
+	* gdb.base/nodebug.exp:  Limit backtrace to 10 frames to avoid
+	timeout problems with infinite stack backtraces.
+	* gdb.base/ptype.exp (ptype struct link, union tu_link):
+	Accept function parameters for linkfunc member.
+
 Thu Nov 21 09:17:19 1996  Fred Fish  <fnf@cygnus.com>
 
 	* lib/gdb.exp (CFLAGS): Remove, unreferenced.
