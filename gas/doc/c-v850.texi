@@ -261,7 +261,6 @@ computes the difference between the address of labels 'here' and
 bits and then mutliplies it by the lower 16 bits in register 5, putting
 the result into register 6. 
 
-
 @cindex @code{lo} pseudo-op, V850
 @item lo()
 Computes the lower 16 bits of the given expression and stores it into
@@ -272,6 +271,19 @@ the immediate operand field of the given instruction.  For example:
 computes the difference between the address of labels 'here' and
 'there', takes the lower 16 bits of this difference and adds it to
 register 5, putting the result into register 6.
+
+@c start-santize-v850e
+@cindex @code{hilo} pseudo-op, V850
+@item hilo()
+Computes the 32 bit value of the given expression and stores it into
+the immediate operand field of the given instruction (which must be a
+mov instruction).  For example:
+
+    @samp{mov hilo(here), r6}
+
+computes the absolute address of label 'here' and puts the result into
+register 6.  
+@c end-santize-v850e
 
 @cindex @code{sdaoff} pseudo-op, V850
 @item sdaoff()
