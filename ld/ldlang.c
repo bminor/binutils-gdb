@@ -3692,21 +3692,6 @@ lang_section_start (name, address)
    called by ENTRY in a linker script.  Command line arguments take
    precedence.  */
 
-/* WINDOWS_NT.  When an entry point has been specified, we will also force
-   this symbol to be defined by calling ldlang_add_undef (equivalent to 
-   having switch -u entry_name on the command line).  The reason we do
-   this is so that the user doesn't have to because they would have to use
-   the -u switch if they were specifying an entry point other than 
-   _mainCRTStartup.  Specifically, if creating a windows application, entry
-   point _WinMainCRTStartup must be specified.
-     What I have found for non console applications (entry not _mainCRTStartup)
-   is that the .obj that contains mainCRTStartup is brought in since it is
-   the first encountered in libc.lib and it has other symbols in it which will
-   be pulled in by the link process.  To avoid this, adding -u with the entry
-   point name specified forces the correct .obj to be used.  We can avoid
-   making the user do this by always adding the entry point name as an
-   undefined symbol.  */
-
 void
 lang_add_entry (name, cmdline)
      CONST char *name;
@@ -3719,14 +3704,6 @@ lang_add_entry (name, cmdline)
       entry_symbol = name;
       entry_from_cmdline = cmdline;
     }
-#if 0 
-  /* don't do this yet.  It seems to work (the executables run), but the 
-     image created is very different from what I was getting before indicating
-     that something else is being pulled in.  When everything else is working,
-     then try to put this back in to see if it will do the right thing for
-     other more complicated applications */
-  ldlang_add_undef (name);
-#endif
 }
 
 void
