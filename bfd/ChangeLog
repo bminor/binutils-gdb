@@ -1,3 +1,9 @@
+Tue Jun 29 02:25:03 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-hppa.c (elf_hppa_howto_table): Use bfd_elf_generic_reloc as
+	relocation function.
+	* elf32-hppa.c (hppa_elf_reloc): Kill unused/unwanted function.
+
 1999-06-27  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (MIPS_ELF_SRDATA_SECTION_NAME): New macro.
