@@ -142,6 +142,9 @@ char *realloc ();
 /* How many characters in the character set.  */
 # define CHAR_SET_SIZE 256
 
+/* CYGNUS LOCAL: define _REGEX_RE_COMP to get BSD style re_comp and re_exec */
+#define _REGEX_RE_COMP
+
 # ifdef SYNTAX_TABLE
 
 extern char *re_syntax_table;
@@ -2198,7 +2201,10 @@ regex_compile (pattern, size, syntax, bufp)
                        the leading `:' and `[' (but set bits for them).  */
                     if (c == ':' && *p == ']')
                       {
-#if defined _LIBC || (defined HAVE_WCTYPE_H && defined HAVE_WCHAR_H)
+/* CYGNUS LOCAL: Skip this code if we don't have btowc().  btowc() is */
+/* defined in the 1994 Amendment 1 to ISO C and may not be present on */
+/* systems where we have wchar.h and wctype.h.   */
+#if defined _LIBC || (defined HAVE_WCTYPE_H && defined HAVE_WCHAR_H && defined HAVE_BTOWC)
                         boolean is_lower = STREQ (str, "lower");
                         boolean is_upper = STREQ (str, "upper");
 			wctype_t wt;

@@ -68,18 +68,13 @@ AC_ARG_PROGRAM
 AC_TYPE_SIGNAL
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(limits.h memory.h string.h strings.h unistd.h termios.h termio.h sgtty.h stddef.h stdlib.h sys/procfs.h link.h endian.h objlist.h libintl.h)
-AC_CHECK_HEADERS(wctype.h wchar.h, USE_WCHAR=yes, USE_WCHAR=no)
-dnl Solaris 2.5 don't define btowc() in the wchar.h
-if test "$USE_WCHAR" = "yes"; then
-  AC_REPLACE_FUNCS(btowc)
-fi
+AC_CHECK_HEADERS(limits.h memory.h string.h strings.h unistd.h termios.h termio.h sgtty.h stddef.h stdlib.h sys/procfs.h link.h endian.h objlist.h libintl.h wctype.h wchar.h)
 
 AC_HEADER_STAT
 
 AC_C_CONST
 
-AC_CHECK_FUNCS(setpgid sbrk select poll sigaction isascii bzero bcopy memcpy)
+AC_CHECK_FUNCS(setpgid sbrk select poll sigaction isascii bzero bcopy memcpy btowc)
 AC_FUNC_ALLOCA
 
 # If we are configured native on GNU/Linux, work around problems with sys/procfs.h
