@@ -1,3 +1,8 @@
+2001-06-19  Andreas Jaeger  <aj@suse.de>
+
+	* binutils-all/readelf.r: Don't check for specific info value to
+	pass testsuite on ia64 and alpha.
+
 2001-06-07  H.J. Lu  <hjl@gnu.org>
 
 	* binutils-all/readelf.ss-mips: Support stabs.
@@ -759,4 +764,3 @@ Sun Feb 21 10:55:55 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 	of dejagnu.  The modifications to these testcases, etc., which
 	will allow them to work with the new version of dejagnu will be
 	made in a future update.
-
