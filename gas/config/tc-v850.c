@@ -853,13 +853,14 @@ md_parse_option (c, arg)
       if (strcmp (arg, "v850") == 0)
 	{
 	  machine = 0;
+	  processor_mask = PROCESSOR_V850;
 	  return 1;
 	}
 /* start-sanitize-v850e */
       else if (strcmp (arg, "v850e") == 0)
 	{
 	  machine = bfd_mach_v850e;
-	  processor_mask = PROCESSOR_V850 | PROCESSOR_V850E;
+	  processor_mask = PROCESSOR_V850E;
 	  
 	  return 1;
 	}
