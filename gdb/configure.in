@@ -67,12 +67,31 @@ ENABLE_GDBTK=
 AC_ARG_ENABLE(gdbtk,
 [  --enable-gdbtk ],
 [case "${enableval}" in
-yes)	enable_gdbtk=yes ;;
-no)	enable_gdbtk=no  ;;
-*)	AC_MSG_ERROR(bad value ${enableval} given for gdbtk option) ;;
-esac])
+    yes)
+	case "$host" in
+	*go32*)
+	    AC_MSG_WARN([GDB does not support GDBtk on host ${host}.  GDBtk will be disabled.])
+	    enable_gdbtk=no ;;
+	*)
+	    enable_gdbtk=yes ;;
+	esac ;;
+    no)
+	enable_gdbtk=no  ;;
+    *)
+	AC_MSG_ERROR(bad value ${enableval} given for gdbtk option) ;;
+esac],
+[
+# Default is on for everything but go32
+case "$host" in
+    *go32*)
+	;;
+    *)
+	enable_gdbtk=yes ;;
+    esac
+])
 
 if test "${enable_gdbtk}" = "yes"; then
+
     AC_PATH_X
     AC_PATH_XTRA
 

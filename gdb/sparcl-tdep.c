@@ -239,17 +239,21 @@ sparclite_check_watch_resources (type, cnt, ot)
      int ot;
 {
   if (type == bp_hardware_breakpoint)
-    if (TARGET_HW_BREAK_LIMIT == 0)
-      return 0;
-    else if (cnt <= TARGET_HW_BREAK_LIMIT)
-      return 1;
+    {
+      if (TARGET_HW_BREAK_LIMIT == 0)
+	return 0;
+      else if (cnt <= TARGET_HW_BREAK_LIMIT)
+	return 1;
+    }
   else
-    if (TARGET_HW_WATCH_LIMIT == 0)
-      return 0;
-    else if (ot)
-      return -1;
-    else if (cnt <= TARGET_HW_WATCH_LIMIT)
-      return 1;
+    {
+      if (TARGET_HW_WATCH_LIMIT == 0)
+	return 0;
+      else if (ot)
+	return -1;
+      else if (cnt <= TARGET_HW_WATCH_LIMIT)
+	return 1;
+    }
   return -1;
 }
 

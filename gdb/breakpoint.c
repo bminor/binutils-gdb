@@ -652,8 +652,8 @@ remove_breakpoint (b)
 	}
       /* Failure to remove any of the hardware watchpoints comes here.  */
       if (b->inserted)
-	error ("Hardware watchpoint %d: Could not remove watchpoint\n",
-	       b->number);
+	warning ("Hardware watchpoint %d: Could not remove watchpoint\n",
+		 b->number);
       
       /* Free the saved value chain.  We will construct a new one
 	 the next time the watchpoint is inserted.  */
@@ -3427,7 +3427,7 @@ breakpoint_re_set ()
 #endif
 
 #if 0
-  /* Took this out (temporaliy at least), since it produces an extra 
+  /* Took this out (temporarily at least), since it produces an extra 
      blank line at startup. This messes up the gdbtests. -PB */
   /* Blank line to finish off all those mention() messages we just printed.  */
   printf_filtered ("\n");

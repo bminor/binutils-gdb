@@ -1427,14 +1427,34 @@ ENABLE_GDBTK=
 if test "${enable_gdbtk+set}" = set; then
   enableval="$enable_gdbtk"
   case "${enableval}" in
-yes)	enable_gdbtk=yes ;;
-no)	enable_gdbtk=no  ;;
-*)	{ echo "configure: error: bad value ${enableval} given for gdbtk option" 1>&2; exit 1; } ;;
+    yes)
+	case "$host" in
+	*go32*)
+	    echo "configure: warning: GDB does not support GDBtk on host ${host}.  GDBtk will be disabled." 1>&2
+	    enable_gdbtk=no ;;
+	*)
+	    enable_gdbtk=yes ;;
+	esac ;;
+    no)
+	enable_gdbtk=no  ;;
+    *)
+	{ echo "configure: error: bad value ${enableval} given for gdbtk option" 1>&2; exit 1; } ;;
 esac
+else
+  
+# Default is on for everything but go32
+case "$host" in
+    *go32*)
+	;;
+    *)
+	enable_gdbtk=yes ;;
+    esac
+
 fi
 
 
 if test "${enable_gdbtk}" = "yes"; then
+
     # If we find X, set shell vars x_includes and x_libraries to the
 # paths, otherwise set no_x=yes.
 # Uses ac_ vars as temps to allow command line to override cache and checks.
@@ -1496,7 +1516,7 @@ test -z "$x_direct_test_library" && x_direct_test_library=Xt
 test -z "$x_direct_test_function" && x_direct_test_function=XtMalloc
 test -z "$x_direct_test_include" && x_direct_test_include=X11/Intrinsic.h
 cat > conftest.$ac_ext <<EOF
-#line 1500 "configure"
+#line 1520 "configure"
 #include "confdefs.h"
 #include <$x_direct_test_include>
 EOF
@@ -1559,7 +1579,7 @@ rm -f conftest*
 ac_save_LIBS="$LIBS"
 LIBS="-l$x_direct_test_library $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1563 "configure"
+#line 1583 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1678,7 +1698,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lICE  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1682 "configure"
+#line 1702 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1722,7 +1742,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldnet  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1726 "configure"
+#line 1746 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1757,7 +1777,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldnet_stub  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1761 "configure"
+#line 1781 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1797,7 +1817,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lnsl  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1801 "configure"
+#line 1821 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1836,7 +1856,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lsocket  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1840 "configure"
+#line 1860 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1893,7 +1913,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1897 "configure"
+#line 1917 "configure"
 #include "confdefs.h"
 #include <tk.h>
 EOF
@@ -1995,7 +2015,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1999 "configure"
+#line 2019 "configure"
 #include "confdefs.h"
 #include <tclInt.h>
 EOF

@@ -18,7 +18,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* The E7000 is an in-circuit emulator for the Hitachi H8/300-H and
    Hitachi-SH processor.  It has serial port and a lan port.  
@@ -43,7 +43,7 @@
 #include <sys/types.h>
 #include "serial.h"
 #include "remote-utils.h"
-
+#include "symfile.h"
 #if 0
 #define HARD_BREAKPOINTS
 #define BC_BREAKPOINTS 0
@@ -1426,8 +1426,10 @@ e7000_insert_breakpoint (addr, shadow)
 	    puts_e7000debug (buf);
 	  }
 #else
+#if 0
 	e7000_read_inferior_memory (addr, shadow, 2);
 	e7000_write_inferior_memory (addr, nop, 2);
+#endif
 
 	sprintf (buf, "B %x\r", addr);
 	puts_e7000debug (buf);
@@ -1470,8 +1472,10 @@ e7000_remove_breakpoint (addr, shadow)
 	puts_e7000debug (buf);
 	expect_prompt ();
 
+#if 0
 	/* Replace the insn under the break */
 	e7000_write_inferior_memory (addr, shadow, 2);
+#endif
 #endif
 
 	return 0;
@@ -1517,13 +1521,6 @@ e7000_command (args, fromtty)
   registers_changed ();
 }
 
-static void
-e7000_load (args, fromtty)
-     char *args;
-     int fromtty;
-{
-  gr_load_image (args, fromtty);
-}
 
 static void
 e7000_drain_command (args, fromtty)
@@ -1776,6 +1773,7 @@ e7000_wait (pid, status)
   switch (stop_reason)
     {
     case 1:			/* Breakpoint */
+      write_pc (read_pc () - 2); /* PC is always off by 2 for breakpoints */
       status->value.sig = TARGET_SIGNAL_TRAP;      
       break;
     case 0:			/* Single step */
@@ -1840,20 +1838,15 @@ target e7000 foobar",
   e7000_prepare_to_store,	/* to_prepare_to_store */
   e7000_xfer_inferior_memory,	/* to_xfer_memory */
   e7000_files_info,		/* to_files_info */
-#ifdef HARD_BREAKPOINTS
   e7000_insert_breakpoint,	/* to_insert_breakpoint */
   e7000_remove_breakpoint,	/* to_remove_breakpoint */
-#else
-  memory_insert_breakpoint,	/* to_insert_breakpoint */
-  memory_remove_breakpoint,	/* to_remove_breakpoint */
-#endif
   0,				/* to_terminal_init */
   0,				/* to_terminal_inferior */
   0,				/* to_terminal_ours_for_output */
   0,				/* to_terminal_ours */
   0,				/* to_terminal_info */
   e7000_kill,			/* to_kill */
-  e7000_load,			/* to_load */
+  generic_load,			/* to_load */
   0,				/* to_lookup_symbol */
   e7000_create_inferior,	/* to_create_inferior */
   e7000_mourn_inferior,		/* to_mourn_inferior */
