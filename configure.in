@@ -601,17 +601,6 @@ no)
 esac
 
 case "${target}" in
-  *-*-netbsd*)
-    # Skip some stuff on all NetBSD configurations.
-    skipdirs="$skipdirs target-newlib target-libiberty target-libgloss"
-
-    # Skip some stuff that's unsupported on some NetBSD configurations.
-    case "${target}" in
-      *)
-        noconfigdirs="$noconfigdirs ${libgcj}"
-	;;
-    esac
-    ;;
   *-*-netware)
     noconfigdirs="$noconfigdirs ${libstdcxx_version} target-newlib target-libiberty target-libgloss target-libffi"
     ;;
@@ -655,6 +644,18 @@ case "${target}" in
   arm-*-pe*)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
+  arm-*-coff*)
+    noconfigdirs="$noconfigdirs target-libgloss"
+    if [ x${is_cross_compiler} != xno ] ; then
+	   target_configdirs="${target_configdirs} target-bsp target-cygmon"
+    fi
+    ;;
+  arm-*-elf*)
+    noconfigdirs="$noconfigdirs target-libgloss"
+    if [ x${is_cross_compiler} != xno ] ; then
+	   target_configdirs="${target_configdirs} target-bsp target-cygmon"
+    fi
+    ;;
   arm-*-oabi*)
     noconfigdirs="$noconfigdirs target-libgloss target-libffi"
     ;;
@@ -668,25 +669,25 @@ case "${target}" in
     noconfigdirs="$noconfigdirs target-libgloss target-libffi"
     ;;
   strongarm-*-elf)
-    noconfigdirs="$noconfigdirs target-libffi"
+    noconfigdirs="$noconfigdirs target-libgloss target-libffi"
     if [ x${is_cross_compiler} != xno ] ; then
 	   target_configdirs="${target_configdirs} target-bsp target-cygmon"
     fi
     ;;
   strongarm-*-coff)
-    noconfigdirs="$noconfigdirs target-libffi"
+    noconfigdirs="$noconfigdirs target-libgloss target-libffi"
     if [ x${is_cross_compiler} != xno ] ; then
 	   target_configdirs="${target_configdirs} target-bsp target-cygmon"
     fi
     ;;
   xscale-*-elf)
-    noconfigdirs="$noconfigdirs target-libffi"
+    noconfigdirs="$noconfigdirs target-libgloss target-libffi"
     if [ x${is_cross_compiler} != xno ] ; then
 	   target_configdirs="${target_configdirs} target-bsp target-cygmon"
     fi
     ;;
   xscale-*-coff)
-    noconfigdirs="$noconfigdirs target-libffi"
+    noconfigdirs="$noconfigdirs target-libgloss target-libffi"
     if [ x${is_cross_compiler} != xno ] ; then
 	   target_configdirs="${target_configdirs} target-bsp target-cygmon"
     fi
@@ -740,10 +741,6 @@ case "${target}" in
   ia64*-*-elf*)
     # No gdb support yet.
     noconfigdirs="$noconfigdirs tix readline mmalloc libgui itcl gdb"
-    ;;
-  ia64*-**-hpux*)
-    # No gdb or ld support yet.
-    noconfigdirs="$noconfigdirs tix readline mmalloc libgui itcl gdb ld"
     ;;
   i[3456]86-*-coff | i[3456]86-*-elf)
     if [ x${is_cross_compiler} != xno ] ; then
@@ -903,9 +900,6 @@ case "${target}" in
       *) skipdirs=`echo " ${skipdirs} " | sed -e 's/ gprof / /'` ;;
     esac
     noconfigdirs="$noconfigdirs target-libgloss target-libffi"
-    ;;
-  sh64-*-*)
-    noconfigdirs="$noconfigdirs target-libgloss ${libgcj}"
     ;;
   sparc-*-elf*)
     if [ x${is_cross_compiler} != xno ] ; then
