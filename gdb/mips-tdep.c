@@ -2126,6 +2126,35 @@ fp_register_arg_p (enum type_code typecode, struct type *arg_type)
 	   && MIPS_FPU_TYPE != MIPS_FPU_NONE);
 }
 
+/* On o32, argument passing in GPRs depends on the alignment of the type being
+   passed.  Return 1 if this type must be aligned to a doubleword boundary. */
+
+static int
+mips_type_needs_double_align (struct type *type)
+{
+  enum type_code typecode = TYPE_CODE (type);
+  
+  if (typecode == TYPE_CODE_FLT && TYPE_LENGTH (type) == 8)
+    return 1;
+  else if (typecode == TYPE_CODE_STRUCT)
+    {
+      if (TYPE_NFIELDS (type) < 1)
+	return 0;
+      return mips_type_needs_double_align (TYPE_FIELD_TYPE (type, 0));
+    }
+  else if (typecode == TYPE_CODE_UNION)
+    {
+      int i, n;    
+
+      n = TYPE_NFIELDS (type);
+      for (i = 0; i < n; i++)
+	if (mips_type_needs_double_align (TYPE_FIELD_TYPE (type, i)))
+	  return 1;
+      return 0;
+    }
+  return 0;
+}
+
 CORE_ADDR
 mips_push_arguments (int nargs,
 		     value_ptr *args,
@@ -2312,6 +2341,14 @@ mips_push_arguments (int nargs,
 	     compatibility, we will put them in both places.  */
 	  int odd_sized_struct = ((len > MIPS_SAVED_REGSIZE) &&
 				  (len % MIPS_SAVED_REGSIZE != 0));
+	  /* Structures should be aligned to eight bytes (even arg registers)
+	     on MIPS_ABI_O32 if their first member has double precision. */
+	  if (gdbarch_tdep (current_gdbarch)->mips_abi == MIPS_ABI_O32
+	      && mips_type_needs_double_align (arg_type))
+	    {
+	      if ((argreg & 1))
+	        argreg++;
+	    }
 	  /* Note: Floating-point values that didn't fit into an FP
              register are only written to memory. */
 	  while (len > 0)
