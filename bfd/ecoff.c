@@ -2918,11 +2918,10 @@ ecoff_write_object_contents (abfd)
     goto error_return;
 
   /* Build the external symbol information.  This must be done before
-     writing out the relocs so that we know the symbol indices.  The
-     condition checks makes sure this object was not created by
-     ecoff_bfd_final_link, since if it was we do not want to tamper
-     with the external symbols.  */
-  if (bfd_get_outsymbols (abfd) != (asymbol **) NULL)
+     writing out the relocs so that we know the symbol indices.  We
+     don't do this if this BFD was created by the backend linker,
+     since it will have already handled the symbols and relocs.  */
+  if (! ecoff_data (abfd)->linker)
     {
       symhdr->iextMax = 0;
       symhdr->issExtMax = 0;
@@ -4387,6 +4386,8 @@ ecoff_bfd_final_link (abfd, info)
     }
 
   bfd_get_symcount (abfd) = symhdr->iextMax + symhdr->isymMax;
+
+  ecoff_data (abfd)->linker = true;
 
   return true;
 }

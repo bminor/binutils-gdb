@@ -121,6 +121,9 @@ typedef struct ecoff_tdata
      linking.  */
   asection **symndx_to_section;
 
+  /* True if this BFD was written by the backend linker.  */
+  boolean linker;
+
 } ecoff_data_type;
 
 /* Each canonical asymbol really looks like this.  */
@@ -233,7 +236,7 @@ extern boolean ecoff_get_section_contents PARAMS ((bfd *abfd,
 						   file_ptr offset,
 						   bfd_size_type count));
 
-#define ecoff_bfd_copy_private_bfd_data _bfd_generic_bfd_copy_private_bfd_data
+extern boolean ecoff_bfd_copy_private_bfd_data PARAMS ((bfd *, bfd *));
 #define ecoff_bfd_copy_private_section_data \
   _bfd_generic_bfd_copy_private_section_data
 

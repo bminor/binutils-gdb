@@ -1,5 +1,11 @@
 Mon Jun  6 10:57:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* libecoff.h (ecoff_data_type): Add linker field.
+	* ecoff.c (ecoff_write_object_contents): Check new tdata linker
+	field, rather than outsymbols being non-NULL, to decide whether to
+	output the symbols and relocs.
+	(ecoff_bfd_final_link): Set new tdata linker field to true.
+
 	* ecoff.c (ecoff_bfd_copy_private_bfd_data): Don't try to copy
 	data to a non-ECOFF file.
 
