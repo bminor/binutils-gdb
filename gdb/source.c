@@ -500,7 +500,7 @@ source_info (char *ignore, int from_tty)
    so that "exec-file ./foo" or "symbol-file ./foo" insures that you
    get that particular version of foo or an error message).
 
-   If FILENAMED_OPENED is non-null, set it to a newly allocated string naming
+   If FILENAME_OPENED is non-null, set it to a newly allocated string naming
    the actual file opened (this string will always start with a "/".  We
    have to take special pains to avoid doubling the "/" between the directory
    and the file, sigh!  Emacs gets confuzzed by this when we print the
