@@ -229,6 +229,8 @@ static int ada_is_direct_array_type (struct type *);
 
 static void ada_language_arch_info (struct gdbarch *,
 				    struct language_arch_info *);
+
+static void check_size (const struct type *);
 
 
 
@@ -437,8 +439,7 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
 
       /* Make sure that the object size is not unreasonable before
          trying to allocate some memory for it.  */
-      if (TYPE_LENGTH (type) > varsize_limit)
-        error ("object size is larger than varsize-limit");
+      check_size (type);
 
       result = allocate_value (type);
       VALUE_LVAL (result) = VALUE_LVAL (val);
@@ -494,6 +495,18 @@ lim_warning (const char *format, ...)
 
   va_end (args);
 }
+
+/* Issue an error if the size of an object of type T is unreasonable,
+   i.e. if it would be a bad idea to allocate a value of this type in
+   GDB.  */
+
+static void
+check_size (const struct type *type)
+{
+  if (TYPE_LENGTH (type) > varsize_limit)
+    error ("object size is larger than varsize-limit");
+}
+
 
 /* Note: would have used MAX_OF_TYPE and MIN_OF_TYPE macros from
    gdbtypes.h, but some of the necessary definitions in that file
@@ -4472,10 +4485,11 @@ done:
 /* Return a symbol in DOMAIN matching NAME, in BLOCK0 and enclosing
    scope and in global scopes, or NULL if none.  NAME is folded and
    encoded first.  Otherwise, the result is as for ada_lookup_symbol_list,
-   but is disambiguated by user query if needed.  *IS_A_FIELD_OF_THIS is
-   set to 0 and *SYMTAB is set to the symbol table in which the symbol
-   was found (in both cases, these assignments occur only if the
-   pointers are non-null).  */
+   choosing the first symbol if there are multiple choices.  
+   *IS_A_FIELD_OF_THIS is set to 0 and *SYMTAB is set to the symbol
+   table in which the symbol was found (in both cases, these
+   assignments occur only if the pointers are non-null).  */
+
 struct symbol *
 ada_lookup_symbol (const char *name, const struct block *block0,
                    domain_enum namespace, int *is_a_field_of_this,
@@ -5518,7 +5532,10 @@ ada_value_struct_elt (struct value *arg, char *name, char *err)
         {
           if (bit_size != 0)
             {
-              arg = ada_value_ind (arg);
+              if (TYPE_CODE (t) == TYPE_CODE_REF)
+                arg = ada_coerce_ref (arg);
+              else
+                arg = ada_value_ind (arg);
               v = ada_value_primitive_packed_val (arg, NULL, byte_offset,
                                                   bit_offset, bit_size,
                                                   field_type);
@@ -6142,7 +6159,23 @@ ada_template_to_fixed_record_type_1 (struct type *type, char *valaddr,
         }
     }
 
-  TYPE_LENGTH (rtype) = align_value (TYPE_LENGTH (rtype), TYPE_LENGTH (type));
+  /* According to exp_dbug.ads, the size of TYPE for variable-size records
+     should contain the alignment of that record, which should be a strictly
+     positive value.  If null or negative, then something is wrong, most
+     probably in the debug info.  In that case, we don't round up the size
+     of the resulting type. If this record is not part of another structure,
+     the current RTYPE length might be good enough for our purposes.  */
+  if (TYPE_LENGTH (type) <= 0)
+    {
+      warning ("Invalid type size for `%s' detected: %d.",
+               TYPE_NAME (rtype) ? TYPE_NAME (rtype) : "<unnamed>",
+               TYPE_LENGTH (type));
+    }
+  else
+    {
+      TYPE_LENGTH (rtype) = align_value (TYPE_LENGTH (rtype),
+                                         TYPE_LENGTH (type));
+    }
 
   value_free_to_mark (mark);
   if (TYPE_LENGTH (rtype) > varsize_limit)
@@ -6740,6 +6773,13 @@ int
 ada_is_aligner_type (struct type *type)
 {
   type = ada_check_typedef (type);
+
+  /* If we can find a parallel XVS type, then the XVS type should
+     be used instead of this type.  And hence, this is not an aligner
+     type.  */
+  if (ada_find_parallel_type (type, "___XVS") != NULL)
+    return 0;
+
   return (TYPE_CODE (type) == TYPE_CODE_STRUCT
           && TYPE_NFIELDS (type) == 1
           && strcmp (TYPE_FIELD_NAME (type, 0), "F") == 0);
@@ -7352,7 +7392,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                                                    nargs, argvec + 1));
 
         default:
-          error ("Internal error in evaluate_subexp");
+          error ("Attempt to index or call something other than an "
+		 "array or function");
         }
 
     case TERNOP_SLICE:
@@ -7360,9 +7401,14 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         struct value *array = evaluate_subexp (NULL_TYPE, exp, pos, noside);
         struct value *low_bound_val =
           evaluate_subexp (NULL_TYPE, exp, pos, noside);
-        LONGEST low_bound = pos_atr (low_bound_val);
-        LONGEST high_bound
-          = pos_atr (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+        struct value *high_bound_val =
+          evaluate_subexp (NULL_TYPE, exp, pos, noside);
+        LONGEST low_bound;
+        LONGEST high_bound;
+        COERCE_REF (low_bound_val);
+        COERCE_REF (high_bound_val);
+        low_bound = pos_atr (low_bound_val);
+        high_bound = pos_atr (high_bound_val);
 
         if (noside == EVAL_SKIP)
           goto nosideret;
@@ -7390,6 +7436,20 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
           return empty_array (ada_type_of_array (array, 0), low_bound);
 
         array = ada_coerce_to_simple_array_ptr (array);
+
+        /* If we have more than one level of pointer indirection,
+           dereference the value until we get only one level.  */
+        while (TYPE_CODE (VALUE_TYPE (array)) == TYPE_CODE_PTR
+               && (TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (array)))
+                     == TYPE_CODE_PTR))
+          array = value_ind (array);
+
+        /* Make sure we really do have an array type before going further,
+           to avoid a SEGV when trying to get the index type or the target
+           type later down the road if the debug info generated by
+           the compiler is incorrect or incomplete.  */
+        if (!ada_is_simple_array_type (VALUE_TYPE (array)))
+          error ("cannot take slice of non-array");
 
         if (TYPE_CODE (VALUE_TYPE (array)) == TYPE_CODE_PTR)
           {
@@ -7717,11 +7777,13 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                    || TYPE_CODE (type) == TYPE_CODE_REF
                    /* In C you can dereference an array to get the 1st elt.  */
                    || TYPE_CODE (type) == TYPE_CODE_ARRAY)
-            return
-              value_zero
-              (to_static_fixed_type
-               (ada_aligned_type (check_typedef (TYPE_TARGET_TYPE (type)))),
-               lval_memory);
+            {
+              type = to_static_fixed_type
+                (ada_aligned_type
+                 (ada_check_typedef (TYPE_TARGET_TYPE (type))));
+              check_size (type);
+              return value_zero (type, lval_memory);
+            }
           else if (TYPE_CODE (type) == TYPE_CODE_INT)
             /* GDB allows dereferencing an int.  */
             return value_zero (builtin_type_int, lval_memory);

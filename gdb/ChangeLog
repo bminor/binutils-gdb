@@ -1,3 +1,34 @@
+2004-10-15  Paul Hilfinger  <Hilfinger@gnat.com>
+
+	* ada-lang.c (ada_lookup_symbol): Correct comment.
+	(ada_evaluate_subexp): Change error message for
+	OP_FUNCALL case so as not to indicate an internal error.
+	
+2004-10-15  Joel Brobecker  <brobecker@gnat.com>
+
+	Committed by Paul Hilfinger.
+	* ada-lang.c (ada_template_to_fixed_record_type_1): Detect bogus
+	type sizes in XVE/XVU types, and emit a warning when that happens,
+	instead of rounding up the size of the resulting type.
+	Some minor reformatting.
+	(ada_is_aligner_type): Do not consider a type as an aligner type 
+	if there is a corresponding XVS type as well.
+	(ada_evaluate_subexp): For TERNOP_SLICE, handle cases where we 
+	have several levels of pointer indirection to the array.
+	
+2004-10-15  Jerome Guitton  <guitton@gnat.com>
+
+	Committed by Paul Hilfinger.
+	* ada-lang.c (check_size): New function.
+	(coerce_unspec_val_to_type): call check_size to make sure
+	that the object size is reasonable.
+	(ada_evaluate_subexp): in UNOP_IND: Ditto. In TERNOP_SLICE:
+	Implements the case when we get a reference when we evaluate
+	the expression of one of the bounds of the slice.
+	(ada_value_struct_elt): when a packed array field is
+	a reference, use ada_coerce_ref to dereference it; use 
+	ada_value_ind only if it is a pointer.
+
 2004-10-15  Joel Brobecker  <brobecker@gnat.com>
 
 	* mips-tdep.c (mips32_scan_prologue): Move the implementation up
