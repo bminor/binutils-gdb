@@ -346,7 +346,6 @@ lookup_minimal_symbol_text (const char *name, const char *sfile,
 
 struct minimal_symbol *
 lookup_minimal_symbol_solib_trampoline (const char *name,
-					const char *sfile,
 					struct objfile *objf)
 {
   struct objfile *objfile;
@@ -354,15 +353,6 @@ lookup_minimal_symbol_solib_trampoline (const char *name,
   struct minimal_symbol *found_symbol = NULL;
 
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
-
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
-  if (sfile != NULL)
-    {
-      char *p = strrchr (sfile, '/');
-      if (p != NULL)
-	sfile = p + 1;
-    }
-#endif
 
   for (objfile = object_files;
        objfile != NULL && found_symbol == NULL;

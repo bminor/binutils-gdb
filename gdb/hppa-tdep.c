@@ -2376,7 +2376,7 @@ hppa_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 	  {
 	    stub_symbol
 	      = lookup_minimal_symbol_solib_trampoline
-	      (DEPRECATED_SYMBOL_NAME (funsymbol), NULL, objfile);
+	      (DEPRECATED_SYMBOL_NAME (funsymbol), objfile);
 
 	    if (!stub_symbol)
 	      stub_symbol = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (funsymbol),

@@ -1,3 +1,13 @@
+2003-10-16  Elena Zannoni  <ezannoni@redhat.com>
+
+	* minsyms.c (lookup_minimal_symbol_solib_trampoline): Remove
+	second parameter, which is always null. Remove
+	SOFUN_ADDRESS_MAYBE_MISSING ifdeffed code.
+	* symtab.h (lookup_minimal_symbol_solib_trampoline): Update
+	accordingly.
+	* somsolib.c (som_solib_create_inferior_hook,
+	som_solib_desire_dynamic_linker_symbols): Update callers.
+	* hppa-tdep.c (hppa_fix_call_dummy): Ditto.
 
 2003-10-16  Kei Sakamoto  <sakamoto.kei@renesas.com>
 
