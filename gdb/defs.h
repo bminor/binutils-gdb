@@ -293,24 +293,36 @@ extern void discard_final_cleanups (struct cleanup *);
 extern void discard_exec_error_cleanups (struct cleanup *);
 extern void discard_my_cleanups (struct cleanup **, struct cleanup *);
 
+/* DEPRECATED: cagney/2000-03-04: Do not use this typedef to cast
+   function pointers so that they match the argument to the various
+   cleanup functions.  Post GDB 5.0, this typedef will be
+   deleted. [Editors note: cagney was the person that added most of
+   those type casts] */
 typedef void (*make_cleanup_func) (void *);
 
-extern struct cleanup *make_cleanup (make_cleanup_func, void *);
+/* NOTE: cagney/2000-03-04: This typedef is strictly for the
+   make_cleanup function declarations below. Do not use this typedef
+   as a cast when passing functions into the make_cleanup() code.
+   Instead either use a bounce function or add a wrapper function.
+   Calling a f(char*) function with f(void*) is non-portable. */
+typedef void (make_cleanup_ftype) (void *);
+
+extern struct cleanup *make_cleanup (make_cleanup_ftype *, void *);
 
 extern struct cleanup *make_cleanup_freeargv (char **);
 
 struct ui_file;
 extern struct cleanup *make_cleanup_ui_file_delete (struct ui_file *);
 
-extern struct cleanup *make_final_cleanup (make_cleanup_func, void *);
+extern struct cleanup *make_final_cleanup (make_cleanup_ftype *, void *);
 
 extern struct cleanup *make_my_cleanup (struct cleanup **,
-					make_cleanup_func, void *);
+					make_cleanup_ftype *, void *);
 
-extern struct cleanup *make_run_cleanup (make_cleanup_func, void *);
+extern struct cleanup *make_run_cleanup (make_cleanup_ftype *, void *);
 
-extern struct cleanup *make_exec_cleanup (make_cleanup_func, void *);
-extern struct cleanup *make_exec_error_cleanup (make_cleanup_func, void *);
+extern struct cleanup *make_exec_cleanup (make_cleanup_ftype *, void *);
+extern struct cleanup *make_exec_error_cleanup (make_cleanup_ftype *, void *);
 
 extern struct cleanup *save_cleanups (void);
 extern struct cleanup *save_final_cleanups (void);

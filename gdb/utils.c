@@ -160,41 +160,31 @@ int pagination_enabled = 1;
    Args are FUNCTION to clean up with, and ARG to pass to it.  */
 
 struct cleanup *
-make_cleanup (function, arg)
-     void (*function) PARAMS ((PTR));
-     PTR arg;
+make_cleanup (make_cleanup_ftype *function, void *arg)
 {
   return make_my_cleanup (&cleanup_chain, function, arg);
 }
 
 struct cleanup *
-make_final_cleanup (function, arg)
-     void (*function) PARAMS ((PTR));
-     PTR arg;
+make_final_cleanup (make_cleanup_ftype *function, void *arg)
 {
   return make_my_cleanup (&final_cleanup_chain, function, arg);
 }
 
 struct cleanup *
-make_run_cleanup (function, arg)
-     void (*function) PARAMS ((PTR));
-     PTR arg;
+make_run_cleanup (make_cleanup_ftype *function, void *arg)
 {
   return make_my_cleanup (&run_cleanup_chain, function, arg);
 }
 
 struct cleanup *
-make_exec_cleanup (function, arg)
-     void (*function) PARAMS ((PTR));
-     PTR arg;
+make_exec_cleanup (make_cleanup_ftype *function, void *arg)
 {
   return make_my_cleanup (&exec_cleanup_chain, function, arg);
 }
 
 struct cleanup *
-make_exec_error_cleanup (function, arg)
-     void (*function) PARAMS ((PTR));
-     PTR arg;
+make_exec_error_cleanup (make_cleanup_ftype *function, void *arg)
 {
   return make_my_cleanup (&exec_error_cleanup_chain, function, arg);
 }
@@ -226,10 +216,8 @@ make_cleanup_ui_file_delete (struct ui_file *arg)
 }
 
 struct cleanup *
-make_my_cleanup (pmy_chain, function, arg)
-     struct cleanup **pmy_chain;
-     void (*function) PARAMS ((PTR));
-     PTR arg;
+make_my_cleanup (struct cleanup **pmy_chain, make_cleanup_ftype *function,
+		 void *arg)
 {
   register struct cleanup *new
   = (struct cleanup *) xmalloc (sizeof (struct cleanup));
@@ -328,7 +316,7 @@ discard_my_cleanups (pmy_chain, old_chain)
   while ((ptr = *pmy_chain) != old_chain)
     {
       *pmy_chain = ptr->next;
-      free ((PTR) ptr);
+      free (ptr);
     }
 }
 
@@ -402,8 +390,7 @@ free_current_contents (location)
 
 /* ARGSUSED */
 void
-null_cleanup (arg)
-     PTR arg;
+null_cleanup (void *arg)
 {
 }
 

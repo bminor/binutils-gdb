@@ -1,3 +1,16 @@
+Sat Mar  4 10:57:25 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (make_cleanup_func): Document as deprecated.
+	(make_cleanup_ftype): New typedef.  Make signature consistent with
+ 	other function typedefs.  Document as not be used out side of
+ 	make_cleanup code. Use in make_cleanup declarations.
+	
+	* utils.c (make_cleanup, make_final_cleanup, make_run_cleanup,
+ 	make_exec_cleanup, make_exec_error_cleanup, make_my_cleanup,
+ 	null_cleanup): Change K&R definition to ISO-C using void* and
+ 	make_cleanup_fytpe.
+	(discard_my_cleanups): Don't cast argument to free.
+
 2000-03-03  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* defs.h (struct continuation_arg): Change type of field 'data'
