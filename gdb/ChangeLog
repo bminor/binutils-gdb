@@ -1,4 +1,5 @@
 2004-01-06  Jeff Johnston  <jjohnstn@redhat.com>
+	    Jason Molenda  <jmolenda@apple.com>
 
 	* disasm.c: Update copyright to include 2004.
 	(do_mixed_source_and_assembly): For uiout asm list
