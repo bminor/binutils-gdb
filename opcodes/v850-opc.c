@@ -470,7 +470,7 @@ const struct v850_operand v850_operands[] =
 
 /* The 32 bit immediate following a 32 bit instruction.  */
 #define IMM32	(IMM16 + 1)
-  { 0, 0, 0, 0, V850E_IMMEDIATE32 }, 
+  { 0, 0, NULL, NULL, V850E_IMMEDIATE32 }, 
 
 /* The imm5 field in a push/pop instruction. */
 #define IMM5	(IMM32 + 1)
@@ -524,7 +524,7 @@ const struct v850_operand v850_operands[] =
 
    The format of the opcode table is:
 
-   NAME		OPCODE			MASK		       { OPERANDS }	   MEMOP
+   NAME		OPCODE			MASK		       { OPERANDS }	   MEMOP    PROCESSOR
 
    NAME is the name of the instruction.
    OPCODE is the instruction opcode.
@@ -532,6 +532,7 @@ const struct v850_operand v850_operands[] =
      which bits in the actual opcode must match OPCODE.
    OPERANDS is the list of operands.
    MEMOP specifies which operand (if any) is a memory operand.
+   PROCESSOR specifies which CPUs support the opcode.
    
    The disassembler reads the table in order and prints the first
    instruction which matches, so this table is sorted to put more
@@ -540,179 +541,171 @@ const struct v850_operand v850_operands[] =
 
 const struct v850_opcode v850_opcodes[] =
 {
-{ "breakpoint",	0xffff,			0xffff,		      	{UNUSED},   		0 },
+{ "breakpoint",	0xffff,			0xffff,		      	{UNUSED},   		0, PROCESSOR_ALL },
 
-{ "jmp",	one (0x0060),		one (0xffe0),	      	{R1}, 			1 },
+{ "jmp",	one (0x0060),		one (0xffe0),	      	{R1}, 			1, PROCESSOR_ALL },
   
 /* load/store instructions */
 /* start-sanitize-v850eq */
-#ifdef ARCH_v850eq
-{ "sld.bu",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2_NOTR0},	1 },
-{ "sld.hu",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2_NOTR0},	1 },
-{ "sld.b",      one (0x0060),		one (0x07f0),         	{D4,   EP,   R2}, 	1 },
-{ "sld.h",      one (0x0070),		one (0x07f0),         	{D5_4, EP,   R2}, 	1 },
-#else
+{ "sld.bu",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2_NOTR0},	1, PROCESSOR_V850EQ },
+{ "sld.hu",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2_NOTR0},	1, PROCESSOR_V850EQ },
+{ "sld.b",      one (0x0060),		one (0x07f0),         	{D4,   EP,   R2}, 	1, PROCESSOR_V850EQ },
+{ "sld.h",      one (0x0070),		one (0x07f0),         	{D5_4, EP,   R2}, 	1, PROCESSOR_V850EQ },
 /* end-sanitize-v850eq */
-{ "sld.b",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2},	1 },
-{ "sld.h",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2}, 	1 },
+{ "sld.b",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2},	1, PROCESSOR_ALL },
+{ "sld.h",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2}, 	1, PROCESSOR_ALL },
 /* start-sanitize-v850e */
-{ "sld.bu",     one (0x0060),		one (0x07f0),         	{D4,   EP,   R2_NOTR0},	1 },
-{ "sld.hu",     one (0x0070),		one (0x07f0),         	{D5_4, EP,   R2_NOTR0},	1 },
+{ "sld.bu",     one (0x0060),		one (0x07f0),         	{D4,   EP,   R2_NOTR0},	1, PROCESSOR_V850E },
+{ "sld.hu",     one (0x0070),		one (0x07f0),         	{D5_4, EP,   R2_NOTR0},	1, PROCESSOR_V850E },
 /* end-sanitize-v850e */
-/* start-sanitize-v850eq */
-#endif
-/* end-sanitize-v850eq */
-{ "sld.w",	one (0x0500),		one (0x0781),	      	{D8_6, EP,   R2}, 	1 },
-{ "sst.b",	one (0x0380),		one (0x0780),	      	{R2,   D7,   EP}, 	2 },
-{ "sst.h",	one (0x0480),		one (0x0780),	      	{R2,   D8_7, EP}, 	2 },
-{ "sst.w",	one (0x0501),		one (0x0781),	      	{R2,   D8_6, EP}, 	2 },
+{ "sld.w",	one (0x0500),		one (0x0781),	      	{D8_6, EP,   R2}, 	1, PROCESSOR_ALL },
+{ "sst.b",	one (0x0380),		one (0x0780),	      	{R2,   D7,   EP}, 	2, PROCESSOR_ALL },
+{ "sst.h",	one (0x0480),		one (0x0780),	      	{R2,   D8_7, EP}, 	2, PROCESSOR_ALL },
+{ "sst.w",	one (0x0501),		one (0x0781),	      	{R2,   D8_6, EP}, 	2, PROCESSOR_ALL },
 
 /* start-sanitize-v850eq */
-{ "pushml",	two (0x07e0, 0x0001),	two (0xfff0, 0x0007), 	{LIST18_L}, 		0 },
-{ "pushmh",	two (0x07e0, 0x0003),	two (0xfff0, 0x0007), 	{LIST18_H}, 		0 },
-{ "popml",	two (0x07f0, 0x0001),	two (0xfff0, 0x0007), 	{LIST18_L}, 		0 },
-{ "popmh",	two (0x07f0, 0x0003),	two (0xfff0, 0x0007), 	{LIST18_H}, 		0 },
+{ "pushml",	two (0x07e0, 0x0001),	two (0xfff0, 0x0007), 	{LIST18_L}, 		0, PROCESSOR_V850EQ },
+{ "pushmh",	two (0x07e0, 0x0003),	two (0xfff0, 0x0007), 	{LIST18_H}, 		0, PROCESSOR_V850EQ },
+{ "popml",	two (0x07f0, 0x0001),	two (0xfff0, 0x0007), 	{LIST18_L}, 		0, PROCESSOR_V850EQ },
+{ "popmh",	two (0x07f0, 0x0003),	two (0xfff0, 0x0007), 	{LIST18_H}, 		0, PROCESSOR_V850EQ },
 /* end-sanitize-v850eq */
   
 /* start-sanitize-v850e */  
-{ "prepare",    two (0x0780, 0x0003),	two (0xffc0, 0x001f), 	{LIST12, IMM5, SP}, 	0 },
-{ "prepare",    two (0x0780, 0x000b),	two (0xffc0, 0x001f), 	{LIST12, IMM5, IMM16}, 	0 },
-{ "prepare",    two (0x0780, 0x0013),	two (0xffc0, 0x001f), 	{LIST12, IMM5, IMM16}, 	0 },
-{ "prepare",    two (0x0780, 0x001b),	two (0xffc0, 0x001f), 	{LIST12, IMM5, IMM32}, 	0 },
-{ "prepare",    two (0x0780, 0x0001),	two (0xffc0, 0x001f), 	{LIST12, IMM5}, 	0 },
-{ "dispose",	one (0x0640),           one (0xffc0),         	{IMM5, LIST12, R2DISPOSE},0 },
-{ "dispose",	two (0x0640, 0x0000),   two (0xffc0, 0x001f), 	{IMM5, LIST12}, 	0 },
+{ "prepare",    two (0x0780, 0x0003),	two (0xffc0, 0x001f), 	{LIST12, IMM5, SP}, 	0, PROCESSOR_NOT_V850 },
+{ "prepare",    two (0x0780, 0x000b),	two (0xffc0, 0x001f), 	{LIST12, IMM5, IMM16}, 	0, PROCESSOR_NOT_V850 },
+{ "prepare",    two (0x0780, 0x0013),	two (0xffc0, 0x001f), 	{LIST12, IMM5, IMM16}, 	0, PROCESSOR_NOT_V850 },
+{ "prepare",    two (0x0780, 0x001b),	two (0xffc0, 0x001f), 	{LIST12, IMM5, IMM32}, 	0, PROCESSOR_NOT_V850 },
+{ "prepare",    two (0x0780, 0x0001),	two (0xffc0, 0x001f), 	{LIST12, IMM5}, 	0, PROCESSOR_NOT_V850 },
+{ "dispose",	one (0x0640),           one (0xffc0),         	{IMM5, LIST12, R2DISPOSE},0, PROCESSOR_NOT_V850 },
+{ "dispose",	two (0x0640, 0x0000),   two (0xffc0, 0x001f), 	{IMM5, LIST12}, 	0, PROCESSOR_NOT_V850 },
 /* end-sanitize-v850e */
 
-{ "ld.b",	two (0x0700, 0x0000),	two (0x07e0, 0x0000), 	{D16, R1, R2}, 		1 },
-{ "ld.h",	two (0x0720, 0x0000),	two (0x07e0, 0x0001), 	{D16_15, R1, R2}, 	1 },
-{ "ld.w",	two (0x0720, 0x0001),	two (0x07e0, 0x0001), 	{D16_15, R1, R2}, 	1 },
+{ "ld.b",	two (0x0700, 0x0000),	two (0x07e0, 0x0000), 	{D16, R1, R2}, 		1, PROCESSOR_ALL },
+{ "ld.h",	two (0x0720, 0x0000),	two (0x07e0, 0x0001), 	{D16_15, R1, R2}, 	1, PROCESSOR_ALL },
+{ "ld.w",	two (0x0720, 0x0001),	two (0x07e0, 0x0001), 	{D16_15, R1, R2}, 	1, PROCESSOR_ALL },
 /* start-sanitize-v850e */
-{ "ld.bu",	two (0x0780, 0x0001),   two (0x07c0, 0x0001), 	{D16_16, R1, R2_NOTR0},	1 },
-{ "ld.hu",	two (0x07e0, 0x0001),   two (0x07e0, 0x0001), 	{D16_15, R1, R2_NOTR0},	1 },  
+{ "ld.bu",	two (0x0780, 0x0001),   two (0x07c0, 0x0001), 	{D16_16, R1, R2_NOTR0},	1, PROCESSOR_NOT_V850 },
+{ "ld.hu",	two (0x07e0, 0x0001),   two (0x07e0, 0x0001), 	{D16_15, R1, R2_NOTR0},	1, PROCESSOR_NOT_V850 },  
 /* end-sanitize-v850e */
-{ "st.b",	two (0x0740, 0x0000),	two (0x07e0, 0x0000), 	{R2, D16, R1}, 		2 },
-{ "st.h",	two (0x0760, 0x0000),	two (0x07e0, 0x0001), 	{R2, D16_15, R1}, 	2 },
-{ "st.w",	two (0x0760, 0x0001),	two (0x07e0, 0x0001), 	{R2, D16_15, R1}, 	2 },
+{ "st.b",	two (0x0740, 0x0000),	two (0x07e0, 0x0000), 	{R2, D16, R1}, 		2, PROCESSOR_ALL },
+{ "st.h",	two (0x0760, 0x0000),	two (0x07e0, 0x0001), 	{R2, D16_15, R1}, 	2, PROCESSOR_ALL },
+{ "st.w",	two (0x0760, 0x0001),	two (0x07e0, 0x0001), 	{R2, D16_15, R1}, 	2, PROCESSOR_ALL },
 
 /* start-sanitize-v850e */
 /* byte swap/extend instructions */
-{ "zxb",	one (0x0080),		one (0xffe0), 	      	{R1_NOTR0},		0 },
-{ "zxh",	one (0x00c0),		one (0xffe0), 	      	{R1_NOTR0}, 		0 },
-{ "sxb",	one (0x00a0),		one (0xffe0), 	      	{R1_NOTR0},		0 },
-{ "sxh",	one (0x00e0),		one (0xffe0),	      	{R1_NOTR0},		0 },
-{ "bsh",	two (0x07e0, 0x0342),	two (0x07ff, 0x07ff), 	{R2, R3}, 		0 },
-{ "bsw",	two (0x07e0, 0x0340),	two (0x07ff, 0x07ff), 	{R2, R3}, 		0 },
-{ "hsw",	two (0x07e0, 0x0344),	two (0x07ff, 0x07ff), 	{R2, R3}, 		0 },
+{ "zxb",	one (0x0080),		one (0xffe0), 	      	{R1_NOTR0},		0, PROCESSOR_NOT_V850 },
+{ "zxh",	one (0x00c0),		one (0xffe0), 	      	{R1_NOTR0}, 		0, PROCESSOR_NOT_V850 },
+{ "sxb",	one (0x00a0),		one (0xffe0), 	      	{R1_NOTR0},		0, PROCESSOR_NOT_V850 },
+{ "sxh",	one (0x00e0),		one (0xffe0),	      	{R1_NOTR0},		0, PROCESSOR_NOT_V850 },
+{ "bsh",	two (0x07e0, 0x0342),	two (0x07ff, 0x07ff), 	{R2, R3}, 		0, PROCESSOR_NOT_V850 },
+{ "bsw",	two (0x07e0, 0x0340),	two (0x07ff, 0x07ff), 	{R2, R3}, 		0, PROCESSOR_NOT_V850 },
+{ "hsw",	two (0x07e0, 0x0344),	two (0x07ff, 0x07ff), 	{R2, R3}, 		0, PROCESSOR_NOT_V850 },
 
 /* jump table instructions */
-{ "switch",	one (0x0040),		one (0xffe0), 	      	{R1}, 			1 },
-{ "callt",	one (0x0200),		one (0xffc0), 	      	{I6}, 			0 },
-{ "ctret", 	two (0x07e0, 0x0144),	two (0xffff, 0xffff), 	{0}, 			0 },
+{ "switch",	one (0x0040),		one (0xffe0), 	      	{R1}, 			1, PROCESSOR_NOT_V850 },
+{ "callt",	one (0x0200),		one (0xffc0), 	      	{I6}, 			0, PROCESSOR_NOT_V850 },
+{ "ctret", 	two (0x07e0, 0x0144),	two (0xffff, 0xffff), 	{0}, 			0, PROCESSOR_NOT_V850 },
 /* end-sanitize-v850e */
 
 /* arithmetic operation instructions */
-{ "setf",	two (0x07e0, 0x0000),	two (0x07f0, 0xffff), 	{CCCC, R2}, 		0 },
+{ "setf",	two (0x07e0, 0x0000),	two (0x07f0, 0xffff), 	{CCCC, R2}, 		0, PROCESSOR_ALL },
 /* start-sanitize-v850e */
-{ "cmov",	two (0x07e0, 0x0320),	two (0x07e0, 0x07e1), 	{MOVCC, R2, R1, R3}, 	0 },
-{ "cmov",	two (0x07e0, 0x0300),	two (0x07e0, 0x07e1), 	{MOVCC, I5, R2, R3}, 	0 },
-/* end-sanitize-v850e */
-/* start-sanitize-v850e */
-{ "mul",	two (0x07e0, 0x0220),	two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0 },
-{ "mul",	two (0x07e0, 0x0240),	two (0x07e0, 0x07c3), 	{I9, R2, R3}, 		0 },
-{ "mulu",	two (0x07e0, 0x0222),	two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0 },
-{ "mulu",	two (0x07e0, 0x0242),	two (0x07e0, 0x07c3), 	{U9, R2, R3}, 		0 },
-/* end-sanitize-v850e */
-/* start-sanitize-v850e */
+{ "cmov",	two (0x07e0, 0x0320),	two (0x07e0, 0x07e1), 	{MOVCC, R2, R1, R3}, 	0, PROCESSOR_NOT_V850 },
+{ "cmov",	two (0x07e0, 0x0300),	two (0x07e0, 0x07e1), 	{MOVCC, I5, R2, R3}, 	0, PROCESSOR_NOT_V850 },
 
-{ "div",	two (0x07e0, 0x02c0),	two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0 },
-{ "divu",	two (0x07e0, 0x02c2),	two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0 },
-{ "divhu",	two (0x07e0, 0x0282),   two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0 },
-{ "divh",	two (0x07e0, 0x0280),   two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0 },
+{ "mul",	two (0x07e0, 0x0220),	two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0, PROCESSOR_NOT_V850 },
+{ "mul",	two (0x07e0, 0x0240),	two (0x07e0, 0x07c3), 	{I9, R2, R3}, 		0, PROCESSOR_NOT_V850 },
+{ "mulu",	two (0x07e0, 0x0222),	two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0, PROCESSOR_NOT_V850 },
+{ "mulu",	two (0x07e0, 0x0242),	two (0x07e0, 0x07c3), 	{U9, R2, R3}, 		0, PROCESSOR_NOT_V850 },
+
+{ "div",	two (0x07e0, 0x02c0),	two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0, PROCESSOR_NOT_V850 },
+{ "divu",	two (0x07e0, 0x02c2),	two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0, PROCESSOR_NOT_V850 },
+{ "divhu",	two (0x07e0, 0x0282),   two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0, PROCESSOR_NOT_V850 },
+{ "divh",	two (0x07e0, 0x0280),   two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0, PROCESSOR_NOT_V850 },
 /* end-sanitize-v850e */
-{ "divh",	OP  (0x02),		OP_MASK,		{R1, R2_NOTR0},		0 },
+{ "divh",	OP  (0x02),		OP_MASK,		{R1, R2_NOTR0},		0, PROCESSOR_ALL },
   
 /* start-sanitize-v850eq */
-{ "divhn",	two (0x07e0, 0x0280),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0 },
-{ "divhun",	two (0x07e0, 0x0282),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0 },
-{ "divn",	two (0x07e0, 0x02c0),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0 },
-{ "divun",	two (0x07e0, 0x02c2),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0 },
-{ "sdivhn",	two (0x07e0, 0x0180),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0 },
-{ "sdivhun",	two (0x07e0, 0x0182),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0 },
-{ "sdivn",	two (0x07e0, 0x01c0),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0 },
-{ "sdivun",	two (0x07e0, 0x01c2),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0 },
+{ "divhn",	two (0x07e0, 0x0280),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0, PROCESSOR_V850EQ },
+{ "divhun",	two (0x07e0, 0x0282),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0, PROCESSOR_V850EQ },
+{ "divn",	two (0x07e0, 0x02c0),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0, PROCESSOR_V850EQ },
+{ "divun",	two (0x07e0, 0x02c2),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0, PROCESSOR_V850EQ },
+{ "sdivhn",	two (0x07e0, 0x0180),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0, PROCESSOR_V850EQ },
+{ "sdivhun",	two (0x07e0, 0x0182),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0, PROCESSOR_V850EQ },
+{ "sdivn",	two (0x07e0, 0x01c0),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0, PROCESSOR_V850EQ },
+{ "sdivun",	two (0x07e0, 0x01c2),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0, PROCESSOR_V850EQ },
 /* end-sanitize-v850eq */
   
-{ "nop",	one (0x00),		one (0xffff),		{0}, 			0 },
-{ "mov",	OP  (0x10),		OP_MASK,		{I5, R2_NOTR0},		0 },
+{ "nop",	one (0x00),		one (0xffff),		{0}, 			0, PROCESSOR_ALL },
+{ "mov",	OP  (0x10),		OP_MASK,		{I5, R2_NOTR0},		0, PROCESSOR_ALL },
 /* start-sanitize-v850e */
-{ "mov",	one (0x0620),		one (0xffe0),		{IMM32, R1_NOTR0},	0 },
+{ "mov",	one (0x0620),		one (0xffe0),		{IMM32, R1_NOTR0},	0, PROCESSOR_NOT_V850 },
 /* end-sanitize-v850e */
-{ "mov",        OP  (0x00),		OP_MASK,		{R1, R2_NOTR0},		0 },
-{ "movea",	OP  (0x31),		OP_MASK,		{I16, R1, R2_NOTR0},	0 },
-{ "movhi",	OP  (0x32),		OP_MASK,		{I16U, R1, R2_NOTR0},	0 },
-{ "add",	OP  (0x0e),		OP_MASK,		IF1, 			0 },
-{ "add",	OP  (0x12),		OP_MASK,		IF2, 			0 },
-{ "addi",	OP  (0x30),		OP_MASK,		IF6, 			0 },
-{ "sub",	OP  (0x0d),		OP_MASK,		IF1, 			0 },
-{ "subr", 	OP  (0x0c),		OP_MASK,		IF1, 			0 },
-{ "mulh",	OP  (0x17),		OP_MASK,		{I5, R2_NOTR0},		0 },
-{ "mulh",	OP  (0x07),		OP_MASK,		{R1, R2_NOTR0},		0 },
-{ "mulhi",	OP  (0x37),		OP_MASK,		{I16, R1, R2_NOTR0},	0 },
-{ "cmp",	OP  (0x0f),		OP_MASK,		IF1, 			0 },
-{ "cmp",	OP  (0x13),		OP_MASK,		IF2, 			0 },
+{ "mov",        OP  (0x00),		OP_MASK,		{R1, R2_NOTR0},		0, PROCESSOR_ALL },
+{ "movea",	OP  (0x31),		OP_MASK,		{I16, R1, R2_NOTR0},	0, PROCESSOR_ALL },
+{ "movhi",	OP  (0x32),		OP_MASK,		{I16U, R1, R2_NOTR0},	0, PROCESSOR_ALL },
+{ "add",	OP  (0x0e),		OP_MASK,		IF1, 			0, PROCESSOR_ALL },
+{ "add",	OP  (0x12),		OP_MASK,		IF2, 			0, PROCESSOR_ALL },
+{ "addi",	OP  (0x30),		OP_MASK,		IF6, 			0, PROCESSOR_ALL },
+{ "sub",	OP  (0x0d),		OP_MASK,		IF1, 			0, PROCESSOR_ALL },
+{ "subr", 	OP  (0x0c),		OP_MASK,		IF1, 			0, PROCESSOR_ALL },
+{ "mulh",	OP  (0x17),		OP_MASK,		{I5, R2_NOTR0},		0, PROCESSOR_ALL },
+{ "mulh",	OP  (0x07),		OP_MASK,		{R1, R2_NOTR0},		0, PROCESSOR_ALL },
+{ "mulhi",	OP  (0x37),		OP_MASK,		{I16, R1, R2_NOTR0},	0, PROCESSOR_ALL },
+{ "cmp",	OP  (0x0f),		OP_MASK,		IF1, 			0, PROCESSOR_ALL },
+{ "cmp",	OP  (0x13),		OP_MASK,		IF2, 			0, PROCESSOR_ALL },
   
 /* saturated operation instructions */
-{ "satadd",	OP (0x11),		OP_MASK,		{I5, R2_NOTR0},		0 },
-{ "satadd",	OP (0x06),		OP_MASK,		{R1, R2_NOTR0},		0 },
-{ "satsub",	OP (0x05),		OP_MASK,		{R1, R2_NOTR0},		0 },
-{ "satsubi",	OP (0x33),		OP_MASK,		{I16, R1, R2_NOTR0},	0 },
-{ "satsubr",	OP (0x04),		OP_MASK,		{R1, R2_NOTR0},		0 },
+{ "satadd",	OP (0x11),		OP_MASK,		{I5, R2_NOTR0},		0, PROCESSOR_ALL },
+{ "satadd",	OP (0x06),		OP_MASK,		{R1, R2_NOTR0},		0, PROCESSOR_ALL },
+{ "satsub",	OP (0x05),		OP_MASK,		{R1, R2_NOTR0},		0, PROCESSOR_ALL },
+{ "satsubi",	OP (0x33),		OP_MASK,		{I16, R1, R2_NOTR0},	0, PROCESSOR_ALL },
+{ "satsubr",	OP (0x04),		OP_MASK,		{R1, R2_NOTR0},		0, PROCESSOR_ALL },
 
 /* logical operation instructions */
-{ "tst",	OP (0x0b),		OP_MASK,		IF1, 			0 },
-{ "or",		OP (0x08),		OP_MASK,		IF1, 			0 },
-{ "ori",	OP (0x34),		OP_MASK,		IF6U, 			0 },
-{ "and",	OP (0x0a),		OP_MASK,		IF1, 			0 },
-{ "andi",	OP (0x36),		OP_MASK,		IF6U, 			0 },
-{ "xor",	OP (0x09),		OP_MASK,		IF1, 			0 },
-{ "xori",	OP (0x35),		OP_MASK,		IF6U, 			0 },
-{ "not",	OP (0x01),		OP_MASK,		IF1, 			0 },
-{ "sar",	OP (0x15),		OP_MASK,		{I5U, R2}, 		0 },
-{ "sar",	two (0x07e0, 0x00a0),	two (0x07e0, 0xffff), 	{R1,  R2}, 		0 },
-{ "shl",	OP  (0x16),		OP_MASK,	      	{I5U, R2}, 		0 },
-{ "shl",	two (0x07e0, 0x00c0),	two (0x07e0, 0xffff), 	{R1,  R2}, 		0 },
-{ "shr",	OP  (0x14),		OP_MASK,	      	{I5U, R2}, 		0 },
-{ "shr",	two (0x07e0, 0x0080),	two (0x07e0, 0xffff), 	{R1,  R2}, 		0 },
+{ "tst",	OP (0x0b),		OP_MASK,		IF1, 			0, PROCESSOR_ALL },
+{ "or",		OP (0x08),		OP_MASK,		IF1, 			0, PROCESSOR_ALL },
+{ "ori",	OP (0x34),		OP_MASK,		IF6U, 			0, PROCESSOR_ALL },
+{ "and",	OP (0x0a),		OP_MASK,		IF1, 			0, PROCESSOR_ALL },
+{ "andi",	OP (0x36),		OP_MASK,		IF6U, 			0, PROCESSOR_ALL },
+{ "xor",	OP (0x09),		OP_MASK,		IF1, 			0, PROCESSOR_ALL },
+{ "xori",	OP (0x35),		OP_MASK,		IF6U, 			0, PROCESSOR_ALL },
+{ "not",	OP (0x01),		OP_MASK,		IF1, 			0, PROCESSOR_ALL },
+{ "sar",	OP (0x15),		OP_MASK,		{I5U, R2}, 		0, PROCESSOR_ALL },
+{ "sar",	two (0x07e0, 0x00a0),	two (0x07e0, 0xffff), 	{R1,  R2}, 		0, PROCESSOR_ALL },
+{ "shl",	OP  (0x16),		OP_MASK,	      	{I5U, R2}, 		0, PROCESSOR_ALL },
+{ "shl",	two (0x07e0, 0x00c0),	two (0x07e0, 0xffff), 	{R1,  R2}, 		0, PROCESSOR_ALL },
+{ "shr",	OP  (0x14),		OP_MASK,	      	{I5U, R2}, 		0, PROCESSOR_ALL },
+{ "shr",	two (0x07e0, 0x0080),	two (0x07e0, 0xffff), 	{R1,  R2}, 		0, PROCESSOR_ALL },
 /* start-sanitize-v850e */
-{ "sasf",       two (0x07e0, 0x0200),	two (0x07f0, 0xffff), 	{CCCC, R2}, 		0 },
+{ "sasf",       two (0x07e0, 0x0200),	two (0x07f0, 0xffff), 	{CCCC, R2}, 		0, PROCESSOR_NOT_V850 },
 /* end-sanitize-v850e */
 
 /* branch instructions */
 	/* signed integer */
-{ "bgt",	BOP (0xf),		BOP_MASK,		IF3, 			0 },
-{ "bge",	BOP (0xe),		BOP_MASK,		IF3, 			0 },
-{ "blt",	BOP (0x6),		BOP_MASK,		IF3, 			0 },
-{ "ble",	BOP (0x7),		BOP_MASK,		IF3, 			0 },
+{ "bgt",	BOP (0xf),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "bge",	BOP (0xe),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "blt",	BOP (0x6),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "ble",	BOP (0x7),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
 	/* unsigned integer */
-{ "bh",		BOP (0xb),		BOP_MASK,		IF3, 			0 },
-{ "bnh",	BOP (0x3),		BOP_MASK,		IF3, 			0 },
-{ "bl",		BOP (0x1),		BOP_MASK,		IF3, 			0 },
-{ "bnl",	BOP (0x9),		BOP_MASK,		IF3, 			0 },
+{ "bh",		BOP (0xb),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "bnh",	BOP (0x3),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "bl",		BOP (0x1),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "bnl",	BOP (0x9),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
 	/* common */
-{ "be",		BOP (0x2),		BOP_MASK,		IF3, 			0 },
-{ "bne",	BOP (0xa),		BOP_MASK,		IF3, 			0 },
+{ "be",		BOP (0x2),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "bne",	BOP (0xa),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
 	/* others */
-{ "bv",		BOP (0x0),		BOP_MASK,		IF3, 			0 },
-{ "bnv",	BOP (0x8),		BOP_MASK,		IF3, 			0 },
-{ "bn",		BOP (0x4),		BOP_MASK,		IF3, 			0 },
-{ "bp",		BOP (0xc),		BOP_MASK,		IF3, 			0 },
-{ "bc",		BOP (0x1),		BOP_MASK,		IF3, 			0 },
-{ "bnc",	BOP (0x9),		BOP_MASK,		IF3, 			0 },
-{ "bz",		BOP (0x2),		BOP_MASK,		IF3, 			0 },
-{ "bnz",	BOP (0xa),		BOP_MASK,		IF3, 			0 },
-{ "br",		BOP (0x5),		BOP_MASK,		IF3, 			0 },
-{ "bsa",	BOP (0xd),		BOP_MASK,		IF3, 			0 },
+{ "bv",		BOP (0x0),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "bnv",	BOP (0x8),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "bn",		BOP (0x4),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "bp",		BOP (0xc),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "bc",		BOP (0x1),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "bnc",	BOP (0x9),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "bz",		BOP (0x2),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "bnz",	BOP (0xa),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "br",		BOP (0x5),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "bsa",	BOP (0xd),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
 
 /* Branch macros.
 
@@ -720,60 +713,60 @@ const struct v850_opcode v850_opcodes[] =
    will twiddle bits as necessary if the long form is needed.  */
 
 	/* signed integer */
-{ "jgt",	BOP (0xf),		BOP_MASK,		IF3, 			0 },
-{ "jge",	BOP (0xe),		BOP_MASK,		IF3, 			0 },
-{ "jlt",	BOP (0x6),		BOP_MASK,		IF3, 			0 },
-{ "jle",	BOP (0x7),		BOP_MASK,		IF3, 			0 },
+{ "jgt",	BOP (0xf),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "jge",	BOP (0xe),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "jlt",	BOP (0x6),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "jle",	BOP (0x7),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
 	/* unsigned integer */
-{ "jh",		BOP (0xb),		BOP_MASK,		IF3, 			0 },
-{ "jnh",	BOP (0x3),		BOP_MASK,		IF3, 			0 },
-{ "jl",		BOP (0x1),		BOP_MASK,		IF3, 			0 },
-{ "jnl",	BOP (0x9),		BOP_MASK,		IF3, 			0 },
+{ "jh",		BOP (0xb),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "jnh",	BOP (0x3),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "jl",		BOP (0x1),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "jnl",	BOP (0x9),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
 	/* common */
-{ "je",		BOP (0x2),		BOP_MASK,		IF3, 			0 },
-{ "jne",	BOP (0xa),		BOP_MASK,		IF3, 			0 },
+{ "je",		BOP (0x2),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "jne",	BOP (0xa),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
 	/* others */
-{ "jv",		BOP (0x0),		BOP_MASK,		IF3, 			0 },
-{ "jnv",	BOP (0x8),		BOP_MASK,		IF3, 			0 },
-{ "jn",		BOP (0x4),		BOP_MASK,		IF3, 			0 },
-{ "jp",		BOP (0xc),		BOP_MASK,		IF3, 			0 },
-{ "jc",		BOP (0x1),		BOP_MASK,		IF3, 			0 },
-{ "jnc",	BOP (0x9),		BOP_MASK,		IF3, 			0 },
-{ "jz",		BOP (0x2),		BOP_MASK,		IF3, 			0 },
-{ "jnz",	BOP (0xa),		BOP_MASK,		IF3, 			0 },
-{ "jsa",	BOP (0xd),		BOP_MASK,		IF3, 			0 },
-{ "jbr",	BOP (0x5),		BOP_MASK,		IF3, 			0 },
+{ "jv",		BOP (0x0),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "jnv",	BOP (0x8),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "jn",		BOP (0x4),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "jp",		BOP (0xc),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "jc",		BOP (0x1),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "jnc",	BOP (0x9),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "jz",		BOP (0x2),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "jnz",	BOP (0xa),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "jsa",	BOP (0xd),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
+{ "jbr",	BOP (0x5),		BOP_MASK,		IF3, 			0, PROCESSOR_ALL },
   
-{ "jr",		one (0x0780),		two (0xffc0, 0x0001),	{D22}, 			0 },
-{ "jarl",	one (0x0780),		two (0x07c0, 0x0001),	{D22, R2}, 		0 }, 
+{ "jr",		one (0x0780),		two (0xffc0, 0x0001),	{D22}, 			0, PROCESSOR_ALL },
+{ "jarl",	one (0x0780),		two (0x07c0, 0x0001),	{D22, R2}, 		0, PROCESSOR_ALL}, 
 
 /* bit manipulation instructions */
-{ "set1",	two (0x07c0, 0x0000),	two (0xc7e0, 0x0000),	{B3, D16, R1}, 		2 },
+{ "set1",	two (0x07c0, 0x0000),	two (0xc7e0, 0x0000),	{B3, D16, R1}, 		2, PROCESSOR_ALL },
 /* start-sanitize-v850e */
-{ "set1",	two (0x07e0, 0x00e0),	two (0x07e0, 0xffff),	{R2, R1},    		2 },
+{ "set1",	two (0x07e0, 0x00e0),	two (0x07e0, 0xffff),	{R2, R1},    		2, PROCESSOR_NOT_V850 },
 /* end-sanitize-v850e */
-{ "not1",	two (0x47c0, 0x0000),	two (0xc7e0, 0x0000),	{B3, D16, R1}, 		2 },
+{ "not1",	two (0x47c0, 0x0000),	two (0xc7e0, 0x0000),	{B3, D16, R1}, 		2, PROCESSOR_ALL },
 /* start-sanitize-v850e */
-{ "not1",	two (0x07e0, 0x00e2),	two (0x07e0, 0xffff),	{R2, R1},    		2 },
+{ "not1",	two (0x07e0, 0x00e2),	two (0x07e0, 0xffff),	{R2, R1},    		2, PROCESSOR_NOT_V850 },
 /* end-sanitize-v850e */
-{ "clr1",	two (0x87c0, 0x0000),	two (0xc7e0, 0x0000),	{B3, D16, R1}, 		2 },
+{ "clr1",	two (0x87c0, 0x0000),	two (0xc7e0, 0x0000),	{B3, D16, R1}, 		2, PROCESSOR_ALL },
 /* start-sanitize-v850e */
-{ "clr1",	two (0x07e0, 0x00e4),	two (0x07e0, 0xffff),   {R2, R1},    		2 },
+{ "clr1",	two (0x07e0, 0x00e4),	two (0x07e0, 0xffff),   {R2, R1},    		2, PROCESSOR_NOT_V850 },
 /* end-sanitize-v850e */
-{ "tst1",	two (0xc7c0, 0x0000),	two (0xc7e0, 0x0000),	{B3, D16, R1}, 		2 },
+{ "tst1",	two (0xc7c0, 0x0000),	two (0xc7e0, 0x0000),	{B3, D16, R1}, 		2, PROCESSOR_ALL },
 /* start-sanitize-v850e */
-{ "tst1",	two (0x07e0, 0x00e6),	two (0x07e0, 0xffff),	{R2, R1},    		2 },
+{ "tst1",	two (0x07e0, 0x00e6),	two (0x07e0, 0xffff),	{R2, R1},    		2, PROCESSOR_NOT_V850 },
 /* end-sanitize-v850e */
 
 /* special instructions */
-{ "di",		two (0x07e0, 0x0160),	two (0xffff, 0xffff),	{0}, 			0 },
-{ "ei",		two (0x87e0, 0x0160),	two (0xffff, 0xffff),	{0}, 			0 },
-{ "halt",	two (0x07e0, 0x0120),	two (0xffff, 0xffff),	{0}, 			0 },
-{ "reti",	two (0x07e0, 0x0140),	two (0xffff, 0xffff),	{0}, 			0 },
-{ "trap",	two (0x07e0, 0x0100),	two (0xffe0, 0xffff),	{I5U}, 			0 },
-{ "ldsr",	two (0x07e0, 0x0020),	two (0x07e0, 0xffff),	{R1, SR2}, 		0 },
-{ "stsr",	two (0x07e0, 0x0040),	two (0x07e0, 0xffff),	{SR1, R2}, 		0 },
-{ 0, 0, 0, {0}, 0 },
+{ "di",		two (0x07e0, 0x0160),	two (0xffff, 0xffff),	{0}, 			0, PROCESSOR_ALL },
+{ "ei",		two (0x87e0, 0x0160),	two (0xffff, 0xffff),	{0}, 			0, PROCESSOR_ALL },
+{ "halt",	two (0x07e0, 0x0120),	two (0xffff, 0xffff),	{0}, 			0, PROCESSOR_ALL },
+{ "reti",	two (0x07e0, 0x0140),	two (0xffff, 0xffff),	{0}, 			0, PROCESSOR_ALL },
+{ "trap",	two (0x07e0, 0x0100),	two (0xffe0, 0xffff),	{I5U}, 			0, PROCESSOR_ALL },
+{ "ldsr",	two (0x07e0, 0x0020),	two (0x07e0, 0xffff),	{R1, SR2}, 		0, PROCESSOR_ALL },
+{ "stsr",	two (0x07e0, 0x0040),	two (0x07e0, 0xffff),	{SR1, R2}, 		0, PROCESSOR_ALL },
+{ 0, 0, 0, {0}, 0, 0 },
 
 } ;
 
