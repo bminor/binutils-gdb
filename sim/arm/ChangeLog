@@ -1,3 +1,8 @@
+2002-07-05  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* armemu.c (ARMul_Emulate32): Add more tests for valid MIA, MIAPH
+	and MIAxy instructions.
+	
 2002-06-21  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* armos.h (ADP_Stopped_RunTimeError): Set correct value.
