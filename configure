@@ -141,7 +141,7 @@ do
 		;;
 # These options have mandatory values.  Since we didn't find an = sign,
 # the value must be in the next argument
-	--b* | --ex* | --ho* | --pre* | --program-p* | --program-s* | --program-t* | --si* | --sr* | --ta* | --tm*)
+	--b* | --ex* | --ho* | --pre* | --program-p* | --program-s* | --program-t* | --si* | --sr* | --ta* | --tm* | --x-*)
 		optarg=$1
 		shift
 		;;
@@ -272,6 +272,8 @@ do
 		;;
 	--x)	with_x=yes
 		withoptions="$withoptions --with-x"
+		;;
+	--x-i* | --x-l*) other_options="$other_options $orig_option"
 		;;
 	--*)
 		echo "Warning: Unrecognized option: \"$orig_option\"". >&2

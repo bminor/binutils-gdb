@@ -1,3 +1,8 @@
+Fri Apr  8 12:01:41 1994  David J. Mackenzie  (djm@cygnus.com)
+
+	* configure: Ignore --x-includes and --x-libraries, for Autoconf
+	compatibility. 
+
 Thu Apr  7 17:31:43 1994  Doug Evans  (dje@canuck.cygnus.com)
 
 	* build-all.mk: Add `clean' target.
