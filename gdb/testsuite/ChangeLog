@@ -1,3 +1,8 @@
+Mon Jul 25 23:48:50 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/corefile.exp:  Change `else if' to `elseif', which is
+	the correct TCL syntax.
+
 Mon Jul 25 15:35:56 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* gdb.base/opaque.exp: use runto instead of messing around with
