@@ -61,6 +61,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 static int restore_pc_queue PARAMS ((struct frame_saved_regs *fsr));
 static int hppa_alignof PARAMS ((struct type *arg));
+static FRAME_ADDR dig_fp_from_stack PARAMS ((FRAME frame,
+					     struct unwind_table_entry *u));
 CORE_ADDR frame_saved_pc PARAMS ((FRAME frame));
 
 
@@ -518,19 +520,138 @@ init_extra_frame_info (fromleaf, frame)
     frame->frame -= framesize;
 }
 
+/* Given a GDB frame, determine the address of the calling function's frame.
+   This will be used to create a new GDB frame struct, and then
+   INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
+
+   This may involve searching through prologues for several functions
+   at boundaries where GCC calls HP C code, or where code which has
+   a frame pointer calls code without a frame pointer.  */
+  
+
 FRAME_ADDR
 frame_chain (frame)
      struct frame_info *frame;
 {
-  int framesize;
+  int my_framesize, caller_framesize;
+  struct unwind_table_entry *u;
 
-  framesize = find_proc_framesize(FRAME_SAVED_PC(frame));
+  /* Get frame sizes for the current frame and the frame of the 
+     caller.  */
+  my_framesize = find_proc_framesize (frame->pc);
+  caller_framesize = find_proc_framesize (FRAME_SAVED_PC(frame));
 
-  if (framesize != -1)
-    return frame->frame - framesize;
+  /* If caller does not have a frame pointer, then its frame
+     can be found at current_frame - caller_framesize.  */
+  if (caller_framesize != -1)
+    return frame->frame - caller_framesize;
 
-  return read_memory_integer (frame->frame, 4);
+  /* Both caller and callee have frame pointers and are GCC compiled
+     (SAVE_SP bit in unwind descriptor is on for both functions.
+     The previous frame pointer is found at the top of the current frame.  */
+  if (caller_framesize == -1 && my_framesize == -1)
+    return read_memory_integer (frame->frame, 4);
+
+  /* Caller has a frame pointer, but callee does not.  This is a little
+     more difficult as GCC and HP C lay out locals and callee register save
+     areas very differently.
+
+     The previous frame pointer could be in a register, or in one of 
+     several areas on the stack.
+
+     Walk from the current frame to the innermost frame examining 
+     unwind descriptors to determine if %r4 ever gets saved into the
+     stack.  If so return whatever value got saved into the stack.
+     If it was never saved in the stack, then the value in %r4 is still
+     valid, so use it. 
+
+     We use information from unwind descriptors to determine if %r4
+     is saved into the stack (Entry_GR field has this information).  */
+
+  while (frame)
+    {
+      u = find_unwind_entry (frame->pc);
+
+      if (!u)
+	{
+	  /* We could find this information by examining prologues.  This
+	     is necessary to deal with stripped executables.  */
+	  warning ("Unable to find unwind for PC 0x%x -- Help!", frame->pc);
+	  return 0;
+	}
+
+      /* Entry_GR specifies the number of callee-saved general registers
+	 saved in the stack.  It starts at %r3, so %r4 would be 2.  */
+      if (u->Entry_GR >= 2 || u->Save_SP)
+	break;
+      else
+	frame = frame->next;
+    }
+
+  if (frame)
+    {
+      /* We may have walked down the chain into a function with a frame
+	 pointer.  */
+      if (u->Save_SP)
+	return read_memory_integer (frame->frame, 4);
+      /* %r4 was saved somewhere in the stack.  Dig it out.  */
+      else 
+	return dig_fp_from_stack (frame, u);
+    }
+  else
+    {
+      /* The value in %r4 was never saved into the stack (thus %r4 still
+	 holds the value of the previous frame pointer).  */
+      return read_register (4);
+    }
 }
+
+/* Given a frame and an unwind descriptor return the value for %fr (aka fp)
+   which was saved into the stack.  FIXME: Why can't we just use the standard
+   saved_regs stuff?  */
+
+static FRAME_ADDR
+dig_fp_from_stack (frame, u)
+     FRAME frame;
+     struct unwind_table_entry *u;
+{
+  CORE_ADDR pc = u->region_start;
+
+  /* Search the function for the save of %r4.  */
+  while (pc != u->region_end)
+    {
+      char buf[4];
+      unsigned long inst;
+      int status;
+
+      /* We need only look for the standard stw %r4,X(%sp) instruction,
+	 the other variants (eg stwm) are only used on the first register
+	 save (eg %r3).  */
+      status = target_read_memory (pc, buf, 4);
+      inst = extract_unsigned_integer (buf, 4);
+
+      if (status != 0)
+	memory_error (status, pc);
+
+      /* Check for stw %r4,X(%sp).  */
+      if ((inst & 0xffffc000) == 0x6bc40000)
+	{
+	  /* Found the instruction which saves %r4.  The offset (relative
+	     to this frame) is framesize + immed14 (derived from the 
+	     store instruction).  */
+	  int offset = (u->Total_frame_size << 3) + extract_14 (inst);
+
+	  return read_memory_integer (frame->frame + offset, 4);
+	}
+
+      /* Keep looking.  */
+      pc += 4;
+    }
+
+  warning ("Unable to find %%r4 in stack.\n");
+  return 0;
+}
+
 
 /* To see if a frame chain is valid, see if the caller looks like it
    was compiled with gcc. */
