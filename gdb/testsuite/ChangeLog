@@ -1,5 +1,8 @@
 Fri Jan 27 09:24:51 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.base/a1-selftest.exp (test_with_self), gdb.base/interrupt.exp:
+	Quote ^C when passing it to stty.  For some shells ^ is a pipe.
+
 	* gdb.base/funcargs.exp: Modify many tests so that every test
 	either passes or fails.  Make some test names unique.
 
