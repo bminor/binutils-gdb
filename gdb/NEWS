@@ -10,6 +10,7 @@ x86 FreeBSD 3.x and 4.x				i[3456]86*-freebsd[34]*
 MIPS Linux					mips*-*-linux*
 MIPS SGI Irix 6.x				mips*-sgi-irix6*
 ia64 AIX					ia64-*-aix*
+s390 and s390x Linux				{s390,s390x}-*-linux*
 
 * New targets
 
