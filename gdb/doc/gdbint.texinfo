@@ -1,5 +1,6 @@
 \input texinfo
 @setfilename gdb-internals
+@c $Id$
 @ifinfo
 This file documents the internals of the GNU debugger GDB.
 
@@ -57,9 +58,9 @@ are preserved on all copies.
 * Releases::			Configuring GDB for release
 * README::			The README file
 * New Architectures::		Defining a new host or target architecture
+* BFD support for GDB::		How BFD and GDB interface
 * Host versus Target::		What features are in which files
 * Symbol Reading::		Defining new symbol readers
-
 @end menu
 
 @node Cleanups, Wrapping, Top, Top
@@ -78,22 +79,28 @@ what they say.  This is only done if you ask that it be done.
 Syntax:
 
 @table @code
-@item old_chain = make_cleanup (function, arg);
-This makes a cleanup which will cause FUNCTION to be called with ARG
-(a char *) later.  The result, OLD_CHAIN, is a handle that can be
-passed to do_cleanups or discard_cleanups later.  Unless you are
-going to call do_cleanups or discard_cleanups yourself,
-you can ignore the result from make_cleanup.
+@item @var{old_chain} = make_cleanup (@var{function}, @var{arg});
+Make a cleanup which will cause @var{function} to be called with @var{arg}
+(a @code{char *}) later.  The result, @var{old_chain}, is a handle that can be
+passed to @code{do_cleanups} or @code{discard_cleanups} later.  Unless you are
+going to call @code{do_cleanups} or @code{discard_cleanups} yourself,
+you can ignore the result from @code{make_cleanup}.
 
 
-@item do_cleanups (old_chain);
-Performs all cleanups done since make_cleanup returned OLD_CHAIN.
-E.g.:   make_cleanup (a, 0); old = make_cleanup (b, 0); do_cleanups (old);
-will call b() but will not call a().  The cleanup that calls a() will remain
-in the cleanup chain, and will be done later unless otherwise discarded.
+@item do_cleanups (@var{old_chain});
+Perform all cleanups done since @code{make_cleanup} returned @var{old_chain}.
+E.g.:   
+@example
+make_cleanup (a, 0); 
+old = make_cleanup (b, 0); 
+do_cleanups (old);
+@end example
+@noindent
+will call @code{b()} but will not call @code{a()}.  The cleanup that calls @code{a()} will remain
+in the cleanup chain, and will be done later unless otherwise discarded.@refill
 
-@item discard_cleanups (old_chain);
-Same as do_cleanups except that it just removes the cleanups from the
+@item discard_cleanups (@var{old_chain});
+Same as @code{do_cleanups} except that it just removes the cleanups from the
 chain and does not call the specified functions.
 
 @end table
@@ -168,7 +175,7 @@ appear anywhere else in the directory.
 
 
 
-@node New Architectures, Host versus Target, README, Top
+@node New Architectures, BFD support for GDB, README, Top
 @chapter Defining a new host or target architecture
 
 
@@ -178,7 +185,11 @@ architecture involved.
 
 Object files needed when the host system is an @var{ARCH} are listed in
 the file @file{xconfig/@var{ARCH}}, in the Makefile macro @samp{XDEPFILES
-= }@dots{}.  You can also define XXXXXX in there.
+= }@dots{}.  The header file that defines the host system should be
+called xm-@var{ARCH}.h, and should be specified as the value of @samp{XM_FILE=}
+in @file{xconfig/@var{ARCH}}.  
+You can also define @samp{CC}, @samp{REGEX} and @samp{REGEX1},
+@samp{SYSV_DEFINE}, @samp{XM_CFLAGS}, etc in there; see @file{Makefile.in}.
 
 There are some ``generic'' versions of routines that can be used by
 various host systems.  If these routines work for the @var{ARCH} host,
@@ -198,22 +209,28 @@ Support for reading registers out of a core file.  This routine calls
 @code{register_addr(}), see below.
 
 @item register_addr()
-If your @code{xm-@var{ARCH}.h} file defines the macro @code{REGISTER_U_ADDR(reg)} to be the
-offset within the @samp{user} struct of a register (represented as a GDB
-register number), @file{coredep.c} will define the @code{register_addr()} function
-and use the macro in it.  If you do not define @code{REGISTER_U_ADDR}, but
-you are using the standard @code{fetch_core_registers}, you
-will need to define your own version of @code{register_addr}, put it into
-your @code{@var{ARCH}-xdep.c} file, and be sure @code{@var{ARCH}-xdep.o} is in the @code{XDEPFILES} list.
-If you have your own @code{fetch_core_registers}, you only need to define
-@code{register_addr} if your @code{fetch_core_registers} calls it.  Many custom
-@code{fetch_core_registers} implementations simply locate the registers
-themselves.
+If your @code{xm-@var{ARCH}.h} file defines the macro
+@code{REGISTER_U_ADDR(reg)} to be the offset within the @samp{user}
+struct of a register (represented as a GDB register number),
+@file{coredep.c} will define the @code{register_addr()} function and use
+the macro in it.  If you do not define @code{REGISTER_U_ADDR}, but you
+are using the standard @code{fetch_core_registers}, you will need to
+define your own version of @code{register_addr}, put it into your
+@code{@var{ARCH}-xdep.c} file, and be sure @code{@var{ARCH}-xdep.o} is
+in the @code{XDEPFILES} list.  If you have your own
+@code{fetch_core_registers}, you only need to define
+@code{register_addr} if your @code{fetch_core_registers} calls it.  Many
+custom @code{fetch_core_registers} implementations simply locate the
+registers themselves.@refill
 @end table
 
-Files needed when the target system is an @var{ARCH} are listed in the file
-@file{tconfig/@var{ARCH}}, in the @code{Makefile} macro @samp{TDEPFILES = }@dots{}.  You can also
-define XXXXXX in there.
+Object files needed when the target system is an @var{ARCH} are listed in
+the file @file{tconfig/@var{ARCH}}, in the Makefile macro @samp{TDEPFILES
+= }@dots{}.  The header file that defines the target system should be
+called tm-@var{ARCH}.h, and should be specified as the value of @samp{TM_FILE}
+in @file{tconfig/@var{ARCH}}.  
+You can also define @samp{TM_CFLAGS}, @samp{TM_CLIBS}, and @samp{TM_CDEPS} 
+in there; see @file{Makefile.in}.
 
 Similar generic support files for target systems are:
 
@@ -227,7 +244,63 @@ extract data from one, write data to one, print information about one,
 etc.  Now that executable files are handled with BFD, every architecture
 should be able to use the generic exec.c rather than its own custom code.
 
-@node Host versus Target, Symbol Reading, New Architectures, Top
+@node BFD support for GDB, Host versus Target, New Architectures, Top
+@chapter Binary File Descriptor library support for GDB
+
+BFD provides support for GDB in several ways:
+
+@table @emph
+@item	identifying executable and core files
+BFD will identify a variety of file types, including a.out, coff, and
+several variants thereof, as well as several kinds of core files.
+
+@item	access to sections of files
+BFD parses the file headers to determine the names, virtual addresses,
+sizes, and file locations of all the various named sections in files
+(such as the text section or the data section).  GDB simply calls
+BFD to read or write section X at byte offset Y for length Z.
+
+@item	specialized core file support
+BFD provides routines to determine the failing command name stored
+in a core file, the signal with which the program failed, and whether
+a core file matches (i.e. could be a core dump of) a particular executable
+file.
+
+@item	locating the symbol information
+GDB uses an internal interface of BFD to determine where to find the
+symbol information in an executable file or symbol-file.  GDB itself
+handles the reading of symbols, since BFD does not ``understand'' debug
+symbols, but GDB uses BFD's cached information to find the symbols,
+string table, etc.
+@end table
+
+When porting GDB to a new operating system, you will need to either
+write specific code for parsing your OS's core files, or customize
+bfd/trad-core.c.   First, use whatever #include files your machine uses
+to define the struct of registers that is accessible (possibly in the
+upage) in a core file (rather than <machine/reg.h>), and an include
+file that defines whatever header exists on a core file (e.g. the
+u-area or a "struct core").  Then modify @samp{trad_unix_core_file_p}
+to use these values to set up the section information for the data
+segment, stack segment, any other segments in the core file (perhaps
+shared library contents or control information), "registers" segment,
+and if there are two discontiguous sets of registers (e.g.  integer and
+float), the "reg2" segment.  This section information basically
+delimits areas in the core file in a standard way, which the
+section-reading routines in BFD know how to seek around in.
+
+Then back in GDB, you need a matching routine called fetch_core_registers.
+If you can use the generic one, it's in core-dep.c; if not, it's in
+your xm-foobar.c file.  It will be passed a char pointer
+to the entire "registers" segment, its length, and a zero; or a char
+pointer to the entire "regs2" segment, its length, and a 2.  The
+routine should suck out the supplied register values and install them into
+gdb's "registers" array.  (@xref{New Architectures}
+for more info about this.)
+
+The interface for symbol reading is described in @xref{Symbol Reading}.
+
+@node Host versus Target, Symbol Reading, BFD support for GDB, Top
 @chapter What is considered ``host-dependent'' versus ``target-dependent''?
 
 The xconfig/*, xm-*.h and *-xdep.c files are for host support.  The
@@ -250,8 +323,43 @@ as I evolve it.  I have moved many things out of the xdep files
 actually, partly as a result of BFD and partly by removing duplicated
 code.
 
+@menu
+* New Host::			Adding a New Host
+* New Target::			Adding a New Target
+* New Config::			Extending @code{configure}
+@end menu
 
-@node Symbol Reading, , Host Versus Target, Top
+@node New Host, New Target, Host versus Target, Host versus Target
+@section Adding a New Host
+
+@node New Target, New Config, New Host, Host versus Target
+@section Adding a New Target
+
+@node New Config,  , New Target, Host versus Target
+@section Extending @code{configure}
+Once you have added a new host, target, or both, you'll also need to
+extend the @code{configure} script to recognize the new configuration
+possibilities.  
+
+You shouldn't edit the @code{configure} script itself to add hosts or
+targets; instead, edit the script fragments in the file
+@code{configure.in}.  To handle new hosts, modify the segment after the
+comment @samp{# per-host}; to handle new targets, modify after @samp{#
+per-target}.
+@c Would it be simpler to just use different per-host and per-target
+@c *scripts*, and call them from {configure} ?
+
+Then fold your changes into the @code{configure} script by using the
+@code{+template} option, and specifying @code{configure} itself as the
+template:
+@example
+configure +template=configure
+@end example
+@c If "configure" is the only workable option value for +template, it's
+@c kind of silly to insist that it be provided.  If it isn't, somebody
+@c please fill in here what are others... (then delete this comment!)
+
+@node Symbol Reading,  , Host versus Target, Top
 @chapter Symbol Reading
 
 GDB reads symbols from "symbol files".  The usual symbol file is the
@@ -312,13 +420,12 @@ simply being discarded.
 Called from @code{symbol_file_add} to actually read the symbols from a
 symbol-file into a set of psymtabs or symtabs.
 
-@code{sf} points to the struct sym_fns originally passed to @code{XXX_sym_init} for possible initialization.  
-@code{addr} is the offset between the file's specified start address and
-its true address in memory.  @code{mainline} is 1 if this is the
-main symbol table being read, and 0 if a secondary
-symbol file (e.g. shared library or dynamically loaded file)
-is being read.
-
+@code{sf} points to the struct sym_fns originally passed to
+@code{XXX_sym_init} for possible initialization.  @code{addr} is the
+offset between the file's specified start address and its true address
+in memory.  @code{mainline} is 1 if this is the main symbol table being
+read, and 0 if a secondary symbol file (e.g. shared library or
+dynamically loaded file) is being read.@refill
 @end table
 
 In addition, if a symbol-reading module creates psymtabs when
