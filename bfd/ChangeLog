@@ -1,3 +1,7 @@
+2000-10-12  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf64-hppa.c: Include alloca-conf.h
+
 2000-10-11  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf.c (swap_out_syms): Revert 2000-10-07 changes.
