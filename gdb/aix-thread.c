@@ -63,6 +63,7 @@
 #endif
 #include <sched.h>
 #include <sys/pthdebug.h>
+#include "ppc-tdep.h"
 
 /* Whether to emit debugging output.  */
 static int debug_aix_thread;
@@ -1031,6 +1032,22 @@ supply_fprs (double *vals)
     supply_register (regno + FP0_REGNUM, (char *) (vals + regno));
 }
 
+/* Predicate to test whether given register number is a "special" register.  */
+static int
+special_register_p (int regno)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  return regno == PC_REGNUM
+      || regno == tdep->ppc_ps_regnum
+      || regno == tdep->ppc_cr_regnum
+      || regno == tdep->ppc_lr_regnum
+      || regno == tdep->ppc_ctr_regnum
+      || regno == tdep->ppc_xer_regnum
+      || (tdep->ppc_mq_regnum >= 0 && regno == tdep->ppc_mq_regnum);
+}
+
+
 /* Record that the special registers contain the specified 64-bit and
    32-bit values.  */
 
@@ -1038,14 +1055,14 @@ static void
 supply_sprs64 (uint64_t iar, uint64_t msr, uint32_t cr,
 	       uint64_t lr, uint64_t ctr, uint32_t xer)
 {
-  int regno = FIRST_UISA_SP_REGNUM;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  supply_register (regno,     (char *) &iar);
-  supply_register (regno + 1, (char *) &msr);
-  supply_register (regno + 2, (char *) &cr);
-  supply_register (regno + 3, (char *) &lr);
-  supply_register (regno + 4, (char *) &ctr);
-  supply_register (regno + 5, (char *) &xer);
+  supply_register (PC_REGNUM,     (char *) &iar);
+  supply_register (tdep->ppc_ps_regnum, (char *) &msr);
+  supply_register (tdep->ppc_cr_regnum, (char *) &cr);
+  supply_register (tdep->ppc_lr_regnum, (char *) &lr);
+  supply_register (tdep->ppc_ctr_regnum, (char *) &ctr);
+  supply_register (tdep->ppc_xer_regnum, (char *) &xer);
 }
 
 /* Record that the special registers contain the specified 32-bit
@@ -1055,14 +1072,14 @@ static void
 supply_sprs32 (uint32_t iar, uint32_t msr, uint32_t cr,
 	       uint32_t lr, uint32_t ctr, uint32_t xer)
 {
-  int regno = FIRST_UISA_SP_REGNUM;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  supply_register (regno,     (char *) &iar);
-  supply_register (regno + 1, (char *) &msr);
-  supply_register (regno + 2, (char *) &cr);
-  supply_register (regno + 3, (char *) &lr);
-  supply_register (regno + 4, (char *) &ctr);
-  supply_register (regno + 5, (char *) &xer);
+  supply_register (PC_REGNUM,     (char *) &iar);
+  supply_register (tdep->ppc_ps_regnum, (char *) &msr);
+  supply_register (tdep->ppc_cr_regnum, (char *) &cr);
+  supply_register (tdep->ppc_lr_regnum, (char *) &lr);
+  supply_register (tdep->ppc_ctr_regnum, (char *) &ctr);
+  supply_register (tdep->ppc_xer_regnum, (char *) &xer);
 }
 
 /* Fetch all registers from pthread PDTID, which doesn't have a kernel
@@ -1166,8 +1183,7 @@ fetch_regs_kernel_thread (int regno, pthdb_tid_t tid)
 
   /* Special-purpose registers.  */
 
-  if (regno == -1 || 
-      (regno > FPLAST_REGNUM && regno <= LAST_UISA_SP_REGNUM))
+  if (regno == -1 || special_register_p (regno))
     {
       if (arch64)
 	{
@@ -1179,13 +1195,15 @@ fetch_regs_kernel_thread (int regno, pthdb_tid_t tid)
 	}
       else
 	{
+	  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
 	  if (!ptrace32 (PTT_READ_SPRS, tid, (int *) &sprs32, 0, NULL))
 	    memset (&sprs32, 0, sizeof (sprs32));
 	  supply_sprs32 (sprs32.pt_iar, sprs32.pt_msr, sprs32.pt_cr,
 			 sprs32.pt_lr, sprs32.pt_ctr, sprs32.pt_xer);
 
-	  if (REGISTER_RAW_SIZE (LAST_UISA_SP_REGNUM))
-	    supply_register (LAST_UISA_SP_REGNUM, (char *) &sprs32.pt_mq);
+	  if (tdep->ppc_mq_regnum >= 0)
+	    supply_register (tdep->ppc_mq_regnum, (char *) &sprs32.pt_mq);
 	}
     }
 }
@@ -1253,48 +1271,59 @@ static void
 fill_sprs64 (uint64_t *iar, uint64_t *msr, uint32_t *cr,
 	     uint64_t *lr, uint64_t *ctr, uint32_t *xer)
 {
-  int regno = FIRST_UISA_SP_REGNUM;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  gdb_assert (sizeof (*iar) == REGISTER_RAW_SIZE (regno));
+  /* Verify that the size of the size of the IAR buffer is the
+     same as the raw size of the PC (in the register cache).  If
+     they're not, then either GDB has been built incorrectly, or
+     there's some other kind of internal error.  To be really safe,
+     we should check all of the sizes.   */
+  gdb_assert (sizeof (*iar) == REGISTER_RAW_SIZE (PC_REGNUM));
 
-  if (register_cached (regno))
-    regcache_collect (regno,     iar);
-  if (register_cached (regno + 1))
-    regcache_collect (regno + 1, msr);
-  if (register_cached (regno + 2))
-    regcache_collect (regno + 2, cr);
-  if (register_cached (regno + 3))
-    regcache_collect (regno + 3, lr);
-  if (register_cached (regno + 4))
-    regcache_collect (regno + 4, ctr);
-  if (register_cached (regno + 5))
-    regcache_collect (regno + 5, xer);
+  if (register_cached (PC_REGNUM))
+    regcache_collect (PC_REGNUM, iar);
+  if (register_cached (tdep->ppc_ps_regnum))
+    regcache_collect (tdep->ppc_ps_regnum, msr);
+  if (register_cached (tdep->ppc_cr_regnum))
+    regcache_collect (tdep->ppc_cr_regnum, cr);
+  if (register_cached (tdep->ppc_lr_regnum))
+    regcache_collect (tdep->ppc_lr_regnum, lr);
+  if (register_cached (tdep->ppc_ctr_regnum))
+    regcache_collect (tdep->ppc_ctr_regnum, ctr);
+  if (register_cached (tdep->ppc_xer_regnum))
+    regcache_collect (tdep->ppc_xer_regnum, xer);
 }
 
 static void
 fill_sprs32 (unsigned long *iar, unsigned long *msr, unsigned long *cr,
 	     unsigned long *lr,  unsigned long *ctr, unsigned long *xer)
 {
-  int regno = FIRST_UISA_SP_REGNUM;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  /* If this assert() fails, the most likely reason is that GDB was
+  /* Verify that the size of the size of the IAR buffer is the
+     same as the raw size of the PC (in the register cache).  If
+     they're not, then either GDB has been built incorrectly, or
+     there's some other kind of internal error.  To be really safe,
+     we should check all of the sizes. 
+
+     If this assert() fails, the most likely reason is that GDB was
      built incorrectly.  In order to make use of many of the header
      files in /usr/include/sys, GDB needs to be configured so that
      sizeof (long) == 4).  */
-  gdb_assert (sizeof (*iar) == REGISTER_RAW_SIZE (regno));
+  gdb_assert (sizeof (*iar) == REGISTER_RAW_SIZE (PC_REGNUM));
 
-  if (register_cached (regno))
-    regcache_collect (regno,     iar);
-  if (register_cached (regno + 1))
-    regcache_collect (regno + 1, msr);
-  if (register_cached (regno + 2))
-    regcache_collect (regno + 2, cr);
-  if (register_cached (regno + 3))
-    regcache_collect (regno + 3, lr);
-  if (register_cached (regno + 4))
-    regcache_collect (regno + 4, ctr);
-  if (register_cached (regno + 5))
-    regcache_collect (regno + 5, xer);
+  if (register_cached (PC_REGNUM))
+    regcache_collect (PC_REGNUM, iar);
+  if (register_cached (tdep->ppc_ps_regnum))
+    regcache_collect (tdep->ppc_ps_regnum, msr);
+  if (register_cached (tdep->ppc_cr_regnum))
+    regcache_collect (tdep->ppc_cr_regnum, cr);
+  if (register_cached (tdep->ppc_lr_regnum))
+    regcache_collect (tdep->ppc_lr_regnum, lr);
+  if (register_cached (tdep->ppc_ctr_regnum))
+    regcache_collect (tdep->ppc_ctr_regnum, ctr);
+  if (register_cached (tdep->ppc_xer_regnum))
+    regcache_collect (tdep->ppc_xer_regnum, xer);
 }
 
 /* Store all registers into pthread PDTID, which doesn't have a kernel
@@ -1355,19 +1384,20 @@ store_regs_user_thread (pthdb_pthread_t pdtid)
 	 will fail if the size of an unsigned long is incorrect.  If this
 	 happens, GDB needs to be reconfigured so that longs are 32-bits.)  */
       unsigned long tmp_iar, tmp_msr, tmp_cr, tmp_lr, tmp_ctr, tmp_xer;
+      struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
       fill_sprs32 (&tmp_iar, &tmp_msr, &tmp_cr, &tmp_lr, &tmp_ctr, &tmp_xer);
-      if (register_cached (FIRST_UISA_SP_REGNUM))
+      if (register_cached (PC_REGNUM))
 	ctx.iar = tmp_iar;
-      if (register_cached (FIRST_UISA_SP_REGNUM + 1))
+      if (register_cached (tdep->ppc_ps_regnum))
 	ctx.msr = tmp_msr;
-      if (register_cached (FIRST_UISA_SP_REGNUM + 2))
+      if (register_cached (tdep->ppc_cr_regnum))
 	ctx.cr  = tmp_cr;
-      if (register_cached (FIRST_UISA_SP_REGNUM + 3))
+      if (register_cached (tdep->ppc_lr_regnum))
 	ctx.lr  = tmp_lr;
-      if (register_cached (FIRST_UISA_SP_REGNUM + 4))
+      if (register_cached (tdep->ppc_ctr_regnum))
 	ctx.ctr = tmp_ctr;
-      if (register_cached (FIRST_UISA_SP_REGNUM + 5))
+      if (register_cached (tdep->ppc_xer_regnum))
 	ctx.xer = tmp_xer;
     }
 
@@ -1394,6 +1424,7 @@ store_regs_kernel_thread (int regno, pthdb_tid_t tid)
   struct ptxsprs sprs64;
   struct ptsprs  sprs32;
   int i;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, 
@@ -1431,8 +1462,7 @@ store_regs_kernel_thread (int regno, pthdb_tid_t tid)
 
   /* Special-purpose registers.  */
 
-  if (regno == -1 || 
-      (regno > FPLAST_REGNUM && regno <= LAST_UISA_SP_REGNUM))
+  if (regno == -1 || special_register_p (regno))
     {
       if (arch64)
 	{
@@ -1452,9 +1482,9 @@ store_regs_kernel_thread (int regno, pthdb_tid_t tid)
 	  fill_sprs32 (&sprs32.pt_iar, &sprs32.pt_msr, &sprs32.pt_cr,
 		       &sprs32.pt_lr,  &sprs32.pt_ctr, &sprs32.pt_xer);
 
-	  if (REGISTER_RAW_SIZE (LAST_UISA_SP_REGNUM))
-	    if (register_cached (LAST_UISA_SP_REGNUM))
-	      regcache_collect (LAST_UISA_SP_REGNUM, &sprs32.pt_mq);
+	  if (tdep->ppc_mq_regnum >= 0)
+	    if (register_cached (tdep->ppc_mq_regnum))
+	      regcache_collect (tdep->ppc_mq_regnum, &sprs32.pt_mq);
 
 	  ptrace32 (PTT_WRITE_SPRS, tid, (int *) &sprs32, 0, NULL);
 	}
