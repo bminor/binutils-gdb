@@ -14,7 +14,7 @@
 ## For more information on these two systems, check out the documentation
 ## for 'Autoconf' (autoconf.texi) and 'Configure' (configure.texi).  
 
-#   Copyright (C) 1992, 93, 94, 95, 1996 Free Software Foundation, Inc.
+#   Copyright (C) 1992, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -437,7 +437,8 @@ case "${target}" in
     noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx target-libgloss"
     ;;
   hppa*-*-*elf* | \
-  hppa*-*-lites*)
+  hppa*-*-lites* | \
+  hppa*-*-rtems* )
     # Do configure ld/binutils/gas for this case.
     ;;
   hppa*-*-*)
