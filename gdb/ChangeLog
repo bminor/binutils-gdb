@@ -1,3 +1,10 @@
+2002-04-04  Jim Ingham  <jingham@apple.com>
+ 
+       * valarith.c (find_size_for_pointer_math): New function, either returns
+       the size for a pointer's target, returns 1 for void *, or errors for
+       incomplete types.
+       (value_add, value_sub): use find_size_for_pointer_math.
+
 2002-04-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* linux-low.c (linux_look_up_symbols): New hook.

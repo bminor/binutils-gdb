@@ -43,12 +43,50 @@ static struct value *value_subscripted_rvalue (struct value *, struct value *, i
 void _initialize_valarith (void);
 
 
+/* Given a pointer, return the size of its target.
+   If the pointer type is void *, then return 1.
+   If the target type is incomplete, then error out.
+   This isn't a general purpose function, but just a 
+   helper for value_sub & value_add.
+*/
+
+static LONGEST
+find_size_for_pointer_math (struct type *ptr_type)
+{
+  LONGEST sz = -1;
+  struct type *ptr_target;
+
+  ptr_target = check_typedef (TYPE_TARGET_TYPE (ptr_type));
+
+  sz = TYPE_LENGTH (ptr_target);
+  if (sz == 0)
+    {
+      if (TYPE_CODE (ptr_type) == TYPE_CODE_VOID)
+	sz = 1;
+      else
+	{
+	  char *name;
+	  
+	  name = TYPE_NAME (ptr_target);
+	  if (name == NULL)
+	    name = TYPE_TAG_NAME (ptr_target);
+	  if (name == NULL)
+	    error ("Cannot perform pointer math on incomplete types, "
+		   "try casting to a known type, or void *.");
+	  else
+	    error ("Cannot perform pointer math on incomplete type \"%s\", "
+		   "try casting to a known type, or void *.", name);
+	}
+    }
+  return sz;
+}
+
 struct value *
 value_add (struct value *arg1, struct value *arg2)
 {
   struct value *valint;
   struct value *valptr;
-  register int len;
+  LONGEST sz;
   struct type *type1, *type2, *valptrtype;
 
   COERCE_NUMBER (arg1);
@@ -77,12 +115,12 @@ value_add (struct value *arg1, struct value *arg2)
 	  valint = arg1;
 	  valptrtype = type2;
 	}
-      len = TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (valptrtype)));
-      if (len == 0)
-	len = 1;		/* For (void *) */
+
+      sz = find_size_for_pointer_math (valptrtype);
+
       retval = value_from_pointer (valptrtype,
 				   value_as_address (valptr)
-				   + (len * value_as_long (valint)));
+				   + (sz * value_as_long (valint)));
       VALUE_BFD_SECTION (retval) = VALUE_BFD_SECTION (valptr);
       return retval;
     }
@@ -104,7 +142,8 @@ value_sub (struct value *arg1, struct value *arg2)
       if (TYPE_CODE (type2) == TYPE_CODE_INT)
 	{
 	  /* pointer - integer.  */
-	  LONGEST sz = TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)));
+	  LONGEST sz = find_size_for_pointer_math (type1);
+
 	  return value_from_pointer (type1,
 				     (value_as_address (arg1)
 				      - (sz * value_as_long (arg2))));
