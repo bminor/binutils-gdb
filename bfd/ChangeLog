@@ -2,6 +2,7 @@ Wed Feb  2 20:37:19 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* libbfd.c, bfd-in.h, hosts/alphaosf.h, hosts/sparc-ll.h, aoutf1.h,
 	sparclynx.c, Makefile.in: Change HOST_64_BIT to BFD_HOST_64_BIT.
+	* bfd-in2.h: Rebuilt.
 
 Wed Feb  2 12:30:13 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
