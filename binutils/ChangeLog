@@ -1,3 +1,9 @@
+Tue Aug 31 14:13:35 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* objdump.c (ARCH_all): Define ARCH_hppa too.
+	(dump_headers): Don't test for SEC_BALIGN if it's not defined by
+	bfd.h.
+
 Tue Aug 31 13:29:12 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* nlmconv.c (main): Force creation of .bss section.  Set up the

@@ -56,7 +56,12 @@ int with_line_numbers;		/* -l */
 int dump_stab_section_info;	/* -stabs */
 boolean disassemble;		/* -d */
 boolean info;			/* -i */
-char *only;
+char *only;			/* -j secname */
+
+struct objdump_disasm_info {
+  bfd *abfd;
+  asection *sec;
+};
 
 char *machine = (char *) NULL;
 asymbol **syms;
@@ -86,7 +91,8 @@ usage (stream, status)
 {
   fprintf (stream, "\
 Usage: %s [-ahifdrtxsl] [-m machine] [-j section_name] [-b bfdname]\n\
-       [--syms] [--reloc] [--header] [--version] [--help] objfile...\n",
+       [--syms] [--reloc] [--header] [--version] [--help] objfile...\n\
+       at least one option besides -l must be given\n",
 	   program_name);
   exit (status);
 }
@@ -136,7 +142,9 @@ dump_headers (abfd)
       PF (SEC_CONSTRUCTOR_BSS, "CONSTRUCTOR BSS");
       PF (SEC_LOAD, "LOAD");
       PF (SEC_RELOC, "RELOC");
+#ifdef SEC_BALIGN
       PF (SEC_BALIGN, "BALIGN");
+#endif
       PF (SEC_READONLY, "READONLY");
       PF (SEC_CODE, "CODE");
       PF (SEC_DATA, "DATA");
@@ -234,7 +242,14 @@ objdump_print_address (vma, info)
      struct disassemble_info *info;
 {
   /* Perform a binary search looking for the closest symbol to
-     the required value */
+     the required value.  */
+  /* @@ For relocateable files, should filter out symbols belonging to
+     the wrong section.  Unfortunately, not enough information is supplied
+     to this routine to determine the correct section in all cases.  */
+  /* @@ Would it speed things up to cache the last two symbols returned,
+     and maybe their address ranges?  For many processors, only one memory
+     operand can be present at a time, so the 2-entry cache wouldn't be
+     constantly churned by code doing heavy memory accesses.  */
 
   unsigned int min = 0;
   unsigned int max = symcount;
@@ -280,6 +295,64 @@ objdump_print_address (vma, info)
 	}
 
     found:
+      {
+	bfd_vma val = syms[thisplace]->value;
+	int i;
+	if (syms[thisplace]->flags & (BSF_LOCAL|BSF_DEBUGGING))
+	  for (i = thisplace - 1; i >= 0; i--)
+	    {
+	      if (syms[i]->value == val
+		  && (!(syms[i]->flags & (BSF_LOCAL|BSF_DEBUGGING))
+		      || ((syms[thisplace]->flags & BSF_DEBUGGING)
+			  && !(syms[i]->flags & BSF_DEBUGGING))))
+		{
+		  thisplace = i;
+		  break;
+		}
+	    }
+	if (syms[thisplace]->flags & (BSF_LOCAL|BSF_DEBUGGING))
+	  for (i = thisplace + 1; i < symcount; i++)
+	    {
+	      if (syms[i]->value == val
+		  && (!(syms[i]->flags & (BSF_LOCAL|BSF_DEBUGGING))
+		      || ((syms[thisplace]->flags & BSF_DEBUGGING)
+			  && !(syms[i]->flags & BSF_DEBUGGING))))
+		{
+		  thisplace = i;
+		  break;
+		}
+	    }
+      }
+      {
+	/* If the file is relocateable, and the symbol could be from this
+	   section, prefer a symbol from this section over symbols from
+	   others, even if the other symbol's value might be closer.
+
+	   Note that this may be wrong for some symbol references if the
+	   sections have overlapping memory ranges, but in that case there's
+	   no way to tell what's desired without looking at the relocation
+	   table.  */
+	struct objdump_disasm_info *aux;
+	int i;
+
+	aux = (struct objdump_disasm_info *) info->application_data;
+	if (aux->abfd->flags & HAS_RELOC
+	    && vma >= bfd_get_section_vma (aux->abfd, aux->sec)
+	    && vma < (bfd_get_section_vma (aux->abfd, aux->sec)
+		      + bfd_get_section_size_before_reloc (aux->sec))
+	    && syms[thisplace]->section != aux->sec)
+	  {
+	    for (i = thisplace + 1; i < symcount; i++)
+	      if (syms[i]->value != syms[thisplace]->value)
+		break;
+	    while (--i >= 0)
+	      if (syms[i]->section == aux->sec)
+		{
+		  thisplace = i;
+		  break;
+		}
+	  }
+      }
       fprintf (info->stream, " <%s", syms[thisplace]->name);
       if (syms[thisplace]->value > vma)
 	{
@@ -301,6 +374,22 @@ objdump_print_address (vma, info)
     }
 }
 
+#ifdef ARCH_all
+#define ARCH_a29k
+#define ARCH_alpha
+#define ARCH_h8300
+#define ARCH_h8500
+#define ARCH_hppa
+#define ARCH_i386
+#define ARCH_i960
+#define ARCH_m68k
+#define ARCH_m88k
+#define ARCH_mips
+#define ARCH_sh
+#define ARCH_sparc
+#define ARCH_z8k
+#endif
+
 void
 disassemble_data (abfd)
      bfd *abfd;
@@ -313,6 +402,7 @@ disassemble_data (abfd)
   disassembler_ftype disassemble = 0; /* New style */
   enum bfd_architecture a;
   struct disassemble_info disasm_info;
+  struct objdump_disasm_info aux;
 
   int prevline;
   CONST char *prev_function = "";
@@ -323,6 +413,8 @@ disassemble_data (abfd)
   boolean done_dot = false;
 
   INIT_DISASSEMBLE_INFO(disasm_info, stdout);
+  disasm_info.application_data = (PTR) &aux;
+  aux.abfd = abfd;
   disasm_info.print_address_func = objdump_print_address;
 
   for (i = 0; i < symcount; i++)
@@ -359,52 +451,83 @@ disassemble_data (abfd)
       a = bfd_get_arch (abfd);
       switch (a)
 	{
-	case bfd_arch_sparc:
-	  disassemble = print_insn_sparc;
+	  /* If you add a case to this table, also add it to the
+	     ARCH_all definition right above this function.  */
+#ifdef ARCH_a29k
+	case bfd_arch_a29k:
+	  /* As far as I know we only handle big-endian 29k objects.  */
+	  disassemble = print_insn_big_a29k;
 	  break;
-        case bfd_arch_z8k:
-	  if (bfd_get_mach(abfd) == bfd_mach_z8001)
-	   disassemble = print_insn_z8001;
-	  else 
-	   disassemble = print_insn_z8002;
+#endif
+#ifdef ARCH_alpha
+	case bfd_arch_alpha:
+	  disassemble = print_insn_alpha;
 	  break;
-	case bfd_arch_i386:
-	  disassemble = print_insn_i386;
-	  break;
-	case bfd_arch_h8500:
-	  disassemble = print_insn_h8500;
-	  break;
+#endif
+#ifdef ARCH_h8300
 	case bfd_arch_h8300:
 	  if (bfd_get_mach(abfd) == bfd_mach_h8300h)
 	   disassemble = print_insn_h8300h;
 	  else 
 	   disassemble = print_insn_h8300;
 	  break;
-	case bfd_arch_sh:
-	  disassemble = print_insn_sh;
+#endif
+#ifdef ARCH_h8500
+	case bfd_arch_h8500:
+	  disassemble = print_insn_h8500;
 	  break;
-	case bfd_arch_alpha:
-	  disassemble = print_insn_alpha;
+#endif
+#ifdef ARCH_hppa
+	case bfd_arch_hppa:
+	  disassemble = print_insn_hppa;
 	  break;
-	case bfd_arch_m68k:
-	  disassemble = print_insn_m68k;
+#endif
+#ifdef ARCH_i386
+	case bfd_arch_i386:
+	  disassemble = print_insn_i386;
 	  break;
-	case bfd_arch_a29k:
-	  /* As far as I know we only handle big-endian 29k objects.  */
-	  disassemble = print_insn_big_a29k;
-	  break;
+#endif
+#ifdef ARCH_i960
 	case bfd_arch_i960:
 	  disassemble = print_insn_i960;
 	  break;
+#endif
+#ifdef ARCH_m68k
+	case bfd_arch_m68k:
+	  disassemble = print_insn_m68k;
+	  break;
+#endif
+#ifdef ARCH_m88k
 	case bfd_arch_m88k:
 	  disassemble = print_insn_m88k;
 	  break;
+#endif
+#ifdef ARCH_mips
 	case bfd_arch_mips:
 	  if (abfd->xvec->byteorder_big_p)
 	    disassemble = print_insn_big_mips;
 	  else
 	    disassemble = print_insn_little_mips;
 	  break;
+#endif
+#ifdef ARCH_sh
+	case bfd_arch_sh:
+	  disassemble = print_insn_sh;
+	  break;
+#endif
+#ifdef ARCH_sparc
+	case bfd_arch_sparc:
+	  disassemble = print_insn_sparc;
+	  break;
+#endif
+#ifdef ARCH_z8k
+        case bfd_arch_z8k:
+	  if (bfd_get_mach(abfd) == bfd_mach_z8001)
+	   disassemble = print_insn_z8001;
+	  else 
+	   disassemble = print_insn_z8002;
+	  break;
+#endif
 	default:
 	  fprintf (stderr, "%s: Can't disassemble for architecture %s\n",
 		   program_name,
@@ -418,6 +541,7 @@ disassemble_data (abfd)
        section != (asection *) NULL;
        section = section->next)
     {
+      aux.sec = section;
 
       if ((section->flags & SEC_LOAD)
 	  && (only == (char *) NULL || strcmp (only, section->name) == 0))
@@ -427,7 +551,7 @@ disassemble_data (abfd)
 	  if (bfd_get_section_size_before_reloc (section) == 0)
 	    continue;
 
-	  data = (bfd_byte *) malloc (bfd_get_section_size_before_reloc (section));
+	  data = (bfd_byte *) malloc ((size_t) bfd_get_section_size_before_reloc (section));
 
 	  if (data == (bfd_byte *) NULL)
 	    {
@@ -798,7 +922,7 @@ dump_data (abfd)
 
 	      if (bfd_get_section_size_before_reloc (section) == 0)
 		continue;
-	      data = (bfd_byte *) malloc (bfd_get_section_size_before_reloc (section));
+	      data = (bfd_byte *) malloc ((size_t) bfd_get_section_size_before_reloc (section));
 	      if (data == (bfd_byte *) NULL)
 		{
 		  fprintf (stderr, "%s: memory exhausted.\n", program_name);
@@ -889,6 +1013,14 @@ dump_relocs (abfd)
       if (bfd_is_com_section (a))
 	continue;
 
+      if (only)
+	{
+	  if (strcmp (only, a->name))
+	    continue;
+	}
+      else if ((a->flags & SEC_RELOC) == 0)
+	continue;
+
       printf ("RELOCATION RECORDS FOR [%s]:", a->name);
 
       if (bfd_get_reloc_upper_bound (abfd, a) == 0)
@@ -909,16 +1041,23 @@ dump_relocs (abfd)
 	  else
 	    {
 	      printf ("\n");
-	      printf ("OFFSET   TYPE      VALUE \n");
+	      /* Get column headers lined up reasonably.  */
+	      {
+		static int width;
+		if (width == 0)
+		  {
+		    char buf[30];
+		    sprintf_vma (buf, (bfd_vma) -1);
+		    width = strlen (buf) - 7;
+		  }
+		printf ("OFFSET %*s TYPE %*s VALUE \n", width, "", 12, "");
+	      }
 
 	      for (p = relpp; relcount && *p != (arelent *) NULL; p++,
 		   relcount--)
 		{
 		  arelent *q = *p;
 		  CONST char *sym_name;
-
-		  /*	  CONST char *section_name =	    q->section == (asection *)NULL ? "*abs" :*/
-		  /*	  q->section->name;*/
 		  CONST char *section_name = (*(q->sym_ptr_ptr))->section->name;
 
 		  if (q->sym_ptr_ptr && *q->sym_ptr_ptr)
@@ -932,14 +1071,14 @@ dump_relocs (abfd)
 		  if (sym_name)
 		    {
 		      printf_vma (q->address);
-		      printf (" %-8s  %s",
+		      printf (" %-16s  %s",
 			      q->howto->name,
 			      sym_name);
 		    }
 		  else
 		    {
 		      printf_vma (q->address);
-		      printf (" %-8s  [%s]",
+		      printf (" %-16s  [%s]",
 			      q->howto->name,
 			      section_name);
 		    }
