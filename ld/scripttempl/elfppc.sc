@@ -129,11 +129,26 @@ SECTIONS
   .got2		${RELOCATING-0} :  { *(.got2) }
 
 		${RELOCATING+PROVIDE (__CTOR_LIST__ = .);}
-  .ctors	${RELOCATING-0} : { *(SORT(.ctors.*)) *(.ctors) }
+  .ctors	${RELOCATING-0} : {
+			/* gcc uses crtbegin.o to find the start of
+			   the constructors, so we make sure it is
+			   first.  Because this is a wildcard, it
+			   doesn't matter if the user does not
+			   actually link against crtbegin.o; the
+			   linker won't look for a file to match a
+			   wildcard.  The wildcard also means that it
+			   doesn't matter which directory crtbegin.o
+			   is in.  */
+			*crtbegin.o(.ctors)
+			*(SORT(.ctors.*))
+			*(.ctors) }
 		${RELOCATING+PROVIDE (__CTOR_END__ = .);}
 
 		${RELOCATING+PROVIDE (__DTOR_LIST__ = .);}
-  .dtors	${RELOCATING-0} : { *(SORT(.dtors.*)) *(.dtors) }
+  .dtors	${RELOCATING-0} : {
+			*crtbegin.o(.dtors)
+			*(SORT(.dtors.*))
+			*(.dtors) }
 		${RELOCATING+PROVIDE (__DTOR_END__ = .);}
 
 		${RELOCATING+PROVIDE (_FIXUP_START_ = .);}

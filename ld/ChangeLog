@@ -1,3 +1,15 @@
+Mon May 18 13:14:43 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Jason Merrill <jason@cygnus.com>:
+	* ldlang.c (wild_sort): Correct order of sort.
+	* scripttempl/elf.sc: Put *crtbegin.o before other .ctors and
+	.dtors.
+	* scripttempl/elfd10v.sc: Likewise.
+start-sanitize-d30v
+	* scripttempl/elfd30v.sc: Likewise.
+end-sanitize-d30v
+	* scripttempl/elfppc.sc: Likewise.
+
 Fri May 15 00:22:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlex.l: Recognize keyword SORT.
@@ -18,7 +30,9 @@ Fri May 15 00:22:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* mri.c (mri_draw_tree): Update calls to lang_add_wild.
 	* scripttempl/elf.sc: Sort .ctors.* and .dtors.* by section name.
 	* scripttempl/elfd10v.sc: Likewise.
+start-sanitize-d30v
 	* scripttempl/elfd30v.sc: Likewise.
+end-sanitize-d30v
 	* scripttempl/elfppc.sc: Likewise.
 
 Thu May 14 18:39:16 1998  Richard Henderson  <rth@cygnus.com>
