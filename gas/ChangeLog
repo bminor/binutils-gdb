@@ -1,3 +1,9 @@
+Mon Jan 23 15:51:41 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* configure: Regenerated.
+
+	* config/tc-mips.c: Include libiberty.h.
+
 Mon Jan 23 14:07:58 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* config/tc-sh.h (tc_init_after_args): Don't define.
