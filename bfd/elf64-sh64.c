@@ -127,7 +127,7 @@ static bfd_byte *sh_elf64_get_relocated_section_contents
 static boolean sh_elf64_set_mach_from_flags PARAMS ((bfd *));
 static boolean sh_elf64_set_private_flags PARAMS ((bfd *, flagword));
 static asection *sh_elf64_gc_mark_hook
-  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 static boolean sh_elf64_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
@@ -2450,12 +2450,12 @@ sh_elf64_merge_private_data (ibfd, obfd)
    relocation.  */
 
 static asection *
-sh_elf64_gc_mark_hook (abfd, info, rel, h, sym)
-       bfd *abfd;
-       struct bfd_link_info *info ATTRIBUTE_UNUSED;
-       Elf_Internal_Rela *rel;
-       struct elf_link_hash_entry *h;
-       Elf_Internal_Sym *sym;
+sh_elf64_gc_mark_hook (sec, info, rel, h, sym)
+     asection *sec;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     Elf_Internal_Rela *rel;
+     struct elf_link_hash_entry *h;
+     Elf_Internal_Sym *sym;
 {
   if (h != NULL)
     {
@@ -2481,9 +2481,7 @@ sh_elf64_gc_mark_hook (abfd, info, rel, h, sym)
 	}
     }
   else
-    {
-      return bfd_section_from_elf_index (abfd, sym->st_shndx);
-    }
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
 
   return NULL;
 }

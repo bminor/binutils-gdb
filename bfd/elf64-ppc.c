@@ -127,8 +127,7 @@ static boolean ppc64_elf_section_from_shdr
 /* Since .opd is an array of descriptors and each entry will end up
    with identical R_PPC64_RELATIVE relocs, there is really no need to
    propagate .opd relocs;  The dynamic linker should be taught to
-   relocate .opd without reloc entries.  FIXME: .opd should be trimmed
-   of unused values.  */
+   relocate .opd without reloc entries.  */
 #ifndef NO_OPD_RELOCS
 #define NO_OPD_RELOCS 0
 #endif
@@ -2005,6 +2004,7 @@ struct ppc_link_hash_entry
   /* Flag function code and descriptor symbols.  */
   unsigned int is_func:1;
   unsigned int is_func_descriptor:1;
+  unsigned int is_entry:1;
 };
 
 /* ppc64 ELF linker hash table.  */
@@ -2100,11 +2100,11 @@ static boolean ppc64_elf_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
 static asection * ppc64_elf_gc_mark_hook
-  PARAMS ((bfd *abfd, struct bfd_link_info *info, Elf_Internal_Rela *rel,
-	   struct elf_link_hash_entry *h, Elf_Internal_Sym *sym));
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
+	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 static boolean ppc64_elf_gc_sweep_hook
-  PARAMS ((bfd *abfd, struct bfd_link_info *info, asection *sec,
-	   const Elf_Internal_Rela *relocs));
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
 static boolean func_desc_adjust
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean ppc64_elf_func_desc_adjust
@@ -2113,6 +2113,8 @@ static boolean ppc64_elf_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static void ppc64_elf_hide_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, boolean));
+static boolean edit_opd
+  PARAMS ((bfd *, struct bfd_link_info *));
 static boolean allocate_dynrelocs
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean readonly_dynrelocs
@@ -2256,6 +2258,7 @@ link_hash_newfunc (entry, table, string)
       eh->oh = NULL;
       eh->is_func = 0;
       eh->is_func_descriptor = 0;
+      eh->is_entry = 0;
     }
 
   return entry;
@@ -2292,6 +2295,7 @@ ppc64_elf_link_hash_table_create (abfd)
   htab->add_stub_section = NULL;
   htab->layout_sections_again = NULL;
   htab->stub_group = NULL;
+  htab->all_local_syms = NULL;
   htab->sgot = NULL;
   htab->srelgot = NULL;
   htab->splt = NULL;
@@ -2514,7 +2518,7 @@ create_linkage_sections (dynobj, info)
     {
       flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
 	       | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-      htab->srelbrlt = bfd_make_section (dynobj, ".rela.branch_lt");
+      htab->srelbrlt = bfd_make_section_anyway (dynobj, ".rela.branch_lt");
       if (!htab->srelbrlt
 	  || ! bfd_set_section_flags (dynobj, htab->srelbrlt, flags)
 	  || ! bfd_set_section_alignment (dynobj, htab->srelbrlt, 3))
@@ -2628,8 +2632,31 @@ ppc64_elf_copy_indirect_symbol (dir, ind)
 
   edir->is_func |= eind->is_func;
   edir->is_func_descriptor |= eind->is_func_descriptor;
+  edir->is_entry |= eind->is_entry;
 
   _bfd_elf_link_hash_copy_indirect (dir, ind);
+}
+
+/* Set a flag, used by ppc64_elf_gc_mark_hook, on the entry symbol and
+   symbols undefined on the command-line.  */
+
+boolean
+ppc64_elf_mark_entry_syms (info)
+     struct bfd_link_info *info;
+{
+  struct ppc_link_hash_table *htab;
+  struct bfd_sym_chain *sym;
+
+  htab = ppc_hash_table (info);
+  for (sym = info->gc_sym_list; sym; sym = sym->next)
+    {
+      struct elf_link_hash_entry *h;
+
+      h = elf_link_hash_lookup (&htab->elf, sym->name, false, false, false);
+      if (h != NULL)
+	((struct ppc_link_hash_entry *) h)->is_entry = 1;
+    }
+  return true;
 }
 
 /* Look through the relocs for a section during the first phase, and
@@ -2649,7 +2676,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
-  boolean is_opd;
+  asection **opd_sym_map;
 
   if (info->relocateable)
     return true;
@@ -2659,12 +2686,34 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 
   sym_hashes = elf_sym_hashes (abfd);
   sym_hashes_end = (sym_hashes
-		    + symtab_hdr->sh_size / sizeof (Elf64_External_Sym));
-  if (!elf_bad_symtab (abfd))
-    sym_hashes_end -= symtab_hdr->sh_info;
+		    + symtab_hdr->sh_size / sizeof (Elf64_External_Sym)
+		    - symtab_hdr->sh_info);
 
   sreloc = NULL;
-  is_opd = strcmp (bfd_get_section_name (abfd, sec), ".opd") == 0;
+  opd_sym_map = NULL;
+  if (strcmp (bfd_get_section_name (abfd, sec), ".opd") == 0)
+    {
+      /* Garbage collection needs some extra help with .opd sections.
+	 We don't want to necessarily keep everything referenced by
+	 relocs in .opd, as that would keep all functions.  Instead,
+	 if we reference an .opd symbol (a function descriptor), we
+	 want to keep the function code symbol's section.  This is
+	 easy for global symbols, but for local syms we need to keep
+	 information about the associated function section.  Later, if
+	 edit_opd deletes entries, we'll use this array to adjust
+	 local syms in .opd.  */
+      union opd_info {
+	asection *func_section;
+	long entry_adjust;
+      };
+      bfd_size_type amt;
+
+      amt = sec->_raw_size * sizeof (union opd_info) / 24;
+      opd_sym_map = (asection **) bfd_zalloc (abfd, amt);
+      if (opd_sym_map == NULL)
+	return false;
+      elf_section_data (sec)->tdata = opd_sym_map;
+    }
 
   if (htab->elf.dynobj == NULL)
     htab->elf.dynobj = abfd;
@@ -2801,7 +2850,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	  break;
 
 	case R_PPC64_ADDR64:
-	  if (is_opd
+	  if (opd_sym_map != NULL
 	      && h != NULL
 	      && h->root.root.string[0] == '.'
 	      && h->root.root.string[1] != 0)
@@ -2817,6 +2866,21 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 		  ((struct ppc_link_hash_entry *) h)->is_func = 1;
 		  ((struct ppc_link_hash_entry *) h)->oh = fdh;
 		}
+	    }
+	  if (opd_sym_map != NULL
+	      && h == NULL
+	      && rel + 1 < rel_end
+	      && ((enum elf_ppc_reloc_type) ELF64_R_TYPE ((rel + 1)->r_info)
+		  == R_PPC64_TOC))
+	    {
+	      asection *s;
+
+	      s = bfd_section_from_r_symndx (abfd, &htab->sym_sec, sec,
+					     r_symndx);
+	      if (s == NULL)
+		return false;
+	      else if (s != sec)
+		opd_sym_map[rel->r_offset / 24] = s;
 	    }
 	  /* Fall through.  */
 
@@ -2843,7 +2907,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	case R_PPC64_UADDR64:
 	case R_PPC64_TOC:
 	  /* Don't propagate .opd relocs.  */
-	  if (NO_OPD_RELOCS && is_opd)
+	  if (NO_OPD_RELOCS && opd_sym_map != NULL)
 	    break;
 
 	  /* If we are creating a shared library, and this is a reloc
@@ -2984,16 +3048,19 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
    relocation.  */
 
 static asection *
-ppc64_elf_gc_mark_hook (abfd, info, rel, h, sym)
-     bfd *abfd;
+ppc64_elf_gc_mark_hook (sec, info, rel, h, sym)
+     asection *sec;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *rel;
      struct elf_link_hash_entry *h;
      Elf_Internal_Sym *sym;
 {
+  asection *rsec = NULL;
+
   if (h != NULL)
     {
       enum elf_ppc_reloc_type r_type;
+      struct ppc_link_hash_entry *fdh;
 
       r_type = (enum elf_ppc_reloc_type) ELF64_R_TYPE (rel->r_info);
       switch (r_type)
@@ -3007,10 +3074,26 @@ ppc64_elf_gc_mark_hook (abfd, info, rel, h, sym)
 	    {
 	    case bfd_link_hash_defined:
 	    case bfd_link_hash_defweak:
-	      return h->root.u.def.section;
+	      fdh = (struct ppc_link_hash_entry *) h;
+
+	      /* Function descriptor syms cause the associated
+		 function code sym section to be marked.  */
+	      if (fdh->is_func_descriptor)
+		rsec = fdh->oh->root.u.def.section;
+
+	      /* Function entry syms return NULL if they are in .opd
+		 and are not ._start (or others undefined on the ld
+		 command line).  Thus we avoid marking all function
+		 sections, as all functions are referenced in .opd.  */ 
+	      else if ((fdh->oh != NULL
+			&& ((struct ppc_link_hash_entry *) fdh->oh)->is_entry)
+		       || elf_section_data (sec)->tdata == NULL)
+		rsec = h->root.u.def.section;
+	      break;
 
 	    case bfd_link_hash_common:
-	      return h->root.u.c.p->section;
+	      rsec = h->root.u.c.p->section;
+	      break;
 
 	    default:
 	      break;
@@ -3019,10 +3102,17 @@ ppc64_elf_gc_mark_hook (abfd, info, rel, h, sym)
     }
   else
     {
-      return bfd_section_from_elf_index (abfd, sym->st_shndx);
+      asection **opd_sym_section;
+
+      rsec = bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+      opd_sym_section = (asection **) elf_section_data (rsec)->tdata;
+      if (opd_sym_section != NULL)
+	rsec = opd_sym_section[sym->st_value / 24];
+      else if (elf_section_data (sec)->tdata != NULL)
+	rsec = NULL;
     }
 
-  return NULL;
+  return rsec;
 }
 
 /* Update the .got, .plt. and dynamic reloc reference counts for the
@@ -3592,6 +3682,268 @@ ppc64_elf_hide_symbol (info, h, force_local)
     }
 }
 
+static boolean
+edit_opd (obfd, info)
+     bfd *obfd;
+     struct bfd_link_info *info;
+{
+  bfd *ibfd;
+  unsigned int bfd_indx;
+  struct ppc_link_hash_table *htab = ppc_hash_table (info);
+
+  for (bfd_indx = 0, ibfd = info->input_bfds;
+       ibfd != NULL;
+       ibfd = ibfd->link_next, bfd_indx++)
+    {
+      asection *sec;
+      Elf_Internal_Rela *relstart, *rel, *relend;
+      Elf_Internal_Shdr *symtab_hdr;
+      struct elf_link_hash_entry **sym_hashes;
+      bfd_vma offset;
+      long *adjust;
+      boolean need_edit;
+
+      sec = bfd_get_section_by_name (ibfd, ".opd");
+      if (sec == NULL)
+	continue;
+
+      adjust = (long *) elf_section_data (sec)->tdata;
+      BFD_ASSERT (adjust != NULL);
+      memset (adjust, 0, (size_t) sec->_raw_size * sizeof (long) / 24);
+
+      if (sec->output_section == bfd_abs_section_ptr)
+	continue;
+
+      /* Look through the section relocs.  */
+      if ((sec->flags & SEC_RELOC) == 0 || sec->reloc_count == 0)
+	continue;
+
+      symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
+      sym_hashes = elf_sym_hashes (ibfd);
+
+      /* Read the relocations.  */
+      relstart = _bfd_elf64_link_read_relocs (obfd, sec, (PTR) NULL,
+					      (Elf_Internal_Rela *) NULL,
+					      info->keep_memory);
+      if (relstart == NULL)
+	return false;
+
+      /* First run through the relocs to check they are sane, and to
+	 determine whether we need to edit this opd section.  */
+      need_edit = false;
+      offset = 0;
+      relend = relstart + sec->reloc_count;
+      for (rel = relstart; rel < relend; rel++)
+	{
+	  enum elf_ppc_reloc_type r_type;
+	  unsigned long r_symndx;
+	  asection *sym_sec;
+	  struct elf_link_hash_entry *h;
+	  Elf_Internal_Sym *sym;
+
+	  /* .opd contains a regular array of 24 byte entries.  We're
+	     only interested in the reloc pointing to a function entry
+	     point.  */
+	  r_type = (enum elf_ppc_reloc_type) ELF64_R_TYPE (rel->r_info);
+	  if (r_type == R_PPC64_TOC)
+	    continue;
+
+	  if (r_type != R_PPC64_ADDR64)
+	    {
+	      (*_bfd_error_handler)
+		(_("%s: unexpected reloc type %u in .opd section"),
+		 bfd_archive_filename (ibfd), r_type);
+	      need_edit = false;
+	      break;
+	    }
+
+	  if (rel + 1 >= relend)
+	    continue;
+	  r_type = (enum elf_ppc_reloc_type) ELF64_R_TYPE ((rel + 1)->r_info);
+	  if (r_type != R_PPC64_TOC)
+	    continue;
+
+	  if (rel->r_offset != offset)
+	    {
+	      /* If someone messes with .opd alignment then after a
+		 "ld -r" we might have padding in the middle of .opd.
+		 Also, there's nothing to prevent someone putting
+		 something silly in .opd with the assembler.  No .opd
+		 optimization for them!  */ 
+	      (*_bfd_error_handler)
+		(_("%s: .opd is not a regular array of opd entries"),
+		 bfd_archive_filename (ibfd));
+	      need_edit = false;
+	      break;
+	    }
+
+	  r_symndx = ELF64_R_SYM (rel->r_info);
+	  sym_sec = NULL;
+	  h = NULL;
+	  sym = NULL;
+	  if (r_symndx >= symtab_hdr->sh_info)
+	    {
+	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	      while (h->root.type == bfd_link_hash_indirect
+		     || h->root.type == bfd_link_hash_warning)
+		h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	      if (h->root.type == bfd_link_hash_defined
+		  || h->root.type == bfd_link_hash_defweak)
+		sym_sec = h->root.u.def.section;
+	    }
+	  else
+	    {
+	      sym = htab->all_local_syms[bfd_indx] + r_symndx;
+	      if ((sym->st_shndx != SHN_UNDEF
+		   && sym->st_shndx < SHN_LORESERVE)
+		  || sym->st_shndx > SHN_HIRESERVE)
+		sym_sec = bfd_section_from_elf_index (ibfd, sym->st_shndx);
+	    }
+
+	  if (sym_sec == NULL || sym_sec->owner == NULL)
+	    {
+	      (*_bfd_error_handler)
+		(_("%s: undefined sym `%s' in .opd section"),
+		 bfd_archive_filename (ibfd),
+		 h != NULL ? h->root.root.string : "<local symbol>");
+	      need_edit = false;
+	      break;
+	    }
+
+	  if (sym_sec->output_section == bfd_abs_section_ptr)
+	    {
+	      /* OK, we've found a function that's excluded from the
+		 link.  */
+	      need_edit = true;
+	    }
+
+	  offset += 24;
+	}
+
+      if (need_edit)
+	{
+	  Elf_Internal_Rela *write_rel;
+	  bfd_byte *rptr, *wptr;
+	  boolean skip;
+
+	  /* This seems a waste of time as input .opd sections are all
+	     zeros as generated by gcc, but I suppose there's no reason
+	     this will always be so.  We might start putting something in
+	     the third word of .opd entries.  */
+	  if ((sec->flags & SEC_IN_MEMORY) == 0)
+	    {
+	      bfd_byte *loc = bfd_alloc (ibfd, sec->_raw_size);
+	      if (loc == NULL)
+		return false;
+	      if (! bfd_get_section_contents (ibfd, sec, loc, (bfd_vma) 0,
+					      sec->_raw_size))
+		return false;
+	      sec->contents = loc;
+	      sec->flags |= (SEC_IN_MEMORY | SEC_HAS_CONTENTS);
+	    }
+
+	  elf_section_data (sec)->relocs = relstart;
+
+	  wptr = sec->contents;
+	  rptr = sec->contents;
+	  write_rel = relstart;
+	  skip = false;
+	  offset = 0;
+	  for (rel = relstart; rel < relend; rel++)
+	    {
+	      if (rel->r_offset == offset)
+		{
+		  unsigned long r_symndx;
+		  asection *sym_sec;
+		  struct elf_link_hash_entry *h;
+		  Elf_Internal_Sym *sym;
+
+		  r_symndx = ELF64_R_SYM (rel->r_info);
+		  sym_sec = NULL;
+		  h = NULL;
+		  sym = NULL;
+		  if (r_symndx >= symtab_hdr->sh_info)
+		    {
+		      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+		      while (h->root.type == bfd_link_hash_indirect
+			     || h->root.type == bfd_link_hash_warning)
+			h = (struct elf_link_hash_entry *) h->root.u.i.link;
+		      if (h->root.type == bfd_link_hash_defined
+			  || h->root.type == bfd_link_hash_defweak)
+			sym_sec = h->root.u.def.section;
+		    }
+		  else
+		    {
+		      sym = htab->all_local_syms[bfd_indx] + r_symndx;
+		      if ((sym->st_shndx != SHN_UNDEF
+			   && sym->st_shndx < SHN_LORESERVE)
+			  || sym->st_shndx > SHN_HIRESERVE)
+			sym_sec = bfd_section_from_elf_index (ibfd,
+							      sym->st_shndx);
+		    }
+
+		  skip = sym_sec->output_section == bfd_abs_section_ptr;
+		  if (!skip)
+		    {
+		      /* We'll be keeping this opd entry.  */
+
+		      if (h != NULL)
+			{
+			  /* Redefine the function descriptor symbol
+			     to this location in the opd section.
+			     We've checked above that opd relocs are
+			     ordered.  */
+			  struct elf_link_hash_entry *fdh;
+			  struct ppc_link_hash_entry *fh;
+
+			  fh = (struct ppc_link_hash_entry *) h;
+			  BFD_ASSERT (fh->is_func);
+			  fdh = fh->oh;
+			  fdh->root.u.def.value = wptr - sec->contents;
+			}
+		      else
+			{
+			  /* Local syms are a bit tricky.  Other parts
+			     of the linker re-read them so it's not
+			     possible to tweak local sym values.  In
+			     any case, we'd need to look through the
+			     local syms for the function descriptor
+			     sym which we don't have at the moment.
+			     So keep an array of adjustments.  */
+			  adjust[(rel->r_offset + wptr - rptr) / 24]
+			    = wptr - rptr;
+			}
+
+		      if (wptr != rptr)
+			memcpy (wptr, rptr, 24);
+		      wptr += 24;
+		    }
+		  rptr += 24;
+		  offset += 24;
+		}
+
+	      /* We need to adjust any reloc offsets to point to the
+		 new opd entries.  While we're at it, we may as well
+		 remove redundant relocs.  */
+	      if (!skip)
+		{
+		  rel->r_offset += wptr - rptr;
+		  if (write_rel != rel)
+		    memcpy (write_rel, rel, sizeof (*rel));
+		  ++write_rel;
+		}
+	    }
+
+	  sec->_cooked_size = wptr - sec->contents;
+	  sec->reloc_count = write_rel - relstart;
+	}
+      else if (elf_section_data (sec)->relocs == NULL)
+	free (relstart);
+    }
+
+  return true;
+}
+     
 /* This is the condition under which ppc64_elf_finish_dynamic_symbol
    will be called from elflink.h.  If elflink.h doesn't call our
    finish_dynamic_symbol routine, we'll need to do something about
@@ -3889,6 +4241,12 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
 	    *local_got = (bfd_vma) -1;
 	}
     }
+
+  if (!get_local_syms (info->input_bfds, htab))
+    return false;
+
+  if (!edit_opd (output_bfd, info))
+    return false;
 
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */
@@ -4365,7 +4723,6 @@ ppc64_elf_setup_section_lists (output_bfd, info)
      struct bfd_link_info *info;
 {
   bfd *input_bfd;
-  unsigned int bfd_count;
   int top_id, top_index;
   asection *section;
   asection **input_list, **list;
@@ -4376,12 +4733,11 @@ ppc64_elf_setup_section_lists (output_bfd, info)
       || htab->sbrlt == NULL)
     return 0;
 
-  /* Count the number of input BFDs and find the top input section id.  */
-  for (input_bfd = info->input_bfds, bfd_count = 0, top_id = 0;
+  /* Find the top input section id.  */
+  for (input_bfd = info->input_bfds, top_id = 0;
        input_bfd != NULL;
        input_bfd = input_bfd->link_next)
     {
-      bfd_count += 1;
       for (section = input_bfd->sections;
 	   section != NULL;
 	   section = section->next)
@@ -4390,7 +4746,6 @@ ppc64_elf_setup_section_lists (output_bfd, info)
 	    top_id = section->id;
 	}
     }
-  htab->bfd_count = bfd_count;
 
   amt = sizeof (struct map_stub) * (top_id + 1);
   htab->stub_group = (struct map_stub *) bfd_zmalloc (amt);
@@ -4543,20 +4898,26 @@ get_local_syms (input_bfd, htab)
      struct ppc_link_hash_table *htab;
 {
   unsigned int bfd_indx;
+  bfd *ibfd;
   Elf_Internal_Sym *local_syms, **all_local_syms;
+  bfd_size_type amt;
+
+  if (htab->all_local_syms != NULL)
+    return true;
 
   /* We want to read in symbol extension records only once.  To do this
      we need to read in the local symbols in parallel and save them for
      later use; so hold pointers to the local symbols in an array.  */
-  bfd_size_type amt = sizeof (Elf_Internal_Sym *) * htab->bfd_count;
+  for (ibfd = input_bfd, bfd_indx = 0; ibfd != NULL; ibfd = ibfd->link_next)
+    bfd_indx += 1;
+  htab->bfd_count = bfd_indx;
+  amt = sizeof (Elf_Internal_Sym *) * bfd_indx;
   all_local_syms = (Elf_Internal_Sym **) bfd_zmalloc (amt);
   htab->all_local_syms = all_local_syms;
   if (all_local_syms == NULL)
     return false;
 
-  /* Walk over all the input BFDs, swapping in local symbols.
-     If we are creating a shared library, create hash entries for the
-     export stubs.  */
+  /* Walk over all the input BFDs, swapping in local symbols.  */
   for (bfd_indx = 0;
        input_bfd != NULL;
        input_bfd = input_bfd->link_next, bfd_indx++)
@@ -4567,6 +4928,9 @@ get_local_syms (input_bfd, htab)
       Elf64_External_Sym *ext_syms, *esym, *end_sy;
       Elf_External_Sym_Shndx *shndx_buf, *shndx;
       bfd_size_type sec_size;
+
+      if (bfd_get_flavour (input_bfd) != bfd_target_elf_flavour)
+	continue;
 
       /* We'll need the symbol table in a second.  */
       symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -4707,10 +5071,7 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 	       section != NULL;
 	       section = section->next)
 	    {
-	      Elf_Internal_Shdr *input_rel_hdr;
-	      Elf64_External_Rela *external_relocs, *erelaend, *erela;
 	      Elf_Internal_Rela *internal_relocs, *irelaend, *irela;
-	      bfd_size_type amt;
 
 	      /* If there aren't any relocs, then there's nothing more
 		 to do.  */
@@ -4724,47 +5085,13 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 		  || section->output_section->owner != output_bfd)
 		continue;
 
-	      /* Allocate space for the external relocations.  */
-	      amt = section->reloc_count;
-	      amt *= sizeof (Elf64_External_Rela);
-	      external_relocs = (Elf64_External_Rela *) bfd_malloc (amt);
-	      if (external_relocs == NULL)
-		{
-		  goto error_ret_free_local;
-		}
-
-	      /* Likewise for the internal relocations.  */
-	      amt = section->reloc_count;
-	      amt *= sizeof (Elf_Internal_Rela);
-	      internal_relocs = (Elf_Internal_Rela *) bfd_malloc (amt);
+	      /* Get the relocs.  */
+	      internal_relocs
+		= _bfd_elf64_link_read_relocs (input_bfd, section, NULL,
+					       (Elf_Internal_Rela *) NULL,
+					       info->keep_memory);
 	      if (internal_relocs == NULL)
-		{
-		  free (external_relocs);
-		  goto error_ret_free_local;
-		}
-
-	      /* Read in the external relocs.  */
-	      input_rel_hdr = &elf_section_data (section)->rel_hdr;
-	      if (bfd_seek (input_bfd, input_rel_hdr->sh_offset, SEEK_SET) != 0
-		  || bfd_bread ((PTR) external_relocs,
-				input_rel_hdr->sh_size,
-				input_bfd) != input_rel_hdr->sh_size)
-		{
-		  free (external_relocs);
-		error_ret_free_internal:
-		  free (internal_relocs);
-		  goto error_ret_free_local;
-		}
-
-	      /* Swap in the relocs.  */
-	      erela = external_relocs;
-	      erelaend = erela + section->reloc_count;
-	      irela = internal_relocs;
-	      for (; erela < erelaend; erela++, irela++)
-		bfd_elf64_swap_reloca_in (input_bfd, erela, irela);
-
-	      /* We're done with the external relocs, free them.  */
-	      free (external_relocs);
+		goto error_ret_free_local;
 
 	      /* Now examine each relocation.  */
 	      irela = internal_relocs;
@@ -4787,7 +5114,10 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 		  if (r_type >= (unsigned int) R_PPC_max)
 		    {
 		      bfd_set_error (bfd_error_bad_value);
-		      goto error_ret_free_internal;
+		    error_ret_free_internal:
+		      if (elf_section_data (section)->relocs == NULL)
+			free (internal_relocs);
+		      goto error_ret_free_local;
 		    }
 
 		  /* Only look for stubs on branch instructions.  */
@@ -4880,7 +5210,7 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 		  if (stub_entry == NULL)
 		    {
 		      free (stub_name);
-		      goto error_ret_free_local;
+		      goto error_ret_free_internal;
 		    }
 
 		  stub_entry->target_value = sym_value;
@@ -4891,7 +5221,8 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 		}
 
 	      /* We're done with the internal relocs, free them.  */
-	      free (internal_relocs);
+	      if (elf_section_data (section)->relocs == NULL)
+		free (internal_relocs);
 	    }
 	}
 
@@ -5151,7 +5482,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   TOCstart = elf_gp (output_bfd);
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
-  is_opd = strcmp (bfd_get_section_name (abfd, input_section), ".opd") == 0;
+  is_opd = elf_section_data (input_section)->tdata != NULL;
 
   rel = relocs;
   relend = relocs + input_section->reloc_count;
@@ -5202,6 +5533,15 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
 	  /* rel may have changed, update our copy of addend.  */
 	  addend = rel->r_addend;
+
+	  if (elf_section_data (sec) != NULL)
+	    {
+	      long *opd_sym_adjust;
+
+	      opd_sym_adjust = (long *) elf_section_data (sec)->tdata;
+	      if (opd_sym_adjust != NULL && sym->st_value % 24 == 0)
+		relocation += opd_sym_adjust[sym->st_value / 24];
+	    }
 	}
       else
 	{
@@ -5650,8 +5990,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			     shared lib.  (I believe this is a generic
 			     bug in binutils handling of weak syms.)
 			     In these cases we won't use the opd
-			     entry in this lib;  We ought to edit the
-			     opd section to remove unused entries.  */
+			     entry in this lib.  */
 			  unresolved_reloc = false;
 			}
 		      outrel.r_info = ELF64_R_INFO (0, R_PPC64_RELATIVE);

@@ -71,7 +71,7 @@ static boolean ppc_elf_check_relocs PARAMS ((bfd *,
 					     asection *,
 					     const Elf_Internal_Rela *));
 
-static asection * ppc_elf_gc_mark_hook PARAMS ((bfd *abfd,
+static asection * ppc_elf_gc_mark_hook PARAMS ((asection *sec,
 						struct bfd_link_info *info,
 						Elf_Internal_Rela *rel,
 						struct elf_link_hash_entry *h,
@@ -2481,8 +2481,8 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
    relocation.  */
 
 static asection *
-ppc_elf_gc_mark_hook (abfd, info, rel, h, sym)
-     bfd *abfd;
+ppc_elf_gc_mark_hook (sec, info, rel, h, sym)
+     asection *sec;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *rel;
      struct elf_link_hash_entry *h;
@@ -2512,9 +2512,7 @@ ppc_elf_gc_mark_hook (abfd, info, rel, h, sym)
 	}
     }
   else
-    {
-      return bfd_section_from_elf_index (abfd, sym->st_shndx);
-    }
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
 
   return NULL;
 }

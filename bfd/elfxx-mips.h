@@ -62,7 +62,7 @@ extern int _bfd_mips_elf_additional_program_headers
 extern boolean _bfd_mips_elf_modify_segment_map
   PARAMS ((bfd *));
 extern asection * _bfd_mips_elf_gc_mark_hook
-  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 extern boolean _bfd_mips_elf_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,

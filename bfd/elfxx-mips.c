@@ -6274,8 +6274,8 @@ _bfd_mips_elf_modify_segment_map (abfd)
    relocation.  */
 
 asection *
-_bfd_mips_elf_gc_mark_hook (abfd, info, rel, h, sym)
-     bfd *abfd;
+_bfd_mips_elf_gc_mark_hook (sec, info, rel, h, sym)
+     asection *sec;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *rel;
      struct elf_link_hash_entry *h;
@@ -6285,7 +6285,7 @@ _bfd_mips_elf_gc_mark_hook (abfd, info, rel, h, sym)
 
   if (h != NULL)
     {
-      switch (ELF_R_TYPE (abfd, rel->r_info))
+      switch (ELF_R_TYPE (sec->owner, rel->r_info))
 	{
 	case R_MIPS_GNU_VTINHERIT:
 	case R_MIPS_GNU_VTENTRY:
@@ -6307,9 +6307,7 @@ _bfd_mips_elf_gc_mark_hook (abfd, info, rel, h, sym)
 	}
     }
   else
-    {
-      return bfd_section_from_elf_index (abfd, sym->st_shndx);
-    }
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
 
   return NULL;
 }

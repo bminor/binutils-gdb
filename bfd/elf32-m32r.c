@@ -1,5 +1,5 @@
 /* M32R-specific support for 32-bit ELF.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -78,7 +78,7 @@ static boolean m32r_elf_check_relocs
 	   const Elf_Internal_Rela *));
 
 asection * m32r_elf_gc_mark_hook
-  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 
 #define NOP_INSN		0x7000
@@ -2033,12 +2033,12 @@ m32r_elf_print_private_bfd_data (abfd, ptr)
 }
 
 asection *
-m32r_elf_gc_mark_hook (abfd, info, rel, h, sym)
-       bfd *abfd;
-       struct bfd_link_info *info ATTRIBUTE_UNUSED;
-       Elf_Internal_Rela *rel;
-       struct elf_link_hash_entry *h;
-       Elf_Internal_Sym *sym;
+m32r_elf_gc_mark_hook (sec, info, rel, h, sym)
+     asection *sec;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     Elf_Internal_Rela *rel;
+     struct elf_link_hash_entry *h;
+     Elf_Internal_Sym *sym;
 {
   if (h != NULL)
     {
@@ -2064,9 +2064,8 @@ m32r_elf_gc_mark_hook (abfd, info, rel, h, sym)
        }
      }
    else
-     {
-       return bfd_section_from_elf_index (abfd, sym->st_shndx);
-     }
+     return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+
   return NULL;
 }
 

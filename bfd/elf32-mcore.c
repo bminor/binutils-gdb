@@ -48,7 +48,7 @@ static boolean mcore_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 static asection * mcore_elf_gc_mark_hook
-  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 static boolean mcore_elf_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
@@ -573,8 +573,8 @@ mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
    relocation.  */
 
 static asection *
-mcore_elf_gc_mark_hook (abfd, info, rel, h, sym)
-     bfd *                        abfd;
+mcore_elf_gc_mark_hook (sec, info, rel, h, sym)
+     asection *                   sec;
      struct bfd_link_info *       info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *          rel;
      struct elf_link_hash_entry * h;
@@ -604,9 +604,7 @@ mcore_elf_gc_mark_hook (abfd, info, rel, h, sym)
 	}
     }
   else
-    {
-      return bfd_section_from_elf_index (abfd, sym->st_shndx);
-    }
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
 
   return NULL;
 }

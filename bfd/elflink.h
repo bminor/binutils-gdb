@@ -7729,7 +7729,7 @@ elf_finish_pointer_linker_section (output_bfd, input_bfd, info, lsect, h,
 static boolean elf_gc_mark
   PARAMS ((struct bfd_link_info *info, asection *sec,
 	   asection * (*gc_mark_hook)
-	     PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+	     PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 		      struct elf_link_hash_entry *, Elf_Internal_Sym *))));
 
 static boolean elf_gc_sweep
@@ -7759,7 +7759,7 @@ elf_gc_mark (info, sec, gc_mark_hook)
      struct bfd_link_info *info;
      asection *sec;
      asection * (*gc_mark_hook)
-       PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+       PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 		struct elf_link_hash_entry *, Elf_Internal_Sym *));
 {
   boolean ret;
@@ -7862,17 +7862,17 @@ elf_gc_mark (info, sec, gc_mark_hook)
 				  (const PTR) locshndx,
 				  &s);
 	      if (ELF_ST_BIND (s.st_info) == STB_LOCAL)
-		rsec = (*gc_mark_hook) (sec->owner, info, rel, NULL, &s);
+		rsec = (*gc_mark_hook) (sec, info, rel, NULL, &s);
 	      else
 		{
 		  h = sym_hashes[r_symndx - extsymoff];
-		  rsec = (*gc_mark_hook) (sec->owner, info, rel, h, NULL);
+		  rsec = (*gc_mark_hook) (sec, info, rel, h, NULL);
 		}
 	    }
 	  else if (r_symndx >= nlocsyms)
 	    {
 	      h = sym_hashes[r_symndx - extsymoff];
-	      rsec = (*gc_mark_hook) (sec->owner, info, rel, h, NULL);
+	      rsec = (*gc_mark_hook) (sec, info, rel, h, NULL);
 	    }
 	  else
 	    {
@@ -7881,7 +7881,7 @@ elf_gc_mark (info, sec, gc_mark_hook)
 				  (const PTR) (locsyms + r_symndx),
 				  (const PTR) locshndx,
 				  &s);
-	      rsec = (*gc_mark_hook) (sec->owner, info, rel, NULL, &s);
+	      rsec = (*gc_mark_hook) (sec, info, rel, NULL, &s);
 	    }
 
 	  if (rsec && !rsec->gc_mark)
@@ -8129,7 +8129,7 @@ elf_gc_sections (abfd, info)
   boolean ok = true;
   bfd *sub;
   asection * (*gc_mark_hook)
-    PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+    PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	     struct elf_link_hash_entry *h, Elf_Internal_Sym *));
 
   if (!get_elf_backend_data (abfd)->can_gc_sections

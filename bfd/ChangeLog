@@ -1,3 +1,63 @@
+2002-07-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_gc_mark): Pass in the section whose relocs we are
+	examining to gc_mark_hook, rather than the bfd.
+	(elf_gc_sections): Adjust.
+	* elf-bfd.h (struct elf_backend_data <gc_mark_hook>): Likewise.
+	* elf-m10300.c (mn10300_elf_gc_mark_hook): Likewise.
+	* elf32-arm.h (elf32_arm_gc_mark_hook): Likewise.
+	* elf32-avr.c (elf32_avr_gc_mark_hook): Likewise.
+	* elf32-cris.c (cris_elf_gc_mark_hook): Likewise.
+	* elf32-d10v.c (elf32_d10v_gc_mark_hook): Likewise.
+	* elf32-fr30.c (fr30_elf_gc_mark_hook): Likewise.
+	* elf32-hppa.c (elf32_hppa_gc_mark_hook): Likewise.
+	* elf32-i386.c (elf_i386_gc_mark_hook): Likewise.
+	* elf32-m32r.c (m32r_elf_gc_mark_hook): Likewise.
+	* elf32-m68k.c (elf_m68k_gc_mark_hook): Likewise.
+	* elf32-mcore.c (mcore_elf_gc_mark_hook): Likewise.
+	* elf32-openrisc.c (openrisc_elf_gc_mark_hook): Likewise.
+	* elf32-ppc.c (ppc_elf_gc_mark_hook): Likewise.
+	* elf32-s390.c (elf_s390_gc_mark_hook): Likewise.
+	* elf32-sh.c (sh_elf_gc_mark_hook): Likewise.
+	* elf32-sparc.c (elf32_sparc_gc_mark_hook): Likewise.
+	* elf32-v850.c (v850_elf_gc_mark_hook): Likewise.
+	* elf32-vax.c (elf_vax_gc_mark_hook): Likewise.
+	* elf32-xstormy16.c (xstormy16_elf_gc_mark_hook): Likewise.
+	* elf64-mmix.c (mmix_elf_gc_mark_hook): Likewise.
+	* elf64-ppc.c (ppc64_elf_gc_mark_hook): Likewise.
+	* elf64-s390.c (elf_s390_gc_mark_hook): Likewise.
+	* elf64-sh64.c (sh_elf64_gc_mark_hook): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_gc_mark_hook): Likewise.
+	* elfxx-mips.h (_bfd_mips_elf_gc_mark_hook): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_gc_mark_hook): Likewise.
+	* elf32-frv.c (elf32_frv_gc_mark_hook): Likewise.  Also remove
+	redundant local sym tests.
+	* elf64-ppc.c (struct ppc_link_hash_entry): Add is_entry.
+	(link_hash_newfunc): Init is_entry.
+	(ppc64_elf_copy_indirect_symbol): Copy is_entry.
+	(ppc64_elf_link_hash_table_create): Init all_local_syms.
+	(create_linkage_sections): Use bfd_make_section_anyway rather than
+	bfd_make_section.
+	(ppc64_elf_mark_entry_syms): New function.
+	(ppc64_elf_check_relocs): Don't bother testing elf_bad_symtab.  Set
+	up opd entry to function section map.
+	(ppc64_elf_gc_mark_hook): Special case opd section relocs, and
+	relocs that reference the opd section.
+	(edit_opd): New function.
+	(ppc64_elf_size_dynamic_sections): Call get_local_syms and edit_opd.
+	(ppc64_elf_setup_section_lists): Don't calculate htab->bfd_count here.
+	(get_local_syms): Do so here.  Exit if we already have local syms.
+	Remove bogus comment imported from elf32-hppa.c.  Don't attempt to
+	read local syms on non-ELF input.
+	(ppc64_elf_size_stubs): Call _bfd_elf64_link_read_relocs rather
+	than duplicating it's function here.  Adjust free of internal
+	relocs to suit.
+	(ppc64_elf_relocate_section): Adjust local syms in opd section.
+	* elf64-ppc.h (ppc64_elf_mark_entry_syms): Declare.
+	* elf32-hppa.c (elf32_hppa_size_stubs): Call
+	_bfd_elf32_link_read_relocs rather than duplicating it's function
+	here.  Adjust free of internal relocs to suit.
+
 2002-07-01  Andreas Jaeger  <aj@suse.de>
 
 	* elf64-x86-64.c (elf64_x86_64_check_relocs): Certain relocations

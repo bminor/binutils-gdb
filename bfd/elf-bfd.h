@@ -680,10 +680,9 @@ struct elf_backend_data
     PARAMS ((bfd *));
 
   /* This function is called during section gc to discover the section a
-     particular relocation refers to.  It need not be defined for hosts
-     that have no queer relocation types.  */
+     particular relocation refers to.  */
   asection * (*gc_mark_hook)
-    PARAMS ((bfd *abfd, struct bfd_link_info *, Elf_Internal_Rela *,
+    PARAMS ((asection *sec, struct bfd_link_info *, Elf_Internal_Rela *,
 	     struct elf_link_hash_entry *h, Elf_Internal_Sym *));
 
   /* This function, if defined, is called during the sweep phase of gc
