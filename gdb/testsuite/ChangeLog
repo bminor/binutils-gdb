@@ -6,6 +6,9 @@ Fri Mar 10 02:49:40 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	(localvars_in_indirect_call):  Consume GDB prompt if `finish'
 	fails.
 
+	* gdb.c++/templates.exp:  Source templ-info.exp only if
+	the templates executable exists.
+
 	* gdb.c++/misc.cc (class Contains_static_instance,
 	class Contains_nested_static_instance),
 	gdb.c++/classes.exp (test_static_members):  Test printing of
