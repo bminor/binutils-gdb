@@ -212,7 +212,7 @@ do
 	--program-transform-name* | --program-t*)
 		# Double any backslashes or dollar signs in the argument
 		program_transform_name="${program_transform_name} -e `echo ${optarg} | sed -e 's/\\\\/\\\\\\\\/g' -e 's/\\\$/$$/g'`"
-		program_transform_nameoption="--program-transform-nameoption='$optarg'"
+		program_transform_nameoption="${program_transform_nameoption} --program-transform-name='$optarg'"
 		;;
 	--rm)
 		removing=--rm

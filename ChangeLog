@@ -1,3 +1,7 @@
+Thu Jun  2 18:56:46 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* configure: Set program_transform_nameoption correctly.
+
 Thu Jun  2 10:57:06 1994  Karen Christianse (karen@cirdan.cygnus.com)
 
 	* brought build-all.mk update-to-date with progressive build-all.mk,
