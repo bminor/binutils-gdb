@@ -350,6 +350,7 @@ proc gdb_test { args } {
     if ![string match $command ""] {
 	if { [send_gdb "$command\n"] != "" } {
 	    perror "Couldn't send $command to GDB.";
+	    fail "$message";
 	    return $result;
 	}
     }

@@ -1,3 +1,8 @@
+Mon Feb 24 13:23:26 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* lib/gdb.exp(gdb_test): Generate a FAIL message when
+	send_gdb fails.
+
 Sun Feb 23 19:56:02 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* config/vr4300.exp: New file.
