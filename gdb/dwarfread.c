@@ -3198,8 +3198,12 @@ decode_modified_type (char *modifiers, unsigned int modcount, int mtype)
 		     DIE_ID, DIE_NAME);	/* FIXME */
 	  break;
 	default:
-	  if (!(MOD_lo_user <= (unsigned char) modifier
-		&& (unsigned char) modifier <= MOD_hi_user))
+	  if (!(MOD_lo_user <= (unsigned char) modifier))
+#if 0
+/* This part of the test would always be true, and it triggers a compiler
+   warning.  */
+  		  && (unsigned char) modifier <= MOD_hi_user))
+#endif
 	    {
 	      complaint (&symfile_complaints,
 			 "DIE @ 0x%x \"%s\", unknown type modifier %u", DIE_ID,

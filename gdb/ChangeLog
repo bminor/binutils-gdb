@@ -1,3 +1,7 @@
+2003-06-27  Elena Zannoni  <ezannoni@redhat.com>
+
+        * dwarfread.c (decode_modified_type): Gag new compiler warning.
+
 2003-06-26  Michael Chastain  <mec@shout.net>
 
 	* config/djgpp/fnchange.lst: Add gdb/testsuite/gdb.c++/pr-1210.cc,
