@@ -60,7 +60,7 @@ proc restore_tests { } {
         for {set e 1} {$e <= $limit} {incr e} {
 
             gdb_test "tbreak callee$e" "Breakpoint.*\[0-9\]*\\." \
-                    "tbreak caller$e"
+                    "tbreak callee$e"
             
   	    gdb_test "continue" ".*/\\* callee$e \\*/" "run to callee$e"
 
