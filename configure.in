@@ -107,17 +107,6 @@ esac
 
 # per-target:
 
-bfd_target=
-
-case "${target}" in
-  a29k-amd-ebmon) bfd_target="ebmon29k"  ;;
-  a29k-amd-udi)   bfd_target="udi29k" ;;
-  a29k-amd-*)     echo "bad target_os for amd" 1>&2
-		  exit 1
-		  ;;
-esac
-
-
 # some tools are so dependent upon X11 that if we're not building with X, 
 # it's not even worth trying to configure, much less build, that tool.
 
@@ -202,8 +191,6 @@ esac
 #  with_gnu_ld=yes
 #  withoptions="$withoptions -with-gnu-ld"
 #fi
-
-target_makefile_frag=config/mt-${bfd_target}
 
 #
 # Local Variables:

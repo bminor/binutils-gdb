@@ -1,3 +1,13 @@
+Thu Apr  8 09:21:30 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure.in: Removed obsolete references to bfd_target and
+	target_makefile_frag.
+
+	* build-all.mk: Set assorted targets for Q2.
+	* config.sub: Recognize z8k-sim and h8300-hms.
+	* test-build.mk: Really don't pass host to configure.
+	(HOLES): Added uname.
+
 Wed Apr  7 15:48:19 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure: Handle an empty program-prefix, program-suffix or
