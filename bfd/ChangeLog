@@ -1,3 +1,13 @@
+2000-11-27  Philip Blundell  <pb@futuretv.com>
+
+	* libcoff-in.h (coff_tdata): Add `strings_written' flag.
+	(obj_coff_strings_written): New accessor macro for above.
+	* libcoff.h: Regenerate.
+	* cofflink.c (_bfd_coff_final_link): Say that we wrote the
+	strings.
+	* coffcode.h (coff_write_object_contents): No need to write out
+	the string table if it's already been done.
+
 2000-11-22  Philip Blundell  <pb@futuretv.com>
 
 	* cofflink.c (_bfd_coff_generic_relocate_section): Don't object to 

@@ -3798,7 +3798,7 @@ coff_write_object_contents (abfd)
 	return false;
     }
 #ifdef COFF_LONG_SECTION_NAMES
-  else if (long_section_names)
+  else if (long_section_names && ! obj_coff_strings_written (abfd))
     {
       /* If we have long section names we have to write out the string
          table even if there are no symbols.  */

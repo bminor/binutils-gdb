@@ -1102,6 +1102,8 @@ _bfd_coff_final_link (abfd, info)
 
       if (! _bfd_stringtab_emit (abfd, finfo.strtab))
 	return false;
+
+      obj_coff_strings_written (abfd) = true;
     }
 
   _bfd_stringtab_free (finfo.strtab);
