@@ -15271,9 +15271,9 @@ watchpoint starting at address @var{address} and covering the next
 Each breakpoint and watchpoint packet @var{type} is documented
 separately.
 
-@emph{Implementation notes: A remote target shall return @samp{} for an
-unrecognized breakpoint or watchpoint packet @var{type}.  A remote
-target shall support either both or neither of a given
+@emph{Implementation notes: A remote target shall return an empty string
+for an unrecognized breakpoint or watchpoint packet @var{type}.  A
+remote target shall support either both or neither of a given
 @code{Z}@var{type}@dots{} and @code{z}@var{type}@dots{} packet pair.  To
 avoid potential problems with duplicate packets, the operations should
 be implemented in an idempotent way.}
