@@ -1,3 +1,8 @@
+1999-07-15  Ian Lance Taylor  <ian@zembu.com>
+
+	* configure.in: Bump version number to 2.9.5.
+	* configure: Rebuild.
+
 Thu Jul 15 02:56:15 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* elf-hppa.h (_bfd_elf_hppa_gen_reloc_type, case R_HPPA): Handle
