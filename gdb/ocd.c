@@ -158,7 +158,7 @@ ocd_start_remote (dummy)
 
   SERIAL_SEND_BREAK (ocd_desc); /* Wake up the wiggler */
 
-  speed = 0; /* 80; 			/* Divide clock by 4000 */
+  speed = 80;			/* Divide clock by 4000 */
 
   buf[0] = OCD_INIT;
   buf[1] = speed >> 8;
@@ -1283,7 +1283,7 @@ ocd_load (args, from_tty)
    not yet supported fully */
    
 #ifndef BDM_BREAKPOINT
-#define BDM_BREAKPOINT 0x4a, 0xfa /* BGND insn on CPU32*/
+#define BDM_BREAKPOINT {0x0,0x0,0x0,0x0} /* For ppc 8xx */
 #endif
 
 /* BDM (at least on CPU32) uses a different breakpoint */

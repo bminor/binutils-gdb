@@ -9,7 +9,7 @@ Sun Aug 10 16:49:09 1997  Geoffrey Noer  <noer@cygnus.com>
 	BDM_BREAKPOINT if not defined in tm.h
 	(ocd_error): add new error cases
 	(ocd_start_remote): send the OCD_INIT command before
-	OCD_AYT and OCD_GET_VERSION calls
+	OCD_AYT and OCD_GET_VERSION calls, 80 was correct speed after all
 	(ocd_write_bytes): no longer static
 	(ocd_insert_breakpoint): no longer static
 	(ocd_remove_breakpoint): new
