@@ -359,7 +359,6 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 5.0
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -933,7 +932,7 @@ tags: TAGS
 
 clean mostlyclean: $(CONFIG_CLEAN)
 	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do 
-	rm -f *.o *.a $(ADD_FILES) *~ init.c-tmp init.l-tmp
+	rm -f *.o *.a $(ADD_FILES) *~ init.c-tmp init.l-tmp version.c-tmp
 	rm -f init.c version.c
 	rm -f gdb$(EXEEXT) core make.log
 	rm -f gdb[0-9]$(EXEEXT)
@@ -1014,12 +1013,13 @@ $(srcdir)/copying.c: @MAINTAINER_MODE_TRUE@ \
 		< $(srcdir)/COPYING > $(srcdir)/copying.tmp
 	mv $(srcdir)/copying.tmp $(srcdir)/copying.c
 
-version.c: Makefile
-	rm -f version.c
-	echo '#include "version.h"' >> version.c
-	echo 'const char version[] = "$(VERSION)";' >> version.c
-	echo 'const char host_name[] = "$(host_alias)";' >> version.c
-	echo 'const char target_name[] = "$(target_alias)";' >> version.c
+version.c: Makefile version.in
+	rm -f version.c-tmp version.c
+	echo '#include "version.h"' >> version.c-tmp
+	echo 'const char version[] = "'"`head -1 ${srcdir}/version.in`"'";' >> version.c-tmp
+	echo 'const char host_name[] = "$(host_alias)";' >> version.c-tmp
+	echo 'const char target_name[] = "$(target_alias)";' >> version.c-tmp
+	mv version.c-tmp version.c
 version.o: version.c $(version_h)
 
 # c-exp.tab.c is generated in objdir from c-exp.y if it doesn't exist
