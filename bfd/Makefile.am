@@ -417,11 +417,11 @@ CFILES = \
 ## This is a list of all .h files which are in the source tree.
 SOURCE_HFILES = \
 	aout-target.h aoutf1.h aoutx.h coffcode.h coffswap.h \
-	ecoffswap.h elf32-hppa.h \
-	elfcode.h genlink.h go32stub.h hppa_stubs.h libaout.h \
+	ecoffswap.h elf32-arm.h elf32-hppa.h elfcode.h elfcore.h \
+	elflink.h freebsd.h genlink.h go32stub.h hppa_stubs.h libaout.h \
 	libbfd.h libcoff.h libecoff.h elf-bfd.h libhppa.h libieee.h \
-	libnlm.h liboasys.h netbsd.h nlm-target.h nlmcode.h ns32k.h \
-	som.h vms.h
+	libnlm.h liboasys.h netbsd.h nlm-target.h nlmcode.h nlmswap.h \
+	ns32k.h peicode.h som.h vms.h
 
 HFILES = \
 	elf32-target.h elf64-target.h targmatch.h \
