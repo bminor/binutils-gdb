@@ -1,3 +1,8 @@
+Fri May  7 14:55:59 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* test-build.mk: Extensive additions to support building on a
+	machine other than the host.
+
 Wed May  5 08:35:04 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
 
 	* configure (tooldir): Fix for i386-aix again.
