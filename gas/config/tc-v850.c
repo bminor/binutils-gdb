@@ -1088,6 +1088,7 @@ md_assemble (str)
 		      errmsg = "invalid condition code name";
 		    }
 		}
+	      /* start-sanitize-v850e */
 	      else if (operand->flags & V850E_PUSH_POP) 
 		{
 		  errmsg = parse_register_list (& insn, operand);
@@ -1096,6 +1097,8 @@ md_assemble (str)
 		  ex.X_op         = O_constant;
 		  ex.X_add_number = 0;
 		}
+	      /* end-sanitize-v850e */
+	      /* start-sanitize-v850e */
 	      else if (operand->flags & V850E_IMMEDIATE16) 
 		{
 		  expression (& ex);
@@ -1117,6 +1120,8 @@ md_assemble (str)
 		  extra_data            = ex.X_add_number;
 		  ex.X_add_number       = 0;
 		}
+	      /* end-sanitize-v850e */
+	      /* start-sanitize-v850e */
 	      else if (operand->flags & V850E_IMMEDIATE32) 
 		{
 		  expression (& ex);
@@ -1129,6 +1134,7 @@ md_assemble (str)
 		  extra_data            = ex.X_add_number;
 		  ex.X_add_number       = 0;
 		}
+	      /* end-sanitize-v850e */
 	      else if (register_name (&ex)
 		       && (operand->flags & V850_OPERAND_REG) == 0)
 		{
@@ -1214,7 +1220,7 @@ md_assemble (str)
       if (match == 0)
         {
 	  next_opcode = opcode + 1;
-	  if (next_opcode->opcode != 0 && !strcmp (next_opcode->name, opcode->name))
+	  if (next_opcode->name != NULL && strcmp (next_opcode->name, opcode->name) == 0)
 	    {
 	      opcode = next_opcode;
 	      continue;

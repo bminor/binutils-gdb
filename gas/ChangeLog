@@ -1,3 +1,8 @@
+Tue Sep  2 15:40:56 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/tc-v850.c (md_assemble): Use opcode->name instead of
+ 	opcode->opcode as the sentinal. Zero is a valid opcode.
+
 start-sanitize-v850
 Tue Aug 26 16:51:14 1997  Ian Lance Taylor  <ian@cygnus.com>
 
