@@ -1,3 +1,8 @@
+Thu Dec 16 16:07:56 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* read.c (lex_type): No longer make '[' a valid character for
+	symbol names.
+
 Wed Dec 15 15:39:53 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* Makefile.in (RUNTEST): New variable.
