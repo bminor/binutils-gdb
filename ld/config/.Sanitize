@@ -38,6 +38,7 @@ dgux.mh
 ebmon29k.mt
 go32.mt
 hp300bsd.mt
+hp9000.mh
 i386-aout.mt
 i386-coff.mt
 i386v.mt
