@@ -1,4 +1,11 @@
-Wed Mar  4 12:10:43 1998  Doug Evans  <devans@canuck.cygnus.com>
+Wed Mar  4 11:36:51 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Makefile.in (SIM_EXTRA_DEPS): Add cpu-opc.h.
+	(arch.o): Delete cpu-opc.h dependency.
+	(decode.o,model.o): Likewise.
+start-sanitize-m32rx
+	(decodex.o,modelx.o): Likewise.
+end-sanitize-m32rx
 
 	* cpu.h,model.c,sem-switch.c,sem.c: Regenerate.
 start-sanitize-m32rx

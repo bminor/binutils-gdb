@@ -44,7 +44,7 @@ SIM_EXTRA_DEPS = \
 	$(srcdir)/../common/cgen-types.h \
 	$(srcdir)/../common/cgen-sim.h \
 	$(srcdir)/../common/cgen-trace.h \
-	arch.h cpuall.h m32r-sim.h
+	arch.h cpuall.h m32r-sim.h cpu-opc.h
 
 SIM_EXTRA_CFLAGS =
 
@@ -74,7 +74,7 @@ OPS_INCLUDE_DEPS = \
 
 sim-if.o: sim-if.c $(INCLUDE_DEPS) $(srcdir)/../common/sim-core.h
 
-arch.o: arch.c $(INCLUDE_DEPS) cpu-opc.h
+arch.o: arch.c $(INCLUDE_DEPS)
 
 # M32R objs
 
@@ -89,12 +89,12 @@ mloop.c: $(srcdir)/../common/genmloop.sh mloop.in Makefile
 mloop.o: mloop.c sem-switch.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu.h
 
 cpu.o: cpu.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu.h
-decode.o: decode.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu-opc.h cpu.h
+decode.o: decode.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu.h
 extract.o: extract.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu.h
 	$(CC) -c $(srcdir)/extract.c $(ALL_CFLAGS) -DSCACHE_P
 sem.o: sem.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu.h
 	$(CC) -c $(srcdir)/sem.c $(ALL_CFLAGS) -DSCACHE_P
-model.o: model.c $(INCLUDE_DEPS) cpu-opc.h cpu.h
+model.o: model.c $(INCLUDE_DEPS) cpu.h
 
 #sem-cache.o: sem.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu.h
 #	$(CC) -c $(srcdir)/sem.c -o sem-cache.o -DSCACHE_P $(ALL_CFLAGS)
@@ -114,9 +114,9 @@ mloopx.c: $(srcdir)/../common/genmloop.sh mloopx.in Makefile
 mloopx.o: mloopx.c readx.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpux.h
 
 cpux.o: cpux.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpux.h
-decodex.o: decodex.c decodex.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu-opc.h cpux.h
+decodex.o: decodex.c decodex.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpux.h
 semx.o: semx.c decodex.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpux.h
-modelx.o: modelx.c $(INCLUDE_DEPS) cpu-opc.h cpux.h
+modelx.o: modelx.c $(INCLUDE_DEPS) cpux.h
 # end-sanitize-m32rx
 
 m32r-clean:
