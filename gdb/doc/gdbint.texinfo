@@ -372,8 +372,6 @@ etc.; see @file{Makefile.in}.
 Contains C macro definitions describing the native system environment,
 such as child process control and core file support.
 Crib from existing @file{nm-*.h} files to create a new one.
-Code that needs these definitions will have to @code{#include "nm.h"}
-explicitly, since it is not included by @file{defs.h}.
 
 @item gdb/@var{xxx}-nat.c
 Contains any miscellaneous C code required for this native support
@@ -928,6 +926,9 @@ what they say.  This is only done if you ask that it be done.
 Syntax:
 
 @table @code
+@item struct cleanup *@var{old_chain};
+Declare a variable which will hold a cleanup chain handle.
+
 @item @var{old_chain} = make_cleanup (@var{function}, @var{arg});
 Make a cleanup which will cause @var{function} to be called with @var{arg}
 (a @code{char *}) later.  The result, @var{old_chain}, is a handle that can be
@@ -2279,7 +2280,8 @@ Define this if the native-dependent code will provide its
 own routines
 @code{fetch_inferior_registers} and @code{store_inferior_registers} in
 @file{@var{HOST}-nat.c}.
-If this symbol is @emph{not} defined, the default routines in
+If this symbol is @emph{not} defined, and @file{infptrace.c}
+is included in this configuration, the default routines in
 @file{infptrace.c} are used for these functions.
 @item GET_LONGJMP_TARGET
 For most machines, this is a target-dependent parameter.  On the DECstation
@@ -2297,13 +2299,15 @@ definition in @file{procfs.c}.
 @item REGISTER_U_ADDR
 Defines the offset of the registers in the ``u area''; @pxref{Host}.
 @item USE_PROC_FS
-This determines whether small routines that translate register values
-to GDB's internal representation (from the /proc representation), and vice
-verse, are compiled.
+This determines whether small routines in @file{*-tdep.c}, which
+translate register values
+between GDB's internal representation and the /proc representation,
+are compiled.
 @item U_REGS_OFFSET
 This is the offset of the registers in the upage.  It need only be
 defined if the generic ptrace register access routines in
 @file{infptrace.c} are being used (that is,
+@file{infptrace.c} is configured in, and
 @code{FETCH_INFERIOR_REGISTERS} is not defined).  If the default value
 from @file{infptrace.c} is good enough, leave it undefined.
 
