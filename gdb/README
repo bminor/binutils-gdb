@@ -41,6 +41,9 @@ To build GDB, you can just do:
 	make
 	cp gdb/gdb /usr/local/bin/gdb	(or wherever you want)
 
+(Building GDB with DJGPP tools for MS-DOS/MS-Windows is slightly
+different; see the file gdb/config/djgpp/README for details.)
+
 This will configure and build all the libraries as well as GDB.
 If `configure' can't determine your system type, specify one as its
 argument, e.g., sun4 or decstation.
@@ -174,6 +177,9 @@ directory.  That directory contains:
 `gdb-4.18/utils'
      A grab bag of random utilities.
 
+   Note: the following instructions are for building GDB on Unix or
+Unix-like systems.  Instructions for building with DJGPP for
+MS-DOS/MS-Windows are in the file gdb/config/djgpp/README.
 
    The simplest way to configure and build GDB is to run `configure'
 from the `gdb-VERSION-NUMBER' source directory, which in this example

@@ -1,5 +1,11 @@
 2000-04-12  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* README: Mention special build instructions for DJGPP.
+	* NEWS: Update with FP features on x87 platforms, and
+	DJGPP-related changes.
+
+2000-04-12  Eli Zaretskii  <eliz@is.elta.co.il>
+
 	* top.c (gdb_completer_file_name_break_characters): New variable.
 	(line_completion_function): When completing on file names, use
 	gdb_completer_file_name_break_characters as word break
