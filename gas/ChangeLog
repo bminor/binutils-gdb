@@ -1,3 +1,10 @@
+start-sanitize-d10v
+Tue Aug 20 14:10:02 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c: All references to defined symbols should
+ 	now use the optimal instruction.  .float and .double now work. 
+
+end-sanitize-d10v	
 Mon Aug 19 14:41:36 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.c (fixup_segment): Adjust PC relative reloc by
