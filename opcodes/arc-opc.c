@@ -654,7 +654,7 @@ arc_opcode_init_insert ()
 
 int
 arc_opcode_limm_p (limmp)
-  long *limmp;
+     long *limmp;
 {
   if (limmp)
     *limmp = limm;
@@ -668,12 +668,12 @@ arc_opcode_limm_p (limmp)
 
 static arc_insn
 insert_reg (insn, operand, mods, reg, value, errmsg)
-  arc_insn insn;
-  const struct arc_operand *operand;
-  int mods;
-  const struct arc_operand_value *reg;
-  long value;
-  const char **errmsg;
+     arc_insn insn;
+     const struct arc_operand *operand;
+     int mods;
+     const struct arc_operand_value *reg;
+     long value;
+     const char **errmsg;
 {
   static char buf[100];
   enum operand op_type = OP_NONE;
@@ -800,12 +800,12 @@ insert_reg (insn, operand, mods, reg, value, errmsg)
 
 static arc_insn
 insert_flag (insn, operand, mods, reg, value, errmsg)
-  arc_insn insn;
-  const struct arc_operand *operand ATTRIBUTE_UNUSED;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
-  long value ATTRIBUTE_UNUSED;
-  const char **errmsg ATTRIBUTE_UNUSED;
+     arc_insn insn;
+     const struct arc_operand *operand ATTRIBUTE_UNUSED;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
+     long value ATTRIBUTE_UNUSED;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   /* We can't store anything in the insn until we've parsed the registers.
      Just record the fact that we've got this flag.  `insert_reg' will use it
@@ -818,12 +818,12 @@ insert_flag (insn, operand, mods, reg, value, errmsg)
 
 static arc_insn
 insert_nullify (insn, operand, mods, reg, value, errmsg)
-  arc_insn insn;
-  const struct arc_operand *operand;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
-  long value;
-  const char **errmsg ATTRIBUTE_UNUSED;
+     arc_insn insn;
+     const struct arc_operand *operand;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
+     long value;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   nullify_p = 1;
   insn |= (value & ((1 << operand->bits) - 1)) << operand->shift;
@@ -837,12 +837,12 @@ insert_nullify (insn, operand, mods, reg, value, errmsg)
 
 static arc_insn
 insert_flagfinish (insn, operand, mods, reg, value, errmsg)
-  arc_insn insn;
-  const struct arc_operand *operand;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
-  long value ATTRIBUTE_UNUSED;
-  const char **errmsg ATTRIBUTE_UNUSED;
+     arc_insn insn;
+     const struct arc_operand *operand;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
+     long value ATTRIBUTE_UNUSED;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   if (flag_p && !flagshimm_handled_p)
     {
@@ -858,12 +858,12 @@ insert_flagfinish (insn, operand, mods, reg, value, errmsg)
 
 static arc_insn
 insert_cond (insn, operand, mods, reg, value, errmsg)
-  arc_insn insn;
-  const struct arc_operand *operand;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
-  long value;
-  const char **errmsg ATTRIBUTE_UNUSED;
+     arc_insn insn;
+     const struct arc_operand *operand;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
+     long value;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   cond_p = 1;
   insn |= (value & ((1 << operand->bits) - 1)) << operand->shift;
@@ -878,12 +878,12 @@ insert_cond (insn, operand, mods, reg, value, errmsg)
 
 static arc_insn
 insert_forcelimm (insn, operand, mods, reg, value, errmsg)
-  arc_insn insn;
-  const struct arc_operand *operand ATTRIBUTE_UNUSED;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
-  long value ATTRIBUTE_UNUSED;
-  const char **errmsg ATTRIBUTE_UNUSED;
+     arc_insn insn;
+     const struct arc_operand *operand ATTRIBUTE_UNUSED;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
+     long value ATTRIBUTE_UNUSED;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   cond_p = 1;
   return insn;
@@ -891,12 +891,12 @@ insert_forcelimm (insn, operand, mods, reg, value, errmsg)
 
 static arc_insn
 insert_addr_wb (insn, operand, mods, reg, value, errmsg)
-  arc_insn insn;
-  const struct arc_operand *operand;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
-  long value ATTRIBUTE_UNUSED;
-  const char **errmsg ATTRIBUTE_UNUSED;
+     arc_insn insn;
+     const struct arc_operand *operand;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
+     long value ATTRIBUTE_UNUSED;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   addrwb_p = 1 << operand->shift;
   return insn;
@@ -904,12 +904,12 @@ insert_addr_wb (insn, operand, mods, reg, value, errmsg)
 
 static arc_insn
 insert_base (insn, operand, mods, reg, value, errmsg)
-  arc_insn insn;
-  const struct arc_operand *operand;
-  int mods;
-  const struct arc_operand_value *reg;
-  long value;
-  const char **errmsg;
+     arc_insn insn;
+     const struct arc_operand *operand;
+     int mods;
+     const struct arc_operand_value *reg;
+     long value;
+     const char **errmsg;
 {
   if (reg != NULL)
     {
@@ -955,12 +955,12 @@ insert_base (insn, operand, mods, reg, value, errmsg)
 
 static arc_insn
 insert_offset (insn, operand, mods, reg, value, errmsg)
-  arc_insn insn;
-  const struct arc_operand *operand;
-  int mods;
-  const struct arc_operand_value *reg;
-  long value;
-  const char **errmsg;
+     arc_insn insn;
+     const struct arc_operand *operand;
+     int mods;
+     const struct arc_operand_value *reg;
+     long value;
+     const char **errmsg;
 {
   long minval, maxval;
 
@@ -1050,11 +1050,11 @@ insert_offset (insn, operand, mods, reg, value, errmsg)
 
 static long
 extract_st_syntax (insn, operand, mods, opval, invalid)
-  arc_insn *insn;
-  const struct arc_operand *operand ATTRIBUTE_UNUSED;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value **opval ATTRIBUTE_UNUSED;
-  int *invalid;
+     arc_insn *insn;
+     const struct arc_operand *operand ATTRIBUTE_UNUSED;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value **opval ATTRIBUTE_UNUSED;
+     int *invalid;
 {
 #define ST_SYNTAX(V,B,O) \
 ((ls_operand[LS_VALUE]  == (V) && \
@@ -1081,7 +1081,7 @@ extract_st_syntax (insn, operand, mods, opval, invalid)
 
 int
 arc_limm_fixup_adjust(insn)
-  arc_insn insn;
+     arc_insn insn;
 {
   int retval = 0;
 
@@ -1100,12 +1100,12 @@ arc_limm_fixup_adjust(insn)
 
 static arc_insn
 insert_st_syntax (insn, operand, mods, reg, value, errmsg)
-  arc_insn insn;
-  const struct arc_operand *operand ATTRIBUTE_UNUSED;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
-  long value ATTRIBUTE_UNUSED;
-  const char **errmsg;
+     arc_insn insn;
+     const struct arc_operand *operand ATTRIBUTE_UNUSED;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
+     long value ATTRIBUTE_UNUSED;
+     const char **errmsg;
 {
   if (ST_SYNTAX(OP_SHIMM,OP_REG,OP_NONE) && shimm != 0)
     {
@@ -1185,12 +1185,12 @@ insert_st_syntax (insn, operand, mods, reg, value, errmsg)
 
 static arc_insn
 insert_ld_syntax (insn, operand, mods, reg, value, errmsg)
-  arc_insn insn;
-  const struct arc_operand *operand ATTRIBUTE_UNUSED;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
-  long value ATTRIBUTE_UNUSED;
-  const char **errmsg;
+     arc_insn insn;
+     const struct arc_operand *operand ATTRIBUTE_UNUSED;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
+     long value ATTRIBUTE_UNUSED;
+     const char **errmsg;
 {
 #define LD_SYNTAX(D,B,O) \
 ((ls_operand[LS_DEST]  == (D) && \
@@ -1226,11 +1226,11 @@ insert_ld_syntax (insn, operand, mods, reg, value, errmsg)
 
 static long
 extract_ld_syntax (insn, operand, mods, opval, invalid)
-  arc_insn *insn;
-  const struct arc_operand *operand ATTRIBUTE_UNUSED;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value **opval ATTRIBUTE_UNUSED;
-  int *invalid;
+     arc_insn *insn;
+     const struct arc_operand *operand ATTRIBUTE_UNUSED;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value **opval ATTRIBUTE_UNUSED;
+     int *invalid;
 {
   int test = insn[0] & I(-1);
 
@@ -1257,12 +1257,12 @@ extract_ld_syntax (insn, operand, mods, opval, invalid)
 
 static arc_insn
 insert_shimmfinish (insn, operand, mods, reg, value, errmsg)
-  arc_insn insn;
-  const struct arc_operand *operand;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
-  long value ATTRIBUTE_UNUSED;
-  const char **errmsg ATTRIBUTE_UNUSED;
+     arc_insn insn;
+     const struct arc_operand *operand;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
+     long value ATTRIBUTE_UNUSED;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   if (shimm_p)
     insn |= (shimm & ((1 << operand->bits) - 1)) << operand->shift;
@@ -1283,12 +1283,12 @@ insert_shimmfinish (insn, operand, mods, reg, value, errmsg)
 
 static arc_insn
 insert_limmfinish (insn, operand, mods, reg, value, errmsg)
-  arc_insn insn;
-  const struct arc_operand *operand ATTRIBUTE_UNUSED;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
-  long value ATTRIBUTE_UNUSED;
-  const char **errmsg ATTRIBUTE_UNUSED;
+     arc_insn insn;
+     const struct arc_operand *operand ATTRIBUTE_UNUSED;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
+     long value ATTRIBUTE_UNUSED;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
 #if 0
   if (limm_p)
@@ -1299,12 +1299,12 @@ insert_limmfinish (insn, operand, mods, reg, value, errmsg)
 
 static arc_insn
 insert_jumpflags (insn, operand, mods, reg, value, errmsg)
-  arc_insn insn;
-  const struct arc_operand *operand;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
-  long value;
-  const char **errmsg;
+     arc_insn insn;
+     const struct arc_operand *operand;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
+     long value;
+     const char **errmsg;
 {
   if (!flag_p)
     {
@@ -1434,11 +1434,11 @@ arc_opcode_init_extract ()
 
 static long
 extract_reg (insn, operand, mods, opval, invalid)
-  arc_insn *insn;
-  const struct arc_operand *operand;
-  int mods;
-  const struct arc_operand_value **opval;
-  int *invalid ATTRIBUTE_UNUSED;
+     arc_insn *insn;
+     const struct arc_operand *operand;
+     int mods;
+     const struct arc_operand_value **opval;
+     int *invalid ATTRIBUTE_UNUSED;
 {
   int regno;
   long value;
@@ -1550,11 +1550,11 @@ extract_reg (insn, operand, mods, opval, invalid)
 
 static long
 extract_flag (insn, operand, mods, opval, invalid)
-  arc_insn *insn;
-  const struct arc_operand *operand;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value **opval;
-  int *invalid ATTRIBUTE_UNUSED;
+     arc_insn *insn;
+     const struct arc_operand *operand;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value **opval;
+     int *invalid ATTRIBUTE_UNUSED;
 {
   int f;
   const struct arc_operand_value *val;
@@ -1581,11 +1581,11 @@ extract_flag (insn, operand, mods, opval, invalid)
 
 static long
 extract_cond (insn, operand, mods, opval, invalid)
-  arc_insn *insn;
-  const struct arc_operand *operand;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value **opval;
-  int *invalid ATTRIBUTE_UNUSED;
+     arc_insn *insn;
+     const struct arc_operand *operand;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value **opval;
+     int *invalid ATTRIBUTE_UNUSED;
 {
   long cond;
   const struct arc_operand_value *val;
@@ -1608,11 +1608,11 @@ extract_cond (insn, operand, mods, opval, invalid)
 
 static long
 extract_reladdr (insn, operand, mods, opval, invalid)
-  arc_insn *insn;
-  const struct arc_operand *operand;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value **opval ATTRIBUTE_UNUSED;
-  int *invalid ATTRIBUTE_UNUSED;
+     arc_insn *insn;
+     const struct arc_operand *operand;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value **opval ATTRIBUTE_UNUSED;
+     int *invalid ATTRIBUTE_UNUSED;
 {
   long addr;
 
@@ -1626,11 +1626,11 @@ extract_reladdr (insn, operand, mods, opval, invalid)
 /* extract the flags bits from a j or jl long immediate.  */
 static long
 extract_jumpflags(insn, operand, mods, opval, invalid)
-  arc_insn *insn;
-  const struct arc_operand *operand;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value **opval ATTRIBUTE_UNUSED;
-  int *invalid;
+     arc_insn *insn;
+     const struct arc_operand *operand;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value **opval ATTRIBUTE_UNUSED;
+     int *invalid;
 {
   if (!flag_p || !limm_p)
     *invalid = 1;
@@ -1642,11 +1642,11 @@ extract_jumpflags(insn, operand, mods, opval, invalid)
 
 static long
 extract_st_offset (insn, operand, mods, opval, invalid)
-  arc_insn *insn;
-  const struct arc_operand *operand;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value **opval ATTRIBUTE_UNUSED;
-  int *invalid;
+     arc_insn *insn;
+     const struct arc_operand *operand;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value **opval ATTRIBUTE_UNUSED;
+     int *invalid;
 {
   int value = 0;
 
@@ -1669,11 +1669,11 @@ extract_st_offset (insn, operand, mods, opval, invalid)
 
 static long
 extract_ld_offset (insn, operand, mods, opval, invalid)
-  arc_insn *insn;
-  const struct arc_operand *operand;
-  int mods;
-  const struct arc_operand_value **opval;
-  int *invalid;
+     arc_insn *insn;
+     const struct arc_operand *operand;
+     int mods;
+     const struct arc_operand_value **opval;
+     int *invalid;
 {
   int test = insn[0] & I(-1);
   int value;
@@ -1698,11 +1698,11 @@ extract_ld_offset (insn, operand, mods, opval, invalid)
 
 static long
 extract_unopmacro (insn, operand, mods, opval, invalid)
-  arc_insn *insn;
-  const struct arc_operand *operand ATTRIBUTE_UNUSED;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value **opval ATTRIBUTE_UNUSED;
-  int *invalid;
+     arc_insn *insn;
+     const struct arc_operand *operand ATTRIBUTE_UNUSED;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value **opval ATTRIBUTE_UNUSED;
+     int *invalid;
 {
   /* This misses the case where B == ARC_REG_SHIMM_UPDATE &&
      C == ARC_REG_SHIMM (or vice versa).  No big deal.  Those insns will get
@@ -1719,8 +1719,8 @@ extract_unopmacro (insn, operand, mods, opval, invalid)
 
 const struct arc_operand_value *
 arc_opcode_lookup_suffix (type, value)
-  const struct arc_operand *type;
-  int value;
+     const struct arc_operand *type;
+     int value;
 {
   register const struct arc_operand_value *v,*end;
   struct arc_ext_operand_value *ext_oper = arc_ext_operands;
@@ -1744,8 +1744,8 @@ arc_opcode_lookup_suffix (type, value)
 
 static const struct arc_operand_value *
 lookup_register (type, regno)
-  int type;
-  long regno;
+     int type;
+     long regno;
 {
   register const struct arc_operand_value *r,*end;
   struct arc_ext_operand_value *ext_oper = arc_ext_operands;
@@ -1771,14 +1771,14 @@ lookup_register (type, regno)
 
 int
 arc_insn_is_j(insn)
-  arc_insn insn;
+     arc_insn insn;
 {
   return (insn & (I(-1))) == I(0x7);
 }
 
 int
 arc_insn_not_jl(insn)
-  arc_insn insn;
+     arc_insn insn;
 {
   return ((insn & (I(-1)|A(-1)|C(-1)|R(-1,7,1)|R(-1,9,1)))
 	  != (I(0x7) | R(-1,9,1)));
@@ -1804,7 +1804,7 @@ arc_operand_type(int opertype)
 
 struct arc_operand_value *
 get_ext_suffix(s)
-  char *s;
+     char *s;
 {
   struct arc_ext_operand_value *suffix = arc_ext_operands;
 
