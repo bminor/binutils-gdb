@@ -1,5 +1,10 @@
 2003-10-09  Daniel Jacobowitz  <drow@mvista.com>
 
+	* remote-mips.c (mips_initialize): Remove unneeded call to
+	get_selected_frame.  Suggested by Atsushi Nemoto <anemo@mba.ocn.ne.jp>.
+
+2003-10-09  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2expr.c (execute_stack_op): Don't treat the frame base as
 	a memory pointer.
 

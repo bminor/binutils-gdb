@@ -1494,10 +1494,6 @@ mips_initialize (void)
      the request itself succeeds or fails.  */
 
   mips_request ('r', 0, 0, &err, mips_receive_wait, NULL);
-  /* FIXME: cagney/2002-11-29: Force the update of selected frame.
-     This shouldn't be necessary, only many many places still refer to
-     selected_frame directly (instead of using get_selected_frame().  */
-  get_selected_frame (); /* Hack!!!  */
 }
 
 /* Open a connection to the remote board.  */
