@@ -35,6 +35,7 @@ SECTIONS
   .rela.plt      : { *(.rela.plt)		}
   .init          : { *(.init)	} =0
   .plt      : { *(.plt)	}
+  . = 0x100000;
   .zdata    : { *(.zdata) *(.zrodata) *(.zbss*) }
   .text      :
   {
@@ -50,7 +51,6 @@ SECTIONS
   .rodata1   : { *(.rodata1) }
   /* Adjust the address for the data segment.  We want to adjust up to
      the same address within the page on the next page up.  */
-  . = 0x100000;
   .data    :
   {
     *(.data)

@@ -1,3 +1,10 @@
+start-sanitize-v850
+Tue Oct 22 11:36:47 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* scriptempl/v850.sc: Move all "normal" sections into
+	the external memory region (0x100000 - 0x200000).
+
+end-sanitize-v850
 start-sanitize-d10v
 Mon Oct 21 17:16:59 1996  Michael Meissner  <meissner@wogglebug.tiac.net>
 
