@@ -1,3 +1,12 @@
+Sat Oct 11 09:02:08 1997  Fred Fish  <fnf@cygnus.com>
+
+	* simops.c (OP_6401): postdecrement on r15 is OK, remove exception.
+	(OP_6601): Ditto.
+
+Fri Oct  3 09:28:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Sat Sep 27 12:51:34 1997  Fred Fish  <fnf@cygnus.com>
 
 	* interp.c (pc_addr): Discard upper bit(s) of PC in case
