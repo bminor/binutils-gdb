@@ -1291,11 +1291,6 @@ case "${target}" in
 	sim_target=mips
 	only_if_gcc=yes
 	;;
-  mn10200*-*-*)
-	# The mn10200 simulator can only be compiled by gcc.
-	sim_target=mn10200
-	only_if_gcc=yes
-	;;
   mn10300*-*-*)
 	# The mn10300 simulator can only be compiled by gcc.
 	sim_target=mn10300
@@ -1319,7 +1314,8 @@ case "${target}" in
   w65-*-*)		sim_target=w65 ;;
   z8k*-*-*)		sim_target=z8k ;;
   sparc64-*-*)
-	;; # Don't build erc32 if sparc64.
+	sim_target=none # Don't build erc32 if sparc64.
+	;;
   sparc*-*-*)
 	# The SPARC simulator can only be compiled by gcc.
 	sim_target=erc32
@@ -1347,7 +1343,7 @@ yes)
 	;;
 esac
 
-if test x"${sim_target}" != x ; then
+if test x"${sim_target}" != xnone ; then
 	configdirs="common ${sim_target}"
 	subdirs="$configdirs"
 
