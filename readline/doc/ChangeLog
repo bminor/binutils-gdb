@@ -1,3 +1,8 @@
+2002-01-20  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* rluser.texinfo (Sample Init File): Prevent overfull hboxes.
+	From Brian Youmans <3diff@gnu.org>.
+
 2000-07-09  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
         * Import of readline 4.1.
