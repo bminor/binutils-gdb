@@ -56,8 +56,8 @@ struct hpread_symfile_info
     unsigned int gntt_symcount;
 
     /* To keep track of all the types we've processed.  */
-    struct type **type_vector;
-    int type_vector_length;
+    struct type **dntt_type_vector;
+    int dntt_type_vector_length;
 
     /* Keeps track of the beginning of a range of source lines.  */
     sltpointer sl_index;
@@ -80,8 +80,9 @@ struct hpread_symfile_info
 #define VT_SIZE(o)              (HPUX_SYMFILE_INFO(o)->vt_size)
 #define LNTT_SYMCOUNT(o)        (HPUX_SYMFILE_INFO(o)->lntt_symcount)
 #define GNTT_SYMCOUNT(o)        (HPUX_SYMFILE_INFO(o)->gntt_symcount)
-#define TYPE_VECTOR(o)          (HPUX_SYMFILE_INFO(o)->type_vector)
-#define TYPE_VECTOR_LENGTH(o)   (HPUX_SYMFILE_INFO(o)->type_vector_length)
+#define DNTT_TYPE_VECTOR(o)     (HPUX_SYMFILE_INFO(o)->dntt_type_vector)
+#define DNTT_TYPE_VECTOR_LENGTH(o) \
+  (HPUX_SYMFILE_INFO(o)->dntt_type_vector_length)
 #define SL_INDEX(o)             (HPUX_SYMFILE_INFO(o)->sl_index)
 #define WITHIN_FUNCTION(o)      (HPUX_SYMFILE_INFO(o)->within_function)
 #define CURRENT_FUNCTION_VALUE(o) (HPUX_SYMFILE_INFO(o)->current_function_value)
@@ -1694,7 +1695,7 @@ hpread_symfile_init (struct objfile *objfile)
   memset (objfile->sym_private, 0, sizeof (struct hpread_symfile_info));
 
   /* We haven't read in any types yet.  */
-  TYPE_VECTOR (objfile) = 0;
+  DNTT_TYPE_VECTOR (objfile) = 0;
 
   /* Read in data from the $GNTT$ subspace.  */
   gntt_section = bfd_get_section_by_name (objfile->obfd, "$GNTT$");
@@ -3033,18 +3034,18 @@ hpread_lookup_type (dnttpointer hp_type, struct objfile *objfile)
 
   if (index < LNTT_SYMCOUNT (objfile))
     {
-      if (index >= TYPE_VECTOR_LENGTH (objfile))
+      if (index >= DNTT_TYPE_VECTOR_LENGTH (objfile))
 	{
-	  old_len = TYPE_VECTOR_LENGTH (objfile);
+	  old_len = DNTT_TYPE_VECTOR_LENGTH (objfile);
 
 	  /* See if we need to allocate a type-vector. */
 	  if (old_len == 0)
 	    {
-	      TYPE_VECTOR_LENGTH (objfile) = LNTT_SYMCOUNT (objfile) + GNTT_SYMCOUNT (objfile);
-	      TYPE_VECTOR (objfile) = (struct type **)
-		xmmalloc (objfile->md, TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *));
-	      memset (&TYPE_VECTOR (objfile)[old_len], 0,
-		      (TYPE_VECTOR_LENGTH (objfile) - old_len) *
+	      DNTT_TYPE_VECTOR_LENGTH (objfile) = LNTT_SYMCOUNT (objfile) + GNTT_SYMCOUNT (objfile);
+	      DNTT_TYPE_VECTOR (objfile) = (struct type **)
+		xmmalloc (objfile->md, DNTT_TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *));
+	      memset (&DNTT_TYPE_VECTOR (objfile)[old_len], 0,
+		      (DNTT_TYPE_VECTOR_LENGTH (objfile) - old_len) *
 		      sizeof (struct type *));
 	    }
 
@@ -3052,25 +3053,25 @@ hpread_lookup_type (dnttpointer hp_type, struct objfile *objfile)
 	   * initially allocate a correct-size type-vector, this code
 	   * should no longer trigger.
 	   */
-	  while (index >= TYPE_VECTOR_LENGTH (objfile))
+	  while (index >= DNTT_TYPE_VECTOR_LENGTH (objfile))
 	    {
-	      TYPE_VECTOR_LENGTH (objfile) *= 2;
+	      DNTT_TYPE_VECTOR_LENGTH (objfile) *= 2;
 	      size_changed = 1;
 	    }
 	  if (size_changed)
 	    {
-	      TYPE_VECTOR (objfile) = (struct type **)
+	      DNTT_TYPE_VECTOR (objfile) = (struct type **)
 		xmrealloc (objfile->md,
-			   (char *) TYPE_VECTOR (objfile),
-		   (TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *)));
+			   (char *) DNTT_TYPE_VECTOR (objfile),
+		   (DNTT_TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *)));
 
-	      memset (&TYPE_VECTOR (objfile)[old_len], 0,
-		      (TYPE_VECTOR_LENGTH (objfile) - old_len) *
+	      memset (&DNTT_TYPE_VECTOR (objfile)[old_len], 0,
+		      (DNTT_TYPE_VECTOR_LENGTH (objfile) - old_len) *
 		      sizeof (struct type *));
 	    }
 
 	}
-      return &TYPE_VECTOR (objfile)[index];
+      return &DNTT_TYPE_VECTOR (objfile)[index];
     }
   else
     return NULL;
