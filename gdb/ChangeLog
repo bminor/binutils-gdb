@@ -1,3 +1,8 @@
+2003-08-27  Andrew Cagney  <cagney@redhat.com>
+
+	* alpha-osf1-tdep.c (alpha_call_dummy_address): Delete function.
+	(alpha_osf1_init_abi): Do not set call_dummy_address.
+
 2003-08-27  David Carlton  <carlton@kealia.com>
 
 	From Randolph Chung  <tausq@debian.org>:
