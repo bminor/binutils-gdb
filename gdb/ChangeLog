@@ -1,3 +1,32 @@
+2003-09-28  Mark Kettenis  <kettenis@gnu.org>
+
+	* i387-tdep.c (i387_supply_fsave, i387_supply_fxsave): Add
+	regcache argument and reverse the order of the other two
+	arguments.  Remove local regcache variable.  Determine
+	architecture from REGCACHE.  Update comments.
+	* x86-64-tdep.c (x86_64_supply_fxsave): Add regcache argument and
+	reverse the order of the other two arguments.  Remove local
+	regcache variable.  Determine architecture from REGCACHE.  Update
+	comments.
+	* i387-tdep.h (i387_supply_fsave, i387_supply_fxsave): Adjust
+	prototypes.  Update comments.
+	* x86-64-tdep.c (x86_64_supply_fxsave): Adjust prototype.  Adjust
+	comment.
+	* amd64fbsd-nat.c (supply_fpregset, fetch_inferior_registers):
+	Update.
+	* go32-nat.c (fetch_register, go32_fetch_registers): Update.
+	* i386-interix-nat.c (supply_fpregset): Update.
+	* i386-linux-nat.c (supply_fpregset, supply_fpxregset): Update.
+	* i386-nto-tdep.c (i386nto_supply_fpregset): Update.
+	* i386gnu-nat.c (fetch_fpregs, supply_fpregset): Update.
+	* i386bsd-nat.c (supply_fpregset, fetch_inferior_registers): Update.
+	* i386nbsd-tdep.c (fetch_core_registers, fetch_elfcore_registers):
+	Update.
+	* i386obsd-tdep.c (fetch_core_registers): Update.
+	* i386v4-nat.c (supply_fpregset): Update.
+	* x86-64-linux-nat.c (supply_fpregset): Update.
+	* x86-64-linux-tdep.c (fetch_core_registers): Update.
+	
 2003-09-27  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.h: Put opaque declarations in alphabetical

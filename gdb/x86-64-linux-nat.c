@@ -166,7 +166,7 @@ store_regs (int tid, int regnum)
 void
 supply_fpregset (elf_fpregset_t *fpregsetp)
 {
-  x86_64_supply_fxsave ((const char *) fpregsetp, -1);
+  x86_64_supply_fxsave (current_regcache, -1, fpregsetp);
 }
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in

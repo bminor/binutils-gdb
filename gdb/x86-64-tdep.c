@@ -1289,22 +1289,32 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
    bits of these pointers (instead of just the 16-bits of the segment
    selector).  */
 
-/* Fill register REGNUM in GDB's register cache with the appropriate
+/* The 64-bit FXSAVE format differs from the 32-bit format in the
+   sense that the instruction pointer and data pointer are simply
+   64-bit offsets into the code segment and the data segment instead
+   of a selector offset pair.  The functions below store the upper 32
+   bits of these pointers (instead of just the 16-bits of the segment
+   selector).  */
+
+/* Fill register REGNUM in REGCACHE with the appropriate
    floating-point or SSE register value from *FXSAVE.  If REGNUM is
    -1, do this for all registers.  This function masks off any of the
    reserved bits in *FXSAVE.  */
 
 void
-x86_64_supply_fxsave (const char *fxsave, int regnum)
+x86_64_supply_fxsave (struct regcache *regcache, int regnum,
+		      const void *fxsave)
 {
-  i387_supply_fxsave (fxsave, regnum);
+  i387_supply_fxsave (regcache, regnum, fxsave);
 
   if (fxsave)
     {
+      const char *regs = fxsave;
+
       if (regnum == -1 || regnum == I387_FISEG_REGNUM)
-	supply_register (I387_FISEG_REGNUM, fxsave + 12);
+	regcache_raw_supply (regcache, I387_FISEG_REGNUM, regs + 12);
       if (regnum == -1 || regnum == I387_FOSEG_REGNUM)
-      supply_register (I387_FOSEG_REGNUM, fxsave + 20);
+	regcache_raw_supply (regcache, I387_FOSEG_REGNUM, regs + 20);
     }
 }
 

@@ -320,7 +320,7 @@ static void store_regs (int tid, int regno) {}
 void 
 supply_fpregset (elf_fpregset_t *fpregsetp)
 {
-  i387_supply_fsave ((const char *) fpregsetp, -1);
+  i387_supply_fsave (current_regcache, -1, fpregsetp);
   dummy_sse_values ();
 }
 
@@ -385,7 +385,7 @@ static void store_fpregs (int tid, int regno) {}
 void
 supply_fpxregset (elf_fpxregset_t *fpxregsetp)
 {
-  i387_supply_fxsave ((const char *) fpxregsetp, -1);
+  i387_supply_fxsave (current_regcache, -1, fpxregsetp);
 }
 
 /* Fill register REGNO (if it is a floating-point or SSE register) in

@@ -468,7 +468,7 @@ fetch_register (int regno)
   if (regno < FP0_REGNUM)
     supply_register (regno, (char *) &a_tss + regno_mapping[regno].tss_ofs);
   else if (i386_fp_regnum_p (regno) || i386_fpc_regnum_p (regno))
-    i387_supply_fsave ((const char *) &npx, regno);
+    i387_supply_fsave (current_regcache, regno, &npx);
   else
     internal_error (__FILE__, __LINE__,
 		    "Invalid register no. %d in fetch_register.", regno);
@@ -483,7 +483,7 @@ go32_fetch_registers (int regno)
     {
       for (regno = 0; regno < FP0_REGNUM; regno++)
 	fetch_register (regno);
-      i387_supply_fsave ((const char *) &npx, -1);
+      i387_supply_fsave (current_regcache, -1, &npx);
     }
 }
 

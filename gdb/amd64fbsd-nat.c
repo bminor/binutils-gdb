@@ -129,7 +129,7 @@ fill_gregset (gregset_t *gregsetp, int regnum)
 void
 supply_fpregset (fpregset_t *fpregsetp)
 {
-  x86_64_supply_fxsave ((const char *) fpregsetp, -1);
+  x86_64_supply_fxsave (current_regcache, -1, fpregsetp);
 }
 
 /* Fill register REGNUM (if it is a floating-point register) in
@@ -169,7 +169,7 @@ fetch_inferior_registers (int regnum)
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't get floating point status");
 
-      x86_64_supply_fxsave ((const char *) &fpregs, -1);
+      x86_64_supply_fxsave (current_regcache, -1, &fpregs);
     }
 }
 

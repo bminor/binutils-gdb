@@ -378,15 +378,14 @@ static int fsave_offset[] =
   (fsave + fsave_offset[regnum - I387_ST0_REGNUM])
 
 
-/* Fill register REGNUM in GDB's register cache with the appropriate
-   value from *FSAVE.  This function masks off any of the reserved
-   bits in *FSAVE.  */
+/* Fill register REGNUM in REGCACHE with the appropriate value from
+   *FSAVE.  This function masks off any of the reserved bits in
+   *FSAVE.  */
 
 void
-i387_supply_fsave (const void *fsave, int regnum)
+i387_supply_fsave (struct regcache *regcache, int regnum, const void *fsave)
 {
-  struct regcache *regcache = current_regcache;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
   const char *regs = fsave;
   int i;
 
@@ -524,15 +523,14 @@ static int fxsave_offset[] =
 static int i387_tag (const unsigned char *raw);
 
 
-/* Fill register REGNUM in GDB's register cache with the appropriate
+/* Fill register REGNUM in REGCACHE with the appropriate
    floating-point or SSE register value from *FXSAVE.  This function
    masks off any of the reserved bits in *FXSAVE.  */
 
 void
-i387_supply_fxsave (const void *fxsave, int regnum)
+i387_supply_fxsave (struct regcache *regcache, int regnum, const void *fxsave)
 {
-  struct regcache *regcache = current_regcache;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
   const char *regs = fxsave;
   int i;
 

@@ -23,9 +23,10 @@
 #define I387_TDEP_H
 
 struct gdbarch;
-struct ui_file;
 struct frame_info;
+struct regcache;
 struct type;
+struct ui_file;
 
 /* Because the number of general-purpose registers is different for
    AMD64, the floating-point registers and SSE registers get shifted.
@@ -73,11 +74,12 @@ extern void i387_value_to_register (struct frame_info *frame, int regnum,
 #define I387_SIZEOF_FSAVE	108
 #define I387_SIZEOF_FXSAVE	512
 
-/* Fill register REGNUM in GDB's register cache with the appropriate
-   value from *FSAVE.  This function masks off any of the reserved
-   bits in *FSAVE.  */
+/* Fill register REGNUM in REGCACHE with the appropriate value from
+   *FSAVE.  This function masks off any of the reserved bits in
+   *FSAVE.  */
 
-extern void i387_supply_fsave (const void *fsave, int regnum);
+extern void i387_supply_fsave (struct regcache *regcache, int regnum,
+			       const void *fsave);
 
 /* Fill register REGNUM (if it is a floating-point register) in *FSAVE
    with the value in GDB's register cache.  If REGNUM is -1, do this
@@ -86,11 +88,12 @@ extern void i387_supply_fsave (const void *fsave, int regnum);
 
 extern void i387_fill_fsave (void *fsave, int regnum);
 
-/* Fill register REGNUM in GDB's register cache with the appropriate
+/* Fill register REGNUM in REGCACHE with the appropriate
    floating-point or SSE register value from *FXSAVE.  This function
    masks off any of the reserved bits in *FXSAVE.  */
 
-extern void i387_supply_fxsave (const void *fxsave, int regnum);
+extern void i387_supply_fxsave (struct regcache *regcache, int regnum,
+				const void *fxsave);
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in
    *FXSAVE with the value in GDB's register cache.  If REGNUM is -1, do
