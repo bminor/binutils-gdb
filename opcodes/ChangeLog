@@ -1,3 +1,15 @@
+start-sanitize-r5900
+Mon Apr 20 19:11:55 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* mips-opc.c (madd.s): Correct mask pattern for disassembly.
+
+end-sanitize-r5900
+start-sanitize-r5900
+Sat Apr 18 00:29:18 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* vu0.h (vlqd, vlqi): Update per revised specs.
+
+end-sanitize-r5900
 start-sanitize-sky
 Thu Apr 16 11:44:59 1998  Doug Evans  <devans@canuck.cygnus.com>
 

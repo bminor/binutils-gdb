@@ -1,5 +1,5 @@
 /* mips.h.  Mips opcode list for GDB, the GNU debugger.
-   Copyright 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
    Contributed by Ralph Campbell and OSF
    Commented and modified by Ian Lance Taylor, Cygnus Support
 
@@ -138,6 +138,10 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"b",       "p",	0x10000000, 0xffff0000,	UBD,		I1	},/* beq 0,0 */
 {"b",       "p",	0x04010000, 0xffff0000,	UBD,		I1	},/* bgez 0 */
 {"bal",     "p",	0x04110000, 0xffff0000,	UBD|WR_31,	I1	},/* bgezal 0*/
+
+/* start-sanitize-r5900 */
+#include "vu0.h"
+/* end-sanitize-r5900 */
 
 {"abs",     "d,v",	0,    (int) M_ABS,	INSN_MACRO,	I1	},
 {"abs.s",   "D,V",	0x46000005, 0xffff003f,	WR_D|RD_S|FP_S,	I1	},
@@ -296,7 +300,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"c.le.d",  "M,S,T",	0x4620003e, 0xffe000ff,	RD_S|RD_T|WR_CC|FP_D,	I4	},
 /* start-sanitize-r5900 */
 {"c.le.s",  "S,T",	0x46000036, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_S,	T5	},
-/* end-santiize-r5900 */
+/* end-sanitize-r5900 */
 {"c.le.s",  "S,T",	0x4600003e, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_S,	I1	},
 {"c.le.s",  "M,S,T",	0x4600003e, 0xffe000ff,	RD_S|RD_T|WR_CC|FP_S,	I4	},
 {"c.ngt.d", "S,T",	0x4620003f, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_D,	I1	},
@@ -565,7 +569,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"madd.d",  "D,R,S,T",	0x4c000021, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_D,	I4	},
 {"madd.s",  "D,R,S,T",	0x4c000020, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_S,	I4	},
 /* start-sanitize-r5900 */
-{"madd.s",  "D,S,T",	0x4600001c, 0xffe007ff, WR_D|RD_S|RD_T|FP_S,    	T5	},
+{"madd.s",  "D,S,T",	0x4600001c, 0xffe0003f, WR_D|RD_S|RD_T|FP_S,    	T5	},
   /* end-sanitize-r5900 */
 {"madd",    "s,t",	0x0000001c, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,		L1	},
 {"madd",    "s,t",	0x70000000, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,	        G1	},
@@ -1024,6 +1028,8 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"invalidate", "t,A(b)",0,    (int) M_SWR_AB,	INSN_MACRO,	I2	}, /* as swr */
 {"swxc1",   "S,t(b)",   0x4c000008, 0xfc0007ff, SM|RD_S|RD_t|RD_b,	I4	},
 {"sync",    "",		0x0000000f, 0xffffffff,	0,		I2|T3	},
+{"sync.p",  "",		0x0000000f, 0xffffffff,	0,		I2	},
+{"sync.l",  "",		0x0000040f, 0xffffffff,	0,		I2	},
 {"syscall", "",		0x0000000c, 0xffffffff,	TRAP,	I1		},
 {"syscall", "B",	0x0000000c, 0xfc00003f,	TRAP,	I1		},
 {"teqi",    "s,j",	0x040c0000, 0xfc1f0000, RD_s|TRAP,	I2	},
