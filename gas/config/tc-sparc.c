@@ -39,7 +39,10 @@ static enum sparc_opcode_arch_val current_architecture = SPARC_OPCODE_ARCH_V6;
 #ifdef SPARC_ARCH64
 static enum sparc_opcode_arch_val max_architecture = SPARC_OPCODE_ARCH_V9;
 #else
-static enum sparc_opcode_arch_val max_architecture = SPARC_OPCODE_ARCH_V8;
+/* ??? This should be V8, but sparclite support was added by making it the
+   default.  GCC now passes -Asparclite, so maybe sometime in the future
+   we can set this to V8.  */
+static enum sparc_opcode_arch_val max_architecture = SPARC_OPCODE_ARCH_SPARCLITE;
 #endif
 
 static int architecture_requested;
@@ -146,6 +149,20 @@ in_signed_range (val, max)
   if (val < ~max)
     return 0;
   return 1;
+}
+
+static int
+sparc_ffs (mask)
+     unsigned int mask;
+{
+  int i;
+
+  if (mask == 0)
+    return -1;
+
+  for (i = 0; (mask & 1) == 0; ++i)
+    mask >>= 1;
+  return i;
 }
 
 #if 0
@@ -603,14 +620,29 @@ md_begin ()
 
   target_big_endian = 1;
 
-  /* If both an architecture and -bump were requested, allow bumping to go
-     as high as needed.  If the requested architecture conflicts with the
-     highest architecture, -bump has no effect.  Note that `max_architecture'
-     records the requested architecture.  */
-  if (architecture_requested && warn_on_bump
-      && !SPARC_OPCODE_CONFLICT_P (max_architecture, SPARC_OPCODE_ARCH_MAX)
-      && !SPARC_OPCODE_CONFLICT_P (SPARC_OPCODE_ARCH_MAX, max_architecture))
-    max_architecture = SPARC_OPCODE_ARCH_MAX;
+  /* If -bump, record the architecture level at which we start issuing
+     warnings.  The behaviour is different depending upon whether an
+     architecture was explicitly specified.  If it wasn't, we issue warnings
+     for all upwards bumps.  If it was, we don't start issuing warnings until
+     we need to bump beyond the requested architecture or when we bump between
+     conflicting architectures.  */
+
+  if (warn_on_bump
+      && architecture_requested)
+    {
+      /* `max_architecture' records the requested architecture.
+	 Issue warnings if we go above it.  */
+      warn_after_architecture = max_architecture;
+
+      /* Find the highest architecture level that doesn't conflict with
+	 the requested one.  */
+      for (max_architecture = SPARC_OPCODE_ARCH_MAX;
+	   max_architecture > warn_after_architecture;
+	   --max_architecture)
+	if (! SPARC_OPCODE_CONFLICT_P (max_architecture,
+				       warn_after_architecture))
+	  break;
+    }
 }
 
 /* Called after all assembly has been done.  */
@@ -1741,28 +1773,25 @@ sparc_ip (str)
       else
 	{
 	  /* We have a match.  Now see if the architecture is ok.  */
-	  enum sparc_opcode_arch_val needed_architecture =
-	    ((v9_arg_p && insn->architecture < SPARC_OPCODE_ARCH_V9)
-	     ? SPARC_OPCODE_ARCH_V9 : insn->architecture);
+	  int needed_arch_mask = insn->architecture;
 
-	  if (needed_architecture == current_architecture)
-	    ; /* ok */
-	  /* Do we have a potential conflict?  */
-	  else if (SPARC_OPCODE_CONFLICT_P (max_architecture,
-					     needed_architecture)
-		   || SPARC_OPCODE_CONFLICT_P (needed_architecture,
-						max_architecture)
-		   || needed_architecture > max_architecture)
+	  if (v9_arg_p)
 	    {
-	      as_bad ("Architecture mismatch on \"%s\".", str);
-	      as_tsktsk (" (Requires %s; requested architecture is %s.)",
-			 sparc_opcode_archs[needed_architecture].name,
-			 sparc_opcode_archs[max_architecture].name);
-	      return;
+	      needed_arch_mask &= ~ ((1 << SPARC_OPCODE_ARCH_V9)
+				     | (1 << SPARC_OPCODE_ARCH_V9A));
+	      needed_arch_mask |= (1 << SPARC_OPCODE_ARCH_V9);
 	    }
-	  /* Do we need to bump?  */
-	  else if (needed_architecture > current_architecture)
+
+	  if (needed_arch_mask & SPARC_OPCODE_SUPPORTED (current_architecture))
+	    ; /* ok */
+	  /* Can we bump up the architecture?  */
+	  else if (needed_arch_mask & SPARC_OPCODE_SUPPORTED (max_architecture))
 	    {
+	      enum sparc_opcode_arch_val needed_architecture =
+		sparc_ffs (SPARC_OPCODE_SUPPORTED (max_architecture)
+			   & needed_arch_mask);
+
+	      assert (needed_architecture <= SPARC_OPCODE_ARCH_MAX);
 	      if (warn_on_bump
 		  && needed_architecture > warn_after_architecture)
 		{
@@ -1770,8 +1799,23 @@ sparc_ip (str)
 			   sparc_opcode_archs[current_architecture].name,
 			   sparc_opcode_archs[needed_architecture].name,
 			   str);
+		  warn_after_architecture = needed_architecture;
 		}
 	      current_architecture = needed_architecture;
+	    }
+	  /* Conflict.  */
+	  else
+	    {
+	      enum sparc_opcode_arch_val needed_architecture =
+		sparc_ffs (~ SPARC_OPCODE_SUPPORTED (max_architecture)
+			   & needed_arch_mask);
+
+	      assert (needed_architecture <= SPARC_OPCODE_ARCH_MAX);
+	      as_bad ("Architecture mismatch on \"%s\".", str);
+	      as_tsktsk (" (Requires %s; requested architecture is %s.)",
+			 sparc_opcode_archs[needed_architecture].name,
+			 sparc_opcode_archs[max_architecture].name);
+	      return;
 	    }
 	} /* if no match */
 
