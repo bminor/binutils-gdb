@@ -1251,8 +1251,14 @@ unconditionally_kill_inferior (pi)
 
   signo = SIGKILL;
 
+#ifdef PROCFS_NEED_CLEAR_CURSIG_FOR_KILL
+  /* Alpha OSF/1-3.x procfs needs a clear of the current signal
+     before the PIOCKILL, otherwise it might generate a corrupted core
+     file for the inferior.  */
+  ioctl (pi->fd, PIOCSSIG, NULL);
+#endif
 #ifdef PROCFS_NEED_PIOCSSIG_FOR_KILL
-  /* Alpha OSF/1 procfs needs a PIOCSSIG call with a SIGKILL signal
+  /* Alpha OSF/1-2.x procfs needs a PIOCSSIG call with a SIGKILL signal
      to kill the inferior, otherwise it might remain stopped with a
      pending SIGKILL.
      We do not check the result of the PIOCSSIG, the inferior might have

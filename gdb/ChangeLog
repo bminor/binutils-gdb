@@ -1,5 +1,9 @@
 Sat Jul 29 01:45:56 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
+	* procfs.c (unconditionally_kill_inferior):  Clear current signal
+	if PROCFS_NEED_CLEAR_CURSIG_FOR_KILL is defined.
+	* config/alpha/nm-osf3.h (PROCFS_NEED_CLEAR_CURSIG_FOR_KILL):  Define.
+
 	* alpha-tdep.c:  Move sigtramp handling of saved registers from
 	read_next_frame_reg to alpha_find_saved_regs, handle saved
 	floating point registers.
