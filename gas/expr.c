@@ -1004,12 +1004,16 @@ operand (expressionP)
       /* didn't begin with digit & not a name */
       segment = expression (expressionP);
       /* Expression() will pass trailing whitespace */
-      if ((c == '(' && *input_line_pointer++ != ')')
-	  || (c == '[' && *input_line_pointer++ != ']'))
+      if ((c == '(' && *input_line_pointer != ')')
+	  || (c == '[' && *input_line_pointer != ']'))
 	{
-	  as_bad (_("Missing ')' assumed"));
-	  input_line_pointer--;
+#ifdef RELAX_PAREN_GROUPING
+	  if (c != '(')
+#endif
+	    as_bad (_("Missing '%c' assumed"), c == '(' ? ')' : ']');
 	}
+      else
+        input_line_pointer++;
       SKIP_WHITESPACE ();
       /* here with input_line_pointer->char after "(...)" */
       return segment;
