@@ -1,5 +1,7 @@
 Wed Nov 19 12:02:41 1997  Doug Evans  <devans@seba.cygnus.com>
 
+	* callback.c (cb_host_to_target_stat): Fix return values.
+
 	* cgen-sim.h (enum_signal_type): Delete.
 	(engine_signal): Update prototype.
 	* cgen-utils.c: Don't include <signal.h>.

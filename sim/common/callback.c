@@ -730,7 +730,8 @@ store (p, size, val, big_p)
 /* Translate a host's stat struct into a target's.
 
    BIG_P is non-zero if the target is big-endian.
-   The result is the size of the target's stat struct.  */
+   The result is the size of the target's stat struct,
+   or zero if an error occured during the translation.  */
 
 int
 cb_host_to_target_stat (cb, hs, ts, big_p)
@@ -751,13 +752,13 @@ cb_host_to_target_stat (cb, hs, ts, big_p)
       if (q == NULL)
 	{
 	  /* FIXME: print error message */
-	  return;
+	  return 0;
 	}
       size = atoi (q + 1);
       if (size == 0)
 	{
 	  /* FIXME: print error message */
-	  return;
+	  return 0;
 	}
 
       if (strncmp (m, "st_dev", q - m) == 0)
@@ -773,6 +774,8 @@ cb_host_to_target_stat (cb, hs, ts, big_p)
       if (m)
 	++m;
     }
+
+  return p - (char *) ts;
 }
 
 /* Cover functions to the vfprintf callbacks.
