@@ -1,3 +1,7 @@
+Fri Apr 24 11:35:01 1998  Andrew Cagney  <cagney@chook.cygnus.com>
+
+	* mips.igen (do_store_left): Pass 0 not NULL to store_memory.
+
 Tue Apr 21 11:59:50 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips.igen (ERET): Implement.
