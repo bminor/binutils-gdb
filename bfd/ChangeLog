@@ -1,3 +1,9 @@
+Wed Apr 17 13:07:37 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* linker.c (_bfd_generic_link_add_one_symbol): When calling the
+	callback routines, pass h->root.string rather than name, in case
+	copy is true and name is transient.
+
 Tue Apr 16 16:36:38 1996  Stu Grossman  (grossman@lisa.cygnus.com)
 
 	* elfcore.h:  Add support for core files with multiple threads.
