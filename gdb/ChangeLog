@@ -1,3 +1,8 @@
+2001-07-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* ser-mac.c: Make obsolete.
+	* Makefile.in (ser-mac.o): Ditto.
+
 2001-07-08  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* go32-nat.c (go32_get_windows_version, print_mem, go32_sysinfo)

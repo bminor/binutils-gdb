@@ -1935,7 +1935,7 @@ scm-valprint.o: $(defs_h) $(value_h) parser-defs.h language.h  \
 
 ser-go32.o: ser-go32.c $(defs_h) serial.h 
 
-ser-mac.o: ser-mac.c $(defs_h) serial.h 
+# OBSOLETE ser-mac.o: ser-mac.c $(defs_h) serial.h 
 
 ser-pipe.o: ser-pipe.c $(defs_h) serial.h $(gdb_string_h) ser-unix.h
 
