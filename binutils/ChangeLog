@@ -1,5 +1,10 @@
 2002-01-09  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* readelf.c (get_netbsd_elfcore_note_type): Use
+	NT_NETBSDCORE_PROCINFO and NT_NETBSDCORE_FIRSTMACH.
+
+2002-01-09  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* readelf.c: Update copyright years.
 	(get_note_type): Return a const char *.
 	(get_netbsd_elfcore_note_type): New function.

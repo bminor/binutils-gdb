@@ -9087,7 +9087,7 @@ get_netbsd_elfcore_note_type (e_type)
 {
   static char buff[64];
 
-  if (e_type == 1)
+  if (e_type == NT_NETBSDCORE_PROCINFO)
     {
       /* NetBSD core "procinfo" structure.  */
       return _("NetBSD procinfo structure");
@@ -9098,7 +9098,7 @@ get_netbsd_elfcore_note_type (e_type)
      than the start of the machine-dependent note types, we don't
      understand it.  */
 
-  if (e_type < 32)
+  if (e_type < NT_NETBSDCORE_FIRSTMACH)
     {
       sprintf (buff, _("Unknown note type: (0x%08x)"), e_type);
       return buff;
@@ -9116,8 +9116,10 @@ get_netbsd_elfcore_note_type (e_type)
     case EM_SPARCV9:
       switch (e_type)
 	{
-	case 32+0:	return _("PT_GETREGS (reg structure)");
-	case 32+2:	return _("PT_GETFPREGS (fpreg structure)");
+	case NT_NETBSDCORE_FIRSTMACH+0:
+	  return _("PT_GETREGS (reg structure)");
+	case NT_NETBSDCORE_FIRSTMACH+2:
+	  return _("PT_GETFPREGS (fpreg structure)");
 	default:
 	  break;
 	}
@@ -9128,14 +9130,16 @@ get_netbsd_elfcore_note_type (e_type)
     default:
       switch (e_type)
 	{
-	case 32+1:	return _("PT_GETREGS (reg structure)");
-	case 32+3:	return _("PT_GETFPREGS (fpreg structure)");
+	case NT_NETBSDCORE_FIRSTMACH+1:
+	  return _("PT_GETREGS (reg structure)");
+	case NT_NETBSDCORE_FIRSTMACH+3:
+	  return _("PT_GETFPREGS (fpreg structure)");
 	default:
 	  break;
 	}
     }
 
-  sprintf (buff, _("PT_FIRSTMACH+%d"), e_type - 32);
+  sprintf (buff, _("PT_FIRSTMACH+%d"), e_type - NT_NETBSDCORE_FIRSTMACH);
   return buff;
 }
 

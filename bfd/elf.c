@@ -6432,7 +6432,7 @@ elfcore_grok_netbsd_note (abfd, note)
   if (elfcore_netbsd_get_lwpid (note, &lwp))
     elf_tdata (abfd)->core_lwpid = lwp;
 
-  if (note->type == 1)
+  if (note->type == NT_NETBSDCORE_PROCINFO)
     {
       /* NetBSD-specific core "procinfo".  Note that we expect to
          find this note before any of the others, which is fine,
@@ -6442,11 +6442,12 @@ elfcore_grok_netbsd_note (abfd, note)
       return elfcore_grok_netbsd_procinfo (abfd, note);
     }
 
-  /* There are not currently any other machine-independent notes defined
-     for NetBSD ELF core files.  If the note type is less than the start
-     of the machine-dependent note types, we don't understand it.  */
+  /* As of Jan 2002 there are no other machine-independent notes
+     defined for NetBSD core files.  If the note type is less
+     than the start of the machine-dependent note types, we don't
+     understand it.  */
   
-  if (note->type < 32)
+  if (note->type < NT_NETBSDCORE_FIRSTMACH)
     return true;
 
 
@@ -6459,10 +6460,10 @@ elfcore_grok_netbsd_note (abfd, note)
     case bfd_arch_sparc:
       switch (note->type)
         {
-        case 32+0:
+        case NT_NETBSDCORE_FIRSTMACH+0:
           return elfcore_make_note_pseudosection (abfd, ".reg", note);
 
-        case 32+2:
+        case NT_NETBSDCORE_FIRSTMACH+2:
           return elfcore_make_note_pseudosection (abfd, ".reg2", note);
 
         default:
@@ -6475,10 +6476,10 @@ elfcore_grok_netbsd_note (abfd, note)
     default:
       switch (note->type)
         {
-        case 32+1:
+        case NT_NETBSDCORE_FIRSTMACH+1:
           return elfcore_make_note_pseudosection (abfd, ".reg", note);
 
-        case 32+3:
+        case NT_NETBSDCORE_FIRSTMACH+3:
           return elfcore_make_note_pseudosection (abfd, ".reg2", note);
 
         default:
