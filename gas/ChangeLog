@@ -1,3 +1,10 @@
+2003-06-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (ppc_csect): Pass alignment to ppc_change_csect.
+	(ppc_change_csect): Add align param.  Align frag at start of csect.
+	(ppc_section, ppc_named_section): Adjust ppc_change_csect calls.
+	(ppc_frob_section): Align vma.
+
 2003-06-18  Jakub Jelinek  <jakub@redhat.com>
 
 	* dw2gencfi.c (EH_FRAME_ALIGNMENT): Define if not defined.
@@ -1595,7 +1602,7 @@
 	(s_d30v_align <ignore>): Likewise.
 	(build_insn): Correct format string.
 	(md_apply_fix3): Likewise.
-	* config/tc-fr30.c (md_parse_option <c,arg>):  Add ATTRIBUTE_UNUSED.
+	* config/tc-fr30.c (md_parse_option <c,arg>): Add ATTRIBUTE_UNUSED.
 	(md_undefined_symbol <name>): Likewise.
 	(md_convert_frag <all args>): Likewise.
 	(md_cgen_lookup_reloc <insn>): Likewise.
@@ -2056,7 +2063,7 @@
 
 2002-11-21  Randolph Chung  <randolph@tausq.org>
 
-	* config/tc-hppa.h (tc_frob_symbol):  Frob undefined unused symbols
+	* config/tc-hppa.h (tc_frob_symbol): Frob undefined unused symbols
 	only if they have default visibility.
 
 2002-11-21  Richard Henderson  <rth@redhat.com>
@@ -3073,14 +3080,14 @@ Thu Oct 10 14:31:30 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	* tc-v850.c (v850_relax): Declare.
 	(v850_longcode): New routine.
 	(v850_handle_align): New routine.
-	(md_pseudo_table):  Add longcall and longjump.
+	(md_pseudo_table): Add longcall and longjump.
 	(md_parse_option): Check for relax option.
-	(tc_gen_reloc):  Handle BFD_RELOC_V850_LONGCALL,
+	(tc_gen_reloc): Handle BFD_RELOC_V850_LONGCALL,
 	BFD_RELOC_V850_LONGJUMP, and BFD_RELOC_V850_ALIGN.
 	(md_apply_fix3): Likewise.
 	(v850_force_relocation): Likewise.
 	(v850_comm): Change the current section.
-	(md_assemble):  Ensure that the correct value is put in the
+	(md_assemble): Ensure that the correct value is put in the
 	fixup.
 	(v850_sdata, v850_tdata, v850_zdata, v850_sbss, v850_tbss,
 	v850_zbss, v850_rosdata, v850_rozdata): Fix section book keeping.

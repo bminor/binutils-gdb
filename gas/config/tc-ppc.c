@@ -111,7 +111,7 @@ static void ppc_ec PARAMS ((int));
 static void ppc_ef PARAMS ((int));
 static void ppc_es PARAMS ((int));
 static void ppc_csect PARAMS ((int));
-static void ppc_change_csect PARAMS ((symbolS *));
+static void ppc_change_csect PARAMS ((symbolS *, offsetT));
 static void ppc_function PARAMS ((int));
 static void ppc_extern PARAMS ((int));
 static void ppc_lglobl PARAMS ((int));
@@ -3006,6 +3006,7 @@ ppc_csect (ignore)
   char *name;
   char endc;
   symbolS *sym;
+  offsetT align;
 
   name = input_line_pointer;
   endc = get_symbol_end ();
@@ -3020,13 +3021,14 @@ ppc_csect (ignore)
       symbol_get_tc (sym)->class = XMC_PR;
     }
 
-  ppc_change_csect (sym);
-
+  align = 2;
   if (*input_line_pointer == ',')
     {
       ++input_line_pointer;
-      symbol_get_tc (sym)->align = get_absolute_expression ();
+      align = get_absolute_expression ();
     }
+
+  ppc_change_csect (sym, align);
 
   demand_empty_rest_of_line ();
 }
@@ -3034,8 +3036,9 @@ ppc_csect (ignore)
 /* Change to a different csect.  */
 
 static void
-ppc_change_csect (sym)
+ppc_change_csect (sym, align)
      symbolS *sym;
+     offsetT align;
 {
   if (S_IS_DEFINED (sym))
     subseg_set (S_GET_SEGMENT (sym), symbol_get_tc (sym)->subseg);
@@ -3045,11 +3048,14 @@ ppc_change_csect (sym)
       int after_toc;
       int hold_chunksize;
       symbolS *list;
+      int is_code;
+      segT sec;
 
       /* This is a new csect.  We need to look at the symbol class to
 	 figure out whether it should go in the text section or the
 	 data section.  */
       after_toc = 0;
+      is_code = 0;
       switch (symbol_get_tc (sym)->class)
 	{
 	case XMC_PR:
@@ -3064,6 +3070,7 @@ ppc_change_csect (sym)
 	  symbol_get_tc (sym)->subseg = ppc_text_subsegment;
 	  ++ppc_text_subsegment;
 	  list_ptr = &ppc_text_csects;
+	  is_code = 1;
 	  break;
 	case XMC_RW:
 	case XMC_TC0:
@@ -3091,18 +3098,24 @@ ppc_change_csect (sym)
       hold_chunksize = chunksize;
       chunksize = 64;
 
-      subseg_new (segment_name (S_GET_SEGMENT (sym)),
-		  symbol_get_tc (sym)->subseg);
+      sec = subseg_new (segment_name (S_GET_SEGMENT (sym)),
+			symbol_get_tc (sym)->subseg);
 
       chunksize = hold_chunksize;
 
       if (after_toc)
 	ppc_after_toc_frag = frag_now;
 
+      record_alignment (sec, align);
+      if (is_code)
+	frag_align_code (align, 0);
+      else
+	frag_align (align, 0, 0);
+
       symbol_set_frag (sym, frag_now);
       S_SET_VALUE (sym, (valueT) frag_now_fix ());
 
-      symbol_get_tc (sym)->align = 2;
+      symbol_get_tc (sym)->align = align;
       symbol_get_tc (sym)->output = 1;
       symbol_get_tc (sym)->within = sym;
 
@@ -3140,7 +3153,7 @@ ppc_section (type)
 
   sym = symbol_find_or_make (name);
 
-  ppc_change_csect (sym);
+  ppc_change_csect (sym, 2);
 
   demand_empty_rest_of_line ();
 }
@@ -3177,7 +3190,7 @@ ppc_named_section (ignore)
 
   sym = symbol_find_or_make (real_name);
 
-  ppc_change_csect (sym);
+  ppc_change_csect (sym, 2);
 
   demand_empty_rest_of_line ();
 }
@@ -5047,8 +5060,9 @@ void
 ppc_frob_section (sec)
      asection *sec;
 {
-  static bfd_size_type vma = 0;
+  static bfd_vma vma = 0;
 
+  vma = md_section_align (sec, vma);
   bfd_set_section_vma (stdoutput, sec, vma);
   vma += bfd_section_size (stdoutput, sec);
 }
