@@ -1,3 +1,15 @@
+Wed Sep 24 17:38:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Wed Sep 24 17:23:31 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Make-common.in (SIM_BITSIZE): Assign from configured value.
+	(CONFIG_CFLAGS): Add SIM_BITSIZE.
+
+	* aclocal.m4 (--enable-sim-bitsize): Developer option for
+ 	controling the bitsize/msb of the target.
+
 Wed Sep 24 17:41:40 1997  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
 	* Make-common.in:  New files sim-break.c, sim-break.h.

@@ -1095,6 +1095,9 @@ print_igen_insn_format (bitmap, mark, data_size, options, name)
       printf ("128");
       break;
       /* end-sanitize-r5900 */
+    case -1:
+      printf ("16");
+      break;
     default:
       printf ("32");
     }
@@ -1116,16 +1119,37 @@ print_igen_insn_models (isa)
       printf ("*mipsII:\n");
     case 3:
       printf ("*mipsIII:\n");
+      /* start-sanitize-cygnus-never */
+      printf ("// %s-%s-%s\n", "start", "sanitize", "r5900");
+      /* end-sanitize-cygnus-never */
+      /* start-sanitize-r5900 */
+      printf ("*r5900:\n");
+      /* end-sanitize-r5900 */
+      /* start-sanitize-cygnus-never */
+      printf ("// %s-%s-%s\n", "end", "sanitize", "r5900");
+      /* end-sanitize-cygnus-never */
+      printf ("*r3900:\n");
+      /* start-sanitize-cygnus-never */
+      printf ("// %s-%s-%s\n", "start", "sanitize", "tx19");
+      /* end-sanitize-cygnus-never */
+      /* start-sanitize-tx19 */
+      printf ("*tx19:\n");
+      /* end-sanitize-tx19 */
+      /* start-sanitize-cygnus-never */
+      printf ("// %s-%s-%s\n", "end", "sanitize", "tx19");
+      /* end-sanitize-cygnus-never */
+      break;
+    default:
+      /* processor specific ISAs */
+      if ((isa & ARCH_VR4100))
+	printf ("*vr4100:\n");
+      /* start-sanitize-r5900 */
+      if ((isa & ARCH_R5900))
+	printf ("*r5900:\n");
+      /* end-sanitize-r5900 */
+      if ((isa & ARCH_R3900))
+	printf ("*r3900:\n");
     }
-  /* processor specific ISAs */
-  if ((isa & ARCH_VR4100))
-    printf ("*vr4100:\n");
-  /* start-sanitize-r5900 */
-  if ((isa & ARCH_R5900))
-    printf ("*r5900:\n");
-  /* end-sanitize-r5900 */
-  if ((isa & ARCH_R3900))
-    printf ("*r3900:\n");
 }
 
 /*---------------------------------------------------------------------------*/
@@ -2345,7 +2369,7 @@ process_instructions(doarch,features)
 	 printf ("\n");
 	 print_igen_insn_format (bitmap,
 				 MIPS16_DECODE[loop].mark, /* format-name */
-				 GETDATASIZEINSN (&MIPS16_DECODE[loop]), /* filter-flags */
+				 -1, /* filter-flags -- -1 => MIPS16 */
 				 "", /* options */
 				 MIPS16_DECODE[loop].name);
 	 printf ("*mips16:\n");
