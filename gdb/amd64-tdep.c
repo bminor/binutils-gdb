@@ -1186,14 +1186,3 @@ amd64_collect_fxsave (const struct regcache *regcache, int regnum,
   if (regnum == -1 || regnum == I387_FOSEG_REGNUM)
     regcache_raw_collect (regcache, I387_FOSEG_REGNUM, regs + 20);
 }
-
-/* Fill register REGNUM (if it is a floating-point or SSE register) in
-   *FXSAVE with the value in GDB's register cache.  If REGNUM is -1, do
-   this for all registers.  This function doesn't touch any of the
-   reserved bits in *FXSAVE.  */
-
-void
-amd64_fill_fxsave (char *fxsave, int regnum)
-{
-  amd64_collect_fxsave (current_regcache, regnum, fxsave);
-}

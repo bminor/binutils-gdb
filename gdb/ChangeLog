@@ -1,3 +1,8 @@
+2004-03-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64-tdep.h (amd64_fill_fxsave): Remove prototype.
+	* amd64-tdep.c (amd64_fill_fxsave): Remove function.
+
 2004-03-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (read_structure_type): Rename from

@@ -70,13 +70,6 @@ extern void amd64_supply_fxsave (struct regcache *regcache, int regnum,
 
 extern void amd64_collect_fxsave (const struct regcache *regcache, int regnum,
 				  void *fxsave);
-
-/* Fill register REGNUM (if it is a floating-point or SSE register) in
-   *FXSAVE with the value in GDB's register cache.  If REGNUM is -1, do
-   this for all registers.  This function doesn't touch any of the
-   reserved bits in *FXSAVE.  */
-
-extern void amd64_fill_fxsave (char *fxsave, int regnum);
 
 
 /* Variables exported from amd64nbsd-tdep.c.  */
