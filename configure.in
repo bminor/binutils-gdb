@@ -375,7 +375,7 @@ case "${host}" in
     noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet"
 	;;
   *-*-cygwin32)
-     noconfigdirs="tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache inet"
+     noconfigdirs="tk tcl expect dejagnu cvs autoconf bison send-pr gprof rcs guile perl apache inet"
     ;;
   ppc*-*-pe)
      noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache inet"
@@ -584,7 +584,7 @@ esac
 # If we are building a Canadian Cross, discard tools that can not be built
 # using a cross compiler.  FIXME: These tools should be fixed.
 if [ "${build}" != "${host}" ]; then
-  noconfigdirs="$noconfigdirs tcl tk expect dejagnu texinfo"
+  noconfigdirs="$noconfigdirs tcl tk expect dejagnu"
 fi
 
 # Make sure we don't let GNU ld be added if we didn't want it.
