@@ -1,5 +1,14 @@
 2002-05-11  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* config/alpha/nbsd.mh (NATDEPFILES): Remove corelow.o.
+	* config/alpha/nbsd.mt (TDEPFILES): Add corelow.o.
+	* config/i386/nbsd.mh (NATDEPFILES): Remove corelow.o.
+	* config/i386/nbsd.mt (TDEPFILES): Add corelow.o.
+	* config/i386/nbsdelf.mh (NATDEPFILES): Remove corelow.o.
+	* config/i386/nbsdelf.mt (TDEPFILES): Add corelow.o.
+
+2002-05-11  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* config/i386/nbsd.mh (NATDEPFILES): Use line continuations.
 	* config/i386/nbsdelf.mh (NATDEPFILES): Likewise.
 	* config/m68k/nbsd.mh (NATDEPFILES): Likewise.
