@@ -1,3 +1,10 @@
+2004-11-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc64fbsd-nat.c: Update copyright year.
+	(_initialize_sparc64fbsd_nat): Construct and add target vector.
+	* config/sparc/fbsd.mh (NATDEPFILES): Remove infptrace.o,
+	inftarg.o.
+
 2004-11-21  Daniel Jacobowitz  <dan@debian.org>
 
 	* sparc-tdep.c (sparc_software_single_step): Handle stepping to NULL.

@@ -1,6 +1,6 @@
 /* Native-dependent code for FreeBSD/sparc64.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,4 +31,7 @@ void
 _initialize_sparc64fbsd_nat (void)
 {
   sparc_gregset = &sparc64fbsd_gregset;
+
+  /* We've got nothing to add to the generic SPARC target.  */
+  add_target (sparc_target ());
 }
