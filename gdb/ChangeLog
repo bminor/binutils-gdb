@@ -1,3 +1,10 @@
+2001-09-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (gdbarch_alloc): Name the new architecture
+	``current_gdbarch'' so that it, and not the identically named
+	global is refered to by macros.
+	* gdbarch.c: Regenerate.
+
 2001-09-29  Andrew Cagney  <ac131313@redhat.com>
 
 	* cli/cli-decode.c (add_set_boolean_cmd): Define.

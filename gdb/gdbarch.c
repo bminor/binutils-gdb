@@ -409,88 +409,94 @@ struct gdbarch *
 gdbarch_alloc (const struct gdbarch_info *info,
                struct gdbarch_tdep *tdep)
 {
-  struct gdbarch *gdbarch = XMALLOC (struct gdbarch);
-  memset (gdbarch, 0, sizeof (*gdbarch));
+  /* NOTE: The new architecture variable is named ``current_gdbarch''
+     so that macros such as TARGET_DOUBLE_BIT, when expanded, refer to
+     the current local architecture and not the previous global
+     architecture.  This ensures that the new architectures initial
+     values are not influenced by the previous architecture.  Once
+     everything is parameterised with gdbarch, this will go away.  */
+  struct gdbarch *current_gdbarch = XMALLOC (struct gdbarch);
+  memset (current_gdbarch, 0, sizeof (*current_gdbarch));
 
-  alloc_gdbarch_data (gdbarch);
+  alloc_gdbarch_data (current_gdbarch);
 
-  gdbarch->tdep = tdep;
+  current_gdbarch->tdep = tdep;
 
-  gdbarch->bfd_arch_info = info->bfd_arch_info;
-  gdbarch->byte_order = info->byte_order;
+  current_gdbarch->bfd_arch_info = info->bfd_arch_info;
+  current_gdbarch->byte_order = info->byte_order;
 
   /* Force the explicit initialization of these. */
-  gdbarch->short_bit = 2*TARGET_CHAR_BIT;
-  gdbarch->int_bit = 4*TARGET_CHAR_BIT;
-  gdbarch->long_bit = 4*TARGET_CHAR_BIT;
-  gdbarch->long_long_bit = 2*TARGET_LONG_BIT;
-  gdbarch->float_bit = 4*TARGET_CHAR_BIT;
-  gdbarch->double_bit = 8*TARGET_CHAR_BIT;
-  gdbarch->long_double_bit = 2*TARGET_DOUBLE_BIT;
-  gdbarch->ptr_bit = TARGET_INT_BIT;
-  gdbarch->bfd_vma_bit = TARGET_ARCHITECTURE->bits_per_address;
-  gdbarch->read_pc = generic_target_read_pc;
-  gdbarch->write_pc = generic_target_write_pc;
-  gdbarch->read_fp = generic_target_read_fp;
-  gdbarch->write_fp = generic_target_write_fp;
-  gdbarch->read_sp = generic_target_read_sp;
-  gdbarch->write_sp = generic_target_write_sp;
-  gdbarch->virtual_frame_pointer = legacy_virtual_frame_pointer;
-  gdbarch->num_regs = -1;
-  gdbarch->sp_regnum = -1;
-  gdbarch->fp_regnum = -1;
-  gdbarch->pc_regnum = -1;
-  gdbarch->fp0_regnum = -1;
-  gdbarch->npc_regnum = -1;
-  gdbarch->nnpc_regnum = -1;
-  gdbarch->stab_reg_to_regnum = no_op_reg_to_regnum;
-  gdbarch->ecoff_reg_to_regnum = no_op_reg_to_regnum;
-  gdbarch->dwarf_reg_to_regnum = no_op_reg_to_regnum;
-  gdbarch->sdb_reg_to_regnum = no_op_reg_to_regnum;
-  gdbarch->dwarf2_reg_to_regnum = no_op_reg_to_regnum;
-  gdbarch->register_name = legacy_register_name;
-  gdbarch->register_size = -1;
-  gdbarch->register_bytes = -1;
-  gdbarch->max_register_raw_size = -1;
-  gdbarch->max_register_virtual_size = -1;
-  gdbarch->do_registers_info = do_registers_info;
-  gdbarch->register_sim_regno = default_register_sim_regno;
-  gdbarch->cannot_fetch_register = cannot_register_not;
-  gdbarch->cannot_store_register = cannot_register_not;
-  gdbarch->use_generic_dummy_frames = -1;
-  gdbarch->call_dummy_start_offset = -1;
-  gdbarch->call_dummy_breakpoint_offset = -1;
-  gdbarch->call_dummy_breakpoint_offset_p = -1;
-  gdbarch->call_dummy_length = -1;
-  gdbarch->call_dummy_p = -1;
-  gdbarch->call_dummy_words = legacy_call_dummy_words;
-  gdbarch->sizeof_call_dummy_words = legacy_sizeof_call_dummy_words;
-  gdbarch->call_dummy_stack_adjust_p = -1;
-  gdbarch->init_frame_pc_first = init_frame_pc_noop;
-  gdbarch->init_frame_pc = init_frame_pc_default;
-  gdbarch->coerce_float_to_double = default_coerce_float_to_double;
-  gdbarch->register_convertible = generic_register_convertible_not;
-  gdbarch->pointer_to_address = unsigned_pointer_to_address;
-  gdbarch->address_to_pointer = unsigned_address_to_pointer;
-  gdbarch->return_value_on_stack = generic_return_value_on_stack_not;
-  gdbarch->prologue_frameless_p = generic_prologue_frameless_p;
-  gdbarch->breakpoint_from_pc = legacy_breakpoint_from_pc;
-  gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
-  gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
-  gdbarch->decr_pc_after_break = -1;
-  gdbarch->prepare_to_proceed = default_prepare_to_proceed;
-  gdbarch->function_start_offset = -1;
-  gdbarch->remote_translate_xfer_address = generic_remote_translate_xfer_address;
-  gdbarch->frame_args_skip = -1;
-  gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
-  gdbarch->extra_stack_alignment_needed = 1;
-  gdbarch->convert_from_func_ptr_addr = core_addr_identity;
-  gdbarch->addr_bits_remove = core_addr_identity;
-  gdbarch->print_insn = legacy_print_insn;
-  gdbarch->skip_trampoline_code = generic_skip_trampoline_code;
+  current_gdbarch->short_bit = 2*TARGET_CHAR_BIT;
+  current_gdbarch->int_bit = 4*TARGET_CHAR_BIT;
+  current_gdbarch->long_bit = 4*TARGET_CHAR_BIT;
+  current_gdbarch->long_long_bit = 2*TARGET_LONG_BIT;
+  current_gdbarch->float_bit = 4*TARGET_CHAR_BIT;
+  current_gdbarch->double_bit = 8*TARGET_CHAR_BIT;
+  current_gdbarch->long_double_bit = 2*TARGET_DOUBLE_BIT;
+  current_gdbarch->ptr_bit = TARGET_INT_BIT;
+  current_gdbarch->bfd_vma_bit = TARGET_ARCHITECTURE->bits_per_address;
+  current_gdbarch->read_pc = generic_target_read_pc;
+  current_gdbarch->write_pc = generic_target_write_pc;
+  current_gdbarch->read_fp = generic_target_read_fp;
+  current_gdbarch->write_fp = generic_target_write_fp;
+  current_gdbarch->read_sp = generic_target_read_sp;
+  current_gdbarch->write_sp = generic_target_write_sp;
+  current_gdbarch->virtual_frame_pointer = legacy_virtual_frame_pointer;
+  current_gdbarch->num_regs = -1;
+  current_gdbarch->sp_regnum = -1;
+  current_gdbarch->fp_regnum = -1;
+  current_gdbarch->pc_regnum = -1;
+  current_gdbarch->fp0_regnum = -1;
+  current_gdbarch->npc_regnum = -1;
+  current_gdbarch->nnpc_regnum = -1;
+  current_gdbarch->stab_reg_to_regnum = no_op_reg_to_regnum;
+  current_gdbarch->ecoff_reg_to_regnum = no_op_reg_to_regnum;
+  current_gdbarch->dwarf_reg_to_regnum = no_op_reg_to_regnum;
+  current_gdbarch->sdb_reg_to_regnum = no_op_reg_to_regnum;
+  current_gdbarch->dwarf2_reg_to_regnum = no_op_reg_to_regnum;
+  current_gdbarch->register_name = legacy_register_name;
+  current_gdbarch->register_size = -1;
+  current_gdbarch->register_bytes = -1;
+  current_gdbarch->max_register_raw_size = -1;
+  current_gdbarch->max_register_virtual_size = -1;
+  current_gdbarch->do_registers_info = do_registers_info;
+  current_gdbarch->register_sim_regno = default_register_sim_regno;
+  current_gdbarch->cannot_fetch_register = cannot_register_not;
+  current_gdbarch->cannot_store_register = cannot_register_not;
+  current_gdbarch->use_generic_dummy_frames = -1;
+  current_gdbarch->call_dummy_start_offset = -1;
+  current_gdbarch->call_dummy_breakpoint_offset = -1;
+  current_gdbarch->call_dummy_breakpoint_offset_p = -1;
+  current_gdbarch->call_dummy_length = -1;
+  current_gdbarch->call_dummy_p = -1;
+  current_gdbarch->call_dummy_words = legacy_call_dummy_words;
+  current_gdbarch->sizeof_call_dummy_words = legacy_sizeof_call_dummy_words;
+  current_gdbarch->call_dummy_stack_adjust_p = -1;
+  current_gdbarch->init_frame_pc_first = init_frame_pc_noop;
+  current_gdbarch->init_frame_pc = init_frame_pc_default;
+  current_gdbarch->coerce_float_to_double = default_coerce_float_to_double;
+  current_gdbarch->register_convertible = generic_register_convertible_not;
+  current_gdbarch->pointer_to_address = unsigned_pointer_to_address;
+  current_gdbarch->address_to_pointer = unsigned_address_to_pointer;
+  current_gdbarch->return_value_on_stack = generic_return_value_on_stack_not;
+  current_gdbarch->prologue_frameless_p = generic_prologue_frameless_p;
+  current_gdbarch->breakpoint_from_pc = legacy_breakpoint_from_pc;
+  current_gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
+  current_gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
+  current_gdbarch->decr_pc_after_break = -1;
+  current_gdbarch->prepare_to_proceed = default_prepare_to_proceed;
+  current_gdbarch->function_start_offset = -1;
+  current_gdbarch->remote_translate_xfer_address = generic_remote_translate_xfer_address;
+  current_gdbarch->frame_args_skip = -1;
+  current_gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
+  current_gdbarch->extra_stack_alignment_needed = 1;
+  current_gdbarch->convert_from_func_ptr_addr = core_addr_identity;
+  current_gdbarch->addr_bits_remove = core_addr_identity;
+  current_gdbarch->print_insn = legacy_print_insn;
+  current_gdbarch->skip_trampoline_code = generic_skip_trampoline_code;
   /* gdbarch_alloc() */
 
-  return gdbarch;
+  return current_gdbarch;
 }
 
 

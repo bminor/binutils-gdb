@@ -1289,19 +1289,25 @@ struct gdbarch *
 gdbarch_alloc (const struct gdbarch_info *info,
                struct gdbarch_tdep *tdep)
 {
-  struct gdbarch *gdbarch = XMALLOC (struct gdbarch);
-  memset (gdbarch, 0, sizeof (*gdbarch));
+  /* NOTE: The new architecture variable is named \`\`current_gdbarch''
+     so that macros such as TARGET_DOUBLE_BIT, when expanded, refer to
+     the current local architecture and not the previous global
+     architecture.  This ensures that the new architectures initial
+     values are not influenced by the previous architecture.  Once
+     everything is parameterised with gdbarch, this will go away.  */
+  struct gdbarch *current_gdbarch = XMALLOC (struct gdbarch);
+  memset (current_gdbarch, 0, sizeof (*current_gdbarch));
 
-  alloc_gdbarch_data (gdbarch);
+  alloc_gdbarch_data (current_gdbarch);
 
-  gdbarch->tdep = tdep;
+  current_gdbarch->tdep = tdep;
 EOF
 printf "\n"
 function_list | while do_read
 do
     if class_is_info_p
     then
-	printf "  gdbarch->${function} = info->${function};\n"
+	printf "  current_gdbarch->${function} = info->${function};\n"
     fi
 done
 printf "\n"
@@ -1312,14 +1318,14 @@ do
     then
 	if [ -n "${predefault}" -a "x${predefault}" != "x0" ]
 	then
-	  printf "  gdbarch->${function} = ${predefault};\n"
+	  printf "  current_gdbarch->${function} = ${predefault};\n"
 	fi
     fi
 done
 cat <<EOF
   /* gdbarch_alloc() */
 
-  return gdbarch;
+  return current_gdbarch;
 }
 EOF
 
