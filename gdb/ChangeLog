@@ -1,3 +1,19 @@
+2003-05-08  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.h (max_register_size): Delete declaration.
+	* regcache.c (max_register_size): Delete function.
+	(struct regcache_descr): Delete field "max_register_size".
+	(init_regcache_descr, init_legacy_regcache_descr): Assert that all
+	registers fit in MAX_REGISTER_SIZE.
+	(regcache_save): Replace max_register_size with MAX_REGISTER_SIZE.
+	(regcache_restore, regcache_xfer_part, regcache_dump): Ditto.
+	* thread-db.c: Replace max_register_size with MAX_REGISTER_SIZE.
+	* sh-tdep.c, rom68k-rom.c, remote-sim.c, remote-mips.c: Ditto.
+	* remote-e7000.c, monitor.c, mipsv4-nat.c, mips-nat.c: Ditto.
+	* m68klinux-nat.c, lynx-nat.c, irix4-nat.c: Ditto.
+	* hpux-thread.c, hppah-nat.c, hppab-nat.c, hppa-tdep.c: Ditto.
+	* dve3900-rom.c, hppa-tdep.c: Ditto.
+
 2003-05-08  David Carlton  <carlton@math.stanford.edu>
 
 	* valops.c (push_word): Fix typo.

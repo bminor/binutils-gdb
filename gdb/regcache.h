@@ -127,12 +127,6 @@ extern int register_offset_hack (struct gdbarch *gdbarch, int regnum);
 extern struct type *register_type (struct gdbarch *gdbarch, int regnum);
 
 
-/* Return the size of the largest register.  Used when allocating
-   space for an aribtrary register value.  */
-
-extern int max_register_size (struct gdbarch *gdbarch);
-
-
 /* Return the size of register REGNUM.  All registers should have only
    one size.
 

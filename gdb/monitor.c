@@ -896,7 +896,7 @@ char *
 monitor_supply_register (int regno, char *valstr)
 {
   ULONGEST val;
-  unsigned char *regbuf = alloca (max_register_size (current_gdbarch));
+  unsigned char regbuf[MAX_REGISTER_SIZE];
   char *p;
 
   val = 0;

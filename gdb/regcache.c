@@ -78,9 +78,6 @@ struct regcache_descr
   long *register_offset;
   long *sizeof_register;
 
-  /* Useful constant.  Largest of all the registers.  */
-  long max_register_size;
-
   /* Cached table containing the type of each register.  */
   struct type **register_type;
 };
@@ -109,7 +106,6 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch,
      read_register_bytes() and write_register_bytes() registers.  */
   descr->sizeof_register = XCALLOC (descr->nr_cooked_registers, long);
   descr->register_offset = XCALLOC (descr->nr_cooked_registers, long);
-  descr->max_register_size = 0;
   for (i = 0; i < descr->nr_cooked_registers; i++)
     {
       /* FIXME: cagney/2001-12-04: This code shouldn't need to use
@@ -119,10 +115,8 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch,
          entirely avoid this uglyness.  */
       descr->register_offset[i] = REGISTER_BYTE (i);
       descr->sizeof_register[i] = REGISTER_RAW_SIZE (i);
-      if (descr->max_register_size < REGISTER_RAW_SIZE (i))
-	descr->max_register_size = REGISTER_RAW_SIZE (i);
-      if (descr->max_register_size < REGISTER_VIRTUAL_SIZE (i))
-	descr->max_register_size = REGISTER_VIRTUAL_SIZE (i);
+      gdb_assert (MAX_REGISTER_SIZE >= REGISTER_RAW_SIZE (i));
+      gdb_assert (MAX_REGISTER_SIZE >= REGISTER_VIRTUAL_SIZE (i));
     }
 
   /* Compute the real size of the register buffer.  Start out by
@@ -219,14 +213,12 @@ init_regcache_descr (struct gdbarch *gdbarch)
     long offset = 0;
     descr->sizeof_register = XCALLOC (descr->nr_cooked_registers, long);
     descr->register_offset = XCALLOC (descr->nr_cooked_registers, long);
-    descr->max_register_size = 0;
     for (i = 0; i < descr->nr_cooked_registers; i++)
       {
 	descr->sizeof_register[i] = TYPE_LENGTH (descr->register_type[i]);
 	descr->register_offset[i] = offset;
 	offset += descr->sizeof_register[i];
-	if (descr->max_register_size < descr->sizeof_register[i])
-	  descr->max_register_size = descr->sizeof_register[i];
+	gdb_assert (MAX_REGISTER_SIZE >= descr->sizeof_register[i]);
       }
     /* Set the real size of the register cache buffer.  */
     descr->sizeof_cooked_registers = offset;
@@ -288,13 +280,6 @@ register_type (struct gdbarch *gdbarch, int regnum)
 
 /* Utility functions returning useful register attributes stored in
    the regcache descr.  */
-
-int
-max_register_size (struct gdbarch *gdbarch)
-{
-  struct regcache_descr *descr = regcache_descr (gdbarch);
-  return descr->max_register_size;
-}
 
 int
 register_size (struct gdbarch *gdbarch, int regnum)
@@ -379,7 +364,7 @@ regcache_save (struct regcache *dst, regcache_cooked_read_ftype *cooked_read,
 	       void *src)
 {
   struct gdbarch *gdbarch = dst->descr->gdbarch;
-  void *buf = alloca (max_register_size (gdbarch));
+  char buf[MAX_REGISTER_SIZE];
   int regnum;
   /* The DST should be `read-only', if it wasn't then the save would
      end up trying to write the register values back out to the
@@ -413,7 +398,7 @@ regcache_restore (struct regcache *dst,
 		  void *src)
 {
   struct gdbarch *gdbarch = dst->descr->gdbarch;
-  void *buf = alloca (max_register_size (gdbarch));
+  char buf[MAX_REGISTER_SIZE];
   int regnum;
   /* The dst had better not be read-only.  If it is, the `restore'
      doesn't make much sense.  */
@@ -1090,7 +1075,7 @@ regcache_xfer_part (struct regcache *regcache, int regnum,
 		    regcache_read_ftype *read, regcache_write_ftype *write)
 {
   struct regcache_descr *descr = regcache->descr;
-  bfd_byte *reg = alloca (descr->max_register_size);
+  bfd_byte reg[MAX_REGISTER_SIZE];
   gdb_assert (offset >= 0 && offset <= descr->sizeof_register[regnum]);
   gdb_assert (len >= 0 && offset + len <= descr->sizeof_register[regnum]);
   /* Something to do?  */
@@ -1480,7 +1465,7 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
   int footnote_register_offset = 0;
   int footnote_register_type_name_null = 0;
   long register_offset = 0;
-  unsigned char *buf = alloca (regcache->descr->max_register_size);
+  unsigned char buf[MAX_REGISTER_SIZE];
 
 #if 0
   fprintf_unfiltered (file, "legacy_p %d\n", regcache->descr->legacy_p);
@@ -1492,8 +1477,6 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 		      regcache->descr->sizeof_raw_registers);
   fprintf_unfiltered (file, "sizeof_raw_register_valid_p %ld\n",
 		      regcache->descr->sizeof_raw_register_valid_p);
-  fprintf_unfiltered (file, "max_register_size %ld\n",
-		      regcache->descr->max_register_size);
   fprintf_unfiltered (file, "NUM_REGS %d\n", NUM_REGS);
   fprintf_unfiltered (file, "NUM_PSEUDO_REGS %d\n", NUM_PSEUDO_REGS);
 #endif

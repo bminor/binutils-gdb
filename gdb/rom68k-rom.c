@@ -88,7 +88,7 @@ static char *
 rom68k_supply_one_register (int regno, unsigned char *hex)
 {
   ULONGEST value;
-  unsigned char *regbuf = alloca (max_register_size (current_gdbarch));
+  unsigned char regbuf[MAX_REGISTER_SIZE];
 
   value = 0;
   while (*hex != '\0')
