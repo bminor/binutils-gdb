@@ -55,8 +55,8 @@ inf_ptrace_kill_inferior (void)
 
      The kill call causes problems under hpux10, so it's been removed;
      if this causes problems we'll deal with them as they arise.  */
-  call_ptrace (PT_KILL, pid, (PTRACE_TYPE_ARG3) 0, 0);
-  ptrace_wait (null_ptid, &status);
+  ptrace (PT_KILL, pid, (PTRACE_TYPE_ARG3) 0, 0);
+  wait (&status);
   target_mourn_inferior ();
 }
 
@@ -255,7 +255,8 @@ inf_ptrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 				   attached process. */
       set_sigio_trap ();
 
-      pid = ptrace_wait (inferior_ptid, &status);
+      pid = wait (&status);
+      target_post_wait (pid_to_ptid (pid), status);
 
       save_errno = errno;
 
@@ -433,7 +434,7 @@ static void
 inf_ptrace_me (void)
 {
   /* "Trace me, Dr. Memory!" */
-  call_ptrace (0, 0, (PTRACE_TYPE_ARG3) 0, 0);
+  ptrace (0, 0, (PTRACE_TYPE_ARG3) 0, 0);
 }
 
 /* Stub function which causes the GDB that runs it, to start ptrace-ing

@@ -1,3 +1,11 @@
+2004-09-24  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ptrace.c (inf_ptrace_kill_inferior): Call ptrace directly
+	instead of call_ptrace.  Call wait directly instead of
+	ptrace_wait.
+	(inf_ptrace_me): Call ptrace directly instead of call_ptrace.
+	(inf_ptrace_wait): Inline ptrace_wait call.
+
 2004-09-24  Paul Hilfinger  <hilfingr@nile.gnat.com>
 
 	* Makefile.in (.y.c): Revert previous change.  ../ylwrap was 
