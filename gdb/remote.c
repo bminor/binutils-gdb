@@ -1877,7 +1877,6 @@ remote_cisco_section_offsets (bfd_vma text_addr,
   asection *sect;
   bfd *abfd;
   int len;
-  char *p;
 
   if (symfile_objfile == NULL)
     return -1;			/* no can do nothin' */
@@ -1894,7 +1893,7 @@ remote_cisco_section_offsets (bfd_vma text_addr,
        sect != 0;
        sect = sect->next)
     {
-      p = (unsigned char *) bfd_get_section_name (abfd, sect);
+      const char *p = bfd_get_section_name (abfd, sect);
       len = strlen (p);
       if (strcmp (p + len - 4, "data") == 0)	/* ends in "data" */
 	if (data_base == 0 ||
@@ -4574,7 +4573,7 @@ compare_sections_command (char *args, int from_tty)
   struct cleanup *old_chain;
   char *tmp;
   char *sectdata;
-  char *sectname;
+  const char *sectname;
   char *buf = alloca (PBUFSIZ);
   bfd_size_type size;
   bfd_vma lma;
@@ -4596,7 +4595,7 @@ compare_sections_command (char *args, int from_tty)
       if (size == 0)
 	continue;		/* skip zero-length section */
 
-      sectname = (char *) bfd_get_section_name (exec_bfd, s);
+      sectname = bfd_get_section_name (exec_bfd, s);
       if (args && strcmp (args, sectname) != 0)
 	continue;		/* not the section selected by user */
 
