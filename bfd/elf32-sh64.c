@@ -1,5 +1,5 @@
 /* Hitachi SH64-specific support for 32-bit ELF
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -765,12 +765,10 @@ sh64_elf_final_write_processing (abfd, linker)
 #define	ELF_MAXPAGESIZE		0x10000
 #undef	elf_symbol_leading_char
 #define	elf_symbol_leading_char	0
-
+#undef	elf32_bed
 #define	elf32_bed		elf32_sh64_nbsd_bed
 
 #include "elf32-target.h"
-
-#undef	elf32_bed
 
 /* Linux support.  */
 #undef	TARGET_BIG_SYM
@@ -781,9 +779,8 @@ sh64_elf_final_write_processing (abfd, linker)
 #define	TARGET_LITTLE_SYM	bfd_elf32_sh64lin_vec
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME	"elf32-sh64-linux"
-
+#undef	elf32_bed
 #define	elf32_bed		elf32_sh64_lin_bed
 
 #include "elf32-target.h"
 
-#undef	elf32_bed

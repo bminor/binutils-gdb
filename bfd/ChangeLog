@@ -1,3 +1,12 @@
+2003-01-20  Fabio Alemagna  <falemagn@aros.org>
+
+	* elf32-sh.c: Treat elfNN_bed like other macros defined in
+	  elfxx-target.h and #undef it before #define'ing it.
+	* elf32-i386.c: Likewise.
+        * elf32-sh64.c: Likewise.
+        * elf64-alpha.c: Likewise.
+        * elf64-sh64.c: Likewise.
+
 2003-01-20  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* bfd-in2.h: Regenerate.

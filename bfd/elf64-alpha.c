@@ -1,23 +1,23 @@
 /* Alpha specific support for 64-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Contributed by Richard Henderson <rth@tamu.edu>.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* We need a published ABI spec for this.  Until one comes out, don't
    assume this'll remain unchanged forever.  */
@@ -48,60 +48,60 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ecoffswap.h"
 
 static int alpha_elf_dynamic_symbol_p
-  PARAMS((struct elf_link_hash_entry *, struct bfd_link_info *));
+  PARAMS ((struct elf_link_hash_entry *, struct bfd_link_info *));
 static struct bfd_hash_entry * elf64_alpha_link_hash_newfunc
-  PARAMS((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 static struct bfd_link_hash_table * elf64_alpha_bfd_link_hash_table_create
-  PARAMS((bfd *));
+  PARAMS ((bfd *));
 
 static bfd_reloc_status_type elf64_alpha_reloc_nil
-  PARAMS((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_reloc_status_type elf64_alpha_reloc_bad
-  PARAMS((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_reloc_status_type elf64_alpha_do_reloc_gpdisp
-  PARAMS((bfd *, bfd_vma, bfd_byte *, bfd_byte *));
+  PARAMS ((bfd *, bfd_vma, bfd_byte *, bfd_byte *));
 static bfd_reloc_status_type elf64_alpha_reloc_gpdisp
-  PARAMS((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 
 static reloc_howto_type * elf64_alpha_bfd_reloc_type_lookup
-  PARAMS((bfd *, bfd_reloc_code_real_type));
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void elf64_alpha_info_to_howto
-  PARAMS((bfd *, arelent *, Elf_Internal_Rela *));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 
 static bfd_boolean elf64_alpha_mkobject
-  PARAMS((bfd *));
+  PARAMS ((bfd *));
 static bfd_boolean elf64_alpha_object_p
-  PARAMS((bfd *));
+  PARAMS ((bfd *));
 static bfd_boolean elf64_alpha_section_from_shdr
-  PARAMS((bfd *, Elf_Internal_Shdr *, const char *));
+  PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
 static bfd_boolean elf64_alpha_section_flags
-  PARAMS((flagword *, Elf_Internal_Shdr *));
+  PARAMS ((flagword *, Elf_Internal_Shdr *));
 static bfd_boolean elf64_alpha_fake_sections
-  PARAMS((bfd *, Elf_Internal_Shdr *, asection *));
+  PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
 static bfd_boolean elf64_alpha_create_got_section
-  PARAMS((bfd *, struct bfd_link_info *));
+  PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean elf64_alpha_create_dynamic_sections
-  PARAMS((bfd *, struct bfd_link_info *));
+  PARAMS ((bfd *, struct bfd_link_info *));
 
 static bfd_boolean elf64_alpha_read_ecoff_info
-  PARAMS((bfd *, asection *, struct ecoff_debug_info *));
+  PARAMS ((bfd *, asection *, struct ecoff_debug_info *));
 static bfd_boolean elf64_alpha_is_local_label_name
-  PARAMS((bfd *, const char *));
+  PARAMS ((bfd *, const char *));
 static bfd_boolean elf64_alpha_find_nearest_line
-  PARAMS((bfd *, asection *, asymbol **, bfd_vma, const char **,
-	  const char **, unsigned int *));
+  PARAMS ((bfd *, asection *, asymbol **, bfd_vma, const char **,
+	   const char **, unsigned int *));
 
 #if defined(__STDC__) || defined(ALMOST_STDC)
 struct alpha_elf_link_hash_entry;
 #endif
 
 static bfd_boolean elf64_alpha_output_extsym
-  PARAMS((struct alpha_elf_link_hash_entry *, PTR));
+  PARAMS ((struct alpha_elf_link_hash_entry *, PTR));
 
 static bfd_boolean elf64_alpha_can_merge_gots
-  PARAMS((bfd *, bfd *));
+  PARAMS ((bfd *, bfd *));
 static void elf64_alpha_merge_gots
-  PARAMS((bfd *, bfd *));
+  PARAMS ((bfd *, bfd *));
 static bfd_boolean elf64_alpha_calc_got_offsets_for_symbol
   PARAMS ((struct alpha_elf_link_hash_entry *, PTR));
 static void elf64_alpha_calc_got_offsets
@@ -129,27 +129,27 @@ static struct alpha_elf_got_entry *get_got_entry
   PARAMS ((bfd *, struct alpha_elf_link_hash_entry *, unsigned long,
 	   unsigned long, bfd_vma));
 static bfd_boolean elf64_alpha_check_relocs
-  PARAMS((bfd *, struct bfd_link_info *, asection *sec,
+  PARAMS ((bfd *, struct bfd_link_info *, asection *sec,
 	  const Elf_Internal_Rela *));
 static bfd_boolean elf64_alpha_adjust_dynamic_symbol
-  PARAMS((struct bfd_link_info *, struct elf_link_hash_entry *));
+  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static bfd_boolean elf64_alpha_size_dynamic_sections
-  PARAMS((bfd *, struct bfd_link_info *));
+  PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean elf64_alpha_relocate_section_r
-  PARAMS((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
-	  Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 static bfd_boolean elf64_alpha_relocate_section
-  PARAMS((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	  Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 static bfd_boolean elf64_alpha_finish_dynamic_symbol
-  PARAMS((bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
-	  Elf_Internal_Sym *));
+  PARAMS ((bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
+	   Elf_Internal_Sym *));
 static bfd_boolean elf64_alpha_finish_dynamic_sections
-  PARAMS((bfd *, struct bfd_link_info *));
+  PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean elf64_alpha_final_link
-  PARAMS((bfd *, struct bfd_link_info *));
+  PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean elf64_alpha_merge_ind_symbols
-  PARAMS((struct alpha_elf_link_hash_entry *, PTR));
+  PARAMS ((struct alpha_elf_link_hash_entry *, PTR));
 static Elf_Internal_Rela * elf64_alpha_find_reloc_at_ofs
   PARAMS ((Elf_Internal_Rela *, Elf_Internal_Rela *, bfd_vma, int));
 static enum elf_reloc_type_class elf64_alpha_reloc_type_class
@@ -180,13 +180,13 @@ struct alpha_elf_link_hash_entry
   {
     struct alpha_elf_got_entry *next;
 
-    /* which .got subsection?  */
+    /* Which .got subsection?  */
     bfd *gotobj;
 
-    /* the addend in effect for this entry.  */
+    /* The addend in effect for this entry.  */
     bfd_vma addend;
 
-    /* the .got offset for this entry.  */
+    /* The .got offset for this entry.  */
     int got_offset;
 
     /* How many references to this entry?  */
@@ -205,22 +205,22 @@ struct alpha_elf_link_hash_entry
     unsigned char reloc_xlated;
   } *got_entries;
 
-  /* used to count non-got, non-plt relocations for delayed sizing
+  /* Used to count non-got, non-plt relocations for delayed sizing
      of relocation sections.  */
   struct alpha_elf_reloc_entry
   {
     struct alpha_elf_reloc_entry *next;
 
-    /* which .reloc section? */
+    /* Which .reloc section? */
     asection *srel;
 
-    /* what kind of relocation? */
+    /* What kind of relocation? */
     unsigned int rtype;
 
-    /* is this against read-only section? */
+    /* Is this against read-only section? */
     unsigned int reltext : 1;
 
-    /* how many did we find?  */
+    /* How many did we find?  */
     unsigned long count;
   } *reloc_entries;
 };
@@ -5616,6 +5616,7 @@ elf64_alpha_fbsd_post_process_headers (abfd, link_info)
 #define elf_backend_post_process_headers \
   elf64_alpha_fbsd_post_process_headers
 
+#undef  elf64_bed
 #define elf64_bed elf64_alpha_fbsd_bed
 
 #include "elf64-target.h"

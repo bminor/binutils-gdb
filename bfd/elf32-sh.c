@@ -1,23 +1,23 @@
 /* Hitachi SH specific support for 32-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Contributed by Ian Lance Taylor, Cygnus Support.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -62,9 +62,9 @@ static void sh_elf_copy_indirect_symbol
 static int sh_elf_optimized_tls_reloc
   PARAMS ((struct bfd_link_info *, int, int));
 static bfd_boolean sh_elf_mkobject
-  PARAMS((bfd *));
+  PARAMS ((bfd *));
 static bfd_boolean sh_elf_object_p
-  PARAMS((bfd *));
+  PARAMS ((bfd *));
 static bfd_boolean sh_elf_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
@@ -85,7 +85,7 @@ static bfd_reloc_status_type sh_elf_reloc_loop
   PARAMS ((int, bfd *, asection *, bfd_byte *, bfd_vma, asection *,
 	   bfd_vma, bfd_vma));
 static bfd_boolean create_got_section
-  PARAMS((bfd *, struct bfd_link_info *));
+  PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean sh_elf_create_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_vma dtpoff_base
@@ -7328,7 +7328,7 @@ sh_elf_reloc_type_class (rela)
     }
 }
 
-/* Support for Linux core dump NOTE sections */
+/* Support for Linux core dump NOTE sections.  */
 static bfd_boolean
 elf32_shlin_grok_prstatus (abfd, note)
      bfd *abfd;
@@ -7462,12 +7462,11 @@ elf32_shlin_grok_psinfo (abfd, note)
 #define	ELF_MAXPAGESIZE			0x10000
 #undef	elf_symbol_leading_char
 #define	elf_symbol_leading_char		0
-
+#undef	elf32_bed
 #define	elf32_bed			elf32_sh_nbsd_bed
 
 #include "elf32-target.h"
 
-#undef	elf32_bed
 
 /* Linux support.  */
 #undef	TARGET_BIG_SYM
@@ -7483,13 +7482,9 @@ elf32_shlin_grok_psinfo (abfd, note)
 #define	elf_backend_grok_prstatus	elf32_shlin_grok_prstatus
 #undef	elf_backend_grok_psinfo
 #define	elf_backend_grok_psinfo		elf32_shlin_grok_psinfo
-
+#undef	elf32_bed
 #define	elf32_bed			elf32_sh_lin_bed
 
 #include "elf32-target.h"
-
-#undef	elf_backend_grok_prstatus
-#undef	elf_backend_grok_psinfo
-#undef	elf32_bed
 
 #endif /* INCLUDE_SHMEDIA */
