@@ -1,5 +1,10 @@
 2004-02-08  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_gdbarch_init): Group deprecated frame unwind
+	methods.
+
+2004-02-08  Andrew Cagney  <cagney@redhat.com>
+
 	* configure.in (CONFIG_ALL): Set to Makefile target, and not
 	makefile macro.
 	* configure: Re-generate.

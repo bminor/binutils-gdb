@@ -6024,17 +6024,36 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_read_pc (gdbarch, mips_read_pc);
   set_gdbarch_write_pc (gdbarch, mips_write_pc);
-  set_gdbarch_deprecated_target_read_fp (gdbarch, mips_read_sp);	/* Draft FRAME base.  */
   set_gdbarch_read_sp (gdbarch, mips_read_sp);
 
   /* Add/remove bits from an address.  The MIPS needs be careful to
      ensure that all 32 bit addresses are sign extended to 64 bits.  */
   set_gdbarch_addr_bits_remove (gdbarch, mips_addr_bits_remove);
 
+#if 0
+#else
+  set_gdbarch_deprecated_target_read_fp (gdbarch, mips_read_sp);	/* Draft FRAME base.  */
+  /* Initialize a frame */
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch,
+						mips_find_saved_regs);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch,
+						mips_init_extra_frame_info);
   /* There's a mess in stack frame creation.  See comments in
      blockframe.c near reference to DEPRECATED_INIT_FRAME_PC_FIRST.  */
   set_gdbarch_deprecated_init_frame_pc_first (gdbarch,
 					      mips_init_frame_pc_first);
+  set_gdbarch_deprecated_pop_frame (gdbarch, mips_pop_frame);
+  set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch,
+					       generic_save_dummy_frame_tos);
+  set_gdbarch_deprecated_frame_chain (gdbarch, mips_frame_chain);
+  set_gdbarch_frameless_function_invocation (gdbarch,
+					     generic_frameless_function_invocation_not);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, mips_frame_saved_pc);
+  set_gdbarch_deprecated_get_saved_register (gdbarch,
+					     mips_get_saved_register);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch,
+					      mips_saved_pc_after_call);
+#endif
 
   /* Map debug register numbers onto internal register numbers.  */
   set_gdbarch_stab_reg_to_regnum (gdbarch, mips_stab_reg_to_regnum);
@@ -6046,42 +6065,24 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				    mips_dwarf_dwarf2_ecoff_reg_to_regnum);
   set_gdbarch_register_sim_regno (gdbarch, mips_register_sim_regno);
 
-  /* Initialize a frame */
-  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch,
-						mips_find_saved_regs);
-  set_gdbarch_deprecated_init_extra_frame_info (gdbarch,
-						mips_init_extra_frame_info);
-
   /* MIPS version of CALL_DUMMY */
 
   /* NOTE: cagney/2003-08-05: Eventually call dummy location will be
      replaced by a command, and all targets will default to on stack
      (regardless of the stack's execute status).  */
   set_gdbarch_call_dummy_location (gdbarch, AT_SYMBOL);
-  set_gdbarch_deprecated_pop_frame (gdbarch, mips_pop_frame);
   set_gdbarch_frame_align (gdbarch, mips_frame_align);
-  set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch,
-					       generic_save_dummy_frame_tos);
 
   set_gdbarch_convert_register_p (gdbarch, mips_convert_register_p);
   set_gdbarch_register_to_value (gdbarch, mips_register_to_value);
   set_gdbarch_value_to_register (gdbarch, mips_value_to_register);
 
-  set_gdbarch_deprecated_frame_chain (gdbarch, mips_frame_chain);
-  set_gdbarch_frameless_function_invocation (gdbarch,
-					     generic_frameless_function_invocation_not);
-  set_gdbarch_deprecated_frame_saved_pc (gdbarch, mips_frame_saved_pc);
   set_gdbarch_frame_args_skip (gdbarch, 0);
-
-  set_gdbarch_deprecated_get_saved_register (gdbarch,
-					     mips_get_saved_register);
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_breakpoint_from_pc (gdbarch, mips_breakpoint_from_pc);
 
   set_gdbarch_skip_prologue (gdbarch, mips_skip_prologue);
-  set_gdbarch_deprecated_saved_pc_after_call (gdbarch,
-					      mips_saved_pc_after_call);
 
   set_gdbarch_pointer_to_address (gdbarch, signed_pointer_to_address);
   set_gdbarch_address_to_pointer (gdbarch, address_to_signed_pointer);
