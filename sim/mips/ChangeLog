@@ -1,3 +1,11 @@
+Mon Dec 30 17:36:06 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* interp.c (store_word, load_word): New static functions.
+	(mips16_entry): New static function.
+	(SignalException): Look for mips16 entry and exit instructions.
+	(simulate): Use the correct index when setting fpr_state after
+	doing a pending move.
+
 Sun Dec 29 09:37:18 1996  Mark Alexander  <marka@cygnus.com>
 
 	* interp.c: Fix byte-swapping code throughout to work on

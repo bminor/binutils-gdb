@@ -1818,6 +1818,139 @@ sim_monitor(reason)
   return;
 }
 
+/* Store a word into memory.  */
+
+static void
+store_word (vaddr, val)
+     uword64 vaddr;
+     t_reg val;
+{
+  uword64 paddr;
+  int uncached;
+
+  if ((vaddr & 3) != 0)
+    SignalException (AddressStore);
+  else
+    {
+      if (AddressTranslation (vaddr, isDATA, isSTORE, &paddr, &uncached,
+			      isTARGET, isREAL))
+	{
+	  const uword64 mask = 7;
+	  uword64 memval;
+	  unsigned int byte;
+
+	  paddr = (paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2));
+	  byte = (vaddr & mask) ^ (BigEndianCPU << 2);
+	  memval = ((uword64) val) << (8 * byte);
+	  StoreMemory (uncached, AccessLength_WORD, memval, paddr, vaddr,
+		       isREAL);
+	}
+    }
+}
+
+/* Load a word from memory.  */
+
+static t_reg
+load_word (vaddr)
+     uword64 vaddr;
+{
+  if ((vaddr & 3) != 0)
+    SignalException (AddressLoad);
+  else
+    {
+      uword64 paddr;
+      int uncached;
+
+      if (AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &uncached,
+			      isTARGET, isREAL))
+	{
+	  const uword64 mask = 0x7;
+	  const unsigned int reverse = ReverseEndian ? 1 : 0;
+	  const unsigned int bigend = BigEndianCPU ? 1 : 0;
+	  uword64 memval;
+	  unsigned int byte;
+
+	  paddr = (paddr & ~mask) | ((paddr & mask) ^ (reverse << 2));
+	  memval = LoadMemory (uncached, AccessLength_WORD, paddr, vaddr,
+			       isDATA, isREAL);
+	  byte = (vaddr & mask) ^ (bigend << 2);
+	  return SIGNEXTEND (((memval >> (8 * byte)) & 0xffffffff), 32);
+	}
+    }
+
+  return 0;
+}
+
+/* Simulate the mips16 entry and exit pseudo-instructions.  These
+   would normally be handled by the reserved instruction exception
+   code, but for ease of simulation we just handle them directly.  */
+
+static void
+mips16_entry (insn)
+     unsigned int insn;
+{
+  int aregs, sregs, rreg;
+
+  aregs = (insn & 0x700) >> 8;
+  sregs = (insn & 0x0c0) >> 6;
+  rreg =  (insn & 0x020) >> 5;
+
+  /* These should be checked by the caller.  */
+  if (aregs == 5 || aregs == 6 || sregs == 3)
+    abort ();
+
+  if (aregs != 7)
+    {
+      int i;
+      t_reg tsp;
+
+      /* This is the entry pseudo-instruction.  */
+
+      for (i = 0; i < aregs; i++)
+	store_word ((uword64) (SP + 4 * i), registers[i + 4]);
+
+      tsp = SP;
+      SP -= 32;
+
+      if (rreg)
+	{
+	  tsp -= 4;
+	  store_word ((uword64) tsp, RA);
+	}
+
+      for (i = 0; i < sregs; i++)
+	{
+	  tsp -= 4;
+	  store_word ((uword64) tsp, registers[16 + i]);
+	}
+    }
+  else
+    {
+      int i;
+      t_reg tsp;
+
+      /* This is the exit pseudo-instruction.  */
+
+      tsp = SP + 32;
+
+      if (rreg)
+	{
+	  tsp -= 4;
+	  RA = load_word ((uword64) tsp);
+	}
+
+      for (i = 0; i < sregs; i++)
+	{
+	  tsp -= 4;
+	  registers[i + 16] = load_word ((uword64) tsp);
+	}
+
+      SP += 32;
+
+      PC = RA;
+    }
+}
+
 void
 sim_warning(char *fmt,...)
 {
@@ -2566,6 +2699,16 @@ SignalException (int exception,...)
             instruction was used to enter the vector (which is the
             case with the current IDT monitor). */
          break; /* out of the switch statement */
+       }
+       /* Look for the mips16 entry and exit instructions, and
+          simulate a handler for them.  */
+       else if ((IPC & 1) != 0
+		&& (instruction & 0xf81f) == 0xe809
+		&& (instruction & 0x700) != 0x500
+		&& (instruction & 0x700) != 0x600
+		&& (instruction & 0x0c0) != 0x0c0) {
+	 mips16_entry (instruction);
+	 break;
        } /* else fall through to normal exception processing */
        sim_warning("ReservedInstruction 0x%08X at IPC = 0x%08X%08X",instruction,WORD64HI(IPC),WORD64LO(IPC));
      }
@@ -4034,7 +4177,7 @@ simulate ()
                    registers, is when performing binary transfers. This
                    means we should update the register type field.  */
                 if ((pending_slot_reg[index] >= FGRIDX) && (pending_slot_reg[index] < (FGRIDX + 32)))
-                 fpr_state[pending_slot_reg[index]] = fmt_uninterpreted;
+                 fpr_state[pending_slot_reg[index] - FGRIDX] = fmt_uninterpreted;
 #endif /* HASFPU */
               }
 #ifdef DEBUG
