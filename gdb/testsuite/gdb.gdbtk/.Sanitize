@@ -24,12 +24,16 @@ Do-first:
 Things-to-keep:
 
 Makefile.in
+browser.exp
+browser.test
 configure.in
 configure
 console.exp
 console.test
 defs
 simple.c
+stack1.c
+stack2.c
 
 Things-to-lose:
 
