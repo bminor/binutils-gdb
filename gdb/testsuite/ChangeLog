@@ -1,3 +1,8 @@
+2002-02-10  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/funcargs.c (localvars_after_alloca): Fix return type.
+	(call_after_alloca): Ditto.
+
 2002-02-10  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/ending-run.exp: Guard "cont" test with

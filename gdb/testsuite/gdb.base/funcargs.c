@@ -634,7 +634,7 @@ void test_struct_args ()
 #ifdef PROTOTYPES
 void localvars_after_alloca (char c, short s, int i, long l)
 #else
-int
+void
 localvars_after_alloca (c, s, i, l)
      char c;
      short s;
@@ -671,7 +671,7 @@ char c; int i; short s; long l; unsigned char uc; unsigned short us; unsigned lo
 #ifdef PROTOTYPES
 void call_after_alloca (char c, short s, int i, long l)
 #else
-int
+void
 call_after_alloca (c, s, i, l)
      char c;
      short s;
