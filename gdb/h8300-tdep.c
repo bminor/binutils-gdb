@@ -377,11 +377,17 @@ h8300_pop_frame ()
 
   for (regnum = 0; regnum < 8; regnum++)
     {
-      if (fsr.regs[regnum])
+      /* Don't forget SP_REGNUM is a frame_saved_regs struct is the
+	 actual value we want, not the address of the value we want.  */
+      if (fsr.regs[regnum] && regnum != SP_REGNUM)
 	write_register (regnum, read_memory_integer(fsr.regs[regnum], BINWORD));
-
-      flush_cached_frames ();
+      else if (fsr.regs[regnum] && regnum == SP_REGNUM)
+	write_register (regnum, fsr.regs[regnum]);
     }
+
+  /* Don't forget the update the PC too!  */
+  write_pc (frame->from_pc);
+  flush_cached_frames ();
 }
 
 

@@ -1,3 +1,13 @@
+Wed May 15 08:25:12 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* coffread.c (coff_symtab_read): Handle C_LABEL symbols like
+	C_STAT symbols.
+	* h8300-tdep.c (h8300_pop_frame): Reset $sp and $pc correctly.
+	Flush cached frames just before exiting.
+	* remote-sim.c (gdbsim_resume): Complain if the program isn't
+	being run.
+	* config/h8300/tm-h8300.h (BELIEVE_PCC_PROMOTION): Define.
+
 Tue May 14 18:05:16 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* procfs.c (procfs_thread_alive procfs_stop):  Make static.

@@ -256,3 +256,5 @@ typedef unsigned short INSN_WORD;
 
 #define NUM_REALREGS 10
 #define NOP { 0x01, 0x80} /* A sleep insn */
+
+#define BELIEVE_PCC_PROMOTION 1

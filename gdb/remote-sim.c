@@ -280,6 +280,9 @@ gdbsim_resume (pid, step, siggnal)
      int pid, step;
      enum target_signal siggnal;
 {
+  if (inferior_pid != 42)
+    error ("The program is not being run.");
+
   if (sr_get_debug ())
     printf_filtered ("gdbsim_resume: step %d, signal %d\n", step, siggnal);
 
