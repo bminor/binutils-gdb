@@ -1,3 +1,27 @@
+1999-08-04  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (i386_operand): No need to change
+	operand_string pointer in segment reg case before goto
+	do_memory_reference.  Initialise displacement_string_start and
+	displacement_string_end after do_memory_reference label.
+	(i386_index_check): Add operand_string param, and print error
+	message on failure here.
+	(i386_intel_memory_operand): Instead of here.
+	(i386_operand): And here.
+	(INFER_ADDR_PREFIX): Enable.
+
+	* doc/c-i386.texi (i386-16bit): Document .code16gcc.
+
+	* config/tc-i386.h (DefaultSize): Define.  Renumber following
+	opcode_modifier defines.
+
+	From Etienne Lorrain  <etienne.lorrain@ibm.net>
+	* config/tc-i386.c (stackop_size): New variable.
+	(set_16bit_code_flag): Clear it here.
+	(set_16bit_gcc_code_flag): New function.
+	(md_pseudo_table): Add "code16gcc" entry.
+	(md_assemble): Set i.suffix for insns with DefaultSize modifier.
+
 1999-08-03  Ian Lance Taylor  <ian@zembu.com>
 
 	* config/obj-coff.c (coff_frob_symbol): Always update set_end with

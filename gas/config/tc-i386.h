@@ -344,17 +344,18 @@ typedef struct
 #define Size16		0x2000	/* needs size prefix if in 32-bit mode */
 #define Size32		0x4000	/* needs size prefix if in 16-bit mode */
 #define IgnoreSize	0x8000  /* instruction ignores operand size prefix */
-#define No_bSuf	       0x10000	/* b suffix on instruction illegal */
-#define No_wSuf	       0x20000	/* w suffix on instruction illegal */
-#define No_lSuf	       0x40000	/* l suffix on instruction illegal */
-#define No_sSuf	       0x80000	/* s suffix on instruction illegal */
-#define No_dSuf       0x100000  /* d suffix on instruction illegal */
-#define No_xSuf       0x200000  /* x suffix on instruction illegal */
-#define FWait	      0x400000	/* instruction needs FWAIT */
-#define IsString      0x800000	/* quick test for string instructions */
-#define regKludge    0x1000000	/* fake an extra reg operand for clr, imul */
-#define IsPrefix     0x2000000	/* opcode is a prefix */
-#define ImmExt	     0x4000000	/* instruction has extension in 8 bit imm */
+#define DefaultSize    0x10000  /* default insn size depends on mode */
+#define No_bSuf	       0x20000	/* b suffix on instruction illegal */
+#define No_wSuf	       0x40000	/* w suffix on instruction illegal */
+#define No_lSuf	       0x80000	/* l suffix on instruction illegal */
+#define No_sSuf	      0x100000	/* s suffix on instruction illegal */
+#define No_dSuf       0x200000  /* d suffix on instruction illegal */
+#define No_xSuf       0x400000  /* x suffix on instruction illegal */
+#define FWait	      0x800000	/* instruction needs FWAIT */
+#define IsString     0x1000000	/* quick test for string instructions */
+#define regKludge    0x2000000	/* fake an extra reg operand for clr, imul */
+#define IsPrefix     0x4000000	/* opcode is a prefix */
+#define ImmExt	     0x8000000	/* instruction has extension in 8 bit imm */
 #define Ugh	    0x80000000	/* deprecated fp insn, gets a warning */
 
   /* operand_types[i] describes the type of operand i.  This is made

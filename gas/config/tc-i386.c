@@ -41,7 +41,7 @@
 #endif
 
 #ifndef INFER_ADDR_PREFIX
-#define INFER_ADDR_PREFIX 0
+#define INFER_ADDR_PREFIX 1
 #endif
 
 #ifndef SCALE1_WHEN_NO_INDEX
@@ -63,6 +63,7 @@ static int fits_in_signed_word PARAMS ((long));
 static int smallest_imm_type PARAMS ((long));
 static int add_prefix PARAMS ((unsigned int));
 static void set_16bit_code_flag PARAMS ((int));
+static void set_16bit_gcc_code_flag PARAMS((int));
 static void set_intel_syntax PARAMS ((int));
 
 #ifdef BFD_ASSEMBLER
@@ -228,6 +229,10 @@ static int flag_16bit_code;	/* 1 if we're writing 16-bit code, 0 if 32-bit */
 static int intel_syntax = 0;	/* 1 for intel syntax, 0 if att syntax */
 
 static int allow_naked_reg = 0;  /* 1 if register prefix % not required */
+
+static char stackop_size = '\0';  /* Used in 16 bit gcc mode to add an l
+				     suffix to call, ret, enter, leave, push,
+				     and pop instructions.  */
 
 /* Interface to relax_segment.
    There are 2 relax states for 386 jump insns: one for conditional &
@@ -516,14 +521,23 @@ add_prefix (prefix)
 
 static void
 set_16bit_code_flag (new_16bit_code_flag)
-	int new_16bit_code_flag;
+     int new_16bit_code_flag;
 {
   flag_16bit_code = new_16bit_code_flag;
+  stackop_size = '\0';
+}
+
+static void
+set_16bit_gcc_code_flag (new_16bit_code_flag)
+     int new_16bit_code_flag;
+{
+  flag_16bit_code = new_16bit_code_flag;
+  stackop_size = new_16bit_code_flag ? 'l' : '\0';
 }
 
 static void
 set_intel_syntax (syntax_flag)
-	int syntax_flag;
+     int syntax_flag;
 {
   /* Find out if register prefixing is specified.  */
   int ask_naked_reg = 0;
@@ -575,6 +589,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"value", cons, 2},
   {"noopt", s_ignore, 0},
   {"optim", s_ignore, 0},
+  {"code16gcc", set_16bit_gcc_code_flag, 1},
   {"code16", set_16bit_code_flag, 1},
   {"code32", set_16bit_code_flag, 0},
   {"intel_syntax", set_intel_syntax, 1},
@@ -1631,6 +1646,10 @@ md_assemble (line)
 	  }
 	else
 	  abort();
+      }
+    else if ((i.tm.opcode_modifier & DefaultSize) && !i.suffix)
+      {
+	i.suffix = stackop_size;
       }
 
     /* Make still unresolved immediate matches conform to size of immediate
@@ -3064,13 +3083,18 @@ i386_parse_seg (op_string)
 
 }
 
-static int i386_index_check PARAMS((void));
+static int i386_index_check PARAMS((const char *));
 
+/* Make sure the memory operand we've been dealt is valid.
+   Returns 1 on success, 0 on a failure.
+*/
 static int
-i386_index_check ()
+i386_index_check (operand_string)
+     const char *operand_string;
 {
-  /* Make sure the memory operand we've been dealt is valid.  */
 #if INFER_ADDR_PREFIX
+  int fudged = 0;
+
  tryprefix:
 #endif
   if (flag_16bit_code ^ (i.prefix[ADDR_PREFIX] != 0) ?
@@ -3093,15 +3117,22 @@ i386_index_check ()
 	       != (Reg32|BaseIndex)))))
     {
 #if INFER_ADDR_PREFIX
-      if (i.prefix[ADDR_PREFIX] == 0)
+      if (i.prefix[ADDR_PREFIX] == 0 && stackop_size != '\0')
 	{
 	  i.prefix[ADDR_PREFIX] = ADDR_PREFIX_OPCODE;
 	  i.prefixes += 1;
+	  fudged = 1;
 	  goto tryprefix;
 	}
-      else
 #endif
-	return 0;
+      if (fudged)
+	as_bad (_("`%s' is not a valid base/index expression"),
+		operand_string);
+      else
+	as_bad (_("`%s' is not a valid %s bit base/index expression"),
+		operand_string,
+		flag_16bit_code ^ (i.prefix[ADDR_PREFIX] != 0) ? "16" : "32");
+      return 0;
     }
   return 1;
 }
@@ -3240,12 +3271,8 @@ i386_intel_memory_operand (operand_string)
 	}
     }
 
-  if (i386_index_check () == 0)
-    {
-      as_bad (_("`%s' is not a valid base/index expression"),
-	      operand_string);
-      return 0;
-    }
+  if (i386_index_check (operand_string) == 0)
+    return 0;
 
   i.mem_operands++;
   return 1;
@@ -3411,8 +3438,6 @@ i386_operand (operand_string)
 	  if (is_space_char (*op_string))
 	    ++op_string;
 
-	  /* Pretend given string starts here.  */
-	  operand_string = op_string;
 	  if (!is_digit_char (*op_string)
 	      && !is_identifier_char (*op_string)
 	      && *op_string != '('
@@ -3461,10 +3486,12 @@ i386_operand (operand_string)
       int found_base_index_form;
 
       /* Start and end of displacement string expression (if found). */
-      char *displacement_string_start = NULL;
-      char *displacement_string_end = NULL;
+      char *displacement_string_start;
+      char *displacement_string_end;
 
     do_memory_reference:
+      displacement_string_start = NULL;
+      displacement_string_end = NULL;
 
       if ((i.mem_operands == 1
 	   && (current_templates->start->opcode_modifier & IsString) == 0)
@@ -3638,12 +3665,8 @@ i386_operand (operand_string)
 	  return 1;
 	}
 
-      if (i386_index_check () == 0)
-	{
-	  as_bad (_("`%s' is not a valid base/index expression"),
-		  operand_string);
-	  return 0;
-	}
+      if (i386_index_check (operand_string) == 0)
+	return 0;
       i.mem_operands++;
     }
   else
