@@ -21,6 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef REMOTE_UTILS_H
 #define REMOTE_UTILS_H
 
+#include "serial.h"
 #include "target.h"
 #include "dcache.h"
 

@@ -323,7 +323,7 @@ SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 #dis-asm_h =	$(INCLUDE_DIR)/dis-asm.h 
 
 dcache_h = dcache.h
-remote_utils_h = $(dcache_h) remote-utils.h
+remote_utils_h = $(dcache_h) serial.h target.h remote-utils.h
 
 readline_headers = \
 	$(READLINE_SRC)/chardefs.h \
@@ -1136,7 +1136,7 @@ m88k-tdep.o: m88k-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 main.o: main.c $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
 	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h signals.h \
-	target.h $(remote_utils_h)
+	$(remote_utils_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(READLINE_CFLAGS) $(srcdir)/main.c
 
 maint.o: maint.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) 
@@ -1212,7 +1212,7 @@ remote-eb.o: remote-eb.c $(wait_h) $(srcdir)/config/a29k/tm-a29k.h \
 	$(defs_h) $(gdbcore_h) $(inferior_h) symfile.h target.h terminal.h
 
 remote-es.o: remote-es.c $(bfd_h) $(wait_h) $(command_h) $(defs_h) \
-	$(inferior_h) target.h terminal.h
+	$(inferior_h) $(remote_utils_h) terminal.h
 
 remote-hms.o: remote-hms.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) serial.h target.h terminal.h
@@ -1228,8 +1228,8 @@ remote-mon.o: remote-mon.c $(wait_h) $(command_h) $(defs_h) \
 
 remote-nindy.o: remote-nindy.c $(ieee-float_h) $(wait_h) $(command_h) \
 	$(defs_h) $(gdbcore_h) $(inferior_h) \
-	nindy-share/env.h nindy-share/stop.h \
-	symfile.h target.h
+	nindy-share/env.h nindy-share/stop.h $(remote_utils_h) \
+	symfile.h
 
 remote-sim.o: remote-sim.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h
@@ -1248,8 +1248,11 @@ remote-vx.o: remote-vx.c $(wait_h) complaints.h $(defs_h) $(gdbcmd_h) \
 remote-z8k.o: remote-z8k.c $(wait_h) $(srcdir)/../sim/z8k/sim.h \
 	$(defs_h) $(gdbcore_h) $(inferior_h) target.h terminal.h
 
+remote-utils.o: remote-utils.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
+	$(inferior_h) $(remote_utils_h) 
+
 remote.o: remote.c $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
-	$(inferior_h) serial.h symfile.h target.h terminal.h
+	$(inferior_h) $(remote_utils_h) symfile.h terminal.h
 
 rs6000-nat.o: rs6000-nat.c $(bfd_h) $(defs_h) $(inferior_h) target.h
 

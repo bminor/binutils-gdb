@@ -17,6 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#ifndef SERIAL_H
+#define SERIAL_H
+
 /* Terminal state pointer.  This is specific to each type of interface. */
 
 typedef PTR serial_ttystate;
@@ -161,3 +164,5 @@ extern int job_control;
 /* Set the process group of the caller to its own pid, or do nothing if
    we lack job control.  */
 extern int gdb_setpgid PARAMS ((void));
+
+#endif /* SERIAL_H */

@@ -1,5 +1,14 @@
 Tue Sep 14 12:21:49 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	* Makefile.in (remote_utils_h): add serial.h and target.h.
+	  (main.o, remote-es.o, remote-nindy.o, remote.o): remove target.h
+	  (already in remote_utils_h).
+	  (remote-utils.o): new rule.
+
+	* remote-utils.h: include serial.h.
+
+	* serial.h: ifdef protect from multiple inclusion.
+
 	* remote.c, remote-nindy.c, remote-mon.c, remote-es.c: include
 	  remote-utils.h.
 
