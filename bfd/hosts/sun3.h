@@ -13,6 +13,7 @@
 #define SEEK_SET 0
 #define SEEK_CUR 1
 
+extern void EXFUN(free,(PTR));
 extern int  EXFUN(abort,(void));
 extern int  EXFUN(close,(int));
 extern int  EXFUN(fcntl,(int des, int cmd, int e));
@@ -39,6 +40,7 @@ extern int stat();
 extern int strtol();
 char *malloc();
 char *realloc();
+
 extern char *strrchr();
 extern char *ctime();
 extern int _flsbuf();
