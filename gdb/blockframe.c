@@ -303,12 +303,6 @@ frameless_look_for_prologue (struct frame_info *frame)
     return 0;
 }
 
-/* Default a few macros that people seldom redefine.  */
-
-#ifndef FRAME_CHAIN_COMBINE
-#define	FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
-#endif
-
 /* Return a structure containing various interesting information
    about the frame that called NEXT_FRAME.  Returns NULL
    if there is no such frame.  */
@@ -379,7 +373,6 @@ get_prev_frame (struct frame_info *next_frame)
       address = FRAME_CHAIN (next_frame);
       if (!FRAME_CHAIN_VALID (address, next_frame))
 	return 0;
-      address = FRAME_CHAIN_COMBINE (address, next_frame);
     }
   if (address == 0)
     return 0;

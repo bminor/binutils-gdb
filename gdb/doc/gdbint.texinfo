@@ -2935,12 +2935,6 @@ See @file{stack.c}.
 @findex FRAME_CHAIN
 Given @var{frame}, return a pointer to the calling frame.
 
-@item FRAME_CHAIN_COMBINE(@var{chain}, @var{frame})
-@findex FRAME_CHAIN_COMBINE
-Define this to take the frame chain pointer and the frame's nominal
-address and produce the nominal address of the caller's frame.
-Presently only defined for HP PA.
-
 @item FRAME_CHAIN_VALID(@var{chain}, @var{thisframe})
 @findex FRAME_CHAIN_VALID
 Define this to be an expression that returns zero if the given frame is

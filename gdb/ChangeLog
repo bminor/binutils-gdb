@@ -1,3 +1,9 @@
+2002-04-14  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/pa/tm-hppa.h (FRAME_CHAIN_COMBINE): Delete macro.
+	* blockframe.c (FRAME_CHAIN_COMBINE): Delete macro.
+	(get_prev_frame): Do not call FRAME_CHAIN_COMBINE.
+
 2002-04-12  Don Howard  <dhoward@redhat.com>
 
 	* cli/cli-cmds.c (init_cli_cmds): Add new user settable value:
