@@ -1,3 +1,10 @@
+start-sanitize-v850
+Fri Jan  3 11:27:02 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* scripttempl/v850.sc (.zdata): Add .zcommon section.
+	(.tdata): Add .tcommon and .tcommon_byte sections.
+
+end-sanitize-v850
 Thu Jan  2 18:14:32 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.tgt (mips*el-*-linux*, mips*-*-linux*): New targets.
