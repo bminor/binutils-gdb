@@ -70,6 +70,11 @@ extern char *malloc ();
 
 char *program_version = "1.2";
 
+/* This is normally declared in as.h, but we don't include that.  We
+   need the function because other files linked with gasp.c might call
+   it.  */
+extern void as_abort PARAMS ((const char *, int, const char *));
+
 #define MAX_INCLUDES 30		/* Maximum include depth */
 #define MAX_REASONABLE 1000	/* Maximum number of expansions */
 

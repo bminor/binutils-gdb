@@ -46,6 +46,7 @@
 
 #ifdef OBJ_MAYBE_ELF
 /* Clean up namespace so we can include obj-elf.h too.  */
+static int mips_output_flavor PARAMS ((void));
 static int mips_output_flavor () { return OUTPUT_FLAVOR; }
 #undef OBJ_PROCESS_STAB
 #undef OUTPUT_FLAVOR

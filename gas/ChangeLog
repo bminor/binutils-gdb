@@ -1,3 +1,34 @@
+Tue Mar 18 15:50:13 1997  H.J. Lu  <hjl@lucon.org>
+
+	* Many files: Add function prototypes.
+	* as.c (show_usage, parse_args): Make static.
+	* frags.h (frag_alloc): Declare.
+	* subsegs.c (subseg_set_rest): Don't declare frag_alloc.
+	* symbols.c (dollar_label_instance): Change return type to long.
+	* symbols.h (print_symbol_value): Declare.
+	(print_expr, print_expr_1, print_symbol_value_1): Declare.
+	* write.c (fix_new_exp): Don't declare make_expr_symbol.
+	(remove_subsegs, relax_frag): Make static.
+	* config/atof-vax.c (atof_vax_sizeof): Change letter to int.
+	(what_kind_of_float): Likewise.
+	(atof_vax): Make static.  Change what_kind to int.
+	(md_atof): Change what_statement_type to int.
+	* config/obj-ecoff.h (obj_ecoff_set_ext): Declare.
+	* config/tc-alpha.c (vax_md_atof): Declare.
+	(md_atof): Don't declare atof_ieee and vax_md_atof.
+	* config/tc-i386.c (set_16bit_code_flag): Make static.
+	* config/tc-i386.h (tc_i386_fix_adjustable): Declare.
+	* config/tc-m68k.c (add_fix): Change width to int.
+	(insert_reg): Change regname to const.
+	(md_atof): Don't declare atof_ieee.
+	(demand_empty_rest_of_line): Don't declare.
+	* config/tc-m88k.c (md_atof): Don't declare atof_ieee.
+	* config/tc-sparc.c (cmp_reg_entry): Change args to const PTR.
+	(parse_keyword_arg): Change lookup_fn to take const arg.
+	(md_atof): Don't declare atof_ieee.
+	* config/tc-sparc.h: Add ifdef for multiple inclusion.
+	(tc_aout_pre_write_hook): Don't declare.
+
 Mon Mar 17 11:21:09 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* as.h (bfd_alloc_by_size_t): Don't declare.

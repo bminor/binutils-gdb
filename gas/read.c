@@ -199,6 +199,7 @@ symbolS *mri_common_symbol;
    may be needed.  */
 static int mri_pending_align;
 
+static void cons_worker PARAMS ((int, int));
 static int scrub_from_string PARAMS ((char **));
 static void do_align PARAMS ((int, char *, int, int));
 static void s_align PARAMS ((int, int));
