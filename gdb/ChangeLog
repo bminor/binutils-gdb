@@ -1,3 +1,10 @@
+Fri May 10 15:53:38 1996  Stu Grossman  (grossman@lisa.cygnus.com)
+
+	* sol-thread.c:  Cleanup.  gcc -Wall fixes.  Add prototypes.
+	Print out messages instead of codes for thread_db errors.  Make
+	access macros for thread and lwp manipulation.  Make cleanups to
+	fixup inferior_pid in case of errors.
+
 Thu May  9 19:06:02 1996  Fred Fish  <fnf@cygnus.com>
 
 	* aclocal.m4: Remove unused definition of AC_C_CROSS.

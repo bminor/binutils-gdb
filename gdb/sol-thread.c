@@ -17,8 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-
 #include "defs.h"
+
+/* Undefine gregset_t and fpregset_t to avoid conflict with defs in xm file. */
 
 #ifdef gregset_t
 #undef gregset_t
@@ -28,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #undef fpregset_t
 #endif
 
-#include "/usr/include/thread.h"
+#include <thread.h>
 #include <proc_service.h>
 #include <thread_db.h>
 #include "gdbthread.h"
@@ -38,30 +39,172 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <unistd.h>
 #include <sys/stat.h>
 
-static void sol_thread_resume PARAMS ((int pid, int step,
-				       enum target_signal signo));
-
 extern struct target_ops sol_thread_ops; /* Forward declaration */
 
 extern int procfs_suppress_run;
+extern struct target_ops procfs_ops; /* target vector for procfs.c */
+
+extern void supply_gregset PARAMS ((const prgregset_t));
+extern void fill_gregset PARAMS ((prgregset_t, int));
+extern void supply_fpregset PARAMS ((const prfpregset_t));
+extern void fill_fpregset PARAMS ((prfpregset_t, int));
 
 struct ps_prochandle
 {
   pid_t pid;
 };
 
+struct string_map
+{
+  int num;
+  char *str;
+};
+
 static struct ps_prochandle main_ph;
 static td_thragent_t *main_ta;
-
 static int sol_thread_active = 0;
 
-
-
-extern struct target_ops procfs_ops;
-
-/* Convert thread_id to an LWP id.  */
-
+static struct cleanup * save_inferior_pid PARAMS ((void));
+static void restore_inferior_pid PARAMS ((int pid));
+static char *td_err_string PARAMS ((td_err_e errcode));
+static char *td_state_string PARAMS ((td_thr_state_e statecode));
 static int thread_to_lwp PARAMS ((int thread_id, int default_lwp));
+static void sol_thread_resume PARAMS ((int pid, int step,
+				       enum target_signal signo));
+static int lwp_to_thread PARAMS ((int lwp));
+
+#define THREAD_FLAG 0x80000000
+#define is_thread(ARG) (((ARG) & THREAD_FLAG) != 0)
+#define is_lwp(ARG) (((ARG) & THREAD_FLAG) == 0)
+#define GET_LWP(LWP_ID) (TIDGET(LWP_ID))
+#define GET_THREAD(THREAD_ID) (((THREAD_ID) >> 16) & 0x7fff)
+#define BUILD_LWP(LWP_ID, PID) ((LWP_ID) << 16 | (PID))
+#define BUILD_THREAD(THREAD_ID, PID) (THREAD_FLAG | BUILD_LWP (THREAD_ID, PID))
+
+/*
+
+LOCAL FUNCTION
+
+	td_err_string - Convert a thread_db error code to a string
+
+SYNOPSIS
+
+	char * td_err_string (errcode)
+
+DESCRIPTION
+
+	Return the thread_db error string associated with errcode.  If errcode
+	is unknown, then return a message.
+
+ */
+
+static char *
+td_err_string (errcode)
+     td_err_e errcode;
+{
+  static struct string_map
+    td_err_table[] = {
+      {TD_OK,		"generic \"call succeeded\""},
+      {TD_ERR,		"generic error."},
+      {TD_NOTHR,	"no thread can be found to satisfy query"},
+      {TD_NOSV,		"no synch. variable can be found to satisfy query"},
+      {TD_NOLWP,	"no lwp can be found to satisfy query"},
+      {TD_BADPH,	"invalid process handle"},
+      {TD_BADTH,	"invalid thread handle"},
+      {TD_BADSH,	"invalid synchronization handle"},
+      {TD_BADTA,	"invalid thread agent"},
+      {TD_BADKEY,	"invalid key"},
+      {TD_NOMSG,	"td_thr_event_getmsg() called when there was no message"},
+      {TD_NOFPREGS,	"FPU register set not available for given thread"},
+      {TD_NOLIBTHREAD,	"application not linked with libthread"},
+      {TD_NOEVENT,	"requested event is not supported"},
+      {TD_NOCAPAB,	"capability not available"},
+      {TD_DBERR,	"Debugger service failed"},
+      {TD_NOAPLIC,	"Operation not applicable to"},
+      {TD_NOTSD,	"No thread specific data for this thread"},
+      {TD_MALLOC,	"Malloc failed"},
+      {TD_PARTIALREG,	"Only part of register set was writen/read"},
+      {TD_NOXREGS,	"X register set not available for given thread"}
+    };
+  const int td_err_size = sizeof td_err_table / sizeof (struct string_map);
+  int i;
+  static char buf[50];
+
+  for (i = 0; i < td_err_size; i++)
+    if (td_err_table[i].num == errcode)
+      return td_err_table[i].str;
+		  
+  sprintf (buf, "Unknown thread_db error code: %d", errcode);
+
+  return buf;
+}
+
+/*
+
+LOCAL FUNCTION
+
+	td_state_string - Convert a thread_db state code to a string
+
+SYNOPSIS
+
+	char * td_state_string (statecode)
+
+DESCRIPTION
+
+	Return the thread_db state string associated with statecode.  If
+	statecode is unknown, then return a message.
+
+ */
+
+static char *
+td_state_string (statecode)
+     td_thr_state_e statecode;
+{
+  static struct string_map
+    td_thr_state_table[] = {
+      {TD_THR_ANY_STATE, "any state"},
+      {TD_THR_UNKNOWN,	"unknown"},
+      {TD_THR_STOPPED,	"stopped"},
+      {TD_THR_RUN,	"run"},
+      {TD_THR_ACTIVE,	"active"},
+      {TD_THR_ZOMBIE,	"zombie"},
+      {TD_THR_SLEEP,	"sleep"},
+      {TD_THR_STOPPED_ASLEEP, "stopped asleep"}
+    };
+  const int td_thr_state_table_size = sizeof td_thr_state_table / sizeof (struct string_map);
+  int i;
+  static char buf[50];
+
+  for (i = 0; i < td_thr_state_table_size; i++)
+    if (td_thr_state_table[i].num == statecode)
+      return td_thr_state_table[i].str;
+		  
+  sprintf (buf, "Unknown thread_db state code: %d", statecode);
+
+  return buf;
+}
+
+/*
+
+LOCAL FUNCTION
+
+	thread_to_lwp - Convert a Posix or Solaris thread id to a LWP id.
+
+SYNOPSIS
+
+	int thread_to_lwp (thread_id, default_lwp)
+
+DESCRIPTION
+
+	This function converts a Posix or Solaris thread id to a lightweight
+	process id.  If thread_id is non-existent, that's an error.  If it's
+	an inactive thread, then we return default_lwp.
+
+NOTES
+
+	This function probably shouldn't call error()...
+
+ */
 
 static int
 thread_to_lwp (thread_id, default_lwp)
@@ -74,38 +217,37 @@ thread_to_lwp (thread_id, default_lwp)
   int pid;
   int lwp;
 
-  if (!(thread_id & 0x80000000))
+  if (is_lwp (thread_id))
     return thread_id;			/* It's already an LWP id */
 
   /* It's a thread.  Convert to lwp */
 
-  pid = thread_id & 0xffff;
-  thread_id = (thread_id >> 16) & 0x7fff;
+  pid = PIDGET (thread_id);
+  thread_id = GET_THREAD(thread_id);
 
   val = td_ta_map_id2thr (main_ta, thread_id, &th);
   if (val != TD_OK)
-    error ("thread_to_lwp: td_ta_map_id2thr %d", val);
+    error ("thread_to_lwp: td_ta_map_id2thr %s", td_err_string (val));
 
   val = td_thr_get_info (&th, &ti);
 
   if (val != TD_OK)
-    error ("thread_to_lwp: td_thr_get_info: %d", val);
+    error ("thread_to_lwp: td_thr_get_info: %s", td_err_string (val));
 
   if (ti.ti_state != TD_THR_ACTIVE)
     {
       if (default_lwp != -1)
 	return default_lwp;
-      error ("thread_to_lwp: thread state not active: %d", ti.ti_state);
+      error ("thread_to_lwp: thread state not active: %s",
+	     td_state_string (ti.ti_state));
     }
   
-  lwp = (ti.ti_lid << 16) | pid;
+  lwp = BUILD_LWP (ti.ti_lid, pid);
 
   return lwp;
 }
 
 /* Convert an LWP id to a thread. */
-
-static int lwp_to_thread PARAMS ((int lwp));
 
 static int
 lwp_to_thread (lwp)
@@ -117,29 +259,41 @@ lwp_to_thread (lwp)
   int pid;
   int thread_id;
 
-  if (lwp & 0x80000000)
+  if (is_thread (lwp))
     return lwp;			/* It's already a thread id */
 
   /* It's an lwp.  Convert it to a thread id.  */
 
-  pid = lwp & 0xffff;
-  lwp = (lwp >> 16) & 0xffff;
+  pid = PIDGET (lwp);
+  lwp = GET_LWP (lwp);
 
   val = td_ta_map_lwp2thr (main_ta, lwp, &th);
   if (val != TD_OK)
-    error ("lwp_to_thread: td_thr_get_info: %d.", val);
+    error ("lwp_to_thread: td_thr_get_info: %s.", td_err_string (val));
 
   val = td_thr_get_info (&th, &ti);
 
   if (val != TD_OK)
-    error ("lwp_to_thread: td_thr_get_info: %d.", val);
+    error ("lwp_to_thread: td_thr_get_info: %s.", td_err_string (val));
 
-  thread_id = (ti.ti_tid << 16) | pid | 0x80000000;
+  thread_id = BUILD_THREAD (ti.ti_tid, pid);
 
   return thread_id;
 }
+
+static struct cleanup *
+save_inferior_pid ()
+{
+  return make_cleanup (restore_inferior_pid, inferior_pid);
+}
 
-
+static void
+restore_inferior_pid (pid)
+     int pid;
+{
+  inferior_pid = pid;
+}
+
 /* ARGSUSED */
 static void
 sol_thread_open (arg, from_tty)
@@ -188,9 +342,9 @@ sol_thread_resume (pid, step, signo)
      int step;
      enum target_signal signo;
 {
-  int save_pid;
+  struct cleanup *old_chain;
 
-  save_pid = inferior_pid;
+  old_chain = save_inferior_pid ();
 
   inferior_pid = thread_to_lwp (inferior_pid, main_ph.pid);
 
@@ -199,7 +353,7 @@ sol_thread_resume (pid, step, signo)
 
   procfs_ops.to_resume (pid, step, signo);
 
-  inferior_pid = save_pid;
+  do_cleanups (old_chain);
 }
 
 /* Wait for any LWPs to stop */
@@ -209,14 +363,15 @@ sol_thread_wait (pid, ourstatus)
      int pid;
      struct target_waitstatus *ourstatus;
 {
-  int statval;
   int rtnval;
   int save_pid;
+  struct cleanup *old_chain;
 
   if (!sol_thread_active)
     return procfs_ops.to_wait (pid, ourstatus);
 
   save_pid = inferior_pid;
+  old_chain = save_inferior_pid ();
 
   inferior_pid = thread_to_lwp (inferior_pid, main_ph.pid);
 
@@ -233,8 +388,6 @@ sol_thread_wait (pid, ourstatus)
       add_thread (rtnval);
     }
 
-  inferior_pid = save_pid;	/* XXX need to make a cleanup for this in case of error */
-
   /* During process initialization, we may get here without the thread package
      being initialized, since that can only happen after we've found the shared
      libs.  */
@@ -242,6 +395,8 @@ sol_thread_wait (pid, ourstatus)
   /* Map the LWP of interest back to the appropriate thread ID */
 
   rtnval = lwp_to_thread (rtnval);
+
+  do_cleanups (old_chain);
 
   return rtnval;
 }
@@ -255,11 +410,13 @@ sol_thread_fetch_registers (regno)
   td_err_e val;
   prgregset_t regset;
   prfpregset_t fpregset;
+#if 0
   int xregsize;
   caddr_t xregset;
+#endif
 
   if (!sol_thread_active
-      || !(inferior_pid & 0x80000000))
+      || is_lwp (inferior_pid))
     {
       procfs_ops.to_fetch_registers (regno);
       return;
@@ -267,14 +424,15 @@ sol_thread_fetch_registers (regno)
 
   /* Convert inferior_pid into a td_thrhandle_t */
 
-  thread = (inferior_pid >> 16) & 0x7fff;
+  thread = GET_THREAD (inferior_pid);
 
   if (thread == 0)
     error ("sol_thread_fetch_registers:  thread == 0");
 
   val = td_ta_map_id2thr (main_ta, thread, &thandle);
   if (val != TD_OK)
-    error ("sol_thread_fetch_registers: td_ta_map_id2thr: %d", val);
+    error ("sol_thread_fetch_registers: td_ta_map_id2thr: %s",
+	   td_err_string (val));
 
   /* Get the integer regs */
 
@@ -293,28 +451,32 @@ sol_thread_fetch_registers (regno)
 				   doesn't need to save them.  */
     }
   else
-    error ("sol_thread_fetch_registers: td_thr_getgregs %d", val);
+    error ("sol_thread_fetch_registers: td_thr_getgregs %s",
+	   td_err_string (val));
 
   /* And, now the fp regs */
 
   val = td_thr_getfpregs (&thandle, &fpregset);
   if (val == TD_OK)
-    supply_fpregset (&fpregset);
+    supply_fpregset (fpregset);
   else if (val != TD_NOFPREGS)
-    error ("sol_thread_fetch_registers: td_thr_getfpregs %d", val);
+    error ("sol_thread_fetch_registers: td_thr_getfpregs %s",
+	   td_err_string (val));
 
 #if 0
 /* thread_db doesn't seem to handle this right */
   val = td_thr_getxregsize (&thandle, &xregsize);
   if (val != TD_OK && val != TD_NOXREGS)
-    error ("sol_thread_fetch_registers: td_thr_getxregsize %d", val);
+    error ("sol_thread_fetch_registers: td_thr_getxregsize %s",
+	   td_err_string (val));
 
   if (val == TD_OK)
     {
       xregset = alloca (xregsize);
       val = td_thr_getxregs (&thandle, xregset);
       if (val != TD_OK)
-	error ("sol_thread_fetch_registers: td_thr_getxregs %d", val);
+	error ("sol_thread_fetch_registers: td_thr_getxregs %s",
+	       td_err_string (val));
     }
 #endif
 }
@@ -328,11 +490,13 @@ sol_thread_store_registers (regno)
   td_err_e val;
   prgregset_t regset;
   prfpregset_t fpregset;
+#if 0
   int xregsize;
   caddr_t xregset;
+#endif
 
   if (!sol_thread_active
-      || !(inferior_pid & 0x80000000))
+      || is_lwp (inferior_pid))
     {
       procfs_ops.to_store_registers (regno);
       return;
@@ -340,52 +504,60 @@ sol_thread_store_registers (regno)
 
   /* Convert inferior_pid into a td_thrhandle_t */
 
-  thread = (inferior_pid >> 16) & 0x7fff;
+  thread = GET_THREAD (inferior_pid);
 
   val = td_ta_map_id2thr (main_ta, thread, &thandle);
   if (val != TD_OK)
-    error ("sol_thread_store_registers: td_ta_map_id2thr %d", val);
+    error ("sol_thread_store_registers: td_ta_map_id2thr %s",
+	   td_err_string (val));
 
   if (regno != -1)
     {				/* Not writing all the regs */
       val = td_thr_getgregs (&thandle, regset);
       if (val != TD_OK)
-	error ("sol_thread_store_registers: td_thr_getgregs %d", val);
+	error ("sol_thread_store_registers: td_thr_getgregs %s",
+	       td_err_string (val));
       val = td_thr_getfpregs (&thandle, &fpregset);
       if (val != TD_OK)
-	error ("sol_thread_store_registers: td_thr_getfpregs %d", val);
+	error ("sol_thread_store_registers: td_thr_getfpregs %s",
+	       td_err_string (val));
 
 #if 0
 /* thread_db doesn't seem to handle this right */
       val = td_thr_getxregsize (&thandle, &xregsize);
       if (val != TD_OK && val != TD_NOXREGS)
-	error ("sol_thread_store_registers: td_thr_getxregsize %d", val);
+	error ("sol_thread_store_registers: td_thr_getxregsize %s",
+	       td_err_string (val));
 
       if (val == TD_OK)
 	{
 	  xregset = alloca (xregsize);
 	  val = td_thr_getxregs (&thandle, xregset);
 	  if (val != TD_OK)
-	    error ("sol_thread_store_registers: td_thr_getxregs %d", val);
+	    error ("sol_thread_store_registers: td_thr_getxregs %s",
+		   td_err_string (val));
 	}
 #endif
     }
 
   fill_gregset (regset, regno);
-  fill_fpregset (&fpregset, regno);
+  fill_fpregset (fpregset, regno);
 
   val = td_thr_setgregs (&thandle, regset);
   if (val != TD_OK)
-    error ("sol_thread_store_registers: td_thr_setgregs %d", val);
+    error ("sol_thread_store_registers: td_thr_setgregs %s",
+	   td_err_string (val));
   val = td_thr_setfpregs (&thandle, &fpregset);
   if (val != TD_OK)
-    error ("sol_thread_store_registers: td_thr_setfpregs %d", val);
+    error ("sol_thread_store_registers: td_thr_setfpregs %s",
+	   td_err_string (val));
 
 #if 0
 /* thread_db doesn't seem to handle this right */
   val = td_thr_getxregsize (&thandle, &xregsize);
   if (val != TD_OK && val != TD_NOXREGS)
-    error ("sol_thread_store_registers: td_thr_getxregsize %d", val);
+    error ("sol_thread_store_registers: td_thr_getxregsize %s",
+	   td_err_string (val));
 
   /* Should probably do something about writing the xregs here, but what are
      they? */
@@ -413,16 +585,16 @@ sol_thread_xfer_memory (memaddr, myaddr, len, dowrite, target)
      struct target_ops *target; /* ignored */
 {
   int retval;
-  int save_pid;
+  struct cleanup *old_chain;
 
-  save_pid = inferior_pid;
+  old_chain = save_inferior_pid ();
 
-  if (inferior_pid & 0x80000000)
+  if (is_thread (inferior_pid))
     inferior_pid = main_ph.pid;	/* It's a thread.  Convert to lwp */
 
   retval = procfs_ops.to_xfer_memory (memaddr, myaddr, len, dowrite, target);
 
-  inferior_pid = save_pid;
+  do_cleanups (old_chain);
 
   return retval;
 }
@@ -463,10 +635,6 @@ sol_thread_create_inferior (exec_file, allargs, env)
 
   if (sol_thread_active)
     {
-      td_thrhandle_t thandle;
-      td_err_e val;
-      td_thrinfo_t ti;
-
       main_ph.pid = inferior_pid; /* Save for xfer_memory */
 
       push_target (&sol_thread_ops);
@@ -499,13 +667,13 @@ sol_thread_new_objfile (objfile)
 
   val = td_init ();
   if (val != TD_OK)
-    error ("target_new_objfile: td_init: %d", val);
+    error ("target_new_objfile: td_init: %s", td_err_string (val));
 
   val = td_ta_new (&main_ph, &main_ta);
   if (val == TD_NOLIBTHREAD)
     return;
   else if (val != TD_OK)
-    error ("target_new_objfile: td_ta_new: %d", val);
+    error ("target_new_objfile: td_ta_new: %s", td_err_string (val));
 
   sol_thread_active = 1;
 }
@@ -548,109 +716,27 @@ struct lwp_map
   int lwpfd;
 };
 
-#if 0
-struct lwp_map *lwp_map;
-
-/* Create a /proc file descriptor for the given LWPID */
-
-static ps_err_e
-get_lwp_fd (const struct ps_prochandle *ph, const lwpid_t lwpid, int *fd)
-{
-  struct lwp_map *lp;
-
-  for (lp = lwp_map; lp; lp = lp->next)
-    if (lp->pid = ph->pid
-	&& lp->lwp == lwpid)
-      {
-	*fd = lp->lwpfd;
-
-	return PS_OK;
-      }
-	
-  lp = xmalloc (sizeof (struct lwp_map));
-
-  if ((lp->lwpfd = ioctl (ph->fd, PIOCOPENLWP, &lwpid)) < 0)
-    {
-      print_sys_errmsg ("get_lwp_fd (): PIOCOPENLWP", errno);
-      return PS_BADLID;
-    }
-
-  lp->pid = ph->pid;
-  lp->lwp = lwpid;
-  lp->next = lwp_map;
-  lwp_map = lp;
-
-  *fd = lp->lwpfd;
-
-  return PS_OK;
-}
-#endif
-
 ps_err_e
 ps_pstop (const struct ps_prochandle *ph)
 {
-#if 0
-  if (ioctl (ph->fd, PIOCSTOP, NULL))
-    {
-      print_sys_errmsg ("ps_pstop (): PIOCSTOP", errno);
-      return PS_ERR;
-    }
-#endif
   return PS_OK;
 }
 
 ps_err_e
 ps_pcontinue (const struct ps_prochandle *ph)
 {
-#if 0
-  if (ioctl (ph->fd, PIOCRUN, NULL))
-    {
-      print_sys_errmsg ("ps_pcontinue (): PIOCRUN", errno);
-      return PS_ERR;
-    }
-#endif
   return PS_OK;
 }
 
 ps_err_e
 ps_lstop (const struct ps_prochandle *ph, lwpid_t lwpid)
 {
-  int lwp_fd;
-  ps_err_e val;
-
-#if 0
-  val = get_lwp_fd (ph, lwpid, &lwp_fd);
-  if (val != PS_OK)
-    return val;
-
-  if (ioctl (lwp_fd, PIOCSTOP, NULL))
-    {
-      print_sys_errmsg ("ps_lstop (): PIOCSTOP", errno);
-      return PS_ERR;
-    }
-#endif
-
   return PS_OK;
 }
 
 ps_err_e
 ps_lcontinue (const struct ps_prochandle *ph, lwpid_t lwpid)
 {
-  int lwp_fd;
-  ps_err_e val;
-
-#if 0
-  val = get_lwp_fd (ph, lwpid, &lwp_fd);
-  if (val != PS_OK)
-    return val;
-
-  if (ioctl (lwp_fd, PIOCRUN, NULL))
-    {
-      print_sys_errmsg ("ps_lcontinue (): PIOCRUN", errno);
-      return PS_ERR;
-    }
-#endif
-
   return PS_OK;
 }
 
@@ -674,11 +760,11 @@ static ps_err_e
 rw_common (int dowrite, const struct ps_prochandle *ph, paddr_t addr,
 	   char *buf, int size)
 {
-  int save_pid;
+  struct cleanup *old_chain;
 
-  save_pid = inferior_pid;
+  old_chain = save_inferior_pid ();
 
-  if (inferior_pid & 0x80000000)
+  if (is_thread (inferior_pid))
     inferior_pid = main_ph.pid;	/* It's a thread.  Convert to lwp */
 
   while (size > 0)
@@ -694,7 +780,7 @@ rw_common (int dowrite, const struct ps_prochandle *ph, paddr_t addr,
 	  else
 	    print_sys_errmsg ("ps_pdread (): write", errno);
 
-	  inferior_pid = save_pid;
+	  do_cleanups (old_chain);
 
 	  return PS_ERR;
 	}
@@ -702,7 +788,7 @@ rw_common (int dowrite, const struct ps_prochandle *ph, paddr_t addr,
       buf += cc;
     }
 
-  inferior_pid = save_pid;
+  do_cleanups (old_chain);
 
   return PS_OK;
 }
@@ -735,16 +821,16 @@ ps_err_e
 ps_lgetregs (const struct ps_prochandle *ph, lwpid_t lwpid,
 	     prgregset_t gregset)
 {
-  int save_pid;
+  struct cleanup *old_chain;
 
-  save_pid = inferior_pid;
+  old_chain = save_inferior_pid ();
 
-  inferior_pid = (lwpid << 16) | (inferior_pid & 0xffff);
+  inferior_pid = BUILD_LWP (lwpid, PIDGET (inferior_pid));
   
   procfs_ops.to_fetch_registers (-1);
   fill_gregset (gregset, -1);
 
-  inferior_pid = save_pid;
+  do_cleanups (old_chain);
 
   return PS_OK;
 }
@@ -753,16 +839,16 @@ ps_err_e
 ps_lsetregs (const struct ps_prochandle *ph, lwpid_t lwpid,
 	     const prgregset_t gregset)
 {
-  int save_pid;
+  struct cleanup *old_chain;
 
-  save_pid = inferior_pid;
+  old_chain = save_inferior_pid ();
 
-  inferior_pid = (lwpid << 16) | (inferior_pid & 0xffff);
+  inferior_pid = BUILD_LWP (lwpid, PIDGET (inferior_pid));
   
   supply_gregset (gregset);
   procfs_ops.to_store_registers (-1);
 
-  inferior_pid = save_pid;
+  do_cleanups (old_chain);
 
   return PS_OK;
 }
@@ -780,11 +866,11 @@ ps_plog (const char *fmt, ...)
 ps_err_e
 ps_lgetxregsize (const struct ps_prochandle *ph, lwpid_t lwpid, int *xregsize)
 {
+#if 0
   int lwp_fd;
   int regsize;
   ps_err_e val;
 
-#if 0
   val = get_lwp_fd (ph, lwpid, &lwp_fd);
   if (val != PS_OK)
     return val;
@@ -806,10 +892,10 @@ ps_lgetxregsize (const struct ps_prochandle *ph, lwpid_t lwpid, int *xregsize)
 ps_err_e
 ps_lgetxregs (const struct ps_prochandle *ph, lwpid_t lwpid, caddr_t xregset)
 {
+#if 0
   int lwp_fd;
   ps_err_e val;
 
-#if 0
   val = get_lwp_fd (ph, lwpid, &lwp_fd);
   if (val != PS_OK)
     return val;
@@ -827,10 +913,10 @@ ps_lgetxregs (const struct ps_prochandle *ph, lwpid_t lwpid, caddr_t xregset)
 ps_err_e
 ps_lsetxregs (const struct ps_prochandle *ph, lwpid_t lwpid, caddr_t xregset)
 {
+#if 0
   int lwp_fd;
   ps_err_e val;
 
-#if 0
   val = get_lwp_fd (ph, lwpid, &lwp_fd);
   if (val != PS_OK)
     return val;
@@ -849,16 +935,16 @@ ps_err_e
 ps_lgetfpregs (const struct ps_prochandle *ph, lwpid_t lwpid,
 	       prfpregset_t *fpregset)
 {
-  int save_pid;
+  struct cleanup *old_chain;
 
-  save_pid = inferior_pid;
+  old_chain = save_inferior_pid ();
 
-  inferior_pid = (lwpid << 16) | (inferior_pid & 0xffff);
+  inferior_pid = BUILD_LWP (lwpid, PIDGET (inferior_pid));
 
   procfs_ops.to_fetch_registers (-1);
-  fill_fpregset (fpregset, -1);
+  fill_fpregset (*fpregset, -1);
 
-  inferior_pid = save_pid;
+  do_cleanups (old_chain);
 
   return PS_OK;
 }
@@ -867,16 +953,16 @@ ps_err_e
 ps_lsetfpregs (const struct ps_prochandle *ph, lwpid_t lwpid,
 	       const prfpregset_t *fpregset)
 {
-  int save_pid;
+  struct cleanup *old_chain;
 
-  save_pid = inferior_pid;
+  old_chain = save_inferior_pid ();
 
-  inferior_pid = (lwpid << 16) | (inferior_pid & 0xffff);
+  inferior_pid = BUILD_LWP (lwpid, PIDGET (inferior_pid));
   
-  supply_gregset (fpregset);
+  supply_fpregset (*fpregset);
   procfs_ops.to_store_registers (-1);
 
-  inferior_pid = save_pid;
+  do_cleanups (old_chain);
 
   return PS_OK;
 }
@@ -887,20 +973,19 @@ solaris_pid_to_str (pid)
 {
   static char buf[100];
 
-  if (pid & 0x80000000)
+  if (is_thread (pid))
     {
       int lwp;
 
       lwp = thread_to_lwp (pid, -2);
 
       if (lwp != -2)
-	sprintf (buf, "Thread %d (LWP %d)", (pid >> 16) & 0x7fff,
-		 (lwp >> 16) & 0xffff);
+	sprintf (buf, "Thread %d (LWP %d)", GET_THREAD (pid), GET_LWP (lwp));
       else
-	sprintf (buf, "Thread %d        ", (pid >> 16) & 0x7fff);
+	sprintf (buf, "Thread %d        ", GET_THREAD (pid));
     }
   else
-    sprintf (buf, "LWP    %d        ", (pid >> 16) & 0xffff);
+    sprintf (buf, "LWP    %d        ", GET_LWP (pid));
 
   return buf;
 }
