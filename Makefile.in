@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Wed Nov 13 15:08:42 PST 1991, by rich@rtl.cygnus.com
+# Last Mod Wed Nov 13 23:26:23 PST 1991, by rich@cygnus.com
 #
 # $Id$
 
@@ -32,7 +32,7 @@ AR = ar
 AR_FLAGS = cq
 
 BISON = `if [ -d $(unsubdir)/../bison ] ; \
-	then echo \`pwd\`/$(unsubdir)/../bison$(subdir)/bison -L \`pwd\`/$(unsubdir)/../bison$(subdir)/ ; \
+	then echo \`pwd\`/$(unsubdir)/../bison$(subdir)/bison -y -L \`pwd\`/$(unsubdir)/../bison$(subdir)/ ; \
 	else echo yacc ; fi`
 
 MAKEINFO = `if [ -d $(unsubdir)/../texinfo/C ] ; \
