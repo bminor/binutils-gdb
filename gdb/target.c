@@ -172,6 +172,9 @@ debug_to_thread_alive PARAMS ((int));
 static void
 debug_to_stop PARAMS ((void));
 
+static int
+debug_to_query PARAMS ((char, char *, char *, int *));
+
 /* Pointer to array of target architecture structures; the size of the
    array; the current index into the array; the allocated size of the 
    array.  */
@@ -237,6 +240,7 @@ struct target_ops dummy_target = {
   0,				/* to_notice_signals */
   0,				/* to_thread_alive */
   0,				/* to_stop */
+  0,				/* to_query */
   NULL,                         /* to_enable_exception_callback */
   NULL,                         /* to_get_current_exception_event */
   NULL,                         /* to_pid_to_exec_file */
@@ -502,6 +506,7 @@ cleanup_target (t)
   de_fault (to_notice_signals,		(void (*) PARAMS((int))) target_ignore);
   de_fault (to_thread_alive,		(int (*) PARAMS((int))) target_ignore);
   de_fault (to_stop,			(void (*) PARAMS((void))) target_ignore);
+  de_fault (to_query,			(int (*) PARAMS((char, char*, char *, int *))) target_ignore);
   de_fault (to_enable_exception_callback,	(struct symtab_and_line * (*) PARAMS((enum exception_event_kind, int))) nosupport_runtime);
   de_fault (to_get_current_exception_event,	(struct exception_event_record * (*) PARAMS((void))) nosupport_runtime);
 
@@ -583,6 +588,7 @@ update_current_target ()
       INHERIT (to_notice_signals, t);
       INHERIT (to_thread_alive, t);
       INHERIT (to_stop, t);
+      INHERIT (to_query, t);
       INHERIT (to_enable_exception_callback, t);
       INHERIT (to_get_current_exception_event, t);
       INHERIT (to_pid_to_exec_file, t);
@@ -2470,6 +2476,22 @@ debug_to_stop ()
   fprintf_unfiltered (gdb_stderr, "target_stop ()\n");
 }
 
+static int
+debug_to_query (type, req, resp, siz)
+  char type;
+  char *req;
+  char *resp;
+  int *siz;
+{
+  int retval;
+
+  retval = debug_target.to_query (type, req, resp, siz);
+
+  fprintf_unfiltered (stderr, "target_query (%c, %s, %s,  %d) = %d\n", type, req, resp, *siz, retval);
+
+  return retval;
+}
+
 static struct symtab_and_line *
 debug_to_enable_exception_callback (kind, enable)
   enum exception_event_kind kind;
@@ -2572,6 +2594,7 @@ setup_target_debug ()
   current_target.to_notice_signals = debug_to_notice_signals;
   current_target.to_thread_alive = debug_to_thread_alive;
   current_target.to_stop = debug_to_stop;
+  current_target.to_query = debug_to_query;
   current_target.to_enable_exception_callback = debug_to_enable_exception_callback;
   current_target.to_get_current_exception_event = debug_to_get_current_exception_event;
   current_target.to_pid_to_exec_file = debug_to_pid_to_exec_file;

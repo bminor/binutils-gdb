@@ -1,3 +1,8 @@
+1999-01-15  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* target.h: added entry for target queries (to_query)
+	  target.c: ditto.
+
 Thu Jan 14 18:29:17 1999  David Taylor  <taylor@texas.cygnus.com>
 
 start-sanitize-carp start-sanitize-vr4xxx

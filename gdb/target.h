@@ -355,6 +355,7 @@ struct target_ops
   void	      (*to_notice_signals) PARAMS ((int pid));
   int	      (*to_thread_alive) PARAMS ((int pid));
   void	      (*to_stop) PARAMS ((void));
+  int 	      (*to_query) PARAMS ((char, char *, char *, int *));
   struct symtab_and_line * (*to_enable_exception_callback) PARAMS ((enum exception_event_kind, int));
   struct exception_event_record * (*to_get_current_exception_event) PARAMS ((void));
   char *      (*to_pid_to_exec_file) PARAMS ((int pid));
@@ -887,6 +888,16 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
    implement a stop button.  */
 
 #define target_stop current_target.to_stop
+
+/* Queries the target side for some information.  The first argument is a
+   letter specifying the type of the query, which is used to determine who
+   should process it.  The second argument is a string that specifies which 
+   information is desired and the third is a buffer that carries back the 
+   response from the target side. The fourth parameter is the size of the
+   output buffer supplied. */
+ 
+#define	target_query(query_type, query, resp_buffer, bufffer_size)	\
+	(*current_target.to_query) (query_type, query, resp_buffer, bufffer_size)
 
 /* Get the symbol information for a breakpointable routine called when
    an exception event occurs. 
