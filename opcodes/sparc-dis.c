@@ -761,14 +761,15 @@ build_hash_table (table, hash_table, num_opcodes)
 {
   register int i;
   int hash_count[HASH_SIZE];
-  struct opcode_hash *hash_buf;
+  static struct opcode_hash *hash_buf = NULL;
 
   /* Start at the end of the table and work backwards so that each
      chain is sorted.  */
-  /*  ??? Do we really need to sort them now?  */
 
   memset (hash_table, 0, HASH_SIZE * sizeof (hash_table[0]));
   memset (hash_count, 0, HASH_SIZE * sizeof (hash_count[0]));
+  if (hash_buf != NULL)
+    free (hash_buf);
   hash_buf = (struct opcode_hash *) xmalloc (sizeof (struct opcode_hash) * num_opcodes);
   for (i = num_opcodes - 1; i >= 0; --i)
     {
@@ -805,9 +806,9 @@ print_insn_sparc (memaddr, info)
      bfd_vma memaddr;
      disassemble_info *info;
 {
-  /* It's not clear that we'll ever switch cpus in a running program.
-     It could theoretically happen in gdb so we handle it.
-     ??? There is currently a memory leak but it's not worth the trouble.  */
+  /* It could happen that we'll switch cpus in a running program.
+     Consider objdump or gdb.  The frequency of occurrence is expected
+     to be low enough that our clumsy approach is not a problem.  */
   if (sparc64_p)
     opcodes_initialized = 0;
   sparc64_p = 0;
@@ -819,9 +820,9 @@ print_insn_sparc64 (memaddr, info)
      bfd_vma memaddr;
      disassemble_info *info;
 {
-  /* It's not clear that we'll ever switch cpus in a running program.
-     It could theoretically happen in gdb so we handle it.
-     ??? There is currently a memory leak but it's not worth the trouble.  */
+  /* It could happen that we'll switch cpus in a running program.
+     Consider objdump or gdb.  The frequency of occurrence is expected
+     to be low enough that our clumsy approach is not a problem.  */
   if (!sparc64_p)
     opcodes_initialized = 0;
   sparc64_p = 1;
