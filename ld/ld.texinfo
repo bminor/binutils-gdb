@@ -1427,11 +1427,8 @@ sign (``@key{=}''), and @var{org}.
 @item -Tbss @var{org}
 @itemx -Tdata @var{org}
 @itemx -Ttext @var{org}
-Use @var{org} as the starting address for---respectively---the
-@code{bss}, @code{data}, or the @code{text} segment of the output file.
-@var{org} must be a single hexadecimal integer;
-for compatibility with other linkers, you may omit the leading
-@samp{0x} usually associated with hexadecimal values.
+Same as --section-start, with @code{.bss}, @code{.data} or
+@code{.text} as the @var{sectionname}.
 
 @kindex --verbose
 @cindex verbose

@@ -1,3 +1,8 @@
+2003-03-31  Alexandre Oliva  <aoliva@redhat.com>
+
+	* ld.texinfo (-Tbss, -Tdata, -Ttext): Document in terms of
+	--section-start.
+
 2003-03-31  David Heine  <dlheine@suif.stanford.edu>
 
 	* ldfile.c (ldfile_add_library_path): Always allocate space for
