@@ -1,3 +1,41 @@
+2002-01-31  Jason R Thorpe <thorpej@wasabisystems.com>
+
+	* TODO: Remove "host architecture pointer size" item.
+	* acconfig.h: Remove.
+	* gconfig.in: Regenerate.
+	* configure.in: Remove check for gmon pointer size.
+	* configure: Regenerate.
+	* gmon.h (GMON_HDRSIZE_BSD44_32): Define.
+	(GMON_HDRSIZE_BSD44_64): Ditto.
+	(GMON_HDRSIZE_OLDBSD_32): Ditto.
+	(GMON_HDRSIZE_OLDBSD_64): Ditto.
+	(struct raw_phdr): Wrap in #if 0, keeping it for
+	documentation purposes only.
+	(struct old_raw_phdr): Likewise.
+	(struct raw_arc): Likewise.  Change type/size of
+	"count" member to long match 4.4BSD.
+	* gmon_io: Update copyright years.
+	(gmon_io_read_64): New function.
+	(gmon_io_read_vma): Use bfd_arch_bits_per_address to
+	determine target pointer size.  Use gmon_io_read_32
+	and gmon_io_read_64.
+	(gmon_io_write_64): New function.
+	(gmon_io_write_vma): Use bfd_arch_bits_per_address to
+	determine target pointer size.  Use gmon_io_write_32
+	and gmon_io_write_64.
+	(get_vma): Remove.
+	(put_vma): Ditto.
+	(gmon_read_raw_arc): New function.
+	(gmon_write_raw_arc): New function.
+	(gmon_out_read): Do not use struct raw_phdr or
+	struct old_raw_phdr to read the gmon header.  Use
+	gmon_read_raw_arc to read call graph records.
+	(gmon_out_write): Do not use struct raw_phdr or
+	struct old_raw_phdr to write the gmon header.  Use
+	gmon_write_raw_arc to write call graph records.
+	* po/gprof.pot: Regenerate.
+	* Makefile.in: Regenerate.
+
 2002-01-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* alpha.c (alpha_Instruction): Don't use.
