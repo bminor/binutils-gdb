@@ -1,3 +1,7 @@
+Thu Dec 15 14:07:16 1994  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* hosts/mpw.h: Include spin.h.
+
 Mon Dec 12 19:29:34 1994  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-config.in: Edit the BFD version into bfd.h.

@@ -53,6 +53,8 @@
 
 #include <stddef.h>
 
+#include <spin.h>
+
 #ifdef MPW_C
 
 #undef  __PTR_TO_INT
