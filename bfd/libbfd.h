@@ -1,7 +1,6 @@
-
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -23,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Align an address upward to a boundary, expressed as a number of bytes.
    E.g. align to an 8-byte boundary with argument of 8.  */
-#define ALIGN(this, boundary) \
+#define BFD_ALIGN(this, boundary) \
   ((( (this) + ((boundary) -1)) & (~((boundary)-1))))
 
 /* If you want to read and write large blocks, you might want to do it
@@ -204,7 +203,14 @@ bfd_init has been called.
 */
 
 /*:libbfd.c*/
-/* bfd_write_bigendian_4byte_int
+/* bfd_xmalloc
+bfd_xmalloc -- Like malloc, but exit if no more memory.
+*/
+ PROTO(PTR, bfd_xmalloc,( bfd_size_type size));
+
+/*
+
+ bfd_write_bigendian_4byte_int
 */
 
  PROTO(void, bfd_write_bigendian_4byte_int,( bfd *abfd,  int i));
@@ -288,7 +294,41 @@ one first, to avoid running out of file descriptors.
 */
 
 
+/*:ctor.c*/
+/* bfd_constructor_entry 
+
+This function is called with an a symbol describing the
+function to be called, an string which descibes the xtor type, eg
+something like "CTOR" or "DTOR" would be fine. And the bfd which owns
+the function.
+
+It's duty is to create a section called "CTOR" or "DTOR" or whatever
+if the bfd doesn't already have one, and grow a relocation table for
+the entry points as they accumulate.
+*/
+
+ PROTO(void, bfd_constructor_entry,
+           (bfd *abfd, 
+	    asymbol **symbol_ptr_ptr,
+	    CONST char*type));
+
+/*
+*/
+
+
 /*:reloc.c*/
+/* bfd_default_reloc_type_lookup
+
+Provides a default relocation lookuperer for any architectue 
+*/
+
+ CONST struct reloc_howto_struct *EXFUN(bfd_default_reloc_type_lookup,
+     (CONST struct bfd_arch_info *,
+      bfd_reloc_code_type  code));
+
+/*
+*/
+
 
 /*:cpu-h8300.c*/
 
