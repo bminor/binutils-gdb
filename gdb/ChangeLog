@@ -1,3 +1,8 @@
+Mon Mar 17 17:52:00 1997  J.T. Conklin  <jtc@cygnus.com>
+
+	* dsrec.c (load_srec): Print leading zeroes when printing section
+ 	addresses.
+
 Mon Mar 17 15:00:16 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 	* remote-sim.h: Delete - moved to ../include/remote-sim.h.
