@@ -1,5 +1,14 @@
 2001-01-04  Nicholas Duffek  <nsd@redhat.com>
 
+	* Makefile.in (SUBDIR_CLI_OBS): Add cli/cli-utils.o.
+	(SUBDIR_CLI_SRCS): Add cli/cli-utils.c.
+	(cli_utils_h): New variable.
+	(cli/cli-utils.o): New rule.
+	* cli/cli-utils.c: New file.
+	* cli/cli-utils.h: New file.
+
+2001-01-04  Nicholas Duffek  <nsd@redhat.com>
+
 	* config/i386/tm-i386.h (REGISTER_CONVERT_TO_VIRTUAL,
 	REGISTER_CONVERT_TO_RAW): Delete trailing semicolon.
 

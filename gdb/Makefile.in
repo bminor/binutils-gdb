@@ -141,9 +141,10 @@ INTL_CFLAGS = -I$(INTL_DIR) -I$(INTL_SRC)
 # CLI sub directory definitons
 #
 SUBDIR_CLI_OBS = \
-	cli-decode.o cli-script.o cli-cmds.o cli-setshow.o
+	cli-decode.o cli-script.o cli-cmds.o cli-setshow.o cli-utils.o
 SUBDIR_CLI_SRCS = \
-	cli/cli-decode.c cli/cli-script.c cli/cli-cmds.c cli/cli-setshow.c
+	cli/cli-decode.c cli/cli-script.c cli/cli-cmds.c cli/cli-setshow.c \
+	cli/cli-utils.c
 SUBDIR_CLI_DEPS =
 SUBDIR_CLI_INITS =
 SUBDIR_CLI_LDFLAGS=
@@ -604,6 +605,7 @@ cli_decode_h =	$(srcdir)/cli/cli-decode.h
 cli_cmds_h =	$(srcdir)/cli/cli-cmds.h
 cli_script_h =	$(srcdir)/cli/cli-script.h
 cli_setshow_h =	$(srcdir)/cli/cli-setshow.h
+cli_utils_h =	$(srcdir)/cli/cli-utils.h
 
 # Header files that need to have srcdir added.  Note that in the cases
 # where we use a macro like $(gdbcmd_h), things are carefully arranged
@@ -2078,6 +2080,9 @@ cli-script.o: $(srcdir)/cli/cli-script.c $(cli_script_h) \
 		$(cli_cmds_h) $(cli_decode_h) top.h \
 		$(defs_h) $(value_h) language.h $(ui_out_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-script.c
+
+cli-utils.o: $(srcdir)/cli/cli-utils.c $(cli_utils_h) $(defs_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-utils.c
 
 #
 # MI dependencies
