@@ -76,7 +76,7 @@ static char *readline_line_completion_function PARAMS ((char *, int));
 /* NOTE 1999-04-29: this function will be static again, after we make the
    event loop be the default command loop for gdb, and we merge
    event-top.c into this file, top.c */
-/* static */ void command_loop_marker PARAMS ((int));
+/* static */ void command_loop_marker (void *);
 
 static void while_command PARAMS ((char *, int));
 
@@ -101,7 +101,7 @@ static char *locate_arg PARAMS ((char *));
 
 static char *insert_args PARAMS ((char *));
 
-static void arg_cleanup PARAMS ((void));
+static void arg_cleanup (void *);
 
 static void init_main PARAMS ((void));
 
@@ -157,7 +157,9 @@ static void set_debug PARAMS ((char *, int));
 static void disconnect PARAMS ((int));
 #endif
 
-static void source_cleanup PARAMS ((FILE *));
+static void do_restore_instream_cleanup (void *stream);
+
+static struct cleanup *make_cleanup_free_command_lines (struct command_line **);
 
 /* Default command line prompt.  This is overriden in some configs. */
 
@@ -760,8 +762,7 @@ static int source_error_allocated;
    user-defined command).  */
 
 static void
-source_cleanup (stream)
-     FILE *stream;
+do_restore_instream_cleanup (void *stream)
 {
   /* Restore the previous input stream.  */
   instream = stream;
@@ -774,7 +775,7 @@ read_command_file (stream)
 {
   struct cleanup *cleanups;
 
-  cleanups = make_cleanup ((make_cleanup_func) source_cleanup, instream);
+  cleanups = make_cleanup (do_restore_instream_cleanup, instream);
   instream = stream;
   command_loop ();
   do_cleanups (cleanups);
@@ -783,6 +784,15 @@ read_command_file (stream)
 extern void init_proc PARAMS ((void));
 
 void (*pre_init_ui_hook) PARAMS ((void));
+
+#ifdef __MSDOS__
+void
+do_chdir_cleanup (void *old_dir)
+{
+  chdir (old_dir);
+  free (old_dir);
+}
+#endif
 
 void
 gdb_init (argv0)
@@ -799,7 +809,7 @@ gdb_init (argv0)
 #ifdef __MSDOS__
   /* Make sure we return to the original directory upon exit, come
      what may, since the OS doesn't do that for us.  */
-  make_final_cleanup ((make_cleanup_func) chdir, strsave (current_directory));
+  make_final_cleanup (do_chdir_cleanup, xstrdup (current_directory));
 #endif
 
   init_cmd_lists ();		/* This needs to be done first */
@@ -884,7 +894,7 @@ get_command_line (type, arg)
   /* Allocate and build a new command line structure.  */
   cmd = build_command_line (type, arg);
 
-  old_chain = make_cleanup ((make_cleanup_func) free_command_lines, &cmd);
+  old_chain = make_cleanup_free_command_lines (&cmd);
 
   /* Read in the body of this command.  */
   if (recurse_read_control_structure (cmd) == invalid_control)
@@ -1261,7 +1271,7 @@ if_command (arg, from_tty)
 
 /* Cleanup */
 static void
-arg_cleanup ()
+arg_cleanup (void *ignore)
 {
   struct user_args *oargs = user_args;
   if (!user_args)
@@ -1288,7 +1298,7 @@ setup_user_args (p)
   args->next = user_args;
   user_args = args;
 
-  old_chain = make_cleanup ((make_cleanup_func) arg_cleanup, 0);
+  old_chain = make_cleanup (arg_cleanup, 0/*ignored*/);
 
   if (p == NULL)
     return old_chain;
@@ -1452,7 +1462,7 @@ execute_user_command (c, args)
 
   /* Set the instream to 0, indicating execution of a
      user-defined function.  */
-  old_chain = make_cleanup ((make_cleanup_func) source_cleanup, instream);
+  old_chain = make_cleanup (do_restore_instream_cleanup, instream);
   instream = (FILE *) 0;
   while (cmdlines)
     {
@@ -1577,8 +1587,7 @@ execute_command (p, from_tty)
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c */
 /* static */ void
-command_loop_marker (foo)
-     int foo;
+command_loop_marker (void *foo)
 {
 }
 
@@ -1609,7 +1618,7 @@ command_loop ()
       quit_flag = 0;
       if (instream == stdin && stdin_is_tty)
 	reinitialize_more_filter ();
-      old_chain = make_cleanup ((make_cleanup_func) command_loop_marker, 0);
+      old_chain = make_cleanup (command_loop_marker, 0);
 
 #if defined(TUI)
       /* A bit of paranoia: I want to make sure the "insert_mode" global
@@ -1690,7 +1699,7 @@ simplified_command_loop (read_input_func, execute_command_func)
       quit_flag = 0;
       if (instream == stdin && stdin_is_tty)
 	reinitialize_more_filter ();
-      old_chain = make_cleanup ((make_cleanup_func) command_loop_marker, 0);
+      old_chain = make_cleanup (command_loop_marker, 0);
 
       /* Get a command-line. */
       command = (*read_input_func) (instream == stdin ?
@@ -2864,8 +2873,7 @@ read_command_lines (prompt_arg, from_tty)
       else
 	{
 	  head = next;
-	  old_chain = make_cleanup ((make_cleanup_func) free_command_lines,
-				    &head);
+	  old_chain = make_cleanup_free_command_lines (&head);
 	}
       tail = next;
     }
@@ -2913,6 +2921,18 @@ free_command_lines (lptr)
       free ((PTR) l);
       l = next;
     }
+}
+
+static void
+do_free_command_lines_cleanup (void *arg)
+{
+  free_command_lines (arg);
+}
+
+static struct cleanup *
+make_cleanup_free_command_lines (struct command_line **arg)
+{
+  return make_cleanup (do_free_command_lines_cleanup, arg);
 }
 
 /* Add an element to the list of info subcommands.  */
@@ -3748,6 +3768,12 @@ source_cleanup_lines (args)
 }
 
 /* ARGSUSED */
+static void
+do_fclose_cleanup (void *stream)
+{
+  fclose (stream);
+}
+
 void
 source_command (args, from_tty)
      char *args;
@@ -3776,7 +3802,7 @@ source_command (args, from_tty)
 	return;
     }
 
-  make_cleanup ((make_cleanup_func) fclose, stream);
+  make_cleanup (do_fclose_cleanup, stream);
 
   old_lines.old_line = source_line_number;
   old_lines.old_file = source_file_name;

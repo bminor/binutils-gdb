@@ -1,3 +1,26 @@
+Mon May 22 15:21:38 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* top.h (command_loop_marker): Change signature to match
+ 	make_cleanup_ftype.
+	* top.c (command_loop_marker): Update.
+	(command_loop, simplified_command_loop), event-top.c
+ 	(command_handler): Remove cast using make_cleanup_func.
+	* event-top.c (command_handler): Ditto.
+
+	* top.c (do_chdir_cleanup): New function.
+	(gdb_init): Use.  Use xstrdup instead of strsave.
+	* top.c (do_fclose_cleanup): New function.
+	(source_command): Use.
+	* top.c (do_restore_instream_cleanup): Rename
+ 	source_cleanup. Change signature to match make_cleanup.
+	(read_command_filem execute_user_command): Update. Remove cast
+ 	using make_cleanup_func.
+	* top.c (do_free_command_lines_cleanup,
+ 	make_cleanup_free_command_lines): New funtions.
+	(get_command_line, read_command_lines): Use.
+	* top.c (arg_cleanup): Change signature to match make_cleanup.
+	(setup_user_args): Remove cast using make_cleanup_func.
+
 Mon May 22 12:05:13 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* defs.h (t_reg): Delete typedef.
