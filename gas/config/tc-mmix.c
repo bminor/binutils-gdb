@@ -2341,6 +2341,10 @@ md_convert_frag (abfd, sec, fragP)
     case STATE_GREG_DEF:
       if (fragP->tc_frag_data == NULL)
 	{
+	  /* We must initialize data that's supposed to be "fixed up" to
+	     avoid emitting garbage, because md_apply_fix3 won't do
+	     anything for undefined symbols.  */
+	  md_number_to_chars (var_partp, 0, 8);
 	  tmpfixP
 	    = fix_new (fragP, var_partp - fragP->fr_literal, 8,
 		       fragP->fr_symbol, fragP->fr_offset, 0, BFD_RELOC_64);

@@ -1,3 +1,8 @@
+2002-11-10  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* config/tc-mmix.c (md_convert_frag) <case STATE_GREG_DEF>:
+	Initialize target of fixup to zero.
+
 2002-11-07  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-mips.c (macro_build_lui): _gp_disp is not special on
