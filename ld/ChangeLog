@@ -1,7 +1,7 @@
 Sat Jan  1 10:53:35 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* scripttempl/aout.sc: Pad .text to DATA_ALIGNMENT if relocating;
-	needed for i386mach.
+	needed for i386mach.  (Should be a no-op on other systems.)
 
 	* emulparams/i386mach.sh (SEGMENT_SIZE): Fix again.
 	(PAGE_SIZE): Don't define; not used.
