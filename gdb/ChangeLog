@@ -1,3 +1,8 @@
+Wed Jul 19 13:15:32 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* remote.c (remote_wait): When getting registers, check endianess and
+	do conversion if necessary.
+
 Tue Jul 18 00:41:31 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gdbserver/low-hppabsd.c: New file.
@@ -73,7 +78,6 @@ Mon Jul 17 21:35:18 1995  Fred Fish  <fnf@cygnus.com>
 	that may be used someday.
 	* f-valprint.c (f_val_print):  Remove unused local variable "straddr".
 	
->>>>>>> 1.3132
 Mon Jul 17 13:08:00 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* stabsread.h (struct stab_section_list): Define.
