@@ -697,10 +697,11 @@ check_event (int pid)
 	error ("Thread creation event doesn't match breakpoint.");
 #endif
 
-      if (in_thread_list (pid))
-	error ("Spurious thread creation event.");
-
-      attach_thread (pid, msg.th_p, &ti, 1);
+      /* We may already know about this thread, for instance when the
+         user has issued the `info threads' command before the SIGTRAP
+         for hitting the thread creation breakpoint was reported.  */
+      if (! in_thread_list (pid))
+	attach_thread (pid, msg.th_p, &ti, 1);
       return;
 
     case TD_DEATH:

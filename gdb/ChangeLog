@@ -1,3 +1,10 @@
+2001-03-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* thread-db.c (check_event): Don't report an error if we encounter
+	a thread creation event for a thread that's already in the thread
+	list, since that may legitemately happen.  Instead only call
+	attach_thread if it's not already in the thread list.
+
 2001-03-28  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/pa/xm-hppah.h (malloc): Really delete declaration
