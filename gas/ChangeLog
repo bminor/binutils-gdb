@@ -1,5 +1,25 @@
 2003-04-30  H.J. Lu <hjl@gnu.org>
 
+	* config/tc-ia64.c (ia64_number_to_chars): New function pointer.
+	(ia64_float_to_chars): Likewise.
+	(dot_byteorder): Set target_big_endian, ia64_number_to_chars
+	and ia64_float_to_chars by tc_segment_info_data.endian from
+	the current segment if byteorder == -1.
+	(md_begin): Call dot_byteorder to set target_big_endian.
+	(md_atof): Call ia64_float_to_chars to convert floating point.
+	(ia64_float_to_chars_bigendian): New function.
+	(ia64_float_to_chars_littleendian): Likewise.
+	(ia64_elf_section_change_hook): Likewise.
+
+	* config/tc-ia64.h (ia64_number_to_chars): New.
+	(md_number_to_chars): Changed to (*ia64_number_to_chars)
+	(ia64_elf_section_change_hook): New.
+	(md_elf_section_change_hook): Defined.
+	(ia64_segment_info_type): New struct.
+	(TC_SEGMENT_INFO_TYPE): Defined.
+
+2003-04-30  H.J. Lu <hjl@gnu.org>
+
 	* config/tc-ia64.c (md_section_align): Deleted.
 
 	* config/tc-ia64.h (SUB_SEGMENT_ALIGN): New.

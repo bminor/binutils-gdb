@@ -156,6 +156,15 @@ struct label_fix
 
 extern int target_big_endian;
 
+void (*ia64_number_to_chars) PARAMS ((char *, valueT, int));
+
+static void ia64_float_to_chars_bigendian
+  PARAMS ((char *, LITTLENUM_TYPE *, int));
+static void ia64_float_to_chars_littleendian
+  PARAMS ((char *, LITTLENUM_TYPE *, int));
+static void (*ia64_float_to_chars)
+  PARAMS ((char *, LITTLENUM_TYPE *, int));
+
 /* Characters which always start a comment.  */
 const char comment_chars[] = "";
 
@@ -4308,7 +4317,32 @@ static void
 dot_byteorder (byteorder)
      int byteorder;
 {
-  target_big_endian = byteorder;
+  segment_info_type *seginfo = seg_info (now_seg);
+
+  if (byteorder == -1)
+    {
+      if (seginfo->tc_segment_info_data.endian == 0)
+	seginfo->tc_segment_info_data.endian
+	  = TARGET_BYTES_BIG_ENDIAN ? 1 : 2;
+      byteorder = seginfo->tc_segment_info_data.endian == 1;
+    }
+  else
+    seginfo->tc_segment_info_data.endian = byteorder ? 1 : 2;
+
+  if (target_big_endian != byteorder)
+    {
+      target_big_endian = byteorder;
+      if (target_big_endian)
+	{
+	  ia64_number_to_chars = number_to_chars_bigendian;
+	  ia64_float_to_chars = ia64_float_to_chars_bigendian;
+	}
+      else
+	{
+	  ia64_number_to_chars = number_to_chars_littleendian;
+	  ia64_float_to_chars = ia64_float_to_chars_littleendian;
+	}
+    }
 }
 
 static void
@@ -6535,7 +6569,10 @@ md_begin ()
 
   bfd_set_section_alignment (stdoutput, text_section, 4);
 
-  target_big_endian = TARGET_BYTES_BIG_ENDIAN;
+  /* Make sure fucntion pointers get initialized.  */
+  target_big_endian = -1;
+  dot_byteorder (TARGET_BYTES_BIG_ENDIAN);
+
   pseudo_func[FUNC_DTP_MODULE].u.sym =
     symbol_new (".<dtpmod>", undefined_section, FUNC_DTP_MODULE,
 		&zero_address_frag);
@@ -10554,7 +10591,6 @@ md_atof (type, lit, size)
      int *size;
 {
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
-  LITTLENUM_TYPE *word;
   char *t;
   int prec;
 
@@ -10589,19 +10625,18 @@ md_atof (type, lit, size)
   t = atof_ieee (input_line_pointer, type, words);
   if (t)
     input_line_pointer = t;
-  *size = prec * sizeof (LITTLENUM_TYPE);
 
-  for (word = words + prec - 1; prec--;)
-    {
-      md_number_to_chars (lit, (long) (*word--), sizeof (LITTLENUM_TYPE));
-      lit += sizeof (LITTLENUM_TYPE);
-    }
+  (*ia64_float_to_chars) (lit, words, prec);
+
   if (type == 'X')
     {
       /* It is 10 byte floating point with 6 byte padding.  */
-      memset (lit, 0, 6);
+      memset (&lit [10], 0, 6);
       *size = 8 * sizeof (LITTLENUM_TYPE);
     }
+  else
+    *size = prec * sizeof (LITTLENUM_TYPE);
+
   return 0;
 }
 
@@ -10655,4 +10690,34 @@ ia64_handle_align (fragp)
 
   memcpy (p, (target_big_endian ? be_nop : le_nop), 16);
   fragp->fr_var = 16;
+}
+
+static void
+ia64_float_to_chars_bigendian (char *lit, LITTLENUM_TYPE *words,
+			       int prec)
+{
+  while (prec--)
+    {
+      number_to_chars_bigendian (lit, (long) (*words++),
+				 sizeof (LITTLENUM_TYPE));
+      lit += sizeof (LITTLENUM_TYPE);
+    }
+}
+
+static void
+ia64_float_to_chars_littleendian (char *lit, LITTLENUM_TYPE *words,
+				  int prec)
+{
+  while (prec--)
+    {
+      number_to_chars_littleendian (lit, (long) (words[prec]),
+				    sizeof (LITTLENUM_TYPE));
+      lit += sizeof (LITTLENUM_TYPE);
+    }
+}
+
+void
+ia64_elf_section_change_hook  (void)
+{
+  dot_byteorder (-1);
 }

@@ -26,14 +26,27 @@
 
 /* Linux is little endian by default.  HPUX is big endian by default.  */
 #ifdef TE_HPUX
-#define md_number_to_chars		number_to_chars_bigendian
 #define TARGET_BYTES_BIG_ENDIAN		1
 #define MD_FLAGS_DEFAULT		EF_IA_64_BE
 #else
-#define md_number_to_chars		number_to_chars_littleendian
 #define TARGET_BYTES_BIG_ENDIAN		0
 #define MD_FLAGS_DEFAULT		EF_IA_64_ABI64
 #endif /* TE_HPUX */
+
+extern void (*ia64_number_to_chars) PARAMS ((char *, valueT, int));
+#define md_number_to_chars		(*ia64_number_to_chars)
+
+extern void ia64_elf_section_change_hook PARAMS ((void));
+#define md_elf_section_change_hook	ia64_elf_section_change_hook
+
+/* We record the endian for this section. 0 means default, 1 means
+   big endian and 2 means little endian.  */
+struct ia64_segment_info_type
+{
+  unsigned int endian : 2;
+};
+
+#define TC_SEGMENT_INFO_TYPE		struct ia64_segment_info_type
 
 /* We need to set the default object file format in ia64_init and not in
    md_begin.  This is because parse_args is called before md_begin, and we

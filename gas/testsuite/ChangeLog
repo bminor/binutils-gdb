@@ -1,3 +1,10 @@
+2003-04-30  H.J. Lu <hjl@gnu.org>
+
+	* gas/ia64/ia64.exp: Add order.
+
+	* gas/ia64/order.s: New file.
+	* gas/ia64/order.d: Likewise.
+
 2003-04-29  H.J. Lu <hjl@gnu.org>
 
 	* gas/ia64/ia64.exp: Add align.
