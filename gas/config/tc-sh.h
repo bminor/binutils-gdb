@@ -42,9 +42,6 @@ extern int sh_small;
 /* Don't try to break words.  */
 #define WORKING_DOT_WORD
 
-/* All SH instructions are multiples of 16 bits.  */
-#define DWARF2_LINE_MIN_INSN_LENGTH 2
-
 /* We require .long, et. al., to be aligned correctly.  */
 #define md_cons_align(nbytes) sh_cons_align (nbytes)
 extern void sh_cons_align (int);
@@ -260,5 +257,18 @@ void sh_cons_fix_new (fragS *, int, int, expressionS *);
 /* This is used to construct expressions out of @GOTOFF, @PLT and @GOT
    symbols.  The relocation type is stored in X_md.  */
 #define O_PIC_reloc O_md1
+
+#define TARGET_USE_CFIPOP 1
+
+#define tc_cfi_frame_initial_instructions sh_cfi_frame_initial_instructions
+extern void sh_cfi_frame_initial_instructions (void);
+
+#define tc_regname_to_dw2regnum sh_regname_to_dw2regnum
+extern int sh_regname_to_dw2regnum (const char *regname);
+
+/* All SH instructions are multiples of 16 bits.  */
+#define DWARF2_LINE_MIN_INSN_LENGTH 2
+#define DWARF2_DEFAULT_RETURN_COLUMN 17
+#define DWARF2_CIE_DATA_ALIGNMENT -4
 
 #endif /* OBJ_ELF */

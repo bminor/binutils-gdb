@@ -1,3 +1,17 @@
+2004-03-17  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* config/tc-sh.c: Include dw2gencfi.h.
+	(sh_cfi_frame_initial_instructions): New function.
+	(sh_regname_to_dw2regnum): Likewise.
+	* config/tc-sh.h (DWARF2_LINE_MIN_INSN_LENGTH): Move to the end of
+	file.
+	(TARGET_USE_CFIPOP): Define.
+	(tc_cfi_frame_initial_instructions): Likewise.
+	(tc_regname_to_dw2regnum): Likewise.
+	(DWARF2_DEFAULT_RETURN_COLUMN, DWARF2_CIE_DATA_ALIGNMENT): Likewise.
+	* Makefile.am: Update dependencies.
+	* Makefile.in: Regenerate.
+
 2004-03-17  Ralf Corsepius <corsepiu@faw.uni-ulm.de>
 
 	* configure.in: Switch sh-*-rtems* to ELF.  Add sh-*-rtemscoff*.
