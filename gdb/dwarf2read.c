@@ -2573,10 +2573,12 @@ get_scope_pc_bounds (struct die_info *die,
 	  case DW_TAG_namespace:
 	    /* FIXME: carlton/2003-12-15: Should we do this for
 	       DW_TAG_class_type/DW_TAG_structure_type, too?  I think
-	       that current GCC's always generate the DIEs
-	       corresponding to definitions methods of classes at
-	       namespace scope, but I don't see any reason why they
-	       have to.  */
+	       that current GCC's always emit the DIEs corresponding
+	       to definitions of methods of classes as children of a
+	       DW_TAG_compile_unit or DW_TAG_namespace (as opposed to
+	       the DIEs giving the declarations, which could be
+	       anywhere).  But I don't see any reason why they have to
+	       be there.  */
 	    get_scope_pc_bounds (child, &current_low, &current_high,
 				 objfile, cu_header);
 
