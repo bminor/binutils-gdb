@@ -1,3 +1,7 @@
+2000-07-09  Nick Clifton  <nickc@cygnus.com>
+
+	* MAINTAINERS: Add several more port specific maintainers.
+
 2000-07-05  Nick Clifton  <nickc@cygnus.com>
 
 	* MAINTAINERS: Add blanket write privs for Michael Meissner.
