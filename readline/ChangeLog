@@ -1,3 +1,7 @@
+Thu Aug 29 16:59:45 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (i[345]86-*-*): Recognize i686 for pentium pro.
+
 Fri Aug 16 17:49:57 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* complete.c:  Include <pwd.h> if not DOS, and if cygwin32 or not

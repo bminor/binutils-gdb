@@ -1,3 +1,8 @@
+Thu Aug 29 17:04:10 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (i[345]86-*-*): Recognize i686 for pentium pro.
+	* configure: Regenerate.
+
 Thu Aug 22 17:12:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Set and substitute HLDENV.
