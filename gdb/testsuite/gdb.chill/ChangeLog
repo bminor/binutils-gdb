@@ -1,3 +1,7 @@
+Mon Nov 28 18:39:08 1994  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* pr-5984.ch, pr-5984.exp, Makefile.in:  New test case.
+
 Fri Sep 16 16:55:03 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* pr-5646.ch, pr-5646-grt.ch, pr-5646.exp, Makefile.in: New testcase.

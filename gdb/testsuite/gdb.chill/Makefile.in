@@ -103,7 +103,7 @@ GDBFLAGS = -nx
 #### host, target, and site specific Makefile frags come in here.
 
 EXECUTABLES = chillvars.exe result.exe \
-  pr-4975.exe pr-5016.exe pr-5020.exe pr-5022.exe pr-5646.exe
+  pr-4975.exe pr-5016.exe pr-5020.exe pr-5022.exe pr-5646.exe pr-5984.exe
 
 # To force pr-4975-grt to be compiled before pr-4975, so the
 # latter can use the former's grant file.
