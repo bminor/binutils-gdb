@@ -154,7 +154,7 @@ extern void sh_frob_file (void);
   sh_coff_reloc_mangle ((seg), (fix), (int), (paddr))
 extern void sh_coff_reloc_mangle
   (struct segment_info_struct *, struct fix *,
-   struct internal_reloc *, unsigned int));
+   struct internal_reloc *, unsigned int);
 
 #define tc_coff_symbol_emit_hook(a) ; /* not used */
 
