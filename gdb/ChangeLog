@@ -1,3 +1,18 @@
+2001-07-15  Elena Zannoni  <ezannoni@redhat.com>
+ 
+	* top.c (readline_line_completion_function, noop_completer): Move
+ 	from here...  
+	* completer.c (readline_line_completion_function, noop_completer):
+ 	...to here.
+	* gdbcmd.h (readline_line_completion_function, noop_completer):
+ 	Move declarations from here...  
+	* completer.h (readline_line_completion_function, noop_completer):
+ 	...to here.
+	* corefile.c: Include completer.h.
+	* source.c: Ditto.
+	* symfile.c: Ditto.
+	* Makefile.in: Update dependencies.
+
 2001-07-15  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* go32-nat.c (go32_create_inferior): Support command lines longer

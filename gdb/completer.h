@@ -21,6 +21,10 @@
 
 extern char *line_completion_function (char *, int, char *, int);
 
+extern char *readline_line_completion_function (char *text, int matches);
+
+extern char **noop_completer (char *, char *);
+
 extern char **filename_completer (char *, char *);
 
 extern char **location_completer (char *, char *);

@@ -95,8 +95,6 @@ static void init_signals (void);
 static void stop_sig (int);
 #endif
 
-static char *readline_line_completion_function (char *, int);
-
 static void init_main (void);
 
 static void float_handler (int);
@@ -1035,24 +1033,6 @@ static int write_history_p;
 static int history_size;
 static char *history_filename;
 
-/* Functions that are used as part of the fancy command line editing.  */
-
-/* This can be used for functions which don't want to complete on symbols
-   but don't want to complete on anything else either.  */
-/* ARGSUSED */
-char **
-noop_completer (char *text, char *prefix)
-{
-  return NULL;
-}
-
-/* Line completion interface function for readline.  */
-
-static char *
-readline_line_completion_function (char *text, int matches)
-{
-  return line_completion_function (text, matches, rl_line_buffer, rl_point);
-}
 
 #ifdef STOP_SIGNAL
 static void

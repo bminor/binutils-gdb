@@ -41,6 +41,7 @@
 #include "gdbtypes.h"
 #include "linespec.h"
 #include "filenames.h"		/* for DOSish file names */
+#include "completer.h"
 #ifdef UI_OUT
 #include "ui-out.h"
 #endif

@@ -38,6 +38,8 @@
 #include "completer.h"
 
 /* Prototypes for local functions */
+char *line_completion_function (char *text, int matches, char *line_buffer,
+				int point);
 
 /* readline uses the word breaks for two things:
    (1) In figuring out where to point the TEXT parameter to the
@@ -95,6 +97,22 @@ char *
 get_gdb_completer_quote_characters (void)
 {
   return gdb_completer_quote_characters;
+}
+
+/* Line completion interface function for readline.  */
+
+char *
+readline_line_completion_function (char *text, int matches)
+{
+  return line_completion_function (text, matches, rl_line_buffer, rl_point);
+}
+
+/* This can be used for functions which don't want to complete on symbols
+   but don't want to complete on anything else either.  */
+char **
+noop_completer (char *text, char *prefix)
+{
+  return NULL;
 }
 
 /* Complete on filenames.  */

@@ -34,6 +34,7 @@
 #include "gdbcore.h"
 #include "dis-asm.h"
 #include "gdb_stat.h"
+#include "completer.h"
 
 /* Local function declarations.  */
 

@@ -125,8 +125,4 @@ extern void print_command_lines (struct ui_out *,
 				 struct command_line *, unsigned int);
 #endif
 
-extern char **noop_completer (char *, char *);
-
-extern char **filename_completer (char *, char *);
-
 #endif /* !defined (GDBCMD_H) */
