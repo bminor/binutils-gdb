@@ -1,5 +1,9 @@
 2001-05-24  H.J. Lu  <hjl@gnu.org>
 
+	* emultempl/stringify.sed: Removed again.
+
+2001-05-24  H.J. Lu  <hjl@gnu.org>
+
 	* emultempl/aix.em (OUTPUT_ARCH): Defined.
 	(gld${EMULATION_NAME}_before_parse): Initialize
 	ldfile_output_architecture, ldfile_output_machine and
