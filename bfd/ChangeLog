@@ -13,6 +13,10 @@ Thu Jan 11 17:06:14 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 Thu Jan 11 11:23:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* xcofflink.c (xcoff_link_add_symbols): Create the special
+	sections if we see a DYNAMIC object, in case that is the only
+	XCOFF input object we see.
+	
 	* elf32-mips.c: Extensive changes for a start at dynamic linking
 	support, from Kazumoto Kojima <kkojima@info.kanagawa-u.ac.jp>.
 

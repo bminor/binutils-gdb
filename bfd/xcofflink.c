@@ -953,18 +953,14 @@ xcoff_link_add_symbols (abfd, info)
 
   if ((abfd->flags & DYNAMIC) != 0
       && ! info->static_link)
-    return xcoff_link_add_dynamic_symbols (abfd, info);
-
-  n_tmask = coff_data (abfd)->local_n_tmask;
-  n_btshft = coff_data (abfd)->local_n_btshft;
-
-  /* Define macros so that ISFCN, et. al., macros work correctly.  */
-#define N_TMASK n_tmask
-#define N_BTSHFT n_btshft
+    {
+      if (! xcoff_link_add_dynamic_symbols (abfd, info))
+	return false;
+    }
 
   /* We need to build a .loader section, so we do it here.  This won't
-     work if we're producing an XCOFF output file with no non dynamic
-     XCOFF input files.  FIXME.  */
+     work if we're producing an XCOFF output file with no XCOFF input
+     files.  FIXME.  */
   if (xcoff_hash_table (info)->loader_section == NULL)
     {
       asection *lsec;
@@ -1022,6 +1018,17 @@ xcoff_link_add_symbols (abfd, info)
       xcoff_hash_table (info)->debug_section = dsec;
       dsec->flags |= SEC_HAS_CONTENTS | SEC_IN_MEMORY;
     }
+
+  if ((abfd->flags & DYNAMIC) != 0
+      && ! info->static_link)
+    return true;
+
+  n_tmask = coff_data (abfd)->local_n_tmask;
+  n_btshft = coff_data (abfd)->local_n_btshft;
+
+  /* Define macros so that ISFCN, et. al., macros work correctly.  */
+#define N_TMASK n_tmask
+#define N_BTSHFT n_btshft
 
   if (info->keep_memory)
     default_copy = false;
@@ -2535,6 +2542,8 @@ struct xcoff_loader_info
   bfd *output_bfd;
   /* Link information structure.  */
   struct bfd_link_info *info;
+  /* Whether all defined symbols should be exported.  */
+  boolean export_defineds;
   /* Number of ldsym structures.  */
   size_t ldsym_count;
   /* Size of string table.  */
@@ -2550,12 +2559,23 @@ struct xcoff_loader_info
    .loader section before the linker lays out the output file.
    LIBPATH is the library path to search for shared objects; this is
    normally built from the -L arguments passed to the linker.  ENTRY
-   is the name of the entry point symbol.  */
+   is the name of the entry point symbol (the -e linker option).
+   FILE_ALIGN is the alignment to use for sections within the file
+   (the -H linker option).  MAXSTACK is the maximum stack size (the
+   -bmaxstack linker option).  MAXDATA is the maximum data size (the
+   -bmaxdata linker option).  GC is whether to do garbage collection
+   (the -bgc linker option).  MODTYPE is the module type (the
+   -bmodtype linker option).  TEXTRO is whether the text section must
+   be read only (the -btextro linker option).  EXPORT_DEFINEDS is
+   whether all defined symbols should be exported (the -unix linker
+   option).  SPECIAL_SECTIONS is set by this routine to csects with
+   magic names like _end.  */
 
 boolean
 bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
 				 file_align, maxstack, maxdata, gc,
-				 modtype, textro, special_sections)
+				 modtype, textro, export_defineds,
+				 special_sections)
      bfd *output_bfd;
      struct bfd_link_info *info;
      const char *libpath;
@@ -2566,6 +2586,7 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
      boolean gc;
      int modtype;
      boolean textro;
+     boolean export_defineds;
      asection **special_sections;
 {
   struct xcoff_link_hash_entry *hentry;
@@ -2592,6 +2613,7 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
   ldinfo.failed = false;
   ldinfo.output_bfd = output_bfd;
   ldinfo.info = info;
+  ldinfo.export_defineds = export_defineds;
   ldinfo.ldsym_count = 0;
   ldinfo.string_size = 0;
   ldinfo.strings = NULL;
@@ -2901,6 +2923,11 @@ xcoff_build_ldsyms (h, p)
 {
   struct xcoff_loader_info *ldinfo = (struct xcoff_loader_info *) p;
   size_t len;
+
+  /* If all defined symbols should be exported, mark them now.  */
+  if (ldinfo->export_defineds
+      && (h->flags & XCOFF_DEF_REGULAR) != 0)
+    h->flags |= XCOFF_EXPORT;
 
   /* We don't want to garbage collect symbols which are not defined in
      XCOFF files.  This is a convenient place to mark them.  */
