@@ -1,3 +1,8 @@
+Fri Jun  7 12:35:46 1991  Sean Fagan  (sef at cygint.cygnus.com)
+
+	* coffcode.h (coff_swap_aux_in): added else case to deal with
+	filenames less than 9 characters.
+
 Thu Jun  6 18:27:38 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* ../include/oasys.h oasys.c (oasys_archive_p): fixed so it works
