@@ -1,3 +1,9 @@
+2000-10-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* remote-rdp.c (remote_rdp_xfer_inferior_memory): Protoize.
+	* remote-sds.c (sds_xfer_memory): Protoize.
+	* remote-sim.c (gdbsim_xfer_inferior_memory): Protoize.
+
 2000-10-12  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	From Daniel Berlin <dberlin@redhat.com> :

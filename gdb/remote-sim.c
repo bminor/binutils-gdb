@@ -706,13 +706,15 @@ gdbsim_prepare_to_store (void)
   /* Do nothing, since we can store individual regs */
 }
 
+/* Transfer LEN bytes between GDB address MYADDR and target address
+   MEMADDR.  If WRITE is non-zero, transfer them to the target,
+   otherwise transfer them from the target.  TARGET is unused.
+
+   Returns the number of bytes transferred. */
+
 static int
-gdbsim_xfer_inferior_memory (memaddr, myaddr, len, write, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
-     struct target_ops *target;	/* ignored */
+gdbsim_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
+			     int write, struct target_ops *target)
 {
   if (!program_loaded)
     error ("No program loaded.");
