@@ -1,6 +1,8 @@
 /* Interface between GDB and target environments, including files and processes
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002 Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
+   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+
    Contributed by Cygnus Support.  Written by John Gilmore.
 
    This file is part of GDB.
@@ -221,7 +223,7 @@ enum target_object
   /* AVR target specific transfer.  See "avr-tdep.c" and "remote.c".  */
   TARGET_OBJECT_AVR,
   /* Transfer up-to LEN bytes of memory starting at OFFSET.  */
-  TARGET_OBJECT_MEORY
+  TARGET_OBJECT_MEMORY
   /* Possible future ojbects: TARGET_OJBECT_FILE, TARGET_OBJECT_PROC,
      TARGET_OBJECT_AUXV, ...  */
 };

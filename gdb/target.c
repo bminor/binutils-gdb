@@ -36,6 +36,7 @@
 #include "dcache.h"
 #include <signal.h>
 #include "regcache.h"
+#include "gdb_assert.h"
 
 static void target_info (char *, int);
 
@@ -70,6 +71,15 @@ static struct target_ops *find_default_run_target (char *);
 static void nosupport_runtime (void);
 
 static void normal_target_post_startup_inferior (ptid_t ptid);
+
+static LONGEST default_read_partial (struct target_ops *ops,
+				     enum target_object object,
+				     const char *annex, void *buf,
+				     ULONGEST offset, LONGEST len);
+static LONGEST default_write_partial (struct target_ops *ops,
+				      enum target_object object,
+				      const char *annex, const void *buf,
+				      ULONGEST offset, LONGEST len);
 
 /* Transfer LEN bytes between target address MEMADDR and GDB address
    MYADDR.  Returns 0 for success, errno code for failure (which
@@ -211,6 +221,10 @@ target_command (char *arg, int from_tty)
 void
 add_target (struct target_ops *t)
 {
+  /* Provide default values for all "must have" methods.  */
+  t->to_read_partial = default_read_partial;
+  t->to_write_partial = default_write_partial;
+
   if (!target_structs)
     {
       target_struct_allocsize = DEFAULT_ALLOCSIZE;
@@ -445,8 +459,8 @@ update_current_target (void)
 #undef INHERIT
 
   /* Clean up a target struct so it no longer has any zero pointers in
-     it.  We default entries, at least to stubs that print error
-     messages.  */
+     it.  Some entries are defaulted to a method that print an error,
+     others are hard-wired to a standard recursive default.  */
 
 #define de_fault(field, value) \
   if (!current_target.field)               \
@@ -601,6 +615,8 @@ update_current_target (void)
   de_fault (to_stop, 
 	    (void (*) (void)) 
 	    target_ignore);
+  current_target.to_read_partial = default_read_partial;
+  current_target.to_write_partial = default_write_partial;
   de_fault (to_rcmd, 
 	    (void (*) (char *, struct ui_file *)) 
 	    tcomplain);
@@ -1061,24 +1077,86 @@ target_write_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
 
 /* More generic transfers.  */
 
+static LONGEST
+default_read_partial (struct target_ops *ops,
+		      enum target_object object,
+		      const char *annex, void *buf,
+		      ULONGEST offset, LONGEST len)
+{
+  if (object == TARGET_OBJECT_MEMORY
+      && ops->to_xfer_memory != NULL)
+    /* If available, fall back to the target's "to_xfer_memory"
+       method.  */
+    {
+      int xfered;
+      errno = 0;
+      xfered = ops->to_xfer_memory (offset, buf, len, 0/*read*/, NULL, ops);
+      if (xfered > 0)
+	return xfered;
+      else if (xfered == 0 && errno == 0)
+	/* "to_xfer_memory" uses 0, cross checked against ERRNO as one
+           indication of an error.  */
+	return 0;
+      else
+	return -1;
+    }
+  else if (ops->beneath != NULL)
+    return target_read_partial (ops->beneath, object, annex, buf, offset, len);
+  else
+    return -1;
+}
+
+static LONGEST
+default_write_partial (struct target_ops *ops,
+		       enum target_object object,
+		       const char *annex, const void *buf,
+		       ULONGEST offset, LONGEST len)
+{
+  if (object == TARGET_OBJECT_MEMORY
+      && ops->to_xfer_memory != NULL)
+    /* If available, fall back to the target's "to_xfer_memory"
+       method.  */
+    {
+      int xfered;
+      errno = 0;
+      {
+	void *buffer = xmalloc (len);
+	struct cleanup *cleanup = make_cleanup (xfree, buffer);
+	memcpy (buffer, buf, len);
+	xfered = ops->to_xfer_memory (offset, buffer, len, 1/*write*/, NULL,
+				      ops);
+	do_cleanups (cleanup);
+      }
+      if (xfered > 0)
+	return xfered;
+      else if (xfered == 0 && errno == 0)
+	/* "to_xfer_memory" uses 0, cross checked against ERRNO as one
+           indication of an error.  */
+	return 0;
+      else
+	return -1;
+    }
+  else if (ops->beneath != NULL)
+    return target_write_partial (ops->beneath, object, annex, buf, offset,
+				 len);
+  else
+    return -1;
+}
+
+/* Target vector read/write partial wrapper functions.
+
+   NOTE: cagney/2003-10-21: I wonder if having "to_xfer_partial
+   (inbuf, outbuf)", instead of separate read/write methods, make life
+   easier.  */
+
 LONGEST
 target_read_partial (struct target_ops *ops,
 		     enum target_object object,
 		     const char *annex, void *buf,
 		     ULONGEST offset, LONGEST len)
 {
-  struct target_ops *op;
-
-  /* Find the first target stratum that can handle the request.  */
-  for (op = ops;
-       op != NULL && op->to_read_partial == NULL;
-       op = op->beneath)
-    ;
-  if (op == NULL)
-    return -1;
-  
-  /* Now apply the operation at that level.  */
-  return op->to_read_partial (op, object, annex, buf, offset, len);
+  gdb_assert (ops->to_read_partial != NULL);
+  return ops->to_read_partial (ops, object, annex, buf, offset, len);
 }
 
 LONGEST
@@ -1087,17 +1165,8 @@ target_write_partial (struct target_ops *ops,
 		      const char *annex, const void *buf,
 		      ULONGEST offset, LONGEST len)
 {
-  struct target_ops *op;
-
-  /* Find the first target stratum that can handle the request.  */
-  for (op = ops;
-       op != NULL && op->to_write_partial == NULL;
-       op = op->beneath)
-    ;
-  if (op == NULL)
-    return -1;
-  
-  return op->to_write_partial (op, object, annex, buf, offset, len);
+  gdb_assert (ops->to_write_partial != NULL);
+  return ops->to_write_partial (ops, object, annex, buf, offset, len);
 }
 
 /* Wrappers to perform the full transfer.  */
@@ -1110,12 +1179,13 @@ target_read (struct target_ops *ops,
   LONGEST xfered = 0;
   while (xfered < len)
     {
-      LONGEST xfer = target_write_partial (ops, object, annex,
-					   (bfd_byte *) buf + xfered,
-					   offset + xfered, len - xfered);
+      LONGEST xfer = target_read_partial (ops, object, annex,
+					  (bfd_byte *) buf + xfered,
+					  offset + xfered, len - xfered);
       /* Call an observer, notifying them of the xfer progress?  */
-      if (xfer < 0)
-	return xfer;
+      if (xfer <= 0)
+	/* Call memory_error?  */
+	return -1;
       xfered += xfer;
       QUIT;
     }
@@ -1135,8 +1205,9 @@ target_write (struct target_ops *ops,
 					   (bfd_byte *) buf + xfered,
 					   offset + xfered, len - xfered);
       /* Call an observer, notifying them of the xfer progress?  */
-      if (xfer < 0)
-	return xfer;
+      if (xfer <= 0)
+	/* Call memory_error?  */
+	return -1;
       xfered += xfer;
       QUIT;
     }

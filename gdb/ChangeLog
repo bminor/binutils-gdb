@@ -1,5 +1,19 @@
 2003-10-22  Andrew Cagney  <cagney@redhat.com>
 
+	* target.c: Include "gdb_assert.h" (target_read): Call
+	"target_read_partial", not "target_write_partial".
+	(default_read_partial, default_write_partial): New function.
+	(target_read_partial, target_write_partial): Simplify, assume that
+	there is always a read/write method.
+	(update_current_target, add_target): Always set "to_read_partial"
+	and "to_write_partial".
+	(target_write, target_read): Fail on a zero byte transfer.
+	* Makefile.in (target.o): Update dependencies.
+	* target.h: Update copyright date.
+	(target_object): Fix typo.
+
+2003-10-22  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (convert_from_func_ptr_addr): Convert to a pure
 	multi-arch method, add "targ" parameter.
 	(struct target_ops): Declare.	
