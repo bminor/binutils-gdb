@@ -1,3 +1,17 @@
+2002-11-13  Alan Modra  <amodra@bigpond.net.au>
+
+	Merge from mainline:
+	2002-11-11  Hans-Peter Nilsson  <hp@axis.com>
+	* lib/ld-lib.exp (run_dump_test): Don't prepend "$srcdir/$subdir/"
+	to a source file starting with "/".
+
+	2002-09-27  Jakub Jelinek  <jakub@redhat.com>
+	* lib/ld-lib.exp (run_ld_link_tests): Add.
+	* ld-sh/sh64/sh64.exp (run_ld_link_tests, regexp_diff,
+	file_contents): Remove.
+	(sh64tests): Add 6th field to the tests array.
+	* ld-i386/i386.exp (run_ld_link_tests): Remove.
+
 2002-10-28  Daniel Jacobowitz  <drow@mvista.com>
 
 	Merge from mainline:
