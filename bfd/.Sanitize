@@ -70,6 +70,7 @@ cf-m68klynx.c
 cf-sparclynx.c
 cisco-core.c
 coff-a29k.c
+coff-arm.c
 coff-alpha.c
 coff-apollo.c
 coff-go32.c
@@ -203,6 +204,8 @@ oasys.c
 opncls.c
 osf-core.c
 pc532-mach.c
+pe-arm.c
+pei-arm.c
 pe-i386.c
 pei-i386.c
 ptrace-core.c

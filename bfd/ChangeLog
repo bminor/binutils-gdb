@@ -1,3 +1,36 @@
+Wed May 24 10:52:01 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	pr ld/6997
+
+	* elf32-i386.c (elf_i386_relocate_section): Give error
+	message when linking to a shared reloc which isn't there.
+
+Wed May 24 10:40:00 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	Support for ARM-PE.
+
+	* Makefile.in, coffcode.h, config.bfd, configure.in, pe-arm.c,
+	 pei-arm.c, reloc.c, targets.c, config/arm-pe.mt:
+	 Support for ARM COFF/PE.
+
+Tue May 23 19:24:58 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* bfd.c (bfd_get_relocated_section_contents): Now a function,
+	tries calling routine from input bfd target vector for
+	bfd_indirect_link_order.  Put a declaration into the header file.
+	* bfd-in2.h: Regenerated.
+	* elf32-mips.c (gprel16_with_gp): New function, split out from
+	mips_elf_gprel16_reloc.
+	(mips_elf_gprel16_reloc): Call it.  If output bfd target vector
+	isn't elf flavoured, abort, since it's assumed to be elf in some
+	of this code, including the code that looks up the gp value.
+	(elf32_mips_get_relocated_section_contents): New function,
+	modified from bfd_generic_get_relocated_section_contents to deal
+	with passing gp to gprel16_with_gp.
+	(bfd_elf32_bfd_get_relocated_section_contents): New macro.
+	* elf32-target.h (bfd_elf32_bfd_get_relocated_section_contents):
+	Don't define if already defined.
+
 Tue May 23 15:58:15 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* Makefile.in: Install bfdlink.h too.
