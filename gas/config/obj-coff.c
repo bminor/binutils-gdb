@@ -2726,7 +2726,8 @@ yank_symbols ()
 	{
 	  /* If the filename was too long to fit in the
 	     auxent, put it in the string table */
-	  if (SA_GET_FILE_FNAME_ZEROS (symbolP) == 0)
+	  if (SA_GET_FILE_FNAME_ZEROS (symbolP) == 0
+	      && SA_GET_FILE_FNAME_OFFSET (symbolP) != 0)
 	    {
 	      SA_SET_FILE_FNAME_OFFSET (symbolP, string_byte_count);
 	      string_byte_count += strlen (filename_list_scan->filename) + 1;
@@ -2942,7 +2943,6 @@ w_strings (where)
 {
   symbolS *symbolP;
   struct filename_list *filename_list_scan = filename_list_head;
-  unsigned int i;
 
   /* Gotta do md_ byte-ordering stuff for string_byte_count first - KWK */
   md_number_to_chars (where, (valueT) string_byte_count, 4);
@@ -2951,18 +2951,22 @@ w_strings (where)
 #ifdef COFF_LONG_SECTION_NAMES
   /* Support long section names as found in PE.  This code must
      coordinate with that in coff_header_append and write_object_file.  */
-  for (i = SEG_E0; i < SEG_LAST; i++)
-    {
-      if (segment_info[i].scnhdr.s_name[0]
-	  && strlen (segment_info[i].name) > SCNNMLEN)
-	{
-	  unsigned int size;
+  {
+    unsigned int i;
 
-	  size = strlen (segment_info[i].name) + 1;
-	  memcpy (where, segment_info[i].name, size);
-	  where += size;
-	}
-    }
+    for (i = SEG_E0; i < SEG_LAST; i++)
+      {
+	if (segment_info[i].scnhdr.s_name[0]
+	    && strlen (segment_info[i].name) > SCNNMLEN)
+	  {
+	    unsigned int size;
+
+	    size = strlen (segment_info[i].name) + 1;
+	    memcpy (where, segment_info[i].name, size);
+	    where += size;
+	  }
+      }
+  }
 #endif /* COFF_LONG_SECTION_NAMES */
 
   for (symbolP = symbol_rootP;
@@ -2978,7 +2982,8 @@ w_strings (where)
 	  where += size;
 	}
       if (S_GET_STORAGE_CLASS (symbolP) == C_FILE
-	  && SA_GET_FILE_FNAME_ZEROS (symbolP) == 0)
+	  && SA_GET_FILE_FNAME_ZEROS (symbolP) == 0
+	  && SA_GET_FILE_FNAME_OFFSET (symbolP) != 0)
 	{
 	  size = strlen (filename_list_scan->filename) + 1;
 	  memcpy (where, filename_list_scan->filename, size);
@@ -3535,7 +3540,7 @@ c_dot_file_symbol (filename)
       f->next = 0;
 
       SA_SET_FILE_FNAME_ZEROS (symbolP, 0);
-      SA_SET_FILE_FNAME_OFFSET (symbolP, 0);
+      SA_SET_FILE_FNAME_OFFSET (symbolP, 1);
 
       if (filename_list_tail) 
 	filename_list_tail->next = f;

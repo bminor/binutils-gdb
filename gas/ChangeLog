@@ -1,3 +1,13 @@
+Tue May  7 11:24:10 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-coff.c (yank_symbols): Check that FNAME_OFFSET is
+	non-zero before assuming this is a long file name.
+	(w_strings): Likewise.
+	(c_dot_file_symbol): Set FNAME_OFFSET to 1 for a long file name.
+
+	* config/obj-coff.c (w_strings): Move declaration of i inside
+	#ifdef block which uses it.
+
 Tue May  7 00:49:58 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-h8300.c (do_a_fix_imm): Rename last argument to
