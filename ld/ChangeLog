@@ -1,3 +1,12 @@
+2000-09-20  Alan Modra  <alan@linuxcare.com.au>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Handle
+	out of memory failure.
+
+	* ldwrite.c (ldwrite): Remove unnecessary einfo arg.
+	(clone_section): Handle out of memory failures.  Rename var to
+	avoid c++ reserved word.
+
 2000-09-18  Alan Modra  <alan@linuxcare.com.au>
 
 	* emultempl/hppaelf.em (hppaelf_add_stub_section): Rename

@@ -306,23 +306,22 @@ clone_section (abfd, s, name, count)
      const char *name;
      int *count;
 {
-  char template[6];
+  char templ[6];
   char *sname;
   asection *n;
   struct bfd_link_hash_entry *h;
 
   /* Invent a section name from the first five chars of the base
      section name and a digit suffix.  */
-  strncpy (template, name, sizeof (template) - 1);
-  template[sizeof (template) - 1] = '\0';
-  sname = bfd_get_unique_section_name (abfd, template, count);
+  strncpy (templ, name, sizeof (templ) - 1);
+  templ[sizeof (templ) - 1] = '\0';
+  if ((sname = bfd_get_unique_section_name (abfd, templ, count)) == NULL
+      || (n = bfd_make_section_anyway (abfd, sname)) == NULL
+      || (h = bfd_link_hash_lookup (link_info.hash,
+				    sname, true, true, false)) == NULL)
+    einfo (_("%F%P: clone section failed: %E\n"));
 
-  n = bfd_make_section_anyway (abfd, sname);
-
-  /* Create a symbol of the same name.  */
-
-  h = bfd_link_hash_lookup (link_info.hash,
-			    sname, true, true, false);
+  /* Set up section symbol.  */
   h->type = bfd_link_hash_defined;
   h->u.def.value = 0;
   h->u.def.section = n;
@@ -536,7 +535,7 @@ ldwrite ()
 	 out.  */
 
       if (bfd_get_error () != bfd_error_no_error)
-	einfo (_("%F%P: final link failed: %E\n"), output_bfd);
+	einfo (_("%F%P: final link failed: %E\n"));
       else
 	xexit(1);
     }

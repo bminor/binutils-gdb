@@ -1,3 +1,8 @@
+2000-09-20  Alan Modra  <alan@linuxcare.com.au>
+
+	* section.c (bfd_get_unique_section_name): Return NULL if
+	bfd_malloc fails.
+
 2000-09-19  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* elf32-m68k.c (elf_cpu32_plt0_entry): Change the PLT entry 0

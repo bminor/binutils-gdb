@@ -1092,9 +1092,13 @@ gld${EMULATION_NAME}_place_orphan (file, s)
      loadable or allocateable characteristics.  */
   outsecname = secname;
   if (bfd_get_section_by_name (output_bfd, outsecname) != NULL)
-    outsecname = bfd_get_unique_section_name (output_bfd,
-					      outsecname,
-					      &count);
+    {
+      outsecname = bfd_get_unique_section_name (output_bfd,
+						outsecname,
+						&count);
+      if (outsecname == NULL)
+	einfo ("%F%P: place_orphan failed: %E\n");
+    }
 
   /* Start building a list of statements for this section.
      First save the current statement pointer.  */
