@@ -108,8 +108,5 @@ print_387_status_word (status)
 	  (status & 0x0200) != 0,
 	  (status & 0x0100) != 0);
 
-  /* FIXME: Someone claims this should be 7 - (status >> 11) & 7 for AIX.
-     What's the story?  Is the following just wrong or are differing
-     notations in use?  */
   printf_unfiltered ("top %d\n", (status >> 11) & 7);
 }

@@ -145,16 +145,16 @@ print_387_status (status, ep)
   printf_unfiltered ("%s; ", local_hex_string(ep->eip));
   printf_unfiltered ("operand %s", local_hex_string(ep->operand_seg));
   printf_unfiltered (":%s\n", local_hex_string(ep->operand));
-  
-  top = 7- ((ep->status >> 11) & 7);
-  
+
+  top = ((ep->status >> 11) & 7);
+
   printf_unfiltered ("regno  tag  msb              lsb  value\n");
   for (fpreg = 7; fpreg >= 0; fpreg--) 
     {
       double val;
-      
+
       printf_unfiltered ("%s %d: ", fpreg == top ? "=>" : "  ", fpreg);
-      
+
       switch ((ep->tag >> ((7 - fpreg) * 2)) & 3) 
 	{
 	case 0: printf_unfiltered ("valid "); break;
@@ -177,6 +177,10 @@ i386_float_info ()
 {
   struct env387 fps;
   int fpsaved = 0;
+  /* We need to reverse the order of the registers.  Apparently AIX stores
+     the highest-numbered ones first.  */
+  struct env387 fps_fixed;
+  int i;
 
   if (inferior_pid)
     {
@@ -210,8 +214,10 @@ i386_float_info ()
 		  MIN(10, sizeof(fps) - offset));
 	}
     } 
-
-  print_387_status (0, (struct env387 *)&fps);
+  fps_fixed = fps;
+  for (i = 0; i < 8; ++i)
+    memcpy (fps_fixed.regs[i], fps.regs[7 - i], 10);
+  print_387_status (0, &fps_fixed);
 }
 
 /* Fetch one register.  */

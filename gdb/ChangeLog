@@ -1,3 +1,11 @@
+Sat Jan 22 17:08:48 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* i386aix-nat.c (i386_float_info): Reverse order of registers before
+	passing them to print_387_status.
+	(print_387_status): Don't subtract top from 7 before using it.
+	* i387-tdep.c: Remove comment about AIX wanting "top" subtracted
+	from 7; the above explains it.
+
 Sat Jan 22 20:25:11 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mips-tdep.c (init_extra_frame_info):  Use frame relative stack
