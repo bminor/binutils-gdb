@@ -1,3 +1,14 @@
+Thu Jun 11 18:30:20 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* stabs.c (struct stab_handle): Add self_crossref field.
+	(parse_stab_string): If a tag is a cross reference to itself,
+	don't define it in the tags list.
+	(parse_stab_type): Set info->self_crossref.
+
+	* debug.c (struct debug_type_real_list): Define.
+	(debug_get_real_type): Add list parameter.  Change all callers.
+	Check for circularity to avoid crashing when it occurs.
+
 Thu Jun 11 14:48:32 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* readelf.c: New file: Display contents of ELF format file.
@@ -6,7 +17,7 @@ Thu Jun 11 14:48:32 1998  Nick Clifton  <nickc@cygnus.com>
 	* Makefile.in: Rebuilt.
 	* binutils.texi: Document readelf.
 	* NEWS: Mention inclusion of readelf into binutils.
-	* po?POTFILES.in; Rebuilt.
+	* po/POTFILES.in; Rebuilt.
 
 Fri Jun  5 18:43:40 1998  Ian Lance Taylor  <ian@cygnus.com>
 
