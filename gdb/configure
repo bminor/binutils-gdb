@@ -18,7 +18,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --enable-netrom "
 ac_help="$ac_help
-  --enable-warnings       Enable compiler warnings if gcc is used"
+  --enable-build-warnings Enable compiler warnings if gcc is used"
 ac_help="$ac_help
   --with-mmalloc          Use memory mapped malloc package"
 ac_help="$ac_help
@@ -4527,14 +4527,14 @@ fi
 if test "${enable_warnings+set}" = set; then
   enableval="$enable_warnings"
   case "${enableval}" in
-yes)	enable_warnings=yes ;;
-no)	enable_warnings=no ;;
+yes)	enable_build_warnings=yes ;;
+no)	enable_build_warnings=no ;;
 *)	{ echo "configure: error: bad value ${enableval} given for warnings options" 1>&2; exit 1; } ;;
 esac
 fi
 
 
-if test "x$enable_warnings" = xyes -a "x$GCC" = xyes
+if test "x$enable_build_warnings" = xyes -a "x$GCC" = xyes
 then
    WARN_CFLAGS="-Wall -Wstrict-prototypes -Wmissing-prototypes"
 else

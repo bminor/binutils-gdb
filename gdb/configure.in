@@ -279,14 +279,14 @@ if test "${enable_netrom}" = "yes"; then
 fi
 
 AC_ARG_ENABLE(warnings,
-[  --enable-warnings       Enable compiler warnings if gcc is used],
+[  --enable-build-warnings Enable compiler warnings if gcc is used],
 [case "${enableval}" in
-yes)	enable_warnings=yes ;;
-no)	enable_warnings=no ;;
+yes)	enable_build_warnings=yes ;;
+no)	enable_build_warnings=no ;;
 *)	AC_MSG_ERROR(bad value ${enableval} given for warnings options) ;;
 esac])
 
-if test "x$enable_warnings" = xyes -a "x$GCC" = xyes
+if test "x$enable_build_warnings" = xyes -a "x$GCC" = xyes
 then
    WARN_CFLAGS="-Wall -Wstrict-prototypes -Wmissing-prototypes"
 else
