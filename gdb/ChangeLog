@@ -1,5 +1,14 @@
 2000-12-21  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c: Add missing ')' in comment.
+	(i386_extract_return_value): Return directly after issuing the
+	warning and filling *VALBUF with zeroes if we cannot get at the
+	floating-point registers.
+	(i386_store_return_value): New function.
+	* config/i386/tm-i386.h (STORE_RETURN_VALUE): Simply call
+	i386_store_return_value.
+	Add prototype for i386_store_return_value.
+
 	* i386-linux-nat.c (store_fpxregs): Add code to detect support for
 	the PTRACE_GETFPXREGS request, and return zero if it's not.
 

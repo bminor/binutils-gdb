@@ -296,17 +296,11 @@ extern void i387_float_info (void);
 extern void i386_extract_return_value (struct type *type, char *regbuf,
 				       char *valbuf);
 
-/* Write into appropriate registers a function return value of type TYPE, given
-   in virtual format.  */
-
-#define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  {    	       	       	       	       	       	       	       	       	     \
-    if (TYPE_CODE (TYPE) == TYPE_CODE_FLT)				     \
-      write_register_bytes (REGISTER_BYTE (FP0_REGNUM), (VALBUF),	     \
-			    TYPE_LENGTH (TYPE));			     \
-    else								     \
-      write_register_bytes (0, (VALBUF), TYPE_LENGTH (TYPE));  		     \
-  }
+/* Write into the appropriate registers a function return value stored
+   in VALBUF of type TYPE, given in virtual format.  */
+#define STORE_RETURN_VALUE(type, valbuf) \
+  i386_store_return_value ((type), (valbuf))
+extern void i386_store_return_value (struct type *type, char *valbuf);
 
 /* Extract from an array REGBUF containing the (raw) register state the address
    in which a function should return its structure value, as a CORE_ADDR (or an

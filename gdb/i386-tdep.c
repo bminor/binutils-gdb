@@ -713,7 +713,7 @@ get_longjmp_target (CORE_ADDR *pc)
 
 /* These registers are used for returning integers (and on some
    targets also for returning `struct' and `union' values when their
-   size and alignment match an integer type.  */
+   size and alignment match an integer type).  */
 #define LOW_RETURN_REGNUM 0	/* %eax */
 #define HIGH_RETURN_REGNUM 2	/* %edx */
 
@@ -732,6 +732,7 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 	{
 	  warning ("Cannot find floating-point return value.");
 	  memset (valbuf, 0, len);
+	  return;
 	}
 
       /* Floating-point return values can be found in %st(0).  */
@@ -771,6 +772,64 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 	}
       else
 	internal_error ("Cannot extract return value of %d bytes long.", len);
+    }
+}
+
+/* Write into the appropriate registers a function return value stored
+   in VALBUF of type TYPE, given in virtual format.  */
+
+void
+i386_store_return_value (struct type *type, char *valbuf)
+{
+  int len = TYPE_LENGTH (type);
+
+  if (TYPE_CODE_FLT == TYPE_CODE (type))
+    {
+      if (NUM_FREGS == 0)
+	{
+	  warning ("Cannot set floating-point return value.");
+	  return;
+	}
+
+      /* Floating-point return values can be found in %st(0).  */
+      if (len == TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT
+	  && TARGET_LONG_DOUBLE_FORMAT == &floatformat_i387_ext)
+	{
+	  /* Copy straight over.  */
+	  write_register_bytes (REGISTER_BYTE (FP0_REGNUM), valbuf,
+				FPU_REG_RAW_SIZE);
+	}
+      else
+	{
+	  char buf[FPU_REG_RAW_SIZE];
+	  DOUBLEST val;
+
+	  /* Convert the value found in VALBUF to the extended
+             floating point format used by the FPU.  This is probably
+             not exactly how it would happen on the target itself, but
+             it is the best we can do.  */
+	  val = extract_floating (valbuf, TYPE_LENGTH (type));
+	  floatformat_from_doublest (&floatformat_i387_ext, &val, buf);
+	  write_register_bytes (REGISTER_BYTE (FP0_REGNUM), buf,
+				FPU_REG_RAW_SIZE);
+	}
+    }
+  else
+    {
+      int low_size = REGISTER_RAW_SIZE (LOW_RETURN_REGNUM);
+      int high_size = REGISTER_RAW_SIZE (HIGH_RETURN_REGNUM);
+
+      if (len <= low_size)
+	write_register_bytes (REGISTER_BYTE (LOW_RETURN_REGNUM), valbuf, len);
+      else if (len <= (low_size + high_size))
+	{
+	  write_register_bytes (REGISTER_BYTE (LOW_RETURN_REGNUM),
+				valbuf, low_size);
+	  write_register_bytes (REGISTER_BYTE (HIGH_RETURN_REGNUM),
+				valbuf + low_size, len - low_size);
+	}
+      else
+	internal_error ("Cannot store return value of %d bytes long.", len);
     }
 }
 
