@@ -1,3 +1,23 @@
+2003-08-07  Elena Zannoni  <ezannoni@redhat.com>
+
+       * gdb.base/completion.exp: Remove reduntant completion test
+       on filename.
+
+2003-08-07  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.base/attach.exp, gdb.base/detach.exp, gdb.base/gcore.exp,
+        gdb.mi/mi-basics.exp, gdb.threads/gcore-thread.exp,
+        gdb.trace/save-trace.exp: Make sure that full pathnames are
+        escaped correctly.
+
+2003-08-07  Elena Zannoni  <ezannoni@redhat.com>
+        
+        * configure.in: Don't generate config.h from config.hin.
+        * configure: Regenerate.
+        * config.hin: Remove file.
+        * gdb.mi/pthreads.c: Remove include of config.h, and other ifdefs.
+        * gdb.threads/pthreads.c: Ditto.
+
 2003-08-07  Daniel Jacobowitz  <drow@mvista.com>
 
 	From Kei Sakamoto <sakamoto.kei@renesas.com>:

@@ -103,9 +103,10 @@ delete_breakpoints
 gdb_breakpoint "thread2"
 gdb_test "continue" "Continuing.*Breakpoint.* thread2 .*" "thread 2 is running"
 
+set escapedfilename [string_to_regexp ${objdir}/${subdir}/gcore.test]
 # Drop corefile
 gdb_test "gcore ${objdir}/${subdir}/gcore.test" \
-	"Saved corefile ${objdir}/${subdir}/gcore.test" \
+	"Saved corefile ${escapedfilename}" \
 	"save a corefile"
 
 # Now restart gdb and load the corefile.

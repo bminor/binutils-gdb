@@ -611,7 +611,7 @@ gdb_expect  {
 }
 
 
-# The following tests used to simply try to complete `${objdir}/Make',
+# The following tests used to simply try to complete `${objdir}/file',
 # and so on.  The problem is that ${objdir} can be very long; the
 # completed filename may be more than eighty characters wide.  When
 # this happens, readline tries to manage things, producing output that
@@ -619,7 +619,7 @@ gdb_expect  {
 # recognize.
 #
 # In the case that motivated this change, the (gdb) prompt occupied
-# the leftmost six columns, and `${objdump}/' was seventy-four
+# the leftmost six columns, and `${objdir}/' was seventy-four
 # characters long --- eighty in all.  After printing the slash,
 # readline emitted a space, a carriage return, and then `Makefile'
 # (the tab character being received as input after `Make'.
@@ -631,36 +631,6 @@ gdb_expect  {
 #
 # So, we avoid long lines.  We `cd' to ${objdir} first, and then do
 # the completion relative to the current directory.
-#
-# Note that if we are building in the source tree, then there will be
-# more than one completion for ./Make, so we need to handle that also.
-# A better long term solution might be to create a temporary directory,
-# populate it with a set of known names, and use that directory to
-# test completions.
-
-gdb_test "cd ${objdir}" "Working directory ${objdir}.*" "cd to \${objdir}"
-send_gdb "file ./Make\t"
-sleep 1
-gdb_expect  {
-        -re "^file ./Make(\\\x07|)file.*$"\
-            { send_gdb "\n"
-              gdb_expect {
-                      -re "\r\nA program is being debugged already\\.  Kill it\\? \\(y or n\\) $"\
-                      { send_gdb "n\n"
-                        gdb_expect {
-                                -re "\r\nProgram not killed\\.\r\n$gdb_prompt $"\
-                                        { pass "complete 'file ./Make'"}
-                                -re ".*$gdb_prompt $" { fail "complete 'file ./Make'"}
-                                timeout           {fail "(timeout) complete 'file ./Make'"}
-                               }
-                      }
-                      -re ".*$gdb_prompt $" { fail "complete 'file ./Make'"}
-                      timeout           {fail "(timeout) complete 'file ./Make'"}
-                     }
-            }
-        -re ".*$gdb_prompt $"       { fail "complete 'file ./Make'" }
-        timeout         { fail "(timeout) complete 'file ./Make'" }
-        }
 
 # ${srcdir} may be a relative path.  We want to make sure we end up
 # in the right directory - so make sure we know where it is.
