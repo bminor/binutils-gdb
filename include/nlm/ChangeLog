@@ -1,4 +1,14 @@
+Wed Nov 17 17:38:58 1993  Sean Eric Fagan  (sef@cygnus.com)
+
+	* external.h: Don't define external_fixed_header here.
+	* i386-ext.h, sparc32-ext.h: New header files to define
+	external_fixed_header for particular CPU's.
+
 Wed Oct 27 11:45:56 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* internal.h (Nlm_Internal_Extended_Header): Added fields
+	sharedDebugRecordOffset and sharedDebugRecordCount.
+	* external.h (NlmNAME(External_Extended_Header)): Likewise.
 
 	* common.h (NLM_SIGNATURE): Do not define (it's different for each
 	backend).
