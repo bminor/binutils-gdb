@@ -13,6 +13,10 @@ Fri Feb 20 12:43:02 1998  Doug Evans  <devans@canuck.cygnus.com>
 	(md_assemble): Watch for .endgif if in ASM_GIF state.
 	(assemble_gif): Complete.
 	(s_endgif): Complete.
+	(cur_mach): New static local.
+	(record_mach): New function.
+	(md_begin): Initialize `cur_mach'.
+	(assemble_*): Record current mach type.
 
 end-sanitize-sky
 Fri Feb 20 15:03:13 1998  Ian Lance Taylor  <ian@cygnus.com>
