@@ -1,3 +1,9 @@
+2001-02-14  H.J. Lu  <hjl@gnu.org>
+
+	* elf.c (elf_find_function): New function.
+	(_bfd_elf_find_nearest_line): Call elf_find_function () to find
+	the file name and function name.
+
 2001-02-14  Nick Clifton  <nickc@redhat.com>
 
 	* ecoff.c (bfd_debug_section): Update to initialise new fields in
@@ -118,7 +124,7 @@
 	(elf64_x86_64_relocate_section): Fix addend for relocation of
 	R_X86_64_(8|16|32|PC8|PC16|PC32).
 
-Mon Feb 12 17:46:24 CET 2001  Jan Hubicka  <jh@suse.cz>
+2001-02-12  Jan Hubicka  <jh@suse.cz>
 
 	* elf64-x86-64.c (x86_64_elf_howto): Fix name of R_X86_64_GOTPCREL.
 
