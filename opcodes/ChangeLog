@@ -1,3 +1,7 @@
+2001-03-30  Alexandre Oliva  <aoliva@redhat.com>
+
+	* ppc-opc.c (insert_mbe): Shift mask initializer as long.
+
 2001-03-24  Alan Modra  <alan@linuxcare.com.au>
 
 	* i386-dis.c (PREGRP25): Define.
