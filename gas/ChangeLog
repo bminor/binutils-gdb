@@ -1,3 +1,8 @@
+2002-11-19  Richard Henderson  <rth@redhat.com>
+
+	* config/obj-elf.c (obj_elf_visibility): Overwrite only the
+	visibility portion of st_other.
+
 2002-11-19  Luke Deller <luked@cse.unsw.edu.au>
 
 	* config/tc-alpha.c (s_alpha_prologue): as_bad when sym is NULL.
