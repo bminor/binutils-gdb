@@ -1,3 +1,15 @@
+2004-09-24  Robert Picco <Robert.Picco@hp.com>
+
+	Committed by Andrew Cagney.
+	* remote.c (set_remote_protocol_p_packet_cmd, remote_protocol_p)
+	(show_remote_protocol_p_packet_cmd): New.  Implement 'p' packet.
+	configuration.
+	(fetch_register_using_p): Implement 'p' packet.  Based on code by
+	Fernando Nasser.
+	(remote_fetch_registers): Call fetch_register_using_p.
+	(init_all_packet_configs, show_remote_cmd)
+	(_initialize_remote): Add p-packet.
+
 2004-09-24  Mark Kettenis  <kettenis@gnu.org>
 
 	* inf-ptrace.c (inf_ptrace_kill_inferior): Call ptrace directly
