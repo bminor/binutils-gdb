@@ -156,6 +156,7 @@ REAL_SOURCES = \
 	$(srcdir)/write.c \
 	$(srcdir)/listing.c \
 	$(srcdir)/ecoff.c \
+	$(srcdir)/stabs.c \
 	$(srcdir)/xmalloc.c
 
 # in an expedient order
@@ -221,6 +222,7 @@ OBJS = \
 	write.o \
 	listing.o \
 	ecoff.o \
+	stabs.o \
 	xmalloc.o
 
 #### host, target, and site specific Makefile frags come in here.
@@ -368,6 +370,10 @@ ecoff.o : ecoff.c as.h host.h targ-env.h obj-format.h \
   ecoff.h $(srcdir)/../include/coff/internal.h \
   $(srcdir)/../include/coff/sym.h $(srcdir)/../include/coff/ecoff.h \
   $(srcdir)/../include/coff/symconst.h $(srcdir)/../include/aout/stab_gnu.h
+stabs.o : stabs.c as.h host.h targ-env.h obj-format.h \
+  targ-cpu.h  struc-symbol.h \
+  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
+  subsegs.h $(srcdir)/../include/aout/stab_gnu.h
 xmalloc.o : xmalloc.c
 atof-targ.o : atof-targ.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
