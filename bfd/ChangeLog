@@ -1,3 +1,8 @@
+2001-02-26  Timothy Wall  <twall@cygnus.com>
+
+	* elfxx-ia64.c (elfNN_ia64_aix_add_symbol_hook): Remove obsolete
+	comments. 
+
 2001-02-26  Nick Clifton <nickc@redhat.com>
 
 	* coffcode.h (styp_to_sec_flags) [COFF_WITH_PE version]: Tidy

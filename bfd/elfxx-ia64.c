@@ -1182,20 +1182,11 @@ elfNN_ia64_aix_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
     {
       int i;
       
-      /* SHN_MONTEREY_SYSCALL (Description from IBM):
-	 Special symbols on AIX; if the value is non-zero, the value
-         should be put in the gp member of the function descriptor.  the
-         function address member should be set to the address of the entry
-         point of the user-space portion of the system call (epc insn in a
-         priviledged page).  If the symbol value is zero, look in the special
-         table for extended system calls.  The number for extended system
-         calls will come from that table.  The index is set when the linker
-         sees an export file that contains the syscall attribute after an
-         exported symbol.  Kernel extensions indicate extended system calls
-         they define by having STO_MONTEREY_SYSCALL in their st_other symbol
-         table member. This is used by the system loader to add extended
-         system calls to its table, which is subsequently provided to the
-         runtime linker at each process startup.  */
+      /* SHN_AIX_SYSCALL: Treat this as any other symbol.  The special symbol
+	 is only relevant when compiling code for extended system calls.
+	 Replace the "special" section with .text, if possible. */
+      /* FIXME need to determine the proper section instead of defaulting to
+	 .text.  */
       for (i = 1; i < elf_elfheader (abfd)->e_shnum; i++)
 	{
 	  asection * sec = bfd_section_from_elf_index (abfd, i);
@@ -1207,8 +1198,6 @@ elfNN_ia64_aix_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	    }
 	}
 
-      /* FIXME need to determine the proper section instead of defaulting to
-	 .text.  */
       if (*secp == NULL)
 	*secp = bfd_abs_section_ptr;
       
