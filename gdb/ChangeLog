@@ -1,3 +1,12 @@
+2005-01-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386bsd-nat.c: Update copyright year.  Don't include
+	<sys/param.h> and <sys/user.h>.
+	(register_u_addr, kernel_u_size): Remove functions.
+	* config/i386/obsd.mh (NAT_FILE): Remove.
+	* config/i386/obsdaout.mh (NAT_FILE): Set to solib.h.
+	* config/i386/nm-obsd.h: Remove file.
+
 2005-01-12  Andrew Cagney  <cagney@gnu.org>
 
 	* exceptions.c: Include "gdb_string.h".

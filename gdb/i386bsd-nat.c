@@ -1,6 +1,7 @@
 /* Native-dependent code for modern i386 BSD's.
 
-   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -330,30 +331,6 @@ i386bsd_dr_get_status (void)
 #endif /* PT_GETDBREGS */
 
 
-/* Support for the user struct.  */
-
-/* Return the address register REGNUM.  BLOCKEND is the value of
-   u.u_ar0, which should point to the registers.  */
-
-CORE_ADDR
-register_u_addr (CORE_ADDR blockend, int regnum)
-{
-  gdb_assert (regnum >= 0 && regnum < ARRAY_SIZE (i386bsd_r_reg_offset));
-
-  return blockend + i386bsd_r_reg_offset[regnum];
-}
-
-#include <sys/param.h>
-#include <sys/user.h>
-
-/* Return the size of the user struct.  */
-
-int
-kernel_u_size (void)
-{
-  return (sizeof (struct user));
-}
-
 void
 _initialize_i386bsd_nat (void)
 {
