@@ -1,3 +1,9 @@
+2004-09-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Don't comment out NATDEPFILES in the generated
+	Makefile if NAT_FILE is unset.
+	* configure: Regenerate.
+
 2004-09-27  Andrew Cagney  <cagney@gnu.org>
 
 	* infrun.c (check_for_old_step_resume_breakpoint): Delete.

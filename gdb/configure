@@ -11764,14 +11764,6 @@ nativefile=$nativefile
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 
-if test "${nativefile}" = ""; then
-        < Makefile \
-        sed -e '/^NATDEPFILES[ 	]*=.*\\$/,/[^\\]$/s/^/# /' \
-            -e '/^NATDEPFILES[ 	]*=/s/^/# /' \
-        | sed -e '/^\(NATDEPFILES[ 	]*[+]=[ 	]*\)/s//# \1/' \
-	> Makefile.tem
-mv -f Makefile.tem Makefile
-fi
 
 sed -e '/^DEPRECATED_TM_FILE[ 	]*=/s,^DEPRECATED_TM_FILE[ 	]*=[ 	]*,&config/'"${gdb_target_cpu}"'/,
 /^XM_FILE[ 	]*=/s,^XM_FILE[ 	]*=[ 	]*,&config/'"${gdb_host_cpu}"'/,

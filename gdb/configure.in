@@ -1564,14 +1564,6 @@ AC_OUTPUT(Makefile .gdbinit:gdbinit.in,
 dnl Autoconf doesn't provide a mechanism for modifying definitions 
 dnl provided by makefile fragments.
 dnl
-if test "${nativefile}" = ""; then
-        < Makefile \
-        sed -e '/^NATDEPFILES[[ 	]]*=.*\\$/,/[[^\\]]$/s/^/# /' \
-            -e '/^NATDEPFILES[[ 	]]*=/s/^/# /' \
-        | sed -e '/^\(NATDEPFILES[[ 	]]*[[+]]=[[ 	]]*\)/s//# \1/' \
-	> Makefile.tem
-mv -f Makefile.tem Makefile
-fi
 
 changequote(,)dnl
 sed -e '/^DEPRECATED_TM_FILE[ 	]*=/s,^DEPRECATED_TM_FILE[ 	]*=[ 	]*,&config/'"${gdb_target_cpu}"'/,
