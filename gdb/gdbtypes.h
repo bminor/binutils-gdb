@@ -761,6 +761,8 @@ lookup_fundamental_type PARAMS ((struct objfile *, int));
 extern void
 fill_in_vptr_fieldno PARAMS ((struct type *));
 
+extern int get_discrete_bounds PARAMS ((struct type*, LONGEST*, LONGEST*));
+
 #if MAINTENANCE_CMDS
 extern void recursive_dump_type PARAMS ((struct type *, int));
 #endif

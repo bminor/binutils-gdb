@@ -347,8 +347,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	}
       {
 	struct type *range = elttype;
-	int low_bound = TYPE_LOW_BOUND (range);
-	int high_bound = TYPE_HIGH_BOUND (range);
+	LONGEST low_bound, high_bound;
 	int i;
 	int is_bitstring = TYPE_CODE (type) == TYPE_CODE_BITSTRING;
 	int need_comma = 0;
@@ -357,9 +356,23 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	  fputs_filtered ("B'", stream);
 	else
 	  fputs_filtered ("[", stream);
+
+	i = get_discrete_bounds (range, &low_bound, &high_bound);
+      maybe_bad_bstring:
+	if (i < 0)
+	  {
+	    fputs_filtered ("<error value>", stream);
+	    goto done;
+	  }
+
 	for (i = low_bound; i <= high_bound; i++)
 	  {
 	    int element = value_bit_index (type, valaddr, i);
+	    if (element < 0)
+	      {
+		i = element;
+		goto maybe_bad_bstring;
+	      }
 	    if (is_bitstring)
 	      fprintf_filtered (stream, "%d", element);
 	    else if (element)
@@ -381,6 +394,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 		  }
 	      }
 	  }
+      done:
 	if (is_bitstring)
 	  fputs_filtered ("'", stream);
 	else

@@ -1,3 +1,12 @@
+Wed Oct  4 17:23:03 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* gdbtypes.c (get_discrete_bounds):  New function.
+	(force_to_range_type):  Use get_discrete_bounds.
+	* gdbtypes.h (get_discrete_bounds):  Add declaration.
+	* valarith.c (value_bit_index):  Generalize to use get_discrete_bounds.
+	* ch-valprint.c (chill_val_print):  Make (power)sets and bitstring
+	support use get_discrete_bounds and generally be more robust.
+
 Tue Oct  3 16:54:56 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote-nrom.c (nrom_ops): Add value for to_thread_alive,

@@ -336,6 +336,48 @@ create_range_type (result_type, index_type, low_bound, high_bound)
   return (result_type);
 }
 
+/* Set *LOWP and *HIGHP to the lower and upper bounds of discrete type TYPE.
+   Return 1 of type is a range type, 0 if it is discrete (and bounds
+   will fit in LONGEST), or -1 otherwise. */
+
+int
+get_discrete_bounds (type, lowp, highp)
+     struct type *type;
+     LONGEST *lowp, *highp;
+{
+  switch (TYPE_CODE (type))
+    {
+    TYPE_CODE_RANGE:
+      *lowp = TYPE_LOW_BOUND (type);
+      *highp = TYPE_HIGH_BOUND (type);
+      return 1;
+    case TYPE_CODE_ENUM:
+      *lowp = TYPE_FIELD_BITPOS (type, 0);
+      *highp = TYPE_FIELD_BITPOS (type, TYPE_NFIELDS (type) - 1);
+      return 0;
+    case TYPE_CODE_BOOL:
+      *lowp = 0;
+      *highp = 1;
+      return 0;
+    case TYPE_CODE_INT:
+      if (TYPE_LENGTH (type) >= sizeof (LONGEST))  /* Too big */
+	return -1;
+      if (!TYPE_UNSIGNED (type))
+	{
+	  *lowp = - (1 << (TYPE_LENGTH (type) * TARGET_CHAR_BIT - 1));
+	  *highp = -*lowp - 1;
+	  return 0;
+	}
+      /* ... fall through for unsigned ints ... */
+    case TYPE_CODE_CHAR:
+      *lowp = 0;
+      *highp = 1 << (TYPE_LENGTH (type) * TARGET_CHAR_BIT) - 1;
+      return 0;
+    default:
+      return -1;
+    }
+}
+
 /* A lot of code assumes that the "index type" of an array/string/
    set/bitstring is specifically a range type, though in some languages
    it can be any discrete type. */
@@ -350,26 +392,13 @@ force_to_range_type (type)
       return type;
 
     case TYPE_CODE_ENUM:
-      {
-	int low_bound = TYPE_FIELD_BITPOS (type, 0);
-	int high_bound = TYPE_FIELD_BITPOS (type, TYPE_NFIELDS (type) - 1);
-	struct type *range_type =
-	  create_range_type (NULL, type, low_bound, high_bound);
-	TYPE_NAME (range_type) = TYPE_NAME (range_type);
-	TYPE_DUMMY_RANGE (range_type) = 1;
-	return range_type;
-      }
     case TYPE_CODE_BOOL:
-      {
-	struct type *range_type = create_range_type (NULL, type, 0, 1);
-	TYPE_NAME (range_type) = TYPE_NAME (range_type);
-	TYPE_DUMMY_RANGE (range_type) = 1;
-	return range_type;
-      }
     case TYPE_CODE_CHAR:
       {
-	int char_max = 1 << (TYPE_LENGTH (type) * HOST_CHAR_BIT) - 1;
-	struct type *range_type = create_range_type (NULL, type, 0, char_max);
+	LONGEST low_bound, high_bound;
+	struct type *range_type;
+	get_discrete_bounds (type, &low_bound, &high_bound);
+	range_type = create_range_type (NULL, type, low_bound, high_bound);
 	TYPE_NAME (range_type) = TYPE_NAME (range_type);
 	TYPE_DUMMY_RANGE (range_type) = 1;
 	return range_type;
