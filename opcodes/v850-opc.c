@@ -69,16 +69,18 @@ const struct v850_operand v850_operands[] = {
 #define IF3	{D8}
 
 /* 16-bit load/store instruction (Format IV) */
-#define IF4	{D6}
+#define IF4A	{D6, R2}
+#define IF4B	{R2, D6}
 
 /* Jump instruction (Format V) */
 #define IF5	{D22}
 
 /* 3 operand instruction (Format VI) */
-#define IF6	{R1, R2, I16}
+#define IF6	{I16, R1, R2}
 
 /* 32-bit load/store instruction (Format VII) */
-#define IF7	{R1, R2, D16}
+#define IF7A	{D16, R1, R2}
+#define IF7B	{R2, D16, R1}
 
 /* Bit manipulation function.  */
 
@@ -103,7 +105,19 @@ const struct v850_operand v850_operands[] = {
 
 const struct v850_opcode v850_opcodes[] = {
 /* load/store instructions */
-/* XXX */
+{ "sld.b",	OP(0x00),		OP_MASK,	IF4A },
+{ "sld.h",	OP(0x00),		OP_MASK,	IF4A },
+{ "sld.w",	OP(0x00),		OP_MASK,	IF4A },
+{ "sst.b",	OP(0x00),		OP_MASK,	IF4B },
+{ "sst.w",	OP(0x00),		OP_MASK,	IF4B },
+{ "sst.l",	OP(0x00),		OP_MASK,	IF4B },
+
+{ "ld.b",	OP(0x00),		OP_MASK,	IF7A },
+{ "ld.h",	OP(0x00),		OP_MASK,	IF7A },
+{ "ld.w",	OP(0x00),		OP_MASK,	IF7A },
+{ "st.b",	OP(0x00),		OP_MASK,	IF7B },
+{ "st.h",	OP(0x00),		OP_MASK,	IF7B },
+{ "st.w",	OP(0x00),		OP_MASK,	IF7B },
 
 /* arithmetic operation instructions */
 { "mov",        OP(0x00),		OP_MASK,	IF1 },
@@ -173,7 +187,7 @@ const struct v850_opcode v850_opcodes[] = {
 { "bsa",	BOP(0xd),		BOP_MASK,	IF3 },
 
 { "jmp",	one(0x0060),		one(0xffe0),	R1 },
-{ "jarl",	one(0x0780),		one(0xf83f),	{ R2,D22 } }, 
+{ "jarl",	one(0x0780),		one(0xf83f),	{ D22, R2 } }, 
 { "jr",		one(0x0780),		one(0xffe0),	{ D22 } },
 
 /* bit manipulation instructions */
