@@ -25,6 +25,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define FETCH_INFERIOR_REGISTERS
 
+/* Before storing, we need to read all the registers.  */
+
+#define CHILD_PREPARE_TO_STORE() read_register_bytes (0, NULL, REGISTER_BYTES)
+
 /* Return sizeof user struct to callers in less machine dependent routines */
 
 #define KERNEL_U_SIZE kernel_u_size()

@@ -1,3 +1,16 @@
+Wed Jan 31 18:36:27 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config/sparc/xm-sparc.h (HAVE_WAIT_STRUCT): Remove, never used.
+
+	* config/sparc/nm-nbsd.h (CHILD_PREPARE_TO_STORE): Move to here
+	from config/sparc/xm-nbsd.h.
+	* config/sparc/nm-sun4os4 (CHILD_PREPARE_TO_STORE): Ditto, from
+	config/sparc/xm-sparc.h.
+	* config/sparc/nm-sun4sol2.h: New file, renamed from nm-sysv4.h.
+	(PRSVADDR_BROKEN): Move here from xm-sun4sol2.h.
+	* config/sparc/sun4sol2.mh (NAT_FILE): Update.
+	* config/sparc/xm-sun4os4.h (HAVE_TERMIOS): Remove.
+
 Wed Jan 31 17:20:26 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/pa/tm-hppa.h (EXTRACT_RETURN_VALUE): Handle software

@@ -1,5 +1,6 @@
 /* Macro definitions for running gdb on a Sun 4 running sunos 4.
-   Copyright (C) 1989, Free Software Foundation, Inc.
+   Copyright (C) 1989, 1993, 1994, 1995, 1996
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,6 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "sparc/xm-sparc.h"
+
 #define FPU
 
 /* If you expect to use the mmalloc package to obtain mapped symbol files,
@@ -40,9 +42,3 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* SunOS 4.x uses nonstandard "char *" as type of third argument to ptrace() */
 
 #define PTRACE_ARG3_TYPE char*
-
-/* Using termios is required to save and restore ICRNL and ONLCR
-   separately.  */
-
-/* At least SunOS 4.1.1 has termios.  I'm not sure about 4.0.3.  */
-#define HAVE_TERMIOS

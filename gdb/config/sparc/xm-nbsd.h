@@ -19,6 +19,3 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Get generic NetBSD host definitions. */
 #include "xm-nbsd.h"
-
-/* Before storing, we need to read all the registers. */
-#define CHILD_PREPARE_TO_STORE() read_register_bytes (0, NULL, REGISTER_BYTES)

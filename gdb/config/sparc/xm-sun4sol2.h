@@ -48,9 +48,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* May be needed, may be not?  From Pace Willisson's port.  FIXME.  */
 #define NEED_POSIX_SETPGID
 
-/* Solaris PSRVADDR support does not seem to include a place for nPC.  */
-#define PRSVADDR_BROKEN
-
 /* solaris doesn't have siginterrupt, though it has sigaction; however,
    in this case siginterrupt would just be setting the default. */
 #define NO_SIGINTERRUPT
