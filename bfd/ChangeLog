@@ -1,3 +1,7 @@
+2002-03-18  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* po/fr.po: Updated version.
+
 2002-03-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* libbfd.c (bfd_write_bigendian_4byte_int): Return true iff success.

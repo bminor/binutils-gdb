@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU bfd 2.12-pre020121\n"
 "POT-Creation-Date: 2002-01-17 12:55+0000\n"
-"PO-Revision-Date: 2002-03-10 08:00-0500\n"
+"PO-Revision-Date: 2002-03-17 20:00-0500\n"
 "Last-Translator: Michel Robitaille <robitail@IRO.UMontreal.CA>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "MIME-Version: 1.0\n"
@@ -36,12 +36,12 @@ msgstr "%s: mauvais enregistrement de relocalisation importé: %d"
 #: aoutx.h:1282 aoutx.h:1699
 #, c-format
 msgid "%s: can not represent section `%s' in a.out object file format"
-msgstr "%s: ne peut représenter la section «%s» dans le fichier format objet a.out"
+msgstr "%s: ne peut représenter la section « %s » dans le fichier format objet a.out"
 
 #: aoutx.h:1669
 #, c-format
 msgid "%s: can not represent section for symbol `%s' in a.out object file format"
-msgstr "%s: ne peut représenter la section pour le symbole «%s» dans le fichier format objet a.out"
+msgstr "%s: ne peut représenter la section pour le symbole « %s » dans le fichier format objet a.out"
 
 #: aoutx.h:1671
 msgid "*unknown*"
@@ -167,7 +167,7 @@ msgstr "SVP rapporter cette anomalie.\n"
 #: binary.c:306
 #, c-format
 msgid "Warning: Writing section `%s' to huge (ie negative) file offset 0x%lx."
-msgstr "AVERTISSEMENT: écriture de la section «%s» vers un énorme décalage (ie négatif) dans le fichier 0x%lx."
+msgstr "AVERTISSEMENT: écriture de la section « %s » vers un énorme décalage (ie négatif) dans le fichier 0x%lx."
 
 #: coff-a29k.c:119
 msgid "Missing IHCONST"
@@ -204,12 +204,12 @@ msgstr "GP relocalisation relative alors que GP n'est pas défini"
 #: coff-arm.c:1051 elf32-arm.h:285
 #, c-format
 msgid "%s: unable to find THUMB glue '%s' for `%s'"
-msgstr "%s: incapable de repérer le REPÈRE de liant «%s» pour «%s»"
+msgstr "%s: incapable de repérer le REPÈRE de liant « %s » pour « %s »"
 
 #: coff-arm.c:1080 elf32-arm.h:320
 #, c-format
 msgid "%s: unable to find ARM glue '%s' for `%s'"
-msgstr "%s: incapable de repérer le liant ARM «%s» pour «%s»"
+msgstr "%s: incapable de repérer le liant ARM « %s » pour « %s »"
 
 #: coff-arm.c:1375 coff-arm.c:1470 elf32-arm.h:886 elf32-arm.h:990
 #, c-format
@@ -233,7 +233,7 @@ msgstr "  considérer de rafaire les liens avec --support-old-code enabled"
 #: coff-arm.c:1767 coff-tic80.c:686 cofflink.c:3017
 #, c-format
 msgid "%s: bad reloc address 0x%lx in section `%s'"
-msgstr "%s: mauvaise adresse de relocalisation 0x%lx dans la section «%s»"
+msgstr "%s: mauvaise adresse de relocalisation 0x%lx dans la section « %s »"
 
 #: coff-arm.c:2107
 #, c-format
@@ -348,12 +348,12 @@ msgstr "%s: type de relocalisation non supporté 0x%02x"
 #: coff-rs6000.c:2756 coff64-rs6000.c:1210
 #, c-format
 msgid "%s: TOC reloc at 0x%x to symbol `%s' with no TOC entry"
-msgstr "%s: table des matières des relocalisation à 0x%x pour les symboles «%s» sans aucune entrée"
+msgstr "%s: table des matières des relocalisation à 0x%x pour les symboles « %s » sans aucune entrée"
 
 #: coff-rs6000.c:3006 coff64-rs6000.c:2060
 #, c-format
 msgid "%s: symbol `%s' has unrecognized smclas %d"
-msgstr "%s: symbole «%s» a une classe smclas non reconnue %d"
+msgstr "%s: symbole « %s » a une classe smclas non reconnue %d"
 
 #: coff-tic54x.c:279 coff-tic80.c:449
 #, c-format
@@ -388,17 +388,17 @@ msgstr "%s: AVERTISSEMENT: symbole d'index illégal %ld dans le numéro de ligne"
 #: coffcode.h:4250
 #, c-format
 msgid "%s: warning: duplicate line number information for `%s'"
-msgstr "%s: AVERTISSEMENT: information de numéro de ligne dédoublée pour «%s»"
+msgstr "%s: AVERTISSEMENT: information de numéro de ligne dédoublée pour « %s »"
 
 #: coffcode.h:4609
 #, c-format
 msgid "%s: Unrecognized storage class %d for %s symbol `%s'"
-msgstr "%s: classe de stockage non reconnue %d pour %s symbole «%s»"
+msgstr "%s: classe de stockage non reconnue %d pour %s symbole « %s »"
 
 #: coffcode.h:4740
 #, c-format
 msgid "warning: %s: local symbol `%s' has no section"
-msgstr "AVERTISSEMENT: %s: symbole local «%s» n'a pas de section"
+msgstr "AVERTISSEMENT: %s: symbole local « %s » n'a pas de section"
 
 #: coffcode.h:4885
 #, c-format
@@ -418,12 +418,12 @@ msgstr "AUX tagndx %ld ttlsiz 0x%lx lnnos %ld prochain %ld"
 #: cofflink.c:536 elflink.h:1967
 #, c-format
 msgid "Warning: type of symbol `%s' changed from %d to %d in %s"
-msgstr "AVERTISSEMENT: type de symbole «%s» a changé de %d à %d dans %s"
+msgstr "AVERTISSEMENT: type de symbole « %s » a changé de %d à %d dans %s"
 
 #: cofflink.c:2317
 #, c-format
 msgid "%s: relocs in section `%s', but it has no contents"
-msgstr "%s: relocalisations dans la section «%s», mais n'a aucun contenu"
+msgstr "%s: relocalisations dans la section « %s », mais n'a aucun contenu"
 
 #: cofflink.c:2653 coffswap.h:889
 #, c-format
@@ -483,12 +483,12 @@ msgstr "Erreur DWARF: ne peut repérer le numéro abrégé %d"
 #: dwarf2.c:1493
 #, c-format
 msgid "Dwarf Error: found dwarf version '%hu', this reader only handles version 2 information."
-msgstr "Erreur DWARF: version DWARF retrouvée «%hu», ce lecteur ne supporte que les informations de la version 2."
+msgstr "Erreur DWARF: version DWARF retrouvée « %hu », ce lecteur ne supporte que les informations de la version 2."
 
 #: dwarf2.c:1500
 #, c-format
 msgid "Dwarf Error: found address size '%u', this reader can not handle sizes greater than '%u'."
-msgstr "Erreur DWARF: taille d'adresse obtenue «%u», ce lecteur ne peut traiter des tailles plus grandes que «%u»."
+msgstr "Erreur DWARF: taille d'adresse obtenue « %u », ce lecteur ne peut traiter des tailles plus grandes que « %u »."
 
 #: dwarf2.c:1523
 #, c-format
@@ -575,7 +575,7 @@ msgstr ""
 #: elf-hppa.h:1366 elf-hppa.h:1399 elf32-ppc.c:3062 elf32-sh.c:3201 elf64-x86-64.c:1275
 #, c-format
 msgid "%s: warning: unresolvable relocation against symbol `%s' from %s section"
-msgstr "%s: AVERTISSEMENT: relocalisation sans solution vers le symbole «%s» de la section %s"
+msgstr "%s: AVERTISSEMENT: relocalisation sans solution vers le symbole « %s » de la section %s"
 
 #: elf-m10200.c:463 elf-m10300.c:673 elf32-arm.h:2074 elf32-avr.c:835 elf32-cris.c:1392 elf32-d10v.c:482 elf32-fr30.c:653 elf32-h8300.c:547 elf32-i860.c:1048 elf32-m32r.c:1281 elf32-openrisc.c:455 elf32-v850.c:1691 elf64-mmix.c:1164
 msgid "internal error: out of range error"
@@ -596,7 +596,7 @@ msgstr "erreur interne: erreur inconnue"
 #: elf.c:345
 #, c-format
 msgid "%s: invalid string offset %u >= %lu for section `%s'"
-msgstr "%s: chaîne de décalage invalide %u >= %lu pour la section «%s»"
+msgstr "%s: chaîne de décalage invalide %u >= %lu pour la section « %s »"
 
 #: elf.c:450
 #, c-format
@@ -668,12 +668,12 @@ msgstr "Erreur: première section dans le segment (%s) débute à 0x%x alors que le
 #: elf.c:3804
 #, c-format
 msgid "%s: warning: allocated section `%s' not in segment"
-msgstr "%s: AVERTISSEMENT: section allouée «%s» n'est pas dans le segment"
+msgstr "%s: AVERTISSEMENT: section allouée « %s » n'est pas dans le segment"
 
 #: elf.c:4138
 #, c-format
 msgid "%s: symbol `%s' required but not present"
-msgstr "%s: symbole «%s» requis mais absent"
+msgstr "%s: symbole « %s » requis mais absent"
 
 #: elf.c:4147
 #, c-format
@@ -693,12 +693,12 @@ msgstr "%s: type de relocalisation non supporté %s"
 #: elf32-arm.h:1224
 #, c-format
 msgid "%s: Warning: Arm BLX instruction targets Arm function '%s'."
-msgstr "%s: AVERTISSEMENT: instruction Arm BLX vise la fonction Arm «%s»."
+msgstr "%s: AVERTISSEMENT: instruction Arm BLX vise la fonction Arm « %s »."
 
 #: elf32-arm.h:1420
 #, c-format
 msgid "%s: Warning: Thumb BLX instruction targets thumb function '%s'."
-msgstr "%s: AVERTISSEMENT: instruction de repérage BLX vise la function de repérage «%s»."
+msgstr "%s: AVERTISSEMENT: instruction de repérage BLX vise la function de repérage « %s »."
 
 #: elf32-arm.h:1904 elf32-i386.c:1776 elf32-sh.c:3133
 #, c-format
@@ -708,7 +708,7 @@ msgstr "%s(%s+0x%lx): %s relocation vers une section SEC_MERGE"
 #: elf32-arm.h:1998
 #, c-format
 msgid "%s: warning: unresolvable relocation %d against symbol `%s' from %s section"
-msgstr "%s: AVERTISSEMENT: relocalisation sans solution %d vers le symbole «%s» de la section %s"
+msgstr "%s: AVERTISSEMENT: relocalisation sans solution %d vers le symbole « %s » de la section %s"
 
 #: elf32-arm.h:2114
 #, c-format
@@ -861,12 +861,12 @@ msgstr "erreur interne: relocalisation dangereuse"
 #: elf32-cris.c:949
 #, c-format
 msgid "%s: unresolvable relocation %s against symbol `%s' from %s section"
-msgstr "%s: relocalisation %s sans solution vers le symbole «%s» à partir de la section %s"
+msgstr "%s: relocalisation %s sans solution vers le symbole « %s » à partir de la section %s"
 
 #: elf32-cris.c:1012
 #, c-format
 msgid "%s: No PLT nor GOT for relocation %s against symbol `%s' from %s section"
-msgstr "%s: pas de relocalisation %s PLT ni GOT vers le symbole «%s» à partir de la section %s"
+msgstr "%s: pas de relocalisation %s PLT ni GOT vers le symbole « %s » à partir de la section %s"
 
 #: elf32-cris.c:1015 elf32-cris.c:1142
 msgid "[whose name is lost]"
@@ -880,12 +880,12 @@ msgstr "%s: relocalisation %s sans zéro ajoute %d vers le symbole local à partir
 #: elf32-cris.c:1138
 #, c-format
 msgid "%s: relocation %s with non-zero addend %d against symbol `%s' from %s section"
-msgstr "%s: relocalisation %s sans zéro ajoute %d vers le symbole «%s» à partir de la section %s"
+msgstr "%s: relocalisation %s sans zéro ajoute %d vers le symbole « %s » à partir de la section %s"
 
 #: elf32-cris.c:1156
 #, c-format
 msgid "%s: relocation %s is not allowed for global symbol: `%s' from %s section"
-msgstr "%s: relocalisation %s n'est pas permise pour le symbole global: «%s» de la section %s."
+msgstr "%s: relocalisation %s n'est pas permise pour le symbole global: « %s » de la section %s."
 
 #: elf32-cris.c:1275
 #, c-format
@@ -903,7 +903,7 @@ msgstr ""
 
 #: elf32-cris.c:2973
 msgid " [symbols have a _ prefix]"
-msgstr " [symboles sont préfixés par «_»]"
+msgstr " [symboles sont préfixés par « _ »]"
 
 #: elf32-cris.c:3012
 #, c-format
@@ -977,17 +977,17 @@ msgstr "%s: symbole index erroné: %d"
 #: elf32-i386.c:863 elf32-s390.c:790 elf64-ppc.c:2085 elf64-s390.c:759
 #, c-format
 msgid "%s: bad relocation section name `%s'"
-msgstr "%s: nom de section de relocalisation erroné «%s»"
+msgstr "%s: nom de section de relocalisation erroné « %s »"
 
 #: elf32-i386.c:2067 elf32-s390.c:1949 elf64-ppc.c:3908 elf64-s390.c:1953
 #, c-format
 msgid "%s(%s+0x%lx): unresolvable relocation against symbol `%s'"
-msgstr "%s(%s+0x%lx): relocalisation sans solution vers le symbole «%s»"
+msgstr "%s(%s+0x%lx): relocalisation sans solution vers le symbole « %s »"
 
 #: elf32-i386.c:2105 elf32-s390.c:1987 elf64-s390.c:1991
 #, c-format
 msgid "%s(%s+0x%lx): reloc against `%s': error %d"
-msgstr "%s(%s+0x%lx): relocalisation vers «%s»: erreur %d"
+msgstr "%s(%s+0x%lx): relocalisation vers « %s »: erreur %d"
 
 #: elf32-m32r.c:924
 msgid "SDA relocation when _SDA_BASE_ not defined"
@@ -1153,7 +1153,7 @@ msgstr "procédure statique (sans name)"
 #: elf32-mips.c:5565 elf64-mips.c:6694
 #, c-format
 msgid "%s: illegal section name `%s'"
-msgstr "%s: nom illégal de section «%s»"
+msgstr "%s: nom illégal de section « %s »"
 
 #: elf32-mips.c:6132 elf64-mips.c:3150
 msgid "not enough GOT space for local GOT entries"
@@ -1274,27 +1274,27 @@ msgstr ""
 #: elf32-v850.c:682
 #, c-format
 msgid "Variable `%s' cannot occupy in multiple small data regions"
-msgstr "Variable «%s» ne peut occuper de multiples petites régions de données"
+msgstr "Variable « %s » ne peut occuper de multiples petites régions de données"
 
 #: elf32-v850.c:685
 #, c-format
 msgid "Variable `%s' can only be in one of the small, zero, and tiny data regions"
-msgstr "Variable «%s» peut seulement être dans une région de données petite, zéro ou minuscule"
+msgstr "Variable « %s » peut seulement être dans une région de données petite, zéro ou minuscule"
 
 #: elf32-v850.c:688
 #, c-format
 msgid "Variable `%s' cannot be in both small and zero data regions simultaneously"
-msgstr "Variable «%s» ne peut être dans une région de données petite et zéro à la fois"
+msgstr "Variable « %s » ne peut être dans une région de données petite et zéro à la fois"
 
 #: elf32-v850.c:691
 #, c-format
 msgid "Variable `%s' cannot be in both small and tiny data regions simultaneously"
-msgstr "Variable «%s» ne peut être dans une région de données petite et minuscule zéro à la fois"
+msgstr "Variable « %s » ne peut être dans une région de données petite et minuscule zéro à la fois"
 
 #: elf32-v850.c:694
 #, c-format
 msgid "Variable `%s' cannot be in both zero and tiny data regions simultaneously"
-msgstr "Variable «%s» ne peut être dans une région de données zéro et minuscule zéro à la fois"
+msgstr "Variable « %s » ne peut être dans une région de données zéro et minuscule zéro à la fois"
 
 #: elf32-v850.c:1072
 msgid "FAILED to find previous HI16 reloc\n"
@@ -1375,7 +1375,7 @@ msgstr "%s: directive LOCAL: registre $%ld n'est pas un registre local.  Premier
 #: elf64-mmix.c:1609
 #, c-format
 msgid "%s: Error: multiple definition of `%s'; start of %s is set in a earlier linked file\n"
-msgstr "%s: erreur: multiple définitions de «%s»; début de %s est initialisé dans un précédent fichier lié\n"
+msgstr "%s: erreur: multiple définitions de « %s »; début de %s est initialisé dans un précédent fichier lié\n"
 
 #: elf64-mmix.c:1668
 msgid "Register section has contents\n"
@@ -1398,7 +1398,7 @@ msgstr ""
 #: elf64-ppc.c:3166
 #, c-format
 msgid "linkage table overflow against `%s'"
-msgstr "débordement de la table de liaison vers «%s»"
+msgstr "débordement de la table de liaison vers « %s »"
 
 #: elf64-ppc.c:3244
 msgid "stub section size doesn't match calculated size"
@@ -1437,7 +1437,7 @@ msgstr " précédemment %s dans %s"
 #: elf64-sparc.c:1359 elf64-sparc.c:1408
 #, c-format
 msgid "Symbol `%s' has differing types: %s in %s"
-msgstr "Symbole «%s» a des types qui diffèrent: %s dans %s"
+msgstr "Symbole « %s » a des types qui diffèrent: %s dans %s"
 
 #: elf64-sparc.c:3014
 #, c-format
@@ -1457,7 +1457,7 @@ msgstr "%s: section %s est trop grande pour ajouter un trou de %ld octets"
 #: elflink.h:1113
 #, c-format
 msgid "%s: warning: unexpected redefinition of `%s'"
-msgstr "%s: AVERTISSEMENT: redéfinition inattendue de «%s»"
+msgstr "%s: AVERTISSEMENT: redéfinition inattendue de « %s »"
 
 #: elflink.h:1784
 #, c-format
@@ -1472,12 +1472,12 @@ msgstr "%s: %s: version requise invalide %d"
 #: elflink.h:1945
 #, c-format
 msgid "Warning: size of symbol `%s' changed from %lu to %lu in %s"
-msgstr "AVERTISSEMENT: taille du symbole «%s» a changé de %lu à %lu dans %s"
+msgstr "AVERTISSEMENT: taille du symbole « %s » a changé de %lu à %lu dans %s"
 
 #: elflink.h:4020
 #, c-format
 msgid "warning: type and size of dynamic symbol `%s' are not defined"
-msgstr "AVERTISSEMENT: type et taille du symbole dynamique «%s» ne sont pas définis"
+msgstr "AVERTISSEMENT: type et taille du symbole dynamique « %s » ne sont pas définis"
 
 #: elflink.h:4329
 #, c-format
@@ -1513,12 +1513,12 @@ msgstr "symboles locaux de la section mise à l'écart %s"
 #: i386linux.c:455 m68klinux.c:459 sparclinux.c:456
 #, c-format
 msgid "Output file requires shared library `%s'\n"
-msgstr "La sortie requiert une ilbrairie partagée «%s»\n"
+msgstr "La sortie requiert une ilbrairie partagée « %s »\n"
 
 #: i386linux.c:463 m68klinux.c:467 sparclinux.c:464
 #, c-format
 msgid "Output file requires shared library `%s.so.%s'\n"
-msgstr "Le fichier de sortie requiert une librairie partagée «%s.so.%s»\n"
+msgstr "Le fichier de sortie requiert une librairie partagée « %s.so.%s »\n"
 
 #: i386linux.c:653 i386linux.c:703 m68klinux.c:660 m68klinux.c:708 sparclinux.c:655 sparclinux.c:705
 #, c-format
@@ -1537,7 +1537,7 @@ msgstr "%s: chaîne trop longue (%d caractères, max 65535)"
 #: ieee.c:365
 #, c-format
 msgid "%s: unrecognized symbol `%s' flags 0x%x"
-msgstr "%s: symbole non reconnue «%s» fanions 0x%x"
+msgstr "%s: symbole non reconnue « %s » fanions 0x%x"
 
 #: ieee.c:877
 #, c-format
@@ -1557,7 +1557,7 @@ msgstr "%s: type inattendu après ATN"
 #: ihex.c:258
 #, c-format
 msgid "%s:%d: unexpected character `%s' in Intel Hex file\n"
-msgstr "%s:%d: caractères inattendue «%s» dans le fichier Intel hexadécimal\n"
+msgstr "%s:%d: caractères inattendue « %s » dans le fichier Intel hexadécimal\n"
 
 #: ihex.c:368
 #, c-format
@@ -1626,7 +1626,7 @@ msgstr " à %s ligne %d dans %s\n"
 #: linker.c:1849
 #, c-format
 msgid "%s: indirect symbol `%s' to `%s' is a loop"
-msgstr "%s: symbole indirect «%s» vers «%s» est une boucle"
+msgstr "%s: symbole indirect « %s » vers « %s » est une boucle"
 
 #: linker.c:2745
 #, c-format
@@ -1651,17 +1651,17 @@ msgstr "%s: pas de corps pour allouer un symbole %d octets de longueur\n"
 #: mmo.c:1190
 #, c-format
 msgid "%s: invalid mmo file: initialization value for $255 is not `Main'\n"
-msgstr "%s: fichier mmo invalide: valeur d'initialisation pour $255 n'est pas «Main»\n"
+msgstr "%s: fichier mmo invalide: valeur d'initialisation pour $255 n'est pas « Main »\n"
 
 #: mmo.c:1336
 #, c-format
 msgid "%s: unsupported wide character sequence 0x%02X 0x%02X after symbol name starting with `%s'\n"
-msgstr "%s: séquence de caractères large 0x%02X 0x%02X non supportée après le nom de symbole débutant avec «%s»\n"
+msgstr "%s: séquence de caractères large 0x%02X 0x%02X non supportée après le nom de symbole débutant avec « %s »\n"
 
 #: mmo.c:1571
 #, c-format
 msgid "%s: invalid mmo file: unsupported lopcode `%d'\n"
-msgstr "%s: fichier mmo invalide: lopcode non supporté «%d»\n"
+msgstr "%s: fichier mmo invalide: lopcode non supporté « %d »\n"
 
 #: mmo.c:1581
 #, c-format
@@ -1701,7 +1701,7 @@ msgstr "%s: ne allouer un nom de ficheir pour le no. de fichier %d, %d octets\n"
 #: mmo.c:1777
 #, c-format
 msgid "%s: invalid mmo file: file number %d `%s', was already entered as `%s'\n"
-msgstr "%s: fichier mmo invalide: no. de fichier %d «%s», a déjà été entré comme «%s»\n"
+msgstr "%s: fichier mmo invalide: no. de fichier %d « %s », a déjà été entré comme « %s »\n"
 
 #: mmo.c:1790
 #, c-format
@@ -1726,17 +1726,17 @@ msgstr "%s: fichier mmo invalide: YZ de lop_end (%ld) n'est pas égal au nombre d
 #: mmo.c:2610
 #, c-format
 msgid "%s: invalid symbol table: duplicate symbol `%s'\n"
-msgstr "%s: table de symboles invalides: duplication du symbole «%s»\n"
+msgstr "%s: table de symboles invalides: duplication du symbole « %s »\n"
 
 #: mmo.c:2898
 #, c-format
 msgid "%s: Bad symbol definition: `Main' set to %s rather than the start address %s\n"
-msgstr "%s: définition de symbole erronée: «Main» initialisé à %s au lieu de l'adresse de départ %s\n"
+msgstr "%s: définition de symbole erronée: « Main » initialisé à %s au lieu de l'adresse de départ %s\n"
 
 #: mmo.c:2932
 #, c-format
 msgid "%s: warning: symbol table too large for mmo, larger than 65535 32-bit words: %d.  Only `Main' will be emitted.\n"
-msgstr "%s: avertissement: table de symboles trop grande pour mmo, plus grande que 65535 mots de 32 bits: %d. Seul «Main» sera produit.\n"
+msgstr "%s: avertissement: table de symboles trop grande pour mmo, plus grande que 65535 mots de 32 bits: %d. Seul « Main » sera produit.\n"
 
 #: mmo.c:2977
 #, c-format
@@ -1766,7 +1766,7 @@ msgstr "%s: adresse de départ invalide pour des registres initialisés de longueu
 #: oasys.c:1036
 #, c-format
 msgid "%s: can not represent section `%s' in oasys"
-msgstr "%s: ne peut représenter la section «%s» dans oasis"
+msgstr "%s: ne peut représenter la section « %s » dans oasis"
 
 #: osf-core.c:132
 #, c-format
@@ -1776,7 +1776,7 @@ msgstr "Type de section de fichier core OSF/1 non traité %d\n"
 #: pe-mips.c:658
 #, c-format
 msgid "%s: `ld -r' not supported with PE MIPS objects\n"
-msgstr "%s: «ld -r» non supporté avec les objets PE MIPS\n"
+msgstr "%s: « ld -r » non supporté avec les objets PE MIPS\n"
 
 #. OK, at this point the following variables are set up:
 #. src = VMA of the memory we're fixing up
@@ -1860,7 +1860,7 @@ msgstr "Champ de fanion     = 0x%.2x\n"
 #: ppcboot.c:427
 #, c-format
 msgid "Partition name      = \"%s\"\n"
-msgstr "Nom de partition    = «%s»\n"
+msgstr "Nom de partition    = « %s »\n"
 
 #: ppcboot.c:446
 #, c-format
@@ -1893,7 +1893,7 @@ msgstr "som_sizeof_headers non implanté"
 #: srec.c:301
 #, c-format
 msgid "%s:%d: Unexpected character `%s' in S-record file\n"
-msgstr "%s:%d: caractère inattendue «%s» dans le fichier S-record\n"
+msgstr "%s:%d: caractère inattendue « %s » dans le fichier S-record\n"
 
 #: syms.c:996
 msgid "Unsupported .stab relocation"
@@ -1971,12 +1971,12 @@ msgstr "Commande STA réservée %d"
 #: vms-tir.c:443
 #, c-format
 msgid "ETIR_S_C_STO_GBL: no symbol \"%s\""
-msgstr "ETIR_S_C_STO_GBL: pas de symbole «%s»"
+msgstr "ETIR_S_C_STO_GBL: pas de symbole « %s »"
 
 #: vms-tir.c:465
 #, c-format
 msgid "ETIR_S_C_STO_CA: no symbol \"%s\""
-msgstr "ETIR_S_C_STO_CA: pas de symbole «%s»"
+msgstr "ETIR_S_C_STO_CA: pas de symbole « %s »"
 
 #: vms-tir.c:478
 msgid "ETIR_S_C_STO_RB/AB: Not supported"
@@ -2144,37 +2144,37 @@ msgstr "Relocalisation non traitée: %s"
 #: xcofflink.c:1241
 #, c-format
 msgid "%s: `%s' has line numbers but no enclosing section"
-msgstr "%s: «%s» contient des numéros de lignes mais de section de fermeture"
+msgstr "%s: « %s » contient des numéros de lignes mais de section de fermeture"
 
 #: xcofflink.c:1294
 #, c-format
 msgid "%s: class %d symbol `%s' has no aux entries"
-msgstr "%s: classe %d symbole «%s» n'a pas d'entrée auxiliaire"
+msgstr "%s: classe %d symbole « %s » n'a pas d'entrée auxiliaire"
 
 #: xcofflink.c:1317
 #, c-format
 msgid "%s: symbol `%s' has unrecognized csect type %d"
-msgstr "%s: symbole «%s» a un type csect non reconnu %d"
+msgstr "%s: symbole « %s » a un type csect non reconnu %d"
 
 #: xcofflink.c:1329
 #, c-format
 msgid "%s: bad XTY_ER symbol `%s': class %d scnum %d scnlen %d"
-msgstr "%s: symbole XTY_ER erroné «%s»: classe %d scnum %d scnlen %d"
+msgstr "%s: symbole XTY_ER erroné « %s »: classe %d scnum %d scnlen %d"
 
 #: xcofflink.c:1365
 #, c-format
 msgid "%s: XMC_TC0 symbol `%s' is class %d scnlen %d"
-msgstr "%s: XMC_TC0 symbol «%s» est la classe %d scnlen %d"
+msgstr "%s: XMC_TC0 symbol « %s » est la classe %d scnlen %d"
 
 #: xcofflink.c:1517
 #, c-format
 msgid "%s: csect `%s' not in enclosing section"
-msgstr "%s: csect «%s» n'est pas dans un section fermée"
+msgstr "%s: csect « %s » n'est pas dans un section fermée"
 
 #: xcofflink.c:1624
 #, c-format
 msgid "%s: misplaced XTY_LD `%s'"
-msgstr "%s: XTY_LD mal placé «%s»"
+msgstr "%s: XTY_LD mal placé « %s »"
 
 #: xcofflink.c:1948
 #, c-format
@@ -2203,7 +2203,7 @@ msgstr "erreur: symbole __rtinit indéfini"
 #: xcofflink.c:3458
 #, c-format
 msgid "warning: attempt to export undefined symbol `%s'"
-msgstr "AVERTISSEMENT: tentative d'exportation d'un symbole indéfini «%s»"
+msgstr "AVERTISSEMENT: tentative d'exportation d'un symbole indéfini « %s »"
 
 #: xcofflink.c:4452
 #, c-format
@@ -2213,12 +2213,12 @@ msgstr "Débordement de la table des entrées: 0x%lx > 0x10000; essayer l'option -
 #: xcofflink.c:5292 xcofflink.c:5754 xcofflink.c:5816 xcofflink.c:6117
 #, c-format
 msgid "%s: loader reloc in unrecognized section `%s'"
-msgstr "%s: chargeur de relocalisation dans une section non reconnnue «%s»"
+msgstr "%s: chargeur de relocalisation dans une section non reconnnue « %s »"
 
 #: xcofflink.c:5314 xcofflink.c:6128
 #, c-format
 msgid "%s: `%s' in loader reloc but not loader sym"
-msgstr "%s: «%s» est dans le chargeur de relocalisation mais pas dans celui des symboles"
+msgstr "%s: « %s » est dans le chargeur de relocalisation mais pas dans celui des symboles"
 
 #: xcofflink.c:5329
 #, c-format

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gprof 2.12-pre020121\n"
 "POT-Creation-Date: 2002-01-17 14:03+0000\n"
-"PO-Revision-Date: 2002-03-10 08:00-0500\n"
+"PO-Revision-Date: 2002-03-16 21:00-0500\n"
 "Last-Translator: Michel Robitaille <robitail@IRO.UMontreal.CA>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "MIME-Version: 1.0\n"
@@ -262,7 +262,7 @@ msgstr "%s: l'option -c n'est pas supporté l'architecture %s\n"
 #: corefile.c:432
 #, c-format
 msgid "%s: file `%s' has no symbols\n"
-msgstr "%s: fichier «%s» n'a pas de symbole\n"
+msgstr "%s: fichier « %s » n'a pas de symbole\n"
 
 #: corefile.c:732
 #, c-format
@@ -287,12 +287,12 @@ msgstr "%s: fichier trop court pour être un fichier gmon\n"
 #: gmon_io.c:217 gmon_io.c:333
 #, c-format
 msgid "%s: file `%s' has bad magic cookie\n"
-msgstr "%s: fichier «%s» a un nombre magique erroné\n"
+msgstr "%s: fichier « %s » a un nombre magique erroné\n"
 
 #: gmon_io.c:228
 #, c-format
 msgid "%s: file `%s' has unsupported version %d\n"
-msgstr "%s: fichier «%s» est d'une version non supportée %d\n"
+msgstr "%s: fichier « %s » est d'une version non supportée %d\n"
 
 #: gmon_io.c:258
 #, c-format
@@ -312,7 +312,7 @@ msgstr "%s: incompatible avec le premier fichier gmon\n"
 #: gmon_io.c:378
 #, c-format
 msgid "%s: file '%s' does not appear to be in gmon.out format\n"
-msgstr "%s: fichier «%s» ne semble pas être dans le format gmon.out\n"
+msgstr "%s: fichier « %s » ne semble pas être dans le format gmon.out\n"
 
 #: gmon_io.c:399
 #, c-format
@@ -331,7 +331,7 @@ msgstr "%s: ne sait pas comment gérer le format %d du fichier\n"
 #: gmon_io.c:448
 #, c-format
 msgid "File `%s' (version %d) contains:\n"
-msgstr "Fichier «%s» (version %d) contient:\n"
+msgstr "Fichier « %s » (version %d) contient:\n"
 
 #: gmon_io.c:451
 #, c-format
@@ -426,7 +426,7 @@ msgstr "Ce logiciel est libre. AUCUNE garantie n'est donnée.\n"
 #: gprof.c:440
 #, c-format
 msgid "%s: unknown demangling style `%s'\n"
-msgstr "%s: style d'encodage par mutilation inconnu «%s»\n"
+msgstr "%s: style d'encodage par mutilation inconnu « %s »\n"
 
 #: gprof.c:460
 #, c-format
@@ -436,7 +436,7 @@ msgstr "%s: une seule des options --function-ordering et --file-ordering peut êt
 #: gprof.c:560
 #, c-format
 msgid "%s: sorry, file format `prof' is not yet supported\n"
-msgstr "%s: désolé, le format de fichier «prof» n'est pas encore supporté\n"
+msgstr "%s: désolé, le format de fichier « prof » n'est pas encore supporté\n"
 
 #: gprof.c:621
 #, c-format
@@ -451,7 +451,7 @@ msgstr "%s: le fichier gmon.out n'a pas de données de type call-graph\n"
 #: hist.c:121
 #, c-format
 msgid "%s: `%s' is incompatible with first gmon file\n"
-msgstr "%s: «%s» est incompatible avec le premier fichier gmon\n"
+msgstr "%s: « %s » est incompatible avec le premier fichier gmon\n"
 
 #: hist.c:137
 #, c-format
@@ -528,7 +528,7 @@ msgstr "Profile plat:\n"
 #: source.c:163
 #, c-format
 msgid "%s: could not locate `%s'\n"
-msgstr "%s: n'a pu localiser «%s»\n"
+msgstr "%s: n'a pu localiser « %s »\n"
 
 #: source.c:238
 #, c-format

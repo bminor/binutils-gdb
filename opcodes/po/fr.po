@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: opcodes 2.12-pre020121\n"
 "POT-Creation-Date: 2002-01-17 13:58+0000\n"
-"PO-Revision-Date: 2002-03-10 08:00-0500\n"
+"PO-Revision-Date: 2002-03-17 20:00-0500\n"
 "Last-Translator: Michel Robitaille <robitail@IRO.UMontreal.CA>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "MIME-Version: 1.0\n"
@@ -60,7 +60,7 @@ msgstr "Erreur interne du désassembleur"
 #: avr-dis.c:228
 #, c-format
 msgid "unknown constraint `%c'"
-msgstr "contrainte inconnue «%c»"
+msgstr "contrainte inconnue « %c »"
 
 #: cgen-asm.c:346 fr30-ibld.c:195 m32r-ibld.c:195 openrisc-ibld.c:195
 #, c-format
@@ -105,12 +105,12 @@ msgstr "instruction non reconnue"
 #: fr30-asm.c:557 m32r-asm.c:559 openrisc-asm.c:478
 #, c-format
 msgid "syntax error (expected char `%c', found `%c')"
-msgstr "erreur de syntaxe (caractère «%c» attendu,  «%c» obtenu)"
+msgstr "erreur de syntaxe (caractère « %c » attendu,  « %c » obtenu)"
 
 #: fr30-asm.c:567 m32r-asm.c:569 openrisc-asm.c:488
 #, c-format
 msgid "syntax error (expected char `%c', found end of instruction)"
-msgstr "erreur de syntaxe (caractère «%c» attendu, fin de l'instruction obtenue)"
+msgstr "erreur de syntaxe (caractère « %c » attendu, fin de l'instruction obtenue)"
 
 #: fr30-asm.c:595 m32r-asm.c:597 openrisc-asm.c:516
 msgid "junk at end of line"
@@ -123,12 +123,12 @@ msgstr "forme d'instruction non reconnue"
 #: fr30-asm.c:714 m32r-asm.c:716 openrisc-asm.c:635
 #, c-format
 msgid "bad instruction `%.50s...'"
-msgstr "instruction erronée «%.50s...»"
+msgstr "instruction erronée « %.50s... »"
 
 #: fr30-asm.c:717 m32r-asm.c:719 openrisc-asm.c:638
 #, c-format
 msgid "bad instruction `%.50s'"
-msgstr "instruction erronée «%.50s»"
+msgstr "instruction erronée « %.50s »"
 
 #. Default text to print if an instruction isn't recognized.
 #: fr30-dis.c:39 m32r-dis.c:39 mmix-dis.c:282 openrisc-dis.c:39
@@ -323,17 +323,17 @@ msgstr "inconnu"
 #: sparc-dis.c:824
 #, c-format
 msgid "Internal error:  bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
-msgstr "Erreur interne:  sparc-opcode.h erroné: «%s», %#.8lx, %#.8lx\n"
+msgstr "Erreur interne:  sparc-opcode.h erroné: « %s », %#.8lx, %#.8lx\n"
 
 #: sparc-dis.c:835
 #, c-format
 msgid "Internal error: bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
-msgstr "Erreur interne: sparc-opcode.h erroné: «%s», %#.8lx, %#.8lx\n"
+msgstr "Erreur interne: sparc-opcode.h erroné: « %s », %#.8lx, %#.8lx\n"
 
 #: sparc-dis.c:884
 #, c-format
 msgid "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n"
-msgstr "Erreur interne: sparc-opcode.h erroné: «%s» == «%s»\n"
+msgstr "Erreur interne: sparc-opcode.h erroné: « %s » == « %s »\n"
 
 #: v850-dis.c:224
 #, c-format

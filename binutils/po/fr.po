@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU binutils 2.12-pre020121\n"
 "POT-Creation-Date: 2002-01-17 13:58+0000\n"
-"PO-Revision-Date: 2002-03-10 08:00-0500\n"
+"PO-Revision-Date: 2002-03-17 20:00-0500\n"
 "Last-Translator: Michel Robitaille <robitail@IRO.UMontreal.CA>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "MIME-Version: 1.0\n"
@@ -37,7 +37,7 @@ msgstr "%s: ne peut obtenir l'adresse à partir de l'archive"
 #: addr2line.c:312 nm.c:447 objdump.c:2800
 #, c-format
 msgid "unknown demangling style `%s'"
-msgstr "style de d'encodage par mutilation inconnu «%s»"
+msgstr "style de d'encodage par mutilation inconnu « %s »"
 
 #: ar.c:237
 #, c-format
@@ -166,15 +166,15 @@ msgstr "aucune opération spécifiée"
 
 #: ar.c:615
 msgid "`u' is only meaningful with the `r' option."
-msgstr "«u» n'a de sens qu'avec l'option «r»."
+msgstr "« u » n'a de sens qu'avec l'option « r »."
 
 #: ar.c:625
 msgid "`N' is only meaningful with the `x' and `d' options."
-msgstr "«N» n'a de  sens qu'avec les options «x» et «d»."
+msgstr "« N » n'a de  sens qu'avec les options « x » et « d »."
 
 #: ar.c:628
 msgid "Value for `N' must be positive."
-msgstr "La valeur de «N» doit être positive."
+msgstr "La valeur de « N » doit être positive."
 
 #: ar.c:711
 #, c-format
@@ -220,7 +220,7 @@ msgstr "création de %s"
 #: ar.c:1226
 #, c-format
 msgid "No member named `%s'\n"
-msgstr "Aucun membre ayant le nom «%s»\n"
+msgstr "Aucun membre ayant le nom « %s »\n"
 
 #: ar.c:1278
 #, c-format
@@ -290,7 +290,7 @@ msgstr "%s: aucune archive ouverte\n"
 #: bucomm.c:106
 #, c-format
 msgid "can't set BFD default target to `%s': %s"
-msgstr "ne peut initialiser les paramètres par défaut BDF cible vers «%s»: %s"
+msgstr "ne peut initialiser les paramètres par défaut BDF cible vers « %s »: %s"
 
 #: bucomm.c:118
 #, c-format
@@ -732,7 +732,7 @@ msgstr "Incapable d'ouvrir le fichier de base: %s"
 #: dlltool.c:3344
 #, c-format
 msgid "Machine '%s' not supported"
-msgstr "Machine «%s» n'est pas supportée"
+msgstr "Machine « %s » n'est pas supportée"
 
 #: dlltool.c:3447 dllwrap.c:240
 #, c-format
@@ -801,7 +801,7 @@ msgstr "  Options pour %s:\n"
 
 #: dllwrap.c:526
 msgid "   --driver-name <driver> Defaults to \"gcc\"\n"
-msgstr "   --driver-name <pilote> par défaut «gcc»\n"
+msgstr "   --driver-name <pilote> par défaut « gcc »\n"
 
 #: dllwrap.c:527
 msgid "   --driver-flags <flags> Override default ld flags\n"
@@ -809,7 +809,7 @@ msgstr "   --driver-flags <fanion> écrasesr les fanions par défaut de ld\n"
 
 #: dllwrap.c:528
 msgid "   --dlltool-name <dlltool> Defaults to \"dlltool\"\n"
-msgstr "   --dlltool-name <outil-dll> par défaut «dlltool»\n"
+msgstr "   --dlltool-name <outil-dll> par défaut « dlltool »\n"
 
 #: dllwrap.c:529
 msgid "   --entry <entry>        Specify alternate DLL entry point\n"
@@ -1248,7 +1248,7 @@ msgstr "AVERTISSEMENT: procédure CHECK %s n'est pas définie"
 
 #: nlmconv.c:726 nlmconv.c:915
 msgid "custom section"
-msgstr "section «custom»"
+msgstr "section « custom »"
 
 #: nlmconv.c:747 nlmconv.c:944
 msgid "help section"
@@ -1413,14 +1413,14 @@ msgstr ""
 "  -A, --print-file-name  afficher le nom du fichier d'entrée avant chaque symbole\n"
 "  -B                     identique à --format=bsd\n"
 "  -C, --demangle[=STYLE] décoder les noms des symboles de bas niveau en noms de ceux\n"
-"                         du niveau  usager. Le STYLE, si spécifié, peut être «auto»\n"
-"                         (par défaut), «gnu», «lucid», «arm», «hp», «edg» ou «gnu-new-abi»,\n"
+"                         du niveau  usager. Le STYLE, si spécifié, peut être « auto »\n"
+"                         (par défaut), « gnu », « lucid », « arm », « hp », « edg » ou « gnu-new-abi »,\n"
 "      --no-demangle      ne pas encoder par mutilation les noms des symboles de bas niveau\n"
 "  -D, --dynamic          afficher les symboles dynamiques au lieu des symboles normaux\n"
 "      --defined-only     afficher seulement les symboles définis\n"
 "  -e                     (ignoré)\n"
-"  -f, --format=FORMAT    utiliser le FORMAT de sortie qui peut être «bsd» (par défaut),\n"
-"                         «sysv» ou «posix».\n"
+"  -f, --format=FORMAT    utiliser le FORMAT de sortie qui peut être « bsd » (par défaut),\n"
+"                         « sysv » ou « posix ».\n"
 "  -g, --extern-only      afficher seulement les symboles externes\n"
 "  -h, --help             afficher cette information\n"
 "  -l, --line-numbers     utiliser les informations de débug pour repérer le nom de fichier\n"
@@ -1697,7 +1697,7 @@ msgstr ""
 #: objcopy.c:504
 #, c-format
 msgid "unrecognized section flag `%s'"
-msgstr "fanion de section non reconnnu «%s»"
+msgstr "fanion de section non reconnnu « %s »"
 
 #: objcopy.c:505
 #, c-format
@@ -1727,12 +1727,12 @@ msgstr "Rebuts ignorés trouvés sur la ligne %d de %s"
 #: objcopy.c:886
 #, c-format
 msgid "%s: Multiple redefinition of symbol \"%s\""
-msgstr "%s: re-définition multiples du symbole «%s»"
+msgstr "%s: re-définition multiples du symbole « %s »"
 
 #: objcopy.c:891
 #, c-format
 msgid "%s: Symbol \"%s\" is target of more than one redefinition"
-msgstr "%s: symbole «%s» cible plus d'une re-définition"
+msgstr "%s: symbole « %s » cible plus d'une re-définition"
 
 #: objcopy.c:943
 msgid "Unable to change endianness of input file(s)"
@@ -1751,7 +1751,7 @@ msgstr "AVERTISSEMENT: fichier de sortie ne peut représenter l'architecture %s"
 #: objcopy.c:1002
 #, c-format
 msgid "can't create section `%s': %s"
-msgstr "Ne peut créer la section «%s»: %s"
+msgstr "Ne peut créer la section « %s »: %s"
 
 #: objcopy.c:1088
 #, c-format
@@ -1809,7 +1809,7 @@ msgstr "données privées"
 #: objcopy.c:1632
 #, c-format
 msgid "%s: section `%s': error in %s: %s"
-msgstr "%s: section «%s»: erreur dans %s: %s"
+msgstr "%s: section « %s »: erreur dans %s: %s"
 
 #: objcopy.c:1910
 #, c-format
@@ -1869,7 +1869,7 @@ msgstr "architecture %s inconnue"
 
 #: objcopy.c:2543
 msgid "Warning: input target 'binary' required for binary architecture parameter."
-msgstr "AVERTISSEMENT: la cible d'entrée «binary» requiert un paramètre pour une architecture binaire."
+msgstr "AVERTISSEMENT: la cible d'entrée « binary » requiert un paramètre pour une architecture binaire."
 
 #: objcopy.c:2544
 #, c-format
@@ -1977,13 +1977,13 @@ msgstr ""
 "  -m, --architecture=MACHINE     spécifier l'architecture cible de la MACHINE\n"
 "  -j, --section=NOM              afficher seulement les informations de la section du NOM\n"
 "  -M, --disassembler-options=OPT relayer l'OPTion au dé-assembleur\n"
-"  -EB --endian=big               assumer le format «big endian» lors du dé-assemblage\n"
-"  -EL --endian=little            assumer le format «little endian» lors du dé-assemblage\n"
+"  -EB --endian=big               assumer le format « big endian » lors du dé-assemblage\n"
+"  -EL --endian=little            assumer le format « little endian » lors du dé-assemblage\n"
 "      --file-start-context       inclure le contexte à partir du début du fichier (avec -S)\n"
 "  -l, --line-numbers             inclure les numéros de ligne et les noms de fichier dans la sortie\n"
 "  -C, --demangle[=STYLE]         décoder les mutilations/traitements des noms de symboles\n"
-"                                 Le STYLE, si spécifé, peut être «auto», «gnu»,\n"
-"                                 «lucid», «arm», «hp», «edg», ou «gnu-new-abi»,\n"
+"                                 Le STYLE, si spécifé, peut être « auto », « gnu »,\n"
+"                                 « lucid », « arm », « hp », « edg », ou « gnu-new-abi »,\n"
 "  -w, --wide                     formatter la sortie pour plus de 80 colonnes\n"
 "  -z, --disassemble-zeroes       ne pas escamoter les blocs de zéros lors du dé-assemblage\n"
 "      --start-address=ADR        traiter seulement les données dont les adresses sont >= ADR\n"
@@ -2125,7 +2125,7 @@ msgstr "option -E non reconnue"
 #: objdump.c:2836
 #, c-format
 msgid "unrecognized --endian type `%s'"
-msgstr "type non reconnu --endian «%s»"
+msgstr "type non reconnu --endian « %s »"
 
 #: rdcoff.c:205
 #, c-format
@@ -2398,7 +2398,7 @@ msgstr "Mémoire épuisée allocation d'une table pour requêtes de vidange"
 #: readelf.c:2357
 #, c-format
 msgid "Unrecognised debug option '%s'\n"
-msgstr "Option de débug non reconnue «%s»\n"
+msgstr "Option de débug non reconnue « %s »\n"
 
 #: readelf.c:2385
 #, c-format
@@ -2908,7 +2908,7 @@ msgid ""
 "Version definition section '%s' contains %ld entries:\n"
 msgstr ""
 "\n"
-"Section des définitions de version «%s» contient %ld entrées:\n"
+"Section des définitions de version « %s » contient %ld entrées:\n"
 
 #: readelf.c:4749
 msgid "  Addr: 0x"
@@ -2960,7 +2960,7 @@ msgid ""
 "Version needs section '%s' contains %ld entries:\n"
 msgstr ""
 "\n"
-"Version nécessitant la section «%s» contenant %ld entrées:\n"
+"Version nécessitant la section « %s » contenant %ld entrées:\n"
 
 #: readelf.c:4840
 msgid " Addr: 0x"
@@ -3021,7 +3021,7 @@ msgid ""
 "Version symbols section '%s' contains %d entries:\n"
 msgstr ""
 "\n"
-"La version de section «%s» des symboles contient %d entrée:\n"
+"La version de section « %s » des symboles contient %d entrée:\n"
 
 #: readelf.c:4944
 msgid " Addr: "
@@ -3117,7 +3117,7 @@ msgid ""
 "Symbol table '%s' contains %lu entries:\n"
 msgstr ""
 "\n"
-"Table de symboles «%s» contient %lu entrées:\n"
+"Table de symboles « %s » contient %lu entrées:\n"
 
 #: readelf.c:5379
 msgid "   Num:    Value  Size Type    Bind   Vis      Ndx Name\n"
@@ -3194,7 +3194,7 @@ msgid ""
 "Section '%s' has no data to dump.\n"
 msgstr ""
 "\n"
-"La section «%s» n'a pas de données à être videngé.\n"
+"La section « %s » n'a pas de données à être videngé.\n"
 
 #: readelf.c:5724
 #, c-format
@@ -3203,7 +3203,7 @@ msgid ""
 "Hex dump of section '%s':\n"
 msgstr ""
 "\n"
-"Vidange hexadécimale de la section «%s»:\n"
+"Vidange hexadécimale de la section « %s »:\n"
 
 #: readelf.c:5729
 msgid "section data"
@@ -3309,7 +3309,7 @@ msgstr "  Longueur minimale des instructions:  %d\n"
 #: readelf.c:5988
 #, c-format
 msgid "  Initial value of 'is_stmt':  %d\n"
-msgstr "  Valeur initiale de «is_stmt»:  %d\n"
+msgstr "  Valeur initiale de « is_stmt »:  %d\n"
 
 #: readelf.c:5989
 #, c-format
@@ -3514,7 +3514,7 @@ msgstr ""
 #: readelf.c:6333
 #, c-format
 msgid "Unknown TAG value: %lx"
-msgstr "Valeur d'étiquette («TAG») inconnue: %lx"
+msgstr "Valeur d'étiquette (« TAG ») inconnue: %lx"
 
 #: readelf.c:6443
 #, c-format
@@ -3766,7 +3766,7 @@ msgid ""
 "Section '%s' has no debugging data.\n"
 msgstr ""
 "\n"
-"La section «%s» n'a aucune donnée de débug.\n"
+"La section « %s » n'a aucune donnée de débug.\n"
 
 #: readelf.c:8570 readelf.c:8632
 msgid "debug section data"
@@ -3796,7 +3796,7 @@ msgid ""
 "Section '%s' contains %d entries:\n"
 msgstr ""
 "\n"
-"Section «%s» contient %d entrées:\n"
+"Section « %s » contient %d entrées:\n"
 
 #: readelf.c:9010
 msgid "conflict list with without table"
@@ -3813,7 +3813,7 @@ msgid ""
 "Section '.conflict' contains %ld entries:\n"
 msgstr ""
 "\n"
-"La section «.conflict» contient %ld entrées:\n"
+"La section « .conflict » contient %ld entrées:\n"
 
 #: readelf.c:9056
 msgid "  Num:    Index       Value  Name"
@@ -4232,12 +4232,12 @@ msgstr "ne peut obtenir le type de la relocalisation BFD_RELOC_RVA"
 #: resrc.c:240 resrc.c:312
 #, c-format
 msgid "can't open temporary file `%s': %s"
-msgstr "ne peut ouvrir un fichier temporaire «%s»: %s"
+msgstr "ne peut ouvrir un fichier temporaire « %s »: %s"
 
 #: resrc.c:246
 #, c-format
 msgid "can't redirect stdout: `%s': %s"
-msgstr "ne peut rediriger sur stdout: «%s»: %s"
+msgstr "ne peut rediriger sur stdout: « %s »: %s"
 
 #: resrc.c:262
 #, c-format
@@ -4247,17 +4247,17 @@ msgstr "%s %s: %s"
 #: resrc.c:308
 #, c-format
 msgid "can't execute `%s': %s"
-msgstr "ne peut exécuter «%s»: %s"
+msgstr "ne peut exécuter « %s »: %s"
 
 #: resrc.c:317
 #, c-format
 msgid "Using temporary file `%s' to read preprocessor output\n"
-msgstr "Utilisation d'un fichier temporaire «%s» pour lire la sortie du préprocesseur\n"
+msgstr "Utilisation d'un fichier temporaire « %s » pour lire la sortie du préprocesseur\n"
 
 #: resrc.c:324
 #, c-format
 msgid "can't popen `%s': %s"
-msgstr "ne peut ouvrir un pipe par popen() «%s»: %s"
+msgstr "ne peut ouvrir un pipe par popen() « %s »: %s"
 
 #: resrc.c:326
 msgid "Using popen to read preprocessor output\n"
@@ -4266,12 +4266,12 @@ msgstr "Utilisation de popen pour lire la sortie du préprocesseur\n"
 #: resrc.c:369
 #, c-format
 msgid "Tried `%s'\n"
-msgstr "Essayé «%s»\n"
+msgstr "Essayé « %s »\n"
 
 #: resrc.c:380
 #, c-format
 msgid "Using `%s'\n"
-msgstr "Utilisation de «%s»\n"
+msgstr "Utilisation de « %s »\n"
 
 #: resrc.c:541
 #, c-format
@@ -4291,12 +4291,12 @@ msgstr "%s: lecture de %lu retourné %lu"
 #: resrc.c:649 resrc.c:903 resrc.c:1176 resrc.c:1330
 #, c-format
 msgid "stat failed on bitmap file `%s': %s"
-msgstr "échec d'évaluation par stat() du fichier bitmap «%s»: %s"
+msgstr "échec d'évaluation par stat() du fichier bitmap « %s »: %s"
 
 #: resrc.c:702
 #, c-format
 msgid "cursor file `%s' does not contain cursor data"
-msgstr "fichier curseur «%s» ne contient aucune donnée de type curseur"
+msgstr "fichier curseur « %s » ne contient aucune donnée de type curseur"
 
 #: resrc.c:734 resrc.c:1047
 #, c-format
@@ -4314,12 +4314,12 @@ msgstr "donnée de contrôle requiert DIALOGEX"
 #: resrc.c:1016
 #, c-format
 msgid "icon file `%s' does not contain icon data"
-msgstr "fichier d'icônes «%s» ne contient pas de données de type icône"
+msgstr "fichier d'icônes « %s » ne contient pas de données de type icône"
 
 #: resrc.c:1535
 #, c-format
 msgid "can't open `%s' for output: %s"
-msgstr "ne peut ouvrir «%s» pour la sortie: %s"
+msgstr "ne peut ouvrir « %s » pour la sortie: %s"
 
 #: size.c:79
 #, c-format
@@ -4372,7 +4372,7 @@ msgstr "débordement numérique"
 #: stabs.c:354
 #, c-format
 msgid "Bad stab: %s\n"
-msgstr "Mauvaise inclusion («stab»): %s\n"
+msgstr "Mauvaise inclusion (« stab »): %s\n"
 
 #: stabs.c:364
 #, c-format
@@ -4454,7 +4454,7 @@ msgstr "Type XCOFF non reconnu %d\n"
 #: stabs.c:3763
 #, c-format
 msgid "bad mangled name `%s'\n"
-msgstr "mauvais codage par mutilation du nom «%s»\n"
+msgstr "mauvais codage par mutilation du nom « %s »\n"
 
 #: stabs.c:3859
 msgid "no argument types in mangled string\n"
@@ -4506,7 +4506,7 @@ msgstr ""
 #: windres.c:237
 #, c-format
 msgid "can't open %s `%s': %s"
-msgstr "ne peut ouvrir %s «%s»: %s"
+msgstr "ne peut ouvrir %s « %s »: %s"
 
 #: windres.c:416
 msgid ": expected to be a directory\n"
@@ -4528,7 +4528,7 @@ msgstr ": valeur dupliquée\n"
 #: windres.c:602
 #, c-format
 msgid "unknown format type `%s'"
-msgstr "type de format inconnu «%s»"
+msgstr "type de format inconnu « %s »"
 
 #: windres.c:603
 #, c-format
@@ -4539,7 +4539,7 @@ msgstr "%s: formats supportés:"
 #: windres.c:690
 #, c-format
 msgid "can not determine type of file `%s'; use the -I option"
-msgstr "ne peut déterminer le type de fichier «%s»; utiliser l'option -I"
+msgstr "ne peut déterminer le type de fichier « %s »; utiliser l'option -I"
 
 #: windres.c:704
 #, c-format
@@ -4624,7 +4624,7 @@ msgstr "stab_int_type: mauvaise taille %u"
 #: wrstabs.c:1467
 #, c-format
 msgid "%s: warning: unknown size for field `%s' in struct"
-msgstr "%s: AVERTISSEMENT: taille inconnue pour le champ «%s» dans le struct"
+msgstr "%s: AVERTISSEMENT: taille inconnue pour le champ « %s » dans le struct"
 
 #~ msgid "GNU %s version %s\n"
 #~ msgstr "GNU %s version %s\n"
