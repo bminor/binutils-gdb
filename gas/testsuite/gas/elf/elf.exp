@@ -6,7 +6,7 @@ proc run_list_test { name suffix opts } {
     global READELF
     global srcdir subdir
     set testname "elf $name list"
-    set file $srcdir/$subdir/$readelf
+    set file $srcdir/$subdir/$name
     gas_run ${name}.s "$opts -o dump.o" ">&dump.out"
     if { [regexp_diff "dump.out" "${file}.l"] } then {
 	fail $testname

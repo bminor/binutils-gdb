@@ -1,3 +1,7 @@
+2001-06-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/elf/elf.exp (run_list_test): Undo $readelf change in 2001-06-07.
+
 2001-06-07  H.J. Lu  <hjl@gnu.org>
 
 	* gas/elf/section2.e-mips: New file.
