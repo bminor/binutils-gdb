@@ -875,39 +875,18 @@ pe_ILF_build_a_bfd (bfd *           abfd,
       /* If necessary, trim the import symbol name.  */
       symbol = symbol_name;
 
+      /* As used by MS compiler, '_', '@', and '?' are alternative
+	 forms of USER_LABEL_PREFIX, with '?' for c++ mangled names,
+	 '@' used for fastcall (in C),  '_' everywhere else.  Only one
+	 of these is used for a symbol.  We strip this leading char for
+	 IMPORT_NAME_NOPREFIX and IMPORT_NAME_UNDECORATE as per the
+	 PE COFF 6.0 spec (section 8.3, Import Name Type).  */
+
       if (import_name_type != IMPORT_NAME)
 	{
-	  bfd_boolean skipped_leading_underscore = FALSE;
-	  bfd_boolean skipped_leading_at = FALSE;
-	  bfd_boolean skipped_leading_question_mark = FALSE;
-	  bfd_boolean check_again;
-	  
-	  /* Skip any prefix in symbol_name.  */
-	  -- symbol;
-	  do
-	    {
-	      check_again = FALSE;
-	      ++ symbol;
-
-	      switch (*symbol)
-		{
-		case '@':
-		  if (! skipped_leading_at)
-		    check_again = skipped_leading_at = TRUE;
-		  break;
-		case '?':
-		  if (! skipped_leading_question_mark)
-		    check_again = skipped_leading_question_mark = TRUE;
-		  break;
-		case '_':
-		  if (! skipped_leading_underscore)
-		    check_again = skipped_leading_underscore = TRUE;
-		  break;
-		default:
-		  break;
-		}
-	    }
-	  while (check_again);
+	  char c = symbol[0];
+	  if (c == '_' || c == '@' || c == '?')
+	    symbol++;
 	}
       
       len = strlen (symbol);

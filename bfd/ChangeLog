@@ -1,3 +1,10 @@
+2005-03-19  Danny Smith <dannysmith@users.sourceforge.net>
+	    Ross Ridge  <rridge@csclub.uwaterloo.ca>
+
+	* peicode.h (pe_ILF_build_a_bfd): Strip only one prefix
+	character in IMPORT_NAME_UNDECORATE and IMPORT_NAME_NOPREFIX
+	cases.  Add comment.
+
 2005-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (elf_mark_used_section): Remove check for special
