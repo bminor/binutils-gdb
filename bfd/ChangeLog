@@ -1,5 +1,7 @@
 Sat Jun  6 00:31:21 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* elf32-m32r.c: Add prototyps for static functions.
+
 	* coff-arm.c: Add prototypes for static functions. 
 
 Fri Jun  5 17:21:51 1998  Nick Clifton  <nickc@cygnus.com>
