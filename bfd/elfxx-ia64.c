@@ -1187,6 +1187,19 @@ elfNN_ia64_final_write_processing (abfd, linker)
 	  break;
 	}
     }
+
+  if (! elf_flags_init (abfd))
+    {
+      unsigned long flags = 0;
+
+      if (abfd->xvec->byteorder == BFD_ENDIAN_BIG)
+	flags |= EF_IA_64_BE;
+      if (bfd_get_mach (abfd) == bfd_mach_ia64_elf64)
+	flags |= EF_IA_64_ABI64;
+
+      elf_elfheader(abfd)->e_flags = flags;
+      elf_flags_init (abfd) = true;
+    }
 }
 
 /* Hook called by the linker routine which adds symbols from an object
