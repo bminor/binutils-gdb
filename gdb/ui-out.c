@@ -58,6 +58,38 @@ struct ui_out_level
     enum ui_out_type type;
   };
 
+/* Tables are special.  Maintain a separate structure that tracks
+   their state.  At present an output can only contain a single table
+   but that restriction might eventually be lifted.  */
+
+struct ui_out_table
+{
+  /* If on, a table is being generated.  */
+  int flag;
+
+  /* If on, the body of a table is being generated.  If off, the table
+     header is being generated.  */
+  int body_flag;
+
+  /* Number of table columns (as specified in the table_begin call).  */
+  int columns;
+
+  /* String identifying the table (as specified in the table_begin
+     call).  */
+  char *id;
+
+  /* Points to the first table header (if any).  */
+  struct ui_out_hdr *header_first;
+
+  /* Points to the last table header (if any).  */
+  struct ui_out_hdr *header_last;
+
+  /* Points to header of NEXT column to format.  */
+  struct ui_out_hdr *header_next;
+
+};
+
+
 /* The ui_out structure */
 /* Any change here requires a corresponding one in the initialization
    of the default uiout, which is statically initialized */
@@ -69,31 +101,12 @@ struct ui_out
     struct ui_out_impl *impl;
     struct ui_out_data *data;
 
-    /* if on, a table is being generated */
-    int table_flag;
-
-    /* if on, the body of a table is being generated */
-    int body_flag;
-
-    /* number of table columns (as specified in the table_begin call) */
-    int table_columns;
-
-    /* strinf identifying the table (as specified in the table_begin call) */
-    char *table_id;
-
-    /* Sub structure tracking the table depth. */
+    /* Sub structure tracking the ui-out depth.  */
     int level;
     struct ui_out_level levels[MAX_UI_OUT_LEVELS];
 
-    /* points to the first header (if any) */
-    struct ui_out_hdr *headerfirst;
-
-    /* points to the last header (if any) */
-    struct ui_out_hdr *headerlast;
-
-    /* points to header of next column to format */
-    struct ui_out_hdr *headercurr;
-
+    /* A table, if any.  At present only a single table is supported.  */
+    struct ui_out_table table;
   };
 
 /* The current (inner most) level. */
@@ -246,7 +259,7 @@ extern void _initialize_ui_out (void);
 static void append_header_to_list (struct ui_out *uiout, int width,
 				   int alignment, const char *col_name,
 				   const char *colhdr);
-static int get_curr_header (struct ui_out *uiout, int *colno, int *width,
+static int get_next_header (struct ui_out *uiout, int *colno, int *width,
 			    int *alignment, char **colhdr);
 static void clear_header_list (struct ui_out *uiout);
 static void verify_field_proper_position (struct ui_out *uiout);
@@ -263,40 +276,41 @@ ui_out_table_begin (struct ui_out *uiout, int nbrofcols,
 		    int nr_rows,
 		    const char *tblid)
 {
-  if (uiout->table_flag)
+  if (uiout->table.flag)
     internal_error (__FILE__, __LINE__,
 		    "tables cannot be nested; table_begin found before \
 previous table_end.");
 
-  uiout->table_flag = 1;
-  uiout->table_columns = nbrofcols;
+  uiout->table.flag = 1;
+  uiout->table.body_flag = 0;
+  uiout->table.columns = nbrofcols;
   if (tblid != NULL)
-    uiout->table_id = xstrdup (tblid);
+    uiout->table.id = xstrdup (tblid);
   else
-    uiout->table_id = NULL;
+    uiout->table.id = NULL;
   clear_header_list (uiout);
 
-  uo_table_begin (uiout, nbrofcols, nr_rows, uiout->table_id);
+  uo_table_begin (uiout, nbrofcols, nr_rows, uiout->table.id);
 }
 
 void
 ui_out_table_body (struct ui_out *uiout)
 {
-  if (!uiout->table_flag)
+  if (!uiout->table.flag)
     internal_error (__FILE__, __LINE__,
 		    "table_body outside a table is not valid; it must be \
 after a table_begin and before a table_end.");
-  if (uiout->body_flag)
+  if (uiout->table.body_flag)
     internal_error (__FILE__, __LINE__,
 		    "extra table_body call not allowed; there must be \
 only one table_body after a table_begin and before a table_end.");
-  if (uiout->headercurr->colno != uiout->table_columns)
+  if (uiout->table.header_next->colno != uiout->table.columns)
     internal_error (__FILE__, __LINE__,
 		    "number of headers differ from number of table \
 columns.");
 
-  uiout->body_flag = 1;
-  uiout->headercurr = uiout->headerfirst;
+  uiout->table.body_flag = 1;
+  uiout->table.header_next = uiout->table.header_first;
 
   uo_table_body (uiout);
 }
@@ -304,17 +318,17 @@ columns.");
 void
 ui_out_table_end (struct ui_out *uiout)
 {
-  if (!uiout->table_flag)
+  if (!uiout->table.flag)
     internal_error (__FILE__, __LINE__,
 		    "misplaced table_end or missing table_begin.");
 
-  uiout->body_flag = 0;
-  uiout->table_flag = 0;
+  uiout->table.body_flag = 0;
+  uiout->table.flag = 0;
 
   uo_table_end (uiout);
 
-  if (uiout->table_id)
-    xfree (uiout->table_id);
+  if (uiout->table.id)
+    xfree (uiout->table.id);
   clear_header_list (uiout);
 }
 
@@ -323,7 +337,7 @@ ui_out_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
 		     const char *col_name,
 		     const char *colhdr)
 {
-  if (!uiout->table_flag || uiout->body_flag)
+  if (!uiout->table.flag || uiout->table.body_flag)
     internal_error (__FILE__, __LINE__,
 		    "table header must be specified after table_begin \
 and before table_body.");
@@ -339,13 +353,13 @@ ui_out_begin (struct ui_out *uiout,
 	      const char *id)
 {
   int new_level;
-  if (uiout->table_flag && !uiout->body_flag)
+  if (uiout->table.flag && !uiout->table.body_flag)
     internal_error (__FILE__, __LINE__,
 		    "table header or table_body expected; lists must be \
 specified after table_body.");
   new_level = push_level (uiout, type, id);
-  if (uiout->table_flag && (new_level == 1))
-    uiout->headercurr = uiout->headerfirst;
+  if (uiout->table.flag && (new_level == 1))
+    uiout->table.header_next = uiout->table.header_first;
   uo_begin (uiout, type, new_level, id);
 }
 
@@ -969,16 +983,17 @@ uo_flush (struct ui_out *uiout)
 static void
 clear_header_list (struct ui_out *uiout)
 {
-  while (uiout->headerfirst != NULL)
+  while (uiout->table.header_first != NULL)
     {
-      uiout->headercurr = uiout->headerfirst;
-      uiout->headerfirst = uiout->headerfirst->next;
-      if (uiout->headercurr->colhdr != NULL)
-	xfree (uiout->headercurr->colhdr);
-      xfree (uiout->headercurr);
+      uiout->table.header_next = uiout->table.header_first;
+      uiout->table.header_first = uiout->table.header_first->next;
+      if (uiout->table.header_next->colhdr != NULL)
+	xfree (uiout->table.header_next->colhdr);
+      xfree (uiout->table.header_next);
     }
-  uiout->headerlast = NULL;
-  uiout->headercurr = NULL;
+  gdb_assert (uiout->table.header_first == NULL);
+  uiout->table.header_last = NULL;
+  uiout->table.header_next = NULL;
 }
 
 static void
@@ -1003,38 +1018,40 @@ append_header_to_list (struct ui_out *uiout,
   else
     temphdr->col_name = xstrdup (colhdr);
   temphdr->next = NULL;
-  if (uiout->headerfirst == NULL)
+  if (uiout->table.header_first == NULL)
     {
       temphdr->colno = 1;
-      uiout->headerfirst = temphdr;
-      uiout->headerlast = temphdr;
+      uiout->table.header_first = temphdr;
+      uiout->table.header_last = temphdr;
     }
   else
     {
-      temphdr->colno = uiout->headerlast->colno + 1;
-      uiout->headerlast->next = temphdr;
-      uiout->headerlast = temphdr;
+      temphdr->colno = uiout->table.header_last->colno + 1;
+      uiout->table.header_last->next = temphdr;
+      uiout->table.header_last = temphdr;
     }
-  uiout->headercurr = uiout->headerlast;
+  uiout->table.header_next = uiout->table.header_last;
 }
 
-/* returns 0 if there is no more headers */
+/* Extract the format information for the NEXT header and and advance
+   the header pointer.  Return 0 if there was no next header.  */
 
 static int
-get_curr_header (struct ui_out *uiout,
+get_next_header (struct ui_out *uiout,
 		 int *colno,
 		 int *width,
 		 int *alignment,
 		 char **colhdr)
 {
-  /* There may be no headers at all or we may have used all columns */
-  if (uiout->headercurr == NULL)
+  /* There may be no headers at all or we may have used all columns.  */
+  if (uiout->table.header_next == NULL)
     return 0;
-  *colno = uiout->headercurr->colno;
-  *width = uiout->headercurr->width;
-  *alignment = uiout->headercurr->alignment;
-  *colhdr = uiout->headercurr->colhdr;
-  uiout->headercurr = uiout->headercurr->next;
+  *colno = uiout->table.header_next->colno;
+  *width = uiout->table.header_next->width;
+  *alignment = uiout->table.header_next->alignment;
+  *colhdr = uiout->table.header_next->colhdr;
+  /* Advance the header pointer to the next entry.  */
+  uiout->table.header_next = uiout->table.header_next->next;
   return 1;
 }
 
@@ -1043,9 +1060,9 @@ get_curr_header (struct ui_out *uiout,
 static void
 verify_field_proper_position (struct ui_out *uiout)
 {
-  if (uiout->table_flag)
+  if (uiout->table.flag)
     {
-      if (!uiout->body_flag)
+      if (!uiout->table.body_flag)
 	internal_error (__FILE__, __LINE__,
 			"table_body missing; table fields must be \
 specified after table_body and inside a list.");
@@ -1067,8 +1084,8 @@ verify_field_alignment (struct ui_out *uiout,
   int colno;
   char *text;
 
-  if (uiout->table_flag
-      && get_curr_header (uiout, &colno, width, align, &text))
+  if (uiout->table.flag
+      && get_next_header (uiout, &colno, width, align, &text))
     {
       if (fldno != colno)
 	internal_error (__FILE__, __LINE__,
@@ -1107,13 +1124,13 @@ ui_out_new (struct ui_out_impl *impl,
   uiout->data = data;
   uiout->impl = impl;
   uiout->flags = flags;
-  uiout->table_flag = 0;
-  uiout->body_flag = 0;
+  uiout->table.flag = 0;
+  uiout->table.body_flag = 0;
   uiout->level = 0;
   memset (uiout->levels, 0, sizeof (uiout->levels));
-  uiout->headerfirst = NULL;
-  uiout->headerlast = NULL;
-  uiout->headercurr = NULL;
+  uiout->table.header_first = NULL;
+  uiout->table.header_last = NULL;
+  uiout->table.header_next = NULL;
   return uiout;
 }
 

@@ -1,3 +1,16 @@
+2001-12-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* ui-out.c (ui_out_table_begin): Initialize body_flag.
+	(struct ui_out_table): New structure.  Move table fields to here.
+	Rename headercurr to headernext.
+	(struct ui_out): Remove table specific fields.  Add field table.
+	(ui_out_table_begin, ui_out_table_body, ui_out_table_end): Update.
+	(ui_out_table_header, ui_out_begin): Update.
+	(verify_field_proper_position, verify_field_alignment): Update.
+	(ui_out_new, clear_header_list, append_header_to_list): Update.
+	(get_next_header): Rename get_curr_header.  Update comments and
+	code.
+
 2001-12-06  Andrew Cagney  <ac131313@redhat.com>
 
 	* regcache.c (XCALLOC): Delete macro that should not have been
