@@ -1,3 +1,14 @@
+Fri Aug 21 15:17:03 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* remote.c (remote_open):  Fix baud rate setting to make -b flag
+	work.  (remote_wait):  Change 'T' message parser to deal with new
+	improved format which allows stub to send an arbitrary bunch of
+	registers.
+	* sparc-stub.c:  General cleanups.  (trap_low, handle_exception):
+	make all this re-entrant by storing all state on the stack.  Clean
+	up memory error trapping.  (computeSignal, set_debug_traps):
+	make it all table driven.  Make a start at a baud rate setting command.
+
 Wed Aug 19 10:23:27 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* m68k-pinsn.c: handle new operand type 'r', introduced for cas2.
