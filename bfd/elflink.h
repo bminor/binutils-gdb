@@ -5005,9 +5005,9 @@ elf_link_input_bfd (finfo, input_bfd)
 	     from discarded sections and section symbols from
 	     removed link-once sections.  Complain about relocs
 	     against discarded sections.  Zero relocs against removed
-	     link-once sections.  */
-	  if (!finfo->info->relocateable
-	      && !elf_section_ignore_discarded_relocs (o))
+	     link-once sections.  Preserve debug information as much
+	     as we can.  */
+	  if (!elf_section_ignore_discarded_relocs (o))
 	    {
 	      Elf_Internal_Rela *rel, *relend;
 
@@ -5016,6 +5016,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	      for ( ; rel < relend; rel++)
 		{
 		  unsigned long r_symndx = ELF_R_SYM (rel->r_info);
+		  asection *sec;
 
 		  if (r_symndx >= locsymcount
 		      || (elf_bad_symtab (input_bfd)
@@ -5030,14 +5031,22 @@ elf_link_input_bfd (finfo, input_bfd)
 
 		      /* Complain if the definition comes from a
 			 discarded section.  */
+		      sec = h->root.u.def.section;
 		      if ((h->root.type == bfd_link_hash_defined
 			   || h->root.type == bfd_link_hash_defweak)
-			  && elf_discarded_section (h->root.u.def.section))
+			  && elf_discarded_section (sec))
 			{
 			  if ((o->flags & SEC_DEBUGGING) != 0)
 			    {
 			      BFD_ASSERT (r_symndx != 0);
-			      memset (rel, 0, sizeof (*rel));
+			      /* Try to preserve debug information.  */
+			      if ((o->flags & SEC_DEBUGGING) != 0
+				  && sec->kept_section != NULL
+				  && sec->_cooked_size == sec->kept_section->_cooked_size)
+				h->root.u.def.section
+				  = sec->kept_section;
+			      else
+				memset (rel, 0, sizeof (*rel));
 			    }
 			  else
 			    finfo->info->callbacks->error_handler
@@ -5051,7 +5060,7 @@ elf_link_input_bfd (finfo, input_bfd)
 		    }
 		  else
 		    {
-		      asection *sec = finfo->sections[r_symndx];
+		      sec = finfo->sections[r_symndx];
 
 		      if (sec != NULL && elf_discarded_section (sec))
 			{
@@ -5059,9 +5068,18 @@ elf_link_input_bfd (finfo, input_bfd)
 			      || (sec->flags & SEC_LINK_ONCE) != 0)
 			    {
 			      BFD_ASSERT (r_symndx != 0);
-			      rel->r_info
-				= ELF_R_INFO (0, ELF_R_TYPE (rel->r_info));
-			      rel->r_addend = 0;
+			      /* Try to preserve debug information.  */
+			      if ((o->flags & SEC_DEBUGGING) != 0
+				  && sec->kept_section != NULL
+				  && sec->_cooked_size == sec->kept_section->_cooked_size)
+				finfo->sections[r_symndx]
+				  = sec->kept_section;
+			      else
+				{
+				  rel->r_info
+				    = ELF_R_INFO (0, ELF_R_TYPE (rel->r_info));
+				  rel->r_addend = 0;
+				}
 			    }
 			  else
 			    {

@@ -1,3 +1,13 @@
+2003-06-17  H.J. Lu <hongjiu.lu@intel.com>
+
+	* section.c (struct sec): Put back kept_section.
+	(STD_SECTION): Put back kept_section initialization.
+	* bfd-in2.h: Regenerate.
+
+	* elflink.h (elf_link_input_bfd): Also check discarded linkonce
+	sections for relocateable output. Use kept_section to preserve
+	debug information discarded by linkonce.
+
 2003-06-17  Roland McGrath  <roland@redhat.com>
 
 	* elfxx-ia64.c (elfNN_ia64_relocate_section): Support

@@ -1089,8 +1089,11 @@ section_already_linked (abfd, sec, data)
 
 	  /* Set the output_section field so that lang_add_section
 	     does not create a lang_input_section structure for this
-	     section.  */
+	     section.  Since there might be a symbol in the section
+	     being discarded, we must retain a pointer to the section
+	     which we are really going to use.  */
 	  sec->output_section = bfd_abs_section_ptr;
+	  sec->kept_section = l->sec;
 
 	  if (flags & SEC_GROUP)
 	    bfd_discard_group (abfd, sec);

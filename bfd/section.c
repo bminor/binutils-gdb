@@ -493,6 +493,10 @@ CODE_FRAGMENT
 .  {* Optional information about a COMDAT entry; NULL if not COMDAT.  *}
 .  struct bfd_comdat_info *comdat;
 .
+.  {* Points to the kept section if this section is a link-once section,
+.     and is discarded.  *}
+.  struct sec *kept_section;
+.
 .  {* When a section is being output, this value changes as more
 .     linenumbers are written out.  *}
 .  file_ptr moving_line_filepos;
@@ -640,8 +644,8 @@ static const asymbol global_syms[] =
     /* line_filepos, userdata, contents, lineno, lineno_count,       */	\
        0,            NULL,     NULL,     NULL,   0,			\
 									\
-    /* entsize, comdat, moving_line_filepos,                         */	\
-       0,       NULL,   0,						\
+    /* entsize, comdat, kept_section, moving_line_filepos,           */	\
+       0,       NULL,   NULL,	      0,				\
 									\
     /* target_index, used_by_bfd, constructor_chain, owner,          */	\
        0,            NULL,        NULL,              NULL,		\
