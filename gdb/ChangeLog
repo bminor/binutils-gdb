@@ -1,16 +1,21 @@
+Thu Dec 15 16:55:35 1994  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* top.c (command_loop): For space usage display, show both
+        absolute size and the change from before command execution.
+
 Thu Dec 15 16:40:10 1994  Stu Grossman  (grossman@cygnus.com)
 
-	* defs.h, gdbtk.c (gdbtk_fputs), main.c (gdb_fputs), top.c:  Add stream arg
-	to fputs_unfiltered_hook.  Differentiate stdout from stderr when
-	passing text into tcl land.
-	* defs.h, top.c, utils.c (error):  Add error_hook.
-	* gdbtk.c:  Improve mechanism for capturing output values.
-	* (full_filename):  Remove.
-	* (gdb_cmd call_wrapper gdbtk_init):  Protect all calls from tcl
-	land with call_wrapper.  This prevents longjmps (usually via
-	error()) from jumping out of tcl/tk and leaving things in an
-	indeterminate state.
-	* gdbtk.tcl:  New view option to disable line numbers.  Put catch
+	* defs.h, gdbtk.c (gdbtk_fputs), main.c (gdb_fputs), top.c: Add
+	stream arg to fputs_unfiltered_hook.  Differentiate stdout from
+	stderr when passing text into tcl land.
+	* defs.h, top.c, utils.c (error): Add error_hook.
+	* gdbtk.c: Improve mechanism for capturing output values.
+	(full_filename): Remove.
+	(gdb_cmd call_wrapper gdbtk_init): Protect all calls from tcl land
+	with call_wrapper.  This prevents longjmps (usually via error())
+	from jumping out of tcl/tk and leaving things in an indeterminate
+	state.
+	* gdbtk.tcl: New view option to disable line numbers.  Put catch
 	around most uses of gdb_cmd.  Add update button to reg config
 	window.  Stop doing immediate updates when selecting registers.
 	Change register view values into checkbuttons.

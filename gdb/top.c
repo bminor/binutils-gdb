@@ -932,6 +932,7 @@ command_loop ()
   char *command;
   int stdin_is_tty = ISATTY (stdin);
   long time_at_cmd_start;
+  long space_at_cmd_start;
   extern int display_time;
   extern int display_space;
 
@@ -951,6 +952,14 @@ command_loop ()
 
       time_at_cmd_start = get_run_time ();
 
+      if (display_space)
+	{
+	  extern char **environ;
+	  char *lim = (char *) sbrk (0);
+
+	  space_at_cmd_start = (long) (lim - (char *) &environ);
+	}
+
       execute_command (command, instream == stdin);
       /* Do any commands attached to breakpoint we stopped at.  */
       bpstat_do_actions (&stop_bpstat);
@@ -968,9 +977,13 @@ command_loop ()
 	{
 	  extern char **environ;
 	  char *lim = (char *) sbrk (0);
+	  long space_now = lim - (char *) &environ;
+	  long space_diff = space_now - space_at_cmd_start;
 
-	  printf_unfiltered ("Post-command data size: %ld\n",
-			     (long) (lim - (char *) &environ));
+	  printf_unfiltered ("Space used: %ld (%c%ld for this command)\n",
+			     space_now,
+			     (space_diff >= 0 ? '+' : '-'),
+			     space_diff);
 	}
     }
 }
