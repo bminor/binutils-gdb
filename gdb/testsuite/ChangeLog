@@ -1,3 +1,8 @@
+2004-05-07  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.arch/powerpc-aix-prologue.c: New file.
+	* gdb.arch/powerpc-aix-prologue.exp: New file.
+
 2004-05-07  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/lineinc.exp, gdb.base/lineinc1.h, gdb.base/lineinc2.h,
