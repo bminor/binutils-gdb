@@ -278,7 +278,7 @@ gdb_mangle_name (type, i, j)
     is_destructor = (strncmp(physname, "__dt", 4) == 0); 
 
 #ifndef GCC_MANGLE_BUG
-  if (is_destructor)
+  if (is_destructor || is_constructor)
     {
       mangled_name = (char*) xmalloc(strlen(physname)+1);
       strcpy(mangled_name, physname);

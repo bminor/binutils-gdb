@@ -1,3 +1,8 @@
+Mon Nov 15 12:29:10 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* symtab.c(gdb_mangle_name): fix the problem with constructor
+	name mangling.
+
 Mon Nov 15 11:38:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdbtypes.h: Add TYPE_FLAG_TARGET_STUB.
