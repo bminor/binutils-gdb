@@ -1,3 +1,19 @@
+2000-11-09  J.T. Conklin  <jtc@redback.com>
+
+	* config/i386/nbsd.mh: Remove solib.o, solib-svr4.o from NATDEPFILES.
+	* config/i386/nbsdelf.mh: Likewise.
+	* config/m68k/nbsd.mh: Likewise.
+	* config/ns32k/nbsd.mh: Likewise.
+	* config/powerpc/nbsd.mh: Likewise.
+	* config/sparc/nbsd.mh: Likewise.
+	* config/sparc/nbsdelf.mh: Likewise.
+	* config/i386/nbsd.mt: Add solib.o, solib-svr4.o to TDEPFILES.
+	* config/i386/nbsdelf.mt: Likewise.
+	* config/m68k/nbsd.mt: Likewise.
+	* config/ns32k/nbsd.mt: Likewise.
+	* config/powerpc/nbsd.mt: Likewise.
+	* config/sparc/nbsd.mt: Likewise.
+
 2000-11-09  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	Add auto-solib-add support for AIX, remove obsolete and unused
