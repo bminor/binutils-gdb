@@ -362,8 +362,6 @@ case "${target}" in
 # end-sanitize-arc
 # start-sanitize-psion
   arm-*-pe*)
-    # Leave g++ for later.
-    noconfigdirs="$noconfigdirs libg++ libstdc++ libio librx"
     ;;
 # end-sanitize-psion
   arm-*-riscix*)
