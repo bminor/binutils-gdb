@@ -1877,7 +1877,7 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: TARGET_CHAR_SIGNED # %s\n",
                       XSTRING (TARGET_CHAR_SIGNED));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_CHAR_SIGNED = %d\n",
+                      "gdbarch_dump: TARGET_CHAR_SIGNED = %ld\n",
                       (long) TARGET_CHAR_SIGNED);
 #endif
 #ifdef TARGET_DOUBLE_BIT

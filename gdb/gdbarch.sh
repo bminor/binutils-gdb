@@ -385,7 +385,7 @@ v::TARGET_ADDR_BIT:int:addr_bit::::8 * sizeof (void*):0:TARGET_PTR_BIT:
 v::TARGET_BFD_VMA_BIT:int:bfd_vma_bit::::8 * sizeof (void*):TARGET_ARCHITECTURE->bits_per_address::0
 #
 # One if \`char' acts like \`signed char', zero if \`unsigned char'.
-v::TARGET_CHAR_SIGNED:int:char_signed::::1:-1:1::%d::
+v::TARGET_CHAR_SIGNED:int:char_signed::::1:-1:1::::
 #
 v::IEEE_FLOAT:int:ieee_float::::0:0::0:::
 #

@@ -1,3 +1,8 @@
+2001-12-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (TARGET_CHAR_SIGNED): Do not specify the print
+	format.
+
 2001-12-19  Jim Blandy  <jimb@redhat.com>
 
 	* s390-tdep.c (s390_pop_frame_regular): Make sure the saved_regs
