@@ -1,6 +1,6 @@
 /* PowerPC-specific support for 32-bit ELF
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
+   2004 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1816,10 +1816,7 @@ ppc_elf_relax_section (bfd *abfd,
       symaddr = tsec->output_section->vma + tsec->output_offset + toff;
 
       roff = irel->r_offset;
-
-      reladdr = (isec->output_section->vma
-		 + isec->output_offset
-		 + roff);
+      reladdr = isec->output_section->vma + isec->output_offset + roff;
 
       /* If the branch is in range, no need to do anything.  */
       if (symaddr - reladdr + max_branch_offset < 2 * max_branch_offset)
@@ -3189,6 +3186,18 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
 	  && h->root.type == bfd_link_hash_undefweak)
 	eh->dyn_relocs = NULL;
+
+      /* Make sure undefined weak symbols are output as a dynamic symbol
+	 in PIEs.  */
+      if (info->pie
+	  && eh->dyn_relocs != NULL
+	  && h->dynindx == -1
+	  && h->root.type == bfd_link_hash_undefweak
+	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+	{
+	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	    return FALSE;
+	}
     }
   else if (ELIMINATE_COPY_RELOCS)
     {

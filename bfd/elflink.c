@@ -1,5 +1,5 @@
 /* ELF linking support for BFD.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1855,10 +1855,6 @@ elf_link_read_relocs_from_section (bfd *abfd,
   Elf_Internal_Shdr *symtab_hdr;
   size_t nsyms;
 
-  /* If there aren't any relocations, that's OK.  */
-  if (!shdr)
-    return TRUE;
-
   /* Position ourselves at the start of the section.  */
   if (bfd_seek (abfd, shdr->sh_offset, SEEK_SET) != 0)
     return FALSE;
@@ -1884,7 +1880,7 @@ elf_link_read_relocs_from_section (bfd *abfd,
     }
 
   erela = external_relocs;
-  erelaend = erela + NUM_SHDR_ENTRIES (shdr) * shdr->sh_entsize;
+  erelaend = erela + shdr->sh_size;
   irela = internal_relocs;
   while (erela < erelaend)
     {
@@ -1970,12 +1966,13 @@ _bfd_elf_link_read_relocs (bfd *abfd,
 					  external_relocs,
 					  internal_relocs))
     goto error_return;
-  if (!elf_link_read_relocs_from_section
-      (abfd, o,
-       elf_section_data (o)->rel_hdr2,
-       ((bfd_byte *) external_relocs) + rel_hdr->sh_size,
-       internal_relocs + (NUM_SHDR_ENTRIES (rel_hdr)
-			  * bed->s->int_rels_per_ext_rel)))
+  if (elf_section_data (o)->rel_hdr2
+      && (!elf_link_read_relocs_from_section
+	  (abfd, o,
+	   elf_section_data (o)->rel_hdr2,
+	   ((bfd_byte *) external_relocs) + rel_hdr->sh_size,
+	   internal_relocs + (NUM_SHDR_ENTRIES (rel_hdr)
+			      * bed->s->int_rels_per_ext_rel))))
     goto error_return;
 
   /* Cache the results for next time, if we can.  */
