@@ -25,6 +25,12 @@
 #ifndef CP_ABI_H_
 #define CP_ABI_H_ 1
 
+/* The functions here that attempt to determine what sort of thing a
+   mangled name refers to may well be revised in the future.  It would
+   certainly be cleaner to carry this information explicitly in GDB's
+   data structures than to derive it from the mangled name.  */
+
+
 /* Kinds of constructors.  All these values are guaranteed to be
    non-zero.  */
 enum ctor_kinds {
@@ -39,6 +45,11 @@ enum ctor_kinds {
   /* An allocating complete-object constructor.  */
   complete_object_allocating_ctor
 };
+
+/* Return non-zero iff NAME is the mangled name of a constructor.
+   Actually, return an `enum ctor_kind' value describing what *kind*
+   of constructor it is.  */
+extern enum ctor_kinds is_constructor_name (const char *name);
 
 
 /* Kinds of destructors.  All these values are guaranteed to be
@@ -57,6 +68,68 @@ enum dtor_kinds {
   base_object_dtor
 };
   
+/* Return non-zero iff NAME is the mangled name of a destructor.
+   Actually, return an `enum dtor_kind' value describing what *kind*
+   of destructor it is.  */
+extern enum dtor_kinds is_destructor_name (const char *name);
+
+
+/* Return non-zero iff NAME is the mangled name of a vtable.  */
+extern int is_vtable_name (const char *name);
+
+
+/* Return non-zero iff NAME is the un-mangled name of an operator,
+   perhaps scoped within some class.  */
+extern int is_operator_name (const char *name);
+
+
+/* Return an object's virtual function as a value.
+
+   VALUEP is a pointer to a pointer to a value, holding the object
+   whose virtual function we want to invoke.  If the ABI requires a
+   virtual function's caller to adjust the `this' pointer by an amount
+   retrieved from the vtable before invoking the function (i.e., we're
+   not using "vtable thunks" to do the adjustment automatically), then
+   this function may set *VALUEP to point to a new object with an
+   appropriately tweaked address.
+
+   The J'th element of the overload set F is the virtual function of
+   *VALUEP we want to invoke.
+
+   TYPE is the base type of *VALUEP whose method we're invoking ---
+   this is the type containing F.  OFFSET is the offset of that base
+   type within *VALUEP.  */
+extern value_ptr value_virtual_fn_field (value_ptr *valuep,
+					 struct fn_field *f, int j,
+					 struct type *type, int offset);
+
+
+/* Try to find the run-time type of VALUE, using C++ run-time type
+   information.  Return the run-time type, or zero if we can't figure
+   it out.
+
+   If we do find the run-time type:
+   - Set *FULL to non-zero if VALUE already contains the complete
+     run-time object, not just some embedded base class of the object.
+   - Set *TOP and *USING_ENC to indicate where the enclosing object
+     starts relative to VALUE:
+     - If *USING_ENC is zero, then *TOP is the offset from the start
+       of the complete object to the start of the embedded subobject
+       VALUE represents.  In other words, the enclosing object starts
+       at VALUE_ADDR (VALUE) + VALUE_OFFSET (VALUE) +
+       VALUE_EMBEDDED_OFFSET (VALUE) + *TOP
+     - If *USING_ENC is non-zero, then *TOP is the offset from the
+       address of the complete object to the enclosing object stored
+       in VALUE.  In other words, the enclosing object starts at
+       VALUE_ADDR (VALUE) + VALUE_OFFSET (VALUE) + *TOP.
+     If VALUE's type and enclosing type are the same, then these two
+     cases are equivalent.
+
+   FULL, TOP, and USING_ENC can each be zero, in which case we don't
+   provide the corresponding piece of information.  */
+extern struct type *value_rtti_type (struct value *value,
+                                     int *full, int *top, int *using_enc);
+
 
 struct cp_abi_ops
 {
@@ -64,66 +137,21 @@ struct cp_abi_ops
   const char *longname;
   const char *doc;
 
-  /* The functions here that attempt to determine what sort of thing a
-     mangled name refers to may well be revised in the future.  It
-     would certainly be cleaner to carry this information explicitly
-     in GDB's data structures than to derive it from the mangled name.  */
-
-  /* Return non-zero iff NAME is the mangled name of a constructor.
-     Actually, return an `enum ctor_kind' value describing what *kind*
-     of constructor it is.  */
+  /* ABI-specific implementations for the functions declared above.  */
   enum ctor_kinds (*is_constructor_name) (const char *name);
-
-  /* Return non-zero iff NAME is the mangled name of a destructor.
-     Actually, return an `enum dtor_kind' value describing what *kind*
-     of destructor it is.  */
   enum dtor_kinds (*is_destructor_name) (const char *name);
-
-  /* Return non-zero iff NAME is the mangled name of a vtable.  */
   int (*is_vtable_name) (const char *name);
-
-  /* Return non-zero iff NAME is the un-mangled name of an operator,
-     perhaps scoped within some class.  */
   int (*is_operator_name) (const char *name);
-
   value_ptr (*virtual_fn_field) (value_ptr * arg1p, struct fn_field * f,
 				 int j, struct type * type, int offset);
-
-  /* Find the real run-time type of a value using RTTI.
-   * V is a pointer to the value.
-   * A pointer to the struct type entry of the run-time type
-   * is returneed.
-   * FULL is a flag that is set only if the value V includes
-   * the entire contents of an object of the RTTI type.
-   * TOP is the offset to the top of the enclosing object of
-   * the real run-time type.  This offset may be for the embedded
-   * object, or for the enclosing object of V.
-   * USING_ENC is the flag that distinguishes the two cases.
-   * If it is 1, then the offset is for the enclosing object,
-   * otherwise for the embedded object.
-   *
-   */
-
   struct type *(*rtti_type) (value_ptr v, int *full, int *top,
 			     int *using_enc);
 };
 
 
 extern struct cp_abi_ops *cp_abis;
-
 extern int num_cp_abis;
-
 extern struct cp_abi_ops current_cp_abi;
-
-extern enum ctor_kinds is_constructor_name (const char *name);
-extern enum dtor_kinds is_destructor_name (const char *name);
-extern int is_vtable_name (const char *name);
-extern int is_operator_name (const char *name);
-extern value_ptr value_virtual_fn_field (value_ptr * arg1p,
-					 struct fn_field *f, int j,
-					 struct type *type, int offset);
-extern struct type *value_rtti_type (value_ptr v, int *full, int *top,
-				     int *using_enc);
 extern int register_cp_abi (struct cp_abi_ops abi);
 extern int switch_to_cp_abi (const char *short_name);
 

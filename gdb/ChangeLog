@@ -1,5 +1,9 @@
 2001-06-06  Jim Blandy  <jimb@redhat.com>
 
+	* cp-abi.h: Rearrange code to put documentation comments above the
+	functions we export.  The actual function table itself simply
+	refers to those functions.  Minor doc fixes.
+
 	* gdbarch.sh: Changes to effect the following:
 	* gdbarch.c (initialize_non_multiarch): New function.
 	* gdbarch.h (initialize_non_multiarch): New declaration.
