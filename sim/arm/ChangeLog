@@ -1,3 +1,8 @@
+2000-07-14  Fernando Nasser <fnasser@cygnus.com>
+
+	* wrapper.c (sim_create_inferior): Reset mode to ARM when creating a
+	new inferior.
+
 2000-07-04  Alexandre Oliva  <aoliva@redhat.com>
 
 	* armvirt.c (ABORTS): Do not define.

@@ -225,6 +225,10 @@ sim_create_inferior (sd, abfd, argv, env)
   case 7: /* armv5 */
   case 8: /* armv5t */
     ARMul_SelectProcessor (state, STRONGARM);
+    /* Reset mode to ARM.  A gdb user may rerun a program that had entered
+       THUMB mode from the start and cause the ARM-mode startup code to be
+       executed in THUMB mode. */
+    ARMul_SetCPSR (state, THUMB2MODE);
     break;
 
   case 3: /* armv3 */
