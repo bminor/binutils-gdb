@@ -1,3 +1,10 @@
+Tue Mar 24 16:58:29 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* Makefile.in (TARGET_CONFIGDIRS, ALL_TARGET_MODULES, 
+	CONFIGURE_TARGET_MODULES, CHECK_TARGET_MODULES, 
+	INSTALL_TARGET_MODULES, CLEAN_TARGET_MODULES, all-target-winsup): 
+	Remove references to librx and libg++.
+
 Tue Mar 24 18:28:12 1998  Eric Mumpower  <nocturne@cygnus.com>
 
 	* Makefile.in (BASE_FLAGS_TO_PASS): Pass $(lispdir) down to

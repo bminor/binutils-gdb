@@ -162,7 +162,7 @@ OTHERS =
 
 # This is set by the configure script to the list of directories which
 # should be built using the target tools.
-TARGET_CONFIGDIRS = libiberty libgloss newlib libio librx libstdc++ libg++ winsup opcodes cygmon
+TARGET_CONFIGDIRS = libiberty libgloss newlib libio libstdc++ winsup opcodes cygmon
 
 # Target libraries are put under this directory:
 # Changed by configure to $(target_alias) if cross.
@@ -746,8 +746,6 @@ INSTALL_X11_MODULES = \
 ALL_TARGET_MODULES = \
 	all-target-libio \
 	all-target-libstdc++ \
-	all-target-librx \
-	all-target-libg++ \
 	all-target-newlib \
 	all-target-winsup \
 	all-target-libgloss \
@@ -761,8 +759,6 @@ ALL_TARGET_MODULES = \
 CONFIGURE_TARGET_MODULES = \
 	configure-target-libio \
 	configure-target-libstdc++ \
-	configure-target-librx \
-	configure-target-libg++ \
 	configure-target-newlib \
 	configure-target-winsup \
 	configure-target-libgloss \
@@ -776,7 +772,6 @@ CONFIGURE_TARGET_MODULES = \
 CHECK_TARGET_MODULES = \
 	check-target-libio \
 	check-target-libstdc++ \
-	check-target-libg++ \
 	check-target-newlib \
 	check-target-winsup \
 	check-target-libiberty \
@@ -787,7 +782,6 @@ CHECK_TARGET_MODULES = \
 INSTALL_TARGET_MODULES = \
 	install-target-libio \
 	install-target-libstdc++ \
-	install-target-libg++ \
 	install-target-newlib \
 	install-target-winsup \
 	install-target-libgloss \
@@ -870,8 +864,6 @@ CLEAN_MODULES = \
 CLEAN_TARGET_MODULES = \
 	clean-target-libio \
 	clean-target-libstdc++ \
-	clean-target-librx \
-	clean-target-libg++ \
 	clean-target-newlib \
 	clean-target-winsup \
 	clean-target-libgloss \
@@ -1550,7 +1542,7 @@ all-tix: all-tcl all-tk
 all-vmake: all-tcl all-tk all-itcl all-tix all-libgui all-libide
 # end-sanitize-ide
 all-wdiff:
-all-target-winsup: all-target-newlib all-target-libiberty all-target-librx all-target-libio configure-target-winsup 
+all-target-winsup: all-target-newlib all-target-libiberty all-target-libio configure-target-winsup 
 configure-target-winsup: configure-target-newlib
 all-uudecode: all-libiberty
 configure-target-libiberty: $(ALL_GCC)
