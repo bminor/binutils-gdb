@@ -1,3 +1,14 @@
+2002-05-22  Michael Snyder  <msnyder@redhat.com>
+
+	* d10v-tdep.c: Change a few macros to enums for ease of debugging.
+	(d10v_frame_chain_valid): Add PC_IN_CALL_DUMMY clause.
+	(d10v_frame_saved_pc): Add PC_IN_CALL_DUMMY clause.
+	(d10v_frame_chain): Bail immediately if PC_IN_CALL_DUMMY.
+	Don't bail if return_pc is PC_IN_CALL_DUMMY.
+	Add a temp variable to save a call (and a memory read).
+	(d10v_init_extra_frame_info): Get fi->pc from callee's return_pc
+	if possible (so that PC_IN_CALL_DUMMY will work).
+
 2002-05-22  Corinna Vinschen  <vinschen@redhat.com>
 
 	* MAINTAINERS: Remove status `OBSOLETE' from v850.
