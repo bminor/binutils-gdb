@@ -438,7 +438,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 	  break;
 
 	default:
-	  abort ();
+	  internal_error (__FILE__, __LINE__, "unknown floating point width");
 	}
       break;
 
@@ -462,7 +462,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 	  break;
 
 	default:
-	  abort ();
+	  internal_error (__FILE__, __LINE__, "unknown floating point width");
 	}
       break;
 
@@ -517,7 +517,7 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 	  error ("Cannot set a 128-bit long double return value.");
 
 	default:
-	  abort ();
+	  internal_error (__FILE__, __LINE__, "unknown floating point width");
 	}
       break;
 
@@ -542,7 +542,7 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 	  error ("Cannot set a 128-bit long double return value.");
 
 	default:
-	  abort ();
+	  internal_error (__FILE__, __LINE__, "unknown floating point width");
 	}
       break;
 

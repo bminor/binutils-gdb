@@ -1,3 +1,8 @@
+2003-06-02  Richard Henderson  <rth@redhat.com>
+
+	* alpha-tdep.c (alpha_extract_return_value): Use internal_error.
+	(alpha_store_return_value): Likewise.
+
 2003-06-02  David Carlton  <carlton@math.stanford.edu>
 
 	* block.c (contained_in): Add 'const' to arguments.
