@@ -18,6 +18,8 @@
 
 2002-04-12  Michael Snyder  <msnyder@redhat.com>
 
+	* cli/cli-decode.c (help_list): Allow long lines to wrap.
+	* symfile.c: Fix indentation, long lines.
 	* source.c: White space fix-up.
 
 2002-04-12  Andrew Cagney  <cagney@redhat.com>

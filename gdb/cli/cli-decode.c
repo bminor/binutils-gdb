@@ -673,14 +673,24 @@ help_list (struct cmd_list_element *list, char *cmdtype,
   help_cmd_list (list, class, cmdtype, (int) class >= 0, stream);
 
   if (class == all_classes)
-    fprintf_filtered (stream, "\n\
-Type \"help%s\" followed by a class name for a list of commands in that class.",
-		      cmdtype1);
+    {
+      fprintf_filtered (stream, "\n\
+Type \"help%s\" followed by a class name for a list of commands in ",
+			cmdtype1);
+      wrap_here ("");
+      fprintf_filtered (stream, "that class.");
+    }
 
-  fprintf_filtered (stream, "\n\
-Type \"help%s\" followed by %scommand name for full documentation.\n\
-Command name abbreviations are allowed if unambiguous.\n",
+  fprintf_filtered (stream, "\nType \"help%s\" followed by %scommand name ",
 		    cmdtype1, cmdtype2);
+  wrap_here ("");
+  fputs_filtered ("for ", stream);
+  wrap_here ("");
+  fputs_filtered ("full ", stream);
+  wrap_here ("");
+  fputs_filtered ("documentation.\n", stream);
+  fputs_filtered ("Command name abbreviations are allowed if unambiguous.\n",
+		  stream);
 }
 
 static void
