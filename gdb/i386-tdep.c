@@ -686,8 +686,6 @@ i386_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 
 #include "frame-unwind.h"
 
-#define regcache_cooked_write_unsigned regcache_raw_write_unsigned
-
 #ifdef I386_REGNO_TO_SYMMETRY
 #error "The Sequent Symmetry is no longer supported."
 #endif
@@ -806,67 +804,33 @@ i386_frame_cache (struct frame_info *frame, void **cachep)
 	}
     }
 
+  if (cache->saved_regs[PC_REGNUM])
+    {
+      char buf[4];
+
+      read_memory (cache->saved_regs[PC_REGNUM], buf, 4);
+      cache->return_pc = extract_address (buf, 4);
+    }
+
   *cachep = cache;
   return cache;
 }
 
-static void
-i386_frame_pop (struct frame_info *frame, void **cachep,
-		struct regcache *regcache)
-{
-  CORE_ADDR fp = get_frame_base (frame);
-  int regnum;
-  char buf[4];
-  ULONGEST val;
-
-  gdb_assert (get_frame_type (frame) != DUMMY_FRAME);
-
-  for (regnum = 0; regnum < I386_NUM_SAVED_REGISTERS; regnum++)
-    {
-      frame_unwind_register (frame, regnum, buf);
-      regcache_cooked_write (regcache, regnum, buf);
-    }
-
-  /* Reset the direction flag.  */
-  regcache_cooked_read_unsigned (regcache, PS_REGNUM, &val);
-  val &= ~(1 << 10);
-  regcache_cooked_write_unsigned (regcache, PS_REGNUM, val);
-
-  /* The following sequence restores %ebp, %eip and %esp.  */
-  read_memory (fp, buf, 4);
-  regcache_cooked_write (regcache, FP_REGNUM, buf);
-  read_memory (fp + 4, buf, 4);
-  regcache_cooked_write (regcache, PC_REGNUM, buf);
-  regcache_cooked_write_unsigned (regcache, SP_REGNUM, fp + 8);
-
-  flush_cached_frames ();
-}
-
 static CORE_ADDR
-i386_frame_pc_unwind (struct frame_info *frame, void **cachep)
+i386_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  struct i386_frame_cache *cache = i386_frame_cache (frame, cachep);
+  char buf[4];
 
-  gdb_assert (get_frame_type (frame) != DUMMY_FRAME);
-
-  if (cache->return_pc == 0)
-    {
-      char buf[4];
-
-      frame_unwind_register (frame, PC_REGNUM, buf);
-      cache->return_pc = extract_address (buf, 4);
-    }
-
-  return cache->return_pc;
+  frame_unwind_register (next_frame, PC_REGNUM, buf);
+  return extract_address (buf, 4);
 }
 
 static void
 i386_frame_id_unwind (struct frame_info *frame, void **cachep,
 		      struct frame_id *id)
 {
-  struct i386_frame_cache *cache = *cachep;
+  struct i386_frame_cache *cache = i386_frame_cache (frame, cachep);
 
-  gdb_assert (cache);
   gdb_assert (get_frame_type (frame) != DUMMY_FRAME);
 
   /* Start with a NULL frame ID.  */
@@ -897,13 +861,48 @@ i386_frame_register_unwind (struct frame_info *frame, void **cachep,
 			    enum lval_type *lvalp, CORE_ADDR *addrp,
 			    int *realnump, void *valuep)
 {
-  /* FIXME: kettenis/20030302: I don't understand why the cache isn't
-     already initialized.  */
   struct i386_frame_cache *cache = i386_frame_cache (frame, cachep);
 
-  gdb_assert (cache);
   gdb_assert (get_frame_type (frame) != DUMMY_FRAME);
   gdb_assert (regnum >= 0);
+
+  /* The System V ABI says that:
+
+     "The flags register contains the system flags, such as the
+     direction flag and the carry flag.  The direction flag must be
+     set to the forward (that is, zero) direction before entry and
+     upon exit from a function.  Other user flags have no specified
+     role in the standard calling sequence and are not preserved.
+
+     To guarantee the "upon exit" part of that statement we fake a
+     saved flags register that has its direction flag cleared.
+
+     Note that GCC doesn't seem to rely on the fact that the direction
+     flag is cleared after a function return; it always explicitly
+     clears the flag before operations where it matters.
+
+     FIXME: kettenis/20030316: I'm not quite sure whether this is the
+     right thing to do.  The way we fake the flags register here makes
+     it impossible to change it.  */
+
+  if (regnum == PS_REGNUM)
+    {
+      *optimizedp = 0;
+      *lvalp = not_lval;
+      *addrp = 0;
+      *realnump = -1;
+      if (valuep)
+	{
+	  ULONGEST val;
+
+	  /* Clear the direction flag.  */
+	  frame_read_unsigned_register (frame, PS_REGNUM, &val);
+	  val &= ~(1 << 10);
+	  store_unsigned_integer (valuep, 4, val);
+	}
+
+      return;
+    }
 
   if (regnum == SP_REGNUM && cache->saved_sp)
     {
@@ -914,7 +913,7 @@ i386_frame_register_unwind (struct frame_info *frame, void **cachep,
       if (valuep)
 	{
 	  /* Store the value.  */
-	  store_address (valuep, 4, cache->saved_regs[SP_REGNUM]);
+	  store_address (valuep, 4, cache->saved_sp);
 	}
       return;
     }
@@ -938,8 +937,6 @@ i386_frame_register_unwind (struct frame_info *frame, void **cachep,
 }
 
 static struct frame_unwind i386_frame_unwind = {
-  i386_frame_pop,
-  i386_frame_pc_unwind,
   i386_frame_id_unwind,
   i386_frame_register_unwind
 };
@@ -1704,6 +1701,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_unwind_dummy_id (gdbarch, i386_unwind_dummy_id);
   set_gdbarch_save_dummy_frame_tos (gdbarch, i386_save_dummy_frame_tos);
+
+  set_gdbarch_unwind_pc (gdbarch, i386_unwind_pc);
 
   /* Add the i386 register groups.  */
   i386_add_reggroups (gdbarch);

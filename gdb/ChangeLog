@@ -1,5 +1,20 @@
 2003-03-16  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (regcache_cooked_write_unsigned): Remove define.
+	(i386_frame_cache): Cache PC.
+	(i386_frame_pop, i386_frame_pc_unwind): Remove.
+	(i386_unwind_pc): New function.
+	(i386_frame_id_unwind): Initialize cache if necessary.  Remove
+	related assertion.
+	(i386_frame_register_unwind): Remove FIXME and related assertion.
+	Add code that fakes a saved processor state with the direction
+	flag cleared.  Fix unwinding the stack register.
+	(struct i386_frame_unwind): Remove i386_frame_pop and
+	i386_frame_pc_unwind.
+	(i386_gdbarch_init): Set unwind_pc.
+
+2003-03-16  Mark Kettenis  <kettenis@gnu.org>
+
 	Merge with mainline.  Tag is kettenis-i386newframe-20030316-mergepoint.
 
 2003-03-08  Mark Kettenis  <kettenis@gnu.org>
