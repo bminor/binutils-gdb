@@ -1,3 +1,9 @@
+Fri Apr 29 15:08:23 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* cf-m68klynx.c (CALC_ADDEND): Check for PC relative relocs by
+	enumerating them, since the reloc type can not serve as an index
+	into the m68k COFF howto_table.
+
 Fri Apr 29 09:42:39 1994  Steve Chamberlain  (sac@cygnus.com)
 
         * config.bfd (*-go32): Changed to coff.

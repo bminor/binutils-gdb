@@ -163,7 +163,9 @@ _bfd_m68klynx_special_fn (abfd, reloc_entry, symbol, data, input_section, output
       cache_ptr->addend = - (ptr->section->vma + ptr->value);	\
     else							\
       cache_ptr->addend = 0;					\
-    if (ptr && _bfd_m68klynx_howto_table[reloc.r_type].pc_relative) \
+    if (ptr && (reloc.r_type == R_PCRBYTE			\
+		|| reloc.r_type == R_PCRWORD			\
+		|| reloc.r_type == R_PCRLONG))			\
       cache_ptr->addend += asect->vma;				\
   }
 
