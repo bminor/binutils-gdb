@@ -1,3 +1,15 @@
+Mon Mar 17 15:00:16 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* remote-sim.h: Delete - moved to ../include/remote-sim.h.
+ 	
+	* Makefile.in (remote_utils_h): Update path to remote-sim.h.
+
+Fri Mar  7 20:55:28 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* remote-sim.c (flush_stdout, write_stderr, flush_stderr,
+ 	vprintf_filtered, evprintf_filtered): Callbacks that accept
+ 	varargs.
+	
 Sat Mar 15 00:50:46 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* breakpoint.c (insert_breakpoints, watchpoint_check,

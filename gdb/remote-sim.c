@@ -46,7 +46,18 @@ static void end_callbacks PARAMS ((void));
 
 static int gdb_os_write_stdout PARAMS ((host_callback *, const char *, int));
 
+static void gdb_os_flush_stdout PARAMS ((host_callback *));
+
+static int gdb_os_write_stderr PARAMS ((host_callback *, const char *, int));
+
+static void gdb_os_flush_stderr PARAMS ((host_callback *));
+
+/* printf_filtered is depreciated */
 static void gdb_os_printf_filtered PARAMS ((host_callback *, const char *, ...));
+
+static void gdb_os_vprintf_filtered PARAMS ((host_callback *, const char *, void *));
+
+static void gdb_os_evprintf_filtered PARAMS ((host_callback *, const char *, void *));
 
 static void gdb_os_error PARAMS ((host_callback *, const char *, ...));
 
@@ -137,7 +148,12 @@ init_callbacks ()
       gdb_callback = default_callback;
       gdb_callback.init (&gdb_callback);
       gdb_callback.write_stdout = gdb_os_write_stdout;
+      gdb_callback.flush_stdout = gdb_os_flush_stdout;
+      gdb_callback.write_stderr = gdb_os_write_stderr;
+      gdb_callback.flush_stderr = gdb_os_flush_stderr;
       gdb_callback.printf_filtered = gdb_os_printf_filtered;
+      gdb_callback.vprintf_filtered = gdb_os_vprintf_filtered;
+      gdb_callback.evprintf_filtered = gdb_os_evprintf_filtered;
       gdb_callback.error = gdb_os_error;
       sim_set_callbacks (gdbsim_desc, &gdb_callback);
       callbacks_initialized = 1;
@@ -179,6 +195,47 @@ gdb_os_write_stdout (p, buf, len)
   return len;
 }
 
+/* GDB version of os_flush_stdout callback.  */
+
+static void
+gdb_os_flush_stdout (p)
+     host_callback *p;
+{
+  gdb_flush (gdb_stdout);
+}
+
+/* GDB version of os_write_stderr callback.  */
+
+static int 
+gdb_os_write_stderr (p, buf, len)
+     host_callback *p;
+     const char *buf;
+     int len;
+{
+  int i;
+  char b[2];
+
+  for (i = 0; i < len; i++) 
+    {
+      b[0] = buf[i];
+      b[1] = 0;
+      if (target_output_hook)
+	target_output_hook (b);
+      else
+	fputs_filtered (b, gdb_stderr);
+    }
+  return len;
+}
+
+/* GDB version of os_flush_stderr callback.  */
+
+static void
+gdb_os_flush_stderr (p)
+     host_callback *p;
+{
+  gdb_flush (gdb_stderr);
+}
+
 /* GDB version of printf_filtered callback.  */
 
 /* VARARGS */
@@ -204,6 +261,36 @@ gdb_os_printf_filtered (p, va_alist)
   vfprintf_filtered (gdb_stdout, format, args);
 
   va_end (args);
+}
+
+/* GDB version of error vprintf_filtered.  */
+
+/* VARARGS */
+static void
+#ifdef ANSI_PROTOTYPES
+gdb_os_vprintf_filtered (host_callback *p, const char *format, void *ap)
+#else
+gdb_os_vprintf_filtered (p, ap)
+     host_callback *p;
+     void *ap;
+#endif
+{
+  vfprintf_filtered (gdb_stdout, format, (va_list)ap);
+}
+
+/* GDB version of error evprintf_filtered.  */
+
+/* VARARGS */
+static void
+#ifdef ANSI_PROTOTYPES
+gdb_os_evprintf_filtered (host_callback *p, const char *format, void *ap)
+#else
+gdb_os_vprintf_filtered (p, ap)
+     host_callback *p;
+     void *ap;
+#endif
+{
+  vfprintf_filtered (gdb_stderr, format, (va_list)ap);
 }
 
 /* GDB version of error callback.  */
