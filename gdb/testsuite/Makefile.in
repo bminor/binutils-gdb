@@ -6,7 +6,7 @@ bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
 tooldir = $(libdir)/$(target_alias)
 
-datadir = $(exec_prefix)/lib/deja-gnu
+datadir = $(exec_prefix)/lib/dejagnu
 mandir = $(prefix)/man
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
