@@ -42,11 +42,11 @@ canonhost := i386-sco3.2v4
 endif
 
 ifeq ($(canonhost),sparc-sun-sunos4.1.1)
-TARGETS = $(NATIVE)	m68k-aout	m68k-vxworks	i960-intel-nindy \
-	i386-aout	a29k-amd-udi	sparc-vxworks	m68k-coff \
-	i960-vxworks	sparc-aout	sparclite-aout	\
-	sparclitefrwcompat-aout 	h8300-hms	z8k-sim \
-	mips-idt-ecoff
+TARGETS = $(NATIVE)	i386-go32	m68k-aout	m68k-vxworks \
+	i960-intel-nindy 		i386-aout	a29k-amd-udi \
+	sparc-vxworks	m68k-coff 	i960-vxworks	sparc-aout \
+	sparclite-aout	sparclitefrwcompat-aout 	h8300-hms \
+	z8k-sim		mips-idt-ecoff
 all: all-cygnus
 endif
 
