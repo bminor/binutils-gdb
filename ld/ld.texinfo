@@ -1101,6 +1101,11 @@ directories specified using @code{-L} options.
 For a native linker, the contents of the environment variable
 @code{LD_LIBRARY_PATH}.
 @item
+For a native ELF linker, the directories in @code{DT_RUNPATH} or
+@code{DT_RPATH} of a shared library are searched for shared
+libraries needed by it. The @code{DT_RPATH} entries are ignored if
+@code{DT_RUNPATH} entries exist.
+@item
 The default directories, normally @file{/lib} and @file{/usr/lib}.
 @item
 For a native linker on an ELF system, if the file @file{/etc/ld.so.conf}

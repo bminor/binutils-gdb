@@ -254,6 +254,7 @@ gld${EMULATION_NAME}_try_needed (name, force)
      int force;
 {
   bfd *abfd;
+  const char *soname;
 
   abfd = bfd_openr (name, bfd_get_target (output_bfd));
   if (abfd == NULL)
@@ -337,6 +338,17 @@ cat >>e${EMULATION_NAME}.c <<EOF
 
   if (bfd_stat (abfd, &global_stat) != 0)
     einfo ("%F%P:%B: bfd_stat failed: %E\n", abfd);
+
+  /* First strip off everything before the last '/'.  */
+  soname = strrchr (abfd->filename, '/');
+  if (soname)
+    soname++;
+  else
+    soname = abfd->filename;
+
+  if (trace_file_tries)
+    info_msg (_("found %s at %s\n"), soname, name);
+
   global_found = false;
   lang_for_each_input_file (gld${EMULATION_NAME}_stat_needed);
   if (global_found)
@@ -350,17 +362,10 @@ cat >>e${EMULATION_NAME}.c <<EOF
      DT_NEEDED entry for this file.  */
   bfd_elf_set_dt_needed_name (abfd, "");
 
-  /* First strip off everything before the last '/'.  */
-  name = strrchr (abfd->filename, '/');
-  if (name)
-    name++;
-  else
-    name = abfd->filename;
-
   /* Tell the ELF backend that the output file needs a DT_NEEDED
      entry for this file if it is used to resolve the reference in
      a regular object.  */
-  bfd_elf_set_dt_needed_soname (abfd, name);
+  bfd_elf_set_dt_needed_soname (abfd, soname);
 
   /* Add this file into the symbol table.  */
   if (! bfd_link_add_symbols (abfd, &link_info))
@@ -565,10 +570,33 @@ static void
 gld${EMULATION_NAME}_after_open ()
 {
   struct bfd_link_needed_list *needed, *l;
+EOF
+if [ "x${host}" = "x${target}" ] ; then
+  case " ${EMULATION_LIBPATH} " in
+  *" ${EMULATION_NAME} "*)
+cat >>e${EMULATION_NAME}.c <<EOF
+  struct bfd_link_needed_list *run_path;
+EOF
+  ;;
+  esac
+fi
+cat >>e${EMULATION_NAME}.c <<EOF
 
   /* We only need to worry about this when doing a final link.  */
   if (link_info.relocateable || link_info.shared)
     return;
+
+EOF
+if [ "x${host}" = "x${target}" ] ; then
+  case " ${EMULATION_LIBPATH} " in
+  *" ${EMULATION_NAME} "*)
+cat >>e${EMULATION_NAME}.c <<EOF
+  run_path = bfd_elf_get_runpath_list (output_bfd, &link_info);
+EOF
+  ;;
+  esac
+fi
+cat >>e${EMULATION_NAME}.c <<EOF
 
   /* Get the list of files which appear in DT_NEEDED entries in
      dynamic objects included in the link (often there will be none).
@@ -584,6 +612,18 @@ gld${EMULATION_NAME}_after_open ()
     {
       struct bfd_link_needed_list *ll;
       int force;
+EOF
+if [ "x${host}" = "x${target}" ] ; then
+  case " ${EMULATION_LIBPATH} " in
+  *" ${EMULATION_NAME} "*)
+cat >>e${EMULATION_NAME}.c <<EOF
+      struct bfd_link_needed_list *rp;
+      int found;
+EOF
+  ;;
+  esac
+fi
+cat >>e${EMULATION_NAME}.c <<EOF
 
       /* If we've already seen this file, skip it.  */
       for (ll = needed; ll != l; ll = ll->next)
@@ -599,12 +639,16 @@ gld${EMULATION_NAME}_after_open ()
       if (global_found)
 	continue;
 
+      if (trace_file_tries)
+	info_msg (_("%s needed by %B\n"), l->name, l->by);
+
       /* We need to find this file and include the symbol table.  We
 	 want to search for the file in the same way that the dynamic
 	 linker will search.  That means that we want to use
 	 rpath_link, rpath, then the environment variable
-	 LD_LIBRARY_PATH (native only), then the linker script
-	 LIB_SEARCH_DIRS.  We do not search using the -L arguments.
+	 LD_LIBRARY_PATH (native only), then the DT_RPATH/DT_RUNPATH
+	 entries (native only), then the linker script LIB_SEARCH_DIRS.
+	 We do not search using the -L arguments.
 
 	 We search twice.  The first time, we skip objects which may
 	 introduce version mismatches.  The second time, we force
@@ -637,6 +681,18 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	  lib_path = (const char *) getenv ("LD_LIBRARY_PATH");
 	  if (gld${EMULATION_NAME}_search_needed (lib_path, l->name, force))
 	    break;
+
+	  found = 0;
+	  for (rp = run_path; !found && rp != NULL; rp = rp->next)
+	    {
+	      found = (rp->by == l->by
+		       && gld${EMULATION_NAME}_search_needed (rp->name,
+							      l->name,
+							      force));
+	    }
+	  if (found)
+	    break;
+
 EOF
   ;;
   esac

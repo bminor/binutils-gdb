@@ -1,5 +1,8 @@
 -*- text -*-
 
+* The native ELF linker now searches the directories in DT_RUNPATH or
+  DT_RPATH of a shared library for shared libraries needed by it.
+
 * TI C54x support, by Timothy Wall.
 
 * Added command line switch --section-start to set the start address of any
