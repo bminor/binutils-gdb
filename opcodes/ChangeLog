@@ -1,3 +1,18 @@
+2003-09-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-dis.c (struct dis_private): New.
+	(powerpc_dialect): Make static.  Accept -Many in addition to existing
+	options.  Save dialect in dis_private.
+	(print_insn_big_powerpc): Retrieve dialect from dis_private.
+	(print_insn_little_powerpc): Likewise.
+	(print_insn_powerpc): Call powpc_dialect here.  Remove unnecessary
+	efs/altivec check.  Try harder to disassemble if given -Many.
+	* ppc-opc.c (insert_fxm): Expand comment.
+	(PPC, PPCCOM, PPC32, PPC64, PPCVEC): Remove PPC_OPCODE_ANY.
+	(POWER, POWER2, PPCPWR2, POWER32, COM, COM32, M601, PWRCOM): Likewise.
+	(POWER4): Remove PPCCOM.
+	(PPCONLY): Don't define.  Update all occurrences to PPC.
+
 2003-09-03  Andrew Cagney  <cagney@redhat.com>
 
 	* dis-init.c (init_disassemble_info): New file and function.
@@ -171,7 +186,7 @@
 
 2003-07-30  Jason Eckhardt  <jle@rice.edu>
 
-        * i860-dis.c: Convert to ISO C90.  Remove superflous prototypes.
+	* i860-dis.c: Convert to ISO C90.  Remove superflous prototypes.
 
 2003-07-30  Nick Clifton  <nickc@redhat.com>
 
@@ -189,8 +204,8 @@
 
 	* arm-dis.c (parse_arm_disassembler_option): Do not expect
 	option string to be NUL terminated.
-        (parse_disassembler_options): Allow options to be space or
-	comma separated.  
+	(parse_disassembler_options): Allow options to be space or
+	comma separated.
 
 2003-07-17  Nick Clifton  <nickc@redhat.com>
 

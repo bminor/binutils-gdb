@@ -1001,7 +1001,8 @@ insert_fxm (unsigned long insn,
     ;
 
   /* If only one bit of the FXM field is set, we can use the new form
-     of the instruction, which is faster.  */
+     of the instruction, which is faster.  Unlike the Power4 branch hint
+     encoding, this is not backward compatible.  */
   else if ((dialect & PPC_OPCODE_POWER4) != 0 && (value & -value) == value)
     insn |= 1 << 20;
 
@@ -1762,27 +1763,26 @@ extract_tbr (unsigned long insn,
 /* Smaller names for the flags so each entry in the opcodes table will
    fit on a single line.  */
 #undef	PPC
-#define PPC     PPC_OPCODE_PPC | PPC_OPCODE_ANY
-#define PPCCOM	PPC_OPCODE_PPC | PPC_OPCODE_COMMON | PPC_OPCODE_ANY
+#define PPC     PPC_OPCODE_PPC
+#define PPCCOM	PPC_OPCODE_PPC | PPC_OPCODE_COMMON
 #define NOPOWER4 PPC_OPCODE_NOPOWER4 | PPCCOM
-#define POWER4	PPC_OPCODE_POWER4 | PPCCOM
-#define PPC32   PPC_OPCODE_32 | PPC_OPCODE_PPC | PPC_OPCODE_ANY
-#define PPC64   PPC_OPCODE_64 | PPC_OPCODE_PPC | PPC_OPCODE_ANY
-#define PPCONLY	PPC_OPCODE_PPC
+#define POWER4	PPC_OPCODE_POWER4
+#define PPC32   PPC_OPCODE_32 | PPC_OPCODE_PPC
+#define PPC64   PPC_OPCODE_64 | PPC_OPCODE_PPC
 #define PPC403	PPC_OPCODE_403
 #define PPC405	PPC403
 #define PPC440	PPC_OPCODE_440
 #define PPC750	PPC
 #define PPC860	PPC
-#define PPCVEC	PPC_OPCODE_ALTIVEC | PPC_OPCODE_ANY | PPC_OPCODE_PPC
-#define	POWER   PPC_OPCODE_POWER | PPC_OPCODE_ANY
-#define	POWER2	PPC_OPCODE_POWER | PPC_OPCODE_POWER2 | PPC_OPCODE_ANY
-#define PPCPWR2	PPC_OPCODE_PPC | PPC_OPCODE_POWER | PPC_OPCODE_POWER2 | PPC_OPCODE_ANY
-#define	POWER32	PPC_OPCODE_POWER | PPC_OPCODE_ANY | PPC_OPCODE_32
-#define	COM     PPC_OPCODE_POWER | PPC_OPCODE_PPC | PPC_OPCODE_COMMON | PPC_OPCODE_ANY
-#define	COM32   PPC_OPCODE_POWER | PPC_OPCODE_PPC | PPC_OPCODE_COMMON | PPC_OPCODE_ANY | PPC_OPCODE_32
-#define	M601    PPC_OPCODE_POWER | PPC_OPCODE_601 | PPC_OPCODE_ANY
-#define PWRCOM	PPC_OPCODE_POWER | PPC_OPCODE_601 | PPC_OPCODE_COMMON | PPC_OPCODE_ANY
+#define PPCVEC	PPC_OPCODE_ALTIVEC | PPC_OPCODE_PPC
+#define	POWER   PPC_OPCODE_POWER
+#define	POWER2	PPC_OPCODE_POWER | PPC_OPCODE_POWER2
+#define PPCPWR2	PPC_OPCODE_PPC | PPC_OPCODE_POWER | PPC_OPCODE_POWER2
+#define	POWER32	PPC_OPCODE_POWER | PPC_OPCODE_32
+#define	COM     PPC_OPCODE_POWER | PPC_OPCODE_PPC | PPC_OPCODE_COMMON
+#define	COM32   PPC_OPCODE_POWER | PPC_OPCODE_PPC | PPC_OPCODE_COMMON | PPC_OPCODE_32
+#define	M601    PPC_OPCODE_POWER | PPC_OPCODE_601
+#define PWRCOM	PPC_OPCODE_POWER | PPC_OPCODE_601 | PPC_OPCODE_COMMON
 #define	MFDEC1	PPC_OPCODE_POWER
 #define	MFDEC2	PPC_OPCODE_PPC | PPC_OPCODE_601 | PPC_OPCODE_BOOKE
 #define BOOKE	PPC_OPCODE_BOOKE
@@ -2369,12 +2369,12 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "cmplwi",  OPL(10,0),	OPL_MASK,	PPCCOM,		{ OBF, RA, UI } },
 { "cmpldi",  OPL(10,1), OPL_MASK,	PPC64,		{ OBF, RA, UI } },
-{ "cmpli",   OP(10),	OP_MASK,	PPCONLY,	{ BF, L, RA, UI } },
+{ "cmpli",   OP(10),	OP_MASK,	PPC,		{ BF, L, RA, UI } },
 { "cmpli",   OP(10),	OP_MASK,	PWRCOM,		{ BF, RA, UI } },
 
 { "cmpwi",   OPL(11,0),	OPL_MASK,	PPCCOM,		{ OBF, RA, SI } },
 { "cmpdi",   OPL(11,1),	OPL_MASK,	PPC64,		{ OBF, RA, SI } },
-{ "cmpi",    OP(11),	OP_MASK,	PPCONLY,	{ BF, L, RA, SI } },
+{ "cmpi",    OP(11),	OP_MASK,	PPC,		{ BF, L, RA, SI } },
 { "cmpi",    OP(11),	OP_MASK,	PWRCOM,		{ BF, RA, SI } },
 
 { "addic",   OP(12),	OP_MASK,	PPCCOM,		{ RT, RA, SI } },
@@ -3158,7 +3158,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "cmpw",    XCMPL(31,0,0), XCMPL_MASK, PPCCOM,		{ OBF, RA, RB } },
 { "cmpd",    XCMPL(31,0,1), XCMPL_MASK, PPC64,		{ OBF, RA, RB } },
-{ "cmp",     X(31,0),	XCMP_MASK,	PPCONLY,	{ BF, L, RA, RB } },
+{ "cmp",     X(31,0),	XCMP_MASK,	PPC,		{ BF, L, RA, RB } },
 { "cmp",     X(31,0),	XCMPL_MASK,	PWRCOM,		{ BF, RA, RB } },
 
 { "twlgt",   XTO(31,4,TOLGT), XTO_MASK, PPCCOM,		{ RA, RB } },
@@ -3264,7 +3264,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "cmplw",   XCMPL(31,32,0), XCMPL_MASK, PPCCOM,	{ OBF, RA, RB } },
 { "cmpld",   XCMPL(31,32,1), XCMPL_MASK, PPC64,		{ OBF, RA, RB } },
-{ "cmpl",    X(31,32),	XCMP_MASK,	 PPCONLY,	{ BF, L, RA, RB } },
+{ "cmpl",    X(31,32),	XCMP_MASK,	 PPC,		{ BF, L, RA, RB } },
 { "cmpl",    X(31,32),	XCMPL_MASK,	 PWRCOM,	{ BF, RA, RB } },
 
 { "subf",    XO(31,40,0,0), XO_MASK,	PPC,		{ RT, RA, RB } },
@@ -3636,12 +3636,12 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "mfsprg5",    XSPR(31,339,261),  XSPR_MASK, PPC405,	{ RT } },
 { "mfsprg6",    XSPR(31,339,262),  XSPR_MASK, PPC405,	{ RT } },
 { "mfsprg7",    XSPR(31,339,263),  XSPR_MASK, PPC405,	{ RT } },
-{ "mftb",       XSPR(31,339,268),  XSPR_MASK, BOOKE,    { RT } },
 { "mftb",       X(31,371),	   X_MASK,    CLASSIC,	{ RT, TBR } },
-{ "mftbl",      XSPR(31,339,268),  XSPR_MASK, BOOKE,    { RT } },
+{ "mftb",       XSPR(31,339,268),  XSPR_MASK, BOOKE,    { RT } },
 { "mftbl",      XSPR(31,371,268),  XSPR_MASK, CLASSIC,	{ RT } },
-{ "mftbu",      XSPR(31,339,269),  XSPR_MASK, BOOKE,    { RT } },
+{ "mftbl",      XSPR(31,339,268),  XSPR_MASK, BOOKE,    { RT } },
 { "mftbu",      XSPR(31,371,269),  XSPR_MASK, CLASSIC,	{ RT } },
+{ "mftbu",      XSPR(31,339,269),  XSPR_MASK, BOOKE,    { RT } },
 { "mfsprg",     XSPR(31,339,272),  XSPRG_MASK, PPC,	{ RT, SPRG } },
 { "mfsprg0",    XSPR(31,339,272),  XSPR_MASK, PPC,	{ RT } },
 { "mfsprg1",    XSPR(31,339,273),  XSPR_MASK, PPC,	{ RT } },
@@ -4137,7 +4137,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "lswi",    X(31,597),	X_MASK,		PPCCOM,		{ RT, RA, NB } },
 { "lsi",     X(31,597),	X_MASK,		PWRCOM,		{ RT, RA, NB } },
 
-{ "lwsync",  XSYNC(31,598,1), 0xffffffff, PPCONLY,	{ 0 } },
+{ "lwsync",  XSYNC(31,598,1), 0xffffffff, PPC,		{ 0 } },
 { "ptesync", XSYNC(31,598,2), 0xffffffff, PPC64,	{ 0 } },
 { "msync",   X(31,598), 0xffffffff,	BOOKE,		{ 0 } },
 { "sync",    X(31,598), XSYNC_MASK,	PPCCOM,		{ LS } },
