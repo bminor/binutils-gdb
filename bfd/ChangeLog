@@ -33,6 +33,10 @@ Tue Nov  7 11:53:48 1995  Kim Knuttila  <krk@cygnus.com>
 
 Tue Nov  7 13:48:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ecofflink.c (_bfd_ecoff_locate_line): Keep looking through stabs
+	entries until both the line number address and the function name
+	address are too large.
+
 	* configure.in: Call AC_CHECK_PROG to find and cache AR.
 	* configure: Rebuilt.
 
