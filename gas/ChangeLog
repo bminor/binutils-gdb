@@ -1,3 +1,8 @@
+2005-03-16  Nick Clifton  <nickc@redhat.com>
+
+	* config/obj-coff.h: Convert to ISO C90 formatting.
+	* config/obj-coff.c: Convert to ISO C90 formatting.
+
 2005-03-15  Zack Weinberg  <zack@codesourcery.com>
 
 	* config/tc-arm.c (do_mla): Rename to do_mlas, take second

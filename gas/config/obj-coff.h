@@ -1,6 +1,6 @@
 /* coff object file format
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004
+   1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -199,10 +199,7 @@
 #define OBJ_COFF_MAX_AUXENTRIES 1
 #endif
 
-extern void coff_obj_symbol_new_hook PARAMS ((symbolS *));
 #define obj_symbol_new_hook coff_obj_symbol_new_hook
-
-extern void coff_obj_read_begin_hook PARAMS ((void));
 #define obj_read_begin_hook coff_obj_read_begin_hook
 
 /* This file really contains two implementations of the COFF back end.
@@ -247,8 +244,6 @@ extern void coff_obj_read_begin_hook PARAMS ((void));
 
 #define OUTPUT_FLAVOR bfd_target_coff_flavour
 
-/* SYMBOL TABLE */
-
 /* Alter the field names, for now, until we've fixed up the other
    references to use the new name.  */
 #ifdef TC_I960
@@ -272,21 +267,14 @@ extern void coff_obj_read_begin_hook PARAMS ((void));
 
 #define DO_NOT_STRIP	0
 
-extern void obj_coff_section PARAMS ((int));
-
 /* The number of auxiliary entries.  */
 #define S_GET_NUMBER_AUXILIARY(s) \
   (coffsymbol (symbol_get_bfdsym (s))->native->u.syment.n_numaux)
 /* The number of auxiliary entries.  */
-#define S_SET_NUMBER_AUXILIARY(s,v)	(S_GET_NUMBER_AUXILIARY (s) = (v))
+#define S_SET_NUMBER_AUXILIARY(s, v)	(S_GET_NUMBER_AUXILIARY (s) = (v))
 
 /* True if a symbol name is in the string table, i.e. its length is > 8.  */
-#define S_IS_STRING(s)		(strlen(S_GET_NAME(s)) > 8 ? 1 : 0)
-
-extern int S_SET_DATA_TYPE PARAMS ((symbolS *, int));
-extern int S_SET_STORAGE_CLASS PARAMS ((symbolS *, int));
-extern int S_GET_STORAGE_CLASS PARAMS ((symbolS *));
-extern void SA_SET_SYM_ENDNDX PARAMS ((symbolS *, symbolS *));
+#define S_IS_STRING(s)		(strlen (S_GET_NAME (s)) > 8 ? 1 : 0)
 
 /* Auxiliary entry macros. SA_ stands for symbol auxiliary.  */
 /* Omit the tv related fields.  */
@@ -304,15 +292,15 @@ extern void SA_SET_SYM_ENDNDX PARAMS ((symbolS *, symbolS *));
 #define SA_GET_SCN_NRELOC(s)	(SYM_AUXENT (s)->x_scn.x_nreloc)
 #define SA_GET_SCN_NLINNO(s)	(SYM_AUXENT (s)->x_scn.x_nlinno)
 
-#define SA_SET_SYM_LNNO(s,v)	(SYM_AUXENT (s)->x_sym.x_misc.x_lnsz.x_lnno=(v))
-#define SA_SET_SYM_SIZE(s,v)	(SYM_AUXENT (s)->x_sym.x_misc.x_lnsz.x_size=(v))
-#define SA_SET_SYM_FSIZE(s,v)	(SYM_AUXENT (s)->x_sym.x_misc.x_fsize=(v))
-#define SA_SET_SYM_LNNOPTR(s,v)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_fcn.x_lnnoptr=(v))
-#define SA_SET_SYM_DIMEN(s,i,v)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_ary.x_dimen[(i)]=(v))
-#define SA_SET_FILE_FNAME(s,v)	strncpy(SYM_AUXENT (s)->x_file.x_fname,(v),FILNMLEN)
-#define SA_SET_SCN_SCNLEN(s,v)	(SYM_AUXENT (s)->x_scn.x_scnlen=(v))
-#define SA_SET_SCN_NRELOC(s,v)	(SYM_AUXENT (s)->x_scn.x_nreloc=(v))
-#define SA_SET_SCN_NLINNO(s,v)	(SYM_AUXENT (s)->x_scn.x_nlinno=(v))
+#define SA_SET_SYM_LNNO(s,v)	(SYM_AUXENT (s)->x_sym.x_misc.x_lnsz.x_lnno = (v))
+#define SA_SET_SYM_SIZE(s,v)	(SYM_AUXENT (s)->x_sym.x_misc.x_lnsz.x_size = (v))
+#define SA_SET_SYM_FSIZE(s,v)	(SYM_AUXENT (s)->x_sym.x_misc.x_fsize = (v))
+#define SA_SET_SYM_LNNOPTR(s,v)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_fcn.x_lnnoptr = (v))
+#define SA_SET_SYM_DIMEN(s,i,v)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_ary.x_dimen[(i)] = (v))
+#define SA_SET_FILE_FNAME(s,v)	strncpy (SYM_AUXENT (s)->x_file.x_fname, (v), FILNMLEN)
+#define SA_SET_SCN_SCNLEN(s,v)	(SYM_AUXENT (s)->x_scn.x_scnlen = (v))
+#define SA_SET_SCN_NRELOC(s,v)	(SYM_AUXENT (s)->x_scn.x_nreloc = (v))
+#define SA_SET_SCN_NLINNO(s,v)	(SYM_AUXENT (s)->x_scn.x_nlinno = (v))
 
 /* Internal use only definitions. SF_ stands for symbol flags.
 
@@ -322,31 +310,31 @@ extern void SA_SET_SYM_ENDNDX PARAMS ((symbolS *, symbolS *));
    more on the balname/callname hack, see tc-i960.h.  b.out is done
    differently.  */
 
-#define SF_I960_MASK	(0x000001ff)	/* Bits 0-8 are used by the i960 port.  */
-#define SF_SYSPROC	(0x0000003f)	/* bits 0-5 are used to store the sysproc number */
-#define SF_IS_SYSPROC	(0x00000040)	/* bit 6 marks symbols that are sysprocs */
-#define SF_BALNAME	(0x00000080)	/* bit 7 marks BALNAME symbols */
-#define SF_CALLNAME	(0x00000100)	/* bit 8 marks CALLNAME symbols */
-
-#define SF_NORMAL_MASK	(0x0000ffff)	/* bits 12-15 are general purpose.  */
-
-#define SF_STATICS	(0x00001000)	/* Mark the .text & all symbols */
-#define SF_DEFINED	(0x00002000)	/* Symbol is defined in this file */
-#define SF_STRING	(0x00004000)	/* Symbol name length > 8 */
-#define SF_LOCAL	(0x00008000)	/* Symbol must not be emitted */
-
-#define SF_DEBUG_MASK	(0xffff0000)	/* bits 16-31 are debug info */
-
-#define SF_FUNCTION	(0x00010000)	/* The symbol is a function */
-#define SF_PROCESS	(0x00020000)	/* Process symbol before write */
-#define SF_TAGGED	(0x00040000)	/* Is associated with a tag */
-#define SF_TAG		(0x00080000)	/* Is a tag */
-#define SF_DEBUG	(0x00100000)	/* Is in debug or abs section */
-#define SF_GET_SEGMENT	(0x00200000)	/* Get the section of the forward symbol.  */
+#define SF_I960_MASK	0x000001ff	/* Bits 0-8 are used by the i960 port.  */
+#define SF_SYSPROC	0x0000003f	/* bits 0-5 are used to store the sysproc number.  */
+#define SF_IS_SYSPROC	0x00000040	/* bit 6 marks symbols that are sysprocs.  */
+#define SF_BALNAME	0x00000080	/* bit 7 marks BALNAME symbols.  */
+#define SF_CALLNAME	0x00000100	/* bit 8 marks CALLNAME symbols.  */
+				  
+#define SF_NORMAL_MASK	0x0000ffff	/* bits 12-15 are general purpose.  */
+				  
+#define SF_STATICS	0x00001000	/* Mark the .text & all symbols.  */
+#define SF_DEFINED	0x00002000	/* Symbol is defined in this file.  */
+#define SF_STRING	0x00004000	/* Symbol name length > 8.  */
+#define SF_LOCAL	0x00008000	/* Symbol must not be emitted.  */
+				  
+#define SF_DEBUG_MASK	0xffff0000	/* bits 16-31 are debug info.  */
+				  
+#define SF_FUNCTION	0x00010000	/* The symbol is a function.  */
+#define SF_PROCESS	0x00020000	/* Process symbol before write.  */
+#define SF_TAGGED	0x00040000	/* Is associated with a tag.  */
+#define SF_TAG		0x00080000	/* Is a tag.  */
+#define SF_DEBUG	0x00100000	/* Is in debug or abs section.  */
+#define SF_GET_SEGMENT	0x00200000	/* Get the section of the forward symbol.  */
 /* All other bits are unused.  */
 
 /* Accessors.  */
-#define SF_GET(s)		(*symbol_get_obj (s))
+#define SF_GET(s)		(* symbol_get_obj (s))
 #define SF_GET_DEBUG(s)		(symbol_get_bfdsym (s)->flags & BSF_DEBUGGING)
 #define SF_SET_DEBUG(s)		(symbol_get_bfdsym (s)->flags |= BSF_DEBUGGING)
 #define SF_GET_NORMAL_FIELD(s)	(SF_GET (s) & SF_NORMAL_MASK)
@@ -361,15 +349,15 @@ extern void SA_SET_SYM_ENDNDX PARAMS ((symbolS *, symbolS *));
 #define SF_GET_TAGGED(s)	(SF_GET (s) & SF_TAGGED)
 #define SF_GET_TAG(s)		(SF_GET (s) & SF_TAG)
 #define SF_GET_GET_SEGMENT(s)	(SF_GET (s) & SF_GET_SEGMENT)
-#define SF_GET_I960(s)		(SF_GET (s) & SF_I960_MASK)	/* used by i960 */
-#define SF_GET_BALNAME(s)	(SF_GET (s) & SF_BALNAME)	/* used by i960 */
-#define SF_GET_CALLNAME(s)	(SF_GET (s) & SF_CALLNAME)	/* used by i960 */
-#define SF_GET_IS_SYSPROC(s)	(SF_GET (s) & SF_IS_SYSPROC)	/* used by i960 */
-#define SF_GET_SYSPROC(s)	(SF_GET (s) & SF_SYSPROC)	/* used by i960 */
+#define SF_GET_I960(s)		(SF_GET (s) & SF_I960_MASK)	/* Used by i960.  */
+#define SF_GET_BALNAME(s)	(SF_GET (s) & SF_BALNAME)	/* Used by i960.  */
+#define SF_GET_CALLNAME(s)	(SF_GET (s) & SF_CALLNAME)	/* Used by i960.  */
+#define SF_GET_IS_SYSPROC(s)	(SF_GET (s) & SF_IS_SYSPROC)	/* Used by i960.  */
+#define SF_GET_SYSPROC(s)	(SF_GET (s) & SF_SYSPROC)	/* Used by i960.  */
 
 /* Modifiers.  */
 #define SF_SET(s,v)		(SF_GET (s) = (v))
-#define SF_SET_NORMAL_FIELD(s,v) (SF_GET (s) |= ((v) & SF_NORMAL_MASK))
+#define SF_SET_NORMAL_FIELD(s,v)(SF_GET (s) |= ((v) & SF_NORMAL_MASK))
 #define SF_SET_DEBUG_FIELD(s,v)	(SF_GET (s) |= ((v) & SF_DEBUG_MASK))
 #define SF_SET_FILE(s)		(SF_GET (s) |= SF_FILE)
 #define SF_SET_STATICS(s)	(SF_GET (s) |= SF_STATICS)
@@ -382,47 +370,38 @@ extern void SA_SET_SYM_ENDNDX PARAMS ((symbolS *, symbolS *));
 #define SF_SET_TAGGED(s)	(SF_GET (s) |= SF_TAGGED)
 #define SF_SET_TAG(s)		(SF_GET (s) |= SF_TAG)
 #define SF_SET_GET_SEGMENT(s)	(SF_GET (s) |= SF_GET_SEGMENT)
-#define SF_SET_I960(s,v)	(SF_GET (s) |= ((v) & SF_I960_MASK))	/* used by i960 */
-#define SF_SET_BALNAME(s)	(SF_GET (s) |= SF_BALNAME)	/* used by i960 */
-#define SF_SET_CALLNAME(s)	(SF_GET (s) |= SF_CALLNAME)	/* used by i960 */
-#define SF_SET_IS_SYSPROC(s)	(SF_GET (s) |= SF_IS_SYSPROC)	/* used by i960 */
-#define SF_SET_SYSPROC(s,v)	(SF_GET (s) |= ((v) & SF_SYSPROC))	/* used by i960 */
+#define SF_SET_I960(s,v)	(SF_GET (s) |= ((v) & SF_I960_MASK))	/* Used by i960.  */
+#define SF_SET_BALNAME(s)	(SF_GET (s) |= SF_BALNAME)		/* Used by i960.  */
+#define SF_SET_CALLNAME(s)	(SF_GET (s) |= SF_CALLNAME)		/* Used by i960.  */
+#define SF_SET_IS_SYSPROC(s)	(SF_GET (s) |= SF_IS_SYSPROC)		/* Used by i960.  */
+#define SF_SET_SYSPROC(s,v)	(SF_GET (s) |= ((v) & SF_SYSPROC))	/* Used by i960.  */
 
-/* --------------  Line number handling ------- */
+
+/*  Line number handling.  */
 extern int text_lineno_number;
 extern int coff_line_base;
 extern int coff_n_line_nos;
-
-#define obj_emit_lineno(WHERE,LINE,FILE_START)	abort ()
-extern void coff_add_linesym PARAMS ((symbolS *));
-
-void c_dot_file_symbol PARAMS ((const char *, int));
-#define obj_app_file(name, app) c_dot_file_symbol (name, app)
-
-extern void coff_frob_symbol PARAMS ((symbolS *, int *));
-extern void coff_adjust_symtab PARAMS ((void));
-extern void coff_frob_section PARAMS ((segT));
-extern void coff_adjust_section_syms PARAMS ((bfd *, asection *, PTR));
-extern void coff_frob_file_after_relocs PARAMS ((void));
-#define obj_frob_symbol(S,P) 	coff_frob_symbol(S,&P)
-#ifndef obj_adjust_symtab
-#define obj_adjust_symtab()	coff_adjust_symtab()
-#endif
-#define obj_frob_section(S)	coff_frob_section (S)
-#define obj_frob_file_after_relocs() coff_frob_file_after_relocs ()
-
 extern symbolS *coff_last_function;
+
+#define obj_emit_lineno(WHERE, LINE, FILE_START)	abort ()
+#define obj_app_file(name, app)      c_dot_file_symbol (name, app)
+#define obj_frob_symbol(S,P) 	     coff_frob_symbol (S, & P)
+#define obj_frob_section(S)	     coff_frob_section (S)
+#define obj_frob_file_after_relocs() coff_frob_file_after_relocs ()
+#ifndef obj_adjust_symtab
+#define obj_adjust_symtab()	     coff_adjust_symtab ()
+#endif
 
 /* Forward the segment of a forwarded symbol, handle assignments that
    just copy symbol values, etc.  */
 #ifndef OBJ_COPY_SYMBOL_ATTRIBUTES
 #ifndef TE_I386AIX
-#define OBJ_COPY_SYMBOL_ATTRIBUTES(dest,src) \
+#define OBJ_COPY_SYMBOL_ATTRIBUTES(dest, src) \
   (SF_GET_GET_SEGMENT (dest) \
    ? (S_SET_SEGMENT (dest, S_GET_SEGMENT (src)), 0) \
    : 0)
 #else
-#define OBJ_COPY_SYMBOL_ATTRIBUTES(dest,src) \
+#define OBJ_COPY_SYMBOL_ATTRIBUTES(dest, src) \
   (SF_GET_GET_SEGMENT (dest) && S_GET_SEGMENT (dest) == SEG_UNKNOWN \
    ? (S_SET_SEGMENT (dest, S_GET_SEGMENT (src)), 0) \
    : 0)
@@ -466,7 +445,7 @@ extern const segT N_TYPE_seg[];
 
 typedef struct
 {
-  /* Basic symbol */
+  /* Basic symbol.  */
   struct internal_syment ost_entry;
   /* Auxiliary entry.  */
   union internal_auxent ost_auxent[OBJ_COFF_MAX_AUXENTRIES];
@@ -525,7 +504,7 @@ typedef struct
    || strchr (S_GET_NAME (s), '\001') != NULL \
    || strchr (S_GET_NAME (s), '\002') != NULL \
    || (flag_strip_local_absolute \
-       && !S_IS_EXTERNAL(s) \
+       && !S_IS_EXTERNAL (s) \
        && (s)->sy_symbol.ost_entry.n_scnum == C_ABS_SECTION))
 
 /* True if a symbol is not defined in this file.  */
@@ -538,12 +517,12 @@ typedef struct
 				 && S_GET_VALUE (s) != 0)
 
 /* True if a symbol name is in the string table, i.e. its length is > 8.  */
-#define S_IS_STRING(s)		(strlen(S_GET_NAME(s)) > 8 ? 1 : 0)
+#define S_IS_STRING(s)		(strlen (S_GET_NAME (s)) > 8 ? 1 : 0)
 
 /* True if a symbol is defined as weak.  */
 #ifdef TE_PE
 #define S_IS_WEAK(s) \
-  ((s)->sy_symbol.ost_entry.n_sclass == C_NT_WEAK \
+  (   (s)->sy_symbol.ost_entry.n_sclass == C_NT_WEAK \
    || (s)->sy_symbol.ost_entry.n_sclass == C_WEAKEXT)
 #else
 #define S_IS_WEAK(s) \
@@ -552,13 +531,13 @@ typedef struct
 
 /* Accessors.  */
 /* The name of the symbol.  */
-#define S_GET_NAME(s)		((char*) (s)->sy_symbol.ost_entry.n_offset)
+#define S_GET_NAME(s)		((char *) (s)->sy_symbol.ost_entry.n_offset)
 
 /* The pointer to the string table.  */
 #define S_GET_OFFSET(s)         ((s)->sy_symbol.ost_entry.n_offset)
 
 /* The numeric value of the segment.  */
-#define S_GET_SEGMENT(s)   s_get_segment(s)
+#define S_GET_SEGMENT(s)   	s_get_segment (s)
 
 /* The data type.  */
 #define S_GET_DATA_TYPE(s)	((s)->sy_symbol.ost_entry.n_type)
@@ -571,38 +550,43 @@ typedef struct
 
 /* Modifiers.  */
 /* Set the name of the symbol.  */
-#define S_SET_NAME(s,v) \
+#define S_SET_NAME(s, v) \
   ((s)->sy_symbol.ost_entry.n_offset = (unsigned long) (v))
 
 /* Set the offset of the symbol.  */
-#define S_SET_OFFSET(s,v) \
+#define S_SET_OFFSET(s, v) \
   ((s)->sy_symbol.ost_entry.n_offset = (v))
 
 /* The numeric value of the segment.  */
-#define S_SET_SEGMENT(s,v) \
-  ((s)->sy_symbol.ost_entry.n_scnum = SEGMENT_TO_SYMBOL_TYPE(v))
+#define S_SET_SEGMENT(s, v) \
+  ((s)->sy_symbol.ost_entry.n_scnum = SEGMENT_TO_SYMBOL_TYPE (v))
 
 /* The data type.  */
-#define S_SET_DATA_TYPE(s,v) \
+#define S_SET_DATA_TYPE(s, v) \
   ((s)->sy_symbol.ost_entry.n_type = (v))
 
 /* The storage class.  */
-#define S_SET_STORAGE_CLASS(s,v) \
+#define S_SET_STORAGE_CLASS(s, v) \
   ((s)->sy_symbol.ost_entry.n_sclass = (v))
 
 /* The number of auxiliary entries.  */
-#define S_SET_NUMBER_AUXILIARY(s,v) \
+#define S_SET_NUMBER_AUXILIARY(s, v) \
   ((s)->sy_symbol.ost_entry.n_numaux = (v))
 
 /* Additional modifiers.  */
 /* The symbol is external (does not mean undefined).  */
 #define S_SET_EXTERNAL(s) \
-  { S_SET_STORAGE_CLASS(s, C_EXT) ; SF_CLEAR_LOCAL(s); }
+  do \
+    { \
+      S_SET_STORAGE_CLASS (s, C_EXT); \
+      SF_CLEAR_LOCAL (s); \
+    } \
+  while (0)
 
 /* Auxiliary entry macros. SA_ stands for symbol auxiliary.  */
 /* Omit the tv related fields.  */
 /* Accessors.  */
-#define SYM_AUXENT(S)	(&(S)->sy_symbol.ost_auxent[0])
+#define SYM_AUXENT(S)		(&(S)->sy_symbol.ost_auxent[0])
 
 #define SA_GET_SYM_TAGNDX(s)	(SYM_AUXENT (s)->x_sym.x_tagndx.l)
 #define SA_GET_SYM_LNNO(s)	(SYM_AUXENT (s)->x_sym.x_misc.x_lnsz.x_lnno)
@@ -619,19 +603,19 @@ typedef struct
 #define SA_GET_SCN_NLINNO(s)	(SYM_AUXENT (s)->x_scn.x_nlinno)
 
 /* Modifiers.  */
-#define SA_SET_SYM_TAGNDX(s,v)	(SYM_AUXENT (s)->x_sym.x_tagndx.l=(v))
-#define SA_SET_SYM_LNNO(s,v)	(SYM_AUXENT (s)->x_sym.x_misc.x_lnsz.x_lnno=(v))
-#define SA_SET_SYM_SIZE(s,v)	(SYM_AUXENT (s)->x_sym.x_misc.x_lnsz.x_size=(v))
-#define SA_SET_SYM_FSIZE(s,v)	(SYM_AUXENT (s)->x_sym.x_misc.x_fsize=(v))
-#define SA_SET_SYM_LNNOPTR(s,v)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_fcn.x_lnnoptr=(v))
-#define SA_SET_SYM_ENDNDX(s,v)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_fcn.x_endndx.l=(v))
-#define SA_SET_SYM_DIMEN(s,i,v)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_ary.x_dimen[(i)]=(v))
-#define SA_SET_FILE_FNAME(s,v)	strncpy(SYM_AUXENT (s)->x_file.x_fname,(v),FILNMLEN)
-#define SA_SET_FILE_FNAME_OFFSET(s,v) (SYM_AUXENT (s)->x_file.x_n.x_offset=(v))
-#define SA_SET_FILE_FNAME_ZEROS(s,v)  (SYM_AUXENT (s)->x_file.x_n.x_zeroes=(v))
-#define SA_SET_SCN_SCNLEN(s,v)	(SYM_AUXENT (s)->x_scn.x_scnlen=(v))
-#define SA_SET_SCN_NRELOC(s,v)	(SYM_AUXENT (s)->x_scn.x_nreloc=(v))
-#define SA_SET_SCN_NLINNO(s,v)	(SYM_AUXENT (s)->x_scn.x_nlinno=(v))
+#define SA_SET_SYM_TAGNDX(s,v)	(SYM_AUXENT (s)->x_sym.x_tagndx.l = (v))
+#define SA_SET_SYM_LNNO(s,v)	(SYM_AUXENT (s)->x_sym.x_misc.x_lnsz.x_lnno = (v))
+#define SA_SET_SYM_SIZE(s,v)	(SYM_AUXENT (s)->x_sym.x_misc.x_lnsz.x_size = (v))
+#define SA_SET_SYM_FSIZE(s,v)	(SYM_AUXENT (s)->x_sym.x_misc.x_fsize = (v))
+#define SA_SET_SYM_LNNOPTR(s,v)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_fcn.x_lnnoptr = (v))
+#define SA_SET_SYM_ENDNDX(s,v)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_fcn.x_endndx.l = (v))
+#define SA_SET_SYM_DIMEN(s,i,v)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_ary.x_dimen[(i)] = (v))
+#define SA_SET_FILE_FNAME(s,v)	strncpy (SYM_AUXENT (s)->x_file.x_fname,(v),FILNMLEN)
+#define SA_SET_FILE_FNAME_OFFSET(s,v) (SYM_AUXENT (s)->x_file.x_n.x_offset = (v))
+#define SA_SET_FILE_FNAME_ZEROS(s,v)  (SYM_AUXENT (s)->x_file.x_n.x_zeroes = (v))
+#define SA_SET_SCN_SCNLEN(s,v)	(SYM_AUXENT (s)->x_scn.x_scnlen = (v))
+#define SA_SET_SCN_NRELOC(s,v)	(SYM_AUXENT (s)->x_scn.x_nreloc = (v))
+#define SA_SET_SCN_NLINNO(s,v)	(SYM_AUXENT (s)->x_scn.x_nlinno = (v))
 
 /* Internal use only definitions. SF_ stands for symbol flags.
 
@@ -641,28 +625,28 @@ typedef struct
    more on the balname/callname hack, see tc-i960.h.  b.out is done
    differently.  */
 
-#define SF_I960_MASK	(0x000001ff)	/* Bits 0-8 are used by the i960 port.  */
-#define SF_SYSPROC	(0x0000003f)	/* bits 0-5 are used to store the sysproc number */
-#define SF_IS_SYSPROC	(0x00000040)	/* bit 6 marks symbols that are sysprocs */
-#define SF_BALNAME	(0x00000080)	/* bit 7 marks BALNAME symbols */
-#define SF_CALLNAME	(0x00000100)	/* bit 8 marks CALLNAME symbols */
-
-#define SF_NORMAL_MASK	(0x0000ffff)	/* bits 12-15 are general purpose.  */
-
-#define SF_STATICS	(0x00001000)	/* Mark the .text & all symbols */
-#define SF_DEFINED	(0x00002000)	/* Symbol is defined in this file */
-#define SF_STRING	(0x00004000)	/* Symbol name length > 8 */
-#define SF_LOCAL	(0x00008000)	/* Symbol must not be emitted */
-
-#define SF_DEBUG_MASK	(0xffff0000)	/* bits 16-31 are debug info */
-
-#define SF_FUNCTION	(0x00010000)	/* The symbol is a function */
-#define SF_PROCESS	(0x00020000)	/* Process symbol before write */
-#define SF_TAGGED	(0x00040000)	/* Is associated with a tag */
-#define SF_TAG		(0x00080000)	/* Is a tag */
-#define SF_DEBUG	(0x00100000)	/* Is in debug or abs section */
-#define SF_GET_SEGMENT	(0x00200000)	/* Get the section of the forward symbol.  */
-#define SF_ADJ_LNNOPTR	(0x00400000)	/* Has a lnnoptr */
+#define SF_I960_MASK	0x000001ff	/* Bits 0-8 are used by the i960 port.  */
+#define SF_SYSPROC	0x0000003f	/* bits 0-5 are used to store the sysproc number.  */
+#define SF_IS_SYSPROC	0x00000040	/* bit 6 marks symbols that are sysprocs.  */
+#define SF_BALNAME	0x00000080	/* bit 7 marks BALNAME symbols.  */
+#define SF_CALLNAME	0x00000100	/* bit 8 marks CALLNAME symbols.  */
+				  
+#define SF_NORMAL_MASK	0x0000ffff	/* bits 12-15 are general purpose.  */
+				  
+#define SF_STATICS	0x00001000	/* Mark the .text & all symbols.  */
+#define SF_DEFINED	0x00002000	/* Symbol is defined in this file.  */
+#define SF_STRING	0x00004000	/* Symbol name length > 8.  */
+#define SF_LOCAL	0x00008000	/* Symbol must not be emitted.  */
+				  
+#define SF_DEBUG_MASK	0xffff0000	/* bits 16-31 are debug info.  */
+				  
+#define SF_FUNCTION	0x00010000	/* The symbol is a function.  */
+#define SF_PROCESS	0x00020000	/* Process symbol before write.  */
+#define SF_TAGGED	0x00040000	/* Is associated with a tag.  */
+#define SF_TAG		0x00080000	/* Is a tag.  */
+#define SF_DEBUG	0x00100000	/* Is in debug or abs section.  */
+#define SF_GET_SEGMENT	0x00200000	/* Get the section of the forward symbol.  */
+#define SF_ADJ_LNNOPTR	0x00400000	/* Has a lnnoptr.  */
 /* All other bits are unused.  */
 
 /* Accessors.  */
@@ -681,15 +665,15 @@ typedef struct
 #define SF_GET_TAG(s)		(SF_GET (s) & SF_TAG)
 #define SF_GET_GET_SEGMENT(s)	(SF_GET (s) & SF_GET_SEGMENT)
 #define SF_GET_ADJ_LNNOPTR(s)	(SF_GET (s) & SF_ADJ_LNNOPTR)
-#define SF_GET_I960(s)		(SF_GET (s) & SF_I960_MASK)	/* used by i960 */
-#define SF_GET_BALNAME(s)	(SF_GET (s) & SF_BALNAME)	/* used by i960 */
-#define SF_GET_CALLNAME(s)	(SF_GET (s) & SF_CALLNAME)	/* used by i960 */
-#define SF_GET_IS_SYSPROC(s)	(SF_GET (s) & SF_IS_SYSPROC)	/* used by i960 */
-#define SF_GET_SYSPROC(s)	(SF_GET (s) & SF_SYSPROC)	/* used by i960 */
+#define SF_GET_I960(s)		(SF_GET (s) & SF_I960_MASK)	/* Used by i960.  */
+#define SF_GET_BALNAME(s)	(SF_GET (s) & SF_BALNAME)	/* Used by i960.  */
+#define SF_GET_CALLNAME(s)	(SF_GET (s) & SF_CALLNAME)	/* Used by i960.  */
+#define SF_GET_IS_SYSPROC(s)	(SF_GET (s) & SF_IS_SYSPROC)	/* Used by i960.  */
+#define SF_GET_SYSPROC(s)	(SF_GET (s) & SF_SYSPROC)	/* Used by i960.  */
 
 /* Modifiers.  */
 #define SF_SET(s,v)		(SF_GET (s) = (v))
-#define SF_SET_NORMAL_FIELD(s,v) (SF_GET (s) |= ((v) & SF_NORMAL_MASK))
+#define SF_SET_NORMAL_FIELD(s,v)(SF_GET (s) |= ((v) & SF_NORMAL_MASK))
 #define SF_SET_DEBUG_FIELD(s,v)	(SF_GET (s) |= ((v) & SF_DEBUG_MASK))
 #define SF_SET_FILE(s)		(SF_GET (s) |= SF_FILE)
 #define SF_SET_STATICS(s)	(SF_GET (s) |= SF_STATICS)
@@ -704,11 +688,11 @@ typedef struct
 #define SF_SET_TAG(s)		(SF_GET (s) |= SF_TAG)
 #define SF_SET_GET_SEGMENT(s)	(SF_GET (s) |= SF_GET_SEGMENT)
 #define SF_SET_ADJ_LNNOPTR(s)	(SF_GET (s) |= SF_ADJ_LNNOPTR)
-#define SF_SET_I960(s,v)	(SF_GET (s) |= ((v) & SF_I960_MASK))	/* used by i960 */
-#define SF_SET_BALNAME(s)	(SF_GET (s) |= SF_BALNAME)	/* used by i960 */
-#define SF_SET_CALLNAME(s)	(SF_GET (s) |= SF_CALLNAME)	/* used by i960 */
-#define SF_SET_IS_SYSPROC(s)	(SF_GET (s) |= SF_IS_SYSPROC)	/* used by i960 */
-#define SF_SET_SYSPROC(s,v)	(SF_GET (s) |= ((v) & SF_SYSPROC))	/* used by i960 */
+#define SF_SET_I960(s,v)	(SF_GET (s) |= ((v) & SF_I960_MASK))	/* Used by i960.  */
+#define SF_SET_BALNAME(s)	(SF_GET (s) |= SF_BALNAME)		/* Used by i960.  */
+#define SF_SET_CALLNAME(s)	(SF_GET (s) |= SF_CALLNAME)		/* Used by i960.  */
+#define SF_SET_IS_SYSPROC(s)	(SF_GET (s) |= SF_IS_SYSPROC)		/* Used by i960.  */
+#define SF_SET_SYSPROC(s,v)	(SF_GET (s) |= ((v) & SF_SYSPROC))	/* Used by i960.  */
 
 /* File header macro and type definition.  */
 
@@ -719,37 +703,35 @@ typedef struct
 #define OBJ_COFF_AOUTHDRSZ (0)
 #else
 #define OBJ_COFF_AOUTHDRSZ (AOUTHDRSZ)
-#endif /* OBJ_COFF_OMIT_OPTIONAL_HEADER */
+#endif
+
+#define H_GET_TEXT_FILE_OFFSET(h) \
+    (long) (FILHSZ \
+	   + OBJ_COFF_AOUTHDRSZ \
+	   + H_GET_NUMBER_OF_SECTIONS (h) * SCNHSZ)
+
+#define H_GET_DATA_FILE_OFFSET(h) \
+    (long) (H_GET_TEXT_FILE_OFFSET (h) \
+	   + H_GET_TEXT_SIZE (h))
+
+#define H_GET_BSS_FILE_OFFSET(h) 0
+
+#define H_GET_RELOCATION_FILE_OFFSET(h) \
+    (long) (H_GET_DATA_FILE_OFFSET (h) \
+	   + H_GET_DATA_SIZE (h))
+
+#define H_GET_LINENO_FILE_OFFSET(h) \
+    (long) (H_GET_RELOCATION_FILE_OFFSET (h) \
+	   + H_GET_RELOCATION_SIZE (h))
+
+#define H_GET_SYMBOL_TABLE_FILE_OFFSET(h) \
+    (long) (H_GET_LINENO_FILE_OFFSET (h) \
+	   + H_GET_LINENO_SIZE (h))
 
 #define H_GET_FILE_SIZE(h) \
-    (long) (FILHSZ + OBJ_COFF_AOUTHDRSZ + \
-	   H_GET_NUMBER_OF_SECTIONS(h) * SCNHSZ + \
-	   H_GET_TEXT_SIZE(h) + H_GET_DATA_SIZE(h) + \
-	   H_GET_RELOCATION_SIZE(h) + H_GET_LINENO_SIZE(h) + \
-	   H_GET_SYMBOL_TABLE_SIZE(h) + \
-	   (h)->string_table_size)
-#define H_GET_TEXT_FILE_OFFSET(h) \
-    (long) (FILHSZ + OBJ_COFF_AOUTHDRSZ + \
-	   H_GET_NUMBER_OF_SECTIONS(h) * SCNHSZ)
-#define H_GET_DATA_FILE_OFFSET(h) \
-    (long) (FILHSZ + OBJ_COFF_AOUTHDRSZ + \
-	   H_GET_NUMBER_OF_SECTIONS(h) * SCNHSZ + \
-	   H_GET_TEXT_SIZE(h))
-#define H_GET_BSS_FILE_OFFSET(h) 0
-#define H_GET_RELOCATION_FILE_OFFSET(h) \
-    (long) (FILHSZ + OBJ_COFF_AOUTHDRSZ + \
-	   H_GET_NUMBER_OF_SECTIONS(h) * SCNHSZ + \
-	   H_GET_TEXT_SIZE(h) + H_GET_DATA_SIZE(h))
-#define H_GET_LINENO_FILE_OFFSET(h) \
-    (long) (FILHSZ + OBJ_COFF_AOUTHDRSZ + \
-	   H_GET_NUMBER_OF_SECTIONS(h) * SCNHSZ + \
-	   H_GET_TEXT_SIZE(h) + H_GET_DATA_SIZE(h) + \
-	   H_GET_RELOCATION_SIZE(h))
-#define H_GET_SYMBOL_TABLE_FILE_OFFSET(h) \
-    (long) (FILHSZ + OBJ_COFF_AOUTHDRSZ + \
-	   H_GET_NUMBER_OF_SECTIONS(h) * SCNHSZ + \
-	   H_GET_TEXT_SIZE(h) + H_GET_DATA_SIZE(h) + \
-	   H_GET_RELOCATION_SIZE(h) + H_GET_LINENO_SIZE(h))
+    (long) (H_GET_SYMBOL_TABLE_FILE_OFFSET (h) \
+	   + H_GET_SYMBOL_TABLE_SIZE (h) \
+	   + (h)->string_table_size)
 
 /* Accessors.  */
 /* aouthdr.  */
@@ -814,9 +796,9 @@ typedef struct
 
 typedef struct
 {
-  struct internal_aouthdr aouthdr;	/* a.out header */
+  struct internal_aouthdr aouthdr;	/* a.out header.  */
   struct internal_filehdr filehdr;	/* File header, not machine dep.  */
-  long string_table_size;		/* names + '\0' + sizeof (int) */
+  long string_table_size;		/* names + '\0' + sizeof (int).  */
   long relocation_size;			/* Cumulated size of relocation
 					   information for all sections in
 					   bytes.  */
@@ -835,38 +817,13 @@ struct lineno_list
 
 #define obj_add_segment(s) obj_coff_add_segment (s)
 
-extern segT obj_coff_add_segment PARAMS ((const char *));
-
-extern void obj_coff_section PARAMS ((int));
-
-extern void c_dot_file_symbol PARAMS ((const char *, int));
-#define obj_app_file(name, app) c_dot_file_symbol (name, app)
-extern void obj_extra_stuff PARAMS ((object_headers * headers));
-
-extern segT s_get_segment PARAMS ((symbolS *ptr));
-
-extern void c_section_header PARAMS ((struct internal_scnhdr * header,
-				      char *name,
-				      long core_address,
-				      long size,
-				      long data_ptr,
-				      long reloc_ptr,
-				      long lineno_ptr,
-				      long reloc_number,
-				      long lineno_number,
-				      long alignment));
-
-#ifndef tc_coff_symbol_emit_hook
-void tc_coff_symbol_emit_hook PARAMS ((symbolS *));
-#endif
-
 /* Sanity check.  */
-
 #ifdef TC_I960
 #ifndef C_LEAFSTAT
 hey ! Where is the C_LEAFSTAT definition ? i960 - coff support is depending on it.
 #endif /* no C_LEAFSTAT */
 #endif /* TC_I960 */
+
 extern struct internal_scnhdr data_section_header;
 extern struct internal_scnhdr text_section_header;
 
@@ -878,7 +835,6 @@ extern struct internal_scnhdr text_section_header;
 
 #ifdef TE_PE
 #define obj_handle_link_once(t) obj_coff_pe_handle_link_once (t)
-extern void obj_coff_pe_handle_link_once ();
 #endif
 
 #endif /* not BFD_ASSEMBLER */
@@ -906,11 +862,40 @@ extern const pseudo_typeS coff_pseudo_table[];
 
 /* We need 12 bytes at the start of the section to hold some initial
    information.  */
-extern void obj_coff_init_stab_section PARAMS ((segT));
 #define INIT_STAB_SECTION(seg) obj_coff_init_stab_section (seg)
 
 /* Store the number of relocations in the section aux entry.  */
 #define SET_SECTION_RELOCS(sec, relocs, n) \
   SA_SET_SCN_NRELOC (section_symbol (sec), n)
 
+#define obj_app_file(name, app) c_dot_file_symbol (name, app)
+
+#ifdef BFD_ASSEMBLER
+extern int  S_SET_DATA_TYPE              (symbolS *, int);
+extern int  S_SET_STORAGE_CLASS          (symbolS *, int);
+extern int  S_GET_STORAGE_CLASS          (symbolS *);
+extern void SA_SET_SYM_ENDNDX            (symbolS *, symbolS *);
+extern void coff_add_linesym             (symbolS *);
+extern void c_dot_file_symbol            (const char *, int);
+extern void coff_frob_symbol             (symbolS *, int *);
+extern void coff_adjust_symtab           (void);
+extern void coff_frob_section            (segT);
+extern void coff_adjust_section_syms     (bfd *, asection *, void *);
+extern void coff_frob_file_after_relocs  (void);
+#else
+extern void obj_extra_stuff              (object_headers *);
+#endif
+extern void coff_obj_symbol_new_hook     (symbolS *);
+extern void coff_obj_read_begin_hook     (void);
+extern void obj_coff_section             (int);
+extern segT obj_coff_add_segment         (const char *);
+extern void obj_coff_section             (int);
+extern void c_dot_file_symbol            (const char *, int);
+extern segT s_get_segment                (symbolS *);
+extern void tc_coff_symbol_emit_hook     (symbolS *);
+extern void obj_coff_pe_handle_link_once (void);
+extern void obj_coff_init_stab_section   (segT);
+extern void c_section_header             (struct internal_scnhdr *,
+					  char *, long, long, long, long,
+					  long, long, long, long);
 #endif /* OBJ_FORMAT_H */
