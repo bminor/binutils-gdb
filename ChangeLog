@@ -1,3 +1,18 @@
+Tue Mar 26 21:18:50 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+        * configure (--enable-*): Handle quoted option lists such as
+        --enable-sim-cflags='-g0 -O' better.
+
+Thu Mar 21 11:53:08 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in ({,inst}all-target): New rule so we can make and
+	install all of the target directories easily.
+
+Wed Mar 20 18:10:57 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* configure.in: Add missing global flag in sed substitution when
+	deleting `target-' from ${configdirs}.
+
 Thu Mar 14 19:15:06 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (DO_X): Don't get confused if CC contains `=' in an
