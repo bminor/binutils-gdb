@@ -1,3 +1,22 @@
+Thu Nov 14 19:27:30 1991  Fred Fish  (fnf at cygnus.com)
+
+	* dwarfread.c:  Add misc function type parameter to internal
+	record_misc_function().  Remove calls to init_misc_bunches()
+	and condense_misc_bunches(), these are now done in elfread.c.
+
+	* elfread.c:  Add support for reading bfd canonical symbol tables
+	and generating misc function vector entries for global and
+	absolute symbols.  Do calls to init_misc_bunches() and
+	condense_misc_bunches() where they will enclose all calls to
+	record_misc_function(), including those in dwarfread.c.
+
+Thu Nov 14 17:02:11 1991  Roland H. Pesch  (pesch at cygnus.com)
+
+	* doc/Makefile.in: new targets gdb.me, gdb.ms, gdb.mm
+	(roffable documentation).
+	* doc/gdb.texinfo: embedded hints (as comments) for better
+	texi2roff conversion.
+
 Thu Nov 14 13:18:25 1991  John Gilmore  (gnu at cygnus.com)
 
 	* m88k-tdep.c (examine_prologue):  Deal with OR instructions

@@ -448,7 +448,8 @@ static int
 EXFUN(locval, (char *loc));
 
 static void
-EXFUN(record_misc_function, (char *name AND CORE_ADDR address));
+EXFUN(record_misc_function, (char *name AND CORE_ADDR address AND
+			     enum misc_function_type));
 
 static int
 EXFUN(compare_psymbols,
@@ -522,9 +523,6 @@ DEFUN(dwarf_build_psymtabs,
       init_psymbol_list (1024);
     }
   
-  init_misc_bunches ();
-  make_cleanup (discard_misc_bunches, 0);
-  
   /* Follow the compilation unit sibling chain, building a partial symbol
      table entry for each one.  Save enough information about each compilation
      unit to locate the full DWARF information later. */
@@ -532,10 +530,6 @@ DEFUN(dwarf_build_psymtabs,
   scan_compilation_units (filename, addr, dbbase, dbbase + dbsize,
 			  dbfoff, lnoffset, objfile);
   
-  /* Go over the miscellaneous functions and install them in the miscellaneous
-     function vector. */
-  
-  condense_misc_bunches (!mainline);
   do_cleanups (back_to);
 }
 
@@ -548,7 +542,8 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	static void record_misc_function (char *name, CORE_ADDR address)
+	static void record_misc_function (char *name, CORE_ADDR address,
+					  enum misc_function_type mf_type)
 
 DESCRIPTION
 
@@ -557,17 +552,14 @@ DESCRIPTION
 	symbol, records this information for later use in building the
 	miscellaneous function vector.
 
-NOTES
-
-	FIXME:  For now we just use mf_text as the type.  This should be
-	fixed.
  */
 
 static void
-DEFUN(record_misc_function, (name, address), char *name AND CORE_ADDR address)
+DEFUN(record_misc_function, (name, address, mf_type),
+      char *name AND CORE_ADDR address AND enum misc_function_type mf_type)
 {
   prim_record_misc_function (obsavestring (name, strlen (name)), address,
-			     mf_text);
+			     mf_type);
 }
 
 /*
@@ -2615,11 +2607,13 @@ DEFUN(add_partial_symbol, (dip), struct dieinfo *dip)
   switch (dip -> dietag)
     {
     case TAG_global_subroutine:
-      record_misc_function (dip -> at_name, dip -> at_low_pc);
+      record_misc_function (dip -> at_name, dip -> at_low_pc, mf_text);
       add_psymbol_to_list (&global_psymbols, dip -> at_name, VAR_NAMESPACE,
 			   LOC_BLOCK, dip -> at_low_pc);
       break;
     case TAG_global_variable:
+      record_misc_function (dip -> at_name, locval (dip -> at_location),
+			    mf_data);
       add_psymbol_to_list (&global_psymbols, dip -> at_name, VAR_NAMESPACE,
 			   LOC_STATIC, 0);
       break;

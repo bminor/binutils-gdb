@@ -94,6 +94,71 @@ DEFUN(elf_locate_sections, (abfd, sectp, ei),
     }
 }
 
+/*
+
+LOCAL FUNCTION
+
+	record_misc_function -- add entry to miscellaneous function vector
+
+SYNOPSIS
+
+	static void record_misc_function (char *name, CORE_ADDR address)
+
+DESCRIPTION
+
+	Given a pointer to the name of a symbol that should be added to the
+	miscellaneous function vector, and the address associated with that
+	symbol, records this information for later use in building the
+	miscellaneous function vector.
+
+NOTES
+
+	FIXME:  For now we just use mf_unknown as the type.  This should be
+	fixed.
+ */
+
+static void
+DEFUN(record_misc_function, (name, address), char *name AND CORE_ADDR address)
+{
+  prim_record_misc_function (obsavestring (name, strlen (name)), address,
+			     mf_unknown);
+}
+
+static void
+DEFUN (elf_symtab_read, (abfd, addr),
+       bfd *abfd AND
+       CORE_ADDR addr)
+{
+  unsigned int storage_needed;
+  asymbol *sym;
+  asymbol **symbol_table;
+  unsigned int number_of_symbols;
+  unsigned int i;
+  struct cleanup *back_to;
+  
+  storage_needed = get_symtab_upper_bound (abfd);
+
+  if (storage_needed > 0)
+    {
+      symbol_table = (asymbol **) bfd_xmalloc (storage_needed);
+      back_to = make_cleanup (free, symbol_table);
+      number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table); 
+  
+      for (i = 0; i < number_of_symbols; i++)
+	{
+	  sym = *symbol_table++;
+	  /* Select global symbols that are defined in a specific section
+	     or are absolute. */
+	  if (sym -> flags & BSF_GLOBAL
+	      && ((sym -> section != NULL) || (sym -> flags & BSF_ABSOLUTE)))
+	    {
+	      record_misc_function ((char *) sym -> name, sym -> value);
+	    }
+	}
+      do_cleanups (back_to);
+    }
+}
+
 /* Scan and build partial symbols for a symbol file.
    We have been initialized by a call to elf_symfile_init, which 
    currently does nothing.
@@ -111,7 +176,14 @@ DEFUN(elf_locate_sections, (abfd, sectp, ei),
    file, the corresponding partial symbol table is mutated into a full
    fledged symbol table by going back and reading the symbols
    for real.  The function dwarf_psymtab_to_symtab() is the function that
-   does this for DWARF symbols. */
+   does this for DWARF symbols.
+
+   Note that ELF files have a "minimal" symbol table, which looks a lot
+   like a COFF symbol table, but has only the minimal information necessary
+   for linking.  We process this also, and just use the information to
+   add to the misc function vector.  This gives us some minimal debugging
+   capability even for files compiled without -g.
+ */
 
 static void
 DEFUN(elf_symfile_read, (sf, addr, mainline),
@@ -121,7 +193,19 @@ DEFUN(elf_symfile_read, (sf, addr, mainline),
 {
   bfd *abfd = sf->objfile->obfd;
   struct elfinfo ei;
+  struct cleanup *back_to;
 
+  init_misc_bunches ();
+  back_to = make_cleanup (discard_misc_bunches, 0);
+
+  /* Process the normal ELF symbol table first. */
+
+  elf_symtab_read (abfd, addr);
+
+  /* Now process the DWARF debugging information, which is contained in
+     special ELF sections.  We first have to find them... */
+
+  (void) memset ((char *) &ei, 0, sizeof (ei));
   bfd_map_over_sections (abfd, elf_locate_sections, &ei);
   if (ei.dboffset && ei.lnoffset)
     {
@@ -132,12 +216,19 @@ DEFUN(elf_symfile_read, (sf, addr, mainline),
 			    ei.dboffset, ei.dbsize,
 			    ei.lnoffset, ei.lnsize, sf->objfile);
     }
+
   if (!partial_symtab_list)
     {
       wrap_here ("");
       printf_filtered ("(no debugging symbols found)...");
       wrap_here ("");
     }
+
+  /* Go over the miscellaneous functions and install them in the
+     miscellaneous function vector. */
+  
+  condense_misc_bunches (!mainline);
+  do_cleanups (back_to);
 }
 
 /* Initialize anything that needs initializing when a completely new symbol
