@@ -12,35 +12,25 @@ proc run_list_test { name opts } {
     pass $testname
 }
 
-set any "0"
+if ![is_elf_format] then {
+    return
+}
 
 if [istarget "x86_64-*"] then {
     run_dump_test "cfi-x86_64"
-    set any "1"
-}
 
-if [istarget "i?86-*"] then {
+} elseif [istarget "i?86-*"] then {
     run_dump_test "cfi-i386"
-    set any "1"
+
+} elseif { [istarget alpha*-*-*] } then {
+    run_dump_test "cfi-alpha-1"
+    run_dump_test "cfi-alpha-2"
+    run_dump_test "cfi-alpha-3"
+
+} else {
+    return
 }
 
-if { [istarget alpha*-*-*] } then {
-
-    set elf [expr [istarget *-*-elf*] \
-                  || [istarget *-*-linux*] \
-                  || [istarget *-*-freebsd*] \
-                  || [istarget *-*-netbsd*] ]
-
-    if $elf {
-	run_dump_test "cfi-alpha-1"
-	run_dump_test "cfi-alpha-2"
-	run_dump_test "cfi-alpha-3"
-	set any "1"
-    }
-}
-
-if $any {
-    run_list_test "cfi-diag-1" ""
-    run_dump_test "cfi-common-1"
-    run_dump_test "cfi-common-2"
-}
+run_list_test "cfi-diag-1" ""
+run_dump_test "cfi-common-1"
+run_dump_test "cfi-common-2"
