@@ -1,3 +1,8 @@
+2005-04-04  Jan-Benedict Glaw  <jbglaw@lug-owl.>
+
+	* binutils-all/vax/objdump.exp: Condense the two tests into one
+	and add a "-M entry:" for the second label.
+
 2005-03-29  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* binutils-all/vax: New directory.
