@@ -1,5 +1,9 @@
 2002-04-20  Alan Modra  <amodra@bigpond.net.au>
 
+	* archures.c (bfd_lookup_arch): Move the list order comment..
+	(struct bfd_arch_info): ..to where it belongs.
+	* bfd-in2.h: Regenerate.
+
 	* archures.c (bfd_lookup_arch): Add comment on list order.
 	(bfd_default_set_arch_mach): Use bfd_lookup_arch.
 	* cpu-powerpc.c (bfd_powerpc_archs): Re-order so that the default

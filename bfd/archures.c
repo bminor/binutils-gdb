@@ -288,7 +288,9 @@ DESCRIPTION
 .  const char *arch_name;
 .  const char *printable_name;
 .  unsigned int section_align_power;
-.  {* True if this is the default machine for the architecture.  *}
+.  {* True if this is the default machine for the architecture.
+.     The default arch should be the first entry for an arch so that
+.     all the entries for that arch can be accessed via <<next>>.  *}
 .  boolean the_default;
 .  const struct bfd_arch_info * (*compatible)
 .	PARAMS ((const struct bfd_arch_info *a,
@@ -973,9 +975,7 @@ DESCRIPTION
 	Look for the architecure info structure which matches the
 	arguments @var{arch} and @var{machine}. A machine of 0 matches the
 	machine/architecture structure which marks itself as the
-	default.  gdb relies on the default arch being the first
-	entry for the given ARCH so that all the entries for that
-	arch can be accessed via ap->next.
+	default.
 */
 
 const bfd_arch_info_type *
