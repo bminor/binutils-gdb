@@ -39,7 +39,7 @@ static boolean sh_elf_copy_private_data
   PARAMS ((bfd *, bfd *));
 static boolean sh_elf_merge_private_data
   PARAMS ((bfd *, bfd *));
-boolean sh_elf_set_mach_from_flags
+static boolean sh_elf_set_mach_from_flags
   PARAMS ((bfd *));
 static boolean sh_elf_relax_section
   PARAMS ((bfd *, asection *, struct bfd_link_info *, boolean *));
@@ -2261,7 +2261,7 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
   return true;
 }
 
-boolean
+static boolean
 sh_elf_set_mach_from_flags (abfd)
      bfd *    abfd;
 {

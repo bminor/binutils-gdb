@@ -1,3 +1,7 @@
+2000-08-11  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-sh.c (sh_elf_set_mach_from_flags): Make it static.
+
 2000-08-10  Jason Eckhardt  <jle@cygnus.com>
 
         * elf32-i860.c (elf32_i860_relocate_section): New function.
