@@ -415,6 +415,7 @@ const struct language_defn m2_language_defn =
   range_check_on,
   type_check_on,
   case_sensitive_on,
+  array_row_major,
   &exp_descriptor_standard,
   m2_parse,			/* parser */
   m2_error,			/* parser error function */

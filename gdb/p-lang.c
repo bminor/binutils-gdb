@@ -451,6 +451,7 @@ const struct language_defn pascal_language_defn =
   range_check_on,
   type_check_on,
   case_sensitive_on,
+  array_row_major,
   &exp_descriptor_standard,
   pascal_parse,
   pascal_error,

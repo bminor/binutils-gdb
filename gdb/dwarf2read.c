@@ -848,6 +848,9 @@ static CORE_ADDR decode_locdesc (struct dwarf_block *, struct dwarf2_cu *);
 
 static void read_array_type (struct die_info *, struct dwarf2_cu *);
 
+static enum dwarf_array_dim_ordering read_array_order (struct die_info *, 
+						       struct dwarf2_cu *);
+
 static void read_tag_pointer_type (struct die_info *, struct dwarf2_cu *);
 
 static void read_tag_ptr_to_member_type (struct die_info *,
@@ -3724,9 +3727,20 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 
   /* Dwarf2 dimensions are output from left to right, create the
      necessary array types in backwards order.  */
+
   type = element_type;
-  while (ndim-- > 0)
-    type = create_array_type (NULL, type, range_types[ndim]);
+
+  if (read_array_order (die, cu) == DW_ORD_col_major)
+    {
+      int i = 0;
+      while (i < ndim)
+	type = create_array_type (NULL, type, range_types[i++]);
+    }
+  else
+    {
+      while (ndim-- > 0)
+	type = create_array_type (NULL, type, range_types[ndim]);
+    }
 
   /* Understand Dwarf2 support for vector types (like they occur on
      the PowerPC w/ AltiVec).  Gcc just adds another attribute to the
@@ -3743,6 +3757,41 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   /* Install the type in the die. */
   die->type = type;
 }
+
+static enum dwarf_array_dim_ordering
+read_array_order (struct die_info *die, struct dwarf2_cu *cu) 
+{
+  struct attribute *attr;
+
+  attr = dwarf2_attr (die, DW_AT_ordering, cu);
+
+  if (attr) return DW_SND (attr);
+
+  /*
+    GNU F77 is a special case, as at 08/2004 array type info is the
+    opposite order to the dwarf2 specification, but data is still 
+    laid out as per normal fortran.
+
+    FIXME: dsl/2004-8-20: If G77 is ever fixed, this will also need 
+    version checking.
+  */
+
+  if (cu->language == language_fortran &&
+      cu->producer && strstr (cu->producer, "GNU F77"))
+    {
+      return DW_ORD_row_major;
+    }
+
+  switch (cu->language_defn->la_array_ordering) 
+    {
+    case array_column_major:
+      return DW_ORD_col_major;
+    case array_row_major:
+    default:
+      return DW_ORD_row_major;
+    };
+}
+
 
 /* First cut: install each common block member as a global variable.  */
 

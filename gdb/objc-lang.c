@@ -659,6 +659,7 @@ const struct language_defn objc_language_defn = {
   range_check_off,
   type_check_off,
   case_sensitive_on,
+  array_row_major,
   &exp_descriptor_standard,
   objc_parse,
   objc_error,

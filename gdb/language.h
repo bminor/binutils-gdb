@@ -96,6 +96,17 @@ extern enum case_mode
   }
 case_mode;
 
+/* array_ordering ==
+   array_row_major:     Arrays are in row major order
+   array_column_major:  Arrays are in column major order.*/
+
+extern enum array_ordering
+  {
+    array_row_major, array_column_major
+  } 
+array_ordering;
+
+
 /* case_sensitivity ==
    case_sensitive_on:   Case sensitivity in name matching is used
    case_sensitive_off:  Case sensitivity in name matching is not used  */
@@ -186,6 +197,9 @@ struct language_defn
 
     /* Default case sensitivity */
     enum case_sensitivity la_case_sensitivity;
+
+    /* Multi-dimensional array ordering */
+    enum array_ordering la_array_ordering;
 
     /* Definitions related to expression printing, prefixifying, and
        dumping */

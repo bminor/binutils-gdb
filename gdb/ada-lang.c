@@ -10166,6 +10166,7 @@ const struct language_defn ada_language_defn = {
   ada_lookup_symbol,
   ada_lookup_minimal_symbol,
 #endif /* GNAT_GDB */
+  array_row_major,
   &ada_exp_descriptor,
   parse,
   ada_error,

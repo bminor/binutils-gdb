@@ -248,6 +248,7 @@ const struct language_defn scm_language_defn =
   range_check_off,
   type_check_off,
   case_sensitive_off,
+  array_row_major,
   &exp_descriptor_scm,
   scm_parse,
   c_error,

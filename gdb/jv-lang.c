@@ -1088,6 +1088,7 @@ const struct language_defn java_language_defn =
   range_check_off,
   type_check_off,
   case_sensitive_on,
+  array_row_major,
   &exp_descriptor_java,
   java_parse,
   java_error,
