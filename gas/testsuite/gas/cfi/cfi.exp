@@ -15,5 +15,6 @@ if { [istarget alpha*-*-*] } then {
 
     if $elf {
 	run_dump_test "cfi-alpha-1"
+	run_dump_test "cfi-alpha-2"
     }
 }

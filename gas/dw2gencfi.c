@@ -666,9 +666,17 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
   exp.X_op_symbol = cie->start_address;
   emit_expr (&exp, 4);				/* CIE offset */
   
+  /* ??? Unsure why this works and the following doesn't.  
+     Symptom was incorrect addends to the relocation.  */
+#if 1
+  memset (frag_more (4), 0, 4);			/* Code offset */
+  fix_new (frag_now, frag_now_fix () - 4, 4,
+	   fde->start_address, 0, 1, BFD_RELOC_32);
+#else
   exp.X_add_symbol = fde->start_address;
   exp.X_op_symbol = symbol_temp_new_now ();
-  emit_expr (&exp, 4);				/* Code offset */
+  emit_expr (&exp, 4);
+#endif
 
   exp.X_add_symbol = fde->end_address;
   exp.X_op_symbol = fde->start_address;		/* Code length */
@@ -770,6 +778,7 @@ cfi_finish (void)
 {
   segT cfi_seg;
   struct fde_entry *fde;
+  int save_flag_traditional_format;
 
   if (cur_fde_data)
     {
@@ -789,6 +798,10 @@ cfi_finish (void)
   subseg_set (cfi_seg, 0);
   record_alignment (cfi_seg, 2);
 
+  /* Make sure check_eh_frame doesn't do anything with our output.  */
+  save_flag_traditional_format = flag_traditional_format;
+  flag_traditional_format = 1;
+
   for (fde = all_fde_data; fde ; fde = fde->next)
     {
       struct cfi_insn_data *first;
@@ -797,4 +810,6 @@ cfi_finish (void)
       cie = select_cie_for_fde (fde, &first);
       output_fde (fde, cie, first);
     }
+
+  flag_traditional_format = save_flag_traditional_format;
 }

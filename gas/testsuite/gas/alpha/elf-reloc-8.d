@@ -311,20 +311,20 @@ OFFSET *TYPE *VALUE
 
 RELOCATION RECORDS FOR \[\.eh_frame\]:
 OFFSET *TYPE *VALUE 
-0*000001c SREL32            \.init\.text\+0xf*ffffff8
-0*0000034 SREL32            \.init\.text\+0x0*0000048
-0*0000048 SREL32            \.init\.text\+0x0*0000078
-0*000005c SREL32            \.init\.text\+0x0*00000a8
-0*0000080 SREL32            \.init\.text\+0x0*00002b8
-0*00000a0 SREL32            \.init\.text\+0x0*0000598
-0*00000b8 SREL32            \.init\.text\+0x0*00005e8
-0*00000cc SREL32            \.init\.text\+0x0*0000608
-0*00000e0 SREL32            \.init\.text\+0x0*0000628
-0*00000fc SREL32            \.init\.text\+0x0*0000748
-0*0000120 SREL32            \.init\.text\+0x0*0000988
-0*000013c SREL32            \.init\.text\+0x0*0000a08
-0*0000150 SREL32            \.init\.text\+0x0*0000a18
-0*0000164 SREL32            \.init\.text\+0x0*0000a38
-0*000017c SREL32            \.init\.text\+0x0*0000a88
-0*0000190 SREL32            \.init\.text\+0x0*0000a98
-0*00001a4 SREL32            \.text\+0xf*ffffff8
+0*000001c SREL32            \.init\.text
+0*0000034 SREL32            \.init\.text\+0x0*0000050
+0*0000048 SREL32            \.init\.text\+0x0*0000080
+0*000005c SREL32            \.init\.text\+0x0*00000b0
+0*0000080 SREL32            \.init\.text\+0x0*00002c0
+0*00000a0 SREL32            \.init\.text\+0x0*00005a0
+0*00000b8 SREL32            \.init\.text\+0x0*00005f0
+0*00000cc SREL32            \.init\.text\+0x0*0000610
+0*00000e0 SREL32            \.init\.text\+0x0*0000630
+0*00000fc SREL32            \.init\.text\+0x0*0000750
+0*0000120 SREL32            \.init\.text\+0x0*0000990
+0*000013c SREL32            \.init\.text\+0x0*0000a10
+0*0000150 SREL32            \.init\.text\+0x0*0000a20
+0*0000164 SREL32            \.init\.text\+0x0*0000a40
+0*000017c SREL32            \.init\.text\+0x0*0000a90
+0*0000190 SREL32            \.init\.text\+0x0*0000aa0
+0*00001a4 SREL32            \.text
