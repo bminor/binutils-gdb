@@ -1,3 +1,11 @@
+Wed Feb  4 17:40:21 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+        * Makefile.in (SFILES): add tracepoint.c.
+        (LINTFILES): add @CONFIG_SRCS@.
+        (SOURCES): Ditto.
+        * configure.in (CONFIG_SRCS): Mirror use of CONFIG_OBS.
+        * configure: Regenerated.
+
 Tue Feb  3 16:12:32 1998  Gordon W. Ross (gwr@mc.com)
 
 	* infptrace.c (child_resume): Don't try to step if 

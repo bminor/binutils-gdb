@@ -38,6 +38,7 @@ dnl List of object files added by configure.
 
 CONFIG_OBS=
 CONFIG_DEPS=
+CONFIG_SRCS=
 
 configdirs="doc testsuite"
 
@@ -210,6 +211,7 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
             AC_MSG_RESULT(yes)
             AC_DEFINE(HAVE_HPUX_THREAD_SUPPORT)
             CONFIG_OBS="${CONFIG_OJS} hpux-thread.o"
+            CONFIG_SRCS="${CONFIG_SRCS} hpux-thread.c"
          else
             AC_MSG_RESULT(no (suppressed because you are not using GCC))
          fi
@@ -223,6 +225,7 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
          AC_MSG_RESULT(yes)
          AC_DEFINE(HAVE_THREAD_DB_LIB)
          CONFIG_OBS="${CONFIG_OBS} sol-thread.o"
+         CONFIG_SRCS="${CONFIG_SRCS} sol-thread.c"
          AC_CHECK_LIB(dl, dlopen)
          if test "$GCC" = "yes" ; then
             # The GNU linker requires the -export-dynamic option to make
@@ -258,6 +261,7 @@ esac])
 
 if test "${enable_netrom}" = "yes"; then
 	CONFIG_OBS="${CONFIG_OBS} remote-nrom.o" 
+        CONFIG_SRCS="${CONFIG_SRCS} remote-nrom.c"
 fi
 
 MMALLOC_CFLAGS=
@@ -427,6 +431,7 @@ AC_SUBST(ENABLE_CFLAGS)
 
 AC_SUBST(CONFIG_OBS)
 AC_SUBST(CONFIG_DEPS)
+AC_SUBST(CONFIG_SRCS)
 
 # Begin stuff to support --enable-shared
 AC_ARG_ENABLE(shared,

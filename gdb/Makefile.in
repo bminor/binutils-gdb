@@ -396,11 +396,11 @@ SFILES = bcache.c blockframe.c breakpoint.c buildsym.c c-exp.y \
 	printcmd.c remote.c remote-nrom.c scm-exp.c scm-lang.c scm-valprint.c \
 	source.c stabsread.c stack.c symfile.c symmisc.c \
 	symtab.c target.c thread.c top.c \
-	typeprint.c utils.c \
+	tracepoint.c typeprint.c utils.c \
 	valarith.c valops.c valprint.c values.c \
 	serial.c ser-unix.c mdebugread.c os9kread.c
 
-LINTFILES = $(SFILES) $(YYFILES) init.c
+LINTFILES = $(SFILES) $(YYFILES) @CONFIG_SRCS@ init.c
 
 # "system" headers.  Using these in dependencies is a rather personal
 # choice. (-rich, summer 1993)
@@ -492,7 +492,7 @@ POSSLIBS = gnu-regex.c gnu-regex.h
 DEPFILES = $(TDEPFILES) $(XDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) \
 	   $(REMOTE_OBS) $(SIM_OBS) @CONFIG_OBS@
 
-SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES)
+SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES) @CONFIG_SRCS@
 # Don't include YYFILES (*.tab.c) because we already include *.y in SFILES,
 # and it's more useful to see it in the .y file.
 TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
