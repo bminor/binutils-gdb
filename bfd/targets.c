@@ -1,5 +1,5 @@
 /* Generic target-file-type support for the BFD library.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -508,6 +508,7 @@ extern const bfd_target bfd_efi_app_ia32_vec;
 extern const bfd_target bfd_efi_app_ia64_vec;
 extern const bfd_target bfd_elf64_alpha_vec;
 extern const bfd_target bfd_elf64_hppa_vec;
+extern const bfd_target bfd_elf64_hppa_linux_vec;
 extern const bfd_target bfd_elf64_ia64_little_vec;
 extern const bfd_target bfd_elf64_ia64_big_vec;
 extern const bfd_target bfd_elf32_ia64_big_vec;
@@ -526,6 +527,7 @@ extern const bfd_target bfd_elf32_us_cris_vec;
 extern const bfd_target bfd_elf32_d10v_vec;
 extern const bfd_target bfd_elf32_d30v_vec;
 extern const bfd_target bfd_elf32_hppa_vec;
+extern const bfd_target bfd_elf32_hppa_linux_vec;
 extern const bfd_target bfd_elf32_i370_vec;
 extern const bfd_target bfd_elf32_i386_vec;
 extern const bfd_target bfd_elf32_i860_vec;
@@ -719,6 +721,7 @@ const bfd_target * const bfd_target_vector[] = {
 #ifdef BFD64
 	&bfd_elf64_alpha_vec,
 	&bfd_elf64_hppa_vec,
+	&bfd_elf64_hppa_linux_vec,
 	&bfd_elf64_ia64_little_vec,
 	&bfd_elf64_ia64_big_vec,
 #endif
@@ -735,6 +738,7 @@ const bfd_target * const bfd_target_vector[] = {
 	&bfd_elf32_d10v_vec,
 	&bfd_elf32_d30v_vec,
 	&bfd_elf32_hppa_vec,
+	&bfd_elf32_hppa_linux_vec,
 	&bfd_elf32_i370_vec,
 	&bfd_elf32_i386_vec,
 #ifdef BFD64

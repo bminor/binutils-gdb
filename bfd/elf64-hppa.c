@@ -1166,8 +1166,15 @@ elf64_hppa_post_process_headers (abfd, link_info)
 
   i_ehdrp = elf_elfheader (abfd);
 
-  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_HPUX;
-  i_ehdrp->e_ident[EI_ABIVERSION] = 1;
+  if (strcmp (bfd_get_target (abfd), "elf64-hppa-linux") == 0)
+    {
+      i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_LINUX;
+    }
+  else
+    {
+      i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_HPUX;
+      i_ehdrp->e_ident[EI_ABIVERSION] = 1;
+    }
 }
 
 /* Create function descriptor section (.opd).  This section is called .opd
@@ -2656,4 +2663,12 @@ const struct elf_size_info hppa64_elf_size_info =
 #define elf_backend_plt_header_size     0
 #define elf_backend_type_change_ok true
 
+#include "elf64-target.h"
+
+#undef TARGET_BIG_SYM
+#define TARGET_BIG_SYM			bfd_elf64_hppa_linux_vec
+#undef TARGET_BIG_NAME
+#define TARGET_BIG_NAME			"elf64-hppa-linux"
+
+#define INCLUDED_TARGET_FILE 1
 #include "elf64-target.h"

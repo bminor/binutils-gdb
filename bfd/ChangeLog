@@ -1,5 +1,19 @@
 2001-01-14  Alan Modra  <alan@linuxcare.com.au>
 
+	* config.bfd: Add linux target variant for elfxx-hppa.
+	* configure.in: Recognize bfd_elf32_hppa_linux_vec and
+	bfd_elf64_hppa_linux_vec.
+	* configure: Regenerate.
+	* elf64-hppa.c: Include elf64-target.h again to support linux
+	target variant.
+	(elf64_hppa_post_process_headers): Set ELFOSABI_LINUX for linux.
+	* elf32-hppa.c: Include elf32-target.h again to support linux
+	target variant.
+	(elf32_hppa_post_process_headers): New function.
+	(elf_backend_post_process_headers): Define.
+	* targets.c (bfd_target_vector): Add bfd_elf64_hppa_linux_vec and
+	bfd_elf32_hppa_linux_vec.
+
 	* elf32-hppa.c (elf32_hppa_link_hash_table): Add text_segment_base,
 	and data_segment_base fields.
 	(elf32_hppa_link_hash_table_create ): Init them.
@@ -226,8 +240,8 @@
 
 2000-12-10  Fred Fish  <fnf@be.com>
 
-      * elflink.h (elf_link_output_extsym): Don't complain about undefined
-      symbols in shared objects if allow_shlib_undefined is true.
+	* elflink.h (elf_link_output_extsym): Don't complain about undefined
+	symbols in shared objects if allow_shlib_undefined is true.
 
 2000-12-12  Nick Clifton  <nickc@redhat.com>
 
@@ -257,7 +271,7 @@
 	* configure: Regenerate.
 	* libcoff-in.h (coff_tdata): Add pointer dwarf2_find_line_info.
 	* libcoff.h: Regenerate.
-	* coffgen.c (coff_find_nearest_line): Call 
+	* coffgen.c (coff_find_nearest_line): Call
 	_bfd_dwarf2_find_nearest_line.
 	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Add parameter. Update
 	accordingly.
@@ -277,7 +291,7 @@
 	to _bfd_find_nearest_line.
 	* elf32-mips.c (_bfd_mips_elf_find_nearest_line): Add parameter to
 	call to _bfd_find_nearest_line.
-	  
+
 2000-12-08  Kazu Hirata  <kazu@hxi.com>
 
 	* coffgen.c: Fix formatting.
@@ -340,75 +354,75 @@
 
 2000-12-01  Chris Demetriou  <cgd@sibyte.com>
 
-        * aoutx.h (NAME(aout,machine_type)): Add bfd_mach_mips32 and
-        bfd_mach_mips32_4k.  Update FIXME comment.
-        * archures.c (bfd_mach_mips32): New constant.
-        (bfd_mach_mips4K, bfd_mach_mips32_4k) Rename the former to
-        the latter, renumber it.
-        * bfd-in2.h (bfd_mach_mips32): New constant.
-        (bfd_mach_mips4K, bfd_mach_mips32_4k) Rename the former to
-        the latter, renumber it.
-        * cpu-mips.c (I_mips32): New constant.
-        (I_mips4K, I_mips32_4k): Rename the former to the latter.
-        (arch_info_struct): Add bfd_mach_mips32 entry, replace
-        bfd_mach_mips4K entry with bfd_mach_mips32_4k entry.
-        * elf32-mips.c (elf_mips_isa): Add E_MIPS_ARCH_32 case.
-        (elf_mips_mach): Likewise.  Also, replace E_MIPS_MACH_MIPS32
-        with E_MIPS_MACH_MIPS32_4K.
-        (_bfd_mips_elf_final_write_processing): Replace
-        bfd_mach_mips4K with bfd_mach_mips32_4k case, add
-        bfd_mach_mips32 case.
-        (_bfd_mips_elf_merge_private_bfd_data): Generalize ISA mixing
-        comparison with support for MIPS32.
-        (_bfd_mips_elf_print_private_bfd_data): Print ISA name for
-        MIPS32.
+	* aoutx.h (NAME(aout,machine_type)): Add bfd_mach_mips32 and
+	bfd_mach_mips32_4k.  Update FIXME comment.
+	* archures.c (bfd_mach_mips32): New constant.
+	(bfd_mach_mips4K, bfd_mach_mips32_4k) Rename the former to
+	the latter, renumber it.
+	* bfd-in2.h (bfd_mach_mips32): New constant.
+	(bfd_mach_mips4K, bfd_mach_mips32_4k) Rename the former to
+	the latter, renumber it.
+	* cpu-mips.c (I_mips32): New constant.
+	(I_mips4K, I_mips32_4k): Rename the former to the latter.
+	(arch_info_struct): Add bfd_mach_mips32 entry, replace
+	bfd_mach_mips4K entry with bfd_mach_mips32_4k entry.
+	* elf32-mips.c (elf_mips_isa): Add E_MIPS_ARCH_32 case.
+	(elf_mips_mach): Likewise.  Also, replace E_MIPS_MACH_MIPS32
+	with E_MIPS_MACH_MIPS32_4K.
+	(_bfd_mips_elf_final_write_processing): Replace
+	bfd_mach_mips4K with bfd_mach_mips32_4k case, add
+	bfd_mach_mips32 case.
+	(_bfd_mips_elf_merge_private_bfd_data): Generalize ISA mixing
+	comparison with support for MIPS32.
+	(_bfd_mips_elf_print_private_bfd_data): Print ISA name for
+	MIPS32.
 
-        * aoutx.h (NAME(aout,machine_type)): Add cases for
-        bfd_mach_mips5 and bfd_mach_mips64.
-        * archures.c (bfd_mach_mips5, bfd_mach_mips64): New constants.
-        * bfd-in2.h (bfd_mach_mips5, bfd_mach_mips64): Likewise.
-        * cpu_mips.c (I_mips5, I_mips64): New definitions.
-        (arch_info_struct): Add entries for bfd_mach_mips5 and
-        bfd_mach_mips64.
-        * elf32-mips.c (elf_mips_isa, elf_mips_mach,
-        _bfd_mips_elf_print_private_bfd_data): Add cases for
-        E_MIPS_ARCH_5 and E_MIPS_ARCH_64.
-        (_bfd_mips_elf_final_write_processing): Add cases for
-        bfd_mach_mips5 and bfd_mach_mips64.
+	* aoutx.h (NAME(aout,machine_type)): Add cases for
+	bfd_mach_mips5 and bfd_mach_mips64.
+	* archures.c (bfd_mach_mips5, bfd_mach_mips64): New constants.
+	* bfd-in2.h (bfd_mach_mips5, bfd_mach_mips64): Likewise.
+	* cpu_mips.c (I_mips5, I_mips64): New definitions.
+	(arch_info_struct): Add entries for bfd_mach_mips5 and
+	bfd_mach_mips64.
+	* elf32-mips.c (elf_mips_isa, elf_mips_mach,
+	_bfd_mips_elf_print_private_bfd_data): Add cases for
+	E_MIPS_ARCH_5 and E_MIPS_ARCH_64.
+	(_bfd_mips_elf_final_write_processing): Add cases for
+	bfd_mach_mips5 and bfd_mach_mips64.
 
-        * bfd/aoutx.h (NAME(aout,machine_type)): Add a
-        bfd_mach_mips_sb1 case.
-        * bfd/archures.c (bfd_mach_mips_sb1): New constant.
-        * bfd/bfd-in2.h (bfd_mach_mips_sb1): New constant.
-        * bfd/cpu-mips.c (I_sb1): New constant.
-        (arch_info_struct): Add entry for bfd_mach_mips_sb1.
-        * bfd/elf32-mips.c (elf_mips_mach): Add case for
-        E_MIPS_MACH_SB1.
-        (_bfd_mips_elf_final_write_processing): Add case for
-        bfd_mach_mips_sb1.
+	* bfd/aoutx.h (NAME(aout,machine_type)): Add a
+	bfd_mach_mips_sb1 case.
+	* bfd/archures.c (bfd_mach_mips_sb1): New constant.
+	* bfd/bfd-in2.h (bfd_mach_mips_sb1): New constant.
+	* bfd/cpu-mips.c (I_sb1): New constant.
+	(arch_info_struct): Add entry for bfd_mach_mips_sb1.
+	* bfd/elf32-mips.c (elf_mips_mach): Add case for
+	E_MIPS_MACH_SB1.
+	(_bfd_mips_elf_final_write_processing): Add case for
+	bfd_mach_mips_sb1.
 
-2000-12-01      Joel Sherrill <joel@OARcorp.com>
+2000-12-01  Joel Sherrill <joel@OARcorp.com>
 
 	* config.bfd (arm-*-rtems*, a29k-*rtems*): New targets.
 	(sparc*-*-rtemself*, sparc*-*-rtemsaout*): New targets.
 	(sparc*-*-rtems*): Switched from a.out to ELF.
 
 2000-11-30  Jan Hubicka  <jh@suse.cz>
-	
-        * Makefile.am (BFD64_BACKENDS): Add elf64-x86-64.lo
-        BFD64_BACKENDS_CFILES): Add elf64-x86-64.c
-        (elf64-x86-64.lo): Add dependencies.
-        * archures.c (DESCRIPTION): Add bfd_mach_x86_64,
-        bfd_mach_x86_64_intel_syntax.
-        * elf.c (prep_headers): Use EM_x86_64 for 64bit output.
-        * config.bfd (x86_64): Add.
-        * configure.in: Add support for bfd_elf64_x86_64_vec.
-        * cpu-i386.c (bfd_x86_64_arch_intel_syntax, bfd_x86_64_arch): Add.
-        (bfd_i386_arch, i8086_ar): Link in.
-        * elf64-x86-64.c: New file.
-        * reloc.c (ENUMDOC): Add BFD_RELOC_X86_64*.
-        * targets.c (bfd_elf64_x86_64_vec): Add.
-        (bfd_target_vect): Add bfd_elf64_x86_64_vec.
+
+	* Makefile.am (BFD64_BACKENDS): Add elf64-x86-64.lo
+	BFD64_BACKENDS_CFILES): Add elf64-x86-64.c
+	(elf64-x86-64.lo): Add dependencies.
+	* archures.c (DESCRIPTION): Add bfd_mach_x86_64,
+	bfd_mach_x86_64_intel_syntax.
+	* elf.c (prep_headers): Use EM_x86_64 for 64bit output.
+	* config.bfd (x86_64): Add.
+	* configure.in: Add support for bfd_elf64_x86_64_vec.
+	* cpu-i386.c (bfd_x86_64_arch_intel_syntax, bfd_x86_64_arch): Add.
+	(bfd_i386_arch, i8086_ar): Link in.
+	* elf64-x86-64.c: New file.
+	* reloc.c (ENUMDOC): Add BFD_RELOC_X86_64*.
+	* targets.c (bfd_elf64_x86_64_vec): Add.
+	(bfd_target_vect): Add bfd_elf64_x86_64_vec.
 
 2000-11-30  Kazu Hirata  <kazu@hxi.com>
 
@@ -446,7 +460,7 @@
 
 2000-11-22  Philip Blundell  <pb@futuretv.com>
 
-	* cofflink.c (_bfd_coff_generic_relocate_section): Don't object to 
+	* cofflink.c (_bfd_coff_generic_relocate_section): Don't object to
 	weak undefined symbols.
 
 2000-11-24  Nick Clifton  <nickc@redhat.com>
@@ -491,7 +505,7 @@
 	(get_got): Delete unused local srel.
 	(elfNN_ia64_check_relocs): Initialize dynrel_type when declared.
 	(elfNN_ia64_relocate_section): Delete unused local dynindx.
-	
+
 2000-11-21  Kazu Hirata  <kazu@hxi.com>
 
 	* coff-a29k.c: Fix formatting.
@@ -727,7 +741,7 @@
 	* configure.in: Recognize alpha-*-freebsd*.
 	* configure: Regenerate.
 
-2000-11-02  Luciano Gemme <ishitawa@yahoo.com> 
+2000-11-02  Luciano Gemme <ishitawa@yahoo.com>
 
 	* srec.c (CHUNK): Rename to DEFAULT_CHUNK.
 	(Chunk): New global variable set by a parameter in objcopy.c.
@@ -744,7 +758,7 @@
 	* Makefile.in: Regenerate.
 	* bfd-in2.h: Regenerate.
 	* po/bfd.pot: Regenerate.
-	
+
 2000-10-31  Philip Blundell  <philb@gnu.org>
 
 	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Only handle
@@ -755,10 +769,10 @@
 	* elf32-arm.h (elf32_arm_copy_private_bfd_data): Don't refuse
 	attempts to mix PIC code with non-PIC, just mark the output as
 	being position dependent.
-	(elf32_arm_merge_private_bfd_data): Likewise.  Print an error 
-	message for EF_SOFT_FLOAT mismatches.  Display diagnostics for 
+	(elf32_arm_merge_private_bfd_data): Likewise.  Print an error
+	message for EF_SOFT_FLOAT mismatches.  Display diagnostics for
 	all mismatches, not just the first one.
-	
+
 2000-10-25  Chris Demetriou  <cgd@sibyte.com>
 
 	* ieee.c (ieee_archive_p): Plug one of many possible
@@ -803,7 +817,7 @@
 	local_p.  Add symbol value only for non-R_MIPS_REL32 relocations
 	against local symbols.
 	(_bfd_mips_elf_finish_dynamic_sections): Undo patch from 2000-10-01.
-	
+
 2000-10-12  Alan Modra  <alan@linuxcare.com.au>
 
 	* section.c (struct sec): Add kept_section.
@@ -814,7 +828,7 @@
 	* bfd-in2.h: Regenerate.
 
 	* elflink.h (elf_link_add_object_symbols): Remove unnecessary
-	zeroing of `flags'.  
+	zeroing of `flags'.
 	(elf_link_input_bfd): Set all asection->symbol->value's here, and
 	fudge values for discarded link-once section symbols.
 
@@ -832,7 +846,7 @@
 
 2000-10-10  Tom Rix <trix@redhat.com>
 
-	* section.c (bfd_make_section_anyway): Release newsect ptr when 
+	* section.c (bfd_make_section_anyway): Release newsect ptr when
 	newsect->symbol fails to alloc.  Use bfd_release instead of free.
 
 2000-10-09  Richard Henderson  <rth@cygnus.com
@@ -982,7 +996,7 @@
 2000-09-26  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elfcode.h (elf_object_p): Preserve and clear abfd section
- 	information.  Restore at error.
+	information.  Restore at error.
 
 2000-09-26  Paul Sokolovsky  <Paul.Sokolovsky@technologist.com>
 
@@ -1168,10 +1182,10 @@
 
 2000-09-13  Anders Norlander  <anorland@acc.umu.se>
 
- 	* cpu-mips.c (arch_info_struct): Add mips:4K
- 	* bfd-in2.h (bfd_mach_mips4K): New define.
- 	* archures.c: Add bfd_mach_mips4K to comment.
- 	* elf32-mips.c (_bfd_mips_elf_final_write_processing): Return
+	* cpu-mips.c (arch_info_struct): Add mips:4K
+	* bfd-in2.h (bfd_mach_mips4K): New define.
+	* archures.c: Add bfd_mach_mips4K to comment.
+	* elf32-mips.c (_bfd_mips_elf_final_write_processing): Return
 	E_MIPS_ARCH_2 for bfd_mach_mips4K.
 
 2000-09-13  Marco Franzen <marcof@thyron.com>
@@ -4003,7 +4017,7 @@ Thu Feb 10 20:07:50 GMT 2000  Toshiyasu Morita (toshi.morita@sega.com)
 	* coffcode.h: Use bfd_coff_xxx instead of the macro XXX (where xxx
 	= scnhsz, filhsz, relsz, aoutsz, etc)
 
-	 * coffswap.h: Ditto.
+	* coffswap.h: Ditto.
 
 2000-01-13  Nick Clifton  <nickc@cygnus.com>
 

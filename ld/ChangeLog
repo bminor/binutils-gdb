@@ -1,5 +1,7 @@
 2001-01-14  Alan Modra  <alan@linuxcare.com.au>
 
+	* emulparams/hppalinux.sh (OUTPUT_FORMAT): Set to elf32-hppa-linux.
+
 	* emultempl/hppaelf.em (hppaelf_after_parse): New function,
 	enabling search for libmilli.  On a relocatable link, make .text
 	sections unique.
@@ -109,7 +111,7 @@
 	* ldmain.c (main): Initialize link_info.allow_shlib_undefined
 	to false.
 	* ld.texinfo: Document new command line switch.
-	
+
 2000-12-12  Geoffrey Keating  <geoffk@redhat.com>
 
 	* emulparams/elf32ppc.sh (OTHER_READWRITE_SECTIONS):
@@ -129,7 +131,7 @@ Mon Dec 11 14:50:33 MET 2000  Jan Hubicka  <jh@suse.cz>
 
 2000-12-01      Joel Sherrill <joel@OARcorp.com>
 
-        * configure.tgt (arm-*-rtems*, a29k-*rtems*, h8300-*-rtems*):
+	* configure.tgt (arm-*-rtems*, a29k-*rtems*, h8300-*-rtems*):
 	New targets.
 	(sparc*-*-rtemself*, sparc*-*-rtemsaout*): New targets.
 	(sparc*-*-rtems*): Switched from a.out to ELF.
@@ -174,8 +176,8 @@ Mon Dec 11 14:50:33 MET 2000  Jan Hubicka  <jh@suse.cz>
 
 2000-11-24  Fred Fish  <fnf@be.com>
 
-        * ldmain.c (main): Remove redundant init of config.make_executable
-        to true.
+	* ldmain.c (main): Remove redundant init of config.make_executable
+	to true.
 
 2000-11-15  Richard Henderson  <rth@redhat.com>
 
@@ -253,9 +255,9 @@ Tue Nov 14 00:59:19 2000  Denis Chertykov  <denisc@overta.ru>
 
 2000-10-17  Chandrakala Chavva  <cchavva@redhat.com>
 
-        * lexsup.c: New option OPTION_TARGET_HELP. Prints all target specific
-        options.
-        * ld.texinfo: Added notes about this new option.
+	* lexsup.c: New option OPTION_TARGET_HELP. Prints all target specific
+	options.
+	* ld.texinfo: Added notes about this new option.
 
 2000-10-16  Nick Clifton  <nickc@redhat.com>
 
@@ -271,7 +273,7 @@ Tue Nov 14 00:59:19 2000  Denis Chertykov  <denisc@overta.ru>
 	pe_dll_search_prefix.
 
 2000-10-12  Charles Wilson  <cwilson@ece.gatech.edu>
-  
+
 	* emultempl/pe.em (pe_dll_search_prefix): New variable,
 	(longopts): New --dll-search-prefix option.
 	(gld_${EMULATION_NAME}_list_options): Document.
@@ -379,7 +381,7 @@ Tue Nov 14 00:59:19 2000  Denis Chertykov  <denisc@overta.ru>
 
 	* pe-dll.c (process_def_file): Uninitialized data wasn't
 	exported with --export-all-symbols switch.
-	
+
 2000-09-28  DJ Delorie  <dj@redhat.com>
 
 	* pe-dll.c (fill_edata): rearrange the data so that ordinals and
@@ -847,7 +849,7 @@ Tue Nov 14 00:59:19 2000  Denis Chertykov  <denisc@overta.ru>
 2000-07-12  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* scripttempl/i386go32.sc: Support the g++ attribute init_priority in
-	  gcc 2.95.2 and later.
+	gcc 2.95.2 and later.
 
 2000-07-11  Kazu Hirata  <kazu@hxi.com>
 
@@ -1097,9 +1099,9 @@ Tue Nov 14 00:59:19 2000  Denis Chertykov  <denisc@overta.ru>
 2000-06-05  Michael Matz <matz@ifh.de>
 
 	* ldgram.y (vers_defns): Handle 'extern "C++" { ... }' in
-	 version scripts.
+	version scripts.
 
-	 * ldlex.l (V_IDENTIFIER): Accept `::' in symbols.
+	* ldlex.l (V_IDENTIFIER): Accept `::' in symbols.
 
 2000-05-23  Marek Michalkiewicz  <marekm@linux.org.pl>
 

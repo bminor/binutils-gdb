@@ -399,6 +399,9 @@ static boolean elf32_hppa_finish_dynamic_symbol
 static boolean elf32_hppa_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
+static void elf32_hppa_post_process_headers
+  PARAMS ((bfd *, struct bfd_link_info *));
+
 static int elf32_hppa_elf_get_symbol_type
   PARAMS ((Elf_Internal_Sym *, int));
 
@@ -4233,6 +4236,27 @@ elf32_hppa_finish_dynamic_sections (output_bfd, info)
   return true;
 }
 
+/* Tweak the OSABI field of the elf header.  */
+
+static void
+elf32_hppa_post_process_headers (abfd, link_info)
+     bfd *abfd;
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
+{
+  Elf_Internal_Ehdr * i_ehdrp;
+
+  i_ehdrp = elf_elfheader (abfd);
+
+  if (strcmp (bfd_get_target (abfd), "elf32-hppa-linux") == 0)
+    {
+      i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_LINUX;
+    }
+  else
+    {
+      i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_HPUX;
+    }
+}
+
 /* Called when writing out an object file to decide the type of a
    symbol.  */
 static int
@@ -4269,6 +4293,7 @@ elf32_hppa_elf_get_symbol_type (elf_sym, type)
 #define elf_backend_gc_sweep_hook	     elf32_hppa_gc_sweep_hook
 #define elf_backend_object_p		     elf32_hppa_object_p
 #define elf_backend_final_write_processing   elf_hppa_final_write_processing
+#define elf_backend_post_process_headers     elf32_hppa_post_process_headers
 #define elf_backend_get_symbol_type	     elf32_hppa_elf_get_symbol_type
 
 #define elf_backend_can_gc_sections	     1
@@ -4284,4 +4309,12 @@ elf32_hppa_elf_get_symbol_type (elf_sym, type)
 #define ELF_MACHINE_CODE	EM_PARISC
 #define ELF_MAXPAGESIZE		0x1000
 
+#include "elf32-target.h"
+
+#undef TARGET_BIG_SYM
+#define TARGET_BIG_SYM			bfd_elf32_hppa_linux_vec
+#undef TARGET_BIG_NAME
+#define TARGET_BIG_NAME			"elf32-hppa-linux"
+
+#define INCLUDED_TARGET_FILE 1
 #include "elf32-target.h"
