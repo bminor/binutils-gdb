@@ -1,3 +1,10 @@
+Wed May  1 14:17:57 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* bout.c (b_out_callback): Set lma of sections.
+	(b_out_bfd_get_relocated_section_contents): Rename in_abfd
+	parameter to output_bfd.  Used input_bfd instead of output_bfd in
+	several places.
+
 Tue Apr 30 17:56:39 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aoutx.h (translate_from_native_sym_flags): Don't create
