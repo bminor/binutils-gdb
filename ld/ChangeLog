@@ -1,3 +1,15 @@
+Tue Jun 18 17:55:39 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.tgt (i[345]86*-*-isc*): New target.  From
+	<uddeborg@carmen.se>.
+
+Wed Jun 12 12:46:21 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lexsup.c: Include "libiberty.h".
+ 	(parse_args): Copy the -Y argument into memory.
+ 	(set_default_dirlist): Don't put the ':' back into the directory
+	list.
+
 Fri Jun  7 11:27:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/sunos.em: Include libiberty.h.
@@ -1070,7 +1082,7 @@ Fri Oct 27 18:03:17 1995  Niklas Hallqvist  <niklas@appli.se>
 	hp300bsd,hp3hpux,hppaelf.sh,i386aout,i386bsd,i386coff,i386go32,
 	i386linux,i386lynx,i386nbsd,lnk960,m68kaout,m68kcoff,m68klynx,
 	m88kbcs,mipsbig,mipsbsd,mipsidt,mipsidtl,mipslit,news,ns32knbsd,
-	pc532machaout,rce,riscix,sa29200,sh,shl,sparclynx,sparcnbsd,
+	pc532machaout,riscix,sa29200,sh,shl,sparclynx,sparcnbsd,
 	st2000,sun3,sun4,vanilla,vax,vsta,w65,z8001,z8002}.sh: Changed
 	PAGE_SIZE to TARGET_PAGE_SIZE. 
 

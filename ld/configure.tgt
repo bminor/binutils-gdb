@@ -41,6 +41,7 @@ i[345]86-*-vsta)	targ_emul=vsta ;;
 i[345]86-*-go32)	targ_emul=i386go32 ;;
 i[345]86-*-aix*)	targ_emul=i386coff ;;
 i[345]86-*-sco*)	targ_emul=i386coff ;;
+i[345]86-*-isc*)	targ_emul=i386coff ;;
 i[345]86-*-lynxos*)	targ_emul=i386lynx ;;
 i[345]86-*-coff)	targ_emul=i386coff ;;
 i[345]86-*-bsd)		targ_emul=i386bsd ;;
@@ -61,6 +62,7 @@ i[345]86-*-unixware)	targ_emul=elf_i386 ;;
 i[345]86-*-netbsd*)	targ_emul=i386nbsd ;;
 i[345]86-*-netware)	targ_emul=i386nw ;;
 i[345]86-*-elf*)	targ_emul=elf_i386 ;;
+i[345]86-*-freebsdelf*)	targ_emul=elf_i386 ;;
 i[345]86-*-sysv*)	targ_emul=i386coff ;;
 i[345]86-*-ptx*)	targ_emul=i386coff ;;
 i[345]86-*-mach*)	targ_emul=i386mach ;;
@@ -83,9 +85,6 @@ h8500-*-hms)		targ_emul=h8500
 			targ_extra_emuls="h8500s h8500b h8500m h8500c"
 			;;
 sh-*-*)			targ_emul=sh; targ_extra_emuls=shl ;;
-# start-sanitize-rce
-rce-*-aout)		targ_emul=rce ;;
-# end-sanitize-rce
 m68k-sony-*)		targ_emul=news ;;
 m68k-hp-bsd*)		targ_emul=hp300bsd ;;
 m68*-motorola-sysv*)	targ_emul=delta68 ;;
@@ -128,8 +127,8 @@ alpha-*-netware*)	targ_emul=alpha ;;
 z8k-*-coff) 		targ_emul=z8002; targ_extra_emuls=z8001 ;;
 ns32k-pc532-mach* | ns32k-pc532-ux*)	targ_emul=pc532machaout ;;
 ns32k-pc532-netbsd* | ns32k-pc532-lites*) targ_emul=ns32knbsd ;;
-powerpc-*-elf* | powerpc-*-eabi*)	targ_emul=elf32ppc ;;
-powerpcle-*-elf* | powerpcle-*-eabi*)	targ_emul=elf32lppc ;;
+powerpc-*-elf* | powerpc-*-eabi* | powerpc-*-linux* | powerpc-*-sysv*)			targ_emul=elf32ppc ;;
+powerpcle-*-elf* | powerpcle-*-eabi* | powerpcle-*-solaris* | powerpcle-*-sysv*)	targ_emul=elf32lppc ;;
 powerpc-*-macos*)	targ_emul=ppcmacos ;;
 powerpc-*-netware*)	targ_emul=ppcnw ;;
 powerpcle-*-pe)         targ_emul=ppcpe ;;
