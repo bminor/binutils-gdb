@@ -1,3 +1,10 @@
+1999-07-08  Ian Lance Taylor  <ian@zembu.com>
+
+	* stabs.c (parse_stab_type): Fix handling of template names with
+	template parameters containing `::'.
+	(stab_demangle_type): Handle a qualified name in a pointer to
+	member.
+
 1999-06-23  Ian Lance Taylor  <ian@zembu.com>
 
 	* Makefile.am (dlltool_SOURCES): Add dyn-string.c.

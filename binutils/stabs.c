@@ -1,5 +1,5 @@
 /* stabs.c -- Parse stabs debugging information
-   Copyright (C) 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -1316,14 +1316,21 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
 	    bad_stab (orig);
 	    return DEBUG_TYPE_NULL;
 	  }
-	while (q1 != NULL && p > q1 && p[1] == ':')
+	if (q1 != NULL && p > q1 && p[1] == ':')
 	  {
-	    q2 = strchr (q1, '>');
-	    if (q2 == NULL || q2 < p)
-	      break;
-	    p += 2;
-	    p = strchr (p, ':');
-	    if (p == NULL)
+	    int nest = 0;
+
+	    for (q2 = q1; *q2 != '\0'; ++q2)
+	      {
+		if (*q2 == '<')
+		  ++nest;
+		else if (*q2 == '>')
+		  --nest;
+		else if (*q2 == ':' && nest == 0)
+		  break;
+	      }
+	    p = q2;
+	    if (*p != ':')
 	      {
 		bad_stab (orig);
 		return DEBUG_TYPE_NULL;
@@ -4785,6 +4792,7 @@ stab_demangle_type (minfo, pp, ptype)
     case 'O':
       {
 	boolean memberp, constp, volatilep;
+	debug_type class_type = DEBUG_TYPE_NULL;
 	debug_type *args;
 	boolean varargs;
 	unsigned int n;
@@ -4797,19 +4805,40 @@ stab_demangle_type (minfo, pp, ptype)
 	varargs = false;
 
 	++*pp;
-	if (! isdigit ((unsigned char) **pp))
+	if (isdigit ((unsigned char) **pp))
+	  {
+	    n = stab_demangle_count (pp);
+	    if (strlen (*pp) < n)
+	      {
+		stab_bad_demangle (orig);
+		return false;
+	      }
+	    name = *pp;
+	    *pp += n;
+
+	    if (ptype != NULL)
+	      {
+		class_type = stab_find_tagged_type (minfo->dhandle,
+						    minfo->info,
+						    name, (int) n,
+						    DEBUG_KIND_CLASS);
+		if (class_type == DEBUG_TYPE_NULL)
+		  return false;
+	      }
+	  }
+	else if (**pp == 'Q')
+	  {
+	    if (! stab_demangle_qualified (minfo, pp,
+					   (ptype == NULL
+					    ? (debug_type *) NULL
+					    : &class_type)))
+	      return false;
+	  }
+	else
 	  {
 	    stab_bad_demangle (orig);
 	    return false;
 	  }
-	n = stab_demangle_count (pp);
-	if (strlen (*pp) < n)
-	  {
-	    stab_bad_demangle (orig);
-	    return false;
-	  }
-	name = *pp;
-	*pp += n;
 
 	if (memberp)
 	  {
@@ -4851,14 +4880,6 @@ stab_demangle_type (minfo, pp, ptype)
 
 	if (ptype != NULL)
 	  {
-	    debug_type class_type;
-
-	    class_type = stab_find_tagged_type (minfo->dhandle, minfo->info,
-						name, (int) n,
-						DEBUG_KIND_CLASS);
-	    if (class_type == DEBUG_TYPE_NULL)
-	      return false;
-
 	    if (! memberp)
 	      *ptype = debug_make_offset_type (minfo->dhandle, class_type,
 					       *ptype);
