@@ -1,3 +1,11 @@
+2000-11-07  Kazu Hirata  <kazu@hxi.com>
+
+	* aix386-core.c: Fix formatting.
+	* aoutf1.h: Likewise.
+	* aoutx.h: Likewise.
+	* archures.c: Likewise.
+	* armnetbsd.c: Likewise.
+
 2000-11-07  Alan Modra  <alan@linuxcare.com.au>
 
 	* coff-h8300.c (special): Adjust reloc address.
