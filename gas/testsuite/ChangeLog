@@ -1,3 +1,8 @@
+2003-11-26  Nick Clifton  <nickc@redhat.com>
+
+	* gas/h8300/t01_mov.s: Revert changes.
+	* gas/h8300/t01_mov.exp: Revert changes.
+
 2003-11-25  Asgari Jinia  <asgarij@kpitcummins.com>
 
 	* gas/h8300/multiples.s : Add instructions for H8s.

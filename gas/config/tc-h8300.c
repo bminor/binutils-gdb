@@ -598,6 +598,7 @@ get_operand (char **ptr, struct h8_op *op, int direction)
           && !(low == 2 && (high == 3 || ((high == 4 || high == 5) && SXmode)))
           && !(low == 3 && (high == 4 || high == 5 || high == 6) && SXmode)
           && !(low == 4 && (high == 5 || high == 6))
+          && !(low == 4 && high == 7 && SXmode)
           && !(low == 5 && (high == 6 || high == 7) && SXmode)
           && !(low == 6 && high == 7 && SXmode))
 	as_bad (_("Invalid register list for ldm/stm\n"));

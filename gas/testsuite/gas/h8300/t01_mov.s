@@ -1067,7 +1067,7 @@ _start:
     ldm @sp+,(er1-er4)                  ;01306d74
     ldm @sp+,(er2-er5)                  ;01306d75
     ldm @sp+,(er3-er6)                  ;01306d76
-    ldm @sp+,(er5-er7)                  ;01206d77
+    ldm @sp+,(er4-er7)                  ;01306d77
 
     stm (er0-er1),@-sp                  ;01106df0
     stm (er1-er2),@-sp                  ;01106df1
@@ -1088,7 +1088,7 @@ _start:
     stm (er1-er4),@-sp                  ;01306df1
     stm (er2-er5),@-sp                  ;01306df2
     stm (er3-er6),@-sp                  ;01306df3
-    stm (er5-er7),@-sp                  ;01206df5
+    stm (er4-er7),@-sp                  ;01306df4
 
     eepmov.b                            ;7b5c598f
 

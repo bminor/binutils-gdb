@@ -11,7 +11,7 @@ proc do_t01_mov_test {} {
 
     set x 0
     expect {
-	-re ".*   7 0000 F312" 	   { set x [expr $x+1]; exp_continue; }
+	-re ".*   7 0000 F312" { set x [expr $x+1]; exp_continue; }
 	-re ".*   8 0002 017D0312" { set x [expr $x+1]; exp_continue; }
 	-re ".*   9 0006 017D1312" { set x [expr $x+1]; exp_continue; }
 	-re ".*  10 000a 017DB312" { set x [expr $x+1]; exp_continue; }
@@ -19,15 +19,15 @@ proc do_t01_mov_test {} {
 	-re ".*  12 0012 017DA312" { set x [expr $x+1]; exp_continue; }
 	-re ".*  13 0016 017D9312" { set x [expr $x+1]; exp_continue; }
 	-re ".*  14 001a 017DC312" { set x [expr $x+1]; exp_continue; }
-	-re ".*  14      1234"     { set x [expr $x+1]; exp_continue; }
+	-re ".*  14      1234" { set x [expr $x+1]; exp_continue; }
 	-re ".*  15 0020 017DCB12" { set x [expr $x+1]; exp_continue; }
 	-re ".*  15      12345678" { set x [expr $x+1]; exp_continue; }
 	-re ".*  16 0028 017DD312" { set x [expr $x+1]; exp_continue; }
-	-re ".*  16      1234"     { set x [expr $x+1]; exp_continue; }
+	-re ".*  16      1234" { set x [expr $x+1]; exp_continue; }
 	-re ".*  17 002e 017DE312" { set x [expr $x+1]; exp_continue; }
-	-re ".*  17      1234"     { set x [expr $x+1]; exp_continue; }
+	-re ".*  17      1234" { set x [expr $x+1]; exp_continue; }
 	-re ".*  18 0034 017DF312" { set x [expr $x+1]; exp_continue; }
-	-re ".*  18      1234"     { set x [expr $x+1]; exp_continue; }
+	-re ".*  18      1234" { set x [expr $x+1]; exp_continue; }
 	-re ".*  19 003a 017DDB12" { set x [expr $x+1]; exp_continue; }
 	-re ".*  19      12345678" { set x [expr $x+1]; exp_continue; }
 	-re ".*  20 0042 017DEB12" { set x [expr $x+1]; exp_continue; }
@@ -35,7 +35,7 @@ proc do_t01_mov_test {} {
 	-re ".*  21 004a 017DFB12" { set x [expr $x+1]; exp_continue; }
 	-re ".*  21      12345678" { set x [expr $x+1]; exp_continue; }
 	-re ".*  22 0052 017D4012" { set x [expr $x+1]; exp_continue; }
-	-re ".*  22      1234"     { set x [expr $x+1]; exp_continue; }
+	-re ".*  22      1234" { set x [expr $x+1]; exp_continue; }
 	-re ".*  23 0058 017D4812" { set x [expr $x+1]; exp_continue; }
 	-re ".*  23      12345678" { set x [expr $x+1]; exp_continue; }
 	-re ".*  24              " {
@@ -2890,7 +2890,7 @@ proc do_t01_mov_test {} {
 	-re ".* 1067 1c60 01306D74" { set x [expr $x+1]; exp_continue; }
 	-re ".* 1068 1c64 01306D75" { set x [expr $x+1]; exp_continue; }
 	-re ".* 1069 1c68 01306D76" { set x [expr $x+1]; exp_continue; }
-	-re ".* 1070 1c6c 01206D77" { set x [expr $x+1]; exp_continue; }
+	-re ".* 1070 1c6c 01306D77" { set x [expr $x+1]; exp_continue; }
 	-re ".* 1071             " {
 	    if [expr $x == 5] then {
 		pass "$testname: ldm @sp+,(er0-er3)"
@@ -2944,7 +2944,7 @@ proc do_t01_mov_test {} {
 	-re ".* 1088 1ca8 01306DF1" { set x [expr $x+1]; exp_continue; }
 	-re ".* 1089 1cac 01306DF2" { set x [expr $x+1]; exp_continue; }
 	-re ".* 1090 1cb0 01306DF3" { set x [expr $x+1]; exp_continue; }
-	-re ".* 1091 1cb4 01206DF5" { set x [expr $x+1]; exp_continue; }
+	-re ".* 1091 1cb4 01306DF4" { set x [expr $x+1]; exp_continue; }
 	-re ".* 1092             " {
 	    if [expr $x == 5] then {
 		pass "$testname: stm (er0-er3),@-sp"
