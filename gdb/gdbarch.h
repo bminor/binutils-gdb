@@ -1114,6 +1114,19 @@ extern void set_gdbarch_stack_align (struct gdbarch *gdbarch, gdbarch_stack_alig
 #endif
 #endif
 
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (EXTRA_STACK_ALIGNMENT_NEEDED)
+#define EXTRA_STACK_ALIGNMENT_NEEDED (1)
+#endif
+
+extern int gdbarch_extra_stack_alignment_needed (struct gdbarch *gdbarch);
+extern void set_gdbarch_extra_stack_alignment_needed (struct gdbarch *gdbarch, int extra_stack_alignment_needed);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (EXTRA_STACK_ALIGNMENT_NEEDED)
+#define EXTRA_STACK_ALIGNMENT_NEEDED (gdbarch_extra_stack_alignment_needed (current_gdbarch))
+#endif
+#endif
+
 #if defined (REG_STRUCT_HAS_ADDR)
 /* Legacy for systems yet to multi-arch REG_STRUCT_HAS_ADDR */
 #define REG_STRUCT_HAS_ADDR_P() (1)

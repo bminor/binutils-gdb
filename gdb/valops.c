@@ -1581,27 +1581,27 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	}
     }
 
-/* elz: on HPPA no need for this extra alignment, maybe it is needed
-   on other architectures. This is because all the alignment is taken care
-   of in the above code (ifdef REG_STRUCT_HAS_ADDR) and in
-   hppa_push_arguments */
-#ifndef NO_EXTRA_ALIGNMENT_NEEDED
-
-  /* MVS 11/22/96: I think at least some of this stack_align code is
-     really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
-     a target-defined manner.  */
-  if (STACK_ALIGN_P () && INNER_THAN (1, 2))
+  /* elz: on HPPA no need for this extra alignment, maybe it is needed
+     on other architectures. This is because all the alignment is
+     taken care of in the above code (ifdef REG_STRUCT_HAS_ADDR) and
+     in hppa_push_arguments */
+  if (EXTRA_STACK_ALIGNMENT_NEEDED)
     {
-      /* If stack grows down, we must leave a hole at the top. */
-      int len = 0;
+      /* MVS 11/22/96: I think at least some of this stack_align code
+	 is really broken.  Better to let PUSH_ARGUMENTS adjust the
+	 stack in a target-defined manner.  */
+      if (STACK_ALIGN_P () && INNER_THAN (1, 2))
+	{
+	  /* If stack grows down, we must leave a hole at the top. */
+	  int len = 0;
 
-      for (i = nargs - 1; i >= 0; i--)
-	len += TYPE_LENGTH (VALUE_ENCLOSING_TYPE (args[i]));
-      if (CALL_DUMMY_STACK_ADJUST_P)
-	len += CALL_DUMMY_STACK_ADJUST;
-      sp -= STACK_ALIGN (len) - len;
+	  for (i = nargs - 1; i >= 0; i--)
+	    len += TYPE_LENGTH (VALUE_ENCLOSING_TYPE (args[i]));
+	  if (CALL_DUMMY_STACK_ADJUST_P)
+	    len += CALL_DUMMY_STACK_ADJUST;
+	  sp -= STACK_ALIGN (len) - len;
+	}
     }
-#endif /* NO_EXTRA_ALIGNMENT_NEEDED */
 
   sp = PUSH_ARGUMENTS (nargs, args, sp, struct_return, struct_addr);
 

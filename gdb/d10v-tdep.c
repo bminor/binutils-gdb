@@ -1603,6 +1603,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_stack_align (gdbarch, d10v_stack_align);
 
   set_gdbarch_register_sim_regno (gdbarch, d10v_register_sim_regno);
+  set_gdbarch_extra_stack_alignment_needed (gdbarch, 0);
 
   return gdbarch;
 }

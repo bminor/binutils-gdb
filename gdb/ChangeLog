@@ -1,3 +1,16 @@
+Wed Aug  2 21:15:26 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh (EXTRA_STACK_ALIGNMENT_NEEDED): Add.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* valops.c (hand_function_call): Replace #ifndef
+ 	NO_EXTRA_ALIGNMENT_NEEDED with if EXTRA_STACK_ALIGNMENT_NEEDED.
+
+	* d10v-tdep.c (d10v_gdbarch_init): Set
+ 	extra_stack_alignment_needed to 0.
+	* config/d10v/tm-d10v.h (NO_EXTRA_ALIGNMENT_NEEDED): Delete.
+	* config/pa/tm-hppa.h (EXTRA_STACK_ALIGNMENT_NEEDED): Replace
+ 	NO_EXTRA_ALIGNMENT_NEEDED.
+
 2000-08-03  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* MAINTAINERS (m68hc11): Stephane Carrez is maintainer.

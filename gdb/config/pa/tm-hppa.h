@@ -106,7 +106,7 @@ extern CORE_ADDR saved_pc_after_call (struct frame_info *);
    On hppa the sp must always be kept 64-bit aligned */
 
 #define STACK_ALIGN(arg) ( ((arg)%8) ? (((arg)+7)&-8) : (arg))
-#define NO_EXTRA_ALIGNMENT_NEEDED 1
+#define EXTRA_STACK_ALIGNMENT_NEEDED 0
 
 /* Sequence of bytes for breakpoint instruction.  */
 
