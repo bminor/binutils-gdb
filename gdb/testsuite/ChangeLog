@@ -1,3 +1,8 @@
+Mon Jan 16 12:13:28 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
+
+	* gdb.base/sigall.exp (test_one_sig): Add xfail for "get signal
+	ALRM" on irix4.
+
 Sun Jan 15 21:58:26 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
 	* TODO: Remove items about corefile.exp testing new exec-file and
