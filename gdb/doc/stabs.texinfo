@@ -74,14 +74,12 @@ This document describes the stabs debugging format.
 * Variables::
 * Types::			Type definitions
 * Symbol Tables::		Symbol information in symbol tables
-* Cplusplus::			Appendixes:
+* Cplusplus::			Stabs specific to C++
 * Stab Types::			Symbol types in a.out files
 * Symbol Descriptors::		Table of symbol descriptors
 * Type Descriptors::		Table of type descriptors
 * Expanded Reference::		Reference information by stab type
 * Questions::			Questions and anomolies
-* XCOFF Differences::		Differences between GNU stabs in a.out
-                                and GNU stabs in XCOFF
 * Sun Differences::		Differences between GNU stabs and Sun
                                 native stabs
 * Stab Sections::		In some object file formats, stabs are
@@ -398,7 +396,7 @@ program.  Only the string field is significant; it is the name of
 a function which is the main program.  Most C compilers do not use this
 stab (they expect the debugger to assume that the name is @code{main}),
 but some C compilers emit an @code{N_MAIN} stab for the @code{main}
-function.
+function.  I'm not sure how XCOFF handles this.
 
 @node Source Files
 @section Paths and Names of the Source Files
@@ -431,9 +429,10 @@ For example:
 Ltext0:
 @end example
 
+@findex C_FILE
 Instead of @code{N_SO} symbols, XCOFF uses a @code{.file} assembler
-directive which assembles to a standard COFF @code{.file} symbol;
-explaining this in detail is outside the scope of this document.
+directive which assembles to a @code{C_FILE} symbol; explaining this in
+detail is outside the scope of this document.
 
 @c FIXME: Exactly when should the empty N_SO be used?  Why?
 If it is useful to indicate the end of a source file, this is done with
@@ -535,24 +534,31 @@ All of the following stabs normally use the @code{N_FUN} symbol type.
 However, Sun's @code{acc} compiler on SunOS4 uses @code{N_GSYM} and
 @code{N_STSYM}, which means that the value of the stab for the function
 is useless and the debugger must get the address of the function from
-the non-stab symbols instead.  BSD Fortran is said to use @code{N_FNAME}
-with the same restriction; the value of the symbol is not useful (I'm
-not sure it really does use this, because GDB doesn't handle this and no
-one has complained).
+the non-stab symbols instead.  On systems where non-stab symbols have
+leading underscores, the stabs will lack underscores and the debugger
+needs to know about the leading underscore to match up the stab and the
+non-stab symbol.  BSD Fortran is said to use @code{N_FNAME} with the
+same restriction; the value of the symbol is not useful (I'm not sure it
+really does use this, because GDB doesn't handle this and no one has
+complained).
 
+@findex C_FUN
 A function is represented by an @samp{F} symbol descriptor for a global
-(extern) function, and @samp{f} for a static (local) function.  The
-value is the address of the start of the function.  For a.out, it
-is already relocated.  For stabs in ELF, the SunPRO compiler version
-2.0.1 and GCC put out an address which gets relocated by the linker.  In
-a future release SunPRO is planning to put out zero, in which case the
-address can be found from the ELF (non-stab) symbol.  Because looking
-things up in the ELF symbols would probably be slow, I'm not sure how to
-find which symbol of that name is the right one, and this doesn't
-provide any way to deal with nested functions, it would probably be
-better to make the value of the stab an address relative to the start of
-the file, or just absolute.  See @ref{ELF Linker Relocation} for more
-information on linker relocation of stabs in ELF files.
+(extern) function, and @samp{f} for a static (local) function.  For
+a.out, the value of the symbol is the address of the start of the
+function; it is already relocated.  For stabs in ELF, the SunPRO
+compiler version 2.0.1 and GCC put out an address which gets relocated
+by the linker.  In a future release SunPRO is planning to put out zero,
+in which case the address can be found from the ELF (non-stab) symbol.
+Because looking things up in the ELF symbols would probably be slow, I'm
+not sure how to find which symbol of that name is the right one, and
+this doesn't provide any way to deal with nested functions, it would
+probably be better to make the value of the stab an address relative to
+the start of the file, or just absolute.  See @ref{ELF Linker
+Relocation} for more information on linker relocation of stabs in ELF
+files.  For XCOFF, the stab uses the @code{C_FUN} storage class and the
+value of the stab is meaningless; the address of the function can be
+found from the csect symbol (XTY_LD/XMC_PR).
 
 The type information of the stab represents the return type of the
 function; thus @samp{foo:f5} means that foo is a function returning type
@@ -690,18 +696,27 @@ Sun documents the desc field of @code{N_LBRAC} and
 However, dbx seems to not care, and GCC always sets desc to
 zero.
 
+@findex .bb
+@findex .be
+@findex C_BLOCK
+For XCOFF, block scope is indicated with @code{C_BLOCK} symbols.  If the
+name of the symbol is @samp{.bb}, then it is the beginning of the block;
+if the name of the symbol is @samp{.be}; it is the end of the block.
+
 @node Alternate Entry Points
 @section Alternate Entry Points
 
+@findex N_ENTRY
+@findex C_ENTRY
 Some languages, like Fortran, have the ability to enter procedures at
 some place other than the beginning.  One can declare an alternate entry
-point.  The @code{N_ENTRY} stab is for this; however, the Sun FORTRAN compiler
-doesn't use it.  According to AIX documentation, only the name of a
-@code{C_ENTRY} stab is significant; the address of the alternate entry
-point comes from the corresponding external symbol.  A previous revision
-of this document said that the value of an @code{N_ENTRY} stab was the
-address of the alternate entry point, but I don't know the source for
-that information.
+point.  The @code{N_ENTRY} stab is for this; however, the Sun FORTRAN
+compiler doesn't use it.  According to AIX documentation, only the name
+of a @code{C_ENTRY} stab is significant; the address of the alternate
+entry point comes from the corresponding external symbol.  A previous
+revision of this document said that the value of an @code{N_ENTRY} stab
+was the address of the alternate entry point, but I don't know the
+source for that information.
 
 @node Constants
 @chapter Constants
@@ -795,7 +810,8 @@ long as that function executes (C calls such variables
 @dfn{automatic}), it can be allocated in a register (@pxref{Register
 Variables}) or on the stack.
 
-@findex N_LSYM
+@findex N_LSYM, for stack variables
+@findex C_LSYM
 Each variable allocated on the stack has a stab with the symbol
 descriptor omitted.  Since type information should begin with a digit,
 @samp{-}, or @samp{(}, only those characters precluded from being used
@@ -803,7 +819,8 @@ for symbol descriptors.  However, the Acorn RISC machine (ARM) is said
 to get this wrong: it puts out a mere type definition here, without the
 preceding @samp{@var{type-number}=}.  This is a bad idea; there is no
 guarantee that type descriptors are distinct from symbol descriptors.
-Stabs for stack variables use the @code{N_LSYM} stab type.
+Stabs for stack variables use the @code{N_LSYM} stab type, or
+@code{C_LSYM} for XCOFF.
 
 The value of the stab is the offset of the variable within the
 local variables.  On most machines this is an offset from the frame
@@ -837,10 +854,12 @@ produces the following stabs:
 @section Global Variables
 
 @findex N_GSYM
+@findex C_GSYM
+@c FIXME: verify for sure that it really is C_GSYM on XCOFF
 A variable whose scope is not specific to just one source file is
 represented by the @samp{G} symbol descriptor.  These stabs use the
-@code{N_GSYM} stab type.  The type information for the stab
-(@pxref{String Field}) gives the type of the variable.
+@code{N_GSYM} stab type (C_GSYM for XCOFF).  The type information for
+the stab (@pxref{String Field}) gives the type of the variable.
 
 For example, the following source code:
 
@@ -874,11 +893,13 @@ variable.
 @section Register Variables
 
 @findex N_RSYM
+@findex C_RSYM
 @c According to an old version of this manual, AIX uses C_RPSYM instead
 @c of C_RSYM.  I am skeptical; this should be verified.
-Register variables have their own stab type, @code{N_RSYM}, and their
-own symbol descriptor, @samp{r}.  The stab's value is the
-number of the register where the variable data will be stored.
+Register variables have their own stab type, @code{N_RSYM}
+(@code{C_RSYM} for XCOFF), and their own symbol descriptor, @samp{r}.
+The stab's value is the number of the register where the variable data
+will be stored.
 @c .stabs "name:type",N_RSYM,0,RegSize,RegNumber (Sun doc)
 
 AIX defines a separate symbol descriptor @samp{d} for floating point
@@ -970,6 +991,9 @@ yield the following stabs:
 .stabs "var_noinit:S1",40,0,0,_var_noinit    # @r{40 is N_LCSYM}
 @end example
 
+@findex C_STSYM
+@findex C_BSTAT
+@findex C_ESTAT
 In XCOFF files, the stab type need not indicate the section;
 @code{C_STSYM} can be used for all statics.  Also, each static variable
 is enclosed in a static block.  A @code{C_BSTAT} (emitted with a
@@ -1045,11 +1069,12 @@ parameters are declared in the source file).  The exact form of the stab
 depends on how the parameter is being passed.
 
 @findex N_PSYM
+@findex C_PSYM
 Parameters passed on the stack use the symbol descriptor @samp{p} and
-the @code{N_PSYM} symbol type.  The value of the symbol is an offset
-used to locate the parameter on the stack; its exact meaning is
-machine-dependent, but on most machines it is an offset from the frame
-pointer.
+the @code{N_PSYM} symbol type (or @code{C_PSYM} for XCOFF).  The value
+of the symbol is an offset used to locate the parameter on the stack;
+its exact meaning is machine-dependent, but on most machines it is an
+offset from the frame pointer.
 
 As a simple example, the code:
 
@@ -1107,11 +1132,11 @@ know that it is an argument.
 @findex N_RSYM, for parameters
 Because that approach is kind of ugly, some compilers use symbol
 descriptor @samp{P} or @samp{R} to indicate an argument which is in a
-register.  Symbol type @code{C_RPSYM} is used with @samp{R} and
-@code{N_RSYM} is used with @samp{P}.  The symbol's value is
-the register number.  @samp{P} and @samp{R} mean the same thing; the
-difference is that @samp{P} is a GNU invention and @samp{R} is an IBM
-(XCOFF) invention.  As of version 4.9, GDB should handle either one.
+register.  Symbol type @code{C_RPSYM} is used in XCOFF and @code{N_RSYM}
+is used otherwise.  The symbol's value is the register number.  @samp{P}
+and @samp{R} mean the same thing; the difference is that @samp{P} is a
+GNU invention and @samp{R} is an IBM (XCOFF) invention.  As of version
+4.9, GDB should handle either one.
 
 There is at least one case where GCC uses a @samp{p} and @samp{r} pair
 rather than @samp{P}; this is where the argument is passed in the
@@ -2018,6 +2043,8 @@ fields; see @ref{Cplusplus}.
 @node Typedefs
 @section Giving a Type a Name
 
+@findex N_LSYM, for types
+@findex C_DECL, for types
 To give a type a name, use the @samp{t} symbol descriptor.  The type
 is specified by the type information (@pxref{String Field}) for the stab.
 For example,
@@ -3552,9 +3579,9 @@ gstring; see @ref{Strings}.
 @c FIXME: This appendix should go away; see N_PSYM or N_SO for an example.
 
 For a full list of stab types, and cross-references to where they are
-described, see @ref{Stab Types}.  This appendix just duplicates certain
-information from the main body of this document; eventually the
-information will all be in one place.
+described, see @ref{Stab Types}.  This appendix just covers certain
+stabs which are not yet described in the main body of this document;
+eventually the information will all be in one place.
 
 Format of an entry:
 
@@ -3806,92 +3833,7 @@ symbols of file scope.  This is true for default, @samp{-ansi} and
 @item
 What ends the procedure scope?  Is it the proc block's @code{N_RBRAC} or the
 next @code{N_FUN}?  (I believe its the first.)
-
-@item
-@c FIXME: This should go with the other stuff about global variables.
-Global variable stabs don't have location information.  This comes
-from the external symbol for the same variable.  The external symbol
-has a leading underbar on the _name of the variable and the stab does
-not.  How do we know these two symbol table entries are talking about
-the same symbol when their names are different? (Answer: the debugger
-knows that external symbols have leading underbars).
-
-@c FIXME: This is absurdly vague; there all kinds of differences, some
-@c of which are the same between gnu & sun, and some of which aren't.
-@c In particular, I'm pretty sure GCC works with Sun dbx by default.
-@c @item
-@c Can GCC be configured to output stabs the way the Sun compiler
-@c does, so that their native debugging tools work? <NO?> It doesn't by
-@c default.  GDB reads either format of stab. (GCC or SunC).  How about
-@c dbx?
 @end itemize
-
-@node XCOFF Differences
-@appendix Differences Between GNU Stabs in a.out and GNU Stabs in XCOFF
-
-@c FIXME: Merge *all* these into the main body of the document.
-The AIX/RS6000 native object file format is XCOFF with stabs.  This
-appendix only covers those differences which are not covered in the main
-body of this document.
-
-@itemize @bullet
-@item
-BSD a.out stab types correspond to AIX XCOFF storage classes. In general
-the mapping is @code{N_@var{stabtype}} becomes @code{C_@var{stabtype}}.
-Some stab types in a.out are not supported in XCOFF; most of these use
-@code{C_DECL}.
-
-@c FIXME: I think they are trying to say something about whether the
-@c assembler defaults the value to the location counter.
-@item
-If the XCOFF stab is an @code{N_FUN} (@code{C_FUN}) then follow the
-string field with @samp{,.} instead of just @samp{,}.
-@end itemize
-
-I think that's it for @file{.s} file differences.  They could stand to be
-better presented.  This is just a list of what I have noticed so far.
-There are a @emph{lot} of differences in the information in the symbol
-tables of the executable and object files.
-
-Mapping of a.out stab types to XCOFF storage classes:
-
-@example
-stab type       storage class
--------------------------------
-N_GSYM          C_GSYM
-N_FNAME         unused
-N_FUN           C_FUN
-N_STSYM         C_STSYM
-N_LCSYM         C_STSYM
-N_MAIN          unknown
-N_PC            unknown
-N_RSYM          C_RSYM
-unknown         C_RPSYM
-N_M2C           unknown
-N_SLINE         unknown
-N_DSLINE        unknown
-N_BSLINE        unknown
-N_BROWSE        unchanged
-N_CATCH         unknown
-N_SSYM          unknown
-N_SO            unknown
-N_LSYM          C_LSYM
-various         C_DECL
-N_BINCL         unknown
-N_SOL           unknown
-N_PSYM          C_PSYM
-N_EINCL         unknown
-N_ENTRY         C_ENTRY
-N_LBRAC         unknown
-N_EXCL          unknown
-N_SCOPE         unknown
-N_RBRAC         unknown
-N_BCOMM         C_BCOMM
-N_ECOMM         C_ECOMM
-N_ECOML         C_ECOML
-
-N_LENG          unknown
-@end example
 
 @node Sun Differences
 @appendix Differences Between GNU Stabs and Sun Native Stabs

@@ -1,3 +1,8 @@
+Mon May  8 09:30:36 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo: Remove node `XCOFF differences'.  Describe value of
+	C_FUN stab.  Other cleanups.
+
 Wed Apr 19 07:02:19 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote.texi (Bootstrapping): Clarify that flush_i_cache is only
