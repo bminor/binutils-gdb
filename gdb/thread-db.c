@@ -1,6 +1,6 @@
 /* libthread_db assisted debugging support, generic parts.
 
-   Copyright 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -34,6 +34,10 @@
 #include "target.h"
 #include "regcache.h"
 #include "solib-svr4.h"
+
+#ifdef HAVE_GNU_LIBC_VERSION_H
+#include <gnu/libc-version.h>
+#endif
 
 #ifndef LIBTHREAD_DB_SO
 #define LIBTHREAD_DB_SO "libthread_db.so.1"
@@ -130,6 +134,7 @@ static CORE_ADDR td_death_bp_addr;
 static void thread_db_find_new_threads (void);
 static void attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 			   const td_thrinfo_t *ti_p, int verbose);
+static void detach_thread (ptid_t ptid, int verbose);
 
 
 /* Building process ids.  */
@@ -150,6 +155,9 @@ static void attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 
 struct private_thread_info
 {
+  /* Flag set when we see a TD_DEATH event for this thread.  */
+  unsigned int dying:1;
+
   /* Cached thread state.  */
   unsigned int th_valid:1;
   unsigned int ti_valid:1;
@@ -491,6 +499,10 @@ enable_thread_event_reporting (void)
   td_thr_events_t events;
   td_notify_t notify;
   td_err_e err;
+#ifdef HAVE_GNU_LIBC_VERSION_H
+  const char *libc_version;
+  int libc_major, libc_minor;
+#endif
 
   /* We cannot use the thread event reporting facility if these
      functions aren't available.  */
@@ -501,12 +513,16 @@ enable_thread_event_reporting (void)
   /* Set the process wide mask saying which events we're interested in.  */
   td_event_emptyset (&events);
   td_event_addset (&events, TD_CREATE);
-#if 0
+
+#ifdef HAVE_GNU_LIBC_VERSION_H
   /* FIXME: kettenis/2000-04-23: The event reporting facility is
      broken for TD_DEATH events in glibc 2.1.3, so don't enable it for
      now.  */
-  td_event_addset (&events, TD_DEATH);
+  libc_version = gnu_get_libc_version ();
+  if (sscanf (libc_version, "%d.%d", &libc_major, &libc_minor) == 2
+      && (libc_major > 2 || (libc_major == 2 && libc_minor > 1)))
 #endif
+    td_event_addset (&events, TD_DEATH);
 
   err = td_ta_set_event_p (thread_agent, &events);
   if (err != TD_OK)
@@ -689,12 +705,37 @@ quit:
     target_new_objfile_chain (objfile);
 }
 
+/* Attach to a new thread.  This function is called when we receive a
+   TD_CREATE event or when we iterate over all threads and find one
+   that wasn't already in our list.  */
+
 static void
 attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 	       const td_thrinfo_t *ti_p, int verbose)
 {
   struct thread_info *tp;
   td_err_e err;
+
+  /* If we're being called after a TD_CREATE event, we may already
+     know about this thread.  There are two ways this can happen.  We
+     may have iterated over all threads between the thread creation
+     and the TD_CREATE event, for instance when the user has issued
+     the `info threads' command before the SIGTRAP for hitting the
+     thread creation breakpoint was reported.  Alternatively, the
+     thread may have exited and a new one been created with the same
+     thread ID.  In the first case we don't need to do anything; in
+     the second case we should discard information about the dead
+     thread and attach to the new one.  */
+  if (in_thread_list (ptid))
+    {
+      tp = find_thread_pid (ptid);
+      gdb_assert (tp != NULL);
+
+      if (!tp->private->dying)
+        return;
+
+      delete_thread (ptid);
+    }
 
   check_thread_signals ();
 
@@ -741,8 +782,21 @@ thread_db_attach (char *args, int from_tty)
 static void
 detach_thread (ptid_t ptid, int verbose)
 {
+  struct thread_info *thread_info;
+
   if (verbose)
     printf_unfiltered ("[%s exited]\n", target_pid_to_str (ptid));
+
+  /* Don't delete the thread now, because it still reports as active
+     until it has executed a few instructions after the event
+     breakpoint - if we deleted it now, "info threads" would cause us
+     to re-attach to it.  Just mark it as having had a TD_DEATH
+     event.  This means that we won't delete it from our thread list
+     until we notice that it's dead (via prune_threads), or until
+     something re-uses its thread ID.  */
+  thread_info = find_thread_pid (ptid);
+  gdb_assert (thread_info != NULL);
+  thread_info->private->dying = 1;
 }
 
 static void
@@ -847,12 +901,9 @@ check_event (ptid_t ptid)
       switch (msg.event)
 	{
 	case TD_CREATE:
-
-	  /* We may already know about this thread, for instance when the
-	     user has issued the `info threads' command before the SIGTRAP
-	     for hitting the thread creation breakpoint was reported.  */
-	  if (!in_thread_list (ptid))
-	    attach_thread (ptid, msg.th_p, &ti, 1);
+	  /* Call attach_thread whether or not we already know about a
+	     thread with this thread ID.  */
+	  attach_thread (ptid, msg.th_p, &ti, 1);
 
 	  break;
 

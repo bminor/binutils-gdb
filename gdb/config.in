@@ -266,6 +266,9 @@
 /* Define if you have the <dirent.h> header file.  */
 #undef HAVE_DIRENT_H
 
+/* Define if you have the <gnu/libc-version.h> header file.  */
+#undef HAVE_GNU_LIBC_VERSION_H
+
 /* Define if you have the <libunwind-ia64.h> header file.  */
 #undef HAVE_LIBUNWIND_IA64_H
 

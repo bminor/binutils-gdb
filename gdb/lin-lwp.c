@@ -1,5 +1,5 @@
 /* Multi-threaded debugging support for GNU/Linux (LWP layer).
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -183,6 +183,8 @@ add_lwp (ptid_t ptid)
 
   memset (lp, 0, sizeof (struct lwp_info));
 
+  lp->waitstatus.kind = TARGET_WAITKIND_IGNORE;
+
   lp->ptid = ptid;
 
   lp->next = lwp_list;
@@ -278,7 +280,7 @@ lin_lwp_open (char *args, int from_tty)
 void
 lin_lwp_attach_lwp (ptid_t ptid, int verbose)
 {
-  struct lwp_info *lp;
+  struct lwp_info *lp, *found_lp;
 
   gdb_assert (is_lwp (ptid));
 
@@ -293,13 +295,17 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
   if (verbose)
     printf_filtered ("[New %s]\n", target_pid_to_str (ptid));
 
-  lp = find_lwp_pid (ptid);
+  found_lp = lp = find_lwp_pid (ptid);
   if (lp == NULL)
     lp = add_lwp (ptid);
 
-  /* We assume that we're already attached to any LWP that has an
-     id equal to the overall process id.  */
-  if (GET_LWP (ptid) != GET_PID (ptid))
+  /* We assume that we're already attached to any LWP that has an id
+     equal to the overall process id, and to any LWP that is already
+     in our list of LWPs.  If we're not seeing exit events from threads
+     and we've had PID wraparound since we last tried to stop all threads,
+     this assumption might be wrong; fortunately, this is very unlikely
+     to happen.  */
+  if (GET_LWP (ptid) != GET_PID (ptid) && found_lp == NULL)
     {
       pid_t pid;
       int status;
@@ -590,6 +596,41 @@ kill_lwp (int lwpid, int signo)
   return kill (lwpid, signo);
 }
 
+/* Handle a GNU/Linux extended wait response.  Most of the work we
+   just pass off to linux_handle_extended_wait, but if it reports a
+   clone event we need to add the new LWP to our list (and not report
+   the trap to higher layers).  This function returns non-zero if
+   the event should be ignored and we should wait again.  */
+
+static int
+lin_lwp_handle_extended (struct lwp_info *lp, int status)
+{
+  linux_handle_extended_wait (GET_LWP (lp->ptid), status,
+			      &lp->waitstatus);
+
+  /* TARGET_WAITKIND_SPURIOUS is used to indicate clone events.  */
+  if (lp->waitstatus.kind == TARGET_WAITKIND_SPURIOUS)
+    {
+      struct lwp_info *new_lp;
+      new_lp = add_lwp (BUILD_LWP (lp->waitstatus.value.related_pid,
+				   GET_PID (inferior_ptid)));
+      new_lp->cloned = 1;
+      new_lp->stopped = 1;
+
+      lp->waitstatus.kind = TARGET_WAITKIND_IGNORE;
+
+      if (debug_lin_lwp)
+	fprintf_unfiltered (gdb_stdlog,
+			    "LLHE: Got clone event from LWP %ld, resuming\n",
+			    GET_LWP (lp->ptid));
+      ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
+
+      return 1;
+    }
+
+  return 0;
+}
+
 /* Wait for LP to stop.  Returns the wait status, or 0 if the LWP has
    exited.  */
 
@@ -609,9 +650,11 @@ wait_lwp (struct lwp_info *lp)
       pid = waitpid (GET_LWP (lp->ptid), &status, __WCLONE);
       if (pid == -1 && errno == ECHILD)
 	{
-	  /* The thread has previously exited.  We need to delete it now
-	     because in the case of NPTL threads, there won't be an
-	     exit event unless it is the main thread.  */
+	  /* The thread has previously exited.  We need to delete it
+	     now because, for some vendor 2.4 kernels with NPTL
+	     support backported, there won't be an exit event unless
+	     it is the main thread.  2.6 kernels will report an exit
+	     event for each thread that exits, as expected.  */
 	  thread_dead = 1;
 	  if (debug_lin_lwp)
 	    fprintf_unfiltered (gdb_stdlog, "WL: %s vanished.\n",
@@ -657,6 +700,17 @@ wait_lwp (struct lwp_info *lp)
     }
 
   gdb_assert (WIFSTOPPED (status));
+
+  /* Handle GNU/Linux's extended waitstatus for trace events.  */
+  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)
+    {
+      if (debug_lin_lwp)
+	fprintf_unfiltered (gdb_stdlog,
+			    "WL: Handling extended status 0x%06x\n",
+			    status);
+      if (lin_lwp_handle_extended (lp, status))
+	return wait_lwp (lp);
+    }
 
   return status;
 }
@@ -1097,6 +1151,8 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   int status;
   pid_t pid;
 
+  ourstatus->kind = TARGET_WAITKIND_IGNORE;
+
   do
     {
       set_sigint_trap ();	/* Causes SIGINT to be passed on to the
@@ -1143,6 +1199,25 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  save_errno = EINTR;
 	}
 
+      /* Handle GNU/Linux's extended waitstatus for trace events.  */
+      if (pid != -1 && WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP
+	  && status >> 16 != 0)
+	{
+	  linux_handle_extended_wait (pid, status, ourstatus);
+
+	  /* If we see a clone event, detach the child, and don't
+	     report the event.  It would be nice to offer some way to
+	     switch into a non-thread-db based threaded mode at this
+	     point.  */
+	  if (ourstatus->kind == TARGET_WAITKIND_SPURIOUS)
+	    {
+	      ptrace (PTRACE_DETACH, ourstatus->value.related_pid, 0, 0);
+	      ourstatus->kind = TARGET_WAITKIND_IGNORE;
+	      pid = -1;
+	      save_errno = EINTR;
+	    }
+	}
+
       clear_sigio_trap ();
       clear_sigint_trap ();
     }
@@ -1159,11 +1234,9 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       return minus_one_ptid;
     }
 
-  /* Handle GNU/Linux's extended waitstatus for trace events.  */
-  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)
-    return linux_handle_extended_wait (pid, status, ourstatus);
+  if (ourstatus->kind == TARGET_WAITKIND_IGNORE)
+    store_waitstatus (ourstatus, status);
 
-  store_waitstatus (ourstatus, status);
   return pid_to_ptid (pid);
 }
 
@@ -1368,6 +1441,20 @@ retry:
 		  add_thread (lp->ptid);
 		  printf_unfiltered ("[New %s]\n",
 				     target_pid_to_str (lp->ptid));
+		}
+	    }
+
+	  /* Handle GNU/Linux's extended waitstatus for trace events.  */
+	  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)
+	    {
+	      if (debug_lin_lwp)
+		fprintf_unfiltered (gdb_stdlog,
+				    "LLW: Handling extended status 0x%06x\n",
+				    status);
+	      if (lin_lwp_handle_extended (lp, status))
+		{
+		  status = 0;
+		  continue;
 		}
 	    }
 
@@ -1588,14 +1675,14 @@ retry:
   else
     trap_ptid = null_ptid;
 
-  /* Handle GNU/Linux's extended waitstatus for trace events.  */
-  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)
+  if (lp->waitstatus.kind != TARGET_WAITKIND_IGNORE)
     {
-      linux_handle_extended_wait (GET_LWP (lp->ptid), status, ourstatus);
-      return trap_ptid;
+      *ourstatus = lp->waitstatus;
+      lp->waitstatus.kind = TARGET_WAITKIND_IGNORE;
     }
+  else
+    store_waitstatus (ourstatus, status);
 
-  store_waitstatus (ourstatus, status);
   return (threaded ? lp->ptid : pid_to_ptid (GET_LWP (lp->ptid)));
 }
 

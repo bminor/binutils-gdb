@@ -1,5 +1,32 @@
 2004-03-29  Daniel Jacobowitz  <drow@mvista.com>
 
+	* Makefile.in (linux_nat_h): Update dependencies.
+	* configure.in: Check for <gnu/libc-version.h>.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* linux-nat.h: Include "target.h".  Add waitstatus field to
+	struct lwp_info.
+	* lin-lwp.c (add_lwp): Initialize waitstatus.kind.
+	(lin_lwp_attach_lwp): Don't attach to LWPs we have already attached
+	to.
+	(lin_lwp_handle_extended): New function.  Handle clone events.
+	(wait_lwp): Use lin_lwp_handle_extended.  Update comment about
+	thread exit events.
+	(child_wait): Handle clone events.
+	(lin_lwp_wait: Use lin_lwp_handle_extended and handle clone events.
+	* linux-nat.c (linux_enable_event_reporting): Turn on
+	PTRACE_O_TRACECLONE.
+	(linux_handle_extended_wait): Handle clone events.
+	* thread-db.c: Include <gnu/libc-version.h>.
+	(struct private_thread_info): Add dying flag.
+	(enable_thread_event_reporting): Enable TD_DEATH for glibc 2.2 and
+	higher.
+	(attach_thread): Update comments.  Handle dying threads.
+	(detach_thread): Set the dying flag.
+	(check_event): Always call attach_thread.
+
+2004-03-29  Daniel Jacobowitz  <drow@mvista.com>
+
 	* mips-tdep.c (mips_pdr_data): New.
 	(non_heuristic_proc_desc): Use objfile_data and set_objfile_data.
 	(_initialize_mips_tdep): Initialize mips_pdr_data.
