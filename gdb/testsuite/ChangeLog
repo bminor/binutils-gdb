@@ -1,3 +1,14 @@
+Mon Jul 18 12:18:07 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* gdb.base/corefile.exp: Execute coremaker to generate core dump.
+	* gdb.base/Makefile.in: Don't try to generate a core dump, we
+	  might testing a cross development system.
+
+Thu Jul 14 18:13:56 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* Makefile.in (RUNTEST_FOR_TARGET): Fix relative pathname, the
+	  runtest script is relative to ${srcdir}, not ${rootdir}.
+
 Thu Jul 14 14:56:59 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* gdb.base/signals.exp: Allow for optionality of breakpoint
