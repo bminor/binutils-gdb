@@ -1,7 +1,7 @@
 2001-11-01  Alan Modra  <amodra@bigpond.net.au>
 
-	* elf32-hppa.c (elf32_hppa_size_dynamic_sections): Set DT_RELASZ
-	whenever DT_PLTRELSZ.
+	* elf32-hppa.c (elf32_hppa_finish_dynamic_sections): Don't count
+	.plt relocs in DT_RELASZ.
 
 2001-10-29  NIIBE Yutaka  <gniibe@m17n.org>
 

@@ -2368,8 +2368,10 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 	{
 	  if (s->_raw_size != 0)
 	    {
-	      /* Remember whether there are any reloc sections.  */
-	      relocs = true;
+	      /* Remember whether there are any reloc sections other
+		 than .rela.plt.  */
+	      if (s != htab->srelplt)
+		relocs = true;
 
 	      /* We use the reloc_count field as a counter if we need
 		 to copy relocs into the output file.  */
@@ -4273,6 +4275,19 @@ elf32_hppa_finish_dynamic_sections (output_bfd, info)
 		dyn.d_un.d_val = s->_cooked_size;
 	      else
 		dyn.d_un.d_val = s->_raw_size;
+	      break;
+
+	    case DT_RELASZ:
+	      /* Don't count procedure linkage table relocs in the
+		 overall reloc count.  */
+	      if (htab->srelplt != NULL)
+		{
+		  s = htab->srelplt->output_section;
+		  if (s->_cooked_size != 0)
+		    dyn.d_un.d_val -= s->_cooked_size;
+		  else
+		    dyn.d_un.d_val -= s->_raw_size;
+		}
 	      break;
 	    }
 
