@@ -31,25 +31,29 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define NELEMS(a)  ((int) (sizeof (a) / sizeof ((a)[0])))
 
 static const char*
-ins_rsvd (const struct ia64_operand *self, ia64_insn value, ia64_insn *code)
+ins_rsvd (const struct ia64_operand *self ATTRIBUTE_UNUSED,
+	  ia64_insn value ATTRIBUTE_UNUSED, ia64_insn *code ATTRIBUTE_UNUSED)
 {
   return "internal error---this shouldn't happen";
 }
 
 static const char*
-ext_rsvd (const struct ia64_operand *self, ia64_insn code, ia64_insn *valuep)
+ext_rsvd (const struct ia64_operand *self ATTRIBUTE_UNUSED,
+	  ia64_insn code ATTRIBUTE_UNUSED, ia64_insn *valuep ATTRIBUTE_UNUSED)
 {
   return "internal error---this shouldn't happen";
 }
 
 static const char*
-ins_const (const struct ia64_operand *self, ia64_insn value, ia64_insn *code)
+ins_const (const struct ia64_operand *self ATTRIBUTE_UNUSED,
+	   ia64_insn value ATTRIBUTE_UNUSED, ia64_insn *code ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 static const char*
-ext_const (const struct ia64_operand *self, ia64_insn code, ia64_insn *valuep)
+ext_const (const struct ia64_operand *self ATTRIBUTE_UNUSED,
+	   ia64_insn code ATTRIBUTE_UNUSED, ia64_insn *valuep ATTRIBUTE_UNUSED)
 {
   return 0;
 }
@@ -133,7 +137,7 @@ static const char*
 ins_imms_scaled (const struct ia64_operand *self, ia64_insn value,
 		 ia64_insn *code, int scale)
 {
-  BFD_HOST_64_BIT svalue = value, sign_bit;
+  BFD_HOST_64_BIT svalue = value, sign_bit = 0;
   ia64_insn new = 0;
   int i;
 
@@ -413,19 +417,19 @@ ext_inc3 (const struct ia64_operand *self, ia64_insn code, ia64_insn *valuep)
 const struct ia64_operand elf64_ia64_operands[IA64_OPND_COUNT] =
   {
     /* constants: */
-    { CST, ins_const, ext_const, "NIL",		{{ 0, }}, 0, "<none>" },
-    { CST, ins_const, ext_const, "ar.ccv",	{{ 0, }}, 0, "ar.ccv" },
-    { CST, ins_const, ext_const, "ar.pfs",	{{ 0, }}, 0, "ar.pfs" },
-    { CST, ins_const, ext_const, "1",		{{ 0, }}, 0, "1" },
-    { CST, ins_const, ext_const, "8",		{{ 0, }}, 0, "1" },
-    { CST, ins_const, ext_const, "16",		{{ 0, }}, 0, "16" },
-    { CST, ins_const, ext_const, "r0",		{{ 0, }}, 0, "r0" },
-    { CST, ins_const, ext_const, "ip",		{{ 0, }}, 0, "ip" },
-    { CST, ins_const, ext_const, "pr",		{{ 0, }}, 0, "pr" },
-    { CST, ins_const, ext_const, "pr.rot",	{{ 0, }}, 0, "pr.rot" },
-    { CST, ins_const, ext_const, "psr",		{{ 0, }}, 0, "psr" },
-    { CST, ins_const, ext_const, "psr.l",	{{ 0, }}, 0, "psr.l" },
-    { CST, ins_const, ext_const, "psr.um",	{{ 0, }}, 0, "psr.um" },
+    { CST, ins_const, ext_const, "NIL",		{{ 0, 0}}, 0, "<none>" },
+    { CST, ins_const, ext_const, "ar.ccv",	{{ 0, 0}}, 0, "ar.ccv" },
+    { CST, ins_const, ext_const, "ar.pfs",	{{ 0, 0}}, 0, "ar.pfs" },
+    { CST, ins_const, ext_const, "1",		{{ 0, 0}}, 0, "1" },
+    { CST, ins_const, ext_const, "8",		{{ 0, 0}}, 0, "1" },
+    { CST, ins_const, ext_const, "16",		{{ 0, 0}}, 0, "16" },
+    { CST, ins_const, ext_const, "r0",		{{ 0, 0}}, 0, "r0" },
+    { CST, ins_const, ext_const, "ip",		{{ 0, 0}}, 0, "ip" },
+    { CST, ins_const, ext_const, "pr",		{{ 0, 0}}, 0, "pr" },
+    { CST, ins_const, ext_const, "pr.rot",	{{ 0, 0}}, 0, "pr.rot" },
+    { CST, ins_const, ext_const, "psr",		{{ 0, 0}}, 0, "psr" },
+    { CST, ins_const, ext_const, "psr.l",	{{ 0, 0}}, 0, "psr.l" },
+    { CST, ins_const, ext_const, "psr.um",	{{ 0, 0}}, 0, "psr.um" },
 
     /* register operands: */
     { REG, ins_reg,   ext_reg,	"ar", {{ 7, 20}}, 0,		/* AR3 */

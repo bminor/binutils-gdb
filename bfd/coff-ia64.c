@@ -37,7 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static reloc_howto_type howto_table[] =
 {
-  {0},
+  EMPTY_HOWTO (0),
 };
 
 #define BADMAG(x) IA64BADMAG(x)
@@ -58,8 +58,8 @@ static reloc_howto_type howto_table[] =
 
 static boolean
 in_reloc_p(abfd, howto)
-     bfd * abfd;
-     reloc_howto_type *howto;
+     bfd * abfd ATTRIBUTE_UNUSED;
+     reloc_howto_type *howto ATTRIBUTE_UNUSED;
 {
   return 0;			/* We don't do relocs for now...  */
 }

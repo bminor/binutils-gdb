@@ -1,3 +1,24 @@
+2000-11-22  Jim Wilson  <wilson@redhat.com>
+
+	* coff-ia64.c (howto_table): Use EMPTY_HOWTO.
+	(in_reloc_p): Add ATTRIBUTE_UNUSED to unused parameters.
+	* cpu-ia64-opc.c (ins_rsvd, ext_rsvd, ins_const, ext_const): Likewise.
+	(ins_imms_scaled): Initialize sign_bit at function entry.
+	(elf64_ia64_operands): Add missing initializers.
+	* elfxx-ia64.c (elfNN_ia64_reloc, elfNN_ia64_reloc_type_lookup,
+	elfNN_ia64_info_to_howto, elfNN_ia64_fake_sections,
+	elfNN_ia64_add_symbol_hook, elfNN_ia64_is_local_label_name,
+	elfNN_ia64_local_hash_table_init, get_fptr, get_pltoff,
+	elfNN_ia64_adjust_dynamic_symbol): Add ATTRIBUTE_UNUSED for unused
+	parameters.
+	(elfNN_ia64_info_to_howto): Initialize free_relocs, free_contents,
+	and free_extsyms at function entry.
+	(elfNN_add_symbol_hook): Add unsigned cast to bfd_get_gp_size result.
+	(elfNN_ia64_create_dynamic_sections): Delete unused local h.
+	(get_got): Delete unused local srel.
+	(elfNN_ia64_check_relocs): Initialize dynrel_type when declared.
+	(elfNN_ia64_relocate_section): Delete unused local dynindx.
+	
 2000-11-21  Kazu Hirata  <kazu@hxi.com>
 
 	* coff-a29k.c: Fix formatting.
