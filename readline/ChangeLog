@@ -1,3 +1,7 @@
+Wed Apr 20 10:43:52 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.in: Use mh-posix for sunos4.1*.
+
 Wed Apr 13 21:28:44 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* rltty.c (set_tty_settings): Don't set readline_echoing_p.
