@@ -1,3 +1,12 @@
+Mon Sep  9 14:26:26 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-dis.c (print_insn_arg): Print condition code registers as
+ 	$fccN.
+
+Tue Sep  3 12:09:46 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc-opc.c (sparc_opcodes): Add setuw, setsw, setx.
+
 start-sanitize-v850
 Tue Sep  3 12:05:25 1996  Jeffrey A Law  (law@cygnus.com)
 

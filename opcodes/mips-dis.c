@@ -16,15 +16,12 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include <ansidecl.h>
 #include "sysdep.h"
 #include "dis-asm.h"
 #include "opcode/mips.h"
-
-/* FIXME: we need direct access to the swapping functions.  */
-#include "libbfd.h"
 
 /* Mips instructions are never longer than this many bytes.  */
 #define MAXLEN 4
@@ -80,7 +77,7 @@ print_insn_arg (d, l, pc, info)
 
     case 'i':
     case 'u':
-      (*info->fprintf_func) (info->stream, "%d",
+      (*info->fprintf_func) (info->stream, "0x%x",
 			(l >> OP_SH_IMMEDIATE) & OP_MASK_IMMEDIATE);
       break;
 
@@ -91,6 +88,18 @@ print_insn_arg (d, l, pc, info)
 	delta |= ~0xffff;
       (*info->fprintf_func) (info->stream, "%d",
 			     delta);
+      break;
+
+    case 'h':
+      (*info->fprintf_func) (info->stream, "0x%x",
+			     (unsigned int) ((l >> OP_SH_PREFX)
+					     & OP_MASK_PREFX));
+      break;
+
+    case 'k':
+      (*info->fprintf_func) (info->stream, "0x%x",
+			     (unsigned int) ((l >> OP_SH_CACHE)
+					     & OP_MASK_CACHE));
       break;
 
     case 'a':
@@ -155,6 +164,11 @@ print_insn_arg (d, l, pc, info)
 			     (l >> OP_SH_FD) & OP_MASK_FD);
       break;
 
+    case 'R':
+      (*info->fprintf_func) (info->stream, "$f%d",
+			     (l >> OP_SH_FR) & OP_MASK_FR);
+      break;
+
     case 'E':
       (*info->fprintf_func) (info->stream, "$%d",
 			     (l >> OP_SH_RT) & OP_MASK_RT);
@@ -163,6 +177,16 @@ print_insn_arg (d, l, pc, info)
     case 'G':
       (*info->fprintf_func) (info->stream, "$%d",
 			     (l >> OP_SH_RD) & OP_MASK_RD);
+      break;
+
+    case 'N':
+      (*info->fprintf_func) (info->stream, "$fcc%d",
+			     (l >> OP_SH_BCC) & OP_MASK_BCC);
+      break;
+
+    case 'M':
+      (*info->fprintf_func) (info->stream, "$fcc%d",
+			     (l >> OP_SH_CCC) & OP_MASK_CCC);
       break;
 
     default:
@@ -177,43 +201,64 @@ print_insn_arg (d, l, pc, info)
    always 4.  BIGENDIAN must be 1 if this is big-endian code, 0 if
    this is little-endian code.  */
 
-int
+static int
 _print_insn_mips (memaddr, word, info)
      bfd_vma memaddr;
      struct disassemble_info *info;
      unsigned long int word;
 {
-  register int i;
-  register const char *d;
+  register const struct mips_opcode *op;
+  static boolean init = 0;
+  static const struct mips_opcode *mips_hash[OP_MASK_OP + 1];
 
-  for (i = 0; i < NUMOPCODES; i++)
+  /* Build a hash table to shorten the search time.  */
+  if (! init)
     {
-      if (mips_opcodes[i].pinfo != INSN_MACRO)
+      unsigned int i;
+
+      for (i = 0; i <= OP_MASK_OP; i++)
 	{
-	  register unsigned int match = mips_opcodes[i].match;
-	  register unsigned int mask = mips_opcodes[i].mask;
-	  if ((word & mask) == match)
-	    break;
+	  for (op = mips_opcodes; op < &mips_opcodes[NUMOPCODES]; op++)
+	    {
+	      if (op->pinfo == INSN_MACRO)
+		continue;
+	      if (i == ((op->match >> OP_SH_OP) & OP_MASK_OP))
+		{
+		  mips_hash[i] = op;
+		  break;
+		}
+	    }
+        }
+
+      init = 1;
+    }
+
+  op = mips_hash[(word >> OP_SH_OP) & OP_MASK_OP];
+  if (op != NULL)
+    {
+      for (; op < &mips_opcodes[NUMOPCODES]; op++)
+	{
+	  if (op->pinfo != INSN_MACRO && (word & op->mask) == op->match)
+	    {
+	      register const char *d;
+
+	      (*info->fprintf_func) (info->stream, "%s", op->name);
+
+	      d = op->args;
+	      if (d != NULL)
+		{
+		  (*info->fprintf_func) (info->stream, " ");
+		  for (; *d != '\0'; d++)
+		    print_insn_arg (d, word, memaddr, info);
+		}
+
+	      return 4;
+	    }
 	}
     }
 
   /* Handle undefined instructions.  */
-  if (i == NUMOPCODES)
-    {
-      (*info->fprintf_func) (info->stream, "0x%x", word);
-      return 4;
-    }
-
-  (*info->fprintf_func) (info->stream, "%s", mips_opcodes[i].name);
-
-  if (!(d = mips_opcodes[i].args))
-    return 4;
-
-  (*info->fprintf_func) (info->stream, " ");
-
-  while (*d)
-    print_insn_arg (d++, word, memaddr, info);
-
+  (*info->fprintf_func) (info->stream, "0x%x", word);
   return 4;
 }
 
@@ -225,7 +270,7 @@ print_insn_big_mips (memaddr, info)
   bfd_byte buffer[4];
   int status = (*info->read_memory_func) (memaddr, buffer, 4, info);
   if (status == 0)
-    return _print_insn_mips (memaddr, _do_getb32 (buffer), info);
+    return _print_insn_mips (memaddr, (unsigned long) bfd_getb32 (buffer), info);
   else
     {
       (*info->memory_error_func) (status, memaddr, info);
@@ -241,7 +286,7 @@ print_insn_little_mips (memaddr, info)
   bfd_byte buffer[4];
   int status = (*info->read_memory_func) (memaddr, buffer, 4, info);
   if (status == 0)
-    return _print_insn_mips (memaddr, _do_getl32 (buffer), info);
+    return _print_insn_mips (memaddr, (unsigned long) bfd_getl32 (buffer), info);
   else
     {
       (*info->memory_error_func) (status, memaddr, info);
