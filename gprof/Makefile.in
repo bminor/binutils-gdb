@@ -40,9 +40,10 @@ OBJS=	gprof.o arcs.o dfn.o lookup.o $(MACHINE).o hertz.o \
 # Files that can be generated, but should be included in distribution.
 DISTSTUFF = flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
 
-CFLAGS=	
+CFLAGS=-g
+LDFLAGS=
 .c.o:
-	$(CC) -c $(CFLAGS) -I$(srcdir) -I$(srcdir)/../include -DMACHINE_H=\"$(MACHINE).h\" $(TCFLAGS) $(HCFLAGS) $<
+	$(CC) -c $(CFLAGS) -I. -I$(srcdir) -I$(srcdir)/../include -I$(srcdir)/../bfd -DMACHINE_H=\"$(MACHINE).h\" $(TCFLAGS) $(HCFLAGS) $<
 
 all:	diststuff $(PROG)
 
@@ -90,7 +91,7 @@ install: all install-info
 	$(INSTALL_DATA) $(srcdir)/gprof.1 $(man1dir)/gprof.1
 
 $(PROG):	$(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(PROG) $(LIBS)
+	$(CC) -o $(PROG) $(LDFLAGS) $(OBJS) $(LIBS)
 
 mostlyclean:
 	-rm -f *.o core gprof nohup.out gprof.info* \

@@ -8,6 +8,12 @@ srcname="gprof"
 
 # per-host:
 
+. ${srcdir}/../bfd/configure.host
+
+# Set up to make a link between the host's include file and "sysdep.h".
+files="../bfd/hosts/${my_host}.h"
+links="sysdep.h"
+
 # per-target:
 case "${target}" in
 i386-*-*)	my_target=i386 ;;
@@ -21,6 +27,3 @@ target_makefile_frag=config/mt-${my_target}
 if [ ! -f ${srcdir}/${target_makefile_frag} ] ; then
 	target_makefile_frag=
 fi
-
-files=
-links=

@@ -19,12 +19,7 @@
  *	@(#)gprof.h	5.9 (Berkeley) 6/1/90
  */
 
-#include <stdio.h>
-#ifdef	__STDC__
-#include <stdlib.h>
-#endif	/* __STDC__ */
-#include <sys/types.h>
-#include <sys/stat.h>
+#include "sysdep.h"
 #include "bfd.h"
 #include "gmon.h"
 
@@ -60,7 +55,7 @@ typedef int	bool;
      */
 long	hz;
 
-typedef	u_short UNIT;		/* unit of profiling */
+typedef	unsigned short UNIT;		/* unit of profiling */
 char	*a_outname;
 #define	A_OUTNAME		"a.out"
 

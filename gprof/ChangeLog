@@ -1,3 +1,14 @@
+Tue Apr 13 16:14:03 1993  Per Bothner  (bothner@cygnus.com)
+
+	* M Makefile.in:  Add -g to CFLAGS.
+	Ads LDFLAGS and use in place of CFLAGS where appropriate.
+	* configure.in:  Make a sysdep.hlink in the same way other
+	bfd-based directories do.
+	* gprof.h (UNIT):  Replace non-standard 'u_short' by 'unsigned
+	short'.
+	* gprof.h:  #include sysdep.h instead of a bunch of stuff.
+	* gprof.c (main):  Fix typo gproff->gprof.
+
 Thu Mar 25 19:00:37 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* gprof.texi: add INFO-DIR-ENTRY
