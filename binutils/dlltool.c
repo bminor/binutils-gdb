@@ -1251,6 +1251,12 @@ scan_all_symbols (abfd)
   PTR minisyms;
   unsigned int size;
 
+  /* Ignore bfds with an import descriptor table.  We assume that any
+     such BFD contains symbols which are exported from another DLL,
+     and we don't want to reexport them from here.  */
+  if (bfd_get_section_by_name (abfd, ".idata$4"))
+    return;
+
   if (! (bfd_get_file_flags (abfd) & HAS_SYMS))
     {
       /* xgettext:c-format */

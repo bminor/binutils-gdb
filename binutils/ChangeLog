@@ -1,3 +1,47 @@
+Sun Oct 25 10:37:45 1998  Mumit Khan  <khan@xraylith.wisc.edu>
+
+        * dlltool.c (scan_all_symbols): Fix patch error.
+
+Fri Oct 16 22:56:20 1998  Felix Lee  <flee@cygnus.com>
+
+	* nm.c (display_rel_file): fix "no symbols" messages.
+	* objdump.c (slurp_symtab): ditto.
+	* po/POTFILES.in, po/binutils.pot: rebuilt
+
+Mon Oct 12 14:28:03 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (dump_relocations): Rename field from Value to Info to
+	match name of field in ELF structures.
+
+Thu Oct  8 15:33:08 1998  Geoffrey Noer  <noer@cygnus.com>
+
+	* configure.in: call AC_EXEEXT instead of AM_EXEEXT and
+	AM_CYGWIN32.
+	* aclocal.m4: remove local AM_EXEEXT/AM_CYGWIN32 macros.
+	* configure: regenerate
+
+Thu Oct  8 15:33:08 1998  Geoffrey Noer  <noer@cygnus.com>
+
+	From Mumit Khan  <khan@xraylith.wisc.edu>:
+        * dlltool.c (scan_all_symbols): Don't re-export symbols exported
+        by other DLLs.
+
+Thu Oct  8 15:33:08 1998  Geoffrey Noer  <noer@cygnus.com>
+
+	* Makefile.am (BUILD_DLLWRAP): Add.
+	(BUILD_DLLWRAP, DLLWRAP_PROG): Add.
+	(bin_PROGRAMS): Add dllwrap.
+	* Makefile.in: regenerate with automake
+
+	From Mumit Khan  <khan@xraylith.wisc.edu>:
+        * dllwrap.c: New file from dllhelpers v0.2.1.
+	(print_version): New function.
+	(long_options): Add --version.
+	(main): Handle.
+        * dyn-string.h, dyn-string.c: New files from egcs-1.1/gcc.
+        * configure.in (BUILD_DLLWRAP): Add.
+        * configure: Regenerate.
+
 Tue Oct  6 18:20:10 1998  Geoffrey Noer  <noer@cygnus.com>
 
 	* Makefile.am (windres_SOURCES): Add resres.c.
