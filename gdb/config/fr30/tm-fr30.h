@@ -102,12 +102,8 @@ extern void fr30_pop_frame PARAMS ((void));
 #define CALL_DUMMY_LOCATION          AT_ENTRY_POINT
 #define FIX_CALL_DUMMY(DUMMY, START, FUNADDR, NARGS, ARGS, TYPE, GCCP)
 #define CALL_DUMMY_ADDRESS()         entry_point_address ()
-extern CORE_ADDR fr30_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
-#define PUSH_RETURN_ADDRESS(PC, SP)  fr30_push_return_address (PC, SP)
-
-
+#define PUSH_RETURN_ADDRESS(PC, SP)  (write_register(RP_REGNUM, CALL_DUMMY_ADDRESS()), SP)
 #define PUSH_DUMMY_FRAME	generic_push_dummy_frame ()
-
 
 /* Number of bytes at start of arglist that are not really args.  */
 #define FRAME_ARGS_SKIP 0
@@ -120,7 +116,8 @@ extern CORE_ADDR fr30_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-    memcpy (VALBUF, REGBUF + REGISTER_BYTE(RETVAL_REG), TYPE_LENGTH (TYPE))
+    memcpy (VALBUF, REGBUF + REGISTER_BYTE(RETVAL_REG) +  \
+	(TYPE_LENGTH(TYPE) < 4 ? 4 - TYPE_LENGTH(TYPE) : 0), TYPE_LENGTH (TYPE))
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
@@ -131,8 +128,6 @@ extern CORE_ADDR fr30_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
 
 #define STORE_STRUCT_RETURN(ADDR, SP) \
   { write_register (RETVAL_REG, (ADDR)); }
-
-
 
 #define FRAME_ARGS_ADDRESS(fi) (fi->frame)
 #define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
@@ -186,10 +181,6 @@ extern CORE_ADDR fr30_skip_prologue PARAMS ((CORE_ADDR pc));
 /* Define this for Wingdb */
 #define TARGET_FR30
 
-#if(1) /* Z.R. */
-
-/*ARM example*/
-
 /* IEEE format floating point */
 #define IEEE_FLOAT
 
@@ -208,8 +199,6 @@ extern CORE_ADDR fr30_skip_prologue PARAMS ((CORE_ADDR pc));
   (FRAMELESS) = (after_prologue == func_start);		\
 }
 
-/*V850 example*/
-
 extern void fr30_init_extra_frame_info PARAMS ((struct frame_info *fi));
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) fr30_init_extra_frame_info (fi)
 
@@ -224,7 +213,9 @@ fr30_push_arguments PARAMS ((int nargs, struct value **args, CORE_ADDR sp,
 
 #define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP)
 
-#define USE_STRUCT_CONVENTION(GCC_P, TYPE) \
-  	(TYPE_NFIELDS (TYPE) > 1 || TYPE_LENGTH (TYPE) > 4)
-
-#endif /* Z.R. */
+/* always pass struct by value as a pointer */
+/* XXX Z.R. GCC does not do that today */
+#define REG_STRUCT_HAS_ADDR(gcc_p,type)		\
+		((TYPE_LENGTH(type) > 4) && (TYPE_LENGTH(type) & 0x3))
+/* alway return struct by value by input pointer */
+#define USE_STRUCT_CONVENTION(GCC_P, TYPE)	1

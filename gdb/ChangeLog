@@ -1,3 +1,9 @@
+
+Thu Jan  7 17:50:15 EST 1999  Zdenek Radouch   (radouch@cygnus.com)
+	Beta FR30 port.
+	* fr30-tdep.c
+	* config/fr30/tm-fr30.h
+	
 Wed Jan  6 12:28:35 1999  David Taylor  <taylor@texas.cygnus.com>
 
 	* configure.in: Add an --enable-tui argument.  Construct

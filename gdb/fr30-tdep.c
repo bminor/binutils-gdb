@@ -1,5 +1,5 @@
 /* Target-dependent code for the Fujitsu FR30.
-   Copyright 1996, Free Software Foundation, Inc.
+   Copyright 1999, Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -28,12 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "symfile.h"
 
-__t(int l, char *s, int a)
-{
-	fprintf(stderr, "(%d): %s: 0x%08x\n", l, s, a);
-}
-#define T(s, a) __t(__LINE__, s, (int)(a))
-
 /* Function: pop_frame
    This routine gets called when either the user uses the `return'
    command, or the call dummy breakpoint gets hit.  */
@@ -43,6 +37,7 @@ fr30_pop_frame ()
 {
   struct frame_info *frame = get_current_frame();
   int regnum;
+  CORE_ADDR sp = read_register(SP_REGNUM);
 
   if (PC_IN_CALL_DUMMY(frame->pc, frame->frame, frame->frame))
     generic_pop_dummy_frame ();
@@ -51,14 +46,13 @@ fr30_pop_frame ()
       write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
 
       for (regnum = 0; regnum < NUM_REGS; regnum++)
-	if (frame->fsr.regs[regnum] != 0)
+	if (frame->fsr.regs[regnum] != 0) {
 	  write_register (regnum,
 		  read_memory_unsigned_integer (frame->fsr.regs[regnum],
 			REGISTER_RAW_SIZE(regnum)));
-
-      write_register (SP_REGNUM, read_register (frame->framereg));
+	}
+      write_register (SP_REGNUM, sp + frame->framesize);
     }
-
   flush_cached_frames ();
 }
 
@@ -91,6 +85,18 @@ fr30_skip_prologue(CORE_ADDR pc)
 }
 
 
+/* Function: push_arguments
+   Setup arguments and RP for a call to the target.  First four args
+   go in FIRST_ARGREG -> LAST_ARGREG, subsequent args go on stack...
+   Structs are passed by reference.  XXX not right now Z.R.
+   64 bit quantities (doubles and long longs) may be split between
+   the regs and the stack.
+   When calling a function that returns a struct, a pointer to the struct
+   is passed in as a secret first argument (always in FIRST_ARGREG).
+
+   Stack space for the args has NOT been allocated: that job is up to us.
+*/
+
 CORE_ADDR
 fr30_push_arguments(nargs, args, sp, struct_return, struct_addr)
      int         nargs;
@@ -117,15 +123,7 @@ fr30_push_arguments(nargs, args, sp, struct_return, struct_addr)
   if (struct_return)
       write_register (argreg++, struct_addr);
 
-#if(0)
-  /* The offset onto the stack at which we will start copying parameters
-     (after the registers are used up) begins at 16 in the old ABI.
-     This leaves room for the "home" area for register parameters.  */
-  stack_offset = REGISTER_SIZE * 4;
-#else
-/* XXX which ABI are we using ? Z.R. */
   stack_offset = 0;
-#endif
 
   /* Process args from left to right.  Store as many as allowed in
 	registers, save the rest to be pushed on the stack */
@@ -244,8 +242,9 @@ save_prologue_cache (fi)
   prologue_cache.framesize   = fi->framesize;
   prologue_cache.frameoffset = fi->frameoffset;
   
-  for (i = 0; i <= NUM_REGS; i++)
+  for (i = 0; i <= NUM_REGS; i++) {
     prologue_cache.fsr.regs[i] = fi->fsr.regs[i];
+  }
 }
 
 
@@ -289,11 +288,9 @@ fr30_scan_prologue (fi)
     }
   else
     {
-	T("NIY", 0);
-      /* XXX ??? Z.R. Get address of the stmfd in the prologue of the callee; the saved
-         PC is the address of the stmfd + 12.  */
+      /* XXX Z.R. What now??? The following is entirely bogus */
       prologue_start = (read_memory_integer (fi->frame, 4) & 0x03fffffc) - 12;
-      prologue_end = prologue_start + 40; /* FIXME: should be big enough */
+      prologue_end = prologue_start + 40;
     }
 
   /* Now search the prologue looking for instructions that set up the
@@ -323,6 +320,13 @@ fr30_scan_prologue (fi)
 		sp_offset -= 4;
 		fi->fsr.regs[reg] = sp_offset;
 	      }
+	}
+      else if((insn & 0xfff0) == 0x1700)		/* st rx,@-r15 */
+        {
+	  int reg = insn & 0xf;
+
+	  sp_offset -= 4;
+	  fi->fsr.regs[reg] = sp_offset;
 	}
       else if((insn & 0xff00) == 0x0f00)		/* enter */
         {
@@ -420,12 +424,12 @@ fr30_init_extra_frame_info (fi)
 	  if (fi->next->fsr.regs[fi->framereg] != 0)
 	    fi->frame = read_memory_integer (fi->next->fsr.regs[fi->framereg],
 					     4);
-
       /* Calculate actual addresses of saved registers using offsets determined
          by fr30_scan_prologue.  */
       for (reg = 0; reg < NUM_REGS; reg++)
-	if (fi->fsr.regs[reg] != 0)
+	if (fi->fsr.regs[reg] != 0) {
 	  fi->fsr.regs[reg] += fi->frame + fi->framesize - fi->frameoffset;
+	}
 }
 
 /* Function: find_callers_reg
@@ -502,112 +506,6 @@ fr30_frame_chain (fi)
     return fi->frame + fi->framesize;
 }
 
-/* Function: push_arguments
-   Setup arguments and RP for a call to the target.  First four args
-   go in R4->R7, subsequent args go on stack...  Structs
-   are passed by reference.  64 bit quantities (doubles and long
-   longs) may be split between the regs and the stack.  When calling a
-   function that returns a struct, a pointer to the struct is passed
-   in as a secret first argument (always in R6).
-
-   Stack space for the args has NOT been allocated: that job is up to us.
-   */
-
-#if(0) /* Z.R. XXX */
-CORE_ADDR
-fr30_push_arguments (nargs, args, sp, struct_return, struct_addr)
-     int nargs;
-     value_ptr *args;
-     CORE_ADDR sp;
-     unsigned char struct_return;
-     CORE_ADDR struct_addr;
-{
-  int argreg;
-  int argnum;
-  int len = 0;
-  int stack_offset;
-
-  /* First, just for safety, make sure stack is aligned */
-  sp &= ~3;
-
-  /* Now make space on the stack for the args. */
-  for (argnum = 0; argnum < nargs; argnum++)
-    len += ((TYPE_LENGTH(VALUE_TYPE(args[argnum])) + 3) & ~3);
-  sp -= len;	/* possibly over-allocating, but it works... */
-		/* (you might think we could allocate 16 bytes */
-		/* less, but the ABI seems to use it all! )  */
-  argreg = ARG0_REGNUM;
-
-  /* the struct_return pointer occupies the first parameter-passing reg */
-  if (struct_return)
-      write_register (argreg++, struct_addr);
-
-  stack_offset = 16;
-  /* The offset onto the stack at which we will start copying parameters
-     (after the registers are used up) begins at 16 rather than at zero.
-     I don't really know why, that's just the way it seems to work.  */
-
-  /* Now load as many as possible of the first arguments into
-     registers, and push the rest onto the stack.  There are 16 bytes
-     in four registers available.  Loop thru args from first to last.  */
-  for (argnum = 0; argnum < nargs; argnum++)
-    {
-      int len;
-      char *val;
-      char valbuf[REGISTER_RAW_SIZE(ARG0_REGNUM)];
-
-      if (TYPE_CODE (VALUE_TYPE (*args)) == TYPE_CODE_STRUCT
-	  && TYPE_LENGTH (VALUE_TYPE (*args)) > 8)
-	{
-	  store_address (valbuf, 4, VALUE_ADDRESS (*args));
-	  len = 4;
-	  val = valbuf;
-	}
-      else
-	{
-	  len = TYPE_LENGTH (VALUE_TYPE (*args));
-	  val = (char *)VALUE_CONTENTS (*args);
-	}
-
-      while (len > 0)
-	if  (argreg <= ARGLAST_REGNUM)
-	  {
-	    CORE_ADDR regval;
-
-	    regval = extract_address (val, REGISTER_RAW_SIZE (argreg));
-	    write_register (argreg, regval);
-
-	    len -= REGISTER_RAW_SIZE (argreg);
-	    val += REGISTER_RAW_SIZE (argreg);
-	    argreg++;
-	  }
-	else
-	  {
-	    write_memory (sp + stack_offset, val, 4);
-
-	    len -= 4;
-	    val += 4;
-	    stack_offset += 4;
-	  }
-      args++;
-    }
-  return sp;
-}
-#endif /* Z.R. */
-
-/* Function: push_return_address (pc)
-   Set up the return address for the inferior function call.
-   Needed for targets where we don't actually execute a JSR/BSR instruction */
- 
-CORE_ADDR
-fr30_push_return_address (pc, sp)
-     CORE_ADDR pc;
-     CORE_ADDR sp;
-{
-  write_register (RP_REGNUM, CALL_DUMMY_ADDRESS ());
-  return sp;
-}
- 
 /* Function: frame_saved_pc 
    Find the caller of this frame.  We do this by seeing if RP_REGNUM
    is saved in the stack anywhere, otherwise we get it from the
@@ -624,22 +522,6 @@ fr30_frame_saved_pc (fi)
   else
     return fr30_find_callers_reg (fi, RP_REGNUM);
 }
-
-#if(0) /* Z.R. XXX */
-void
-get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
-     char *raw_buffer;
-     int *optimized;
-     CORE_ADDR *addrp;
-     struct frame_info *frame;
-     int regnum;
-     enum lval_type *lval;
-{
-  generic_get_saved_register (raw_buffer, optimized, addrp, 
-			      frame, regnum, lval);
-}
-#endif /* Z.R. */
-
 
 /* Function: fix_call_dummy
    Pokes the callee function's address into the CALL_DUMMY assembly stub.
@@ -668,4 +550,3 @@ fr30_fix_call_dummy (dummy, sp, fun, nargs, args, type, gcc_p)
   store_unsigned_integer ((unsigned int *)&dummy[0], 2, offset24 >> 16);
   return 0;
 }
-
