@@ -33,6 +33,7 @@ tm-hppa.h
 tm-hppab.h
 tm-hppah.h
 tm-hppao.h
+tm-pro.h
 xm-hppab.h
 xm-hppah.h
 xm-pa.h
