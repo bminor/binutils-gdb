@@ -29,6 +29,11 @@ Mon Aug 31 13:47:45 1992  Fred Fish  (fnf@cygnus.com)
 	* gdbtypes.h (TYPE_CODE_CLASS):  Add type for C++ classes, but
 	treat as alias for TYPE_CODE_STRUCT for now.
 
+Sun Aug 30 21:32:17 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in: map "gdb" through program_transform_name when
+	installing.
+
 Sun Aug 30 21:18:51 1992  Fred Fish  (fnf@cygnus.com)
 
 	* {i386-tdep.c, m68k-tdep.c, mips-tdep.c, sparc-tdep.c}
