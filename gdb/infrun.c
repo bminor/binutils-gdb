@@ -1332,6 +1332,7 @@ handle_inferior_event (struct execution_control_state *ecs)
   /* If it's a new process, add it to the thread database */
 
   ecs->new_thread_event = (!ptid_equal (ecs->ptid, inferior_ptid)
+			   && !ptid_equal (ecs->ptid, minus_one_ptid)
 			   && !in_thread_list (ecs->ptid));
 
   if (ecs->ws.kind != TARGET_WAITKIND_EXITED

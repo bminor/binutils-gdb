@@ -252,7 +252,10 @@ thread_db_state_str (td_thr_state_e state)
 
    THP is a handle to the current thread; if INFOP is not NULL, the
    struct thread_info associated with this thread is returned in
-   *INFOP.  */
+   *INFOP.
+
+   If the thread is a zombie, TD_THR_ZOMBIE is returned.  Otherwise,
+   zero is returned to indicate success.  */
 
 static int
 thread_get_info_callback (const td_thrhandle_t *thp, void *infop)
@@ -270,6 +273,16 @@ thread_get_info_callback (const td_thrhandle_t *thp, void *infop)
   /* Fill the cache.  */
   thread_ptid = BUILD_THREAD (ti.ti_tid, GET_PID (inferior_ptid));
   thread_info = find_thread_pid (thread_ptid);
+
+  /* In the case of a zombie thread, don't continue.  We don't want to
+     attach to it thinking it is a new thread and we don't want to mark
+     it as valid.  */
+  if (ti.ti_state == TD_THR_UNKNOWN || ti.ti_state == TD_THR_ZOMBIE)
+    {
+      if (infop != NULL)
+        *(struct thread_info **) infop = thread_info;
+      return TD_THR_ZOMBIE;
+    }
 
   if (thread_info == NULL)
     {
@@ -355,7 +368,19 @@ thread_from_lwp (ptid_t ptid)
 	   GET_LWP (ptid), thread_db_err_str (err));
 
   thread_info = NULL;
-  thread_get_info_callback (&th, &thread_info);
+
+  /* Fetch the thread info.  If we get back TD_THR_ZOMBIE, then the
+     event thread has already died.  If another gdb interface has called
+     thread_alive() previously, the thread won't be found on the thread list
+     anymore.  In that case, we don't want to process this ptid anymore
+     to avoid the possibility of later treating it as a newly
+     discovered thread id that we should add to the list.  Thus,
+     we return a -1 ptid which is also how the thread list marks a
+     dead thread.  */
+  if (thread_get_info_callback (&th, &thread_info) == TD_THR_ZOMBIE
+      && thread_info == NULL)
+    return pid_to_ptid (-1);
+
   gdb_assert (thread_info && thread_info->private->ti_valid);
 
   return BUILD_THREAD (thread_info->private->ti.ti_tid, GET_PID (ptid));
@@ -950,7 +975,16 @@ thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   if (!ptid_equal (trap_ptid, null_ptid))
     trap_ptid = thread_from_lwp (trap_ptid);
 
-  return thread_from_lwp (ptid);
+  /* Change the ptid back into the higher level PID + TID format.
+     If the thread is dead and no longer on the thread list, we will 
+     get back a dead ptid.  This can occur if the thread death event
+     gets postponed by other simultaneous events.  In such a case, 
+     we want to just ignore the event and continue on.  */
+  ptid = thread_from_lwp (ptid);
+  if (GET_PID (ptid) == -1)
+    ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+  
+  return ptid;
 }
 
 static int

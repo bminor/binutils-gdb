@@ -1,3 +1,15 @@
+2004-06-04  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* infrun.c (handle_inferior_event): Don't treat an invalid ptid
+	as a new thread event.
+	* thread_db.c (thread_get_info_callback): If the thread is a
+	zombie, return TD_THR_ZOMBIE.
+	* (thread_from_lwp): If thread_get_info_callback returns
+	TD_THR_ZOMBIE, check if the thread is still on the thread list
+	and return a -1 ptid if not found.
+	(thread_db_wait): If thread_from_lwp returns a -1 ptid, then
+	change the status to TARGET_WAITKIND_SPURIOUS.
+
 2004-06-03  Corinna Vinschen  <vinschen@redhat.com>
 
 	* sh-tdep.c (sh3e_sh4_store_return_value): Correctly store
