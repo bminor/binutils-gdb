@@ -1,3 +1,9 @@
+Wed Oct 13 14:00:02 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* write.c (relax_and_size_all_segments): Moved #endif for OBJ_BOUT
+	so that OBJ_BOUT doesn't forget to adjust all the fragments in the
+	.bss section.
+
 Tue Oct 12 17:26:15 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c: If OBJ_ELF, include elf/mips.h.
