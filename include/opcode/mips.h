@@ -1,5 +1,5 @@
 /* mips.h.  Mips opcode list for GDB, the GNU debugger.
-   Copyright 1993, 1995 Free Software Foundation, Inc.
+   Copyright 1993, 94, 95, 1996 Free Software Foundation, Inc.
    Contributed by Ralph Campbell and OSF
    Commented and modified by Ian Lance Taylor, Cygnus Support
 
@@ -18,6 +18,9 @@ the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this file; see the file COPYING.  If not, write to the Free
 Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+#ifndef _MIPS_H_
+#define _MIPS_H_
 
 /* These are bit masks and shift counts to use to access the various
    fields of an instruction.  To retrieve the X field of an
@@ -94,6 +97,30 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define OP_SH_FUNCT		0
 #define OP_MASK_SPEC		0x3f
 #define OP_SH_SPEC		0
+#define OP_SH_LOCC              8       /* FP condition code */
+#define OP_SH_HICC              18      /* FP condition code */
+#define OP_MASK_CC              0x7
+#define OP_SH_COP1NORM          25      /* Normal COP1 encoding */
+#define OP_MASK_COP1NORM        0x1     /* a single bit */
+#define OP_SH_COP1SPEC          21      /* COP1 encodings */
+#define OP_MASK_COP1SPEC        0xf
+#define OP_MASK_COP1SCLR        0x4
+#define OP_MASK_COP1CMP         0x3
+#define OP_SH_COP1CMP           4
+#define OP_SH_FORMAT            21      /* FP short format field */
+#define OP_MASK_FORMAT          0x7
+#define OP_SH_TRUE              16
+#define OP_MASK_TRUE            0x1
+#define OP_SH_GE                17
+#define OP_MASK_GE              0x01
+#define OP_SH_UNSIGNED          16
+#define OP_MASK_UNSIGNED        0x1
+#define OP_SH_HINT              16
+#define OP_MASK_HINT            0x1f
+#define OP_SH_MMI               0       /* Multimedia (parallel) op */
+#define OP_MASK_MMI             0x3f 
+#define OP_SH_MMISUB            6
+#define OP_MASK_MMISUB          0x1f 
 
 /* This structure holds information for a particular instruction.  */
 
@@ -246,6 +273,12 @@ struct mips_opcode
 #define INSN_ISA4		    0x40000000
 /* LSI R4010 instruction.  */
 #define INSN_4010		    0x50000000
+/* NEC VR4100 instruction. */
+#define INSN_4100                   0x60000000
+/* start-sanitize-r5900 */
+/* Toshiba R5900 instruction */
+#define INSN_5900                   0x70000000
+/* end-sanitize-r5900 */
 
 /* Instruction is actually a macro.  It should be ignored by the
    disassembler, and requires special treatment by the assembler.  */
@@ -264,6 +297,7 @@ enum {
     M_ADD_I,
     M_ADDU_I,
     M_AND_I,
+    M_BEQ,
     M_BEQ_I,
     M_BEQL_I,
     M_BGE,
@@ -298,6 +332,7 @@ enum {
     M_BLTUL,
     M_BLTU_I,
     M_BLTUL_I,
+    M_BNE,
     M_BNE_I,
     M_BNEL_I,
     M_DABS,
@@ -325,6 +360,7 @@ enum {
     M_DREMU_3I,
     M_DSUB_I,
     M_DSUBU_I,
+    M_DSUBU_I_2,
     M_J_A,
     M_JAL_1,
     M_JAL_2,
@@ -439,6 +475,7 @@ enum {
     M_SWR_AB,
     M_SUB_I,
     M_SUBU_I,
+    M_SUBU_I_2,
     M_TEQ_I,
     M_TGE_I,
     M_TGEU_I,
@@ -461,8 +498,14 @@ enum {
     M_USW_A,
     M_USD,
     M_USD_A,
-    M_XOR_I
+    M_XOR_I,
+    M_COP0,
+    M_COP1,
+    M_COP2,
+    M_COP3,
+    M_NUM_MACROS
 };
+
 
 /* The order of overloaded instructions matters.  Label arguments and
    register arguments look the same. Instructions that can have either
@@ -474,6 +517,169 @@ enum {
    Many instructions are short hand for other instructions (i.e., The
    jal <register> instruction is short for jalr <register>).  */
 
-extern const struct mips_opcode mips_opcodes[];
-extern const int bfd_mips_num_opcodes;
+extern const struct mips_opcode mips_builtin_opcodes[];
+extern const int bfd_mips_num_builtin_opcodes;
+extern struct mips_opcode *mips_opcodes;
+extern int bfd_mips_num_opcodes;
 #define NUMOPCODES bfd_mips_num_opcodes
+
+
+/* The rest of this file adds definitions for the mips16 TinyRISC
+   processor.  */
+
+/* These are the bitmasks and shift counts used for the different
+   fields in the instruction formats.  Other than OP, no masks are
+   provided for the fixed portions of an instruction, since they are
+   not needed.
+
+   The I format uses IMM11.
+
+   The RI format uses RX and IMM8.
+
+   The RR format uses RX, and RY.
+
+   The RRI format uses RX, RY, and IMM5.
+
+   The RRR format uses RX, RY, and RZ.
+
+   The RRI_A format uses RX, RY, and IMM4.
+
+   The SHIFT format uses RX, RY, and SHAMT.
+
+   The I8 format uses IMM8.
+
+   The I8_MOVR32 format uses RY and REGR32.
+
+   The IR_MOV32R format uses REG32R and MOV32Z.
+
+   The I64 format uses IMM8.
+
+   The RI64 format uses RY and IMM5.
+   */
+
+#define MIPS16OP_MASK_OP	0x1f
+#define MIPS16OP_SH_OP		11
+#define MIPS16OP_MASK_IMM11	0x7ff
+#define MIPS16OP_SH_IMM11	0
+#define MIPS16OP_MASK_RX	0x7
+#define MIPS16OP_SH_RX		8
+#define MIPS16OP_MASK_IMM8	0xff
+#define MIPS16OP_SH_IMM8	0
+#define MIPS16OP_MASK_RY	0x7
+#define MIPS16OP_SH_RY		5
+#define MIPS16OP_MASK_IMM5	0x1f
+#define MIPS16OP_SH_IMM5	0
+#define MIPS16OP_MASK_RZ	0x7
+#define MIPS16OP_SH_RZ		2
+#define MIPS16OP_MASK_IMM4	0xf
+#define MIPS16OP_SH_IMM4	0
+#define MIPS16OP_MASK_REGR32	0x1f
+#define MIPS16OP_SH_REGR32	0
+#define MIPS16OP_MASK_REG32R	0x1f
+#define MIPS16OP_SH_REG32R	3
+#define MIPS16OP_EXTRACT_REG32R(i) ((((i) >> 5) & 7) | ((i) & 0x18))
+#define MIPS16OP_MASK_MOVE32Z	0x7
+#define MIPS16OP_SH_MOVE32Z	0
+#define MIPS16OP_MASK_IMM6	0x3f
+#define MIPS16OP_SH_IMM6	5
+
+/* These are the characters which may appears in the args field of an
+   instruction.  They appear in the order in which the fields appear
+   when the instruction is used.  Commas and parentheses in the args
+   string are ignored when assembling, and written into the output
+   when disassembling.
+
+   "y" 3 bit register (MIPS16OP_*_RY)
+   "x" 3 bit register (MIPS16OP_*_RX)
+   "z" 3 bit register (MIPS16OP_*_RZ)
+   "Z" 3 bit register (MIPS16OP_*_MOVE32Z)
+   "v" 3 bit same register as source and destination (MIPS16OP_*_RX)
+   "w" 3 bit same register as source and destination (MIPS16OP_*_RY)
+   "0" zero register ($0)
+   "S" stack pointer ($sp or $29)
+   "P" program counter
+   "R" return address register ($ra or $31)
+   "X" 5 bit MIPS register (MIPS16OP_*_REGR32)
+   "Y" 5 bit MIPS register (MIPS16OP_*_REG32R)
+   "6" 6 bit unsigned break code (MIPS16OP_*_IMM6)
+   "a" 26 bit jump address
+   "e" 11 bit extension value
+   "l" register list for entry instruction
+   "L" register list for exit instruction
+
+   The remaining codes may be extended.  Except as otherwise noted,
+   the full extended operand is a 16 bit signed value.
+   "<" 3 bit unsigned shift count * 0 (MIPS16OP_*_RZ) (full 5 bit unsigned)
+   ">" 3 bit unsigned shift count * 0 (MIPS16OP_*_RX) (full 5 bit unsigned)
+   "[" 3 bit unsigned shift count * 0 (MIPS16OP_*_RZ) (full 6 bit unsigned)
+   "]" 3 bit unsigned shift count * 0 (MIPS16OP_*_RX) (full 6 bit unsigned)
+   "4" 4 bit signed immediate * 0 (MIPS16OP_*_IMM4) (full 15 bit signed)
+   "5" 5 bit unsigned immediate * 0 (MIPS16OP_*_IMM5)
+   "H" 5 bit unsigned immediate * 2 (MIPS16OP_*_IMM5)
+   "W" 5 bit unsigned immediate * 4 (MIPS16OP_*_IMM5)
+   "D" 5 bit unsigned immediate * 8 (MIPS16OP_*_IMM5)
+   "j" 5 bit signed immediate * 0 (MIPS16OP_*_IMM5)
+   "8" 8 bit unsigned immediate * 0 (MIPS16OP_*_IMM8)
+   "V" 8 bit unsigned immediate * 4 (MIPS16OP_*_IMM8)
+   "C" 8 bit unsigned immediate * 8 (MIPS16OP_*_IMM8)
+   "U" 8 bit unsigned immediate * 0 (MIPS16OP_*_IMM8) (full 16 bit unsigned)
+   "k" 8 bit signed immediate * 0 (MIPS16OP_*_IMM8)
+   "K" 8 bit signed immediate * 8 (MIPS16OP_*_IMM8)
+   "p" 8 bit conditional branch address (MIPS16OP_*_IMM8)
+   "q" 11 bit branch address (MIPS16OP_*_IMM11)
+   "A" 8 bit PC relative address * 4 (MIPS16OP_*_IMM8)
+   "B" 5 bit PC relative address * 8 (MIPS16OP_*_IMM5)
+   "E" 5 bit PC relative address * 4 (MIPS16OP_*_IMM5)
+   */
+
+/* For the mips16, we use the same opcode table format and a few of
+   the same flags.  However, most of the flags are different.  */
+
+/* Modifies the register in MIPS16OP_*_RX.  */
+#define MIPS16_INSN_WRITE_X		    0x00000001
+/* Modifies the register in MIPS16OP_*_RY.  */
+#define MIPS16_INSN_WRITE_Y		    0x00000002
+/* Modifies the register in MIPS16OP_*_RZ.  */
+#define MIPS16_INSN_WRITE_Z		    0x00000004
+/* Modifies the T ($24) register.  */
+#define MIPS16_INSN_WRITE_T		    0x00000008
+/* Modifies the SP ($29) register.  */
+#define MIPS16_INSN_WRITE_SP		    0x00000010
+/* Modifies the RA ($31) register.  */
+#define MIPS16_INSN_WRITE_31		    0x00000020
+/* Modifies the general purpose register in MIPS16OP_*_REG32R.  */
+#define MIPS16_INSN_WRITE_GPR_Y		    0x00000040
+/* Reads the register in MIPS16OP_*_RX.  */
+#define MIPS16_INSN_READ_X		    0x00000080
+/* Reads the register in MIPS16OP_*_RY.  */
+#define MIPS16_INSN_READ_Y		    0x00000100
+/* Reads the register in MIPS16OP_*_MOVE32Z.  */
+#define MIPS16_INSN_READ_Z		    0x00000200
+/* Reads the T ($24) register.  */
+#define MIPS16_INSN_READ_T		    0x00000400
+/* Reads the SP ($29) register.  */
+#define MIPS16_INSN_READ_SP		    0x00000800
+/* Reads the RA ($31) register.  */
+#define MIPS16_INSN_READ_31		    0x00001000
+/* Reads the program counter.  */
+#define MIPS16_INSN_READ_PC		    0x00002000
+/* Reads the general purpose register in MIPS16OP_*_REGR32.  */
+#define MIPS16_INSN_READ_GPR_X		    0x00004000
+
+/* The following flags have the same value for the mips16 opcode
+   table:
+   INSN_UNCOND_BRANCH_DELAY
+   INSN_COND_BRANCH_DELAY
+   INSN_COND_BRANCH_LIKELY (never used)
+   INSN_READ_HI
+   INSN_READ_LO
+   INSN_WRITE_HI
+   INSN_WRITE_LO
+   INSN_TRAP
+   INSN_ISA3
+   */
+
+extern const struct mips_opcode mips16_opcodes[];
+extern const int bfd_mips16_num_opcodes;
+
+#endif /* _MIPS_H_ */

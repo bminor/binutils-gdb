@@ -1,3 +1,11 @@
+Sat Feb 22 21:25:00 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* mips.h: Add macros for cop0, cop1 cop2 and cop3.
+	Change mips_opcodes from const array to a pointer, 
+	and change bfd_mips_num_opcodes from const int to int,
+	so that we can increase the size of the mips opcodes table 
+	dynamically.
+	
 start-sanitize-d30v
 Fri Feb 21 16:34:18 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
