@@ -1,3 +1,8 @@
+Thu Jun  2 10:57:06 1994  Karen Christianse (karen@cirdan.cygnus.com)
+
+	* brought build-all.mk update-to-date with progressive build-all.mk,
+	  added new targets and hppa info.
+	
 Thu Jun  2 00:12:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure: If config.guess result is a prefix of the user

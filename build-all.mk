@@ -37,7 +37,7 @@
 TREE	= devo
 include $(TREE)/release-info
 
-TEST_INSTALL_DISK = /tug
+TEST_INSTALL_DISK = /galt
 
 INSTALLDIR = $(TEST_INSTALL_DISK)/$(TREE)-test/$(RELEASE_TAG)
 
@@ -100,6 +100,9 @@ endif
 ifeq ($(canonhost),m68k-lynx-lynxos)
 canonhost := m68k-lynx
 endif
+ifeq ($(canonhost),rs6000-lynx-lynxos2.2.2)
+canonhost := rs6000-lynx
+endif
 
 ifeq ($(canonhost),sparc-sun-sunos4.1.3)
 TARGETS = $(NATIVE) \
@@ -109,11 +112,11 @@ TARGETS = $(NATIVE) \
 	i386-aout	\
 	i386-lynx 	\
 	i960-vxworks 	\
-	mips-idt-ecoff	\
+	mips-idt-ecoff	mips64-elf	mips-elf \
 	m68k-aout	m68k-vxworks 	m68k-coff \
 	m68k-lynx 	\
 	sh-hms 		\
-	sparc-aout	sparc-vxworks	\
+	sparc-aout	sparc-lynx	sparc-vxworks	\
 	sparclite-aout  sparclite-vxworks \
 	sparclite-coff  z8k-coff
 GCC = gcc -O -pipe
@@ -134,8 +137,7 @@ TARGETS = $(NATIVE) \
 	i960-vxworks \
 	m68k-aout	m68k-coff 	m68k-vxworks \
 	m88k-coff     \
-	mipsel-idt-ecoff \
-	sparclite-aout
+	mipsel-idt-ecoff sparc-lynx 
 CC = cc -Xs
 GCC = gcc -O -pipe
 all: all-cygnus
@@ -149,7 +151,8 @@ endif
 
 ifeq ($(canonhost),mips-sgi-irix4)
 TARGETS	= $(NATIVE) \
-	mips-idt-ecoff	sh-hms
+	mips-idt-ecoff	sh-hms \
+	mips64-elf
 CC = cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh2000
 all: all-cygnus
 endif
@@ -175,10 +178,10 @@ TARGETS = \
 	$(NATIVE) \
 	i960-vxworks \
 	m68k-aout	m68k-vxworks
-CC = cc 
+CC = cc -Wp,-H256000
 #CFLAGS = +Obb2000
 CFLAGS = -g
-all: all-native
+all: all-cygnus
 endif
 
 ifeq ($(canonhost),i386-sco3.2v4)
@@ -200,7 +203,7 @@ GCC = i386-go32-gcc -O
 CFLAGS =
 CXXFLAGS = -O
 MAKEINFOFLAGS = --no-split
-all: all-cross
+all: all-dos
 endif
 
 ifeq ($(canonhost),i386-sysv4.2)
@@ -217,6 +220,20 @@ SHELL=/bin/bash
 endif
 
 ifeq ($(canonhost),m68k-lynx)
+TARGETS = $(NATIVE)
+CC = /bin/gcc
+all: all-cygnus
+SHELL=/bin/bash
+endif
+
+ifeq ($(canonhost),sparc-lynx)
+TARGETS = $(NATIVE)
+CC = /bin/gcc
+all: all-cygnus
+SHELL=/bin/bash
+endif
+
+ifeq ($(canonhost),rs6000-lynx)
 TARGETS = $(NATIVE)
 CC = /bin/gcc
 all: all-cygnus
@@ -336,8 +353,7 @@ do-dos:
 all-dos:
         @for i in $(TARGETS) ; do \
             echo "building $(canonhost) cross to $$i" ; \
-            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) host=$(host) target=$$i do-dos $
-(cyglog) && \
+            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) host=$(host) target=$$i do-dos $(cyglog) && \
                echo "     completed successfully at `date`" ; \
         done
 
