@@ -510,9 +510,6 @@ static symbolS *ppc_current_block;
    cause BFD to set the section number of a symbol to N_DEBUG.  */
 static asection *ppc_coff_debug_section;
 
-/* The size of the .debug section.  */
-static bfd_size_type ppc_debug_name_section_size;
-
 #endif /* OBJ_XCOFF */
 
 #ifdef TE_PE
@@ -2243,13 +2240,6 @@ ppc_stabx (ignore)
 	ppc_current_csect->sy_tc.within = sym;
     }
 
-  if (strlen (name) > SYMNMLEN)
-    {
-      /* For some reason, each name is preceded by a two byte length
-	 and followed by a null byte.  */
-      ppc_debug_name_section_size += strlen (name) + 3;
-    }
-
   demand_empty_rest_of_line ();
 }
 
@@ -2576,9 +2566,6 @@ ppc_bc (ignore)
   sym->sy_tc.output = 1;
 
   ppc_frob_label (sym);
-
-  if (strlen (name) > SYMNMLEN)
-    ppc_debug_name_section_size += strlen (name) + 3;
 
   demand_empty_rest_of_line ();
 }
@@ -3794,25 +3781,6 @@ ppc_frob_section (sec)
   vma += bfd_section_size (stdoutput, sec);
 }
 
-/* Adjust the file by adding a .debug section if needed.  */
-
-void
-ppc_frob_file ()
-{
-  if (ppc_debug_name_section_size > 0)
-    {
-      asection *sec;
-
-      sec = bfd_make_section (stdoutput, ".debug");
-      if (sec == (asection *) NULL
-	  || ! bfd_set_section_size (stdoutput, sec,
-				     ppc_debug_name_section_size)
-	  || ! bfd_set_section_flags (stdoutput, sec,
-				      SEC_HAS_CONTENTS | SEC_LOAD))
-	as_fatal ("can't make .debug section");
-    }
-}
-
 #endif /* OBJ_XCOFF */
 
 /* Turn a string in input_line_pointer into a floating point constant
@@ -4221,6 +4189,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	      value += fixp->fx_frag->fr_address + fixp->fx_where;
 	    }			/* fall through */
 
+	case BFD_RELOC_RVA:
 	case BFD_RELOC_32_PCREL:
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
 			      value, 4);
@@ -4249,6 +4218,9 @@ md_apply_fix3 (fixp, valuep, seg)
 	  break;
 
 	default:
+	  fprintf(stderr,
+		  "Gas failure, reloc value %d\n", fixp->fx_r_type);
+	  fflush(stderr);
 	  abort ();
 	}
     }

@@ -1,3 +1,12 @@
+Mon Nov 20 17:26:00 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-ppc.c (ppc_debug_name_section_size): Remove.
+	(ppc_stabx): Don't increment ppc_debug_name_section_size.
+	(ppc_bc): Likewise.
+	(ppc_frob_file): Remove.
+	* config/tc-ppc.h (tc_frob_file): Don't define.
+	(ppc_frob_file): Don't declare.
+
 Mon Nov 20 13:37:05 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* Makefile.in (TARG_CPU_DEP_alpha): Mention alpha-opcode.h.
