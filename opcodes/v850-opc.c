@@ -265,6 +265,31 @@ const struct v850_opcode v850_opcodes[] = {
 { "br",		BOP(0x5),		BOP_MASK,	IF3, 0 },
 { "bsa",	BOP(0xd),		BOP_MASK,	IF3, 0 },
 
+/* Branch aliases */
+	/* signed integer */
+{ "jgt",	BOP(0xf),		BOP_MASK,	IF3, 0 },
+{ "jge",	BOP(0xe),		BOP_MASK,	IF3, 0 },
+{ "jlt",	BOP(0x6),		BOP_MASK,	IF3, 0 },
+{ "jle",	BOP(0x7),		BOP_MASK,	IF3, 0 },
+	/* unsigned integer */
+{ "jh",		BOP(0xb),		BOP_MASK,	IF3, 0 },
+{ "jnh",	BOP(0x3),		BOP_MASK,	IF3, 0 },
+{ "jl",		BOP(0x1),		BOP_MASK,	IF3, 0 },
+{ "jnl",	BOP(0x9),		BOP_MASK,	IF3, 0 },
+	/* common */
+{ "je",		BOP(0x2),		BOP_MASK,	IF3, 0 },
+{ "jne",	BOP(0xa),		BOP_MASK,	IF3, 0 },
+	/* others */
+{ "jv",		BOP(0x0),		BOP_MASK,	IF3, 0 },
+{ "jnv",	BOP(0x8),		BOP_MASK,	IF3, 0 },
+{ "jn",		BOP(0x4),		BOP_MASK,	IF3, 0 },
+{ "jp",		BOP(0xc),		BOP_MASK,	IF3, 0 },
+{ "jc",		BOP(0x1),		BOP_MASK,	IF3, 0 },
+{ "jnc",	BOP(0x9),		BOP_MASK,	IF3, 0 },
+{ "jz",		BOP(0x2),		BOP_MASK,	IF3, 0 },
+{ "jnz",	BOP(0xa),		BOP_MASK,	IF3, 0 },
+{ "jsa",	BOP(0xd),		BOP_MASK,	IF3, 0 },
+
 { "jmp",	one(0x0060),		one(0xffe0),	{ R1}, 1 },
 { "jr",		one(0x0780),		two(0xffc0,0x0001),{ D22 }, 0 },
 { "jarl",	one(0x0780),		two(0x07c0,0x0001),{ D22, R2 }, 0 }, 
@@ -410,7 +435,7 @@ insert_d8_6 (insn, value, errmsg)
   if ((value % 4) != 0)
     *errmsg = "short load/store word at odd offset";
 
-  value >>= 1;
+  value >>= 2;
 
   return (insn | (value & 0x7e));
 }

@@ -1,3 +1,10 @@
+start-sanitize-v850
+Thu Oct 24 17:53:52 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* v850-opc.c (v850_opcodes): Add "jCC" instructions (aliases for
+	"bCC"instructions).
+
+end-sanitize-v850
 Thu Oct 24 17:21:20 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-dis.c (_print_insn_mips): Use a tab between the instruction
