@@ -1,3 +1,8 @@
+2004-08-10  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* ChangeLog: Add copyright notice.  The notice is copied
+	from emacs 21.3 top level ChangeLog.
+
 2004-08-09  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* lib/cp-support.exp: New file.
@@ -12622,3 +12627,8 @@ left-margin: 8
 fill-column: 74
 version-control: never
 End:
+
+    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+    2003, 2004 Free Software Foundation, Inc.
+  Copying and distribution of this file, with or without modification,
+  are permitted provided the copyright notice and this notice are preserved.
