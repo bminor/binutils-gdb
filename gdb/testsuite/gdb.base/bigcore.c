@@ -117,6 +117,8 @@ struct list
 static struct list dummy;
 static struct list heap = { &dummy, &dummy };
 
+static unsigned long bytes_allocated;
+
 int
 main ()
 {
@@ -151,14 +153,13 @@ main ()
      each section.  The linking ensures that some, but not all, the
      memory is allocated.  NB: Some kernels handle this efficiently -
      only allocating and writing out referenced pages leaving holes in
-     the file for unreferend pages - while others handle this poorly -
-     writing out all pages including those that wern't referenced.  */
+     the file for unmodified pages - while others handle this poorly -
+     writing out all pages including those that weren't modified.  */
 
   print_string ("Alocating the entire heap ...\n");
   {
     size_t chunk_size;
-    long bytes_allocated = 0;
-    long chunks_allocated = 0;
+    unsigned long chunks_allocated = 0;
     /* Create a linked list of memory chunks.  Start with
        MAX_CHUNK_SIZE blocks of memory and then try allocating smaller
        and smaller amounts until all (well at least most) memory has

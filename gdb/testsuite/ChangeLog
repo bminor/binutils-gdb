@@ -1,3 +1,11 @@
+2004-05-10  Daniel Jacobowitz  <dan@debian.org>
+
+	PR external/1568
+	* gdb.base/bigcore.exp: Check the size of the dumped core file.
+	XFAIL if it is smaller than bytes_allocated.
+	* gdb.base/bigcore.c (bytes_allocated): Make static and unsigned.
+	(main): Make chunks_allocated unsigned.  Correct comment.
+
 2004-05-07  Joel Brobecker  <brobecker@gnat.com>
 
 	* gdb.arch/powerpc-aix-prologue.c: New file.

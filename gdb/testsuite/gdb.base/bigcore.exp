@@ -105,9 +105,30 @@ gdb_test "tbreak $print_core_line"
 gdb_test continue ".*print_string.*"
 gdb_test next ".*0 = 0.*"
 
+# Check that the corefile is plausibly large enough.  We're trying to
+# detect the case where the operating system has truncated the file
+# just before signed wraparound.  TCL, unfortunately, has a similar
+# problem - so use catch.  It can handle the "bad" size but not necessarily
+# the "good" one.  And we must use GDB for the comparison, similarly.
+
+if {[catch {file size $corefile} core_size] == 0} {
+    set core_ok 0
+    gdb_test_multiple "print bytes_allocated < $core_size" "check core size" {
+	-re " = 1\r\n$gdb_prompt $" {
+	    pass "check core size"
+	    set core_ok 1
+	}
+	-re " = 0\r\n$gdb_prompt $" {
+	    xfail "check core size (system does not support large corefiles)"
+	}
+    }
+    if {$core_ok == 0} {
+	return 0
+    }
+}
+
 # Traverse part of bigcore's linked list of memory chunks (forward or
-# backward), saving each chunk's address.  I don't know why but
-# expect_out didn't work with gdb_test_multiple.
+# backward), saving each chunk's address.
 
 proc extract_heap { dir } {
     global gdb_prompt
@@ -115,8 +136,7 @@ proc extract_heap { dir } {
     set heap ""
     set test "extract ${dir} heap"
     set lim 0
-    send_gdb "print heap.${dir}\n"
-    gdb_expect {
+    gdb_test_multiple "print heap.${dir}" "$test" {
 	-re " = \\(struct list \\*\\) 0x0.*$gdb_prompt $" {
 	    pass "$test"
 	}
