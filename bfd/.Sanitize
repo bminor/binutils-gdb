@@ -92,6 +92,7 @@ coff-sh.c
 coff-sparc.c
 coff-u68k.c
 coff-we32k.c
+coff-w65.c
 coff-z8k.c
 coffcode.h
 coffgen.c
@@ -121,6 +122,7 @@ cpu-sh.c
 cpu-sparc.c
 cpu-vax.c
 cpu-we32k.c
+cpu-w65.c
 cpu-z8k.c
 demo64.c
 dep-in.sed

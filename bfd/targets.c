@@ -430,6 +430,9 @@ extern const bfd_target aout0_big_vec;
 extern const bfd_target apollocoff_vec;
 extern const bfd_target b_out_vec_big_host;
 extern const bfd_target b_out_vec_little_host;
+/* start-sanitize-arc */
+extern const bfd_target bfd_elf32_arc_vec;
+/* end-sanitize-arc */
 extern const bfd_target bfd_elf32_big_generic_vec;
 extern const bfd_target bfd_elf32_bigmips_vec;
 extern const bfd_target bfd_elf32_hppa_vec;
@@ -497,6 +500,7 @@ extern const bfd_target sparccoff_vec;
 extern const bfd_target sunos_big_vec;
 extern const bfd_target tekhex_vec;
 extern const bfd_target we32kcoff_vec;
+extern const bfd_target w65_vec;
 extern const bfd_target z8kcoff_vec;
 
 /* srec is always included.  */
@@ -547,6 +551,9 @@ const bfd_target * const bfd_target_vector[] = {
 	   But that does not mean they are unnecessary.  If configured with
 	   --enable-targets=all, objdump or gdb should be able to examine
 	   the file even if we don't recognize the machine type.  */
+/* start-sanitize-arc */
+	&bfd_elf32_arc_vec,
+/* end-sanitize-arc */
 	&bfd_elf32_big_generic_vec,
 	&bfd_elf32_bigmips_vec,
 	&bfd_elf32_hppa_vec,

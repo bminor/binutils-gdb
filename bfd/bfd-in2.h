@@ -1030,6 +1030,7 @@ enum bfd_architecture
   bfd_arch_alpha,      /* Dec Alpha */
   bfd_arch_arm,        /* Advanced Risc Machines ARM */
   bfd_arch_ns32k,      /* National Semiconductors ns32000 */
+  bfd_arch_w65,        /* WDC 65816 */
   /* start-sanitize-rce */
   bfd_arch_rce,        /* Motorola RCE */
   /* end-sanitize-rce */
@@ -2008,6 +2009,7 @@ enum bfd_flavour {
   bfd_target_oasys_flavour,
   bfd_target_tekhex_flavour,
   bfd_target_srec_flavour,
+  bfd_target_raw_flavour,
   bfd_target_som_flavour,
   bfd_target_os9k_flavour};
 
