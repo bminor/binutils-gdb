@@ -1097,7 +1097,7 @@ elf_hppa_unmark_useless_dynamic_symbols (struct elf_link_hash_entry *h,
      linker code.  */
   if (! info->relocatable
       && ! (info->shared
-	    && !info->no_undefined)
+	    && info->unresolved_syms_in_shared_libs == RM_IGNORE)
       && h->root.type == bfd_link_hash_undefined
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)
@@ -1132,7 +1132,7 @@ elf_hppa_remark_useless_dynamic_symbols (struct elf_link_hash_entry *h,
      linker code.  */
   if (! info->relocatable
       && ! (info->shared
-	    && !info->no_undefined)
+	    && info->unresolved_syms_in_shared_libs == RM_IGNORE)
       && h->root.type == bfd_link_hash_undefined
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0
@@ -1399,7 +1399,8 @@ elf_hppa_relocate_section (bfd *output_bfd,
 		relocation = 0;
 	    }
 	  /* Allow undefined symbols in shared libraries.  */
-	  else if (info->shared && !info->no_undefined
+	  else if (info->shared
+		   && info->unresolved_syms_in_shared_libs == RM_IGNORE
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    {
 	      if (info->symbolic)

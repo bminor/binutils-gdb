@@ -1,3 +1,20 @@
+2003-08-20  Nick Clifton  <nickc@redhat.com>
+
+	* ldmain.c: Initialise the new fields in bfd_link_info to
+        NOT_YET_SET.
+       	* lexsup.c (enum option_values): New enum.  Use this to
+        replace the handed coded values for the long switch options.
+        (ld_options): Add 'unresolved-symbols',
+        'warn-unresolved-symbols' and 'error-unresolved-symbols'.
+        (parse_args): Handle the new switches.  Set the values of
+        unresolved_symbols_in_objects and
+        unresolved_symbols_in_shared_libs appropriately.  If they were
+        not initialised by the command line, install default values.
+        * emultempl/elf32.em (handle_option): Update OPTION_GROUP and
+        -z defs to use the new fields in bfd_link_info.
+	* ld.texinfo: Document the new switches.
+	* NEWS: Mention this feature.
+
 2003-08-15 Dmitry Diky <diwil@mail.ru>
 	
 	* Makefile.am (GENSCRIPTS_EXTRA): New script definition which

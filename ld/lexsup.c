@@ -62,82 +62,87 @@ int parsing_defsym = 0;
 
 /* Codes used for the long options with no short synonyms.  150 isn't
    special; it's just an arbitrary non-ASCII char value.  */
-
-#define OPTION_ASSERT			150
-#define OPTION_CALL_SHARED		(OPTION_ASSERT + 1)
-#define OPTION_CREF			(OPTION_CALL_SHARED + 1)
-#define OPTION_DEFSYM			(OPTION_CREF + 1)
-#define OPTION_DEMANGLE			(OPTION_DEFSYM + 1)
-#define OPTION_DYNAMIC_LINKER		(OPTION_DEMANGLE + 1)
-#define OPTION_EB			(OPTION_DYNAMIC_LINKER + 1)
-#define OPTION_EL			(OPTION_EB + 1)
-#define OPTION_EMBEDDED_RELOCS		(OPTION_EL + 1)
-#define OPTION_EXPORT_DYNAMIC		(OPTION_EMBEDDED_RELOCS + 1)
-#define OPTION_HELP			(OPTION_EXPORT_DYNAMIC + 1)
-#define OPTION_IGNORE			(OPTION_HELP + 1)
-#define OPTION_MAP			(OPTION_IGNORE + 1)
-#define OPTION_NO_DEMANGLE		(OPTION_MAP + 1)
-#define OPTION_NO_KEEP_MEMORY		(OPTION_NO_DEMANGLE + 1)
-#define OPTION_NO_WARN_MISMATCH		(OPTION_NO_KEEP_MEMORY + 1)
-#define OPTION_NOINHIBIT_EXEC		(OPTION_NO_WARN_MISMATCH + 1)
-#define OPTION_NON_SHARED		(OPTION_NOINHIBIT_EXEC + 1)
-#define OPTION_NO_WHOLE_ARCHIVE		(OPTION_NON_SHARED + 1)
-#define OPTION_OFORMAT			(OPTION_NO_WHOLE_ARCHIVE + 1)
-#define OPTION_RELAX			(OPTION_OFORMAT + 1)
-#define OPTION_RETAIN_SYMBOLS_FILE	(OPTION_RELAX + 1)
-#define OPTION_RPATH			(OPTION_RETAIN_SYMBOLS_FILE + 1)
-#define OPTION_RPATH_LINK		(OPTION_RPATH + 1)
-#define OPTION_SHARED			(OPTION_RPATH_LINK + 1)
-#define OPTION_SONAME			(OPTION_SHARED + 1)
-#define OPTION_SORT_COMMON		(OPTION_SONAME + 1)
-#define OPTION_STATS			(OPTION_SORT_COMMON + 1)
-#define OPTION_SYMBOLIC			(OPTION_STATS + 1)
-#define OPTION_TASK_LINK		(OPTION_SYMBOLIC + 1)
-#define OPTION_TBSS			(OPTION_TASK_LINK + 1)
-#define OPTION_TDATA			(OPTION_TBSS + 1)
-#define OPTION_TTEXT			(OPTION_TDATA + 1)
-#define OPTION_TRADITIONAL_FORMAT	(OPTION_TTEXT + 1)
-#define OPTION_UR			(OPTION_TRADITIONAL_FORMAT + 1)
-#define OPTION_VERBOSE			(OPTION_UR + 1)
-#define OPTION_VERSION			(OPTION_VERBOSE + 1)
-#define OPTION_VERSION_SCRIPT		(OPTION_VERSION + 1)
-#define OPTION_VERSION_EXPORTS_SECTION	(OPTION_VERSION_SCRIPT + 1)
-#define OPTION_WARN_COMMON		(OPTION_VERSION_EXPORTS_SECTION + 1)
-#define OPTION_WARN_CONSTRUCTORS	(OPTION_WARN_COMMON + 1)
-#define OPTION_WARN_FATAL		(OPTION_WARN_CONSTRUCTORS + 1)
-#define OPTION_WARN_MULTIPLE_GP		(OPTION_WARN_FATAL + 1)
-#define OPTION_WARN_ONCE		(OPTION_WARN_MULTIPLE_GP + 1)
-#define OPTION_WARN_SECTION_ALIGN	(OPTION_WARN_ONCE + 1)
-#define OPTION_SPLIT_BY_RELOC		(OPTION_WARN_SECTION_ALIGN + 1)
-#define OPTION_SPLIT_BY_FILE 		(OPTION_SPLIT_BY_RELOC + 1)
-#define OPTION_WHOLE_ARCHIVE		(OPTION_SPLIT_BY_FILE + 1)
-#define OPTION_WRAP			(OPTION_WHOLE_ARCHIVE + 1)
-#define OPTION_FORCE_EXE_SUFFIX		(OPTION_WRAP + 1)
-#define OPTION_GC_SECTIONS		(OPTION_FORCE_EXE_SUFFIX + 1)
-#define OPTION_NO_GC_SECTIONS		(OPTION_GC_SECTIONS + 1)
-#define OPTION_CHECK_SECTIONS		(OPTION_NO_GC_SECTIONS + 1)
-#define OPTION_NO_CHECK_SECTIONS	(OPTION_CHECK_SECTIONS + 1)
-#define OPTION_MPC860C0			(OPTION_NO_CHECK_SECTIONS + 1)
-#define OPTION_NO_UNDEFINED		(OPTION_MPC860C0 + 1)
-#define OPTION_INIT			(OPTION_NO_UNDEFINED + 1)
-#define OPTION_FINI			(OPTION_INIT + 1)
-#define OPTION_SECTION_START		(OPTION_FINI + 1)
-#define OPTION_UNIQUE			(OPTION_SECTION_START + 1)
-#define OPTION_TARGET_HELP		(OPTION_UNIQUE + 1)
-#define OPTION_ALLOW_SHLIB_UNDEFINED	(OPTION_TARGET_HELP + 1)
-#define OPTION_NO_ALLOW_SHLIB_UNDEFINED	(OPTION_ALLOW_SHLIB_UNDEFINED + 1)
-#define OPTION_ALLOW_MULTIPLE_DEFINITION (OPTION_NO_ALLOW_SHLIB_UNDEFINED + 1)
-#define OPTION_NO_UNDEFINED_VERSION	(OPTION_ALLOW_MULTIPLE_DEFINITION + 1)
-#define OPTION_DISCARD_NONE		(OPTION_NO_UNDEFINED_VERSION + 1)
-#define OPTION_SPARE_DYNAMIC_TAGS	(OPTION_DISCARD_NONE + 1)
-#define OPTION_NO_DEFINE_COMMON		(OPTION_SPARE_DYNAMIC_TAGS + 1)
-#define OPTION_NOSTDLIB			(OPTION_NO_DEFINE_COMMON + 1)
-#define OPTION_NO_OMAGIC		(OPTION_NOSTDLIB + 1)
-#define OPTION_STRIP_DISCARDED		(OPTION_NO_OMAGIC + 1)
-#define OPTION_NO_STRIP_DISCARDED	(OPTION_STRIP_DISCARDED + 1)
-#define OPTION_ACCEPT_UNKNOWN_INPUT_ARCH    (OPTION_NO_STRIP_DISCARDED + 1)
-#define OPTION_NO_ACCEPT_UNKNOWN_INPUT_ARCH (OPTION_ACCEPT_UNKNOWN_INPUT_ARCH + 1)
-#define OPTION_PIE			(OPTION_NO_ACCEPT_UNKNOWN_INPUT_ARCH + 1)
+enum option_values
+{
+  OPTION_ASSERT = 150,
+  OPTION_CALL_SHARED,
+  OPTION_CREF,
+  OPTION_DEFSYM,
+  OPTION_DEMANGLE,
+  OPTION_DYNAMIC_LINKER,
+  OPTION_EB,
+  OPTION_EL,
+  OPTION_EMBEDDED_RELOCS,
+  OPTION_EXPORT_DYNAMIC,
+  OPTION_HELP,
+  OPTION_IGNORE,
+  OPTION_MAP,
+  OPTION_NO_DEMANGLE,
+  OPTION_NO_KEEP_MEMORY,
+  OPTION_NO_WARN_MISMATCH,
+  OPTION_NOINHIBIT_EXEC,
+  OPTION_NON_SHARED,
+  OPTION_NO_WHOLE_ARCHIVE,
+  OPTION_OFORMAT,
+  OPTION_RELAX,
+  OPTION_RETAIN_SYMBOLS_FILE,
+  OPTION_RPATH,
+  OPTION_RPATH_LINK,
+  OPTION_SHARED,
+  OPTION_SONAME,
+  OPTION_SORT_COMMON,
+  OPTION_STATS,
+  OPTION_SYMBOLIC,
+  OPTION_TASK_LINK,
+  OPTION_TBSS,
+  OPTION_TDATA,
+  OPTION_TTEXT,
+  OPTION_TRADITIONAL_FORMAT,
+  OPTION_UR,
+  OPTION_VERBOSE,
+  OPTION_VERSION,
+  OPTION_VERSION_SCRIPT,
+  OPTION_VERSION_EXPORTS_SECTION,
+  OPTION_WARN_COMMON,
+  OPTION_WARN_CONSTRUCTORS,
+  OPTION_WARN_FATAL,
+  OPTION_WARN_MULTIPLE_GP,
+  OPTION_WARN_ONCE,
+  OPTION_WARN_SECTION_ALIGN,
+  OPTION_SPLIT_BY_RELOC,
+  OPTION_SPLIT_BY_FILE ,
+  OPTION_WHOLE_ARCHIVE,
+  OPTION_WRAP,
+  OPTION_FORCE_EXE_SUFFIX,
+  OPTION_GC_SECTIONS,
+  OPTION_NO_GC_SECTIONS,
+  OPTION_CHECK_SECTIONS,
+  OPTION_NO_CHECK_SECTIONS,
+  OPTION_MPC860C0,
+  OPTION_NO_UNDEFINED,
+  OPTION_INIT,
+  OPTION_FINI,
+  OPTION_SECTION_START,
+  OPTION_UNIQUE,
+  OPTION_TARGET_HELP,
+  OPTION_ALLOW_SHLIB_UNDEFINED,
+  OPTION_NO_ALLOW_SHLIB_UNDEFINED,
+  OPTION_ALLOW_MULTIPLE_DEFINITION,
+  OPTION_NO_UNDEFINED_VERSION,
+  OPTION_DISCARD_NONE,
+  OPTION_SPARE_DYNAMIC_TAGS,
+  OPTION_NO_DEFINE_COMMON,
+  OPTION_NOSTDLIB,
+  OPTION_NO_OMAGIC,
+  OPTION_STRIP_DISCARDED,
+  OPTION_NO_STRIP_DISCARDED,
+  OPTION_ACCEPT_UNKNOWN_INPUT_ARCH,
+  OPTION_NO_ACCEPT_UNKNOWN_INPUT_ARCH,
+  OPTION_PIE,
+  OPTION_UNRESOLVED_SYMBOLS,
+  OPTION_WARN_UNRESOLVED_SYMBOLS,
+  OPTION_ERROR_UNRESOLVED_SYMBOLS
+};
 
 /* The long options.  This structure is used for both the option
    parsing and the help text.  */
@@ -334,11 +339,11 @@ static const struct ld_option ld_options[] =
   { {"no-keep-memory", no_argument, NULL, OPTION_NO_KEEP_MEMORY},
       '\0', NULL, N_("Use less memory and more disk I/O"), TWO_DASHES },
   { {"no-undefined", no_argument, NULL, OPTION_NO_UNDEFINED},
-     '\0', NULL, N_("Allow no undefined symbols"), TWO_DASHES },
+     '\0', NULL, N_("Do not allow unresolved references in object files"), TWO_DASHES },
   { {"allow-shlib-undefined", no_argument, NULL, OPTION_ALLOW_SHLIB_UNDEFINED},
-     '\0', NULL, N_("Allow undefined symbols in shared objects (the default)"), TWO_DASHES },
+     '\0', NULL, N_("Allow unresolved references in shared libaries"), TWO_DASHES },
   { {"no-allow-shlib-undefined", no_argument, NULL, OPTION_NO_ALLOW_SHLIB_UNDEFINED},
-     '\0', NULL, N_("Do not allow undefined symbols in shared objects"), TWO_DASHES },
+     '\0', NULL, N_("Do not allow unresolved references in shared libs"), TWO_DASHES },
   { {"allow-multiple-definition", no_argument, NULL, OPTION_ALLOW_MULTIPLE_DEFINITION},
      '\0', NULL, N_("Allow multiple definitions"), TWO_DASHES },
   { {"no-undefined-version", no_argument, NULL, OPTION_NO_UNDEFINED_VERSION},
@@ -400,6 +405,9 @@ static const struct ld_option ld_options[] =
       '\0', N_("ADDRESS"), N_("Set address of .data section"), ONE_DASH },
   { {"Ttext", required_argument, NULL, OPTION_TTEXT},
       '\0', N_("ADDRESS"), N_("Set address of .text section"), ONE_DASH },
+  { {"unresolved-symbols=<method>", required_argument, NULL, OPTION_UNRESOLVED_SYMBOLS},
+     '\0', NULL, N_("How to handle unresolved symbols.  <method> is:\n\t\t\t\tignore-all, report-all, ignore-in-object-files,\n\t\t\t\tignore-in-shared-libs"),
+    TWO_DASHES },
   { {"verbose", no_argument, NULL, OPTION_VERBOSE},
       '\0', NULL, N_("Output lots of information during link"), TWO_DASHES },
   { {"dll-verbose", no_argument, NULL, OPTION_VERBOSE}, /* Linux.  */
@@ -422,6 +430,10 @@ static const struct ld_option ld_options[] =
   { {"warn-section-align", no_argument, NULL, OPTION_WARN_SECTION_ALIGN},
       '\0', NULL, N_("Warn if start of section changes due to alignment"),
       TWO_DASHES },
+  { {"warn-unresolved-symbols", no_argument, NULL, OPTION_WARN_UNRESOLVED_SYMBOLS},
+    '\0', NULL, N_("Report unresolved symbols as warnings"), TWO_DASHES },
+  { {"error-unresolved-symbols", no_argument, NULL, OPTION_ERROR_UNRESOLVED_SYMBOLS},
+    '\0', NULL, N_("Report unresolved symbols as errors"), TWO_DASHES },
   { {"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL},
      '\0', NULL, N_("Treat warnings as errors"),
      TWO_DASHES },
@@ -469,6 +481,7 @@ parse_args (unsigned argc, char **argv)
   struct option *longopts;
   struct option *really_longopts;
   int last_optind;
+  enum report_method how_to_report_unresolved_symbols = RM_GENERATE_ERROR;
 
   shortopts = xmalloc (OPTION_COUNT * 3 + 2);
   longopts = xmalloc (sizeof (*longopts) * (OPTION_COUNT + 1));
@@ -647,9 +660,21 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_CALL_SHARED:
 	  config.dynamic_link = TRUE;
+	  /* When linking against shared libraries, the default
+	     behaviour is to ignore any unresolved references.  */
+	  if (link_info.unresolved_syms_in_objects == RM_NOT_YET_SET)
+	    link_info.unresolved_syms_in_objects = RM_IGNORE;
+	  if (link_info.unresolved_syms_in_shared_libs == RM_NOT_YET_SET)
+	    link_info.unresolved_syms_in_shared_libs = RM_IGNORE;
 	  break;
 	case OPTION_NON_SHARED:
 	  config.dynamic_link = FALSE;
+	  /* When linking against static libraries, the default
+	     behaviour is to report any unresolved references.  */
+	  if (link_info.unresolved_syms_in_objects == RM_NOT_YET_SET)
+	    link_info.unresolved_syms_in_objects = how_to_report_unresolved_symbols;
+	  if (link_info.unresolved_syms_in_shared_libs == RM_NOT_YET_SET)
+	    link_info.unresolved_syms_in_shared_libs = how_to_report_unresolved_symbols;
 	  break;
 	case OPTION_CREF:
 	  command_line.cref = TRUE;
@@ -790,14 +815,53 @@ parse_args (unsigned argc, char **argv)
 	  link_info.keep_memory = FALSE;
 	  break;
 	case OPTION_NO_UNDEFINED:
-	  link_info.no_undefined = TRUE;
+	  link_info.unresolved_syms_in_objects = how_to_report_unresolved_symbols;
 	  break;
 	case OPTION_ALLOW_SHLIB_UNDEFINED:
-	  link_info.allow_shlib_undefined = TRUE;
+	  link_info.unresolved_syms_in_shared_libs = RM_IGNORE;
 	  break;
 	case OPTION_NO_ALLOW_SHLIB_UNDEFINED:
-	  link_info.allow_shlib_undefined = FALSE;
+	  link_info.unresolved_syms_in_shared_libs = how_to_report_unresolved_symbols;
 	  break;
+	case OPTION_UNRESOLVED_SYMBOLS:
+	  if (strcmp (optarg, "ignore-all") == 0)
+	    {
+	      link_info.unresolved_syms_in_objects = RM_IGNORE;
+	      link_info.unresolved_syms_in_shared_libs = RM_IGNORE;
+	    }
+	  else if (strcmp (optarg, "report-all") == 0)
+	    {
+	      link_info.unresolved_syms_in_objects = how_to_report_unresolved_symbols;
+	      link_info.unresolved_syms_in_shared_libs = how_to_report_unresolved_symbols;
+	    }
+	  else if (strcmp (optarg, "ignore-in-object-files") == 0)
+	    {
+	      link_info.unresolved_syms_in_objects = RM_IGNORE;
+	      link_info.unresolved_syms_in_shared_libs = how_to_report_unresolved_symbols;
+	    }
+      	  else if (strcmp (optarg, "ignore-in-shared-libs") == 0)
+	    {
+	      link_info.unresolved_syms_in_objects = how_to_report_unresolved_symbols;
+	      link_info.unresolved_syms_in_shared_libs = RM_IGNORE;
+	    }
+	  else
+	    einfo (_("%P%F: bad --unresolved-symbols option: %s\n"), optarg);
+	  break;
+	case OPTION_WARN_UNRESOLVED_SYMBOLS:
+	  how_to_report_unresolved_symbols = RM_GENERATE_WARNING;
+	  if (link_info.unresolved_syms_in_objects == RM_GENERATE_ERROR)
+	    link_info.unresolved_syms_in_objects = RM_GENERATE_WARNING;
+	  if (link_info.unresolved_syms_in_shared_libs == RM_GENERATE_ERROR)
+	    link_info.unresolved_syms_in_shared_libs = RM_GENERATE_WARNING;
+	  break;
+	  
+	case OPTION_ERROR_UNRESOLVED_SYMBOLS:
+	  how_to_report_unresolved_symbols = RM_GENERATE_ERROR;
+	  if (link_info.unresolved_syms_in_objects == RM_GENERATE_WARNING)
+	    link_info.unresolved_syms_in_objects = RM_GENERATE_ERROR;
+	  if (link_info.unresolved_syms_in_shared_libs == RM_GENERATE_WARNING)
+	    link_info.unresolved_syms_in_shared_libs = RM_GENERATE_ERROR;
+	  break;	  
 	case OPTION_ALLOW_MULTIPLE_DEFINITION:
 	  link_info.allow_multiple_definition = TRUE;
 	  break;
@@ -948,7 +1012,15 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_SHARED:
 	  if (config.has_shared)
-	    link_info.shared = TRUE;
+	    {
+	      link_info.shared = TRUE;
+	      /* When creating a shared library, the default
+		 behaviour is to ignore any unresolved references.  */
+	      if (link_info.unresolved_syms_in_objects == RM_NOT_YET_SET)
+		link_info.unresolved_syms_in_objects = RM_IGNORE;
+	      if (link_info.unresolved_syms_in_shared_libs == RM_NOT_YET_SET)
+		link_info.unresolved_syms_in_shared_libs = RM_IGNORE;
+	    }
 	  else
 	    einfo (_("%P%F: -shared not supported\n"));
 	  break;
@@ -1202,6 +1274,14 @@ parse_args (unsigned argc, char **argv)
       set_default_dirlist (default_dirlist);
       free (default_dirlist);
     }
+
+  if (link_info.unresolved_syms_in_objects == RM_NOT_YET_SET)
+    /* FIXME: Should we allow emulations a chance to set this ?  */
+    link_info.unresolved_syms_in_objects = how_to_report_unresolved_symbols;
+  
+  if (link_info.unresolved_syms_in_shared_libs == RM_NOT_YET_SET)
+    /* FIXME: Should we allow emulations a chance to set this ?  */
+    link_info.unresolved_syms_in_shared_libs = how_to_report_unresolved_symbols;
 }
 
 /* Add the (colon-separated) elements of DIRLIST_PTR to the

@@ -883,7 +883,8 @@ Combines multiple reloc sections and sorts them to make dynamic symbol
 lookup caching possible.
 
 @item defs
-Disallows undefined symbols.
+Disallows undefined symbols in object files.  Undefined symbols in
+shared libaries are still allowed.
 
 @item initfirst
 This option is only meaningful when building a shared object.
@@ -984,15 +985,16 @@ for which shared libraries are supported.  This option is normally the
 default on such platforms.  The different variants of this option are
 for compatibility with various systems.  You may use this option
 multiple times on the command line: it affects library searching for
-@option{-l} options which follow it.
+@option{-l} options which follow it.  This
+option also implies @option{--unresolved-symbols=ignore-all}.
 
 @kindex -Bgroup
 @item -Bgroup
 Set the @code{DF_1_GROUP} flag in the @code{DT_FLAGS_1} entry in the dynamic
 section.  This causes the runtime linker to handle lookups in this
 object and its dependencies to be performed only inside the group.
-@option{--no-undefined} is implied.  This option is only meaningful on ELF
-platforms which support shared libraries.
+@option{--unresolved-symbols=report-all} is implied.  This option is
+only meaningful on ELF platforms which support shared libraries.
 
 @kindex -Bstatic
 @kindex -dn
@@ -1006,7 +1008,8 @@ Do not link against shared libraries.  This is only meaningful on
 platforms for which shared libraries are supported.  The different
 variants of this option are for compatibility with various systems.  You
 may use this option multiple times on the command line: it affects
-library searching for @option{-l} options which follow it.
+library searching for @option{-l} options which follow it.  This
+option also implies @option{--unresolved-symbols=report-all}.
 
 @kindex -Bsymbolic
 @item -Bsymbolic
@@ -1025,7 +1028,7 @@ been assigned to see if there any overlaps.  Normally the linker will
 perform this check, and if it finds any overlaps it will produce
 suitable error messages.  The linker does know about, and does make
 allowances for sections in overlays.  The default behaviour can be
-restored by using the command line switch @samp{--check-sections}.
+restored by using the command line switch @option{--check-sections}.
 
 @cindex cross reference table
 @kindex --cref
@@ -1146,7 +1149,7 @@ Print a summary of all target specific options on the standard output and exit.
 @kindex -Map
 @item -Map @var{mapfile}
 Print a link map to the file @var{mapfile}.  See the description of the
-@samp{-M} option, above.
+@option{-M} option, above.
 
 @cindex memory usage
 @kindex --no-keep-memory
@@ -1161,11 +1164,11 @@ while linking a large executable.
 @kindex -z defs
 @item --no-undefined
 @itemx -z defs
-Normally when creating a non-symbolic shared library, undefined symbols
-are allowed and left to be resolved by the runtime loader.  This option
-disallows such undefined symbols if they come from regular object
-files.  The switch @samp{--no-allow-shlib-undefined} controls the
-behaviour for shared objects being linked into the shared library.
+Report unresolved symbol references from regular object files.  This
+is done even if the linker is creating a non-symbolic shared library.
+The switch @option{--[no-]allow-shlib-undefined} controls the
+behaviour for reporting unresolved references found in shared
+libraries being linked in.  
 
 @kindex --allow-multiple-definition
 @kindex -z muldefs
@@ -1179,22 +1182,21 @@ first definition will be used.
 @kindex --no-allow-shlib-undefined
 @item --allow-shlib-undefined
 @itemx --no-allow-shlib-undefined
-Allow (the default) or disallow undefined symbols in shared objects.
-The setting of this switch overrides @samp{--no-undefined} where
-shared objects are concerned.  Thus if @samp{--no-undefined} is set
-but @samp{--no-allow-shlib-undefined} is not, the net result will be
-that undefined symbols in regular object files will trigger an error,
-but undefined symbols in shared objects will be ignored.
+Allows (the default) or disallows undefined symbols in shared libraries.
+This switch is similar to @option{--no-undefined} except that it
+determines the behaviour when the undefined symbols are in a
+shared library rather than a regular object file.  It does not affect
+how undefined symbols in regular object files are handled.
 
-The reason that @samp{--allow-shlib-undefined} is the default is that
-the shared object being specified at link time may not be the same one
-that is available at load time, so the symbols might actually be
+The reason that @option{--allow-shlib-undefined} is the default is that
+the shared library being specified at link time may not be the same as
+the one that is available at load time, so the symbols might actually be
 resolvable at load time.  Plus there are some systems, (eg BeOS) where
-undefined symbols in shared libraries is normal since the kernel
-patches them at load time to select which function is most appropriate
-for the current architecture. eg. to dynamically select an appropriate
-memset function.  Apparently it is also normal for HPPA shared
-libraries to have undefined symbols.
+undefined symbols in shared libraries is normal.  (The kernel patches
+them at load time to select which function is most appropriate 
+for the current architecture.  This is used for example to dynamically
+select an appropriate memset function).  Apparently it is also normal
+for HPPA shared libraries to have undefined symbols.
 
 @kindex --no-undefined-version
 @item --no-undefined-version
@@ -1486,6 +1488,39 @@ sign (``@key{=}''), and @var{org}.
 Same as --section-start, with @code{.bss}, @code{.data} or
 @code{.text} as the @var{sectionname}.
 
+@kindex --unresolved-symbols
+@item --unresolved-symbols=@var{method}
+Determine how to handle unresolved symbols.  There are four possible
+values for @samp{method}:
+
+@table @samp
+@item ignore-all
+Do not report any unresolved symbols.  This is the default when
+creating shared libraries or dynamic executables.
+
+@item report-all
+Report all unresolved symbols.  This is the default when creating
+static binaries.
+
+@item ignore-in-object-files
+Report unresolved symbols that are contained in shared libraries, but
+ignore them if they come from regular object files.
+
+@item ignore-in-shared-libs
+Report unresolved symbols that come from regular object files, but
+ignore them if they come from shared libraries.  This can be useful
+when creating a dynamic binary and it is known that all the shared
+libraries that it should be referencing are included on the linker's
+command line.
+@end table
+
+The behaviour for shared libraries on their own can also be controlled
+by the @option{--[no-]allow-shlib-undefined} option.
+
+Normally the linker will generate an error message for each reported
+unresolved symbol but the option @option{--warn-unresolved-symbols}
+can change this to a warning.
+
 @kindex --verbose
 @cindex verbose
 @item --dll-verbose
@@ -1508,10 +1543,10 @@ is only meaningful on ELF platforms which support shared libraries.
 @cindex combining symbols, warnings on
 @item --warn-common
 Warn when a common symbol is combined with another common symbol or with
-a symbol definition.  Unix linkers allow this somewhat sloppy practice,
+a symbol definition.  Unix linkers allow this somewhat sloppy practise,
 but linkers on some other operating systems do not.  This option allows
 you to find potential problems from combining global symbols.
-Unfortunately, some C libraries use this practice, so you may get some
+Unfortunately, some C libraries use this practise, so you may get some
 warnings about symbols in the libraries as well as in your programs.
 
 There are three kinds of global symbols, illustrated here by C examples:
@@ -1624,6 +1659,17 @@ alignment.  Typically, the alignment will be set by an input section.
 The address will only be changed if it not explicitly specified; that
 is, if the @code{SECTIONS} command does not specify a start address for
 the section (@pxref{SECTIONS}).
+
+@kindex --warn-unresolved-symbols
+@item --warn-unresolved-symbols
+If the linker is going to report an unresolved symbol (see the option
+@option{--unresolved-symbols}) it will normally generate an error.
+This option makes it generate a warning instead.
+
+@kindex --error-unresolved-symbols
+@item --error-unresolved-symbols
+This restores the linker's default behaviour of generating errors when
+it is reporting unresolved symbols.
 
 @kindex --whole-archive
 @cindex including an entire archive
@@ -1871,7 +1917,7 @@ automatically or implicitly exported symbols.
 The linker will create the file @var{file} which will contain an
 import lib corresponding to the DLL the linker is generating. This
 import lib (which should be called @code{*.dll.a} or @code{*.a}
-may be used to link clients against the generated DLL; this behavior
+may be used to link clients against the generated DLL; this behaviour
 makes it possible to skip a separate @code{dlltool} import library
 creation step.
 [This option is specific to the i386 PE targeted port of the linker]
@@ -1897,7 +1943,7 @@ default.
 @item --dll-search-prefix @var{string}
 When linking dynamically to a dll without an import library,
 search for @code{<string><basename>.dll} in preference to 
-@code{lib<basename>.dll}. This behavior allows easy distinction
+@code{lib<basename>.dll}. This behaviour allows easy distinction
 between DLLs built for the various "subplatforms": native, cygwin,
 uwin, pw, etc.  For instance, cygwin DLLs typically use
 @code{--dll-search-prefix=cyg}. 
@@ -1928,7 +1974,7 @@ data type of the exported variable:
 
 One way is to use --enable-runtime-pseudo-reloc switch. This leaves the task
 of adjusting references in your client code for runtime environment, so
-this method works only when runtime environtment supports this feature.
+this method works only when runtime environment supports this feature.
 
 A second solution is to force one of the 'constants' to be a variable -- 
 that is, unknown and un-optimizable at compile time.  For arrays, 
@@ -1968,7 +2014,7 @@ extern_ll -->
 
 A third method of dealing with this difficulty is to abandon
 'auto-import' for the offending symbol and mark it with 
-@code{__declspec(dllimport)}.  However, in practice that
+@code{__declspec(dllimport)}.  However, in practise that
 requires using compile-time #defines to indicate whether you are
 building a DLL, building client code that will link to the DLL, or 
 merely building/linking to a static library.   In making the choice 
@@ -2025,7 +2071,7 @@ functions).
 
 @kindex --disable-auto-import
 @item --disable-auto-import
-Do not attempt to do sophisticalted linking of @code{_symbol} to 
+Do not attempt to do sophisticated linking of @code{_symbol} to 
 @code{__imp__symbol} for DATA imports from DLLs.
 [This option is specific to the i386 PE targeted port of the linker]
 
@@ -2083,7 +2129,7 @@ subsystem version also.
 
 @c man begin ENVIRONMENT
 
-You can change the behavior of @command{ld} with the environment variables
+You can change the behaviour of @command{ld} with the environment variables
 @ifclear SingleFormat
 @code{GNUTARGET},
 @end ifclear

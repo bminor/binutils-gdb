@@ -710,13 +710,14 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; ++rel)
     {
-      enum {
-	NEED_DLT = 1,
-	NEED_PLT = 2,
-	NEED_STUB = 4,
-	NEED_OPD = 8,
-	NEED_DYNREL = 16,
-      };
+      enum
+	{
+	  NEED_DLT = 1,
+	  NEED_PLT = 2,
+	  NEED_STUB = 4,
+	  NEED_OPD = 8,
+	  NEED_DYNREL = 16,
+	};
 
       struct elf_link_hash_entry *h = NULL;
       unsigned long r_symndx = ELF64_R_SYM (rel->r_info);
@@ -746,7 +747,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 	 this may help reduce memory usage and processing time later.  */
       maybe_dynamic = FALSE;
       if (h && ((info->shared
-		    && (!info->symbolic || info->allow_shlib_undefined) )
+		 && (!info->symbolic || info->unresolved_syms_in_shared_libs == RM_IGNORE))
 		|| ! (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
 		|| h->root.type == bfd_link_hash_defweak))
 	maybe_dynamic = TRUE;

@@ -856,24 +856,12 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       else
 	{
-	  /* It seems this can happen with erroneous or unsupported input
-	     (mixing a.out and elf in an archive, for example.)  */
-	  if (sym_hashes == NULL)
-	    return FALSE;
+	  bfd_boolean warned;
+	  bfd_boolean unresolved_reloc;
 
-	  h = sym_hashes [r_symndx - symtab_hdr->sh_info];
+	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx, symtab_hdr, relocation, sec, unresolved_reloc, info, warned);
 
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-	  symname = h->root.root.string;
-
-	  if (h->root.type == bfd_link_hash_defined
-	      || h->root.type == bfd_link_hash_defweak)
-	    {
-	      sec = h->root.u.def.section;
-
+	  if (unresolved_reloc
 	      /* Perhaps we should detect the cases that
 		 sec->output_section is expected to be NULL like i386 and
 		 m68k, but apparently (and according to elfxx-ia64.c) all
@@ -888,46 +876,45 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		 is *not* dynamically linked against.  Thus this will
 		 automatically remind us so we can see if there are other
 		 valid cases we need to revisit.  */
-	      if ((sec->output_section == NULL
-		   && (sec->owner->flags & DYNAMIC) != 0)
+	      && (sec->owner->flags & DYNAMIC) != 0)
+	    relocation = 0;
 
-		  /* Here follow the cases where the relocation value must
-		     be zero (or when further handling is simplified when
-		     zero).  I can't claim to understand the various
-		     conditions and they weren't described in the files
-		     where I copied them from (elf32-m68k.c and
-		     elf32-i386.c), but let's mention examples of where
-		     they happen.  FIXME: Perhaps define and use a
-		     dynamic_symbol_p function like ia64.
+	  else if (h->root.type == bfd_link_hash_defined
+		   || h->root.type == bfd_link_hash_defweak)
+	    {
+	      /* Here follow the cases where the relocation value must
+		 be zero (or when further handling is simplified when
+		 zero).  I can't claim to understand the various
+		 conditions and they weren't described in the files
+		 where I copied them from (elf32-m68k.c and
+		 elf32-i386.c), but let's mention examples of where
+		 they happen.  FIXME: Perhaps define and use a
+		 dynamic_symbol_p function like ia64.
 
-		     - When creating a shared library, we can have an
-		     ordinary relocation for a symbol defined in a shared
-		     library (perhaps the one we create).  We then make
-		     the relocation value zero, as the value seen now will
-		     be added into the relocation addend in this shared
-		     library, but must be handled only at dynamic-link
-		     time.  FIXME: Not sure this example covers the
-		     h->elf_link_hash_flags test, though it's there in
-		     other targets.  */
-		  || (info->shared
-		      && ((! info->symbolic && h->dynindx != -1)
-			  || (h->elf_link_hash_flags
-			      & ELF_LINK_HASH_DEF_REGULAR) == 0)
-		      && (input_section->flags & SEC_ALLOC) != 0
-		      && (r_type == R_CRIS_8
-			  || r_type == R_CRIS_16
-			  || r_type == R_CRIS_32
-			  || r_type == R_CRIS_8_PCREL
-			  || r_type == R_CRIS_16_PCREL
-			  || r_type == R_CRIS_32_PCREL)))
+		 - When creating a shared library, we can have an
+		 ordinary relocation for a symbol defined in a shared
+		 library (perhaps the one we create).  We then make
+		 the relocation value zero, as the value seen now will
+		 be added into the relocation addend in this shared
+		 library, but must be handled only at dynamic-link
+		 time.  FIXME: Not sure this example covers the
+		 h->elf_link_hash_flags test, though it's there in
+		 other targets.  */
+	      if (info->shared
+		  && ((! info->symbolic && h->dynindx != -1)
+		      || (h->elf_link_hash_flags
+			  & ELF_LINK_HASH_DEF_REGULAR) == 0)
+		  && (input_section->flags & SEC_ALLOC) != 0
+		  && (r_type == R_CRIS_8
+		      || r_type == R_CRIS_16
+		      || r_type == R_CRIS_32
+		      || r_type == R_CRIS_8_PCREL
+		      || r_type == R_CRIS_16_PCREL
+		      || r_type == R_CRIS_32_PCREL))
 		relocation = 0;
-	      else if (sec->output_section != NULL)
-		relocation = (h->root.u.def.value
-			      + sec->output_section->vma
-			      + sec->output_offset);
-	      else
+	      else if (unresolved_reloc)
 		{
-		  (*_bfd_error_handler)
+		  _bfd_error_handler
 		    (_("%s: unresolvable relocation %s against symbol `%s' from %s section"),
 		     bfd_archive_filename (input_bfd),
 		     cris_elf_howto_table[r_type].name,
@@ -936,22 +923,6 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}
-	    }
-	  else if (h->root.type == bfd_link_hash_undefweak)
-	    relocation = 0;
-	  else if (info->shared
-		   && !info->no_undefined
-		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-	    relocation = 0;
-	  else
-	    {
-	      if (!(info->callbacks->undefined_symbol
-		    (info, symname, input_bfd,
-		     input_section, rel->r_offset,
-		     (!info->shared || info->no_undefined
-		      || ELF_ST_VISIBILITY (h->other)))))
-		return FALSE;
-	      relocation = 0;
 	    }
 	}
 

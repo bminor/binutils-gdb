@@ -4363,24 +4363,19 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 	return TRUE;
     }
 
-  /* If we are not creating a shared library, and this symbol is
-     referenced by a shared library but is not defined anywhere, then
-     warn that it is undefined.  If we do not do this, the runtime
-     linker will complain that the symbol is undefined when the
-     program is run.  We don't have to worry about symbols that are
-     referenced by regular files, because we will already have issued
-     warnings for them.  */
-  if (! finfo->info->relocatable
-      && (finfo->info->executable
-	  || ! finfo->info->allow_shlib_undefined)
-      && h->root.type == bfd_link_hash_undefined
+  /* If we have an undefined symbol reference here then it must have
+     come from a shared library that is being linked in.  (Undefined
+     references in regular files have already been handled).  If we
+     are reporting errors for this situation then do so now.  */
+  if (h->root.type == bfd_link_hash_undefined
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0
-      && ! elf_link_check_versioned_symbol (finfo->info, h))
+      && ! elf_link_check_versioned_symbol (finfo->info, h)
+      && finfo->info->unresolved_syms_in_shared_libs != RM_IGNORE)
     {
       if (! ((*finfo->info->callbacks->undefined_symbol)
 	     (finfo->info, h->root.root.string, h->root.u.undef.abfd,
-	      NULL, 0, TRUE)))
+	      NULL, 0, finfo->info->unresolved_syms_in_shared_libs == RM_GENERATE_ERROR)))
 	{
 	  eoinfo->failed = TRUE;
 	  return FALSE;
@@ -4390,10 +4385,9 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
   /* We should also warn if a forced local symbol is referenced from
      shared libraries.  */
   if (! finfo->info->relocatable
-      && (! finfo->info->shared || ! finfo->info->allow_shlib_undefined)
+      && (! finfo->info->shared)
       && (h->elf_link_hash_flags
-	  & (ELF_LINK_FORCED_LOCAL | ELF_LINK_HASH_REF_DYNAMIC
-	     | ELF_LINK_DYNAMIC_DEF | ELF_LINK_DYNAMIC_WEAK))
+	  & (ELF_LINK_FORCED_LOCAL | ELF_LINK_HASH_REF_DYNAMIC | ELF_LINK_DYNAMIC_DEF | ELF_LINK_DYNAMIC_WEAK))
 	 == (ELF_LINK_FORCED_LOCAL | ELF_LINK_HASH_REF_DYNAMIC)
       && ! elf_link_check_versioned_symbol (finfo->info, h))
     {

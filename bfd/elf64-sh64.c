@@ -1610,6 +1610,8 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
       else
 	{
+	  /* ??? Could we use the RELOC_FOR_GLOBAL_SYMBOL macro here ?  */
+
 	  /* Section symbols are never (?) placed in the hash table, so
 	     we can just ignore hash relocations when creating a
 	     relocatable object file.  */
@@ -1699,7 +1701,9 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
-	  else if (info->shared && !info->symbolic && !info->no_undefined)
+	  else if (info->shared
+		   && !info->symbolic
+		   && info->unresolved_syms_in_objects == RM_IGNORE)
 	    relocation = 0;
 	  else
 	    {

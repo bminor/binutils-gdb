@@ -4663,6 +4663,8 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	}
       else
 	{
+	  /* FIXME: Ought to make use of the RELOC_FOR_GLOBAL_SYMBOL macro.  */
+
 	  /* Section symbol are never (?) placed in the hash table, so
 	     we can just ignore hash relocations when creating a
 	     relocatable object file.  */
@@ -4765,16 +4767,17 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
 	  else if (! info->executable
-		   && ! info->no_undefined
+		   && info->unresolved_syms_in_objects == RM_IGNORE
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    relocation = 0;
 	  else
 	    {
-	      if (! ((*info->callbacks->undefined_symbol)
-		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset,
-		      (info->executable || info->no_undefined
-		       || ELF_ST_VISIBILITY (h->other)))))
+	      if (! info->callbacks->undefined_symbol
+		  (info, h->root.root.string, input_bfd,
+		   input_section, rel->r_offset,
+		   ((info->shared && info->unresolved_syms_in_shared_libs == RM_GENERATE_ERROR)
+		    || (!info->shared && info->unresolved_syms_in_objects == RM_GENERATE_ERROR)
+		    || ELF_ST_VISIBILITY (h->other))))
 		return FALSE;
 	      relocation = 0;
 	    }

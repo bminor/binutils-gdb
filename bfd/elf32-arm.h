@@ -1963,19 +1963,16 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       else
 	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  bfd_boolean warned;
+	  bfd_boolean unresolved_reloc;
 
-	  while (   h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-	  if (   h->root.type == bfd_link_hash_defined
-	      || h->root.type == bfd_link_hash_defweak)
+	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx,
+				   symtab_hdr, relocation,
+				   sec, unresolved_reloc, info,
+				   warned);
+	  
+	  if (unresolved_reloc || relocation != 0)
 	    {
-	      int relocation_needed = 1;
-
-	      sec = h->root.u.def.section;
-
 	      /* In these cases, we don't need the relocation value.
 	         We check specially because in some obscure cases
 	         sec->output_section will be NULL.  */
@@ -1998,64 +1995,39 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 			      && (h->elf_link_hash_flags
 				  & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 		      )
-	            relocation_needed = 0;
+	            relocation = 0;
 		  break;
 
 	        case R_ARM_GOTPC:
-	          relocation_needed = 0;
+	          relocation = 0;
 		  break;
 
 	        case R_ARM_GOT32:
 	          if ((WILL_CALL_FINISH_DYNAMIC_SYMBOL
-		       (elf_hash_table(info)->dynamic_sections_created,
+		       (elf_hash_table (info)->dynamic_sections_created,
 			info->shared, h))
 		      && (!info->shared
 	                  || (!info->symbolic && h->dynindx != -1)
 	                  || (h->elf_link_hash_flags
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0))
-	            relocation_needed = 0;
+	            relocation = 0;
 		  break;
 
 	        case R_ARM_PLT32:
 	          if (h->plt.offset != (bfd_vma)-1)
-	            relocation_needed = 0;
+	            relocation = 0;
 		  break;
 
 	        default:
-		  if (sec->output_section == NULL)
-		    {
-		      (*_bfd_error_handler)
-			(_("%s: warning: unresolvable relocation %d against symbol `%s' from %s section"),
-			 bfd_archive_filename (input_bfd),
-			 r_type,
-			 h->root.root.string,
-			 bfd_get_section_name (input_bfd, input_section));
-		      relocation_needed = 0;
-		    }
+		  if (unresolved_reloc)
+		    _bfd_error_handler
+		      (_("%s: warning: unresolvable relocation %d against symbol `%s' from %s section"),
+		       bfd_archive_filename (input_bfd),
+		       r_type,
+		       h->root.root.string,
+		       bfd_get_section_name (input_bfd, input_section));
+		  break;
 		}
-
-	      if (relocation_needed)
-		relocation = h->root.u.def.value
-		  + sec->output_section->vma
-		  + sec->output_offset;
-	      else
-		relocation = 0;
-	    }
-	  else if (h->root.type == bfd_link_hash_undefweak)
-	    relocation = 0;
-	  else if (info->shared && !info->symbolic
-		   && !info->no_undefined
-		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-	    relocation = 0;
-	  else
-	    {
-	      if (!((*info->callbacks->undefined_symbol)
-		    (info, h->root.root.string, input_bfd,
-		     input_section, rel->r_offset,
-		     (!info->shared || info->no_undefined
-		      || ELF_ST_VISIBILITY (h->other)))))
-		return FALSE;
-	      relocation = 0;
 	    }
 	}
 

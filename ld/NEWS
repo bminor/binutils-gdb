@@ -1,5 +1,10 @@
 -*- text -*-
 
+* Improved linker's handling of unresolved symbols.  The switch
+  --unresolved-symbols=<method> has been added to tell the linker when it
+  should report them and the switch --warn-unresolved-symbols has been added to
+  make reports be issued as warning messages rather than errors.
+
 * Added support for Xtensa architecture.
 
 * Added --with-sysroot configure switch to specify a target system root, for

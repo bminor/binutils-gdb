@@ -2853,7 +2853,7 @@ elf32_hppa_size_stubs
 		      else if (hash->elf.root.type == bfd_link_hash_undefined)
 			{
 			  if (! (info->shared
-				 && !info->no_undefined
+				 && info->unresolved_syms_in_objects == RM_IGNORE
 				 && (ELF_ST_VISIBILITY (hash->elf.other)
 				     == STV_DEFAULT)
 				 && hash->elf.type != STT_PARISC_MILLI))
@@ -3444,43 +3444,33 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	}
       else
 	{
-	  int indx;
+	  struct elf_link_hash_entry *hh;
+	  bfd_boolean unresolved_reloc;
 
-	  /* It's a global; Find its entry in the link hash.  */
-	  indx = r_symndx - symtab_hdr->sh_info;
-	  h = ((struct elf32_hppa_link_hash_entry *)
-	       elf_sym_hashes (input_bfd)[indx]);
-	  while (h->elf.root.type == bfd_link_hash_indirect
-		 || h->elf.root.type == bfd_link_hash_warning)
-	    h = (struct elf32_hppa_link_hash_entry *) h->elf.root.u.i.link;
+	  RELOC_FOR_GLOBAL_SYMBOL (hh, elf_sym_hashes (input_bfd), r_symndx, symtab_hdr,
+				   relocation, sym_sec, unresolved_reloc, info,
+				   warned_undef);
 
-	  relocation = 0;
-	  if (h->elf.root.type == bfd_link_hash_defined
-	      || h->elf.root.type == bfd_link_hash_defweak)
-	    {
-	      sym_sec = h->elf.root.u.def.section;
-	      /* If sym_sec->output_section is NULL, then it's a
-		 symbol defined in a shared library.  */
-	      if (sym_sec->output_section != NULL)
-		relocation = (h->elf.root.u.def.value
-			      + sym_sec->output_offset
-			      + sym_sec->output_section->vma);
+	  if (relocation == 0
+	      && hh->root.type != bfd_link_hash_defined
+	      && hh->root.type != bfd_link_hash_defweak
+	      && hh->root.type != bfd_link_hash_undefweak)
+	    {  
+	      if (!info->executable
+		  && info->unresolved_syms_in_objects == RM_IGNORE
+		  && ELF_ST_VISIBILITY (hh->other) == STV_DEFAULT
+		  && hh->type == STT_PARISC_MILLI)
+		{
+		  if (! info->callbacks->undefined_symbol
+		      (info, hh->root.root.string, input_bfd,
+		       input_section, rel->r_offset,
+		       ((info->shared && info->unresolved_syms_in_shared_libs == RM_GENERATE_ERROR)
+			|| (!info->shared && info->unresolved_syms_in_objects == RM_GENERATE_ERROR))))
+		    return FALSE;
+		  warned_undef = TRUE;
+		}
 	    }
-	  else if (h->elf.root.type == bfd_link_hash_undefweak)
-	    ;
-	  else if (info->shared
-		   && !info->no_undefined
-		   && ELF_ST_VISIBILITY (h->elf.other) == STV_DEFAULT
-		   && h->elf.type != STT_PARISC_MILLI)
-	    ;
-	  else
-	    {
-	      if (!((*info->callbacks->undefined_symbol)
-		    (info, h->elf.root.root.string, input_bfd,
-		     input_section, rel->r_offset, TRUE)))
-		return FALSE;
-	      warned_undef = TRUE;
-	    }
+	  h = (struct elf32_hppa_link_hash_entry *) hh;
 	}
 
       /* Do any required modifications to the relocation value, and

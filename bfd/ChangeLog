@@ -1,3 +1,45 @@
+2003-08-20  Nick Clifton  <nickc@redhat.com>
+
+	* elf-bfd.h (RELOC_FOR_GLOBAL_SYMBOL): New macro used to
+	replace some duplicated code in most elfxx-xxxx.c files.  This
+	version uses the new fields in bfd_link_info.
+
+        * elf-m10300.c (mn10300_elf_relocate_section): Use new macro.
+        * elf32-arm.h (elf32_arm_relocate_section): Likewise.
+        * elf32-cris.c (cris_elf_relocate_section): Likewise.
+	* elf32-hppa.c (elf32_hppa_relocate_section): Likewise.
+	* elf32-i386.c (elf_i386_relocate_section): Likewise.
+	* elf32-ip2k.c (ip2k_elf_relocate_section): Likewise.
+	* elf32-iq2000.c (iq2000_elf_relocate_section): Likewise.
+	* elf32-m68k.c (elf_m68k_relocate_section): Likewise.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	* elf32-s390.c (elf_s390_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+	* elf32-vax.c (elf_vax_relocate_section): Likewise.
+	* elf32-xtensa.c (elf_xtensa_relocate_section): Likewise.
+	* elf64-alpha.c (elf64_alpha_relocate_section): Likewise.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Likewise.
+	* elf64-s390.c (elf_s390_relocate_section): Likewise.
+	* elf64-sparc.c (sparc64_elf_relocate_section): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Likewise.
+        
+        * elf-hppa.h (elf_hppa_unmark_useless_dynamic_symbols,
+	elf_hppa_remark_useless_dynamic_symbols,
+	elf_hppa_relocate_section): Use the new fields in
+	bfd_link_info structure.
+	* elf32-sh.c (sh_elf_relocate_section): Likewise.
+	* elf64-alpha.c (elf64_alpha_check_relocs): Likewise.
+	* elf64-hppa.c (elf64_hppa_check_relocs): Likewise.
+	* elf64-sh64.c (sh_elf64_relocate_section): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_check_relocs): Likewise.
+	* elfxx-mips.c (mips_elf_calculate_relocation): Likewise.
+
+	* elflink.h (elf_link_output_extsym): Fix test for reporting
+        undefined symbols in shared libraries.  Remove redundant test
+        of shlib_undefined when reporting references to forced local
+        symbols.
+
 2003-08-18  Andreas Schwab  <schwab@suse.de>
 
 	* libpei.h (bfd_pe_executable_p): Also recognize efi-app

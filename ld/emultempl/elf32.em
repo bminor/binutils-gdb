@@ -1602,7 +1602,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
     case OPTION_GROUP:
       link_info.flags_1 |= (bfd_vma) DF_1_GROUP;
       /* Groups must be self-contained.  */
-      link_info.no_undefined = TRUE;
+      link_info.unresolved_syms_in_objects = RM_GENERATE_ERROR;
+      link_info.unresolved_syms_in_shared_libs = RM_GENERATE_ERROR;
       break;
 
     case 'z':
@@ -1631,7 +1632,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	  link_info.flags_1 |= (bfd_vma) DF_1_ORIGIN;
 	}
       else if (strcmp (optarg, "defs") == 0)
-	link_info.no_undefined = TRUE;
+	link_info.unresolved_syms_in_objects = RM_GENERATE_ERROR;
       else if (strcmp (optarg, "muldefs") == 0)
 	link_info.allow_multiple_definition = TRUE;
       else if (strcmp (optarg, "combreloc") == 0)
@@ -1684,7 +1685,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  --enable-new-dtags\tEnable new dynamic tags\n"));
   fprintf (file, _("  --eh-frame-hdr\tCreate .eh_frame_hdr section\n"));
   fprintf (file, _("  -z combreloc\t\tMerge dynamic relocs into one section and sort\n"));
-  fprintf (file, _("  -z defs\t\tDisallows undefined symbols\n"));
+  fprintf (file, _("  -z defs\t\tReport unresolved symbols in object files.\n"));
   fprintf (file, _("  -z execstack\t\tMark executable as requiring executable stack\n"));
   fprintf (file, _("  -z initfirst\t\tMark DSO to be initialized first at runtime\n"));
   fprintf (file, _("  -z interpose\t\tMark object to interpose all DSOs but executable\n"));

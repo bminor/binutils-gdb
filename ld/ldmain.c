@@ -289,8 +289,8 @@ main (int argc, char **argv)
   link_info.static_link = FALSE;
   link_info.traditional_format = FALSE;
   link_info.optimize = FALSE;
-  link_info.no_undefined = FALSE;
-  link_info.allow_shlib_undefined = TRUE;
+  link_info.unresolved_syms_in_objects = RM_NOT_YET_SET;
+  link_info.unresolved_syms_in_shared_libs = RM_NOT_YET_SET;
   link_info.allow_multiple_definition = FALSE;
   link_info.allow_undefined_version = TRUE;
   link_info.keep_memory = TRUE;

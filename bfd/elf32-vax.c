@@ -1487,15 +1487,17 @@ elf_vax_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       else
 	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	  if (h->root.type == bfd_link_hash_defined
+	  bfd_boolean unresolved_reloc;
+	  bfd_boolean warned;
+
+	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx,
+				   symtab_hdr, relocation, sec,
+				   unresolved_reloc, info,
+				   warned);
+	   
+	  if ((h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
-	    {
-	      sec = h->root.u.def.section;
-	      if ((r_type == R_VAX_PLT32
+	      && ((r_type == R_VAX_PLT32
 		   && h->plt.offset != (bfd_vma) -1
 		   && elf_hash_table (info)->dynamic_sections_created)
 		  || (r_type == R_VAX_GOT32
@@ -1524,34 +1526,11 @@ elf_vax_relocate_section (output_bfd, info, input_bfd, input_section,
 			  || r_type == R_VAX_32
 			  || r_type == R_VAX_PC8
 			  || r_type == R_VAX_PC16
-			  || r_type == R_VAX_PC32)))
-		{
-		  /* In these cases, we don't need the relocation
-		     value.  We check specially because in some
-		     obscure cases sec->output_section will be NULL.  */
-		  relocation = 0;
-		}
-	      else
-		relocation = (h->root.u.def.value
-			      + sec->output_section->vma
-			      + sec->output_offset);
-	    }
-	  else if (h->root.type == bfd_link_hash_undefweak)
+			  || r_type == R_VAX_PC32))))
+	    /* In these cases, we don't need the relocation
+	       value.  We check specially because in some
+	       obscure cases sec->output_section will be NULL.  */
 	    relocation = 0;
-	  else if (info->shared
-		   && !info->no_undefined
-		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-	    relocation = 0;
-	  else
-	    {
-	      if (!(info->callbacks->undefined_symbol
-		    (info, h->root.root.string, input_bfd,
-		     input_section, rel->r_offset,
-		     (!info->shared || info->no_undefined
-		      || ELF_ST_VISIBILITY (h->other)))))
-		return FALSE;
-	      relocation = 0;
-	    }
 	}
 
       switch (r_type)
