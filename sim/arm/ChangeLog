@@ -1,5 +1,9 @@
 2000-07-14  Fernando Nasser <fnasser@cygnus.com>
 
+	* wrapper.c (sim_create_inferior): Fix typo in the previous patch.
+
+2000-07-14  Fernando Nasser <fnasser@cygnus.com>
+
 	* wrapper.c (sim_create_inferior): Reset mode to ARM when creating a
 	new inferior.
 

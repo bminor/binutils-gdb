@@ -228,7 +228,7 @@ sim_create_inferior (sd, abfd, argv, env)
     /* Reset mode to ARM.  A gdb user may rerun a program that had entered
        THUMB mode from the start and cause the ARM-mode startup code to be
        executed in THUMB mode. */
-    ARMul_SetCPSR (state, THUMB2MODE);
+    ARMul_SetCPSR (state, USER32MODE);
     break;
 
   case 3: /* armv3 */
