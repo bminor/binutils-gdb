@@ -1,5 +1,11 @@
 2003-10-30  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-linux-tdep.c (i386_linux_sc_reg_offset): Don't explicitly
+	specify size of array.
+	(i386_linux_init_abi): Remove initialization of
+	TDEP->num_xmm_regs.  Use I386_LINUX_NUM_REGS for number of
+	registers.  Use ARRAY_SIZE to initialize TDEP->sc_num_regs.
+
 	* config/i386/fbsd64.mt (TDEPFILES): Add corelow.o.
 	* config/i386/fbsd64.mh (NATDEPFILES): Remove corelow.o and
 	core-regset.o.

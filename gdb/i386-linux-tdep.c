@@ -440,7 +440,7 @@ i386_linux_svr4_fetch_link_map_offsets (void)
 
 
 /* From <asm/sigcontext.h>.  */
-static int i386_linux_sc_reg_offset[I386_NUM_GREGS] =
+static int i386_linux_sc_reg_offset[] =
 {
   11 * 4,			/* %eax */
   10 * 4,			/* %ecx */
@@ -468,15 +468,11 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* GNU/Linux uses ELF.  */
   i386_elf_init_abi (info, gdbarch);
 
-  /* We support the SSE registers on GNU/Linux.  */
-  tdep->num_xmm_regs = I386_NUM_XREGS - 1;
-  /* set_gdbarch_num_regs (gdbarch, I386_SSE_NUM_REGS); */
-
   /* Since we have the extra "orig_eax" register on GNU/Linux, we have
      to adjust a few things.  */
 
   set_gdbarch_write_pc (gdbarch, i386_linux_write_pc);
-  set_gdbarch_num_regs (gdbarch, I386_SSE_NUM_REGS + 1);
+  set_gdbarch_num_regs (gdbarch, I386_LINUX_NUM_REGS);
   set_gdbarch_register_name (gdbarch, i386_linux_register_name);
   set_gdbarch_register_reggroup_p (gdbarch, i386_linux_register_reggroup_p);
 
@@ -484,7 +480,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->sigcontext_addr = i386_linux_sigcontext_addr;
   tdep->sc_reg_offset = i386_linux_sc_reg_offset;
-  tdep->sc_num_regs = I386_NUM_GREGS;
+  tdep->sc_num_regs = ARRAY_SIZE (i386_linux_sc_reg_offset);
 
   /* When the i386 Linux kernel calls a signal handler, the return
      address points to a bit of code on the stack.  This function is
