@@ -1,3 +1,11 @@
+2005-03-01  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/arm.exp (undefined): Run a COFF variant of this test for
+	COFF based ports.
+	* gas/arm/undefined_coff.s: New file: Variant of undefined.s but
+	with a COFF formated local label name.
+	* gas/arm/undefined_coff.l: New file.  Variant of undefined.l.
+
 2005-03-01  Stig Petter Olsroed  <stigpo@users.sourceforge.net>
 	    Nick Clifton  <nickc@redhat.com>
 
