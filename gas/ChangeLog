@@ -1,3 +1,12 @@
+Fri Apr  3 11:58:19 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.h: Reorder operand flags and opcode modifier
+	flags for clarity.  Remove unused definitions: Unknown,
+	ImmUnknown, DispUnknown, NoModrm.
+	* config/tc-i386.c (type_names): Add missing Debug type.
+	(md_assemble): Better duplicate prefix checking.  Quicker string
+	instruction check via new opcode_modifier flag.
+
 Fri Apr  3 11:44:34 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* doc/as.texinfo (Invoking): Clarify -Wa example.
