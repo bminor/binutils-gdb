@@ -1,5 +1,8 @@
 Sun Sep 26 23:45:29 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
+	* expr.c (expr) [DIFF_EXPR_OK]: Permit subtraction of two symbols
+	in different defined segments.
+
 	* write.c (relax_segment): Localize "aim" variable.  If
 	DIFF_EXPR_OK, don't impose checks on symbol segment types.  
 	(fixup_segment) [DIFF_EXPR_OK]: If sub_symbolP is in the current
