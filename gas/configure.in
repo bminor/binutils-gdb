@@ -51,6 +51,7 @@ case "${host}" in
   i[34]86-*-isc*)		gas_host=sysv		;;
   i386-sun-sunos*)		gas_host=sun386		;;
   i386-*-mach*)			gas_host=mach3		;;
+  i386-*-go32)			target_makefile_frag=config/go32.mh	;;
 
   m68k-sun-sunos*)		gas_host=sun3		;;
   m68*-*-hpux)			gas_host=hpux		;;
@@ -137,8 +138,8 @@ dev=no
 
 # assign object format
 case ${generic_target} in
-  a29k-amd-udi)		obj_format=coffbfd gas_target=ebmon29k ;;
-  a29k-amd-ebmon)	obj_format=coffbfd gas_target=ebmon29k ;;
+  a29k-amd-udi)		obj_format=coff gas_target=ebmon29k ;;
+  a29k-amd-ebmon)	obj_format=coff gas_target=ebmon29k ;;
 
   alpha-*-netware*)	obj_format=ecoff ;;
   alpha-*-osf*)		obj_format=ecoff ;;
@@ -149,54 +150,48 @@ case ${generic_target} in
   hppa-*-bsd*)		obj_format=som emulation=hppa ;;
   hppa-*-hiux*)		obj_format=som emulation=hppa ;;
 
-  h8300-*-coff)		obj_format=coffbfd ;;
+  h8300-*-coff)		obj_format=coff ;;
 
-  i386-ibm-aix*)	obj_format=coffbfd gas_target=i386coff
+  i386-ibm-aix*)	obj_format=coff gas_target=i386coff
 			 emulation=i386aix ;;
   i386-*-bsd*)		obj_format=aout emulation=386bsd ;;
-  i386-*-netbsd0.8)	obj_format=aout emulation=netbsd ;;
+  i386-*-netbsd0.8)	obj_format=aout emulation=386bsd ;;
   i386-*-netbsd*)	obj_format=aout emulation=netbsd ;;
   i386-*-linux*elf*)	obj_format=elf  emulation=linux ;;
-  i386-*-linux*coff*)	obj_format=coffbfd emulation=linux
+  i386-*-linux*coff*)	obj_format=coff emulation=linux
 			 gas_target=i386coff ;;
   i386-*-linux*)	obj_format=aout emulation=linux ;;
-  i386-*-lynxos*)	obj_format=coffbfd gas_target=i386coff
+  i386-*-lynxos*)	obj_format=coff gas_target=i386coff
 			 emulation=lynx ;;
   i386-*-sysv4* | i386-*-solaris* | i386-*-elf)
 			obj_format=elf ;;
   i386-*-coff | i386-*-sysv* | i386-*-sco* | i386-*-isc*)
-			obj_format=coffbfd gas_target=i386coff ;;
+			obj_format=coff gas_target=i386coff ;;
   i386-*-vsta)		obj_format=aout ;;
-  i386-*-go32)		obj_format=coffbfd gas_target=i386coff ;;
+  i386-*-go32)		obj_format=coff gas_target=i386coff ;;
   i386-*-mach* | i386-*-gnu*)
 			obj_format=aout emulation=mach bfd_gas=yes ;;
 
   i960-*-bout)		obj_format=bout ;;
-  i960-*-coff)		obj_format=coffbfd emulation=ic960 gas_target=ic960coff ;;
+  i960-*-coff)		obj_format=coff emulation=ic960 gas_target=ic960coff ;;
   i960-*-nindy*)	obj_format=bout ;;
   i960-*-vxworks4*)	obj_format=bout ;;
   i960-*-vxworks5.0)	obj_format=bout ;;
-  i960-*-vxworks5.*)	obj_format=coffbfd emulation=ic960 gas_target=ic960coff ;;
+  i960-*-vxworks5.*)	obj_format=coff emulation=ic960 gas_target=ic960coff ;;
   i960-*-vxworks*)	obj_format=bout ;;
 
   m68k-wrs-vxworks | m68k-ericsson-ose | m68k-*-sunos*)
 			obj_format=aout emulation=sun3 ;;
-  m68k-motorola-sysv)	obj_format=coffbfd gas_target=m68kcoff emulation=delta ;;
-# The dpx2-specific support has apparently not been used in a while, or
-# it's not currently required.  Either way, I've heard nothing about it,
-# and the configure.in code that would've selected te-dpx2.h wasn't being
-# reached because of the m68k-*-sysv* line below.  This was (I think) the
-# last target using obj-coff.c without BFD_ASSEMBLER.  I want to blast that
-# code.  So if you really need te-dpx2.h, start with this for now, and try
-# to make it work:
-# m68k-bull-sysv3*)	obj_format=coffbfd gas_target=m68kcoff emulation=dpx2 ;;
+  m68k-motorola-sysv)	obj_format=coff gas_target=m68kcoff emulation=delta ;;
+  m68k-bull-sysv3*)	obj_format=coff gas_target=m68kcoff emulation=dpx2 ;;
+  m68k-apollo-*)	obj_format=coff gas_target=apollo emulation=apollo ;;
   m68k-*-coff | m68k-*-sysv*)
-			obj_format=coffbfd gas_target=m68kcoff ;;
+			obj_format=coff gas_target=m68kcoff ;;
   m68k-*-hpux)		obj_format=hp300 emulation=hp300 ;;
-  m68k-*-lynxos*)	obj_format=coffbfd gas_target=m68kcoff
+  m68k-*-lynxos*)	obj_format=coff gas_target=m68kcoff
 			 emulation=lynx ;;
 
-  m88k-*-coff*)		obj_format=coffbfd gas_target=m88kcoff ;;
+  m88k-*-coff*)		obj_format=coff gas_target=m88kcoff ;;
 
   # don't change emulation like *-*-bsd does
   mips-*-bsd*)		bfd_gas=yes obj_format=aout gas_target=mips-lit ;;
@@ -224,7 +219,7 @@ case ${generic_target} in
   ppc-*-aix*)		obj_format=coff bfd_gas=yes ;;
   ppc-*-sysv4*)		obj_format=elf bfd_gas=yes ;;
 
-  sh-*-coff)		obj_format=coffbfd ;;
+  sh-*-coff)		obj_format=coff ;;
 
   sparc*-*-sunos4*)	obj_format=aout emulation=sun3 bfd_gas=yes ;;
   sparc*-*-aout | sparc*-*-vxworks)
@@ -241,7 +236,7 @@ case ${generic_target} in
   vax-*-vms)		obj_format=vms ;;
 
   z8k-*-coff | z8k-*-sim)
-			obj_format=coffbfd ;;
+			obj_format=coff ;;
 
   *-*-aout | *-*-scout)
 			obj_format=aout ;;
@@ -250,8 +245,8 @@ case ${generic_target} in
   *-*-bsd*)
 			obj_format=aout emulation=sun3 ;;
   *-*-generic)		obj_format=generic ;;
-  *-*-xray | *-*-hms)	obj_format=coffbfd ;;
-  *-*-sim)		obj_format=coffbfd ;;
+  *-*-xray | *-*-hms)	obj_format=coff ;;
+  *-*-sim)		obj_format=coff ;;
   *-*-elf | *-*-sysv4* | *-*-solaris*)
 	echo '*** Warning: GAS support for ELF format is incomplete' 1>&2
 			obj_format=elf dev=yes ;;
@@ -289,8 +284,8 @@ fi
 target_makefile_frag=config/${gas_target}.mt
 
 case ${bfd_gas}-${obj_format} in
-  yes-coffbfd)	obj_format=coff ;;
-  no-coffbfd)	need_bfd=yes extra_def="MANY_SEGMENTS" ;;
+  yes-coff)	need_bfd=yes ;;
+  no-coff)	need_bfd=yes extra_def="MANY_SEGMENTS" ;;
   *-elf)	bfd_gas=yes ;;
   *-ecoff)	bfd_gas=yes ;;
   *-som)	bfd_gas=yes ;;
