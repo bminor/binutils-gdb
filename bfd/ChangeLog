@@ -1,5 +1,11 @@
 Fri Mar  7 10:37:30 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* xcofflink.c (_bfd_xcoff_bfd_final_link): Always allocate space
+	for at least 6 output symbols.
+	(xcoff_write_global_symbol): When emitting TOC entry relocs, also
+	emit a TC csect to represent the space they take up.  For an XO
+	symbol, just emit a reference, not a csect.
+
 	* Makefile.in ($(SHLINK)): Just use ln -s, not ln -sf, since
 	Solaris doesn't like the combined options, and the -f is
 	unnecessary.

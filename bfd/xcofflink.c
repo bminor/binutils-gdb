@@ -1,5 +1,5 @@
 /* POWER/PowerPC XCOFF linker support.
-   Copyright 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>, Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -269,7 +269,9 @@ struct xcoff_link_hash_entry
   /* The .loader symbol table entry, if there is one.  */
   struct internal_ldsym *ldsym;
 
-  /* The .loader symbol table index.  */
+  /* If XCOFF_BUILT_LDSYM is set, this is the .loader symbol table
+     index.  If XCOFF_BUILD_LDSYM is clear, and XCOFF_IMPORT is set,
+     this is the l_ifile value.  */
   long ldindx;
 
   /* Some linker flags.  */
@@ -1408,6 +1410,8 @@ xcoff_link_add_symbols (abfd, info)
       bfd_byte *linenos;
     } *reloc_info = NULL;
 
+  keep_syms = obj_coff_keep_syms (abfd);
+
   if ((abfd->flags & DYNAMIC) != 0
       && ! info->static_link)
     {
@@ -1571,7 +1575,6 @@ xcoff_link_add_symbols (abfd, info)
     }
 
   /* Don't let the linker relocation routines discard the symbols.  */
-  keep_syms = obj_coff_keep_syms (abfd);
   obj_coff_keep_syms (abfd) = true;
 
   csect = NULL;
@@ -2560,6 +2563,61 @@ xcoff_link_add_dynamic_symbols (abfd, info)
 	  h->root.u.def.section = bfd_abs_section_ptr;
 	  h->root.u.def.value = ldsym.l_value;
 	}
+
+      /* If this symbol defines a function descriptor, then it
+	 implicitly defines the function code as well.  */
+      if (h->smclas == XMC_DS
+	  || (h->smclas == XMC_XO && name[0] != '.'))
+	h->flags |= XCOFF_DESCRIPTOR;
+      if ((h->flags & XCOFF_DESCRIPTOR) != 0)
+	{
+	  struct xcoff_link_hash_entry *hds;
+
+	  hds = h->descriptor;
+	  if (hds == NULL)
+	    {
+	      char *dsnm;
+
+	      dsnm = bfd_malloc (strlen (name) + 2);
+	      if (dsnm == NULL)
+		return false;
+	      dsnm[0] = '.';
+	      strcpy (dsnm + 1, name);
+	      hds = xcoff_link_hash_lookup (xcoff_hash_table (info), dsnm,
+					    true, true, true);
+	      free (dsnm);
+	      if (hds == NULL)
+		return false;
+
+	      if (hds->root.type == bfd_link_hash_new)
+		{
+		  hds->root.type = bfd_link_hash_undefined;
+		  hds->root.u.undef.abfd = abfd;
+		  /* We do not want to add this to the undefined
+                     symbol list.  */
+		}
+
+	      hds->descriptor = h;
+	      h->descriptor = hds;
+	    }
+
+	  hds->flags |= XCOFF_DEF_DYNAMIC;
+	  if (hds->smclas == XMC_UA)
+	    hds->smclas = XMC_PR;
+
+	  /* An absolute symbol appears to actually define code, not a
+	     function descriptor.  This is how some math functions are
+	     implemented on AIX 4.1.  */
+	  if (h->smclas == XMC_XO
+	      && (hds->root.type == bfd_link_hash_undefined
+		  || hds->root.type == bfd_link_hash_undefweak))
+	    {
+	      hds->smclas = XMC_XO;
+	      hds->root.type = bfd_link_hash_defined;
+	      hds->root.u.def.section = bfd_abs_section_ptr;
+	      hds->root.u.def.value = ldsym.l_value;
+	    }
+	}
     }
 
   if (buf != NULL && ! coff_section_data (abfd, lsec)->keep_contents)
@@ -2740,7 +2798,6 @@ xcoff_mark (info, sec)
 			  && h->root.root.string[0] == '.'
 			  && h->descriptor != NULL
 			  && ((h->descriptor->flags & XCOFF_DEF_DYNAMIC) != 0
-			      || info->shared
 			      || ((h->descriptor->flags & XCOFF_IMPORT) != 0
 				  && (h->descriptor->flags
 				      & XCOFF_DEF_REGULAR) == 0))))
@@ -2890,16 +2947,12 @@ bfd_xcoff_import_symbol (output_bfd, info, harg, val, imppath, impfile,
       h->root.u.def.value = val;
     }
 
-  if (h->ldsym == NULL)
-    {
-      h->ldsym = ((struct internal_ldsym *)
-		  bfd_zalloc (output_bfd, sizeof (struct internal_ldsym)));
-      if (h->ldsym == NULL)
-	return false;
-    }
-
+  /* We overload the ldindx field to hold the l_ifile value for this
+     symbol.  */
+  BFD_ASSERT (h->ldsym == NULL);
+  BFD_ASSERT ((h->flags & XCOFF_BUILT_LDSYM) == 0);
   if (imppath == NULL)
-    h->ldsym->l_ifile = (bfd_size_type) -1;
+    h->ldindx = -1;
   else
     {
       unsigned int c;
@@ -2932,7 +2985,7 @@ bfd_xcoff_import_symbol (output_bfd, info, harg, val, imppath, impfile,
 	  *pp = n;
 	}
 
-      h->ldsym->l_ifile = c;
+      h->ldindx = c;
     }
 
   return true;
@@ -3466,7 +3519,47 @@ xcoff_build_ldsyms (h, p)
   if (ldinfo->export_defineds
       && (h->flags & XCOFF_DEF_REGULAR) != 0
       && h->root.root.string[0] != '.')
-    h->flags |= XCOFF_EXPORT;
+    {
+      boolean export;
+
+      /* We don't export a symbol which is being defined by an object
+	 included from an archive which contains a shared object.  The
+	 rationale is that if an archive contains both an unshared and
+	 a shared object, then there must be some reason that the
+	 unshared object is unshared, and we don't want to start
+	 providing a shared version of it.  In particular, this solves
+	 a bug involving the _savefNN set of functions.  gcc will call
+	 those functions without providing a slot to restore the TOC,
+	 so it is essential that these functions be linked in directly
+	 and not from a shared object, which means that a shared
+	 object which also happens to link them in must not export
+	 them.  This is confusing, but I haven't been able to think of
+	 a different approach.  Note that the symbols can, of course,
+	 be exported explicitly.  */
+      export = true;
+      if ((h->root.type == bfd_link_hash_defined
+	   || h->root.type == bfd_link_hash_defweak)
+	  && h->root.u.def.section->owner != NULL
+	  && h->root.u.def.section->owner->my_archive != NULL)
+	{
+	  bfd *arbfd, *member;
+
+	  arbfd = h->root.u.def.section->owner->my_archive;
+	  member = bfd_openr_next_archived_file (arbfd, (bfd *) NULL);
+	  while (member != NULL)
+	    {
+	      if ((member->flags & DYNAMIC) != 0)
+		{
+		  export = false;
+		  break;
+		}
+	      member = bfd_openr_next_archived_file (arbfd, member);
+	    }
+	}
+
+      if (export)
+	h->flags |= XCOFF_EXPORT;
+    }
 
   /* We don't want to garbage collect symbols which are not defined in
      XCOFF files.  This is a convenient place to mark them.  */
@@ -3479,17 +3572,16 @@ xcoff_build_ldsyms (h, p)
 	      != ldinfo->info->hash->creator)))
     h->flags |= XCOFF_MARK;
 
-  /* If this symbol is called and defined in a dynamic object, or not
-     defined at all when building a shared object, or imported, then
-     we need to set up global linkage code for it.  (Unless we did
-     garbage collection and we didn't need this symbol.)  */
+  /* If this symbol is called and defined in a dynamic object, or it
+     is imported, then we need to set up global linkage code for it.
+     (Unless we did garbage collection and we didn't need this
+     symbol.)  */
   if ((h->flags & XCOFF_CALLED) != 0
       && (h->root.type == bfd_link_hash_undefined
 	  || h->root.type == bfd_link_hash_undefweak)
       && h->root.root.string[0] == '.'
       && h->descriptor != NULL
       && ((h->descriptor->flags & XCOFF_DEF_DYNAMIC) != 0
-	  || ldinfo->info->shared
 	  || ((h->descriptor->flags & XCOFF_IMPORT) != 0
 	      && (h->descriptor->flags & XCOFF_DEF_REGULAR) == 0))
       && (! xcoff_hash_table (ldinfo->info)->gc
@@ -3619,19 +3711,18 @@ xcoff_build_ldsyms (h, p)
 
   /* We need to add this symbol to the .loader symbols.  */
 
-  /* h->ldsym will already have been allocated for an explicitly
-     imported symbol.  */
+  BFD_ASSERT (h->ldsym == NULL);
+  h->ldsym = ((struct internal_ldsym *)
+	      bfd_zalloc (ldinfo->output_bfd,
+			  sizeof (struct internal_ldsym)));
   if (h->ldsym == NULL)
     {
-      h->ldsym = ((struct internal_ldsym *)
-		  bfd_zalloc (ldinfo->output_bfd,
-			      sizeof (struct internal_ldsym)));
-      if (h->ldsym == NULL)
-	{
-	  ldinfo->failed = true;
-	  return false;
-	}
+      ldinfo->failed = true;
+      return false;
     }
+
+  if ((h->flags & XCOFF_IMPORT) != 0)
+    h->ldsym->l_ifile = h->ldindx;
 
   /* The first 3 symbol table indices are reserved to indicate the
      sections.  */
@@ -3807,7 +3898,6 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 	  saw_contents = true;
 	  for (op = &abfd->sections; *op != NULL; op = &(*op)->next)
 	    {
-	      (*op)->target_index = indx;
 	      if (strcmp ((*op)->name, ".pad") == 0)
 		saw_contents = false;
 	      else if (((*op)->flags & SEC_HAS_CONTENTS) != 0
@@ -3967,9 +4057,9 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 
   /* Figure out the largest number of symbols in an input BFD.  Take
      the opportunity to clear the output_has_begun fields of all the
-     input BFD's.  We want at least 4 symbols, since that is the
+     input BFD's.  We want at least 6 symbols, since that is the
      number which xcoff_write_global_symbol may need.  */
-  max_sym_count = 4;
+  max_sym_count = 6;
   for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
     {
       size_t sz;
@@ -4617,8 +4707,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
 		  && (isym.n_sclass != C_EXT
 		      && (isym.n_sclass != C_HIDEXT
 			  || smtyp != XTY_SD))
-		  && strncmp (name, finfo->info->lprefix,
-			      finfo->info->lprefix_len) == 0))
+		  && bfd_is_local_label_name (input_bfd, name)))
 	    skip = true;
 	}
 
@@ -5455,6 +5544,7 @@ xcoff_write_global_symbol (h, p)
   union internal_auxent aux;
 
   output_bfd = finfo->output_bfd;
+  outsym = finfo->outsyms;
 
   /* If this symbol was garbage collected, just skip it.  */
   if (xcoff_hash_table (finfo->info)->gc
@@ -5563,6 +5653,8 @@ xcoff_write_global_symbol (h, p)
       int oindx;
       struct internal_reloc *irel;
       struct internal_ldrel ldrel;
+      struct internal_syment irsym;
+      union internal_auxent iraux;
 
       tocsec = h->toc_section;
       osec = tocsec->output_section;
@@ -5590,6 +5682,63 @@ xcoff_write_global_symbol (h, p)
       ldrel.l_rsecnm = oindx;
       xcoff_swap_ldrel_out (output_bfd, &ldrel, finfo->ldrel);
       ++finfo->ldrel;
+
+      /* We need to emit a symbol to define a csect which holds the
+         reloc.  */
+      if (strlen (h->root.root.string) <= SYMNMLEN)
+	strncpy (irsym._n._n_name, h->root.root.string, SYMNMLEN);
+      else
+	{
+	  boolean hash;
+	  bfd_size_type indx;
+
+	  hash = true;
+	  if ((output_bfd->flags & BFD_TRADITIONAL_FORMAT) != 0)
+	    hash = false;
+	  indx = _bfd_stringtab_add (finfo->strtab, h->root.root.string, hash,
+				     false);
+	  if (indx == (bfd_size_type) -1)
+	    return false;
+	  irsym._n._n_n._n_zeroes = 0;
+	  irsym._n._n_n._n_offset = STRING_SIZE_SIZE + indx;
+	}
+
+      irsym.n_value = irel->r_vaddr;
+      irsym.n_scnum = osec->target_index;
+      irsym.n_sclass = C_HIDEXT;
+      irsym.n_type = T_NULL;
+      irsym.n_numaux = 1;
+
+      bfd_coff_swap_sym_out (output_bfd, (PTR) &irsym, (PTR) outsym);
+      outsym += bfd_coff_symesz (output_bfd);
+
+      memset (&iraux, 0, sizeof iraux);
+      iraux.x_csect.x_smtyp = XTY_SD;
+      iraux.x_csect.x_scnlen.l = 4;
+      iraux.x_csect.x_smclas = XMC_TC;
+
+      bfd_coff_swap_aux_out (output_bfd, (PTR) &iraux, T_NULL, C_HIDEXT, 0, 1,
+			     (PTR) outsym);
+      outsym += bfd_coff_auxesz (output_bfd);
+
+      if (h->indx >= 0)
+	{
+	  /* We aren't going to write out the symbols below, so we
+             need to write them out now.  */
+	  if (bfd_seek (output_bfd,
+			(obj_sym_filepos (output_bfd)
+			 + (obj_raw_syment_count (output_bfd)
+			    * bfd_coff_symesz (output_bfd))),
+			SEEK_SET) != 0
+	      || (bfd_write (finfo->outsyms, outsym - finfo->outsyms, 1,
+			     output_bfd)
+		  != (bfd_size_type) (outsym - finfo->outsyms)))
+	    return false;
+	  obj_raw_syment_count (output_bfd) +=
+	    (outsym - finfo->outsyms) / bfd_coff_symesz (output_bfd);
+
+	  outsym = finfo->outsyms;
+	}
     }
 
   /* If this symbol is a specially defined function descriptor, write
@@ -5697,7 +5846,10 @@ xcoff_write_global_symbol (h, p)
     }
 
   if (h->indx >= 0)
-    return true;
+    {
+      BFD_ASSERT (outsym == finfo->outsyms);
+      return true;
+    }
 
   if (h->indx != -2
       && (finfo->info->strip == strip_all
@@ -5705,13 +5857,17 @@ xcoff_write_global_symbol (h, p)
 	      && (bfd_hash_lookup (finfo->info->keep_hash,
 				   h->root.root.string, false, false)
 		  == NULL))))
-    return true;
+    {
+      BFD_ASSERT (outsym == finfo->outsyms);
+      return true;
+    }
 
   if (h->indx != -2
       && (h->flags & (XCOFF_REF_REGULAR | XCOFF_DEF_REGULAR)) == 0)
-    return true;
-
-  outsym = finfo->outsyms;
+    {
+      BFD_ASSERT (outsym == finfo->outsyms);
+      return true;
+    }
 
   memset (&aux, 0, sizeof aux);
 
@@ -5739,6 +5895,16 @@ xcoff_write_global_symbol (h, p)
       || h->root.type == bfd_link_hash_undefweak)
     {
       isym.n_value = 0;
+      isym.n_scnum = N_UNDEF;
+      isym.n_sclass = C_EXT;
+      aux.x_csect.x_smtyp = XTY_ER;
+    }
+  else if ((h->root.type == bfd_link_hash_defined
+	    || h->root.type == bfd_link_hash_defweak)
+	   && h->smclas == XMC_XO)
+    {
+      BFD_ASSERT (bfd_is_abs_section (h->root.u.def.section));
+      isym.n_value = h->root.u.def.value;
       isym.n_scnum = N_UNDEF;
       isym.n_sclass = C_EXT;
       aux.x_csect.x_smtyp = XTY_ER;
@@ -5793,8 +5959,9 @@ xcoff_write_global_symbol (h, p)
 			 (PTR) outsym);
   outsym += bfd_coff_auxesz (output_bfd);
 
-  if (h->root.type == bfd_link_hash_defined
-      || h->root.type == bfd_link_hash_defweak)
+  if ((h->root.type == bfd_link_hash_defined
+       || h->root.type == bfd_link_hash_defweak)
+      && h->smclas != XMC_XO)
     {
       /* We just output an SD symbol.  Now output an LD symbol.  */
 
