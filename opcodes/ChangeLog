@@ -1,3 +1,9 @@
+start-sanitize-sky
+Tue Mar 17 10:53:58 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp-dis.c (print_dma): Change length from 16 to 8.
+
+end-sanitize-sky
 Sat Mar 14 23:47:14 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* m32r-opc.h: Regenerate.
