@@ -40,13 +40,13 @@
    flag_m68k_mri, because the two flags will be affected by the .mri
    pseudo-op at different times.  */
 static int scrub_m68k_mri;
-#else
-#define scrub_m68k_mri 0
-#endif
 
 /* The pseudo-op which switches in and out of MRI mode.  See the
    comment in do_scrub_chars.  */
 static const char mri_pseudo[] = ".mri 0";
+#else
+#define scrub_m68k_mri 0
+#endif
 
 #if defined TC_ARM && defined OBJ_ELF
 /* The pseudo-op for which we need to special-case `@' characters.

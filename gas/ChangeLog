@@ -1,5 +1,7 @@
 2002-05-02  Alan Modra  <amodra@bigpond.net.au>
 
+	* app.c (mri_pseudo): Only declare for TC_M68K.
+
 	* config/tc-ppc.c (mapping): Map sectoff to BFD_RELOC_16_BASEREL.
 	(ppc_elf_validate_fix): Replace BFD_RELOC_32_BASEREL with
 	BFD_RELOC_16_BASEREL.
