@@ -891,11 +891,20 @@ typedef struct sec
 	   table.  */
 #define SEC_SORT_ENTRIES 0x80000
 
-	 /* A mark flag used by some of the linker backends.  This
-	   should not be set by application code.  */
-#define SEC_LINKER_MARK 0x100000
-
 	 /*  End of section flags.  */
+
+	 /* Some internal packed boolean fields.  */
+
+	 /* See the vma field.  */
+	unsigned int user_set_vma : 1;
+
+	 /* Whether relocations have been processed.  */
+	unsigned int reloc_done : 1;
+
+	 /* A mark flag used by some of the linker backends.  */
+	unsigned int linker_mark : 1;
+
+	 /* End of internal packed boolean fields.  */
 
         /*  The virtual memory address of the section - where it will be
            at run time.  The symbols are relocated against this.  The
@@ -905,7 +914,6 @@ typedef struct sec
 	    target and various flags).  */
 
    bfd_vma vma;
-   boolean user_set_vma;
 
         /*  The load address of the section - where it would be in a
            rom image; really only used for writing section header
@@ -1006,7 +1014,6 @@ typedef struct sec
 
    bfd *owner;
 
-   boolean reloc_done;
 	  /* A symbol which points at this section only */
    struct symbol_cache_entry *symbol;
    struct symbol_cache_entry **symbol_ptr_ptr;

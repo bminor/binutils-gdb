@@ -3690,7 +3690,7 @@ NAME(aout,final_link) (abfd, info, callback)
       for (p = o->link_order_head; p != NULL; p = p->next)
 	{
 	  if (p->type == bfd_indirect_link_order)
-	    p->u.indirect.section->flags |= SEC_LINKER_MARK;
+	    p->u.indirect.section->linker_mark = true;
 	}
     }
 
@@ -3849,10 +3849,10 @@ aout_link_input_bfd (finfo, input_bfd)
     return false;
 
   /* Relocate and write out the sections.  These functions use the
-     symbol map created by aout_link_write_symbols.  SEC_LINKER_MARK
-     will be set if these sections are to be included in the link,
-     which will normally be the case.  */
-  if ((obj_textsec (input_bfd)->flags & SEC_LINKER_MARK) != 0)
+     symbol map created by aout_link_write_symbols.  The linker_mark
+     field will be set if these sections are to be included in the
+     link, which will normally be the case.  */
+  if (obj_textsec (input_bfd)->linker_mark)
     {
       if (! aout_link_input_section (finfo, input_bfd,
 				     obj_textsec (input_bfd),
@@ -3860,7 +3860,7 @@ aout_link_input_bfd (finfo, input_bfd)
 				     exec_hdr (input_bfd)->a_trsize))
 	return false;
     }
-  if ((obj_datasec (input_bfd)->flags & SEC_LINKER_MARK) != 0)
+  if (obj_datasec (input_bfd)->linker_mark)
     {
       if (! aout_link_input_section (finfo, input_bfd,
 				     obj_datasec (input_bfd),

@@ -269,11 +269,20 @@ CODE_FRAGMENT
 .	   table.  *}
 .#define SEC_SORT_ENTRIES 0x80000
 .
-.	{* A mark flag used by some of the linker backends.  This
-.	   should not be set by application code.  *}
-.#define SEC_LINKER_MARK 0x100000
-.
 .	{*  End of section flags.  *}
+.
+.	{* Some internal packed boolean fields.  *}
+.
+.	{* See the vma field.  *}
+.	unsigned int user_set_vma : 1;
+.
+.	{* Whether relocations have been processed.  *}
+.	unsigned int reloc_done : 1;
+.
+.	{* A mark flag used by some of the linker backends.  *}
+.	unsigned int linker_mark : 1;
+.
+.	{* End of internal packed boolean fields.  *}
 .
 .       {*  The virtual memory address of the section - where it will be
 .           at run time.  The symbols are relocated against this.  The
@@ -283,7 +292,6 @@ CODE_FRAGMENT
 .	    target and various flags).  *}
 .
 .   bfd_vma vma;
-.   boolean user_set_vma;
 .
 .       {*  The load address of the section - where it would be in a
 .           rom image; really only used for writing section header
@@ -384,7 +392,6 @@ CODE_FRAGMENT
 .
 .   bfd *owner;
 .
-.   boolean reloc_done;
 .	 {* A symbol which points at this section only *}
 .   struct symbol_cache_entry *symbol;
 .   struct symbol_cache_entry **symbol_ptr_ptr;
@@ -443,9 +450,9 @@ static const asymbol global_syms[] =
 #define STD_SECTION(SEC, FLAGS, SYM, NAME, IDX)	\
   const asymbol * const SYM = (asymbol *) &global_syms[IDX]; \
   const asection SEC = \
-    { NAME, 0, 0, FLAGS, 0, false, 0, 0, 0, 0, (asection *) &SEC, \
-      0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, (boolean) 0, \
-      (asymbol *) &global_syms[IDX], (asymbol **) &SYM, }
+    { NAME, 0, 0, FLAGS, 0, 0, 0, 0, 0, 0, 0, 0, (asection *) &SEC, \
+      0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, \
+      (asymbol *) &global_syms[IDX], (asymbol **) &SYM, 0, 0 }
 
 STD_SECTION (bfd_com_section, SEC_IS_COMMON, bfd_com_symbol,
 	     BFD_COM_SECTION_NAME, 0);

@@ -495,7 +495,7 @@ _bfd_coff_final_link (abfd, info)
 		 link.  This will normally be every section.  We need
 		 to do this so that we can identify any sections which
 		 the linker has decided to not include.  */
-	      sec->flags |= SEC_LINKER_MARK;
+	      sec->linker_mark = true;
 
 	      if (info->strip == strip_none
 		  || info->strip == strip_some)
@@ -1750,7 +1750,7 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
     {
       bfd_byte *contents;
 
-      if ((o->flags & SEC_LINKER_MARK) == 0)
+      if (! o->linker_mark)
 	{
 	  /* This section was omitted from the link.  */
 	  continue;

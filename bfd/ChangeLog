@@ -10,6 +10,9 @@ Wed Mar 27 10:43:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 	(coff_ppc_relocate_section): Remove unused variables.  Make
 	fprintf strings and argument types correspond.  Put before_addr in
 	DEBUG_RELOC ifdef.
+	(dump_toc): Make fprintf strings and argument types correspond.
+	(ppc_process_before_allocation): Remove unused variables.  Always
+	return a value.
 	(ppc_reflo_reloc): Ifdef out.
 	(ppc_addr32nb_reloc): Ifdef out.
 	(ppc_coff_rtype2howto): Make fprintf strings and argument types
@@ -19,13 +22,12 @@ Wed Mar 27 10:43:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* peicode.h (pe_print_idata): Move otherwise unused variables into
 	the #ifdef where they are used.  Always return a value.
-	(pe_print_edata): Change fprintf strings and add cast to make
-	fprintf strings correspond to actual types.  Always return a
-	value.
+	(pe_print_edata): Make fprintf strings and argument types
+	correspond.  Always return a value.
 	(pe_print_pdata): Removed unused variable addr_value.  Always
 	return a value.
 	(pe_print_reloc): Remove unused variable onaline.  Make fprintf
-	strings and arguments correspond.  Always return a value.
+	strings and argument types correspond.  Always return a value.
 
 	* elf32-ppc.c (ppc_elf_fake_sections): Return true.
 	(ppc_elf_finish_dynamic_symbol): Move definition of unused
@@ -43,7 +45,9 @@ Wed Mar 27 10:43:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* Makefile.in: Rebuild dependencies.
 	(HFILES): Add ns32k.h.
 
-	* section.c (SEC_LINKER_MARK): Define.
+	* section.c (struct sec): Add linker_mark field.  Change
+	user_set_vma and reloc_done to be single bit fields.
+	(STD_SECTION): Update accordingly.
 	* bfd-in2.h: Rebuild.
 	* aoutx.h (NAME(aout,final_link)): Mark sections included in the
 	link.
