@@ -80,6 +80,10 @@ print_insn_arg (d, l, pc, info)
     case ',':
     case '(':
     case ')':
+      /* start-sanitize-vr5400 */
+    case '[':
+    case ']':
+      /* end-sanitize-vr5400 */
       (*info->fprintf_func) (info->stream, "%c", *d);
       break;
 
@@ -211,6 +215,23 @@ print_insn_arg (d, l, pc, info)
 			     (l >> OP_SH_CCC) & OP_MASK_CCC);
       break;
 
+    case 'P':
+      (*info->fprintf_func) (info->stream, "$%d",
+			     (l >> OP_SH_PERFREG) & OP_MASK_PERFREG);
+      break;
+
+      /* start-sanitize-vr5400 */
+    case 'e':
+      (*info->fprintf_func) (info->stream, "%d",
+			     (l >> OP_SH_VECBYTE) & OP_MASK_VECBYTE);
+      break;
+
+    case '%':
+      (*info->fprintf_func) (info->stream, "%d",
+			     (l >> OP_SH_VECALIGN) & OP_MASK_VECALIGN);
+      break;
+      /* end-sanitize-vr5400 */
+
     default:
       (*info->fprintf_func) (info->stream,
 			     "# internal error, undefined modifier(%c)", *d);
@@ -230,6 +251,7 @@ _print_insn_mips (memaddr, word, info)
      struct disassemble_info *info;
 {
   register const struct mips_opcode *op;
+  int target_processor, mips_isa;
   static boolean init = 0;
   static const struct mips_opcode *mips_hash[OP_MASK_OP + 1];
 
@@ -255,6 +277,95 @@ _print_insn_mips (memaddr, word, info)
       init = 1;
     }
 
+  switch (info->mach)
+    {
+      /* start-sanitize-tx19 */
+      case bfd_mach_mips1900:
+	target_processor = 1900;
+	mips_isa = 1;
+	break;
+      /* end-sanitize-tx19 */
+      case bfd_mach_mips3000:
+	target_processor = 3000;
+	mips_isa = 1;
+	break;
+      case bfd_mach_mips3900:
+	target_processor = 3900;
+	mips_isa = 1;
+	break;
+      case bfd_mach_mips4000:
+	target_processor = 4000;
+	mips_isa = 3;
+	break;
+      case bfd_mach_mips4010:
+	target_processor = 4010;
+	mips_isa = 2;
+	break;
+      case bfd_mach_mips4100:
+	target_processor = 4100;
+	mips_isa = 3;
+	break;
+      case bfd_mach_mips4300:
+	target_processor = 4300;
+	mips_isa = 3;
+	break;
+      case bfd_mach_mips4400:
+	target_processor = 4400;
+	mips_isa = 3;
+	break;
+      case bfd_mach_mips4600:
+	target_processor = 4600;
+	mips_isa = 3;
+	break;
+      case bfd_mach_mips4650:
+	target_processor = 4650;
+	mips_isa = 3;
+	break;
+      /* start-sanitize-tx49 */
+      case bfd_mach_mips4900:
+	target_processor = 4900;
+	mips_isa = 3;
+	break;
+      /* end-sanitize-tx49 */
+      case bfd_mach_mips5000:
+	target_processor = 5000;
+	mips_isa = 4;
+	break;
+      /* start-sanitize-vr5400 */
+      case bfd_mach_mips5400:
+	target_processor = 5400;
+	mips_isa = 3;
+	break;
+      /* end-sanitize-vr5400 */
+      /* start-sanitize-r5900 */
+      case bfd_mach_mips5900:
+	target_processor = 5900;
+	mips_isa = 3;
+	break;
+      /* end-sanitize-r5900 */
+      case bfd_mach_mips6000:
+	target_processor = 6000;
+	mips_isa = 2;
+	break;
+      case bfd_mach_mips8000:
+	target_processor = 8000;
+	mips_isa = 4;
+	break;
+      case bfd_mach_mips10000:
+	target_processor = 10000;
+	mips_isa = 4;
+	break;
+      case bfd_mach_mips16:
+	target_processor = 16;
+	mips_isa = 3;
+	break;
+      default:
+	target_processor = 3000;
+	mips_isa = 3;
+	break;
+
+    }
+
   info->bytes_per_chunk = 4;
   info->display_endian = info->endian;
 
@@ -266,6 +377,41 @@ _print_insn_mips (memaddr, word, info)
 	  if (op->pinfo != INSN_MACRO && (word & op->mask) == op->match)
 	    {
 	      register const char *d;
+	      int insn_isa;
+
+	      if ((op->membership & INSN_ISA) == INSN_ISA1)
+		insn_isa = 1;
+	      else if ((op->membership & INSN_ISA) == INSN_ISA2)
+		insn_isa = 2;
+	      else if ((op->membership & INSN_ISA) == INSN_ISA3)
+		insn_isa = 3;
+	      else if ((op->membership & INSN_ISA) == INSN_ISA4)
+		insn_isa = 4;
+	      else
+		insn_isa = 15;
+
+	      if (insn_isa > mips_isa
+		  && (target_processor == 4650
+		      && op->membership & INSN_4650) == 0
+		  && (target_processor == 4010
+		      && op->membership & INSN_4010) == 0
+		  && (target_processor == 4100
+		      && op->membership & INSN_4100) == 0
+		  /* start-sanitize-vr5400 */
+		  && (target_processor == 5400
+		      && op->membership & INSN_5400) == 0
+		  /* end-santiize-vr5400 */
+		  /* start-sanitize-r5900 */
+		  && (target_processor == 5900
+		      && op->membership & INSN_5900) == 0
+		  /* end-sanitize-r5900 */
+		  /* start-sanitize-tx49 */
+		  && (target_processor == 4900
+		      && op->membership & INSN_4900) == 0
+		  /* end-sanitize-tx49 */
+		  && (target_processor == 3900
+		      && op->membership & INSN_3900) == 0)
+		continue;
 
 	      (*info->fprintf_func) (info->stream, "%s", op->name);
 
@@ -786,7 +932,7 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
 		baseaddr = memaddr + 2;
 	      }
 	    else if (use_extend)
-	      baseaddr = memaddr;
+	      baseaddr = memaddr - 2;
 	    else
 	      {
 		int status;

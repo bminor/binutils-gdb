@@ -1,3 +1,8 @@
+Tue Jan 27 21:52:59 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mips-dis.c (_print_insn_mips): Set target_processor as appropriate.
+	Only recognize instructions for the current target_processor.
+
 start-sanitize-sky
 Tue Jan 27 14:11:04 1998  Doug Evans  <devans@seba.cygnus.com>
 

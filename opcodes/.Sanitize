@@ -209,7 +209,7 @@ else
 fi
 
 
-r5900_files="ChangeLog mips-opc.c"
+r5900_files="ChangeLog mips-opc.c mips-dis.c"
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
 	for i in $r5900_files ; do
 		if test ! -d $i && (grep sanitize-r5900 $i > /dev/null) ; then
@@ -265,7 +265,7 @@ else
 	done
 fi
 
-tx19_files="ChangeLog mips16-opc.c"
+tx19_files="ChangeLog mips16-opc.c mips-dis.c"
 if ( echo $* | grep keep\-tx19 > /dev/null ) ; then
 	for i in $tx19_files ; do
 		if test ! -d $i && (grep sanitize-tx19 $i > /dev/null) ; then
@@ -293,7 +293,7 @@ else
 	done
 fi
 
-tx49_files="ChangeLog mips-opc.c"
+tx49_files="ChangeLog mips-opc.c mips-dis.c"
 if ( echo $* | grep keep\-tx49 > /dev/null ) ; then
 	for i in $tx49_files ; do
 		if test ! -d $i && (grep sanitize-tx49 $i > /dev/null) ; then
