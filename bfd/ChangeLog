@@ -1,3 +1,8 @@
+1999-08-11  Robin Farine <advanc@dial.eunet.ch>
+
+	* elf32-arm.h (elf32_arm_final_link_relocate): Check for overflow
+	in R_ARM_PC24 relocs.
+
 Tue Aug 10 12:48:09 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* elf-hppa.h (elf_hppa_fake_sections): New function.

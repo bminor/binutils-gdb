@@ -1223,10 +1223,16 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 		    value -= 8;
 		}
 	    }
+
+	  /* Perform a signed range check.  */
+	  signed_addend = value;
+	  signed_addend >>= howto->rightshift;
+	  if (signed_addend > ((bfd_signed_vma)(howto->dst_mask >> 1))
+	      || signed_addend < - ((bfd_signed_vma) ((howto->dst_mask + 1) >> 1)))
+	    return bfd_reloc_overflow;
 	  
-	  value >>= howto->rightshift;
-	  value &= howto->dst_mask;
-	  value |= (bfd_get_32 (input_bfd, hit_data) & (~ howto->dst_mask));
+	  value = (signed_addend & howto->dst_mask)
+	    | (bfd_get_32 (input_bfd, hit_data) & (~ howto->dst_mask));
 	  break;
 
 	case R_ARM_ABS32:
