@@ -1,3 +1,13 @@
+2002-04-03  Alan Modra  <amodra@bigpond.net.au>
+
+	Merge from mainline.
+	2002-03-28  Alan Modra  <amodra@bigpond.net.au>
+	* cpu-mips.c (mips_compatible): Make static, prototype.
+
+	2002-03-14  Alan Modra  <amodra@bigpond.net.au>
+	* cpu-mips.c (mips_compatible): New.  Don't check bits_per_word.
+	(N): Use the above.
+
 2002-04-01  Nathan Williams  <nathanw@wasabisystems.com>
 
 	* elf.c (elfcore_netbsd_get_lwpid): Fix off-by-one error
