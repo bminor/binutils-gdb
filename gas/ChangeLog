@@ -1,4 +1,4 @@
-2001-10-17  Hans-Peter Nilsson  <hp@bitrange.com>
+2001-10-18  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* write.c (fixup_segment): Handle fixups for SEC_MERGE sections as
 	for undefined symbols.
