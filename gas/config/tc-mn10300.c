@@ -212,7 +212,6 @@ static const struct reg_name xr_registers[] =
   { "mcrl", 3 },
   { "mcvf", 4 },
   { "mdrq", 1 },
-  { "pc", 0 },
   { "sp", 0 },
   { "xr0", 0 },
   { "xr1", 1 },
@@ -238,6 +237,7 @@ static const struct reg_name xr_registers[] =
 static const struct reg_name other_registers[] =
 {
   { "mdr", 0 },
+  { "pc", 0 },
   { "psw", 0 },
   { "sp", 0 },
 };

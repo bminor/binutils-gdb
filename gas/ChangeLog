@@ -1,3 +1,8 @@
+2002-01-22  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-mn10300.c (xr_registers): Move `pc'...
+	(other_registers): ... here.
+
 2002-01-21  DJ Delorie  <dj@redhat.com>
 
 	* config/obj-coff.c (obj_coff_init_stab_section): Make the
