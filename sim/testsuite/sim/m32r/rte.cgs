@@ -1,0 +1,22 @@
+# m32r testcase for rte
+# mach(): m32r m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global rte
+rte:
+	mvi_h_gr r4, 0x80030000 ; C set, interrupt disabled, using interrupt stack
+	mvtc r4, cr0
+
+	mvaddr_h_gr r4, ok
+	mvtc r4, cr6
+
+;	rte
+	fail
+ok:
+	mvfc r4, cr0
+	test_h_gr r4, 0x03030000 ; C clear, interrupts enabled, user stack
+
+	pass

@@ -1,5 +1,8 @@
 Thu Feb 19 11:15:45 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* sim/m32r/testutils.inc (mvaddr_h_gr): new macro to load an
+	address into a general register.
+
 	* sim/m32r/or3.cgs: Test OR3 instruction.
 	* sim/m32r/rach.cgs: Test RACH instruction.
 	* sim/m32r/rem.cgs: Test REM instruction.
