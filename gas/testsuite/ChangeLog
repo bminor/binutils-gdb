@@ -1,6 +1,11 @@
+2004-03-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/i386/padlock.s: Pad with .p2align.
+	* gas/i386/padlock.d: Adjust.
+
 2004-03-12  Michal Ludvig  <mludvig@suse.cz>
 
-	* gas/i386/padlock.s, gas/i386/padlock.d: New tests for 
+	* gas/i386/padlock.s, gas/i386/padlock.d: New tests for
 	VIA PadLock instructions.
 	* gas/i386/i386.exp: Run padlock tests.
 

@@ -14,3 +14,5 @@ foo:
 	rep xcryptofb
 	xstore
 	rep xstore
+
+	.p2align 4,0
