@@ -247,10 +247,10 @@ bfd_set_archive_head (bfd *output_archive, bfd *new_head)
 bfd *
 _bfd_look_for_bfd_in_cache (bfd *arch_bfd, file_ptr filepos)
 {
+  htab_t hash_table = bfd_ardata (arch_bfd)->cache;
   struct ar_cache m;
   m.ptr = filepos;
 
-  htab_t hash_table = bfd_ardata (arch_bfd)->cache;
   if (hash_table)
     {
       struct ar_cache *entry = (struct ar_cache *) htab_find (hash_table, &m);

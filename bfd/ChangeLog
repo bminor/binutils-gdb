@@ -1,3 +1,8 @@
+2005-03-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* archive.c (_bfd_look_for_bfd_in_cache): Move declaration of
+	has_table to the start of the function.
+
 2005-03-10  Ben Elliston  <bje@au.ibm.com>
 
 	* archive.c: Include hashtab.h.
