@@ -210,14 +210,13 @@ target_signal_to_string (enum target_signal sig)
 char *
 target_signal_to_name (enum target_signal sig)
 {
-  if (sig == TARGET_SIGNAL_UNKNOWN)
-    /* I think the code which prints this will always print it along with
-       the string, so no need to be verbose.  */
-    return "?";
-  else if ((sig >= TARGET_SIGNAL_FIRST) && (sig <= TARGET_SIGNAL_LAST))
+  if ((sig >= TARGET_SIGNAL_FIRST) && (sig <= TARGET_SIGNAL_LAST)
+      && signals[sig].name != NULL)
     return signals[sig].name;
   else
-    return signals[sig].name;
+    /* I think the code which prints this will always print it along
+       with the string, so no need to be verbose (very old comment).  */
+    return "?";
 }
 
 /* Given a name, return its signal.  */

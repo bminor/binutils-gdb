@@ -1,5 +1,10 @@
 2002-01-13  Andrew Cagney  <ac131313@redhat.com>
 
+	* signals.c (target_signal_to_name): Rewrite.  Only use
+	signals[].name when in bounds and non-NULL.
+	
+2002-01-13  Andrew Cagney  <ac131313@redhat.com>
+
 	From Petr Ledvina <ledvinap@kae.zcu.cz>:
 	* signals.c (target_signal_to_name): Verify that SIG is within the
 	bounds of the signals array.
