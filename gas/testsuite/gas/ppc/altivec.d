@@ -1,4 +1,4 @@
-#as: -m601 -maltivec
+#as: -a32 -m601 -maltivec
 #objdump: -Dr
 #name: AltiVec tests
 
