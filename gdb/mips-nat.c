@@ -59,7 +59,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   : regno >= FP0_REGNUM ?	FPR_BASE + (regno - FP0_REGNUM) \
   : 0)
 
-static const char zerobuf[MAX_REGISTER_RAW_SIZE];
+static char zerobuf[MAX_REGISTER_RAW_SIZE];
 
 /* Get all registers from the inferior */
 
