@@ -23,11 +23,13 @@ Things-to-keep:
 
 nm-sun4os4.h
 sparc-em.mt
+sparclite.mt
 sun4os4.mh
 sun4os4.mt
 sun4sol2.mh
 sun4sol2.mt
 tm-sparc.h
+tm-sparclite.h
 tm-spc-em.h
 tm-sun4os4.h
 tm-sun4sol2.h

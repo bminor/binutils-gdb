@@ -189,9 +189,9 @@ rs6000-nat.c
 rs6000-pinsn.c
 rs6000-tdep.c
 saber.suppress
-ser-bsd.c
 ser-go32.c
-ser-termios.c
+ser-unix.c
+serial.c
 serial.h
 signals.h
 solib.c
