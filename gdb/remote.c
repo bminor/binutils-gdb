@@ -37,6 +37,7 @@
 #include "remote.h"
 #include "regcache.h"
 #include "value.h"
+#include "gdb_assert.h"
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -5404,8 +5405,9 @@ enum
 }
 minitelnet_return;
 
-/* shared between readsocket() and readtty()  */
-static char *tty_input;
+/* Shared between readsocket() and readtty().  The size is arbitrary,
+   however all targets are known to support a 400 character packet.  */
+static char tty_input[400];
 
 static int escape_count;
 static int echo_check;
@@ -5451,6 +5453,7 @@ readsocket (void)
 	{
 	  if (tty_input[echo_check] == data)
 	    {
+	      gdb_assert (echo_check <= sizeof (tty_input));
 	      echo_check++;	/* Character matched user input: */
 	      continue;		/* Continue without echoing it.  */
 	    }
@@ -5787,9 +5790,6 @@ static void
 build_remote_gdbarch_data (void)
 {
   build_remote_packet_sizes ();
-
-  /* Cisco stuff */
-  tty_input = xmalloc (PBUFSIZ);
   remote_address_size = TARGET_ADDR_BIT;
 }
 
@@ -5819,7 +5819,6 @@ _initialize_remote (void)
 
   /* architecture specific data */
   build_remote_gdbarch_data ();
-  register_gdbarch_swap (&tty_input, sizeof (&tty_input), NULL);
   register_remote_packet_sizes ();
   register_gdbarch_swap (&remote_address_size, 
                          sizeof (&remote_address_size), NULL);
