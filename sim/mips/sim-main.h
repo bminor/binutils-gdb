@@ -297,6 +297,13 @@ do {									\
 } while (0)
 
 
+enum float_operation
+  {
+    FLOP_ADD,    FLOP_SUB,    FLOP_MUL,    FLOP_MADD,
+    FLOP_MSUB,   FLOP_MAX=10, FLOP_MIN,    FLOP_ABS,
+    FLOP_ITOF0=14, FLOP_FTOI0=18, FLOP_NEG=23
+  };
+
 
 struct _sim_cpu {
 
@@ -361,13 +368,6 @@ struct _sim_cpu {
 
 #endif
 
-
-enum float_operation
-  {
-    FLOP_ADD,    FLOP_SUB,    FLOP_MUL,    FLOP_MADD,
-    FLOP_MSUB,   FLOP_MAX=10, FLOP_MIN,    FLOP_ABS,
-    FLOP_ITOF0=14, FLOP_FTOI0=18, FLOP_NEG=23
-  };
 
 /* To keep this default simulator simple, and fast, we use a direct
    vector of registers. The internal simulator engine then uses

@@ -1,3 +1,8 @@
+2001-11-17  Fred Fish  <fnf@redhat.com>
+
+	* sim-main.h (float_operation): Move enum declaration outside
+	of _sim_cpu struct declaration.
+
 2001-04-12  Jim Blandy  <jimb@redhat.com>
 
 	* mips.igen (CFC1, CTC1): Pass the correct register numbers to
