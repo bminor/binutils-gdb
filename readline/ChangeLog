@@ -1,3 +1,8 @@
+Wed Apr 22 18:08:01 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* configure.in: remove subdirs declaration.  The obsolete semantic
+	  for subdirs has been usurped by per's new meaning.
+
 Tue Apr 21 11:54:23 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in: rework CFLAGS so that they can be set on the
