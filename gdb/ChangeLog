@@ -1,3 +1,8 @@
+2002-05-15  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-linux-tdep.c (ARM_LINUX_JB_PC): Renamed from JB_PC.
+	(ARM_LINUX_JB_ELEMENT_SIZE): Likewise.
+
 2002-05-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/mem-break.c (reinsert_breakpoint_by_bp): Correct typo
