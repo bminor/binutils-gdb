@@ -678,9 +678,7 @@ hash_ask (handle, string, access)
      const char *string;
      int access;		/* access type */
 {
-  const char *string1;	/* JF avoid strcmp calls */
   const char *s;
-  int c;
   struct hash_entry *slot;
   int collision;	/* count collisions */
 
@@ -692,22 +690,8 @@ hash_ask (handle, string, access)
   hash_found = FALSE;
   while (((s = slot->hash_string) != NULL) && s != DELETED)
     {
-#if 1
       if (string == s || !strcmp (string, s))
 	hash_found = TRUE;
-#else
-      for (string1 = string;;)
-	{
-	  if ((c = *s++) == 0)
-	    {
-	      if (!*string1)
-		hash_found = TRUE;
-	      break;
-	    }
-	  if (*string1++ != c)
-	    break;
-	}
-#endif
       if (hash_found)
 	break;
       collision++;
@@ -726,21 +710,8 @@ hash_ask (handle, string, access)
       slot = handle->hash_where;/* now look again */
       while (((s = slot->hash_string) != NULL) && s != DELETED)
 	{
-#if 0
-	  for (string1 = string; *s; string1++, s++)
-	    {
-	      if (*string1 != *s)
-		break;
-	    }
-	  if (*s == *string1)
-	    {
-	      hash_found = TRUE;
-	      break;
-	    }
-#else
 	  if (string == s || !strcmp (string, s))
 	    hash_found = TRUE;
-#endif
 	  collision++;
 	  slot++;
 	}

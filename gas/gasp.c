@@ -1494,7 +1494,7 @@ do_data (idx, in, size)
      int size;
 {
   int opsize = 4;
-  char *opname;
+  char *opname = ".yikes!";
   sb acc;
   sb_new (&acc);
 
@@ -2351,6 +2351,9 @@ istrue (idx, in)
 	  idx = exp_get_abs ("Conditional operator must have absolute operands.\n", idx, in, &valb);
 	  switch (cond)
 	    {
+	    default:
+	      res = 42;
+	      break;
 	    case EQ:
 	      res = vala == valb;
 	      break;

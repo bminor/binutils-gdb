@@ -1,5 +1,25 @@
 Thu Jan 19 14:49:47 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* config/tc-alpha.c (alpha_ip): Initialize local variables to keep
+	gcc quiet.
+	(gpdisp_hi16_howto): Don't use "const" with reloc_howto_type.
+	(in_range_signed): Add parens around subtraction inside shift.
+	* gasp.c (do_data): Initialize local variable "opname".
+	(istrue): Provide a default case to set "res" and keep "gcc -Wall"
+	quiet.
+	* write.c (write_contents): Deleted unused variable.
+	(print_symbol_value_1): Declare.
+	* hash.c (hash_ask): Delete disabled non-strcmp version of the
+	code, and automatic variables used only in those sections.
+	* write.c (chain_frchains_together_1): Only define local variable
+	"prev_fix" if BFD_ASSEMBLER.
+	* flonum-konst.c (dummy1): Return void.
+	* config/tc-vax.c (md_assemble): Remove two comparisons of
+	unsigned numbers versus zero.
+
+	* config/tc-alpha.c, config/alpha-opcode.h: Revert 2 June changes.
+	Turns out we never got the assignment done after all.
+
 	Cleanup of VAX and VMS code, from Pat Rankin:
 	* config/obj-vms.c: Changed exported function names to lower case.
 	(Changed call sites in write.c.)  Declare VMS system function
