@@ -1,0 +1,32 @@
+
+if [istarget z8k-*-*] then {
+
+# EI/DI test
+
+     gas_test "eidi.s" "" "" "EI/DI operands"
+     gas_test_error "eidif.s" "" "EI/DI operands"
+
+# JR range test
+
+     gas_test_error "jr-forwf.s" "" "relative jump out of range"
+     gas_test_error "jr-backf.s" "" "relative jump out of range"
+     gas_test "jr-forw.s" "" "" "relative jump in range"
+     gas_test "jr-back.s" "" "" "relative jump in range"
+
+# 4 bit argument tests
+
+     gas_test_error "incf.s" "" "immediate 4bit value out of range"
+     gas_test_error "decf.s" "" "immediate 4bit value out of range"
+     gas_test_error "incbf.s" "" "immediate 4bit value out of range"
+     gas_test_error "decbf.s" "" "immediate 4bit value out of range"
+     gas_test_error "ldkf.s" "" "immediate 4bit value out of range"
+     gas_test "inc.s" "" "" "immediate 4bit value"
+     gas_test "dec.s" "" "" "immediate 4bit value"
+     gas_test "ldk.s" "" "" "immediate 4bit value"
+
+# in/out opcodes test
+
+     run_dump_test "inout"
+
+}
+

@@ -1,3 +1,24 @@
+2003-06-21  Christian Groessler  <chris@groessler.org>
+
+	* gas/z8k: New directory.
+	* gas/z8k/dec.s: New file.
+	* gas/z8k/decbf.s: New file.
+	* gas/z8k/decf.s: New file.
+	* gas/z8k/eidi.s: New file.
+	* gas/z8k/eidif.s: New file.
+	* gas/z8k/inc.s: New file.
+	* gas/z8k/incbf.s: New file.
+	* gas/z8k/incf.s: New file.
+	* gas/z8k/inout.d: New file.
+	* gas/z8k/inout.s: New file.
+	* gas/z8k/jr-back.s: New file.
+	* gas/z8k/jr-backf.s: New file.
+	* gas/z8k/jr-forw.s: New file.
+	* gas/z8k/jr-forwf.s: New file.
+	* gas/z8k/ldk.s: New file.
+	* gas/z8k/ldkf.s: New file.
+	* gas/z8k/z8k.exp: New file.
+
 2003-06-18  Jakub Jelinek  <jakub@redhat.com>
 
 	* gas/cfi/cfi-i386.d: Regenerated.
