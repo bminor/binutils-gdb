@@ -42,7 +42,7 @@ static boolean warn_unsigned_overflows = FALSE;
 static int     machine = -1;
 
 /* Indicates the target processor(s) for the assemble.  */
-static unsigned int	processor_mask = -1;
+static int	processor_mask = -1;
 
 
 /* Structure to hold information about predefined registers.  */
@@ -112,7 +112,7 @@ static int fc;
 
 
 void
-v850_sdata (int ignore)
+v850_sdata (int ignore ATTRIBUTE_UNUSED)
 {
   obj_elf_section_change_hook();
   
@@ -122,7 +122,7 @@ v850_sdata (int ignore)
 }
 
 void
-v850_tdata (int ignore)
+v850_tdata (int ignore ATTRIBUTE_UNUSED)
 {
   obj_elf_section_change_hook();
   
@@ -132,7 +132,7 @@ v850_tdata (int ignore)
 }
 
 void
-v850_zdata (int ignore)
+v850_zdata (int ignore ATTRIBUTE_UNUSED)
 {
   obj_elf_section_change_hook();
   
@@ -142,7 +142,7 @@ v850_zdata (int ignore)
 }
 
 void
-v850_sbss (int ignore)
+v850_sbss (int ignore ATTRIBUTE_UNUSED)
 {
   obj_elf_section_change_hook();
   
@@ -152,7 +152,7 @@ v850_sbss (int ignore)
 }
 
 void
-v850_tbss (int ignore)
+v850_tbss (int ignore ATTRIBUTE_UNUSED)
 {
   obj_elf_section_change_hook();
   
@@ -162,7 +162,7 @@ v850_tbss (int ignore)
 }
 
 void
-v850_zbss (int ignore)
+v850_zbss (int ignore ATTRIBUTE_UNUSED)
 {
   obj_elf_section_change_hook();
   
@@ -172,7 +172,7 @@ v850_zbss (int ignore)
 }
 
 void
-v850_rosdata (int ignore)
+v850_rosdata (int ignore ATTRIBUTE_UNUSED)
 {
   obj_elf_section_change_hook();
   
@@ -182,7 +182,7 @@ v850_rosdata (int ignore)
 }
 
 void
-v850_rozdata (int ignore)
+v850_rozdata (int ignore ATTRIBUTE_UNUSED)
 {
   obj_elf_section_change_hook();
   
@@ -192,7 +192,7 @@ v850_rozdata (int ignore)
 }
 
 void
-v850_call_table_data (int ignore)
+v850_call_table_data (int ignore ATTRIBUTE_UNUSED)
 {
   obj_elf_section_change_hook();
   
@@ -202,7 +202,7 @@ v850_call_table_data (int ignore)
 }
 
 void
-v850_call_table_text (int ignore)
+v850_call_table_text (int ignore ATTRIBUTE_UNUSED)
 {
   obj_elf_section_change_hook();
   
@@ -212,7 +212,7 @@ v850_call_table_text (int ignore)
 }
 
 void
-v850_bss (int ignore)
+v850_bss (int ignore ATTRIBUTE_UNUSED)
 {
   register int temp = get_absolute_expression ();
 
@@ -224,7 +224,7 @@ v850_bss (int ignore)
 }
 
 void
-v850_offset (int ignore)
+v850_offset (int ignore ATTRIBUTE_UNUSED)
 {
   int temp = get_absolute_expression ();
   
@@ -245,7 +245,7 @@ v850_comm (area)
   char      c;
   char *    p;
   int       temp;
-  int       size;
+  unsigned int       size;
   symbolS * symbolP;
   int       have_align;
 
@@ -484,9 +484,10 @@ v850_comm (area)
 		  
 		  scommon_section = subseg_new (".scommon", 0);
 		  
-		  bfd_set_section_flags (stdoutput, scommon_section, applicable
+		  bfd_set_section_flags (stdoutput, scommon_section,
+					 (applicable
 		     & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA
-			| SEC_HAS_CONTENTS) | SEC_IS_COMMON);
+			| SEC_HAS_CONTENTS)) | SEC_IS_COMMON);
 		}
 	      S_SET_SEGMENT (symbolP, scommon_section);
 	      break;
@@ -500,9 +501,10 @@ v850_comm (area)
 		  
 		  zcommon_section = subseg_new (".zcommon", 0);
 		  
-		  bfd_set_section_flags (stdoutput, zcommon_section, applicable
+		  bfd_set_section_flags (stdoutput, zcommon_section,
+					 (applicable
 		     & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA
-			| SEC_HAS_CONTENTS) | SEC_IS_COMMON);
+			| SEC_HAS_CONTENTS)) | SEC_IS_COMMON);
 		}
 	      S_SET_SEGMENT (symbolP, zcommon_section);
 	      break;
@@ -516,9 +518,10 @@ v850_comm (area)
 		  
 		  tcommon_section = subseg_new (".tcommon", 0);
 		  
-		  bfd_set_section_flags (stdoutput, tcommon_section, applicable
+		  bfd_set_section_flags (stdoutput, tcommon_section,
+					 (applicable
 		     & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA
-			| SEC_HAS_CONTENTS) | SEC_IS_COMMON);
+			| SEC_HAS_CONTENTS)) | SEC_IS_COMMON);
 		}
 	      S_SET_SEGMENT (symbolP, tcommon_section);
 	      break;
@@ -855,10 +858,9 @@ system_register_name (expressionP, accept_numbers, accept_list_names)
 
 	  /* Make sure that the register number is allowable. */
 	  if (   reg_number < 0
-		 || reg_number > 5
-		 && reg_number < 16
-		 || reg_number > 20
-		 )
+	      || (reg_number > 5 && reg_number < 16)
+	      || reg_number > 20
+	      )
 	    {
 	      reg_number = -1;
 	    }
@@ -1009,7 +1011,6 @@ parse_register_list
   
   if (* input_line_pointer != '{')
     {
-      int bits;
       int reg;
       int i;
 		
@@ -1200,8 +1201,9 @@ md_parse_option (c, arg)
 {
   if (c != 'm')
     {
-      /* xgettext:c-format */
-      fprintf (stderr, _("unknown command line option: -%c%s\n"), c, arg);
+      if (c != 'a')
+	/* xgettext:c-format */
+	fprintf (stderr, _("unknown command line option: -%c%s\n"), c, arg);
       return 0;
     }
 
@@ -1245,7 +1247,7 @@ md_parse_option (c, arg)
 
 symbolS *
 md_undefined_symbol (name)
-  char * name;
+  char * name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -1295,7 +1297,7 @@ md_atof (type, litp, sizep)
 /* Very gross.  */
 void
 md_convert_frag (abfd, sec, fragP)
-  bfd *      abfd;
+  bfd *      abfd ATTRIBUTE_UNUSED;
   asection * sec;
   fragS *    fragP;
 {
@@ -1590,8 +1592,7 @@ v850_insert_operand (insn, operand, val, file, line, str)
     {
       if (operand->bits != 32)
 	{
-	  long    min, max;
-	  offsetT test;
+	  long  min, max;
 
 	  if ((operand->flags & V850_OPERAND_SIGNED) != 0)
 	    {
@@ -1662,15 +1663,15 @@ md_assemble (str)
   struct v850_opcode *      next_opcode;
   const unsigned char *     opindex_ptr;
   int                       next_opindex;
-  int                       relaxable;
+  int                       relaxable = 0;
   unsigned long             insn;
   unsigned long             insn_size;
   char *                    f;
   int                       i;
   int                       match;
   boolean                   extra_data_after_insn = false;
-  unsigned                  extra_data_len;
-  unsigned long             extra_data;
+  unsigned                  extra_data_len = 0;
+  unsigned long             extra_data = 0;
   char *		    saved_input_line_pointer;
 
   
@@ -2213,6 +2214,8 @@ md_assemble (str)
 	    case BFD_RELOC_HI16_S:
 	      fixP->fx_no_overflow = 1;
 	      break;
+	    default:
+	      break;
 	    }
 	}
       else
@@ -2237,7 +2240,7 @@ md_assemble (str)
                  
 arelent *
 tc_gen_reloc (seg, fixp)
-     asection * seg;
+     asection * seg ATTRIBUTE_UNUSED;
      fixS *     fixp;
 {
   arelent * reloc;
@@ -2273,7 +2276,7 @@ tc_gen_reloc (seg, fixp)
 int
 md_estimate_size_before_relax (fragp, seg)
      fragS * fragp;
-     asection * seg;
+     asection * seg ATTRIBUTE_UNUSED;
 {
   if (fragp->fr_subtype == 0)
     fragp->fr_var = 4;
@@ -2305,7 +2308,7 @@ int
 md_apply_fix3 (fixp, valuep, seg)
      fixS *   fixp;
      valueT * valuep;
-     segT     seg;
+     segT     seg ATTRIBUTE_UNUSED;
 {
   valueT value;
   char * where;
@@ -2452,6 +2455,7 @@ v850_fix_adjustable (fixP)
   if (S_IS_EXTERN (fixP->fx_addsy))
     return 0;
   
+  /* Similarly for weak symbols.  */
   if (S_IS_WEAK (fixP->fx_addsy))
     return 0;
   

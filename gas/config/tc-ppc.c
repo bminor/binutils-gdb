@@ -2495,7 +2495,7 @@ ppc_comm (lcomm)
 
 static void
 ppc_csect (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   char endc;
@@ -2645,7 +2645,7 @@ ppc_section (type)
 
 static void
 ppc_named_section (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *user_name;
   const char *real_name;
@@ -2680,7 +2680,7 @@ ppc_named_section (ignore)
 
 static void
 ppc_extern (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   char endc;
@@ -2699,7 +2699,7 @@ ppc_extern (ignore)
 
 static void
 ppc_lglobl (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   char endc;
@@ -2722,7 +2722,7 @@ ppc_lglobl (ignore)
 
 static void
 ppc_rename (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   char endc;
@@ -2758,7 +2758,7 @@ ppc_rename (ignore)
 
 static void
 ppc_stabx (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   int len;
@@ -2865,7 +2865,7 @@ ppc_stabx (ignore)
 
 static void
 ppc_function (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   char endc;
@@ -2956,7 +2956,7 @@ ppc_function (ignore)
 
 static void
 ppc_bf (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   symbolS *sym;
 
@@ -2984,7 +2984,7 @@ ppc_bf (ignore)
 
 static void
 ppc_ef (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   symbolS *sym;
 
@@ -3057,7 +3057,7 @@ ppc_biei (ei)
 
 static void
 ppc_bs (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   char endc;
@@ -3093,7 +3093,7 @@ ppc_bs (ignore)
 
 static void
 ppc_es (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   symbolS *sym;
 
@@ -3118,7 +3118,7 @@ ppc_es (ignore)
 
 static void
 ppc_bb (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   symbolS *sym;
 
@@ -3145,7 +3145,7 @@ ppc_bb (ignore)
 
 static void
 ppc_eb (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   symbolS *sym;
 
@@ -3170,7 +3170,7 @@ ppc_eb (ignore)
 
 static void
 ppc_bc (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   int len;
@@ -3193,7 +3193,7 @@ ppc_bc (ignore)
 
 static void
 ppc_ec (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   symbolS *sym;
 
@@ -3213,7 +3213,7 @@ ppc_ec (ignore)
 
 static void
 ppc_toc (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (ppc_toc_csect != (symbolS *) NULL)
     subseg_set (data_section, symbol_get_tc (ppc_toc_csect)->subseg);
@@ -3269,7 +3269,7 @@ ppc_xcoff_cons (log_size)
 
 static void
 ppc_machine(dummy) 
-    int dummy;
+    int dummy ATTRIBUTE_UNUSED;
 {
     discard_rest_of_line();
    /* What does aix use this for?  */
@@ -3277,7 +3277,7 @@ ppc_machine(dummy)
 
 static void
 ppc_vbyte (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS exp;
   int byte_count;
@@ -3419,7 +3419,7 @@ ppc_set_current_section (new)
 */
 static void
 ppc_previous(ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   symbolS *tmp;
 
@@ -3452,7 +3452,7 @@ ppc_previous(ignore)
 */
 static void
 ppc_pdata(ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (pdata_section == 0) 
     {
@@ -3487,7 +3487,7 @@ ppc_pdata(ignore)
 */
 static void
 ppc_ydata(ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (ydata_section == 0) 
     {
@@ -3524,7 +3524,7 @@ ppc_ydata(ignore)
 */
 static void
 ppc_reldata(ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (reldata_section == 0)
     {
@@ -3555,7 +3555,7 @@ ppc_reldata(ignore)
 */
 static void
 ppc_rdata(ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (rdata_section == 0)
     {
@@ -3582,7 +3582,7 @@ ppc_rdata(ignore)
 */
 static void
 ppc_ualong(ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   /* try for long */
   cons ( 4 );
@@ -3597,7 +3597,7 @@ ppc_ualong(ignore)
 */
 static void
 ppc_znop(ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   unsigned long insn;
   const struct powerpc_opcode *opcode;
@@ -3781,7 +3781,7 @@ ppc_pe_comm(lcomm)
 
 void
 ppc_pe_section (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   /* Strip out the section name */
   char *section_name;
@@ -3943,7 +3943,7 @@ ppc_pe_section (ignore)
 
 static void
 ppc_pe_function (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   char endc;
@@ -3966,7 +3966,7 @@ ppc_pe_function (ignore)
 
 static void
 ppc_pe_tocd (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (tocdata_section == 0)
     {
