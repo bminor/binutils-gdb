@@ -111,10 +111,7 @@ static int memory_size;
 static int
 get_now ()
 {
-#ifndef WIN32
-  return time (0);
-#endif
-  return 0;
+  return time (0);	/* WinXX HAS UNIX like 'time', so why not using it? */
 }
 
 static int
@@ -155,7 +152,7 @@ lvalue (x, rn)
       return X (OP_MEM, SP);
 
     default:
-      abort ();
+      abort (); /* ?? May be something more usefull? */
     }
 }
 
@@ -608,7 +605,7 @@ fetch (arg, n)
       return t;
 
     default:
-      abort ();
+      abort (); /* ?? May be something more usefull? */
 
     }
 }
@@ -997,8 +994,12 @@ sim_resume (sd, step, siggnal)
 
 #endif
 
-      cycles += code->cycles;
-      insts++;
+      if (code->opcode)
+       {
+        cycles += code->cycles;
+        insts++;
+       }
+
       switch (code->opcode)
 	{
 	case 0:
@@ -1860,10 +1861,10 @@ sim_fetch_register (sd, rn, buf, length)
     {
     default:
       abort ();
-    case 8:
+    case CCR_REGNUM:
       v = cpu.ccr;
       break;
-    case 9:
+    case PC_REGNUM:
       v = cpu.pc;
       break;
     case R0_REGNUM:
@@ -1876,15 +1877,15 @@ sim_fetch_register (sd, rn, buf, length)
     case R7_REGNUM:
       v = cpu.regs[rn];
       break;
-    case 10:
+    case CYCLE_REGNUM:
       v = cpu.cycles;
       longreg = 1;
       break;
-    case 11:
+    case TICK_REGNUM:
       v = cpu.ticks;
       longreg = 1;
       break;
-    case 12:
+    case INST_REGNUM:
       v = cpu.insts;
       longreg = 1;
       break;
