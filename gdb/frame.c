@@ -139,14 +139,25 @@ static int frame_debug;
 static int backtrace_past_main;
 static unsigned int backtrace_limit = UINT_MAX;
 
+static void
+fprint_field (struct ui_file *file, const char *name, int p, CORE_ADDR addr)
+{
+  if (p)
+    fprintf_unfiltered (file, "%s=0x%s", name, paddr_nz (addr));
+  else
+    fprintf_unfiltered (file, "!%s", name);
+}
 
 void
 fprint_frame_id (struct ui_file *file, struct frame_id id)
 {
-  fprintf_unfiltered (file, "{stack=0x%s,code=0x%s,special=0x%s}",
-		      paddr_nz (id.stack_addr),
-		      paddr_nz (id.code_addr),
-		      paddr_nz (id.special_addr));
+  fprintf_unfiltered (file, "{");
+  fprint_field (file, "stack", id.stack_addr_p, id.stack_addr);
+  fprintf_unfiltered (file, ",");
+  fprint_field (file, "code", id.code_addr_p, id.code_addr);
+  fprintf_unfiltered (file, ",");
+  fprint_field (file, "special", id.special_addr_p, id.special_addr);
+  fprintf_unfiltered (file, "}");
 }
 
 static void
