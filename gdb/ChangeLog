@@ -1,3 +1,31 @@
+Mon Feb  2 19:06:13 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* Makefile.in (VERSION): Bump to 4.16.2.
+
+Mon Feb  2 17:18:25 1998  Richard Henderson  <rth@cygnus.com>
+
+        * alpha-nat.c (fetch_aout_core_registers): Rename from
+        fetch_core_registers.
+        (fetch_elf_core_registers): New function.
+        (supply_gregset): Use ALPHA_REGSET_BASE.
+        (supply_fpregset): Likewise.
+        (fill_fpregset): Likewise.
+        (alpha_aout_core_fns): Rename from alpha_core_fns.
+        (alpha_elf_core_fns): New.
+        * config/alpha/alpha-linux.mh (NATDEPFILES): solib.o not osfsolib.o.
+        Disable MMALLOC.
+        * config/alpha/nm-linux.h (SVR4_SHARED_LIBS): Define if ELF.
+	(TARGET_ELF64): Likewise.
+        (ALPHA_REGSET_BASE): New.
+        * config/alpha/nm-osf.h (ALPHA_REGSET_BASE): New.
+        * config/alpha/tm-alphalinux.h: Include tm-sysv4.h.
+
+        * solib.c (elf_locate_base): Add TARGET_ELF64 support.
+        (info_sharedlibary_command): Likewise.
+
+        * configure.host: Match alpha*.
+        * configure.tgt: Likewise.
+
 Fri Jan 30 15:11:38 1998  David Taylor  <taylor@texas.cygnus.com>
 
 	Changes by <Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>

@@ -243,7 +243,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION=4.16.1
+VERSION=4.16.2
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -524,7 +524,12 @@ NTSOBS = standalone.o
 
 NTSSTART = kdb-start.o
 
-SUBDIRS = doc testsuite nlm mswin
+SUBDIRS = doc \
+	testsuite \
+	$(start-sanitize-mswin) \
+	mswin \
+	$(end-sanitize-mswin) \
+	nlm
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.tab.c jv-exp.tab.c f-exp.tab.c m2-exp.tab.c
