@@ -1,3 +1,16 @@
+Tue Jun 23 11:08:53 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c: Rewrite to use fopen/fread ratehr than mmap.
+
+	Add --section-headers command line switch, which is an alias for
+	--sections.
+
+	Incorporate improvemnts made by Andreas Schwab
+	<schwab@issan.informatik.uni-dortmund.de> including output
+	formatting and version info display.
+
+	* binutils.texi: Document --section-headers switch to readelf. 
+
 Mon Jun 22 18:28:19 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* readelf.c: Include bfd.h and bucomm.h before system header

@@ -2276,7 +2276,7 @@ Displays dlltool's version number and then exits.
 readelf [ -a | --all ] 
         [ -h | --file-header]
         [ -l | --program-headers | --segments]
-        [ -S | --sections]
+        [ -S | --section-headers | --sections]
         [ -s | --symbols]
         [ -r | --relocs]
         [ -d | --dynamic]
