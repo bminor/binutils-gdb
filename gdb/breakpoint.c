@@ -1535,7 +1535,11 @@ break_command_1 (arg, tempflag, from_tty)
       b->number = breakpoint_count;
       b->type = bp_breakpoint;
       b->cond = cond;
-      
+
+      /* FIXME: We should add the filename if this is a static function
+	 and probably if it is a line number (the line numbers could
+	 have changed when we re-read symbols; possibly better to disable
+	 the breakpoint in that case).  */
       if (addr_start)
 	b->addr_string = savestring (addr_start, addr_end - addr_start);
       if (cond_start)
@@ -2239,6 +2243,15 @@ breakpoint_re_set_one (bint)
 
     case bp_watchpoint:
       innermost_block = NULL;
+      /* The issue arises of what context to evaluate this in.  The same
+	 one as when it was set, but what does that mean when symbols have
+	 been re-read?  We could save the filename and functionname, but
+	 if the context is more local than that, the best we could do would
+	 be something like how many levels deep and which index at that
+	 particular level, but that's going to be less stable than filenames
+	 or functionnames.  */
+      /* So for now, just use a global context.  */
+      /* FIXME, use catch_errors.  */
       b->exp = parse_expression (b->exp_string);
       b->exp_valid_block = innermost_block;
       b->val = evaluate_expression (b->exp);
