@@ -1,3 +1,10 @@
+start-sanitize-r5900
+Tue Mar 24 18:11:13 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * vu0.h (cfc2, ctc2): Add variants with ".i" and ".ni"
+        opcode extensions.
+
+end-sanitize-r5900
 start-sanitize-m32rx
 Mon Mar 23 11:32:11 1998  Nick Clifton  <nickc@cygnus.com>
 

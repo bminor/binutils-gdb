@@ -17,6 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this file; see the file COPYING.  If not, write to the Free
 Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+{"cfc2.ni",  "t,G",	0x48400000, 0xffe007ff, LCD|WR_t|RD_C2, I1      },
+{"cfc2.i",   "t,G",	0x48400001, 0xffe007ff, LCD|WR_t|RD_C2, I1      },
+{"ctc2.ni",  "t,G",	0x48c00000, 0xffe007ff, COD|RD_t|WR_CC, I1      },
+{"ctc2.i",   "t,G",	0x48c00001, 0xffe007ff, COD|RD_t|WR_CC, I1      },
 {"lqc2",     "1,o(b)",	0xd8000000, 0xfc000000,	0, 		T5},
 {"qmfc2",    "t,2",	0x48200000, 0xffe007ff,	0, 		T5},
 {"qmfc2.ni", "t,2",	0x48200000, 0xffe007ff,	0, 		T5},
