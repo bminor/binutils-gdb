@@ -1,3 +1,7 @@
+Sat Jan 14 11:25:28 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
+
+	* gdb.base/setvar.exp: Check for and reject crazy expected type hacks.
+
 Thu Jan 12 01:14:53 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
 	* gdb.base/sigall.c (gen_*): Pass argument to handle_* to avoid
