@@ -1037,26 +1037,6 @@ m68k_get_longjmp_target (CORE_ADDR *pc)
   return 1;
 }
 
-#ifdef SYSCALL_TRAP
-/* Immediately after a function call, return the saved pc before the frame
-   is setup.  For sun3's, we check for the common case of being inside of a
-   system call, and if so, we know that Sun pushes the call # on the stack
-   prior to doing the trap. */
-
-static CORE_ADDR
-m68k_saved_pc_after_call (struct frame_info *frame)
-{
-  int op;
-
-  op = read_memory_unsigned_integer (frame->pc - SYSCALL_TRAP_OFFSET, 2);
-
-  if (op == SYSCALL_TRAP)
-    return read_memory_unsigned_integer (read_register (SP_REGNUM) + 4, 4);
-  else
-    return read_memory_unsigned_integer (read_register (SP_REGNUM), 4);
-}
-#endif /* SYSCALL_TRAP */
-
 /* Function: m68k_gdbarch_init
    Initializer function for the m68k gdbarch vector.
    Called by gdbarch.  Sets up the gdbarch vector(s) for this target. */
@@ -1079,9 +1059,6 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_double_bit (gdbarch, 96);
 
   set_gdbarch_skip_prologue (gdbarch, m68k_skip_prologue);
-#ifdef SYSCALL_TRAP
-  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, m68k_saved_pc_after_call);
-#endif
   set_gdbarch_breakpoint_from_pc (gdbarch, m68k_local_breakpoint_from_pc);
 
   /* Stack grows down. */

@@ -1,4 +1,10 @@
 2004-02-04  Andrew Cagney  <cagney@redhat.com>
+
+	* m68k-tdep.c (m68k_saved_pc_after_call): Delete #ifdef
+	SYSCALL_TRAP function.
+	(m68k_gdbarch_init): Delete #ifdef SYSCALL_TRAP code.
+
+2004-02-04  Andrew Cagney  <cagney@redhat.com>
 	    Daniel Jacobowitz  <drow@mvista.com>
 
 	* objfiles.h: Delete comments refering to inside_entry_func and
