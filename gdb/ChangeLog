@@ -1,5 +1,25 @@
 2001-12-20  Elena Zannoni  <ezannoni@redhat.com>
 
+	* ppc-linux-nat.c (ppc_ptrace_cannot_fetch_store_register):
+	New function.
+	(fetch_register): New function.
+	(fetch_ppc_registers): New function.
+	(fetch_inferior_registers): New function.
+	(store_register): New function.
+	(store_ppc_registers): New function.
+	(store_inferior_registers): New function.
+	(ppc_register_u_addr): Eliminate ustart parameter and its
+	uses. Make static.
+	(PT_READ_U, PT_WRITE_U, PTRACE_XFER_TYPE): Define if needed.
+	Include sys/ptrace.h.
+
+	* config/powerpc/nm-linux.h (FETCH_INFERIOR_REGISTERS): Define.
+	(U_REGS_OFFSET, REGISTER_U_ADDR): Delete.
+
+	* config/powerpc/linux.mh (NATDEPFILES): Delete core-aout.o.
+
+2001-12-20  Elena Zannoni  <ezannoni@redhat.com>
+
         * rs6000-nat.c (fetch_register): Don't error out unless the
         register number is really bogus.
 

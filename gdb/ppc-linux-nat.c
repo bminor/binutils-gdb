@@ -32,10 +32,23 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <sys/procfs.h>
+#include <sys/ptrace.h>
 
 /* Prototypes for supply_gregset etc. */
 #include "gregset.h"
 #include "ppc-tdep.h"
+
+#ifndef PT_READ_U
+#define PT_READ_U PTRACE_PEEKUSR
+#endif
+#ifndef PT_WRITE_U
+#define PT_WRITE_U PTRACE_POKEUSR
+#endif
+
+/* Default the type of the ptrace transfer to int.  */
+#ifndef PTRACE_XFER_TYPE
+#define PTRACE_XFER_TYPE int
+#endif
 
 int
 kernel_u_size (void)
@@ -56,37 +69,159 @@ PT_FPR0 + 48, PT_FPR0 + 50, PT_FPR0 + 52, PT_FPR0 + 54, PT_FPR0 + 56, PT_FPR0 + 
 PT_NIP, PT_MSR, PT_CCR, PT_LNK, PT_CTR, PT_XER, PT_MQ */
 /* *INDENT_ON * */
 
-int 
-ppc_register_u_addr (int ustart, int regno)
+static int
+ppc_register_u_addr (int regno)
 {
   int u_addr = -1;
 
   /* General purpose registers occupy 1 slot each in the buffer */
   if (regno >= gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum
       && regno <= gdbarch_tdep (current_gdbarch)->ppc_gplast_regnum )
-    u_addr =  (ustart + (PT_R0 + regno) * 4);
+    u_addr =  ((PT_R0 + regno) * 4);
 
   /* Floating point regs: 2 slots each */
   if (regno >= FP0_REGNUM && regno <= FPLAST_REGNUM)
-    u_addr = (ustart + (PT_FPR0 + (regno - FP0_REGNUM) * 2) * 4);
+    u_addr = ((PT_FPR0 + (regno - FP0_REGNUM) * 2) * 4);
 
   /* UISA special purpose registers: 1 slot each */
   if (regno == PC_REGNUM)
-    u_addr = ustart + PT_NIP * 4;
+    u_addr = PT_NIP * 4;
   if (regno == gdbarch_tdep (current_gdbarch)->ppc_lr_regnum)
-    u_addr = ustart + PT_LNK * 4;
+    u_addr = PT_LNK * 4;
   if (regno == gdbarch_tdep (current_gdbarch)->ppc_cr_regnum)
-    u_addr = ustart + PT_CCR * 4;
+    u_addr = PT_CCR * 4;
   if (regno == gdbarch_tdep (current_gdbarch)->ppc_xer_regnum)
-    u_addr = ustart + PT_XER * 4;
+    u_addr = PT_XER * 4;
   if (regno == gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum)
-    u_addr = ustart + PT_CTR * 4;
+    u_addr = PT_CTR * 4;
   if (regno == gdbarch_tdep (current_gdbarch)->ppc_mq_regnum)
-    u_addr = ustart + PT_MQ * 4;
+    u_addr = PT_MQ * 4;
   if (regno == gdbarch_tdep (current_gdbarch)->ppc_ps_regnum)
-    u_addr = ustart + PT_MSR * 4;
+    u_addr = PT_MSR * 4;
 
   return u_addr;
+}
+
+static int
+ppc_ptrace_cannot_fetch_store_register (int regno)
+{
+  return (ppc_register_u_addr (regno) == -1);
+}
+
+static void
+fetch_register (int regno)
+{
+  /* This isn't really an address.  But ptrace thinks of it as one.  */
+  char mess[128];              /* For messages */
+  register int i;
+  unsigned int offset;         /* Offset of registers within the u area. */
+  char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+  int tid;
+  CORE_ADDR regaddr = ppc_register_u_addr (regno);
+
+  if (regaddr == -1)
+    {
+      memset (buf, '\0', REGISTER_RAW_SIZE (regno));   /* Supply zeroes */
+      supply_register (regno, buf);
+      return;
+    }
+
+  /* Overload thread id onto process id */
+  if ((tid = TIDGET (inferior_ptid)) == 0)
+    tid = PIDGET (inferior_ptid);      /* no thread id, just use process id */
+
+  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
+    {
+      errno = 0;
+      *(PTRACE_XFER_TYPE *) & buf[i] = ptrace (PT_READ_U, tid,
+					       (PTRACE_ARG3_TYPE) regaddr, 0);
+      regaddr += sizeof (PTRACE_XFER_TYPE);
+      if (errno != 0)
+	{
+	  sprintf (mess, "reading register %s (#%d)", 
+		   REGISTER_NAME (regno), regno);
+	  perror_with_name (mess);
+	}
+    }
+  supply_register (regno, buf);
+}
+
+static void 
+fetch_ppc_registers (void)
+{
+  int i;
+  int last_register = gdbarch_tdep (current_gdbarch)->ppc_mq_regnum;
+  
+  for (i = 0; i <= last_register; i++)
+    fetch_register (i);
+}
+
+/* Fetch registers from the child process.  Fetch all registers if
+   regno == -1, otherwise fetch all general registers or all floating
+   point registers depending upon the value of regno.  */
+void
+fetch_inferior_registers (int regno)
+{
+  if (regno == -1)
+    fetch_ppc_registers ();
+  else 
+    fetch_register (regno);
+}
+
+/* Store one register. */
+static void
+store_register (int regno)
+{
+  /* This isn't really an address.  But ptrace thinks of it as one.  */
+  CORE_ADDR regaddr = ppc_register_u_addr (regno);
+  char mess[128];              /* For messages */
+  register int i;
+  unsigned int offset;         /* Offset of registers within the u area.  */
+  int tid;
+  char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+
+  if (regaddr == -1)
+    {
+      return;
+    }
+
+  /* Overload thread id onto process id */
+  if ((tid = TIDGET (inferior_ptid)) == 0)
+    tid = PIDGET (inferior_ptid);      /* no thread id, just use process id */
+
+  regcache_collect (regno, buf);
+  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
+    {
+      errno = 0;
+      ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) regaddr,
+	      *(PTRACE_XFER_TYPE *) & buf[i]);
+      regaddr += sizeof (PTRACE_XFER_TYPE);
+      if (errno != 0)
+	{
+	  sprintf (mess, "writing register %s (#%d)", 
+		   REGISTER_NAME (regno), regno);
+	  perror_with_name (mess);
+	}
+    }
+}
+
+static void
+store_ppc_registers (void)
+{
+  int i;
+  int last_register = gdbarch_tdep (current_gdbarch)->ppc_mq_regnum;
+  
+  for (i = 0; i <= last_register; i++)
+    store_register (i);
+}
+
+void
+store_inferior_registers (int regno)
+{
+  if (regno >= 0)
+    store_register (regno);
+  else
+    store_ppc_registers ();
 }
 
 void
@@ -111,7 +246,6 @@ supply_gregset (gdb_gregset_t *gregsetp)
 		   (char *) (regp + PT_MQ));
   supply_register (gdbarch_tdep (current_gdbarch)->ppc_ps_regnum,
 		   (char *) (regp + PT_MSR));
- 
 }
 
 void

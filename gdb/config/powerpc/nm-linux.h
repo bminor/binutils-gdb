@@ -28,10 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define KERNEL_U_SIZE kernel_u_size()
 extern int kernel_u_size (void);
 
-#define U_REGS_OFFSET 0
-
-extern int ppc_register_u_addr (int, int);
-#define REGISTER_U_ADDR(addr, blockend, regno) \
-        (addr) = ppc_register_u_addr ((blockend),(regno));
+#define FETCH_INFERIOR_REGISTERS
 
 #endif /* #ifndef NM_LINUX_H */
