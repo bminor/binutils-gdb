@@ -1,3 +1,8 @@
+2003-10-22  James E Wilson  <wilson@specifixinc.com>
+
+	* MAINTAINERS: Move myself from paper trail section back to write
+	after approval section.
+
 2003-10-22  Andrew Cagney  <cagney@redhat.com>
 
 	* exec.h: New file.
