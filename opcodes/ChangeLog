@@ -1,3 +1,10 @@
+Mon Dec  1 12:25:57 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* m68k-opc.c (btst): Change Dd@s to Dd;b.
+
+	* m68k-dis.c (print_insn_arg): Recognize 'm', 'n', 'o', 'p', 'q',
+	and 'v' as operand types.
+
 Mon Dec  1 11:56:50 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* m68k-opc.c: Add argument for lpstop.  From Olivier Carmona
