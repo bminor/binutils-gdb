@@ -845,6 +845,16 @@ obj_elf_text (i)
 #endif
 }
 
+/* This can be called from the processor backends if they change
+   sections.  */
+
+void
+obj_elf_section_change_hook ()
+{
+  previous_section = now_seg;
+  previous_subsection = now_subseg;
+}
+
 void
 obj_elf_previous (ignore)
      int ignore;
@@ -1362,10 +1372,11 @@ elf_frob_symbol (symp, puntp)
     }
 
 #ifdef TC_MIPS
-  /* The Irix 5 assembler appears to set the type of any common symbol
-     to STT_OBJECT.  We try to be compatible, since the Irix 5 linker
-     apparently sometimes cares.  FIXME: What about Irix 6?  */
-  if (S_IS_COMMON (symp))
+  /* The Irix 5 and 6 assemblers set the type of any common symbol and
+     any undefined non-function symbol to STT_OBJECT.  We try to be compatible,
+     since newer Irix 5 and 6 linkers care.  */
+  if (S_IS_COMMON (symp)
+      || (! S_IS_DEFINED (symp) && ((symp->bsym->flags & BSF_FUNCTION) == 0)))
     symp->bsym->flags |= BSF_OBJECT;
 #endif
 
