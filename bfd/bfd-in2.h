@@ -1920,19 +1920,18 @@ struct reloc_howto_struct
      links (e.g. GOT stuff) it doesn't matter what this is set to.  */
   bfd_boolean partial_inplace;
 
-  /* The src_mask selects which parts of the read in data
-     are to be used in the relocation sum.  E.g., if this was an 8 bit
-     byte of data which we read and relocated, this would be
-     0x000000ff.  When we have relocs which have an addend, such as
-     sun4 extended relocs, the value in the offset part of a
-     relocating field is garbage so we never use it.  In this case
-     the mask would be 0x00000000.  */
+  /* src_mask selects the part of the instruction (or data) to be used
+     in the relocation sum.  If the target relocations don't have an
+     addend in the reloc, eg. ELF USE_REL, src_mask will normally equal
+     dst_mask to extract the addend from the section contents.  If
+     relocations do have an addend in the reloc, eg. ELF USE_RELA, this
+     field should be zero.  Non-zero values for ELF USE_RELA targets are
+     bogus as in those cases the value in the dst_mask part of the
+     section contents should be treated as garbage.  */
   bfd_vma src_mask;
 
-  /* The dst_mask selects which parts of the instruction are replaced
-     into the instruction.  In most cases src_mask == dst_mask,
-     except in the above special case, where dst_mask would be
-     0x000000ff, and src_mask would be 0x00000000.  */
+  /* dst_mask selects which parts of the instruction (or data) are
+     replaced with a relocated value.  */
   bfd_vma dst_mask;
 
   /* When some formats create PC relative instructions, they leave

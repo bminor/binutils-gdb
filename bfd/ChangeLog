@@ -1,3 +1,9 @@
+2002-12-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd/reloc.c (struct reloc_howto_struct): Revise src_mask and
+	dst_mask comments.
+	* bfd-in2.h: Regenerate.
+
 2002-12-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Reorganize dynamic reloc
