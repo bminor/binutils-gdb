@@ -1,3 +1,10 @@
+Wed Jul 22 16:29:12 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (dump_relocations): Add dumps of HPPA and ARC
+	relocations.
+
+	(process_relocs): Do not abort if no string table can be found.
+
 1998-07-22 14:58  Ulrich Drepper  <drepper@cygnus.com>
 
 	* readelf.c: Remove definition of functions to return relocation

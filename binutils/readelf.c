@@ -28,11 +28,35 @@
 #include <time.h>
 
 #include "bfd.h"
+
 #include "elf/common.h"
-#include "elf/i386.h"
-#include "elf/v850.h"
 #include "elf/external.h"
 #include "elf/internal.h"
+
+/* The following headers use the elf/reloc-macros.h file to
+   automatically generate relocation recognition functions
+   such as elf_mips_reloc_type()  */
+
+#define RELOC_MACROS_GEN_FUNC
+
+#include "elf/i386.h"
+#include "elf/v850.h"
+#include "elf/ppc.h"
+#include "elf/mips.h"
+#include "elf/alpha.h"
+#include "elf/arm.h"
+#include "elf/m68k.h"
+#include "elf/sparc.h"
+#include "elf/m32r.h"
+#include "elf/d10v.h"
+/* start-sanitize-d30v */
+#include "elf/d30v.h"
+/* end-sanitize-d30v */
+#include "elf/sh.h"
+#include "elf/mn10200.h"
+#include "elf/mn10300.h"
+#include "elf/hppa.h"
+#include "elf/arc.h"
 
 #include "bucomm.h"
 #include "getopt.h"
@@ -80,22 +104,6 @@ char 			dump_sects [NUM_DUMP_SECTS];
 /* Forward declarations for dumb compilers.  */
 static const char * get_mips_dynamic_type PARAMS ((unsigned long type));
 static const char * get_dynamic_type PARAMS ((unsigned long type));
-static const char * elf_i386_reloc_type    PARAMS ((unsigned long rtype));
-static const char * elf_m68k_reloc_type    PARAMS ((unsigned long rtype));
-static const char * elf_sparc_reloc_type   PARAMS ((unsigned long rtype));
-static const char * elf_m32r_reloc_type    PARAMS ((unsigned long rtype));
-static const char * elf_v850_reloc_type    PARAMS ((unsigned long rtype));
-static const char * elf_d10v_reloc_type    PARAMS ((unsigned long rtype));
-/* start-sanitize-d30v */
-static const char * elf_d30v_reloc_type    PARAMS ((unsigned long rtype));
-/* end-sanitize-d30v */
-static const char * elf_sh_reloc_type      PARAMS ((unsigned long rtype));
-static const char * elf_mn10300_reloc_type PARAMS ((unsigned long rtype));
-static const char * elf_mn10200_reloc_type PARAMS ((unsigned long rtype));
-static const char * elf_ppc_reloc_type	   PARAMS ((unsigned long rtype));
-static const char * elf_mips_reloc_type	   PARAMS ((unsigned long rtype));
-static const char * elf_alpha_reloc_type   PARAMS ((unsigned long rtype));
-static const char * elf_arm_reloc_type     PARAMS ((unsigned long rtype));
 static int    dump_relocations
   PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Sym *, char *));
 static char * get_file_type     PARAMS ((unsigned e_type));
@@ -282,121 +290,6 @@ byte_get_big_endian (field, size)
 }
 
 
-/* Define the macros we need to define the relocation recognition functions. */
-#define START_RELOC_NUMBERS(name)  static const char *			      \
-				   name (rtype)				      \
-				        unsigned long rtype;		      \
-				   {					      \
-				     switch (rtype) {
-#ifdef __STDC__
-# define RELOC_NUMBER(name, number)    case number: return #name;
-#else
-# define RELOC_NUMBER(name, number)    case number: return "name";
-#endif
-#define END_RELOC_NUMBERS              default: return NULL;		      \
-				     }					      \
-				   }
-
-/* Define the i386 relocations.  */
-static const char *
-elf_i386_reloc_type (rtype)
-     unsigned long rtype;
-{
-  switch (rtype)
-    {
-    case R_386_NONE:     return "R_386_NONE";
-    case R_386_32:       return "R_386_32";
-    case R_386_PC32:     return "R_386_PC32";
-    case R_386_GOT32:    return "R_386_GOT32";
-    case R_386_PLT32:    return "R_386_PLT32";
-    case R_386_COPY:     return "R_386_COPY";
-    case R_386_GLOB_DAT: return "R_386_GLOB_DAT";
-    case R_386_JMP_SLOT: return "R_386_JMP_SLOT";
-    case R_386_RELATIVE: return "R_386_RELATIVE";
-    case R_386_GOTOFF:   return "R_386_GOTOFF";
-    case R_386_GOTPC:    return "R_386_GOTPC";
-    case R_386_16:       return "R_386_16";
-    case R_386_PC16:     return "R_386_PC16";
-    case R_386_PC8:      return "R_386_PC8";
-    default:             return NULL;
-    }
-}
-
-/* Define the m68k relocations.  */
-#include "elf/m68k.h"
-
-/* Define the SPARC relocations.  */
-#include "elf/sparc.h"
-
-/* Define the m32r relocations.  */
-#include "elf/m32r.h"
-
-
-static const char *
-elf_v850_reloc_type (rtype)
-     unsigned long rtype;
-{
-  switch (rtype)
-    {
-    case R_V850_NONE: return "R_V850_NONE";
-    case R_V850_9_PCREL: return "R_V850_9_PCREL";
-    case R_V850_22_PCREL: return "R_V850_22_PCREL";
-    case R_V850_HI16_S: return "R_V850_HI16_S";
-    case R_V850_HI16: return "R_V850_HI16";
-    case R_V850_LO16: return "R_V850_LO16";
-    case R_V850_32: return "R_V850_32";
-    case R_V850_16: return "R_V850_16";
-    case R_V850_8: return "R_V850_8";
-    case R_V850_SDA_16_16_OFFSET: return "R_V850_SDA_16_16_OFFSET";
-    case R_V850_SDA_15_16_OFFSET: return "R_V850_SDA_15_16_OFFSET";
-    case R_V850_ZDA_16_16_OFFSET: return "R_V850_ZDA_16_16_OFFSET";
-    case R_V850_ZDA_15_16_OFFSET: return "R_V850_ZDA_15_16_OFFSET";
-    case R_V850_TDA_6_8_OFFSET: return "R_V850_TDA_6_8_OFFSET";
-    case R_V850_TDA_7_8_OFFSET: return "R_V850_TDA_7_8_OFFSET";
-    case R_V850_TDA_7_7_OFFSET: return "R_V850_TDA_7_7_OFFSET";
-    case R_V850_TDA_16_16_OFFSET: return "R_V850_TDA_16_16_OFFSET";
-/* start-sanitize-v850e */
-    case R_V850_TDA_4_5_OFFSET: return "R_V850_TDA_4_5_OFFSET";
-    case R_V850_TDA_4_4_OFFSET: return "R_V850_TDA_4_4_OFFSET";
-    case R_V850_SDA_16_16_SPLIT_OFFSET: return "R_V850_SDA_16_16_SPLIT_OFFSET";
-    case R_V850_ZDA_16_16_SPLIT_OFFSET: return "R_V850_ZDA_16_16_SPLIT_OFFSET";
-    case R_V850_CALLT_6_7_OFFSET: return "R_V850_CALLT_6_7_OFFSET";
-    case R_V850_CALLT_16_16_OFFSET: return "R_V850_CALLT_16_16_OFFSET";
-/* end-sanitize-v850e */
-    default:		 return NULL;
-    }
-}
-
-/* Define the function to get ARM relocations.  */
-#include "elf/d10v.h"
-
-/* start-sanitize-d30v */
-/* Define the function to get ARM relocations.  */
-#include "elf/d30v.h"
-
-/* end-sanitize-d30v */
-/* Define the function to get SH relocations.  */
-#include "elf/sh.h"
-
-/* Define the function to get MN10300 relocations.  */
-#include "elf/mn10300.h"
-
-/* Define the function to get MN10200 relocations.  */
-#include "elf/mn10200.h"
-
-/* Define the function to get PPC relocations.  */
-#include "elf/ppc.h"
-
-/* Define the function to get MIPS relocations.  */
-#include "elf/mips.h"
-
-/* Define the function to get MIPS relocations.  */
-#include "elf/alpha.h"
-
-/* Define the function to get ARM relocations.  */
-#include "elf/arm.h"
-
-
 /* Display the contents of the relocation data
    found at the specified offset.  */
 static int
@@ -539,7 +432,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
 	  break;
 
 	case EM_CYGNUS_V850:
-	  rtype = elf_v850_reloc_type (ELF32_R_TYPE (info));
+	  rtype = v850_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	case EM_CYGNUS_D10V:
@@ -565,7 +458,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
 	  break;
 
 	case EM_PPC:
-	  rtype = elf_ppc_reloc_type (ELF32_R_TYPE (info));
+	  rtype = ppc_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	case EM_MIPS:
@@ -579,6 +472,14 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
 
 	case EM_ARM:
 	  rtype = elf_arm_reloc_type (ELF32_R_TYPE (info));
+	  break;
+	  
+	case EM_CYGNUS_ARC:
+	  rtype = elf_arc_reloc_type (ELF32_R_TYPE (info));
+	  break;
+	  
+	case EM_PARISC:
+	  rtype = elf32_hppa_reloc_type (ELF32_R_TYPE (info));
 	  break;
 	}
 
@@ -797,6 +698,7 @@ get_machine_name (e_machine)
       /* start-sanitize-d30v */
     case EM_CYGNUS_D30V:        return "d30v";
       /* end-sanitize-d30v */
+    case EM_CYGNUS_ARC:		return "Arc";
     case EM_CYGNUS_M32R:	return "M32r";
     case EM_CYGNUS_V850:	return "v850";
     case EM_CYGNUS_MN10300:	return "mn10300";
@@ -1730,11 +1632,9 @@ process_relocs (file)
     }
   else
     {
-      Elf32_Internal_Shdr *    section;
-      unsigned long i;
-      int           found = 0;
-
-      assert (string_table != NULL);
+      Elf32_Internal_Shdr *     section;
+      unsigned long 		i;
+      int           		found = 0;
 
       for (i = 0, section = section_headers;
 	   i < elf_header.e_shnum;
@@ -1754,10 +1654,15 @@ process_relocs (file)
 	      Elf_Internal_Sym *    symtab;
 	      char *                strtab;
 
-	      printf
-		(_("\nRelocation section '%s' at offset 0x%x contains %d entries:\n"),
-		 SECTION_NAME (section), rel_offset,
-		 rel_size / section->sh_entsize);
+	      printf (_("\nRelocation section "));
+	      
+	      if (string_table == NULL)
+		printf ("%d", section->sh_name);
+	      else
+		printf ("'%s'", SECTION_NAME (section));
+	      
+	      printf (_(" at offset 0x%x contains %d entries:\n"),
+		 rel_offset, rel_size / section->sh_entsize);
 
 	      symsec = section_headers + section->sh_link;
 
