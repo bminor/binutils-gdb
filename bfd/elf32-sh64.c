@@ -89,6 +89,7 @@ static void sh64_find_section_for_address
 #define elf_backend_final_write_processing 	sh64_elf_final_write_processing
 #define elf_backend_section_from_shdr		sh64_backend_section_from_shdr
 #define elf_backend_special_sections		sh64_elf_special_sections
+#define elf_backend_section_flags		sh64_elf_section_flags
 
 #define bfd_elf32_new_section_hook		sh64_elf_new_section_hook
 
@@ -149,7 +150,6 @@ static bfd_boolean
 sh64_elf_set_mach_from_flags (bfd *abfd)
 {
   flagword flags = elf_elfheader (abfd)->e_flags;
-  asection *cranges;
 
   switch (flags & EF_SH_MACH_MASK)
     {
@@ -164,17 +164,18 @@ sh64_elf_set_mach_from_flags (bfd *abfd)
       return FALSE;
     }
 
-  /* We also need to set SEC_DEBUGGING on an incoming .cranges section.
-     We could have used elf_backend_section_flags if it had given us the
-     section name; the bfd_section member in the header argument is not
-     set at the point of the call.  FIXME: Find out whether that is by
-     undocumented design or a bug.  */
-  cranges = bfd_get_section_by_name (abfd, SH64_CRANGES_SECTION_NAME);
-  if (cranges != NULL
-      && ! bfd_set_section_flags (abfd, cranges,
-				  bfd_get_section_flags (abfd, cranges)
-				  | SEC_DEBUGGING))
+  return TRUE;
+}
+
+static bfd_boolean
+sh64_elf_section_flags (flagword *flags,
+			const Elf_Internal_Shdr *hdr)
+{
+  if (hdr->bfd_section == NULL)
     return FALSE;
+
+  if (strcmp (hdr->bfd_section->name, SH64_CRANGES_SECTION_NAME) == 0)
+    *flags |= SEC_DEBUGGING;
 
   return TRUE;
 }

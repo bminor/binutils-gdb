@@ -1,3 +1,11 @@
+2004-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-sh64.c (elf_backend_section_flags): New. Defined.
+	(sh64_elf_set_mach_from_flags): Remove the kludge for .cranges
+	section.
+	(sh64_elf_section_flags): New. Set SEC_DEBUGGING for .cranges
+	section.
+
 2004-04-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-alpha.c (elf64_alpha_read_ecoff_info): Don't assign
