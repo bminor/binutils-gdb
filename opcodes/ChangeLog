@@ -1,4 +1,15 @@
+Tue Jul 11 14:23:37 1995  Jeff Spiegel  <jeffs@lsil.com>
+
+	* mips-opc.c (L1): Define.
+	(mips_opcodes): Add R4010 instructions: flushi, flushd, flushid,
+	addciu, madd, maddu, ffc, ffs, msub, msubu, selsi, selsr, waiti,
+	and wb.
+
 Tue Jul 11 11:49:49 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-opc.c (mips_opcodes): For the move pseudo-op, prefer daddu
+	if ISA 3 and addu otherwise, replacing or, since some MIPS chips
+	have multiple add units but only a single logical unit.
 
 	* ppc-opc.c (powerpc_operands): Change CR to use a bitsize of 3,
 	shifted by 18, without any insertion or extraction function.
