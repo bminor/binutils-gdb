@@ -1,3 +1,9 @@
+2003-05-29  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb_assert.h (gdb_assert_fail): Provide different definitions
+	dependant on the availability of ASSERT_FUNCTION.
+	(ASSERT_FUNCTION): Do not define when there is no function name.
+
 2003-05-29  Kevin Buettner  <kevinb@redhat.com>
 
 	From Jimi X <jimix@watson.ibm.com>:
