@@ -1,3 +1,9 @@
+start-sanitize-cygnus
+Fri Feb  5 19:25:50 1999  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-m32r.c (assemble_two_insns): Always call fill_insn.
+
+end-sanitize-cygnus
 1999-02-05  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.h: Tidy OBJ_ELF and OBJ_COFF definitions.

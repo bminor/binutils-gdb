@@ -90,7 +90,7 @@ static const char * m32r_cpu_desc;
    shouldn't assume or require it to).  */
 static int warn_unmatched_high = 0;
 
-/* start-sanitize-m32rx */
+/* start-sanitize-cygnus */
 /* Non-zero if -m32rx has been specified, in which case support for the
    extended M32RX instruction set should be enabled.  */
 static int enable_m32rx = 0;
@@ -105,7 +105,7 @@ static int warn_explicit_parallel_conflicts = 1;
 
 /* Non-zero if insns can be made parallel.  */
 static int optimize;
-/* end-sanitize-m32rx */
+/* end-sanitize-cygnus */
 
 /* stuff for .scomm symbols.  */
 static segT     sbss_section;
@@ -142,7 +142,7 @@ struct m32r_hi_fixup
 static struct m32r_hi_fixup * m32r_hi_fixup_list;
 
 
-/* start-sanitize-m32rx */
+/* start-sanitize-cygnus */
 static void
 allow_m32rx (on)
      int on;
@@ -153,18 +153,18 @@ allow_m32rx (on)
     bfd_set_arch_mach (stdoutput, TARGET_ARCH,
 		       enable_m32rx ? bfd_mach_m32rx : bfd_mach_m32r);
 }
-/* end-sanitize-m32rx */
+/* end-sanitize-cygnus */
 
 #define M32R_SHORTOPTS ""
-/* start-sanitize-m32rx */
+/* start-sanitize-cygnus */
 #undef M32R_SHORTOPTS
 #define M32R_SHORTOPTS "O"
-/* end-sanitize-m32rx */
+/* end-sanitize-cygnus */
 const char * md_shortopts = M32R_SHORTOPTS;
 
 struct option md_longopts[] =
 {
-/* start-sanitize-m32rx */
+/* start-sanitize-cygnus */
 #define OPTION_M32RX	(OPTION_MD_BASE)
   {"m32rx", no_argument, NULL, OPTION_M32RX},
 #define OPTION_WARN_PARALLEL	(OPTION_MD_BASE + 1)
@@ -175,7 +175,7 @@ struct option md_longopts[] =
   {"Wnp", no_argument, NULL, OPTION_NO_WARN_PARALLEL},
 #define OPTION_SPECIAL	(OPTION_MD_BASE + 3)
   {"hidden", no_argument, NULL, OPTION_SPECIAL},
-/* end-sanitize-m32rx */
+/* end-sanitize-cygnus */
 
   /* Sigh.  I guess all warnings must now have both variants.  */
 #define OPTION_WARN_UNMATCHED (OPTION_MD_BASE + 4)
@@ -203,7 +203,7 @@ md_parse_option (c, arg)
 {
   switch (c)
     {
-/* start-sanitize-m32rx */
+/* start-sanitize-cygnus */
     case 'O':
       optimize = 1;
       break;
@@ -232,7 +232,7 @@ md_parse_option (c, arg)
 	  return 0;
 	}
       break;
-/* end-sanitize-m32rx */
+/* end-sanitize-cygnus */
 
     case OPTION_WARN_UNMATCHED:
       warn_unmatched_high = 1;
@@ -263,7 +263,7 @@ md_show_usage (stream)
 {
   fprintf (stream, _(" M32R specific command line options:\n"));
 
-/* start-sanitize-m32rx */
+/* start-sanitize-cygnus */
   fprintf (stream, _("\
   -m32rx                  support the extended m32rx instruction set\n"));
   fprintf (stream, _("\
@@ -281,7 +281,7 @@ md_show_usage (stream)
   -Wp                     synonym for -warn-explicit-parallel-conflicts\n"));
   fprintf (stream, _("\
   -Wnp                    synonym for -no-warn-explicit-parallel-conflicts\n"));
-/* end-sanitize-m32rx */
+/* end-sanitize-cygnus */
 
   fprintf (stream, _("\
   -warn-unmatched-high    warn when an (s)high reloc has no matching low reloc\n"));
@@ -316,11 +316,11 @@ const pseudo_typeS md_pseudo_table[] =
   { "fillinsn", fill_insn,	0 },
   { "scomm",	m32r_scomm,	0 },
   { "debugsym",	debug_sym,	0 },
-/* start-sanitize-m32rx */
+/* start-sanitize-cygnus */
   /* Not documented as so far there is no need for them.... */  
   { "m32r",	allow_m32rx,	0 },
   { "m32rx",	allow_m32rx,	1 },
-/* end-sanitize-m32rx */
+/* end-sanitize-cygnus */
   { NULL, NULL, 0 }
 };
 
@@ -556,12 +556,12 @@ md_begin ()
   scom_symbol.name            = ".scommon";
   scom_symbol.section         = & scom_section;
 
-/* start-sanitize-m32rx */
+/* start-sanitize-cygnus */
   allow_m32rx (enable_m32rx);
-/* end-sanitize-m32rx */
+/* end-sanitize-cygnus */
 }
 
-/* start-sanitize-m32rx */
+/* start-sanitize-cygnus */
 
 #define OPERAND_IS_COND_BIT(operand, indices, index) 			\
 	(CGEN_OPERAND_INSTANCE_HW (operand)->type == HW_H_COND		\
@@ -747,12 +747,13 @@ assemble_two_insns (str, str2, parallel_p)
 
   * str2 = 0; /* Seperate the two instructions.  */
 
-  /* If there was a previous 16 bit insn, then fill the following 16 bit slot,
-     so that the parallel instruction will start on a 32 bit boundary.
+  /* Make sure the two insns begin on a 32 bit boundary.
      This is also done for the serial case (foo -> bar), relaxing doesn't
-     affect insns written like this.  */
-  if (prev_insn.insn)
-    fill_insn (0);
+     affect insns written like this.
+     Note that we must always do this as we can't assume anything about
+     whether we're currently on a 32 bit boundary or not.  Relaxing may
+     change this.  */
+  fill_insn (0);
 
   first.debug_sym_link = debug_sym_link;
   debug_sym_link = (sym_linkS *)0;
@@ -970,7 +971,7 @@ assemble_two_insns (str, str2, parallel_p)
   prev_subseg = now_subseg;
 }
 
-/* end-sanitize-m32rx */
+/* end-sanitize-cygnus */
 
 
 void
@@ -984,7 +985,7 @@ md_assemble (str)
   /* Initialize GAS's cgen interface for a new instruction.  */
   gas_cgen_init_parse ();
 
-/* start-sanitize-m32rx */
+/* start-sanitize-cygnus */
   /* Look for a parallel instruction seperator.  */
   if ((str2 = strstr (str, "||")) != NULL)
     {
@@ -998,7 +999,7 @@ md_assemble (str)
       assemble_two_insns (str, str2, 0);
       return;
     }
-/* end-sanitize-m32rx */
+/* end-sanitize-cygnus */
   
   insn.debug_sym_link = debug_sym_link;
   debug_sym_link = (sym_linkS *)0;
@@ -1012,7 +1013,7 @@ md_assemble (str)
       return;
     }
 
-/* start-sanitize-m32rx */
+/* start-sanitize-cygnus */
   if (! enable_special
       && CGEN_INSN_ATTR (insn.insn, CGEN_INSN_SPECIAL))
     {
@@ -1027,7 +1028,7 @@ md_assemble (str)
       as_bad (_("instruction '%s' is for the M32RX only"), str);
       return;
     }
-/* end-sanitize-m32rx */
+/* end-sanitize-cygnus */
   
   if (CGEN_INSN_BITSIZE (insn.insn) == 32)
     {
@@ -1049,15 +1050,15 @@ md_assemble (str)
   else
     {
       int on_32bit_boundary_p;
-/* start-sanitize-m32rx */
+/* start-sanitize-cygnus */
       int swap = false;
-/* end-sanitize-m32rx */
+/* end-sanitize-cygnus */
 
       if (CGEN_INSN_BITSIZE (insn.insn) != 16)
 	abort();
 
       insn.orig_insn = insn.insn;
-/* start-sanitize-m32rx */
+/* start-sanitize-cygnus */
       /* If the previous insn was relaxable, then it may be expanded
 	 to fill the current 16 bit slot.  Emit a NOP here to occupy
 	 this slot, so that we can start at optimizing at a 32 bit
@@ -1076,13 +1077,13 @@ md_assemble (str)
 	  if (insn.insn == NULL)
 	    as_fatal (_("internal error: lookup/get operands failed"));
 	}
-/* end-sanitize-m32rx */
+/* end-sanitize-cygnus */
 
       /* Compute whether we're on a 32 bit boundary or not.
 	 prev_insn.insn is NULL when we're on a 32 bit boundary.  */
       on_32bit_boundary_p = prev_insn.insn == NULL;
 
-/* start-sanitize-m32rx */
+/* start-sanitize-cygnus */
       /* Look to see if this instruction can be combined with the
 	 previous instruction to make one, parallel, 32 bit instruction.
 	 If the previous instruction (potentially) changed the flow of
@@ -1106,7 +1107,7 @@ md_assemble (str)
 	  else if (can_make_parallel (& insn, & prev_insn) == NULL)
 	    swap = true;
 	}
-/* end-sanitize-m32rx */
+/* end-sanitize-cygnus */
 
       expand_debug_syms (insn.debug_sym_link, 1);
 
@@ -1127,7 +1128,7 @@ md_assemble (str)
 	  insn.fixups[i] = fi.fixups[i];
       }
 
-/* start-sanitize-m32rx */
+/* start-sanitize-cygnus */
       if (swap)
 	{
 	  int i,tmp;
@@ -1155,7 +1156,7 @@ md_assemble (str)
 	  for (i = 0; i < insn.num_fixups; ++i)
 	    insn.fixups[i]->fx_where -= 2;
 	}
-/* end-sanitize-m32rx */
+/* end-sanitize-cygnus */
 
       /* Keep track of whether we've seen a pair of 16 bit insns.
 	 prev_insn.insn is NULL when we're on a 32 bit boundary.  */
