@@ -1,3 +1,11 @@
+Thu Apr 17 14:30:04 1997  Per Bothner  <bothner@deneb.cygnus.com>
+
+	* defs.h (enum language):  Add language_java.
+	* java-exp.y, java-lang.c, java-lang.h, java-valprint.c:  New files.
+	* Makefile.in:  Upadte for new files.
+	* objfiles.c (allocate_objfile):  Allow NULL bfd argument.
+	* symfile.c (deduce_language_from_filename):  Recognize .java.
+
 Thu Apr 17 02:20:23 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* m32r-stub.c (stash_registers): Rewrite.

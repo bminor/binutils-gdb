@@ -1,4 +1,4 @@
-# Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
+# Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997
 # Free Software Foundation, Inc.
 
 # This file is part of GDB.
@@ -357,6 +357,7 @@ SFILES = bcache.c blockframe.c breakpoint.c buildsym.c c-exp.y \
 	elfread.c environ.c eval.c expprint.c \
 	f-exp.y f-lang.c f-typeprint.c f-valprint.c findvar.c \
 	gdbtypes.c infcmd.c inflow.c infrun.c language.c \
+	java-exp.y java-lang.c java-valprint.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c main.c maint.c \
 	mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c parse.c \
 	printcmd.c remote.c remote-nrom.c scm-exp.c scm-lang.c scm-valprint.c \
@@ -382,6 +383,7 @@ remote-sim_h =	$(INCLUDE_DIR)/remote-sim.h
 
 dcache_h = dcache.h
 remote_utils_h = $(dcache_h) serial.h target.h remote-utils.h $(remote-sim_h)
+
 
 readline_headers = \
 	$(READLINE_SRC)/chardefs.h \
@@ -425,7 +427,7 @@ HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	gdb-stabs.h $(inferior_h) language.h minimon.h monitor.h \
 	objfiles.h parser-defs.h partial-stab.h serial.h signals.h solib.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
-	c-lang.h ch-lang.h f-lang.h m2-lang.h \
+	c-lang.h ch-lang.h f-lang.h java-lang.h m2-lang.h \
 	complaints.h valprint.h \
 	29k-share/udi/udiids.h 29k-share/udi_soc nindy-share/b.out.h \
 	nindy-share/block_io.h nindy-share/coff.h \
@@ -471,7 +473,8 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	exec.o bcache.o objfiles.o minsyms.o maint.o demangle.o \
 	dbxread.o coffread.o elfread.o \
 	dwarfread.o dwarf2read.o mipsread.o stabsread.o corefile.o \
-	c-lang.o ch-exp.o ch-lang.o f-lang.o m2-lang.o \
+	c-lang.o ch-exp.o ch-lang.o f-lang.o \
+	java-lang.o java-valprint.o m2-lang.o \
 	scm-exp.o scm-lang.o scm-valprint.o complaints.o typeprint.o \
 	c-typeprint.o ch-typeprint.o f-typeprint.o m2-typeprint.o \
 	c-valprint.o cp-valprint.o ch-valprint.o f-valprint.o m2-valprint.o \
@@ -490,8 +493,8 @@ NTSSTART = kdb-start.o
 SUBDIRS = doc testsuite nlm
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
-YYFILES = c-exp.tab.c f-exp.tab.c m2-exp.tab.c
-YYOBJ = c-exp.tab.o f-exp.tab.o m2-exp.tab.o
+YYFILES = c-exp.tab.c java-exp.tab.c f-exp.tab.c m2-exp.tab.c
+YYOBJ = c-exp.tab.o java-exp.tab.o f-exp.tab.o m2-exp.tab.o
 
 # Things which need to be built when making a distribution.
 
@@ -543,7 +546,14 @@ install-only:
 		$(INSTALL_DATA) $(srcdir)/gdb.1 $(man1dir)/$$transformed_name.1
 	# start-sanitize-gdbtk
 	if [ x"$(ENABLE_GDBTK)" != x ] ; then \
-		  $(INSTALL_DATA) $(srcdir)/gdbtk.tcl $(datadir)/gdbtk.tcl ; \
+		  echo "Making directory gdbtcl"; \
+		  mkdir $(datadir)/gdbtcl; \
+		  chmod 755 $(datadir)/gdbtcl; \
+		  cd $(srcdir)/gdbtcl ; \
+		  	for i in * ; \
+		    do \
+		      $(INSTALL_DATA) $$i $(datadir)/gdbtcl/$$i ; \
+		    done ; \
 		else \
 		  true ; \
 		fi
@@ -559,11 +569,6 @@ uninstall: force
 		  true ; \
 		fi ; \
 		rm -f $(bindir)/$$transformed_name $(man1dir)/$$transformed_name.1
-	# start-sanitize-gdbtk
-	if [ x"$(ENABLE_GDBTK)" != x ] ; then \
-		rm -f $(datadir)/gdbtk.tcl ; \
-	fi
-	# end-sanitize-gdbtk
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 # We do this by grepping through sources.  If that turns out to be too slow,
@@ -635,10 +640,10 @@ libgdb-files: $(LIBGDBDEPS) Makefile.in
 saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#setopt load_flags $(CFLAGS) $(BFD_CFLAGS) -DHOST_SYS=SUN4_SYS
 	#load ./init.c $(SFILES)
-	#unload $(srcdir)/c-exp.y $(srcdir)/m2-exp.y
+	#unload $(srcdir)/c-exp.y $(srcdir)/java-exp.y $(srcdir)/m2-exp.y
 	#unload vx-share/*.h
 	#unload nindy-share/[A-Z]*
-	#load c-exp.tab.c m2-exp.tab.c
+	#load c-exp.tab.c java-exp.tab.c m2-exp.tab.c
 	#load copying.c version.c
 	#load ../opcodes/libopcodes.a
 	#load ../libiberty/libiberty.a
@@ -733,7 +738,7 @@ clean mostlyclean:
 # functionality described is if the distributed files are unmodified.
 distclean: clean
 	@$(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(SUBDIRS)" subdir_do 
-	rm -f nm.h tm.h xm.h config.status config.h stamp-h
+	rm -f nm.h tm.h xm.h config.status config.h stamp-h .gdbinit
 	rm -f y.output yacc.acts yacc.tmp y.tab.h
 	rm -f config.log config.cache
 	rm -f Makefile
@@ -742,7 +747,7 @@ maintainer-clean realclean: clean
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 	@$(MAKE) $(FLAGS_TO_PASS) DO=maintainer-clean "DODIRS=$(SUBDIRS)" subdir_do
-	rm -f c-exp.tab.c f-exp.tab.c m2-exp.tab.c
+	rm -f c-exp.tab.c java-exp.tab.c f-exp.tab.c m2-exp.tab.c
 	rm -f TAGS $(INFOFILES)
 	rm -f nm.h tm.h xm.h config.status
 	rm -f y.output yacc.acts yacc.tmp
@@ -821,6 +826,19 @@ c-exp.tab.c: c-exp.y
 	-rm y.tab.c
 	mv c-exp.new ./c-exp.tab.c
 
+java-exp.tab.o: java-exp.tab.c
+java-exp.tab.c: java-exp.y
+	$(YACC) $(YFLAGS) $(srcdir)/java-exp.y
+	-sed -e '/extern.*malloc/d' \
+	     -e '/extern.*realloc/d' \
+	     -e '/extern.*free/d' \
+	     -e '/include.*malloc.h/d' \
+	     -e 's/malloc/xmalloc/g' \
+	     -e 's/realloc/xrealloc/g' \
+	  < y.tab.c > java-exp.new
+	-rm y.tab.c
+	mv java-exp.new ./java-exp.tab.c
+
 f-exp.tab.o: f-exp.tab.c
 f-exp.tab.c: f-exp.y c-exp.tab.c
 	$(YACC) $(YFLAGS) $(srcdir)/f-exp.y
@@ -852,7 +870,7 @@ m2-exp.tab.c: m2-exp.y
 	mv m2-exp.new ./m2-exp.tab.c
 
 # These files are updated atomically, so make never has to remove them
-.PRECIOUS: m2-exp.tab.c f-exp.tab.c c-exp.tab.c
+.PRECIOUS: m2-exp.tab.c java-exp.tab.c f-exp.tab.c c-exp.tab.c
 
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
@@ -1140,7 +1158,7 @@ fork-child.o: fork-child.c $(wait_h) $(defs_h) $(gdbcore_h) \
 gdbtk.o: gdbtk.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(bfd_h) symfile.h objfiles.h target.h gdb_string.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
-		$(srcdir)/gdbtk.c -DGDBTK_FILENAME=\"$(datadir)/gdbtk.tcl\"
+		$(srcdir)/gdbtk.c -DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
 # end-sanitize-gdbtk
 
 gdbtypes.o: gdbtypes.c $(bfd_h) complaints.h $(defs_h) $(expression_h) \
@@ -1506,6 +1524,10 @@ symtab.o: symtab.c call-cmds.h $(defs_h) $(expression_h) $(frame_h) \
 tahoe-tdep.o: tahoe-tdep.c $(OP_INCLUDE)/tahoe.h $(defs_h) \
 	$(symtab_h)
 
+#start-sanitize-tic80
+tic80-tdep.o: tic80-tdep.c $(defs_h)
+#end-sanitize-tic80
+
 target.o: target.c $(bfd_h) $(defs_h) $(gdbcmd_h) $(inferior_h) \
 	objfiles.h symfile.h target.h gdb_string.h
 
@@ -1573,6 +1595,10 @@ z8k-tdep.o: z8k-tdep.c $(bfd_h) $(dis-asm_h) $(defs_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbtypes_h) $(symtab_h) $(gdbcore_h)
 
 c-exp.tab.o: c-exp.tab.c c-lang.h $(defs_h) $(expression_h) \
+	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h) \
+	$(bfd_h) objfiles.h symfile.h
+
+java-exp.tab.o: java-exp.tab.c java-lang.h $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h) \
 	$(bfd_h) objfiles.h symfile.h
 

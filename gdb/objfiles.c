@@ -130,6 +130,7 @@ allocate_objfile (abfd, mapped)
   mapped |= mapped_symbol_files;
 
 #if !defined(NO_MMALLOC) && defined(HAVE_MMAP)
+  if (abfd != NULL)
   {
 
     /* If we can support mapped symbol files, try to open/reopen the
@@ -254,15 +255,18 @@ allocate_objfile (abfd, mapped)
     {
       mfree (objfile -> md, objfile -> name);
     }
-  objfile -> name = mstrsave (objfile -> md, bfd_get_filename (abfd));
-  objfile -> mtime = bfd_get_mtime (abfd);
-
-  /* Build section table.  */
-
-  if (build_objfile_section_table (objfile))
+  if (abfd != NULL)
     {
-      error ("Can't find the file sections in `%s': %s", 
-	     objfile -> name, bfd_errmsg (bfd_get_error ()));
+      objfile -> name = mstrsave (objfile -> md, bfd_get_filename (abfd));
+      objfile -> mtime = bfd_get_mtime (abfd);
+
+      /* Build section table.  */
+
+      if (build_objfile_section_table (objfile))
+	{
+	  error ("Can't find the file sections in `%s': %s", 
+		 objfile -> name, bfd_errmsg (bfd_get_error ()));
+	}
     }
 
   /* Add this file onto the tail of the linked list of other such files. */

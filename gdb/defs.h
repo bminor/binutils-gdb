@@ -134,6 +134,7 @@ enum language
    language_auto,		/* Placeholder for automatic setting */
    language_c, 			/* C */
    language_cplus, 		/* C++ */
+   language_java,		/* Java */
    language_chill,		/* Chill */
    language_fortran,		/* Fortran */
    language_m2,			/* Modula-2 */
@@ -231,11 +232,11 @@ extern void request_quit PARAMS ((int));
 
 extern void do_cleanups PARAMS ((struct cleanup *));
 extern void do_final_cleanups PARAMS ((struct cleanup *));
-extern void do_my_cleanups PARAMS ((struct cleanup *, struct cleanup *));
+extern void do_my_cleanups PARAMS ((struct cleanup **, struct cleanup *));
 
 extern void discard_cleanups PARAMS ((struct cleanup *));
 extern void discard_final_cleanups PARAMS ((struct cleanup *));
-extern void discard_my_cleanups PARAMS ((struct cleanup *, struct cleanup *));
+extern void discard_my_cleanups PARAMS ((struct cleanup **, struct cleanup *));
 
 /* The bare make_cleanup function is one of those rare beasts that
    takes almost any type of function as the first arg and anything that
@@ -254,15 +255,15 @@ extern struct cleanup *make_cleanup ();
 extern struct cleanup *
 make_final_cleanup PARAMS ((void (*function) (void *), void *));
 extern struct cleanup *
-make_my_cleanup PARAMS ((struct cleanup *, void (*function) (void *), void *));
+make_my_cleanup PARAMS ((struct cleanup **, void (*function) (void *), void *));
 
 extern struct cleanup *save_cleanups PARAMS ((void));
 extern struct cleanup *save_final_cleanups PARAMS ((void));
-extern struct cleanup *save_my_cleanups PARAMS ((struct cleanup *));
+extern struct cleanup *save_my_cleanups PARAMS ((struct cleanup **));
 
 extern void restore_cleanups PARAMS ((struct cleanup *));
 extern void restore_final_cleanups PARAMS ((struct cleanup *));
-extern void restore_my_cleanups PARAMS ((struct cleanup *, struct cleanup *));
+extern void restore_my_cleanups PARAMS ((struct cleanup **, struct cleanup *));
 
 extern void free_current_contents PARAMS ((char **));
 
@@ -549,6 +550,8 @@ enum val_prettyprint
 #define	LONG_MAX ((long)(ULONG_MAX >> 1))	/* 0x7FFFFFFF for 32-bits */
 #endif
 
+#ifndef LONGEST
+
 #ifdef BFD64
 
 /* This is to make sure that LONGEST is at least as big as CORE_ADDR.  */
@@ -558,17 +561,24 @@ enum val_prettyprint
 
 #else /* No BFD64 */
 
-#ifndef LONGEST
 #  ifdef CC_HAS_LONG_LONG
 #    define LONGEST long long
 #    define ULONGEST unsigned long long
 #  else
-#    define LONGEST long
-#    define ULONGEST unsigned long
+/* BFD_HOST_64_BIT is defined for some hosts that don't have long long
+   (e.g. i386-windows) so try it.  */
+#    ifdef BFD_HOST_64_BIT
+#      define LONGEST BFD_HOST_64_BIT
+#      define ULONGEST BFD_HOST_U_64_BIT
+#    else
+#      define LONGEST long
+#      define ULONGEST unsigned long
+#    endif
 #  endif
-#endif
 
 #endif /* No BFD64 */
+
+#endif /* ! LONGEST */
 
 /* Convert a LONGEST to an int.  This is used in contexts (e.g. number of
    arguments to a function, number in a value history, register number, etc.)
