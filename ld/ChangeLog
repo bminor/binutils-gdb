@@ -1,3 +1,17 @@
+Mon Apr 27 11:56:21 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/elf32.em (global_vercheck_needed): New file static
+	variable.
+	(global_vercheck_failed): New file static variable.
+	(gld${EMULATION_NAME}_after_open): Check for shared libraries
+	twice, once with force set to 0 and once with it set to 1.
+ 	(gld${EMULATION_NAME}_check_ld_so_conf): Add force parameter.
+	Change all callers.
+	(gld${EMULATION_NAME}_search_needed): Likewise.
+	(gld${EMULATION_NAME}_try_needed): Likewise.  If not force, check
+	whether the libraries needs any incompatible versions.
+	(gld${EMULATION_NAME}_vercheck): New static function.
+
 Wed Apr 22 16:01:35 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* po/Make-in (MKINSTALLDIRS): Don't look in $(top_srcdir).
