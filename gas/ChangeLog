@@ -1,3 +1,8 @@
+Thu Jul 22 10:58:51 1993  Brendan Kehoe  (brendan@lisa.cygnus.com)
+
+	* config/obj-aout.c: Only include aout/aout64.h if BFD_ASSEMBLER
+	is defined.
+
 Wed Jul 21 17:32:02 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* configure.in (case ${host}):  Map *-*-sysv4* to gas_host=sysv.
