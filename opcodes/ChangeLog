@@ -1,4 +1,10 @@
-Mon Dec 31 16:46:26 2001  Jeffrey A Law  (law@redhat.com)
+2002-01-07  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* po/es.po: New file: Spanish translation.
+	* configure.in (ALL_LINGUAS): Add es.
+	* configure: Regenerate.
+
+2001-12-31  Jeffrey A Law  (law@redhat.com)
 
 	* hppa-dis.c (print_insn_hppa): Handle new 'c' mode completers,
 	'X', 'M', and 'A'.  No longer emit a space after 'x' or 's'.

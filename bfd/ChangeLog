@@ -1,3 +1,9 @@
+2002-01-07  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* po/es.po: New file: Spanish translation.
+	* configure.in (ALL_LINGUAS): Add es.
+	* configure: Regenerate.
+
 2002-01-06  Steve Ellcey  <sje@cup.hp.com>
 
 	* elfxx-ia64.c (is_unwind_section_name): Add target vector as
