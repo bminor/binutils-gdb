@@ -165,11 +165,11 @@ bfd_h8_disassemble (addr, info, mode)
 
 	      if (looking_for & DBIT)
 		{
-		  if ((looking_for & 5) != (thisnib &5)) goto fail;
+		  if ((looking_for & 5) != (thisnib & 5)) goto fail;
 		  abs = (thisnib & 0x8) ? 2 : 1;
 		}		  
 	      
-	      else  if (looking_for & (REG | IND|INC|DEC))
+	      else if (looking_for & (REG | IND|INC|DEC))
 		{
 		  if (looking_for & SRC)
 		    {

@@ -800,8 +800,8 @@ irf_operand (int op, const char *field)
   if (!field)
     {
       return op == IA64_OPND_RR_R3 || op == IA64_OPND_DBR_R3
-        || op == IA64_OPND_IBR_R3 || op == IA64_OPND_PKR_R3
-        || op == IA64_OPND_PMC_R3 || op == IA64_OPND_PMD_R3
+        || op == IA64_OPND_IBR_R3  || op == IA64_OPND_PKR_R3
+	|| op == IA64_OPND_PMC_R3  || op == IA64_OPND_PMD_R3
 	|| op == IA64_OPND_MSR_R3 || op == IA64_OPND_CPUID_R3;
     }
   else
@@ -1710,6 +1710,7 @@ add_dis_entry (first, opcode, mask, opcodenum, ent, completer_index)
     {
       abort ();
     }
+
   while (ent != NULL)
     {
       ia64_insn newopcode = (opcode & (~ ent->mask)) | ent->bits;
@@ -2550,7 +2551,6 @@ insert_completer_entry (opc, tabent, order)
   (*ptr)->is_terminal = 1;
   (*ptr)->mask = (ia64_insn)-1;
   (*ptr)->bits = opc->opcode;
-
   (*ptr)->dependencies = insert_opcode_dependencies (opc, *ptr);
   (*ptr)->order = order;
 }
@@ -2684,6 +2684,7 @@ add_opcode_entry (opc)
         }
       ordered_table[otlen++] = nent;
     }
+
   insert_completer_entry (opc, *place, opcode_count++);
 }
 

@@ -20,7 +20,7 @@
 #include <errno.h>
 #include <math.h>
 #include <stdlib.h>
-#include <string.h>
+#include "sysdep.h"
 #include "dis-asm.h"
 #include "opcode/tic54x.h"
 #include "coff/tic54x.h"

@@ -1,3 +1,9 @@
+2000-05-30  Nick Clifton  <nickc@cygnus.com>
+
+	* opintl.h (gettext, dgettext, dcgettext, textdomain,
+	bindtextdomain): Replace defines with those from intl/libgettext.h
+	to quieten gcc warnings.
+
 2000-05-26  Alan Modra  <alan@linuxcare.com.au>
 
 	* Makefile.am: Update dependencies with "make dep-am"
