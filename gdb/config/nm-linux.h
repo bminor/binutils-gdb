@@ -59,5 +59,5 @@ extern int linuxthreads_prepare_to_proceed (int step);
 /* Use elf_gregset_t and elf_fpregset_t, rather than
    gregset_t and fpregset_t.  */
 
-#define GDB_GREGSET_T  prgregset_t
-#define GDB_FPREGSET_T prfpregset_t
+#define GDB_GREGSET_T  elf_gregset_t
+#define GDB_FPREGSET_T elf_fpregset_t

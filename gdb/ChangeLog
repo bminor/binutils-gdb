@@ -1,3 +1,7 @@
+2000-05-28  Kevin Buettner  <kevinb@redhat.com>
+
+	* config/nm-linux.h (GDB_GREGSET_T, GDB_FPREGSET_T): Fix typos.
+
 2000-05-27  Kevin Buettner  <kevinb@redhat.com>
 
 	* abug-rom.c, alpha-nat.c, alpha-tdep.c, annotate.c,
