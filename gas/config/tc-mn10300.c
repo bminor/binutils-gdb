@@ -105,6 +105,10 @@ struct mn10300_fixup
 };
 struct mn10300_fixup fixups[MAX_INSN_FIXUPS];
 static int fc;
+
+/* We must store the value of each register operand so that we can
+   verify that certain registers do not match.  */
+int mn10300_reg_operands[MN10300_MAX_OPERANDS];
 
 const char *md_shortopts = "";
 struct option md_longopts[] = {
@@ -878,7 +882,7 @@ md_begin ()
 
   /* This is both a simplification (we don't have to write md_apply_fix)
      and support for future optimizations (branch shortening and similar
-     stuff in the linker.  */
+     stuff in the linker).  */
   linkrelax = 1;
 
   /* Set the default machine type.  */
@@ -924,11 +928,16 @@ md_assemble (str)
 
   for(;;)
     {
-      const char *errmsg = "Invalid opcode/operands";
+      const char *errmsg;
       int op_idx;
       char *hold;
       int extra_shift = 0;
 
+
+      errmsg = _("Invalid opcode/operands");
+
+      /* Reset the array of register operands.  */
+      memset (mn10300_reg_operands, -1, sizeof (mn10300_reg_operands));
 
       relaxable = 0;
       fc = 0;
@@ -1330,6 +1339,9 @@ md_assemble (str)
 					ex.X_add_number, (char *) NULL,
 					0, extra_shift);
 
+
+		/* And note the register number in the register array.  */
+		mn10300_reg_operands[op_idx - 1] = ex.X_add_number;
 		break;
 	      }
 
@@ -1383,6 +1395,35 @@ keep_going:
       /* Make sure we used all the operands!  */
       if (*str != ',')
 	match = 1;
+
+      /* If this instruction has registers that must not match, verify
+	 that they do indeed not match.  */
+      if (opcode->no_match_operands)
+	{
+	  int i;
+
+	  /* Look at each operand to see if it's marked.  */
+	  for (i = 0; i < MN10300_MAX_OPERANDS; i++)
+	    {
+	      if ((1 << i) & opcode->no_match_operands)
+		{
+		  int j;
+
+		  /* operand I is marked.  Check that it does not match any
+		     operands > I which are marked.  */
+		  for (j = i + 1; j < MN10300_MAX_OPERANDS; j++)
+		    {
+		      if (((1 << j) & opcode->no_match_operands)
+			  && mn10300_reg_operands[i] == mn10300_reg_operands[j])
+			{
+			  errmsg = _("Invalid register specification.");
+			  match = 0;
+			  goto error;
+			}
+		    }
+		}
+	    }
+	}
 
     error:
       if (match == 0)

@@ -1,3 +1,9 @@
+Tue Jul 28 11:01:21 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10300.c (md_assemble): Fix "errmsg" initialization
+	to work with internationalization code.  Issue an error when two
+	operands match that are not allowed to match.
+
 Mon Jul 27 16:25:58 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* configure.in (install_tooldir): Allow target to specify whether
