@@ -1,3 +1,10 @@
+2003-09-08  Dave Brolley  <brolley@redhat.com>
+
+	On behalf of Doug Evans <dje@sebabeach.org>
+	* cgen.sh: New arg archfile.
+	* Make-common.in (cgen-arch,cgen-cpu,cgen-defs,cgen-decode,
+	cgen-cpu-decode,cgen-desc): Update call to cgen.sh.
+
 2003-08-28  Andrew Cagney  <cagney@redhat.com>
 
 	* dv-glue.c (hw_glue_finish): Change %d to %ld to match sizeof.

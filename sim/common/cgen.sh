@@ -3,7 +3,7 @@
 #
 # Usage: /bin/sh cgen.sh {"arch"|"cpu"|"decode"|"defs"|"cpu-decode"} \
 #	srcdir cgen cgendir cgenflags \
-#	arch archflags cpu mach suffix extrafiles
+#	arch archflags cpu mach suffix archfile extrafiles
 #
 # We store the generated files in the source directory until we decide to
 # ship a Scheme interpreter (or other implementation) with gdb/binutils.
@@ -24,6 +24,7 @@ isa=$9
 # portably bring parameters beyond $9 into view
 shift ; mach=$9
 shift ; suffix=$9
+shift ; archfile=$9
 shift ; extrafiles=$9
 
 rootdir=${srcdir}/../..
@@ -57,7 +58,7 @@ arch)
 		${cgenflags} \
 		-f "${archflags}" \
 		-m ${mach} \
-		-a ${arch} \
+		-a ${archfile} \
 		-i ${isa} \
 		-A tmp-arch.h1 \
 		-B tmp-arch.c1 \
@@ -111,7 +112,7 @@ cpu | decode | cpu-decode)
 		${cgenflags} \
 		-f "${archflags}" \
 		-m ${mach} \
-		-a ${arch} \
+		-a ${archfile} \
 		-i ${isa} \
 		${fileopts}
 
@@ -180,7 +181,7 @@ defs)
 		${cgenflags} \
 		-f "${archflags}" \
 		-m ${mach} \
-		-a ${arch} \
+		-a ${archfile} \
 		-i ${isa} \
 		-G tmp-defs.h1
 	sed $sedscript < tmp-defs.h1 > tmp-defs.h
@@ -197,7 +198,7 @@ desc)
 		${cgenflags} \
 		-f "${archflags}" \
 		-m ${mach} \
-		-a ${arch} \
+		-a ${archfile} \
 		-i ${isa} \
 		-H tmp-desc.h1 \
 		-C tmp-desc.c1 \
