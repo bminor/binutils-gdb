@@ -259,6 +259,7 @@ print_insn (pc, info, buf, buflen)
   /* Special case - a 32 bit instruction which is actually two 16 bit instructions
      being executed in parallel.  */
   if (buflen == 32
+      && (pc & 0x3) == 0
       && ((insn_value & 0x80008000) == 0x00008000))
     {
       if (info->endian == BFD_ENDIAN_BIG)
