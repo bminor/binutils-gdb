@@ -42,14 +42,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 
-/* If current_type is non-NULL, it is a signal to the lexer that we have
-   just parsed: 'TYPE ::' and so if an identifier is seen, the lexer must
-   search for it in TYPE.  This lex-time search is needed to parse
-   C++ nested types, as in: 'TYPE :: NESTED_TYPE', since this must
-   parse as a type, not a (non-type) identifier. */   
-
-static struct type *current_type = NULL;
-
 /* These MUST be included in any grammar file!!!! Please choose unique names!
    Note that this are a combined list of variables that can be produced
    by any one of bison, byacc, or yacc. */
@@ -128,7 +120,7 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 %}
 
 %type <voidval> exp exp1 type_exp start variable qualified_name
-%type <tval> type typebase typebase_coloncolon qualified_type
+%type <tval> type typebase
 %type <tvec> nonempty_typelist
 /* %type <bval> block */
 
@@ -152,7 +144,6 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 %token <sval> STRING
 %token <ssym> NAME /* BLOCKNAME defined below to give it higher precedence. */
 %token <tsym> TYPENAME
-%token <tval> NESTED_TYPE
 %type <sval> name
 %type <ssym> name_not_typename
 %type <tsym> typename
@@ -274,16 +265,16 @@ exp	:	SIZEOF exp       %prec UNARY
 
 exp	:	exp ARROW name
 			{ write_exp_elt_opcode (STRUCTOP_PTR);
-			  write_exp_elt_type (NULL);
 			  write_exp_string ($3);
 			  write_exp_elt_opcode (STRUCTOP_PTR); }
 	;
 
-exp	:	exp ARROW typebase_coloncolon name
-			{ write_exp_elt_opcode (STRUCTOP_PTR);
-			  write_exp_elt_type ($3);
-			  write_exp_string ($4);
-			  write_exp_elt_opcode (STRUCTOP_PTR); }
+exp	:	exp ARROW qualified_name
+			{ /* exp->type::name becomes exp->*(&type::name) */
+			  /* Note: this doesn't work if name is a
+			     static member!  FIXME */
+			  write_exp_elt_opcode (UNOP_ADDR);
+			  write_exp_elt_opcode (STRUCTOP_MPTR); }
 	;
 exp	:	exp ARROW '*' exp
 			{ write_exp_elt_opcode (STRUCTOP_MPTR); }
@@ -291,16 +282,16 @@ exp	:	exp ARROW '*' exp
 
 exp	:	exp '.' name
 			{ write_exp_elt_opcode (STRUCTOP_STRUCT);
-			  write_exp_elt_type (NULL);
 			  write_exp_string ($3);
 			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
 	;
 
-exp	:	exp '.'  typebase_coloncolon name
-			{ write_exp_elt_opcode (STRUCTOP_STRUCT);
-			  write_exp_elt_type ($3);
-			  write_exp_string ($4);
-			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
+exp	:	exp '.' qualified_name
+			{ /* exp.type::name becomes exp.*(&type::name) */
+			  /* Note: this doesn't work if name is a
+			     static member!  FIXME */
+			  write_exp_elt_opcode (UNOP_ADDR);
+			  write_exp_elt_opcode (STRUCTOP_MEMBER); }
 	;
 
 exp	:	exp '.' '*' exp
@@ -585,9 +576,7 @@ variable:	block COLONCOLON name
 			  write_exp_elt_opcode (OP_VAR_VALUE); }
 	;
 
-typebase_coloncolon : typebase COLONCOLON  { current_type = $1; $$ = $1; }
-
-qualified_name:	typebase_coloncolon name
+qualified_name:	typebase COLONCOLON name
 			{
 			  struct type *type = $1;
 			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
@@ -597,11 +586,10 @@ qualified_name:	typebase_coloncolon name
 
 			  write_exp_elt_opcode (OP_SCOPE);
 			  write_exp_elt_type (type);
-			  write_exp_string ($2);
+			  write_exp_string ($3);
 			  write_exp_elt_opcode (OP_SCOPE);
-			  current_type = NULL;
 			}
-	|	typebase_coloncolon '~' name
+	|	typebase COLONCOLON '~' name
 			{
 			  struct type *type = $1;
 			  struct stoken tmp_token;
@@ -610,20 +598,19 @@ qualified_name:	typebase_coloncolon name
 			    error ("`%s' is not defined as an aggregate type.",
 				   TYPE_NAME (type));
 
-			  if (strcmp (type_name_no_tag (type), $3.ptr))
+			  if (strcmp (type_name_no_tag (type), $4.ptr))
 			    error ("invalid destructor `%s::~%s'",
-				   type_name_no_tag (type), $3.ptr);
+				   type_name_no_tag (type), $4.ptr);
 
-			  tmp_token.ptr = (char*) alloca ($3.length + 2);
-			  tmp_token.length = $3.length + 1;
+			  tmp_token.ptr = (char*) alloca ($4.length + 2);
+			  tmp_token.length = $4.length + 1;
 			  tmp_token.ptr[0] = '~';
-			  memcpy (tmp_token.ptr+1, $3.ptr, $3.length);
+			  memcpy (tmp_token.ptr+1, $4.ptr, $4.length);
 			  tmp_token.ptr[tmp_token.length] = 0;
 			  write_exp_elt_opcode (OP_SCOPE);
 			  write_exp_elt_type (type);
 			  write_exp_string (tmp_token);
 			  write_exp_elt_opcode (OP_SCOPE);
-			  current_type = NULL;
 			}
 	;
 
@@ -835,15 +822,9 @@ func_mod:	'(' ')'
 			{ free ((PTR)$2); $$ = 0; }
 	;
 
-qualified_type: typebase_coloncolon NESTED_TYPE
-			{ $$ = $2; current_type = NULL; }
-	;
-
 type	:	ptype
-	|	qualified_type
-	|	typebase_coloncolon '*'
-			{ $$ = lookup_member_type (builtin_type_int, $1);
-			  current_type = NULL; }
+	|	typebase COLONCOLON '*'
+			{ $$ = lookup_member_type (builtin_type_int, $1); }
 	|	type '(' typebase COLONCOLON '*' ')'
 			{ $$ = lookup_member_type ($1, $3); }
 	|	type '(' typebase COLONCOLON '*' ')' '(' ')'
@@ -895,10 +876,6 @@ typebase
 	|	ENUM name
 			{ $$ = lookup_enum (copy_name ($2),
 					    expression_context_block); }
-	|	STRUCT qualified_type { $$ = check_struct ($2); }
-	|	CLASS qualified_type { $$ = check_struct ($2); }
-	|	UNION qualified_type { $$ = check_union ($2); }
-	|	ENUM qualified_type { $$ = check_enum ($2); }
 	|	UNSIGNED typename
 			{ $$ = lookup_unsigned_typename (TYPE_NAME($2.type)); }
 	|	UNSIGNED
@@ -1440,17 +1417,6 @@ yylex ()
     {
       yylval.ivar =  lookup_internalvar (copy_name (yylval.sval) + 1);
       return VARIABLE;
-    }
-
-  if (current_type)
-    {
-      struct type *t =
-	  find_nested_type (current_type, copy_name (yylval.sval));
-      if (t)
-	{
-	  yylval.tval = t;
-	  return NESTED_TYPE;
-        }
     }
 
   /* Use token-type BLOCKNAME for symbols that happen to be defined as

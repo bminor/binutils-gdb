@@ -1269,31 +1269,6 @@ find_pc_line_pc_range (pc, startptr, endptr)
   return sal.symtab != 0;
 }
 
-struct type *
-find_nested_type (type, name)
-     struct type *type;
-     char *name;
-{
-  int i;
-  for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
-    {
-      char *t_field_name = TYPE_FIELD_NAME (type, i);
-
-      if (t_field_name && !strcmp (t_field_name, name))
-	if (TYPE_FIELD_NESTED (type, i))
-	  {
-	    return TYPE_FIELD_TYPE (type, i);
-	  }
-    }
-  for (i = TYPE_N_BASECLASSES (type) - 1; i >= 0; i--)
-    {
-      struct type * t = find_nested_type (TYPE_BASECLASS (type, i), name);
-      if (t)
-	return t;
-    }
-  return NULL;
-}
-
 /* If P is of the form "operator[ \t]+..." where `...' is
    some legitimate operator text, return a pointer to the
    beginning of the substring of the operator text.
