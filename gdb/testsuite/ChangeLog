@@ -1,3 +1,9 @@
+2004-10-20  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.ada/null_record.exp: Check where we stopped after
+	sending the start command, instead of where the associated
+	temporary breakpoint was inserted.
+
 2004-10-14  Andrew Cagney  <cagney@gnu.org>
 
 	* gdb.mi/gdb701.c (main): Return 0.

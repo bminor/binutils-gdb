@@ -35,7 +35,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 gdb_test "start" \
-         "Breakpoint \[0-9\]+ at .*null_record.adb.*" \
+         "null_record \\(\\) at .*null_record.adb.*" \
          "start"
 
 gdb_test "ptype empty" \
