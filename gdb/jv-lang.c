@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdb_string.h"
 #include "value.h"
 #include "c-lang.h"
-#include "java-lang.h"
+#include "jv-lang.h"
 #include "gdbcore.h"
 
 struct type *java_int_type;
@@ -49,6 +49,8 @@ struct type *java_object_type;
    to record dynamically loaded Java classes and dynamically
    compiled java methods. */
 struct objfile *dynamics_objfile = NULL;
+
+struct type *java_link_class_type PARAMS((struct type*, value_ptr));
 
 struct objfile *
 get_dynamics_objfile ()
@@ -158,12 +160,31 @@ java_lookup_class (name)
   struct symbol *sym;
   sym = lookup_symbol (name, expression_context_block, STRUCT_NAMESPACE,
 		       (int *) 0, (struct symtab **) NULL);
-  if (sym == NULL)
+  if (sym != NULL)
+    return SYMBOL_TYPE (sym);
+#if 0
+  CORE_ADDR addr;
+  if (called from parser)
     {
-      /* FIXME - should search inferior's symbol table. */
-      return NULL;
+      call lookup_class (or similar) in inferior;
+      if not found:
+	return NULL;
+      addr = found in inferior;
     }
-  return SYMBOL_TYPE (sym);
+  else
+    addr = 0;
+  struct type *type;
+  type = alloc_type (objfile);
+  TYPE_CODE (type) = TYPE_CODE_STRUCT;
+  INIT_CPLUS_SPECIFIC (type);
+  TYPE_NAME (type) = obsavestring (name, strlen(name), &objfile->type_obstack);
+  TYPE_FLAGS (type) |= TYPE_FLAG_STUB;
+  TYPE ? = addr;
+  return type;
+#else
+  /* FIXME - should search inferior's symbol table. */
+  return NULL;
+#endif
 }
 
 /* Return a nul-terminated string (allocated on OBSTACK) for
@@ -212,22 +233,15 @@ type_from_class (clas)
      value_ptr clas;
 {
   struct type *type;
-  struct type *tsuper;
-  int ninterfaces, nfields;
   char *name;
   value_ptr temp;
   struct objfile *objfile = get_dynamics_objfile();
-  value_ptr utf8_name, fields, field, method, methods;
+  value_ptr utf8_name;
   char *nptr;
   CORE_ADDR addr;
   struct block *bl;
-  int i, j;
-  int type_is_object = 0;
+  int i;
   int is_array = 0;
-  int nmethods;
-  struct fn_field *fn_fields;
-  struct fn_fieldlist *fn_fieldlists;
-  char *unqualified_name;
 
   type = check_typedef (VALUE_TYPE (clas));
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
@@ -274,20 +288,41 @@ type_from_class (clas)
       VALUE_TYPE (temp) = lookup_pointer_type (VALUE_TYPE (clas));
       TYPE_TARGET_TYPE (type) = type_from_class (temp);
     }
-  unqualified_name = name;
   for (nptr = name;  *nptr != 0;  nptr++)
     {
       if (*nptr == '/')
-	{
-	  *nptr = '.';
-	  unqualified_name = nptr+1;
-	}
+	*nptr = '.';
     }
 
   ALLOCATE_CPLUS_STRUCT_TYPE (type);
   TYPE_NAME (type) = name;
 
   add_class_symtab_symbol (add_class_symbol (type, addr));
+  return java_link_class_type (type, clas);
+}
+
+/* Fill in class TYPE with data from the CLAS value. */ 
+
+struct type *
+java_link_class_type (type, clas)
+     struct type *type;
+     value_ptr clas;
+{
+  value_ptr temp;
+  char *unqualified_name;
+  char *name = TYPE_NAME (type);
+  int ninterfaces, nfields, nmethods;
+  int type_is_object = 0;
+  struct fn_field *fn_fields;
+  struct fn_fieldlist *fn_fieldlists;
+  value_ptr fields, field, method, methods;
+  int i, j;
+  struct objfile *objfile = get_dynamics_objfile();
+  struct type *tsuper;
+
+  unqualified_name = strrchr (name, '.');
+  if (unqualified_name == NULL)
+    unqualified_name = name;
 
   temp = clas;
   temp = value_struct_elt (&temp, NULL, "superclass", NULL, "structure");
@@ -677,7 +712,7 @@ const struct language_defn java_language_defn = {
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   java_create_fundamental_type,	/* Create fundamental type in this language */
-  c_print_type,			/* Print a type using appropriate syntax */
+  java_print_type,		/* Print a type using appropriate syntax */
   java_val_print,		/* Print a value using appropriate syntax */
   java_value_print,		/* Print a top-level value */
   {"",      "",    "",   ""},	/* Binary format info */

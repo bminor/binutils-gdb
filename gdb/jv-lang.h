@@ -18,10 +18,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 extern int
-java_parse PARAMS ((void));	/* Defined in java-exp.y */
+java_parse PARAMS ((void));	/* Defined in jv-exp.y */
 
 extern void
-java_error PARAMS ((char *));	/* Defined in java-exp.y */
+java_error PARAMS ((char *));	/* Defined in jv-exp.y */
 
 #define JAVA_OBJECT_SIZE (6 * 4)  /* sizeof (struct Object) FIXME ! */
 
@@ -61,3 +61,6 @@ extern struct type *get_java_object_type ();
 extern struct type * java_lookup_class PARAMS((char *));
 
 extern int is_object_type PARAMS ((struct type*));
+
+extern void			/* Defined in jv-typeprint.c */
+java_print_type PARAMS ((struct type *, char *, GDB_FILE *, int, int));

@@ -1,3 +1,12 @@
+Wed Jul 30 14:04:18 1997  Per Bothner  <bothner@cygnus.com>
+
+	* java-*:  Renamed to jv-*, to make fit within 14 characters.
+	* jv-lang.h (java_type_print):  Added declaration.
+	* jv-typeprint.c:  New file.  Provides java_print_type.
+	* jv-lang.c (java_link_class_type):  New function.
+	(java_language_defn):  Replace c_print_type by java_print_type.
+	* Makefile.in:  Update accordingly.
+
 Tue Jul 29 10:12:44 1997  Felix Lee  <flee@cygnus.com>
 
 	* Makefile.in (init.c): except some mswin files do need to be
