@@ -2619,7 +2619,7 @@ define_command (comname, from_tty)
 	{
 	  warning ("Your new `%s' command does not hook any existing command.",
 		   comname);
-	  if (!query ("Proceed? ", (char *)0))
+	  if (!query ("Proceed? "))
 	    error ("Not confirmed.");
 	}
     }

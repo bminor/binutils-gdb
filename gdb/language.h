@@ -395,10 +395,12 @@ op_error PARAMS ((char *fmt, enum exp_opcode, int));
    op_error((f),(o),range_check==range_check_on ? 1 : 0)
 
 extern void
-type_error PARAMS ((char *, ...));
+type_error PARAMS ((char *, ...))
+     ATTR_FORMAT(printf, 1, 2);
 
 void
-range_error PARAMS ((char *, ...));
+range_error PARAMS ((char *, ...))
+     ATTR_FORMAT(printf, 1, 2);
 
 /* Data:  Does this value represent "truth" to the current language?  */
 

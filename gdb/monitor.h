@@ -172,6 +172,8 @@ extern void monitor_open PARAMS ((char *args, struct monitor_ops *ops, int from_
 extern char *monitor_supply_register PARAMS ((int regno, char *valstr));
 extern int monitor_expect PARAMS ((char *prompt, char *buf, int buflen));
 extern int monitor_expect_prompt PARAMS ((char *buf, int buflen));
-extern void monitor_printf PARAMS ((char *, ...));
-extern void monitor_printf_noecho PARAMS ((char *, ...));
+extern void monitor_printf PARAMS ((char *, ...))
+     ATTR_FORMAT(printf, 1, 2);
+extern void monitor_printf_noecho PARAMS ((char *, ...))
+     ATTR_FORMAT(printf, 1, 2);
 extern void init_monitor_ops PARAMS ((struct target_ops *));
