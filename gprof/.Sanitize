@@ -32,6 +32,7 @@ Makefile.in
 NOTES
 TEST
 TODO
+acconfig.h
 aclocal.m4
 alpha.c
 alpha.h
@@ -55,6 +56,7 @@ dummy.c
 dummy.h
 flat_bl.m
 fsf_callg_bl.m
+gconfig.in
 gen-c-prog.awk
 gmon.h
 gmon_io.c
@@ -78,6 +80,7 @@ source.c
 source.h
 sparc.c
 sparc.h
+stamp-h.in
 sym_ids.c
 sym_ids.h
 symtab.c

@@ -22,7 +22,16 @@
 #define gprof_h
 
 #include <ansidecl.h>
+
+/* Include the BFD sysdep.h file.  */
 #include "sysdep.h"
+
+/* Undefine the BFD PACKAGE and VERSION macros before including the
+   gprof config.h file.  */
+#undef PACKAGE
+#undef VERSION
+
+#include "gconfig.h"
 
 #ifndef MIN
 #define MIN(a,b)	((a) < (b) ? (a) : (b))

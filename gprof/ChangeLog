@@ -1,3 +1,22 @@
+Sat Aug  9 16:25:01 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Change version number to 2.8.2.  Call
+	AM_PROG_LIBTOOL.  Remove shared library handling; now handled by
+	libtool.  Add AM_CONFIG_HEADER.  Change AC_PROG_INSTALL to
+	AM_PROG_INSTALL.  Add AM_EXEEXT.
+	* Makefile.am (LINK): Remove.
+	(gprof_LDFLAGS): Remove
+	(gprof_DEPENDENCIES): Change libbfd.a to libbfd.la.
+	(gprof_LDADD): Likewise.
+	($(OBJECTS)): Depend upon gconfig.h and ../bfd/config.h.
+	* gprof.h: Undefine PACKAGE and VERSION after including BFD
+	sysdep.h file, then include new gconfig.h file.
+	* gprof.c (VERSION): Don't define.
+	* acconfig.h: New file.
+	* stamp-h.in: New file.
+	* gconfig.in: New file, created by autoheader.
+	* Makefile.in, configure, aclocal.m4: Rebuild.
+
 Sat Jun 28 23:20:42 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aclocal.m4, configure, Makefile.in: Rebuild with automake 1.2.

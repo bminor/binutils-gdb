@@ -7,8 +7,6 @@ SUFFIXES = .m
 
 INCLUDES = -D_GNU_SOURCE -DDEBUG -DTARGET_$(MY_TARGET) -DMACHINE_H=\"$(MY_TARGET).h\" -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd
 
-LINK = $(HLDENV) $(CC) $(LDFLAGS) -o $@
-
 MY_TARGET = @MY_TARGET@
 
 bin_PROGRAMS = gprof
@@ -17,9 +15,8 @@ gprof_SOURCES = basic_blocks.c call_graph.c cg_arcs.c cg_dfn.c \
 	cg_print.c core.c gmon_io.c gprof.c hertz.c hist.c source.c \
 	search_list.c symtab.c sym_ids.c utils.c \
 	flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
-gprof_LDFLAGS = $(HLDFLAGS)
-gprof_DEPENDENCIES = $(MY_TARGET).o ../bfd/libbfd.a ../libiberty/libiberty.a
-gprof_LDADD = $(MY_TARGET).o @BFDLIB@ ../libiberty/libiberty.a
+gprof_DEPENDENCIES = $(MY_TARGET).o ../bfd/libbfd.la ../libiberty/libiberty.a
+gprof_LDADD = $(MY_TARGET).o ../bfd/libbfd.la ../libiberty/libiberty.a
 
 noinst_HEADERS = \
 	alpha.h i386.h ns532.h sparc.h tahoe.h vax.h dummy.h \
@@ -46,7 +43,7 @@ $(OBJECTS): ../bfd/bfd.h call_graph.h cg_arcs.h cg_print.h \
 	core.h gmon_io.h gmon_out.h gprof.h hertz.h hist.h \
 	search_list.h source.h sym_ids.h symtab.h utils.h \
 	$(srcdir)/../include/libiberty.h $(srcdir)/../bfd/sysdep.h \
-	$(MY_TARGET).h
+	gconfig.h ../bfd/config.h $(MY_TARGET).h
 $(MY_TARGET).o: $(MY_TARGET).c
 basic_blocks.o: basic_blocks.c
 bsd_call_bl.o: bsd_call_bl.c

@@ -30,8 +30,6 @@
 #include "source.h"
 #include "sym_ids.h"
 
-#define VERSION "2.8.1"
-
 const char *whoami;
 const char *function_mapping_file;
 const char *a_out_name = A_OUTNAME;

@@ -55,14 +55,15 @@ host_alias = @host_alias@
 host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
-BFDLIB = @BFDLIB@
 CC = @CC@
 EXEEXT = @EXEEXT@
-HLDENV = @HLDENV@
-HLDFLAGS = @HLDFLAGS@
+LD = @LD@
+LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 PACKAGE = @PACKAGE@
+RANLIB = @RANLIB@
 VERSION = @VERSION@
 
 AUTOMAKE_OPTIONS = foreign
@@ -70,8 +71,6 @@ AUTOMAKE_OPTIONS = foreign
 SUFFIXES = .m
 
 INCLUDES = -D_GNU_SOURCE -DDEBUG -DTARGET_$(MY_TARGET) -DMACHINE_H=\"$(MY_TARGET).h\" -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd
-
-LINK = $(HLDENV) $(CC) $(LDFLAGS) -o $@
 
 MY_TARGET = @MY_TARGET@
 
@@ -81,9 +80,8 @@ gprof_SOURCES = basic_blocks.c call_graph.c cg_arcs.c cg_dfn.c \
 	cg_print.c core.c gmon_io.c gprof.c hertz.c hist.c source.c \
 	search_list.c symtab.c sym_ids.c utils.c \
 	flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
-gprof_LDFLAGS = $(HLDFLAGS)
-gprof_DEPENDENCIES = $(MY_TARGET).o ../bfd/libbfd.a ../libiberty/libiberty.a
-gprof_LDADD = $(MY_TARGET).o @BFDLIB@ ../libiberty/libiberty.a
+gprof_DEPENDENCIES = $(MY_TARGET).o ../bfd/libbfd.la ../libiberty/libiberty.a
+gprof_LDADD = $(MY_TARGET).o ../bfd/libbfd.la ../libiberty/libiberty.a
 
 noinst_HEADERS = \
 	alpha.h i386.h ns532.h sparc.h tahoe.h vax.h dummy.h \
@@ -100,11 +98,13 @@ info_TEXINFOS = gprof.texi
 man_MANS = gprof.1
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
+CONFIG_HEADER = gconfig.h
 CONFIG_CLEAN_FILES = 
+bin_PROGRAMS =  gprof$(EXEEXT)
 PROGRAMS =  $(bin_PROGRAMS)
 
 
-DEFS = @DEFS@ -I. -I$(srcdir) 
+DEFS = @DEFS@ -I. -I$(srcdir) -I.
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
@@ -112,8 +112,11 @@ gprof_OBJECTS =  basic_blocks.o call_graph.o cg_arcs.o cg_dfn.o \
 cg_print.o core.o gmon_io.o gprof.o hertz.o hist.o source.o \
 search_list.o symtab.o sym_ids.o utils.o flat_bl.o bsd_callg_bl.o \
 fsf_callg_bl.o
+gprof_LDFLAGS = 
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
+LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -o $@
 TEXI2DVI = `if test -f $(top_srcdir)/../texinfo/util/texi2dvi; then echo $(top_srcdir)/../texinfo/util/texi2dvi; else echo texi2dvi; fi`
 TEXINFO_TEX = $(top_srcdir)/../texinfo/texinfo.tex
 INFO_DEPS = gprof.info
@@ -124,8 +127,8 @@ MANS = gprof.1
 NROFF = nroff
 HEADERS =  $(noinst_HEADERS)
 
-DIST_COMMON =  ChangeLog Makefile.am Makefile.in TODO aclocal.m4 \
-configure configure.in
+DIST_COMMON =  ChangeLog Makefile.am Makefile.in TODO acconfig.h \
+aclocal.m4 configure configure.in gconfig.in stamp-h.in
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
@@ -138,7 +141,7 @@ OBJECTS = $(gprof_OBJECTS)
 default: all
 
 .SUFFIXES:
-.SUFFIXES: .c .dvi .info .m .o .ps .texi .texinfo
+.SUFFIXES: .c .dvi .info .lo .m .o .ps .texi .texinfo
 $(srcdir)/Makefile.in: @MAINT@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --cygnus Makefile
 
@@ -154,12 +157,30 @@ config.status: $(srcdir)/configure
 $(srcdir)/configure: @MAINT@$(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
 
+gconfig.h: stamp-h ; @true
+stamp-h: $(srcdir)/gconfig.in $(top_builddir)/config.status
+	cd $(top_builddir) \
+	  && CONFIG_FILES= CONFIG_HEADERS=gconfig.h:gconfig.in \
+	     $(SHELL) ./config.status
+	@echo timestamp > stamp-h
+$(srcdir)/gconfig.in: @MAINT@$(srcdir)/stamp-h.in
+$(srcdir)/stamp-h.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) acconfig.h
+	cd $(top_srcdir) && $(AUTOHEADER)
+	@echo timestamp > $(srcdir)/stamp-h.in
+
+mostlyclean-hdr:
+
+clean-hdr:
+
+distclean-hdr:
+	rm -f gconfig.h
+
+maintainer-clean-hdr:
+
 mostlyclean-binPROGRAMS:
 
 clean-binPROGRAMS:
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  rm -f $$p $$p$(EXEEXT); \
-	done
+	test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
 distclean-binPROGRAMS:
 
@@ -170,15 +191,15 @@ install-binPROGRAMS: $(bin_PROGRAMS)
 	$(mkinstalldirs) $(bindir)
 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo "  $(INSTALL_PROGRAM) $$p$(EXEEXT) $(bindir)/`echo $$p|sed '$(transform)'`$(EXEEXT)"; \
-	     $(INSTALL_PROGRAM) $$p$(EXEEXT) $(bindir)/`echo $$p|sed '$(transform)'`$(EXEEXT); \
+	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed '$(transform)'`"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed '$(transform)'`; \
 	  else :; fi; \
 	done
 
 uninstall-binPROGRAMS:
 	$(NORMAL_UNINSTALL)
 	list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  rm -f $(bindir)/`echo $$p|sed '$(transform)'`$(EXEEXT); \
+	  rm -f $(bindir)/`echo $$p|sed '$(transform)'`; \
 	done
 
 .c.o:
@@ -194,10 +215,22 @@ distclean-compile:
 
 maintainer-clean-compile:
 
-gprof: $(gprof_OBJECTS) $(gprof_DEPENDENCIES)
+.c.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+mostlyclean-libtool:
+	rm -f *.lo
+
+clean-libtool:
+	rm -rf .libs
+
+distclean-libtool:
+
+maintainer-clean-libtool:
+
+gprof$(EXEEXT): $(gprof_OBJECTS) $(gprof_DEPENDENCIES)
 	@rm -f gprof$(EXEEXT)
 	$(LINK) $(gprof_LDFLAGS) $(gprof_OBJECTS) $(gprof_LDADD) $(LIBS)
-	@test -z "$(EXEEXT)" || echo timestamp > gprof
 
 gprof.info: gprof.texi
 gprof.dvi: gprof.texi
@@ -219,11 +252,11 @@ DVIPS = dvips
 
 .texinfo.info:
 	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
-	$(MAKEINFO) $<
+	$(MAKEINFO) -I $(srcdir) $<
 
 .texinfo:
 	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
-	$(MAKEINFO) $<
+	$(MAKEINFO) -I $(srcdir) $<
 
 .texinfo.dvi:
 	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
@@ -307,11 +340,11 @@ tags: TAGS
 ID: $(HEADERS) $(SOURCES)
 	here=`pwd` && cd $(srcdir) && mkid -f$$here/ID $(SOURCES) $(HEADERS)
 
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES)
+TAGS:  $(HEADERS) $(SOURCES) gconfig.in $(TAGS_DEPENDENCIES)
 	tags=; \
 	here=`pwd`; \
-	test -z "$(ETAGS_ARGS)$(SOURCES)$(HEADERS)$$tags" \
-	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $(SOURCES) $(HEADERS) -o $$here/TAGS)
+	test -z "$(ETAGS_ARGS)gconfig.in$(SOURCES)$(HEADERS)$$tags" \
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags gconfig.in $(SOURCES) $(HEADERS) -o $$here/TAGS)
 
 mostlyclean-tags:
 
@@ -382,7 +415,7 @@ install: install-exec install-data all
 
 uninstall: uninstall-binPROGRAMS uninstall-man
 
-all: Makefile $(PROGRAMS) $(MANS) $(HEADERS)
+all: Makefile $(PROGRAMS) $(MANS) $(HEADERS) gconfig.h
 
 install-strip:
 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
@@ -404,27 +437,33 @@ distclean-generic:
 maintainer-clean-generic:
 	test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 	test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
-mostlyclean:  mostlyclean-binPROGRAMS mostlyclean-compile \
+mostlyclean:  mostlyclean-hdr mostlyclean-binPROGRAMS \
+		mostlyclean-compile mostlyclean-libtool \
 		mostlyclean-aminfo mostlyclean-tags mostlyclean-generic
 
-clean:  clean-binPROGRAMS clean-compile clean-aminfo clean-tags \
-		clean-generic mostlyclean
+clean:  clean-hdr clean-binPROGRAMS clean-compile clean-libtool \
+		clean-aminfo clean-tags clean-generic mostlyclean
 
-distclean:  distclean-binPROGRAMS distclean-compile distclean-aminfo \
-		distclean-tags distclean-generic clean
+distclean:  distclean-hdr distclean-binPROGRAMS distclean-compile \
+		distclean-libtool distclean-aminfo distclean-tags \
+		distclean-generic clean
 	rm -f config.status
+	rm -f libtool
 
-maintainer-clean:  maintainer-clean-binPROGRAMS maintainer-clean-compile \
+maintainer-clean:  maintainer-clean-hdr maintainer-clean-binPROGRAMS \
+		maintainer-clean-compile maintainer-clean-libtool \
 		maintainer-clean-aminfo maintainer-clean-tags \
 		maintainer-clean-generic distclean
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 	rm -f config.status
 
-.PHONY: default mostlyclean-binPROGRAMS distclean-binPROGRAMS \
+.PHONY: default mostlyclean-hdr distclean-hdr clean-hdr \
+maintainer-clean-hdr mostlyclean-binPROGRAMS distclean-binPROGRAMS \
 clean-binPROGRAMS maintainer-clean-binPROGRAMS uninstall-binPROGRAMS \
 install-binPROGRAMS mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile install-info-am uninstall-info \
+maintainer-clean-compile mostlyclean-libtool distclean-libtool \
+clean-libtool maintainer-clean-libtool install-info-am uninstall-info \
 mostlyclean-aminfo distclean-aminfo clean-aminfo \
 maintainer-clean-aminfo install-man uninstall-man tags mostlyclean-tags \
 distclean-tags clean-tags maintainer-clean-tags distdir info dvi \
@@ -443,7 +482,7 @@ $(OBJECTS): ../bfd/bfd.h call_graph.h cg_arcs.h cg_print.h \
 	core.h gmon_io.h gmon_out.h gprof.h hertz.h hist.h \
 	search_list.h source.h sym_ids.h symtab.h utils.h \
 	$(srcdir)/../include/libiberty.h $(srcdir)/../bfd/sysdep.h \
-	$(MY_TARGET).h
+	gconfig.h ../bfd/config.h $(MY_TARGET).h
 $(MY_TARGET).o: $(MY_TARGET).c
 basic_blocks.o: basic_blocks.c
 bsd_call_bl.o: bsd_call_bl.c

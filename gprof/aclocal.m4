@@ -90,6 +90,153 @@ else
 fi
 AC_SUBST($1)])
 
+
+# serial 9 AM_PROG_LIBTOOL
+AC_DEFUN(AM_PROG_LIBTOOL,
+[AC_REQUIRE([AC_CANONICAL_HOST])
+AC_REQUIRE([AC_PROG_CC])
+AC_REQUIRE([AC_PROG_RANLIB])
+AC_REQUIRE([AM_PROG_LD])
+AC_REQUIRE([AC_PROG_LN_S])
+
+# Always use our own libtool.
+LIBTOOL='$(top_builddir)/libtool'
+AC_SUBST(LIBTOOL)
+
+dnl Allow the --disable-shared flag to stop us from building shared libs.
+AC_ARG_ENABLE(shared,
+[  --enable-shared         build shared libraries [default=yes]],
+[if test "$enableval" = no; then
+  enable_shared=no
+else
+  enable_shared=yes
+fi])
+libtool_shared=
+test "$enable_shared" = no && libtool_shared=" --disable-shared"
+
+dnl Allow the --disable-static flag to stop us from building static libs.
+AC_ARG_ENABLE(static,
+[  --enable-static         build static libraries [default=yes]],
+[if test "$enableval" = no; then
+  enable_static=no
+else
+  enable_static=yes
+fi])
+libtool_static=
+test "$enable_static" = no && libtool_static=" --disable-static"
+
+libtool_flags="$libtool_shared$libtool_static"
+test "$silent" = yes && libtool_flags="$libtool_flags --silent"
+test "$ac_cv_prog_gcc" = yes && libtool_flags="$libtool_flags --with-gcc"
+test "$ac_cv_prog_gnu_ld" = yes && libtool_flags="$libtool_flags --with-gnu-ld"
+
+# Some flags need to be propagated to the compiler or linker for good
+# libtool support.
+[case "$host" in
+*-*-irix6*)
+  ac_save_CFLAGS="$CFLAGS"
+  # -n32 always needs to be added to the linker when using GCC.
+  test "$ac_cv_prog_gcc" = yes && CFLAGS="$CFLAGS -n32"
+  for f in '-32' '-64' '-cckr' '-n32' '-mips1' '-mips2' '-mips3' '-mips4'; do
+    if echo " $CC $CFLAGS " | egrep -e "[ 	]$f[	 ]" > /dev/null; then
+      LD="${LD-ld} $f"
+    fi
+  done
+  CFLAGS="$ac_save_CFLAGS"
+  ;;
+
+*-*-sco3.2v5*)
+  # On SCO OpenServer 5, we need -belf to get full-featured binaries.
+  CFLAGS="$CFLAGS -belf"
+  ;;
+esac]
+
+# Actually configure libtool.  ac_aux_dir is where install-sh is found.
+CC="$CC" CFLAGS="$CFLAGS" CPPFLAGS="$CPPFLAGS" \
+LD="$LD" RANLIB="$RANLIB" LN_S="$LN_S" \
+${CONFIG_SHELL-/bin/sh} $ac_aux_dir/ltconfig \
+$libtool_flags --no-verify $ac_aux_dir/ltmain.sh $host \
+|| AC_MSG_ERROR([libtool configure failed])
+])
+
+# AM_PROG_LD - find the path to the GNU or non-GNU linker
+AC_DEFUN(AM_PROG_LD,
+[AC_ARG_WITH(gnu-ld,
+[  --with-gnu-ld           assume the C compiler uses GNU ld [default=no]],
+test "$withval" = no || with_gnu_ld=yes, with_gnu_ld=no)
+if test "$with_gnu_ld" = yes; then
+  AC_MSG_CHECKING([for GNU ld])
+else
+  AC_MSG_CHECKING([for non-GNU ld])
+fi
+AC_CACHE_VAL(ac_cv_path_LD,
+[case "$LD" in
+  /*)
+  ac_cv_path_LD="$LD" # Let the user override the test with a path.
+  ;;
+  *)
+  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}:"
+  for ac_dir in $PATH; do
+    test -z "$ac_dir" && ac_dir=.
+    if test -f "$ac_dir/ld"; then
+      ac_cv_path_LD="$ac_dir/ld"
+      # Check to see if the program is GNU ld.  I'd rather use --version,
+      # but apparently some GNU ld's only accept -v.
+      # Break only if it was the GNU/non-GNU ld that we prefer.
+      if "$ac_cv_path_LD" -v 2>&1 < /dev/null | egrep '(GNU ld|with BFD)' > /dev/null; then
+	test "$with_gnu_ld" = yes && break
+      else
+        test "$with_gnu_ld" != yes && break
+      fi
+    fi
+  done
+  IFS="$ac_save_ifs"
+  ;;
+esac])
+LD="$ac_cv_path_LD"
+if test -n "$LD"; then
+  AC_MSG_RESULT($LD)
+else
+  AC_MSG_RESULT(no)
+fi
+test -z "$LD" && AC_MSG_ERROR([no acceptable ld found in \$PATH])
+AC_SUBST(LD)
+AM_PROG_LD_GNU
+])
+
+AC_DEFUN(AM_PROG_LD_GNU,
+[AC_CACHE_CHECK([whether we are using GNU ld], ac_cv_prog_gnu_ld,
+[# I'd rather use --version here, but apparently some GNU ld's only accept -v.
+if $LD -v 2>&1 </dev/null | egrep '(GNU ld|with BFD)' > /dev/null; then
+  ac_cv_prog_gnu_ld=yes
+else
+  ac_cv_prog_gnu_ld=no
+fi])
+])
+
+# Like AC_CONFIG_HEADER, but automatically create stamp file.
+
+AC_DEFUN(AM_CONFIG_HEADER,
+[AC_PREREQ([2.12])
+AC_CONFIG_HEADER([$1])
+dnl When config.status generates a header, we must update the stamp-h file.
+dnl This file resides in the same directory as the config header
+dnl that is generated.  We must strip everything past the first ":",
+dnl and everything past the last "/".
+AC_OUTPUT_COMMANDS(changequote(<<,>>)dnl
+ifelse(patsubst(<<$1>>, <<[^ ]>>, <<>>), <<>>,
+<<test -z "<<$>>CONFIG_HEADERS" || echo timestamp > patsubst(<<$1>>, <<^\([^:]*/\)?.*>>, <<\1>>)stamp-h<<>>dnl>>,
+<<am_indx=1
+for am_file in <<$1>>; do
+  case " <<$>>CONFIG_HEADERS " in
+  *" <<$>>am_file "*<<)>>
+    echo timestamp > `echo <<$>>am_file | sed -e 's%:.*%%' -e 's%[^/]*$%%'`stamp-h$am_indx
+    ;;
+  esac
+  am_indx=`expr "<<$>>am_indx" + 1`
+done<<>>dnl>>)
+changequote([,]))])
+
 # Add --enable-maintainer-mode option to configure.
 # From Jim Meyering
 
@@ -114,27 +261,45 @@ AC_DEFUN(AM_MAINTAINER_MODE,
 )
 
 # Check to see if we're running under Cygwin32, without using
+# AC_CANONICAL_*.  If so, set output variable CYGWIN32 to "yes".
+# Otherwise set it to "no".
+
+dnl AM_CYGWIN32()
+AC_DEFUN(AM_CYGWIN32,
+[AC_CACHE_CHECK(for Cygwin32 environment, am_cv_cygwin32,
+[AC_TRY_COMPILE(,[int main () { return __CYGWIN32__; }],
+am_cv_cygwin32=yes, am_cv_cygwin32=no)
+rm -f conftest*])
+CYGWIN32=
+test "$am_cv_cygwin32" = yes && CYGWIN32=yes])
+
+# Check to see if we're running under Win32, without using
 # AC_CANONICAL_*.  If so, set output variable EXEEXT to ".exe".
 # Otherwise set it to "".
 
-dnl AM_CYGWIN32()
-dnl You might think we can do this by checking for a cygwin32-specific
-dnl cpp define.  We can't, because cross-compilers that target
-dnl cygwin32 don't use the .exe suffix.  I don't know why.
-AC_DEFUN(AM_CYGWIN32,
-[AC_CACHE_CHECK(for Cygwin32 environment, am_cv_cygwin32,
-[cat > conftest.$ac_ext << 'EOF'
-int main () {
-/* Nothing.  */
-return 0; }
-EOF
-if AC_TRY_EVAL(ac_link) && test -s conftest.exe; then
-   am_cv_cygwin32=yes
+dnl AM_EXEEXT()
+dnl This knows we add .exe if we're building in the Cygwin32
+dnl environment. But if we're not, then it compiles a test program
+dnl to see if there is a suffix for executables.
+AC_DEFUN(AM_EXEEXT,
+[AC_REQUIRE([AM_CYGWIN32])
+AC_MSG_CHECKING([for executable suffix])
+AC_CACHE_VAL(am_cv_exeext,
+[if test "$CYGWIN32" = yes; then
+am_cv_exeext=.exe
 else
-   am_cv_cygwin32=no
+cat > am_c_test.c << 'EOF'
+int main() {
+/* Nothing needed here */
+}
+EOF
+${CC-cc} -o am_c_test $CFLAGS $CPPFLAGS $LDFLAGS am_c_test.c $LIBS 1>&5
+am_cv_exeext=`echo am_c_test.* | grep -v am_c_test.c | sed -e s/am_c_test//`
+rm -f am_c_test*])
+test x"${am_cv_exeext}" = x && am_cv_exeext=no
 fi
-rm -f conftest*])
-EXEEXT=
-test "$am_cv_cygwin32" = yes && EXEEXT=.exe
+EXEEXT=""
+test x"${am_cv_exeext}" != xno && EXEEXT=${am_cv_exeext}
+AC_MSG_RESULT(${am_cv_exeext})
 AC_SUBST(EXEEXT)])
 
