@@ -27,6 +27,7 @@ ChangeLog
 alpha.h
 arc.h
 arm.h
+arm-oabi.h
 common.h
 d10v.h
 d30v.h
