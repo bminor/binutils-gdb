@@ -1,3 +1,18 @@
+Wed Mar  8 15:39:39 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (md_begin): Check for a cpu string of r8000 or
+	r10000.  If mips_isa is 4, set the machine number to 8000.
+	(append_insn): If mips_isa is at least 4, don't generate nops for
+	coprocessor delays.  Check INSN_READ_FPR_R when setting
+	mips_cprmask[1].
+	(mips_emit_delays): If mips_isa is at least 4, don't generate nops
+	for coprocessor delays.
+	(mips_ip): Check for INSN_ISA4 instructions.  Handle new argument
+	types 'h', 'R', 'N', and 'M'.
+	(md_longopts): Accept "mips4".
+	(md_parse_option): Handle -mips4, and -mcpu=10000 and -mcpu=8000.
+	(s_mipsset): Permit .set mips4.
+
 Wed Mar  8 09:36:05 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (ppc_elf_validate_fix): Allow .stab sections to
