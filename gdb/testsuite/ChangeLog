@@ -1,3 +1,18 @@
+2001-05-07  Keith Seitz <keiths@cygnus.com>
+
+        * lib/gdb.exp (gdbtk_initialize_display): New proc which will
+        set up the display for testing.
+        (gdbtk_start): Convert all paths to paths that tcl will like.
+        Export target information to environment.
+        (_gdbtk_xvfb_init): New proc to start Xvfb if available and
+        necessary.
+        (_gdbtk_xvfb_exit): New proc to kill Xvfb if necessary.
+        (to_tcl_path): New proc to convert a given pathname into
+        a path acceptible as an argument to a tcl command.
+        (_gdbtk_export_target_info): New proc to export target info
+        into the environment for gdbtk testing.
+        (gdbtk_done): New proc to signal end-of-test.
+
 2001-05-06  Jim Blandy  <jimb@redhat.com>
 
 	* restore.c: Make the code of caller0 correspond to its comment.
