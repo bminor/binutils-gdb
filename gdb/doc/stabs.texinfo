@@ -1099,7 +1099,7 @@ handle either one.  Symbol type @samp{C_RPSYM} is used with @samp{R} and
 AIX, according to the documentation, uses @samp{D} for a parameter
 passed in a floating point register.  This strikes me as incredibly
 bogus---why doesn't it just use @samp{R} with a register number which
-indicates that it's a floating point register.  I haven't verified
+indicates that it's a floating point register?  I haven't verified
 whether the system actually does what the documentation indicates.
 
 There is at least one case where GCC uses a @samp{p}/@samp{r} pair
@@ -1127,15 +1127,15 @@ stores it as a local variable.  If possible, the compiler should claim
 that it's in a register, but this isn't always done.  Some compilers use
 the pair of symbols approach described above ("arg:p" followed by
 "arg:"); this includes gcc1 (not gcc2) on the sparc when passing a small
-structure and gcc2 when the argument type is float and it is passed as a
-double and converted to float by the prologue (in the latter case the
-type of the "arg:p" symbol is double and the type of the "arg:" symbol
-is float).  GCC, at least on the 960, uses a single @samp{p} symbol
-descriptor for an argument which is stored as a local variable but uses
-@samp{N_LSYM} instead of @samp{N_PSYM}.  In this case the value of the
-symbol is an offset relative to the local variables for that function,
-not relative to the arguments (on some machines those are the same
-thing, but not on all).
+structure and gcc2 (sometimes) when the argument type is float and it is
+passed as a double and converted to float by the prologue (in the latter
+case the type of the "arg:p" symbol is double and the type of the "arg:"
+symbol is float).  GCC, at least on the 960, uses a single @samp{p}
+symbol descriptor for an argument which is stored as a local variable
+but uses @samp{N_LSYM} instead of @samp{N_PSYM}.  In this case the value
+of the symbol is an offset relative to the local variables for that
+function, not relative to the arguments (on some machines those are the
+same thing, but not on all).
 
 If the parameter is passed by reference (e.g. Pascal VAR parameters),
 then type symbol descriptor is @samp{v} if it is in the argument list,
