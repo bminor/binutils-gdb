@@ -1,3 +1,7 @@
+Tue Nov  2 18:16:31 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-sparc.c (sparc_ip): Add default case to reloc switch.
+
 Mon Oct 25 14:06:17 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-sparc.c (sparc_ip): Fix up membar argument handling.
