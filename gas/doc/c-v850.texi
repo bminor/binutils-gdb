@@ -47,7 +47,7 @@ r0, zero
 @item general register 1
 r1
 @item general register 2
-r2
+r2, hp
 @cindex @code{sp} register, V850
 @item general register 3
 r3, sp
@@ -236,7 +236,7 @@ loads the contents of the location pointed to by the label '_a_variable'
 into register 6, provided that the label is located somewhere within 256
 bytes of the address held in the EP register.  [Note the linker assumes
 that the EP register contains a fixed address set to the address of the
-label called '--ep'].
+label called '__ep'].
 
 @cindex @code{zdaoff} pseudo-op, V850
 @item zdaoff()
