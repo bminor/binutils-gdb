@@ -360,7 +360,27 @@ m68k_svr4_return_value (struct gdbarch *gdbarch, struct type *type,
 
   if ((code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION)
       && !m68k_reg_struct_return_p (gdbarch, type))
-    return RETURN_VALUE_STRUCT_CONVENTION;
+    {
+      /* The System V ABI says that:
+
+	 "A function returning a structure or union also sets %a0 to
+	 the value it finds in %a0.  Thus when the caller receives
+	 control again, the address of the returned object resides in
+	 register %a0."
+
+	 So the ABI guarantees that we can always find the return
+	 value just after the function has returned.  */
+
+      if (readbuf)
+	{
+	  ULONGEST addr;
+
+	  regcache_raw_read_unsigned (regcache, M68K_A0_REGNUM, &addr);
+	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	}
+
+      return RETURN_VALUE_ABI_RETURNS_ADDRESS;
+    }
 
   /* This special case is for structures consisting of a single
      `float' or `double' member.  These structures are returned in
