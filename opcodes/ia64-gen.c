@@ -399,9 +399,21 @@ fetch_insn_class(const char *full_name, int create)
   if ((comment = strchr(name, '[')) != NULL)
     is_class = 1;
   if ((notestr = strchr(name, '+')) != NULL)
+    is_class = 1;
+
+  /* If it is a composite class, then ignore comments and notes that come after
+     the '\\', since they don't apply to the part we are decoding now.  */
+  if (xsect)
+    {
+      if (comment > xsect)
+	comment = 0;
+      if (notestr > xsect)
+	notestr = 0;
+    }
+
+  if (notestr)
     {
       char *nextnotestr;
-      is_class = 1;
       note = atoi (notestr + 1);
       if ((nextnotestr = strchr (notestr + 1, '+')) != NULL)
         {
@@ -413,8 +425,9 @@ fetch_insn_class(const char *full_name, int create)
         }
     }
 
-  /* if it's a composite class, leave the notes and comments in place so that
-     we have a unique name for the composite class */
+  /* If it's a composite class, leave the notes and comments in place so that
+     we have a unique name for the composite class.  Otherwise, we remove
+     them.  */
   if (!xsect)
     {
       if (notestr)
@@ -1055,6 +1068,9 @@ in_iclass(struct ia64_opcode *idesc, struct iclass *ic,
             resolved = idesc->operands[0] == IA64_OPND_B2;
           else if (strcmp (ic->name, "invala") == 0)
             resolved = strcmp (idesc->name, ic->name) == 0;
+	  else if (strncmp (idesc->name, "st", 2) == 0
+		   && strstr (format, "M5") != NULL)
+	    resolved = idesc->flags & IA64_OPCODE_POSTINC;
           else
             resolved = 0;
         }
