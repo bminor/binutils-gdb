@@ -1,3 +1,8 @@
+2000-09-20  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-tahoe.c: Fix formatting.
+	* config/tc-tahoe.h: Likewise.
+
 2000-09-19  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* config/tc-vax.c (synthetic_votstrs): Remove jbssi and jbcci.
