@@ -205,6 +205,8 @@ static void enter_linenos PARAMS ((long, int, int, struct objfile *));
 
 static void free_linetab PARAMS ((void));
 
+static void free_linetab_cleanup (void *ignore);
+
 static int init_lineno PARAMS ((bfd *, long, int));
 
 static char *getsymname PARAMS ((struct internal_syment *));
@@ -212,6 +214,8 @@ static char *getsymname PARAMS ((struct internal_syment *));
 static char *coff_getfilename PARAMS ((union internal_auxent *));
 
 static void free_stringtab PARAMS ((void));
+
+static void free_stringtab_cleanup (void *ignore);
 
 static int init_stringtab PARAMS ((bfd *, long));
 
@@ -656,7 +660,7 @@ coff_symfile_read (objfile, mainline)
   info->max_lineno_offset = 0;
   bfd_map_over_sections (abfd, find_linenos, (PTR) info);
 
-  make_cleanup ((make_cleanup_func) free_linetab, 0);
+  make_cleanup (free_linetab_cleanup, 0 /*ignore*/);
   val = init_lineno (abfd, info->min_lineno_offset,
 		     info->max_lineno_offset - info->min_lineno_offset);
   if (val < 0)
@@ -664,7 +668,7 @@ coff_symfile_read (objfile, mainline)
 
   /* Now read the string table, all at once.  */
 
-  make_cleanup ((make_cleanup_func) free_stringtab, 0);
+  make_cleanup (free_stringtab_cleanup, 0 /*ignore*/);
   val = init_stringtab (abfd, stringtab_offset);
   if (val < 0)
     error ("\"%s\": can't get string table", name);
@@ -1287,6 +1291,12 @@ free_stringtab ()
   stringtab = NULL;
 }
 
+static void
+free_stringtab_cleanup (void *ignore)
+{
+  free_stringtab ();
+}
+
 static char *
 getsymname (symbol_entry)
      struct internal_syment *symbol_entry;
@@ -1386,6 +1396,12 @@ free_linetab ()
   if (linetab)
     free (linetab);
   linetab = NULL;
+}
+
+static void
+free_linetab_cleanup (void *ignore)
+{
+  free_linetab ();
 }
 
 #if !defined (L_LNNO32)

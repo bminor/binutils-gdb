@@ -1108,7 +1108,7 @@ download (load_arg_string, from_tty)
     error ("Must specify at least a file name with the load command");
 
   filename = tilde_expand (filename);
-  make_cleanup ((make_cleanup_func) free, filename);
+  make_cleanup (free, filename);
 
   while (token = strtok (NULL, " \t"))
     {

@@ -44,7 +44,7 @@ static int udp_fd = -1;
 
 static serial_t open_tty PARAMS ((char *name));
 static int send_resp PARAMS ((serial_t desc, char c));
-static void close_tty PARAMS ((int ignore));
+static void close_tty (void * ignore);
 #ifdef HAVE_SOCKETS
 static int recv_udp_buf PARAMS ((int fd, unsigned char *buf, int len, int timeout));
 static int send_udp_buf PARAMS ((int fd, unsigned char *buf, int len));
@@ -358,8 +358,7 @@ send_resp (desc, c)
 }
 
 static void
-close_tty (ignore)
-     int ignore;
+close_tty (void *ignore)
 {
   if (!remote_desc)
     return;
@@ -480,7 +479,7 @@ or: target sparclite udp host");
     {
       remote_desc = open_tty (p);
 
-      old_chain = make_cleanup ((make_cleanup_func) close_tty, 0);
+      old_chain = make_cleanup (close_tty, 0 /*ignore*/);
 
       c = send_resp (remote_desc, 0x00);
 

@@ -46,7 +46,7 @@ static void sig_print_info (enum target_signal);
 
 static void sig_print_header (void);
 
-static void resume_cleanups (int);
+static void resume_cleanups (void *);
 
 static int hook_stop_stub (void *);
 
@@ -752,7 +752,7 @@ static int singlestep_breakpoints_inserted_p = 0;
 /* Things to clean up if we QUIT out of resume ().  */
 /* ARGSUSED */
 static void
-resume_cleanups (int arg)
+resume_cleanups (void *ignore)
 {
   normal_stop ();
 }
@@ -796,8 +796,7 @@ void
 resume (int step, enum target_signal sig)
 {
   int should_resume = 1;
-  struct cleanup *old_cleanups = make_cleanup ((make_cleanup_func)
-					       resume_cleanups, 0);
+  struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
   QUIT;
 
 #ifdef CANNOT_STEP_BREAKPOINT
@@ -4112,6 +4111,18 @@ restore_inferior_status (struct inferior_status *inf_status)
     }
 
   free_inferior_status (inf_status);
+}
+
+static void
+do_restore_inferior_status_cleanup (void *sts)
+{
+  restore_inferior_status (sts);
+}
+
+struct cleanup *
+make_cleanup_restore_inferior_status (struct inferior_status *inf_status)
+{
+  return make_cleanup (do_restore_inferior_status_cleanup, inf_status);
 }
 
 void

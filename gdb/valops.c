@@ -1364,8 +1364,7 @@ hand_function_call (function, nargs, args)
     noprocess ();
 
   inf_status = save_inferior_status (1);
-  old_chain = make_cleanup ((make_cleanup_func) restore_inferior_status,
-			    inf_status);
+  old_chain = make_cleanup_restore_inferior_status (inf_status);
 
   /* PUSH_DUMMY_FRAME is responsible for saving the inferior registers
      (and POP_FRAME for restoring them).  (At least on most machines)

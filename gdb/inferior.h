@@ -42,6 +42,8 @@ extern struct inferior_status *save_inferior_status PARAMS ((int));
 
 extern void restore_inferior_status PARAMS ((struct inferior_status *));
 
+extern struct cleanup *make_cleanup_restore_inferior_status (struct inferior_status *);
+
 extern void discard_inferior_status PARAMS ((struct inferior_status *));
 
 extern void write_inferior_status_register PARAMS ((struct inferior_status * inf_status, int regno, LONGEST val));

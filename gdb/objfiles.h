@@ -507,6 +507,8 @@ unlink_objfile PARAMS ((struct objfile *));
 extern void
 free_objfile PARAMS ((struct objfile *));
 
+extern struct cleanup *make_cleanup_free_objfile (struct objfile *);
+
 extern void
 free_all_objfiles PARAMS ((void));
 

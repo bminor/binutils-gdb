@@ -72,6 +72,8 @@ void (*pre_add_symbol_hook) PARAMS ((char *));
 void (*post_add_symbol_hook) PARAMS ((void));
 void (*target_new_objfile_hook) PARAMS ((struct objfile *));
 
+static void clear_symtab_users_cleanup (void *ignore);
+
 /* Global variables owned by this file */
 int readnow_symbol_files;	/* Read full symbols immediately */
 
@@ -605,13 +607,13 @@ syms_from_objfile (objfile, addrs, mainline, verbo)
 
   /* Make sure that partially constructed symbol tables will be cleaned up
      if an error occurs during symbol reading.  */
-  old_chain = make_cleanup ((make_cleanup_func) free_objfile, objfile);
+  old_chain = make_cleanup_free_objfile (objfile);
 
   if (mainline)
     {
       /* We will modify the main symbol table, make sure that all its users
          will be cleaned up if an error occurs during symbol reading.  */
-      make_cleanup ((make_cleanup_func) clear_symtab_users, 0);
+      make_cleanup (clear_symtab_users_cleanup, 0 /*ignore*/);
 
       /* Since no error yet, throw away the old symbol table.  */
 
@@ -1657,10 +1659,9 @@ reread_symbols ()
 	      /* If we get an error, blow away this objfile (not sure if
 	         that is the correct response for things like shared
 	         libraries).  */
-	      old_cleanups = make_cleanup ((make_cleanup_func) free_objfile,
-					   objfile);
+	      old_cleanups = make_cleanup_free_objfile (objfile);
 	      /* We need to do this whenever any symbols go away.  */
-	      make_cleanup ((make_cleanup_func) clear_symtab_users, 0);
+	      make_cleanup (clear_symtab_users_cleanup, 0 /*ignore*/);
 
 	      /* Clean up any state BFD has sitting around.  We don't need
 	         to close the descriptor but BFD lacks a way of closing the
@@ -2086,6 +2087,12 @@ clear_symtab_users ()
   clear_pc_function_cache ();
   if (target_new_objfile_hook)
     target_new_objfile_hook (NULL);
+}
+
+static void
+clear_symtab_users_cleanup (void *ignore)
+{
+  clear_symtab_users ();
 }
 
 /* clear_symtab_users_once:

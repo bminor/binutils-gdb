@@ -455,6 +455,12 @@ nexti_command (count_string, from_tty)
 }
 
 static void
+disable_longjmp_breakpoint_cleanup (void *ignore)
+{
+  disable_longjmp_breakpoint ();
+}
+
+static void
 step_1 (skip_subroutines, single_inst, count_string)
      int skip_subroutines;
      int single_inst;
@@ -489,10 +495,9 @@ step_1 (skip_subroutines, single_inst, count_string)
     {
       enable_longjmp_breakpoint ();
       if (!event_loop_p || !target_can_async_p ())
-	cleanups = make_cleanup ((make_cleanup_func) disable_longjmp_breakpoint,
-				 0);
+	cleanups = make_cleanup (disable_longjmp_breakpoint_cleanup, 0 /*ignore*/);
       else
-        make_exec_cleanup ((make_cleanup_func) disable_longjmp_breakpoint, 0);
+        make_exec_cleanup (disable_longjmp_breakpoint_cleanup, 0 /*ignore*/);
     }
 
   /* In synchronous case, all is well, just use the regular for loop. */

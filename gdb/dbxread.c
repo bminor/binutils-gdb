@@ -1094,6 +1094,18 @@ free_bincl_list (objfile)
   bincls_allocated = 0;
 }
 
+static void
+do_free_bincl_list_cleanup (void *objfile)
+{
+  free_bincl_list (objfile);
+}
+
+static struct cleanup *
+make_cleanup_free_bincl_list (struct objfile *objfile)
+{
+  return make_cleanup (do_free_bincl_list_cleanup, objfile);
+}
+
 /* Scan a SunOs dynamic symbol table for symbols of interest and
    add them to the minimal symbol table.  */
 
@@ -1295,7 +1307,7 @@ read_dbx_symtab (objfile)
 
   /* Init bincl list */
   init_bincl_list (20, objfile);
-  back_to = make_cleanup ((make_cleanup_func) free_bincl_list, objfile);
+  back_to = make_cleanup_free_bincl_list (objfile);
 
   last_source_file = NULL;
 

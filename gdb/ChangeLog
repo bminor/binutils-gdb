@@ -1,3 +1,43 @@
+Mon May 22 16:20:31 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* inferior.h (make_cleanup_restore_inferior_status): 
+	* infrun.c (make_cleanup_restore_inferior_status,
+ 	do_restore_inferior_status_cleanup): New functions.
+	* valops.c (hand_function_call): Use.
+	* infcmd.c (disable_longjmp_breakpoint_cleanup): New function.
+	(step_1): Use.
+	* symfile.c (clear_symtab_users_cleanup): New function.
+	(syms_from_objfile, reread_symbols): Use.
+	* objfiles.c (make_cleanup_free_objfile, do_free_objfile_cleanup):
+ 	New functions.
+	* objfiles.h (make_cleanup_free_objfile): Add declaration.
+	* symfile.c (syms_from_objfile, reread_symbols), hpread.c
+ 	(hpread_build_psymtabs), hp-psymtab-read.c
+ 	(hpread_build_psymtabs): Use.
+	* dwarf2read.c (make_cleanup_free_die_list,
+ 	do_free_die_list_cleanup): New functions.
+	(psymtab_to_symtab_1): Use.
+	* tracepoint.c (make_cleanup_free_actions,
+ 	do_free_actions_cleanup): New functions.
+	(read_actions): Use.
+	* corelow.c (core_close_cleanup): New function.
+ 	(core_open): Use.
+	* dbxread.c (make_cleanup_free_bincl_list,
+ 	do_free_bincl_list_cleanup): New function.
+	(read_dbx_symtab): Use.
+	* coffread.c (free_linetab_cleanup, free_stringtab_cleanup): New
+ 	functions.
+	(coff_symfile_read): Use.
+	* varobj.c (make_cleanup_free_variable, do_free_variable_cleanup):
+ 	New function.
+	(varobj_create): Use.
+	* sparcl-tdep.c (close_tty), infrun.c (resume_cleanups), parse.c
+ 	(free_funcalls): Change signature to match make_cleanup_ftype.
+	* infrun.c (resume), tracepoint.c (encode_actions), remote-udi.c
+ 	(download), solib.c (open_symbol_file_object), sparcl-tdep.c
+ 	(sparclite_open), parse.c (parse_exp_1): Remove cast using
+ 	make_cleanup_func.
+
 Mon May 22 15:49:13 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* procfs.c (info_proc_cmd): Use make_cleanup_freeargv.

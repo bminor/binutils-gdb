@@ -984,7 +984,7 @@ open_symbol_file_object (from_ttyp)
       return 0;
     }
 
-  make_cleanup ((make_cleanup_func) free, (void *) filename);
+  make_cleanup (free, filename);
   /* Have a pathname: read the symbol file.  */
   symbol_file_command (filename, *from_ttyp);
 

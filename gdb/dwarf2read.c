@@ -708,6 +708,8 @@ struct die_info *read_comp_unit PARAMS ((char *, bfd *));
 
 static void free_die_list PARAMS ((struct die_info *));
 
+static struct cleanup *make_cleanup_free_die_list (struct die_info *);
+
 static void process_die PARAMS ((struct die_info *, struct objfile *));
 
 static char *dwarf2_linkage_name PARAMS ((struct die_info *));
@@ -1322,7 +1324,7 @@ psymtab_to_symtab_1 (pst)
 
   dies = read_comp_unit (info_ptr, abfd);
 
-  make_cleanup ((make_cleanup_func) free_die_list, dies);
+  make_cleanup_free_die_list (dies);
 
   /* Do line number decoding in read_file_scope () */
   process_die (dies, objfile);
@@ -2955,6 +2957,19 @@ free_die_list (dies)
       die = next;
     }
 }
+
+static void
+do_free_die_list_cleanup (void *dies)
+{
+  free_die_list (dies);
+}
+
+static struct cleanup *
+make_cleanup_free_die_list (struct die_info *dies)
+{
+  return make_cleanup (do_free_die_list_cleanup, dies);
+}
+
 
 /* Read the contents of the section at OFFSET and of size SIZE from the
    object file specified by OBJFILE into the psymbol_obstack and return it.  */

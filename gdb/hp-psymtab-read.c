@@ -1628,7 +1628,7 @@ hpread_build_psymtabs (objfile, mainline)
     (struct partial_symtab **) alloca (dependencies_allocated *
 				       sizeof (struct partial_symtab *));
 
-  old_chain = make_cleanup ((make_cleanup_func) free_objfile, objfile);
+  old_chain = make_cleanup_free_objfile (objfile);
 
   last_source_file = 0;
 

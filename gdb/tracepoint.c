@@ -156,6 +156,7 @@ static void add_aexpr PARAMS ((struct collection_list *, struct agent_expr *));
 static unsigned char *mem2hex (unsigned char *, unsigned char *, int);
 static void add_register PARAMS ((struct collection_list * collection, 
 				  unsigned int regno));
+static struct cleanup *make_cleanup_free_actions (struct tracepoint *t);
 static void free_actions_list PARAMS ((char **actions_list));
 static void free_actions_list_cleanup_wrapper PARAMS ((void *));
 
@@ -854,7 +855,7 @@ read_actions (t)
 	signal (STOP_SIGNAL, stop_sig);
     }
 #endif
-  old_chain = make_cleanup ((make_cleanup_func) free_actions, (void *) t);
+  old_chain = make_cleanup_free_actions (t);
   while (1)
     {
       /* Make sure that all output has been output.  Some machines may let
@@ -1061,6 +1062,18 @@ free_actions (t)
       free (line);
     }
   t->actions = NULL;
+}
+
+static void
+do_free_actions_cleanup (void *t)
+{
+  free_actions (t);
+}
+
+static struct cleanup *
+make_cleanup_free_actions (struct tracepoint *t)
+{
+  return make_cleanup (do_free_actions_cleanup, t);
 }
 
 struct memrange
@@ -1587,8 +1600,7 @@ encode_actions (t, tdp_actions, stepping_actions)
 		  struct agent_reqs areqs;
 
 		  exp = parse_exp_1 (&action_exp, block_for_pc (t->address), 1);
-		  old_chain = make_cleanup ((make_cleanup_func)
-					    free_current_contents, &exp);
+		  old_chain = make_cleanup (free_current_contents, &exp);
 
 		  switch (exp->elts[0].opcode)
 		    {

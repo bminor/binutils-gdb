@@ -494,6 +494,17 @@ free_objfile (objfile)
     }
 }
 
+static void
+do_free_objfile_cleanup (void *obj)
+{
+  free_objfile (obj);
+}
+
+struct cleanup *
+make_cleanup_free_objfile (struct objfile *obj)
+{
+  return make_cleanup (do_free_objfile_cleanup, obj);
+}
 
 /* Free all the object files at once and clean up their users.  */
 
