@@ -1505,6 +1505,12 @@ print_transfer_performance (struct ui_file *stream,
 
 /* This function allows the addition of incrementally linked object files.
    It does not modify any state in the target, only in the debugger.  */
+/* Note: ezannoni 2000-04-13 This function/command used to have a
+   special case syntax for the rombug target (Rombug is the boot
+   monitor for Microware's OS-9 / OS-9000, see remote-os9k.c). In the
+   rombug case, the user doesn't need to supply a text address,
+   instead a call to target_link() (in target.c) would supply the
+   value to use. We are now discontinuing this type of ad hoc syntax. */
 
 /* ARGSUSED */
 static void
@@ -1512,198 +1518,164 @@ add_symbol_file_command (args, from_tty)
      char *args;
      int from_tty;
 {
-  char *name = NULL;
+  char *filename = NULL;
   int flags = OBJF_USERLOADED;
   char *arg;
   int expecting_option = 0;
-  int option_index = 0;
+  int section_index = 0;
   int argcnt = 0;
   int sec_num = 0;
   int i;
+  int expecting_sec_name = 0;
+  int expecting_sec_addr = 0;
+
   struct
   {
-    enum { OPT_SECTION } type;
     char *name;
     char *value;
-  } opt[SECT_OFF_MAX];
+  } sect_opts[SECT_OFF_MAX];
+
   struct section_addr_info section_addrs;
+  struct cleanup *my_cleanups;
 
   dont_repeat ();
 
   if (args == NULL)
-    {
-      error ("add-symbol-file takes a file name and an address");
-    }
+    error ("add-symbol-file takes a file name and an address");
 
   /* Make a copy of the string that we can safely write into. */
-
   args = xstrdup (args);
-  make_cleanup (free, args);
 
   /* Ensure section_addrs is initialized */
   memset (&section_addrs, 0, sizeof (section_addrs));
 
-  /* Pick off any -option args and the file name. */
-
   while (*args != '\000')
     {
+      /* Any leading spaces? */
       while (isspace (*args))
-	{
-	  args++;
-	}
+	args++;
+
+      /* Point arg to the beginning of the argument. */
       arg = args;
+
+      /* Move args pointer over the argument. */
       while ((*args != '\000') && !isspace (*args))
-	{
-	  args++;
-	}
+	args++;
+
+      /* If there are more arguments, terminate arg and
+         proceed past it. */
       if (*args != '\000')
-	{
-	  *args++ = '\000';
-	}
-      if (*arg != '-')
-	{
-	  if (expecting_option)
-	    {
- 	      opt[option_index++].value = arg;
- 	      expecting_option = 0;
- 	    }
- 	  else
- 	    {
-	      switch (argcnt)
-		{
- 		case 0:
- 		  name = arg;
- 		  break;
- 		case 1: 
- 		  opt[option_index].type = OPT_SECTION;
- 		  opt[option_index].name = ".text";
- 		  opt[option_index++].value = arg;
- 		  break;
- 		case 2: 
- 		  opt[option_index].type = OPT_SECTION;
- 		  opt[option_index].name = ".data";
- 		  opt[option_index++].value = arg;
- 		  break;
- 		case 3: 
- 		  opt[option_index].type = OPT_SECTION;
- 		  opt[option_index].name = ".bss";
- 		  opt[option_index++].value = arg;
- 		  break;
- 		default:
- 		  warning ("Too many arguments entered; see \"help add-symbol-file\" for command syntax.");
-		}
-	      argcnt++;
- 	    }
-	}
-      else if (STREQ (arg, "-mapped"))
-	{
-	  flags |= OBJF_MAPPED;
-	}
-      else if (STREQ (arg, "-readnow"))
-	{
-	  flags |= OBJF_READNOW;
-	}
-      else if (STREQN (arg, "-T", 2))
- 	{
- 	  if (option_index >= SECT_OFF_MAX)
-	    {
-	      warning ("Number of options exceeds maximum allowed.");
-	    }
- 	  else
- 	    {
- 	      expecting_option = 1;
- 	      opt[option_index].type = OPT_SECTION;
- 	      opt[option_index].name = arg + 2;
- 	    }
- 	}
-      else 
-        {
-	  error ("Unknown option `%s'", arg);
-        }
-    }
+	*args++ = '\000';
 
-  if (name == NULL)
-    {
-      error ("add-symbol-file takes a file name");
-    }
-  name = tilde_expand (name);
-  make_cleanup (free, name);
-
-  if (option_index > 0)
-    {
-      /* Print the prompt for the query below.
-	 We have to split this up into 3 print statements because
-	 local_hex_string returns a local static string. */
- 
-      printf_filtered ("add symbol table from file \"%s\" at\n", name);
-      for (i = 0; i < option_index; i++)
+      /* Now process the argument. */
+      if (argcnt == 0)
 	{
-	  switch (opt[i].type)
-	    {
-	    case OPT_SECTION:
+	  /* The first argument is the file name. */
+	  filename = tilde_expand (arg);
+	  my_cleanups = make_cleanup (free, filename);
+	}
+      else
+	if (argcnt == 1)
+	  {
+	    /* The second argument is always the text address at which
+               to load the program. */
+	    sect_opts[section_index].name = ".text";
+	    sect_opts[section_index].value = arg;
+	    section_index++;		  
+	  }
+	else
+	  {
+	    /* It's an option (starting with '-') or it's an argument
+	       to an option */
+
+	    if (*arg == '-')
 	      {
-                CORE_ADDR addr;
-                char *val = opt[i].value;
-                char *sec = opt[i].name;
- 
-                val = opt[i].value;
-                if (val[0] == '0' && val[1] == 'x')
-                  addr = strtoul (val+2, NULL, 16);
-                else
-                  addr = strtoul (val, NULL, 10);
- 
-                if (strcmp (sec, ".text") == 0)
-                  section_addrs.text_addr = addr;
-                else if (strcmp (sec, ".data") == 0)
-                  section_addrs.data_addr = addr;
-                else if (strcmp (sec, ".bss") == 0)
-                  section_addrs.bss_addr = addr;
-                /* Add the section to the others even if it is a
-                   text data or bss section. This is redundent but
-                   eventually, none will be given special treatment */
-		{
-		  section_addrs.other[sec_num].name = xstrdup (sec);
-		  make_cleanup (free, section_addrs.other[sec_num].name);
-		  section_addrs.other[sec_num++].addr = addr;
-		  printf_filtered ("\t%s_addr = %s\n",
-				   sec, 
-				   local_hex_string ((unsigned long)addr));
-		}
- 
-                /* The object's sections are initialized when a 
-                   call is made to build_objfile_section_table (objfile).
-                   This happens in reread_symbols. 
-                   At this point, we don't know what file type this is,
-                   so we can't determine what section names are valid.  */
-              }
-              break;
-            default:
-              complain (&unknown_option_complaint, opt[i].name);
-	    }
-	}
-      /* Eventually, these hard coded names will be obsolete */
-      /* All the addresses will be on the others section */
+		if (strcmp (arg, "-mapped") == 0)
+		  flags |= OBJF_MAPPED;
+		else 
+		  if (strcmp (arg, "-readnow") == 0)
+		    flags |= OBJF_READNOW;
+		  else 
+		    if (strcmp (arg, "-s") == 0)
+		      {
+			if (section_index >= SECT_OFF_MAX)
+			  error ("Too many sections specified.");
+			expecting_sec_name = 1;
+			expecting_sec_addr = 1;
+		      }
+	      }
+	    else
+	      {
+		if (expecting_sec_name)
+		  {
+		    sect_opts[section_index].name = arg;
+		    expecting_sec_name = 0;
+		  }
+		else
+		  if (expecting_sec_addr)
+		    {
+		      sect_opts[section_index].value = arg;
+		      expecting_sec_addr = 0;
+		      section_index++;		  
+		    }
+		  else
+		    error ("USAGE: add-symbol-file <filename> <textaddress> [-mapped] [-readnow] [-s <secname> <addr>]*");
+	      }
+	  }
+      argcnt++;
     }
-  else
+
+  /* Print the prompt for the query below. And save the arguments into
+     a sect_addr_info structure to be passed around to other
+     functions.  We have to split this up into separate print
+     statements because local_hex_string returns a local static
+     string. */
+ 
+  printf_filtered ("add symbol table from file \"%s\" at\n", filename);
+  for (i = 0; i < section_index; i++)
     {
-      CORE_ADDR text_addr;
-      target_link (name, &text_addr);  
-      if (text_addr == (CORE_ADDR) -1)
-	error("Don't know how to get text start location for this file");
-      section_addrs.text_addr = text_addr;
-      section_addrs.data_addr = 0;
-      section_addrs.bss_addr = 0;
-      printf_filtered("add symbol table from file \"%s\" at text_addr = %s?\n",
-		      name, local_hex_string ((unsigned long)text_addr));
+      CORE_ADDR addr;
+      char *val = sect_opts[i].value;
+      char *sec = sect_opts[i].name;
+ 
+      val = sect_opts[i].value;
+      if (val[0] == '0' && val[1] == 'x')
+	addr = strtoul (val+2, NULL, 16);
+      else
+	addr = strtoul (val, NULL, 10);
+
+      if (strcmp (sec, ".text") == 0)
+	section_addrs.text_addr = addr;
+      else if (strcmp (sec, ".data") == 0)
+	section_addrs.data_addr = addr;
+      else if (strcmp (sec, ".bss") == 0)
+	section_addrs.bss_addr = addr;
+
+      /* Here we store the section offsets in the order they were
+         entered on the command line. */
+      section_addrs.other[sec_num].name = sec;
+      section_addrs.other[sec_num].addr = addr;
+      printf_filtered ("\t%s_addr = %s\n",
+		       sec, 
+		       local_hex_string ((unsigned long)addr));
+      sec_num++;
+
+      /* The object's sections are initialized when a 
+	 call is made to build_objfile_section_table (objfile).
+	 This happens in reread_symbols. 
+	 At this point, we don't know what file type this is,
+	 so we can't determine what section names are valid.  */
     }
+
   if (from_tty && (!query ("%s", "")))
     error ("Not confirmed.");
 
-  symbol_file_add (name, from_tty, &section_addrs, 0, flags);
+  symbol_file_add (filename, from_tty, &section_addrs, 0, flags);
 
   /* Getting new symbols may change our opinion about what is
      frameless.  */
   reinit_frame_cache ();
+  do_cleanups (my_cleanups);
 }
 
 static void
@@ -3370,13 +3342,12 @@ to execute.", &cmdlist);
   c->completer = filename_completer;
 
   c = add_cmd ("add-symbol-file", class_files, add_symbol_file_command,
-	       "Usage: add-symbol-file FILE ADDR [DATA_ADDR [BSS_ADDR]]\n\
-or:    add-symbol-file FILE -T<SECT> <SECT_ADDR> -T<SECT> <SECT_ADDR> ...\n\
+	       "Usage: add-symbol-file FILE ADDR [-s <SECT> <SECT_ADDR> -s <SECT> <SECT_ADDR> ...]\n\
 Load the symbols from FILE, assuming FILE has been dynamically loaded.\n\
 ADDR is the starting address of the file's text.\n\
-The optional arguments, DATA_ADDR and BSS_ADDR, should be specified\n\
-if the data and bss segments are not contiguous with the text.\n\
-For complicated cases, SECT is a section name to be loaded at SECT_ADDR.",
+The optional arguments are section-name section-address pairs and\n\
+should be specified if the data and bss segments are not contiguous\n\
+with the text. SECT is a section name to be loaded at SECT_ADDR.",
 	       &cmdlist);
   c->completer = filename_completer;
 

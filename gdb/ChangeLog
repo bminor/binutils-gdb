@@ -1,3 +1,11 @@
+2000-04-17  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* symfile.c (add_symbol_file_command): Rewrite the arguments
+ 	processing part. Simplify syntax of command. Remove support for
+ 	rombug.
+	(_initialize_symfile): Update help message for add-symbol-file
+ 	command.
+
 Mon Apr 17 15:53:38 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbarch.sh (IEEE_FLOAT): Only dump when defined.
