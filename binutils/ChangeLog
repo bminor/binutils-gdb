@@ -1,3 +1,7 @@
+Wed Apr 22 16:00:35 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* po/Make-in (MKINSTALLDIRS): Don't look in $(top_srcdir).
+
 Wed Apr 22 00:33:56 1998  Tom Tromey  <tromey@scribbles.cygnus.com>
 
 	* Makefile.am (INCLUDES): Search intl dirs for headers; define
