@@ -1,3 +1,7 @@
+Fri Jun 28 11:09:38 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in (TARGET_OS): Add definition to conf.
+
 Thu Jun 27 20:39:40 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* config/tc-mips.c (append_insn): Parenthesize
