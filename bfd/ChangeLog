@@ -1,5 +1,11 @@
 2002-04-07  Andrew Cagney  <ac131313@redhat.com>
 
+	* configure.in: Add missing ``|'' to powerpc-*-aix4.[4-9]*
+	pattern.
+	* configure: Re-generate.
+
+2002-04-07  Andrew Cagney  <ac131313@redhat.com>
+
 	* configure.in: Only define AIX_CORE_DUMPX_CORE when AIX version
 	is greater or equal to 4.3.3.
 	* configure: Regenerate.

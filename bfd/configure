@@ -5177,7 +5177,7 @@ if test "${target}" = "${host}"; then
         COREFILE=rs6000-core.lo
 	COREFLAG="$COREFLAG -DAIX_5_CORE -DAIX_CORE_DUMPX_CORE"
 	;;
-  rs6000-*-aix4.[4-9]* | powerpc-*-aix4.[4-9]* \
+  rs6000-*-aix4.[4-9]* | powerpc-*-aix4.[4-9]* | \
   rs6000-*-aix4.3.[3-9]* | powerpc-*-aix4.3.[3-9]*)
         COREFILE=rs6000-core.lo
 	COREFLAG="$COREFLAG -DAIX_CORE_DUMPX_CORE"
