@@ -1,9 +1,19 @@
+Thu Jul  1 15:46:16 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.in: Use config/mh-riscos for mips-*-sysv*.
+
+Wed Jun 30 09:31:58 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure: Correct error message for missing Makefile.in to
+	print correct directory.
+
 Tue Jun 29 13:52:16 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* install.sh: kludge around 386BSD shell bug
 
 Tue Jun 29 13:06:49 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
+	* config.guess:  Recognize NeXT.
 	* config.guess:  Recognize i486-ncr-sysv4.
 	* Makefile.in (taz):  rm $(TOOL)-$$VER before linking.
 

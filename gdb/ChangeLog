@@ -1,5 +1,10 @@
 Thu Jul  1 09:51:27 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* config/mips/nm-riscos.h: Remove unmatched #endif.
+	Define FETCH_INFERIOR_REGISTERS.
+	* config/mips/riscos.mh: Don't include coredep.o; mips-nat.o is enough.
+	Fix misspelling of NAT_FILE.
+
 	* ser-unix.c (hardwire_print_tty_state) [HAVE_TERMIOS]: Don't
 	print c_line.
 	(_initialize_ser_hardwire): Just check whether _POSIX_JOB_CONTROL

@@ -41,6 +41,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 		  addr = PCB_OFFSET(pcb_fpc_eir); \
               else \
                   addr = 0;
-#endif
 
 #include "mips/nm-mips.h"
+
+/* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
+#define FETCH_INFERIOR_REGISTERS
