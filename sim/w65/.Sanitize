@@ -29,6 +29,7 @@ ChangeLog
 Makefile.in
 acconfig.h
 config.in
+configure
 configure.in
 interp.c
 gencode.c
