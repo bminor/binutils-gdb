@@ -1,3 +1,8 @@
+2004-02-02  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/bang.exp: Use gdb_run_cmd so this tests works with
+	remote targets.  Update copyright years.
+
 2004-02-02  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* lib/gdb.exp (gdb_breakpoint): Add pending breakpoint
