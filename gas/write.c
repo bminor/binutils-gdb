@@ -1797,6 +1797,7 @@ write_object_file ()
  */
 
 #ifndef md_relax_frag
+#ifdef TC_GENERIC_RELAX_TABLE
 
 /* Subroutines of relax_segment.  */
 static int 
@@ -1810,6 +1811,7 @@ is_dnrange (f1, f2)
   return 0;
 }
 
+#endif /* defined (TC_GENERIC_RELAX_TABLE) */
 #endif /* ! defined (md_relax_frag) */
 
 /* Relax_align. Advance location counter to next address that has 'alignment'

@@ -1,5 +1,8 @@
 Wed Jun 19 11:31:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* write.c (is_dnrange): Only define if TC_GENERIC_RELAX_TABLE is
+	defined.
+
 	* doc/as.texinfo: Document that any number of hex digits can
 	follow \x.
 
