@@ -217,7 +217,7 @@ gdb_set_interpreter (struct gdb_interpreter *interp)
 
   if (!first_time)
     {
-      if (!gdb_interpreter_is_quiet (interp))
+      if (!gdb_interpreter_is_quiet_p (interp))
 	{
 	  sprintf (buffer, "Switching to interpreter \"%.24s\".\n",
 		   interp->name);
@@ -290,7 +290,7 @@ gdb_interpreter_display_prompt_p (void)
 }
 
 int
-gdb_interpreter_is_quiet (struct gdb_interpreter *interp)
+gdb_interpreter_is_quiet_p (struct gdb_interpreter *interp)
 {
   if (interp != NULL)
     return interp->quiet_p;

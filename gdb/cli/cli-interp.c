@@ -74,7 +74,7 @@ cli_interpreter_suspend (void *data)
 static int
 cli_interpreter_display_prompt_p (void)
 {
-  if (gdb_interpreter_is_quiet (NULL))
+  if (gdb_interpreter_is_quiet_p (NULL))
     return 0;
   else
     return 1;

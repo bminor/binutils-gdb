@@ -54,7 +54,7 @@ extern int gdb_interpreter_exec (char *command_str);
 extern int gdb_interpreter_display_prompt_p (void);
 extern int gdb_interpreter_set_quiet (struct gdb_interpreter *interp,
 				      int quiet);
-extern int gdb_interpreter_is_quiet (struct gdb_interpreter *interp);
+extern int gdb_interpreter_is_quiet_p (struct gdb_interpreter *interp);
 extern struct gdb_interpreter_procs *gdb_interpreter_get_procs (struct
 								gdb_interpreter
 								*interp);
