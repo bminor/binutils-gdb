@@ -1,3 +1,23 @@
+2003-10-04  Christian Groessler  <chris@groessler.org>
+
+	* gas/z8k/calr-backf.s: New file.
+	* gas/z8k/calr-forwf.s: New file.
+	* gas/z8k/calr.d: New file.
+	* gas/z8k/calr.s: New file.
+	* gas/z8k/djnz-backf.s: New file.
+	* gas/z8k/djnz-backf2.s: New file.
+	* gas/z8k/djnz.d: New file.
+	* gas/z8k/djnz.s: New file.
+	* gas/z8k/jr-back.d: New file.
+	* gas/z8k/jr-forw.d: New file.
+	* gas/z8k/jr-back.s: Fix displacement length. Add some more jumps
+	for jr-back.d. 
+	* gas/z8k/jr-backf.s: Fix displacement length.
+	* gas/z8k/jr-forw.s: Fix displacement length. Add some more jumps
+	for jr-forw.d. 
+	* gas/z8k/jr-forwf.s: Fix displacement length.
+	* gas/z8k/z8k.exp: Run new tests.
+
 2003-10-01  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* gas/mips/ldstla-32-shared.d: New file.

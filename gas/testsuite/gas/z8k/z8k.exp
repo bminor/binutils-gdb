@@ -6,12 +6,14 @@ if [istarget z8k-*-*] then {
      gas_test "eidi.s" "" "" "EI/DI operands"
      gas_test_error "eidif.s" "" "EI/DI operands"
 
-# JR range test
+# pcrel range test
 
-     gas_test_error "jr-forwf.s" "" "relative jump out of range"
-     gas_test_error "jr-backf.s" "" "relative jump out of range"
-     gas_test "jr-forw.s" "" "" "relative jump in range"
-     gas_test "jr-back.s" "" "" "relative jump in range"
+     gas_test_error "jr-forwf.s" "" "relative jump out of range (jr)"
+     gas_test_error "jr-backf.s" "" "relative jump out of range (jr)"
+     gas_test_error "djnz-backf.s" "" "relative jump out of range (djnz)"
+     gas_test_error "djnz-backf2.s" "" "relative jump out of range (djnz)"
+     gas_test_error "calr-forwf.s" "" "relative jump out of range (calr)"
+     gas_test_error "calr-backf.s" "" "relative jump out of range (calr)"
 
 # 4 bit argument tests
 
@@ -28,5 +30,10 @@ if [istarget z8k-*-*] then {
 
      run_dump_test "inout"
 
-}
+# pcrel tests
 
+     run_dump_test "jr-forw"
+     run_dump_test "jr-back"
+     run_dump_test "djnz"
+     run_dump_test "calr"
+}

@@ -1,5 +1,5 @@
 .text
 start:	jr t,dest
-	.space	254
+	.space	256
 .globl dest
 dest:	nop

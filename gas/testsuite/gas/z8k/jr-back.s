@@ -1,7 +1,9 @@
 .text
 .globl	start
 start:	nop
-	.space	254
-.globl	dest
-dest:	jr t,start
+	.space	248
+
+	jr t,start
+	jr t,start
+	jr t,start
 	nop
