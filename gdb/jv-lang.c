@@ -115,10 +115,9 @@ get_java_class_symtab (void)
 
       /* Allocate GLOBAL_BLOCK.  This has to be relocatable. */
       class_symtab_space = 128;
-      bl = (struct block *)
-	mmalloc (objfile->md,
-		 sizeof (struct block)
-		 + ((class_symtab_space - 1) * sizeof (struct symbol *)));
+      bl = xmmalloc (objfile->md,
+		     sizeof (struct block)
+		     + ((class_symtab_space - 1) * sizeof (struct symbol *)));
       *bl = *BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
       BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = bl;
       class_symtab->free_ptr = (char *) bl;

@@ -1,5 +1,8 @@
 2001-12-02  Andrew Cagney  <ac131313@redhat.com>
 
+	* jv-lang.c (get_java_class_symtab): Use xmmalloc instead of
+	mmalloc.
+
 	* coffread.c, dbxread.c, elfread.c, hp-psymtab-read.c, hpread.c,
 	nlmread.c, objfiles.c, os9kread.c, somread.c, source.c, symfile.c,
 	symmisc.c, xcoffread.c: Use xmfree instead of mfree.
