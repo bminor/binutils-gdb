@@ -1,3 +1,7 @@
+Tue Jun 29 08:29:17 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* remote-mips.c, remote-nindy.c: move bfd.h before symfile.h (for file_ptr decl)
+
 Tue Jun 29 09:11:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* dbxread.c (process_one_symbol): If we find a LOC_BLOCK where we

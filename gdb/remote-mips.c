@@ -21,8 +21,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "inferior.h"
-#include "symfile.h"
 #include "bfd.h"
+#include "symfile.h"
 #include "wait.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"

@@ -102,11 +102,11 @@ NINDY ROM monitor at the other end of the line.
 
 #include "frame.h"
 #include "inferior.h"
+#include "bfd.h"
 #include "symfile.h"
 #include "target.h"
 #include "gdbcore.h"
 #include "command.h"
-#include "bfd.h"
 #include "ieee-float.h"
 
 #include "wait.h"
