@@ -1,3 +1,14 @@
+2003-01-23  Nick Clifton  <nickc@redhat.com>
+
+	* Add sh2e support:
+
+	2002-04-02  Elena Zannoni  <ezannoni@redhat.com>
+
+		* archures.c (bfd_mach_sh2e): Added.
+		* bfd-in2.h: Rebuilt.
+		* cpu-sh.c (arch_info_struct): Added SH2e.
+		* elf32-sh.c (sh_elf_set_mach_from_flags): Handle EF_SH2E.
+
 2003-01-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct bfd_elf_section_data): Remove tdata.  Change

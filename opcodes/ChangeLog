@@ -1,3 +1,15 @@
+2003-01-23  Nick Clifton  <nickc@redhat.com>
+
+	* Add sh2e support:
+
+	2002-04-02  Alexandre Oliva  <aoliva@redhat.com>
+
+		* sh-dis.c (print_insn_shx): Handle bfd_mach_sh2e.
+		* sh-opc.h (arch_sh2e, arch_sh2e_up): New.
+		(arch_sh2_up): Added sh2e.
+		(sh_table): Replaced all occurrences of arch_sh3e_up with
+		arch_sh2e_up, except in fsqrt.
+
 2003-01-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* sh64-dis.c: Include elf32-sh64.h.

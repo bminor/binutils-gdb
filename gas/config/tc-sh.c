@@ -2718,7 +2718,7 @@ SH options:\n\
 -big			generate big endian code\n\
 -relax			alter jump instructions for long displacements\n\
 -small			align sections to 4 byte boundaries, not 16\n\
--dsp			enable sh-dsp insns, and disable sh3e / sh4 insns.\n"));
+-dsp			enable sh-dsp insns, and disable sh2e/sh3e/sh4 insns.\n"));
 #ifdef HAVE_SH64
   fprintf (stream, _("\
 -isa=[shmedia		set default instruction set for SH64\n\
@@ -3298,6 +3298,8 @@ sh_elf_final_processing ()
     val = EF_SH1;
   else if (valid_arch & arch_sh2)
     val = EF_SH2;
+  else if (valid_arch & arch_sh2e)
+    val = EF_SH2E;
   else if (valid_arch & arch_sh_dsp)
     val = EF_SH_DSP;
   else if (valid_arch & arch_sh3)

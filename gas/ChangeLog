@@ -1,3 +1,15 @@
+2003-01-23  Nick Clifton  <nickc@redhat.com>
+
+        NEWS: Announce sh2e support.
+
+	* Add sh2e support:
+
+	2002-04-02  Alexandre Oliva  <aoliva@redhat.com>
+
+		* config/tc-sh.c (md_show_usage): Added sh2e next to
+		sh3e.
+		(sh_elf_final_processing): Handle arch_sh2e.
+
 2003-01-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* symbols.c (S_FORCE_RELOC): Add "strict" param.

@@ -6724,6 +6724,9 @@ sh_elf_set_mach_from_flags (abfd)
     case EF_SH2:
       bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh2);
       break;
+    case EF_SH2E:
+      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh2e);
+      break;
     case EF_SH_DSP:
       bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh_dsp);
       break;
