@@ -1,3 +1,12 @@
+2004-10-05  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* m32r-tdep.c (m32r_use_struct_convention): Delete function.
+	(m32r_extract_struct_value_address): Delete function.
+	(m32r_return_value): New function.
+	(m32r_gdbarch_init): Instead of store_return_value,
+	extract_return_value, deprecated_extract_struct_value_address
+	and deprecated_use_struct_convention, set return_value.
+
 2004-10-03  Daniel Jacobowitz  <dan@debian.org>
 
 	* dwarf2read.c (read_subrange_type): Add comment for variable
