@@ -1,3 +1,12 @@
+2004-07-26  Dmitry Diky  <diwil@spec.ru>
+
+	* Makefile.am: Add new subtargets: msp430x1610, msp430x1611,
+	msp430x1612, msp430x415, msp430x417, msp430xG437, msp430xG438,
+	msp430xG439.
+	* configure.tgt: Likewise.
+	* emulparams/msp430all.sh: Likewise.
+	* Makefile.in: Regenerate.
+
 2004-07-23  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/elf32.em (_place_orphan): Use an already existing

@@ -1,3 +1,9 @@
+2004-07-26  Dmitry Diky  <diwil@spec.ru>
+
+	* config/tc-msp430.c: Add new subtargets: msp430x1610,
+	msp430x1611, msp430x1612, msp430x415, msp430x417, msp430xG437,
+	msp430xG438, msp430xG439.
+
 2004-07-25  Daniel Jacobowitz  <dan@debian.org>
 
 	* doc/as.texinfo (Section, PushSection): Correct documentation

@@ -1,6 +1,6 @@
 /* tc-msp430.c -- Assembler code for the Texas Instruments MSP430
 
-  Copyright (C) 2002, 2003 Free Software Foundation, Inc.
+  Copyright (C) 2002, 2003, 2004 Free Software Foundation, Inc.
   Contributed by Dmitry Diky <diwil@mail.ru>
 
   This file is part of GAS, the GNU Assembler.
@@ -119,6 +119,9 @@ static struct mcu_type_s mcu_types[] =
   {"msp430x167", MSP430_ISA_16, bfd_mach_msp16},
   {"msp430x168", MSP430_ISA_16, bfd_mach_msp16},
   {"msp430x169", MSP430_ISA_16, bfd_mach_msp16},
+  {"msp430x1610", MSP430_ISA_16, bfd_mach_msp16},
+  {"msp430x1611", MSP430_ISA_16, bfd_mach_msp16},
+  {"msp430x1612", MSP430_ISA_16, bfd_mach_msp16},
 
   {"msp430x311", MSP430_ISA_31, bfd_mach_msp31},
   {"msp430x312", MSP430_ISA_31, bfd_mach_msp31},
@@ -132,13 +135,20 @@ static struct mcu_type_s mcu_types[] =
 
   {"msp430x412", MSP430_ISA_41, bfd_mach_msp41},
   {"msp430x413", MSP430_ISA_41, bfd_mach_msp41},
+  {"msp430x415", MSP430_ISA_41, bfd_mach_msp41},
+  {"msp430x417", MSP430_ISA_41, bfd_mach_msp41},
 
   {"msp430xE423", MSP430_ISA_42, bfd_mach_msp42},
   {"msp430xE425", MSP430_ISA_42, bfd_mach_msp42},
   {"msp430xE427", MSP430_ISA_42, bfd_mach_msp42},
+
   {"msp430xW423", MSP430_ISA_42, bfd_mach_msp42},
   {"msp430xW425", MSP430_ISA_42, bfd_mach_msp42},
   {"msp430xW427", MSP430_ISA_42, bfd_mach_msp42},
+
+  {"msp430xG437", MSP430_ISA_43, bfd_mach_msp43},
+  {"msp430xG438", MSP430_ISA_43, bfd_mach_msp43},
+  {"msp430xG439", MSP430_ISA_43, bfd_mach_msp43},
 
   {"msp430x435", MSP430_ISA_43, bfd_mach_msp43},
   {"msp430x436", MSP430_ISA_43, bfd_mach_msp43},
@@ -189,8 +199,7 @@ show_mcu_list (stream)
 }
 
 void
-md_show_usage (stream)
-     FILE *stream;
+md_show_usage (FILE *stream)
 {
   fprintf (stream,
 	   _("MSP430 options:\n"
@@ -205,12 +214,14 @@ md_show_usage (stream)
 	     "                  msp430x147  msp430x148  msp430x149\n"
 	     "                  msp430x155  msp430x156  msp430x157\n"
 	     "                  msp430x167  msp430x168  msp430x169\n"
+	     "                  msp430x1610 msp430x1611 msp430x1612\n"
 	     "                  msp430x311  msp430x312  msp430x313  msp430x314  msp430x315\n"
 	     "                  msp430x323  msp430x325\n"
 	     "                  msp430x336  msp430x337\n"
-	     "                  msp430x412  msp430x413\n"
+	     "                  msp430x412  msp430x413  msp430x415  msp430x417\n"
 	     "                  msp430xE423 msp430xE425 msp430E427\n"
 	     "                  msp430xW423 msp430xW425 msp430W427\n"
+	     "                  msp430xG437 msp430xG438 msp430G439\n"
 	     "                  msp430x435  msp430x436  msp430x437\n"
 	     "                  msp430x447  msp430x448  msp430x449\n"));
 
