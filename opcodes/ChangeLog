@@ -1,3 +1,8 @@
+2003-01-08  Klee Dienes  <kdienes@apple.com>
+
+	* Makefile.am (ALL_MACHINES): Add msp430-dis.lo.
+	* Makefile.in: Regenerate.
+
 2003-01-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-opc.c (powerpc_macros <extrwi>): Accept a shift of 32.

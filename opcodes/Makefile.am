@@ -233,6 +233,7 @@ ALL_MACHINES = \
 	mips16-opc.lo \
 	mmix-dis.lo \
 	mmix-opc.lo \
+	msp430-dis.lo \
 	ns32k-dis.lo \
 	openrisc-asm.lo \
 	openrisc-desc.lo \
