@@ -1,5 +1,18 @@
 2002-08-25  Andrew Cagney  <ac131313@redhat.com>
 
+	* regcache.h (register_offset_hack): Declare.
+	(regcache_cooked_read_using_offset_hack): Declare.
+	(regcache_cooked_write_using_offset_hack): Declare.
+
+	* regcache.c (register_offset_hack): New function.
+	(regcache_cooked_read_using_offset_hack): New function.
+	(regcache_cooked_write_using_offset_hack): New function.
+	(regcache_dump): Check that the registers, according to their
+	offset, are packed hard against each other.
+	(cooked_xfer_using_offset_hack): New function.
+
+2002-08-25  Andrew Cagney  <ac131313@redhat.com>
+
 	* regcache.c (struct regcache_descr): Add field register_type.
 	(init_legacy_regcache_descr): Pass a pre-allocated regcache_descr
 	in as a parameter

@@ -88,6 +88,33 @@ extern void supply_register (int regnum, const void *val);
 extern void regcache_collect (int regnum, void *buf);
 
 
+/* The register's ``offset''.
+
+   NOTE: cagney/2002-08-17: The ``struct value'' and expression
+   evaluator treat the register cache as a large liner buffer.
+   Instead of reading/writing a register using its register number,
+   the code read/writes registers by specifying their offset into the
+   buffer and a number of bytes.  The code also assumes that these
+   byte read/writes can cross register boundaries, adjacent registers
+   treated as a contiguous set of bytes.
+
+   The below map that model onto the real register cache.  New code
+   should go out of their way to avoid using these interfaces.
+
+   FIXME: cagney/2002-08-17: The ``struct value'' and expression
+   evaluator should be fixed.  Instead of using the { offset, length }
+   pair to describe a value within one or more registers, the code
+   should use a chain of { regnum, offset, len } tripples.  */
+
+extern int register_offset_hack (struct gdbarch *gdbarch, int regnum);
+extern void regcache_cooked_read_using_offset_hack (struct regcache *regcache,
+						    int offset, int len,
+						    void *buf);
+extern void regcache_cooked_write_using_offset_hack (struct regcache *regcache,
+						     int offset, int len,
+						     const void *buf);
+
+
 /* The type of a register.  This function is slightly more efficient
    then its gdbarch vector counterpart since it returns a precomputed
    value stored in a table.
