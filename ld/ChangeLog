@@ -1,3 +1,11 @@
+start-sanitize-d30v
+Thu Feb 26 17:09:53 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* scripttempl/elfd30v.sc: Add support for .eit_v section and put
+	it at 0xfffff020.
+	* emulparams/d30v{elf,_o,_e}.sh: Ditto.
+
+end-sanitize-d30v
 Mon Feb 23 17:46:51 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/pe.em (sort_sections): Permit the wildcard to include
