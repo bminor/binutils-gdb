@@ -1,3 +1,7 @@
+Mon Mar 31 23:28:39 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* coffcode.h (coff_mkobject_hook): Declare if not a macro.
+
 Mon Mar 31 16:29:50 1997  Joel Sherrill  <joel@oarcorp.com>
 
         * config.bfd (hppa*-*-rtems*): New target, like hppa-*-*elf*.
