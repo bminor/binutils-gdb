@@ -40,7 +40,15 @@ proc sim_compile { source dest type options } {
 # Run a program on the simulator.
 # Required by dejagnu (at least ${tool}_run used to be).
 #
+# SIM_OPTS are options for the simulator.
+# PROG_OPTS are options passed to the simulated program.
 # At present REDIR must be "" or "> foo".
+# OPTIONS is a list of options internal to this routine.
+# This is modelled after target_compile.  We want to be able to add new
+# options without having to update all our users.
+# Currently:
+#	env(foo)=val	- set environment variable foo to val for this run
+#	timeout=val	- set the timeout to val for this run
 #
 # The result is a list of two elements.
 # The first is one of pass/fail/etc.
@@ -50,9 +58,10 @@ proc sim_compile { source dest type options } {
 # dejagnu/config/sim.exp.  It's not clear how to pass arguments to the
 # simulator (not the simulated program, the simulator) with sim_load.
 
-proc sim_run { prog sim_opts prog_opts redir env_vals } {
+proc sim_run { prog sim_opts prog_opts redir options } {
     global SIMFLAGS
 
+    # Set the default value of the timeout.
     # FIXME: The timeout value we actually want is a function of
     # host, target, and testcase.
     set testcase_timeout [board_info target sim_time_limit]
@@ -63,11 +72,23 @@ proc sim_run { prog sim_opts prog_opts redir env_vals } {
 	set testcase_timeout 240 ;# 240 same as in dejagnu/config/sim.exp.
     }
 
+    # Initial the environment we pass to the testcase.
+    set testcase_env ""
+
+    # Process OPTIONS ...
+    foreach o $options {
+	if [regexp {^env\((.*)\)=(.*)} $o full var val] {
+	    set testcase_env "$testcase_env $var=$val"
+	} elseif [regexp {^timeout=(.*)} $o full val] {
+	    set testcase_timeout $val
+	}
+    }
+
     set sim [board_info target sim]
 
     # FIXME: this works for UNIX only
-    if { "$env_vals" != "" } {
-	set sim "env $env_vals $sim"
+    if { "$testcase_env" != "" } {
+	set sim "env $testcase_env $sim"
     }
 
     if { "$redir" == "" } {
@@ -128,6 +149,7 @@ proc run_sim_test { name } {
     set opts(sim) {}
     set opts(output) {}
     set opts(mach) {}
+    set opts(timeout) {}
 
     foreach i $opt_array {
 	set opt_name [lindex $i 0]
@@ -184,7 +206,13 @@ proc run_sim_test { name } {
 	    set opts(sim,$mach) $opts(sim)
 	}
 
-	set result [sim_run ${name}.x "$opts(sim,$mach)" "" "" ""]
+	# Build the options argument.
+	set options ""
+	if { "$opts(timeout)" != "" } {
+	    set options "$options timeout=$opts(timeout)"
+	}
+
+	set result [sim_run ${name}.x "$opts(sim,$mach)" "" "" "$options"]
 	set status [lindex $result 0]
 	set output [lindex $result 1]
 
