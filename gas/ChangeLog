@@ -6,6 +6,9 @@ Mon Jun 10 14:52:29 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 Mon Jun 10 11:45:51 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-sparc.c (md_pseudo_table): Add "empty".
+	(s_empty): New static function.
+
 	* config/obj-coff.c (struct filename_list): Only define if not
 	BFD_ASSEMBLER.
 	(filename_list_head, filename_list_tail): Likewise.
