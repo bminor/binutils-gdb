@@ -46,16 +46,8 @@
 #undef  MIPS_LAST_ARG_REGNUM
 #define MIPS_LAST_ARG_REGNUM 11	/* N32 uses R4 through R11 for args */
 
-#undef  MIPS_NUM_ARG_REGS
-#define MIPS_NUM_ARG_REGS 8
-
 #endif /* N32 */
 
-/* When calling functions on Irix 5 (or any MIPS SVR4 ABI compliant
-   platform) $25 must hold the function address.  Dest_Reg is a macro
-   used in CALL_DUMMY in tm-mips.h.  */
-#undef Dest_Reg
-#define Dest_Reg 25
 
 /* The signal handler trampoline is called _sigtramp.  */
 #undef IN_SIGTRAMP

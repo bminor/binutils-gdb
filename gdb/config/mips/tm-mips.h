@@ -185,10 +185,8 @@ extern char *mips_register_name PARAMS ((int regnr));
 #define A0_REGNUM 4		/* Loc of first arg during a subr call */
 #if MIPS_EABI
 #define MIPS_LAST_ARG_REGNUM 11	/* EABI uses R4 through R11 for args */
-#define MIPS_NUM_ARG_REGS 8
 #else
 #define MIPS_LAST_ARG_REGNUM 7	/* old ABI uses R4 through R7 for args */
-#define MIPS_NUM_ARG_REGS 4
 #endif
 #define T9_REGNUM 25		/* Contains address of callee in PIC */
 #define SP_REGNUM 29		/* Contains address of top of stack */
@@ -430,8 +428,10 @@ extern void mips_pop_frame PARAMS ((void));
 
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
 
-/* On Irix, $t9 ($25) contains the address of the callee (used for PIC).
-   It doesn't hurt to do this on other systems; $t9 will be ignored.  */
+/* When calling functions on Irix 5 (or any MIPS SVR4 ABI compliant
+   platform), $t9 ($25) (Dest_Reg) contains the address of the callee
+   (used for PIC).  It doesn't hurt to do this on other systems; $t9
+   will be ignored.  */
 #define FIX_CALL_DUMMY(dummyname, start_sp, fun, nargs, args, rettype, gcc_p) \
     write_register(T9_REGNUM, fun)
 
