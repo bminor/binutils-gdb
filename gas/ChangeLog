@@ -1,3 +1,8 @@
+Fri Oct 10 11:54:50 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/tc-d10v.c (parallel_ok): Flag SP as modified for @-sp
+ 	operand - OPERAND_ATMINUS.
+
 Fri Oct 10 00:47:44 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* config/tc-d10v.c (parallel_ok): Note that auto increment and

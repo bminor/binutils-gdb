@@ -879,6 +879,12 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
 		    mod[j] |= 1 << regno;
 		}
 	    }
+	  else if (flags & OPERAND_ATMINUS)
+	    {
+	      /* SP implicitly used/modified */
+	      mod[j] |= 1 << 15;
+	      used[j] |= 1 << 15;
+	    }
 	}
       if (op->exec_type & RMEM)
 	used[j] |= 1 << 20;
