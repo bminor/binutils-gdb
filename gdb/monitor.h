@@ -148,6 +148,10 @@ struct monitor_ops
 
 #define MO_SEND_BREAK_ON_STOP 0x80
 
+/* If set, target sends an ACK after each S-record */
+
+#define MO_SREC_ACK 0x100
+
 #define SREC_SIZE 160
 
 extern void monitor_open PARAMS ((char *args, struct monitor_ops *ops,

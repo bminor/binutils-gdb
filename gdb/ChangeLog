@@ -1,3 +1,15 @@
+Mon May 20 22:52:00 1996  Mark Alexander  <marka@cygnus.com>
+
+	* dsrec.c (load_srec): Add WAITACK parameter, for machines
+	like EST visionICE that send back an ACK after each S-record.
+	* monitor.c (monitor_wait_srec_ack): New function.
+	(monitor_load): Pass monitor_wait_srec_ack to load_srec
+	if the monitor's MO_SREC_ACK flag is set.
+	* monitor.h: Define MO_SREC_ACK flag.
+	* remote-est.c (est_cmds): Add MO_SREC_ACK flag.
+	* sh3-rom.c (sh3_load): Accomodate change in load_srec prototype.
+	* srec.h: Add WAITACK parameter to load_srec prototype.
+
 Sun May 19 21:22:00 1996  Rob Savoye  <rob@chinadoll>
 
 	* config/sparc/sparclite.mt: Add the sparc simulator.

@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 void load_srec PARAMS ((serial_t desc, const char *file, int maxrecsize,
-			int flags, int hashmark));
+			int flags, int hashmark, int (*waitack)(void)));
 
 /* S-record capability flags */
 
