@@ -46,6 +46,8 @@ alpha-opc.h
 arm-dis.c
 arm-opc.h
 a29k-dis.c
+config.in
+configure
 configure.bat
 configure.in
 dis-buf.c
@@ -69,6 +71,7 @@ sh-opc.h
 sh-dis.c
 sparc-dis.c
 sparc-opc.c
+sysdep.h
 w65-dis.c
 w65-opc.h
 z8k-dis.c
@@ -100,7 +103,7 @@ else
 	done
 fi
 
-rce_files="configure.in"
+rce_files="configure.in configure"
 if ( echo $* | grep keep\-rce > /dev/null ) ; then
 	for i in $rce_files ; do
 		if test ! -d $i && (grep sanitize-rce $i > /dev/null) ; then
@@ -128,7 +131,7 @@ else
 	done
 fi
 
-arc_files="ChangeLog Makefile.in configure.in disassemble.c"
+arc_files="ChangeLog Makefile.in configure.in configure disassemble.c"
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	for i in $arc_files ; do
 		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then
