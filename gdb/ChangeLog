@@ -1,3 +1,8 @@
+2002-05-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* corelow.c (core_open): Only call set_gdbarch_from_file if
+	exec_bfd is NULL.
+
 2002-05-17  Andrey Volkov <avolkov@transas.com>
 
 	* h8300-tdep.c: Add support of EXR register
