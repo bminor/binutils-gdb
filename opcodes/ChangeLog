@@ -1,3 +1,8 @@
+2003-02-23  Elias Athanasopoulos  <elathan@phys.uoa.gr>
+
+	* mips-dis.c (print_mips_disassembler_options): Make 'i' unsigned,
+	use ARRAY_SIZE in loops.
+
 2003-02-12  Dave Brolley  <brolley@redhat.com>
 
 	* fr30-desc.c: Regenerate.
