@@ -44,6 +44,7 @@
 #include "value.h"
 #include "observer.h"
 #include "language.h"
+#include "gdb_assert.h"
 
 /* Prototypes for local functions */
 
@@ -474,6 +475,14 @@ follow_exec (int pid, char *execd_pathname)
    because we cannot remove the breakpoints in the inferior process
    until after the `wait' in `wait_for_inferior'.  */
 static int singlestep_breakpoints_inserted_p = 0;
+
+/* The thread we inserted single-step breakpoints for.  */
+static ptid_t singlestep_ptid;
+
+/* If another thread hit the singlestep breakpoint, we save the original
+   thread here so that we can resume single-stepping it later.  */
+static ptid_t saved_singlestep_ptid;
+static int stepping_past_singlestep_breakpoint;
 
 
 /* Things to clean up if we QUIT out of resume ().  */
@@ -560,6 +569,7 @@ resume (int step, enum target_signal sig)
       /* and do not pull these breakpoints until after a `wait' in
          `wait_for_inferior' */
       singlestep_breakpoints_inserted_p = 1;
+      singlestep_ptid = inferior_ptid;
     }
 
   /* Handle any optimized stores to the inferior NOW...  */
@@ -597,7 +607,8 @@ resume (int step, enum target_signal sig)
       resume_ptid = RESUME_ALL;	/* Default */
 
       if ((step || singlestep_breakpoints_inserted_p) &&
-	  !breakpoints_inserted && breakpoint_here_p (read_pc ()))
+	  (stepping_past_singlestep_breakpoint
+	   || (!breakpoints_inserted && breakpoint_here_p (read_pc ()))))
 	{
 	  /* Stepping past a breakpoint without inserting breakpoints.
 	     Make sure only the current thread gets to step, so that
@@ -896,6 +907,8 @@ init_wait_for_inferior (void)
   number_of_threads_in_syscalls = 0;
 
   clear_proceed_status ();
+
+  stepping_past_singlestep_breakpoint = 0;
 }
 
 static void
@@ -1739,12 +1752,46 @@ handle_inferior_event (struct execution_control_state *ecs)
 
   stop_pc = read_pc_pid (ecs->ptid);
 
+  if (stepping_past_singlestep_breakpoint)
+    {
+      gdb_assert (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p);
+      gdb_assert (ptid_equal (singlestep_ptid, ecs->ptid));
+      gdb_assert (!ptid_equal (singlestep_ptid, saved_singlestep_ptid));
+
+      stepping_past_singlestep_breakpoint = 0;
+
+      /* We've either finished single-stepping past the single-step
+	 breakpoint, or stopped for some other reason.  It would be nice if
+	 we could tell, but we can't reliably.  */
+      if (stop_signal == TARGET_SIGNAL_TRAP)
+        {
+	  /* Pull the single step breakpoints out of the target.  */
+	  SOFTWARE_SINGLE_STEP (0, 0);
+	  singlestep_breakpoints_inserted_p = 0;
+
+	  ecs->random_signal = 0;
+
+	  ecs->ptid = saved_singlestep_ptid;
+	  context_switch (ecs);
+	  if (context_hook)
+	    context_hook (pid_to_thread_id (ecs->ptid));
+
+	  resume (1, TARGET_SIGNAL_0);
+	  prepare_to_wait (ecs);
+	  return;
+	}
+    }
+
+  stepping_past_singlestep_breakpoint = 0;
+
   /* See if a thread hit a thread-specific breakpoint that was meant for
      another thread.  If so, then step that thread past the breakpoint,
      and continue it.  */
 
   if (stop_signal == TARGET_SIGNAL_TRAP)
     {
+      int thread_hop_needed = 0;
+
       /* Check if a regular breakpoint has been hit before checking
          for a potential single step breakpoint. Otherwise, GDB will
          not see this breakpoint hit when stepping onto breakpoints.  */
@@ -1752,11 +1799,37 @@ handle_inferior_event (struct execution_control_state *ecs)
 	{
 	  ecs->random_signal = 0;
 	  if (!breakpoint_thread_match (stop_pc, ecs->ptid))
+	    thread_hop_needed = 1;
+	}
+      else if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
+	{
+	  ecs->random_signal = 0;
+	  /* The call to in_thread_list is necessary because PTIDs sometimes
+	     change when we go from single-threaded to multi-threaded.  If
+	     the singlestep_ptid is still in the list, assume that it is
+	     really different from ecs->ptid.  */
+	  if (!ptid_equal (singlestep_ptid, ecs->ptid)
+	      && in_thread_list (singlestep_ptid))
+	    {
+	      thread_hop_needed = 1;
+	      stepping_past_singlestep_breakpoint = 1;
+	      saved_singlestep_ptid = singlestep_ptid;
+	    }
+	}
+
+      if (thread_hop_needed)
 	    {
 	      int remove_status;
 
 	      /* Saw a breakpoint, but it was hit by the wrong thread.
 	         Just continue. */
+
+	      if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
+		{
+		  /* Pull the single step breakpoints out of the target. */
+		  SOFTWARE_SINGLE_STEP (0, 0);
+		  singlestep_breakpoints_inserted_p = 0;
+		}
 
 	      remove_status = remove_breakpoints ();
 	      /* Did we fail to remove breakpoints?  If so, try
@@ -1799,7 +1872,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 		  registers_changed ();
 		  return;
 		}
-	    }
 	}
       else if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
         {

@@ -1,3 +1,14 @@
+2004-02-16  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (infrun.o): Add $(gdb_assert_h).
+	* infrun.c: Include "gdb_assert.h".
+	(singlestep_ptid, saved_singlestep_ptid)
+	(stepping_past_singlestep_breakpoint): New variables.
+	(resume): Set singlestep_ptid.  Check for singlestep thread
+	hop.
+	(init_wait_for_inferior): Clear stepping_past_singlestep_breakpoint.
+	(handle_inferior_event): Handle singlestep thread hop.
+
 2004-02-16  Andrew Cagney  <cagney@redhat.com>
 
 	* dwarf2-frame.c (dwarf2_frame_ops): New function.

@@ -1851,7 +1851,7 @@ infrun.o: infrun.c $(defs_h) $(gdb_string_h) $(symtab_h) $(frame_h) \
 	$(inferior_h) $(breakpoint_h) $(gdb_wait_h) $(gdbcore_h) $(gdbcmd_h) \
 	$(cli_script_h) $(target_h) $(gdbthread_h) $(annotate_h) \
 	$(symfile_h) $(top_h) $(inf_loop_h) $(regcache_h) $(value_h) \
-	$(observer_h) $(language_h)
+	$(observer_h) $(language_h) $(gdb_assert_h)
 inftarg.o: inftarg.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(command_h) $(gdb_stat_h) $(gdb_wait_h) $(inflow_h)
 infttrace.o: infttrace.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
