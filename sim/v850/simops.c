@@ -2458,7 +2458,7 @@ OP_24007E0 (void)
 {
   trace_input ("mul", OP_IMM_REG_REG, 0);
 
-  Multiply64 (true, (OP[3] & 0x1f) | ((OP[3] >> 13) & 0x1e0));
+  Multiply64 (true, SEXT9 ((OP[3] & 0x1f) | ((OP[3] >> 13) & 0x1e0)));
 
   trace_output (OP_IMM_REG_REG);
 
