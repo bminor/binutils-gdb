@@ -3,6 +3,7 @@
 	PR java/1322
 	* dwarf2-frame.c (dwarf2_frame_find_fde): Check whether any FDEs are
 	available before calling SECT_OFF_TEXT.
+	* PROBLEMS: Remove description of java/1322.
 
 2003-08-25  Jeff Johnston  <jjohnstn@redhat.com>
 
