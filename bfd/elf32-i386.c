@@ -252,7 +252,6 @@ elf_i386_create_dynamic_sections (abfd, info)
 {
   flagword flags;
   register asection *s;
-  struct elf_link_hash_entry *h;
 
   /* We need to create .plt, .rel.plt, .got, .got.plt, .dynbss, and
      .rel.bss sections.  */
