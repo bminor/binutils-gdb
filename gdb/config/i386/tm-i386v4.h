@@ -1,5 +1,5 @@
 /* Macro definitions for GDB on an Intel i386 running SVR4.
-   Copyright (C) 1991, Free Software Foundation, Inc.
+   Copyright (C) 1991, 1994 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support (fnf@cygint)
 
 This file is part of GDB.
@@ -67,3 +67,48 @@ extern int
 get_longjmp_target PARAMS ((CORE_ADDR *));
 
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
+
+/* The following redefines make backtracing through sigtramp work.
+   They manufacture a fake sigtramp frame and obtain the saved pc in sigtramp
+   from the ucontext structure which is pushed by the kernel on the
+   user stack. Unfortunately there are three variants of sigtramp handlers.  */
+
+#define I386V4_SIGTRAMP_SAVED_PC
+#define IN_SIGTRAMP(pc, name) ((name)					\
+			       && (STREQ ("_sigreturn", name)		\
+				   || STREQ ("_sigacthandler", name)	\
+				   || STREQ ("sigvechandler", name)))
+
+/* FRAME_CHAIN takes a frame's nominal address and produces the frame's
+   chain-pointer.
+   In the case of the i386, the frame's nominal address
+   is the address of a 4-byte word containing the calling frame's address.  */
+#undef FRAME_CHAIN
+#define FRAME_CHAIN(thisframe)  \
+  ((thisframe)->signal_handler_caller \
+   ? (thisframe)->frame \
+   : (!inside_entry_file ((thisframe)->pc) \
+      ? read_memory_integer ((thisframe)->frame, 4) \
+      : 0))
+
+/* A macro that tells us whether the function invocation represented
+   by FI does not have a frame on the stack associated with it.  If it
+   does not, FRAMELESS is set to 1, else 0.  */
+#undef FRAMELESS_FUNCTION_INVOCATION
+#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
+  do { \
+    if ((FI)->signal_handler_caller) \
+      (FRAMELESS) = 0; \
+    else \
+      (FRAMELESS) = frameless_look_for_prologue(FI); \
+  } while (0)
+
+/* Saved Pc.  Get it from ucontext if within sigtramp.  */
+
+#undef FRAME_SAVED_PC(FRAME)
+#define FRAME_SAVED_PC(FRAME) \
+  (((FRAME)->signal_handler_caller \
+    ? i386v4_sigtramp_saved_pc (FRAME) \
+    : read_memory_integer ((FRAME)->frame + 4, 4)) \
+   )
+extern CORE_ADDR i386v4_sigtramp_saved_pc PARAMS ((struct frame_info *));
