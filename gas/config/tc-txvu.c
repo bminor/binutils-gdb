@@ -299,6 +299,7 @@ assemble_insn (str, lower_p, buf)
 	      if (operand->flags & TXVU_OPERAND_SUFFIX)
 		as_fatal ("bad opcode table, suffix wrong");
 
+#if 0 /* commas are in the syntax string now */
 	      /* If this is not the first, there must be a comma.  */
 	      if (num_operands > 0)
 		{
@@ -306,6 +307,7 @@ assemble_insn (str, lower_p, buf)
 		    break;
 		  ++str;
 		}
+#endif
 
 	      /* Is there anything left to parse?
 		 We don't check for this at the top because we want to parse
