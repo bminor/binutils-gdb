@@ -1,3 +1,10 @@
+2005-03-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/m68k/mcf-emac.d: Allow for 64-bit addresses.
+	* gas/m68k/mcf-mac.d: Likewise.
+	* gas/m68k/mcf-mov3q.d: Likewise.
+	* gas/m68k/mode5.d: Likewise.
+
 2005-02-22  Eric Christopher  <echristo@redhat.com>
 
 	* gas/mips/elf-rel10.d: Update for label change.

@@ -6,7 +6,7 @@
 
 Disassembly of section .text:
 
-00000000 <.text>:
+0+ <.text>:
        0:	a241 0280      	macw %d1l,%a1u,<<,%acc0
        4:	a2d0 d281      	macw %d1l,%a5u,<<,%a0@,%a1,%acc0
        8:	a490 b2a5      	macw %d5l,%a3u,<<,%a0@&,%d2,%acc0

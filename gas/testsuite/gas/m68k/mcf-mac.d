@@ -6,7 +6,7 @@
 
 Disassembly of section .text:
 
-00000000 <.text>:
+0+ <.text>:
        0:	a182           	movel %acc,%d2
        2:	a189           	movel %acc,%a1
        4:	a989           	movel %macsr,%a1
