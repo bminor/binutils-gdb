@@ -211,7 +211,7 @@ process_keepsyms (table, size)
   ks_file = fopen (keepsyms_file, "r");
   if (!ks_file)
     {
-      info ("%X%P: can't open keep-symbols file `%s'\n", keepsyms_file);
+      info ("%X%P: cannot open keep-symbols file `%s'\n", keepsyms_file);
       goto egress;
     }
   errno = 0;
@@ -457,9 +457,9 @@ write_file_locals (output_buffer)
 		/* The value is the start of this section in the output file*/
 		newsym->value = 0;
 		/* FIXME: Usurping BSF_KEEP_G flag, since it's defined as
-	     "used by the linker" and I can't find any other code that
-	     uses it.  Should be a cleaner way of doing this (like an
-	     "application flags" field in the symbol structure?).  */
+		   "used by the linker" and I can't find any other code that
+		   uses it.  Should be a cleaner way of doing this (like an
+		   "application flags" field in the symbol structure?).  */
 		newsym->flags = BSF_LOCAL | BSF_KEEP_G;
 		newsym->section = s;
 		*output_buffer++ = newsym;
@@ -620,7 +620,7 @@ ldsym_write ()
   if (keepsyms_file != 0
       && strip_symbols != STRIP_SOME)
     {
-      info ("%P `-retain-symbols-file' overrides `-s' and `-S'\n");
+      info ("%P: `-retain-symbols-file' overrides `-s' and `-S'\n");
       strip_symbols = STRIP_SOME;
     }
   if (strip_symbols != STRIP_ALL)

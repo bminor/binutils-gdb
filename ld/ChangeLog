@@ -1,3 +1,15 @@
+Fri Aug  6 08:57:39 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ldexp.c, ldfile.c, ldlang.c, lexsup.c, ldmain.c, ldemul.c:
+	Remove inital caps in some error messages, change "can't" to
+	"cannot", add missing colons.
+	* ldmisc.c (vfinfo): Print "%%" as a single %.
+	For '%' followed by unrecognized character, print them both
+	verbatim instead of expecting a char * arg.
+	For '%C', don't put the function name in parens.
+
+	* ldexp.c (invalid): Pass "%%", not "% ".
+
 Fri Aug  6 14:31:22 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* scripttempl/mips.sc: Always define _ftext, _fdata, _fbss.
