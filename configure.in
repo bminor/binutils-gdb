@@ -363,10 +363,10 @@ esac
 
 case "${target}" in
   *-*-netware)
-    noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-librx target-newlib target-libiberty"
+    noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-librx target-newlib target-libiberty target-libgloss"
     ;;
   *-*-vxworks*)
-    noconfigdirs="$noconfigdirs target-newlib"
+    noconfigdirs="$noconfigdirs target-newlib target-libgloss"
     ;;
   *-*-ose)
     noconfigdirs="$noconfigdirs target-libgloss"
@@ -375,24 +375,26 @@ case "${target}" in
     # ld works, but does not support shared libraries.  emacs doesn't
     # work.  newlib is not 64 bit ready.  I'm not sure about fileutils or grep.
     # gas doesn't generate exception information.
-    noconfigdirs="$noconfigdirs gas ld emacs fileutils grep target-newlib"
+    noconfigdirs="$noconfigdirs gas ld emacs fileutils grep target-newlib target-libgloss"
     ;;
   alpha*-*-*)
     # newlib is not 64 bit ready
-    noconfigdirs="$noconfigdirs target-newlib"
+    noconfigdirs="$noconfigdirs target-newlib target-libgloss"
     ;;
 # start-sanitize-arc
   arc-*-*)
+    noconfigdirs="$noconfigdirs target-libgloss"
     ;;
 # end-sanitize-arc
   arm-*-pe*)
+    noconfigdirs="$noconfigdirs target-libgloss"
     ;;
   arm-*-riscix*)
-    noconfigdirs="$noconfigdirs ld"
+    noconfigdirs="$noconfigdirs ld target-libgloss"
     ;;
   h8300*-*-* | \
   h8500-*-*)
-    noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx"
+    noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx target-libgloss"
     ;;
   hppa*-*-*elf* | \
   hppa*-*-lites*)
@@ -416,7 +418,7 @@ case "${target}" in
 
     # make/glob's configure uses some AC_TRY_RUN type tests
     target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs tcl tk expect make"
+    noconfigdirs="$noconfigdirs tcl tk expect make target-libgloss"
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
 
@@ -428,21 +430,21 @@ case "${target}" in
 
     ;;    
   i[345]86-*-pe)
-    noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx"
+    noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx target-libgloss"
     ;;
   i[345]86-*-sco3.2v5*)
     # The linker does not yet know about weak symbols in COFF,
     # and is not configured to handle mixed ELF and COFF.
-    noconfigdirs="$noconfigdirs gprof ld"
+    noconfigdirs="$noconfigdirs gprof ld target-libgloss"
     ;;
   i[345]86-*-sco*)
-    noconfigdirs="$noconfigdirs gprof"
+    noconfigdirs="$noconfigdirs gprof target-libgloss"
     ;;
   i[345]86-*-solaris2*)
     # The linker does static linking correctly, but the Solaris C library
     # has bugs such that some important functions won't work when statically
     # linked.  (See man pages for getpwuid, for example.)
-    noconfigdirs="$noconfigdirs ld"
+    noconfigdirs="$noconfigdirs ld target-libgloss"
     ;;
   i[345]86-*-sysv4*)
     # The SYSV4 C compiler doesn't handle Emacs correctly
@@ -451,15 +453,15 @@ case "${target}" in
         *) ;;
     esac
     # but that's okay since emacs doesn't work anyway
-    noconfigdirs="$noconfigdirs emacs emacs19"
+    noconfigdirs="$noconfigdirs emacs emacs19 target-libgloss"
     ;;
   powerpc-*-aix*)
     # copied from rs6000-*-* entry
-    noconfigdirs="$noconfigdirs gprof cvs"
+    noconfigdirs="$noconfigdirs gprof cvs target-libgloss"
     ;;
   powerpc*-*-winnt* | powerpc*-*-pe* | ppc*-*-pe)
     target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs gdb tcl tk make expect"
+    noconfigdirs="$noconfigdirs gdb tcl tk make expect target-libgloss"
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
     ;;
@@ -472,24 +474,24 @@ case "${target}" in
     noconfigdirs="$noconfigdirs gprof"
     ;;
   m68k-apollo-*)
-    noconfigdirs="$noconfigdirs ld binutils gprof"
+    noconfigdirs="$noconfigdirs ld binutils gprof target-libgloss"
     ;;
   mips*-*-irix5*)
     # The GNU linker does not support shared libraries.
     # emacs is emacs 18, which does not work on Irix 5 (emacs19 does work)
-    noconfigdirs="$noconfigdirs ld gprof emacs"
+    noconfigdirs="$noconfigdirs ld gprof emacs target-libgloss"
     ;;
   mips*-dec-bsd*)
-    noconfigdirs="$noconfigdirs gprof"
+    noconfigdirs="$noconfigdirs gprof target-libgloss"
     ;;
   mips*-*-bsd*)
-    noconfigdirs="$noconfigdirs gprof"
+    noconfigdirs="$noconfigdirs gprof target-libgloss"
     ;;
   mips*-*-*)
     noconfigdirs="$noconfigdirs gprof"
     ;;
   romp-*-*)
-    noconfigdirs="$noconfigdirs bfd binutils ld gas opcodes"
+    noconfigdirs="$noconfigdirs bfd binutils ld gas opcodes target-libgloss"
     ;;
   sh-*-*)
     case "${host}" in
@@ -497,26 +499,27 @@ case "${target}" in
       i[345]86-*-go32) ;; # don't add gprof back in
       *) skipdirs=`echo " ${skipdirs} " | sed -e 's/ gprof / /'` ;;
     esac
+    noconfigdirs="$noconfigdirs target-libgloss"
     ;;
   sparc-*-sunos4*)
     if [ x${is_cross_compiler} != xno ] ; then
-           noconfigdirs="$noconfigdirs gdb gdbtest target-newlib"
+           noconfigdirs="$noconfigdirs gdb gdbtest target-newlib target-libgloss"
     else
            use_gnu_ld=no
     fi
     ;;
   v810-*-*)
-    noconfigdirs="$noconfigdirs bfd binutils gas gcc gdb ld target-libio target-libg++ target-libstdc++ opcodes"
+    noconfigdirs="$noconfigdirs bfd binutils gas gcc gdb ld target-libio target-libg++ target-libstdc++ opcodes target-libgloss"
     ;;
   vax-*-vms)
-    noconfigdirs="$noconfigdirs bfd binutils gdb ld target-newlib opcodes"
+    noconfigdirs="$noconfigdirs bfd binutils gdb ld target-newlib opcodes target-libgloss"
     ;;
   vax-*-*)
-    noconfigdirs="$noconfigdirs target-newlib"
+    noconfigdirs="$noconfigdirs target-newlib target-libgloss"
     ;;
   *-*-lynxos*)
     # Newlib makes problems for libg++ in crosses.
-    noconfigdirs="$noconfigdirs target-newlib"
+    noconfigdirs="$noconfigdirs target-newlib target-libgloss"
     ;; 
   *-*-macos* | \
   *-*-mpw*)
@@ -528,7 +531,7 @@ esac
 # targets that need a second pass
 case "${target}" in
   *-gm-magic*)
-    noconfigdirs="$noconfigdirs libgloss"
+    noconfigdirs="$noconfigdirs target-libgloss"
     ;;
 esac
 

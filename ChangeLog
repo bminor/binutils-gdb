@@ -1,3 +1,8 @@
+Wed Apr 17 19:30:01 1996  Rob Savoye  <rob@chinadoll.cygnus.com>
+
+	* configure.in: Don't configure libgloss for unsupported
+	architectures.
+
 Tue Apr 16 11:17:05 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in (CLEAN_MODULES): Add clean-apache.
