@@ -1,5 +1,11 @@
 Fri Jul  3 14:19:06 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/pe.em (set_pe_subsystem): Don't call
+	ldlang_add_undef.
+	(gld_${EMULATION_NAME}_after_parse): New static function.
+	(ld_${EMULATION_NAME}_emulation): Use new after_parse function
+	rather than after_parse_default.
+
 	* ldgram.y (extern_name_list): Do not require symbols to be
 	separated by commas.
 	(ifile_p1): Add EXTERN.

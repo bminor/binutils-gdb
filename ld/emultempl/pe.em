@@ -48,8 +48,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static void gld_${EMULATION_NAME}_set_symbols PARAMS ((void));
 static void gld_${EMULATION_NAME}_after_open PARAMS ((void));
 static void gld_${EMULATION_NAME}_before_parse PARAMS ((void));
+static void gld_${EMULATION_NAME}_after_parse PARAMS ((void));
 static void gld_${EMULATION_NAME}_before_allocation PARAMS ((void));
-static boolean gld${EMULATION_NAME}_place_orphan
+static boolean gld_${EMULATION_NAME}_place_orphan
   PARAMS ((lang_input_statement_type *, asection *));
 static char *gld_${EMULATION_NAME}_get_script PARAMS ((int *));
 static int gld_${EMULATION_NAME}_parse_args PARAMS ((int, char **));
@@ -65,6 +66,7 @@ static void sort_sections PARAMS ((lang_statement_union_type *));
 
 static struct internal_extra_pe_aouthdr pe;
 static int dll;
+static int support_old_code = 0;
 
 extern const char *output_filename;
 
@@ -92,31 +94,35 @@ gld_${EMULATION_NAME}_before_parse()
 #define OPTION_STACK                    (OPTION_SECTION_ALIGNMENT + 1)
 #define OPTION_SUBSYSTEM                (OPTION_STACK + 1)
 #define OPTION_HEAP			(OPTION_SUBSYSTEM + 1)
+#define OPTION_SUPPORT_OLD_CODE		(OPTION_HEAP + 1)
 
-static struct option longopts[] = {
+static struct option longopts[] =
+{
   /* PE options */
-    {"base-file", required_argument, NULL, OPTION_BASE_FILE},
-    {"dll", no_argument, NULL, OPTION_DLL},
-    {"file-alignment", required_argument, NULL, OPTION_FILE_ALIGNMENT},
-    {"heap", required_argument, NULL, OPTION_HEAP}, 
-    {"image-base", required_argument, NULL, OPTION_IMAGE_BASE}, 
-    {"major-image-version", required_argument, NULL, OPTION_MAJOR_IMAGE_VERSION},
-    {"major-os-version", required_argument, NULL, OPTION_MAJOR_OS_VERSION},
-    {"major-subsystem-version", required_argument, NULL, OPTION_MAJOR_SUBSYSTEM_VERSION},
-    {"minor-image-version", required_argument, NULL, OPTION_MINOR_IMAGE_VERSION},
-    {"minor-os-version", required_argument, NULL, OPTION_MINOR_OS_VERSION},
-    {"minor-subsystem-version", required_argument, NULL, OPTION_MINOR_SUBSYSTEM_VERSION},
-    {"section-alignment", required_argument, NULL, OPTION_SECTION_ALIGNMENT},
-    {"stack", required_argument, NULL, OPTION_STACK},
-    {"subsystem", required_argument, NULL, OPTION_SUBSYSTEM},
-   {NULL, no_argument, NULL, 0}
-  };
+  {"base-file", required_argument, NULL, OPTION_BASE_FILE},
+  {"dll", no_argument, NULL, OPTION_DLL},
+  {"file-alignment", required_argument, NULL, OPTION_FILE_ALIGNMENT},
+  {"heap", required_argument, NULL, OPTION_HEAP}, 
+  {"image-base", required_argument, NULL, OPTION_IMAGE_BASE},
+  {"major-image-version", required_argument, NULL, OPTION_MAJOR_IMAGE_VERSION},
+  {"major-os-version", required_argument, NULL, OPTION_MAJOR_OS_VERSION},
+  {"major-subsystem-version", required_argument, NULL, OPTION_MAJOR_SUBSYSTEM_VERSION},
+  {"minor-image-version", required_argument, NULL, OPTION_MINOR_IMAGE_VERSION},
+  {"minor-os-version", required_argument, NULL, OPTION_MINOR_OS_VERSION},
+  {"minor-subsystem-version", required_argument, NULL, OPTION_MINOR_SUBSYSTEM_VERSION},
+  {"section-alignment", required_argument, NULL, OPTION_SECTION_ALIGNMENT},
+  {"stack", required_argument, NULL, OPTION_STACK},
+  {"subsystem", required_argument, NULL, OPTION_SUBSYSTEM},
+  {"support-old-code", no_argument, NULL, OPTION_SUPPORT_OLD_CODE},
+  {NULL, no_argument, NULL, 0}
+};
 
 
 /* PE/WIN32; added routines to get the subsystem type, heap and/or stack
    parameters which may be input from the command line */
 
-typedef struct {
+typedef struct
+{
   void *ptr;
   int size;
   int value;
@@ -150,6 +156,26 @@ static definfo init[] =
   { NULL, 0, 0, NULL, 0 }
 };
 
+static void
+gld_${EMULATION_NAME}_list_options (file)
+     FILE * file;
+{
+  fprintf (file, _("  --base_file <basefile>             Generate a base file for relocatable DLLs\n"));
+  fprintf (file, _("  --dll                              Set image base to the default for DLLs\n"));
+  fprintf (file, _("  --file-alignment <size>            Set file alignment\n"));
+  fprintf (file, _("  --heap <size>                      Set initial size of the heap\n"));
+  fprintf (file, _("  --image-base <address>             Set start address of the executable\n"));
+  fprintf (file, _("  --major-image-version <number>     Set version number of the executable\n"));
+  fprintf (file, _("  --major-os-version <number>        Set minimum required OS version\n"));
+  fprintf (file, _("  --major-subsystem-version <number> Set minimum required OS subsystem version\n"));
+  fprintf (file, _("  --minor-image-version <number>     Set revision number of the executable\n"));
+  fprintf (file, _("  --minor-os-version <number>        Set minimum required OS revision\n"));
+  fprintf (file, _("  --minor-subsystem-version <number> Set minimum required OS subsystem revision\n"));
+  fprintf (file, _("  --section-alignment <size>         Set section alignment\n"));
+  fprintf (file, _("  --stack <size>                     Set size of the initial stack\n"));
+  fprintf (file, _("  --subsystem <name>[:<version>]     Set required OS subsystem [& version]\n"));
+  fprintf (file, _("  --support-old-code                 Support interworking with old code\n"));
+}
 
 static void
 set_pe_name (name, val)
@@ -210,7 +236,7 @@ set_pe_subsystem ()
 	set_pe_name ("__minor_subsystem_version__",
 		     strtoul (end + 1, &end, 0));
       if (*end != '\0')
-	einfo ("%P: warning: bad version number in -subsystem option\n");
+	einfo (_("%P: warning: bad version number in -subsystem option\n"));
     }
 
   for (i = 0; v[i].name; i++)
@@ -220,29 +246,13 @@ set_pe_subsystem ()
 	{
 	  set_pe_name ("__subsystem__", v[i].value);
 
-	  /* If the subsystem is windows, we use a different entry
-	     point.  We also register the entry point as an undefined
-	     symbol.  The reason we do this is so that the user
-	     doesn't have to because they would have to use the -u
-	     switch if they were specifying an entry point other than
-	     _mainCRTStartup.  Specifically, if creating a windows
-	     application, entry point _WinMainCRTStartup must be
-	     specified.  What I have found for non console
-	     applications (entry not _mainCRTStartup) is that the .obj
-	     that contains mainCRTStartup is brought in since it is
-	     the first encountered in libc.lib and it has other
-	     symbols in it which will be pulled in by the link
-	     process.  To avoid this, adding -u with the entry point
-	     name specified forces the correct .obj to be used.  We
-	     can avoid making the user do this by always adding the
-	     entry point name as an undefined symbol.  */
 	  lang_add_entry (v[i].entry, 1);
-	  ldlang_add_undef (v[i].entry);
 
 	  return;
 	}
     }
-  einfo ("%P%F: invalid subsystem type %s\n", optarg);
+  
+  einfo (_("%P%F: invalid subsystem type %s\n"), optarg);
 }
 
 
@@ -253,11 +263,11 @@ set_pe_value (name)
      
 {
   char *end;
+  
   set_pe_name (name,  strtoul (optarg, &end, 0));
+  
   if (end == optarg)
-    {
-      einfo ("%P%F: invalid hex number for PE parameter '%s'\n", optarg);
-    }
+    einfo (_("%P%F: invalid hex number for PE parameter '%s'\n"), optarg);
 
   optarg = end;
 }
@@ -268,15 +278,14 @@ set_pe_stack_heap (resname, comname)
      char *comname;
 {
   set_pe_value (resname);
+  
   if (*optarg == ',')
     {
       optarg++;
       set_pe_value (comname);
     }
   else if (*optarg)
-    {
-      einfo ("%P%F: strange hex info for PE parameter '%s'\n", optarg);
-    }
+    einfo (_("%P%F: strange hex info for PE parameter '%s'\n"), optarg);
 }
 
 
@@ -314,7 +323,8 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
       link_info.base_file = (PTR) fopen (optarg, FOPEN_WB);
       if (link_info.base_file == NULL)
 	{
-	  fprintf (stderr, "%s: Can't open base file %s\n",
+	  /* xgettext:c-format */
+	  fprintf (stderr, _("%s: Can't open base file %s\n"),
 		   program_name, optarg);
 	  xexit (1);
 	}
@@ -360,6 +370,9 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
     case OPTION_IMAGE_BASE:
       set_pe_value ("__image_base__");
       break;
+    case OPTION_SUPPORT_OLD_CODE:
+      support_old_code = 1;
+      break;
     }
   return 1;
 }
@@ -368,7 +381,7 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
    read.  */
 
 static void
-gld_${EMULATION_NAME}_set_symbols()
+gld_${EMULATION_NAME}_set_symbols ()
 {
   /* Run through and invent symbols for all the
      names and insert the defaults. */
@@ -415,24 +428,55 @@ gld_${EMULATION_NAME}_set_symbols()
   if (pe.FileAlignment >
       pe.SectionAlignment)
     {
-      einfo ("%P: warning, file alignment > section alignment.\n");
+      einfo (_("%P: warning, file alignment > section alignment.\n"));
     }
 }
 
+/* This is called after the linker script and the command line options
+   have been read.  */
+
 static void
-gld_${EMULATION_NAME}_after_open()
+gld_${EMULATION_NAME}_after_parse ()
+{
+  /* The Windows libraries are designed for the linker to treat the
+     entry point as an undefined symbol.  Otherwise, the .obj that
+     defines mainCRTStartup is brought in because it is the first
+     encountered in libc.lib and it has other symbols in it which will
+     be pulled in by the link process.  To avoid this, we act as
+     though the user specified -u with the entry point symbol.
+
+     This function is called after the linker script and command line
+     options have been read, so at this point we know the right entry
+     point.  This function is called before the input files are
+     opened, so registering the symbol as undefined will make a
+     difference.  */
+
+  ldlang_add_undef (entry_symbol);
+}
+
+static void
+gld_${EMULATION_NAME}_after_open ()
 {
   /* Pass the wacky PE command line options into the output bfd.
      FIXME: This should be done via a function, rather than by
      including an internal BFD header.  */
-  if (!coff_data(output_bfd)->pe)
-    {
-      einfo ("%F%P: PE operations on non PE file.\n");
-    }
+  
+  if (!coff_data (output_bfd)->pe)
+    einfo (_("%F%P: PE operations on non PE file.\n"));
 
-  pe_data(output_bfd)->pe_opthdr = pe;
-  pe_data(output_bfd)->dll = init[DLLOFF].value;
+  pe_data (output_bfd)->pe_opthdr = pe;
+  pe_data (output_bfd)->dll = init[DLLOFF].value;
 
+#ifdef TARGET_IS_armpe
+  {
+    /* Find a BFD that can hold the interworking stubs.  */
+    LANG_FOR_EACH_INPUT_STATEMENT (is)
+      {
+	if (bfd_arm_get_bfd_for_interworking (is->the_bfd, & link_info))
+	  break;
+      }
+  }
+#endif
 }
 
 /* Callback functions for qsort in sort_sections. */
@@ -607,32 +651,41 @@ gld_${EMULATION_NAME}_before_allocation()
   {
     LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
-	if (!ppc_process_before_allocation(is->the_bfd, &link_info))
+	if (!ppc_process_before_allocation (is->the_bfd, &link_info))
 	  {
-	    einfo("Errors encountered processing file %s\n", is->filename);
+	    /* xgettext:c-format */
+	    einfo (_("Errors encountered processing file %s\n"), is->filename);
 	  }
       }
   }
 
   /* We have seen it all. Allocate it, and carry on */
   ppc_allocate_toc_section (&link_info);
-#else
-  /* FIXME: we should be able to set the size of the interworking stub section */
-  /* Here we rummage through the found bfds to collect glue information. */
-  /* FIXME: should this be based on a command line option? krk@cygnus.com */
+#endif /* TARGET_IS_ppcpe */
+
+#ifdef TARGET_IS_armpe
+  /* FIXME: we should be able to set the size of the interworking stub
+     section.
+
+     Here we rummage through the found bfds to collect glue
+     information.  FIXME: should this be based on a command line
+     option?  krk@cygnus.com */
   {
     LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
-	if (!arm_process_before_allocation (is->the_bfd, & link_info))
+	if (! bfd_arm_process_before_allocation
+	    (is->the_bfd, & link_info, support_old_code))
 	  {
-	    einfo ("Errors encountered processing file %s", is->filename);
+	    /* xgettext:c-format */
+	    einfo (_("Errors encountered processing file %s for interworking"),
+		   is->filename);
 	  }
       }
   }
 
   /* We have seen it all. Allocate it, and carry on */
-  arm_allocate_interworking_sections (& link_info);
-#endif
+  bfd_arm_allocate_interworking_sections (& link_info);
+#endif /* TARGET_IS_armpe */
 
   sort_sections (stat_ptr->head);
 }
@@ -650,7 +703,7 @@ gld_${EMULATION_NAME}_before_allocation()
 
 /*ARGSUSED*/
 static boolean
-gld${EMULATION_NAME}_place_orphan (file, s)
+gld_${EMULATION_NAME}_place_orphan (file, s)
      lang_input_statement_type *file;
      asection *s;
 {
@@ -760,7 +813,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld_${EMULATION_NAME}_before_parse,
   syslib_default,
   hll_default,
-  after_parse_default,
+  gld_${EMULATION_NAME}_after_parse,
   gld_${EMULATION_NAME}_after_open,
   after_allocation_default,
   set_output_arch_default,
@@ -772,8 +825,10 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   NULL, /* finish */
   NULL, /* create output section statements */
   NULL, /* open dynamic archive */
-  gld${EMULATION_NAME}_place_orphan,
+  gld_${EMULATION_NAME}_place_orphan,
   gld_${EMULATION_NAME}_set_symbols,
-  gld_${EMULATION_NAME}_parse_args
+  gld_${EMULATION_NAME}_parse_args,
+  NULL, /* unrecognised file */
+  gld_${EMULATION_NAME}_list_options
 };
 EOF
