@@ -708,7 +708,7 @@ all-etc:
 all-expect: all-tcl
 all-fileutils:
 all-find:
-all-flex: all-libiberty
+all-flex: all-libiberty all-byacc
 all-gas: all-libiberty all-opcodes all-bfd
 all-gawk:
 all-gcc: all-libiberty all-byacc all-binutils all-gas

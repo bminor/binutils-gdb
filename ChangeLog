@@ -1,5 +1,7 @@
 Thu Apr  1 08:25:42 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* Makefile.in (all-flex): flex depends on byacc.
+
 	* build-all.mk: If host not specified, use config.guess.  Pass TAG
 	to test-build.mk as RELEASE_TAG.
 	* test-build.mk (configargs): New variable containing arguments to
