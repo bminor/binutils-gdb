@@ -116,13 +116,11 @@ Fri Dec 20 11:06:03 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* mswin/genmakes:  Don't define _DEBUG.  This breaks wingdb.
 
-start-sanitize-v850
 Thu Dec 19 19:42:44 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* v850-tdep.c (v850_scan_prologue): Deal with -mep shorting
 	register saves by using the ep register.
 
-end-sanitize-v850
 Thu Dec 19 15:57:16 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* m32r-tdep.c (m32r_frame_find_saved_regs): Fix thinko in arg def.
@@ -276,9 +274,7 @@ Tue Dec  3 11:38:14 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 	* config/h8300/tm-h8300.h: turn on USE_GENERIC_DUMMY_FRAMES
 	* config/m32r/tm-m32r.h: Ditto.
 	* config/sh/tm-sh.h: Ditto.
-start-sanitize-v850
 	* config/v850/tm-v850.h: Ditto.
-end-sanitize-v850
 
 Sun Dec  1 00:41:47 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
@@ -503,9 +499,7 @@ Wed Nov 27 11:29:06 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 	* h8300-tdep.c, config/h8300/tm-h8300.h: Ditto.
 	* m32r-tdep.c, config/m32r/tm-m32r.h: Ditto.
 	* sh-tdep.c, config/sh/tm-sh.h: Ditto.
-start-sanitize-v850
 	* v850-tdep.c, config/v850/tm-v850.h: Ditto.
-end-sanitize-v850
 	
 Wed Nov 27 10:32:14 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
@@ -519,10 +513,8 @@ Wed Nov 27 10:32:14 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 	* config/m32r/tm-m32r.h:   config for generic target function calls.
 	* sh-tdep.c:    Add target function calls using generic frame support.
 	* config/sh/tm-sh.h:       config for generic target function calls.
-start-sanitize-v850
 	* v850-tdep.c:  Add target function calls using generic frame support.
 	* config/v850/tm-v850.h:   config for generic target function calls.
-end-sanitize-v850
 	* valops.c:     ADD PUSH_RETURN_ADDRESS so that it doesn't have to be
 			done by PUSH_ARGUMENTS when there's no CALL_DUMMY.
 
@@ -889,15 +881,13 @@ Thu Oct 24 10:06:58 1996  Stu Grossman  (grossman@critters.cygnus.com)
 	CUR_SYMBOL_STRX instead.
 	* config/i386/xm-windows.h:  Define SIGQUIT and SIGTRAP.
 
-start-sanitize-v850
 	* config/v850/tm-v850.h:  Define PS_REGNUM and TARGET_V850 for
 	MSVC builds.
 	* mswin/gdbwin.c (reg_order):  Define register order for V850.
 	* mswin/gui.cpp (CGuiApp::InitInstance):  Define target name for
 	V850.
 	* mswin/regdoc.h:  Define MAXREGS for V850.
-end-sanitize-v850
-start-sanitize-v850
+
 Tue Oct 22 16:28:20 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* v850-tdep.c (scan_prologue):  Changes to deal with scheduled
@@ -909,7 +899,6 @@ Tue Oct 22 16:28:20 1996  Stu Grossman  (grossman@critters.cygnus.com)
 	we have all the info at this time.
 	* (v850_frame_chain):  Use new calling convention for scan_prologue.
 
-end-sanitize-v850
 Tue Oct 22 10:25:29 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-tdep.c, config/d10v/tm-d10v.h: Changes to allow stack
@@ -926,7 +915,6 @@ Mon Oct 21 18:17:08 1996  Mark Alexander  <marka@cygnus.com>
 	sign-extension problems in calculating psymtab addresses.
 	* buildsym.c (end_symtab): Use macro to pop context.
 
-start-sanitize-v850
 Mon Oct 21 14:40:50 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* v850-tdep.c:  Cleanup lots of things.  Add many comments.
@@ -935,7 +923,6 @@ Mon Oct 21 14:40:50 1996  Stu Grossman  (grossman@critters.cygnus.com)
 	sign bugs with scanning prologues.  Get a little smarter about
 	calculating the length of uninteresting instructions.
 
-end-sanitize-v850
 Mon Oct 21 14:01:38 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* top.c: Add new commands "set annotate" and "show annotate".
@@ -971,14 +958,12 @@ Wed Oct 16 17:46:03 1996  Stan Shebs  <shebs@andros.cygnus.com>
 	equivalent expression uses.
 	* infrun.c (wait_for_inferior): Ditto.
 
-start-sanitize-v850
 Wed Oct 16 01:53:43 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* v850-tdep.c (v850_push_arguments):  Use symbolic names for arg
 	registers.
 	* config/v850/tm-v850.h:  Change FP to 29.  Define arg regs.
 
-end-sanitize-v850
 Tue Oct 15 16:30:07 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* Makefile.in (init.c):  Don't use -s option with grep.  It means
@@ -998,13 +983,10 @@ Tue Oct 15 16:30:07 1996  Stu Grossman  (grossman@critters.cygnus.com)
 	* utils.c (floatformat_from_doublest):  Fix logic error with
 	converting from double to float.  (It wasn't shifting mant_long if
 	it had a hidden bit.)
-
-start-sanitize-v850
 	* v850-tdep.c:  Add support for function calling.  Fix some
 	problems with debugging code w/o debug symbols.
 	* config/v850/tm-v850.h:  Ditto.
 
-end-sanitize-v850
 Tue Oct 15 18:19:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* utils.c: Always ensure that size_t is defined.  Check
@@ -1027,11 +1009,9 @@ Fri Oct 11 15:43:54 1996  Stu Grossman  (grossman@critters.cygnus.com)
 	struct frame to make it possible to use frame_saved_regs in
 	EXTRA_FRAME_INFO macro.
 
-start-sanitize-v850
 	* v850-tdep.c config/v850/tm-v850.h:  Lotsa new functions and
 	macros to make frame operations (such as backtrace) work.
 
-end-sanitize-v850
 Fri Oct 11 14:23:50 1996  Fred Fish  <fnf@cygnus.com>
 
 	* dbxread.c (process_one_symbol): Check for null string directly
@@ -1180,26 +1160,22 @@ Mon Sep 30 20:02:45 1996  Fred Fish  <fnf@cygnus.com>
 
 	* defs.h: Remove define of PRIVATE_XMALLOC.
 
-start-sanitize-v850
 Mon Sep 30 15:39:28 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* config/v850/tm-v850.h:  Use distinct register for PC, not EIPC.
 
-end-sanitize-v850
 Mon Sep 30 11:16:34 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* top.c (execute_control_command):  Free values from while_control
 	and if_control conditions after evaluation to avoid storage leaks.
 	From Peter Schauer.
  
-start-sanitize-v850
 Fri Sep 27 17:43:06 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* configure configure.in:  Recognize v850 target.
 	* v850-tdep.c:  New file, NEC V850 target support.
 	* config/v850/{v850.mt tm-v850.h}:  New files for NEC V850 support.
 
-end-sanitize-v850
 Fri Sep 27 14:48:15 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* infrun.c (wait_for_inferior):  Update current_line and

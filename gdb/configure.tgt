@@ -261,7 +261,6 @@ tic80-*-*)		gdb_target=tic80
 
 vax-*-*)		gdb_target=vax ;;
 
-# start-sanitize-v850
 v850-*-*)		gdb_target=v850
 			case $gdb_host in
 			windows)
@@ -269,7 +268,6 @@ v850-*-*)		gdb_target=v850
 				LIBS="${LIBS} v850.lib" ;;
 			esac
 			;;
-# end-sanitize-v850
 # start-sanitize-v850e
 v850e-*-*)		gdb_target=v850
 			gdb_target_cpu=v850

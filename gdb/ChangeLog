@@ -122,11 +122,9 @@ Mon Aug 18 17:29:54 1997  Ian Lance Taylor  <ian@cygnus.com>
 	(child_wait): Check the return value of handle_exception.  Set the
 	continue_status argument to ContinueDebugEvent accordingly.
 
-start-sanitize-v850e
 Mon Aug 18 11:14:15 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.tgt: Add support for v850e target.
-end-sanitize-v850e
 
 start-sanitize-v850eq
 Mon Aug 18 11:14:15 1997  Nick Clifton  <nickc@cygnus.com>
@@ -572,13 +570,11 @@ Fri Jul 25 16:48:18 1997  Jeffrey A Law  (law@cygnus.com)
 	* top.c (execute_command): Force cleanup of alloca areas.
 	* findvar.c (registers_changed): Likewise.
 
-start-sanitize-v850
 Fri Jul 25 15:37:15 1997  Stu Grossman  <grossman@cygnus.com>
 
 	* v850ice.c:  Include <windows.h>.  Support new v850 DLL interface.
 	* Add defs for target status.
 
-end-sanitize-v850
 start-sanitize-gdbtk
 Tue Jul 22 19:45:37 1997  Martin M. Hunt  <hunt@cygnus.com>
 
@@ -1217,9 +1213,7 @@ Tue Apr 22 09:02:10 1997  Stu Grossman  (grossman@critters.cygnus.com)
 	config/mips/{embed embed64 embedl embedl64 vr4300 vr4300el vr5000
 	vr5000el}.mt config/powerpc/{aix aix4}.mh config/rs6000/{aix
 	aix4}.mh config/sh/sh.mt config/sparc/sp64sim.mt:
-start-sanitize-v850
 	config/v850/v850.mt:
-end-sanitize-v850
 	Remove -lm.  That's now handled by configure.
 
 	* Makefile.in (maintainer-clean):  Add distclean to dependencies.
@@ -2306,10 +2300,8 @@ Fri Jan  3 12:08:16 1997  Stu Grossman  (grossman@critters.cygnus.com)
 	ENABLE_OBS, and THREAD_DB_OBS.  These are consolidated into LIBS
 	and CONFIG_OBS.
 	* configure configure.in:  Clean up test cases around thread support.
-start-sanitize-v850
 	* configure.tgt (v850-*-*):  Include v850ice.o and v850.lib if
 	host is Windows.
-end-sanitize-v850
 	* c-valprint.c ch-valprint.c cp-valprint.c eval.c expprint.c
 	printcmd.c valops.c value.h values.c:  Add bfd_section arg to
 	value_at and value_at_lazy.
@@ -2357,13 +2349,11 @@ end-sanitize-v850
 	section.
 	* (unpack_double):  Clean up _MSC_VER conditionals to remove
 	duplicate code.
-start-sanitize-v850
 	* v850ice.c:  New module to support communication with NEC's
 	PC-based ICE.
 	* config/v850/tm-v850.h (REGISTER_NAMES):  Replace sp, gp, fp, and
 	ep names with rxx names.  sp and fp are renamed via a different
 	mechanism.
-end-sanitize-v850
 
 Fri Jan  3 14:20:05 1997  Geoffrey Noer  <noer@cygnus.com>
 

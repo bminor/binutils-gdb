@@ -15,20 +15,6 @@
 
 Do-first:
 
-v850_files="tm-v850.h v850.mt"
-
-if ( echo $* | grep keep\-v850 > /dev/null ) ; then
-	keep_these_too="${v850_files} ${keep_these_too}"
-	if [ -n "${verbose}" ] ; then
-		echo Keeping ${v850_files}
-	fi
-else
-	lose_these_too="${v850_files} ${lose_these_too}"
-	if [ -n "${verbose}" ] ; then
-		echo Deleting ${v850_files}
-	fi
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -37,36 +23,11 @@ fi
 
 Things-to-keep:
 
+tm-v850.h
+v850.mt
+
 Things-to-lose:
 
-
 Do-last:
-
-if ( echo $* | grep keep\-v850 > /dev/null ) ; then
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-v850 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping v850 stuff in $i
-			fi
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-v850 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v850\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-v850/,/end-\sanitize\-v850/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
 
 # End of file.
