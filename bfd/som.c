@@ -1851,7 +1851,8 @@ setup_sections (abfd, file_hdr, current_offset)
   char *space_strings;
   unsigned int space_index, i;
   unsigned int total_subspaces = 0;
-  asection **subspace_sections, *section;
+  asection **subspace_sections = NULL;
+  asection *section;
   bfd_size_type amt;
 
   /* First, read in space names.  */

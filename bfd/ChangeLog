@@ -1,3 +1,7 @@
+2001-11-02  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* som.c (setup_sections): Initialize subspace_sections.
+
 2001-11-02  H.J. Lu  (hjl@gnu.org)
 
 	* coffgen.c (coff_object_p): Return 0 if the header is too big.
