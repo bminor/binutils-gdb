@@ -571,10 +571,6 @@ static int
 locval PARAMS ((char *));
 
 static void
-record_minimal_symbol PARAMS ((char *, CORE_ADDR, enum minimal_symbol_type,
-			       struct objfile *));
-
-static void
 set_cu_language PARAMS ((struct dieinfo *));
 
 static struct type *
@@ -777,39 +773,6 @@ dwarf_build_psymtabs (objfile, section_offsets, mainline, dbfoff, dbfsize,
   
   do_cleanups (back_to);
   current_objfile = NULL;
-}
-
-
-/*
-
-LOCAL FUNCTION
-
-	record_minimal_symbol -- add entry to gdb's minimal symbol table
-
-SYNOPSIS
-
-	static void record_minimal_symbol (char *name, CORE_ADDR address,
-					  enum minimal_symbol_type ms_type,
-					  struct objfile *objfile)
-
-DESCRIPTION
-
-	Given a pointer to the name of a symbol that should be added to the
-	minimal symbol table, and the address associated with that
-	symbol, records this information for later use in building the
-	minimal symbol table.
-
- */
-
-static void
-record_minimal_symbol (name, address, ms_type, objfile)
-     char *name;
-     CORE_ADDR address;
-     enum minimal_symbol_type ms_type;
-     struct objfile *objfile;
-{
-  name = obsavestring (name, strlen (name), &objfile -> symbol_obstack);
-  prim_record_minimal_symbol (name, address, ms_type);
 }
 
 /*
@@ -2614,20 +2577,6 @@ DESCRIPTION
 	add to a partial symbol table, finish filling in the die info
 	and then add a partial symbol table entry for it.
 
-	Also record the symbol in the minimal symbol table.  Note that
-	DWARF does not directly distinquish between data and bss symbols,
-	so we use mst_data/mst_file_data for both of them.  One way we
-	could make the distinction is checking the address of the symbol
-	and then checking the flags on the ELF section that contains
-	that address to look for SHT_PROGBITS (data) or SHT_NOBITS (bss),
-	but it probably isn't worth the effort.  A side effect of leaving
-	things as they are is that the minimal symbol created from the DWARF
-	info, containing the wrong minimal_symbol_type, overrides the minimal
-	symbol created from processing the canonical bfd symbols, which
-	did have the right minimal_symbol_type.  This is probably a side
-	effect of the way the table is sorted and duplicates are discarded.
-	(FIXME?)
-
 NOTES
 
 	The caller must ensure that the DIE has a valid name attribute.
@@ -2641,32 +2590,24 @@ add_partial_symbol (dip, objfile)
   switch (dip -> die_tag)
     {
     case TAG_global_subroutine:
-      record_minimal_symbol (dip -> at_name, dip -> at_low_pc, mst_text,
-			     objfile);
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
 			   VAR_NAMESPACE, LOC_BLOCK,
 			   objfile -> global_psymbols,
 			   dip -> at_low_pc, cu_language, objfile);
       break;
     case TAG_global_variable:
-      record_minimal_symbol (dip -> at_name, locval (dip -> at_location),
-			     mst_data, objfile);
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
 			   VAR_NAMESPACE, LOC_STATIC,
 			   objfile -> global_psymbols,
 			   0, cu_language, objfile);
       break;
     case TAG_subroutine:
-      record_minimal_symbol (dip -> at_name, dip -> at_low_pc, mst_file_text,
-			     objfile);
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
 			   VAR_NAMESPACE, LOC_BLOCK,
 			   objfile -> static_psymbols,
 			   dip -> at_low_pc, cu_language, objfile);
       break;
     case TAG_local_variable:
-      record_minimal_symbol (dip -> at_name, locval (dip -> at_location),
-			     mst_file_data, objfile);
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
 			   VAR_NAMESPACE, LOC_STATIC,
 			   objfile -> static_psymbols,

@@ -1,3 +1,14 @@
+Sun Aug  8 10:07:47 1993  Fred Fish  (fnf@cygnus.com)
+
+	* dwarfread.c (record_minimal_symbol):  Remove prototype and
+	function.
+	* dwarfread.c (add_partial_symbol):  Remove code to add minimal
+	symbols and remove comment about limitations.  Experiments show
+	that now that gdb handles the ELF symtab better for creating
+	minimal symbols, that no additional information is added by
+	examining the DWARF information, and in fact, given the
+	limitations, the DWARF code was actually making things worse.
+
 Sat Aug  7 10:59:03 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* elfread.c (elf_symtab_read):  Properly sort out the bss symbols
