@@ -1,3 +1,13 @@
+2002-04-24  Roland McGrath  <roland@frob.com>
+
+	* config/i386/i386gnu.mh (NATDEPFILES): Add core-regset.o here.
+	* i386gnu-nat.c [HAVE_SYS_PROCFS_H]
+	(supply_gregset, supply_fpregset): New functions.
+
+	* gnu-nat.c (gnu_find_memory_regions): New function.
+	(init_gnu_ops): Set `to_find_memory_regions' hook to that.
+	(gnu_xfer_memory): Add a cast.
+
 2002-04-24  Michael Snyder  <msnyder@redhat.com>
 
 	* arm-tdep.c (arm_scan_prologue): Move "mov ip, sp" into the 

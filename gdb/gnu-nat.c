@@ -2458,12 +2458,83 @@ gnu_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   else
     {
       inf_debug (current_inferior, "%s %p[%d] %s %p",
-		 write ? "writing" : "reading", memaddr, len,
+		 write ? "writing" : "reading", (void *) memaddr, len,
 		 write ? "<--" : "-->", myaddr);
       if (write)
 	return gnu_write_inferior (task, memaddr, myaddr, len);
       else
 	return gnu_read_inferior (task, memaddr, myaddr, len);
+    }
+}
+
+/* Call FUNC on each memory region in the task.  */
+static int
+gnu_find_memory_regions (int (*func) (CORE_ADDR,
+				      unsigned long,
+				      int, int, int,
+				      void *),
+			 void *data)
+{
+  error_t err;
+  task_t task;
+  vm_address_t region_address, last_region_address, last_region_end;
+  vm_prot_t last_protection;
+
+  if (current_inferior == 0 || current_inferior->task == 0)
+    return 0;
+  task = current_inferior->task->port;
+  if (task == MACH_PORT_NULL)
+    return 0;
+
+  region_address = last_region_address = last_region_end = VM_MIN_ADDRESS;
+  last_protection = VM_PROT_NONE;
+  while (region_address < VM_MAX_ADDRESS)
+    {
+      vm_prot_t protection;
+      vm_prot_t max_protection;
+      vm_inherit_t inheritance;
+      boolean_t shared;
+      mach_port_t object_name;
+      vm_offset_t offset;
+      vm_size_t region_length = VM_MAX_ADDRESS - region_address;
+      vm_address_t old_address = region_address;
+
+      err = vm_region (task,
+		       &region_address,
+		       &region_length,
+		       &protection,
+		       &max_protection,
+		       &inheritance,
+		       &shared,
+		       &object_name,
+		       &offset);
+      if (err == KERN_NO_SPACE)
+	break;
+      if (err != KERN_SUCCESS)
+	{
+	  warning ("vm_region failed: %s", mach_error_string (err));
+	  return -1;
+	}
+
+      if (protection == last_protection && region_address == last_region_end)
+	/* This region is contiguous with and indistinguishable from
+	   the previous one, so we just extend that one.  */
+	last_region_end = region_address += region_length;
+      else
+	{
+	  /* This region is distinct from the last one we saw, so report
+	     that previous one.  */
+	  if (last_protection != VM_PROT_NONE)
+	    (*func) (last_region_address,
+		     last_region_end - last_region_address,
+		     last_protection & VM_PROT_READ,
+		     last_protection & VM_PROT_WRITE,
+		     last_protection & VM_PROT_EXECUTE,
+		     data);
+	  last_region_address = region_address;
+	  last_region_end = region_address += region_length;
+	  last_protection = protection;
+	}
     }
 }
 
@@ -2524,6 +2595,7 @@ init_gnu_ops (void)
   gnu_ops.to_store_registers = gnu_store_registers;    /* to_store_registers */
   gnu_ops.to_prepare_to_store = gnu_prepare_to_store; /* to_prepare_to_store */
   gnu_ops.to_xfer_memory = gnu_xfer_memory; /* to_xfer_memory */
+  gnu_ops.to_find_memory_regions = gnu_find_memory_regions;
   gnu_ops.to_files_info = 0;		/* to_files_info */
   gnu_ops.to_insert_breakpoint = memory_insert_breakpoint;
   gnu_ops.to_remove_breakpoint = memory_remove_breakpoint;

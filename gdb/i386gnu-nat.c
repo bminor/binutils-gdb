@@ -38,6 +38,10 @@
 #include "gnu-nat.h"
 #include "i387-nat.h"
 
+#ifdef HAVE_SYS_PROCFS_H
+# include <sys/procfs.h>
+# include "gregset.h"
+#endif
 
 /* Offset to the thread_state_t location where REG is stored.  */
 #define REG_OFFSET(reg) offsetof (struct i386_thread_state, reg)
@@ -87,6 +91,24 @@ fetch_fpregs (struct proc *thread)
   /* Supply the floating-point registers.  */
   i387_supply_fsave (state.hw_state);
 }
+
+#ifdef HAVE_SYS_PROCFS_H
+/* These two calls are used by the core-regset.c code for
+   reading ELF core files.  */
+void
+supply_gregset (gdb_gregset_t *gregs)
+{
+  int i;
+  for (i = 0; i < NUM_GREGS; i++)
+    supply_register (i, REG_ADDR (gregs, i));
+}
+
+void
+supply_fpregset (gdb_fpregset_t *fpregs)
+{
+  i387_supply_fsave ((char *) fpregs);
+}
+#endif
 
 /* Fetch register REGNO, or all regs if REGNO is -1.  */
 void
