@@ -1,3 +1,20 @@
+2003-01-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	Original patch by Tom Tromey <tromey@cygnus.com> and
+	Jason Molenda <jmolenda@apple.com>.
+	* Makefile.in (PROFILE_CFLAGS): Substitute from configure.
+	(INTERNAL_LDFLAGS): Don't include PROFILE_CFLAGS.
+	* NEWS: Mention profiling.
+	* configure.in (--enable-gdbtk): Fix typo.
+	(--enable-profiling): New.  Set PROFILE_CFLAGS.
+	* maint.c (maintenance_set_profile_cmd): Remove NOTYET.
+	Fill in function.
+	(profiling_state): New variable.
+	(mcleanup_wrapper): New function.
+	(_initialize_maint): Remove NOTYET, fix call to
+	add_setshow_boolean_cmd for "maint set profile".
+	* configure: Regenerated.
+
 2003-01-21  Martin M. Hunt  <hunt@redhat.com>
 
 	* Makefile.in (install-gdbtk): Install PNG images too.

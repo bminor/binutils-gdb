@@ -322,7 +322,8 @@ GDB_CFLAGS = -I. -I$(srcdir) -I$(srcdir)/config -DLOCALEDIR="\"$(prefix)/share/l
 # M{H,T}_CFLAGS, if defined, have host- and target-dependent CFLAGS
 # from the config directory.
 GLOBAL_CFLAGS = $(MT_CFLAGS) $(MH_CFLAGS)
-#PROFILE_CFLAGS = -pg
+
+PROFILE_CFLAGS = @PROFILE_CFLAGS@
 
 # CFLAGS is specifically reserved for setting from the command line
 # when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
@@ -349,7 +350,8 @@ LDFLAGS = @LDFLAGS@
 # Profiling options need to go here to work.
 # I think it's perfectly reasonable for a user to set -pg in CFLAGS
 # and have it work; that's why CFLAGS is here.
-INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) $(MH_LDFLAGS) $(LDFLAGS) $(CONFIG_LDFLAGS)
+# PROFILE_CFLAGS is _not_ included, however, because we use monstartup.
+INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(MH_LDFLAGS) $(LDFLAGS) $(CONFIG_LDFLAGS)
 
 # If your system is missing alloca(), or, more likely, it's there but
 # it doesn't work, then refer to libiberty.
