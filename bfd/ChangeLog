@@ -1,5 +1,12 @@
 Thu Nov 11 15:16:28 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* bfd.c (struct _bfd): Add hppabsd_core_data.
+	* targets.c (target_vector): Add hppabsd_core_vec.
+	* hpux-core.c (hpux_core_core_file_p): Fail if an unknown core
+	section is encountered during core section scanning.
+	* hppabsd-core.c: New file.
+	* config/hppabsd.mh: Enable HPPA BSD core files.
+
 	* elf32-hppa.c (hppa_elf_reloc): Remove DEFUN crud.  Remove code
 	which is either commented out or ifdef'd out.  Add, update and
 	clean comments.  Fix various indention and spacing problems.  Handle

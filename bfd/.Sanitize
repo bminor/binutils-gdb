@@ -124,6 +124,7 @@ hosts
 hp300bsd.c
 hp300hpux.c
 hppa_stubs.h
+hppabsd-core.c
 hpux-core.c
 i386aout.c
 i386bsd.c
