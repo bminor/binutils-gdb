@@ -1,3 +1,8 @@
+Tue Dec 13 13:31:06 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* cpu-z8k.c (arch_info_struct): Make z8002 the default
+	architecture.
+
 Fri Dec  9 12:43:05 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* elfcode.h (elf_bfd_link_add_symbols): If the first object in the
