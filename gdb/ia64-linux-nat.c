@@ -1,8 +1,8 @@
 /* Functions specific to running gdb native on IA-64 running
    GNU/Linux.
 
-   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
-   Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -517,7 +517,7 @@ fetch_debug_register (ptid_t ptid, int idx)
   if (tid == 0)
     tid = PIDGET (ptid);
 
-  val = ptrace (PT_READ_U, tid, (PTRACE_ARG3_TYPE) (PT_DBR + 8 * idx), 0);
+  val = ptrace (PT_READ_U, tid, (PTRACE_TYPE_ARG3) (PT_DBR + 8 * idx), 0);
 
   return val;
 }
@@ -531,7 +531,7 @@ store_debug_register (ptid_t ptid, int idx, long val)
   if (tid == 0)
     tid = PIDGET (ptid);
 
-  (void) ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) (PT_DBR + 8 * idx), val);
+  (void) ptrace (PT_WRITE_U, tid, (PTRACE_TYPE_ARG3) (PT_DBR + 8 * idx), val);
 }
 
 static void
@@ -648,7 +648,7 @@ ia64_linux_stopped_by_watchpoint (ptid_t ptid)
     tid = PIDGET (ptid);
   
   errno = 0;
-  ptrace (PTRACE_GETSIGINFO, tid, (PTRACE_ARG3_TYPE) 0, &siginfo);
+  ptrace (PTRACE_GETSIGINFO, tid, (PTRACE_TYPE_ARG3) 0, &siginfo);
 
   if (errno != 0 || siginfo.si_signo != SIGTRAP || 
       (siginfo.si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)

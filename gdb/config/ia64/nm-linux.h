@@ -1,5 +1,6 @@
 /* Native support for GNU/Linux, for GDB, the GNU debugger.
-   Copyright 1999, 2000, 2001
+
+   Copyright 1999, 2000, 2001, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -41,9 +42,6 @@ extern int ia64_cannot_fetch_register (int regno);
 extern int ia64_cannot_store_register (int regno);
 
 #define U_REGS_OFFSET 0
-
-#define PTRACE_ARG3_TYPE long
-#define PTRACE_XFER_TYPE long
 
 /* Hardware watchpoints */
 

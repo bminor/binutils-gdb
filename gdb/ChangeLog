@@ -1,5 +1,12 @@
 2004-08-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* ia64-linux-nat.c: Update copyright year.
+	(fetch_debug_register, store_debug_register)
+	(ia64_linux_stopped_by_watchpoint): Replace PTRACE_ARG3_TYPE with
+	PTRACE_TYPE_ARG3.
+	* config/ia64/nm-linux.h: Update copyright year.
+	 (PTRACE_ARG3_TYPE, PTRACE_XFER_TYPE): Remove defines.
+
 	* amd64-linux-tdep.c (amd64_linux_sigtramp_start): Change argument
 	from CORE_ADDR to struct frame_info *.  Use
 	safe_frame_unwind_memory instead of deprecated_read_memory_nobpt.
