@@ -126,18 +126,6 @@ m68kbsd_regset_from_core_section (struct gdbarch *gdbarch,
 
   return NULL;
 }
-
-
-/* Support for shared libraries.  */
-
-/* Return non-zero if we are in a shared library trampoline code stub.  */
-
-int
-m68kbsd_aout_in_solib_call_trampoline (CORE_ADDR pc, char *name)
-{
-  return (name && !strcmp (name, "_DYNAMIC"));
-}
-
 
 static void
 m68kbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -161,10 +149,6 @@ m68kbsd_aout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   m68kbsd_init_abi (info, gdbarch);
 
   tdep->struct_return = reg_struct_return;
-
-  /* Assume SunOS-style shared libraries.  */
-  set_gdbarch_in_solib_call_trampoline
-    (gdbarch, m68kbsd_aout_in_solib_call_trampoline);
 }
 
 /* NetBSD ELF.  */

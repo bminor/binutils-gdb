@@ -1,5 +1,25 @@
 2004-10-31  Andrew Cagney  <cagney@gnu.org>
 
+	* armnbsd-tdep.c (arm_netbsd_aout_init_abi)
+	(arm_netbsd_aout_in_solib_call_trampoline): Do not set
+	in_solib_call_trampoline, delete corresponding unused function.
+	* vaxnbsd-tdep.c (vaxnbsd_aout_in_solib_call_trampoline) 
+	(vaxnbsd_aout_init_abi): Ditto.
+	* sparcnbsd-tdep.c (sparcnbsd_aout_in_solib_call_trampoline) 
+	(sparc32nbsd_aout_init_abi): Ditto.
+	* ppc-linux-tdep.c (ppc64_in_solib_call_trampoline) 
+	(ppc_linux_init_abi): Ditto.
+	* ns32knbsd-tdep.c (ns32knbsd_aout_in_solib_call_trampoline) 
+	(ns32knbsd_init_abi_aout): Ditto.
+	* mips-tdep.c (mips_in_call_stub, mips_gdbarch_init): Ditto.
+	* mips-linux-tdep.c (mips_linux_init_abi): Ditto.
+	* m68kbsd-tdep.c (m68kbsd_aout_in_solib_call_trampoline) 
+	(m68kbsd_aout_init_abi): Ditto.
+	* i386-cygwin-tdep.c (i386_cygwin_in_solib_call_trampoline) 
+	(i386_cygwin_init_abi): Ditto.
+	* i386bsd-tdep.c (i386bsd_aout_in_solib_call_trampoline) 
+	(i386bsd_init_abi): Ditto.
+
 	* sparc-sol2-tdep.c (sparc32_sol2_init_abi): Do not set
 	in_solib_call_trampoline to in_plt_entry, IN_SOLIB_CALL_TRAMPOLINE
 	isn't used by this architecture.

@@ -25,15 +25,6 @@
 #include "ns32k-tdep.h"
 #include "gdb_string.h"
 
-static int
-ns32knbsd_aout_in_solib_call_trampoline (CORE_ADDR pc, char *name)
-{
-  if (strcmp (name, "_DYNAMIC") == 0)
-    return 1;
-
-  return 0;
-}
-
 static void
 ns32knbsd_init_abi_common (struct gdbarch_info info,
                            struct gdbarch *gdbarch)
@@ -47,9 +38,6 @@ ns32knbsd_init_abi_aout (struct gdbarch_info info,
                          struct gdbarch *gdbarch)
 {
   ns32knbsd_init_abi_common (info, gdbarch);
-
-  set_gdbarch_in_solib_call_trampoline (gdbarch,
-                                     ns32knbsd_aout_in_solib_call_trampoline);
 }
 
 static enum gdb_osabi

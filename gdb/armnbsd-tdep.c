@@ -39,15 +39,6 @@ static const char arm_nbsd_arm_be_breakpoint[] = {0xe6, 0x00, 0x00, 0x11};
 static const char arm_nbsd_thumb_le_breakpoint[] = {0xfe, 0xde};
 static const char arm_nbsd_thumb_be_breakpoint[] = {0xde, 0xfe};
 
-static int
-arm_netbsd_aout_in_solib_call_trampoline (CORE_ADDR pc, char *name)
-{
-  if (strcmp (name, "_PROCEDURE_LINKAGE_TABLE_") == 0)
-    return 1;
-
-  return 0;
-}
-
 static void
 arm_netbsd_init_abi_common (struct gdbarch_info info,
 			    struct gdbarch *gdbarch)

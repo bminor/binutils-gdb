@@ -4537,36 +4537,6 @@ mips_skip_trampoline_code (CORE_ADDR pc)
   return 0;			/* not a stub */
 }
 
-
-/* Return non-zero if the PC is inside a call thunk (aka stub or trampoline).
-   This implements the IN_SOLIB_CALL_TRAMPOLINE macro.  */
-
-static int
-mips_in_call_stub (CORE_ADDR pc, char *name)
-{
-  CORE_ADDR start_addr;
-
-  /* Find the starting address of the function containing the PC.  If the
-     caller didn't give us a name, look it up at the same time.  */
-  if (find_pc_partial_function (pc, name ? NULL : &name, &start_addr, NULL) ==
-      0)
-    return 0;
-
-  if (strncmp (name, "__mips16_call_stub_", 19) == 0)
-    {
-      /* If the PC is in __mips16_call_stub_{1..10}, this is a call stub.  */
-      if (name[19] >= '0' && name[19] <= '9')
-	return 1;
-      /* If the PC at the start of __mips16_call_stub_{s,d}f_{0..10}, i.e.
-         before the jal instruction, this is effectively a call stub.  */
-      else if (name[19] == 's' || name[19] == 'd')
-	return pc == start_addr;
-    }
-
-  return 0;			/* not a stub */
-}
-
-
 /* Return non-zero if the PC is inside a return thunk (aka stub or
    trampoline).  */
 
@@ -5095,10 +5065,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      that supports both shared libraries and MIPS16, we'll have to find
      a better place for these.  */
   if (info.osabi == GDB_OSABI_UNKNOWN)
-    {
-      set_gdbarch_in_solib_call_trampoline (gdbarch, mips_in_call_stub);
-      set_gdbarch_in_solib_return_trampoline (gdbarch, mips_in_solib_return_trampoline);
-    }
+    set_gdbarch_in_solib_return_trampoline (gdbarch, mips_in_solib_return_trampoline);
 
   set_gdbarch_single_step_through_delay (gdbarch, mips_single_step_through_delay);
 
