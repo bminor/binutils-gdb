@@ -13,7 +13,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 load_lib gdb.exp
 
@@ -34,14 +34,24 @@ proc gdb_target_monitor { } {
     global targetname
     global serialport
     global baud
+    global target_info
 
     set timeout 60
+    if {$baud != ""} then {
+	send "set remotebaud $baud\n"
+    }
+    if [info exists target_info(target,cflags)] {
+	set targetname "$target_info(target,target)"
+    }
+    if [info exists target_info(target,netport)] {
+	set serialport "$target_info(target,netport)"
+    }
     for {set i 1} {$i <= 3} {incr i} {
 	send "target $targetname $serialport\n"
 	expect {
 		-re "Remote target $targetname connected to.*$prompt $"	{
 		     verbose "Set target to $targetname"
-		     break
+		     return
 		}
 		-re "Connection refused" {
 		    verbose "Connection refused by remote target.  Pausing, and trying again."
@@ -49,12 +59,14 @@ proc gdb_target_monitor { } {
 		    continue
 		}
 		timeout { 
-		    perror "Couldn't set target for $targetname."
-		    cleanup
-		    exit $exit_status
+		    break
 		}
 	}
     }
+
+    perror "Couldn't set target for $targetname."
+    cleanup
+    exit $exit_status
 }
 
 #
@@ -72,22 +84,23 @@ proc gdb_load { arg } {
 
     gdb_target_monitor
 
-    send "load\n"
+    verbose "Loading $arg"
+    send "load $arg\n"
     set timeout 600
     expect {
 	-re ".*$prompt $" {
-	    if $verbose>1 then {
+	    if { $verbose > 1 } {
 		send_user "Loaded $arg into $GDB\n"
 	    }
 	    return 1
 	}
 	-re "$prompt $"     {
-	    if $verbose>1 then {
-	 perror "GDB couldn't load."
+	    if { $verbose > 1 } {
+		perror "GDB couldn't load."
 	    }
 	}
 	timeout {
-	    if $verbose>1 then {
+	    if { $verbose > 1 } {
 	 perror "Timed out trying to load $arg."
 	    }
 	}

@@ -1,3 +1,10 @@
+Tue May  7 22:01:12 1996  Rob Savoye  <rob@chinadoll.cygnus.com>
+
+	* config/abug.exp: New file for the older Motorola Bug monitor
+	that runs on the mvme13x series VME boards.
+	* config/monitor.exp: Use the new config array for target settings
+	if they exist.
+
 Fri May  3 16:02:55 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* sim-gdb.exp: Make the SH simulator allocate less space when
