@@ -1,3 +1,7 @@
+2004-12-09  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* readelf.c (get_machine_flags): Handle E_MIPS_MACH_9000.
+
 2004-12-08  Ben Elliston  <bje@au.ibm.com>
 
 	* arlex.l: Fix formatting.
