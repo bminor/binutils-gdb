@@ -25,21 +25,17 @@
 #include "opcode/arc.h"
 #include "elf/arc.h"
 
-extern int target_big_endian;
 extern int arc_get_mach PARAMS ((char *));
 
-static arc_insn arc_insert_operand PARAMS ((arc_insn insn,
-					    const struct arc_operand *operand,
-					    int mods,
-					    const struct arc_operand_value *reg,
-					    offsetT val,
-					    char *file, unsigned int line));
-
+static arc_insn arc_insert_operand PARAMS ((arc_insn,
+					    const struct arc_operand *, int,
+					    const struct arc_operand_value *,
+					    offsetT, char *, unsigned int));
 static void arc_common PARAMS ((int));
 static void arc_cpu PARAMS ((int));
 /*static void arc_rename PARAMS ((int));*/
-
-static int find_mach PARAMS ((char *));
+static int get_arc_exp_reloc_type PARAMS ((int, int, expressionS *,
+					   expressionS *));
 
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -47,7 +43,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "common", arc_common, 0 },
 /*{ "hword", cons, 2 }, - already exists */
   { "word", cons, 4 },
-  { "xword", cons, 8 },
+/*{ "xword", cons, 8 },*/
   { "cpu", arc_cpu, 0 },
 /*{ "rename", arc_rename, 0 },*/
   { NULL, 0, 0 },
@@ -55,7 +51,6 @@ const pseudo_typeS md_pseudo_table[] =
 
 const int md_short_jump_size = 4;
 const int md_long_jump_size = 4;
-const int md_reloc_size = 12;	/* Size of relocation record */
 
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful */
@@ -79,31 +74,32 @@ const char EXP_CHARS[] = "eE";
 /* Chars that mean this number is a floating point constant */
 /* As in 0f12.456 */
 /* or    0d1.2345e12 */
-const char FLT_CHARS[] = "rRsSfFdDxXpP";
+const char FLT_CHARS[] = "rRsSfFdD";
+
+/* Byte order.  */
+extern int target_big_endian;
+const char *arc_target_format = DEFAULT_TARGET_FORMAT;
+static int byte_order;
 
 /* One of bfd_mach_arc_xxx.  */
 static int arc_mach_type = bfd_mach_arc_base;
 
-/* Non-zero if the cpu type was specified on the command line.  */
-static int mach_type_specified = 0;
+/* Non-zero if the cpu type has been explicitly specified.  */
+static int mach_type_specified_p = 0;
 
 /* Non-zero if opcode tables have been initialized.
    A .cpu command must appear before any instructions.  */
 static int cpu_tables_init_p = 0;
 
-static const char *arc_condition_codes[] =
-{
-  "al", "eq", "ne", "p", "n", "c", "nc", "v",
-  "nv", "gt", "ge", "lt", "le", "hi", "ls", "pnz"
-};
-
-static struct hash_control *arc_ops_hash = NULL;
 static struct hash_control *arc_suffix_hash = NULL;
-static struct hash_control *arc_reg_hash = NULL;
 
-const char *md_shortopts = "m:";
+const char *md_shortopts = "";
 struct option md_longopts[] =
 {
+#define OPTION_EB (OPTION_MD_BASE + 0)
+  {"EB", no_argument, NULL, OPTION_EB},
+#define OPTION_EL (OPTION_MD_BASE + 1)
+  {"EL", no_argument, NULL, OPTION_EL},
   { NULL, no_argument, NULL, 0 }
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -122,26 +118,18 @@ md_parse_option (c, arg)
 {
   switch (c)
     {
-    case 'm':
-      if (strncmp (arg, "cpu=", 4) == 0)
-	{
-	  int mach = arc_get_mach (arg + 4);
-
-	  if (mach != -1)
-	    {
-	      arc_mach_type = mach;
-	      mach_type_specified = 1;
-	      break;
-	    }
-	}
-      as_bad ("invalid architecture -m%s", arg);
-      return 0;
-
+    case OPTION_EB:
+      byte_order = BIG_ENDIAN;
+      arc_target_format = "elf32-bigarc";
+      break;
+    case OPTION_EL:
+      byte_order = LITTLE_ENDIAN;
+      arc_target_format = "elf32-littlearc";
+      break;
     default:
       return 0;
     }
-
- return 1;
+  return 1;
 }
 
 void
@@ -150,7 +138,8 @@ md_show_usage (stream)
 {
   fprintf (stream, "\
 ARC options:\n\
--mcpu={base,host,graphics,audio}	select cpu type\n");
+-EB			generate big endian output\n\
+-EL			generate little endian output\n");
 }
 
 /* This function is called once, at assembler startup time.  It should
@@ -161,12 +150,17 @@ ARC options:\n\
 void
 md_begin ()
 {
-  /* The endianness can be chosen "at the factory".  One day we may have
-     to be bi-endian.  */
-  target_big_endian = 0;
+  /* The endianness can be chosen "at the factory".  */
+  target_big_endian = byte_order == BIG_ENDIAN;
 
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, arc_mach_type))
     as_warn ("could not set architecture and machine");
+
+  /* Assume the base cpu.  This call is necessary because we need to
+     initialize `arc_operand_map' which may be needed before we see the
+     first insn.  */
+  arc_opcode_init_tables (arc_get_opcode_mach (bfd_mach_arc_base,
+					       target_big_endian));
 }
 
 /* Initialize the various opcode and operand tables.
@@ -178,31 +172,16 @@ init_opcode_tables (mach)
 {
   register unsigned int i;
   char *last;
-  /* Indexed by bfd_mach_arc_xxx.  */
-  static int cpu_type_map[] =
-    {
-      ARC_CPU_BASE,
-      ARC_CPU_HOST,
-      ARC_CPU_GRAPHICS,
-      ARC_CPU_AUDIO,
-    };
 
-  if ((arc_ops_hash = hash_new ()) == NULL
-      || (arc_suffix_hash = hash_new ()) == NULL
-      || (arc_reg_hash = hash_new ()) == NULL)
-    as_fatal ("Virtual memory exhausted");
+  if ((arc_suffix_hash = hash_new ()) == NULL)
+    as_fatal ("virtual memory exhausted");
 
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, mach))
     as_warn ("could not set architecture and machine");
 
   /* This initializes a few things in arc-opc.c that we need.
      This must be called before the various arc_xxx_supported fns.  */
-  arc_opcode_init_tables (cpu_type_map[mach]);
-
-#if 0
-  for (i = 0; i < arc_opcodes_count; i++)
-    hash_insert (arc_ops_hash, arc_opcodes[i].name, (PTR) (arc_opcodes + i));
-#endif
+  arc_opcode_init_tables (arc_get_opcode_mach (mach, target_big_endian));
 
   /* Only put the first entry of each equivalently named suffix in the
      table.  */
@@ -216,12 +195,18 @@ init_opcode_tables (mach)
       last = arc_suffixes[i].name;
     }
 
-  /* ??? This is the simple version.  See tc-arm.c for something snazzier.  */
+  /* Since registers don't have a prefix, we put them in the symbol table so
+     they can't be used as symbols.  This also simplifies argument parsing as
+     we can let gas parse registers for us.  The recorded register number is
+     the index in `arc_reg_names'.  */
   for (i = 0; i < arc_reg_names_count; i++)
     {
       if (! arc_opval_supported (&arc_reg_names[i]))
 	continue;
-      hash_insert (arc_reg_hash, arc_reg_names[i].name, (PTR) (arc_reg_names + i));
+      /* Use symbol_create here instead of symbol_new so we don't try to
+	 output registers into the object file's symbol table.  */
+      symbol_table_insert (symbol_create (arc_reg_names[i].name, reg_section,
+					  i, &zero_address_frag));
     }
 
   /* Tell `s_cpu' it's too late.  */
@@ -301,9 +286,9 @@ arc_insert_operand (insn, operand, mods, reg, val, file, line)
 
 struct arc_fixup
 {
-  expressionS exp;
   /* index into `arc_operands' */
   int opindex;
+  expressionS exp;
 };
 
 #define MAX_INSN_FIXUPS 5
@@ -317,7 +302,6 @@ md_assemble (str)
   const struct arc_opcode *opcode,*opcode_end;
   char *start;
   arc_insn insn;
-  bfd_reloc_code_real_type reloc;
   static int init_tables_p = 0;
 
   /* Opcode table initialization is deferred until here because we have to
@@ -363,7 +347,6 @@ md_assemble (str)
 
       arc_opcode_init_insert ();
       insn = opcode->value;
-      reloc = BFD_RELOC_NONE;
       fc = 0;
       past_opcode_p = 0;
 
@@ -382,21 +365,22 @@ md_assemble (str)
 	  if (*syn != '%' || *++syn == '%')
 	    {
 	      /* Handle '+' specially as we want to allow "ld r0,[sp-4]".  */
-	      if (*syn == '+' && *str == '-')
+	      /* ??? The syntax has changed to [sp,-4].  */
+	      if (0 && *syn == '+' && *str == '-')
 		{
 		  /* Skip over syn's +, but leave str's - alone.
 		     That makes the case identical to "ld r0,[sp+-4]".  */
 		  ++syn;
 		}
-	      else if (*str != *syn)
-		break;
-	      else
+	      else if (*str == *syn)
 		{
 		  if (*syn == ' ')
 		    past_opcode_p = 1;
 		  ++syn;
 		  ++str;
 		}
+	      else
+		break;
 	      continue;
 	    }
 
@@ -504,7 +488,7 @@ md_assemble (str)
 		}
 	      ++syn;
 	      if (!found)
-		/* There's nothing to do except, go on to try the next one.
+		/* There's nothing to do except go on to try the next one.
 		   ??? This test can be deleted when we're done.  */
 		;
 	    }
@@ -513,9 +497,9 @@ md_assemble (str)
 	    {
 	      char c;
 	      char *hold;
-	      const struct arc_operand_value *reg;
-	      long value;
-	      expressionS ex;
+	      const struct arc_operand_value *reg = NULL;
+	      long value = 0;
+	      expressionS exp;
 
 	      if (operand->flags & ARC_OPERAND_SUFFIX)
 		abort ();
@@ -525,7 +509,7 @@ md_assemble (str)
 		 any trailing fake arguments in the syntax string.  */
 	      if (*str == '\0')
 		break;
-
+#if 0
 	      /* Is this a syntax character?  Eg: is there a '[' present when
 		 there shouldn't be?  */
 	      if (!isalnum (*str)
@@ -533,68 +517,63 @@ md_assemble (str)
 		  && *str != '.'
 		  /* '_' as in "_print" */
 		  && *str != '_'
-		  /* '-' as in "[fp-4]" */
-		  && *str != '-')
+		  /* '-' as in "[fp,-4]" */
+		  && *str != '-'
+		  /* '%' as in "%ia(_func)" */
+		  && *str != '%')
 		break;
+#endif
 
-	      /* Is it a register?  */
-	      value = 0;
-	      hold = str;
-	      while (*str && (isalnum (*str) || *str == '_'))
-		++str;
-	      c = *str;
-	      *str = '\0';
-	      reg = hash_find (arc_reg_hash, hold);
-	      *str = c;
-	      if (!reg)
+	      /* Parse the operand.  */
+	      hold = input_line_pointer;
+	      input_line_pointer = str;
+	      expression (&exp);
+	      str = input_line_pointer;
+	      input_line_pointer = hold;
+
+	      if (exp.X_op == O_illegal)
+		as_bad ("illegal operand");
+	      else if (exp.X_op == O_absent)
+		as_bad ("missing operand");
+	      else if (exp.X_op == O_constant)
 		{
-		  /* Restore `str', it wasn't a register.  */
-		  str = hold;
+		  value = exp.X_add_number;
+		}
+	      else if (exp.X_op == O_register)
+		{
+		  reg = arc_reg_names + exp.X_add_number;
+		}
+	      else
+		{
+		  /* We need to generate a fixup for this expression.  */
+		  if (fc >= MAX_INSN_FIXUPS)
+		    as_fatal ("too many fixups");
+		  fixups[fc].exp = exp;
 
-		  /* Gather the operand.  */
-		  hold = input_line_pointer;
-		  input_line_pointer = str;
-		  expression (&ex);
-		  str = input_line_pointer;
-		  input_line_pointer = hold;
-
-		  if (ex.X_op == O_illegal)
-		    as_bad ("illegal operand");
-		  else if (ex.X_op == O_absent)
-		    as_bad ("missing operand");
-		  else if (ex.X_op == O_constant)
+		  /* If this is a register constant (IE: one whose
+		     register value gets stored as 61-63) then this
+		     must be a limm.  We don't support shimm relocs.  */
+		  /* ??? This bit could use some cleaning up.
+		     Referencing the format chars like this goes
+		     against style.  */
+#define IS_REG_OPERAND(o) ((o) == 'a' || (o) == 'b' || (o) == 'c')
+		  if (IS_REG_OPERAND (*syn))
 		    {
-		      value = ex.X_add_number;
+		      const char *junk;
+
+		      fixups[fc].opindex = arc_operand_map['L'];
+		      limm_reloc_p = 1;
+		      /* Tell insert_reg we need a limm.  This is
+			 needed because the value at this point is
+			 zero, a shimm.  */
+		      /* ??? We need a cleaner interface than this.  */
+		      (*arc_operands[arc_operand_map['Q']].insert)
+			(insn, operand, mods, reg, 0L, &junk);
 		    }
 		  else
-		    {
-		      /* We need to generate a fixup for this expression.
-			 If this is a register constant (IE: one whose register
-			 value gets stored as 61-63) then this must be a limm.
-			 We don't support shimm relocs.  */
-		      if (fc >= MAX_INSN_FIXUPS)
-			as_fatal ("too many fixups");
-		      fixups[fc].exp = ex;
-
-		      /* ??? This bit could use some cleaning up.  Referencing
-			 the format chars like this goes against style.  */
-#define IS_REG_OPERAND(o) ((o) == 'a' || (o) == 'b' || (o) == 'c')
-		      if (IS_REG_OPERAND (*syn))
-			{
-			  const char *junk;
-			  fixups[fc].opindex = arc_operand_map['L'];
-			  limm_reloc_p = 1;
-			  /* Tell insert_reg we need a limm.  This is needed
-			     because the value at this point is zero, a shimm.
-			     ??? Hack city.  */
-			  (*arc_operands[arc_operand_map['Q']].insert)
-			    (insn, operand, mods, reg, 0L, &junk);
-			}
-		      else
-			fixups[fc].opindex = arc_operand_map[*syn];
-		      ++fc;
-		      value = 0;
-		    }
+		    fixups[fc].opindex = arc_operand_map[*syn];
+		  ++fc;
+		  value = 0;
 		}
 
 	      /* Insert the register or expression into the instruction.  */
@@ -623,14 +602,14 @@ md_assemble (str)
 	    }
 	}
 
+      /* If we're at the end of the syntax string, we're done.  */
       if (*syn == '\0')
 	{
 	  int i;
 	  char *f;
 	  long limm;
 
-	  /* We've found a matching insn.
-	     ??? For the moment we assume a valid `str' can only contain blanks
+	  /* ??? For the moment we assume a valid `str' can only contain blanks
 	     now.  IE: We needn't try again with a longer version of the
 	     insn.  */
 
@@ -661,23 +640,51 @@ md_assemble (str)
 	      md_number_to_chars (f, insn, 4);
 	    }
 
-	  /* Create any fixups.  At this point we do not use a
-	     bfd_reloc_code_real_type, but instead just use the operand index.
-	     This lets us easily handle fixups for any operand type, although
-	     that is admittedly not a very exciting feature.  We pick a BFD
-	     reloc type in md_apply_fix.  */
-	  for (i = 0; i < fc; i++)
+	  /* Create any fixups.  */
+	  for (i = 0; i < fc; ++i)
 	    {
+	      int op_type, reloc_type;
+	      expressionS exptmp;
 	      const struct arc_operand *operand;
 
-	      operand = &arc_operands[fixups[i].opindex];
+	      /* Create a fixup for this operand.
+		 At this point we do not use a bfd_reloc_code_real_type for
+		 operands residing in the insn, but instead just use the
+		 operand index.  This lets us easily handle fixups for any
+		 operand type, although that is admittedly not a very exciting
+		 feature.  We pick a BFD reloc type in md_apply_fix.
+
+		 Limm values (4 byte immediate "constants") must be treated
+		 normally because they're not part of the actual insn word
+		 and thus the insertion routines don't handle them.  */
+
+	      if (arc_operands[fixups[i].opindex].flags & ARC_OPERAND_LIMM)
+		{
+		  op_type = fixups[i].opindex;
+		  /* FIXME: can we add this data to the operand table?  */
+		  if (op_type == arc_operand_map['L'])
+		    reloc_type = BFD_RELOC_32;
+		  else if (op_type == arc_operand_map['J'])
+		    reloc_type = BFD_RELOC_ARC_B26;
+		  else
+		    abort ();
+		  reloc_type = get_arc_exp_reloc_type (1, reloc_type,
+						       &fixups[i].exp,
+						       &exptmp);
+		}
+	      else
+		{
+		  op_type = get_arc_exp_reloc_type (0, fixups[i].opindex,
+						    &fixups[i].exp, &exptmp);
+		  reloc_type = op_type + (int) BFD_RELOC_UNUSED;
+		}
+	      operand = &arc_operands[op_type];
 	      fix_new_exp (frag_now,
 			   ((f - frag_now->fr_literal)
-			    + (operand->fmt == 'L' ? 4 : 0)), 4,
-			   &fixups[i].exp,
-			   (operand->flags & ARC_OPERAND_RELATIVE) != 0,
-			   ((bfd_reloc_code_real_type)
-			    (fixups[i].opindex + (int) BFD_RELOC_UNUSED)));
+			    + (operand->flags & ARC_OPERAND_LIMM ? 4 : 0)), 4,
+			   &exptmp,
+			   (operand->flags & ARC_OPERAND_RELATIVE_BRANCH) != 0,
+			   (bfd_reloc_code_real_type) reloc_type);
 	    }
 
 	  /* All done.  */
@@ -690,6 +697,8 @@ md_assemble (str)
   as_bad ("bad instruction `%s'", start);
 }
 
+/* ??? This was copied from tc-sparc.c, I think.  Is it necessary?  */
+
 static void
 arc_common (ignore)
      int ignore;
@@ -737,13 +746,6 @@ arc_common (ignore)
 		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
 	}
     }
-  else
-    {
-#ifndef OBJ_ELF
-      S_SET_VALUE (symbolP, (valueT) size);
-      S_SET_EXTERNAL (symbolP);
-#endif
-    }
   assert (symbolP->sy_frag == &zero_address_frag);
   if (*input_line_pointer != ',')
     {
@@ -756,19 +758,11 @@ arc_common (ignore)
   if (*input_line_pointer != '"')
     {
       temp = get_absolute_expression ();
-#ifndef OBJ_ELF
-      if (temp > max_alignment)
-	{
-	  temp = max_alignment;
-	  as_warn ("Common alignment too large: %d. assumed", temp);
-	}
-#endif
       if (temp < 0)
 	{
 	  temp = 0;
 	  as_warn ("Common alignment negative; 0 assumed");
 	}
-#ifdef OBJ_ELF
       if (symbolP->local)
 	{
 	  segT old_sec;
@@ -795,13 +789,10 @@ arc_common (ignore)
 	  subseg_set (old_sec, old_subsec);
 	}
       else
-#endif
 	{
 	allocate_common:
 	  S_SET_VALUE (symbolP, (valueT) size);
-#ifdef OBJ_ELF
 	  S_SET_ALIGN (symbolP, temp);
-#endif
 	  S_SET_EXTERNAL (symbolP);
 	  /* should be common, but this is how gas does it for now */
 	  S_SET_SEGMENT (symbolP, bfd_und_section_ptr);
@@ -810,15 +801,10 @@ arc_common (ignore)
   else
     {
       input_line_pointer++;
-      /* @@ Some use the dot, some don't.  Can we get some consistency??  */
-      if (*input_line_pointer == '.')
-	input_line_pointer++;
-      /* @@ Some say data, some say bss.  */
-      if (strncmp (input_line_pointer, "bss\"", 4)
-	  && strncmp (input_line_pointer, "data\"", 5))
+      /* ??? Some say data, some say bss.  */
+      if (strncmp (input_line_pointer, ".bss\"", 5)
+	  && strncmp (input_line_pointer, ".data\"", 6))
 	{
-	  while (*--input_line_pointer != '"')
-	    ;
 	  input_line_pointer--;
 	  goto bad_common_segment;
 	}
@@ -853,16 +839,6 @@ arc_cpu (ignore)
   int mach;
   char c;
   char *cpu;
-  static int seen_p = 0;
-
-  /* Allow only one .cpu.  */
-  if (seen_p)
-    {
-      as_bad ("only one .cpu command allowed");
-      ignore_rest_of_line ();
-      return;
-    }
-  seen_p = 1;
 
   /* If an instruction has already been seen, it's too late.  */
   if (cpu_tables_init_p)
@@ -879,16 +855,18 @@ arc_cpu (ignore)
   if (mach == -1)
     goto bad_cpu;
 
-  /* Kind of overkill but what the heck.  */
   demand_empty_rest_of_line ();
 
   /* The cpu may have been selected on the command line.
      The choices must match.  */
-  if (mach_type_specified && mach != arc_mach_type)
-    as_bad (".cpu conflicts with -mcpu flag");
+  /* ??? This was a command line option early on.  It's gone now, but
+     leave this in.  */
+  if (mach_type_specified_p && mach != arc_mach_type)
+    as_bad (".cpu conflicts with previous value");
   else
     {
       arc_mach_type = mach;
+      mach_type_specified_p = 1;
       if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, mach))
 	as_warn ("could not set architecture and machine");
     }
@@ -1003,7 +981,6 @@ md_number_to_chars (buf, val, n)
      valueT val;
      int n;
 {
-  /* The ARC isn't bi-endian.  Yet.  */
   if (target_big_endian)
     number_to_chars_bigendian (buf, val, n);
   else
@@ -1049,24 +1026,100 @@ md_convert_frag (abfd, sec, fragp)
 }
 
 /* Parse an operand that is machine-specific.
-   We just return without modifying the expression if we have nothing to do. */
 
-/* ARGSUSED */
+   The ARC has a special %-op to adjust addresses so they're usable in
+   branches.  The "st" is short for the STatus register.
+   ??? Later expand this to take a flags value too.
+
+   ??? We can't create new expression types so we map the %-op's onto the
+   existing syntax.  This means that the user could use the chosen syntax
+   to achieve the same effect.  Perhaps put a special cookie in X_add_number
+   to mark the expression as special.  */
+
 void 
 md_operand (expressionP)
      expressionS *expressionP;
 {
+  char *p = input_line_pointer;
+
+  if (*p == '%' && strncmp (p, "%st(", 4) == 0)
+    {
+      expressionS two;
+
+      input_line_pointer += 4;
+      expression (expressionP);
+      if (*input_line_pointer != ')')
+	{
+	  as_bad ("missing ')' in %-op");
+	  return;
+	}
+      ++input_line_pointer;
+      if (expressionP->X_op != O_symbol
+	  || expressionP->X_add_number != 0)
+	{
+	  as_bad ("expression too complex for %st");
+	  return;
+	}
+      expressionP->X_op = O_right_shift;
+      two.X_op = O_constant;
+      two.X_add_symbol = two.X_op_symbol = NULL;
+      two.X_add_number = 2;
+      expressionP->X_op_symbol = make_expr_symbol (&two);
+    }
 }
 
-/* We have no need to default values of symbols. */
+/* We have no need to default values of symbols.
+   We could catch register names here, but that is handled by inserting
+   them all in the symbol table to begin with.  */
 
-/* ARGSUSED */
 symbolS *
 md_undefined_symbol (name)
      char *name;
 {
   return 0;
-}				/* md_undefined_symbol() */
+}
+
+/* Functions concerning expressions.  */
+
+/* Parse a .byte, .word, etc. expression.
+
+   Values for the status register are specified with %st(label).
+   `label' will be right shifted by 2.  */
+
+void
+arc_parse_cons_expression (exp, nbytes)
+     expressionS *exp;
+     int nbytes;
+{
+  expr (0, exp);
+}
+
+/* Record a fixup for a cons expression.  */
+
+void
+arc_cons_fix_new (frag, where, nbytes, exp)
+     fragS *frag;
+     int where;
+     int nbytes;
+     expressionS *exp;
+{
+  if (nbytes == 4)
+    {
+      int reloc_type;
+      expressionS exptmp;
+
+      /* This may be a special ARC reloc (eg: %st()).  */
+      reloc_type = get_arc_exp_reloc_type (1, BFD_RELOC_32, exp, &exptmp);
+      fix_new_exp (frag, where, nbytes, &exptmp, 0, reloc_type);
+    }
+  else
+    {
+      fix_new_exp (frag, where, nbytes, exp, 0,
+		   nbytes == 2 ? BFD_RELOC_16
+		   : nbytes == 8 ? BFD_RELOC_64
+		   : BFD_RELOC_32);
+    }
+}
 
 /* Functions concerning relocs.  */
 
@@ -1086,14 +1139,67 @@ md_pcrel_from (fixP)
   return fixP->fx_frag->fr_address + fixP->fx_where + fixP->fx_size;
 }
 
+/* Compute the reloc type of an expression.
+   The possibly modified expression is stored in EXPNEW.
+
+   This is used to convert the expressions generated by the %-op's into
+   the appropriate operand type.  It is called for both data in instructions
+   (operands) and data outside instructions (variables, debugging info, etc.).
+
+   Currently supported %-ops:
+
+   %st(symbol): represented as "symbol >> 2"
+                "st" is short for STatus as in the status register (pc)
+
+   DEFAULT_TYPE is the type to use if no special processing is required.
+
+   DATA_P is non-zero for data or limm values, zero for insn operands.
+   Remember that the opcode "insertion fns" cannot be used on data, they're
+   only for inserting operands into insns.  They also can't be used for limm
+   values as the insertion routines don't handle limm values.  When called for
+   insns we return fudged reloc types (real_value - BFD_RELOC_UNUSED).  When
+   called for data or limm values we use real reloc types.  */
+
+static int
+get_arc_exp_reloc_type (data_p, default_type, exp, expnew)
+     int data_p;
+     int default_type;
+     expressionS *exp;
+     expressionS *expnew;
+{
+  /* If the expression is "symbol >> 2" we must change it to just "symbol",
+     as fix_new_exp can't handle it.  That's ok though.  What's really going
+     on here is that we're using ">> 2" as a special syntax for specifying
+     BFD_RELOC_ARC_B26.  */
+
+  if (exp->X_op == O_right_shift)
+    {
+      if (exp->X_add_symbol != NULL
+	  && (exp->X_add_symbol->sy_value.X_op == O_constant
+	      || exp->X_add_symbol->sy_value.X_op == O_symbol)
+	  && exp->X_op_symbol != NULL
+	  && exp->X_op_symbol->sy_value.X_op == O_constant
+	  && exp->X_op_symbol->sy_value.X_add_number == 2
+	  && exp->X_add_number == 0)
+	{
+	  *expnew = *exp;
+	  expnew->X_op = O_symbol;
+	  expnew->X_op_symbol = NULL;
+	  return data_p ? BFD_RELOC_ARC_B26 : arc_operand_map['J'];
+	}
+    }
+
+  *expnew = *exp;
+  return default_type;
+}
+
 /* Apply a fixup to the object code.  This is called for all the
    fixups we generated by the call to fix_new_exp, above.  In the call
    above we used a reloc code which was the largest legal reloc code
    plus the operand index.  Here we undo that to recover the operand
    index.  At this point all symbol values should be fully resolved,
    and we attempt to completely resolve the reloc.  If we can not do
-   that, we determine the correct reloc code and put it back in the
-   fixup.  */
+   that, we determine the correct reloc code and put it back in the fixup.  */
 
 int
 md_apply_fix (fixP, valueP)
@@ -1170,16 +1276,31 @@ md_apply_fix (fixP, valueP)
 
       /* Determine a BFD reloc value based on the operand information.
 	 We are only prepared to turn a few of the operands into relocs.
-	 FIXME: Selecting the reloc type is a bit haphazard; perhaps
-	 there should be a new field in the operand table.  */
-      if ((operand->flags & ARC_OPERAND_RELATIVE) != 0
-	  && operand->bits == 20
-	  && operand->shift == 7)
-	fixP->fx_r_type = BFD_RELOC_ARC_B22_PCREL;
-      else if ((operand->flags & ARC_OPERAND_ABSOLUTE) != 0
-	       && operand->bits == 32
-	       && operand->shift == 32)
-	fixP->fx_r_type = BFD_RELOC_32;
+	 !!! Note that we can't handle limm values here.  Since we're using
+	 implicit addends the addend must be inserted into the instruction,
+	 however, the opcode insertion routines currently do nothing with
+	 limm values.  */
+      if (operand->fmt == 'B')
+	{
+	  assert ((operand->flags & ARC_OPERAND_RELATIVE_BRANCH) != 0
+		  && operand->bits == 20
+		  && operand->shift == 7);
+	  fixP->fx_r_type = BFD_RELOC_ARC_B22_PCREL;
+	}
+      else if (0 && operand->fmt == 'J')
+	{
+	  assert ((operand->flags & ARC_OPERAND_ABSOLUTE_BRANCH) != 0
+		  && operand->bits == 24
+		  && operand->shift == 32);
+	  fixP->fx_r_type = BFD_RELOC_ARC_B26;
+	}
+      else if (0 && operand->fmt == 'L')
+	{
+	  assert ((operand->flags & ARC_OPERAND_LIMM) != 0
+		  && operand->bits == 32
+		  && operand->shift == 32);
+	  fixP->fx_r_type = BFD_RELOC_32;
+	}
       else
 	{
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
@@ -1192,28 +1313,31 @@ md_apply_fix (fixP, valueP)
     {
       switch (fixP->fx_r_type)
 	{
-	case BFD_RELOC_32:
+	case BFD_RELOC_8:
 	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
-			      value, 4);
+			      value, 1);
 	  break;
 	case BFD_RELOC_16:
 	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			      value, 2);
 	  break;
-	case BFD_RELOC_8:
+	case BFD_RELOC_32:
+	case BFD_RELOC_ARC_B26:
 	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
-			      value, 1);
+			      value, 4);
 	  break;
+#if 0
+	case BFD_RELOC_64:
+	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
+			      value, 8);
+	  break;
+#endif
 	default:
 	  abort ();
 	}
     }
 
-#ifdef OBJ_ELF
   fixP->fx_addnumber = value;
-#else
-  fixP->fx_addnumber = 0;
-#endif
 
   return 1;
 }
