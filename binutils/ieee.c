@@ -3735,9 +3735,6 @@ struct ieee_write_type
   unsigned int referencep : 1;
   /* Whether this is in the local type block.  */
   unsigned int localp : 1;
-  /* If this is not local, whether a reference to this type should be
-     local.  */
-  unsigned reflocalp : 1;
   /* Whether this is a duplicate struct definition which we are
      ignoring.  */
   unsigned int ignorep : 1;
@@ -3794,6 +3791,8 @@ struct ieee_defined_enum
   struct ieee_defined_enum *next;
   /* Type index.  */
   unsigned int indx;
+  /* Whether this enum has been defined.  */
+  boolean defined;
   /* Tag.  */
   const char *tag;
   /* Names.  */
@@ -4733,7 +4732,18 @@ write_ieee_debugging_info (abfd, dhandle)
   /* Prepend the global typedef information to the other data.  */
   if (! ieee_buffer_emptyp (&info.global_types))
     {
+      /* The HP debugger seems to have a bug in which it ignores the
+         last entry in the global types, so we add a dummy entry.  */
       if (! ieee_change_buffer (&info, &info.global_types)
+	  || ! ieee_write_byte (&info, (int) ieee_nn_record)
+	  || ! ieee_write_number (&info, info.name_indx)
+	  || ! ieee_write_id (&info, "")
+	  || ! ieee_write_byte (&info, (int) ieee_ty_record_enum)
+	  || ! ieee_write_number (&info, info.type_indx)
+	  || ! ieee_write_byte (&info, 0xce)
+	  || ! ieee_write_number (&info, info.name_indx)
+	  || ! ieee_write_number (&info, 'P')
+	  || ! ieee_write_number (&info, (int) builtin_void + 32)
 	  || ! ieee_write_byte (&info, (int) ieee_be_record_enum))
 	return false;
 
@@ -5407,9 +5417,11 @@ ieee_enum_type (p, tag, names, vals)
   struct ieee_handle *info = (struct ieee_handle *) p;
   struct ieee_defined_enum *e;
   boolean localp, simple;
+  unsigned int indx;
   int i;
 
   localp = false;
+  indx = (unsigned int) -1;
   for (e = info->enums; e != NULL; e = e->next)
     {
       if (tag == NULL)
@@ -5423,6 +5435,13 @@ ieee_enum_type (p, tag, names, vals)
 	      || tag[0] != e->tag[0]
 	      || strcmp (tag, e->tag) != 0)
 	    continue;
+	}
+
+      if (! e->defined)
+	{
+	  /* This enum tag has been seen but not defined.  */
+	  indx = e->indx;
+	  break;
 	}
 
       if (names != NULL && e->names != NULL)
@@ -5472,8 +5491,8 @@ ieee_enum_type (p, tag, names, vals)
 	}
     }
 
-  if (! ieee_define_named_type (info, tag, (unsigned int) -1, 0,
-				true, localp, (struct ieee_buflist *) NULL)
+  if (! ieee_define_named_type (info, tag, indx, 0, true, localp,
+				(struct ieee_buflist *) NULL)
       || ! ieee_write_number (info, simple ? 'E' : 'N'))
     return false;
   if (simple)
@@ -5499,25 +5518,26 @@ ieee_enum_type (p, tag, names, vals)
 
   if (! localp)
     {
-      e = (struct ieee_defined_enum *) xmalloc (sizeof *e);
-      memset (e, 0, sizeof *e);
+      if (indx == (unsigned int) -1)
+	{
+	  e = (struct ieee_defined_enum *) xmalloc (sizeof *e);
+	  memset (e, 0, sizeof *e);
+	  e->indx = info->type_stack->type.indx;
+	  e->tag = tag;
 
-      e->indx = info->type_stack->type.indx;
-      e->tag = tag;
+	  e->next = info->enums;
+	  info->enums = e;
+	}
+
       e->names = names;
       e->vals = vals;
-
-      e->next = info->enums;
-      info->enums = e;
+      e->defined = true;
     }
 
   return true;
 }
 
-/* Make a pointer type.  The HP debugger seems to sometimes get
- confused by global pointers to global pointers.  Therefore, we mark
- all pointers as reflocalp, so that references to global pointers are
- forced to be local.  This is probably less efficient than possible.  */
+/* Make a pointer type.  */
 
 static boolean
 ieee_pointer_type (p)
@@ -5528,18 +5548,13 @@ ieee_pointer_type (p)
   unsigned int indx;
   struct ieee_modified_type *m = NULL;
 
-  localp = info->type_stack->type.localp || info->type_stack->type.reflocalp;
+  localp = info->type_stack->type.localp;
   indx = ieee_pop_type (info);
 
   /* A pointer to a simple builtin type can be obtained by adding 32.
      FIXME: Will this be a short pointer, and will that matter?  */
   if (indx < 32)
-    {
-      if (! ieee_push_type (info, indx + 32, 0, true, false))
-	return false;
-      /* I don't think we need to set reflocalp for this case.  */
-      return true;
-    }
+    return ieee_push_type (info, indx + 32, 0, true, false);
 
   if (! localp)
     {
@@ -5549,12 +5564,7 @@ ieee_pointer_type (p)
 
       /* FIXME: The size should depend upon the architecture.  */
       if (m->pointer > 0)
-	{
-	  if (! ieee_push_type (info, m->pointer, 4, true, false))
-	    return false;
-	  info->type_stack->type.reflocalp = true;
-	  return true;
-	}
+	return ieee_push_type (info, m->pointer, 4, true, false);
     }
 
   if (! ieee_define_type (info, 4, true, localp)
@@ -5564,8 +5574,6 @@ ieee_pointer_type (p)
 
   if (! localp)
     m->pointer = info->type_stack->type.indx;
-
-  info->type_stack->type.reflocalp = true;
 
   return true;
 }
@@ -5596,8 +5604,7 @@ ieee_function_type (p, argcount, varargs)
       args = (unsigned int *) xmalloc (argcount * sizeof *args);
       for (i = argcount - 1; i >= 0; i--)
 	{
-	  if (info->type_stack->type.localp
-	      || info->type_stack->type.reflocalp)
+	  if (info->type_stack->type.localp)
 	    localp = true;
 	  args[i] = ieee_pop_type (info);
 	}
@@ -5605,7 +5612,7 @@ ieee_function_type (p, argcount, varargs)
   else if (argcount < 0)
     varargs = false;
 
-  if (info->type_stack->type.localp || info->type_stack->type.reflocalp)
+  if (info->type_stack->type.localp)
     localp = true;
   retindx = ieee_pop_type (info);
 
@@ -5692,7 +5699,7 @@ ieee_range_type (p, low, high)
 
   size = info->type_stack->type.size;
   unsignedp = info->type_stack->type.unsignedp;
-  localp = info->type_stack->type.localp || info->type_stack->type.reflocalp;
+  localp = info->type_stack->type.localp;
   ieee_pop_unused_type (info);
   return (ieee_define_type (info, size, unsignedp, localp)
 	  && ieee_write_number (info, 'R')
@@ -5720,7 +5727,7 @@ ieee_array_type (p, low, high, stringp)
 
   /* IEEE does not store the range, so we just ignore it.  */
   ieee_pop_unused_type (info);
-  localp = info->type_stack->type.localp || info->type_stack->type.reflocalp;
+  localp = info->type_stack->type.localp;
   eleindx = ieee_pop_type (info);
 
   if (! localp)
@@ -5776,7 +5783,7 @@ ieee_set_type (p, bitstringp)
   boolean localp;
   unsigned int eleindx;
 
-  localp = info->type_stack->type.localp || info->type_stack->type.reflocalp;
+  localp = info->type_stack->type.localp;
   eleindx = ieee_pop_type (info);
 
   /* FIXME: We don't know the size, so we just use 4.  */
@@ -5844,7 +5851,7 @@ ieee_const_type (p)
 
   size = info->type_stack->type.size;
   unsignedp = info->type_stack->type.unsignedp;
-  localp = info->type_stack->type.localp || info->type_stack->type.reflocalp;
+  localp = info->type_stack->type.localp;
   indx = ieee_pop_type (info);
 
   if (! localp)
@@ -5884,7 +5891,7 @@ ieee_volatile_type (p)
 
   size = info->type_stack->type.size;
   unsignedp = info->type_stack->type.unsignedp;
-  localp = info->type_stack->type.localp || info->type_stack->type.reflocalp;
+  localp = info->type_stack->type.localp;
   indx = ieee_pop_type (info);
 
   if (! localp)
@@ -6072,7 +6079,7 @@ ieee_struct_field (p, name, bitpos, bitsize, visibility)
   size = info->type_stack->type.size;
   unsignedp = info->type_stack->type.unsignedp;
   referencep = info->type_stack->type.referencep;
-  localp = info->type_stack->type.localp || info->type_stack->type.reflocalp;
+  localp = info->type_stack->type.localp;
   indx = ieee_pop_type (info);
 
   if (localp)
@@ -6350,7 +6357,7 @@ ieee_class_baseclass (p, bitpos, virtual, visibility)
 	  && ! ieee_buffer_emptyp (&info->type_stack->next->type.strdef));
 
   bname = info->type_stack->type.name;
-  localp = info->type_stack->type.localp || info->type_stack->type.reflocalp;
+  localp = info->type_stack->type.localp;
   bindx = ieee_pop_type (info);
 
   /* We are currently defining both a struct and a class.  We must
@@ -6677,7 +6684,19 @@ ieee_tag_type (p, name, id, kind)
       for (e = info->enums; e != NULL; e = e->next)
 	if (e->tag != NULL && strcmp (e->tag, name) == 0)
 	  return ieee_push_type (info, e->indx, 0, true, false);
-      abort ();
+
+      e = (struct ieee_defined_enum *) xmalloc (sizeof *e);
+      memset (e, 0, sizeof *e);
+
+      e->indx = info->type_indx;
+      ++info->type_indx;
+      e->tag = name;
+      e->defined = false;
+
+      e->next = info->enums;
+      info->enums = e;
+
+      return ieee_push_type (info, e->indx, 0, true, false);
     }
 
   localp = false;
