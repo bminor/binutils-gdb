@@ -427,7 +427,7 @@ shmedia_frob_section_type (asection *sec)
      target-specific semantics.  This target is ELF only (semantics not
      defined for other formats), so we use the target-specific pointer
      field of the ELF section data.  */
-  if (seginfo)
+  if (seginfo && sh64_abi == sh64_abi_32)
     {
       struct sh64_section_data *sec_elf_data;
       flagword sec_type = 0;

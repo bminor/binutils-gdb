@@ -1,3 +1,8 @@
+2003-11-20  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-sh64.c (shmedia_frob_section): Only frob elf32
+	sections.
+
 2003-11-19  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* config/tc-h8300.c: Make some functions and global
