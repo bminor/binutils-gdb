@@ -1996,6 +1996,12 @@ init_main (void)
       async_annotation_suffix = "prompt";
       /* Set the variable associated with the setshow prompt command. */
       new_async_prompt = savestring (PROMPT (0), strlen (PROMPT (0)));
+
+      /* If gdb was started with --annotate=2, this is equivalent to
+	 the user entering the command 'set annotate 2' at the gdb
+	 prompt, so we need to do extra processing. */
+      if (annotation_level > 1)
+        set_async_annotation_level (NULL, 0, NULL);
     }
   gdb_prompt_escape = 0;	/* default to none.  */
 

@@ -1,3 +1,10 @@
+2001-04-05  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        From  Jimmy Guo  <guo@cup.hp.com>
+        * top.c (init_main): set prompt if annotation_level>1,
+        this is necessary when annotation_level is set to 2 via
+        --annotate=2 command line option.
+
 2001-04-04  Andrew Cagney  <ac131313@redhat.com>
 
 	Obsolete a29k-*-* host and a29k-*-sym1* and a29k-*-kern* targets.
