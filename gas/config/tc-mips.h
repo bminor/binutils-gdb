@@ -46,7 +46,7 @@ struct expressionS;
 #define LOCAL_LABELS_FB 1
 
 /* Maximum symbol offset that can be encoded in a BFD_RELOC_GPREL16
-   relocation: */
+   relocation.  */
 #define MAX_GPREL_OFFSET (0x7FF0)
 
 #define md_relax_frag(segment, fragp, stretch) \
