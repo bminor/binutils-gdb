@@ -41,6 +41,7 @@ Things-to-keep:
 
 alpha.mt
 alphaosf.mh
+arm-pe.mt
 armb-aout.mt
 arml-aout.mt
 coff-a29k.mt

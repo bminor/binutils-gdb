@@ -1,3 +1,52 @@
+Wed May 24 11:23:21 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	Add support for ARM-PE.
+	* Makefile.in (ALL_EMULATIONS): Add armpe.o
+	* configure.in: Recognize armpe.
+	* config/arm-pe.mt: New file.
+	* emulparams/armpe.sh: New file.
+	* scripttempl/armpe.sc: New file.
+
+
+Mon May 22 15:19:26 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* configure.in (h8300h-*-hms): Deleted
+	* config/cf-h8300h.mt: Deleted.
+
+Thu May 18 04:26:10 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
+
+	Wed May 10 14:28:16 1995 Richard Earnshaw (rearnsha@armltd.co.uk)
+
+	From David Taylor (dtaylor@armltd.co.uk)
+	* Makefile.in (ALL_EMULATIONS): Add earmout[lb].o
+	* configure.in: Recognize arm{,e[lb]-*-aout.
+	* config/arm[lb]-aout.mt: New files.
+	* emulparams/armaout[lb].sh: New files.
+	* scripttempl/armaout.sc: New file.
+
+Tue May 16 18:27:11 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/ppcle-elf32.mt (EMUL): Use elf32lppc, not elf32ppcle, to
+	be unique in 8 characters for DOS.
+
+	* emulparams/elf32lppc.sh: New file, renamed from elf32ppcle.sh.
+	* emulparams/elf32ppcle.sh: Deleted.
+
+Fri May 12 11:03:55 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+			  Tom Griest <griest@cs.yale.edu>
+
+	Initial support for PE executables (eg NT, win32)
+
+	* Makefile.in (configure.in, ei386pe): Add support.
+	* ldmain.c (main): Initialize PE argument info.
+	* ldwrite.c (print_file_stuff): Don't print out .drectve
+	and .debug section info.
+	* lexsup.c (set_subsystem, set_stack_heap, OPTION_HEAP,
+	 OPTION_SUBSYSTEM, parse_argsm set_subsystem, set_stack_heap):
+	 Handle new arguments.
+	* config/i386-pe.mt, emultempl/i386pe.em, scripttempl/i386pe.sc:
+	New files
+
 Wed May 10 18:37:59 1995  Stu Grossman  (grossman@andros.cygnus.com)
 
 	* scripttempl/hppaelf.sc:  Remove .PARISC.unwind section from text

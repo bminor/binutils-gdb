@@ -44,6 +44,7 @@ a29k.sh
 alpha.sh
 armaoutb.sh
 armaoutl.sh
+armpe.sh
 coff_sparc.sh
 ebmon29k.sh
 elf32_sparc.sh

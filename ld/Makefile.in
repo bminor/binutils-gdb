@@ -194,7 +194,8 @@ BFDLIB = ../bfd/libbfd.a
 LIBIBERTY = ../libiberty/libiberty.a
 
 
-ALL_EMULATIONS = ea29k.o ealpha.o ecoff_sparc.o eebmon29k.o \
+ALL_EMULATIONS = ea29k.o ealpha.o earmaoutl.o earmoutb.o \
+	ecoff_sparc.o eebmon29k.o \
 	eelf32_sparc.o eelf32bmip.o eelf32lmip.o eelf32ppc.o eelf32ppcle.o \
 	eelf64_sparc.o eelf_i386.o egld960.o ego32.o eh8300.o \
 	eh8300h.o eh8500.o eh8500b.o eh8500c.o eh8500m.o eh8500s.o \
@@ -205,7 +206,7 @@ ALL_EMULATIONS = ea29k.o ealpha.o ecoff_sparc.o eebmon29k.o \
 	emipsidt.o emipsidtl.o emipslit.o enews.o ens32knbsd.o eppcnw.o \
 	eriscix.o esa29200.o eshl.o esh.o esparclynx.o esparcnbsd.o \
 	est2000.o esun3.o esun4.o evanilla.o evax.o evsta.o \
-	ez8ksim.o
+	ez8ksim.o ei386pe.o earmpe.o
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
@@ -282,6 +283,9 @@ esun4.c: $(srcdir)/emulparams/sun4.sh \
 esun3.c: $(srcdir)/emulparams/sun3.sh \
   $(srcdir)/emultempl/sunos.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} sun3
+earmpe.c: $(srcdir)/emulparams/armpe.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/armpe.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} armpe
 evsta.c: $(srcdir)/emulparams/vsta.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} vsta
@@ -300,6 +304,9 @@ ehp300bsd.c: $(srcdir)/emulparams/hp300bsd.sh \
 ehp3hpux.c: $(srcdir)/emulparams/hp3hpux.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} hp3hpux
+ei386pe.c: $(srcdir)/emulparams/i386pe.sh \
+  $(srcdir)/emultempl/i386pe.em $(srcdir)/scripttempl/i386pe.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} i386pe
 ehppaelf.c: $(srcdir)/emulparams/hppaelf.sh \
   $(srcdir)/emultempl/hppaelf.em $(srcdir)/scripttempl/hppaelf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} hppaelf
@@ -354,9 +361,6 @@ eshl.c: $(srcdir)/emulparams/shl.sh \
 est2000.c: $(srcdir)/emulparams/st2000.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/st2000.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} st2000
-ez8ksim.c: $(srcdir)/emulparams/z8ksim.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/z8ksim.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} z8ksim
 evanilla.c: $(srcdir)/emulparams/vanilla.sh \
   $(srcdir)/emultempl/vanilla.em $(srcdir)/scripttempl/vanilla.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} vanilla
@@ -469,6 +473,15 @@ ens32knbsd.c:	$(srcdir)/emulparams/ns32knbsd.sh \
 esparcnbsd.c:	$(srcdir)/emulparams/sparcnbsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} sparcnbsd
+earmaoutl.c:	$(srcdir)/emulparams/armaoutl.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/armaout.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} armaoutl
+earmaoutb.c:	$(srcdir)/emulparams/armaoutb.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/armaout.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} armaoutb
+ez8ksim.c: $(srcdir)/emulparams/z8ksim.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/z8ksim.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} z8ksim
 
 # start-sanitize-arc
 earcelf.c: $(srcdir)/emulparams/arcelf.sh \
