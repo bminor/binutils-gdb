@@ -94,21 +94,37 @@ Things-to-lose:
 Do-last:
 
 if ( echo $* | grep keep-v9 > /dev/null ) ; then
-	echo Keeping ChangeLog.v9.
+	if [ -n "${verbose}" ] ; then
+		echo Keeping `pwd`/ChangeLog.v9.
+		echo Keeping v9 code in `pwd`/configure.in.
+	fi
 else
-	echo Removing ChangeLog.v9
+	if [ -n "${verbose}" ] ; then
+		echo Removing `pwd`/ChangeLog.v9
+	fi
 	if [ -n "${safe}" ] ; then
 		mv ChangeLog.v9 .Recover
 	else
 		rm ChangeLog.v9
 	fi
+	if [ -n "${verbose}" ] ; then
+		echo Cleaning v9 code from `pwd`/configure.in.
+	fi
+	grep -v v9 < configure.in > new
+	if [ -n "${safe}" ]; then
+		mv configure.in .Recover
+	fi
+	mv -f new configure.in
 fi
 
 
 #
 #
 # $Log$
-# Revision 1.19  1993/05/27 06:21:49  rich
+# Revision 1.20  1993/06/04 23:06:28  raeburn
+# clean v9 stuff out of configure.in
+#
+# Revision 1.19  1993/05/27  06:21:49  rich
 # added things-to-lose sections
 #
 # Revision 1.18  1993/05/17  19:35:50  raeburn
