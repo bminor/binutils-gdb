@@ -699,7 +699,7 @@ exp_fold_tree (etree_type *tree,
 
   if (tree == NULL)
     {
-      result.valid_p = FALSE;
+      memset (&result, 0, sizeof (result));
       return result;
     }
 
@@ -711,7 +711,7 @@ exp_fold_tree (etree_type *tree,
 
     case etree_rel:
       if (allocation_done != lang_final_phase_enum)
-	result.valid_p = FALSE;
+	memset (&result, 0, sizeof (result));
       else
 	result = new_rel ((tree->rel.value
 			   + tree->rel.section->output_section->vma
@@ -724,12 +724,8 @@ exp_fold_tree (etree_type *tree,
       result = exp_fold_tree (tree->assert_s.child,
 			      current_section,
 			      allocation_done, dot, dotp);
-      if (result.valid_p)
-	{
-	  if (! result.value)
-	    einfo ("%X%P: %s\n", tree->assert_s.message);
-	  return result;
-	}
+      if (result.valid_p && !result.value)
+	einfo ("%X%P: %s\n", tree->assert_s.message);
       break;
 
     case etree_unary:
@@ -787,6 +783,8 @@ exp_fold_tree (etree_type *tree,
 		    }
 		}
 	    }
+	  else
+	    memset (&result, 0, sizeof (result));
 	}
       else
 	{
@@ -839,6 +837,7 @@ exp_fold_tree (etree_type *tree,
 
     default:
       FAIL ();
+      memset (&result, 0, sizeof (result));
       break;
     }
 

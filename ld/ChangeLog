@@ -1,5 +1,10 @@
 2005-03-14  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldexp.c (exp_fold_tree): Ensure return value is initialized.
+	Tidy etree_assert case.
+
+2005-03-14  Alan Modra  <amodra@bigpond.net.au>
+
 	* po/tr.po: Commit new Turkish translation.
 
 2005-03-07  Nick Clifton  <nickc@redhat.com>
