@@ -1,3 +1,9 @@
+2002-07-29  Andrey Volkov  <avolkov@transas.com>
+
+ 	* compile.c: Include "gdb/sim-h8300.h"
+ 	* Makefile.in: Add dependences on "inst.h",
+ 	"gdb/callback.h", "gdb/remote-sim.h" and "gdb/sim-h8300.h".
+
 2002-06-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
