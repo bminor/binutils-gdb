@@ -1,3 +1,11 @@
+start-sanitize-sky
+Mon Mar 23 13:26:12 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/dvp/mpg-1.[sd]: New files.
+	* gas/dvp/mpg-1vu.s: New file.
+	* gas/dvp/dvp.exp: Run new test mpg-1.s.
+
+end-sanitize-sky
 start-sanitize-m32rx
 Mon Mar 23 11:34:00 1998  Nick Clifton  <nickc@cygnus.com>
 
