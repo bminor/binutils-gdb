@@ -421,7 +421,6 @@
 	frame_unwind_register_unsigned instead of
 	frame_unwind_unsigned_register.
 
->>>>>>> current-public.22/gdb/ChangeLog Mon, 08 Sep 2003 21:54:22 -0700 hilfingr (GdbPub/g/3_ChangeLog 1.15.1.2.1.1 644)
 2003-08-30  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in: Search for gethostbyname in libnsl.
