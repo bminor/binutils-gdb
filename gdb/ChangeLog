@@ -1,3 +1,21 @@
+2003-08-21  Andrew Cagney  <cagney@redhat.com>
+
+	* sh3-rom.c (sh3_open, sh3e_open): Use gdbarch_update_p to select
+	a specific architecture.
+	* arch-utils.h (set_architecture_from_arch_mach): Delete
+	declaration.
+	(target_architecture_hook): Delete declaration.
+	* arch-utils.c: Delete non GDB_MULTI_ARCH includes.
+	(default_float_format): Assume GDB_MULTI_ARCH.
+	(default_double_format): Assume GDB_MULTI_ARCH.
+	(set_endian_from_file): Delete function.
+	(arch_ok): Delete function.
+	(set_arch): Delete function.
+	(set_architecture_from_arch_mach): Delete function.
+	(set_architecture_from_file): Delete function.
+	(set_architecture): Assume GDB_MULTI_ARCH.
+	(set_gdbarch_from_file): Assume GDB_MULTI_ARCH.
+
 2003-08-21  Mark Kettenis  <kettenis@gnu.org>
 
 	Rewrite FreeBSD/sparc64 native configuration.
