@@ -89,9 +89,9 @@ case "${targ}" in
   h8300h-*-hms)		ld_target=cf-h8300h ;;
   h8500-*-hms)		ld_target=coff-h8500 ;;
   sh-*-*)		ld_target=coff-sh ;;
-# start-sanitize-r16
-  r16-*-*)		ld_target=r16-aout ;;
-# end-sanitize-r16
+# start-sanitize-rce
+  rce-*-*)		ld_target=rce-aout ;;
+# end-sanitize-rce
   m68k-sony-*)		ld_target=news ;;
   m68k-hp-bsd*)		ld_target=hp300bsd ;;
   m68*-*-aout)		ld_target=m68k ;;
