@@ -584,7 +584,6 @@ copy_object (ibfd, obfd)
 						  off, now))
 		    {
 		      nonfatal (bfd_get_filename (obfd));
-		      status = 1;
 		    }
 		  left -= now;
 		  off += now;

@@ -1,3 +1,8 @@
+Wed Dec 14 15:51:56 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* objcopy.c (copy_object): Don't bother setting status after
+	nonfatal() "call", because it won't return.
+
 Fri Dec  9 00:22:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* nlmconv.c (powerpc_mangle_relocs): Don't switch a reloc to use
