@@ -43,5 +43,16 @@ extern void tuiResizeAll (void);
 extern void tuiRefreshAll (void);
 extern void tuiSigwinchHandler (int);
 
+extern chtype tui_border_ulcorner;
+extern chtype tui_border_urcorner;
+extern chtype tui_border_lrcorner;
+extern chtype tui_border_llcorner;
+extern chtype tui_border_vline;
+extern chtype tui_border_hline;
+extern int tui_border_attrs;
+extern int tui_active_border_attrs;
+
+extern int tui_update_variables ();
+
 #endif
 /*_TUI_WIN_H*/

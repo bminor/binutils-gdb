@@ -23,7 +23,7 @@
 #include "tui.h"
 #include "tuiData.h"
 #include "tuiGeneralWin.h"
-
+#include "tuiWin.h"
 
 /*
    ** local support functions
@@ -84,26 +84,29 @@ tuiDelwin (WINDOW * window)
 }				/* tuiDelwin */
 
 
-/*
-   ** boxWin().
- */
+/* Draw a border arround the window.  */
 void
 boxWin (TuiGenWinInfoPtr winInfo, int highlightFlag)
 {
-  if (m_genWinPtrNotNull (winInfo) && winInfo->handle != (WINDOW *) NULL)
+  if (winInfo && winInfo->handle)
     {
-      if (highlightFlag == HILITE)
-	box (winInfo->handle, '|', '-');
-      else
-	{
-/*            wattron(winInfo->handle, A_DIM); */
-	  box (winInfo->handle, ':', '.');
-/*            wattroff(winInfo->handle, A_DIM); */
-	}
-    }
+      WINDOW *win;
+      int attrs;
 
-  return;
-}				/* boxWin */
+      win = winInfo->handle;
+      if (highlightFlag == HILITE)
+        attrs = tui_active_border_attrs;
+      else
+        attrs = tui_border_attrs;
+
+      wattron (win, attrs);
+      wborder (win, tui_border_vline, tui_border_vline,
+               tui_border_hline, tui_border_hline,
+               tui_border_ulcorner, tui_border_urcorner,
+               tui_border_llcorner, tui_border_lrcorner);
+      wattroff (win, attrs);
+    }
+}
 
 
 /*

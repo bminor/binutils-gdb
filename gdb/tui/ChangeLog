@@ -1,5 +1,18 @@
 2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* tuiGeneralWin.c (boxWin): Use the tui configuration variables.
+	* tuiWin.h: Declare the new variables.
+	* tuiWin.c (_initialize_tuiWin): Create TUI configuration variables.
+	(tui_update_variables): New function.
+	(translate): New function.
+	(tui_border_kind_enums, tui_border_mode_enums): New tables.
+	(tui_border_mode_translate): New table.
+	(tui_border_kind_translate_*): New tables.
+	(tui_active_border_mode): New variables.
+	(tui_border_*): New variables.
+
+2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* tuiWin.c (_parseScrollingArgs): Fix uninitialized variable.
 	(_makeVisibleWithNewHeight): Use TuiLineOrAddress type.
 

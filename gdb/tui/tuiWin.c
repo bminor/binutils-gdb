@@ -79,6 +79,185 @@ static void _parseScrollingArgs (char *, TuiWinInfoPtr *, int *);
 ** PUBLIC FUNCTIONS
 ***************************************/
 
+/* Possible values for tui-border-kind variable.  */
+static const char *tui_border_kind_enums[] = {
+  "space",
+  "ascii",
+  "acs",
+  NULL
+};
+
+/* Possible values for tui-border-mode and tui-active-border-mode.  */
+static const char *tui_border_mode_enums[] = {
+  "normal",
+  "standout",
+  "reverse",
+  "half",
+  "half-standout",
+  "bold",
+  "bold-standout",
+  NULL
+};
+
+struct tui_translate
+{
+  const char *name;
+  int value;
+};
+
+/* Translation table for border-mode variables.
+   The list of values must be terminated by a NULL.
+   After the NULL value, an entry defines the default.  */
+struct tui_translate tui_border_mode_translate[] = {
+  { "normal",		A_NORMAL },
+  { "standout",		A_STANDOUT },
+  { "reverse",		A_REVERSE },
+  { "half",		A_DIM },
+  { "half-standout",	A_DIM | A_STANDOUT },
+  { "bold",		A_BOLD },
+  { "bold-standout",	A_BOLD | A_STANDOUT },
+  { 0, 0 },
+  { "normal",		A_NORMAL }
+};
+
+/* Translation tables for border-kind, one for each border
+   character (see wborder, border curses operations).
+   -1 is used to indicate the ACS because ACS characters
+   are determined at run time by curses (depends on terminal).  */
+struct tui_translate tui_border_kind_translate_vline[] = {
+  { "space",    ' ' },
+  { "ascii",    '|' },
+  { "acs",      -1 },
+  { 0, 0 },
+  { "ascii",    '|' }
+};
+
+struct tui_translate tui_border_kind_translate_hline[] = {
+  { "space",    ' ' },
+  { "ascii",    '-' },
+  { "acs",      -1 },
+  { 0, 0 },
+  { "ascii",    '-' }
+};
+
+struct tui_translate tui_border_kind_translate_ulcorner[] = {
+  { "space",    ' ' },
+  { "ascii",    '+' },
+  { "acs",      -1 },
+  { 0, 0 },
+  { "ascii",    '+' }
+};
+
+struct tui_translate tui_border_kind_translate_urcorner[] = {
+  { "space",    ' ' },
+  { "ascii",    '+' },
+  { "acs",      -1 },
+  { 0, 0 },
+  { "ascii",    '+' }
+};
+
+struct tui_translate tui_border_kind_translate_llcorner[] = {
+  { "space",    ' ' },
+  { "ascii",    '+' },
+  { "acs",      -1 },
+  { 0, 0 },
+  { "ascii",    '+' }
+};
+
+struct tui_translate tui_border_kind_translate_lrcorner[] = {
+  { "space",    ' ' },
+  { "ascii",    '+' },
+  { "acs",      -1 },
+  { 0, 0 },
+  { "ascii",    '+' }
+};
+
+
+/* Tui configuration variables controlled with set/show command.  */
+const char *tui_active_border_mode = "bold-standout";
+const char *tui_border_mode = "normal";
+const char *tui_border_kind = "acs";
+
+/* Tui internal configuration variables.  These variables are
+   updated by tui_update_variables to reflect the tui configuration
+   variables.  */
+chtype tui_border_vline;
+chtype tui_border_hline;
+chtype tui_border_ulcorner;
+chtype tui_border_urcorner;
+chtype tui_border_llcorner;
+chtype tui_border_lrcorner;
+
+int tui_border_attrs;
+int tui_active_border_attrs;
+
+/* Identify the item in the translation table.
+   When the item is not recognized, use the default entry.  */
+static struct tui_translate *
+translate (const char *name, struct tui_translate *table)
+{
+  while (table->name)
+    {
+      if (name && strcmp (table->name, name) == 0)
+        return table;
+      table++;
+    }
+
+  /* Not found, return default entry.  */
+  table++;
+  return table;
+}
+
+/* Update the tui internal configuration according to gdb settings.
+   Returns 1 if the configuration has changed and the screen should
+   be redrawn.  */
+int
+tui_update_variables ()
+{
+  int need_redraw = 0;
+  struct tui_translate *entry;
+
+  entry = translate (tui_border_mode, tui_border_mode_translate);
+  if (tui_border_attrs != entry->value)
+    {
+      tui_border_attrs = entry->value;
+      need_redraw = 1;
+    }
+  entry = translate (tui_active_border_mode, tui_border_mode_translate);
+  if (tui_active_border_attrs != entry->value)
+    {
+      tui_active_border_attrs = entry->value;
+      need_redraw = 1;
+    }
+
+  /* If one corner changes, all characters are changed.
+     Only check the first one.  The ACS characters are determined at
+     run time by curses terminal management.  */
+  entry = translate (tui_border_kind, tui_border_kind_translate_lrcorner);
+  if (tui_border_lrcorner != (chtype) entry->value)
+    {
+      tui_border_lrcorner = (entry->value < 0) ? ACS_LRCORNER : entry->value;
+      need_redraw = 1;
+    }
+  entry = translate (tui_border_kind, tui_border_kind_translate_llcorner);
+  tui_border_llcorner = (entry->value < 0) ? ACS_LLCORNER : entry->value;
+
+  entry = translate (tui_border_kind, tui_border_kind_translate_ulcorner);
+  tui_border_ulcorner = (entry->value < 0) ? ACS_ULCORNER : entry->value;
+
+  entry = translate (tui_border_kind, tui_border_kind_translate_urcorner);
+  tui_border_urcorner = (entry->value < 0) ? ACS_URCORNER : entry->value;
+
+  entry = translate (tui_border_kind, tui_border_kind_translate_hline);
+  tui_border_hline = (entry->value < 0) ? ACS_HLINE : entry->value;
+
+  entry = translate (tui_border_kind, tui_border_kind_translate_vline);
+  tui_border_vline = (entry->value < 0) ? ACS_VLINE : entry->value;
+
+  return need_redraw;
+}
+
+
 /*
    ** _initialize_tuiWin().
    **        Function to initialize gdb commands, for tui window manipulation.
@@ -86,6 +265,8 @@ static void _parseScrollingArgs (char *, TuiWinInfoPtr *, int *);
 void
 _initialize_tuiWin (void)
 {
+  struct cmd_list_element *c;
+
   /* Define the classes of commands.
      They will appear in the help list in the reverse of this order.  */
 
@@ -132,6 +313,48 @@ cmd  : the command window\n");
     add_com ("w", class_xdb, _tuiXDBsetWinHeight_command,
              "XDB compatibility command for setting the height of a command window.\n\
 Usage: w <#lines>\n");
+
+  /* Define the tui control variables.  */
+  c = add_set_enum_cmd
+    ("tui-border-kind", class_tui,
+     tui_border_kind_enums, (char*) &tui_border_kind,
+     "Set the kind of border for TUI windows.\n"
+     "This variable controls the border of TUI windows:\n"
+     "space           use a white space\n"
+     "ascii           use ascii characters + - | for the border\n"
+     "acs             use the Alternate Character Set\n",
+     &setlist);
+  add_show_from_set (c, &showlist);
+
+  c = add_set_enum_cmd
+    ("tui-border-mode", class_tui,
+     tui_border_mode_enums, (char*) &tui_border_mode,
+     "Set the attribute mode to use for the TUI window borders.\n"
+     "This variable controls the attributes to use for the window borders:\n"
+     "normal          normal display\n"
+     "standout        use highlight mode of terminal\n"
+     "reverse         use reverse video mode\n"
+     "half            use half bright\n"
+     "half-standout   use half bright and standout mode\n"
+     "bold            use extra bright or bold\n"
+     "bold-standout   use extra bright or bold with standout mode\n",
+     &setlist);
+  add_show_from_set (c, &showlist);
+
+  c = add_set_enum_cmd
+    ("tui-active-border-mode", class_tui,
+     tui_border_mode_enums, (char*) &tui_active_border_mode,
+     "Set the attribute mode to use for the active TUI window border.\n"
+     "This variable controls the attributes to use for the active window border:\n"
+     "normal          normal display\n"
+     "standout        use highlight mode of terminal\n"
+     "reverse         use reverse video mode\n"
+     "half            use half bright\n"
+     "half-standout   use half bright and standout mode\n"
+     "bold            use extra bright or bold\n"
+     "bold-standout   use extra bright or bold with standout mode\n",
+     &setlist);
+  add_show_from_set (c, &showlist);
 }
 
 
