@@ -1,3 +1,7 @@
+2003-10-09  Andrew Cagney  <cagney@redhat.com>
+
+	* MAINTAINERS: Mark m32r-elf as buildable with -Werror.
+
 2003-10-09  Michael Snyder  <msnyder@redhat.com>
 
 	* frame.h: Fix typo in comment.
