@@ -4100,6 +4100,7 @@ pa_build_unwind_subspace (call_info)
   /* Get some space to hold relocation information for the unwind
      descriptor.  */
   p = frag_more (4);
+  md_number_to_chars (p, 0.opcode, 4);
 
   /* Relocation info. for start offset of the function.  */
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
@@ -4107,6 +4108,7 @@ pa_build_unwind_subspace (call_info)
 		(expressionS *) NULL, 0, R_PARISC_DIR32, e_fsel, 32, 0, NULL);
 
   p = frag_more (4);
+  md_number_to_chars (p, 0.opcode, 4);
 
   /* Relocation info. for end offset of the function.
 

@@ -1,3 +1,8 @@
+Mon Jun 19 15:27:17 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_build_unwind_subspace): Zero out memory
+	from frag_more calls.
+
 Thu Jun 15 16:53:37 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* config/obj-coff.c: Don't use "bfd/" when including libbfd.h
