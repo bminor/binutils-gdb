@@ -1,3 +1,8 @@
+Sat Jan 22 12:26:01 1994  Stu Grossman  (grossman at cygnus.com)
+
+	* sparclynx.c:  Setup appropriate macros to enable core file
+	support.
+
 Fri Jan 21 16:25:35 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* targets.c: Add a vector of matching format names.
