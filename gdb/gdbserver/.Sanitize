@@ -28,6 +28,7 @@ README
 configure.in
 low-lynx.c
 low-sparc.c
+low-sun3.c
 remote-utils.c
 server.c
 server.h

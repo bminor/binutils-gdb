@@ -144,8 +144,8 @@ LINTFLAGS= -I${BFD_DIR}
 
 # All source files that go into linking GDB remote server.
 
-SFILES = $(srcdir)/utils.c $(srcdir)/low-lynx.c $(srcdir)/low-sparc.c \
-	 $(srcdir)/server.c $(srcdir)/remote-utils.c
+SFILES = $(srcdir)/low-lynx.c $(srcdir)/low-sparc.c $(srcdir)/low-sun3.c \
+	 $(srcdir)/utils.c $(srcdir)/server.c $(srcdir)/remote-utils.c
 
 DEPFILES = $(GDBSERVER_DEPFILES)
 
@@ -279,6 +279,7 @@ server.o : ${srcdir}/server.c ${srcdir}/server.h
 remote-utils.o : ${srcdir}/remote-utils.c ${srcdir}/server.h
 low-lynx.o : ${srcdir}/low-lynx.c ${srcdir}/server.h
 low-sparc.o : $(srcdir)/low-sparc.c $(srcdir)/server.h
+low-sun3.o : $(srcdir)/low-sun3.c $(srcdir)/server.h
 utils.o : ${srcdir}/utils.c ${srcdir}/server.h
 
 # This is the end of "Makefile.in".
