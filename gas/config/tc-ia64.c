@@ -909,6 +909,7 @@ ia64_flush_insns ()
   struct label_fix *lfix;
   segT saved_seg;
   subsegT saved_subseg;
+  unw_rec_list *ptr;
 
   if (!md.last_text_seg)
     return;
@@ -935,6 +936,22 @@ ia64_flush_insns ()
       symbol_set_frag (lfix->sym, frag_now);
     }
   CURR_SLOT.tag_fixups = 0;
+
+  /* In case there are unwind directives following the last instruction,
+     resolve those now.  We only handle body and prologue directives here.
+     Give an error for others.  */
+  for (ptr = unwind.current_entry; ptr; ptr = ptr->next)
+    {
+      if (ptr->r.type == prologue || ptr->r.type == prologue_gr
+	  || ptr->r.type == body)
+	{
+	  ptr->slot_number = (unsigned long) frag_more (0);
+	  ptr->slot_frag = frag_now;
+	}
+      else
+	as_bad (_("Unwind directive not followed by an instruction."));
+    }
+  unwind.current_entry = NULL;
 
   subseg_set (saved_seg, saved_subseg);
 

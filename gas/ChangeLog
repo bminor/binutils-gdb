@@ -1,3 +1,8 @@
+2001-01-15  Jim Wilson  <wilson@redhat.com>
+
+	* config/tc-ia64.c (ia64_flush_insns): Handle unwind directives
+	not immediately followed by an instruction.
+
 2001-01-15  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-m68hc11.c: Fix formatting.
