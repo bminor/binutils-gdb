@@ -1,5 +1,5 @@
 /* Select target systems and architectures at runtime for GDB.
-   Copyright 1990, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1990, 1992, 1993, 1994, 1995, 1998 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB.
@@ -73,6 +73,99 @@ target_command PARAMS ((char *, int));
 static struct target_ops *
 find_default_run_target PARAMS ((char *));
 
+static void
+update_current_target PARAMS ((void));
+
+/* Transfer LEN bytes between target address MEMADDR and GDB address MYADDR.
+   Returns 0 for success, errno code for failure (which includes partial
+   transfers--if you want a more useful response to partial transfers, try
+   target_read_memory_partial).  */
+
+static int
+target_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len,
+			    int write, asection *bfd_section));
+
+static void
+debug_to_open PARAMS ((char *, int));
+
+static void
+debug_to_close PARAMS ((int));
+
+static void
+debug_to_attach PARAMS ((char *, int));
+
+static void
+debug_to_detach PARAMS ((char *, int));
+
+static void
+debug_to_resume PARAMS ((int, int, enum target_signal));
+
+static int
+debug_to_wait PARAMS ((int, struct target_waitstatus *));
+
+static void
+debug_to_fetch_registers PARAMS ((int));
+
+static void
+debug_to_store_registers PARAMS ((int));
+
+static void
+debug_to_prepare_to_store PARAMS ((void));
+
+static int
+debug_to_xfer_memory PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *));
+
+static void
+debug_to_files_info PARAMS ((struct target_ops *));
+
+static int
+debug_to_insert_breakpoint PARAMS ((CORE_ADDR, char *));
+
+static int
+debug_to_remove_breakpoint PARAMS ((CORE_ADDR, char *));
+
+static void
+debug_to_terminal_init PARAMS ((void));
+
+static void
+debug_to_terminal_inferior PARAMS ((void));
+
+static void
+debug_to_terminal_ours_for_output PARAMS ((void));
+
+static void
+debug_to_terminal_ours PARAMS ((void));
+
+static void
+debug_to_terminal_info PARAMS ((char *, int));
+
+static void
+debug_to_kill PARAMS ((void));
+
+static void
+debug_to_load PARAMS ((char *, int));
+
+static int
+debug_to_lookup_symbol PARAMS ((char *, CORE_ADDR *));
+
+static void
+debug_to_create_inferior PARAMS ((char *, char *, char **));
+
+static void
+debug_to_mourn_inferior PARAMS ((void));
+
+static int
+debug_to_can_run PARAMS ((void));
+
+static void
+debug_to_notice_signals PARAMS ((int));
+
+static int
+debug_to_thread_alive PARAMS ((int));
+
+static void
+debug_to_stop PARAMS ((void));
+
 /* Pointer to array of target architecture structures; the size of the
    array; the current index into the array; the allocated size of the 
    array.  */
@@ -118,9 +211,9 @@ struct target_ops dummy_target = {
   0,				/* to_stop */
   dummy_stratum,		/* to_stratum */
   0,				/* to_next */
-  0,				/* to_next */
   0,				/* to_has_all_memory */
   0,				/* to_has_memory */
+  0,				/* to_has_stack */
   0,				/* to_has_registers */
   0,				/* to_has_execution */
   0,				/* to_sections */
@@ -308,33 +401,33 @@ cleanup_target (t)
 
   /*        FIELD			DEFAULT VALUE        */
 
-  de_fault (to_open, 			(void (*)())tcomplain);
-  de_fault (to_close, 			(void (*)())ignore);
+  de_fault (to_open, 			(void (*) PARAMS((char *, int))) tcomplain);
+  de_fault (to_close, 			(void (*) PARAMS((int))) ignore);
   de_fault (to_attach, 			maybe_kill_then_attach);
-  de_fault (to_detach, 			(void (*)())ignore);
-  de_fault (to_resume, 			(void (*)())noprocess);
-  de_fault (to_wait, 			(int (*)())noprocess);
-  de_fault (to_fetch_registers, 	(void (*)())ignore);
-  de_fault (to_store_registers,		(void (*)())noprocess);
-  de_fault (to_prepare_to_store,	(void (*)())noprocess);
-  de_fault (to_xfer_memory,		(int (*)())nomemory);
-  de_fault (to_files_info,		(void (*)())ignore);
+  de_fault (to_detach, 			(void (*) PARAMS((char *, int))) ignore);
+  de_fault (to_resume, 			(void (*) PARAMS((int, int, enum target_signal))) noprocess);
+  de_fault (to_wait, 			(int (*) PARAMS((int, struct target_waitstatus *))) noprocess);
+  de_fault (to_fetch_registers, 	(void (*) PARAMS((int))) ignore);
+  de_fault (to_store_registers,		(void (*) PARAMS((int))) noprocess);
+  de_fault (to_prepare_to_store,	(void (*) PARAMS((void))) noprocess);
+  de_fault (to_xfer_memory,		(int (*) PARAMS((CORE_ADDR, char *, int, int, struct target_ops *))) nomemory);
+  de_fault (to_files_info,		(void (*) PARAMS((struct target_ops *))) ignore);
   de_fault (to_insert_breakpoint,	memory_insert_breakpoint);
   de_fault (to_remove_breakpoint,	memory_remove_breakpoint);
-  de_fault (to_terminal_init,		ignore);
-  de_fault (to_terminal_inferior,	ignore);
-  de_fault (to_terminal_ours_for_output,ignore);
-  de_fault (to_terminal_ours,		ignore);
+  de_fault (to_terminal_init,		(void (*) PARAMS((void))) ignore);
+  de_fault (to_terminal_inferior,	(void (*) PARAMS ((void))) ignore);
+  de_fault (to_terminal_ours_for_output,(void (*) PARAMS ((void))) ignore);
+  de_fault (to_terminal_ours,		(void (*) PARAMS ((void))) ignore);
   de_fault (to_terminal_info,		default_terminal_info);
-  de_fault (to_kill,			(void (*)())noprocess);
-  de_fault (to_load,			(void (*)())tcomplain);
-  de_fault (to_lookup_symbol,		nosymbol);
+  de_fault (to_kill,			(void (*) PARAMS((void))) noprocess);
+  de_fault (to_load,			(void (*) PARAMS((char *, int))) tcomplain);
+  de_fault (to_lookup_symbol,		(int (*) PARAMS ((char *, CORE_ADDR *))) nosymbol);
   de_fault (to_create_inferior,		maybe_kill_then_create_inferior);
-  de_fault (to_mourn_inferior,		(void (*)())noprocess);
+  de_fault (to_mourn_inferior,		(void (*) PARAMS((void))) noprocess);
   de_fault (to_can_run,			return_zero);
-  de_fault (to_notice_signals,		(void (*)())ignore);
-  de_fault (to_thread_alive,		(int (*)())ignore);
-  de_fault (to_stop,			(void (*)())ignore);
+  de_fault (to_notice_signals,		(void (*) PARAMS((int))) ignore);
+  de_fault (to_thread_alive,		(int (*) PARAMS((int))) ignore);
+  de_fault (to_stop,			(void (*) PARAMS((void))) ignore);
 
 #undef de_fault
 }
@@ -566,9 +659,18 @@ target_read_string (memaddr, string, len, errnop)
       tlen = MIN (len, 4 - (memaddr & 3));
       offset = memaddr & 3;
 
-      errcode = target_xfer_memory (memaddr & ~3, buf, 4, 0);
+      errcode = target_xfer_memory (memaddr & ~3, buf, 4, 0, NULL);
       if (errcode != 0)
-	goto done;
+	{
+	  /* The transfer request might have crossed the boundary to an
+	     unallocated region of memory. Retry the transfer, requesting
+	     a single byte.  */
+	  tlen = 1;
+	  offset = 0;
+	  errcode = target_xfer_memory (memaddr, buf, 1, 0, NULL);
+	  if (errcode != 0)
+	    goto done;
+	}
 
       if (bufptr - buffer + tlen > buffer_allocated)
 	{
@@ -617,7 +719,17 @@ target_read_memory (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
-  return target_xfer_memory (memaddr, myaddr, len, 0);
+  return target_xfer_memory (memaddr, myaddr, len, 0, NULL);
+}
+
+int
+target_read_memory_section (memaddr, myaddr, len, bfd_section)
+     CORE_ADDR memaddr;
+     char *myaddr;
+     int len;
+     asection *bfd_section;
+{
+  return target_xfer_memory (memaddr, myaddr, len, 0, bfd_section);
 }
 
 /* Read LEN bytes of target memory at address MEMADDR, placing the results
@@ -636,7 +748,7 @@ target_read_memory_partial (memaddr, myaddr, len, errnoptr)
   int errcode;	/* Error from last read. */
 
   /* First try a complete read. */
-  errcode = target_xfer_memory (memaddr, myaddr, len, 0);
+  errcode = target_xfer_memory (memaddr, myaddr, len, 0, NULL);
   if (errcode == 0)
     {
       /* Got it all. */
@@ -647,7 +759,7 @@ target_read_memory_partial (memaddr, myaddr, len, errnoptr)
       /* Loop, reading one byte at a time until we get as much as we can. */
       for (errcode = 0, nread = 0; len > 0 && errcode == 0; nread++, len--)
 	{
-	  errcode = target_xfer_memory (memaddr++, myaddr++, 1, 0);
+	  errcode = target_xfer_memory (memaddr++, myaddr++, 1, 0, NULL);
 	}
       /* If an error, the last read was unsuccessful, so adjust count. */
       if (errcode != 0)
@@ -668,9 +780,15 @@ target_write_memory (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
-  return target_xfer_memory (memaddr, myaddr, len, 1);
+  return target_xfer_memory (memaddr, myaddr, len, 1, NULL);
 }
  
+/* This variable is used to pass section information down to targets.  This
+   *should* be done by adding an argument to the target_xfer_memory function
+   of all the targets, but I didn't feel like changing 50+ files.  */
+
+asection *target_memory_bfd_section = NULL;
+
 /* Move memory to or from the targets.  Iterate until all of it has
    been moved, if necessary.  The top target gets priority; anything
    it doesn't want, is offered to the next one down, etc.  Note the
@@ -681,17 +799,24 @@ target_write_memory (memaddr, myaddr, len)
 
    Result is 0 or errno value.  */
 
-int
-target_xfer_memory (memaddr, myaddr, len, write)
+static int
+target_xfer_memory (memaddr, myaddr, len, write, bfd_section)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
      int write;
+     asection *bfd_section;
 {
   int curlen;
   int res;
   struct target_ops *t;
   struct target_stack_item *item;
+
+  /* Zero length requests are ok and require no work.  */
+  if (len == 0)
+    return 0;
+
+  target_memory_bfd_section = bfd_section;
 
   /* to_xfer_memory is not guaranteed to set errno, even when it returns
      0.  */
@@ -1028,6 +1153,7 @@ static struct {
   {"SIG62", "Real-time event 62"},
   {"SIG63", "Real-time event 63"},
 
+#if defined(MACH) || defined(__MACH__)
   /* Mach exceptions */
   {"EXC_BAD_ACCESS", "Could not access memory"},
   {"EXC_BAD_INSTRUCTION", "Illegal instruction/operand"},
@@ -1035,7 +1161,7 @@ static struct {
   {"EXC_EMULATION", "Emulation instruction"},
   {"EXC_SOFTWARE", "Software generated exception"},
   {"EXC_BREAKPOINT", "Breakpoint"},
-
+#endif
   {NULL, "Unknown signal"},
   {NULL, "Internal error: printing TARGET_SIGNAL_DEFAULT"},
 
@@ -1620,7 +1746,8 @@ debug_to_fetch_registers (regno)
   fprintf_unfiltered (stderr, "target_fetch_registers (%s)",
 		      regno != -1 ? reg_names[regno] : "-1");
   if (regno != -1)
-    fprintf_unfiltered (stderr, " = 0x%x %d", read_register (regno),
+    fprintf_unfiltered (stderr, " = 0x%x %d",
+			(unsigned long) read_register (regno),
 			read_register (regno));
   fprintf_unfiltered (stderr, "\n");
 }
@@ -1633,8 +1760,9 @@ debug_to_store_registers (regno)
 
   if (regno >= 0 && regno < NUM_REGS)
     fprintf_unfiltered (stderr, "target_store_registers (%s) = 0x%x %d\n",
-			reg_names[regno], read_register (regno),
-			read_register (regno));
+			reg_names[regno],
+			(unsigned long) read_register (regno),
+			(unsigned long) read_register (regno));
   else
     fprintf_unfiltered (stderr, "target_store_registers (%d)\n", regno);
 }
@@ -1661,7 +1789,10 @@ debug_to_xfer_memory (memaddr, myaddr, len, write, target)
 
   fprintf_unfiltered (stderr,
 		      "target_xfer_memory (0x%x, xxx, %d, %s, xxx) = %d",
-		      memaddr, len, write ? "write" : "read", retval);
+		      (unsigned int) memaddr, /* possable truncate long long */
+		      len, write ? "write" : "read", retval);
+
+  
 
   if (retval > 0)
     {
@@ -1700,7 +1831,7 @@ debug_to_insert_breakpoint (addr, save)
   retval = debug_target.to_insert_breakpoint (addr, save);
 
   fprintf_unfiltered (stderr, "target_insert_breakpoint (0x%x, xxx) = %d\n",
-		      addr, retval);
+		      (unsigned long) addr, retval);
   return retval;
 }
 
@@ -1714,7 +1845,7 @@ debug_to_remove_breakpoint (addr, save)
   retval = debug_target.to_remove_breakpoint (addr, save);
 
   fprintf_unfiltered (stderr, "target_remove_breakpoint (0x%x, xxx) = %d\n",
-		      addr, retval);
+		      (unsigned long)addr, retval);
   return retval;
 }
 

@@ -1,3 +1,11 @@
+Fri Oct  2 03:51:48 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* target.c (target_xfer_memory):  Handle requests with zero
+	transfer length right away.
+
+	* values.c (unpack_double):  Set up code, length and signedness of
+	type _after_ checking for typedef.
+
 Thu Oct  1 15:39:27 EDT 1998 Frank Ch. Eigler <fche@cygnus.com>
 
 	* breakpoint.c (bpstat_stop_status): Do not consider an

@@ -661,12 +661,15 @@ unpack_double (type, valaddr, invp)
      char *valaddr;
      int *invp;
 {
-  register enum type_code code = TYPE_CODE (type);
-  register int len = TYPE_LENGTH (type);
-  register int nosign = TYPE_UNSIGNED (type);
+  enum type_code code;
+  int len;
+  int nosign;
 
   *invp = 0;			/* Assume valid.   */
   CHECK_TYPEDEF (type);
+  code = TYPE_CODE (type);
+  len = TYPE_LENGTH (type);
+  nosign = TYPE_UNSIGNED (type);
   if (code == TYPE_CODE_FLT)
     {
 #ifdef INVALID_FLOAT
