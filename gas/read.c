@@ -695,14 +695,46 @@ read_a_source_file (name)
     }				/* while (more buffers to scan) */
   input_scrub_close ();		/* Close the input file */
 
-}				/* read_a_source_file() */
+}
 
 void 
 s_abort (ignore)
      int ignore;
 {
   as_fatal (".abort detected.  Abandoning ship.");
-}				/* s_abort() */
+}
+
+/* Guts of .align directive.  */
+static void 
+do_align (n, fill)
+     int n;
+     char *fill;
+{
+#ifdef md_do_align
+  md_do_align (n, fill, just_record_alignment);
+#endif
+  if (!fill)
+    {
+      /* @@ Fix this right for BFD!  */
+      static char zero;
+      static char nop_opcode = NOP_OPCODE;
+
+      if (now_seg != data_section && now_seg != bss_section)
+	{
+	  fill = &nop_opcode;
+	}
+      else
+	{
+	  fill = &zero;
+	}
+    }
+  /* Only make a frag if we HAVE to. . . */
+  if (n && !need_pass_2)
+    frag_align (n, *fill);
+
+ just_record_alignment:
+  record_alignment (now_seg, n);
+}
 
 /* For machines where ".align 4" means align to a 4 byte boundary. */
 void 
@@ -710,7 +742,7 @@ s_align_bytes (arg)
      int arg;
 {
   register unsigned int temp;
-  register long temp_fill;
+  char temp_fill;
   unsigned int i = 0;
   unsigned long max_alignment = 1 << 15;
 
@@ -724,10 +756,8 @@ s_align_bytes (arg)
       as_bad ("Alignment too large: %d. assumed.", temp = max_alignment);
     }
 
-  /*
-     * For the sparc, `.align (1<<n)' actually means `.align n'
-     * so we have to convert it.
-     */
+  /* For the sparc, `.align (1<<n)' actually means `.align n' so we
+     have to convert it.  */
   if (temp != 0)
     {
       for (i = 0; (temp & 1) == 0; temp >>= 1, ++i)
@@ -741,19 +771,13 @@ s_align_bytes (arg)
     {
       input_line_pointer++;
       temp_fill = get_absolute_expression ();
+      do_align (temp, &temp_fill);
     }
-  else if (now_seg != data_section && now_seg != bss_section)
-    temp_fill = NOP_OPCODE;
   else
-    temp_fill = 0;
-  /* Only make a frag if we HAVE to. . . */
-  if (temp && !need_pass_2)
-    frag_align ((int) temp, (int) temp_fill);
-
-  record_alignment (now_seg, (int) temp);
+    do_align (temp, (char *) 0);
 
   demand_empty_rest_of_line ();
-}				/* s_align_bytes() */
+}
 
 /* For machines where ".align 4" means align to 2**4 boundary. */
 void 
@@ -761,7 +785,7 @@ s_align_ptwo (ignore)
      int ignore;
 {
   register int temp;
-  register long temp_fill;
+  char temp_fill;
   long max_alignment = 15;
 
   temp = get_absolute_expression ();
@@ -776,20 +800,13 @@ s_align_ptwo (ignore)
     {
       input_line_pointer++;
       temp_fill = get_absolute_expression ();
+      do_align (temp, &temp_fill);
     }
-  /* @@ Fix this right for BFD!  */
-  else if (now_seg != data_section && now_seg != bss_section)
-    temp_fill = NOP_OPCODE;
   else
-    temp_fill = 0;
-  /* Only make a frag if we HAVE to. . . */
-  if (temp && !need_pass_2)
-    frag_align (temp, (int) temp_fill);
-
-  record_alignment (now_seg, temp);
+    do_align (temp, (char *) 0);
 
   demand_empty_rest_of_line ();
-}				/* s_align_ptwo() */
+}
 
 void 
 s_comm (ignore)
@@ -1104,6 +1121,18 @@ s_lcomm (needs_align)
 	}
       record_alignment (bss_seg, align);
     }				/* if needs align */
+  else
+    {
+      /* Assume some objects may require alignment on some systems.  */
+#ifdef TC_ALPHA
+      if (temp > 1)
+	{
+	  align = ffs (temp) - 1;
+	  if (temp % (1 << align))
+	    abort ();
+	}
+#endif
+    }
 
   *p = 0;
   symbolP = symbol_find_or_make (name);
