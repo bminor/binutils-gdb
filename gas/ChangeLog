@@ -1,3 +1,14 @@
+2004-07-20  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* config/tc-mips.c (append_insn): Handle constant expressions with
+	no associated relocation.
+	(mips_ip): Cancel the expression after use for the Q format
+	specifier.
+	(parse_relocation): Return no relocation for unsupported
+	operators.
+	(my_getSmallExpression): Return no relocation if no relocation
+	operators are used.
+
 2004-07-19  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* config/obj-som.c (adjust_stab_sections): Add prototype.

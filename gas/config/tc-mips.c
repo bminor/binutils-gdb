@@ -2083,7 +2083,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
     }
 
   fixp[0] = fixp[1] = fixp[2] = NULL;
-  if (address_expr != NULL && *reloc_type < BFD_RELOC_UNUSED)
+  if (address_expr != NULL && *reloc_type <= BFD_RELOC_UNUSED)
     {
       if (address_expr->X_op == O_constant)
 	{
@@ -2116,6 +2116,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      ip->insn_opcode |= (address_expr->X_add_number >> 16) & 0xffff;
 	      break;
 
+	    case BFD_RELOC_UNUSED:
 	    case BFD_RELOC_LO16:
 	    case BFD_RELOC_MIPS_GOT_DISP:
 	      ip->insn_opcode |= address_expr->X_add_number & 0xffff;
@@ -2151,7 +2152,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      internalError ();
 	    }
 	}
-      else
+      else if (*reloc_type < BFD_RELOC_UNUSED)
 	need_reloc:
 	{
 	  reloc_howto_type *howto;
@@ -8600,6 +8601,7 @@ do_msbd:
 			  ip->insn_opcode |= (imm_expr.X_add_number
 					      << (OP_SH_VSEL +
 						  (is_qh ? 2 : 1)));
+			  imm_expr.X_op = O_absent;
 			  if (*s != ']')
 			    as_warn(_("Expecting ']' found '%s'"), s);
 			  else
@@ -9813,7 +9815,7 @@ parse_relocation (char **str, bfd_reloc_code_real_type *reloc)
 	  {
 	    as_bad ("relocation %s isn't supported by the current ABI",
 		    percent_op[i].str);
-	    *reloc = BFD_RELOC_LO16;
+	    *reloc = BFD_RELOC_UNUSED;
 	  }
 	return TRUE;
       }
@@ -9825,8 +9827,7 @@ parse_relocation (char **str, bfd_reloc_code_real_type *reloc)
    expression in *EP and the relocations in the array starting
    at RELOC.  Return the number of relocation operators used.
 
-   On exit, EXPR_END points to the first character after the expression.
-   If no relocation operators are used, RELOC[0] is set to BFD_RELOC_LO16.  */
+   On exit, EXPR_END points to the first character after the expression.  */
 
 static size_t
 my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
@@ -9872,9 +9873,7 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
 
   expr_end = str;
 
-  if (reloc_index == 0)
-    reloc[0] = BFD_RELOC_LO16;
-  else
+  if (reloc_index != 0)
     {
       prev_reloc_op_frag = frag_now;
       for (i = 0; i < reloc_index; i++)
