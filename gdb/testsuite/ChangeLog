@@ -1,3 +1,8 @@
+2003-02-03  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/pr-1023.cc: New file.
+	* gdb.c++/pr-1023.exp: New file.
+
 2003-02-05  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.c++/local.exp: Don't expect Local to be in scope in main;
