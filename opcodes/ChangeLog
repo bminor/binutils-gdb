@@ -1,3 +1,8 @@
+2001-02-28  Igor Shevlyakov  <igor@windriver.com>
+
+	* m68k-opc.c: fix cpushl according to Motorola. Enable
+	bunch of instructions for Coldfire 5407 and add all new.
+
 2001-02-27  Alan Modra  <alan@linuxcare.com.au>
 
 	* configure.in (BFD_VERSION): Do without grep.
