@@ -1,3 +1,7 @@
+2000-09-12  Alexandre Oliva  <aoliva@redhat.com>
+
+	* MAINTAINERS: Added myself.
+
 2000-09-11  Alexandre Oliva  <aoliva@redhat.com>
 
 	* acinclude.m4 (CY_GNU_GETTEXT): Add dummy definition, so that the
