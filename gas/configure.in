@@ -217,6 +217,7 @@ changequote([,])dnl
 			    *)   targ=mips-lit ;;
 			    esac
 			    ;;
+      mips-*-irix6*)	    fmt=elf targ=mips-big ;;
       mips-*-irix5*)        fmt=elf targ=mips-big ;;
       mips-*-irix*)         fmt=ecoff targ=mips-big ;;
       mips-*-riscos*)       fmt=ecoff targ=mips-big ;;
@@ -683,7 +684,7 @@ if test "${shared}" = "true"; then
     HLDFLAGS='-Wl,+s,+b,$(libdir)'
     RPATH_ENVVAR=SHLIB_PATH
     ;;
-  *-*-irix5*)
+  *-*-irix5* | *-*-irix6*)
     HLDFLAGS='-Wl,-rpath,$(libdir)'
     ;;
   *-*-linux*aout*)
