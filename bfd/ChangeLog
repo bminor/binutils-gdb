@@ -1,3 +1,8 @@
+Mon Sep 27 19:09:27 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elfcode.h (bfd_section_from_shdr): Set filepos for SHT_STRTAB
+	section.
+
 Fri Sep 24 15:47:40 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* hpux-core.c: Add comment about hpux version 7.
