@@ -324,12 +324,12 @@ static CORE_ADDR
 avr_read_pc (ptid_t ptid)
 {
   ptid_t save_ptid;
-  CORE_ADDR pc;
+  ULONGEST pc;
   CORE_ADDR retval;
 
   save_ptid = inferior_ptid;
   inferior_ptid = ptid;
-  pc = (int) read_register (AVR_PC_REGNUM);
+  regcache_cooked_read_unsigned (current_regcache, AVR_PC_REGNUM, &pc);
   inferior_ptid = save_ptid;
   retval = avr_make_iaddr (pc);
   return retval;
@@ -349,7 +349,10 @@ avr_write_pc (CORE_ADDR val, ptid_t ptid)
 static CORE_ADDR
 avr_read_sp (void)
 {
-  return (avr_make_saddr (read_register (AVR_SP_REGNUM)));
+  ULONGEST sp;
+
+  regcache_cooked_read_unsigned (current_regcache, AVR_SP_REGNUM, &sp);
+  return (avr_make_saddr (sp));
 }
 
 static int
