@@ -1,5 +1,9 @@
 2003-07-30  Jason Eckhardt  <jle@rice.edu>
 
+	* coff-i860.c: Convert to ISO C90.  Remove superflous prototypes.
+
+2003-07-30  Jason Eckhardt  <jle@rice.edu>
+
 	* elf32-i860.c: Convert to ISO C90.  Remove superflous prototypes.
 
 2003-07-30  Randolph Chung  <tausq@debian.org>

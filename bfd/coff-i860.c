@@ -30,13 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "libcoff.h"
 
-static bfd_reloc_status_type coff_i860_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static reloc_howto_type *coff_i860_rtype_to_howto
-  PARAMS ((bfd *, asection *, struct internal_reloc *,
-	   struct coff_link_hash_entry *, struct internal_syment *,
-	   bfd_vma *));
-static const bfd_target * i3coff_object_p PARAMS ((bfd *));
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
 /* The page size is a guess based on ELF.  */
@@ -53,15 +46,13 @@ static const bfd_target * i3coff_object_p PARAMS ((bfd *));
    reloc type to make any required adjustments.  */
 
 static bfd_reloc_status_type
-coff_i860_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
-		 error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section ATTRIBUTE_UNUSED;
-     bfd *output_bfd;
-     char **error_message ATTRIBUTE_UNUSED;
+coff_i860_reloc (bfd *abfd,
+		 arelent *reloc_entry,
+		 asymbol *symbol,
+		 void *data,
+		 asection *input_section ATTRIBUTE_UNUSED,
+		 bfd *output_bfd,
+		 char **error_message ATTRIBUTE_UNUSED)
 {
   symvalue diff;
 
@@ -312,13 +303,12 @@ static reloc_howto_type howto_table[] =
 #define coff_relocate_section _bfd_coff_generic_relocate_section
 
 static reloc_howto_type *
-coff_i860_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *sec;
-     struct internal_reloc *rel;
-     struct coff_link_hash_entry *h;
-     struct internal_syment *sym;
-     bfd_vma *addendp;
+coff_i860_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
+			  asection *sec,
+			  struct internal_reloc *rel,
+			  struct coff_link_hash_entry *h,
+			  struct internal_syment *sym,
+			  bfd_vma *addendp)
 {
 
   reloc_howto_type *howto;
@@ -361,8 +351,7 @@ coff_i860_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 #include "coffcode.h"
 
 static const bfd_target *
-i3coff_object_p(a)
-     bfd *a;
+i3coff_object_p(bfd *a)
 {
   return coff_object_p (a);
 }
