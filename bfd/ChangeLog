@@ -1,3 +1,20 @@
+Wed Jun 11 22:44:20 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-mn10300.c (elf32_mn10300_link_hash_entry): New structure
+	for derived elf linker hash table entries.  References to
+	elf_link_hash_entry changed appropriately.
+	(elf32_mn10300_link_hash_table): New structure for derived elf
+	linker hash table.
+	(elf32_mn10300_hash_table): Define.
+	(elf32_mn10300_link_hash_traverse): Likewise.
+	(elf32_mn10300_link_hash_newfunc): New function.
+	(elf32_mn10300_link_hash_table_create): Likewise.
+	(elf32_mn10300_finish_hash_table_entry): Likewise.
+	(mn10300_elf_relax_section): Handle "call" -> "calls", removal
+	of prologue code, and call:32->call:16 relaxing.
+	(compute_function_info: New function.
+	(bfd_elf32_bfd_ilink_hash_table_create): Define.
+
 Wed Jun 11 00:00:07 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_link_output_extsym): Call finish_dynamic_symbol
