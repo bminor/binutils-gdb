@@ -5766,6 +5766,31 @@ do_ldmstm (str)
       inst.instruction |= LDM_TYPE_2_OR_3;
     }
 
+  if (inst.instruction & WRITE_BACK)
+    {
+      /* Check for unpredictable uses of writeback.  */
+      if (inst.instruction & LOAD_BIT)
+	{
+	  /* Not allowed in LDM type 2.  */
+	  if ((inst.instruction & LDM_TYPE_2_OR_3)
+	      && ((range & (1 << REG_PC)) == 0))
+	    as_warn (_("writeback of base register is UNPREDICTABLE"));
+	  /* Only allowed if base reg not in list for other types.  */
+	  else if (range & (1 << base_reg))
+	    as_warn (_("writeback of base register when in register list is UNPREDICTABLE"));
+	}
+      else /* STM.  */
+	{
+	  /* Not allowed for type 2.  */
+	  if (inst.instruction & LDM_TYPE_2_OR_3)
+	    as_warn (_("writeback of base register is UNPREDICTABLE"));
+	  /* Only allowed if base reg not in list, or first in list.  */
+	  else if ((range & (1 << base_reg))
+		   && (range & ((1 << base_reg) - 1)))
+	    as_warn (_("if writeback register is in list, it must be the lowest reg in the list"));
+	}
+    }
+  
   inst.instruction |= range;
   end_of_line (str);
   return;
@@ -9652,12 +9677,14 @@ md_apply_fix3 (fixP, valP, seg)
 
       newimm |= (temp & 0xfffff000);
       md_number_to_chars (buf, (valueT) newimm, INSN_SIZE);
+      fixP->fx_done = 1;
       break;
 
     case BFD_RELOC_ARM_ADRL_IMMEDIATE:
       {
 	unsigned int highpart = 0;
 	unsigned int newinsn  = 0xe1a00000; /* nop.  */
+
 	newimm = validate_immediate (value);
 	temp = md_chars_to_number (buf, INSN_SIZE);
 
@@ -10274,8 +10301,7 @@ tc_gen_reloc (section, fixp)
 
     case BFD_RELOC_ARM_IMMEDIATE:
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    _("internal relocation (type %d) not fixed up (IMMEDIATE)"),
-		    fixp->fx_r_type);
+		    _("internal relocation (type: IMMEDIATE) not fixed up"));
       return NULL;
 
     case BFD_RELOC_ARM_ADRL_IMMEDIATE:
@@ -10285,8 +10311,7 @@ tc_gen_reloc (section, fixp)
 
     case BFD_RELOC_ARM_OFFSET_IMM:
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    _("internal_relocation (type %d) not fixed up (OFFSET_IMM)"),
-		    fixp->fx_r_type);
+		    _("internal_relocation (type: OFFSET_IMM) not fixed up"));
       return NULL;
 
     default:
@@ -10295,8 +10320,6 @@ tc_gen_reloc (section, fixp)
 
 	switch (fixp->fx_r_type)
 	  {
-	  case BFD_RELOC_ARM_IMMEDIATE:    type = "IMMEDIATE";    break;
-	  case BFD_RELOC_ARM_OFFSET_IMM:   type = "OFFSET_IMM";   break;
 	  case BFD_RELOC_ARM_OFFSET_IMM8:  type = "OFFSET_IMM8";  break;
 	  case BFD_RELOC_ARM_SHIFT_IMM:    type = "SHIFT_IMM";    break;
 	  case BFD_RELOC_ARM_SWI:          type = "SWI";          break;

@@ -1,3 +1,15 @@
+2002-09-17  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (md_apply_fix3): Note that an implemented
+	BFD_RELOC_ARM_IMMEDIATE has been done.
+        (tc_gen_reloc): Do not issue reloc number of unimplemented
+	BFD_RELOC_ARM_IMMEDIATE and BFD_RELOC_ARM_OFFSET_IMM relocs -
+	their name is already in the error message - plus remove them
+	from the default case.
+
+	* config/tc-arm.c (do_ldmstm): Warn about unpredictable
+	behavior of instructions.
+
 2002-09-17  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* config/tc-tic4x.c: Add function declarations and ATTRIBUTE_UNUSED.
