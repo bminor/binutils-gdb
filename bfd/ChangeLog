@@ -1,3 +1,8 @@
+2002-05-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* elfarm-oabi.c (bfd_elf32_arm_add_glue_sections_to_bfd): Define.
+	Move other similar defines to start of file.
+
 2002-05-30  Tom Rix  <trix@redhat.com>
 
 	* coff-rs6000.c (xcoff_rtype2howto): Handle 16 bit R_RBA.
