@@ -173,7 +173,7 @@ if ![file exists $binfile] then {
 	send_gdb "\004"
 	gdb_expect {
 	    -re "end of file.*Program exited normally.*$gdb_prompt $" {
-		pass "send_gdb end of file"
+		pass "send end of file"
 	    }
 	    -re "$gdb_prompt $" { fail "send end of file" }
 	    timeout { fail "send end of file (timeout)" }

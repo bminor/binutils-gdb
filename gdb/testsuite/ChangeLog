@@ -1,3 +1,8 @@
+2000-05-08  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* gdb.base/interrupt.exp: Make "pass" message say "send" 
+	rather than "send_gdb" (for consistancy).
+
 Mon May  1 15:37:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 2000-04-28 Andreas Jaeger  <aj@suse.de>:
