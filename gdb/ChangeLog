@@ -1,5 +1,35 @@
 2004-10-06  Corinna Vinschen  <vinschen@redhat.com>
 
+	* sh-tdep.c (SH_NUM_REGS): Define as 67.
+	(sh_sh_register_name): Add eight empty register names.
+	(sh_sh3_register_name): Ditto.
+	(sh_sh3e_register_name): Ditto.
+	(sh_sh2e_register_name): Ditto.
+	(sh_sh2a_register_name): New function, defining SH2A register set.
+	(sh_sh2a_nofpu_register_name): New function, defining SH2A register set
+	in nofpu case.
+	(sh_sh_dsp_register_name): Add eight empty register names.
+	(sh_sh3_dsp_register_name): Ditto.
+	(sh_sh4_register_name): Ditto.
+	(sh_sh4_nofpu_register_name): Ditto.
+	(sh_sh4al_dsp_register_name): Ditto.
+	(sh2a_show_regs): New function.
+	(sh2a_nofpu_show_regs): New function.
+	(sh_sh2a_register_type): New function.
+	(do_bank_register_info): New function.
+	(sh_print_pseudo_register): Call do_bank_register_info.
+	Call sh_print_pseudo_register for valid "bank" register.
+	(sh_sh2a_register_sim_regno): New function.
+	(sh_gdbarch_init): Add bfd_mach_sh2a and bfd_mach_sh2a_nofpu handling.
+	Increment pseudo register count by one for all sh variants with
+	pseudo registers to accomodate pseudo bank register.
+	* sh-tdep.h: Add register numbers for R0_BANK0_REGNUM, MACHB_REGNUM,
+	IVNB_REGNUM, PRB_REGNUM, GBRB_REGNUM, MACLB_REGNUM, BANK_REGNUM,
+	IBCR_REGNUM, IBNR_REGNUM, TBR_REGNUM and PSEUDO_BANK_REGNUM. 
+	Increment pseudo register numbers.
+
+2004-10-06  Corinna Vinschen  <vinschen@redhat.com>
+
 	* dwarf2read.c (read_subroutine_type): Call make_function_type
 	instead of lookup_function_type.
 
