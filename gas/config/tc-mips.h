@@ -29,10 +29,13 @@
 #define WORKING_DOT_WORD	1
 #define OLD_FLOAT_READS
 #define REPEAT_CONS_EXPRESSIONS
+#define RELOC_EXPANSION_POSSIBLE
+#define MAX_RELOC_EXPANSION 3
 #define LOCAL_LABELS_FB
 
 #define LOCAL_LABEL(name) ((name)[0] == '$')
 
+#define md_relax_frag(fragp, stretch)	(0)
 #define md_undefined_symbol(name)	(0)
 #define md_operand(x)
 
@@ -56,9 +59,9 @@
 #ifndef TARGET_FORMAT 
 #ifdef OBJ_AOUT
 #ifdef TARGET_BYTES_BIG_ENDIAN
-#define TARGET_FORMAT "aout-mips-big"
+#define TARGET_FORMAT "a.out-mips-big"
 #else
-#define TARGET_FORMAT "aout-mips-little"
+#define TARGET_FORMAT "a.out-mips-little"
 #endif
 #endif /* OBJ_AOUT */
 #ifdef OBJ_ECOFF
@@ -82,13 +85,7 @@ struct mips_cl_insn {
     const struct mips_opcode	*insn_mo;
 };
 
-#ifndef BFD_ASSEMBLER
-#define md_convert_frag(h,f)		{as_fatal ("MIPS convert_frag\n");}
-#else
-#define md_convert_frag(b,s,f)		{as_fatal ("MIPS convert_frag\n");}
-#endif
-
-extern int tc_get_register PARAMS ((void));
+extern int tc_get_register PARAMS ((int frame));
 
 #define tc_frob_label(sym) mips_define_label (sym)
 extern void mips_define_label PARAMS ((struct symbol *));
@@ -100,3 +97,11 @@ extern void cons_fix_new_mips ();
    and used by ECOFF and possibly other object file formats.  */
 extern unsigned long mips_gprmask;
 extern unsigned long mips_cprmask[4];
+
+#ifdef OBJ_ELF
+#define elf_tc_final_processing mips_elf_final_processing
+extern void mips_elf_final_processing PARAMS ((void));
+#endif
+
+extern void md_mips_end PARAMS ((void));
+#define md_end()	md_mips_end()
