@@ -1,4 +1,3 @@
-
 /* coff object file format
    Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 
@@ -25,6 +24,9 @@
 
 #define WORKING_DOT_WORD
 #define WARN_SIGNED_OVERFLOW_WORD
+
+/* By default we omit the optional aouthdr.  */
+#define OBJ_COFF_OMIT_OPTIONAL_HEADER
 
 #include "targ-cpu.h"
 

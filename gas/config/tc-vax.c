@@ -23,7 +23,6 @@
 
 #include "as.h"
 
-#include "read.h"
 #include "vax-inst.h"
 #include "obstack.h"		/* For FRAG_APPEND_1_CHAR macro in "frags.h" */
 
@@ -388,20 +387,20 @@ md_assemble (instruction_string)
       as_fatal ("vax_assemble\"%s\" in=\"%s\"", p, instruction_string);
     }
   /*
-	 * Now we try to find as many as_warn()s as we can. If we do any as_warn()s
-	 * then goofed=1. Notice that we don't make any frags yet.
-	 * Should goofed be 1, then this instruction will wedge in any pass,
-	 * and we can safely flush it, without causing interpass symbol phase
-	 * errors. That is, without changing label values in different passes.
-	 */
+   * Now we try to find as many as_warn()s as we can. If we do any as_warn()s
+   * then goofed=1. Notice that we don't make any frags yet.
+   * Should goofed be 1, then this instruction will wedge in any pass,
+   * and we can safely flush it, without causing interpass symbol phase
+   * errors. That is, without changing label values in different passes.
+   */
   if (goofed = (*v.vit_error))
     {
       as_warn ("Ignoring statement due to \"%s\"", v.vit_error);
     }
   /*
-	 * We need to use expression() and friends, which require us to diddle
-	 * input_line_pointer. So we save it and restore it later.
-	 */
+   * We need to use expression() and friends, which require us to diddle
+   * input_line_pointer. So we save it and restore it later.
+   */
   save_input_line_pointer = input_line_pointer;
   for (operandP = v.vit_operand,
        expP = exp_of_operand,
@@ -418,7 +417,8 @@ md_assemble (instruction_string)
 	  goofed = 1;
 	}
       else
-	{			/* statement has no syntax goofs: lets sniff the expression */
+	{
+	  /* statement has no syntax goofs: lets sniff the expression */
 	  int can_be_short = 0;	/* 1 if a bignum can be reduced to a short literal. */
 
 	  input_line_pointer = operandP->vop_expr_begin;
@@ -431,10 +431,11 @@ md_assemble (instruction_string)
 	      /* for BSD4.2 compatibility, missing expression is absolute 0 */
 	      to_seg = expP->X_seg = SEG_ABSOLUTE;
 	      expP->X_add_number = 0;
-	      /* for SEG_ABSOLUTE, we shouldnt need to set X_subtract_symbol, X_add_symbol to any
-				   particular value. But, we will program defensively. Since this situation occurs rarely
-				   so it costs us little to do, and stops Dean worrying about the origin of random bits in
-				   expressionS's. */
+	      /* For SEG_ABSOLUTE, we shouldn't need to set X_subtract_symbol,
+		 X_add_symbol to any particular value.  But, we will program
+		 defensively. Since this situation occurs rarely so it costs
+		 us little to do, and stops Dean worrying about the origin of
+		 random bits in expressionS's.  */
 	      expP->X_add_symbol = NULL;
 	      expP->X_subtract_symbol = NULL;
 	    case SEG_TEXT:
@@ -447,18 +448,18 @@ md_assemble (instruction_string)
 	    case SEG_DIFFERENCE:
 	    case SEG_PASS1:
 	      /*
-				 * Major bug. We can't handle the case of a
-				 * SEG_DIFFERENCE expression in a VIT_OPCODE_SYNTHETIC
-				 * variable-length instruction.
-				 * We don't have a frag type that is smart enough to
-				 * relax a SEG_DIFFERENCE, and so we just force all
-				 * SEG_DIFFERENCEs to behave like SEG_PASS1s.
-				 * Clearly, if there is a demand we can invent a new or
-				 * modified frag type and then coding up a frag for this
-				 * case will be easy. SEG_DIFFERENCE was invented for the
-				 * .words after a CASE opcode, and was never intended for
-				 * instruction operands.
-				 */
+	       * Major bug. We can't handle the case of a
+	       * SEG_DIFFERENCE expression in a VIT_OPCODE_SYNTHETIC
+	       * variable-length instruction.
+	       * We don't have a frag type that is smart enough to
+	       * relax a SEG_DIFFERENCE, and so we just force all
+	       * SEG_DIFFERENCEs to behave like SEG_PASS1s.
+	       * Clearly, if there is a demand we can invent a new or
+	       * modified frag type and then coding up a frag for this
+	       * case will be easy. SEG_DIFFERENCE was invented for the
+	       * .words after a CASE opcode, and was never intended for
+	       * instruction operands.
+	       */
 	      need_pass_2 = 1;
 	      as_warn ("Can't relocate expression");
 	      break;
@@ -1828,10 +1829,10 @@ vip (vitP, instring)
       c = *p;
       *p = '\0';
       /*
-		 * Here with instring pointing to what better be an op-name, and p
-		 * pointing to character just past that.
-		 * We trust instring points to an op-name, with no whitespace.
-		 */
+       * Here with instring pointing to what better be an op-name, and p
+       * pointing to character just past that.
+       * We trust instring points to an op-name, with no whitespace.
+       */
       vwP = (struct vot_wot *) hash_find (op_hash, instring);
       *p = c;			/* Restore char after op-code. */
       if (vwP == 0)
@@ -1843,18 +1844,18 @@ vip (vitP, instring)
       else
 	{
 	  /*
-			 * We found a match! So lets pick up as many operands as the
-			 * instruction wants, and even gripe if there are too many.
-			 * We expect comma to seperate each operand.
-			 * We let instring track the text, while p tracks a part of the
-			 * struct vot.
-			 */
+	   * We found a match! So lets pick up as many operands as the
+	   * instruction wants, and even gripe if there are too many.
+	   * We expect comma to seperate each operand.
+	   * We let instring track the text, while p tracks a part of the
+	   * struct vot.
+	   */
 	  /*
-			 * The lines below know about 2-byte opcodes starting FD,FE or FF.
-			 * They also understand synthetic opcodes. Note:
-			 * we return 32 bits of opcode, including bucky bits, BUT
-			 * an opcode length is either 8 or 16 bits for vit_opcode_nbytes.
-			 */
+	   * The lines below know about 2-byte opcodes starting FD,FE or FF.
+	   * They also understand synthetic opcodes. Note:
+	   * we return 32 bits of opcode, including bucky bits, BUT
+	   * an opcode length is either 8 or 16 bits for vit_opcode_nbytes.
+	   */
 	  oc = vwP->vot_code;	/* The op-code. */
 	  vitP->vit_opcode_nbytes = (oc & 0xFF) >= 0xFD ? 2 : 1;
 	  md_number_to_chars (vitP->vit_opcode, oc, 4);
@@ -1867,9 +1868,9 @@ vip (vitP, instring)
 	    )
 	    {
 	      /*
-				 * Here to parse one operand. Leave instring pointing just
-				 * past any one ',' that marks the end of this operand.
-				 */
+	       * Here to parse one operand. Leave instring pointing just
+	       * past any one ',' that marks the end of this operand.
+	       */
 	      if (!p[1])
 		bug = "p";	/* ODD(!!) number of bytes in vot_how?? */
 	      else if (*instring)
@@ -1877,9 +1878,9 @@ vip (vitP, instring)
 		  for (q = instring; (c = *q) && c != ','; q++)
 		    ;
 		  /*
-					 * Q points to ',' or '\0' that ends argument. C is that
-					 * character.
-					 */
+		   * Q points to ',' or '\0' that ends argument. C is that
+		   * character.
+		   */
 		  *q = 0;
 		  operandp->vop_width = p[1];
 		  operandp->vop_nbytes = vax_operand_width_size[p[1]];
@@ -2355,12 +2356,13 @@ vip_op_defaults (immediate, indirect, displen)	/* can be called any time */
 char *				/* (code here) bug message, "" = OK */
 /* our code bug, NOT bad assembly language */
 vip_op (optext, vopP)
-     char *optext;		/* user's input string e.g.: */
-     /* "@B^foo@bar(AP)[FP]:" */
-     struct vop *vopP;		/* In: vop_access, vop_width. */
-     /* Out: _ndx, _reg, _mode, _short, _warn, */
-     /* _error _expr_begin, _expr_end, _nbytes. */
-     /* vop_nbytes : number of bytes in a datum. */
+     /* user's input string e.g.: "@B^foo@bar(AP)[FP]:" */
+     char *optext;
+     /* Input fields: vop_access, vop_width.
+	Output fields: _ndx, _reg, _mode, _short, _warn,
+	_error _expr_begin, _expr_end, _nbytes.
+	vop_nbytes : number of bytes in a datum. */
+     struct vop *vopP;
 {
   char *p;			/* track operand text forward */
   char *q;			/* track operand text backward */
@@ -2467,9 +2469,9 @@ vip_op (optext, vopP)
       else
 	{
 	  /*
-			 * Confusers like "[]" will eventually lose with a bad register
-			 * name error. So again we don't need to check for early '\0'.
-			 */
+	   * Confusers like "[]" will eventually lose with a bad register
+	   * name error. So again we don't need to check for early '\0'.
+	   */
 	  if (q[3] == ']')
 	    ndx = vax_reg_parse (q[1], q[2], 0);
 	  else if (q[4] == ']')
@@ -2522,9 +2524,9 @@ vip_op (optext, vopP)
 	  else
 	    {
 	      /*
-				 * Confusers like "()" will eventually lose with a bad register
-				 * name error. So again we don't need to check for early '\0'.
-				 */
+	       * Confusers like "()" will eventually lose with a bad register
+	       * name error. So again we don't need to check for early '\0'.
+	       */
 	      if (q[3] == ')')
 		reg = vax_reg_parse (q[1], q[2], 0);
 	      else if (q[4] == ')')
@@ -2532,11 +2534,11 @@ vip_op (optext, vopP)
 	      else
 		reg = -1;
 	      /*
-				 * Since we saw a ')' we will demand a register name in the ')'.
-				 * This is nasty: why can't our hypothetical assembler permit
-				 * parenthesised expressions? BECAUSE I AM LAZY! That is why.
-				 * Abuse luser if we didn't spy a register name.
-				 */
+	       * Since we saw a ')' we will demand a register name in the ')'.
+	       * This is nasty: why can't our hypothetical assembler permit
+	       * parenthesised expressions? BECAUSE I AM LAZY! That is why.
+	       * Abuse luser if we didn't spy a register name.
+	       */
 	      if (reg < 0)
 		{
 		  /* JF allow parenthasized expressions.  I hope this works */
@@ -2548,31 +2550,31 @@ vip_op (optext, vopP)
 	      else
 		q--;		/* point just before '(' of "(...)" */
 	      /*
-				 * If err == "..." then we lost. Run away.
-				 * Otherwise if reg >= 0 then we saw (Rn).
-				 */
+	       * If err == "..." then we lost. Run away.
+	       * Otherwise if reg >= 0 then we saw (Rn).
+	       */
 	    }
 	  /*
-			 * If err == "..." then we lost.
-			 * Otherwise paren==1 and reg = register in "()".
-			 */
+	   * If err == "..." then we lost.
+	   * Otherwise paren==1 and reg = register in "()".
+	   */
 	}
       else
 	paren = 0;
       /*
-		 * If err == "..." then we lost.
-		 * Otherwise, q points just before "(Rn)", if any.
-		 * If there was a "(...)" then paren==1, and reg is the register.
-		 */
+       * If err == "..." then we lost.
+       * Otherwise, q points just before "(Rn)", if any.
+       * If there was a "(...)" then paren==1, and reg is the register.
+       */
 
       /*
-		 * We should only seek '-' of "-(...)" if:
-		 *   we saw "(...)"                    paren == 1
-		 *   we have no errors so far          ! *err
-		 *   we did not see '+' of "(...)+"    sign < 1
-		 * We don't check len. We want a specific error message later if
-		 * user tries "x^...-(Rn)". This is a feature not a bug.
-		 */
+       * We should only seek '-' of "-(...)" if:
+       *   we saw "(...)"                    paren == 1
+       *   we have no errors so far          ! *err
+       *   we did not see '+' of "(...)+"    sign < 1
+       * We don't check len. We want a specific error message later if
+       * user tries "x^...-(Rn)". This is a feature not a bug.
+       */
       if (!*err)
 	{
 	  if (paren && sign < 1)/* !sign is adequate test */
@@ -2584,14 +2586,14 @@ vip_op (optext, vopP)
 		}
 	    }
 	  /*
-			 * We have back-tracked over most
-			 * of the crud at the end of an operand.
-			 * Unless err, we know: sign, paren. If paren, we know reg.
-			 * The last case is of an expression "Rn".
-			 * This is worth hunting for if !err, !paren.
-			 * We wouldn't be here if err.
-			 * We remember to save q, in case we didn't want "Rn" anyway.
-			 */
+	   * We have back-tracked over most
+	   * of the crud at the end of an operand.
+	   * Unless err, we know: sign, paren. If paren, we know reg.
+	   * The last case is of an expression "Rn".
+	   * This is worth hunting for if !err, !paren.
+	   * We wouldn't be here if err.
+	   * We remember to save q, in case we didn't want "Rn" anyway.
+	   */
 	  if (!paren)
 	    {
 	      if (*q == ' ' && q >= p)	/* Expect all whitespace reduced to ' '. */
@@ -2603,8 +2605,8 @@ vip_op (optext, vopP)
 	      else
 		reg = -1;	/* always comes here if no register at all */
 	      /*
-				 * Here with a definitive reg value.
-				 */
+	       * Here with a definitive reg value.
+	       */
 	      if (reg >= 0)
 		{
 		  oldq = q;
@@ -2614,41 +2616,41 @@ vip_op (optext, vopP)
 	}
     }
   /*
-	 * have reg. -1:absent; else 0:15
-	 */
+   * have reg. -1:absent; else 0:15
+   */
 
   /*
-	 * We have:  err, at, len, hash, ndx, sign, paren, reg.
-	 * Also, any remaining expression is from *p through *q inclusive.
-	 * Should there be no expression, q==p-1. So expression length = q-p+1.
-	 * This completes the first part: parsing the operand text.
-	 */
+   * We have:  err, at, len, hash, ndx, sign, paren, reg.
+   * Also, any remaining expression is from *p through *q inclusive.
+   * Should there be no expression, q==p-1. So expression length = q-p+1.
+   * This completes the first part: parsing the operand text.
+   */
 
   /*
-	 * We now want to boil the data down, checking consistency on the way.
-	 * We want:  len, mode, reg, ndx, err, p, q, wrn, bug.
-	 * We will deliver a 4-bit reg, and a 4-bit mode.
-	 */
+   * We now want to boil the data down, checking consistency on the way.
+   * We want:  len, mode, reg, ndx, err, p, q, wrn, bug.
+   * We will deliver a 4-bit reg, and a 4-bit mode.
+   */
 
   /*
-	 * Case of branch operand. Different. No L^B^W^I^S^ allowed for instance.
-	 *
-	 * in:  at	?
-	 *      len	?
-	 *      hash	?
-	 *      p:q	?
-	 *      sign  ?
-	 *      paren	?
-	 *      reg   ?
-	 *      ndx   ?
-	 *
-	 * out: mode  0
-	 *      reg   -1
-	 *      len	' '
-	 *      p:q	whatever was input
-	 *      ndx	-1
-	 *      err	" "		 or error message, and other outputs trashed
-	 */
+   * Case of branch operand. Different. No L^B^W^I^S^ allowed for instance.
+   *
+   * in:  at	?
+   *      len	?
+   *      hash	?
+   *      p:q	?
+   *      sign  ?
+   *      paren	?
+   *      reg   ?
+   *      ndx   ?
+   *
+   * out: mode  0
+   *      reg   -1
+   *      len	' '
+   *      p:q	whatever was input
+   *      ndx	-1
+   *      err	" "		 or error message, and other outputs trashed
+   */
   /* branch operands have restricted forms */
   if (!*err && access == 'b')
     {
@@ -2661,24 +2663,24 @@ vip_op (optext, vopP)
   /* Since nobody seems to use it: comment this 'feature'(?) out for now. */
 #ifdef NEVER
   /*
-	 * Case of stand-alone operand. e.g. ".long foo"
-	 *
-	 * in:  at	?
-	 *      len	?
-	 *      hash	?
-	 *      p:q	?
-	 *      sign  ?
-	 *      paren	?
-	 *      reg   ?
-	 *      ndx   ?
-	 *
-	 * out: mode  0
-	 *      reg   -1
-	 *      len	' '
-	 *      p:q	whatever was input
-	 *      ndx	-1
-	 *      err	" "		 or error message, and other outputs trashed
-	 */
+   * Case of stand-alone operand. e.g. ".long foo"
+   *
+   * in:  at	?
+   *      len	?
+   *      hash	?
+   *      p:q	?
+   *      sign  ?
+   *      paren	?
+   *      reg   ?
+   *      ndx   ?
+   *
+   * out: mode  0
+   *      reg   -1
+   *      len	' '
+   *      p:q	whatever was input
+   *      ndx	-1
+   *      err	" "		 or error message, and other outputs trashed
+   */
   if (!*err)
     {
       if (access == ' ')
@@ -2730,23 +2732,23 @@ vip_op (optext, vopP)
 #endif /*#Ifdef NEVER*/
 
   /*
-	 * Case of S^#.
-	 *
-	 * in:  at       0
-	 *      len      's'               definition
-	 *      hash     1              demand
-	 *      p:q                        demand not empty
-	 *      sign     0                 by paren==0
-	 *      paren    0             by "()" scan logic because "S^" seen
-	 *      reg      -1                or nn by mistake
-	 *      ndx      -1
-	 *
-	 * out: mode     0
-	 *      reg      -1
-	 *      len      's'
-	 *      exp
-	 *      ndx      -1
-	 */
+   * Case of S^#.
+   *
+   * in:  at       0
+   *      len      's'               definition
+   *      hash     1              demand
+   *      p:q                        demand not empty
+   *      sign     0                 by paren==0
+   *      paren    0             by "()" scan logic because "S^" seen
+   *      reg      -1                or nn by mistake
+   *      ndx      -1
+   *
+   * out: mode     0
+   *      reg      -1
+   *      len      's'
+   *      exp
+   *      ndx      -1
+   */
   if (!*err && len == 's')
     {
       if (!hash || paren || at || ndx >= 0)
@@ -2779,23 +2781,23 @@ vip_op (optext, vopP)
     }
 
   /*
-	 * Case of -(Rn), which is weird case.
-	 *
-	 * in:  at       0
-	 *      len      '
-	 *      hash     0
-	 *      p:q      q<p
-	 *      sign     -1                by definition
-	 *      paren    1              by definition
-	 *      reg      present           by definition
-	 *      ndx      optional
-	 *
-	 * out: mode     7
-	 *      reg      present
-	 *      len      ' '
-	 *      exp      ""                enforce empty expression
-	 *      ndx      optional          warn if same as reg
-	 */
+   * Case of -(Rn), which is weird case.
+   *
+   * in:  at       0
+   *      len      '
+   *      hash     0
+   *      p:q      q<p
+   *      sign     -1                by definition
+   *      paren    1              by definition
+   *      reg      present           by definition
+   *      ndx      optional
+   *
+   * out: mode     7
+   *      reg      present
+   *      len      ' '
+   *      exp      ""                enforce empty expression
+   *      ndx      optional          warn if same as reg
+   */
   if (!*err && sign < 0)
     {
       if (len != ' ' || hash || at || p <= q)
@@ -2812,10 +2814,10 @@ vip_op (optext, vopP)
     }
 
   /*
-	 * We convert "(Rn)" to "@Rn" for our convenience.
-	 * (I hope this is convenient: has someone got a better way to parse this?)
-	 * A side-effect of this is that "@Rn" is a valid operand.
-	 */
+   * We convert "(Rn)" to "@Rn" for our convenience.
+   * (I hope this is convenient: has someone got a better way to parse this?)
+   * A side-effect of this is that "@Rn" is a valid operand.
+   */
   if (paren && !sign && !hash && !at && len == ' ' && p > q)
     {
       at = 1;
@@ -2823,23 +2825,23 @@ vip_op (optext, vopP)
     }
 
   /*
-	 * Case of (Rn)+, which is slightly different.
-	 *
-	 * in:  at
-	 *      len      ' '
-	 *      hash     0
-	 *      p:q      q<p
-	 *      sign     +1                by definition
-	 *      paren    1              by definition
-	 *      reg      present           by definition
-	 *      ndx      optional
-	 *
-	 * out: mode     8+@
-	 *      reg      present
-	 *      len      ' '
-	 *      exp      ""                enforce empty expression
-	 *      ndx      optional          warn if same as reg
-	 */
+   * Case of (Rn)+, which is slightly different.
+   *
+   * in:  at
+   *      len      ' '
+   *      hash     0
+   *      p:q      q<p
+   *      sign     +1                by definition
+   *      paren    1              by definition
+   *      reg      present           by definition
+   *      ndx      optional
+   *
+   * out: mode     8+@
+   *      reg      present
+   *      len      ' '
+   *      exp      ""                enforce empty expression
+   *      ndx      optional          warn if same as reg
+   */
   if (!*err && sign > 0)
     {
       if (len != ' ' || hash || p <= q)
@@ -2856,23 +2858,23 @@ vip_op (optext, vopP)
     }
 
   /*
-	 * Case of #, without S^.
-	 *
-	 * in:  at
-	 *      len      ' ' or 'i'
-	 *      hash     1              by definition
-	 *      p:q
-	 *      sign     0
-	 *      paren    0
-	 *      reg      absent
-	 *      ndx      optional
-	 *
-	 * out: mode     8+@
-	 *      reg      PC
-	 *      len      ' ' or 'i'
-	 *      exp
-	 *      ndx      optional
-	 */
+   * Case of #, without S^.
+   *
+   * in:  at
+   *      len      ' ' or 'i'
+   *      hash     1              by definition
+   *      p:q
+   *      sign     0
+   *      paren    0
+   *      reg      absent
+   *      ndx      optional
+   *
+   * out: mode     8+@
+   *      reg      PC
+   *      len      ' ' or 'i'
+   *      exp
+   *      ndx      optional
+   */
   if (!*err && hash)
     {
       if (len != 'i' && len != ' ')
@@ -2884,10 +2886,10 @@ vip_op (optext, vopP)
 	  if (reg >= 0)
 	    {
 	      /*
-				 * SHIT! we saw #Rnn! Put the Rnn back into the expression.
-				 * By using oldq, we don't need to know how long Rnn was.
-				 * KLUDGE!
-				 */
+	       * SHIT! we saw #Rnn! Put the Rnn back into the expression.
+	       * By using oldq, we don't need to know how long Rnn was.
+	       * KLUDGE!
+	       */
 	      q = oldq;
 	      reg = -1;		/* no register any more */
 	    }
@@ -2904,29 +2906,29 @@ vip_op (optext, vopP)
 	}
     }
   /*
-	 * If !*err, then        sign == 0
-	 *                       hash == 0
-	 */
+   * If !*err, then        sign == 0
+   *                       hash == 0
+   */
 
   /*
-	 * Case of Rn. We seperate this one because it has a few special
-	 * errors the remaining modes lack.
-	 *
-	 * in:  at       optional
-	 *      len      ' '
-	 *      hash     0             by program logic
-	 *      p:q      empty
-	 *      sign     0                 by program logic
-	 *      paren    0             by definition
-	 *      reg      present           by definition
-	 *      ndx      optional
-	 *
-	 * out: mode     5+@
-	 *      reg      present
-	 *      len      ' '               enforce no length
-	 *      exp      ""                enforce empty expression
-	 *      ndx      optional          warn if same as reg
-	 */
+   * Case of Rn. We seperate this one because it has a few special
+   * errors the remaining modes lack.
+   *
+   * in:  at       optional
+   *      len      ' '
+   *      hash     0             by program logic
+   *      p:q      empty
+   *      sign     0                 by program logic
+   *      paren    0             by definition
+   *      reg      present           by definition
+   *      ndx      optional
+   *
+   * out: mode     5+@
+   *      reg      present
+   *      len      ' '               enforce no length
+   *      exp      ""                enforce empty expression
+   *      ndx      optional          warn if same as reg
+   */
   if (!*err && !paren && reg >= 0)
     {
       if (len != ' ')
@@ -2943,12 +2945,12 @@ vip_op (optext, vopP)
       else
 	{
 	  /*
-			 * Idea here is to detect from length of datum
-			 * and from register number if we will touch PC.
-			 * Warn if we do.
-			 * vop_nbytes is number of bytes in operand.
-			 * Compute highest byte affected, compare to PC0.
-			 */
+	   * Idea here is to detect from length of datum
+	   * and from register number if we will touch PC.
+	   * Warn if we do.
+	   * vop_nbytes is number of bytes in operand.
+	   * Compute highest byte affected, compare to PC0.
+	   */
 	  if ((vopP->vop_nbytes + reg * 4) > 60)
 	    wrn = "PC part of operand unpredictable";
 	  err = " ";		/* win */
@@ -2996,12 +2998,12 @@ vip_op (optext, vopP)
     }
 
   /*
-	 * here with completely specified     mode
-	 *					len
-	 *					reg
-	 *					expression   p,q
-	 *					ndx
-	 */
+   * here with completely specified     mode
+   *					len
+   *					reg
+   *					expression   p,q
+   *					ndx
+   */
 
   if (*err == ' ')
     err = "";			/* " " is no longer an error */

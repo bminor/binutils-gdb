@@ -22,20 +22,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <ctype.h>
 #include "m88k-opcode.h"
 #include "as.h"
-#include "frags.h"
-#include "struc-symbol.h"
 #include "flonum.h"
-#include "expr.h"
-#include "hash.h"
 #include "md.h"
 #include "m88k.h"
-#include "write.h"
-#include "read.h"
-/*
-#include "obstack.h"
-#include "struc-symbol.h"
-*/
-#include "symbols.h"
 
 char *getval ();
 char *get_reg ();
@@ -1232,7 +1221,7 @@ s_bss ()
   char *name;
   char c;
   char *p;
-  int temp, bss_align = 1;
+  int temp, bss_align;
   symbolS *symbolP;
   extern const char is_end_of_line[256];
 
@@ -1261,27 +1250,42 @@ s_bss ()
     {
       input_line_pointer++;
       bss_align = get_absolute_expression ();
-      while (local_bss_counter % bss_align != 0)
-	local_bss_counter++;
     }
+  else
+    bss_align = 0;
 
-  if (symbolP->sy_other == 0
-      && symbolP->sy_desc == 0
-      && ((symbolP->sy_type == N_BSS
-	   && symbolP->sy_value == local_bss_counter)
-	  || ((symbolP->sy_type & N_TYPE) == N_UNDF
-	      && symbolP->sy_value == 0)))
+  if (!S_IS_DEFINED(symbolP)
+      || S_GET_SEGMENT(symbolP) == SEG_BSS)
     {
-      symbolP->sy_value = local_bss_counter;
-      symbolP->sy_type = N_BSS;
-      symbolP->sy_frag = &bss_address_frag;
-      local_bss_counter += temp;
+      if (! need_pass_2)
+	{
+	  char *p;
+	  segT current_seg = now_seg;
+	  subsegT current_subseg = now_subseg;
+
+	  subseg_new (SEG_BSS, 1); /* switch to bss	*/
+
+	  if (bss_align)
+	    frag_align (bss_align, 0);
+
+	  /* detach from old frag */
+	  if (symbolP->sy_type == N_BSS && symbolP->sy_frag != NULL)
+	    symbolP->sy_frag->fr_symbol = NULL;
+
+	  symbolP->sy_frag  = frag_now;
+	  p = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
+			temp, (char *)0);
+	  *p = 0;
+	  S_SET_SEGMENT (symbolP, SEG_BSS);
+
+	  subseg_new (current_seg, current_subseg);
+	}
     }
   else
     {
-      as_warn ("Ignoring attempt to re-define symbol from %d. to %d.",
-	       symbolP->sy_value, local_bss_counter);
+      as_warn ("Ignoring attempt to re-define symbol %s.", name);
     }
+
   while (!is_end_of_line[*input_line_pointer])
     {
       input_line_pointer++;

@@ -22,7 +22,6 @@
    much bloody rewriting required before.  There still probably is.  */
 
 #include "as.h"
-#include "read.h"
 
 #include "opcode/a29k.h"
 

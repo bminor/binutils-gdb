@@ -4488,9 +4488,11 @@ VMS_Check_For_Main ()
 /*
  *	Write a VAX/VMS object file (everything else has been done!)
  */
-VMS_write_object_file (text_siz, data_siz, text_frag_root, data_frag_root)
+VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
+		       data_frag_root)
      unsigned text_siz;
      unsigned data_siz;
+     unsigned bss_siz;
      struct frag *text_frag_root;
      struct frag *data_frag_root;
 {
@@ -4581,11 +4583,10 @@ VMS_write_object_file (text_siz, data_siz, text_frag_root, data_frag_root)
   /*
    *	Define the BSS Psect
    */
-  if (local_bss_counter > 0)
+  if (bss_siz > 0)
     {
       Bss_Psect = Psect_Number++;
-      VMS_Psect_Spec ("$uninitialized_data", local_bss_counter, "DATA",
-		      0);
+      VMS_Psect_Spec ("$uninitialized_data", bss_siz, "DATA", 0);
     }
 #ifndef gxx_bug_fixed
   /* 
