@@ -17,6 +17,5 @@
 # along with GDB; see the file COPYING.  If not, write to
 # the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
-TDEPFILES= rs6000-pinsn.o rs6000-tdep.o exec.o
+TDEPFILES= rs6000-pinsn.o rs6000-tdep.o
 TM_FILE= tm-ppc-nw.h
-
