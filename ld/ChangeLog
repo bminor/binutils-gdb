@@ -1,3 +1,7 @@
+2004-07-27  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* emulparams/hppanbsd.sh (OUTPUT_FORMAT): Set to "elf32-hppa-netbsd".
+
 2004-07-26  Dmitry Diky  <diwil@spec.ru>
 
 	* Makefile.am: Add new subtargets: msp430x1610, msp430x1611,

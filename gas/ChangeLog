@@ -1,3 +1,8 @@
+2004-07-27  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* config/tc-hppa.h (TARGET_FORMAT): Set to "elf32-hppa-netbsd"
+	for TE_NetBSD.
+
 2004-07-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (ppc_frob_file_before_adjust): Warn if .toc too big.
