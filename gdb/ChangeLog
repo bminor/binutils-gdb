@@ -1,3 +1,11 @@
+Fri Dec 15 23:27:56 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (remote_fetch_registers): Replace #ifdef
+ 	REGISTER_BYTES_OK with REGISTER_BYTES_OK_P.
+
+	* gdbarch.sh (REGISTER_BYTES_OK): Multi-arch.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 Fri Dec 15 22:58:59 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* serial.c (serial_printf): Call xvasprintf instead of vasprintf.

@@ -169,6 +169,7 @@ struct gdbarch
   gdbarch_register_virtual_type_ftype *register_virtual_type;
   gdbarch_do_registers_info_ftype *do_registers_info;
   gdbarch_register_sim_regno_ftype *register_sim_regno;
+  gdbarch_register_bytes_ok_ftype *register_bytes_ok;
   int use_generic_dummy_frames;
   int call_dummy_location;
   gdbarch_call_dummy_address_ftype *call_dummy_address;
@@ -266,6 +267,7 @@ struct gdbarch startup_gdbarch =
   8 * sizeof (void*),
   8 * sizeof (void*),
   8 * sizeof (void*),
+  0,
   0,
   0,
   0,
@@ -463,7 +465,7 @@ void
 gdbarch_free (struct gdbarch *arch)
 {
   /* At the moment, this is trivial.  */
-  xfree (arch);
+  free (arch);
 }
 
 
@@ -547,6 +549,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
     internal_error ("gdbarch: verify_gdbarch: register_virtual_type invalid");
   /* Skip verify of do_registers_info, invalid_p == 0 */
   /* Skip verify of register_sim_regno, invalid_p == 0 */
+  /* Skip verify of register_bytes_ok, has predicate */
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->use_generic_dummy_frames == -1))
     internal_error ("gdbarch: verify_gdbarch: use_generic_dummy_frames invalid");
@@ -942,6 +945,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: %s # %s\n",
                       "REGISTER_SIM_REGNO(reg_nr)",
                       XSTRING (REGISTER_SIM_REGNO (reg_nr)));
+#endif
+#ifdef REGISTER_BYTES_OK
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REGISTER_BYTES_OK(nr_bytes)",
+                      XSTRING (REGISTER_BYTES_OK (nr_bytes)));
 #endif
 #ifdef USE_GENERIC_DUMMY_FRAMES
   fprintf_unfiltered (file,
@@ -1604,6 +1613,13 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: REGISTER_SIM_REGNO = 0x%08lx\n",
                         (long) current_gdbarch->register_sim_regno
                         /*REGISTER_SIM_REGNO ()*/);
+#endif
+#ifdef REGISTER_BYTES_OK
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: REGISTER_BYTES_OK = 0x%08lx\n",
+                        (long) current_gdbarch->register_bytes_ok
+                        /*REGISTER_BYTES_OK ()*/);
 #endif
 #ifdef USE_GENERIC_DUMMY_FRAMES
   fprintf_unfiltered (file,
@@ -2761,6 +2777,29 @@ set_gdbarch_register_sim_regno (struct gdbarch *gdbarch,
                                 gdbarch_register_sim_regno_ftype register_sim_regno)
 {
   gdbarch->register_sim_regno = register_sim_regno;
+}
+
+int
+gdbarch_register_bytes_ok_p (struct gdbarch *gdbarch)
+{
+  return gdbarch->register_bytes_ok != 0;
+}
+
+int
+gdbarch_register_bytes_ok (struct gdbarch *gdbarch, long nr_bytes)
+{
+  if (gdbarch->register_bytes_ok == 0)
+    internal_error ("gdbarch: gdbarch_register_bytes_ok invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_register_bytes_ok called\n");
+  return gdbarch->register_bytes_ok (nr_bytes);
+}
+
+void
+set_gdbarch_register_bytes_ok (struct gdbarch *gdbarch,
+                               gdbarch_register_bytes_ok_ftype register_bytes_ok)
+{
+  gdbarch->register_bytes_ok = register_bytes_ok;
 }
 
 int

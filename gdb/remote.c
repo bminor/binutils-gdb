@@ -3080,10 +3080,9 @@ remote_fetch_registers (int regno)
   if (i != register_bytes_found)
     {
       register_bytes_found = i;
-#ifdef REGISTER_BYTES_OK
-      if (!REGISTER_BYTES_OK (i))
+      if (REGISTER_BYTES_OK_P ()
+	  && !REGISTER_BYTES_OK (i))
 	warning ("Remote reply is too short: %s", buf);
-#endif
     }
 
 supply_them:

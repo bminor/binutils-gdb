@@ -621,6 +621,35 @@ extern void set_gdbarch_register_sim_regno (struct gdbarch *gdbarch, gdbarch_reg
 #endif
 #endif
 
+#if defined (REGISTER_BYTES_OK)
+/* Legacy for systems yet to multi-arch REGISTER_BYTES_OK */
+#define REGISTER_BYTES_OK_P() (1)
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_BYTES_OK_P)
+#define REGISTER_BYTES_OK_P() (0)
+#endif
+
+extern int gdbarch_register_bytes_ok_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_BYTES_OK_P)
+#define REGISTER_BYTES_OK_P() (gdbarch_register_bytes_ok_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_BYTES_OK)
+#define REGISTER_BYTES_OK(nr_bytes) (internal_error ("REGISTER_BYTES_OK"), 0)
+#endif
+
+typedef int (gdbarch_register_bytes_ok_ftype) (long nr_bytes);
+extern int gdbarch_register_bytes_ok (struct gdbarch *gdbarch, long nr_bytes);
+extern void set_gdbarch_register_bytes_ok (struct gdbarch *gdbarch, gdbarch_register_bytes_ok_ftype *register_bytes_ok);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_BYTES_OK)
+#define REGISTER_BYTES_OK(nr_bytes) (gdbarch_register_bytes_ok (current_gdbarch, nr_bytes))
+#endif
+#endif
+
 extern int gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch);
 extern void set_gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch, int use_generic_dummy_frames);
 #if GDB_MULTI_ARCH
