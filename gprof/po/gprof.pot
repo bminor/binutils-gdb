@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 1998-04-22 00:30-0700\n"
+"POT-Creation-Date: 1998-06-12 19:33-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -188,14 +188,13 @@ msgstr ""
 msgid "%6.6s %5.5s %7.7s %7.7s %7.7s %7.7s     <spontaneous>\n"
 msgstr ""
 
-#: cg_print.c:586
+#: cg_print.c:587
 msgid ""
-"\f\n"
 "Index by function name\n"
 "\n"
 msgstr ""
 
-#: cg_print.c:643 cg_print.c:652
+#: cg_print.c:644 cg_print.c:653
 #, c-format
 msgid "<cycle %d>"
 msgstr ""
@@ -342,49 +341,49 @@ msgstr ""
 msgid "Report bugs to bug-gnu-utils@gnu.org\n"
 msgstr ""
 
-#: gprof.c:227
+#: gprof.c:229
 #, c-format
 msgid "%s: debugging not supported; -d ignored\n"
 msgstr ""
 
-#: gprof.c:304
+#: gprof.c:306
 #, c-format
 msgid "%s: unknown file format %s\n"
 msgstr ""
 
 #. This output is intended to follow the GNU standards document.
-#: gprof.c:388
+#: gprof.c:390
 #, c-format
 msgid "GNU gprof %s\n"
 msgstr ""
 
-#: gprof.c:389
+#: gprof.c:391
 msgid ""
 "Based on BSD gprof, copyright 1983 Regents of the University of California.\n"
 msgstr ""
 
-#: gprof.c:390
+#: gprof.c:392
 msgid ""
 "This program is free software.  This program has absolutely no warranty.\n"
 msgstr ""
 
-#: gprof.c:436
+#: gprof.c:438
 #, c-format
 msgid ""
 "%s: Only one of --function-ordering and --file-ordering may be specified.\n"
 msgstr ""
 
-#: gprof.c:536
+#: gprof.c:538
 #, c-format
 msgid "%s: sorry, file format `prof' is not yet supported\n"
 msgstr ""
 
-#: gprof.c:597
+#: gprof.c:599
 #, c-format
 msgid "%s: gmon.out file is missing histogram\n"
 msgstr ""
 
-#: gprof.c:604
+#: gprof.c:606
 #, c-format
 msgid "%s: gmon.out file is missing call-graph data\n"
 msgstr ""
