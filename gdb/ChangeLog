@@ -1,5 +1,17 @@
 2003-04-09  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.h (struct frame_info): Delete field "pc".  Replace
+	"pc_unwind_cache" and "pc_unwind_cache_p" with "prev_pc"
+	structure.
+	* frame.c (frame_pc_unwind): Update.
+	(create_sentinel_frame): Do not set "pc".
+	(get_prev_frame): Do not set "pc".  Use frame_pc_unwind.
+	(get_frame_pc): Call frame_pc_unwind.
+	(deprecated_update_frame_pc_hack): Update.
+	(create_new_frame): Use "pc" not "->pc".
+
+2003-04-09  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.c (get_frame_id): Eliminate code updating "frame".
 	(legacy_get_prev_frame): Ditto.
 	(get_frame_base): Return id.base directly.

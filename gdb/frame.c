@@ -139,7 +139,7 @@ frame_find_by_id (struct frame_id id)
 CORE_ADDR
 frame_pc_unwind (struct frame_info *this_frame)
 {
-  if (!this_frame->pc_unwind_cache_p)
+  if (!this_frame->prev_pc.p)
     {
       CORE_ADDR pc;
       if (gdbarch_unwind_pc_p (current_gdbarch))
@@ -181,10 +181,10 @@ frame_pc_unwind (struct frame_info *this_frame)
 	}
       else
 	internal_error (__FILE__, __LINE__, "No gdbarch_unwind_pc method");
-      this_frame->pc_unwind_cache = pc;
-      this_frame->pc_unwind_cache_p = 1;
+      this_frame->prev_pc.value = pc;
+      this_frame->prev_pc.p = 1;
     }
-  return this_frame->pc_unwind_cache;
+  return this_frame->prev_pc.value;
 }
 
 CORE_ADDR
@@ -518,14 +518,6 @@ create_sentinel_frame (struct regcache *regcache)
   /* Link this frame back to itself.  The frame is self referential
      (the unwound PC is the same as the pc), so make it so.  */
   frame->next = frame;
-  /* Always unwind the PC as part of creating this frame.  This
-     ensures that the frame's PC points at something valid.  */
-  /* FIXME: cagney/2003-01-10: Problem here.  Unwinding a sentinel
-     frame's PC may require information such as the frame's thread's
-     stop reason.  Is it possible to get to that?  */
-  /* FIXME: cagney/2003-04-04: Once ->pc is eliminated, this
-     assignment can go away.  */
-  frame->pc = frame_pc_unwind (frame);
   /* Make the sentinel frame's ID valid, but invalid.  That way all
      comparisons with it should fail.  */
   frame->id_p = 1;
@@ -977,7 +969,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   /* Select/initialize both the unwind function and the frame's type
      based on the PC.  */
-  fi->unwind = frame_unwind_find_by_pc (current_gdbarch, fi->pc);
+  fi->unwind = frame_unwind_find_by_pc (current_gdbarch, pc);
   if (fi->unwind->type != UNKNOWN_FRAME)
     fi->type = fi->unwind->type;
   else
@@ -1113,9 +1105,10 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 
       /* Set the unwind functions based on that identified PC.  Ditto
          for the "type" but strongly prefer the unwinder's frame type.  */
-      prev->unwind = frame_unwind_find_by_pc (current_gdbarch, prev->pc);
+      prev->unwind = frame_unwind_find_by_pc (current_gdbarch,
+					      get_frame_pc (prev));
       if (prev->unwind->type == UNKNOWN_FRAME)
-	prev->type = frame_type_from_pc (prev->pc);
+	prev->type = frame_type_from_pc (get_frame_pc (prev));
       else
 	prev->type = prev->unwind->type;
 
@@ -1590,10 +1583,7 @@ get_prev_frame (struct frame_info *this_frame)
      because (well ignoring the PPC) a dummy frame can be located
      using THIS_FRAME's frame ID.  */
 
-  /* FIXME: cagney/2003-04-04: Once ->pc is eliminated, this
-     assignment can go away.  */
-  prev_frame->pc = frame_pc_unwind (this_frame);
-  if (prev_frame->pc == 0)
+  if (frame_pc_unwind (this_frame) == 0)
     {
       /* The allocated PREV_FRAME will be reclaimed when the frame
 	 obstack is next purged.  */
@@ -1605,7 +1595,7 @@ get_prev_frame (struct frame_info *this_frame)
 
   /* Set the unwind functions based on that identified PC.  */
   prev_frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
-						prev_frame->pc);
+						frame_pc_unwind (this_frame));
 
   /* FIXME: cagney/2003-04-02: Rather than storing the frame's type in
      the frame, the unwinder's type should be returned directly.
@@ -1642,7 +1632,8 @@ get_prev_frame (struct frame_info *this_frame)
 CORE_ADDR
 get_frame_pc (struct frame_info *frame)
 {
-  return frame->pc;
+  gdb_assert (frame->next != NULL);
+  return frame_pc_unwind (frame->next);
 }
 
 static int
@@ -1777,8 +1768,6 @@ frame_extra_info_zalloc (struct frame_info *fi, long size)
 void
 deprecated_update_frame_pc_hack (struct frame_info *frame, CORE_ADDR pc)
 {
-  /* See comment in "frame.h".  */
-  frame->pc = pc;
   /* NOTE: cagney/2003-03-11: Some architectures (e.g., Arm) are
      maintaining a locally allocated frame object.  Since such frame's
      are not in the frame chain, it isn't possible to assume that the
@@ -1788,8 +1777,8 @@ deprecated_update_frame_pc_hack (struct frame_info *frame, CORE_ADDR pc)
       /* While we're at it, update this frame's cached PC value, found
 	 in the next frame.  Oh for the day when "struct frame_info"
 	 is opaque and this hack on hack can just go away.  */
-      frame->next->pc_unwind_cache = pc;
-      frame->next->pc_unwind_cache_p = 1;
+      frame->next->prev_pc.value = pc;
+      frame->next->prev_pc.p = 1;
     }
 }
 

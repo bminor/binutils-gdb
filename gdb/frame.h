@@ -337,11 +337,6 @@ extern void frame_pop (struct frame_info *frame);
 
 struct frame_info
   {
-    /* Address at which execution is occurring in this frame.
-       For the innermost frame, it's the current pc.
-       For other frames, it is a pc saved in the next frame.  */
-    CORE_ADDR pc;
-
     /* Level of this frame.  The inner-most (youngest) frame is at
        level 0.  As you move towards the outer-most (oldest) frame,
        the level increases.  This is a cached value.  It could just as
@@ -389,8 +384,10 @@ struct frame_info
     const struct frame_unwind *unwind;
 
     /* Cached copy of the previous frame's resume address.  */
-    int pc_unwind_cache_p;
-    CORE_ADDR pc_unwind_cache;
+    struct {
+      int p;
+      CORE_ADDR value;
+    } prev_pc;
 
     /* Cached copy of the previous frame's function address.  */
     struct
