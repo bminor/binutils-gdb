@@ -1816,10 +1816,7 @@ ppc_elf_relax_section (bfd *abfd,
       symaddr = tsec->output_section->vma + tsec->output_offset + toff;
 
       roff = irel->r_offset;
-
-      reladdr = (isec->output_section->vma
-		 + isec->output_offset
-		 + roff);
+      reladdr = isec->output_section->vma + isec->output_offset + roff;
 
       /* If the branch is in range, no need to do anything.  */
       if (symaddr - reladdr + max_branch_offset < 2 * max_branch_offset)

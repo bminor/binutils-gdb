@@ -1,5 +1,12 @@
 2004-03-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.c (elf_link_read_relocs_from_section): Don't use
+	NUM_SHDR_ENTRIES in end of reloc calc.  Move NULL shdr check..
+	(_bfd_elf_link_read_relocs): ..to here.
+	* elf32-ppc.c (ppc_elf_relax_section): Formatting.
+
+2004-03-16  Alan Modra  <amodra@bigpond.net.au>
+
 	* configure.in (HOST_64BIT_TYPE, HOST_U_64BIT_TYPE): Don't override
 	values selected in configure.host.  Require both to be defined
 	before setting BFD_HOST_64_BIT_DEFINED.  Protect assignment to
