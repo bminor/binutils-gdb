@@ -1591,6 +1591,10 @@ dvp_frob_file ()
 	 We are responsible for updating sym->bsym->value.  */
       S_SET_SEGMENT (p->sym, p->sec);
       /* Adjust for the section's vma.  */
+      /* FIXME: bfd doesn't get this right, it adds the section vma
+	 back in (in elf.c:swap_out_syms).  As a workaround the
+	 section vma is assumed to be zero.  Of course, there might
+	 not be a point in setting it to non-zero anyway.  */
       p->sym->bsym->value -= bfd_get_section_vma (stdoutput, p->sec);
     }
 }
@@ -2332,8 +2336,11 @@ create_vuoverlay_section (section_name, addr, start_label, end_label)
   /* There's no point in setting the section vma as we can't get the linker
      to preserve it.  But what the heck ...  It might be useful to the
      objdump user.  */
+#if 0  /* FIXME: bfd's elf.c:swap_out_syms always emits symbol values with
+	  the section vma added in so we can't do this.  */
   if (addr->sy_value.X_op == O_constant)
     bfd_set_section_vma (stdoutput, vuoverlay_section, S_GET_VALUE (addr));
+#endif
   /* The size of the section won't be known until we see the .endmpg,
      but we can compute it from the start and end labels.  */
   /* FIXME: This causes the section to occupy space in the file.  */
