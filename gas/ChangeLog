@@ -1,3 +1,18 @@
+Thu Jun 27 17:46:33 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-sparc.h (md_cons_align): Define.
+	(sparc_cons_align): Declare.
+	(HANDLE_ALIGN): Define.
+	(sparc_handle_align): Declare.
+	* config/tc-sparc.c (sparc_cons_align): New function.
+	(sparc_handle_align): New function.
+	* read.c (cons_worker): Call md_cons_align if it is defined.
+
+	* as.h (struct frag): Add fr_file and fr_line fields.
+	* frags.c (frag_new): Set fr_file and fr_line.
+	(frag_var): Likewise.
+	(frag_variant): Likewise.
+
 Thu Jun 27 20:39:40 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* config/tc-mips.c (append_insn): Parenthesize
