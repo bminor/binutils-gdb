@@ -669,6 +669,15 @@ adjust_reloc_syms (abfd, sec, xxx)
 	sym = fixp->fx_addsy;
 	symsec = sym->bsym->section;
 
+	/* All symbols should have already been resolved at this
+	   point.  It is possible to see unresolved expression
+	   symbols, though, since they are not in the regular symbol
+	   table.  */
+	if (sym != NULL && ! sym->sy_resolved)
+	  resolve_symbol_value (sym);
+	if (fixp->fx_subsy != NULL && ! fixp->fx_subsy->sy_resolved)
+	  resolve_symbol_value (fixp->fx_subsy);
+
 	if (sym != NULL && sym->sy_mri_common)
 	  {
 	    /* These symbols are handled specially in fixup_segment.  */
@@ -912,7 +921,8 @@ write_relocs (abfd, sec, xxx)
       data = fixp->fx_frag->fr_literal + fixp->fx_where;
       if (fixp->fx_where + fixp->fx_size
 	  > fixp->fx_frag->fr_fix + fixp->fx_frag->fr_offset)
-	abort ();
+	as_bad_where (fixp->fx_file, fixp->fx_line,
+		      "internal error: fixup not contained within frag");
       for (j = 0; reloc[j]; j++)
         {
 	  s = bfd_install_relocation (stdoutput, reloc[j],
