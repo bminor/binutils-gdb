@@ -2127,6 +2127,7 @@ gdbtk_init ( argv0 )
   struct cleanup *old_chain;
   char *lib, *gdbtk_lib, *gdbtk_lib_tmp, *gdbtk_file;
   int i, found_main;
+  Tcl_Obj *auto_path_elem, *auto_path_name;
 #ifndef WINNT
   struct sigaction action;
   static sigset_t nullsigmask = {0};
@@ -2379,9 +2380,14 @@ gdbtk_init ( argv0 )
   found_main = 0;
   /* see if GDBTK_LIBRARY is a path list */
   lib = strtok (gdbtk_lib_tmp, GDBTK_PATH_SEP);
+  auto_path_elem = Tcl_NewObj ();
+  auto_path_name = Tcl_NewStringObj ("auto_path", -1);
+
   do
     {
-      if (Tcl_VarEval (interp, "lappend auto_path ", lib, NULL) != TCL_OK)
+      Tcl_SetStringObj (auto_path_elem, lib, -1);
+      if (Tcl_ObjSetVar2 (interp, auto_path_name, NULL, auto_path_elem,
+			  TCL_GLOBAL_ONLY | TCL_LIST_ELEMENT ) == NULL)
 	{
 	  fputs_unfiltered (Tcl_GetVar (interp, "errorInfo", 0), gdb_stderr);
 	  error ("");
@@ -2399,7 +2405,9 @@ gdbtk_init ( argv0 )
   while ((lib = strtok (NULL, ":")) != NULL);
 
   free (gdbtk_lib_tmp);
-
+  Tcl_DecrRefCount(auto_path_elem);
+  Tcl_DecrRefCount(auto_path_name);
+      
   if (!found_main)
     {
       /* Try finding it with the auto path.  */

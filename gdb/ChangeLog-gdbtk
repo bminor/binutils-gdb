@@ -1,3 +1,10 @@
+Mon Jun 15 13:18:21 1998  Jim Ingham <jingham@cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Add elements to the auto_path AS LIST
+	ELEMENTS.  This allows gdbtk to work when installed in a directory 
+	which has a space in the path.  D. Moseley pointed out the bug.
+
+
 Tue Jun  9 14:10:46 1998  Keith Seitz  <keiths@cygnus.com>
 
 	* gdbtk.c (gdb_get_vars_command): Return static variables and
