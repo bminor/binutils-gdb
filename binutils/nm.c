@@ -51,7 +51,7 @@ struct get_relocs_info
   asymbol **syms;
 };
 
-struct extended_symbol_info 
+struct extended_symbol_info
 {
   symbol_info *sinfo;
   bfd_vma ssize;
@@ -355,6 +355,7 @@ main (argc, argv)
 #endif
 #if defined (HAVE_SETLOCALE)
   setlocale (LC_CTYPE, "");
+  setlocale (LC_COLLATE, "");
 #endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
@@ -705,8 +706,23 @@ non_numeric_forward (P_x, P_y)
   xn = bfd_asymbol_name (x);
   yn = bfd_asymbol_name (y);
 
-  return ((xn == NULL) ? ((yn == NULL) ? 0 : -1) :
-	  ((yn == NULL) ? 1 : strcmp (xn, yn)));
+  if (yn == NULL)
+    return xn != NULL;
+  if (xn == NULL)
+    return -1;
+
+#ifdef HAVE_STRCOLL
+  /* Solaris 2.5 has a bug in strcoll.
+     strcoll returns invalid values when confronted with empty strings.  */
+  if (*yn == '\0')
+    return *xn != '\0';
+  if (*xn == '\0')
+    return -1;
+
+  return strcoll (xn, yn);
+#else
+  return strcmp (xn, yn);
+#endif
 }
 
 static int
@@ -886,7 +902,7 @@ sort_symbols_by_size (abfd, dynamic, minisyms, symcount, size, symsizesp)
 
       sec = bfd_get_section (sym);
 
-      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour) 
+      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
 	sz = ((elf_symbol_type *) sym)->internal_elf_sym.st_size;
       else if (bfd_is_com_section (sec))
 	sz = sym->value;
@@ -1186,7 +1202,7 @@ print_symbol (abfd, sym, ssize, archive_bfd)
       bfd_get_symbol_info (abfd, sym, &syminfo);
       info.sinfo = &syminfo;
       info.ssize = ssize;
-      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour) 
+      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
 	info.elfinfo = (elf_symbol_type *) sym;
       else
 	info.elfinfo = NULL;
@@ -1545,7 +1561,7 @@ print_symbol_info_sysv (info, abfd)
       printf ("|     |");				/* Line, Section */
     }
   else
-    {	
+    {
       /* Type, Size, Line, Section */
       if (info->elfinfo)
 	printf ("%18s|",
