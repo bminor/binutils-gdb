@@ -133,12 +133,12 @@ struct aix_framedata {
    figured out where they go. But we want to do this relocation just
    once. */
 
-extern int aix_loadInfoTextIndex;
+extern int loadinfotextindex;
 
 #define	SOLIB_CREATE_INFERIOR_HOOK(PID)	\
   do {					\
-    if (aix_loadInfoTextIndex == 0)	\
-	aixcoff_relocate_symtab (PID);	\
+    if (loadinfotextindex == 0)	\
+	xcoff_relocate_symtab (PID);	\
   } while (0)
 	
 
@@ -164,7 +164,7 @@ extern int aix_loadInfoTextIndex;
    continue;				\
  }
 
-/* In aixcoff, we cannot process line numbers when we see them. This is
+/* In xcoff, we cannot process line numbers when we see them. This is
    mainly because we don't know the boundaries of the include files. So,
    we postpone that, and then enter and sort(?) the whole line table at
    once, when we are closing the current symbol table in end_symtab(). */
@@ -179,7 +179,7 @@ extern int aix_loadInfoTextIndex;
    load segments. */
 
 #define	SOLIB_ADD(a, b, c)	\
-   if (inferior_pid)	aixcoff_relocate_symtab (inferior_pid)
+   if (inferior_pid)	xcoff_relocate_symtab (inferior_pid)
 
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines
@@ -413,17 +413,6 @@ extern unsigned int rs6000_struct_return_address;
    as a CORE_ADDR (or an expression that can be used as one).  */
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF)	rs6000_struct_return_address
-
-
-/* Do implement the attach and detach commands.  */
-
-#define ATTACH_DETACH
-
-/* infptrace.c requires those. */
-
-#define PTRACE_ATTACH 30
-#define	PTRACE_DETACH 31
-
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
@@ -638,3 +627,7 @@ aix_resizewindow ()				\
 
 /* Flag for machine-specific stuff in shared files.  FIXME */
 #define IBM6000_TARGET
+
+/* RS6000/AIX does not support PT_STEP.  Has to be simulated.  */
+
+#define NO_SINGLE_STEP

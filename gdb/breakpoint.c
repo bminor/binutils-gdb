@@ -317,11 +317,8 @@ commands_command (arg, from_tty)
     if (b->number == bnum)
       {
 	if (from_tty && input_from_terminal_p ())
-	  {
-	    printf_filtered ("Type commands for when breakpoint %d is hit, one per line.\n\
+	  printf_filtered ("Type commands for when breakpoint %d is hit, one per line.\n\
 End with a line saying just \"end\".\n", bnum);
-	    fflush (stdout);
-	  }
 	l = read_command_lines ();
 	free_command_lines (&b->commands);
 	b->commands = l;
@@ -1112,9 +1109,11 @@ breakpoints_info (bnum_exp, from_tty)
   breakpoint_1 (bnum, 0);
 }
 
+#if MAINTENANCE_CMDS
+
 /* ARGSUSED */
 static void
-all_breakpoints_info (bnum_exp, from_tty)
+maintenance_info_breakpoints (bnum_exp, from_tty)
      char *bnum_exp;
      int from_tty;
 {
@@ -1125,6 +1124,8 @@ all_breakpoints_info (bnum_exp, from_tty)
 
   breakpoint_1 (bnum, 1);
 }
+
+#endif
 
 /* Print a message describing any breakpoints set at PC.  */
 
@@ -1286,7 +1287,10 @@ enable_longjmp_breakpoint()
 
   ALL_BREAKPOINTS (b)
     if (b->type == bp_longjmp)
-      b->enable = enabled;
+      {
+	b->enable = enabled;
+	check_duplicates (b->address);
+      }
 }
 
 void
@@ -1295,9 +1299,12 @@ disable_longjmp_breakpoint()
   register struct breakpoint *b;
 
   ALL_BREAKPOINTS (b)
-    if (b->type == bp_longjmp
+    if (   b->type == bp_longjmp
 	|| b->type == bp_longjmp_resume)
-      b->enable = disabled;
+      {
+	b->enable = disabled;
+	check_duplicates (b->address);
+      }
 }
 
 /* Call this after hitting the longjmp() breakpoint.  Use this to set a new
@@ -1323,6 +1330,7 @@ set_longjmp_resume_breakpoint(pc, frame)
 	  b->frame = FRAME_FP(frame);
 	else
 	  b->frame = 0;
+	check_duplicates (b->address);
 	return;
       }
 }
@@ -2247,6 +2255,11 @@ breakpoint_re_set ()
   static char message1[] = "Error in re-setting breakpoint %d:\n";
   char message[sizeof (message1) + 30 /* slop */];
   
+  if (current_source_symtab == NULL)
+    {
+      select_source_symtab (NULL);
+    }
+
   ALL_BREAKPOINTS_SAFE (b, temp)
     {
       sprintf (message, message1, b->number);	/* Format possible error msg */
@@ -2509,15 +2522,6 @@ decode_line_spec_1 (string, funfirstline)
   return sals;
 }
 
-
-/* Chain containing all defined enable commands.  */
-
-extern struct cmd_list_element 
-  *enablelist, *disablelist,
-  *deletelist, *enablebreaklist;
-
-extern struct cmd_list_element *cmdlist;
-
 void
 _initialize_breakpoint ()
 {
@@ -2662,7 +2666,9 @@ are set to the address of the last breakpoint listed.\n\n\
 Convenience variable \"$bpnum\" contains the number of the last\n\
 breakpoint set.");
 
-  add_info ("all-breakpoints", all_breakpoints_info,
+#if MAINTENANCE_CMDS
+
+  add_cmd ("breakpoints", class_maintenance, maintenance_info_breakpoints,
 	    "Status of all breakpoints, or breakpoint number NUMBER.\n\
 The \"Type\" column indicates one of:\n\
 \tbreakpoint     - normal breakpoint\n\
@@ -2678,7 +2684,10 @@ address and file/line number respectively.\n\n\
 Convenience variable \"$_\" and default examine address for \"x\"\n\
 are set to the address of the last breakpoint listed.\n\n\
 Convenience variable \"$bpnum\" contains the number of the last\n\
-breakpoint set.");
+breakpoint set.",
+	   &maintenanceinfolist);
+
+#endif	/* MAINTENANCE_CMDS */
 
   add_com ("catch", class_breakpoint, catch_command,
          "Set breakpoints to catch exceptions that are raised.\n\
@@ -2701,7 +2710,7 @@ an expression changes.");
 	    "Synonym for ``info breakpoints''.");
 }
 
-#ifdef IBM6000_HOST
+#ifdef IBM6000_TARGET
 /* Where should this function go? It is used by AIX only. FIXME. */
 
 /* Breakpoint address relocation used to be done in breakpoint_re_set(). That

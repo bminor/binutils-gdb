@@ -1,5 +1,43 @@
 Fri Aug 28 13:13:33 1992  John Gilmore  (gnu@cygnus.com)
 
+	RS/6000 portability changes (for hosting cross-debuggers).
+
+	* breakpoint.c (fixup_breakpoints):  Re-kludge to IBM6000_TARGET.
+	* buildsym.c, rs6000-xdep.c, rs6000-tdep.c, tm-rs6000.h, 
+	xcoffexec.c, xcoffread.c:  Rename aixcoff to xcoff everywhere.
+	* printcmd.c (print_frame_args):  Remove an RS/6000 dependency.
+	* stabsread.c (define_symbol):  Remove RS/6000 dependencies.
+	* tm-rs6000.h (ATTACH_DETACH):  Remove: host-dependent.
+	(PTRACE_ATTACH, PTRACE_DETACH):  Remove: host-dep.
+	(NO_SINGLE_STEP):  Add, target-dependent.
+	(loadinfotextindex):  Lowercase, remove "aix_".
+	* xm-rs6000.h:  Add <sys/ptrace.h> for infptrace.c.
+	(NO_SINGLE_STEP):  Remove, target-dependent.
+	* xcoffexec.c (vmap_symtab):  Cleanup #if 0'd code.
+	* xcoffread.c:  Only build file if RS/6000 native GDB.
+	(build_function_symbol):  Remove #if 0'd code.
+	* rs6000-tdep.c:  Cleanup.  Add static fn protos.
+	Use CORE_ADDR for addresses throughout.  Make void fns void.
+	(pop_dummy_frame):  Add FIXME about bogosity of design here.
+	(rs6000_struct_return_address):  Ditto.
+	(frameless_function_invocation, frame_get_cache_fsr,
+	frame_initial_stack_address, xcoff_relocate_symtab,
+	xcoff_init_loadinfo, free_loadinfo, xcoff_add_toc_to_loadinfo,
+	add_text_to_loadinfo, find_toc_address):  Move from xdep file.
+	Use CORE_ADDRs.  Change identifiers to lowercase.
+
+	* rs6000-xdep.c:  Make whole file conditional on native RS/6000,
+	supplying dummy routines if non-native.  Add prototype for
+	static exec_one_dummy_insn.  Move a mess of functions to
+	rs6000-tdep.c (as above).  Remove #if 0'd code.
+
+	* config/rs6000.mh (XDEPFILES):  Move xcoffexec.o to target side.
+	(XM_CLIBS):  Add -lm to circumvent AIX 3.2 libc ldexp bug.
+	* config/rs6000.mt (TDEPFILES):  Adopt xcoffexec.o.
+
+	* gdbtypes.h (TYPE_ALLOC):  Parenthesize result to avoid problems
+	for callers.
+
 	* vx-share/README, nindy-share/README:  New files describing
 	how these directories' code is shared, and with whom.
 

@@ -590,7 +590,7 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile)
 	}
     }
 
-  /* It is unfortunate that in aixcoff, pending blocks might not be ordered
+  /* It is unfortunate that in xcoff, pending blocks might not be ordered
      in this stage. Especially, blocks for static functions will show up at
      the end.  We need to sort them, so tools like `find_pc_function' and
      `find_pc_block' can work reliably. */
@@ -649,7 +649,7 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile)
     }
 
 #ifdef PROCESS_LINENUMBER_HOOK
-  PROCESS_LINENUMBER_HOOK ();			/* Needed for aixcoff. */
+  PROCESS_LINENUMBER_HOOK ();			/* Needed for xcoff. */
 #endif
 
   /* Now create the symtab objects proper, one for each subfile.  */

@@ -445,16 +445,6 @@ struct stat *vip;
     }
 
   if (vp->tstart != old_start) {
-
-#if 0
-  We don't have a valid `objfile' at this point. This is moved into the
-  previous statement; ALL_OBJFILES() for-loop.
-
-    ALL_MSYMBOLS (objfile, msymbol)
-      if (msymbol->address < TEXT_SEGMENT_BASE)
-	msymbol -> address += vp->tstart - old_start;
-#endif /* 0 */
-
     /* breakpoints need to be relocated as well. */
     fixup_breakpoints (0, TEXT_SEGMENT_BASE, vp->tstart - old_start);
   }
@@ -565,7 +555,7 @@ register struct ld_info *ldi; {
 	register char *mem, *objname;
 
 	/* This ldi structure was allocated using alloca() in 
-	   aixcoff_relocate_symtab(). Now we need to have persistent object 
+	   xcoff_relocate_symtab(). Now we need to have persistent object 
 	   and member names, so we should save them. */
 
 	mem = ldi->ldinfo_filename + strlen(ldi->ldinfo_filename) + 1;

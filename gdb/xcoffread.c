@@ -1,5 +1,6 @@
-/* Read AIXcoff symbol tables and convert to internal format, for GDB.
-   Copyright (C) 1986-1991 Free Software Foundation, Inc.
+/* Read AIX xcoff symbol tables and convert to internal format, for GDB.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992
+   	     Free Software Foundation, Inc.
    Derived from coffread.c, dbxread.c, and a lot of hacking.
    Contributed by IBM Corporation.
 
@@ -22,10 +23,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "bfd.h"
 
-#ifdef IBM6000_HOST
-/* Native only:  Need struct tbtable in <sys/debug.h>. */
+#if defined(IBM6000_HOST) && defined(IBM6000_TARGET)
+/* Native only:  Need struct tbtable in <sys/debug.h> from host, and 
+		 need xcoff_add_toc_to_loadinfo in rs6000-tdep.c from target. */
 
-/* AIX COFF names have a preceeding dot `.' */
+/* AIX XCOFF names have a preceeding dot `.' */
 #define NAMES_HAVE_DOT 1
 
 #include <sys/types.h>
@@ -175,21 +177,21 @@ static int
 init_stringtab PARAMS ((bfd *, long, struct objfile *));
 
 static void
-aixcoff_symfile_init PARAMS ((struct objfile *));
+xcoff_symfile_init PARAMS ((struct objfile *));
 
 static void
-aixcoff_new_init PARAMS ((struct objfile *));
+xcoff_new_init PARAMS ((struct objfile *));
 
 struct section_offset;
 
 static void
-aixcoff_symfile_read PARAMS ((struct objfile *, struct section_offset *, int));
+xcoff_symfile_read PARAMS ((struct objfile *, struct section_offset *, int));
 
 static void
-aixcoff_symfile_finish PARAMS ((struct objfile *));
+xcoff_symfile_finish PARAMS ((struct objfile *));
 
 static struct section_offsets *
-aixcoff_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
+xcoff_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
 
 static int
 init_lineno PARAMS ((bfd *, long, int));
@@ -453,11 +455,11 @@ static void
 record_include_begin (cs)
 struct coff_symbol *cs;
 {
-  /* In aixcoff, we assume include files cannot be nested (not in .c files
+  /* In xcoff, we assume include files cannot be nested (not in .c files
      of course, but in corresponding .s files.) */
 
   if (inclDepth)
-    fatal ("aix internal: pending include file exists.");
+    fatal ("xcoff internal: pending include file exists.");
 
   ++inclDepth;
 
@@ -489,7 +491,7 @@ struct coff_symbol *cs;
   InclTable *pTbl;  
 
   if (inclDepth == 0)
-    fatal ("aix internal: Mismatch C_BINCL/C_EINCL pair found.");
+    fatal ("xcoff internal: Mismatch C_BINCL/C_EINCL pair found.");
 
   pTbl = &inclTable [inclIndx];
   pTbl->end = cs->c_value;
@@ -979,7 +981,7 @@ static struct symbol parmsym = {		/* default parameter symbol */
 }
 
 
-/* aixcoff has static blocks marked in `.bs', `.es' pairs. They cannot be
+/* xcoff has static blocks marked in `.bs', `.es' pairs. They cannot be
    nested. At any given time, a symbol can only be in one static block.
    This is the base address of current static block, zero if non exists. */
    
@@ -1073,7 +1075,7 @@ read_xcoff_symtab (objfile, nsyms)
     /* READ_ONE_SYMBOL (symbol, cs, symname_alloced); */
     /* read one symbol into `cs' structure. After processing the whole symbol
        table, only string table will be kept in memory, symbol table and debug
-       section of aixcoff will be freed. Thus we can mark symbols with names
+       section of xcoff will be freed. Thus we can mark symbols with names
        in string table as `alloced'. */
     {
       int ii;
@@ -2030,7 +2032,7 @@ init_lineno (abfd, offset, size)
    (a \ at the end of the text of a name)
    call this function to get the continuation.  */
 /* So far, I haven't seen this happenning xlc output. I doubt we'll need this
-   for aixcoff. */
+   for xcoff. */
 
 #undef next_symbol_text
 #define	next_symbol_text() \
@@ -2100,42 +2102,14 @@ char **pp;
   }
 }
 
-#if 0	/* Seems to be unused, don't bother converting from old misc function
-	   vector usage to new minimal symbol tables.  FIXME:  Delete this? */
-
-/* if we now nothing about a function but its address, make a function symbol
-   out of it with the limited knowladge you have. This will be used when
-   somebody refers to a function, which doesn't exist in the symbol table,
-   but is in the minimal symbol table. */
-
-struct symbol *
-build_function_symbol (ind, objfile)
-     int ind;
-     struct objfile *objfile;
-{
-  struct symbol *sym =
-  (struct symbol *) obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
-  SYMBOL_NAME (sym) = misc_function_vector[ind].name;
-  /*   SYMBOL_VALUE (sym) = misc_function_vector[ind].address; */
-  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
-  SYMBOL_CLASS (sym) = LOC_BLOCK;
-  SYMBOL_TYPE (sym) = lookup_function_type (lookup_fundamental_type (current_objfile, FT_INTEGER));
-  SYMBOL_BLOCK_VALUE (sym) = (struct block *)
-      obstack_alloc (&objfile->symbol_obstack, sizeof (struct block));
-  BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) = misc_function_vector[ind].address;
-  return sym;
-}
-
-#endif
-
 static void
-aixcoff_new_init (objfile)
+xcoff_new_init (objfile)
      struct objfile *objfile;
 {
 }
 
 static void
-aixcoff_symfile_init (objfile)
+xcoff_symfile_init (objfile)
   struct objfile *objfile;
 {
   bfd *abfd = objfile->obfd;
@@ -2152,7 +2126,7 @@ aixcoff_symfile_init (objfile)
    objfile struct from the global list of known objfiles. */
 
 static void
-aixcoff_symfile_finish (objfile)
+xcoff_symfile_finish (objfile)
      struct objfile *objfile;
 {
   if (objfile -> sym_private != NULL)
@@ -2251,10 +2225,10 @@ free_debugsection()
 }
 
 
-/* aixcoff version of symbol file read. */
+/* xcoff version of symbol file read. */
 
 static void
-aixcoff_symfile_read (objfile, section_offset, mainline)
+xcoff_symfile_read (objfile, section_offset, mainline)
   struct objfile *objfile;
   struct section_offset *section_offset;
   int mainline;
@@ -2341,7 +2315,7 @@ aixcoff_symfile_read (objfile, section_offset, mainline)
 
 static
 struct section_offsets *
-aixcoff_symfile_offsets (objfile, addr)
+xcoff_symfile_offsets (objfile, addr)
      struct objfile *objfile;
      CORE_ADDR addr;
 {
@@ -2358,24 +2332,24 @@ aixcoff_symfile_offsets (objfile, addr)
   
   return section_offsets;
 }
-/* Register our ability to parse symbols for aixcoff BFD files. */
+/* Register our ability to parse symbols for xcoff BFD files. */
 
-static struct sym_fns aixcoff_sym_fns =
+static struct sym_fns xcoff_sym_fns =
 {
   "aixcoff-rs6000",	/* sym_name: name or name prefix of BFD target type */
   15,			/* sym_namelen: number of significant sym_name chars */
-  aixcoff_new_init,	/* sym_new_init: init anything gbl to entire symtab */
-  aixcoff_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
-  aixcoff_symfile_read,	/* sym_read: read a symbol file into symtab */
-  aixcoff_symfile_finish, /* sym_finish: finished with file, cleanup */
-  aixcoff_symfile_offsets, /* sym_offsets: xlate offsets ext->int form */
+  xcoff_new_init,	/* sym_new_init: init anything gbl to entire symtab */
+  xcoff_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
+  xcoff_symfile_read,	/* sym_read: read a symbol file into symtab */
+  xcoff_symfile_finish, /* sym_finish: finished with file, cleanup */
+  xcoff_symfile_offsets, /* sym_offsets: xlate offsets ext->int form */
   NULL			/* next: pointer to next struct sym_fns */
 };
 
 void
 _initialize_xcoffread ()
 {
-  add_symtab_fns(&aixcoff_sym_fns);
+  add_symtab_fns(&xcoff_sym_fns);
 }
 
 #else /* IBM6000_HOST */

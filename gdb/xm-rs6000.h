@@ -19,6 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <sys/select.h>
+#include <sys/ptrace.h>
 
 /* Big end is at the low address */
 
@@ -49,6 +50,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* The IBM compiler requires this in order to properly compile alloca().  */
 #pragma alloca
 
+/* There is no vfork.  */
+
 #define	vfork	fork
 
 /* Do implement the attach and detach commands.  */
@@ -62,10 +65,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Setpgrp() takes arguments, unlike ordinary Sys V's.  */
 
 #define	SETPGRP_ARGS 1
-
-/* RS6000/AIXCOFF does not support PT_STEP. Has to be simulated. */
-
-#define NO_SINGLE_STEP
 
 /* Flag for machine-specific stuff in shared files.  FIXME */
 #define IBM6000_HOST

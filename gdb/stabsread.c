@@ -447,26 +447,12 @@ define_symbol (valu, string, desc, type, objfile)
       }
     }
   p++;
+
   /* Determine the type of name being defined.  */
   /* The Acorn RISC machine's compiler can put out locals that don't
      start with "234=" or "(3,4)=", so assume anything other than the
      deftypes we know how to handle is a local.  */
-  /* (Peter Watkins @ Computervision)
-     Handle Sun-style local fortran array types 'ar...' . 
-     (gnu@cygnus.com) -- this strchr() handles them properly?
-     (tiemann@cygnus.com) -- 'C' is for catch.  */
-
-#ifdef IBM6000_TARGET
-
-  /* 'R' is for register parameters. */
-
   if (!strchr ("cfFGpPrStTvVXCR", *p))
-
-#else
-
-  if (!strchr ("cfFGpPrStTvVXC", *p))
-
-#endif
     deftype = 'l';
   else
     deftype = *p++;
@@ -543,12 +529,6 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_TYPE (sym)
 	= lookup_pointer_type (lookup_function_type (read_type (&p, objfile)));
     }
-
-#ifdef IBM6000_TARGET
-  else if (deftype == 'R')
-      SYMBOL_TYPE (sym) = read_type (&p, objfile);
-#endif
-
   else
     {
       /* The symbol class letter is followed by a type (typically the
@@ -754,9 +734,7 @@ define_symbol (valu, string, desc, type, objfile)
       add_symbol_to_list (sym, &local_symbols);
       break;
 
-#ifdef IBM6000_TARGET
     case 'R':
-#endif
     case 'r':
       /* Register variable (either global or local).  */
       SYMBOL_CLASS (sym) = LOC_REGISTER;
@@ -2970,7 +2948,6 @@ void end_stabs ()
 
 void
 finish_global_stabs (objfile)
-
      struct objfile *objfile;
 {
   if (global_stabs)
