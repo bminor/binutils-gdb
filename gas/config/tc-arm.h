@@ -137,7 +137,7 @@ bfd_boolean arm_fix_adjustable PARAMS ((struct fix *));
 #define ARM_RESET_FLAG(s,v) 	(*symbol_get_tc (s) &= ~(v))
 
 #define ARM_FLAG_THUMB 		(1 << 0)	/* The symbol is a Thumb symbol rather than an Arm symbol.  */
-#define ARM_FLAG_INTERWORK 	(1 << 1)	/* The symbol is attached to code that suppports interworking.  */
+#define ARM_FLAG_INTERWORK 	(1 << 1)	/* The symbol is attached to code that supports interworking.  */
 #define THUMB_FLAG_FUNC		(1 << 2)	/* The symbol is attached to the start of a Thumb function.  */
 
 #define ARM_IS_THUMB(s)		(ARM_GET_FLAG (s) & ARM_FLAG_THUMB)

@@ -232,7 +232,7 @@ const char FLT_CHARS[] = "";
 #define STATE_UNDF		    (3)
 #define STATE_MAX_LENGTH	    (3)
 
-/* These displacements are relative to the adress following the opcode
+/* These displacements are relative to the address following the opcode
    word of the instruction.  The first letter is Byte, Word.  The 2nd
    letter is Forward, Backward.  */
 
@@ -971,7 +971,7 @@ md_assemble (str)
     {
       if (output_instruction.imm_oprnd_size > 0)
 	{
-	  /* The intruction has an immediate operand.  */
+	  /* The instruction has an immediate operand.  */
 	  enum bfd_reloc_code_real reloc = BFD_RELOC_NONE;
 
 	  switch (output_instruction.imm_oprnd_size)
@@ -2109,7 +2109,7 @@ get_autoinc_prefix_or_indir_op (cPP, prefixp, is_autoincp, src_regnop,
    advanced to the character following the indirect operand on success, or
    has an unspecified value on failure.
 
-   cPP	     Pointer to pointer to string begining
+   cPP	     Pointer to pointer to string beginning
 	     with the operand
 
    prefixp   Pointer to structure containing an

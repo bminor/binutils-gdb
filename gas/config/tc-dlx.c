@@ -631,7 +631,7 @@ dlx_parse_loadop (str)
 
       imm[m2] = '\0';
 
-      /* Assemble the instruction to gas intrernal format.  */
+      /* Assemble the instruction to gas internal format.  */
       for (i = 0; rd[i] != '\0'; i++)
 	iBuf[i] = rd[i];
 
@@ -754,7 +754,7 @@ dlx_parse_storeop (str)
 
       imm[i] = '\0';
 
-      /* Assemble the instruction to gas intrernal format.  */
+      /* Assemble the instruction to gas internal format.  */
       for (i = 0; rd[i] != '\0'; i++)
 	iBuf[i] = rd[i];
       iBuf[i++] = ',';
@@ -1304,7 +1304,7 @@ md_undefined_symbol (name)
 
 
 /* Parse an operand that is machine-specific, the function was called
-   in expr.c by operand() function, when everything failed bdfore it
+   in expr.c by operand() function, when everything failed before it
    call a quit.  */
 
 void

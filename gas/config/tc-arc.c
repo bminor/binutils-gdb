@@ -1832,7 +1832,7 @@ get_arc_exp_reloc_type (data_p, default_type, exp, expnew)
      expressionS *expnew;
 {
   /* If the expression is "symbol >> 2" we must change it to just "symbol",
-     as fix_new_exp can't handle it.  Similarily for (symbol - symbol) >> 2.
+     as fix_new_exp can't handle it.  Similarly for (symbol - symbol) >> 2.
      That's ok though.  What's really going on here is that we're using
      ">> 2" as a special syntax for specifying BFD_RELOC_ARC_B26.  */
 

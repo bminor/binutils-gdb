@@ -110,7 +110,7 @@ extern int alpha_elf_section_letter PARAMS ((int, char **));
 extern flagword alpha_elf_section_flags PARAMS ((flagword, int, int));
 #endif
 
-/* Whether to add support for explict !relocation_op!sequence_number.  At the
+/* Whether to add support for explicit !relocation_op!sequence_number.  At the
    moment, only do this for ELF, though ECOFF could use it as well.  */
 
 #ifdef OBJ_ELF

@@ -362,7 +362,7 @@ struct asm_psr
   unsigned long field;
 };
 
-/* The bit that distnguishes CPSR and SPSR.  */
+/* The bit that distinguishes CPSR and SPSR.  */
 #define SPSR_BIT   (1 << 22)
 
 /* How many bits to shift the PSR_xxx bits up by.  */
@@ -2597,7 +2597,7 @@ validate_immediate (val)
   return FAIL;
 }
 
-/* Check to see if an immediate can be computed as two seperate immediate
+/* Check to see if an immediate can be computed as two separate immediate
    values, added together.  We already know that this value cannot be
    computed by just one ARM instruction.  */
 
@@ -3899,12 +3899,12 @@ do_mrs (str)
 
   if (   strcmp (str, "CPSR") == 0
       || strcmp (str, "SPSR") == 0
-	 /* Lower case versions for backwards compatability.  */
+	 /* Lower case versions for backwards compatibility.  */
       || strcmp (str, "cpsr") == 0
       || strcmp (str, "spsr") == 0)
     skip = 4;
 
-  /* This is for backwards compatability with older toolchains.  */
+  /* This is for backwards compatibility with older toolchains.  */
   else if (   strcmp (str, "cpsr_all") == 0
 	   || strcmp (str, "spsr_all") == 0)
     skip = 8;
@@ -4522,7 +4522,7 @@ do_clz (str)
 /* ARM V5 (argument parse)
      LDC2{L} <coproc>, <CRd>, <addressing mode>
      STC2{L} <coproc>, <CRd>, <addressing mode>
-     Instruction is not conditional, and has 0xf in the codition field.
+     Instruction is not conditional, and has 0xf in the condition field.
      Otherwise, it's the same as LDC/STC.  */
 
 static void
@@ -5892,7 +5892,7 @@ decode_shift (str, unrestrict)
 }
 
 /* Do those data_ops which can take a negative immediate constant
-   by altering the instuction.  A bit of a hack really.
+   by altering the instruction.  A bit of a hack really.
         MOV <-> MVN
         AND <-> BIC
         ADC <-> SBC
@@ -9805,7 +9805,7 @@ do_mav_ldst (str, reg0)
   if (negative)
     offset = -offset;
   else
-    inst.instruction |= CP_T_UD; /* Postive, so set bit U.  */
+    inst.instruction |= CP_T_UD; /* Positive, so set bit U.  */
 
   inst.instruction |= offset >> 2;
   end_of_line (str);
@@ -9925,7 +9925,7 @@ find_real_start (symbolP)
   const char * name = S_GET_NAME (symbolP);
   symbolS *    new_target;
 
-  /* This definiton must agree with the one in gcc/config/arm/thumb.c.  */
+  /* This definition must agree with the one in gcc/config/arm/thumb.c.  */
 #define STUB_NAME ".real_start_of"
 
   if (name == NULL)
@@ -10872,8 +10872,8 @@ md_pcrel_from (fixP)
     }
 
 #ifdef TE_WINCE
-  /* The pattern was adjusted to accomodate CE's off-by-one fixups,
-     so we un-adjust here to compensate for the accomodation.  */
+  /* The pattern was adjusted to accommodate CE's off-by-one fixups,
+     so we un-adjust here to compensate for the accommodation.  */
   return fixP->fx_where + fixP->fx_frag->fr_address + 8;
 #else
   return fixP->fx_where + fixP->fx_frag->fr_address;
@@ -11238,7 +11238,7 @@ md_apply_fix3 (fixP, valP, seg)
 	     the absolute address that is the destination of the branch in the
 	     24 bits of the branch instruction.  If however, we happen to know
 	     that the destination of the branch is in the same section as the
-	     branch instruciton itself, then we can compute the relocation for
+	     branch instruction itself, then we can compute the relocation for
 	     ourselves and not have to bother the linker with it.
 
 	     FIXME: The tests for OBJ_ELF and ! target_oabi are only here
@@ -13097,7 +13097,7 @@ arm_frag_align_code (n, max)
 {
   char * p;
 
-  /* We assume that there will never be a requirment
+  /* We assume that there will never be a requirement
      to support alignments greater than 32 bytes.  */
   if (max > MAX_MEM_FOR_RS_ALIGN_CODE)
     as_fatal (_("alignments greater than 32 bytes not supported in .text sections."));

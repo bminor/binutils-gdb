@@ -533,7 +533,7 @@ static const int alpha_num_reloc_op
 /* Maximum # digits needed to hold the largest sequence # */
 #define ALPHA_RELOC_DIGITS 25
 
-/* Structure to hold explict sequence information.  */
+/* Structure to hold explicit sequence information.  */
 struct alpha_reloc_tag
 {
   fixS *master;			/* the literal reloc */
@@ -1727,7 +1727,7 @@ alpha_adjust_relocs (abfd, sec, ptr)
   if (! seginfo->fix_root)
     return;
 
-  /* First rebuild the fixup chain without the expicit lituse and
+  /* First rebuild the fixup chain without the explicit lituse and
      gpdisp_lo16 relocs.  */
   prevP = &seginfo->fix_root;
   for (fixp = seginfo->fix_root; fixp; fixp = next)
@@ -3014,7 +3014,7 @@ add_to_link_pool (basesym, sym, addend)
    but this is what OSF/1 does.
 
    If explicit relocations of the form !literal!<number> are allowed,
-   and used, then explict_reloc with be an expression pointer.
+   and used, then explicit_reloc with be an expression pointer.
 
    Finally, the return value is nonzero if the calling macro may emit
    a LITUSE reloc if otherwise appropriate; the return value is the
@@ -3365,7 +3365,7 @@ load_expression (targreg, exp, pbasereg, poffset)
 }
 
 /* The lda macro differs from the lda instruction in that it handles
-   most simple expressions, particualrly symbol address loads and
+   most simple expressions, particularly symbol address loads and
    large constants.  */
 
 static void
