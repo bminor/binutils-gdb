@@ -1,3 +1,28 @@
+Sat May  3 20:51:48 1997  Mark Alexander  <marka@cygnus.com>
+
+	* utils.c (floatformat_from_doublest): Handle infinity properly.
+
+Thu May  1 11:44:46 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* Finalize merge from Hurd folk.  
+	    Mon Oct 30 16:41:04 1995  Miles Bader  <miles@gnu.ai.mit.edu>
+	    * thread.c (thread_apply_command, thread_apply_all_command,
+	    thread_command): Make sure TP is alive.
+	    (thread_alive): New function.
+	    Tue Nov 14 14:31:03 1995  Miles Bader  <miles@gnu.ai.mit.edu>
+	    * infrun.c (sig_print_info): Deal better with long signal names.
+	    Wed Nov 22 15:23:35 1995  Miles Bader  <miles@gnu.ai.mit.edu>
+	    * thread.c (thread_id_to_pid): New function.
+	    Fri Dec  1 13:25:25 1995  Miles Bader  <miles@gnu.ai.mit.edu>
+	    * gnu-nat.c: (set_thread_cmd_list, show_thread_cmd_list,
+	    set_thread_default_cmd_list, show_thread_default_cmd_list): 
+	    New variables.  (set_thread_cmd, show_thread_cmd, 
+	    set_thread_default_cmd, show_thread_default_cmd): New functions.
+	    Fri Apr 18 15:20:16 1997  Miles Bader  <miles@gnu.ai.mit.edu>
+	    * gnu-nat.c (inf_startup): remove TASK parameter. 
+	    (inf_set_task): replace with new function (inf_set_pid).  
+	  * gdbthread.h: Add extern decl for thread_cmd_list.
+	
 Thu May  1 02:28:21 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* printcmd.c (disassemble_command):  Adjust low function bound
@@ -17,19 +42,17 @@ Mon Apr 28 21:25:32 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 	satisfy symbol dependancy in solib.c (core_ops).
 	* target.[ch] conditionalize Mach-specific signals so that they
 	won't show up in non-Mach gdb's!
-	* thread.c: add function thread_id_to_pid; change name of static
-	function "thread_switch" to "switch_to_thread", to avoid conflict
-	with Mach global symbol; move thread_cmd_list to global scope
-	so targets can add their own thread commands.
+	* thread.c: change name of static function "thread_switch" to 
+	"switch_to_thread", to avoid conflict with Mach global symbol; 
+	move thread_cmd_list to global scope so targets can add their 
+	own thread commands.
 	* infrun.c: sig_print_info: allow for long signal names.
 	* gnu-nat.[ch]: tidying up comments.
-	* gnu-nat.c: move several functions to static scope, just for tidy;
-	remove calls to prune_threads and renumber_threads; 
+	* gnu-nat.c: remove calls to prune_threads and renumber_threads; 
 	gnu_wait must not return -1 when inferior exits; 
 	attach_to_child will modify inferior_pid in a way that allows
-	fork_inferior to remain unchanged; 
-	remove extra arg from startup_inferior;
-	move mach-specific thread commands here from thread.c.
+	fork_inferior to remain unchanged; remove extra arg from 
+	startup_inferior; move Mach thread commands here from thread.c.
 
 Mon Apr 28 18:21:20 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
