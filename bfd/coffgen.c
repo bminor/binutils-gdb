@@ -280,7 +280,8 @@ coff_object_p (abfd)
   bfd_coff_swap_filehdr_in (abfd, filehdr, &internal_f);
   bfd_release (abfd, filehdr);
 
-  if (bfd_coff_bad_format_hook (abfd, &internal_f) == false)
+  if (bfd_coff_bad_format_hook (abfd, &internal_f) == false
+      || internal_f.f_opthdr > aoutsz)
     {
       bfd_set_error (bfd_error_wrong_format);
       return 0;

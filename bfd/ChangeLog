@@ -1,3 +1,7 @@
+2001-11-02  H.J. Lu  (hjl@gnu.org)
+
+	* coffgen.c (coff_object_p): Return 0 if the header is too big.
+
 2001-11-02  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elfcore.h (elf_core_file_p): Preserve and clear abfd section
