@@ -1188,7 +1188,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 		_bfd_error_handler (_("\
 %s: Warning: Arm BLX instruction targets Arm function '%s'."),
 				    bfd_get_filename (input_bfd),
-				    h->root.root.string);
+				    h ? h->root.root.string : "(local)");
 	    }
 	  else
 #endif
@@ -1377,7 +1377,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	      _bfd_error_handler (_("\
 %s: Warning: Thumb BLX instruction targets thumb function '%s'."),
 				  bfd_get_filename (input_bfd),
-				  h->root.root.string);
+				  h ? h->root.root.string : "(local)");
 	  }
 	else
 #endif
