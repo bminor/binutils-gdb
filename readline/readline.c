@@ -5137,7 +5137,7 @@ filename_completion_function (text, state)
   static char *users_dirname = (char *)NULL;
   static int filename_len;
 
-  struct direct *entry = (struct direct *)NULL;
+  struct dirent *entry = (struct dirent *)NULL;
 
   /* If we don't have any state, then do some initialization. */
   if (!state)

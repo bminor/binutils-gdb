@@ -1,3 +1,8 @@
+Mon Nov 18 23:59:52 1991  Stu Grossman  (grossman at cygnus.com)
+
+	* readline.c (filename_completion_function):  use struct dirent
+	instead	of struct direct.
+
 Fri Nov  1 07:02:13 1991  Brian Fox  (bfox at gnuwest.fsf.org)
 
 	* readline.c (rl_translate_keyseq) Make C-? translate to RUBOUT
