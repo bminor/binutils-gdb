@@ -1431,7 +1431,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	insert_breakpoints ();
 
 	/* We need to restart all the threads now,
-	 * unles we're running in scheduler-locked mode. 
+	 * unless we're running in scheduler-locked mode. 
 	 * FIXME: shouldn't we look at currently_stepping ()?
 	 */
 	if (scheduler_mode == schedlock_on)
