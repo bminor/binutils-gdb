@@ -1,3 +1,8 @@
+2003-06-03  Andreas Schwab  <schwab@suse.de>
+
+	* m68k-tdep.c (m68k_gdbarch_init): Use set_gdbarch_print_insn ...
+	(_initialize_m68k_tdep): ... instead of deprecated_tm_print_insn.
+
 2003-06-02  Richard Henderson  <rth@redhat.com>
 
 	* alpha-tdep.c (alpha_register_reggroup_p): Zero is only

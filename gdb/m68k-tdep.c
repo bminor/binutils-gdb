@@ -966,6 +966,9 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
+  /* Disassembler.  */
+  set_gdbarch_print_insn (gdbarch, print_insn_m68k);
+
 #if defined JB_PC && defined JB_ELEMENT_SIZE
   tdep->jb_pc = JB_PC;
   tdep->jb_elt_size = JB_ELEMENT_SIZE;
@@ -999,5 +1002,4 @@ void
 _initialize_m68k_tdep (void)
 {
   gdbarch_register (bfd_arch_m68k, m68k_gdbarch_init, m68k_dump_tdep);
-  deprecated_tm_print_insn = print_insn_m68k;
 }
