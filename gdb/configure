@@ -3732,7 +3732,7 @@ EOF
 esac
 
 
-for ac_func in bcopy btowc bzero canonicalize_file_name isascii poll \
+for ac_func in btowc canonicalize_file_name isascii poll \
 	realpath sbrk setpgid setpgrp sigaction sigprocmask sigsetmask 
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6

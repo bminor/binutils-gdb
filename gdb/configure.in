@@ -135,7 +135,7 @@ AC_HEADER_STAT
 AC_C_CONST
 AC_C_INLINE
 
-AC_CHECK_FUNCS(bcopy btowc bzero canonicalize_file_name isascii poll \
+AC_CHECK_FUNCS(btowc canonicalize_file_name isascii poll \
 	realpath sbrk setpgid setpgrp sigaction sigprocmask sigsetmask )
 AC_FUNC_ALLOCA
 AC_FUNC_VFORK
