@@ -1,3 +1,9 @@
+2001-07-01  Ben Elliston  <bje@redhat.com>
+
+	* gas/m88k/allinsn.s: New file.
+	* gas/m88k/allinsn.d: Likewise.
+	* gas/m88k/m88k.exp: Test with allinsn.s also.
+
 2001-06-28  Eric Christopher  <echristo@redhat.com>
 
 	* gas/mips/usd.d: Change for march/mtune.
