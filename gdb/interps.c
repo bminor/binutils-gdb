@@ -46,6 +46,7 @@
 #include "interps.h"
 #include "completer.h"
 #include "gdb_string.h"
+#include "gdb-events.h"
 
 struct gdb_interpreter
 {
@@ -278,6 +279,9 @@ gdb_set_interpreter (struct gdb_interpreter *interp)
 	}
     }
 
+  /* Clear out any installed interpreter hooks/event handlers. */
+  clear_interpreter_hooks ();
+
   if (interp->procs.resume_proc != NULL
       && (!interp->procs.resume_proc (interp->data)))
     {
@@ -460,6 +464,7 @@ clear_interpreter_hooks ()
   error_hook = 0;
   error_begin_hook = 0;
   command_loop_hook = 0;
+  clear_gdb_event_hooks ();
 }
 
 /* This is a lazy init routine, called the first time

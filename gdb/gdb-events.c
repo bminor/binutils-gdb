@@ -134,6 +134,14 @@ set_gdb_event_hooks (struct gdb_events *vector)
 }
 #endif
 
+#if WITH_GDB_EVENTS
+void
+clear_gdb_event_hooks (void)
+{
+  set_gdb_event_hooks (&null_event_hooks);
+}
+#endif
+
 enum gdb_event
 {
   breakpoint_create,

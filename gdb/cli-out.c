@@ -365,6 +365,15 @@ cli_out_new (struct ui_file *stream)
   return ui_out_new (&cli_ui_out_impl, data, flags);
 }
 
+struct ui_file *
+cli_out_set_stream (struct ui_out *uiout, struct ui_file *stream)
+{
+  struct ui_out_data *data = ui_out_data (uiout);
+  struct ui_file *old = data->stream;
+  data->stream = stream;
+  return old;
+}
+
 /* standard gdb initialization hook */
 void
 _initialize_cli_out (void)

@@ -1,3 +1,24 @@
+2002-06-24  Keith Seitz  <keiths@redhat.com>
+
+	* Makefile.in (interps.o): Add gdb-events.h as a dependency.
+
+	* gdb-events.sh (clear_gdb_event_hooks): New function.
+	* gdb-events.c: Regenerate.
+	* gdb-events.h: Regenerate.
+
+	* cli-out.h (cli_out_set_stream): New function.
+	* cli-out.c (cli_out_set_stream): New function.
+
+	* interps.c: Include gdb-events.h.
+	(clear_interpreter_hooks): Also clear out event handlers.
+	(gdb_set_interpreter): Clear out any hooks/event handlers that
+	may have been installed by old interpreter.
+
+	* cli/cli-interp.c (cli_interpreter_exec): Set the stream for the
+	cli's uiout to gdb_stdout, which has probably changed from it's
+	initialization. Restore the original stream when we're done executing
+	in the interpreter.
+
 2002-06-18  Keith Seitz  <keiths@redhat.com>
 
 	* breakpoint.c (internal_breakpoint_number): Make static global.
