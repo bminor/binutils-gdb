@@ -21,8 +21,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /*doc*
 @section Architectures
 BFD's idea of an architecture is implimented in @code{archures.c}. BFD
-keeps two atoms in a bfd describing the architecture of the data
-attatched to the bfd, the @code{enum bfd_architecture arch} field and
+keeps two atoms in a BFD describing the architecture of the data
+attatched to the BFD, the @code{enum bfd_architecture arch} field and
 the @code{unsigned long machine} field.
 */
 
@@ -122,7 +122,7 @@ struct arch_print {
 /*proto* bfd_prinable_arch_mach
 Return a printable string representing the architecture and machine
 type. The result is only good until the next call to
-bfd_printable_arch_mach.  
+@code{bfd_printable_arch_mach}.  
 *; PROTO(CONST char *,bfd_printable_arch_mach,
     (enum bfd_architecture arch, unsigned long machine));
 */
@@ -344,10 +344,10 @@ scan_960_mach (string, ap, archp, machinep, archspec)
 *i bfd_arch_compatible
 This routine is used to determine whether two BFDs' architectures and machine types are
 compatible.  It calculates the lowest common denominator between the
-two architectures and machine types implied by the bfds and sets the
+two architectures and machine types implied by the BFDs and sets the
 objects pointed at by @var{archp} and @var{machine} if non NULL. 
 
-This routine returns @code{true} if the bfds are of compatible type,
+This routine returns @code{true} if the BFDs are of compatible type,
 otherwise @code{false}.
 *; PROTO(boolean, bfd_arch_compatible,
      (bfd *abfd,

@@ -37,7 +37,7 @@ machine, including @code{sunos.c} - for sun3 and sun4 and
 
 The base file @code{aoutx.h} defines general mechanisms for reading
 and writing records to and from disk, and various other methods which
-bfd requires. It is included by @code{aout32.c} and @code{aout64.c} to
+BFD requires. It is included by @code{aout32.c} and @code{aout64.c} to
 form the names aout_32_swap_exec_header_in,
 aout_64_swap_exec_header_in, etc.
 
@@ -507,7 +507,7 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, callback_to_real_object_p),
 /*doc*
 *i aout_<size>_mkobject
 
-This routine initializes a bfd for use with a.out files.
+This routine initializes a BFD for use with a.out files.
 
 *; PROTO(boolean, aout_<size>_mkobject, (bfd *));
 */
@@ -601,7 +601,7 @@ DEFUN(NAME(aout,machine_type),(arch, machine),
 /*doc*
 *i aout_<size>_set_arch_mach
 
-Sets the architecture and the machine of the bfd to those values
+Sets the architecture and the machine of the BFD to those values
 supplied. Verifies that the format can support the architecture
 required.
 
@@ -628,7 +628,7 @@ DEFUN(NAME(aout,set_arch_mach),(abfd, arch, machine),
 /*doc*
 *i aout_<size>new_section_hook
 
-Called by the bfd in response to a @code{bfd_make_section} request.
+Called by the BFD in response to a @code{bfd_make_section} request.
 *; PROTO(boolean, aout_<size>_new_section_hook,
          (bfd *abfd,
 	  asection *newsect));
@@ -1681,7 +1681,7 @@ DEFUN(NAME(aout,print_symbol),(ignore_abfd, afile, symbol, how),
 }
 
 /* 
- provided a bfd, a section and an offset into the section, calculate
+ provided a BFD, a section and an offset into the section, calculate
  and return the name of the source file and the line nearest to the
  wanted location.
 */

@@ -1,21 +1,22 @@
-/* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+/* Generic BFD library interface and support routines.
+   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Written by Cygnus Support.
 
-This file is part of BFD, the Binary File Diddler.
+This file is part of BFD, the Binary File Descriptor library.
 
-BFD is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-BFD is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with BFD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
-
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
 
@@ -23,8 +24,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 @section typedef bfd
 
 Pointers to bfd structs are the cornerstone of any application using
-libbfd. References though the bfd and to data in the bfd give the
-entire bfd functionality.
+libbfd. References though the BFD and to data in the BFD give the
+entire BFD functionality.
 
 Finally!  The BFD struct itself.  This contains the major data about
 the file, and contains pointers to the rest of the data.
@@ -33,7 +34,7 @@ the file, and contains pointers to the rest of the data.
 
 $struct _bfd 
 ${
-  The filename the application opened the bfd with.
+  The filename the application opened the BFD with.
 
 $  CONST char *filename;                
 
@@ -43,7 +44,7 @@ $  struct bfd_target *xvec;
 
 
 To avoid dragging too many header files into every file that
-includes bfd.h, IOSTREAM has been declared as a "char *", and MTIME
+includes @file{bfd.h}, IOSTREAM has been declared as a "char *", and MTIME
 as a "long".  Their correct types, to which they are cast when used,
 are "FILE *" and "time_t".  
 
@@ -55,13 +56,13 @@ Is the file being cached @xref{File Caching}.
 
 $  boolean cacheable;
 
-Marks whether there was a default target specified when the bfd was
+Marks whether there was a default target specified when the BFD was
 opened. This is used to select what matching algorithm to use to chose
 the back end.
 
 $  boolean target_defaulted;
 
-The caching routines use these to maintain an LRU list of bfds.
+The caching routines use these to maintain an LRU list of BFDs.
 
 $  struct _bfd *lru_prev, *lru_next;
 
@@ -83,11 +84,11 @@ For output files, channel we locked (is this used?).
 
 $int ifd;
 
-The format which belongs to the bfd.
+The format which belongs to the BFD.
 
 $  bfd_format format;
 
-The direction the bfd was opened with
+The direction the BFD was opened with
 
 $  enum bfd_direction {no_direction = 0,
 $                       read_direction = 1,
@@ -123,7 +124,7 @@ $  bfd_vma start_address;
 Used for input and output
 
 $  unsigned int symcount;
-Symtab for output bfd
+Symtab for output BFD
 
 $  struct symbol_cache_entry  **outsymbols;             
 
@@ -352,7 +353,7 @@ int line;
 
 /*proto* bfd_set_start_address
 
-Marks the entry point of an output bfd. Returns @code{true} on
+Marks the entry point of an output BFD. Returns @code{true} on
 success, @code{false} otherwise.
 
 *; PROTO(boolean, bfd_set_start_address,(bfd *, bfd_vma));
@@ -397,9 +398,10 @@ bfd_get_mtime (abfd)
   return abfd->mtime;
 }
 
-/*proto*
-*i stuff
+/*proto* stuff
+
 *+
+
 #define bfd_sizeof_headers(abfd, reloc) \
      BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, reloc))
 

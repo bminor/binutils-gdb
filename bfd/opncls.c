@@ -1,35 +1,35 @@
-/* opncls.c -- open and close a bfd. */
+/* opncls.c -- open and close a BFD.
+   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Written by Cygnus Support.
 
-/* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+This file is part of BFD, the Binary File Descriptor library.
 
-This file is part of BFD, the Binary File Diddler.
-
-BFD is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-BFD is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with BFD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
 
 #include <sysdep.h>
 #include "bfd.h"
 #include "libbfd.h"
-
+#include "obstack.h"
 extern void bfd_cache_init();
 FILE *bfd_open_file();
 
 /* fdopen is a loser -- we should use stdio exclusively.  Unfortunately
    if we do that we can't use fcntl.  */
-
+
 /** Locking 
 
    Locking is loosely controlled by the preprocessor variable
@@ -42,11 +42,12 @@ FILE *bfd_open_file();
    which, of course, knows about any other) we use the fcntl locks,
    because they're Posix.
 
-   The reason that bfd_openr and bfd_fdopenr exist, yet only bfd_openw
-   exists is because of locking.  When we do output, we lock the
-   filename file for output, then open a temporary file which does not
-   actually get its correct filename until closing time.  This is
-   safest, but requires the asymmetry in read and write entry points.
+   The reason that @code{bfd_openr} and @code{bfd_fdopenr} exist, yet
+   only @code{bfd_openw} exists is because of locking.  When we do
+   output, we lock the filename file for output, then open a temporary
+   file which does not actually get its correct filename until closing
+   time.  This is safest, but requires the asymmetry in read and write
+   entry points.
 
    Perhaps, since unix has so many different kinds of locking anyway,
    we should use the emacs lock scheme?... */
@@ -102,8 +103,8 @@ bfd *obfd;
 */
 /*proto*
 *i bfd_openr
-Opens the file supplied (using fopen) with the target supplied, it
-returns a pointer to the created bfd.
+Opens the file supplied (using @code{fopen}) with the target supplied, it
+returns a pointer to the created BFD.
 
 If NULL is returned then an error has occured.
 Possible errors are no_memory, invalid_target or system_call error.
@@ -152,7 +153,7 @@ DEFUN(bfd_openr, (filename, target),
  */
 /*proto*
 *i bfd_fdopenr
-bfd_fdopenr is to bfd_fopenr much like  fdopen is to fopen. It opens a bfd on
+bfd_fdopenr is to bfd_fopenr much like  fdopen is to fopen. It opens a BFD on
 a file already described by the @var{fd} supplied. 
 
 Possible errors are no_memory, invalid_target and system_call error.
@@ -230,12 +231,12 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
 }
 
 /** bfd_openw -- open for writing.
-  Returns a pointer to a freshly-allocated bfd on success, or NULL.
+  Returns a pointer to a freshly-allocated BFD on success, or NULL.
 
   See comment by bfd_fdopenr before you try to modify this function. */
 
 /*proto* bfd_openw
-Creates a bfd, associated with file @var{filename}, using the file
+Creates a BFD, associated with file @var{filename}, using the file
 format @var{target}, and returns a pointer to it.
 
 Possible errors are system_call_error, no_memory, invalid_target.
@@ -276,12 +277,12 @@ DEFUN(bfd_openw,(filename, target),
 }
 
 /*proto* bfd_close
-This function closes a bfd. If the bfd was open for writing, then
+This function closes a BFD. If the BFD was open for writing, then
 pending operations are completed and the file written out and closed.
 If the created file is executable, then @code{chmod} is called to mark
 it as such.
 
-All memory attatched to the bfd's obstacks is released. 
+All memory attatched to the BFD's obstacks is released. 
 
 @code{true} is returned if all is ok, otherwise @code{false}.
 *; PROTO(boolean, bfd_close,(bfd *));
@@ -323,8 +324,8 @@ DEFUN(bfd_close,(abfd),
 }
 
 /*proto* bfd_create
-This routine creates a new bfd in the manner of bfd_openw, but without
-opening a file. The new bfd takes the target from the target used by
+This routine creates a new BFD in the manner of @code{bfd_openw}, but without
+opening a file. The new BFD takes the target from the target used by
 @var{template}. The format is always set to @code{bfd_object}.
 
 *; PROTO(bfd *, bfd_create, (CONST char *filename, bfd *template));
@@ -364,7 +365,7 @@ DEFUN(void bfd_alloc_grow,(abfd, ptr, size),
       PTR ptr AND
       bfd_size_type size)
 {
-   obstack_grow(&(abfd->memory), ptr, size);
+  (void)   obstack_grow(&(abfd->memory), ptr, size);
 }
 DEFUN(PTR bfd_alloc_finish,(abfd),
       bfd *abfd)
@@ -400,7 +401,7 @@ DEFUN(PTR bfd_realloc,(abfd, old, size),
 
 /*proto* bfd_alloc_size
 Return the number of bytes in the obstacks connected to the supplied
-bfd.
+BFD.
 *; PROTO(bfd_size_type,bfd_alloc_size,(bfd *abfd));
 */
 

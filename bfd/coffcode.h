@@ -56,7 +56,7 @@ that they match what you need. You will probably also have to add
 @code{#ifdef}s to the code in @code{internalcoff.h} and
 @code{coffcode.h} if your version of coff is too wild.
 
-You can verify that your new bfd backend works quite simply by
+You can verify that your new BFD backend works quite simply by
 building @code{objdump} from the @code{binutils} directory, and
 making sure that its version of what's going on at your host systems
 idea (assuming it has the pretty standard coff dump utility (usually
@@ -69,7 +69,7 @@ it.
 @subsection How The Coff Backend Works
 
 @subsubsection Bit Twiddling
-Each flavour of coff supported in bfd has its own header file
+Each flavour of coff supported in BFD has its own header file
 descibing the external layout of the structures. There is also an
 internal description of the coff layout (in @code{internalcoff.h})
 file (@code{}). A major function of the coff backend is swapping the
@@ -83,15 +83,15 @@ number entry in coff is sometimes 16 bits, and sometimes 32 bits.
 @code{#define}ing @code{PUT_LNSZ_LNNO} and @code{GET_LNSZ_LNNO} will
 select the correct one. No doubt, some day someone will find a version
 of coff which has a varying field size not catered for at the moment.
-To port bfd, that person will have to add more @code{#defines}.
+To port BFD, that person will have to add more @code{#defines}.
 
 Three of the bit twiddling routines are exported to @code{gdb};
 @code{coff_swap_aux_in}, @code{coff_swap_sym_in} and
 @code{coff_swap_linno_in}. @code{GDB} reads the symbol table on its
-own, but uses bfd to fix things up.
+own, but uses BFD to fix things up.
 
 @subsubsection Symbol Reading
-The simple canonical form for symbols used by bfd is not rich enough
+The simple canonical form for symbols used by BFD is not rich enough
 to keep all the information available in a coff symbol table. The back
 end gets around this by keeping the original symbol table around,
 "behind the sceens". 
@@ -119,7 +119,7 @@ table. This pass moves all strings into memory, and replaces them with
 pointers to the strings.
 
 The symbol table is massaged once again, this time to create the
-canonical table used by the bfd application. Each symbol is inspected
+canonical table used by the BFD application. Each symbol is inspected
 in turn, and a decision made (using the @code{sclass} field) about the
 various flags to set in the @code{asymbol} @xref{Symbols}. The
 generated canonical table shares strings with the hidden internal
@@ -131,7 +131,7 @@ symbols which own the functions the linenumbers belong to.
 @subsubsection Symbol Writing
 Writing a symbol to a coff file which didn't come from a coff file
 will lose any debugging information. The @code{asymbol} structure
-remembers the bfd from which was born, and on output the back end
+remembers the BFD from which was born, and on output the back end
 makes sure that the same destination target as source target is
 present.
 
@@ -143,7 +143,7 @@ pointers to pointers. This allows applications like the linker to
 accumulate and output large symbol tables without having to do too
 much byte copying.
 
-The symbol table is not output to a writable bfd until it is closed. 
+The symbol table is not output to a writable BFD until it is closed. 
 The order of operations on the canonical symbol table at that point
 are:
 @table @code
@@ -155,7 +155,7 @@ field in the list with the offset from the first symbol of the current
 symbol. 
 
 Another function of this procedure is to turn the canonical value form
-of bfd into the form used by coff. Internally, bfd expects symbol
+of BFD into the form used by coff. Internally, BFD expects symbol
 values to be offsets from a section base; so a symbol physically at
 0x120, but in a section starting at 0x100, would have the value 0x20.
 Coff expects symbols to contain their final value, so symbols have
@@ -218,7 +218,7 @@ Each canonical asymbol really looks like this:
 $ typedef struct coff_symbol_struct
 $ {
 
-The actual symbol which the rest of bfd works with
+The actual symbol which the rest of BFD works with
 
 $   asymbol symbol;
 
@@ -2906,7 +2906,7 @@ sec_ptr         asect;
 
 /*doc*
 @subsubsection Reading Relocations
-Coff relocations are easily transformed into the internal bfd form
+Coff relocations are easily transformed into the internal BFD form
 (@code{arelent}). 
 
 Reading a coff relocation table is done in the following stages:
@@ -3079,7 +3079,7 @@ asymbol       **symbols;
 #ifndef NO_COFF_SYMBOLS
 
 /*
-provided a bfd, a section and an offset into the section, calculate and
+provided a BFD, a section and an offset into the section, calculate and
 return the name of the source file and the line nearest to the wanted
 location.
 */
@@ -3137,7 +3137,7 @@ DEFUN(coff_find_nearest_line,(abfd,
   }
   /* Now wander though the raw linenumbers of the section */
   /*
-    If this is the same bfd as we were previously called with and this is
+    If this is the same BFD as we were previously called with and this is
     the same section, and the offset we want is further down then we can
     prime the lookup loop
     */

@@ -21,16 +21,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /*doc*
 @section Relocations
 
-Bfd maintains relocations in much the same was as it maintains
+BFD maintains relocations in much the same was as it maintains
 symbols; they are left alone until required, then read in en-mass and
 traslated into an internal form. There is a common routine
 @code{bfd_perform_relocation} which acts upon the canonical form to to
 the actual fixup.
 
 Note that relocations are maintained on a per section basis, whilst
-symbols are maintained on a per bfd basis.
+symbols are maintained on a per BFD basis.
 
-All a back end has to do to fit the bfd interface is to create as many
+All a back end has to do to fit the BFD interface is to create as many
 @code{struct reloc_cache_entry} as there are relocations in a
 particuar section, and fill in the right bits:
 
@@ -249,7 +249,7 @@ relocation emitted has no symbol, just a section to relocate against.
 
 I'm not sure what it means when both a symbol pointer an a section
 pointer are present. Some formats use this sort of mechanism to
-describe PIC relocations, but bfd can't to that sort of thing yet.
+describe PIC relocations, but BFD can't to that sort of thing yet.
 @item howto
 The howto field can be imagined as a relocation instruction. It is a
 pointer to a struct which contains information on what to do with all
@@ -263,7 +263,7 @@ possible to create each howto field on demand.
 
 /*proto* reloc_howto_type
 The @code{reloc_howto_type} is a structure which contains all the
-information that bfd needs to know to tie up a back end's data.
+information that BFD needs to know to tie up a back end's data.
 
 *+++
 

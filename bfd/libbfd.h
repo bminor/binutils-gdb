@@ -203,17 +203,17 @@ time.
 /*
 
   bfd_last_cache
-Zero, or a pointer to the topmost bfd on the chain.  This is used by the
-bfd_cache_lookup() macro in libbfd.h to determine when it can avoid a function
-call.  
+Zero, or a pointer to the topmost BFD on the chain.  This is used by
+the @code{bfd_cache_lookup} macro in @file{libbfd.h} to determine when
+it can avoid a function call.
 */
 extern bfd *bfd_last_cache;
 
 /*
 
   bfd_cache_lookup
-Checks to see if the required bfd is the same as the last one looked
-up. If so then it can use the iostream in the bfd with impunity, since
+Checks to see if the required BFD is the same as the last one looked
+up. If so then it can use the iostream in the BFD with impunity, since
 it can't have changed since the last lookup, otherwise it has to
 perform the complicated lookup function
 */
@@ -232,7 +232,7 @@ Initialize a BFD by putting it on the cache LRU.
 /*
 
 *i bfd_cache_close
-Remove the bfd from the cache. If the attatched file is open, then close it too.
+Remove the BFD from the cache. If the attatched file is open, then close it too.
 */
  PROTO(void, bfd_cache_close, (bfd *));
 

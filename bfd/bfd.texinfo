@@ -35,7 +35,7 @@ into another language, under the above conditions for modified versions.
 @title{libbfd}
 @subtitle{The Binary File Descriptor Library}
 @sp 1
-@subtitle First Edition---@code{bfd} version < 2.0
+@subtitle First Edition---BFD version < 2.0
 @subtitle April 1991
 @author {Steve Chamberlain}
 @author {Cygnus Support}
@@ -77,8 +77,8 @@ This file documents the binary file descriptor library libbfd.
 @end ifinfo
 
 @menu
-* Overview::			Overview of bfd
-* History::			History of bfd
+* Overview::			Overview of BFD
+* History::			History of BFD
 * Backends::			Backends
 * Porting::			Porting
 * Future::			Future
@@ -98,7 +98,7 @@ BFD body:
 * Internal::
 * File Caching::
 
-Bfd backends:
+BFD backends:
 * a.out backends::
 * coff backends::
 @end menu
@@ -107,40 +107,40 @@ Bfd backends:
 @chapter Introduction
 @cindex BFD
 @cindex what is it?
-Simply put, @code{bfd} is a package which allow applications to use the
+Simply put, BFD is a package which allows applications to use the
 same routines to operate on object files whatever the object file
 format.  A different object file format can be supported simply by
 creating a new BFD back end and adding it to the library.
 
 BFD is split into two parts; the front end and the many back ends.
 @itemize @bullet
-@item The front end of bfd provides the interface to the user. It manages
+@item The front end of BFD provides the interface to the user. It manages
 memory, and various canonical data structures. The front end also
 decides which back end to use, and when to call back end routines.
-@item The back ends provide bfd its view of the real world. Each back
-end provides a set of calls which the bfd front end can use to maintain
+@item The back ends provide BFD its view of the real world. Each back
+end provides a set of calls which the BFD front end can use to maintain
 its canonical form. The back ends also may keep around information for
 their own use, for greater efficiency.
 @end itemize
 @node History, How It Works, Overview,Top
 @section History
 
-One spur behind @code{bfd} was the Intel Oregon's GNU 960 team desire for
-interoperability of applications on their COFF and b.out file formats.
-Cygnus was providing GNU support for the team, and Cygnus were
-contracted to provid the required functionality.
+One spur behind BFD was the desire, on the part of the GNU 960 team at
+Intel Oregon, for interoperability of applications on their COFF and
+b.out file formats.  Cygnus was providing GNU support for the team, and
+Cygnus was contracted to provide the required functionality.
 
-The name came from a conversation Gumby Wallace was
-having with Richard Stallman about the library, RMS said that it
-would be quite hard, Gumby said BFD. (Stallman was right, but the name
-stuck).
+The name came from a conversation David Wallace was having with Richard
+Stallman about the library: RMS said that it would be quite hard---David
+said ``BFD''.  Stallman was right, but the name stuck.
 
 At the same time, Ready Systems wanted much the same thing, but for
-different object file formats, IEEE-695, Oasys, Srecords, a.out and 68k coff.
+different object file formats: IEEE-695, Oasys, Srecords, a.out and 68k
+coff.
 
 BFD was first implemented by Steve Chamberlain (steve@@cygnus.com),
 John Gilmore (gnu@@cygnus.com),  K. Richard Pixley (rich@@cygnus.com) and
-Gumby Wallace (gumby@@cygnus.com) at Cygnus Support in Palo Alto,
+David Wallace (gumby@@cygnus.com) at Cygnus Support in Palo Alto,
 California.
 
 @node How It Works, History, Porting, Top
@@ -148,19 +148,22 @@ California.
 
 To use the library, include @code{bfd.h} and link with @code{libbfd.a}.	
 
-@code{bfd} provides a common interface to the parts of an object file
-to a calling application. 
+BFD provides a common interface to the parts of an object file
+for a calling application. 
 
-When an application sucessfully opens a
-target file (object, archive or whatever) a pointer to an internal
-structure is returned. This pointer points to structure described in
-@code{include/bfd.h}, called @code{bfd}. Conventionally this pointer is
-called a @code{bfd}, and instances of it within code are called
-@code{abfd}. All operations on the target object file are applied as
-methods to the @code{bfd}, the mapping is defined within @code{bfd.h} in
-a set of macros, all beginning @code{bfd}_something. 
+When an application sucessfully opens a target file (object, archive or
+whatever) a pointer to an internal structure is returned. This pointer
+points to a structure called @code{bfd}, described in
+@code{include/bfd.h}.  Our convention is to call this pointer a BFD, and
+instances of it within code @code{abfd}.  All operations on
+the target object file are applied as methods to the BFD.  The mapping is
+defined within @code{bfd.h} in a set of macros, all beginning
+@samp{bfd}_.
 
-For example, this sequence would do what you expect:
+For example, this sequence would do what you would probably expect:
+return the number of sections in an object file attached to a BFD
+@code{abfd}. 
+
 @lisp
 @cartouche
 #include "bfd.h"
@@ -173,14 +176,14 @@ bfd *abfd;
 @end cartouche
 @end lisp
 
-The metaphor used within @code{bfd} is that an object file has a header,
+The abstraction used within BFD is that an object file has a header,
 a number of sections containing raw data, a set of relocations, and some
-symbol information. Also, @code{bfd}s opened upon archives have the
-additional attribute of an index and contained sub bfds. This approach is
-find for a.out and coff, but looses efficiency when applied to formats
+symbol information. Also, BFDs opened for archives have the
+additional attribute of an index and contain subordinate BFDs. This approach is
+fine for a.out and coff, but loses efficiency when applied to formats
 such as S-records and IEEE-695. 
 
-@section What BFD Version 1 Can't Do
+@section What BFD Version 1 Can Do
 As different information from the the object files is required,
 BFD reads from different sections of the file and processes them.
 For example a very common operation for the linker is processing symbol
@@ -189,8 +192,8 @@ between the object file's representation of symbols and an internal
 canonical format. When the linker asks for the symbol table of an object
 file, it calls through the memory pointer to the relevant BFD
 back end routine which reads and converts the table into a canonical
-form.  The linker then operates upon the common form. When the link is
-finished and the linker writes the symbol table of the output file,
+form.  The linker then operates upon the canonical form. When the link is
+finished and the linker writes the output file's symbol table,
 another BFD back end routine is called which takes the newly
 created symbol table and converts it into the chosen output format.
 
@@ -282,10 +285,13 @@ Normal global and simple local symbols are maintained on output, so an
 output file (no matter its format) will retain symbols pointing to
 functions and to global, static, and common variables.  Some symbol
 information is not worth retaining; in @code{a.out} type information is
-stored in the symbol table as long symbol names. This information would
+stored in the symbol table as long symbol names. 
+@c FIXME: is the enclosed text linker-specific?
+This information would
 be useless to most COFF debuggers and may be thrown away with
 appropriate command line switches. (The GNU debugger @code{gdb} does
 support @code{a.out} style debugging information in COFF).
+@c end linker-query FIXME
 
 There is one word of type information within the symbol, so if the
 format supports symbol type information within symbols (for example COFF,
@@ -328,24 +334,24 @@ What is a backend
 @node Memory Usage, Sections, bfd, Top
 @section Memory Usage
 BFD keeps all its internal structures in obstacks. There is one obstack
-per open bfd file, into which the current state is stored. When a bfd is
+per open BFD file, into which the current state is stored. When a BFD is
 closed, the obstack is deleted, and so everything which has been
 allocated by libbfd for the closing file will be thrown away.
 
 BFD will not free anything created by an application, but pointers into
-bfd structures will be invalidated on a @code{bfd_close}; for example,
+@code{bfd} structures will be invalidated on a @code{bfd_close}; for example,
 after a @code{bfd_close} the vector passed to
 @code{bfd_canonicalize_symtab} will still be around, since it has been
 allocated by the application, but the data that it pointed to will be
 lost.
 
-The general rule is not to close a bfd until all operations dependent
-upon data from the bfd have been completed, or all the data from within
+The general rule is not to close a BFD until all operations dependent
+upon data from the BFD have been completed, or all the data from within
 the file has been copied. To help with the management of memory, there is a function
 (@code{bfd_alloc_size}) which returns the number of bytes in obstacks
-associated with the supplied bfd. This could be used to select the
-greediest open bfd, close it to reclaim the memory, perform some
-operation and reopen the bfd again, to get a fresh copy of the data structures.
+associated with the supplied BFD. This could be used to select the
+greediest open BFD, close it to reclaim the memory, perform some
+operation and reopen the BFD again, to get a fresh copy of the data structures.
 
 @node Sections,Symbols ,Memory Usage, Top
 @include  section.texi
@@ -391,7 +397,7 @@ operation and reopen the bfd again, to get a fresh copy of the data structures.
 * srecord backend::
 @end menu
 @node What to Put Where, aout backends, BFD back end, BFD back end
-All of bfd lives in one directory.
+All of BFD lives in one directory.
 @page
 @node aout backends, coff backends, What to Put Where, BFD back end
 @include  aoutx.texi

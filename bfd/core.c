@@ -49,7 +49,7 @@ DEFUN(bfd_core_file_failing_command,(abfd),
 
 /*proto* bfd_core_file_failing_signal
 Returns the signal number which caused the core dump which generated
-the file the bfd is attatched to.
+the file the BFD is attatched to.
 
 *; PROTO(int, bfd_core_file_failing_signal, (bfd *));
 */

@@ -1,9 +1,29 @@
+/* Object file "section" support for the BFD library.
+   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Written by Cygnus Support.
+
+This file is part of BFD, the Binary File Descriptor library.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
 /*doc*
 @section Sections
-Sections are supported in bfd in @code{section.c}.
+Sections are supported in BFD in @code{section.c}.
 
-The raw data contained within a bfd is maintained through the section
-abstraction.  A single bfd may have any number of sections, and keeps
+The raw data contained within a BFD is maintained through the section
+abstraction.  A single BFD may have any number of sections, and keeps
 hold of them by pointing to the first, each one points to the next in
 the list.
 
@@ -17,18 +37,18 @@ the list.
 @node Section Input, Section Output,,Sections
 @comment  node-name,  next,  previous,  up
 @subsection Section Input
-When a bfd is opened for reading, the section structures are created
-and attatched to the bfd.
+When a BFD is opened for reading, the section structures are created
+and attatched to the BFD.
 
 Each section has a name which describes the section in the outside
 world - for example, @code{a.out} would contain at least three
 sections, called @code{.text}, @code{.data} and @code{.bss}. 
 
-Sometimes a bfd will contain more than the 'natural' number of
+Sometimes a BFD will contain more than the 'natural' number of
 sections. A back end may attatch other sections containing constructor
 data, or an application may add a section (using bfd_make_section) to
-the sections attatched to an already open bfd. For example, the linker
-creates a supernumary section @code{COMMON} for each input file's bfd
+the sections attatched to an already open BFD. For example, the linker
+creates a supernumary section @code{COMMON} for each input file's BFD
 to hold information about common storage.
 
 The raw data is not necessarily read in at the same time as the
@@ -42,8 +62,8 @@ the data and relocations.
 
 @node Section Output,typedef asection,Section Input,Sections
 @subsection Section Output
-To write a new object style bfd, the various sections to be written
-have to be created. They are attatched to the bfd in the same way as
+To write a new object style BFD, the various sections to be written
+have to be created. They are attatched to the BFD in the same way as
 input sections, data is written to the sections using
 @code{bfd_set_section_contents}. 
 
@@ -99,7 +119,7 @@ the same as that passed to bfd_make_section.
 
 $    CONST char *name;
 
-The next section in the list belonging to the bfd, or NULL.
+The next section in the list belonging to the BFD, or NULL.
 
 $    struct sec *next;
 
@@ -159,6 +179,15 @@ peform on standard data.
 
 $#define SEC_CONSTRUCTOR 0x100
 
+The section is a constuctor, and should be placed at the end of the ..
+
+$#define SEC_CONSTRUCTOR_TEXT 0x1100
+
+$#define SEC_CONSTRUCTOR_DATA 0x2100
+
+$#define SEC_CONSTRUCTOR_BSS  0x3100
+
+
 The section has contents - a bss section could be
 @code{SEC_ALLOC} | @code{SEC_HAS_CONTENTS}, a debug section could be
 @code{SEC_HAS_CONTENTS}
@@ -169,6 +198,7 @@ An instruction to the linker not to output sections containing
 this flag even if they have information which would normally be written.
 
 $#define SEC_NEVER_LOAD 0x400
+
 
 The base address of the section in the address space of the target.
 
@@ -256,7 +286,7 @@ relocations created to relocate items within it.
 
 $   struct relent_chain *constructor_chain;
 
-The bfd which owns the section.
+The BFD which owns the section.
 
 $   bfd *owner;
 
@@ -293,14 +323,14 @@ DEFUN(bfd_get_section_by_name,(abfd, name),
 
 /*proto* bfd_make_section
 This function creates a new empty section called @var{name} and attatches it
-to the end of the chain of sections for @var{bfd}. An attempt to
+to the end of the chain of sections for the BFD supplied. An attempt to
 create a section with a name which is already in use, returns the old
 section by that name instead.
 
 Possible errors are:
 @table @code
 @item invalid_operation
-If output has already started for this bfd.
+If output has already started for this BFD.
 @item no_memory
 If obstack alloc fails.
 @end table
@@ -357,7 +387,7 @@ DEFUN(bfd_make_section,(abfd, name),
 
 
 /*proto* bfd_set_section_flags
-Attempts to set the attributes of the section named in the bfd
+Attempts to set the attributes of the section named in the BFD
 supplied to the value. Returns true on success, false on error.
 Possible error returns are:
 @table @code
@@ -389,7 +419,7 @@ DEFUN(bfd_set_section_flags,(abfd, section, flags),
 
 /*proto* bfd_map_over_sections
 Calls the provided function @var{func} for each section attatched to
-the bfd @var{abfd}, passing @var{obj} as an argument. The function
+the BFD @var{abfd}, passing @var{obj} as an argument. The function
 will be called as if by 
 
 @example
@@ -435,7 +465,7 @@ Sets @var{section} to the size @var{val}. If the operation is ok, then
 Possible error returns:
 @table @code
 @item invalid_operation
-Writing has started to the bfd, so setting the size is invalid
+Writing has started to the BFD, so setting the size is invalid
 @end table 
 
 *; PROTO(boolean, bfd_set_section_size,
@@ -446,7 +476,7 @@ boolean
 DEFUN(bfd_set_section_size,(abfd, ptr, val),
       bfd *abfd AND
       sec_ptr ptr AND
-      unsigned long val)
+      bfd_size_type val)
 {
   /* Once you've started writing to any section you cannot create or change
      the size of any others. */
@@ -462,7 +492,7 @@ DEFUN(bfd_set_section_size,(abfd, ptr, val),
 }
 
 /*proto* bfd_set_section_contents
-Sets the contents of the section @var{section} in bfd @var{abfd} to
+Sets the contents of the section @var{section} in BFD @var{abfd} to
 the data starting in memory at @var{data}. The data is written to the
 output section starting at offset @var{offset} for @var{count} bytes.
 
@@ -510,7 +540,7 @@ DEFUN(bfd_set_section_contents,(abfd, section, location, offset, count),
 }
 
 /*proto* bfd_get_section_contents
-This function reads data from @var{section} in bfd @var{abfd} into
+This function reads data from @var{section} in BFD @var{abfd} into
 memory starting at @var{location}. The data is read at an offset of
 @var{offset} from the start of the input section, and is read for
 @var{count} bytes.

@@ -135,7 +135,7 @@ Each canonical asymbol really looks like this:
  {
 
 /*
-The actual symbol which the rest of bfd works with
+The actual symbol which the rest of BFD works with
 */
 
    asymbol symbol;
