@@ -1,3 +1,34 @@
+Fri Nov 14 11:56:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips.igen: Tag vr5000 instructions.
+	(ANDI): Was missing mipsIV model, fix assembler syntax.
+	(do_c_cond_fmt): New function.
+	(C.cond.fmt): Handle mips I-III which do not support CC field
+ 	separatly.
+	(bc1): Handle mips IV which do not have a delaed FCC separatly.
+	(SDR): Mask paddr when BigEndianMem, not the converse as specified
+ 	in IV3.2 spec.
+	(DMULT, DMULTU): Force use of hosts 64bit multiplication.  Handle
+ 	vr5000 which saves LO in a GPR separatly.
+	
+	* configure.in (enable-sim-igen): For vr5000, select vr5000
+ 	specific instructions.
+	* configure: Re-generate.
+	
+Wed Nov 12 14:42:52 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (SIM_OBJS): Add sim-fpu module.
+
+	* interp.c (store_fpr), sim-main.h: Add separate fmt_uninterpreted_32 and
+ 	fmt_uninterpreted_64 bit cases to switch.  Convert to
+ 	fmt_formatted,
+
+	* sim-main.h (ENGINE_ISSUE_PREFIX_HOOK): Define,
+
+	* mips.igen (SWR): Mask paddr when BigEndianMem, not the converse
+ 	as specified in IV3.2 spec.
+	(MTC1, DMTC1): Call StoreFPR to store the GPR in the FPR.
+
 Tue Nov 11 12:38:23 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips.igen: Delay slot branches add OFFSET to NIA not CIA.

@@ -121,8 +121,12 @@ case "${target}" in
   mips64vr54*-*-*)	sim_default_gen=IGEN
 			sim_use_gen=IGEN
 			sim_igen_machine="vr5400"
+			#sim_igen_machine="vr5000,vr5400 -G gen-muli-sim"
 			;;
 # end-sanitize-vr5400
+  mips64vr5*-*-*)	sim_default_gen=IGEN
+			sim_igen_machine="vr5000"
+			;;
   mips16*-*-*)		sim_default_gen=M16
 			;;
   mips32*-*-*)		sim_default_gen=IGEN
