@@ -1,5 +1,7 @@
 2003-09-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/sparc/nm-sol2.h: New file.
+
 	New SPARC target.
 	* configure.tgt: Remove support for old SPARC targets.
 	* configure.tgt: Remove support for old SPARC hosts.
