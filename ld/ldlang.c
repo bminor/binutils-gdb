@@ -18,53 +18,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ 
  *
- * $Log$
- * Revision 1.4  1991/03/27 02:29:22  steve
- * *** empty log message ***
- *
- * Revision 1.3  1991/03/27  00:52:49  steve
- * *** empty log message ***
- *
- * Revision 1.2  1991/03/22  23:02:34  steve
- * Brought up to sync with Intel again.
- *
- * Revision 1.3  1991/03/16  22:19:21  rich
- * pop
- *
- * Revision 1.2  1991/03/15  18:52:42  rich
- * pop
- *
- * Revision 1.1  1991/03/13  00:48:23  chrisb
- * Initial revision
- *
- * Revision 1.8  1991/03/10  09:31:28  rich
- *  Modified Files:
- *  	Makefile config.h ld-emul.c ld-emul.h ld-gld.c ld-gld960.c
- *  	ld-lnk960.c ld.h lddigest.c ldexp.c ldexp.h ldfile.c ldfile.h
- *  	ldgram.y ldinfo.h ldlang.c ldlang.h ldlex.h ldlex.l ldmain.c
- *  	ldmain.h ldmisc.c ldmisc.h ldsym.c ldsym.h ldversion.c
- *  	ldversion.h ldwarn.h ldwrite.c ldwrite.h y.tab.h
- *
- * As of this round of changes, ld now builds on all hosts of (Intel960)
- * interest and copy passes my copy test on big endian hosts again.
- *
- * Revision 1.7  1991/03/09  03:31:03  sac
- * After a fatal info message, the output file is deleted.
- *
- * Revision 1.6  1991/03/09  03:25:06  sac
- * Added support for LONG, SHORT and BYTE keywords in scripts
- *
- * Revision 1.5  1991/03/06  21:59:31  sac
- * Completed G++ support
- *
- * Revision 1.4  1991/03/06  02:26:02  sac
- * Added support for constructor sections.
- * Remove parsing ambiguity.
- * Lint
- *
- * Revision 1.3  1991/02/22  17:15:01  sac
- * Added RCS keywords and copyrights
- *
 */
 
 

@@ -20,9 +20,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    $Id$ 
 
    $Log$
-   Revision 1.2  1991/03/22 23:02:31  steve
-   Brought up to sync with Intel again.
+   Revision 1.3  1991/04/08 23:21:26  steve
+   *** empty log message ***
 
+ * Revision 1.2  1991/03/22  23:02:31  steve
+ * Brought up to sync with Intel again.
+ *
  * Revision 1.2  1991/03/15  18:45:55  rich
  * foo
  *
@@ -199,10 +202,13 @@ lnk960_before_allocation()
 static void
 lnk960_after_allocation()
 {
-  lang_abs_symbol_at_end_of(".text","_etext");
-  lang_abs_symbol_at_end_of(".data","_edata");
-  lang_abs_symbol_at_beginning_of(".bss","_bss_start");
-  lang_abs_symbol_at_end_of(".bss","_end");
+  extern ld_config_type config;
+  if (config.relocateable_output == false) {
+    lang_abs_symbol_at_end_of(".text","_etext");
+    lang_abs_symbol_at_end_of(".data","_edata");
+    lang_abs_symbol_at_beginning_of(".bss","_bss_start");
+    lang_abs_symbol_at_end_of(".bss","_end");
+  }
 }
 
 static struct

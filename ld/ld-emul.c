@@ -119,7 +119,7 @@ char *target;
     ld_emulation = &ld_gld960_emulation;
   }
   else {
-    info("%P%F unrecognised emulation mode: %s",target);
+    info("%P%F unrecognised emulation mode: %s\n",target);
   }
 }
 

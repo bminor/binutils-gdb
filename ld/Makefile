@@ -3,8 +3,8 @@
 #
 # $Id$
 #
-srcdir	= ../common
-VPATH = ../common
+srcdir=../common
+VPATH=../common
 BASEDIR	= ../..
 HOSTDIR = ../$(HOST)/
 INCLUDE	= $(srcdir)/$(BASEDIR)/include-cygnus
@@ -14,9 +14,20 @@ DEBUG	= -g
 
 #__sun3__#EXTRA_DEF=-DHOST_SYS=SUN3_SYS
 #__sun4__#EXTRA_DEF=-DHOST_SYS=SUN4_SYS
+#__dgux__#EXTRA_DEF=-DHOST_SYS=DGUX_SYS
 
 CFLAGS	= $(INCLUDES) $(EXTRA_DEF) $(DEBUG)
 LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF) 
+
+.SUFFIXES: .y
+
+.y.o:
+	yacc -tvd $<
+	mv y.tab.c ldgram.tab.c
+	$(CC) -c $(CFLAGS) ldgram.tab.c
+	mv ldgram.tab.o ldgram.o
+
+
 # go directly to ld.new in case this ld isn't capable of
 # linking native object on this host.  It can be renamed on
 # install.
@@ -25,7 +36,7 @@ PROGS	= $(HOSTDIR)/ld.new
 # for self hosting
 GNUTARGET=a.out-generic-big
 LDEMULATION=gld
-bfdlib=$(srcdir)/$(BASEDIR)/bfd/$(HOST)/libbfd.a
+BFDLIB=$(srcdir)/$(BASEDIR)/bfd/$(HOST)/libbfd.a
 
 OBJS= ldgram.o ldlex.o ldlang.o ldmain.o ldwrite.o ldexp.o ld-lnk960.o ld-gld68k.o \
 	ld-gld.o ld-gld960.o ld-emul.o ldversion.o ldmisc.o ldsym.o ldfile.o
@@ -57,32 +68,27 @@ $(BFDLIB): $(BFDSOURCES)
 
 $(PROGS): $(OBJS) $(BFDLIB)
 #	(cd ../bfd; make)
-#	LDEMULATION=gld; export LDEMULATION;  GNUTARGET=a.out-generic-big;./ldok -format a.out-generic-big  -o ld /lib/crt0.o   $(OBJS) $(bfdlib) -lc /usr/local/lib/gcc/sparc/1.91/gnulib
-#	gld -o ld /lib/crt0.o   $(OBJS) $(bfdlib) -lc /usr/local/lib/gcc/sparc/1.91/gnulib
-	$(CC) -Bstatic -o ld.new $(OBJS) $(bfdlib)
+#	LDEMULATION=gld; export LDEMULATION;  GNUTARGET=a.out-generic-big;./ldok -format a.out-generic-big  -o ld /lib/crt0.o   $(OBJS) $(BFDLIB) -lc /usr/local/lib/gcc/sparc/1.91/gnulib
+#	gld -o ld /lib/crt0.o   $(OBJS) $(BFDLIB) -lc /usr/local/lib/gcc/sparc/1.91/gnulib
+	$(CC) -Bstatic -o ld.new $(OBJS) $(BFDLIB)
 
 
 ld1: ld
-	gcc -v  -B./ -o ld1  $(OBJS) $(bfdlib)
+	gcc -v  -B./ -o ld1  $(OBJS) $(BFDLIB)
 
 ld2: ld1
 	mv ld1 ld
-	gcc -v  -B./ -o ld2  $(OBJS) $(bfdlib)
+	gcc -v  -B./ -o ld2  $(OBJS) $(BFDLIB)
 
 ld3: ld2
 	mv ld2 ld
-	gcc -v  -B./ -o ld3  $(OBJS) $(bfdlib)
+	gcc -v  -B./ -o ld3  $(OBJS) $(BFDLIB)
 
 ld.dvi:ld.tex
 	tex ld.tex
 
-ldgram.o:ldgram.y
-	yacc -d ldgram.y
-	mv y.tab.c ldgram.tab.c
-	$(CC) -c $(CFLAGS) ldgram.tab.c
-	mv ldgram.tab.o ldgram.o
-
-ldgram.tab.h:y.tab.h
+ldgram.o: ldgram.y
+ldgram.tab.h:ldgram.y
 	cp y.tab.h ldgram.tab.h
 	
 ldlex.c: ldlex.l ldgram.tab.h
@@ -96,11 +102,11 @@ ldlang.o: ldlang.c ldgram.tab.h
 ld-gld.o: ld-gld.c
 ld-gld68k.o: ld-gld68k.c
 ld-gld960.o: ld-gld960.c
-ld-emul.o:ld-emul.c
-ld-lnk960.o:ld-lnk960.c
-ldexp.o:ldexp.c ldgram.tab.h
-ldmisc.o:ldmisc.c 
-ldsym.o:ldsym.c 
+ld-emul.o: ld-emul.c
+ld-lnk960.o: ld-lnk960.c
+ldexp.o: ldexp.c ldgram.tab.h
+ldmisc.o: ldmisc.c 
+ldsym.o: ldsym.c 
 
 clean:
 	- rm -f $(OBJS) $(GENERATED_SOURCES) $(GENERATED_HEADERS)

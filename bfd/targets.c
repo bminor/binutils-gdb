@@ -37,6 +37,7 @@ extern bfd_target ieee_vec;
 extern bfd_target oasys_vec;
 extern bfd_target m88k_bcs_vec;
 
+vvvvvvvvvvvvvvvvvvvv
 bfd_target *target_vector[] = {
 	&aout_little_vec,
 	&ieee_vec,
@@ -50,3 +51,4 @@ bfd_target *target_vector[] = {
 	&srec_vec,
 	NULL,
 };
+^^^^^^^^^^^^^^^^^^^^

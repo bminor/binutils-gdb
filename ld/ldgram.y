@@ -225,10 +225,10 @@ command_line_option:
 			{
 			force_make_executable = true;
 			}
-        |      OPTION_d {
+    |      OPTION_d {
 			  command_line.force_common_definition = true;
 			}
-        |      OPTION_dc
+    |      OPTION_dc
 			 {
 			  command_line.force_common_definition = true;
 			}
@@ -236,16 +236,17 @@ command_line_option:
 			{
 			/* Ignored */
 			}
-        |      	OPTION_dp
+    |      	OPTION_dp
 			 {
 			  command_line.force_common_definition = true;
 			}
-        | 	OPTION_format NAME
+    | 	OPTION_format NAME
 	           {
 			  lang_add_target($2);
        		   }
 
-	| 	OPTION_Texp { hex_mode  =true; } 
+	| 	OPTION_Texp 
+               { hex_mode  =true; } 
 		  exp
 		{ lang_section_start($1, $3);
 		  hex_mode = false; }
@@ -290,9 +291,11 @@ command_line_option:
 	|	OPTION_defsym 
 			{
 			ldgram_in_defsym = true;
+			hex_mode = true;
 			}
 			 assignment
 			{
+			hex_mode = false;
 			ldgram_in_defsym = false;
 			}	
 

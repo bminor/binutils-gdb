@@ -1,3 +1,4 @@
+/*#define UNDERSCORE_HACK 0*/
 /*
    
  bfd backend for oasys objects.
@@ -90,7 +91,13 @@ bfd *abfd;
   /* Buy enough memory for all the symbols and all the names */
   data->symbols = 
     (asymbol *)malloc(sizeof(asymbol) * abfd->symcount);
+#ifdef UNDERSCORE_HACK
+  /* buy 1 more char for each symbol to keep the underscore in*/
+  data->strings = malloc(data->symbol_string_length +
+			 abfd->symcount);
+#else
   data->strings = malloc(data->symbol_string_length);
+#endif
 
   dest_undefined = data->symbols;
   dest_defined = data->symbols + abfd->symcount -1;
@@ -98,6 +105,7 @@ bfd *abfd;
   string_ptr = data->strings;
   bfd_seek(abfd, (file_ptr)0, SEEK_SET);
   while (loop) {
+
     oasys_read_record(abfd, &record);
     switch (record.header.type) {
     case oasys_record_is_header_enum:
@@ -105,12 +113,16 @@ bfd *abfd;
     case oasys_record_is_local_enum:
     case oasys_record_is_symbol_enum:
 	{
+int 	  flag = record.header.type == oasys_record_is_local_enum ?
+	    (BSF_LOCAL) : (BSF_GLOBAL | BSF_EXPORT);
+
+
 	  size_t length = oasys_string_length(&record);
 	  switch (record.symbol.relb[0] & RELOCATION_TYPE_BITS) {
 	  case RELOCATION_TYPE_ABS:
 	    dest = dest_defined--;
 	    dest->section = 0;
-	    dest->flags = BSF_ABSOLUTE | BSF_EXPORT | BSF_GLOBAL;
+	    dest->flags = BSF_ABSOLUTE | flag;
 	    break;
 	  case RELOCATION_TYPE_REL:
 	    dest = dest_defined--;
@@ -119,11 +131,11 @@ bfd *abfd;
 					 RELOCATION_SECT_BITS];
 	    if (record.header.type == oasys_record_is_local_enum) 
 		{
-		  dest->flags =  BSF_LOCAL;
+		  dest->flags = BSF_LOCAL;
 		}
 	    else {
 
-	      dest->flags = BSF_EXPORT | BSF_GLOBAL;
+	      dest->flags = flag;
 	    }
 	    break;
 	  case RELOCATION_TYPE_UND:
@@ -142,9 +154,15 @@ bfd *abfd;
 	  }
 	  dest->name = string_ptr;
 	  dest->the_bfd = abfd;
-
+	  dest->udata = (void *)NULL;
 	  dest->value = bfd_h_getlong(abfd, &record.symbol.value);
+#if UNDERSCORE_HACK
+	  string_ptr[0] = '_';
+	  string_ptr++;
+#endif
 	  memcpy(string_ptr, record.symbol.name, length);
+
+
 	  string_ptr[length] =0;
 	  string_ptr += length +1;
 	}
@@ -163,8 +181,7 @@ bfd *abfd;
 {
   oasys_slurp_symbol_table (abfd);
 
-  return (abfd->symcount != 0) ? 
-    (abfd->symcount+1) * (sizeof (oasys_symbol_type *)) : 0;
+  return    (abfd->symcount+1) * (sizeof (oasys_symbol_type *));
 }
 
 /* 
@@ -289,10 +306,12 @@ bfd *abfd;
   /* Inspect the records, but only keep the section info -
      remember the size of the symbols
      */
+  static_data.first_data_record = 0;
   while (loop) {
+
     oasys_record_union_type record;
     oasys_read_record(abfd, &record);
-    if (record.header.length < sizeof(record.header))
+ if (record.header.length < sizeof(record.header))
       return (bfd_target *)NULL;
 
     switch ((oasys_record_enum_type)(record.header.type)) {
@@ -429,6 +448,7 @@ bfd *abfd;
     per->reloc_tail_ptr = (oasys_reloc_type **)&(s->relocation);
   }
 
+  if (data->first_data_record == 0)  return true;
   bfd_seek(abfd, data->first_data_record, SEEK_SET);
   while (loop) {
     oasys_read_record(abfd, &record);
@@ -436,93 +456,112 @@ bfd *abfd;
     case oasys_record_is_header_enum:
       break;
     case oasys_record_is_data_enum:
-      {
+	{
 
-	uint8e_type *src = record.data.data;
-	uint8e_type *end_src = ((uint8e_type *)&record) + record.header.length;
-	unsigned int relbit;
-	bfd_byte *dst_ptr ;
-	bfd_byte *dst_base_ptr ;
-	asection *section;
-	unsigned int count;
+	  uint8e_type *src = record.data.data;
+	  uint8e_type *end_src = ((uint8e_type *)&record) +
+	    record.header.length;
+	  unsigned int relbit;
+	  bfd_byte *dst_ptr ;
+	  bfd_byte *dst_base_ptr ;
+	  asection *section;
+	  unsigned int count;
 
-	bfd_vma dst_offset = bfd_h_getlong(abfd, record.data.addr);
-	section = data->sections[record.data.relb & RELOCATION_SECT_BITS];
-	per =  oasys_per_section(section);
-dst_base_ptr = 	dst_ptr = oasys_per_section(section)->data + dst_offset;
+	  bfd_vma dst_offset = bfd_h_getlong(abfd, record.data.addr);
+	  section = data->sections[record.data.relb & RELOCATION_SECT_BITS];
+	  per =  oasys_per_section(section);
+	  dst_base_ptr = oasys_per_section(section)->data;
+	  dst_ptr = oasys_per_section(section)->data +
+	    dst_offset;
 
-	while (src < end_src) {
-	  uint8e_type mod_byte = *src++;
-	  count = 8;
-
-	  for (relbit = 1; count-- != 0; relbit <<=1) 
-	    {
-	      if (relbit & mod_byte) 
-		{
-		  uint8e_type reloc = *src;
-		  /* This item needs to be relocated */
-		  switch (reloc & RELOCATION_TYPE_BITS) {
-		  case RELOCATION_TYPE_ABS:
-
-		    break;
-
-		  case RELOCATION_TYPE_REL: 
-		    {
-		      /* Relocate the item relative to the section */
-		      oasys_reloc_type *r =
-			(oasys_reloc_type *)
-			  obstack_alloc(&per->reloc_obstack,
-					sizeof(oasys_reloc_type));
-		      *(per->reloc_tail_ptr) = r;
-		      per->reloc_tail_ptr = &r->next;
-		      r->next= (oasys_reloc_type *)NULL;
-		      /* Reference to undefined symbol */
-		      src++;
-		      /* There is no symbol */
-		      r->symbol = 0;
-		      /* Work out the howto */
-		      r->relent.section =
-			data->sections[reloc & RELOCATION_SECT_BITS];
-		      r->relent.addend = 0;
-		      r->relent.address = dst_ptr - dst_base_ptr;
-		      r->relent.howto = &howto_table[reloc>>6];
-		      section->reloc_count++;
-
-		    }
-		    break;
-
-
-		  case RELOCATION_TYPE_UND:
-		    { 
-		      oasys_reloc_type *r =
-			(oasys_reloc_type *)
-			  obstack_alloc(&per->reloc_obstack,
-					sizeof(oasys_reloc_type));
-		      *(per->reloc_tail_ptr) = r;
-		      per->reloc_tail_ptr = &r->next;
-		      r->next= (oasys_reloc_type *)NULL;
-		      /* Reference to undefined symbol */
-		      src++;
-		      /* Get symbol number */
-		      r->symbol = (src[0]<<8) | src[1];
-		      /* Work out the howto */
-		      r->relent.section = (asection *)NULL;
-		      r->relent.addend = 0;
-		      r->relent.address = dst_ptr - dst_base_ptr;
-		      r->relent.howto = &howto_table[reloc>>6];
-
-		      section->reloc_count++;
-		      src+=2;
-		    }
-		    break;
-		  case RELOCATION_TYPE_COM:
-		    BFD_FAIL();
-		  }
-		}
-	      *dst_ptr++ = *src++;
+	  while (src < end_src) {
+	    uint32_type gap = end_src - src -1;
+	    uint8e_type mod_byte = *src++;
+	    count = 8;
+	    if (mod_byte == 0 && gap >= 8) {
+	      dst_ptr[0] = src[0];
+	      dst_ptr[1] = src[1];
+	      dst_ptr[2] = src[2];
+	      dst_ptr[3] = src[3];
+	      dst_ptr[4] = src[4];
+	      dst_ptr[5] = src[5];
+	      dst_ptr[6] = src[6];
+	      dst_ptr[7] = src[7];
+	      dst_ptr+= 8;
+	      src += 8;
 	    }
-	}	  
-      }
+	    else {
+	      for (relbit = 1; count-- != 0 && gap != 0; gap --, relbit <<=1) 
+		  {
+		    if (relbit & mod_byte) 
+			{
+			  uint8e_type reloc = *src;
+			  /* This item needs to be relocated */
+			  switch (reloc & RELOCATION_TYPE_BITS) {
+			  case RELOCATION_TYPE_ABS:
+
+			    break;
+
+			  case RELOCATION_TYPE_REL: 
+			      {
+				/* Relocate the item relative to the section */
+				oasys_reloc_type *r =
+				  (oasys_reloc_type *)
+				    obstack_alloc(&per->reloc_obstack,
+						  sizeof(oasys_reloc_type));
+				*(per->reloc_tail_ptr) = r;
+				per->reloc_tail_ptr = &r->next;
+				r->next= (oasys_reloc_type *)NULL;
+				/* Reference to undefined symbol */
+				src++;
+				/* There is no symbol */
+				r->symbol = 0;
+				/* Work out the howto */
+				r->relent.section =
+				  data->sections[reloc & RELOCATION_SECT_BITS];
+				r->relent.addend = 0;
+				r->relent.address = dst_ptr - dst_base_ptr;
+				r->relent.howto = &howto_table[reloc>>6];
+				r->relent.sym_ptr_ptr = (asymbol **)NULL;
+				section->reloc_count++;
+
+			      }
+			    break;
+
+
+			  case RELOCATION_TYPE_UND:
+			      { 
+				oasys_reloc_type *r =
+				  (oasys_reloc_type *)
+				    obstack_alloc(&per->reloc_obstack,
+						  sizeof(oasys_reloc_type));
+				*(per->reloc_tail_ptr) = r;
+				per->reloc_tail_ptr = &r->next;
+				r->next= (oasys_reloc_type *)NULL;
+				/* Reference to undefined symbol */
+				src++;
+				/* Get symbol number */
+				r->symbol = (src[0]<<8) | src[1];
+				/* Work out the howto */
+				r->relent.section = (asection *)NULL;
+				r->relent.addend = 0;
+				r->relent.address = dst_ptr - dst_base_ptr;
+				r->relent.howto = &howto_table[reloc>>6];
+				r->relent.sym_ptr_ptr = (asymbol **)NULL;
+
+				section->reloc_count++;
+				src+=2;
+			      }
+			    break;
+			  case RELOCATION_TYPE_COM:
+			    BFD_FAIL();
+			  }
+			}
+		    *dst_ptr++ = *src++;
+		  }
+	    }
+	  }	  
+	}
       break;
     case oasys_record_is_local_enum:
     case oasys_record_is_symbol_enum:

@@ -357,6 +357,13 @@ coff_real_object_p(abfd, nscns, opthdr)
     abfd->obj_machine = 68020;
     break;
 #endif
+#ifdef MC88MAGIC
+  case MC88MAGIC:
+  case MC88DMAGIC:
+    abfd->obj_arch = bfd_arch_m88k;
+    abfd->obj_machine = 88100;
+    break;
+#endif
 #ifdef I960ROMAGIC
   case I960ROMAGIC:
   case I960RWMAGIC:
@@ -1126,9 +1133,9 @@ coff_set_flags(abfd, magicp, flagsp)
 	*magicp = MC68MAGIC;
 	return true;
 #endif
-#if M88DMAGIC
+#ifdef M88MAGIC
     case bfd_arch_m88k:
-	*magicp = MC88DMAGIC;
+	*magicp = MC88MAGIC;
 	return true;
 	break;
 #endif
@@ -1711,7 +1718,7 @@ get_normalized_symtab(abfd)
 	}
 	else {
 	    if ((((AUXENT *) (retval + 1))->x_file.x_n.x_offset
-		 = (int) malloc(namelength)) == NULL) {
+		 = (int) malloc(namelength+1)) == NULL) {
 		bfd_error = no_memory;
 		return (NULL);
 	    }			/* on error */
@@ -1740,7 +1747,6 @@ get_normalized_symtab(abfd)
     /* ...and normalize symbol names. */
 
     for (s = retval + obj_symbol_slew(abfd); s < end; ++s) {
-
 	if (s->n_zeroes != 0) {
 	    /*
 	       This is a "short" name.  Make it long.
@@ -1763,7 +1769,7 @@ get_normalized_symtab(abfd)
 		return (NULL);
 	    }			/* on error */
 	    bzero(newstring, i);
-	    strncpy(newstring, s->n_name, 8);
+	    strncpy(newstring, s->n_name, i -1 );
 	    s->n_offset = (int) newstring;
 	    s->n_zeroes = 0;
 
