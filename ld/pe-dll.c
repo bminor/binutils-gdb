@@ -38,6 +38,7 @@
 #include "coff/internal.h"
 #include "../bfd/libcoff.h"
 #include "deffile.h"
+#include "pe-dll.h"
 
 /************************************************************************
 
@@ -71,12 +72,12 @@ static bfd_vma image_base;
 static bfd *filler_bfd;
 static struct sec *edata_s, *reloc_s;
 static unsigned char *edata_d, *reloc_d;
-static int edata_sz, reloc_sz;
+static size_t edata_sz, reloc_sz;
 
 typedef struct {
   char *target_name;
   char *object_target;
-  int imagebase_reloc;
+  unsigned int imagebase_reloc;
   int pe_arch;
   int bfd_arch;
   int underscored;
@@ -93,7 +94,7 @@ static pe_details_type pe_detail_list[] = {
     bfd_arch_i386,
     1
   },
-  { 0 }
+  { NULL, NULL, 0, 0, 0, 0 }
 };
 
 static pe_details_type *pe_details;
@@ -102,7 +103,7 @@ static pe_details_type *pe_details;
 
 void
 pe_dll_id_target (target)
-     char *target;
+     const char *target;
 {
   int i;
   for (i=0; pe_detail_list[i].target_name; i++)
@@ -227,7 +228,7 @@ auto_export (d, n)
 
 static void
 process_def_file (abfd, info)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
   int i, j;
@@ -489,7 +490,7 @@ build_filler_bfd (include_edata)
 static void
 generate_edata (abfd, info)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
 {
   int i, next_ordinal;
   int name_table_size = 0;
@@ -574,7 +575,7 @@ generate_edata (abfd, info)
 static void
 fill_edata (abfd, info)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
 {
   int i, hint;
   unsigned char *edirectory;
@@ -844,7 +845,7 @@ quoteput (s, f, needs_quotes)
 
 void
 pe_dll_generate_def_file (pe_out_def_filename)
-     char *pe_out_def_filename;
+     const char *pe_out_def_filename;
 {
   int i;
   FILE *out = fopen (pe_out_def_filename, "w");
@@ -1397,7 +1398,7 @@ make_one (exp, parent)
 void
 pe_dll_generate_implib (def, impfilename)
      def_file *def;
-     char *impfilename;
+     const char *impfilename;
 {
   int i;
   bfd *ar_head;
@@ -1611,14 +1612,14 @@ pe_as32 (ptr)
 
 boolean
 pe_implied_import_dll (filename)
-     char *filename;
+     const char *filename;
 {
   bfd *dll;
   unsigned long pe_header_offset, opthdr_ofs, num_entries, i;
   unsigned long export_rva, export_size, nsections, secptr, expptr;
   unsigned char *expdata, *erva;
   unsigned long name_rvas, ordinals, nexp, ordbase;
-  char *dll_name;
+  const char *dll_name;
 
   /* No, I can't use bfd here.  kernel32.dll puts its export table in
      the middle of the .rdata section. */
@@ -1717,7 +1718,7 @@ pe_dll_build_sections (abfd, info)
 void
 pe_exe_build_sections (abfd, info)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
 {
   pe_dll_id_target (bfd_get_target (abfd));
   build_filler_bfd (0);

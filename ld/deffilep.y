@@ -93,7 +93,6 @@ static void def_version PARAMS ((int, int));
 static void def_directive PARAMS ((char *));
 static int def_parse PARAMS ((void));
 static int def_error PARAMS ((const char *));
-static int def_debug;
 static int def_lex PARAMS ((void));
 
 static int lex_forced_token = 0;

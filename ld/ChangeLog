@@ -1,3 +1,26 @@
+1999-09-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* pe-dll.h: New file.
+	* pe-dll.c: Include "pe-dll.h".  Mark unused arguments as needed
+	to avoid warnings.
+	(edata_sz, reloc_sz): Change from int to size_t.
+	(pe_details_type): Change type of imagebase_reloc from int to
+	unsigned int.
+	(pe_detail_list): Fully initialize last entry.
+	(pe_dll_id_target): Change parameter to const.
+	(pe_dll_generate_def_file): Likewise.
+	(pe_dll_generate_implib): Likewise.
+	(pe_implied_import_dll): Likewise.  Change dll_name to const.
+	* emultempl/pe.em: Include "pe-dll.h".  Remove declarations now in
+	pe-dll.h.
+	(init): Fully initialize __dll__ entry.
+	(gld_${EMULATION_NAME}_after_open): Remove unused variables
+	sequence, elt, and i.
+	* deffile.h: Add preprocessor guard.
+	* deffilep.y (def_debug): Remove.
+	* Makefile.am: Rebuild dependencies.
+	(HFILES): Add pe-dll.h.
+
 1999-09-12  Donn Terry  <donn@interix.com>
 
 	* emultempl/pe.em (PE_DEF_SECTION_ALIGNMENT): If

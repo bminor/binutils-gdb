@@ -45,6 +45,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "../bfd/libcoff.h"
 #include "../bfd/libbfd.h"
 #include "deffile.h"
+#include "pe-dll.h"
 
 #define TARGET_IS_${EMULATION_NAME}
 
@@ -89,13 +90,9 @@ static struct internal_extra_pe_aouthdr pe;
 static int dll;
 static int support_old_code = 0;
 static char * thumb_entry_symbol = NULL;
-extern def_file *pe_def_file;
 static lang_assignment_statement_type *image_base_statement = 0;
 
 static char *pe_out_def_filename = 0;
-extern int pe_dll_export_everything;
-extern int pe_dll_kill_ats;
-extern int pe_dll_stdcall_aliases;
 static int pe_enable_stdcall_fixup = -1; /* 0=disable 1=enable */
 static char *pe_implib_filename = 0;
 
@@ -195,7 +192,7 @@ static definfo init[] =
 #define IMAGEBASEOFF 0
   D(ImageBase,"__image_base__", NT_EXE_IMAGE_BASE),
 #define DLLOFF 1
-  {&dll, sizeof(dll), 0, "__dll__"},
+  {&dll, sizeof(dll), 0, "__dll__", 0},
   D(SectionAlignment,"__section_alignment__", PE_DEF_SECTION_ALIGNMENT),
   D(FileAlignment,"__file_alignment__", PE_DEF_FILE_ALIGNMENT),
   D(MajorOperatingSystemVersion,"__major_os_version__", 4),
@@ -701,10 +698,10 @@ gld_${EMULATION_NAME}_after_open ()
 #endif
 
   {
-    static int sequence = 0;
     int is_ms_arch;
-    bfd *cur_arch = 0, *elt;
+    bfd *cur_arch = 0;
     lang_input_statement_type *is2;
+
     /* Careful - this is a shell script.  Watch those dollar signs! */
     /* Microsoft import libraries have every member named the same,
        and not in the right order for us to link them correctly.  We
@@ -713,7 +710,7 @@ gld_${EMULATION_NAME}_after_open ()
        thunks, and the sentinel(s).  The head is easy; it's the one
        with idata2.  We assume that the sentinels won't have relocs,
        and the thunks will.  It's easier than checking the symbol
-       table for external references. */
+       table for external references.  */
     LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
 	if (is->the_bfd->my_archive)
@@ -734,9 +731,10 @@ gld_${EMULATION_NAME}_after_open ()
 
 	    if (is_ms_arch)
 	      {
-		int idata2 = 0, i, reloc_count=0;
+		int idata2 = 0, reloc_count=0;
 		asection *sec;
 		char *new_name, seq;
+
 		for (sec = is->the_bfd->sections; sec; sec = sec->next)
 		  {
 		    if (strcmp (sec->name, ".idata\$2") == 0)

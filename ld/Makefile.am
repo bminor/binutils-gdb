@@ -225,7 +225,7 @@ CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 
 HFILES = ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
 	ldlang.h ldlex.h ldmain.h ldmisc.h ldver.h \
-	ldwrite.h mri.h deffile.h
+	ldwrite.h mri.h deffile.h pe-dll.h
 
 GENERATED_CFILES = ldgram.c ldlex.c deffilep.c
 GENERATED_HFILES = ldgram.h ldemul-list.h deffilep.h
@@ -883,7 +883,7 @@ pe-dll.o: pe-dll.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/libiberty.h ld.h ldexp.h ldlang.h ldwrite.h \
   ldmisc.h ldgram.h ldmain.h ldemul.h $(INCDIR)/coff/internal.h \
-  ../bfd/libcoff.h deffile.h
+  ../bfd/libcoff.h deffile.h pe-dll.h
 ldgram.o: ldgram.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
   ld.h ldexp.h ldver.h ldlang.h ldemul.h ldfile.h ldmisc.h \
