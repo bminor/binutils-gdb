@@ -8,6 +8,7 @@ end-sanitize-v8plus
 	* bfd-in2.h: Regenerated.
 	* aoutx.h (aout,machine_type): bfd_mach_sparc64 renamed to
 	bfd_mach_sparc_v9.
+	* elf64-sparc.c (sparc64_elf_object_p): Likewise.
 	* config.bfd (sparc64-*-sysv4*,sparc64-*-solaris2*): Set targ_defvec
 	to bfd_elf32_sparc_vec.
 	* cpu-sparc.c (arch_info_struct): Renamed from sparc_arch_info.
