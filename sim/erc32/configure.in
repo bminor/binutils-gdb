@@ -5,10 +5,10 @@ AC_INIT(Makefile.in)
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../..)
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
+AC_PROG_CC
 
 . ${srcdir}/../../bfd/configure.host
 
-AC_PROG_CC
 AC_SUBST(CFLAGS)
 AC_SUBST(HDEFINES)
 AR=${AR-ar}
