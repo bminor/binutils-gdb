@@ -676,7 +676,7 @@ extern void pop_frame ();
 /* Because of this, we need (as a kludge) to know the addresses of the
    text section.  */
 
-#define	NEED_TEXT_START_END
+#define	NEED_TEXT_START_END 1
 
 /* How to translate register numbers in the .stab's into gdb's internal register
    numbers.  We don't translate them, but we warn if an invalid register

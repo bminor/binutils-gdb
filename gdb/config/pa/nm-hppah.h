@@ -34,7 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* We need to figure out where the text region is so that we use the
    appropriate ptrace operator to manipulate text.  Simply reading/writing
    user space will crap out HPUX.  */
-#define NEED_TEXT_START_END
+#define NEED_TEXT_START_END 1
 
 /* This macro defines the register numbers (from REGISTER_NAMES) that
    are effectively unavailable to the user through ptrace().  It allows

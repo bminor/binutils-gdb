@@ -1,3 +1,12 @@
+Thu Nov 19 09:53:00 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* exec.c (exec_file_command): Cleanup. Replace #if
+ 	NEED_TEXT_START_END with if().
+	* config/pa/nm-hppah.h (NEED_TEXT_START_END): Redefine to be 1.
+	* config/convex/tm-convex.h (NEED_TEXT_START_END): Ditto.
+	* config/gould/tm-np1.h (NEED_TEXT_START_END): Ditto.
+	* config/a29k/tm-a29k.h (NEED_TEXT_START_END): Ditto.
+
 Thu Nov 19 13:06:22 1998  Geoffrey Noer  <noer@cygnus.com>
 
 	* main.c: Wait until more time has passed before calling
