@@ -1572,7 +1572,8 @@ coffread.o: coffread.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(demangle_h) \
 	$(coff_internal_h) $(libcoff_h) $(symfile_h) $(objfiles_h) \
 	$(buildsym_h) $(gdb_stabs_h) $(stabsread_h) $(complaints_h) \
 	$(target_h) $(gdb_assert_h)
-complaints.o: complaints.c $(defs_h) $(complaints_h) $(gdbcmd_h)
+complaints.o: complaints.c $(defs_h) $(complaints_h) $(gdb_assert_h) \
+	$(command_h) $(gdbcmd_h)
 completer.o: completer.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(filenames_h) $(cli_decode_h) $(gdbcmd_h) $(completer_h)
 copying.o: copying.c $(defs_h) $(command_h) $(gdbcmd_h)

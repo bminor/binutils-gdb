@@ -1,3 +1,36 @@
+2002-09-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* complaints.h: Update copyright.
+	(struct complaints): Declare.
+	(struct complaint): Make `message' constant.
+	(internal_complaint): Declare.
+	(complaint): Declare.
+	(complaint_root): Delete declaration.
+	(symfile_complaints): Delete declaration.
+	(struct complaints): Add opaque declaration.
+	(clear_complaints): Add a complaints parameter.
+	* complaints.c: Update copyright.
+	(enum complaint_series): Define.
+	(complaint_root): Delete.
+	(struct complaints): Define.
+	(complaint_sentinel, symfile_complaint_book): New variables.
+	(symfile_explanations, symfile_complaints): New variables.
+	New variables.
+	(get_complaints): New function.
+	(vcomplaint): New function.
+	(complaint): New function.
+	(internal_complaint): New function.
+	(complain): Call vcomplain with symfile_complaint.
+	(clear_complaints): Rewrite.
+	(_initialize_complaints): Use add_setshow_command.
+	* Makefile.in (complaints.o): Update dependencies.
+	* symfile.c (syms_from_objfile): Add symfile_complaints parameter
+	to call to clear_complaints.
+	(new_symfile_objfile, reread_symbols): Ditto.
+	(oldsyms_complaint): Delete.
+	(empty_symtab_complaint, unknown_option_complaint): Delete.
+	(free_named_symtabs): Use complaint instead of complain.
+
 2002-09-18  Michael Snyder  <msnyder@redhat.com>
 
 	* objc-lang.c: First clean-up round: comments, indentation.
