@@ -263,6 +263,23 @@ unsigned min, max;
     return new;
 }
 
+/* look for immediate notation '#' */
+static char *
+parse_imm_notation(s)
+char *s;
+{
+  static int isa_imm;
+
+  if( s == (char *)(NULL) ) return( (char *)(isa_imm) );
+  isa_imm=0;
+  while( isspace(*s) )
+	s++;
+  if( *s=='#' ) {
+	isa_imm=1;
+	s++;
+  }
+  return(s);
+}
 
 static char *
 parse_mem(s, reg, off, siz)
@@ -304,26 +321,6 @@ unsigned siz;
 	as_bad("base register expected");
     return s;
 }
-
-/* look for immediate notation '#' */
-static char *
-parse_imm_notation(s)
-char *s;
-{
-  static int isa_imm;
-
-  if( s == (char *)(NULL) ) return( (char *)(isa_imm) );
-  isa_imm=0;
-  while( isspace(*s) )
-	s++;
-  if( *s=='#' ) {
-	isa_imm=1;
-	s++;
-  }
-  return(s);
-}
-
-
 
 
 /* This is the guts of the machine-dependent assembler.  STR points to a
@@ -1141,7 +1138,12 @@ md_pcrel_from (fixP)
   return gap;
 }
 
-
+void
+dump_literals (i)
+     int i;
+{
+  /* does nothing for now.  */
+}
 
 #ifdef BFD_ASSEMBLER
 
