@@ -1,3 +1,7 @@
+2004-06-28  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* Makefile.in: Regenerate to clean up breakage.
+
 2004-06-15  Ben Elliston  <bje@au.ibm.com>
 
 	* configure.in: Run through autoupdate.
