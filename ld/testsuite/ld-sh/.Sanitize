@@ -23,17 +23,10 @@ Do-first:
 
 Things-to-keep:
 
-ChangeLog
-config
-lib
-ld-bootstrap
-ld-cdtest
-ld-empic
-ld-scripts
-ld-sh
-ld-shared
-ld-undefined
-ld-versados
+sh.exp
+sh1.s
+sh2.c
+start.s
 
 Things-to-lose:
 
