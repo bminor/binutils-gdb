@@ -174,10 +174,10 @@ struct mips_set_options
 };
 
 /* True if -mgp32 was passed.  */
-static int file_mips_gp32 = 0;
+static int file_mips_gp32 = -1;
 
 /* True if -mfp32 was passed.  */
-static int file_mips_fp32 = 0;
+static int file_mips_fp32 = -1;
 
 /* This is the struct we use to hold the current set of options.  Note
    that we must set the isa field to ISA_UNKNOWN and the mips16 field to
@@ -1056,6 +1056,71 @@ md_begin ()
 		  "Use -march instead of -mcpu."));
     }
 
+#if 1
+  /* For backward compatibility, let -mipsN set various defaults.  */
+  /* This code should go away, to be replaced with something rather more
+     draconian.  Until GCC 3.1 has been released for some reasonable
+     amount of time, however, we need to support this.  */
+  if (mips_opts.isa != ISA_UNKNOWN)
+    {
+      /* Translate -mipsN to the appropriate settings of file_mips_gp32
+	 and file_mips_fp32.  Tag binaries as using the mipsN ISA.  */
+      if (file_mips_gp32 < 0)
+	{
+	  if (ISA_HAS_64BIT_REGS (mips_opts.isa))
+	    file_mips_gp32 = 0;
+	  else
+	    file_mips_gp32 = 1;
+	}
+      if (file_mips_fp32 < 0)
+	{
+	  if (ISA_HAS_64BIT_REGS (mips_opts.isa))
+	    file_mips_fp32 = 0;
+	  else
+	    file_mips_fp32 = 1;
+	}
+
+      ci = mips_cpu_info_from_isa (mips_opts.isa);
+      assert (ci != NULL);
+      /* -mipsN has higher priority than -mcpu but lower than -march.  */
+      if (mips_arch == CPU_UNKNOWN)
+	mips_arch = ci->cpu;
+
+      /* Default mips_abi.  */
+      if (mips_opts.abi == NO_ABI)
+	{
+	  if (mips_opts.isa == ISA_MIPS1 || mips_opts.isa == ISA_MIPS2)
+	    mips_opts.abi = O32_ABI;
+	  else if (mips_opts.isa == ISA_MIPS3 || mips_opts.isa == ISA_MIPS4)
+	    mips_opts.abi = O64_ABI;
+	}
+    }
+
+  if (mips_arch == CPU_UNKNOWN && mips_cpu != CPU_UNKNOWN)
+    {
+      ci = mips_cpu_info_from_cpu (mips_cpu);
+      assert (ci != NULL);
+      mips_arch = ci->cpu;
+      as_warn (_("The -mcpu option is deprecated.  Please use -march and "
+		 "-mtune instead."));
+    }
+
+  /* Set tune from -mcpu, not from -mipsN.  */
+  if (mips_tune == CPU_UNKNOWN && mips_cpu != CPU_UNKNOWN)
+    {
+      ci = mips_cpu_info_from_cpu (mips_cpu);
+      assert (ci != NULL);
+      mips_tune = ci->cpu;
+    }
+
+  /* At this point, mips_arch will either be CPU_UNKNOWN if no ARCH was
+     specified on the command line, or some other value if one was.
+     Similarly, mips_opts.isa will be ISA_UNKNOWN if not specified on
+     the command line, or will be set otherwise if one was.  */
+
+  if (mips_arch != CPU_UNKNOWN && mips_opts.isa != ISA_UNKNOWN)
+    /* Handled above.  */;
+#else
   if (mips_arch == CPU_UNKNOWN && mips_cpu != CPU_UNKNOWN)
     {
       ci = mips_cpu_info_from_cpu (mips_cpu);
@@ -1069,6 +1134,7 @@ md_begin ()
      specified on the command line, or some other value if one was.
      Similarly, mips_opts.isa will be ISA_UNKNOWN if not specified on
      the command line, or will be set otherwise if one was.  */
+
   if (mips_arch != CPU_UNKNOWN && mips_opts.isa != ISA_UNKNOWN)
     {
       /* We have to check if the isa is the default isa of arch.  Otherwise
@@ -1089,6 +1155,7 @@ md_begin ()
 	  mips_arch = ci->cpu;
 	}
     }
+#endif
   else if (mips_arch != CPU_UNKNOWN && mips_opts.isa == ISA_UNKNOWN)
     {
       /* We have ARCH, we need ISA.  */
@@ -1149,6 +1216,11 @@ md_begin ()
 
   if (! bfd_set_arch_mach (stdoutput, bfd_arch_mips, mips_arch))
     as_warn (_("Could not set architecture and machine"));
+
+  if (file_mips_gp32 < 0)
+    file_mips_gp32 = 0;
+  if (file_mips_fp32 < 0)
+    file_mips_fp32 = 0;
 
   file_mips_isa = mips_opts.isa;
   file_mips_abi = mips_opts.abi;

@@ -1,3 +1,10 @@
+2001-12-20  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+	    Daniel Jacobowitz <drow@mvista.com>
+
+	* config/tc-mips.c (file_mips_gp32): Initialize to invalid value.
+	(file_mips_fp32): Likewise.
+	(md_begin): Compatibility handling for -mipsN option.
+
 2001-12-20  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-sh.c (parse_at): Reject @(r0) and @(r0,).
