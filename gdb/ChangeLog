@@ -1,5 +1,20 @@
 2004-03-15  Kevin Buettner  <kevinb@redhat.com>
 
+	* Makefile.in (frv-linux-tdep.o): Add dependencies.
+	* frv-linux-tdep.c: New file.
+	* frv-tdep.c (struct gdbarch_tdep): Add new field
+	``sigcontext_reg_addr''.
+	(frv_set_sigcontext_reg_addr, frv_sigtramp,frame_cache)
+	(frv_sigtramp_frame_this_id, frv_sigtramp_frame_prev_register)
+	(frv_sigramp_frame_sniffer): New functions.
+	(frv_sigtramp_frame_unwind): New static global.
+	(frv_gdbarch_init): Hook in ABI-specific overrides.  Hook up frame
+	sniffers.
+	* frv-tdep.h (frv_set_sigcontext_reg_addr): New function.
+	* config/frv/frv.mt (TDEPFILES): Add frv-linux-tdep.o.
+
+2004-03-15  Kevin Buettner  <kevinb@redhat.com>
+
 	* frv-tdep.c (frv_analyze_prologue): Terminate prologue scan,
 	but not via a call to error(), when unable to read memory.
 

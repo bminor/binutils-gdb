@@ -84,6 +84,11 @@ enum {
 /* Return the FR-V ABI associated with GDBARCH.  */
 enum frv_abi frv_abi (struct gdbarch *gdbarch);
 
+/* Associate a sigcontext address fetcher with GDBARCH.  */
+void frv_set_sigcontext_reg_addr (struct gdbarch *gdbarch,
+                                  CORE_ADDR (*sigcontext_reg_addr)
+			            (struct frame_info *, int, CORE_ADDR *));
+
 /* Fetch the interpreter and executable loadmap addresses (for shared
    library support) for the FDPIC ABI.  Return 0 if successful, -1 if
    not.  (E.g, -1 will be returned if the ABI isn't the FDPIC ABI.)  */

@@ -96,6 +96,11 @@ struct gdbarch_tdep
 
   /* Register names.  */
   char **register_names;
+
+  /* Given NEXT_FRAME, determine the address of register REGNO saved in
+     the calling sigtramp frame.  */
+  CORE_ADDR (*sigcontext_reg_addr) (struct frame_info *next_frame, int regno,
+                                    CORE_ADDR *);
 };
 
 #define CURRENT_VARIANT (gdbarch_tdep (current_gdbarch))
@@ -105,6 +110,15 @@ enum frv_abi
 frv_abi (struct gdbarch *gdbarch)
 {
   return gdbarch_tdep (gdbarch)->frv_abi;
+}
+
+/* Set sigcontext_reg_addr.  */
+void
+frv_set_sigcontext_reg_addr (struct gdbarch *gdbarch,
+                             CORE_ADDR (*sigcontext_reg_addr)
+			       (struct frame_info *, int, CORE_ADDR *))
+{
+  gdbarch_tdep (gdbarch)->sigcontext_reg_addr = sigcontext_reg_addr;
 }
 
 /* Fetch the interpreter and executable loadmap addresses (for shared
@@ -1344,6 +1358,101 @@ frv_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 			 frame_pc_unwind (next_frame));
 }
 
+/* Signal trampolines.  */
+
+static struct frv_unwind_cache *
+frv_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
+{
+  struct frv_unwind_cache *cache;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  CORE_ADDR addr;
+  char buf[4];
+  int regno;
+  CORE_ADDR sc_addr_cache_val = 0;
+
+  if (*this_cache)
+    return *this_cache;
+
+  cache = FRAME_OBSTACK_ZALLOC (struct frv_unwind_cache);
+  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+
+  frame_unwind_register (next_frame, sp_regnum, buf);
+  cache->base = extract_unsigned_integer (buf, sizeof buf);
+
+  for (regno = 0; regno < frv_num_regs; regno++)
+    {
+      cache->saved_regs[regno].addr 
+	= tdep->sigcontext_reg_addr (next_frame, regno, &sc_addr_cache_val);
+    }
+
+
+  if (cache->saved_regs[sp_regnum].addr != -1
+      && target_read_memory (cache->saved_regs[sp_regnum].addr,
+                              buf, sizeof buf) == 0)
+    {
+      cache->prev_sp = extract_unsigned_integer (buf, sizeof buf);
+
+      /* Now that we've bothered to read it out of memory, save the
+         prev frame's SP value in the cache.  */
+      trad_frame_set_value (cache->saved_regs, sp_regnum, cache->prev_sp);
+    }
+  else
+    {
+      warning ("Can't read SP value from sigtramp frame");
+    }
+
+  *this_cache = cache;
+  return cache;
+}
+
+static void
+frv_sigtramp_frame_this_id (struct frame_info *next_frame, void **this_cache,
+			     struct frame_id *this_id)
+{
+  struct frv_unwind_cache *cache =
+    frv_sigtramp_frame_cache (next_frame, this_cache);
+
+  (*this_id) = frame_id_build (cache->base, frame_pc_unwind (next_frame));
+}
+
+static void
+frv_sigtramp_frame_prev_register (struct frame_info *next_frame,
+				   void **this_cache,
+				   int regnum, int *optimizedp,
+				   enum lval_type *lvalp, CORE_ADDR *addrp,
+				   int *realnump, void *valuep)
+{
+  /* Make sure we've initialized the cache.  */
+  frv_sigtramp_frame_cache (next_frame, this_cache);
+
+  frv_frame_prev_register (next_frame, this_cache, regnum,
+			    optimizedp, lvalp, addrp, realnump, valuep);
+}
+
+static const struct frame_unwind frv_sigtramp_frame_unwind =
+{
+  SIGTRAMP_FRAME,
+  frv_sigtramp_frame_this_id,
+  frv_sigtramp_frame_prev_register
+};
+
+static const struct frame_unwind *
+frv_sigtramp_frame_sniffer (struct frame_info *next_frame)
+{
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  char *name;
+
+  /* We shouldn't even bother to try if the OSABI didn't register
+     a sigcontext_reg_addr handler.  */
+  if (!gdbarch_tdep (current_gdbarch)->sigcontext_reg_addr)
+    return NULL;
+
+  find_pc_partial_function (pc, &name, NULL, NULL);
+  if (PC_IN_SIGTRAMP (pc, name))
+    return &frv_sigtramp_frame_unwind;
+
+  return NULL;
+}
 
 static struct gdbarch *
 frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
@@ -1434,8 +1543,9 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_unwind_pc (gdbarch, frv_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, frv_unwind_sp);
   set_gdbarch_frame_align (gdbarch, frv_frame_align);
-  frame_unwind_append_sniffer (gdbarch, frv_frame_sniffer);
   frame_base_set_default (gdbarch, &frv_frame_base);
+  /* We set the sniffer lower down after the OSABI hooks have been
+     established.  */
 
   /* Settings for calling functions in the inferior.  */
   set_gdbarch_push_dummy_call (gdbarch, frv_push_dummy_call);
@@ -1479,6 +1589,15 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (frv_abi (gdbarch) == FRV_ABI_FDPIC)
     set_gdbarch_convert_from_func_ptr_addr (gdbarch,
 					    frv_convert_from_func_ptr_addr);
+
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch);
+
+  /* Set the sigtramp frame sniffer.  */
+  frame_unwind_append_sniffer (gdbarch, frv_sigtramp_frame_sniffer); 
+
+  /* Set the fallback (prologue based) frame sniffer.  */
+  frame_unwind_append_sniffer (gdbarch, frv_frame_sniffer);
 
   return gdbarch;
 }
