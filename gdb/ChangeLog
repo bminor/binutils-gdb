@@ -1,5 +1,7 @@
 2004-04-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* vaxbsd-nat.c: New file.
+
 	* vax-tdep.h: Update copyright year.  Adjust comments.
 	(VAX_REGISTER_SIZE, VAX_REGISTER_BYTES, VAX_MAX_REGISTER_RAW_SIZE,
 	VAX_MAX_REGISTER_VIRTUAL_SIZE): Remove macros.
