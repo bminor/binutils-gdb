@@ -1,3 +1,7 @@
+2002-03-13  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* po/fr.po: Updated version.
+
 2002-03-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (lang_check): Do relocatable link checks first, so that

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gprof 2.12-pre020121\n"
 "POT-Creation-Date: 2002-01-17 14:03+0000\n"
-"PO-Revision-Date: 2002-01-25 08:00-0500\n"
+"PO-Revision-Date: 2002-03-10 08:00-0500\n"
 "Last-Translator: Michel Robitaille <robitail@IRO.UMontreal.CA>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "MIME-Version: 1.0\n"
@@ -70,8 +70,14 @@ msgstr ""
 "\n"
 
 #: basic_blocks.c:562
-msgid "\nExecution Summary:\n\n"
-msgstr "\nSommaire d'exécution:\n\n"
+msgid ""
+"\n"
+"Execution Summary:\n"
+"\n"
+msgstr ""
+"\n"
+"Sommaire d'exécution:\n"
+"\n"
 
 #: basic_blocks.c:563
 #, c-format
@@ -90,8 +96,12 @@ msgstr "%9.2f   Percent du fichier exécuté\n"
 
 #: basic_blocks.c:570
 #, c-format
-msgid "\n%9lu   Total number of line executions\n"
-msgstr "\n%9lu   Nombre total de lignes exécutées\n"
+msgid ""
+"\n"
+"%9lu   Total number of line executions\n"
+msgstr ""
+"\n"
+"%9lu   Nombre total de lignes exécutées\n"
 
 #: basic_blocks.c:572
 #, c-format
@@ -104,26 +114,46 @@ msgid "[cg_tally] arc from %s to %s traversed %lu times\n"
 msgstr "[cg_tally] arc à partir de %s à %s traversés %lu fois\n"
 
 #: cg_print.c:54
-msgid "\t\t     Call graph (explanation follows)\n\n"
-msgstr "\t\t     Appel de graphe (les explications suivent)\n\n"
+msgid ""
+"\t\t     Call graph (explanation follows)\n"
+"\n"
+msgstr ""
+"\t\t     Appel de graphe (les explications suivent)\n"
+"\n"
 
 #: cg_print.c:56
-msgid "\t\t\tCall graph\n\n"
-msgstr "\t\t\tAppel de graphe\n\n"
+msgid ""
+"\t\t\tCall graph\n"
+"\n"
+msgstr ""
+"\t\t\tAppel de graphe\n"
+"\n"
 
 #: cg_print.c:59 hist.c:354
 #, c-format
-msgid "\ngranularity: each sample hit covers %ld byte(s)"
-msgstr "\ngranularité: chaque échantillonnage couvre %ld octet(s)"
+msgid ""
+"\n"
+"granularity: each sample hit covers %ld byte(s)"
+msgstr ""
+"\n"
+"granularité: chaque échantillonnage couvre %ld octet(s)"
 
 #: cg_print.c:63
 #, c-format
-msgid " for %.2f%% of %.2f seconds\n\n"
-msgstr " pour %.2f%% of %.2f secondes\n\n"
+msgid ""
+" for %.2f%% of %.2f seconds\n"
+"\n"
+msgstr ""
+" pour %.2f%% of %.2f secondes\n"
+"\n"
 
 #: cg_print.c:67
-msgid " no time propagated\n\n"
-msgstr " pas de propagation de temps\n\n"
+msgid ""
+" no time propagated\n"
+"\n"
+msgstr ""
+" pas de propagation de temps\n"
+"\n"
 
 #: cg_print.c:76 cg_print.c:79 cg_print.c:81
 msgid "called"
@@ -182,8 +212,12 @@ msgid "%6.6s %5.5s %7.7s %7.7s %7.7s %7.7s     <spontaneous>\n"
 msgstr "%6.6s %5.5s %7.7s %7.7s %7.7s %7.7s     <spontanés>\n"
 
 #: cg_print.c:570
-msgid "Index by function name\n\n"
-msgstr "Index par nom de fonction\n\n"
+msgid ""
+"Index by function name\n"
+"\n"
+msgstr ""
+"Index par nom de fonction\n"
+"\n"
 
 #: cg_print.c:627 cg_print.c:636
 #, c-format
@@ -228,7 +262,7 @@ msgstr "%s: l'option -c n'est pas supporté l'architecture %s\n"
 #: corefile.c:432
 #, c-format
 msgid "%s: file `%s' has no symbols\n"
-msgstr "%s: fichier `%s' n'a pas de symbole\n"
+msgstr "%s: fichier «%s» n'a pas de symbole\n"
 
 #: corefile.c:732
 #, c-format
@@ -253,12 +287,12 @@ msgstr "%s: fichier trop court pour être un fichier gmon\n"
 #: gmon_io.c:217 gmon_io.c:333
 #, c-format
 msgid "%s: file `%s' has bad magic cookie\n"
-msgstr "%s: fichier `%s' a un nombre magique erroné\n"
+msgstr "%s: fichier «%s» a un nombre magique erroné\n"
 
 #: gmon_io.c:228
 #, c-format
 msgid "%s: file `%s' has unsupported version %d\n"
-msgstr "%s: fichier `%s' est d'une version non supportée %d\n"
+msgstr "%s: fichier «%s» est d'une version non supportée %d\n"
 
 #: gmon_io.c:258
 #, c-format
@@ -278,7 +312,7 @@ msgstr "%s: incompatible avec le premier fichier gmon\n"
 #: gmon_io.c:378
 #, c-format
 msgid "%s: file '%s' does not appear to be in gmon.out format\n"
-msgstr "%s: fichier '%s' ne semble pas être dans le format gmon.out\n"
+msgstr "%s: fichier «%s» ne semble pas être dans le format gmon.out\n"
 
 #: gmon_io.c:399
 #, c-format
@@ -297,7 +331,7 @@ msgstr "%s: ne sait pas comment gérer le format %d du fichier\n"
 #: gmon_io.c:448
 #, c-format
 msgid "File `%s' (version %d) contains:\n"
-msgstr "Fichier `%s' (version %d) contient:\n"
+msgstr "Fichier «%s» (version %d) contient:\n"
 
 #: gmon_io.c:451
 #, c-format
@@ -392,7 +426,7 @@ msgstr "Ce logiciel est libre. AUCUNE garantie n'est donnée.\n"
 #: gprof.c:440
 #, c-format
 msgid "%s: unknown demangling style `%s'\n"
-msgstr "%s: style d'encodage par mutilation inconnu `%s'\n"
+msgstr "%s: style d'encodage par mutilation inconnu «%s»\n"
 
 #: gprof.c:460
 #, c-format
@@ -402,7 +436,7 @@ msgstr "%s: une seule des options --function-ordering et --file-ordering peut êt
 #: gprof.c:560
 #, c-format
 msgid "%s: sorry, file format `prof' is not yet supported\n"
-msgstr "%s: désolé, le format de fichier `prof' n'est pas encore supporté\n"
+msgstr "%s: désolé, le format de fichier «prof» n'est pas encore supporté\n"
 
 #: gprof.c:621
 #, c-format
@@ -417,7 +451,7 @@ msgstr "%s: le fichier gmon.out n'a pas de données de type call-graph\n"
 #: hist.c:121
 #, c-format
 msgid "%s: `%s' is incompatible with first gmon file\n"
-msgstr "%s: `%s' est incompatible avec le premier fichier gmon\n"
+msgstr "%s: «%s» est incompatible avec le premier fichier gmon\n"
 
 #: hist.c:137
 #, c-format
@@ -431,17 +465,29 @@ msgstr "%c%c/appel"
 
 #: hist.c:358
 #, c-format
-msgid " for %.2f%% of %.2f %s\n\n"
-msgstr " pour %.2f%% of %.2f %s\n\n"
+msgid ""
+" for %.2f%% of %.2f %s\n"
+"\n"
+msgstr ""
+" pour %.2f%% of %.2f %s\n"
+"\n"
 
 #: hist.c:364
 #, c-format
-msgid "\nEach sample counts as %g %s.\n"
-msgstr "\nChaque échantillon dénombre %g %s.\n"
+msgid ""
+"\n"
+"Each sample counts as %g %s.\n"
+msgstr ""
+"\n"
+"Chaque échantillon dénombre %g %s.\n"
 
 #: hist.c:369
-msgid " no time accumulated\n\n"
-msgstr " pas d'accumulation de temps\n\n"
+msgid ""
+" no time accumulated\n"
+"\n"
+msgstr ""
+" pas d'accumulation de temps\n"
+"\n"
 
 #: hist.c:376
 msgid "cumulative"
@@ -464,8 +510,16 @@ msgid "calls"
 msgstr "appels"
 
 #: hist.c:468
-msgid "\n\n\nflat profile:\n"
-msgstr "\n\n\nprofile plat:\n"
+msgid ""
+"\n"
+"\n"
+"\n"
+"flat profile:\n"
+msgstr ""
+"\n"
+"\n"
+"\n"
+"profile plat:\n"
 
 #: hist.c:474
 msgid "Flat profile:\n"
@@ -474,7 +528,7 @@ msgstr "Profile plat:\n"
 #: source.c:163
 #, c-format
 msgid "%s: could not locate `%s'\n"
-msgstr "%s: n'a pu localiser `%s'\n"
+msgstr "%s: n'a pu localiser «%s»\n"
 
 #: source.c:238
 #, c-format
