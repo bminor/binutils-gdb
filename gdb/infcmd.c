@@ -399,11 +399,12 @@ step_1 (skip_subroutines, single_inst, count_string)
 	}
       else
 	{
-	  /* Say we are stepping, but stop after one insn whatever it does.
-	     Don't step through subroutine calls even to undebuggable
-	     functions.  */
+	  /* Say we are stepping, but stop after one insn whatever it does.  */
 	  step_range_start = step_range_end = 1;
 	  if (!skip_subroutines)
+	    /* It is stepi.
+	       Don't step over function calls, not even to functions lacking
+	       line numbers.  */
 	    step_over_calls = 0;
 	}
 

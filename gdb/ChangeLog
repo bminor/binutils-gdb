@@ -1,5 +1,21 @@
 Sat Jul 10 09:54:17 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* infrun.c: Remove step_resume_{duplicate,shadow}.  Replace
+	step_resume_break_address with step_resume_breakpoint (now local
+	to wait_for_inferior).
+	({insert,remove}_step_breakpoint): Remove.
+	(wait_for_inferior): Set step resume break with
+	set_momentary_breakpoint.  Test hitting it with bpstat_stop_status
+	and bpstat_what	(stop_step_resume_break removed).
+	* breakpoint.{h,c}, infrun.c: Return value from bpstat_what now struct
+	which includes previous return value as main_action, and a step_resume
+	bit.
+	* breakpoint.c (delete_breakpoint): If breakpoint was inserted, and
+	there is another breakpoint there, insert it.
+	* infrun.c (wait_for_inferior): Rearrange the spaghetti a bit.  Use
+	a few more gotos.
+	Various: Clean up and add comments.
+
 	* infrun.c [TDESC]: Remove remaining tdesc code (see ChangeLog
 	for Wed Nov 13 16:45:13 1991).
 

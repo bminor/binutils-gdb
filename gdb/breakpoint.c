@@ -815,7 +815,7 @@ bpstat_alloc (b, cbs)
    still on the stack, I guess this needs to be machine-specific (e.g.
    a29k) but I think
 
-      read_register (FP_REGNUM) INNER_THAN watchpoint_frame->frame
+      read_fp () INNER_THAN watchpoint_frame->frame
 
    would generally work.
 
@@ -824,7 +824,7 @@ bpstat_alloc (b, cbs)
    watchpoint is relative to (another machine-specific thing, usually
 
       FRAMELESS_FUNCTION_INVOCATION (get_current_frame(), fromleaf)
-      read_register (FP_REGNUM) == wp_frame->frame
+      read_fp () == wp_frame->frame
       && !fromleaf
 
    ), *then* it could do a
@@ -918,7 +918,7 @@ within_scope (valid_block)
 /* Check watchpoint condition.  */
 static int
 watchpoint_check (p)
-     PTR p;
+     char *p;
 {
   bpstat bs = (bpstat) p;
   FRAME fr;
@@ -1058,7 +1058,8 @@ bpstat_stop_status (pc, frame_address)
 	    "Error evaluating expression for watchpoint %d\n";
 	  char message[sizeof (message1) + 30 /* slop */];
 	  sprintf (message, message1, b->number);
-	  switch (catch_errors (watchpoint_check, (char *) bs, message))
+	  switch (catch_errors (watchpoint_check, (char *) bs, message,
+				RETURN_MASK_ALL))
 	    {
 	    case WP_DISABLED:
 	      /* We've already printed what needs to be printed.  */
@@ -1104,7 +1105,8 @@ bpstat_stop_status (pc, frame_address)
 	      select_frame (get_current_frame (), 0);
 	      value_is_zero
 		= catch_errors (breakpoint_cond_eval, (char *)(b->cond),
-				"Error in testing breakpoint condition:\n");
+				"Error in testing breakpoint condition:\n",
+				RETURN_MASK_ALL);
 				/* FIXME-someday, should give breakpoint # */
 	      free_all_values ();
 	    }
@@ -1165,14 +1167,14 @@ bpstat_stop_status (pc, frame_address)
 }
 
 /* Tell what to do about this bpstat.  */
-enum bpstat_what
+struct bpstat_what
 bpstat_what (bs)
      bpstat bs;
 {
   /* Classify each bpstat as one of the following.  */
   enum class {
-    /* There was a watchpoint, but we're not stopping.  */
-    wp_nostop = 0,
+    /* This bpstat element has no effect on the main_action.  */
+    no_effect = 0,
 
     /* There was a watchpoint, stop but don't print.  */
     wp_silent,
@@ -1215,13 +1217,13 @@ bpstat_what (bs)
 #define err BPSTAT_WHAT_STOP_NOISY
 
   /* Given an old action and a class, come up with a new action.  */
-  static const enum bpstat_what
+  static const enum bpstat_what_main_action
     table[(int)class_last][(int)BPSTAT_WHAT_LAST] =
       {
 	/*                              old action */
 	/*       keep_c  stop_s  stop_n  single  setlr   clrlr   clrlrs */
 
-/*wp_nostop*/	{keep_c, stop_s, stop_n, single, setlr , clrlr , clrlrs},
+/*no_effect*/	{keep_c, stop_s, stop_n, single, setlr , clrlr , clrlrs},
 /*wp_silent*/	{stop_s, stop_s, stop_n, stop_s, stop_s, stop_s, stop_s},
 /*wp_noisy*/    {stop_n, stop_n, stop_n, stop_n, stop_n, stop_n, stop_n},
 /*bp_nostop*/	{single, stop_s, stop_n, single, setlr , clrlrs, clrlrs},
@@ -1238,7 +1240,8 @@ bpstat_what (bs)
 #undef clrlr
 #undef clrlrs
 #undef err
-  enum bpstat_what current_action = BPSTAT_WHAT_KEEP_CHECKING;
+  enum bpstat_what_main_action current_action = BPSTAT_WHAT_KEEP_CHECKING;
+  int found_step_resume = 0;
 
   for (; bs != NULL; bs = bs->next)
     {
@@ -1271,7 +1274,9 @@ bpstat_what (bs)
 		bs_class = wp_silent;
 	    }
 	  else
-	    bs_class = wp_nostop;
+	    /* There was a watchpoint, but we're not stopping.  This requires
+	       no further action.  */
+	    bs_class = no_effect;
 	  break;
 	case bp_longjmp:
 	  bs_class = long_jump;
@@ -1279,10 +1284,34 @@ bpstat_what (bs)
 	case bp_longjmp_resume:
 	  bs_class = long_resume;
 	  break;
+	case bp_step_resume:
+#if 0
+	  /* Need to temporarily disable this until we can fix the bug
+	     with nexting over a breakpoint with ->stop clear causing
+	     an infinite loop.  For now, treat the breakpoint as having
+	     been hit even if the frame is wrong.  */
+	  if (bs->stop)
+	    {
+#endif
+	      found_step_resume = 1;
+	      /* We don't handle this via the main_action.  */
+	      bs_class = no_effect;
+#if 0
+	    }
+	  else
+	    /* It is for the wrong frame.  */
+	    bs_class = bp_nostop;
+#endif
+	  break;
 	}
       current_action = table[(int)bs_class][(int)current_action];
     }
-  return current_action;
+  {
+    struct bpstat_what retval;
+    retval.main_action = current_action;
+    retval.step_resume = found_step_resume;
+    return retval;
+  }
 }
 
 /* Nonzero if we should step constantly (e.g. watchpoints on machines
@@ -2251,7 +2280,7 @@ catch_command_1 (arg, tempflag, from_tty)
   else
     {
       /* Grab selected catch clauses.  */
-      error ("catch NAME not implemeneted");
+      error ("catch NAME not implemented");
 #if 0
       /* This isn't used; I don't know what it was for.  */
       sals = map_catch_names (arg, catch_breakpoint);
@@ -2444,7 +2473,7 @@ delete_breakpoint (bpt)
   register bpstat bs;
 
   if (bpt->inserted)
-      target_remove_breakpoint(bpt->address, bpt->shadow_contents);
+    target_remove_breakpoint(bpt->address, bpt->shadow_contents);
 
   if (breakpoint_chain == bpt)
     breakpoint_chain = bpt->next;
@@ -2457,6 +2486,24 @@ delete_breakpoint (bpt)
       }
 
   check_duplicates (bpt->address);
+  /* If this breakpoint was inserted, and there is another breakpoint
+     at the same address, we need to insert the other breakpoint.  */
+  if (bpt->inserted)
+    {
+      ALL_BREAKPOINTS (b)
+	if (b->address == bpt->address && !b->duplicate)
+	  {
+	    int val;
+	    val = target_insert_breakpoint (b->address, b->shadow_contents);
+	    if (val != 0)
+	      {
+		fprintf (stderr, "Cannot insert breakpoint %d:\n", b->number);
+		memory_error (val, b->address);	/* which bombs us out */
+	      }
+	    else
+	      b->inserted = 1;
+	  }
+    }
 
   free_command_lines (&bpt->commands);
   if (bpt->cond)
@@ -2606,17 +2653,11 @@ breakpoint_re_set ()
   static char message1[] = "Error in re-setting breakpoint %d:\n";
   char message[sizeof (message1) + 30 /* slop */];
   
-  /* If we have no current source symtab, and we have any breakpoints,
-     go through the work of making a source context.  */
-  if (current_source_symtab == NULL && breakpoint_chain != 0)
-    {
-      select_source_symtab (NULL);
-    }
-
   ALL_BREAKPOINTS_SAFE (b, temp)
     {
       sprintf (message, message1, b->number);	/* Format possible error msg */
-      catch_errors (breakpoint_re_set_one, (char *) b, message);
+      catch_errors (breakpoint_re_set_one, (char *) b, message,
+		    RETURN_MASK_ALL);
     }
 
   create_longjmp_breakpoint("longjmp");
