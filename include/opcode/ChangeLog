@@ -1,3 +1,8 @@
+Wed Oct 22 17:28:33 1997  Richard Henderson  <rth@cygnus.com>
+
+	* sparc.h: Add '_' and '/' for v9a asr's.
+	Patch from David Miller <davem@vger.rutgers.edu>
+
 Tue Oct 14 13:22:29 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* h8300.h: Bit ops with absolute addresses not in the 8 bit
