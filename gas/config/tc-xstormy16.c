@@ -556,8 +556,12 @@ xstormy16_md_apply_fix3 (fixP, valueP, seg)
 
   /* Tuck `value' away for use by tc_gen_reloc.
      See the comment describing fx_addnumber in write.h.
-     This field is misnamed (or misused :-).  */
-  fixP->fx_addnumber += value;
+     This field is misnamed (or misused :-).
+     We do not do this for pc-relative relocs against a
+     defined symbol, since it will be done for us.  */
+  if ((! fixP->fx_pcrel)
+      || (fixP->fx_addsy && ! S_IS_DEFINED (fixP->fx_addsy)))
+    fixP->fx_addnumber += value;
 }
 
 

@@ -1,3 +1,9 @@
+2003-05-02  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-xstormy16.c (xstormy16_md_apply_fix3): Do not bias the
+	addend with the symbol's value for pc-relative relocations against
+	a defined symbol - this will be done automatically.
+
 2003-05-01  H.J. Lu <hjl@gnu.org>
 
 	* config/obj-elf.c (obj_elf_type): Accept "notype" and
