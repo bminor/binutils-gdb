@@ -1029,10 +1029,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
   struct frame_info *prev;
   int fromleaf;
 
-  /* Allocate the new frame but do not wire it in to the frame chain.
-     Some (bad) code in INIT_FRAME_EXTRA_INFO tries to look along
-     frame->next to pull some fancy tricks (of course such code is, by
-     definition, recursive).  Try to prevent it.
+  /* Allocate the new frame.
 
      There is no reason to worry about memory leaks, should the
      remainder of the function fail.  The allocated memory will be
@@ -1041,6 +1038,17 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      memory allocation calls.  */
   prev = FRAME_OBSTACK_ZALLOC (struct frame_info);
   prev->level = this_frame->level + 1;
+
+  /* Do not completly wire it in to the frame chain.  Some (bad) code
+     in INIT_FRAME_EXTRA_INFO tries to look along frame->prev to pull
+     some fancy tricks (of course such code is, by definition,
+     recursive).
+  
+     On the other hand, methods, such as get_frame_pc() and
+     get_frame_base() rely on being able to walk along the frame
+     chain.  Make certain that at least they work by providing that
+     link.  Of course things manipulating prev can't go back.  */
+  prev->next = this_frame;
 
   /* NOTE: cagney/2002-11-18: Should have been correctly setting the
      frame's type here, before anything else, and not last, at the
@@ -1155,7 +1163,6 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 
       /* Link it in.  */
       this_frame->prev = prev;
-      prev->next = this_frame;
 
       /* FIXME: cagney/2002-01-19: This call will go away.  Instead of
 	 initializing extra info, all frames will use the frame_cache
@@ -1230,7 +1237,6 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 
   /* Link in the already allocated prev frame.  */
   this_frame->prev = prev;
-  prev->next = this_frame;
   deprecated_update_frame_base_hack (prev, address);
 
   /* This change should not be needed, FIXME!  We should determine
