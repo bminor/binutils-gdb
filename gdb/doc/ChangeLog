@@ -1,3 +1,7 @@
+Sun Oct  3 15:26:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Include Files): Fix typo (start -> end).
+
 Thu Sep 30 18:24:56 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* gdb.texinfo, remote.texi: assorted small improvements, mostly

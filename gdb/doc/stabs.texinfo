@@ -429,11 +429,10 @@ common with @code{N_BINCL}).
 
 @findex N_SOL
 An @code{N_SOL} symbol specifies which include file subsequent symbols
-refer to.  The string field is the name of the file and the
-value is the text address corresponding to the start of the
-previous include file and the start of this one.  To specify the main
-source file again, use an @code{N_SOL} symbol with the name of the main
-source file.
+refer to.  The string field is the name of the file and the value is the
+text address corresponding to the end of the previous include file and
+the start of this one.  To specify the main source file again, use an
+@code{N_SOL} symbol with the name of the main source file.
 
 @findex N_BINCL
 @findex N_EINCL
