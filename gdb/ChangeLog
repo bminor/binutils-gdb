@@ -1,3 +1,8 @@
+Sat Mar 20 00:33:39 1993  John Gilmore  (gnu@cygnus.com)
+
+	* c-exp.y (parse_number):  Avoid shift warning.
+	* serial.h (struct ttystate):  Declare empty one on DOS.
+
 Fri Mar 19 12:59:50 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* xm-sun4os4.h:  Return type of free() should be void, not int.

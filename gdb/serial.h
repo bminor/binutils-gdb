@@ -1,5 +1,5 @@
 /* Remote serial support interface definitions for GDB, the GNU Debugger.
-   Copyright 1992 Free Software Foundation, Inc.
+   Copyright 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -20,6 +20,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef __GO32__
 
 /* Then you use the asynctsr */
+
+struct ttystate {
+	/* No members */
+};
 
 #else
 #ifdef HAVE_TERMIO
