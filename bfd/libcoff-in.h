@@ -126,6 +126,9 @@ struct xcoff_tdata
   /* Basic COFF information.  */
   coff_data_type coff;
 
+  /* True if this is an XCOFF64 file. */
+  boolean xcoff64;
+
   /* True if a large a.out header should be generated.  */
   boolean full_aouthdr;
 

@@ -1,3 +1,9 @@
+2000-06-16  Nicholas Duffek  <nsd@cygnus.com>
+
+	* coffcode.h (coff_mkobject_hook): Set xcoff_tdata.xcoff64.
+	* libcoff-in.h (struct xcoff_tdata): Define xcoff64 field.
+	* libcoff.h (struct xcoff_tdata): Define xcoff64 field.
+
 2000-06-16  Nicholas Duffek  <nsd@redhat.com>
 
 	* bfd-in.h (bfd_family_coff): Define.

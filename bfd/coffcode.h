@@ -1731,6 +1731,11 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
       struct xcoff_tdata *xcoff;
 
       xcoff = xcoff_data (abfd);
+# ifdef U803XTOCMAGIC
+      xcoff->xcoff64 = internal_f->f_magic == U803XTOCMAGIC;
+# else
+      xcoff->xcoff64 = 0;
+# endif
       xcoff->full_aouthdr = true;
       xcoff->toc = internal_a->o_toc;
       xcoff->sntoc = internal_a->o_sntoc;
