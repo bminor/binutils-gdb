@@ -1,5 +1,8 @@
 Tue Feb 11 12:28:09 1997  Jeffrey A Law  (law@cygnus.com)
 
+	* config/mn10200/tm-mn10200.h (EXTRACT_RETURN_VALUE): Fix case when
+	extracting a return value from a register pair.
+
 	* mn10200-tdep.c (mn10200_push_arguments): Stack only needs to
 	be two byte aligned.  Round argument sizes up to two byte boundary.
 	Write out args in two byte hunks.

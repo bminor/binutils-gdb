@@ -127,7 +127,7 @@ extern CORE_ADDR mn10200_frame_saved_pc   PARAMS ((struct frame_info *));
     else if (TYPE_LENGTH (TYPE) > 2 && TYPE_CODE (TYPE) != TYPE_CODE_PTR) \
       { \
 	memcpy (VALBUF, REGBUF + REGISTER_BYTE (0), 2); \
-	memcpy (VALBUF, REGBUF + REGISTER_BYTE (1), 2); \
+	memcpy (VALBUF + 2, REGBUF + REGISTER_BYTE (1), 2); \
       } \
     else \
       { \
