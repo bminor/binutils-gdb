@@ -1,3 +1,8 @@
+2002-05-06  Ben Elliston  <bje@redhat.com>
+From Graydon Hoare  <graydon@redhat.com>
+
+	* config/sid.exp: Include support for "rawsid" protocol.
+
 2002-05-03  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.c++/hang.exp: Check for corruption of the cv_type chain.

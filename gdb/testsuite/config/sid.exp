@@ -53,6 +53,8 @@ proc sid_start {} {
 	}
 	if { [board_info target sim,protocol] == "sid" } {
 	    set spawncmd "[target_info sim] [target_info sim,options] $sidendian2 -e \"set cpu-gdb-socket sockaddr-local 0.0.0.0:$port\""
+	} elseif { [board_info target sim,protocol] == "rawsid" } {
+	    set spawncmd "[target_info sim] [target_info sim,options] -$sidendian --gdb=$port"
 	} else {
 	    set spawncmd "../../sid/bsp/[target_info sim] $sidendian --gdb=$port [target_info sim,options]"
 	}
@@ -67,6 +69,8 @@ proc sid_start {} {
 	    # FIXME: sim,options may be from the build tree, should find
 	    # it in the install tree.
 	    set spawncmd "sid [target_info sim,options] $sidendian2 -e \"set cpu-gdb-socket sockaddr-local 0.0.0.0:$port\""
+	} elseif { [board_info target sim,protocol] == "rawsid" } {
+	    set spawncmd "[target_info sim] [target_info sim,options] -$sidendian --gdb=$port"
 	} else {
 	    set spawncmd "[target_info sim] $sidendian --gdb=$port [target_info sim,options]"
 	}
