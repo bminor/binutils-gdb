@@ -1,3 +1,12 @@
+2001-09-04  Jeff Law <law@redhat.com>
+
+	* elf32-h8300.c (special): New function.
+	(h8_elf_howto_table): Use it for SPECIAL_FUNCTION field in
+	all relocations.
+	(elf32_h8_final_link_relocate): Treat R_H8_DIR24A8 like 32bit
+	relocations.  Fix problems with the true 24bit reloc R_H8_DIR24R8.
+	Fix minor problems with 8bit and 16bit PC relative relocations.
+
 2001-09-01  Andreas Jaeger  <aj@suse.de>
 
 	* vms-tir.c: Add missing prototypes.

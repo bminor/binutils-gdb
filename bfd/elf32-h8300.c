@@ -39,6 +39,8 @@ static boolean elf32_h8_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *,
 	   bfd_byte *, Elf_Internal_Rela *,
 	   Elf_Internal_Sym *, asection **));
+static bfd_reloc_status_type special 
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 
 /* This does not include any relocation information, but should be
    good enough for GDB or objdump to read the file.  */
@@ -53,7 +55,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 NULL,			/* special_function */
+	 special,			/* special_function */
 	 "R_H8_NONE",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -67,7 +69,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 NULL,			/* special_function */
+	 special,			/* special_function */
 	 "R_H8_DIR32",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -81,7 +83,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 NULL,			/* special_function */
+	 special,			/* special_function */
 	 "R_H8_DIR16",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -95,7 +97,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 NULL,			/* special_function */
+	 special,			/* special_function */
 	 "R_H8_DIR16",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -109,7 +111,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 NULL,			/* special_function */
+	 special,			/* special_function */
 	 "R_H8_DIR16A8",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -123,7 +125,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 NULL,			/* special_function */
+	 special,			/* special_function */
 	 "R_H8_DIR16R8",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -137,7 +139,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 NULL,			/* special_function */
+	 special,			/* special_function */
 	 "R_H8_DIR24A8",	/* name */
 	 true,			/* partial_inplace */
 	 0xff000000,		/* src_mask */
@@ -151,7 +153,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 NULL,			/* special_function */
+	 special,			/* special_function */
 	 "R_H8_DIR24R8",	/* name */
 	 true,			/* partial_inplace */
 	 0xff000000,		/* src_mask */
@@ -165,7 +167,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 NULL,			/* special_function */
+	 special,			/* special_function */
 	 "R_H8_DIR32",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -179,7 +181,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 NULL,			/* special_function */
+	 special,			/* special_function */
 	 "R_H8_PCREL16",	/* name */
 	 false,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -193,7 +195,7 @@ static reloc_howto_type h8_elf_howto_table[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 NULL,			/* special_function */
+	 special,			/* special_function */
 	 "R_H8_PCREL8",		/* name */
 	 false,			/* partial_inplace */
 	 0xff,			/* src_mask */
@@ -274,6 +276,28 @@ elf32_h8_info_to_howto_rel (abfd, bfd_reloc, elf_reloc)
   bfd_reloc->howto = &h8_elf_howto_table[r];
 }
 
+/* Special handling for H8/300 relocs.
+   We only come here for pcrel stuff and return normally if not an -r link.
+   When doing -r, we can't do any arithmetic for the pcrel stuff, because
+   we support relaxing on the H8/300 series chips.  */
+static bfd_reloc_status_type
+special (abfd, reloc_entry, symbol, data, input_section, output_bfd,
+	 error_message)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
+     bfd *output_bfd;
+     char **error_message ATTRIBUTE_UNUSED;
+{
+  if (output_bfd == (bfd *) NULL)
+    return bfd_reloc_continue;
+
+  /* Adjust the reloc address to that in the output section.  */
+  reloc_entry->address += input_section->output_offset;
+  return bfd_reloc_ok;
+}
 
 /* Perform a relocation as part of a final link.  */
 static bfd_reloc_status_type
@@ -302,6 +326,7 @@ elf32_h8_final_link_relocate (r_type, input_bfd, output_bfd,
 
     case R_H8_DIR32:
     case R_H8_DIR32A16:
+    case R_H8_DIR24A8:
       value += addend;
       bfd_put_32 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
@@ -320,12 +345,21 @@ elf32_h8_final_link_relocate (r_type, input_bfd, output_bfd,
       bfd_put_8 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
 
-    case R_H8_DIR24A8:
     case R_H8_DIR24R8:
       value += addend;
 
+      /* HIT_DATA is the address for the first byte for the relocated
+	 value.  Subtract 1 so that we can manipulate the data in 32bit
+	 hunks.  */
+      hit_data--;
+
+      /* Clear out the top byte in value.  */
       value &= 0xffffff;
+
+      /* Retrieve the type byte for value from the section contents.  */
       value |= (bfd_get_32 (input_bfd, hit_data) & 0xff000000);
+
+      /* Now scribble it out in one 32bit hunk.  */
       bfd_put_32 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
 
@@ -335,6 +369,11 @@ elf32_h8_final_link_relocate (r_type, input_bfd, output_bfd,
       value -= offset;
       value += addend;
 
+      /* The value is relative to the start of the instruction,
+	 not the relocation offset.  Subtract 2 to account for
+	 this minor issue.  */
+      value -= 2;
+
       bfd_put_16 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
 
@@ -343,6 +382,11 @@ elf32_h8_final_link_relocate (r_type, input_bfd, output_bfd,
 		+ input_section->output_offset);
       value -= offset;
       value += addend;
+
+      /* The value is relative to the start of the instruction,
+	 not the relocation offset.  Subtract 1 to account for
+	 this minor issue.  */
+      value -= 1;
 
       bfd_put_8 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
