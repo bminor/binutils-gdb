@@ -1,3 +1,7 @@
+2002-03-07  Daniel Jacobowitz  <drow@mvista.com>
+
+	* NEWS: Mark version 2.12.
+
 2002-02-28  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/tc-alpha.c (s_alpha_text): Use obj_elf_text for OBJ_ELF, not

@@ -1,3 +1,7 @@
+2002-03-07  Daniel Jacobowitz  <drow@mvista.com>
+
+	* NEWS: Mark version 2.12.
+
 2002-02-20  Andreas Schwab  <schwab@suse.de>
 
 	* emulparams/elf64_ia64.sh (OTHER_READONLY_SECTIONS): Don't fold
