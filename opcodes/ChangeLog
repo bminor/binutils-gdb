@@ -1,3 +1,8 @@
+Tue Sep 10 16:12:39 1996  Fred Fish  <fnf@rtl.cygnus.com>
+
+	* mips-dis.c (print_insn_arg): Add prototype.
+	(_print_insn_mips): Ditto.
+
 Mon Sep  9 14:26:26 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-dis.c (print_insn_arg): Print condition code registers as
