@@ -1,5 +1,11 @@
 2004-08-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.in: Add <ncurses/ncurses.h> to the list of possible
+	curses headers.
+	* configure, config.in: Regenerate.	
+	* gdb_curses.h [HAVE_NCURSES_NCURSES_H]: Include
+	<ncurses/ncurses.h>.
+
 	* config/nm-bsd.h (PTRACE_ARG3_TYPE): Remove define.
 	* config/nm-nbsd.h: Update copyright year.
 	(PTRACE_ARG3_TYPE): Remove define.

@@ -22,7 +22,9 @@
 #ifndef GDB_CURSES_H
 #define GDB_CURSES_H 1
 
-#if defined (HAVE_NCURSES_H)
+#if defined (HAVE_NCURSES_NCURSES_H)
+#include <ncurses/ncurses.h>
+#elif defined (HAVE_NCURSES_H)
 #include <ncurses.h>
 #elif defined (HAVE_CURSESX_H)
 #include <cursesX.h>
@@ -30,4 +32,4 @@
 #include <curses.h>
 #endif
 
-#endif
+#endif /* gdb_curses.h */
