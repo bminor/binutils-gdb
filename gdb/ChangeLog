@@ -1,3 +1,8 @@
+Sat Jan 30 19:55:52 1993  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (HFILES):  Add typeprint.h.
+	* typeprint.[ch]:  Update copyrights.
+
 Thu Jan 28 19:09:02 1993  John Gilmore  (gnu@cygnus.com)
 
 	* Makefile.in:  Update to match doc/ subdir changes.
