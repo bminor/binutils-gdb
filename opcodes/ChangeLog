@@ -1,4 +1,9 @@
-Sun Sep 04 17:58:10 1994	Richard Earnshaw (rwe@pegasus.esprit.ec.org)
+Tue Sep  6 11:37:12 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* mips-opc.c: Set INSN_STORE_MEMORY flag for all instructions
+	which store a value into memory.
+
+Sun Sep 04 17:58:10 1994  Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 
 	* configure.in, Makefile.in, disassemble.c: Add support for the ARM.
 	* arm-dis.c, arm-opc.h: New files.
