@@ -232,6 +232,19 @@ fix_new_exp (frag, where, size, exp, pcrel, r_type)
     case O_absent:
       break;
 
+    case O_add:
+      /* This comes up when _GLOBAL_OFFSET_TABLE_+(.-L0) is read, if
+	 the difference expression cannot immediately be reduced.  */
+      {
+	extern symbolS *make_expr_symbol ();
+	symbolS *stmp = make_expr_symbol (exp);
+	exp->X_op = O_symbol;
+	exp->X_op_symbol = 0;
+	exp->X_add_symbol = stmp;
+	exp->X_add_number = 0;
+	return fix_new_exp (frag, where, size, exp, pcrel, r_type);
+      }
+
     case O_uminus:
       sub = exp->X_add_symbol;
       off = exp->X_add_number;
@@ -573,7 +586,11 @@ adjust_reloc_syms (abfd, sec, xxx)
     else if (fixp->fx_addsy)
       {
 	symbolS *sym = fixp->fx_addsy;
-	asection *symsec = sym->bsym->section;
+	asection *symsec;
+
+      reduce_fixup:
+
+	symsec = sym->bsym->section;
 
 	/* If it's one of these sections, assume the symbol is
 	   definitely going to be output.  The code in
@@ -616,6 +633,27 @@ adjust_reloc_syms (abfd, sec, xxx)
 	    continue;
 	  }
 #endif
+
+	/* For PIC support: We may get expressions like
+	   "_GLOBAL_OFFSET_TABLE_+(.-L5)" where "." and "L5" may not
+	   necessarily have had a fixed difference initially.  But now
+	   it should be a known constant, so we can reduce it.  Since
+	   we can't easily handle a symbol value that looks like
+	   someUndefinedSymbol+const, though, we convert the fixup to
+	   access the undefined symbol directly, and discard the
+	   intermediate symbol.  */
+	if (S_GET_SEGMENT (sym) == expr_section
+	    && sym->sy_value.X_op == O_add
+	    && (resolve_symbol_value (sym->sy_value.X_add_symbol),
+		S_GET_SEGMENT (sym->sy_value.X_add_symbol) == undefined_section)
+	    && (resolve_symbol_value (sym->sy_value.X_op_symbol),
+		S_GET_SEGMENT (sym->sy_value.X_op_symbol) == absolute_section))
+	  {
+	    fixp->fx_offset += S_GET_VALUE (sym->sy_value.X_op_symbol);
+	    fixp->fx_offset += sym->sy_value.X_add_number;
+	    fixp->fx_addsy = sym = sym->sy_value.X_add_symbol;
+	    goto reduce_fixup;
+	  }
 
 	/* If the section symbol isn't going to be output, the relocs
 	   at least should still work.  If not, figure out what to do
@@ -676,7 +714,6 @@ write_relocs (abfd, sec, xxx)
   for (fixp = seginfo->fix_root; fixp != (fixS *) NULL; fixp = fixp->fx_next)
     {
       arelent *reloc;
-      char *data;
       bfd_reloc_status_type s;
 
       if (fixp->fx_done)
@@ -690,24 +727,14 @@ write_relocs (abfd, sec, xxx)
 	  n--;
 	  continue;
 	}
-      data = fixp->fx_frag->fr_literal + fixp->fx_where;
       if (fixp->fx_where + fixp->fx_size
 	  > fixp->fx_frag->fr_fix + fixp->fx_frag->fr_offset)
 	abort ();
 
-      if (reloc->howto->partial_inplace == false
-	  && reloc->howto->pcrel_offset == true
-	  && reloc->howto->pc_relative == true)
-	{
-	  /* bfd_perform_relocation screws this up */
-	  reloc->addend += reloc->address;
-	}
-      /* Pass bogus address so that when bfd_perform_relocation adds
-	 `reloc->address' back in, it'll come up with `data', which is where
-	 we want it to operate.  We can't just do it by fudging reloc->address,
-	 since that might be used in the calculations(?).  */
-      s = bfd_perform_relocation (stdoutput, reloc, data - reloc->address,
-				  sec, stdoutput, &err);
+      s = bfd_install_relocation (stdoutput, reloc,
+				  fixp->fx_frag->fr_literal,
+				  fixp->fx_frag->fr_address,
+				  sec, &err);
       switch (s)
 	{
 	case bfd_reloc_ok:
@@ -716,7 +743,8 @@ write_relocs (abfd, sec, xxx)
 	  as_bad_where (fixp->fx_file, fixp->fx_line, "relocation overflow");
 	  break;
 	default:
-	  as_fatal ("bad return from bfd_perform_relocation");
+	  as_fatal ("%s:%u: bad return from bfd_perform_relocation",
+		    fixp->fx_file, fixp->fx_line);
 	}
       relocs[i++] = reloc;
     }
@@ -759,8 +787,13 @@ write_relocs (abfd, sec, xxx)
 	    {
 	    case bfd_reloc_ok:
 	      break;
+	    case bfd_reloc_overflow:
+	      as_bad_where (fixp->fx_file, fixp->fx_line,
+			    "relocation overflow");
+	      break;
 	    default:
-	      as_fatal ("bad return from bfd_perform_relocation");
+	      as_fatal ("%s:%u: bad return from bfd_perform_relocation",
+			fixp->fx_file, fixp->fx_line);
 	    }
         }
     }
@@ -843,7 +876,7 @@ write_contents (abfd, sec, xxx)
 	    {
 	      bfd_perror (stdoutput->filename);
 	      as_perror ("FATAL: Can't write %s", stdoutput->filename);
-	      exit (42);
+	      exit (EXIT_FAILURE);
 	    }
 	  offset += f->fr_fix;
 	}
@@ -866,7 +899,7 @@ write_contents (abfd, sec, xxx)
 	      {
 		bfd_perror (stdoutput->filename);
 		as_perror ("FATAL: Can't write %s", stdoutput->filename);
-		exit (42);
+		exit (EXIT_FAILURE);
 	      }
 	    offset += fill_size;
 	  }
@@ -1464,6 +1497,17 @@ write_object_file ()
 #endif /* VMS */
 #else /* BFD_ASSEMBLER */
 
+  /* Resolve symbol values.  This needs to be done before processing
+     the relocations.  */
+  if (symbol_rootP)
+    {
+      symbolS *symp;
+
+      for (symp = symbol_rootP; symp; symp = symbol_next (symp))
+	if (!symp->sy_resolved)
+	  resolve_symbol_value (symp);
+    }
+
   bfd_map_over_sections (stdoutput, adjust_reloc_syms, (char *)0);
 
   /* Set up symbol table, and write it out.  */
@@ -1475,6 +1519,9 @@ write_object_file ()
 	{
 	  int punt = 0;
 
+	  /* Do it again, because adjust_reloc_syms might introduce
+	     more symbols.  They'll probably only be section symbols,
+	     but they'll still need to have the values computed.  */
 	  if (! symp->sy_resolved)
 	    {
 	      if (symp->sy_value.X_op == O_constant)
@@ -2297,6 +2344,37 @@ number_to_chars_littleendian (buf, val, n)
       *buf++ = val & 0xff;
       val >>= 8;
     }
+}
+
+/* for debugging */
+extern int indent_level;
+
+void
+print_fixup (fixp)
+     fixS *fixp;
+{
+  indent_level = 1;
+  fprintf (stderr, "fix");
+  if (fixp->fx_pcrel)
+    fprintf (stderr, " pcrel");
+  if (fixp->fx_pcrel_adjust)
+    fprintf (stderr, " pcrel_adjust=%d", fixp->fx_pcrel_adjust);
+  if (fixp->fx_im_disp)
+    {
+#ifdef TC_NS32K
+      fprintf (stderr, " im_disp=%d", fixp->fx_im_disp);
+#else
+      fprintf (stderr, " im_disp");
+#endif
+    }
+  if (fixp->fx_tcbit)
+    fprintf (stderr, " tcbit");
+  if (fixp->fx_done)
+    fprintf (stderr, " done");
+  fprintf (stderr, "\n    %s:%d", fixp->fx_file, fixp->fx_line);
+  fprintf (stderr, "\n    size=%d frag=%lx where=%ld addnumber=%lx",
+	   fixp->fx_size, (long) fixp->fx_frag, fixp->fx_where,
+	   (long) fixp->fx_addnumber);
 }
 
 /* end of write.c */
