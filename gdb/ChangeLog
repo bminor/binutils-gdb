@@ -1,5 +1,9 @@
 Thu Oct 24 01:32:51 1991  Fred Fish  (fnf at cygnus.com)
 
+	* infrun.c (child_create_inferior): System V versions must call
+	setpgrp() with no arguments, to comply with prototyping typically
+	in <unistd.h>.
+
 	* munch: Add support for SVR4 style nm output.
 
 	* dbxread.c, mipsread.c symmisc.c, symtab.c:  Remove the object

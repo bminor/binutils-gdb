@@ -534,7 +534,11 @@ child_create_inferior (exec_file, allargs, env)
 
 #ifdef TIOCGPGRP
       /* Run inferior in a separate process group.  */
+#ifdef USG
+      debug_setpgrp = setpgrp ();
+#else
       debug_setpgrp = setpgrp (getpid (), getpid ());
+#endif
       if (debug_setpgrp == -1)
 	 perror("setpgrp failed in child");
 #endif /* TIOCGPGRP */
