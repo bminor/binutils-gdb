@@ -124,10 +124,10 @@ struct aix_framedata {
 
 extern int aix_loadInfoTextIndex;
 
-#define	SOLIB_CREATE_INFERIOR_HOOK()	\
+#define	SOLIB_CREATE_INFERIOR_HOOK(PID)	\
   do {					\
     if (aix_loadInfoTextIndex == 0)	\
-	aixcoff_relocate_symtab (pid);	\
+	aixcoff_relocate_symtab (PID);	\
   } while (0)
 	
 

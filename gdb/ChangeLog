@@ -1,3 +1,8 @@
+Thu Mar 12 11:56:46 1992  Per Bothner  (bothner@cygnus.com)
+
+	* solib.h, infrun.c, tm-rs6000.h:  Add a PID parameter
+	to SOLIB_CREATE_INFERIOR_HOOK macro.
+
 Sun Mar  8 21:17:48 1992  Fred Fish  (fnf@cygnus.com)
 
 	* symfile.h:  Add prototype for iterate_over_msymbols().

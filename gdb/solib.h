@@ -42,7 +42,7 @@ solib_add PARAMS ((char *, int, struct target_ops *));
    which they are linked, and sufficient information to read in their symbols
    at a later time. */
 
-#define SOLIB_CREATE_INFERIOR_HOOK	solib_create_inferior_hook
+#define SOLIB_CREATE_INFERIOR_HOOK(PID)	solib_create_inferior_hook()
 
 extern void
 solib_create_inferior_hook PARAMS((void));	/* solib.c */
