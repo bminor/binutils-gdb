@@ -1,5 +1,14 @@
 2002-04-04  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.asm/Makefile.in: Correct dependencies.
+
+	* gdb.asm/powerpc.inc: New file.
+	* gdb.asm/asm-source.exp: Add PowerPC.
+	* gdb.asm/configure.in: Likewise.
+	* gdb.asm/configure: Regenerated.
+
+2002-04-04  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.base/relocate.exp: New file.
 	* gdb.base/relocate.c: New file.
 

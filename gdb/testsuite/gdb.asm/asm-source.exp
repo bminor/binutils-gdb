@@ -53,6 +53,9 @@ if [istarget "i\[3456\]86-*-*"] then {
 if [istarget "m32r*-*"] then {
     set asm-arch m32r
 }
+if [istarget "powerpc*-*"] then {
+    set asm-arch powerpc
+}
 if [istarget "sparc-*-*"] then {
     set asm-arch sparc
 }

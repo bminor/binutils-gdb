@@ -21,6 +21,7 @@ d10v-*-*) archinc=d10v.inc ;;
 s390-*-*) archinc=s390.inc ;;
 i[[3456]]86*) archinc=i386.inc ;;
 m32r*-*) archinc=m32r.inc ;;
+powerpc*-*) archinc=powerpc.inc ;;
 sparc-*-*) archinc=sparc.inc ;;
 xstormy16-*-*) archinc=xstormy16.inc ;;
 esac
