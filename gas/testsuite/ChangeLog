@@ -1,3 +1,12 @@
+2005-03-03  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* gas/arc/extensions.s: Add tests for extcoreregister
+	* gas/arc/extensions.d: Likewise.  
+	* gas/arc/warn.s: Warnings for readonly core registers
+	accessed .
+	* gas/arc/warn.d:Likewise.
+	* testsuite/gas/arc/arc.exp:Run extensions testcase.
+
 2005-03-03  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/noat-1.d: Add -mips1 to assembler options.
