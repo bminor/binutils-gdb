@@ -14,7 +14,7 @@ dnl The ugly bit...
 dnl
 AC_MSG_CHECKING([for CC])
 dnl Don't bother with cache.
-test -z "$CC" && CC=`egrep '^CC *=' ../Makefile | tail -1 | sed 's/^CC *= *//'`
+test -z "$CC" && test -r ../Makefile && CC=`egrep '^CC *=' ../Makefile | tail -1 | sed 's/^CC *= *//'`
 test -z "$CC" && CC=cc
 AC_MSG_RESULT(setting CC to $CC)
 AC_SUBST(CC)

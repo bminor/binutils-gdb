@@ -562,7 +562,7 @@ HDEFINES=
 . ${srcdir}/configure.host
 
 echo $ac_n "checking for CC""... $ac_c" 1>&6
-test -z "$CC" && CC=`egrep '^CC *=' ../Makefile | tail -1 | sed 's/^CC *= *//'`
+test -z "$CC" && test -r ../Makefile && CC=`egrep '^CC *=' ../Makefile | tail -1 | sed 's/^CC *= *//'`
 test -z "$CC" && CC=cc
 echo "$ac_t""setting CC to $CC" 1>&6
 

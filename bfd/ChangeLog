@@ -1,5 +1,8 @@
 Tue Sep  5 19:35:28 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aclocal.m4: Don't try to grep ../Makefile if it doesn't exist.
+	* configure: Rebuild.
+
 	* coff-sparc.c (CALC_ADDEND): Don't set the addend to the value of
 	a global symbol.
 
