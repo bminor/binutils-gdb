@@ -1,3 +1,8 @@
+2004-06-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* arc-ext.c (build_ARC_extmap): Use bfd_get_section_size
+	instead of _raw_size.
+
 2004-06-08  Jakub Jelinek  <jakub@redhat.com>
 
 	* ia64-gen.c (in_iclass): Handle more postinc st
