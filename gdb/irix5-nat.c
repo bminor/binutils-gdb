@@ -56,8 +56,7 @@ supply_gregset (gregset_t *gregsetp)
   register int regi;
   register greg_t *regp = &(*gregsetp)[0];
   int gregoff = sizeof (greg_t) - MIPS_REGSIZE;
-  static char zerobuf[MAX_REGISTER_RAW_SIZE] =
-  {0};
+  static char zerobuf[32] = {0};
 
   for (regi = 0; regi <= CTX_RA; regi++)
     supply_register (regi, (char *) (regp + regi) + gregoff);
@@ -120,8 +119,7 @@ void
 supply_fpregset (fpregset_t *fpregsetp)
 {
   register int regi;
-  static char zerobuf[MAX_REGISTER_RAW_SIZE] =
-  {0};
+  static char zerobuf[32] = {0};
 
   /* FIXME, this is wrong for the N32 ABI which has 64 bit FP regs. */
 
