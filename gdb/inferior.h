@@ -2,7 +2,8 @@
    Where it is, why it stopped, and how to step it.
 
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1998, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
+   1996, 1998, 1999, 2000, 2001, 2003, 2004, 2005 
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -145,7 +146,7 @@ extern int inferior_ignoring_leading_exec_events;
 
 /* Inferior environment. */
 
-extern struct environ *inferior_environ;
+extern struct gdb_environ *inferior_environ;
 
 extern void clear_proceed_status (void);
 

@@ -1,5 +1,5 @@
 /* Header for environment manipulation library.
-   Copyright 1989, 1992, 2000 Free Software Foundation, Inc.
+   Copyright 1989, 1992, 2000, 2005 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 /* We manipulate environments represented as these structures.  */
 
-struct environ
+struct gdb_environ
   {
     /* Number of usable slots allocated in VECTOR.
        VECTOR always has one slot not counted here,
@@ -34,18 +34,18 @@ struct environ
     char **vector;
   };
 
-extern struct environ *make_environ (void);
+extern struct gdb_environ *make_environ (void);
 
-extern void free_environ (struct environ *);
+extern void free_environ (struct gdb_environ *);
 
-extern void init_environ (struct environ *);
+extern void init_environ (struct gdb_environ *);
 
-extern char *get_in_environ (const struct environ *, const char *);
+extern char *get_in_environ (const struct gdb_environ *, const char *);
 
-extern void set_in_environ (struct environ *, const char *, const char *);
+extern void set_in_environ (struct gdb_environ *, const char *, const char *);
 
-extern void unset_in_environ (struct environ *, char *);
+extern void unset_in_environ (struct gdb_environ *, char *);
 
-extern char **environ_vector (struct environ *);
+extern char **environ_vector (struct gdb_environ *);
 
 #endif /* defined (ENVIRON_H) */

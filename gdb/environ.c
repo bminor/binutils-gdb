@@ -1,6 +1,6 @@
 /* environ.c -- library for manipulating environments for GNU.
 
-   Copyright 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 2000,
+   Copyright 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 2000, 2005
    2003 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -28,12 +28,12 @@
 
 /* Return a new environment object.  */
 
-struct environ *
+struct gdb_environ *
 make_environ (void)
 {
-  struct environ *e;
+  struct gdb_environ *e;
 
-  e = (struct environ *) xmalloc (sizeof (struct environ));
+  e = (struct gdb_environ *) xmalloc (sizeof (struct gdb_environ));
 
   e->allocated = 10;
   e->vector = (char **) xmalloc ((e->allocated + 1) * sizeof (char *));
@@ -44,7 +44,7 @@ make_environ (void)
 /* Free an environment and all the strings in it.  */
 
 void
-free_environ (struct environ *e)
+free_environ (struct gdb_environ *e)
 {
   char **vector = e->vector;
 
@@ -59,7 +59,7 @@ free_environ (struct environ *e)
    that all strings in these environments are safe to free.  */
 
 void
-init_environ (struct environ *e)
+init_environ (struct gdb_environ *e)
 {
   extern char **environ;
   int i;
@@ -91,7 +91,7 @@ init_environ (struct environ *e)
    This is used to get something to pass to execve.  */
 
 char **
-environ_vector (struct environ *e)
+environ_vector (struct gdb_environ *e)
 {
   return e->vector;
 }
@@ -99,7 +99,7 @@ environ_vector (struct environ *e)
 /* Return the value in environment E of variable VAR.  */
 
 char *
-get_in_environ (const struct environ *e, const char *var)
+get_in_environ (const struct gdb_environ *e, const char *var)
 {
   int len = strlen (var);
   char **vector = e->vector;
@@ -115,7 +115,7 @@ get_in_environ (const struct environ *e, const char *var)
 /* Store the value in E of VAR as VALUE.  */
 
 void
-set_in_environ (struct environ *e, const char *var, const char *value)
+set_in_environ (struct gdb_environ *e, const char *var, const char *value)
 {
   int i;
   int len = strlen (var);
@@ -162,7 +162,7 @@ set_in_environ (struct environ *e, const char *var, const char *value)
 /* Remove the setting for variable VAR from environment E.  */
 
 void
-unset_in_environ (struct environ *e, char *var)
+unset_in_environ (struct gdb_environ *e, char *var)
 {
   int len = strlen (var);
   char **vector = e->vector;

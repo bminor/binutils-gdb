@@ -1,3 +1,25 @@
+2005-03-08  Mark Mitchell  <mark@codesourcery.com>
+
+	* environ.h (struct environ): Rename to ...
+	(struct gdb_environ): ... this.
+	(make_environ): Update prototype.
+	(free_environ): Likewise.
+	(init_environ): Likewise.
+	(get_in_environ): Likewise.
+	(set_in_environ): Likewise.
+	(unset_in_environ): Likewise.
+	(environ_vector): Likewise.
+	* environ.c (make_environ): Replace "struct environ" with "struct
+	gdb_environ".
+	(free_environ): Likewise.
+	(init_environ): Likewise.
+	(environ_vector): Likewise.
+	(get_in_environ): Likewise.
+	(set_in_environ): Likewise.
+	(unset_in_environ): Likewise.
+	* infcmd.c (inferior_environ): Likewise.
+	* inferior.h (inferior_environ): Likewise.
+
 2005-03-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* infcmd.c (run_command_1): New function, extracted from

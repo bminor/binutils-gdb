@@ -198,7 +198,7 @@ int step_multi;
 /* Environment to use for running inferior,
    in format described in environ.h.  */
 
-struct environ *inferior_environ;
+struct gdb_environ *inferior_environ;
 
 /* Accessor routines. */
 
