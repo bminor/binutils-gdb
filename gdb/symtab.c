@@ -1644,6 +1644,11 @@ build_canonical_line_spec (sal, symname, canonical)
    if no file is validly specified.  Callers must check that.
    Also, the line number returned may be invalid.  */
 
+/* We allow single quotes in various places.  This is a hideous
+   kludge, which exists because the completer can't yet deal with the
+   lack of single quotes.  FIXME: write a linespec_completer which we
+   can use as appropriate instead of make_symbol_completion_list.  */
+
 struct symtabs_and_lines
 decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
      char **argptr;
@@ -1742,6 +1747,8 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	  while(!++p && *p != '>');
 	  if (!p)
 	    {
+	      /* FIXME: Why warning() and then return_to_top_level?
+		 What's wrong with error()?  */
 	      warning("non-matching '<' and '>' in command");
 	      return_to_top_level (RETURN_ERROR);
 	    }

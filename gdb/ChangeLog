@@ -1,3 +1,9 @@
+Fri Nov 19 15:08:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* symtab.c (decode_line_1): Add comment about use of
+	return_to_top_level directly instead of error.  Add comment saying
+	that the '' should not be needed--that the completer should be fixed.
+
 Fri Nov 19 11:00:33 1993  Kung Hsu  (kung@cirdan.cygnus.com)
 
 	* symtab.c(decode_line_1): fix the inconsistency of setting
