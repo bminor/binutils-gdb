@@ -195,7 +195,8 @@ etree_type *base; /* Relocation base - or null */
 #define cat(a,b) a/**/b
 #endif
 
-#define new_stat(x, y) (cat (x, _type)*) new_statement (cat (x, _enum), sizeof (cat (x, _type)), y)
+/* Don't beautify the line below with "innocent" whitespace, it breaks the K&R C preprocessor!  */
+#define new_stat(x, y) (cat (x,_type)*) new_statement (cat (x,_enum), sizeof (cat (x,_type)), y)
 
 #define outside_section_address(q) ((q)->output_offset + (q)->output_section->vma)
 

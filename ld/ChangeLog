@@ -1,3 +1,8 @@
+2000-12-13  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* ldlang.c (new_stat): Revert the last beautification with "innocent"
+	whitespace, it breaks the K&R C preprocessor.
+
 2000-12-11  DJ Delorie  <dj@redhat.com>
 
 	* ld.texinfo: Add notes about --whole-archive and gcc.
