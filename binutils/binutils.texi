@@ -567,9 +567,9 @@ The GNU linker @code{ld} is now described in a separate manual.
 @smallexample
 nm [ -a | --debug-syms ]  [ -g | --extern-only ]
    [ -B ]  [ -C | --demangle ] [ -D | --dynamic ]
-   [ -s | --print-armap ]  [ -A | -o | --print-file-name ]  
+   [ -s | --print-armap ]  [ -A | -o | --print-file-name ]
    [ -n | -v | --numeric-sort ]  [ -p | --no-sort ]
-   [ -r | --reverse-sort ]  [ -u | --undefined-only ]  
+   [ -r | --reverse-sort ]  [ --size-sort ] [ -u | --undefined-only ]
    [ -t @var{radix} | --radix=@var{radix} ] [ -P | --portability ]
    [ --target=@var{bfdname} ] [ -f @var{format} | --format=@var{format} ]
    [ --no-demangle ] [ -V | --version ]  [ --help ]  [ @var{objfile}@dots{} ]
@@ -705,6 +705,11 @@ contain definitions for which names.
 @itemx --reverse-sort 
 Reverse the order of the sort (whether numeric or alphabetic); let the
 last come first.
+
+@item --size-sort
+Sort symbols by size.  The size is computed as the difference between
+the value of the symbol and the value of the symbol with the next higher
+value.  The size of the symbol is printed, rather than the value.
 
 @item -t @var{radix}
 @itemx --radix=@var{radix}

@@ -25,6 +25,7 @@ nm \- list symbols from object files.
 .RB "[\|" \-n | \-\-numeric\-sort "\|]" 
 .RB "[\|" \-p | \-\-no\-sort "\|]"
 .RB "[\|" \-r | \-\-reverse\-sort "\|]" 
+.RB "[\|" \-\-size\-sort "\|]" 
 .RB "[\|" \-u | \-\-undefined\-only "\|]"  
 .RB "[\|" \-\-help "\|]"  
 .RB "[\|" \-\-version "\|]"  
@@ -144,6 +145,12 @@ contain definitions for what names.
 .B \-\-reverse\-sort 
 Reverse the sense of the sort (whether numeric or alphabetic); let the
 last come first.
+
+.TP
+.B \-\-size\-sort 
+Sort symbols by size.  The size is computed as the difference between
+the value of the symbol and the value of the symbol with the next higher
+value.  The size of the symbol is printed, rather than the value.
 
 .TP
 .B "\-t \fIradix"

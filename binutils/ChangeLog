@@ -1,3 +1,20 @@
+Wed Sep 14 12:19:07 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* nm.c: Include libiberty.h.
+	(sort_by_size): New static variable.
+	(long_options): Add --size-sort.
+	(usage): Mention --size-sort.
+	(numeric_forward): Make static.  Change from void * to PTR.
+	(numeric_reverse): Likewise.
+	(non_numeric_forward, non_numeric_reverse): Likewise.
+	(sorters): Change declaration from void * to PTR.
+	(size_forward, sort_symbol_by_size): New static functions.
+	(display_rel_file): Handle sort_by_size.
+	(filter_symbols): If sort_by_size, discard absolute and undefined
+	symbols.
+	* binutils.texi (nm): Document --size-sort.
+	* nm.1: Document --size-sort.
+
 Tue Sep 13 21:06:06 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* objcopy.c (copy_main): Initialize input_filename and
@@ -76,7 +93,6 @@ Mon Jul 25 12:58:36 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 	* objdump.c (objdump_print_address): Correct handling of end of
 	symbols when looking for next symbol with a different value.
 
-
 Fri Jul 22 16:48:34 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* nm.c (numeric_forward): Treat undefined symbols as "less than"
@@ -88,7 +104,6 @@ Fri Jul 22 16:48:34 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	(print_symbol_info_bsd): For undefined symbols, print leading
 	spaces equivalent to the width of a printed bfd_vma, rather than
 	assuming that 8 will look right.
-
 
 Fri Jul 22 10:36:50 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
