@@ -1,3 +1,10 @@
+start-sanitize-d10v
+Thu Aug 22 10:50:00 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c: Fix a reloc bug caused by my last change. 
+	* doc/c-d10v.texi: Cleanup.
+	
+end-sanitize-d10v	
 start-sanitize-v850
 Tue Aug 20 15:15:16 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 
