@@ -1,3 +1,8 @@
+Tue Nov  2 14:42:27 1993  Bill Cox (bill@tarkas.cygnus.com)
+
+	* libbfd.h (artdata): Use long, not time_t for portability, at
+	  least to HPUX.
+
 Tue Nov  2 09:32:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config.bfd: Use bigmips for mips*-*-bsd*.
