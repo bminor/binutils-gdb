@@ -1,3 +1,8 @@
+2001-04-27  David Mosberger  <davidm@hpl.hp.com>
+
+	* config/tc-ia64.c (dot_spillmem_p): Fix output_spill_?sprel_p()
+	argument passing order: predicate goes last, not first.
+
 2001-04-27  Sean McNeil <sean@mcneil.com>
 
 	* configure.in: Add arm-vxworks.

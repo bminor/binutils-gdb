@@ -3613,9 +3613,9 @@ dot_spillmem_p (psprel)
     }
 
   if (psprel)
-    add_unwind_entry (output_spill_psprel_p (qp, ab, reg, e3.X_add_number));
+    add_unwind_entry (output_spill_psprel_p (ab, reg, e3.X_add_number, qp));
   else
-    add_unwind_entry (output_spill_sprel_p (qp, ab, reg, e3.X_add_number));
+    add_unwind_entry (output_spill_sprel_p (ab, reg, e3.X_add_number, qp));
 }
 
 static void
