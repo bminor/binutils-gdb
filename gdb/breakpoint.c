@@ -113,7 +113,7 @@ static void
 breakpoints_info PARAMS ((char *, int));
 
 static void
-breakpoint_1 PARAMS ((int, enum bptype));
+breakpoint_1 PARAMS ((int, enum bptype, int));
 
 static bpstat
 bpstat_alloc PARAMS ((struct breakpoint *, bpstat));
@@ -225,6 +225,8 @@ get_number (pp)
     }
   else
     {
+      if (*p == '-')
+	++p;
       while (*p >= '0' && *p <= '9')
 	++p;
       if (p == *pp)
@@ -996,9 +998,10 @@ bpstat_should_step ()
    is nonzero, process only watchpoints.  */
 
 static void
-breakpoint_1 (bnum, type)
+breakpoint_1 (bnum, type, allflag)
      int bnum;
      enum bptype type;
+     int allflag;
 {
   register struct breakpoint *b;
   register struct command_line *l;
@@ -1007,7 +1010,7 @@ breakpoint_1 (bnum, type)
   int found_a_breakpoint = 0;
   static char *bptypes[] = {"breakpoint", "until", "finish", "watchpoint",
 			      "longjmp", "longjmp resume"};
-  static char *bpdisps[] = {"del", "dis", ""};
+  static char *bpdisps[] = {"del", "dis", "keep"};
   static char bpenables[] = "ny";
 
   if (!breakpoint_chain)
@@ -1020,11 +1023,17 @@ breakpoint_1 (bnum, type)
     if (bnum == -1
 	|| bnum == b->number)
       {
+/*  We only print out user settable breakpoints unless the allflag is set. */
+	if (!allflag
+	    && b->type != bp_breakpoint
+	    && b->type != bp_watchpoint)
+	  continue;
+
 	if (!found_a_breakpoint++)
-	  printf_filtered ("Num Type       Disp Enb %sWhat\n",
+	  printf_filtered ("Num Type           Disp Enb %sWhat\n",
 			   addressprint ? "Address    " : "");
 
-	printf_filtered ("%-3d %-10s %-4s %-3c ",
+	printf_filtered ("%-3d %-14s %-4s %-3c ",
 			 b->number,
 			 bptypes[b->type],
 			 bpdisps[b->disposition],
@@ -1035,6 +1044,10 @@ breakpoint_1 (bnum, type)
 	    print_expression (b->exp, stdout);
 	    break;
 	  case bp_breakpoint:
+	  case bp_until:
+	  case bp_finish:
+	  case bp_longjmp:
+	  case bp_longjmp_resume:
 	    if (addressprint)
 	      printf_filtered ("%s ", local_hex_string_custom(b->address, "08"));
 
@@ -1099,7 +1112,21 @@ breakpoints_info (bnum_exp, from_tty)
   if (bnum_exp)
     bnum = parse_and_eval_address (bnum_exp);
 
-  breakpoint_1 (bnum, bp_breakpoint);
+  breakpoint_1 (bnum, bp_breakpoint, 0);
+}
+
+/* ARGSUSED */
+static void
+all_breakpoints_info (bnum_exp, from_tty)
+     char *bnum_exp;
+     int from_tty;
+{
+  int bnum = -1;
+
+  if (bnum_exp)
+    bnum = parse_and_eval_address (bnum_exp);
+
+  breakpoint_1 (bnum, bp_breakpoint, 1);
 }
 
 /* ARGSUSED */
@@ -1113,7 +1140,7 @@ watchpoints_info (bnum_exp, from_tty)
   if (bnum_exp)
     bnum = parse_and_eval_address (bnum_exp);
 
-  breakpoint_1 (bnum, bp_watchpoint);
+  breakpoint_1 (bnum, bp_watchpoint, 0);
 }
 
 /* Print a message describing any breakpoints set at PC.  */
@@ -1229,19 +1256,14 @@ set_raw_breakpoint (sal)
   return b;
 }
 
-struct breakpoint *longjmp_breakpoint = NULL;
-struct breakpoint *_longjmp_breakpoint = NULL;
-struct breakpoint *siglongjmp_breakpoint = NULL;
-struct breakpoint *longjmp_resume_breakpoint = NULL;
-
 static void
-create_longjmp_breakpoint_1(func_name, bpt)
+create_longjmp_breakpoint(func_name)
      char *func_name;
-     struct breakpoint **bpt;
 {
   int i;
   struct symtab_and_line sal;
   struct breakpoint *b;
+  static int internal_breakpoint_number = -1;
 
   if (*bpt != NULL)
     {
@@ -1264,45 +1286,18 @@ create_longjmp_breakpoint_1(func_name, bpt)
 
   sal.symtab = NULL;
   sal.line = 0;
-  if (*bpt != NULL)
-    b = *bpt;
-  else
-    b = set_raw_breakpoint(sal);
 
+  b = set_raw_breakpoint(sal);
   if (!b) return;
 
-  b->type = bp_longjmp;
+  b->type = func_name != NULL ? bp_longjmp : bp_longjmp_resume;
   b->disposition = donttouch;
   b->enable = disabled;
   b->silent = 1;
-  *bpt = b;
+  if (func_name)
+    b->addr_string = strsave(func_name);
+  b->number = internal_breakpoint_number--;
 }
-
-/* Call this routine each time we read a new executable or symbol table
-   file.  */
-
-#ifdef GET_LONGJMP_TARGET
-void
-create_longjmp_breakpoint()
-{
-  create_longjmp_breakpoint_1("longjmp", &longjmp_breakpoint);
-  create_longjmp_breakpoint_1("_longjmp", &_longjmp_breakpoint);
-  create_longjmp_breakpoint_1("siglongjmp", &siglongjmp_breakpoint);
-
-  if ((longjmp_breakpoint || _longjmp_breakpoint || siglongjmp_breakpoint)
-      && !longjmp_resume_breakpoint)
-    {
-      create_longjmp_breakpoint_1(NULL, &longjmp_resume_breakpoint);
-      if (longjmp_resume_breakpoint)
-	longjmp_resume_breakpoint->type = bp_longjmp_resume;
-    }
-}
-#else
-void
-create_longjmp_breakpoint()
-{
-}
-#endif
 
 /* Call this routine when stepping and nexting to enable a breakpoint if we do
    a longjmp().  When we hit that breakpoint, call
@@ -1311,29 +1306,29 @@ create_longjmp_breakpoint()
 void
 enable_longjmp_breakpoint()
 {
-  if (longjmp_breakpoint)
-    longjmp_breakpoint->enable = enabled;
-  if (_longjmp_breakpoint)
-    _longjmp_breakpoint->enable = enabled;
-  if (siglongjmp_breakpoint)
-    siglongjmp_breakpoint->enable = enabled;
+  register struct breakpoint *b;
+
+  ALL_BREAKPOINTS (b)
+    if (b->type == bp_longjmp)
+      b->enable = enabled;
 }
 
 void
 disable_longjmp_breakpoint()
 {
-  if (longjmp_breakpoint)
-    longjmp_breakpoint->enable = disabled;
-  if (_longjmp_breakpoint)
-    _longjmp_breakpoint->enable = disabled;
-  if (siglongjmp_breakpoint)
-    siglongjmp_breakpoint->enable = disabled;
-  if (longjmp_resume_breakpoint)
-    longjmp_resume_breakpoint->enable = disabled;
+  register struct breakpoint *b;
+
+  ALL_BREAKPOINTS (b)
+    if (b->type == bp_longjmp
+	|| b->type == bp_longjmp_resume)
+      b->enable = disabled;
 }
 
 /* Call this after hitting the longjmp() breakpoint.  Use this to set a new
    breakpoint at the target of the jmp_buf.
+
+   FIXME - This ought to be done by setting a temporary breakpoint that gets
+   deleted automatically...
 */
 
 void
@@ -1341,12 +1336,19 @@ set_longjmp_resume_breakpoint(pc, frame)
      CORE_ADDR pc;
      FRAME frame;
 {
-  longjmp_resume_breakpoint->address = pc;
-  longjmp_resume_breakpoint->enable = enabled;
-  if (frame != NULL)
-    longjmp_resume_breakpoint->frame = FRAME_FP(frame);
-  else
-    longjmp_resume_breakpoint->frame = 0;
+  register struct breakpoint *b;
+
+  ALL_BREAKPOINTS (b)
+    if (b->type == bp_longjmp_resume)
+      {
+	b->address = pc;
+	b->enable = enabled;
+	if (frame != NULL)
+	  b->frame = FRAME_FP(frame);
+	else
+	  b->frame = 0;
+	return;
+      }
 }
 
 /* Set a breakpoint that will evaporate an end of command
@@ -2197,8 +2199,15 @@ breakpoint_re_set_one (bint)
   char *s;
   enum enable save_enable;
 
-  if (b->type != bp_watchpoint && b->addr_string != NULL)
+  switch (b->type)
     {
+    case bp_breakpoint:
+      if (b->addr_string == NULL)
+	{
+	  /* Anything without a string can't be re-set. */
+	  delete_breakpoint (b);
+	  return 0;
+	}
       /* In case we have a problem, disable this breakpoint.  We'll restore
 	 its status if we succeed.  */
       save_enable = b->enable;
@@ -2225,12 +2234,21 @@ breakpoint_re_set_one (bint)
 	  mention (b);
 	}
       free (sals.sals);
-    }
-  else
-    {
-      /* Anything without a string can't be re-set. */
+      break;
+    case bp_watchpoint:
+      /* FIXME!  This is the wrong thing to do.... */
       delete_breakpoint (b);
+      break;
+    default:
+      printf_filtered ("Deleting unknown breakpoint type %d\n", b->type);
+    case bp_until:
+    case bp_finish:
+    case bp_longjmp:
+    case bp_longjmp_resume:
+      delete_breakpoint (b);
+      break;
     }
+
   return 0;
 }
 
@@ -2248,6 +2266,11 @@ breakpoint_re_set ()
       sprintf (message, message1, b->number);	/* Format possible error msg */
       (void) catch_errors (breakpoint_re_set_one, (char *) b, message);
     }
+
+  create_longjmp_breakpoint("longjmp");
+  create_longjmp_breakpoint("_longjmp");
+  create_longjmp_breakpoint("siglongjmp");
+  create_longjmp_breakpoint(NULL);
 
   /* Blank line to finish off all those mention() messages we just printed.  */
   printf_filtered ("\n");
@@ -2620,10 +2643,32 @@ Do \"help breakpoints\" for info on other commands dealing with breakpoints.");
   add_com_alias ("brea", "break", class_run, 1);
 
   add_info ("breakpoints", breakpoints_info,
+	    "Status of user-settable breakpoints, or breakpoint number NUMBER.\n\
+The \"Type\" column indicates one of:\n\
+\tbreakpoint     - for normal breakpoints\n\
+\twatchpoint     - for watchpoints\n\
+The \"Disp\" column contains one of \"keep\", \"del\", or \"dis\" to indicate\n\
+the disposition of the breakpoint after it gets hit.  \"dis\" means that the\n\
+breakpoint will be disabled.  The \"Address\" and \"What\" columns indicate the\n\
+address and file/line number respectively.\n\n\
+Convenience variable \"$_\" and default examine address for \"x\"\n\
+are set to the address of the last breakpoint listed.\n\n\
+Convenience variable \"$bpnum\" contains the number of the last\n\
+breakpoint set.");
+
+  add_info ("all-breakpoints", all_breakpoints_info,
 	    "Status of all breakpoints, or breakpoint number NUMBER.\n\
-Second column is \"y\" for enabled breakpoint, \"n\" for disabled,\n\
-\"o\" for enabled once (disable when hit), \"d\" for enable but delete when hit.\n\
-Then come the address and the file/line number.\n\n\
+The \"Type\" column indicates one of:\n\
+\tbreakpoint     - for normal breakpoints\n\
+\twatchpoint     - for watchpoints\n\
+\tlongjmp        - for internal breakpoints to handle stepping through longjmp()\n\
+\tlongjmp resume - for internal breakpoints at the target of longjmp()\n\
+\tuntil          - for internal breakpoints used by the \"until\" command\n\
+\tfinish         - for internal breakpoints used by the \"finish\" command\n\
+The \"Disp\" column contains one of \"keep\", \"del\", or \"dis\" to indicate\n\
+the disposition of the breakpoint after it gets hit.  \"dis\" means that the\n\
+breakpoint will be disabled.  The \"Address\" and \"What\" columns indicate the\n\
+address and file/line number respectively.\n\n\
 Convenience variable \"$_\" and default examine address for \"x\"\n\
 are set to the address of the last breakpoint listed.\n\n\
 Convenience variable \"$bpnum\" contains the number of the last\n\
