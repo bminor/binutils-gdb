@@ -210,6 +210,11 @@ CORE_ADDR pc;
       return pc - 4;			/* don't skip over this branch */
   }
 
+  if ((op & 0xfc1f0000) == 0xd8010000) { /* stfd Rx,NUM(r1) */
+    pc += 4;				 /* store floating register double */
+    op = read_memory_integer (pc, 4);
+  }
+
   if ((op & 0xfc1f0000) == 0xbc010000) { /* stm Rx, NUM(r1) */
     pc += 4;
     op = read_memory_integer (pc, 4);
@@ -217,7 +222,7 @@ CORE_ADDR pc;
 
   while (((tmp = op >> 16) == 0x9001) || /* st   r0, NUM(r1) */
 	 (tmp == 0x9421) ||		/* stu  r1, NUM(r1) */
-	 (op == 0x93e1fffc)) 		/* st   r31,-4(r1) */
+	 (tmp == 0x93e1)) 		/* st   r31,NUM(r1) */
   {
     pc += 4;
     op = read_memory_integer (pc, 4);
@@ -476,7 +481,7 @@ pop_frame ()
   if (fdata.saved_gpr != -1)
     for (ii=fdata.saved_gpr; ii <= 31; ++ii) {
       read_memory (addr, &registers [REGISTER_BYTE (ii)], 4);
-      addr += sizeof (int);
+      addr += 4;
     }
 
   if (fdata.saved_fpr != -1)
@@ -533,7 +538,8 @@ fix_call_dummy(dummyname, pc, fun, nargs, type)
 
 /* return information about a function frame.
    in struct aix_frameinfo fdata:
-    - frameless is TRUE, if function does not save %pc value in its frame.
+    - frameless is TRUE, if function does not have a frame.
+    - nosavedpc is TRUE, if function does not save %pc value in its frame.
     - offset is the number of bytes used in the frame to save registers.
     - saved_gpr is the number of the first saved gpr.
     - saved_fpr is the number of the first saved fpr.
@@ -550,20 +556,22 @@ function_frame_info (pc, fdata)
 
   fdata->offset = 0;
   fdata->saved_gpr = fdata->saved_fpr = fdata->alloca_reg = -1;
+  fdata->frameless = 1;
 
   op  = read_memory_integer (pc, 4);
   if (op == 0x7c0802a6) {		/* mflr r0 */
     pc += 4;
     op = read_memory_integer (pc, 4);
+    fdata->nosavedpc = 0;
     fdata->frameless = 0;
   }
-  else				/* else, this is a frameless invocation */
-    fdata->frameless = 1;
-
+  else				/* else, pc is not saved */
+    fdata->nosavedpc = 1;
 
   if ((op & 0xfc00003e) == 0x7c000026) { /* mfcr Rx */
     pc += 4;
     op = read_memory_integer (pc, 4);
+    fdata->frameless = 0;
   }
 
   if ((op & 0xfc000000) == 0x48000000) { /* bl foo, to save fprs??? */
@@ -577,11 +585,13 @@ function_frame_info (pc, fdata)
     if (op == 0x4def7b82 ||		/* crorc 15, 15, 15 */
 	op == 0x0)
       return;				/* prologue is over */
+    fdata->frameless = 0;
   }
 
   if ((op & 0xfc1f0000) == 0xd8010000) { /* stfd Rx,NUM(r1) */
     pc += 4;				 /* store floating register double */
     op = read_memory_integer (pc, 4);
+    fdata->frameless = 0;
   }
 
   if ((op & 0xfc1f0000) == 0xbc010000) { /* stm Rx, NUM(r1) */
@@ -589,7 +599,7 @@ function_frame_info (pc, fdata)
     fdata->saved_gpr = (op >> 21) & 0x1f;
     tmp2 = op & 0xffff;
     if (tmp2 > 0x7fff)
-      tmp2 = 0xffff0000 | tmp2;
+      tmp2 = (~0 &~ 0xffff) | tmp2;
 
     if (tmp2 < 0) {
       tmp2 = tmp2 * -1;
@@ -602,29 +612,43 @@ function_frame_info (pc, fdata)
     fdata->offset = tmp2;
     pc += 4;
     op = read_memory_integer (pc, 4);
+    fdata->frameless = 0;
   }
 
   while (((tmp = op >> 16) == 0x9001) ||	/* st   r0, NUM(r1) */
 	 (tmp == 0x9421) ||			/* stu  r1, NUM(r1) */
-	 (op == 0x93e1fffc)) 			/* st   r31,-4(r1) */
+	 (tmp == 0x93e1))			/* st r31, NUM(r1) */
   {
+    int tmp2;
+
     /* gcc takes a short cut and uses this instruction to save r31 only. */
 
-    if (op == 0x93e1fffc) {
+    if (tmp == 0x93e1) {
       if (fdata->offset)
 /*        fatal ("Unrecognized prolog."); */
         printf ("Unrecognized prolog!\n");
 
       fdata->saved_gpr = 31;
-      fdata->offset = 4;
+      tmp2 = op & 0xffff;
+      if (tmp2 > 0x7fff) {
+	tmp2 = - ((~0 &~ 0xffff) | tmp2);
+	fdata->saved_fpr = (tmp2 - ((32 - 31) * 4)) / 8;
+	if ( fdata->saved_fpr > 0)
+	  fdata->saved_fpr = 32 - fdata->saved_fpr;
+	else
+	  fdata->saved_fpr = -1;
+      }
+      fdata->offset = tmp2;
     }
     pc += 4;
     op = read_memory_integer (pc, 4);
+    fdata->frameless = 0;
   }
 
   while ((tmp = (op >> 22)) == 0x20f) {	/* l	r31, ... or */
     pc += 4;				/* l	r30, ...    */
     op = read_memory_integer (pc, 4);
+    fdata->frameless = 0;
   }
 
   /* store parameters into stack */
@@ -636,10 +660,13 @@ function_frame_info (pc, fdata)
     {
       pc += 4;					/* store fpr double */
       op = read_memory_integer (pc, 4);
+      fdata->frameless = 0;
     }
 
-  if (op == 0x603f0000)				/* oril r31, r1, 0x0 */
+  if (op == 0x603f0000) {			/* oril r31, r1, 0x0 */
     fdata->alloca_reg = 31;
+    fdata->frameless = 0;
+  }
 }
 
 
@@ -906,11 +933,14 @@ CORE_ADDR pc;
 
 
 /* Determines whether the function FI has a frame on the stack or not.
-   Called from the FRAMELESS_FUNCTION_INVOCATION macro in tm.h.  */
+   Called from the FRAMELESS_FUNCTION_INVOCATION macro in tm.h with a
+   second argument of 0, and from the FRAME_SAVED_PC macro with a
+   second argument of 1.  */
 
 int
-frameless_function_invocation (fi)
+frameless_function_invocation (fi, pcsaved)
 struct frame_info *fi;
+int pcsaved;
 {
   CORE_ADDR func_start;
   struct aix_framedata fdata;
@@ -924,7 +954,7 @@ struct frame_info *fi;
     return 0;
 
   function_frame_info (func_start, &fdata);
-  return fdata.frameless;
+  return pcsaved ? fdata.nosavedpc : fdata.frameless;
 }
 
 
@@ -1026,7 +1056,7 @@ frame_initial_stack_address (fi)
   for (callee_fi = fi->next; callee_fi; callee_fi = callee_fi->next) {
 
     if (!callee_fi->cache_fsr)
-      frame_get_cache_fsr (fi, NULL);
+      frame_get_cache_fsr (callee_fi, NULL);
 
     /* this is the address in which alloca register is saved. */
 

@@ -1,4 +1,33 @@
+Tue Nov 17 11:17:06 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+ 	* tm-rs6000.h (BELIEVE_PCC_PROMOTION): Define, since AIX cc gets
+	it right.
+	(aix_framedata): added nosavedpc field.
+	(SAVED_PC_AFTER_CALL): Don't try to optimize; just call
+	read_register.
+	(FRAMELESS_FUNCTION_INVOCATION): Pass second argument of 0.
+	(FRAME_SAVED_PC): If PC not saved, use SAVED_PC_AFTER_CALL.
+	* rs6000-tdep.c (skip_prologue): Handle gcc generated stfd
+	instructions as function_frame_info does.  Expand special case of
+	st r31,-4(r1) to be st r31,NUM(r1), since gcc can generate offsets
+	other than -4.
+	(pop_frame): Add 4 rather than sizeof (int) to avoid host
+	dependence.
+	(function_frame_info): Set frameless if the function has no frame,
+	and set nosavedpc if the PC was not saved.  Handle gcc generated
+	stfd 31,-4(31); st 31, -12(31) correctly.
+	(frameless_function_invocation): New second argument pcsaved; if 0
+	return whether the function has a frame, if 1 return whether the
+	function saved PC.
+	(frame_initial_stack_address): Correct typo: cache registers for
+	callee_fi, not for fi, (avoids reading garbage memory locations).
+
 Mon Nov 16 15:58:07 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* infrun.c (wait_for_inferior (just before step_over_function
+	label)):  Change test for stepping into subroutine to check for the
+	presence of line number info.  This makes stuff compiled with -g1
+	cause GDB to not lose control when stepping.
 
 	* symtab.c (find_pc_line):  Improve code per gnu's suggestions.
 	Improve comments as well.
