@@ -71,6 +71,9 @@ endif
 ifeq ($(canonhost),mips-dec-ultrix4.2)
 canonhost := mips-dec-ultrix
 endif
+ifeq ($(canonhost),mips-dec-ultrix4.4)
+canonhost := mips-dec-ultrix
+endif
 ifeq ($(canonhost),mips-sgi-irix4.0.1)
 canonhost := mips-sgi-irix4
 endif
@@ -137,6 +140,23 @@ endif
 # that the native is spelled 'native'.
 #
 
+ifeq ($(canonhost),sparc-sun-sunos4.1)
+TARGETS = $(NATIVE) \
+	i386-go32 \
+	a29k-amd-udi a29k-vxworks5.1 \
+	sh-hms h8300-hms \
+	powerpc-eabi hppa1.1-hp-proelf \
+	i386-aout i386-elf \
+	i960-nindy-coff i960-vxworks5.0 i960-vxworks5.1 \
+	m68k-aout m68k-coff m68k-elf m68k-vxworks5.1 \
+	mips-elf mips-idt-ecoff mips64-elf \
+	sparc-aout sparclite-aout sparclite-coff \
+	z8k-coff i386-unixware mips-ncd-elf \
+	OSE68000 OSE68k
+GCC = gcc -O2 -pipe
+all: all-cygnus
+endif
+
 ifeq ($(canonhost),sparc-sun-sunos4.1.3)
 TARGETS = $(NATIVE) \
 	i386-go32 	\
@@ -185,9 +205,12 @@ all: all-cygnus
 endif
 
 ifeq ($(canonhost),mips-dec-ultrix)
-TARGETS = $(NATIVE) m68k-aout
+TARGETS = $(NATIVE)
 CC = cc -Wf,-XNg1000
 all: all-cygnus
+SHELL = /usr/unsupported/bin/bash
+CONFIG_SHELL = /usr/unsupported/bin/bash
+TMPDIR = $(shell mkdir $(canonhost)-tmpdir; cd $(canonhost)-tmpdir ; pwd)
 endif
 
 ifeq ($(patsubst alpha-dec-osf%,alpha,$(canonhost)),alpha)
@@ -214,7 +237,7 @@ CC = cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh2000
 all: all-cygnus
 endif
 
-ifeq ($(canonhost),powerpc-ibm-aix4.1.1)
+ifeq ($(canonhost),powerpc-ibm-aix4.1)
 TARGETS	= $(NATIVE)
 all: all-cygnus
 endif
@@ -233,8 +256,13 @@ TARGETS	= $(NATIVE) \
 all: all-cygnus
 endif
 
-ifeq ($(canonhost),m68k-hp-hpux)
-TARGETS	= $(NATIVE)	m68k-aout
+ifeq ($(canonhost),rs6000-ibm-aix4.1)
+TARGETS	= $(NATIVE)
+all: all-cygnus
+endif
+
+ifeq ($(canonhost),m68k-hp-hpux9)
+TARGETS	= $(NATIVE)
 TMPDIR := $(shell mkdir $(canonhost)-tmpdir; cd $(canonhost)-tmpdir ; pwd)
 CC = cc -Wp,-P,-H256000
 #CFLAGS = +O1000 
@@ -242,13 +270,22 @@ CFLAGS = -g
 all: all-cygnus
 endif
 
-ifeq ($(canonhost),hppa1.1-hp-hpux)
+ifeq ($(canonhost),hppa1.1-hp-hpux9)
 TARGETS = \
 	$(NATIVE) \
 	h8300-hms \
 	hppa1.1-hp-proelf \
 	i960-vxworks5.0 i960-vxworks5.1 \
 	m68k-aout  m68k-coff  m68k-vxworks5.1
+CC = cc -Wp,-H256000
+#CFLAGS = +Obb2000
+CFLAGS = -g
+all: all-cygnus
+endif
+
+#ifeq ($(canonhost),hppa1.1-hp-hpux10)
+ifeq ($(patsubst hppa1.1-hp-hpux10%,hpux10,$(canonhost)),hpux10)
+TARGETS = $(NATIVE)
 CC = cc -Wp,-H256000
 #CFLAGS = +Obb2000
 CFLAGS = -g
@@ -285,8 +322,7 @@ endif
 
 ifeq ($(canonhost),i386-ncr-sysv4.3)
 TARGETS = $(NATIVE)
-CC = cc
-CFLAGS = -Hnocopyr
+CC = cc -Hnocopyr
 SHELL = /usr/unsupported/bin/bash
 CONFIG_SHELL = /usr/unsupported/bin/bash
 all: all-cygnus
