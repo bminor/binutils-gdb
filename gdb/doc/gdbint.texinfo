@@ -6749,7 +6749,9 @@ is so old that it has never been converted to use BFD.  Now that's old!
 @end table
 
 @include observer.texi
+@raisesections
 @include fdl.texi
+@lowersections
 
 @node Index
 @unnumbered Index

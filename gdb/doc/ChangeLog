@@ -1,3 +1,9 @@
+2004-02-24  Andrew Cagney  <cagney@redhat.com>
+
+	* annotate.texinfo: Wrap fdl.texi include in raise/lower sections.
+	* gdb.texinfo, gdbint.texinfo, stabs.texinfo: Ditto.
+	* fdl.texi: Import Version 1.2, November 2002.
+	
 2004-02-17  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.texinfo (Mode Options): Note that "mi1" is deprecated.

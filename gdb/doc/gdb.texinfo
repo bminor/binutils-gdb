@@ -21629,7 +21629,9 @@ host is called:
 
 @include gpl.texi
 
+@raisesections
 @include fdl.texi
+@lowersections
 
 @node Index
 @unnumbered Index
