@@ -131,6 +131,93 @@ gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
   return true;
 }
 
+EOF
+if [ "x${host}" = "x${target}" ] ; then
+cat >>e${EMULATION_NAME}.c <<EOF
+
+/* For a native linker, check the file /etc/ld.so.conf for directories
+   in which we may find shared libraries.  /etc/ld.so.conf is really
+   only meaningful on Linux, but we check it on other systems anyhow.  */
+
+static boolean gld${EMULATION_NAME}_check_ld_so_conf PARAMS ((const char *));
+
+static boolean
+gld${EMULATION_NAME}_check_ld_so_conf (name)
+     const char *name;
+{
+  static boolean initialized;
+  static char *ld_so_conf;
+
+  if (! initialized)
+    {
+      FILE *f;
+
+      f = fopen ("/etc/ld.so.conf", FOPEN_RT);
+      if (f != NULL)
+	{
+	  char *b;
+	  size_t len, alloc;
+	  int c;
+
+	  len = 0;
+	  alloc = 100;
+	  b = (char *) xmalloc (alloc);
+
+	  while ((c = getc (f)) != EOF)
+	    {
+	      if (len + 1 >= alloc)
+		{
+		  alloc *= 2;
+		  b = (char *) xrealloc (b, alloc);
+		}
+	      if (c != ':'
+		  && c != ' '
+		  && c != '\t'
+		  && c != '\n'
+		  && c != ',')
+		{
+		  b[len] = c;
+		  ++len;
+		}
+	      else
+		{
+		  if (len > 0 && b[len - 1] != ':')
+		    {
+		      b[len] = ':';
+		      ++len;
+		    }
+		}
+	    }
+
+	  if (len > 0 && b[len - 1] == ':')
+	    --len;
+
+	  if (len > 0)
+	    b[len] = '\0';
+	  else
+	    {
+	      free (b);
+	      b = NULL;
+	    }
+
+	  fclose (f);
+
+	  ld_so_conf = b;
+	}
+
+      initialized = true;
+    }
+
+  if (ld_so_conf == NULL)
+    return false;
+
+  return gld${EMULATION_NAME}_search_needed (ld_so_conf, name);
+}
+
+EOF
+fi
+cat >>e${EMULATION_NAME}.c <<EOF
+
 /* These variables are required to pass information back and forth
    between after_open and check_needed and stat_needed.  */
 
@@ -222,6 +309,14 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	}
       if (search != NULL)
 	continue;
+EOF
+if [ "x${host}" = "x${target}" ] ; then
+cat >>e${EMULATION_NAME}.c <<EOF
+      if (gld${EMULATION_NAME}_check_ld_so_conf (l->name))
+	continue;
+EOF
+fi
+cat >>e${EMULATION_NAME}.c <<EOF
 
       einfo ("%P: warning: %s, needed by %B, not found\n",
 	     l->name, l->by);
@@ -596,7 +691,7 @@ gld${EMULATION_NAME}_find_exp_assignment (exp)
       break;
 
     case etree_trinary:
-      gld${EMULATION_NAME}_find_exp_assignment (exp->trinary.lhs);
+      gld${EMULATION_NAME}_find_exp_assignment (exp->trinary.cond);
       gld${EMULATION_NAME}_find_exp_assignment (exp->trinary.lhs);
       gld${EMULATION_NAME}_find_exp_assignment (exp->trinary.rhs);
       break;

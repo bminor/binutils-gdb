@@ -1,5 +1,14 @@
 Fri Apr  5 14:30:14 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/elf32.em (gld${EMULATION_NAME}_check_ld_so_conf): New
+	static function, if ${host} = ${target}.
+	(gld${EMULATION_NAME}_after_open): Call check_ld_so_conf to find a
+	needed shared library if ${host} = $[target}.
+
+	* configure.host (i[345]86-*-linux*): Add -dynamic-linker to
+	HOSTING_CRT0.  Search -lgcc both before and after -lc in
+	HOSTING_LIBS.
+
 	* configure.tgt: Add i[345]86-*-freebsdelf* target; from John
 	Polstra <jdp@polstra.com>.
 
