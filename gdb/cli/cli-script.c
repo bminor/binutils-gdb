@@ -1028,7 +1028,6 @@ free_command_lines (struct command_line **lptr)
       xfree (l);
       l = next;
     }
-  *lptr = NULL;
 }
 
 static void

@@ -21,7 +21,6 @@
 # Some basic checks for the CLI.
 
 load_lib mi-support.exp
-set MIFLAGS "-i=mi"
 
 gdb_exit
 if [mi_gdb_start] {
@@ -38,3 +37,7 @@ mi_gdb_test "47show architecture\n" \
 
 mi_gdb_exit
 return 0
+
+# Local variables: 
+# change-log-default-name: "ChangeLog-mi"
+# End: 

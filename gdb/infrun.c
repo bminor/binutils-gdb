@@ -110,6 +110,31 @@ static ptid_t previous_inferior_ptid;
 
 static int may_follow_exec = MAY_FOLLOW_EXEC;
 
+/* resume and wait_for_inferior use this to ensure that when
+   stepping over a hit breakpoint in a threaded application
+   only the thread that hit the breakpoint is stepped and the
+   other threads don't continue.  This prevents having another
+   thread run past the breakpoint while it is temporarily
+   removed.
+
+   This is not thread-specific, so it isn't saved as part of
+   the infrun state.
+
+   Versions of gdb which don't use the "step == this thread steps
+   and others continue" model but instead use the "step == this
+   thread steps and others wait" shouldn't do this.  */
+
+static int thread_step_needed = 0;
+
+/* This is true if thread_step_needed should actually be used.  At
+   present this is only true for HP-UX native.  */
+
+#ifndef USE_THREAD_STEP_NEEDED
+#define USE_THREAD_STEP_NEEDED (0)
+#endif
+
+static int use_thread_step_needed = USE_THREAD_STEP_NEEDED;
+
 /* GET_LONGJMP_TARGET returns the PC at which longjmp() will resume the
    program.  It needs to examine the jmp_buf argument and extract the PC
    from it.  The return value is non-zero on success, zero otherwise. */
@@ -781,6 +806,8 @@ set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
 }
 
 
+
+
 /* Resume the inferior, but allow a QUIT.  This is useful if the user
    wants to interrupt some lengthy single-stepping operation
    (for child processes, the SIGINT goes to the inferior, and so
@@ -796,8 +823,13 @@ resume (int step, enum target_signal sig)
   struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
   QUIT;
 
-  /* FIXME: calling breakpoint_here_p (read_pc ()) three times! */
-
+#ifdef CANNOT_STEP_BREAKPOINT
+  /* Most targets can step a breakpoint instruction, thus executing it
+     normally.  But if this one cannot, just continue and we will hit
+     it anyway.  */
+  if (step && breakpoints_inserted && breakpoint_here_p (read_pc ()))
+    step = 0;
+#endif
 
   /* Some targets (e.g. Solaris x86) have a kernel bug when stepping
      over an instruction that causes a page fault without triggering
@@ -880,34 +912,41 @@ resume (int step, enum target_signal sig)
     {
       ptid_t resume_ptid;
 
-      resume_ptid = RESUME_ALL;		/* Default */
-
-      if ((step || singlestep_breakpoints_inserted_p) &&
-	  !breakpoints_inserted && breakpoint_here_p (read_pc ()))
+      if (use_thread_step_needed && thread_step_needed)
 	{
-	  /* Stepping past a breakpoint without inserting breakpoints.
-	     Make sure only the current thread gets to step, so that
-	     other threads don't sneak past breakpoints while they are
-	     not inserted. */
+	  /* We stopped on a BPT instruction;
+	     don't continue other threads and
+	     just step this thread. */
+	  thread_step_needed = 0;
 
-	  resume_ptid = inferior_ptid;
+	  if (!breakpoint_here_p (read_pc ()))
+	    {
+	      /* Breakpoint deleted: ok to do regular resume
+	         where all the threads either step or continue. */
+	      resume_ptid = RESUME_ALL;
+	    }
+	  else
+	    {
+	      if (!step)
+		{
+		  warning ("Internal error, changing continue to step.");
+		  remove_breakpoints ();
+		  breakpoints_inserted = 0;
+		  trap_expected = 1;
+		  step = 1;
+		}
+	      resume_ptid = inferior_ptid;
+	    }
 	}
-
-      if ((scheduler_mode == schedlock_on) ||
-	  (scheduler_mode == schedlock_step && 
-	   (step || singlestep_breakpoints_inserted_p)))
+      else
 	{
-	  /* User-settable 'scheduler' mode requires solo thread resume. */
+	  /* Vanilla resume. */
+	  if ((scheduler_mode == schedlock_on) ||
+	      (scheduler_mode == schedlock_step && step != 0))
 	    resume_ptid = inferior_ptid;
+	  else
+	    resume_ptid = RESUME_ALL;
 	}
-
-#ifdef CANNOT_STEP_BREAKPOINT
-      /* Most targets can step a breakpoint instruction, thus executing it
-	 normally.  But if this one cannot, just continue and we will hit
-	 it anyway.  */
-      if (step && breakpoints_inserted && breakpoint_here_p (read_pc ()))
-	step = 0;
-#endif
       target_resume (resume_ptid, step, sig);
     }
 
@@ -982,6 +1021,16 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
   else
     {
       write_pc (addr);
+
+      /* New address; we don't need to single-step a thread
+         over a breakpoint we just hit, 'cause we aren't
+         continuing from there.
+
+         It's not worth worrying about the case where a user
+         asks for a "jump" at the current PC--if they get the
+         hiccup of re-hiting a hit breakpoint, what else do
+         they expect? */
+      thread_step_needed = 0;
     }
 
 #ifdef PREPARE_TO_PROCEED
@@ -999,6 +1048,7 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
   if (PREPARE_TO_PROCEED (1) && breakpoint_here_p (read_pc ()))
     {
       oneproc = 1;
+      thread_step_needed = 1;
     }
 
 #endif /* PREPARE_TO_PROCEED */
@@ -1227,7 +1277,7 @@ wait_for_inferior (void)
   struct execution_control_state ecss;
   struct execution_control_state *ecs;
 
-  old_cleanups = make_cleanup (delete_step_resume_breakpoint,
+  old_cleanups = make_cleanup (delete_breakpoint_current_contents,
 			       &step_resume_breakpoint);
   make_cleanup (delete_breakpoint_current_contents,
 		&through_sigtramp_breakpoint);
@@ -1238,6 +1288,8 @@ wait_for_inferior (void)
 
   /* Fill in with reasonable starting values.  */
   init_execution_control_state (ecs);
+
+  thread_step_needed = 0;
 
   /* We'll update this if & when we switch to a new thread. */
   previous_inferior_ptid = inferior_ptid;
@@ -1289,13 +1341,15 @@ fetch_inferior_event (void *client_data)
 
   if (!async_ecs->wait_some_more)
     {
-      old_cleanups = make_exec_cleanup (delete_step_resume_breakpoint, 
+      old_cleanups = make_exec_cleanup (delete_breakpoint_current_contents,
 					&step_resume_breakpoint);
       make_exec_cleanup (delete_breakpoint_current_contents,
 			 &through_sigtramp_breakpoint);
 
       /* Fill in with reasonable starting values.  */
       init_execution_control_state (async_ecs);
+
+      thread_step_needed = 0;
 
       /* We'll update this if & when we switch to a new thread. */
       previous_inferior_ptid = inferior_ptid;
@@ -1379,49 +1433,6 @@ get_last_target_status(ptid_t *ptidp, struct target_waitstatus *status)
   *status = target_last_waitstatus;
 }
 
-/* Switch thread contexts, maintaining "infrun state". */
-
-static void
-context_switch (struct execution_control_state *ecs)
-{
-  /* Caution: it may happen that the new thread (or the old one!)
-     is not in the thread list.  In this case we must not attempt
-     to "switch context", or we run the risk that our context may
-     be lost.  This may happen as a result of the target module
-     mishandling thread creation.  */
-
-  if (in_thread_list (inferior_ptid) && in_thread_list (ecs->ptid))
-    { /* Perform infrun state context switch: */
-      /* Save infrun state for the old thread.  */
-      save_infrun_state (inferior_ptid, prev_pc, 
-			 prev_func_start, prev_func_name, 
-			 trap_expected, step_resume_breakpoint,
-			 through_sigtramp_breakpoint, step_range_start, 
-			 step_range_end, step_frame_address, 
-			 ecs->handling_longjmp, ecs->another_trap,
-			 ecs->stepping_through_solib_after_catch,
-			 ecs->stepping_through_solib_catchpoints,
-			 ecs->stepping_through_sigtramp,
-			 ecs->current_line, ecs->current_symtab, 
-			 step_sp);
-
-      /* Load infrun state for the new thread.  */
-      load_infrun_state (ecs->ptid, &prev_pc, 
-			 &prev_func_start, &prev_func_name, 
-			 &trap_expected, &step_resume_breakpoint,
-			 &through_sigtramp_breakpoint, &step_range_start, 
-			 &step_range_end, &step_frame_address, 
-			 &ecs->handling_longjmp, &ecs->another_trap,
-			 &ecs->stepping_through_solib_after_catch,
-			 &ecs->stepping_through_solib_catchpoints,
-			 &ecs->stepping_through_sigtramp, 
-			 &ecs->current_line, &ecs->current_symtab,
-			 &step_sp);
-    }
-  inferior_ptid = ecs->ptid;
-}
-
-
 /* Given an execution control state that has been freshly filled in
    by an event from the inferior, figure out what it means and take
    appropriate action.  */
@@ -1440,12 +1451,12 @@ handle_inferior_event (struct execution_control_state *ecs)
   {
     switch (ecs->infwait_state)
       {
-      case infwait_thread_hop_state:
-	/* Cancel the waiton_ptid. */
-	ecs->waiton_ptid = pid_to_ptid (-1);
-	/* Fall thru to the normal_state case. */
-
       case infwait_normal_state:
+	/* Since we've done a wait, we have a new event.  Don't
+	   carry over any expectations about needing to step over a
+	   breakpoint. */
+	thread_step_needed = 0;
+
 	/* See comments where a TARGET_WAITKIND_SYSCALL_RETURN event
 	   is serviced in this loop, below. */
 	if (ecs->enable_hw_watchpoints_after_wait)
@@ -1455,6 +1466,21 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  }
 	stepped_after_stopped_by_watchpoint = 0;
 	break;
+
+      case infwait_thread_hop_state:
+	insert_breakpoints ();
+
+	/* We need to restart all the threads now,
+	 * unless we're running in scheduler-locked mode. 
+	 * FIXME: shouldn't we look at currently_stepping ()?
+	 */
+	if (scheduler_mode == schedlock_on)
+	  target_resume (ecs->ptid, 0, TARGET_SIGNAL_0);
+	else
+	  target_resume (RESUME_ALL, 0, TARGET_SIGNAL_0);
+	ecs->infwait_state = infwait_normal_state;
+	prepare_to_wait (ecs);
+	return;
 
       case infwait_nullified_state:
 	break;
@@ -1617,17 +1643,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	stop_pc = read_pc_pid (ecs->ptid);
 	ecs->saved_inferior_ptid = inferior_ptid;
 	inferior_ptid = ecs->ptid;
-	/* The second argument of bpstat_stop_status is meant to help
-	   distinguish between a breakpoint trap and a singlestep trap.
-	   This is only important on targets where DECR_PC_AFTER_BREAK
-	   is non-zero.  The prev_pc test is meant to distinguish between
-	   singlestepping a trap instruction, and singlestepping thru a
-	   jump to the instruction following a trap instruction. */
-	   
-	stop_bpstat = bpstat_stop_status (&stop_pc, 
-					  currently_stepping (ecs) &&
-					  prev_pc != 
-					  stop_pc - DECR_PC_AFTER_BREAK);
+	stop_bpstat = bpstat_stop_status (&stop_pc, currently_stepping (ecs));
 	ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
 	inferior_ptid = ecs->saved_inferior_ptid;
 	goto process_event_stop_test;
@@ -1676,17 +1692,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  }
 
 	stop_pc = read_pc ();
-	/* The second argument of bpstat_stop_status is meant to help
-	   distinguish between a breakpoint trap and a singlestep trap.
-	   This is only important on targets where DECR_PC_AFTER_BREAK
-	   is non-zero.  The prev_pc test is meant to distinguish between
-	   singlestepping a trap instruction, and singlestepping thru a
-	   jump to the instruction following a trap instruction. */
-	   
-	stop_bpstat = bpstat_stop_status (&stop_pc, 
-					  currently_stepping (ecs) &&
-					  prev_pc !=
-					  stop_pc - DECR_PC_AFTER_BREAK);
+	stop_bpstat = bpstat_stop_status (&stop_pc, currently_stepping (ecs));
 	ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
 	goto process_event_stop_test;
 
@@ -1751,17 +1757,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	stop_pc = read_pc_pid (ecs->ptid);
 	ecs->saved_inferior_ptid = inferior_ptid;
 	inferior_ptid = ecs->ptid;
-	/* The second argument of bpstat_stop_status is meant to help
-	   distinguish between a breakpoint trap and a singlestep trap.
-	   This is only important on targets where DECR_PC_AFTER_BREAK
-	   is non-zero.  The prev_pc test is meant to distinguish between
-	   singlestepping a trap instruction, and singlestepping thru a
-	   jump to the instruction following a trap instruction. */
-	   
-	stop_bpstat = bpstat_stop_status (&stop_pc, 
-					  currently_stepping (ecs) &&
-					  prev_pc !=
-					  stop_pc - DECR_PC_AFTER_BREAK);
+	stop_bpstat = bpstat_stop_status (&stop_pc, currently_stepping (ecs));
 	ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
 	inferior_ptid = ecs->saved_inferior_ptid;
 	goto process_event_stop_test;
@@ -1870,8 +1866,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
 		/* Saw a breakpoint, but it was hit by the wrong thread.
 		   Just continue. */
-		if (DECR_PC_AFTER_BREAK)
-		  write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK, ecs->ptid);
+		write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK, ecs->ptid);
 
 		remove_status = remove_breakpoints ();
 		/* Did we fail to remove breakpoints?  If so, try
@@ -1883,40 +1878,39 @@ handle_inferior_event (struct execution_control_state *ecs)
 		   then either :-) or execs. */
 		if (remove_status != 0)
 		  {
-		    /* FIXME!  This is obviously non-portable! */
-		    write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK + 4, 
-				  ecs->ptid);
-		    /* We need to restart all the threads now,
-		     * unles we're running in scheduler-locked mode. 
-		     * Use currently_stepping to determine whether to 
-		     * step or continue.
-		     */
-		    /* FIXME MVS: is there any reason not to call resume()? */
-		    if (scheduler_mode == schedlock_on)
-		      target_resume (ecs->ptid, 
-				     currently_stepping (ecs), 
-				     TARGET_SIGNAL_0);
-		    else
-		      target_resume (RESUME_ALL, 
-				     currently_stepping (ecs), 
-				     TARGET_SIGNAL_0);
-		    prepare_to_wait (ecs);
-		    return;
+		    write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK + 4, ecs->ptid);
 		  }
 		else
 		  {		/* Single step */
-		    breakpoints_inserted = 0;
-		    if (!ptid_equal (inferior_ptid, ecs->ptid))
-		      context_switch (ecs);
+		    target_resume (ecs->ptid, 1, TARGET_SIGNAL_0);
+		    /* FIXME: What if a signal arrives instead of the
+		       single-step happening?  */
+
 		    ecs->waiton_ptid = ecs->ptid;
 		    ecs->wp = &(ecs->ws);
-		    ecs->another_trap = 1;
-
 		    ecs->infwait_state = infwait_thread_hop_state;
-		    keep_going (ecs);
-		    registers_changed ();
+		    prepare_to_wait (ecs);
 		    return;
 		  }
+
+		/* We need to restart all the threads now,
+		 * unles we're running in scheduler-locked mode. 
+		 * FIXME: shouldn't we look at currently_stepping ()?
+		 */
+		if (scheduler_mode == schedlock_on)
+		  target_resume (ecs->ptid, 0, TARGET_SIGNAL_0);
+		else
+		  target_resume (RESUME_ALL, 0, TARGET_SIGNAL_0);
+		prepare_to_wait (ecs);
+		return;
+	      }
+	    else
+	      {
+		/* This breakpoint matches--either it is the right
+		   thread or it's a generic breakpoint for all threads.
+		   Remember that we'll need to step just _this_ thread
+		   on any following user continuation! */
+		thread_step_needed = 1;
 	      }
 	  }
       }
@@ -1981,7 +1975,40 @@ handle_inferior_event (struct execution_control_state *ecs)
 	/* It's a SIGTRAP or a signal we're interested in.  Switch threads,
 	   and fall into the rest of wait_for_inferior().  */
 
-	context_switch (ecs);
+	/* Caution: it may happen that the new thread (or the old one!)
+	   is not in the thread list.  In this case we must not attempt
+	   to "switch context", or we run the risk that our context may
+	   be lost.  This may happen as a result of the target module
+	   mishandling thread creation.  */
+
+	if (in_thread_list (inferior_ptid) && in_thread_list (ecs->ptid))
+	  { /* Perform infrun state context switch: */
+	    /* Save infrun state for the old thread.  */
+	    save_infrun_state (inferior_ptid, prev_pc,
+			       prev_func_start, prev_func_name,
+			       trap_expected, step_resume_breakpoint,
+			       through_sigtramp_breakpoint,
+			       step_range_start, step_range_end,
+			       step_frame_address, ecs->handling_longjmp,
+			       ecs->another_trap,
+			       ecs->stepping_through_solib_after_catch,
+			       ecs->stepping_through_solib_catchpoints,
+			       ecs->stepping_through_sigtramp);
+
+	    /* Load infrun state for the new thread.  */
+	    load_infrun_state (ecs->ptid, &prev_pc,
+			       &prev_func_start, &prev_func_name,
+			       &trap_expected, &step_resume_breakpoint,
+			       &through_sigtramp_breakpoint,
+			       &step_range_start, &step_range_end,
+			       &step_frame_address, &ecs->handling_longjmp,
+			       &ecs->another_trap,
+			       &ecs->stepping_through_solib_after_catch,
+			       &ecs->stepping_through_solib_catchpoints,
+			       &ecs->stepping_through_sigtramp);
+	  }
+
+	inferior_ptid = ecs->ptid;
 
 	if (context_hook)
 	  context_hook (pid_to_thread_id (ecs->ptid));
@@ -2049,8 +2076,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   includes evaluating watchpoints, things will come to a
 	   stop in the correct manner.  */
 
-	if (DECR_PC_AFTER_BREAK)
-	  write_pc (stop_pc - DECR_PC_AFTER_BREAK);
+	write_pc (stop_pc - DECR_PC_AFTER_BREAK);
 
 	remove_breakpoints ();
 	registers_changed ();
@@ -2131,14 +2157,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 	else
 	  {
 	    /* See if there is a breakpoint at the current PC.  */
-
-	    /* The second argument of bpstat_stop_status is meant to help
-	       distinguish between a breakpoint trap and a singlestep trap.
-	       This is only important on targets where DECR_PC_AFTER_BREAK
-	       is non-zero.  The prev_pc test is meant to distinguish between
-	       singlestepping a trap instruction, and singlestepping thru a
-	       jump to the instruction following a trap instruction. */
-
 	    stop_bpstat = bpstat_stop_status
 	      (&stop_pc,
 	    /* Pass TRUE if our reason for stopping is something other
@@ -2148,7 +2166,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 	       sigtramp, which is detected by a new stack pointer value
 	       below any usual function calling stack adjustments.  */
 		(currently_stepping (ecs)
-		 && prev_pc != stop_pc - DECR_PC_AFTER_BREAK
 		 && !(step_range_end
 		      && INNER_THAN (read_sp (), (step_sp - 16))))
 	      );
@@ -2337,7 +2354,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     interferes with us */
 	  if (step_resume_breakpoint != NULL)
 	    {
-	      delete_step_resume_breakpoint (&step_resume_breakpoint);
+	      delete_breakpoint (step_resume_breakpoint);
+	      step_resume_breakpoint = NULL;
 	    }
 	  /* Not sure whether we need to blow this away too, but probably
 	     it is like the step-resume breakpoint.  */
@@ -2383,6 +2401,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	case BPSTAT_WHAT_SINGLE:
 	  if (breakpoints_inserted)
 	    {
+	      thread_step_needed = 1;
 	      remove_breakpoints ();
 	    }
 	  breakpoints_inserted = 0;
@@ -2434,7 +2453,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	      step_resume_breakpoint =
 		bpstat_find_step_resume_breakpoint (stop_bpstat);
 	    }
-	  delete_step_resume_breakpoint (&step_resume_breakpoint);
+	  delete_breakpoint (step_resume_breakpoint);
+	  step_resume_breakpoint = NULL;
 	  break;
 
 	case BPSTAT_WHAT_THROUGH_SIGTRAMP:
@@ -2755,16 +2775,11 @@ handle_inferior_event (struct execution_control_state *ecs)
       {
 	/* It's a subroutine call.  */
 
-	if ((step_over_calls == STEP_OVER_NONE)
-	    || ((step_range_end == 1)
-	        && in_prologue (prev_pc, ecs->stop_func_start)))
+	if (step_over_calls == STEP_OVER_NONE)
 	  {
 	    /* I presume that step_over_calls is only 0 when we're
 	       supposed to be stepping at the assembly language level
 	       ("stepi").  Just stop.  */
-	    /* Also, maybe we just did a "nexti" inside a prolog,
-               so we thought it was a subroutine call but it was not.
-               Stop as well.  FENN */
 	    stop_step = 1;
 	    print_stop_reason (END_STEPPING_RANGE, 0);
 	    stop_stepping (ecs);
@@ -3308,7 +3323,7 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       /* Print a message only if not in the middle of doing a "step n"
 	 operation for n > 1 */
       if (!step_multi || !stop_step)
-	if (ui_out_is_mi_like_p (uiout))
+	if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
 	  ui_out_field_string (uiout, "reason", "end-stepping-range");
 #endif
       break;
@@ -3320,7 +3335,7 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       /* The inferior was terminated by a signal. */
 #ifdef UI_OUT
       annotate_signalled ();
-      if (ui_out_is_mi_like_p (uiout))
+      if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
 	ui_out_field_string (uiout, "reason", "exited-signalled");
       ui_out_text (uiout, "\nProgram terminated with signal ");
       annotate_signal_name ();
@@ -3354,7 +3369,7 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       annotate_exited (stop_info);
       if (stop_info)
 	{
-	  if (ui_out_is_mi_like_p (uiout))
+	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
 	    ui_out_field_string (uiout, "reason", "exited");
 	  ui_out_text (uiout, "\nProgram exited with code ");
 	  ui_out_field_fmt (uiout, "exit-code", "0%o", (unsigned int) stop_info);
@@ -3362,7 +3377,7 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
 	}
       else
 	{
-	  if (ui_out_is_mi_like_p (uiout))
+	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
 	    ui_out_field_string (uiout, "reason", "exited-normally");
 	  ui_out_text (uiout, "\nProgram exited normally.\n");
 	}
@@ -3548,12 +3563,12 @@ and/or watchpoints.\n");
 #ifdef UI_OUT
 	  /* For mi, have the same behavior every time we stop:
              print everything but the source line. */
-	  if (ui_out_is_mi_like_p (uiout))
+	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
 	    source_flag = LOC_AND_ADDRESS;
 #endif
 
 #ifdef UI_OUT
-	  if (ui_out_is_mi_like_p (uiout))
+	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
 	    ui_out_field_int (uiout, "thread-id",
 	                      pid_to_thread_id (inferior_ptid));
 #endif
@@ -4177,90 +4192,6 @@ discard_inferior_status (struct inferior_status *inf_status)
   free_inferior_status (inf_status);
 }
 
-/* Oft used ptids */
-ptid_t null_ptid;
-ptid_t minus_one_ptid;
-
-/* Create a ptid given the necessary PID, LWP, and TID components.  */
-   
-ptid_t
-ptid_build (int pid, long lwp, long tid)
-{
-  ptid_t ptid;
-
-  ptid.pid = pid;
-  ptid.lwp = lwp;
-  ptid.tid = tid;
-  return ptid;
-}
-
-/* Create a ptid from just a pid.  */
-
-ptid_t
-pid_to_ptid (int pid)
-{
-  return ptid_build (pid, 0, 0);
-}
-
-/* Fetch the pid (process id) component from a ptid.  */
-
-int
-ptid_get_pid (ptid_t ptid)
-{
-  return ptid.pid;
-}
-
-/* Fetch the lwp (lightweight process) component from a ptid.  */
-
-long
-ptid_get_lwp (ptid_t ptid)
-{
-  return ptid.lwp;
-}
-
-/* Fetch the tid (thread id) component from a ptid.  */
-
-long
-ptid_get_tid (ptid_t ptid)
-{
-  return ptid.tid;
-}
-
-/* ptid_equal() is used to test equality of two ptids.  */
-
-int
-ptid_equal (ptid_t ptid1, ptid_t ptid2)
-{
-  return (ptid1.pid == ptid2.pid && ptid1.lwp == ptid2.lwp
-          && ptid1.tid == ptid2.tid);
-}
-
-/* restore_inferior_ptid() will be used by the cleanup machinery
-   to restore the inferior_ptid value saved in a call to
-   save_inferior_ptid().  */
-
-static void
-restore_inferior_ptid (void *arg)
-{
-  ptid_t *saved_ptid_ptr = arg;
-  inferior_ptid = *saved_ptid_ptr;
-  xfree (arg);
-}
-
-/* Save the value of inferior_ptid so that it may be restored by a
-   later call to do_cleanups().  Returns the struct cleanup pointer
-   needed for later doing the cleanup.  */
-
-struct cleanup *
-save_inferior_ptid (void)
-{
-  ptid_t *saved_ptid_ptr;
-
-  saved_ptid_ptr = xmalloc (sizeof (ptid_t));
-  *saved_ptid_ptr = inferior_ptid;
-  return make_cleanup (restore_inferior_ptid, saved_ptid_ptr);
-}
-
 
 static void
 build_infrun (void)
@@ -4445,10 +4376,4 @@ instruction of that function. Otherwise, the function is skipped and\n\
 the step command stops at a different source line.",
 			&setlist);
   add_show_from_set (c, &showlist);
-
-  /* ptid initializations */
-  null_ptid = ptid_build (0, 0, 0);
-  minus_one_ptid = ptid_build (-1, 0, 0);
-  inferior_ptid = null_ptid;
-  target_last_wait_ptid = minus_one_ptid;
 }

@@ -55,6 +55,11 @@ struct value;
 
 #define DEFAULT_MIPS_TYPE "generic"
 
+/* Remove useless bits from an instruction address.  */
+
+#define ADDR_BITS_REMOVE(addr) mips_addr_bits_remove(addr)
+CORE_ADDR mips_addr_bits_remove (CORE_ADDR addr);
+
 /* Remove useless bits from the stack pointer.  */
 
 #define TARGET_READ_SP() ADDR_BITS_REMOVE (read_register (SP_REGNUM))
@@ -383,6 +388,15 @@ extern void mips_pop_frame (void);
 #define CALL_DUMMY_ADDRESS() (mips_call_dummy_address ())
 extern CORE_ADDR mips_call_dummy_address (void);
 
+/* There's a mess in stack frame creation.  See comments in blockframe.c
+   near reference to INIT_FRAME_PC_FIRST.  */
+
+#define	INIT_FRAME_PC(fromleaf, prev)	/* nada */
+
+#define INIT_FRAME_PC_FIRST(fromleaf, prev) \
+   mips_init_frame_pc_first(fromleaf, prev)
+extern void mips_init_frame_pc_first (int, struct frame_info *);
+
 /* Special symbol found in blocks associated with routines.  We can hang
    mips_extra_func_info_t's off of this.  */
 
@@ -502,6 +516,3 @@ extern void mips_set_processor_type_command (char *, int);
 /* MIPS sign extends addresses */
 #define POINTER_TO_ADDRESS(TYPE,BUF) (signed_pointer_to_address (TYPE, BUF))
 #define ADDRESS_TO_POINTER(TYPE,BUF,ADDR) (address_to_signed_pointer (TYPE, BUF, ADDR))
-
-/* Single step based on where the current instruction will take us.  */
-extern void mips_software_single_step (enum target_signal, int);

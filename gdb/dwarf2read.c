@@ -194,7 +194,6 @@ struct partial_die_info
     unsigned int offset;
     unsigned int abbrev;
     char *name;
-    int has_pc_info;
     CORE_ADDR lowpc;
     CORE_ADDR highpc;
     struct dwarf_block *locdesc;
@@ -587,7 +586,7 @@ static void dwarf2_empty_abbrev_table (PTR);
 static struct abbrev_info *dwarf2_lookup_abbrev (unsigned int);
 
 static char *read_partial_die (struct partial_die_info *,
-			       bfd *, char *,
+			       bfd *, char *, int *,
 			       const struct comp_unit_head *);
 
 static char *read_full_die (struct die_info **, bfd *, char *,
@@ -728,8 +727,7 @@ static void read_tag_string_type (struct die_info *, struct objfile *);
 static void read_subroutine_type (struct die_info *, struct objfile *,
 				  const struct comp_unit_head *);
 
-static struct die_info *read_comp_unit (char *, bfd *,
-                                        const struct comp_unit_head *);
+struct die_info *read_comp_unit (char *, bfd *, const struct comp_unit_head *);
 
 static void free_die_list (struct die_info *);
 
@@ -758,19 +756,19 @@ static char *dwarf_cfi_name (unsigned int);
 struct die_info *copy_die (struct die_info *);
 #endif
 
-static struct die_info *sibling_die (struct die_info *);
+struct die_info *sibling_die (struct die_info *);
 
-static void dump_die (struct die_info *);
+void dump_die (struct die_info *);
 
-static void dump_die_list (struct die_info *);
+void dump_die_list (struct die_info *);
 
-static void store_in_ref_table (unsigned int, struct die_info *);
+void store_in_ref_table (unsigned int, struct die_info *);
 
 static void dwarf2_empty_hash_tables (void);
 
 static unsigned int dwarf2_get_ref_die_offset (struct attribute *);
 
-static struct die_info *follow_die_ref (unsigned int);
+struct die_info *follow_die_ref (unsigned int);
 
 static struct type *dwarf2_fundamental_type (struct objfile *, int);
 
@@ -972,6 +970,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
   struct partial_die_info comp_unit_die;
   struct partial_symtab *pst;
   struct cleanup *back_to;
+  int comp_unit_has_pc_info;
   CORE_ADDR lowpc, highpc;
 
   info_ptr = dwarf_info_buffer;
@@ -980,20 +979,8 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
   obstack_init (&dwarf2_tmp_obstack);
   back_to = make_cleanup (dwarf2_free_tmp_obstack, NULL);
 
-  /* Since the objects we're extracting from dwarf_info_buffer vary in
-     length, only the individual functions to extract them (like
-     read_comp_unit_head and read_partial_die) can really know whether
-     the buffer is large enough to hold another complete object.
-
-     At the moment, they don't actually check that.  If
-     dwarf_info_buffer holds just one extra byte after the last
-     compilation unit's dies, then read_comp_unit_head will happily
-     read off the end of the buffer.  read_partial_die is similarly
-     casual.  Those functions should be fixed.
-
-     For this loop condition, simply checking whether there's any data
-     left at all should be sufficient.  */
-  while (info_ptr < dwarf_info_buffer + dwarf_info_size)
+  while ((unsigned int) (info_ptr - dwarf_info_buffer)
+	 + ((info_ptr - dwarf_info_buffer) % 4) < dwarf_info_size)
     {
       struct comp_unit_head cu_header;
       beg_of_comp_unit = info_ptr;
@@ -1025,7 +1012,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
       /* Read the compilation unit die */
       info_ptr = read_partial_die (&comp_unit_die, abfd, info_ptr,
-				   &cu_header);
+				   &comp_unit_has_pc_info, &cu_header);
 
       /* Set the language we're debugging */
       set_cu_language (comp_unit_die.language);
@@ -1060,7 +1047,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
 	  /* If the compilation unit didn't have an explicit address range,
 	     then use the information extracted from its child dies.  */
-	  if (! comp_unit_die.has_pc_info)
+	  if (!comp_unit_has_pc_info)
 	    {
 	      comp_unit_die.lowpc = lowpc;
 	      comp_unit_die.highpc = highpc;
@@ -1103,20 +1090,22 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
      back to that level. */
 
   int nesting_level = 1;
+  int has_pc_info;
 
   *lowpc = ((CORE_ADDR) -1);
   *highpc = ((CORE_ADDR) 0);
 
   while (nesting_level)
     {
-      info_ptr = read_partial_die (&pdi, abfd, info_ptr, cu_header);
+      info_ptr = read_partial_die (&pdi, abfd, info_ptr,
+				   &has_pc_info, cu_header);
 
       if (pdi.name)
 	{
 	  switch (pdi.tag)
 	    {
 	    case DW_TAG_subprogram:
-	      if (pdi.has_pc_info)
+	      if (has_pc_info)
 		{
 		  if (pdi.lowpc < *lowpc)
 		    {
@@ -2910,7 +2899,7 @@ read_base_type (struct die_info *die, struct objfile *objfile)
 
 /* Read a whole compilation unit into a linked list of dies.  */
 
-static struct die_info *
+struct die_info *
 read_comp_unit (char *info_ptr, bfd *abfd,
 		const struct comp_unit_head *cu_header)
 {
@@ -3134,7 +3123,8 @@ dwarf2_lookup_abbrev (unsigned int number)
 
 static char *
 read_partial_die (struct partial_die_info *part_die, bfd *abfd,
-		  char *info_ptr, const struct comp_unit_head *cu_header)
+		  char *info_ptr, int *has_pc_info,
+		  const struct comp_unit_head *cu_header)
 {
   unsigned int abbrev_number, bytes_read, i;
   struct abbrev_info *abbrev;
@@ -3145,6 +3135,7 @@ read_partial_die (struct partial_die_info *part_die, bfd *abfd,
   int has_high_pc_attr = 0;
 
   *part_die = zeroed_partial_die;
+  *has_pc_info = 0;
   abbrev_number = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
   info_ptr += bytes_read;
   if (!abbrev_number)
@@ -3230,7 +3221,7 @@ read_partial_die (struct partial_die_info *part_die, bfd *abfd,
       int dummy;
 
       spec_ptr = dwarf_info_buffer + dwarf2_get_ref_die_offset (&spec_attr);
-      read_partial_die (&spec_die, abfd, spec_ptr, cu_header);
+      read_partial_die (&spec_die, abfd, spec_ptr, &dummy, cu_header);
       if (spec_die.name)
 	{
 	  part_die->name = spec_die.name;
@@ -3253,7 +3244,7 @@ read_partial_die (struct partial_die_info *part_die, bfd *abfd,
       && part_die->lowpc < part_die->highpc
       && (part_die->lowpc != 0
 	  || (bfd_get_file_flags (abfd) & HAS_RELOC)))
-    part_die->has_pc_info = 1;
+    *has_pc_info = 1;
   return info_ptr;
 }
 
@@ -3729,9 +3720,6 @@ set_cu_language (unsigned int lang)
       break;
     case DW_LANG_Mips_Assembler:
       cu_language = language_asm;
-      break;
-    case DW_LANG_Java:
-      cu_language = language_java;
       break;
     case DW_LANG_Ada83:
     case DW_LANG_Cobol74:
@@ -4725,7 +4713,7 @@ copy_die (struct die_info *old_die)
 
 /* Return sibling of die, NULL if no sibling.  */
 
-static struct die_info *
+struct die_info *
 sibling_die (struct die_info *die)
 {
   int nesting_level = 0;
@@ -5511,7 +5499,7 @@ dwarf_cfi_name (register unsigned cfi_opc)
 }
 #endif
 
-static void
+void
 dump_die (struct die_info *die)
 {
   unsigned int i;
@@ -5573,7 +5561,7 @@ dump_die (struct die_info *die)
     }
 }
 
-static void
+void
 dump_die_list (struct die_info *die)
 {
   while (die)
@@ -5583,7 +5571,7 @@ dump_die_list (struct die_info *die)
     }
 }
 
-static void
+void
 store_in_ref_table (unsigned int offset, struct die_info *die)
 {
   int h;
@@ -5625,7 +5613,7 @@ dwarf2_get_ref_die_offset (struct attribute *attr)
   return result;
 }
 
-static struct die_info *
+struct die_info *
 follow_die_ref (unsigned int offset)
 {
   struct die_info *die;

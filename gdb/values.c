@@ -695,7 +695,12 @@ unpack_double (struct type *type, char *valaddr, int *invp)
   else if (nosign)
     {
       /* Unsigned -- be sure we compensate for signed LONGEST.  */
+#if !defined (_MSC_VER) || (_MSC_VER > 900)
       return (ULONGEST) unpack_long (type, valaddr);
+#else
+      /* FIXME!!! msvc22 doesn't support unsigned __int64 -> double */
+      return (LONGEST) unpack_long (type, valaddr);
+#endif /* _MSC_VER */
     }
   else
     {
@@ -757,63 +762,12 @@ value_static_field (struct type *type, int fieldno)
 	}
       else
 	{
- 	  /* Anything static that isn't a constant, has an address */
- 	  if (SYMBOL_CLASS (sym) != LOC_CONST)
- 	    {
-	      addr = SYMBOL_VALUE_ADDRESS (sym);
-	      sect = SYMBOL_BFD_SECTION (sym);
-	    }
- 	  /* However, static const's do not, the value is already known.  */
- 	  else
- 	    {
- 	      return value_from_longest (TYPE_FIELD_TYPE (type, fieldno), SYMBOL_VALUE (sym));
- 	    }
- 	}
+	  addr = SYMBOL_VALUE_ADDRESS (sym);
+	  sect = SYMBOL_BFD_SECTION (sym);
+	}
       SET_FIELD_PHYSADDR (TYPE_FIELD (type, fieldno), addr);
     }
   return value_at (TYPE_FIELD_TYPE (type, fieldno), addr, sect);
-}
-
-/* Change the enclosing type of a value object VAL to NEW_ENCL_TYPE.  
-   You have to be careful here, since the size of the data area for the value 
-   is set by the length of the enclosing type.  So if NEW_ENCL_TYPE is bigger 
-   than the old enclosing type, you have to allocate more space for the data.  
-   The return value is a pointer to the new version of this value structure. */
-
-value_ptr
-value_change_enclosing_type (value_ptr val, struct type *new_encl_type)
-{
-  if (TYPE_LENGTH (new_encl_type) <= TYPE_LENGTH (VALUE_ENCLOSING_TYPE (val))) 
-    {
-      VALUE_ENCLOSING_TYPE (val) = new_encl_type;
-      return val;
-    }
-  else
-    {
-      value_ptr new_val;
-      register value_ptr prev;
-      
-      new_val = (value_ptr) xrealloc (val, sizeof (struct value) + TYPE_LENGTH (new_encl_type));
-      
-      /* We have to make sure this ends up in the same place in the value
-	 chain as the original copy, so it's clean-up behavior is the same. 
-	 If the value has been released, this is a waste of time, but there
-	 is no way to tell that in advance, so... */
-      
-      if (val != all_values) 
-	{
-	  for (prev = all_values; prev != NULL; prev = prev->next)
-	    {
-	      if (prev->next == val) 
-		{
-		  prev->next = new_val;
-		  break;
-		}
-	    }
-	}
-      
-      return new_val;
-    }
 }
 
 /* Given a value ARG1 (offset by OFFSET bytes)
@@ -851,7 +805,7 @@ value_primitive_field (register value_ptr arg1, int offset,
          entire object's contents for later references to virtual
          bases, etc.  */
       v = allocate_value (VALUE_ENCLOSING_TYPE (arg1));
-      VALUE_TYPE (v) = type;
+      VALUE_TYPE (v) = arg_type;
       if (VALUE_LAZY (arg1))
 	VALUE_LAZY (v) = 1;
       else
@@ -1328,7 +1282,7 @@ value_being_returned (struct type *valtype, char *retbuf, int struct_return)
   CORE_ADDR addr;
 
   /* If this is not defined, just use EXTRACT_RETURN_VALUE instead.  */
-  if (EXTRACT_STRUCT_VALUE_ADDRESS_P ())
+  if (EXTRACT_STRUCT_VALUE_ADDRESS_P)
     if (struct_return)
       {
 	addr = EXTRACT_STRUCT_VALUE_ADDRESS (retbuf);

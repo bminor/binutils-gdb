@@ -18,6 +18,7 @@
 load_lib gdb.exp
 
 proc sid_start {} {
+    global sid_spawn_id
     global verbose
 
     set port [lindex [split [target_info netport] ":"] 1]
@@ -49,11 +50,7 @@ proc sid_start {} {
 	    set env(MKSID) "../../sid/main/static/mksid"
 	    if {! [file exists $env(SID)]} then { error "Cannot find sid in build tree" }
 	}
-	if { [board_info target sim,protocol] == "sid" } {
-	    set spawncmd "[target_info sim] [target_info sim,options] -e \"set gdb-socket sockaddr-local 0.0.0.0:$port\""
-	} else {
-	    set spawncmd "../../sid/bsp/[target_info sim] $sidverbose $sidendian --gdb=$port [target_info sim,options]"
-	}
+	set spawncmd "../../sid/bsp/[target_info sim] $sidverbose $sidendian --persistent --gdb=$port [target_info sim,options]"
 	set post_spawn {
 	    global env
 	    unset env(SID_LIBRARY_PATH)
@@ -61,21 +58,13 @@ proc sid_start {} {
 	    unset env(SID)
 	}
     } else {
-	global find_rawsid;
-
 	set pre_spawn {}
-	if { [board_info target sim,protocol] == "sid" } {
-	    # FIXME: sim,options may be from the build tree, should find
-	    # it in the install tree.
-	    set spawncmd "sid [target_info sim,options] -e \"set gdb-socket sockaddr-local 0.0.0.0:$port\""
-	} else {
-	    set spawncmd "[target_info sim] $sidverbose $sidendian --gdb=$port [target_info sim,options]"
-	}
+	set spawncmd "[target_info sim] $sidverbose $sidendian --persistent --gdb=$port [target_info sim,options]"
 	set post_spawn {}
     }
 
     eval $pre_spawn
-    if {[catch [list remote_spawn host $spawncmd] msg]} {
+    if {[catch "spawn $spawncmd" msg]} {
 	perror $msg
 	exit 1
     }
@@ -92,9 +81,7 @@ proc sid_start {} {
     # GDB would wait for a fair while for the stub to respond.
     sleep 4
 
-    if ![target_info exists gdb,no_push_conn] {
-        remote_push_conn host;
-    }
+    set sid_spawn_id $spawn_id
 }
 
 #
@@ -107,9 +94,12 @@ proc gdb_start {} {
 }
 
 proc sid_exit {} {
-    if ![target_info exists gdb,no_push_conn] {
-	remote_close host;
-	remote_pop_conn host;
+    global sid_spawn_id 
+    if {[info exists sid_spawn_id]} {
+	catch {exec kill [exp_pid -i $sid_spawn_id]}
+	catch {wait -i $sid_spawn_id}
+	unset sid_spawn_id
+        sleep 4
     }
 }
 
@@ -141,18 +131,13 @@ proc gdb_target_sid { } {
     set timeout 60
     verbose "Timeout is now $timeout seconds" 2
     gdb_expect {
-	-re ".*\[Ee\]rror.*$gdb_prompt $" {
-	    perror "Couldn't set target for remote simulator."
-	    cleanup
-	    gdb_exit
-	}
 	-re "Remote debugging using.*$gdb_prompt"	{
 	    verbose "Set target to sid"
 	}
 	timeout { 
 	    perror "Couldn't set target for remote simulator."
 	    cleanup
-	    gdb_exit
+	    exit $exit_status
 	}
     }
     set timeout $prev_timeout
@@ -169,7 +154,6 @@ proc gdb_load { arg } {
     global loadfile
     global GDB
     global gdb_prompt
-    global retval
 
     gdb_unload
     if [gdb_file_cmd $arg] then { return -1 }
@@ -181,32 +165,24 @@ proc gdb_load { arg } {
     set timeout 2400
     verbose "Timeout is now $timeout seconds" 2
     gdb_expect {
-	-re ".*\[Ee\]rror.*$gdb_prompt $" {
-	    if $verbose>1 then {
-		perror "Error during download."
-	    }
-	    set retval -1;
-	}
 	-re ".*$gdb_prompt $" {
 	    if $verbose>1 then {
 		send_user "Loaded $arg into $GDB\n"
 	    }
-	    set retval 1;
+	    set timeout 30
+	    verbose "Timeout is now $timeout seconds" 2
+	    return 1
 	}
 	-re "$gdb_prompt $"     {
 	    if $verbose>1 then {
 		perror "GDB couldn't load."
 	    }
-	    set retval -1;
 	}
 	timeout {
 	    if $verbose>1 then {
 		perror "Timed out trying to load $arg."
 	    }
-	    set retval -1;
 	}
     }
     set timeout $prev_timeout
-    verbose "Timeout is now $timeout seconds" 2
-    return $retval;
 }

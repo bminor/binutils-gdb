@@ -33,8 +33,6 @@
 #include "remote.h"
 #include "linespec.h"
 #include "regcache.h"
-#include "completer.h"
-#include "gdb-events.h"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -424,6 +422,10 @@ trace_command (char *arg, int from_tty)
 	t->addr_string = savestring (addr_start, addr_end - addr_start);
 
       trace_mention (t);
+
+      /* Let the UI know of any additions */
+      if (create_tracepoint_hook)
+	create_tracepoint_hook (t);
     }
 
   if (sals.nelts > 1)
@@ -570,11 +572,13 @@ tracepoint_operation (struct tracepoint *t, int from_tty,
     {
     case enable_op:
       t->enabled = enabled;
-      tracepoint_modify_event (t->number);
+      if (modify_tracepoint_hook)
+	modify_tracepoint_hook (t);
       break;
     case disable_op:
       t->enabled = disabled;
-      tracepoint_modify_event (t->number);
+      if (modify_tracepoint_hook)
+	modify_tracepoint_hook (t);
       break;
     case delete_op:
       if (tracepoint_chain == t)
@@ -583,10 +587,13 @@ tracepoint_operation (struct tracepoint *t, int from_tty,
       ALL_TRACEPOINTS (t2)
 	if (t2->next == t)
 	{
-	  tracepoint_delete_event (t2->number);
 	  t2->next = t->next;
 	  break;
 	}
+
+      /* Let the UI know of any deletions */
+      if (delete_tracepoint_hook)
+	delete_tracepoint_hook (t);
 
       if (t->addr_string)
 	xfree (t->addr_string);
@@ -733,7 +740,8 @@ trace_pass_command (char *args, int from_tty)
 	    if (t1 == (struct tracepoint *) -1 || t1 == t2)
 	      {
 		t2->pass_count = count;
-		tracepoint_modify_event (t2->number);
+		if (modify_tracepoint_hook)
+		  modify_tracepoint_hook (t2);
 		if (from_tty)
 		  printf_filtered ("Setting tracepoint %d's passcount to %d\n",
 				   t2->number, count);
@@ -2786,13 +2794,12 @@ Arguments are tracepoint numbers, separated by spaces.\n\
 No argument means enable all tracepoints.",
 	   &enablelist);
 
-  c = add_com ("trace", class_trace, trace_command,
-	       "Set a tracepoint at a specified line or function or address.\n\
+  add_com ("trace", class_trace, trace_command,
+	   "Set a tracepoint at a specified line or function or address.\n\
 Argument may be a line number, function name, or '*' plus an address.\n\
 For a line number or function, trace at the start of its code.\n\
 If an address is specified, trace at that exact address.\n\n\
 Do \"help tracepoints\" for info on other tracepoint commands.");
-  c->completer = location_completer;
 
   add_com_alias ("tp", "trace", class_alias, 0);
   add_com_alias ("tr", "trace", class_alias, 1);

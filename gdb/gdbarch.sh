@@ -85,7 +85,7 @@ EOF
 	    case "${invalid_p}" in
 		0 ) valid_p=1 ;;
 		"" )
-		    if [ -n "${predefault}" ]
+		    if [ "${predefault}" ]
 		    then
 			#invalid_p="gdbarch->${function} == ${predefault}"
 			valid_p="gdbarch->${function} != ${predefault}"
@@ -104,10 +104,10 @@ EOF
 	    # always a valid definition of MEMBER as this again
 	    # ensures consistency.
 
-	    if [ -n "${postdefault}" ]
+	    if [ "${postdefault}" != "" ]
 	    then
 		fallbackdefault="${postdefault}"
-	    elif [ -n "${predefault}" ]
+	    elif [ "${predefault}" != "" ]
 	    then
 		fallbackdefault="${predefault}"
 	    else
@@ -120,7 +120,7 @@ EOF
 	    break
 	fi
     done
-    if [ -n "${class}" ]
+    if [ "${class}" ]
     then
 	true
     else
@@ -131,8 +131,8 @@ EOF
 
 fallback_default_p ()
 {
-    [ -n "${postdefault}" -a "x${invalid_p}" != "x0" ] \
-	|| [ -n "${predefault}" -a "x${invalid_p}" = "x0" ]
+    [ "${postdefault}" != "" -a "${invalid_p}" != "0" ] \
+	|| [ "${predefault}" != "" -a "${invalid_p}" = "0" ]
 }
 
 class_is_variable_p ()
@@ -248,19 +248,17 @@ do
 
     predefault ) : ;;
 
-	# An initial value to assign to MEMBER of the freshly
-	# malloc()ed gdbarch object.  After initialization, the
-	# freshly malloc()ed object is passed to the target
-	# architecture code for further updates.
+	# A initial value to assign to MEMBER of the freshly
+	# malloc()ed gdbarch object.  After the gdbarch object has
+	# been initialized using PREDEFAULT, it is passed to the
+	# target code for further updates.
 
 	# If PREDEFAULT is empty, zero is used.
 
-	# A non-empty PREDEFAULT, an empty POSTDEFAULT and a zero
-	# INVALID_P are specified, PREDEFAULT will be used as the
-	# default for the non- multi-arch target.
-
-	# A zero PREDEFAULT function will force the fallback to call
-	# internal_error().
+	# When POSTDEFAULT is empty, a non-empty PREDEFAULT and a zero
+	# INVALID_P will be used as default values when when
+	# multi-arch is disabled.  Specify a zero PREDEFAULT function
+	# to make that fallback call internal_error().
 
 	# Variable declarations can refer to ``gdbarch'' which will
 	# contain the current architecture.  Care should be taken.
@@ -268,19 +266,15 @@ do
     postdefault ) : ;;
 
 	# A value to assign to MEMBER of the new gdbarch object should
-	# the target architecture code fail to change the PREDEFAULT
-	# value.
+	# the target code fail to change the PREDEFAULT value.  Also
+	# use POSTDEFAULT as the fallback value for the non-
+	# multi-arch case.
 
 	# If POSTDEFAULT is empty, no post update is performed.
 
 	# If both INVALID_P and POSTDEFAULT are non-empty then
 	# INVALID_P will be used to determine if MEMBER should be
 	# changed to POSTDEFAULT.
-
-	# If a non-empty POSTDEFAULT and a zero INVALID_P are
-	# specified, POSTDEFAULT will be used as the default for the
-	# non- multi-arch target (regardless of the value of
-	# PREDEFAULT).
 
 	# You cannot specify both a zero INVALID_P and a POSTDEFAULT.
 
@@ -429,8 +423,6 @@ f:2:DO_REGISTERS_INFO:void:do_registers_info:int reg_nr, int fpregs:reg_nr, fpre
 # also include/...-sim.h.
 f:2:REGISTER_SIM_REGNO:int:register_sim_regno:int reg_nr:reg_nr:::default_register_sim_regno::0
 F:2:REGISTER_BYTES_OK:int:register_bytes_ok:long nr_bytes:nr_bytes::0:0
-f:2:CANNOT_FETCH_REGISTER:int:cannot_fetch_register:int regnum:regnum:::cannot_register_not::0
-f:2:CANNOT_STORE_REGISTER:int:cannot_store_register:int regnum:regnum:::cannot_register_not::0
 #
 v:1:USE_GENERIC_DUMMY_FRAMES:int:use_generic_dummy_frames::::0:-1
 v:2:CALL_DUMMY_LOCATION:int:call_dummy_location::::0:0
@@ -446,8 +438,6 @@ v:2:SIZEOF_CALL_DUMMY_WORDS:int:sizeof_call_dummy_words::::0:legacy_sizeof_call_
 v:1:CALL_DUMMY_STACK_ADJUST_P:int:call_dummy_stack_adjust_p::::0:-1:::0x%08lx
 v:2:CALL_DUMMY_STACK_ADJUST:int:call_dummy_stack_adjust::::0:::gdbarch->call_dummy_stack_adjust_p && gdbarch->call_dummy_stack_adjust == 0:0x%08lx::CALL_DUMMY_STACK_ADJUST_P
 f:2:FIX_CALL_DUMMY:void:fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p:::0
-f:2:INIT_FRAME_PC_FIRST:void:init_frame_pc_first:int fromleaf, struct frame_info *prev:fromleaf, prev:::init_frame_pc_noop::0
-f:2:INIT_FRAME_PC:void:init_frame_pc:int fromleaf, struct frame_info *prev:fromleaf, prev:::init_frame_pc_default::0
 #
 v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion:::::::
 v:2:BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type:::::::
@@ -486,7 +476,7 @@ f:2:D10V_CONVERT_IADDR_TO_RAW:CORE_ADDR:d10v_convert_iaddr_to_raw:CORE_ADDR x:x:
 #
 f:2:STORE_STRUCT_RETURN:void:store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp:::0
 f:2:STORE_RETURN_VALUE:void:store_return_value:struct type *type, char *valbuf:type, valbuf:::0
-F:2:EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:extract_struct_value_address:char *regbuf:regbuf:::0
+f:2:EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:extract_struct_value_address:char *regbuf:regbuf:::0
 f:2:USE_STRUCT_CONVENTION:int:use_struct_convention:int gcc_p, struct type *value_type:gcc_p, value_type:::0
 #
 f:2:FRAME_INIT_SAVED_REGS:void:frame_init_saved_regs:struct frame_info *frame:frame::0:0
@@ -523,17 +513,7 @@ v:2:PARM_BOUNDARY:int:parm_boundary
 v:2:TARGET_FLOAT_FORMAT:const struct floatformat *:float_format::::::default_float_format (gdbarch)
 v:2:TARGET_DOUBLE_FORMAT:const struct floatformat *:double_format::::::default_double_format (gdbarch)
 v:2:TARGET_LONG_DOUBLE_FORMAT:const struct floatformat *:long_double_format::::::&floatformat_unknown
-f:2:CONVERT_FROM_FUNC_PTR_ADDR:CORE_ADDR:convert_from_func_ptr_addr:CORE_ADDR addr:addr:::core_addr_identity::0
-# On some machines there are bits in addresses which are not really
-# part of the address, but are used by the kernel, the hardware, etc.
-# for special purposes.  ADDR_BITS_REMOVE takes out any such bits so
-# we get a "real" address such as one would find in a symbol table.
-# This is used only for addresses of instructions, and even then I'm
-# not sure it's used in all contexts.  It exists to deal with there
-# being a few stray bits in the PC which would mislead us, not as some
-# sort of generic thing to handle alignment or segmentation (it's
-# possible it should be in TARGET_READ_PC instead).
-f:2:ADDR_BITS_REMOVE:CORE_ADDR:addr_bits_remove:CORE_ADDR addr:addr:::core_addr_identity::0
+f:2:CONVERT_FROM_FUNC_PTR_ADDR:CORE_ADDR:convert_from_func_ptr_addr:CORE_ADDR addr:addr:::default_convert_from_func_ptr_addr::0
 # FIXME/cagney/2001-01-18: This should be split in two.  A target method that indicates if
 # the target needs software single step.  An ISA method to implement it.
 #
@@ -569,7 +549,7 @@ EOF
 	kill $$
 	exit 1
     fi
-    if [ "x${invalid_p}" = "x0" -a -n "${postdefault}" ]
+    if [ "${invalid_p}" = "0" -a "${postdefault}" != "" ]
     then
 	echo "Error: postdefault is useless when invalid_p=0" 1>&2
 	kill $$
@@ -653,10 +633,6 @@ extern struct gdbarch *current_gdbarch;
 #error "FRAME_FIND_SAVED_REGS: replaced by FRAME_INIT_SAVED_REGS"
 #endif
 #endif
-
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PURE) && defined (GDB_TM_FILE)
-#error "GDB_TM_FILE: Pure multi-arch targets do not have a tm.h file."
-#endif
 EOF
 
 # function typedef's
@@ -670,9 +646,6 @@ do
 	printf "\n"
 	printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);\n"
 	printf "/* set_gdbarch_${function}() - not applicable - pre-initialized. */\n"
-	printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (${macro})\n"
-	printf "#error \"Non multi-arch definition of ${macro}\"\n"
-	printf "#endif\n"
 	printf "#if GDB_MULTI_ARCH\n"
 	printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})\n"
 	printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
@@ -687,7 +660,7 @@ printf "\n"
 printf "/* The following are initialized by the target dependent code. */\n"
 function_list | while do_read
 do
-    if [ -n "${comment}" ]
+    if [ "${comment}" ]
     then
 	echo "${comment}" | sed \
 	    -e '2 s,#,/*,' \
@@ -719,9 +692,6 @@ do
 	    printf "#endif\n"
 	    printf "\n"
 	    printf "extern int gdbarch_${function}_p (struct gdbarch *gdbarch);\n"
-	    printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (${macro}_P)\n"
-	    printf "#error \"Non multi-arch definition of ${macro}\"\n"
-	    printf "#endif\n"
 	    printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro}_P)\n"
 	    printf "#define ${macro}_P() (gdbarch_${function}_p (current_gdbarch))\n"
 	    printf "#endif\n"
@@ -741,9 +711,6 @@ do
 	printf "\n"
 	printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);\n"
 	printf "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, ${returntype} ${function});\n"
-	printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (${macro})\n"
-	printf "#error \"Non multi-arch definition of ${macro}\"\n"
-	printf "#endif\n"
 	printf "#if GDB_MULTI_ARCH\n"
 	printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})\n"
 	printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
@@ -758,7 +725,7 @@ do
 	    printf "\n"
 	    printf "/* Default (function) for non- multi-arch platforms. */\n"
 	    printf "#if (!GDB_MULTI_ARCH) && !defined (${macro})\n"
-	    if [ "x${fallbackdefault}" = "x0" ]
+	    if [ "${fallbackdefault}" = "0" ]
 	    then
 		printf "#define ${macro}(${actual}) (internal_error (__FILE__, __LINE__, \"${macro}\"), 0)\n"
 	    else
@@ -769,7 +736,7 @@ do
 	    printf "#endif\n"
 	fi
 	printf "\n"
-	if [ "x${formal}" = "xvoid" ] && class_is_multiarch_p
+	if [ "${formal}" = "void" ] && class_is_multiarch_p
 	then
 	    printf "typedef ${returntype} (gdbarch_${function}_ftype) (struct gdbarch *gdbarch);\n"
 	elif class_is_multiarch_p
@@ -778,7 +745,7 @@ do
 	else
 	    printf "typedef ${returntype} (gdbarch_${function}_ftype) (${formal});\n"
 	fi
-	if [ "x${formal}" = "xvoid" ]
+	if [ "${formal}" = "void" ]
 	then
 	  printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);\n"
 	else
@@ -787,15 +754,12 @@ do
 	printf "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, gdbarch_${function}_ftype *${function});\n"
 	if class_is_multiarch_p ; then :
 	else
-	    printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (${macro})\n"
-	    printf "#error \"Non multi-arch definition of ${macro}\"\n"
-	    printf "#endif\n"
 	    printf "#if GDB_MULTI_ARCH\n"
 	    printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})\n"
-	    if [ "x${actual}" = "x" ]
+	    if [ "${actual}" = "" ]
 	    then
 		printf "#define ${macro}() (gdbarch_${function} (current_gdbarch))\n"
-	    elif [ "x${actual}" = "x-" ]
+	    elif [ "${actual}" = "-" ]
 	    then
 		printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
 	    else
@@ -874,6 +838,9 @@ struct gdbarch_list
 
 struct gdbarch_info
 {
+  /* Use default: bfd_arch_unknown (ZERO). */
+  enum bfd_architecture bfd_architecture;
+
   /* Use default: NULL (ZERO). */
   const struct bfd_arch_info *bfd_arch_info;
 
@@ -927,12 +894,16 @@ extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info, struct gd
 extern void gdbarch_free (struct gdbarch *);
 
 
-/* Helper function. Force an update of the current architecture.
+/* Helper function. Force an update of the current architecture.  Used
+   by legacy targets that have added their own target specific
+   architecture manipulation commands.
 
-   The actual architecture selected is determined by INFO, \`\`(gdb) set
-   architecture'' et.al., the existing architecture and BFD's default
-   architecture.  INFO should be initialized to zero and then selected
-   fields should be updated.
+   The INFO parameter shall be fully initialized (\`\`memset (&INFO,
+   sizeof (info), 0)'' set relevant fields) before gdbarch_update_p()
+   is called.  gdbarch_update_p() shall initialize any \`\`default''
+   fields using information obtained from the previous architecture or
+   INFO.ABFD (if specified) before calling the corresponding
+   architectures INIT function.
 
    Returns non-zero if the update succeeds */
 
@@ -1079,6 +1050,17 @@ extern disassemble_info tm_print_insn_info;
 #define GDB_TARGET_IS_D10V (TARGET_ARCHITECTURE->arch == bfd_arch_d10v)
 
 
+/* Fallback definition for EXTRACT_STRUCT_VALUE_ADDRESS */
+#ifndef EXTRACT_STRUCT_VALUE_ADDRESS
+#define EXTRACT_STRUCT_VALUE_ADDRESS_P (0)
+#define EXTRACT_STRUCT_VALUE_ADDRESS(X) (internal_error (__FILE__, __LINE__, "gdbarch: EXTRACT_STRUCT_VALUE_ADDRESS"), 0)
+#else
+#ifndef EXTRACT_STRUCT_VALUE_ADDRESS_P
+#define EXTRACT_STRUCT_VALUE_ADDRESS_P (1)
+#endif
+#endif
+
+
 /* Set the dynamic target-system-dependent parameters (architecture,
    byte-order, ...) using information found in the BFD */
 
@@ -1090,10 +1072,6 @@ extern void set_gdbarch_from_file (bfd *);
 
 extern void initialize_current_architecture (void);
 
-/* For non-multiarched targets, do any initialization of the default
-   gdbarch object necessary after the _initialize_MODULE functions
-   have run.  */
-extern void initialize_non_multiarch ();
 
 /* gdbarch trace variable */
 extern int gdbarch_debug;
@@ -1275,15 +1253,6 @@ cat <<EOF
 };
 
 struct gdbarch *current_gdbarch = &startup_gdbarch;
-
-/* Do any initialization needed for a non-multiarch configuration
-   after the _initialize_MODULE functions have been run.  */
-void
-initialize_non_multiarch ()
-{
-  alloc_gdbarch_data (&startup_gdbarch);
-  init_gdbarch_data (&startup_gdbarch);
-}
 EOF
 
 # Create a new gdbarch struct
@@ -1320,7 +1289,7 @@ function_list | while do_read
 do
     if class_is_function_p || class_is_variable_p
     then
-	if [ -n "${predefault}" -a "x${predefault}" != "x0" ]
+	if [ "${predefault}" != "" -a "${predefault}" != "0" ]
 	then
 	  printf "  gdbarch->${function} = ${predefault};\n"
 	fi
@@ -1377,32 +1346,32 @@ function_list | while do_read
 do
     if class_is_function_p || class_is_variable_p
     then
-	if [ "x${invalid_p}" = "x0" ]
+	if [ "${invalid_p}" = "0" ]
 	then
 	    printf "  /* Skip verify of ${function}, invalid_p == 0 */\n"
 	elif class_is_predicate_p
 	then
 	    printf "  /* Skip verify of ${function}, has predicate */\n"
 	# FIXME: See do_read for potential simplification
- 	elif [ -n "${invalid_p}" -a -n "${postdefault}" ]
+ 	elif [ "${invalid_p}" -a "${postdefault}" ]
 	then
 	    printf "  if (${invalid_p})\n"
 	    printf "    gdbarch->${function} = ${postdefault};\n"
-	elif [ -n "${predefault}" -a -n "${postdefault}" ]
+	elif [ "${predefault}" -a "${postdefault}" ]
 	then
 	    printf "  if (gdbarch->${function} == ${predefault})\n"
 	    printf "    gdbarch->${function} = ${postdefault};\n"
-	elif [ -n "${postdefault}" ]
+	elif [ "${postdefault}" ]
 	then
 	    printf "  if (gdbarch->${function} == 0)\n"
 	    printf "    gdbarch->${function} = ${postdefault};\n"
-	elif [ -n "${invalid_p}" ]
+	elif [ "${invalid_p}" ]
 	then
 	    printf "  if ((GDB_MULTI_ARCH >= ${level})\n"
 	    printf "      && (${invalid_p}))\n"
 	    printf "    internal_error (__FILE__, __LINE__,\n"
 	    printf "                    \"gdbarch: verify_gdbarch: ${function} invalid\");\n"
-	elif [ -n "${predefault}" ]
+	elif [ "${predefault}" ]
 	then
 	    printf "  if ((GDB_MULTI_ARCH >= ${level})\n"
 	    printf "      && (gdbarch->${function} == ${predefault}))\n"
@@ -1438,7 +1407,7 @@ function_list | while do_read
 do
     # multiarch functions don't have macros.
     class_is_multiarch_p && continue
-    if [ "x${returntype}" = "xvoid" ]
+    if [ "${returntype}" = "void" ]
     then
 	printf "#if defined (${macro}) && GDB_MULTI_ARCH\n"
 	printf "  /* Macro might contain \`[{}]' when not multi-arch */\n"
@@ -1469,13 +1438,13 @@ do
 	continue
     fi
     printf "#ifdef ${macro}\n"
-    if [ "x${print_p}" = "x()" ]
+    if [ "${print_p}" = "()" ]
     then
         printf "  gdbarch_dump_${function} (current_gdbarch);\n"
-    elif [ "x${print_p}" = "x0" ]
+    elif [ "${print_p}" = "0" ]
     then
         printf "  /* skip print of ${macro}, print_p == 0. */\n"
-    elif [ -n "${print_p}" ]
+    elif [ "${print_p}" ]
     then
         printf "  if (${print_p})\n"
 	printf "    fprintf_unfiltered (file,\n"
@@ -1522,7 +1491,7 @@ do
 	printf "int\n"
 	printf "gdbarch_${function}_p (struct gdbarch *gdbarch)\n"
 	printf "{\n"
-	if [ -n "${valid_p}" ]
+	if [ "${valid_p}" ]
 	then
 	    printf "  return ${valid_p};\n"
 	else
@@ -1534,7 +1503,7 @@ do
     then
 	printf "\n"
 	printf "${returntype}\n"
-	if [ "x${formal}" = "xvoid" ]
+	if [ "${formal}" = "void" ]
 	then
 	  printf "gdbarch_${function} (struct gdbarch *gdbarch)\n"
 	else
@@ -1546,7 +1515,7 @@ do
 	printf "                    \"gdbarch: gdbarch_${function} invalid\");\n"
 	printf "  if (gdbarch_debug >= 2)\n"
 	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\\\\n\");\n"
-	if [ "x${actual}" = "x-" -o "x${actual}" = "x" ]
+	if [ "${actual}" = "-" -o "${actual}" = "" ]
 	then
 	    if class_is_multiarch_p
 	    then
@@ -1562,7 +1531,7 @@ do
 		params="${actual}"
 	    fi
         fi
-       	if [ "x${returntype}" = "xvoid" ]
+       	if [ "${returntype}" = "void" ]
 	then
 	  printf "  gdbarch->${function} (${params});\n"
 	else
@@ -1582,15 +1551,15 @@ do
 	printf "${returntype}\n"
 	printf "gdbarch_${function} (struct gdbarch *gdbarch)\n"
 	printf "{\n"
-	if [ "x${invalid_p}" = "x0" ]
+	if [ "${invalid_p}" = "0" ]
 	then
 	    printf "  /* Skip verify of ${function}, invalid_p == 0 */\n"
-	elif [ -n "${invalid_p}" ]
+	elif [ "${invalid_p}" ]
 	then
 	  printf "  if (${invalid_p})\n"
 	  printf "    internal_error (__FILE__, __LINE__,\n"
 	  printf "                    \"gdbarch: gdbarch_${function} invalid\");\n"
-	elif [ -n "${predefault}" ]
+	elif [ "${predefault}" ]
 	then
 	  printf "  if (gdbarch->${function} == ${predefault})\n"
 	  printf "    internal_error (__FILE__, __LINE__,\n"
@@ -1976,70 +1945,73 @@ gdbarch_update_p (struct gdbarch_info info)
   struct gdbarch_list **list;
   struct gdbarch_registration *rego;
 
-  /* Fill in missing parts of the INFO struct using a number of
-     sources: \`\`set ...''; INFOabfd supplied; existing target.  */
-
-  /* \`\`(gdb) set architecture ...'' */
-  if (info.bfd_arch_info == NULL
-      && !TARGET_ARCHITECTURE_AUTO)
-    info.bfd_arch_info = TARGET_ARCHITECTURE;
-  if (info.bfd_arch_info == NULL
-      && info.abfd != NULL
-      && bfd_get_arch (info.abfd) != bfd_arch_unknown
-      && bfd_get_arch (info.abfd) != bfd_arch_obscure)
-    info.bfd_arch_info = bfd_get_arch_info (info.abfd);
-  if (info.bfd_arch_info == NULL)
-    info.bfd_arch_info = TARGET_ARCHITECTURE;
-
-  /* \`\`(gdb) set byte-order ...'' */
-  if (info.byte_order == 0
-      && !TARGET_BYTE_ORDER_AUTO)
-    info.byte_order = TARGET_BYTE_ORDER;
-  /* From the INFO struct. */
-  if (info.byte_order == 0
-      && info.abfd != NULL)
-    info.byte_order = (bfd_big_endian (info.abfd) ? BIG_ENDIAN
-		       : bfd_little_endian (info.abfd) ? LITTLE_ENDIAN
-		       : 0);
-  /* From the current target. */
-  if (info.byte_order == 0)
-    info.byte_order = TARGET_BYTE_ORDER;
-
-  /* Must have found some sort of architecture. */
-  gdb_assert (info.bfd_arch_info != NULL);
-
-  if (gdbarch_debug)
+  /* Fill in any missing bits. Most important is the bfd_architecture
+     which is used to select the target architecture. */
+  if (info.bfd_architecture == bfd_arch_unknown)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_update: info.bfd_arch_info %s\n",
-			  (info.bfd_arch_info != NULL
-			   ? info.bfd_arch_info->printable_name
-			   : "(null)"));
-      fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_update: info.byte_order %d (%s)\n",
-			  info.byte_order,
-			  (info.byte_order == BIG_ENDIAN ? "big"
-			   : info.byte_order == LITTLE_ENDIAN ? "little"
-			   : "default"));
-      fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_update: info.abfd 0x%lx\n",
-			  (long) info.abfd);
-      fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_update: info.tdep_info 0x%lx\n",
-			  (long) info.tdep_info);
+      if (info.bfd_arch_info != NULL)
+	info.bfd_architecture = info.bfd_arch_info->arch;
+      else if (info.abfd != NULL)
+	info.bfd_architecture = bfd_get_arch (info.abfd);
+      /* FIXME - should query BFD for its default architecture. */
+      else
+	info.bfd_architecture = current_gdbarch->bfd_arch_info->arch;
     }
+  if (info.bfd_arch_info == NULL)
+    {
+      if (target_architecture_auto && info.abfd != NULL)
+	info.bfd_arch_info = bfd_get_arch_info (info.abfd);
+      else
+	info.bfd_arch_info = current_gdbarch->bfd_arch_info;
+    }
+  if (info.byte_order == 0)
+    {
+      if (target_byte_order_auto && info.abfd != NULL)
+	info.byte_order = (bfd_big_endian (info.abfd) ? BIG_ENDIAN
+			   : bfd_little_endian (info.abfd) ? LITTLE_ENDIAN
+			   : 0);
+      else
+	info.byte_order = current_gdbarch->byte_order;
+      /* FIXME - should query BFD for its default byte-order. */
+    }
+  /* A default for abfd? */
 
   /* Find the target that knows about this architecture. */
   for (rego = gdbarch_registry;
        rego != NULL;
        rego = rego->next)
-    if (rego->bfd_architecture == info.bfd_arch_info->arch)
+    if (rego->bfd_architecture == info.bfd_architecture)
       break;
   if (rego == NULL)
     {
       if (gdbarch_debug)
 	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: No matching architecture\\n");
       return 0;
+    }
+
+  if (gdbarch_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "gdbarch_update: info.bfd_architecture %d (%s)\\n",
+			  info.bfd_architecture,
+			  bfd_lookup_arch (info.bfd_architecture, 0)->printable_name);
+      fprintf_unfiltered (gdb_stdlog,
+			  "gdbarch_update: info.bfd_arch_info %s\\n",
+			  (info.bfd_arch_info != NULL
+			   ? info.bfd_arch_info->printable_name
+			   : "(null)"));
+      fprintf_unfiltered (gdb_stdlog,
+			  "gdbarch_update: info.byte_order %d (%s)\\n",
+			  info.byte_order,
+			  (info.byte_order == BIG_ENDIAN ? "big"
+			   : info.byte_order == LITTLE_ENDIAN ? "little"
+			   : "default"));
+      fprintf_unfiltered (gdb_stdlog,
+			  "gdbarch_update: info.abfd 0x%lx\\n",
+			  (long) info.abfd);
+      fprintf_unfiltered (gdb_stdlog,
+			  "gdbarch_update: info.tdep_info 0x%lx\\n",
+			  (long) info.tdep_info);
     }
 
   /* Ask the target for a replacement architecture. */

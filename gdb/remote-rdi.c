@@ -77,7 +77,7 @@ static void arm_rdi_mourn (void);
 
 static void arm_rdi_send (char *buf);
 
-static ptid_t arm_rdi_wait (ptid_t ptid, struct target_waitstatus *status);
+static int arm_rdi_wait (ptid_t ptid, struct target_waitstatus *status);
 
 static void arm_rdi_kill (void);
 

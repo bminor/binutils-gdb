@@ -377,7 +377,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 		  /* Just one line to print. */
 		  if (next_line == mle[i].line)
 		    {
-		      ui_out_tuple_begin (uiout, "src_and_asm_line");
+		      ui_out_list_begin (uiout, "src_and_asm_line");
 		      print_source_lines (symtab, next_line, mle[i].line + 1, 0);
 		    }
 		  else
@@ -385,21 +385,21 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 		      /* Several source lines w/o asm instructions associated. */
 		      for (; next_line < mle[i].line; next_line++)
 			{
-			  ui_out_tuple_begin (uiout, "src_and_asm_line");
+			  ui_out_list_begin (uiout, "src_and_asm_line");
 			  print_source_lines (symtab, next_line, mle[i].line + 1, 0);
 			  ui_out_list_begin (uiout, "line_asm_insn");
 			  ui_out_list_end (uiout);
-			  ui_out_tuple_end (uiout);
+			  ui_out_list_end (uiout);
 			}
 		      /* Print the last line and leave list open for
 		         asm instructions to be added. */
-		      ui_out_tuple_begin (uiout, "src_and_asm_line");
+		      ui_out_list_begin (uiout, "src_and_asm_line");
 		      print_source_lines (symtab, next_line, mle[i].line + 1, 0);
 		    }
 		}
 	      else
 		{
-		  ui_out_tuple_begin (uiout, "src_and_asm_line");
+		  ui_out_list_begin (uiout, "src_and_asm_line");
 		  print_source_lines (symtab, mle[i].line, mle[i].line + 1, 0);
 		}
 
@@ -418,7 +418,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 		  else
 		    num_displayed++;
 		}
-	      ui_out_tuple_begin (uiout, NULL);
+	      ui_out_list_begin (uiout, NULL);
 	      ui_out_field_core_addr (uiout, "address", pc);
 
 	      if (!build_address_symbolic (pc, 0, &name, &offset, &filename, &line, &unmapped))
@@ -437,12 +437,12 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 	      pc += (*tm_print_insn) (pc, &di);
 	      ui_out_field_stream (uiout, "inst", stb);
 	      ui_file_rewind (stb->stream);
-	      ui_out_tuple_end (uiout);
+	      ui_out_list_end (uiout);
 	    }
 	  if (close_list)
 	    {
 	      ui_out_list_end (uiout);
-	      ui_out_tuple_end (uiout);
+	      ui_out_list_end (uiout);
 	      close_list = 0;
 	    }
 	  if (how_many >= 0)
@@ -466,7 +466,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 	      else
 		num_displayed++;
 	    }
-	  ui_out_tuple_begin (uiout, NULL);
+	  ui_out_list_begin (uiout, NULL);
 	  ui_out_field_core_addr (uiout, "address", pc);
 
 	  if (!build_address_symbolic (pc, 0, &name, &offset, &filename, &line, &unmapped))
@@ -485,7 +485,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 	  pc += (*tm_print_insn) (pc, &di);
 	  ui_out_field_stream (uiout, "inst", stb);
 	  ui_file_rewind (stb->stream);
-	  ui_out_tuple_end (uiout);
+	  ui_out_list_end (uiout);
 	}
       ui_out_list_end (uiout);
     }

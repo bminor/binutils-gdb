@@ -340,7 +340,7 @@ go32_resume (ptid_t ptid, int step, enum target_signal siggnal)
 
 static char child_cwd[FILENAME_MAX];
 
-static ptid_t
+static int
 go32_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   int i;
@@ -455,7 +455,7 @@ go32_wait (ptid_t ptid, struct target_waitstatus *status)
 	    }
 	}
     }
-  return pid_to_ptid (SOME_PID);
+  return SOME_PID;
 }
 
 static void

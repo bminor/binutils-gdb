@@ -73,12 +73,9 @@
 
 #define GDB_MULTI_ARCH_PARTIAL 1
 
-/* The target is partially multi-arched. Both the multi-arch vector
-   and "tm.h" provide definitions. "tm.h" cannot override a definition
-   provided by the multi-arch vector.  It is detected as a compilation
-   error.
-
-   This setting is only useful during a multi-arch conversion. */
+/* The target is multi-arched.  The MULTI-ARCH vector provides all
+   definitions.  "tm.h" is included and may provide definitions of
+   non- multi-arch macros..  */
 
 #define GDB_MULTI_ARCH_TM 2
 
@@ -345,75 +342,11 @@ enum target_signal
 
     /* Yes, this pains me, too.  But LynxOS didn't have SIG32, and now
        Linux does, and we can't disturb the numbering, since it's part
-       of the remote protocol.  Note that in some GDB's
-       TARGET_SIGNAL_REALTIME_32 is number 76.  */
+       of the protocol.  Note that in some GDB's TARGET_SIGNAL_REALTIME_32
+       is number 76.  */
     TARGET_SIGNAL_REALTIME_32,
-    /* Yet another pain, IRIX 6 has SIG64. */
+    /* Yet another pain, IRIX 6 has SIG64.  */
     TARGET_SIGNAL_REALTIME_64,
-    /* Yet another pain, Linux/MIPS might go up to 128. */
-    TARGET_SIGNAL_REALTIME_65,
-    TARGET_SIGNAL_REALTIME_66,
-    TARGET_SIGNAL_REALTIME_67,
-    TARGET_SIGNAL_REALTIME_68,
-    TARGET_SIGNAL_REALTIME_69,
-    TARGET_SIGNAL_REALTIME_70,
-    TARGET_SIGNAL_REALTIME_71,
-    TARGET_SIGNAL_REALTIME_72,
-    TARGET_SIGNAL_REALTIME_73,
-    TARGET_SIGNAL_REALTIME_74,
-    TARGET_SIGNAL_REALTIME_75,
-    TARGET_SIGNAL_REALTIME_76,
-    TARGET_SIGNAL_REALTIME_77,
-    TARGET_SIGNAL_REALTIME_78,
-    TARGET_SIGNAL_REALTIME_79,
-    TARGET_SIGNAL_REALTIME_80,
-    TARGET_SIGNAL_REALTIME_81,
-    TARGET_SIGNAL_REALTIME_82,
-    TARGET_SIGNAL_REALTIME_83,
-    TARGET_SIGNAL_REALTIME_84,
-    TARGET_SIGNAL_REALTIME_85,
-    TARGET_SIGNAL_REALTIME_86,
-    TARGET_SIGNAL_REALTIME_87,
-    TARGET_SIGNAL_REALTIME_88,
-    TARGET_SIGNAL_REALTIME_89,
-    TARGET_SIGNAL_REALTIME_90,
-    TARGET_SIGNAL_REALTIME_91,
-    TARGET_SIGNAL_REALTIME_92,
-    TARGET_SIGNAL_REALTIME_93,
-    TARGET_SIGNAL_REALTIME_94,
-    TARGET_SIGNAL_REALTIME_95,
-    TARGET_SIGNAL_REALTIME_96,
-    TARGET_SIGNAL_REALTIME_97,
-    TARGET_SIGNAL_REALTIME_98,
-    TARGET_SIGNAL_REALTIME_99,
-    TARGET_SIGNAL_REALTIME_100,
-    TARGET_SIGNAL_REALTIME_101,
-    TARGET_SIGNAL_REALTIME_102,
-    TARGET_SIGNAL_REALTIME_103,
-    TARGET_SIGNAL_REALTIME_104,
-    TARGET_SIGNAL_REALTIME_105,
-    TARGET_SIGNAL_REALTIME_106,
-    TARGET_SIGNAL_REALTIME_107,
-    TARGET_SIGNAL_REALTIME_108,
-    TARGET_SIGNAL_REALTIME_109,
-    TARGET_SIGNAL_REALTIME_110,
-    TARGET_SIGNAL_REALTIME_111,
-    TARGET_SIGNAL_REALTIME_112,
-    TARGET_SIGNAL_REALTIME_113,
-    TARGET_SIGNAL_REALTIME_114,
-    TARGET_SIGNAL_REALTIME_115,
-    TARGET_SIGNAL_REALTIME_116,
-    TARGET_SIGNAL_REALTIME_117,
-    TARGET_SIGNAL_REALTIME_118,
-    TARGET_SIGNAL_REALTIME_119,
-    TARGET_SIGNAL_REALTIME_120,
-    TARGET_SIGNAL_REALTIME_121,
-    TARGET_SIGNAL_REALTIME_122,
-    TARGET_SIGNAL_REALTIME_123,
-    TARGET_SIGNAL_REALTIME_124,
-    TARGET_SIGNAL_REALTIME_125,
-    TARGET_SIGNAL_REALTIME_126,
-    TARGET_SIGNAL_REALTIME_127,
 
 #if defined(MACH) || defined(__MACH__)
     /* Mach exceptions */
@@ -765,7 +698,7 @@ extern void print_address (CORE_ADDR, struct ui_file *);
 
 /* From source.c */
 
-extern int openp (const char *, int, const char *, int, int, char **);
+extern int openp (char *, int, char *, int, int, char **);
 
 extern int source_full_path_of (char *, char **);
 
@@ -911,37 +844,36 @@ enum val_prettyprint
     Val_pretty_default
   };
 
-/* The ptid struct is a collection of the various "ids" necessary
-   for identifying the inferior.  This consists of the process id
-   (pid), thread id (tid), and other fields necessary for uniquely
-   identifying the inferior process/thread being debugged.  When
-   manipulating ptids, the constructors, accessors, and predicate
-   declared in inferior.h should be used.  These are as follows:
+/* A collection of the various "ids" necessary for identifying
+   the inferior.  This consists of the process id (pid, thread
+   id (tid), and other fields necessary for uniquely identifying
+   the inferior process/thread being debugged.
 
-      ptid_build	- Make a new ptid from a pid, lwp, and tid.
-      pid_to_ptid	- Make a new ptid from just a pid.
-      ptid_get_pid	- Fetch the pid component of a ptid.
-      ptid_get_lwp	- Fetch the lwp component of a ptid.
-      ptid_get_tid	- Fetch the tid component of a ptid.
-      ptid_equal	- Test to see if two ptids are equal.
+   The present typedef is obviously quite naive with respect to
+   the magnitudes that real life pids and tids can take on and
+   will be replaced with something more robust shortly.  */
 
-   Please do NOT access the struct ptid members directly (except, of
-   course, in the implementation of the above ptid manipulation
-   functions).  */
+typedef int ptid_t;
 
-struct ptid
-  {
-    /* Process id */
-    int pid;
+/* Convert a pid to a ptid_t.  This macro is temporary and will
+   be replaced shortly.  */
 
-    /* Lightweight process id */
-    long lwp;
+#define pid_to_ptid(PID) ((ptid_t) MERGEPID ((PID),0))
 
-    /* Thread id */
-    long tid;
-  };
+/* Define a value for the null (or zero) pid.  This macro is temporary
+   and will go away shortly.  */
 
-typedef struct ptid ptid_t;
+#define null_ptid (pid_to_ptid (0))
+
+/* Define a value for the -1 pid.  This macro is temporary and will go
+   away shortly.  */
+
+#define minus_one_ptid (pid_to_ptid (-1))
+
+/* Define a ptid comparison operator.  This macro is temporary and will
+   be replaced with a real function shortly.  */
+
+#define ptid_equal(PTID1,PTID2) ((PTID1) == (PTID2))
 
 
 
@@ -987,7 +919,13 @@ typedef struct ptid ptid_t;
 #include "fopen-same.h"
 #endif
 
+/* Microsoft C can't deal with const pointers */
+
+#ifdef _MSC_VER
+#define CONST_PTR
+#else
 #define CONST_PTR const
+#endif
 
 /* Defaults for system-wide constants (if not defined by xm.h, we fake it).
    FIXME: Assumes 2's complement arithmetic */
@@ -1153,6 +1091,11 @@ extern char *getenv (const char *);
 #endif
 
 #ifdef HAVE_STDLIB_H
+#if defined(_MSC_VER) && !defined(__cplusplus)
+/* msvc defines these in stdlib.h for c code */
+#undef min
+#undef max
+#endif
 #include <stdlib.h>
 #endif
 #ifndef min
@@ -1326,6 +1269,19 @@ extern char *floatformat_mantissa (const struct floatformat *, char *);
 extern DOUBLEST extract_floating (void *, int);
 extern void store_floating (void *, int, DOUBLEST);
 
+/* On some machines there are bits in addresses which are not really
+   part of the address, but are used by the kernel, the hardware, etc.
+   for special purposes.  ADDR_BITS_REMOVE takes out any such bits
+   so we get a "real" address such as one would find in a symbol
+   table.  This is used only for addresses of instructions, and even then
+   I'm not sure it's used in all contexts.  It exists to deal with there
+   being a few stray bits in the PC which would mislead us, not as some sort
+   of generic thing to handle alignment or segmentation (it's possible it
+   should be in TARGET_READ_PC instead). */
+#if !defined (ADDR_BITS_REMOVE)
+#define ADDR_BITS_REMOVE(addr) (addr)
+#endif /* No ADDR_BITS_REMOVE.  */
+
 /* From valops.c */
 
 extern CORE_ADDR push_bytes (CORE_ADDR, char *, int);
@@ -1407,24 +1363,43 @@ extern int use_windows;
 #define DIRNAME_SEPARATOR ':'
 #endif
 
+#ifndef SLASH_P
+#if defined(__GO32__)||defined(_WIN32)
+#define SLASH_P(X) ((X)=='\\')
+#else
+#define SLASH_P(X) ((X)=='/')
+#endif
+#endif
+
+#ifndef SLASH_CHAR
+#if defined(__GO32__)||defined(_WIN32)
+#define SLASH_CHAR '\\'
+#else
+#define SLASH_CHAR '/'
+#endif
+#endif
+
 #ifndef SLASH_STRING
-#ifdef _WIN32
+#if defined(__GO32__)||defined(_WIN32)
 #define SLASH_STRING "\\"
 #else
 #define SLASH_STRING "/"
 #endif
 #endif
 
-/* Provide default definitions of PIDGET, TIDGET, and MERGEPID.
-   The name ``TIDGET'' is a historical accident.  Many uses of TIDGET
-   in the code actually refer to a lightweight process id, i.e,
-   something that can be considered a process id in its own right for
-   certain purposes.  */
+#ifndef ROOTED_P
+#define ROOTED_P(X) (SLASH_P((X)[0]))
+#endif
+
+/* On some systems, PIDGET is defined to extract the inferior pid from
+   an internal pid that has the thread id and pid in seperate bit
+   fields.  If not defined, then just use the entire internal pid as
+   the actual pid. */
 
 #ifndef PIDGET
-#define PIDGET(PTID) (ptid_get_pid (PTID))
-#define TIDGET(PTID) (ptid_get_lwp (PTID))
-#define MERGEPID(PID, TID) ptid_build (PID, TID, 0)
+#define PIDGET(PID) (PID)
+#define TIDGET(PID) 0
+#define MERGEPID(PID, TID) (PID)
 #endif
 
 /* Define well known filenos if the system does not define them.  */

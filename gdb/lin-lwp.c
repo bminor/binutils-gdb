@@ -82,14 +82,6 @@ struct lwp_info
   /* Non-zero if this LWP is stopped.  */
   int stopped;
 
-  /* Non-zero if this LWP will be/has been resumed.  Note that an LWP
-     can be marked both as stopped and resumed at the same time.  This
-     happens if we try to resume an LWP that has a wait status
-     pending.  We shouldn't let the LWP run until that wait status has
-     been processed, but we should not report that wait status if GDB
-     didn't try to let the LWP run.  */
-  int resumed;
-
   /* If non-zero, a pending wait status.  */
   int status;
 
@@ -110,10 +102,18 @@ static int num_lwps;
 static int threaded;
 
 
-#define GET_LWP(ptid)		ptid_get_lwp (ptid)
-#define GET_PID(ptid)		ptid_get_pid (ptid)
-#define is_lwp(ptid)		(GET_LWP (ptid) != 0)
-#define BUILD_LWP(lwp, pid)	ptid_build (pid, lwp, 0)
+#ifndef TIDGET
+#define TIDGET(PID)		(((PID) & 0x7fffffff) >> 16)
+#define PIDGET0(PID)		(((PID) & 0xffff))
+#define PIDGET(PID)		((PIDGET0 (PID) == 0xffff) ? -1 : PIDGET0 (PID))
+#define MERGEPID(PID, TID)	(((PID) & 0xffff) | ((TID) << 16))
+#endif
+
+#define THREAD_FLAG		0x80000000
+#define is_lwp(pid)		(((pid) & THREAD_FLAG) == 0 && TIDGET (pid))
+#define GET_LWP(pid)		TIDGET (pid)
+#define GET_PID(pid)		PIDGET (pid)
+#define BUILD_LWP(tid, pid)	MERGEPID (pid, tid)
 
 #define is_cloned(pid)	(GET_LWP (pid) != GET_PID (pid))
 
@@ -151,13 +151,10 @@ static sigset_t blocked_mask;
 
 
 /* Prototypes for local functions.  */
-static int stop_wait_callback (struct lwp_info *lp, void *data);
+static void lin_lwp_mourn_inferior (void);
 
 
-/* Initialize the list of LWPs.  Note that this module, contrary to
-   what GDB's generic threads layer does for its thread list,
-   re-initializes the LWP lists whenever we mourn or detach (which
-   doesn't involve mourning) the inferior.  */
+/* Initialize the list of LWPs.  */
 
 static void
 init_lwp_list (void)
@@ -257,16 +254,34 @@ find_lwp_pid (ptid_t ptid)
 struct lwp_info *
 iterate_over_lwps (int (*callback) (struct lwp_info *, void *), void *data)
 {
-  struct lwp_info *lp, *lpnext;
+  struct lwp_info *lp;
 
-  for (lp = lwp_list; lp; lp = lpnext)
-    {
-      lpnext = lp->next;
-      if ((*callback) (lp, data))
-	return lp;
-    }
+  for (lp = lwp_list; lp; lp = lp->next)
+    if ((*callback) (lp, data))
+      return lp;
 
   return NULL;
+}
+
+
+/* Helper functions.  */
+
+static void
+restore_inferior_ptid (void *arg)
+{
+  ptid_t *saved_ptid_ptr = arg;
+  inferior_ptid = *saved_ptid_ptr;
+  xfree (arg);
+}
+
+static struct cleanup *
+save_inferior_ptid (void)
+{
+  ptid_t *saved_ptid_ptr;
+
+  saved_ptid_ptr = xmalloc (sizeof (ptid_t));
+  *saved_ptid_ptr = inferior_ptid;
+  return make_cleanup (restore_inferior_ptid, saved_ptid_ptr);
 }
 
 
@@ -274,10 +289,7 @@ iterate_over_lwps (int (*callback) (struct lwp_info *, void *), void *data)
    layer.
 
    Note that this implementation is potentially redundant now that
-   default_prepare_to_proceed() has been added.
-
-   FIXME This may not support switching threads after Ctrl-C
-   correctly. The default implementation does support this. */
+   default_prepare_to_proceed() has been added.  */
 
 int
 lin_lwp_prepare_to_proceed (void)
@@ -332,101 +344,26 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
   if (verbose)
     printf_filtered ("[New %s]\n", target_pid_to_str (ptid));
 
-  /* We assume that we're already tracing the initial process.  */
-  if (is_cloned (ptid) && ptrace (PTRACE_ATTACH, GET_LWP (ptid), 0, 0) < 0)
+  if (ptrace (PTRACE_ATTACH, GET_LWP (ptid), 0, 0) < 0)
     error ("Can't attach %s: %s", target_pid_to_str (ptid), strerror (errno));
 
-  lp = find_lwp_pid (ptid);
-  if (lp == NULL)
-    lp = add_lwp (ptid);
-
-  if (is_cloned (ptid))
-    {
-      lp->signalled = 1;
-      stop_wait_callback (lp, NULL);
-    }
+  lp = add_lwp (ptid);
+  lp->signalled = 1;
 }
 
 static void
 lin_lwp_attach (char *args, int from_tty)
 {
-  struct lwp_info *lp;
-
   /* FIXME: We should probably accept a list of process id's, and
      attach all of them.  */
-  child_ops.to_attach (args, from_tty);
-
-  /* Add the initial process as the first LWP to the list.  */
-  lp = add_lwp (BUILD_LWP (PIDGET (inferior_ptid), PIDGET (inferior_ptid)));
-
-  /* Make sure the initial process is stopped.  The user-level threads
-     layer might want to poke around in the inferior, and that won't
-     work if things haven't stabilized yet.  */
-  lp->signalled = 1;
-  stop_wait_callback (lp, NULL);
-  gdb_assert (lp->status == 0);
-
-  /* Fake the SIGSTOP that core GDB expects.  */
-  lp->status = W_STOPCODE (SIGSTOP);
-  lp->resumed = 1;
-}
-
-static int
-detach_callback (struct lwp_info *lp, void *data)
-{
-  gdb_assert (lp->status == 0 || WIFSTOPPED (lp->status));
-
-  if (debug_lin_lwp && lp->status)
-    fprintf_unfiltered (gdb_stdlog, "Pending %s for LWP %ld on detach.\n",
-			strsignal (WSTOPSIG (lp->status)), GET_LWP (lp->ptid));
-
-  while (lp->signalled && lp->stopped)
-    {
-      if (ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0,
-		  WSTOPSIG (lp->status)) < 0)
-	error ("Can't continue %s: %s", target_pid_to_str (lp->ptid),
-	       strerror (errno));
-
-      lp->stopped = 0;
-      lp->signalled = 0;
-      lp->status = 0;
-      stop_wait_callback (lp, NULL);
-
-      gdb_assert (lp->status == 0 || WIFSTOPPED (lp->status));
-    }
-
-  if (is_cloned (lp->ptid))
-    {
-      if (ptrace (PTRACE_DETACH, GET_LWP (lp->ptid), 0,
-		  WSTOPSIG (lp->status)) < 0)
-	error ("Can't detach %s: %s", target_pid_to_str (lp->ptid),
-	       strerror (errno));
-
-      delete_lwp (lp->ptid);
-    }
-
-  return 0;
+  error("Not implemented yet");
 }
 
 static void
 lin_lwp_detach (char *args, int from_tty)
 {
-  iterate_over_lwps (detach_callback, NULL);
-
-  /* Only the initial (uncloned) process should be left right now.  */
-  gdb_assert (num_lwps == 1);
-
-  trap_ptid = null_ptid;
-
-  /* Destroy LWP info; it's no longer valid.  */
-  init_lwp_list ();
-
-  /* Restore the original signal mask.  */
-  sigprocmask (SIG_SETMASK, &normal_mask, NULL);
-  sigemptyset (&blocked_mask);
-
-  inferior_ptid = pid_to_ptid (GET_PID (inferior_ptid));
-  child_ops.to_detach (args, from_tty);
+  /* FIXME: Provide implementation when we implement lin_lwp_attach.  */
+  error ("Not implemented yet");
 }
 
 
@@ -487,20 +424,6 @@ resume_callback (struct lwp_info *lp, void *data)
   return 0;
 }
 
-static int
-resume_clear_callback (struct lwp_info *lp, void *data)
-{
-  lp->resumed = 0;
-  return 0;
-}
-
-static int
-resume_set_callback (struct lwp_info *lp, void *data)
-{
-  lp->resumed = 1;
-  return 0;
-}
-
 static void
 lin_lwp_resume (ptid_t ptid, int step, enum target_signal signo)
 {
@@ -513,13 +436,8 @@ lin_lwp_resume (ptid_t ptid, int step, enum target_signal signo)
      processes, but give the signal only to this one'.  */
   resume_all = (PIDGET (ptid) == -1) || !step;
 
-  if (resume_all)
-    iterate_over_lwps (resume_set_callback, NULL);
-  else
-    iterate_over_lwps (resume_clear_callback, NULL);
-
   /* If PID is -1, it's the current inferior that should be
-     handled specially.  */
+     handled special.  */
   if (PIDGET (ptid) == -1)
     ptid = inferior_ptid;
 
@@ -530,9 +448,6 @@ lin_lwp_resume (ptid_t ptid, int step, enum target_signal signo)
 
       /* Remember if we're stepping.  */
       lp->step = step;
-
-      /* Mark this LWP as resumed.  */
-      lp->resumed = 1;
 
       /* If we have a pending wait status for this thread, there is no
          point in resuming the process.  */
@@ -585,7 +500,6 @@ stop_wait_callback (struct lwp_info *lp, void *data)
       pid_t pid;
       int status;
 
-    get_another_event:
       gdb_assert (lp->status == 0);
 
       pid = waitpid (GET_LWP (lp->ptid), &status,
@@ -651,22 +565,6 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 		write_pc_pid (read_pc_pid (pid_to_ptid (pid)) 
 		                - DECR_PC_AFTER_BREAK,
 			      pid_to_ptid (pid));
-
-	      /* Now resume this LWP and get the SIGSTOP event. */
-	      ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
-	      goto get_another_event;
-	    }
-	  else if (WSTOPSIG (status) == SIGINT &&
-		   signal_pass_state (SIGINT) == 0)
-	    {
-	      /* Since SIGINT gets forwarded to the entire process group
-		 (in the case where ^C/BREAK is typed at the tty/console),
-		 just ignore all SIGINT events from all lwp's except for
-		 the one that was caught by lin_lwp_wait.  */
-
-	      /* Now resume this LWP and get the SIGSTP event. */
-	      ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
-	      goto get_another_event;
 	    }
 	  else
 	    {
@@ -676,7 +574,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 				    strsignal (WSTOPSIG (status)), pid);
 
 	      /* The thread was stopped with a signal other than
-		 SIGSTOP, and didn't accidentally trip a breakpoint.
+		 SIGSTOP, and didn't accidentiliy trip a breakpoint.
 		 Record the wait status.  */
 	      lp->status = status;
 	    }
@@ -697,9 +595,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 static int
 status_callback (struct lwp_info *lp, void *data)
 {
-  /* Only report a pending wait status if we pretend that this has
-     indeed been resumed.  */
-  return (lp->status != 0 && lp->resumed);
+  return (lp->status != 0);
 }
 
 /* Return non-zero if LP isn't stopped.  */
@@ -708,14 +604,6 @@ static int
 running_callback (struct lwp_info *lp, void *data)
 {
   return (lp->stopped == 0);
-}
-
-/* Return non-zero if LP has been resumed.  */
-
-static int
-resumed_callback (struct lwp_info *lp, void *data)
-{
-  return lp->resumed;
 }
 
 static ptid_t
@@ -735,9 +623,6 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
  retry:
 
-  /* Make sure there is at least one thread that has been resumed.  */
-  gdb_assert (iterate_over_lwps (resumed_callback, NULL));
-
   /* First check if there is a LWP with a wait status pending.  */
   if (pid == -1)
     {
@@ -747,8 +632,8 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	{
 	  if (debug_lin_lwp)
 	    fprintf_unfiltered (gdb_stdlog, 
-				"Using pending wait status for LWP %ld.\n",
-				GET_LWP (lp->ptid));
+				"Using pending wait status for LWP %d.\n",
+				(int) GET_LWP (lp->ptid));
 
 	  status = lp->status;
 	  lp->status = 0;
@@ -763,8 +648,8 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
     {
       if (debug_lin_lwp)
 	fprintf_unfiltered (gdb_stdlog, 
-			    "Waiting for specific LWP %ld.\n",
-			    GET_LWP (ptid));
+			    "Waiting for specific LWP %d.\n",
+			    (int) GET_LWP (ptid));
 
       /* We have a specific LWP to check.  */
       lp = find_lwp_pid (ptid);
@@ -775,7 +660,7 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       if (debug_lin_lwp)
 	if (status)
 	  fprintf_unfiltered (gdb_stdlog, 
-			      "Using pending wait status for LWP %ld.\n",
+			      "Using pending wait status for LWP %d.\n",
 			      GET_LWP (lp->ptid));
 
       /* If we have to wait, take into account whether PID is a cloned
@@ -801,7 +686,6 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       child_resume (pid_to_ptid (GET_LWP (lp->ptid)), lp->step,
                     TARGET_SIGNAL_0);
       lp->stopped = 0;
-      gdb_assert (lp->resumed);
 
       /* This should catch the pending SIGSTOP.  */
       stop_wait_callback (lp, NULL);
@@ -888,7 +772,6 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	      child_resume (pid_to_ptid (GET_LWP (lp->ptid)), lp->step,
 	                    TARGET_SIGNAL_0);
 	      lp->stopped = 0;
-	      gdb_assert (lp->resumed);
 
 	      /* Discard the event.  */
 	      status = 0;
@@ -932,11 +815,6 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  && signal_print_state (signo) == 0
 	  && signal_pass_state (signo) == 1)
 	{
-	  /* FIMXE: kettenis/2001-06-06: Should we resume all threads
-             here?  It is not clear we should.  GDB may not expect
-             other threads to run.  On the other hand, not resuming
-             newly attached threads may cause an unwanted delay in
-             getting them running.  */
 	  child_resume (pid_to_ptid (GET_LWP (lp->ptid)), lp->step, signo);
 	  lp->stopped = 0;
 	  status = 0;
@@ -1021,22 +899,37 @@ lin_lwp_kill (void)
 static void
 lin_lwp_create_inferior (char *exec_file, char *allargs, char **env)
 {
-  child_ops.to_create_inferior (exec_file, allargs, env);
+  struct target_ops *target_beneath;
+
+  init_lwp_list ();
+
+#if 0
+  target_beneath = find_target_beneath (&lin_lwp_ops);
+#else
+  target_beneath = &child_ops;
+#endif
+  target_beneath->to_create_inferior (exec_file, allargs, env);
 }
 
 static void  
 lin_lwp_mourn_inferior (void)
 {
-  trap_ptid = null_ptid;
+  struct target_ops *target_beneath;
 
-  /* Destroy LWP info; it's no longer valid.  */
   init_lwp_list ();
+
+  trap_ptid = null_ptid;
 
   /* Restore the original signal mask.  */
   sigprocmask (SIG_SETMASK, &normal_mask, NULL);
   sigemptyset (&blocked_mask);
 
-  child_ops.to_mourn_inferior ();
+#if 0
+  target_beneath = find_target_beneath (&lin_lwp_ops);
+#else
+  target_beneath = &child_ops;
+#endif
+  target_beneath->to_mourn_inferior ();
 }
 
 static void

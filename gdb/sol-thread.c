@@ -97,6 +97,8 @@ static struct ps_prochandle main_ph;
 static td_thragent_t *main_ta;
 static int sol_thread_active = 0;
 
+static struct cleanup *save_inferior_ptid (void);
+static void restore_inferior_ptid (void *pid);
 static char *td_err_string (td_err_e errcode);
 static char *td_state_string (td_thr_state_e statecode);
 static ptid_t thread_to_lwp (ptid_t thread_id, int default_lwp);
@@ -111,15 +113,14 @@ static void init_sol_core_ops (void);
 /* Default definitions: These must be defined in tm.h 
    if they are to be shared with a process module such as procfs.  */
 
-#define GET_PID(ptid)		ptid_get_pid (ptid)
-#define GET_LWP(ptid)		ptid_get_lwp (ptid)
-#define GET_THREAD(ptid)	ptid_get_tid (ptid)
+#define THREAD_FLAG		0x80000000
+#define is_thread(ARG)		(((ARG) & THREAD_FLAG) != 0)
+#define is_lwp(ARG)		(((ARG) & THREAD_FLAG) == 0)
+#define GET_LWP(PID)		TIDGET (PID)
+#define GET_THREAD(PID)		TIDGET (PID)
+#define BUILD_LWP(TID, PID)	MERGEPID (PID, TID)
 
-#define is_lwp(ptid)		(GET_LWP (ptid) != 0)
-#define is_thread(ptid)		(GET_THREAD (ptid) != 0)
-
-#define BUILD_LWP(lwp, pid)	ptid_build (pid, lwp, 0)
-#define BUILD_THREAD(tid, pid)	ptid_build (pid, 0, tid)
+#define BUILD_THREAD(TID, PID)	(MERGEPID (PID, TID) | THREAD_FLAG)
 
 /* Pointers to routines from lithread_db resolved by dlopen() */
 
@@ -392,6 +393,50 @@ lwp_to_thread (ptid_t lwp)
     error ("lwp_to_thread: td_thr_get_info: %s.", td_err_string (val));
 
   return BUILD_THREAD (ti.ti_tid, PIDGET (lwp));
+}
+
+/*
+
+   LOCAL FUNCTION
+
+   save_inferior_ptid - Save inferior_ptid on the cleanup list
+   restore_inferior_ptid - Restore inferior_ptid from the cleanup list
+
+   SYNOPSIS
+
+   struct cleanup *save_inferior_ptid ()
+   void restore_inferior_ptid (int pid)
+
+   DESCRIPTION
+
+   These two functions act in unison to restore inferior_ptid in
+   case of an error.
+
+   NOTES
+
+   inferior_ptid is a global variable that needs to be changed by many of
+   these routines before calling functions in procfs.c.  In order to
+   guarantee that inferior_ptid gets restored (in case of errors), you
+   need to call save_inferior_ptid before changing it.  At the end of the
+   function, you should invoke do_cleanups to restore it.
+
+ */
+
+
+static struct cleanup *
+save_inferior_ptid (void)
+{
+  ptid_t *saved_ptid = xmalloc (sizeof (ptid_t));
+  *saved_ptid = inferior_ptid;
+  return make_cleanup (restore_inferior_ptid, saved_ptid);
+}
+
+static void
+restore_inferior_ptid (void *data)
+{
+  ptid_t *saved_ptid = data;
+  inferior_ptid = *saved_ptid;
+  xfree (saved_ptid);
 }
 
 

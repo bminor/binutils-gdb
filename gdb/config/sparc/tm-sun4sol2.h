@@ -19,7 +19,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
+#define GDB_MULTI_ARCH 2
 
 #include "sparc/tm-sparc.h"
 #include "tm-sysv4.h"
@@ -80,3 +80,9 @@ extern char *sunpro_static_transform_name (char *);
 
 /* Enable handling of shared libraries for a.out executables.  */
 #define HANDLE_SVR4_EXEC_EMULATORS
+
+/* Macros to extract process id and thread id from a composite pid/tid */
+#define PIDGET0(PID)		(((PID) & 0xffff))
+#define PIDGET(PID)		((PIDGET0 (PID) == 0xffff) ? -1 : PIDGET0 (PID))
+#define TIDGET(PID)		(((PID) & 0x7fffffff) >> 16)
+#define MERGEPID(PID, TID)	(((PID) & 0xffff) | ((TID) << 16))

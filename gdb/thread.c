@@ -65,23 +65,6 @@ static void restore_current_thread (ptid_t);
 static void switch_to_thread (ptid_t ptid);
 static void prune_threads (void);
 
-void
-delete_step_resume_breakpoint (void *arg)
-{
-  struct breakpoint **breakpointp = (struct breakpoint **) arg;
-  struct thread_info *tp;
-
-  if (*breakpointp != NULL)
-    {
-      delete_breakpoint (*breakpointp);
-      for (tp = thread_list; tp; tp = tp->next)
-	if (tp->step_resume_breakpoint == *breakpointp)
-	  tp->step_resume_breakpoint = NULL;
-
-      *breakpointp = NULL;
-    }
-}
-
 static void
 free_thread (struct thread_info *tp)
 {
@@ -124,11 +107,26 @@ add_thread (ptid_t ptid)
 {
   struct thread_info *tp;
 
-  tp = (struct thread_info *) xmalloc (sizeof (*tp));
-  memset (tp, 0, sizeof (*tp));
+  tp = (struct thread_info *) xmalloc (sizeof (struct thread_info));
+
   tp->ptid = ptid;
   tp->num = ++highest_thread_num;
+  tp->prev_pc = 0;
+  tp->prev_func_start = 0;
+  tp->prev_func_name = NULL;
+  tp->step_range_start = 0;
+  tp->step_range_end = 0;
+  tp->step_frame_address = 0;
+  tp->step_resume_breakpoint = 0;
+  tp->through_sigtramp_breakpoint = 0;
+  tp->handling_longjmp = 0;
+  tp->trap_expected = 0;
+  tp->another_trap = 0;
+  tp->stepping_through_solib_after_catch = 0;
+  tp->stepping_through_solib_catchpoints = NULL;
+  tp->stepping_through_sigtramp = 0;
   tp->next = thread_list;
+  tp->private = NULL;
   thread_list = tp;
   return tp;
 }
@@ -261,7 +259,7 @@ do_captured_list_thread_ids (void *arg)
   struct thread_info *tp;
   int num = 0;
 
-  ui_out_tuple_begin (uiout, "thread-ids");
+  ui_out_list_begin (uiout, "thread-ids");
 
   for (tp = thread_list; tp; tp = tp->next)
     {
@@ -269,7 +267,7 @@ do_captured_list_thread_ids (void *arg)
       ui_out_field_int (uiout, "thread-id", tp->num);
     }
 
-  ui_out_tuple_end (uiout);
+  ui_out_list_end (uiout);
   ui_out_field_int (uiout, "number-of-threads", num);
   return GDB_RC_OK;
 }
@@ -287,24 +285,15 @@ gdb_list_thread_ids (/* output object */)
 /* Load infrun state for the thread PID.  */
 
 void
-load_infrun_state (ptid_t ptid, 
-		   CORE_ADDR *prev_pc, 
-		   CORE_ADDR *prev_func_start,
-		   char **prev_func_name, 
-		   int *trap_expected,
+load_infrun_state (ptid_t ptid, CORE_ADDR *prev_pc, CORE_ADDR *prev_func_start,
+		   char **prev_func_name, int *trap_expected,
 		   struct breakpoint **step_resume_breakpoint,
 		   struct breakpoint **through_sigtramp_breakpoint,
-		   CORE_ADDR *step_range_start, 
-		   CORE_ADDR *step_range_end,
-		   CORE_ADDR *step_frame_address, 
-		   int *handling_longjmp,
-		   int *another_trap, 
-		   int *stepping_through_solib_after_catch,
+		   CORE_ADDR *step_range_start, CORE_ADDR *step_range_end,
+		   CORE_ADDR *step_frame_address, int *handling_longjmp,
+		   int *another_trap, int *stepping_through_solib_after_catch,
 		   bpstat *stepping_through_solib_catchpoints,
-		   int *stepping_through_sigtramp,
-		   int *current_line, 
-		   struct symtab **current_symtab, 
-		   CORE_ADDR *step_sp)
+		   int *stepping_through_sigtramp)
 {
   struct thread_info *tp;
 
@@ -317,43 +306,31 @@ load_infrun_state (ptid_t ptid,
   *prev_pc = tp->prev_pc;
   *prev_func_start = tp->prev_func_start;
   *prev_func_name = tp->prev_func_name;
-  *trap_expected = tp->trap_expected;
   *step_resume_breakpoint = tp->step_resume_breakpoint;
-  *through_sigtramp_breakpoint = tp->through_sigtramp_breakpoint;
   *step_range_start = tp->step_range_start;
   *step_range_end = tp->step_range_end;
   *step_frame_address = tp->step_frame_address;
+  *through_sigtramp_breakpoint = tp->through_sigtramp_breakpoint;
   *handling_longjmp = tp->handling_longjmp;
+  *trap_expected = tp->trap_expected;
   *another_trap = tp->another_trap;
   *stepping_through_solib_after_catch = tp->stepping_through_solib_after_catch;
   *stepping_through_solib_catchpoints = tp->stepping_through_solib_catchpoints;
   *stepping_through_sigtramp = tp->stepping_through_sigtramp;
-  *current_line = tp->current_line;
-  *current_symtab = tp->current_symtab;
-  *step_sp = tp->step_sp;
 }
 
 /* Save infrun state for the thread PID.  */
 
 void
-save_infrun_state (ptid_t ptid, 
-		   CORE_ADDR prev_pc, 
-		   CORE_ADDR prev_func_start,
-		   char *prev_func_name, 
-		   int trap_expected,
+save_infrun_state (ptid_t ptid, CORE_ADDR prev_pc, CORE_ADDR prev_func_start,
+		   char *prev_func_name, int trap_expected,
 		   struct breakpoint *step_resume_breakpoint,
 		   struct breakpoint *through_sigtramp_breakpoint,
-		   CORE_ADDR step_range_start, 
-		   CORE_ADDR step_range_end,
-		   CORE_ADDR step_frame_address, 
-		   int handling_longjmp,
-		   int another_trap, 
-		   int stepping_through_solib_after_catch,
+		   CORE_ADDR step_range_start, CORE_ADDR step_range_end,
+		   CORE_ADDR step_frame_address, int handling_longjmp,
+		   int another_trap, int stepping_through_solib_after_catch,
 		   bpstat stepping_through_solib_catchpoints,
-		   int stepping_through_sigtramp, 
-		   int current_line,
-		   struct symtab *current_symtab,
-		   CORE_ADDR step_sp)
+		   int stepping_through_sigtramp)
 {
   struct thread_info *tp;
 
@@ -366,20 +343,17 @@ save_infrun_state (ptid_t ptid,
   tp->prev_pc = prev_pc;
   tp->prev_func_start = prev_func_start;
   tp->prev_func_name = prev_func_name;
-  tp->trap_expected = trap_expected;
   tp->step_resume_breakpoint = step_resume_breakpoint;
-  tp->through_sigtramp_breakpoint = through_sigtramp_breakpoint;
   tp->step_range_start = step_range_start;
   tp->step_range_end = step_range_end;
   tp->step_frame_address = step_frame_address;
+  tp->through_sigtramp_breakpoint = through_sigtramp_breakpoint;
   tp->handling_longjmp = handling_longjmp;
+  tp->trap_expected = trap_expected;
   tp->another_trap = another_trap;
   tp->stepping_through_solib_after_catch = stepping_through_solib_after_catch;
   tp->stepping_through_solib_catchpoints = stepping_through_solib_catchpoints;
   tp->stepping_through_sigtramp = stepping_through_sigtramp;
-  tp->current_line = current_line;
-  tp->current_symtab = current_symtab;
-  tp->step_sp = step_sp;
 }
 
 /* Return true if TP is an active thread. */

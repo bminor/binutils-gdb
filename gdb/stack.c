@@ -531,7 +531,8 @@ print_frame (struct frame_info *fi,
   annotate_frame_begin (level == -1 ? 0 : level, fi->pc);
 
 #ifdef UI_OUT
-  list_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
+  ui_out_list_begin (uiout, "frame");
+  list_chain = make_cleanup_ui_out_list_end (uiout);
 #endif
 
   if (level >= 0)
@@ -586,11 +587,12 @@ print_frame (struct frame_info *fi,
       args.func = func;
       args.stream = gdb_stdout;
 #ifdef UI_OUT
-      args_list_chain = make_cleanup_ui_out_list_begin_end (uiout, "args");
+      ui_out_list_begin (uiout, "args");
+      args_list_chain = make_cleanup_ui_out_list_end (uiout);
       catch_errors (print_args_stub, &args, "", RETURN_MASK_ALL);
       /* FIXME: args must be a list. If one argument is a string it will
 		 have " that will not be properly escaped.  */
-      /* Invoke ui_out_tuple_end.  */
+      /* Invoke ui_out_list_end.  */
       do_cleanups (args_list_chain);
 #else
       catch_errors (print_args_stub, &args, "", RETURN_MASK_ALL);
@@ -647,7 +649,7 @@ print_frame (struct frame_info *fi,
 #endif /* PC_SOLIB */
 
 #ifdef UI_OUT
-  /* do_cleanups will call ui_out_tuple_end() for us.  */
+  /* do_cleanups will call ui_out_list_end() for us.  */
   do_cleanups (list_chain);
   ui_out_text (uiout, "\n");
   do_cleanups (old_chain);

@@ -374,6 +374,26 @@ linuxthreads_find_trap (int pid, int stop)
   return 1;
 }
 
+/* Cleanup stub for save_inferior_ptid.  */
+static void
+restore_inferior_ptid (void *arg)
+{
+  ptid_t *saved_ptid_ptr = arg;
+  inferior_ptid = *saved_ptid_ptr;
+  xfree (arg);
+}
+
+/* Register a cleanup to restore the value of inferior_ptid.  */
+static struct cleanup *
+save_inferior_ptid (void)
+{
+  ptid_t *saved_ptid_ptr;
+  
+  saved_ptid_ptr = xmalloc (sizeof (ptid_t));
+  *saved_ptid_ptr = inferior_ptid;
+  return make_cleanup (restore_inferior_ptid, saved_ptid_ptr);
+}
+
 static void
 sigchld_handler (int signo)
 {
@@ -1040,10 +1060,7 @@ quit:
    return 1 otherwise 0.
 
    Note that this implementation is potentially redundant now that
-   default_prepare_to_proceed() has been added.
-
-   FIXME This may not support switching threads after Ctrl-C
-   correctly. The default implementation does support this. */
+   default_prepare_to_proceed() has been added.  */
 
 int
 linuxthreads_prepare_to_proceed (int step)

@@ -51,10 +51,32 @@ typedef size_t gdb_ps_size_t;
 
 /* Building process ids.  */
 
+#ifndef MERGEPID
+#define MERGEPID(PID, TID)	(((PID) & 0xffff) | ((TID) << 16))
+#endif
+
 #define BUILD_LWP(tid, pid)	MERGEPID (pid, tid)
 
 
 /* Helper functions.  */
+
+static void
+restore_inferior_ptid (void *arg)
+{
+  ptid_t *saved_pid_ptr = arg;
+  inferior_ptid = *saved_pid_ptr;
+  xfree (arg);
+}
+
+static struct cleanup *
+save_inferior_ptid (void)
+{
+  ptid_t *saved_ptid_ptr;
+
+  saved_ptid_ptr = xmalloc (sizeof (ptid_t));
+  *saved_ptid_ptr = inferior_ptid;
+  return make_cleanup (restore_inferior_ptid, saved_ptid_ptr);
+}
 
 /* Transfer LEN bytes of memory between BUF and address ADDR in the
    process specified by PH.  If WRITE, transfer them to the process,

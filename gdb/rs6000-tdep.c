@@ -2210,7 +2210,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   if (!from_xcoff_exec)
     {
-      arch = info.bfd_arch_info->arch;
+      arch = info.bfd_architecture;
       mach = info.bfd_arch_info->mach;
     }
   else

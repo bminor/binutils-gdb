@@ -1045,12 +1045,9 @@ Run using @var{device} for your program's standard input and output.
 @cindex @code{--interpreter}
 Use the interpreter @var{interp} for interface with the controlling
 program or device.  This option is meant to be set by programs which
-communicate with @value{GDBN} using it as a back end.
-
-@samp{--interpreter=mi} (or @samp{--interpreter=mi1}) causes
-@value{GDBN} to use the @dfn{gdb/mi interface} (@pxref{GDB/MI, , The
-@sc{gdb/mi} Interface}). The older @sc{gdb/mi} interface, included in
-@value{GDBN} version 5.0 can be selected with @samp{--interpreter=mi0}.
+communicate with @value{GDBN} using it as a back end.  For example,
+@samp{--interpreter=mi} causes @value{GDBN} to use the @dfn{gdbmi
+interface} (@pxref{GDB/MI, , The @sc{gdb/mi} Interface}).
 
 @item -write
 @cindex @code{--write}
@@ -3457,9 +3454,8 @@ program.  You can tell @value{GDBN} in advance what to do for each kind of
 signal.
 
 @cindex handling signals
-Normally, @value{GDBN} is set up to let the non-erroneous signals like
-@code{SIGALRM} be silently passed to your program
-(so as not to interfere with their role in the program's functioning)
+Normally, @value{GDBN} is set up to ignore non-erroneous signals like @code{SIGALRM}
+(so as not to interfere with their role in the functioning of your program)
 but to stop your program immediately whenever an error signal happens.
 You can change these settings with the @code{handle} command.
 
@@ -3477,7 +3473,7 @@ the defined types of signals.
 @item handle @var{signal} @var{keywords}@dots{}
 Change the way @value{GDBN} handles signal @var{signal}.  @var{signal}
 can be the number of a signal or its name (with or without the
-@samp{SIG} at the beginning); a list of signal numbers of the form
+@samp{SIG} at the beginning); a list of signal numberss of the form
 @samp{@var{low}-@var{high}}; or the word @samp{all}, meaning all the
 known signals.  The @var{keywords} say what change to make.
 @end table
@@ -3522,11 +3518,6 @@ effect for the signal in question @emph{at that time}.  In other words,
 after @value{GDBN} reports a signal, you can use the @code{handle}
 command with @code{pass} or @code{nopass} to control whether your
 program sees that signal when you continue.
-
-The default is set to @code{nostop}, @code{noprint}, @code{pass} for
-non-erroneous signals such as @code{SIGALRM}, @code{SIGWINCH} and
-@code{SIGCHLD}, and to @code{stop}, @code{print}, @code{pass} for the
-erroneous signals.
 
 You can also use the @code{signal} command to prevent your program from
 seeing a signal, or cause it to see a signal it normally would not see,
@@ -7323,10 +7314,9 @@ treats the use of the operator @code{IN}, or the use of operators
 @code{<=}, and @code{>=} on sets as an error.
 @end quotation
 
-
+@cindex Modula-2 built-ins
 @node Built-In Func/Proc
 @subsubsection Built-in functions and procedures
-@cindex Modula-2 built-ins
 
 Modula-2 also makes available several built-in procedures and functions.
 In describing these, the following metavariables are used:
@@ -9782,16 +9772,17 @@ their corresponding response @var{data}:
 @tab Request
 @tab Description
 
-@item extended mode
+@item extended ops
 @tab @code{!}
 @tab
-Enable extended mode.  In extended mode, the remote server is made
-persistent.  The @samp{R} packet is used to restart the program being
-debugged.
+Use the extended remote protocol.  Sticky---only needs to be set once.
+The extended remote protocol supports the @samp{R} packet.
 @item
-@tab reply @samp{OK}
+@tab reply @samp{}
 @tab
-The remote target both supports and has enabled extended mode.
+Stubs that support the extended remote protocol return @samp{} which,
+unfortunately, is identical to the response returned by stubs that do not
+support protocol extensions.
 
 @item last signal
 @tab @code{?}
@@ -10084,13 +10075,9 @@ Reset the entire system.
 @item remote restart
 @tab @code{R}@var{XX}
 @tab
-Restart the program being debugged.  @var{XX}, while needed, is ignored.
-This packet is only available in extended mode.
-@item
-@tab
-no reply
-@tab
-The @samp{R} packet has no reply.
+Restart the remote server.  @var{XX} while needed has no clear
+definition.  FIXME: @emph{An example interaction explaining how this
+packet is used in extended-remote mode is needed}.
 
 @item step
 @tab @code{s}@var{addr}
@@ -10413,52 +10400,6 @@ Indicate a badly formed request.
 @tab reply @samp{}
 @tab
 When @samp{q}@samp{Rcmd} is not recognized.
-
-@item symbol lookup
-@tab @code{qSymbol::}
-@tab
-Notify the target that @value{GDBN} is prepared to serve symbol lookup
-requests.  Accept requests from the target for the values of symbols.
-@item
-@tab
-@tab
-@item
-@tab reply @code{OK}
-@tab
-The target does not need to look up any (more) symbols.
-@item
-@tab reply @code{qSymbol:}@var{sym_name}
-@tab
-The target requests the value of symbol @var{sym_name} (hex encoded).  
-@value{GDBN} may provide the value by using the 
-@code{qSymbol:}@var{sym_value}:@var{sym_name}
-message, described below.
-
-@item symbol value
-@tab @code{qSymbol:}@var{sym_value}:@var{sym_name}
-@tab
-Set the value of SYM_NAME to SYM_VALUE.
-@item
-@tab
-@tab
-@var{sym_name} (hex encoded) is the name of a symbol whose value
-the target has previously requested.
-@item
-@tab
-@tab
-@var{sym_value} (hex) is the value for symbol @var{sym_name}.
-If @value{GDBN} cannot supply a value for @var{sym_name}, then this
-field will be empty.
-@item
-@tab reply @code{OK}
-@tab
-The target does not need to look up any (more) symbols.
-@item
-@tab reply @code{qSymbol:}@var{sym_name}
-@tab
-The target requests the value of a new symbol @var{sym_name} (hex encoded).
-@value{GDBN} will continue to supply the values of symbols (if available),
-until the target ceases to request them.
 
 @end multitable
 

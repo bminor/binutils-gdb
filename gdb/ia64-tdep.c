@@ -717,69 +717,6 @@ ia64_frame_saved_pc (struct frame_info *frame)
     }
 }
 
-/* Limit the number of skipped non-prologue instructions since examining
-   of the prologue is expensive.  */
-static int max_skip_non_prologue_insns = 10;
-
-/* Given PC representing the starting address of a function, and
-   LIM_PC which is the (sloppy) limit to which to scan when looking
-   for a prologue, attempt to further refine this limit by using
-   the line data in the symbol table.  If successful, a better guess
-   on where the prologue ends is returned, otherwise the previous
-   value of lim_pc is returned.  TRUST_LIMIT is a pointer to a flag
-   which will be set to indicate whether the returned limit may be
-   used with no further scanning in the event that the function is
-   frameless.  */
-
-static CORE_ADDR
-refine_prologue_limit (CORE_ADDR pc, CORE_ADDR lim_pc, int *trust_limit)
-{
-  struct symtab_and_line prologue_sal;
-  CORE_ADDR start_pc = pc;
-
-  /* Start off not trusting the limit.  */
-  *trust_limit = 0;
-
-  prologue_sal = find_pc_line (pc, 0);
-  if (prologue_sal.line != 0)
-    {
-      int i;
-      CORE_ADDR addr = prologue_sal.end;
-
-      /* Handle the case in which compiler's optimizer/scheduler
-         has moved instructions into the prologue.  We scan ahead
-	 in the function looking for address ranges whose corresponding
-	 line number is less than or equal to the first one that we
-	 found for the function.  (It can be less than when the
-	 scheduler puts a body instruction before the first prologue
-	 instruction.)  */
-      for (i = 2 * max_skip_non_prologue_insns; 
-           i > 0 && (lim_pc == 0 || addr < lim_pc);
-	   i--)
-        {
-	  struct symtab_and_line sal;
-
-	  sal = find_pc_line (addr, 0);
-	  if (sal.line == 0)
-	    break;
-	  if (sal.line <= prologue_sal.line 
-	      && sal.symtab == prologue_sal.symtab)
-	    {
-	      prologue_sal = sal;
-	    }
-	  addr = sal.end;
-	}
-
-      if (lim_pc == 0 || prologue_sal.end < lim_pc)
-	{
-	  lim_pc = prologue_sal.end;
-	  if (start_pc == get_pc_function_start (lim_pc))
-	    *trust_limit = 1;
-	}
-    }
-  return lim_pc;
-}
-
 #define isScratch(_regnum_) ((_regnum_) == 2 || (_regnum_) == 3 \
   || (8 <= (_regnum_) && (_regnum_) <= 11) \
   || (14 <= (_regnum_) && (_regnum_) <= 31))
@@ -807,7 +744,6 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
   CORE_ADDR spill_addr = 0;
   char instores[8];
   char infpstores[8];
-  int trust_limit;
 
   memset (instores, 0, sizeof instores);
   memset (infpstores, 0, sizeof infpstores);
@@ -823,8 +759,6 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
       && frame->extra_info->after_prologue != 0
       && frame->extra_info->after_prologue <= lim_pc)
     return frame->extra_info->after_prologue;
-
-  lim_pc = refine_prologue_limit (pc, lim_pc, &trust_limit);
 
   /* Must start with an alloc instruction */
   next_pc = fetch_instruction (pc, &it, &instr);
@@ -845,11 +779,7 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
       pc = next_pc;
     }
   else
-    {
-      pc = lim_pc;	/* Frameless: We're done early.  */
-      if (trust_limit)
-	last_prologue_pc = lim_pc;
-    }
+    pc = lim_pc;	/* We're done early */
 
   /* Loop, looking for prologue instructions, keeping track of
      where preserved registers were spilled. */
@@ -1534,17 +1464,14 @@ is_float_or_hfa_type_recurse (struct type *t, struct type **etp)
 	}
       break;
     case TYPE_CODE_ARRAY:
-      return
-	is_float_or_hfa_type_recurse (check_typedef (TYPE_TARGET_TYPE (t)),
-				      etp);
+      return is_float_or_hfa_type_recurse (TYPE_TARGET_TYPE (t), etp);
       break;
     case TYPE_CODE_STRUCT:
       {
 	int i;
 
 	for (i = 0; i < TYPE_NFIELDS (t); i++)
-	  if (!is_float_or_hfa_type_recurse
-	      (check_typedef (TYPE_FIELD_TYPE (t, i)), etp))
+	  if (!is_float_or_hfa_type_recurse (TYPE_FIELD_TYPE (t, i), etp))
 	    return 0;
 	return 1;
       }
@@ -1567,40 +1494,6 @@ is_float_or_hfa_type (struct type *t)
   return is_float_or_hfa_type_recurse (t, &et) ? et : 0;
 }
 
-
-/* Return 1 if the alignment of T is such that the next even slot
-   should be used.  Return 0, if the next available slot should
-   be used.  (See section 8.5.1 of the IA-64 Software Conventions
-   and Runtime manual.)  */
-
-static int
-slot_alignment_is_next_even (struct type *t)
-{
-  switch (TYPE_CODE (t))
-    {
-    case TYPE_CODE_INT:
-    case TYPE_CODE_FLT:
-      if (TYPE_LENGTH (t) > 8)
-	return 1;
-      else
-	return 0;
-    case TYPE_CODE_ARRAY:
-      return
-	slot_alignment_is_next_even (check_typedef (TYPE_TARGET_TYPE (t)));
-    case TYPE_CODE_STRUCT:
-      {
-	int i;
-
-	for (i = 0; i < TYPE_NFIELDS (t); i++)
-	  if (slot_alignment_is_next_even
-	      (check_typedef (TYPE_FIELD_TYPE (t, i))))
-	    return 1;
-	return 0;
-      }
-    default:
-      return 0;
-    }
-}
 
 /* Attempt to find (and return) the global pointer for the given
    function.
@@ -1769,7 +1662,9 @@ ia64_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
       type = check_typedef (VALUE_TYPE (arg));
       len = TYPE_LENGTH (type);
 
-      if ((nslots & 1) && slot_alignment_is_next_even (type))
+      /* FIXME: This is crude and it is wrong (IMO), but it matches
+         what gcc does, I think. */
+      if (len > 8 && (nslots & 1))
 	nslots++;
 
       if (TYPE_CODE (type) == TYPE_CODE_FUNC)
@@ -1844,11 +1739,8 @@ ia64_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
 	}
 
       /* Normal slots */
-
-      /* Skip odd slot if necessary...  */
-      if ((slotnum & 1) && slot_alignment_is_next_even (type))
+      if (len > 8 && (slotnum & 1))
 	slotnum++;
-
       argoffset = 0;
       while (len > 0)
 	{

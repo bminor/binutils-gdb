@@ -350,11 +350,16 @@ _initialize_sh3_rom (void)
   sh3_ops.to_longname = "Hitachi SH-3 rom monitor";
 
   sh3_ops.to_doc =
-  /* We can download through the parallel port too. */
-    "Debug on a Hitachi eval board running the SH-3E rom monitor.\n"
-    "Specify the serial device it is connected to.\n"
+#ifdef _WINDOWS
+  /* On windows we can talk through the parallel port too. */
+    "Debug on a Hitachi eval board running the SH-3 rom monitor.\n"
+    "Specify the serial device it is connected to (e.g. com2).\n"
     "If you want to use the parallel port to download to it, specify that\n"
-    "as an additional second argument.";
+    "as the second argument. (e.g. lpt1)";
+#else
+    "Debug on a Hitachi eval board running the SH-3 rom monitor.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).";
+#endif
 
   sh3_ops.to_open = sh3_open;
   sh3_ops.to_close = sh3_close;
@@ -369,11 +374,16 @@ _initialize_sh3_rom (void)
   sh3e_ops.to_longname = "Hitachi SH-3E rom monitor";
 
   sh3e_ops.to_doc =
-  /* We can download through the parallel port too. */
+#ifdef _WINDOWS
+  /* On windows we can talk through the parallel port too. */
     "Debug on a Hitachi eval board running the SH-3E rom monitor.\n"
-    "Specify the serial device it is connected to.\n"
+    "Specify the serial device it is connected to (e.g. com2).\n"
     "If you want to use the parallel port to download to it, specify that\n"
-    "as an additional second argument.";
+    "as the second argument. (e.g. lpt1)";
+#else
+    "Debug on a Hitachi eval board running the SH-3E rom monitor.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).";
+#endif
 
   sh3e_ops.to_open = sh3e_open;
   sh3e_ops.to_close = sh3_close;

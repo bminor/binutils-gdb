@@ -1639,7 +1639,7 @@ value_of_root (struct varobj **var_handle, int *type_changed)
 	    {
 	      tmp_var->obj_name = 
 		savestring (var->obj_name, strlen (var->obj_name));
-	      varobj_delete (var, NULL, 0);
+	      uninstall_variable (var);
 	    }
 	  else
 	    {
@@ -1761,13 +1761,7 @@ c_number_of_children (struct varobj *var)
     case TYPE_CODE_PTR:
       /* This is where things get compilcated. All pointers have one child.
          Except, of course, for struct and union ptr, which we automagically
-         dereference for the user and function ptrs, which have no children.
-         We also don't dereference void* as we don't know what to show.
-         We can show char* so we allow it to be dereferenced.  If you decide
-         to test for it, please mind that a little magic is necessary to
-         properly identify it: char* has TYPE_CODE == TYPE_CODE_INT and 
-         TYPE_NAME == "char" */
-
+         dereference for the user and function ptrs, which have no children. */
       switch (TYPE_CODE (target))
 	{
 	case TYPE_CODE_STRUCT:
@@ -1776,12 +1770,17 @@ c_number_of_children (struct varobj *var)
 	  break;
 
 	case TYPE_CODE_FUNC:
-	case TYPE_CODE_VOID:
 	  children = 0;
 	  break;
 
 	default:
-	  children = 1;
+	  /* Don't dereference char* or void*. */
+	  if (TYPE_NAME (target) != NULL
+	      && (STREQ (TYPE_NAME (target), "char")
+		  || STREQ (TYPE_NAME (target), "void")))
+	    children = 0;
+	  else
+	    children = 1;
 	}
       break;
 

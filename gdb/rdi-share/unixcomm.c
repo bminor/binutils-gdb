@@ -96,15 +96,7 @@
 #define PARPORT2   "/dev/par1"
 #endif
 
-#if defined(_WIN32) || defined (__CYGWIN32__) 
-#define SERIAL_PREFIX "com"
-#define SERPORT1   "com1"
-#define SERPORT2   "com2"
-#define PARPORT1   "lpt1"
-#define PARPORT2   "lpt2"
-#endif
-
-#if !defined (SERIAL_PREFIX)
+#if defined (__FreeBSD__) || defined (__NetBSD__) || defined (__OpenBSD__) || defined (bsdi)
 #define SERIAL_PREFIX "/dev/cuaa"
 #define SERPORT1   "/dev/cuaa0"
 #define SERPORT2   "/dev/cuaa1"
@@ -112,6 +104,14 @@
 #define PARPORT2   "/dev/lpt1"
 #endif
 
+
+#if defined(_WIN32) || defined (__CYGWIN32__) 
+#define SERIAL_PREFIX "com"
+#define SERPORT1   "com1"
+#define SERPORT2   "com2"
+#define PARPORT1   "lpt1"
+#define PARPORT2   "lpt2"
+#endif
 
 
 

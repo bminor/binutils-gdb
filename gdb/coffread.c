@@ -312,7 +312,7 @@ struct find_targ_sec_arg
     asection **resultp;
   };
 
-static void find_targ_sec (bfd *, asection *, PTR);
+static void find_targ_sec (bfd *, asection *, void *);
 
 static void
 find_targ_sec (bfd *abfd, asection *sect, PTR obj)
@@ -688,11 +688,6 @@ coff_symfile_read (struct objfile *objfile, int mainline)
 			       info->textaddr, info->textsize,
 			       info->stabsects,
 			       info->stabstrsect->filepos, stabstrsize);
-    }
-  if (dwarf2_has_info (abfd))
-    {
-      /* DWARF2 sections.  */
-      dwarf2_build_psymtabs (objfile, mainline);
     }
 
   do_cleanups (back_to);

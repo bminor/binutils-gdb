@@ -25,7 +25,6 @@
 #
 
 load_lib mi-support.exp
-set MIFLAGS "-i=mi"
 
 gdb_exit
 if [mi_gdb_start] {
@@ -61,7 +60,7 @@ proc test_breakpoints_creation_and_listing {} {
              "break-insert operation"
 
     mi_gdb_test "204-break-list" \
-                "204\\^done,BreakpointTable=\{.*,body=\\\[bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"32\",times=\"0\"\}\\\]\}" \
+                "204\\^done,BreakpointTable=\{hdr=\{.*\},bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"32\",times=\"0\"\}\}" \
                 "list of breakpoints"
 }
 
@@ -80,7 +79,7 @@ proc test_running_the_program {} {
     mi_run_cmd
     # The running part has been checked already by mi_run_cmd
         gdb_expect {
-	    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",line=\"32\"\}\r\n$mi_gdb_prompt$" {
+	    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\{\},file=\".*basics.c\",line=\"32\"\}\r\n$mi_gdb_prompt$" {
             pass "run to main"
           }
           -re ".*$mi_gdb_prompt$" {fail "run to main (2)"}
@@ -100,11 +99,11 @@ proc test_disassembly_only {} {
 
     mi_gdb_test "print/x \$pc" "" ""
     mi_gdb_test "111-data-disassemble -s \$pc -e \"\$pc + 12\" -- 0" \
-	    "111\\^done,asm_insns=\\\[\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\},\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}.*\]" \
+	    "111\\^done,asm_insns=\{\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\},\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}.*\}" \
              "data-disassemble from pc to pc+12 assembly only"
 
     mi_gdb_test "222-data-disassemble  -f basics.c -l 32 -- 0" \
-	    "222\\^done,asm_insns=\\\[\{address=\"$hex\",func-name=\"main\",offset=\"0\",inst=\".*\"\},.*,\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}\\\]" \
+	    "222\\^done,asm_insns=\{\{address=\"$hex\",func-name=\"main\",offset=\"0\",inst=\".*\"\},.*,\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}\}" \
               "data-disassemble file & line, assembly only"
 }
 
@@ -121,15 +120,15 @@ proc test_disassembly_lines_limit {} {
 
     mi_gdb_test "print/x \$pc" "" ""
     mi_gdb_test "222-data-disassemble  -f basics.c -l 32 -n 20 -- 0" \
-	    "222\\^done,asm_insns=\\\[\{address=\"$hex\",func-name=\"main\",offset=\"0\",inst=\".*\"\},.*,\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}\\\]" \
+	    "222\\^done,asm_insns=\{\{address=\"$hex\",func-name=\"main\",offset=\"0\",inst=\".*\"\},.*,\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}\}" \
               "data-disassemble file, line, number assembly only"
 
     mi_gdb_test "222-data-disassemble  -f basics.c -l 32 -n 0 -- 0" \
-	    "222\\^done,asm_insns=\\\[\\\]" \
+	    "222\\^done,asm_insns=\{\}" \
               "data-disassemble file, line, number (zero lines) assembly only"
 
     mi_gdb_test "222-data-disassemble  -f basics.c -l 32 -n 50 -- 0" \
-	    "222\\^done,asm_insns=\\\[\{address=\"$hex\",func-name=\"main\",offset=\"0\",inst=\".*\"\},.*,\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}\\\]" \
+	    "222\\^done,asm_insns=\{\{address=\"$hex\",func-name=\"main\",offset=\"0\",inst=\".*\"\},.*,\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}\}" \
               "data-disassemble file, line, number (more than main lines) assembly only"
 }
 
@@ -145,7 +144,7 @@ proc test_disassembly_mixed {} {
     # -data-disassembly -s $pc -e "$pc+8" -- 1
 
     mi_gdb_test "002-data-disassemble -f basics.c -l 21 -- 1" \
-	    "002\\^done,asm_insns=\\\[src_and_asm_line=\{line=\"21\",file=\".*basics.c\",line_asm_insn=\\\[\{address=\"$hex\",func-name=\"callee2\",offset=\"0\",inst=\".*\"\}.*\\\]\}.*,src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\\\[.*\{address=\"$hex\",func-name=\"callee2\",offset=\"$decimal\",inst=\".*\"\}\\\]\}\\\]" \
+	    "002\\^done,asm_insns=\{src_and_asm_line=\{line=\"21\",file=\".*basics.c\",line_asm_insn=\{\{address=\"$hex\",func-name=\"callee2\",offset=\"0\",inst=\".*\"\}.*\}\},.*,src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{.*\{address=\"$hex\",func-name=\"callee2\",offset=\"$decimal\",inst=\".*\"\}\}\}\}" \
              "data-disassemble file, line assembly mixed"
 
     #
@@ -154,7 +153,7 @@ proc test_disassembly_mixed {} {
     # which we are now, even if we have specified that the range is only 2 insns.
     #
     mi_gdb_test "003-data-disassemble -s \$pc -e \"\$pc+4\" -- 1" \
-	    "003\\^done,asm_insns=\\\[src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\\\[\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}.*\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}\\\]\}\\\]" \
+	    "003\\^done,asm_insns=\{src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}.*\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}\}\}\}" \
              "data-disassemble range assembly mixed"
 }
 
@@ -171,15 +170,15 @@ proc test_disassembly_mixed_lines_limit {} {
 
     mi_gdb_test "print/x \$pc" "" ""
     mi_gdb_test "222-data-disassemble  -f basics.c -l 32 -n 20 -- 1" \
-	    "222\\^done,asm_insns=\\\[src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\\\[\{address=\"$hex\",func-name=\"main\",offset=\"0\",inst=\".*\"\},.*,\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}\\\]\}\]" \
+	    "222\\^done,asm_insns=\{src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{\{address=\"$hex\",func-name=\"main\",offset=\"0\",inst=\".*\"\},.*,\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}.*\}" \
               "data-disassemble file, line, number assembly mixed"
 
     mi_gdb_test "222-data-disassemble  -f basics.c -l 32 -n 0 -- 1" \
-	    "222\\^done,asm_insns=\\\[src_and_asm_line=\{line=\"31\",file=\".*basics.c\",line_asm_insn=\\\[\\\]\}\\\]" \
+	    "222\\^done,asm_insns=\{src_and_asm_line=\{line=\"31\",file=\".*basics.c\",line_asm_insn=\{\}\}\}" \
               "data-disassemble file, line, number (zero lines) assembly mixed"
 
     mi_gdb_test "222-data-disassemble  -f basics.c -l 32 -n 50 -- 1" \
-	    "222\\^done,asm_insns=\\\[src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\\\[\{address=\"$hex\",func-name=\"main\",offset=\"0\",inst=\".*\"\}.*,\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}\\\]\}\]" \
+	    "222\\^done,asm_insns=\{src_and_asm_line=\{line=\"$decimal\",file=\".*basics.c\",line_asm_insn=\{\{address=\"$hex\",func-name=\"main\",offset=\"0\",inst=\".*\"\},.*,\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}.*\}" \
               "data-disassemble file, line, number (more than main lines) assembly mixed"
 }
 
@@ -222,3 +221,7 @@ test_disassembly_mixed_lines_limit
 
 mi_gdb_exit
 return 0
+
+# Local variables: 
+# change-log-default-name: "ChangeLog-mi"
+# End: 

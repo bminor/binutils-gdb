@@ -170,11 +170,7 @@ proc all_threads_running {} {
 
     send_gdb "p common_routine::full_coverage\n"
     gdb_expect {
-	-re ".* = 1.*$gdb_prompt $" {}
-	-re ".* = 0.*$gdb_prompt $" {
-	    fail "some threads didn't run"
-	    return 0
-	}
+	-re ".*= 1\r\n$gdb_prompt $" {}
 	default {
 	    fail "some threads didn't run"
 	    return 0
@@ -197,11 +193,13 @@ proc test_startup {} {
     # We should be able to do an info threads before starting any others.
     send_gdb "info threads\n"
     gdb_expect {
-	-re ".*Thread.*main.*$gdb_prompt $" {
+	-re ".*Thread.*LWP.*main.*$gdb_prompt $" {
 	    pass "info threads"
 	}
 	-re "\r\n$gdb_prompt $" {
-	    unsupported "gdb does not support pthreads for this machine"
+	    pass "info threads"
+	    setup_xfail "*-*-*"
+	    fail "gdb does not support pthreads for this machine"
 	    return 0
 	}
     }
@@ -259,7 +257,6 @@ proc check_control_c {} {
 	}
 	timeout {
 	    fail "$description (timeout)"
-	    return 1;
 	}
     }
     gdb_test "bt" ""
@@ -268,7 +265,6 @@ proc check_control_c {} {
     if [all_threads_running] then {
 	pass "All threads running after continuing from ^C stop"
     }
-    return 0;
 }
 
 proc check_backtraces {} {
@@ -339,10 +335,7 @@ setup_xfail "alpha-*-osf*"
 if [runto_main] then {
     clear_xfail "alpha-*-osf*"
     if [test_startup] then {
-	if [check_control_c] then {
-	    warning "Could not stop child with ^C; skipping rest of tests.\n"
-	    return;
-	}
+	check_control_c
 	check_backtraces
     }
 }

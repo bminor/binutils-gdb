@@ -186,11 +186,9 @@ static void remote_find_new_threads (void);
 
 static void record_currthread (int currthread);
 
-static int fromhex (int a);
+/* exported functions */
 
-static int hex2bin (const char *hex, char *bin, int count);
-
-static int bin2hex (const char *bin, char *hex, int count);
+extern int fromhex (int a);
 
 static int putpkt_binary (char *buf, int cnt);
 
@@ -668,22 +666,6 @@ packet_ok (const char *buf, struct packet_config *config)
 	}
       return PACKET_UNKNOWN;
     }
-}
-
-/* Should we try the 'qSymbol' (target symbol lookup service) request? */
-static struct packet_config remote_protocol_qSymbol;
-
-static void
-set_remote_protocol_qSymbol_packet_cmd (char *args, int from_tty,
-				  struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_qSymbol);
-}
-
-static void
-show_remote_protocol_qSymbol_packet_cmd (char *args, int from_tty)
-{
-  show_packet_config_cmd (&remote_protocol_qSymbol);
 }
 
 /* Should we try the 'e' (step over range) request? */
@@ -1753,9 +1735,17 @@ remote_threads_extra_info (struct thread_info *tp)
       getpkt (bufp, PBUFSIZ, 0);
       if (bufp[0] != 0)
 	{
-	  n = min (strlen (bufp) / 2, sizeof (display_buf));
-	  result = hex2bin (bufp, display_buf, n);
-	  display_buf [result] = '\0';
+	  char *p;
+
+	  for (p = display_buf; 
+	       p < display_buf + sizeof(display_buf) - 1 &&
+		 bufp[0] != 0 &&
+		 bufp[1] != 0;
+	       p++, bufp+=2)
+	    {
+	      *p = fromhex (bufp[0]) * 16 + fromhex (bufp[1]);
+	    }
+	  *p = 0;
 	  return display_buf;
 	}
     }
@@ -2086,50 +2076,11 @@ init_all_packet_configs (void)
   update_packet_config (&remote_protocol_e);
   update_packet_config (&remote_protocol_E);
   update_packet_config (&remote_protocol_P);
-  update_packet_config (&remote_protocol_qSymbol);
   for (i = 0; i < NR_Z_PACKET_TYPES; i++)
     update_packet_config (&remote_protocol_Z[i]);
   /* Force remote_write_bytes to check whether target supports binary
      downloading. */
   update_packet_config (&remote_protocol_binary_download);
-}
-
-/* Symbol look-up. */
-
-static void
-remote_check_symbols (struct objfile *objfile)
-{
-  char *msg, *reply, *tmp;
-  struct minimal_symbol *sym;
-  int end;
-
-  if (remote_protocol_qSymbol.support == PACKET_DISABLE)
-    return;
-
-  msg   = alloca (PBUFSIZ);
-  reply = alloca (PBUFSIZ);
-
-  /* Invite target to request symbol lookups. */
-
-  putpkt ("qSymbol::");
-  getpkt (reply, PBUFSIZ, 0);
-  packet_ok (reply, &remote_protocol_qSymbol);
-
-  while (strncmp (reply, "qSymbol:", 8) == 0)
-    {
-      tmp = &reply[8];
-      end = hex2bin (tmp, msg, strlen (tmp) / 2);
-      msg[end] = '\0';
-      sym = lookup_minimal_symbol (msg, NULL, NULL);
-      if (sym == NULL)
-	sprintf (msg, "qSymbol::%s", &reply[8]);
-      else
-	sprintf (msg, "qSymbol:%s:%s", 
-		 paddr_nz (SYMBOL_VALUE_ADDRESS (sym)),
-		 &reply[8]);
-      putpkt (msg);
-      getpkt (reply, PBUFSIZ, 0);
-    }
 }
 
 static void
@@ -2192,11 +2143,6 @@ serial device is attached to the remote system\n\
      someday have a notion of debugging several processes.  */
 
   inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
-  /* First delete any symbols previously loaded from shared libraries. */
-  no_shared_libraries (NULL, 0);
-#endif
-
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it
      (we'd be in an inconsistent state otherwise).  */
@@ -2215,19 +2161,14 @@ serial device is attached to the remote system\n\
       putpkt ("!");
       getpkt (buf, PBUFSIZ, 0);
     }
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
   /* FIXME: need a master target_open vector from which all 
      remote_opens can be called, so that stuff like this can 
      go there.  Failing that, the following code must be copied
      to the open function for any remote target that wants to 
      support svr4 shared libraries.  */
-
-  /* Set up to detect and load shared libraries. */
+#ifdef SOLIB_CREATE_INFERIOR_HOOK
   if (exec_bfd) 	/* No use without an exec file. */
-    {
-      SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
-      remote_check_symbols (symfile_objfile);
-    }
+    SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
 #endif
 }
 
@@ -2302,11 +2243,6 @@ serial device is attached to the remote system\n\
      implemented. */
   wait_forever_enabled_p = 0;
 
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
-  /* First delete any symbols previously loaded from shared libraries. */
-  no_shared_libraries (NULL, 0);
-#endif
-
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it
      (we'd be in an inconsistent state otherwise).  */
@@ -2328,19 +2264,14 @@ serial device is attached to the remote system\n\
       putpkt ("!");
       getpkt (buf, PBUFSIZ, 0);
     }
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
   /* FIXME: need a master target_open vector from which all 
      remote_opens can be called, so that stuff like this can 
      go there.  Failing that, the following code must be copied
      to the open function for any remote target that wants to 
      support svr4 shared libraries.  */
-
-  /* Set up to detect and load shared libraries. */
+#ifdef SOLIB_CREATE_INFERIOR_HOOK
   if (exec_bfd) 	/* No use without an exec file. */
-    {
-      SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
-      remote_check_symbols (symfile_objfile);
-    }
+    SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
 #endif
 }
 
@@ -2391,7 +2322,7 @@ remote_async_detach (char *args, int from_tty)
 
 /* Convert hex digit A to a number.  */
 
-static int
+int
 fromhex (int a)
 {
   if (a >= '0' && a <= '9')
@@ -2404,25 +2335,6 @@ fromhex (int a)
     error ("Reply contains invalid hex digit %d", a);
 }
 
-static int
-hex2bin (const char *hex, char *bin, int count)
-{
-  int i;
-
-  for (i = 0; i < count; i++)
-    {
-      if (hex[0] == 0 || hex[1] == 0)
-	{
-	  /* Hex string is short, or of uneven length.
-	     Return the count that has been converted so far. */
-	  return i;
-	}
-      *bin++ = fromhex (hex[0]) * 16 + fromhex (hex[1]);
-      hex += 2;
-    }
-  return i;
-}
-
 /* Convert number NIB to a hex digit.  */
 
 static int
@@ -2432,23 +2344,6 @@ tohex (int nib)
     return '0' + nib;
   else
     return 'a' + nib - 10;
-}
-
-static int
-bin2hex (const char *bin, char *hex, int count)
-{
-  int i;
-  /* May use a length, or a nul-terminated string as input. */
-  if (count == 0)
-    count = strlen (bin);
-
-  for (i = 0; i < count; i++)
-    {
-      *hex++ = tohex ((*bin >> 4) & 0xf);
-      *hex++ = tohex (*bin++ & 0xf);
-    }
-  *hex = 0;
-  return i;
 }
 
 /* Tell the remote machine to resume.  */
@@ -2508,7 +2403,7 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
 	      putpkt (buf);
 	      getpkt (buf, PBUFSIZ, 0);
 
-	      if (packet_ok (buf, &remote_protocol_E) == PACKET_OK)
+	      if (packet_ok(buf, &remote_protocol_E) == PACKET_OK)
 		return;
 	    }
 	}
@@ -2526,7 +2421,7 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
 	      putpkt (buf);
 	      getpkt (buf, PBUFSIZ, 0);
 
-	      if (packet_ok (buf, &remote_protocol_e) == PACKET_OK)
+	      if (packet_ok(buf, &remote_protocol_e) == PACKET_OK)
 		return;
 	    }
 	}
@@ -2596,7 +2491,7 @@ remote_async_resume (ptid_t ptid, int step, enum target_signal siggnal)
 	      putpkt (buf);
 	      getpkt (buf, PBUFSIZ, 0);
 
-	      if (packet_ok (buf, &remote_protocol_E) == PACKET_OK)
+	      if (packet_ok(buf, &remote_protocol_E) == PACKET_OK)
 		goto register_event_loop;
 	    }
 	}
@@ -2614,7 +2509,7 @@ remote_async_resume (ptid_t ptid, int step, enum target_signal siggnal)
 	      putpkt (buf);
 	      getpkt (buf, PBUFSIZ, 0);
 
-	      if (packet_ok (buf, &remote_protocol_e) == PACKET_OK)
+	      if (packet_ok(buf, &remote_protocol_e) == PACKET_OK)
 		goto register_event_loop;
 	    }
 	}
@@ -2902,7 +2797,6 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 	      {
 		unsigned char *p1;
 		char *p_temp;
-		int fieldsize;
 
 		/* Read the register number */
 		regno = strtol ((const char *) p, &p_temp, 16);
@@ -2936,10 +2830,13 @@ Packet: '%s'\n",
 Packet: '%s'\n",
 			       regno, p, buf);
 
-		    fieldsize = hex2bin (p, regs, REGISTER_RAW_SIZE (regno));
-		    p += 2 * fieldsize;
-		    if (fieldsize < REGISTER_RAW_SIZE (regno))
-		      warning ("Remote reply is too short: %s", buf);
+		    for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
+		      {
+			if (p[0] == 0 || p[1] == 0)
+			  warning ("Remote reply is too short: %s", buf);
+			regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
+			p += 2;
+		      }
 		    supply_register (regno, regs);
 		  }
 
@@ -3121,7 +3018,6 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 	      {
 		unsigned char *p1;
 		char *p_temp;
-		int fieldsize;
 
 		/* Read the register number */
 		regno = strtol ((const char *) p, &p_temp, 16);
@@ -3155,10 +3051,13 @@ Packet: '%s'\n",
 Packet: '%s'\n",
 			       regno, p, buf);
 
-		    fieldsize = hex2bin (p, regs, REGISTER_RAW_SIZE (regno));
-		    p += 2 * fieldsize;
-		    if (fieldsize < REGISTER_RAW_SIZE (regno))
-		      warning ("Remote reply is too short: %s", buf);
+		    for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
+		      {
+			if (p[0] == 0 || p[1] == 0)
+			  warning ("Remote reply is too short: %s", buf);
+			regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
+			p += 2;
+		      }
 		    supply_register (regno, regs);
 		  }
 
@@ -3408,7 +3307,12 @@ store_register_using_P (int regno)
   sprintf (buf, "P%x=", regno);
   p = buf + strlen (buf);
   regp = register_buffer (regno);
-  bin2hex (regp, p, REGISTER_RAW_SIZE (regno));
+  for (i = 0; i < REGISTER_RAW_SIZE (regno); ++i)
+    {
+      *p++ = tohex ((regp[i] >> 4) & 0xf);
+      *p++ = tohex (regp[i] & 0xf);
+    }
+  *p = '\0';
   remote_send (buf, PBUFSIZ);
 
   return buf[0] != '\0';
@@ -3465,7 +3369,13 @@ remote_store_registers (int regno)
   regs = register_buffer (-1);
   p = buf + 1;
   /* remote_prepare_to_store insures that register_bytes_found gets set.  */
-  bin2hex (regs, p, register_bytes_found);
+  for (i = 0; i < register_bytes_found; i++)
+    {
+      *p++ = tohex ((regs[i] >> 4) & 0xf);
+      *p++ = tohex (regs[i] & 0xf);
+    }
+  *p = '\0';
+
   remote_send (buf, PBUFSIZ);
 }
 
@@ -3692,8 +3602,12 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
       /* Normal mode: Send target system values byte by byte, in
 	 increasing byte addresses.  Each byte is encoded as a two hex
 	 value.  */
-      nr_bytes = bin2hex (myaddr, p, todo);
-      p += 2 * nr_bytes;
+      for (nr_bytes = 0; nr_bytes < todo; nr_bytes++)
+	{
+	  *p++ = tohex ((myaddr[nr_bytes] >> 4) & 0xf);
+	  *p++ = tohex (myaddr[nr_bytes] & 0xf);
+	}
+      *p = '\0';
       break;
     case PACKET_SUPPORT_UNKNOWN:
       internal_error (__FILE__, __LINE__,
@@ -3784,11 +3698,14 @@ remote_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
          each byte encoded as two hex characters.  */
 
       p = buf;
-      if ((i = hex2bin (p, myaddr, todo)) < todo)
+      for (i = 0; i < todo; i++)
 	{
-	  /* Reply is short.  This means that we were able to read
-	     only part of what we wanted to. */
-	  return i + (origlen - len);
+	  if (p[0] == 0 || p[1] == 0)
+	    /* Reply is short.  This means that we were able to read
+	       only part of what we wanted to.  */
+	    return i + (origlen - len);
+	  myaddr[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
+	  p += 2;
 	}
       myaddr += todo;
       memaddr += todo;
@@ -4988,7 +4905,12 @@ remote_rcmd (char *command,
     error ("\"monitor\" command ``%s'' is too long\n", command);
 
   /* Encode the actual command */
-  bin2hex (command, p, 0);
+  for (i = 0; command[i]; i++)
+    {
+      *p++ = tohex ((command[i] >> 4) & 0xf);
+      *p++ = tohex (command[i] & 0xf);
+    }
+  *p = '\0';
 
   if (putpkt (buf) < 0)
     error ("Communication problem with target\n");
@@ -5766,6 +5688,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
 static void
 set_remote_cmd (char *args, int from_tty)
 {
+  
 }
 
 static void
@@ -5776,7 +5699,6 @@ show_remote_cmd (char *args, int from_tty)
   show_remote_protocol_e_packet_cmd (args, from_tty);
   show_remote_protocol_E_packet_cmd (args, from_tty);
   show_remote_protocol_P_packet_cmd (args, from_tty);
-  show_remote_protocol_qSymbol_packet_cmd (args, from_tty);
   show_remote_protocol_binary_download_cmd (args, from_tty);
 }
 
@@ -5788,23 +5710,6 @@ build_remote_gdbarch_data (void)
   /* Cisco stuff */
   tty_input = xmalloc (PBUFSIZ);
   remote_address_size = TARGET_ADDR_BIT;
-}
-
-/* Saved pointer to previous owner of the new_objfile event. */
-static void (*remote_new_objfile_chain) (struct objfile *);
-
-/* Function to be called whenever a new objfile (shlib) is detected. */
-static void
-remote_new_objfile (struct objfile *objfile)
-{
-  if (remote_desc != 0)		/* Have a remote connection */
-    {
-      remote_check_symbols (objfile);
-    }
-  /* Call predecessor on chain, if any. */
-  if (remote_new_objfile_chain != 0 &&
-      remote_desc == 0)
-    remote_new_objfile_chain (objfile);
 }
 
 void
@@ -5836,10 +5741,6 @@ _initialize_remote (void)
 
   init_remote_cisco_ops ();
   add_target (&remote_cisco_ops);
-
-  /* Hook into new objfile notification.  */
-  remote_new_objfile_chain = target_new_objfile_hook;
-  target_new_objfile_hook  = remote_new_objfile;
 
 #if 0
   init_remote_threadtests ();
@@ -5940,13 +5841,6 @@ in a memory packet.\n",
 
   add_info ("remote-process", remote_info_process,
 	    "Query the remote system for process info.");
-
-  add_packet_config_cmd (&remote_protocol_qSymbol,
-			 "qSymbol", "symbol-lookup",
-			 set_remote_protocol_qSymbol_packet_cmd,
-			 show_remote_protocol_qSymbol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
 
   add_packet_config_cmd (&remote_protocol_e,
 			 "e", "step-over-range",

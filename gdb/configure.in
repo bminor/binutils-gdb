@@ -341,9 +341,6 @@ if test ${host} = ${target} ; then
   AC_MSG_CHECKING(for member som_addr in struct so_map)
   AC_CACHE_VAL(gdb_cv_have_struct_so_map_with_som_members,
     [AC_TRY_COMPILE([#include <sys/types.h>
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
 #include <link.h>],
                     [struct so_map lm; (void) lm.som_addr;],
                     gdb_cv_have_struct_so_map_with_som_members=yes,
@@ -583,8 +580,7 @@ AC_ARG_ENABLE(gdbmi,
       AC_MSG_ERROR(Bad value for --enable-gdbmi: ${enableval})
     ;;
   esac
-],
-[enable_gdbmi=yes])
+])
 case ${enable_gdbmi} in
   "yes" )
     if test -d "${srcdir}/mi" ; then

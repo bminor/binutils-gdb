@@ -57,8 +57,9 @@ maintainer works with the native maintainer when resolving API issues.
 	arc		--target=arc-elf ,-Werror
 			Maintenance only
 
-	arm		--target=arm-coff,arm-elf,arm-pe -w
+	arm		(--target=arm-coff,arm-elf,arm-pe broken)
 			Fernando Nasser		fnasser@cygnus.com
+			Jim Ingham		jingham@apple.com
 			Scott Bambrough		scottb@netwinder.org
 
 	d10v		--target=d10v-elf ,-Werror
@@ -111,13 +112,13 @@ maintainer works with the native maintainer when resolving API issues.
 			Maintenance only
 
 	mn10300		--target=mn10300-elf ,-Werror
-			Maintenance only
+			Andrew Cagney		cagney@cygnus.com
 
 	ns32k		--target=ns32k-netbsd ,-Werror
 			Maintenance only
 
 	pa		(--target=hppa1.1-hp-proelf broken)
-			Maintenance only
+			Jeff Law		law@cygnus.com
 
 	powerpc		--target=powerpc-eabi,powerpcle-eabi ,-Werror
 			Kevin Buettner		kevinb@cygnus.com
@@ -196,6 +197,7 @@ GNU/Linux PPC native	Kevin Buettner		kevinb@cygnus.com
 FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 			David O'Brien		obrien@freebsd.org
 hurd native		Mark Kettenis		kettenis@gnu.org
+hpux, hp pa native	Jeff Law		law@cygnus.com
 NetBSD native & host	J.T. Conklin		jtc@redback.com
 SCO/Unixware		Nick Duffek		nsd@cygnus.com
 			Robert Lipe		rjl@sco.com
@@ -229,8 +231,6 @@ generic symtabs		Jim Blandy		jimb@cygnus.com
   stabs reader		Jim Blandy		jimb@cygnus.com
 			Elena Zannoni		ezannoni@cygnus.com
   coff reader		Philippe De Muyter	phdm@macqel.be
-  xcoff reader		Any maintainer can modify this; please send tricky
-			ones to Kevin Buettner <kevinb@cygnus.com>
   linespec		Jim Blandy		jimb@cygnus.com
 			Elena Zannoni		ezannoni@cygnus.com
 			Fernando Nasser		fnasser@cygnus.com
@@ -242,9 +242,8 @@ threads			Michael Snyder		msnyder@cygnus.com
 breakpoints		Michael Snyder		msnyder@cygnus.com
 			Jim Blandy		jimb@cygnus.com
 language support	David Taylor		taylor@cygnus.com
-  Java support (devolved)
-			Per Bothner		per@bothner.com
-			Anthony Green 		green@cygnus.com
+  C++ support		Daniel Berlin		dan@cgsoftware.com
+  Java support		Anthony Green 		green@cygnus.com
   Objective-C/C++	Klee Dienes		kdienes@apple.com
 			Jim Ingham		jimgham@apple.com
   Pascal support	Pierre Muller		muller@sourceware.cygnus.com
@@ -262,17 +261,11 @@ remote.c		Andrew Cagney		cagney@cygnus.com
 include/remote-sim.h, remote-sim.c
 			Andrew Cagney		cagney@cygnus.com
 sds protocol		Fernando Nasser		fnasser@cygnus.com
+			Jim Ingham		jingham@apple.com
 rdi/adp protocol	Fernando Nasser		fnasser@cygnus.com
+			Jim Ingham		jingham@apple.com
 documentation		Eli Zaretskii		eliz@gnu.org
 testsuite		Fernando Nasser		fnasser@cygnus.com
-  config                Mark Salter             msalter@redhat.com
-  lib                   Mark Salter             msalter@redhat.com
-  gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
-  mi tests (gdb.mi)     Elena Zannoni           ezannoni@redhat.com
-                        Andrew Cagney           cagney@redhat.com
-  stabs (gdb.satbs)     Elena Zannoni           ezannoni@redhat.com
-  threads (gdb.threads) Michael Snyder          msnyder@redhat.com
-  trace (gdb.trace)     Michael Snyder          msnyder@redhat.com
   hp tests (gdb.hp)	(vacant)
   Java tests (gdb.java)	Anthony Green 		green@cygnus.com
 Kernel Object Display	Fernando Nasser		fnasser@cygnus.com
@@ -285,8 +278,8 @@ command interpreter	Fernando Nasser		fnasser@cygnus.com
 gdbtk (c & tcl)		Jim Ingham		jingham@apple.com
 			Fernando Nasser         fnasser@cygnus.com
 			Keith Seitz		keiths@cygnus.com
-libgui (w/foundry, sn)	Jim Ingham              jingham@apple.com
-			Keith Seitz		keiths@redhat.com
+libgui (w/foundry, sn)	Syd Polk		spolk@cygnus.com
+			Jim Ingham		jingham@apple.com
 mi (gdb/mi)		Andrew Cagney		cagney@cygnus.com
 			Elena Zannoni           ezannoni@cygnus.com
 			Fernando Nasser		fnasser@cygnus.com
@@ -313,52 +306,42 @@ readline/		Master version: ftp://ftp.cwru.edu/pub/bash/
 
 
 
-			Write After Approval
-			   (alphabetic)
-
-To get recommended for the Write After Approval list you need a valid
-FSF assignment and have submitted one good patch.
+		Write After Approval
 
 David Anderson					davea@sgi.com
-Philip Blundell					philb@gnu.org
-Joel Brobecker					brobecker@act-europe.fr
-Michael Chastain				chastain@redhat.com
-Nick Clifton					nickc@cygnus.com
-Orjan Friberg					orjanf@axis.com
-Paul Hilfinger					hilfinger@gnat.com
-Matt Hiller					hiller@redhat.com
-Kazu Hirata					kazu@hxi.com
-Jeff Holcomb					jeffh@redhat.com
-Don Howard					dhoward@redhat.com
-Martin Hunt					hunt@redhat.com
-Daniel Jacobowitz				dan@debian.org
-Andreas Jaeger					aj@suse.de
-Geoff Keating					geoffk@redhat.com
 Jim Kingdon					jkingdon@engr.sgi.com  ++
-Jonathan Larmour				jlarmour@redhat.co.uk
-H.J. Lu						hjl@lucon.org
-Glen McCready					gkm@cygnus.com
 Jason Molenda					jsm@cygnus.com
+H.J. Lu						hjl@lucon.org
+Nick Clifton					nickc@cygnus.com
+Jonathan Larmour				jlarmour@redhat.co.uk
+Glen McCready					gkm@cygnus.com
+Gary Thomas					gthomas@redhat.com
 Pierre Muller					muller@sourceware.cygnus.com
+Kazu Hirata					kazu@hxi.com
+Tom Tromey					tromey@cygnus.com
 Alexandre Oliva					aoliva@redhat.com
 Mark Salter					msalter@redhat.com
-Keith Seitz					keiths@cygnus.com
+Michael Chastain				chastain@redhat.com
+Orjan Friberg					orjanf@axis.com
+Jeff Holcomb					jeffh@redhat.com
 David Smith					dsmith@redhat.com
-Gary Thomas					gthomas@redhat.com
-Tom Tromey					tromey@cygnus.com
-
+Martin Hunt					hunt@redhat.com
+Matt Hiller					hiller@redhat.com
+Philip Blundell					philb@gnu.org
+Keith Seitz					keiths@cygnus.com
+Geoff Keating					geoffk@redhat.com
+Don Howard					dhoward@redhat.com
 
 
 			Past Maintainers
 
 Jimmy Guo (gdb.hp, tui)				guo@cup.hp.com
-Jeff Law (hppa)					law@cygnus.com
-Daniel Berlin (C++ support)			dan@cgsoftware.com
 
 
 Folks that have been caught up in a paper trail:
 
 Jim Kingdon					jkingdon@engr.sgi.com
+Paul Hilfinger					hilfingr@gnat.com (*)
 Chris G. Demetriou				cgd@sibyte.com
 
 --

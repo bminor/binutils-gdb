@@ -1072,7 +1072,7 @@ extern int asm_demangle;
 
 /* lookup a symbol table by source file name */
 
-extern struct symtab *lookup_symtab (const char *);
+extern struct symtab *lookup_symtab (char *);
 
 /* lookup a symbol by name (optional block, optional symtab) */
 
@@ -1122,7 +1122,7 @@ find_pc_sect_partial_function (CORE_ADDR, asection *,
 
 /* lookup partial symbol table by filename */
 
-extern struct partial_symtab *lookup_partial_symtab (const char *);
+extern struct partial_symtab *lookup_partial_symtab (char *);
 
 /* lookup partial symbol table by address */
 
@@ -1359,11 +1359,7 @@ extern void select_source_symtab (struct symtab *);
 
 extern char **make_symbol_completion_list (char *, char *);
 
-extern char **make_file_symbol_completion_list (char *, char *, char *);
-
 extern struct symbol **make_symbol_overload_list (struct symbol *);
-
-extern char **make_source_files_completion_list (char *, char *);
 
 /* symtab.c */
 

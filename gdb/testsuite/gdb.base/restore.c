@@ -14,12 +14,11 @@
    (defun caller (n) (format "caller%d" n))
    (defun local  (n) (format "l%d"  n))
    (defun local-sum (n)
-     (if (zerop n) (insert "0")
-       (let ((j 1))
-         (while (<= j n)
-           (insert (local j))
-           (if (< j n) (insert "+"))
-           (setq j (1+ j))))))
+     (let ((j 1))
+       (while (<= j n)
+         (insert (local j))
+	 (if (< j n) (insert "+"))
+         (setq j (1+ j)))))
    (defun local-chain (n previous first-end)
      (let ((j 1))
        (while (<= j n)
@@ -54,7 +53,8 @@
 	   (insert "{\n")
 	   (local-chain i "n" (callee i))
 	   (insert "  return ")
-	   (local-sum i)
+	   (if (<= i 0) (insert "n")
+	     (local-sum i))
 	   (insert ";\n")
 	   (insert "}\n\n")
 	   (setq i (1+ i))))
@@ -103,7 +103,7 @@ increment (int n)
 int
 callee0 (int n)
 {
-  return 0;
+  return n;
 }
 
 /* Returns n * 1 + 1 */

@@ -40,9 +40,6 @@
 
 switch (CUR_SYMBOL_TYPE)
   {
-    static struct complaint function_outside_compilation_unit = {
-      "function `%s' appears to be defined outside of all compilation units", 0, 0
-    };
     char *p;
     /*
      * Standard, external, non-debugger, symbols
@@ -579,15 +576,6 @@ switch (CUR_SYMBOL_TYPE)
 	continue;
 
       case 'f':
-        if (! pst)
-          {
-            int name_len = p - namestring;
-            char *name = xmalloc (name_len + 1);
-            memcpy (name, namestring, name_len);
-            name[name_len] = '\0';
-            complain (&function_outside_compilation_unit, name);
-            xfree (name);
-          }
 	CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 #ifdef DBXREAD_ONLY
 	/* Kludges for ELF/STABS with Sun ACC */
@@ -612,12 +600,10 @@ switch (CUR_SYMBOL_TYPE)
 	   the bounds created by N_SO symbols.  If that's the case
 	   use the address of this function as the low bound for
 	   the partial symbol table.  */
-	if (pst
-            && (textlow_not_set
-                || (CUR_SYMBOL_VALUE < pst->textlow
-                    && (CUR_SYMBOL_VALUE
-                        != ANOFFSET (objfile->section_offsets,
-                                     SECT_OFF_TEXT (objfile))))))
+	if (textlow_not_set
+	    || (pst && CUR_SYMBOL_VALUE < pst->textlow
+		&& CUR_SYMBOL_VALUE
+		!= ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile))))
 	  {
 	    pst->textlow = CUR_SYMBOL_VALUE;
 	    textlow_not_set = 0;
@@ -634,15 +620,6 @@ switch (CUR_SYMBOL_TYPE)
 	   are put into the global psymtab like one would expect.
 	   They're also in the minimal symbol table.  */
       case 'F':
-        if (! pst)
-          {
-            int name_len = p - namestring;
-            char *name = xmalloc (name_len + 1);
-            memcpy (name, namestring, name_len);
-            name[name_len] = '\0';
-            complain (&function_outside_compilation_unit, name);
-            xfree (name);
-          }
 	CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 #ifdef DBXREAD_ONLY
 	/* Kludges for ELF/STABS with Sun ACC */
@@ -670,12 +647,10 @@ switch (CUR_SYMBOL_TYPE)
 	   the bounds created by N_SO symbols.  If that's the case
 	   use the address of this function as the low bound for
 	   the partial symbol table.  */
-	if (pst
-            && (textlow_not_set
-                || (CUR_SYMBOL_VALUE < pst->textlow
-                    && (CUR_SYMBOL_VALUE
-                        != ANOFFSET (objfile->section_offsets,
-                                     SECT_OFF_TEXT (objfile))))))
+	if (textlow_not_set
+	    || (pst && CUR_SYMBOL_VALUE < pst->textlow
+		&& CUR_SYMBOL_VALUE
+		!= ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile))))
 	  {
 	    pst->textlow = CUR_SYMBOL_VALUE;
 	    textlow_not_set = 0;

@@ -4250,7 +4250,7 @@ initialize_hp_cxx_exception_support (void)
       if (!eh_notify_callback_addr)
 	{
 	  /* We can get here either if there is no plabel in the export list
-	     for the main image, or if something strange happened (?) */
+	     for the main image, or if something strange happened (??) */
 	  warning ("Couldn't find a plabel (indirect function label) for the exception callback.");
 	  warning ("GDB will not be able to intercept exception events.");
 	  return 0;
@@ -4594,10 +4594,7 @@ unwind_command (char *exp, int from_tty)
    putting the BPT instruction in and taking it out.
 
    Note that this implementation is potentially redundant now that
-   default_prepare_to_proceed() has been added.
-
-   FIXME This may not support switching threads after Ctrl-C
-   correctly. The default implementation does support this. */
+   default_prepare_to_proceed() has been added.  */
 int
 hppa_prepare_to_proceed (void)
 {
