@@ -424,13 +424,13 @@ do_scrub_chars (get, tostart, tolen)
      I don't want to make such a significant change to the assembler's
      memory usage.  */
 
-#define PUT(pch)			\
-  do					\
-    {					\
-      *to++ = (pch);			\
-      if (to >= toend)			\
-        goto tofull;			\
-    }					\
+#define PUT(pch)				\
+  do						\
+    {						\
+      *to++ = (pch);				\
+      if (to >= toend)				\
+	goto tofull;				\
+    }						\
   while (0)
 
   if (saved_input != NULL)

@@ -2398,7 +2398,7 @@ print_symbol_value_1 (file, sym)
       segT s = S_GET_SEGMENT (sym);
 
       if (s != undefined_section
-          && s != expr_section)
+	  && s != expr_section)
 	fprintf (file, " %lx", (long) S_GET_VALUE (sym));
     }
   else if (indent_level < max_indent_level

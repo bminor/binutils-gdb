@@ -1,3 +1,15 @@
+2002-05-18  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* app.c: Fix formatting.
+	* as.c: Likewise.
+	* ehopt.c: Likewise.
+	* expr.c: Likewise.
+	* input-file.c: Likewise.
+	* listing.c: Likewise.
+	* macro.h: Likewise.
+	* stabs.c: Likewise.
+	* symbols.c: Likewise.
+
 2002-05-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/obj-generic.c: Delete file.

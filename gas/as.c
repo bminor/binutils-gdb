@@ -500,8 +500,8 @@ parse_args (pargc, pargv)
 	  break;
 
 	case OPTION_TARGET_HELP:
-          md_show_usage (stdout);
-          exit (EXIT_SUCCESS);
+	  md_show_usage (stdout);
+	  exit (EXIT_SUCCESS);
 
 	case OPTION_HELP:
 	  show_usage (stdout);

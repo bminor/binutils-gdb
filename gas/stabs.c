@@ -247,7 +247,7 @@ s_stab_generic (what, stab_secname, stabstr_secname)
        format, probably DWARF.  */
     as_warn (_(".stab%c: description field '%x' too big, try a different debug format"),
 	     what, desc);
-    
+
   if (what == 's' || what == 'n')
     {
       if (*input_line_pointer != ',')
