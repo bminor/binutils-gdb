@@ -1,3 +1,8 @@
+2002-10-18  Adam Fedor  <fedor@gnu.org>
+
+	* gdb.base/default.exp: Update expected output to include 'ObjC'.
+	* gdb.base/help.exp: Likewise.
+
 2002-10-17  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.base/constvars.c (struct crass, struct crisp): New structs.
