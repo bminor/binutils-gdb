@@ -26,6 +26,8 @@
 #include "vax-tdep.h"
 #include "solib-svr4.h"
 
+#include "gdb_string.h"
+
 /* Support for shared libraries.  */
 
 /* Return non-zero if we are in a shared library trampoline code stub.  */

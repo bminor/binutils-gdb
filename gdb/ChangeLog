@@ -1,5 +1,8 @@
 2004-04-21  Andrew Cagney  <cagney@redhat.com>
 
+	* Makefile.in (vaxnbsd-tdep.o): Update dependencies.
+	* vaxnbsd-tdep.c: Include "gdb_string.h".
+
 	* symfile.c (symbol_file_add_from_memory): #if 0 function.
 	(add_symbol_file_from_memory_command): #if 0 function body, call
 	error instead.
