@@ -1364,7 +1364,17 @@ mips16_jump_reloc (abfd, reloc_entry, symbol, data, input_section,
     }
 
   /* FIXME.  */
-  abort ();
+  {
+    static boolean warned;
+
+    if (! warned)
+      (*_bfd_error_handler)
+	("Linking mips16 objects into %s format is not supported",
+	 bfd_get_target (input_section->output_section->owner));
+    warned = true;
+  }
+
+  return bfd_reloc_undefined;
 }
 
 /* Handle a mips16 GP relative reloc.  */
@@ -2946,7 +2956,12 @@ mips_elf_is_local_label_name (abfd, name)
      bfd *abfd;
      const char *name;
 {
-  return name[0] == '$';
+  if (name[0] == '$')
+    return true;
+
+  /* On Irix 6, the labels go back to starting with '.', so we accept
+     the generic ELF local label syntax as well.  */
+  return _bfd_elf_is_local_label_name (abfd, name);
 }
 
 /* MIPS ELF uses a special find_nearest_line routine in order the
@@ -5014,6 +5029,8 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			   == 0)))
 		  && (input_section->flags & SEC_ALLOC) != 0)
 		{
+		  boolean skip;
+
 		  /* When generating a shared object, these
 		     relocations are copied into the output file to be
 		     resolved at run time.  */
@@ -5023,16 +5040,35 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      BFD_ASSERT (sreloc != NULL);
 		    }
 
-		  outrel.r_offset = (rel->r_offset
-				     + input_section->output_section->vma
-				     + input_section->output_offset);
+		  skip = false;
+
+		  if (elf_section_data (input_section)->stab_info == NULL)
+		    outrel.r_offset = rel->r_offset;
+		  else
+		    {
+		      bfd_vma off;
+
+		      off = (_bfd_stab_section_offset
+			     (output_bfd, &elf_hash_table (info)->stab_info,
+			      input_section,
+			      &elf_section_data (input_section)->stab_info,
+			      rel->r_offset));
+		      if (off == (bfd_vma) -1)
+			skip = true;
+		      outrel.r_offset = off;
+		    }
+
+		  outrel.r_offset += (input_section->output_section->vma
+				      + input_section->output_offset);
 
 		  addend = bfd_get_32 (input_bfd, contents + rel->r_offset);
 
-		  if (h != NULL
-		      && (! info->symbolic
-			  || (h->elf_link_hash_flags
-			      & ELF_LINK_HASH_DEF_REGULAR) == 0))
+		  if (skip)
+		    memset (&outrel, 0, sizeof outrel);
+		  else if (h != NULL
+			   && (! info->symbolic
+			       || (h->elf_link_hash_flags
+				   & ELF_LINK_HASH_DEF_REGULAR) == 0))
 		    {
 		      BFD_ASSERT (h->dynindx != -1);
 		      outrel.r_info = ELF32_R_INFO (h->dynindx, R_MIPS_REL32);
@@ -5072,14 +5108,16 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      addend += relocation;
 		    }
 
-		  bfd_put_32 (output_bfd, addend, contents + rel->r_offset);
+		  if (! skip)
+		    bfd_put_32 (output_bfd, addend, contents + rel->r_offset);
+
 		  bfd_elf32_swap_reloc_out (output_bfd, &outrel,
 					     (((Elf32_External_Rel *)
 					       sreloc->contents)
 					      + sreloc->reloc_count));
 		  ++sreloc->reloc_count;
 
-		  if (SGI_COMPAT (output_bfd))
+		  if (! skip && SGI_COMPAT (output_bfd))
 		    {
 		      if (scpt == NULL)
 			continue;
