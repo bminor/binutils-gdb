@@ -1,3 +1,8 @@
+Tue Jul 13 10:04:16 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mips-dis.c (print_insn_arg, _print_insn_mips): Made pointer to
+	argument string const char * to correspond to opcode/mips.h.
+
 Tue Jul  6 15:18:37 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* mips-dis.c: Updated to account for name changes in new version
