@@ -102,7 +102,7 @@ extern const struct mn10300_operand mn10300_operands[];
 
 #define MN10300_OPERAND_MEMADDR 0x2000
 
-#define MN10300_OPERAND_RELAX 0x3000
+#define MN10300_OPERAND_RELAX 0x4000
 
 /* Opcode Formats.  */
 #define FMT_S0 1
