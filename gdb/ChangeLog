@@ -1,5 +1,9 @@
 Sun Feb  6 06:55:15 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* corelow.c (solib_add_stub, core_open): Pass address of from_tty
+	rather than trying to shove an int into a pointer and back out
+	again.  This avoids compiler warnings.
+
 	* defs.h (alloca): Declare as void *, not char *, on hpux.
 	Don't prototype it, just declare the return type.
 

@@ -70,13 +70,14 @@ core_close (quitting)
 }
 
 #ifdef SOLIB_ADD
-/* Stub function for catch_errors around shared library hacking. */
+/* Stub function for catch_errors around shared library hacking.  FROM_TTYP
+   is really an int * which points to from_tty.  */
 
 static int 
-solib_add_stub (from_tty)
-     char *from_tty;
+solib_add_stub (from_ttyp)
+     char *from_ttyp;
 {
-    SOLIB_ADD (NULL, (int)from_tty, &core_ops);
+    SOLIB_ADD (NULL, *(int *)from_ttyp, &core_ops);
     return 0;
 }
 #endif /* SOLIB_ADD */
@@ -194,7 +195,7 @@ core_open (filename, from_tty)
 
     /* Add symbols and section mappings for any shared libraries */
 #ifdef SOLIB_ADD
-    catch_errors (solib_add_stub, (char *)from_tty, (char *)0,
+    catch_errors (solib_add_stub, &from_tty, (char *)0,
 		  RETURN_MASK_ALL);
 #endif
 
