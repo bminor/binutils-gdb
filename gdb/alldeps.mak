@@ -1,7 +1,7 @@
 # Start of "alldeps.mak" definitions
 ALLDEPFILES = $(ALLDEPFILES_MAINDIR) $(ALLDEPFILES_SUBDIR)
 ALLDEPFILES_MAINDIR=\
-a68v-xdep.c\
+a68v-nat.c\
 altos-xdep.c\
 am29k-pinsn.c\
 am29k-tdep.c\
@@ -26,6 +26,7 @@ hppa-pinsn.c\
 hppab-core.c\
 hppab-nat.c\
 hppab-tdep.c\
+hppah-nat.c\
 hppah-tdep.c\
 i386-pinsn.c\
 i386-tdep.c\
@@ -34,6 +35,8 @@ i386mach-nat.c\
 i386v-nat.c\
 i386v4-nat.c\
 i387-tdep.c\
+i860-pinsn.c\
+i860-tdep.c\
 i960-pinsn.c\
 i960-tdep.c\
 infptrace.c\
@@ -61,6 +64,7 @@ remote-hms.c\
 remote-mm.c\
 remote-nindy.c\
 remote-st2000.c\
+remote-udi.c\
 remote-vx.c\
 rs6000-nat.c\
 rs6000-pinsn.c\
@@ -85,13 +89,17 @@ xcoffsolib.c
 
 ALLDEPFILES_SUBDIR=\
 nindy-share/Onindy.c\
+29k-share/dfe/mini2udi.c\
 nindy-share/nindy.c\
 nindy-share/ttybreak.c\
 nindy-share/ttyflush.c\
+29k-share/udi/udip2soc.c\
+29k-share/udi/udr.c\
 vx-share/xdr_ld.c\
 vx-share/xdr_ptrace.c\
 vx-share/xdr_rdb.c\
-vx-share/xdr_regs.c
+vx-share/xdr_regs.c\
+29k-share/dfe/yank.c
 
 ALLPARAM=\
 tm-29k.h\
@@ -129,6 +137,7 @@ tm-rs6000.h\
 tm-spc-noun.h\
 tm-spc-un.h\
 tm-st2000.h\
+tm-stratus.h\
 tm-sun2.h\
 tm-sun2os4.h\
 tm-sun3.h\
@@ -177,6 +186,7 @@ xm-pn.h\
 xm-pyr.h\
 xm-rs6000.h\
 xm-rtbsd.h\
+xm-stratus.h\
 xm-sun2.h\
 xm-sun3.h\
 xm-sun386.h\
@@ -194,6 +204,7 @@ ALLCONFIG=\
 ./config/3b1.mh\
 ./config/3b1.mt\
 ./config/a29k-kern.mt\
+./config/a29k-udi.mt\
 ./config/a29k.mt\
 ./config/altos.mh\
 ./config/altos.mt\
@@ -270,6 +281,8 @@ ALLCONFIG=\
 ./config/sparc-noun.mt\
 ./config/sparc-un.mt\
 ./config/st2000.mt\
+./config/stratus.mh\
+./config/stratus.mt\
 ./config/sun2os3.mh\
 ./config/sun2os3.mt\
 ./config/sun2os4.mh\
