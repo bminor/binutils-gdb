@@ -1,3 +1,13 @@
+Sun Apr 26 15:31:55 1998  Tom Tromey  <tromey@creche>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Sun Apr 26 15:19:45 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* acconfig.h: New file.
+	* configure.in: Reverted change of Apr 24; use sinclude again.
+
 Fri Apr 24 14:16:40 1998  Tom Tromey  <tromey@creche>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

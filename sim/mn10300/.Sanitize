@@ -32,6 +32,7 @@ Things-to-keep:
 
 ChangeLog
 Makefile.in
+acconfig.h
 config.in
 configure
 configure.in

@@ -35,6 +35,7 @@ ChangeLog
 Makefile.in
 README
 TODO
+acconfig.h
 arch.c
 arch.h
 config.in

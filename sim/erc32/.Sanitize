@@ -29,6 +29,7 @@ NEWS
 README.erc32
 README.gdb
 README.sis
+acconfig.h
 config.in
 configure
 configure.in

@@ -29,6 +29,7 @@ ChangeLog
 COPYING
 Makefile.in
 README.Cygnus
+acconfig.h
 armcopro.c
 armdefs.h
 armemu.c

@@ -64,6 +64,7 @@ Things-to-keep:
 ChangeLog
 Makefile.in
 README.Cygnus
+acconfig.h
 config.in
 configure
 configure.in

@@ -25,6 +25,7 @@ Things-to-keep:
 
 ChangeLog
 Makefile.in
+acconfig.h
 alu.h
 config.in
 configure
