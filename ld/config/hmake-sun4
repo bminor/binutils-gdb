@@ -1,6 +1,6 @@
 HDEFINES=-DHOST_SYS=SUN4_SYS  
 YACC=yacc -tvd
-CC=gcc -Wall -ansi
+#CC=gcc -Wall -ansi
 #stuff for self hosting
 HOSTING_CRT0=/lib/crt0.o
 HOSTING_LIBS=/limbo/latest/=sun4/lib/gcc/sparc/1.92/gnulib  -lc
