@@ -1,3 +1,9 @@
+2003-08-20  Michael Chastain  <mec@shout.net>
+
+	* defs.h (ENUM_BITFIELD): New macro.
+	* symtab.h (ENUM_BITFIELD): Use it.
+	(BYTE_BITFIELD): Remove old macro, which was already disabled.
+
 2003-08-19  Shrinivas Atre <shrinivasa@kpitcummins.com>
 
 	* MAINTAINERS (write after approval): Add myself.
