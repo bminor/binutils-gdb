@@ -503,7 +503,7 @@ styp_to_sec_flags (abfd, hdr, name)
 	 section VMA and the file offset match.  If we don't know
 	 COFF_PAGE_SIZE, we can't ensure the correct correspondence,
 	 and demand page loading of the file will fail.  */
-#ifdef COFF_PAGE_SIZE
+#if defined (COFF_PAGE_SIZE) && !defined (COFF_ALIGN_IN_S_FLAGS)
       sec_flags |= SEC_DEBUGGING;
 #endif
     }
@@ -1315,7 +1315,7 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
     }
 #endif
 
-#ifdef  ARM
+#if defined  ARM && ! defined COFF_WITH_PE
   /* Set the flags field from the COFF header read in */
   if (! coff_arm_bfd_set_private_flags (abfd, internal_f->f_flags))
     coff->flags = 0;
@@ -1982,8 +1982,19 @@ coff_set_flags (abfd, magicp, flagsp)
     case bfd_arch_arm:
       * magicp = ARMMAGIC;
       * flagsp = 0;
-      if (APCS_SET (abfd) && APCS_FLAG (abfd))
-	* flagsp = F_APCS26;
+      if (APCS_SET (abfd))
+	{
+	  if (APCS_26_FLAG (abfd))
+	    * flagsp |= F_APCS26;
+	  
+	  if (APCS_FLOAT_FLAG (abfd))
+	    * flagsp |= F_APCS_FLOAT;
+	  
+	  if (PIC_FLAG (abfd))
+	    * flagsp |= F_PIC;
+	}
+      if (INTERWORK_SET (abfd) && INTERWORK_FLAG (abfd))
+	* flagsp |= F_INTERWORK;
       switch (bfd_get_mach (abfd))
 	{
 	case bfd_mach_arm_2:  * flagsp |= F_ARM_2;  break;

@@ -1,3 +1,13 @@
+Wed Nov 26 09:30:37 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* coffcode.h (coff_mkobject_hook): Only set private flags for non
+	PE ARM ports.
+
+Tue Nov 25 15:33:23 1997  Richard Henderson  <rth@cygnus.com>
+
+	* binary.c (binary_set_section_contents): Also ignore NEVER_LOAD
+	sections.
+
 Tue Nov 25 10:55:36 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-arm.c (coff_arm_bfd_merge_private_bfd_data): Do not
