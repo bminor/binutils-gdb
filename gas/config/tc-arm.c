@@ -115,23 +115,21 @@ enum arm_float_abi
 #endif
 #endif
 
-#ifdef TE_LINUX
-#define FPU_DEFAULT FPU_ARCH_FPA
-#endif
-
-#ifdef TE_NetBSD
-#ifdef OBJ_ELF
-#define FPU_DEFAULT FPU_ARCH_VFP	/* Soft-float, but VFP order.  */
-#else
-/* Legacy a.out format.  */
-#define FPU_DEFAULT FPU_ARCH_FPA	/* Soft-float, but FPA order.  */
-#endif
-#endif
-
-/* For backwards compatibility we default to the FPA.  */
 #ifndef FPU_DEFAULT
-#define FPU_DEFAULT FPU_ARCH_FPA
-#endif
+# ifdef TE_LINUX
+#  define FPU_DEFAULT FPU_ARCH_FPA
+# elif defined (TE_NetBSD)
+#  ifdef OBJ_ELF
+#   define FPU_DEFAULT FPU_ARCH_VFP	/* Soft-float, but VFP order.  */
+#  else
+    /* Legacy a.out format.  */
+#   define FPU_DEFAULT FPU_ARCH_FPA	/* Soft-float, but FPA order.  */
+#  endif
+# else
+   /* For backwards compatibility, default to FPA.  */
+#  define FPU_DEFAULT FPU_ARCH_FPA
+# endif
+#endif /* ifndef FPU_DEFAULT */
 
 #define streq(a, b)           (strcmp (a, b) == 0)
 #define skip_whitespace(str)  while (*(str) == ' ') ++(str)

@@ -216,6 +216,7 @@ changequote([,])dnl
       arm-*-kaos*)			fmt=elf ;;
       arm*-*-conix*)			fmt=elf ;;
       arm-*-linux*aout*)		fmt=aout em=linux ;;
+      arm*-*-linux-gnueabi*)		fmt=elf  em=armlinuxeabi ;;	 
       arm*-*-linux-gnu*)		fmt=elf  em=linux ;;
       arm*-*-uclinux*)			fmt=elf  em=linux ;;
       arm-*-netbsdelf*)                 fmt=elf  em=nbsd ;;

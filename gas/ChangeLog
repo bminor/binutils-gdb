@@ -1,3 +1,14 @@
+2004-12-01  Mark Mitchell  <mark@codesourcery.com>
+
+	* Makefile.am (TARG_ENV_HFILES): Add te-armlinuxeabi.h.
+	* configure.in: Use it for arm*-*-linux-gnueabi*.
+	* config/tc-arm.c: Allow emulation file to set FPU_DEFAULT.
+	* config/te-armlinuxeabi.h: New file.
+	* Makefile.in: Regenerated.
+	* aclocal.m4: Likewise.
+	* configure: Likewise.
+	* doc/Makefile.in: Regenerated. 
+
 2004-12-02  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (xtensa_switch_section_emit_state): Use subseg_set.
