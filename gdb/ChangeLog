@@ -1,3 +1,7 @@
+Fri Dec 15 22:58:59 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* serial.c (serial_printf): Call xvasprintf instead of vasprintf.
+
 2000-12-14  Matthew Green  <mrg@eterna.com.au>
 
 	* solib-svr4.c (solib_break_names): Add NetBSD's `_rtld_debug_state'.
