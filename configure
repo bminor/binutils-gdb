@@ -85,7 +85,36 @@ version="$Revision$"
 x11=default
 
 ### we might need to use some other shell than /bin/sh for running subshells
-#
+
+### If we are on Windows, search for the shell.  This will permit people
+### to not have /bin/sh, but to be able to see /SOME/PATH/sh configure
+### without also having to set CONFIG_SHELL.  This code will work when
+### using bash, which sets OSTYPE.
+case "${OSTYPE}" in
+*win32*)
+  if [ x${CONFIG_SHELL} = x ]; then
+    if [ ! -f /bin/sh ]; then
+      if [ x${SHELL} != x ] && [ -f ${SHELL} ]; then
+	CONFIG_SHELL=${SHELL}
+      else
+	for prog in sh sh.exe bash bash.exe; do
+	  IFS="${IFS=	}"; save_ifs="$IFS"; IFS="${IFS}:"
+	  for dir in $PATH; do
+	    test -z "$dir" && dir=.
+	    if test -f $dir/$prog; then
+	      CONFIG_SHELL=$dir/$prog
+	      break
+	    fi
+	  done
+	  IFS="$save_ifs"
+	  test -n "${CONFIG_SHELL}" && break
+	done
+      fi
+    fi
+  fi
+  ;;
+esac
+
 config_shell=${CONFIG_SHELL-/bin/sh}
 
 NO_EDIT="This file was generated automatically by configure.  Do not edit."
@@ -791,7 +820,7 @@ t loop
 	break
       fi
       if test -f $dir/bison; then
-	BISON=bison
+	BISON="bison -y"
 	break
       fi
       if test -f $dir/yacc; then
@@ -800,7 +829,9 @@ t loop
       fi
     done
     IFS="$save_ifs"
-    BISON=${BISON-bison}
+    if [ -z "${BISON}" ]; then
+      BISON="bison -y"
+    fi
   fi
 
   if [ -z "${LEX}" ]; then
@@ -1158,7 +1189,7 @@ EOF
 			t loop4
 			s%^CXXFLAGS[ 	]*=.*$%CXXFLAGS = ${CXXFLAGS}%
 			}" \
-		    -e "s:^SHELL[	 ]*=.*$:SHELL = ${config_shell}:" \
+		    -e "s|^SHELL[	 ]*=.*$|SHELL = ${config_shell}|" \
 		    -e "s:^GDB_TK[	 ]*=.*$:GDB_TK = ${GDB_TK}:" \
                     -e "s|^srcdir[ 	]*=.*$|srcdir = ${makesrcdir}|" \
                     -e "s///" \
