@@ -105,6 +105,7 @@ extern void ia64_md_do_align PARAMS ((int, const char *, int, int));
 extern void ia64_handle_align PARAMS ((fragS *f));
 extern void ia64_after_parse_args PARAMS ((void));
 extern void ia64_dwarf2_emit_offset PARAMS ((symbolS *, unsigned int));
+extern void ia64_check_label PARAMS ((symbolS *));
 
 #define md_end()       			ia64_end_of_source ()
 #define md_start_line_hook()		ia64_start_line ()
@@ -137,6 +138,7 @@ extern void ia64_dwarf2_emit_offset PARAMS ((symbolS *, unsigned int));
 #define md_elf_section_type(str,len)	ia64_elf_section_type (str, len)
 #define md_after_parse_args()		ia64_after_parse_args ()
 #define TC_DWARF2_EMIT_OFFSET		ia64_dwarf2_emit_offset
+#define tc_check_label(l)		ia64_check_label (l)
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE  (15 + 16)
 

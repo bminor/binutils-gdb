@@ -710,6 +710,9 @@ read_a_source_file (name)
 		  line_label = colon (s);	/* User-defined label.  */
 		  /* Put ':' back for error messages' sake.  */
 		  *input_line_pointer++ = ':';
+#ifdef tc_check_label
+		  tc_check_label (line_label);
+#endif
 		  /* Input_line_pointer->after ':'.  */
 		  SKIP_WHITESPACE ();
 		}

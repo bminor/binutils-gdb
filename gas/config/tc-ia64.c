@@ -10721,3 +10721,14 @@ ia64_elf_section_change_hook  (void)
 {
   dot_byteorder (-1);
 }
+
+/* Check if a label should be made global.  */
+void
+ia64_check_label (symbolS *label)
+{
+  if (*input_line_pointer == ':')
+    {
+      S_SET_EXTERNAL (label);
+      input_line_pointer++;
+    }
+}

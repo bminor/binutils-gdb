@@ -1,3 +1,11 @@
+2003-05-01  H.J. Lu <hjl@gnu.org>
+
+	* config/tc-ia64.c (ia64_check_label): New.
+	* config/tc-ia64.h (tc_check_label): New.
+
+	* read.c (read_a_source_file): Call tc_check_label after
+	creating a user-defined label if defined.
+
 2003-05-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (md_show_usage): Mention -a32, -a64, -l, -le, -b,
