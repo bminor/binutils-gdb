@@ -50,10 +50,27 @@ const struct sparc_gregset sparc32_sol2_gregset =
 };
 
 
+/* The Solaris signal trampolines reside in libc.  For normal signals,
+   the function `sigacthandler' is used.  This signal trampoline will
+   call the signal handler using the System V calling convention,
+   where the third argument is a pointer to an instance of
+   `ucontext_t', which has a member `uc_mcontext' that contains the
+   saved registers.  Incidentally, the kernel passes the `ucontext_t'
+   pointer as the third argument of the signal trampoline too, and
+   `sigacthandler' simply passes it on. However, if you link your
+   program with "-L/usr/ucblib -R/usr/ucblib -lucb", the function
+   `ucbsigvechandler' will be used, which invokes the using the BSD
+   convention, where the third argument is a pointer to an instance of
+   `struct sigcontext'.  It is the `ucbsigvechandler' function that
+   converts the `ucontext_t' to a `sigcontext', and back.  Unless the
+   signal handler modifies the `struct sigcontext' we can safely
+   ignore this.  */
+
 static int
 sparc_sol2_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
-  return (name && strcmp (name, "sigacthandler") == 0);
+  return (name && (strcmp (name, "sigacthandler") == 0
+		   || strcmp (name, "ucbsigvechandler") == 0));
 }
 
 static struct sparc_frame_cache *
@@ -67,21 +84,24 @@ sparc32_sol2_sigtramp_frame_cache (struct frame_info *next_frame,
   if (*this_cache)
     return *this_cache;
 
-  cache = sparc32_frame_cache (next_frame, this_cache);
+  cache = sparc_frame_cache (next_frame, this_cache);
   gdb_assert (cache == *this_cache);
 
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
+  /* The third argument is a pointer to an instance of `ucontext_t',
+     which has a member `uc_mcontext' that contains the saved
+     registers.  */
   regnum = (cache->frameless_p ? SPARC_O2_REGNUM : SPARC_I2_REGNUM);
   mcontext_addr = frame_unwind_register_unsigned (next_frame, regnum) + 40;
 
-  cache->saved_regs[SPARC32_PSR_REGNUM].addr = mcontext_addr + 0;
-  cache->saved_regs[SPARC32_PC_REGNUM].addr = mcontext_addr + 4;
-  cache->saved_regs[SPARC32_NPC_REGNUM].addr = mcontext_addr + 8;
-  cache->saved_regs[SPARC32_Y_REGNUM].addr = mcontext_addr + 12;
+  cache->saved_regs[SPARC32_PSR_REGNUM].addr = mcontext_addr + 0 * 4;
+  cache->saved_regs[SPARC32_PC_REGNUM].addr = mcontext_addr + 1 * 4;
+  cache->saved_regs[SPARC32_NPC_REGNUM].addr = mcontext_addr + 2 * 4;
+  cache->saved_regs[SPARC32_Y_REGNUM].addr = mcontext_addr + 3 * 4;
 
   /* Since %g0 is always zero, keep the identity encoding.  */
-  for (regnum = SPARC_G1_REGNUM, addr = mcontext_addr + 16;
+  for (regnum = SPARC_G1_REGNUM, addr = mcontext_addr + 4 * 4;
        regnum <= SPARC_O7_REGNUM; regnum++, addr += 4)
     cache->saved_regs[regnum].addr = addr;
 
@@ -93,7 +113,9 @@ sparc32_sol2_sigtramp_frame_cache (struct frame_info *next_frame,
     }
   else
     {
-      for (regnum = SPARC_L0_REGNUM, addr = cache->base;
+      addr = cache->saved_regs[SPARC_SP_REGNUM].addr;
+      addr = get_frame_memory_unsigned (next_frame, addr, 4);
+      for (regnum = SPARC_L0_REGNUM;
 	   regnum <= SPARC_I7_REGNUM; regnum++, addr += 4)
 	cache->saved_regs[regnum].addr = addr;
     }
