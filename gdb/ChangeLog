@@ -1,3 +1,8 @@
+2003-06-10  Jim Blandy  <jimb@redhat.com>
+
+	* ppc-linux-nat.c (ppc_register_u_addr): Correctly compute u-area
+	register offsets for both the 32- and 64-bit interfaces.
+
 2003-06-06  Jim Blandy  <jimb@redhat.com>
 
 	* ppc-linux-tdep.c (ppc64_call_dummy_address): New function.
