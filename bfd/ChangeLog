@@ -1,3 +1,7 @@
+2002-08-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-i370.c: Move reloc enum to include/elf/i370.h.
+
 2002-08-15  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (elf_cris_discard_excess_program_dynamics): Add
@@ -108,7 +112,7 @@
 
 2002-08-08  H.J. Lu <hjl@gnu.org>
 
-	* elflink.h (elf_add_default_symbol): Don't warn a defintion
+	* elflink.h (elf_add_default_symbol): Don't warn if a definition
 	overrides an indirect versioned symbol.
 
 2002-08-08  Jakub Jelinek  <jakub@redhat.com>
@@ -1924,7 +1928,7 @@
 
 2002-05-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
-	* bfd/bfd.c (bfd_get_arch_size): Remove bfd_set_error call for
+	* bfd.c (bfd_get_arch_size): Remove bfd_set_error call for
 	non-ELF targets.
 
 2002-05-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
@@ -2370,7 +2374,7 @@
 
 2002-04-30  Mark Mitchell  <mark@codesourcery.com>
 
-	* bfd/config.bfd: Add support for powerpc-*-windiss.
+	* config.bfd: Add support for powerpc-*-windiss.
 
 2002-04-30  Tom Rix  <trix@redhat.com>
 
@@ -4020,7 +4024,7 @@
 
 2002-01-25  Steve Ellcey <sje@cup.hp.com>
 
-	* bfd/elfxx-ia64.c: Reset AIX vector function overrides for HP-UX.
+	* elfxx-ia64.c: Reset AIX vector function overrides for HP-UX.
 
 2002-01-25  Philipp Thomas  <pthomas@suse.de>
 
@@ -4054,8 +4058,7 @@
 
 2002-01-23  Steve Ellcey <sje@cup.hp.com>
 
-	* bfd/targets.c (bfd_elf32_ia64_hpux_big_vec): Add to
-	DEFAULT_VECTOR.
+	* targets.c (bfd_elf32_ia64_hpux_big_vec): Add to DEFAULT_VECTOR.
 	(bfd_elf64_ia64_hpux_big_vec): Ditto.
 	(bfd_elf32_h8300_vec): Ditto.
 

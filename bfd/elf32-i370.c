@@ -34,30 +34,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf-bfd.h"
 #include "elf/i370.h"
 
-/* i370 relocations */
-/* Note that there is really just one relocation that we currently
- * support (and only one that we seem to need, at the moment), and
- * that is the 31-bit address relocation.  Note that the 370/390
- * only supports a 31-bit (2GB) address space.
- */
-enum i370_reloc_type
-{
-  R_I370_NONE		=   0,
-  R_I370_ADDR31		=   1,
-  R_I370_ADDR32		=   2,
-  R_I370_ADDR16		=   3,
-  R_I370_REL31		=   4,
-  R_I370_REL32		=   5,
-  R_I370_ADDR12		=   6,
-  R_I370_REL12		=   7,
-  R_I370_ADDR8		=   8,
-  R_I370_REL8		=   9,
-  R_I370_COPY		=  10,
-  R_I370_RELATIVE	=  11,
-
-  R_I370_max
-};
-
 static reloc_howto_type *i370_elf_howto_table[ (int)R_I370_max ];
 
 static reloc_howto_type i370_elf_howto_raw[] =
