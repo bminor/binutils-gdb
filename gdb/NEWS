@@ -5,9 +5,9 @@
 
 * ``gdbserver'' now supports multithreaded applications on some targets
 
-Support for multithreaded applications using LinuxThreads has been added
-for arm*-*-linux*, i[3456]86-*-linux*, mips*-*-linux*, powerpc*-*-linux*,
-and sh*-*-linux*.
+Support for multithreaded applications using libthread_db has been
+added for arm*-*-linux*-gnu*, i[3456]86-*-linux*-gnu*,
+mips*-*-linux*-gnu*, powerpc*-*-linux*-gnu*, and sh*-*-linux*-gnu*.
 
 * GDB now supports C/C++ preprocessor macros.
 
@@ -15,21 +15,16 @@ GDB now expands preprocessor macro invocations in C/C++ expressions,
 and provides various commands for showing macro definitions and how
 they expand.
 
+The new command `macro expand EXPRESSION' expands any macro
+invocations in expression, and shows the result.
+
+The new command `show macro MACRO-NAME' shows the definition of the
+macro named MACRO-NAME, and where it was defined.
+
 Most compilers don't include information about macros in the debugging
 information by default.  In GCC 3.1, for example, you need to compile
 your program with the options `-gdwarf-2 -g3'.  If the macro
 information is present in the executable, GDB will read it.
-
-Here are the new commands for working with macros:
-
-** macro expand EXPRESSION
-
-Expand any macro invocations in expression, and show the result.
-
-** show macro MACRO-NAME
-
-Show the definition of the macro named MACRO-NAME, and where it was
-defined.
 
 * Multi-arched targets.
 

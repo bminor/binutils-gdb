@@ -1,5 +1,9 @@
 2002-08-03  Andrew Cagney  <ac131313@redhat.com>
 
+	* NEWS: Cleanup.  Use *-linux*-gnu*.  Only use `*' for headings.
+
+2002-08-03  Andrew Cagney  <ac131313@redhat.com>
+
 	* Makefile.in (gdbtk-bp.o): Update dependencies.
 	(gdbtk-register.o): Ditto.
 	(gdbtk-varobj.o): Ditto.
