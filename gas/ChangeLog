@@ -2,6 +2,9 @@ start-sanitize-sky
 Thu Apr 16 11:48:18 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/tc-dvp.c (unpackloc_sym): Delete.  All uses deleted.
+	(vif_insn_type): New function.
+	(md_apply_fix3): Don't validate user specified length if unpack insn
+	and wl > cl.
 
 end-sanitize-sky
 Wed Apr 15 15:17:27 1998  Richard Henderson  <rth@cygnus.com>
