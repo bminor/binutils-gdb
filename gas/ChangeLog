@@ -7,6 +7,9 @@ Tue Aug 26 09:46:22 1997  Nick Clifton  <nickc@cygnus.com>
 end-sanitize-v850
 Tue Aug 26 12:23:25 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* expr.c (integer_constant): If BFD64, don't make a bignum if the
+	number will fit in 64 bits.
+
 	* config/tc-alpha.c (load_expression): Check explicitly for O_big,
 	rather than calling abort.
 
