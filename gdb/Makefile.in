@@ -1165,7 +1165,6 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	sh-tdep.c solib.c sparc-nat.c \
 	sparc-tdep.c sparcl-tdep.c sun3-nat.c sun386-nat.c \
 	symm-tdep.c symm-nat.c \
-	ultra3-nat.c ultra3-xdep.c \
 	vax-tdep.c \
 	vx-share/xdr_ld.c vx-share/xdr_ptrace.c vx-share/xdr_rdb.c \
 	win32-nat.c \
@@ -1982,9 +1981,9 @@ typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \
 	$(value_h) gdb_string.h
 
-ultra3-nat.o: ultra3-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
+# OBSOLETE ultra3-nat.o: ultra3-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 
-ultra3-xdep.o: ultra3-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
+# OBSOLETE ultra3-xdep.o: ultra3-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 # OBSOLETE umax-xdep.o: umax-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 

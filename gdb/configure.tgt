@@ -38,9 +38,9 @@ a29k-*-aout*)		gdb_target=a29k ;;
 a29k-*-coff*)		gdb_target=a29k ;;
 a29k-*-elf*)		gdb_target=a29k ;;
 a29k-*-ebmon*)		gdb_target=a29k ;;
-a29k-*-kern*)		gdb_target=a29k-kern ;;
+# OBSOLETE a29k-*-kern*)		gdb_target=a29k-kern ;;
 a29k-*-none*)		gdb_target=a29k ;;
-a29k-*-sym1*)		gdb_target=ultra3 ;;
+# OBSOLETE a29k-*-sym1*)		gdb_target=ultra3 ;;
 a29k-*-udi*)		gdb_target=a29k-udi ;;
 a29k-*-vxworks*)        gdb_target=vx29k ;;
 

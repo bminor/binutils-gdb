@@ -1,3 +1,22 @@
+2001-04-04  Andrew Cagney  <ac131313@redhat.com>
+
+	Obsolete a29k-*-* host and a29k-*-sym1* and a29k-*-kern* targets.
+	* configure.tgt (a29k-*-sym1*, a29k-*-kern*): Obsolete.
+	* configure.host (a29k-*-*): Obsolete.
+	* Makefile.in (ALLDEPFILES): Remove ultra3-nat.c and
+	ultra3-xdep.c.
+	(ultra3-nat.o, ultra3-xdep.o): Obsolete.
+	* config/a29k/tm-ultra3.h: Obsolete.
+	* config/a29k/ultra3.mt: Obsolete.
+	* config/a29k/ultra3.mh: Obsolete.
+	* config/a29k/nm-ultra3.h: Obsolete.
+	* config/a29k/xm-ultra3.h: Obsolete.
+	* ultra3-xdep.c: Obsolete.
+	* ultra3-nat.c: Obsolete.
+	* config/a29k/a29k-kern.mt: Obsolete.
+	* NEWS: Update.
+	* TODO: Update.
+
 Wed Apr  4 21:48:42 2001  Christopher Faylor <cgf@cygnus.com>
 
 	* main.c: Remove windows.h use.

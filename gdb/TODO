@@ -193,8 +193,9 @@ Steps:
 		  m68*-*bug-*		m68k	 -	  (monitor)
 		  m68*-monitor-*	m68k	 -	  (monitor)
 		  m68*-est-*		m68k	 -	  (monitor)
-		  a29k-*-*		a29k	 ultra3	  -
-		  a29k-*-sym1*		a29k	 -	  ultra3
+		  a29k-*-*		a29k	 ultra3	  -          yes
+		  a29k-*-sym1*		a29k	 -	  ultra3     yes
+		  a29k-*-kern*		a29k	 -	  a29k-kern  yes
 		  powerpcle-*-solaris*	powerpc	 solaris  solaris
 		  powerpcle-*-cygwin*	powerpc	 cygwin	  cygwin
 		  powerpc-*-netware*	powerpc  -	  ppc-nw
@@ -383,6 +384,12 @@ dependency lists.  It isn't done in a consistent way.
 
 The following are more general cleanups and fixes.  They are not tied
 to any specific release.
+
+--
+
+Investigate changing --target=a29k-amd-udi to a29k-*-coff* and
+rationalize *.mt files.  The got-ya is in remote-eb.c - it has its own
+custom tty manipulation - it should be using the serial object.
 
 --
 

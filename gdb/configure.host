@@ -26,7 +26,7 @@ esac
 
 case "${host}" in
 
-a29k-*-*)		gdb_host=ultra3 ;;
+# OBSOLETE a29k-*-*)		gdb_host=ultra3 ;;
 
 alpha*-*-osf1*)		gdb_host=alpha-osf1 ;;
 alpha*-*-osf2*)		gdb_host=alpha-osf2 ;;

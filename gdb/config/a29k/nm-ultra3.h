@@ -1,28 +1,28 @@
-/* Host definitions for GDB running on an a29k NYU Ultracomputer
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993
-   Free Software Foundation, Inc.
-   Contributed by David Wood (wood@lab.ultra.nyu.edu).
-
-   This file is part of GDB.
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
-
-/* If we ever *do* end up using the standard fetch_inferior_registers,
-   this is the right value for U_REGS_OFFSET.  */
-#define	U_REGS_OFFSET	0
-
-/* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
-#define FETCH_INFERIOR_REGISTERS
+/* OBSOLETE /* Host definitions for GDB running on an a29k NYU Ultracomputer */
+/* OBSOLETE    Copyright 1986, 1987, 1989, 1991, 1992, 1993 */
+/* OBSOLETE    Free Software Foundation, Inc. */
+/* OBSOLETE    Contributed by David Wood (wood@lab.ultra.nyu.edu). */
+/* OBSOLETE  */
+/* OBSOLETE    This file is part of GDB. */
+/* OBSOLETE  */
+/* OBSOLETE    This program is free software; you can redistribute it and/or modify */
+/* OBSOLETE    it under the terms of the GNU General Public License as published by */
+/* OBSOLETE    the Free Software Foundation; either version 2 of the License, or */
+/* OBSOLETE    (at your option) any later version. */
+/* OBSOLETE  */
+/* OBSOLETE    This program is distributed in the hope that it will be useful, */
+/* OBSOLETE    but WITHOUT ANY WARRANTY; without even the implied warranty of */
+/* OBSOLETE    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
+/* OBSOLETE    GNU General Public License for more details. */
+/* OBSOLETE  */
+/* OBSOLETE    You should have received a copy of the GNU General Public License */
+/* OBSOLETE    along with this program; if not, write to the Free Software */
+/* OBSOLETE    Foundation, Inc., 59 Temple Place - Suite 330, */
+/* OBSOLETE    Boston, MA 02111-1307, USA.  */ */
+/* OBSOLETE  */
+/* OBSOLETE /* If we ever *do* end up using the standard fetch_inferior_registers, */
+/* OBSOLETE    this is the right value for U_REGS_OFFSET.  */ */
+/* OBSOLETE #define	U_REGS_OFFSET	0 */
+/* OBSOLETE  */
+/* OBSOLETE /* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */ */
+/* OBSOLETE #define FETCH_INFERIOR_REGISTERS */
