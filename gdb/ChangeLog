@@ -1,3 +1,10 @@
+2003-04-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* solib-svr4.c (svr4_have_link_map_offsets): New function.
+	(locate_base): Return early if there aren't any link map offsets.
+	(svr4_solib_create_inferior_hook): Warn if shared library support
+	is unavailable.
+
 2003-04-14  David Carlton  <carlton@math.stanford.edu>
 
 	* symtab.c (symbol_set_names): Add prefix when storing Java names
