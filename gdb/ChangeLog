@@ -1,3 +1,29 @@
+Wed Jun  7 11:34:54 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* arch-utils.c (target_byte_order, target_byte_order_auto,
+ 	show_endian, set_endian, set_endian_big, set_endian_little,
+ 	set_endian_auto, set_endian_from_file, enum set_arch,
+ 	target_architecture_auto, set_architecture_string,
+ 	target_architecture_hook, target_architecture, arch_ok, set_arch,
+ 	set_architecture_from_arch_mach, set_architecture_from_file,
+ 	show_architecture, set_architecture, info_architecture,
+ 	set_gdbarch_from_file, initialize_current_architecture): Copy from
+ 	gdbarch.c.  Rewrite ``set architecture'' and ``set endian''
+ 	commands to use enums.
+	(_initialize_gdbarch_utils): Fix name.
+	* arch-utils.h (set_architecture_from_arch_mach,
+ 	target_architecture_hook): Copy from gdbarch.h.
+	* gdbarch.sh: Update.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+	* TODO: Update.
+
+	* v850-tdep.c, sh3-rom.c, sh-tdep.c, i386-tdep.c: Include
+ 	"arch-utils.h".
+	* Makefile.in (v850-tdep.o): Specify dependencies.
+	(i386-tdep.o, sh3-rom.o, sh-tdep.o): Add arch-utils.h to
+ 	dependency list.
+
 2000-06-06  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* configure.in: Enable autoconf to find curses.h on Solaris 2.8.

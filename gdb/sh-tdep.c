@@ -1,5 +1,6 @@
 /* Target-dependent code for Hitachi Super-H, for GDB.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 2000 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -35,6 +36,7 @@
 #include "dis-asm.h"
 #include "inferior.h"		/* for BEFORE_TEXT_END etc. */
 #include "gdb_string.h"
+#include "arch-utils.h"
 
 /* A set of original names, to be used when restoring back to generic
    registers from a specific set.  */

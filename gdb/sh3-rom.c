@@ -1,5 +1,5 @@
 /* Remote target glue for the Hitachi SH-3 ROM monitor.
-   Copyright 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,6 +24,7 @@
 #include "monitor.h"
 #include "serial.h"
 #include "srec.h"
+#include "arch-utils.h"
 
 static serial_t parallel;
 static int parallel_in_use;

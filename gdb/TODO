@@ -297,6 +297,23 @@ http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00845.html
 
 --
 
+Change the parameter ``char *list[]'' (etc) to ``const char (*)[]'' so
+that dynamic lists from things like gdbarch_printable_names() can be
+passed.
+
+--
+
+The ``maintenance deprecate set endian big'' command doesn't notice
+that it is deprecating ``set endian'' and not ``set endian big'' (big
+is implemented using an enum).  Is anyone going to notice this?
+
+--
+
+When tab expanding something like ``set arch<tab>'' ignore the
+deprecated ``set archdebug'' and expand to ``set architecture''.
+
+--
+
 
 			New Features and Fixes
 			======================
@@ -333,6 +350,9 @@ This requires internationalization.
 Convert GDB build process to AUTOMAKE.
 
 See also sub-directory configure below.
+
+The current convention is (kind of) to use $(<header>_h) in all
+dependency lists.  It isn't done in a consistent way.
 
 --
 
@@ -422,6 +442,16 @@ Which is very different from ``(gdb) ! ls''.  Implementing the latter
 is trivial.
 
 http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00034.html
+
+--
+
+Change the (char *list[]) to (const char (*)[]) so that dynamic lists can
+be passed.
+
+--
+
+When tab expanding something like ``set arch<tab>'' ignore the
+deprecated ``set archdebug'' and expand to ``set architecture''.
 
 --
 
@@ -881,14 +911,6 @@ Fix BELIEVE_PPC_PROMOTION.  Change it to BELIEVE_PPC_PROMOTION_P?
 
 At present there is still #ifdef BELIEVE_PPC_PROMOTION code in the
 symtab file.
-
---
-
-Fix ``set architecture <tab>''
-
-This command should expand to a list of all supported architectures.
-At present ``info architecture'' needs to be used.  That is simply
-wrong.  It involves the use of add_set_enum_cmd().
 
 --
 

@@ -1363,6 +1363,10 @@ v850ice.o: v850ice.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/v850ice.c
 
+v850-tdep.o: v850-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(obstack_h) \
+	$(target_h) $(value_h) $(bfd_h) $(gdb_string_h) $(gdbcore_h) \
+	$(symfile_h) $(arch_utils_h)
+
 tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
 	$(gdbtypes_h) $(expression_h) $(gdbcmd_h) $(value_h) target.h \
 	language.h gdb_string.h $(readline_headers) $(remote_h)
@@ -1401,7 +1405,7 @@ i386gnu-nat.o: gnu-nat.h
 
 i386-tdep.o: i386-tdep.c $(defs_h) gdb_string.h $(frame_h)	\
 	$(inferior_h) $(gdbcore_h) target.h $(floatformat_h)	\
-	$(symtab_h) $(gdbcmd_h) $(command_h)
+	$(symtab_h) $(gdbcmd_h) $(command_h) $(arch_utils_h)
 
 i386aix-nat.o: i386aix-nat.c $(defs_h) $(frame_h) $(inferior_h) \
 	language.h $(gdbcore_h) $(floatformat_h) target.h
@@ -1790,10 +1794,10 @@ serial.o: serial.c $(defs_h) serial.h gdb_string.h
 
 sh-tdep.o: sh-tdep.c $(bfd_h) $(dis-asm_h) \
 	$(srcdir)/../opcodes/sh-opc.h $(defs_h) $(expression_h) $(frame_h) \
-	$(gdbcmd_h) $(gdbtypes_h) $(symtab_h) $(value_h)
+	$(gdbcmd_h) $(gdbtypes_h) $(symtab_h) $(value_h) $(arch_utils_h)
 
 sh3-rom.o: sh3-rom.c monitor.h $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
-	$(inferior_h) target.h serial.h terminal.h
+	$(inferior_h) target.h serial.h terminal.h $(arch_utils_h)
 
 mon960-rom.o: mon960-rom.c monitor.h $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) target.h serial.h terminal.h
