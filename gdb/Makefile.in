@@ -51,9 +51,6 @@ AR = ar
 AR_FLAGS = qv
 RANLIB = ranlib
 
-M_INSTALL=@:
-M_UNINSTALL=@:
-
 # Flags that describe where you can find the termcap library.
 # This can be overridden in the host Makefile fragment file.
 TERMCAP = -ltermcap

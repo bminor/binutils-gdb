@@ -1,5 +1,8 @@
 Sat Jan 29 07:44:59 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* Makefile.in: Don't set M_INSTALL and M_UNINSTALL.  These variables
+	are not used anywhere (a 5 Oct 1993 change removed the uses).
+
 	* config/m68k/monitor.mt (TDEPFILE): Add remote-es.o.
 	* config/m68k/es1800.mt: Add comment.
 	* remote-es.c: Comment out entire file until it can be fixed.
