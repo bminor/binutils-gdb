@@ -217,38 +217,6 @@ static int undef_types_length;
   } while (0)
 
 
-/* This is used by other symbol readers besides stabs, so for cleanliness
-   should probably be in buildsym.c.  */
-
-int
-hashname (name)
-     char *name;
-{
-  register char *p = name;
-  register int total = p[0];
-  register int c;
-
-  c = p[1];
-  total += c << 2;
-  if (c)
-    {
-      c = p[2];
-      total += c << 4;
-      if (c)
-	{
-	  total += p[3] << 6;
-	}
-    }
-
-  /* Ensure result is positive.  */
-  if (total < 0)
-    {
-      total += (1000 << 6);
-    }
-  return (total % HASHSIZE);
-}
-
-
 /* Look up a dbx type-number pair.  Return the address of the slot
    where the type for that number-pair is stored.
    The number-pair is in TYPENUMS.

@@ -1,3 +1,8 @@
+Mon Aug  9 16:45:00 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* stabsread.c, buildsym.c (hashname): Moved function to
+	  buildsym.c, as suggested in the sources.
+
 Mon Aug  9 09:53:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote-udi.c: Make udi_ops extern rather than trying forward

@@ -855,6 +855,37 @@ push_context (desc, valu)
 }
 
 
+/* Compute a small integer hash code for the given name. */
+
+int
+hashname (name)
+     char *name;
+{
+  register char *p = name;
+  register int total = p[0];
+  register int c;
+
+  c = p[1];
+  total += c << 2;
+  if (c)
+    {
+      c = p[2];
+      total += c << 4;
+      if (c)
+	{
+	  total += p[3] << 6;
+	}
+    }
+
+  /* Ensure result is positive.  */
+  if (total < 0)
+    {
+      total += (1000 << 6);
+    }
+  return (total % HASHSIZE);
+}
+
+
 /* Initialize anything that needs initializing when starting to read
    a fresh piece of a symbol file, e.g. reading in the stuff corresponding
    to a psymtab.  */
