@@ -468,9 +468,8 @@ extern CORE_ADDR sparc_skip_prologue (CORE_ADDR, int);
   /* time of the register saves.  */ \
   int sp_offset;
 
-/* We need to override GET_SAVED_REGISTER so that we can deal with the way
-   outs change into ins in different frames.  HAVE_REGISTER_WINDOWS can't
-   deal with this case and also handle flat frames at the same time.  */
+/* We need to override GET_SAVED_REGISTER so that we can deal with the
+   way outs change into ins in different frames.  */
 
 void sparc_get_saved_register (char *raw_buffer,
 			       int *optimized,

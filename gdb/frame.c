@@ -43,39 +43,6 @@ find_saved_register (struct frame_info *frame, int regnum)
   if (frame == NULL)		/* No regs saved if want current frame */
     return 0;
 
-#ifdef HAVE_REGISTER_WINDOWS
-  /* We assume that a register in a register window will only be saved
-     in one place (since the name changes and/or disappears as you go
-     towards inner frames), so we only call get_frame_saved_regs on
-     the current frame.  This is directly in contradiction to the
-     usage below, which assumes that registers used in a frame must be
-     saved in a lower (more interior) frame.  This change is a result
-     of working on a register window machine; get_frame_saved_regs
-     always returns the registers saved within a frame, within the
-     context (register namespace) of that frame. */
-
-  /* However, note that we don't want this to return anything if
-     nothing is saved (if there's a frame inside of this one).  Also,
-     callers to this routine asking for the stack pointer want the
-     stack pointer saved for *this* frame; this is returned from the
-     next frame.  */
-
-  if (REGISTER_IN_WINDOW_P (regnum))
-    {
-      frame1 = get_next_frame (frame);
-      if (!frame1)
-	return 0;		/* Registers of this frame are active.  */
-
-      /* Get the SP from the next frame in; it will be this
-         current frame.  */
-      if (regnum != SP_REGNUM)
-	frame1 = frame;
-
-      FRAME_INIT_SAVED_REGS (frame1);
-      return frame1->saved_regs[regnum];	/* ... which might be zero */
-    }
-#endif /* HAVE_REGISTER_WINDOWS */
-
   /* Note that this next routine assumes that registers used in
      frame x will be saved only in the frame that x calls and
      frames interior to it.  This is not true on the sparc, but the

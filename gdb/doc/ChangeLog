@@ -1,3 +1,8 @@
+2002-04-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	definition of HAVE_REGISTER_WINDOWS.
+
 2002-04-19  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdbint.texinfo (Releasing GDB, Coding): Fix typos.  Reported by

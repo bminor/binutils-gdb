@@ -116,8 +116,6 @@ extern CORE_ADDR saved_pc_after_call ();
 
 /* The i960 has register windows, sort of.  */
 
-#define HAVE_REGISTER_WINDOWS
-
 extern void i960_get_saved_register (char *raw_buffer,
 				     int *optimized,
 				     CORE_ADDR *addrp,

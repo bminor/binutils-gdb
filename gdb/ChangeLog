@@ -1,5 +1,12 @@
 2002-04-21  Andrew Cagney  <ac131313@redhat.com>
 
+	* frame.c (find_saved_register): Delete #ifdef
+	HAVE_REGISTER_WINDOWS code.
+	* config/sparc/tm-sparc.h: Update comments.
+	* config/i960/tm-i960.h (HAVE_REGISTER_WINDOWS): Delete macro.
+
+2002-04-21  Andrew Cagney  <ac131313@redhat.com>
+
 	* i960-tdep.c (i960_find_saved_register): New function.
 	(i960_get_saved_register): New function.
 	* config/i960/tm-i960.h (GET_SAVED_REGISTER): Define.

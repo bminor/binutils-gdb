@@ -3044,10 +3044,6 @@ pointer.  It examines the current state of the machine as needed.
 Define this if you need to supply your own definition for the function
 @code{get_saved_register}.
 
-@item HAVE_REGISTER_WINDOWS
-@findex HAVE_REGISTER_WINDOWS
-Define this if the target has register windows.
-
 @item REGISTER_IN_WINDOW_P (@var{regnum})
 @findex REGISTER_IN_WINDOW_P
 Define this to be an expression that is 1 if the given register is in
