@@ -397,11 +397,18 @@ lookup_function_type (struct type *type)
 extern int
 address_space_name_to_int (char *space_identifier)
 {
+  struct gdbarch *gdbarch = current_gdbarch;
+  int type_flags;
   /* Check for known address space delimiters. */
   if (!strcmp (space_identifier, "code"))
     return TYPE_FLAG_CODE_SPACE;
   else if (!strcmp (space_identifier, "data"))
     return TYPE_FLAG_DATA_SPACE;
+  else if (gdbarch_address_class_name_to_type_flags_p (gdbarch)
+           && gdbarch_address_class_name_to_type_flags (gdbarch,
+							space_identifier,
+							&type_flags))
+    return type_flags;
   else
     error ("Unknown address space specifier: \"%s\"", space_identifier);
 }
@@ -412,10 +419,14 @@ address_space_name_to_int (char *space_identifier)
 extern char *
 address_space_int_to_name (int space_flag)
 {
+  struct gdbarch *gdbarch = current_gdbarch;
   if (space_flag & TYPE_FLAG_CODE_SPACE)
     return "code";
   else if (space_flag & TYPE_FLAG_DATA_SPACE)
     return "data";
+  else if ((space_flag & TYPE_FLAG_ADDRESS_CLASS_ALL)
+           && gdbarch_address_class_type_flags_to_name_p (gdbarch))
+    return gdbarch_address_class_type_flags_to_name (gdbarch, space_flag);
   else
     return NULL;
 }
@@ -465,14 +476,17 @@ make_qualified_type (struct type *type, int new_flags,
    is identical to the one supplied except that it has an address
    space attribute attached to it (such as "code" or "data").
 
-   This is for Harvard architectures. */
+   The space attributes "code" and "data" are for Harvard architectures.
+   The address space attributes are for architectures which have
+   alternately sized pointers or pointers with alternate representations.  */
 
 struct type *
 make_type_with_address_space (struct type *type, int space_flag)
 {
   struct type *ntype;
   int new_flags = ((TYPE_INSTANCE_FLAGS (type)
-		    & ~(TYPE_FLAG_CODE_SPACE | TYPE_FLAG_DATA_SPACE))
+		    & ~(TYPE_FLAG_CODE_SPACE | TYPE_FLAG_DATA_SPACE
+		        | TYPE_FLAG_ADDRESS_CLASS_ALL))
 		   | space_flag);
 
   return make_qualified_type (type, new_flags, NULL);
@@ -1276,13 +1290,12 @@ fill_in_vptr_fieldno (struct type *type)
          virtual (and hence we cannot share the table pointer).  */
       for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
 	{
-	  fill_in_vptr_fieldno (TYPE_BASECLASS (type, i));
-	  if (TYPE_VPTR_FIELDNO (TYPE_BASECLASS (type, i)) >= 0)
+	  struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
+	  fill_in_vptr_fieldno (baseclass);
+	  if (TYPE_VPTR_FIELDNO (baseclass) >= 0)
 	    {
-	      TYPE_VPTR_FIELDNO (type)
-		= TYPE_VPTR_FIELDNO (TYPE_BASECLASS (type, i));
-	      TYPE_VPTR_BASETYPE (type)
-		= TYPE_VPTR_BASETYPE (TYPE_BASECLASS (type, i));
+	      TYPE_VPTR_FIELDNO (type) = TYPE_VPTR_FIELDNO (baseclass);
+	      TYPE_VPTR_BASETYPE (type) = TYPE_VPTR_BASETYPE (baseclass);
 	      break;
 	    }
 	}
@@ -1328,7 +1341,7 @@ get_destructor_fn_field (struct type *t, int *method_indexp, int *field_indexp)
    This used to be coded as a macro, but I don't think it is called 
    often enough to merit such treatment.  */
 
-struct complaint stub_noname_complaint =
+struct deprecated_complaint stub_noname_complaint =
 {"stub type has NULL name", 0, 0};
 
 struct type *
@@ -1499,7 +1512,7 @@ add_mangled_type (struct extra *pextras, struct type *t)
 	default:
 	  {
 
-	    static struct complaint msg =
+	    static struct deprecated_complaint msg =
 	    {"Bad int type code length x%x\n", 0, 0};
 
 	    complain (&msg, tlen);
@@ -1521,7 +1534,7 @@ add_mangled_type (struct extra *pextras, struct type *t)
 	  break;
 	default:
 	  {
-	    static struct complaint msg =
+	    static struct deprecated_complaint msg =
 	    {"Bad float type code length x%x\n", 0, 0};
 	    complain (&msg, tlen);
 	  }
@@ -1537,7 +1550,7 @@ add_mangled_type (struct extra *pextras, struct type *t)
       break;
     case TYPE_CODE_TYPEDEF:
       {
-	static struct complaint msg =
+	static struct deprecated_complaint msg =
 	{"Typedefs in overloaded functions not yet supported\n", 0, 0};
 	complain (&msg);
       }
@@ -1577,7 +1590,7 @@ add_mangled_type (struct extra *pextras, struct type *t)
     case TYPE_CODE_ERROR:
     default:
       {
-	static struct complaint msg =
+	static struct deprecated_complaint msg =
 	{"Unknown type code x%x\n", 0, 0};
 	complain (&msg, tcode);
       }
@@ -3140,6 +3153,14 @@ recursive_dump_type (struct type *type, int spaces)
   if (TYPE_DATA_SPACE (type))
     {
       puts_filtered (" TYPE_FLAG_DATA_SPACE");
+    }
+  if (TYPE_ADDRESS_CLASS_1 (type))
+    {
+      puts_filtered (" TYPE_FLAG_ADDRESS_CLASS_1");
+    }
+  if (TYPE_ADDRESS_CLASS_2 (type))
+    {
+      puts_filtered (" TYPE_FLAG_ADDRESS_CLASS_2");
     }
   puts_filtered ("\n");
   printfi_filtered (spaces, "flags 0x%x", TYPE_FLAGS (type));

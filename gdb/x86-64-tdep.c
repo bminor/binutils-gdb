@@ -1,7 +1,6 @@
 /* Target-dependent code for the x86-64 for GDB, the GNU debugger.
 
    Copyright 2001, 2002 Free Software Foundation, Inc.
-
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -251,18 +250,20 @@ static const char *valid_flavours[] = {
 };
 static const char *disassembly_flavour = att_flavour;
 
+/* Push the return address (pointing to the call dummy) onto the stack
+   and return the new value for the stack pointer.  */
+
 static CORE_ADDR
 x86_64_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   char buf[8];
 
   store_unsigned_integer (buf, 8, CALL_DUMMY_ADDRESS ());
-
   write_memory (sp - 8, buf, 8);
   return sp - 8;
 }
 
-void
+static void
 x86_64_pop_frame (void)
 {
   generic_pop_current_frame (cfi_pop_frame);
@@ -300,8 +301,8 @@ merge_classes (enum x86_64_reg_class class1, enum x86_64_reg_class class2)
   if (class1 == class2)
     return class1;
 
-  /* Rule #2: If one of the classes is NO_CLASS, the resulting class is
-     the other class.  */
+  /* Rule #2: If one of the classes is NO_CLASS, the resulting class
+     is the other class.  */
   if (class1 == X86_64_NO_CLASS)
     return class2;
   if (class2 == X86_64_NO_CLASS)
@@ -328,15 +329,13 @@ merge_classes (enum x86_64_reg_class class1, enum x86_64_reg_class class2)
   return X86_64_SSE_CLASS;
 }
 
+/* Classify the argument type.  CLASSES will be filled by the register
+   class used to pass each word of the operand.  The number of words
+   is returned.  In case the parameter should be passed in memory, 0
+   is returned.  As a special case for zero sized containers,
+   classes[0] will be NO_CLASS and 1 is returned.
 
-/* Classify the argument type.
-   CLASSES will be filled by the register class used to pass each word
-   of the operand.  The number of words is returned.  In case the parameter
-   should be passed in memory, 0 is returned. As a special case for zero
-   sized containers, classes[0] will be NO_CLASS and 1 is returned.
-
-   See the x86-64 PS ABI for details.
-*/
+   See the x86-64 psABI for details.  */
 
 static int
 classify_argument (struct type *type,
@@ -361,8 +360,8 @@ classify_argument (struct type *type,
 	for (i = 0; i < words; i++)
 	  classes[i] = X86_64_NO_CLASS;
 
-	/* Zero sized arrays or structures are NO_CLASS.  We return 0 to
-	   signalize memory class, so handle it as special case.  */
+	/* Zero sized arrays or structures are NO_CLASS.  We return 0
+	   to signalize memory class, so handle it as special case.  */
 	if (!words)
 	  {
 	    classes[0] = X86_64_NO_CLASS;
@@ -445,7 +444,7 @@ classify_argument (struct type *type,
 		&& (i == 0 || classes[i - 1] != X86_64_SSE_CLASS))
 	      classes[i] = X86_64_SSE_CLASS;
 
-	    /*  X86_64_X87UP_CLASS should be preceeded by X86_64_X87_CLASS.  */
+	    /* X86_64_X87UP_CLASS should be preceeded by X86_64_X87_CLASS.  */
 	    if (classes[i] == X86_64_X87UP_CLASS
 		&& (i == 0 || classes[i - 1] != X86_64_X87_CLASS))
 	      classes[i] = X86_64_SSE_CLASS;
@@ -499,8 +498,9 @@ classify_argument (struct type *type,
 		  "classify_argument: unknown argument type");
 }
 
-/* Examine the argument and return set number of register required in each
-   class.  Return 0 ifif parameter should be passed in memory.  */
+/* Examine the argument and set *INT_NREGS and *SSE_NREGS to the
+   number of registers required based on the information passed in
+   CLASSES.  Return 0 if parameter should be passed in memory.  */
 
 static int
 examine_argument (enum x86_64_reg_class classes[MAX_CLASSES],
@@ -538,9 +538,9 @@ examine_argument (enum x86_64_reg_class classes[MAX_CLASSES],
 #define RET_SSE_REGS 2
 
 /* Check if the structure in value_type is returned in registers or in
-   memory. If this function returns 1, gdb will call STORE_STRUCT_RETURN and
-   EXTRACT_STRUCT_VALUE_ADDRESS else STORE_RETURN_VALUE and EXTRACT_RETURN_VALUE
-   will be used.  */
+   memory. If this function returns 1, GDB will call
+   STORE_STRUCT_RETURN and EXTRACT_STRUCT_VALUE_ADDRESS else
+   STORE_RETURN_VALUE and EXTRACT_RETURN_VALUE will be used.  */
 int
 x86_64_use_struct_convention (int gcc_p, struct type *value_type)
 {
@@ -553,7 +553,6 @@ x86_64_use_struct_convention (int gcc_p, struct type *value_type)
 	  !examine_argument (class, n, &needed_intregs, &needed_sseregs) ||
 	  needed_intregs > RET_INT_REGS || needed_sseregs > RET_SSE_REGS);
 }
-
 
 /* Extract from an array REGBUF containing the (raw) register state, a
    function return value of TYPE, and copy that, in virtual format,
@@ -637,10 +636,10 @@ x86_64_extract_return_value (struct type *type, char *regbuf, char *valbuf)
     }
 }
 
-/* Handled by unwind informations.  */
 static void
 x86_64_frame_init_saved_regs (struct frame_info *fi)
 {
+  /* Do nothing.  Everything is handled by the stack unwinding code.  */
 }
 
 #define INT_REGS 6
@@ -693,30 +692,30 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		case X86_64_NO_CLASS:
 		  break;
 		case X86_64_INTEGER_CLASS:
-		  write_register_gen (int_parameter_registers
-				      [(intreg + 1) / 2],
-				      VALUE_CONTENTS_ALL (args[i]) + offset);
+		  deprecated_write_register_gen (int_parameter_registers
+						 [(intreg + 1) / 2],
+						 VALUE_CONTENTS_ALL (args[i]) + offset);
 		  offset += 8;
 		  intreg += 2;
 		  break;
 		case X86_64_INTEGERSI_CLASS:
-		  write_register_gen (int_parameter_registers[intreg / 2],
-				      VALUE_CONTENTS_ALL (args[i]) + offset);
+		  deprecated_write_register_gen (int_parameter_registers[intreg / 2],
+						 VALUE_CONTENTS_ALL (args[i]) + offset);
 		  offset += 8;
 		  intreg++;
 		  break;
 		case X86_64_SSEDF_CLASS:
 		case X86_64_SSESF_CLASS:
 		case X86_64_SSE_CLASS:
-		  write_register_gen (sse_parameter_registers
-				      [(ssereg + 1) / 2],
-				      VALUE_CONTENTS_ALL (args[i]) + offset);
+		  deprecated_write_register_gen (sse_parameter_registers
+						 [(ssereg + 1) / 2],
+						 VALUE_CONTENTS_ALL (args[i]) + offset);
 		  offset += 8;
 		  ssereg += 2;
 		  break;
 		case X86_64_SSEUP_CLASS:
-		  write_register_gen (sse_parameter_registers[ssereg / 2],
-				      VALUE_CONTENTS_ALL (args[i]) + offset);
+		  deprecated_write_register_gen (sse_parameter_registers[ssereg / 2],
+						 VALUE_CONTENTS_ALL (args[i]) + offset);
 		  offset += 8;
 		  ssereg++;
 		  break;
@@ -862,34 +861,35 @@ x86_64_skip_prologue (CORE_ADDR pc)
   struct symtab_and_line v_sal;
   struct symbol *v_function;
   CORE_ADDR endaddr;
+  unsigned char prolog_buf[PROLOG_BUFSIZE];
 
-  /* We will handle only functions beginning with:
-     55          pushq %rbp
-     48 89 e5    movq %rsp,%rbp 
-   */
-  unsigned char prolog_expect[PROLOG_BUFSIZE] = { 0x55, 0x48, 0x89, 0xe5 },
-    prolog_buf[PROLOG_BUFSIZE];
+  /* We will handle only functions starting with: */
+  static unsigned char prolog_expect[PROLOG_BUFSIZE] =
+  {
+    0x55,			/* pushq %rbp */
+    0x48, 0x89, 0xe5		/* movq %rsp, %rbp */
+  };
 
   read_memory (pc, (char *) prolog_buf, PROLOG_BUFSIZE);
 
-  /* First check, whether pc points to pushq %rbp, movq %rsp,%rbp.  */
+  /* First check, whether pc points to pushq %rbp, movq %rsp, %rbp.  */
   for (i = 0; i < PROLOG_BUFSIZE; i++)
     if (prolog_expect[i] != prolog_buf[i])
-      return pc;		/* ... no, it doesn't. Nothing to skip.  */
+      return pc;		/* ... no, it doesn't.  Nothing to skip.  */
 
-  /* OK, we have found the prologue and want PC of the first 
+  /* OK, we have found the prologue and want PC of the first
      non-prologue instruction.  */
   pc += PROLOG_BUFSIZE;
 
   v_function = find_pc_function (pc);
   v_sal = find_pc_line (pc, 0);
 
-  /* If pc doesn't point to a function with debuginfo, 
-     some of the following may be NULL.  */
+  /* If pc doesn't point to a function with debuginfo, some of the
+     following may be NULL.  */
   if (!v_function || !v_function->ginfo.value.block || !v_sal.symtab)
     return pc;
 
-  endaddr = v_function->ginfo.value.block->endaddr;
+  endaddr = BLOCK_END (SYMBOL_BLOCK_VALUE (v_function));
 
   for (i = 0; i < v_sal.symtab->linetable->nitems; i++)
     if (v_sal.symtab->linetable->item[i].pc >= pc
@@ -903,108 +903,72 @@ x86_64_skip_prologue (CORE_ADDR pc)
 }
 
 /* Sequence of bytes for breakpoint instruction.  */
-static unsigned char *
-x86_64_breakpoint_from_pc (CORE_ADDR * pc, int *lenptr)
+static const unsigned char *
+x86_64_breakpoint_from_pc (CORE_ADDR *pc, int *lenptr)
 {
   static unsigned char breakpoint[] = { 0xcc };
   *lenptr = 1;
   return breakpoint;
 }
 
-static struct gdbarch *
-x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+static void
+x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int i, sum;
 
-  /* Find a candidate among the list of pre-declared architectures. */
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
-       arches = gdbarch_list_lookup_by_info (arches->next, &info))
-    {
-      switch (info.bfd_arch_info->mach)
-	{
-	case bfd_mach_x86_64:
-	case bfd_mach_x86_64_intel_syntax:
-	  switch (gdbarch_bfd_arch_info (arches->gdbarch)->mach)
-	    {
-	    case bfd_mach_x86_64:
-	    case bfd_mach_x86_64_intel_syntax:
-	      return arches->gdbarch;
-	    case bfd_mach_i386_i386:
-	    case bfd_mach_i386_i8086:
-	    case bfd_mach_i386_i386_intel_syntax:
-	      break;
-	    default:
-	      internal_error (__FILE__, __LINE__,
-			      "x86_64_gdbarch_init: unknown machine type");
-	    }
-	  break;
-	case bfd_mach_i386_i386:
-	case bfd_mach_i386_i8086:
-	case bfd_mach_i386_i386_intel_syntax:
-	  switch (gdbarch_bfd_arch_info (arches->gdbarch)->mach)
-	    {
-	    case bfd_mach_x86_64:
-	    case bfd_mach_x86_64_intel_syntax:
-	      break;
-	    case bfd_mach_i386_i386:
-	    case bfd_mach_i386_i8086:
-	    case bfd_mach_i386_i386_intel_syntax:
-	      return arches->gdbarch;
-	    default:
-	      internal_error (__FILE__, __LINE__,
-			      "x86_64_gdbarch_init: unknown machine type");
-	    }
-	  break;
-	default:
-	  internal_error (__FILE__, __LINE__,
-			  "x86_64_gdbarch_init: unknown machine type");
-	}
-    }
+  /* The x86-64 has 16 SSE registers.  */
+  tdep->num_xmm_regs = 16;
 
-  tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
-  gdbarch = gdbarch_alloc (&info, tdep);
-
-  switch (info.bfd_arch_info->mach)
-    {
-    case bfd_mach_x86_64:
-    case bfd_mach_x86_64_intel_syntax:
-      tdep->num_xmm_regs = 16;
-      break;
-    case bfd_mach_i386_i386:
-    case bfd_mach_i386_i8086:
-    case bfd_mach_i386_i386_intel_syntax:
-      /* This is place for definition of i386 target vector.  */
-      break;
-    default:
-      internal_error (__FILE__, __LINE__,
-		      "x86_64_gdbarch_init: unknown machine type");
-    }
-
+  /* This is what all the fuss is about.  */
   set_gdbarch_long_bit (gdbarch, 64);
   set_gdbarch_long_long_bit (gdbarch, 64);
   set_gdbarch_ptr_bit (gdbarch, 64);
 
-  set_gdbarch_long_double_format (gdbarch, &floatformat_i387_ext);
+  /* In contrast to the i386, on the x86-64 a `long double' actually
+     takes up 128 bits, even though it's still based on the i387
+     extended floating-point format which has only 80 significant bits.  */
+  set_gdbarch_long_double_bit (gdbarch, 128);
 
   set_gdbarch_num_regs (gdbarch, X86_64_NUM_REGS);
+
+  /* Register numbers of various important registers.  */
+  set_gdbarch_sp_regnum (gdbarch, 7); /* %rsp */
+  set_gdbarch_fp_regnum (gdbarch, 6); /* %rbp */
+  set_gdbarch_pc_regnum (gdbarch, 16); /* %rip */
+  set_gdbarch_ps_regnum (gdbarch, 17); /* %eflags */
+  set_gdbarch_fp0_regnum (gdbarch, X86_64_NUM_GREGS); /* %st(0) */
+
+  /* The "default" register numbering scheme for the x86-64 is
+     referred to as the "DWARF register number mapping" in the psABI.
+     The preferred debugging format for all known x86-64 targets is
+     actually DWARF2, and GCC doesn't seem to support DWARF (that is
+     DWARF-1), but we provide the same mapping just in case.  This
+     mapping is also used for stabs, which GCC does support.  */
+  set_gdbarch_stab_reg_to_regnum (gdbarch, x86_64_dwarf2_reg_to_regnum);
+  set_gdbarch_dwarf_reg_to_regnum (gdbarch, x86_64_dwarf2_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, x86_64_dwarf2_reg_to_regnum);
+
+  /* We don't override SDB_REG_RO_REGNUM, sice COFF doesn't seem to be
+     in use on any of the supported x86-64 targets.  */
+
   set_gdbarch_register_name (gdbarch, x86_64_register_name);
   set_gdbarch_register_size (gdbarch, 8);
-  set_gdbarch_register_raw_size (gdbarch, x86_64_register_raw_size);
-  set_gdbarch_max_register_raw_size (gdbarch, 16);
-  set_gdbarch_register_byte (gdbarch, x86_64_register_byte);
 
-  /* Total amount of space needed to store our copies of the machine's register
-     (SIZEOF_GREGS + SIZEOF_FPU_REGS + SIZEOF_FPU_CTRL_REGS + SIZEOF_SSE_REGS) */
+  /* Total amount of space needed to store our copies of the machine's
+     register (SIZEOF_GREGS + SIZEOF_FPU_REGS + SIZEOF_FPU_CTRL_REGS +
+     SIZEOF_SSE_REGS) */
   for (i = 0, sum = 0; i < X86_64_NUM_REGS; i++)
     sum += x86_64_register_info_table[i].size;
   set_gdbarch_register_bytes (gdbarch, sum);
-  set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
-  set_gdbarch_max_register_virtual_size (gdbarch, 16);
 
+  set_gdbarch_register_raw_size (gdbarch, x86_64_register_raw_size);
+  set_gdbarch_register_byte (gdbarch, x86_64_register_byte);
   set_gdbarch_register_virtual_type (gdbarch, x86_64_register_virtual_type);
+
+  /* FIXME: kettenis/20021026: As long as we don't support longjmp,
+     that is, as long as we have `tdep->jb_pc_offset == -1', using
+     i386_get_longjmp_target is fine.  */
 
   set_gdbarch_register_convertible (gdbarch, x86_64_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch,
@@ -1012,115 +976,134 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_convert_to_raw (gdbarch,
 				       x86_64_register_convert_to_raw);
 
-/* Register numbers of various important registers.  */
-  set_gdbarch_sp_regnum (gdbarch, 7);	/* (rsp) Contains address of top of stack.  */
-  set_gdbarch_fp_regnum (gdbarch, 6);	/* (rbp) */
-  set_gdbarch_pc_regnum (gdbarch, 16);	/* (rip) Contains program counter.  */
-
-  set_gdbarch_fp0_regnum (gdbarch, X86_64_NUM_GREGS);	/* First FPU floating-point register.  */
-
-  set_gdbarch_read_fp (gdbarch, cfi_read_fp);
-
-/* Discard from the stack the innermost frame, restoring all registers.  */
-  set_gdbarch_pop_frame (gdbarch, x86_64_pop_frame);
-
-  /* FRAME_CHAIN takes a frame's nominal address and produces the frame's
-     chain-pointer.  */
-  set_gdbarch_frame_chain (gdbarch, cfi_frame_chain);
-
-  set_gdbarch_frameless_function_invocation (gdbarch,
-					     x86_64_frameless_function_invocation);
-  set_gdbarch_frame_saved_pc (gdbarch, x86_64_linux_frame_saved_pc);
-
-  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
-  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
-
-/* Return number of bytes at start of arglist that are not really args.  */
-  set_gdbarch_frame_args_skip (gdbarch, 8);
-
-  set_gdbarch_frame_init_saved_regs (gdbarch, x86_64_frame_init_saved_regs);
-
-/* Frame pc initialization is handled by unwind informations.  */
-  set_gdbarch_init_frame_pc (gdbarch, cfi_init_frame_pc);
-
-/* Initialization of unwind informations.  */
-  set_gdbarch_init_extra_frame_info (gdbarch, cfi_init_extra_frame_info);
-
-/* Getting saved registers is handled by unwind informations.  */
+  /* Getting saved registers is handled by unwind information.  */
   set_gdbarch_get_saved_register (gdbarch, cfi_get_saved_register);
 
-  set_gdbarch_frame_init_saved_regs (gdbarch, x86_64_frame_init_saved_regs);
+  /* FIXME: kettenis/20021026: Should we set parm_boundary to 64 here?  */
+  set_gdbarch_read_fp (gdbarch, cfi_read_fp);
 
-/* Cons up virtual frame pointer for trace */
-  set_gdbarch_virtual_frame_pointer (gdbarch, cfi_virtual_frame_pointer);
-
-
-  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
-
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
-  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
-  set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
-  set_gdbarch_call_dummy_words (gdbarch, 0);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
-  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
-  set_gdbarch_push_return_address (gdbarch, x86_64_push_return_address);
+  /* FIXME: kettenis/20021026: Should be undeprecated.  */
+  set_gdbarch_extract_return_value (gdbarch, NULL);
+  set_gdbarch_deprecated_extract_return_value (gdbarch,
+					       x86_64_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, x86_64_push_arguments);
-
-/* Return number of args passed to a frame, no way to tell.  */
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
-/* Don't use default structure extract routine */
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, 0);
-
-/* If USE_STRUCT_CONVENTION retruns 0, then gdb uses STORE_RETURN_VALUE
-   and EXTRACT_RETURN_VALUE to store/fetch the functions return value.  It is
-   the case when structure is returned in registers.  */
+  set_gdbarch_push_return_address (gdbarch, x86_64_push_return_address);
+  set_gdbarch_pop_frame (gdbarch, x86_64_pop_frame);
+  set_gdbarch_store_struct_return (gdbarch, x86_64_store_struct_return);
+  /* FIXME: kettenis/20021026: Should be undeprecated.  */
+  set_gdbarch_store_return_value (gdbarch, NULL);
+  set_gdbarch_deprecated_store_return_value (gdbarch,
+					     x86_64_store_return_value);
+  /* Override, since this is handled by x86_64_extract_return_value.  */
+  set_gdbarch_extract_struct_value_address (gdbarch, NULL);
   set_gdbarch_use_struct_convention (gdbarch, x86_64_use_struct_convention);
 
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function. */
-  set_gdbarch_store_struct_return (gdbarch, x86_64_store_struct_return);
-
-/* Extract from an array REGBUF containing the (raw) register state
-   a function return value of type TYPE, and copy that, in virtual format,
-   into VALBUF.  */
-  set_gdbarch_deprecated_extract_return_value (gdbarch, x86_64_extract_return_value);
-
-
-/* Write into the appropriate registers a function return value stored
-   in VALBUF of type TYPE, given in virtual format.  */
-  set_gdbarch_deprecated_store_return_value (gdbarch, x86_64_store_return_value);
-
-
-/* Offset from address of function to start of its code.  */
-  set_gdbarch_function_start_offset (gdbarch, 0);
-
+  set_gdbarch_frame_init_saved_regs (gdbarch, x86_64_frame_init_saved_regs);
   set_gdbarch_skip_prologue (gdbarch, x86_64_skip_prologue);
 
+  set_gdbarch_frame_chain (gdbarch, x86_64_linux_frame_chain);
+  set_gdbarch_frameless_function_invocation (gdbarch,
+					 x86_64_frameless_function_invocation);
+  /* FIXME: kettenis/20021025: Shouldn't this be set to
+     generic_file_frame_chain_valid?  */
+  set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
+  /* FIXME: kettenis/20021026: These two are GNU/Linux-specific and
+     should be moved elsewhere.  */
+  set_gdbarch_frame_saved_pc (gdbarch, x86_64_linux_frame_saved_pc);
   set_gdbarch_saved_pc_after_call (gdbarch, x86_64_linux_saved_pc_after_call);
+  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
+  /* FIXME: kettenis/20021026: This one is GNU/Linux-specific too.  */
+  set_gdbarch_pc_in_sigtramp (gdbarch, x86_64_linux_in_sigtramp);
+
+  /* Build call frame information (CFI) from DWARF2 frame debug info.  */
+  set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
+
+  /* Initialization of per-frame CFI.  */
+  set_gdbarch_init_extra_frame_info (gdbarch, cfi_init_extra_frame_info);
+
+  /* Frame PC initialization is handled by using CFI.  */
+  set_gdbarch_init_frame_pc (gdbarch, x86_64_init_frame_pc);
+
+  /* Cons up virtual frame pointer for trace.  */
+  set_gdbarch_virtual_frame_pointer (gdbarch, cfi_virtual_frame_pointer);
+
+  /* FIXME: kettenis/20021026: This is ELF-specific.  Fine for now,
+     since all supported x86-64 targets are ELF, but that might change
+     in the future.  */
+  set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
+}
+
+static struct gdbarch *
+x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+{
+  struct gdbarch_tdep *tdep;
+  struct gdbarch *gdbarch;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
+
+  /* Try to determine the OS ABI of the object we're loading.  */
+  if (info.abfd != NULL)
+    osabi = gdbarch_lookup_osabi (info.abfd);
+
+  /* Find a candidate among extant architectures.  */
+  for (arches = gdbarch_list_lookup_by_info (arches, &info);
+       arches != NULL;
+       arches = gdbarch_list_lookup_by_info (arches->next, &info))
+    {
+      /* Make sure the OS ABI selection matches.  */
+      tdep = gdbarch_tdep (arches->gdbarch);
+      if (tdep && tdep->osabi == osabi)
+        return arches->gdbarch;
+    }
+
+  /* Allocate space for the new architecture.  */
+  tdep = XMALLOC (struct gdbarch_tdep);
+  gdbarch = gdbarch_alloc (&info, tdep);
+
+  tdep->osabi = osabi;
+
+  /* FIXME: kettenis/20021025: The following calls are going to
+     disappear when we integrate the x86_64 target into the i386
+     target.  */
+
+  set_gdbarch_long_double_format (gdbarch, &floatformat_i387_ext);
+
+  set_gdbarch_max_register_raw_size (gdbarch, 16);
+  set_gdbarch_max_register_virtual_size (gdbarch, 16);
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  set_gdbarch_breakpoint_from_pc (gdbarch,
-				  (gdbarch_breakpoint_from_pc_ftype *)
-				  x86_64_breakpoint_from_pc);
-
-  set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
-
-/* Amount PC must be decremented by after a breakpoint.  This is often the
-   number of bytes in BREAKPOINT but not always.  */
+  set_gdbarch_breakpoint_from_pc (gdbarch, x86_64_breakpoint_from_pc);
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
+  set_gdbarch_function_start_offset (gdbarch, 0);
 
-/* Use dwarf2 debug frame informations.  */
-  set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
-  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, x86_64_dwarf2_reg_to_regnum);
+  set_gdbarch_frame_args_skip (gdbarch, 8);
+  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
+  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
+
+  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
+
+  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
+  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
+  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
+  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
+  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
+  set_gdbarch_call_dummy_length (gdbarch, 0);
+  set_gdbarch_call_dummy_p (gdbarch, 1);
+  set_gdbarch_call_dummy_words (gdbarch, NULL);
+  set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
+  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
+  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
+
+  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
+
+  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
+
+  /* FIXME: kettenis/20021025: These already are the default.  */
+
+  set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, 0);
+
+  x86_64_init_abi (info, gdbarch);
 
   return gdbarch;
 }

@@ -361,7 +361,7 @@ gdbsim_store_register (int regno)
     {
       char tmp[MAX_REGISTER_RAW_SIZE];
       int nr_bytes;
-      read_register_gen (regno, tmp);
+      deprecated_read_register_gen (regno, tmp);
       nr_bytes = sim_store_register (gdbsim_desc,
 				     REGISTER_SIM_REGNO (regno),
 				     tmp, REGISTER_RAW_SIZE (regno));

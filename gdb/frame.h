@@ -325,9 +325,14 @@ extern void generic_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 				    int nargs, struct value **args,
 				    struct type *type, int gcc_p);
 
-extern void generic_get_saved_register (char *, int *, CORE_ADDR *,
-					struct frame_info *, int,
-					enum lval_type *);
+/* The function generic_get_saved_register() has been made obsolete.
+   GET_SAVED_REGISTER now defaults to the recursive equivalent -
+   generic_unwind_get_saved_register() - so there is no need to even
+   set GET_SAVED_REGISTER.  Architectures that need to override the
+   register unwind mechanism should modify frame->unwind().  */
+extern void deprecated_generic_get_saved_register (char *, int *, CORE_ADDR *,
+						   struct frame_info *, int,
+						   enum lval_type *);
 
 extern void generic_unwind_get_saved_register (char *raw_buffer,
 					       int *optimized,
@@ -366,11 +371,30 @@ extern void get_saved_register (char *raw_buffer, int *optimized,
 extern int frame_register_read (struct frame_info *frame, int regnum,
 				void *buf);
 
+/* Return the value of register REGNUM that belongs to FRAME.  The
+   value is obtained by unwinding the register from the next / more
+   inner frame.  */
+/* NOTE: cagney/2002-09-13: Return void as one day these functions may
+   be changed to return an indication that the read succeeded.  */
+extern void frame_read_signed_register (struct frame_info *frame,
+					int regnum, LONGEST *val);
+extern void frame_read_unsigned_register (struct frame_info *frame,
+					  int regnum, ULONGEST *val);
+
 /* Map between a frame register number and its name.  A frame register
    space is a superset of the cooked register space --- it also
    includes builtin registers.  */
 
 extern int frame_map_name_to_regnum (const char *name, int strlen);
 extern const char *frame_map_regnum_to_name (int regnum);
+
+/* From stack.c.  */
+extern void args_info (char *, int);
+
+extern void locals_info (char *, int);
+
+extern void (*selected_frame_level_changed_hook) (int);
+
+extern void return_command (char *, int);
 
 #endif /* !defined (FRAME_H)  */

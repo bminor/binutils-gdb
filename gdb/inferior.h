@@ -315,6 +315,16 @@ extern char *set_inferior_args (char *);
 
 extern void set_inferior_args_vector (int, char **);
 
+extern void registers_info (char *, int);
+
+extern void nexti_command (char *, int);
+
+extern void stepi_command (char *, int);
+
+extern void continue_command (char *, int);
+
+extern void interrupt_target_command (char *args, int from_tty);
+
 /* Last signal that the inferior received (why it stopped).  */
 
 extern enum target_signal stop_signal;

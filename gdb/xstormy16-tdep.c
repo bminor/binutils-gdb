@@ -186,7 +186,7 @@ xstormy16_get_saved_register (char *raw_buffer,
 			      struct frame_info *fi,
 			      int regnum, enum lval_type *lval)
 {
-  generic_get_saved_register (raw_buffer, optimized, addrp, fi, regnum, lval);
+  deprecated_generic_get_saved_register (raw_buffer, optimized, addrp, fi, regnum, lval);
 }
 
 /* Function: xstormy16_type_is_scalar
@@ -387,7 +387,7 @@ xstormy16_store_return_value (struct type *type, char *valbuf)
       /* Add leading zeros to the value. */
       memset (buf, 0, xstormy16_reg_size);
       memcpy (buf, valbuf, 1);
-      write_register_gen (E_1ST_ARG_REGNUM, buf);
+      deprecated_write_register_gen (E_1ST_ARG_REGNUM, buf);
     }
   else if (xstormy16_type_is_scalar (type) &&
 	   TYPE_LENGTH (type) <= E_MAX_RETTYPE_SIZE_IN_REGS)
@@ -439,7 +439,7 @@ xstormy16_frame_saved_register (struct frame_info *fi, int regnum)
   int size = xstormy16_register_raw_size (regnum);
   char *buf = (char *) alloca (size);
 
-  generic_get_saved_register (buf, NULL, NULL, fi, regnum, NULL);
+  deprecated_generic_get_saved_register (buf, NULL, NULL, fi, regnum, NULL);
   return (CORE_ADDR) extract_unsigned_integer (buf, size);
 }
 

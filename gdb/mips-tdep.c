@@ -1704,7 +1704,14 @@ mips_frame_saved_pc (struct frame_info *frame)
   int pcreg = frame->signal_handler_caller ? PC_REGNUM
   : (proc_desc ? PROC_PC_REG (proc_desc) : RA_REGNUM);
 
-  if (proc_desc && PROC_DESC_IS_DUMMY (proc_desc))
+  if (USE_GENERIC_DUMMY_FRAMES
+      && PC_IN_CALL_DUMMY (frame->pc, 0, 0))
+    {
+      LONGEST tmp;
+      frame_unwind_signed_register (frame, PC_REGNUM, &tmp);
+      saved_pc = tmp;
+    }
+  else if (proc_desc && PROC_DESC_IS_DUMMY (proc_desc))
     saved_pc = read_memory_integer (frame->frame - MIPS_SAVED_REGSIZE, MIPS_SAVED_REGSIZE);
   else
     saved_pc = read_next_frame_reg (frame, pcreg);
@@ -2421,6 +2428,15 @@ mips_frame_chain (struct frame_info *frame)
   if ((tmp = SKIP_TRAMPOLINE_CODE (saved_pc)) != 0)
     saved_pc = tmp;
 
+  if (USE_GENERIC_DUMMY_FRAMES
+      && PC_IN_CALL_DUMMY (saved_pc, 0, 0))
+    {
+      /* A dummy frame, uses SP not FP.  Get the old SP value.  If all
+         is well, frame->frame the bottom of the current frame will
+         contain that value.  */
+      return frame->frame;
+    }
+
   /* Look up the procedure descriptor for this PC.  */
   proc_desc = find_proc_desc (saved_pc, frame, 1);
   if (!proc_desc)
@@ -2436,8 +2452,10 @@ mips_frame_chain (struct frame_info *frame)
       /* The previous frame from a sigtramp frame might be frameless
 	 and have frame size zero.  */
       && !frame->signal_handler_caller
-      /* Check if this is a call dummy frame.  */
-      && frame->pc != CALL_DUMMY_ADDRESS ())
+      /* For a generic dummy frame, let get_frame_pointer() unwind a
+         register value saved as part of the dummy frame call.  */
+      && !(USE_GENERIC_DUMMY_FRAMES
+	   && PC_IN_CALL_DUMMY (frame->pc, 0, 0)))
     return 0;
   else
     return get_frame_pointer (frame, proc_desc);
@@ -2467,6 +2485,15 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
       if (fci->pc == PROC_LOW_ADDR (proc_desc)
 	  && !PROC_DESC_IS_DUMMY (proc_desc))
 	fci->frame = read_next_frame_reg (fci->next, SP_REGNUM);
+      else if (USE_GENERIC_DUMMY_FRAMES
+	       && PC_IN_CALL_DUMMY (fci->pc, 0, 0))
+	/* Do not ``fix'' fci->frame.  It will have the value of the
+           generic dummy frame's top-of-stack (since the draft
+           fci->frame is obtained by returning the unwound stack
+           pointer) and that is what we want.  That way the fci->frame
+           value will match the top-of-stack value that was saved as
+           part of the dummy frames data.  */
+	/* Do nothing.  */;
       else
 	fci->frame = get_frame_pointer (fci->next, proc_desc);
 
@@ -3691,7 +3718,7 @@ mips_push_register (CORE_ADDR * sp, int regno)
       offset = 0;
     }
   *sp -= regsize;
-  read_register_gen (regno, buffer);
+  deprecated_read_register_gen (regno, buffer);
   write_memory (*sp, buffer + offset, regsize);
 }
 
@@ -3783,8 +3810,15 @@ mips_pop_frame (void)
   register int regnum;
   struct frame_info *frame = get_current_frame ();
   CORE_ADDR new_sp = FRAME_FP (frame);
-
   mips_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
+
+  if (USE_GENERIC_DUMMY_FRAMES
+      && PC_IN_CALL_DUMMY (frame->pc, 0, 0))
+    {
+      generic_pop_dummy_frame ();
+      flush_cached_frames ();
+      return;
+    }
 
   write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
   if (frame->saved_regs == NULL)
@@ -5558,7 +5592,7 @@ mips_find_abi_section (bfd *abfd, asection *sect, void *obj)
     *abip = MIPS_ABI_O32;
   else if (strcmp (name, ".mdebug.abiN32") == 0)
     *abip = MIPS_ABI_N32;
-  else if (strcmp (name, ".mdebug.abiN64") == 0)
+  else if (strcmp (name, ".mdebug.abi64") == 0)
     *abip = MIPS_ABI_N64;
   else if (strcmp (name, ".mdebug.abiO64") == 0)
     *abip = MIPS_ABI_O64;
@@ -5956,22 +5990,38 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
+#if OLD_STYLE_MIPS_DUMMY_FRAMES
   set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
+#else
+  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
+#endif
   set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, mips_call_dummy_address);
   set_gdbarch_push_return_address (gdbarch, mips_push_return_address);
+#if OLD_STYLE_MIPS_DUMMY_FRAMES
   set_gdbarch_push_dummy_frame (gdbarch, mips_push_dummy_frame);
+#else
+  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
+#endif
   set_gdbarch_pop_frame (gdbarch, mips_pop_frame);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, mips_fix_call_dummy);
+#if OLD_STYLE_MIPS_DUMMY_FRAMES
   set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
+#else
+  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
+#endif
   set_gdbarch_call_dummy_words (gdbarch, mips_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (mips_call_dummy_words));
   set_gdbarch_push_return_address (gdbarch, mips_push_return_address);
   set_gdbarch_frame_align (gdbarch, mips_frame_align);
+#if OLD_STYLE_MIPS_DUMMY_FRAMES
+#else
+  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+#endif
   set_gdbarch_register_convertible (gdbarch, mips_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch, 
 					   mips_register_convert_to_virtual);
@@ -6010,7 +6060,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_register_virtual_type (gdbarch, mips_register_virtual_type);
   set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
 
-  set_gdbarch_do_registers_info (gdbarch, mips_do_registers_info);
+  set_gdbarch_deprecated_do_registers_info (gdbarch, mips_do_registers_info);
   set_gdbarch_pc_in_sigtramp (gdbarch, mips_pc_in_sigtramp);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
@@ -6143,12 +6193,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: CAUSE_REGNUM = %d\n",
 		      CAUSE_REGNUM);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: CPLUS_MARKER = %c\n",
-		      CPLUS_MARKER);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: DO_REGISTERS_INFO # %s\n",
-		      XSTRING (DO_REGISTERS_INFO));
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: DWARF_REG_TO_REGNUM # %s\n",
 		      XSTRING (DWARF_REG_TO_REGNUM (REGNUM)));

@@ -1035,19 +1035,17 @@ sigtramp_saved_pc (struct frame_info *frame)
   buf = alloca (ptrbytes);
   /* Get sigcontext address, it is the third parameter on the stack.  */
   if (frame->next)
-    sigcontext_addr = read_memory_integer (FRAME_ARGS_ADDRESS (frame->next)
-					   + FRAME_ARGS_SKIP
-					   + sigcontext_offs,
-					   ptrbytes);
+    sigcontext_addr = read_memory_typed_address
+      (FRAME_ARGS_ADDRESS (frame->next) + FRAME_ARGS_SKIP + sigcontext_offs,
+       builtin_type_void_data_ptr);
   else
-    sigcontext_addr = read_memory_integer (read_register (SP_REGNUM)
-					   + sigcontext_offs,
-					   ptrbytes);
+    sigcontext_addr = read_memory_typed_address
+      (read_register (SP_REGNUM) + sigcontext_offs, builtin_type_void_data_ptr);
 
   /* Don't cause a memory_error when accessing sigcontext in case the stack
      layout has changed or the stack is corrupt.  */
   target_read_memory (sigcontext_addr + SIGCONTEXT_PC_OFFSET, buf, ptrbytes);
-  return extract_unsigned_integer (buf, ptrbytes);
+  return extract_typed_address (buf, builtin_type_void_data_ptr);
 }
 #endif /* SIGCONTEXT_PC_OFFSET */
 
@@ -1151,8 +1149,8 @@ static struct dummy_frame *dummy_frame_stack = NULL;
 
 /* Function: find_dummy_frame(pc, fp, sp)
 
-   Search the stack of dummy frames for one matching the given PC, FP
-   and SP.  Unlike PC_IN_CALL_DUMMY, this function doesn't need to
+   Search the stack of dummy frames for one matching the given PC and
+   FP/SP.  Unlike PC_IN_CALL_DUMMY, this function doesn't need to
    adjust for DECR_PC_AFTER_BREAK.  This is because it is only legal
    to call this function after the PC has been adjusted.  */
 
@@ -1163,12 +1161,37 @@ generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 
   for (dummyframe = dummy_frame_stack; dummyframe != NULL;
        dummyframe = dummyframe->next)
-    if ((pc >= dummyframe->call_lo && pc < dummyframe->call_hi)
-	&& (fp == dummyframe->fp
-	    || fp == dummyframe->sp
-	    || fp == dummyframe->top))
-      /* The frame in question lies between the saved fp and sp, inclusive */
+    {
+      /* Does the PC fall within the dummy frame's breakpoint
+         instruction.  If not, discard this one.  */
+      if (!(pc >= dummyframe->call_lo && pc < dummyframe->call_hi))
+	continue;
+      /* Does the FP match?  */
+      if (dummyframe->top != 0)
+	{
+	  /* If the target architecture explicitly saved the
+	     top-of-stack before the inferior function call, assume
+	     that that same architecture will always pass in an FP
+	     (frame base) value that eactly matches that saved TOS.
+	     Don't check the saved SP and SP as they can lead to false
+	     hits.  */
+	  if (fp != dummyframe->top)
+	    continue;
+	}
+      else
+	{
+	  /* An older target that hasn't explicitly or implicitly
+             saved the dummy frame's top-of-stack.  Try matching the
+             FP against the saved SP and FP.  NOTE: If you're trying
+             to fix a problem with GDB not correctly finding a dummy
+             frame, check the comments that go with FRAME_ALIGN() and
+             SAVE_DUMMY_FRAME_TOS().  */
+	  if (fp != dummyframe->fp && fp != dummyframe->sp)
+	    continue;
+	}
+      /* The FP matches this dummy frame.  */
       return dummyframe->regcache;
+    }
 
   return 0;
 }
@@ -1265,7 +1288,7 @@ generic_push_dummy_frame (void)
 
   dummy_frame->pc = read_pc ();
   dummy_frame->sp = read_sp ();
-  dummy_frame->top = dummy_frame->sp;
+  dummy_frame->top = 0;
   dummy_frame->fp = fp;
   regcache_cpy (dummy_frame->regcache, current_regcache);
   dummy_frame->next = dummy_frame_stack;
@@ -1527,9 +1550,10 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
    The argument RAW_BUFFER must point to aligned memory.  */
 
 void
-generic_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
-			    struct frame_info *frame, int regnum,
-			    enum lval_type *lval)
+deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
+				       CORE_ADDR *addrp,
+				       struct frame_info *frame, int regnum,
+				       enum lval_type *lval)
 {
   if (!target_has_registers)
     error ("No registers.");
@@ -1595,7 +1619,7 @@ generic_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
   if (addrp)
     *addrp = REGISTER_BYTE (regnum);
   if (raw_buffer)
-    read_register_gen (regnum, raw_buffer);
+    deprecated_read_register_gen (regnum, raw_buffer);
 }
 
 void

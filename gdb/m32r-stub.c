@@ -210,8 +210,16 @@ handle_exception(int exceptionVector)
   unsigned char   buf[16];
   int binary;
 
-  if (!finish_from_step())
-    return;		/* "false step": let the target continue */
+  /* Do not call finish_from_step() if this is not a trap #1
+   * (breakpoint trap).  Without this check, the finish_from_step()
+   * might interpret a system call trap as a single step trap.  This
+   * can happen if: the stub receives 's' and exits, but an interrupt
+   * was pending; the interrupt is now handled and causes the stub to
+   * be reentered because some function makes a system call.  
+   */
+  if (exceptionVector == 1)	/* Trap exception? */
+    if (!finish_from_step())	/* Go see if stepping state needs update. */
+      return;		/* "false step": let the target continue */
 
   gdb_m32r_vector = exceptionVector;
 

@@ -1104,7 +1104,11 @@ address_info (char *exp, int from_tty)
 	  printf_filtered ("Symbol \"");
 	  fprintf_symbol_filtered (gdb_stdout, exp,
 				   current_language->la_language, DMGL_ANSI);
-	  printf_filtered ("\" is a field of the local class variable `this'\n");
+	  printf_filtered ("\" is a field of the local class variable ");
+	  if (current_language->la_language == language_objc)
+	    printf_filtered ("`self'\n");	/* ObjC equivalent of "this" */
+	  else
+	    printf_filtered ("`this'\n");
 	  return;
 	}
 
@@ -1275,10 +1279,16 @@ address_info (char *exp, int from_tty)
       }
       break;
 
-    case LOC_THREAD_LOCAL_STATIC:
+    case LOC_HP_THREAD_LOCAL_STATIC:
       printf_filtered (
 			"a thread-local variable at offset %ld from the thread base register %s",
 			val, REGISTER_NAME (basereg));
+      break;
+
+    case LOC_THREAD_LOCAL_STATIC:
+      printf_filtered ("a thread-local variable at offset %ld in the "
+                       "thread-local storage for `%s'",
+                       val, SYMBOL_OBJFILE (sym)->name);
       break;
 
     case LOC_OPTIMIZED_OUT:

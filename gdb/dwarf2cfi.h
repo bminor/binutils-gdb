@@ -22,6 +22,37 @@
 #ifndef DWARF2CFI_H
 #define DWARF2CFI_H
 
+struct context_reg
+{
+  union
+  {
+    unsigned int reg;
+    long offset;
+    CORE_ADDR addr;
+  }
+  loc;
+  enum
+  {
+    REG_CTX_UNSAVED,
+    REG_CTX_SAVED_OFFSET,
+    REG_CTX_SAVED_REG,
+    REG_CTX_SAVED_ADDR,
+    REG_CTX_VALUE,
+  }
+  how;
+};
+
+/* This is the register and unwind state for a particular frame.  */
+struct context
+{
+  struct context_reg *reg;
+
+  CORE_ADDR cfa;
+  CORE_ADDR ra;
+  void *lsda;
+  int args_size;
+};
+
 /* Return the frame address.  */
 CORE_ADDR cfi_read_fp ();
 
@@ -53,7 +84,7 @@ CORE_ADDR cfi_get_ra (struct frame_info *fi);
    The argument RAW_BUFFER must point to aligned memory.  */
 void cfi_get_saved_register (char *raw_buffer,
 			     int *optimized,
-			     CORE_ADDR * addrp,
+			     CORE_ADDR *addrp,
 			     struct frame_info *frame,
 			     int regnum, enum lval_type *lval);
 
@@ -63,4 +94,7 @@ void cfi_get_saved_register (char *raw_buffer,
 void cfi_virtual_frame_pointer (CORE_ADDR pc, int *frame_regnum,
 				LONGEST * frame_offset);
 
+struct context *context_alloc ();
+void context_cpy (struct context *dst, struct context *src);
+struct frame_state *frame_state_alloc ();
 #endif

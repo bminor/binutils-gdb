@@ -1128,9 +1128,10 @@ _initialize_event_loop (void)
 void
 gdb_setup_readline (void)
 {
-  /* This function is a noop for the async case.  The assumption is that
-     the async setup is ALL done in gdb_init, and we would only mess it up
-     here.  The async stuff should really go away over time. */
+
+  /* This function is a noop for the sync case.  The assumption is that
+     the sync setup is ALL done in gdb_init, and we would only mess it up
+     here.  The sync stuff should really go away over time. */
 
   if (event_loop_p)
     {

@@ -535,8 +535,12 @@ static CORE_ADDR
 i386_frame_saved_pc (struct frame_info *frame)
 {
   if (PC_IN_CALL_DUMMY (frame->pc, 0, 0))
-    return deprecated_read_register_dummy (frame->pc, frame->frame,
-					   PC_REGNUM);
+    {
+      ULONGEST pc;
+
+      frame_unwind_unsigned_register (frame, PC_REGNUM, &pc);
+      return pc;
+    }
 
   if (frame->signal_handler_caller)
     return i386_sigtramp_saved_pc (frame);
@@ -834,7 +838,7 @@ i386_do_pop_frame (struct frame_info *frame)
       if (addr)
 	{
 	  read_memory (addr, regbuf, REGISTER_RAW_SIZE (regnum));
-	  write_register_gen (regnum, regbuf);
+	  deprecated_write_register_gen (regnum, regbuf);
 	}
     }
   write_register (FP_REGNUM, read_memory_integer (fp, 4));
@@ -1039,25 +1043,17 @@ i386_store_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
-/* Extract from an array REGBUF containing the (raw) register state
-   the address in which a function should return its structure value,
-   as a CORE_ADDR.  */
+/* Extract from REGCACHE, which contains the (raw) register state, the
+   address in which a function should return its structure value, as a
+   CORE_ADDR.  */
 
 static CORE_ADDR
 i386_extract_struct_value_address (struct regcache *regcache)
 {
-  /* NOTE: cagney/2002-08-12: Replaced a call to
-     regcache_raw_read_as_address() with a call to
-     regcache_cooked_read_unsigned().  The old, ...as_address function
-     was eventually calling extract_unsigned_integer (via
-     extract_address) to unpack the registers value.  The below is
-     doing an unsigned extract so that it is functionally equivalent.
-     The read needs to be cooked as, otherwise, it will never
-     correctly return the value of a register in the [NUM_REGS
-     .. NUM_REGS+NUM_PSEUDO_REGS) range.  */
-  ULONGEST val;
-  regcache_cooked_read_unsigned (regcache, LOW_RETURN_REGNUM, &val);
-  return val;
+  ULONGEST addr;
+
+  regcache_raw_read_unsigned (regcache, LOW_RETURN_REGNUM, &addr);
+  return addr;
 }
 
 

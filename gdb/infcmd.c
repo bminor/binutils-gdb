@@ -42,17 +42,23 @@
 #include "parser-defs.h"
 #include "regcache.h"
 
-/* Functions exported for general use: */
-
-void nofp_registers_info (char *, int);
+/* Functions exported for general use, in inferior.h: */
 
 void all_registers_info (char *, int);
 
 void registers_info (char *, int);
 
-/* Local functions: */
+void nexti_command (char *, int);
+
+void stepi_command (char *, int);
 
 void continue_command (char *, int);
+
+void interrupt_target_command (char *args, int from_tty);
+
+/* Local functions: */
+
+static void nofp_registers_info (char *, int);
 
 static void print_return_value (int struct_return, struct type *value_type);
 
@@ -72,8 +78,6 @@ static void float_info (char *, int);
 
 static void detach_command (char *, int);
 
-static void interrupt_target_command (char *args, int from_tty);
-
 static void unset_environment_command (char *, int);
 
 static void set_environment_command (char *, int);
@@ -91,10 +95,6 @@ static void jump_command (char *, int);
 static void step_1 (int, int, char *);
 static void step_once (int skip_subroutines, int single_inst, int count);
 static void step_1_continuation (struct continuation_arg *arg);
-
-void nexti_command (char *, int);
-
-void stepi_command (char *, int);
 
 static void next_command (char *, int);
 
@@ -983,7 +983,7 @@ run_stack_dummy (CORE_ADDR addr, struct regcache *buffer)
       struct breakpoint *bpt;
       struct symtab_and_line sal;
 
-      INIT_SAL (&sal);		/* initialize to zeroes */
+      init_sal (&sal);		/* initialize to zeroes */
       if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
 	{
 	  sal.pc = CALL_DUMMY_ADDRESS ();
@@ -1571,10 +1571,9 @@ default_print_registers_info (struct gdbarch *gdbarch,
   char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
   char *virtual_buffer = alloca (MAX_REGISTER_VIRTUAL_SIZE);
 
-  /* FIXME: cagney/2002-03-08: This should be deprecated.  */
-  if (DO_REGISTERS_INFO_P ())
+  if (DEPRECATED_DO_REGISTERS_INFO_P ())
     {
-      DO_REGISTERS_INFO (regnum, print_all);
+      DEPRECATED_DO_REGISTERS_INFO (regnum, print_all);
       return;
     }
 
@@ -1729,7 +1728,7 @@ all_registers_info (char *addr_exp, int from_tty)
   registers_info (addr_exp, 1);
 }
 
-void
+static void
 nofp_registers_info (char *addr_exp, int from_tty)
 {
   registers_info (addr_exp, 0);
@@ -1891,14 +1890,7 @@ detach_command (char *args, int from_tty)
 
 /* Stop the execution of the target while running in async mode, in
    the backgound. */
-
 void
-interrupt_target_command_wrapper (char *args, int from_tty)
-{
-  interrupt_target_command (args, from_tty);
-}
-
-static void
 interrupt_target_command (char *args, int from_tty)
 {
   if (event_loop_p && target_can_async_p ())

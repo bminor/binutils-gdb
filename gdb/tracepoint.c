@@ -73,10 +73,6 @@ extern int addressprint;	/* Print machine addresses? */
  */  
 
 extern void output_command (char *, int);
-extern void registers_info (char *, int);
-extern void args_info (char *, int);
-extern void locals_info (char *, int);
-
 
 /* If this definition isn't overridden by the header files, assume
    that isatty and fileno exist on this system.  */

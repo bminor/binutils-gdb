@@ -150,16 +150,16 @@ struct coff_symfile_info
     CORE_ADDR toc_offset;
   };
 
-static struct complaint storclass_complaint =
+static struct deprecated_complaint storclass_complaint =
 {"Unexpected storage class: %d", 0, 0};
 
-static struct complaint bf_notfound_complaint =
+static struct deprecated_complaint bf_notfound_complaint =
 {"line numbers off, `.bf' symbol not found", 0, 0};
 
-static struct complaint ef_complaint =
+static struct deprecated_complaint ef_complaint =
 {"Mismatched .ef symbol ignored starting at symnum %d", 0, 0};
 
-static struct complaint eb_complaint =
+static struct deprecated_complaint eb_complaint =
 {"Mismatched .eb symbol ignored starting at symnum %d", 0, 0};
 
 static void xcoff_initial_scan (struct objfile *, int);
@@ -483,7 +483,7 @@ record_include_begin (struct coff_symbol *cs)
       /* This can happen with old versions of GCC.
          GCC 2.3.3-930426 does not exhibit this on a test case which
          a user said produced the message for him.  */
-      static struct complaint msg =
+      static struct deprecated_complaint msg =
       {"Nested C_BINCL symbols", 0, 0};
       complain (&msg);
     }
@@ -502,7 +502,7 @@ record_include_end (struct coff_symbol *cs)
 
   if (inclDepth == 0)
     {
-      static struct complaint msg =
+      static struct deprecated_complaint msg =
       {"Mismatched C_BINCL/C_EINCL pair", 0, 0};
       complain (&msg);
     }
@@ -766,7 +766,7 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset, unsigned endoff
     {
       if (endoffset >= limit_offset)
 	{
-	  static struct complaint msg =
+	  static struct deprecated_complaint msg =
 	  {"Bad line table offset in C_EINCL directive", 0, 0};
 	  complain (&msg);
 	  return;
@@ -864,7 +864,7 @@ static char *
 xcoff_next_symbol_text (struct objfile *objfile)
 {
   struct internal_syment symbol;
-  static struct complaint msg =
+  static struct deprecated_complaint msg =
   {"Unexpected symbol continuation", 0, 0};
   char *retval;
   /* FIXME: is this the same as the passed arg? */
@@ -1332,7 +1332,7 @@ read_xcoff_symtab (struct partial_symtab *pst)
 	case C_UNTAG:
 	case C_ENTAG:
 	  {
-	    static struct complaint msg =
+	    static struct deprecated_complaint msg =
 	    {"Unrecognized storage class %d.", 0, 0};
 	    complain (&msg, cs->c_sclass);
 	  }
@@ -1603,7 +1603,7 @@ read_symbol (struct internal_syment *symbol, int symno)
   ->symtbl;
   if (symno < 0 || symno >= nsyms)
     {
-      static struct complaint msg =
+      static struct deprecated_complaint msg =
       {"Invalid symbol offset", 0, 0};
       complain (&msg);
       symbol->n_value = 0;
@@ -2442,7 +2442,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 
 	default:
 	  {
-	    static struct complaint msg =
+	    static struct deprecated_complaint msg =
 	    {"Storage class %d not recognized during scan", 0, 0};
 	    complain (&msg, sclass);
 	  }
@@ -2565,7 +2565,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 	case C_STSYM:
 	  {
 
-	    static struct complaint function_outside_compilation_unit = {
+	    static struct deprecated_complaint function_outside_compilation_unit = {
 	      "function `%s' appears to be defined outside of all compilation units", 0, 0
 	    };
 

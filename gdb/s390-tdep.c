@@ -1595,10 +1595,10 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
         else if (is_double_arg (type)
                  && gr <= 5)
           {
-            write_register_gen (S390_GP0_REGNUM + gr,
-                                VALUE_CONTENTS (arg));
-            write_register_gen (S390_GP0_REGNUM + gr + 1,
-                                VALUE_CONTENTS (arg) + 4);
+            deprecated_write_register_gen (S390_GP0_REGNUM + gr,
+					   VALUE_CONTENTS (arg));
+            deprecated_write_register_gen (S390_GP0_REGNUM + gr + 1,
+					   VALUE_CONTENTS (arg) + 4);
             gr += 2;
           }
         else

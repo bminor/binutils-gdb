@@ -128,8 +128,8 @@ EXTERN int n_this_object_header_files;
 
 EXTERN int n_allocated_this_object_header_files;
 
-extern struct complaint unknown_symtype_complaint;
-extern struct complaint unknown_symchar_complaint;
+extern struct deprecated_complaint unknown_symtype_complaint;
+extern struct deprecated_complaint unknown_symchar_complaint;
 
 extern struct type *read_type (char **, struct objfile *);
 

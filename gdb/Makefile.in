@@ -550,7 +550,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	nlmread.c \
 	objfiles.c osabi.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c printcmd.c \
-	regcache.c remote.c \
+	regcache.c reggroups.c remote.c \
 	scm-exp.c scm-lang.c scm-valprint.c serial.c ser-unix.c source.c \
 	stabsread.c stack.c std-regs.c symfile.c symmisc.c symtab.c \
 	target.c thread.c top.c tracepoint.c typeprint.c \
@@ -699,6 +699,7 @@ ppc_tdep_h = ppc-tdep.h $(osabi_h)
 ppcnbsd_tdep_h = ppcnbsd-tdep.h
 proc_utils_h = proc-utils.h
 regcache_h = regcache.h
+reggroups_h = reggroups.h
 remote_utils_h = remote-utils.h $(target_h)
 remote_h = remote.h
 scm_lang_h = scm-lang.h $(scm_tags_h)
@@ -855,7 +856,8 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	nlmread.o serial.o mdebugread.o top.o utils.o \
 	ui-file.o \
 	frame.o doublest.o \
-	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o cp-support.o
+	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o cp-support.o \
+	reggroups.o
 
 OBS = $(COMMON_OBS) $(ANNOTATE_OBS)
 
@@ -1686,7 +1688,7 @@ gdbarch.o: gdbarch.c $(defs_h) $(arch_utils_h) $(gdbcmd_h) $(inferior_h) \
 	$(gdb_string_h) $(symtab_h) $(frame_h) $(inferior_h) $(breakpoint_h) \
 	$(gdb_wait_h) $(gdbcore_h) $(gdbcmd_h) $(target_h) $(gdbthread_h) \
 	$(annotate_h) $(symfile_h) $(value_h) $(symcat_h) $(floatformat_h) \
-	$(gdb_assert_h) $(gdb_string_h) $(gdb_events_h)
+	$(gdb_assert_h) $(gdb_string_h) $(gdb_events_h) $(reggroups_h)
 gdbtypes.o: gdbtypes.c $(defs_h) $(gdb_string_h) $(bfd_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(gdbtypes_h) $(expression_h) \
 	$(language_h) $(target_h) $(value_h) $(demangle_h) $(complaints_h) \
@@ -1763,8 +1765,10 @@ i386nbsd-tdep.o: i386nbsd-tdep.c $(defs_h) $(gdbtypes_h) $(gdbcore_h) \
 	$(regcache_h) $(arch_utils_h) $(i386_tdep_h) $(i387_tdep_h) \
 	$(nbsd_tdep_h) $(solib_svr4_h)
 i386obsd-nat.o: i386obsd-nat.c $(defs_h)
+i386obsd-tdep.o: i386obsd-tdep.c $(defs_h) $(arch_utils_h) $(gdbcore_h) \
+	$(regcache_h) $(i386_tdep_h) $(i387_tdep_h)
 i386v-nat.o: i386v-nat.c $(defs_h) $(frame_h) $(inferior_h) $(language_h) \
-	$(gdbcore_h) $(gdb_stat_h) $(floatformat_h) $(target_h)
+	$(gdbcore_h) $(gdb_stat_h) $(floatformat_h) $(target_h) $(i386_tdep_h)
 i386v4-nat.o: i386v4-nat.c $(defs_h) $(value_h) $(inferior_h) $(regcache_h) \
 	$(i386_tdep_h) $(i387_tdep_h) $(gregset_h)
 i387-tdep.o: i387-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(language_h) \
@@ -1825,7 +1829,7 @@ lin-lwp.o: lin-lwp.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(gdb_wait_h) \
 	$(gdbthread_h) $(inferior_h) $(target_h) $(regcache_h) $(gdbcmd_h)
 linespec.o: linespec.c $(defs_h) $(symtab_h) $(frame_h) $(command_h) \
 	$(symfile_h) $(objfiles_h) $(demangle_h) $(value_h) $(completer_h) \
-	$(cp_abi_h) $(source_h)
+	$(cp_abi_h) $(source_h) $(parser_defs_h)
 linux-proc.o: linux-proc.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(gregset_h) $(gdbcore_h) $(gdbthread_h) $(elf_bfd_h) \
 	$(cli_decode_h) $(gdb_string_h)
@@ -1979,7 +1983,7 @@ ppc-linux-tdep.o: ppc-linux-tdep.c $(defs_h) $(frame_h) $(inferior_h) \
 	$(symtab_h) $(target_h) $(gdbcore_h) $(gdbcmd_h) $(symfile_h) \
 	$(objfiles_h) $(regcache_h) $(value_h) $(solib_svr4_h) $(ppc_tdep_h)
 ppc-sysv-tdep.o: ppc-sysv-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
-	$(regcache_h) $(value_h) $(ppc_tdep_h)
+	$(regcache_h) $(value_h) $(gdb_string_h) $(ppc_tdep_h)
 ppcbug-rom.o: ppcbug-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h)
 ppcnbsd-nat.o: ppcnbsd-nat.c $(defs_h) $(inferior_h) $(ppc_tdep_h) \
@@ -2004,8 +2008,10 @@ procfs.o: procfs.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 ptx4-nat.o: ptx4-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h) \
 	$(gregset_h)
 regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(gdbarch_h) \
-	$(gdbcmd_h) $(regcache_h) $(gdb_assert_h) $(gdb_string_h) \
-	$(gdbcmd_h)
+	$(gdbcmd_h) $(regcache_h) $(reggroups_h) $(gdb_assert_h) \
+	$(gdb_string_h) $(gdbcmd_h)
+reggroups.o: reggroups.c $(defs_h) $(reggroups_h) $(gdbtypes_h) \
+	$(gdb_assert_h) $(regcache_h) $(command_h) $(gdbcmd_h)
 remote-array.o: remote-array.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(gdb_string_h) $(command_h) $(serial_h) $(monitor_h) \
 	$(remote_utils_h) $(inferior_h) $(version_h) $(regcache_h)
@@ -2132,7 +2138,8 @@ solib-legacy.o: solib-legacy.c $(defs_h) $(gdbcore_h) $(solib_svr4_h)
 solib-osf.o: solib-osf.c $(defs_h) $(gdb_string_h) $(bfd_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(target_h) $(inferior_h) $(solist_h)
 solib-sunos.o: solib-sunos.c $(defs_h) $(gdb_string_h) $(symtab_h) $(bfd_h) \
-	$(symfile_h) $(objfiles_h) $(gdbcore_h) $(inferior_h) $(solist_h)
+	$(symfile_h) $(objfiles_h) $(gdbcore_h) $(inferior_h) $(solist_h) \
+	$(bcache_h) $(regcache_h)
 solib-svr4.o: solib-svr4.c $(defs_h) $(elf_external_h) $(elf_common_h) \
 	$(elf_mips_h) $(symtab_h) $(bfd_h) $(symfile_h) $(objfiles_h) \
 	$(gdbcore_h) $(target_h) $(inferior_h) $(solist_h) $(solib_svr4_h)
@@ -2347,7 +2354,7 @@ install-gdbtk:
 	else \
 	  true ; \
 	fi ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs $(bindir)
+	$(SHELL) $(srcdir)/../mkinstalldirs $(bindir); \
 	$(INSTALL_PROGRAM) insight$(EXEEXT) $(bindir)/$$transformed_name$(EXEEXT) ; \
 	$(SHELL) $(srcdir)/../mkinstalldirs $(GDBTK_LIBRARY) ; \
 	$(SHELL) $(srcdir)/../mkinstalldirs $(libdir)/insight$(GDBTK_VERSION) ; \
@@ -2506,7 +2513,7 @@ mi-main.o: $(srcdir)/mi/mi-main.c $(defs_h) $(target_h) $(inferior_h) \
 	$(gdb_string_h) $(top_h) $(gdbthread_h) $(mi_cmds_h) $(mi_parse_h) \
 	$(mi_getopt_h) $(mi_console_h) $(ui_out_h) $(mi_out_h) \
 	$(event_loop_h) $(event_top_h) $(gdbcore_h) $(value_h) $(regcache_h) \
-	$(gdb_h)
+	$(gdb_h) $(frame_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-main.c
 mi-out.o: $(srcdir)/mi/mi-out.c $(defs_h) $(ui_out_h) $(mi_out_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-out.c

@@ -1375,8 +1375,8 @@ ia64_get_saved_register (char *raw_buffer,
 	         + ((regnum - IA64_FR32_REGNUM) + rrb_fr) % 96;
 	}
 
-      generic_get_saved_register (raw_buffer, optimized, addrp, frame,
-                                  regnum, lval);
+      deprecated_generic_get_saved_register (raw_buffer, optimized, addrp,
+					     frame, regnum, lval);
     }
 }
 

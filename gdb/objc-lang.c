@@ -34,7 +34,7 @@
 #include "value.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "string.h"		/* for strchr */
+#include "gdb_string.h"		/* for strchr */
 #include "target.h"		/* for target_has_execution */
 #include "gdbcore.h"
 #include "gdbcmd.h"
@@ -74,11 +74,11 @@ struct objc_method {
 
 /* Complaints about ObjC classes, selectors, etc.  */
 
-static struct complaint noclass_lookup_complaint = {
+static struct deprecated_complaint noclass_lookup_complaint = {
   "no way to lookup Objective-C classes", 0, 0
 };
 
-static struct complaint nosel_lookup_complaint = {
+static struct deprecated_complaint nosel_lookup_complaint = {
   "no way to lookup Objective-C selectors", 0, 0
 };
 
@@ -266,9 +266,10 @@ objc_demangle (const char *mangled)
       while (*cp && *cp == '_')
 	cp++;			/* skip any initial underbars in class name */
 
-      if (!(cp = strchr(cp, '_')))	/* find first non-initial underbar */
+      cp = strchr(cp, '_');
+      if (!cp)	                /* find first non-initial underbar */
 	{
-	  free(demangled);	/* not mangled name */
+	  xfree(demangled);	/* not mangled name */
 	  return NULL;
 	}
       if (cp[1] == '_') {	/* easy case: no category name     */
@@ -277,9 +278,10 @@ objc_demangle (const char *mangled)
       }
       else {
 	*cp++ = '(';		/* less easy case: category name */
-	if (!(cp = strchr(cp, '_')))
+	cp = strchr(cp, '_');
+	if (!cp)
 	  {
-	    free(demangled);	/* not mangled name */
+	    xfree(demangled);	/* not mangled name */
 	    return NULL;
 	  }
 	*cp++ = ')';
@@ -739,7 +741,7 @@ add_msglist(struct stoken *str, int addcolon)
   s = (char *)xmalloc(len);
   strcpy(s, msglist_sel);
   strncat(s, p, plen);
-  free(msglist_sel);
+  xfree(msglist_sel);
   msglist_sel = s;
   if (addcolon) {
     s[len-2] = ':';
@@ -764,9 +766,9 @@ end_msglist(void)
   if (!selid)
     error("Can't find selector \"%s\"", p);
   write_exp_elt_longcst (selid);
-  free(p);
+  xfree(p);
   write_exp_elt_longcst (val);	/* Number of args */
-  free(sel);
+  xfree(sel);
 
   return val;
 }
@@ -805,12 +807,14 @@ compare_selectors (void *a, void *b)
 {
   char *aname, *bname;
 
-  if ((aname = SYMBOL_SOURCE_NAME (*(struct symbol **) a)) == NULL ||
-      (bname = SYMBOL_SOURCE_NAME (*(struct symbol **) b)) == NULL)
+  aname = SYMBOL_SOURCE_NAME (*(struct symbol **) a);
+  bname = SYMBOL_SOURCE_NAME (*(struct symbol **) b);
+  if (aname == NULL || bname == NULL)
     error ("internal: compare_selectors(1)");
 
-  if ((aname = strchr(aname, ' ')) == NULL ||
-      (bname = strchr(bname, ' ')) == NULL)
+  aname = strchr(aname, ' ');
+  bname = strchr(bname, ' ');
+  if (aname == NULL || bname == NULL)
     error ("internal: compare_selectors(2)");
 
   return specialcmp (aname+1, bname+1);
@@ -870,7 +874,8 @@ selectors_info (char *regexp, int from_tty)
   ALL_MSYMBOLS (objfile, msymbol)
     {
       QUIT;
-      if ((name = SYMBOL_DEMANGLED_NAME (msymbol)) == NULL)
+      name = SYMBOL_DEMANGLED_NAME (msymbol);
+      if (name == NULL)
 	name = SYMBOL_NAME (msymbol);
       if (name &&
 	 (name[0] == '-' || name[0] == '+') &&
@@ -902,7 +907,8 @@ selectors_info (char *regexp, int from_tty)
       ALL_MSYMBOLS (objfile, msymbol)
 	{
 	  QUIT;
-	  if ((name = SYMBOL_DEMANGLED_NAME (msymbol)) == NULL)
+	  name = SYMBOL_DEMANGLED_NAME (msymbol);
+	  if (name == NULL)
 	    name = SYMBOL_NAME (msymbol);
 	  if (name &&
 	     (name[0] == '-' || name[0] == '+') &&
@@ -927,7 +933,8 @@ selectors_info (char *regexp, int from_tty)
 	  char *p = asel;
 
 	  QUIT;
-	  if ((name = SYMBOL_DEMANGLED_NAME (sym_arr[ix])) == NULL)
+	  name = SYMBOL_DEMANGLED_NAME (sym_arr[ix]);
+	  if (name == NULL)
 	    name = SYMBOL_NAME (sym_arr[ix]);
 	  name = strchr (name, ' ') + 1;
 	  if (p[0] && specialcmp(name, p) == 0)
@@ -958,8 +965,9 @@ compare_classes (void *a, void *b)
 {
   char *aname, *bname;
 
-  if ((aname = SYMBOL_SOURCE_NAME (*(struct symbol **) a)) == NULL ||
-      (bname = SYMBOL_SOURCE_NAME (*(struct symbol **) b)) == NULL)
+  aname = SYMBOL_SOURCE_NAME (*(struct symbol **) a);
+  bname = SYMBOL_SOURCE_NAME (*(struct symbol **) b);
+  if (aname == NULL || bname == NULL)
     error ("internal: compare_classes(1)");
 
   return specialcmp (aname+1, bname+1);
@@ -1009,7 +1017,8 @@ classes_info (char *regexp, int from_tty)
   ALL_MSYMBOLS (objfile, msymbol)
     {
       QUIT;
-      if ((name = SYMBOL_DEMANGLED_NAME (msymbol)) == NULL)
+      name = SYMBOL_DEMANGLED_NAME (msymbol);
+      if (name == NULL)
 	name = SYMBOL_NAME (msymbol);
       if (name &&
 	 (name[0] == '-' || name[0] == '+') &&
@@ -1034,7 +1043,8 @@ classes_info (char *regexp, int from_tty)
       ALL_MSYMBOLS (objfile, msymbol)
 	{
 	  QUIT;
-	  if ((name = SYMBOL_DEMANGLED_NAME (msymbol)) == NULL)
+	  name = SYMBOL_DEMANGLED_NAME (msymbol);
+	  if (name == NULL)
 	    name = SYMBOL_NAME (msymbol);
 	  if (name &&
 	     (name[0] == '-' || name[0] == '+') &&
@@ -1052,7 +1062,8 @@ classes_info (char *regexp, int from_tty)
 	  char *p = aclass;
 
 	  QUIT;
-	  if ((name = SYMBOL_DEMANGLED_NAME (sym_arr[ix])) == NULL)
+	  name = SYMBOL_DEMANGLED_NAME (sym_arr[ix]);
+	  if (name == NULL)
 	    name = SYMBOL_NAME (sym_arr[ix]);
 	  name += 2;
 	  if (p[0] && specialcmp(name, p) == 0)
@@ -1309,8 +1320,8 @@ find_methods (struct symtab *symtab, char type,
 	continue;
 
       if (symtab)
-	if ((SYMBOL_VALUE_ADDRESS (msymbol) <  block->startaddr) ||
-	    (SYMBOL_VALUE_ADDRESS (msymbol) >= block->endaddr))
+	if ((SYMBOL_VALUE_ADDRESS (msymbol) <  BLOCK_START (block)) ||
+	    (SYMBOL_VALUE_ADDRESS (msymbol) >= BLOCK_END (block)))
 	  /* Not in the specified symtab.  */
 	  continue;
 
@@ -1551,12 +1562,14 @@ print_object_command (char *args, int from_tty)
     do_cleanups (old_chain);
   }
 
-  if (!(function = find_function_in_inferior ("_NSPrintForDebugger")))
+  function = find_function_in_inferior ("_NSPrintForDebugger");
+  if (!function)
     error ("Unable to locate _NSPrintForDebugger in child process");
 
   description = call_function_by_hand (function, 1, &object);
 
-  if ((string_addr = value_as_long (description)) == 0)
+  string_addr = value_as_long (description);
+  if (string_addr == 0)
     error ("object returns null description");
 
   read_memory (string_addr + i++, &c, 1);
@@ -1658,7 +1671,7 @@ struct objc_submethod_helper_data {
 };
 
 int 
-find_objc_msgcall_submethod_helper (PTR arg)
+find_objc_msgcall_submethod_helper (void * arg)
 {
   struct objc_submethod_helper_data *s = 
     (struct objc_submethod_helper_data *) arg;
@@ -1681,7 +1694,7 @@ find_objc_msgcall_submethod (CORE_ADDR (*f) (CORE_ADDR, CORE_ADDR *),
   s.new_pc = new_pc;
 
   if (catch_errors (find_objc_msgcall_submethod_helper,
-		    (PTR) &s,
+		    (void *) &s,
 		    "Unable to determine target of Objective-C method call (ignoring):\n",
 		    RETURN_MASK_ALL) == 0) 
     return 1;

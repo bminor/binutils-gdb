@@ -115,7 +115,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
          available?  */
       *realnump = regnum;
       if (bufferp)
-	read_register_gen (regnum, bufferp);
+	deprecated_read_register_gen (regnum, bufferp);
       return;
     }
 
@@ -150,6 +150,40 @@ frame_unwind_unsigned_register (struct frame_info *frame, int regnum,
   frame_register_unwind (frame, regnum, &optimized, &lval, &addr,
 			 &realnum, buf);
   (*val) = extract_unsigned_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
+}
+
+void
+frame_read_unsigned_register (struct frame_info *frame, int regnum,
+			      ULONGEST *val)
+{
+  /* NOTE: cagney/2002-10-31: There is a bit of dogma here - there is
+     always a frame.  Both this, and the equivalent
+     frame_read_signed_register() function, can only be called with a
+     valid frame.  If, for some reason, this function is called
+     without a frame then the problem isn't here, but rather in the
+     caller.  It should of first created a frame and then passed that
+     in.  */
+  /* NOTE: cagney/2002-10-31: As a side bar, keep in mind that the
+     ``current_frame'' should not be treated as a special case.  While
+     ``get_next_frame (current_frame) == NULL'' currently holds, it
+     should, as far as possible, not be relied upon.  In the future,
+     ``get_next_frame (current_frame)'' may instead simply return a
+     normal frame object that simply always gets register values from
+     the register cache.  Consequently, frame code should try to avoid
+     tests like ``if get_next_frame() == NULL'' and instead just rely
+     on recursive frame calls (like the below code) when manipulating
+     a frame chain.  */
+  gdb_assert (frame != NULL);
+  frame_unwind_unsigned_register (get_next_frame (frame), regnum, val);
+}
+
+void
+frame_read_signed_register (struct frame_info *frame, int regnum,
+			    LONGEST *val)
+{
+  /* See note in frame_read_unsigned_register().  */
+  gdb_assert (frame != NULL);
+  frame_unwind_signed_register (get_next_frame (frame), regnum, val);
 }
 
 void
