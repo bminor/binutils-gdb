@@ -1,3 +1,9 @@
+2004-01-14  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/sepdebug.exp: Bail out of the test if we don't know
+	what debug info we have. Print a better message if something goes
+	wrong while producing the separate debug info file.
+
 2004-01-14  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.base/callfuncs.c: Remove explicit declaration of malloc.
