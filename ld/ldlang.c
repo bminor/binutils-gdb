@@ -3286,10 +3286,44 @@ lang_size_sections
     {
       /* If DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END pair was seen, try
 	 to put exp_data_seg.relro on a (common) page boundary.  */
+      bfd_vma old_base, relro_end;
 
       exp_data_seg.phase = exp_dataseg_relro_adjust;
+      old_base = exp_data_seg.base;
+      exp_data_seg.base += (-exp_data_seg.relro_end
+			    & (exp_data_seg.pagesize - 1));
+      /* Compute the expected PT_GNU_RELRO segment end.  */
+      relro_end = (exp_data_seg.relro_end + exp_data_seg.pagesize - 1)
+		  & (exp_data_seg.pagesize - 1);
       result = lang_size_sections_1 (s, output_section_statement, prev, fill,
 				     dot, relax, check_regions);
+      if (exp_data_seg.relro_end > relro_end)
+	{
+	  /* The alignment of sections between DATA_SEGMENT_ALIGN
+	     and DATA_SEGMENT_RELRO_END caused huge padding to be
+	     inserted at DATA_SEGMENT_RELRO_END.  Try some other base.  */
+	  asection *sec;
+	  unsigned int max_alignment_power = 0;
+
+	  /* Find maximum alignment power of sections between
+	     DATA_SEGMENT_ALIGN and DATA_SEGMENT_RELRO_END.  */
+	  for (sec = output_bfd->sections; sec; sec = sec->next)
+	    if (sec->vma >= exp_data_seg.base
+		&& sec->vma < exp_data_seg.relro_end
+		&& sec->alignment_power > max_alignment_power)
+	      max_alignment_power = sec->alignment_power;
+
+	  if (((bfd_vma) 1 << max_alignment_power) < exp_data_seg.pagesize)
+	    {
+	      if (exp_data_seg.base - (1 << max_alignment_power)
+		  < old_base)
+		exp_data_seg.base += exp_data_seg.pagesize;
+	      exp_data_seg.base -= (1 << max_alignment_power);
+	      result = lang_size_sections_1 (s, output_section_statement,
+					     prev, fill, dot, relax,
+					     check_regions);
+	    }
+	}
       link_info.relro_start = exp_data_seg.base;
       link_info.relro_end = exp_data_seg.relro_end;
     }

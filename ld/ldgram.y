@@ -808,8 +808,8 @@ exp	:
 			{ $$ = exp_binop(ALIGN_K,$3,$5); }
 	|	DATA_SEGMENT_ALIGN '(' exp ',' exp ')'
 			{ $$ = exp_binop (DATA_SEGMENT_ALIGN, $3, $5); }
-	|	DATA_SEGMENT_RELRO_END '(' exp ')'
-			{ $$ = exp_unop(DATA_SEGMENT_RELRO_END, $3); }
+	|	DATA_SEGMENT_RELRO_END '(' exp ',' exp ')'
+			{ $$ = exp_binop (DATA_SEGMENT_RELRO_END, $5, $3); }
 	|	DATA_SEGMENT_END '(' exp ')'
 			{ $$ = exp_unop(DATA_SEGMENT_END, $3); }
 	|	BLOCK '(' exp ')'

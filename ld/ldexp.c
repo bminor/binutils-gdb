@@ -265,25 +265,6 @@ fold_unary (etree_type *tree,
 	    result.valid_p = FALSE;
 	  break;
 
-	case DATA_SEGMENT_RELRO_END:
-	  if (allocation_done != lang_first_phase_enum
-	      && (exp_data_seg.phase == exp_dataseg_align_seen
-		  || exp_data_seg.phase == exp_dataseg_adjust
-		  || exp_data_seg.phase == exp_dataseg_relro_adjust
-		  || allocation_done != lang_allocating_phase_enum))
-	    {
-	      if (exp_data_seg.phase == exp_dataseg_align_seen
-		  || exp_data_seg.phase == exp_dataseg_relro_adjust)
-		exp_data_seg.relro_end
-		  = result.value + current_section->bfd_section->vma;
-	      if (exp_data_seg.phase == exp_dataseg_align_seen)
-		exp_data_seg.phase = exp_dataseg_relro_seen;
-	      result.value = dot - current_section->bfd_section->vma;
-	    }
-	  else
-	    result.valid_p = FALSE;
-	  break;
-
 	case DATA_SEGMENT_END:
 	  if (allocation_done != lang_first_phase_enum
 	      && current_section == abs_output_section
@@ -422,13 +403,7 @@ fold_binary (etree_type *tree,
 
 		  result.value = align_n (dot, maxpage);
 		  if (exp_data_seg.phase == exp_dataseg_relro_adjust)
-		    {
-		      /* Attempt to align DATA_SEGMENT_RELRO_END at
-			 a common page boundary.  */
-		      exp_data_seg.base += (-exp_data_seg.relro_end
-					    & (other.value - 1));
-		      result.value = exp_data_seg.base;
-		    }
+		    result.value = exp_data_seg.base;
 		  else if (exp_data_seg.phase != exp_dataseg_adjust)
 		    {
 		      result.value += dot & (maxpage - 1);
@@ -443,6 +418,32 @@ fold_binary (etree_type *tree,
 		  else if (other.value < maxpage)
 		    result.value += (dot + other.value - 1)
 				    & (maxpage - other.value);
+		}
+	      else
+		result.valid_p = FALSE;
+	      break;
+
+	    case DATA_SEGMENT_RELRO_END:
+	      if (allocation_done != lang_first_phase_enum
+		  && (exp_data_seg.phase == exp_dataseg_align_seen
+		      || exp_data_seg.phase == exp_dataseg_adjust
+		      || exp_data_seg.phase == exp_dataseg_relro_adjust
+		      || allocation_done != lang_allocating_phase_enum))
+		{
+		  if (exp_data_seg.phase == exp_dataseg_align_seen
+		      || exp_data_seg.phase == exp_dataseg_relro_adjust)
+		    exp_data_seg.relro_end
+		      = result.value + other.value;
+		  if (exp_data_seg.phase == exp_dataseg_relro_adjust
+		      && (exp_data_seg.relro_end
+			  & (exp_data_seg.pagesize - 1)))
+		    {
+		      exp_data_seg.relro_end += exp_data_seg.pagesize - 1;
+		      exp_data_seg.relro_end &= ~(exp_data_seg.pagesize - 1);
+		      result.value = exp_data_seg.relro_end - other.value;
+		    }
+		  if (exp_data_seg.phase == exp_dataseg_align_seen)
+		    exp_data_seg.phase = exp_dataseg_relro_seen;
 		}
 	      else
 		result.valid_p = FALSE;

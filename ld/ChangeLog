@@ -1,3 +1,21 @@
+2004-10-04  Jakub Jelinek  <jakub@redhat.com>
+
+	* ldgram.y (DATA_SEGMENT_RELRO_END): Add one argument.
+	* scripttempl/elf.sc (DATA_SEGMENT_RELRO_END): Add 0 as first
+	argument.
+	(DATA_SEGMENT_RELRO_GOTPLT_END): Pass $SEPARATE_GOTPLT as first
+	and . as second argument.
+	(GOTPLT): Move $DATA_SEGMENT_RELRO_GOTPLT_END before the section.
+	* ldexp.c (fold_unary): Remove DATA_SEGMENT_RELRO_END handling here.
+	(fold_binary): Add it here.  Insert padding to make relro_end
+	COMMONPAGESIZE bytes aligned.  For DATA_SEGMENT_ALIGN in
+	exp_dataseg_relro_adjust phase just use previously computed
+	exp_data_seg.base.
+	* ldlang.c (lang_size_sections): Set exp_data_seg.base for
+	relro_adjust here.  Call lang_size_sections_1 once more if there
+	was too big padding at DATA_SEGMENT_RELRO_END.
+	* ld.texinfo (DATA_SEGMENT_RELRO_END): Add documentation.
+
 2004-10-01  Paul Brook  <paul@codesourcery.com>
 
 	* emulparams/armelf.sh: Add unwinding table sections.

@@ -4545,6 +4545,21 @@ evaluation purposes.
   . = DATA_SEGMENT_END(.);
 @end smallexample
 
+@item DATA_SEGMENT_RELRO_END(@var{offset}, @var{exp})
+@kindex DATA_SEGMENT_RELRO_END(@var{offset}, @var{exp})
+This defines the end of the @code{PT_GNU_RELRO} segment when
+@samp{-z relro} option is used.  Second argument is returned.
+When @samp{-z relro} option is not present, @code{DATA_SEGMENT_RELRO_END}
+does nothing, otherwise @code{DATA_SEGMENT_ALIGN} is padded so that
+@var{exp} + @var{offset} is aligned to the most commonly used page
+boundary for particular target.  If present in the linker script,
+it must always come in between @code{DATA_SEGMENT_ALIGN} and
+@code{DATA_SEGMENT_END}.
+
+@smallexample
+  . = DATA_SEGMENT_RELRO_END(24, .);
+@end smallexample
+
 @item DEFINED(@var{symbol})
 @kindex DEFINED(@var{symbol})
 @cindex symbol defaults

@@ -90,9 +90,9 @@ if test -n "${COMMONPAGESIZE}"; then
   DATA_SEGMENT_ALIGN="ALIGN (${SEGMENT_SIZE}) - ((${MAXPAGESIZE} - .) & (${MAXPAGESIZE} - 1)); . = DATA_SEGMENT_ALIGN (${MAXPAGESIZE}, ${COMMONPAGESIZE})"
   DATA_SEGMENT_END=". = DATA_SEGMENT_END (.);"
   if test -n "${SEPARATE_GOTPLT}"; then
-    DATA_SEGMENT_RELRO_GOTPLT_END=". = DATA_SEGMENT_RELRO_END (. + ${SEPARATE_GOTPLT});"
+    DATA_SEGMENT_RELRO_GOTPLT_END=". = DATA_SEGMENT_RELRO_END (${SEPARATE_GOTPLT}, .);"
   else
-    DATA_SEGMENT_RELRO_END=". = DATA_SEGMENT_RELRO_END (.);"
+    DATA_SEGMENT_RELRO_END=". = DATA_SEGMENT_RELRO_END (0, .);"
   fi
 fi
 INTERP=".interp       ${RELOCATING-0} : { *(.interp) }"
@@ -102,7 +102,8 @@ if test -z "$GOT"; then
     GOT=".got          ${RELOCATING-0} : { *(.got.plt) *(.got) }"
   else
     GOT=".got          ${RELOCATING-0} : { *(.got) }"
-    GOTPLT=".got.plt      ${RELOCATING-0} : { ${RELOCATING+${DATA_SEGMENT_RELRO_GOTPLT_END}} *(.got.plt) }"
+    GOTPLT="${RELOCATING+${DATA_SEGMENT_RELRO_GOTPLT_END}}
+  .got.plt      ${RELOCATING-0} : { *(.got.plt) }"
   fi
 fi
 DYNAMIC=".dynamic      ${RELOCATING-0} : { *(.dynamic) }"
