@@ -1,3 +1,20 @@
+2003-07-31  Andrew Cagney  <cagney@redhat.com>
+
+	* user-regs.c (struct user_reg): Add "next" link.
+	(struct user_regs): Replace "user" with "first" and "last" links.
+	(append_user_reg): Add pre-allocated "reg" parameter.
+	(builtin_user_regs): Provide initial value for "last".
+	(user_reg_add_builtin): XMALLOC memory for append_user_reg.
+	(user_regs_init): Allocate memory from the gdbarch obstack.
+	(user_reg_add): GDBARCH_OBSTACK_ZALLOC memory for append_user_reg.
+	(user_reg_map_name_to_regnum): Rewrite to search the user_reg
+	linked list.
+	(usernum_to_user_reg): New function.
+	(user_reg_map_regnum_to_name): Use usernum_to_user_reg.
+	(value_of_user_reg): Use usernum_to_user_reg.
+	(user_regs_free): Delete function.
+	(_initialize_user_regs): Update register_gdbarch_data call.
+
 2003-07-31  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (new_symbol): Use var_decode_location for parameters.

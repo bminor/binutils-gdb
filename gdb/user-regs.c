@@ -42,33 +42,39 @@ struct user_reg
 {
   const char *name;
   struct value *(*read) (struct frame_info * frame);
+  struct user_reg *next;
 };
 
 struct user_regs
 {
-  struct user_reg *user;
-  int nr;
+  struct user_reg *first;
+  struct user_reg **last;
 };
 
 static void
-append_user_reg (struct user_regs *regs,
-		    const char *name, user_reg_read_ftype *read)
+append_user_reg (struct user_regs *regs, const char *name,
+		 user_reg_read_ftype *read, struct user_reg *reg)
 {
-  regs->nr++;
-  regs->user = xrealloc (regs->user,
-			    regs->nr * sizeof (struct user_reg));
-  regs->user[regs->nr - 1].name = name;
-  regs->user[regs->nr - 1].read = read;
+  /* The caller is responsible for allocating memory needed to store
+     the register.  By doing this, the function can operate on a
+     register list stored in the common heap or a specific obstack.  */
+  gdb_assert (reg != NULL);
+  reg->name = name;
+  reg->read = read;
+  reg->next = NULL;
+  (*regs->last) = reg;
+  regs->last = &(*regs->last)->next;
 }
 
 /* An array of the builtin user registers.  */
 
-static struct user_regs builtin_user_regs;
+static struct user_regs builtin_user_regs = { NULL, &builtin_user_regs.first };
 
 void
 user_reg_add_builtin (const char *name, user_reg_read_ftype *read)
 {
-  append_user_reg (&builtin_user_regs, name, read);
+  append_user_reg (&builtin_user_regs, name, read,
+		   XMALLOC (struct user_reg));
 }
 
 /* Per-architecture user registers.  Start with the builtin user
@@ -79,21 +85,13 @@ static struct gdbarch_data *user_regs_data;
 static void *
 user_regs_init (struct gdbarch *gdbarch)
 {
-  int i;
-  struct user_regs *regs = XMALLOC (struct user_regs);
-  memset (regs, 0, sizeof (struct user_regs));
-  for (i = 0; i < builtin_user_regs.nr; i++)
-    append_user_reg (regs, builtin_user_regs.user[i].name,
-		     builtin_user_regs.user[i].read);
+  struct user_reg *reg;
+  struct user_regs *regs = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct user_regs);
+  regs->last = &regs->first;
+  for (reg = builtin_user_regs.first; reg != NULL; reg = reg->next)
+    append_user_reg (regs, reg->name, reg->read,
+		     GDBARCH_OBSTACK_ZALLOC (gdbarch, struct user_reg));
   return regs;
-}
-
-static void
-user_regs_free (struct gdbarch *gdbarch, void *data)
-{
-  struct user_regs *regs = data;
-  xfree (regs->user);
-  xfree (regs);
 }
 
 void
@@ -108,7 +106,8 @@ user_reg_add (struct gdbarch *gdbarch, const char *name,
       regs = user_regs_init (gdbarch);
       set_gdbarch_data (gdbarch, user_regs_data, regs);
     }
-  append_user_reg (regs, name, read);
+  append_user_reg (regs, name, read,
+		   GDBARCH_OBSTACK_ZALLOC (gdbarch, struct user_reg));
 }
 
 int
@@ -139,17 +138,32 @@ user_reg_map_name_to_regnum (struct gdbarch *gdbarch, const char *name,
   /* Search the user name space.  */
   {
     struct user_regs *regs = gdbarch_data (gdbarch, user_regs_data);
-    int reg;
-    for (reg = 0; reg < regs->nr; reg++)
+    struct user_reg *reg;
+    int nr;
+    for (nr = 0, reg = regs->first; reg != NULL; reg = reg->next, nr++)
       {
-	if ((len < 0 && strcmp (regs->user[reg].name, name))
-	    || (len == strlen (regs->user[reg].name)
-		&& strncmp (regs->user[reg].name, name, len) == 0))
-	  return NUM_REGS + NUM_PSEUDO_REGS + reg;
+	if ((len < 0 && strcmp (reg->name, name))
+	    || (len == strlen (reg->name)
+		&& strncmp (reg->name, name, len) == 0))
+	  return NUM_REGS + NUM_PSEUDO_REGS + nr;
       }
   }
 
   return -1;
+}
+
+static struct user_reg *
+usernum_to_user_reg (struct gdbarch *gdbarch, int usernum)
+{
+  struct user_regs *regs = gdbarch_data (gdbarch, user_regs_data);
+  struct user_reg *reg;
+  for (reg = regs->first; reg != NULL; reg = reg->next)
+    {
+      if (usernum == 0)
+	return reg;
+      usernum--;
+    }
+  return NULL;
 }
 
 const char *
@@ -157,24 +171,29 @@ user_reg_map_regnum_to_name (struct gdbarch *gdbarch, int regnum)
 {
   int maxregs = (gdbarch_num_regs (gdbarch)
 		 + gdbarch_num_pseudo_regs (gdbarch));
-  struct user_regs *regs = gdbarch_data (gdbarch, user_regs_data);
   if (regnum < 0)
     return NULL;
-  if (regnum < maxregs)
+  else if (regnum < maxregs)
     return gdbarch_register_name (gdbarch, regnum);
-  if (regnum < (maxregs + regs->nr))
-    return regs->user[regnum - maxregs].name;
-  return NULL;
+  else
+    {
+      struct user_reg *reg = usernum_to_user_reg (gdbarch, regnum - maxregs);
+      if (reg == NULL)
+	return NULL;
+      else
+	return reg->name;
+    }
 }
 
 struct value *
 value_of_user_reg (int regnum, struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct user_regs *regs = gdbarch_data (gdbarch, user_regs_data);
-  int reg = regnum - (NUM_REGS + NUM_PSEUDO_REGS);
-  gdb_assert (reg >= 0 && reg < regs->nr);
-  return regs->user[reg].read (frame);
+  int maxregs = (gdbarch_num_regs (gdbarch)
+		 + gdbarch_num_pseudo_regs (gdbarch));
+  struct user_reg *reg = usernum_to_user_reg (gdbarch, regnum - maxregs);
+  gdb_assert (reg != NULL);
+  return reg->read (frame);
 }
 
 extern initialize_file_ftype _initialize_user_regs; /* -Wmissing-prototypes */
@@ -182,5 +201,5 @@ extern initialize_file_ftype _initialize_user_regs; /* -Wmissing-prototypes */
 void
 _initialize_user_regs (void)
 {
-  user_regs_data = register_gdbarch_data (user_regs_init, user_regs_free);
+  user_regs_data = register_gdbarch_data (user_regs_init, NULL);
 }
