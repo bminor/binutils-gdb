@@ -570,6 +570,8 @@ array_open(args, name, from_tty)
 {
   char packet[PBUFSIZ];
 
+  baud_rate = 4800;		/* this is the only supported baud rate */
+
   if (args == NULL)
     error ("Use `target %s DEVICE-NAME' to use a serial port, or \n\
 `target %s HOST-NAME:PORT-NUMBER' to use a network connection.", name, name);
@@ -1419,6 +1421,5 @@ void
 _initialize_array ()
 {
   add_target (&array_ops);
-  baud_rate = 4800;			/* this is the only supported baud rate */
 }
 
