@@ -99,6 +99,12 @@ generic_return_value_on_stack_not (struct type *type)
   return 0;
 }
 
+CORE_ADDR
+generic_skip_trampoline_code (CORE_ADDR pc)
+{
+  return 0;
+}
+
 char *
 legacy_register_name (int i)
 {

@@ -120,14 +120,6 @@ static int may_follow_exec = MAY_FOLLOW_EXEC;
 #endif
 
 
-/* Some machines have trampoline code that sits between function callers
-   and the actual functions themselves.  If this machine doesn't have
-   such things, disable their processing.  */
-
-#ifndef SKIP_TRAMPOLINE_CODE
-#define	SKIP_TRAMPOLINE_CODE(pc)	0
-#endif
-
 /* Dynamic function trampolines are similar to solib trampolines in that they
    are between the caller and the callee.  The difference is that when you
    enter a dynamic trampoline, you can't determine the callee's address.  Some

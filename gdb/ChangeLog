@@ -1,3 +1,12 @@
+2001-08-15  Corinna Vinschen  <vinschen@redhat.com>
+
+	* arch-utils.c (generic_skip_trampoline_code): New function.
+	* arch-utils.h (generic_skip_trampoline_code): Declare external.
+	* gdbarch.c: Regeberated from gdbarch.sh.
+	* gdbarch.h: Ditto.
+	* gdbarch.sh (SKIP_TRAMPOLINE_CODE): Multi-arch.
+	* infrun.c: Remove default setting of SKIP_TRAMPOLINE_CODE macro.
+
 2001-08-14  Daniel Jacobowitz  <drow@mvista.com>
 	    H.J. Lu  (hjl@gnu.org)
 

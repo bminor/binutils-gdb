@@ -249,6 +249,7 @@ struct gdbarch
   gdbarch_convert_from_func_ptr_addr_ftype *convert_from_func_ptr_addr;
   gdbarch_addr_bits_remove_ftype *addr_bits_remove;
   gdbarch_software_single_step_ftype *software_single_step;
+  gdbarch_skip_trampoline_code_ftype *skip_trampoline_code;
 };
 
 
@@ -334,6 +335,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   generic_get_saved_register,
+  0,
   0,
   0,
   0,
@@ -482,6 +484,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->extra_stack_alignment_needed = 1;
   gdbarch->convert_from_func_ptr_addr = core_addr_identity;
   gdbarch->addr_bits_remove = core_addr_identity;
+  gdbarch->skip_trampoline_code = generic_skip_trampoline_code;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -777,6 +780,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of convert_from_func_ptr_addr, invalid_p == 0 */
   /* Skip verify of addr_bits_remove, invalid_p == 0 */
   /* Skip verify of software_single_step, has predicate */
+  /* Skip verify of skip_trampoline_code, invalid_p == 0 */
 }
 
 
@@ -1467,6 +1471,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: %s # %s\n",
                       "SOFTWARE_SINGLE_STEP(sig, insert_breakpoints_p)",
                       XSTRING (SOFTWARE_SINGLE_STEP (sig, insert_breakpoints_p)));
+#endif
+#ifdef SKIP_TRAMPOLINE_CODE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "SKIP_TRAMPOLINE_CODE(pc)",
+                      XSTRING (SKIP_TRAMPOLINE_CODE (pc)));
 #endif
 #ifdef TARGET_ARCHITECTURE
   if (TARGET_ARCHITECTURE != NULL)
@@ -2199,6 +2209,13 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: SOFTWARE_SINGLE_STEP = 0x%08lx\n",
                         (long) current_gdbarch->software_single_step
                         /*SOFTWARE_SINGLE_STEP ()*/);
+#endif
+#ifdef SKIP_TRAMPOLINE_CODE
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: SKIP_TRAMPOLINE_CODE = 0x%08lx\n",
+                        (long) current_gdbarch->skip_trampoline_code
+                        /*SKIP_TRAMPOLINE_CODE ()*/);
 #endif
   if (current_gdbarch->dump_tdep != NULL)
     current_gdbarch->dump_tdep (current_gdbarch, file);
@@ -4311,6 +4328,24 @@ set_gdbarch_software_single_step (struct gdbarch *gdbarch,
                                   gdbarch_software_single_step_ftype software_single_step)
 {
   gdbarch->software_single_step = software_single_step;
+}
+
+CORE_ADDR
+gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  if (gdbarch->skip_trampoline_code == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_skip_trampoline_code invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_skip_trampoline_code called\n");
+  return gdbarch->skip_trampoline_code (pc);
+}
+
+void
+set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch,
+                                  gdbarch_skip_trampoline_code_ftype skip_trampoline_code)
+{
+  gdbarch->skip_trampoline_code = skip_trampoline_code;
 }
 
 
