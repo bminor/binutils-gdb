@@ -26,15 +26,11 @@ AR =
 INCDIR = $(srcdir)/../include-cygnus
 CSEARCH = -I$(INCDIR)
 
-# These things now done from host specific Makefile fragments.
-#CSWITCHES = -g  # -Wall
-#CDEFINES = # -DHOST_SYS=AIX_SYS # -DCOFF_TIMESTAMP -DANSI_LIBRARIES
-
 #### host and target dependent Makefile fragments come in here.
 ###
 
-TARG = libbfd.a
-CFLAGS = -g $(CDEFINES) $(CSEARCH) $(CSWITCHES) # -DINTEL960VERSION
+TARGETLIB = libbfd.a
+CFLAGS = -g $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) # -DINTEL960VERSION
 
 
 BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
@@ -50,22 +46,48 @@ SYSDEP_H=$(INCDIR)/sysdep.h
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
 	 sunos.c icoff.c b.out.c  srec.c oasys.c ieee.c m88k-bcs.c
 
-all: $(TARG) 
+STAGESTUFF = $(TARGETLIB) $(OFILES)
 
-POINTOS = $(BFD_LIBS) $(BFD_BACKENDS)
+all: $(TARGETLIB) 
 
-$(TARG): $(POINTOS)
-	 rm -f $(TARG)
-	 ar clq $(TARG) $(BFD_LIBS) $(BFD_BACKENDS)
-	 ranlib $(TARG)
+OFILES = $(BFD_LIBS) $(BFD_BACKENDS)
+
+$(TARGETLIB): $(OFILES)
+	 rm -f $(TARGETLIB)
+	 ar clq $(TARGETLIB) $(OFILES)
+	 ranlib $(TARGETLIB)
+
+stage1: force
+	- mkdir stage1
+	- mv -f $(STAGESTUFF) stage1
+
+stage2: force
+	- mkdir stage2
+	- mv -f $(STAGESTUFF) stage2
+
+stage3: force
+	- mkdir stage3
+	- mv -f $(STAGESTUFF) stage3
+
+de-stage1: force
+	- (cd stage1 ; mv -f $(STAGESTUFF) ..)
+	- rmdir stage1
+
+de-stage2: force
+	- (cd stage2 ; mv -f $(STAGESTUFF) ..)
+	- rmdir stage2
+
+de-stage3: force
+	- (cd stage3 ; mv -f $(STAGESTUFF) ..)
+	- rmdir stage3
 
 tags etags: TAGS
 
-TAGS: .force
+TAGS: force
 	etags $(INCDIR)/*.h *.h *.c
 
 clean:
-	rm -f $(BFD_LIBS) $(BFD_BACKENDS) *~ core libbfd.a
+	rm -f *.[oa] *~ core *.E
 
 clobber realclean: clean
 	rm -f libbfd.a TAGS
@@ -131,8 +153,7 @@ roll:
 
 # Dummy target to force execution of dependent targets.
 #
-.force:
-FORCE:
+force:
 
 install:
 
