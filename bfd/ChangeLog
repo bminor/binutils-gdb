@@ -1,5 +1,8 @@
 Thu Mar 13 14:08:53 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elflink.h (elf_link_add_object_symbols): Don't warn about type
+	or size changes because of a weak symbol.
+
 	* cisco-core.c (SIGEMT): Define if not defined.
 
 Wed Mar 12 21:36:05 1997  Ian Lance Taylor  <ian@cygnus.com>

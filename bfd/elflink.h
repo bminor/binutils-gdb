@@ -861,9 +861,11 @@ elf_link_add_object_symbols (abfd, info)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
 	  /* It's OK to change the type if it used to be a weak
-             definition.  */
+             definition, or if the current definition is weak (and
+             hence might be ignored).  */
 	  if (h->root.type == bfd_link_hash_defweak
-	      || h->root.type == bfd_link_hash_undefweak)
+	      || h->root.type == bfd_link_hash_undefweak
+	      || bind == STB_WEAK)
 	    type_change_ok = true;
 
 	  /* It's OK to change the size if it used to be a weak
