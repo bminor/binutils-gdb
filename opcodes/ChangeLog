@@ -1,3 +1,28 @@
+2001-09-20  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* fr30-opc.c: Fix compile time warning messages.
+	* i370-opc.c: Fix compile time warning messages.
+	* i960-dis.c: Fix compile time warning messages.
+	* m32r-asm.c: Fix compile time warning messages.
+	* m32r-desc.c: Fix compile time warning messages.
+	* m32r-dis.c: Fix compile time warning messages.
+	* m32r-ibld.c: Fix compile time warning messages.
+	* m32r-opc.c: Fix compile time warning messages.
+	* m32r-opinst.c: Fix compile time warning messages.
+	* ns32k-dis.c: Fix compile time warning messages.
+	* openrisc-asm.c: Fix compile time warning messages.
+	* openrisc-desc.c: Fix compile time warning messages.
+	* openrisc-dis.c: Fix compile time warning messages.
+	* openrisc-ibld.c: Fix compile time warning messages.
+	* openrisc-opc.c: Fix compile time warning messages.
+	* pdp11-dis.c: Fix compile time warning messages.
+	* tic54x-dis.c: Fix compile time warning messages.
+	* v850-opc.c: Fix compile time warning messages.
+	* vax-dis.c: Fix compile time warning messages.
+	* w65-opc.h: Fix compile time warning messages.
+	* z8k-opc.h: Fix compile time warning messages.
+	* z8kgen.c: Fix compile time warning messages.
+
 2001-09-19  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* arm-dis.c:   Fix compile time warning messages.

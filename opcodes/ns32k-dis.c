@@ -635,20 +635,20 @@ print_insn_arg (d, ioffset, aoffsetp, buffer, addr, result, index_offset)
 	      break;
 	    case 'W':
 	      Ivalue = bit_extract (buffer, *aoffsetp, 16);
-	      flip_bytes (&Ivalue, 2);
+	      flip_bytes ((char *) & Ivalue, 2);
 	      *aoffsetp += 16;
 	      Ivalue = sign_extend (Ivalue, 16);
 	      sprintf (result, "$%d", Ivalue);
 	      break;
 	    case 'D':
 	      Ivalue = bit_extract (buffer, *aoffsetp, 32);
-	      flip_bytes (&Ivalue, 4);
+	      flip_bytes ((char *) & Ivalue, 4);
 	      *aoffsetp += 32;
 	      sprintf (result, "$%d", Ivalue);
 	      break;
 	    case 'F':
 	      bit_copy (buffer, *aoffsetp, 32, (char *) &Fvalue);
-	      flip_bytes (&Fvalue, 4);
+	      flip_bytes ((char *) & Fvalue, 4);
 	      *aoffsetp += 32;
 	      if (INVALID_FLOAT (&Fvalue, 4))
 		sprintf (result, "<<invalid float 0x%.8x>>", *(int *) &Fvalue);
@@ -657,7 +657,7 @@ print_insn_arg (d, ioffset, aoffsetp, buffer, addr, result, index_offset)
 	      break;
 	    case 'L':
 	      bit_copy (buffer, *aoffsetp, 64, (char *) &Lvalue);
-	      flip_bytes (&Lvalue, 8);
+	      flip_bytes ((char *) & Lvalue, 8);
 	      *aoffsetp += 64;
 	      if (INVALID_FLOAT (&Lvalue, 8))
 		sprintf (result, "<<invalid long 0x%.8x%.8x>>",
@@ -840,13 +840,13 @@ get_displacement (buffer, aoffsetp)
       break;
     case 0x80:
       Ivalue2 = bit_extract (buffer, *aoffsetp, 16);
-      flip_bytes (&Ivalue2, 2);
+      flip_bytes ((char *) & Ivalue2, 2);
       Ivalue = sign_extend (Ivalue2, 14);
       *aoffsetp += 16;
       break;
     case 0xc0:
       Ivalue = bit_extract (buffer, *aoffsetp, 32);
-      flip_bytes (&Ivalue, 4);
+      flip_bytes ((char *) & Ivalue, 4);
       Ivalue = sign_extend (Ivalue, 30);
       *aoffsetp += 32;
       break;

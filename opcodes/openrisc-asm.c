@@ -35,6 +35,7 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #include "openrisc-opc.h"
 #include "opintl.h"
 #include "xregex.h"
+#include "libiberty.h"
 
 #undef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -43,6 +44,14 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 
 static const char * parse_insn_normal
      PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *, const char **, CGEN_FIELDS *));
+long openrisc_sign_extend_16bit
+     PARAMS ((long));
+static const char * parse_hi16
+     PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
+static const char * parse_lo16
+     PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
+const char * openrisc_cgen_parse_operand
+     PARAMS ((CGEN_CPU_DESC, int, const char **, CGEN_FIELDS *));
 
 /* -- assembler routines inserted here */
 
@@ -181,7 +190,7 @@ openrisc_cgen_parse_operand (cd, opindex, strp, fields)
 {
   const char * errmsg = NULL;
   /* Used by scalar operands that still need to be parsed.  */
-  long junk;
+  long junk ATTRIBUTE_UNUSED;
 
   switch (opindex)
     {
@@ -276,7 +285,7 @@ char *
 openrisc_cgen_build_insn_regex (insn)
      CGEN_INSN *insn;
 {  
-  CGEN_OPCODE *opc = CGEN_INSN_OPCODE (insn);
+  CGEN_OPCODE *opc = (CGEN_OPCODE *) CGEN_INSN_OPCODE (insn);
   const char *mnem = CGEN_INSN_MNEMONIC (insn);
   int mnem_len;
   char rxbuf[CGEN_MAX_RX_ELEMENTS];

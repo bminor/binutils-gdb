@@ -33,6 +33,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "opintl.h"
 #include "libiberty.h"
 
+static void               init_tables               PARAMS ((void));
+static const CGEN_MACH *  lookup_mach_via_bfd_name  PARAMS ((const CGEN_MACH *, const char *));
+static void               build_hw_table            PARAMS ((CGEN_CPU_TABLE *));
+static void               build_ifield_table        PARAMS ((CGEN_CPU_TABLE *));
+static void               build_operand_table       PARAMS ((CGEN_CPU_TABLE *));
+static void               build_insn_table          PARAMS ((CGEN_CPU_TABLE *));
+static void               m32r_cgen_rebuild_tables  PARAMS ((CGEN_CPU_TABLE *));
 /* Attributes.  */
 
 static const CGEN_ATTR_ENTRY bool_attr[] =

@@ -35,10 +35,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* The hash functions are recorded here to help keep assembler code out of
    the disassembler and vice versa.  */
 
-static int asm_hash_insn_p PARAMS ((const CGEN_INSN *));
-static unsigned int asm_hash_insn PARAMS ((const char *));
-static int dis_hash_insn_p PARAMS ((const CGEN_INSN *));
-static unsigned int dis_hash_insn PARAMS ((const char *, CGEN_INSN_INT));
+static int           asm_hash_insn_p     PARAMS ((const CGEN_INSN *));
+static unsigned int  asm_hash_insn       PARAMS ((const char *));
+static int           dis_hash_insn_p     PARAMS ((const CGEN_INSN *));
+static unsigned int  dis_hash_insn       PARAMS ((const char *, CGEN_INSN_INT));
+static void          set_fields_bitsize  PARAMS ((CGEN_FIELDS *, int));
 
 /* Instruction formats.  */
 
@@ -594,7 +595,7 @@ static const CGEN_OPCODE openrisc_cgen_macro_insn_opcode_table[] =
 
 static int
 asm_hash_insn_p (insn)
-     const CGEN_INSN *insn;
+     const CGEN_INSN *insn ATTRIBUTE_UNUSED;
 {
   return CGEN_ASM_HASH_P (insn);
 }
@@ -645,7 +646,7 @@ asm_hash_insn (mnem)
 static unsigned int
 dis_hash_insn (buf, value)
      const char * buf;
-     CGEN_INSN_INT value;
+     CGEN_INSN_INT value ATTRIBUTE_UNUSED;
 {
   return CGEN_DIS_HASH (buf, value);
 }

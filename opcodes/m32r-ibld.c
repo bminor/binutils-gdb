@@ -58,7 +58,18 @@ static int extract_insn_normal
 	      CGEN_INSN_INT, CGEN_FIELDS *, bfd_vma));
 static void put_insn_int_value
      PARAMS ((CGEN_CPU_DESC, CGEN_INSN_BYTES_PTR, int, int, CGEN_INSN_INT));
-
+const char * m32r_cgen_insert_operand
+     PARAMS ((CGEN_CPU_DESC, int, CGEN_FIELDS *, CGEN_INSN_BYTES_PTR, bfd_vma));
+int m32r_cgen_extract_operand
+     PARAMS ((CGEN_CPU_DESC, int, CGEN_EXTRACT_INFO *, CGEN_INSN_INT, CGEN_FIELDS *, bfd_vma));
+int m32r_cgen_get_int_operand
+     PARAMS ((CGEN_CPU_DESC, int, const CGEN_FIELDS *));
+bfd_vma m32r_cgen_get_vma_operand
+     PARAMS ((CGEN_CPU_DESC, int, const CGEN_FIELDS *));
+void m32r_cgen_set_int_operand
+     PARAMS ((CGEN_CPU_DESC, int, CGEN_FIELDS *, int));
+void m32r_cgen_set_vma_operand
+     PARAMS ((CGEN_CPU_DESC, int, CGEN_FIELDS *, bfd_vma));
 
 /* Operand insertion.  */
 
@@ -797,7 +808,7 @@ cgen_extract_fn * const m32r_cgen_extract_handlers[] =
 
 int
 m32r_cgen_get_int_operand (cd, opindex, fields)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      int opindex;
      const CGEN_FIELDS * fields;
 {
@@ -887,7 +898,7 @@ m32r_cgen_get_int_operand (cd, opindex, fields)
 
 bfd_vma
 m32r_cgen_get_vma_operand (cd, opindex, fields)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      int opindex;
      const CGEN_FIELDS * fields;
 {
@@ -982,7 +993,7 @@ m32r_cgen_get_vma_operand (cd, opindex, fields)
 
 void
 m32r_cgen_set_int_operand (cd, opindex, fields, value)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      int opindex;
      CGEN_FIELDS * fields;
      int value;
@@ -1068,7 +1079,7 @@ m32r_cgen_set_int_operand (cd, opindex, fields, value)
 
 void
 m32r_cgen_set_vma_operand (cd, opindex, fields, value)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      int opindex;
      CGEN_FIELDS * fields;
      bfd_vma value;

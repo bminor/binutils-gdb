@@ -34,42 +34,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* two-word opcodes */
 #define two(x,y)	((unsigned int) (x) | ((unsigned int) (y) << 16))
 
-static long unsigned int insert_d9
-  PARAMS ((long unsigned int, long int, const char **));
-static long unsigned int extract_d9
-  PARAMS ((long unsigned int, int *));
-static long unsigned int insert_d22
-  PARAMS ((long unsigned int, long int, const char **));
-static long unsigned int extract_d22
-  PARAMS ((long unsigned int, int *));
-static long unsigned int insert_d16_15
-  PARAMS ((long unsigned int, long int, const char **));
-static long unsigned int extract_d16_15
-  PARAMS ((long unsigned int, int *));
-static long unsigned int insert_d8_7
-  PARAMS ((long unsigned int, long int, const char **));
-static long unsigned int extract_d8_7 PARAMS ((long unsigned int, int *));
-static long unsigned int insert_d8_6
-  PARAMS ((long unsigned int, long int, const char **));
-static long unsigned int extract_d8_6 PARAMS ((long unsigned int, int *));
-static long unsigned int insert_d5_4
-  PARAMS ((long unsigned int, long int, const char **));
-static long unsigned int extract_d5_4 PARAMS ((long unsigned int, int *));
-static long unsigned int insert_d16_16
-  PARAMS ((long unsigned int, long int, const char **));
-static long unsigned int extract_d16_16 PARAMS ((long unsigned int, int *));
-static long unsigned int insert_i9
-  PARAMS ((long unsigned int, long int, const char **));
-static long unsigned int extract_i9 PARAMS ((long unsigned int, int *));
-static long unsigned int insert_u9
-  PARAMS ((long unsigned int, long unsigned int, const char **));
-static long unsigned int extract_u9 PARAMS ((long unsigned int, int *));
-static long unsigned int insert_spe
-  PARAMS ((long unsigned int, long unsigned int, const char **));
-static long unsigned int extract_spe PARAMS ((long unsigned int, int *));
-static long unsigned int insert_i5div
-  PARAMS ((long unsigned int, long unsigned int, const char **));
-static long unsigned int extract_i5div PARAMS ((long unsigned int, int *));
+static long unsigned insert_d9      PARAMS ((long unsigned, long, const char **));
+static long unsigned extract_d9     PARAMS ((long unsigned, int *));
+static long unsigned insert_d22     PARAMS ((long unsigned, long, const char **));
+static long unsigned extract_d22    PARAMS ((long unsigned, int *));
+static long unsigned insert_d16_15  PARAMS ((long unsigned, long, const char **));
+static long unsigned extract_d16_15 PARAMS ((long unsigned, int *));
+static long unsigned insert_d8_7    PARAMS ((long unsigned, long, const char **));
+static long unsigned extract_d8_7   PARAMS ((long unsigned, int *));
+static long unsigned insert_d8_6    PARAMS ((long unsigned, long, const char **));
+static long unsigned extract_d8_6   PARAMS ((long unsigned, int *));
+static long unsigned insert_d5_4    PARAMS ((long unsigned, long, const char **));
+static long unsigned extract_d5_4   PARAMS ((long unsigned, int *));
+static long unsigned insert_d16_16  PARAMS ((long unsigned, long, const char **));
+static long unsigned extract_d16_16 PARAMS ((long unsigned, int *));
+static long unsigned insert_i9      PARAMS ((long unsigned, long, const char **));
+static long unsigned extract_i9     PARAMS ((long unsigned, int *));
+static long unsigned insert_u9      PARAMS ((long unsigned, long, const char **));
+static long unsigned extract_u9     PARAMS ((long unsigned, int *));
+static long unsigned insert_spe     PARAMS ((long unsigned, long, const char **));
+static long unsigned extract_spe    PARAMS ((long unsigned, int *));
+static long unsigned insert_i5div   PARAMS ((long unsigned, long, const char **));
+static long unsigned extract_i5div  PARAMS ((long unsigned, int *));
 
 
 /* The functions used to insert and extract complicated operands.  */
@@ -322,11 +308,12 @@ extract_i9 (insn, invalid)
 }
 
 static unsigned long
-insert_u9 (insn, value, errmsg)
+insert_u9 (insn, v, errmsg)
      unsigned long insn;
-     unsigned long value;
+     long v;
      const char ** errmsg;
 {
+  unsigned long value = (unsigned long) v;
   if (value > 0x1ff)
     * errmsg = _(immediate_out_of_range);
 
@@ -348,11 +335,13 @@ extract_u9 (insn, invalid)
 }
 
 static unsigned long
-insert_spe (insn, value, errmsg)
+insert_spe (insn, v, errmsg)
      unsigned long insn;
-     unsigned long value;
+     long v;
      const char ** errmsg;
 {
+  unsigned long value = (unsigned long) v;
+
   if (value != 3)
     * errmsg = _("invalid register for stack adjustment");
 
@@ -368,11 +357,13 @@ extract_spe (insn, invalid)
 }
 
 static unsigned long
-insert_i5div (insn, value, errmsg)
+insert_i5div (insn, v, errmsg)
      unsigned long insn;
-     unsigned long value;
+     long v;
      const char ** errmsg;
 {
+  unsigned long value = (unsigned long) v;
+
   if (value > 0x1ff)
     {
       if (value & 1)
@@ -405,7 +396,7 @@ extract_i5div (insn, invalid)
 
 /* Warning: code in gas/config/tc-v850.c examines the contents of this array.
    If you change any of the values here, be sure to look for side effects in
-   that code. */
+   that code.  */
 const struct v850_operand v850_operands[] =
 {
 #define UNUSED	0

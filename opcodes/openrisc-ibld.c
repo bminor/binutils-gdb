@@ -59,7 +59,18 @@ static int extract_insn_normal
 	      CGEN_INSN_INT, CGEN_FIELDS *, bfd_vma));
 static void put_insn_int_value
      PARAMS ((CGEN_CPU_DESC, CGEN_INSN_BYTES_PTR, int, int, CGEN_INSN_INT));
-
+const char * openrisc_cgen_insert_operand
+     PARAMS ((CGEN_CPU_DESC, int, CGEN_FIELDS *, CGEN_INSN_BYTES_PTR, bfd_vma));
+int openrisc_cgen_extract_operand
+     PARAMS ((CGEN_CPU_DESC, int, CGEN_EXTRACT_INFO *, CGEN_INSN_INT, CGEN_FIELDS *, bfd_vma));
+int openrisc_cgen_get_int_operand
+     PARAMS ((CGEN_CPU_DESC, int, const CGEN_FIELDS *));
+bfd_vma openrisc_cgen_get_vma_operand
+     PARAMS ((CGEN_CPU_DESC, int, const CGEN_FIELDS *));
+void openrisc_cgen_set_int_operand
+     PARAMS ((CGEN_CPU_DESC, int, CGEN_FIELDS *, int));
+void openrisc_cgen_set_vma_operand
+     PARAMS ((CGEN_CPU_DESC, int, CGEN_FIELDS *, bfd_vma));
 
 /* Operand insertion.  */
 
@@ -703,6 +714,8 @@ openrisc_cgen_extract_operand (cd, opindex, ex_info, insn_value, fields, pc)
         length = extract_normal (cd, ex_info, insn_value, 0, 0, 25, 5, 32, total_length, pc, & fields->f_i16_2);
         if (length <= 0) break;
 {
+  extern long openrisc_sign_extend_16bit PARAMS ((long));
+  
   FLD (f_i16nc) = openrisc_sign_extend_16bit (((((FLD (f_i16_2)) << (11))) | (FLD (f_i16_1))));
 }
       }
@@ -741,7 +754,7 @@ cgen_extract_fn * const openrisc_cgen_extract_handlers[] =
 
 int
 openrisc_cgen_get_int_operand (cd, opindex, fields)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      int opindex;
      const CGEN_FIELDS * fields;
 {
@@ -801,7 +814,7 @@ openrisc_cgen_get_int_operand (cd, opindex, fields)
 
 bfd_vma
 openrisc_cgen_get_vma_operand (cd, opindex, fields)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      int opindex;
      const CGEN_FIELDS * fields;
 {
@@ -866,7 +879,7 @@ openrisc_cgen_get_vma_operand (cd, opindex, fields)
 
 void
 openrisc_cgen_set_int_operand (cd, opindex, fields, value)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      int opindex;
      CGEN_FIELDS * fields;
      int value;
@@ -923,7 +936,7 @@ openrisc_cgen_set_int_operand (cd, opindex, fields, value)
 
 void
 openrisc_cgen_set_vma_operand (cd, opindex, fields, value)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      int opindex;
      CGEN_FIELDS * fields;
      bfd_vma value;

@@ -47,10 +47,17 @@ static void print_keyword
 static void print_insn_normal
      PARAMS ((CGEN_CPU_DESC, PTR, const CGEN_INSN *, CGEN_FIELDS *,
 	      bfd_vma, int));
-static int print_insn PARAMS ((CGEN_CPU_DESC, bfd_vma,
-			       disassemble_info *, char *, int));
-static int default_print_insn
+static int print_insn
+     PARAMS ((CGEN_CPU_DESC, bfd_vma, disassemble_info *, char *, int));
+static void print_hash
+     PARAMS ((CGEN_CPU_DESC, PTR, long, unsigned, bfd_vma, int));
+static int my_print_insn
      PARAMS ((CGEN_CPU_DESC, bfd_vma, disassemble_info *));
+void m32r_cgen_print_operand
+     PARAMS ((CGEN_CPU_DESC, int, PTR, CGEN_FIELDS *, void const *, bfd_vma, int));
+static int read_insn
+     PARAMS ((CGEN_CPU_DESC, bfd_vma, disassemble_info *, char *, int,
+	      CGEN_EXTRACT_INFO *, unsigned long *));
 
 /* -- disassembler routines inserted here */
 
@@ -68,12 +75,12 @@ do { \
 
 static void
 print_hash (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
-     long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     long value ATTRIBUTE_UNUSED;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   disassemble_info *info = (disassemble_info *) dis_info;
   (*info->fprintf_func) (info->stream, "#");
@@ -156,7 +163,7 @@ m32r_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
      int opindex;
      PTR xinfo;
      CGEN_FIELDS *fields;
-     void const *attrs;
+     void const *attrs ATTRIBUTE_UNUSED;
      bfd_vma pc;
      int length;
 {
@@ -264,7 +271,7 @@ m32r_cgen_init_dis (cd)
 static void
 print_normal (cd, dis_info, value, attrs, pc, length)
 #ifdef CGEN_PRINT_NORMAL
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
 #else
      CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
 #endif
@@ -272,8 +279,8 @@ print_normal (cd, dis_info, value, attrs, pc, length)
      long value;
      unsigned int attrs;
 #ifdef CGEN_PRINT_NORMAL
-     bfd_vma pc;
-     int length;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 #else
      bfd_vma pc ATTRIBUTE_UNUSED;
      int length ATTRIBUTE_UNUSED;
@@ -299,7 +306,7 @@ print_normal (cd, dis_info, value, attrs, pc, length)
 static void
 print_address (cd, dis_info, value, attrs, pc, length)
 #ifdef CGEN_PRINT_NORMAL
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
 #else
      CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
 #endif
@@ -307,8 +314,8 @@ print_address (cd, dis_info, value, attrs, pc, length)
      bfd_vma value;
      unsigned int attrs;
 #ifdef CGEN_PRINT_NORMAL
-     bfd_vma pc;
-     int length;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 #else
      bfd_vma pc ATTRIBUTE_UNUSED;
      int length ATTRIBUTE_UNUSED;
@@ -397,7 +404,7 @@ print_insn_normal (cd, dis_info, insn, fields, pc, length)
    Returns 0 if all is well, non-zero otherwise.  */
 static int
 read_insn (cd, pc, info, buf, buflen, ex_info, insn_value)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      bfd_vma pc;
      disassemble_info *info;
      char *buf;
@@ -475,8 +482,8 @@ print_insn (cd, pc, info, buf, buflen)
 
       /* Base size may exceed this instruction's size.  Extract the
          relevant part from the buffer. */
-      if ((CGEN_INSN_BITSIZE (insn) / 8) < buflen &&
-	  (CGEN_INSN_BITSIZE (insn) / 8) <= sizeof (unsigned long))
+      if ((CGEN_INSN_BITSIZE (insn) / 8) < buflen
+	  && (unsigned) (CGEN_INSN_BITSIZE (insn) / 8) <= sizeof (unsigned long))
 	insn_value_cropped = bfd_get_bits (buf, CGEN_INSN_BITSIZE (insn), 
 					   info->endian == BFD_ENDIAN_BIG);
       else
@@ -491,8 +498,8 @@ print_insn (cd, pc, info, buf, buflen)
 
 	  /* Make sure the entire insn is loaded into insn_value, if it
 	     can fit.  */
-	  if (CGEN_INSN_BITSIZE (insn) > cd->base_insn_bitsize &&
-	      (CGEN_INSN_BITSIZE (insn) / 8) <= sizeof (unsigned long))
+	  if ((unsigned) CGEN_INSN_BITSIZE (insn) > cd->base_insn_bitsize
+	      && ((unsigned) CGEN_INSN_BITSIZE (insn) / 8) <= sizeof (unsigned long))
 	    {
 	      unsigned long full_insn_value;
 	      int rc = read_insn (cd, pc, info, buf,
@@ -530,7 +537,9 @@ print_insn (cd, pc, info, buf, buflen)
 
 #ifndef CGEN_PRINT_INSN
 #define CGEN_PRINT_INSN default_print_insn
-#endif
+
+static int default_print_insn
+     PARAMS ((CGEN_CPU_DESC, bfd_vma, disassemble_info *));
 
 static int
 default_print_insn (cd, pc, info)
@@ -561,6 +570,7 @@ default_print_insn (cd, pc, info)
 
   return print_insn (cd, pc, info, buf, buflen);
 }
+#endif
 
 /* Main entry point.
    Print one instruction from PC on INFO->STREAM.

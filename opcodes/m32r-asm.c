@@ -35,14 +35,19 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #include "m32r-opc.h"
 #include "opintl.h"
 #include "xregex.h"
+#include "libiberty.h"
 
 #undef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #undef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
 
-static const char * parse_insn_normal
-     PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *, const char **, CGEN_FIELDS *));
+static const char * parse_insn_normal       PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *, const char **, CGEN_FIELDS *));
+static const char * parse_hash              PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
+static const char * parse_hi16              PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
+static const char * parse_slo16             PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
+static const char * parse_ulo16             PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
+       const char * m32r_cgen_parse_operand PARAMS ((CGEN_CPU_DESC, int, const char **, CGEN_FIELDS *));
 
 /* -- assembler routines inserted here */
 
@@ -52,10 +57,10 @@ static const char * parse_insn_normal
 
 static const char *
 parse_hash (cd, strp, opindex, valuep)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      const char **strp;
-     int opindex;
-     unsigned long *valuep;
+     int opindex ATTRIBUTE_UNUSED;
+     unsigned long *valuep ATTRIBUTE_UNUSED;
 {
   if (**strp == '#')
     ++*strp;
@@ -352,7 +357,7 @@ char *
 m32r_cgen_build_insn_regex (insn)
      CGEN_INSN *insn;
 {  
-  CGEN_OPCODE *opc = CGEN_INSN_OPCODE (insn);
+  CGEN_OPCODE *opc = (CGEN_OPCODE *) CGEN_INSN_OPCODE (insn);
   const char *mnem = CGEN_INSN_MNEMONIC (insn);
   int mnem_len;
   char rxbuf[CGEN_MAX_RX_ELEMENTS];

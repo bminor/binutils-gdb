@@ -248,7 +248,7 @@ int flags;
 #endif
 char *name;
 unsigned char opcode;
-void (*func)();
+void (*func) PARAMS ((void));
 unsigned int arg_info[4];
 unsigned int byte_info[10];
 int noperands;

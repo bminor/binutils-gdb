@@ -1227,7 +1227,7 @@ gas ()
   printf ("#endif\n");
   printf ("char *name;\n");
   printf ("unsigned char opcode;\n");
-  printf ("void (*func)();\n");
+  printf ("void (*func) PARAMS ((void));\n");
   printf ("unsigned int arg_info[4];\n");
   printf ("unsigned int byte_info[%d];\n", BYTE_INFO_LEN);
   printf ("int noperands;\n");

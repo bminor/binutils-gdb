@@ -112,7 +112,7 @@ print_insn_vax (memaddr, info)
      disassemble_info *info;
 {
   const struct vot *votp;
-  const char *argp = NULL;
+  const char *argp;
   unsigned char *arg;
   struct private priv;
   bfd_byte *buffer = priv.the_buffer;
@@ -120,12 +120,14 @@ print_insn_vax (memaddr, info)
   info->private_data = (PTR) &priv;
   priv.max_fetched = priv.the_buffer;
   priv.insn_start = memaddr;
+
   if (setjmp (priv.bailout) != 0)
     {
       /* Error return.  */
       return -1;
     }
 
+  argp = NULL;
   /* Check if the info buffer has more than one byte left since
      the last opcode might be a single byte with no argument data.  */
   if (info->buffer_length - (memaddr - info->buffer_vma) > 1)

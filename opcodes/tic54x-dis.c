@@ -197,7 +197,8 @@ print_instruction (info, memaddr, opcode, tm_name, tm_operands, size, ext)
   /* string storage for multiple operands */
   char operand[4][64] = { {0},{0},{0},{0}, };
   bfd_byte buf[2];
-  unsigned long opcode2, lkaddr;
+  unsigned long opcode2 = 0;
+  unsigned long lkaddr = 0;
   enum optype src = OP_None;
   enum optype dst = OP_None;
   int i, shift;
