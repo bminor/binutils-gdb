@@ -1,3 +1,10 @@
+Sun Aug  8 13:59:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote.c: Add comments about 'd', 'r', and unrecognized requests.
+
+	* inflow.c (terminal_init_inferior): Don't muck with tty state if
+	gdb_has_a_terminal() is false.
+
 Sun Aug  8 10:07:47 1993  Fred Fish  (fnf@cygnus.com)
 
 	* dwarfread.c (record_minimal_symbol):  Remove prototype and
