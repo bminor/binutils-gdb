@@ -1,5 +1,11 @@
 2003-07-07  Daniel Jacobowitz  <drow@mvista.com>
 
+	* mips-linux-nat.c (mips_linux_cannot_fetch_register)
+	(mips_linux_cannot_store_register): List supported instead of
+	unsupported registers.
+
+2003-07-07  Daniel Jacobowitz  <drow@mvista.com>
+
 	* disasm.c (dump_insns): Separate instructions from addresses.
 
 2003-07-07  Andreas Schwab  <schwab@suse.de>

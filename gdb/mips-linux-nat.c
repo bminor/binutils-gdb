@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux on MIPS processors.
 
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,31 +29,42 @@
 int
 mips_linux_cannot_fetch_register (int regno)
 {
-  if (REGISTER_NAME (regno)[0] == 0)
-    return 1;
-  if (regno == PS_REGNUM)
-    return 1;
-  else if (regno == ZERO_REGNUM)
-    return 1;
-  else
+  if (regno > ZERO_REGNUM && regno < ZERO_REGNUM + 32)
     return 0;
+  else if (regno >= FP0_REGNUM && regno <= FP0_REGNUM + 32)
+    return 0;
+
+  switch (regno)
+    {
+    case LO_REGNUM:
+    case HI_REGNUM:
+    case BADVADDR_REGNUM:
+    case CAUSE_REGNUM:
+    case PC_REGNUM:
+    case FCRCS_REGNUM:
+    case FCRIR_REGNUM:
+      return 0;
+    }
+
+  return 1;
 }
 
 int
 mips_linux_cannot_store_register (int regno)
 {
-  if (REGISTER_NAME (regno)[0] == 0)
-    return 1;
-  if (regno == PS_REGNUM)
-    return 1;
-  else if (regno == ZERO_REGNUM)
-    return 1;
-  else if (regno == BADVADDR_REGNUM)
-    return 1;
-  else if (regno == CAUSE_REGNUM)
-    return 1;
-  else if (regno == FCRIR_REGNUM)
-    return 1;
-  else
+  if (regno > ZERO_REGNUM && regno < ZERO_REGNUM + 32)
     return 0;
+  else if (regno >= FP0_REGNUM && regno <= FP0_REGNUM + 32)
+    return 0;
+
+  switch (regno)
+    {
+    case LO_REGNUM:
+    case HI_REGNUM:
+    case PC_REGNUM:
+    case FCRCS_REGNUM:
+      return 0;
+    }
+
+  return 1;
 }
