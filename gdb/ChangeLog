@@ -1,3 +1,17 @@
+2000-03-04  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* event-loop.c (top-level) [NO_FD_SET]: Deprecate this branch.
+	Print an error at compile time if we are to use select, but FD_SET
+	is not available.
+	(SELECT_MASK, NBBY, FD_SETSIZE, NFDBITS, MASK_SIZE): Define only
+	if HAVE_POLL is not defined and NO_FD_SET *is* defined.
+	(create_file_handler) [!HAVE_POLL]: Use FD_SET and FD_CLR.
+	(delete_file_handler) [!HAVE_POLL]: Use FD_CLR and FD_ISSET.
+	(gdb_wait_for_event) [!HAVE_POLL]: Copy fd_set sets directly
+	instead of using memcpy and memset.  Use FD_ISSET.
+
+	* config/i386/xm-go32.h (fd_mask): Remove typedef.
+
 Mon Mar 20 19:58:45 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* command.c (_initialize_command): Document requirements for ``!''

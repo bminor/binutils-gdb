@@ -36,4 +36,3 @@
 #define DIRNAME_SEPARATOR ';'
 
 #define HOST_I386
-typedef unsigned char fd_mask;

@@ -27,6 +27,7 @@
 #include <poll.h>
 #else
 #include <sys/types.h>
+#include <string.h>
 #endif
 #include <errno.h>
 #include <setjmp.h>
@@ -34,9 +35,14 @@
 
 /* Type of the mask arguments to select. */
 
-#ifndef NO_FD_SET
-#define SELECT_MASK fd_set
-#else
+#ifndef HAVE_POLL
+#ifdef NO_FD_SET
+/* All this stuff below is not required if select is used as God(tm)
+   intended, with the FD_* macros.  Are there any implementations of
+   select which don't have FD_SET and other standard FD_* macros?  I
+   don't think there are, but if I'm wrong, we need to catch them.  */
+#error FD_SET must be defined if select function is to be used!
+
 #ifndef _AIX
 typedef long fd_mask;
 #endif
@@ -44,15 +50,13 @@ typedef long fd_mask;
 #define SELECT_MASK void
 #else
 #define SELECT_MASK int
-#endif
-#endif
+#endif /* !_IBMR2 */
 
 /* Define "NBBY" (number of bits per byte) if it's not already defined. */
 
 #ifndef NBBY
 #define NBBY 8
 #endif
-
 
 /* Define the number of fd_masks in an fd_set */
 
@@ -70,6 +74,9 @@ typedef long fd_mask;
 #define NFDBITS NBBY*sizeof(fd_mask)
 #endif
 #define MASK_SIZE howmany(FD_SETSIZE, NFDBITS)
+
+#endif /* NO_FD_SET */
+#endif /* !HAVE_POLL */
 
 
 typedef struct gdb_event gdb_event;
@@ -192,10 +199,10 @@ static struct
 
     /* Masks to be used in the next call to select.
        Bits are set in response to calls to create_file_handler. */
-    fd_mask check_masks[3 * MASK_SIZE];
+    fd_set check_masks[3];
 
     /* What file descriptors were found ready by select. */
-    fd_mask ready_masks[3 * MASK_SIZE];
+    fd_set ready_masks[3];
 
     /* Number of valid bits (highest fd value + 1). */
     int num_fds;
@@ -487,10 +494,6 @@ create_file_handler (int fd, int mask, handler_func * proc, gdb_client_data clie
 {
   file_handler *file_ptr;
 
-#ifndef HAVE_POLL
-  int index, bit;
-#endif
-
   /* Do we already have a file handler for this file? (We may be
      changing its associated procedure). */
   for (file_ptr = gdb_notifier.first_file_handler; file_ptr != NULL;
@@ -532,23 +535,20 @@ create_file_handler (int fd, int mask, handler_func * proc, gdb_client_data clie
 
 #else /* ! HAVE_POLL */
 
-  index = fd / (NBBY * sizeof (fd_mask));
-  bit = 1 << (fd % (NBBY * sizeof (fd_mask)));
-
   if (mask & GDB_READABLE)
-    gdb_notifier.check_masks[index] |= bit;
+    FD_SET (fd, &gdb_notifier.check_masks[0]);
   else
-    gdb_notifier.check_masks[index] &= ~bit;
+    FD_CLR (fd, &gdb_notifier.check_masks[0]);
 
   if (mask & GDB_WRITABLE)
-    (gdb_notifier.check_masks + MASK_SIZE)[index] |= bit;
+    FD_SET (fd, &gdb_notifier.check_masks[1]);
   else
-    (gdb_notifier.check_masks + MASK_SIZE)[index] &= ~bit;
+    FD_CLR (fd, &gdb_notifier.check_masks[1]);
 
   if (mask & GDB_EXCEPTION)
-    (gdb_notifier.check_masks + 2 * (MASK_SIZE))[index] |= bit;
+    FD_SET (fd, &gdb_notifier.check_masks[2]);
   else
-    (gdb_notifier.check_masks + 2 * (MASK_SIZE))[index] &= ~bit;
+    FD_CLR (fd, &gdb_notifier.check_masks[2]);
 
   if (gdb_notifier.num_fds <= fd)
     gdb_notifier.num_fds = fd + 1;
@@ -562,11 +562,10 @@ void
 delete_file_handler (int fd)
 {
   file_handler *file_ptr, *prev_ptr = NULL;
-  int i, j;
+  int i;
+#ifdef HAVE_POLL
+  int j;
   struct pollfd *new_poll_fds;
-#ifndef HAVE_POLL
-  int index, bit;
-  unsigned long flags;
 #endif
 
   /* Find the entry for the given file. */
@@ -604,36 +603,26 @@ delete_file_handler (int fd)
 
 #else /* ! HAVE_POLL */
 
-  index = fd / (NBBY * sizeof (fd_mask));
-  bit = 1 << (fd % (NBBY * sizeof (fd_mask)));
-
   if (file_ptr->mask & GDB_READABLE)
-    gdb_notifier.check_masks[index] &= ~bit;
+    FD_CLR (fd, &gdb_notifier.check_masks[0]);
   if (file_ptr->mask & GDB_WRITABLE)
-    (gdb_notifier.check_masks + MASK_SIZE)[index] &= ~bit;
+    FD_CLR (fd, &gdb_notifier.check_masks[1]);
   if (file_ptr->mask & GDB_EXCEPTION)
-    (gdb_notifier.check_masks + 2 * (MASK_SIZE))[index] &= ~bit;
+    FD_CLR (fd, &gdb_notifier.check_masks[2]);
 
   /* Find current max fd. */
 
   if ((fd + 1) == gdb_notifier.num_fds)
     {
-      for (gdb_notifier.num_fds = 0; index >= 0; index--)
+      gdb_notifier.num_fds--;
+      for (i = gdb_notifier.num_fds; i; i--)
 	{
-	  flags = gdb_notifier.check_masks[index]
-	    | (gdb_notifier.check_masks + MASK_SIZE)[index]
-	    | (gdb_notifier.check_masks + 2 * (MASK_SIZE))[index];
-	  if (flags)
-	    {
-	      for (i = (NBBY * sizeof (fd_mask)); i > 0; i--)
-		{
-		  if (flags & (((unsigned long) 1) << (i - 1)))
-		    break;
-		}
-	      gdb_notifier.num_fds = index * (NBBY * sizeof (fd_mask)) + i;
-	      break;
-	    }
+	  if (FD_ISSET (i - 1, &gdb_notifier.check_masks[0])
+	      || FD_ISSET (i - 1, &gdb_notifier.check_masks[1])
+	      || FD_ISSET (i - 1, &gdb_notifier.check_masks[2]))
+	    break;
 	}
+      gdb_notifier.num_fds = i;
     }
 #endif /* HAVE_POLL */
 
@@ -742,10 +731,8 @@ gdb_wait_for_event (void)
   file_handler *file_ptr;
   gdb_event *file_event_ptr;
   int num_found = 0;
+#ifdef HAVE_POLL
   int i;
-
-#ifndef HAVE_POLL
-  int mask, bit, index;
 #endif
 
   /* Make sure all output is done before getting another event. */
@@ -767,20 +754,24 @@ gdb_wait_for_event (void)
     perror_with_name ("Poll");
 
 #else /* ! HAVE_POLL */
-  memcpy (gdb_notifier.ready_masks,
-	  gdb_notifier.check_masks,
-	  3 * MASK_SIZE * sizeof (fd_mask));
+
+  gdb_notifier.ready_masks[0] = gdb_notifier.check_masks[0];
+  gdb_notifier.ready_masks[1] = gdb_notifier.check_masks[1];
+  gdb_notifier.ready_masks[2] = gdb_notifier.check_masks[2];
+
   num_found = select (gdb_notifier.num_fds,
-		      (SELECT_MASK *) & gdb_notifier.ready_masks[0],
-		      (SELECT_MASK *) & gdb_notifier.ready_masks[MASK_SIZE],
-		  (SELECT_MASK *) & gdb_notifier.ready_masks[2 * MASK_SIZE],
-		  gdb_notifier.timeout_valid ? &gdb_notifier.timeout : NULL);
+		      & gdb_notifier.ready_masks[0],
+		      & gdb_notifier.ready_masks[1],
+		      & gdb_notifier.ready_masks[2],
+		      gdb_notifier.timeout_valid
+		      ? &gdb_notifier.timeout : NULL);
 
   /* Clear the masks after an error from select. */
   if (num_found == -1)
     {
-      memset (gdb_notifier.ready_masks,
-	      0, 3 * MASK_SIZE * sizeof (fd_mask));
+      FD_ZERO (&gdb_notifier.ready_masks[0]);
+      FD_ZERO (&gdb_notifier.ready_masks[1]);
+      FD_ZERO (&gdb_notifier.ready_masks[2]);
       /* Dont print anything is we got a signal, let gdb handle it. */
       if (errno != EINTR)
 	perror_with_name ("Select");
@@ -821,19 +812,18 @@ gdb_wait_for_event (void)
     }
 
 #else /* ! HAVE_POLL */
+
   for (file_ptr = gdb_notifier.first_file_handler;
        (file_ptr != NULL) && (num_found > 0);
        file_ptr = file_ptr->next_file)
     {
-      index = file_ptr->fd / (NBBY * sizeof (fd_mask));
-      bit = 1 << (file_ptr->fd % (NBBY * sizeof (fd_mask)));
-      mask = 0;
+      int mask = 0;
 
-      if (gdb_notifier.ready_masks[index] & bit)
+      if (FD_ISSET (file_ptr->fd, &gdb_notifier.ready_masks[0]))
 	mask |= GDB_READABLE;
-      if ((gdb_notifier.ready_masks + MASK_SIZE)[index] & bit)
+      if (FD_ISSET (file_ptr->fd, &gdb_notifier.ready_masks[1]))
 	mask |= GDB_WRITABLE;
-      if ((gdb_notifier.ready_masks + 2 * (MASK_SIZE))[index] & bit)
+      if (FD_ISSET (file_ptr->fd, &gdb_notifier.ready_masks[2]))
 	mask |= GDB_EXCEPTION;
 
       if (!mask)
@@ -851,6 +841,7 @@ gdb_wait_for_event (void)
 	}
       file_ptr->ready_mask = mask;
     }
+
 #endif /* HAVE_POLL */
 
   return 0;
