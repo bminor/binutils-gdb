@@ -1,3 +1,8 @@
+2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	PR gdb/1179
+	* dwarfread.c (struct_type): Skip static fields without crashing.
+
 2003-06-22  Andrew Cagney  <cagney@redhat.com>
 
 	GDB 6.0 branch created.

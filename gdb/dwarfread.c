@@ -979,6 +979,13 @@ struct_type (struct dieinfo *dip, char *thisdie, char *enddie,
       switch (mbr.die_tag)
 	{
 	case TAG_member:
+	  /* Static fields can be either TAG_global_variable (GCC) or else
+	     TAG_member with no location (Diab).  We could treat the latter like
+	     the former... but since we don't support the former, just avoid
+	     crashing on the latter for now.  */
+	  if (mbr.at_location == NULL)
+	    break;
+
 	  /* Get space to record the next field's data.  */
 	  new = (struct nextfield *) alloca (sizeof (struct nextfield));
 	  new->next = list;
