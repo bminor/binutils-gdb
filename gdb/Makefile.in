@@ -812,7 +812,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
 	ns32k-pinsn.c paread.c procfs.c pyr-pinsn.c pyr-tdep.c pyr-xdep.c \
 	remote-adapt.c remote-bug.c remote-eb.c remote-es.c remote-hms.c remote-mips.c \
-	remote-mm.c remote-monitor.c remote-nindy.c remote-sim.c remote-st.c \
+	remote-mm.c remote-mon.c remote-nindy.c remote-sim.c remote-st.c \
 	remote-udi.c remote-vx.c remote-z8k.c rs6000-nat.c rs6000-pinsn.c \
 	rs6000-tdep.c ser-go32.c ser-tcp.c sh-tdep.c solib.c sparc-nat.c \
 	sparc-pinsn.c sparc-tdep.c sun3-nat.c sun386-nat.c symm-tdep.c \
@@ -1212,7 +1212,7 @@ remote-mips.o: remote-mips.c $(wait_h) $(defs_h) $(gdbcmd_h) \
 remote-mm.o: remote-mm.c $(bfd_h) $(wait_h) $(defs_h) $(inferior_h) \
 	minimon.h target.h terminal.h
 
-remote-monitor.o: remote-monitor.c $(wait_h) $(command_h) $(defs_h) \
+remote-mon.o: remote-mon.c $(wait_h) $(command_h) $(defs_h) \
 	$(gdbcore_h) monitor.h serial.h target.h
 
 remote-nindy.o: remote-nindy.c $(ieee-float_h) $(wait_h) $(command_h) \

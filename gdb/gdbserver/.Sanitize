@@ -26,16 +26,14 @@ Things-to-keep:
 Makefile.in
 README
 configure.in
-remote-gutils.c
-remote-inflow.c
-remote-server.c
+low-lynx.c
+low-sparc.c
 remote-utils.c
+server.c
 server.h
+utils.c
 
 Things-to-lose:
-
-
-remote-inflow-sparc.c
 
 Do-last:
 

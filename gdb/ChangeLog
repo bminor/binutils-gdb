@@ -1,3 +1,15 @@
+Fri Aug 27 09:30:40 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* Rename files for 14-character limits:
+	gdbserver/remote-gutils.c -> gdbserver/utils.c
+	gdbserver/remote-inflow.c -> gdbserver/low-lynx.c
+	gdbserver/remote-inflow-sparc.c -> gdbserver/low-sparc.c
+	gdbserver/remote-server.c -> gdbserver/server.c
+	remote-monitor.c -> remote-mon.c
+	* Makefile.in, gdbserver/Makefile.in, config/m68k/monitor.mt:
+	Change accordingly.
+	* gdbserver/Makefile.in: Remove more junk inherited from gdb Makefile.
+
 Thu Aug 26 14:32:51 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* infcmd.c, inferior.h (run_stack_dummy): If we stop somewhere
