@@ -110,6 +110,16 @@ RUNTEST = `if [ -f $${srcdir}/../dejagnu/runtest ] ; then \
 	   fi`
 RUNTESTFLAGS=
 
+TARG_CPU_C = $(srcdir)/config/tc-@target_cpu_type@.c
+TARG_CPU_O = tc-@target_cpu_type@.o
+TARG_CPU_H = $(srcdir)/config/tc-@target_cpu_type@.h
+OBJ_FORMAT_C = $(srcdir)/config/obj-@obj_format@.c
+OBJ_FORMAT_O = obj-@obj_format@.o
+OBJ_FORMAT_H = $(srcdir)/config/obj-@obj_format@.h
+TARG_ENV_H = $(srcdir)/config/te-@te_file@.h
+ATOF_TARG_C = $(srcdir)/config/atof-@atof@.c
+ATOF_TARG_O = atof-@atof@.o
+
 # use @target_cpu_type@ for refering to configured target name
 IT_HDRS=itbl-parse.h $(srcdir)/itbl-ops.h 
 IT_SRCS=itbl-parse.c itbl-lex.c $(srcdir)/itbl-ops.c
@@ -118,7 +128,7 @@ IT_OBJS=itbl-parse.o itbl-lex.o itbl-ops.o
 
 # Lists of files for various purposes.
 
-REAL_SOURCES = \
+SOURCES = \
 	$(srcdir)/app.c \
 	$(srcdir)/as.c \
 	$(srcdir)/atof-generic.c \
@@ -144,15 +154,7 @@ REAL_SOURCES = \
 	$(srcdir)/ecoff.c \
 	$(srcdir)/stabs.c
 
-# in an expedient order
-LINKED_SOURCES = \
-	targ-cpu.c \
-	obj-format.c \
-	atof-targ.c
-
-SOURCES = $(LINKED_SOURCES) $(REAL_SOURCES)
-
-REAL_HEADERS = \
+HEADERS = \
 	$(srcdir)/as.h \
 	$(srcdir)/bignum.h \
 	$(srcdir)/expr.h \
@@ -171,22 +173,14 @@ REAL_HEADERS = \
 	$(srcdir)/write.h \
 	$(srcdir)/ecoff.h
 
-LINKED_HEADERS = \
-	targ-env.h \
-	targ-cpu.h \
-	obj-format.h \
-	atof-targ.h 
-
-HEADERS = $(LINKED_HEADERS) $(REAL_HEADERS)
-
 TE_OBJS=
 
 # @target_frag@
 
 OBJS = \
-	targ-cpu.o \
-	obj-format.o \
-	atof-targ.o \
+	$(TARG_CPU_O) \
+	$(OBJ_FORMAT_O) \
+	$(ATOF_TARG_O) \
 	app.o \
 	as.o \
 	atof-generic.o \
@@ -268,9 +262,9 @@ $(OBJS): @ALL_OBJ_DEPS@
 as.new: $(OBJS) $(LIBDEPS)
 	$(HLDENV) $(CC) $(HLDFLAGS) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
 
-$(OBJS): config.h as.h targ-env.h obj-format.h targ-cpu.h flonum.h expr.h \
-	struc-symbol.h write.h frags.h hash.h read.h symbols.h tc.h obj.h \
-	listing.h bignum.h $(srcdir)/../include/libiberty.h
+$(OBJS): config.h as.h $(TARG_ENV_H) $(OBJ_FORMAT_H) $(TARG_CPU_H) flonum.h \
+	expr.h struc-symbol.h write.h frags.h hash.h read.h symbols.h tc.h \
+	obj.h listing.h bignum.h $(srcdir)/../include/libiberty.h
 
 gasp.new: $(GASPOBJS) ../libiberty/libiberty.a
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o gasp.new $(GASPOBJS) ../libiberty/libiberty.a $(LOADLIBES)
@@ -377,6 +371,15 @@ TARG_CPU_DEP_w65     = $(srcdir)/../opcodes/w65-opc.h subsegs.h \
 			$(srcdir)/../include/obstack.h
 TARG_CPU_DEP_z8k     = $(srcdir)/../opcodes/z8k-opc.h
 
+# The implicit .c.o rule doesn't work here, perhaps because of the
+# variables, or perhaps because the sources are not on vpath.
+$(TARG_CPU_O): $(TARG_CPU_C) $(TARG_CPU_DEP_@target_cpu_type@)
+	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(TARG_CPU_C)
+$(OBJ_FORMAT_O): $(OBJ_FORMAT_C)
+	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(OBJ_FORMAT_C)
+$(ATOF_TARG_O): $(ATOF_TARG_C)
+	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(ATOF_TARG_C)
+
 gasp.o : gasp.c sb.h macro.h config.h
 sb.o : sb.c sb.h config.h
 macro.o : macro.c macro.h sb.h hash.h config.h
@@ -410,9 +413,6 @@ ecoff.o : ecoff.c ecoff.h \
 	$(srcdir)/../include/aout/stab_gnu.h
 stabs.o : stabs.c subsegs.h $(srcdir)/../include/aout/stab_gnu.h \
 	$(srcdir)/../include/obstack.h
-atof-targ.o : atof-targ.c
-obj-format.o : obj-format.c
-targ-cpu.o : targ-cpu.c $(TARG_CPU_DEP_@target_cpu_type@) $(IT_HDRS)
 
 obj-elf.o : $(srcdir)/config/obj-elf.c
 	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/config/obj-elf.c
@@ -440,7 +440,6 @@ m68k-parse.o: m68k-parse.c $(srcdir)/config/m68k-parse.h
 
 # The instruction table specification lexical analyzer and parser.
 
-itbl-cpu.h : $(srcdir)/config/itbl-@target_cpu_type@.h
 itbl-parse.h : $(srcdir)/itbl-parse.y
 itbl-parse.c : $(srcdir)/itbl-parse.y
 itbl-lex.c : $(srcdir)/itbl-lex.l
@@ -478,12 +477,6 @@ IT_TEST_OBJS= itbl-parse.o itbl-lex.o itbl-test-ops.o
 itbl-test: $(IT_TEST_OBJS) itbl-test.o $(LIBDEPS)
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o itbl-test itbl-test.o $(IT_TEST_OBJS) $(LIBS)
 
-# target itbl definitions for configuring coprocessor itbl support.
-# configure should have taken care of this for us...
-itbl-cpu.h: $(srcdir)/config/itbl-@target_cpu_type@.h
-	ln -s $(srcdir)/config/itbl-@target_cpu_type@.h itbl-cpu.h
-
-
 # Remake the info files.
 
 doc: $(srcdir)/as.info
@@ -503,9 +496,8 @@ clean mostlyclean: clean-here
 
 # Like clean but also delete the links made to configure gas.
 
-DISTCLEAN_HERE = config.status Makefile targ-env.h targ-cpu.h \
-	targ-cpu.c obj-format.h obj-format.c atof-targ.c TAGS \
-	atof-targ.h itbl-cpu.h \
+DISTCLEAN_HERE = config.status Makefile targ-env.h targ-cpu.h obj-format.h \
+	TAGS itbl-cpu.h \
 	config-stamp config.h conf config.log config.cache .gdbinit \
 	testsuite/Makefile testsuite/config.status
 

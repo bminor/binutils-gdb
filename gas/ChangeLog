@@ -1,3 +1,26 @@
+Fri Mar 21 15:42:37 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Don't set files and links.  Don't call
+	AC_LINK_FILES.  Substitute te_file.  Create targ-cpu.h,
+	obj-format.h, targ-env.h, and itbl-cpu.h in AC_OUTPUT.
+	* configure: Rebuild.
+	* Makefile.in (TARG_CPU_C): New variable.
+	(TARG_CPU_O, TARG_CPU_H): New variables.
+	(OBJ_FORMAT_C, OBJ_FORMAT_O, OBJ_FORMAT_H): New variables.
+	(TARG_ENV_H, ATOF_TARG_C, ATOF_TARG_O): New variables.
+	(SOURCES): Rename from REAL_SOURCES.  Delete old definition.
+	(LINKED_SOURCES): Remove.
+	(HEADERS): Rename from REAL_HEADERS.  Delete old definition.
+	(LINKED_HEADERS): Remove.
+	(OBJS): Use $(TARG_CPU_O), etc., rather than targ-cpu.o, etc.
+	($(OBJS)): Depend upon $(TARG_ENV_H), etc., rather than
+	targ-cpu.h, etc.
+	($(TARG_CPU_O), $(OBJ_FORMAT_O) $(ATOF_TARG_O)): New targets.
+	(targ-cpu.o, obj-format.o, atof-targ.o): Remove targets.
+	(itbl-cpu.h): Remove target.
+	(DISTCLEAN_HERE): Remove targ-cpu.c, obj-format.c, atof-targ.c,
+	atof-targ.h.
+
 Thu Mar 20 19:18:58 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* doc/as.texinfo (Symbol Names): Don't use obsolete @ctrl macro.
