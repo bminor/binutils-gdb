@@ -1,3 +1,9 @@
+Fri Mar 28 15:25:24 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* configure.in (sparc-*-linux*aout*, sparc-*-linux*): New
+	targets.
+	* configure: Rebuild.
+
 Fri Mar 28 13:08:33 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* itbl-parse.y (yyerror): Make static.  Declare.
