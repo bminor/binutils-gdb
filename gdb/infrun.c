@@ -667,6 +667,12 @@ clear_proceed_status (void)
   bpstat_clear (&stop_bpstat);
 }
 
+
+/* Record the pc of the program the last time it stopped.  This is
+   just used internally by wait_for_inferior, but need to be preserved
+   over calls to it and cleared when the inferior is started.  */
+static CORE_ADDR prev_pc;
+
 /* Basic routine for continuing the program in various fashions.
 
    ADDR is the address to resume at, or -1 for resume where stopped.
@@ -772,6 +778,30 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
      inferior.  */
   gdb_flush (gdb_stdout);
 
+  /* Refresh prev_pc value just prior to resuming.  This used to be
+     done in stop_stepping, however, setting prev_pc there did not handle
+     scenarios such as inferior function calls or returning from
+     a function via the return command.  In those cases, the prev_pc
+     value was not set properly for subsequent commands.  The prev_pc value 
+     is used to initialize the starting line number in the ecs.  With an 
+     invalid value, the gdb next command ends up stopping at the position
+     represented by the next line table entry past our start position.
+     On platforms that generate one line table entry per line, this
+     is not a problem.  However, on the ia64, the compiler generates
+     extraneous line table entries that do not increase the line number.
+     When we issue the gdb next command on the ia64 after an inferior call
+     or a return command, we often end up a few instructions forward, still 
+     within the original line we started.
+
+     An attempt was made to have init_execution_control_state () refresh
+     the prev_pc value before calculating the line number.  This approach
+     did not work because on platforms that use ptrace, the pc register
+     cannot be read unless the inferior is stopped.  At that point, we
+     are not guaranteed the inferior is stopped and so the read_pc ()
+     call can fail.  Setting the prev_pc value here ensures the value is 
+     updated correctly when the inferior is stopped.  */  
+  prev_pc = read_pc ();
+
   /* Resume inferior.  */
   resume (oneproc || step || bpstat_should_step (), stop_signal);
 
@@ -785,11 +815,6 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
       normal_stop ();
     }
 }
-
-/* Record the pc of the program the last time it stopped.  This is
-   just used internally by wait_for_inferior, but need to be preserved
-   over calls to it and cleared when the inferior is started.  */
-static CORE_ADDR prev_pc;
 
 
 /* Start remote-debugging of a machine over a serial link.  */
@@ -2757,14 +2782,6 @@ step_over_function (struct execution_control_state *ecs)
 static void
 stop_stepping (struct execution_control_state *ecs)
 {
-  if (target_has_execution)
-    {
-      /* Assuming the inferior still exists, set these up for next
-         time, just like we did above if we didn't break out of the
-         loop.  */
-      prev_pc = read_pc ();
-    }
-
   /* Let callers know we don't want to wait for the inferior anymore.  */
   ecs->wait_some_more = 0;
 }
