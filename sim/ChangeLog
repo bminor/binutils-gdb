@@ -1,3 +1,7 @@
+2004-11-12  Andrew Cagney  <cagney@gnu.org>
+
+	* d30v, fr30, mn10200, z8k: Delete directory.
+
 2004-03-10  Ben Elliston  <bje@gnu.org>
 
 	* MAINTAINERS: Update my mail address.
