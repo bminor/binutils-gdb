@@ -784,7 +784,7 @@ _bfd_elf_merge_sections (abfd, info)
   return true;
 }
 
-/* Print out the program headers.  */
+/* Copy the program header from one object module to another */
 
 boolean
 _bfd_elf_copy_private_bfd_data (ibfd, obfd)
@@ -803,6 +803,8 @@ _bfd_elf_copy_private_bfd_data (ibfd, obfd)
   elf_flags_init (obfd) = true;
   return true;
 }
+
+/* Print out the program headers.  */
 
 boolean
 _bfd_elf_print_private_bfd_data (abfd, farg)

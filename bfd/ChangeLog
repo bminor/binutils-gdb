@@ -1,5 +1,9 @@
 2001-12-18  H.J. Lu <hjl@gnu.org>
 
+	* elf.c (_bfd_elf_copy_private_bfd_data): Update comments.
+
+2001-12-18  H.J. Lu <hjl@gnu.org>
+
 	* elf-bfd.h (_bfd_elf_copy_private_bfd_data): New. Prototype.
 	(_bfd_mips_elf_copy_private_bfd_data): Removed.
 
