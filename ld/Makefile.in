@@ -113,6 +113,9 @@ CXX = `if [ -f ../gcc/xgcc ] ; then \
 	    fi`
 CXXFLAGS = -fgnu-linker
 
+# FIX_ME: using ../gcc/xgcc breaks the cdtest. 
+CXX= g++
+
 # Setup the testing framework, if you have one
 RUNTEST = runtest
 RUNTEST_FLAGS =

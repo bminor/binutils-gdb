@@ -1,3 +1,7 @@
+Fri Sep 10 09:36:29 1993  Jeffrey Wheat  (cassidy@cygnus.com)
+
+	* Makefile.in: Changed CXX back to g++. 
+
 Fri Sep 10 09:34:29 1993  Jeffrey Wheat  (cassidy@cygnus.com)
 
 	* Makefile.in: Fixed RUNTEST* CXX CXXFLAGS macros and check rule.
