@@ -1,6 +1,23 @@
+Tue Oct 25 11:38:02 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* bfdlink.h (struct bfd_link_callbacks): Fix comments for
+	multiple_common field.
+
+Sun Sep 04 17:58:10 1994  Richard Earnshaw (rwe@pegasus.esprit.ec.org)
+
+	* aout/aout64.h: Only define QMAGIC if it isn't already defined.
+
+	* dis-asm.h: Add support for the ARM.
+
+Wed Aug 10 12:51:41 1994  Doug Evans  (dje@canuck.cygnus.com)
+
+	* libiberty.h (strsignal): Document its existence even if we
+	can't declare it.
+
 Tue Aug  2 14:40:03 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
-	* os9k.h: Comment out apparently-unused declarations.
+	* os9k.h: Remove u_int16, u_int32, and owner_id typedefs and
+	expand their uses.  Those names conflict with Mach headers.
 
 Fri Jul 22 14:17:12 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
