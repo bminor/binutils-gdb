@@ -1,3 +1,10 @@
+2002-03-19  Chris G. Demetriou  <cgd@broadcom.com>
+
+	* interp.c: Move FPU support routines from here to...
+	* cp1.c: Here.  New file.
+	* Makefile.in (SIM_OBJS): Add cp1.o to object list.
+	(cp1.o): New target.
+
 2002-03-12  Chris Demetriou  <cgd@broadcom.com>
 
 	* configure.in (mipsisa32*-*-*, mipsisa64*-*-*): New targets.
