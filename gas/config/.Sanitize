@@ -82,6 +82,8 @@ obj-hp300.c
 obj-hp300.h
 obj-ieee.c
 obj-ieee.h
+obj-som.c
+obj-som.h
 obj-vms.c
 obj-vms.h
 sh.mt
