@@ -1,7 +1,7 @@
 /* Definitions for symbol file management in GDB.
 
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -281,12 +281,22 @@ struct objfile
 
     long mtime;
 
+    /* Obstack to hold objects that should be freed when we load a new symbol
+       table from this object file. */
+
+    /* Note ezannoni 2004-02-05: this obstack will become the only
+       obstack per objfile instead of having 3 separate ones with the
+       same lifetime.  I am in the process of gradually migrating the
+       old obstacks to this one, so that it can be used more
+       freely. */
+
+    struct obstack objfile_obstack; 
+
     /* Obstacks to hold objects that should be freed when we load a new symbol
        table from this object file. */
 
     struct obstack psymbol_obstack;	/* Partial symbols */
     struct obstack symbol_obstack;	/* Full symbols */
-    struct obstack type_obstack;	/* Types */
 
     /* A byte cache where we can stash arbitrary "chunks" of bytes that
        will not change. */
@@ -509,7 +519,7 @@ extern struct objfile *symfile_objfile;
 
 extern struct objfile *rt_common_objfile;
 
-/* When we need to allocate a new type, we need to know which type_obstack
+/* When we need to allocate a new type, we need to know which objfile_obstack
    to allocate the type on, since there is one for each objfile.  The places
    where types are allocated are deeply buried in function call hierarchies
    which know nothing about objfiles, so rather than trying to pass a

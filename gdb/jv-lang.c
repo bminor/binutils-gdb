@@ -186,7 +186,7 @@ java_lookup_class (char *name)
   type = alloc_type (objfile);
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
   INIT_CPLUS_SPECIFIC (type);
-  TYPE_TAG_NAME (type) = obsavestring (name, strlen (name), &objfile->type_obstack);
+  TYPE_TAG_NAME (type) = obsavestring (name, strlen (name), &objfile->objfile_obstack);
   TYPE_FLAGS (type) |= TYPE_FLAG_STUB;
   TYPE ? = addr;
   return type;
@@ -289,7 +289,7 @@ type_from_class (struct value *clas)
   /* if clasloader non-null, prepend loader address. FIXME */
   temp = clas;
   utf8_name = value_struct_elt (&temp, NULL, "name", NULL, "structure");
-  name = get_java_utf8_name (&objfile->type_obstack, utf8_name);
+  name = get_java_utf8_name (&objfile->objfile_obstack, utf8_name);
   for (nptr = name; *nptr != 0; nptr++)
     {
       if (*nptr == '/')
@@ -309,7 +309,7 @@ type_from_class (struct value *clas)
       char *signature = name;
       int namelen = java_demangled_signature_length (signature);
       if (namelen > strlen (name))
-	name = obstack_alloc (&objfile->type_obstack, namelen + 1);
+	name = obstack_alloc (&objfile->objfile_obstack, namelen + 1);
       java_demangled_signature_copy (name, signature);
       name[namelen] = '\0';
       is_array = 1;
@@ -442,7 +442,7 @@ java_link_class_type (struct type *type, struct value *clas)
       temp = field;
       temp = value_struct_elt (&temp, NULL, "name", NULL, "structure");
       TYPE_FIELD_NAME (type, i) =
-	get_java_utf8_name (&objfile->type_obstack, temp);
+	get_java_utf8_name (&objfile->objfile_obstack, temp);
       temp = field;
       accflags = value_as_long (value_struct_elt (&temp, NULL, "accflags",
 						  NULL, "structure"));
@@ -513,7 +513,7 @@ java_link_class_type (struct type *type, struct value *clas)
       /* Get method name. */
       temp = method;
       temp = value_struct_elt (&temp, NULL, "name", NULL, "structure");
-      mname = get_java_utf8_name (&objfile->type_obstack, temp);
+      mname = get_java_utf8_name (&objfile->objfile_obstack, temp);
       if (strcmp (mname, "<init>") == 0)
 	mname = unqualified_name;
 
@@ -538,7 +538,7 @@ java_link_class_type (struct type *type, struct value *clas)
 	    {			/* Found an existing method with the same name. */
 	      int l;
 	      if (mname != unqualified_name)
-		obstack_free (&objfile->type_obstack, mname);
+		obstack_free (&objfile->objfile_obstack, mname);
 	      mname = fn_fieldlists[j].name;
 	      fn_fieldlists[j].length++;
 	      k = i - k;	/* Index of new slot. */

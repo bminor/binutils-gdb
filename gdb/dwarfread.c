@@ -1,7 +1,7 @@
 /* DWARF debugging format support for GDB.
 
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Written by Fred Fish at Cygnus Support.  Portions based on dbxread.c,
    mipsread.c, coffread.c, and dwarfread.c from a Data General SVR4 gdb port.
@@ -968,7 +968,7 @@ struct_type (struct dieinfo *dip, char *thisdie, char *enddie,
       && *dip->at_name != '~'
       && *dip->at_name != '.')
     {
-      TYPE_TAG_NAME (type) = obconcat (&objfile->type_obstack,
+      TYPE_TAG_NAME (type) = obconcat (&objfile->objfile_obstack,
 				       "", "", dip->at_name);
     }
   /* Use whatever size is known.  Zero is a valid size.  We might however
@@ -1011,7 +1011,7 @@ struct_type (struct dieinfo *dip, char *thisdie, char *enddie,
 	  /* Save the data.  */
 	  list->field.name =
 	    obsavestring (mbr.at_name, strlen (mbr.at_name),
-			  &objfile->type_obstack);
+			  &objfile->objfile_obstack);
 	  FIELD_TYPE (list->field) = decode_die_type (&mbr);
 	  FIELD_BITPOS (list->field) = 8 * locval (&mbr);
 	  FIELD_STATIC_KIND (list->field) = 0;
@@ -1670,7 +1670,7 @@ enum_type (struct dieinfo *dip, struct objfile *objfile)
       && *dip->at_name != '~'
       && *dip->at_name != '.')
     {
-      TYPE_TAG_NAME (type) = obconcat (&objfile->type_obstack,
+      TYPE_TAG_NAME (type) = obconcat (&objfile->objfile_obstack,
 				       "", "", dip->at_name);
     }
   if (dip->at_byte_size != 0)
@@ -1704,7 +1704,7 @@ enum_type (struct dieinfo *dip, struct objfile *objfile)
 			    objfile);
 	  scan += TARGET_FT_LONG_SIZE (objfile);
 	  list->field.name = obsavestring (scan, strlen (scan),
-					   &objfile->type_obstack);
+					   &objfile->objfile_obstack);
 	  scan += strlen (scan) + 1;
 	  nfields++;
 	  /* Handcraft a new symbol for this enum member. */

@@ -1,7 +1,7 @@
 /* GDB routines for manipulating objfiles.
 
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -169,7 +169,7 @@ allocate_objfile (bfd *abfd, int flags)
 				  xfree);
       obstack_specify_allocation (&objfile->symbol_obstack, 0, 0, xmalloc,
 				  xfree);
-      obstack_specify_allocation (&objfile->type_obstack, 0, 0, xmalloc,
+      obstack_specify_allocation (&objfile->objfile_obstack, 0, 0, xmalloc,
 				  xfree);
 
       terminate_minimal_symbol_table (objfile);
@@ -433,7 +433,7 @@ free_objfile (struct objfile *objfile)
     htab_delete (objfile->demangled_names_hash);
   obstack_free (&objfile->psymbol_obstack, 0);
   obstack_free (&objfile->symbol_obstack, 0);
-  obstack_free (&objfile->type_obstack, 0);
+  obstack_free (&objfile->objfile_obstack, 0);
   xmfree (objfile->md, objfile);
   objfile = NULL;
 }

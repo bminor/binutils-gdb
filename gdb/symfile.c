@@ -1913,7 +1913,7 @@ reread_symbols (void)
 		}
 	      obstack_free (&objfile->psymbol_obstack, 0);
 	      obstack_free (&objfile->symbol_obstack, 0);
-	      obstack_free (&objfile->type_obstack, 0);
+	      obstack_free (&objfile->objfile_obstack, 0);
 	      objfile->sections = NULL;
 	      objfile->symtabs = NULL;
 	      objfile->psymtabs = NULL;
@@ -1943,7 +1943,7 @@ reread_symbols (void)
 					  xmalloc, xfree);
 	      obstack_specify_allocation (&objfile->symbol_obstack, 0, 0,
 					  xmalloc, xfree);
-	      obstack_specify_allocation (&objfile->type_obstack, 0, 0,
+	      obstack_specify_allocation (&objfile->objfile_obstack, 0, 0,
 					  xmalloc, xfree);
 	      if (build_objfile_section_table (objfile))
 		{

@@ -1637,7 +1637,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	  else if (TYPE_TAG_NAME (tp) == NULL
 		   || strcmp (TYPE_TAG_NAME (tp), name) != 0)
 	    TYPE_TAG_NAME (tp) = obsavestring (name, strlen (name),
-					    &current_objfile->type_obstack);
+					    &current_objfile->objfile_obstack);
 	}
     }
 
@@ -1673,7 +1673,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	  if (TYPE_NAME (tp) == NULL
 	      || strcmp (TYPE_NAME (tp), name) != 0)
 	    TYPE_NAME (tp) = obsavestring (name, strlen (name),
-					   &current_objfile->type_obstack);
+					   &current_objfile->objfile_obstack);
 	}
     }
   if (t->bt == btTypedef)
@@ -1697,11 +1697,11 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
       TYPE_FIELDS (tp) = ((struct field *)
 			  TYPE_ALLOC (tp, 2 * sizeof (struct field)));
       TYPE_FIELD_NAME (tp, 0) = obsavestring ("Low", strlen ("Low"),
-					    &current_objfile->type_obstack);
+					    &current_objfile->objfile_obstack);
       TYPE_FIELD_BITPOS (tp, 0) = AUX_GET_DNLOW (bigend, ax);
       ax++;
       TYPE_FIELD_NAME (tp, 1) = obsavestring ("High", strlen ("High"),
-					    &current_objfile->type_obstack);
+					    &current_objfile->objfile_obstack);
       TYPE_FIELD_BITPOS (tp, 1) = AUX_GET_DNHIGH (bigend, ax);
       ax++;
     }

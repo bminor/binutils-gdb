@@ -1,3 +1,29 @@
+2004-02-07  Elena Zannoni  <ezannoni@redhat.com>
+
+	* objfiles.h (struct objfile): Add objfile_obstack field.
+	Remove type_obstack field.
+
+	* dwarf2read.c (dwarf2_add_field,dwarf2_add_member_fn,
+	read_structure_scope read_enumeration, new_symbol): Replace
+	type_obstack with objfile_obstack.
+	* dwarfread.c (struct_type, enum_type): Ditto.
+	* gdbtypes.c (alloc_type, alloc_type_instance, init_type) 
+	(lookup_fundamental_type): Ditto.
+	* gdbtypes.h (TYPE_ALLOC): Ditto.
+	* hpread.c (hpread_read_enum_type, hpread_read_function_type) 
+	(hpread_read_doc_function_type, hpread_read_struct_type) 
+	(fix_static_member_physnames, hpread_read_array_type) 
+	(hpread_read_subrange_type, hpread_type_lookup): Ditto.
+	* jv-lang.c (java_lookup_class, type_from_class, type_from_class) 
+	(java_link_class_type): Ditto.
+	* mdebugread.c (parse_type): Ditto.
+	* objfiles.c (allocate_objfile, free_objfile): Ditto.
+	* solib-sunos.c (solib_add_common_symbols): Ditto.
+	* stabsread.c (define_symbol, read_type, read_member_functions,
+	read_cpp_abbrev, read_one_struct_field): Ditto.
+	* symfile.c (reread_symbols): Ditto.
+	* symmisc.c (print_objfile_statistics): Ditto.
+	
 2004-02-07  Andrew Cagney  <cagney@redhat.com>
 
 	* tui/tui-data.h (tui_win_element): Rename TuiWinElement.

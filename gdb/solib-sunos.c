@@ -1,6 +1,6 @@
 /* Handle SunOS shared libraries for GDB, the GNU Debugger.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000,
-   2001
+   2001, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -149,7 +149,7 @@ allocate_rt_common_objfile (void)
 			      xfree);
   obstack_specify_allocation (&objfile->symbol_obstack, 0, 0, xmalloc,
 			      xfree);
-  obstack_specify_allocation (&objfile->type_obstack, 0, 0, xmalloc,
+  obstack_specify_allocation (&objfile->objfile_obstack, 0, 0, xmalloc,
 			      xfree);
   objfile->name = mstrsave (objfile->md, "rt_common");
 

@@ -3145,7 +3145,7 @@ hpread_read_enum_type (dnttpointer hp_type, union dnttentry *dn_bufp,
   TYPE_FLAGS (type) &= ~TYPE_FLAG_STUB;
   TYPE_NFIELDS (type) = nsyms;
   TYPE_FIELDS (type) = (struct field *)
-    obstack_alloc (&objfile->type_obstack, sizeof (struct field) * nsyms);
+    obstack_alloc (&objfile->objfile_obstack, sizeof (struct field) * nsyms);
 
   /* Find the symbols for the members and put them into the type.
      The symbols can be found in the symlist that we put them on
@@ -3306,7 +3306,7 @@ hpread_read_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
   /* Note how many parameters we found.  */
   TYPE_NFIELDS (type) = nsyms;
   TYPE_FIELDS (type) = (struct field *)
-    obstack_alloc (&objfile->type_obstack,
+    obstack_alloc (&objfile->objfile_obstack,
 		   sizeof (struct field) * nsyms);
 
   /* Find the symbols for the parameters and 
@@ -3485,7 +3485,7 @@ hpread_read_doc_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
   /* Note how many parameters we found.  */
   TYPE_NFIELDS (type) = nsyms;
   TYPE_FIELDS (type) = (struct field *)
-    obstack_alloc (&objfile->type_obstack,
+    obstack_alloc (&objfile->objfile_obstack,
 		   sizeof (struct field) * nsyms);
 
   /* Find the symbols for the parameters and 
@@ -3782,7 +3782,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 
   if (n_templ_args > 0)
     TYPE_TEMPLATE_ARGS (type) = (struct template_arg *)
-      obstack_alloc (&objfile->type_obstack, sizeof (struct template_arg) * n_templ_args);
+      obstack_alloc (&objfile->objfile_obstack, sizeof (struct template_arg) * n_templ_args);
   for (n = n_templ_args; t_list; t_list = t_list->next)
     {
       n -= 1;
@@ -4255,7 +4255,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
   TYPE_NINSTANTIATIONS (type) = ninstantiations;
   if (ninstantiations > 0)
     TYPE_INSTANTIATIONS (type) = (struct type **)
-      obstack_alloc (&objfile->type_obstack, sizeof (struct type *) * ninstantiations);
+      obstack_alloc (&objfile->objfile_obstack, sizeof (struct type *) * ninstantiations);
   for (n = ninstantiations; i_list; i_list = i_list->next)
     {
       n -= 1;
@@ -4267,7 +4267,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
   TYPE_NFIELDS (type) = nfields;
   TYPE_N_BASECLASSES (type) = n_base_classes;
   TYPE_FIELDS (type) = (struct field *)
-    obstack_alloc (&objfile->type_obstack, sizeof (struct field) * nfields);
+    obstack_alloc (&objfile->objfile_obstack, sizeof (struct field) * nfields);
   /* Copy the saved-up fields into the field vector.  */
   for (n = nfields, tmp_list = list; tmp_list; tmp_list = tmp_list->next)
     {
@@ -4281,7 +4281,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
   TYPE_NFN_FIELDS (type) = n_fn_fields;
   TYPE_NFN_FIELDS_TOTAL (type) = n_fn_fields_total;
   TYPE_FN_FIELDLISTS (type) = (struct fn_fieldlist *)
-    obstack_alloc (&objfile->type_obstack, sizeof (struct fn_fieldlist) * n_fn_fields);
+    obstack_alloc (&objfile->objfile_obstack, sizeof (struct fn_fieldlist) * n_fn_fields);
   for (n = n_fn_fields; fn_list; fn_list = fn_list->next)
     {
       n -= 1;
@@ -4399,7 +4399,7 @@ fix_static_member_physnames (struct type *type, char *class_name,
 	  return;		/* physnames are already set */
 
 	SET_FIELD_PHYSNAME (TYPE_FIELDS (type)[i],
-			    obstack_alloc (&objfile->type_obstack,
+			    obstack_alloc (&objfile->objfile_obstack,
 	     strlen (class_name) + strlen (TYPE_FIELD_NAME (type, i)) + 3));
 	strcpy (TYPE_FIELD_STATIC_PHYSNAME (type, i), class_name);
 	strcat (TYPE_FIELD_STATIC_PHYSNAME (type, i), "::");
@@ -4562,7 +4562,7 @@ hpread_read_array_type (dnttpointer hp_type, union dnttentry *dn_bufp,
    */
   TYPE_NFIELDS (type) = 1;
   TYPE_FIELDS (type) = (struct field *)
-    obstack_alloc (&objfile->type_obstack, sizeof (struct field));
+    obstack_alloc (&objfile->objfile_obstack, sizeof (struct field));
   TYPE_FIELD_TYPE (type, 0) = hpread_type_lookup (dn_bufp->darray.indextype,
 						  objfile);
   return type;
@@ -4585,7 +4585,7 @@ hpread_read_subrange_type (dnttpointer hp_type, union dnttentry *dn_bufp,
   TYPE_LENGTH (type) = dn_bufp->dsubr.bitlength / 8;
   TYPE_NFIELDS (type) = 2;
   TYPE_FIELDS (type)
-    = (struct field *) obstack_alloc (&objfile->type_obstack,
+    = (struct field *) obstack_alloc (&objfile->objfile_obstack,
 				      2 * sizeof (struct field));
 
   if (dn_bufp->dsubr.dyn_low)
@@ -4803,7 +4803,7 @@ hpread_type_lookup (dnttpointer hp_type, struct objfile *objfile)
 
 	/* Build the correct name.  */
 	TYPE_NAME (structtype)
-	  = (char *) obstack_alloc (&objfile->type_obstack,
+	  = (char *) obstack_alloc (&objfile->objfile_obstack,
 				    strlen (prefix) + strlen (suffix) + 1);
 	TYPE_NAME (structtype) = strcpy (TYPE_NAME (structtype), prefix);
 	TYPE_NAME (structtype) = strcat (TYPE_NAME (structtype), suffix);

@@ -2666,7 +2666,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       if (attr && DW_STRING (attr))
 	fieldname = DW_STRING (attr);
       fp->name = obsavestring (fieldname, strlen (fieldname),
-			       &objfile->type_obstack);
+			       &objfile->objfile_obstack);
 
       /* Change accessibility for artificial fields (e.g. virtual table
          pointer or virtual base class pointer) to private.  */
@@ -2698,10 +2698,10 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       physname = dwarf2_linkage_name (die, cu);
 
       SET_FIELD_PHYSNAME (*fp, obsavestring (physname, strlen (physname),
-					     &objfile->type_obstack));
+					     &objfile->objfile_obstack));
       FIELD_TYPE (*fp) = die_type (die, cu);
       FIELD_NAME (*fp) = obsavestring (fieldname, strlen (fieldname),
-				       &objfile->type_obstack);
+				       &objfile->objfile_obstack);
     }
   else if (die->tag == DW_TAG_inheritance)
     {
@@ -2870,7 +2870,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   /* Fill in the member function field info.  */
   fnp = &new_fnfield->fnfield;
   fnp->physname = obsavestring (physname, strlen (physname),
-				&objfile->type_obstack);
+				&objfile->objfile_obstack);
   fnp->type = alloc_type (objfile);
   if (die->type && TYPE_CODE (die->type) == TYPE_CODE_FUNC)
     {
@@ -3036,7 +3036,7 @@ read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	     TYPE_TAG_NAME to be a const char *, I ran into a cascade
 	     of changes which would have forced decode_line_1 to take
 	     a const char **.  */
-	  char *new_prefix = obconcat (&objfile->type_obstack,
+	  char *new_prefix = obconcat (&objfile->objfile_obstack,
 				       processing_current_prefix,
 				       processing_current_prefix[0] == '\0'
 				       ? "" : "::",
@@ -3047,7 +3047,7 @@ read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
       else
 	{
 	  TYPE_TAG_NAME (type) = obsavestring (name, strlen (name),
-					       &objfile->type_obstack);
+					       &objfile->objfile_obstack);
 	  need_to_update_name = (cu->language == language_cplus);
 	}
     }
@@ -3139,7 +3139,7 @@ read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 		      TYPE_TAG_NAME (type)
 			= obsavestring (actual_class_name,
 					strlen (actual_class_name),
-					&objfile->type_obstack);
+					&objfile->objfile_obstack);
 		    }
 		  xfree (actual_class_name);
 		  need_to_update_name = 0;
@@ -3256,7 +3256,7 @@ read_enumeration (struct die_info *die, struct dwarf2_cu *cu)
 
       if (processing_has_namespace_info)
 	{
-	  TYPE_TAG_NAME (type) = obconcat (&objfile->type_obstack,
+	  TYPE_TAG_NAME (type) = obconcat (&objfile->objfile_obstack,
 					   processing_current_prefix,
 					   processing_current_prefix[0] == '\0'
 					   ? "" : "::",
@@ -3265,7 +3265,7 @@ read_enumeration (struct die_info *die, struct dwarf2_cu *cu)
       else
 	{
 	  TYPE_TAG_NAME (type) = obsavestring (name, strlen (name),
-					       &objfile->type_obstack);
+					       &objfile->objfile_obstack);
 	}
     }
 
@@ -5717,7 +5717,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 		  TYPE_NAME (SYMBOL_TYPE (sym)) =
 		    obsavestring (SYMBOL_NATURAL_NAME (sym),
 				  strlen (SYMBOL_NATURAL_NAME (sym)),
-				  &objfile->type_obstack);
+				  &objfile->objfile_obstack);
 		add_symbol_to_list (typedef_sym, list_to_add);
 	      }
 	  }
