@@ -286,13 +286,22 @@ trace_install (SIM_DESC sd)
 static void
 trace_uninstall (SIM_DESC sd)
 {
-  int i;
+  int i,j;
 
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)
     {
       TRACE_DATA *data = CPU_TRACE_DATA (STATE_CPU (sd, i));
       if (TRACE_FILE (data) != NULL)
-	fclose (TRACE_FILE (data));
+	{
+	  /* If output from different cpus is going to the same file,
+	     avoid closing the file twice.  */
+	  for (j = 0; j < i; ++j)
+	    if (TRACE_FILE (CPU_TRACE_DATA (STATE_CPU (sd, j)))
+		== TRACE_FILE (data))
+	      break;
+	  if (i == j)
+	    fclose (TRACE_FILE (data));
+	}
     }
 }
 

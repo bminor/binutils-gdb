@@ -1,3 +1,7 @@
+Tue May  6 16:38:16 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sim-trace.c (trace_uninstall): Don't close a file twice.
+
 Tue May  6 06:14:01 1997  Mike Meissner  <meissner@cygnus.com>
 
 	* sim-trace.c (toplevel): Include bfd.h.
