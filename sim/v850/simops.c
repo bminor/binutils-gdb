@@ -56,20 +56,18 @@ int type3_regs[15] = { 2, 1, 0, 27, 26, 25, 24, 31, 30, 29, 28, 23, 22, 20, 21};
 
 #ifdef DEBUG
 #ifndef SIZE_INSTRUCTION
-#define SIZE_INSTRUCTION 6
-#endif
-
-#ifndef SIZE_OPERANDS
-#define SIZE_OPERANDS 16
+#define SIZE_INSTRUCTION 18
 #endif
 
 #ifndef SIZE_VALUES
 #define SIZE_VALUES 11
 #endif
 
-#ifndef SIZE_LOCATION
-#define SIZE_LOCATION 40
-#endif
+
+static unsigned32 trace_values[3];
+static int trace_num_values;
+static unsigned32 trace_pc;
+static char *trace_name;
 
 
 void
@@ -78,61 +76,12 @@ trace_input (name, type, size)
      enum op_types type;
      int size;
 {
-  char buf[1024];
-  char *p;
-  uint32 values[3];
-  int num_values, i;
-  const char *filename;
-  const char *functionname;
-  unsigned int linenumber;
 
   if (!TRACE_ALU_P (STATE_CPU (simulator, 0)))
     return;
 
-  buf[0] = '\0';
-
-  if (STATE_TEXT_SECTION (simulator)
-      && PC >= STATE_TEXT_START (simulator)
-      && PC < STATE_TEXT_END (simulator))
-    {
-      filename = (const char *)0;
-      functionname = (const char *)0;
-      linenumber = 0;
-      if (bfd_find_nearest_line (STATE_PROG_BFD (simulator),
-				 STATE_TEXT_SECTION (simulator),
-				 (struct symbol_cache_entry **)0,
-				 PC - STATE_TEXT_START (simulator),
-				 &filename, &functionname, &linenumber))
-	{
-	  p = buf;
-	  if (linenumber)
-	    {
-	      sprintf (p, "Line %5d ", linenumber);
-	      p += strlen (p);
-	    }
-
-	  if (functionname)
-	    {
-	      sprintf (p, "Func %s ", functionname);
-	      p += strlen (p);
-	    }
-	  else if (filename)
-	    {
-	      char *q = (char *) strrchr (filename, '/');
-	      sprintf (p, "File %s ", (q) ? q+1 : filename);
-	      p += strlen (p);
-	    }
-
-	  if (*p == ' ')
-	    *p = '\0';
-	}
-    }
-
-  trace_printf (simulator, STATE_CPU (simulator, 0),
-		"0x%.8x: %-*.*s %-*s",
-		(unsigned)PC,
-		SIZE_LOCATION, SIZE_LOCATION, buf,
-		SIZE_INSTRUCTION, name);
+  trace_pc = PC;
+  trace_name = name;
 
   switch (type)
     {
@@ -140,13 +89,13 @@ trace_input (name, type, size)
     case OP_UNKNOWN:
     case OP_NONE:
     case OP_TRAP:
-      num_values = 0;
+      trace_num_values = 0;
       break;
       
     case OP_REG:
     case OP_REG_REG_MOVE:
-      values[0] = State.regs[OP[0]];
-      num_values = 1;
+      trace_values[0] = State.regs[OP[0]];
+      trace_num_values = 1;
       break;
       
       /* start-sanitize-v850e */
@@ -154,167 +103,178 @@ trace_input (name, type, size)
       /* end-sanitize-v850e */
     case OP_REG_REG:
     case OP_REG_REG_CMP:
-      values[0] = State.regs[OP[1]];
-      values[1] = State.regs[OP[0]];
-      num_values = 2;
+      trace_values[0] = State.regs[OP[1]];
+      trace_values[1] = State.regs[OP[0]];
+      trace_num_values = 2;
       break;
       
     case OP_IMM_REG:
     case OP_IMM_REG_CMP:
-      values[0] = SEXT5 (OP[0]);
-      values[1] = OP[1];
-      num_values = 2;
+      trace_values[0] = SEXT5 (OP[0]);
+      trace_values[1] = OP[1];
+      trace_num_values = 2;
       break;
       
     case OP_IMM_REG_MOVE:
-      values[0] = SEXT5 (OP[0]);
-      num_values = 1;
+      trace_values[0] = SEXT5 (OP[0]);
+      trace_num_values = 1;
       break;
       
     case OP_COND_BR:
-      values[0] = State.pc;
-      values[1] = SEXT9 (OP[0]);
-      values[2] = PSW;
-      num_values = 3;
+      trace_values[0] = State.pc;
+      trace_values[1] = SEXT9 (OP[0]);
+      trace_values[2] = PSW;
+      trace_num_values = 3;
       break;
       
     case OP_LOAD16:
-      values[0] = OP[1] * size;
-      values[1] = State.regs[30];
-      num_values = 2;
+      trace_values[0] = OP[1] * size;
+      trace_values[1] = State.regs[30];
+      trace_num_values = 2;
       break;
       
     case OP_STORE16:
-      values[0] = State.regs[OP[0]];
-      values[1] = OP[1] * size;
-      values[2] = State.regs[30];
-      num_values = 3;
+      trace_values[0] = State.regs[OP[0]];
+      trace_values[1] = OP[1] * size;
+      trace_values[2] = State.regs[30];
+      trace_num_values = 3;
       break;
       
     case OP_LOAD32:
-      values[0] = EXTEND16 (OP[2]);
-      values[1] = State.regs[OP[0]];
-      num_values = 2;
+      trace_values[0] = EXTEND16 (OP[2]);
+      trace_values[1] = State.regs[OP[0]];
+      trace_num_values = 2;
       break;
       
     case OP_STORE32:
-      values[0] = State.regs[OP[1]];
-      values[1] = EXTEND16 (OP[2]);
-      values[2] = State.regs[OP[0]];
-      num_values = 3;
+      trace_values[0] = State.regs[OP[1]];
+      trace_values[1] = EXTEND16 (OP[2]);
+      trace_values[2] = State.regs[OP[0]];
+      trace_num_values = 3;
       break;
       
     case OP_JUMP:
-      values[0] = SEXT22 (OP[0]);
-      values[1] = State.pc;
-      num_values = 2;
+      trace_values[0] = SEXT22 (OP[0]);
+      trace_values[1] = State.pc;
+      trace_num_values = 2;
       break;
       
     case OP_IMM_REG_REG:
-      values[0] = EXTEND16 (OP[0]) << size;
-      values[1] = State.regs[OP[1]];
-      num_values = 2;
+      trace_values[0] = EXTEND16 (OP[0]) << size;
+      trace_values[1] = State.regs[OP[1]];
+      trace_num_values = 2;
       break;
       
     case OP_UIMM_REG_REG:
-      values[0] = (OP[0] & 0xffff) << size;
-      values[1] = State.regs[OP[1]];
-      num_values = 2;
+      trace_values[0] = (OP[0] & 0xffff) << size;
+      trace_values[1] = State.regs[OP[1]];
+      trace_num_values = 2;
       break;
       
     case OP_BIT:
-      num_values = 0;
+      trace_num_values = 0;
       break;
       
     case OP_EX1:
-      values[0] = PSW;
-      num_values = 1;
+      trace_values[0] = PSW;
+      trace_num_values = 1;
       break;
       
     case OP_EX2:
-      num_values = 0;
+      trace_num_values = 0;
       break;
       
     case OP_LDSR:
-      values[0] = State.regs[OP[0]];
-      num_values = 1;
+      trace_values[0] = State.regs[OP[0]];
+      trace_num_values = 1;
       break;
       
     case OP_STSR:
-      values[0] = State.sregs[OP[1]];
-      num_values = 1;
+      trace_values[0] = State.sregs[OP[1]];
+      trace_num_values = 1;
     }
   
-  for (i = 0; i < num_values; i++)
-    trace_printf (simulator, STATE_CPU (simulator, 0),
-		  "%*s0x%.8lx", SIZE_VALUES - 10, "", values[i]);
-  
-  while (i++ < 3)
-    trace_printf (simulator, STATE_CPU (simulator, 0),
-		  "%*s", SIZE_VALUES, "");
 }
 
 void
 trace_output (result)
      enum op_types result;
 {
-  if (TRACE_ALU_P (STATE_CPU (simulator, 0)))
+  char buf[1000];
+  char *chp;
+
+  if (!TRACE_ALU_P (STATE_CPU (simulator, 0)))
+    return;
+
+  buf[0] = '\0';
+  chp = buf;
+
+  /* write out the values saved during the trace_input call */
+  {
+    int i;
+    for (i = 0; i < trace_num_values; i++)
+      {
+	sprintf (chp, "%*s0x%.8lx", SIZE_VALUES - 10, "", trace_values[i]);
+	chp = strchr (chp, '\0');
+      }
+    while (i++ < 3)
+      {
+	sprintf (chp, "%*s", SIZE_VALUES, "");
+	chp = strchr (chp, '\0');
+      }
+  }
+
+  switch (result)
     {
-      switch (result)
-	{
-	default:
-	case OP_UNKNOWN:
-	case OP_NONE:
-	case OP_TRAP:
-	case OP_REG:
-	case OP_REG_REG_CMP:
-	case OP_IMM_REG_CMP:
-	case OP_COND_BR:
-	case OP_STORE16:
-	case OP_STORE32:
-	case OP_BIT:
-	case OP_EX2:
-	  break;
-
-	case OP_LOAD16:
-	case OP_STSR:
-	  trace_printf (simulator, STATE_CPU (simulator, 0),
-			" :: 0x%.8lx", (unsigned long)State.regs[OP[0]]);
-	  break;
-
-	case OP_REG_REG:
-	case OP_REG_REG_MOVE:
-	case OP_IMM_REG:
-	case OP_IMM_REG_MOVE:
-	case OP_LOAD32:
-	case OP_EX1:
-	  trace_printf (simulator, STATE_CPU (simulator, 0),
-			" :: 0x%.8lx", (unsigned long)State.regs[OP[1]]);
-	  break;
-
-	case OP_IMM_REG_REG:
-	case OP_UIMM_REG_REG:
-	  trace_printf (simulator, STATE_CPU (simulator, 0),
-			" :: 0x%.8lx", (unsigned long)State.regs[OP[2]]);
-	  break;
-
-	case OP_JUMP:
-	  if (OP[1] != 0)
-	    trace_printf (simulator, STATE_CPU (simulator, 0),
-			  " :: 0x%.8lx", (unsigned long)State.regs[OP[1]]);
-	  break;
-
-	case OP_LDSR:
-	  trace_printf (simulator, STATE_CPU (simulator, 0),
-			" :: 0x%.8lx", (unsigned long)State.sregs[OP[1]]);
-	  break;
-	}
-
-      trace_printf (simulator, STATE_CPU (simulator, 0),
-		    "\n");
+    default:
+    case OP_UNKNOWN:
+    case OP_NONE:
+    case OP_TRAP:
+    case OP_REG:
+    case OP_REG_REG_CMP:
+    case OP_IMM_REG_CMP:
+    case OP_COND_BR:
+    case OP_STORE16:
+    case OP_STORE32:
+    case OP_BIT:
+    case OP_EX2:
+      break;
+      
+    case OP_LOAD16:
+    case OP_STSR:
+      sprintf (chp, " :: 0x%.8lx", (unsigned long)State.regs[OP[0]]);
+      break;
+      
+    case OP_REG_REG:
+    case OP_REG_REG_MOVE:
+    case OP_IMM_REG:
+    case OP_IMM_REG_MOVE:
+    case OP_LOAD32:
+    case OP_EX1:
+      sprintf (chp, " :: 0x%.8lx", (unsigned long)State.regs[OP[1]]);
+      break;
+      
+    case OP_IMM_REG_REG:
+    case OP_UIMM_REG_REG:
+      sprintf (chp, " :: 0x%.8lx", (unsigned long)State.regs[OP[2]]);
+      break;
+      
+    case OP_JUMP:
+      if (OP[1] != 0)
+	sprintf (chp, " :: 0x%.8lx", (unsigned long)State.regs[OP[1]]);
+      break;
+      
+    case OP_LDSR:
+      sprintf (chp, " :: 0x%.8lx", (unsigned long)State.sregs[OP[1]]);
+      break;
     }
-}
+  
+  trace_one_insn (simulator, STATE_CPU (simulator, 0), trace_pc,
+		  TRACE_LINENUM_P (STATE_CPU (simulator, 0)),
+		  "simops", __LINE__, "alu", 
+		  "%-*s -%s", SIZE_INSTRUCTION, trace_name, buf);
 
+}
 #endif
 
 
