@@ -1,3 +1,8 @@
+Thu Jan 27 16:53:56 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.texinfo (Selection, Frame Info): Update information about
+	arbitrary frame specficiations.
+
 Wed Jan 26 15:31:57 1994  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* gdb.texinfo, remote.texi: general editing pass prior to Net release

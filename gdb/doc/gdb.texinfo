@@ -3293,14 +3293,19 @@ impossible for @value{GDBN} to assign numbers properly to all frames.  In
 addition, this can be useful when your program has multiple stacks and
 switches between them.
 
-@ifset SPARC
+@ifclear H8EXCLUSIVE
 On the SPARC architecture, @code{frame} needs two addresses to
 select an arbitrary frame: a frame pointer and a stack pointer.
+
+On the MIPS and Alpha architecture, it needs two addresses: a stack
+pointer and a program counter.
+
+On the 29k architecture, it needs three addresses: a register stack
+pointer, a program counter, and a memory stack pointer.
 @c note to future updaters: this is conditioned on a flag
-@c FRAME_SPECIFICATION_DYADIC in the tm-*.h files, currently only used
-@c by SPARC, hence the specific attribution.  Generalize or list all
-@c possibilities if more supported machines start doing this.
-@end ifset
+@c SETUP_ARBITRARY_FRAME in the tm-*.h files.  The above is up to date
+@c as of 27 Jan 1994.
+@end ifclear
 
 @item up @var{n}
 @kindex up
@@ -3381,9 +3386,11 @@ the usual conventions.
 
 @item info frame @var{addr}
 @itemx info f @var{addr}
-Print a verbose description of the frame at address @var{addr},
-without selecting that frame.  The selected frame remains unchanged by
-this command.
+Print a verbose description of the frame at address @var{addr}, without
+selecting that frame.  The selected frame remains unchanged by this
+command.  This requires the same kind of address (more than one for some
+architectures) that you specify in the @code{frame} command.
+@xref{Selection, ,Selecting a frame}.
 
 @item info args
 @kindex info args
