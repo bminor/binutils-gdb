@@ -17,6 +17,11 @@
 
 Do-first:
 
+for d in more.parse ; do
+	if [ -d $d ]; then
+		lose_these_too="$d ${lose_these_too}"
+	fi
+done
 
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
@@ -31,10 +36,6 @@ basic
 parse
 reloc
 unsorted
-
-Things-to-lose:
-
-more.parse
 
 Do-last:
 
