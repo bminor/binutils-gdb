@@ -126,7 +126,8 @@ store_inferior_registers (regno)
     {
       for (regno = 1; regno < NUM_REGS; regno++)
 	{
-	  if (regno == 32 || regno == 35 || regno == 36 || regno == 71)
+	  if (regno == 32 || regno == 35 || regno == 36
+	      || regno == 71 || regno == FP_REGNUM)
 	    continue;
 	  regaddr = register_addr (regno, 1);
 	  errno = 0;

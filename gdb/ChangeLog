@@ -1,3 +1,11 @@
+Fri Oct  4 17:04:31 1991  Per Bothner  (bothner at cygnus.com)
+
+	More patches from Peter Schauer <pes@regent.e-technik.tu-muenchen.de>:
+	* mips-xdep.c (store_inferior_registers):  Don't try to
+	write the (pseudo) FP.
+	* mipsread.c (parse_partial_symbols):  Improved algorithm for
+	setting pst->texthigh.
+
 Fri Oct  4 16:47:32 1991  Roland H. Pesch  (pesch at cygnus.com)
 
 	* doc/Makefile: make TEXINPUTS include . everywhere
