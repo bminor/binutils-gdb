@@ -1,3 +1,8 @@
+Tue Jul  7 00:20:29 1992  Fred Fish  (fnf@cygnus.com)
+
+	* configure.in:  Add m68k-ericsson-*.
+	* remote-es1800.c, tm-es1800.h, config/es1800.mt:  New files.
+
 Sun Jul  5 17:17:16 1992  Fred Fish  (fnf@cygnus.com)
 
 	* maint.c:  New file.

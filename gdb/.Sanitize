@@ -160,6 +160,7 @@ regex.h
 rem-multi.shar
 remote-adapt.c
 remote-eb.c
+remote-es1800.c
 remote-hms.c
 remote-mm.c
 remote-nindy.c
@@ -198,8 +199,6 @@ terminal.h
 tm-29k.h
 tm-3b1.h
 tm-68k.h
-tm-h8300.h
-tm-m88k.h
 tm-altos.h
 tm-altosgas.h
 tm-amix.h
@@ -207,6 +206,8 @@ tm-arm.h
 tm-bigmips.h
 tm-convex.h
 tm-delta88.h
+tm-es1800.h
+tm-h8300.h
 tm-hp300bsd.h
 tm-hp300hpux.h
 tm-hppabsd.h
@@ -218,6 +219,7 @@ tm-i960.h
 tm-irix3.h
 tm-isi.h
 tm-linux.h
+tm-m88k.h
 tm-merlin.h
 tm-mips.h
 tm-news.h

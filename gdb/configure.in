@@ -197,6 +197,7 @@ m68k)
 		sysv4*)		gdb_target=amix ;;
 		esac
 		;;
+	ericsson) gdb_target=es1800 ;;
 	hp)
 		case "${target_os}" in
 		bsd)	gdb_target=hp300bsd ;;
