@@ -23,12 +23,6 @@ else
 	lose_these_too="tic80 ${lose_these_too}"
 fi
 
-if ( echo $* | grep keep\-v850 > /dev/null ) ; then
-	keep_these_too="v850 ${keep_these_too}"
-else
-	lose_these_too="v850 ${lose_these_too}"
-fi
-
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
 	keep_these_too="d30v ${keep_these_too}"
 else
@@ -65,9 +59,15 @@ sparc
 sparc-solaris
 sun4
 template
+v850
 vax
 
 Things-to-lose:
+
+gasp
+i386-bsd
+ieee.fp
+mn10x00
 
 Do-last:
 

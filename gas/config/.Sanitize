@@ -31,12 +31,6 @@ else
 	lose_these_too="${tic80_files} ${lose_these_too}"
 fi
 
-if ( echo $* | grep keep\-v850 > /dev/null ) ; then
-	keep_these_too="tc-v850.c tc-v850.h ${keep_these_too}"
-else
-	lose_these_too="tc-v850.c tc-v850.h ${lose_these_too}"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -129,6 +123,8 @@ tc-sparc.c
 tc-sparc.h
 tc-tahoe.c
 tc-tahoe.h
+tc-v850.c
+tc-v850.h
 tc-vax.c
 tc-vax.h
 tc-w65.c
@@ -169,6 +165,8 @@ vms-conf.h
 vms-a-conf.h
 
 Things-to-lose:
+
+vms
 
 Do-last:
 
@@ -293,57 +291,7 @@ fi
 
 v850e_files="tc-v850.c tc-v850.h"
 if ( echo $* | grep keep\-v850e > /dev/null ) ; then
- if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
 	for i in $v850e_files ; do
-		if test -f $i && (grep sanitize-v850eq $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping v850e and v850eq stuff in $i
-			fi
-		fi
-	done
- else
-	for i in $v850e_files ; do
-		if test -r $i && (grep sanitize-v850eq $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v850eq\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-v850eq/,/end\-sanitize\-v850eq/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
- fi
-else
- if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
-	for i in $v850e_files ; do
-		if test -f $i && (grep sanitize-v850eq $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping v850e and v850eq stuff in $i
-			fi
-		fi
-	done
- else
-	for i in $v850e_files ; do
-		if test -r $i && (grep sanitize-v850eq $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v850eq\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-v850eq/,/end\-sanitize\-v850eq/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
 		if test -r $i && (grep sanitize-v850e $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
 				echo Removing traces of \"v850e\" from $i...
@@ -359,7 +307,6 @@ else
 			mv new $i
 		fi
 	done
- fi
 fi
 
 # End of file.

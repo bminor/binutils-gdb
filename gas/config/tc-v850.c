@@ -241,11 +241,9 @@ set_machine (int number)
     {
     case 0: processor_mask = PROCESSOR_V850; break;
 /* start-sanitize-v850e */
-    case bfd_mach_v850e: processor_mask = PROCESSOR_V850E; break;
-/* end-sanitize-v850e */
-/* start-sanitize-v850eq */
+    case bfd_mach_v850e:  processor_mask = PROCESSOR_V850E; break;
     case bfd_mach_v850eq: processor_mask = PROCESSOR_V850EQ; break;
-/* end-sanitize-v850eq */
+/* end-sanitize-v850e */
     }
 }
 
@@ -269,10 +267,8 @@ const pseudo_typeS md_pseudo_table[] =
   {"call_table_data", v850_call_table_data, 0},
   {"call_table_text", v850_call_table_text, 0},
   {"v850e",           set_machine,          bfd_mach_v850e},
-/* end-sanitize-v850e */
-/* start-sanitize-v850eq */
   {"v850eq",          set_machine,          bfd_mach_v850eq},
-/* end-sanitize-v850eq */
+/* end-sanitize-v850e */
   { NULL,     NULL,         0}
 };
 
@@ -611,10 +607,8 @@ parse_register_list
 )
 {
   static int  type1_regs[ 32 ] = { 30,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 31, 29, 28, 23, 22, 21, 20, 27, 26, 25, 24 };
-/* start-sanitize-v850eq */
   static int  type2_regs[ 32 ] = { 19, 18, 17, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 31, 29, 28, 23, 22, 21, 20, 27, 26, 25, 24 };
   static int  type3_regs[ 32 ] = {  3,  2,  1,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 15, 13, 12,  7,  6,  5,  4, 11, 10,  9,  8 };
-/* end-sanitize-v850eq */
   int *       regs;
   expressionS exp;
 
@@ -623,10 +617,8 @@ parse_register_list
   switch (operand->shift)
     {
     case 0xffe00001: regs = type1_regs; break;
-/* start-sanitize-v850eq */
     case 0xfff8000f: regs = type2_regs; break;
     case 0xfff8001f: regs = type3_regs; break;
-/* end-sanitize-v850eq */
     default:
       as_bad ("unknown operand shift: %x\n", operand->shift );		    
       return "internal failure in parse_register_list";
@@ -649,9 +641,7 @@ parse_register_list
       if (exp.X_op != O_constant)
 	return "constant expression or register list expected";
 
-/* start-sanitize-v850eq */
       if (regs == type1_regs)
-/* end-sanitize-v850eq */
 	{
 	  if (exp.X_add_number & 0xFFFFF000)
 	    return "high bits set in register list expression";
@@ -664,7 +654,6 @@ parse_register_list
 		    * insn |= (1 << i);
 	      }
 	}
-/* start-sanitize-v850eq */
       else if (regs == type2_regs)
 	{
 	  if (exp.X_add_number & 0xFFFE0000)
@@ -700,7 +689,6 @@ parse_register_list
 	  if (exp.X_add_number & (1 << 16))
 	    * insn |= (1 << 19);
 	}
-/* end-sanitize-v850eq */
 
       return NULL;
     }
@@ -823,10 +811,8 @@ md_show_usage (stream)
   fprintf (stream, "\t-mv850               The code is targeted at the v850\n");
 /* start-sanitize-v850e */
   fprintf (stream, "\t-mv850e              The code is targeted at the v850e\n");
-/* end-sanitize-v850e */
-/* start-sanitize-v850eq */
   fprintf (stream, "\t-mv850eq             The code is targeted at the v850eq\n");
-/* end-sanitize-v850eq */
+/* end-sanitize-v850e */
 } 
 
 int
@@ -863,15 +849,13 @@ md_parse_option (c, arg)
 	  processor_mask = PROCESSOR_V850E;
 	  return 1;
 	}
-/* end-sanitize-v850e */
-/* start-sanitize-v850eq */
       else if (strcmp (arg, "v850eq") == 0)
 	{
 	  machine = bfd_mach_v850eq;
 	  processor_mask = PROCESSOR_V850EQ;
 	  return 1;
 	}
-/* end-sanitize-v850eq */
+/* end-sanitize-v850e */
       break;
     }
   
@@ -981,7 +965,7 @@ md_begin ()
   register const struct v850_opcode * op;
   flagword                            applicable;
 
-/* start-sanitize-v850eq */
+/* start-sanitize-v850e */
   if (strncmp (TARGET_CPU, "v850eq", 6) == 0)
     {
       if (machine == -1)
@@ -990,10 +974,7 @@ md_begin ()
       if (processor_mask == -1)
 	processor_mask = PROCESSOR_V850EQ;
     }
-  else
-/* end-sanitize-v850eq */
-/* start-sanitize-v850e */
-  if (strncmp (TARGET_CPU, "v850e", 5) == 0)
+  else if (strncmp (TARGET_CPU, "v850e", 5) == 0)
     {
       if (machine == -1)
 	machine        = bfd_mach_v850e;
