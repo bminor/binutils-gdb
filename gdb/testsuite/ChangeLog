@@ -1,3 +1,8 @@
+2001-05-24  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.threads/pthreads.exp (test_startup): Relax test for thread
+	debugging.  If test fails, issue an "unsupported" not a "fail".
+
 2001-05-24  Jim Blandy  <jimb@redhat.com>
 
 	Don't assume that short is shorter than int.

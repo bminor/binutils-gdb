@@ -197,13 +197,11 @@ proc test_startup {} {
     # We should be able to do an info threads before starting any others.
     send_gdb "info threads\n"
     gdb_expect {
-	-re ".*Thread.*LWP.*main.*$gdb_prompt $" {
+	-re ".*Thread.*main.*$gdb_prompt $" {
 	    pass "info threads"
 	}
 	-re "\r\n$gdb_prompt $" {
-	    pass "info threads"
-	    setup_xfail "*-*-*"
-	    fail "gdb does not support pthreads for this machine"
+	    unsupported "gdb does not support pthreads for this machine"
 	    return 0
 	}
     }
