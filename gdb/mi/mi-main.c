@@ -640,7 +640,7 @@ mi_cmd_data_assign (char *command, char **argv, int argc)
      01-12-1999: Need to decide what to do with this for libgdb purposes. */
 
   expr = parse_expression (argv[0]);
-  old_chain = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+  old_chain = make_cleanup (free_current_contents, &expr);
   evaluate_expression (expr);
   do_cleanups (old_chain);
   return MI_CMD_DONE;
@@ -669,7 +669,7 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
 
   expr = parse_expression (argv[0]);
 
-  old_chain = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+  old_chain = make_cleanup (free_current_contents, &expr);
 
   val = evaluate_expression (expr);
 

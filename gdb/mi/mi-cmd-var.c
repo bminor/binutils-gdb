@@ -61,8 +61,7 @@ mi_cmd_var_create (char *command, char **argv, int argc)
   name = xstrdup (argv[0]);
   /* Add cleanup for name. Must be free_current_contents as
      name can be reallocated */
-  old_cleanups = make_cleanup ((make_cleanup_func) free_current_contents,
-			       &name);
+  old_cleanups = make_cleanup (free_current_contents, &name);
 
   frame = xstrdup (argv[1]);
   old_cleanups = make_cleanup (free, frame);
@@ -128,8 +127,7 @@ mi_cmd_var_delete (char *command, char **argv, int argc)
   name = xstrdup (argv[0]);
   /* Add cleanup for name. Must be free_current_contents as
      name can be reallocated */
-  old_cleanups = make_cleanup ((make_cleanup_func) free_current_contents,
-			       &name);
+  old_cleanups = make_cleanup (free_current_contents, &name);
 
   /* If we have one single argument it cannot be '-c' or any string
      starting with '-'. */
