@@ -1,5 +1,11 @@
 2003-04-23  Andrew Cagney  <cagney@redhat.com>
 
+	* infcall.c (call_function_by_hand): Make declaration of "i",
+	"sal", "bpt" and "old_sp" more local to their use.  Delete #if
+	lint.
+
+2003-04-23  Andrew Cagney  <cagney@redhat.com>
+
 	* infcall.c (call_function_by_hand): Delete variable
 	"n_method_args".  Localize "param_type"'s declaration to the loop
 	that it is used.  Reinstate code assigning to said variable -

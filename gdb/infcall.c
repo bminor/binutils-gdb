@@ -237,7 +237,6 @@ struct value *
 call_function_by_hand (struct value *function, int nargs, struct value **args)
 {
   register CORE_ADDR sp;
-  register int i;
   int rc;
   CORE_ADDR start_sp;
   /* CALL_DUMMY is an array of words (REGISTER_SIZE), but each word
@@ -258,7 +257,6 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   int sizeof_dummy1;
   char *dummy1;
   CORE_ADDR dummy_addr;
-  CORE_ADDR old_sp;
   struct type *value_type;
   unsigned char struct_return;
   CORE_ADDR struct_addr = 0;
@@ -322,55 +320,56 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
       generic_push_dummy_frame ();
     }
 
-  old_sp = read_sp ();
-
   /* Ensure that the initial SP is correctly aligned.  */
-  if (gdbarch_frame_align_p (current_gdbarch))
-    {
-      /* NOTE: cagney/2002-09-18:
+  {
+    CORE_ADDR old_sp = read_sp ();
+    if (gdbarch_frame_align_p (current_gdbarch))
+      {
+	/* NOTE: cagney/2002-09-18:
+	   
+	   On a RISC architecture, a void parameterless generic dummy
+	   frame (i.e., no parameters, no result) typically does not
+	   need to push anything the stack and hence can leave SP and
+	   FP.  Similarly, a framelss (possibly leaf) function does
+	   not push anything on the stack and, hence, that too can
+	   leave FP and SP unchanged.  As a consequence, a sequence of
+	   void parameterless generic dummy frame calls to frameless
+	   functions will create a sequence of effectively identical
+	   frames (SP, FP and TOS and PC the same).  This, not
+	   suprisingly, results in what appears to be a stack in an
+	   infinite loop --- when GDB tries to find a generic dummy
+	   frame on the internal dummy frame stack, it will always
+	   find the first one.
 
-	 On a RISC architecture, a void parameterless generic dummy
-	 frame (i.e., no parameters, no result) typically does not
-	 need to push anything the stack and hence can leave SP and
-	 FP.  Similarly, a framelss (possibly leaf) function does not
-	 push anything on the stack and, hence, that too can leave FP
-	 and SP unchanged.  As a consequence, a sequence of void
-	 parameterless generic dummy frame calls to frameless
-	 functions will create a sequence of effectively identical
-	 frames (SP, FP and TOS and PC the same).  This, not
-	 suprisingly, results in what appears to be a stack in an
-	 infinite loop --- when GDB tries to find a generic dummy
-	 frame on the internal dummy frame stack, it will always find
-	 the first one.
-
-	 To avoid this problem, the code below always grows the stack.
-	 That way, two dummy frames can never be identical.  It does
-	 burn a few bytes of stack but that is a small price to pay
-	 :-).  */
-      sp = gdbarch_frame_align (current_gdbarch, old_sp);
-      if (sp == old_sp)
-	{
-	  if (INNER_THAN (1, 2))
-	    /* Stack grows down.  */
-	    sp = gdbarch_frame_align (current_gdbarch, old_sp - 1);
-	  else
-	    /* Stack grows up.  */
-	    sp = gdbarch_frame_align (current_gdbarch, old_sp + 1);
-	}
-      gdb_assert ((INNER_THAN (1, 2) && sp <= old_sp)
-		  || (INNER_THAN (2, 1) && sp >= old_sp));
-    }
-  else
-    /* FIXME: cagney/2002-09-18: Hey, you loose!  Who knows how badly
-       aligned the SP is!  Further, per comment above, if the generic
-       dummy frame ends up empty (because nothing is pushed) GDB won't
-       be able to correctly perform back traces.  If a target is
-       having trouble with backtraces, first thing to do is add
-       FRAME_ALIGN() to its architecture vector.  After that, try
-       adding SAVE_DUMMY_FRAME_TOS() and modifying
-       DEPRECATED_FRAME_CHAIN so that when the next outer frame is a
-       generic dummy, it returns the current frame's base.  */
-    sp = old_sp;
+	   To avoid this problem, the code below always grows the
+	   stack.  That way, two dummy frames can never be identical.
+	   It does burn a few bytes of stack but that is a small price
+	   to pay :-).  */
+	sp = gdbarch_frame_align (current_gdbarch, old_sp);
+	if (sp == old_sp)
+	  {
+	    if (INNER_THAN (1, 2))
+	      /* Stack grows down.  */
+	      sp = gdbarch_frame_align (current_gdbarch, old_sp - 1);
+	    else
+	      /* Stack grows up.  */
+	      sp = gdbarch_frame_align (current_gdbarch, old_sp + 1);
+	  }
+	gdb_assert ((INNER_THAN (1, 2) && sp <= old_sp)
+		    || (INNER_THAN (2, 1) && sp >= old_sp));
+      }
+    else
+      /* FIXME: cagney/2002-09-18: Hey, you loose!  Who knows how
+	 badly aligned the SP is!  Further, per comment above, if the
+	 generic dummy frame ends up empty (because nothing is pushed)
+	 GDB won't be able to correctly perform back traces.  If a
+	 target is having trouble with backtraces, first thing to do
+	 is add FRAME_ALIGN() to its architecture vector.  After that,
+	 try adding SAVE_DUMMY_FRAME_TOS() and modifying
+	 DEPRECATED_FRAME_CHAIN so that when the next outer frame is a
+	 generic dummy, it returns the current frame's base.  */
+      sp = old_sp;
+  }
 
   if (INNER_THAN (1, 2))
     {
@@ -407,10 +406,13 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 
   /* Create a call sequence customized for this function
      and the number of arguments for it.  */
-  for (i = 0; i < (int) (SIZEOF_CALL_DUMMY_WORDS / sizeof (dummy[0])); i++)
-    store_unsigned_integer (&dummy1[i * REGISTER_SIZE],
-			    REGISTER_SIZE,
-			    (ULONGEST) dummy[i]);
+  {
+    int i;
+    for (i = 0; i < (int) (SIZEOF_CALL_DUMMY_WORDS / sizeof (dummy[0])); i++)
+      store_unsigned_integer (&dummy1[i * REGISTER_SIZE],
+			      REGISTER_SIZE,
+			      (ULONGEST) dummy[i]);
+  }
 
   switch (CALL_DUMMY_LOCATION)
     {
@@ -459,72 +461,74 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
       internal_error (__FILE__, __LINE__, "bad switch");
     }
 
-#ifdef lint
-  sp = old_sp;			/* It really is used, for some ifdef's... */
-#endif
-
   if (nargs < TYPE_NFIELDS (ftype))
     error ("too few arguments in function call");
 
-  for (i = nargs - 1; i >= 0; i--)
-    {
-      int prototyped;
-      struct type *param_type;
+  {
+    int i;
+    for (i = nargs - 1; i >= 0; i--)
+      {
+	int prototyped;
+	struct type *param_type;
+	
+	/* FIXME drow/2002-05-31: Should just always mark methods as
+	   prototyped.  Can we respect TYPE_VARARGS?  Probably not.  */
+	if (TYPE_CODE (ftype) == TYPE_CODE_METHOD)
+	  prototyped = 1;
+	else if (i < TYPE_NFIELDS (ftype))
+	  prototyped = TYPE_PROTOTYPED (ftype);
+	else
+	  prototyped = 0;
 
-      /* FIXME drow/2002-05-31: Should just always mark methods as
-	 prototyped.  Can we respect TYPE_VARARGS?  Probably not.  */
-      if (TYPE_CODE (ftype) == TYPE_CODE_METHOD)
-	prototyped = 1;
-      else if (i < TYPE_NFIELDS (ftype))
-	prototyped = TYPE_PROTOTYPED (ftype);
-      else
-	prototyped = 0;
+	if (i < TYPE_NFIELDS (ftype))
+	  param_type = TYPE_FIELD_TYPE (ftype, i);
+	else
+	  param_type = NULL;
+	
+	args[i] = value_arg_coerce (args[i], param_type, prototyped);
 
-      if (i < TYPE_NFIELDS (ftype))
-	param_type = TYPE_FIELD_TYPE (ftype, i);
-      else
-	param_type = NULL;
+	/* elz: this code is to handle the case in which the function
+	   to be called has a pointer to function as parameter and the
+	   corresponding actual argument is the address of a function
+	   and not a pointer to function variable.  In aCC compiled
+	   code, the calls through pointers to functions (in the body
+	   of the function called by hand) are made via
+	   $$dyncall_external which requires some registers setting,
+	   this is taken care of if we call via a function pointer
+	   variable, but not via a function address.  In cc this is
+	   not a problem. */
 
-      args[i] = value_arg_coerce (args[i], param_type, prototyped);
-
-      /* elz: this code is to handle the case in which the function to
-         be called has a pointer to function as parameter and the
-         corresponding actual argument is the address of a function
-         and not a pointer to function variable.  In aCC compiled
-         code, the calls through pointers to functions (in the body of
-         the function called by hand) are made via $$dyncall_external
-         which requires some registers setting, this is taken care of
-         if we call via a function pointer variable, but not via a
-         function address.  In cc this is not a problem. */
-
-      if (using_gcc == 0)
-	{
-	  if (param_type != NULL && TYPE_CODE (ftype) != TYPE_CODE_METHOD)
-	    {
-	      /* if this parameter is a pointer to function.  */
-	      if (TYPE_CODE (param_type) == TYPE_CODE_PTR)
-		if (TYPE_CODE (TYPE_TARGET_TYPE (param_type)) == TYPE_CODE_FUNC)
-		  /* elz: FIXME here should go the test about the
-		     compiler used to compile the target. We want to
-		     issue the error message only if the compiler used
-		     was HP's aCC.  If we used HP's cc, then there is
-		     no problem and no need to return at this point.  */
-		  /* Go see if the actual parameter is a variable of
-		     type pointer to function or just a function.  */
-		  if (args[i]->lval == not_lval)
-		    {
-		      char *arg_name;
-		      if (find_pc_partial_function ((CORE_ADDR) args[i]->aligner.contents[0], &arg_name, NULL, NULL))
-			error ("\
+	if (using_gcc == 0)
+	  {
+	    if (param_type != NULL && TYPE_CODE (ftype) != TYPE_CODE_METHOD)
+	      {
+		/* if this parameter is a pointer to function.  */
+		if (TYPE_CODE (param_type) == TYPE_CODE_PTR)
+		  if (TYPE_CODE (TYPE_TARGET_TYPE (param_type)) == TYPE_CODE_FUNC)
+		    /* elz: FIXME here should go the test about the
+		       compiler used to compile the target. We want to
+		       issue the error message only if the compiler
+		       used was HP's aCC.  If we used HP's cc, then
+		       there is no problem and no need to return at
+		       this point.  */
+		    /* Go see if the actual parameter is a variable of
+		       type pointer to function or just a function.  */
+		    if (args[i]->lval == not_lval)
+		      {
+			char *arg_name;
+			if (find_pc_partial_function ((CORE_ADDR) args[i]->aligner.contents[0], &arg_name, NULL, NULL))
+			  error ("\
 You cannot use function <%s> as argument. \n\
 You must use a pointer to function type variable. Command ignored.", arg_name);
-		    }
-	    }
-	}
-    }
+		      }
+	      }
+	  }
+      }
+  }
 
   if (REG_STRUCT_HAS_ADDR_P ())
     {
+      int i;
       /* This is a machine like the sparc, where we may need to pass a
 	 pointer to the structure, not the structure itself.  */
       for (i = nargs - 1; i >= 0; i--)
@@ -632,7 +636,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	{
 	  /* If stack grows down, we must leave a hole at the top. */
 	  int len = 0;
-
+	  int i;
 	  for (i = nargs - 1; i >= 0; i--)
 	    len += TYPE_LENGTH (VALUE_ENCLOSING_TYPE (args[i]));
 	  if (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ())
@@ -774,24 +778,25 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
       struct regcache *buffer = retbuf;
       struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
       int saved_async = 0;
-      struct breakpoint *bpt;
-      struct symtab_and_line sal;
 
       /* Now proceed, having reached the desired place.  */
       clear_proceed_status ();
 
-      init_sal (&sal);		/* initialize to zeroes */
-      sal.pc = bp_addr;
-      sal.section = find_pc_overlay (sal.pc);
-  
+      /* Create a momentary breakpoint at the return address of the
+	 inferior.  That way it breaks when it returns.  */
+
       {
+	struct breakpoint *bpt;
+	struct symtab_and_line sal;
+	struct frame_id frame;
+	init_sal (&sal);		/* initialize to zeroes */
+	sal.pc = bp_addr;
+	sal.section = find_pc_overlay (sal.pc);
 	/* Set up a frame ID for the dummy frame so we can pass it to
 	   set_momentary_breakpoint.  We need to give the breakpoint a
 	   frame ID so that the breakpoint code can correctly
 	   re-identify the dummy breakpoint.  */
-	struct frame_id frame = frame_id_build (read_fp (), sal.pc);
-	/* Create a momentary breakpoint at the return address of the
-	   inferior.  That way it breaks when it returns.  */
+	frame = frame_id_build (read_fp (), sal.pc);
 	bpt = set_momentary_breakpoint (sal, frame, bp_call_dummy);
 	bpt->disposition = disp_del;
       }
