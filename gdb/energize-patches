@@ -880,9 +880,9 @@ diff -c -r1.48 valprint.c
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/config/amix.mh,v
 retrieving revision 1.4
-diff -c -r1.4 config/amix.mh
+diff -c -r1.4 amix.mh
 *** 1.4	1992/06/10 02:05:16
---- amix.mh	1992/07/05 17:47:19
+--- config/amix.mh	1992/07/05 17:47:19
 ***************
 *** 22,24 ****
 --- 22,31 ----
@@ -899,9 +899,9 @@ diff -c -r1.4 config/amix.mh
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/config/ncr3000.mh,v
 retrieving revision 1.4
-diff -c -r1.4 config/ncr3000.mh
+diff -c -r1.4 ncr3000.mh
 *** 1.4	1992/06/15 19:25:13
---- ncr3000.mh	1992/07/05 17:49:34
+--- config/ncr3000.mh	1992/07/05 17:49:34
 ***************
 *** 38,40 ****
 --- 38,47 ----
