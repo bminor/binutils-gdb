@@ -21,7 +21,7 @@
    Boston, MA 02111-1307, USA.
  */
 
-#include "serial.h"
+struct serial;
 
 /* This structure describes the strings necessary to give small command
    sequences to the monitor, and parse the response.
@@ -97,7 +97,7 @@ struct monitor_ops
     char *dump_registers;	/* Command to dump all regs at once */
     char *register_pattern;	/* Pattern that picks out register from reg dump */
     void (*supply_register) (char *name, int namelen, char *val, int vallen);
-    void (*load_routine) (serial_t desc, char *file,
+    void (*load_routine) (struct serial *desc, char *file,
 			  int hashmark);	/* Download routine */
     int (*dumpregs) (void);	/* routine to dump all registers */
     int (*continue_hook) (void);	/* Emit the continue command */

@@ -1,3 +1,14 @@
+2001-07-10  Andrew Cagney  <ac131313@redhat.com>
+
+	* remote-utils.h (struct serial): Declare as opaque.  Remove
+	include of "serial.h".
+	* Makefile.in (remote_utils_h): Update.
+
+	* monitor.h (struct serial): Declare as opaque.  Remove include of
+	"serial.h".
+	(struct monitor_ops): Replace serial_t with `struct serial *'.
+	* monitor.c (monitor_desc): Ditto.
+
 2001-07-10  Daniel Jacobowitz  <drow@mvista.com>
 
 	* mips-linux-tdep.c: New file.

@@ -119,7 +119,7 @@ static CORE_ADDR *breakaddr;
    that monitor_open knows that we don't have a file open when the
    program starts.  */
 
-static serial_t monitor_desc = NULL;
+static struct serial *monitor_desc = NULL;
 
 /* Pointer to regexp pattern matching data */
 

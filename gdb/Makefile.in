@@ -559,7 +559,7 @@ demangle_h =    $(INCLUDE_DIR)/demangle.h
 obstack_h =     $(INCLUDE_DIR)/obstack.h
 
 dcache_h = dcache.h
-remote_utils_h = $(dcache_h) serial.h target.h remote-utils.h $(remote-sim_h)
+remote_utils_h =  remote-utils.h $(target_h)
 
 
 readline_headers = \

@@ -22,8 +22,8 @@
 #ifndef REMOTE_UTILS_H
 #define REMOTE_UTILS_H
 
-#include "serial.h"
 #include "target.h"
+struct serial;
 
 /* Stuff that should be shared (and handled consistently) among the various
    remote targets.  */
@@ -35,7 +35,7 @@ struct _sr_settings
     int retries;
 
     char *device;
-    serial_t desc;
+    struct serial *desc;
 
   };
 
