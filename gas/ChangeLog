@@ -1,3 +1,15 @@
+Mon Jul 27 16:25:58 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* configure.in (install_tooldir): Allow target to specify whether
+	it wants to be installed in $(tooldir)/bin.
+start-sanitize-sky
+	(dvp-*-*): Don't install in $(tooldir)/bin.
+end-sanitize-sky
+	* configure: Regenerate.
+	* Makefile.am (install-exec-local): Set install-exec-tooldir
+	dependency via configure.
+	* Makefile.in: Regenerate.
+
 Fri Jul 24 19:58:59 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* Makefile.am (install-exec-local): Split into two ...
