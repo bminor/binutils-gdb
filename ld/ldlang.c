@@ -622,7 +622,7 @@ lang_output_section_statement_lookup (const char *const name)
 
       lookup->next = NULL;
       lookup->bfd_section = NULL;
-      lookup->processed = FALSE;
+      lookup->processed = 0;
       lookup->sectype = normal_section;
       lookup->addr_tree = NULL;
       lang_list_init (&lookup->children);
@@ -2984,12 +2984,15 @@ lang_size_sections_1
 		  {
 		    etree_value_type r;
 
+		    os->processed = -1;
 		    r = exp_fold_tree (os->addr_tree,
 				       abs_output_section,
 				       lang_allocating_phase_enum,
 				       dot, &dot);
+		    os->processed = 0;
+		    
 		    if (!r.valid_p)
-		      einfo (_("%F%S: non constant address expression for section %s\n"),
+		      einfo (_("%F%S: non constant or forward reference address expression for section %s\n"),
 			     os->name);
 
 		    dot = r.value + r.section->bfd_section->vma;
@@ -3027,7 +3030,7 @@ lang_size_sections_1
 		= TO_SIZE (after - os->bfd_section->vma);
 
 	    dot = os->bfd_section->vma + TO_ADDR (os->bfd_section->_raw_size);
-	    os->processed = TRUE;
+	    os->processed = 1;
 
 	    if (os->update_dot_tree != 0)
 	      exp_fold_tree (os->update_dot_tree, abs_output_section,
@@ -3088,6 +3091,11 @@ lang_size_sections_1
 	      dot - output_section_statement->bfd_section->vma;
 	    s->data_statement.output_section =
 	      output_section_statement->bfd_section;
+
+	    /* We might refer to provided symbols in the expression, and
+	       need to mark them as needed.  */
+	    exp_fold_tree (s->data_statement.exp, abs_output_section,
+			   lang_allocating_phase_enum, dot, &dot);
 
 	    switch (s->data_statement.type)
 	      {
@@ -3294,6 +3302,7 @@ lang_size_sections
 	  && first + last <= exp_data_seg.pagesize)
 	{
 	  exp_data_seg.phase = exp_dataseg_adjust;
+	  lang_statement_iteration++;
 	  result = lang_size_sections_1 (s, output_section_statement, prev,
 					 fill, dot, relax, check_regions);
 	}

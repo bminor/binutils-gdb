@@ -1,3 +1,8 @@
+2004-02-23  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-scripts/provide.exp: New.
+	* ld-scripts/provide-{1,2,3}.{s,t,d}.exp: New.
+
 2004-02-20  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-scripts/align.{s,t,exp}: New.

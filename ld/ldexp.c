@@ -141,17 +141,6 @@ new_abs (bfd_vma value)
   return new;
 }
 
-static void
-check (lang_output_section_statement_type *os,
-       const char *name,
-       const char *op)
-{
-  if (os == NULL)
-    einfo (_("%F%P: %s uses undefined section %s\n"), op, name);
-  if (! os->processed)
-    einfo (_("%F%P: %s forward reference of section %s\n"), op, name);
-}
-
 etree_type *
 exp_intop (bfd_vma value)
 {
@@ -460,14 +449,6 @@ fold_trinary (etree_type *tree,
   return result;
 }
 
-etree_value_type
-invalid (void)
-{
-  etree_value_type new;
-  new.valid_p = FALSE;
-  return new;
-}
-
 static etree_value_type
 fold_name (etree_type *tree,
 	   lang_output_section_statement_type *current_section,
@@ -476,25 +457,18 @@ fold_name (etree_type *tree,
 {
   etree_value_type result;
 
+  result.valid_p = FALSE;
+  
   switch (tree->type.node_code)
     {
     case SIZEOF_HEADERS:
       if (allocation_done != lang_first_phase_enum)
-	{
-	  result = new_abs (bfd_sizeof_headers (output_bfd,
-						link_info.relocatable));
-	}
-      else
-	{
-	  result.valid_p = FALSE;
-	}
+	result = new_abs (bfd_sizeof_headers (output_bfd,
+					      link_info.relocatable));
       break;
     case DEFINED:
       if (allocation_done == lang_first_phase_enum)
-	{
-	  lang_track_definedness (tree->name.name);
-	  result.valid_p = FALSE;
-	}
+	lang_track_definedness (tree->name.name);
       else
 	{
 	  struct bfd_link_hash_entry *h;
@@ -515,13 +489,10 @@ fold_name (etree_type *tree,
 	}
       break;
     case NAME:
-      result.valid_p = FALSE;
       if (tree->name.name[0] == '.' && tree->name.name[1] == 0)
 	{
 	  if (allocation_done != lang_first_phase_enum)
 	    result = new_rel_from_section (dot, current_section);
-	  else
-	    result = invalid ();
 	}
       else if (allocation_done != lang_first_phase_enum)
 	{
@@ -529,10 +500,11 @@ fold_name (etree_type *tree,
 
 	  h = bfd_wrapped_link_hash_lookup (output_bfd, &link_info,
 					    tree->name.name,
-					    FALSE, FALSE, TRUE);
-	  if (h != NULL
-	      && (h->type == bfd_link_hash_defined
-		  || h->type == bfd_link_hash_defweak))
+					    TRUE, FALSE, TRUE);
+	  if (!h)
+	    einfo (_("%P%F: bfd_link_hash_lookup failed: %E\n"));
+	  else if (h->type == bfd_link_hash_defined
+		   || h->type == bfd_link_hash_defweak)
 	    {
 	      if (bfd_is_abs_section (h->u.def.section))
 		result = new_abs (h->u.def.value);
@@ -565,6 +537,12 @@ fold_name (etree_type *tree,
 	  else if (allocation_done == lang_final_phase_enum)
 	    einfo (_("%F%S: undefined symbol `%s' referenced in expression\n"),
 		   tree->name.name);
+	  else if (h->type == bfd_link_hash_new)
+	    {
+	      h->type = bfd_link_hash_undefined;
+	      h->u.undef.abfd = NULL;
+	      bfd_link_add_undef (link_info.hash, h);
+	    }
 	}
       break;
 
@@ -574,11 +552,9 @@ fold_name (etree_type *tree,
 	  lang_output_section_statement_type *os;
 
 	  os = lang_output_section_find (tree->name.name);
-	  check (os, tree->name.name, "ADDR");
-	  result = new_rel (0, NULL, os);
+	  if (os && os->processed > 0)
+	    result = new_rel (0, NULL, os);
 	}
-      else
-	result = invalid ();
       break;
 
     case LOADADDR:
@@ -587,16 +563,16 @@ fold_name (etree_type *tree,
 	  lang_output_section_statement_type *os;
 
 	  os = lang_output_section_find (tree->name.name);
-	  check (os, tree->name.name, "LOADADDR");
-	  if (os->load_base == NULL)
-	    result = new_rel (0, NULL, os);
-	  else
-	    result = exp_fold_tree_no_dot (os->load_base,
-					   abs_output_section,
-					   allocation_done);
+	  if (os && os->processed != 0)
+	    {
+	      if (os->load_base == NULL)
+		result = new_rel (0, NULL, os);
+	      else
+		result = exp_fold_tree_no_dot (os->load_base,
+					       abs_output_section,
+					       allocation_done);
+	    }
 	}
-      else
-	result = invalid ();
       break;
 
     case SIZEOF:
@@ -606,11 +582,9 @@ fold_name (etree_type *tree,
 	  lang_output_section_statement_type *os;
 
 	  os = lang_output_section_find (tree->name.name);
-	  check (os, tree->name.name, "SIZEOF");
-	  result = new_abs (os->bfd_section->_raw_size / opb);
+	  if (os && os->processed > 0)
+	    result = new_abs (os->bfd_section->_raw_size / opb);
 	}
-      else
-	result = invalid ();
       break;
 
     default:
@@ -733,14 +707,15 @@ exp_fold_tree (etree_type *tree,
 	      else
 		create = FALSE;
 	      h = bfd_link_hash_lookup (link_info.hash, tree->assign.dst,
-					create, FALSE, FALSE);
+					create, FALSE, TRUE);
 	      if (h == NULL)
 		{
-		  if (tree->type.node_class == etree_assign)
+		  if (create)
 		    einfo (_("%P%F:%s: hash creation failed\n"),
 			   tree->assign.dst);
 		}
 	      else if (tree->type.node_class == etree_provide
+		       && h->type != bfd_link_hash_new
 		       && h->type != bfd_link_hash_undefined
 		       && h->type != bfd_link_hash_common)
 		{
