@@ -9,8 +9,10 @@ MKDEP = gcc -MM
 SUBDIRS = doc po
 
 docdir = doc
+bfdlibdir = @bfdlibdir@
+bfdincludedir = @bfdincludedir@
 
-lib_LTLIBRARIES = libbfd.la
+bfdlib_LTLIBRARIES = libbfd.la
 
 WARN_CFLAGS = @WARN_CFLAGS@
 AM_CFLAGS = $(WARN_CFLAGS)
@@ -672,14 +674,35 @@ $(BFD32_LIBS) \
  $(BFD64_BACKENDS) \
  $(OPTIONAL_BACKENDS): $(BFD_H) $(BFD_H_DEPS) $(LOCAL_H_DEPS)
 
-# Install BFD include file, and others that it needs.
-install-data-local: $(BFD_H)
+install-bfdlibLTLIBRARIES: @INSTALL_LIBBFD_TRUE@install_libbfd
 	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(exec_prefix)/include
-	$(INSTALL_DATA) $(BFD_H) $(DESTDIR)$(exec_prefix)/include/bfd.h
-	$(INSTALL_DATA) $(INCDIR)/ansidecl.h $(DESTDIR)$(exec_prefix)/include/ansidecl.h
-	$(INSTALL_DATA) $(INCDIR)/symcat.h $(DESTDIR)$(exec_prefix)/include/symcat.h
-	$(INSTALL_DATA) $(INCDIR)/bfdlink.h $(DESTDIR)$(exec_prefix)/include/bfdlink.h
+
+uninstall-bfdlibLTLIBRARIES: @INSTALL_LIBBFD_TRUE@uninstall_libbfd
+	@$(NORMAL_UNINSTALL)
+
+.PHONY: install_libbfd uninstall_libbfd
+install_libbfd: $(bfdlib_LTLIBRARIES) $(BFD_H)
+	$(mkinstalldirs) $(DESTDIR)$(bfdlibdir)
+	$(mkinstalldirs) $(DESTDIR)$(bfdincludedir)
+	@list='$(bfdlib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo "$(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(bfdlibdir)/$$p"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(bfdlibdir)/$$p; \
+	  else :; fi; \
+	done
+	$(INSTALL_DATA) $(BFD_H) $(DESTDIR)$(bfdincludedir)/bfd.h
+	$(INSTALL_DATA) $(INCDIR)/ansidecl.h $(DESTDIR)$(bfdincludedir)/ansidecl.h
+	$(INSTALL_DATA) $(INCDIR)/symcat.h $(DESTDIR)$(bfdincludedir)/symcat.h
+	$(INSTALL_DATA) $(INCDIR)/bfdlink.h $(DESTDIR)$(bfdincludedir)/bfdlink.h
+
+uninstall_libbfd:
+	list='$(bfdlib_LTLIBRARIES)'; for p in $$list; do \
+	  $(LIBTOOL)  --mode=uninstall rm -f $(DESTDIR)$(bfdlibdir)/$$p; \
+	done
+	rm -f $(DESTDIR)$(bfdincludedir)/bfd.h
+	rm -f $(DESTDIR)$(bfdincludedir)/ansidecl.h
+	rm -f $(DESTDIR)$(bfdincludedir)/symcat.h
+	rm -f $(DESTDIR)$(bfdincludedir)/bfdlink.h
 
 Makefile: $(srcdir)/configure.in
 

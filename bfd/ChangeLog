@@ -1,3 +1,19 @@
+2002-05-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* acinclude.m4 (AM_INSTALL_LIBBFD): New.
+	* configure.in: Invoke AM_INSTALL_LIBBFD.
+	* Makefile.am (install-data-local): Revert 2002-05-13.  Move to..
+	(install_libbfd): .. New target.
+	(uninstall_libbfd): Likewise.
+	(install-bfdlibLTLIBRARIES): Likewise.
+	(uninstall-bfdlibLTLIBRARIES): Likewise.
+	(bfdlibdir): New.
+	(bfdincludedir): New.
+	(lib_LTLIBRARIES): Rename to bfdlib_LTLIBRARIES.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
 2002-05-17  Stuart Balfour <sbalfour@cisco.com>
 
 	* hash.c (bfd_hash_lookup): Remove computation of len from inside
