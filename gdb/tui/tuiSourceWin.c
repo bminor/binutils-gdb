@@ -111,7 +111,7 @@ tuiUpdateSourceWindowAsIs (TuiWinInfoPtr winInfo, struct symtab *s,
   if (winInfo->generic.type == SRC_WIN)
     ret = tuiSetSourceContent (s, lineOrAddr.lineNo, noerror);
   else
-    ret = tuiSetDisassemContent (s, lineOrAddr.addr);
+    ret = tuiSetDisassemContent (lineOrAddr.addr);
 
   if (ret == TUI_FAILURE)
     {

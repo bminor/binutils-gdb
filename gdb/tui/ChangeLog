@@ -1,5 +1,19 @@
 2002-08-28  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tuiDisassem.c (tui_disassemble): New function to disassemble
+	several lines in a buffer.
+	(tui_find_disassembly_address): New function to search backward
+	or forward a disassembly line.
+	(tuiSetDisassemContent): Use tui_disassemble to obtain the real
+	content and format it in the window.
+	(tuiShowDisassemAndUpdateSource): Remove unused locals.
+	(tuiVerticalDisassemScroll): Use tui_find_disassembly_address to
+	obtain the address to disassemble for the scrolling.
+	* tuiDisassem.h (tuiGetBeginAsmAddress): Update.
+	* tuiSourceWin.c (tuiUpdateSourceWindowAsIs): Don't pass symtab.
+
+2002-08-28  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tuiIO.c (CTRL_CHAR): Redefine and use readline 4.3 definition.
 
 2002-08-26  Stephane Carrez  <stcarrez@nerim.fr>

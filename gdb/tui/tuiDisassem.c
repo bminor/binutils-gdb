@@ -53,95 +53,240 @@
 #include "tuiStack.h"
 #include "tui-file.h"
 
+struct tui_asm_line 
+{
+  CORE_ADDR addr;
+  char* addr_string;
+  char* insn;
+};
 
-/*
-   ** tuiSetDisassemContent().
-   **        Function to set the disassembly window's content.
- */
+/* Function to set the disassembly window's content.
+   Disassemble count lines starting at pc.
+   Return address of the count'th instruction after pc.  */
+static CORE_ADDR
+tui_disassemble (struct tui_asm_line* lines, CORE_ADDR pc, int count)
+{
+  struct ui_file *gdb_dis_out;
+  disassemble_info asm_info;
+
+  /* now init the ui_file structure */
+  gdb_dis_out = tui_sfileopen (256);
+
+  memcpy (&asm_info, TARGET_PRINT_INSN_INFO, sizeof (asm_info));
+  asm_info.stream = gdb_dis_out;
+
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+    asm_info.endian = BFD_ENDIAN_BIG;
+  else
+    asm_info.endian = BFD_ENDIAN_LITTLE;
+
+  if (TARGET_ARCHITECTURE != NULL)
+    asm_info.mach = TARGET_ARCHITECTURE->mach;
+
+  /* Now construct each line */
+  for (; count > 0; count--, lines++)
+    {
+      if (lines->addr_string)
+        xfree (lines->addr_string);
+      if (lines->insn)
+        xfree (lines->insn);
+      
+      print_address (pc, gdb_dis_out);
+      lines->addr = pc;
+      lines->addr_string = xstrdup (tui_file_get_strbuf (gdb_dis_out));
+
+      ui_file_rewind (gdb_dis_out);
+
+      pc = pc + TARGET_PRINT_INSN (pc, &asm_info);
+
+      lines->insn = xstrdup (tui_file_get_strbuf (gdb_dis_out));
+
+      /* reset the buffer to empty */
+      ui_file_rewind (gdb_dis_out);
+    }
+  ui_file_delete (gdb_dis_out);
+  return pc;
+}
+
+/* Find the disassembly address that corresponds to FROM lines
+   above or below the PC.  Variable sized instructions are taken
+   into account by the algorithm.  */
+static CORE_ADDR
+tui_find_disassembly_address (CORE_ADDR pc, int from)
+{
+  register CORE_ADDR newLow;
+  int maxLines;
+  int i;
+  struct tui_asm_line* lines;
+
+  maxLines = (from > 0) ? from : - from;
+  if (maxLines <= 1)
+     return pc;
+
+  lines = (struct tui_asm_line*) alloca (sizeof (struct tui_asm_line)
+                                         * maxLines);
+  memset (lines, 0, sizeof (struct tui_asm_line) * maxLines);
+
+  newLow = pc;
+  if (from > 0)
+    {
+      tui_disassemble (lines, pc, maxLines);
+      newLow = lines[maxLines - 1].addr;
+    }
+  else
+    {
+      CORE_ADDR last_addr;
+      int pos;
+      struct minimal_symbol* msymbol;
+              
+      /* Find backward an address which is a symbol
+         and for which disassembling from that address will fill
+         completely the window.  */
+      pos = maxLines - 1;
+      do {
+         newLow -= 1 * maxLines;
+         msymbol = lookup_minimal_symbol_by_pc_section (newLow, 0);
+
+         if (msymbol)
+            newLow = SYMBOL_VALUE_ADDRESS (msymbol);
+         else
+            newLow += 1 * maxLines;
+
+         tui_disassemble (lines, newLow, maxLines);
+         last_addr = lines[pos].addr;
+      } while (last_addr > pc && msymbol);
+
+      /* Scan forward disassembling one instruction at a time
+         until the last visible instruction of the window
+         matches the pc.  We keep the disassembled instructions
+         in the 'lines' window and shift it downward (increasing
+         its addresses).  */
+      if (last_addr < pc)
+        do
+          {
+            CORE_ADDR next_addr;
+                 
+            pos++;
+            if (pos >= maxLines)
+              pos = 0;
+
+            next_addr = tui_disassemble (&lines[pos], last_addr, 1);
+
+            /* If there are some problems while disassembling exit.  */
+            if (next_addr <= last_addr)
+              break;
+            last_addr = next_addr;
+          } while (last_addr <= pc);
+      pos++;
+      if (pos >= maxLines)
+         pos = 0;
+      newLow = lines[pos].addr;
+    }
+  for (i = 0; i < maxLines; i++)
+    {
+      xfree (lines[i].addr_string);
+      xfree (lines[i].insn);
+    }
+  return newLow;
+}
+
+/* Function to set the disassembly window's content.  */
 TuiStatus
-tuiSetDisassemContent (struct symtab *s, CORE_ADDR startAddr)
+tuiSetDisassemContent (CORE_ADDR pc)
 {
   TuiStatus ret = TUI_FAILURE;
-  struct ui_file *gdb_dis_out;
+  register int i;
+  register int offset = disassemWin->detail.sourceInfo.horizontalOffset;
+  register int lineWidth, maxLines;
+  CORE_ADDR cur_pc;
+  TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
+  int tab_len = tuiDefaultTabLen ();
+  struct tui_asm_line* lines;
+  int insn_pos;
+  int addr_size, max_size;
+  char* line;
+  
+  if (pc == 0)
+    return TUI_FAILURE;
 
-  if (startAddr != 0)
+  ret = tuiAllocSourceBuffer (disassemWin);
+  if (ret != TUI_SUCCESS)
+    return ret;
+
+  disassemWin->detail.sourceInfo.startLineOrAddr.addr = pc;
+  cur_pc = (CORE_ADDR)
+    (((TuiWinElementPtr) locator->content[0])->whichElement.locator.addr);
+
+  maxLines = disassemWin->generic.height - 2;	/* account for hilite */
+
+  /* Get temporary table that will hold all strings (addr & insn).  */
+  lines = (struct tui_asm_line*) alloca (sizeof (struct tui_asm_line)
+                                         * maxLines);
+  memset (lines, 0, sizeof (struct tui_asm_line) * maxLines);
+
+  lineWidth = disassemWin->generic.width - 1;
+
+  tui_disassemble (lines, pc, maxLines);
+
+  /* See what is the maximum length of an address and of a line.  */
+  addr_size = 0;
+  max_size = 0;
+  for (i = 0; i < maxLines; i++)
     {
-      register int i, desc;
+      size_t len = strlen (lines[i].addr_string);
+      if (len > addr_size)
+        addr_size = len;
 
-      if ((ret = tuiAllocSourceBuffer (disassemWin)) == TUI_SUCCESS)
-	{
-	  register int offset = disassemWin->detail.sourceInfo.horizontalOffset;
-	  register int threshold, curLine = 0, lineWidth, maxLines;
-	  CORE_ADDR newpc, pc;
-	  disassemble_info asmInfo;
-	  TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
-extern void strcat_address (CORE_ADDR, char *, int);
-extern void strcat_address_numeric (CORE_ADDR, int, char *, int);
-	  int curLen = 0;
-	  int tab_len = tuiDefaultTabLen ();
-
-	  maxLines = disassemWin->generic.height - 2;	/* account for hilite */
-	  lineWidth = disassemWin->generic.width - 1;
-	  threshold = (lineWidth - 1) + offset;
-
-	  /* now init the ui_file structure */
-	  gdb_dis_out = tui_sfileopen (threshold);
-
-          asmInfo = tm_print_insn_info;
-          asmInfo.stream = gdb_dis_out;
-
-	  disassemWin->detail.sourceInfo.startLineOrAddr.addr = startAddr;
-
-	  /* Now construct each line */
-	  for (curLine = 0, pc = startAddr; (curLine < maxLines);)
-	    {
-	      TuiWinElementPtr element = (TuiWinElementPtr) disassemWin->generic.content[curLine];
-
-	      print_address (pc, gdb_dis_out);
-
-	      curLen = strlen (tui_file_get_strbuf (gdb_dis_out));
-	      i = curLen - ((curLen / tab_len) * tab_len);
-
-	      /* adjust buffer length if necessary */
-	      tui_file_adjust_strbuf ((tab_len - i > 0) ? (tab_len - i) : 0, gdb_dis_out);
-
-	      /* Add spaces to make the instructions start onthe same column */
-	      while (i < tab_len)
-		{
-		  tui_file_get_strbuf (gdb_dis_out)[curLen] = ' ';
-		  i++;
-		  curLen++;
-		}
-	      tui_file_get_strbuf (gdb_dis_out)[curLen] = '\0';
-
-	      newpc = pc + ((*tm_print_insn) (pc, &asmInfo));
-
-	      /* Now copy the line taking the offset into account */
-	      if (strlen (tui_file_get_strbuf (gdb_dis_out)) > offset)
-		strcpy (element->whichElement.source.line,
-			&(tui_file_get_strbuf (gdb_dis_out)[offset]));
-	      else
-		element->whichElement.source.line[0] = '\0';
-	      element->whichElement.source.lineOrAddr.addr = pc;
-	      element->whichElement.source.isExecPoint =
-		(pc == (CORE_ADDR) ((TuiWinElementPtr) locator->content[0])->whichElement.locator.addr);
-	      element->whichElement.source.hasBreak =
-		(breakpoint_here_p (pc) != no_breakpoint_here
-		 && !element->whichElement.source.isExecPoint);
-	      curLine++;
-	      pc = newpc;
-	      /* reset the buffer to empty */
-	      tui_file_get_strbuf (gdb_dis_out)[0] = '\0';
-	    }
-	  ui_file_delete (gdb_dis_out);
-	  gdb_dis_out = NULL;
-	  disassemWin->generic.contentSize = curLine;
-	  ret = TUI_SUCCESS;
-	}
+      len = strlen (lines[i].insn) + tab_len;
+      if (len > max_size)
+        max_size = len;
     }
+  max_size += addr_size + tab_len;
 
-  return ret;
-}				/* tuiSetDisassemContent */
+  /* Allocate memory to create each line.  */
+  line = (char*) alloca (max_size);
+  insn_pos = (1 + (addr_size / tab_len)) * tab_len;
+
+  /* Now construct each line */
+  for (i = 0; i < maxLines; i++)
+    {
+      TuiWinElementPtr element;
+      TuiSourceElement* src;
+      int curLen;
+
+      element = (TuiWinElementPtr) disassemWin->generic.content[i];
+      src = &element->whichElement.source;
+      strcpy (line, lines[i].addr_string);
+      curLen = strlen (line);
+
+      /* Add spaces to make the instructions start on the same column */
+      while (curLen < insn_pos)
+        {
+          strcat (line, " ");
+          curLen++;
+        }
+
+      strcat (line, lines[i].insn);
+
+      /* Now copy the line taking the offset into account */
+      if (strlen (line) > offset)
+        strcpy (src->line, &line[offset]);
+      else
+        src->line[0] = '\0';
+
+      src->lineOrAddr.addr = lines[i].addr;
+      src->isExecPoint = lines[i].addr == cur_pc;
+
+      /* See whether there is a breakpoint installed.  */
+      src->hasBreak = (!src->isExecPoint
+                       && breakpoint_here_p (pc) != no_breakpoint_here);
+
+      xfree (lines[i].addr_string);
+      xfree (lines[i].insn);
+    }
+  disassemWin->generic.contentSize = i;
+  return TUI_SUCCESS;
+}
 
 
 /*
@@ -182,7 +327,7 @@ tuiShowDisassemAndUpdateSource (CORE_ADDR startAddr)
   if (currentLayout () == SRC_DISASSEM_COMMAND)
     {
       TuiLineOrAddress val;
-      TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
+
       /*
          ** Update what is in the source window if it is displayed too,
          ** note that it follows what is in the disassembly window and visa-versa
@@ -235,8 +380,7 @@ tuiGetBeginAsmAddress (void)
     addr = element->addr;
 
   return addr;
-}
-
+}				/* tuiGetBeginAsmAddress */
 
 /*
    ** tuiVerticalDisassemScroll().
@@ -248,9 +392,11 @@ tuiVerticalDisassemScroll (TuiScrollDirection scrollDirection,
 {
   if (disassemWin->generic.content != (OpaquePtr) NULL)
     {
-      CORE_ADDR pc, lowAddr;
+      CORE_ADDR pc;
       TuiWinContent content;
       struct symtab *s;
+      TuiLineOrAddress val;
+      int maxLines, dir;
 
       content = (TuiWinContent) disassemWin->generic.content;
       if (current_source_symtab == (struct symtab *) NULL)
@@ -258,32 +404,12 @@ tuiVerticalDisassemScroll (TuiScrollDirection scrollDirection,
       else
 	s = current_source_symtab;
 
+      /* account for hilite */
+      maxLines = disassemWin->generic.height - 2;
       pc = content[0]->whichElement.source.lineOrAddr.addr;
-      if (find_pc_partial_function (pc, (char **) NULL, &lowAddr,
-				    (CORE_ADDR) 0) == 0)
-	error ("No function contains program counter for selected frame.\n");
-      else
-	{
-	  register int line = 0;
-	  register CORE_ADDR newLow;
-	  bfd_byte buffer[4];
-	  TuiLineOrAddress val;
+      dir = (scrollDirection == FORWARD_SCROLL) ? maxLines : - maxLines;
 
-	  newLow = pc;
-	  if (scrollDirection == FORWARD_SCROLL)
-	    {
-	      for (; line < numToScroll; line++)
-		newLow += sizeof (bfd_getb32 (buffer));
-	    }
-	  else
-	    {
-	      for (; newLow != 0 && line < numToScroll; line++)
-		newLow -= sizeof (bfd_getb32 (buffer));
-	    }
-	  val.addr = newLow;
-	  tuiUpdateSourceWindowAsIs (disassemWin, s, val, FALSE);
-	}
+      val.addr = tui_find_disassembly_address (pc, dir);
+      tuiUpdateSourceWindowAsIs (disassemWin, s, val, FALSE);
     }
-
-  return;
-}				/* tuiVerticalDisassemScroll */
+}
