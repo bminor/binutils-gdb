@@ -1,3 +1,11 @@
+Thu Mar  4 14:44:01 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-mips.c (ecoff_bfd_reloc_type_lookup): New function.
+	(ecoff_write_object_contents): Added BFD_ASSERT calls to ensure
+	relocs are reasonable.
+	* coff-msym.c: Eliminated uses of DEFUN.
+	(ecoff_swap_tir_out): New function.	
+
 Tue Mar  2 17:52:58 1993  Fred Fish  (fnf@cygnus.com)
 
 	(Ultrix 2.2 support from Michael Rendell <michael@mercury.cs.mun.ca>)

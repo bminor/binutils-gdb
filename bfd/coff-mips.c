@@ -134,6 +134,8 @@ static unsigned int ecoff_canonicalize_reloc PARAMS ((bfd *abfd,
 						      asection *section,
 						      arelent **relptr,
 						      asymbol **symbols));
+static CONST struct reloc_howto_struct *ecoff_bfd_reloc_type_lookup
+  PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static boolean ecoff_find_nearest_line PARAMS ((bfd *abfd,
 						asection *section,
 						asymbol **symbols,
@@ -1862,6 +1864,9 @@ static reloc_howto_type ecoff_howto_table[] =
 	 false)			/* pcrel_offset */
 };
 
+#define ECOFF_HOWTO_COUNT \
+  (sizeof ecoff_howto_table / sizeof ecoff_howto_table[0])
+
 /* Read in the relocs for a section.  */
 
 static boolean
@@ -2008,6 +2013,39 @@ ecoff_canonicalize_reloc (abfd, section, relptr, symbols)
   *relptr = (arelent *) NULL;
 
   return section->reloc_count;
+}
+
+/* Get the howto structure for a generic reloc type.  */
+
+static CONST struct reloc_howto_struct *
+ecoff_bfd_reloc_type_lookup (abfd, code)
+     bfd *abfd;
+     bfd_reloc_code_real_type code;
+{
+  int ecoff_type;
+
+  switch (code)
+    {
+    case BFD_RELOC_16:
+      ecoff_type = ECOFF_R_REFHALF;
+      break;
+    case BFD_RELOC_32:
+      ecoff_type = ECOFF_R_REFWORD;
+      break;
+    case BFD_RELOC_MIPS_JMP:
+      ecoff_type = ECOFF_R_JMPADDR;
+      break;
+    case BFD_RELOC_HI16_S:
+      ecoff_type = ECOFF_R_REFHI;
+      break;
+    case BFD_RELOC_LO16:
+      ecoff_type = ECOFF_R_REFLO;
+      break;
+    default:
+      return (CONST struct reloc_howto_struct *) NULL;
+    }
+
+  return &ecoff_howto_table[ecoff_type];
 }
 
 /* Provided a BFD, a section and an offset into the section, calculate
@@ -3425,8 +3463,25 @@ ecoff_write_object_contents (abfd)
 	  reloc = *reloc_ptr_ptr;
 	  sym = *reloc->sym_ptr_ptr;
 
+	  /* This must be an ECOFF reloc.  */
+	  BFD_ASSERT (reloc->howto != (reloc_howto_type *) NULL
+		      && reloc->howto >= ecoff_howto_table
+		      && (reloc->howto
+			  < (ecoff_howto_table + ECOFF_HOWTO_COUNT)));
+
 	  in.r_vaddr = reloc->address + bfd_get_section_vma (abfd, current);
 	  in.r_type = reloc->howto->type;
+
+	  /* If this is a REFHI reloc, the next one must be a REFLO
+	     reloc for the same symbol.  */
+	  BFD_ASSERT (in.r_type != ECOFF_R_REFHI
+		      || (reloc_ptr_ptr < reloc_end
+			  && (reloc_ptr_ptr[1]->howto
+			      != (reloc_howto_type *) NULL)
+			  && (reloc_ptr_ptr[1]->howto->type
+			      == ECOFF_R_REFLO)
+			  && (sym == *reloc_ptr_ptr[1]->sym_ptr_ptr)));
+
 	  if ((sym->flags & BSF_SECTION_SYM) == 0)
 	    {
 	      in.r_symndx = ecoff_get_sym_index (*reloc->sym_ptr_ptr);
@@ -3992,6 +4047,8 @@ static CONST bfd_coff_backend_data bfd_ecoff_std_swap_table = {
 #define ecoff_bfd_get_relocated_section_contents \
   bfd_generic_get_relocated_section_contents
 #define ecoff_bfd_relax_section		bfd_generic_relax_section
+#define ecoff_bfd_make_debug_symbol \
+  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 
 bfd_target ecoff_little_vec =
 {
@@ -4020,7 +4077,6 @@ bfd_target ecoff_little_vec =
   {bfd_false, ecoff_write_object_contents, /* bfd_write_contents */
      _bfd_write_archive_contents, bfd_false},
   JUMP_TABLE (ecoff),
-  0, 0,
   (PTR) &bfd_ecoff_std_swap_table
 };
 
@@ -4049,7 +4105,6 @@ bfd_target ecoff_big_vec =
  {bfd_false, ecoff_write_object_contents, /* bfd_write_contents */
     _bfd_write_archive_contents, bfd_false},
   JUMP_TABLE(ecoff),
-  0, 0,
   (PTR) &bfd_ecoff_std_swap_table
   /* Note that there is another bfd_target just above this one.  If
      you are adding initializers here, you should be adding them there

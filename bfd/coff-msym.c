@@ -35,10 +35,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Swap in the symbolic header.  */
 
 void
-DEFUN (ecoff_swap_hdr_in, (abfd, ext_copy, intern),
-       bfd *abfd AND
-       struct hdr_ext *ext_copy AND
-       HDRR *intern)
+ecoff_swap_hdr_in (abfd, ext_copy, intern)
+     bfd *abfd;
+     struct hdr_ext *ext_copy;
+     HDRR *intern;
 {
   struct hdr_ext ext[1];
 
@@ -79,10 +79,10 @@ DEFUN (ecoff_swap_hdr_in, (abfd, ext_copy, intern),
 /* Swap out the symbolic header.  */
 
 void
-DEFUN (ecoff_swap_hdr_out, (abfd, intern_copy, ext),
-       bfd *abfd AND
-       HDRR *intern_copy AND
-       struct hdr_ext *ext)
+ecoff_swap_hdr_out (abfd, intern_copy, ext)
+     bfd *abfd;
+     HDRR *intern_copy;
+     struct hdr_ext *ext;
 {
   HDRR intern[1];
 
@@ -123,10 +123,10 @@ DEFUN (ecoff_swap_hdr_out, (abfd, intern_copy, ext),
 /* Swap in the file descriptor record.  */
 
 void
-DEFUN (ecoff_swap_fdr_in, (abfd, ext_copy, intern),
-       bfd *abfd AND
-       struct fdr_ext *ext_copy AND
-       FDR *intern)
+ecoff_swap_fdr_in (abfd, ext_copy, intern)
+     bfd *abfd;
+     struct fdr_ext *ext_copy;
+     FDR *intern;
 {
   struct fdr_ext ext[1];
 
@@ -181,10 +181,10 @@ DEFUN (ecoff_swap_fdr_in, (abfd, ext_copy, intern),
 /* Swap out the file descriptor record.  */
 
 void
-DEFUN (ecoff_swap_fdr_out, (abfd, intern_copy, ext),
-       bfd *abfd AND
-       FDR *intern_copy AND
-       struct fdr_ext *ext)
+ecoff_swap_fdr_out (abfd, intern_copy, ext)
+     bfd *abfd;
+     FDR *intern_copy;
+     struct fdr_ext *ext;
 {
   FDR intern[1];
 
@@ -242,10 +242,10 @@ DEFUN (ecoff_swap_fdr_out, (abfd, intern_copy, ext),
 /* Swap in the procedure descriptor record.  */
 
 void
-DEFUN (ecoff_swap_pdr_in, (abfd, ext_copy, intern),
-       bfd *abfd AND
-       struct pdr_ext *ext_copy AND
-       PDR *intern)
+ecoff_swap_pdr_in (abfd, ext_copy, intern)
+     bfd *abfd;
+     struct pdr_ext *ext_copy;
+     PDR *intern;
 {
   struct pdr_ext ext[1];
 
@@ -275,10 +275,10 @@ DEFUN (ecoff_swap_pdr_in, (abfd, ext_copy, intern),
 /* Swap out the procedure descriptor record.  */
 
 void
-DEFUN (ecoff_swap_pdr_out, (abfd, intern_copy, ext),
-       bfd *abfd AND
-       PDR *intern_copy AND
-       struct pdr_ext *ext)
+ecoff_swap_pdr_out (abfd, intern_copy, ext)
+     bfd *abfd;
+     PDR *intern_copy;
+     struct pdr_ext *ext;
 {
   PDR intern[1];
 
@@ -308,10 +308,10 @@ DEFUN (ecoff_swap_pdr_out, (abfd, intern_copy, ext),
 /* Swap in a symbol record.  */
 
 void
-DEFUN (ecoff_swap_sym_in, (abfd, ext_copy, intern),
-       bfd *abfd AND
-       struct sym_ext *ext_copy AND
-       SYMR *intern)
+ecoff_swap_sym_in (abfd, ext_copy, intern)
+     bfd *abfd;
+     struct sym_ext *ext_copy;
+     SYMR *intern;
 {
   struct sym_ext ext[1];
 
@@ -356,10 +356,10 @@ DEFUN (ecoff_swap_sym_in, (abfd, ext_copy, intern),
 /* Swap out a symbol record.  */
 
 void
-DEFUN (ecoff_swap_sym_out, (abfd, intern_copy, ext),
-       bfd *abfd AND
-       SYMR *intern_copy AND
-       struct sym_ext *ext)
+ecoff_swap_sym_out (abfd, intern_copy, ext)
+     bfd *abfd;
+     SYMR *intern_copy;
+     struct sym_ext *ext;
 {
   SYMR  intern[1];
 
@@ -404,10 +404,10 @@ DEFUN (ecoff_swap_sym_out, (abfd, intern_copy, ext),
 /* Swap in an external symbol record.  */
 
 void
-DEFUN (ecoff_swap_ext_in, (abfd, ext_copy, intern),
-       bfd *abfd AND
-       struct ext_ext *ext_copy AND
-       EXTR *intern)
+ecoff_swap_ext_in (abfd, ext_copy, intern)
+     bfd *abfd;
+     struct ext_ext *ext_copy;
+     EXTR *intern;
 {
   struct ext_ext ext[1];
 
@@ -437,10 +437,10 @@ DEFUN (ecoff_swap_ext_in, (abfd, ext_copy, intern),
 /* Swap out an external symbol record.  */
 
 void
-DEFUN (ecoff_swap_ext_out, (abfd, intern_copy, ext),
-       bfd *abfd AND
-       EXTR *intern_copy AND
-       struct ext_ext *ext)
+ecoff_swap_ext_out (abfd, intern_copy, ext)
+     bfd *abfd;
+     EXTR *intern_copy;
+     struct ext_ext *ext;
 {
   EXTR intern[1];
 
@@ -473,10 +473,10 @@ DEFUN (ecoff_swap_ext_out, (abfd, intern_copy, ext),
    info comes from the file header record (fh-fBigendian).  */
 
 void
-DEFUN (ecoff_swap_tir_in, (bigend, ext_copy, intern),
-       int bigend AND
-       struct tir_ext *ext_copy AND
-       TIR *intern)
+ecoff_swap_tir_in (bigend, ext_copy, intern)
+     int bigend;
+     struct tir_ext *ext_copy;
+     TIR *intern;
 {
   struct tir_ext ext[1];
 
@@ -525,14 +525,71 @@ DEFUN (ecoff_swap_tir_in, (bigend, ext_copy, intern),
 #endif
 }
 
+/* Swap out a type information record.
+   BIGEND says whether AUX symbols are big-endian or little-endian; this
+   info comes from the file header record (fh-fBigendian).  */
+
+void
+ecoff_swap_tir_out (bigend, intern_copy, ext)
+     int bigend;
+     TIR *intern_copy;
+     struct tir_ext *ext;
+{
+  TIR intern[1];
+
+  *intern = *intern_copy;	/* Make it reasonable to do in-place.  */
+  
+  /* now the fun stuff... */
+  if (bigend) {
+    ext->t_bits1[0] = ((intern->fBitfield ? TIR_BITS1_FBITFIELD_BIG : 0)
+		       | (intern->continued ? TIR_BITS1_CONTINUED_BIG : 0)
+		       | ((intern->bt << TIR_BITS1_BT_SH_BIG)
+			  & TIR_BITS1_BT_BIG));
+    ext->t_tq45[0] = (((intern->tq4 << TIR_BITS_TQ4_SH_BIG)
+		       & TIR_BITS_TQ4_BIG)
+		      | ((intern->tq5 << TIR_BITS_TQ5_SH_BIG)
+			 & TIR_BITS_TQ5_BIG));
+    ext->t_tq01[0] = (((intern->tq0 << TIR_BITS_TQ0_SH_BIG)
+		       & TIR_BITS_TQ0_BIG)
+		      | ((intern->tq1 << TIR_BITS_TQ1_SH_BIG)
+			 & TIR_BITS_TQ1_BIG));
+    ext->t_tq23[0] = (((intern->tq2 << TIR_BITS_TQ2_SH_BIG)
+		       & TIR_BITS_TQ2_BIG)
+		      | ((intern->tq3 << TIR_BITS_TQ3_SH_BIG)
+			 & TIR_BITS_TQ3_BIG));
+  } else {
+    ext->t_bits1[0] = ((intern->fBitfield ? TIR_BITS1_FBITFIELD_LITTLE : 0)
+		       | (intern->continued ? TIR_BITS1_CONTINUED_LITTLE : 0)
+		       | ((intern->bt << TIR_BITS1_BT_SH_LITTLE)
+			  & TIR_BITS1_BT_LITTLE));
+    ext->t_tq45[0] = (((intern->tq4 << TIR_BITS_TQ4_SH_LITTLE)
+		       & TIR_BITS_TQ4_LITTLE)
+		      | ((intern->tq5 << TIR_BITS_TQ5_SH_LITTLE)
+			 & TIR_BITS_TQ5_LITTLE));
+    ext->t_tq01[0] = (((intern->tq0 << TIR_BITS_TQ0_SH_LITTLE)
+		       & TIR_BITS_TQ0_LITTLE)
+		      | ((intern->tq1 << TIR_BITS_TQ1_SH_LITTLE)
+			 & TIR_BITS_TQ1_LITTLE));
+    ext->t_tq23[0] = (((intern->tq2 << TIR_BITS_TQ2_SH_LITTLE)
+		       & TIR_BITS_TQ2_LITTLE)
+		      | ((intern->tq3 << TIR_BITS_TQ3_SH_LITTLE)
+			 & TIR_BITS_TQ3_LITTLE));
+  }
+
+#ifdef TEST
+  if (memcmp ((char *)ext, (char *)intern, sizeof (*intern)) != 0)
+    abort();
+#endif
+}
+
 /* Swap in a relative symbol record.  BIGEND says whether it is in
    big-endian or little-endian format.*/
 
 void
-DEFUN (ecoff_swap_rndx_in, (bigend, ext_copy, intern),
-       int bigend AND
-       struct rndx_ext *ext_copy AND
-       RNDXR *intern)
+ecoff_swap_rndx_in (bigend, ext_copy, intern)
+     int bigend;
+     struct rndx_ext *ext_copy;
+     RNDXR *intern;
 {
   struct rndx_ext ext[1];
 
@@ -567,10 +624,10 @@ DEFUN (ecoff_swap_rndx_in, (bigend, ext_copy, intern),
    big-endian or little-endian format.*/
 
 void
-DEFUN (ecoff_swap_rndx_out, (bigend, intern_copy, ext),
-       int bigend AND
-       RNDXR *intern_copy AND
-       struct rndx_ext *ext)
+ecoff_swap_rndx_out (bigend, intern_copy, ext)
+     int bigend;
+     RNDXR *intern_copy;
+     struct rndx_ext *ext;
 {
   RNDXR intern[1];
 
@@ -604,10 +661,10 @@ DEFUN (ecoff_swap_rndx_out, (bigend, intern_copy, ext),
 /* Swap in a relative file descriptor.  */
 
 void
-DEFUN (ecoff_swap_rfd_in, (abfd, ext, intern),
-       bfd *abfd AND
-       struct rfd_ext *ext AND
-       RFDT *intern)
+ecoff_swap_rfd_in (abfd, ext, intern)
+     bfd *abfd;
+     struct rfd_ext *ext;
+     RFDT *intern;
 {
   
   *intern = bfd_h_get_32 (abfd, (bfd_byte *)ext->rfd);
@@ -621,10 +678,10 @@ DEFUN (ecoff_swap_rfd_in, (abfd, ext, intern),
 /* Swap out a relative file descriptor.  */
 
 void
-DEFUN (ecoff_swap_rfd_out, (abfd, intern, ext),
-       bfd *abfd AND
-       RFDT *intern AND
-       struct rfd_ext *ext)
+ecoff_swap_rfd_out (abfd, intern, ext)
+     bfd *abfd;
+     RFDT *intern;
+     struct rfd_ext *ext;
 {
   bfd_h_put_32 (abfd, *intern, (bfd_byte *)ext->rfd);
 
@@ -637,10 +694,10 @@ DEFUN (ecoff_swap_rfd_out, (abfd, intern, ext),
 /* Swap in an optimization symbol.  */
 
 void
-DEFUN (ecoff_swap_opt_in, (abfd, ext_copy, intern),
-       bfd *abfd AND
-       struct opt_ext *ext_copy AND
-       OPTR *intern)
+ecoff_swap_opt_in (abfd, ext_copy, intern)
+     bfd *abfd;
+     struct opt_ext *ext_copy;
+     OPTR *intern;
 {
   struct opt_ext ext[1];
 
@@ -675,10 +732,10 @@ DEFUN (ecoff_swap_opt_in, (abfd, ext_copy, intern),
 /* Swap out an optimization symbol.  */
 
 void
-DEFUN (ecoff_swap_opt_out, (abfd, intern_copy, ext),
-       bfd *abfd AND
-       OPTR *intern_copy AND
-       struct opt_ext *ext)
+ecoff_swap_opt_out (abfd, intern_copy, ext)
+     bfd *abfd;
+     OPTR *intern_copy;
+     struct opt_ext *ext;
 {
   OPTR intern[1];
 
@@ -713,10 +770,10 @@ DEFUN (ecoff_swap_opt_out, (abfd, intern_copy, ext),
 /* Swap in a dense number.  */
 
 void
-DEFUN (ecoff_swap_dnr_in, (abfd, ext_copy, intern),
-       bfd *abfd AND
-       struct dnr_ext *ext_copy AND
-       DNR *intern)
+ecoff_swap_dnr_in (abfd, ext_copy, intern)
+     bfd *abfd;
+     struct dnr_ext *ext_copy;
+     DNR *intern;
 {
   struct dnr_ext ext[1];
 
@@ -734,10 +791,10 @@ DEFUN (ecoff_swap_dnr_in, (abfd, ext_copy, intern),
 /* Swap out a dense number.  */
 
 void
-DEFUN (ecoff_swap_dnr_out, (abfd, intern_copy, ext),
-       bfd *abfd AND
-       DNR *intern_copy AND
-       struct dnr_ext *ext)
+ecoff_swap_dnr_out (abfd, intern_copy, ext)
+     bfd *abfd;
+     DNR *intern_copy;
+     struct dnr_ext *ext;
 {
   DNR intern[1];
 
