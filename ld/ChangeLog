@@ -1,3 +1,11 @@
+2003-06-10  Richard Sandiford  <rsandifo@redhat.com>
+
+	* configure.tgt (h8300*): Add h8300sxn emulations.
+	* Makefile.am (ALL_EMULATIONS): Add eh8300sxn.o and eh8300sxnelf.o.
+	(eh8300sxn.c, eh8300sxnelf.c): New rules.
+	* Makefile.in: Regenerate.
+	* emulparams/h8300sxnelf.sh, emulparams/h8300sxn.sh: New files.
+
 2003-06-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/elf64ppc.sh (EXECUTABLE_SYMBOLS, OTHER_BSS_END_SYMBOLS,

@@ -137,6 +137,20 @@ h8300sxmode (arg)
 }
 
 void
+h8300sxnmode (arg)
+     int arg ATTRIBUTE_UNUSED;
+{
+  Smode = 1;
+  Hmode = 1;
+  SXmode = 1;
+  Nmode = 1;
+#ifdef BFD_ASSEMBLER
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_h8300, bfd_mach_h8300sxn))
+    as_warn (_("could not set architecture and machine"));
+#endif
+}
+
+void
 sbranch (size)
      int size;
 {
@@ -163,6 +177,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"h8300s",  h8300smode,  0},
   {"h8300sn", h8300snmode, 0},
   {"h8300sx", h8300sxmode, 0},
+  {"h8300sxn", h8300sxnmode, 0},
   {"sbranch", sbranch, L_8},
   {"lbranch", sbranch, L_16},
 

@@ -1,3 +1,13 @@
+2003-06-10  Richard Sandiford  <rsandifo@redhat.com>
+
+	* archures.c (bfd_mach_h8300sxn): New architecture.
+	* bfd-in2.h: Regenerate.
+	* cpu-h8300.c (h8300_scan): Check for 'sxn'.
+	(h8300sxn_info_struct): New.
+	(h8300sx_info_struct): Link to it.
+	* elf32-h8300.c (elf32_h8_mach): Add h8300sxn case.
+	(elf32_h8_final_write_processing): Likewise.
+
 2003-06-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c: Move TARGET_LITTLE_SYM and other macros used by
