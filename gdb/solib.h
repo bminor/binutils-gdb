@@ -194,4 +194,4 @@ extern char *solib_address (CORE_ADDR);	/* solib.c */
 
 extern int in_solib_dynsym_resolve_code (CORE_ADDR);	/* solib.c */
 
-extern int no_shared_libraries (char *ignored, int from_tty);
+extern void no_shared_libraries (char *ignored, int from_tty);

@@ -1,3 +1,8 @@
+2001-05-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* solib.h (no_shared_libraries): Make declaration match definition
+	in solib.c.
+
 2001-05-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* remote.c (remote_write_bytes): Set nr_bytes before returning it.
