@@ -1,6 +1,8 @@
 1999-01-14  Doug Evans  <devans@casey.cygnus.com>
 
+start-sanitize-cygnus
 	* Makefile.in (stamp-arch): Pass FLAGS to cgen.
+end-sanitize-cygnus
 	* arch.c,arch.h,cpuall.h: Regenerate.
 	* cpu.c,cpu.h,decode.c,decode.h,model.c,sem-switch.c,sem.c: Regenerate.
 	* traps.c (sim_engine_invalid_insn): PCADDR->IADDR.
