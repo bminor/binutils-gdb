@@ -1,3 +1,8 @@
+Fri Jan 23 07:52:45 1998  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/watchpoint.exp: Set "d10v*-*-*" clear_xfail for
+	"calling function with watchpoint enabled".
+
 Thu Jan 22 14:23:29 1998  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/break.exp (test_next_with_recursion): Remove
