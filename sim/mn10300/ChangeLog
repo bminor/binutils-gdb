@@ -1,4 +1,8 @@
 start-sanitize-am33
+Wed Jul  8 16:29:12 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* am33.igen: More am33 instructions.  Fix "div".
+
 Mon Jul  6 15:39:22 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300.igen: Add am33 support.

@@ -1159,7 +1159,7 @@
 *am33
 {
   int srcreg, dstreg;
-  unsigned long long temp;
+  long long temp;
   int n, z;
 
   PC = cia;
@@ -1181,7 +1181,7 @@
   temp = State.regs[REG_MDR];
   temp <<= 32;
   temp |= State.regs[dstreg];
-  State.regs[REG_MDR] = temp % (long)State.regs[srcreg];
+  State.regs[REG_MDR] = temp % (signed32)State.regs[srcreg];
   temp /= (long)State.regs[srcreg];
   State.regs[dstreg] = temp & 0xffffffff;
   z = (State.regs[dstreg] == 0);
@@ -1384,8 +1384,59 @@
   store_half (State.regs[dstreg], State.regs[srcreg]);
 }
 
-// ??? mov
-// ??? mov
+// 1111 1001 0110 1010 Rm Rn; mov (Rm+),Rn
+8.0xf9+8.0x6a+4.RN2,4.RM0:D1y:::mov
+"mov"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_word (State.regs[srcreg]);
+  State.regs[srcreg] += 4;
+}
+
+// 1111 1001 0111 1010 Rm Rn; mov Rm,(Rn+)
+8.0xf9+8.0x7a+4.RM2,4.RN0:D1z:::mov
+"mov"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_word (State.regs[dstreg], State.regs[srcreg]);
+  State.regs[dstreg] += 4;
+}
 
 // 1111 1001 1000 1010 Rn 0000; mov (sp),Rn
 8.0xf9+8.0x8a+4.RN2,4.0000:D1j:::mov
@@ -1501,22 +1552,593 @@
   store_half (State.regs[REG_SP], State.regs[dstreg]);
 }
 
-// ??? movhu
-// ??? movhu
-// ??? mac
-// ??? macu
-// ??? macb
-// ??? macbu
-// ??? mach
-// ??? machu
-// ??? dmach
-// ??? dmachu
-// ??? dmulh
-// ??? dmulhu
-// ??? sat16
+// 1111 1001 1110 1010 Rm Rn; movhu (Rm+),Rn
+8.0xf9+8.0xea+4.RN2,4.RM0:D1y:::movhu
+"movhu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_half (State.regs[srcreg]);
+  State.regs[srcreg] += 2;
+}
+
+// 1111 1001 1111 1010 Rm Rn; movhu Rm,(Rn+)
+8.0xf9+8.0xfa+4.RM2,4.RN0:D1z:::movhu
+"movhu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_half (State.regs[dstreg], State.regs[srcreg]);
+  State.regs[dstreg] += 2;
+}
+
+
+// 1111 1001 0000 1011 Rm Rn; mac Rm,Rn
+8.0xf9+8.0x0b+4.RM2,4.RN0:D1:::mac
+"mac"
+*am33
+{
+  int srcreg1, srcreg2;
+  long long temp, sum;
+  int c, v;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  temp = ((signed64)State.regs[srcreg2]
+          * (signed64)State.regs[srcreg1]);
+  sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
+  c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
+  State.regs[REG_MCRL] = sum;
+  temp >>= 32;
+  temp &= 0xffffffff;
+  sum = State.regs[REG_MCRH] + temp + c;
+  v = ((State.regs[REG_MCRH] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRH] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1001 0001 1011 Rm Rn; macu Rm,Rn
+8.0xf9+8.0x1b+4.RM2,4.RN0:D1:::macu
+"macu"
+*am33
+{
+  int srcreg1, srcreg2;
+  unsigned long long temp, sum;
+  int c, v;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  temp = ((unsigned64)State.regs[srcreg2]
+          * (unsigned64)State.regs[srcreg1]);
+  sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
+  c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
+  State.regs[REG_MCRL] = sum;
+  temp >>= 32;
+  temp &= 0xffffffff;
+  sum = State.regs[REG_MCRH] + temp + c;
+  v = ((State.regs[REG_MCRH] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRH] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1001 0010 1011 Rm Rn; macb Rm,Rn
+8.0xf9+8.0x2b+4.RM2,4.RN0:D1:::macb
+"macb"
+*am33
+{
+  int srcreg1, srcreg2;
+  long temp, sum;
+  int v;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  temp = ((signed32)(State.regs[srcreg2] & 0xff)
+          * (signed32)(State.regs[srcreg1] & 0xff));
+  sum = State.regs[REG_MCRL] + temp;
+  v = ((State.regs[REG_MCRL] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRL] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1001 0011 1011 Rm Rn; macbu Rm,Rn
+8.0xf9+8.0x3b+4.RM2,4.RN0:D1:::macbu
+"macbu"
+*am33
+{
+  int srcreg1, srcreg2;
+  long long temp, sum;
+  int v;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  temp = ((unsigned32)(State.regs[srcreg2] & 0xff)
+          * (unsigned32)(State.regs[srcreg1] & 0xff));
+  sum = State.regs[REG_MCRL] + temp;
+  v = ((State.regs[REG_MCRL] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRL] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1001 0100 1011 Rm Rn; mach Rm,Rn
+8.0xf9+8.0x4b+4.RM2,4.RN0:D1:::mach
+"mach"
+*am33
+{
+  int srcreg1, srcreg2;
+  long long temp, sum;
+  int c, v;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  temp = ((unsigned64)(State.regs[srcreg2] & 0xffff)
+          * (unsigned64)(State.regs[srcreg1] & 0xffff));
+  sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
+  c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
+  State.regs[REG_MCRL] = sum;
+  temp >>= 32;
+  temp &= 0xffffffff;
+  sum = State.regs[REG_MCRH] + temp + c;
+  v = ((State.regs[REG_MCRH] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRH] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1001 0101 1011 Rm Rn; machu Rm,Rn
+8.0xf9+8.0x5b+4.RM2,4.RN0:D1:::machu
+"machu"
+*am33
+{
+  int srcreg1, srcreg2;
+  long long temp, sum;
+  int c, v;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  temp = ((unsigned64)(State.regs[srcreg2] & 0xffff)
+          * (unsigned64)(State.regs[srcreg1] & 0xffff));
+  sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
+  c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
+  State.regs[REG_MCRL] = sum;
+  temp >>= 32;
+  temp &= 0xffffffff;
+  sum = State.regs[REG_MCRH] + temp + c;
+  v = ((State.regs[REG_MCRH] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRH] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1001 0110 1011 Rm Rn; dmach Rm,Rn
+8.0xf9+8.0x6b+4.RM2,4.RN0:D1:::dmach
+"dmach"
+*am33
+{
+  int srcreg1, srcreg2;
+  long temp, temp2, sum;
+  int v;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  temp = ((signed32)(State.regs[srcreg2] & 0xffff)
+          * (signed32)(State.regs[srcreg1] & 0xffff));
+  temp2 = ((signed32)((State.regs[srcreg1] >> 16) & 0xffff)
+	   * (signed32)((State.regs[srcreg2] >> 16) & 0xffff));
+  sum = temp + temp2 + State.regs[REG_MCRL];
+  v = ((State.regs[REG_MCRL] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRL] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1001 0111 1011 Rm Rn; dmachu Rm,Rn
+8.0xf9+8.0x7b+4.RM2,4.RN0:D1:::dmachu
+"dmachu"
+*am33
+{
+  int srcreg1, srcreg2;
+  unsigned long temp, temp2, sum;
+  int v;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  temp = ((unsigned32)(State.regs[srcreg2] & 0xffff)
+          * (unsigned32)(State.regs[srcreg1] & 0xffff));
+  temp2 = ((unsigned32)((State.regs[srcreg1] >> 16) & 0xffff)
+	   * (unsigned32)((State.regs[srcreg2] >> 16) & 0xffff));
+  sum = temp + temp2 + State.regs[REG_MCRL];
+  v = ((State.regs[REG_MCRL] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRL] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1001 1000 1011 Rm Rn; dmulh Rm,Rn
+8.0xf9+8.0x8b+4.RM2,4.RN0:D1:::dmulh
+"dmulh"
+*am33
+{
+  int srcreg, dstreg;
+  long temp;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  temp = ((signed32)(State.regs[dstreg] & 0xffff)
+          * (signed32)(State.regs[srcreg] & 0xffff));
+  State.regs[REG_MDRQ] = temp;
+  temp = ((signed32)((State.regs[dstreg] >> 16) & 0xffff)
+          * (signed32)((State.regs[srcreg] >>16) & 0xffff));
+  State.regs[dstreg] = temp;
+}
+
+// 1111 1001 1001 1011 Rm Rn; dmulhu Rm,Rn
+8.0xf9+8.0x9b+4.RM2,4.RN0:D1:::dumachu
+"dmachu"
+*am33
+{
+  int srcreg, dstreg;
+  unsigned long temp;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  temp = ((unsigned32)(State.regs[dstreg] & 0xffff)
+          * (unsigned32)(State.regs[srcreg] & 0xffff));
+  State.regs[REG_MDRQ] = temp;
+  temp = ((unsigned32)((State.regs[dstreg] >> 16) & 0xffff)
+          * (unsigned32)((State.regs[srcreg] >>16) & 0xffff));
+  State.regs[dstreg] = temp;
+}
+
+// 1111 1001 1010 1011 Rm Rn; sat16 Rm,Rn
+8.0xf9+8.0xab+4.RM2,4.RN0:D1:::sat16
+"sat16"
+*am33
+{
+  int srcreg, dstreg;
+  int value;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  value = State.regs[srcreg];
+
+  if (value >= 0x7fff)
+    State.regs[dstreg] = 0x7fff;
+  else if (value <= 0xffff8000)
+    State.regs[dstreg] = 0xffff8000;
+  else
+    State.regs[dstreg] = value;
+}
+
 // ??? mcste
-// ??? swap
-// ??? bsch
+
+// 1111 1001 1100 1011 Rm Rn; swap Rm,Rn
+8.0xf9+8.0xcb+4.RM2,4.RN0:D1:::swap
+"swap"
+*am33
+{
+  int srcreg, dstreg;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = (((State.regs[srcreg] & 0xff) << 24)
+			| (((State.regs[srcreg] >> 8) & 0xff) << 16)
+			| (((State.regs[srcreg] >> 16) & 0xff) << 8)
+			| ((State.regs[srcreg] >> 24) & 0xff));
+}
+
+// 1111 1101 1101 1011 Rm Rn; swaph Rm,Rn
+8.0xf9+8.0xdb+4.RM2,4.RN0:D1:::swaph
+"swaph"
+*am33
+{
+  int srcreg, dstreg;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = (((State.regs[srcreg] & 0xff) << 8)
+			| ((State.regs[srcreg] >> 8) & 0xff)
+			| (((State.regs[srcreg] >> 16) & 0xff) << 24)
+			| (((State.regs[srcreg] >> 24) & 0xff) << 16));
+}
+
+// 1111 1001 1110 1011 Rm Rn; swhw Rm,Rn
+8.0xf9+8.0xeb+4.RM2,4.RN0:D1:::swhw
+"swhw"
+*am33
+{
+  int srcreg, dstreg;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = (((State.regs[srcreg] & 0xffff) << 16)
+			| ((State.regs[srcreg] >> 16) & 0xffff));
+}
+
+// 1111 1001 1111 1011 Rm Rn; bsch Rm,Rn
+8.0xf9+8.0xfb+4.RM2,4.RN0:D1:::bsch
+"bsch"
+*am33
+{
+  int temp, c, i;
+  int srcreg, dstreg;
+  int start;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  temp = State.regs[srcreg];
+  start = (State.regs[dstreg] & 0x1f) - 1;
+  if (start == -1)
+    start = 31;
+    
+  for (i = start; i >= 0; i--)
+    {
+      if (temp & (1 << i))
+	{
+	  c = 1;
+	  State.regs[dstreg] = i;
+	  break;
+	}
+    }
+
+  if (i < 0)
+    {
+      c = 0;
+      State.regs[dstreg] = 0;
+    }
+  PSW &= ~(PSW_C);
+  PSW |= (c ? PSW_C : 0);
+}
+
 
 // 1111 1011 0000 1000 Rn Rn IMM8; mov IMM8,Rn
 8.0xfb+8.0x08+4.RM2,4.RN0=RM2+8.IMM8:D2j:::mov
@@ -1922,7 +2544,6 @@
 }
 
 
-// XYZ
 // 1111 1011 0000 1010 Rn Rm IMM8; mov (d8,Rm),Rn
 8.0xfb+8.0x0a+4.RN2,4.RM0+8.IMM8:D2l:::mov
 "mov"
@@ -2074,8 +2695,59 @@
   store_half (State.regs[dstreg] + EXTEND8 (IMM8), State.regs[srcreg]);
 }
 
-// ??? mov
-// ??? mov
+// 1111 1011 0110 1010 Rn Rm IMM8; mov (d8,Rm+),Rn
+8.0xfb+8.0x6a+4.RN2,4.RM0+8.IMM8:D2y:::mov
+"mov"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_word (State.regs[srcreg] + EXTEND8 (IMM8));
+  State.regs[srcreg] += 4;
+}
+
+// 1111 1011 0111 1010 Rn Rm IMM8; mov Rm,(d8,Rn+)
+8.0xfb+8.0x7a+4.RM2,4.RN0+8.IMM8:D2z:::mov
+"mov"
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_word (State.regs[dstreg] + EXTEND8 (IMM8), State.regs[srcreg]);
+  State.regs[dstreg] += 4;
+}
+
 
 // 1111 1011 1000 1010 Rn 0000 IMM8; mov (d8,sp),Rn
 8.0xfb+8.0x8a+4.RN2,4.0x0+8.IMM8:D2n:::mov
@@ -2185,14 +2857,252 @@
   store_half (State.regs[REG_SP] + EXTEND8 (IMM8), State.regs[srcreg]);
 }
 
-// ??? movhu
-// ??? movhu
-// ??? mac
-// ??? macu
-// ??? macb
-// ??? macbu
-// ??? mach
-// ??? machu
+// 1111 1011 1110 1010 Rn Rm IMM8; movhu (d8,Rm+),Rn
+8.0xfb+8.0xea+4.RN2,4.RM0+8.IMM8:D2y:::movhu
+"movhu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_half (State.regs[srcreg] + EXTEND8 (IMM8));
+  State.regs[srcreg] += 2;
+}
+
+// 1111 1011 1111 1010 Rn Rm IMM8; movhu Rm,(d8,Rn+)
+8.0xfb+8.0xfa+4.RM2,4.RN0+8.IMM8:D2z:::movhu
+"movhu"
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_half (State.regs[dstreg] + EXTEND8 (IMM8), State.regs[srcreg]);
+  State.regs[dstreg] += 2;
+}
+
+
+// 1111 1011 0000 1011 Rn Rn IMM8; mac imm8,Rn
+8.0xfb+8.0x0b+4.RN2,4.RN0=RN2+8.IMM8:D2:::mac
+"mac"
+{
+  int srcreg1, srcreg2;
+  long long temp, sum;
+  int c, v;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    srcreg1 = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    srcreg1 = REG_D0 + RN2 - 12;
+  else
+    srcreg1 = REG_E0 + RN2;
+
+  temp = ((signed64)EXTEND8 (IMM8)
+          * (signed64)State.regs[srcreg1]);
+  sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
+  c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
+  State.regs[REG_MCRL] = sum;
+  temp >>= 32;
+  temp &= 0xffffffff;
+  sum = State.regs[REG_MCRH] + temp + c;
+  v = ((State.regs[REG_MCRH] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRH] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1011 0001 1011 Rn Rn IMM8; macu imm8,Rn
+8.0xfb+8.0x1b+4.RN2,4.RN0=RN2+8.IMM8:D2:::macu
+"macu"
+{
+  int srcreg1, srcreg2;
+  long long temp, sum;
+  int c, v;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    srcreg1 = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    srcreg1 = REG_D0 + RN2 - 12;
+  else
+    srcreg1 = REG_E0 + RN2;
+
+  temp = ((unsigned64) (IMM8)
+          * (unsigned64)State.regs[srcreg1]);
+  sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
+  c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
+  State.regs[REG_MCRL] = sum;
+  temp >>= 32;
+  temp &= 0xffffffff;
+  sum = State.regs[REG_MCRH] + temp + c;
+  v = ((State.regs[REG_MCRH] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRH] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1011 0010 1011 Rn Rn IMM8; macb imm8,Rn
+8.0xfb+8.0x2b+4.RN2,4.RN0=RN2+8.IMM8:D2:::macb
+"macb"
+{
+  int srcreg1, srcreg2;
+  long long temp, sum;
+  int c, v;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    srcreg1 = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    srcreg1 = REG_D0 + RN2 - 12;
+  else
+    srcreg1 = REG_E0 + RN2;
+
+  temp = ((signed64)EXTEND8 (IMM8)
+          * (signed64)State.regs[srcreg1] & 0xff);
+  sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
+  c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
+  State.regs[REG_MCRL] = sum;
+  temp >>= 32;
+  temp &= 0xffffffff;
+  sum = State.regs[REG_MCRH] + temp + c;
+  v = ((State.regs[REG_MCRH] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRH] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1011 0011 1011 Rn Rn IMM8; macbu imm8,Rn
+8.0xfb+8.0x3b+4.RN2,4.RN0=RN2+8.IMM8:D2:::macbu
+"macbu"
+{
+  int srcreg1, srcreg2;
+  long long temp, sum;
+  int c, v;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    srcreg1 = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    srcreg1 = REG_D0 + RN2 - 12;
+  else
+    srcreg1 = REG_E0 + RN2;
+
+  temp = ((unsigned64) (IMM8)
+          * (unsigned64)State.regs[srcreg1] & 0xff);
+  sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
+  c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
+  State.regs[REG_MCRL] = sum;
+  temp >>= 32;
+  temp &= 0xffffffff;
+  sum = State.regs[REG_MCRH] + temp + c;
+  v = ((State.regs[REG_MCRH] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRH] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1011 0100 1011 Rn Rn IMM8; mach imm8,Rn
+8.0xfb+8.0x4b+4.RN2,4.RN0=RN2+8.IMM8:D2:::mach
+"mach"
+{
+  int srcreg1, srcreg2;
+  long long temp, sum;
+  int c, v;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    srcreg1 = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    srcreg1 = REG_D0 + RN2 - 12;
+  else
+    srcreg1 = REG_E0 + RN2;
+
+  temp = ((signed64)EXTEND8 (IMM8)
+          * (signed64)State.regs[srcreg1] & 0xffff);
+  sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
+  c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
+  State.regs[REG_MCRL] = sum;
+  temp >>= 32;
+  temp &= 0xffffffff;
+  sum = State.regs[REG_MCRH] + temp + c;
+  v = ((State.regs[REG_MCRH] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRH] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
+// 1111 1011 0101 1011 Rn Rn IMM8; machu imm8,Rn
+8.0xfb+8.0x5b+4.RN2,4.RN0=RN2+8.IMM8:D2:::machu
+"machu"
+{
+  int srcreg1, srcreg2;
+  long long temp, sum;
+  int c, v;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    srcreg1 = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    srcreg1 = REG_D0 + RN2 - 12;
+  else
+    srcreg1 = REG_E0 + RN2;
+
+  temp = ((unsigned64) (IMM8)
+          * (unsigned64)State.regs[srcreg1] & 0xffff);
+  sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
+  c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
+  State.regs[REG_MCRL] = sum;
+  temp >>= 32;
+  temp &= 0xffffffff;
+  sum = State.regs[REG_MCRH] + temp + c;
+  v = ((State.regs[REG_MCRH] & 0x80000000) == (temp & 0x80000000)
+        && (temp & 0x80000000) != (sum & 0x80000000));
+  State.regs[REG_MCRH] = sum;
+  if (v)
+    State.regs[REG_MCVF] = 1;
+}
+
 // ??? mcste
 
 // 1111 1011 0111 1100 Rm Rn Rd; add Rm,Rn,Rd
@@ -2632,32 +3542,445 @@
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0));
 }
 
-// mul
-// mulu
-// mov
-// mov
-// movbu
-// movbu
-// movhu
-// movhu
-// mov
-// mov
-// movbu
-// movbu
-// movhu
-// movhu
-// mac
-// macu
-// macb
-// macbu
-// mach
-// machu
-// dmach
-// dmachu
-// dmulh
-// dmulhu
-// sat24
-// bsch
+// 1111 1011 1010 1101 Rm Rn Rd1 Rd2; mul Rm,Rn,Rd1,Rd2
+8.0xfb+8.0xad+4.RM2,4.RN0+4.RD0,4.RD2:D2c:::mul
+"mul"
+*am33
+{
+  int srcreg1, srcreg2, dstreg1, dstreg2;
+  signed long long temp;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  if (RD0 > 7 && RD0 < 12)
+    dstreg1 = REG_A0 + RD0 - 8;
+  else if (RD0 > 11 && RD0 < 16)
+    dstreg1 = REG_D0 + RD0 - 12;
+  else
+    dstreg1 = REG_E0 + RD0;
+
+  if (RD2 > 7 && RD2 < 12)
+    dstreg2 = REG_A0 + RD2 - 8;
+  else if (RD2 > 11 && RD2 < 16)
+    dstreg2 = REG_D0 + RD2 - 12;
+  else
+    dstreg2 = REG_E0 + RD2;
+
+  temp = ((signed64)(signed32)State.regs[srcreg1]
+          *  (signed64)(signed32)State.regs[srcreg2]);
+  State.regs[dstreg1] = temp & 0xffffffff;
+  State.regs[dstreg2] = (temp & 0xffffffff00000000LL) >> 32;;
+}
+
+// 1111 1011 1011 1101 Rm Rn Rd1 Rd2; mulu Rm,Rn,Rd1,Rd2
+8.0xfb+8.0xbd+4.RM2,4.RN0+4.RD0,4.RD2:D2c:::mulu
+"mulu"
+*am33
+{
+  int srcreg1, srcreg2, dstreg1, dstreg2;
+  signed long long temp;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  if (RD0 > 7 && RD0 < 12)
+    dstreg1 = REG_A0 + RD0 - 8;
+  else if (RD0 > 11 && RD0 < 16)
+    dstreg1 = REG_D0 + RD0 - 12;
+  else
+    dstreg1 = REG_E0 + RD0;
+
+  if (RD2 > 7 && RD2 < 12)
+    dstreg2 = REG_A0 + RD2 - 8;
+  else if (RD2 > 11 && RD2 < 16)
+    dstreg2 = REG_D0 + RD2 - 12;
+  else
+    dstreg2 = REG_E0 + RD2;
+
+  temp = ((unsigned64)(unsigned32)State.regs[srcreg1]
+          *  (unsigned64)(unsigned32)State.regs[srcreg2]);
+  State.regs[dstreg1] = temp & 0xffffffff;
+  State.regs[dstreg2] = (temp & 0xffffffff00000000LL) >> 32;;
+}
+
+// 1111 1011 0000 1110 Rn 0000 abs8 ; mov (abs8),Rn
+8.0xfb+8.0x0e+4.RN2,4.0x0+8.IMM8:D2p:::mov
+"mov"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_word (IMM8);
+}
+
+// 1111 1011 0001 1110 Rm 0000 abs8 ; mov Rn,(abs8)
+8.0xfb+8.0x1e+4.RM2,4.0x0+8.IMM8:D2q:::mov
+"mov"
+*am33
+{
+  int srcreg;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  store_word (IMM8, State.regs[srcreg]);
+}
+
+// 1111 1011 0010 1110 Rn 0000 abs8 ; movbu (abs8),Rn
+8.0xfb+8.0x2e+4.RN2,4.0x0+8.IMM8:D2p:::movbu
+"movbu"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_byte (IMM8);
+}
+
+// 1111 1011 0011 1110 Rm 0000 abs8 ; movbu Rn,(abs8)
+8.0xfb+8.0x3e+4.RM2,4.0x0+8.IMM8:D2q:::movbu
+"movbu"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  store_byte (IMM8, State.regs[srcreg]);
+}
+
+// 1111 1011 0100 1110 Rn 0000 abs8 ; movhu (abs8),Rn
+8.0xfb+8.0x4e+4.RN2,4.0x0+8.IMM8:D2p:::movhu
+"movhu"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_half (IMM8);
+}
+
+// 1111 1011 0101 1110 Rm 0000 abs8 ; movhu Rn,(abs8)
+8.0xfb+8.0x5e+4.RM2,4.0x0+8.IMM8:D2q:::movhu
+"movhu"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  store_half (IMM8, State.regs[srcreg]);
+}
+
+// 1111 1011 1000 1110 Ri Rm Rn; mov (Ri,Rm),Rn
+8.0xfb+8.0x8e+4.RI0,4.RM0+4.RN0,4.0x0:D2r:::mov
+"mov"
+*am33
+{
+  int srcreg1, srcreg2, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg1 = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg1 = REG_D0 + RM0 - 12;
+  else
+    srcreg1 = REG_E0 + RM0;
+
+  if (RI0 > 7 && RI0 < 12)
+    srcreg2 = REG_A0 + RI0 - 8;
+  else if (RI0 > 11 && RI0 < 16)
+    srcreg2 = REG_D0 + RI0 - 12;
+  else
+    srcreg2 = REG_E0 + RI0;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = load_word (State.regs[srcreg1] + State.regs[srcreg2]);
+}
+
+// 1111 1011 1001 1110 Ri Rm Rn; mov Rn,(Ri,Rm)
+8.0xfb+8.0x9e+4.RI0,4.RN0+4.RM0,4.0x0:D2s:::mov
+"mov"
+*am33
+{
+  int srcreg, dstreg1, dstreg2;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RI0 > 7 && RI0 < 12)
+    dstreg1 = REG_A0 + RI0 - 8;
+  else if (RI0 > 11 && RI0 < 16)
+    dstreg1 = REG_D0 + RI0 - 12;
+  else
+    dstreg1 = REG_E0 + RI0;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg2 = REG_D0 + RN0 - 12;
+  else
+    dstreg2 = REG_E0 + RN0;
+
+  store_word (State.regs[dstreg1] + State.regs[dstreg2], State.regs[srcreg]);
+}
+
+// 1111 1011 1010 1110 Ri Rm Rn; movbu (Ri,Rm),Rn
+8.0xfb+8.0xae+4.RI0,4.RM0+4.RN0,4.0x0:D2r:::movbu
+"movbu"
+*am33
+{
+  int srcreg1, srcreg2, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg1 = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg1 = REG_D0 + RM0 - 12;
+  else
+    srcreg1 = REG_E0 + RM0;
+
+  if (RI0 > 7 && RI0 < 12)
+    srcreg2 = REG_A0 + RI0 - 8;
+  else if (RI0 > 11 && RI0 < 16)
+    srcreg2 = REG_D0 + RI0 - 12;
+  else
+    srcreg2 = REG_E0 + RI0;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = load_byte (State.regs[srcreg1] + State.regs[srcreg2]);
+}
+
+// 1111 1011 1011 1110 Ri Rm Rn; movbu Rn,(Ri,Rm)
+8.0xfb+8.0xbe+4.RI0,4.RN0+4.RM0,4.0x0:D2s:::movbu
+"movbu"
+*am33
+{
+  int srcreg, dstreg1, dstreg2;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RI0 > 7 && RI0 < 12)
+    dstreg1 = REG_A0 + RI0 - 8;
+  else if (RI0 > 11 && RI0 < 16)
+    dstreg1 = REG_D0 + RI0 - 12;
+  else
+    dstreg1 = REG_E0 + RI0;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg2 = REG_D0 + RN0 - 12;
+  else
+    dstreg2 = REG_E0 + RN0;
+
+  store_byte (State.regs[dstreg1] + State.regs[dstreg2], State.regs[srcreg]);
+}
+
+// 1111 1011 1100 1110 Ri Rm Rn; movhu (Ri,Rm),Rn
+8.0xfb+8.0xce+4.RI0,4.RM0+4.RN0,4.0x0:D2r:::movhu
+"movhu"
+*am33
+{
+  int srcreg1, srcreg2, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg1 = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg1 = REG_D0 + RM0 - 12;
+  else
+    srcreg1 = REG_E0 + RM0;
+
+  if (RI0 > 7 && RI0 < 12)
+    srcreg2 = REG_A0 + RI0 - 8;
+  else if (RI0 > 11 && RI0 < 16)
+    srcreg2 = REG_D0 + RI0 - 12;
+  else
+    srcreg2 = REG_E0 + RI0;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = load_half (State.regs[srcreg1] + State.regs[srcreg2]);
+}
+
+// 1111 1011 1101 1110 Ri Rm Rn; movhu Rn,(Ri,Rm)
+8.0xfb+8.0xde+4.RI0,4.RN0+4.RM0,4.0x0:D2s:::movhu
+"movhu"
+*am33
+{
+  int srcreg, dstreg1, dstreg2;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RI0 > 7 && RI0 < 12)
+    dstreg1 = REG_A0 + RI0 - 8;
+  else if (RI0 > 11 && RI0 < 16)
+    dstreg1 = REG_D0 + RI0 - 12;
+  else
+    dstreg1 = REG_E0 + RI0;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg2 = REG_D0 + RN0 - 12;
+  else
+    dstreg2 = REG_E0 + RN0;
+
+  store_half (State.regs[dstreg1] + State.regs[dstreg2], State.regs[srcreg]);
+}
+
+// ??? mac
+// ??? macu
+// ??? macb
+// ??? macbu
+// ??? mach
+// ??? machu
+// ??? dmach
+// ??? dmachu
+// ??? dmulh
+// ??? dmulhu
+
+// 1111 1011 1010 1111 Rm Rn; sat24 Rm,Rn
+8.0xfb+8.0xaf+4.RM2,4.RN0+8.0x0:D2:::sat24
+"sat24"
+*am33
+{
+  int srcreg, dstreg;
+  int value;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  value = State.regs[srcreg];
+
+  if (value >= 0x7fffff)
+    State.regs[dstreg] = 0x7fffff;
+  else if (value <= 0xff800000)
+    State.regs[dstreg] = 0xff800000;
+  else
+    State.regs[dstreg] = value;
+}
+
+// ??? bsch
 
 // 1111 1101 0000 1000 Rn Rn IMM32; mov imm24,Rn
 8.0xfd+8.0x08+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4t:::mov
@@ -2987,8 +4310,8 @@
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
-// mul
-// mulu
+// ??? mul
+// ??? mulu
 
 // 1111 1101 1110 1001 Rn Rn IMM24; btst imm24,,Rn
 8.0xfd+8.0xe9+4.RN2,4.RN0=RN2+8.IMM24A+8.IMM24B+8.IMM24C:D4p:::btst
@@ -3171,8 +4494,62 @@
 	      State.regs[srcreg]);
 }
 
-// mov
-// mov
+// 1111 1101 0110 1010 Rn Rm IMM24; mov (d24,Rm+),Rn
+8.0xfd+8.0x6a+4.RN2,4.RM0+8.IMM24A+8.IMM24B+8.IMM24C:D4y:::mov
+"mov"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_word (State.regs[srcreg]
+				  + FETCH24 (IMM24A, IMM24B, IMM24C));
+  State.regs[srcreg] += 4;
+}
+
+// 1111 1101 0111 1010 Rm Rn IMM24; mov Rm,(d24,Rn+)
+8.0xfd+8.0x7a+4.RM2,4.RN0+8.IMM24A+8.IMM24B+8.IMM24C:D4z:::mov
+"mov"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_word (State.regs[dstreg] + FETCH24 (IMM24A, IMM24B, IMM24C),
+	      State.regs[srcreg]);
+  State.regs[dstreg] += 4;
+}
+
 
 // 1111 1101 1000 1010 Rn 0000 IMM24; mov (d24,sp),Rn
 8.0xfd+8.0x8a+4.RN2,4.0x0+IMM24A+8.IMM24B+8.IMM24C:D4r:::mov
@@ -3294,13 +4671,67 @@
 	      State.regs[srcreg]);
 }
 
-// movhu
-// movhu
-// mac
-// macb
-// macbu
-// mach
-// machu
+// 1111 1101 1110 1010 Rn Rm IMM24; movhu (d24,Rm+),Rn
+8.0xfd+8.0xea+4.RN2,4.RM0+8.IMM24A+8.IMM24B+8.IMM24C:D4y:::movhu
+"movhu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_half (State.regs[srcreg]
+				  + FETCH24 (IMM24A, IMM24B, IMM24C));
+  State.regs[dstreg] += 2;
+}
+
+// 1111 1101 1111 1010 Rm Rn IMM24; movhu Rm,(d24,Rn+)
+8.0xfd+8.0xfa+4.RM2,4.RN0+8.IMM24A+8.IMM24B+8.IMM24C:D4z:::movhu
+"movhu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_half (State.regs[dstreg] + FETCH24 (IMM24A, IMM24B, IMM24C),
+	      State.regs[srcreg]);
+  State.regs[srcreg] += 2;
+}
+
+// ??? mac
+// ??? macb
+// ??? macbu
+// ??? mach
+// ??? machu
 
 // 1111 1101 0000 1110 Rn 0000 ABS24; mov (abs24),Rn
 8.0xfd+8.0x0e+4.RN2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4u:::mov
@@ -3746,8 +5177,8 @@
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
 }
 
-// mul
-// mulu
+// ??? mul
+// ??? mulu
 
 // 1111 1110 1110 1001 Rn Rn IMM32; btst imm32,Rn
 8.0xfe+8.0xe9+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5a:::btst
@@ -3930,8 +5361,62 @@
 	      State.regs[srcreg]);
 }
 
-// mov
-// mov
+// 1111 1110 0110 1010 Rn Rm IMM32; mov (d32,Rm+),Rn
+8.0xfe+8.0x6a+4.RN2,4.RM0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5y:::mov
+"mov"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_word (State.regs[srcreg]
+				  + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
+  State.regs[srcreg] += 4;
+}
+
+// 1111 1110 0111 1010 Rm Rn IMM32; mov Rm,(d32,Rn+)
+8.0xfe+8.0x7a+4.RM2,4.RN0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5z:::mov
+"mov"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_word (State.regs[dstreg] + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D),
+	      State.regs[srcreg]);
+  State.regs[dstreg] += 4;
+}
+
 
 // 1111 1110 1000 1010 Rn 0000 IMM32; mov (d32,sp),Rn
 8.0xfe+8.0x8a+4.RN2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5c:::mov
@@ -4054,19 +5539,73 @@
 }
 
 
-// movhu
-// movhu
+// 1111 1110 1110 1010 Rn Rm IMM32; movhu (d32,Rm+),Rn
+8.0xfe+8.0xea+4.RN2,4.RM0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5y:::movhu
+"movhu"
+*am33
+{
+  int srcreg, dstreg;
 
-// mac
-// macu
-// macb
-// macbu
-// mach
-// machu
-// dmach
-// dmachu
-// dmulh
-// dmulhu
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_half (State.regs[srcreg]
+				  + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
+  State.regs[srcreg] += 2;
+}
+
+// 1111 1110 1111 1010 Rm Rn IMM32; movhu Rm,(d32,Rn+)
+8.0xfe+8.0xfa+4.RM2,4.RN0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5f:::movhu
+"movhu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_half (State.regs[dstreg] + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D),
+	      State.regs[srcreg]);
+  State.regs[dstreg] += 2;
+}
+
+
+// ??? mac
+// ??? macu
+// ??? macb
+// ??? macbu
+// ??? mach
+// ??? machu
+// ??? dmach
+// ??? dmachu
+// ??? dmulh
+// ??? dmulhu
 
 // 1111 1110 0000 1110 Rn 0000 IMM32; mov (abs32),Rn
 8.0xfe+8.0x0e+4.RN2,4.0x0+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5h:::mov
@@ -4181,10 +5720,5 @@
 
   store_half (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D), State.regs[srcreg]);
 }
-
-// movbu
-// movbu
-// movhu
-// movhu
 
 // DSP
