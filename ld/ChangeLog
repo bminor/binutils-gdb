@@ -1,5 +1,19 @@
 2000-03-01  H.J. Lu  <hjl@gnu.org>
 
+	* emulparams/mipspe.sh: Add SUBSYSTEM and INITIAL_SYMBOL_CHAR.
+	* emulparams/shpe.sh: Likewise.
+
+2000-03-01  Nick Clifton  <nickc@cygnus.com>
+
+	* pe-dll.c: Remove unused variables and add ATTRIBUTE_UNUSED
+	to unused parameters.
+
+	* emultempl/pe.em: Add "#ifdef DLL_SUPPORT" around static
+	functions only used by DLL code.
+	(_place_orphan): Initialise 'dollar'.
+
+2000-03-01  H.J. Lu  <hjl@gnu.org>
+
 	* ldmain.c (undefined_symbol): Take one more arg, fatal, to
 	indicate if the undefined symbol is a fatal error or not.
 	Don't delete the output file if "fatal" is false.

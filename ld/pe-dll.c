@@ -617,15 +617,12 @@ generate_edata (abfd, info)
 
 static void
 fill_exported_offsets (abfd, info)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
-  int i, j;
+  int i;
   struct bfd_link_hash_entry *blhe;
-  bfd *b;
-  struct sec *s;
-  def_file_export *e=0;
-
+  
   for (i = 0; i < pe_def_file->num_exports; i++)
     {
       char *name = (char *) xmalloc (strlen (pe_def_file->exports[i].internal_name) + 2);
@@ -1402,12 +1399,12 @@ make_one (exp, parent)
      bfd *parent;
 {
   asection *tx, *id7, *id5, *id4, *id6;
-  unsigned char *td, *d7, *d5, *d4, *d6;
+  unsigned char *td, *d7, *d5, *d4, *d6 = NULL;
   int len;
   char *oname;
   bfd *abfd;
-  unsigned char *jmp_bytes;
-  int jmp_byte_count;
+  unsigned char *jmp_bytes = NULL;
+  int jmp_byte_count = 0;
 
   switch (pe_details->pe_arch)
     {

@@ -114,9 +114,11 @@ static int support_old_code = 0;
 static char * thumb_entry_symbol = NULL;
 static lang_assignment_statement_type *image_base_statement = 0;
 
-static char *pe_out_def_filename = 0;
 static int pe_enable_stdcall_fixup = -1; /* 0=disable 1=enable */
+#ifdef DLL_SUPPORT
+static char *pe_out_def_filename = 0;
 static char *pe_implib_filename = 0;
+#endif
 
 extern const char *output_filename;
 
@@ -642,6 +644,7 @@ pe_undef_cdecl_match (h, string)
   return true;
 }
 
+#ifdef DLL_SUPPORT
 static void
 pe_fixup_stdcalls ()
 {
@@ -706,6 +709,7 @@ pe_fixup_stdcalls ()
       }
     }
 }
+#endif /* DLL_SUPPORT */
 
 static void
 gld_${EMULATION_NAME}_after_open ()
@@ -757,7 +761,7 @@ gld_${EMULATION_NAME}_after_open ()
 #endif
 
   {
-    int is_ms_arch;
+    int is_ms_arch = 0;
     bfd *cur_arch = 0;
     lang_input_statement_type *is2;
 
@@ -869,7 +873,7 @@ gld_${EMULATION_NAME}_before_allocation()
 
 /* This is called when an input file isn't recognized as a BFD.  We
    check here for .DEF files and pull them in automatically. */
-
+#ifdef DLL_SUPPORT
 static int
 saw_option(char *option)
 {
@@ -879,10 +883,11 @@ saw_option(char *option)
       return init[i].inited;
   return 0;
 }
+#endif
 
 static boolean
 gld_${EMULATION_NAME}_unrecognized_file(entry)
-  lang_input_statement_type *entry;
+     lang_input_statement_type *entry ATTRIBUTE_UNUSED;
 {
 #ifdef DLL_SUPPORT
   const char *ext = entry->filename + strlen (entry->filename) - 4;
@@ -967,7 +972,7 @@ gld_${EMULATION_NAME}_unrecognized_file(entry)
 
 static boolean
 gld_${EMULATION_NAME}_recognized_file(entry)
-  lang_input_statement_type *entry;
+  lang_input_statement_type *entry ATTRIBUTE_UNUSED;
 {
 #ifdef DLL_SUPPORT
 #ifdef TARGET_IS_i386pe
@@ -1087,7 +1092,7 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
      asection *s;
 {
   const char *secname;
-  char *dollar;
+  char *dollar = NULL;
 
   if ((s->flags & SEC_ALLOC) == 0)
     return false;
