@@ -17,8 +17,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include <readline/tilde.h>
 #include "defs.h"
+#include <readline/tilde.h>
 #include "value.h"
 #include <ctype.h>
 #include "gdb_string.h"

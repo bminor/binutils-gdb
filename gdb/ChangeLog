@@ -1,3 +1,8 @@
+2002-12-09  David Carlton  <carlton@math.stanford.edu>
+
+	* cli/cli-setshow.c: #include <readline/tilde.h> after defs.h.
+	* cli/cli-cmds.c: Ditto.
+
 2002-12-09  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (gdbarch_dump): Print NAME_OF_MALLOC using %s.  Wrap
