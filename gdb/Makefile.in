@@ -1055,9 +1055,9 @@ init.c: $(INIT_FILES)
 	    sed -n -e 's/^_initialize_\([a-z_0-9A-Z]*\).*/\1/p' $$f 2>/dev/null; \
 	done | \
 	while read f; do \
-	    case "$$fs" in \
-	        "* $$f *") ;; \
-	        *) echo $$f ; fs="$$fs $$f ";; \
+	    case " $$fs " in \
+	        *" $$f "* ) ;; \
+	        * ) echo $$f ; fs="$$fs $$f";; \
             esac; \
 	done >> init.l-tmp
 	@echo '/* Do not modify this file.  */' >>init.c-tmp

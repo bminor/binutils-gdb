@@ -1,3 +1,8 @@
+2004-02-10  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (init.c): Fix script removing duplicates. Problem
+	reported by Peter Schauer.
+
 2004-02-09  Elena Zannoni  <ezannoni@redhat.com>
 
 	* bcache.c (bcache_xmalloc): Use obstack_init instead of
