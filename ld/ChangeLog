@@ -1,3 +1,8 @@
+Tue Mar 14 12:28:03 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/sunos.em (gld${EMULATION_NAME}_find_so): Set force_maj
+	for -lc.N.  From H.J. Lu <hjl@nynexst.com>.
+
 Fri Mar 10 14:43:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldmain.c (main): Don't set EXEC_P if link_info.shared is set.
