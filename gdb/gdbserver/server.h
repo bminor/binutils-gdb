@@ -23,20 +23,36 @@
 #define SERVER_H
 
 #include "config.h"
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <setjmp.h>
 
+#ifndef ATTR_NORETURN
+#if defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7))
+#define ATTR_NORETURN __attribute__ ((noreturn))
+#else
+#define ATTR_NORETURN           /* nothing */
+#endif
+#endif
 
-/* FIXME:  Both of these should be autoconf'd for.  */
-#define NORETURN
+#ifndef ATTR_FORMAT
+#if defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 4))
+#define ATTR_FORMAT(type, x, y) __attribute__ ((format(type, x, y)))
+#else
+#define ATTR_FORMAT(type, x, y) /* nothing */
+#endif
+#endif
+
+/* FIXME: This should probably be autoconf'd for.  It's an integer type at
+   least the size of a (void *).  */
 typedef long long CORE_ADDR;
 
 #include "regcache.h"
 #include "gdb/signals.h"
 
-#include <setjmp.h>
 
 /* Target-specific functions */
 
@@ -93,11 +109,13 @@ int target_signal_to_host (enum target_signal oursig);
 /* Functions from utils.c */
 
 void perror_with_name (char *string);
-void error (const char *string,...);
-void fatal (const char *string,...);
+void error (const char *string,...) ATTR_NORETURN;
+void fatal (const char *string,...) ATTR_NORETURN;
 void warning (const char *string,...);
 
+/* Functions from the register cache definition.  */
 
+void init_registers (void);
 
 /* Maximum number of bytes to read/write at once.  The value here
    is chosen to fill up a packet (the headers account for the 32).  */

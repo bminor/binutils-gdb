@@ -90,13 +90,15 @@ INCLUDE_CFLAGS = -I. -I${srcdir} -I$(srcdir)/../regformats -I$(INCLUDE_DIR)
 GLOBAL_CFLAGS = ${MT_CFLAGS} ${MH_CFLAGS}
 #PROFILE_CFLAGS = -pg
 
+WARN_CFLAGS = -Wall
+
 # CFLAGS is specifically reserved for setting from the command line
 # when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
 CFLAGS = @CFLAGS@
 
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
-INTERNAL_CFLAGS = ${CFLAGS} ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} \
-	${INCLUDE_CFLAGS} ${BFD_CFLAGS}
+INTERNAL_CFLAGS =  $(WARN_CFLAGS) ${CFLAGS} ${GLOBAL_CFLAGS} \
+	${PROFILE_CFLAGS} ${INCLUDE_CFLAGS} ${BFD_CFLAGS}
 
 # LDFLAGS is specifically reserved for setting from the command line
 # when running make.
@@ -195,8 +197,11 @@ maintainer-clean realclean: clean
 
 STAGESTUFF=${OBS} ${TSOBS} ${NTSOBS} ${ADD_FILES} init.c init.o version.c gdb
 
+config.h: config.in config.status
+	CONFIG_FILES="" $(SHELL) ./config.status
+
 Makefile: Makefile.in config.status
-	$(SHELL) ./config.status
+	CONFIG_HEADERS="" $(SHELL) ./config.status
 
 config.status: configure configure.srv
 	$(SHELL) ./config.status --recheck

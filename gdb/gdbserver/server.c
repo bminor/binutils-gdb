@@ -55,6 +55,7 @@ attach_inferior (int pid, char *statusptr, unsigned char *sigptr)
 }
 
 extern int remote_debug;
+static int attached;
 
 int
 main (int argc, char *argv[])
@@ -64,9 +65,8 @@ main (int argc, char *argv[])
   unsigned char signal;
   unsigned int len;
   CORE_ADDR mem_addr;
-  int bad_attach = 0;
-  int pid = 0;
-  int attached = 0;
+  int bad_attach;
+  int pid;
   char *arg_end;
 
   if (setjmp (toplevel))
@@ -75,6 +75,9 @@ main (int argc, char *argv[])
       exit (1);
     }
 
+  bad_attach = 0;
+  pid = 0;
+  attached = 0;
   if (argc >= 3 && strcmp (argv[2], "--attach") == 0)
     {
       if (argc == 4

@@ -30,6 +30,12 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
 
 /* Sort of a hack... */
 #define EOL (EOF - 1)
@@ -83,8 +89,6 @@ remote_close (void)
 void
 remote_open (char *name)
 {
-  extern char *strchr ();
-
   if (!strchr (name, ':'))
     {
       fprintf (stderr, "%s: Must specify tcp connection as host:addr\n", name);

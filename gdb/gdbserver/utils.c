@@ -57,7 +57,7 @@ perror_with_name (char *string)
    STRING is the error message, used as a fprintf string,
    and ARG is passed as an argument to it.  */
 
-NORETURN void
+void
 error (const char *string,...)
 {
   extern jmp_buf toplevel;
@@ -74,7 +74,7 @@ error (const char *string,...)
    STRING and ARG are passed to fprintf.  */
 
 /* VARARGS */
-NORETURN void
+void
 fatal (const char *string,...)
 {
   va_list args;

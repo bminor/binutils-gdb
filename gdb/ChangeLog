@@ -1,5 +1,28 @@
 2002-04-09  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdbserver/Makefile.in: Add WARN_CFLAGS.  Update configury
+	dependencies.
+	* gdbserver/configure.in: Check for <string.h>
+	* gdbserver/configure: Regenerate.
+	* gdbserver/config.in: Regenerate.
+	* gdbserver/gdbreplay.c: Include needed system headers.
+	(remote_open): Remove strchr prototype.
+	* gdbserver/linux-low.h: Correct #ifdef to HAVE_LINUX_USRREGS.
+	* gdbserver/regcache.c (supply_register): Change buf argument to const void *.
+	(supply_register_by_name): Likewise.
+	(collect_register): Change buf argument to void *.
+	(collect_register_by_name): Likewise.
+	* gdbserver/regcache.h: Add missing prototypes.
+	* gdbserver/remote-utils.c: Include <arpa/inet.h> for inet_ntoa.
+	* gdbserver/server.c (handle_query): New function.
+	(attached): New static variable, moved out of main.
+	(main): Quiet longjmp clobber warnings.
+	* gdbserver/server.h: Add ATTR_NORETURN and ATTR_FORMAT.  Update prototypes.
+	* gdbserver/utils.c (error): Remove NORETURN.
+	(fatal): Likewise.
+
+2002-04-09  Daniel Jacobowitz  <drow@mvista.com>
+
 	* symtab.h (ALL_BLOCK_SYMBOLS): Don't dereference the pointer
 	after the last symbol in a block.
 

@@ -18,7 +18,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifdef HAVE_LINUX_USR_REGISTERS
+#ifdef HAVE_LINUX_USRREGS
 extern int regmap[];
 extern int num_regs;
 int cannot_fetch_register (int regno);

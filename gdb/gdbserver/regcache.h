@@ -46,4 +46,12 @@ int find_regno (const char *name);
 
 extern const char **gdbserver_expedite_regs;
 
+void supply_register (int n, const void *buf);
+
+void supply_register_by_name (const char *name, const void *buf);
+
+void collect_register (int n, void *buf);
+
+void collect_register_by_name (const char *name, void *buf);
+
 #endif /* REGCACHE_H */

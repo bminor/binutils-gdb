@@ -123,25 +123,25 @@ register_data (int n)
 }
 
 void
-supply_register (int n, const char *buf)
+supply_register (int n, const void *buf)
 {
   memcpy (register_data (n), buf, register_size (n));
 }
 
 void
-supply_register_by_name (const char *name, const char *buf)
+supply_register_by_name (const char *name, const void *buf)
 {
   supply_register (find_regno (name), buf);
 }
 
 void
-collect_register (int n, char *buf)
+collect_register (int n, void *buf)
 {
   memcpy (buf, register_data (n), register_size (n));
 }
 
 void
-collect_register_by_name (const char *name, char *buf)
+collect_register_by_name (const char *name, void *buf)
 {
   collect_register (find_regno (name), buf);
 }

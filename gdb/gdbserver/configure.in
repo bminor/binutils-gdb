@@ -30,7 +30,7 @@ AC_PROG_INSTALL
 
 AC_HEADER_STDC
 
-AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h)
+AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h)
 
 . ${srcdir}/configure.srv
 

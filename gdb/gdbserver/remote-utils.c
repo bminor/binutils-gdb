@@ -35,6 +35,7 @@
 #include <fcntl.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 
 int remote_debug = 0;
 struct ui_file *gdb_stdlog;
