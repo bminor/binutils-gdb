@@ -1,5 +1,4 @@
 # Sanitize.in for devo.
-# $Id$
 #
 
 # Each directory to survive it's way into a release will need a file
@@ -17,29 +16,6 @@
 
 Do-first:
 
-if ( echo $* | grep keep\-arc > /dev/null ) ; then
-	keep_these_too="arc ${keep_these_too}"
-else
-	lose_these_too="arc ${lose_these_too}"
-fi
-
-if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
-	keep_these_too="tic80 ${keep_these_too}"
-else
-	lose_these_too="tic80 ${lose_these_too}"
-fi
-
-if ( echo $* | grep keep\-v850 > /dev/null ) ; then
-	keep_these_too="v850 ${keep_these_too}"
-else
-	lose_these_too="v850 ${lose_these_too}"
-fi
-
-if ( echo $* | grep keep\-d30v > /dev/null ) ; then
-	keep_these_too="d30v ${keep_these_too}"
-else
-	lose_these_too="d30v ${lose_these_too}"
-fi
 
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
@@ -49,28 +25,9 @@ fi
 
 Things-to-keep:
 
-all
-alpha
-arm
-h8300
-hppa
-i386
-ieee-fp
-m32r
-m68k
-m68k-coff
-m88k
-macros
-mips
-mn10200
-mn10300
-mri
-sh
-sparc
-sparc-solaris
-sun4
-template
-vax
+init.d
+init.s
+m88k.exp
 
 Things-to-lose:
 
