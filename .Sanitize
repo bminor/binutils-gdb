@@ -22,6 +22,11 @@
 # new file, and will get warnings from Sanitize when everything is really
 # okay.  You don't want to get people in the habit of ignoring complaints from
 # Sanitize, do you?  No, I didn't think so.
+#
+# If you do add a file to the regular things-to-keep section, don't forget
+# to add the corresponding entry to the devo-support entry (or whatever) in
+# the modules file.
+#
 ########################
 
 # .Sanitize for devo.
@@ -111,6 +116,9 @@ done
 # Directories listed in this section will have their own Sanitize
 # called.  Directories not listed will be removed in their entirety
 # with rm -rf.
+
+# ??? It is debatable whether cfg-*.in belongs in Things-to-keep or
+# keep_these_too.  If someone feels strongly about it, please move them.
 
 Things-to-keep:
 
