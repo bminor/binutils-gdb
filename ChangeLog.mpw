@@ -1,3 +1,7 @@
+Thu Jun 30 18:20:02 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-README: Update the GDB information.
+
 Wed Jun 29 17:09:56 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-build.in: (install-only): New target.
