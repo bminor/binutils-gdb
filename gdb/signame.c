@@ -1,5 +1,5 @@
 /* Convert between signal names and numbers, for GDB.
-   Copyright 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,22 +19,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include <signal.h>
-#include "signame.h"
-
 /* GDB-specific, FIXME.  (This is for the SYS_SIGLIST_MISSING define).  */
 #include "defs.h"
+#include "signame.h"
 
-#ifdef __STDC__
-#define CONST const
-#else
-#define CONST
-#endif
+static void
+init_sig PARAMS ((int, const char *, const char *));
+
+static void
+init_sigs PARAMS ((void));
 
 #if SYS_SIGLIST_MISSING
 /* There is too much variation in Sys V signal numbers and names, so
    we must initialize them at runtime.  */
 
-static CONST char undoc[] = "unknown signal";
+static const char undoc[] = "unknown signal";
 
 /* We'd like to make this const char*[], but whoever's using it might
    want to assign from it to a char*.  */
@@ -46,7 +45,7 @@ char *sys_siglist[NSIG];
 typedef struct
   {
     int number;
-    CONST char *abbrev;
+    const char *abbrev;
   } num_abbrev;
 static num_abbrev sig_table[NSIG*2];
 /* Number of elements of sig_table used.  */
@@ -57,8 +56,8 @@ static int sig_table_nelts = 0;
 static void
 init_sig (number, abbrev, name)
      int number;
-     CONST char *abbrev;
-     CONST char *name;
+     const char *abbrev;
+     const char *name;
 {
 #if SYS_SIGLIST_MISSING
   sys_siglist[number] = (char *) name;
@@ -219,7 +218,7 @@ sig_abbrev (number)
    signal by that name.  */
 int
 sig_number (abbrev)
-     CONST char *abbrev;
+     const char *abbrev;
 {
   int i;
 
@@ -240,7 +239,7 @@ sig_number (abbrev)
 void
 psignal (signal, message)
      unsigned signal;
-     CONST char *message;
+     const char *message;
 {
   if (signal <= 0 || signal >= NSIG)
     fprintf (stderr, "%s: unknown signal", message);

@@ -1,5 +1,5 @@
 /* Work with core dump and executable files, for GDB.
-   Copyright 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -30,9 +30,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "gdbcore.h"
 
-extern int xfer_memory ();
-extern void child_attach (), child_create_inferior ();
-extern void print_section_info ();
+#ifdef SOLIB_ADD
+static int 
+solib_add_stub PARAMS ((char *));
+#endif
+
+static void
+core_close PARAMS ((int));
+
+static void
+core_open PARAMS ((char *, int));
+
+static void
+core_detach PARAMS ((char *, int));
+
+static void
+get_core_registers PARAMS ((int));
+
+static void
+core_files_info PARAMS ((struct target_ops *));
 
 extern int sys_nerr;
 extern char *sys_errlist[];
@@ -42,7 +58,7 @@ extern char registers[];
 
 /* Hook for `exec_file_command' command to call.  */
 
-void (*exec_file_display_hook) () = NULL;
+void (*exec_file_display_hook) PARAMS ((char *)) = NULL;
 
 /* Binary file diddling handle for the core file.  */
 
@@ -56,7 +72,7 @@ extern struct target_ops core_ops;
    and mark data and stack spaces as empty.  */
 
 /* ARGSUSED */
-void
+static void
 core_close (quitting)
      int quitting;
 {
@@ -67,10 +83,10 @@ core_close (quitting)
 #ifdef CLEAR_SOLIB
     CLEAR_SOLIB ();
 #endif
-    if (core_ops.sections) {
-      free (core_ops.sections);
-      core_ops.sections = NULL;
-      core_ops.sections_end = NULL;
+    if (core_ops.to_sections) {
+      free (core_ops.to_sections);
+      core_ops.to_sections = NULL;
+      core_ops.to_sections_end = NULL;
     }
   }
 }
@@ -78,7 +94,7 @@ core_close (quitting)
 #ifdef SOLIB_ADD
 /* Stub function for catch_errors around shared library hacking. */
 
-int 
+static int 
 solib_add_stub (from_tty)
      char *from_tty;
 {
@@ -89,7 +105,7 @@ solib_add_stub (from_tty)
 
 /* This routine opens and sets up the core file bfd */
 
-void
+static void
 core_open (filename, from_tty)
      char *filename;
      int from_tty;
@@ -131,7 +147,8 @@ core_open (filename, from_tty)
 
   if (!bfd_check_format (temp_bfd, bfd_core))
     {
-      make_cleanup (bfd_close, temp_bfd);	/* Do it after the err msg */
+      /* Do it after the err msg */
+      make_cleanup (bfd_close, temp_bfd);
       error ("\"%s\" is not a core dump: %s", filename, bfd_errmsg(bfd_error));
     }
 
@@ -145,8 +162,8 @@ core_open (filename, from_tty)
   validate_files ();
 
   /* Find the data section */
-  if (build_section_table (core_bfd, &core_ops.sections,
-			   &core_ops.sections_end))
+  if (build_section_table (core_bfd, &core_ops.to_sections,
+			   &core_ops.to_sections_end))
     error ("Can't find sections in `%s': %s", bfd_get_filename(core_bfd),
 	   bfd_errmsg (bfd_error));
 
@@ -183,7 +200,7 @@ your %s; do ``info files''\n", current_target->to_longname);
   }
 }
 
-void
+static void
 core_detach (args, from_tty)
      char *args;
      int from_tty;
@@ -215,7 +232,7 @@ core_file_command (filename, from_tty)
 
 void
 specify_exec_file_hook (hook)
-     void (*hook) ();
+     void (*hook) PARAMS ((char *));
 {
   exec_file_display_hook = hook;
 }
@@ -280,6 +297,8 @@ core_files_info (t)
   print_section_info (t, core_bfd);
 }
 
+/* Report a memory error with error().  */
+
 void
 memory_error (status, memaddr)
      int status;
@@ -429,7 +448,7 @@ struct target_ops core_ops = {
 	xfer_memory, core_files_info,
 	0, 0, /* core_insert_breakpoint, core_remove_breakpoint, */
 	0, 0, 0, 0, 0, /* terminal stuff */
-	0, 0, 0, 0, /* kill, load, call fn, lookup sym */
+	0, 0, 0, /* kill, load, lookup sym */
 	child_create_inferior, 0, /* mourn_inferior */
 	core_stratum, 0, /* next */
 	0, 1, 1, 1, 0,	/* all mem, mem, stack, regs, exec */

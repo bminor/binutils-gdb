@@ -1,5 +1,5 @@
 /* Multiple source language support for GDB.
-   Copyright 1991 Free Software Foundation, Inc.
+   Copyright 1991, 1992 Free Software Foundation, Inc.
    Contributed by the Department of Computer Science at the State University
    of New York at Buffalo.
 
@@ -36,19 +36,56 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "value.h"
 #include "gdbcmd.h"
 #include "frame.h"
-#include "language.h"
 #include "expression.h"
+#include "language.h"
 #include "target.h"
 #include "parser-defs.h"
 
-extern volatile void return_to_top_level ();
+static void
+show_language_command PARAMS ((char *, int));
 
-/* Forward function declarations */
-static void set_type_range ();
+static void
+set_language_command PARAMS ((char *, int));
+
+static void
+show_type_command PARAMS ((char *, int));
+
+static void
+set_type_command PARAMS ((char *, int));
+
+static void
+show_range_command PARAMS ((char *, int));
+
+static void
+set_range_command PARAMS ((char *, int));
+
+static void
+set_range_str PARAMS ((void));
+
+static void
+set_type_str PARAMS ((void));
+
+static void
+set_lang_str PARAMS ((void));
+
+static void
+unk_lang_error PARAMS ((char *));
+
+static int
+unk_lang_parser PARAMS ((void));
+
+static void
+show_check PARAMS ((char *, int));
+
+static void
+set_check PARAMS ((char *, int));
+
+static void
+set_type_range PARAMS ((void));
 
 /* Forward declaration */
 extern const struct language_defn unknown_language_defn;
-
+  
 /* The current (default at startup) state of type and range checking.
     (If the modes are set to "auto", though, these are changed based
     on the default language at startup, and then again based on the
@@ -66,7 +103,7 @@ enum language_mode language_mode = language_mode_auto;
 
 /* The list of supported languages.  The list itself is malloc'd.  */
 
-static struct language_defn **languages;
+static const struct language_defn **languages;
 static unsigned languages_size;
 static unsigned languages_allocsize;
 #define	DEFAULT_ALLOCSIZE 3
@@ -86,16 +123,13 @@ static char *range;
 char lang_frame_mismatch_warn[] =
 	"Warning: the current language does not match this frame.";
 
-void set_lang_str();
-void set_type_str();
-void set_range_str();
 
 /* This page contains the functions corresponding to GDB commands
    and their helpers. */
 
 /* Show command.  Display a warning if the language set
    does not match the frame. */
-void
+static void
 show_language_command (ignore, from_tty)
    char *ignore;
    int from_tty;
@@ -110,7 +144,7 @@ show_language_command (ignore, from_tty)
 }
 
 /* Set command.  Change the current working language. */
-void
+static void
 set_language_command (ignore, from_tty)
    char *ignore;
    int from_tty;
@@ -163,7 +197,7 @@ modula-2         Use the Modula-2 language\n");
 
 /* Show command.  Display a warning if the type setting does
    not match the current language. */
-void
+static void
 show_type_command(ignore, from_tty)
    char *ignore;
    int from_tty;
@@ -174,7 +208,7 @@ show_type_command(ignore, from_tty)
 }
 
 /* Set command.  Change the setting for type checking. */
-void
+static void
 set_type_command(ignore, from_tty)
    char *ignore;
    int from_tty;
@@ -208,7 +242,7 @@ set_type_command(ignore, from_tty)
 
 /* Show command.  Display a warning if the range setting does
    not match the current language. */
-void
+static void
 show_range_command(ignore, from_tty)
    char *ignore;
    int from_tty;
@@ -220,7 +254,7 @@ show_range_command(ignore, from_tty)
 }
 
 /* Set command.  Change the setting for range checking. */
-void
+static void
 set_range_command(ignore, from_tty)
    char *ignore;
    int from_tty;
@@ -290,7 +324,7 @@ set_language(lang)
 
 /* This page contains functions that update the global vars
    language, type and range. */
-void
+static void
 set_lang_str()
 {
    char *prefix = "";
@@ -302,7 +336,7 @@ set_lang_str()
    language = concat(prefix, current_language->la_name, NULL);
 }
 
-void
+static void
 set_type_str()
 {
    char *tmp, *prefix = "";
@@ -329,7 +363,7 @@ set_type_str()
    type = concat(prefix,tmp,NULL);
 }
 
-void
+static void
 set_range_str()
 {
    char *tmp, *pref = "";
@@ -358,10 +392,12 @@ set_range_str()
 
 
 /* Print out the current language settings: language, range and
-   type checking. */
+   type checking.  If QUIETLY, print only what has changed.  */
 void
-language_info ()
+language_info (quietly)
+     int quietly;
 {
+  /* FIXME:  quietly is ignored at the moment.  */
    printf("Current Language:  %s\n",language);
    show_language_command((char *)0, 1);
    printf("Type checking:     %s\n",type);
@@ -371,6 +407,9 @@ language_info ()
 }
 
 /* Return the result of a binary operation. */
+
+#if 0	/* Currently unused */
+
 struct type *
 binop_result_type(v1,v2)
    value v1,v2;
@@ -406,6 +445,9 @@ binop_result_type(v1,v2)
    abort();
    return (struct type *)0;	/* For lint */
 }
+
+#endif	/* 0 */
+
 
 /* This page contains functions that return format strings for
    printf for printing out numbers in different formats */
@@ -583,6 +625,7 @@ character_type (type)
 	 TYPE_LENGTH(type) == sizeof(char)
 	 ? 1 : 0;
    }
+   return (0);
 }
 
 /* Returns non-zero if the value is a boolean type */
@@ -599,6 +642,7 @@ boolean_type (type)
    case language_cplus:
       return TYPE_CODE(type) != TYPE_CODE_INT ? 0 : 1;
    }
+   return (0);
 }
 
 /* Returns non-zero if the value is a floating-point type */
@@ -635,6 +679,7 @@ structured_type(type)
 	 (TYPE_CODE(type) == TYPE_CODE_SET) ||
 	    (TYPE_CODE(type) == TYPE_CODE_ARRAY);
    }
+   return (0);
 }
 
 /* This page contains functions that return info about
@@ -683,6 +728,9 @@ value_true(val)
 
 /* Returns non-zero if the operator OP is defined on
    the values ARG1 and ARG2. */
+
+#if 0	/* Currently unused */
+
 void
 binop_type_check(arg1,arg2,op)
    value arg1,arg2;
@@ -836,6 +884,9 @@ binop_type_check(arg1,arg2,op)
       }
    }
 }
+
+#endif	/* 0 */
+
 
 /* This page contains functions for the printing out of
    error messages that occur during type- and range-
@@ -867,9 +918,10 @@ op_error (fmt,op,fatal)
    [type|range]_check is [type|range]_check_on, then return_to_top_level()
    is called in the style of error ().  Otherwise, the message is prefixed
    by "warning:  " and we do not return to the top level. */
+
 void
 type_error (va_alist)
-   va_dcl
+     va_dcl
 {
    va_list args;
    char *string;
@@ -890,7 +942,7 @@ type_error (va_alist)
 
 void
 range_error (va_alist)
-   va_dcl
+     va_dcl
 {
    va_list args;
    char *string;
@@ -952,7 +1004,7 @@ show_check (arg, from_tty)
 
 void
 add_language (lang)
-     struct language_defn *lang;
+     const struct language_defn *lang;
 {
   if (lang->la_magic != LANG_MAGIC)
     {
@@ -964,13 +1016,13 @@ add_language (lang)
   if (!languages)
     {
       languages_allocsize = DEFAULT_ALLOCSIZE;
-      languages = (struct language_defn **) xmalloc
+      languages = (const struct language_defn **) xmalloc
 	(languages_allocsize * sizeof (*languages));
     }
   if (languages_size >= languages_allocsize)
     {
       languages_allocsize *= 2;
-      languages = (struct language_defn **) xrealloc (languages,
+      languages = (const struct language_defn **) xrealloc ((char *) languages,
 	languages_allocsize * sizeof (*languages));
     }
   languages[languages_size++] = lang;
@@ -978,14 +1030,15 @@ add_language (lang)
 
 /* Define the language that is no language.  */
 
-int
+static int
 unk_lang_parser ()
 {
   return 1;
 }
 
-void
-unk_lang_error ()
+static void
+unk_lang_error (msg)
+     char *msg;
 {
   error ("Attempted to parse an expression with unknown language");
 }

@@ -1,5 +1,5 @@
 /* Host-dependent code for SPARC host systems, for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1990, 1991  Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -140,7 +140,7 @@ fetch_inferior_registers (regno)
    If REGNO is -1, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time).  */
 
-int
+void
 store_inferior_registers (regno)
      int regno;
 {
@@ -181,7 +181,7 @@ store_inferior_registers (regno)
       else
 	{
 	  deferred_stores |= wanna_store;
-	  return 0;
+	  return;
 	}
     }
 
@@ -241,14 +241,14 @@ store_inferior_registers (regno)
 	 ptrace (PTRACE_SETFPREGS, inferior_pid, &inferior_fp_registers))
 	 perror("ptrace_setfpregs");
     }
-    return 0;
 }
 
 void
-fetch_core_registers (core_reg_sect, core_reg_size, which)
+fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
   char *core_reg_sect;
   unsigned core_reg_size;
   int which;
+  unsigned int reg_addr;	/* Unused in this version */
 {
 
   if (which == 0) {
