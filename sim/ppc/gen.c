@@ -42,6 +42,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "ppc-config.h"
 
 #undef WITH_ASSERT
 #define WITH_ASSERT 1

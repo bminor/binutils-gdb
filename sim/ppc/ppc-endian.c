@@ -28,6 +28,7 @@
 
 
 #include "config.h"
+#include "ppc-config.h"
 #include "words.h"
 #include "ppc-endian.h"
 #include "sim_callbacks.h"

@@ -31,6 +31,7 @@ README.psim
 basics.h
 bits.c
 bits.h
+config.in
 configure
 configure.in
 core.c

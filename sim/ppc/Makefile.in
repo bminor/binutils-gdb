@@ -49,19 +49,23 @@ docdir = $(datadir)/doc
 
 SHELL = /bin/sh
 
-# FIXME: use autoconf's AC_PROG_INSTALL
 INSTALL = $(srcroot)/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
 INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
 
-AR = ar
+AR = @AR@
 AR_FLAGS = rc
-CFLAGS = -g
+CC = @CC@
+CFLAGS = @CFLAGS@
+CC_FOR_BUILD = @CC_FOR_BUILD@
 BISON = bison
 MAKEINFO = makeinfo
-RANLIB = ranlib
+RANLIB = @RANLIB@
+
+HDEFINES = @HDEFINES@
+TDEFINES =
 
 .NOEXPORT:
 MAKEOVERRIDES=
@@ -76,10 +80,6 @@ CONFIG_FILE	= std-config.h
 LIBIBERTY_LIB	= ../../libiberty/libiberty.a
 BFD_LIB		= ../../bfd/libbfd.a
 
-#### Makefile fragments come in here.
-# @host_makefile_frag@
-###
-
 TARGETLIB = libsim.a
 
 all:	run libsim.a $(GDB_OBJ)
@@ -91,6 +91,7 @@ all:	run libsim.a $(GDB_OBJ)
 
 BASICS_H = \
 	config.h \
+	ppc-config.h \
 	words.h \
 	ppc-endian.h \
 	debug.h \
@@ -136,7 +137,8 @@ BUILT_SRC = \
 	idecode.h idecode.c \
 	semantics.h semantics.c \
 	spreg.h spreg.c \
-	config.h
+	config.h \
+	ppc-config.h
 
 LIB_SRC = \
 	psim.c \
@@ -201,7 +203,7 @@ bits.o: bits.c bits.h
 debug.o: debug.c $(BASICS_H)
 
 ppc-endian.o: ppc-endian.c ppc-endian.h \
-	config.h words.h sim_callbacks.h
+	config.h ppc-config.h words.h sim_callbacks.h
 
 system.o: system.c system.h $(CPU_H) $(IDECODE_H)
 
@@ -243,8 +245,8 @@ semantics.o: semantics.c semantics.h $(CPU_H) $(IDECODE_H)
 # Rules to create the built c source code files
 #
 
-config.h: $(CONFIG_FILE)
-	cp $(srcdir)/$(CONFIG_FILE) config.h
+ppc-config.h: $(CONFIG_FILE)
+	cp $(srcdir)/$(CONFIG_FILE) ppc-config.h
 
 
 tmp-gencode: gen ppc-instructions ppc-spr-table $(srcdir)/../../move-if-change
@@ -268,26 +270,31 @@ tmp-gencode: gen ppc-instructions ppc-spr-table $(srcdir)/../../move-if-change
 
 icache.h idecode.h idecode.c semantics.h semantics.c spreg.h spreg.c: tmp-gencode
 
-gen.o: gen.c config.h
+gen.o: gen.c config.h ppc-config.h
+	$(CC_FOR_BUILD) -c $(CFLAGS) $(HDEFINES) $(CSEARCH) $(CSWITCHES) $(srcdir)/gen.c
 
-gen: gen.o config.h $(LIBIBERTY_LIB) $(LIBS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o gen gen.o $(LIBIBERTY_LIB) $(LIBS)
+gen: gen.o config.h ppc-config.h $(LIBIBERTY_LIB) $(LIBS)
+	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o gen gen.o $(LIBIBERTY_LIB) $(LIBS)
 		
 #
 
 tags etags: TAGS
 
-TAGS: tmp-gencode config.h
+TAGS: tmp-gencode config.h ppc-config.h
 	etags $(srcdir)/*.h $(srcdir)/*.c $(BUILT_SRC)
 
-clean:
-	rm -f tmp-* *.[oas] core psim run gen
+clean mostlyclean:
+	rm -f tmp-* *.[oas] core psim run gen config.log
 
-distclean mostlyclean realclean: clean
-	rm -f TAGS $(BUILT_SRC) Makefile config.cache config.log config.status
+distclean realclean: clean
+	rm -f TAGS $(BUILT_SRC) Makefile config.cache config.status config.h stamp-h
 
-Makefile: Makefile.in config.status @frags@
-	$(SHELL) ./config.status
+Makefile: Makefile.in config.status
+	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status
+
+config.h: stamp-h ; @true
+stamp-h: config.in config.status
+	CONFIG_FILES= CONFIG_HEADERS=config.h:config.in $(SHELL) ./config.status
 
 config.status: configure
 	$(SHELL) ./config.status --recheck

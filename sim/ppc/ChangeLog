@@ -1,3 +1,27 @@
+	* configure.in: Call AC_CONFIG_HEADER.  Don't try to use
+	bfd/hosts/*.h file or bfd/config/*.mh file.  Call AC_PROG_CC and
+	AC_PROG_RANLIB.  Substitute in values for CFLAGS, HDEFINES, AR,
+	and CC_FOR_BUILD.  Call AC_CHECK_HEADERS for various header files.
+	Touch stamp.h if creating config.h.
+	* configure: Rebuild.
+	* config.in: New file, created by autoheader.
+	* Makefile.in (AR): Define as @AR@.
+	(CC): New variable, defined as @CC@.
+	(CFLAGS): Define as @CFLAGS@.
+	(CC_FOR_BUILD): New variable, defined as @CC_FOR_BUILD@.
+	(RANLIB): Define as @RANLIB@.
+	(HDEFINES, TDEFINES): New variables.
+	(@host_makefile_frag@): Remove.
+	(mostlyclean): Make the same as clean, not distclean.
+	(clean): Remove config.log.
+	(distclean): Remove config.h and stamp-h.
+	(Makefile): Don't depend upon @frags@.  Just rebuild Makefile when
+	invoking config.status.
+	(config.h, stamp-h): New targets.
+	(gen, gen.o): Build with CC_FOR_BUILD, not CC.
+	(ppc-config.h): Rename from old config.h build.
+	* (basics.h,gen.c,ppc-endian.c,psim.c): Include ppc-config.h.
+	
 Fri Sep  8 09:51:03 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure{,.in}: Don't include sysdep.h from bfd, since bfd no
