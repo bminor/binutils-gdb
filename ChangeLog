@@ -1,5 +1,7 @@
 Thu Apr  1 08:25:42 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* test-build.mk: Don't use /usr/unsupported/bin/as on AIX.
+
 	* configure.in: Build gas for mips-*-*.
 
 Wed Mar 31 21:20:58 1993  K. Richard Pixley  (rich@rtl.cygnus.com)

@@ -75,7 +75,7 @@ FLAGS_TO_PASS := "CC=$(CC)" $(FLAGS_TO_PASS)
 endif
 
 
-prefixes	= --prefix=$(release_root) --exec_prefix=$(release_root)/H-$(host)
+prefixes	= --prefix=$(release_root) --exec-prefix=$(release_root)/H-$(host)
 relbindir	= $(release_root)/H-$(host)/bin
 
 
@@ -431,16 +431,8 @@ CC_HOLE :=
 NUKEM := cc 
 endif
 
-### rs6000 as is busted.  We cache a patched version in unsupported.
-ifeq ($(host),rs6000-ibm-aix)
-AS_HOLE := as
-else
-AS_HOLE :=
-endif
-
 ### These things are also needed by a three-stage, but in this case, the GNU version of the tool is required.
 PARTIAL_HOLES := \
-	$(AS_HOLE) \
 	$(MAKE_HOLE) \
 	$(CC_HOLE) \
 	flex \
