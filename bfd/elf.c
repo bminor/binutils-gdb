@@ -1939,8 +1939,8 @@ _bfd_elf_init_reloc_shdr (abfd, rel_hdr, asect, use_rela_p)
     return false;
   sprintf (name, "%s%s", use_rela_p ? ".rela" : ".rel", asect->name);
   rel_hdr->sh_name =
-    (unsigned int) _bfd_stringtab_add (elf_shstrtab (abfd), name,
-				       true, false);
+    (unsigned int) _bfd_elf_strtab_add (elf_shstrtab (abfd), name,
+					false);
   if (rel_hdr->sh_name == (unsigned int) -1)
     return false;
   rel_hdr->sh_type = use_rela_p ? SHT_RELA : SHT_REL;
@@ -1977,9 +1977,8 @@ elf_fake_sections (abfd, asect, failedptrarg)
 
   this_hdr = &elf_section_data (asect)->this_hdr;
 
-  this_hdr->sh_name = (unsigned long) _bfd_stringtab_add (elf_shstrtab (abfd),
-							  asect->name,
-							  true, false);
+  this_hdr->sh_name = (unsigned long) _bfd_elf_strtab_add (elf_shstrtab (abfd),
+							   asect->name, false);
   if (this_hdr->sh_name == (unsigned long) -1)
     {
       *failedptr = true;
@@ -2200,38 +2199,51 @@ assign_section_numbers (abfd)
 {
   struct elf_obj_tdata *t = elf_tdata (abfd);
   asection *sec;
-  unsigned int section_number;
+  unsigned int section_number, secn;
   Elf_Internal_Shdr **i_shdrp;
   bfd_size_type amt;
 
   section_number = 1;
+
+  _bfd_elf_strtab_clear_all_refs (elf_shstrtab (abfd));
 
   for (sec = abfd->sections; sec; sec = sec->next)
     {
       struct bfd_elf_section_data *d = elf_section_data (sec);
 
       d->this_idx = section_number++;
+      _bfd_elf_strtab_addref (elf_shstrtab (abfd), d->this_hdr.sh_name);
       if ((sec->flags & SEC_RELOC) == 0)
 	d->rel_idx = 0;
       else
-	d->rel_idx = section_number++;
+	{
+	  d->rel_idx = section_number++;
+	  _bfd_elf_strtab_addref (elf_shstrtab (abfd), d->rel_hdr.sh_name);
+	}
 
       if (d->rel_hdr2)
-	d->rel_idx2 = section_number++;
+	{
+	  d->rel_idx2 = section_number++;
+	  _bfd_elf_strtab_addref (elf_shstrtab (abfd), d->rel_hdr2->sh_name);
+	}
       else
 	d->rel_idx2 = 0;
     }
 
   t->shstrtab_section = section_number++;
+  _bfd_elf_strtab_addref (elf_shstrtab (abfd), t->shstrtab_hdr.sh_name);
   elf_elfheader (abfd)->e_shstrndx = t->shstrtab_section;
-  t->shstrtab_hdr.sh_size = _bfd_stringtab_size (elf_shstrtab (abfd));
 
   if (bfd_get_symcount (abfd) > 0)
     {
       t->symtab_section = section_number++;
+      _bfd_elf_strtab_addref (elf_shstrtab (abfd), t->symtab_hdr.sh_name);
       t->strtab_section = section_number++;
+      _bfd_elf_strtab_addref (elf_shstrtab (abfd), t->strtab_hdr.sh_name);
     }
 
+  _bfd_elf_strtab_finalize (elf_shstrtab (abfd));
+  t->shstrtab_hdr.sh_size = _bfd_elf_strtab_size (elf_shstrtab (abfd));
   elf_elfheader (abfd)->e_shnum = section_number;
 
   /* Set up the list of section header pointers, in agreement with the
@@ -2367,6 +2379,10 @@ assign_section_numbers (abfd)
 	  d->this_hdr.sh_link = t->symtab_section;
 	}
     }
+
+  for (secn = 1; secn < section_number; ++secn)
+    i_shdrp[secn]->sh_name = _bfd_elf_strtab_offset (elf_shstrtab (abfd),
+						     i_shdrp[secn]->sh_name);
 
   return true;
 }
@@ -2629,7 +2645,7 @@ _bfd_elf_compute_section_file_positions (abfd, link_info)
   shstrtab_hdr->sh_type = SHT_STRTAB;
   shstrtab_hdr->sh_flags = 0;
   shstrtab_hdr->sh_addr = 0;
-  shstrtab_hdr->sh_size = _bfd_stringtab_size (elf_shstrtab (abfd));
+  shstrtab_hdr->sh_size = _bfd_elf_strtab_size (elf_shstrtab (abfd));
   shstrtab_hdr->sh_entsize = 0;
   shstrtab_hdr->sh_link = 0;
   shstrtab_hdr->sh_info = 0;
@@ -3620,13 +3636,13 @@ prep_headers (abfd)
   Elf_Internal_Phdr *i_phdrp = 0; /* Program header table, internal form */
   Elf_Internal_Shdr **i_shdrp;	/* Section header table, internal form */
   int count;
-  struct bfd_strtab_hash *shstrtab;
+  struct elf_strtab_hash *shstrtab;
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   i_ehdrp = elf_elfheader (abfd);
   i_shdrp = elf_elfsections (abfd);
 
-  shstrtab = _bfd_elf_stringtab_init ();
+  shstrtab = _bfd_elf_strtab_init ();
   if (shstrtab == NULL)
     return false;
 
@@ -3712,11 +3728,11 @@ prep_headers (abfd)
     }
 
   elf_tdata (abfd)->symtab_hdr.sh_name =
-    (unsigned int) _bfd_stringtab_add (shstrtab, ".symtab", true, false);
+    (unsigned int) _bfd_elf_strtab_add (shstrtab, ".symtab", false);
   elf_tdata (abfd)->strtab_hdr.sh_name =
-    (unsigned int) _bfd_stringtab_add (shstrtab, ".strtab", true, false);
+    (unsigned int) _bfd_elf_strtab_add (shstrtab, ".strtab", false);
   elf_tdata (abfd)->shstrtab_hdr.sh_name =
-    (unsigned int) _bfd_stringtab_add (shstrtab, ".shstrtab", true, false);
+    (unsigned int) _bfd_elf_strtab_add (shstrtab, ".shstrtab", false);
   if (elf_tdata (abfd)->symtab_hdr.sh_name == (unsigned int) -1
       || elf_tdata (abfd)->symtab_hdr.sh_name == (unsigned int) -1
       || elf_tdata (abfd)->shstrtab_hdr.sh_name == (unsigned int) -1)
@@ -3795,7 +3811,7 @@ _bfd_elf_write_object_contents (abfd)
 
   /* Write out the section header names.  */
   if (bfd_seek (abfd, elf_tdata (abfd)->shstrtab_hdr.sh_offset, SEEK_SET) != 0
-      || ! _bfd_stringtab_emit (abfd, elf_shstrtab (abfd)))
+      || ! _bfd_elf_strtab_emit (abfd, elf_shstrtab (abfd)))
     return false;
 
   if (bed->elf_backend_final_write_processing)
@@ -5549,7 +5565,7 @@ _bfd_elf_close_and_cleanup (abfd)
   if (bfd_get_format (abfd) == bfd_object)
     {
       if (elf_shstrtab (abfd) != NULL)
-	_bfd_stringtab_free (elf_shstrtab (abfd));
+	_bfd_elf_strtab_free (elf_shstrtab (abfd));
     }
 
   return _bfd_generic_close_and_cleanup (abfd);

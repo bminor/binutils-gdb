@@ -1840,7 +1840,7 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
 	    entry->isym.st_size = 0;
 	    if (*app_regs [reg].name != '\0')
 	      entry->isym.st_name
-		= _bfd_stringtab_add (dynstr, app_regs[reg].name, true, false);
+		= _bfd_elf_strtab_add (dynstr, app_regs[reg].name, false);
 	    else
 	      entry->isym.st_name = 0;
 	    entry->isym.st_other = 0;

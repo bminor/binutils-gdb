@@ -44,6 +44,8 @@ static boolean elf_merge_symbol
 	   boolean *, boolean *, boolean *, boolean));
 static boolean elf_export_symbol
   PARAMS ((struct elf_link_hash_entry *, PTR));
+static boolean elf_finalize_dynstr
+  PARAMS ((bfd *, struct bfd_link_info *));
 static boolean elf_fix_symbol_flags
   PARAMS ((struct elf_link_hash_entry *, struct elf_info_failed *));
 static boolean elf_adjust_dynamic_symbol
@@ -1294,13 +1296,12 @@ elf_link_add_object_symbols (abfd, info)
       if (add_needed)
 	{
 	  /* Add a DT_NEEDED entry for this dynamic object.  */
-	  oldsize = _bfd_stringtab_size (hash_table->dynstr);
-	  strindex = _bfd_stringtab_add (hash_table->dynstr, name,
-					 true, false);
+	  oldsize = _bfd_elf_strtab_size (hash_table->dynstr);
+	  strindex = _bfd_elf_strtab_add (hash_table->dynstr, name, false);
 	  if (strindex == (bfd_size_type) -1)
 	    goto error_return;
 
-	  if (oldsize == _bfd_stringtab_size (hash_table->dynstr))
+	  if (oldsize == _bfd_elf_strtab_size (hash_table->dynstr))
 	    {
 	      asection *sdyn;
 	      Elf_External_Dyn *dyncon, *dynconend;
@@ -1328,6 +1329,7 @@ elf_link_add_object_symbols (abfd, info)
 			free (buf);
 		      if (extversym != NULL)
 			free (extversym);
+		      _bfd_elf_strtab_delref (hash_table->dynstr, strindex);
 		      return true;
 		    }
 		}
@@ -1965,6 +1967,8 @@ elf_link_add_object_symbols (abfd, info)
 	      case STV_HIDDEN:
 		h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
 		(*bed->elf_backend_hide_symbol) (info, h);
+		_bfd_elf_strtab_delref (hash_table->dynstr,
+					h->dynstr_index);
 		break;
 	      }
 
@@ -1983,15 +1987,13 @@ elf_link_add_object_symbols (abfd, info)
 		 have to make sure there is a DT_NEEDED entry for it.  */
 
 	      dt_needed = false;
-	      oldsize = _bfd_stringtab_size (hash_table->dynstr);
-	      strindex = _bfd_stringtab_add (hash_table->dynstr,
-	      				     elf_dt_soname (abfd),
-					     true, false);
+	      oldsize = _bfd_elf_strtab_size (hash_table->dynstr);
+	      strindex = _bfd_elf_strtab_add (hash_table->dynstr,
+					      elf_dt_soname (abfd), false);
 	      if (strindex == (bfd_size_type) -1)
 		goto error_return;
 
-	      if (oldsize
-		  == _bfd_stringtab_size (hash_table->dynstr))
+	      if (oldsize == _bfd_elf_strtab_size (hash_table->dynstr))
 		{
 		  asection *sdyn;
 		  Elf_External_Dyn *dyncon, *dynconend;
@@ -2290,7 +2292,7 @@ elf_link_create_dynamic_sections (abfd, info)
   /* Create a strtab to hold the dynamic symbol names.  */
   if (elf_hash_table (info)->dynstr == NULL)
     {
-      elf_hash_table (info)->dynstr = elf_stringtab_init ();
+      elf_hash_table (info)->dynstr = _bfd_elf_strtab_init ();
       if (elf_hash_table (info)->dynstr == NULL)
 	return false;
     }
@@ -2390,7 +2392,7 @@ elf_link_record_local_dynamic_symbol (info, input_bfd, input_indx)
 {
   struct elf_link_local_dynamic_entry *entry;
   struct elf_link_hash_table *eht;
-  struct bfd_strtab_hash *dynstr;
+  struct elf_strtab_hash *dynstr;
   Elf_External_Sym esym;
   unsigned long dynstr_index;
   char *name;
@@ -2426,12 +2428,12 @@ elf_link_record_local_dynamic_symbol (info, input_bfd, input_indx)
   if (dynstr == NULL)
     {
       /* Create a strtab to hold the dynamic symbol names.  */
-      elf_hash_table (info)->dynstr = dynstr = _bfd_elf_stringtab_init ();
+      elf_hash_table (info)->dynstr = dynstr = _bfd_elf_strtab_init ();
       if (dynstr == NULL)
 	return false;
     }
 
-  dynstr_index = _bfd_stringtab_add (dynstr, name, true, false);
+  dynstr_index = _bfd_elf_strtab_add (dynstr, name, false);
   if (dynstr_index == (unsigned long) -1)
     return false;
   entry->isym.st_name = dynstr_index;
@@ -2949,8 +2951,8 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
       if (soname != NULL)
 	{
-	  soname_indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
-					    soname, true, true);
+	  soname_indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
+					     soname, true);
 	  if (soname_indx == (bfd_size_type) -1
 	      || ! elf_add_dynamic_entry (info, (bfd_vma) DT_SONAME,
 					  soname_indx))
@@ -2969,8 +2971,10 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	{
 	  bfd_size_type indx;
 
-	  indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr, rpath,
-				     true, true);
+	  indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr, rpath,
+				      true);
+	  if (info->new_dtags)
+	    _bfd_elf_strtab_addref (elf_hash_table (info)->dynstr, indx);
 	  if (indx == (bfd_size_type) -1
 	      || ! elf_add_dynamic_entry (info, (bfd_vma) DT_RPATH, indx)
 	      || (info->new_dtags
@@ -2983,8 +2987,8 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	{
 	  bfd_size_type indx;
 
-	  indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
-				     filter_shlib, true, true);
+	  indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
+				      filter_shlib, true);
 	  if (indx == (bfd_size_type) -1
 	      || ! elf_add_dynamic_entry (info, (bfd_vma) DT_FILTER, indx))
 	    return false;
@@ -2998,8 +3002,8 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	    {
 	      bfd_size_type indx;
 
-	      indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
-					 *p, true, true);
+	      indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
+					  *p, true);
 	      if (indx == (bfd_size_type) -1
 		  || ! elf_add_dynamic_entry (info, (bfd_vma) DT_AUXILIARY,
 					      indx))
@@ -3081,7 +3085,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	{
 	  bfd_size_type strsize;
 
-	  strsize = _bfd_stringtab_size (elf_hash_table (info)->dynstr);
+	  strsize = _bfd_elf_strtab_size (elf_hash_table (info)->dynstr);
 	  if (! elf_add_dynamic_entry (info, (bfd_vma) DT_HASH, (bfd_vma) 0)
 	      || ! elf_add_dynamic_entry (info, (bfd_vma) DT_STRTAB, (bfd_vma) 0)
 	      || ! elf_add_dynamic_entry (info, (bfd_vma) DT_SYMTAB, (bfd_vma) 0)
@@ -3164,6 +3168,8 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
 	  if (soname_indx != (bfd_size_type) -1)
 	    {
+	      _bfd_elf_strtab_addref (elf_hash_table (info)->dynstr,
+				      soname_indx);
 	      def.vd_hash = bfd_elf_hash (soname);
 	      defaux.vda_name = soname_indx;
 	    }
@@ -3174,8 +3180,8 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
 	      name = basename (output_bfd->filename);
 	      def.vd_hash = bfd_elf_hash (name);
-	      indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
-					    name, true, false);
+	      indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
+					  name, false);
 	      if (indx == (bfd_size_type) -1)
 		return false;
 	      defaux.vda_name = indx;
@@ -3234,6 +3240,8 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	      p += sizeof (Elf_External_Verdef);
 
 	      defaux.vda_name = h->dynstr_index;
+	      _bfd_elf_strtab_addref (elf_hash_table (info)->dynstr,
+				      h->dynstr_index);
 	      if (t->deps == NULL)
 		defaux.vda_next = 0;
 	      else
@@ -3253,7 +3261,11 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 		      defaux.vda_name = 0;
 		    }
 		  else
-		    defaux.vda_name = n->version_needed->name_indx;
+		    {
+		      defaux.vda_name = n->version_needed->name_indx;
+		      _bfd_elf_strtab_addref (elf_hash_table (info)->dynstr,
+					      defaux.vda_name);
+		    }
 		  if (n->next == NULL)
 		    defaux.vda_next = 0;
 		  else
@@ -3352,14 +3364,11 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
 		t->vn_version = VER_NEED_CURRENT;
 		t->vn_cnt = caux;
-		if (elf_dt_name (t->vn_bfd) != NULL)
-		  indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
-					     elf_dt_name (t->vn_bfd),
-					     true, false);
-		else
-		  indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
-					     basename (t->vn_bfd->filename),
-					     true, false);
+		indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
+					    elf_dt_name (t->vn_bfd) != NULL
+					    ? elf_dt_name (t->vn_bfd)
+					    : basename (t->vn_bfd->filename),
+					    false);
 		if (indx == (bfd_size_type) -1)
 		  return false;
 		t->vn_file = indx;
@@ -3377,8 +3386,8 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 		for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
 		  {
 		    a->vna_hash = bfd_elf_hash (a->vna_nodename);
-		    indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
-					       a->vna_nodename, true, false);
+		    indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
+						a->vna_nodename, false);
 		    if (indx == (bfd_size_type) -1)
 		      return false;
 		    a->vna_name = indx;
@@ -3482,7 +3491,10 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
       s = bfd_get_section_by_name (dynobj, ".dynstr");
       BFD_ASSERT (s != NULL);
-      s->_raw_size = _bfd_stringtab_size (elf_hash_table (info)->dynstr);
+
+      elf_finalize_dynstr (output_bfd, info);
+
+      s->_raw_size = _bfd_elf_strtab_size (elf_hash_table (info)->dynstr);
 
       for (dtagcount = 0; dtagcount <= info->spare_dynamic_tags; ++dtagcount)
 	if (! elf_add_dynamic_entry (info, (bfd_vma) DT_NULL, (bfd_vma) 0))
@@ -3492,6 +3504,150 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
   return true;
 }
 
+/* This function is used to adjust offsets into .dynstr for
+   dynamic symbols.  This is called via elf_link_hash_traverse.  */
+      
+static boolean elf_adjust_dynstr_offsets
+PARAMS ((struct elf_link_hash_entry *, PTR));
+        
+static boolean
+elf_adjust_dynstr_offsets (h, data)
+     struct elf_link_hash_entry *h;
+     PTR data;
+{
+  struct elf_strtab_hash *dynstr = (struct elf_strtab_hash *) data;
+
+  if (h->dynindx != -1)
+    h->dynstr_index = _bfd_elf_strtab_offset (dynstr, h->dynstr_index);
+  return true;
+}
+
+/* Assign string offsets in .dynstr, update all structures referencing
+   them.  */
+
+static boolean
+elf_finalize_dynstr (output_bfd, info)
+     bfd *output_bfd;
+     struct bfd_link_info *info;
+{
+  struct elf_link_local_dynamic_entry *entry;
+  struct elf_strtab_hash *dynstr = elf_hash_table (info)->dynstr;
+  bfd *dynobj = elf_hash_table (info)->dynobj;
+  asection *sdyn;
+  bfd_size_type size;
+  Elf_External_Dyn *dyncon, *dynconend;
+
+  _bfd_elf_strtab_finalize (dynstr);
+  size = _bfd_elf_strtab_size (dynstr);
+
+  /* Update all .dynamic entries referencing .dynstr strings.  */
+  sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+  BFD_ASSERT (sdyn != NULL);
+
+  dyncon = (Elf_External_Dyn *) sdyn->contents;
+  dynconend = (Elf_External_Dyn *) (sdyn->contents +
+				    sdyn->_raw_size);
+  for (; dyncon < dynconend; dyncon++)
+    {
+      Elf_Internal_Dyn dyn;
+
+      elf_swap_dyn_in (dynobj, dyncon, & dyn);
+      switch (dyn.d_tag)
+	{
+	case DT_STRSZ:
+	  dyn.d_un.d_val = size;
+	  elf_swap_dyn_out (dynobj, & dyn, dyncon);
+	  break;
+	case DT_NEEDED:
+	case DT_SONAME:
+	case DT_RPATH:
+	case DT_RUNPATH:
+	case DT_FILTER:
+	case DT_AUXILIARY:
+	  dyn.d_un.d_val = _bfd_elf_strtab_offset (dynstr, dyn.d_un.d_val);
+	  elf_swap_dyn_out (dynobj, & dyn, dyncon);
+	  break;
+	default:
+	  break;
+	}
+    }
+
+  /* Now update local dynamic symbols.  */
+  for (entry = elf_hash_table (info)->dynlocal; entry ; entry = entry->next)
+    entry->isym.st_name = _bfd_elf_strtab_offset (dynstr,
+						  entry->isym.st_name);
+
+  /* And the rest of dynamic symbols.  */
+  elf_link_hash_traverse (elf_hash_table (info),
+			  elf_adjust_dynstr_offsets, dynstr);
+
+  /* Adjust version definitions.  */
+  if (elf_tdata (output_bfd)->cverdefs)
+    {
+      asection *s;
+      bfd_byte *p;
+      bfd_size_type i;
+      Elf_Internal_Verdef def;
+      Elf_Internal_Verdaux defaux;
+                    
+      s = bfd_get_section_by_name (dynobj, ".gnu.version_d");
+      p = (bfd_byte *) s->contents;
+      do
+	{
+	  _bfd_elf_swap_verdef_in (output_bfd, (Elf_External_Verdef *) p,
+				   &def);
+	  p += sizeof (Elf_External_Verdef);
+	  for (i = 0; i < def.vd_cnt; ++i)
+	    {
+	      _bfd_elf_swap_verdaux_in (output_bfd,
+					(Elf_External_Verdaux *) p, &defaux);
+	      defaux.vda_name = _bfd_elf_strtab_offset (dynstr,
+							defaux.vda_name);
+	      _bfd_elf_swap_verdaux_out (output_bfd,
+					 &defaux, (Elf_External_Verdaux *) p);
+	      p += sizeof (Elf_External_Verdaux);
+	    }
+	}
+      while (def.vd_next);
+    }
+
+  /* Adjust version references.  */
+  if (elf_tdata (output_bfd)->verref)
+    {
+      asection *s;
+      bfd_byte *p;
+      bfd_size_type i;
+      Elf_Internal_Verneed need;
+      Elf_Internal_Vernaux needaux;
+                    
+      s = bfd_get_section_by_name (dynobj, ".gnu.version_r");
+      p = (bfd_byte *) s->contents;
+      do
+	{
+	  _bfd_elf_swap_verneed_in (output_bfd, (Elf_External_Verneed *) p,
+				    &need);
+	  need.vn_file = _bfd_elf_strtab_offset (dynstr, need.vn_file);
+	  _bfd_elf_swap_verneed_out (output_bfd, &need,
+				     (Elf_External_Verneed *) p);
+	  p += sizeof (Elf_External_Verneed);
+	  for (i = 0; i < need.vn_cnt; ++i)
+	    {
+	      _bfd_elf_swap_vernaux_in (output_bfd,
+					(Elf_External_Vernaux *) p, &needaux);
+	      needaux.vna_name = _bfd_elf_strtab_offset (dynstr,
+							 needaux.vna_name);
+	      _bfd_elf_swap_vernaux_out (output_bfd,
+					 &needaux,
+					 (Elf_External_Vernaux *) p);
+	      p += sizeof (Elf_External_Vernaux);
+	    }
+	}
+      while (need.vn_next);
+    }
+
+  return true;
+}
+
 /* Fix up the flags for a symbol.  This handles various cases which
    can only be fixed after all the input files are seen.  This is
    currently called by both adjust_dynamic_symbol and
@@ -3591,7 +3747,11 @@ elf_fix_symbol_flags (h, eif)
       bed = get_elf_backend_data (elf_hash_table (eif->info)->dynobj);
       if (ELF_ST_VISIBILITY (h->other) == STV_INTERNAL
 	  || ELF_ST_VISIBILITY (h->other) == STV_HIDDEN)
-	h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
+	{
+	  h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
+	  _bfd_elf_strtab_delref (elf_hash_table (eif->info)->dynstr,
+				  h->dynstr_index);
+	}
       (*bed->elf_backend_hide_symbol) (eif->info, h);
     }
 
@@ -3976,9 +4136,8 @@ elf_link_assign_sym_version (h, data)
 			    {
 			      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
 			      (*bed->elf_backend_hide_symbol) (info, h);
-			      /* FIXME: The name of the symbol has
-				 already been recorded in the dynamic
-				 string table section.  */
+			      _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
+						      h->dynstr_index);
 			    }
 
 			  break;
@@ -4089,9 +4248,8 @@ elf_link_assign_sym_version (h, data)
 			{
 			  h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
 			  (*bed->elf_backend_hide_symbol) (info, h);
-			  /* FIXME: The name of the symbol has already
-			     been recorded in the dynamic string table
-			     section.  */
+			  _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
+						  h->dynstr_index);
 			}
 		      break;
 		    }
@@ -4111,8 +4269,8 @@ elf_link_assign_sym_version (h, data)
 	    {
 	      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
 	      (*bed->elf_backend_hide_symbol) (info, h);
-	      /* FIXME: The name of the symbol has already been
-		 recorded in the dynamic string table section.  */
+	      _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
+				      h->dynstr_index);
 	    }
 	}
     }
@@ -5308,8 +5466,8 @@ elf_bfd_final_link (abfd, info)
                  stringtab.  */
 	      off = elf_section_data (o->output_section)->this_hdr.sh_offset;
 	      if (bfd_seek (abfd, off, SEEK_SET) != 0
-		  || ! _bfd_stringtab_emit (abfd,
-					    elf_hash_table (info)->dynstr))
+		  || ! _bfd_elf_strtab_emit (abfd,
+					     elf_hash_table (info)->dynstr))
 		goto error_return;
 	    }
 	}

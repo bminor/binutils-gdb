@@ -215,6 +215,7 @@ BFD32_BACKENDS = \
 	elf32-v850.lo \
 	elf32.lo \
 	elflink.lo \
+	elf-strtab.lo \
 	epoc-pe-arm.lo \
 	epoc-pei-arm.lo \
 	hp300bsd.lo \
@@ -355,6 +356,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-v850.c \
 	elf32.c \
 	elflink.c \
+	elf-strtab.c \
 	epoc-pe-arm.c \
 	epoc-pei-arm.c \
 	hp300bsd.c \
@@ -1129,6 +1131,7 @@ elf32.lo: elf32.c elfcode.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
 elflink.lo: elflink.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h
+elf-strtab.lo: elf-strtab.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 epoc-pe-arm.lo: epoc-pe-arm.c pe-arm.c $(INCDIR)/filenames.h \
   coff-arm.c $(INCDIR)/coff/arm.h $(INCDIR)/coff/external.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \

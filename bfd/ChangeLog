@@ -1,3 +1,55 @@
+2001-11-07  Jakub Jelinek  <jakub@redhat.com>
+
+	* Makefile.am (BFD32_BACKENDS): Add elf-strtab.lo.
+	(BFD32_BACKENDS_CFILES): Add elf-strtab.c.
+	(elf-strtab.lo): Add rule.
+	* Makefile.in: Rebuilt.
+	* configure.in (elf): Add elf-strtab.lo.
+	* configure: Rebuilt.
+	* elf-bfd.h (elf_strtab_hash): Forward declare.
+	(struct elf_link_hash_table): Change dynstr type to
+	struct elf_strtab_hash *.
+	(struct elf_obj_tdata): Change strtab_ptr type to
+	struct elf_strtab_hash *.
+	(_bfd_elf_strtab_init, _bfd_elf_strtab_free, _bfd_elf_strtab_add,
+	_bfd_elf_strtab_addref, _bfd_elf_strtab_delref,
+	_bfd_elf_strtab_clear_all_refs, _bfd_elf_strtab_size,
+	_bfd_elf_strtab_offset, _bfd_elf_strtab_emit,
+	_bfd_elf_strtab_finalize): New prototypes.
+	* elf-strtab.c: New file.
+	* elflink.h (elf_link_add_object_symbols): Use _bfd_elf_strtab_add
+	and _bfd_elf_strtab_size instead of _bfd_stringtab calls.
+	Call _bfd_elf_strtab_delref if DT_NEEDED entry is not needed or
+	when forcing dynamic symbol to local.
+	(elf_link_create_dynamic_sections): Call
+	_bfd_elf_strtab_init instead of elf_stringtab_init.
+	(elf_link_record_local_dynamic_symbol): Likewise, change
+	dynstr type.  Use _bfd_elf_strtab functions instead of
+	_bfd_stringtab calls.
+	(size_dynamic_sections): Use _bfd_elf_strtab functions instead of
+	_bfd_stringtab calls.  For DT_RUNPATH and Verdaux vda_name fields,
+	call _bfd_elf_strtab_addref.  Call elf_finalize_dynstr.
+	(elf_adjust_dynstr_offsets, elf_finalize_dynstr): New functions.
+	(elf_fix_symbol_flags): Call _bfd_elf_strtab_delref when forcing
+	dynamic symbol to local.
+	(elf_link_assign_sym_version): Likewise.
+	(elf_bfd_final_link): Call _bfd_elf_strtab_emit instead of
+	_bfd_stringtab_emit.
+	* elflink.c (_bfd_elf_link_record_dynamic_symbol): Change dynstr
+	type.  Call _bfd_elf_strtab functions instead of
+	_bfd_stringtab functions.
+	* elf64-sparc.c (sparc64_elf_size_dynamic_sections): Likewise.
+	* elf.c (_bfd_elf_init_reloc_shdr): Likewise.
+	(elf_fake_sections): Likewise.
+	(assign_section_numbers): Call _bfd_elf_strtab_clear_all_refs
+	on shstrtab hash table, call _bfd_elf_strtab_addref on each section
+	name in the output.  Call _bfd_elf_strtab_finalize and
+	use _bfd_elf_strtab_offset to finalize sh_name section header fields.
+	(_bfd_elf_compute_section_file_positions): Use _bfd_elf_strtab_size
+	instead of _bfd_stringtab_size.
+	(prep_headers): Change shstrtab type.
+	Use _bfd_elf_strtab calls instead of _bfd_stringtab calls.
+
 2001-11-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.h (elf_link_input_bfd <removed linkonce relocs>): Fix

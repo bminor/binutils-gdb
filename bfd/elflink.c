@@ -230,7 +230,7 @@ _bfd_elf_link_record_dynamic_symbol (info, h)
 {
   if (h->dynindx == -1)
     {
-      struct bfd_strtab_hash *dynstr;
+      struct elf_strtab_hash *dynstr;
       char *p, *alc;
       const char *name;
       boolean copy;
@@ -262,7 +262,7 @@ _bfd_elf_link_record_dynamic_symbol (info, h)
       if (dynstr == NULL)
 	{
 	  /* Create a strtab to hold the dynamic symbol names.  */
-	  elf_hash_table (info)->dynstr = dynstr = _bfd_elf_stringtab_init ();
+	  elf_hash_table (info)->dynstr = dynstr = _bfd_elf_strtab_init ();
 	  if (dynstr == NULL)
 	    return false;
 	}
@@ -287,7 +287,7 @@ _bfd_elf_link_record_dynamic_symbol (info, h)
 	  copy = true;
 	}
 
-      indx = _bfd_stringtab_add (dynstr, name, true, copy);
+      indx = _bfd_elf_strtab_add (dynstr, name, copy);
 
       if (alc != NULL)
 	free (alc);

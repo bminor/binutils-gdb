@@ -79,6 +79,8 @@ typedef struct
 
 } elf_symbol_type;
 
+struct elf_strtab_hash;
+
 /* ELF linker hash table entries.  */
 
 struct elf_link_hash_entry
@@ -248,7 +250,7 @@ struct elf_link_hash_table
 
   /* The string table of dynamic symbols, which becomes the .dynstr
      section.  */
-  struct bfd_strtab_hash *dynstr;
+  struct elf_strtab_hash *dynstr;
 
   /* The number of buckets in the hash table in the .hash section.
      This is based on the number of dynamic symbols.  */
@@ -891,7 +893,7 @@ struct elf_obj_tdata
   Elf_Internal_Shdr **elf_sect_ptr;
   Elf_Internal_Phdr *phdr;
   struct elf_segment_map *segment_map;
-  struct bfd_strtab_hash *strtab_ptr;
+  struct elf_strtab_hash *strtab_ptr;
   int num_locals;
   int num_globals;
   int num_section_syms;
@@ -1202,6 +1204,28 @@ extern boolean _bfd_elf_create_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 extern struct bfd_strtab_hash *_bfd_elf_stringtab_init
   PARAMS ((void));
+
+extern struct elf_strtab_hash * _bfd_elf_strtab_init
+  PARAMS ((void));
+extern void _bfd_elf_strtab_free
+  PARAMS ((struct elf_strtab_hash *));
+extern bfd_size_type _bfd_elf_strtab_add
+  PARAMS ((struct elf_strtab_hash *, const char *, boolean));
+extern void _bfd_elf_strtab_addref
+  PARAMS ((struct elf_strtab_hash *, bfd_size_type));
+extern void _bfd_elf_strtab_delref
+  PARAMS ((struct elf_strtab_hash *, bfd_size_type));
+extern void _bfd_elf_strtab_clear_all_refs
+  PARAMS ((struct elf_strtab_hash *));
+extern bfd_size_type _bfd_elf_strtab_size
+  PARAMS ((struct elf_strtab_hash *));
+extern bfd_size_type _bfd_elf_strtab_offset
+  PARAMS ((struct elf_strtab_hash *, bfd_size_type));
+extern boolean _bfd_elf_strtab_emit
+  PARAMS ((bfd *, struct elf_strtab_hash *));
+extern void _bfd_elf_strtab_finalize
+  PARAMS ((struct elf_strtab_hash *));
+
 extern boolean _bfd_elf_link_record_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 extern long _bfd_elf_link_lookup_local_dynindx
