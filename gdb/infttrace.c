@@ -4523,7 +4523,15 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
 	 pending signal will be passed to the inferior.  interrupt.exp
 	 in the testsuite does this precise thing and fails due to the
 	 unwanted signal delivery to the inferior.  */
-      if (resume_all_threads)
+      /* drow/2002-12-05: However, note that we must use TT_PROC_CONTINUE
+	 if we are tracing a vfork.  */
+      if (vfork_in_flight)
+	{
+	  call_ttrace (TT_PROC_CONTINUE, tid, TT_NIL, TT_NIL, TT_NIL);
+	  clear_all_handled ();
+	  clear_all_stepping_mode ();
+	}
+      else if (resume_all_threads)
 	{
 #ifdef THREAD_DEBUG
 	  if (debug_on)

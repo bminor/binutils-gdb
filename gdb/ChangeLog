@@ -1,4 +1,19 @@
-2002-12-06  Daniel Jacobowitz  <drow@mvista.com>
+2002-12-10  Daniel Jacobowitz  <drow@mvista.com>
+
+	* hppah-nat.c (saved_child_execd_pathname, saved_vfork_state): New.
+	(child_post_follow_vfork): Cancel pending exec event if we follow
+	the parent.
+	(child_wait): Only return TARGET_WAITKIND_VFORKED when all necessary
+	events have been processed.  Return a fake TARGET_WAITKIND_EXECD
+	event at the following wait call if necessary.
+	* infrun.c (follow_vfork): Don't follow_exec here.
+	(handle_inferior_event): Add comment to TARGET_WAITKIND_EXECD
+	case about HP/UX 10.20.  Remove code pushed down to
+	hppah-nat.c:child_wait.
+	* infttrace.c (child_resume): Use TT_PROC_CONTINUE if
+	vfork_in_flight is set.
+
+2002-12-10  Daniel Jacobowitz  <drow@mvista.com>
 
 	* hppah-nat.c (child_wait): Return TARGET_WAITKIND_IGNORE
 	for the parent's fork event.

@@ -384,6 +384,14 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   return len;
 }
 
+char *saved_child_execd_pathname = NULL;
+enum {
+  STATE_NONE,
+  STATE_GOT_CHILD,
+  STATE_GOT_EXEC,
+  STATE_GOT_PARENT,
+  STATE_FAKE_EXEC
+} saved_vfork_state = STATE_NONE;
 
 void
 child_post_follow_vfork (int parent_pid, int followed_parent, int child_pid,
@@ -409,6 +417,13 @@ child_post_follow_vfork (int parent_pid, int followed_parent, int child_pid,
     {
       reattach_breakpoints (parent_pid);
     }
+
+  /* If we followed the parent, don't try to follow the child's exec.  */
+  if (saved_vfork_state != STATE_GOT_PARENT && saved_vfork_state != STATE_FAKE_EXEC)
+    fprintf_unfiltered (gdb_stdout, "hppa: post follow vfork: confused state\n");
+
+  if (followed_parent || saved_vfork_state == STATE_GOT_PARENT)
+    saved_vfork_state = STATE_NONE;
 
   /* Are we a debugger that followed the child of a vfork?  If so,
      then recall that we don't actually acquire control of the child
@@ -466,7 +481,6 @@ hppa_tid_to_str (ptid_t ptid)
 int not_same_real_pid = 1;
 /*## */
 
-
 /* Wait for child to do something.  Return pid of child, or -1 in case
    of error; store status through argument pointer OURSTATUS.  */
 
@@ -481,6 +495,14 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   int syscall_id;
   enum target_waitkind kind;
   int pid;
+
+  if (saved_vfork_state == STATE_FAKE_EXEC)
+    {
+      saved_vfork_state = STATE_NONE;
+      ourstatus->kind = TARGET_WAITKIND_EXECD;
+      ourstatus->value.execd_pathname = saved_child_execd_pathname;
+      return inferior_ptid;
+    }
 
   do
     {
@@ -543,17 +565,73 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	    }
 	}
 
-      if (hpux_has_vforked (pid, &related_pid)
-	  && ((pid == PIDGET (inferior_ptid))
-	      || (related_pid == PIDGET (inferior_ptid))))
+      if (hpux_has_vforked (pid, &related_pid))
 	{
-	  ourstatus->kind = TARGET_WAITKIND_VFORKED;
-	  ourstatus->value.related_pid = related_pid;
-	  return pid_to_ptid (pid);
+	  if (pid == PIDGET (inferior_ptid))
+	    {
+	      if (saved_vfork_state == STATE_GOT_CHILD)
+		saved_vfork_state = STATE_GOT_PARENT;
+	      else if (saved_vfork_state == STATE_GOT_EXEC)
+		saved_vfork_state = STATE_FAKE_EXEC;
+	      else
+		fprintf_unfiltered (gdb_stdout,
+				    "hppah: parent vfork: confused\n");
+	    }
+	  else if (related_pid == PIDGET (inferior_ptid))
+	    {
+	      if (saved_vfork_state == STATE_NONE)
+		saved_vfork_state = STATE_GOT_CHILD;
+	      else
+		fprintf_unfiltered (gdb_stdout,
+				    "hppah: child vfork: confused\n");
+	    }
+	  else
+	    fprintf_unfiltered (gdb_stdout,
+				"hppah: unknown vfork: confused\n");
+
+	  if (saved_vfork_state == STATE_GOT_CHILD)
+	    {
+	      child_post_startup_inferior (pid_to_ptid (pid));
+	      ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+	      return pid_to_ptid (pid);
+	    }
+	  else
+	    {
+	      ourstatus->kind = TARGET_WAITKIND_VFORKED;
+	      ourstatus->value.related_pid = related_pid;
+	      return pid_to_ptid (pid);
+	    }
 	}
 
       if (hpux_has_execd (pid, &execd_pathname))
 	{
+	  /* On HP-UX, events associated with a vforking inferior come in
+	     threes: a vfork event for the child (always first), followed
+	     a vfork event for the parent and an exec event for the child.
+	     The latter two can come in either order.
+
+	     If we get the parent vfork event first, life's good: We follow
+	     either the parent or child, and then the child's exec event is
+	     a "don't care".
+
+	     But if we get the child's exec event first, then we delay
+	     responding to it until we handle the parent's vfork.  Because,
+	     otherwise we can't satisfy a "catch vfork".  */
+	  if (saved_vfork_state == STATE_GOT_CHILD)
+	    {
+	      saved_child_execd_pathname = execd_pathname;
+	      saved_vfork_state = STATE_GOT_EXEC;
+
+	      /* On HP/UX with ptrace, the child must be resumed before
+		 the parent vfork event is delivered.  A single-step
+		 suffices.  */
+	      if (RESUME_EXECD_VFORKING_CHILD_TO_GET_PARENT_VFORK ())
+		target_resume (pid_to_ptid (pid), 1, TARGET_SIGNAL_0);
+
+	      ourstatus->kind = TARGET_WAITKIND_IGNORE;
+	      return inferior_ptid;
+	    }
+	  
 	  /* Are we ignoring initial exec events?  (This is likely because
 	     we're in the process of starting up the inferior, and another
 	     (older) mechanism handles those.)  If so, we'll report this

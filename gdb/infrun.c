@@ -534,16 +534,6 @@ static void
 follow_vfork (int parent_pid, int child_pid)
 {
   follow_inferior_fork (parent_pid, child_pid, 0, 1);
-
-  /* Did we follow the child?  Had it exec'd before we saw the parent vfork? */
-  if (pending_follow.fork_event.saw_child_exec
-      && (PIDGET (inferior_ptid) == child_pid))
-    {
-      pending_follow.fork_event.saw_child_exec = 0;
-      pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
-      follow_exec (PIDGET (inferior_ptid), pending_follow.execd_pathname);
-      xfree (pending_follow.execd_pathname);
-    }
 }
 
 /* EXECD_PATHNAME is assumed to be non-NULL. */
@@ -1555,6 +1545,9 @@ handle_inferior_event (struct execution_control_state *ecs)
     case TARGET_WAITKIND_EXECD:
       stop_signal = TARGET_SIGNAL_TRAP;
 
+      /* NOTE drow/2002-12-05: This code should be pushed down into the
+	 target_wait function.  Until then following vfork on HP/UX 10.20
+	 is probably broken by this.  Of course, it's broken anyway.  */
       /* Is this a target which reports multiple exec events per actual
          call to exec()?  (HP-UX using ptrace does, for example.)  If so,
          ignore all but the last one.  Just resume the exec'r, and wait
@@ -1575,36 +1568,6 @@ handle_inferior_event (struct execution_control_state *ecs)
       pending_follow.execd_pathname =
 	savestring (ecs->ws.value.execd_pathname,
 		    strlen (ecs->ws.value.execd_pathname));
-
-      /* Did inferior_ptid exec, or did a (possibly not-yet-followed)
-         child of a vfork exec?
-
-         ??rehrauer: This is unabashedly an HP-UX specific thing.  On
-         HP-UX, events associated with a vforking inferior come in
-         threes: a vfork event for the child (always first), followed
-         a vfork event for the parent and an exec event for the child.
-         The latter two can come in either order.
-
-         If we get the parent vfork event first, life's good: We follow
-         either the parent or child, and then the child's exec event is
-         a "don't care".
-
-         But if we get the child's exec event first, then we delay
-         responding to it until we handle the parent's vfork.  Because,
-         otherwise we can't satisfy a "catch vfork". */
-      if (pending_follow.kind == TARGET_WAITKIND_VFORKED)
-	{
-	  pending_follow.fork_event.saw_child_exec = 1;
-
-	  /* On some targets, the child must be resumed before
-	     the parent vfork event is delivered.  A single-step
-	     suffices. */
-	  if (RESUME_EXECD_VFORKING_CHILD_TO_GET_PARENT_VFORK ())
-	    target_resume (ecs->ptid, 1, TARGET_SIGNAL_0);
-	  /* We expect the parent vfork event to be available now. */
-	  prepare_to_wait (ecs);
-	  return;
-	}
 
       /* This causes the eventpoints and symbol table to be reset.  Must
          do this now, before trying to determine whether to stop. */
