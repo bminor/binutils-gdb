@@ -52,3 +52,17 @@
 #define MD_APPLY_FIX3
 
 #define TC_HANDLES_FX_DONE
+
+/* Called after parsing a file.  */
+#define md_after_pass_hook() dvp_parse_done ()
+
+/* Default section names. */
+#define TEXT_SECTION_NAME	".vutext"
+#define DATA_SECTION_NAME	".vudata"
+#define BSS_SECTION_NAME	".vubss"
+
+#define ELF_TC_SPECIAL_SECTIONS \
+  { ".vubss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE		}, \
+  { ".vudata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE		}, \
+  { ".vutext",	SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR	},
+
