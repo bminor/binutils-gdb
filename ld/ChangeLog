@@ -1,3 +1,8 @@
+2001-03-27  Matthew Wilcox  <willy@ldl.fc.hp.com>
+
+	* emulparams/hppalinux.sh (MAXPAGESIZE): Set to 0x4000.
+	(TEXT_START_ADDR, TARGET_PAGE_SIZE): Ditto.
+
 2001-03-26  Andreas Jaeger  <aj@suse.de>
 
 	* ld.texinfo (Overview): Fix syntax in texi code.
