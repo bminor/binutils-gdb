@@ -1914,7 +1914,6 @@ open_input_bfds (s, force)
 	  if (s->input_statement.real)
 	    {
 	      lang_statement_list_type add;
-	      bfd_error_handler_type pfn;
 
 	      s->input_statement.target = current_target;
 
@@ -1931,14 +1930,7 @@ open_input_bfds (s, force)
 
 	      lang_list_init (&add);
 
-	      /* We need to know if an error occurs whilst loading the
-		 symbols, since this means that a valid executable can
-		 not be produced.  */
-	      pfn = bfd_set_error_handler (record_bfd_errors);
-
 	      load_symbols (&s->input_statement, &add);
-
-	      bfd_set_error_handler (pfn);
 
 	      if (add.head != NULL)
 		{

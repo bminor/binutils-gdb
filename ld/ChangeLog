@@ -1,3 +1,8 @@
+2001-05-31  H.J. Lu  <hjl@gnu.org>
+
+	* ldlang.c (open_input_bfds): Don't change the bfd error
+	handler whilst loading symbols.
+
 2001-05-28  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* configure.tgt: Remove i370-mvs architecture, it is not currently
@@ -78,8 +83,6 @@
 
 	* emulparams/aixppc64.sh : New file for xcoff64 support
 	
-2000-01-18  H.J. Lu  <hjl@gnu.org>
-
 2001-05-23  Alexandre Oliva  <aoliva@redhat.com>
 
 	* emultempl/elf32.em (ELF_INTERPRETER_SET_DEFAULT): Use this new
