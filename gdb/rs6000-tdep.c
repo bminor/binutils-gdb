@@ -22,6 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "symtab.h"
 #include "target.h"
+#include "gdbcore.h"
 
 #include "xcoffsolib.h"
 
@@ -49,8 +50,10 @@ int one_stepped;
 /* Breakpoint shadows for the single step instructions will be kept here. */
 
 static struct sstep_breaks {
-	int address;
-	int data;
+  /* Address, or 0 if this is not in use.  */
+  CORE_ADDR address;
+  /* Shadow contents.  */
+  char data[4];
 } stepBreaks[2];
 
 /* Static function prototypes */
@@ -124,15 +127,15 @@ single_step (signal)
 #define	INSNLEN(OPCODE)	 4
 
   static char breakp[] = BREAKPOINT;
-  int ii, insn, ret, loc;
-  int breaks[2], opcode;
+  int ii, insn;
+  CORE_ADDR loc;
+  CORE_ADDR breaks[2];
+  int opcode;
 
   if (!one_stepped) {
     loc = read_pc ();
 
-    ret = read_memory (loc, &insn, sizeof (int));
-    if (ret)
-      printf ("Error in single_step()!!\n");
+    read_memory (loc, &insn, 4);
 
     breaks[0] = loc + INSNLEN(insn);
     opcode = insn >> 26;
@@ -142,7 +145,7 @@ single_step (signal)
     if (breaks[1] == breaks[0])
       breaks[1] = -1;
 
-    stepBreaks[1].address = -1;
+    stepBreaks[1].address = 0;
 
     for (ii=0; ii < 2; ++ii) {
 
@@ -150,9 +153,9 @@ single_step (signal)
       if ( breaks[ii] == -1)
         continue;
 
-      read_memory (breaks[ii], &(stepBreaks[ii].data), sizeof(int));
+      read_memory (breaks[ii], stepBreaks[ii].data, 4);
 
-      ret = write_memory (breaks[ii], breakp, sizeof(int));
+      write_memory (breaks[ii], breakp, 4);
       stepBreaks[ii].address = breaks[ii];
     }  
 
@@ -161,13 +164,14 @@ single_step (signal)
 
     /* remove step breakpoints. */
     for (ii=0; ii < 2; ++ii)
-      if (stepBreaks[ii].address != -1)
+      if (stepBreaks[ii].address != 0)
         write_memory 
-           (stepBreaks[ii].address, &(stepBreaks[ii].data), sizeof(int));
+           (stepBreaks[ii].address, stepBreaks[ii].data, 4);
 
     one_stepped = 0;
   }
   errno = 0;			/* FIXME, don't ignore errors! */
+			/* What errors?  {read,write}_memory call error().  */
 }
 
 
