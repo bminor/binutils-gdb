@@ -102,6 +102,7 @@ news.sh
 ns32knbsd.sh
 pc532machaout.sh
 ppcnw.sh
+ppcpe.sh
 riscix.sh
 sa29200.sh
 sh.sh
