@@ -1,5 +1,8 @@
 Tue Oct 25 14:44:33 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* config/tc-mips.c (macro): Ensure that mips2 case of M_LI_DD in
+	.rdata does not become a variant frag.
+
 	* config/tc-mips.c (mips_cpu): Initialize to -1.
 	(md_begin): Don't mips_cpu if it was already set.
 	(md_parse_option): For -mipsN, don't set mips_cpu if it was

@@ -3166,6 +3166,12 @@ macro (ip)
 	    {
 	      macro_build ((char *) NULL, &icnt, &offset_expr, "ldc1",
 			   "T,o(b)", treg, (int) BFD_RELOC_LO16, AT);
+
+	      /* To avoid confusion in tc_gen_reloc, we must ensure
+		 that this does not become a variant frag.  */
+	      frag_wane (frag_now);
+	      frag_new (0);
+
 	      break;
 	    }
 	  breg = AT;
