@@ -1,5 +1,7 @@
 Fri Jul  2 09:08:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.t17/{interrupt.{c,exp},Makefile.in}: New test for solaris bug.
+
 	* gdb.t06/twice.exp, Makefile.in: Just use an include of twice.c
 	rather than actually putting it through cpp twice.
 
