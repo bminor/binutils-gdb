@@ -1,5 +1,11 @@
 Wed Jul 21 11:37:30 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* mipsread.c (parse_symbol): when stTypedef and friends occur within
+	an stBlock, skip over the fields of the inner one.
+
+	* mips-tdep.c (init_extra_frame_info): If in lenient prologue, call
+	heuristic_proc_desc rather than just assuming registers not saved.
+
 	* Makefile.in (regex.o): Add dependency.
 
 	* hppa{b,h}-nat.c: Warning, not error, if can't access registers.
