@@ -1,3 +1,8 @@
+Thu Oct  8 23:19:25 1992  John Gilmore  (gnu@cygnus.com)
+
+	* infcmd.c (path_info):  Avoid 250-char limit on printf_filtered,
+	by using puts_filtered instead.
+
 Fri Oct  9 00:28:25 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* remote-nindy.c (nindy_load): Replacement version from Steve
