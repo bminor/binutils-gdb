@@ -291,6 +291,7 @@ extern const char *xtensa_target_format (void);
 extern void xtensa_init_fix_data (struct fix *);
 extern void xtensa_frag_init (fragS *);
 extern int xtensa_force_relocation (struct fix *);
+extern int xtensa_validate_fix_sub (struct fix *);
 extern void xtensa_frob_label (struct symbol *);
 extern void xtensa_end (void);
 extern void xtensa_post_relax_hook (void);
@@ -314,6 +315,9 @@ extern char *xtensa_section_rename (char *);
 #define TC_FRAG_TYPE			struct xtensa_frag_type
 #define TC_FRAG_INIT(frag)		xtensa_frag_init (frag)
 #define TC_FORCE_RELOCATION(fix)	xtensa_force_relocation (fix)
+#define TC_FORCE_RELOCATION_SUB_SAME(fix, seg) \
+  (! SEG_NORMAL (seg) || xtensa_force_relocation (fix))
+#define	TC_VALIDATE_FIX_SUB(fix)	xtensa_validate_fix_sub (fix)
 #define NO_PSEUDO_DOT			xtensa_check_inside_bundle ()
 #define tc_canonicalize_symbol_name(s)	xtensa_section_rename (s)
 #define tc_canonicalize_section_name(s)	xtensa_section_rename (s)
