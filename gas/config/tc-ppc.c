@@ -58,6 +58,7 @@ static void ppc_toc PARAMS ((int));
 #ifdef OBJ_ELF
 static bfd_reloc_code_real_type ppc_elf_suffix PARAMS ((char **));
 static void ppc_elf_cons PARAMS ((int));
+static void ppc_elf_validate_fix (fixS *, segT);
 #endif
 
 /* Generic assembler global variables which must be defined by all
@@ -115,7 +116,6 @@ const pseudo_typeS md_pseudo_table[] =
   { "long",	ppc_elf_cons,	4 },
   { "word",	ppc_elf_cons,	2 },
   { "short",	ppc_elf_cons,	2 },
-  { "byte",	ppc_elf_cons,	1 },
 #endif
 
   /* This pseudo-op is used even when not generating XCOFF output.  */
@@ -142,6 +142,12 @@ static struct hash_control *ppc_hash;
 
 /* Macro hash table.  */
 static struct hash_control *ppc_macro_hash;
+
+#ifdef OBJ_ELF
+/* Whether to warn about non PC relative relocations that aren't
+   in the .got2 section. */
+static int mrelocatable = 0;
+#endif
 
 #ifdef OBJ_COFF
 
@@ -255,6 +261,11 @@ md_parse_option (c, arg)
       /* -many means to assemble for any architecture (PWR/PWRX/PPC).  */
       else if (strcmp (arg, "any") == 0)
 	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_POWER2 | PPC_OPCODE_PPC;
+#ifdef OBJ_ELF
+      /* -mrelocatable -- warn about initializations that require relocation */
+      else if (strcmp (arg, "relocatable") == 0)
+	mrelocatable = 1;
+#endif
       else
 	{
 	  as_bad ("invalid architecture -m%s", arg);
@@ -296,6 +307,7 @@ PowerPC options:\n\
 -many			generate code for any architecture (PWR/PWRX/PPC)\n");
 #ifdef OBJ_ELF
   fprintf(stream, "\
+-mrelocatable		warn incompatible with GCC's -mrelocatble option\n\
 -V			print assembler version number\n\
 -Qy, -Qn		ignored\n");
 #endif
@@ -515,17 +527,11 @@ ppc_elf_suffix (str_p)
       *str_p += 2;
       return BFD_RELOC_HI16;
     }
-  else if (strncmp (str, "@PCREL", 6) == 0 || strncmp (str, "@pcrel", 6) == 0)
-    {				/* this is a hack */
-      *str_p += 6;
-      return BFD_RELOC_32_PCREL;
-    }
 
   return BFD_RELOC_UNUSED;
 }
 
-/* Like normal .long, except support @got, etc. */
-/* worker to do .byte etc statements */
+/* Like normal .long/.short/.word, except support @got, etc. */
 /* clobbers input_line_pointer, checks */
 /* end-of-line. */
 static void
@@ -565,6 +571,21 @@ ppc_elf_cons (nbytes)
 
   input_line_pointer--;		/* Put terminator back into stream. */
   demand_empty_rest_of_line ();
+}
+
+/* Validate any relocations emitted for -mrelocatable */
+static void
+ppc_elf_validate_fix (fixS *fixp, segT seg)
+{
+  if (mrelocatable
+      && !fixp->fx_done
+      && !fixp->fx_pcrel
+      && fixp->fx_r_type <= BFD_RELOC_UNUSED
+      && strcmp (segment_name (seg), ".got2") != 0)
+    {
+      as_bad_where (fixp->fx_file, fixp->fx_line,
+		    "Relocation cannot be done when using -mrelocatable");
+    }
 }
 
 #endif /* OBJ_ELF */
@@ -2355,16 +2376,6 @@ md_convert_frag (abfd, sec, fragp)
   abort ();
 }
 
-/* Parse an operand that is machine-specific.  We just return without
-   modifying the expression if we have nothing to do.  */
-
-/*ARGSUSED*/
-void
-md_operand (expressionP)
-     expressionS *expressionP;
-{
-}
-
 /* We have no need to default values of symbols.  */
 
 /*ARGSUSED*/
@@ -2511,9 +2522,10 @@ ppc_is_toc_sym (sym)
    fixup.  */
 
 int
-md_apply_fix (fixp, valuep)
+md_apply_fix3 (fixp, valuep, seg)
      fixS *fixp;
      valueT *valuep;
+     segT seg;
 {
   valueT value;
 
@@ -2642,9 +2654,18 @@ md_apply_fix (fixp, valuep)
     }
   else
     {
+#ifdef OBJ_ELF
+      ppc_elf_validate_fix (fixp, seg);
+#endif
       switch (fixp->fx_r_type)
 	{
 	case BFD_RELOC_32:
+	  if (fixp->fx_pcrel)
+	    {
+	      fixp->fx_r_type = BFD_RELOC_32_PCREL;
+	      value += fixp->fx_frag->fr_address + fixp->fx_where;
+	    }			/* fall through */
+
 	case BFD_RELOC_32_PCREL:
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
 			      value, 4);
@@ -2654,10 +2675,17 @@ md_apply_fix (fixp, valuep)
 	case BFD_RELOC_HI16_S:
 	case BFD_RELOC_PPC_TOC16:
 	case BFD_RELOC_16:
+	  if (fixp->fx_pcrel)
+	    abort ();
+
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
 			      value, 2);
 	  break;
+
 	case BFD_RELOC_8:
+	  if (fixp->fx_pcrel)
+	    abort ();
+
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
 			      value, 1);
 	  break;

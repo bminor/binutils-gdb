@@ -1,3 +1,27 @@
+Fri Mar  3 16:26:19 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* tc.h (md_apply_fix3): If MD_APPLY_FIX3 is defined, declare
+	md_apply_fix3.
+
+	* write.c (fixup_segment): If MD_APPLY_FIX3 is defined, call
+	md_apply_fix3 with the normal 2 arguments and the current segment
+	pointer instead of md_apply_fix.
+
+	* config/tc-ppc.h (MD_APPLY_FIX3): Define.
+
+	* config/tc-ppc.c (ppc_elf_validate_fix): Warn if -mrelocatable
+	and a non PC relative relocation that isn't in the .got2 segment
+	was performed.
+	(md_apply_fix3): Rename from md_apply_fix and take segment pointer
+	as third argument.  If ELF object format, call ppc_elf_validate_fix
+	for normal relocations.
+	(md_parse_option): If ELF object format, recognize the
+	-mrelocatable switch.
+
+Thu Mar  2 16:34:44 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-i386.h (AOUT_MACHTYPE): Define as 100, not 0.
+
 Tue Feb 28 18:29:27 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/tc-arm.c, config/tc-arm.h (md_operand): Replaced empty
@@ -821,7 +845,8 @@ Mon Nov 28 00:11:15 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 Wed Nov 23 19:36:09 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
-	* config/obj-coff.h (TARGET_FORMAT): Select between coff-shl and coff-sh.
+	* config/obj-coff.h (TARGET_FORMAT): Select between coff-shl and
+	coff-sh.
 	* config/sh.mh (TARG_CPU_DEPENDENTS): Get it right.
 	* config/tc-sh.c  (little): New function.
 	(md_parse_option): Notice new option.

@@ -74,7 +74,6 @@ static struct frag *bss_last_frag;	/* Last frag in segment. */
 
 #ifndef BFD
 static object_headers headers;
-static char *the_object_file;
 #endif
 
 long string_byte_count;
@@ -97,7 +96,7 @@ static fixS *fix_new_internal PARAMS ((fragS *, int where, int size,
 				       offsetT offset, int pcrel,
 				       int r_type));
 #endif
-#if defined (BFD_ASSEMBLER) || !defined (BFD)
+#if defined (BFD_ASSEMBLER) || (!defined (BFD) && !defined (OBJ_VMS))
 static long fixup_segment PARAMS ((fixS * fixP, segT this_segment_type));
 #endif
 static relax_addressT relax_align PARAMS ((relax_addressT addr, int align));
@@ -340,9 +339,8 @@ chain_frchains_together_1 (section, frchp)
      struct frchain *frchp;
 {
   fragS dummy, *prev_frag = &dummy;
-  fixS fix_dummy;
 #ifdef BFD_ASSEMBLER
-  fixS *prev_fix = &fix_dummy;
+  fixS fix_dummy, *prev_fix = &fix_dummy;
 #endif
 
   for (; frchp && frchp->frch_seg == section; frchp = frchp->frch_next)
@@ -414,8 +412,8 @@ cvt_frag_to_fill (sec, fragP)
      fragS *fragP;
 #else
 static void
-cvt_frag_to_fill (headers, fragP)
-     object_headers *headers;
+cvt_frag_to_fill (headersP, fragP)
+     object_headers *headersP;
      fragS *fragP;
 #endif
 {
@@ -443,7 +441,7 @@ cvt_frag_to_fill (headers, fragP)
 #ifdef BFD_ASSEMBLER
       md_convert_frag (stdoutput, sec, fragP);
 #else
-      md_convert_frag (headers, fragP);
+      md_convert_frag (headersP, fragP);
 #endif
 
       assert (fragP->fr_next == NULL || (fragP->fr_next->fr_address - fragP->fr_address == fragP->fr_fix));
@@ -1181,7 +1179,7 @@ write_object_file ()
      a routine to check for the definition of the procedure "_main",
      and if so -- fix it up so that it can be program entry point. */
   vms_check_for_main ();
-#endif /* VMS */
+#endif /* OBJ_VMS */
 
   /* After every sub-segment, we fake an ".align ...". This conforms to
      BSD4.2 brane-damage. We then fake ".fill 0" because that is the kind of
@@ -1427,6 +1425,7 @@ write_object_file ()
 #ifndef BFD_ASSEMBLER
 #ifndef	OBJ_VMS
   {				/* not vms */
+    char *the_object_file;
     long object_file_size;
     /*
      * Scan every FixS performing fixups. We had to wait until now to do
@@ -1524,9 +1523,10 @@ write_object_file ()
 
     /* Write the data to the file */
     output_file_append (the_object_file, object_file_size, out_file_name);
+    free (the_object_file);
 #endif
   }				/* non vms output */
-#else /* VMS */
+#else /* OBJ_VMS */
   /*
    *	Now do the VMS-dependent part of writing the object file
    */
@@ -1534,7 +1534,7 @@ write_object_file ()
 			 H_GET_DATA_SIZE (&headers),
 			 H_GET_BSS_SIZE (&headers),
 			 text_frag_root, data_frag_root);
-#endif /* VMS */
+#endif /* OBJ_VMS */
 #else /* BFD_ASSEMBLER */
 
   /* Resolve symbol values.  This needs to be done before processing
@@ -2044,7 +2044,7 @@ relax_segment (segment_frag_root, segment)
    */
 }				/* relax_segment() */
 
-#if defined (BFD_ASSEMBLER) || !defined (BFD)
+#if defined (BFD_ASSEMBLER) || (!defined (BFD) && !defined (OBJ_VMS))
 
 #ifndef TC_RELOC_RTSYM_LOC_FIXUP
 #define TC_RELOC_RTSYM_LOC_FIXUP(X) (1)
@@ -2358,10 +2358,14 @@ fixup_segment (fixP, this_segment_type)
 
       if (!fixP->fx_done)
 	{
+#ifdef MD_APPLY_FIX3
+	  md_apply_fix3 (fixP, &add_number, this_segment_type);
+#else
 #ifdef BFD_ASSEMBLER
 	  md_apply_fix (fixP, &add_number);
 #else
 	  md_apply_fix (fixP, add_number);
+#endif
 #endif
 
 #ifndef TC_HANDLES_FX_DONE
@@ -2385,7 +2389,7 @@ fixup_segment (fixP, this_segment_type)
   return seg_reloc_count;
 }
 
-#endif /* defined (BFD_ASSEMBLER) || !defined (BFD) */
+#endif /* defined (BFD_ASSEMBLER) || (!defined (BFD) && !defined (OBJ_VMS)) */
 
 void
 number_to_chars_bigendian (buf, val, n)
