@@ -15,6 +15,7 @@ start-sanitize-sky
 	(gif_operands): Fix word order.
 	(gif_opcodes): Likewise.
 	({insert,extract,print}_gif_regs): Likewise.
+	(gif_regs): Add new register number/name changes.
 end-sanitize-sky
 
 Tue Feb 24 11:06:18 1998  Nick Clifton  <nickc@cygnus.com>
