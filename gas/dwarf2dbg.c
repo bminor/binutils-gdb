@@ -780,7 +780,7 @@ void
 dwarf2_generate_asm_lineno (size)
      int size;
 {
-  bfd_vma addr;
+  addressT addr;
   static struct dwarf2_line_info debug_line;
 
   /* First update the notion of the current source line.  */

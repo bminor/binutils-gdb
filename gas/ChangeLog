@@ -1,3 +1,8 @@
+2000-11-12  H.J. Lu  (hjl@gnu.org)
+
+	* dwarf2dbg.c (dwarf2_generate_asm_lineno): Use addressT
+	instead of bfd_vma for non-bfd assemblers.
+
 2000-11-09  Kazu Hirata  <kazu@hxi.com>
 
 	* itbl-ops.c: Fix comment typos.
