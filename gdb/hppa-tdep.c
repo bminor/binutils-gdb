@@ -1004,6 +1004,8 @@ skip_prologue(pc)
   return pc;
 }
 
+#ifdef MAINTENANCE_CMDS
+
 static void
 unwind_command (exp, from_tty)
      char *exp;
@@ -1034,3 +1036,13 @@ unwind_command (exp, from_tty)
   printf ("%08x\n%08X\n%08X\n%08X\n", xxx.foo[0], xxx.foo[1], xxx.foo[2],
 	  xxx.foo[3]);
 }
+
+void
+_initialize_hppa_tdep ()
+{
+  add_cmd ("unwind", class_maintenance, unwind_command,
+	   "Print unwind table entry at given address.",
+	   &maintenanceprintlist);
+}
+
+#endif /* MAINTENANCE_CMDS */

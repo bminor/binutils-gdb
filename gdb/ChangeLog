@@ -1,5 +1,8 @@
 Thu Jul 29 12:09:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* hppa-tdep.c: Make "maintenance print unwind" command from old
+	"unwind" command.
+
 	* remote-udi.c: Remove udi_timer, call to siginterrupt, and associated
 	obsolete junk which apparently had been copied from the
 	pre-serial.h remote.c, but which is no longer used.
