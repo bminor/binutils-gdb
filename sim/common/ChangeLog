@@ -1,3 +1,9 @@
+Mon Mar 17 18:10:05 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* sim-inline.h: Add definitions for sim-types.
+	(ALL_BY_MODULE): New macro, encapsulate full inlining by the
+ 	module.
+
 Mon Mar 17 15:38:27 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 	
 	* sim-events.h: Remove defunct reference to callback struct.
