@@ -391,11 +391,27 @@ INLINE_SIM_BITS(unsigned_word) MSEXTRACTED (unsigned_word val, int start, int st
 
 /* move a group of bits around */
 
-INLINE_SIM_BITS(unsigned16) INSERTED16 (unsigned16 val, int start, int stop);
-INLINE_SIM_BITS(unsigned32) INSERTED32 (unsigned32 val, int start, int stop);
-INLINE_SIM_BITS(unsigned64) INSERTED64 (unsigned64 val, int start, int stop);
+INLINE_SIM_BITS(unsigned16) LSINSERTED16 (unsigned16 val, int start, int stop);
+INLINE_SIM_BITS(unsigned32) LSINSERTED32 (unsigned32 val, int start, int stop);
+INLINE_SIM_BITS(unsigned64) LSINSERTED64 (unsigned64 val, int start, int stop);
+INLINE_SIM_BITS(unsigned_word) LSINSERTED (unsigned_word val, int start, int stop);
 
-INLINE_SIM_BITS(unsigned_word) INSERTED (unsigned_word val, int start, int stop);
+INLINE_SIM_BITS(unsigned16) MSINSERTED16 (unsigned16 val, int start, int stop);
+INLINE_SIM_BITS(unsigned32) MSINSERTED32 (unsigned32 val, int start, int stop);
+INLINE_SIM_BITS(unsigned64) MSINSERTED64 (unsigned64 val, int start, int stop);
+INLINE_SIM_BITS(unsigned_word) MSINSERTED (unsigned_word val, int start, int stop);
+
+#if (WITH_TARGET_WORD_MSB == 0)
+#define INSERTED16 MSINSERTED16
+#define INSERTED32 MSINSERTED32
+#define INSERTED64 MSINSERTED64
+#define INSERTED   MSINSERTED
+#else
+#define INSERTED16 LSINSERTED16
+#define INSERTED32 LSINSERTED32
+#define INSERTED64 LSINSERTED64
+#define INSERTED   LSINSERTED
+#endif
 
 
 
@@ -464,11 +480,27 @@ INLINE_SIM_BITS(unsigned64) ROTR64 (unsigned64 val, int shift);
 
 /* Sign extension operations */
 
-INLINE_SIM_BITS(unsigned16) SEXT16 (signed16 val, int sign_bit);
-INLINE_SIM_BITS(unsigned32) SEXT32 (signed32 val, int sign_bit);
-INLINE_SIM_BITS(unsigned64) SEXT64 (signed64 val, int sign_bit);
+INLINE_SIM_BITS(unsigned16) LSSEXT16 (signed16 val, int sign_bit);
+INLINE_SIM_BITS(unsigned32) LSSEXT32 (signed32 val, int sign_bit);
+INLINE_SIM_BITS(unsigned64) LSSEXT64 (signed64 val, int sign_bit);
+INLINE_SIM_BITS(unsigned_word) LSSEXT (signed_word val, int sign_bit);
 
-INLINE_SIM_BITS(unsigned_word) SEXT (signed_word val, int sign_bit);
+INLINE_SIM_BITS(unsigned16) MSSEXT16 (signed16 val, int sign_bit);
+INLINE_SIM_BITS(unsigned32) MSSEXT32 (signed32 val, int sign_bit);
+INLINE_SIM_BITS(unsigned64) MSSEXT64 (signed64 val, int sign_bit);
+INLINE_SIM_BITS(unsigned_word) MSSEXT (signed_word val, int sign_bit);
+
+#if (WITH_TARGET_WORD_MSB == 0)
+#define SEXT16 MSSEXT16
+#define SEXT32 MSSEXT32
+#define SEXT64 MSSEXT64
+#define SEXT   MSSEXT
+#else
+#define SEXT16 LSSEXT16
+#define SEXT32 LSSEXT32
+#define SEXT64 LSSEXT64
+#define SEXT   LSSEXT
+#endif
 
 
 

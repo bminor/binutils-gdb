@@ -101,24 +101,47 @@ MSEXTRACTED (unsigned_word val,
 
 INLINE_SIM_BITS\
 (unsigned_word)
-INSERTED (unsigned_word val,
-	  int start,
-	  int stop)
+LSINSERTED (unsigned_word val,
+	    int start,
+	    int stop)
 {
-  ASSERT ((WITH_TARGET_WORD_MSB == 0 && start <= stop)
-	  || (WITH_TARGET_WORD_MSB != 0 && start >= stop));
+  ASSERT (start >= stop);
 #if (WITH_TARGET_WORD_BITSIZE == 64)
-  return INSERTED64 (val, start, stop);
+  return LSINSERTED64 (val, start, stop);
+#endif
+#if (WITH_TARGET_WORD_BITSIZE == 32)
+  /* Bit numbers are 63..0, even for 32 bit targets.
+     On 32 bit targets we ignore 63..32  */
+  if (stop >= 32)
+    return 0;
+  else
+    {
+      val <<= stop;
+      val &= LSMASK (start, stop);
+      return val;
+    }
+#endif
+}
+
+INLINE_SIM_BITS\
+(unsigned_word)
+MSINSERTED (unsigned_word val,
+	    int start,
+	    int stop)
+{
+  ASSERT (start <= stop);
+#if (WITH_TARGET_WORD_BITSIZE == 64)
+  return MSINSERTED64 (val, start, stop);
 #endif
 #if (WITH_TARGET_WORD_BITSIZE == 32)
   /* Bit numbers are 0..63, even for 32 bit targets.
      On 32 bit targets we ignore 0..31.  */
-  if (_LSB_SHIFT (64, stop) >= 32)
+  if (stop < 32)
     return 0;
   else
     {
-      val &= LSMASK (_MAKE_WIDTH (start, stop), 0);
-      val <<= _LSB_SHIFT (64, stop);
+      val <<= ((64 - 1) - stop);
+      val &= MSMASK (start, stop);
       return val;
     }
 #endif
@@ -128,21 +151,37 @@ INSERTED (unsigned_word val,
 
 INLINE_SIM_BITS\
 (unsigned_word)
-SEXT (signed_word val,
-      int sign_bit)
+LSSEXT (signed_word val,
+	int sign_bit)
 {
-  /* make the sign-bit most significant and then smear it back into
-     position */
   ASSERT (sign_bit < 64);
 #if (WITH_TARGET_WORD_BITSIZE == 64)
-  return SEXT64 (val, sign_bit);
+  return LSSEXT64 (val, sign_bit);
 #endif
 #if (WITH_TARGET_WORD_BITSIZE == 32)
-  if (_MSB_SHIFT (64, sign_bit) < 32)
+  if (sign_bit >= 32)
     return val;
   else {
-    val <<= (_MSB_SHIFT (64, sign_bit) - 32);
-    val >>= (_MSB_SHIFT (64, sign_bit) - 32);
+    val = LSSEXT32 (val, sign_bit);
+    return val;
+  }
+#endif
+}
+
+INLINE_SIM_BITS\
+(unsigned_word)
+MSSEXT (signed_word val,
+	int sign_bit)
+{
+  ASSERT (sign_bit < 64);
+#if (WITH_TARGET_WORD_BITSIZE == 64)
+  return MSSEXT64 (val, sign_bit);
+#endif
+#if (WITH_TARGET_WORD_BITSIZE == 32)
+  if (sign_bit < 32)
+    return val;
+  else {
+    val = MSSEXT32 (val, sign_bit - 32);
     return val;
   }
 #endif
