@@ -1,3 +1,11 @@
+Tue Mar 24 16:51:29 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.h (md_cleanup, md_elf_section_change_hook): Call
+	m32r_elf_section_change_hook.
+
+	* config/tc-m32r.c (m32r_elf_section_change_hook): New function to
+	emit a nop if a section ends with a 16 bit instruction.
+
 Tue Mar 24 19:48:09 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.c (obj_coff_bss): Compile unconditionally.  Call
