@@ -100,6 +100,8 @@ svr4 shlibs (solib.c)	Jim Blandy		jimb@cygnus.com
 coff reader		*Philippe De Muyter	phdm@macqel.be
 remote.c		Andrew Cagney		cagney@cygnus.com
 			*J.T. Conklin		jtc@redback.com
+include/remote-sim.h, remote-sim.c
+			Andrew Cagney		cagney@cygnus.com
 sds protocol		Fernando Nasser		fnasser@cygnus.com
 			Jim Ingham		jingham@cygnus.com
 rdi/adp protocol	Fernando Nasser		fnasser@cygnus.com
@@ -124,8 +126,13 @@ Misc:
 
 Web pages.		Jim Kingdon		kingdon@redhat.com
 			(anyone can edit; kingdon is just lead maintainer)
+
 Makefile.in, configure*	ALL
-mmalloc			ALL Host maintainers
+
+mmalloc/		ALL Host maintainers
+
+sim/			See sim/MAINTAINERS, co-ordinated by:
+			Frank Ch. Eigler	fche@cygnus.com
 
 
 
