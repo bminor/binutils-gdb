@@ -31,7 +31,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef	CMUCS
 #include <mips/syms.h>
 #else /* not CMUCS */
-#include <syms.h>
+#include <symconst.h>
+#include <sym.h>
 #endif /* not CMUCS */
 
 /* Since these things are defined differently on various systems I'll
@@ -76,6 +77,12 @@ static void psymtab_to_symtab_1();
 
 struct complaint unknown_ext_complaint = 
 	{"unknown external symbol %s", 0, 0};
+
+struct complaint unknown_sym_complaint = 
+	{"unknown local symbol %s", 0, 0};
+
+struct complaint unknown_st_complaint = 
+	{"with type %d", 0, 0};
 
 /* Already parsed symbols are marked specially */
 
@@ -158,7 +165,6 @@ static int compare_psymtabs();
 static int compare_blocks();
 
 static struct partial_symtab *new_psymtab();
-static struct partial_symbol *new_psymbol();
 static struct partial_symtab *parse_fdr();
 static int compare_psymbols();
 
@@ -167,12 +173,8 @@ static void reorder_psymtabs();
 
 /* Things we export to other modules */
 
-
-/* Lists of partial symbols */
-
-struct psymbol_allocation_list global_psymbols, static_psymbols;
-
 /* Address bounds for the signal trampoline in inferior, if any */
+/* FIXME:  Nothing really seems to use this.  Why is it here? */
 
 CORE_ADDR sigtramp_address, sigtramp_end;
 
@@ -186,7 +188,7 @@ CORE_ADDR sigtramp_address, sigtramp_end;
 
    These two functions only do the minimum work necessary for letting the
    user "name" things symbolically, they do not read the entire symtab.
-   Instead, they read in the external symbols and put them in partial
+   Instead, they read in the external and static symbols and put them in partial
    symbol tables.  When more extensive information is requested of a
    file the corresponding partial symbol table is mutated into a full
    fledged symbol table by going back and reading the relative symbols
@@ -295,7 +297,7 @@ mipscoff_symfile_read(sf, addr, mainline)
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
 
-  read_mips_symtab(abfd, desc, 0);
+  read_mips_symtab(abfd, desc);
 
 /*  patch_opaque_types ();*/
 
@@ -306,11 +308,7 @@ mipscoff_symfile_read(sf, addr, mainline)
   /* Go over the misc symbol bunches and install them in vector.  */
 
   condense_misc_bunches (0);
-
-  /* Make a default for file to list.  */
-
-  select_source_symtab (0);	/* FIXME, this might be too slow, see dbxread */
-}  
+}
   
 void
 mipscoff_symfile_discard()
@@ -350,6 +348,7 @@ mipscoff_psymtab_to_symtab(pst)
 		fflush(stdout);
 	}
 	/* Restore the header and list of pending typedefs */
+	/* FIXME, we should use private data that is a proper pointer. */
 	cur_hdr = (HDRR *) pst->ldsymlen;
 
 	psymtab_to_symtab_1(pst);
@@ -594,16 +593,15 @@ char *fdr_name(name)
    FIXME:  INCREMENTAL is currently always zero, though it should not be. */
 
 static
-read_mips_symtab (abfd, desc, incremental)
+read_mips_symtab (abfd, desc)
 	bfd *abfd;
 	int desc;
-	int incremental;
 {
 	CORE_ADDR end_of_text_seg;
 
 	read_the_mips_symtab(abfd, desc, &end_of_text_seg);
 
-	parse_partial_symbols(cur_hdr, incremental, end_of_text_seg);
+	parse_partial_symbols(cur_hdr, end_of_text_seg);
 	cur_hdr = 0;
 
 	/*
@@ -633,6 +631,7 @@ read_mips_symtab (abfd, desc, incremental)
 static struct pst_map {
 	struct partial_symtab *pst;	/* the psymtab proper */
 	int n_globals;			/* globals it exports */
+	int n_statics;			/* statics (locals) it contains */
 } * fdr_to_pst;
 
 
@@ -848,11 +847,15 @@ parse_symbol(sh, ax)
 		class = LOC_STATIC;
 		b = BLOCKVECTOR_BLOCK(BLOCKVECTOR(top_stack->cur_st),
 				      GLOBAL_BLOCK);
+		s = new_symbol(sh->iss);
+		SYMBOL_VALUE_ADDRESS(s) = (CORE_ADDR)sh->value;
 		goto data;
 
 	    case stStatic:	/* static data, goes into the current block. */
 		class = LOC_STATIC;
 		b = top_stack->cur_block;
+		s = new_symbol(sh->iss);
+		SYMBOL_VALUE_ADDRESS(s) = (CORE_ADDR)sh->value;
 		goto data;
 
 	    case stLocal:	/* local variable, goes into the current block */
@@ -863,9 +866,10 @@ parse_symbol(sh, ax)
 		} else
 			class = LOC_LOCAL;
 		b = top_stack->cur_block;
+		s = new_symbol(sh->iss);
+		SYMBOL_VALUE(s) = sh->value;
 
 data:		/* Common code for symbols describing data */
-		s = new_symbol(sh->iss);
 		SYMBOL_NAMESPACE(s) = VAR_NAMESPACE;
 		SYMBOL_CLASS(s) = class;
 		add_symbol(s, b);
@@ -877,7 +881,6 @@ data:		/* Common code for symbols describing data */
 		else
 			SYMBOL_TYPE(s) = parse_type(ax + sh->index, sh, 0);
 		/* Value of a data symbol is its memory address */
-		SYMBOL_VALUE(s) = sh->value;
 		break;
 
 	    case stParam:	/* argument to procedure, goes into current block */
@@ -900,7 +903,7 @@ data:		/* Common code for symbols describing data */
 		s = new_symbol(sh->iss);
 		SYMBOL_NAMESPACE(s) = VAR_NAMESPACE;	/* so that it can be used */
 		SYMBOL_CLASS(s) = LOC_LABEL;		/* but not misused */
-		SYMBOL_VALUE(s) = sh->value;
+		SYMBOL_VALUE_ADDRESS(s) = (CORE_ADDR)sh->value;
 		SYMBOL_TYPE(s) = builtin_type_int;
 		add_symbol(s, top_stack->cur_block);
 		break;
@@ -1382,7 +1385,9 @@ parse_procedure(pr, bound)
    making sure we know where the aux are for it. For procedures,
    parsing of the PDRs has already provided all the needed
    information, we only parse them if SKIP_PROCEDURES is false,
-   and only if this causes no symbol duplication */
+   and only if this causes no symbol duplication.
+
+   This routine clobbers top_stack->cur_block and ->cur_st. */
 
 static
 parse_external(es, skip_procedures)
@@ -1540,28 +1545,31 @@ parse_one_file(fh, f_idx, bound)
 	if (LINETABLE(cur_stab)->nitems < fh->cline)
 		shrink_linetable(cur_stab);
 }
+
+/* Master parsing procedure for first-pass reading of file symbols
+   into a partial_symtab.
 
+   Parses the symtab described by the symbolic header HDR.
+   END_OF_TEXT_SEG gives the address just after the text segment for
+   the symtab we are reading.  */
 
-/* Master parsing procedure. Parses the symtab described by the
-   symbolic header HDR.  If INCREMENTAL is true we are called
-   by add-file and must preserve the old symtabs.  END_OF_TEXT_SEG
-   gives the address just after the text segment for the symtab
-   we are reading.  */
 static
-parse_partial_symbols(hdr, incremental, end_of_text_seg)
+parse_partial_symbols(hdr, end_of_text_seg)
 	HDRR *hdr;
 {
-	int             f_idx, s_idx, h_max;
+	int             f_idx, s_idx, h_max, stat_idx;
 	CORE_ADDR	dummy, *prevhigh;
 	/* Running pointers */
-	FDR            *fh;
-	RFDT	       *rh;
-	register EXTR           *esh;
+	FDR		*fh;
+	RFDT		*rh;
+	register EXTR	*esh;
+	register SYMR	*sh;
+	struct partial_symtab *pst;
 
 	/*
 	 * Big plan: 
 	 *
-	 * Only parse the External symbols, and the Relative FDR.
+	 * Only parse the Local and External symbols, and the Relative FDR.
 	 * Fixup enough of the loader symtab to be able to use it.
 	 * Allocate space only for the file`s portions we need to
 	 * look at. (XXX)
@@ -1590,34 +1598,63 @@ parse_partial_symbols(hdr, incremental, end_of_text_seg)
 	h_max = hdr->iextMax;
 
 	/* Parse externals: two passes because they can be ordered
-	   in any way */
+	   in any way, but gdb likes to have them segregated by their
+	   source file.  */
 
-	/* Pass 1: Presize and partition the list */
+	/* Pass 1 over external syms: Presize and partition the list */
 	for (s_idx = 0; s_idx < hdr->iextMax; s_idx++) {
 		esh = (EXTR *) (hdr->cbExtOffset) + s_idx;
 		fdr_to_pst[esh->ifd].n_globals++;
 	}
 
 	if (global_psymbols.list) {
+		int origsize = global_psymbols.next - global_psymbols.list;
+
 		global_psymbols.list = (struct partial_symbol *)
-			xrealloc( global_psymbols.list, (h_max +
-				global_psymbols.size) * sizeof(struct partial_symbol));
-		global_psymbols.next = global_psymbols.list + global_psymbols.size;
-		global_psymbols.size += h_max;
+			xrealloc (global_psymbols.list,
+			   (h_max + origsize) * sizeof(struct partial_symbol));
+		global_psymbols.next = global_psymbols.list + origsize;
+		global_psymbols.size = h_max + origsize;
 	} else {
 		global_psymbols.list = (struct partial_symbol *)
-				xmalloc( h_max * sizeof(struct partial_symbol));
-		global_psymbols.size = h_max;
+				xmalloc (h_max * sizeof(struct partial_symbol));
 		global_psymbols.next = global_psymbols.list;
+		global_psymbols.size = h_max;
 	}
 
-	s_idx = global_psymbols.next - global_psymbols.list;
+	/* Pass 1.5 over files:  partition out global symbol space */
+	s_idx    = global_psymbols.next - global_psymbols.list;
 	for (f_idx = -1; f_idx < hdr->ifdMax; f_idx++) {
 		fdr_to_pst[f_idx].pst->globals_offset = s_idx;
 		s_idx += fdr_to_pst[f_idx].n_globals;
 	}
 
-	/* Pass 2: fill in symbols */
+	/* Pass 1.6 over files:  partition out static symbol space.
+	   Note that this loop starts at 0, not at -1. */
+	stat_idx = static_psymbols.next - static_psymbols.list;
+	for (f_idx = 0; f_idx < hdr->ifdMax; f_idx++) {
+		fdr_to_pst[f_idx].pst->statics_offset = stat_idx;
+		fh = f_idx + (FDR *)(hdr->cbFdOffset);
+		stat_idx += fh->csym;
+	}
+
+	/* Now that we know its max size, allocate static symbol list */
+	if (static_psymbols.list) {
+		int origsize = static_psymbols.next - static_psymbols.list;
+
+		static_psymbols.list = (struct partial_symbol *)
+			xrealloc (static_psymbols.list,
+			   stat_idx * sizeof(struct partial_symbol));
+		static_psymbols.next = static_psymbols.list + origsize;
+		static_psymbols.size = stat_idx;
+	} else {
+		static_psymbols.list = (struct partial_symbol *)
+			xmalloc (stat_idx * sizeof(struct partial_symbol));
+		static_psymbols.next = static_psymbols.list;
+		static_psymbols.size = stat_idx;
+	}
+
+	/* Pass 2 over external syms: fill in external symbols */
 	for (s_idx = 0; s_idx < hdr->iextMax; s_idx++) {
 		register struct partial_symbol *p;
 		enum misc_function_type misc_type = mf_text;
@@ -1625,20 +1662,27 @@ parse_partial_symbols(hdr, incremental, end_of_text_seg)
 
 		if (esh->asym.sc == scUndefined || esh->asym.sc == scNil)
 			continue;
-		p = new_psymbol(&global_psymbols, esh->asym.iss, esh->ifd);
-		SYMBOL_VALUE(p) = esh->asym.value;
+
+		/* Locate the psymtab and the preallocated psymbol.  */
+		pst = fdr_to_pst[esh->ifd].pst;
+		p = global_psymbols.list + pst->globals_offset +
+			 pst->n_global_syms++;
+		SYMBOL_NAME(p) = (char *)(esh->asym.iss);
 		SYMBOL_NAMESPACE(p) = VAR_NAMESPACE;
 
 		switch (esh->asym.st) {
 		case stProc:
 			SYMBOL_CLASS(p) = LOC_BLOCK;
+			SYMBOL_VALUE(p) = esh->asym.value;
 			break;
 		case stGlobal:
 			SYMBOL_CLASS(p) = LOC_STATIC;
+			SYMBOL_VALUE_ADDRESS(p) = (CORE_ADDR)esh->asym.value;
 			misc_type = mf_data;
 			break;
 		case stLabel:
 			SYMBOL_CLASS(p) = LOC_LABEL;
+			SYMBOL_VALUE_ADDRESS(p) = (CORE_ADDR)esh->asym.value;
 			break;
 		default:
 			misc_type = mf_unknown;
@@ -1649,6 +1693,75 @@ parse_partial_symbols(hdr, incremental, end_of_text_seg)
 				           misc_type);
 	}
 
+	/* Pass 3 over files, over local syms: fill in static symbols */
+	for (f_idx = 0; f_idx < hdr->ifdMax; f_idx++) {
+		fh = f_idx + (FDR *)(cur_hdr->cbFdOffset);
+		pst = fdr_to_pst[f_idx].pst;
+		
+		for (s_idx = 0; s_idx < fh->csym; ) {
+			register struct partial_symbol *p;
+
+			sh = s_idx + (SYMR *) fh->isymBase;
+
+			if (sh->sc == scUndefined || sh->sc == scNil) {
+				/* FIXME, premature? */
+				s_idx++;
+				continue;
+			}
+
+			/* Locate the preallocated psymbol.  */
+			p = static_psymbols.list + pst->statics_offset +
+				 pst->n_static_syms;
+			SYMBOL_NAME(p) = (char *)(sh->iss);
+			SYMBOL_VALUE(p) = sh->value;
+			SYMBOL_NAMESPACE(p) = VAR_NAMESPACE;
+
+			switch (sh->st) {
+			case stProc:		/* Asm labels apparently */
+			case stStaticProc:		/* Function */
+				SYMBOL_CLASS(p) = LOC_BLOCK;
+				pst->n_static_syms++;	/* Use gdb symbol */
+				/* Skip over procedure to next one. */
+				s_idx = (sh->index + (AUXU *)fh->iauxBase)
+					  ->isym;
+				continue;
+			case stStatic:			/* Variable */
+				SYMBOL_CLASS(p) = LOC_STATIC;
+				SYMBOL_VALUE_ADDRESS(p) = (CORE_ADDR)sh->value;
+				break;
+			case stTypedef:			/* Typedef */
+				SYMBOL_CLASS(p) = LOC_TYPEDEF;
+				break;
+			case stConstant:		/* Constant decl */
+				SYMBOL_CLASS(p) = LOC_CONST;
+				break;
+			case stBlock:			/* { }, str, un, enum */
+				/* Eventually we want struct names and enum
+				   values out of here.  FIXME */
+				/* Skip over the block */
+				s_idx = sh->index;
+				continue;
+			case stFile:			/* File headers */
+			case stLabel:			/* Labels */
+			case stEnd:			/* Ends of files */
+				goto skip;
+			default:
+				complain (&unknown_sym_complaint, SYMBOL_NAME(p));
+				complain (&unknown_st_complaint, sh->st);
+				s_idx++;
+				continue;
+			}
+			pst->n_static_syms++;	/* Use this gdb symbol */
+		skip:
+			s_idx++;		/* Go to next file symbol */
+#if 0
+/* We don't usually record static syms, but some we seem to.  chk dbxread. */
+/*FIXME*/		prim_record_misc_function (SYMBOL_NAME(p),
+						   SYMBOL_VALUE(p),
+						   misc_type);
+#endif
+		}
+	}
 
 	/* The array (of lists) of globals must be sorted.
 	   Take care, since we are at it, of pst->texthigh.
@@ -1718,9 +1831,9 @@ parse_fdr(f_idx, lev)
 		pst->textlow = fh->adr;
 		pst->texthigh = fh->cpd;	/* To be fixed later */
 	}
-	/* Reverse mapping PST -> FDR */
-	pst->ldsymoff = f_idx;
 
+	/* Make everything point to everything. */
+	pst->ldsymoff = f_idx;
 	fdr_to_pst[f_idx].pst = pst;
 	fh->ioptBase = (int)pst;
 
@@ -1812,7 +1925,7 @@ psymtab_to_symtab_1(pst)
 	push_parse_stack();
 	top_stack->cur_st = cur_stab;
 	top_stack->cur_block = BLOCKVECTOR_BLOCK(BLOCKVECTOR(cur_stab),
-						 GLOBAL_BLOCK);
+						 STATIC_BLOCK);
 	BLOCK_START(top_stack->cur_block) = fh ? fh->adr : 0;
 	BLOCK_END(top_stack->cur_block) = 0;
 	top_stack->blocktype = stFile;
@@ -1827,7 +1940,9 @@ psymtab_to_symtab_1(pst)
 				cur_hdr->cbDnOffset : fh[1].adr);
 
 	/* .. and our share of externals.
-	   XXX use the global list to speed up things here. how ? */
+	   XXX use the global list to speed up things here. how ? 
+	   FIXME, Maybe quit once we have found the right number of ext's? */
+	/* parse_external clobbers top_stack->cur_block and ->cur_st here. */
 	top_stack->blocktype = stFile;
 	top_stack->maxsyms = cur_hdr->isymMax + cur_hdr->ipdMax + cur_hdr->iextMax;
 	for (i = 0; i < cur_hdr->iextMax; i++) {
@@ -1851,10 +1966,10 @@ psymtab_to_symtab_1(pst)
 	 * Sort the symbol table now, we are done adding symbols to it.
 	 */
 	sort_symtab_syms(st);
+
+	/* Now link the psymtab and the symtab.  */
+	pst->symtab = st;
 }
-
-
-
 
 /* Ancillary parsing procedures. */
 
@@ -2086,6 +2201,8 @@ sort_blocks(s)
 		/* Cosmetic */
 		if (BLOCK_END(BLOCKVECTOR_BLOCK(bv,GLOBAL_BLOCK)) == 0)
 			BLOCK_START(BLOCKVECTOR_BLOCK(bv,GLOBAL_BLOCK)) = 0;
+		if (BLOCK_END(BLOCKVECTOR_BLOCK(bv,STATIC_BLOCK)) == 0)
+			BLOCK_START(BLOCKVECTOR_BLOCK(bv,STATIC_BLOCK)) = 0;
 		return;
 	}
 	/*
@@ -2227,19 +2344,6 @@ new_symtab(name, maxsyms, maxlines)
 	return s;
 }
 
-/* Cleanup before loading a fresh image */
-
-static destroy_all_symtabs()
-{
-  if (symfile)
-    free(symfile);
-  symfile = 0;
-
-  free_all_symtabs();
-  current_source_symtab = 0;
-  /* psymtabs! */
-}
-
 /* Allocate a new partial_symtab NAME */
 
 static struct partial_symtab *
@@ -2261,31 +2365,13 @@ new_psymtab(name)
 	partial_symtab_list = pst;
 
 	/* Keep a backpointer to the file`s symbols */
+	/* FIXME, we should use private data that is a proper pointer. */
 	pst->ldsymlen = (int)cur_hdr;
 
 	/* The way to turn this into a symtab is to call... */
 	pst->read_symtab = mipscoff_psymtab_to_symtab;
 
 	return pst;
-}
-
-
-/* Allocate a new NAME psymbol from LIST, extending it if necessary.
-   The psymbol belongs to the psymtab at index PST_IDX */
-
-static struct partial_symbol *
-new_psymbol(list, name, pst_idx)
-	struct psymbol_allocation_list *list;
-	char *name;
-{
-	struct partial_symbol *p;
-	struct partial_symtab *pst = fdr_to_pst[pst_idx].pst;
-
-	/* Lists are pre-sized, we won`t overflow */
-
-	p = list->list + pst->globals_offset + pst->n_global_syms++;
-	SYMBOL_NAME(p) = name;
-	return p;
 }
 
 

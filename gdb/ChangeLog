@@ -1,3 +1,51 @@
+Thu Jul 18 22:46:05 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* symtab.h (LOC_EXTERNAL):  Eliminate in favor of LOC_STATIC.
+	(ldsymoff, ldsymlen, globals_offset, statics_offset): Improve
+	comments.
+	* dbxread.c (read_dbx_symtab):  LOC_EXTERNAL -> LOC_STATIC.
+	* expread.y, findvar.c, symmisc.c:  Ditto.
+	* printcmd.c (address_info):  Update printed forms of LOC_
+	symbols.  Elim LOC_EXTERNAL.  
+	(print_frame_args):  Keep track of param stack offsets before
+	re-looking up to find the local register param is kept in.
+
+	* mipsread.c:  Use <symconst.h> and <sym.h> rather than <syms.h>.
+	Further integration of mipsread into gdb.  Eliminate unused
+	routines, duplicate declarations.  Handle static symbols in 
+	psymtabs as well as external symbols.  When reading symtabs,
+	insert symbols into the correct block (global, static, or a local
+	block).
+	(read_mips_symtab, parse_partial_symbols):  Don't pass useless
+	"incremental" arg.
+	(mipscoff_symfile_read):  Don't call select_source_symtab.
+	(parse_symbol):  Use SYMBOL_VALUE_ADDRESS where appropriate,
+	rather than SYMBOL_VALUE.
+	(parse_external):  Comment clobbering of top_stack.
+	(parse_partial_symbols):  Update comments.  Allocate and parse
+	static symbols as well as external symbols.  FIXME, enum values
+	are not handled in this pass, but should be.  Inline new_psymbol.
+	Use SYMBOL_VALUE_ADDRESS.
+	(psymtab_to_symtab_1):  Read symbols into global static block
+	by default (until enter some function's local block context).
+	(sort_blocks):  Clean up STATIC_BLOCK as well as GLOBAL_BLOCK.
+	(destroy_all_symtabs, new_psymbol):  Eliminate, unused.
+
+	* source.c (select_source_symtab):  Select a source symtab
+	from either the symtabs or, failing that, the psymtabs.
+	(list_command):  Update error message.
+	(forward_search_command, reverse_search_command):  Use getc, not
+	fgetc, for speed.  FIXME, add comment about buffers that die if
+	overrun by long line.
+
+	* values.c (unpack_field_as_long, modify_field):  Avoid shifting
+	by an entire word, which is not portable, if we have a 32-bit
+	field.  (Code in dbxread.c already turns such bitfields, if
+	aligned, into ordinary ints, but fixing this will help for other
+	symbol formats and for future changes.)
+	* core.c (core_open):  Handle ANSI const brain death.
+	* utils.c (vprintf):  Fix varargs typo.
+
 Sun Jul 14 00:42:53 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* findvar.c (find_var_value):  Handle &function better.
