@@ -1,3 +1,7 @@
+Tue Oct 10 11:07:23 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (BISON): Remove macro.
+
 Tue Oct 10 08:49:00 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* complete.c (filename_completion_function): Enable for
