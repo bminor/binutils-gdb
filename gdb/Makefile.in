@@ -935,10 +935,10 @@ install-only: $(CONFIG_INSTALL)
 		else \
 		  true ; \
 		fi ; \
-		$(srcdir)/../mkinstalldirs $(bindir) ; \
+		$(SHELL) $(srcdir)/../mkinstalldirs $(bindir) ; \
 		$(INSTALL_PROGRAM) gdb$(EXEEXT) \
 			$(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) ; \
-		$(srcdir)/../mkinstalldirs \
+		$(SHELL) $(srcdir)/../mkinstalldirs \
 			$(DESTDIR)$(man1dir) ; \
 		$(INSTALL_DATA) $(srcdir)/gdb.1 \
 			$(DESTDIR)$(man1dir)/$$transformed_name.1
