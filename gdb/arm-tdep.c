@@ -103,6 +103,21 @@ static int arm_debug;
 static struct cmd_list_element *setarmcmdlist = NULL;
 static struct cmd_list_element *showarmcmdlist = NULL;
 
+/* The type of floating-point to use.  Keep this in sync with enum
+   arm_float_model, and the help string in _initialize_arm_tdep.  */
+static const char *fp_model_strings[] =
+{
+  "auto",
+  "softfpa",
+  "fpa",
+  "softvfp",
+  "vfp"
+};
+
+/* A variable that can be configured by the user.  */
+static enum arm_float_model arm_fp_model = ARM_FLOAT_AUTO;
+static const char *current_fp_model = "auto";
+
 /* Number of different reg name sets (options).  */
 static int num_disassembly_options;
 
@@ -2170,9 +2185,7 @@ arm_extract_return_value (struct type *type,
 
   if (TYPE_CODE_FLT == TYPE_CODE (type))
     {
-      struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-      switch (tdep->fp_model)
+      switch (arm_get_fp_model (current_gdbarch))
 	{
 	case ARM_FLOAT_FPA:
 	  {
@@ -2187,7 +2200,7 @@ arm_extract_return_value (struct type *type,
 	  }
 	  break;
 
-	case ARM_FLOAT_SOFT:
+	case ARM_FLOAT_SOFT_FPA:
 	case ARM_FLOAT_SOFT_VFP:
 	  regcache_cooked_read (regs, ARM_A1_REGNUM, valbuf);
 	  if (TYPE_LENGTH (type) > 4)
@@ -2365,10 +2378,9 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
       char buf[ARM_MAX_REGISTER_RAW_SIZE];
 
-      switch (tdep->fp_model)
+      switch (arm_get_fp_model (current_gdbarch))
 	{
 	case ARM_FLOAT_FPA:
 
@@ -2376,7 +2388,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	  regcache_cooked_write (regs, ARM_F0_REGNUM, buf);
 	  break;
 
-	case ARM_FLOAT_SOFT:
+	case ARM_FLOAT_SOFT_FPA:
 	case ARM_FLOAT_SOFT_VFP:
 	  regcache_cooked_write (regs, ARM_A1_REGNUM, valbuf);
 	  if (TYPE_LENGTH (type) > 4)
@@ -2531,6 +2543,69 @@ static void
 show_arm_command (char *args, int from_tty)
 {
   cmd_show_list (showarmcmdlist, from_tty, "");
+}
+
+enum arm_float_model
+arm_get_fp_model (struct gdbarch *gdbarch)
+{
+  if (arm_fp_model == ARM_FLOAT_AUTO)
+    return gdbarch_tdep (gdbarch)->fp_model;
+
+  return arm_fp_model;
+}
+
+static void
+arm_set_fp (struct gdbarch *gdbarch)
+{
+  enum arm_float_model fp_model = arm_get_fp_model (gdbarch);
+
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE 
+      && (fp_model == ARM_FLOAT_SOFT_FPA || fp_model == ARM_FLOAT_FPA))
+    {
+      set_gdbarch_double_format	(gdbarch,
+				 &floatformat_ieee_double_littlebyte_bigword);
+      set_gdbarch_long_double_format
+	(gdbarch, &floatformat_ieee_double_littlebyte_bigword);
+    }
+  else
+    {
+      set_gdbarch_double_format (gdbarch, &floatformat_ieee_double_little);
+      set_gdbarch_long_double_format (gdbarch,
+				      &floatformat_ieee_double_little);
+    }
+}
+
+static void
+set_fp_model_sfunc (char *args, int from_tty,
+		    struct cmd_list_element *c)
+{
+  enum arm_float_model fp_model;
+
+  for (fp_model = ARM_FLOAT_AUTO; fp_model != ARM_FLOAT_LAST; fp_model++)
+    if (strcmp (current_fp_model, fp_model_strings[fp_model]) == 0)
+      {
+	arm_fp_model = fp_model;
+	break;
+      }
+
+  if (fp_model == ARM_FLOAT_LAST)
+    internal_error (__FILE__, __LINE__, "Invalid fp model accepted: %s.",
+		    current_fp_model);
+
+  if (gdbarch_bfd_arch_info (current_gdbarch)->arch == bfd_arch_arm)
+    arm_set_fp (current_gdbarch);
+}
+
+static void
+show_fp_model (char *args, int from_tty,
+	       struct cmd_list_element *c)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (arm_fp_model == ARM_FLOAT_AUTO 
+      && gdbarch_bfd_arch_info (current_gdbarch)->arch == bfd_arch_arm)
+    printf_filtered ("  - the default for the current ABI is \"%s\".\n",
+		     fp_model_strings[tdep->fp_model]);
 }
 
 /* If the user changes the register disassembly style used for info
@@ -2804,8 +2879,10 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
 
-  /* This is the way it has always defaulted.  */
-  tdep->fp_model = ARM_FLOAT_FPA;
+  /* We used to default to FPA for generic ARM, but almost nobody uses that
+     now, and we now provide a way for the user to force the model.  So 
+     default to the most useful variant.  */
+  tdep->fp_model = ARM_FLOAT_SOFT_FPA;
 
   /* Breakpoints.  */
   switch (info.byte_order)
@@ -2953,20 +3030,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
     case BFD_ENDIAN_LITTLE:
       set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_little);
-      if (tdep->fp_model == ARM_FLOAT_VFP
-	  || tdep->fp_model == ARM_FLOAT_SOFT_VFP)
-	{
-	  set_gdbarch_double_format (gdbarch, &floatformat_ieee_double_little);
-	  set_gdbarch_long_double_format (gdbarch,
-					  &floatformat_ieee_double_little);
-	}
-      else
-	{
-	  set_gdbarch_double_format
-	    (gdbarch, &floatformat_ieee_double_littlebyte_bigword);
-	  set_gdbarch_long_double_format
-	    (gdbarch, &floatformat_ieee_double_littlebyte_bigword);
-	}
+      arm_set_fp (gdbarch);
       break;
 
     default:
@@ -3103,6 +3167,7 @@ _initialize_arm_tdep (void)
 			      valid_disassembly_styles, &disassembly_style,
 			      helptext, &setarmcmdlist);
 
+  set_cmd_sfunc (new_set, set_disassembly_style_sfunc);
   add_show_from_set (new_set, &showarmcmdlist);
 
   add_setshow_cmd_full ("apcs32", no_class,
@@ -3121,6 +3186,19 @@ _initialize_arm_tdep (void)
 			   "When off, a 26-bit PC will be used.",
 			   NULL, NULL,
 			   &setarmcmdlist, &showarmcmdlist);
+
+  /* Add a command to allow the user to force the FPU model.  */
+  new_set = add_set_enum_cmd
+    ("fpu", no_class, fp_model_strings, &current_fp_model,
+     "Set the floating point type.\n"
+     "auto - Determine the FP typefrom the OS-ABI.\n"
+     "softfpa - Software FP, mixed-endian doubles on little-endian ARMs.\n"
+     "fpa - FPA co-processor (GCC compiled).\n"
+     "softvfp - Software FP with pure-endian doubles.\n"
+     "vfp - VFP co-processor.",
+     &setarmcmdlist);
+  set_cmd_sfunc (new_set, set_fp_model_sfunc);
+  set_cmd_sfunc (add_show_from_set (new_set, &showarmcmdlist), show_fp_model);
 
   /* Add the deprecated "othernames" command.  */
   deprecate_cmd (add_com ("othernames", class_obscure, arm_othernames,

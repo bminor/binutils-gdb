@@ -1,5 +1,23 @@
 2003-03-22  Richard Earnshaw  <rearnsha@arm.com>
 
+	* arm-tdep.h (arm_float_model): Add AUTO and LAST values.
+	(arm_get_fp_model): Declare.
+	* arm-tdep.c (fp_model_strings): New string array.
+	(arm_fp_model, current_fp_model): New variables.
+	(arm_get_fp_model): New function.
+	(arm_set_fp): New function.
+	(set_fp_model_sfunc): New function.
+	(show_fp_model): New function.
+	(_initialize_arm_tdep): Add new command to set/show the FPU.
+	(arm_extract_return_value): Use arm_get_fp_model.
+	(arm_store_return_value): Likewise.
+	(arm_gdbarch_init): Default fpa model is softfpa.  Call arm_set_fp
+	to initialize the floating-point data types.
+	* arm-linux-tdep.c (arm_linux_init_abi): The default floating point
+	model is FPA.
+
+2003-03-22  Richard Earnshaw  <rearnsha@arm.com>
+
 	* arm-tdep.c (show_arm_command): Don't print out help.  Instead, show
 	the current setting of each value.
 	(_initialize_arm_tdep): Delete variable new_cmd and add new vars

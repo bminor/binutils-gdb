@@ -109,15 +109,23 @@ enum gdb_regnum {
    only generate 2 of those.  The third is APCS_FLOAT, where arguments to
    functions are passed in floating-point registers.  
 
-   In addition to the traditional models, VFP adds two more.  */
+   In addition to the traditional models, VFP adds two more. 
+
+   If you update this enum, don't forget to update fp_model_strings in 
+   arm-tdep.c.  */
 
 enum arm_float_model
 {
-  ARM_FLOAT_SOFT,
-  ARM_FLOAT_FPA,
-  ARM_FLOAT_SOFT_VFP,
-  ARM_FLOAT_VFP
+  ARM_FLOAT_AUTO,	/* Automatic detection.  Do not set in tdep.  */
+  ARM_FLOAT_SOFT_FPA,	/* Traditional soft-float (mixed-endian on LE ARM).  */
+  ARM_FLOAT_FPA,	/* FPA co-processor.  GCC calling convention.  */
+  ARM_FLOAT_SOFT_VFP,	/* Soft-float with pure-endian doubles.  */
+  ARM_FLOAT_VFP,	/* Full VFP calling convention.  */
+  ARM_FLOAT_LAST	/* Keep at end.  */
 };
+
+/* A method to the setting based on user's choice and ABI setting.  */
+enum arm_float_model arm_get_fp_model (struct gdbarch *);
 
 /* Target-dependent structure in gdbarch.  */
 struct gdbarch_tdep
