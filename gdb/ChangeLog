@@ -1,5 +1,9 @@
 2002-05-22  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* config/alpha/tm-nbsd.h: Include solib.h.
+
+2002-05-22  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* alphanbsd-tdep.c (alphanbsd_sigtramp_offset): Don't make
 	assumptions about the host's byte order.
 

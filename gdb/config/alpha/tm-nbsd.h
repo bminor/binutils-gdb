@@ -22,6 +22,7 @@
 #define TM_NBSD_H
 
 #include "alpha/tm-alpha.h"
+#include "solib.h"
 
 /* Number of traps that happen between exec'ing the shell to run an
    inferior, and when we finally get to the inferior code.  The
