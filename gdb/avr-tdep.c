@@ -1216,8 +1216,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_max_register_virtual_size (gdbarch, 4);
   set_gdbarch_register_virtual_type (gdbarch, avr_register_virtual_type);
 
-  /* We might need to define our own here or define FRAME_INIT_SAVED_REGS */
-  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
 
   set_gdbarch_print_insn (gdbarch, print_insn_avr);
 

@@ -1,3 +1,8 @@
+2002-09-03  Theodore A. Roth  <troth@verinet.com>
+
+	* gdb/avr-tdep.c (avr_gdbarch_init): Use
+	generic_unwind_get_saved_register.
+
 2002-09-03  David Carlton  <carlton@math.stanford.edu>
 
 	* dwarf2read.c (dwarf2_add_member_fn): Add the 'type'
