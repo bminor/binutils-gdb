@@ -1,3 +1,9 @@
+2002-03-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* value.h (struct value): Delete field ``substring_addr''.  Change
+	aligner fields to force_doublest_align, force_longest_align,
+	force_core_addr_align and force_pointer_align.
+
 2002-03-16  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* ia64-tdep.c (ia64_gdbarch_init): Call set_gdbarch_frame_args_skip,
