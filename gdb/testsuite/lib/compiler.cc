@@ -40,7 +40,13 @@ set compiler_info [join {gcc __GNUC__ __GNUC_MINOR__ "unknown"} -]
 #endif
 #endif
 
+#if defined (__HP_CXD_SPP)
+/* older hp ansi c, such as A.11.01.25171.gp, defines this */
+set compiler_info [join {hpcc __HP_CXD_SPP} -]
+#endif
+
 #if defined (__HP_cc)
+/* newer hp ansi c, such as B.11.11.28706.gp, defines this */
 set compiler_info [join {hpcc __HP_cc} -]
 #endif
 
