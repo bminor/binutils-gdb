@@ -1,7 +1,11 @@
+Mon Dec  9 16:48:33 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: fix for bad directory tests.
+
 Sat Dec  7 00:17:01 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
 	* configure: \{1,2\} appears to be a sysv'ism.  Use a different
-	  regexp.
+	  regexp.  -srcdir relative was being handled incorrectly.
 
 	* Makefile.in: unwrapped some for loops so that parallel makes
 	  work again and so one can focus one's attention on a particular

@@ -62,6 +62,7 @@ SUBDIRS = libiberty glob readline bfd gdb binutils ld gas gcc gnulib clib
 OTHERS = 
 
 ALL = all.normal
+INSTALL_TARGET = install.all
 
 ### for debugging
 #GCCVERBOSE=-v
@@ -84,6 +85,7 @@ install-info: dir.info install-info-dirs force
 # clib prms
 all.normal: all-texinfo all-bison all-ld all-gnulib all-gdb all-make \
 	all-cvs all-emacs all-ispell
+all.cross: all-bison all-ld all-gnulib all-gdb
 #	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
 clean: clean-libiberty clean-texinfo clean-bfd clean-binutils clean-bison \
@@ -92,17 +94,22 @@ clean: clean-libiberty clean-texinfo clean-bfd clean-binutils clean-bison \
 	clean-cvs clean-emacs clean-ispell
 	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 
-install: install-dirs install-libiberty install-texinfo install-binutils install-bison \
+install: $(INSTALL_TARGET)
+
+install.all: install-dirs install-libiberty install-texinfo install-binutils install-bison \
 	install-byacc install-ld install-gas install-gnulib \
 	install-readline install-glob install-gdb install-make install-cvs \
 	install-emacs install-ispell
-
+install.cross: install-dirs install-libiberty install-binutils install-bison \
+	install-byacc install-ld install-gas install-gnulib \
+	install-readline install-glob install-gdb
 
 ### libiberty
 .PHONY: all-libiberty just-libiberty
 all-libiberty: just-libiberty
 just-libiberty: force
-	[ -d $(unsubdir)/libiberty ] && (cd $(unsubdir)/libiberty$(subdir); \
+	if [ -d $(unsubdir)/libiberty ] ; then \
+		(cd $(unsubdir)/libiberty$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -113,10 +120,14 @@ just-libiberty: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-libiberty: force
-	[ -d $(unsubdir)/libiberty ] && (cd $(unsubdir)/libiberty$(subdir); \
+	if [ -d $(unsubdir)/libiberty ] ; then \
+		(cd $(unsubdir)/libiberty$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -127,10 +138,14 @@ clean-libiberty: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-libiberty: force
-	[ -d $(unsubdir)/libiberty ] && (cd $(unsubdir)/libiberty$(subdir); \
+	if [ -d $(unsubdir)/libiberty ] ; then \
+		(cd $(unsubdir)/libiberty$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -141,13 +156,17 @@ install-libiberty: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### texinfo
 .PHONY: all-texinfo just-texinfo
 all-texinfo: just-texinfo
 just-texinfo: just-libiberty force
-	[ -d $(unsubdir)/texinfo ] && (cd $(unsubdir)/texinfo$(subdir); \
+	if [ -d $(unsubdir)/texinfo ] ; then \
+		(cd $(unsubdir)/texinfo$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -158,10 +177,14 @@ just-texinfo: just-libiberty force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-texinfo: force
-	[ -d $(unsubdir)/texinfo ] && (cd $(unsubdir)/texinfo$(subdir); \
+	if [ -d $(unsubdir)/texinfo ] ; then \
+		(cd $(unsubdir)/texinfo$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -172,10 +195,14 @@ clean-texinfo: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-texinfo: force
-	[ -d $(unsubdir)/texinfo ] && (cd $(unsubdir)/texinfo$(subdir); \
+	if [ -d $(unsubdir)/texinfo ] ; then \
+		(cd $(unsubdir)/texinfo$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -186,13 +213,17 @@ install-texinfo: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### bfd
 .PHONY: all-bfd just-bfd
 all-bfd: just-bfd
 just-bfd: force
-	[ -d $(unsubdir)/bfd ] && (cd $(unsubdir)/bfd$(subdir); \
+	if [ -d $(unsubdir)/bfd ] ; then \
+		(cd $(unsubdir)/bfd$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -203,10 +234,14 @@ just-bfd: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-bfd: force
-	[ -d $(unsubdir)/bfd ] && (cd $(unsubdir)/bfd$(subdir); \
+	if [ -d $(unsubdir)/bfd ] ; then \
+		(cd $(unsubdir)/bfd$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -217,10 +252,14 @@ clean-bfd: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-bfd: force
-	[ -d $(unsubdir)/bfd ] && (cd $(unsubdir)/bfd$(subdir); \
+	if [ -d $(unsubdir)/bfd ] ; then \
+		(cd $(unsubdir)/bfd$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -231,13 +270,17 @@ install-bfd: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### binutils
 .PHONY: all-binutils just-binutils
 all-binutils: just-binutils
 just-binutils: just-libiberty just-bfd force
-	[ -d $(unsubdir)/binutils ] && (cd $(unsubdir)/binutils$(subdir); \
+	if [ -d $(unsubdir)/binutils ] ; then \
+		(cd $(unsubdir)/binutils$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -248,10 +291,14 @@ just-binutils: just-libiberty just-bfd force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-binutils: force
-	[ -d $(unsubdir)/binutils ] && (cd $(unsubdir)/binutils$(subdir); \
+	if [ -d $(unsubdir)/binutils ] ; then \
+		(cd $(unsubdir)/binutils$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -262,10 +309,14 @@ clean-binutils: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-binutils: force
-	[ -d $(unsubdir)/binutils ] && (cd $(unsubdir)/binutils$(subdir); \
+	if [ -d $(unsubdir)/binutils ] ; then \
+		(cd $(unsubdir)/binutils$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -276,13 +327,17 @@ install-binutils: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### byacc
 .PHONY: all-byacc just-byacc
 all-byacc: just-byacc
 just-byacc: force
-	[ -d $(unsubdir)/byacc ] && (cd $(unsubdir)/byacc$(subdir); \
+	if [ -d $(unsubdir)/byacc ] ; then \
+		(cd $(unsubdir)/byacc$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -293,10 +348,14 @@ just-byacc: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-byacc: force
-	[ -d $(unsubdir)/byacc ] && (cd $(unsubdir)/byacc$(subdir); \
+	if [ -d $(unsubdir)/byacc ] ; then \
+		(cd $(unsubdir)/byacc$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -307,10 +366,14 @@ clean-byacc: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-byacc: force
-	[ -d $(unsubdir)/byacc ] && (cd $(unsubdir)/byacc$(subdir); \
+	if [ -d $(unsubdir)/byacc ] ; then \
+		(cd $(unsubdir)/byacc$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -321,13 +384,17 @@ install-byacc: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### bison
 .PHONY: all-bison just-bison
 all-bison: just-bison
 just-bison: just-libiberty force
-	[ -d $(unsubdir)/bison ] && (cd $(unsubdir)/bison$(subdir); \
+	if [ -d $(unsubdir)/bison ] ; then \
+		(cd $(unsubdir)/bison$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -338,10 +405,14 @@ just-bison: just-libiberty force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-bison: force
-	[ -d $(unsubdir)/bison ] && (cd $(unsubdir)/bison$(subdir); \
+	if [ -d $(unsubdir)/bison ] ; then \
+		(cd $(unsubdir)/bison$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -352,10 +423,14 @@ clean-bison: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-bison: force
-	[ -d $(unsubdir)/bison ] && (cd $(unsubdir)/bison$(subdir); \
+	if [ -d $(unsubdir)/bison ] ; then \
+		(cd $(unsubdir)/bison$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -366,13 +441,17 @@ install-bison: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### gcc
 .PHONY: all-gcc just-gcc
 all-gcc: just-gcc
 just-gcc: just-libiberty just-byacc force
-	[ -d $(unsubdir)/gcc ] && (cd $(unsubdir)/gcc$(subdir); \
+	if [ -d $(unsubdir)/gcc ] ; then \
+		(cd $(unsubdir)/gcc$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -383,10 +462,14 @@ just-gcc: just-libiberty just-byacc force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-gcc: force
-	[ -d $(unsubdir)/gcc ] && (cd $(unsubdir)/gcc$(subdir); \
+	if [ -d $(unsubdir)/gcc ] ; then \
+		(cd $(unsubdir)/gcc$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -397,10 +480,14 @@ clean-gcc: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-gcc:
-	[ -d $(unsubdir)/gcc ] && (cd $(unsubdir)/gcc$(subdir); \
+	if [ -d $(unsubdir)/gcc ] ; then \
+		(cd $(unsubdir)/gcc$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -411,13 +498,17 @@ install-gcc:
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### readline
 .PHONY: all-readline just-readline
 all-readline: just-readline
 just-readline: force
-	[ -d $(unsubdir)/readline ] && (cd $(unsubdir)/readline$(subdir); \
+	if [ -d $(unsubdir)/readline ] ; then \
+		(cd $(unsubdir)/readline$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -428,10 +519,14 @@ just-readline: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-readline: force
-	[ -d $(unsubdir)/readline ] && (cd $(unsubdir)/readline$(subdir); \
+	if [ -d $(unsubdir)/readline ] ; then \
+		(cd $(unsubdir)/readline$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -442,10 +537,14 @@ clean-readline: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-readline: force
-	[ -d $(unsubdir)/readline ] && (cd $(unsubdir)/readline$(subdir); \
+	if [ -d $(unsubdir)/readline ] ; then \
+		(cd $(unsubdir)/readline$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -456,13 +555,17 @@ install-readline: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### glob
 .PHONY: all-glob just-glob
 all-glob: just-glob
 just-glob: force
-	[ -d $(unsubdir)/glob ] && (cd $(unsubdir)/glob$(subdir); \
+	if [ -d $(unsubdir)/glob ] ; then \
+		(cd $(unsubdir)/glob$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -473,10 +576,14 @@ just-glob: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-glob: force
-	[ -d $(unsubdir)/glob ] && (cd $(unsubdir)/glob$(subdir); \
+	if [ -d $(unsubdir)/glob ] ; then \
+		(cd $(unsubdir)/glob$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -487,10 +594,14 @@ clean-glob: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-glob: force
-	[ -d $(unsubdir)/glob ] && (cd $(unsubdir)/glob$(subdir); \
+	if [ -d $(unsubdir)/glob ] ; then \
+		(cd $(unsubdir)/glob$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -501,13 +612,17 @@ install-glob: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### gas
 .PHONY: all-gas just-gas
 all-gas: just-gas
 just-gas: just-libiberty just-bfd force
-	[ -d $(unsubdir)/gas ] && (cd $(unsubdir)/gas$(subdir); \
+	if [ -d $(unsubdir)/gas ] ; then \
+		(cd $(unsubdir)/gas$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -518,10 +633,14 @@ just-gas: just-libiberty just-bfd force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-gas: force
-	[ -d $(unsubdir)/gas ] && (cd $(unsubdir)/gas$(subdir); \
+	if [ -d $(unsubdir)/gas ] ; then \
+		(cd $(unsubdir)/gas$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -532,10 +651,14 @@ clean-gas: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-gas: force
-	[ -d $(unsubdir)/gas ] && (cd $(unsubdir)/gas$(subdir); \
+	if [ -d $(unsubdir)/gas ] ; then \
+		(cd $(unsubdir)/gas$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -546,13 +669,17 @@ install-gas: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### ld
 .PHONY: all-ld just-ld
 all-ld: just-ld
 just-ld: just-libiberty just-bfd just-byacc force
-	[ -d $(unsubdir)/ld ] && (cd $(unsubdir)/ld$(subdir); \
+	if [ -d $(unsubdir)/ld ] ; then \
+		(cd $(unsubdir)/ld$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -563,10 +690,14 @@ just-ld: just-libiberty just-bfd just-byacc force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-ld: force
-	[ -d $(unsubdir)/ld ] && (cd $(unsubdir)/ld$(subdir); \
+	if [ -d $(unsubdir)/ld ] ; then \
+		(cd $(unsubdir)/ld$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -577,10 +708,14 @@ clean-ld: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-ld: force
-	[ -d $(unsubdir)/ld ] && (cd $(unsubdir)/ld$(subdir); \
+	if [ -d $(unsubdir)/ld ] ; then \
+		(cd $(unsubdir)/ld$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -591,13 +726,17 @@ install-ld: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### gnulib
 .PHONY: all-gnulib just-gnulib
 all-gnulib: just-gnulib
 just-gnulib: all-gcc all-gas all-binutils force
-	[ -d $(unsubdir)/gnulib ] && (cd $(unsubdir)/gnulib$(subdir); \
+	if [ -d $(unsubdir)/gnulib ] ; then \
+		(cd $(unsubdir)/gnulib$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -608,10 +747,14 @@ just-gnulib: all-gcc all-gas all-binutils force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-gnulib: force
-	[ -d $(unsubdir)/gnulib ] && (cd $(unsubdir)/gnulib$(subdir); \
+	if [ -d $(unsubdir)/gnulib ] ; then \
+		(cd $(unsubdir)/gnulib$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -622,10 +765,14 @@ clean-gnulib: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-gnulib: force
-	[ -d $(unsubdir)/gnulib ] && (cd $(unsubdir)/gnulib$(subdir); \
+	if [ -d $(unsubdir)/gnulib ] ; then \
+		(cd $(unsubdir)/gnulib$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -636,13 +783,17 @@ install-gnulib: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### gdb
 .PHONY: all-gdb just-gdb
 all-gdb: just-gdb
 just-gdb: just-bfd just-libiberty just-readline just-glob force
-	[ -d $(unsubdir)/gdb ] && (cd $(unsubdir)/gdb$(subdir); \
+	if [ -d $(unsubdir)/gdb ] ; then \
+		(cd $(unsubdir)/gdb$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -653,10 +804,14 @@ just-gdb: just-bfd just-libiberty just-readline just-glob force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-gdb: force
-	[ -d $(unsubdir)/gdb ] && (cd $(unsubdir)/gdb$(subdir); \
+	if [ -d $(unsubdir)/gdb ] ; then \
+		(cd $(unsubdir)/gdb$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -667,10 +822,14 @@ clean-gdb: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-gdb: force
-	[ -d $(unsubdir)/gdb ] && (cd $(unsubdir)/gdb$(subdir); \
+	if [ -d $(unsubdir)/gdb ] ; then \
+		(cd $(unsubdir)/gdb$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -681,13 +840,17 @@ install-gdb: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### make
 .PHONY: all-make just-make
 all-make: just-make
 just-make: all-libiberty force
-	[ -d $(unsubdir)/make ] && (cd $(unsubdir)/make$(subdir); \
+	if [ -d $(unsubdir)/make ] ; then \
+		(cd $(unsubdir)/make$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -698,10 +861,14 @@ just-make: all-libiberty force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-make: force
-	[ -d $(unsubdir)/make ] && (cd $(unsubdir)/make$(subdir); \
+	if [ -d $(unsubdir)/make ] ; then \
+		(cd $(unsubdir)/make$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -712,10 +879,14 @@ clean-make: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-make: force
-	[ -d $(unsubdir)/make ] && (cd $(unsubdir)/make$(subdir); \
+	if [ -d $(unsubdir)/make ] ; then \
+		(cd $(unsubdir)/make$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -726,13 +897,17 @@ install-make: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### diff
 .PHONY: all-diff just-diff
 all-diff: just-diff
 just-diff: force
-	[ -d $(unsubdir)/diff ] && (cd $(unsubdir)/diff$(subdir); \
+	if [ -d $(unsubdir)/diff ] ; then \
+		(cd $(unsubdir)/diff$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -743,10 +918,14 @@ just-diff: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-diff: force
-	[ -d $(unsubdir)/diff ] && (cd $(unsubdir)/diff$(subdir); \
+	if [ -d $(unsubdir)/diff ] ; then \
+		(cd $(unsubdir)/diff$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -757,10 +936,14 @@ clean-diff: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-diff: force
-	[ -d $(unsubdir)/diff ] && (cd $(unsubdir)/diff/$(subdir); \
+	if [ -d $(unsubdir)/diff ] ; then \
+		(cd $(unsubdir)/diff/$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -771,13 +954,17 @@ install-diff: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### grep
 .PHONY: all-grep just-grep
 all-grep: just-grep
 just-grep: force
-	[ -d $(unsubdir)/grep ] && (cd $(unsubdir)/grep$(subdir); \
+	if [ -d $(unsubdir)/grep ] ; then \
+		(cd $(unsubdir)/grep$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -788,10 +975,14 @@ just-grep: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-grep: force
-	[ -d $(unsubdir)/grep ] && (cd $(unsubdir)/grep$(subdir); \
+	if [ -d $(unsubdir)/grep ] ; then \
+		(cd $(unsubdir)/grep$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -802,10 +993,14 @@ clean-grep: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-grep: force
-	[ -d $(unsubdir)/grep ] && (cd $(unsubdir)/grep$(subdir); \
+	if [ -d $(unsubdir)/grep ] ; then \
+		(cd $(unsubdir)/grep$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -816,13 +1011,17 @@ install-grep: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### rcs
 .PHONY: all-rcs just-rcs
 all-rcs: just-rcs
 just-rcs: just-diff just-grep force
-	[ -d $(unsubdir)/rcs ] && (cd $(unsubdir)/rcs$(subdir); \
+	if [ -d $(unsubdir)/rcs ] ; then \
+		(cd $(unsubdir)/rcs$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -833,10 +1032,14 @@ just-rcs: just-diff just-grep force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-rcs: force
-	[ -d $(unsubdir)/rcs ] && (cd $(unsubdir)/rcs$(subdir); \
+	if [ -d $(unsubdir)/rcs ] ; then \
+		(cd $(unsubdir)/rcs$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -847,10 +1050,14 @@ clean-rcs: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-rcs: install-grep install-diff force
-	[ -d $(unsubdir)/rcs ] && (cd $(unsubdir)/rcs$(subdir); \
+	if [ -d $(unsubdir)/rcs ] ; then \
+		(cd $(unsubdir)/rcs$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -861,13 +1068,17 @@ install-rcs: install-grep install-diff force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### gdbm
 .PHONY: all-gdbm just-gdbm
 all-gdbm: just-gdbm
 just-gdbm: force
-	[ -d $(unsubdir)/gdbm ] && (cd $(unsubdir)/gdbm$(subdir); \
+	if [ -d $(unsubdir)/gdbm ] ; then \
+		(cd $(unsubdir)/gdbm$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -878,10 +1089,14 @@ just-gdbm: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-gdbm: force
-	[ -d $(unsubdir)/gdbm ] && (cd $(unsubdir)/gdbm$(subdir); \
+	if [ -d $(unsubdir)/gdbm ] ; then \
+		(cd $(unsubdir)/gdbm$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -892,10 +1107,14 @@ clean-gdbm: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-gdbm: force
-	[ -d $(unsubdir)/gdbm ] && (cd $(unsubdir)/gdbm$(subdir); \
+	if [ -d $(unsubdir)/gdbm ] ; then \
+		(cd $(unsubdir)/gdbm$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -906,13 +1125,17 @@ install-gdbm: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### cvs
 .PHONY: all-cvs just-cvs
 all-cvs: just-cvs just-rcs just-grep just-diff
 just-cvs: just-gdbm force
-	[ -d $(unsubdir)/cvs ] && (cd $(unsubdir)/cvs$(subdir); \
+	if [ -d $(unsubdir)/cvs ] ; then \
+		(cd $(unsubdir)/cvs$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -923,10 +1146,14 @@ just-cvs: just-gdbm force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-cvs: force
-	[ -d $(unsubdir)/cvs ] && (cd $(unsubdir)/cvs$(subdir); \
+	if [ -d $(unsubdir)/cvs ] ; then \
+		(cd $(unsubdir)/cvs$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -937,10 +1164,14 @@ clean-cvs: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-cvs: install-rcs install-gdbm force
-	[ -d $(unsubdir)/cvs ] && (cd $(unsubdir)/cvs$(subdir); \
+	if [ -d $(unsubdir)/cvs ] ; then \
+		(cd $(unsubdir)/cvs$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -951,13 +1182,17 @@ install-cvs: install-rcs install-gdbm force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### emacs
 .PHONY: all-emacs just-emacs
 all-emacs: just-emacs
 just-emacs: force
-	[ -d $(unsubdir)/emacs ] && (cd $(unsubdir)/emacs$(subdir); \
+	if [ -d $(unsubdir)/emacs ] ; then \
+		(cd $(unsubdir)/emacs$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -968,10 +1203,14 @@ just-emacs: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-emacs: force
-	[ -d $(unsubdir)/emacs ] && (cd $(unsubdir)/emacs$(subdir); \
+	if [ -d $(unsubdir)/emacs ] ; then \
+		(cd $(unsubdir)/emacs$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -982,10 +1221,14 @@ clean-emacs: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-emacs: install-rcs install-gdbm force
-	[ -d $(unsubdir)/emacs ] && (cd $(unsubdir)/emacs$(subdir); \
+	if [ -d $(unsubdir)/emacs ] ; then \
+		(cd $(unsubdir)/emacs$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -996,13 +1239,17 @@ install-emacs: install-rcs install-gdbm force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### ispell
 .PHONY: all-ispell just-ispell
 all-ispell: just-ispell
 just-ispell: all-emacs force
-	[ -d $(unsubdir)/ispell ] && (cd $(unsubdir)/ispell$(subdir); \
+	if [ -d $(unsubdir)/ispell ] ; then \
+		(cd $(unsubdir)/ispell$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -1013,10 +1260,14 @@ just-ispell: all-emacs force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			all)
+			all) ; \
+	else \
+		true ; \
+	fi
 
 clean-ispell: force
-	[ -d $(unsubdir)/ispell ] && (cd $(unsubdir)/ispell$(subdir); \
+	if [ -d $(unsubdir)/ispell ] ; then \
+		(cd $(unsubdir)/ispell$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -1027,10 +1278,14 @@ clean-ispell: force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			clean)
+			clean) ; \
+	else \
+		true ; \
+	fi
 
 install-ispell: install-rcs install-gdbm force
-	[ -d $(unsubdir)/ispell ] && (cd $(unsubdir)/ispell$(subdir); \
+	if [ -d $(unsubdir)/ispell ] ; then \
+		(cd $(unsubdir)/ispell$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -1041,7 +1296,10 @@ install-ispell: install-rcs install-gdbm force
 			"LDFLAGS=$(LDFLAGS)" \
 			"BISON=$(BISON)" \
 			"MAKEINFO=$(MAKEINFO)" \
-			install)
+			install) ; \
+	else \
+		true ; \
+	fi
 
 ### other supporting targets
 # this is a bad hack.
