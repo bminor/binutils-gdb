@@ -1,6 +1,19 @@
 2000-06-02  Christopher Faylor  <cgf@cygnus.com>
 
-	* configure.in: Detect correct versions of ranlib and windres when
+	* win32-nat.c: Fix up gcc warnings throughout.
+	(handle_load_dll): Change DLL name to lower case.
+	(handle_exception): Add a second argument indicating whether a
+	breakpoint should be ignored.  Return a 0 if the breakpoint was
+	ignored.
+	(get_child_debug_event): Pass argument to handle_exception to control
+	whether a breakpoint should be ignored.
+	(child_create_inferior): Use modern cygwin API.  Explicitly clear
+	last_sig.  Pass FIRST_EXCEPTION to get_child_debug_event for detection
+	of first breakpoint.
+
+2000-06-02  Christopher Faylor  <cgf@cygnus.com>
+
+	* configure.in: Detect correct versions of dlltool and windres when
 	cross-compiling.
 	* configure: Regenerate.
 

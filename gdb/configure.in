@@ -609,11 +609,6 @@ AC_CACHE_CHECK([for cygwin], gdb_cv_os_cygwin,
 lose
 #endif],[gdb_cv_os_cygwin=yes],[gdb_cv_os_cygwin=no])])
 
-DLLTOOL=${DLLTOOL-dlltool}
-WINDRES=${WINDRES-windres}
-AC_SUBST(DLLTOOL)
-AC_SUBST(WINDRES)
-
 dnl Figure out which term library to use.
 if test x$gdb_host = xgo32; then
   TERM_LIB=
