@@ -58,6 +58,14 @@
 static const int hppa32_num_regs = 128;
 static const int hppa64_num_regs = 96;
 
+/* hppa-specific object data -- unwind and solib info.
+   TODO/maybe: think about splitting this into two parts; the unwind data is 
+   common to all hppa targets, but is only used in this file; we can register 
+   that separately and make this static. The solib data is probably hpux-
+   specific, so we can create a separate extern objfile_data that is registered
+   by hppa-hpux-tdep.c and shared with pa64solib.c and somsolib.c.  */
+const struct objfile_data *hppa_objfile_priv_data = NULL;
+
 /* Get at various relevent fields of an instruction word. */
 #define MASK_5 0x1f
 #define MASK_11 0x7ff
@@ -66,8 +74,8 @@ static const int hppa64_num_regs = 96;
 
 /* Define offsets into the call dummy for the _sr4export address.
    See comments related to CALL_DUMMY for more info.  */
-#define SR4EXPORT_LDIL_OFFSET (INSTRUCTION_SIZE * 12)
-#define SR4EXPORT_LDO_OFFSET (INSTRUCTION_SIZE * 13)
+#define SR4EXPORT_LDIL_OFFSET (HPPA_INSTRUCTION_SIZE * 12)
+#define SR4EXPORT_LDO_OFFSET (HPPA_INSTRUCTION_SIZE * 13)
 
 /* To support detection of the pseudo-initial frame
    that threads have. */
@@ -456,12 +464,12 @@ read_unwind_info (struct objfile *objfile)
   unsigned index, unwind_entries;
   unsigned stub_entries, total_entries;
   CORE_ADDR text_offset;
-  struct obj_unwind_info *ui;
-  obj_private_data_t *obj_private;
+  struct hppa_unwind_info *ui;
+  struct hppa_objfile_private *obj_private;
 
   text_offset = ANOFFSET (objfile->section_offsets, 0);
-  ui = (struct obj_unwind_info *) obstack_alloc (&objfile->objfile_obstack,
-					   sizeof (struct obj_unwind_info));
+  ui = (struct hppa_unwind_info *) obstack_alloc (&objfile->objfile_obstack,
+					   sizeof (struct hppa_unwind_info));
 
   ui->table = NULL;
   ui->cache = NULL;
@@ -570,18 +578,18 @@ read_unwind_info (struct objfile *objfile)
 	 compare_unwind_entries);
 
   /* Keep a pointer to the unwind information.  */
-  if (objfile->obj_private == NULL)
+  obj_private = (struct hppa_objfile_private *) 
+	        objfile_data (objfile, hppa_objfile_priv_data);
+  if (obj_private == NULL)
     {
-      obj_private = (obj_private_data_t *)
-	obstack_alloc (&objfile->objfile_obstack,
-		       sizeof (obj_private_data_t));
+      obj_private = (struct hppa_objfile_private *)
+	obstack_alloc (&objfile->objfile_obstack, 
+                       sizeof (struct hppa_objfile_private));
+      set_objfile_data (objfile, hppa_objfile_priv_data, obj_private);
       obj_private->unwind_info = NULL;
       obj_private->so_info = NULL;
       obj_private->dp = 0;
-
-      objfile->obj_private = obj_private;
     }
-  obj_private = (obj_private_data_t *) objfile->obj_private;
   obj_private->unwind_info = ui;
 }
 
@@ -595,6 +603,7 @@ find_unwind_entry (CORE_ADDR pc)
 {
   int first, middle, last;
   struct objfile *objfile;
+  struct hppa_objfile_private *priv;
 
   /* A function at address 0?  Not in HP-UX! */
   if (pc == (CORE_ADDR) 0)
@@ -602,17 +611,19 @@ find_unwind_entry (CORE_ADDR pc)
 
   ALL_OBJFILES (objfile)
   {
-    struct obj_unwind_info *ui;
+    struct hppa_unwind_info *ui;
     ui = NULL;
-    if (objfile->obj_private)
-      ui = ((obj_private_data_t *) (objfile->obj_private))->unwind_info;
+    priv = objfile_data (objfile, hppa_objfile_priv_data);
+    if (priv)
+      ui = ((struct hppa_objfile_private *) priv)->unwind_info;
 
     if (!ui)
       {
 	read_unwind_info (objfile);
-	if (objfile->obj_private == NULL)
+        priv = objfile_data (objfile, hppa_objfile_priv_data);
+	if (priv == NULL)
 	  error ("Internal error reading unwind information.");
-	ui = ((obj_private_data_t *) (objfile->obj_private))->unwind_info;
+        ui = ((struct hppa_objfile_private *) priv)->unwind_info;
       }
 
     /* First, check the cache */
@@ -732,26 +743,6 @@ hppa64_register_name (int i)
     return NULL;
   else
     return names[i];
-}
-
-
-
-/* Return the adjustment necessary to make for addresses on the stack
-   as presented by hpread.c.
-
-   This is necessary because of the stack direction on the PA and the
-   bizarre way in which someone (?) decided they wanted to handle
-   frame pointerless code in GDB.  */
-int
-hpread_adjust_stack_address (CORE_ADDR func_addr)
-{
-  struct unwind_table_entry *u;
-
-  u = find_unwind_entry (func_addr);
-  if (!u)
-    return 0;
-  else
-    return u->Total_frame_size << 3;
 }
 
 /* This function pushes a stack frame with arguments as part of the
@@ -2729,6 +2720,8 @@ _initialize_hppa_tdep (void)
   void break_at_finish_at_depth_command (char *arg, int from_tty);
 
   gdbarch_register (bfd_arch_hppa, hppa_gdbarch_init, hppa_dump_tdep);
+
+  hppa_objfile_priv_data = register_objfile_data ();
 
   add_cmd ("unwind", class_maintenance, unwind_command,
 	   "Print unwind table entry at given address.",

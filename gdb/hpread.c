@@ -37,6 +37,7 @@
 #include "demangle.h"
 #include "somsolib.h"
 #include "gdb_assert.h"
+#include "hppa-tdep.h"
 
 /* Private information attached to an objfile which we use to find
    and internalize the HP C debug symbols within that objfile.  */
@@ -233,6 +234,8 @@ static void fixup_class_method_type
   (struct type *, struct type *, struct objfile *);
 
 static void hpread_adjust_bitoffsets (struct type *, int);
+
+static int hpread_adjust_stack_address (CORE_ADDR func_addr);
 
 static dnttpointer hpread_get_next_skip_over_anon_unions
   (int, dnttpointer, union dnttentry **, struct objfile *);
@@ -3247,10 +3250,9 @@ hpread_read_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
       if (paramp->dfparam.copyparam)
 	{
 	  SYMBOL_VALUE (sym) = paramp->dfparam.location;
-#ifdef HPREAD_ADJUST_STACK_ADDRESS
 	  SYMBOL_VALUE (sym)
-	    += HPREAD_ADJUST_STACK_ADDRESS (CURRENT_FUNCTION_VALUE (objfile));
-#endif
+	    += hpread_adjust_stack_address (CURRENT_FUNCTION_VALUE (objfile));
+
 	  /* This is likely a pass-by-invisible reference parameter,
 	     Hack on the symbol class to make GDB happy.  */
 	  /* ??rehrauer: This appears to be broken w/r/t to passing
@@ -3426,10 +3428,9 @@ hpread_read_doc_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
       if (paramp->dfparam.copyparam)
 	{
 	  SYMBOL_VALUE (sym) = paramp->dfparam.location;
-#ifdef HPREAD_ADJUST_STACK_ADDRESS
 	  SYMBOL_VALUE (sym)
-	    += HPREAD_ADJUST_STACK_ADDRESS (CURRENT_FUNCTION_VALUE (objfile));
-#endif
+	    += hpread_adjust_stack_address(CURRENT_FUNCTION_VALUE (objfile));
+
 	  /* This is likely a pass-by-invisible reference parameter,
 	     Hack on the symbol class to make GDB happy.  */
 	  /* ??rehrauer: This appears to be broken w/r/t to passing
@@ -5697,10 +5698,8 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
       if (dn_bufp->dfparam.copyparam)
 	{
 	  SYMBOL_VALUE (sym) = dn_bufp->dfparam.location;
-#ifdef HPREAD_ADJUST_STACK_ADDRESS
 	  SYMBOL_VALUE (sym)
-	    += HPREAD_ADJUST_STACK_ADDRESS (CURRENT_FUNCTION_VALUE (objfile));
-#endif
+	    += hpread_adjust_stack_address (CURRENT_FUNCTION_VALUE (objfile));
 	}
       else
 	SYMBOL_VALUE (sym) = dn_bufp->dfparam.location;
@@ -5754,11 +5753,14 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	       * to "somsolib.c".  But C lets us point to one.
 	       */
 	      struct so_list *so;
+              struct hppa_objfile_private *priv;
 
-	      if (objfile->obj_private == NULL)
+              priv = (struct hppa_objfile_private *)
+	        objfile_data (objfile, hppa_objfile_priv_data);
+	      if (priv == NULL)
 		error ("Internal error in reading shared library information.");
 
-	      so = ((obj_private_data_t *) (objfile->obj_private))->so_info;
+	      so = ((struct hppa_objfile_private *) priv)->so_info;
 	      if (so == NULL)
 		error ("Internal error in reading shared library information.");
 
@@ -5781,10 +5783,8 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	SYMBOL_CLASS (sym) = LOC_LOCAL;
 
       SYMBOL_VALUE (sym) = dn_bufp->ddvar.location;
-#ifdef HPREAD_ADJUST_STACK_ADDRESS
       SYMBOL_VALUE (sym)
-	+= HPREAD_ADJUST_STACK_ADDRESS (CURRENT_FUNCTION_VALUE (objfile));
-#endif
+	+= hpread_adjust_stack_address (CURRENT_FUNCTION_VALUE (objfile));
       SYMBOL_TYPE (sym) = hpread_type_lookup (dn_bufp->ddvar.type, objfile);
       if (dn_bufp->ddvar.global)
 	add_symbol_to_list (sym, &global_symbols);
@@ -6262,6 +6262,24 @@ hpread_adjust_bitoffsets (struct type *type, int bits)
 
   for (i = 0; i < TYPE_NFIELDS (type); i++)
     TYPE_FIELD_BITPOS (type, i) -= bits;
+}
+
+/* Return the adjustment necessary to make for addresses on the stack
+   as presented by hpread.c.
+
+   This is necessary because of the stack direction on the PA and the
+   bizarre way in which someone (?) decided they wanted to handle
+   frame pointerless code in GDB.  */
+int
+hpread_adjust_stack_address (CORE_ADDR func_addr)
+{
+  struct unwind_table_entry *u;
+
+  u = find_unwind_entry (func_addr);
+  if (!u)
+    return 0;
+  else
+    return u->Total_frame_size << 3;
 }
 
 /* Because of quirks in HP compilers' treatment of anonymous unions inside

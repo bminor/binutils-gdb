@@ -52,6 +52,7 @@
 #include "language.h"
 #include "regcache.h"
 #include "exec.h"
+#include "hppa-tdep.h"
 
 #include <fcntl.h>
 
@@ -220,7 +221,7 @@ pa64_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
 {
   bfd *tmp_bfd;
   asection *sec;
-  obj_private_data_t *obj_private;
+  struct hppa_objfile_private *obj_private;
   struct section_addr_info *section_addrs;
   struct cleanup *my_cleanups;
 
@@ -278,17 +279,18 @@ pa64_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
   /* Mark this as a shared library and save private data.  */
   so->objfile->flags |= OBJF_SHARED;
 
-  if (so->objfile->obj_private == NULL)
+  obj_private = (struct hppa_objfile_private *)
+	        objfile_data (so->objfile, hppa_objfile_priv_data);
+  if (obj_private == NULL)
     {
-      obj_private = (obj_private_data_t *)
+      obj_private = (struct hppa_objfile_private *)
 	obstack_alloc (&so->objfile->objfile_obstack,
-		       sizeof (obj_private_data_t));
+		       sizeof (struct hppa_objfile_private));
+      set_objfile_data (so->objfile, hppa_objfile_priv_data, obj_private);
       obj_private->unwind_info = NULL;
       obj_private->so_info = NULL;
-      so->objfile->obj_private = obj_private;
     }
 
-  obj_private = (obj_private_data_t *) so->objfile->obj_private;
   obj_private->so_info = so;
   obj_private->dp = so->pa64_solib_desc.linkage_ptr;
   do_cleanups (my_cleanups);

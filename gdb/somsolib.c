@@ -43,6 +43,7 @@
 #include "regcache.h"
 #include "gdb_assert.h"
 #include "exec.h"
+#include "hppa-tdep.h"
 
 #include <fcntl.h>
 
@@ -278,7 +279,7 @@ static void
 som_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
 			     CORE_ADDR text_addr)
 {
-  obj_private_data_t *obj_private;
+  struct hppa_objfile_private *obj_private;
   struct obj_section *s;
 
   so->objfile = symbol_file_add (name, from_tty, NULL, 0, OBJF_SHARED);
@@ -307,17 +308,18 @@ som_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
    */
   so->objfile->flags |= OBJF_SHARED;
 
-  if (so->objfile->obj_private == NULL)
+  obj_private = (struct hppa_objfile_private *)
+	        objfile_data (so->objfile, hppa_objfile_priv_data);
+  if (obj_private == NULL)
     {
-      obj_private = (obj_private_data_t *)
+      obj_private = (struct hppa_objfile_private *)
 	obstack_alloc (&so->objfile->objfile_obstack,
-		       sizeof (obj_private_data_t));
+		       sizeof (struct hppa_objfile_private));
+      set_objfile_data (so->objfile, hppa_objfile_priv_data, obj_private);
       obj_private->unwind_info = NULL;
       obj_private->so_info = NULL;
-      so->objfile->obj_private = obj_private;
     }
 
-  obj_private = (obj_private_data_t *) so->objfile->obj_private;
   obj_private->so_info = so;
 
   if (!bfd_check_format (so->abfd, bfd_object))

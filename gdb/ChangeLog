@@ -1,5 +1,26 @@
 2004-04-17  Randolph Chung  <tausq@debian.org>
 
+	* Makefile.in (hpread.o, pa64solib.o, somsolib.o): Add $(hppa_tdep_h)
+	* hppa-tdep.h (INSTRUCTION_SIZE): Move from tm-hppa.h.
+	(hpread_adjust_stack_address): Move to hpread.c.
+	* hppa-tdep.h (unwind_table_entry, unwind_stub_types, obj_unwind_info,
+	obj_private_struct): Move from tm-hppa.h.
+	* hpread.c (hppa-tdep.h): Include.
+	(hpread_adjust_stack_address): Move from hppa-tdep.c.
+	(hpread_read_function_type, hpread_read_doc_function_type)
+	(hpread_process_one_debug_symbol): Call hpread_adjust_stack_address 
+	directly.
+	* pa64solib.c (hppa-tdep.h): Include.
+	* somsolib.c (hppa-tdep.h): Include.
+	* config/pa/tm-hppa.h (frame_info, frame_saved_regs, value, type,
+	inferior_status): Remove unused forward declarations.
+	(INSTRUCTION_SIZE): Move to hppa-tdep.c.
+	(unwind_table_entry, unwind_stub_types, obj_unwind_info, 
+	obj_private_struct): Move to hppa-tdep.h.
+	(HPREAD_ADJUST_STACK_ADDRESS): Remove.
+
+2004-04-17  Randolph Chung  <tausq@debian.org>
+
 	* hppa-tdep.c (hppa_reg_struct_has_addr, hppa_skip_prologue)
 	(hppa_skip_trampoline_code, hppa_in_solib_call_trampoline)
 	(hppa_in_solib_return_trampoline, hppa_cannot_store_register)

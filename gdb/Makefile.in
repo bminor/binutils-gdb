@@ -1837,7 +1837,7 @@ hppa-tdep.o: hppa-tdep.c $(defs_h) $(frame_h) $(bfd_h) $(inferior_h) \
 hpread.o: hpread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(hp_symtab_h) \
 	$(syms_h) $(symtab_h) $(symfile_h) $(objfiles_h) $(buildsym_h) \
 	$(complaints_h) $(gdb_stabs_h) $(gdbtypes_h) $(demangle_h) \
-	$(somsolib_h) $(gdb_assert_h) $(gdb_string_h)
+	$(somsolib_h) $(gdb_assert_h) $(gdb_string_h) $(hppa_tdep_h)
 hpux-thread.o: hpux-thread.c $(defs_h) $(gdbthread_h) $(target_h) \
 	$(inferior_h) $(regcache_h) $(gdb_stat_h) $(gdbcore_h)
 i386bsd-nat.o: i386bsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
@@ -2128,7 +2128,7 @@ osabi.o: osabi.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(osabi_h) \
 pa64solib.o: pa64solib.c $(defs_h) $(frame_h) $(bfd_h) $(libhppa_h) \
 	$(gdbcore_h) $(symtab_h) $(breakpoint_h) $(symfile_h) $(objfiles_h) \
 	$(inferior_h) $(gdb_stabs_h) $(gdb_stat_h) $(gdbcmd_h) $(language_h) \
-	$(regcache_h) $(exec_h)
+	$(regcache_h) $(exec_h) $(hppa_tdep_h)
 parse.o: parse.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(frame_h) $(expression_h) $(value_h) $(command_h) $(language_h) \
 	$(parser_defs_h) $(gdbcmd_h) $(symfile_h) $(inferior_h) \
@@ -2338,7 +2338,7 @@ somread.o: somread.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
 somsolib.o: somsolib.c $(defs_h) $(frame_h) $(bfd_h) $(som_h) $(libhppa_h) \
 	$(gdbcore_h) $(symtab_h) $(breakpoint_h) $(symfile_h) $(objfiles_h) \
 	$(inferior_h) $(gdb_stabs_h) $(gdb_stat_h) $(gdbcmd_h) $(language_h) \
-	$(regcache_h) $(gdb_assert_h) $(exec_h)
+	$(regcache_h) $(gdb_assert_h) $(exec_h) $(hppa_tdep_h)
 source.o: source.c $(defs_h) $(symtab_h) $(expression_h) $(language_h) \
 	$(command_h) $(source_h) $(gdbcmd_h) $(frame_h) $(value_h) \
 	$(gdb_string_h) $(gdb_stat_h) $(gdbcore_h) $(gdb_regex_h) \
