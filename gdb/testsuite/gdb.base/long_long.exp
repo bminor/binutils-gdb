@@ -85,6 +85,15 @@ gdb_expect {
     default { }
 }
 
+# Detect targets with 2-byte pointers.  Assume all others use 4-bytes.
+set sizeof_ptr 4
+send_gdb "print sizeof(void*)\n"
+gdb_expect {
+    -re ".* = 2.*$gdb_prompt $" { set sizeof_ptr 2 }
+    -re ".*$gdb_prompt $" { }
+    default { }
+}
+
 # Detect targets with 4-byte shorts.  Assume all others use 2-bytes.
 
 set sizeof_short 2
@@ -130,7 +139,11 @@ gdb_test "p/d oct" ".*-6399925985474168457.*"
 gdb_test "p/u oct" ".*12046818088235383159.*"
 gdb_test "p/o oct" ".*.*"
 gdb_test "p/t oct" ".*1010011100101110111001010011100101110111000001010011100101110111.*"
-gdb_test "p/a oct" ".*0x.*77053977.*"
+if { $sizeof_ptr == 2 } {
+  gdb_test "p/a oct" ".*0x.*3977.*"
+} else {
+  gdb_test "p/a oct" ".*0x.*77053977.*"
+}
 gdb_test "p/c oct" ".*'w'.*"
 
 if { $sizeof_double == 8 } {
@@ -166,7 +179,13 @@ if { $target_bigendian_p } {
 	gdb_test "p/u *(int *)&oct" ".*2804868409.*"
 	gdb_test "p/o *(int *)&oct" ".*024713562471.*"
 	gdb_test "p/t *(int *)&oct" ".*10100111001011101110010100111001.*"
-	gdb_test "p/a *(int *)&oct" ".*0xf*a72ee539.*"
+
+	if { $sizeof_ptr == 2 } {
+	    gdb_test "p/a *(int *)&oct" ".*0xe539.*"
+	} else {
+	    gdb_test "p/a *(int *)&oct" ".*0xf*a72ee539.*"
+	}
+
 	gdb_test "p/c *(int *)&oct" ".*57 '9'.*"
 	gdb_test "p/f *(int *)&oct" ".*-2.42716126e-15.*"
 
@@ -176,7 +195,12 @@ if { $target_bigendian_p } {
 	gdb_test "p/u *(int *)&oct" ".*42798.*"
 	gdb_test "p/o *(int *)&oct" ".*0123456.*"
 	gdb_test "p/t *(int *)&oct" ".*1010011100101110.*"
-	gdb_test "p/a *(int *)&oct" ".*0xffffa72e.*"
+
+	if { $sizeof_ptr == 2 } {
+	    gdb_test "p/a *(int *)&oct" ".*0xa72e.*"
+	} else {
+	    gdb_test "p/a *(int *)&oct" ".*0xffffa72e.*"
+	}
 	gdb_test "p/c *(int *)&oct" ".*46 '.'.*"
 	gdb_test "p/f *(int *)&oct" ".*-22738.*"
 
@@ -187,7 +211,11 @@ if { $target_bigendian_p } {
 	gdb_test "p/u *(short *)&oct" ".*42798.*"
 	gdb_test "p/o *(short *)&oct" ".*0123456.*"
 	gdb_test "p/t *(short *)&oct" ".*1010011100101110.*"
-	gdb_test "p/a *(short *)&oct" ".*0xf*ffffa72e.*"
+	if { $sizeof_ptr == 2 } {
+	    gdb_test "p/a *(short *)&oct" ".*0xa72e.*"
+	} else {
+	    gdb_test "p/a *(short *)&oct" ".*0xf*ffffa72e.*"
+	}
 	gdb_test "p/c *(short *)&oct" ".* 46 '.'.*"
 	gdb_test "p/f *(short *)&oct" ".*-22738.*"
     } else {
@@ -205,7 +233,11 @@ if { $target_bigendian_p } {
     gdb_test "x/u &oct" ".*2804868409.*"
     gdb_test "x/o &oct" ".*024713562471.*"
     gdb_test "x/t &oct" ".*10100111001011101110010100111001.*"
-    gdb_test "x/a &oct" ".*0xa72ee539.*"
+    if { $sizeof_ptr == 2 } {
+	gdb_test "x/a &oct" ".*0xa72e.*"
+    } else {
+	gdb_test "x/a &oct" ".*0xa72ee539.*"
+    }
     gdb_test "x/c &oct" ".*-89 .*"
     # FIXME GDB's output is correct, but this longer match fails.
     # gdb_test "x/c &oct" ".*-89 '\\\\247'.*"

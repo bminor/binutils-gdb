@@ -1,5 +1,10 @@
 2001-07-17  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* gdb.base/long_long.exp: Detect size of pointer.  Take into
+	account 2-byte pointers when testing for p/a results.
+
+2001-07-17  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* gdb.base/remote.c (RANDOM_DATA_SIZE): New define, defaults to 48K 
 	and defined to 1K for m68hc11.
 	(random_data): Reduce table to 1K for embedded platforms (68hc11).
