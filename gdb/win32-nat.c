@@ -439,9 +439,10 @@ struct safe_symbol_file_add_args
 /* Maintain a linked list of "so" information. */
 struct so_stuff
 {
-  struct so_stuff *next, **last;
+  struct so_stuff *next;
   DWORD load_addr;
   int loaded;
+  struct objfile *objfile;
   char name[1];
 } solib_start, *solib_end;
 
@@ -468,9 +469,9 @@ safe_symbol_file_add_cleanup (void *p)
 #define sp ((struct safe_symbol_file_add_args *)p)
   gdb_flush (gdb_stderr);
   gdb_flush (gdb_stdout);
-  /* ui_file_delete (gdb_stderr); */
+  ui_file_delete (gdb_stderr);
   ui_file_delete (gdb_stdout);
-  /* gdb_stderr = sp->err; */
+  gdb_stderr = sp->err;
   gdb_stdout = sp->out;
 #undef sp
 }
@@ -490,7 +491,7 @@ safe_symbol_file_add (char *name, int from_tty,
   p.out = gdb_stdout;
   gdb_flush (gdb_stderr);
   gdb_flush (gdb_stdout);
-  /* gdb_stderr = ui_file_new (); */
+  gdb_stderr = ui_file_new ();
   gdb_stdout = ui_file_new ();
   p.name = name;
   p.from_tty = from_tty;
@@ -534,11 +535,12 @@ register_loaded_dll (const char *name, DWORD load_addr)
   so = (struct so_stuff *) xmalloc (sizeof (struct so_stuff) + strlen (ppath) + 8 + 1);
   so->loaded = 0;
   so->load_addr = load_addr;
+  so->next = NULL;
+  so->objfile = NULL;
   strcpy (so->name, ppath);
 
   solib_end->next = so;
   solib_end = so;
-  so->next = NULL;
   len = strlen (ppath);
   if (len > max_dll_name_len)
     max_dll_name_len = len;
@@ -627,6 +629,29 @@ handle_load_dll (void *dummy ATTRIBUTE_UNUSED)
   return 1;
 }
 
+static int
+handle_unload_dll (void *dummy ATTRIBUTE_UNUSED)
+{
+  DWORD lpBaseOfDll = (DWORD) current_event.u.UnloadDll.lpBaseOfDll + 0x1000;
+  struct so_stuff *so;
+
+  for (so = &solib_start; so->next != NULL; so = so->next)
+    if (so->next->load_addr == lpBaseOfDll)
+      {
+	struct so_stuff *sodel = so->next;
+	so->next = sodel->next;
+	if (!so->next)
+	  solib_end = so;
+	if (sodel->objfile)
+	  free_objfile (sodel->objfile);
+	xfree(sodel);
+	return 1;
+      }
+  error ("Error: dll starting at 0x%lx not found.\n", (DWORD) lpBaseOfDll);
+
+  return 0;
+}
+
 /* Return name of last loaded DLL. */
 char *
 child_solib_loaded_library_pathname (int pid ATTRIBUTE_UNUSED)
@@ -647,12 +672,13 @@ child_clear_solibs (void)
     }
 
   solib_start.next = NULL;
+  solib_start.objfile = NULL;
   solib_end = &solib_start;
   max_dll_name_len = sizeof ("DLL Name") - 1;
 }
 
 /* Add DLL symbol information. */
-static void
+static struct objfile *
 solib_symbols_add (char *name, int from_tty, CORE_ADDR load_addr)
 {
   struct section_addr_info section_addrs;
@@ -662,14 +688,12 @@ solib_symbols_add (char *name, int from_tty, CORE_ADDR load_addr)
      of the file header and the section alignment. */
 
   if (!name || !name[0])
-    return;
+    return NULL;
 
   memset (&section_addrs, 0, sizeof (section_addrs));
   section_addrs.other[0].name = ".text";
   section_addrs.other[0].addr = load_addr;
-  safe_symbol_file_add (name, from_tty, NULL, 0, OBJF_SHARED);
-
-  return;
+  return safe_symbol_file_add (name, from_tty, NULL, 0, OBJF_SHARED);
 }
 
 /* Load DLL symbol info. */
@@ -935,7 +959,11 @@ get_child_debug_event (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *ourst
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "UNLOAD_DLL_DEBUG_EVENT"));
-      break;			/* FIXME: don't know what to do here */
+      catch_errors (handle_unload_dll, NULL, (char *) "", RETURN_MASK_ALL);
+      registers_changed ();	/* mark all regs invalid */
+      /* ourstatus->kind = TARGET_WAITKIND_UNLOADED;
+         does not exist yet. */
+      break;
 
     case EXCEPTION_DEBUG_EVENT:
       DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
@@ -1720,7 +1748,8 @@ child_solib_add (char *filename ATTRIBUTE_UNUSED, int from_tty, struct target_op
   else
     {
       if (solib_end && solib_end->name)
-	solib_symbols_add (solib_end->name, from_tty, solib_end->load_addr);
+	     solib_end->objfile = solib_symbols_add (solib_end->name, from_tty,
+                                                solib_end->load_addr);
     }
 }
 

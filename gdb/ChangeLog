@@ -1,3 +1,12 @@
+2001-11-24  Pierre Muller  <muller@ics.u-strasbg.fr>
+	    Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c (struct so_stuff): Add objfile *objfile field needed to
+	be able to remove the DLL when unloaded.  Remove unused last field.
+	(handle_unload_dll): New function to handle unloading of DLL.
+	(solib_symbols_add): Change return type to struct objfile *.
+	(get_child_debug_event): Call handle_unload_dll function.
+
 2001-11-24  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c (_initialize_check_for_gdb_ini): New function.
