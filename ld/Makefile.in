@@ -55,7 +55,7 @@ LD_PROG	= ld.new
 	mkscript < $< >$*.x
 
 # for self hosting
-GNUTARGET=a.out-generic-big
+GNUTARGET=a.out-sunos-big
 LDEMULATION=gld
 BFDLIB=$(srcdir)/../bfd$(subdir)/libbfd.a
 LIBIBERTY=$(srcdir)/../libiberty$(subdir)/libiberty.a
