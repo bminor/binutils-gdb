@@ -1,5 +1,12 @@
 2001-09-26  Andrew Cagney  <ac131313@redhat.com>
 
+	* serial.c (serial_set_cmdlist, serial_show_cmdlist): New
+	variables.
+	(serial_set_cmd, serial_show_cmd): New functions.
+	(_initialize_serial): Add "set/show serial" command.
+
+2001-09-26  Andrew Cagney  <ac131313@redhat.com>
+
 	* CONTRIBUTE: Update.
 
 2001-09-26  Kevin Buettner  <kevinb@redhat.com>

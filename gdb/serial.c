@@ -651,6 +651,25 @@ connect_command (char *args, int fromtty)
 }
 #endif /* 0 */
 
+/* Serial set/show framework.  */
+
+static struct cmd_list_element *serial_set_cmdlist;
+static struct cmd_list_element *serial_show_cmdlist;
+
+static void
+serial_set_cmd (char *args, int from_tty)
+{
+  printf_unfiltered ("\"set serial\" must be followed by the name of a command.\n");
+  help_list (serial_set_cmdlist, "set serial ", -1, gdb_stdout);
+}
+
+static void
+serial_show_cmd (char *args, int from_tty)
+{
+  cmd_show_list (serial_show_cmdlist, from_tty, "");
+}
+
+
 void
 _initialize_serial (void)
 {
@@ -659,6 +678,18 @@ _initialize_serial (void)
 	   "Connect the terminal directly up to the command monitor.\n\
 Use <CR>~. or <CR>~^D to break out.");
 #endif /* 0 */
+
+  add_prefix_cmd ("serial", class_maintenance, serial_set_cmd, "\
+Set default serial/parallel port configuration.",
+		  &serial_set_cmdlist, "set serial ",
+		  0/*allow-unknown*/,
+		  &setlist);
+
+  add_prefix_cmd ("serial", class_maintenance, serial_show_cmd, "\
+Show default serial/parallel port configuration.",
+		  &serial_show_cmdlist, "show serial ",
+		  0/*allow-unknown*/,
+		  &showlist);
 
   add_show_from_set
     (add_set_cmd ("remotelogfile", no_class,
