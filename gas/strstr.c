@@ -1,5 +1,6 @@
 /* strstr - find first occurrence of wanted in s
-   Copyright (C) 1989, 1990, 1991 Free Software Foundation.
+
+   Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -18,6 +19,7 @@
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* If your compiler is really ansi, then you don't need this. */
+
 #ifndef __STDC__
 
 #define SIZET int

@@ -1,7 +1,5 @@
-#ifndef OBJ_FORMAT_H
-#define OBJ_FORMAT_H
 /* coff object file format
-   Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS.
    
@@ -18,6 +16,9 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+#ifndef OBJ_FORMAT_H
+#define OBJ_FORMAT_H
 
 #define OBJ_COFF 1
 

@@ -1,5 +1,6 @@
-/* xrealloc.c -new memory or bust-
-   Copyright (C) 1987, 1990, 1991 Free Software Foundation, Inc.
+/* xrealloc.c - new memory or bust
+
+   Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    

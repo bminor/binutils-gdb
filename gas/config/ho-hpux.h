@@ -1,5 +1,5 @@
 /* ho-hpux.h -- Header to compile the assembler under HP-UX
-   Copyright (C) 1988, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1988, 1991, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    

@@ -1,5 +1,5 @@
 /* ho-pmax.h  Host-specific header file for decstation 3100.
-   Copyright (C) 1987, 1990, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    

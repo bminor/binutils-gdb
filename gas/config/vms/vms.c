@@ -1,5 +1,6 @@
 /* vms.c -- Write out a VAX/VMS object file
-   Copyright (C) 1987, 1988 Free Software Foundation, Inc.
+
+   Copyright (C) 1987, 1988, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    

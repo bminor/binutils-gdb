@@ -1,7 +1,6 @@
-#define MRI 
-/* m68k.c  All the m68020 specific stuff in one convenient, huge,
+/* tc-m68kmote.c  All the m68020 specific stuff in one convenient, huge,
    slow to compile, easy to find file.
-   Copyright (C) 1987, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1991, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -19,6 +18,7 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#define MRI 
 #include <ctype.h>
 
 #include "as.h"
