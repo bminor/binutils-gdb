@@ -1,3 +1,12 @@
+Wed Sep 10 10:25:40 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (trace_input): Use trace_printf instead of
+ 	sim_io_printf.
+	(trace_output): Ditto.
+	(trace_input): Only trace when TRACE_ALU_P.  Delete code
+ 	disasembling instruction.
+	(trace_output): Only trace when TRACE_ALU_P.
+
 Tue Sep  9 01:29:50 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* simops.c (trace_input, trace_output): Use sim_io_printf.

@@ -121,12 +121,11 @@ trace_input (name, type, size)
   char *p;
   uint32 values[3];
   int num_values, i;
-  char *cond;
   const char *filename;
   const char *functionname;
   unsigned int linenumber;
 
-  if (!TRACE_INSN_P (STATE_CPU (simulator, 0)))
+  if (!TRACE_ALU_P (STATE_CPU (simulator, 0)))
     return;
 
   buf[0] = '\0';
@@ -168,11 +167,13 @@ trace_input (name, type, size)
 	}
     }
 
-  sim_io_printf (simulator, "0x%.8x: %-*.*s %-*s",
-		 (unsigned)PC,
-		 SIZE_LOCATION, SIZE_LOCATION, buf,
-		 SIZE_INSTRUCTION, name);
+  trace_printf (simulator, STATE_CPU (simulator, 0),
+		"0x%.8x: %-*.*s %-*s",
+		(unsigned)PC,
+		SIZE_LOCATION, SIZE_LOCATION, buf,
+		SIZE_INSTRUCTION, name);
 
+#if 0
   switch (type)
     {
     default:
@@ -238,29 +239,31 @@ trace_input (name, type, size)
       break;
 
     case OP_EX1:
-      switch (OP[0] & 0xf)
-	{
-	default:  cond = "?";	break;
-	case 0x0: cond = "v";	break;
-	case 0x1: cond = "c";	break;
-	case 0x2: cond = "z";	break;
-	case 0x3: cond = "nh";	break;
-	case 0x4: cond = "s";	break;
-	case 0x5: cond = "t";	break;
-	case 0x6: cond = "lt";	break;
-	case 0x7: cond = "le";	break;
-	case 0x8: cond = "nv";	break;
-	case 0x9: cond = "nc";	break;
-	case 0xa: cond = "nz";	break;
-	case 0xb: cond = "h";	break;
-	case 0xc: cond = "ns";	break;
-	case 0xd: cond = "sa";	break;
-	case 0xe: cond = "ge";	break;
-	case 0xf: cond = "gt";	break;
-	}
-
-      sprintf (buf, "%s,r%ld", cond, OP[1]);
-      break;
+      {
+	char *cond;
+	switch (OP[0] & 0xf)
+	  {
+	  default:  cond = "?";	break;
+	  case 0x0: cond = "v";	break;
+	  case 0x1: cond = "c";	break;
+	  case 0x2: cond = "z";	break;
+	  case 0x3: cond = "nh";	break;
+	  case 0x4: cond = "s";	break;
+	  case 0x5: cond = "t";	break;
+	  case 0x6: cond = "lt";	break;
+	  case 0x7: cond = "le";	break;
+	  case 0x8: cond = "nv";	break;
+	  case 0x9: cond = "nc";	break;
+	  case 0xa: cond = "nz";	break;
+	  case 0xb: cond = "h";	break;
+	  case 0xc: cond = "ns";	break;
+	  case 0xd: cond = "sa";	break;
+	  case 0xe: cond = "ge";	break;
+	  case 0xf: cond = "gt";	break;
+	  }
+	sprintf (buf, "%s,r%ld", cond, OP[1]);
+	break;
+      }
 
     case OP_EX2:
       strcpy (buf, "EX2");
@@ -299,14 +302,19 @@ trace_input (name, type, size)
       sprintf (buf, "r%ld, [r%ld]", OP[1], OP[0] );
       break;
     }
+#endif
 
   if (!TRACE_ALU_P (STATE_CPU (simulator, 0)))
     {
-      sim_io_printf (simulator, "%s\n", buf);
+      trace_printf (simulator, STATE_CPU (simulator, 0),
+		    "%s\n", buf);
     }
   else
     {
-      sim_io_printf (simulator, "%-*s", SIZE_OPERANDS, buf);
+#if 0
+      trace_printf (simulator, STATE_CPU (simulator, 0),
+		    "%-*s", SIZE_OPERANDS, buf);
+#endif
       switch (type)
 	{
 	default:
@@ -417,10 +425,12 @@ trace_input (name, type, size)
 	}
 
       for (i = 0; i < num_values; i++)
-	sim_io_printf (simulator, "%*s0x%.8lx", SIZE_VALUES - 10, "", values[i]);
+	trace_printf (simulator, STATE_CPU (simulator, 0),
+		      "%*s0x%.8lx", SIZE_VALUES - 10, "", values[i]);
 
       while (i++ < 3)
-	sim_io_printf (simulator, "%*s", SIZE_VALUES, "");
+	trace_printf (simulator, STATE_CPU (simulator, 0),
+		      "%*s", SIZE_VALUES, "");
     }
 }
 
@@ -428,8 +438,7 @@ static void
 trace_output (result)
      enum op_types result;
 {
-  if (TRACE_INSN_P (STATE_CPU (simulator, 0))
-      && TRACE_ALU_P (STATE_CPU (simulator, 0)))
+  if (TRACE_ALU_P (STATE_CPU (simulator, 0)))
     {
       switch (result)
 	{
@@ -449,8 +458,8 @@ trace_output (result)
 
 	case OP_LOAD16:
 	case OP_STSR:
-	  sim_io_printf (simulator, " :: 0x%.8lx",
-					     (unsigned long)State.regs[OP[0]]);
+	  trace_printf (simulator, STATE_CPU (simulator, 0),
+			" :: 0x%.8lx", (unsigned long)State.regs[OP[0]]);
 	  break;
 
 	case OP_REG_REG:
@@ -459,29 +468,30 @@ trace_output (result)
 	case OP_IMM_REG_MOVE:
 	case OP_LOAD32:
 	case OP_EX1:
-	  sim_io_printf (simulator, " :: 0x%.8lx",
-					     (unsigned long)State.regs[OP[1]]);
+	  trace_printf (simulator, STATE_CPU (simulator, 0),
+			" :: 0x%.8lx", (unsigned long)State.regs[OP[1]]);
 	  break;
 
 	case OP_IMM_REG_REG:
 	case OP_UIMM_REG_REG:
-	  sim_io_printf (simulator, " :: 0x%.8lx",
-					     (unsigned long)State.regs[OP[2]]);
+	  trace_printf (simulator, STATE_CPU (simulator, 0),
+			" :: 0x%.8lx", (unsigned long)State.regs[OP[2]]);
 	  break;
 
 	case OP_JUMP:
 	  if (OP[1] != 0)
-	    sim_io_printf (simulator, " :: 0x%.8lx",
-					       (unsigned long)State.regs[OP[1]]);
+	    trace_printf (simulator, STATE_CPU (simulator, 0),
+			  " :: 0x%.8lx", (unsigned long)State.regs[OP[1]]);
 	  break;
 
 	case OP_LDSR:
-	  sim_io_printf (simulator, " :: 0x%.8lx",
-					     (unsigned long)State.sregs[OP[1]]);
+	  trace_printf (simulator, STATE_CPU (simulator, 0),
+			" :: 0x%.8lx", (unsigned long)State.sregs[OP[1]]);
 	  break;
 	}
 
-      sim_io_printf (simulator, "\n");
+      trace_printf (simulator, STATE_CPU (simulator, 0),
+		    "\n");
     }
 }
 
@@ -489,7 +499,7 @@ trace_output (result)
 #define trace_input(NAME, IN1, IN2)
 #define trace_output(RESULT)
 
-//#define trace_input(NAME, IN1, IN2) fprintf (stderr, NAME "\n" );
+/* #define trace_input(NAME, IN1, IN2) fprintf (stderr, NAME "\n" ); */
 
 #endif
 
