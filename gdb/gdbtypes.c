@@ -1753,6 +1753,48 @@ init_type (enum type_code code, int length, int flags, char *name,
   return (type);
 }
 
+/* Helper function.  Create an empty composite type.  */
+
+struct type *
+init_composite_type (char *name, enum type_code code)
+{
+  struct type *t;
+  gdb_assert (code == TYPE_CODE_STRUCT
+	      || code == TYPE_CODE_UNION);
+  t = init_type (code, 0, 0, NULL, NULL);
+  TYPE_TAG_NAME (t) = name;
+  return t;
+}
+
+/* Helper function.  Append a field to a composite type.  */
+
+void
+append_composite_type_field (struct type *t, char *name, struct type *field)
+{
+  struct field *f;
+  TYPE_NFIELDS (t) = TYPE_NFIELDS (t) + 1;
+  TYPE_FIELDS (t) = xrealloc (TYPE_FIELDS (t),
+			      sizeof (struct field) * TYPE_NFIELDS (t));
+  f = &(TYPE_FIELDS (t)[TYPE_NFIELDS (t) - 1]);
+  memset (f, 0, sizeof f[0]);
+  FIELD_TYPE (f[0]) = field;
+  FIELD_NAME (f[0]) = name;
+  if (TYPE_CODE (t) == TYPE_CODE_UNION)
+    {
+      if (TYPE_LENGTH (t) > TYPE_LENGTH (field))
+	TYPE_LENGTH (t) = TYPE_LENGTH (field);
+    }
+  else if (TYPE_CODE (t) == TYPE_CODE_STRUCT)
+    {
+      TYPE_LENGTH (t) = TYPE_LENGTH (t) + TYPE_LENGTH (field);
+      if (TYPE_NFIELDS (t) > 1)
+	{
+	  FIELD_BITPOS (f[0]) = (FIELD_BITPOS (f[-1])
+				 + TYPE_LENGTH (field) * TARGET_CHAR_BIT);
+	}
+    }
+}
+
 /* Look up a fundamental type for the specified objfile.
    May need to construct such a type if this is the first use.
 

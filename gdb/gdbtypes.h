@@ -1054,6 +1054,16 @@ extern struct type *alloc_type (struct objfile *);
 extern struct type *init_type (enum type_code, int, int, char *,
 			       struct objfile *);
 
+/* Helper functions to construct a struct or record type.  An
+   initially empty type is created using init_composite_type().
+   Fields are then added using append_struct_type_field().  A union
+   type has its size set to the largest field.  A struct type has each
+   field packed against the previous.  */
+
+extern struct type *init_composite_type (char *name, enum type_code code);
+extern void append_composite_type_field (struct type *t, char *name,
+					 struct type *field);
+
 extern struct type *lookup_reference_type (struct type *);
 
 extern struct type *make_reference_type (struct type *, struct type **);

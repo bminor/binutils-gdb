@@ -1,3 +1,10 @@
+2002-03-22  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbtypes.c (append_composite_type_field): New function.
+	(init_composite_type): New function.
+	* gdbtypes.h (append_composite_type_field): Declare.
+	(init_composite_type): Ditto.
+
 2002-03-22  Elena Zannoni  <ezannoni@redhat.com>
 
         * ppc-linux-tdep.c (ppc_sysv_abi_use_struct_convention): New
