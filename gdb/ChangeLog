@@ -1,5 +1,9 @@
 2004-03-13  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* m68hc11-tdep.c (m68hc11_register_name): Get soft reg information.
+
+2004-03-13  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tui/tui-win.h (tui_get_cmd_list): Declare.
 	* tui/tui-win.c (tui_command): New function.
 	(tui_get_cmd_list): New function.
