@@ -1496,6 +1496,7 @@ _bfd_elf_link_hash_table_init
   table->tls_sec = NULL;
   table->tls_size = 0;
   table->loaded = NULL;
+  table->is_relocatable_executable = FALSE;
 
   ret = _bfd_link_hash_table_init (&table->root, abfd, newfunc);
   table->root.type = bfd_link_elf_hash_table;

@@ -398,6 +398,10 @@ struct elf_link_hash_table
 
   /* A linked list of BFD's loaded in the link.  */
   struct elf_link_loaded_list *loaded;
+
+  /* True if this target has relocatable executables, so needs dynamic
+     section symbols.  */
+  bfd_boolean is_relocatable_executable;
 };
 
 /* Look up an entry in an ELF linker hash table.  */

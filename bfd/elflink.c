@@ -386,7 +386,8 @@ bfd_elf_link_record_dynamic_symbol (struct bfd_link_info *info,
 	      && h->root.type != bfd_link_hash_undefweak)
 	    {
 	      h->forced_local = 1;
-	      return TRUE;
+	      if (!elf_hash_table (info)->is_relocatable_executable)
+		return TRUE;
 	    }
 
 	default:
@@ -494,7 +495,8 @@ bfd_elf_record_link_assignment (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   if ((h->def_dynamic
        || h->ref_dynamic
-       || info->shared)
+       || info->shared
+       || (info->executable && elf_hash_table (info)->is_relocatable_executable))
       && h->dynindx == -1)
     {
       if (! bfd_elf_link_record_dynamic_symbol (info, h))
@@ -710,7 +712,7 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd, struct bfd_link_info *info)
 {
   unsigned long dynsymcount = 0;
 
-  if (info->shared)
+  if (info->shared || elf_hash_table (info)->is_relocatable_executable)
     {
       const struct elf_backend_data *bed = get_elf_backend_data (output_bfd);
       asection *p;
@@ -8167,7 +8169,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       long last_local = 0;
 
       /* Write out the section symbols for the output sections.  */
-      if (info->shared)
+      if (info->shared || elf_hash_table (info)->is_relocatable_executable)
 	{
 	  asection *s;
 

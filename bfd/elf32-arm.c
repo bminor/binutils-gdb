@@ -2350,9 +2350,10 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 					   (bfd_vma) 0);
 	}
 
-      /* When generating a shared object, these relocations are copied
-	 into the output file to be resolved at run time.  */
-      if (info->shared
+      /* When generating a shared object or relocatable executable, these
+	 relocations are copied into the output file to be resolved at
+	 run time.  */
+      if ((info->shared || globals->root.is_relocatable_executable)
 	  && (input_section->flags & SEC_ALLOC)
 	  && (r_type != R_ARM_REL32
 	      || !SYMBOL_CALLS_LOCAL (info, h))
@@ -3986,6 +3987,15 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
   htab = elf32_arm_hash_table (info);
   sreloc = NULL;
 
+  /* Create dynamic sections for relocatable executables so that we can
+     copy relocations.  */
+  if (htab->root.is_relocatable_executable
+      && ! htab->root.dynamic_sections_created)
+    {
+      if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
+	return FALSE;
+    }
+
   dynobj = elf_hash_table (info)->dynobj;
   local_got_offsets = elf_local_got_offsets (abfd);
 
@@ -4106,11 +4116,11 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  eh->plt_thumb_refcount += 1;
 	      }
 
-	    /* If we are creating a shared library, and this is a reloc
-               against a global symbol, or a non PC relative reloc
-               against a local symbol, then we need to copy the reloc
-               into the shared library.  However, if we are linking with
-               -Bsymbolic, we do not need to copy a reloc against a
+	    /* If we are creating a shared library or relocatable executable,
+	       and this is a reloc against a global symbol, or a non PC
+	       relative reloc against a local symbol, then we need to copy
+	       the reloc into the shared library.  However, if we are linking
+	       with -Bsymbolic, we do not need to copy a reloc against a
                global symbol which is defined in an object we are
                including in the link (i.e., DEF_REGULAR is set).  At
                this point we have not seen all the input files, so it is
@@ -4118,7 +4128,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
                later (it is never cleared).  We account for that
                possibility below by storing information in the
                relocs_copied field of the hash table entry.  */
-	    if (info->shared
+	    if ((info->shared || htab->root.is_relocatable_executable)
 		&& (sec->flags & SEC_ALLOC) != 0
 		&& ((r_type != R_ARM_PC24
 		     && r_type != R_ARM_PLT32
@@ -4378,7 +4388,9 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
   asection * s;
   unsigned int power_of_two;
   struct elf32_arm_link_hash_entry * eh;
+  struct elf32_arm_link_hash_table *globals;
 
+  globals = elf32_arm_hash_table (info);
   dynobj = elf_hash_table (info)->dynobj;
 
   /* Make sure we know what is going on here.  */
@@ -4443,8 +4455,10 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
   /* If we are creating a shared library, we must presume that the
      only references to the symbol are via the global offset table.
      For such cases we need not do anything here; the relocations will
-     be handled correctly by relocate_section.  */
-  if (info->shared)
+     be handled correctly by relocate_section.  Relocatable executables
+     can reference data in shared objects directly, so we don't need to
+     do anything here.  */
+  if (info->shared || globals->root.is_relocatable_executable)
     return TRUE;
 
   /* We must allocate the symbol in our .dynbss section, which will
@@ -4637,13 +4651,23 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
      space for pc-relative relocs that have become local due to symbol
      visibility changes.  */
 
-  if (info->shared)
+  if (info->shared || htab->root.is_relocatable_executable)
     {
       /* Discard relocs on undefined weak syms with non-default
          visibility.  */
       if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
 	  && h->root.type == bfd_link_hash_undefweak)
 	eh->relocs_copied = NULL;
+      else if (htab->root.is_relocatable_executable && h->dynindx == -1
+	       && h->root.type == bfd_link_hash_new)
+	{
+	  /* Output absolute symbols so that we can create relocations
+	     against them.  For normal symbols we output a relocation
+	     against the section that contains them.  */
+	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
+	    return FALSE;
+	}
+
     }
   else
     {
@@ -5846,6 +5870,7 @@ elf32_arm_symbian_link_hash_table_create (bfd *abfd)
       /* The PLT entries are each three instructions.  */
       htab->plt_entry_size = 4 * NUM_ELEM (elf32_arm_symbian_plt_entry);
       htab->symbian_p = 1;
+      htab->root.is_relocatable_executable = 1;
     }
   return ret;
 }     

@@ -1,3 +1,23 @@
+2005-02-11  Paul Brook  <paul@codesourcery.com>
+
+	* elf-bfd.h (struct elf_link_hash_table): Add
+	is_relocatable_executable.
+	* elf.c (_bfd_elf_link_hash_table_init): Initialize it.
+	* elflink.c (bfd_elf_link_record_dynamic_symbol): Create local dynamic
+	symbols in relocatable executables.
+	(bfd_elf_record_link_assignment): Create dynamic section symbols in
+	relocatable executables.
+	(_bfd_elf_link_renumber_dynsyms): Ditto.
+	(bfd_elf_final_link): Ditto.
+	* elf32-arm.c (elf32_arm_final_link_relocate): Copy absolute
+	relocations into relocatable executables.
+	(elf32_arm_check_relocs): Crate dynamic sections for relocatable
+	executables.  Also copy absolute relocations.
+	(elf32_arm_adjust_dynamic_symbol): Don't create copy relocations
+	in relocatable executables.
+	(allocate_dynrelocs): Copy relocations for relocatable executables.
+	Output dynamic symbols for symbols defined in linker scripts.
+
 2005-02-11  Nick Clifton  <nickc@redhat.com>
 
 	* libbfd.c (read_signed_leb128): Use an unsigned type for 'shift'
