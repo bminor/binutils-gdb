@@ -65,7 +65,7 @@ parse_args (argc, argv)
      as if it were the argument of an option with character code 1.  */
 
   const char *shortopts =
-    "-a:A:B::b:c:de:F::G:gh:iL:l:Mm:NnO:o:R:rSsT:tu:VvXxY:y:z:()";
+    "-a:A:b:c:de:F::G:gh:iL:l:Mm:NnO:o:R:rSsT:tu:VvXxY:y:z:()";
 
   /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
 
@@ -83,11 +83,13 @@ parse_args (argc, argv)
 #define OPTION_NO_KEEP_MEMORY		(OPTION_MAP + 1)
 #define OPTION_NOINHIBIT_EXEC		(OPTION_NO_KEEP_MEMORY + 1)
 #define OPTION_NON_SHARED		(OPTION_NOINHIBIT_EXEC + 1)
-#define OPTION_OFORMAT			(OPTION_NON_SHARED + 1)
+#define OPTION_NO_WHOLE_ARCHIVE		(OPTION_NON_SHARED + 1)
+#define OPTION_OFORMAT			(OPTION_NO_WHOLE_ARCHIVE + 1)
 #define OPTION_RELAX			(OPTION_OFORMAT + 1)
 #define OPTION_RETAIN_SYMBOLS_FILE	(OPTION_RELAX + 1)
 #define OPTION_RPATH			(OPTION_RETAIN_SYMBOLS_FILE + 1)
-#define OPTION_SHARED			(OPTION_RPATH + 1)
+#define OPTION_RPATH_LINK		(OPTION_RPATH + 1)
+#define OPTION_SHARED			(OPTION_RPATH_LINK + 1)
 #define OPTION_SONAME			(OPTION_SHARED + 1)
 #define OPTION_SORT_COMMON		(OPTION_SONAME + 1)
 #define OPTION_STATS			(OPTION_SORT_COMMON + 1)
@@ -130,6 +132,7 @@ parse_args (argc, argv)
     {"help", no_argument, NULL, OPTION_HELP},
     {"Map", required_argument, NULL, OPTION_MAP},
     {"no-keep-memory", no_argument, NULL, OPTION_NO_KEEP_MEMORY},
+    {"no-whole-archive", no_argument, NULL, OPTION_NO_WHOLE_ARCHIVE},
     {"noinhibit-exec", no_argument, NULL, OPTION_NOINHIBIT_EXEC},
     {"noinhibit_exec", no_argument, NULL, OPTION_NOINHIBIT_EXEC},
     {"non_shared", no_argument, NULL, OPTION_NON_SHARED},
@@ -139,6 +142,7 @@ parse_args (argc, argv)
     {"relax", no_argument, NULL, OPTION_RELAX},
     {"retain-symbols-file", required_argument, NULL, OPTION_RETAIN_SYMBOLS_FILE},
     {"rpath", required_argument, NULL, OPTION_RPATH},
+    {"rpath-link", required_argument, NULL, OPTION_RPATH_LINK},
     {"shared", no_argument, NULL, OPTION_SHARED},
     {"soname", required_argument, NULL, OPTION_SONAME},
     {"sort-common", no_argument, NULL, OPTION_SORT_COMMON},
@@ -219,8 +223,7 @@ parse_args (argc, argv)
 	    einfo ("%P%F: unrecognized -a option `%s'\n", optarg);
 	  break;
 	case OPTION_ASSERT:
-	  /* FIXME: We just ignore these, except for pure-text, but we
-             should handle them.  */
+	  /* FIXME: We just ignore these, but we should handle them.  */
 	  if (strcmp (optarg, "definitions") == 0)
 	    ;
 	  else if (strcmp (optarg, "nodefinitions") == 0)
@@ -228,16 +231,7 @@ parse_args (argc, argv)
 	  else if (strcmp (optarg, "nosymbolic") == 0)
 	    ;
 	  else if (strcmp (optarg, "pure-text") == 0)
-	    {
-	      /* FIXME: This is wrong.  We do it this way as a hack to
-                 support SunOS4, on which gcc -shared will pass
-                 -assert pure-text to the linker.  The SunOS linker
-                 will automatically create a shared library if there
-                 are any undefined symbols, but our linker does not
-                 know how to do that (it seems to require an extra
-                 pass over the relocs).  */
-	      link_info.shared = true;
-	    }
+	    ;
 	  else
 	    einfo ("%P%F: unrecognized -assert option `%s'\n", optarg);
 	  break;
@@ -286,7 +280,7 @@ parse_args (argc, argv)
 	  command_line.export_dynamic = true;
 	  break;
 	case 'e':
-	  lang_add_entry (optarg, 1);
+	  lang_add_entry (optarg, true);
 	  break;
 	case 'F':
 	  /* Ignore.  */
@@ -325,15 +319,20 @@ parse_args (argc, argv)
 	case 'N':
 	  config.text_read_only = false;
 	  config.magic_demand_paged = false;
+	  config.dynamic_link = false;
 	  break;
 	case 'n':
 	  config.magic_demand_paged = false;
+	  config.dynamic_link = false;
 	  break;
 	case OPTION_NO_KEEP_MEMORY:
 	  link_info.keep_memory = false;
 	  break;
 	case OPTION_NOINHIBIT_EXEC:
 	  force_make_executable = true;
+	  break;
+	case OPTION_NO_WHOLE_ARCHIVE:
+	  whole_archive = false;
 	  break;
 	case 'O':
 	  /* FIXME "-O<non-digits> <value>" used to set the address of
@@ -390,6 +389,21 @@ parse_args (argc, argv)
 	      sprintf (buf, "%s:%s", command_line.rpath, optarg);
 	      free (command_line.rpath);
 	      command_line.rpath = buf;
+	    }
+	  break;
+	case OPTION_RPATH_LINK:
+	  if (command_line.rpath_link == NULL)
+	    command_line.rpath_link = buystring (optarg);
+	  else
+	    {
+	      char *buf;
+
+	      buf = xmalloc (strlen (command_line.rpath_link)
+			     + strlen (optarg)
+			     + 2);
+	      sprintf (buf, "%s:%s", command_line.rpath_link, optarg);
+	      free (command_line.rpath_link);
+	      command_line.rpath_link = buf;
 	    }
 	  break;
 	case OPTION_RELAX:

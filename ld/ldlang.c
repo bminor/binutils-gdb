@@ -373,6 +373,7 @@ new_afile (name, file_type, target, add_to_list)
   p->symbol_count = 0;
   p->common_output_section = (asection *) NULL;
   p->dynamic = config.dynamic_link;
+  p->whole_archive = whole_archive;
   p->loaded = false;
   lang_statement_append (&input_file_chain,
 			 (lang_statement_union_type *) p,
@@ -827,7 +828,7 @@ load_symbols (entry, place)
       break;
 
     case bfd_archive:
-      if (whole_archive)
+      if (entry->whole_archive)
 	{
 	  bfd *member = bfd_openr_next_archived_file (entry->the_bfd,
 						      (bfd *) NULL);

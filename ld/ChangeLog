@@ -1,3 +1,12 @@
+Tue Feb 27 12:55:46 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lexsup.c (parse_args): Recognize --no-whole-archive.
+	* ldlang.h (lang_input_statement_type): Add whole_archive field.
+	* ldlang.c (new_afile): Set whole_archive field.
+	(load_symbols): Check input file specific whole_archive field
+	rather than global variable.
+	* ld.texinfo, ld.1: Document --no-whole-archive.
+
 Tue Feb 20 16:07:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.tgt: Correct gldi960 to gld960.

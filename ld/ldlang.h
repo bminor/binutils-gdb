@@ -97,6 +97,16 @@ typedef struct lang_output_statement_struct
 } lang_output_statement_type;
 
 
+/* This structure holds a list of program headers describing segments
+   in which this section should be placed.  */
+
+struct lang_output_section_phdr_list
+{
+  struct lang_output_section_phdr_list *next;
+  const char *name;
+  boolean used;
+};
+
 typedef struct lang_output_section_statement_struct 
 {
   lang_statement_header_type header;
@@ -118,7 +128,9 @@ typedef struct lang_output_section_statement_struct
   int subsection_alignment;  /* alignment of components */
   int section_alignment;  /* alignment of start of section */
 
-  union etree_union *load_base;  
+  union etree_union *load_base;
+
+  struct lang_output_section_phdr_list *phdrs;
 } lang_output_section_statement_type;
 
 
@@ -219,9 +231,14 @@ typedef struct lang_input_statement_struct
      Also default text_start to after this file's bss. */
     
   boolean just_syms_flag;
-    
+
+  /* Whether to search for this entry as a dynamic archive.  */
+  boolean dynamic;
+
+  /* Whether to include the entire contents of an archive.  */
+  boolean whole_archive;
+
   boolean loaded;
-    
     
   /*    unsigned int globals_in_this_file;*/
   const char *target;
@@ -304,11 +321,28 @@ typedef union lang_statement_union
   lang_group_statement_type group_statement;
 } lang_statement_union_type;
 
+/* This structure holds information about a program header, from the
+   PHDRS command in the linker script.  */
+
+struct lang_phdr
+{
+  struct lang_phdr *next;
+  const char *name;
+  unsigned long type;
+  boolean filehdr;
+  boolean phdrs;
+  etree_type *at;
+  etree_type *flags;
+};
+
 extern lang_output_section_statement_type *abs_output_section;
 extern boolean lang_has_input_file;
 extern etree_type *base;
 extern lang_statement_list_type *stat_ptr;
 extern boolean delete_output_file_on_failure;
+
+extern const char *entry_symbol;
+extern boolean entry_from_cmdline;
 
 extern void lang_init PARAMS ((void));
 extern struct memory_region_struct *lang_memory_region_lookup
@@ -327,7 +361,7 @@ extern void lang_enter_output_section_statement
 extern void lang_final PARAMS ((void));
 extern void lang_process PARAMS ((void));
 extern void lang_section_start PARAMS ((const char *, union etree_union *));
-extern void lang_add_entry PARAMS ((const char *, int));
+extern void lang_add_entry PARAMS ((const char *, boolean));
 extern void lang_add_target PARAMS ((const char *));
 extern void lang_add_wild PARAMS ((const char *const , const char *const));
 extern void lang_add_map PARAMS ((const char *));
@@ -393,5 +427,9 @@ extern void wild_doit
   PARAMS ((lang_statement_list_type *ptr, asection *section,
 	   lang_output_section_statement_type *output,
 	   lang_input_statement_type *file));
+extern void lang_new_phdr
+  PARAMS ((const char *, etree_type *, boolean, boolean, etree_type *,
+	   etree_type *));
+extern void lang_section_in_phdr PARAMS ((const char *));
 
 #endif

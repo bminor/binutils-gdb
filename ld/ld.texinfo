@@ -189,7 +189,7 @@ ld [ -o @var{output} ]  @var{objfile}@dots{}
   [ -( [ archives ] -) ]
   [ --start-group [ archives ] --end-group ]
   [ -split-by-reloc @var{count} ] [ -split-by-file ]
-  [ --whole-archive ]
+  [ --whole-archive ] [ --no-whole-archive ]
 @end smallexample
 
 This plethora of command-line options may seem intimidating, but in
@@ -941,11 +941,16 @@ which refers to it.
 
 @kindex --whole-archive
 @cindex including an entire archive
-For each archive mentioned on the command line, include every object
-file in the archive in the link, rather than searching the archive for
-the required object files.  This is normally used to turn an archive
-file into a shared library, forcing every object to be included in the
-resulting shared library.
+For each archive mentioned on the command line after the
+@code{--whole-archive} option, include every object file in the archive
+in the link, rather than searching the archive for the required object
+files.  This is normally used to turn an archive file into a shared
+library, forcing every object to be included in the resulting shared
+library.
+
+@kindex --no-whole-archive
+Turn off the effect of the @code{--whole-archive} option for archives
+which appear later on the command line.
 
 @kindex -X
 @cindex local symbols, deleting
