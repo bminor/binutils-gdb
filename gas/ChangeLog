@@ -1,3 +1,9 @@
+Thu Mar 20 16:49:14 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* config/tc-m68k.c (mri_chip): Replace calls to get_symbol_end by
+	open coded loop that does not require the name to start with a
+	name beginner.
+
 Thu Mar 20 13:42:01 1997  H.J. Lu  <hjl@lucon.org>
 
 	* frags.c (frag_var): Change offset parameter to offsetT.
