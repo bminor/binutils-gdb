@@ -1,3 +1,7 @@
+Tue Aug 10 06:23:16 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* configure.in: Include aout32.o for any a.out/b.out formats.
+
 Mon Aug  9 09:37:18 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* config/i386-linux.mt (SELECT_VECS): Support bfd_elf32_i386_vec.
