@@ -1,3 +1,35 @@
+2001-08-04  Richard Henderson  <rth@redhat.com>
+
+	* config/tc-alpha.c (struct alpha_insn): Make sequence scalar long.
+	(MACRO_LITERAL, MACRO_BASE, MACRO_BYTOFF, MACRO_JSR): Remove.
+	(alpha_macros): Remove occurrences of same.
+	(O_lituse_addr, O_gprel): New.
+	(DUMMY_RELOC_LITUSE_*): New.
+	(s_alpha_ucons, s_alpha_arch): Prototype.
+	(alpha_reloc_op): Construct elements via DEF macro.
+	(ALPHA_RELOC_SEQUENCE_OK): Remove.
+	(struct alpha_reloc_tag): Rename from alpha_literal_tag; rename
+	members to not be literal specific.
+	(next_sequence_num): New.
+	(md_apply_fix3): Cope with missing GPDISP_LO16.  Adjust for
+	added/removed BFD relocations.
+	(alpha_force_relocation, alpha_fix_adjustable): Likewise.
+	(alpha_adjust_symtab_relocs): Handle GPDISP relocs as well.
+	(tokenize_arguments): Parse ! relocations properly.
+	(find_macro_match): Delete unused macro argument types.
+	(assemble_insn): Add reloc parameter; emit that instead of the
+	default as appropriate.
+	(get_alpha_reloc_tag): New.  Split from ...
+	(emit_insn): ... here.  Allocate a reloc tag for GPDISP.
+	(assemble_tokens): Don't search macros if user relocation present.
+	Copy reloc sequence number to insn struct.
+	(emit_ldgp): Remove user reloc handling.
+	(load_expression, emit_lda, emit_ldah, emit_ir_load): Likewise.
+	(emit_loadstore, emit_ldXu, emit_ldil, emit_stX): Likewise.
+	(emit_sextX, emit_division, emit_jsrjmp, emit_retjcr): Likewise.
+	* config/tc-alpha.h (tc_adjust_symtab): Always define.
+	(struct alpha_fix_tag): Name members less literal specific.
+
 Tue Sep  4 20:01:19 2001  Jeffrey A Law  (law@cygnus.com)
 
 	* tc-h8300.c (tc_gen_reloc): Give an error if we try to take the

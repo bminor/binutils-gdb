@@ -1,3 +1,14 @@
+2001-08-04  Richard Henderson  <rth@redhat.com>
+
+	* gas/alpha/alpha.exp: New file.
+	* gas/alpha/elf-reloc-1.[sd]: New test.
+	* gas/alpha/elf-reloc-2.[sl]: New test.
+	* gas/alpha/elf-reloc-3.[sl]: New test.
+	* gas/alpha/elf-reloc-4.[sd]: New test.
+	* gas/alpha/fp.exp: Remove file.
+	* gas/alpha/fp.s: Output to .data not .rdata.
+	* gas/alpha/fp.d: Adjust to match.
+
 Tue Sep  4 20:06:09 2001  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/all/gas.exp (930509a): Expect failure on the H8/300 ELF port.
