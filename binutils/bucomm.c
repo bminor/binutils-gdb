@@ -22,7 +22,13 @@
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "bucomm.h"
+
+#ifdef __STDC__
+#include <stdarg.h>
+#else
 #include <varargs.h>
+#endif
 
 char *target = NULL;		/* default as late as possible */
 
@@ -37,7 +43,7 @@ char *program_name;
 
 void
 bfd_nonfatal (string)
-     char *string;
+     CONST char *string;
 {
   CONST char *errmsg = bfd_errmsg (bfd_error);
 
@@ -49,7 +55,7 @@ bfd_nonfatal (string)
 
 void
 bfd_fatal (string)
-     char *string;
+     CONST char *string;
 {
   bfd_nonfatal (string);
 
@@ -58,16 +64,15 @@ bfd_fatal (string)
   exit (1);
 }
 
-#if 0				/* !defined(NO_STDARG) */
+#ifdef __STDC__
 void
-fatal (Format)
-     const char *Format;
+fatal (const char *format, ...)
 {
   va_list args;
 
   fprintf (stderr, "%s: ", program_name);
-  va_start (args, Format);
-  vfprintf (stderr, Format, args);
+  va_start (args, format);
+  vfprintf (stderr, format, args);
   va_end (args);
   putc ('\n', stderr);
   if (NULL != exit_handler)
@@ -94,9 +99,6 @@ fatal (va_alist)
 }
 #endif
 
-
-void mode_string ();
-
 /* Display the archive header for an element as if it were an ls -l listing:
 
    Mode       User\tGroup\tSize\tDate               Name */
@@ -115,7 +117,7 @@ print_arelt_descr (file, abfd, verbose)
 	{
 	  char modebuf[11];
 	  char timebuf[40];
-	  long when = buf.st_mtime;
+	  time_t when = buf.st_mtime;
 	  CONST char *ctime_result = (CONST char *) ctime (&when);
 
 	  /* POSIX format:  skip weekday and seconds from ctime output.  */
