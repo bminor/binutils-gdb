@@ -31,6 +31,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Local functions.  */
 
+static int
+typecmp PARAMS ((int staticp, struct type *t1[], value t2[]));
+
 static CORE_ADDR
 find_function_addr PARAMS ((value, struct type **));
 
@@ -664,6 +667,13 @@ value_arg_coerce (arg)
   register struct type *type;
 
   COERCE_ENUM (arg);
+#if 1	/* FIXME:  This is only a temporary patch.  -fnf */
+  if (VALUE_REPEATED (arg)
+      || TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ARRAY)
+    arg = value_coerce_array (arg);
+  if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_FUNC)
+    arg = value_coerce_function (arg);
+#endif
 
   type = VALUE_TYPE (arg);
 
@@ -822,8 +832,8 @@ call_function_by_hand (function, nargs, args)
     SWAP_TARGET_AND_HOST (&dummy1[i], sizeof (REGISTER_TYPE));
 
 #ifdef GDB_TARGET_IS_HPPA
-  FIX_CALL_DUMMY (dummy1, start_sp, real_pc, funaddr, nargs, args,
-		  value_type, using_gcc);
+  real_pc = FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
+			    value_type, using_gcc);
 #else
   FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
 		  value_type, using_gcc);

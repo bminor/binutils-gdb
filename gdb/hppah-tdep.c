@@ -59,6 +59,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 
+static int restore_pc_queue PARAMS ((struct frame_saved_regs *fsr));
+static int hppa_alignof PARAMS ((struct type *arg));
+
 
 /* Routines to extract various sized constants out of hppa 
    instructions. */
@@ -534,7 +537,7 @@ find_dummy_frame_regs (frame, frame_saved_regs)
 }
 
 int
-hp_pop_frame ()
+hppa_pop_frame ()
 {
   register FRAME frame = get_current_frame ();
   register CORE_ADDR fp;
@@ -548,7 +551,7 @@ hp_pop_frame ()
   get_frame_saved_regs (fi, &fsr);
 
   if (fsr.regs[IPSW_REGNUM])    /* Restoring a call dummy frame */
-    hp_restore_pc_queue (&fsr);
+    restore_pc_queue (&fsr);
 
   for (regnum = 31; regnum > 0; regnum--)
     if (fsr.regs[regnum])
@@ -589,8 +592,8 @@ hp_pop_frame ()
  * After returning to a dummy on the stack, restore the instruction
  * queue space registers. */
 
-int
-hp_restore_pc_queue (fsr)
+static int
+restore_pc_queue (fsr)
      struct frame_saved_regs *fsr;
 {
   CORE_ADDR pc = read_pc ();
@@ -638,7 +641,7 @@ hp_restore_pc_queue (fsr)
 }
 
 CORE_ADDR
-hp_push_arguments (nargs, args, sp, struct_return, struct_addr)
+hppa_push_arguments (nargs, args, sp, struct_return, struct_addr)
      int nargs;
      value *args;
      CORE_ADDR sp;
@@ -652,11 +655,14 @@ hp_push_arguments (nargs, args, sp, struct_return, struct_addr)
   
   for (i = 0; i < nargs; i++)
     {
+      /* Coerce chars to int & float to double if necessary */
+      args[i] = value_arg_coerce (args[i]);
+
       cum += TYPE_LENGTH (VALUE_TYPE (args[i]));
 
     /* value must go at proper alignment. Assume alignment is a
 	 power of two.*/
-      alignment = hp_alignof (VALUE_TYPE (args[i]));
+      alignment = hppa_alignof (VALUE_TYPE (args[i]));
       if (cum % alignment)
 	cum = (cum + alignment) & -alignment;
       offset[i] = -cum;
@@ -672,11 +678,56 @@ hp_push_arguments (nargs, args, sp, struct_return, struct_addr)
   return sp + 32;
 }
 
+/*
+ * Insert the specified number of args and function address
+ * into a call sequence of the above form stored at DUMMYNAME.
+ *
+ * On the hppa we need to call the stack dummy through $$dyncall.
+ * Therefore our version of FIX_CALL_DUMMY takes an extra argument,
+ * real_pc, which is the location where gdb should start up the
+ * inferior to do the function call.
+ */
+
+CORE_ADDR
+hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
+     REGISTER_TYPE *dummy;
+     CORE_ADDR pc;
+     CORE_ADDR fun;
+     int nargs;
+     value *args;
+     struct type *type;
+     int gcc_p;
+{
+  CORE_ADDR dyncall_addr, sr4export_addr;
+  struct minimal_symbol *msymbol;
+
+  msymbol = lookup_minimal_symbol ("$$dyncall", (struct objfile *) NULL);
+  if (msymbol == NULL)
+    error ("Can't find an address for $$dyncall trampoline");
+
+  dyncall_addr = SYMBOL_VALUE_ADDRESS (msymbol);
+
+  msymbol = lookup_minimal_symbol ("_sr4export", (struct objfile *) NULL);
+  if (msymbol == NULL)
+    error ("Can't find an address for _sr4export trampoline");
+
+  sr4export_addr = SYMBOL_VALUE_ADDRESS (msymbol);
+
+  dummy[9] = deposit_21 (fun >> 11, dummy[9]);
+  dummy[10] = deposit_14 (fun & MASK_11, dummy[10]);
+  dummy[12] = deposit_21 (sr4export_addr >> 11, dummy[12]);
+  dummy[13] = deposit_14 (sr4export_addr & MASK_11, dummy[13]);
+
+  write_register (22, pc);
+
+  return dyncall_addr;
+}
+
 /* return the alignment of a type in bytes. Structures have the maximum
    alignment required by their fields. */
 
-int
-hp_alignof (arg)
+static int
+hppa_alignof (arg)
      struct type *arg;
 {
   int max_align, align, i;
@@ -687,7 +738,7 @@ hp_alignof (arg)
     case TYPE_CODE_FLT:
       return TYPE_LENGTH (arg);
     case TYPE_CODE_ARRAY:
-      return hp_alignof (TYPE_FIELD_TYPE (arg, 0));
+      return hppa_alignof (TYPE_FIELD_TYPE (arg, 0));
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
       max_align = 2;
@@ -696,7 +747,7 @@ hp_alignof (arg)
 	  /* Bit fields have no real alignment. */
 	  if (!TYPE_FIELD_BITPOS (arg, i))
 	    {
-	      align = hp_alignof (TYPE_FIELD_TYPE (arg, i));
+	      align = hppa_alignof (TYPE_FIELD_TYPE (arg, i));
 	      max_align = max (max_align, align);
 	    }
 	}
