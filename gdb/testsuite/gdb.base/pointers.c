@@ -194,7 +194,7 @@ int more_code()
     L = -234;
     UL = 234;
     F = 1.25E10;
-    D = -1.375E-123;
+    D = -1.25E-37;
     pC = &C;
     ppC = &pC;
     pppC = &ppC;
