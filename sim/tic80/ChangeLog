@@ -1,5 +1,8 @@
 Fri Feb 13 17:11:22 1998  Michael Meissner  <meissner@cygnus.com>
 
+	* insns ({get,set}_fp_reg): Tic80 floating point is little endian,
+	not big endian.
+
 	* misc.c (tic80_trace_fpu*): Pass address of sim_fpu structure,
 	not the structure itself.  Use %g consistantly to print floating
 	point.

@@ -447,7 +447,7 @@ sim_fpu::function::get_fp_reg:int reg, unsigned32 val, int precision
 	      sim_engine_abort (SD, CPU, cia, "DP FP register must be even");
 	    if (reg <= 1)
 	      sim_engine_abort (SD, CPU, cia, "DP FP register must be >= 2");
-	    sim_fpu_232to (&ans, GPR (reg), GPR (reg + 1));
+	    sim_fpu_232to (&ans, GPR (reg + 1), GPR (reg));
 	    break;
 	  case 2: /* 32 bit signed integer */
 	    sim_fpu_i32to (&ans, val, 0);
@@ -473,7 +473,7 @@ void::function::set_fp_reg:int Dest, sim_fpu val, int PD
 	        sim_engine_abort (SD, CPU, cia, "DP FP Dest register must be even");
 	      if (Dest <= 1)
 	        sim_engine_abort (SD, CPU, cia, "DP FP Dest register must be >= 2");
-	      sim_fpu_to232 (&GPR (Dest + 0), &GPR (Dest + 1), &val);
+	      sim_fpu_to232 (&GPR (Dest + 1), &GPR (Dest + 0), &val);
 	      break;
 	    }
 	  case 2: /* signed */
