@@ -323,7 +323,10 @@ discard_minimal_symbols (foo)
 
 /* Compact duplicate entries out of a minimal symbol table by walking
    through the table and compacting out entries with duplicate addresses
-   and matching names.
+   and matching names.  Return the number of entries remaining.
+
+   On entry, the table resides between msymbol[0] and msymbol[mcount].
+   On exit, it resides between msymbol[0] and msymbol[result_count].
 
    When files contain multiple sources of symbol information, it is
    possible for the minimal symbol table to contain many duplicate entries.
@@ -336,17 +339,14 @@ discard_minimal_symbols (foo)
    over a 1000 duplicates, about a third of the total table size.  Aside
    from the potential trap of not noticing that two successive entries
    identify the same location, this duplication impacts the time required
-   to linearly scan the table, which is done in a number of places.  So
+   to linearly scan the table, which is done in a number of places.  So we
    just do one linear scan here and toss out the duplicates.
 
    Note that we are not concerned here about recovering the space that
    is potentially freed up, because the strings themselves are allocated
    on the symbol_obstack, and will get automatically freed when the symbol
-   table is freed.  Also, the unused minimal symbols at the end of the
-   compacted region will get freed automatically as well by whomever
-   is responsible for deallocating the entire minimal symbol table.  We
-   can't diddle with the pointer anywhy, so don't worry about the 
-   wasted space.
+   table is freed.  The caller can free up the unused minimal symbols at
+   the end of the compacted region if their allocation strategy allows it.
 
    Also note we only go up to the next to last entry within the loop
    and then copy the last entry explicitly after the loop terminates.
@@ -390,21 +390,14 @@ compact_minimal_symbols (msymbol, mcount)
   return (mcount);
 }
 
-/* INCLINK nonzero means bunches are from an incrementally-linked file.
-   Add them to the existing bunches.
-   Otherwise INCLINK is zero, and we start from scratch.
-
-   FIXME:  INCLINK is currently unused, and is a holdover from when all
-   these symbols were stored in a shared, globally available table.  If
-   it turns out we still need to be able to incrementally add minimal
-   symbols to an existing minimal symbol table for a given objfile, then
-   we will need to slightly modify this code so that when INCLINK is
-   nonzero we copy the existing table to a work area that is allocated
-   large enough for all the symbols and add the new ones to the end. */
+/* Add the minimal symbols in the existing bunches to the objfile's
+   official minimal symbol table.  99% of the time, this adds the
+   bunches to NO existing symbols.  Once in a while for shared
+   libraries, we add symbols (e.g. common symbols) to an existing
+   objfile.  */
 
 void
-install_minimal_symbols (inclink, objfile)
-     int inclink;
+install_minimal_symbols (objfile)
      struct objfile *objfile;
 {
   register int bindex;
@@ -412,23 +405,34 @@ install_minimal_symbols (inclink, objfile)
   register struct msym_bunch *bunch;
   register struct minimal_symbol *msymbols;
   int nbytes;
+  int alloc_count;
 
   if (msym_count > 0)
     {
-      /* Allocate a temporary work area into which we will gather the
-	 bunches of minimal symbols, sort them, and then compact out
-	 duplicate entries.  Once we have a final table, it will be attached
-	 to the specified objfile. */
+      /* Allocate enough space in the obstack, into which we will gather the
+	 bunches of new and existing minimal symbols, sort them, and then
+	 compact out the duplicate entries.  Once we have a final table,
+	 we will give back the excess space.  */
 
+      alloc_count = msym_count + objfile->minimal_symbol_count + 1;
+      obstack_blank (&objfile->symbol_obstack,
+		     alloc_count * sizeof (struct minimal_symbol));
       msymbols = (struct minimal_symbol *)
-	xmalloc (msym_count * sizeof (struct minimal_symbol));
-      mcount = 0;
-      
+		 obstack_base (&objfile->symbol_obstack);
+
+      /* Copy in the existing minimal symbols, if there are any.  */
+
+      if (objfile->minimal_symbol_count)
+        memcpy ((char *)msymbols, (char *)objfile->msymbols, 
+		objfile->minimal_symbol_count * sizeof (struct minimal_symbol));
+
       /* Walk through the list of minimal symbol bunches, adding each symbol
 	 to the new contiguous array of symbols.  Note that we start with the
 	 current, possibly partially filled bunch (thus we use the current
 	 msym_bunch_index for the first bunch we copy over), and thereafter
 	 each bunch is full. */
+      
+      mcount = objfile->minimal_symbol_count;
       
       for (bunch = msym_bunch; bunch != NULL; bunch = bunch -> next)
 	{
@@ -450,42 +454,42 @@ install_minimal_symbols (inclink, objfile)
 	    }
 	  msym_bunch_index = BUNCH_SIZE;
 	}
-      
+
       /* Sort the minimal symbols by address.  */
       
       qsort (msymbols, mcount, sizeof (struct minimal_symbol),
 	     compare_minimal_symbols);
       
-      /* Compact out any duplicates.  The table is reallocated to a
-	 smaller size, even though it is unnecessary here, as we are just
-	 going to move everything to an obstack anyway. */
+      /* Compact out any duplicates, and free up whatever space we are
+	 no longer using.  */
       
       mcount = compact_minimal_symbols (msymbols, mcount);
-      
-      /* Attach the minimal symbol table to the specified objfile, allocating
-	 the table entries in the symbol_obstack.  Note that the strings them-
-	 selves are already located in the symbol_obstack.  We also terminate
-	 the minimal symbol table with a "null symbol", which is *not* included
-	 in the size of the table.  This makes it easier to find the end of
-	 the table when we are handed a pointer to some symbol in the middle
-	 of it. */
-      
-      objfile -> minimal_symbol_count = mcount;
-      nbytes = (mcount + 1) * sizeof (struct minimal_symbol);
-      objfile -> msymbols = (struct minimal_symbol *)
-	obstack_alloc (&objfile -> symbol_obstack, nbytes);
-      memcpy (objfile -> msymbols, msymbols, nbytes);
-      free (msymbols);
 
-      /* Zero out the fields in the "null symbol" allocated at the end
+      obstack_blank (&objfile->symbol_obstack,
+	(mcount + 1 - alloc_count) * sizeof (struct minimal_symbol));
+      msymbols = (struct minimal_symbol *)
+	obstack_finish (&objfile->symbol_obstack);
+
+      /* We also terminate the minimal symbol table
+	 with a "null symbol", which is *not* included in the size of
+	 the table.  This makes it easier to find the end of the table
+	 when we are handed a pointer to some symbol in the middle of it.
+         Zero out the fields in the "null symbol" allocated at the end
 	 of the array.  Note that the symbol count does *not* include
 	 this null symbol, which is why it is indexed by mcount and not
 	 mcount-1. */
 
-      objfile -> msymbols[mcount].name = NULL;
-      objfile -> msymbols[mcount].address = 0;
-      objfile -> msymbols[mcount].info = NULL;
-      objfile -> msymbols[mcount].type = mst_unknown;
+      msymbols[mcount].name = NULL;
+      msymbols[mcount].address = 0;
+      msymbols[mcount].info = NULL;
+      msymbols[mcount].type = mst_unknown;
+
+      /* Attach the minimal symbol table to the specified objfile.
+	 The strings themselves are also located in the symbol_obstack
+	 of this objfile.  */
+
+      objfile -> minimal_symbol_count = mcount;
+      objfile -> msymbols = msymbols;
     }
 }
 

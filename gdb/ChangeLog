@@ -1,3 +1,110 @@
+Sat Feb 22 00:08:50 1992  John Gilmore  (gnu at cygnus.com)
+
+	* xm-sun3os4.h, xm-sun4os4.h:  Enable HAVE_MMAP.
+
+	* minsyms.c (install_minimal_symbols):  Add bunches to any
+	existing minsyms in the objfile.  Avoid extra mallocation
+	by working directly in the obstack.  Remove ignored `mainline' parm.
+	* coffread.c, dbxread.c, elfread.c, mipsread.c, solib.c, symtab.h,
+	xcoffread.c:  Change all callers.
+	* FIXME:  We should be able to eliminate MAINLINE from all the
+	symbol readers now, with a small bit of work.
+
+	* valops.c, value.h:  Lint.
+	* remote-vx.c:  Add missing break; statement.  Bugfix by
+	Michael Sclafani, <sclafani@src.dec.com>.
+
+Fri Feb 21 17:29:54 1992  John Gilmore  (gnu at cygnus.com)
+
+	* Check in Fred Fish's changes in these modules.  Fred
+	will make ChangeLog entries for all of them.
+
+	* Makefile.in
+	* altos-xdep.c
+	* am29k-tdep.c
+	* arm-xdep.c
+	* blockframe.c
+	* breakpoint.c
+	* breakpoint.h
+	* buildsym.c
+	* buildsym.h
+	* c-exp.y
+	* coffread.c
+	* command.c
+	* command.h
+	* convex-xdep.c
+	* copying.c
+	* coredep.c
+	* cplus-dem.c
+	* dbxread.c
+	* dwarfread.c
+	* elfread.c
+	* eval.c
+	* expprint.c
+	* findvar.c
+	* gdbtypes.h
+	* gmalloc.c
+	* gmalloc.h
+	* gould-xdep.c
+	* hp300ux-xdep.c
+	* i386-stub.c
+	* i386-tdep.c
+	* i386-xdep.c
+	* i387-tdep.c
+	* i960-tdep.c
+	* infcmd.c
+	* inflow.c
+	* infptrace.c
+	* language.c
+	* m2-exp.y
+	* m68k-pinsn.c
+	* m68k-stub.c
+	* m88k-pinsn.c
+	* m88k-xdep.c
+	* mach386-xdep.c
+	* main.c
+	* mcheck.c
+	* mem-break.c
+	* mips-xdep.c
+	* mipsread.c
+	* nindy-tdep.c
+	* parse.c
+	* parser-defs.h
+	* partial-stab.h
+	* printcmd.c
+	* procfs.c
+	* pyr-xdep.c
+	* remote-mm.c
+	* remote-nindy.c
+	* remote-vx.c
+	* rs6000-xdep.c
+	* solib.c
+	* source.c
+	* stack.c
+	* symfile.c
+	* symfile.h
+	* symm-tdep.c
+	* symmisc.c
+	* symtab.c
+	* symtab.h
+	* target.c
+	* target.h
+	* tm-sunos.h
+	* utils.c
+	* valarith.c
+	* valops.c
+	* valprint.c
+	* values.c
+	* xcoffexec.c
+	* xcoffread.c
+	* gdbtypes.c
+	* minsyms.c
+	* mmap-alloc.c
+	* mmap-sbrk.c
+	* objfiles.c
+	* state.c
+	* state.h
+
 Thu Feb 20 18:10:17 1992  Fred Fish  (fnf at cygnus.com)
 
 	* tm-sparc.h, tm-sysv4.h, solib.h:  Move shared lib definitions

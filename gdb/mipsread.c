@@ -97,6 +97,9 @@ extern void	     sort_symtab_syms();
 
 /* Various complaints about symbol reading that don't abort the process */
    
+struct complaint bad_file_number_complaint = 
+	{"bad file number %d", 0, 0};
+
 struct complaint unknown_ext_complaint = 
 	{"unknown external symbol %s", 0, 0};
 
@@ -195,7 +198,6 @@ static struct linetable	*new_linetable();
 static struct blockvector *new_bvect();
 
 static struct type	*parse_type();
-static struct type	*make_type();
 static struct symbol	*mylookup_symbol();
 static struct block	*shrink_block();
 static void sort_blocks();
@@ -267,17 +269,18 @@ mipscoff_symfile_read(sf, addr, mainline)
   if (val < 0)
     perror_with_name (name);
 
-  init_misc_bunches ();
-  make_cleanup (discard_misc_bunches, 0);
+  init_minimal_symbol_collection ();
+  make_cleanup (discard_minimal_symbols, 0);
 
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
 
   read_mips_symtab(sf->objfile, desc);
 
-  /* Go over the misc symbol bunches and install them in vector.  */
+  /* Install any minimal symbols that have been collected as the current
+     minimal symbols for this objfile. */
 
-  condense_misc_bunches (!mainline);
+  install_minimal_symbols (sf -> objfile);
 }
   
 /* Exported procedure: Allocate zeroed memory */
@@ -319,7 +322,7 @@ mipscoff_psymtab_to_symtab(pst)
 
 	/* Match with global symbols.  This only needs to be done once,
 	   after all of the symtabs and dependencies have been read in.   */
-	scan_file_globals ();
+	scan_file_globals (pst->objfile);
 
 	if (info_verbose)
 		printf_filtered("done.\n");
@@ -1081,8 +1084,8 @@ data:		/* Common code for symbols describing data */
 		    TYPE_LENGTH(t) = sh->value;
 		    TYPE_NFIELDS(t) = nfields;
 		    TYPE_FIELDS(t) = f = (struct field*)
-			obstack_alloc (symbol_obstack,
-				       nfields * sizeof (struct field));
+		      obstack_alloc (&current_objfile -> type_obstack,
+				     nfields * sizeof (struct field));
 		    
 		    if (type_code == TYPE_CODE_ENUM) {
 			/* This is a non-empty enum. */
@@ -1094,7 +1097,7 @@ data:		/* Common code for symbols describing data */
 			    f->bitsize = 0;
 			    
 			    enum_sym = (struct symbol *)
-				obstack_alloc (symbol_obstack,
+				obstack_alloc (&objfile->symbol_obstack,
 					       sizeof (struct symbol));
 			    memset (enum_sym, 0, sizeof (struct symbol));
 			    SYMBOL_NAME (enum_sym) = f->name;
@@ -1330,7 +1333,7 @@ static struct type *parse_type(ax, sh, bs)
 		ax += cross_ref(ax, &tp, type_code, &pn);
 		/* reading .o file ? */
 		if (UNSAFE_DATA_ADDR(tp))
-		    tp = make_type(type_code, 0, 0, 0);
+		    tp = init_type(type_code, 0, 0, 0, (struct objfile *) NULL);
 		/* SOMEONE OUGHT TO FIX DBXREAD TO DROP "STRUCT" */
 		sprintf(name, fmt, pn);
 
@@ -1341,7 +1344,8 @@ static struct type *parse_type(ax, sh, bs)
 		    TYPE_CODE(tp) = type_code;
 		}
 		if (TYPE_NAME(tp) == NULL || strcmp(TYPE_NAME(tp), name) != 0)
-		    TYPE_NAME(tp) = obsavestring(name, strlen(name));
+		    TYPE_NAME(tp) = obsavestring(name, strlen(name),
+						 &current_objfile -> type_obstack);
 	}
 
 	/* Deal with range types */
@@ -1350,12 +1354,14 @@ static struct type *parse_type(ax, sh, bs)
 
 		TYPE_NFIELDS (tp) = 2;
 		TYPE_FIELDS (tp) =
-		    (struct field *) obstack_alloc (symbol_obstack,
-						    2 * sizeof (struct field));
-		TYPE_FIELD_NAME (tp, 0) = "Low";
+		  (struct field *) obstack_alloc (&current_objfile -> type_obstack,
+						  2 * sizeof (struct field));
+		TYPE_FIELD_NAME (tp, 0) = obsavestring ("Low", strlen ("Low"),
+							&current_objfile -> type_obstack);
 		TYPE_FIELD_BITPOS (tp, 0) = ax->dnLow;
 		ax++;
-		TYPE_FIELD_NAME (tp, 1) = "High";
+		TYPE_FIELD_NAME (tp, 1) = obsavestring ("High", strlen ("High"),
+							&current_objfile -> type_obstack);
 		TYPE_FIELD_BITPOS (tp, 1) = ax->dnHigh;
 		ax++;
 	}
@@ -1416,7 +1422,7 @@ upgrade_type(tpp, tq, ax, sh)
 
 	case tqArray:
 		off = 0;
-		t = make_type(TYPE_CODE_ARRAY, 0, 0, 0);
+		t = init_type(TYPE_CODE_ARRAY, 0, 0, 0, (struct objfile *) NULL);
 		TYPE_TARGET_TYPE(t) = *tpp;
 
 		/* Determine and record the domain type (type of index) */
@@ -1781,7 +1787,7 @@ parse_partial_symbols(end_of_text_seg, objfile)
 
 /* Pass 2 over external syms: fill in external symbols */
 	for (s_idx = 0; s_idx < hdr->iextMax; s_idx++) {
-		enum misc_function_type misc_type = mf_text;
+		enum minimal_symbol_type ms_type = mst_text;
 		esh = (EXTR *) (hdr->cbExtOffset) + s_idx;
 
 		extern_tab[fdr_to_pst[esh->ifd].globals_offset
@@ -1794,18 +1800,18 @@ parse_partial_symbols(end_of_text_seg, objfile)
 		case stProc:
 			break;
 		case stGlobal:
-			misc_type = mf_data;
+			ms_type = mst_data;
 			break;
 		case stLabel:
 			break;
 		default:
-			misc_type = mf_unknown;
+			ms_type = mst_unknown;
 			complain (&unknown_ext_complaint,
 				  (char *)(esh->asym.iss));
 		}
-		prim_record_misc_function ((char *)(esh->asym.iss),
-				           esh->asym.value,
-				           misc_type);
+		prim_record_minimal_symbol ((char *)(esh->asym.iss),
+					    esh->asym.value,
+					    ms_type);
 	}
 
 	/* Pass 3 over files, over local syms: fill in static symbols */
@@ -1838,11 +1844,13 @@ parse_partial_symbols(end_of_text_seg, objfile)
 	    
 	    pst->texthigh = pst->textlow;
 	    
+#if 0	    /* This is done in start_psymtab_common */
 	    pst->globals_offset = global_psymbols.next - global_psymbols.list;
 	    pst->statics_offset = static_psymbols.next - static_psymbols.list;
 	    
 	    pst->n_global_syms = 0;
 	    pst->n_static_syms = 0;
+#endif
 	    
 	    /* The second symbol must be @stab.
 	       This symbol is emitted by mips-tfile to signal
@@ -1985,7 +1993,7 @@ parse_partial_symbols(end_of_text_seg, objfile)
 		    }
 		    if (global_psymbols.next >=
 			global_psymbols.list + global_psymbols.size)
-			extend_psymbol_list (&global_psymbols);
+			extend_psymbol_list (&global_psymbols, objfile);
 		    psym = global_psymbols.next++;
 		    SYMBOL_NAME (psym) = (char*)sh->iss;
 		    SYMBOL_NAMESPACE (psym) = VAR_NAMESPACE;
@@ -2008,7 +2016,40 @@ parse_partial_symbols(end_of_text_seg, objfile)
 	/* Mark the last code address, and remember it for later */
 	hdr->cbDnOffset = end_of_text_seg;
 
-	do_cleanups (old_chain);
+    /* Now scan the FDRs for dependencies */
+    for (f_idx = 0; f_idx < hdr->ifdMax; f_idx++) {
+	int s_id0 = 0;
+	fh = f_idx + (FDR *)(cur_hdr->cbFdOffset);
+	pst = fdr_to_pst[f_idx].pst;
+
+	/* This should catch stabs-in-ecoff. */
+	if (fh->crfd <= 1)
+		continue;
+
+	if (fh->cpd == 0) {  /* If there are no functions defined here ... */
+		/* ...then presumably a .h file: drop reverse depends .h->.c */
+		for (; s_id0 < fh->crfd; s_id0++) {
+			RFDT *rh = (RFDT *) (fh->rfdBase) + s_id0;
+			if (*rh == f_idx) {
+				s_id0++;	/* Skip self-dependency */
+				break;
+			}
+		}
+	}
+	pst->number_of_dependencies = fh->crfd - s_id0;
+	pst->dependencies = (struct partial_symtab **)
+		obstack_alloc (psymbol_obstack,
+			       pst->number_of_dependencies *
+			       sizeof (struct partial_symtab *));
+	for (s_idx = s_id0; s_idx < fh->crfd; s_idx++) {
+	    RFDT *rh = (RFDT *) (fh->rfdBase) + s_idx;
+	    if (*rh < 0 || *rh >= hdr->ifdMax)
+		complain(&bad_file_number_complaint, *rh);
+	    else
+		pst->dependencies[s_idx-s_id0] = fdr_to_pst[*rh].pst;
+	}
+    }
+    do_cleanups (old_chain);
 }
 
 
@@ -2070,7 +2111,7 @@ parse_fdr(f_idx, lev, objfile)
 	}
 	pst->number_of_dependencies = fh->crfd - s_id0;
 	pst->dependencies = (struct partial_symtab **)
-		obstack_alloc (psymbol_obstack,
+		obstack_alloc (&objfile->psymbol_obstack,
 				 pst->number_of_dependencies *
 				   sizeof (struct partial_symtab *));
 	for (s_idx = s_id0; s_idx < fh->crfd; s_idx++) {
@@ -2170,6 +2211,7 @@ psymtab_to_symtab_1(pst, filename)
     cur_fdr = fh;
     /* Now read the symbols for this symtab */
     
+    current_objfile = pst -> objfile;
     if (!have_stabs) {
 	cur_fd = FDR_IDX(pst);
 	cur_stab = st;
@@ -2201,7 +2243,10 @@ psymtab_to_symtab_1(pst, filename)
 	
 	if (have_stabs) {
 	    if (fh->csym <= 2)
+	      {
+		current_objfile = NULL;
 		return;
+	      }
 	    for (cur_sdx = 2; cur_sdx < fh->csym; cur_sdx++) {
 		register SYMR	*sh = cur_sdx + (SYMR *) fh->isymBase;
 		char *name = (char*)sh->iss;
@@ -2279,6 +2324,8 @@ psymtab_to_symtab_1(pst, filename)
     
     /* Now link the psymtab and the symtab.  */
     pst->symtab = st;
+
+    current_objfile = NULL;
 }
 
 /* Ancillary parsing procedures. */
@@ -2337,7 +2384,7 @@ cross_ref(rn, tpp, type_code, pname)
 		    if (p)
 			*tpp = p->t;
 		    else {
-			*tpp = make_type(type_code, 0, 0, 0);
+			*tpp = init_type(type_code, 0, 0, 0, (struct objfile *) NULL);
 			add_pending(fh, sh, *tpp);
 		    }
 		}
@@ -2568,24 +2615,20 @@ struct symtab *
 new_symtab(name, maxsyms, maxlines, objfile)
 	char *name;
 {
-	struct symtab *s = allocate_symtab (name, objfile);
+  struct symtab *s = allocate_symtab (name, objfile);
 
-	LINETABLE(s) = new_linetable(maxlines);
+  LINETABLE(s) = new_linetable(maxlines);
 
-	/* All symtabs must have at least two blocks */
-	BLOCKVECTOR(s) = new_bvect(2);
-	BLOCKVECTOR_BLOCK(BLOCKVECTOR(s), GLOBAL_BLOCK) = new_block(maxsyms);
-	BLOCKVECTOR_BLOCK(BLOCKVECTOR(s), STATIC_BLOCK) = new_block(maxsyms);
-	BLOCK_SUPERBLOCK( BLOCKVECTOR_BLOCK(BLOCKVECTOR(s),STATIC_BLOCK)) =
-		BLOCKVECTOR_BLOCK(BLOCKVECTOR(s), GLOBAL_BLOCK);
+  /* All symtabs must have at least two blocks */
+  BLOCKVECTOR(s) = new_bvect(2);
+  BLOCKVECTOR_BLOCK(BLOCKVECTOR(s), GLOBAL_BLOCK) = new_block(maxsyms);
+  BLOCKVECTOR_BLOCK(BLOCKVECTOR(s), STATIC_BLOCK) = new_block(maxsyms);
+  BLOCK_SUPERBLOCK( BLOCKVECTOR_BLOCK(BLOCKVECTOR(s),STATIC_BLOCK)) =
+    BLOCKVECTOR_BLOCK(BLOCKVECTOR(s), GLOBAL_BLOCK);
 
-	s->free_code = free_linetable;
+  s->free_code = free_linetable;
 
-	/* Link the new symtab into the list of such.  */
-	s->next = symtab_list;
-	symtab_list = s;
-
-	return s;
+  return (s);
 }
 
 /* Allocate a new partial_symtab NAME */
@@ -2595,34 +2638,21 @@ new_psymtab(name, objfile)
 	char *name;
 	struct objfile *objfile;
 {
-	struct partial_symtab *pst;
+  struct partial_symtab *psymtab;
+  
+  /* FIXME -- why (char *) -1 rather than NULL? */
+  psymtab = allocate_psymtab (name == (char *) -1 ? "<no name>" : name,
+			      objfile);
+  
+  /* Keep a backpointer to the file's symbols */
 
-	pst = (struct partial_symtab *)
-	      obstack_alloc (psymbol_obstack, sizeof (*pst));
-	memset (pst, 0, sizeof (*pst));
-
-	if (name == (char*)-1)		/* FIXME -- why not null here? */
-		pst->filename = "<no name>";
-	else
-		pst->filename = name;
-
-	/* Chain it to its object file */
-	pst->objfile = objfile;
-	pst->objfile_chain = objfile->psymtabs;
-	objfile->psymtabs = pst;
-	
-	pst->next = partial_symtab_list;
-	partial_symtab_list = pst;
-
-	/* Keep a backpointer to the file's symbols */
-	pst->read_symtab_private = (char *) obstack_alloc (psymbol_obstack,
-						  sizeof (struct symloc));
-	CUR_HDR(pst) = cur_hdr;
-
-	/* The way to turn this into a symtab is to call... */
-	pst->read_symtab = mipscoff_psymtab_to_symtab;
-
-	return pst;
+  psymtab -> read_symtab_private = (char *)
+    obstack_alloc (&objfile->psymbol_obstack, sizeof (struct symloc));
+  CUR_HDR(psymtab) = cur_hdr;
+  
+  /* The way to turn this into a symtab is to call... */
+  psymtab->read_symtab = mipscoff_psymtab_to_symtab;
+  return (psymtab);
 }
 
 
@@ -2719,7 +2749,7 @@ new_symbol(name)
 	char *name;
 {
 	struct symbol *s = (struct symbol *) 
-		obstack_alloc (symbol_obstack, sizeof (struct symbol));
+		obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
 
 	memset (s, 0, sizeof (*s));
 	SYMBOL_NAME(s) = name;
@@ -2733,41 +2763,14 @@ struct type *
 new_type(name)
 	char *name;
 {
-	struct type *t = (struct type *)
-		obstack_alloc (symbol_obstack, sizeof (struct type));
+	struct type *t;
 
-	memset (t, 0, sizeof (*t));
-	TYPE_VPTR_FIELDNO (t) = -1;
+	t = alloc_type (current_objfile);
 	TYPE_NAME(t) = name;
 	TYPE_CPLUS_SPECIFIC(t) = &cplus_struct_default;
 	return t;
 }
 
-/* Create and initialize a new type with printname NAME.
-   CODE and LENGTH are the initial info we put in,
-   UNS says whether the type is unsigned or not.  */
-
-static
-struct type *
-make_type(code, length, uns, name)
-     enum type_code code;
-     int length, uns;
-     char *name;
-{
-    register struct type *type;
-    
-    /* FIXME, I don't think this ever gets freed.  */
-    type = (struct type *) xzalloc(sizeof(struct type));
-    TYPE_CODE(type) = code;
-    TYPE_LENGTH(type) = length;
-    TYPE_FLAGS(type) = uns ? TYPE_FLAG_UNSIGNED : 0;
-    TYPE_NAME(type) = name;
-    TYPE_VPTR_FIELDNO (type) = -1;
-    
-    if (code != TYPE_CODE_METHOD && code != TYPE_CODE_FUNC)
-	TYPE_CPLUS_SPECIFIC(type) = &cplus_struct_default;
-    return type;
-}
 
 /* Things used for calling functions in the inferior.
    These functions are exported to our companion
@@ -2821,7 +2824,7 @@ fixup_sigtramp()
 	 */
 	SYMBOL_NAMESPACE(s) = VAR_NAMESPACE;
 	SYMBOL_CLASS(s) = LOC_BLOCK;
-	SYMBOL_TYPE(s) = make_type(TYPE_CODE_FUNC, 4, 0, 0);
+	SYMBOL_TYPE(s) = init_type(TYPE_CODE_FUNC, 4, 0, 0, (struct objfile *) NULL);
 	TYPE_TARGET_TYPE(SYMBOL_TYPE(s)) = builtin_type_void;
 
 	/* Need a block to allocate .gdbinfo. in */
@@ -2872,14 +2875,24 @@ _initialize_mipsread ()
 	add_symtab_fns (&ecoff_sym_fns);
 
 	/* Missing basic types */
-	builtin_type_string = make_type(TYPE_CODE_PASCAL_ARRAY,
-					1, 0, "string");
-	builtin_type_complex = make_type(TYPE_CODE_FLT,
-					 2 * sizeof(float), 0, "complex");
-	builtin_type_double_complex = make_type(TYPE_CODE_FLT,
-				    2 * sizeof(double), 0, "double_complex");
-	builtin_type_fixed_dec = make_type(TYPE_CODE_INT, sizeof(int),
-					   0, "fixed_decimal");
-	builtin_type_float_dec = make_type(TYPE_CODE_FLT, sizeof(double),
-					   0, "floating_decimal");
+	builtin_type_string =
+	    init_type (TYPE_CODE_PASCAL_ARRAY,
+		       1, 0, "string",
+		       (struct objfile *) NULL);
+	builtin_type_complex =
+	    init_type(TYPE_CODE_FLT,
+		      2 * sizeof(float), 0, "complex",
+		      (struct objfile *) NULL);
+	builtin_type_double_complex =
+	    init_type(TYPE_CODE_FLT,
+		      2 * sizeof(double), 0, "double_complex",
+		      (struct objfile *) NULL);
+	builtin_type_fixed_dec =
+	    init_type(TYPE_CODE_INT, sizeof(int),
+		      0, "fixed_decimal",
+		      (struct objfile *) NULL);
+	builtin_type_float_dec =
+	    init_type(TYPE_CODE_FLT, sizeof(double),
+		      0, "floating_decimal",
+		      (struct objfile *) NULL);
 }

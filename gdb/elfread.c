@@ -313,7 +313,7 @@ elf_symfile_read (sf, addr, mainline)
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */
 
-  install_minimal_symbols (!mainline, sf -> objfile);
+  install_minimal_symbols (sf -> objfile);
 
   do_cleanups (back_to);
 }

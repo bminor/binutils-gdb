@@ -1009,6 +1009,7 @@ vx_wait (status)
 
     case EVENT_ZERO_DIV:	/* Division by zero */
       WSETSTOP (w, SIGFPE);	/* Like Unix, call it a float exception. */
+      break;
 
     case EVENT_SIGNAL:
       /* The target is not running Unix, and its
