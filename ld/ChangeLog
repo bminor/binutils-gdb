@@ -1,3 +1,8 @@
+Fri Jun  4 08:50:14 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/sun3.mh (HOSTING_LIBS, HOSTING_EMU): Removed obsolete and
+	incorrect definitions.
+
 Tue Jun  1 14:56:10 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* ldsym.c (write_file_locals):  Write BSF_CONSTRUCTOR
