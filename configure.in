@@ -257,8 +257,7 @@ case "${target}" in
     ;;
   rs6000-*-*)
     # a gcc built textutils will cause the linker to hang on 'join'
-    # The CVS server code doesn't work on the RS/6000
-    noconfigdirs="$noconfigdirs ld binutils gprof textutils cvs"
+    noconfigdirs="$noconfigdirs ld binutils gprof textutils"
     ;;
   m68k-apollo-*)
     noconfigdirs="$noconfigdirs ld binutils gprof"
