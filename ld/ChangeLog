@@ -1,3 +1,14 @@
+Thu Sep  8 13:25:24 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* emulparams/elf32ppc.sh (OTHER_READWRITE_SECTIONS): Don't define;
+	.got section is now explicitly handled in elf.sc.
+
+Wed Sep  7 13:08:34 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* scripttempl/alpha.sc: Redo script to set . outside of sections
+	and not bother to explicitly specify section addresses.
+	Explicitly place .sdata section.
+
 Tue Sep  6 23:51:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* scripttempl/m68kcoff.sc: Put .bss in data segment.
