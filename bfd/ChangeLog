@@ -1,3 +1,10 @@
+1999-08-02  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* elflink.h (elf_bfd_final_link): Copy the whole isym, not just
+	some fields.
+	* elf64-sparc.c (sparc64_elf_output_arch_syms): Declare used
+	variables and initialize them.
+
 1999-08-01  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (_bfd_mips_elf_final_link): Handle the case where

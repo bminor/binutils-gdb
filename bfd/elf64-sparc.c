@@ -1403,6 +1403,8 @@ sparc64_elf_output_arch_syms (output_bfd, info, finfo, func)
      to back up symtab->sh_info.  */
   if (elf_hash_table (info)->dynlocal)
     {
+      bfd * dynobj = elf_hash_table (info)->dynobj;
+      asection *dynsymsec = bfd_get_section_by_name (dynobj, ".dynsym");
       struct elf_link_local_dynamic_entry *e;
 
       for (e = elf_hash_table (info)->dynlocal; e ; e = e->next)

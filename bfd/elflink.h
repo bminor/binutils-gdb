@@ -4250,19 +4250,12 @@ elf_bfd_final_link (abfd, info)
 	    {
 	      asection *s;
 
-	      sym.st_size = e->isym.st_size;
-	      sym.st_other = e->isym.st_other;
-
-	      /* Note that we saved a word of storage and overwrote
+	      /* Copy the internal symbol as is.
+		 Note that we saved a word of storage and overwrote
                  the original st_name with the dynstr_index.  */
-	      sym.st_name = e->isym.st_name;
+              sym = e->isym;
 
-	      if (e->isym.st_shndx == 0 || e->isym.st_shndx >= SHN_LORESERVE)
-		{
-		  sym.st_shndx = e->isym.st_shndx;
-		  sym.st_value = e->isym.st_value;
-		}
-	      else
+	      if (e->isym.st_shndx > 0 && e->isym.st_shndx < SHN_LORESERVE)
 		{
 		  s = bfd_section_from_elf_index (e->input_bfd,
 						  e->isym.st_shndx);
