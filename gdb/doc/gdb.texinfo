@@ -6,7 +6,7 @@
 @c of @set vars.  However, you can override filename with makeinfo -o.
 @setfilename gdb.info
 @c
-@include gdb-config.texi
+@include gdb-cfg.texi
 @c
 @ifset GENERIC
 @settitle Debugging with @value{GDBN}
