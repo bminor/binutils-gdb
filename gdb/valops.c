@@ -1000,7 +1000,7 @@ call_function_by_hand (function, nargs, args)
   /* Write the stack pointer.  This is here because the statements above
      might fool with it.  On SPARC, this write also stores the register
      window into the right place in the new stack frame, which otherwise
-     wouldn't happen.  (See write_inferior_registers in sparc-xdep.c.)  */
+     wouldn't happen.  (See store_inferior_registers in sparc-nat.c.)  */
   write_sp (sp);
 
   /* Figure out the value returned by the function.  */
