@@ -1,3 +1,8 @@
+Mon Jan 10 15:48:36 1994  Tom Lord  (lord@rtl.cygnus.com)
+
+	* m68k-stub.c, sparc-stub.c: removed spurious introduction of 
+	_filtered io routines from these two files.
+
 Fri Jan  7 12:42:45 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/i386/tm-i386v.h, config/m68k/tm-m68k.h, config/mips/tm-mips.h,
