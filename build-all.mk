@@ -6,21 +6,20 @@
 #
 
 TREE	= devo
+include $(TREE)/release-info
 
-NATIVE  = native
+TEST_INSTALL_DISK = /cirdan/abc
 
-DATE	= 930511
-
-TAG	= latest-$(DATE)
-
-INSTALLDIR = /rtl/justice/devo-test/$(TAG)
+INSTALLDIR = $(TEST_INSTALL_DISK)/$(TREE)-test/$(RELEASE_TAG)
 
 ifndef host
 host := $(shell $(TREE)/config.guess)
 endif
 
-GCC = gcc -O 
-CFLAGS = -g
+NATIVE  = native
+
+GCC     = gcc -O 
+CFLAGS  = -g
 
 log	= 1>$(canonhost)-build-log 2>&1
 tlog    = 1> $(canonhost)-x-$$i-build-log 2>&1
@@ -111,13 +110,13 @@ FLAGS_TO_PASS := \
 	"CC=$(CC)" \
 	"CFLAGS=$(CFLAGS)" \
 	"host=$(canonhost)" \
-	"RELEASE_TAG=$(TAG)"
+	"RELEASE_TAG=$(RELEASE_TAG)"
 
 all-emacs:
 	@echo build started at `date`
 	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
-	rm -f /usr/cygnus/$(TAG)
-	ln -s $(INSTALLDIR) /usr/cygnus/$(TAG) 
+	rm -f $(ROOTING)/$(RELEASE_TAG)
+	ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG) 
 	$(MAKE) -f test-build.mk $(FLAGS_TO_PASS) do1 > $(canonhost)-native-log 2>&1 
 	$(MAKE) -f test-build.mk $(FLAGS_TO_PASS) do-latest > $(canonhost)-latest-log 2>&1 
 	@echo done at `date`
@@ -125,8 +124,8 @@ all-emacs:
 all-cygnus:
 	@echo build started at `date`
 	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
-	rm -f /usr/cygnus/$(TAG)
-	ln -s $(INSTALLDIR) /usr/cygnus/$(TAG) 
+	rm -f $(ROOTING)/$(RELEASE_TAG)
+	ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG) 
 	@for i in $(TARGETS) ; do \
 	  if [ "$$i" = "native" ] ; then \
             if [ ! -f $(canonhost)-3stage-done ] ; then \
@@ -145,8 +144,8 @@ all-cygnus:
 native:
 	@echo build started at `date`
 	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
-	rm -f /usr/cygnus/$(TAG)
-	ln -s $(INSTALLDIR) /usr/cygnus/$(TAG) 
+	rm -f $(ROOTING)/$(RELEASE_TAG)
+	ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG) 
 	$(MAKE) -f test-build.mk $(FLAGS_TO_PASS) $(canonhost)-stamp-3stage-done $(log)
 	@echo done at `date`
 
@@ -169,8 +168,8 @@ build-cygnus:
 
 all-native:
 	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
-	rm -f /usr/cygnus/$(TAG)
-	ln -s $(INSTALLDIR) /usr/cygnus/$(TAG)
+	rm -f $(ROOTING)/$(RELEASE_TAG)
+	ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG)
 	@for i in $(TARGETS) ; do \
 	    echo "building $(canonhost) cross to $$i" ; \
             $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i do-native $(tlog) && \
