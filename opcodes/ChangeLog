@@ -1,3 +1,14 @@
+Thu Mar 19 15:46:53 1998  Nick Clifton  <nickc@cygnus.com>
+
+	These patches are courtesy of Jonathan Walton and Tony Thompson
+	(athompso@cambridge.arm.com).
+	
+	* arm-dis.c (print_insn_thumb): Ignore bottom two bits of PC
+	relative addresses.
+
+	* arm-opc.h (thumb_opcodes): Annotate PC relative addresses with
+	both the offset and the label closest to the destination.
+
 start-sanitize-r5900
 Thu Mar 19 13:53:25 1998  Jeffrey A Law  (law@cygnus.com)
 

@@ -66,7 +66,7 @@ Thumb specific format options:
    %<bitfield>B         print Thumb branch destination (signed displacement)
    %<bitfield>W         print (bitfield * 4) as a decimal
    %<bitfield>H         print (bitfield * 2) as a decimal
-   %<bitfield>a         print (bitfield * 4) as a decoded symbol
+   %<bitfield>a         print (bitfield * 4) as a pc-rel offset + decoded symbol
 */
 
 /* Note: There is a partial ordering in this table - it must be searched from
@@ -223,7 +223,7 @@ static struct thumb_opcode thumb_opcodes[] =
   {0x3000, 0xF800, "add\t%8-10r, #%0-7d"},
   {0x3800, 0xF800, "sub\t%8-10r, #%0-7d"},
   /* format 6 */
-  {0x4800, 0xF800, "ldr\t%8-10r, %0-7a"},
+  {0x4800, 0xF800, "ldr\t%8-10r, [pc, #%0-7W]\t(%0-7a)"},  /* TODO: Disassemble PC relative "LDR rD,=<symbolic>" */
   /* format 9 */
   {0x6000, 0xF800, "str\t%0-2r, [%3-5r, #%6-10W]"},
   {0x6800, 0xF800, "ldr\t%0-2r, [%3-5r, #%6-10W]"},
@@ -236,7 +236,7 @@ static struct thumb_opcode thumb_opcodes[] =
   {0x9000, 0xF800, "str\t%8-10r, [sp, #%0-7W]"},
   {0x9800, 0xF800, "ldr\t%8-10r, [sp, #%0-7W]"},
   /* format 12 */
-  {0xA000, 0xF800, "add\t%8-10r, pc, #%0-7W"},  /* TODO: Disassemble PC relative "LDR rD,=<symbolic>" */
+  {0xA000, 0xF800, "add\t%8-10r, pc, #%0-7W\t(adr %8-10r,%0-7a)"},
   {0xA800, 0xF800, "add\t%8-10r, sp, #%0-7W"},
   /* format 15 */
   {0xC000, 0xF800, "stmia\t%8-10r!,%M"},
