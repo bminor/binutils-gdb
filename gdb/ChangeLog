@@ -1,3 +1,20 @@
+Mon Jul 31 19:12:48 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* h8500-tdep.c: General linting and cleanup.
+	(opcodes/h8500-opc.h): Don't include.
+	(code_size, data_size): Make static.
+	(frame_locals_address, frame_args_address): Remove.
+	(h8300_pop_frame): Rename to h8500_pop_frame.
+	(big_command, medium_command, compact_command, small_command):
+	Define as regular functions rather than with macro trickery.
+	(tm_print_insn): Set to correct disassembler function.
+	* config/h8500/tm-h8500.h: Minor cleanup, add prototypes.
+	(ABOUT_TO_RETURN): #if 0 out.
+	(FRAME_ARGS_ADDRESS, FRAME_LOCALS_ADDRESS): Use usual define.
+	(GDB_TARGET_IS_H8500): Remove duplicate	definition.
+	(regoff): Remove, never used.
+	* config/h8500/h8500.mt (TDEPFILES): Add monitor.o.
+
 Mon Jul 31 14:32:30 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* configure.in: Check for unistd.h.

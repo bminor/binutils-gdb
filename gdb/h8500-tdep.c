@@ -1,4 +1,4 @@
-/* Target-machine dependent code for Hitachi H8/500, for GDB.
+/* Target-dependent code for Hitachi H8/500, for GDB.
    Copyright 1993, 1994, 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -30,15 +30,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcmd.h"
 #include "value.h"
 #include "dis-asm.h"
-#include "../opcodes/h8500-opc.h"
-;
+#include "gdbcore.h"
 
 #define UNSIGNED_SHORT(X) ((X) & 0xffff)
-int code_size = 2;
-int data_size = 2;
+
+static int code_size = 2;
+
+static int data_size = 2;
 
 /* Shape of an H8/500 frame :
-
 
    arg-n
    ..
@@ -52,7 +52,6 @@ int data_size = 2;
    saved registers
 
 */
-
 
 /* an easy to debug H8 stack frame looks like:
 0x6df6		push	r6
@@ -76,19 +75,14 @@ int data_size = 2;
 #define LINK_16 0x1f
 
 int minimum_mode = 1;
-CORE_ADDR examine_prologue ();
-
-void frame_find_saved_regs ();
-
 
 CORE_ADDR
 h8500_skip_prologue (start_pc)
      CORE_ADDR start_pc;
-
 {
   short int w;
 
- w = read_memory_integer (start_pc, 1);
+  w = read_memory_integer (start_pc, 1);
   if (w == LINK_8)
     {
       start_pc += 2;
@@ -121,7 +115,6 @@ h8500_frame_chain (thisframe)
     return 0;
 }
 
-
 /* Fetch the instruction at ADDR, returning 0 if ADDR is beyond LIM or
    is not the address of a valid instruction, the address of the next
    instruction beyond ADDR otherwise.  *PWORD1 receives the first word
@@ -142,15 +135,15 @@ NEXT_PROLOGUE_INSN (addr, lim, pword1)
   return 0;
 }
 
-/* Examine the prologue of a function.  `ip' points to the first instruction.
-   `limit' is the limit of the prologue (e.g. the addr of the first
-   linenumber, or perhaps the program counter if we're stepping through).
-   `frame_sp' is the stack pointer value in use in this frame.
-   `fsr' is a pointer to a frame_saved_regs structure into which we put
-   info about the registers saved by this frame.
-   `fi' is a struct frame_info pointer; we fill in various fields in it
-   to reflect the offsets of the arg pointer and the locals pointer.  */
-
+/* Examine the prologue of a function.  `ip' points to the first
+   instruction.  `limit' is the limit of the prologue (e.g. the addr
+   of the first linenumber, or perhaps the program counter if we're
+   stepping through).  `frame_sp' is the stack pointer value in use in
+   this frame.  `fsr' is a pointer to a frame_saved_regs structure
+   into which we put info about the registers saved by this frame.
+   `fi' is a struct frame_info pointer; we fill in various fields in
+   it to reflect the offsets of the arg pointer and the locals
+   pointer.  */
 
 /* Return the saved PC from this frame. */
 
@@ -161,25 +154,8 @@ frame_saved_pc (frame)
   return read_memory_integer (FRAME_FP (frame) + 2, PTR_SIZE);
 }
 
-CORE_ADDR
-frame_locals_address (fi)
-     struct frame_info *fi;
-{
-  return fi->frame;
-}
-
-/* Return the address of the argument block for the frame
-   described by FI.  Returns 0 if the address is unknown.  */
-
-CORE_ADDR
-frame_args_address (fi)
-     struct frame_info *fi;
-{
-  return fi->frame;
-}
-
-void
-h8300_pop_frame ()
+void 
+h8500_pop_frame ()
 {
   unsigned regnum;
   struct frame_saved_regs fsr;
@@ -190,15 +166,15 @@ h8300_pop_frame ()
   for (regnum = 0; regnum < 8; regnum++)
     {
       if (fsr.regs[regnum])
-	  write_register (regnum, read_memory_short (fsr.regs[regnum]));
+	write_register (regnum, read_memory_short (fsr.regs[regnum]));
 
       flush_cached_frames ();
     }
-
 }
 
 void
 print_register_hook (regno)
+     int regno;
 {
   if (regno == CCR_REGNUM)
     {
@@ -247,34 +223,37 @@ int
 h8500_register_size (regno)
      int regno;
 {
-  switch (regno) {
-  case SEG_C_REGNUM:
-  case SEG_D_REGNUM:
-  case SEG_E_REGNUM:
-  case SEG_T_REGNUM:
-    return 1;
-  case R0_REGNUM:
-  case R1_REGNUM:
-  case R2_REGNUM:
-  case R3_REGNUM:
-  case R4_REGNUM:
-  case R5_REGNUM:
-  case R6_REGNUM:
-  case R7_REGNUM:
-  case CCR_REGNUM:
-    return 2;
+  switch (regno)
+    {
+    case SEG_C_REGNUM:
+    case SEG_D_REGNUM:
+    case SEG_E_REGNUM:
+    case SEG_T_REGNUM:
+      return 1;
+    case R0_REGNUM:
+    case R1_REGNUM:
+    case R2_REGNUM:
+    case R3_REGNUM:
+    case R4_REGNUM:
+    case R5_REGNUM:
+    case R6_REGNUM:
+    case R7_REGNUM:
+    case CCR_REGNUM:
+      return 2;
 
-  case PR0_REGNUM:
-  case PR1_REGNUM:
-  case PR2_REGNUM:
-  case PR3_REGNUM:
-  case PR4_REGNUM:
-  case PR5_REGNUM:
-  case PR6_REGNUM:
-  case PR7_REGNUM:
-  case PC_REGNUM:
-    return 4;
-  }
+    case PR0_REGNUM:
+    case PR1_REGNUM:
+    case PR2_REGNUM:
+    case PR3_REGNUM:
+    case PR4_REGNUM:
+    case PR5_REGNUM:
+    case PR6_REGNUM:
+    case PR7_REGNUM:
+    case PC_REGNUM:
+      return 4;
+    default:
+      abort ();
+    }
 }
 
 struct type *
@@ -323,7 +302,6 @@ void
 frame_find_saved_regs (frame_info, frame_saved_regs)
      struct frame_info *frame_info;
      struct frame_saved_regs *frame_saved_regs;
-
 {
   register int regnum;
   register int regmask;
@@ -400,10 +378,12 @@ lose:;
   (frame_saved_regs)->regs[PC_REGNUM] = (frame_info)->frame + 2;
 }
 
-saved_pc_after_call (frame)
+CORE_ADDR
+saved_pc_after_call ()
 {
   int x;
   int a = read_register (SP_REGNUM);
+
   x = read_memory_integer (a, code_size);
   if (code_size == 2)
     {
@@ -415,10 +395,12 @@ saved_pc_after_call (frame)
   return x;
 }
 
-
+#if 0  /* never called */
 /* Nonzero if instruction at PC is a return instruction.  */
 
+int
 about_to_return (pc)
+     CORE_ADDR pc;
 {
   int b1 = read_memory_integer (pc, 1);
 
@@ -443,7 +425,7 @@ about_to_return (pc)
     }
   return 0;
 }
-
+#endif
 
 void
 h8500_set_pointer_size (newsize)
@@ -467,16 +449,39 @@ h8500_set_pointer_size (newsize)
     }
 }
 
+static void
+big_command ()
+{
+  h8500_set_pointer_size (32);
+  code_size = 4;
+  data_size = 4;
+}
 
-struct cmd_list_element *setmemorylist;
+static void
+medium_command ()
+{
+  h8500_set_pointer_size (32);
+  code_size = 4;
+  data_size = 2;
+}
 
+static void
+compact_command ()
+{
+  h8500_set_pointer_size (32);
+  code_size = 2;
+  data_size = 4;
+}
 
-#define C(name,a,b,c) name () { h8500_set_pointer_size(a); code_size = b; data_size = c; }
+static void
+small_command ()
+{
+  h8500_set_pointer_size (16);
+  code_size = 2;
+  data_size = 2;
+}
 
-C(big_command, 32,4,4);
-C(medium_command, 32, 4,2);
-C(compact_command, 32,2,4);
-C(small_command, 16,2,2);
+static struct cmd_list_element *setmemorylist;
 
 static void
 set_memory (args, from_tty)
@@ -608,27 +613,6 @@ h8500_set_trapped_internalvar (var, newval, bitpos, bitsize, offset)
   parse_and_eval (expression);
 }
 
-void
-_initialize_h8500_tdep ()
-{
-  add_prefix_cmd ("memory", no_class, set_memory,
-		  "set the memory model", &setmemorylist, "set memory ", 0,
-		  &setlist);
-
-  add_cmd ("small", class_support, small_command,
-	   "Set small memory model. (16 bit code, 16 bit data)", &setmemorylist);
-
-  add_cmd ("big", class_support, big_command,
-	   "Set big memory model. (32 bit code, 32 bit data)", &setmemorylist);
-
-  add_cmd ("medium", class_support, medium_command,
-	   "Set medium memory model. (32 bit code, 16 bit data)", &setmemorylist);
-
-  add_cmd ("compact", class_support, compact_command,
-	   "Set compact memory model. (16 bit code, 32 bit data)", &setmemorylist);
-
-}
-
 CORE_ADDR
 h8500_read_sp ()
 {
@@ -673,5 +657,22 @@ h8500_write_fp (v)
 void
 _initialize_h8500_tdep ()
 {
-  tm_print_insn = gdb_print_insn_sh;
+  tm_print_insn = print_insn_h8500;
+
+  add_prefix_cmd ("memory", no_class, set_memory,
+		  "set the memory model", &setmemorylist, "set memory ", 0,
+		  &setlist);
+
+  add_cmd ("small", class_support, small_command,
+	   "Set small memory model. (16 bit code, 16 bit data)", &setmemorylist);
+
+  add_cmd ("big", class_support, big_command,
+	   "Set big memory model. (32 bit code, 32 bit data)", &setmemorylist);
+
+  add_cmd ("medium", class_support, medium_command,
+	   "Set medium memory model. (32 bit code, 16 bit data)", &setmemorylist);
+
+  add_cmd ("compact", class_support, compact_command,
+	   "Set compact memory model. (16 bit code, 32 bit data)", &setmemorylist);
+
 }
