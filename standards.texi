@@ -34,7 +34,7 @@ by the Free Software Foundation.
 @sp 10
 @titlefont{GNU Coding Standards}
 @author{Richard Stallman}
-@author{last updated 9 May 1992}
+@author{last updated 16 May 1992}
 @c Note date also appears below.
 @page
 
@@ -57,16 +57,10 @@ by Free Software Foundation.
 @end titlepage
 
 @ifinfo
-@format
-START-INFO-DIR-ENTRY
-* standards: (standards.info).	The GNU coding standards.
-END-INFO-DIR-ENTRY
-@end format
-
 @node Top, Reading Non-Free Code, (dir), (dir)
 @top Version
 
-Last updated 9 May 1992.
+Last updated 16 May 1992.
 @c Note date also appears above.
 @end ifinfo
 
@@ -297,11 +291,17 @@ the file names where they should reside for actual use.  If there is a
 simple test to verify that a program is properly installed then run that
 test.
 
+Use @samp{-} before any command for installing a man page, so that
+@code{make} will ignore any errors.  This is in case there are systems
+that don't have the Unix man page documentation system installed.
+
 @item clean
 Delete all files from the current directory that are normally created by
 building the program.  Don't delete the files that record the
 configuration.  Also preserve files that could be made by building, but
 normally aren't because the distribution comes with them.
+
+Delete @file{.dvi} files here if they are not part of the distribution.
 
 @item distclean
 Delete all files from the current directory that are created by
