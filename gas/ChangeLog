@@ -1,3 +1,35 @@
+Mon Feb 28 15:03:26 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/tc-alpha.c (md_atof): Omit warning about FP values.
+	(line_comment_chars): Add ! to list.
+	(md_apply_fix): Do process 32- and 64-bit relocations.
+
+	* config/obj-coffbfd.c (obj_coff_lcomm): Put "#if 0" around the
+	unused parts (most of the function).
+	(obj_coff_init_stab_section): Cast alloca result.
+
+	* configure.in (i960-*-coff, i960-*-vxworks5.*): Use coffbfd, and
+	gas_target ic960coff.
+	* config/ic960coff.mt: New file.
+	* config/obj-coffbfd.h [TC_I960]: Include coff/i960.h.
+	(TARGET_FORMAT) [TC_I960]: Use coff-Intel-little.
+	* config/te-ic960.h (CROSS_COMPILE): Don't undef this.  We'll
+	always build little-endian object files.
+	* config/tc-i960.c (md_reloc_size): Don't define at all if BFD or
+	BFD_ASSEMBLER is defined.
+	(mem_fmt): Since COFF doesn't handle callx relocations yet, treat
+	them like normal 32-bit relocations.
+	(md_apply_fix): For callx relocations, store zero.
+	(tc_bout_fix_to_chars): Store symbol index for all callx
+	relocations, regardless of link-relax setting.
+	(tc_coff_fix2rtype, tc_coff_sizemachdep): New functions.
+	(i960_handle_align) [! OBJ_BOUT]: If link-relax option is
+	selected, print an error message and clear it.
+	* config/tc-i960.h (BFD_ARCH, COFF_FLAGS, COFF_MAGIC,
+	TC_COUNT_RELOC, TC_COFF_FIX2RTYPE, TC_COFF_SIZEMACHDEP,
+	tc_fix_adjustable): New macros.
+	(tc_coff_fix2rtype, tc_coff_sizemachdep): Declare.
+
 Fri Feb 25 20:56:57 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (hppa_tc_symbol): Call PA ELF BFD version.
