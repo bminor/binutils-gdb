@@ -1,3 +1,8 @@
+2003-02-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	FLOAT_INFO.
+
 2003-01-30  Andrew Cagney  <ac131313@redhat.com>
 
 	* stabs.texinfo (Member Type Descriptor): Clarify description of

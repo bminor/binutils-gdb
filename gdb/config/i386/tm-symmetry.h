@@ -1,7 +1,9 @@
 /* Target machine definitions for GDB on a Sequent Symmetry under dynix 3.0,
    with Weitek 1167 and i387 support.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 2003 Free
+   Software Foundation, Inc.
+
    Symmetry version by Jay Vosburgh (fubar@sequent.com).
 
    This file is part of GDB.
@@ -38,15 +40,6 @@
 
 #undef DECR_PC_AFTER_BREAK
 #define DECR_PC_AFTER_BREAK 0
-
-#if 0
-/* --- this code can't be used unless we know we are running native,
-   since it uses host specific ptrace calls. */
-/* code for 80387 fpu.  Functions are from i386-dep.c, copied into
- * symm-dep.c.
- */
-#define FLOAT_INFO { i386_float_info(); }
-#endif
 
 /* Number of machine registers */
 

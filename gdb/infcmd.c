@@ -2008,12 +2008,6 @@ print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
     gdbarch_print_float_info (gdbarch, file, frame, args);
   else
     {
-#ifdef FLOAT_INFO
-#if GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL
-#error "FLOAT_INFO defined in multi-arch"
-#endif
-      FLOAT_INFO;
-#else
       int regnum;
       int printed_something = 0;
 
@@ -2028,7 +2022,6 @@ print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
       if (!printed_something)
 	fprintf_filtered (file, "\
 No floating-point info available for this processor.\n");
-#endif
     }
 }
 

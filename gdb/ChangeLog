@@ -1,3 +1,13 @@
+2003-02-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* infcmd.c (print_float_info): Delete code conditional on
+	FLOAT_INFO.
+	* config/nm-lynx.h: Delete #undef FLOAT_INFO.  Update copyright.
+	* config/m68k/nm-apollo68b.h: Ditto.
+	* config/i386/tm-ptx.h (FLOAT_INFO): Delete.  Update copyright.
+	* config/ns32k/nm-nbsd.h (FLOAT_INFO): Ditto.
+	* config/i386/tm-symmetry.h (FLOAT_INFO): Ditto.
+
 2003-02-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/tm-i386os9k.h: Removed.
