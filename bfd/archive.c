@@ -24,22 +24,73 @@ SECTION
 	Archives
 
 DESCRIPTION
-	Gumby, you promised to write this bit...
-
 	Archives are supported in BFD in <<archive.c>>.
 
-	An archive is represented internally just like another BFD,
-	with a pointer to a chain of contained BFDs. Archives can be
-	created by opening BFDs, linking them together and attaching
-	them as children to another BFD and then closing the parent
-	BFD. 
+	An archive (or library) is just another BFD.  It has a symbol
+	table, although there's not much a user program will do with it.
 
+	The big difference between an archive BFD and an ordinary BFD
+	is that the archive doesn't have sections.  Instead it has a
+	chain of BFDs considered its contents.  These BFDs can be
+	manipulated just like any other.  The BFDs contained in an
+	archive opened for reading will all be opened for reading; you
+	may put either input or output BFDs into an archive opened for
+	output; it will be handled correctly when the archive is closed.
+
+	Use <<bfd_openr_next_archived_file>> to step through all
+	the contents of an archive opened for input.  It's not
+	required that you read the entire archive if you don't want
+	to!  Read it until you find what you want.
+
+	Archive contents of output BFDs are chained through the
+	<<next>> pointer in a BFD.  The first one is findable through
+	the <<archive_head>> slot of the archive.  Set it with
+	<<set_archive_head>> (q.v.).  A given BFD may be in only one
+	open output archive at a time.
+
+	As expected, the BFD archive code is more general than the
+	archive code of any given environment.  BFD archives may
+	contain files of different formats (eg a.out and coff) and
+	even different architectures.  You may even place archives
+	recursively into archives!
+
+	This can cause unexpected confusion, since some archive
+	formats are more expressive than others.  For instance intel
+	COFF archives can preserve long filenames; Sun a.out archives
+	cannot.  If you move a file from the first to the second
+	format and back again, the filename may be truncated.
+	Likewise, different a.out environments have different
+	conventions as to how they truncate filenames, whether they
+	preserve directory names in filenames, etc.  When
+	interoperating with native tools, be sure your files are
+	homogeneous.
+
+	Beware: most of these formats do not react well to the
+	presence of spaces in filenames.  We do the best we can, but
+	can't always handle this due to restrctions in the format of
+	archives.  Many unix utilities are braindead in regards to
+	spaces and such in filenames anyway, so this shouldn't be much
+	of a restriction.
 */
 
 /* Assumes:
    o - all archive elements start on an even boundary, newline padded;
    o - all arch headers are char *;
    o - all arch headers are the same size (across architectures).
+*/
+
+/* Some formats provide a way to cram a long filename into the short
+   (16 chars) space provided by a bsd archive.  The trick is: make a
+   special "file" in the front of the archive, sort of like the SYMDEF
+   entry.  If the filename is too long to fit, put it in the extended
+   name table, and use its index as the filename.  To prevent
+   confusion prepend the index with a space.  This means you can't
+   have filenames that start with a space, but then again, many unix
+   utilities can't handle that anyway.
+
+   This scheme unfortunately requires that you stand on your head in
+   order to write an archive since you need to put a magic file at the
+   front, and need to touch every entry to do so.  C'est la vie.
 */
 
 /* $Id$ */
@@ -57,7 +108,7 @@ DESCRIPTION
 /* We keep a cache of archive filepointers to archive elements to
    speed up searching the archive by filepos.  We only add an entry to
    the cache when we actually read one.  We also don't sort the cache;
-   it's short enough to search linearly.
+   it's generally short enough to search linearly.
    Note that the pointers here point to the front of the ar_hdr, not
    to the front of the contents!
 */
@@ -91,17 +142,28 @@ _bfd_generic_mkarchive (abfd)
 FUNCTION
 	bfd_get_next_mapent
 
-DESCRIPTION
-	What this does
-
 SYNOPSIS
-	symindex bfd_get_next_mapent(bfd *, symindex, carsym **);
+	symindex bfd_get_next_mapent(bfd *, symindex previous, carsym ** sym);
+
+DESCRIPTION
+	This function steps through an archive's symbol table (if it
+	has one).  Successively updates <<sym>> with the next symbol's
+	information, returning that symbol's (internal) index into the
+	symbol table.
+
+	Supply BFD_NO_MORE_SYMBOLS as the <<previous>> entry to get
+	the first one; returns BFD_NO_MORE_SYMBOLS when you're already
+	got the last one.
+
+	A <<carsym>> is a canonical archive symbol.  The only
+	user-visible element is its name, a null-terminated string.
 */
+
 symindex
-bfd_get_next_mapent (abfd, prev, entry)
-     bfd *abfd;
-     symindex prev;
-     carsym **entry;
+DEFUN(bfd_get_next_mapent,(abfd, prev, entry)
+     bfd *abfd AND
+     symindex prev AND
+     carsym **entry)
 {
   if (!bfd_has_map (abfd)) {
     bfd_error = invalid_operation;
@@ -115,7 +177,6 @@ bfd_get_next_mapent (abfd, prev, entry)
   *entry = (bfd_ardata (abfd)->symdefs + prev);
   return prev;
 }
-
 
 /* To be called by backends only */
 bfd *
@@ -136,14 +197,12 @@ _bfd_create_empty_archive_element_shell (obfd)
 FUNCTION
 	bfd_set_archive_head
 
-DESCRIPTION
-	Used whilst processing archives. Sets the head of the chain of
-	BFDs contained in an archive to @var{new_head}. (see chapter
-	on archives)
-
 SYNOPSIS
 	boolean bfd_set_archive_head(bfd *output, bfd *new_head);
 
+DESCRIPTION
+	Used whilst processing archives. Sets the head of the chain of
+	BFDs contained in an archive to @var{new_head}. 
 */
 
 boolean
@@ -203,7 +262,6 @@ add_bfd_to_cache (arch_bfd, filepos, new_elt)
 
 /* The name begins with space.  Hence the rest of the name is an index into
    the string table. */
-
 char *
 get_extended_arelt_filename (arch, name)
      bfd *arch;
@@ -320,6 +378,11 @@ snarf_ar_hdr (abfd)
     return ared;
 }
 
+/* This is an internal function; it's mainly used when indexing
+   through the archive symbol table, but also used to get the next
+   element, since it handles the bookkeeping so nicely for us.
+*/
+
 bfd *
 get_elt_at_filepos (archive, filepos)
      bfd *archive;
@@ -360,17 +423,18 @@ get_elt_at_filepos (archive, filepos)
 FUNCTION
 	bfd_get_elt_at_index
 
-DESCRIPTION
-	Return the sub bfd contained within the archive at archive index n.
-
 SYNOPSIS
-	bfd *bfd_get_elt_at_index(bfd *, int);
+	bfd *bfd_get_elt_at_index(bfd * archive, int index);
+
+DESCRIPTION
+	Return the bfd which is referenced by the symbol indexed by <<index>>.
+	<<index>> should have been returned by <<bfd_get_next_mapent>> (q.v.).
 
 */
 bfd *
-bfd_get_elt_at_index (abfd, index)
-     bfd *abfd;
-     int index;
+DEFUN(bfd_get_elt_at_index,(abfd, index)
+     bfd *abfd AND
+     int index)
 {
   bfd *result =
     get_elt_at_filepos
@@ -382,16 +446,16 @@ bfd_get_elt_at_index (abfd, index)
 FUNCTION
 	bfd_openr_next_archived_file
 
+SYNOPSIS
+	bfd* bfd_openr_next_archived_file(bfd *archive, bfd *previous);
+
 DESCRIPTION
 	Initially provided a BFD containing an archive and NULL, opens
-	a BFD on the first contained element and returns that.
+	an inpout BFD on the first contained element and returns that.
 	Subsequent calls to bfd_openr_next_archived_file should pass
 	the archive and the previous return value to return a created
 	BFD to the next contained element. NULL is returned when there
 	are no more.
-
-SYNOPSIS
-	bfd* bfd_openr_next_archived_file(bfd *archive, bfd *previous);
 
 */
 
@@ -401,17 +465,17 @@ DEFUN(bfd_openr_next_archived_file,(archive, last_file),
       bfd*last_file)
 {
 
-  if ((bfd_get_format (archive) != bfd_archive) ||
-      (archive->direction == write_direction)) {
-    bfd_error = invalid_operation;
-    return NULL;
-  }
+    if ((bfd_get_format (archive) != bfd_archive) ||
+	(archive->direction == write_direction)) {
+	    bfd_error = invalid_operation;
+	    return NULL;
+	}
 
 
-  return BFD_SEND (archive,
-		   openr_next_archived_file,
-		   (archive,
-		    last_file));
+    return BFD_SEND (archive,
+		     openr_next_archived_file,
+		     (archive,
+		      last_file));
 
 }
 
@@ -431,7 +495,7 @@ bfd *bfd_generic_openr_next_archived_file(archive, last_file)
 
   return get_elt_at_filepos (archive, filestart);
 }
-
+
 
 bfd_target *
 bfd_generic_archive_p (abfd)
@@ -482,66 +546,66 @@ bfd_slurp_bsd_armap (abfd)
      bfd *abfd;
 {
 
-  struct areltdata *mapdata;
-  char nextname[17];
-  unsigned int counter = 0;
-  int *raw_armap, *rbase;
-  struct artdata *ardata = bfd_ardata (abfd);
-  char *stringbase;
+    struct areltdata *mapdata;
+    char nextname[17];
+    unsigned int counter = 0;
+    int *raw_armap, *rbase;
+    struct artdata *ardata = bfd_ardata (abfd);
+    char *stringbase;
 
-  /* FIXME, if the read fails, this routine quietly returns "true"!!
-     It should probably do that if the read gives 0 bytes (empty archive),
-     but fail for any other size... */
-  if (bfd_read ((PTR)nextname, 1, 16, abfd) == 16) {
-      /* The archive has at least 16 bytes in it */
-      bfd_seek (abfd, -16L, SEEK_CUR);
+    /* FIXME, if the read fails, this routine quietly returns "true"!!
+       It should probably do that if the read gives 0 bytes (empty archive),
+       but fail for any other size... */
+    if (bfd_read ((PTR)nextname, 1, 16, abfd) == 16) {
+	    /* The archive has at least 16 bytes in it */
+	    bfd_seek (abfd, -16L, SEEK_CUR);
 
-      /* This should be using RANLIBMAG, but at least it can be grepped for
-	 in this comment.  */
-      if (strncmp (nextname, "__.SYMDEF       ", 16)) {
-	  bfd_has_map (abfd) = false;
-	  return true;
-      }
+	    /* This should be using RANLIBMAG, but at least it can be grepped for
+	       in this comment.  */
+	    if (strncmp (nextname, "__.SYMDEF       ", 16)) {
+		    bfd_has_map (abfd) = false;
+		    return true;
+		}
 
-      mapdata = snarf_ar_hdr (abfd);
-      if (mapdata == NULL) return false;
+	    mapdata = snarf_ar_hdr (abfd);
+	    if (mapdata == NULL) return false;
 
-      raw_armap = (int *) bfd_zalloc(abfd,mapdata->parsed_size);
-      if (raw_armap == NULL) {
-	  bfd_error = no_memory;
-  byebye:
-	  bfd_release (abfd, (PTR)mapdata);
-	  return false;
-      }
+	    raw_armap = (int *) bfd_zalloc(abfd,mapdata->parsed_size);
+	    if (raw_armap == NULL) {
+		    bfd_error = no_memory;
+		  byebye:
+		    bfd_release (abfd, (PTR)mapdata);
+		    return false;
+		}
 
-      if (bfd_read ((PTR)raw_armap, 1, mapdata->parsed_size, abfd) !=
-	  mapdata->parsed_size) {
-	  bfd_error = malformed_archive;
-	  bfd_release (abfd, (PTR)raw_armap);
-	  goto byebye;
-      }
+	    if (bfd_read ((PTR)raw_armap, 1, mapdata->parsed_size, abfd) !=
+		mapdata->parsed_size) {
+		    bfd_error = malformed_archive;
+		    bfd_release (abfd, (PTR)raw_armap);
+		    goto byebye;
+		}
 
-      ardata->symdef_count = bfd_h_get_32(abfd, (PTR)raw_armap) / sizeof (struct symdef);
-      ardata->cache = 0;
-      rbase = raw_armap+1;
-      ardata->symdefs = (carsym *) rbase;
-      stringbase = ((char *) (ardata->symdefs + ardata->symdef_count)) + 4;
+	    ardata->symdef_count = bfd_h_get_32(abfd, (PTR)raw_armap) / sizeof (struct symdef);
+	    ardata->cache = 0;
+	    rbase = raw_armap+1;
+	    ardata->symdefs = (carsym *) rbase;
+	    stringbase = ((char *) (ardata->symdefs + ardata->symdef_count)) + 4;
 
-      for (;counter < ardata->symdef_count; counter++) {
-	  struct symdef *sym = ((struct symdef *) rbase) + counter;
-	  sym->s.name = bfd_h_get_32(abfd, (PTR)(&(sym->s.string_offset))) + stringbase;
-	  sym->file_offset = bfd_h_get_32(abfd, (PTR)( &(sym->file_offset)));
-      }
+	    for (;counter < ardata->symdef_count; counter++) {
+		    struct symdef *sym = ((struct symdef *) rbase) + counter;
+		    sym->s.name = bfd_h_get_32(abfd, (PTR)(&(sym->s.string_offset))) + stringbase;
+		    sym->file_offset = bfd_h_get_32(abfd, (PTR)( &(sym->file_offset)));
+		}
   
-      ardata->first_file_filepos = bfd_tell (abfd);
-      /* Pad to an even boundary if you have to */
-      ardata->first_file_filepos += (ardata-> first_file_filepos) %2;
-      /* FIXME, we should provide some way to free raw_ardata when
-	 we are done using the strings from it.  For now, it seems
-	 to be allocated on an obstack anyway... */
-      bfd_has_map (abfd) = true;
-  }
-  return true;
+	    ardata->first_file_filepos = bfd_tell (abfd);
+	    /* Pad to an even boundary if you have to */
+	    ardata->first_file_filepos += (ardata-> first_file_filepos) %2;
+	    /* FIXME, we should provide some way to free raw_ardata when
+	       we are done using the strings from it.  For now, it seems
+	       to be allocated on an obstack anyway... */
+	    bfd_has_map (abfd) = true;
+	}
+    return true;
 }
 
 /* Returns false on error, true otherwise */
@@ -845,6 +909,12 @@ DEFUN(bfd_ar_hdr_from_filesystem, (abfd,filename),
 
   return ared;
 }
+
+/* This is magic required by the "ar" program.  Since it's
+    undocumented, it's undocumented.   You may think that it would
+    take a strong stomach to write this, and it does, but it takes
+    even a stronger stomach to try to code around such a thing!
+*/
 
 struct ar_hdr *
 DEFUN(bfd_special_undocumented_glue, (abfd, filename),
@@ -1193,9 +1263,11 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
      unsigned int orl_count;
      int stridx;
 {
+  int padit = stridx & 1;
   unsigned int ranlibsize = orl_count * sizeof (struct ranlib);
-  unsigned int stringsize = stridx + 4;
-  unsigned int mapsize = stringsize + ranlibsize + 4;
+  unsigned int stringsize = stridx + padit;
+  /* Include 8 bytes to store ranlibsize and stringsize in output. */
+  unsigned int mapsize = ranlibsize + stringsize + 8;
   file_ptr firstreal;
   bfd *current = arch->archive_head;
   bfd *last_elt = current;		/* last element arch seen */
@@ -1204,9 +1276,6 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
   struct ar_hdr hdr;
   struct stat statbuf;
   unsigned int i;
-  int padit = mapsize & 1;
-  
-  if (padit) mapsize ++;
 
   firstreal = mapsize + elength + sizeof (struct ar_hdr) + SARMAG;
 
@@ -1243,7 +1312,7 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
   }
 
   /* now write the strings themselves */
-  bfd_h_put_32(arch, stridx, (PTR)&temp);
+  bfd_h_put_32(arch, stringsize, (PTR)&temp);
   bfd_write ((PTR)&temp, 1, sizeof (temp), arch);
   for (count = 0; count < orl_count; count++)
     bfd_write (*((map[count]).name), 1, strlen (*((map[count]).name))+1, arch);
@@ -1263,15 +1332,15 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
  number of symbols
  offset of file for symbol 0
  offset of file for symbol 1
-    ..
+
  offset of file for symbol n-1
  symbol name 0
  symbol name 1	
-    ..
+ 
  symbol name n-1
 
 */
-  
+
 boolean
 coff_write_armap (arch, elength, map, symbol_count, stridx)
      bfd *arch;
