@@ -1687,3 +1687,30 @@ proc gdbtk_analyze_results {results} {
     }
   }
 }
+
+# Print a message and return true if a test should be skipped
+# due to lack of floating point suport.
+
+proc gdb_skip_float_test { msg } {
+    if [target_info exists gdb,skip_float_tests] {
+	verbose "Skipping test '$msg': no float tests.";
+	return 1;
+    }
+    return 0;
+}
+
+# Print a message and return true if a test should be skipped
+# due to lack of stdio support.
+
+proc gdb_skip_stdio_test { msg } {
+    if [target_info exists gdb,noinferiorio] {
+	verbose "Skipping test '$msg': no inferior i/o.";
+	return 1;
+    }
+    return 0;
+}
+
+proc gdb_skip_bogus_test { msg } {
+    return 0;
+}
+

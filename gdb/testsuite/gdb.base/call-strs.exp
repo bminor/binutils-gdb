@@ -143,105 +143,125 @@ gdb_expect {
 
 
 #print str_func1(s)
-send_gdb "print  str_func1(s)\n"
-gdb_expect {
-    -re "first string arg is: test string.*\"test string\".*$gdb_prompt $" {
-        pass "print str_func1(s)"
-      }
-    -re ".*$gdb_prompt $" { fail "print str_func1(s)" }
-    timeout           { fail "(timeout) print str_func1(s)" }
-  }
+if ![gdb_skip_stdio_test "print str_func1(s)"] {
+    send_gdb "print  str_func1(s)\n"
+    gdb_expect {
+	-re "first string arg is: test string.*\"test string\".*$gdb_prompt $" {
+	    pass "print str_func1(s)"
+	}
+	-re ".*$gdb_prompt $" { fail "print str_func1(s)" }
+	timeout               { fail "(timeout) print str_func1(s)" }
+    }
+}
 
 
 #print str_func1("test string")
-send_gdb "print  str_func1(\"test string\")\n"
-gdb_expect {
-    -re "first string arg is: test string.*\"test string\".*$gdb_prompt $" {
-        pass "print str_func1(\"test string\")"
-      }
-    -re ".*$gdb_prompt $" { fail "print str_func1(\"test string\")" }
-    timeout           { fail "(timeout) print str_func1(\"test string\")" }
-  }
+if ![gdb_skip_stdio_test "print str_func1(teststring)"] {
+    send_gdb "print  str_func1(\"test string\")\n"
+    gdb_expect {
+	-re "first string arg is: test string.*\"test string\".*$gdb_prompt $" {
+	    pass "print str_func1(\"test string\")"
+	}
+	-re ".*$gdb_prompt $" { fail "print str_func1(\"test string\")" }
+	timeout     { fail "(timeout) print str_func1(\"test string\")" }
+    }
+}
 
 #call str_func1(s)
-send_gdb "call  str_func1(s)\n"
-gdb_expect {
-    -re "first string arg is: test string.*\"test string\".*$gdb_prompt $" {
-        pass "call str_func1(s)"
-      }
-    -re ".*$gdb_prompt $" { fail "call str_func1(s)" }
-    timeout           { fail "(timeout) call str_func1(s)" }
-  }
+if ![gdb_skip_stdio_test "call str_func1(s)"] {
+    send_gdb "call  str_func1(s)\n"
+    gdb_expect {
+	-re "first string arg is: test string.*\"test string\".*$gdb_prompt $" {
+	    pass "call str_func1(s)"
+	}
+	-re ".*$gdb_prompt $" { fail "call str_func1(s)" }
+	timeout               { fail "(timeout) call str_func1(s)" }
+    }
+}
 
 #call str_func1("test string")
-send_gdb "call  str_func1(\"test string\")\n"
-gdb_expect {
-    -re "first string arg is: test string.*\"test string\".*$gdb_prompt $" {
-        pass "call str_func1(\"test string\")"
-      }
-    -re ".*$gdb_prompt $" { fail "call str_func1(\"test string\")" }
-    timeout           { fail "(timeout) call str_func1(\"test string\")" }
-  }
+if ![gdb_skip_stdio_test "call str_func1 (...)"] {
+    send_gdb "call  str_func1(\"test string\")\n"
+    gdb_expect {
+	-re "first string arg is: test string.*\"test string\".*$gdb_prompt $" {
+	    pass "call str_func1(\"test string\")"
+	}
+	-re ".*$gdb_prompt $" { fail "call str_func1(\"test string\")" }
+	timeout     { fail "(timeout) call str_func1(\"test string\")" }
+    }
+}
 
 #print str_func1(buf)
-send_gdb "print  str_func1(buf)\n"
-gdb_expect {
-    -re "first string arg is: test string.*\"test string\".*$gdb_prompt $" {
-        pass "print str_func1(buf)"
-      }
-    -re ".*$gdb_prompt $" { fail "print str_func1(buf)" }
-    timeout           { fail "(timeout) print str_func1(buf)" }
-  }
+if ![gdb_skip_stdio_test "print str_func1(buf)"] {
+    send_gdb "print  str_func1(buf)\n"
+    gdb_expect {
+	-re "first string arg is: test string.*\"test string\".*$gdb_prompt $" {
+	    pass "print str_func1(buf)"
+	}
+	-re ".*$gdb_prompt $" { fail "print str_func1(buf)" }
+	timeout               { fail "(timeout) print str_func1(buf)" }
+    }
+}
 
 #call str_func1(buf)
-send_gdb "call str_func1(buf)\n"
-gdb_expect {
-    -re "first string arg is: test string.*\"test string\".*$gdb_prompt $" {
-        pass "call str_func1(buf)"
-      }
-    -re ".*$gdb_prompt $" { fail "call str_func1(buf)" }
-    timeout           { fail "(timeout) call str_func1(buf)" }
-  }
+if ![gdb_skip_stdio_test "call str_func1(buf)"] {
+    send_gdb "call str_func1(buf)\n"
+    gdb_expect {
+	-re "first string arg is: test string.*\"test string\".*$gdb_prompt $" {
+	    pass "call str_func1(buf)"
+	}
+	-re ".*$gdb_prompt $" { fail "call str_func1(buf)" }
+	timeout               { fail "(timeout) call str_func1(buf)" }
+    }
+}
 
 #print str_func("a","b","c","d","e","f","g")
-send_gdb "print  str_func(\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\")\n"
-gdb_expect {
-    -re "first string arg is: a\[ \t\r\n\]+second string arg is: b\[ \t\r\n\]+third string arg is: c\[ \t\r\n\]+fourth string arg is: d\[ \t\r\n\]+fifth string arg is: e\[ \t\r\n\]+sixth string arg is: f\[ \t\r\n\]+seventh string arg is: g\[ \t\r\n\]+.*= \"abcdefg\".*$gdb_prompt $" {
-        pass "print str_func(\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\")"
-      }
-    -re ".*$gdb_prompt $" { fail "print str_func(\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\")" }
-    timeout           { fail "(timeout) print str_func(\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\")" }
-  }
+if ![gdb_skip_stdio_test "print str_func(a,b,c,d,e,f,g)"] {
+    send_gdb "print  str_func(\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\")\n"
+    gdb_expect {
+	-re "first string arg is: a\[ \t\r\n\]+second string arg is: b\[ \t\r\n\]+third string arg is: c\[ \t\r\n\]+fourth string arg is: d\[ \t\r\n\]+fifth string arg is: e\[ \t\r\n\]+sixth string arg is: f\[ \t\r\n\]+seventh string arg is: g\[ \t\r\n\]+.*= \"abcdefg\".*$gdb_prompt $" {
+	    pass "print str_func(\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\")"
+	}
+	-re ".*$gdb_prompt $" { fail "print str_func(\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\")" }
+	timeout           { fail "(timeout) print str_func(\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\")" }
+    }
+}
 
 #call str_func("a","b","c","d","e","f","g")
-send_gdb "call  str_func(\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\")\n"
-gdb_expect {
-    -re "first string arg is: a\[ \t\r\n\]+second string arg is: b\[ \t\r\n\]+third string arg is: c\[ \t\r\n\]+fourth string arg is: d\[ \t\r\n\]+fifth string arg is: e\[ \t\r\n\]+sixth string arg is: f\[ \t\r\n\]+seventh string arg is: g\[ \t\r\n\]+.*= \"abcdefg\".*$gdb_prompt $" {
-        pass "call str_func(\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\")"
-      }
-    -re ".*$gdb_prompt $" { fail "call str_func(\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\")" }
-    timeout           { fail "(timeout) call str_func(\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\")" }
-  }
+if ![gdb_skip_stdio_test "call str_func(a,b,c,d,e,f,g)"] {
+    send_gdb "call  str_func(\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\")\n"
+    gdb_expect {
+	-re "first string arg is: a\[ \t\r\n\]+second string arg is: b\[ \t\r\n\]+third string arg is: c\[ \t\r\n\]+fourth string arg is: d\[ \t\r\n\]+fifth string arg is: e\[ \t\r\n\]+sixth string arg is: f\[ \t\r\n\]+seventh string arg is: g\[ \t\r\n\]+.*= \"abcdefg\".*$gdb_prompt $" {
+	    pass "call str_func(\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\")"
+	}
+	-re ".*$gdb_prompt $" { fail "call str_func(\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\")" }
+	timeout           { fail "(timeout) call str_func(\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\")" }
+    }
+}
 
 #print str_func(s,s,s,s,s,s,s)
-send_gdb "print  str_func(s,s,s,s,s,s,s)\n"
-gdb_expect {
-    -re "first string arg is: test string\[ \t\r\n\]+second string arg is: test string\[ \t\r\n\]+third string arg is: test string\[ \t\r\n\]+fourth string arg is: test string\[ \t\r\n\]+fifth string arg is: test string\[ \t\r\n\]+sixth string arg is: test string\[ \t\r\n\]+seventh string arg is: test string\[ \t\r\n\]+.*\"test stringtest stringtest stringtest stringtest stringtest stringtest string\".*$gdb_prompt $" {
-        pass "print str_func(s,s,s,s,s,s,s)"
-      }
-    -re ".*$gdb_prompt $" { fail "print str_func(s,s,s,s,s,s,s)" }
-    timeout           { fail "(timeout) print str_func(s,s,s,s,s,s,s)" }
-  }
+if ![gdb_skip_stdio_test "print str_func(s,s,s,s,s,s,s,s)"] {
+    send_gdb "print  str_func(s,s,s,s,s,s,s)\n"
+    gdb_expect {
+	-re "first string arg is: test string\[ \t\r\n\]+second string arg is: test string\[ \t\r\n\]+third string arg is: test string\[ \t\r\n\]+fourth string arg is: test string\[ \t\r\n\]+fifth string arg is: test string\[ \t\r\n\]+sixth string arg is: test string\[ \t\r\n\]+seventh string arg is: test string\[ \t\r\n\]+.*\"test stringtest stringtest stringtest stringtest stringtest stringtest string\".*$gdb_prompt $" {
+	    pass "print str_func(s,s,s,s,s,s,s)"
+	}
+	-re ".*$gdb_prompt $" { fail "print str_func(s,s,s,s,s,s,s)" }
+	timeout     { fail "(timeout) print str_func(s,s,s,s,s,s,s)" }
+    }
+}
 
 #call str_func(s,s,s,s,s,s,s)
-send_gdb "call  str_func(s,s,s,s,s,s,s)\n"
-gdb_expect {
-    -re "first string arg is: test string\[ \t\r\n\]+second string arg is: test string\[ \t\r\n\]+third string arg is: test string\[ \t\r\n\]+fourth string arg is: test string\[ \t\r\n\]+fifth string arg is: test string\[ \t\r\n\]+sixth string arg is: test string\[ \t\r\n\]+seventh string arg is: test string\[ \t\r\n\]+.*\"test stringtest stringtest stringtest stringtest stringtest stringtest string\".*$gdb_prompt $" {
-        pass "call str_func(s,s,s,s,s,s,s)"
-      }
-    -re ".*$gdb_prompt $" { fail "call str_func(s,s,s,s,s,s,s)" }
-    timeout           { fail "(timeout) call str_func(s,s,s,s,s,s,s)" }
-  }
+if ![gdb_skip_stdio_test "call str_func(s,s,s,s,s,s,s,s)"] {
+    send_gdb "call  str_func(s,s,s,s,s,s,s)\n"
+    gdb_expect {
+	-re "first string arg is: test string\[ \t\r\n\]+second string arg is: test string\[ \t\r\n\]+third string arg is: test string\[ \t\r\n\]+fourth string arg is: test string\[ \t\r\n\]+fifth string arg is: test string\[ \t\r\n\]+sixth string arg is: test string\[ \t\r\n\]+seventh string arg is: test string\[ \t\r\n\]+.*\"test stringtest stringtest stringtest stringtest stringtest stringtest string\".*$gdb_prompt $" {
+	    pass "call str_func(s,s,s,s,s,s,s)"
+	}
+	-re ".*$gdb_prompt $" { fail "call str_func(s,s,s,s,s,s,s)" }
+	timeout               { fail "(timeout) call str_func(s,s,s,s,s,s,s)" }
+    }
+}
 
 gdb_exit
 return 0

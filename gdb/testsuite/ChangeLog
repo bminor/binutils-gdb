@@ -1,3 +1,19 @@
+2000-10-16  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdb.base/sizeof.exp (check_sizeof): Skip if no printf support.
+	* gdb.base/varargs.exp: Skip entire test if no printf support.
+	* gdb.base/ending-run.exp (Step to return): Skip if no printf supt.
+	* gdb.base/shlib-call.exp: Skip several tests if no printf support.
+
+2000-10-13  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* lib/gdb.exp (gdb_skip_float_test): New proc.  Skip test if
+	no floating point support.
+	(gdb_skip_stdio_test): New proc.  Skip test if no stdio support.
+	* gdb.base/call-ar-st.exp: Use above procs to skip tests.
+	* gdb.base/call-rt-st.exp: Ditto.
+	* gdb.base/call-strs.exp: Ditto.
+
 2000-08-02  Jimmy Guo  <guo@hpcleara.cup.hp.com>
 
 	* gdb.base/sizeof.c: include <stdio.h>.

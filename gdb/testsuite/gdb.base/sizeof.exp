@@ -92,6 +92,11 @@ set sizeof_long_double [get_sizeof "long double" 8]
 
 proc check_sizeof { type size } {
     global gdb_prompt
+
+    if [gdb_skip_stdio_test "check sizeof $type == $size"] {
+	return;
+    }
+
     set pat [string_to_regexp ${type}]
     send_gdb "next\n"
     gdb_expect {
