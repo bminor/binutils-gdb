@@ -11,6 +11,16 @@
 
 typedef int (*fprintf_ftype) PARAMS((FILE*, const char*, ...));
 
+enum dis_insn_type {
+  dis_noninsn,			/* Not a valid instruction */
+  dis_nonbranch,		/* Not a branch instruction */
+  dis_branch,			/* Unconditional branch */
+  dis_condbranch,		/* Conditional branch */
+  dis_jsr,			/* Jump to subroutine */
+  dis_condjsr,			/* Conditional jump to subroutine */
+  dis_dref,			/* Data reference instruction */
+  dis_dref2			/* Two data references in instruction */
+};
 
 /* This struct is passed into the instruction decoding routine, 
    and is passed back out into each callback.  The various fields are used
@@ -63,16 +73,6 @@ typedef struct disassemble_info {
      To determine whether this decoder supports this information, set
      insn_info_valid to 0, decode an instruction, then check it.  */
 
-  enum dis_insn_type {
-    dis_noninsn,		/* Not a valid instruction */
-    dis_nonbranch,		/* Not a branch instruction */
-    dis_branch,			/* Unconditional branch */
-    dis_condbranch,		/* Conditional branch */
-    dis_jsr,			/* Jump to subroutine */
-    dis_condjsr,		/* Conditional jump to subroutine */
-    dis_dref,			/* Data reference instruction */
-    dis_dref2,			/* Two data references in instruction */
-  };
   char insn_info_valid;		/* Branch info has been set. */
   char branch_delay_insns;	/* How many sequential insn's will run before
 				   a branch takes effect.  (0 = normal) */
@@ -104,17 +104,22 @@ extern int print_insn_h8300		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_h8300h		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_h8500		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_alpha		PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_arm		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_sparc		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_big_a29k		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_little_a29k	PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_i960		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_sh		PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_shl		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_hppa		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_m88k		PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_ns32k		PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_big_powerpc	PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_little_powerpc	PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_rs6000		PARAMS ((bfd_vma, disassemble_info*));
 
-
-
-
+/* Fetch the disassembler for a given BFD, if that support is available.  */
+extern disassembler_ftype disassembler	PARAMS ((bfd *));
 
 
 /* This block of definitions is for particular callers who read instructions
