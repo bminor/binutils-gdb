@@ -704,6 +704,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
      "set width 0" won't fail if no language is explicitly set in a config file
      or implicitly set by reading an executable during startup. */
   set_language (language_c);
+  expected_language = current_language;	/* don't warn about the change.  */
 
   /* Read and execute $HOME/.gdbinit file, if it exists.  This is done
      *before* all the command line arguments are processed; it sets
@@ -860,6 +861,34 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
   /* No exit -- exit is through quit_command.  */
 }
 
+void
+execute_user_command (c, args)
+     struct cmd_list_element *c;
+     char *args;
+{
+  register struct command_line *cmdlines;
+  struct cleanup *old_chain;
+  
+  if (args)
+    error ("User-defined commands cannot take arguments.");
+
+  cmdlines = c->user_commands;
+  if (cmdlines == 0)
+    /* Null command */
+    return;
+
+  /* Set the instream to 0, indicating execution of a
+     user-defined function.  */
+  old_chain = make_cleanup (source_cleanup, instream);
+  instream = (FILE *) 0;
+  while (cmdlines)
+    {
+      execute_command (cmdlines->line, 0);
+      cmdlines = cmdlines->next;
+    }
+  do_cleanups (old_chain);
+}
+
 /* Execute the line P as a command.
    Pass FROM_TTY as second argument to the defining function.  */
 
@@ -871,7 +900,6 @@ execute_command (p, from_tty)
   register struct cmd_list_element *c;
   register struct command_line *cmdlines;
   register enum language flang;
-  static const struct language_defn *saved_language = 0;
   static int warned = 0;
 
   free_all_values ();
@@ -888,28 +916,13 @@ execute_command (p, from_tty)
       c = lookup_cmd (&p, cmdlist, "", 0, 1);
       /* Pass null arg rather than an empty one.  */
       arg = *p ? p : 0;
-      if (c->class == class_user)
-	{
-	  struct cleanup *old_chain;
-	  
-	  if (*p)
-	    error ("User-defined commands cannot take arguments.");
-	  cmdlines = c->user_commands;
-	  if (cmdlines == 0)
-	    /* Null command */
-	    return;
 
-	  /* Set the instream to 0, indicating execution of a
-	     user-defined function.  */
-	  old_chain =  make_cleanup (source_cleanup, instream);
-	  instream = (FILE *) 0;
-	  while (cmdlines)
-	    {
-	      execute_command (cmdlines->line, 0);
-	      cmdlines = cmdlines->next;
-	    }
-	  do_cleanups (old_chain);
-	}
+      /* If this command has been hooked, run the hook first. */
+      if (c->hook)
+	execute_user_command (c->hook, (char *)0);
+
+      if (c->class == class_user)
+	execute_user_command (c, arg);
       else if (c->type == set_cmd || c->type == show_cmd)
 	do_setshow_command (arg, from_tty & caution, c);
       else if (c->function.cfunc == NO_FUNCTION)
@@ -919,13 +932,11 @@ execute_command (p, from_tty)
    }
 
   /* Tell the user if the language has changed (except first time).  */
-  if (current_language != saved_language)
+  if (current_language != expected_language)
   {
     if (language_mode == language_mode_auto) {
-      if (saved_language)
-	language_info (1);	/* Print what changed.  */
+      language_info (1);	/* Print what changed.  */
     }
-    saved_language = current_language;
     warned = 0;
   }
 
@@ -1748,8 +1759,10 @@ define_command (comname, from_tty)
      int from_tty;
 {
   register struct command_line *cmds;
-  register struct cmd_list_element *c, *newc;
+  register struct cmd_list_element *c, *newc, *hookc;
   char *tem = comname;
+#define	HOOK_STRING	"hook-"
+#define	HOOK_LEN 5
 
   validate_comname (comname);
 
@@ -1768,9 +1781,29 @@ define_command (comname, from_tty)
 	error ("Command \"%s\" not redefined.", c->name);
     }
 
+  /* If this new command is a hook, then mark the command which it
+     is hooking.  Note that we allow hooking `help' commands, so that
+     we can hook the `stop' pseudo-command.  */
+
+  if (!strncmp (comname, HOOK_STRING, HOOK_LEN))
+    {
+      /* Look up cmd it hooks, and verify that we got an exact match.  */
+      tem = comname+HOOK_LEN;
+      hookc = lookup_cmd (&tem, cmdlist, "", -1, 0);
+      if (hookc && 0 != strcmp (comname+HOOK_LEN, hookc->name))
+	hookc = 0;
+      if (!hookc)
+	{
+	  warning ("Your new `%s' command does not hook any existing command.",
+		   comname);
+	  if (!query ("Proceed? ", (char *)0))
+	    error ("Not confirmed.");
+	}
+    }
+
   comname = savestring (comname, strlen (comname));
 
-  /* If the rest of the commands will be case insensetive, this one 
+  /* If the rest of the commands will be case insensitive, this one 
      should behave in the same manner. */
   for (tem = comname; *tem; tem++)
     if (isupper(*tem)) *tem = tolower(*tem);
@@ -1791,6 +1824,14 @@ End with a line saying just \"end\".\n", comname);
 	   (c && c->class == class_user)
 	   ? c->doc : savestring ("User-defined.", 13), &cmdlist);
   newc->user_commands = cmds;
+
+  /* If this new command is a hook, then mark both commands as being
+     tied.  */
+  if (hookc)
+    {
+      hookc->hook = newc;	/* Target gets hooked.  */
+      newc->hookee = hookc;	/* We are marked as hooking target cmd.  */
+    }
 }
 
 static void

@@ -1,5 +1,13 @@
 Tue Oct  6 02:23:17 1992  John Gilmore  (gnu@cygnus.com)
 
+	* language.c, language.h:  Move saved_language out to global
+	expected_language.  Set expected_language when user expectation
+	changes.
+	* language.c (language_info):  Don't print type/range checking gub.
+	* main.c (main):  Set expected language.
+	(execute_command):  Check against expected language.
+	* symfile.c (set_initial_language):  Set expected language.
+
 	* configure.in, config/i386sol2.{mh,mt}:  Preliminary Solaris-x86 conf.
 
 Fri Sep  4 00:34:30 1992  Per Bothner  (bothner@rtl.cygnus.com)

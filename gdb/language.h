@@ -95,6 +95,11 @@ const struct op_print
 
 extern const struct language_defn *current_language;
 
+/* Pointer to the language_defn expected by the user, e.g. the language
+   of main(), or the language we last mentioned in a message, or C.  */
+
+extern const struct language_defn *expected_language;
+
 /* language_mode == 
    language_mode_auto:   current_language automatically set upon selection
 			 of scope (e.g. stack frame)

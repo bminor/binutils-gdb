@@ -102,6 +102,11 @@ enum type_check type_check = type_check_off;
 const struct language_defn *current_language = &unknown_language_defn;
 enum language_mode language_mode = language_mode_auto;
 
+/* The language that the user expects to be typing in (the language
+   of main(), or the last language we notified them about, or C).  */
+
+const struct language_defn *expected_language;
+
 /* The list of supported languages.  The list itself is malloc'd.  */
 
 static const struct language_defn **languages;
@@ -176,6 +181,7 @@ modula-2         Use the Modula-2 language\n");
   	flang = get_frame_language();
 	if (flang!=language_unknown)
 	  set_language(flang);
+	expected_language = current_language;
 	return;
       } else {
 	/* Enter manual mode.  Set the specified language.  */
@@ -183,6 +189,7 @@ modula-2         Use the Modula-2 language\n");
 	current_language = languages[i];
 	set_type_range ();
 	set_lang_str();
+	expected_language = current_language;
 	return;
       }
     }
@@ -394,17 +401,25 @@ set_range_str()
 
 /* Print out the current language settings: language, range and
    type checking.  If QUIETLY, print only what has changed.  */
+
 void
 language_info (quietly)
      int quietly;
 {
-  /* FIXME:  quietly is ignored at the moment.  */
-   printf("Current Language:  %s\n",language);
-   show_language_command((char *)0, 1);
-   printf("Type checking:     %s\n",type);
-   show_type_command((char *)0, 1);
-   printf("Range checking:    %s\n",range);
-   show_range_command((char *)0, 1);
+  if (quietly && expected_language == current_language)
+    return;
+
+  expected_language = current_language;
+  printf("Current language:  %s\n",language);
+  show_language_command((char *)0, 1);
+
+  if (!quietly)
+    {
+       printf("Type checking:     %s\n",type);
+       show_type_command((char *)0, 1);
+       printf("Range checking:    %s\n",range);
+       show_range_command((char *)0, 1);
+    }
 }
 
 /* Return the result of a binary operation. */
