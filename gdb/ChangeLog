@@ -1,3 +1,8 @@
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* lin-lwp.c (struct private_thread_info, find_lwp_callback): Remove.
+	(resume_callback): Remove dead code.
+
 2003-01-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (FRAME_INIT_SAVED_REGS): Change to function with
