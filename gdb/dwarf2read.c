@@ -219,43 +219,40 @@ asection *dwarf_eh_frame_section;
 /* The data in a compilation unit header, after target2host
    translation, looks like this.  */
 struct comp_unit_head
-  {
-    unsigned long length;
-    short version;
-    unsigned int abbrev_offset;
-    unsigned char addr_size;
-    unsigned char signed_addr_p;
-    unsigned int offset_size;	/* size of file offsets; either 4 or 8 */
-    unsigned int initial_length_size; /* size of the length field; either
-                                         4 or 12 */
+{
+  unsigned long length;
+  short version;
+  unsigned int abbrev_offset;
+  unsigned char addr_size;
+  unsigned char signed_addr_p;
 
-    /* Offset to the first byte of this compilation unit header in the 
-     * .debug_info section, for resolving relative reference dies. */
+  /* Size of file offsets; either 4 or 8.  */
+  unsigned int offset_size;
 
-    unsigned int offset;
+  /* Size of the length field; either 4 or 12.  */
+  unsigned int initial_length_size;
 
-    /* Pointer to this compilation unit header in the .debug_info
-     * section */
+  /* Offset to the first byte of this compilation unit header in the
+     .debug_info section, for resolving relative reference dies.  */
+  unsigned int offset;
 
-    char *cu_head_ptr;
+  /* Pointer to this compilation unit header in the .debug_info
+     section.  */
+  char *cu_head_ptr;
 
-    /* Pointer to the first die of this compilatio unit.  This will
-     * be the first byte following the compilation unit header. */
+  /* Pointer to the first die of this compilation unit.  This will be
+     the first byte following the compilation unit header.  */
+  char *first_die_ptr;
 
-    char *first_die_ptr;
+  /* Pointer to the next compilation unit header in the program.  */
+  struct comp_unit_head *next;
 
-    /* Pointer to the next compilation unit header in the program. */
+  /* Base address of this compilation unit.  */
+  CORE_ADDR base_address;
 
-    struct comp_unit_head *next;
-
-    /* Base address of this compilation unit.  */
-
-    CORE_ADDR base_address;
-
-    /* Non-zero if base_address has been set.  */
-
-    int base_known;
-  };
+  /* Non-zero if base_address has been set.  */
+  int base_known;
+};
 
 /* Fixed size for the DIE hash table.  */
 #ifndef REF_HASH_SIZE
@@ -6272,8 +6269,8 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
       return 0;
     }
 
-  /* Make sure that at least there's room for the total_length field.  That
-     could be 12 bytes long, but we're just going to fudge that.  */
+  /* Make sure that at least there's room for the total_length field.
+     That could be 12 bytes long, but we're just going to fudge that.  */
   if (offset + 4 >= dwarf2_per_objfile->line_size)
     {
       dwarf2_statement_list_fits_in_line_number_section_complaint ();
@@ -6287,7 +6284,7 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
 
   line_ptr = dwarf2_per_objfile->line_buffer + offset;
 
-  /* read in the header */
+  /* Read in the header.  */
   lh->total_length = read_initial_length (abfd, line_ptr, NULL, &bytes_read);
   line_ptr += bytes_read;
   if (line_ptr + lh->total_length > (dwarf2_per_objfile->line_buffer
@@ -6321,7 +6318,7 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
       line_ptr += 1;
     }
 
-  /* Read directory table  */
+  /* Read directory table.  */
   while ((cur_dir = read_string (abfd, line_ptr, &bytes_read)) != NULL)
     {
       line_ptr += bytes_read;
@@ -6329,7 +6326,7 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
     }
   line_ptr += bytes_read;
 
-  /* Read file name table */
+  /* Read file name table.  */
   while ((cur_file = read_string (abfd, line_ptr, &bytes_read)) != NULL)
     {
       unsigned int dir_index, mod_time, length;
@@ -6457,6 +6454,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	     are 1-based.  */
           struct file_entry *fe = &lh->file_names[file - 1];
           char *dir;
+
           if (fe->dir_index)
             dir = lh->include_dirs[fe->dir_index - 1];
           else
@@ -6464,14 +6462,15 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	  dwarf2_start_subfile (fe->name, dir);
 	}
 
-      /* Decode the table. */
+      /* Decode the table.  */
       while (!end_sequence)
 	{
 	  op_code = read_1_byte (abfd, line_ptr);
 	  line_ptr += 1;
 
 	  if (op_code >= lh->opcode_base)
-	    {		/* Special operand.  */
+	    {		
+	      /* Special operand.  */
 	      adj_opcode = op_code - lh->opcode_base;
 	      address += (adj_opcode / lh->line_range)
 		* lh->minimum_instruction_length;
@@ -6479,7 +6478,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
               lh->file_names[file - 1].included_p = 1;
               if (!decode_for_pst_p)
                 {
-	          /* append row to matrix using current values */
+	          /* Append row to matrix using current values.  */
 	          record_line (current_subfile, line, 
 	                       check_cu_functions (address, cu));
                 }
@@ -6548,11 +6547,12 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	      break;
 	    case DW_LNS_set_file:
               {
-                /* lh->include_dirs and lh->file_names are 0-based,
-                   but the directory and file name numbers in the
-                   statement program are 1-based.  */
+                /* The arrays lh->include_dirs and lh->file_names are
+                   0-based, but the directory and file name numbers in
+                   the statement program are 1-based.  */
                 struct file_entry *fe;
                 char *dir;
+
                 file = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
                 line_ptr += bytes_read;
                 fe = &lh->file_names[file - 1];
@@ -6576,9 +6576,9 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	      break;
 	    /* Add to the address register of the state machine the
 	       address increment value corresponding to special opcode
-	       255.  Ie, this value is scaled by the minimum instruction
-	       length since special opcode 255 would have scaled the
-	       the increment.  */
+	       255.  I.e., this value is scaled by the minimum
+	       instruction length since special opcode 255 would have
+	       scaled the the increment.  */
 	    case DW_LNS_const_add_pc:
 	      address += (lh->minimum_instruction_length
 			  * ((255 - lh->opcode_base) / lh->line_range));
@@ -6588,8 +6588,10 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	      line_ptr += 2;
 	      break;
 	    default:
-	      {  /* Unknown standard opcode, ignore it.  */
+	      {
+		/* Unknown standard opcode, ignore it.  */
 		int i;
+
 		for (i = 0; i < lh->standard_opcode_lengths[op_code]; i++)
 		  {
 		    (void) read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
