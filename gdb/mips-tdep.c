@@ -58,7 +58,6 @@
 
 static const struct objfile_data *mips_pdr_data;
 
-static void set_reg_offset (CORE_ADDR *saved_regs, int regnum, CORE_ADDR off);
 static struct type *mips_register_type (struct gdbarch *gdbarch, int regnum);
 
 /* A useful bit in the CP0 status register (PS_REGNUM).  */
@@ -420,8 +419,10 @@ mips_stack_argsize (struct gdbarch *gdbarch)
 
 #define VM_MIN_ADDRESS (CORE_ADDR)0x400000
 
+struct mips_frame_cache;
 static mips_extra_func_info_t heuristic_proc_desc (CORE_ADDR, CORE_ADDR,
-						   struct frame_info *);
+						   struct frame_info *,
+						   struct mips_frame_cache *);
 static mips_extra_func_info_t non_heuristic_proc_desc (CORE_ADDR pc,
 						       CORE_ADDR *addrptr);
 
@@ -912,7 +913,7 @@ after_prologue (CORE_ADDR pc)
       if (!proc_symbol || pc < val.pc)
 	{
 	  mips_extra_func_info_t found_heuristic =
-	    heuristic_proc_desc (PROC_LOW_ADDR (proc_desc), pc, NULL);
+	    heuristic_proc_desc (PROC_LOW_ADDR (proc_desc), pc, NULL, NULL);
 	  if (found_heuristic)
 	    proc_desc = found_heuristic;
 	}
@@ -922,7 +923,7 @@ after_prologue (CORE_ADDR pc)
       if (startaddr == 0)
 	startaddr = heuristic_proc_start (pc);
 
-      proc_desc = heuristic_proc_desc (startaddr, pc, NULL);
+      proc_desc = heuristic_proc_desc (startaddr, pc, NULL, NULL);
     }
 
   if (proc_desc)
@@ -1815,7 +1816,11 @@ mips_insn16_frame_cache (struct frame_info *next_frame, void **this_cache)
     if (start_addr == 0)
       start_addr = heuristic_proc_start (pc);
 
-    proc_desc = heuristic_proc_desc (start_addr, pc, next_frame);
+#ifdef NOT_YET
+    proc_desc = heuristic_proc_desc (start_addr, pc, next_frame, this_cache);
+#else
+    proc_desc = heuristic_proc_desc (start_addr, pc, next_frame, NULL);
+#endif
   }
   
   /* Extract the frame's base.  */
@@ -2072,7 +2077,11 @@ mips_insn32_frame_cache (struct frame_info *next_frame, void **this_cache)
     if (start_addr == 0)
       start_addr = heuristic_proc_start (pc);
 
-    proc_desc = heuristic_proc_desc (start_addr, pc, next_frame);
+#ifdef NOT_YET
+    proc_desc = heuristic_proc_desc (start_addr, pc, next_frame, this_cache);
+#else
+    proc_desc = heuristic_proc_desc (start_addr, pc, next_frame, NULL);
+#endif
   }
   
   if (proc_desc == NULL)
@@ -2435,13 +2444,6 @@ mips_software_single_step (enum target_signal sig, int insert_breakpoints_p)
 
 static struct mips_extra_func_info temp_proc_desc;
 
-/* This hack will go away once the get_prev_frame() code has been
-   modified to set the frame's type first.  That is BEFORE init extra
-   frame info et.al.  is called.  This is because it will become
-   possible to skip the init extra info call for sigtramp and dummy
-   frames.  */
-static CORE_ADDR *temp_saved_regs;
-
 /* Set a register's saved stack address in temp_saved_regs.  If an
    address has already been set for this register, do nothing; this
    way we will only recognize the first save of a given register in a
@@ -2454,12 +2456,14 @@ static CORE_ADDR *temp_saved_regs;
    frame.  */
 
 static void
-set_reg_offset (CORE_ADDR *saved_regs, int regno, CORE_ADDR offset)
+set_reg_offset (struct mips_frame_cache *this_cache, int regnum,
+		CORE_ADDR offset)
 {
-  if (saved_regs[regno] == 0)
+  if (this_cache != NULL
+      && this_cache->saved_regs[regnum].addr == 0)
     {
-      saved_regs[regno + 0 * NUM_REGS] = offset;
-      saved_regs[regno + 1 * NUM_REGS] = offset;
+      this_cache->saved_regs[regnum + 0 * NUM_REGS].addr = offset;
+      this_cache->saved_regs[regnum + 1 * NUM_REGS].addr = offset;
     }
 }
 
@@ -2617,7 +2621,9 @@ mips16_get_imm (unsigned short prev_inst,	/* previous instruction */
 
 static void
 mips16_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
-			    struct frame_info *next_frame, CORE_ADDR sp)
+			    CORE_ADDR sp,
+			    struct frame_info *next_frame,
+			    struct mips_frame_cache *this_cache)
 {
   CORE_ADDR cur_pc;
   CORE_ADDR frame_addr = 0;	/* Value of $r17, used as frame pointer */
@@ -2655,26 +2661,26 @@ mips16_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 	  offset = mips16_get_imm (prev_inst, inst, 8, 4, 0);
 	  reg = mips16_to_32_reg[(inst & 0x700) >> 8];
 	  PROC_REG_MASK (&temp_proc_desc) |= (1 << reg);
-	  set_reg_offset (temp_saved_regs, reg, sp + offset);
+	  set_reg_offset (this_cache, reg, sp + offset);
 	}
       else if ((inst & 0xff00) == 0xf900)	/* sd reg,n($sp) */
 	{
 	  offset = mips16_get_imm (prev_inst, inst, 5, 8, 0);
 	  reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
 	  PROC_REG_MASK (&temp_proc_desc) |= (1 << reg);
-	  set_reg_offset (temp_saved_regs, reg, sp + offset);
+	  set_reg_offset (this_cache, reg, sp + offset);
 	}
       else if ((inst & 0xff00) == 0x6200)	/* sw $ra,n($sp) */
 	{
 	  offset = mips16_get_imm (prev_inst, inst, 8, 4, 0);
 	  PROC_REG_MASK (&temp_proc_desc) |= (1 << RA_REGNUM);
-	  set_reg_offset (temp_saved_regs, RA_REGNUM, sp + offset);
+	  set_reg_offset (this_cache, RA_REGNUM, sp + offset);
 	}
       else if ((inst & 0xff00) == 0xfa00)	/* sd $ra,n($sp) */
 	{
 	  offset = mips16_get_imm (prev_inst, inst, 8, 8, 0);
 	  PROC_REG_MASK (&temp_proc_desc) |= (1 << RA_REGNUM);
-	  set_reg_offset (temp_saved_regs, RA_REGNUM, sp + offset);
+	  set_reg_offset (this_cache, RA_REGNUM, sp + offset);
 	}
       else if (inst == 0x673d)	/* move $s1, $sp */
 	{
@@ -2693,14 +2699,14 @@ mips16_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 	  offset = mips16_get_imm (prev_inst, inst, 5, 4, 0);
 	  reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
 	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
-	  set_reg_offset (temp_saved_regs, reg, frame_addr + offset);
+	  set_reg_offset (this_cache, reg, frame_addr + offset);
 	}
       else if ((inst & 0xFF00) == 0x7900)	/* sd reg,offset($s1) */
 	{
 	  offset = mips16_get_imm (prev_inst, inst, 5, 8, 0);
 	  reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
 	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
-	  set_reg_offset (temp_saved_regs, reg, frame_addr + offset);
+	  set_reg_offset (this_cache, reg, frame_addr + offset);
 	}
       else if ((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700)	/* entry */
 	entry_inst = inst;	/* save for later processing */
@@ -2730,7 +2736,7 @@ mips16_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
       for (reg = 4, offset = 0; reg < areg_count + 4; reg++)
 	{
 	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
-	  set_reg_offset (temp_saved_regs, reg, sp + offset);
+	  set_reg_offset (this_cache, reg, sp + offset);
 	  offset += mips_abi_regsize (current_gdbarch);
 	}
 
@@ -2739,7 +2745,7 @@ mips16_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
       if (entry_inst & 0x20)
 	{
 	  PROC_REG_MASK (&temp_proc_desc) |= 1 << RA_REGNUM;
-	  set_reg_offset (temp_saved_regs, RA_REGNUM, sp + offset);
+	  set_reg_offset (this_cache, RA_REGNUM, sp + offset);
 	  offset -= mips_abi_regsize (current_gdbarch);
 	}
 
@@ -2747,7 +2753,7 @@ mips16_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
       for (reg = 16; reg < sreg_count + 16; reg++)
 	{
 	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
-	  set_reg_offset (temp_saved_regs, reg, sp + offset);
+	  set_reg_offset (this_cache, reg, sp + offset);
 	  offset -= mips_abi_regsize (current_gdbarch);
 	}
     }
@@ -2755,13 +2761,14 @@ mips16_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 
 static void
 mips32_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
-			    struct frame_info *next_frame, CORE_ADDR sp)
+			    CORE_ADDR sp, struct frame_info *next_frame,
+			    struct mips_frame_cache *this_cache)
 {
   CORE_ADDR cur_pc;
   CORE_ADDR frame_addr = 0;	/* Value of $r30. Used by gcc for frame-pointer */
 restart:
-  temp_saved_regs = xrealloc (temp_saved_regs, SIZEOF_FRAME_SAVED_REGS);
-  memset (temp_saved_regs, '\0', SIZEOF_FRAME_SAVED_REGS);
+  this_cache = xrealloc (this_cache, SIZEOF_FRAME_SAVED_REGS);
+  memset (this_cache, '\0', SIZEOF_FRAME_SAVED_REGS);
   PROC_FRAME_OFFSET (&temp_proc_desc) = 0;
   PROC_FRAME_ADJUST (&temp_proc_desc) = 0;	/* offset of FP from SP */
   for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS_INSTLEN)
@@ -2792,14 +2799,14 @@ restart:
       else if ((high_word & 0xFFE0) == 0xafa0)	/* sw reg,offset($sp) */
 	{
 	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
-	  set_reg_offset (temp_saved_regs, reg, sp + low_word);
+	  set_reg_offset (this_cache, reg, sp + low_word);
 	}
       else if ((high_word & 0xFFE0) == 0xffa0)	/* sd reg,offset($sp) */
 	{
 	  /* Irix 6.2 N32 ABI uses sd instructions for saving $gp and
 	     $ra.  */
 	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
-	  set_reg_offset (temp_saved_regs, reg, sp + low_word);
+	  set_reg_offset (this_cache, reg, sp + low_word);
 	}
       else if (high_word == 0x27be)	/* addiu $30,$sp,size */
 	{
@@ -2849,14 +2856,15 @@ restart:
       else if ((high_word & 0xFFE0) == 0xafc0)	/* sw reg,offset($30) */
 	{
 	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
-	  set_reg_offset (temp_saved_regs, reg, frame_addr + low_word);
+	  set_reg_offset (this_cache, reg, frame_addr + low_word);
 	}
     }
 }
 
 static mips_extra_func_info_t
 heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
-		     struct frame_info *next_frame)
+		     struct frame_info *next_frame,
+		     struct mips_frame_cache *this_cache)
 {
   CORE_ADDR sp;
 
@@ -2870,8 +2878,6 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   if (start_pc == 0)
     return NULL;
   memset (&temp_proc_desc, '\0', sizeof (temp_proc_desc));
-  temp_saved_regs = xrealloc (temp_saved_regs, SIZEOF_FRAME_SAVED_REGS);
-  memset (temp_saved_regs, '\0', SIZEOF_FRAME_SAVED_REGS);
   PROC_LOW_ADDR (&temp_proc_desc) = start_pc;
   PROC_FRAME_REG (&temp_proc_desc) = MIPS_SP_REGNUM;
   PROC_PC_REG (&temp_proc_desc) = RA_REGNUM;
@@ -2879,9 +2885,11 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   if (start_pc + 200 < limit_pc)
     limit_pc = start_pc + 200;
   if (pc_is_mips16 (start_pc))
-    mips16_heuristic_proc_desc (start_pc, limit_pc, next_frame, sp);
+    mips16_heuristic_proc_desc (start_pc, limit_pc, sp,
+				next_frame, this_cache);
   else
-    mips32_heuristic_proc_desc (start_pc, limit_pc, next_frame, sp);
+    mips32_heuristic_proc_desc (start_pc, limit_pc, sp,
+				next_frame, this_cache);
   return &temp_proc_desc;
 }
 

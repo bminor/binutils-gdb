@@ -1,5 +1,12 @@
 2004-09-03  Andrew Cagney  <cagney@gnu.org>
 
+	* mips-tdep.c (temp_saved_regs): Delete.
+	(set_reg_offset): Replace saved_regs parameter with this_cache.
+	(heuristic_proc_desc, mips16_heuristic_proc_desc)
+	(mips32_heuristic_proc_desc): Add this_cache parameter.
+	(mips_insn32_frame_cache, mips_insn16_frame_cache)
+	(after_prologue): Pass a NULL this_cache.
+
 	* mips-tdep.c (mips_mdebug_frame_cache): Delete code handling
 	non-kernel trap prologues.
 
