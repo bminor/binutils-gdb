@@ -7535,7 +7535,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		}
 
 	      if (!mips_elf_perform_relocation (info, howto, rel, addend,
-						input_bfd,  input_section,
+						input_bfd, input_section,
 						contents, false))
 		return false;
 	    }

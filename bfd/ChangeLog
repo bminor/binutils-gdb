@@ -1,3 +1,13 @@
+2001-12-17  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elf32-mips.c (_bfd_mips_elf_relocate_section): Formatting.
+	* elf64-mips.c: Add most of the fixes and tweaks done in elf32-mips.c
+	over the last months. Add some code for mips16 handling.
+	(mips_elf64_check_mips16_stubs): New function.
+	(mips_elf64_stub_section_p): Likewise.
+	(mips_elf64_calculate_relocation): Change interface to support mips16.
+	(mips_elf64_perform_relocation): Likewise.
+
 2001-12-17  Alan Modra  <amodra@bigpond.net.au>
 	Support for more than 64k ELF sections.
 	* elf-bfd.h (elf_size_info <swap_symbol_out>): Add shndx param.
