@@ -1,3 +1,8 @@
+Wed Jan 29 18:58:43 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* sparc-pinsn.c (compare_opcodes):  Make it prefer v6, v7,
+	cypress, v8 mnemonics in that order.
+
 Tue Jan 28 17:32:13 1992  Per Bothner  (bothner at cygnus.com)
 
 	* sparc-pinsn.c:  Put the qsort() back in.

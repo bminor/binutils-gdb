@@ -438,12 +438,19 @@ compare_opcodes (a, b)
      better have the same opcode.  This is a sanity check on the table.  */
   i = strcmp (op0->name, op1->name);
   if (i)
+    {
+      /* *** FIXME - There must be a better way to deal with this! */
+      /* We prefer names used in the earliest architecture */
+      if (op0->architecture != op1->architecture)
+	return op0->architecture - op1->architecture;
+
       if (op0->flags & F_ALIAS) /* If they're both aliases, be arbitrary. */
-	  return i;
+	return i;
       else
-	  fprintf (stderr,
-		   "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n",
-		   op0->name, op1->name);
+	fprintf (stderr,
+		 "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n",
+		 op0->name, op1->name);
+    }
 
   /* Fewer arguments are preferred.  */
   {
