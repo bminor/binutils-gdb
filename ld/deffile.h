@@ -41,10 +41,18 @@ typedef struct def_file_export
   }
 def_file_export;
 
+typedef struct def_file_module
+  {
+    struct def_file_module *next;
+    void *user_data;
+    char name[1]; /* extended via malloc */
+  }
+def_file_module;
+
 typedef struct def_file_import
   {
     char *internal_name;	/* always set */
-    char *module;		/* always set */
+    def_file_module *module;	/* always set */
     char *name;			/* may be NULL; either this or ordinal will be set */
     int ordinal;		/* may be -1 */
   }
@@ -72,6 +80,9 @@ typedef struct def_file
     /* from the EXPORTS commands */
     int num_exports;
     def_file_export *exports;
+
+    /* used by imports for module names */
+    def_file_module *modules;
 
     /* from the IMPORTS commands */
     int num_imports;

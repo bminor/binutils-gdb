@@ -268,7 +268,7 @@ process_def_file (abfd, info)
 	}
     }
 
-  e = pe_def_file->exports;	/* convenience */
+  e = pe_def_file->exports; /* convenience, but watch out for it changing */
 
   exported_symbol_offsets = (bfd_vma *) xmalloc (NE * sizeof (bfd_vma));
   exported_symbol_sections = (struct sec **) xmalloc (NE * sizeof (struct sec *));
@@ -859,7 +859,7 @@ pe_dll_generate_def_file (pe_out_def_filename)
 	      quoteput (im->internal_name, out, 0);
 	      fprintf (out, " = ");
 	    }
-	  quoteput (im->module, out, 0);
+	  quoteput (im->module->name, out, 0);
 	  fprintf (out, ".");
 	  if (im->name)
 	    quoteput (im->name, out, 0);
