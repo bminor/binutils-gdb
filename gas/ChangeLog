@@ -1,3 +1,9 @@
+Tue May 16 19:36:00 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/obj-ecoff.c (ecoff_pop_insert): New function.
+	(ecoff_format_ops): Use it.
+	(obj_ecoff_frob_symbol): Now static.
+
 Wed May 17 00:59:12 1995  Andrew Cagney - aka Noid  <cagney@highland.com.au>
 
 	* config/tc-ppc.c (md_begin): Was assuming that an instruction was
