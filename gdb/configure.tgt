@@ -63,6 +63,8 @@ xscale-*-*)		gdb_target=embed
                         configdirs="$configdirs rdi-share"
                         ;;
 
+cris*)                  gdb_target=cris ;;
+
 d10v-*-*)		gdb_target=d10v ;;
 d30v-*-*)		gdb_target=d30v ;;
 
@@ -318,6 +320,7 @@ esac
 # map GDB target onto multi-arch support
 
 case "${gdb_target}" in
+cris)		gdb_multi_arch=yes ;;
 d10v)		gdb_multi_arch=yes ;;
 m68hc11)	gdb_multi_arch=yes ;;
 esac
