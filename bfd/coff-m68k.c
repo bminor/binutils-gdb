@@ -504,7 +504,8 @@ bfd_m68k_coff_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
       bfd_put_32 (abfd,
 		  (irel->r_vaddr - datasec->vma + datasec->output_offset), p);
       memset (p + 4, 0, 8);
-      strncpy (p + 4, targetsec->output_section->name, 8);
+      if (targetsec != NULL)
+	strncpy (p + 4, targetsec->output_section->name, 8);
     }
   
   return true;

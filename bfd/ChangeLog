@@ -1,3 +1,9 @@
+2000-09-10  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* coff-m68k.c (bfd_m68k_coff_create_embedded_relocs): Emit 8 NULs for
+	target section name instead of dumping core when the target symbol is
+	undefined.
+
 2000-09-09  Kazu Hirata  <kazu@hxi.com>
 
 	* riscix.c: Remove DEFUN.
