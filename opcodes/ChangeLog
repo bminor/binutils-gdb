@@ -1,3 +1,10 @@
+start-sanitize-r5900
+Wed Jul 22 17:05:40 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mips-opc.c: Make phmadh and phmsbh synonyms for phmaddh and
+	phmsubh respectively.
+
+end-sanitize-r5900
 Tue Jul 21 13:41:07 1998  Doug Evans  <devans@seba.cygnus.com>
 
 start-sanitize-cygnus
