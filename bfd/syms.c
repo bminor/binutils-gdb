@@ -55,7 +55,7 @@ SECTION
 INODE
 Reading Symbols, Writing Symbols, Symbols, Symbols
 SUBSECTION
-	Reading Symbols
+	Reading symbols
 
 	There are two stages to reading a symbol table from a BFD:
 	allocating storage, and the actual reading process. This is an
@@ -87,7 +87,7 @@ SUBSECTION
 INODE
 Writing Symbols, typedef asymbol, Reading Symbols, Symbols
 SUBSECTION
-	Writing Symbols
+	Writing symbols
 
 	Writing of a symbol table is automatic when a BFD open for
 	writing is closed. The application attaches a vector of
@@ -274,7 +274,7 @@ DOCDD
 INODE
 symbol handling functions,  , typedef asymbol, Symbols
 SUBSECTION
-	Symbol Handling Functions
+	Symbol handling functions
 */
 
 /*
@@ -353,7 +353,7 @@ DESCRIPTION
 */
 void
 DEFUN(bfd_print_symbol_vandf,(file, symbol),
-PTR file AND
+FILE *file AND
 asymbol *symbol)
 {
   flagword type = symbol->flags;
