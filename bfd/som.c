@@ -216,7 +216,6 @@ static boolean som_bfd_fill_in_ar_symbols PARAMS ((bfd *, struct lst_header *,
 						   carsym **syms));
 static boolean som_slurp_armap PARAMS ((bfd *));
 static boolean som_write_armap PARAMS ((bfd *));
-static boolean som_slurp_extended_name_table PARAMS ((bfd *));
 static void som_bfd_derive_misc_symbol_info PARAMS ((bfd *, asymbol *,
 					     struct som_misc_symbol_info *));
 static boolean som_bfd_prep_for_ar_write PARAMS ((bfd *, unsigned int *,
@@ -225,6 +224,7 @@ static unsigned int som_bfd_ar_symbol_hash PARAMS ((asymbol *));
 static boolean som_bfd_ar_write_symbol_stuff PARAMS ((bfd *, unsigned int,
 						      unsigned int,
 						      struct lst_header));
+static CONST char *normalize PARAMS ((CONST char *file));
 	
 /* Map SOM section names to POSIX/BSD single-character symbol types.
 
@@ -4724,6 +4724,14 @@ som_slurp_armap (abfd)
       == false)
     return false;
 
+  /* Seek back to the "first" file in the archive.  Note the "first"
+     file may be the extended name table.  */
+  if (bfd_seek (abfd, ardata->first_file_filepos, SEEK_SET) < 0)
+    {
+      bfd_set_error (bfd_error_system_call);
+      return false;
+    }
+
   /* Notify the generic archive code that we have a symbol map.  */
   bfd_has_map (abfd) = true;
   return true;
@@ -4813,6 +4821,19 @@ som_bfd_ar_symbol_hash (symbol)
 	  | (symbol->name[len-2] << 8) | symbol->name[len-1];
 }
 
+static CONST char *
+normalize (file)
+     CONST char *file;
+{
+  CONST char *filename = strrchr (file, '/');
+
+  if (filename != NULL)
+    filename++;
+  else
+    filename = file;
+  return filename;
+}
+
 /* Do the bulk of the work required to write the SOM library
    symbol table.  */
    
@@ -4825,11 +4846,12 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
   file_ptr lst_filepos;
   char *strings = NULL, *p;
   struct lst_symbol_record *lst_syms = NULL, *curr_lst_sym;
-  bfd *curr_bfd = abfd->archive_head;
+  bfd *curr_bfd;
   unsigned int *hash_table = NULL;
   struct som_entry *som_dict = NULL;
   struct lst_symbol_record **last_hash_entry = NULL;
-  unsigned int curr_som_offset, som_index;
+  unsigned int curr_som_offset, som_index, extended_name_length = 0;
+  unsigned int maxname = abfd->xvec->ar_max_namelen;
 
   hash_table =
     (unsigned int *) malloc (lst.hash_size * sizeof (unsigned int));
@@ -4876,6 +4898,33 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
   som_index = 0;
   curr_som_offset = 8 + 2 * sizeof (struct ar_hdr) + lst.file_end;
 
+  /* Yow!  We have to know the size of the extended name table
+     too.  */
+  for (curr_bfd = abfd->archive_head;
+       curr_bfd != NULL;
+       curr_bfd = curr_bfd->next)
+    {
+      CONST char *normal = normalize (curr_bfd->filename);
+      unsigned int thislen;
+
+      if (!normal)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+      thislen = strlen (normal);
+      if (thislen > maxname)
+	extended_name_length += thislen + 1;
+    }
+
+  /* Make room for the archive header and the contents of the
+     extended string table.  */
+  if (extended_name_length)
+    curr_som_offset += extended_name_length + sizeof (struct ar_hdr);
+
+  /* Make sure we're properly aligned.  */
+  curr_som_offset = (curr_som_offset + 0x1) & ~0x1;
+
   /* FIXME should be done with buffers just like everything else... */
   lst_syms = malloc (nsyms * sizeof (struct lst_symbol_record));
   if (lst_syms == NULL && nsyms != 0)
@@ -4893,7 +4942,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
   p = strings;
   curr_lst_sym = lst_syms;
 
-
+  curr_bfd = abfd->archive_head;
   while (curr_bfd != NULL)
     {
       unsigned int curr_count, i;
@@ -5149,12 +5198,12 @@ som_write_armap (abfd)
 
   /* SOM ABI says this must be zero.  */
   lst.free_list = 0;
-
   lst.file_end = lst_size;
 
   /* Compute the checksum.  Must happen after the entire lst header
      has filled in.  */
   p = (int *)&lst;
+  lst.checksum = 0;
   for (i = 0; i < sizeof (struct lst_header)/sizeof (int) - 1; i++)
     lst.checksum ^= *p++;
 
@@ -5196,16 +5245,6 @@ som_write_armap (abfd)
   return true;
 }
 
-/* Apparently the extened names are never used, even though they appear
-   in the SOM ABI.  Hmmm.  */
-static boolean
-som_slurp_extended_name_table (abfd)
-     bfd *abfd;
-{
-  bfd_ardata (abfd)->extended_names = NULL;
-  return true;
-}
-
 /* End of miscellaneous support functions. */
 
 #define som_bfd_debug_info_start        bfd_void
@@ -5215,6 +5254,7 @@ som_slurp_extended_name_table (abfd)
 #define som_openr_next_archived_file	bfd_generic_openr_next_archived_file
 #define som_generic_stat_arch_elt	bfd_generic_stat_arch_elt
 #define som_truncate_arname		bfd_bsd_truncate_arname
+#define som_slurp_extended_name_table	_bfd_slurp_extended_name_table
 
 #define som_get_lineno                   (struct lineno_cache_entry *(*)())bfd_nullvoidptr
 #define	som_close_and_cleanup	           bfd_generic_close_and_cleanup
@@ -5253,7 +5293,7 @@ bfd_target som_vec =
    predictable, and if so what is it */
   0,
   '/',				/* ar_pad_char */
-  16,				/* ar_max_namelen */
+  14,				/* ar_max_namelen */
   3,				/* minimum alignment */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,

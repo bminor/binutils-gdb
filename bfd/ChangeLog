@@ -1,3 +1,17 @@
+Fri Mar 18 18:13:49 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+        * Better long-filename handling.  Reads SOM ABI compliant extended
+	names, but doesn't quite write compliant extended names yet.
+	* som.c (som_slurp_extended_name_table): Delete function.  The
+	generic code will handle things correctly.
+	(som_slurp_armap): Seek to the beginning of the next member.
+	(normalize): New function.
+	(som_bfd_ar_write_symbol_stuff): Take the size of the extended
+	name table into account when computing the file offsets in the
+	SOM dictionary.  Make sure to align to an even boundary.
+	(som_write_armap): Initialize the checksum to zero.
+	(ar_maxchars): Fix.  Opps.
+
 Fri Mar 18 20:35:24 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* aoutx.h (reloc_type_lookup): Handle BFD_RELOC_CTOR on a 64-bit
