@@ -337,10 +337,11 @@ dump_section_header (abfd, section, ignored)
      PTR ignored ATTRIBUTE_UNUSED;
 {
   char *comma = "";
+  int opb = bfd_octets_per_byte (abfd);
 
   printf ("%3d %-13s %08lx  ", section->index,
 	  bfd_get_section_name (abfd, section),
-	  (unsigned long) bfd_section_size (abfd, section));
+	  (unsigned long) bfd_section_size (abfd, section) / opb);
   printf_vma (bfd_get_section_vma (abfd, section));
   printf ("  ");
   printf_vma (section->lma);
@@ -739,6 +740,7 @@ find_symbol_for_address (abfd, sec, vma, require_sec, place)
   long min = 0;
   long max = sorted_symcount;
   long thisplace;
+  int opb = bfd_octets_per_byte (abfd); 
 
   if (sorted_symcount < 1)
     return NULL;
@@ -786,7 +788,7 @@ find_symbol_for_address (abfd, sec, vma, require_sec, place)
 	  || ((abfd->flags & HAS_RELOC) != 0
 	      && vma >= bfd_get_section_vma (abfd, sec)
 	      && vma < (bfd_get_section_vma (abfd, sec)
-			+ bfd_section_size (abfd, sec)))))
+			+ bfd_section_size (abfd, sec) / opb))))
     {
       long i;
 
@@ -1010,10 +1012,10 @@ skip_to_line (p, line, show)
    listing.  */
 
 static void
-show_line (abfd, section, off)
+show_line (abfd, section, addr_offset)
      bfd *abfd;
      asection *section;
-     bfd_vma off;
+     bfd_vma addr_offset;
 {
   CONST char *filename;
   CONST char *functionname;
@@ -1022,7 +1024,7 @@ show_line (abfd, section, off)
   if (! with_line_numbers && ! with_source_code)
     return;
 
-  if (! bfd_find_nearest_line (abfd, section, syms, off, &filename,
+  if (! bfd_find_nearest_line (abfd, section, syms, addr_offset, &filename,
 			       &functionname, &line))
     return;
 
@@ -1231,31 +1233,33 @@ objdump_sprintf (va_alist)
 /* Disassemble some data in memory between given values.  */
 
 static void
-disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
+disassemble_bytes (info, disassemble_fn, insns, data, 
+                   start_offset, stop_offset, relppp,
 		   relppend)
      struct disassemble_info *info;
      disassembler_ftype disassemble_fn;
      boolean insns;
      bfd_byte *data;
-     bfd_vma start;
-     bfd_vma stop;
+     bfd_vma start_offset;
+     bfd_vma stop_offset;
      arelent ***relppp;
      arelent **relppend;
 {
   struct objdump_disasm_info *aux;
   asection *section;
-  int bytes_per_line;
+  int octets_per_line;
   boolean done_dot;
   int skip_addr_chars;
-  bfd_vma i;
+  bfd_vma addr_offset;
+  int opb = info->octets_per_byte;
 
   aux = (struct objdump_disasm_info *) info->application_data;
   section = aux->sec;
 
   if (insns)
-    bytes_per_line = 4;
+    octets_per_line = 4;
   else
-    bytes_per_line = 16;
+    octets_per_line = 16;
 
   /* Figure out how many characters to skip at the start of an
      address, to make the disassembly look nicer.  We discard leading
@@ -1267,8 +1271,8 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
       char buf[30];
       char *s;
 
-      sprintf_vma (buf,
-		   section->vma + bfd_section_size (section->owner, section));
+      sprintf_vma (buf, section->vma + 
+                   bfd_section_size (section->owner, section) / opb);
       s = buf;
       while (s[0] == '0' && s[1] == '0' && s[2] == '0' && s[3] == '0'
 	     && s[4] == '0')
@@ -1281,34 +1285,35 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
   info->insn_info_valid = 0;
 
   done_dot = false;
-  i = start;
-  while (i < stop)
+  addr_offset = start_offset;
+  while (addr_offset < stop_offset)
     {
       bfd_vma z;
-      int bytes = 0;
+      int octets = 0;
       boolean need_nl = false;
 
-      /* If we see more than SKIP_ZEROES bytes of zeroes, we just
+      /* If we see more than SKIP_ZEROES octets of zeroes, we just
          print `...'.  */
-      for (z = i; z < stop; z++)
+      for (z = addr_offset * opb; z < stop_offset * opb; z++)
 	if (data[z] != 0)
 	  break;
       if (! disassemble_zeroes
 	  && (info->insn_info_valid == 0
 	      || info->branch_delay_insns == 0)
-	  && (z - i >= SKIP_ZEROES
-	      || (z == stop && z - i < SKIP_ZEROES_AT_END)))
+	  && (z - addr_offset * opb >= SKIP_ZEROES
+	      || (z == stop_offset * opb && 
+                  z - addr_offset * opb < SKIP_ZEROES_AT_END)))
 	{
 	  printf ("\t...\n");
 
-	  /* If there are more nonzero bytes to follow, we only skip
+	  /* If there are more nonzero octets to follow, we only skip
              zeroes in multiples of 4, to try to avoid running over
              the start of an instruction which happens to start with
              zero.  */
-	  if (z != stop)
-	    z = i + ((z - i) &~ 3);
+	  if (z != stop_offset * opb)
+	    z = addr_offset * opb + ((z - addr_offset * opb) &~ 3);
 
-	  bytes = z - i;
+	  octets = z - addr_offset * opb;
 	}
       else
 	{
@@ -1320,13 +1325,13 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	  done_dot = false;
 
 	  if (with_line_numbers || with_source_code)
-	    show_line (aux->abfd, section, i);
+	    show_line (aux->abfd, section, addr_offset);
 
 	  if (! prefix_addresses)
 	    {
 	      char *s;
 
-	      sprintf_vma (buf, section->vma + i);
+	      sprintf_vma (buf, section->vma + addr_offset);
 	      for (s = buf + skip_addr_chars; *s == '0'; s++)
 		*s = ' ';
 	      if (*s == '\0')
@@ -1336,7 +1341,7 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	  else
 	    {
 	      aux->require_sec = true;
-	      objdump_print_address (section->vma + i, info);
+	      objdump_print_address (section->vma + addr_offset, info);
 	      aux->require_sec = false;
 	      putchar (' ');
 	    }
@@ -1351,21 +1356,21 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	      info->bytes_per_line = 0;
 	      info->bytes_per_chunk = 0;
 
-	      /* FIXME: This is wrong.  It tests the number of bytes
+	      /* FIXME: This is wrong.  It tests the number of octets
                  in the last instruction, not the current one.  */
 	      if (*relppp < relppend
-		  && (**relppp)->address >= i
-		  && (**relppp)->address < i + bytes)
+		  && (**relppp)->address >= addr_offset
+		  && (**relppp)->address < addr_offset + octets / opb)
 		info->flags = INSN_HAS_RELOC;
 	      else
 		info->flags = 0;
 
-	      bytes = (*disassemble_fn) (section->vma + i, info);
+	      octets = (*disassemble_fn) (section->vma + addr_offset, info);
 	      info->fprintf_func = (fprintf_ftype) fprintf;
 	      info->stream = stdout;
 	      if (info->bytes_per_line != 0)
-		bytes_per_line = info->bytes_per_line;
-	      if (bytes < 0)
+		octets_per_line = info->bytes_per_line;
+	      if (octets < 0)
 		{
 		  if (sfile.current != sfile.buffer)
 		    printf ("%s\n", sfile.buffer);
@@ -1377,18 +1382,18 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	    {
 	      bfd_vma j;
 
-	      bytes = bytes_per_line;
-	      if (i + bytes > stop)
-		bytes = stop - i;
+	      octets = octets_per_line;
+	      if (addr_offset + octets / opb > stop_offset)
+		octets = (stop_offset - addr_offset) * opb;
 
-	      for (j = i; j < i + bytes; ++j)
+	      for (j = addr_offset * opb; j < addr_offset * opb + octets; ++j)
 		{
 		  if (isprint (data[j]))
-		    buf[j - i] = data[j];
+		    buf[j - addr_offset * opb] = data[j];
 		  else
-		    buf[j - i] = '.';
+		    buf[j - addr_offset * opb] = '.';
 		}
-	      buf[j - i] = '\0';
+	      buf[j - addr_offset * opb] = '\0';
 	    }
 
 	  if (prefix_addresses
@@ -1398,17 +1403,17 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	      bfd_vma j;
 
 	      /* If ! prefix_addresses and ! wide_output, we print
-                 bytes_per_line bytes per line.  */
-	      pb = bytes;
-	      if (pb > bytes_per_line && ! prefix_addresses && ! wide_output)
-		pb = bytes_per_line;
+                 octets_per_line octets per line.  */
+	      pb = octets;
+	      if (pb > octets_per_line && ! prefix_addresses && ! wide_output)
+		pb = octets_per_line;
 
 	      if (info->bytes_per_chunk)
 		bpc = info->bytes_per_chunk;
 	      else
 		bpc = 1;
 
-	      for (j = i; j < i + pb; j += bpc)
+	      for (j = addr_offset * opb; j < addr_offset * opb + pb; j += bpc)
 		{
 		  int k;
 		  if (bpc > 1 && info->display_endian == BFD_ENDIAN_LITTLE)
@@ -1425,7 +1430,7 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 		    }
 		}
 
-	      for (; pb < bytes_per_line; pb += bpc)
+	      for (; pb < octets_per_line; pb += bpc)
 		{
 		  int k;
 
@@ -1453,25 +1458,25 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	      ? show_raw_insn > 0
 	      : show_raw_insn >= 0)
 	    {
-	      while (pb < bytes)
+	      while (pb < octets)
 		{
 		  bfd_vma j;
 		  char *s;
 
 		  putchar ('\n');
-		  j = i + pb;
+		  j = addr_offset * opb + pb;
 
-		  sprintf_vma (buf, section->vma + j);
+		  sprintf_vma (buf, section->vma + j / opb);
 		  for (s = buf + skip_addr_chars; *s == '0'; s++)
 		    *s = ' ';
 		  if (*s == '\0')
 		    *--s = '0';
 		  printf ("%s:\t", buf + skip_addr_chars);
 
-		  pb += bytes_per_line;
-		  if (pb > bytes)
-		    pb = bytes;
-		  for (; j < i + pb; j += bpc)
+		  pb += octets_per_line;
+		  if (pb > octets)
+		    pb = octets;
+		  for (; j < addr_offset * opb + pb; j += bpc)
 		    {
 		      int k;
 
@@ -1501,8 +1506,8 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	  && (section->flags & SEC_RELOC) != 0)
 	{
 	  while ((*relppp) < relppend
-		 && ((**relppp)->address >= (bfd_vma) i
-		     && (**relppp)->address < (bfd_vma) i + bytes))
+		 && ((**relppp)->address >= (bfd_vma) addr_offset
+		     && (**relppp)->address < (bfd_vma) addr_offset + octets / opb))
 	    {
 	      arelent *q;
 
@@ -1553,7 +1558,7 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
       if (need_nl)
 	printf ("\n");
 
-      i += bytes;
+      addr_offset += octets / opb;
     }
 }
 
@@ -1563,11 +1568,12 @@ static void
 disassemble_data (abfd)
      bfd *abfd;
 {
-  long i;
+  long addr_offset;
   disassembler_ftype disassemble_fn;
   struct disassemble_info disasm_info;
   struct objdump_disasm_info aux;
   asection *section;
+  int opb = bfd_octets_per_byte (abfd);
 
   print_files = NULL;
   prev_functionname = NULL;
@@ -1589,6 +1595,7 @@ disassemble_data (abfd)
   aux.require_sec = false;
   disasm_info.print_address_func = objdump_print_address;
   disasm_info.symbol_at_address_func = objdump_symbol_at_address;
+  disasm_info.octets_per_byte = opb;
 
   if (machine != (char *) NULL)
     {
@@ -1646,7 +1653,7 @@ disassemble_data (abfd)
       arelent **relbuf = NULL;
       arelent **relpp = NULL;
       arelent **relppend = NULL;
-      long stop;
+      long stop_offset;
       asymbol *sym = NULL;
       long place = 0;
 
@@ -1709,37 +1716,37 @@ disassemble_data (abfd)
       disasm_info.buffer_length = datasize;
       if (start_address == (bfd_vma) -1
 	  || start_address < disasm_info.buffer_vma)
-	i = 0;
+	addr_offset = 0;
       else
-	i = start_address - disasm_info.buffer_vma;
+	addr_offset = start_address - disasm_info.buffer_vma;
       if (stop_address == (bfd_vma) -1)
-	stop = datasize;
+	stop_offset = datasize / opb;
       else
 	{
 	  if (stop_address < disasm_info.buffer_vma)
-	    stop = 0;
+	    stop_offset = 0;
 	  else
-	    stop = stop_address - disasm_info.buffer_vma;
-	  if (stop > disasm_info.buffer_length)
-	    stop = disasm_info.buffer_length;
+	    stop_offset = stop_address - disasm_info.buffer_vma;
+	  if (stop_offset > disasm_info.buffer_length / opb)
+	    stop_offset = disasm_info.buffer_length / opb;
 	}
 
-      sym = find_symbol_for_address (abfd, section, section->vma + i,
+      sym = find_symbol_for_address (abfd, section, section->vma + addr_offset,
 				     true, &place);
 
-      while (i < stop)
+      while (addr_offset < stop_offset)
 	{
 	  asymbol *nextsym;
-	  long nextstop;
+	  long nextstop_offset;
 	  boolean insns;
 	  
-	  if (sym != NULL && bfd_asymbol_value (sym) <= section->vma + i)
+	  if (sym != NULL && bfd_asymbol_value (sym) <= section->vma + addr_offset)
 	    {
 	      int x;
 
 	      for (x = place;
 		   (x < sorted_symcount
-		    && bfd_asymbol_value (sorted_syms[x]) <= section->vma + i);
+		    && bfd_asymbol_value (sorted_syms[x]) <= section->vma + addr_offset);
 		   ++x)
 		continue;
 	      disasm_info.symbols = & sorted_syms[place];
@@ -1752,13 +1759,13 @@ disassemble_data (abfd)
 	    {
 	      printf ("\n");
 	      objdump_print_addr_with_sym (abfd, section, sym,
-					   section->vma + i,
+					   section->vma + addr_offset,
 					   &disasm_info,
 					   false);
 	      printf (":\n");
 	    }
 	  
-	  if (sym != NULL && bfd_asymbol_value (sym) > section->vma + i)
+	  if (sym != NULL && bfd_asymbol_value (sym) > section->vma + addr_offset)
 	    nextsym = sym;
 	  else if (sym == NULL)
 	    nextsym = NULL;
@@ -1779,19 +1786,19 @@ disassemble_data (abfd)
 		nextsym = sorted_syms[place];
 	    }
 	  
-	  if (sym != NULL && bfd_asymbol_value (sym) > section->vma + i)
+	  if (sym != NULL && bfd_asymbol_value (sym) > section->vma + addr_offset)
 	    {
-	      nextstop = bfd_asymbol_value (sym) - section->vma;
-	      if (nextstop > stop)
-		nextstop = stop;
+	      nextstop_offset = bfd_asymbol_value (sym) - section->vma;
+	      if (nextstop_offset > stop_offset)
+		nextstop_offset = stop_offset;
 	    }
 	  else if (nextsym == NULL)
-	    nextstop = stop;
+	    nextstop_offset = stop_offset;
 	  else
 	    {
-	      nextstop = bfd_asymbol_value (nextsym) - section->vma;
-	      if (nextstop > stop)
-		nextstop = stop;
+	      nextstop_offset = bfd_asymbol_value (nextsym) - section->vma;
+	      if (nextstop_offset > stop_offset)
+		nextstop_offset = stop_offset;
 	    }
 	  
 	  /* If a symbol is explicitly marked as being an object
@@ -1799,7 +1806,7 @@ disassemble_data (abfd)
 	     disassembling them.  */
 	  if (disassemble_all
 	      || sym == NULL
-	      || bfd_asymbol_value (sym) > section->vma + i
+	      || bfd_asymbol_value (sym) > section->vma + addr_offset
 	      || ((sym->flags & BSF_OBJECT) == 0
 		  && (strstr (bfd_asymbol_name (sym), "gnu_compiled")
 		      == NULL)
@@ -1810,10 +1817,10 @@ disassemble_data (abfd)
 	  else
 	    insns = false;
 	  
-	  disassemble_bytes (&disasm_info, disassemble_fn, insns, data, i,
-			     nextstop, &relpp, relppend);
+	  disassemble_bytes (&disasm_info, disassemble_fn, insns, data, 
+                             addr_offset, nextstop_offset, &relpp, relppend);
 	  
-	  i = nextstop;
+	  addr_offset = nextstop_offset;
 	  sym = nextsym;
 	}
       
@@ -2249,8 +2256,9 @@ dump_data (abfd)
   asection *section;
   bfd_byte *data = 0;
   bfd_size_type datasize = 0;
-  bfd_size_type i;
-  bfd_size_type start, stop;
+  bfd_size_type addr_offset;
+  bfd_size_type start_offset, stop_offset;
+  int opb = bfd_octets_per_byte (abfd);
 
   for (section = abfd->sections; section != NULL; section =
        section->next)
@@ -2274,28 +2282,31 @@ dump_data (abfd)
 
 	      if (start_address == (bfd_vma) -1
 		  || start_address < section->vma)
-		start = 0;
+		start_offset = 0;
 	      else
-		start = start_address - section->vma;
+		start_offset = start_address - section->vma;
 	      if (stop_address == (bfd_vma) -1)
-		stop = bfd_section_size (abfd, section);
+		stop_offset = bfd_section_size (abfd, section) / opb;
 	      else
 		{
 		  if (stop_address < section->vma)
-		    stop = 0;
+		    stop_offset = 0;
 		  else
-		    stop = stop_address - section->vma;
-		  if (stop > bfd_section_size (abfd, section))
-		    stop = bfd_section_size (abfd, section);
+		    stop_offset = stop_address - section->vma;
+		  if (stop_offset > bfd_section_size (abfd, section) / opb)
+		    stop_offset = bfd_section_size (abfd, section) / opb;
 		}
-	      for (i = start; i < stop; i += onaline)
+	      for (addr_offset = start_offset; 
+                   addr_offset < stop_offset; addr_offset += onaline)
 		{
 		  bfd_size_type j;
 
-		  printf (" %04lx ", (unsigned long int) (i + section->vma));
-		  for (j = i; j < i + onaline; j++)
+		  printf (" %04lx ", (unsigned long int) 
+                          (addr_offset + section->vma));
+		  for (j = addr_offset * opb; 
+                       j < addr_offset * opb + onaline; j++)
 		    {
-		      if (j < stop)
+		      if (j < stop_offset * opb)
 			printf ("%02x", (unsigned) (data[j]));
 		      else
 			printf ("  ");
@@ -2304,9 +2315,9 @@ dump_data (abfd)
 		    }
 
 		  printf (" ");
-		  for (j = i; j < i + onaline; j++)
+		  for (j = addr_offset; j < addr_offset * opb + onaline; j++)
 		    {
-		      if (j >= stop)
+		      if (j >= stop_offset * opb)
 			printf (" ");
 		      else
 			printf ("%c", isprint (data[j]) ? data[j] : '.');

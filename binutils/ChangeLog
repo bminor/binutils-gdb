@@ -1,3 +1,9 @@
+2000-02-03  Timothy Wall <twall@redhat.com>
+
+	* binutils/objdump.c (dump_section_header, find_symbol_for_address,
+	show_line, disassemble_bytes, disassemble_data, dump_data):
+	distinguish between octets and bytes.
+	
 2000-01-27  Thomas de Lellis  <tdel@windriver.com>
 
         * nm.c (print_symbol_info_bsd): Use bfd_is_undefined_symclass to

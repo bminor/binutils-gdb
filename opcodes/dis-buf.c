@@ -29,11 +29,17 @@ buffer_read_memory (memaddr, myaddr, length, info)
      int length;
      struct disassemble_info *info;
 {
+  int opb = info->octets_per_byte;
+  int end_addr_offset = length / opb;
+  int max_addr_offset = info->buffer_length / opb; 
+  int octets = (memaddr - info->buffer_vma) * opb;
+
   if (memaddr < info->buffer_vma
-      || memaddr - info->buffer_vma + length > info->buffer_length)
+      || memaddr - info->buffer_vma + end_addr_offset > max_addr_offset)
     /* Out of bounds.  Use EIO because GDB uses it.  */
     return EIO;
-  memcpy (myaddr, info->buffer + (memaddr - info->buffer_vma), length);
+  memcpy (myaddr, info->buffer + octets, length);
+
   return 0;
 }
 

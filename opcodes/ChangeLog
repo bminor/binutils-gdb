@@ -1,3 +1,9 @@
+2000-02-03  Timothy Wall  <twall@redhat.com>	
+	
+	* dis-buf.c (buffer_read_memory):  Use octets_per_byte field
+	to adjust target address bounds checking and calculate the
+	appropriate octet offset into data.
+	
 2000-01-27  Nick Clifton  <nickc@redhat.com>
 
 	* arm-dis.c: (parse_disassembler_option): Rename to
