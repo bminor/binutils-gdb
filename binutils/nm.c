@@ -369,6 +369,7 @@ display_archive (file)
      bfd *file;
 {
   bfd *arfile = NULL;
+  bfd *last_arfile = NULL;
   char **matching;
 
   (*format->print_archive_filename) (bfd_get_filename (file));
@@ -403,8 +404,13 @@ display_archive (file)
 	    }
 	}
 
-      bfd_close (arfile);
+      if (last_arfile != NULL)
+	bfd_close (last_arfile);
+      last_arfile = arfile;
     }
+
+  if (last_arfile != NULL)
+    bfd_close (last_arfile);
 }
 
 static boolean
