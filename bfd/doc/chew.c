@@ -1,5 +1,5 @@
 /* chew
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1998, 2000
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1998, 2000, 2001
    Free Software Foundation, Inc.
    Contributed by steve chamberlain @cygnus
 
@@ -487,6 +487,7 @@ paramstuff (void)
   unsigned int openp;
   unsigned int fname;
   unsigned int idx;
+  unsigned int len;
   string_type out;
   init_string (&out);
 
@@ -513,29 +514,33 @@ paramstuff (void)
 
       fname++;
 
-      for (idx = 0; idx < fname; idx++) 	/* Output type */
+      /* Output type, omitting trailing whitespace character(s), if
+         any.  */
+      for (len = fname; 0 < len; len--)
 	{
-	  /* Omit a trailing whitespace.  */
-	  if (idx + 1 == fname && isspace ((unsigned char) at (tos, idx)))
+	  if (!isspace ((unsigned char) at (tos, len - 1)))
 	    break;
-
-	  catchar (&out, at (tos, idx));
 	}
+      for (idx = 0; idx < len; idx++)
+	catchar (&out, at (tos, idx));
 
       cattext (&out, "\n");	/* Insert a newline between type and fnname */
 
-      for (idx = fname; idx < openp; idx++) 		/* Output fnname */
+      /* Output function name, omitting trailing whitespace
+         character(s), if any.  */
+      for (len = openp; 0 < len; len--)
 	{
-	  catchar (&out, at (tos, idx));
+	  if (!isspace ((unsigned char) at (tos, len - 1)))
+	    break;
 	}
+      for (idx = fname; idx < len; idx++)
+	catchar (&out, at (tos, idx));
 
       cattext (&out, " PARAMS (");
 
-      while (at (tos, idx) && at (tos, idx) != ';')
-	{
-	  catchar (&out, at (tos, idx));
-	  idx++;
-	}
+      for (idx = openp; at (tos, idx) && at (tos, idx) != ';'; idx++)
+	catchar (&out, at (tos, idx));
+
       cattext (&out, ");\n\n");
     }
   overwrite_string (tos, &out);
