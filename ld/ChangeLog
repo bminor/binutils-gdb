@@ -1,3 +1,20 @@
+Thu Dec  5 13:45:58 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
+	use hold_rel unless SEC_ALLOC is set for the reloc section.
+	(gld${EMULATION_NAME}_place_section): Only set hold_rel if
+	SEC_ALLOC is set.
+
+Tue Dec  3 11:29:20 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (section_already_linked): Set the output_offset as well
+	as the output_section when only reading symbols from a file.
+
+Mon Dec  2 11:43:50 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emulparams/*.sh: Make sure that each set of parameters which
+	uses the elf.sc script sets MACHINE.
+
 Wed Nov 27 03:22:05 1996  Jason Merrill  <jason@yorick.cygnus.com>
 
 	* scripttempl/elf.sc: Add the remaining DWARF sections.

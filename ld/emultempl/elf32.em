@@ -327,7 +327,7 @@ EOF
 fi
 cat >>e${EMULATION_NAME}.c <<EOF
 
-      einfo ("%P: warning: %s, needed by %B, not found\n",
+      einfo ("%P: warning: %s, needed by %B, not found (try using --rpath)\n",
 	     l->name, l->by);
     }
 }
@@ -777,6 +777,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 	   && hold_data != NULL)
     place = hold_data;
   else if (strncmp (secname, ".rel", 4) == 0
+	   && (s->flags & SEC_ALLOC) != 0
 	   && hold_rel != NULL)
     place = hold_rel;
   else if ((s->flags & SEC_CODE) == 0
@@ -840,7 +841,8 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   os = lang_output_section_statement_lookup (secname);
   wild_doit (&os->children, s, os, file);
 
-  lang_leave_output_section_statement ((bfd_vma) 0, "*default*");
+  lang_leave_output_section_statement
+    ((bfd_vma) 0, "*default*", (struct lang_output_section_phdr_list *) NULL);
   stat_ptr = &add;
 
   if (*ps == '\0' && config.build_constructors)
@@ -886,6 +888,7 @@ gld${EMULATION_NAME}_place_section (s)
     hold_bss = os;
   else if (hold_rel == NULL
 	   && os->bfd_section != NULL
+	   && (os->flags & SEC_ALLOC) != 0
 	   && strncmp (os->name, ".rel", 4) == 0)
     hold_rel = os;
 }
