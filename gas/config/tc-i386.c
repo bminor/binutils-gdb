@@ -3906,6 +3906,7 @@ md_apply_fix3 (fixP, valp, seg)
   register char *p = fixP->fx_where + fixP->fx_frag->fr_literal;
   valueT value = *valp;
 
+#if defined (BFD_ASSEMBLER) && !defined (TE_Mach)
   if (fixP->fx_pcrel)
     {
       switch (fixP->fx_r_type)
@@ -3922,7 +3923,6 @@ md_apply_fix3 (fixP, valp, seg)
 	}
     }
 
-#if defined (BFD_ASSEMBLER) && !defined (TE_Mach)
   /*
    * This is a hack.  There should be a better way to
    * handle this.
