@@ -1,0 +1,5 @@
+# Makefile changes for Suns running Solaris 2
+
+SYSV = -DSYSV
+RANLIB = echo >/dev/null
+INSTALL = cp
