@@ -1,3 +1,8 @@
+2002-05-13  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.asm/asm-source.exp: Add v850 as supported target.
+	* gdb.asm/v850.inc: New file.
+
 2002-05-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.c++/annota2.exp (annotate-quit): Add comment.
