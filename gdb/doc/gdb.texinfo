@@ -40,11 +40,12 @@ original English.
 @sp 1
 @center The GNU Source-Level Debugger
 @sp 4
-@center Third Edition, GDB version 3.4
+@center Third Edition, GDB version 4.0
 @sp 1
-@center October 1989
+@center October 1990
 @sp 5
 @center Richard M. Stallman
+@center (later modifications and additions by Cygnus Support)
 @page
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1988, 1989 Free Software Foundation, Inc.
@@ -456,9 +457,12 @@ instance, when debugging GDB with GDB, it is useful to change the prompt
 in one of the GDBs so that you tell which one you are talking to.
 
 @table @code
-@item set prompt @var{newprompt}
+@item set prompt @samp{newprompt}
 @kindex set prompt
-Directs GDB to use @var{newprompt} as its prompt string henceforth.
+Directs GDB to use @samp{newprompt} as its prompt string henceforth.
+@kindex show prompt
+@item show prompt
+Prints the line: Gdb's prompt is: @samp{your-prompt}
 @end table
 
 @cindex exiting GDB
@@ -469,6 +473,112 @@ of any GDB command that is in progress and return to GDB command level.
 It is safe to type @kbd{Ctrl-c} at any time because GDB does not allow
 it to take effect until a time when it is safe.
 
+@cindex readline
+@cindex command line editing
+@cindex history substitution
+GDB now reads its input commands via the @code{readline} interface. 
+This GNU utility provides consistant behaviour for programs which
+need to provide a command line interface to the user.  From the point 
+of view of the user, the new gains are @samp{emacs}-style or @samp{vi}-style
+inline editing of commands, @samp{csh}-like history substitution,
+and a storage and recall of command history across debugging sessions.
+
+You may control the behavior of command line editing in GDB with the
+following commands:
+
+@table @code
+@kindex set editing
+@item set editing
+@itemx set editing on
+Enable command line editing (enabled by default).
+
+@item set editing off
+Disable command line editing.
+
+@kindex set editing-mode 
+@item set editing-mode @samp{vi}
+Use @samp{vi}-style editing, rather than @samp{emacs}-style.
+@item set editing-mode @samp{emacs}
+Return to use of @samp{emacs}-style.
+
+Users who wish to temporarily to @samp{vi}-style, can use the commands
+@kbd{Control-meta-J} or @kbd{ESC-Control-J}.
+@table end
+
+@kindex info editing
+@item info editing
+Display the current settings relating to command line editing, and also
+display the last ten commands in the command history.
+
+@item info editing @var{n}
+Print ten commands centered on command number @var{n}.
+
+@item info editing +
+Print ten commands just after the commands last printed.
+
+@kindex set history file
+@item set history file @samp{filename}
+Set the name of the GDB command history file to @samp{filename}.  This is
+the file from which GDB will read an initial command history
+list or to which it will write this list when it exits.  This list is
+accessed through history expansion or through the history
+command editing characters listed below.  This file defaults to the
+value of the environmental variable @code{GDBHISTFILE}, or to
+@code{./.gdb_history} if this variable is not set.
+
+@kindex set history write
+@item set history write
+@itemx set history write on
+Enable the writing of the command history to the command history file
+named above.  This is enabled by default.
+
+@item set history write off
+Disable the writing of the command history to the command history file. 
+
+@kindex set history size
+@item set history size @var{size}
+Set the number of commands which GDB will keep in its history list.
+This defaults to the value of the environmental variable
+@code{HISTSIZE}, or to 256 if this variable is not set.
+
+@cindex history expansion
+
+Because of the additional meaning of @code{!} to GDB (as the
+logical not operator in C), history expansion is off by default.  If you
+decide to enable history expansion with the @samp{set history expansion
+on} command, you will need to follow @samp{!} with a space or a tab to
+prevent it from being expanded.
+
+The commands to control history expansion are:
+
+@table @code
+
+@kindex set history expansion
+@item set history expansion on
+@itemx set history expansion
+Enable history expansion.
+
+@item set history expansion off
+Disable history expansion.  History expansion is off by default.
+
+@end table
+
+The @code{readline} code comes with more complete documentation of
+editing and history expansion features.  Users unfamiliar with @samp{emacs}
+or @samp{vi} may wish to read it.  It is available as appendix A and
+appendix B of this documentation.
+
+Occasionally it is useful to execute a shell command from within GDB.
+This can be done with the @samp{shell} command.
+
+@table @code
+@item shell @var{shell command string}
+@kindex shell
+@cindex shell escape
+Directs GDB to invoke an inferior shell to execute @var{shell command string}.
+The environment variable @code{SHELL} is used if it exists, otherwise GDB
+uses @samp{/bin/sh}.
+
 @cindex screen size
 @cindex pauses in output
 Certain commands to GDB may produce large amounts of information output
@@ -477,19 +587,21 @@ input at the end of each page of output.  Type @key{RET} when you want
 to continue the output.  Normally GDB knows the size of the screen from
 on the termcap data base together with the value of the @code{TERM}
 environment variable; if this is not correct, you can override it with
-the @samp{set screensize} command:
+the @samp{set screen-height} and @samp{set screen-width} commands:
 
 @table @code
-@item set screensize @var{lpp}
-@itemx set screensize @var{lpp} @var{cpl}
-@kindex set screensize
-Specify a screen height of @var{lpp} lines and (optionally) a width of
-@var{cpl} characters.  If you omit @var{cpl}, the width does not change.
+@item set screen-height @var{lpp}
+@item set screen-width @var{cpl}
+@kindex set screen-height
+@kindex set screen-width
+Specify a screen height of @var{lpp} lines and  a  screen width of
+@var{cpl} characters. 
 
 If you specify a height of zero lines, GDB will not pause during output
 no matter how long the output is.  This is useful if output is to a file
 or to an editor buffer.
 @end table
+
 
 Also, GDB may at times produce more information about its own workings
 than is of interest to the user.  Some of these informational messages
@@ -645,6 +757,29 @@ convenience variables, the value history, and all breakpoints and
 auto-display expressions.  This is because they may contain pointers to the
 internal data recording symbols and data types, which are part of the old
 symbol table data being discarded inside GDB.
+
+@kindex shared-library
+@kindex share
+@cindex shared libraries
+
+GDB can now support Sun's shared library format.  Symbols from a shared
+library cannot be referenced before the shared library has been linked
+with the program.  (That is to say, after one types @samp{run} and 
+the function @code{main()} has been entered.)
+
+@item sharedlibrary @samp{regex}
+@itemx share @samp{regex}
+Load shared object library symbols for files matching a UNIX regular
+expresssion.
+
+@item sharedlibrary
+@itemx share
+Load symbols for all shared libraries.
+
+@kindex info sharedlibrary
+Print the names of the shared libraries which are currently loaded.
+
+
 
 @node Compilation, Running, Files, Top
 @chapter Compiling Your Program for Debugging
@@ -948,6 +1083,7 @@ investigate and find out why.
                  then you can use GDB to see what is going on.
 * Breakpoints::  Breakpoints let you stop your program when it
                  reaches a specified point in the code.
+                 an expression changes.
 * Continuing::   Resuming execution until the next signal or breakpoint.
 * Stepping::     Stepping runs the program a short distance and
                  then stops it wherever it has come to.
@@ -1036,7 +1172,7 @@ You can also use the @samp{signal} command to prevent the program from
 seeing a signal, or cause it to see a signal it normally would not see,
 or to give it any signal at any time.  @xref{Signaling}.
 
-@node Breakpoints, Continuing, Signals, Stopping
+@node Breakpoints, Watchpoints Continuing, Signals, Stopping
 @section Breakpoints
 
 @cindex breakpoints
@@ -1063,6 +1199,18 @@ as argument lists only that breakpoint.  The convenience variable @code{$_}
 and the default examining-address for the @samp{x} command are set to the
 address of the last breakpoint listed (@pxref{Memory}).
 
+@cindex watchpoints
+A @dfn{watchpoint} is a special breakpoint that  stops your program 
+when the value of an expression
+changes.  Aside from the different syntax in setting a watchpoint,
+it behaves exactly like an other breakpoint and is enabled, disabled,
+and deleted exactly like any other breakpoint.
+
+@kindex info watch
+@item info watch
+This command prints a list of watchpoints. 
+
+
 @menu
 * Set Breaks::     How to establish breakpoints.
 * Delete Breaks::   How to remove breakpoints no longer needed.
@@ -1076,7 +1224,10 @@ address of the last breakpoint listed (@pxref{Memory}).
 @subsection Setting Breakpoints
 
 @kindex break
+@kindex watch
 Breakpoints are set with the @samp{break} command (abbreviated @samp{b}).
+Watchpoints are set with the @samp{watch} command.
+
 You have several ways to say where the breakpoint should go.
 
 @table @code
@@ -1136,6 +1287,10 @@ Set a breakpoint enabled only for one stop.  @var{args} are the
 same as in the @samp{break} command, and the breakpoint is set in the same
 way, but the breakpoint is automatically disabled the first time it
 is hit.  @xref{Disabling}.
+
+@kindex watch 
+@item watch @samp{expr}
+Set a watchpoint for an expression.
 @end table
 
 GDB allows you to set any number of breakpoints at the same place in the
@@ -1145,8 +1300,8 @@ breakpoints are conditional, this is even useful (@pxref{Conditions}).
 @node Delete Breaks, Disabling, Set Breaks, Breakpoints
 @subsection Deleting Breakpoints
 
-@cindex clearing breakpoint
-@cindex deleting breakpoints
+@cindex clearing breakpoints and watchpoints
+@cindex deleting breakpoints and watchpoints
 It is often necessary to eliminate a breakpoint once it has done its job
 and you no longer want the program to stop there.  This is called
 @dfn{deleting} the breakpoint.  A breakpoint that has been deleted no
@@ -1996,59 +2151,57 @@ this command with as little as @samp{rev}.
 
 @cindex source path
 @cindex directories for source files
-Executable programs sometimes do not record the directories of the source files
-from which they were compiled, just the names.  Even when they do, the 
-directories could be moved between the compilation and your debugging
-session.  GDB remembers a list of
+Executable programs do not record the directories of the source files
+from which they were compiled, just the names.  GDB remembers a list of
 directories to search for source files; this is called the @dfn{source
 path}.  Each time GDB wants a source file, it tries all the directories
 in the list, in the order they are present in the list, until it finds a
 file with the desired name.  @b{Note that the executable search path is
 @i{not} used for this purpose.  Neither is the current working
-directory, unless it happens to be in the source path.}  
-
-If it can't find a source file in the source path, and the object program
-records what directory it was compiled in, GDB tries that directory too.
-If the source path is empty, and there is no record of the compilation
-directory, GDB will, as a last resort, look in the current directory.
-
-Whenever you reset or rearrange the source path, GDB will clear out
-any information it has cached about where source files are found, where
-each line is in the file, etc.
+directory, unless it happens to be in the source path.}
 
 @kindex directory
-When you start GDB, its source path is empty.
-To add other directories, use the @samp{directory} command.
+When you start GDB, its source path contains just the current working
+directory.  To add other directories, use the @samp{directory} command.
 
 @table @code
 @item directory @var{dirnames...}
-Add directory @var{dirname} to the front of the source path.  Several
+Add directory @var{dirname} to the end of the source path.  Several
 directory names may be given to this command, separated by whitespace or
-@samp{:}.  If a name is already in the source path, it is moved to the
-front of the path, so it will be searched sooner.
+@samp{:}.
 
 @item directory
-Reset the source path to empty again.  This requires confirmation.
+Reset the source path to just the current working directory of GDB.
+This requires confirmation.
+
+Since this command deletes directories from the search path, it may
+change the directory in which a previously read source file will be
+discovered.  To make this work correctly, this command also clears out
+the tables GDB maintains about the source files it has already found.
 
 @item info directories
 @kindex info directories
 Print the source path: show which directories it contains.
 @end table
 
-Because the @samp{directory} command adds to the front of the source path,
-it can affect files that GDB has already found.  If the source
+Because the @samp{directory} command adds to the end of the source path,
+it does not affect any file that GDB has already found.  If the source
 path contains directories that you do not want, and these directories
 contain misleading files with names matching your source files, the
 way to correct the situation is as follows:
 
 @enumerate
 @item
-Use @samp{directory} with no argument to reset the source path to empty.
+Choose the directory you want at the beginning of the source path.
+Use the @samp{cd} command to make that the current working directory.
+
+@item
+Use @samp{directory} with no argument to reset the source path to just
+that directory.
 
 @item
 Use @samp{directory} with suitable arguments to add any other
-directories you want in the source path.  You can add all the directories
-in one command.
+directories you want in the source path.
 @end enumerate
 
 @node Data, Symbols, Source, Top
@@ -2218,6 +2371,38 @@ Display the current settings for the format options.
 If GDB is printing a large array, it will stop printing after it has
 printed the number of elements set by the @samp{set array-max} command.
 This limit also applies to the display of strings.
+
+@item set arrayprint
+@itemx set arrayprint on
+@kindex set arrayprint
+GDB will pretty print arrays.  This format is more convenient to read,
+but uses more space.  The default is off.
+
+@item set arrayprint off.
+Return to compressed format for arrays.
+
+@item set vtblprint 
+@itemx set vtblprint on 
+@kindex set vtbprint
+
+Pretty print C++ virtual function tables.  The default is off.
+
+@item set vtblprint off
+Do not pretty print C++ virtual arrays.
+
+@item set addressprint
+@item set adressprint on
+@kindex set addressprint
+GDB will print memory addresses in stack traces and structure values.
+The default is on.
+
+@item set addressprint off
+Do not print addresses.
+
+GDB will pretty print C++ virtual function tables.  The default is off.
+
+@item set vtblprint off
+Do not pretty print C++ virtual function tables.
 
 @item set prettyprint on
 @kindex set prettyprint
@@ -2849,16 +3034,6 @@ Print the names and data types of all variables (except for local
 variables) whose names contain a match for regular expression
 @var{regexp}.
 
-@ignore
-Uncomment this only if the implementation is fixed.
-@item info types
-@kindex info types
-Print all data types that are defined in the program.
-
-@item info types @var{regexp}
-Print all data types that are defined in the program whose names
-contain a match for regular expression @var{regexp}.
-@end ignore
 
 @ignore
 This was never implemented.
@@ -3368,6 +3543,15 @@ communicates with Emacs in terms of line numbers.  If you add or
 delete lines from the text, the line numbers that GDB knows will cease
 to correspond properly to the code.
 
+@kindex emacs epoch environment  
+@kindex epoch
+@kindex inspect
+
+Version 18 of Emacs has a built-in window system called the @samp{epoch}
+environment.  Users of this environment can use a new command,
+@samp{inspect} which performs identically to @samp{print} except that
+each value is printed in its own window.
+
 @node Remote, Commands, Emacs, Top
 @chapter Remote Kernel Debugging
 
@@ -3415,84 +3599,9 @@ step and continue the remote program.
 To resume the remote program and stop debugging it, use the @samp{detach}
 command.
 
-@ignore
-This material will be merged in when better Readline documentation
-is done.
 
-@node GDB Readline, History Top ,Readline Top, Command Editing
-@subsection GDB Readline
-
-You may control the behavior of command line editing in GDB with the
-following commands:
-
-@table @code
-@kindex set editing
-@item set editing
-@itemx set editing on
-Enable command line editing (enabled by default).
-
-@item set editing off
-Disable command line editing.
-
-@kindex set history file
-@item set history file @var{filename}
-Set the name of the GDB command history file to @var{filename}.  This is
-the file from which GDB will read an initial command history
-list or to which it will write this list when it exits.  This list is
-accessed through history expansion or through the history
-command editing characters listed below.  This file defaults to the
-value of the environmental variable @code{GDBHISTFILE}, or to
-@code{./.gdb_history} if this variable is not set.
-
-@kindex set history write
-@item set history write
-@itemx set history write on
-Enable the writing of the command history to the command history file
-named above.  This is enabled by default.
-
-@item set history write off
-Disable the writing of the command history to the command history file. 
-
-@kindex set history size
-@item set history size @var{size}
-Set the number of commands which GDB will keep in its history list.
-This defaults to the value of the environmental variable
-@code{HISTSIZE}, or to 256 if this variable is not set.
-
-@kindex info editing
-@item info editing
-Display the current settings relating to command line editing, and also
-display the last ten commands in the command history.
-
-@item info editing @var{n}
-Print ten commands centered on command number @var{n}.
-
-@item info editing +
-Print ten commands just after the commands last printed.
-@end table
-
-@node GDB History, , History Top, Command editing    
-@comment  node-name,  next,  previous,  up
-Note that because of the additional meaning of @code{!} to GDB (as the
-logical not operator in C), history expansion is off by default.  If you
-decide to enable history expansion with the @samp{set history expansion
-on} command, you will need to follow @samp{!} with a space or a tab to
-prevent it from being expanded.
-
-The commands to control history expansion are:
-
-@table @code
-
-@kindex set history expansion
-@item set history expansion on
-@itemx set history expansion
-Enable history expansion.
-
-@item set history expansion off
-Disable history expansion.  History expansion is off by default.
-
-@end table
-@end ignore
+HOW DO I GET AN APPENDIX, labelled as such in TEX!!!
+Fox's readline inc docs should go here.
 
 @node Commands, Concepts, Remote, Top
 @unnumbered Command Index
@@ -3506,18 +3615,3 @@ Disable history expansion.  History expansion is off by default.
 
 @contents
 @bye
-
-
-
-
-Occasionally it is useful to execute a shell command from within GDB.
-This can be done with the @samp{shell} command.
-
-@table @code
-@item shell @var{shell command string}
-@kindex shell
-@cindex shell escape
-Directs GDB to invoke an inferior shell to execute @var{shell command string}.
-The environment variable @code{SHELL} is used if it exists, otherwise GDB
-uses @samp{/bin/sh}.
-@end table
