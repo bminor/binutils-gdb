@@ -1,3 +1,8 @@
+Tue Sep 15 15:32:02 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (install): if $(tooldir) exists, install as in
+	$(tooldir)/bin.
+
 Sun Sep 13 20:30:10 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Added WARN_SIGNED_OVERFLOW_WORD define to give an error if any
