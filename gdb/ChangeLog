@@ -3,6 +3,14 @@ Mon Nov  8 10:42:03 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* stabsread.c: Remove long_kludge_name code (it was already #if 0).
 	* stabsread.c (read_one_struct_field): Clean up comments to reflect
 	Kung's change of 5 Nov 93.
+	* stabsread.c (read_one_struct_field): Don't give up on unknown
+	visibility character, just shove it in fip->list->visibility.
+	(read_baseclasses): Don't give up on unknown virtual or visibility
+	characters, just assume a reasonable default, complain, and keep
+	going.
+	(attach_fields_to_type): Complain on unrecognized visibility.
+	One result of all this is that '9' (VISIBILITY_IGNORE) can be used
+	in a stab as well as being something which GDB uses internally.
 
 Mon Nov  8 07:57:30 1993  Doug Evans  (dje@canuck.cygnus.com)
 

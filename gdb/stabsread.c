@@ -54,7 +54,12 @@ struct field_info
   struct nextfield
     {
       struct nextfield *next;
+
+      /* This is the raw visibility from the stab.  It is not checked
+	 for being one of the visibilities we recognize, so code which
+	 examines this field better be able to deal.  */
       int visibility;
+
       struct field field;
     } *list;
   struct next_fnfieldlist
@@ -1705,7 +1710,7 @@ rs6000_builtin_type (typenum)
 #define VISIBILITY_PRIVATE	'0'	/* Stabs character for private field */
 #define VISIBILITY_PROTECTED	'1'	/* Stabs character for protected fld */
 #define VISIBILITY_PUBLIC	'2'	/* Stabs character for public field */
-#define VISIBILITY_IGNORE	'9'	/* artificial character for ignore the						   field */ 
+#define VISIBILITY_IGNORE	'9'	/* Optimized out or zero length */
 
 /* Read member function stabs info for C++ classes.  The form of each member
    function data is:
@@ -2114,36 +2119,19 @@ read_one_struct_field (fip, pp, p, type, objfile)
   fip -> list -> field.name =
     obsavestring (*pp, p - *pp, &objfile -> type_obstack);
   *pp = p + 1;
-  
+
   /* This means we have a visibility for a field coming. */
   if (**pp == '/')
     {
       (*pp)++;
       fip -> list -> visibility = *(*pp)++;
-      switch (fip -> list -> visibility)
-	{
-	  case VISIBILITY_PRIVATE:
-	  case VISIBILITY_PROTECTED:
-	    break;
-	  
-	  case VISIBILITY_PUBLIC:
-	    /* Nothing to do */
-	    break;
-	  
-	  default:
-	    /* Unknown visibility specifier. */
-	    complain (&stabs_general_complaint,
-		      "unknown visibility specifier");
-	    return;
-	    break;
-	}
     }
   else
     {
       /* normal dbx-style format, no explicit visibility */
       fip -> list -> visibility = VISIBILITY_PUBLIC;
     }
-  
+
   fip -> list -> field.type = read_type (pp, objfile);
   if (**pp == ':')
     {
@@ -2219,7 +2207,7 @@ read_one_struct_field (fip, pp, p, type, objfile)
 	 dbx gives a bit size for all fields.
 	 Note that forward refs cannot be packed,
 	 and treat enums as if they had the width of ints.  */
-      
+
       if (TYPE_CODE (fip -> list -> field.type) != TYPE_CODE_INT
 	  && TYPE_CODE (fip -> list -> field.type) != TYPE_CODE_ENUM)
 	{
@@ -2255,6 +2243,7 @@ read_one_struct_field (fip, pp, p, type, objfile)
    	'/0'	(VISIBILITY_PRIVATE)
 	'/1'	(VISIBILITY_PROTECTED)
 	'/2'	(VISIBILITY_PUBLIC)
+	'/9'	(VISIBILITY_IGNORE)
 
    or nothing, for C style fields with public visibility.
 
@@ -2413,7 +2402,7 @@ read_baseclasses (fip, pp, type, objfile)
       new -> field.bitsize = 0;	/* this should be an unpacked field! */
 
       STABS_CONTINUE (pp);
-      switch (*(*pp)++)
+      switch (**pp)
 	{
 	  case '0':
 	    /* Nothing to do. */
@@ -2422,9 +2411,14 @@ read_baseclasses (fip, pp, type, objfile)
 	    SET_TYPE_FIELD_VIRTUAL (type, i);
 	    break;
 	  default:
-	    /* Bad visibility format.  */
-	    return 0;
+	    /* Unknown character.  Complain and treat it as non-virtual.  */
+	    {
+	      static struct complaint msg = {
+		"Unknown virtual character `%c' for baseclass", 0, 0};
+	      complain (&msg, **pp);
+	    }
 	}
+      ++(*pp);
 
       new -> visibility = *(*pp)++;
       switch (new -> visibility)
@@ -2434,8 +2428,14 @@ read_baseclasses (fip, pp, type, objfile)
 	  case VISIBILITY_PUBLIC:
 	    break;
 	  default:
-	    /* Bad visibility format.  */
-	    return 0;
+	    /* Bad visibility format.  Complain and treat it as
+	       public.  */
+	    {
+	      static struct complaint msg = {
+		"Unknown visibility `%c' for baseclass", 0, 0};
+	      complain (&msg, new -> visibility);
+	      new -> visibility = VISIBILITY_PUBLIC;
+	    }
 	}
 
       {
@@ -2657,12 +2657,18 @@ attach_fields_to_type (fip, type, objfile)
 
 	  case VISIBILITY_IGNORE:
 	    SET_TYPE_FIELD_IGNORE (type, nfields);
+	    break;
 
 	  case VISIBILITY_PUBLIC:
 	    break;
 
 	  default:
-	    /* Should warn about this unknown visibility? */
+	    /* Unknown visibility.  Complain and treat it as public.  */
+	    {
+	      static struct complaint msg = {
+		"Unknown visibility `%c' for field", 0, 0};
+	      complain (&msg, fip -> list -> visibility);
+	    }
 	    break;
 	}
       fip -> list = fip -> list -> next;
