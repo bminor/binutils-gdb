@@ -122,6 +122,18 @@ const struct tic80_operand tic80_operands[] =
 #define LICR (SICR + 1)
   { 32, 0, NULL, NULL, TIC80_OPERAND_CR },
 
+  /* Register in bits 26-22, enclosed in parens and with optional
+     ":m" flag in bit 17 */
+
+#define REGM_SI (LICR + 1)
+  { 5, 22, NULL, NULL, TIC80_OPERAND_GPR | TIC80_OPERAND_PARENS | TIC80_OPERAND_M_SI },
+
+  /* Register in bits 26-22, enclosed in parens and with optional
+     ":m" flag in bit 15 */
+
+#define REGM_LI (REGM_SI + 1)
+  { 5, 22, NULL, NULL, TIC80_OPERAND_GPR | TIC80_OPERAND_PARENS | TIC80_OPERAND_M_LI },
+
 };
 
 const int tic80_num_operands = sizeof (tic80_operands)/sizeof(*tic80_operands);
@@ -131,25 +143,48 @@ const int tic80_num_operands = sizeof (tic80_operands)/sizeof(*tic80_operands);
 
 #define FIXME 0
 
-/* Short-Immediate Format Instructions */
+/* Short-Immediate Format Instructions - basic opcode */
 #define OP_SI(x)	(((x) & 0x7F) << 15)
 #define MASK_SI		OP_SI(0x7F)
-#define MASK_SI_M	OP_SI(0x7B)	/* Short-Immediate with embedded M bit */
 
-/* Long-Immediate Format Instructions */
+/* Long-Immediate Format Instructions - basic opcode */
 #define OP_LI(x)	(((x) & 0x3FF) << 12)
 #define MASK_LI		OP_LI(0x3FF)
-#define MASK_LI_M	OP_LI(0x3F7)	/* Long-Immediate with embedded M bit */
 
-/* Register Format Instructions */
+/* Register Format Instructions - basic opcode */
 #define OP_REG(x)	OP_LI(x)	/* For readability */
 #define MASK_REG	MASK_LI		/* For readability */
-#define MASK_REG_M	MASK_LI_M	/* For readability */
 
+/* The 'F' bit at bit 27 */
+#define F(x)		((x) << 27)
+
+/* The 'M' bit at bit 15 in register and long immediate opcodes */
+#define M_REG(x)	((x) << 15)
+#define M_LI(x)		((x) << 15)
+
+/* The 'M' bit at bit 17 in short immediate opcodes */
+#define M_SI(x)		((x) << 17)
+
+/* The 'SZ' field at bits 14-13 in register and long immediate opcodes */
+#define SZ_REG(x)	((x) << 13)
+#define SZ_LI(x)	((x) << 13)
+
+/* The 'SZ' field at bits 16-15 in short immediate opcodes */
+#define SZ_SI(x)	((x) << 15)
+
+/* The 'D' (direct external memory access) bit at bit 10 in long immediate
+   and register opcodes. */
+#define D(x)		((x) << 10)
+
+/* The 'S' (scale offset by data size) bit at bit 11 in long immediate
+   and register opcodes. */
+#define S(x)		((x) << 11)
+
+
 const struct tic80_opcode tic80_opcodes[] = {
 
   /* The "nop" instruction is really "rdcr 0,r0".  We put it first so that this
-     specific bit pattern will get dissembled as a nop rather than an rdcr. The
+     specific bit pattern will get disassembled as a nop rather than an rdcr. The
      mask of all ones ensures that this will happen. */
 
   {"nop",	OP_SI(0x4),	~0,		0,		{0}			},
@@ -247,36 +282,70 @@ const struct tic80_opcode tic80_opcodes[] = {
   {"brcr",	OP_LI(0x30D),	MASK_LI,	FMT_LI,		{LICR}			},
   {"brcr",	OP_REG(0x30C),	MASK_REG,	FMT_REG,	{REG0}			},
 
+  /* Branch and save return - nonannulled */
+
+  {"bsr",	OP_SI(0x40),	MASK_SI,	FMT_SI, 	{SSOFF,REG27}		},
+  {"bsr",	OP_LI(0x381),	MASK_LI,	FMT_LI, 	{LSOFF,REG27}		},
+  {"bsr",	OP_REG(0x380),	MASK_REG,	FMT_REG, 	{REG0,REG27}		},
+
+  /* Branch and save return - annulled */
+
+  {"bsr.a",	OP_SI(0x41),	MASK_SI,	FMT_SI, 	{SSOFF,REG27}		},
+  {"bsr.a",	OP_LI(0x383),	MASK_LI,	FMT_LI, 	{LSOFF,REG27}		},
+  {"bsr.a",	OP_REG(0x382),	MASK_REG,	FMT_REG, 	{REG0,REG27}		},
+
+  /* Send command */
+
+  {"cmnd",	OP_SI(0x2),	MASK_SI,	FMT_SI, 	{SUI}			},
+  {"cmnd",	OP_LI(0x305),	MASK_LI,	FMT_LI, 	{LUI}			},
+  {"cmnd",	OP_REG(0x304),	MASK_REG,	FMT_REG, 	{REG0}			},
+
+  /* Integer compare */
+
+  {"cmp",	OP_SI(0x50),	MASK_SI,	FMT_SI, 	{SSI,REG22,REG27}	},
+  {"cmp",	OP_LI(0x3A1),	MASK_LI,	FMT_LI, 	{LSI,REG22,REG27}	},
+  {"cmp",	OP_REG(0x3A0),	MASK_REG,	FMT_REG, 	{REG0,REG22,REG27}	},
+
+  /* Flush data cache subblock - don't clear subblock preset flag */
+
+  {"dcachec",	OP_SI(0x38),	F(1) | (MASK_SI & ~M_SI(1)),			FMT_SI, {SSI,REGM_SI}	},
+  {"dcachec",	OP_LI(0x371),	F(1) | (MASK_LI & ~M_LI(1)) | S(1) | D(1),	FMT_LI, {LSI,REGM_LI}	},
+  {"dcachec",	OP_REG(0x370),	F(1) | (MASK_REG & ~M_REG(1)) | S(1) | D(1),	FMT_REG, {REG0,REGM_LI}	},
+
+  /* Flush data cache subblock - clear subblock preset flag */
+
+  {"dcachef",	OP_SI(0x38) | F(1),	F(1) | (MASK_SI & ~M_SI(1)),			FMT_SI, {SSI,REGM_SI}	},
+  {"dcachef",	OP_LI(0x371) | F(1),	F(1) | (MASK_LI & ~M_LI(1)) | S(1) | D(1),	FMT_LI, {LSI,REGM_LI}	},
+  {"dcachef",	OP_REG(0x370) | F(1),	F(1) | (MASK_REG & ~M_REG(1)) | S(1) | D(1),	FMT_REG, {REG0,REGM_LI}	},
+
   /* WORK IN PROGRESS BELOW THIS POINT */
 
-  {"cmnd",	OP_LI(0x305),	MASK_LI,	FMT_LI,		FIXME},
-  {"cmnd",	OP_REG(0x304),	MASK_REG,	FMT_REG,	FIXME},
-  {"cmnd",	OP_SI(0x2),	MASK_SI,	FMT_SI,		FIXME},
   {"illop0",	OP_SI(0),	MASK_SI,	FMT_SI,		FIXME},
-  {"ld",	OP_LI(0x345),	MASK_LI_M,	FMT_LI,		FIXME},
-  {"ld",	OP_REG(0x344),	MASK_REG_M,	FMT_REG,	FIXME},
-  {"ld",	OP_SI(0x22),	MASK_SI_M,	FMT_SI,		FIXME},
-  {"ld.b",	OP_LI(0x341),	MASK_LI_M,	FMT_LI,		FIXME},
-  {"ld.b",	OP_REG(0x340),	MASK_REG_M,	FMT_REG,	FIXME},
-  {"ld.b",	OP_SI(0x20),	MASK_SI_M,	FMT_SI,		FIXME},
-  {"ld.d",	OP_LI(0x347),	MASK_LI_M,	FMT_LI,		FIXME},
-  {"ld.d",	OP_REG(0x346),	MASK_REG_M,	FMT_REG,	FIXME},
-  {"ld.d",	OP_SI(0x23),	MASK_SI_M,	FMT_SI,		FIXME},
-  {"ld.h",	OP_LI(0x343),	MASK_LI_M,	FMT_LI,		FIXME},
-  {"ld.h",	OP_REG(0x342),	MASK_REG_M,	FMT_REG,	FIXME},
-  {"ld.h",	OP_SI(0x21),	MASK_SI_M,	FMT_SI,		FIXME},
-  {"ld.u",	OP_LI(0x355),	MASK_LI_M,	FMT_LI,		FIXME},
-  {"ld.u",	OP_REG(0x354),	MASK_REG_M,	FMT_REG,	FIXME},
-  {"ld.u",	OP_SI(0x2A),	MASK_SI_M,	FMT_SI,		FIXME},
-  {"ld.ub",	OP_LI(0x351),	MASK_LI_M,	FMT_LI,		FIXME},
-  {"ld.ub",	OP_REG(0x350),	MASK_REG_M,	FMT_REG,	FIXME},
-  {"ld.ub",	OP_SI(0x28),	MASK_SI_M,	FMT_SI,		FIXME},
-  {"ld.ud",	OP_LI(0x357),	MASK_LI_M,	FMT_LI,		FIXME},
-  {"ld.ud",	OP_REG(0x356),	MASK_REG_M,	FMT_REG,	FIXME},
-  {"ld.ud",	OP_SI(0x2B),	MASK_SI_M,	FMT_SI,		FIXME},
-  {"ld.uh",	OP_LI(0x353),	MASK_LI_M,	FMT_LI,		FIXME},
-  {"ld.uh",	OP_REG(0x352),	MASK_REG_M,	FMT_REG,	FIXME},
-  {"ld.uh",	OP_SI(0x29),	MASK_SI_M,	FMT_SI,		FIXME},
+
+  {"ld",	OP_LI(0x345),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
+  {"ld",	OP_REG(0x344),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
+  {"ld",	OP_SI(0x22),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
+  {"ld.b",	OP_LI(0x341),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
+  {"ld.b",	OP_REG(0x340),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
+  {"ld.b",	OP_SI(0x20),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
+  {"ld.d",	OP_LI(0x347),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
+  {"ld.d",	OP_REG(0x346),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
+  {"ld.d",	OP_SI(0x23),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
+  {"ld.h",	OP_LI(0x343),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
+  {"ld.h",	OP_REG(0x342),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
+  {"ld.h",	OP_SI(0x21),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
+  {"ld.u",	OP_LI(0x355),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
+  {"ld.u",	OP_REG(0x354),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
+  {"ld.u",	OP_SI(0x2A),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
+  {"ld.ub",	OP_LI(0x351),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
+  {"ld.ub",	OP_REG(0x350),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
+  {"ld.ub",	OP_SI(0x28),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
+  {"ld.ud",	OP_LI(0x357),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
+  {"ld.ud",	OP_REG(0x356),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
+  {"ld.ud",	OP_SI(0x2B),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
+  {"ld.uh",	OP_LI(0x353),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
+  {"ld.uh",	OP_REG(0x352),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
+  {"ld.uh",	OP_SI(0x29),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
   {"or.ff",	OP_LI(0x33D),	MASK_LI,	FMT_LI,		FIXME},
   {"or.ff",	OP_REG(0x33C),	MASK_REG,	FMT_REG,	FIXME},
   {"or.ff",	OP_SI(0x1E),	MASK_SI,	FMT_SI,		FIXME},
@@ -308,18 +377,18 @@ const struct tic80_opcode tic80_opcodes[] = {
   {"shift.im",	OP_SI(0xF),	MASK_SI,	FMT_SI,		FIXME},
   {"shift.iz",	OP_REG(0x31C),	MASK_REG,	FMT_REG,	FIXME},
   {"shift.iz",	OP_SI(0xE),	MASK_SI,	FMT_SI,		FIXME},
-  {"st",	OP_LI(0x365),	MASK_LI_M,	FMT_LI,		FIXME},
-  {"st",	OP_REG(0x364),	MASK_REG_M,	FMT_REG,	FIXME},
-  {"st",	OP_SI(0x32),	MASK_SI_M,	FMT_SI,		FIXME},
-  {"st.b",	OP_LI(0x361),	MASK_LI_M,	FMT_LI,		FIXME},
-  {"st.b",	OP_REG(0x360),	MASK_REG_M,	FMT_REG,	FIXME},
-  {"st.b",	OP_SI(0x30),	MASK_SI_M,	FMT_SI,		FIXME},
-  {"st.d",	OP_LI(0x367),	MASK_LI_M,	FMT_LI,		FIXME},
-  {"st.d",	OP_REG(0x366),	MASK_REG_M,	FMT_REG,	FIXME},
-  {"st.d",	OP_SI(0x33),	MASK_SI_M,	FMT_SI,		FIXME},
-  {"st.h",	OP_LI(0x363),	MASK_LI_M,	FMT_LI,		FIXME},
-  {"st.h",	OP_REG(0x362),	MASK_REG_M,	FMT_REG,	FIXME},
-  {"st.h",	OP_SI(0x31),	MASK_SI_M,	FMT_SI,		FIXME},
+  {"st",	OP_LI(0x365),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
+  {"st",	OP_REG(0x364),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
+  {"st",	OP_SI(0x32),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
+  {"st.b",	OP_LI(0x361),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
+  {"st.b",	OP_REG(0x360),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
+  {"st.b",	OP_SI(0x30),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
+  {"st.d",	OP_LI(0x367),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
+  {"st.d",	OP_REG(0x366),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
+  {"st.d",	OP_SI(0x33),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
+  {"st.h",	OP_LI(0x363),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
+  {"st.h",	OP_REG(0x362),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
+  {"st.h",	OP_SI(0x31),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
   {"swcr",	OP_LI(0x30B),	MASK_LI,	FMT_LI,		FIXME},
   {"swcr",	OP_REG(0x30A),	MASK_REG,	FMT_REG,	FIXME},
   {"swcr",	OP_SI(0x5),	MASK_SI,	FMT_SI,		FIXME},

@@ -21,6 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "opcode/tic80.h"
 #include "dis-asm.h"
 
+#define M_SI(insn,op) ((((op) -> flags & TIC80_OPERAND_M_SI) != 0) && ((insn) & (1 << 17)))
+#define M_LI(insn,op) ((((op) -> flags & TIC80_OPERAND_M_LI) != 0) && ((insn) & (1 << 15)))
+
 int 
 print_insn_tic80 (memaddr, info)
      bfd_vma memaddr;
@@ -33,8 +36,7 @@ print_insn_tic80 (memaddr, info)
   const struct tic80_opcode *opcode_end;
   const unsigned char *opindex;
   const struct tic80_operand *operand;
-  int need_comma;
-  int need_paren;
+  int close_paren;
   int length = 4;
 
   status = (*info->read_memory_func) (memaddr, buffer, 4, info);
@@ -82,8 +84,6 @@ print_insn_tic80 (memaddr, info)
       (*info -> fprintf_func) (info -> stream, "%s", opcode -> name);
 
       /* Now extract and print the operands. */
-      need_comma = 0;
-      need_paren = 0;
       if (opcode -> operands[0] != 0)
 	{
 	  (*info -> fprintf_func) (info -> stream, "\t");
@@ -127,16 +127,33 @@ print_insn_tic80 (memaddr, info)
 		value -= 1 << operand -> bits;
 	    }
 
-	  if (need_comma)
+	  /* If this operand is enclosed in parenthesis, then print
+	     the open paren, otherwise just print the regular comma
+	     separator, except for the first operand. */
+
+	  if ((operand -> flags & TIC80_OPERAND_PARENS) == 0)
 	    {
-	      (*info -> fprintf_func) (info -> stream, ",");
-	      need_comma = 0;
+	      close_paren = 0;
+	      if (opindex != opcode -> operands)
+		{
+		  (*info -> fprintf_func) (info -> stream, ",");
+		}
+	    }
+	  else
+	    {
+	      close_paren = 1;
+	      (*info -> fprintf_func) (info -> stream, "(");
 	    }
 
 	  /* Print the operand as directed by the flags.  */
+
 	  if ((operand -> flags & TIC80_OPERAND_GPR) != 0)
 	    {
 	      (*info -> fprintf_func) (info -> stream, "r%ld", value);
+	      if (M_SI (insn[0], operand) || M_LI (insn[0], operand))
+		{
+		  (*info -> fprintf_func) (info -> stream, ":m");
+		}
 	    }
 	  else if ((operand -> flags & TIC80_OPERAND_FPA) != 0)
 	    {
@@ -275,20 +292,12 @@ print_insn_tic80 (memaddr, info)
 		}
 	    }
 
-	  if (need_paren)
+	  /* If we printed an open paren before printing this operand, close
+	     it now. The flag gets reset on each loop. */
+
+	  if (close_paren)
 	    {
 	      (*info -> fprintf_func) (info -> stream, ")");
-	      need_paren = 0;
-	    }
-
-	  if ((operand -> flags & TIC80_OPERAND_PARENS) == 0)
-	    {
-	      need_comma = 1;
-	    }
-	  else
-	    {
-	      (*info -> fprintf_func) (info -> stream, "(");
-	      need_paren = 1;
 	    }
 	}
     }

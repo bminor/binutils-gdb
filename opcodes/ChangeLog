@@ -1,4 +1,16 @@
 start-sanitize-tic80
+Sun Jan  5 12:18:14 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80-dis.c (M_SI, M_LI): Add macros to test for ":m" modifier bit
+ 	in an instruction.
+	* tic80-dis.c (print_insn_tic80): Change comma and paren handling.
+  	Use M_SI and M_LI macros to check for ":m" modifier for GPR operands.
+	* tic80-opc.c (tic80_operands): Add REGM_SI and REGM_LI operands.
+	(F, M_REG, M_LI, M_SI, SZ_REG, SZ_LI, SZ_SI, D, S): New	bit-twiddlers.
+	(MASK_LI_M, MASK_SI_M, MASK_REG_M): Remove and replace in opcode
+	masks with "MASK_* & ~M_*" to get the M bit reset.
+	(tic80_opcodes): Add bsr, bsr.a, cmnd, cmp, dcachec, and dcachef.
+	
 Sat Jan  4 19:05:05 1997  Fred Fish  <fnf@cygnus.com>
 
 	* tic80-dis.c (print_insn_tic80): Print TIC80_OPERAND_RELATIVE
