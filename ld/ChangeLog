@@ -1,3 +1,8 @@
+Thu Aug 13 12:52:45 1998  H.J. Lu  <hjl@gnu.org>
+
+	* Makefile.am (ld.dvi): Use " instead of ' for MAKEINFO.
+	* Makefile.in: Rebuild.
+
 start-sanitize-sky
 Wed Aug 12 16:30:29 1998  Doug Evans  <devans@canuck.cygnus.com>
 
