@@ -23,9 +23,9 @@
 #include "mips-tdep.h"
 
 /* Pseudo registers can not be read.  ptrace does not provide a way to
-   read (or set) PS_REGNUM, and there's no point in reading or setting
-   MIPS_ZERO_REGNUM.  We also can not set BADVADDR, CAUSE, or FCRIR
-   via ptrace().  */
+   read (or set) MIPS_PS_REGNUM, and there's no point in reading or
+   setting MIPS_ZERO_REGNUM.  We also can not set BADVADDR, CAUSE, or
+   FCRIR via ptrace().  */
 
 int
 mips_linux_cannot_fetch_register (int regno)

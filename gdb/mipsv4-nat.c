@@ -63,7 +63,7 @@ supply_gregset (gregset_t *gregsetp)
 		       (char *) (regp + CXT_CAUSE));
 
   /* Fill inaccessible registers with zero.  */
-  regcache_raw_supply (current_regcache, PS_REGNUM, zerobuf);
+  regcache_raw_supply (current_regcache, MIPS_PS_REGNUM, zerobuf);
   regcache_raw_supply (current_regcache,
 		       mips_regnum (current_gdbarch)->badvaddr,
 		       zerobuf);

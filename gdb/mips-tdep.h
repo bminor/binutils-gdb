@@ -77,6 +77,7 @@ enum
   MIPS_T9_REGNUM = 25,		/* Contains address of callee in PIC.  */
   MIPS_SP_REGNUM = 29,
   MIPS_RA_REGNUM = 31,
+  MIPS_PS_REGNUM = 32,		/* Contains processor status.  */
   MIPS_EMBED_LO_REGNUM = 33,
   MIPS_EMBED_HI_REGNUM = 34,
   MIPS_EMBED_BADVADDR_REGNUM = 35,

@@ -124,7 +124,7 @@ supply_gregset (elf_gregset_t *gregsetp)
 		    (char *)(regp + EF_CP0_EPC));
   supply_32bit_reg (mips_regnum (current_gdbarch)->badvaddr,
 		    (char *)(regp + EF_CP0_BADVADDR));
-  supply_32bit_reg (PS_REGNUM, (char *)(regp + EF_CP0_STATUS));
+  supply_32bit_reg (MIPS_PS_REGNUM, (char *)(regp + EF_CP0_STATUS));
   supply_32bit_reg (mips_regnum (current_gdbarch)->cause,
 		    (char *)(regp + EF_CP0_CAUSE));
 
@@ -152,7 +152,7 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
       fill_gregset (gregsetp, mips_regnum (current_gdbarch)->hi);
       fill_gregset (gregsetp, mips_regnum (current_gdbarch)->pc);
       fill_gregset (gregsetp, mips_regnum (current_gdbarch)->badvaddr);
-      fill_gregset (gregsetp, PS_REGNUM);
+      fill_gregset (gregsetp, MIPS_PS_REGNUM);
       fill_gregset (gregsetp, mips_regnum (current_gdbarch)->cause);
 
       return;
@@ -173,7 +173,7 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
     regaddr = EF_CP0_EPC;
   else if (regno == mips_regnum (current_gdbarch)->badvaddr)
     regaddr = EF_CP0_BADVADDR;
-  else if (regno == PS_REGNUM)
+  else if (regno == MIPS_PS_REGNUM)
     regaddr = EF_CP0_STATUS;
   else if (regno == mips_regnum (current_gdbarch)->cause)
     regaddr = EF_CP0_CAUSE;
@@ -402,7 +402,7 @@ mips64_supply_gregset (mips64_elf_gregset_t *gregsetp)
 		       (char *)(regp + MIPS64_EF_CP0_EPC));
   regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->badvaddr,
 		       (char *)(regp + MIPS64_EF_CP0_BADVADDR));
-  regcache_raw_supply (current_regcache, PS_REGNUM,
+  regcache_raw_supply (current_regcache, MIPS_PS_REGNUM,
 		       (char *)(regp + MIPS64_EF_CP0_STATUS));
   regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->cause,
 		       (char *)(regp + MIPS64_EF_CP0_CAUSE));
@@ -431,7 +431,7 @@ mips64_fill_gregset (mips64_elf_gregset_t *gregsetp, int regno)
       mips64_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->hi);
       mips64_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->pc);
       mips64_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->badvaddr);
-      mips64_fill_gregset (gregsetp, PS_REGNUM);
+      mips64_fill_gregset (gregsetp, MIPS_PS_REGNUM);
       mips64_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->cause);
 
       return;
@@ -452,7 +452,7 @@ mips64_fill_gregset (mips64_elf_gregset_t *gregsetp, int regno)
     regaddr = MIPS64_EF_CP0_EPC;
   else if (regno == mips_regnum (current_gdbarch)->badvaddr)
     regaddr = MIPS64_EF_CP0_BADVADDR;
-  else if (regno == PS_REGNUM)
+  else if (regno == MIPS_PS_REGNUM)
     regaddr = MIPS64_EF_CP0_STATUS;
   else if (regno == mips_regnum (current_gdbarch)->cause)
     regaddr = MIPS64_EF_CP0_CAUSE;

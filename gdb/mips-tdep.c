@@ -60,7 +60,7 @@ static const struct objfile_data *mips_pdr_data;
 
 static struct type *mips_register_type (struct gdbarch *gdbarch, int regnum);
 
-/* A useful bit in the CP0 status register (PS_REGNUM).  */
+/* A useful bit in the CP0 status register (MIPS_PS_REGNUM).  */
 /* This bit is set if we are emulating 32-bit FPRs on a 64-bit chip.  */
 #define ST0_FR (1 << 26)
 
@@ -386,7 +386,7 @@ mips2_fp_compat (void)
   /* Otherwise check the FR bit in the status register - it controls
      the FP compatiblity mode.  If it is clear we are in compatibility
      mode.  */
-  if ((read_register (PS_REGNUM) & ST0_FR) == 0)
+  if ((read_register (MIPS_PS_REGNUM) & ST0_FR) == 0)
     return 1;
 #endif
 
@@ -5313,7 +5313,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file, "mips_dump_tdep: PROC_REG_MASK = function?\n");
   fprintf_unfiltered (file, "mips_dump_tdep: PROC_REG_OFFSET = function?\n");
   fprintf_unfiltered (file, "mips_dump_tdep: PROC_SYMBOL = function?\n");
-  fprintf_unfiltered (file, "mips_dump_tdep: PS_REGNUM = %d\n", PS_REGNUM);
 #ifdef SAVED_BYTES
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: SAVED_BYTES = %d\n", SAVED_BYTES);

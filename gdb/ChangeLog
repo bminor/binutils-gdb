@@ -1,5 +1,10 @@
 2004-10-30  Andrew Cagney  <cagney@gnu.org>
 
+	* config/mips/tm-mips.h (PS_REGNUM): Delete.
+	* mips-tdep.h (MIPS_PS_REGNUM): Add.
+	* remote-vxmips.c, mipsv4-nat.c, mips-tdep.c: Update.
+	* mips-linux-nat.c: Update.
+
 	* mips-tdep.h: Add comments on registers.
 	(MIPS_UNUSED_REGNUM): Define.
 	* config/mips/tm-mips.h (ZERO_REGNUM, UNUSED_REGNUM)

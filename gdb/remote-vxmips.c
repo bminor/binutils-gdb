@@ -108,7 +108,7 @@ vx_read_register (int regno)
 
   /* Copy SR, LO, HI, and PC.  */
 
-  memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (PS_REGNUM)],
+  memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (MIPS_PS_REGNUM)],
 	  &mips_greg_packet[MIPS_R_SR],
 	  MIPS_GREG_SIZE);
   memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->lo)],
@@ -173,7 +173,7 @@ vx_write_register (int regno)
   /* Copy SR, LO, HI, and PC.  */
 
   memcpy (&mips_greg_packet[MIPS_R_SR],
-	  &deprecated_registers[DEPRECATED_REGISTER_BYTE (PS_REGNUM)],
+	  &deprecated_registers[DEPRECATED_REGISTER_BYTE (MIPS_PS_REGNUM)],
 	  MIPS_GREG_SIZE);
   memcpy (&mips_greg_packet[MIPS_R_LO],
 	  &deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->lo)],

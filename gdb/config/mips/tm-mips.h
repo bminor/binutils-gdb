@@ -44,7 +44,6 @@ extern int mips_step_skips_delay (CORE_ADDR);
 #define STEP_SKIPS_DELAY(pc) (mips_step_skips_delay (pc))
 
 #define RA_REGNUM 31		/* Contains return address value */
-#define PS_REGNUM 32		/* Contains processor status */
 #define	FIRST_EMBED_REGNUM 74	/* First CP0 register for embedded use */
 #define	PRID_REGNUM 89		/* Processor ID */
 #define	LAST_EMBED_REGNUM 89	/* Last one */
