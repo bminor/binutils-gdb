@@ -64,7 +64,6 @@ tm-mipsv4.h
 xm-irix3.h
 xm-irix4.h
 xm-irix5.h
-xm-makeva.h
 xm-mips.h
 xm-mipsm3.h
 xm-mipsv4.h
