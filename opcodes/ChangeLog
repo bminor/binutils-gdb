@@ -1,3 +1,7 @@
+2004-12-23  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* crx-opc.c: Mark 'bcop' instruction as RELAXABLE.
+
 2004-12-14  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* avr-dis.c: Prettyprint. Added printing of symbol names in all

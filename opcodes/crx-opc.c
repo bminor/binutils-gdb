@@ -542,10 +542,10 @@ const inst crx_instruction[] =
 
   /* CO-processor extensions.  */
   /* opc12 c4 opc4 ui4 disps9 */
-  {"bcop",    2, 0x30107, 12, COP_BRANCH_INS | FMT_4, 
+  {"bcop",    2, 0x30107, 12, COP_BRANCH_INS | FMT_4 | RELAXABLE, 
       {{ui4,8}, {ui4,16}, {disps9,0}}},
   /* opc12 c4 opc4 ui4 disps25 */
-  {"bcop",    3, 0x31107, 12, COP_BRANCH_INS | FMT_4, 
+  {"bcop",    3, 0x31107, 12, COP_BRANCH_INS | FMT_4 | RELAXABLE, 
       {{ui4,8}, {ui4,16}, {disps25,0}}},
   /* opc12 c4 opc4 cpdo r r */
   {"cpdop",   2, 0x3010B, 12, COP_REG_INS | FMT_4, 
