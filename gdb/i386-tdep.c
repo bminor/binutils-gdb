@@ -481,19 +481,26 @@ i386_frameless_function_invocation (struct frame_info *frame)
   return frameless_look_for_prologue (frame);
 }
 
+/* Assuming FRAME is for a sigtramp routine, return the saved program
+   counter.  */
+
+static CORE_ADDR
+i386_sigtramp_saved_pc (struct frame_info *frame)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  CORE_ADDR addr;
+
+  addr = tdep->sigcontext_addr (frame);
+  return read_memory_unsigned_integer (addr + tdep->sc_pc_offset, 4);
+}
+
 /* Return the saved program counter for FRAME.  */
 
 static CORE_ADDR
 i386_frame_saved_pc (struct frame_info *frame)
 {
   if (frame->signal_handler_caller)
-    {
-      CORE_ADDR (*sigtramp_saved_pc) (struct frame_info *);
-      sigtramp_saved_pc = gdbarch_tdep (current_gdbarch)->sigtramp_saved_pc;
-
-      gdb_assert (sigtramp_saved_pc != NULL);
-      return sigtramp_saved_pc (frame);
-    }
+    return i386_sigtramp_saved_pc (frame);
 
   return read_memory_unsigned_integer (frame->frame + 4, 4);
 }
@@ -1244,29 +1251,31 @@ i386_svr4_pc_in_sigtramp (CORE_ADDR pc, char *name)
 		   || strcmp ("sigvechandler", name) == 0));
 }
 
-/* Get saved user PC for sigtramp from the pushed ucontext on the
-   stack for all three variants of SVR4 sigtramps.  */
+/* Get address of the pushed ucontext (sigcontext) on the stack for
+   all three variants of SVR4 sigtramps.  */
 
 static CORE_ADDR
-i386_svr4_sigtramp_saved_pc (struct frame_info *frame)
+i386_svr4_sigcontext_addr (struct frame_info *frame)
 {
-  CORE_ADDR saved_pc_offset = 4;
+  int sigcontext_offset = -1;
   char *name = NULL;
 
   find_pc_partial_function (frame->pc, &name, NULL, NULL);
   if (name)
     {
       if (strcmp (name, "_sigreturn") == 0)
-	saved_pc_offset = 132 + 14 * 4;
+	sigcontext_offset = 132;
       else if (strcmp (name, "_sigacthandler") == 0)
-	saved_pc_offset = 80 + 14 * 4;
+	sigcontext_offset = 80;
       else if (strcmp (name, "sigvechandler") == 0)
-	saved_pc_offset = 120 + 14 * 4;
+	sigcontext_offset = 120;
     }
 
+  gdb_assert (sigcontext_offset != -1);
+
   if (frame->next)
-    return read_memory_integer (frame->next->frame + saved_pc_offset, 4);
-  return read_memory_integer (read_register (SP_REGNUM) + saved_pc_offset, 4);
+    return frame->next->frame + sigcontext_offset;
+  return read_register (SP_REGNUM) + sigcontext_offset;
 }
 
 
@@ -1303,7 +1312,9 @@ i386_svr4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
 
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_svr4_pc_in_sigtramp);
-  tdep->sigtramp_saved_pc = i386_svr4_sigtramp_saved_pc;
+  tdep->sigcontext_addr = i386_svr4_sigcontext_addr;
+  tdep->sc_pc_offset = 14 * 4;
+  tdep->sc_sp_offset = 7 * 4;
 
   tdep->jb_pc_offset = 20;
 }
@@ -1369,17 +1380,18 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   tdep->jb_pc_offset = -1;
   tdep->struct_return = pcc_struct_return;
-  tdep->sigtramp_saved_pc = NULL;
   tdep->sigtramp_start = 0;
   tdep->sigtramp_end = 0;
+  tdep->sigcontext_addr = NULL;
   tdep->sc_pc_offset = -1;
+  tdep->sc_sp_offset = -1;
 
   /* The format used for `long double' on almost all i386 targets is
      the i387 extended floating-point format.  In fact, of all targets
      in the GCC 2.95 tree, only OSF/1 does it different, and insists
      on having a `long double' that's not `long' at all.  */
   set_gdbarch_long_double_format (gdbarch, &floatformat_i387_ext);
-  
+
   /* Although the i386 extended floating-point has only 80 significant
      bits, a `long double' actually takes up 96, probably to enforce
      alignment.  */
@@ -1388,7 +1400,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* NOTE: tm-i386aix.h, tm-i386bsd.h, tm-i386os9k.h, tm-ptx.h,
      tm-symmetry.h currently override this.  Sigh.  */
   set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS);
-  
+
   set_gdbarch_sp_regnum (gdbarch, 4);
   set_gdbarch_fp_regnum (gdbarch, 5);
   set_gdbarch_pc_regnum (gdbarch, 8);

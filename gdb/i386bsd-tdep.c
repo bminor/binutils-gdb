@@ -39,9 +39,12 @@ i386bsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
 }
 
 /* Assuming FRAME is for a BSD sigtramp routine, return the address of
-   the associated sigcontext structure.  */
+   the associated sigcontext structure.
 
-static CORE_ADDR
+   Note: This function is used for Solaris 2 too, so don't make it
+   static.  */
+
+CORE_ADDR
 i386bsd_sigcontext_addr (struct frame_info *frame)
 {
   if (frame->next)
@@ -53,22 +56,6 @@ i386bsd_sigcontext_addr (struct frame_info *frame)
   /* This is the top frame.  We'll have to find the address of the
      sigcontext structure by looking at the stack pointer.  */
   return read_memory_unsigned_integer (read_register (SP_REGNUM) + 8, 4);
-}
-
-/* Assuming FRAME is for a BSD sigtramp routine, return the saved
-   program counter.
-
-   Note: This function is used for Solaris 2 too, so don't make it
-   static.  */
-
-CORE_ADDR
-i386bsd_sigtramp_saved_pc (struct frame_info *frame)
-{
-  int sc_pc_offset = gdbarch_tdep (current_gdbarch)->sc_pc_offset;
-  CORE_ADDR addr;
-
-  addr = i386bsd_sigcontext_addr (frame);
-  return read_memory_unsigned_integer (addr + sc_pc_offset, 4);
 }
 
 /* Return the start address of the sigtramp routine.  */
@@ -116,9 +103,9 @@ i386bsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->jb_pc_offset = 0;
 
-  tdep->sigtramp_saved_pc = i386bsd_sigtramp_saved_pc;
   tdep->sigtramp_start = 0xfdbfdfc0;
   tdep->sigtramp_end = 0xfdbfe000;
+  tdep->sigcontext_addr = i386bsd_sigcontext_addr;
   tdep->sc_pc_offset = i386bsd_sc_pc_offset;
 }
 

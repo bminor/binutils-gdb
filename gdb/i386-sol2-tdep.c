@@ -44,7 +44,7 @@ i386_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Signal trampolines are different from SVR4, in fact they're
      rather similar to BSD.  */
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_sol2_pc_in_sigtramp);
-  tdep->sigtramp_saved_pc = i386bsd_sigtramp_saved_pc;
+  tdep->sigcontext_addr = i386bsd_sigcontext_addr;
   tdep->sc_pc_offset = 36 + 14 * 4;
 
   /* Assume that the prototype flag can be trusted.  */

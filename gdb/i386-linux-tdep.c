@@ -566,7 +566,6 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_frame_chain (gdbarch, i386_linux_frame_chain);
   set_gdbarch_frame_saved_pc (gdbarch, i386_linux_frame_saved_pc);
   set_gdbarch_saved_pc_after_call (gdbarch, i386_linux_saved_pc_after_call);
-  tdep->sigtramp_saved_pc = i386_linux_sigtramp_saved_pc;
 
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
 				       i386_linux_svr4_fetch_link_map_offsets);

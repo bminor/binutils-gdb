@@ -1,5 +1,29 @@
 2002-07-01  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.h (struct gdbarch_tdep): Replace sigtramp_saved_pc
+	with sigcontext_addr.  Add sc_sp_offset.
+	(i386bsd_sigtramp_saved_pc): Remove prototype.
+	(i386bsd_sicontext_addr): Add prototype.
+	* i386-tdep.c (i386_sigtramp_saved_pc): New function.
+	(i386_frame_saved_pc): Rewrite to call i386_sigtramp_saved_pc.
+	(i386_svr4_sigtramp_saved_pc): Removed.
+	(i386_svr4_sigcontext_addr): New function.
+	(i386_svr4_init_abi): Don't initialize tdep->sigtramp_saved_pc.
+	Initialize tdep->sigcontext_addr instead.  Initialize
+	tdep->sc_pc_offset and tdep->sc_sp_offset.
+	(i386_gdbarch_init): Likewise.
+	* i386bsd-tdep.c (i386bsd_sigcontext_addr): Don't make it static
+	any more.
+	(i386bsd_sigtramp_saved_pc): Remove function.
+	(i386bsd_init_abi): Don't initialize tdep->sigtramp_saved_pc.
+	Initialize tdep->sigcontext_addr instead.  Initialize
+	tdep->sc_pc_offset.
+	* i386-linux-tdep.c (i386_linux_init_abi): Remove initialization
+	of tdep->sigtramp_saved_pc.
+	* i386-sol2-tdep.c (i386_sol2_init_abi): Don't initialize
+	tdep->sigtramp_saved_pc.  Initialize tdep->sigcontext_addr
+	instead.
+
 	* i386-tdep.c (i386_frameless_function_invocation,
 	i386_frame_num_args, i386_frame_init_saved_regs,
 	i386_skip_prologue, i386_push_dummy_frame, i386_fix_call_dummy,

@@ -65,15 +65,16 @@ struct gdbarch_tdep
   /* Convention for returning structures.  */
   enum struct_return struct_return;
 
-  /* Get saved PC for sigtramp.  */
-  CORE_ADDR (*sigtramp_saved_pc) (struct frame_info *);
-
   /* Address range where sigtramp lives.  */
   CORE_ADDR sigtramp_start;
   CORE_ADDR sigtramp_end;
 
-  /* Offset of saved PC in `struct sigcontext'.  */
+  /* Get address of sigcontext for sigtramp.  */
+  CORE_ADDR (*sigcontext_addr) (struct frame_info *);
+
+  /* Offset of saved PC and SP in `struct sigcontext'.  */
   int sc_pc_offset;
+  int sc_sp_offset;
 };
 
 /* Floating-point registers.  */
@@ -175,6 +176,6 @@ extern void i386_svr4_init_abi (struct gdbarch_info, struct gdbarch *);
 
 /* Functions exported from i386bsd-tdep.c.  */
 
-extern CORE_ADDR i386bsd_sigtramp_saved_pc (struct frame_info *frame);
+extern CORE_ADDR i386bsd_sigcontext_addr (struct frame_info *frame);
 
 #endif /* i386-tdep.h */
