@@ -1,3 +1,8 @@
+Fri Sep 19 10:36:30 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* igen.c (print_function_name): Put the format name after the
+ 	function / instruction name, not before.
+
 Tue Sep 16 11:01:07 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gen.c (insns_bit_useless): Don't treat string fields restricted

@@ -268,6 +268,9 @@ print_function_name (lf *file,
       nr += lf_printf (file, "_");
     }
 
+  /* the function name */
+  nr += print_c_name (file, basename);
+  
   /* the format name if available */
   if (format_name != NULL)
     {
@@ -275,9 +278,6 @@ print_function_name (lf *file,
       nr += lf_printf (file, "_");
     }
 
-  /* the function name */
-  nr += print_c_name (file, basename);
-  
   /* the suffix */
   nr += print_opcode_bits (file, expanded_bits);
 
