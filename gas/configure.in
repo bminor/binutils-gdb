@@ -133,6 +133,9 @@ changequote([,])dnl
 # start-sanitize-d10v
       d10v-*-*)		    fmt=elf bfd_gas=yes ;;
 # end-sanitize-d10v
+# start-sanitize-d30v
+      d30v-*-*)		    fmt=elf bfd_gas=yes ;;
+# end-sanitize-d30v
 
       hppa-*-*elf*)         fmt=elf em=hppa ;;
       hppa-*-lites*)        fmt=elf em=hppa ;;
@@ -145,6 +148,7 @@ changequote([,])dnl
 
       i386-ibm-aix*)        fmt=coff targ=i386coff
 			     em=i386aix ;;
+      i386-sequent-bsd*)    fmt=aout em=dynix bfd_gas=yes ;;
       i386-*-bsd*)          fmt=aout em=386bsd ;;
       i386-*-netbsd0.8)     fmt=aout em=386bsd ;;
       i386-*-netbsd*)       fmt=aout em=nbsd bfd_gas=yes;;
@@ -290,7 +294,7 @@ changequote([,])dnl
       sparc-*-netbsd*)      fmt=aout em=nbsd bfd_gas=yes ;;
 
 # start-sanitize-tic80
-      tic80-*-coff)	    fmt=coff targ=tic80coff;;
+      tic80-*-*)	    fmt=coff targ=tic80coff;;
 # end-sanitize-tic80
       v850-*-*)		    fmt=elf bfd_gas=yes ;;
 
