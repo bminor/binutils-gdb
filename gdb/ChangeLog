@@ -1,3 +1,8 @@
+2003-04-18  Jim Blandy  <jimb@redhat.com>
+
+	* s390-tdep.c (s390_frame_align): New function.
+        (s390_gdbarch_init): Register it with the gdbarch object.
+
 2003-04-17  Richard Henderson  <rth@redhat.com>
 
 	* remote.c (minitelnet): Don't redeclare escape_count, echo_check.

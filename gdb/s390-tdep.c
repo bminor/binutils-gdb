@@ -1664,6 +1664,15 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 }
 
 
+static CORE_ADDR
+s390_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  /* Both the 32- and 64-bit ABI's say that the stack pointer should
+     always be aligned on an eight-byte boundary.  */
+  return (addr & -8);
+}
+
+
 static int
 s390_use_struct_convention (int gcc_p, struct type *value_type)
 {
@@ -1862,6 +1871,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Parameters for inferior function calls.  */
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
+  set_gdbarch_frame_align (gdbarch, s390_frame_align);
   set_gdbarch_deprecated_push_arguments (gdbarch, s390_push_arguments);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_deprecated_push_return_address (gdbarch,
