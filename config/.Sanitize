@@ -86,7 +86,7 @@ mt-v810
 mt-x86pic
 
 Things-to-lose:
-
+acinclude.m4
 
 
 # The lines between the "Do-last:" line and the end of the file
