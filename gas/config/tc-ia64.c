@@ -3068,7 +3068,7 @@ dot_vframesp (dummy)
       add_unwind_entry (output_psp_sprel (e.X_add_number));
     }
   else
-    as_bad ("First operand to .vframesp must be a general register");
+    as_bad ("Operand to .vframesp must be a constant (sp-relative offset)");
 }
 
 static void
@@ -3084,7 +3084,7 @@ dot_vframepsp (dummy)
       add_unwind_entry (output_psp_sprel (e.X_add_number));
     }
   else
-    as_bad ("First operand to .vframepsp must be a general register");
+    as_bad ("Operand to .vframepsp must be a constant (psp-relative offset)");
 }
 
 static void
