@@ -138,11 +138,15 @@ register int	subseg;
 		    seg_fix_rootP = & data_fix_root;
 		    seg_fix_tailP = & data_fix_tail;
 	    }
-	else
+	else if (seg == SEG_TEXT)
 	    {
-		    know (seg == SEG_TEXT);
 		    seg_fix_rootP = & text_fix_root;
 		    seg_fix_tailP = & text_fix_tail;
+	    }
+	else {
+		    know (seg == SEG_BSS);
+		    seg_fix_rootP = & bss_fix_root;
+		    seg_fix_tailP = & bss_fix_tail;
 	    }
 #endif
 }
@@ -170,7 +174,7 @@ register subsegT	subseg;
 {
 	long tmp;		/* JF for obstack alignment hacking */
 #ifndef MANY_SEGMENTS
-	know(seg == SEG_DATA || seg == SEG_TEXT);
+	know(seg == SEG_DATA || seg == SEG_TEXT || seg == SEG_BSS);
 #endif
 #ifdef OBJ_AOUT
 /* If -R specifed, always put stuff into the data section */
@@ -183,7 +187,6 @@ register subsegT	subseg;
 	  }
 	}
 #endif
-
 	if (seg != now_seg || subseg != now_subseg)
 	    {				/* we just changed sub-segments */
 		    register	frchainS *	frcP;	/* crawl frchain chain */
