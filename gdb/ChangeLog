@@ -3,10 +3,10 @@ Fri Dec 27 14:53:40 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	* v850-tdep.c (struct pifsr): Add cur_frameoffset field.
 	(v850_scan_prologue): Add debug code #ifdef'ed DEBUG.  Support new
 	compiler prologues using register save functions and short store
-	instructions.
+	instructions.  Add support for functions with large stack frames.
 
-	* config/v850/tm-vm850.h ({R1,EP}_REGNUMS): New register number
-	defintiions for r1, ep.
+	* config/v850/tm-vm850.h ({R0,R1,R12,EP}_REGNUMS): New register
+	number defintiions for r0, r1, r12, ep.
 	(SAVE{1,2,3}_{START,END}_REGNUM): Register number definitions for
 	the 3 sets of saved registers.
 

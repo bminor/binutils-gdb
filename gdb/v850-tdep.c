@@ -71,6 +71,7 @@ v850_scan_prologue (pc, pi)
   CORE_ADDR save_pc, save_end;
   int regsave_func_p;
   int current_sp_size;
+  int r12_tmp;
 
   /* First, figure out the bounds of the prologue so that we can limit the
      search to something reasonable.  */
@@ -115,6 +116,7 @@ v850_scan_prologue (pc, pi)
   regsave_func_p = 0;
   save_pc = 0;
   save_end = 0;
+  r12_tmp = 0;
 
 #ifdef DEBUG
   printf_filtered ("Current_pc = 0x%.8lx, prologue_end = 0x%.8lx\n",
@@ -184,13 +186,19 @@ v850_scan_prologue (pc, pi)
 	  pi->framereg = FP_REGNUM;
 	}
 
+      else if (insn == ((R12_REGNUM << 11) | 0x0640 | R0_REGNUM))	/* movhi hi(const),r0,r12 */
+	r12_tmp = read_memory_integer (current_pc + 2, 2) << 16;
+      else if (insn == ((R12_REGNUM << 11) | 0x0620 | R12_REGNUM))	/* movea lo(const),r12,r12 */
+	r12_tmp += read_memory_integer (current_pc + 2, 2);
+      else if (insn == ((SP_REGNUM << 11) | 0x01c0 | R12_REGNUM) && r12_tmp) /* add r12,sp */
+	pi->frameoffset = r12_tmp;
       else if (insn == ((EP_REGNUM << 11) | 0x0000 | SP_REGNUM))	/* mov sp,ep */
 	ep_used = 1;
       else if (insn == ((EP_REGNUM << 11) | 0x0000 | R1_REGNUM))	/* mov r1,ep */
 	ep_used = 0;
-      else if (((insn & 0x07ff) == (0x0760 | SP_REGNUM)		 /* st.w <reg>,<offset>[sp] */
+      else if (((insn & 0x07ff) == (0x0760 | SP_REGNUM)			/* st.w <reg>,<offset>[sp] */
 		|| (fp_used
-		    && (insn & 0x07ff) == (0x0760 | FP_REGNUM))) /* st.w <reg>,<offset>[fp] */
+		    && (insn & 0x07ff) == (0x0760 | FP_REGNUM)))	/* st.w <reg>,<offset>[fp] */
 	       && pifsr
 	       && (((reg = (insn >> 11) & 0x1f) >= SAVE1_START_REGNUM && reg <= SAVE1_END_REGNUM)
 		   || (reg >= SAVE2_START_REGNUM && reg <= SAVE2_END_REGNUM)

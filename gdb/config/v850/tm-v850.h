@@ -39,6 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define REGISTER_SIZE 4
 #define MAX_REGISTER_RAW_SIZE 4
 
+#define R0_REGNUM 0
 #define R1_REGNUM 1
 #define SAVE1_START_REGNUM 2
 #define SAVE1_END_REGNUM 2
@@ -47,6 +48,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARGLAST_REGNUM 9
 #define V0_REGNUM 10
 #define V1_REGNUM 11
+#define R12_REGNUM 12
 #define SAVE2_START_REGNUM 20
 #define SAVE2_END_REGNUM 29
 #define FP_REGNUM 29
