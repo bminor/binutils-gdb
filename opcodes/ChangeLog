@@ -1,3 +1,23 @@
+start-sanitize-sky
+Wed Mar 25 13:32:36 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp-dis.c (print_insn): Print unpack address in hex.
+	* dvp-opc.c (parse_vif_mpgloc): Renamed from parse_vif_mpgloc_star.
+	Don't skip over '*', just record it.
+	(insert_vif_mpgloc): Don't update state_vif_mpgloc if '*' value.
+	(parse_vif_unpackloc): Renamed from parse_vif_unpackloc_star.
+	Don't skip over '*', just record it.
+	(insert_vif_unpackloc): Don't update state_vif_unpackloc if '*' value.
+	(vif_operands): Delete VIF_MPGLOC_STAR,VIF_UNPACKLOC_STAR entries.
+	(vif_opcodes): Likewise.
+	(state_vif_{mpg,unpack}loc_star_p): New static locals.
+	(vif_macros,vif_macro_count): New globals.
+	(vif_unpack_len_value): New arguments wl,cl.  All callers updated.
+	(vif_set_{mpg,unpack}loc): Delete.  All callers updated.
+	(vif_get_wl_cl): New function.
+	(dvp_opcode_init_parse): Init mpgloc,unpackloc state.
+
+end-sanitize-sky
 Wed Mar 25 14:32:48 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* m68k-dis.c (print_insn_m68k): Use info->mach to select the
