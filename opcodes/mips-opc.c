@@ -114,7 +114,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
    them first.  The assemblers uses a hash table based on the
    instruction name anyhow.  */
 /* name,    args,	match,	    mask,	pinfo,          	membership */
-{"pref",    "k,o(b)",   0xcc000000, 0xfc000000, RD_b,           	I32|G3	},
+{"pref",    "k,o(b)",   0xcc000000, 0xfc000000, RD_b,           	I4|I32|G3	},
 {"prefx",   "h,t(b)",	0x4c00000f, 0xfc0007ff, RD_b|RD_t,		I4	},
 {"nop",     "",         0x00000000, 0xffffffff, 0,              	I1      },
 {"ssnop",   "",         0x00000040, 0xffffffff, 0,              	I32	},
@@ -583,6 +583,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"ffc",     "d,v",	0x0000000b, 0xfc1f07ff,	WR_d|RD_s,		L1	},
 {"movn.d",  "D,S,t",    0x46200013, 0xffe0003f, WR_D|RD_S|RD_t|FP_D,    I4|I32	},
 {"movn.s",  "D,S,t",    0x46000013, 0xffe0003f, WR_D|RD_S|RD_t|FP_S,    I4|I32	},
+{"movn.ps", "D,S,t",    0x46c00013, 0xffe0003f, WR_D|RD_S|RD_t|FP_D,    I5	},
 {"movt",    "d,s,N",    0x00010001, 0xfc0307ff, WR_d|RD_s|RD_CC,        I4|I32	},
 {"movt.d",  "D,S,N",    0x46210011, 0xffe3003f, WR_D|RD_S|RD_CC|FP_D,   I4|I32	},
 {"movt.s",  "D,S,N",    0x46010011, 0xffe3003f, WR_D|RD_S|RD_CC|FP_S,   I4|I32	},
@@ -591,6 +592,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"ffs",     "d,v",	0x0000000a, 0xfc1f07ff,	WR_d|RD_s,		L1	},
 {"movz.d",  "D,S,t",    0x46200012, 0xffe0003f, WR_D|RD_S|RD_t|FP_D,    I4|I32	},
 {"movz.s",  "D,S,t",    0x46000012, 0xffe0003f, WR_D|RD_S|RD_t|FP_S,    I4|I32	},
+{"movz.ps", "D,S,t",    0x46c00012, 0xffe0003f, WR_D|RD_S|RD_t|FP_D,    I5	},
 /* move is at the top of the table.  */
 {"msub.d",  "D,R,S,T",	0x4c000029, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_D, I4	},
 {"msub.s",  "D,R,S,T",	0x4c000028, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_S, I4	},

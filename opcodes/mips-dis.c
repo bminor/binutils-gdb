@@ -397,10 +397,14 @@ static int
 is_newabi (header)
      Elf_Internal_Ehdr *header;
 {
-  if ((header->e_flags
-       & (E_MIPS_ABI_EABI32 | E_MIPS_ABI_EABI64 | EF_MIPS_ABI2)) != 0
-      || (header->e_ident[EI_CLASS] == ELFCLASS64
-	  && (header->e_flags & E_MIPS_ABI_O64) == 0))
+  /* There are no old-style ABIs which use 64-bit ELF.  */
+  if (header->e_ident[EI_CLASS] == ELFCLASS64)
+    return 1;
+
+  /* If a 32-bit ELF file, N32, EABI32, and EABI64 are new-style ABIs.  */
+  if ((header->e_flags & EF_MIPS_ABI2) != 0
+      || (header->e_flags & EF_MIPS_ABI) == E_MIPS_ABI_EABI32
+      || (header->e_flags & EF_MIPS_ABI) == E_MIPS_ABI_EABI64)
     return 1;
 
   return 0;
