@@ -1,3 +1,8 @@
+2000-04-25  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-i386.c (offset_in_range): Ensure shift counts are less
+	than 32.
+
 2000-04-24  Nick Clifton  <nickc@cygnus.com>
 
 	* doc/c-arm.texi (ARM Directives): Document behaviour of .align 0.
