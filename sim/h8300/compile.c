@@ -3153,10 +3153,10 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  if (fetch2 (sd, &code->dst, &rd))
 	    goto end;
 
-	  if (code->src.type == X (OP_IMM, SB))
+	  if (memcmp (&code->src, &code->dst, sizeof (code->src)) == 0)
+	    ea = 1;		/* unary  op */
+	  else			/* binary op */
 	    fetch (sd, &code->src, &ea);
-	  else
-	    ea = 1;
 
 	  if (code->opcode == O (O_SHLL, SB))
 	    {
@@ -3177,10 +3177,10 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  if (fetch2 (sd, &code->dst, &rd))
 	    goto end;
 
-	  if (code->src.type == X (OP_IMM, SW))
-	    fetch (sd, &code->src, &ea);
+	  if (memcmp (&code->src, &code->dst, sizeof (code->src)) == 0)
+	    ea = 1;		/* unary  op */
 	  else
-	    ea = 1;
+	    fetch (sd, &code->src, &ea);
 
 	  if (code->opcode == O (O_SHLL, SW))
 	    {
@@ -3201,10 +3201,10 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  if (fetch2 (sd, &code->dst, &rd))
 	    goto end;
 
-	  if (code->src.type == X (OP_IMM, SL))
-	    fetch (sd, &code->src, &ea);
+	  if (memcmp (&code->src, &code->dst, sizeof (code->src)) == 0)
+	    ea = 1;		/* unary  op */
 	  else
-	    ea = 1;
+	    fetch (sd, &code->src, &ea);
 
 	  if (code->opcode == O (O_SHLL, SL))
 	    {
