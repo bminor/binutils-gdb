@@ -583,7 +583,8 @@ DEFUN_VOID (cg_print_index)
     {
       name_sorted_syms[todo++] = &cycle_header[index];
     }
-  printf (_("\f\nIndex by function name\n\n"));
+  printf ("\f\n");
+  printf (_("Index by function name\n\n"));
   index = (todo + 2) / 3;
   for (i = 0; i < index; i++)
     {
