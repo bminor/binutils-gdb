@@ -1,3 +1,21 @@
+2001-05-17  H.J. Lu  <hjl@gnu.org>
+
+	* ld-elfvers/vers.exp: Pass "-rpath .:$tmpdir" to "vers19".
+
+	* ld-elfvers/vers1.ver: Remove "tmpdir/" from the version
+	definition.
+	* ld-elfvers/vers2.ver: Likewise.
+	* ld-elfvers/vers3.ver: Likewise.
+	* ld-elfvers/vers4a.ver: Likewise.
+	* ld-elfvers/vers6.ver: Likewise.
+	* ld-elfvers/vers7a.ver: Likewise.
+	* ld-elfvers/vers8.ver: Likewise.
+	* ld-elfvers/vers9.ver: Likewise.
+	* ld-elfvers/vers15.ver: Likewise.
+	* ld-elfvers/vers16a.ver: Likewise.
+	* ld-elfvers/vers17.ver: Likewise.
+	* ld-elfvers/vers18.ver: Likewise.
+
 2001-05-03  H.J. Lu  <hjl@gnu.org>
 
 	* ld-elfvers/vers19.ver: Expect vers17.so instead of
