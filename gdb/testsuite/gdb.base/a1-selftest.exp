@@ -80,6 +80,15 @@ proc test_with_self {} {
 	}
     }
 
+    # We'll need this when we send a ^C to GDB.  Need to do it before we
+    # run the program and gdb starts saving and restoring tty states.
+    # On Ultrix, we don't need it and it is really slow (because shell_escape
+    # doesn't use vfork).
+    if ![istarget "*-*-ultrix*"] then {
+	gdb_test "shell stty intr '^C'" "" \
+	    "set interrupt character in test_with_self"
+    }
+
     # run yourself
     set description "run until breakpoint at main"
     send "run\n"
@@ -383,14 +392,6 @@ proc test_with_self {} {
 		fail "$description (timeout)"
 	    }
 	}
-    }
-
-    # We'll need this when we send a ^C to GDB.
-    # On Ultrix, we don't need it and it is really slow (because shell_escape
-    # doesn't use vfork).
-    if ![istarget "*-*-ultrix*"] then {
-	gdb_test "shell stty intr '^C'" "" \
-	    "set interrupt character in test_with_self"
     }
 
     # start the "xgdb" process
