@@ -1,3 +1,8 @@
+2004-08-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.tgt (x86_64-*-openbsd*): Set gdb_osabi to
+	GDB_OSABI_OPENBSD_ELF.
+
 2004-08-07  Robert Millan  <robertmh@gnu.org>
 
 	* bsd-kvm.c: Check for nlist.h before including it.
