@@ -460,7 +460,7 @@ represents the procedure itself.  The @code{N_LBRAC} uses the
 @menu
 * Basic types:: Basic type definitions
 * Range types:: Range types defined by min and max value 
-* Bit-ranges:: Range type defined by number of bits
+* Float "range" types:: Range type defined by size in bytes
 @end menu
 
 @node Basic types
@@ -529,17 +529,20 @@ range of type @code{int}, with a minimum value of 0 and a maximum of 65535.
 13 .stabs "short unsigned int:t8=r1;0;65535;",128,0,0,0
 @end example
 
-@node Bit-ranges
-@section Range type defined by number of bits
+@node Float "range" types
+@section Range type defined by size in bytes
 
 @table @strong
 @item Type Descriptor:
 @code{r}
 @end table
 
-In a range definition, if the number after the second semicolon is 0,
-then the number after the first semicolon is the number of bits needed
-to represent the type.
+In a range definition, if the first number after the semicolon is
+positive and the second is zero, then the type being defined is a
+floating point type, and the number after the first semicolon is the
+number of bytes needed to represent the type.  Note that this does not
+provide a way to distinguish 8-byte real floating point types from
+8-byte complex floating point types.
 
 @example
 .stabs "@var{name}:
