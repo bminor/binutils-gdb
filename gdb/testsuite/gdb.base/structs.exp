@@ -130,17 +130,8 @@ proc do_function_calls {} {
     gdb_test "p L2" " = {a = 97 'a', b = 98 'b'}"
     gdb_test "p L3" " = {a = 65 'A', b = 66 'B', c = 67 'C'}"
     gdb_test "p L4" " = {a = 49 '1', b = 50 '2', c = 51 '3', d = 52 '4'}"
-    if {$gcc_compiled} then {
-	setup_xfail "hppa*-*-*"
-    }
     gdb_test "p L5" " = {a = 97 'a', b = 98 'b', c = 99 'c', d = 100 'd', e = 101 'e'}"
-    if {$gcc_compiled} then {
-	setup_xfail "hppa*-*-*"
-    }
     gdb_test "p L6" " = {a = 65 'A', b = 66 'B', c = 67 'C', d = 68 'D', e = 69 'E', f = 70 'F'}"
-    if {$gcc_compiled} then {
-	setup_xfail "hppa*-*-*"
-    }
     gdb_test "p L7" " = {a = 49 '1', b = 50 '2', c = 51 '3', d = 52 '4', e = 53 '5', f = 54 '6', g = 55 '7'}"
     gdb_test "p L8" " = {a = 49 '1', b = 50 '2', c = 51 '3', d = 52 '4', e = 53 '5', f = 54 '6', g = 55 '7', h = 56 '8'}"
     gdb_test "p L9" " = {a = 97 'a', b = 98 'b', c = 99 'c', d = 100 'd', e = 101 'e', f = 102 'f', g = 103 'g', h = 104 'h', i = 105 'i'}"

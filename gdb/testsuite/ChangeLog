@@ -1,3 +1,12 @@
+Mon Jan  7 12:22:18 2002  Jeffrey A Law  (law@redhat.com)
+
+	* gdb.base/selftest.exp (backtrace through signal handler): Remove
+	hppa*-*-hpux* expected failure.
+	* gdb.base/structs.exp (do_function_calls): Similarly.
+
+	* gdb.c++/annota2.exp (watch triggered on a.x): Handle hardware
+	watchpoints.
+
 2002-01-06  Andrew Cagney  <ac131313@redhat.com>
 
 	Fix PR gdb/66.
