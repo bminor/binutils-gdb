@@ -58,7 +58,7 @@ struct gdb_interpreter
   /* This is the ui_out used to collect results for this interpreter.
      It can be a formatter for stdout, as is the case for the console
      & mi outputs, or it might be a result formatter. */
-  struct ui_out *interpreter_out;      
+  struct ui_out *interpreter_out;
 
   struct gdb_interpreter_procs procs;
   int quiet_p;
@@ -66,9 +66,6 @@ struct gdb_interpreter
 
 /* Functions local to this file. */
 static void initialize_interps (void);
-
-static void list_interpreter_cmd (char *args, int from_tty);
-static void do_set_interpreter (int not_an_fd);
 static char **interpreter_completer (char *text, char *word);
 
 /* The magic initialization routine for this module. */
@@ -85,7 +82,6 @@ static int interpreter_initialized = 0;
 /* gdb_new_interpreter - This allocates space for a new interpreter,
    fills the fields from the inputs, and returns a pointer to the
    interpreter. */
-
 struct gdb_interpreter *
 gdb_new_interpreter (char *name,
 		     void *data,
@@ -115,7 +111,6 @@ gdb_new_interpreter (char *name,
    interpreter of the same name is already on the list, then
    the new one is NOT added, and the function returns 0.  Otherwise
    it returns 1. */
-
 int
 gdb_add_interpreter (struct gdb_interpreter *interp)
 {
@@ -137,7 +132,6 @@ gdb_add_interpreter (struct gdb_interpreter *interp)
    interpreter back in place and return 0.  If we can't restore the
    old interpreter, then raise an internal error, since we are in
    pretty bad shape at this point. */
-
 int
 gdb_set_interpreter (struct gdb_interpreter *interp)
 {
@@ -235,12 +229,9 @@ gdb_set_interpreter (struct gdb_interpreter *interp)
   return 1;
 }
 
-/*
- * gdb_lookup_interpreter - Looks up the interpreter for NAME.  If
- * no such interpreter exists, return NULL, otherwise return a pointer
- * to the interpreter. 
- */
-
+/* gdb_lookup_interpreter - Looks up the interpreter for NAME.  If no
+   such interpreter exists, return NULL, otherwise return a pointer to
+   the interpreter.  */
 struct gdb_interpreter *
 gdb_lookup_interpreter (char *name)
 {
@@ -259,7 +250,6 @@ gdb_lookup_interpreter (char *name)
 }
 
 /* Returns the current interpreter. */
-
 struct gdb_interpreter *
 gdb_current_interpreter ()
 {
@@ -291,7 +281,6 @@ gdb_current_interpreter_is_named (char *interp_name)
    If the current interpreter defines a prompt_proc, then that proc is 
    run.  If the proc returns a non-zero value, display_gdb_prompt will
    return without itself displaying the prompt. */
-
 int
 gdb_interpreter_display_prompt (char *new_prompt)
 {
@@ -321,7 +310,6 @@ gdb_interpreter_set_quiet (struct gdb_interpreter *interp, int quiet)
 
 /* gdb_interpreter_exec - This executes COMMAND_STR in the current 
    interpreter. */
-
 int
 gdb_interpreter_exec (char *command_str)
 {
@@ -330,10 +318,10 @@ gdb_interpreter_exec (char *command_str)
       return current_interpreter->procs.exec_proc (current_interpreter->data,
 						   command_str);
     }
-
   return 0;
 }
 
+/* Accessor function.  Not used at the moment.  */
 struct gdb_interpreter_procs *
 gdb_interpreter_get_procs (struct gdb_interpreter *interp)
 {
@@ -343,6 +331,7 @@ gdb_interpreter_get_procs (struct gdb_interpreter *interp)
   return &current_interpreter->procs;
 }
 
+/* Accessor function.  Not used at the moment.  */
 void *
 gdb_interpreter_get_data (struct gdb_interpreter *interp)
 {
@@ -355,7 +344,6 @@ gdb_interpreter_get_data (struct gdb_interpreter *interp)
 /* A convenience routine that nulls out all the
    common command hooks.  Use it when removing your interpreter in its 
    suspend proc. */
-
 void
 clear_interpreter_hooks ()
 {
@@ -387,7 +375,6 @@ clear_interpreter_hooks ()
    the interpreter module is used.  I put it here just in case, but I haven't
    thought of a use for it yet.  I will probably bag it soon, since I don't
    think it will be necessary. */
-
 static void
 initialize_interps (void)
 {
@@ -453,7 +440,6 @@ interpreter_exec_cmd (char *args, int from_tty)
 }
 
 /* List the possible interpreters which could complete the given text. */
-
 static char **
 interpreter_completer (char *text, char *word)
 {
@@ -510,8 +496,7 @@ interpreter_completer (char *text, char *word)
   return matches;
 }
 
-/* This just adds the "set interpreter" and "info interpreters" commands. */
-
+/* This just adds the "interpreter-exec" command.  */
 void
 _initialize_interpreter (void)
 {
