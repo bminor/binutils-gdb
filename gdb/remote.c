@@ -90,6 +90,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 					AA = signal number
 					n... = register number
 					r... = register contents
+	or...		WAA		The process extited, and AA is
+					the exit status.  This is only
+					applicable for certains sorts of
+					targets.
+	or...		NAATT;DD;BB	Relocate the object file.
+					AA = signal number
+					TT = text address
+					DD = data address
+					BB = bss address
+					This is used by the NLM stub,
+					which is why it only has three
+					addresses rather than one per
+					section: the NLM stub always
+					sees only three sections, even
+					though gdb may see more.
 
 	kill request	k
 
@@ -114,6 +129,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "wait.h"
 #include "terminal.h"
 #include "gdbcmd.h"
+#include "objfiles.h"
+#include "gdb-stabs.h"
 
 #include "dcache.h"
 
@@ -489,6 +506,58 @@ remote_wait (status)
 
 	  supply_register (regno, regs);
 	}
+    }
+  else if (buf[0] == 'N')
+    {
+      unsigned char *p1;
+      bfd_vma text_addr, data_addr, bss_addr;
+
+      /* Relocate object file.  Format is NAATT;DD;BB where AA is the
+	 signal number, TT is the new text address, DD is the new data
+	 address, and BB is the new bss address.  This is used by the
+	 NLM stub; gdb may see more sections.  */
+      p = &buf[3];
+      text_addr = strtol (p, &p1, 16);
+      if (p1 == p || *p1 != ';')
+	error ("Malformed relocation packet: Packet '%s'", buf);
+      p = p1 + 1;
+      data_addr = strtol (p, &p1, 16);
+      if (p1 == p || *p1 != ';')
+	error ("Malformed relocation packet: Packet '%s'", buf);
+      p = p1 + 1;
+      bss_addr = strtol (p, &p1, 16);
+      if (p1 == p)
+	error ("Malformed relocation packet: Packet '%s'", buf);
+
+      if (symfile_objfile != NULL)
+	{
+	  struct section_offsets *offs;
+
+	  /* FIXME: Why don't the various symfile_offsets routines in
+	     the sym_fns vectors set this?  */
+	  if (symfile_objfile->num_sections == 0)
+	    symfile_objfile->num_sections = SECT_OFF_MAX;
+
+	  offs = ((struct section_offsets *)
+		  alloca (sizeof (struct section_offsets)
+			  + (symfile_objfile->num_sections
+			     * sizeof (offs->offsets))));
+	  memcpy (offs, symfile_objfile->section_offsets,
+		  (sizeof (struct section_offsets)
+		   + (symfile_objfile->num_sections
+		      * sizeof (offs->offsets))));
+	  ANOFFSET (offs, SECT_OFF_TEXT) = text_addr;
+	  ANOFFSET (offs, SECT_OFF_DATA) = data_addr;
+	  ANOFFSET (offs, SECT_OFF_BSS) = bss_addr;
+
+	  objfile_relocate (symfile_objfile, offs);
+	}
+    }
+  else if (buf[0] == 'W')
+    {
+      /* The remote process exited.  */
+      WSETEXIT (*status, (fromhex (buf[1]) << 4) + fromhex (buf[2]));
+      return 0;
     }
   else if (buf[0] != 'S')
     error ("Invalid remote reply: %s", buf);
