@@ -244,6 +244,27 @@ i386_linux_sigtramp_p (struct frame_info *next_frame)
 	  || strcmp ("__restore_rt", name) == 0);
 }
 
+/* Return one if the unwound PC from NEXT_FRAME is in a signal trampoline
+   which may have DWARF-2 CFI.  */
+
+static int
+i386_linux_dwarf_signal_frame_p (struct gdbarch *gdbarch,
+				 struct frame_info *next_frame)
+{
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  char *name;
+
+  find_pc_partial_function (pc, &name, NULL, NULL);
+
+  /* If a vsyscall DSO is in use, the signal trampolines may have these
+     names.  */
+  if (name && (strcmp (name, "__kernel_sigreturn") == 0
+	       || strcmp (name, "__kernel_rt_sigreturn") == 0))
+    return 1;
+
+  return 0;
+}
+
 /* Offset to struct sigcontext in ucontext, from <asm/ucontext.h>.  */
 #define I386_LINUX_UCONTEXT_SIGCONTEXT_OFFSET 20
 
@@ -414,6 +435,8 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* GNU/Linux uses the dynamic linker included in the GNU C Library.  */
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
+
+  dwarf2_frame_set_signal_frame_p (gdbarch, i386_linux_dwarf_signal_frame_p);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

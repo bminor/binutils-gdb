@@ -2620,7 +2620,8 @@ symfile.o: symfile.c $(defs_h) $(bfdlink_h) $(symtab_h) $(gdbtypes_h) \
 	$(hashtab_h) $(readline_h) $(gdb_assert_h) $(block_h) \
 	$(gdb_string_h) $(gdb_stat_h)
 symfile-mem.o: symfile-mem.c $(defs_h) $(symtab_h) $(gdbcore_h) \
-	$(objfiles_h) $(gdbcmd_h) $(target_h) $(value_h) $(symfile_h)
+	$(objfiles_h) $(gdbcmd_h) $(target_h) $(value_h) $(symfile_h) \
+	$(observer_h) $(auxv_h) $(elf_common_h)
 symmisc.o: symmisc.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(bfd_h) \
 	$(symfile_h) $(objfiles_h) $(breakpoint_h) $(command_h) \
 	$(gdb_obstack_h) $(language_h) $(bcache_h) $(block_h) $(gdb_regex_h) \

@@ -220,6 +220,10 @@ inf_ptrace_attach (char *args, int from_tty)
 
   inferior_ptid = pid_to_ptid (pid);
   push_target (ptrace_ops_hack);
+
+  /* Do this first, before anything has had a chance to query the
+     inferior's symbol table or similar.  */
+  observer_notify_inferior_created (&current_target, from_tty);
 }
 
 static void

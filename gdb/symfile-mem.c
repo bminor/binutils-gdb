@@ -52,13 +52,19 @@
 #include "target.h"
 #include "value.h"
 #include "symfile.h"
+#include "observer.h"
+#include "auxv.h"
+#include "elf/common.h"
 
 
 /* Read inferior memory at ADDR to find the header of a loaded object file
    and read its in-core symbols out of inferior memory.  TEMPL is a bfd
-   representing the target's format.  */
+   representing the target's format.  NAME is the name to use for this
+   symbol file in messages; it can be NULL or a malloc-allocated string
+   which will be attached to the BFD.  */
 static struct objfile *
-symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr, int from_tty)
+symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr, char *name,
+			     int from_tty)
 {
   struct objfile *objf;
   struct bfd *nbfd;
@@ -75,7 +81,10 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr, int from_tty)
   if (nbfd == NULL)
     error ("Failed to read a valid object file image from memory.");
 
-  nbfd->filename = xstrdup ("shared object read from target memory");
+  if (name == NULL)
+    nbfd->filename = xstrdup ("shared object read from target memory");
+  else
+    nbfd->filename = name;
 
   if (!bfd_check_format (nbfd, bfd_object))
     {
@@ -129,7 +138,73 @@ add_symbol_file_from_memory_command (char *args, int from_tty)
     error ("\
 Must use symbol-file or exec-file before add-symbol-file-from-memory.");
 
-  symbol_file_add_from_memory (templ, addr, from_tty);
+  symbol_file_add_from_memory (templ, addr, NULL, from_tty);
+}
+
+/* Arguments for symbol_file_add_from_memory_wrapper.  */
+
+struct symbol_file_add_from_memory_args
+{
+  struct bfd *bfd;
+  CORE_ADDR sysinfo_ehdr;
+  char *name;
+  int from_tty;
+};
+
+/* Wrapper function for symbol_file_add_from_memory, for
+   catch_exceptions.  */
+
+static int
+symbol_file_add_from_memory_wrapper (struct ui_out *uiout, void *data)
+{
+  struct symbol_file_add_from_memory_args *args = data;
+
+  symbol_file_add_from_memory (args->bfd, args->sysinfo_ehdr, args->name,
+			       args->from_tty);
+  return 0;
+}
+
+/* Try to add the symbols for the vsyscall page, if there is one.  This function
+   is called via the inferior_created observer.  */
+
+static void
+add_vsyscall_page (struct target_ops *target, int from_tty)
+{
+  CORE_ADDR sysinfo_ehdr;
+
+  if (target_auxv_search (target, AT_SYSINFO_EHDR, &sysinfo_ehdr) > 0
+      && sysinfo_ehdr != (CORE_ADDR) 0)
+    {
+      struct bfd *bfd;
+      struct symbol_file_add_from_memory_args args;
+
+      if (core_bfd != NULL)
+	bfd = core_bfd;
+      else if (exec_bfd != NULL)
+	bfd = exec_bfd;
+      else
+       /* FIXME: cagney/2004-05-06: Should not require an existing
+	  BFD when trying to create a run-time BFD of the VSYSCALL
+	  page in the inferior.  Unfortunately that's the current
+	  interface so for the moment bail.  Introducing a
+	  ``bfd_runtime'' (a BFD created using the loaded image) file
+	  format should fix this.  */
+	{
+	  warning ("could not load vsyscall page because no executable was specified");
+	  warning ("try using the \"file\" command first");
+	  return;
+	}
+      args.bfd = bfd;
+      args.sysinfo_ehdr = sysinfo_ehdr;
+      xasprintf (&args.name, "system-supplied DSO at 0x%s",
+		 paddr_nz (sysinfo_ehdr));
+      /* Pass zero for FROM_TTY, because the action of loading the
+	 vsyscall DSO was not triggered by the user, even if the user
+	 typed "run" at the TTY.  */
+      args.from_tty = 0;
+      catch_exceptions (uiout, symbol_file_add_from_memory_wrapper,
+			&args, NULL, RETURN_MASK_ALL);
+    }
 }
 
 
@@ -143,4 +218,7 @@ Load the symbols out of memory from a dynamically loaded object file.\n\
 Give an expression for the address of the file's shared object file header.",
            &cmdlist);
 
+  /* Want to know of each new inferior so that its vsyscall info can
+     be extracted.  */
+  observer_attach_inferior_created (add_vsyscall_page);
 }

@@ -1,3 +1,23 @@
+2004-11-07  Andrew Cagney  <cagney@redhat.com>
+	    Daniel Jacobowitz  <dan@debian.org>
+	    Roland McGrath  <roland@redhat.com>
+
+	* Makefile.in (symfile-mem.o): Update dependencies.
+	* i386-linux-tdep.c (i386_linux_dwarf_signal_frame_p): New.
+	(i386_linux_init_abi): Call dwarf2_frame_set_signal_frame_p.
+	* inf-ptrace.c (inf_ptrace_attach): Call
+	observer_notify_inferior_created.
+	* inftarg.c (child_attach): Likewise.
+	* symfile-mem.c: Include "observer.h", "auxv.h", and "elf/common.h".
+	(symbol_file_add_from_memory): Take NAME argument.  Use it for
+	the new BFD's filename.
+	(add_symbol_file_from_memory_command): Update call to
+	symbol_file_add_from_memory.
+	(struct symbol_file_add_from_memory_args, add_vsyscall_page)
+	(symbol_file_add_from_memory_wrapper): New.
+	(_initialize_symfile_mem): Register add_vsyscall_page as an
+	inferior_created observer.
+
 2004-11-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* m68kbsd-nat.c (m68kbsd_fetch_inferior_registers): Rename from
