@@ -1,3 +1,13 @@
+2002-10-23  David Carlton  <carlton@math.stanford.edu>
+
+	* dwarf2read.c (dwarf_tag_name): Add DWARF 3 names.
+	(dwarf_attr_name): Ditto.
+	(dwarf_type_encoding_name): Ditto.
+	(scan_partial_symbols): Descend into DW_TAG_namespace entries.
+	(process_die): Handle DW_TAG_namespace,
+	DW_TAG_imported_declaration, DW_TAG_imported_module.
+	(read_namespace): New function.
+
 2002-10-22  Joel Brobecker  <brobecker@gnat.com>
 
 	* configure.in: Define NEW_PROC_API on Interix too.
