@@ -1,5 +1,19 @@
 2004-08-24  Jim Blandy  <jimb@redhat.com>
 
+	* dwarf2expr.h (struct dwarf_expr_context): New members
+	'num_pieces' and 'pieces', for returning the result of an
+	expression that uses DW_OP_piece.
+	(struct dwarf_expr_piece): New struct type.
+	* dwarf2expr.c (new_dwarf_expr_context): Initialize num_pieces and
+	pieces.
+	(free_dwarf_expr_context): Free pieces, if any.
+	(add_piece): New function.
+	(execute_stack_op): Implement DW_OP_piece.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc): If the result of the
+	expression is a list of pieces, print an error message.
+        (dwarf2_loc_desc_needs_frame): If the expression yields
+        pieces, and any piece is in a register, then we need a frame.
+
 	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Wait to fetch the top of
 	the stack until we've decided what sort of result the evaluation
 	has produced.  Use separate variables, with more specific names.

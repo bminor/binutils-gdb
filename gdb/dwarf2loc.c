@@ -205,6 +205,7 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
 			  unsigned char *data, unsigned short size,
 			  struct objfile *objfile)
 {
+  struct gdbarch *arch = get_frame_arch (frame);
   struct value *retval;
   struct dwarf_expr_baton baton;
   struct dwarf_expr_context *ctx;
@@ -227,8 +228,15 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
   ctx->get_tls_address = dwarf_expr_tls_address;
 
   dwarf_expr_eval (ctx, data, size);
-
-  if (ctx->in_reg)
+  if (ctx->num_pieces > 0)
+    {
+      /* We haven't implemented splicing together pieces from
+         arbitrary sources yet.  */
+      error ("The value of variable '%s' is distributed across several\n"
+             "locations, and GDB cannot access its value.\n",
+             SYMBOL_NATURAL_NAME (var));
+    }
+  else if (ctx->in_reg)
     {
       CORE_ADDR dwarf_regnum = dwarf_expr_fetch (ctx, 0);
       int gdb_regnum = DWARF2_REG_TO_REGNUM (dwarf_regnum);
@@ -322,6 +330,17 @@ dwarf2_loc_desc_needs_frame (unsigned char *data, unsigned short size)
   dwarf_expr_eval (ctx, data, size);
 
   in_reg = ctx->in_reg;
+
+  if (ctx->num_pieces > 0)
+    {
+      int i;
+
+      /* If the location has several pieces, and any of them are in
+         registers, then we will need a frame to fetch them from.  */
+      for (i = 0; i < ctx->num_pieces; i++)
+        if (ctx->pieces[i].in_reg)
+          in_reg = 1;
+    }
 
   free_dwarf_expr_context (ctx);
 
