@@ -1,3 +1,8 @@
+2001-06-06  Martin Schwidefsky <schwidefsky@de.ibm.com>
+
+	* config/tc-s390.h (TC_FORCE_RELOCATION): Always emit relocations
+	BFD_RELOC_VTABLE_INHERIT and BFD_RELOC_VTABLE_ENTRY.
+
 2001-06-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-i386.c (md_assemble): Handle Pentium4 branch hints.
