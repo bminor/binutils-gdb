@@ -1,4 +1,5 @@
-/* Amiga Unix host system */
+/* Amiga/Atari SVR4 Unix host system */
+
 #include <ansidecl.h>
 #include <fcntl.h>
 #include <errno.h>
