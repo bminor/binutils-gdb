@@ -1,3 +1,11 @@
+2002-12-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd-in.h: Comment typo fix.  Formatting.
+	* bfd-in2.h: Regenerate.
+	* coff64-rs6000.c (xcoff64_openr_next_archived_file): Warning fix.
+	* elf32-m68hc12.c (m68hc12_elf_set_mach_from_flags): Prototype.
+	* elf64-mmix.c (mmix_dump_bpo_gregs): Warning fix.
+
 2002-12-05  Richard Henderson  <rth@redhat.com>
 
 	* elfxx-ia64.c (elfNN_ia64_relax_section): Handle PCREL21BI.

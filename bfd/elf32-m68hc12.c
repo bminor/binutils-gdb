@@ -47,6 +47,8 @@ static bfd_boolean elf32_m68hc11_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
 
+static bfd_boolean m68hc12_elf_set_mach_from_flags PARAMS ((bfd *));
+
 bfd_boolean _bfd_m68hc12_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
 bfd_boolean _bfd_m68hc12_elf_set_private_flags PARAMS ((bfd *, flagword));
 bfd_boolean _bfd_m68hc12_elf_print_private_bfd_data PARAMS ((bfd *, PTR));
@@ -794,7 +796,7 @@ _bfd_m68hc12_elf_print_private_bfd_data (abfd, ptr)
   if (elf_elfheader (abfd)->e_flags & EF_M68HCS12_MACH)
     fprintf (file, _(" cpu=HCS12]"));
   else
-    fprintf (file, _(" cpu=HC12]"));    
+    fprintf (file, _(" cpu=HC12]"));
   fputc ('\n', file);
 
   return TRUE;

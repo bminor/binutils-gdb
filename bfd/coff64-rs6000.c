@@ -2019,7 +2019,7 @@ xcoff64_openr_next_archived_file (archive, last_file)
      bfd *archive;
      bfd *last_file;
 {
-  file_ptr filestart;
+  bfd_vma filestart;
 
   if ((xcoff_ardata (archive) == NULL)
       || ! xcoff_big_format_p (archive))
@@ -2048,7 +2048,7 @@ xcoff64_openr_next_archived_file (archive, last_file)
       return NULL;
     }
 
-  return _bfd_get_elt_at_filepos (archive, filestart);
+  return _bfd_get_elt_at_filepos (archive, (file_ptr) filestart);
 }
 
 /* We can't use the usual coff_sizeof_headers routine, because AIX

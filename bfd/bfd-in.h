@@ -72,11 +72,11 @@ typedef struct _bfd bfd;
 
 /* Boolean type used in bfd.  Too many systems define their own
    versions of "boolean" for us to safely typedef a "boolean" of
-   our own.  Using an enum for "bfd_boolean" has it's own set of
+   our own.  Using an enum for "bfd_boolean" has its own set of
    problems, with strange looking casts required to avoid warnings
    on some older compilers.  Thus we just use an int.
 
-   General rule: functions which are bfd_boolean return TRUE on
+   General rule: Functions which are bfd_boolean return TRUE on
    success and FALSE on failure (unless they're a predicate).  */
 
 typedef int bfd_boolean;
@@ -535,48 +535,48 @@ extern bfd_boolean bfd_record_phdr
 
 /* Byte swapping routines.  */
 
-bfd_vma		bfd_getb64
+bfd_vma bfd_getb64
   PARAMS ((const unsigned char *));
-bfd_vma 	bfd_getl64
+bfd_vma bfd_getl64
   PARAMS ((const unsigned char *));
-bfd_signed_vma	bfd_getb_signed_64
+bfd_signed_vma bfd_getb_signed_64
   PARAMS ((const unsigned char *));
-bfd_signed_vma	bfd_getl_signed_64
+bfd_signed_vma bfd_getl_signed_64
   PARAMS ((const unsigned char *));
-bfd_vma		bfd_getb32
+bfd_vma bfd_getb32
   PARAMS ((const unsigned char *));
-bfd_vma		bfd_getl32
+bfd_vma bfd_getl32
   PARAMS ((const unsigned char *));
-bfd_signed_vma	bfd_getb_signed_32
+bfd_signed_vma bfd_getb_signed_32
   PARAMS ((const unsigned char *));
-bfd_signed_vma	bfd_getl_signed_32
+bfd_signed_vma bfd_getl_signed_32
   PARAMS ((const unsigned char *));
-bfd_vma		bfd_getb16
+bfd_vma bfd_getb16
   PARAMS ((const unsigned char *));
-bfd_vma		bfd_getl16
+bfd_vma bfd_getl16
   PARAMS ((const unsigned char *));
-bfd_signed_vma	bfd_getb_signed_16
+bfd_signed_vma bfd_getb_signed_16
   PARAMS ((const unsigned char *));
-bfd_signed_vma	bfd_getl_signed_16
+bfd_signed_vma bfd_getl_signed_16
   PARAMS ((const unsigned char *));
-void		bfd_putb64
+void bfd_putb64
   PARAMS ((bfd_vma, unsigned char *));
-void		bfd_putl64
+void bfd_putl64
   PARAMS ((bfd_vma, unsigned char *));
-void		bfd_putb32
+void bfd_putb32
   PARAMS ((bfd_vma, unsigned char *));
-void		bfd_putl32
+void bfd_putl32
   PARAMS ((bfd_vma, unsigned char *));
-void		bfd_putb16
+void bfd_putb16
   PARAMS ((bfd_vma, unsigned char *));
-void		bfd_putl16
+void bfd_putl16
   PARAMS ((bfd_vma, unsigned char *));
 
 /* Byte swapping routines which take size and endiannes as arguments.  */
 
-bfd_vma         bfd_get_bits
+bfd_vma bfd_get_bits
   PARAMS ((bfd_byte *, int, bfd_boolean));
-void            bfd_put_bits
+void bfd_put_bits
   PARAMS ((bfd_vma, bfd_byte *, int, bfd_boolean));
 
 /* Externally visible ECOFF routines.  */
@@ -620,7 +620,7 @@ extern bfd_boolean bfd_ecoff_debug_externals
 	   const struct ecoff_debug_swap *swap,
 	   bfd_boolean relocateable,
 	   bfd_boolean (*get_extr) (struct symbol_cache_entry *,
-				struct ecoff_extr *),
+				    struct ecoff_extr *),
 	   void (*set_index) (struct symbol_cache_entry *,
 			      bfd_size_type)));
 extern bfd_boolean bfd_ecoff_debug_one_external

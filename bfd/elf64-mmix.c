@@ -2281,8 +2281,8 @@ mmix_dump_bpo_gregs (link_info, pf)
     for (i = 0; i < gregdata->n_max_bpo_relocs; i++)
       (*pf) ("%4u (%4u)/%4u#%u: 0x%08lx%08lx  r: %3u o: %3u\n",
 	     i,
-	     gregdata->bpo_reloc_indexes != NULL
-	     ? gregdata->bpo_reloc_indexes[i] : -1,
+	     (gregdata->bpo_reloc_indexes != NULL
+	      ? gregdata->bpo_reloc_indexes[i] : (size_t) -1),
 	     gregdata->reloc_request[i].bpo_reloc_no,
 	     gregdata->reloc_request[i].valid,
 
