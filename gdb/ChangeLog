@@ -1,4 +1,12 @@
 2002-01-21  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-tdep.c (arm_register_name): New function.
+	(arm_registers_names): Make static.
+	* config/arm/tm-arm.h (arm_register_names): Delete declaration.
+	(arm_register_name): Declare.
+	(REGISTER_NAME): Use it.
+
+2002-01-21  Richard Earnshaw  <rearnsha@arm.com>
 	    Kevin Buettner  <kevinb@redhat.com>
 
 	Convert arm targets to new FRAME interface.

@@ -169,10 +169,8 @@ extern void arm_float_info (void);
 #define NUM_GREGS	16	/* Number of general purpose registers.  */
 #define NUM_REGS	(NUM_GREGS + NUM_FREGS + NUM_SREGS)
 
-/* An array of names of registers. */
-extern char **arm_register_names;
-
-#define REGISTER_NAME(i) arm_register_names[i]
+#define REGISTER_NAME(i) arm_register_name(i)
+char *arm_register_name (int);
 
 /* Register numbers of various important registers.  Note that some of
    these values are "real" register numbers, and correspond to the

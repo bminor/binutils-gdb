@@ -83,7 +83,7 @@ static char * arm_register_name_strings[] =
  "f0",  "f1",  "f2",  "f3",	/* 16 17 18 19 */
  "f4",  "f5",  "f6",  "f7",	/* 20 21 22 23 */
  "fps", "cpsr" }; 		/* 24 25       */
-char **arm_register_names = arm_register_name_strings;
+static char **arm_register_names = arm_register_name_strings;
 
 /* Valid register name flavors.  */
 static const char **valid_flavors;
@@ -2118,6 +2118,13 @@ set_disassembly_flavor_sfunc (char *args, int from_tty,
   set_disassembly_flavor ();
 }
 
+/* Return the ARM register name corresponding to register I.  */
+char *
+arm_register_name(int i)
+{
+  return arm_register_names[i];
+}
+
 static void
 set_disassembly_flavor (void)
 {
