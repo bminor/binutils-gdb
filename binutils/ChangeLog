@@ -1,3 +1,8 @@
+2004-07-15  Aravinda PR  <aravindapr@rediffmail.com>
+
+	* nlmconv.c (main): Pass map_file argument to link_inputs.
+	(link_inputs): Use map_file argument if it is defined.
+
 2004-07-13  Nick Clifton  <nickc@redhat.com>
 
 	* dllwrap.c: Replace 'program_name' with 'prog_name' to avoid

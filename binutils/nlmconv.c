@@ -133,7 +133,7 @@ static void mangle_relocs
   (bfd *, asection *, arelent ***, long *, char *, bfd_size_type);
 static void default_mangle_relocs
   (bfd *, asection *, arelent ***, long *, char *, bfd_size_type);
-static char *link_inputs (struct string_list *, char *);
+static char *link_inputs (struct string_list *, char *, char *);
 
 #ifdef NLMCONV_I386
 static void i386_mangle_relocs (bfd *, asection *, arelent ***, long *, char *, bfd_size_type);
@@ -320,7 +320,7 @@ main (int argc, char **argv)
       if (input_files->next == NULL)
 	input_file = input_files->string;
       else
-	input_file = link_inputs (input_files, ld_arg);
+	input_file = link_inputs (input_files, ld_arg, map_file);
     }
   else if (input_file == NULL)
     {
@@ -459,7 +459,7 @@ main (int argc, char **argv)
   endsym = NULL;
   for (i = 0; i < symcount; i++)
     {
-      register asymbol *sym;
+      asymbol *sym;
 
       sym = symbols[i];
 
@@ -555,7 +555,7 @@ main (int argc, char **argv)
       /* If this is a global symbol, check the export list.  */
       if ((sym->flags & (BSF_EXPORT | BSF_GLOBAL)) != 0)
 	{
-	  register struct string_list *l;
+	  struct string_list *l;
 	  int found_simple;
 
 	  /* Unfortunately, a symbol can appear multiple times on the
@@ -603,7 +603,7 @@ main (int argc, char **argv)
 	 Change the prefix if necessary.  */
       if (bfd_is_und_section (bfd_get_section (sym)))
 	{
-	  register struct string_list *l;
+	  struct string_list *l;
 
 	  for (l = import_symbols; l != NULL; l = l->next)
 	    {
@@ -922,8 +922,8 @@ main (int argc, char **argv)
 	 export information and the debugging information.  */
       nlm_fixed_header (outbfd)->debugInfoOffset = (file_ptr) -1;
     }
-  if (map_file != NULL)
-    non_fatal (_("warning: MAP and FULLMAP are not supported; try ld -M"));
+  if (full_map)
+    non_fatal (_("warning: FULLMAP is not supported; try ld -M"));
   if (help_file != NULL)
     {
       void *data;
@@ -1361,8 +1361,8 @@ default_mangle_relocs (bfd *outbfd ATTRIBUTE_UNUSED, asection *insec,
   if (insec->output_offset != 0)
     {
       long reloc_count;
-      register arelent **relocs;
-      register long i;
+      arelent **relocs;
+      long i;
 
       reloc_count = *reloc_count_ptr;
       relocs = *relocs_ptr;
@@ -1549,13 +1549,13 @@ static reloc_howto_type nlm32_alpha_nw_howto =
 
 static void
 alpha_mangle_relocs (bfd *outbfd, asection *insec,
-		     register arelent ***relocs_ptr, long *reloc_count_ptr,
+		     arelent ***relocs_ptr, long *reloc_count_ptr,
 		     char *contents ATTRIBUTE_UNUSED,
 		     bfd_size_type contents_size ATTRIBUTE_UNUSED)
 {
   long old_reloc_count;
   arelent **old_relocs;
-  register arelent **relocs;
+  arelent **relocs;
 
   old_reloc_count = *reloc_count_ptr;
   old_relocs = *relocs_ptr;
@@ -1611,7 +1611,7 @@ alpha_mangle_relocs (bfd *outbfd, asection *insec,
 
   if (insec->output_offset != 0)
     {
-      register bfd_size_type i;
+      bfd_size_type i;
 
       for (i = 0; i < (bfd_size_type) old_reloc_count; i++, relocs++)
 	(*relocs)->address += insec->output_offset;
@@ -1859,14 +1859,14 @@ powerpc_resolve_stubs (bfd *inbfd, bfd *outbfd)
 
 static void
 powerpc_mangle_relocs (bfd *outbfd, asection *insec,
-		       register arelent ***relocs_ptr,
+		       arelent ***relocs_ptr,
 		       long *reloc_count_ptr, char *contents,
 		       bfd_size_type contents_size ATTRIBUTE_UNUSED)
 {
   reloc_howto_type *toc_howto;
   long reloc_count;
-  register arelent **relocs;
-  register long i;
+  arelent **relocs;
+  long i;
 
   toc_howto = bfd_reloc_type_lookup (insec->owner, BFD_RELOC_PPC_TOC16);
   if (toc_howto == (reloc_howto_type *) NULL)
@@ -2036,7 +2036,7 @@ powerpc_mangle_relocs (bfd *outbfd, asection *insec,
    file.  */
 
 static char *
-link_inputs (struct string_list *inputs, char *ld)
+link_inputs (struct string_list *inputs, char *ld, char * map_file)
 {
   size_t c;
   struct string_list *q;
@@ -2051,7 +2051,7 @@ link_inputs (struct string_list *inputs, char *ld)
   for (q = inputs; q != NULL; q = q->next)
     ++c;
 
-  argv = (char **) alloca ((c + 5) * sizeof(char *));
+  argv = (char **) alloca ((c + 7) * sizeof (char *));
 
 #ifndef __MSDOS__
   if (ld == NULL)
@@ -2083,7 +2083,19 @@ link_inputs (struct string_list *inputs, char *ld)
   argv[1] = (char *) "-Ur";
   argv[2] = (char *) "-o";
   argv[3] = unlink_on_exit;
-  i = 4;
+  /* If we have been given the name of a mapfile and that
+     name is not 'stderr' then pass it on to the linker.  */
+  if (map_file
+      && * map_file
+      && strcmp (map_file, "stderr") == 0)
+    {
+      argv[4] = (char *) "-Map";
+      argv[5] = map_file;
+      i = 6;
+    }
+  else
+    i = 4;
+
   for (q = inputs; q != NULL; q = q->next, i++)
     argv[i] = q->string;
   argv[i] = NULL;
