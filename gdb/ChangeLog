@@ -1,5 +1,8 @@
 2004-02-22  Andrew Cagney  <cagney@redhat.com>
 
+	* frame-unwind.c (frame_unwind_find_by_frame): Add legacy_frame_p
+	to predicates for "seriously old code".
+
 	* hppa-tdep.c (hppa_gdbarch_init): Convert compile time #if0s into
 	runtime if(0).
 
