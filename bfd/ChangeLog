@@ -1,3 +1,10 @@
+2003-08-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* dep-in.sed: Remove libintl.h.
+	* Makefile.am (SRC-POTFILES.in, BLD-POTFILES.in): Unset LC_COLLATE.
+	(POTFILES.in): Remove target.
+	* Makefile.in: Regenerate.
+
 2003-08-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_next_input_section): Update comment.
