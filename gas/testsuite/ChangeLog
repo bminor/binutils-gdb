@@ -1,5 +1,8 @@
 Fri Apr  4 13:19:39 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* gas/arm/arm.exp: Only run inst and arm7t on targets which can
+	handle -EL.  Add setup_xfail for thumb.
+
 	* gas/h8300/ffxx1.d: Don't fail if BFD is 64 bits.
 
 Thu Apr  3 18:26:56 1997  Doug Evans  <dje@canuck.cygnus.com>
