@@ -1,5 +1,8 @@
 Wed Jun 19 11:31:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m68k.c (m68k_ip): Reject PRE and POST indexing mode on
+	cpu32.  From Eric Norum <Eric.Norum@usask.ca>.
+
 	* config/tc-mips.c (mips_ip): In cases 'I', 'i', and 'j', set
 	insn_error rather than calling check_absolute_expr.
 
