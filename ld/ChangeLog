@@ -1,3 +1,7 @@
+Wed Nov  3 15:10:15 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
+
+	* Makefile.in (distclean): Don't delete dvi or info files.
+
 Wed Nov  3 12:07:39 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldlang.c (lang_add_output): Take new arg, FROM_SCRIPT.
