@@ -109,6 +109,8 @@
 @V@/gdb/gdbtk/library/ChangeLog-2000 @V@/gdb/gdbtk/library/ChangeLog.000
 @V@/gdb/gdbtk/library/ChangeLog-2001 @V@/gdb/gdbtk/library/ChangeLog.001
 @V@/gdb/i386-linux-tdep.c @V@/gdb/i386linux-tdep.c
+@V@/gdb/i386bsd-nat.c @V@/gdb/i3bsd-nat.c
+@V@/gdb/i386bsd-tdep.c @V@/gdb/i3bsd-tdep.c
 @V@/gdb/i386nbsd-nat.c @V@/gdb/i3nbsd-nat.c
 @V@/gdb/i386nbsd-tdep.c @V@/gdb/i3nbsd-tdep.c
 @V@/gdb/ia64-aix-nat.c @V@/gdb/ia64aix-nat.c
