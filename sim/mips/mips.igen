@@ -5384,10 +5384,12 @@
 *r5900:
 // start-sanitize-sky
 {
+#ifdef TARGET_SKY
   address_word offset = EXTEND16 (OFFSET) << 2;
   extern int sky_cpcond0;
   if (sky_cpcond0 == 0)
     DELAY_SLOT (NIA + offset);
+#endif    
 }
 // end-sanitize-sky
 // end-sanitize-r5900
@@ -5407,10 +5409,12 @@
 *r5900:
 // start-sanitize-sky
 {
+#ifdef TARGET_SKY
   address_word offset = EXTEND16 (OFFSET) << 2;
   extern int sky_cpcond0;
   if (sky_cpcond0 == 0)
     DELAY_SLOT (NIA + offset);
+#endif
 }
 // end-sanitize-sky
 // end-sanitize-r5900
@@ -5423,10 +5427,12 @@
 *r5900:
 // start-sanitize-sky
 {
+#ifdef TARGET_SKY
   address_word offset = EXTEND16 (OFFSET) << 2;
   extern int sky_cpcond0;
   if (sky_cpcond0 != 0)
     DELAY_SLOT (NIA + offset);
+#endif
 }
 // end-sanitize-sky
 // end-sanitize-r5900
@@ -5447,10 +5453,12 @@
 *r5900:
 // start-sanitize-sky
 {
+#ifdef TARGET_SKY
   address_word offset = EXTEND16 (OFFSET) << 2;
   extern int sky_cpcond0;
   if (sky_cpcond0 != 0)
     DELAY_SLOT (NIA + offset);
+#endif
 }
 // end-sanitize-sky
 // end-sanitize-r5900
