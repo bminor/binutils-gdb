@@ -14,6 +14,7 @@ version=`$(unsubdir)/../gcc$(subdir)/gcc -dumpversion`
 prefix = $(destdir)
 bindir = $(prefix)/H-$(host_alias)/T-independent/bin
 
+# Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../texinfo/fsf
 
 #INSTALL = install -c
@@ -147,13 +148,29 @@ de-stage3: force
 	- (cd stage3 ; mv -f * ..)
 	- rmdir stage3
 
+######################################################################
+# DOCUMENTATION TARGETS
+# TeX output
 binutils.dvi: binutils.texinfo
 	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex binutils.texinfo
 	texindex binutils.??
 	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex binutils.texinfo
 
+# info file for online browsing
 binutils.info: binutils.texinfo
 	makeinfo binutils.texinfo
+
+# roff output (-ms)
+#   edit instances of "ms" to "me" or "mm" to suit your preferences.
+#   (we don't use a variable because we don't trust all makes to handle
+#   a var in the target name right).
+binutils.ms: binutils.texinfo
+	sed -e '/\\input texinfo/d' \
+		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
+		binutils.texinfo | \
+	texi2roff -ms >binutils.ms 
+
+######################################################################
 
 clean:
 	-rm -f *.o *~ \#* core $(STAGESTUFF) TAGS binutils.?? binutils.???
