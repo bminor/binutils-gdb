@@ -1,5 +1,7 @@
 Sun Mar 20 09:24:36 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* bfd/som.c (som_begin_writing): Fix thinko (off by one error).
+
 	* som.c (bfd_section_from_som_symbol): Only to do the value
 	comparison for function symbols within executables.
 
