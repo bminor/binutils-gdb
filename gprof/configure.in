@@ -10,7 +10,7 @@ srcname="gprof"
 
 # per-target:
 case "${target}" in
-i386-*-*)	my_target=i386 ;;
+i[345]86-*-*)	my_target=i386 ;;
 sparc-*-*)	my_target=sparc ;;
 tahoe-*-*)	my_target=tahoe ;;
 vax-*-*)	my_target=vax ;;

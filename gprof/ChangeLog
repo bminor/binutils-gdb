@@ -1,3 +1,7 @@
+Wed Aug 24 12:49:13 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* configure.in: Change i386-*-* to i[345]86-*-*.
+
 Sun Jul 10 00:35:31 1994  Ian Dall  (dall@hfrd.dsto.gov.au)
 
 	* ns532.c, ns532.h: New Files. ns532 support.
