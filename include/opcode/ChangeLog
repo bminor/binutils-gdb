@@ -1,3 +1,19 @@
+Tue Jul 26 17:48:05 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* i960.h (I_CX2): New instruction category.
+	start-sanitize-i960xl
+	It includes instructions available on Cx and XL processors.
+	(I_XL): New instruction category, for XL-only instructions.
+	end-sanitize-i960xl
+	(i960_opcodes): Put eshro and sysctl in I_CX2 category.
+	start-sanitize-i960xl
+	Added i960XL-only instructions, in I_XL category.
+	end-sanitize-i960xl
+
+Wed Jul 13 18:43:47 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* ns32k.h (endop): Made pointer const too.
+
 Sun Jul 10 11:01:09 1994  Ian Dall  (dall@hfrd.dsto.gov.au)
 
 	* ns32k.h: Drop Q operand type as there is no correct use
