@@ -1,3 +1,11 @@
+Wed Apr 14 17:12:51 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* xcoffread.c (record_include_{begin,end}): Change fatal to complain.
+
+Wed Apr 14 14:03:18 1993  Per Bothner  (bothner@cygnus.com)
+
+	* ch-exp.y:  Fix thinko that broke parsing of FALSE.
+
 Wed Apr 14 12:49:29 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* stabsread.c (read_member_functions): Initialize domain for stubbed

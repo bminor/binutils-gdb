@@ -404,12 +404,17 @@ static void
 record_include_begin (cs)
 struct coff_symbol *cs;
 {
-  /* In xcoff, we assume include files cannot be nested (not in .c files
-     of course, but in corresponding .s files.) */
-
   if (inclDepth)
-    fatal ("xcoff internal: pending include file exists.");
+    {
+      /* In xcoff, we assume include files cannot be nested (not in .c files
+	 of course, but in corresponding .s files.).  */
 
+      /* 14 Apr 93: A user said he got this message, but said he'd deleted
+	 the test case.  I changed it from a fatal() to a complain()
+	 and changed the wording.  */
+      struct complaint msg = {"Nested C_BINCL symbols", 0, 0};
+      complain (&msg);
+    }
   ++inclDepth;
 
   /* allocate an include file, or make room for the new entry */
@@ -440,7 +445,10 @@ struct coff_symbol *cs;
   InclTable *pTbl;  
 
   if (inclDepth == 0)
-    fatal ("xcoff internal: Mismatch C_BINCL/C_EINCL pair found.");
+    {
+      struct complaint msg = {"Mismatched C_BINCL/C_EINCL pair", 0, 0};
+      complain (&msg);
+    }
 
   pTbl = &inclTable [inclIndx];
   pTbl->end = cs->c_value;
