@@ -1309,6 +1309,31 @@ extern void set_gdbarch_deprecated_call_dummy_stack_adjust (struct gdbarch *gdba
 #endif
 #endif
 
+#if defined (FIX_CALL_DUMMY)
+/* Legacy for systems yet to multi-arch FIX_CALL_DUMMY */
+#if !defined (FIX_CALL_DUMMY_P)
+#define FIX_CALL_DUMMY_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (FIX_CALL_DUMMY_P)
+#define FIX_CALL_DUMMY_P() (0)
+#endif
+
+extern int gdbarch_fix_call_dummy_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FIX_CALL_DUMMY_P)
+#error "Non multi-arch definition of FIX_CALL_DUMMY"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FIX_CALL_DUMMY_P)
+#define FIX_CALL_DUMMY_P() (gdbarch_fix_call_dummy_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (FIX_CALL_DUMMY)
+#define FIX_CALL_DUMMY(dummy, pc, fun, nargs, args, type, gcc_p) (internal_error (__FILE__, __LINE__, "FIX_CALL_DUMMY"), 0)
+#endif
+
 typedef void (gdbarch_fix_call_dummy_ftype) (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p);
 extern void gdbarch_fix_call_dummy (struct gdbarch *gdbarch, char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p);
 extern void set_gdbarch_fix_call_dummy (struct gdbarch *gdbarch, gdbarch_fix_call_dummy_ftype *fix_call_dummy);

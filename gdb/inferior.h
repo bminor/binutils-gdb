@@ -439,10 +439,6 @@ extern int attach_flag;
 #define PUSH_DUMMY_FRAME (internal_error (__FILE__, __LINE__, "PUSH_DUMMY_FRAME"), 0)
 #endif
 
-#if !defined FIX_CALL_DUMMY
-#define FIX_CALL_DUMMY(a1,a2,a3,a4,a5,a6,a7) (internal_error (__FILE__, __LINE__, "FIX_CALL_DUMMY"), 0)
-#endif
-
 #if !defined STORE_STRUCT_RETURN
 #define STORE_STRUCT_RETURN(a1,a2) (internal_error (__FILE__, __LINE__, "STORE_STRUCT_RETURN"), 0)
 #endif

@@ -691,9 +691,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of call_dummy_words, invalid_p == 0 */
   /* Skip verify of sizeof_call_dummy_words, invalid_p == 0 */
   /* Skip verify of deprecated_call_dummy_stack_adjust, has predicate */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->fix_call_dummy == 0))
-    fprintf_unfiltered (log, "\n\tfix_call_dummy");
+  /* Skip verify of fix_call_dummy, has predicate */
   /* Skip verify of deprecated_init_frame_pc_first, has predicate */
   /* Skip verify of deprecated_init_frame_pc, has predicate */
   /* Skip verify of deprecated_get_saved_register, has predicate */
@@ -1634,6 +1632,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: EXTRACT_STRUCT_VALUE_ADDRESS = <0x%08lx>\n",
                         (long) current_gdbarch->extract_struct_value_address
                         /*EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
+#endif
+#ifdef FIX_CALL_DUMMY_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FIX_CALL_DUMMY_P()",
+                      XSTRING (FIX_CALL_DUMMY_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: FIX_CALL_DUMMY_P() = %d\n",
+                      FIX_CALL_DUMMY_P ());
 #endif
 #ifdef FIX_CALL_DUMMY
 #if GDB_MULTI_ARCH
@@ -3891,6 +3898,13 @@ set_gdbarch_deprecated_call_dummy_stack_adjust (struct gdbarch *gdbarch,
                                                 int deprecated_call_dummy_stack_adjust)
 {
   gdbarch->deprecated_call_dummy_stack_adjust = deprecated_call_dummy_stack_adjust;
+}
+
+int
+gdbarch_fix_call_dummy_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->fix_call_dummy != 0;
 }
 
 void

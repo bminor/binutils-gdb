@@ -1424,8 +1424,12 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   real_pc = FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
 			    value_type, using_gcc);
 #else
-  FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
-		  value_type, using_gcc);
+  if (FIX_CALL_DUMMY_P ())
+    {
+      /* gdb_assert (CALL_DUMMY_LOCATION == ON_STACK) true?  */
+      FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args, value_type,
+		      using_gcc);
+    }
   real_pc = start_sp;
 #endif
 

@@ -294,17 +294,6 @@ generic_pop_dummy_frame (void)
   discard_innermost_dummy (&dummy_frame_stack);
 }
 
-/* Function: fix_call_dummy
-   Stub function.  Generic dummy frames typically do not need to fix
-   the frame being created */
-
-void
-generic_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
-			struct value **args, struct type *type, int gcc_p)
-{
-  return;
-}
-
 /* Given a call-dummy dummy-frame, return the registers.  Here the
    register value is taken from the local copy of the register buffer.  */
 

@@ -544,10 +544,6 @@ extern int generic_pc_in_call_dummy (CORE_ADDR pc,
 
 extern char *deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp);
 
-extern void generic_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
-				    int nargs, struct value **args,
-				    struct type *type, int gcc_p);
-
 void generic_unwind_get_saved_register (char *raw_buffer,
 				        int *optimizedp,
 				        CORE_ADDR *addrp,
