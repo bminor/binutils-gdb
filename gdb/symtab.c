@@ -114,9 +114,9 @@ struct symbol *lookup_symbol_aux_minsyms (const char *name,
 					  struct symtab **symtab);
 #endif
 
-/* This flag is used in hppa-tdep.c, and set in hp-symtab-read.c */
-/* Signals the presence of objects compiled by HP compilers */
-int hp_som_som_object_present = 0;
+/* This flag is used in hppa-tdep.c, and set in hp-symtab-read.c.
+   Signals the presence of objects compiled by HP compilers.  */
+int deprecated_hp_som_som_object_present = 0;
 
 static void fixup_section (struct general_symbol_info *, struct objfile *);
 

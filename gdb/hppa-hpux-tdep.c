@@ -44,12 +44,6 @@ typedef struct
   }
 args_for_find_stub;
 
-/* This is declared in symtab.c; set to 1 in hp-symtab-read.c */
-extern int hp_som_som_object_present;
-
-/* In breakpoint.c */
-extern int exception_catchpoints_are_fragile;
-
 /* FIXME: brobecker 2002-12-25.  The following functions will eventually
    become static, after the multiarching conversion is done.  */
 int hppa_hpux_pc_in_sigtramp (CORE_ADDR pc, char *name);
@@ -198,8 +192,6 @@ __eh_notification;
 static int hp_cxx_exception_support = 0;
 /* Has the initialize function been run? */
 int hp_cxx_exception_support_initialized = 0;
-/* Similar to above, but imported from breakpoint.c -- non-target-specific */
-extern int exception_support_initialized;
 /* Address of __eh_notify_hook */
 static CORE_ADDR eh_notify_hook_addr = 0;
 /* Address of __d_eh_notify_callback */
@@ -374,7 +366,7 @@ initialize_hp_cxx_exception_support (void)
   if (recurse > 0)
     {
       hp_cxx_exception_support_initialized = 0;
-      exception_support_initialized = 0;
+      deprecated_exception_support_initialized = 0;
       return 0;
     }
 
@@ -385,7 +377,7 @@ initialize_hp_cxx_exception_support (void)
      for exception handling debug support will be available!
      This will percolate back up to breakpoint.c, where our callers
      will decide to try the g++ exception-handling support instead. */
-  if (!hp_som_som_object_present)
+  if (!deprecated_hp_som_som_object_present)
     return 0;
 
   /* We have a SOM executable with SOM debug info; find the hooks */
@@ -469,7 +461,7 @@ initialize_hp_cxx_exception_support (void)
       eh_notify_callback_addr = args.return_val;
       recurse--;
 
-      exception_catchpoints_are_fragile = 1;
+      deprecated_exception_catchpoints_are_fragile = 1;
 
       if (!eh_notify_callback_addr)
 	{
@@ -481,7 +473,7 @@ initialize_hp_cxx_exception_support (void)
 	}
     }
   else
-    exception_catchpoints_are_fragile = 0;
+    deprecated_exception_catchpoints_are_fragile = 0;
 #endif
 
   /* Now, look for the breakpointable routine in end.o */
@@ -556,7 +548,7 @@ initialize_hp_cxx_exception_support (void)
   /* Set the flags */
   hp_cxx_exception_support = 2;	/* everything worked so far */
   hp_cxx_exception_support_initialized = 1;
-  exception_support_initialized = 1;
+  deprecated_exception_support_initialized = 1;
 
   return 1;
 }
@@ -575,7 +567,8 @@ child_enable_exception_callback (enum exception_event_kind kind, int enable)
 {
   char buf[4];
 
-  if (!exception_support_initialized || !hp_cxx_exception_support_initialized)
+  if (!deprecated_exception_support_initialized
+      || !hp_cxx_exception_support_initialized)
     if (!initialize_hp_cxx_exception_support ())
       return NULL;
 

@@ -266,13 +266,13 @@ int breakpoint_count;
 /* Pointer to current exception event record */
 static struct exception_event_record *current_exception_event;
 
-/* Indicator of whether exception catchpoints should be nuked
-   between runs of a program */
-int exception_catchpoints_are_fragile = 0;
+/* Indicator of whether exception catchpoints should be nuked between
+   runs of a program.  */
+int deprecated_exception_catchpoints_are_fragile = 0;
 
 /* Indicator of when exception catchpoints set-up should be
-   reinitialized -- e.g. when program is re-run */
-int exception_support_initialized = 0;
+   reinitialized -- e.g. when program is re-run.  */
+int deprecated_exception_support_initialized = 0;
 
 /* This function returns a pointer to the string representation of the
    pathname of the dynamically-linked library that has just been
@@ -1636,8 +1636,8 @@ breakpoint_init_inferior (enum inf_context context)
       default:
 	/* Likewise for exception catchpoints in dynamic-linked
 	   executables where required */
-	if (ep_is_exception_catchpoint (b) &&
-	    exception_catchpoints_are_fragile)
+	if (ep_is_exception_catchpoint (b)
+	    && deprecated_exception_catchpoints_are_fragile)
 	  {
 	    warning_needed = 1;
 	    delete_breakpoint (b);
@@ -1646,8 +1646,8 @@ breakpoint_init_inferior (enum inf_context context)
       }
   }
 
-  if (exception_catchpoints_are_fragile)
-    exception_support_initialized = 0;
+  if (deprecated_exception_catchpoints_are_fragile)
+    deprecated_exception_support_initialized = 0;
 
   /* Don't issue the warning unless it's really needed... */
   if (warning_needed && (context != inf_exited))

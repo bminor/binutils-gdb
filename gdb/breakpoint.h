@@ -802,4 +802,13 @@ extern void delete_command (char *arg, int from_tty);
    remove fails. */
 extern int remove_hw_watchpoints (void);
 
+
+/* Indicator of whether exception catchpoints should be nuked between
+   runs of a program.  */
+extern int deprecated_exception_catchpoints_are_fragile;
+
+/* Indicator of when exception catchpoints set-up should be
+   reinitialized -- e.g. when program is re-run.  */
+extern int deprecated_exception_support_initialized;
+
 #endif /* !defined (BREAKPOINT_H) */

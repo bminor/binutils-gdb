@@ -1,5 +1,36 @@
 2004-04-08  Andrew Cagney  <cagney@redhat.com>
 
+	* breakpoint.h (deprecated_exception_catchpoints_are_fragile)
+	(deprecated_exception_support_initialized): Declare.
+	* hppa-hpux-tdep.c (initialize_hp_cxx_exception_support) 
+	(initialize_hp_cxx_exception_support)
+	(child_enable_exception_callback): Update.
+	* breakpoint.c (deprecated_exception_catchpoints_are_fragile)
+	(deprecated_exception_support_initialized): Rename
+	deprecated_exception_catchpoints_are_fragile and
+	deprecated_exception_support_initialized.
+	(breakpoint_init_inferior, breakpoint_init_inferior): Update.
+
+	* symtab.c (deprecated_hp_som_som_object_present): Rename
+	hp_som_som_object_present.
+	* symtab.h (deprecated_hp_som_som_object_present): Declare.
+	* symfile.c (hp_som_som_object_present, RESET_HP_UX_GLOBALS):
+	Update.  Delete extern declaration.
+	* valops.c (hp_som_som_object_present): Ditto.
+	* parse.c (deprecated_hp_som_som_object_present) 
+	(parse_nested_classes_for_hpacc): Ditto.
+	* hpread.c (hp_som_som_object_present, hpread_expand_symtab): Ditto.
+	* hppa-hpux-tdep.c (hp_som_som_object_present) 
+	(initialize_hp_cxx_exception_support): Ditto.
+	* eval.c (hp_som_som_object_present, evaluate_subexp_standard): Ditto.
+	* cp-valprint.c (hp_som_som_object_present) 
+	(cp_print_class_method): Ditto.
+	* c-typeprint.c (hp_som_som_object_present): 
+	(c_type_print_base): Ditto.
+	* c-exp.y (hp_som_som_object_present): Ditto.
+
+2004-04-08  Andrew Cagney  <cagney@redhat.com>
+
 	* frame-unwind.c (struct frame_unwind_table, frame_unwind_init)
 	(frame_unwind_prepend_unwinder, frame_unwind_append_sniffer)
 	(frame_unwind_find_by_frame): Re-implement the unwind code so

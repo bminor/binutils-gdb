@@ -43,10 +43,6 @@
 #include "gdb_assert.h"
 #include "cp-support.h"
 
-/* Flag indicating HP compilers were used; needed to correctly handle some
-   value operations with HP aCC code/runtime. */
-extern int hp_som_som_object_present;
-
 extern int overload_debug;
 /* Local functions.  */
 
@@ -299,8 +295,8 @@ value_cast (struct type *type, struct value *arg2)
     {
       LONGEST longest;
 
-      if (hp_som_som_object_present &&	/* if target compiled by HP aCC */
-	  (code2 == TYPE_CODE_PTR))
+      if (deprecated_hp_som_som_object_present	/* if target compiled by HP aCC */
+	  && (code2 == TYPE_CODE_PTR))
 	{
 	  unsigned int *ptr;
 	  struct value *retvalp;

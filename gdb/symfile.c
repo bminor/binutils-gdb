@@ -65,10 +65,9 @@
 /* Some HP-UX related globals to clear when a new "main"
    symbol file is loaded. HP-specific.  */
 
-extern int hp_som_som_object_present;
 extern int hp_cxx_exception_support_initialized;
 #define RESET_HP_UX_GLOBALS() do {\
-                                    hp_som_som_object_present = 0;             /* indicates HP-compiled code */        \
+                                    deprecated_hp_som_som_object_present = 0;             /* indicates HP-compiled code */        \
                                     hp_cxx_exception_support_initialized = 0;  /* must reinitialize exception stuff */ \
                               } while (0)
 #endif

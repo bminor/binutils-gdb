@@ -1362,4 +1362,9 @@ extern struct cleanup *make_cleanup_free_search_symbols (struct symbol_search
 extern void set_main_name (const char *name);
 extern /*const */ char *main_name (void);
 
+/* Global to indicate presence of HP-compiled objects,
+   in particular, SOM executable file with SOM debug info 
+   Defined in symtab.c, used in hppa-tdep.c. */
+extern int deprecated_hp_som_som_object_present;
+
 #endif /* !defined(SYMTAB_H) */

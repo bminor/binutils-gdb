@@ -238,11 +238,6 @@ static dnttpointer hpread_get_next_skip_over_anon_unions
   (int, dnttpointer, union dnttentry **, struct objfile *);
 
 
-/* Global to indicate presence of HP-compiled objects,
-   in particular, SOM executable file with SOM debug info 
-   Defined in symtab.c, used in hppa-tdep.c. */
-extern int hp_som_som_object_present;
-
 /* Static used to indicate a class type that requires a
    fix-up of one of its method types */
 static struct type *fixup_class = NULL;
@@ -2875,7 +2870,7 @@ hpread_expand_symtab (struct objfile *objfile, int sym_offset, int sym_size,
     }
 
   current_objfile = NULL;
-  hp_som_som_object_present = 1;	/* Indicate we've processed an HP SOM SOM file */
+  deprecated_hp_som_som_object_present = 1;	/* Indicate we've processed an HP SOM SOM file */
 
   return end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT (objfile));
 }

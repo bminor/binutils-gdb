@@ -95,8 +95,6 @@ int comma_terminates;
 
 static int expressiondebug = 0;
 
-extern int hp_som_som_object_present;
-
 static void free_funcalls (void *ignore);
 
 static void prefixify_expression (struct expression *);
@@ -590,7 +588,7 @@ parse_nested_classes_for_hpacc (char *name, int len, char **token,
      return NULL, and caller must default to standard GDB
      behaviour. */
 
-  if (!hp_som_som_object_present)
+  if (!deprecated_hp_som_som_object_present)
     return (struct symbol *) NULL;
 
   p = name;
