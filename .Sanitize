@@ -1,6 +1,15 @@
-# .Sanitize for devo.
-
 ########################
+#
+#	 H    H  EEEEEE Y     Y  !!
+#	 H    H  E       Y   Y   !!
+#	 H    H  E        Y Y    !!
+#	 H    H  E         Y     !!
+#	 HHHHHH  EEEEE     Y     !!
+#	 H    H  E         Y     !!
+#	 H    H  E         Y     !!
+#	 H    H  E         Y
+#	 H    H  EEEEEE    Y     !!
+#
 # YO!  READ ME!!!!!!!!!
 # If you're about to add a file or directory which isn't checked out as part
 # of every module in devo (e.g., if "cvs co gas+utils" won't get it, or if
@@ -14,6 +23,8 @@
 # okay.  You don't want to get people in the habit of ignoring complaints from
 # Sanitize, do you?  No, I didn't think so.
 ########################
+
+# .Sanitize for devo.
 
 # Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
