@@ -91,7 +91,7 @@ fi
 AC_SUBST($1)])
 
 
-# serial 18 AM_PROG_LIBTOOL
+# serial 19 AM_PROG_LIBTOOL
 AC_DEFUN(AM_PROG_LIBTOOL,
 [AC_REQUIRE([AC_CANONICAL_HOST])
 AC_REQUIRE([AC_PROG_RANLIB])
@@ -142,40 +142,31 @@ test "$ac_cv_prog_gnu_ld" = yes && libtool_flags="$libtool_flags --with-gnu-ld"
 
 # Some flags need to be propagated to the compiler or linker for good
 # libtool support.
-[case "$host" in
-*-*-irix6*)
-  ac_save_CFLAGS="$CFLAGS"
-  flag_passed=no
-  for f in -32 -64 -n32 ABI -cckr -mips1 -mips2 -mips3 -mips4; do
-    case "$f" in
-    ABI)
-      test -n "$SGI_ABI" && flag_passed=yes
-      if test "$flag_passed" = no && test "$ac_cv_prog_gcc" = yes; then
-	# Choose the ABI flag according to GCC's specs.
-	if $CC -dumpspecs 2>&1 | sed '/^\*link:$/,/^$/!d' | egrep -e '[ 	]-32' >/dev/null; then
-	  LD="${LD-ld} -32"
-	else
-	  LD="${LD-ld} -n32"
-	fi
-      fi
+case "$host" in
+*-*-irix*)
+  # Find out which ABI we are using.
+  echo '[#]line __oline__ "configure"' > conftest.$ac_ext
+  if AC_TRY_EVAL(ac_compile); then
+    case "`/usr/bin/file conftest.o`" in
+    *32-bit*)
+      LD="${LD-ld} -32"
       ;;
-
-    *)
-      if echo " $CC $CFLAGS " | egrep -e "[ 	]$f[	 ]" > /dev/null; then
-	flag_passed=yes
-	LD="${LD-ld} $f"
-      fi
+    *N32*)
+      LD="${LD-ld} -n32"
+      ;;
+    *64-bit*)
+      LD="${LD-ld} -64"
       ;;
     esac
-  done
-  CFLAGS="$ac_save_CFLAGS"
+  fi
+  rm -rf conftest*
   ;;
 
 *-*-sco3.2v5*)
   # On SCO OpenServer 5, we need -belf to get full-featured binaries.
   CFLAGS="$CFLAGS -belf"
   ;;
-esac]
+esac
 
 # Actually configure libtool.  ac_aux_dir is where install-sh is found.
 CC="$CC" CFLAGS="$CFLAGS" CPPFLAGS="$CPPFLAGS" \

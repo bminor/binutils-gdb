@@ -1,3 +1,7 @@
+Sat Feb  7 15:43:12 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure, aclocal.m4: Rebuild with new libtool.
+
 Fri Feb  6 12:02:28 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* alpha.c (alpha_Instruction): Use int, not signed.
