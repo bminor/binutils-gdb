@@ -1,3 +1,9 @@
+1999-07-13  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-mips.c (mips_elf_calculate_relocation): Do not complain
+	when _gp_disp is undefined.  Do not check R_MIPS_LO16 for overflow
+	when the relocation is against _gp_disp.
+
 1999-07-12  Mark Mitchell  <mark@codesourcery.com>
 
 	* dwarf2.c (read_attribute): Support DW_FORM_ref8.

@@ -5770,11 +5770,13 @@ mips_elf_calculate_relocation (abfd,
 
 	  gp_disp_p = true;
 	}
-
-      /* If this symbol is defined, calculate its address.  */
-      if ((h->root.root.type == bfd_link_hash_defined
-	   || h->root.root.type == bfd_link_hash_defweak)
-	  && h->root.root.u.def.section)
+      /* If this symbol is defined, calculate its address.  Note that
+	 _gp_disp is a magic symbol, always implicitly defined by the
+	 linker, so it's inappropriate to check to see whether or not
+	 its defined.  */
+      else if ((h->root.root.type == bfd_link_hash_defined
+		|| h->root.root.type == bfd_link_hash_defweak)
+	       && h->root.root.u.def.section)
 	{
 	  sec = h->root.root.u.def.section;
 	  if (sec->output_section)
@@ -5908,7 +5910,22 @@ mips_elf_calculate_relocation (abfd,
       else
 	{
 	  value = addend + gp - p + 4;
-	  overflowed_p = mips_elf_overflow_p (value, 16);
+	  /* The MIPS ABI requires checking the R_MIPS_LO16 relocation
+	     for overflow.  But, on, say, Irix 5, relocations against
+	     _gp_disp are normally generated from the .cpload
+	     pseudo-op.  It generates code that normally looks like
+	     this:
+
+	       lui    $gp,%hi(_gp_disp)
+	       addiu  $gp,$gp,%lo(_gp_disp)
+	       addu   $gp,$gp,$t9
+
+	     Here $t9 holds the address of the function being called,
+	     as required by the MIPS ELF ABI.  The R_MIPS_LO16
+	     relocation can easily overlfow in this situation, but the
+	     R_MIPS_HI16 relocation will handle the overflow.
+	     Therefore, we consider this a bug in the MIPS ABI, and do
+	     not check for overflow here.  */
 	}
       break;
 
