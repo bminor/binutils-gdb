@@ -1,3 +1,8 @@
+2002-01-17  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.asm/asm-source.exp (info symbol): Take another shot at
+	anchoring the pattern matching the entry point symbol's name.
+
 2002-01-17  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.base/maint.exp: Update ``maint internal-error'' to match

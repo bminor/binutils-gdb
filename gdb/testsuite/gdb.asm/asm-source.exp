@@ -133,13 +133,18 @@ gdb_expect {
 set entry_symbol ""
 send_gdb "info symbol 0x$entry_point\n"
 gdb_expect {
-    -re "info symbol 0x$entry_point\[\r\n\]*" {
-	exp_continue
-    }
-    -re "^(.*) in section .*$gdb_prompt $" {
-        # It's important to anchor the pattern above at the beginning
-        # of the line.  Without that carat, the (.*) may end up
-        # matching the empty string.
+    -re "info symbol 0x$entry_point\[\r\n\]+(\[^\r\n\]*) in section .*$gdb_prompt $" {
+        # We match the echoed `info symbol' command here, to help us
+        # reliably identify the beginning of the start symbol in the
+        # command's output.  You might think we could just use '^' to
+        # start matching at the beginning of the line, but
+        # unfortunately, in Expect, '^' matches the beginning of the
+        # input that hasn't been matched by any expect clause yet.  If
+        # every expect clause consumes a complete line, along with its
+        # terminating CR/LF, this is equivalent to the beginning of a
+        # line.  But expect clauses that end with `.*' will consume as
+        # much as happened to arrive from the TTY --- exactly where
+        # they leave you depends on inter-process timing.  :(
 	set entry_symbol $expect_out(1,string)
 	pass "info symbol"
     }
