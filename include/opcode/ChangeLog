@@ -1,3 +1,9 @@
+Thu May  7 02:14:08 1998  Doug Evans  <devans@charmed.cygnus.com>
+
+	* cgen.h (cgen_asm_init_parse): Delete.
+	(cgen_save_fixups,cgen_restore_fixups,cgen_swap_fixups): Delete.
+	(cgen_asm_record_register,cgen_asm_finish_insn): Delete.
+
 Mon Apr 27 10:13:11 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen.h (CGEN_ATTR_TYPE): Delete `const', moved to uses.
