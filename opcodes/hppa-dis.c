@@ -97,8 +97,8 @@ static const char *const logical_cond_64_names[] = {
   "", ",*=", ",*<", ",*<=", 0, 0, 0, ",*od",
   ",*tr", ",*<>", ",*>=", ",*>", 0, 0, 0, ",*ev"};
 static const char *const unit_cond_names[] = {
-  "", 0, ",sbz", ",shz", ",sdc", 0, ",sbc", ",shc",
-  ",tr", 0, ",nbz", ",nhz", ",ndc", 0, ",nbc", ",nhc"
+  "", ",swz", ",sbz", ",shz", ",sdc", ",swc", ",sbc", ",shc",
+  ",tr", ",nwz", ",nbz", ",nhz", ",ndc", ",nwc", ",nbc", ",nhc"
 };
 static const char *const unit_cond_64_names[] = {
   "", ",*swz", ",*sbz", ",*shz", ",*sdc", ",*swc", ",*sbc", ",*shc",
@@ -823,6 +823,7 @@ print_insn_hppa (memaddr, info)
 		case 'U':
 		  fput_const (extract_10U_store (insn), info);
 		  break;
+		case 'B':
 		case 'Q':
 		  fput_const (extract_5Q_store (insn), info);
 		  break;
