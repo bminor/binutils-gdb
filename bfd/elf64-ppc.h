@@ -18,25 +18,25 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 bfd_boolean ppc64_elf_mark_entry_syms
-  PARAMS ((struct bfd_link_info *));
+  (struct bfd_link_info *);
 bfd_boolean ppc64_elf_edit_opd
-  PARAMS ((bfd *, struct bfd_link_info *));
+  (bfd *, struct bfd_link_info *);
 bfd_boolean ppc64_elf_tls_setup
-  PARAMS ((bfd *, struct bfd_link_info *));
+  (bfd *, struct bfd_link_info *);
 bfd_boolean ppc64_elf_tls_optimize
-  PARAMS ((bfd *, struct bfd_link_info *));
+  (bfd *, struct bfd_link_info *);
 bfd_vma ppc64_elf_toc
-  PARAMS ((bfd *));
+  (bfd *);
 int ppc64_elf_setup_section_lists
-  PARAMS ((bfd *, struct bfd_link_info *));
+  (bfd *, struct bfd_link_info *);
 void ppc64_elf_next_toc_section
-  PARAMS ((struct bfd_link_info *, asection *));
+  (struct bfd_link_info *, asection *);
 void ppc64_elf_reinit_toc
-  PARAMS ((bfd *, struct bfd_link_info *));
+  (bfd *, struct bfd_link_info *);
 bfd_boolean ppc64_elf_next_input_section
-  PARAMS ((struct bfd_link_info *, asection *));
+  (struct bfd_link_info *, asection *);
 bfd_boolean ppc64_elf_size_stubs
-  PARAMS ((bfd *, bfd *, struct bfd_link_info *, bfd_signed_vma,
-	   asection *(*) (const char *, asection *), void (*) (void)));
+  (bfd *, bfd *, struct bfd_link_info *, bfd_signed_vma,
+   asection *(*) (const char *, asection *), void (*) (void));
 bfd_boolean ppc64_elf_build_stubs
-  PARAMS ((bfd_boolean, struct bfd_link_info *, char **));
+  (bfd_boolean, struct bfd_link_info *, char **);

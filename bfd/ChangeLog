@@ -1,3 +1,14 @@
+2003-06-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c: Convert to C90 function definitions, remove unnecessary
+	prototypes and casts.  Replace PTR with void *.  Format copyright.
+	Mention ABI links.
+	(struct ppc_link_hash_table): Rename sgot, srelgot, splt, srelplt,
+	sdynbss, srelbss, sglink, sbrlt and srelbrlt to got, relgot .. relbrlt.
+	(ppc_type_of_stub): Make r_type an enum.
+	(ppc64_elf_size_stubs): Likewise.
+	* elf64-ppc.h: Remove PARAMS macro.
+
 2003-06-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_link_hash_table_create): Reinstate init of
@@ -83,8 +94,8 @@
 2003-06-17  Nick Clifton  <nickc@redhat.com>
 
 	* elflink.h (elf_gc_record_vtentry): Allocate an extra element
-        in the vtable_entries_used array to allow for the accessing
-        the largest element.
+	in the vtable_entries_used array to allow for the accessing
+	the largest element.
 
 2003-06-17  Alan Modra  <amodra@bigpond.net.au>
 
