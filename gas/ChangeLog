@@ -1,5 +1,15 @@
 2000-06-22  Alan Modra  <alan@linuxcare.com.au>
 
+	* dep-in.sed: Escape literal `.'s on patterns.  Trim off `../'
+	first before anything else.  Add bin-bugs.h, emul.h and progress.h
+	Sort list of files as for $(OBJS) in Makefile.am.
+
+	* Makefile.am (DEP): grep for leading `/' in DEPA, and fail if we
+	find one.  Remake dependencies.
+	($(OBJS)): Add bin-bugs.h, emul.h, and progress.h  Sort the list.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 	* config/tc-i386.c (i386_displacement): Don't assume a constant
 	displacement is necessarily 16 bits when in 16 bit code mode.
 	(md_assemble): Instead size the displacement here after we know

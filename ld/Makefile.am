@@ -892,8 +892,12 @@ distclean-local:
 DEP: dep.sed $(CFILES) $(HFILES) $(GENERATED_CFILES) $(GENERATED_HFILES) config.h
 	rm -f DEP1
 	$(MAKE) MKDEP="$(MKDEP)" DEP1
-	sed -f dep.sed < DEP1 > $@
-	echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> $@
+	if grep ' /' DEP1 > /dev/null 2> /dev/null; then \
+	  echo 'make DEP failed!'; exit 1; \
+	else \
+	  sed -f dep.sed < DEP1 > $@; \
+	  echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> $@; \
+	fi
 
 DEP1: $(CFILES) $(GENERATED_CFILES)
 	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > DEP2
