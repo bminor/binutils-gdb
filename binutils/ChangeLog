@@ -1,3 +1,8 @@
+Thu Oct 24 16:42:10 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* rddbg.c (read_section_stabs_debugging_info): Preserve the
+	backslash when concatenating multiple stabs strings.
+
 Thu Oct 10 11:36:31 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* dlltool.c (scan_open_obj_file): Fix loop exit test.
