@@ -35,7 +35,7 @@ child_pid_to_exec_file (int pid)
   char *path;
   char *buf;
 
-  asprintf (&path, "/proc/%d/file", pid);
+  xasprintf (&path, "/proc/%d/file", pid);
   buf = xcalloc (MAXPATHLEN, sizeof (char));
   make_cleanup (xfree, path);
   make_cleanup (xfree, buf);
@@ -84,7 +84,7 @@ fbsd_find_memory_regions (int (*func) (CORE_ADDR,
   char protection[4];
   int read, write, exec;
 
-  asprintf (&mapfilename, "/proc/%ld/map", (long) pid);
+  xasprintf (&mapfilename, "/proc/%ld/map", (long) pid);
   mapfile = fopen (mapfilename, "r");
   if (mapfile == NULL)
     error ("Couldn't open %s\n", mapfilename);
@@ -145,7 +145,7 @@ fbsd_make_corefile_notes (bfd *obfd, int *note_size)
   if (get_exec_file (0))
     {
       char *fname = strrchr (get_exec_file (0), '/') + 1;
-      char *psargs = strdup (fname);
+      char *psargs = xstrdup (fname);
 
       if (get_inferior_args ())
 	psargs = reconcat (psargs, psargs, " ", get_inferior_args (), NULL);

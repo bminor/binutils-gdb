@@ -1,3 +1,9 @@
+2002-04-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* fbsd-proc.c (child_pid_to_exec_file, fbsd_find_memory_regions):
+	s/asprintf/xasprintf/.
+	(fbsd_make_corefile_notes): s/strdup/xstrdup/.
+
 2002-04-07  Andrew Cagney  <ac131313@redhat.com>
 
 	I believe Jeff Law denies responsability for this one:
