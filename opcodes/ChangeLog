@@ -1,3 +1,11 @@
+Mon Mar  6 10:04:36 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa-dis.c: Include libhppa.h.
+
+Fri Feb 24 19:15:36 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-opc.c: Change dli to use M_DLI, and add dla.
+
 Mon Feb 20 23:54:38 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* Makefile.in (ALL_MACHINES):  Add w65-dis.o.
