@@ -17,16 +17,20 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* We need a published ABI spec for this.  Until one comes out, don't
-   assume this'll remain unchanged forever.  */
-
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
 
-#define SPARC64_OLD_RELOCS
+/* This is defined if one wants to build upward compatible binaries
+   with the original sparc64-elf toolchain.  The support is kept in for
+   now but is turned off by default.  dje 970930  */
+/*#define SPARC64_OLD_RELOCS*/
+
 #include "elf/sparc.h"
+
+/* In case we're on a 32-bit machine, construct a 64-bit "-1" value.  */
+#define MINUS_ONE (~ (bfd_vma) 0)
 
 static reloc_howto_type *sparc64_elf_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
@@ -37,14 +41,16 @@ static boolean sparc64_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 static boolean sparc64_elf_object_p PARAMS ((bfd *));
+
+/* The relocation "howto" table.  */
 
-/* The howto table and associated functions.
-   ??? Some of the relocation values have changed.  Until we're ready
-   to upgrade, we have our own copy.  At some point a non upward compatible
-   change will be made at which point this table can be deleted and we'll
-   use the one in elf32-sparc.c.  */
-
+static bfd_reloc_status_type sparc_elf_notsup_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_reloc_status_type sparc_elf_wdisp16_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static bfd_reloc_status_type sparc_elf_hix22_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static bfd_reloc_status_type sparc_elf_lox10_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 
 static reloc_howto_type sparc64_elf_howto_table[] = 
@@ -73,30 +79,39 @@ static reloc_howto_type sparc64_elf_howto_table[] =
   HOWTO(R_SPARC_JMP_SLOT,  0,0,00,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_JMP_SLOT",false,0,0x00000000,true),
   HOWTO(R_SPARC_RELATIVE,  0,0,00,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_RELATIVE",false,0,0x00000000,true),
   HOWTO(R_SPARC_UA32,      0,0,00,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_UA32",    false,0,0x00000000,true),
-#if 0 /* not used yet */
-  HOWTO(R_SPARC_PLT32,     0,0,00,false,0,complain_overflow_dont,    sparc_elf_notsupported_reloc,  "R_SPARC_PLT32",    false,0,0x00000000,true),
-  HOWTO(R_SPARC_HIPLT22,   0,0,00,false,0,complain_overflow_dont,    sparc_elf_notsupported_reloc,  "R_SPARC_HIPLT22",  false,0,0x00000000,true),
-  HOWTO(R_SPARC_LOPLT10,   0,0,00,false,0,complain_overflow_dont,    sparc_elf_notsupported_reloc,  "R_SPARC_LOPLT10",  false,0,0x00000000,true),
-  HOWTO(R_SPARC_PCPLT32,   0,0,00,false,0,complain_overflow_dont,    sparc_elf_notsupported_reloc,  "R_SPARC_PCPLT32",  false,0,0x00000000,true),
-  HOWTO(R_SPARC_PCPLT22,   0,0,00,false,0,complain_overflow_dont,    sparc_elf_notsupported_reloc,  "R_SPARC_PCPLT22",  false,0,0x00000000,true),
-  HOWTO(R_SPARC_PCPLT10,   0,0,00,false,0,complain_overflow_dont,    sparc_elf_notsupported_reloc,  "R_SPARC_PCPLT10",  false,0,0x00000000,true),
+#ifndef SPARC64_OLD_RELOCS
+  /* These aren't implemented yet.  */
+  HOWTO(R_SPARC_PLT32,     0,0,00,false,0,complain_overflow_dont,    sparc_elf_notsup_reloc, "R_SPARC_PLT32",    false,0,0x00000000,true),
+  HOWTO(R_SPARC_HIPLT22,   0,0,00,false,0,complain_overflow_dont,    sparc_elf_notsup_reloc, "R_SPARC_HIPLT22",  false,0,0x00000000,true),
+  HOWTO(R_SPARC_LOPLT10,   0,0,00,false,0,complain_overflow_dont,    sparc_elf_notsup_reloc, "R_SPARC_LOPLT10",  false,0,0x00000000,true),
+  HOWTO(R_SPARC_PCPLT32,   0,0,00,false,0,complain_overflow_dont,    sparc_elf_notsup_reloc, "R_SPARC_PCPLT32",  false,0,0x00000000,true),
+  HOWTO(R_SPARC_PCPLT22,   0,0,00,false,0,complain_overflow_dont,    sparc_elf_notsup_reloc, "R_SPARC_PCPLT22",  false,0,0x00000000,true),
+  HOWTO(R_SPARC_PCPLT10,   0,0,00,false,0,complain_overflow_dont,    sparc_elf_notsup_reloc, "R_SPARC_PCPLT10",  false,0,0x00000000,true),
 #endif
   HOWTO(R_SPARC_10,        0,2,10,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_10",      false,0,0x000003ff,true),
   HOWTO(R_SPARC_11,        0,2,11,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_11",      false,0,0x000007ff,true),
-  HOWTO(R_SPARC_64,        0,4,00,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_64",      false,0,~ (bfd_vma) 0, true),
-  HOWTO(R_SPARC_OLO10,     0,2,10,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_OLO10",   false,0,0x000003ff,true),
-  HOWTO(R_SPARC_HH22,     42,2,22,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_HH22",    false,0,0x003fffff,true),
+  HOWTO(R_SPARC_64,        0,4,64,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_64",      false,0,MINUS_ONE, true),
+  HOWTO(R_SPARC_OLO10,     0,2,13,false,0,complain_overflow_signed,  sparc_elf_notsup_reloc, "R_SPARC_OLO10",   false,0,0x00001fff,true),
+  HOWTO(R_SPARC_HH22,     42,2,22,false,0,complain_overflow_unsigned,bfd_elf_generic_reloc,  "R_SPARC_HH22",    false,0,0x003fffff,true),
   HOWTO(R_SPARC_HM10,     32,2,10,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_HM10",    false,0,0x000003ff,true),
   HOWTO(R_SPARC_LM22,     10,2,22,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_LM22",    false,0,0x003fffff,true),
-  HOWTO(R_SPARC_PC_HH22,  42,2,22,true, 0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_HH22",    false,0,0x003fffff,true),
+  HOWTO(R_SPARC_PC_HH22,  42,2,22,true, 0,complain_overflow_unsigned,bfd_elf_generic_reloc,  "R_SPARC_HH22",    false,0,0x003fffff,true),
   HOWTO(R_SPARC_PC_HM10,  32,2,10,true, 0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_HM10",    false,0,0x000003ff,true),
   HOWTO(R_SPARC_PC_LM22,  10,2,22,true, 0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_LM22",    false,0,0x003fffff,true),
   HOWTO(R_SPARC_WDISP16,   2,2,16,true, 0,complain_overflow_signed,  sparc_elf_wdisp16_reloc,"R_SPARC_WDISP16", false,0,0x00000000,true),
-  HOWTO(R_SPARC_WDISP19,   2,2,22,true, 0,complain_overflow_signed,  bfd_elf_generic_reloc,  "R_SPARC_WDISP19", false,0,0x0007ffff,true),
+  HOWTO(R_SPARC_WDISP19,   2,2,19,true, 0,complain_overflow_signed,  bfd_elf_generic_reloc,  "R_SPARC_WDISP19", false,0,0x0007ffff,true),
   HOWTO(R_SPARC_UNUSED_42, 0,0, 0,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_UNUSED_42",false,0,0x00000000,true),
   HOWTO(R_SPARC_7,         0,2, 7,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_7",       false,0,0x0000007f,true),
   HOWTO(R_SPARC_5,         0,2, 5,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_5",       false,0,0x0000001f,true),
   HOWTO(R_SPARC_6,         0,2, 6,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_6",       false,0,0x0000003f,true),
+  HOWTO(R_SPARC_DISP64,    0,4,64,true, 0,complain_overflow_signed,  bfd_elf_generic_reloc,  "R_SPARC_DISP64",  false,0,MINUS_ONE, true),
+  HOWTO(R_SPARC_PLT64,     0,4,64,false,0,complain_overflow_bitfield,sparc_elf_notsup_reloc, "R_SPARC_PLT64",   false,0,MINUS_ONE, false),
+  HOWTO(R_SPARC_HIX22,     0,4, 0,false,0,complain_overflow_bitfield,sparc_elf_hix22_reloc,  "R_SPARC_HIX22",   false,0,MINUS_ONE, false),
+  HOWTO(R_SPARC_LOX10,     0,4, 0,false,0,complain_overflow_dont,    sparc_elf_lox10_reloc,  "R_SPARC_LOX10",   false,0,MINUS_ONE, false),
+  HOWTO(R_SPARC_H44,      22,2,22,false,0,complain_overflow_unsigned,bfd_elf_generic_reloc,  "R_SPARC_H44",     false,0,0x003fffff,false),
+  HOWTO(R_SPARC_M44,      12,2,10,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_M44",     false,0,0x000003ff,false),
+  HOWTO(R_SPARC_L44,       0,2,13,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_L44",     false,0,0x00000fff,false),
+  HOWTO(R_SPARC_REGISTER,  0,4, 0,false,0,complain_overflow_bitfield,sparc_elf_notsup_reloc, "R_SPARC_REGISTER",false,0,MINUS_ONE, false)
 };
 
 struct elf_reloc_map {
@@ -110,9 +125,7 @@ static CONST struct elf_reloc_map sparc_reloc_map[] =
   { BFD_RELOC_16, R_SPARC_16, },
   { BFD_RELOC_8, R_SPARC_8 },
   { BFD_RELOC_8_PCREL, R_SPARC_DISP8 },
-  /* ??? This might cause us to need separate functions in elf{32,64}-sparc.c
-     (we could still have just one table), but is this reloc ever used?  */
-  { BFD_RELOC_CTOR, R_SPARC_32 }, /* @@ Assumes 32 bits.  */
+  { BFD_RELOC_CTOR, R_SPARC_64 },
   { BFD_RELOC_32, R_SPARC_32 },
   { BFD_RELOC_32_PCREL, R_SPARC_DISP32 },
   { BFD_RELOC_HI22, R_SPARC_HI22 },
@@ -148,6 +161,14 @@ static CONST struct elf_reloc_map sparc_reloc_map[] =
   {BFD_RELOC_SPARC_7, R_SPARC_7},
   {BFD_RELOC_SPARC_5, R_SPARC_5},
   {BFD_RELOC_SPARC_6, R_SPARC_6},
+  {BFD_RELOC_SPARC_DISP64, R_SPARC_DISP64},
+  {BFD_RELOC_SPARC_PLT64, R_SPARC_PLT64},
+  {BFD_RELOC_SPARC_HIX22, R_SPARC_HIX22},
+  {BFD_RELOC_SPARC_LOX10, R_SPARC_LOX10},
+  {BFD_RELOC_SPARC_H44, R_SPARC_H44},
+  {BFD_RELOC_SPARC_M44, R_SPARC_M44},
+  {BFD_RELOC_SPARC_L44, R_SPARC_L44},
+  {BFD_RELOC_SPARC_REGISTER, R_SPARC_REGISTER}
 };
 
 static reloc_howto_type *
@@ -174,6 +195,88 @@ sparc64_elf_info_to_howto (abfd, cache_ptr, dst)
   cache_ptr->howto = &sparc64_elf_howto_table[ELF64_R_TYPE (dst->r_info)];
 }
 
+/* Utility for performing the standard initial work of an instruction
+   relocation.
+   *PRELOCATION will contain the relocated item.
+   *PINSN will contain the instruction from the input stream.
+   If the result is `bfd_reloc_other' the caller can continue with
+   performing the relocation.  Otherwise it must stop and return the
+   value to its caller.  */
+
+static bfd_reloc_status_type
+init_insn_reloc (abfd,
+		 reloc_entry,
+		 symbol,
+		 data,
+		 input_section,
+		 output_bfd,
+		 prelocation,
+		 pinsn)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+     bfd_vma *prelocation;
+     bfd_vma *pinsn;
+{
+  bfd_vma relocation;
+  reloc_howto_type *howto = reloc_entry->howto;
+
+  if (output_bfd != (bfd *) NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (! howto->partial_inplace
+	  || reloc_entry->addend == 0))
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  /* This works because partial_inplace == false.  */
+  if (output_bfd != NULL)
+    return bfd_reloc_continue;
+
+  if (reloc_entry->address > input_section->_cooked_size)
+    return bfd_reloc_outofrange;
+
+  relocation = (symbol->value
+		+ symbol->section->output_section->vma
+		+ symbol->section->output_offset);
+  relocation += reloc_entry->addend;
+  if (howto->pc_relative)
+    {
+      relocation -= (input_section->output_section->vma
+		     + input_section->output_offset);
+      relocation -= reloc_entry->address;
+    }
+
+  *prelocation = relocation;
+  *pinsn = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
+  return bfd_reloc_other;
+}
+
+/* For unsupported relocs.  */
+
+static bfd_reloc_status_type
+sparc_elf_notsup_reloc (abfd,
+			reloc_entry,
+			symbol,
+			data,
+			input_section,
+			output_bfd,
+			error_message)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+     char **error_message;
+{
+  return bfd_reloc_notsupported;
+}
+
 /* Handle the WDISP16 reloc.  */
 
 static bfd_reloc_status_type
@@ -193,41 +296,93 @@ sparc_elf_wdisp16_reloc (abfd,
      char **error_message;
 {
   bfd_vma relocation;
-  bfd_vma x;
+  bfd_vma insn;
+  bfd_reloc_status_type status;
 
-  if (output_bfd != (bfd *) NULL
-      && (symbol->flags & BSF_SECTION_SYM) == 0
-      && (! reloc_entry->howto->partial_inplace
-	  || reloc_entry->addend == 0))
-    {
-      reloc_entry->address += input_section->output_offset;
-      return bfd_reloc_ok;
-    }
+  status = init_insn_reloc (abfd, reloc_entry, symbol, data,
+			    input_section, output_bfd, &relocation, &insn);
+  if (status != bfd_reloc_other)
+    return status;
 
-  if (output_bfd != NULL)
-    return bfd_reloc_continue;
-
-  if (reloc_entry->address > input_section->_cooked_size)
-    return bfd_reloc_outofrange;
-
-  relocation = (symbol->value
-		+ symbol->section->output_section->vma
-		+ symbol->section->output_offset);
-  relocation += reloc_entry->addend;
-  relocation -=	(input_section->output_section->vma
-		 + input_section->output_offset);
-  relocation -= reloc_entry->address;
-
-  x = bfd_get_32 (abfd, (char *) data + reloc_entry->address);
-  x |= ((((relocation >> 2) & 0xc000) << 6)
-	| ((relocation >> 2) & 0x3fff));
-  bfd_put_32 (abfd, x, (char *) data + reloc_entry->address);
+  insn = (insn & ~0x303fff) | ((((relocation >> 2) & 0xc000) << 6)
+			       | ((relocation >> 2) & 0x3fff));
+  bfd_put_32 (abfd, insn, (bfd_byte *) data + reloc_entry->address);
 
   if ((bfd_signed_vma) relocation < - 0x40000
       || (bfd_signed_vma) relocation > 0x3ffff)
     return bfd_reloc_overflow;
   else
     return bfd_reloc_ok;
+}
+
+/* Handle the HIX22 reloc.  */
+
+static bfd_reloc_status_type
+sparc_elf_hix22_reloc (abfd,
+		       reloc_entry,
+		       symbol,
+		       data,
+		       input_section,
+		       output_bfd,
+		       error_message)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+     char **error_message;
+{
+  bfd_vma relocation;
+  bfd_vma insn;
+  bfd_reloc_status_type status;
+
+  status = init_insn_reloc (abfd, reloc_entry, symbol, data,
+			    input_section, output_bfd, &relocation, &insn);
+  if (status != bfd_reloc_other)
+    return status;
+
+  relocation ^= MINUS_ONE;
+  insn = (insn & ~0x3fffff) | ((relocation >> 10) & 0x3fffff);
+  bfd_put_32 (abfd, insn, (bfd_byte *) data + reloc_entry->address);
+
+  if ((relocation & ~ (bfd_vma) 0xffffffff) != 0)
+    return bfd_reloc_overflow;
+  else
+    return bfd_reloc_ok;
+}
+
+/* Handle the LOX10 reloc.  */
+
+static bfd_reloc_status_type
+sparc_elf_lox10_reloc (abfd,
+		       reloc_entry,
+		       symbol,
+		       data,
+		       input_section,
+		       output_bfd,
+		       error_message)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+     char **error_message;
+{
+  bfd_vma relocation;
+  bfd_vma insn;
+  bfd_reloc_status_type status;
+
+  status = init_insn_reloc (abfd, reloc_entry, symbol, data,
+			    input_section, output_bfd, &relocation, &insn);
+  if (status != bfd_reloc_other)
+    return status;
+
+  insn = (insn & ~0x1fff) | 0x1c00 | (relocation & 0x3ff);
+  bfd_put_32 (abfd, insn, (bfd_byte *) data + reloc_entry->address);
+
+  return bfd_reloc_ok;
 }
 
 /* Relocate a SPARC64 ELF section.  */
@@ -332,29 +487,83 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	}
 
-      if (r_type != R_SPARC_WDISP16)
-	r = _bfd_final_link_relocate (howto, input_bfd, input_section,
-				      contents, rel->r_offset,
-				      relocation, rel->r_addend);
-      else
+      switch (r_type)
 	{
-	  bfd_vma x;
+	case R_SPARC_OLO10:
+	  {
+	    bfd_vma x;
 
-	  relocation += rel->r_addend;
-	  relocation -= (input_section->output_section->vma
-			 + input_section->output_offset);
-	  relocation -= rel->r_offset;
+	    relocation += rel->r_addend;
+	    relocation = (relocation & 0x3ff) + ELF64_R_TYPE_DATA (rel->r_info);
 
-	  x = bfd_get_32 (input_bfd, contents + rel->r_offset);
-	  x |= ((((relocation >> 2) & 0xc000) << 6)
-		| ((relocation >> 2) & 0x3fff));
-	  bfd_put_32 (input_bfd, x, contents + rel->r_offset);
+	    x = bfd_get_32 (input_bfd, contents + rel->r_offset);
+	    x = (x & ~0x1fff) | (relocation & 0x1fff);
+	    bfd_put_32 (input_bfd, x, contents + rel->r_offset);
 
-	  if ((bfd_signed_vma) relocation < - 0x40000
-	      || (bfd_signed_vma) relocation > 0x3ffff)
-	    r = bfd_reloc_overflow;
-	  else
+	    r = bfd_check_overflow (howto->complain_on_overflow,
+				    howto->bitsize, howto->rightshift,
+				    relocation);
+	  }
+	  break;
+
+	case R_SPARC_WDISP16:
+	  {
+	    bfd_vma x;
+
+	    relocation += rel->r_addend;
+	    /* Adjust for pc-relative-ness.  */
+	    relocation -= (input_section->output_section->vma
+			   + input_section->output_offset);
+	    relocation -= rel->r_offset;
+
+	    x = bfd_get_32 (input_bfd, contents + rel->r_offset);
+	    x = (x & ~0x303fff) | ((((relocation >> 2) & 0xc000) << 6)
+				   | ((relocation >> 2) & 0x3fff));
+	    bfd_put_32 (input_bfd, x, contents + rel->r_offset);
+
+	    r = bfd_check_overflow (howto->complain_on_overflow,
+				    howto->bitsize, howto->rightshift,
+				    relocation);
+	  }
+	  break;
+
+	case R_SPARC_HIX22:
+	  {
+	    bfd_vma x;
+
+	    relocation += rel->r_addend;
+	    relocation = relocation ^ MINUS_ONE;
+
+	    x = bfd_get_32 (input_bfd, contents + rel->r_offset);
+	    x = (x & ~0x3fffff) | ((relocation >> 10) & 0x3fffff);
+	    bfd_put_32 (input_bfd, x, contents + rel->r_offset);
+
+	    r = bfd_check_overflow (howto->complain_on_overflow,
+				    howto->bitsize, howto->rightshift,
+				    relocation);
+	  }
+	  break;
+
+	case R_SPARC_LOX10:
+	  {
+	    bfd_vma x;
+
+	    relocation += rel->r_addend;
+	    relocation = (relocation & 0x3ff) | 0x1c00;
+
+	    x = bfd_get_32 (input_bfd, contents + rel->r_offset);
+	    x = (x & ~0x1fff) | relocation;
+	    bfd_put_32 (input_bfd, x, contents + rel->r_offset);
+
 	    r = bfd_reloc_ok;
+	  }
+	  break;
+
+	default:
+	  r = _bfd_final_link_relocate (howto, input_bfd, input_section,
+					contents, rel->r_offset,
+					relocation, rel->r_addend);
+	  break;
 	}
 
       if (r != bfd_reloc_ok)

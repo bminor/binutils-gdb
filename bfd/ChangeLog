@@ -1,3 +1,8 @@
+Thu Oct  9 16:43:39 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* elf64-sparc.c (sparc_elf_{hix22,lox10}_reloc): New functions.
+	(sparc64_elf_howto_table): Use them for HIX22,LOX10 relocs.
+
 Wed Oct  8 11:38:45 1997  Richard Henderson  <rth@cygnus.com>
 
 	* elfcore.h (bfd_prstatus): Pedanticly, alignment_power should
