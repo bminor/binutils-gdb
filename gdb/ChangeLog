@@ -1,3 +1,7 @@
+Tue Jul  9 16:48:55 1996  Raymond Jou  <rjou@mexican.cygnus.com>
+
+	* ser-mac.c (mac_close): Change a typo SetSetBuf to SerSetBuf.
+
 Mon Jul 08 08:50:39 1996  Mark Alexander  <marka@cygnus.com>
 
 	* mon960-rom.c (mon960_open): Add floating point detection to
