@@ -3826,6 +3826,18 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 					    1 << align);
 	    }
 	}
+      /* Make sure the .dynamic section is the first section in the
+	 PT_DYNAMIC segment.  */
+      else if (p->p_type == PT_DYNAMIC
+	       && m->count > 1
+	       && strcmp (m->sections[0]->name, ".dynamic") != 0)
+	{
+	  _bfd_error_handler
+	    (_("%s: The first section in the PT_DYNAMIC segment is not the .dynamic section"),
+	     bfd_get_filename (abfd));
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
 
       if (m->count == 0)
 	p->p_vaddr = 0;

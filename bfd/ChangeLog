@@ -1,3 +1,8 @@
+2004-07-09  Jie Zhang  <zhangjie@magima.com.cn>
+
+	* elf.c (assign_file_positions_for_segments): Make sure the
+	.dynamic section is the first section in the PT_DYNAMIC segment.
+
 2004-07-09  Nick Clifton  <nickc@redhat.com>
 
 	* config.bfd: Change sh-sybmian-elf to sh-*-symbianelf.
