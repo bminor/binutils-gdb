@@ -166,20 +166,20 @@ arc_elf_object_p (abfd)
      bfd *abfd;
 {
   int mach;
-  unsigned long arch = elf_elfheader (abfd)->e_flags & EF_ARC_CPU;
+  unsigned long arch = elf_elfheader (abfd)->e_flags & EF_ARC_MACH;
 
   switch (arch)
     {
-    case E_ARC_CPU_BASE:
+    case E_ARC_MACH_BASE:
       mach = bfd_mach_arc_base;
       break;
-    case E_ARC_CPU_HOST:
+    case E_ARC_MACH_HOST:
       mach = bfd_mach_arc_host;
       break;
-    case E_ARC_CPU_GRAPHICS:
+    case E_ARC_MACH_GRAPHICS:
       mach = bfd_mach_arc_graphics;
       break;
-    case E_ARC_CPU_AUDIO:
+    case E_ARC_MACH_AUDIO:
       mach = bfd_mach_arc_audio;
       break;
     default:
@@ -205,22 +205,22 @@ arc_elf_final_write_processing (abfd, linker)
   switch (mach = bfd_get_mach (abfd))
     {
     case bfd_mach_arc_base:
-      val = E_ARC_CPU_BASE;
+      val = E_ARC_MACH_BASE;
       break;
     case bfd_mach_arc_host:
-      val = E_ARC_CPU_HOST;
+      val = E_ARC_MACH_HOST;
       break;
     case bfd_mach_arc_graphics:
-      val = E_ARC_CPU_GRAPHICS;
+      val = E_ARC_MACH_GRAPHICS;
       break;
     case bfd_mach_arc_audio:
-      val = E_ARC_CPU_AUDIO;
+      val = E_ARC_MACH_AUDIO;
       break;
     default:
       return;
     }
 
-  elf_elfheader (abfd)->e_flags &=~ EF_ARC_CPU;
+  elf_elfheader (abfd)->e_flags &=~ EF_ARC_MACH;
   elf_elfheader (abfd)->e_flags |= val;
 }
 
