@@ -1,3 +1,8 @@
+2002-10-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* rs6000-tdep.c (rs6000_gdbarch_init): For powerpc:7400, fix
+	"vrsave"'s register number.
+
 2002-09-29  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/djgpp/fnchange.lst: Rename i386gnu-nat.c and

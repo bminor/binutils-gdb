@@ -2783,7 +2783,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	break;
       case bfd_mach_ppc_7400:
 	tdep->ppc_vr0_regnum = 119;
-	tdep->ppc_vrsave_regnum = 153;
+	tdep->ppc_vrsave_regnum = 152;
 	tdep->ppc_ev0_regnum = -1;
 	tdep->ppc_ev31_regnum = -1;
 	break;
