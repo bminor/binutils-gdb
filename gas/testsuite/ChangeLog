@@ -1,3 +1,9 @@
+start-sanitize-tx49
+Wed Oct 29 16:27:30 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* gas/mips/mips.exp: Add tx49 configury.
+
+end-sanitize-tx49
 Wed Oct 15 10:40:14 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/ieee-fp/x930509a.s: Tweak slightly to work on the PA.

@@ -230,6 +230,35 @@ else
 	done
 fi
 
+tx49_files="ChangeLog tc-mips.c"
+
+if ( echo $* | grep keep\-tx49 > /dev/null ) ; then
+	for i in $tx49_files ; do
+		if test ! -d $i && (grep sanitize-tx49 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping tx49 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-tx49 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"tx49\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-tx49/,/end\-sanitize\-tx49/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
 tic80_files="obj-coff.h"
 
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then

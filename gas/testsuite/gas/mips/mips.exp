@@ -13,6 +13,11 @@ if [istarget mips*-*-*] then {
     set gpr_ilocks [expr $gpr_ilocks || [istarget mipstx19*-*-*]]
 # end-sanitize-tx19
 
+    #start-sanitize-tx49
+    set ilocks [expr $ilocks || [istarget mips64tx49*-*-*]]
+    #end-sanitize-tx49
+
+
     run_dump_test "abs"
     run_dump_test "add"
     run_dump_test "and"

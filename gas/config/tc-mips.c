@@ -220,7 +220,11 @@ static int mips_3900 = -1;
 /* Whether the processor uses hardware interlocks to protect 
    reads from the HI and LO registers, and thus does not
    require nops to be inserted.  */
-#define hilo_interlocks (mips_4010 || mips_cpu == 4300 || mips_3900)
+#define hilo_interlocks (mips_4010 || mips_cpu == 4300 || mips_3900 \
+                         /* start-sanitize-tx49 */                  \
+                         || mips_cpu == 4900                        \
+                         /* end-sanitize-tx49 */                    \
+                         )
 
 /* Whether the processor uses hardware interlocks to protect reads
    from the GPRs, and thus does not require nops to be inserted.  */
@@ -877,6 +881,14 @@ md_begin ()
 	  if (mips_4010 == -1)
 	    mips_4010 = 1;
 	}
+      /* start-sanitize-tx49 */
+      else if (strcmp (cpu, "mips64tx49") == 0)
+	{
+	  mips_opts.isa = 3;
+	  if (mips_cpu == -1)
+	    mips_cpu = 4900;
+	}
+      /* end-sanitize-tx49 */
       else if (strcmp (cpu, "r5000") == 0
 	       || strcmp (cpu, "mips64vr5000") == 0)
 	{
@@ -8542,6 +8554,10 @@ md_parse_option (c, arg)
 		    if (mips_4650 < 0)
 		      mips_4650 = 1;
 		  }
+                /* start-sanitize-tx49 */
+		else if (strcmp (p, "4900") == 0)
+		  mips_cpu = 4900;
+                /* end-sanitize-tx49 */
 		else if (strcmp (p, "4010") == 0)
 		  {
 		    mips_cpu = 4010;

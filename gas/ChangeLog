@@ -1,3 +1,11 @@
+start-sanitize-tx49
+Wed Oct 29 16:22:38 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* config/tc-mips.c (hilo_interlocks): True for tx49.
+	(md_begin): Add mips64tx49.
+	(md_parse_option): Add 4900 cpu.
+	
+end-sanitize-tx49
 Fri Oct 24 15:56:47 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-ppc.c (md_assemble): When handling @l, always sign
