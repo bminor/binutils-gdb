@@ -1,3 +1,12 @@
+Fri Dec  2 15:55:38 1994  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* Makefile.in (LIBGXX_SUPPORT_DIRS):  Add libstdc++.
+
+Tue Nov 29 19:37:56 1994  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* Makefile.in:  Move -fno-implicit-template from CXXFLAGS
+	to LIBCXXFLAGS.  Tests are better run without it.
+
 Wed Nov 23 10:29:25 1994  Brendan Kehoe  (brendan@lisa.cygnus.com)
 
 	* Makefile.in (all-ispell): Depend on all-emacs19 instead of all-emacs.
