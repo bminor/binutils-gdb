@@ -27,7 +27,7 @@ dnl header fields.  This is an attempt to do that.  I can't think of a
 dnl good feature test for this.
 case "${target}" in
 *-*-bsd4.4* | *-*-netbsd* | *-*-freebsd* | *-*-openbsd* \
-| *-*-cygwin32 | *-*-mingw32 | *-*-win32 )
+| *-*-cygwin* | *-*-mingw32 | *-*-win32 )
   AC_DEFINE(BSD44_FORMAT)
   ;;
 esac

@@ -69,36 +69,39 @@ AM_PROG_INSTALL
 AC_CHECK_HEADERS(string.h strings.h stdlib.h)
 
 # start-sanitize-cygnus
-use_cgen=no
 cgen_maint=no
+# Default is to use one in build tree.
+cgen=../cgen/cgen
+cgendir='$(srcdir)/../cgen'
 # Having --enable-maintainer-mode take arguments is another way to go.
+# ??? One can argue --with is more appropriate if one wants to specify
+# a directory name, but what we're doing here is an enable/disable kind
+# of thing and specifying both --enable and --with is klunky.
+# If you reeely want this to be --with, go ahead and change it.
 AC_ARG_ENABLE(cgen-maint,
-[  --enable-cgen-maint     build cgen generated files],
+[  --enable-cgen-maint[=dir]    build cgen generated files],
 [case "${enableval}" in
-  yes) cgen_maint=yes ;;
-  no)  cgen_maint=no ;;
-  *)   AC_MSG_ERROR([bad value ${enableval} for opcodes cgen-maint option]) ;;
+  yes)	cgen_maint=yes ;;
+  no)	cgen_maint=no ;;
+  *)
+	# argument is cgen install directory (not implemented yet).
+	# Having a `share' directory might be more appropriate for the .scm,
+	# .cpu, etc. files.
+	cgen_maint=yes
+	cgendir=${cgen_maint}/lib/cgen
+	cgen=${cgendir}/bin/cgen
+	;;
 esac])dnl
 AM_CONDITIONAL(CGEN_MAINT, test x${cgen_maint} = xyes)
-if test "x${cgen_maint}" = xyes ; then
-	for targ in $target $canon_targets
-	do
-	    case $targ in
-	    all) use_cgen=yes ;;
-	    m32r-*-*) use_cgen=yes ;;
-	    esac
-	done
-fi
-if test $use_cgen = yes ; then
-    AC_CHECK_PROG(SCHEME, guile, guile, guile)
-fi
+AC_SUBST(cgendir)
+AC_SUBST(cgen)
 # end-sanitize-cygnus
 
 # Horrible hacks to build DLLs on Windows.
 WIN32LDFLAGS=
 WIN32LIBADD=
 case "${host}" in
-*-*-cygwin32*)
+*-*-cygwin*)
   if test "$enable_shared" = "yes"; then
     WIN32LDFLAGS="-no-undefined"
     WIN32LIBADD="-L`pwd`/../bfd -lbfd -L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin"
@@ -159,9 +162,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_arm_arch)		ta="$ta arm-dis.lo" ;;
 	bfd_convex_arch)	;;
 	bfd_d10v_arch)		ta="$ta d10v-dis.lo d10v-opc.lo" ;;
-# start-sanitize-d30v
 	bfd_d30v_arch)		ta="$ta d30v-dis.lo d30v-opc.lo" ;;
-# end-sanitize-d30v
 	bfd_h8300_arch)		ta="$ta h8300-dis.lo" ;;
 	bfd_h8500_arch)		ta="$ta h8500-dis.lo" ;;
 	bfd_hppa_arch)		ta="$ta hppa-dis.lo" ;;
