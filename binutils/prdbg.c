@@ -519,30 +519,38 @@ pr_enum_type (p, tag, names, values)
   if (! append_type (info, "{ "))
     return false;
 
-  val = 0;
-  for (i = 0; names[i] != NULL; i++)
+  if (names == NULL)
     {
-      if (i > 0)
-	{
-	  if (! append_type (info, ", "))
-	    return false;
-	}
-
-      if (! append_type (info, names[i]))
+      if (! append_type (info, "/* undefined */"))
 	return false;
-
-      if (values[i] != val)
+    }
+  else
+    {
+      val = 0;
+      for (i = 0; names[i] != NULL; i++)
 	{
-	  char ab[20];
+	  if (i > 0)
+	    {
+	      if (! append_type (info, ", "))
+		return false;
+	    }
 
-	  print_vma (values[i], ab, false, false);
-	  if (! append_type (info, " = ")
-	      || ! append_type (info, ab))
+	  if (! append_type (info, names[i]))
 	    return false;
-	  val = values[i];
-	}
 
-      ++val;
+	  if (values[i] != val)
+	    {
+	      char ab[20];
+
+	      print_vma (values[i], ab, false, false);
+	      if (! append_type (info, " = ")
+		  || ! append_type (info, ab))
+		return false;
+	      val = values[i];
+	    }
+
+	  ++val;
+	}
     }
 
   return append_type (info, " }");

@@ -1706,6 +1706,20 @@ debug_make_undefined_tagged_type (handle, name, kind)
   if (name == NULL)
     return DEBUG_TYPE_NULL;
 
+  switch (kind)
+    {
+    case DEBUG_KIND_STRUCT:
+    case DEBUG_KIND_UNION:
+    case DEBUG_KIND_CLASS:
+    case DEBUG_KIND_UNION_CLASS:
+    case DEBUG_KIND_ENUM:
+      break;
+
+    default:
+      debug_error ("debug_make_undefined_type: unsupported kind");
+      return DEBUG_TYPE_NULL;
+    }
+
   t = debug_make_type (info, kind, 0);
   if (t == NULL)
     return DEBUG_TYPE_NULL;
@@ -2250,19 +2264,24 @@ debug_write_type (info, fns, fhandle, type, name)
       return (*fns->bool_type) (fhandle, type->size);
     case DEBUG_KIND_STRUCT:
     case DEBUG_KIND_UNION:
-      if (info->class_mark == type->u.kclass->mark)
+      if (type->u.kclass != NULL)
 	{
-	  /* We are currently outputting this struct.  I don't know if
-             this can happen, but it can happen for a class.  */
-	  return (*fns->tag_type) (fhandle, "?defining?", type->kind);
+	  if (info->class_mark == type->u.kclass->mark)
+	    {
+	      /* We are currently outputting this struct.  I don't
+		 know if this can happen, but it can happen for a
+		 class.  */
+	      return (*fns->tag_type) (fhandle, "?defining?", type->kind);
+	    }
+	  type->u.kclass->mark = info->class_mark;
 	}
-      type->u.kclass->mark = info->class_mark;
 
       if (! (*fns->start_struct_type) (fhandle, tag,
 				       type->kind == DEBUG_KIND_STRUCT,
 				       type->size))
 	return false;
-      if (type->u.kclass->fields != NULL)
+      if (type->u.kclass != NULL
+	  && type->u.kclass->fields != NULL)
 	{
 	  for (i = 0; type->u.kclass->fields[i] != NULL; i++)
 	    {
@@ -2281,6 +2300,9 @@ debug_write_type (info, fns, fhandle, type, name)
     case DEBUG_KIND_UNION_CLASS:
       return debug_write_class_type (info, fns, fhandle, type, tag);
     case DEBUG_KIND_ENUM:
+      if (type->u.kenum == NULL)
+	return (*fns->enum_type) (fhandle, tag, (const char **) NULL,
+				  (bfd_signed_vma *) NULL);
       return (*fns->enum_type) (fhandle, tag, type->u.kenum->names,
 				type->u.kenum->values);
     case DEBUG_KIND_POINTER:
@@ -2389,20 +2411,24 @@ debug_write_class_type (info, fns, fhandle, type, tag)
 {
   unsigned int i;
 
-  if (info->class_mark == type->u.kclass->mark)
+  if (type->u.kclass != NULL)
     {
-      /* We are currently outputting this class.  This can happen when
-         there are methods for an anonymous class.  */
-      return (*fns->tag_type) (fhandle, "?defining?", type->kind);
-    }
-  type->u.kclass->mark = info->class_mark;
+      if (info->class_mark == type->u.kclass->mark)
+	{
+	  /* We are currently outputting this class.  This can happen
+	     when there are methods for an anonymous class.  */
+	  return (*fns->tag_type) (fhandle, "?defining?", type->kind);
+	}
+      type->u.kclass->mark = info->class_mark;
 
-  if (type->u.kclass->vptrbase != NULL
-      && type->u.kclass->vptrbase != type)
-    {
-      if (! debug_write_type (info, fns, fhandle, type->u.kclass->vptrbase,
-			      (struct debug_name *) NULL))
-	return false;
+      if (type->u.kclass->vptrbase != NULL
+	  && type->u.kclass->vptrbase != type)
+	{
+	  if (! debug_write_type (info, fns, fhandle,
+				  type->u.kclass->vptrbase,
+				  (struct debug_name *) NULL))
+	    return false;
+	}
     }
 
   if (! (*fns->start_class_type) (fhandle, tag,
@@ -2411,93 +2437,98 @@ debug_write_class_type (info, fns, fhandle, type, tag)
 				  type->u.kclass->vptrbase != NULL,
 				  type->u.kclass->vptrbase == type))
     return false;
-  if (type->u.kclass->fields != NULL)
+
+  if (type->u.kclass != NULL)
     {
-      for (i = 0; type->u.kclass->fields[i] != NULL; i++)
+      if (type->u.kclass->fields != NULL)
 	{
-	  struct debug_field *f;
-
-	  f = type->u.kclass->fields[i];
-	  if (! debug_write_type (info, fns, fhandle, f->type,
-				  (struct debug_name *) NULL))
-	    return false;
-	  if (f->static_member)
+	  for (i = 0; type->u.kclass->fields[i] != NULL; i++)
 	    {
-	      if (! (*fns->class_static_member) (fhandle, f->name,
-						 f->u.s.physname,
-						 f->visibility))
-		return false;
-	    }
-	  else
-	    {
-	      if (! (*fns->struct_field) (fhandle, f->name, f->u.f.bitpos,
-					  f->u.f.bitsize, f->visibility))
-		return false;
-	    }
-	}
-    }
+	      struct debug_field *f;
 
-  if (type->u.kclass->baseclasses != NULL)
-    {
-      for (i = 0; type->u.kclass->baseclasses[i] != NULL; i++)
-	{
-	  struct debug_baseclass *b;
-
-	  b = type->u.kclass->baseclasses[i];
-	  if (! debug_write_type (info, fns, fhandle, b->type,
-				  (struct debug_name *) NULL))
-	    return false;
-	  if (! (*fns->class_baseclass) (fhandle, b->bitpos, b->virtual,
-					 b->visibility))
-	    return false;
-	}
-    }
-
-  if (type->u.kclass->methods != NULL)
-    {
-      for (i = 0; type->u.kclass->methods[i] != NULL; i++)
-	{
-	  struct debug_method *m;
-	  unsigned int j;
-
-	  m = type->u.kclass->methods[i];
-	  if (! (*fns->class_start_method) (fhandle, m->name))
-	    return false;
-	  for (j = 0; m->variants[j] != NULL; j++)
-	    {
-	      struct debug_method_variant *v;
-
-	      v = m->variants[j];
-	      if (v->context != NULL)
-		{
-		  if (! debug_write_type (info, fns, fhandle, v->context,
-					  (struct debug_name *) NULL))
-		    return false;
-		}
-	      if (! debug_write_type (info, fns, fhandle, v->type,
+	      f = type->u.kclass->fields[i];
+	      if (! debug_write_type (info, fns, fhandle, f->type,
 				      (struct debug_name *) NULL))
 		return false;
-	      if (v->voffset != VOFFSET_STATIC_METHOD)
+	      if (f->static_member)
 		{
-		  if (! (*fns->class_method_variant) (fhandle, v->argtypes,
-						      v->visibility,
-						      v->constp, v->volatilep,
-						      v->voffset,
-						      v->context != NULL))
+		  if (! (*fns->class_static_member) (fhandle, f->name,
+						     f->u.s.physname,
+						     f->visibility))
 		    return false;
 		}
 	      else
 		{
-		  if (! (*fns->class_static_method_variant) (fhandle,
-							     v->argtypes,
-							     v->visibility,
-							     v->constp,
-							     v->volatilep))
+		  if (! (*fns->struct_field) (fhandle, f->name, f->u.f.bitpos,
+					      f->u.f.bitsize, f->visibility))
 		    return false;
 		}
 	    }
-	  if (! (*fns->class_end_method) (fhandle))
-	    return false;
+	}
+
+      if (type->u.kclass->baseclasses != NULL)
+	{
+	  for (i = 0; type->u.kclass->baseclasses[i] != NULL; i++)
+	    {
+	      struct debug_baseclass *b;
+
+	      b = type->u.kclass->baseclasses[i];
+	      if (! debug_write_type (info, fns, fhandle, b->type,
+				      (struct debug_name *) NULL))
+		return false;
+	      if (! (*fns->class_baseclass) (fhandle, b->bitpos, b->virtual,
+					     b->visibility))
+		return false;
+	    }
+	}
+
+      if (type->u.kclass->methods != NULL)
+	{
+	  for (i = 0; type->u.kclass->methods[i] != NULL; i++)
+	    {
+	      struct debug_method *m;
+	      unsigned int j;
+
+	      m = type->u.kclass->methods[i];
+	      if (! (*fns->class_start_method) (fhandle, m->name))
+		return false;
+	      for (j = 0; m->variants[j] != NULL; j++)
+		{
+		  struct debug_method_variant *v;
+
+		  v = m->variants[j];
+		  if (v->context != NULL)
+		    {
+		      if (! debug_write_type (info, fns, fhandle, v->context,
+					      (struct debug_name *) NULL))
+			return false;
+		    }
+		  if (! debug_write_type (info, fns, fhandle, v->type,
+					  (struct debug_name *) NULL))
+		    return false;
+		  if (v->voffset != VOFFSET_STATIC_METHOD)
+		    {
+		      if (! (*fns->class_method_variant) (fhandle, v->argtypes,
+							  v->visibility,
+							  v->constp,
+							  v->volatilep,
+							  v->voffset,
+							  v->context != NULL))
+			return false;
+		    }
+		  else
+		    {
+		      if (! (*fns->class_static_method_variant) (fhandle,
+								 v->argtypes,
+								 v->visibility,
+								 v->constp,
+								 v->volatilep))
+			return false;
+		    }
+		}
+	      if (! (*fns->class_end_method) (fhandle))
+		return false;
+	    }
 	}
     }
 

@@ -1,3 +1,11 @@
+Thu Jan 11 11:45:34 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* debug.c (debug_make_undefined_tagged_type): Make sure we are
+	given a kind of type we can handle.
+	(debug_write_type): Handle undefined enums and structs.
+	(debug_write_class_type): Handle undefined classes.
+	* prdbg.c (pr_enum_type): Handle an undefined enum.
+
 Wed Jan 10 15:33:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in: Updated dependencies.

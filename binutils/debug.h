@@ -194,7 +194,8 @@ struct debug_write_fns
 
   /* Push an enum type onto the type stack, given the tag, a NULL
      terminated array of names and the associated values.  If there is
-     no tag, the tag argument will be NULL.  */
+     no tag, the tag argument will be NULL.  If this is an undefined
+     enum, the names and values arguments will be NULL.  */
   boolean (*enum_type) PARAMS ((PTR, const char *, const char **,
 				bfd_signed_vma *));
 
@@ -259,7 +260,9 @@ struct debug_write_fns
      end_struct_type function.  The second argument is the tag; this
      will be NULL if there isn't one.  The boolean argument is true
      for a struct, false for a union.  The unsigned int argument is
-     the size.  */
+     the size.  If this is an undefined struct or union, the size will
+     be 0 and struct_field will not be called before end_struct_type
+     is called.  */
   boolean (*start_struct_type) PARAMS ((PTR, const char *, boolean,
 					unsigned int));
 
