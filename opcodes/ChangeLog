@@ -1,3 +1,8 @@
+Mon May 15 15:18:07 2000  Donald Lindsay  <dlindsay@cygnus.com>
+
+	* d10v-opc.c (d10v_opcodes): add ALONE tag to all short branches
+	except brf's.
+
 2000-05-21  Nick Clifton  <nickc@cygnus.com>
 
 	* Makefile.am (LIBIBERTY): Define.
