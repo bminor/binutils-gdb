@@ -7863,6 +7863,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
       /* Handle other relocations that tweak non-addend part of insn.  */
       insn = 0;
+      max_br_offset = 1 << 25;
+      addend = rel->r_addend;
       switch (r_type)
 	{
 	default:
@@ -7879,31 +7881,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_REL14_BRNTAKEN:
 	  insn |= bfd_get_32 (output_bfd,
 			      contents + rel->r_offset) & ~(0x01 << 21);
-	  if (is_power4)
-	    {
-	      /* Set 'a' bit.  This is 0b00010 in BO field for branch
-		 on CR(BI) insns (BO == 001at or 011at), and 0b01000
-		 for branch on CTR insns (BO == 1a00t or 1a01t).  */
-	      if ((insn & (0x14 << 21)) == (0x04 << 21))
-		insn |= 0x02 << 21;
-	      else if ((insn & (0x14 << 21)) == (0x10 << 21))
-		insn |= 0x08 << 21;
-	      else
-		break;
-	    }
-	  else
-	    {
-	      from = (rel->r_offset
-		      + input_section->output_offset
-		      + input_section->output_section->vma);
+	  /* Fall thru.  */
 
-	      /* Invert 'y' bit if not the default.  */
-	      if ((bfd_signed_vma) (relocation + rel->r_addend - from) < 0)
-		insn ^= 0x01 << 21;
-	    }
-
-	  bfd_put_32 (output_bfd, insn, contents + rel->r_offset);
-	  break;
+	case R_PPC64_REL14:
+	  max_br_offset = 1 << 15;
+	  /* Fall thru.  */
 
 	case R_PPC64_REL24:
 	  /* Calls to functions with a different TOC, such as calls to
@@ -7912,11 +7894,13 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	     linkage stubs needs to be followed by a nop, as the nop
 	     will be replaced with an instruction to restore the TOC
 	     base pointer.  */
+	  stub_entry = NULL;
 	  if (((h != NULL
 		&& (fdh = &((struct ppc_link_hash_entry *) h)->oh->elf) != NULL
 		&& fdh->plt.plist != NULL)
 	       || ((fdh = h, sec) != NULL
 		   && sec->output_section != NULL
+		   && sec->id <= htab->top_id
 		   && (htab->stub_group[sec->id].toc_off
 		       != htab->stub_group[input_section->id].toc_off)))
 	      && (stub_entry = ppc_get_stub_entry (input_section, sec, fdh,
@@ -7925,17 +7909,18 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  || stub_entry->stub_type == ppc_stub_plt_branch_r2off
 		  || stub_entry->stub_type == ppc_stub_long_branch_r2off))
 	    {
-	      bfd_boolean can_plt_call = 0;
+	      bfd_boolean can_plt_call = FALSE;
 
 	      if (rel->r_offset + 8 <= input_section->size)
 		{
-		  insn = bfd_get_32 (input_bfd, contents + rel->r_offset + 4);
-		  if (insn == NOP
-		      || insn == CROR_151515 || insn == CROR_313131)
+		  unsigned long nop;
+		  nop = bfd_get_32 (input_bfd, contents + rel->r_offset + 4);
+		  if (nop == NOP
+		      || nop == CROR_151515 || nop == CROR_313131)
 		    {
 		      bfd_put_32 (input_bfd, LD_R2_40R1,
 				  contents + rel->r_offset + 4);
-		      can_plt_call = 1;
+		      can_plt_call = TRUE;
 		    }
 		}
 
@@ -7945,16 +7930,17 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		    {
 		      /* If this is a plain branch rather than a branch
 			 and link, don't require a nop.  */
-		      insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
-		      if ((insn & 1) == 0)
-			can_plt_call = 1;
+		      unsigned long br;
+		      br = bfd_get_32 (input_bfd, contents + rel->r_offset);
+		      if ((br & 1) == 0)
+			can_plt_call = TRUE;
 		    }
 		  else if (h != NULL
 			   && strcmp (h->root.root.string,
 				      ".__libc_start_main") == 0)
 		    {
 		      /* Allow crt1 branch to go via a toc adjusting stub.  */
-		      can_plt_call = 1;
+		      can_plt_call = TRUE;
 		    }
 		  else
 		    {
@@ -7986,23 +7972,66 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		    }
 		}
 
-	      if (can_plt_call)
+	      if (can_plt_call
+		  && stub_entry->stub_type == ppc_stub_plt_call)
+		unresolved_reloc = FALSE;
+	    }
+
+	  /* If the branch is out of reach we ought to have a long
+	     branch stub.  */
+	  from = (rel->r_offset
+		  + input_section->output_offset
+		  + input_section->output_section->vma);
+
+	  if (stub_entry == NULL
+	      && (relocation + rel->r_addend - from + max_br_offset
+		  >= 2 * max_br_offset)
+	      && r_type != R_PPC64_ADDR14_BRTAKEN
+	      && r_type != R_PPC64_ADDR14_BRNTAKEN)
+	    stub_entry = ppc_get_stub_entry (input_section, sec, h, rel, htab);
+
+	  if (stub_entry != NULL)
+	    {
+	      /* Munge up the value and addend so that we call the stub
+		 rather than the procedure directly.  */
+	      relocation = (stub_entry->stub_offset
+			    + stub_entry->stub_sec->output_offset
+			    + stub_entry->stub_sec->output_section->vma);
+	      addend = 0;
+	    }
+
+	  if (insn != 0)
+	    {
+	      if (is_power4)
 		{
-		  relocation = (stub_entry->stub_offset
-				+ stub_entry->stub_sec->output_offset
-				+ stub_entry->stub_sec->output_section->vma);
-		  if (stub_entry->stub_type == ppc_stub_plt_call)
-		    unresolved_reloc = FALSE;
+		  /* Set 'a' bit.  This is 0b00010 in BO field for branch
+		     on CR(BI) insns (BO == 001at or 011at), and 0b01000
+		     for branch on CTR insns (BO == 1a00t or 1a01t).  */
+		  if ((insn & (0x14 << 21)) == (0x04 << 21))
+		    insn |= 0x02 << 21;
+		  else if ((insn & (0x14 << 21)) == (0x10 << 21))
+		    insn |= 0x08 << 21;
+		  else
+		    break;
 		}
+	      else
+		{
+		  /* Invert 'y' bit if not the default.  */
+		  if ((bfd_signed_vma) (relocation + rel->r_addend - from) < 0)
+		    insn ^= 0x01 << 21;
+		}
+
+	      bfd_put_32 (output_bfd, insn, contents + rel->r_offset);
 	    }
 
 	  /* NOP out calls to undefined weak functions.
 	     We can thus call a weak function without first
 	     checking whether the function is defined.  */
-	  if (h != NULL
-	      && h->root.type == bfd_link_hash_undefweak
-	      && relocation == 0
-	      && rel->r_addend == 0)
+	  else if (h != NULL
+		   && h->root.type == bfd_link_hash_undefweak
+		   && r_type == R_PPC64_REL24
+		   && relocation == 0
+		   && rel->r_addend == 0)
 	    {
 	      bfd_put_32 (output_bfd, NOP, contents + rel->r_offset);
 	      continue;
@@ -8012,7 +8041,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
       /* Set `addend'.  */
       tls_type = 0;
-      addend = rel->r_addend;
       switch (r_type)
 	{
 	default:
@@ -8643,40 +8671,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      bfd_set_error (bfd_error_bad_value);
 	      ret = FALSE;
 	      continue;
-	    }
-	  break;
-
-	case R_PPC64_REL14:
-	case R_PPC64_REL14_BRNTAKEN:
-	case R_PPC64_REL14_BRTAKEN:
-	  max_br_offset = 1 << 15;
-	  goto branch_check;
-
-	case R_PPC64_REL24:
-	  max_br_offset = 1 << 25;
-
-	branch_check:
-	  /* If the branch is out of reach or the TOC register needs
-	     adjusting, then redirect the call to the local stub for
-	     this function.  */
-	  from = (rel->r_offset
-		  + input_section->output_offset
-		  + input_section->output_section->vma);
-	  if ((relocation + addend - from + max_br_offset >= 2 * max_br_offset
-	       || (sec != NULL
-		   && sec->output_section != NULL
-		   && sec->id <= htab->top_id
-		   && (htab->stub_group[sec->id].toc_off
-		       != htab->stub_group[input_section->id].toc_off)))
-	      && (stub_entry = ppc_get_stub_entry (input_section, sec, h,
-						   rel, htab)) != NULL)
-	    {
-	      /* Munge up the value and addend so that we call the stub
-		 rather than the procedure directly.  */
-	      relocation = (stub_entry->stub_offset
-			    + stub_entry->stub_sec->output_offset
-			    + stub_entry->stub_sec->output_section->vma);
-	      addend = 0;
 	    }
 	  break;
 	}
