@@ -2102,7 +2102,7 @@ elf_link_read_relocs_from_section (abfd, shdr, external_relocs,
 			       * sizeof (Elf_Internal_Rel)));
       for (; erel < erelend; erel++, irela += bed->s->int_rels_per_ext_rel)
 	{
-	  int i;
+	  unsigned char i;
 
 	  if (bed->s->swap_reloc_in)
 	    (*bed->s->swap_reloc_in) (abfd, (bfd_byte *) erel, irel);
