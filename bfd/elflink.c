@@ -962,12 +962,16 @@ _bfd_elf_merge_symbol (bfd *abfd,
   /* It's OK to change the type if either the existing symbol or the
      new symbol is weak unless it comes from a DT_NEEDED entry of
      a shared object, in which case, the DT_NEEDED entry may not be
-     required at the run time.  */
+     required at the run time. The type change is also OK if the
+     old symbol is undefined and the new symbol is defined.  */
 
   if ((! dt_needed && oldweakdef)
       || oldweakundef
       || newweakdef
-      || newweakundef)
+      || newweakundef
+      || (newdef
+	  && (h->root.type == bfd_link_hash_undefined
+	      || h->root.type == bfd_link_hash_undefweak)))
     *type_change_ok = TRUE;
 
   /* It's OK to change the size if either the existing symbol or the

@@ -1,3 +1,8 @@
+2003-09-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_merge_symbol): Allow type change if
+	the old symbol is undefined and the new symbol is defined.
+
 2003-09-18  Andreas Schwab  <schwab@suse.de>
 
 	* simple.c (bfd_simple_get_relocated_section_contents): Use
