@@ -1,4 +1,17 @@
 2004-08-04  Andrew Cagney  <cagney@gnu.org>
+	    Jim Blandy <jimb@redhat.com>
+
+	* sim_callbacks.h (simulator): Declare.
+	* Makefile.in (gdb-sim.o): New rule.
+	(MAIN_SRC, GDB_OBJ): Add gdb-sim.o, gdb-sim.c.
+	(DEFS_H): Delete.
+	(GDB_SIM_PPC_H): Define.
+	* gdb-sim.c: New file.
+	* sim_calls.c: Do not include "defs.h".
+	(simulator): Drop static.
+	(sim_store_register, sim_fetch_register): Delete.
+
+2004-08-04  Andrew Cagney  <cagney@gnu.org>
 
 	* Back out accidently committed change.
 

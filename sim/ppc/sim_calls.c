@@ -40,7 +40,6 @@
 #endif
 #endif
 
-#include "defs.h"
 #include "bfd.h"
 #include "gdb/callback.h"
 #include "gdb/remote-sim.h"
@@ -55,32 +54,9 @@ static int poll_quit_count = POLL_QUIT_INTERVAL;
 
 /* Structures used by the simulator, for gdb just have static structures */
 
-static psim *simulator;
+psim *simulator;
 static device *root_device;
 static host_callback *callbacks;
-
-/* We use GDB's gdbarch_register_name function to map GDB register
-   numbers onto names, which we can then look up in the register
-   table.  Since the `set architecture' command can select a new
-   processor variant at run-time, the meanings of the register numbers
-   can change, so we need to make sure the sim uses the same
-   name/number mapping that GDB uses.
-
-   (We don't use the REGISTER_NAME macro, which is a wrapper for
-   gdbarch_register_name.  We #include GDB's "defs.h", which tries to
-   #include GDB's "config.h", but gets ours instead, and REGISTER_NAME
-   ends up not getting defined.  Simpler to just use
-   gdbarch_register_name directly.)
-
-   We used to just use the REGISTER_NAMES macro from GDB's
-   target-dependent header files, which expanded into an initializer
-   for an array of strings.  That was kind of nice, because it meant
-   that libsim.a had only a compile-time dependency on GDB; using
-   gdbarch_register_name directly means that there are now link-time
-   and run-time dependencies too.
-
-   Perhaps the host_callback structure could provide a function for
-   retrieving register names; that would be cleaner.  */
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind,
@@ -175,54 +151,6 @@ sim_write (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 		    (long)mem, (long)buf, length, result));
   return result;
 }
-
-
-int
-sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
-{
-  const char *regname;
-
-  if (simulator == NULL) {
-    return 0;
-  }
-
-  /* GDB will sometimes ask for the contents of a register named "";
-     we ignore such requests, and leave garbage in *BUF.  In GDB
-     terms, the empty string means "the register with this number is
-     not present in the currently selected architecture variant."
-     That's following the kludge we're using for the MIPS processors.
-     But there are loops that just walk through the entire list of
-     names and try to get everything.  */
-  regname = gdbarch_register_name (current_gdbarch, regno);
-  if (! regname || regname[0] == '\0')
-    return -1;
-
-  TRACE(trace_gdb, ("sim_fetch_register(regno=%d(%s), buf=0x%lx)\n",
-		    regno, regname, (long)buf));
-  return psim_read_register(simulator, MAX_NR_PROCESSORS,
-			    buf, regname, raw_transfer);
-}
-
-
-int
-sim_store_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
-{
-  const char *regname;
-
-  if (simulator == NULL)
-    return 0;
-
-  /* See comments in sim_fetch_register, above.  */
-  regname = gdbarch_register_name (current_gdbarch, regno);
-  if (! regname || regname[0] == '\0')
-    return -1;
-
-  TRACE(trace_gdb, ("sim_store_register(regno=%d(%s), buf=0x%lx)\n",
-		    regno, regname, (long)buf));
-  return psim_write_register(simulator, MAX_NR_PROCESSORS,
-			     buf, regname, raw_transfer);
-}
-
 
 void
 sim_info (SIM_DESC sd, int verbose)
