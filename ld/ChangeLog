@@ -1,3 +1,11 @@
+1999-07-07  Mark Mitchell  <mark@codesourcery.com>
+
+	* Makefile.am (ALL_64_EMULATIONS): Add eelf64bmip.
+	(eelf64bmip): New target.
+	* Makefile.in: Regenerated.
+	* configure.tgt (mips-sgi-irix6*): Add 64-bit emulation.
+	* emulparams/elf64bmip.sh: New file.
+
 1999-07-05  Nick Clifton  <nickc@cygnus.com>
 
 	* emultempl/pe.em (after_open): Abort if input format is ARM and
