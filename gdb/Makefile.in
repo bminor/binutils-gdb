@@ -1239,15 +1239,17 @@ alpha-tdep.o: alpha-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 annotate.o: annotate.c $(defs_h) $(annotate_h) $(value_h) $(target_h) $(gdbtypes_h)
 
 arm-linux-nat.o: arm-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
-	$(gdb_string_h) $(regcache_h)
+	$(gdb_string_h) $(regcache_h) arm-tdep.h
 
 arm-linux-tdep.o: arm-linux-tdep.c $(defs_h) $(target_h) $(value_h) \
-	$(gdbtypes_h) $(floatformat_h) $(regcache_h) $(doublest_h)
+	$(gdbtypes_h) $(floatformat_h) $(regcache_h) $(doublest_h) arm-tdep.h
 
-arm-tdep.o: arm-tdep.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h) $(defs_h) \
-	$(gdbcore_h) $(regcache_h) $(doublest_h) $(value_h)
+arm-tdep.o: arm-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcmd_h) \
+	$(gdbcore_h) $(gdb_string_h) $(dis_asm_h) $(regcache_h) $(doublest_h) \
+	$(value_h) $(arch_utils_h) $(solib_svr4_h) arm-tdep.h \
+	$(BFD_SRC)/elf-bfd.h $(INCLUDE_DIR)/coff/internal.h 
 
-armnbsd-nat.o: armnbsd-nat.c $(defs_h)
+armnbsd-nat.o: armnbsd-nat.c $(defs_h) arm-tdep.h
 
 bcache.o: bcache.c $(bcache_h) $(defs_h)
 
@@ -1866,7 +1868,7 @@ remote-array.o: remote-array.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(version_h) $(regcache_h)
 
 remote-rdi.o: remote-rdi.c $(defs_h) $(gdbcore_h) \
-	$(inferior_h) $(gdb_string_h) $(completer_h)
+	$(inferior_h) $(gdb_string_h) $(completer_h) arm-tdep.h
 
 rdi-share/libangsd.a:	force
 	@dir=rdi-share; \
@@ -1879,7 +1881,7 @@ rdi-share/libangsd.a:	force
 	fi
 
 remote-rdp.o: remote-rdp.c $(defs_h) $(gdbcore_h) \
-	$(inferior_h) $(gdb_string_h)
+	$(inferior_h) $(gdb_string_h) arm-tdep.h
 
 remote-bug.o: remote-bug.c $(defs_h) $(gdbcore_h) $(serial_h) \
 	$(inferior_h) $(target_h) $(terminal_h) $(remote_utils_h) \
