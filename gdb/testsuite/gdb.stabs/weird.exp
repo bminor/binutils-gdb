@@ -19,6 +19,25 @@ proc do_tests {} {
 	clear_xfail "rs*-*-aix*"
 	gdb_test "ptype red" "type = enum \{red, green, blue\}" "ptype unnamed enum"
 
+	# Mips/alpha targets that use gcc with mips-tfile put out the stabs
+	# assembler directives embedded in comments. If the assembler
+	# file is then processed with native cc, all stabs directives
+	# will be lost.
+	# Skip the rest of the stabs tests for this case.
+	send "ptype inttype\n"
+	expect {
+		-re "^ptype inttype\r*\ntype = inttype.*$prompt $" {
+			pass "stabs found"
+		}
+		-re ".*$prompt $" {
+			setup_xfail "mips-*-*"
+			setup_xfail "alpha-*-*"
+			fail "stabs not found"
+			return
+		}
+		default { fail "checking for stabs" }
+	}
+
 	print_weird_var var0
 	print_weird_var var1
 	print_weird_var var2
@@ -244,7 +263,7 @@ if ![file exists $binfile] then {
 			fail "Errors reading weird.o"
 		}
 		timeout {
-			error "couldn't load $binfile into $GDB (timed out)."
+			perror "couldn't load $binfile into $GDB (timed out)."
 			return -1
 		}
 		eof { fail "(eof) cannot read weird.o" }

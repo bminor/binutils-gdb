@@ -1,3 +1,9 @@
+Wed Nov  3 11:23:11 1993  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* lib/gdb.exp: Transform tool name.
+	* gdb.t*/*.exp: Change error to perror so it works with DejaGnu
+	1.1's new error handling system.
+
 Mon Nov  1 10:36:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in, gdb.t2*/Makefile.in: Add -O to CXXFLAGS.

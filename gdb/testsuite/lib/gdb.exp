@@ -23,6 +23,13 @@
 # need to be modified for any target, it can be done with a variable
 # or by passing arguments.
 
+if ![info exists GDB] then {
+    set GDB [transform gdb]
+}
+if ![info exists GDBFLAGS] then {
+    set GDBFLAGS ""
+}
+
 #
 # gdb_version -- extract and print the version number of gcc
 #
@@ -31,9 +38,8 @@ proc default_gdb_version {} {
     global GDBFLAGS
     if {[which $GDB] != 0} then {
 	set tmp [exec echo "q" | $GDB]
-	set version "[lindex $tmp [lsearch $tmp "\[0-9\]*"]]"
-	set version "[string range $version 0 [expr [string length $version]-2]]"
-	clone_output "[which $GDB] version $version $GDBFLAGS\n"
+	regexp " \[0-9\.\]+" $tmp version
+	clone_output "[which $GDB] version$version $GDBFLAGS\n"
     } else {
 	warning "$GDB does not exist"
     }
@@ -53,9 +59,7 @@ proc gdb_unload {} {
 	-re "No symbol file now\.\r" { continue -expect }
 	-re "A program is being debugged already..*Kill it\? \(y or n\) $"\
 	    { send "y\n"
-		if $verbose>1 then {
-		    send_user "\t\tKilling previous program being debugged\n"
-		}
+		verbose "\t\tKilling previous program being debugged"
 	    continue -expect
 	}
 	-re "Discard symbol table from .*\? \(y or n\) $" {
@@ -64,7 +68,7 @@ proc gdb_unload {} {
 	}
 	-re "$prompt $" {}
 	timeout {
-	    error "couldn't unload file in $GDB (timed out)."
+	    perror "couldn't unload file in $GDB (timed out)."
 	    return -1
 	}
     }
@@ -187,7 +191,7 @@ proc gdb_test { args } {
     # trap the send so any problems don't crash things
     catch "send \"$command\n\"" errmess
     if [string match "write\(spawn_id=\[0-9\]+\):" $errmess] then {
-	error "sent \"$command\" got expect error \"$errmess\""
+	perror "sent \"$command\" got expect error \"$errmess\""
 	catch "close"
 	gdb_start
 	return -1
@@ -209,11 +213,11 @@ proc gdb_test { args } {
 	    set result 0
 	}
 	-re "Undefined command:.*$prompt" {
-	    error "Undefined command \"$command\"."
+	    perror "Undefined command \"$command\"."
 	    set result 1
 	}
 	-re "Ambiguous command.*$prompt $" {
-	    error "\"$command\" is not a unique command name."
+	    perror "\"$command\" is not a unique command name."
 	    set result 1
 	}
 	-re ".*$prompt $" {
@@ -224,18 +228,18 @@ proc gdb_test { args } {
 	}
 	"<return>" {
 	    send "\n"
-	    error "Window too small."
+	    perror "Window too small."
 	}
 	-re "\(y or n\) " {
 	    send "n\n"
-	    error "Got interactive prompt."
+	    perror "Got interactive prompt."
 	}
 	eof {
-	    error "Process no longer exists"
+	    perror "Process no longer exists"
 	    return -1
 	}
 	buffer_full {
-	    error "internal buffer is full."
+	    perror "internal buffer is full."
 	}
 	timeout	{
 	    fail "(timeout) $message"
@@ -247,9 +251,8 @@ proc gdb_test { args } {
 
 proc gdb_reinitialize_dir { subdir } {
     global prompt
-    global verbose
 
-    send "dir\n"
+   send "dir\n"
     expect {
 	-re "Reinitialize source path to empty.*" {
 	    send "y\n"
@@ -258,26 +261,23 @@ proc gdb_reinitialize_dir { subdir } {
 		    send "dir $subdir\n"
 		    expect {
 			-re "Source directories searched.*$prompt $" {
-			    if $verbose>1 then {
-				send_user "Dir set to $subdir\n"
-			    }
+			    verbose "Dir set to $subdir"
 			}
 			-re ".*$prompt $" {
-			    error "Dir \"$subdir\" failed."
+			    perror "Dir \"$subdir\" failed."
 			}
 		    }
 		}
 		-re ".*$prompt $" {
-		    error "Dir \"$subdir\" failed."
+		    perror "Dir \"$subdir\" failed."
 		}
 	    }
 	}
 	-re ".*$prompt $" {
-	    error "Dir \"$subdir\" failed."
+	    perror "Dir \"$subdir\" failed."
 	}
     }
 }
-
 
 #
 # gdb_exit -- exit the GDB, killing the target program if necessary
@@ -302,25 +302,19 @@ proc default_gdb_exit {} {
     # FIXME: What is this catch statement doing here?  Won't it prevent us
     # from getting errors that we'd rather see?
     catch {
-    expect {
-	eof { 
-	    verbose "Got EOF from $GDB" 2
-	}
-	timeout { 
-	    verbose "Got TIMEOUT from $GDB" 2
-	}
-	-re "The program is running.  Quit anyway.*(y or n) $" {
-	    send "y\n"
-	    verbose "Killing program being debugged" 2
+	expect {
+	    eof { 
+		verbose "Got EOF from $GDB" 2
+	    }
+	    timeout { 
+		verbose "Got TIMEOUT from $GDB" 2
+	    }
+	    -re "The program is running.  Quit anyway.*(y or n) $" {
+		send "y\n"
+		verbose "Killing program being debugged" 2
+	    }
 	}
     }
-    }
-
-    # FIXME: Does the catch prevent us from getting errors that we'd rather
-    # see?  the old gdb_exit in unix-gdb.exp had "close" without catch
-    # in the above expect statement (for the timeout and -re "The
-    # program... cases) (as well as a catch "close" here).
-    catch "close"
 
     # Before this was here sometimes "uit" would get sent to the next GDB
     # (assuming this is immediately followed by gdb_start), which would
@@ -329,6 +323,67 @@ proc default_gdb_exit {} {
     wait
 }
 
+#
+# gdb_load -- load a file into the debugger.
+#             return a -1 if anything goes wrong.
+#
+proc gdb_file_cmd { arg } {
+    global verbose
+    global loadpath
+    global loadfile
+    global GDB
+    global prompt
+
+    send "file $arg\n"
+    expect {
+        -re "Reading symbols from.*done.*$prompt $" {
+            verbose "\t\tLoaded $arg into the $GDB"
+            return 0
+        }
+        -re "has no symbol-table.*$prompt $" {
+            perror "$arg wasn't compiled with \"-g\""
+            return -1
+        }
+        -re "A program is being debugged already..*Kill it\? \(y or n\) $" {
+            send "y\n"
+                verbose "\t\tKilling previous program being debugged"
+            continue -expect
+        }
+        -re "Load new symbol table from.*\? \(y or n\) $" {
+            send "y\n"
+            expect {
+                -re "Reading symbols from.*done.*$prompt $" {
+                    verbose "\t\tLoaded $arg with new symbol table into $GDB"
+                    return 0
+                }
+                timeout {
+                    perror "(timeout) Couldn't load $arg, other program already l
+oaded."
+                    return -1
+                }
+            }
+	}
+        -re ".*No such file or directory.*$prompt $" {
+            perror "($arg) No such file or directory\n"
+            return -1
+        }
+        -re "$prompt $" {
+            perror "couldn't load $arg into $GDB."
+            return -1
+            }
+        timeout {
+            error "couldn't load $arg into $GDB (timed out)."
+            return -1
+        }
+        eof {
+            # This is an attempt to detect a core dump, but seems not to
+            # work.  Perhaps we need to match .* followed by eof, in which
+            # expect does not seem to have a way to do that.
+            error "couldn't load $arg into $GDB (end of file)."
+            return -1
+        }
+    }
+}
 
 
 
