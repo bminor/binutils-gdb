@@ -10414,7 +10414,6 @@ md_apply_fix3 (fix, valP, seg)
 {
   char *fixpos;
   valueT value = *valP;
-  int adjust = 0;
 
   fixpos = fix->fx_frag->fr_literal + fix->fx_where;
 
@@ -10424,22 +10423,18 @@ md_apply_fix3 (fix, valP, seg)
 	{
 	case BFD_RELOC_IA64_DIR32MSB:
 	  fix->fx_r_type = BFD_RELOC_IA64_PCREL32MSB;
-	  adjust = 1;
 	  break;
 
 	case BFD_RELOC_IA64_DIR32LSB:
 	  fix->fx_r_type = BFD_RELOC_IA64_PCREL32LSB;
-	  adjust = 1;
 	  break;
 
 	case BFD_RELOC_IA64_DIR64MSB:
 	  fix->fx_r_type = BFD_RELOC_IA64_PCREL64MSB;
-	  adjust = 1;
 	  break;
 
 	case BFD_RELOC_IA64_DIR64LSB:
 	  fix->fx_r_type = BFD_RELOC_IA64_PCREL64LSB;
-	  adjust = 1;
 	  break;
 
 	default:
@@ -10474,11 +10469,6 @@ md_apply_fix3 (fix, valP, seg)
 	default:
 	  break;
 	}
-
-      /* ??? This is a hack copied from tc-i386.c to make PCREL relocs
-	 work.  There should be a better way to handle this.  */
-      if (adjust)
-	fix->fx_offset += fix->fx_where + fix->fx_frag->fr_address;
     }
   else if (fix->tc_fix_data.opnd == IA64_OPND_NIL)
     {

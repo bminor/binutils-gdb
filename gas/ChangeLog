@@ -1,3 +1,8 @@
+2002-12-08  H.J. Lu <hjl@gnu.org>
+
+	* config/tc-ia64.c (md_apply_fix3): Remove the PCREL hack
+	copied from tc-i386.c.
+
 2002-12-08  Stephane Carrez  <stcarrez@nerim.fr>
 
 	Fix Bug savannah/1825:
