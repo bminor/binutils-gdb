@@ -1,3 +1,8 @@
+Fri Jul 26 14:06:50 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (disassemble_data): Set disasm_info.flavour from
+	abfd.
+
 Tue Jul 23 13:59:54 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* dlltool.c (secdata): In non DLLTOOL_PPC case, change alignment
