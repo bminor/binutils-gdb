@@ -1,3 +1,13 @@
+start-sanitize-m32r
+Fri Feb 21 13:55:14 1997  Doug Evans  <dje@seba.cygnus.com>
+
+	* elf32-m32r.c: Rewrite to use ELF backend linker.
+	Store lower 16 bits of addend in R_M32R_HI16_[SU]LO insns.
+	Add small data area support (R_M32R_SDA16).
+	* reloc.c: Document BFD_RELOC_M32R_SDA16.
+	* bfd-in2.h,libbfd.h: Regenerated.
+
+end-sanitize-m32r
 Thu Feb 20 23:50:31 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-mn10200.c (mn10200_elf_relax_section): New function.

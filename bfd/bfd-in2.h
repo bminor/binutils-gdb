@@ -1916,6 +1916,10 @@ used when the lower 16 bits are treated as signed. */
 
 /* This is a 16-bit reloc containing the lower 16 bits of an address. */
   BFD_RELOC_M32R_LO16,
+
+/* This is a 16-bit reloc containing the small data area offset for use in
+add3, load, and store instructions. */
+  BFD_RELOC_M32R_SDA16,
 /* end-sanitize-m32r */
 
 /* start-sanitize-v850 */
