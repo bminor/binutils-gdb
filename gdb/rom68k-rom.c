@@ -142,7 +142,7 @@ static struct monitor_ops rom68k_cmds =
   "dc\r",			/* download command */
   "Waiting for S-records from host... ", /* Load response */
   "ROM68K :->",			/* monitor command prompt */
-  "=",				/* end-of-command delimitor */
+  "\r",				/* end-of-line terminator */
   ".\r",			/* optional command terminator */
   &rom68k_ops,			/* target operations */
   SERIAL_1_STOPBITS,		/* number of stop bits */

@@ -143,7 +143,7 @@ static struct monitor_ops est_cmds =
   "dl\r",			/* download command */
   "+",				/* load response */
   ">BKM>",			/* monitor command prompt */
-  NULL,				/* end-of-command delimitor */
+  "\r",				/* end-of-line terminator */
   NULL,				/* optional command terminator */
   &est_ops,			/* target operations */
   SERIAL_1_STOPBITS,		/* number of stop bits */

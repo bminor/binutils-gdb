@@ -1,3 +1,7 @@
+Fri May 12 13:48:41 1995  Stu Grossman  (grossman@andros.cygnus.com)
+
+	* cpu32bug-rom.c remote-est.c rom68k-rom.c:  Update line_term element.
+
 Fri May 12 06:39:30 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* partial-stab.h: Expand comments.

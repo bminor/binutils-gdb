@@ -140,7 +140,7 @@ static struct monitor_ops cpu32bug_cmds =
   "lo\r",			/* download command */
   "lo\r\n",			/* load response */
   "CPU32Bug>",			/* monitor command prompt */
-  NULL,				/* end-of-command delimitor */
+  "\r",				/* end-of-line terminator */
   NULL,				/* optional command terminator */
   &cpu32bug_ops,		/* target operations */
   SERIAL_1_STOPBITS,		/* number of stop bits */
