@@ -1,3 +1,8 @@
+2003-11-25  Adam Fedor  <fedor@gnu.org>
+
+	* gdb.objc/nondebug.exp: Test for PR objc/1236.
+	* gdb.objc/nondebug.m: New file.
+
 2003-11-26  Ben Elliston  <bje@wasabisystems.com>
 
 	* gdb.asm/asm-source.exp: Make sure the final link succeeds on
