@@ -1,3 +1,7 @@
+2003-04-25  David Carlton  <carlton@bactrian.org>
+
+	* config/djgpp/fnchange.lst: Add testsuite/gdb.c++/maint.exp.
+
 2003-04-24  Adam Fedor  <fedor@gnu.org>
 
 	* objc-lang.c: Include "valprint.h"
