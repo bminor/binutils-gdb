@@ -1,3 +1,8 @@
+Wed Apr 29 17:07:10 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
+
+	* Makefile.in: Added dependencies to all-target-boehm-gc and
+ 	all-target-libjava to have them configure during the build.
+
 start-sanitize-gdbtk
 Tue Apr 28 16:24:24 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 

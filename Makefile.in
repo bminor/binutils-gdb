@@ -1502,7 +1502,7 @@ all-bash:
 all-bfd: all-libiberty all-intl
 all-binutils: all-libiberty all-opcodes all-bfd all-flex all-bison all-byacc all-intl
 all-bison: all-texinfo
-all-target-boehm-gc:
+all-target-boehm-gc: configure-target-boehm-gc
 all-byacc:
 all-cvssrc:
 configure-target-cygmon: $(ALL_GCC)
@@ -1570,7 +1570,7 @@ all-libiberty:
 all-libide: all-ilu
 all-libidetcl: all-tcl all-tk all-itcl all-ilu all-libgui all-libide
 # end-sanitize-ide
-all-target-libjava:
+all-target-libjava: configure-target-libjava
 configure-target-librx: $(ALL_GCC) configure-target-newlib
 all-target-librx: configure-target-librx
 configure-target-libstdc++: $(ALL_GCC)
