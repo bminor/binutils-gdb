@@ -572,6 +572,7 @@ version.c : Makefile.in
 
 # c-exp.tab.c is generated in srcdir from c-exp.y, then compiled in target
 # directory to c-exp.tab.o.
+c-exp.tab.o: ${srcdir}/c-exp.tab.c
 ${srcdir}/c-exp.tab.c : $(srcdir)/c-exp.y
 	@echo 'Expect 4 shift/reduce conflicts.'
 	${YACC} $(srcdir)/c-exp.y
@@ -579,6 +580,7 @@ ${srcdir}/c-exp.tab.c : $(srcdir)/c-exp.y
 
 # m2-exp.tab.c is generated in srcdir from m2-exp.y, then compiled in target
 # directory to m2-exp.tab.o.
+m2-exp.tab.o: ${srcdir}/m2-exp.tab.c
 ${srcdir}/m2-exp.tab.c : $(srcdir)/m2-exp.y
 	${YACC} $(srcdir)/m2-exp.y
 	mv y.tab.c ${srcdir}/m2-exp.tab.c
