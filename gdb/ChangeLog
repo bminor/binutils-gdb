@@ -1,3 +1,8 @@
+2001-03-20  Daniel Berlin  <dberlin@redhat.com>
+	
+	* symtab.c (completion_list_add_name): Remove duplicate string checks,
+	readline already does this, and it's much faster at it, too.
+
 2001-04-01  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* go32-nat.c: Minor tweaks, to pacify the ari script.

@@ -2844,17 +2844,6 @@ completion_list_add_name (char *symname, char *sym_text, int sym_text_len,
       return;
     }
 
-  /* Clip any symbol names that we've already considered.  (This is a
-     time optimization)  */
-
-  for (i = 0; i < return_val_index; ++i)
-    {
-      if (STREQ (symname, return_val[i]))
-	{
-	  return;
-	}
-    }
-
   /* We have a match for a completion, so add SYMNAME to the current list
      of matches. Note that the name is moved to freshly malloc'd space. */
 
@@ -2878,19 +2867,6 @@ completion_list_add_name (char *symname, char *sym_text, int sym_text_len,
 	strncpy (new, word, sym_text - word);
 	new[sym_text - word] = '\0';
 	strcat (new, symname);
-      }
-
-    /* Recheck for duplicates if we intend to add a modified symbol.  */
-    if (word != sym_text)
-      {
-	for (i = 0; i < return_val_index; ++i)
-	  {
-	    if (STREQ (new, return_val[i]))
-	      {
-		xfree (new);
-		return;
-	      }
-	  }
       }
 
     if (return_val_index + 3 > return_val_size)
