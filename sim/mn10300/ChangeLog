@@ -1,3 +1,7 @@
+Thu Dec  5 22:26:31 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c: Fix thinkos in last change to "inc dn".
+
 Wed Dec  4 10:57:53 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* simops.c: "add imm,sp" does not effect the condition codes.

@@ -1424,16 +1424,18 @@ void OP_F270 ()
 void OP_40 ()
 {
   int z,n,c,v;
-  unsigned int value;
+  unsigned int value, imm, reg1;
 
-  value = State.regs[REG_D0 + ((insn & 0xc) >> 2)] + 1;
+  reg1 = State.regs[REG_D0 + ((insn & 0xc) >> 2)];
+  imm = 1;
+  value = reg1 + imm;
   State.regs[REG_D0 + ((insn & 0xc) >> 2)] = value;
 
   z = (value == 0);
   n = (value & 0x80000000);
-  c = (reg1 < reg2);
-  v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
-       && (reg2 & 0x80000000) != (value & 0x80000000));
+  c = (reg1 < imm);
+  v = ((reg1 & 0x80000000) != (imm & 0x80000000)
+       && (reg1 & 0x80000000) != (value & 0x80000000));
 
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
