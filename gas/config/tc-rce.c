@@ -1,4 +1,4 @@
-/* tc-rce.c -- Assemble code for the Experimental R16
+/* tc-rce.c -- Assemble code for the Experimental RCE
 
    Copyright (C) 1993 Free Software Foundation.
 
