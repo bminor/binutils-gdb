@@ -1,3 +1,7 @@
+2003-04-13  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/h8300: New directory.  Tests for Renesas h8/300 family.
+
 2003-04-01  Nick Clifton  <nickc@redhat.com>
 
 	* sim/arm: New directory: Tests for ARM simulator.
