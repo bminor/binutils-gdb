@@ -63,6 +63,7 @@ ls-sthh.S
 ls-stw.S
 os-dbt.S
 tick.s
+trap.S
 
 Things-to-lose:
 
