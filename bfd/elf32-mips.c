@@ -1,5 +1,5 @@
 /* MIPS-specific support for 32-bit ELF
-   Copyright 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1993, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
 
    Most of the information added by Ian Lance Taylor, Cygnus Support,
    <ian@cygnus.com>.
@@ -59,6 +59,7 @@ static boolean mips_elf_create_procedure_table
 static int mips_elf_additional_program_headers PARAMS ((bfd *));
 static boolean mips_elf_modify_segment_map PARAMS ((bfd *));
 static INLINE int elf_mips_isa PARAMS ((flagword));
+static INLINE int elf_mips_mach PARAMS ((flagword));
 static boolean mips_elf32_section_from_shdr
   PARAMS ((bfd *, Elf32_Internal_Shdr *, char *));
 static boolean mips_elf32_section_processing
@@ -309,13 +310,18 @@ enum reloc_type
   R_MIPS_INSERT_B,	R_MIPS_DELETE,
   R_MIPS_HIGHER,	R_MIPS_HIGHEST,
   R_MIPS_CALL_HI16,	R_MIPS_CALL_LO16,
+  /* start-sanitize-r5900 */
+  /* This is used by a mips co-processor instruction.  */
+  R_MIPS15_S3,
+  /* end-sanitize-r5900 */
   R_MIPS_max,
   /* These relocs are used for the mips16.  */
   R_MIPS16_26 = 100,
   R_MIPS16_GPREL = 101
 /* start-sanitize-sky */
   /* These relocs are for the dvp.  */
-  , R_MIPS_DVP_11_PCREL = 120
+  , R_MIPS_DVP_11_PCREL = 120,
+  R_MIPS_DVP_27_S4 = 121
 /* end-sanitize-sky */
 };
 
@@ -699,7 +705,24 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 true,			/* partial_inplace */
 	 0x0000ffff,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* start-sanitize-r5900 */
+  HOWTO (R_MIPS15_S3,		/* type */
+	 3,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 15,			/* bitsize */
+	 false,			/* pc_relative */
+	 6,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_MIPS15_S3",		/* name */
+	 true,			/* partial_inplace */
+	 0x001fffc0,		/* src_mask */
+	 0x001fffc0,		/* dst_mask */
 	 false)			/* pcrel_offset */
+  /* end-sanitize-r5900 */
+
 };
 
 /* The reloc used for BFD_RELOC_CTOR when doing a 64 bit link.  This
@@ -758,8 +781,10 @@ static reloc_howto_type elf_mips16_gprel_howto =
 	 false);		/* pcrel_offset */
 
 /* start-sanitize-sky */
-/* DVP relocations.  */
-static  reloc_howto_type elf_mips_dvp_11_pcrel_howto =
+/* DVP relocations.
+   Note that partial_inplace and pcrel_offset are backwards from the
+   mips port.  This is intentional as it seems more reasonable.  */
+static reloc_howto_type elf_mips_dvp_11_pcrel_howto =
   HOWTO (R_MIPS_DVP_11_PCREL,	/* type */
 	 3,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -769,10 +794,24 @@ static  reloc_howto_type elf_mips_dvp_11_pcrel_howto =
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MIPS_DVP_11_PCREL",	/* name */
-	 true,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x7ff,			/* src_mask */
 	 0x7ff,			/* dst_mask */
 	 true);			/* pcrel_offset */
+static reloc_howto_type elf_mips_dvp_27_s4_howto =
+  HOWTO (R_MIPS_DVP_27_S4,	/* type */
+	 4,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 27,			/* bitsize */
+	 false,			/* pc_relative */
+	 4,			/* bitpos */
+	 complain_overflow_unsigned, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_MIPS_DVP_27_S4",	/* name */
+	 false,			/* partial_inplace */
+	 0x7ffffff0,		/* src_mask */
+	 0x7ffffff0,		/* dst_mask */
+	 false);		/* pcrel_offset */
 /* end-sanitize-sky */
 
 /* Do a R_MIPS_HI16 relocation.  This has to be done in combination
@@ -1099,7 +1138,7 @@ mips_elf_final_gp (output_bfd, symbol, relocateable, error_message, pgp)
 	      *pgp = 4;
 	      _bfd_set_gp_value (output_bfd, *pgp);
 	      *error_message =
-		(char *) "GP relative relocation when _gp not defined";
+		(char *) _("GP relative relocation when _gp not defined");
 	      return bfd_reloc_dangerous;
 	    }
 	}
@@ -1259,7 +1298,7 @@ _bfd_mips_elf_gprel32_reloc (abfd,
       && reloc_entry->addend == 0)
     {
       *error_message = (char *)
-	"32bits gp relative relocation occurs for an external symbol";
+	_("32bits gp relative relocation occurs for an external symbol");
       return bfd_reloc_outofrange;
     }
 
@@ -1408,7 +1447,7 @@ mips16_jump_reloc (abfd, reloc_entry, symbol, data, input_section,
 
     if (! warned)
       (*_bfd_error_handler)
-	("Linking mips16 objects into %s format is not supported",
+	(_("Linking mips16 objects into %s format is not supported"),
 	 bfd_get_target (input_section->output_section->owner));
     warned = true;
   }
@@ -1512,6 +1551,71 @@ elf_mips_isa (flags)
   return 4;
 }
 
+/* Return the MACH for a MIPS e_flags value.  */
+
+static INLINE int
+elf_mips_mach (flags)
+     flagword flags;
+{
+  switch (flags & EF_MIPS_MACH)
+    {
+    case E_MIPS_MACH_3900:
+      return bfd_mach_mips3900;
+      
+    case E_MIPS_MACH_4010:
+      return bfd_mach_mips4010;
+      
+    case E_MIPS_MACH_4100:
+      return bfd_mach_mips4100;
+      /* start-sanitize-vr4320 */
+
+    case E_MIPS_MACH_4320:
+      return bfd_mach_mips4320;
+      /* end-sanitize-vr4320 */
+      
+    case E_MIPS_MACH_4650:
+      return bfd_mach_mips4650;
+      /* start-sanitize-tx49 */
+
+    case E_MIPS_MACH_4900:
+      return bfd_mach_mips4900;
+      /* end-sanitize-tx49 */
+      /* start-sanitize-vr5400 */
+      
+    case E_MIPS_MACH_5400:
+      return bfd_mach_mips5400;
+      /* end-sanitize-vr5400 */
+      /* start-sanitize-r5900 */
+      
+    case E_MIPS_MACH_5900:
+      return bfd_mach_mips5900;
+      /* end-sanitize-r5900 */
+      
+    default:
+      switch (flags & EF_MIPS_ARCH)
+	{
+	default:
+	case E_MIPS_ARCH_1:
+	  return bfd_mach_mips3000;
+	  break;
+	  
+	case E_MIPS_ARCH_2:
+	  return bfd_mach_mips6000;
+	  break;
+	  
+	case E_MIPS_ARCH_3:
+	  return bfd_mach_mips4000;
+	  break;
+	  
+	case E_MIPS_ARCH_4:
+	  return bfd_mach_mips8000;
+	  break;
+	}
+    }
+
+  return 0;
+}
+
 /* A mapping from BFD reloc types to MIPS ELF reloc types.  */
 
 struct elf_reloc_map {
@@ -1537,7 +1641,10 @@ static CONST struct elf_reloc_map mips_reloc_map[] =
   { BFD_RELOC_MIPS_GOT_HI16, R_MIPS_GOT_HI16 },
   { BFD_RELOC_MIPS_GOT_LO16, R_MIPS_GOT_LO16 },
   { BFD_RELOC_MIPS_CALL_HI16, R_MIPS_CALL_HI16 },
-  { BFD_RELOC_MIPS_CALL_LO16, R_MIPS_CALL_LO16 }
+  { BFD_RELOC_MIPS_CALL_LO16, R_MIPS_CALL_LO16 },
+  /* start-sanitize-r5900 */
+  { BFD_RELOC_MIPS15_S3, R_MIPS15_S3 },
+  /* end-sanitize-r5900 */
 };
 
 /* Given a BFD reloc type, return a howto structure.  */
@@ -1555,12 +1662,13 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
 	return &elf_mips_howto_table[(int) mips_reloc_map[i].elf_reloc_val];
     }
 
-  /* We need to handle BFD_RELOC_CTOR specially.  If this is a mips3
-     file, then we assume that we are using 64 bit addresses, and use
-     R_MIPS_64.  Otherwise, we use R_MIPS_32.  */
+  /* We need to handle BFD_RELOC_CTOR specially.
+
+     Select the right relocation (R_MIPS_32 or R_MIPS_64) based on the
+     size of addresses on this architecture.  */
   if (code == BFD_RELOC_CTOR)
     {
-      if (elf_mips_isa (elf_elfheader (abfd)->e_flags) < 3)
+      if (bfd_arch_bits_per_address (abfd) == 32)
 	return &elf_mips_howto_table[(int) R_MIPS_32];
       else
 	return &elf_mips_ctor64_howto;
@@ -1575,6 +1683,8 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
 /* start-sanitize-sky */
   else if (code == BFD_RELOC_MIPS_DVP_11_PCREL)
     return &elf_mips_dvp_11_pcrel_howto;
+  else if (code == BFD_RELOC_MIPS_DVP_27_S4)
+    return &elf_mips_dvp_27_s4_howto;
 /* end-sanitize-sky */
 
   return NULL;
@@ -1598,6 +1708,8 @@ mips_info_to_howto_rel (abfd, cache_ptr, dst)
 /* start-sanitize-sky */
   else if (r_type == R_MIPS_DVP_11_PCREL)
     cache_ptr->howto = &elf_mips_dvp_11_pcrel_howto;
+  else if (r_type == R_MIPS_DVP_27_S4)
+    cache_ptr->howto = &elf_mips_dvp_27_s4_howto;
 /* end-sanitize-sky */
   else
     {
@@ -1802,26 +1914,8 @@ boolean
 _bfd_mips_elf_object_p (abfd)
      bfd *abfd;
 {
-  switch (elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH)
-    {
-    default:
-    case E_MIPS_ARCH_1:
-      (void) bfd_default_set_arch_mach (abfd, bfd_arch_mips, 3000);
-      break;
-
-    case E_MIPS_ARCH_2:
-      (void) bfd_default_set_arch_mach (abfd, bfd_arch_mips, 6000);
-      break;
-
-    case E_MIPS_ARCH_3:
-      (void) bfd_default_set_arch_mach (abfd, bfd_arch_mips, 4000);
-      break;
-
-    case E_MIPS_ARCH_4:
-      (void) bfd_default_set_arch_mach (abfd, bfd_arch_mips, 8000);
-      break;
-    }
-
+  bfd_default_set_arch_mach (abfd, bfd_arch_mips, 
+			     elf_mips_mach (elf_elfheader (abfd)->e_flags));
   return true;
 }
 
@@ -1857,31 +1951,69 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
 
   switch (bfd_get_mach (abfd))
     {
-    case 3000:
+    default:
+    case bfd_mach_mips3000:
       val = E_MIPS_ARCH_1;
       break;
-
-    case 6000:
+      
+    case bfd_mach_mips3900:
+      val = E_MIPS_ARCH_1 | E_MIPS_MACH_3900;
+      break;
+      
+    case bfd_mach_mips6000:
       val = E_MIPS_ARCH_2;
       break;
 
-    case 4000:
+    case bfd_mach_mips4000:
       val = E_MIPS_ARCH_3;
       break;
 
-    case 8000:
-      val = E_MIPS_ARCH_4;
+    case bfd_mach_mips4010:
+      val = E_MIPS_ARCH_3 | E_MIPS_MACH_4010;
       break;
 
-    default:
-      val = 0;
+    case bfd_mach_mips4100:
+      val = E_MIPS_ARCH_3 | E_MIPS_MACH_4100;
+      break;
+      /* start-sanitize-vr4320 */
+
+    case bfd_mach_mips4320:
+      val = E_MIPS_ARCH_3 | E_MIPS_MACH_4320;
+      break;
+      /* end-sanitize-vr4320 */
+
+    case bfd_mach_mips4650:
+      val = E_MIPS_ARCH_3 | E_MIPS_MACH_4650;
+      break;
+      /* start-sanitize-tx49 */
+
+    case bfd_mach_mips4900:
+      val = E_MIPS_ARCH_3 | E_MIPS_MACH_4900;
+      break;
+      /* end-sanitize-tx49 */
+      /* start-sanitize-vr5400 */
+
+    case bfd_mach_mips5400:
+      val = E_MIPS_ARCH_3 | E_MIPS_MACH_5400;
+      break;
+      /* end-sanitize-vr5400 */
+      /* start-sanitize-r5900 */
+
+    case bfd_mach_mips5900:
+      val = E_MIPS_ARCH_3 | E_MIPS_MACH_5900;
+      break;
+      /* end-sanitize-r5900 */
+
+    case bfd_mach_mips8000:
+      val = E_MIPS_ARCH_4;
       break;
     }
 
-  elf_elfheader (abfd)->e_flags &=~ EF_MIPS_ARCH;
+  elf_elfheader (abfd)->e_flags &= ~ (EF_MIPS_ARCH | EF_MIPS_MACH);
   elf_elfheader (abfd)->e_flags |= val;
 
-  /* Set the sh_info field for .gptab sections.  */
+  /* Set the sh_info field for .gptab sections and other appropriate
+     info for each special section.  */
   for (i = 1, hdrpp = elf_elfsections (abfd) + 1;
        i < elf_elfheader (abfd)->e_shnum;
        i++, hdrpp++)
@@ -1943,6 +2075,16 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
 	  BFD_ASSERT (sec != NULL);
 	  (*hdrpp)->sh_link = elf_section_data (sec)->this_idx;
 	  break;
+
+/* start-sanitize-sky */
+	case SHT_DVP_OVERLAY_TABLE:
+	  /* ??? This may not be technically necessary, just going with
+	     the flow ...  */
+	  sec = bfd_get_section_by_name (abfd, SHNAME_DVP_OVERLAY_STRTAB);
+	  if (sec != NULL)
+	    (*hdrpp)->sh_link = elf_section_data (sec)->this_idx;
+	  break;
+/* end-sanitize-sky */
 	}
     }
 }
@@ -1999,11 +2141,14 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
   if (ibfd->xvec->byteorder != obfd->xvec->byteorder
       && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
     {
-      (*_bfd_error_handler)
-	("%s: compiled for a %s endian system and target is %s endian",
-	 bfd_get_filename (ibfd),
-	 bfd_big_endian (ibfd) ? "big" : "little",
-	 bfd_big_endian (obfd) ? "big" : "little");
+      const char *msg;
+
+      if (bfd_big_endian (ibfd))
+	msg = _("%s: compiled for a big endian system and target is little endian");
+      else
+	msg = _("%s: compiled for a little endian system and target is big endian");
+
+      (*_bfd_error_handler) (msg, bfd_get_filename (ibfd));
 
       bfd_set_error (bfd_error_wrong_format);
       return false;
@@ -2048,7 +2193,7 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
       new_flags &= ~EF_MIPS_PIC;
       old_flags &= ~EF_MIPS_PIC;
       (*_bfd_error_handler)
-	("%s: linking PIC files with non-PIC files",
+	(_("%s: linking PIC files with non-PIC files"),
 	 bfd_get_filename (ibfd));
       ok = false;
     }
@@ -2058,39 +2203,56 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
       new_flags &= ~EF_MIPS_CPIC;
       old_flags &= ~EF_MIPS_CPIC;
       (*_bfd_error_handler)
-	("%s: linking abicalls files with non-abicalls files",
+	(_("%s: linking abicalls files with non-abicalls files"),
 	 bfd_get_filename (ibfd));
       ok = false;
     }
 
-  /* Don't warn about mixing -mips1 and -mips2 code, or mixing -mips3
-     and -mips4 code.  They will normally use the same data sizes and
-     calling conventions.  */
-  if ((new_flags & EF_MIPS_ARCH) != (old_flags & EF_MIPS_ARCH))
+  /* Compare the ISA's. */
+  if ((new_flags & (EF_MIPS_ARCH | EF_MIPS_MACH)) 
+      != (old_flags & (EF_MIPS_ARCH | EF_MIPS_MACH)))
     {
-      int new_isa, old_isa;
-
-      new_isa = elf_mips_isa (new_flags);
-      old_isa = elf_mips_isa (old_flags);
-      if ((new_isa == 1 || new_isa == 2)
-	  ? (old_isa != 1 && old_isa != 2)
-	  : (old_isa == 1 || old_isa == 2))
+      /* If either has no machine specified, just compare the general isa's. */
+      if ( !(new_flags & EF_MIPS_MACH) || !(old_flags & EF_MIPS_MACH))
 	{
-	  (*_bfd_error_handler)
-	    ("%s: ISA mismatch (-mips%d) with previous modules (-mips%d)",
-	     bfd_get_filename (ibfd), new_isa, old_isa);
-	  ok = false;
+	  int new_isa, old_isa;
+
+	  /* Don't warn about mixing -mips1 and -mips2 code, or mixing -mips3
+	     and -mips4 code.  They will normally use the same data sizes and
+	     calling conventions.  */
+	  
+	  new_isa = elf_mips_isa (new_flags);
+	  old_isa = elf_mips_isa (old_flags);
+	  if ((new_isa == 1 || new_isa == 2)
+	      ? (old_isa != 1 && old_isa != 2)
+	      : (old_isa == 1 || old_isa == 2))
+	    {
+	      (*_bfd_error_handler)
+	       (_("%s: ISA mismatch (-mips%d) with previous modules (-mips%d)"),
+		bfd_get_filename (ibfd), new_isa, old_isa);
+	      ok = false;
+	    }
 	}
 
-      new_flags &= ~ EF_MIPS_ARCH;
-      old_flags &= ~ EF_MIPS_ARCH;
+      else
+	{
+	  (*_bfd_error_handler)
+	    (_("%s: ISA mismatch (%d) with previous modules (%d)"),
+	     bfd_get_filename (ibfd), 
+	     elf_mips_mach (new_flags), 
+	     elf_mips_mach (old_flags));
+	  ok = false;
+	}
+	  
+      new_flags &= ~ (EF_MIPS_ARCH | EF_MIPS_MACH);
+      old_flags &= ~ (EF_MIPS_ARCH | EF_MIPS_MACH);
     }
 
   /* Warn about any other mismatches */
   if (new_flags != old_flags)
     {
       (*_bfd_error_handler)
-	("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)",
+	(_("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
 	 bfd_get_filename (ibfd), (unsigned long) new_flags,
 	 (unsigned long) old_flags);
       ok = false;
@@ -2126,7 +2288,7 @@ _bfd_mips_elf_section_from_shdr (abfd, hdr, name)
   switch (hdr->sh_type)
     {
     case SHT_MIPS_LIBLIST:
-      if (strcmp (name, ".liblist") != 0)
+      if (strcmp (name, _(".liblist")) != 0)
 	return false;
       break;
     case SHT_MIPS_MSYM:
@@ -2181,6 +2343,17 @@ _bfd_mips_elf_section_from_shdr (abfd, hdr, name)
 		      sizeof ".MIPS.post_rel" - 1) != 0)
 	return false;
       break;
+/* start-sanitize-sky */
+    case SHT_DVP_OVERLAY_TABLE:
+      if (strcmp (name, SHNAME_DVP_OVERLAY_TABLE) !=0)
+	return false;
+      break;
+    case SHT_DVP_OVERLAY:
+      if (strncmp (name, SHNAME_DVP_OVERLAY_PREFIX,
+		   sizeof (SHNAME_DVP_OVERLAY_PREFIX) - 1) !=0)
+	return false;
+      break;
+/* end-sanitize-sky */
     default:
       return false;
     }
@@ -2381,6 +2554,19 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
       hdr->sh_flags |= SHF_MIPS_NOSTRIP;
       /* The sh_link field is set in final_write_processing.  */
     }
+/* start-sanitize-sky */
+  else if (strcmp (name, SHNAME_DVP_OVERLAY_TABLE) == 0)
+    {
+      hdr->sh_type = SHT_DVP_OVERLAY_TABLE;
+      hdr->sh_entsize = sizeof (Elf64_Dvp_External_Overlay);
+      /* The sh_link field is set in final_write_processing.  */
+    }
+  else if (strcmp (name, SHNAME_DVP_OVERLAY_STRTAB) == 0)
+    hdr->sh_type = SHT_STRTAB;
+  else if (strncmp (name, SHNAME_DVP_OVERLAY_PREFIX,
+		    sizeof (SHNAME_DVP_OVERLAY_PREFIX) - 1) == 0)
+    hdr->sh_type = SHT_DVP_OVERLAY;
+/* end-sanitize-sky */
 
   return true;
 }
@@ -3652,7 +3838,7 @@ mips_elf_create_procedure_table (handle, abfd, info, s, debug)
   unsigned long i;
   PDR pdr;
   SYMR sym;
-  const char *no_name_func = "static procedure (no name)";
+  const char *no_name_func = _("static procedure (no name)");
 
   epdr = NULL;
   rpdr = NULL;
@@ -3999,6 +4185,7 @@ mips_elf_final_link (abfd, info)
 	      esym.asym.st = stLocal;
 	      esym.asym.reserved = 0;
 	      esym.asym.index = indexNil;
+	      last = 0;
 	      for (i = 0; i < 8; i++)
 		{
 		  esym.asym.sc = sc[i];
@@ -4224,7 +4411,7 @@ mips_elf_final_link (abfd, info)
 	  else
 	    {
 	      (*_bfd_error_handler)
-		("%s: illegal section name `%s'",
+		(_("%s: illegal section name `%s'"),
 		 bfd_get_filename (abfd), o->name);
 	      bfd_set_error (bfd_error_nonrepresentable_section);
 	      return false;
@@ -4531,7 +4718,7 @@ mips_elf_relocate_got_local (output_bfd, input_bfd, sgot, relhi, rello,
       if (assigned_gotno >= g->local_gotno)
 	{
 	  (*_bfd_error_handler)
-	    ("more got entries are needed for hipage relocations");
+	    (_("more got entries are needed for hipage relocations"));
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
 	}
@@ -4631,6 +4818,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       if ((r_type < 0 || r_type >= (int) R_MIPS_max)
 /* start-sanitize-sky */
 	  && r_type != R_MIPS_DVP_11_PCREL
+	  && r_type != R_MIPS_DVP_27_S4
 /* end-sanitize-sky */
 	  && r_type != R_MIPS16_26
 	  && r_type != R_MIPS16_GPREL)
@@ -4645,6 +4833,8 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 /* start-sanitize-sky */
       else if (r_type == R_MIPS_DVP_11_PCREL)
 	howto = &elf_mips_dvp_11_pcrel_howto;
+      else if (r_type == R_MIPS_DVP_27_S4)
+	howto = &elf_mips_dvp_27_s4_howto;
 /* end-sanitize-sky */
       else
 	howto = elf_mips_howto_table + r_type;
@@ -4682,7 +4872,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (! ((*info->callbacks->reloc_dangerous)
 		     (info,
-		      "GP relative relocation when GP not defined",
+		      _("GP relative relocation when GP not defined"),
 		      input_bfd, input_section,
 		      rel->r_offset)))
 		return false;
@@ -4837,7 +5027,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    {
 		      if (! ((*info->callbacks->reloc_dangerous)
 			     (info,
-			      "_gp_disp used when GP not defined",
+			      _("_gp_disp used when GP not defined"),
 			      input_bfd, input_section,
 			      rel->r_offset)))
 			return false;
@@ -5068,10 +5258,10 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
                  next reloc must be the corresponding LO16 reloc.  */
 	      BFD_ASSERT (h != NULL && h->got_offset != (bfd_vma) -1);
 	      BFD_ASSERT ((rel + 1) < relend);
-	      BFD_ASSERT (ELF32_R_TYPE ((rel + 1)->r_info)
+	      BFD_ASSERT ((int) ELF32_R_TYPE ((rel + 1)->r_info)
 			  == (r_type == R_MIPS_CALL_HI16
-			      ? R_MIPS_CALL_LO16
-			      : R_MIPS_GOT_LO16));
+			      ? (int) R_MIPS_CALL_LO16
+			      : (int) R_MIPS_GOT_LO16));
 
 	      offset = (h->dynindx - g->global_gotsym + g->local_gotno) * 4;
 	      BFD_ASSERT (g->local_gotno <= offset
@@ -5253,7 +5443,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  && ((insn >> 26) & 0x3f) != 0x1d)
 		{
 		  (*_bfd_error_handler)
-		    ("%s: %s+0x%lx: jump to mips16 routine which is not jal",
+		    (_("%s: %s+0x%lx: jump to mips16 routine which is not jal"),
 		     bfd_get_filename (input_bfd),
 		     input_section->name,
 		     (unsigned long) rel->r_offset);
@@ -5370,6 +5560,18 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			  & 0xf0000000)))
 		r = bfd_reloc_overflow;
 	    }
+
+	  /* Don't bother to report a relocation overflow for a call
+             to a weak undefined symbol with a value of zero.  This
+             permits us to use
+	         if (!f) f();
+	     even if we aren't in range to call address zero.  */
+	  if (r == bfd_reloc_overflow
+	      && (r_type == R_MIPS16_26 || r_type == R_MIPS_26)
+	      && relocation + addend == 0
+	      && h != NULL
+	      && h->root.type == bfd_link_hash_undefweak)
+	    r = bfd_reloc_ok;
 
 	  if (SGI_COMPAT (abfd)
 	      && scpt != NULL
@@ -5986,7 +6188,7 @@ mips_elf_check_relocs (abfd, info, sec, relocs)
 	  if (h == NULL)
 	    {
 	      (*_bfd_error_handler)
-		("%s: CALL16 reloc at 0x%lx not against global symbol",
+		(_("%s: CALL16 reloc at 0x%lx not against global symbol"),
 		 bfd_get_filename (abfd), (unsigned long) rel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
 	      return false;
@@ -7055,6 +7257,8 @@ mips_elf_finish_dynamic_sections (output_bfd, info)
 	    sym.st_other = 0;
 
 	    i = 0;
+	    last = 0;
+	    dindx = 0;
 	    while ((name = *namep++) != NULL)
 	      {
 		s = bfd_get_section_by_name (output_bfd, name);

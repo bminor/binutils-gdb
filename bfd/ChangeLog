@@ -1,3 +1,13 @@
+start-sanitize-sky
+Sun May 31 16:11:22 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* elf32-mips.c (_bfd_mips_elf_final_write_processing): Set sh_link
+	field of .DVP.ovlytab to .DVP.ovlystrtab's section index.
+	(_bfd_mips_elf_section_from_shdr): Recognize SHT_DVP_OVERLAY_TABLE
+	and SHT_DVP_OVERLAY.
+	(_bfd_mips_elf_fake_sections): Ditto.
+
+end-sanitize-sky
 Fri May 29 09:58:08 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf.c (copy_private_bfd_data): Adjust physical address of
