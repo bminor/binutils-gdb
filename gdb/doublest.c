@@ -814,9 +814,9 @@ convert_typed_floating (const void *from, const struct type *from_type,
 
 const struct floatformat *floatformat_ieee_single[BFD_ENDIAN_UNKNOWN];
 const struct floatformat *floatformat_ieee_double[BFD_ENDIAN_UNKNOWN];
+const struct floatformat *floatformat_ieee_quad[BFD_ENDIAN_UNKNOWN];
 const struct floatformat *floatformat_arm_ext[BFD_ENDIAN_UNKNOWN];
 const struct floatformat *floatformat_ia64_spill[BFD_ENDIAN_UNKNOWN];
-const struct floatformat *floatformat_ia64_quad[BFD_ENDIAN_UNKNOWN];
 
 extern void _initialize_doublest (void);
 
@@ -831,6 +831,6 @@ _initialize_doublest (void)
   floatformat_arm_ext[BFD_ENDIAN_BIG] = &floatformat_arm_ext_big;
   floatformat_ia64_spill[BFD_ENDIAN_LITTLE] = &floatformat_ia64_spill_little;
   floatformat_ia64_spill[BFD_ENDIAN_BIG] = &floatformat_ia64_spill_big;
-  floatformat_ia64_quad[BFD_ENDIAN_LITTLE] = &floatformat_ia64_quad_little;
-  floatformat_ia64_quad[BFD_ENDIAN_BIG] = &floatformat_ia64_quad_big;
+  floatformat_ieee_quad[BFD_ENDIAN_LITTLE] = &floatformat_ia64_quad_little;
+  floatformat_ieee_quad[BFD_ENDIAN_BIG] = &floatformat_ia64_quad_big;
 }

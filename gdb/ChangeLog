@@ -1,3 +1,11 @@
+2004-08-24  Andrew Cagney  <cagney@gnu.org>
+
+	* doublest.h (floatformat_ieee_quad): Rename
+	floatformat_ia64_quad.
+	* doublest.c (floatformat_ieee_quad): Rename
+	floatformat_ia64_quad.
+	(_initialize_doublest): Update.
+
 2004-08-24  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2expr.h (struct dwarf_expr_context): New members
