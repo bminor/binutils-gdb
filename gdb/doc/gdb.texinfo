@@ -11259,7 +11259,10 @@ Summarize available information about the process.
 @item info proc mappings
 Report on the address ranges accessible in the program, with information
 on whether your program may read, write, or execute each range.
-
+@ignore
+@comment These sub-options of 'info proc' were not included when
+@comment procfs.c was re-written.  Keep their descriptions around
+@comment against the day when someone finds the time to put them back in.
 @kindex info proc times
 @item info proc times
 Starting time, user CPU time, and system CPU time for your program and
@@ -11278,6 +11281,7 @@ received.
 
 @item info proc all
 Show all the above information about the process.
+@end ignore
 @end table
 
 @node DJGPP Native

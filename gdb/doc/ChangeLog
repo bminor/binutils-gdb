@@ -1,3 +1,8 @@
+2001-12-26  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.texinfo (info proc): Comment out documentation for 
+	'info proc' sub-options that are currently not implemented.
+
 2001-12-20  Jim Blandy  <jimb@redhat.com>
 
 	* gdbint.texinfo (TARGET_CHAR_SIGNED): Document.
