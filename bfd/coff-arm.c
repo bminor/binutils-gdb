@@ -1,6 +1,6 @@
 /* BFD back-end for ARM COFF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004
+   2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -2504,7 +2504,9 @@ coff_arm_is_local_label_name (abfd, name)
 #ifdef USER_LABEL_PREFIX
   if (USER_LABEL_PREFIX[0] != 0)
     {
-      if (strncmp (name, USER_LABEL_PREFIX, strlen (USER_LABEL_PREFIX)) == 0)
+      size_t len = strlen (USER_LABEL_PREFIX);
+
+      if (strncmp (name, USER_LABEL_PREFIX, len) == 0)
 	return FALSE;
     }
 #endif

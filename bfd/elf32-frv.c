@@ -1144,8 +1144,8 @@ frvfdpic_relocs_info_hash (const void *entry_)
   const struct frvfdpic_relocs_info *entry = entry_;
 
   return (entry->symndx == -1
-	  ? (long)entry->d.h->root.root.hash
-	  : entry->symndx + entry->d.abfd->id * 257) + entry->addend;
+	  ? (long) entry->d.h->root.root.hash
+	  : entry->symndx + (long) entry->d.abfd->id * 257) + entry->addend;
 }
 
 /* Test whether the key fields of two frvfdpic_relocs_info entries are
