@@ -1,3 +1,20 @@
+1999-01-26  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim-memopt.c (memory_options): Add MEMORY_FILL option.
+	(memory_option_handler): Implement MEMORY_FILL option.  Make
+ 	MEMORY_CLEAR an alias for MEMORY_FILL=0.
+	(parse_ulong_value): New function.
+	(do_memopt_add): Allocate all buffers.  Optionally fill them.
+
+1999-01-15  Richard Henderson  <rth@cygnus.com>
+
+	* hw-events.c (hw_event_queue_schedule): _vtracef takes a
+	va_list, not an integer.
+	* sim-events.c (sim_events_schedule): Likewise.
+
+	* sim-types.h (UNSIGNED32, UNSIGNED64): Properly cast to 
+	the appropriate type.
+
 1999-01-14  Doug Evans  <devans@casey.cygnus.com>
 
 	* cgen-defs.h (PCADDR,CIA): Define in terms of IADDR.
