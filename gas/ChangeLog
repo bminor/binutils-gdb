@@ -1,7 +1,14 @@
+Fri Jan 12 12:04:00 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* expr.c (operand): Skip whitespace after a close parenthesis.
+	From James Carlson <carlson@xylogics.com>.
+
 Tue Jan  2 12:43:23 1996  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* config/tc-sh.c (md_apply_fix): Call as_bad_where instead of
 	as_warn_where for relocation overflow.
+	(parse_reg): Accept register name only if next character is
+	not alphanumeric.
 
 Sat Dec 30 23:42:51 1995  Jeffrey A Law  (law@cygnus.com)
 
