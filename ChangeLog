@@ -1,3 +1,8 @@
+Mon Nov 11 10:43:41 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (powerpc*-{eabi,elf,linux,rtem,sysv,solaris}*): Do
+	not use mt-ppc target Makefile fragment any more.
+
 Sun Nov  3 19:17:07 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* configure.in (*-*-windows):  Exclude everything but those dirs
