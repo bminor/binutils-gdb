@@ -42,9 +42,3 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #undef SIGFRAME_FPREGSAVE_OFF
 #define SIGFRAME_FPREGSAVE_OFF	(SIGFRAME_BASE + 2 * 4 + 8 + 32 * 8 + 4)
 #define SIGFRAME_REG_SIZE	8
-
-/* start-sanitize-gm */
-#ifdef GENERAL_MAGIC
-#include "tm-magic.h"
-#endif /* GENERAL_MAGIC */
-/* end-sanitize-gm */

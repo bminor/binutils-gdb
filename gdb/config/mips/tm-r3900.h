@@ -22,39 +22,3 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #undef DEFAULT_MIPS_TYPE
 #define DEFAULT_MIPS_TYPE "r3051"
-
-/* start-sanitize-gm */
-#ifdef GENERAL_MAGIC
-
-#include "tm-magic.h"		/* Include generic stuff */
-
-/* For some reason GM can't hack this... */
-
-#undef GET_LONGJMP_TARGET
-
-/* Watchpoint support */
-
-#define TARGET_HAS_HARDWARE_WATCHPOINTS
-
-#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) \
-	(1 == 1)	/* We allow all types of hardware watchpoints */
-
-/* Use these macros for watchpoint insertion/deletion.  */
-/* type can be 0: write watch, 1: read watch, 2: access watch (read/write) */
-
-#define target_insert_watchpoint(addr, len, type) \
-	remote_mips_set_watchpoint (addr, len, type)
-
-#define target_remove_watchpoint(addr, len, type) \
-	remote_mips_remove_watchpoint (addr, len, type)
-
-/* We need to remove watchpoints when stepping, else we hit them again! */
-
-#define HAVE_NONSTEPPABLE_WATCHPOINT
-
-#define STOPPED_BY_WATCHPOINT(w) remote_mips_stopped_by_watchpoint ()
-
-#define FLUSH_CACHED_MEMORY() flush_cached_memory()
-
-#endif /* GENERAL_MAGIC */
-/* end-sanitize-gm */

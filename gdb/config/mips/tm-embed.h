@@ -44,27 +44,6 @@ int remote_mips_remove_watchpoint PARAMS ((CORE_ADDR addr, int len, int type));
 
 #define STOPPED_BY_WATCHPOINT(w) remote_mips_stopped_by_watchpoint ()
 
-/* start-sanitize-gm */
-#ifdef GENERAL_MAGIC
-
-#include "tm-magic.h"		/* Include generic stuff */
-
-/* For some reason GM can't hack this... */
-
-#undef GET_LONGJMP_TARGET
-
-#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) \
-	(1 == 1)		/* We allow all types of hardware watchpoints */
-
-#define FLUSH_CACHED_MEMORY() flush_cached_memory()
-
-#else
-/* end-sanitize-gm */
-
 #define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) \
   remote_mips_can_use_hardware_watchpoint(cnt)
 int remote_mips_can_use_hardware_watchpoint PARAMS ((int cnt));
-
-/* start-sanitize-gm */
-#endif /* GENERAL_MAGIC */
-/* end-sanitize-gm */
