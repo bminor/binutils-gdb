@@ -2052,9 +2052,18 @@ get_osabi_name (osabi)
 
   switch (osabi)
     {
-    case ELFOSABI_SYSV:       return _("UNIX - System V");
+    case ELFOSABI_NONE:       return _("UNIX - System V");
     case ELFOSABI_HPUX:       return _("UNIX - HP-UX");
+    case ELFOSABI_NETBSD:     return _("UNIX - NetBSD");
     case ELFOSABI_LINUX:      return _("UNIX - Linux");
+    case ELFOSABI_HURD:       return _("GNU/Hurd");
+    case ELFOSABI_SOLARIS:    return _("UNIX - Solaris");
+    case ELFOSABI_MONTEREY:   return _("UNIX - Monterey");
+    case ELFOSABI_IRIX:       return _("UNIX - IRIX");
+    case ELFOSABI_FREEBSD:    return _("UNIX - FreeBSD");
+    case ELFOSABI_TRU64:      return _("UNIX - TRU64");
+    case ELFOSABI_MODESTO:    return _("Novell - Modesto");
+    case ELFOSABI_OPENBSD:    return _("UNIX - OpenBSD");
     case ELFOSABI_STANDALONE: return _("Standalone App");
     case ELFOSABI_ARM:        return _("ARM");
     default:
