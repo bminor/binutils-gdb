@@ -512,7 +512,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	inf-loop.c infcmd.c inflow.c infrun.c \
 	jv-exp.y jv-lang.c jv-valprint.c jv-typeprint.c \
 	kod.c kod-cisco.c \
-	language.c linespec.c \
+	language.c legacy-frame.c linespec.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c \
 	macrotab.c macroexp.c macrocmd.c macroscope.c main.c maint.c \
 	mdebugread.c memattr.c mem-break.c minsyms.c mipsread.c \
@@ -649,6 +649,7 @@ inferior_h = inferior.h $(breakpoint_h) $(target_h) $(frame_h)
 jv_lang_h = jv-lang.h
 kod_h = kod.h
 language_h = language.h
+legacy_frame_h = legacy-frame.h
 linespec_h = linespec.h
 m2_lang_h = m2-lang.h
 m68k_tdep_h = m68k-tdep.h
@@ -834,7 +835,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	frame.o doublest.o \
 	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o cp-support.o \
 	sentinel-frame.o \
-	reggroups.o
+	reggroups.o legacy-frame.o
 
 OBS = $(COMMON_OBS) $(ANNOTATE_OBS)
 
@@ -1681,8 +1682,9 @@ fork-child.o: fork-child.c $(defs_h) $(gdb_string_h) $(frame_h) \
 	$(terminal_h) $(gdbthread_h) $(command_h)
 frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
 	$(regcache_h) $(gdb_assert_h) $(gdb_string_h) $(builtin_regs_h) \
-	$(gdb_obstack_h) $(dummy_frame_h) $(gdbcore_h) $(annotate_h) \
-	$(language_h) $(sentinel_frame_h) $(ui_out_h)
+	$(gdb_obstack_h) $(dummy_frame_h) $(sentinel_frame_h) \
+	$(legacy_frame_h) $(gdbcore_h) $(annotate_h) $(language_h) \
+	$(ui_out_h)
 frv-tdep.o: frv-tdep.c $(defs_h) $(inferior_h) $(symfile_h) $(gdbcore_h) \
 	$(arch_utils_h) $(regcache_h)
 gcore.o: gcore.c $(defs_h) $(cli_decode_h) $(inferior_h) $(gdbcore_h) \
@@ -1832,6 +1834,8 @@ language.o: language.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(parser_defs_h) $(jv_lang_h)
 lin-lwp.o: lin-lwp.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(gdb_wait_h) \
 	$(gdbthread_h) $(inferior_h) $(target_h) $(regcache_h) $(gdbcmd_h)
+legacy-frame.o: legacy-frame.c $(defs_h) $(legacy_frame_h) $(gdb_assert_h) \
+	$(frame_h) $(gdbcore_h) $(regcache_h) $(target_h) $(dummy_frame_h)
 linespec.o: linespec.c $(defs_h) $(symtab_h) $(frame_h) $(command_h) \
 	$(symfile_h) $(objfiles_h) $(demangle_h) $(value_h) $(completer_h) \
 	$(cp_abi_h) $(source_h) $(parser_defs_h)

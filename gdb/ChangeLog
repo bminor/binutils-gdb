@@ -1,9 +1,35 @@
 2003-01-10  Andrew Cagney  <ac131313@redhat.com>
 
-	* sentinel-frame.c (sentinel_frame_register_unwind): Correctly set
-	LVALP and ADDRP.
+	* frame.c (create_sentinel_frame): Initialize sentinel frame's PC.
 
-	* frame.c: Include "ui-out.h".
+	* sentinel-frame.c (struct frame_unwind_cache): Add pc field.
+
+	* sentinel-frame.h (sentinel_frame_cache): Add a pc parameter.
+
+	* frame.c (deprecated_generic_get_saved_register): Move from here.
+	* legacy-frame.c (deprecated_generic_get_saved_register): to here.
+
+	* legacy-frame.c: Include "regcache.h", "dummy-frame.h", and
+	"target.h".
+
+	* frame.c (set_unwind_by_pc): Update.
+	(frame_saved_regs_id_unwind): Delete function.
+	(frame_saved_regs_register_unwind): Delete function.
+	(frame_saved_regs_pc_unwind): Delete function.
+	(legacy_get_prev_frame): Rename deprecated_get_prev_frame.
+	(get_prev_frame): Update call.
+	(get_prev_frame): Move check for inside_main_func to before
+	setting of prev_p.  Add check for inside_entry_file, but after
+	prev_p.
+
+	* Makefile.in (frame.o): Update dependencies.
+
+	* frame.c: Include "legacy-frame.h".
+
+	* Makefile.in (SFILES): Add legacy-frame.c.
+	(legacy_frame_h): Define.
+	(COMMON_OBS): Add legacy-frame.o.
+	(legacy-frame.o): Specify dependencies.
 
 2003-01-09  Andrew Cagney  <ac131313@redhat.com>
 
@@ -13,6 +39,10 @@
 	(deprecated_get_prev_frame): Rename old get_prev_frame.
 	(get_prev_frame): Rewrite.  Unwind the PC first.  Use
 	frame_id_unwind.
+
+	* sentinel-frame.c (sentinel_frame_register_unwind): Correctly set
+	LVALP and ADDRP.
+	* frame.c: Include "ui-out.h".
 
 2003-01-09  Andrew Cagney  <ac131313@redhat.com>
 
