@@ -1,3 +1,10 @@
+2003-02-02  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2002-11-10 Jason Molenda (jason-cl@molenda.com):
+        * mi-cmd-var.c (mi_cmd_var_list_children): CHILDREN field is
+        now a list; still a tuple when in mi1.
+        * gdbmi.texinfo: Update var-list-children example.
+
 2003-01-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-cmd-env.c: Update copyright.

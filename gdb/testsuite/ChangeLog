@@ -1,3 +1,11 @@
+2003-02-02  Andrew Cagney  <ac131313@redhat.com>
+
+	2002-11-10 Jason Molenda (jason-cl@molenda.com):
+        * gdb.mi/mi-var-child.exp: -var-list-children's CHILDREN field is
+        now a list, not a tuple.
+        * gdb.mi/mi-var-display.exp: Ditto.
+        * gdb.mi/gdb792.exp: Ditto.
+
 2003-02-01  Andrew Cagney  <ac131313@redhat.com>
 
 	From 2002-11-09 Jason Molenda (jason-cl@molenda.com):
