@@ -1,3 +1,8 @@
+Tue Jan 18 03:54:59 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* aoutx.h (translate_from_native_sym_flags): Give warning symbols
+	an (unused) nonzero section value, needed for check below.
+
 Mon Jan 17 15:12:07 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* aoutx.h (translate_from_native_sym_flags,

@@ -1168,6 +1168,11 @@ DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd),
 	    abort ();
 	  cache_ptr->symbol.value = (bfd_vma) ((cache_ptr + 1));
 
+          /* We don't use a warning symbol's section, but we need
+	     it to be nonzero for the sanity check below, so
+	     pick one arbitrarily.  */
+	  cache_ptr->symbol.section = &bfd_abs_section;
+
 	  /* We furgle with the next symbol in place.
 	     We don't want it to be undefined, we'll trample the type */
 	  (sym_pointer + 1)->e_type[0] = 0xff;
