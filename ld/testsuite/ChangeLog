@@ -1,3 +1,9 @@
+2003-07-22  H.J. Lu <hongjiu.lu@intel.com>
+
+	* ld-selective/selective.exp: Skip "ia64-*-*".
+
+	* ld-srec/srec.exp: Make xfail on "ia64-*-*".
+
 2003-07-11  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ld-h8300/relax-3{.s,.d,-coff.d}: New test.

@@ -39,6 +39,11 @@ if {[istarget "alpha*-*-*"]} {
     return
 }
 
+# IA64 does not support selective linking
+if {[istarget "ia64-*-*"]} {
+    return
+}
+
 # s390 does not support selective linking
 if {[istarget "s390*-*-*"]} {
     return
