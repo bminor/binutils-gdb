@@ -1,5 +1,30 @@
 2004-02-23  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (struct dwarf2_cu): Add dies.
+	(struct dwarf2_per_cu_data): Shrink length field to add new
+	queued flag.
+	(make_cleanup_free_die_list, do_free_die_list_cleanup): Remove.
+	(dwarf_alloc_block): Take a dwarf2_cu argument.  Allocate
+	blocks on the partial_die_obstack.
+	(dwarf2_find_comp_unit_psymtab, struct dwarf2_queue_item)
+	(dwarf2_queue, queue_comp_unit, process_queue): New.
+	(load_full_comp_unit, process_full_comp_unit): New functions,
+	split from psymtab_to_symtab_1.
+	(psymtab_to_symtab_1): Remove.
+	(dwarf2_build_psymtabs_hard): Initialize the whole dwarf2_cu
+	structure.  Cache the psymtab if we have a per_cu structure.
+	(load_comp_unit): Initialize the whole dwarf2_cu structure.
+	(dwarf2_psymtab_to_symtab): Restore dwarf2_per_objfile here.
+	(read_full_die): Queue compilation units for references.
+	(read_attribute_value): Update calls to dwarf_alloc_block.
+	(follow_die_ref): Follow inter-complation-unit references.
+	(free_comp_units_worker): Free the die list.
+	(get_die_type): Take the hash table as an argument.
+	(reset_die_and_siblings_types): Don't try to restore types
+	if none were saved.
+
+2004-02-23  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (struct dwarf2_per_objfile_data): Add comment
 	for cu_tree.  Add read_in_chain.
 	(age_cached_comp_units): New function.
