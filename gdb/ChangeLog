@@ -1,3 +1,8 @@
+Thu Apr  4 17:17:53 1996  Fred Fish  <fnf@cygnus.com>
+
+	* symmisc.c (print_objfile_statistics): Print memory used by
+	psymbol cache obstack.
+
 Thu Apr  4 15:43:07 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* symfile.c (report_transfer_performance): New function.
