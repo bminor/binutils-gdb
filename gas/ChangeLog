@@ -10,6 +10,7 @@ Tue Apr 11 01:42:36 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	TC_GENERIC_RELAX_TABLE is defined, and use its value for the base
 	of the table.
 	* tc.h (md_relax_table): Delete declaration.
+	* as.h (struct relax_type): Add forward declaration for type.
 	* config/tc-a29k.c: Deleted md_relax_table.
 	* config/tc-{alpha,arm,h8300,hppa,i860,m88k,mips,ppc,sparc,z8k}.c:
 	Ditto.
