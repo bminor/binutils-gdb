@@ -552,10 +552,10 @@ md_assemble (str)
 
     case SPECIAL_CASE_FDIV:
       /* According to information leaked from Sun, the "fdiv" instructions
-		   on early SPARC machines would produce incorrect results sometimes.
-		   The workaround is to add an fmovs of the destination register to
-		   itself just after the instruction.  This was true on machines
-		   with Weitek 1165 float chips, such as the Sun-4/260 and /280. */
+	 on early SPARC machines would produce incorrect results sometimes.
+	 The workaround is to add an fmovs of the destination register to
+	 itself just after the instruction.  This was true on machines
+	 with Weitek 1165 float chips, such as the Sun-4/260 and /280. */
       special_case = 0;
       assert (the_insn.reloc == NO_RELOC);
       toP = frag_more (4);
@@ -626,9 +626,9 @@ sparc_ip (str)
       the_insn.reloc = NO_RELOC;
 
       /*
-		 * Build the opcode, checking as we go to make
-		 * sure that the operands match
-		 */
+       * Build the opcode, checking as we go to make
+       * sure that the operands match
+       */
       for (args = insn->args;; ++args)
 	{
 	  switch (*args)
@@ -639,9 +639,9 @@ sparc_ip (str)
 	    case 'K':
 	      {
 		/* Load is 0; Store is 1.
-			       We compute the mask based on the values
-			       we find in S.  OK is set set
-			       if we see something we don't like.  */
+		   We compute the mask based on the values
+		   we find in S.  OK is set set
+		   if we see something we don't like.  */
 		int ok = 1;
 		int mask = 0;
 		while (ok == 1)
@@ -1309,16 +1309,16 @@ sparc_ip (str)
 		    break;
 		}
 	      /* Note that if the getExpression() fails, we
-				   will still have created U entries in the
-				   symbol table for the 'symbols' in the input
-				   string.  Try not to create U symbols for
-				   registers, etc. */
+		 will still have created U entries in the
+		 symbol table for the 'symbols' in the input
+		 string.  Try not to create U symbols for
+		 registers, etc. */
 	      {
 		/* This stuff checks to see if the
-					   expression ends in +%reg If it does,
-					   it removes the register from the
-					   expression, and re-sets 's' to point
-					   to the right place */
+		   expression ends in +%reg If it does,
+		   it removes the register from the
+		   expression, and re-sets 's' to point
+		   to the right place */
 
 		char *s1;
 
@@ -1350,9 +1350,9 @@ sparc_ip (str)
 	      s = expr_end;
 
 	      /* Check for invalid constant values.  Don't
-				   warn if constant was inside %hi or %lo,
-				   since these truncate the constant to
-				   fit.  */
+		 warn if constant was inside %hi or %lo,
+		 since these truncate the constant to
+		 fit.  */
 	      if (immediate_max != 0
 		  && the_insn.reloc != RELOC_LO10
 		  && the_insn.reloc != RELOC_HI22
@@ -1755,7 +1755,7 @@ md_apply_fix (fixP, val)
 	}			/* on overflow */
 
       val = (val >>= 2) + 1;
-      buf[1] |= ((val >> 14) & 0x3) << 3;
+      buf[1] |= ((val >> 14) & 0x3) << 4;
       buf[2] |= (val >> 8) & 0x3f;
       buf[3] = val & 0xff;
       break;
@@ -2234,12 +2234,5 @@ tc_aout_pre_write_hook (headers)
   H_SET_VERSION (headers, 1);
   return;
 }				/* tc_aout_pre_write_hook() */
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
 
 /* end of tc-sparc.c */
