@@ -1,6 +1,6 @@
 /* Target-dependent code for Renesas M32R, for GDB.
 
-   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
+   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -256,53 +256,53 @@ m32r_store_return_value (struct type *type, struct regcache *regcache,
 /* This is required by skip_prologue. The results of decoding a prologue
    should be cached because this thrashing is getting nuts.  */
 
-static void
+static int
 decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
-		 CORE_ADDR *pl_endptr)
+		 CORE_ADDR *pl_endptr, unsigned long *framelength)
 {
   unsigned long framesize;
   int insn;
   int op1;
-  int maybe_one_more = 0;
   CORE_ADDR after_prologue = 0;
+  CORE_ADDR after_push = 0;
   CORE_ADDR after_stack_adjust = 0;
   CORE_ADDR current_pc;
+  LONGEST return_value;
 
   framesize = 0;
   after_prologue = 0;
 
   for (current_pc = start_pc; current_pc < scan_limit; current_pc += 2)
     {
+      /* Check if current pc's location is readable. */
+      if (!safe_read_memory_integer (current_pc, 2, &return_value))
+	return -1;
+
       insn = read_memory_unsigned_integer (current_pc, 2);
+
+      if (insn == 0x0000)
+	break;
 
       /* If this is a 32 bit instruction, we dont want to examine its
          immediate data as though it were an instruction */
       if (current_pc & 0x02)
 	{
-	  /* Clear the parallel execution bit from 16 bit instruction */
-	  if (maybe_one_more)
-	    {
-	      /* The last instruction was a branch, usually terminates
-	         the series, but if this is a parallel instruction,
-	         it may be a stack framing instruction */
-	      if (!(insn & 0x8000))
-		{
-		  /* nope, we are really done */
-		  break;
-		}
-	    }
 	  /* decode this instruction further */
 	  insn &= 0x7fff;
 	}
       else
 	{
-	  if (maybe_one_more)
-	    break;		/* This isnt the one more */
 	  if (insn & 0x8000)
 	    {
 	      if (current_pc == scan_limit)
 		scan_limit += 2;	/* extend the search */
+
 	      current_pc += 2;	/* skip the immediate data */
+
+	      /* Check if current pc's location is readable. */
+	      if (!safe_read_memory_integer (current_pc, 2, &return_value))
+		return -1;
+
 	      if (insn == 0x8faf)	/* add3 sp, sp, xxxx */
 		/* add 16 bit sign-extended offset */
 		{
@@ -312,6 +312,8 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
 	      else
 		{
 		  if (((insn >> 8) == 0xe4)	/* ld24 r4, xxxxxx; sub sp, r4 */
+		      && safe_read_memory_integer (current_pc + 2, 2,
+						   &return_value)
 		      && read_memory_unsigned_integer (current_pc + 2,
 						       2) == 0x0f24)
 		    /* subtract 24 bit sign-extended negative-offset */
@@ -324,7 +326,7 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
 		      framesize += insn;
 		    }
 		}
-	      after_prologue = current_pc;
+	      after_push = current_pc + 2;
 	      continue;
 	    }
 	}
@@ -363,17 +365,23 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
 	  after_prologue = current_pc + 2;
 	  break;		/* end of stack adjustments */
 	}
+
       /* Nop looks like a branch, continue explicitly */
       if (insn == 0x7000)
 	{
 	  after_prologue = current_pc + 2;
 	  continue;		/* nop occurs between pushes */
 	}
+      /* End of prolog if any of these are trap instructions */
+      if ((insn & 0xfff0) == 0x10f0)
+	{
+	  after_prologue = current_pc;
+	  break;
+	}
       /* End of prolog if any of these are branch instructions */
       if ((op1 == 0x7000) || (op1 == 0xb000) || (op1 == 0xf000))
 	{
 	  after_prologue = current_pc;
-	  maybe_one_more = 1;
 	  continue;
 	}
       /* Some of the branch instructions are mixed with other types */
@@ -383,11 +391,13 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
 	  if ((subop == 0x0ec0) || (subop == 0x0fc0))
 	    {
 	      after_prologue = current_pc;
-	      maybe_one_more = 1;
 	      continue;		/* jmp , jl */
 	    }
 	}
     }
+
+  if (framelength)
+    *framelength = framesize;
 
   if (current_pc >= scan_limit)
     {
@@ -400,6 +410,13 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
 	    {
 	      *pl_endptr = after_stack_adjust;
 	    }
+	  else if (after_push != 0)
+	    /* We did not find a "mv fp,sp", but we DID find
+	       a push.  Is it safe to use that as the
+	       end of the prologue?  I just don't know. */
+	    {
+	      *pl_endptr = after_push;
+	    }
 	  else
 	    /* We reached the end of the loop without finding the end
 	       of the prologue.  No way to win -- we should report failure.  
@@ -407,25 +424,29 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
 	       GDB will set a breakpoint at the start of the function (etc.) */
 	    *pl_endptr = start_pc;
 	}
-      return;
+      return 0;
     }
+
   if (after_prologue == 0)
     after_prologue = current_pc;
 
   if (pl_endptr)
     *pl_endptr = after_prologue;
+
+  return 0;
 }				/*  decode_prologue */
 
 /* Function: skip_prologue
    Find end of function prologue */
 
-#define DEFAULT_SEARCH_LIMIT 44
+#define DEFAULT_SEARCH_LIMIT 128
 
 CORE_ADDR
 m32r_skip_prologue (CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end;
   struct symtab_and_line sal;
+  LONGEST return_value;
 
   /* See what the symbol table says */
 
@@ -447,10 +468,17 @@ m32r_skip_prologue (CORE_ADDR pc)
     }
   else
     func_end = pc + DEFAULT_SEARCH_LIMIT;
-  decode_prologue (pc, func_end, &sal.end);
+
+  /* If pc's location is not readable, just quit. */
+  if (!safe_read_memory_integer (pc, 4, &return_value))
+    return pc;
+
+  /* Find the end of prologue.  */
+  if (decode_prologue (pc, func_end, &sal.end, NULL) < 0)
+    return pc;
+
   return sal.end;
 }
-
 
 struct m32r_unwind_cache
 {
@@ -480,12 +508,13 @@ static struct m32r_unwind_cache *
 m32r_frame_unwind_cache (struct frame_info *next_frame,
 			 void **this_prologue_cache)
 {
-  CORE_ADDR pc;
+  CORE_ADDR pc, scan_limit;
   ULONGEST prev_sp;
   ULONGEST this_base;
-  unsigned long op;
+  unsigned long op, op2;
   int i;
   struct m32r_unwind_cache *info;
+
 
   if ((*this_prologue_cache))
     return (*this_prologue_cache);
@@ -496,10 +525,11 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
 
   info->size = 0;
   info->sp_offset = 0;
-
   info->uses_frame = 0;
+
+  scan_limit = frame_pc_unwind (next_frame);
   for (pc = frame_func_unwind (next_frame);
-       pc > 0 && pc < frame_pc_unwind (next_frame); pc += 2)
+       pc > 0 && pc < scan_limit; pc += 2)
     {
       if ((pc & 2) == 0)
 	{
@@ -513,18 +543,19 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
 		  short n = op & 0xffff;
 		  info->sp_offset += n;
 		}
-	      else if (((op >> 8) == 0xe4)	/* ld24 r4, xxxxxx; sub sp, r4 */
-		       && get_frame_memory_unsigned (next_frame, pc + 4,
+	      else if (((op >> 8) == 0xe4)
+		       && get_frame_memory_unsigned (next_frame, pc + 2,
 						     2) == 0x0f24)
 		{
+		  /* ld24 r4, xxxxxx; sub sp, r4 */
 		  unsigned long n = op & 0xffffff;
 		  info->sp_offset += n;
-		  pc += 2;
+		  pc += 2;	/* skip sub instruction */
 		}
-	      else
-		break;
 
-	      pc += 2;
+	      if (pc == scan_limit)
+		scan_limit += 2;	/* extend the search */
+	      pc += 2;		/* skip the immediate data */
 	      continue;
 	    }
 	}
@@ -549,12 +580,13 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
 	  /* mv fp, sp */
 	  info->uses_frame = 1;
 	  info->r13_offset = info->sp_offset;
+	  break;		/* end of stack adjustments */
 	}
-      else if (op == 0x7000)
-	/* nop */
-	continue;
-      else
-	break;
+      else if ((op & 0xfff0) == 0x10f0)
+	{
+	  /* end of prologue if this is a trap instruction */
+	  break;		/* end of stack adjustments */
+	}
     }
 
   info->size = -info->sp_offset;

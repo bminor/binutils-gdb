@@ -1,3 +1,12 @@
+2004-10-07  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* m32r-tdep.c (decode_prologue): Support functions written
+	in assembler language. Recognize trap instructions as the
+	end of prologue.
+	(m32r_frame_unwind_cache): Ditto.
+	(m32r_skip_prologue): Extend search limit. Quit analyzing
+	prologue if pc's location is not readable.
+
 2004-10-06  Paul N. Hilfinger  <Hilfinger@gnat.com>
 
 	* Makefile.in (.l.c): Do conversions of names of alloc and free 
