@@ -1,6 +1,8 @@
 /* GDB routines for manipulating objfiles.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+   2001, 2002 Free Software Foundation, Inc.
+
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
    This file is part of GDB.
@@ -30,6 +32,7 @@
 #include "objfiles.h"
 #include "gdb-stabs.h"
 #include "target.h"
+#include "bcache.h"
 
 #include <sys/types.h>
 #include "gdb_stat.h"
@@ -269,10 +272,8 @@ allocate_objfile (bfd *abfd, int flags)
       objfile = (struct objfile *) xmalloc (sizeof (struct objfile));
       memset (objfile, 0, sizeof (struct objfile));
       objfile->md = NULL;
-      obstack_specify_allocation (&objfile->psymbol_cache.cache, 0, 0,
-				  xmalloc, xfree);
-      obstack_specify_allocation (&objfile->macro_cache.cache, 0, 0,
-				  xmalloc, xfree);
+      objfile->psymbol_cache = bcache_xmalloc ();
+      objfile->macro_cache = bcache_xmalloc ();
       obstack_specify_allocation (&objfile->psymbol_obstack, 0, 0, xmalloc,
 				  xfree);
       obstack_specify_allocation (&objfile->symbol_obstack, 0, 0, xmalloc,
@@ -483,8 +484,8 @@ free_objfile (struct objfile *objfile)
       if (objfile->static_psymbols.list)
 	xmfree (objfile->md, objfile->static_psymbols.list);
       /* Free the obstacks for non-reusable objfiles */
-      free_bcache (&objfile->psymbol_cache);
-      free_bcache (&objfile->macro_cache);
+      bcache_xfree (objfile->psymbol_cache);
+      bcache_xfree (objfile->macro_cache);
       obstack_free (&objfile->psymbol_obstack, 0);
       obstack_free (&objfile->symbol_obstack, 0);
       obstack_free (&objfile->type_obstack, 0);

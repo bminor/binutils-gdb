@@ -6476,7 +6476,7 @@ macro_start_file (int file, int line,
      at all until we actually get a filename.  */
   if (! pending_macros)
     pending_macros = new_macro_table (&objfile->symbol_obstack,
-                                      &objfile->macro_cache);
+                                      objfile->macro_cache);
 
   if (! current_file)
     /* If we have no current file, then this must be the start_file

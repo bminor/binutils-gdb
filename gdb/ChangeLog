@@ -1,3 +1,42 @@
+2002-07-12  Andrew Cagney  <ac131313@redhat.com>
+
+	* bcache.h: Update copyright.
+	(struct bstring, struct bcache): Move definition to "bcache.c".
+	Replaced by opaque declaration.
+	(bcache_xfree): Replace free_bcache.
+	(bcache_xmalloc, bcache_memory_used): Declare.
+	
+	* bcache.c: Update copyright.
+	(struct bstring, struct bcache): Moved to here from "bcache.h".
+	Update comments.
+	(bcache_xmalloc, bcache_memory_used): New functions.
+	(bcache_xfree): Replace function free_bcache.
+	
+	* Makefile.in (objfiles.o): Add $(bcache_h).
+	(objfiles_h): Remove $(bcache_h).
+	(symfile.o): Add $(bcache_h).
+
+	* symmisc.c: Update copyright.
+	(print_symbol_bcache_statistics): Pass psymbol_cache by value.
+	(print_objfile_statistics): Use bcache_memory_used.
+
+	* symfile.c: Include "bcache.h".
+	(reread_symbols): Use bcache_xfree.
+	(reread_symbols): Use bcache_xmalloc and bcache_xfree.
+	(add_psymbol_to_list): Pass psymbol_cache by value.
+	(add_psymbol_with_dem_name_to_list): Ditto.
+
+	* objfiles.h: Update copyright.
+	(struct bcache): Declare opaque.  Do not include "bcache.h".
+	(struct objfile): Change psymbol_cache and macro_cache to ``struct
+	bcache'' pointers.
+	* dwarf2read.c (macro_start_file): Pass macro_cache by value.
+
+	* objfiles.c: Include "bcache.h".  Update copyright.
+	(allocate_objfile): Use bcache_xmalloc to create psymbol_cache and
+	macro_cache.
+	(free_objfile): Use bcache_xfree.
+
 2002-07-11  Grace Sainsbury  <graces@redhat.com>
 
 	* monitor.c (monitor_fetch_register): Make name a constant.

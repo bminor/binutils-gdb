@@ -641,7 +641,7 @@ macrotab_h =    macrotab.h
 macroscope_h =  macroscope.h $(macrotab_h) $(symtab_h)
 memattr_h =     memattr.h
 monitor_h =	monitor.h
-objfiles_h =	objfiles.h $(bcache_h)
+objfiles_h =	objfiles.h
 parser_defs_h =	parser-defs.h $(doublest_h)
 ppc_tdep_h =	ppc-tdep.h osabi.h
 regcache_h =	regcache.h
@@ -1871,7 +1871,7 @@ nindy-tdep.o: nindy-tdep.c $(defs_h) $(frame_h) $(symtab_h)  $(gdbcore_h)
 ns32k-tdep.o: ns32k-tdep.c $(bfd_h) $(dis_asm_h) $(defs_h)
 
 objfiles.o: objfiles.c $(bfd_h) $(defs_h) $(objfiles_h) $(symfile_h) \
-	$(symtab_h) $(gdb_string_h) $(breakpoint_h)
+	$(symtab_h) $(gdb_string_h) $(breakpoint_h) $(bcache_h)
 
 solib-osf.o: solib-osf.c $(defs_h) $(inferior_h) $(symtab_h) $(objfiles_h) \
 	$(symfile_h) $(target_h) $(gdb_string_h) $(solist_h)
@@ -2167,7 +2167,7 @@ sun3-nat.o: sun3-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 symfile.o: symfile.c $(breakpoint_h) $(complaints_h) $(defs_h) \
 	$(expression_h) $(gdb_stabs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(gdbtypes_h) $(language_h) $(objfiles_h) $(symfile_h) $(symtab_h) \
-	$(target_h) $(gdb_string_h) $(completer_h)
+	$(target_h) $(gdb_string_h) $(completer_h) $(bcache_h)
 
 symm-tdep.o: symm-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 

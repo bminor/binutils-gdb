@@ -1,6 +1,8 @@
 /* Do various things to symbol tables (other than lookup), for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
+   1995, 1996, 1997, 1998, 1999, 2000, 2002 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -167,7 +169,7 @@ print_symbol_bcache_statistics (void)
   ALL_OBJFILES (objfile)
   {
     printf_filtered ("Byte cache statistics for '%s':\n", objfile->name);
-    print_bcache_statistics (&objfile->psymbol_cache, "partial symbol cache");
+    print_bcache_statistics (objfile->psymbol_cache, "partial symbol cache");
   }
   immediate_quit--;
 }
@@ -202,9 +204,9 @@ print_objfile_statistics (void)
     printf_filtered ("  Total memory used for psymbol obstack: %d\n",
 		     obstack_memory_used (&objfile->psymbol_obstack));
     printf_filtered ("  Total memory used for psymbol cache: %d\n",
-		     obstack_memory_used (&objfile->psymbol_cache.cache));
+		     bcache_memory_used (objfile->psymbol_cache));
     printf_filtered ("  Total memory used for macro cache: %d\n",
-		     obstack_memory_used (&objfile->macro_cache.cache));
+		     bcache_memory_used (objfile->macro_cache));
     printf_filtered ("  Total memory used for symbol obstack: %d\n",
 		     obstack_memory_used (&objfile->symbol_obstack));
     printf_filtered ("  Total memory used for type obstack: %d\n",
