@@ -184,6 +184,8 @@ udi_create_inferior (execfile, args, env)
 	return;
   }
 
+  inferior_pid = 40000;
+
 #if defined(ULTRA3) && defined(KERNEL_DEBUGGING)
    /* On ultra3 (NYU) we assume the kernel is already running so there is
     *   no file to download
@@ -221,6 +223,8 @@ udi_mourn()
    '<udi_udi_config_id> [progname]' for example.
  */
 
+/* XXX - need cleanups for udiconnect for various failures!!! */
+
 static char *udi_config_id;
 static void
 udi_open (name, from_tty)
@@ -239,6 +243,8 @@ udi_open (name, from_tty)
 
   DENTER("udi_open()");
 
+  target_preopen(from_tty);
+
   /* Find the first whitespace character, it separates udi_config_id
      from prog_name.  */
   if(!name) goto erroid;
@@ -248,6 +254,7 @@ udi_open (name, from_tty)
   if (*p == '\0')
 erroid:
     error("Usage: target udi config_id progname, where config_id appears in udi_soc file");
+
   udi_config_id = (char*)malloc (p - name + 1);
   strncpy (udi_config_id, name, p - name);
   udi_config_id[p - name] = '\0';
@@ -260,11 +267,9 @@ erroid:
     free (prog_name);
   prog_name = savestring (p, strlen (p));
 
-  if (udi_session_id >= 0)
-    close (udi_session_id);
+  if (UDIConnect(udi_config_id, &udi_session_id))
+    error("UDIConnect() failed: %s\n", dfe_errmsg);
 
-  if(UDIConnect(udi_config_id, &udi_session_id))
-     fprintf(stderr, "UDIConnect() failed: %s\n", dfe_errmsg);
   push_target (&udi_ops);
 
 #ifndef HAVE_TERMIO
@@ -272,18 +277,18 @@ erroid:
   /* Cause SIGALRM's to make reads fail with EINTR instead of resuming
      the read.  */
   if (siginterrupt (SIGALRM, 1) != 0)
-    perror ("udi_open: error in siginterrupt");
+    error ("udi_open: siginterrupt() %s", safe_strerror(errno));
 #endif
 
   /* Set up read timeout timer.  */
   if ((void (*)) signal (SIGALRM, udi_timer) == (void (*)) -1)
-    perror ("udi_open: error in signal");
+    error ("udi_open: signal() %s", safe_strerror(errno));
 #endif
 
 #if defined (LOG_FILE)
   log_file = fopen (LOG_FILE, "w");
   if (log_file == NULL)
-    perror (LOG_FILE);
+    error ("udi_open: fopen(%s) %s", LOG_FILE, safe_strerror(errno));
 #endif
   /*
   ** Initialize target configuration structure (global)
@@ -386,6 +391,7 @@ udi_close (quitting)	/*FIXME: how is quitting used */
 
   /* Do not try to close udi_session_id again, later in the program.  */
   udi_session_id = -1;
+  inferior_pid = 0;
 
 #if defined (LOG_FILE)
   if (ferror (log_file))
@@ -394,7 +400,7 @@ udi_close (quitting)	/*FIXME: how is quitting used */
     printf ("Error closing log file.\n");
 #endif
 
-  printf ("Ending remote debugging\n");
+  printf_filtered ("  Ending remote debugging\n");
 
   DEXIT("udi_close()");
 } 
@@ -633,89 +639,99 @@ int	regno;
   int		i;
 
   if (regno >= 0)  {
-	fetch_register(regno);
-	return;
+    fetch_register(regno);
+    return;
   }
-  DENTER("udi_fetch_registers()");
 
 /* Gr1/rsp */
+
   From.Space = UDI29KGlobalRegs;
   From.Offset = 1;
-  To = (UDIUInt32*)&registers[4 * GR1_REGNUM];
+  To = (UDIUInt32 *)&registers[4 * GR1_REGNUM];
   Count = 1;
-  if(UDIRead(From, To, Count, Size, &CountDone, HostEndian))
+  if (UDIRead(From, To, Count, Size, &CountDone, HostEndian))
     error("UDIRead() failed in udi_fetch_registers");
-  else register_valid[4 * GR1_REGNUM] = 1;
+
+  register_valid[GR1_REGNUM] = 1;
 
 #if defined(GR64_REGNUM)	/* Read gr64-127 */
+
 /* Global Registers gr64-gr95 */ 
+
   From.Space = UDI29KGlobalRegs;
   From.Offset = 64;
-  To = &registers[4 * GR64_REGNUM];
+  To = (UDIUInt32 *)&registers[4 * GR64_REGNUM];
   Count = 32;
-  if(UDIRead(From, To, Count, Size, &CountDone, HostEndian))
+  if (UDIRead(From, To, Count, Size, &CountDone, HostEndian))
     error("UDIRead() failed in udi_fetch_registers");
-  else for(i = 4 * GR64_REGNUM; i < 4*GR64_REGNUM + 32; i++)
+
+  for (i = GR64_REGNUM; i < GR64_REGNUM + 32; i++)
+    register_valid[i] = 1;
+
 #endif	/*  GR64_REGNUM */
 
 /* Global Registers gr96-gr127 */ 
-  From.Space = UDI29KGlobalRegs;
-  From.Offset = 64;
-  To = (UDIUInt32*)&registers[4 * GR96_REGNUM];
-  Count = 32;
-  if(UDIRead(From, To, Count, Size, &CountDone, HostEndian))
-    error("UDIRead() failed in udi_fetch_registers");
-  else for(i = 4 * GR96_REGNUM; i < 4*GR96_REGNUM + 32; i++)
-	register_valid[i] = 1;
 
-/* Local Registers */ 
+  From.Space = UDI29KGlobalRegs;
+  From.Offset = 96;
+  To = (UDIUInt32 *)&registers[4 * GR96_REGNUM];
+  Count = 32;
+  if (UDIRead(From, To, Count, Size, &CountDone, HostEndian))
+    error("UDIRead() failed in udi_fetch_registers");
+
+  for (i = GR96_REGNUM; i < GR96_REGNUM + 32; i++)
+    register_valid[i] = 1;
+
+/* Local Registers */
+
   From.Space = UDI29KLocalRegs;
   From.Offset = 0;
-  To = (UDIUInt32*)&registers[4 * LR0_REGNUM];
+  To = (UDIUInt32 *)&registers[4 * LR0_REGNUM];
   Count = 128;
-  if(UDIRead(From, To, Count, Size, &CountDone, HostEndian))
+  if (UDIRead(From, To, Count, Size, &CountDone, HostEndian))
     error("UDIRead() failed in udi_fetch_registers");
-  else for(i = 4 * LR0_REGNUM; i < 4*LR0_REGNUM + 128; i++)
-	register_valid[i] = 1;
 
-/* Protected Special Registers */ 
+  for (i = LR0_REGNUM; i < LR0_REGNUM + 128; i++)
+    register_valid[i] = 1;
+
+/* Protected Special Registers */
+
   From.Space = UDI29KSpecialRegs;
   From.Offset = 0;
-  To = (UDIUInt32*)&registers[4 * SR_REGNUM(0)];
+  To = (UDIUInt32 *)&registers[4 * SR_REGNUM(0)];
   Count = 15;
-  if(UDIRead(From, To, Count, Size, &CountDone, HostEndian))
+  if (UDIRead(From, To, Count, Size, &CountDone, HostEndian))
     error("UDIRead() failed in udi_fetch_registers");
-  else for(i = 4 * SR_REGNUM(0); i < 4*SR_REGNUM(0) + 15; i++)
-	register_valid[i] = 1;
+
+  for (i = SR_REGNUM(0); i < SR_REGNUM(0) + 15; i++)
+    register_valid[i] = 1;
 
   if (USE_SHADOW_PC) {	/* Let regno_to_srnum() handle the register number */
-	fetch_register(NPC_REGNUM);
-	fetch_register(PC_REGNUM);
-	fetch_register(PC2_REGNUM);
-  }
+    fetch_register(NPC_REGNUM);
+    fetch_register(PC_REGNUM);
+    fetch_register(PC2_REGNUM);
 
-/* Unprotected Special Registers sr128-sr135*/ 
-  if (USE_SHADOW_PC) 	/* Let regno_to_srnum() handle the register number */
-  { From.Space = UDI29KSpecialRegs;
+/* Unprotected Special Registers sr128-sr135 */
+
+    From.Space = UDI29KSpecialRegs;
     From.Offset = 128;
-    To = (UDIUInt32*)&registers[4 * SR_REGNUM(128)];
-    Count = 135-128 +1;
-    if(UDIRead(From, To, Count, Size, &CountDone, HostEndian))
+    To = (UDIUInt32 *)&registers[4 * SR_REGNUM(128)];
+    Count = 135-128 + 1;
+    if (UDIRead(From, To, Count, Size, &CountDone, HostEndian))
       error("UDIRead() failed in udi_fetch_registers");
-    else for(i = 4 * SR_REGNUM(128); i < 4*SR_REGNUM(128) + 135-128+1; i++)
-	register_valid[i] = 1;
+
+    for (i = SR_REGNUM(128); i < SR_REGNUM(128) + 135-128+1; i++)
+      register_valid[i] = 1;
   }
 
   /* There doesn't seem to be any way to get these.  */
   {
     int val = -1;
     supply_register (FPE_REGNUM, (char *) &val);
-    supply_register (INT_REGNUM, (char *) &val);
+    supply_register (INTE_REGNUM, (char *) &val);
     supply_register (FPS_REGNUM, (char *) &val);
     supply_register (EXO_REGNUM, (char *) &val);
   }
-
-  DEXIT("udi_fetch_registerS()");
 }
 
 
@@ -741,10 +757,9 @@ int regno;
       return;
     }
 
-  DENTER("udi_store_registers()");
-
 /* Gr1/rsp */
-  From = (UDIUInt32*)&registers[4 * GR1_REGNUM];
+
+  From = (UDIUInt32 *)&registers[4 * GR1_REGNUM];
   To.Space = UDI29KGlobalRegs;
   To.Offset = 1;
   Count = 1;
@@ -752,17 +767,21 @@ int regno;
     error("UDIWrite() failed in udi_store_regisetrs");
 
 #if defined(GR64_REGNUM)
+
 /* Global registers gr64-gr95 */
-  From = (UDIUInt32*)&registers[4 * GR64_REGNUM];
+
+  From = (UDIUInt32 *)&registers[4 * GR64_REGNUM];
   To.Space = UDI29KGlobalRegs;
   To.Offset = 64;
   Count = 32;
   if(UDIWrite(From, To, Count, Size, &CountDone, HostEndian))
     error("UDIWrite() failed in udi_store_regisetrs");
+
 #endif	/* GR64_REGNUM */
 
 /* Global registers gr96-gr127 */
-  From = (UDIUInt32*)&registers[4 * GR96_REGNUM];
+
+  From = (UDIUInt32 *)&registers[4 * GR96_REGNUM];
   To.Space = UDI29KGlobalRegs;
   To.Offset = 96;
   Count = 32;
@@ -770,7 +789,8 @@ int regno;
     error("UDIWrite() failed in udi_store_regisetrs");
 
 /* Local Registers */
-  From = (UDIUInt32*)&registers[4 * LR0_REGNUM];
+
+  From = (UDIUInt32 *)&registers[4 * LR0_REGNUM];
   To.Space = UDI29KLocalRegs;
   To.Offset = 0;
   Count = 128;
@@ -779,15 +799,17 @@ int regno;
 
 
 /* Protected Special Registers */ /* VAB through TMR */
-  From = (UDIUInt32*)&registers[4 * SR_REGNUM(0)];
+
+  From = (UDIUInt32 *)&registers[4 * SR_REGNUM(0)];
   To.Space = UDI29KSpecialRegs;
   To.Offset = 0;
   Count = 10;
   if(UDIWrite(From, To, Count, Size, &CountDone, HostEndian))
     error("UDIWrite() failed in udi_store_regisetrs");
 
-  /* PC0, PC1, PC2 possibly as shadow registers */
-  From = (UDIUInt32*)&registers[4 * SR_REGNUM(10)];
+/* PC0, PC1, PC2 possibly as shadow registers */
+
+  From = (UDIUInt32 *)&registers[4 * SR_REGNUM(10)];
   To.Space = UDI29KSpecialRegs;
   Count = 3;
   if (USE_SHADOW_PC) 
@@ -798,7 +820,8 @@ int regno;
     error("UDIWrite() failed in udi_store_regisetrs");
 
   /* LRU and MMU */
-  From = (UDIUInt32*)&registers[4 * SR_REGNUM(13)];
+
+  From = (UDIUInt32 *)&registers[4 * SR_REGNUM(13)];
   To.Space = UDI29KSpecialRegs;
   To.Offset = 13;
   Count = 2;
@@ -806,7 +829,8 @@ int regno;
     error("UDIWrite() failed in udi_store_regisetrs");
 
 /* Unprotected Special Registers */ 
-  From = (UDIUInt32*)&registers[4 * SR_REGNUM(128)];
+
+  From = (UDIUInt32 *)&registers[4 * SR_REGNUM(128)];
   To.Space = UDI29KSpecialRegs;
   To.Offset = 128;
   Count = 135-128 +1;
@@ -814,7 +838,6 @@ int regno;
     error("UDIWrite() failed in udi_store_regisetrs");
 
   registers_changed ();
-  DEXIT("udi_store_registers() failed in udi_store_regisetrs");
 }
 
 /****************************************************** UDI_PREPARE_TO_STORE */
@@ -944,11 +967,12 @@ int     from_tty;
 #if defined(ULTRA3) && defined(KERNEL_DEBUGGING)
 	/* We don't ever kill the kernel */
 	if (from_tty) {
-		printf("Kernel not killed, but left in current state.\n");
-	 	printf("Use detach to leave kernel running.\n");
+		printf_filtered("Kernel not killed, but left in current state.\n");
+	 	printf_filtered("Use detach to leave kernel running.\n");
 	}
 #else
 	UDIStop();
+	inferior_pid = 0;
 	if (from_tty) {
 		printf("Target has been stopped.");
 	}
@@ -1113,45 +1137,47 @@ fetch_register (regno)
   UDIBool	HostEndian = 0;
   int  		result;
 
-  DENTER("udi_fetch_register()");
-
   if (regno == GR1_REGNUM)
-  { From.Space = UDI29KGlobalRegs;
-    From.Offset = 1;
-    result = UDIRead(From, &To, Count, Size, &CountDone, HostEndian);
-  }
+    {
+      From.Space = UDI29KGlobalRegs;
+      From.Offset = 1;
+    }
   else if (regno >= GR96_REGNUM && regno < GR96_REGNUM + 32)
-  { From.Space = UDI29KGlobalRegs;
-    From.Offset = (regno - GR96_REGNUM) + 96;;
-    result = UDIRead(From, &To, Count, Size, &CountDone, HostEndian);
-  }
+    {
+      From.Space = UDI29KGlobalRegs;
+      From.Offset = (regno - GR96_REGNUM) + 96;;
+    }
+
 #if defined(GR64_REGNUM)
+
   else if (regno >= GR64_REGNUM && regno < GR64_REGNUM + 32 )
-  { From.Space = UDI29KGlobalRegs;
-    From.Offset = (regno - GR64_REGNUM) + 64;
-    result = UDIRead(From, &To, Count, Size, &CountDone, HostEndian);
-  }
+    {
+      From.Space = UDI29KGlobalRegs;
+      From.Offset = (regno - GR64_REGNUM) + 64;
+    }
+
 #endif	/* GR64_REGNUM */
+
   else if (regno >= LR0_REGNUM && regno < LR0_REGNUM + 128)
-  { From.Space = UDI29KLocalRegs;
-    From.Offset = (regno - LR0_REGNUM);
-    result = UDIRead(From, &To, Count, Size, &CountDone, HostEndian);
-  }
+    {
+      From.Space = UDI29KLocalRegs;
+      From.Offset = (regno - LR0_REGNUM);
+    }
   else if (regno>=FPE_REGNUM && regno<=EXO_REGNUM)  
-  { int val = -1;
-    supply_register(160 + (regno - FPE_REGNUM),(char *) &val);
-    return 0;		/* Pretend Success */
-  }
+    {
+      int val = -1;
+      supply_register(160 + (regno - FPE_REGNUM),(char *) &val);
+      return 0;		/* Pretend Success */
+    }
   else 
-  { From.Space = UDI29KSpecialRegs;
-    From.Offset = regnum_to_srnum(regno); 
-    result = UDIRead(From, &To, Count, Size, &CountDone, HostEndian);
-  }
-  DEXIT("udi_fetch_register()");
-  if(result)
-  { result = -1;
+    {
+      From.Space = UDI29KSpecialRegs;
+      From.Offset = regnum_to_srnum(regno); 
+    }
+
+  if (UDIRead(From, &To, Count, Size, &CountDone, HostEndian))
     error("UDIRead() failed in udi_fetch_registers");
-  }
+
   supply_register(regno, (char *) &To);
   return result;
 }
@@ -1253,7 +1279,7 @@ int	regno;
 		case FC_REGNUM:  return(134); 
 		case CR_REGNUM:  return(135); 
 		case FPE_REGNUM: return(160); 
-		case INT_REGNUM: return(161); 
+		case INTE_REGNUM: return(161); 
 		case FPS_REGNUM: return(162); 
 		case EXO_REGNUM:return(164); 
 		default:

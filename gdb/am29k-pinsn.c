@@ -18,9 +18,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
+
 #include "defs.h"
 #include "target.h"
-#include "am29k-opcode.h"
+#include "opcode/a29k.h"
 
 /* Print a symbolic representation of a general-purpose
    register number NUM on STREAM.
@@ -127,7 +129,7 @@ print_insn (memaddr, stream)
   /* The four bytes of the instruction.  */
   unsigned char insn24, insn16, insn8, insn0;
 
-  struct am29k_opcode *opcode;
+  struct a29k_opcode *opcode;
 
   read_memory (memaddr, &insn[0], 4);
 
@@ -140,11 +142,11 @@ print_insn (memaddr, stream)
   }
 
   /* The opcode is always in insn24.  */
-  for (opcode = &am29k_opcodes[0];
-       opcode < &am29k_opcodes[NUM_OPCODES];
+  for (opcode = &a29k_opcodes[0];
+       opcode < &a29k_opcodes[num_opcodes];
        ++opcode)
     {
-      if (insn24 == opcode->opcode)
+      if ((insn24<<24) == opcode->opcode)
 	{
 	  char *s;
 	  

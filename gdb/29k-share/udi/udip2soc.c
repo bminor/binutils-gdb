@@ -65,8 +65,6 @@ extern	char*		getenv();
 #define		SBUF_SIZE 500		/* size of string buffer */
 #define		ERRMSG_SIZE 500		/* size of error message buffer */
 
-#define	errmsg_m {int ii; for(ii=0; ii<ERRMSG_SIZE; ii++) dfe_errmsg[ii]=0;}
-
 typedef struct connection_str		/* record of connect session */
 {
     int		in_use;
@@ -114,21 +112,26 @@ LOCAL char	config_file[80];	/* path/name for config file */
 * soc2cayman  AF_INET            cayman      7000           <not supported>
 * soc2tip     AF_UNIX   astring              tip.exe        ...
 */
+UDIError
 UDIConnect(Config, Session)
-char*	Config;			/* in  -- identification string */
-UDISessionId *Session;		/* out -- session ID */
+     char *Config;		/* in  -- identification string */
+     UDISessionId *Session;	/* out -- session ID */
 {
     UDIInt32	service_id = UDIConnect_c;
     int		domain;
     int		cnt=0;
-    int		rcnt, pos, fd, params_pos=0;
+    int		rcnt, pos, params_pos=0;
     char	*tip_main_string;
     char	*env_p;
     struct hostent	*tip_info_p;
+    FILE	*fd;
+#if 0
     FILE	*f_p;
+#endif
     UDIUInt32	TIPIPCId;
     UDIUInt32	DFEIPCId;
 
+#if 0 /* This is crap.  It assumes that udi_soc is executable! */
     sprintf(sbuf, "which udi_soc");
     f_p = popen(sbuf, "r");
     if(f_p)
@@ -136,115 +139,102 @@ UDISessionId *Session;		/* out -- session ID */
 	sbuf[cnt-2]=0;
     }
     pclose(f_p);
-    errmsg_m;
-    for (rcnt=0; rcnt < MAX_SESSIONS; rcnt++)
-        if(!session[rcnt].in_use) break;
-    if(rcnt >= MAX_SESSIONS)
-    {
-        sprintf(dfe_errmsg, "DFE-ipc ERROR: Too many sessions already open");
-        return UDIErrorIPCLimitation;
-    }
+#endif
+
+    for (rcnt=0;
+	 rcnt < MAX_SESSIONS && session[rcnt].in_use;
+	 rcnt++);
+
+    if (rcnt >= MAX_SESSIONS)
+      {
+	sprintf(dfe_errmsg, "DFE-ipc ERROR: Too many sessions already open");
+	return UDIErrorIPCLimitation;
+      }
+
     /* One connection can be multiplexed between several sessions. */
-    for (cnt=0; cnt < MAX_SESSIONS; cnt++)	
-        if(!soc_con[cnt].in_use) break;
-    if(cnt >= MAX_SESSIONS)
-    {
-        sprintf(dfe_errmsg, "DFE-ipc ERROR: Too many connections already open");
+
+    for (cnt=0;
+	 cnt < MAX_SESSIONS && soc_con[cnt].in_use;
+	 cnt++);
+
+    if (cnt >= MAX_SESSIONS)
+      {
+        sprintf(dfe_errmsg,
+		"DFE-ipc ERROR: Too many connections already open");
         return UDIErrorIPCLimitation;
-    }
+      }
+
     *Session = rcnt;
     session[rcnt].soc_con_p = &soc_con[cnt];
 
-    if(strchr(Config, ' '))		/* test if file entry given */
-    {
+    if (strchr(Config, ' '))		/* test if file entry given */
+      {
         soc_con[cnt].in_use = TRUE;
         sscanf(Config, "%s %s %s %s %n",
-	    soc_con[cnt].connect_id,
-	    soc_con[cnt].domain_string,
-	    soc_con[cnt].tip_string,
-	    soc_con[cnt].tip_exe,
-	    &params_pos);
+	       soc_con[cnt].connect_id,
+	       soc_con[cnt].domain_string,
+	       soc_con[cnt].tip_string,
+	       soc_con[cnt].tip_exe,
+	       &params_pos);
 	tip_main_string = Config + params_pos;
-    }
+      }
     else				/* here if need to read udi_soc file */
-    {
-	fd = -1;
+      {
+	strcpy(config_file, "udi_soc");
 	env_p = getenv("UDICONF");
-	if(env_p)
-	{   sprintf(config_file, "%s", env_p);	/* path includes file name */
-	    fd = open(config_file, O_RDONLY);
-	}
-	if(fd == -1)
-	{   fd = open("udi_soc", O_RDONLY);
-	    strcpy(config_file, "udi_soc");
-	}
-	if(fd == -1)
-	{   fd = open(sbuf, O_RDONLY);
-	    strcpy(config_file, sbuf);
-	}
-	if(fd == -1)
-    	{   sprintf(dfe_errmsg, "UDIConnect, can't open udi_soc file:\n%s ",
-	    	sys_errlist[errno]);
-	    return UDIErrorCantOpenConfigFile;
-	}
-	while(1)
-	{   pos = 0;
-	    while((rcnt = read(fd, &sbuf[pos], 1)) != -1)/* read a line */
-	    {   if (sbuf[pos] == '\n' || rcnt == 0 )
-		    break;
-		pos += 1;
-	    }
-	    sbuf[pos] = 0;			/* terminate string */
-            sscanf(sbuf, "%s %s %s %s %n",
-	        soc_con[cnt].connect_id,
-	        soc_con[cnt].domain_string,
-	        soc_con[cnt].tip_string,
-	        soc_con[cnt].tip_exe,
-		&params_pos);
-	    if( strcmp(Config, soc_con[cnt].connect_id)
-		|| rcnt == -1 || rcnt == 0)
-	        if(rcnt == -1 || rcnt == 0)
-    	        {   sprintf(dfe_errmsg,
-			"UDIConnect, can't find entry in udi_soc file");
-	            return UDIErrorNoSuchConfiguration;
-	        }
-		else
-		    continue;
-            soc_con[cnt].in_use = TRUE;		/* here if entry found */
-	    tip_main_string = sbuf + params_pos;
+	if (env_p)
+	  strcpy(config_file, env_p);
+
+	fd = fopen(config_file, "r");
+
+	if (!fd)
+	  {
+	    sprintf(dfe_errmsg, "UDIConnect, can't open udi_soc file:\n%s ",
+		    sys_errlist[errno]);
+	    dfe_errno = UDIErrorCantOpenConfigFile;
+	    goto tip_failure;
+	  }
+
+	while (1)
+	  {
+	    if (fscanf(fd, "%s %s %s %s %[^\n]\n",
+		       soc_con[cnt].connect_id,
+		       soc_con[cnt].domain_string,
+		       soc_con[cnt].tip_string,
+		       soc_con[cnt].tip_exe,
+		       sbuf) == EOF)
+	      break;
+
+	    if (strcmp(Config, soc_con[cnt].connect_id) != 0)
+	      continue;
+
+	    soc_con[cnt].in_use = TRUE; /* here if entry found */
+
+	    tip_main_string = sbuf;
 	    break;
-	}
-	close(fd);
-    }
-/*-------------------------------------------------------------- '*' SOC_ID */
-    if( *soc_con[cnt].tip_string == '*'
-     && *soc_con[cnt+1].tip_string == 0)
-    {
-	rcnt = 0;
-	pos = getpid();
-	do
-	{ 
-	    sprintf(soc_con[cnt].tip_string,"/tmp/U%d", pos++);
-	    fd = open(soc_con[cnt].tip_string, O_CREAT);
-	    if(rcnt++ > 20)
-	    {   sprintf(dfe_errmsg,
-			"DFE-ipc ERROR, can't create random socket name\n");
-	        return UDIErrorCantConnect;
-	    }
-	} while(fd == -1);
-	close(fd);
-	unlink(soc_con[cnt].tip_string);
-    }
+	  }
+
+	fclose(fd);
+	if (!soc_con[cnt].in_use)
+	  {
+	    sprintf(dfe_errmsg,
+		    "UDIConnect, can't find `%s' entry in udi_soc file",
+		    Config);
+	    dfe_errno = UDIErrorNoSuchConfiguration;
+	    goto tip_failure;
+	  }
+      }
 /*----------------------------------------------------------- SELECT DOMAIN */
-    if(!strcmp(soc_con[cnt].domain_string, "AF_UNIX"))
-	domain = AF_UNIX;
-    else if(!strcmp(soc_con[cnt].domain_string, "AF_INET"))
-	domain = AF_INET;
+    if (strcmp(soc_con[cnt].domain_string, "AF_UNIX") == 0)
+      domain = AF_UNIX;
+    else if (strcmp(soc_con[cnt].domain_string, "AF_INET") == 0)
+      domain = AF_INET;
     else
-    {   errmsg_m;
+      {
     	sprintf(dfe_errmsg, "DFE-ipc ERROR: socket address family not known");
-	return UDIErrorBadConfigFileEntry;
-    }
+	dfe_errno = UDIErrorBadConfigFileEntry;
+	goto tip_failure;
+      }
 
 /*---------------------------------------------------- MULTIPLEXED SOCKET ? */
 /* If the requested session requires communication with
@@ -254,127 +244,188 @@ UDISessionId *Session;		/* out -- session ID */
    socket-name/host-name and the domain are the same.
  */
     for (rcnt=0; rcnt < MAX_SESSIONS; rcnt++)
-    {   if( soc_con[rcnt].in_use
-	&& !strcmp(soc_con[cnt].domain_string, soc_con[rcnt].domain_string)
-	&& !strcmp(soc_con[cnt].tip_string, soc_con[rcnt].tip_string) 
-	&& rcnt != cnt	)
-	{
+      {
+	if (soc_con[rcnt].in_use
+	    && rcnt != cnt
+	    && strcmp(soc_con[cnt].domain_string,
+		      soc_con[rcnt].domain_string) == 0
+	    && strcmp(soc_con[cnt].tip_string,
+		      soc_con[rcnt].tip_string) == 0)
+	  {
 	    session[*Session].soc_con_p = &soc_con[rcnt];
 	    soc_con[cnt].in_use = FALSE;	/* don't need new connect */
 	    goto tip_connect; 
 	}
-    }
+      }
 /*------------------------------------------------------------------ SOCKET */
     soc_con[cnt].dfe_sd = socket(domain, SOCK_STREAM, 0);
-    if (soc_con[cnt].dfe_sd == -1 )
-    {   errmsg_m;
+    if (soc_con[cnt].dfe_sd == -1)
+      {
     	sprintf(dfe_errmsg, "DFE-ipc ERROR, socket() call failed %s ",
-	    sys_errlist[errno]);
-    	UDIKill(cnt);
-    }
+		sys_errlist[errno]);
+	dfe_errno = UDIErrorUnknownError;
+	goto tip_failure;
+      }
 
 /*--------------------------------------------------------- AF_UNIX CONNECT */
-    if(domain == AF_UNIX)
-    {
-        memset( (char*)&soc_con[cnt].tip_sockaddr, 0,
-            sizeof(soc_con[cnt].tip_sockaddr));
+    if (domain == AF_UNIX)
+      {
+	if (strcmp(soc_con[cnt].tip_string, "*") == 0)
+	  {
+	    for (pos = 0; pos < 20; pos++)
+	      {
+		int f;
+
+		sprintf(soc_con[cnt].tip_string,"/tmp/U%d", getpid() + pos);
+		f = open(soc_con[cnt].tip_string, O_CREAT);
+		if (f == -1)
+		  continue;
+
+		close(f);
+		unlink(soc_con[cnt].tip_string);
+		break;
+	      }
+
+	    if (pos >= 20)
+	      {
+		sprintf(dfe_errmsg,
+			"DFE-ipc ERROR, can't create random socket name");
+		dfe_errno = UDIErrorCantConnect;
+		goto tip_failure;
+	      }
+	  }
+
         soc_con[cnt].tip_sockaddr.sa_family = domain;
         bcopy(soc_con[cnt].tip_string,
-		soc_con[cnt].tip_sockaddr.sa_data,
-		sizeof(soc_con[cnt].tip_sockaddr.sa_data) );
-    	if(connect(soc_con[cnt].dfe_sd, 
-		&soc_con[cnt].tip_sockaddr,
-		sizeof(soc_con[cnt].tip_sockaddr)) == -1)
-  	{	/* if connect() fails assume TIP not yet started */
+	      soc_con[cnt].tip_sockaddr.sa_data,
+	      sizeof(soc_con[cnt].tip_sockaddr.sa_data));
+    	if (connect(soc_con[cnt].dfe_sd,
+		    &soc_con[cnt].tip_sockaddr,
+		    sizeof(soc_con[cnt].tip_sockaddr)))
+	  { /* if connect() fails assume TIP not yet started */
 /*------------------------------------------------------------ AF_UNIX EXEC */
 	    int	pid;
-	    union	wait statusp;
-	    char*	arg0 = strrchr(soc_con[cnt].tip_exe,'/');
+	    union wait statusp;
+	    char *arg0;
 
-	    if(!arg0) arg0 = soc_con[cnt].tip_exe;
-	    else	arg0++;
+	    arg0 = strrchr(soc_con[cnt].tip_exe,'/');
+
+	    if (arg0)
+	      arg0++;
+	    else
+	      arg0 = soc_con[cnt].tip_exe;
     
-	    if((pid = fork()) == 0)
-            {   execlp(
-		    soc_con[cnt].tip_exe,
-		    arg0,
-		    soc_con[cnt].domain_string,
-		    soc_con[cnt].tip_string,
-		    NULL);
-	        exit(1);
-            }
-            if(wait4(pid, &statusp, WNOHANG, NULL))
-	    {
-	        sprintf(dfe_errmsg, "DFE-ipc ERROR: can't exec the TIP\n");
-	        return UDIErrorCantStartTIP;
-	    }
-	    sleep(2);
-			/* not TIP is running, try conect() again */
-    	    if(connect(soc_con[cnt].dfe_sd, 
-		&soc_con[cnt].tip_sockaddr,
-		sizeof(soc_con[cnt].tip_sockaddr)) == -1)
-	    {   sprintf(dfe_errmsg, "DFE-ipc ERROR, connect() call failed: %s",
+	    pid = vfork();
+
+	    if (pid == 0)	/* Child */
+	      {
+		execlp(soc_con[cnt].tip_exe,
+		       arg0,
+		       soc_con[cnt].domain_string,
+		       soc_con[cnt].tip_string,
+		       NULL);
+	        _exit(1);
+	      }
+
+            if (wait4(pid, &statusp, WNOHANG, NULL))
+	      {
+	        sprintf(dfe_errmsg, "DFE-ipc ERROR: can't exec the TIP");
+	        dfe_errno = UDIErrorCantStartTIP;
+		goto tip_failure;
+	      }
+
+	    pos = 3;
+    	    for (pos = 3; pos > 0; pos--)
+	      {
+		if (!connect(soc_con[cnt].dfe_sd, 
+			     &soc_con[cnt].tip_sockaddr,
+			     sizeof(soc_con[cnt].tip_sockaddr)))
+		  break;
+		sleep(1);
+	      }
+
+	    if (pos == 0)
+	      {
+		sprintf(dfe_errmsg, "DFE-ipc ERROR, connect() call failed: %s",
 	    		sys_errlist[errno]);
-	        return UDIErrorCantConnect;
-	    }
+	        dfe_errno = UDIErrorCantConnect;
+		goto tip_failure;
+	      }
 	  }
-    }
+      }
 /*--------------------------------------------------------- AF_INET CONNECT */
-    if(domain == AF_INET)
-    {
-	fprintf(stderr,"DFE-ipc WARNING, need to have first started remote TIP\n");
-     	memset( (char*)&soc_con[cnt].tip_sockaddr_in, 0,
-	    sizeof(soc_con[cnt].tip_sockaddr_in));
+    else if (domain == AF_INET)
+      {
+	fprintf(stderr,
+		"DFE-ipc WARNING, need to have first started remote TIP");
+
 	soc_con[cnt].tip_sockaddr_in.sin_family = domain;
 	soc_con[cnt].tip_sockaddr_in.sin_addr.s_addr =
 	    inet_addr(soc_con[cnt].tip_string);
-	if( soc_con[cnt].tip_sockaddr_in.sin_addr.s_addr == -1)
-	{
+	if (soc_con[cnt].tip_sockaddr_in.sin_addr.s_addr == -1)
+	  {
 	    tip_info_p = gethostbyname(soc_con[cnt].tip_string);
-	    if( tip_info_p == NULL)
-	    {   errmsg_m;
-	       sprintf(dfe_errmsg,"DFE-ipc ERROR, %s not found in /etc/hosts",
-		   soc_con[cnt].tip_string);
-	    	return UDIErrorNoSuchConnection;
-	    }
+	    if (tip_info_p == NULL)
+	      {
+		sprintf(dfe_errmsg,"DFE-ipc ERROR, No such host %s",
+			soc_con[cnt].tip_string);
+	    	dfe_errno = UDIErrorNoSuchConnection;
+		goto tip_failure;
+	      }
 	    bcopy(tip_info_p->h_addr,
-		(char *)&soc_con[cnt].tip_sockaddr_in.sin_addr,
-	   	tip_info_p->h_length);
-	}
-	soc_con[cnt].tip_sockaddr_in.sin_port=htons(atoi(soc_con[cnt].tip_exe));
-    	if(connect(soc_con[cnt].dfe_sd,
-		&soc_con[cnt].tip_sockaddr_in,
-		sizeof(soc_con[cnt].tip_sockaddr_in)) == -1)
-	{   errmsg_m;
+		  (char *)&soc_con[cnt].tip_sockaddr_in.sin_addr,
+		  tip_info_p->h_length);
+	  }
+	soc_con[cnt].tip_sockaddr_in.sin_port
+	  = htons(atoi(soc_con[cnt].tip_exe));
+
+    	if (connect(soc_con[cnt].dfe_sd,
+		    &soc_con[cnt].tip_sockaddr_in,
+		    sizeof(soc_con[cnt].tip_sockaddr_in)))
+	  {
     	    sprintf(dfe_errmsg, "DFE-ipc ERROR, connect() call failed %s ",
-	    	sys_errlist[errno]);
-	    return UDIErrorCantConnect;
-    	}
-    }
+		    sys_errlist[errno]);
+	    dfe_errno = UDIErrorCantConnect;
+	    goto tip_failure;
+	  }
+      }
 /*------------------------------------------------------------- TIP CONNECT */
-    if(cnt ==0) udr_create(udrs, soc_con[cnt].dfe_sd, SOC_BUF_SIZE);
+    if (cnt == 0) udr_create(udrs, soc_con[cnt].dfe_sd, SOC_BUF_SIZE);
+
 tip_connect:
     current = cnt;
-    session[*Session].in_use = TRUE;	/* session id is now in use*/
+    session[*Session].in_use = TRUE;	/* session id is now in use */
 
     udr_errno = 0;
     udrs->udr_op = UDR_ENCODE;		/* send all "in" parameters */
     udr_UDIInt32(udrs, &service_id);
+
     DFEIPCId = (company_c << 16) + (product_c << 12) + version_c;
     udr_UDIUInt32(udrs, &DFEIPCId);
+
     udr_string(udrs, tip_main_string);
+
     udr_sendnow(udrs);
 
     udrs->udr_op = UDR_DECODE;		/* recv all "out" parameters */
     udr_UDIUInt32(udrs, &TIPIPCId);
-    if ((TIPIPCId & 0xfff) < version_c) {
-	    fprintf(stderr, "DFE-ipc: Obsolete TIP Specified\n");
-	    return(UDIErrorExecutableNotTIP);
-    }
+    if ((TIPIPCId & 0xfff) < version_c)
+      sprintf(dfe_errmsg, "DFE-ipc: Obsolete TIP Specified");
+
     udr_UDIInt32(udrs, &soc_con[cnt].tip_pid);
+
     udr_UDISessionId(udrs, &session[*Session].tip_id);
+
     udr_UDIError(udrs, &dfe_errno);
-    if(dfe_errno > 0) UDIKill(Session, 0);
+    if (dfe_errno > 0) UDIKill(Session, 0);
+
+    return dfe_errno;
+
+tip_failure:
+
+    soc_con[cnt].in_use = FALSE;
+    session[*Session].in_use = FALSE;
+/* XXX - Should also close dfe_sd, but not sure what to do if muxed */
     return dfe_errno;
 }
 
@@ -389,7 +440,7 @@ UDIBool		Terminate;
     int	cnt;
     UDIInt32	service_id = UDIDisconnect_c;
     if(Session < 0 || Session > MAX_SESSIONS)
-    {	errmsg_m;
+    {
 	sprintf(dfe_errmsg," SessionId not valid (%d)", Session);
 	return UDIErrorNoSuchConfiguration;
     }
@@ -407,7 +458,7 @@ UDIBool		Terminate;
 		) break;
     if(cnt >= MAX_SESSIONS)	/* test if socket not multiplexed */
         if(shutdown(session[Session].soc_con_p->dfe_sd, 2))
-        {   errmsg_m;
+        {
      	    sprintf(dfe_errmsg, "DFE-ipc WARNING: socket shutdown failed");
 	    return UDIErrorIPCInternal;
         }
@@ -428,7 +479,7 @@ UDIInt32	Signal;
     int	cnt;
     UDIInt32	service_id = UDIKill_c;
     if(Session < 0 || Session > MAX_SESSIONS)
-    {	errmsg_m;
+    {
 	sprintf(dfe_errmsg," SessionId not valid (%d)", Session);
 	return UDIErrorNoSuchConfiguration;
     }
@@ -446,7 +497,7 @@ UDIInt32	Signal;
 		) break;
     if(cnt < MAX_SESSIONS)	/* test if socket not multiplexed */
         if(shutdown(session[Session].soc_con_p->dfe_sd, 2))
-        {   errmsg_m;
+        {
      	    sprintf(dfe_errmsg, "DFE-ipc WARNING: socket shutdown failed");
 	    return UDIErrorIPCInternal;
         }
@@ -862,10 +913,13 @@ UDIRange	range;          /* in -- range if StepInRange is TRUE */
 */
 UDIVoid UDIStop()
 {
-    if(!strcmp(session[current].soc_con_p->domain_string, "AF_UNIX"))
-        kill(session[current].soc_con_p->tip_pid, SIGUSR1);
+    if (strcmp(session[current].soc_con_p->domain_string, "AF_UNIX") == 0)
+      kill(session[current].soc_con_p->tip_pid, SIGINT);
     else
-	udr_signal(udrs);
+      udr_signal(udrs);
+
+/* XXX - should clean up session[] and soc_con[] structs here as well... */
+
     return;
 }
 

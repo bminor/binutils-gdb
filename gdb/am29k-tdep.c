@@ -20,8 +20,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "gdbcore.h"
+#include <stdio.h>
 #include "frame.h"
 #include "value.h"
+/*#include <sys/param.h> */
 #include "symtab.h"
 #include "inferior.h"
 
@@ -136,9 +138,12 @@ examine_prologue (pc, rsize, msize, mfp_used)
     }
   p += 4;
 
-  /* Next instruction must be asgeu V_SPILL,gr1,rab.  */
+  /* Next instruction must be asgeu V_SPILL,gr1,rab.  
+   * We don't check the vector number to allow for kernel debugging.  The 
+   * kernel will use a different trap number. 
+   */
   insn = read_memory_integer (p, 4);
-  if (insn != 0x5e40017e)
+  if ((insn & 0xff00ffff) != (0x5e000100|RAB_HW_REGNUM))
     {
       p = pc;
       goto done;
@@ -148,7 +153,10 @@ examine_prologue (pc, rsize, msize, mfp_used)
   /* Next instruction usually sets the frame pointer (lr1) by adding
      <size * 4> from gr1.  However, this can (and high C does) be
      deferred until anytime before the first function call.  So it is
-     OK if we don't see anything which sets lr1.  */
+     OK if we don't see anything which sets lr1.  
+     To allow for alternate register sets (gcc -mkernel-registers)  the msp
+     register number is a compile time constant. */
+
   /* Normally this is just add lr1,gr1,<size * 4>.  */
   insn = read_memory_integer (p, 4);
   if ((insn & 0xffffff00) == 0x15810100)
@@ -178,14 +186,16 @@ examine_prologue (pc, rsize, msize, mfp_used)
      we don't check this rsize against the first instruction, and
      we don't check that the trace-back tag indicates a memory frame pointer
      is in use.  
+     To allow for alternate register sets (gcc -mkernel-registers)  the msp
+     register number is a compile time constant.
 
      The recommended instruction is actually "sll lr<whatever>,msp,0". 
      We check for that, too.  Originally Jim Kingdon's code seemed
      to be looking for a "sub" instruction here, but the mask was set
      up to lose all the time. */
   insn = read_memory_integer (p, 4);
-  if (((insn & 0xff80ffff) == 0x15807d00)	/* add */
-   || ((insn & 0xff80ffff) == 0x81807d00) )	/* sll */
+  if (((insn & 0xff80ffff) == (0x15800000|(MSP_HW_REGNUM<<8)))     /* add */
+   || ((insn & 0xff80ffff) == (0x81800000|(MSP_HW_REGNUM<<8))))    /* sll */
     {
       p += 4;
       if (mfp_used != NULL)
@@ -196,14 +206,18 @@ examine_prologue (pc, rsize, msize, mfp_used)
      but only if a memory frame is
      being used.  We don't check msize against the trace-back tag.
 
+     To allow for alternate register sets (gcc -mkernel-registers) the msp
+     register number is a compile time constant.
+
      Normally this is just
      sub msp,msp,<msize>
      */
   insn = read_memory_integer (p, 4);
-  if ((insn & 0xffffff00) == 0x257d7d00)
+  if ((insn & 0xffffff00) == 
+		(0x25000000|(MSP_HW_REGNUM<<16)|(MSP_HW_REGNUM<<8)))
     {
       p += 4;
-      if (msize != NULL)
+      if (msize != NULL) 
 	*msize = insn & 0xff;
     }
   else
@@ -235,7 +249,8 @@ examine_prologue (pc, rsize, msize, mfp_used)
 	      insn = read_memory_integer (q, 4);
 	    }
 	  /* Check for sub msp,msp,<reg>.  */
-	  if ((insn & 0xffffff00) == 0x247d7d00
+          if ((insn & 0xffffff00) == 
+		(0x24000000|(MSP_HW_REGNUM<<16)|(MSP_HW_REGNUM<<8))
 	      && (insn & 0xff) == reg)
 	    {
 	      p = q + 4;
@@ -288,6 +303,47 @@ skip_prologue (pc)
   return examine_prologue (pc, (unsigned *)NULL, (unsigned *)NULL,
 			   (int *)NULL);
 }
+/*
+ * Examine the one or two word tag at the beginning of a function.
+ * The tag word is expect to be at 'p', if it is not there, we fail
+ * by returning 0.  The documentation for the tag word was taken from
+ * page 7-15 of the 29050 User's Manual.  We are assuming that the
+ * m bit is in bit 22 of the tag word, which seems to be the agreed upon
+ * convention today (1/15/92).
+ * msize is return in bytes.
+ */
+static int	/* 0/1 - failure/success of finding the tag word  */
+examine_tag(p, is_trans, argcount, msize, mfp_used)
+     CORE_ADDR p;
+     int *is_trans;
+     int   *argcount;
+     unsigned *msize;
+     int *mfp_used;
+{
+  unsigned int tag1, tag2;
+
+  tag1 = read_memory_integer (p, 4);
+  if ((tag1 & 0xff000000) != 0)		/* Not a tag word */
+    return 0;
+  if (tag1 & (1<<23)) 			/* A two word tag */
+    {
+       tag2 = read_memory_integer (p+4, 4);
+       if (msize)
+	 *msize = tag2;
+    }
+  else					/* A one word tag */
+    {
+       if (msize)
+	 *msize = tag1 & 0x7ff;
+    }
+  if (is_trans)
+    *is_trans = ((tag1 & (1<<21)) ? 1 : 0); 
+  if (argcount)
+    *argcount = (tag1 >> 16) & 0x1f;
+  if (mfp_used)
+    *mfp_used = ((tag1 & (1<<22)) ? 1 : 0); 
+  return(1);
+}
 
 /* Initialize the frame.  In addition to setting "extra" frame info,
    we also set ->frame because we use it in a nonstandard way, and ->pc
@@ -302,7 +358,7 @@ init_frame_info (innermost_frame, fci)
   long insn;
   unsigned rsize;
   unsigned msize;
-  int mfp_used;
+  int mfp_used, trans;
   struct symbol *func;
 
   p = fci->pc;
@@ -325,6 +381,7 @@ init_frame_info (innermost_frame, fci)
       /* Dummy frames always use a memory frame pointer.  */
       fci->saved_msp = 
 	read_register_stack_integer (fci->frame + DUMMY_FRAME_RSIZE - 4, 4);
+      fci->flags |= (TRANSPARENT|MFP_USED);
       return;
     }
     
@@ -347,6 +404,7 @@ init_frame_info (innermost_frame, fci)
 	  fci->saved_msp = 0;
 	  fci->rsize = 0;
 	  fci->msize = 0;
+	  fci->flags = TRANSPARENT;
 	  return;
 	}
       else
@@ -354,13 +412,25 @@ init_frame_info (innermost_frame, fci)
 	   after the trace-back tag.  */
 	p += 4;
     }
-  /* We've found the start of the function.  Since High C interchanges
-     the meanings of bits 23 and 22 (as of Jul 90), and we
-     need to look at the prologue anyway to figure out
-     what rsize is, ignore the contents of the trace-back tag.  */
-  examine_prologue (p, &rsize, &msize, &mfp_used);
+  /* We've found the start of the function.  
+   * Try looking for a tag word that indicates whether there is a
+   * memory frame pointer and what the memory stack allocation is.
+   * If one doesn't exist, try using a more exhaustive search of
+   * the prologue.  For now we don't care about the argcount or
+   * whether or not the routine is transparent.
+   */
+  if (examine_tag(p-4,&trans,NULL,&msize,&mfp_used)) /* Found a good tag */
+      examine_prologue (p, &rsize, 0, 0);
+  else 						/* No tag try prologue */
+      examine_prologue (p, &rsize, &msize, &mfp_used);
+
   fci->rsize = rsize;
   fci->msize = msize;
+  fci->flags = 0;
+  if (mfp_used)
+  	fci->flags |= MFP_USED;
+  if (trans)
+  	fci->flags |= TRANSPARENT;
   if (innermost_frame)
     {
       fci->saved_msp = read_register (MSP_REGNUM) + msize;
@@ -368,10 +438,10 @@ init_frame_info (innermost_frame, fci)
   else
     {
       if (mfp_used)
-	fci->saved_msp =
-	  read_register_stack_integer (fci->frame + rsize - 1, 4);
+  	 fci->saved_msp =
+	      read_register_stack_integer (fci->frame + rsize - 4, 4);
       else
-	fci->saved_msp = fci->next->saved_msp + msize;
+  	    fci->saved_msp = fci->next->saved_msp + msize;
     }
 }
 
@@ -397,7 +467,7 @@ init_frame_pc (fromleaf, fci)
 {
   fci->pc = (fromleaf ? SAVED_PC_AFTER_CALL (fci->next) :
 	     fci->next ? FRAME_SAVED_PC (fci->next) : read_pc ());
-  init_frame_info (0, fci);
+  init_frame_info (fromleaf, fci);
 }
 
 /* Local variables (i.e. LOC_LOCAL) are on the memory stack, with their
@@ -408,9 +478,7 @@ CORE_ADDR
 frame_locals_address (fi)
      struct frame_info *fi;
 {
-  struct block *b = block_for_pc (fi->pc);
-  /* If compiled without -g, assume GCC.  */
-  if (b == NULL || BLOCK_GCC_COMPILED (b))
+  if (fi->flags & MFP_USED) 
     return fi->saved_msp;
   else
     return fi->saved_msp - fi->msize;
@@ -435,6 +503,24 @@ read_register_stack (memaddr, myaddr, actual_mem_addr, lval)
 {
   long rfb = read_register (RFB_REGNUM);
   long rsp = read_register (RSP_REGNUM);
+
+#ifdef RSTACK_HIGH_ADDR	/* Highest allowed address in register stack */
+  /* If we don't do this 'info register' stops in the middle. */
+  if (memaddr >= RSTACK_HIGH_ADDR) 
+    {
+      int val=-1;			/* a bogus value */
+      /* It's in a local register, but off the end of the stack.  */
+      int regnum = (memaddr - rsp) / 4 + LR0_REGNUM;
+      if (myaddr != NULL)
+	*(int*)myaddr = val;		/* Provide bogusness */
+      supply_register(regnum,&val);	/* More bogusness */
+      if (lval != NULL)
+	*lval = lval_register;
+      if (actual_mem_addr != NULL)
+	*actual_mem_addr = REGISTER_BYTE (regnum);
+    }
+  else
+#endif	/* RSTACK_HIGH_ADDR */
   if (memaddr < rfb)
     {
       /* It's in a register.  */
@@ -451,8 +537,8 @@ read_register_stack (memaddr, myaddr, actual_mem_addr, lval)
   else
     {
       /* It's in the memory portion of the register stack.  */
-      if (myaddr != NULL)
-	read_memory (memaddr, myaddr, 4);
+      if (myaddr != NULL) 
+	   read_memory (memaddr, myaddr, 4);
       if (lval != NULL)
 	*lval = lval_memory;
       if (actual_mem_addr != NULL)
@@ -484,6 +570,16 @@ write_register_stack (memaddr, myaddr, actual_mem_addr)
 {
   long rfb = read_register (RFB_REGNUM);
   long rsp = read_register (RSP_REGNUM);
+#ifdef RSTACK_HIGH_ADDR	/* Highest allowed address in register stack */
+  /* If we don't do this 'info register' stops in the middle. */
+  if (memaddr >= RSTACK_HIGH_ADDR) 
+    {
+      /* It's in a register, but off the end of the stack.  */
+      if (actual_mem_addr != NULL)
+	*actual_mem_addr = NULL; 
+    }
+  else
+#endif	/* RSTACK_HIGH_ADDR */
   if (memaddr < rfb)
     {
       /* It's in a register.  */
@@ -493,7 +589,7 @@ write_register_stack (memaddr, myaddr, actual_mem_addr)
       if (myaddr != NULL)
 	write_register (regnum, *(long *)myaddr);
       if (actual_mem_addr != NULL)
-	*actual_mem_addr = 0;
+	*actual_mem_addr = NULL;
     }
   else
     {
@@ -521,9 +617,14 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
      int regnum;
      enum lval_type *lvalp;
 {
-  struct frame_info *fi = get_frame_info (frame);
+  struct frame_info *fi;
   CORE_ADDR addr;
   enum lval_type lval;
+
+  if (frame == 0)
+    return;
+
+  fi = get_frame_info (frame);
 
   /* Once something has a register number, it doesn't get optimized out.  */
   if (optimized != NULL)
@@ -583,6 +684,7 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
     *addrp = addr;
 }
 
+
 /* Discard from the stack the innermost frame,
    restoring all saved registers.  */
 
@@ -594,7 +696,6 @@ pop_frame ()
   CORE_ADDR rfb = read_register (RFB_REGNUM);				      
   CORE_ADDR gr1 = fi->frame + fi->rsize;
   CORE_ADDR lr1;							      
-  CORE_ADDR ret_addr;
   int i;
 
   /* If popping a dummy frame, need to restore registers.  */
@@ -602,14 +703,16 @@ pop_frame ()
 			read_register (SP_REGNUM),
 			FRAME_FP (fi)))
     {
+      int lrnum = LR0_REGNUM + DUMMY_ARG/4;
       for (i = 0; i < DUMMY_SAVE_SR128; ++i)
-	write_register
-	  (SR_REGNUM (i + 128),
-	   read_register (LR0_REGNUM + DUMMY_ARG / 4 + i));
+	write_register (SR_REGNUM (i + 128),read_register (lrnum++));
+      for (i = 0; i < DUMMY_SAVE_SR160; ++i)
+	write_register (SR_REGNUM(i+160), read_register (lrnum++));
       for (i = 0; i < DUMMY_SAVE_GREGS; ++i)
-	write_register
-	  (RETURN_REGNUM + i,
-	   read_register (LR0_REGNUM + DUMMY_ARG / 4 + DUMMY_SAVE_SR128 + i));
+	write_register (RETURN_REGNUM + i, read_register (lrnum++));
+      /* Restore the PCs.  */
+      write_register(PC_REGNUM, read_register (lrnum++));
+      write_register(NPC_REGNUM, read_register (lrnum));
     }
 
   /* Restore the memory stack pointer.  */
@@ -633,9 +736,6 @@ pop_frame ()
           write_register (LR0_REGNUM + ((rfb - gr1) % 0x80) + i / 4, word);					      
         }								      
     }
-  ret_addr = read_register (LR0_REGNUM);
-  write_register (PC_REGNUM, ret_addr);
-  write_register (NPC_REGNUM, ret_addr + 4);
   flush_cached_frames ();						      
   set_current_frame (create_new_frame (0, read_pc()));		      
 }
@@ -648,12 +748,10 @@ push_dummy_frame ()
   long w;
   CORE_ADDR rab, gr1;
   CORE_ADDR msp = read_register (MSP_REGNUM);
-  int i;
+  int lrnum,  i, saved_lr0;
   
-  /* Save the PC.  */
-  write_register (LR0_REGNUM, read_register (PC_REGNUM));
 
-  /* Allocate the new frame.  */
+  /* Allocate the new frame. */ 
   gr1 = read_register (GR1_REGNUM) - DUMMY_FRAME_RSIZE;
   write_register (GR1_REGNUM, gr1);
 
@@ -671,8 +769,8 @@ push_dummy_frame ()
       for (i = 0; i < num_bytes; i += 4)
 	{
 	  /* Note:  word is in target byte order.  */
-	  read_register_gen (LR0_REGNUM + i / 4, (char *)&word);
-	  write_memory (rfb - num_bytes + i, (char *)&word, 4);
+	  read_register_gen (LR0_REGNUM + i / 4, &word, 4);
+	  write_memory (rfb - num_bytes + i, &word, 4);
 	}
     }
 
@@ -687,10 +785,32 @@ push_dummy_frame ()
   write_register (MSP_REGNUM, msp - 16 * 4);
 
   /* Save registers.  */
+  lrnum = LR0_REGNUM + DUMMY_ARG/4;
   for (i = 0; i < DUMMY_SAVE_SR128; ++i)
-    write_register (LR0_REGNUM + DUMMY_ARG / 4 + i,
-		    read_register (SR_REGNUM (i + 128)));
+    write_register (lrnum++, read_register (SR_REGNUM (i + 128)));
+  for (i = 0; i < DUMMY_SAVE_SR160; ++i)
+    write_register (lrnum++, read_register (SR_REGNUM (i + 160)));
   for (i = 0; i < DUMMY_SAVE_GREGS; ++i)
-    write_register (LR0_REGNUM + DUMMY_ARG / 4 + DUMMY_SAVE_SR128 + i,
-		    read_register (RETURN_REGNUM + i));
+    write_register (lrnum++, read_register (RETURN_REGNUM + i));
+  /* Save the PCs.  */
+  write_register (lrnum++, read_register (PC_REGNUM));
+  write_register (lrnum, read_register (NPC_REGNUM));
 }
+
+reginv_com (args, fromtty)
+     char       *args;
+     int        fromtty;
+{
+   registers_changed();
+   if (fromtty)
+	printf_filtered("Gdb's register cache invalidated.\n");
+}
+
+/* We use this mostly for debugging gdb */
+void
+_initialize_29k()
+{
+  add_com ("reginv ", class_obscure, reginv_com, 
+        "Invalidate gdb's internal register cache.");
+}
+
