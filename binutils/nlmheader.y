@@ -494,7 +494,7 @@ string_list:
 /* If strerror is just a macro, we want to use the one from libiberty
    since it will handle undefined values.  */
 #undef strerror
-extern char *strerror ();
+extern char *strerror PARAMS ((int));
 
 /* The lexer is simple, too simple for flex.  Keywords are only
    recognized at the start of lines.  Everything else must be an
