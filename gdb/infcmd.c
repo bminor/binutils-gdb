@@ -1050,22 +1050,16 @@ advance_command (char *arg, int from_tty)
 /* Print the result of a function at the end of a 'finish' command.  */
 
 static void
-print_return_value (int structure_return, struct type *value_type)
+print_return_value (int struct_return, struct type *value_type)
 {
+  struct cleanup *old_chain;
+  struct ui_stream *stb;
   struct value *value;
-  static struct ui_stream *stb = NULL;
 
-  if (!structure_return)
+  if (!struct_return)
     {
+      /* The return value can be found in the inferior's registers.  */
       value = register_value_being_returned (value_type, stop_registers);
-      stb = ui_out_stream_new (uiout);
-      ui_out_text (uiout, "Value returned is ");
-      ui_out_field_fmt (uiout, "gdb-result-var", "$%d",
-			record_latest_value (value));
-      ui_out_text (uiout, " = ");
-      value_print (value, stb->stream, 0, Val_no_prettyprint);
-      ui_out_field_stream (uiout, "return-value", stb);
-      ui_out_text (uiout, "\n");
     }
   /* FIXME: 2003-09-27: When returning from a nested inferior function
      call, it's possible (with no help from the architecture vector)
@@ -1110,15 +1104,19 @@ print_return_value (int structure_return, struct type *value_type)
 	  EXTRACT_RETURN_VALUE (value_type, stop_registers,
 				VALUE_CONTENTS_RAW (value));
 	}
-      stb = ui_out_stream_new (uiout);
-      ui_out_text (uiout, "Value returned is ");
-      ui_out_field_fmt (uiout, "gdb-result-var", "$%d",
-			record_latest_value (value));
-      ui_out_text (uiout, " = ");
-      value_print (value, stb->stream, 0, Val_no_prettyprint);
-      ui_out_field_stream (uiout, "return-value", stb);
-      ui_out_text (uiout, "\n");
     }
+
+  /* Print it.  */
+  stb = ui_out_stream_new (uiout);
+  old_chain = make_cleanup_ui_out_stream_delete (stb);
+  ui_out_text (uiout, "Value returned is ");
+  ui_out_field_fmt (uiout, "gdb-result-var", "$%d",
+		    record_latest_value (value));
+  ui_out_text (uiout, " = ");
+  value_print (value, stb->stream, 0, Val_no_prettyprint);
+  ui_out_field_stream (uiout, "return-value", stb);
+  ui_out_text (uiout, "\n");
+  do_cleanups (old_chain);
 }
 
 /* Stuff that needs to be done by the finish command after the target

@@ -1,5 +1,11 @@
 2004-01-25  Mark Kettenis  <kettenis@gnu.org>
 
+	* infcmd.c (print_return_value): Plug memory leak; delete
+	ui_stream object.  Rename argument `structure_return' to
+	`struct_return'.
+
+2004-01-25  Mark Kettenis  <kettenis@gnu.org>
+
 	* infcmd.c (print_return_value): Wrap long lines.
 	(finish_command_continuation, finish_command): Remove unused
 	variable `funcaddr'.  Fix some coding-standards problems.
