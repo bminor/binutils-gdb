@@ -85,61 +85,23 @@ extern int fputc();
 extern int unlink();
 #endif /* STDC_HEADERS */
 
-/* EXACT TYPES */
-#ifndef int8e_type
-#define int8e_type char
-#endif
-#ifndef uint8e_type
-#define uint8e_type unsigned char
-#endif
-#ifndef int16e_type
-#define int16e_type short
-#endif
-#ifndef uint16e_type
-#define uint16e_type unsigned short
-#endif
-#ifndef int32e_type
-#define int32e_type int
-#endif
-#ifndef uint32e_type
-#define uint32e_type unsigned int
-#endif
 #ifndef uint64e_type
 #ifdef __GNUC__
 #define uint64e_type unsigned long long
 #define int64e_type long long
-#define uint64_typeLOW(x) (uint32_type)(((x) & 0xffffffff))
-#define uint64_typeHIGH(x) (uint32_type)(((x) >> 32) & 0xffffffff)
+#define uint64_typeLOW(x) (unsigned long)(((x) & 0xffffffff))
+#define uint64_typeHIGH(x) (unsigned long)(((x) >> 32) & 0xffffffff)
 #else
 struct  uint64e_struct {
-  uint32e_type low, high;
+  unsigned long low, high;
 };
 #define uint64e_type struct uint64e_struct
 #define int64e_type struct uint64e_struct
-#define uint64_typeLOW(x) (uint32_type)(((x).low))
-#define uint64_typeHIGH(x) (uint32_type)(((x).high))
+#define uint64_typeLOW(x) (unsigned long)(((x).low))
+#define uint64_typeHIGH(x) (unsigned long)(((x).high))
 #endif
 #endif
 
-/* CORRECT SIZE OR GREATER */
-#ifndef int8_type
-#define int8_type int8e_type
-#endif
-#ifndef uint8_type
-#define uint8_type uint8e_type
-#endif
-#ifndef int16_type
-#define int16_type int16e_type
-#endif
-#ifndef uint16_type
-#define uint16_type uint16e_type
-#endif
-#ifndef int32_type
-#define int32_type int32e_type
-#endif
-#ifndef uint32_type
-#define uint32_type uint32e_type
-#endif
 #ifndef int64_type
 #define int64_type int64e_type
 #endif

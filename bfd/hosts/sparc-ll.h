@@ -74,53 +74,37 @@ extern int fputc();
 extern int unlink();
 
 
-/* EXACT TYPES */
-typedef char int8e_type;
-typedef unsigned char uint8e_type;
-typedef short int16e_type;
-typedef unsigned short uint16e_type;
-typedef int int32e_type;
-typedef unsigned int uint32e_type;
-
-
 #ifdef __GNUC__
 typedef unsigned long long uint64e_type;
 
 #else
 typedef struct {
-  uint32e_type low, high;
+  unsigned long low, high;
 } uint64e_type;
 
 #endif
-/* CORRECT SIZE OR GREATER */
-typedef char int8_type;
-typedef unsigned char uint8_type;
-typedef short int16_type;
-typedef unsigned short uint16_type;
-typedef int int32_type;
-typedef unsigned int uint32_type;
 
 #ifdef __GNUC__
 typedef unsigned long long uint64_type;
 typedef long long int64_type;
 #else
 typedef struct {
-  uint32e_type low, high;
+  unsigned long low, high;
 } uint64_type;
 
 typedef struct {
-  uint32e_type low, high;
+  unsigned long low, high;
 } int64_type;
 
 #endif
 
-
 #define BYTES_IN_PRINTF_INT 4
 #ifndef __GNUC__
-#define uint64_typeLOW(x) (uint32_type)(((x).low))
-#define uint64_typeHIGH(x) (uint32_type)(((x).high))
+#define uint64_typeLOW(x) (unsigned long)(((x).low))
+#define uint64_typeHIGH(x) (unsigned long)(((x).high))
 #else
-#define uint64_typeLOW(x) (uint32_type)(((x) & 0xffffffff))
-#define uint64_typeHIGH(x) (uint32_type)(((x) >> 32) & 0xffffffff)
+#define uint64_typeLOW(x) (unsigned long)(((x) & 0xffffffff))
+#define uint64_typeHIGH(x) (unsigned long)(((x) >> 32) & 0xffffffff)
 #endif
+
 #include "fopen-same.h"

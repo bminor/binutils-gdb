@@ -23,20 +23,4 @@ extern PTR  EXFUN(realloc, (PTR, unsigned));
 extern void EXFUN( free,(PTR));
 #endif
 
-/* EXACT TYPES */
-typedef char int8e_type;
-typedef unsigned char uint8e_type;
-typedef short int16e_type;
-typedef unsigned short uint16e_type;
-typedef int int32e_type;
-typedef unsigned int uint32e_type;
-
-/* CORRECT SIZE OR GREATER */
-typedef char int8_type;
-typedef unsigned char uint8_type;
-typedef short int16_type;
-typedef unsigned short uint16_type;
-typedef int int32_type;
-typedef unsigned int uint32_type;
-
 #include "fopen-same.h"
