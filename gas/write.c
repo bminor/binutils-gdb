@@ -2354,7 +2354,7 @@ print_fixup (fixp)
      fixS *fixp;
 {
   indent_level = 1;
-  fprintf (stderr, "fix");
+  fprintf (stderr, "fix %s:%d", fixp->fx_file, fixp->fx_line);
   if (fixp->fx_pcrel)
     fprintf (stderr, " pcrel");
   if (fixp->fx_pcrel_adjust)
@@ -2371,10 +2371,22 @@ print_fixup (fixp)
     fprintf (stderr, " tcbit");
   if (fixp->fx_done)
     fprintf (stderr, " done");
-  fprintf (stderr, "\n    %s:%d", fixp->fx_file, fixp->fx_line);
   fprintf (stderr, "\n    size=%d frag=%lx where=%ld addnumber=%lx",
 	   fixp->fx_size, (long) fixp->fx_frag, fixp->fx_where,
 	   (long) fixp->fx_addnumber);
+#ifdef BFD_ASSEMBLER
+  fprintf (stderr, "\n    %s (%d)", bfd_get_reloc_code_name (fixp->fx_r_type),
+	   fixp->fx_r_type);
+#else
+  fprintf (stderr, " r_type=%d", fixp->fx_r_type);
+#endif
+  if (fixp->fx_addsy)
+    {
+      fprintf (stderr, "\n    <");
+      print_symbol_value_1 (stderr, fixp->fx_addsy);
+      fprintf (stderr, ">");
+    }
+  fprintf (stderr, "\n");
 }
 
 /* end of write.c */
