@@ -73,6 +73,7 @@ SIM_PROFILE = @sim_profile@
 
 SIM_ASSERT = @sim_assert@
 SIM_ALIGNMENT = @sim_alignment@
+SIM_DEFAULT_MODEL = @sim_default_model@
 SIM_ENDIAN = @sim_endian@
 SIM_FLOAT = @sim_float@
 SIM_HARDWARE = @sim_hardware@
@@ -81,11 +82,11 @@ SIM_INLINE = @sim_inline@
 SIM_PACKAGES = @sim_packages@
 SIM_REGPARM = @sim_regparm@
 SIM_RESERVED_BITS = @sim_reserved_bits@
+SIM_SCACHE = @sim_scache@
 SIM_SMP = @sim_smp@
 SIM_STDCALL = @sim_stdcall@
 SIM_WARNINGS = @sim_warnings@
 SIM_XOR_ENDIAN = @sim_xor_endian@
-
 
 HDEFINES = @HDEFINES@
 TDEFINES =
@@ -127,6 +128,7 @@ SIM_EXTRA_CLEAN =
 CONFIG_CFLAGS = @DEFS@ \
 	$(SIM_CFLAGS) \
 	$(SIM_DEBUG) \
+	$(SIM_DEFAULT_MODEL) \
 	$(SIM_TRACE) \
 	$(SIM_PROFILE) \
 	$(SIM_BSWAP) \
@@ -140,6 +142,7 @@ CONFIG_CFLAGS = @DEFS@ \
 	$(SIM_PACKAGES) \
 	$(SIM_REGPARM) \
 	$(SIM_RESERVED_BITS) \
+	$(SIM_SCACHE) \
 	$(SIM_SMP) \
 	$(SIM_STDCALL) \
 	$(SIM_WARNINGS) \
