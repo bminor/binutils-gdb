@@ -1,3 +1,10 @@
+2000-04-18  H.J. Lu  <hjl@gnu.org>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Call
+	lang_leave_output_section_statement () after calling
+	lang_enter_output_section_statement ().
+	* emultempl/armelf.em: Likewise.
+
 2000-04-18  Alan Modra  <alan@linuxcare.com.au>
 
 	* emultempl/elf32.em (struct orphan_save): Add section field.
