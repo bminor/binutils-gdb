@@ -1,3 +1,7 @@
+Sat Mar 14 17:20:38 1992  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in, configure.in:  Add support for mmalloc library.
+
 Fri Mar 13 18:44:18 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in: add stmp dependencies for a few more things.
