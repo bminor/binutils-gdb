@@ -62,6 +62,7 @@ tm-sunos.h
 tm-sysv4.h
 vax
 xm-lynx.h
+xm-mpw.h
 xm-nbsd.h
 xm-sysv4.h
 w65
