@@ -1,3 +1,10 @@
+2001-06-23  H.J. Lu  <hjl@gnu.org>
+
+	* elf32-i386.c (elf_i386_relocate_section): Check the
+	ELF_LINK_HASH_DEF_DYNAMIC to see if a symbol is not defined
+	in the regular object file and treat the weak definition as
+	the normal one.
+
 2001-06-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-i386.c (elf_i386_relocate_section <R_386_GOT32>): Tighten
