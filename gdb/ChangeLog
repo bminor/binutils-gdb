@@ -1,5 +1,10 @@
 2003-08-13  J. Brobecker  <brobecker@gnat.com>
 
+	* config/pa/tm-hppa64.h (HPUX_1100): Remove, not used.
+	(ADDR_BITS_REMOVE): Remove, redundant.
+
+2003-08-13  J. Brobecker  <brobecker@gnat.com>
+
 	* hppa-tdep.c (hppa_gdbarch_init): Set the addr_bits_remove
 	gdbarch method to clear the 2 low bits of text addresses.
 

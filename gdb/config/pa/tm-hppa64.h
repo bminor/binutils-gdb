@@ -43,11 +43,6 @@ struct frame_info;
 
 #include "pa/tm-hppah.h"
 
-#define HPUX_1100 1
-
-/* The low two bits of the IA are the privilege level of the instruction.  */
-#define ADDR_BITS_REMOVE(addr) ((CORE_ADDR)addr & (CORE_ADDR)~3)
-
 /* Say how long (ordinary) registers are.  This is used in
    push_word and a few other places, but REGISTER_RAW_SIZE is
    the real way to know how big a register is.  */
