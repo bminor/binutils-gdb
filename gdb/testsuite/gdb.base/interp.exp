@@ -22,7 +22,7 @@ if $tracelevel then {
 
 gdb_start
 
-gdb_test "interpreter-exec mi \"-var-update *\"\n" "\\^done,changelist=[].*"
-gdb_test "interpreter-exec console \"show version\"\n" "GNU gdb .*"
+gdb_test "interpreter-exec mi \"-var-update *\"" "\\^done,changelist=[].*"
+gdb_test "interpreter-exec console \"show version\"" "GNU gdb .*"
 
 gdb_exit
