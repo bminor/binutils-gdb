@@ -34,69 +34,113 @@ variants.  *-tdep.c. The Target/Architecture maintainer works with the
 host maintainer when resolving build issues.  The Target/Architecture
 maintainer works with the native maintainer when resolving API issues.
 
-	a29k		maintenance only (a29k-amd-udi -Werror)
-	alpha		maintenance only (alpha-dec-osf4.0a)
-	arc		maintenance only (arc-elf)
+	a29k		--target=a29k-amd-udi -Werror
+			Maintenance only
 
-	arm		Fernando Nasser		fnasser@cygnus.com
+	alpha		--target=alpha-dec-osf4.0a -Werror
+			Maintenance only
+
+	arc		--target=arc-elf ,-Werror
+			Maintenance only
+
+	arm		--target=arm-coff,arm-elf,arm-pe ,-Werror
+			Fernando Nasser		fnasser@cygnus.com
 			Jim Ingham		jingham@apple.com
 			Scott Bambrough		scottb@netwinder.org
 
 	convex		OBSOLETE
 
-	d10v		Andrew Cagney		cagney@cygnus.com
+	d10v		--target=d10v-elf ,-Werror
+			Andrew Cagney		cagney@cygnus.com
 
-	d30v		David Taylor		taylor@cygnus.com
+	d30v		--target=d30v-elf ,-Werror
+			David Taylor		taylor@cygnus.com
 
-	djgpp		(see native and host)
+	djgpp		--target=i586-pc-msdosdjgpp ,-Werror
+			(See native and host)
 
-	fr30		maintenance only (fr30-elf)
-	h8300		maintenance only (h8300hms)
-	h8500		maintenance only (h8500hms)
+	fr30		--target=fr30-elf -Werror
+			Maintenance only
 
-	i386		Mark Kettenis           kettenis@gnu.org
+	h8300		--target=h8300hms -Werror
+			Maintenance only
 
-	i960		maintenance only (i960-coff)
+	h8500		--target=h8500hms -Werror
+			Maintenance only
 
-	ia64		Kevin Buettner		kevinb@cygnus.com
-	m32r		Michael Snyder		msnyder@cygnus.com
+	i386		--target=i386-elf,i386-aout ,-Werror
+			Mark Kettenis           kettenis@gnu.org
 
-	m68hc11		Stephane Carrez		Stephane.Carrez@worldnet.fr
+	i960		(--target=i960-coff broken)
+			Maintenance only
 
-	m68k		maintenance only (m68k-aout, m68k-coff, m68k-elf)
-	m88k		maintenance only (?)
-	mcore		maintenance only (?)
+	ia64		(--target=ia64-elf broken)
+			Kevin Buettner		kevinb@cygnus.com
 
-	mips		Andrew Cagney		cagney@cygnus.com
+	m32r		--target=m32r-elf -Werror
+			Michael Snyder		msnyder@cygnus.com
 
-	mn10200		maintenance only (mn10200-elf)
+	m68hc11		--target=m68hc11-elf ,-Werror
+			Stephane Carrez		Stephane.Carrez@worldnet.fr
 
-	mn10300		Andrew Cagney		cagney@cygnus.com
+	m68k		--target=m68k-aout,m68k-coff,m68k-elf ,-Werror
+			Maintenance only
 
-	ns32k		maintenance only (?)
+	m88k		(?)
+			Maintenance only
 
-	pa		Jeff Law		law@cygnus.com
+	mcore		(--target=mcore-elf,mcore-pe broken)
+			Maintenance only
 
-	powerpc		Kevin Buettner		kevinb@cygnus.com
+	mips		--target=mips-elf,mips64-elf ,-Werror
+			Andrew Cagney		cagney@cygnus.com
+
+	mn10200		(--target=mn10200-elf broken)
+			Maintenance only
+
+	mn10300		(--target=mn10300-elf broken)
+			Andrew Cagney		cagney@cygnus.com
+
+	ns32k		(--target=ns32k-netbsd broken)
+			Maintenance only
+
+	pa		(--target=hppa1.1-hp-proelf broken)
+			Jeff Law		law@cygnus.com
+
+	powerpc		(--target=powerpc-eabi,powerpcle-eabi broken)
+			Kevin Buettner		kevinb@cygnus.com
 			Nick Duffek		nsd@cygnus.com
 
 	pyramid		OBSOLETE
 
-	romp		maintenance only (?)
+	romp		(?)
+			Maintenance only
 
-	rs6000		(see rs6000 native and ppc target)
+	rs6000		--target=rs6000-ibm-aix3.2,rs6000-ibm-aix4.1 ,-Werror
+			(see rs6000 native and ppc target)
 
-	sh		Elena Zannoni		ezannoni@cygnus.com
+	sh		(--target=sh-hms,sh-elf broken)
+			Elena Zannoni		ezannoni@cygnus.com
 
-	sparc		David Taylor		taylor@cygnus.com
+	sparc		--target=sparc-elf,sparc64-elf ,-Werror
+			David Taylor		taylor@cygnus.com
 
 	tahoe		OBSOLETE
 
-	tic80		maintenance only (tic80-coff)
-	v850		maintenance only (v850-elf)
-	vax		maintenance only (vax-dec-vms5.5)
-	w65		maintenance only (?)
-	z8k		maintenance only (?)
+	tic80		(--target=tic80-coff broken)
+			Maintenance only
+
+	v850		(--target=v850-elf broken)
+			Maintenance only
+
+	vax		--target=vax-dec-vms5.5 ,-Werror
+			Maintenance only
+
+	w65		(--target=w64 broken)
+			Maintenance only
+
+	z8k		(--target=z8k-coff broken)
+			Maintenance only
 
 All maintainers can make arbitrary changes to OBSOLETE targets.
 

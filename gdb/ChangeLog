@@ -1,3 +1,11 @@
+Thu Jan 18 12:08:57 2001  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (build_warnings): Disable -Wuninitialized until GDB
+ 	compiles with -Wuninitialized,-Werror.
+	* configure: Regenerate.
+
+	* MAINTAINERS: Add list of buildable targets.
+
 Thu Jan 18 12:48:04 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* defs.h (STRCMP): Delete macro.

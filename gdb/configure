@@ -5843,7 +5843,7 @@ fi
 # NOTE: If you add to this list, remember to update
 # gdb/doc/gdbint.texinfo.
 build_warnings="-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs \
--Wformat -Wparentheses -Wpointer-arith -Wuninitialized"
+-Wformat -Wparentheses -Wpointer-arith"
 # Up for debate: -Wswitch -Wcomment -trigraphs -Wtrigraphs
 # -Wunused-function -Wunused-label -Wunused-variable -Wunused-value
 # -Wchar-subscripts -Wuninitialized -Wtraditional -Wshadow -Wcast-qual
