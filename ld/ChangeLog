@@ -1,3 +1,12 @@
+Mon Feb  1 11:39:46 1999  Catherine Moore  <clm@cygnus.com>
+
+        * Makefile.am (earmelf_oabi.o):  New.
+        * Makefile.in:  Regenerate.
+        * configure.tgt (arm-*-oabi):  New.
+        (thumb-*-oabi):  New.
+        * emulparams/armelf_oabi.sh:  New.
+        * emultempl/armelf_oabi.em:  New.
+
 1999-01-31 17:57:31 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* scripttempl/elfppc.sc: Add support for -fleading-underscores
