@@ -1,3 +1,7 @@
+Wed Jan  6 15:14:11 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* arparse.y: fix unnecessary shift/reduce
+
 Tue Dec 22 15:46:56 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* Makefile.in:  Make check depend on all.
@@ -6,6 +10,10 @@ Tue Dec 22 15:46:56 1992  Per Bothner  (bothner@rtl.cygnus.com)
 	* objdump.c:  Standardize:  L_SET -> SEEK_SET.
 	* objdump.c:  Use new macro bfd_asymbol_bfd.
 	* configure.in:  Allow std-host as the default ${mys_host}.
+
+Thu Dec 17 19:38:19 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: added dvi target, define and use TEXI2DVI
 
 Tue Dec 15 18:05:07 1992  Per Bothner  (bothner@cygnus.com)
 
