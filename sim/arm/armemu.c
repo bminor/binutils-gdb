@@ -3544,7 +3544,7 @@ LoadSMult (ARMul_State * state, ARMword instr,
 	  state->Cpsr = GETSPSR (state->Bank);
 	  ARMul_CPSRAltered (state);
 	}
-      state->Reg[15] = PC;
+      WriteR15 (state, PC);
 #else
       if (state->Mode == USER26MODE || state->Mode == USER32MODE)
 	{			/* protect bits in user mode */
@@ -3555,8 +3555,8 @@ LoadSMult (ARMul_State * state, ARMword instr,
 	}
       else
 	ARMul_R15Altered (state);
-#endif
       FLUSHPIPE;
+#endif
     }
 
   if (!BIT (15) && state->Mode != USER26MODE && state->Mode != USER32MODE)

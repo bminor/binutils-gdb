@@ -1,5 +1,8 @@
 2000-07-04  Alexandre Oliva  <aoliva@redhat.com>
 
+	* armemu.c (LoadSMult): Use WriteR15() to discard the least
+	significant bits of PC.
+
 	* armemu.h (WRITEDESTB): New macro.
 	* armemu.c (ARMul_Emulate26, bl): Use WriteR15Branch() to
 	modify PC.  Moved the existing logic...
