@@ -548,7 +548,7 @@ v850_comm (area)
       goto allocate_common;
     }
 
-  symbolP->bsym->flags |= BSF_OBJECT;
+  symbol_get_bfdsym (symbolP)->flags |= BSF_OBJECT;
 
   demand_empty_rest_of_line ();
   return;

@@ -1,3 +1,10 @@
+1999-06-22  Ian Lance Taylor  <ian@zembu.com>
+
+	* config/obj-ecoff.c (obj_ecoff_set_ext): Change uses of bsym to
+	use symbol_get_bfdsym instead.
+	* config/tc-ppc.c (md_assemble): Likewise.
+	* config/tc-v850.c (v850_comm): Likewise.
+
 1999-06-22  Jonathan Larmour  <jlarmour@cygnus.co.uk>
 
 	* config/tc-arc.c (tc_gen_reloc): Use symbol_get_bfdsym to get at

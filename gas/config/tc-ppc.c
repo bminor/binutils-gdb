@@ -1783,7 +1783,8 @@ md_assemble (str)
 	      if (ex.X_op == O_symbol) 
 		{		  
 		  assert (ex.X_add_symbol != NULL);
-		  if (ex.X_add_symbol->bsym->section != tocdata_section)
+		  if (symbol_get_bfdsym (ex.X_add_symbol)->section
+		      != tocdata_section)
 		    {
 		      as_bad(_("[tocv] symbol is not a toc symbol"));
 		    }
