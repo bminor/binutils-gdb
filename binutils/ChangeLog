@@ -1,3 +1,11 @@
+2000-02-21  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* objdump.c (dump_section_header): Change `opb' to unsigned.
+	(find_symbol_for_address): Same here.
+	(disassemble_data): And here.  Change `addr_offset',
+	`stop_offset', `nextstop_offset' to unsigned long.
+	(dump_data): Change opb to unsigned.
+
 2000-02-18  Frank Ch. Eigler  <fche@redhat.com>
 
 	* resrc.c: Remove unmatched #if for cygwin.

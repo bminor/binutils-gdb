@@ -6202,6 +6202,9 @@ elf_gc_sweep (info, gc_sweep_hook)
     {
       asection *o;
 
+      if (bfd_get_flavour (sub) != bfd_target_elf_flavour)
+	continue;
+
       for (o = sub->sections; o != NULL; o = o->next)
 	{
 	  /* Keep special sections.  Keep .debug sections.  */
@@ -6416,6 +6419,10 @@ elf_gc_sections (abfd, info)
   for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
     {
       asection *o;
+
+      if (bfd_get_flavour (sub) != bfd_target_elf_flavour)
+	continue;
+
       for (o = sub->sections; o != NULL; o = o->next)
 	{
 	  if (o->flags & SEC_KEEP)
@@ -6571,10 +6578,14 @@ elf_gc_common_finalize_got_offsets (abfd, info)
   /* Do the local .got entries first.  */
   for (i = info->input_bfds; i; i = i->link_next)
     {
-      bfd_signed_vma *local_got = elf_local_got_refcounts (i);
+      bfd_signed_vma *local_got;
       bfd_size_type j, locsymcount;
       Elf_Internal_Shdr *symtab_hdr;
 
+      if (bfd_get_flavour (i) != bfd_target_elf_flavour)
+	continue;
+
+      local_got = elf_local_got_refcounts (i);
       if (!local_got)
 	continue;
 

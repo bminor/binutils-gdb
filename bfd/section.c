@@ -508,9 +508,11 @@ CODE_FRAGMENT
 .extern const struct symbol_cache_entry * const bfd_und_symbol;
 .extern const struct symbol_cache_entry * const bfd_ind_symbol;
 .#define bfd_get_section_size_before_reloc(section) \
-.     (section->reloc_done ? (abort(),1): (section)->_raw_size)
+.     ((section)->reloc_done ? (abort (), (bfd_size_type) 1) \
+.                            : (section)->_raw_size)
 .#define bfd_get_section_size_after_reloc(section) \
-.     ((section->reloc_done) ? (section)->_cooked_size: (abort(),1))
+.     ((section)->reloc_done ? (section)->_cooked_size \
+.                            : (abort (), (bfd_size_type) 1))
 */
 
 /* We use a macro to initialize the static asymbol structures because

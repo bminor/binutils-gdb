@@ -934,7 +934,7 @@ FUNCTION
 	bfd_octets_per_byte
 
 SYNOPSIS
-	int bfd_octets_per_byte(bfd *abfd);
+	unsigned int bfd_octets_per_byte(bfd *abfd);
 
 DESCRIPTION
 	Return the number of octets (8-bit quantities) per target byte
@@ -943,7 +943,7 @@ DESCRIPTION
 
 */
 
-int
+unsigned int
 bfd_octets_per_byte (abfd)
      bfd * abfd;
 {
@@ -956,8 +956,8 @@ FUNCTION
 	bfd_arch_mach_octets_per_byte
 
 SYNOPSIS
-	int bfd_arch_mach_octets_per_byte(enum bfd_architecture arch,
-                                          unsigned long machine);
+	unsigned int bfd_arch_mach_octets_per_byte(enum bfd_architecture arch,
+                                                   unsigned long machine);
 
 DESCRIPTION
 	See bfd_octets_per_byte.
@@ -966,7 +966,7 @@ DESCRIPTION
         available
 */
 
-int
+unsigned int
 bfd_arch_mach_octets_per_byte (arch, mach)
     enum bfd_architecture arch;
     unsigned long mach;
@@ -977,4 +977,3 @@ bfd_arch_mach_octets_per_byte (arch, mach)
       return ap->bits_per_byte / 8;
     return 1;
 }
-

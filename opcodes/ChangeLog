@@ -1,3 +1,8 @@
+2000-02-21  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* dis-buf.c (buffer_read_memory): Change `length' param and all int
+	vars to unsigned.
+
 Thu Feb 17 00:18:12 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* sh-dis.c (print_movxy, print_insn_ddt, print_dsp_reg): New functions.

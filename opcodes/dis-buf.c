@@ -26,13 +26,13 @@ int
 buffer_read_memory (memaddr, myaddr, length, info)
      bfd_vma memaddr;
      bfd_byte *myaddr;
-     int length;
+     unsigned int length;
      struct disassemble_info *info;
 {
-  int opb = info->octets_per_byte;
-  int end_addr_offset = length / opb;
-  int max_addr_offset = info->buffer_length / opb; 
-  int octets = (memaddr - info->buffer_vma) * opb;
+  unsigned int opb = info->octets_per_byte;
+  unsigned int end_addr_offset = length / opb;
+  unsigned int max_addr_offset = info->buffer_length / opb; 
+  unsigned int octets = (memaddr - info->buffer_vma) * opb;
 
   if (memaddr < info->buffer_vma
       || memaddr - info->buffer_vma + end_addr_offset > max_addr_offset)

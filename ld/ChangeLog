@@ -1,3 +1,12 @@
+2000-02-21  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* ldlang.c (print_input_section, print_data_statement,
+	print_reloc_statement, print_padding_statement, insert_pad,
+	size_input_section, lang_check_section_addresses,
+	lang_size_sections, lang_do_assignments, lang_set_startof,
+	lang_one_common): Change `opb' to unsigned. 
+	(lang_do_assignments): Also change `size' to unsigned.
+
 2000-02-16  Richard Henderson  <rth@cygnus.com>
 
 	* scripttempl/elf.sc: Place OTHER_PLT_RELOC_SECTION.

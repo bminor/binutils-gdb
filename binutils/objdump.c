@@ -340,7 +340,7 @@ dump_section_header (abfd, section, ignored)
      PTR ignored ATTRIBUTE_UNUSED;
 {
   char *comma = "";
-  int opb = bfd_octets_per_byte (abfd);
+  unsigned int opb = bfd_octets_per_byte (abfd);
 
   printf ("%3d %-13s %08lx  ", section->index,
 	  bfd_get_section_name (abfd, section),
@@ -743,7 +743,7 @@ find_symbol_for_address (abfd, sec, vma, require_sec, place)
   long min = 0;
   long max = sorted_symcount;
   long thisplace;
-  int opb = bfd_octets_per_byte (abfd); 
+  unsigned int opb = bfd_octets_per_byte (abfd); 
 
   if (sorted_symcount < 1)
     return NULL;
@@ -1574,12 +1574,12 @@ static void
 disassemble_data (abfd)
      bfd *abfd;
 {
-  long addr_offset;
+  unsigned long addr_offset;
   disassembler_ftype disassemble_fn;
   struct disassemble_info disasm_info;
   struct objdump_disasm_info aux;
   asection *section;
-  int opb = bfd_octets_per_byte (abfd);
+  unsigned int opb = bfd_octets_per_byte (abfd);
 
   print_files = NULL;
   prev_functionname = NULL;
@@ -1659,7 +1659,7 @@ disassemble_data (abfd)
       arelent **relbuf = NULL;
       arelent **relpp = NULL;
       arelent **relppend = NULL;
-      long stop_offset;
+      unsigned long stop_offset;
       asymbol *sym = NULL;
       long place = 0;
 
@@ -1743,7 +1743,7 @@ disassemble_data (abfd)
       while (addr_offset < stop_offset)
 	{
 	  asymbol *nextsym;
-	  long nextstop_offset;
+	  unsigned long nextstop_offset;
 	  boolean insns;
 	  
 	  if (sym != NULL && bfd_asymbol_value (sym) <= section->vma + addr_offset)
@@ -2264,7 +2264,7 @@ dump_data (abfd)
   bfd_size_type datasize = 0;
   bfd_size_type addr_offset;
   bfd_size_type start_offset, stop_offset;
-  int opb = bfd_octets_per_byte (abfd);
+  unsigned int opb = bfd_octets_per_byte (abfd);
 
   for (section = abfd->sections; section != NULL; section =
        section->next)

@@ -1,3 +1,20 @@
+2000-02-21  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* archures.c (bfd_octets_per_byte): Return unsigned int.
+	(bfd_arch_mach_octets_per_byte): Ditto.
+	* libbfd.c (bfd_read, bfd_seek): Quell signed vs. unsigned
+	comparison warning.
+	* section.c (bfd_get_section_size_before_reloc): Quell signed
+	vs. unsigned comparison warning.
+	(bfd_get_section_size_after_reloc): Same here.  Fix parentheses too.
+	* trad-core.c (trad_unix_core_file_p): Correct 2000-01-27
+	change.  What was I thinking?
+	* bfd-in2.h: Regenerate.
+
+	* elflink.h (elf_gc_sweep): Skip non-elf input bfds.
+	(elf_gc_sections): Same here.
+	(elf_gc_common_finalize_got_offsets): And here.
+
 2000-02-21  Ian Lance Taylor  <ian@zembu.com>
 
 	ELF HPPA doesn't work at present; remove it until it does.

@@ -892,7 +892,7 @@ tc_i386_force_relocation (fixp)
   return 0;
 #else
   /* For COFF */
-  return fixp->fx_r_type==7;
+  return fixp->fx_r_type == 7;
 #endif
 }
 
@@ -2204,7 +2204,6 @@ md_assemble (line)
     else if (i.tm.opcode_modifier & JumpInterSegment)
       {
 	int size;
-	int reloc_type;
 	int prefix;
 	int code16;
 
@@ -2221,12 +2220,8 @@ md_assemble (line)
 	  }
 
 	size = 4;
-	reloc_type = BFD_RELOC_32;
 	if (code16)
-	  {
-	    size = 2;
-	    reloc_type = BFD_RELOC_16;
-	  }
+	  size = 2;
 
 	if (i.prefixes != 0 && !intel_syntax)
 	  as_warn (_("skipping prefixes on this instruction"));
@@ -2249,7 +2244,7 @@ md_assemble (line)
 	  }
 	else
 	  fix_new_exp (frag_now, p - frag_now->fr_literal, size,
-		       i.imms[1], 0, reloc_type);
+		       i.imms[1], 0, reloc (size, 0, i.disp_reloc[0]));
 	if (i.imms[0]->X_op != O_constant)
 	  as_bad (_("can't handle non absolute segment in `%s'"),
 		  i.tm.name);
@@ -2424,7 +2419,11 @@ md_assemble (line)
 			/* Need a 32-bit fixup (don't support 8bit
 			   non-absolute ims).  Try to support other
 			   sizes ... */
-			int r_type;
+#ifdef BFD_ASSEMBLER
+			enum bfd_reloc_code_real reloc_type;
+#else
+			int reloc_type;
+#endif
 			int size;
 			int pcrel = 0;
 
@@ -2436,9 +2435,9 @@ md_assemble (line)
 			  size = 4;
 			insn_size += size;
 			p = frag_more (size);
-			r_type = reloc (size, 0, i.disp_reloc[0]);
+			reloc_type = reloc (size, 0, i.disp_reloc[0]);
 #ifdef BFD_ASSEMBLER
-			if (r_type == BFD_RELOC_32
+			if (reloc_type == BFD_RELOC_32
 			    && GOT_symbol
 			    && GOT_symbol == i.imms[n]->X_add_symbol
 			    && (i.imms[n]->X_op == O_symbol
@@ -2447,12 +2446,12 @@ md_assemble (line)
 					 (i.imms[n]->X_op_symbol)->X_op)
 					== O_subtract))))
 			  {
-			    r_type = BFD_RELOC_386_GOTPC;
+			    reloc_type = BFD_RELOC_386_GOTPC;
 			    i.imms[n]->X_add_number += 3;
 			  }
 #endif
 			fix_new_exp (frag_now, p - frag_now->fr_literal, size,
-				     i.imms[n], pcrel, r_type);
+				     i.imms[n], pcrel, reloc_type);
 		      }
 		  }
 	      }
@@ -3643,7 +3642,24 @@ md_estimate_size_before_relax (fragP, segment)
       /* symbol is undefined in this segment */
       int code16 = fragP->fr_subtype & CODE16;
       int size = code16 ? 2 : 4;
-      int pcrel_reloc = code16 ? BFD_RELOC_16_PCREL : BFD_RELOC_32_PCREL;
+#ifdef BFD_ASSEMBLER
+      enum bfd_reloc_code_real reloc_type;
+#else
+      int reloc_type;
+#endif
+
+      if (GOT_symbol /* Not quite right - we should switch on presence of
+			@PLT, but I cannot see how to get to that from
+			here.  We should have done this in md_assemble to
+			really get it right all of the time, but I think it
+			does not matter that much, as this will be right
+			most of the time. ERY  */
+	  && S_GET_SEGMENT(fragP->fr_symbol) == undefined_section)
+	reloc_type = BFD_RELOC_386_PLT32;
+      else if (code16)
+	reloc_type = BFD_RELOC_16_PCREL;
+      else
+	reloc_type = BFD_RELOC_32_PCREL;
 
       switch (opcode[0])
 	{
@@ -3653,31 +3669,19 @@ md_estimate_size_before_relax (fragP, segment)
 	  fix_new (fragP, old_fr_fix, size,
 		   fragP->fr_symbol,
 		   fragP->fr_offset, 1,
-		   (GOT_symbol && /* Not quite right - we should switch on
-				     presence of @PLT, but I cannot see how
-				     to get to that from here.  We should have
-				     done this in md_assemble to really
-				     get it right all of the time, but I
-				     think it does not matter that much, as
-				     this will be right most of the time. ERY*/
-		    S_GET_SEGMENT(fragP->fr_symbol) == undefined_section)
-		   ? BFD_RELOC_386_PLT32 : pcrel_reloc);
+		   reloc_type);
 	  break;
 
 	default:
 	  /* This changes the byte-displacement jump 0x7N
-	     to the dword-displacement jump 0x0f8N.  */
+	     to the dword-displacement jump 0x0f,0x8N.  */
 	  opcode[1] = opcode[0] + 0x10;
-	  opcode[0] = TWO_BYTE_OPCODE_ESCAPE;	/* two-byte escape */
+	  opcode[0] = TWO_BYTE_OPCODE_ESCAPE;
 	  fragP->fr_fix += 1 + size;	/* we've added an opcode byte */
 	  fix_new (fragP, old_fr_fix + 1, size,
 		   fragP->fr_symbol,
 		   fragP->fr_offset, 1,
-		   (GOT_symbol &&  /* Not quite right - we should switch on
-				      presence of @PLT, but I cannot see how
-				      to get to that from here.  ERY */
-		    S_GET_SEGMENT(fragP->fr_symbol) == undefined_section)
-		   ? BFD_RELOC_386_PLT32 : pcrel_reloc);
+		   reloc_type);
 	  break;
 	}
       frag_wane (fragP);

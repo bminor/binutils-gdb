@@ -2169,8 +2169,8 @@ print_input_section (in)
 {
   asection *i = in->section;
   bfd_size_type size = i->_cooked_size != 0 ? i->_cooked_size : i->_raw_size;
-  int opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
-                                           ldfile_output_machine);
+  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
+						ldfile_output_machine);
   if (size != 0)
     {
       print_space ();
@@ -2236,8 +2236,8 @@ print_data_statement (data)
   bfd_vma addr;
   bfd_size_type size;
   const char *name;
-  int opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
-                                           ldfile_output_machine);
+  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
+						ldfile_output_machine);
 
   for (i = 0; i < SECTION_NAME_MAP_LENGTH; i++)
     print_space ();
@@ -2307,8 +2307,8 @@ print_reloc_statement (reloc)
   int i;
   bfd_vma addr;
   bfd_size_type size;
-  int opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
-                                           ldfile_output_machine); 
+  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
+						ldfile_output_machine); 
 
   for (i = 0; i < SECTION_NAME_MAP_LENGTH; i++)
     print_space ();
@@ -2339,8 +2339,8 @@ print_padding_statement (s)
 {
   int len;
   bfd_vma addr;
-  int opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
-                                           ldfile_output_machine); 
+  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
+						ldfile_output_machine); 
 
   minfo (" *fill*");
 
@@ -2556,8 +2556,8 @@ insert_pad (this_ptr, fill, power, output_section_statement, dot)
      inserting a magic 'padding' statement.
      */
 
-  int opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
-                                           ldfile_output_machine); 
+  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
+						ldfile_output_machine); 
   unsigned int alignment_needed = align_power (dot, power) - dot;
 
   if (alignment_needed != 0)
@@ -2599,8 +2599,8 @@ size_input_section (this_ptr, output_section_statement, fill, dot, relax)
 {
   lang_input_section_type *is = &((*this_ptr)->input_section);
   asection *i = is->section;
-  int opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
-                                           ldfile_output_machine); 
+  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
+						ldfile_output_machine); 
 
   if (is->ifile->just_syms_flag == false)
     {
@@ -2643,7 +2643,7 @@ static void
 lang_check_section_addresses ()
 {
   asection * s;
-  int opb = bfd_octets_per_byte (output_bfd);
+  unsigned opb = bfd_octets_per_byte (output_bfd);
 
   /* Scan all sections in the output list.  */
   for (s = output_bfd->sections; s != NULL; s = s->next)
@@ -2744,8 +2744,8 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
      bfd_vma dot;
      boolean relax;
 {
-  int opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
-                                           ldfile_output_machine);
+  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
+						ldfile_output_machine);
 
   /* Size up the sections from their constituent parts.  */
   for (; s != (lang_statement_union_type *) NULL; s = s->next)
@@ -3119,8 +3119,8 @@ lang_do_assignments (s, output_section_statement, fill, dot)
      fill_type fill;
      bfd_vma dot;
 {
-  int opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
-                                           ldfile_output_machine); 
+  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
+						ldfile_output_machine); 
 
   for (; s != (lang_statement_union_type *) NULL; s = s->next)
     {
@@ -3185,7 +3185,7 @@ lang_do_assignments (s, output_section_statement, fill, dot)
 	      einfo (_("%F%P: invalid data statement\n"));
 	  }
           {
-            int size;
+            unsigned int size;
             switch (s->data_statement.type)
               {
               default:
@@ -3309,8 +3309,8 @@ lang_set_startof ()
       h = bfd_link_hash_lookup (link_info.hash, buf, false, false, true);
       if (h != NULL && h->type == bfd_link_hash_undefined)
 	{
-          int opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
-                                                   ldfile_output_machine); 
+          unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
+							ldfile_output_machine);
 	  h->type = bfd_link_hash_defined;
 	  if (s->_cooked_size != 0)
 	    h->u.def.value = s->_cooked_size / opb;
@@ -3492,8 +3492,8 @@ lang_one_common (h, info)
   unsigned int power_of_two;
   bfd_vma size;
   asection *section;
-  int opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
-                                           ldfile_output_machine); 
+  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture, 
+						ldfile_output_machine); 
 
   if (h->type != bfd_link_hash_common)
     return true;

@@ -679,7 +679,6 @@ print_lines (list, lineno, string, address)
   unsigned int lines;
   unsigned int octet_in_word = 0;
   char *src = data_buffer;
-  int end = strlen(src);
   int cur;
 
   /* Print the stuff on the first line */
