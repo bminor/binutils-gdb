@@ -1,3 +1,8 @@
+2005-03-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* cp-abi.c (set_cp_abi_as_auto_default): Use xasprintf instead of
+	a combination of xmalloc and sprintf.
+
 2005-03-13  Jim Blandy  <jimb@redhat.com>
 
 	* configure.ac: Use '=', not '=='; the latter is a GNU extension.

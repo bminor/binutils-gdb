@@ -145,14 +145,11 @@ set_cp_abi_as_auto_default (const char *short_name)
   auto_cp_abi = *abi;
 
   auto_cp_abi.shortname = "auto";
-  new_longname = xmalloc (strlen ("currently ") + 1 + strlen (abi->shortname)
-			  + 1 + 1);
-  sprintf (new_longname, "currently \"%s\"", abi->shortname);
+  xasprintf (&new_longname, "currently \"%s\"", abi->shortname);
   auto_cp_abi.longname = new_longname;
 
-  new_doc = xmalloc (strlen ("Automatically selected; currently ")
-		     + 1 + strlen (abi->shortname) + 1 + 1);
-  sprintf (new_doc, "Automatically selected; currently \"%s\"", abi->shortname);
+  xasprintf (&new_doc, "Automatically selected; currently \"%s\"",
+	     abi->shortname);
   auto_cp_abi.doc = new_doc;
 
   /* Since we copy the current ABI into current_cp_abi instead of
