@@ -595,66 +595,73 @@ sort_sections (s)
       case lang_wild_statement_enum:
 	{
 	  lang_statement_union_type **p = &s->wild_statement.children.head;
+	  struct wildcard_list *sec;
 
-	  /* Is this the .idata section?  */
-	  if (s->wild_statement.section_name != NULL
-	      && strncmp (s->wild_statement.section_name, ".idata", 6) == 0)
+	  for (sec = s->wild_statement.section_list; sec; sec = sec->next)
 	    {
-	      /* Sort the children.  We want to sort any objects in
-                 the same archive.  In order to handle the case of
-                 including a single archive multiple times, we sort
-                 all the children by archive name and then by object
-                 name.  After sorting them, we re-thread the pointer
-                 chain.  */
-
-	      while (*p)
+	      /* Is this the .idata section?  */
+	      if (sec->spec.name != NULL
+		  && strncmp (sec->spec.name, ".idata", 6) == 0)
 		{
-		  lang_statement_union_type *start = *p;
-		  if (start->header.type != lang_input_section_enum
-		      || !start->input_section.ifile->the_bfd->my_archive)
-		    p = &(start->header.next);
-		  else
+		  /* Sort the children.  We want to sort any objects in
+		     the same archive.  In order to handle the case of
+		     including a single archive multiple times, we sort
+		     all the children by archive name and then by object
+		     name.  After sorting them, we re-thread the pointer
+		     chain.  */
+
+		  while (*p)
+		    {
+		      lang_statement_union_type *start = *p;
+		      if (start->header.type != lang_input_section_enum
+			  || !start->input_section.ifile->the_bfd->my_archive)
+			p = &(start->header.next);
+		      else
+			{
+			  lang_statement_union_type *end;
+			  int count;
+
+			  for (end = start, count = 0;
+			       end && (end->header.type
+				       == lang_input_section_enum);
+			       end = end->next)
+			    count++;
+
+			  p = sort_sections_1 (p, end, count,
+					       sort_by_file_name);
+			}
+		    }
+		  break;
+		}
+
+	      /* If this is a collection of grouped sections, sort them.
+		 The linker script must explicitly mention "*(.foo\$)" or
+		 "*(.foo\$*)".  Don't sort them if \$ is not the last
+		 character (not sure if this is really useful, but it
+		 allows explicitly mentioning some \$ sections and letting
+		 the linker handle the rest).  */
+	      if (sec->spec.name != NULL)
+		{
+		  char *q = strchr (sec->spec.name, '\$');
+
+		  if (q != NULL
+		      && (q[1] == '\0'
+			  || (q[1] == '*' && q[2] == '\0')))
 		    {
 		      lang_statement_union_type *end;
 		      int count;
 
-		      for (end = start, count = 0;
-			   end && end->header.type == lang_input_section_enum;
-			   end = end->next)
-			count++;
-
-		      p = sort_sections_1 (p, end, count, sort_by_file_name);
+		      for (end = *p, count = 0; end; end = end->next)
+			{
+			  if (end->header.type != lang_input_section_enum)
+			    abort ();
+			  count++;
+			}
+		      (void) sort_sections_1 (p, end, count,
+					      sort_by_section_name);
 		    }
+		  break;
 		}
-	      break;
-	    }
-
-	  /* If this is a collection of grouped sections, sort them.
-	     The linker script must explicitly mention "*(.foo\$)" or
-	     "*(.foo\$*)".  Don't sort them if \$ is not the last
-	     character (not sure if this is really useful, but it
-	     allows explicitly mentioning some \$ sections and letting
-	     the linker handle the rest).  */
-	  if (s->wild_statement.section_name != NULL)
-	    {
-	      char *q = strchr (s->wild_statement.section_name, '\$');
-
-	      if (q != NULL
-		  && (q[1] == '\0'
-		      || (q[1] == '*' && q[2] == '\0')))
-		{
-		  lang_statement_union_type *end;
-		  int count;
-
-		  for (end = *p, count = 0; end; end = end->next)
-		    {
-		      if (end->header.type != lang_input_section_enum)
-			abort ();
-		      count++;
-		    }
-		  (void) sort_sections_1 (p, end, count, sort_by_section_name);
-		}
-	      break;
 	    }
 	}
 	break;
@@ -765,11 +772,16 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   ps[0] = '\$';
   ps[1] = 0;
   for (l = os->children.head; l; l = l->next)
-    {
-      if (l->header.type == lang_wild_statement_enum
-	  && strcmp (l->wild_statement.section_name, output_secname) == 0)
-	break;
-    }
+    if (l->header.type == lang_wild_statement_enum)
+      {
+	struct wildcard_list *sec;
+
+	for (sec = l->wild_statement.section_list; sec; sec = sec->next)
+	  if (sec->spec.name && strcmp (sec->spec.name, output_secname) == 0)
+	    break;
+	if (sec)
+	  break;
+      }
   ps[0] = 0;
   if (l == NULL)
 #if 1
@@ -778,11 +790,20 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 	 should one decide to not require *(.foo\$) to appear in the linker
 	 script.  */
     {
-      lang_wild_statement_type *new = new_stat (lang_wild_statement,
-						&os->children);
-      new->section_name = xmalloc (strlen (output_secname) + 2);
-      sprintf (new->section_name, "%s\$", output_secname);
+      lang_wild_statement_type *new;
+      struct wildcard_list *tmp;
+
+      tmp = (struct wildcard_list *) xmalloc (sizeof *tmp);
+      tmp->next = NULL;
+      tmp->spec.name = xmalloc (strlen (output_secname) + 2);
+      sprintf (tmp->spec.name, "%s\$", output_secname);
+      tmp->spec.exclude_name_list = NULL;
+      tmp->sorted = false;
+      new = new_stat (lang_wild_statement, &os->children);
       new->filename = NULL;
+      new->filenames_sorted = false;
+      new->section_list = tmp;
+      new->keep_sections = false;
       lang_list_init (&new->children);
       l = new;
     }
