@@ -1,3 +1,10 @@
+Wed May 26 09:57:19 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t00/default.exp: update info line for new message.
+
+	* gdb.t02/{whatis.exp,gdbme.c}:
+	Test that "char *" doesn't print as "caddr_t".
+
 Tue May 25 13:28:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t00/help.exp: Use .* in place of some help messages which
