@@ -1,5 +1,8 @@
 Tue Feb 28 14:38:39 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
+	* defs.h (SWAP_TARGET_AND_HOST): check endianess at runtime not
+	compile time.
+
 	* arc-tdep.c (_initialize_arc_tdep): set tm_print_insn according to 
 	processor.
 	* remote-arc.c (arc_wait): when a processor stops, stop other two

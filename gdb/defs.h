@@ -741,22 +741,23 @@ extern void set_endian_from_file PARAMS ((bfd *));
 #endif /* BITS_BIG_ENDIAN not defined.  */
 
 /* Swap LEN bytes at BUFFER between target and host byte-order.  */
-#if TARGET_BYTE_ORDER == HOST_BYTE_ORDER
-#define SWAP_TARGET_AND_HOST(buffer,len)
-#else /* Target and host byte order differ.  */
 #define SWAP_TARGET_AND_HOST(buffer,len) \
-  {                                                                      \
-    char __tmp_;							 \
-    char *p = (char *)(buffer);                                          \
-    char *q = ((char *)(buffer)) + len - 1;                              \
-    for (; p < q; p++, q--)                                              \
-      {                                                                  \
-        __tmp_ = *q;                                                     \
-        *q = *p;                                                         \
-        *p = __tmp_;                                                     \
-      }                                                                  \
-  }
-#endif /* Target and host byte order differ.  */
+  do                                                                    \
+    {                                                                   \
+      if (TARGET_BYTE_ORDER != HOST_BYTE_ORDER)                         \
+        {                                                               \
+          char tmp;                                                     \
+          char *p = (char *)(buffer);                                   \
+          char *q = ((char *)(buffer)) + len - 1;                       \
+          for (; p < q; p++, q--)                                       \
+            {                                                           \
+              tmp = *q;                                                 \
+              *q = *p;                                                  \
+              *p = tmp;                                                 \
+            }                                                           \
+        }                                                               \
+    }                                                                   \
+  while (0)
 
 /* In findvar.c.  */
 
