@@ -49,9 +49,7 @@
 #include "elf/sparc.h"
 #include "elf/m32r.h"
 #include "elf/d10v.h"
-/* start-sanitize-d30v */
 #include "elf/d30v.h"
-/* end-sanitize-d30v */
 #include "elf/sh.h"
 #include "elf/mn10200.h"
 #include "elf/mn10300.h"
@@ -344,9 +342,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
     case EM_SPARC:
     case EM_PPC:
     case EM_CYGNUS_V850:
-      /* start-sanitize-d30v */
     case EM_CYGNUS_D30V:
-      /* end-sanitize-d30v */
     case EM_CYGNUS_MN10200:
     case EM_CYGNUS_MN10300:
     case EM_SH:
@@ -439,12 +435,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
 	  rtype = elf_d10v_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
-	  /* start-sanitize-d30v */
 	case EM_CYGNUS_D30V:
 	  rtype = elf_d30v_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
-	  /* end-sanitize-d30v */
 	case EM_SH:
 	  rtype = elf_sh_reloc_type (ELF32_R_TYPE (info));
 	  break;
@@ -695,9 +689,7 @@ get_machine_name (e_machine)
     case EM_SPARCV9:     	return "Sparc v9";
     case EM_ALPHA:       	return "Alpha";
     case EM_CYGNUS_D10V:        return "d10v";
-      /* start-sanitize-d30v */
     case EM_CYGNUS_D30V:        return "d30v";
-      /* end-sanitize-d30v */
     case EM_CYGNUS_ARC:		return "Arc";
     case EM_CYGNUS_M32R:	return "M32r";
     case EM_CYGNUS_V850:	return "v850";

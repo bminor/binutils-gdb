@@ -312,6 +312,8 @@ binutils.dvi: $(srcdir)/binutils.texi config.texi
 
 binutils.info: $(srcdir)/binutils.texi config.texi
 
+MAINTAINERCLEANFILES = config.texi
+
 $(DEMANGLER_PROG).1: cxxfilt.man Makefile
 	sed -e 's/@PROGRAM@/$(DEMANGLER_PROG)/' < $(srcdir)/cxxfilt.man \
 		> $(DEMANGLER_PROG).1
@@ -393,7 +395,9 @@ not-ranlib.o: not-ranlib.c
 not-strip.o: not-strip.c
 objcopy.o: objcopy.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/progress.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/getopt.h $(INCDIR)/libiberty.h budbg.h
+  $(INCDIR)/getopt.h $(INCDIR)/libiberty.h budbg.h $(INCDIR)/elf/internal.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h
 objdump.o: objdump.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/getopt.h $(INCDIR)/progress.h bucomm.h config.h \
   $(INCDIR)/fopen-same.h $(INCDIR)/dis-asm.h $(INCDIR)/libiberty.h \
@@ -445,9 +449,14 @@ resbin.o: resbin.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 winduni.o: winduni.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h winduni.h
 readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/ppc.h $(INCDIR)/elf/m32r.h \
-  $(INCDIR)/elf/mips.h $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/i386.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/elf/v850.h \
+  $(INCDIR)/elf/ppc.h $(INCDIR)/elf/mips.h $(INCDIR)/elf/alpha.h \
+  $(INCDIR)/elf/arm.h $(INCDIR)/elf/m68k.h $(INCDIR)/elf/sparc.h \
+  $(INCDIR)/elf/m32r.h $(INCDIR)/elf/d10v.h $(INCDIR)/elf/d30v.h \
+  $(INCDIR)/elf/sh.h $(INCDIR)/elf/mn10200.h $(INCDIR)/elf/mn10300.h \
+  $(INCDIR)/elf/hppa.h $(INCDIR)/elf/arc.h bucomm.h config.h \
+  $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h
 underscore.o: underscore.c
 arparse.o: arparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h arsup.h

@@ -248,6 +248,8 @@ DISTSTUFF = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
 DISTCLEANFILES = stamp-under sysinfo underscore.c sysroff.c sysroff.h \
 	site.exp site.bak
 
+MAINTAINERCLEANFILES = config.texi
+
 MOSTLYCLEANFILES = sysinfo $(DEMANGLER_PROG).1 binutils.log binutils.sum \
 	abcdefgh*
 
@@ -385,7 +387,7 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 $(ACLOCAL_M4): @MAINT@ configure.in  acinclude.m4
 	cd $(srcdir) && $(ACLOCAL)
 
-config.status: $(srcdir)/configure
+config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
 $(srcdir)/configure: @MAINT@$(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
@@ -702,10 +704,10 @@ uninstall-man1:
 	done
 install-man: $(MANS)
 	@$(NORMAL_INSTALL)
-	$(MAKE) install-man1
+	$(MAKE) $(AM_MAKEFLAGS) install-man1
 uninstall-man:
 	@$(NORMAL_UNINSTALL)
-	$(MAKE) uninstall-man1
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-man1
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run `make' without going through this Makefile.
@@ -723,7 +725,7 @@ check-recursive installcheck-recursive info-recursive dvi-recursive:
 	list='$(SUBDIRS)'; for subdir in $$list; do \
 	  target=`echo $@ | sed s/-recursive//`; \
 	  echo "Making $$target in $$subdir"; \
-	  (cd $$subdir && $(MAKE) $$target) \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$target) \
 	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
 	done && test -z "$$fail"
 
@@ -736,12 +738,12 @@ maintainer-clean-recursive:
 	for subdir in $$rev; do \
 	  target=`echo $@ | sed s/-recursive//`; \
 	  echo "Making $$target in $$subdir"; \
-	  (cd $$subdir && $(MAKE) $$target) \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$target) \
 	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
 	done && test -z "$$fail"
 tags-recursive:
 	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  (cd $$subdir && $(MAKE) tags); \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) tags); \
 	done
 
 tags: TAGS
@@ -786,12 +788,12 @@ distcheck: dist
 	dc_install_base=`cd $(distdir)/=inst && pwd`; \
 	cd $(distdir)/=build \
 	  && ../configure --srcdir=.. --prefix=$$dc_install_base \
-	  && $(MAKE) \
-	  && $(MAKE) dvi \
-	  && $(MAKE) check \
-	  && $(MAKE) install \
-	  && $(MAKE) installcheck \
-	  && $(MAKE) dist
+	  && $(MAKE) $(AM_MAKEFLAGS) \
+	  && $(MAKE) $(AM_MAKEFLAGS) dvi \
+	  && $(MAKE) $(AM_MAKEFLAGS) check \
+	  && $(MAKE) $(AM_MAKEFLAGS) install \
+	  && $(MAKE) $(AM_MAKEFLAGS) installcheck \
+	  && $(MAKE) $(AM_MAKEFLAGS) dist
 	-rm -rf $(distdir)
 	@echo "========================"; \
 	echo "$(distdir).tar.gz is ready for distribution"; \
@@ -819,10 +821,10 @@ distdir: $(DISTFILES)
 	  || mkdir $(distdir)/$$subdir \
 	  || exit 1; \
 	  chmod 777 $(distdir)/$$subdir; \
-	  (cd $$subdir && $(MAKE) top_distdir=../$(distdir) distdir=../$(distdir)/$$subdir distdir) \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir=../$(distdir) distdir=../$(distdir)/$$subdir distdir) \
 	    || exit 1; \
 	done
-	$(MAKE) top_distdir="$(top_distdir)" distdir="$(distdir)" dist-info
+	$(MAKE) $(AM_MAKEFLAGS) top_distdir="$(top_distdir)" distdir="$(distdir)" dist-info
 
 RUNTESTFLAGS =
 
@@ -851,11 +853,11 @@ site.exp: Makefile
 info: $(INFO_DEPS) info-recursive
 dvi: $(DVIS) dvi-recursive
 check:
-	$(MAKE) check-recursive check-DEJAGNU
+	$(MAKE) $(AM_MAKEFLAGS) check-recursive check-DEJAGNU
 installcheck: installcheck-recursive
 install-info: install-info-am install-info-recursive
 all-recursive-am: config.h
-	$(MAKE) all-recursive
+	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 all-am: Makefile $(PROGRAMS) $(MANS) config.h
 
@@ -877,7 +879,7 @@ install: install-recursive install-exec-am install-data-am
 uninstall: uninstall-recursive uninstall-am
 
 install-strip:
-	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
 installdirs: installdirs-recursive
 	$(mkinstalldirs)  $(DATADIR)$(bindir) $(DESTDIR)$(mandir)/man1
 
@@ -1165,7 +1167,9 @@ not-ranlib.o: not-ranlib.c
 not-strip.o: not-strip.c
 objcopy.o: objcopy.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/progress.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/getopt.h $(INCDIR)/libiberty.h budbg.h
+  $(INCDIR)/getopt.h $(INCDIR)/libiberty.h budbg.h $(INCDIR)/elf/internal.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h
 objdump.o: objdump.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/getopt.h $(INCDIR)/progress.h bucomm.h config.h \
   $(INCDIR)/fopen-same.h $(INCDIR)/dis-asm.h $(INCDIR)/libiberty.h \
@@ -1217,9 +1221,14 @@ resbin.o: resbin.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 winduni.o: winduni.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h winduni.h
 readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/ppc.h $(INCDIR)/elf/m32r.h \
-  $(INCDIR)/elf/mips.h $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h \
-  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/i386.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/elf/v850.h \
+  $(INCDIR)/elf/ppc.h $(INCDIR)/elf/mips.h $(INCDIR)/elf/alpha.h \
+  $(INCDIR)/elf/arm.h $(INCDIR)/elf/m68k.h $(INCDIR)/elf/sparc.h \
+  $(INCDIR)/elf/m32r.h $(INCDIR)/elf/d10v.h $(INCDIR)/elf/d30v.h \
+  $(INCDIR)/elf/sh.h $(INCDIR)/elf/mn10200.h $(INCDIR)/elf/mn10300.h \
+  $(INCDIR)/elf/hppa.h $(INCDIR)/elf/arc.h bucomm.h config.h \
+  $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h
 underscore.o: underscore.c
 arparse.o: arparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h arsup.h
