@@ -23,9 +23,12 @@ nm\(em\&list symbols from object files.
 .RB "[\|" \-p | \-\-no\-sort "\|]"
 .RB "[\|" \-r | \-\-reverse\-sort "\|]" 
 .RB "[\|" \-u | \-\-undefined\-only "\|]"  
-.RB "[\|" "\-\-target="\c
-.I bfdname\c
-\&\|]
+.RB "[\|" \-\-help "\|]"  
+.RB "[\|" \-\-version "\|]"  
+.RB "[\|" "\-t \fIradix" | \-\-radix=\fIradix "\|]"
+.RB "[\|" \-P | --portability "\|]"
+.RB "[\|" "\-f \fIformat" | \-\-format=\fIformat "\|]"
+.RB "[\|" "\-\-target=\fIbfdname" "\|]"
 .RB "[\|" \c
 .I objfile\c
 \&.\|.\|.\|]
@@ -34,22 +37,27 @@ nm\(em\&list symbols from object files.
 .SH DESCRIPTION
 GNU \c
 .B nm\c
-\& will list the symbols from object files \c
+\& lists the symbols from object files \c
 .I objfile\c
-\&.
+\&.  If no object files are given as arguments, \c
+.B nm\c
+\& assumes `\|\c
+.B a.out\c
+\|'.
 
 .SH OPTIONS
 The long and short forms of options, shown here as alternatives, are
 equivalent.
 
 .TP
-.IR "objfile" .\|.\|.
-Object files whose symbols are to be listed.  If no object files are
-listed as arguments, \c
-.B nm\c
-\& assumes `\|\c
-.B a.out\c
-\|'.
+.B \-A
+.TP
+.B \-o
+.TP
+.B \-\-print\-file\-name 
+Precede each symbol by the name of the input file where it was found,
+rather than identifying the input file once only before all of its
+symbols. 
 
 .TP
 .B \-a
@@ -58,10 +66,26 @@ listed as arguments, \c
 Display debugger-only symbols; normally these are not listed.
 
 .TP
+.B "\-f \fIformat"
+Use the output format \fIformat\fP, which can be ``bsd'',
+``sysv'', or ``posix''.  The default is `bsd''.
+Only the first character of \fIformat\fP is significant; it can be
+either upper or lower case.
+
+.TP
 .B \-g
 .TP
 .B \-\-extern\-only 
 Display only external symbols.
+
+.TP
+.B \-n
+.TP
+.B \-v
+.TP
+.B \-\-numeric\-sort 
+Sort symbols numerically by their addresses, not alphabetically by their
+names. 
 
 .TP
 .B \-p
@@ -71,11 +95,11 @@ Don't bother to sort the symbols in any order; just print them in the
 order encountered.
 
 .TP
-.B \-n
+.B \-P
 .TP
-.B \-\-numeric\-sort 
-Sort symbols numerically by their addresses, not alphabetically by their
-names. 
+.B \-\-portability
+Use the POSIX.2 standard output format instead of the default format.
+Equivalent to ``\-f posix''.
 
 .TP
 .B \-s
@@ -90,14 +114,6 @@ When listing symbols from archive members, include the index: a mapping
 contain definitions for what names.
 
 .TP
-.B \-o
-.TP
-.B \-\-print\-file\-name 
-Precede each symbol by the name of the input file where it was found,
-rather than identifying the input file once only before all of its
-symbols. 
-
-.TP
 .B \-r
 .TP
 .B \-\-reverse\-sort 
@@ -105,7 +121,14 @@ Reverse the sense of the sort (whether numeric or alphabetic); let the
 last come first.
 
 .TP
-.BI "\-\-target " "bfdname"\c
+.B "\-t \fIradix"
+.TP
+.B "\-\-radix=\fIradix"
+Use \fIradix\fP as the radix for printing the symbol values.  It must be
+``d'' for decimal, ``o'' for octal, or ``x'' for hexadecimal.
+
+.TP
+.BI "\-\-target=" "bfdname"\c
 \&
 Specify an object code format other than your system's default format.
 See 
@@ -118,7 +141,19 @@ for information on listing available formats.
 .B \-\-undefined\-only 
 Display only undefined symbols (those external to each object file).
 
-.PP
+.TP
+.B \-V
+.TP
+.B \-\-version
+Show the version number of
+.B nm
+and exit.
+
+.TP
+.B \-\-help
+Show a summary of the options to
+.B nm
+and exit.
 
 .SH "SEE ALSO"
 .RB "`\|" binutils "\|'"

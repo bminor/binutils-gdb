@@ -21,51 +21,70 @@ strip\(em\&Discard symbols from object files.
 .RB "[\|" \-X | \-\-discard\-locals "\|]"
 .RB "[\|" \-v | \-\-verbose "\|]"
 .RB "[\|" \-V | \-\-version "\|]"
+.RB "[\|" \-V | \-\-help "\|]"
 .I objfile\c
 \&.\|.\|.
 
 .SH DESCRIPTION
-GNU \c
-.B strip\c
-\& discards all symbols from the object files
-\c
-.I objfile\c
-\&.  The list of object files may include archives.
+GNU
+.B strip
+discards all symbols from the object files
+.IR objfile .
+The list of object files may include archives.
+At least one object file must be given.
 
-\c
-.B strip\c
-\& will not execute unless at least one object file is listed.
-
-\& \c
-.B strip\c
-\& modifies the files named in its argument,
+.P
+.B strip
+modifies the files named in its argument,
 rather than writing modified copies under different names.
 
 .SH OPTIONS
 .TP
-.B "\-F \fIformat\fP \-\-format=\fIformat\fP \-\-target=\fIformat\fP"
+.B "\-F \fIformat"
+.TP
+.B "\-\-format=\fIformat"
+.TP
+.B "\-\-target=\fIformat"
 Treat the original \fIobjfile\fP as a file with the object
 code format \fIformat\fP, and rewrite it in the same format.
 
 .TP
-.B "\-I \fIformat\fP \-\-input\-format=\fIformat\fP"
+.B \-\-help
+Show a summary of the options to
+.B strip
+and exit.
+
+.TP
+.B "\-I \fIformat
+.TP
+.B "\-\-input\-format=\fIformat"
 Treat the original \fIobjfile\fP as a file with the object
 code format \fIformat\fP.
 
 .TP
-.B "\-O \fIformat\fP \-\-output\-format=\fIformat\fP"
+.B "\-O \fIformat\fP"
+.TP
+.B "\-\-output\-format=\fIformat"
 Replace \fIobjfile\fP with a file in the output format \fIformat\fP.
 
 .TP
-.B "\-s \-\-strip\-all"
+.B \-s
+.TP
+.B \-\-strip\-all
 Remove all symbols.
 
 .TP
-.B "\-S -g \-\-strip\-debug"
+.B \-S
+.TP
+.B -g
+.TP
+.B \-\-strip\-debug
 Remove debugging symbols only.
 
 .TP
-.B "\-x \-\-discard\-all"
+.B \-x
+.TP
+.B \-\-discard\-all
 Remove non-global symbols.
 
 .TP
@@ -74,25 +93,26 @@ Remove compiler-generated local symbols.
 (These usually start with ``L'' or ``.''.)
 
 .TP
-.B "\-v \-\-verbose"
+.B \-v
+.TP
+.B \-\-verbose
 Verbose output: list all object files modified.  In the case of
-archives, ``strip \-V'' lists all members of the archive.
+archives,
+.B "strip \-V"
+lists all members of the archive.
 
 .TP
-.B "\-V \-\-version
-Show the version number for \fBstrip\fP.
-
-.PP
+.B \-V
+.TP
+.B \-\-version
+Show the version number for \fBstrip\fP and exit.
 
 .SH "SEE ALSO"
 .RB "`\|" binutils "\|'" 
 entry in 
-.B
-info\c
-\&; 
-.I
-The GNU Binary Utilities\c
-\&, Roland H. Pesch (October 1991).
+.BR info ;
+.IR "The GNU Binary Utilities ,
+Roland H. Pesch (October 1991).
 
 .SH COPYING
 Copyright (c) 1991 Free Software Foundation, Inc.

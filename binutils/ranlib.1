@@ -14,38 +14,42 @@ ranlib\(em\&generate index to archive.
 .hy 0
 .na
 .B ranlib \c
+.RB "[\|" \-v | \-V "\|]"
 .I archive\c
 \&
 .ad b
 .hy 1
 .SH DESCRIPTION
-\c
-.B ranlib\c
-\& generates an index to the contents of an archive, and
+.B ranlib
+generates an index to the contents of an archive, and
 stores it in the archive.  The index lists each symbol defined by a
 member of an archive that is a relocatable object file.  
-
-You may use `\|\c
-.B nm \-s\c
-\|' or `\|\c
-.B nm +print-armap\c
-\|' to list this index.
-
+.PP
+You may use
+.RB ` "nm \-s" '
+or
+.RB ` "nm \-\-print-armap" '
+to list this index.
+.PP
 An archive with such an index speeds up linking to the library, and
 allows routines in the library to call each other without regard to
 their placement in the archive.
+.PP
+The GNU
+.B ranlib
+program is another form of GNU
+.BR ar ;
+running
+.B ranlib
+is completely equivalent to executing
+.RB ` "ar \-s" '.
 
-The GNU \c
-.B ranlib\c
-\& program is another form of GNU \c
-.B ar\c
-\&; running
-\c
-.B ranlib\c
-\& is completely equivalent to executing `\|\c
-.B ar \-s\c
-\|'.
-
+.SH OPTIONS
+.TP
+.B \-v
+Print the version number of
+.B ranlib
+and exit.
 
 .SH "SEE ALSO"
 .RB "`\|" binutils "\|'"

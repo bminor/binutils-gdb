@@ -554,7 +554,7 @@ objcopy [ -F @var{format} | --format=@var{format} ]
         [ -O @var{format} | --output-format=@var{format} ]
         [ -S | --strip-all ]  [ -g | --strip-debug ]
         [ -x | --discard-all ]  [ -X | --discard-locals ]
-        [ -v | --verbose ]  [ -V | --version ]
+        [ -v | --verbose ]  [ -V | --version ]  [ --help ]
         @var{infile} [@var{outfile}]
 @end smallexample
 
@@ -619,6 +619,9 @@ Show the version number of @code{objcopy}.
 @itemx --verbose
 Verbose output: list all object files modified.  In the case of
 archives, @samp{objcopy -V} lists all members of the archive.
+
+@item --help
+Show a summary of the options to @code{objcopy}.
 @end table
 
 @iftex
@@ -642,7 +645,7 @@ nm [ -a | --debug-syms ]  [ -g | --extern-only ]
    [ -r | --reverse-sort ]  [ -u | --undefined-only ]  
    [ -t @var{radix} | --radix=@var{radix} ] [ -P | --portability ]
    [ --target=@var{bfdname} ] [ -f @var{format} | --format=@var{format} ]
-   [ -V | --version ] [ @var{objfile}@dots{} ]
+   [ -V | --version ]  [ --help ]  [ @var{objfile}@dots{} ]
 @end smallexample
 
 GNU @code{nm} lists the symbols from object files @var{objfile}@dots{}.
@@ -714,13 +717,19 @@ listed.
 @itemx --format=@var{format}
 Use the output format @var{format}, which can be @code{bsd},
 @code{sysv}, or @code{posix}.  The default is @code{bsd}.
-Only the first character of @var{format} is significant, it can be
+Only the first character of @var{format} is significant; it can be
 either upper or lower case.
 
 @item -g
 @itemx --extern-only 
 @cindex external symbols
 Display only external symbols.
+
+@item -n
+@itemx -v
+@itemx --numeric-sort 
+Sort symbols numerically by their addresses, rather than alphabetically
+by their names. 
 
 @item -p
 @itemx --no-sort 
@@ -732,12 +741,6 @@ encountered.
 @itemx --portability
 Use the POSIX.2 standard output format instead of the default format.
 Equivalent to @samp{-f posix}.
-
-@item -n
-@itemx -v
-@itemx --numeric-sort 
-Sort symbols numerically by their addresses, rather than alphabetically
-by their names. 
 
 @item -s
 @itemx --print-armap
@@ -769,7 +772,10 @@ Display only undefined symbols (those external to each object file).
 
 @item -V
 @itemx --version
-Show the version number of @code{nm}.
+Show the version number of @code{nm} and exit.
+
+@item --help
+Show a summary of the options to @code{nm} and exit.
 @end table
 
 @node objdump, ranlib, nm, Top
@@ -781,8 +787,8 @@ Show the version number of @code{nm}.
 @smallexample
 objdump [ -a ]  [ -b @var{bfdname} ]  [ -d ]  [ -f ]
         [ -h | --header ]  [ -i ]  [ -j @var{section} ]  [ -l ]
-        [ -m @var{machine} ]  [ -r | --reloc ]  [ -s ]
-        [ --stabs ]  [ -t | --syms ]  [ -x ]
+        [ -m @var{machine} ]  [ -r | --reloc ]  [ -s ]  [ --stabs ]
+        [ -t | --syms ]  [ -x ]  [ --version ]  [ --help ]
         @var{objfile}@dots{}
 @end smallexample
 
@@ -792,14 +798,14 @@ information is mostly useful to programmers who are working on the
 compilation tools, as opposed to programmers who just want their
 program to compile and work.
 
+@var{objfile}@dots{} are the object files to be examined.  When you
+specify archives, @code{objdump} shows information on each of the member
+object files.
+
 The long and short forms of options, shown here as alternatives, are
 equivalent.
 
 @table @code
-@item @var{objfile}@dots{}
-The object files to be examined.  When you specify archives,
-@code{objdump} shows information on each of the member object files.
-
 @item -a
 @c print_arelt_descr
 @cindex archive headers
@@ -841,6 +847,9 @@ each of the @var{objfile} files.
 @cindex section headers
 Header.  Display summary information from the section headers of the
 object file.
+
+@item --help
+Print a summary of the options to @code{objdump} and exit.
 
 @item -i
 @cindex architectures available
@@ -895,13 +904,15 @@ output.
 Symbol Table.  Print the symbol table entries of the file.
 This is similar to the information provided by the @samp{nm} program.
 
+@item --version
+Print the version number of @code{objdump} and exit.
+
 @item -x
 @cindex all header information, object file
 @cindex header information, all
 Display all available header information, including the symbol table and
 relocation entries.  Using @samp{-x} is equivalent to specifying all of
 @samp{-a -f -h -r -t}.
-
 @end table
 
 @node ranlib, size, objdump, Top
@@ -953,11 +964,11 @@ size---for each of the object or archive files @var{objfile} in its
 argument list.  By default, one line of output is generated for each
 object file or each module in an archive.
 
-The command line options have the following meanings:
-@table @code
-@item @var{objfile}@dots{}
-The object files to be examined.
+@var{objfile}@dots{} are the object files to be examined.
 
+The command line options have the following meanings:
+
+@table @code
 @item -A
 @itemx -B
 @itemx --format=@var{compatibility}
@@ -1038,7 +1049,7 @@ Display the version number of @code{size}.
 @cindex strings, printing
 
 @smallexample
-strings [-afhov] [-n @var{min-len}] [-@var{min-len}] [-t @var{radix}] [-]
+strings [-afov] [-@var{min-len}] [-n @var{min-len}] [-t @var{radix}] [-]
         [--all] [--print-file-name] [--bytes=@var{min-len}] [--radix=@var{radix}]
         [--help] [--version] @var{file}@dots{}
 @end smallexample
@@ -1064,20 +1075,19 @@ the whole files.
 @itemx --print-file-name
 Print the name of the file before each string.
 
-@item -h
-@itemx --help
+@item --help
 Print a summary of the program usage on the standard output and exit.
 
-@item -n @var{min-len}
 @itemx -@var{min-len}
+@item -n @var{min-len}
 @itemx --bytes=@var{min-len}
 Print sequences of characters that are at least @var{min-len} characters
 long, instead of the default 4.
 
 @item -o
-Like @samp{-t o}.
-Some other versions of @code{strings} have @samp{-o} act like @samp{-t d} instead.
-Since we can not be compatible with both ways, we simply chose one.
+Like @samp{-t o}.  Some other versions of @code{strings} have @samp{-o}
+act like @samp{-t d} instead.  Since we can not be compatible with both
+ways, we simply chose one.
 
 @item -t @var{radix}
 @itemx --radix=@var{radix}
@@ -1104,19 +1114,27 @@ strip [ -F @var{format} | --format=@var{format} | --target=@var{format} ]
       [ -O @var{format} | --output-format=@var{format} ]
       [ -s | --strip-all ] [ -S | -g | --strip-debug ]
       [ -x | --discard-all ] [ -X | --discard-locals ]
-      [ -v | --verbose ]  [ -V | --version ]
+      [ -v | --verbose ]  [ -V | --version ]  [ --help ]
       @var{objfile}@dots{}
 @end smallexample
 
 GNU @code{strip} discards all symbols from object files
 @var{objfile}.  The list of object files may include archives.
-
-@code{strip} will not execute unless at least one object file is listed.
+At least one object file must be given.
 
 @code{strip} modifies the files named in its argument,
 rather than writing modified copies under different names.
 
 @table @code
+@item -F @var{format}
+@itemx --format=@var{format}
+@itemx --target=@var{format}
+Treat the original @var{objfile} as a file with the object
+code format @var{format}, and rewrite it in the same format.
+
+@item --help
+Show a summary of the options to @code{strip} and exit.
+
 @item -I @var{format}	
 @itemx --input-format=@var{format}
 Treat the original @var{objfile} as a file with the object
@@ -1125,12 +1143,6 @@ code format @var{format}.
 @item -O @var{format}
 @itemx --output-format=@var{format}
 Replace @var{objfile} with a file in the output format @var{format}.
-
-@item -F @var{format}
-@itemx --format=@var{format}
-@itemx --target=@var{format}
-Treat the original @var{objfile} as a file with the object
-code format @var{format}, and rewrite it in the same format.
 
 @item -s
 @itemx --strip-all
@@ -1166,10 +1178,16 @@ archives, @samp{strip -v} lists all members of the archive.
 @kindex c++filt
 @cindex demangling C++ symbols
 
+@smallexample
+c++filt [ -_ | --strip-underscores ]
+        [ -s @var{format} | --format=@var{format} ]
+        [ --help ]  [ --version ]  [ @var{arg}@dots{} ]
+@end smallexample
+
 The C++ language provides function overloading, which means that you can
 write many functions with the same name (providing each takes parameters
 of different types).  All C++ function names are encoded into a
-low-level assembly label (in some circles this is described as
+low-level assembly label (this process is known as
 @dfn{mangling}). The @code{c++filt} program does the inverse mapping: it
 decodes (@dfn{demangles}) low-level names into user-level names so that
 the linker can keep these overloaded functions from clashing.
@@ -1194,10 +1212,34 @@ c++filt @var{symbol}
 
 All results are printed on the standard output.
 
-Note that on some systems, both the C and C++ compilers put an
-underscore in front of every name.  (I.e. the C name @code{foo} gets the
-low-level name @code{_foo}.)  On such systems, @code{c++filt} removes
-any initial underscore of a potential label.
+@table @code
+@item -_
+@item --strip-underscores
+On some systems, both the C and C++ compilers put an underscore in front
+of every name.  For example, the C name @code{foo} gets the low-level
+name @code{_foo}.  This option removes the initial underscore.
+
+@item -s @var{format}
+@itemx --format=@var{format}
+GNU @code{nm} can decode three different methods of mangling, used by
+different C++ compilers.  The argument to this option selects which
+method it uses:
+
+@table @code
+@item gnu
+the one used by the GNU compiler (the default method)
+@item lucid
+the one used by the Lucid compiler
+@item arm
+the one specified by the C++ Annotated Reference Manual
+@end table
+
+@item --help
+Print a summary of the options to @code{c++filt} and exit.
+
+@item --version
+Print the version number of @code{c++filt} and exit.
+@end table
 
 @quotation
 @emph{Warning:} @code{c++filt} is a new utility, and the details of its
@@ -1206,14 +1248,14 @@ a command-line option may be required in the the future to decode a name
 passed as an argument on the command line; in other words, 
 
 @example
-c++filt @var{SYMBOL}
+c++filt @var{symbol}
 @end example
 
 @noindent
 may in a future release become
 
 @example
-c++filt @var{flag} @var{SYMBOL}
+c++filt @var{option} @var{symbol}
 @end example
 @end quotation
 

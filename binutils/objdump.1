@@ -14,7 +14,7 @@ objdump\(em\&display information from object files.
 .hy 0
 .na
 .TP
-.B   objdump
+.B objdump
 .RB "[\|" \-a "\|]" 
 .RB "[\|" "\-b\ "\c
 .I bfdname\c
@@ -35,6 +35,8 @@ objdump\(em\&display information from object files.
 .RB "[\|" \-\-stabs "\|]"
 .RB "[\|" \-t | \-\-syms "\|]" 
 .RB "[\|" \-x "\|]"
+.RB "[\|" \-\-version "\|]"
+.RB "[\|" \-\-help "\|]"
 .I objfile\c
 \&.\|.\|.
 .ad b
@@ -47,16 +49,16 @@ The options control what particular information to display.  This
 information is mostly useful to programmers who are working on the
 compilation tools, as opposed to programmers who just want their
 program to compile and work.
-.SH OPTIONS
-Where long and short forms of an option are shown together, they are
-equivalent.
-
-.TP
+.PP
 .IR  "objfile" .\|.\|.
-The object files to be examined.  When you specify archives,
+are the object files to be examined.  When you specify archives,
 \c
 .B objdump\c
 \& shows information on each of the member object files.
+
+.SH OPTIONS
+Where long and short forms of an option are shown together, they are
+equivalent.
 
 .TP
 .B \-a
@@ -76,7 +78,7 @@ the object file format of each archive member.
 .TP
 .BI "-b " "bfdname"\c
 \&
-You can specify a particular object-code format for your object files as
+Specify the object-code format for the object files to be
 \c
 .I bfdname\c
 \&.  This may not be necessary; \c
@@ -89,7 +91,7 @@ objdump\ \-b\ oasys\ \-m\ vax\ \-h\ fu.o
 .br
 .sp
 
-Displays summary information from the section headers (`\|\c
+display summary information from the section headers (`\|\c
 .B \-h\c
 \|') of
 `\|\c
@@ -122,6 +124,12 @@ each file in \c
 .B \-\-header
 Header.  Display summary information from the section headers of the
 object file.
+
+.TP
+.B \-\-help
+Print a summary of the options to
+.B objdump
+and exit.
 
 .TP
 .B \-i
@@ -186,6 +194,12 @@ This is similar to the information provided by the `\|\c
 \|' program.
 
 .TP
+.B \-\-version
+Print the version number of
+.B objdump
+and exit.
+
+.TP
 .B \-x
 Display all available header information, including the symbol table and
 relocation entries.  Using `\|\c
@@ -194,8 +208,6 @@ relocation entries.  Using `\|\c
 `\|\c
 .B \-a \-f \-h \-r \-t\c
 \|'.
-
-.PP
 
 .SH "SEE ALSO"
 .RB "`\|" binutils "\|'"
