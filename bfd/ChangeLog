@@ -1,5 +1,8 @@
 Thu Jun  2 17:39:22 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* hosts/sun3.h: Include <stdlib.h>.  Don't declare free, exit or
+	getenv.
+
 	Add linker support for SunOS shared libraries.
 	* sunos.c: Include bfdlink.h.  Add many new functions and
 	definitions for SunOS shared library support.

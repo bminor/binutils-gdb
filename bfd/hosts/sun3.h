@@ -7,27 +7,20 @@
 #include <ctype.h>
 #include <string.h>
 #include <sys/file.h>
+#include <stdlib.h>
 #ifndef	O_ACCMODE
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
 #endif
 #define SEEK_SET 0
 #define SEEK_CUR 1
 
-#ifdef __STDC__
-extern void	free	PARAMS ((PTR));
-#else /* not __STDC__ */
-extern int	free	PARAMS ((PTR));
-#endif /* not __STDC__ */
-extern void	abort	PARAMS ((void));
 extern int	close	PARAMS ((int));
 extern int	fprintf	PARAMS ((FILE *,CONST char *,...));
-extern void	exit	PARAMS ((int));
 extern int	fclose	PARAMS ((FILE*));
 extern void	bcopy	PARAMS ((char*,char*,int));
 extern int	bcmp	PARAMS ((char *, char *, int));
 extern void	bzero	PARAMS ((char *, int));
 extern void	perror	PARAMS ((CONST char *));
-extern char *getenv();
 extern char * strchr();
 extern char *memchr();
 extern char *strrchr();
