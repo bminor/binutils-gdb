@@ -1,3 +1,26 @@
+Thu Jul 13 10:43:59 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* nm.c (HAVE_SBRK): Define execpt on amigados and WINDOWS_NT.
+	(struct size_sym): Define.
+	(show_stats): New static variable.
+	(long_options): Add undocumented option "stats".
+	(main): Print memory stats if requested.
+	(sort_bfd, sort_dynamic, sort_x, sort_y): New static variables.
+	(numeric_forward): Use minisymbols rather than asymbols.
+	(non_numeric_forward): Likewise.
+	(size_forward1): Rename from size_forward.  Use minisymbols.
+	(size_forward2): New static function.
+	(sort_symbols_by_size): Take new arguments dynamic, size, and
+	symsizep.  Use minisymbols.  Don't store the size back in the
+	symbol; store in a newly allocate struct size_sym array.
+	(display_rel_file): Read minisymbols rather than asymbols.  Set
+	sort_* variables.  Call print_size_symbols if sorting by size.
+	(filter_symbols): Take new arguments dynamic and size.  Use
+	minisymbols.
+	(print_symbols): Likewise.  Call print_symbol for actual printing.
+	(print_size_symbols): New static function.
+	(print_symbol): New static function.
+
 Wed Jul 12 10:43:05 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objdump.c (dump_section_stabs): Only print each stabs section
