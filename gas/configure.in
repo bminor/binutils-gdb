@@ -150,9 +150,9 @@ case ${generic_target} in
 
   sh-*-coff)		obj_format=coff ;;
 
-# start-sanitize-r16
-  r16-*-aout)		obj_format=aout ;;
-# end-sanitize-r16
+# start-sanitize-rce
+  rce-*-aout)		obj_format=aout ;;
+# end-sanitize-rce
 
   ns32k-pc532-mach*)	obj_format=aout emulation=pc532 ;;
   ns32k-pc532-netbsd*)	obj_format=aout emulation=nbsd532 ;;

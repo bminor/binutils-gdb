@@ -56,7 +56,7 @@ static bfd_arch_info_type arch_info_struct[] =
     32,				/* 32 bits in a word */
     32,				/* 32 bits in an address */
     8,				/* 8 bits in a byte */
-    bfd_arch_r16,
+    bfd_arch_rce,
     0,				/* only 1 machine */
     "SOP",			/* arch_name  */
     "SOP",			/* printable name */

@@ -1,4 +1,4 @@
-/* This file is tc-r16.h
+/* This file is tc-rce.h
 
    Copyright (C) 1993 Free Software Foundation, Inc.
 
@@ -23,15 +23,15 @@
 
 #ifdef BFD_ASSEMBLER
 
-#define TARGET_ARCH	bfd_arch_r16
+#define TARGET_ARCH	bfd_arch_rce
 #define TARGET_BYTES_BIG_ENDIAN 1
 #ifdef OBJ_AOUT
-#define TARGET_FORMAT	"a.out-r16"
+#define TARGET_FORMAT	"a.out-rce"
 #endif
 
 #else /* ! BFD_ASSEMBLER */
 
-#define BFD_ARCH	bfd_arch_r16
+#define BFD_ARCH	bfd_arch_rce
 #define NO_RELOC	0
 #define RELOC_32	1234
 

@@ -198,6 +198,10 @@ h8500-*-*)		gdb_target=h8500hms ;;
 
 sh-*-*)			gdb_target=sh ;;
 
+# start-sanitize-r16
+r16-*-*)		gdb_target=r16 ;;
+# end-sanitize-r16
+
 hppa*-*-bsd*)		gdb_target=hppabsd ;;
 hppa*-*-pro*)		gdb_target=hppapro ;;
 hppa*-*-hpux*)		gdb_target=hppahpux ;;

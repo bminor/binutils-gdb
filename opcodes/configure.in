@@ -103,9 +103,9 @@ if [ x${all_targets} = xfalse ]; then
 	bfd_powerpc_arch)	ta="$ta ppc-dis.o ppc-opc.o" ;;
 	bfd_rs6000_arch)	ta="$ta ppc-dis.o ppc-opc.o" ;;
 	bfd_sh_arch)		ta="$ta sh-dis.o" ;;
-# start-sanitize-r16
-	bfd_r16_arch)		ta="$ta r16-dis.o" ;;
-# end-sanitize-r16
+# start-sanitize-rce
+	bfd_rce_arch)		ta="$ta rce-dis.o" ;;
+# end-sanitize-rce
 	bfd_sparc_arch)		ta="$ta sparc-dis.o sparc-opc.o" ;;
 	bfd_vax_arch)		;;
 	bfd_we32k_arch)		;;

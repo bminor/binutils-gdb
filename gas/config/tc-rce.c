@@ -1,4 +1,4 @@
-/* tc-r16.c -- Assemble code for the Experimental R16
+/* tc-rce.c -- Assemble code for the Experimental R16
 
    Copyright (C) 1993 Free Software Foundation.
 
@@ -28,7 +28,7 @@
 #include "bfd.h"
 #include "subsegs.h"
 #define DEFINE_TABLE
-#include "../opcodes/r16-opc.h"
+#include "../opcodes/rce-opc.h"
 #include <ctype.h>
 
 #if 1	/**** TEMP ****/
@@ -116,13 +116,13 @@ static struct hash_control *opcode_hash_control;	/* Opcode mnemonics */
 void
 md_begin ()
 {
-  r16_opcode_info *opcode;
+  rce_opcode_info *opcode;
   char *prev_name = "";
 
   opcode_hash_control = hash_new ();
 
   /* Insert unique names into hash table */
-  for (opcode = r16_table; opcode->name; opcode++)
+  for (opcode = rce_table; opcode->name; opcode++)
     {
       if (strcmp (prev_name, opcode->name))
 	{
@@ -272,7 +272,7 @@ char *str;
 {
     char *op_start;
     char *op_end;
-    r16_opcode_info *opcode;
+    rce_opcode_info *opcode;
     char *output;
     int nlen = 0;
     unsigned short inst;
@@ -298,7 +298,7 @@ char *str;
 	return;
     }
 
-    opcode = (r16_opcode_info *) hash_find (opcode_hash_control, name);
+    opcode = (rce_opcode_info *) hash_find (opcode_hash_control, name);
     if (opcode == NULL)
     {
 	as_bad ("unknown opcode \"%s\"", name);

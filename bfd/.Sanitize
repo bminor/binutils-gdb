@@ -23,12 +23,12 @@ else
 	lose_these_too="${mpw_files} ${lose_these_too}"
 fi
 
-r16_files="cpu-r16.c aout-r16.c"
+rce_files="cpu-rce.c aout-rce.c"
 
-if ( echo $* | grep keep\-r16 > /dev/null ) ; then
-	keep_these_too="${r16_files} ${keep_these_too}"
+if ( echo $* | grep keep\-rce > /dev/null ) ; then
+	keep_these_too="${rce_files} ${keep_these_too}"
 else
-	lose_these_too="${r16_files} ${lose_these_too}"
+	lose_these_too="${rce_files} ${lose_these_too}"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
@@ -263,23 +263,23 @@ else
 	done
 fi
 
-r16_files = "ChangeLog archures.c config.bfd configure.in targets.c"
-if ( echo $* | grep keep\-r16 > /dev/null ) ; then
-	for i in $r16_files ; do
-		if test ! -d $i && (grep sanitize-r16 $i > /dev/null) ; then
+rce_files="ChangeLog archures.c config.bfd configure.in targets.c"
+if ( echo $* | grep keep\-rce > /dev/null ) ; then
+	for i in $rce_files ; do
+		if test ! -d $i && (grep sanitize-rce $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
-				echo Keeping r16 stuff in $i
+				echo Keeping rce stuff in $i
 			fi
 		fi
 	done
 else
-	for i in $r16_files ; do
-		if test ! -d $i && (grep sanitize-r16 $i > /dev/null) ; then
+	for i in $rce_files ; do
+		if test ! -d $i && (grep sanitize-rce $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"r16\" from $i...
+				echo Removing traces of \"rce\" from $i...
 			fi
 			cp $i new
-			sed '/start\-sanitize\-r16/,/end-\sanitize\-r16/d' < $i > new
+			sed '/start\-sanitize\-rce/,/end-\sanitize\-rce/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...

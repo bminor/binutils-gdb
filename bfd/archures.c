@@ -435,9 +435,9 @@ extern void bfd_mips_arch PARAMS ((void));
 extern void bfd_powerpc_arch PARAMS ((void));
 extern void bfd_rs6000_arch PARAMS ((void));
 extern void bfd_sh_arch PARAMS ((void));
-/* start-sanitize-r16 */
-extern void bfd_r16_arch PARAMS ((void));
-/* end-sanitize-r16 */
+/* start-sanitize-rce */
+extern void bfd_rce_arch PARAMS ((void));
+/* end-sanitize-rce */
 extern void bfd_sparc_arch PARAMS ((void));
 extern void bfd_vax_arch PARAMS ((void));
 extern void bfd_we32k_arch PARAMS ((void));
@@ -463,9 +463,9 @@ static void (*archures_init_table[]) PARAMS ((void)) =
   bfd_powerpc_arch,
   bfd_rs6000_arch,
   bfd_sh_arch,
-/* start-sanitize-r16 */
-  bfd_r16_arch,
-/* end-sanitize-r16 */
+/* start-sanitize-rce */
+  bfd_rce_arch,
+/* end-sanitize-rce */
   bfd_sparc_arch,
   bfd_vax_arch,
   bfd_we32k_arch,

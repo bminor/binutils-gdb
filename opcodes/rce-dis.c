@@ -19,7 +19,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define STATIC_TABLE
 #define DEFINE_TABLE
 
-#include "r16-opc.h"
+#include "rce-opc.h"
 #include "dis-asm.h"
 
 int 
@@ -33,7 +33,7 @@ print_insn_sop(memaddr, info)
   unsigned  char nibs[4];
   int status;
   int relmask = ~0;
-  r16_opcode_info *op;
+  rce_opcode_info *op;
   int dslot = 0;
   
   status = info->read_memory_func(memaddr, insn, 2, info);

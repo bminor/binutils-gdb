@@ -34,9 +34,9 @@ case "${canon}" in
   h8300*-*-*)		bfd_name=h8300-coff strip_underscore=yes ;;
   h8500-*-*)		bfd_name=h8500-coff strip_underscore=yes ;;
   sh-*-*)		bfd_name=sh-coff strip_underscore=yes ;;
-# start-sanitize-r16
-  r16-*-aout)		bfd_name=r16-aout ;;
-# end-sanitize-r16
+# start-sanitize-rce
+  rce-*-aout)		bfd_name=rce-aout ;;
+# end-sanitize-rce
   hppa*-*-*elf*)	bfd_name=hppa-elf ;;
   hppa*-*-bsd*)		bfd_name=hppabsd ;;
   hppa*-*-hpux*)	bfd_name=hppahpux ;;

@@ -1,15 +1,15 @@
 typedef enum {
 	O0, OT, O1, OC, O2, OI, OB, LS, BR, LI, LR, LJ, OM
-} r16_opclass;
+} rce_opclass;
 
 typedef struct inst
 {	char *name;
 	unsigned short opclass;
 	unsigned short inst;
-} r16_opcode_info;
+} rce_opcode_info;
 
 #ifdef DEFINE_TABLE
-r16_opcode_info r16_table[]={
+rce_opcode_info rce_table[]={
 { "bkpt",	O0,	0x0000 },
 { "sync",	O0,	0x0001 },
 { "rte",	O0,	0x0002 },
