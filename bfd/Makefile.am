@@ -958,7 +958,8 @@ elf32-i386.lo: elf32-i386.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf32-target.h
 elf32-i860.lo: elf32-i860.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h elf32-target.h
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/i860.h $(INCDIR)/elf/reloc-macros.h \
+  elf32-target.h
 elf32-i960.lo: elf32-i960.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/i960.h $(INCDIR)/elf/reloc-macros.h \
@@ -1011,11 +1012,10 @@ elf32-sh.lo: elf32-sh.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
-# Keep this one in sync with the one above
-elf32-sh-lin.lo: elf32-sh.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
-  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
-  elf32-target.h elf32-sh-lin.c
+elf32-sh-lin.lo: elf32-sh-lin.c elf32-sh.c $(INCDIR)/filenames.h \
+  $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h \
+  $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-sparc.lo: elf32-sparc.c $(INCDIR)/filenames.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/sparc.h \
@@ -1046,7 +1046,7 @@ hp300hpux.lo: hp300hpux.c $(INCDIR)/aout/hp300hpux.h \
   aoutx.h $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h libaout.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
   $(INCDIR)/aout/ar.h aout-target.h
-som.lo: som.c $(INCDIR)/filenames.h
+som.lo: som.c $(INCDIR)/alloca-conf.h $(INCDIR)/filenames.h
 i386aout.lo: i386aout.c $(INCDIR)/filenames.h $(INCDIR)/aout/aout64.h \
   libaout.h $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
