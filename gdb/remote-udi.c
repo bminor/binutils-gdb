@@ -583,7 +583,7 @@ udi_wait (status)
 
   timeout = old_timeout;	/* Restore original timeout value */
   immediate_quit = old_immediate_quit;
-  return 0;
+  return inferior_pid;
 }
 
 /********************************************************** UDI_FETCH_REGISTERS
