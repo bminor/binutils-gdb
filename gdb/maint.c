@@ -30,6 +30,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbtypes.h"
 #include "demangle.h"
 #include "gdbcore.h"
+#include "expression.h" /* For language.h */
+#include "language.h"
 
 static void
 maintenance_command PARAMS ((char *, int));

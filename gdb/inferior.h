@@ -36,9 +36,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
  * control variables.
  */
 struct inferior_status {
-  int pc_changed;
   int stop_signal;
-  int stop_pc;
+  CORE_ADDR stop_pc;
   FRAME_ADDR stop_frame_address;
   bpstat stop_bpstat;
   int stop_step;
@@ -55,6 +54,12 @@ struct inferior_status {
   FRAME_ADDR selected_frame_address;
   int selected_level;
   char stop_registers[REGISTER_BYTES];
+
+  /* These are here because if call_function_by_hand has written some
+     registers and then decides to call error(), we better not have changed
+     any registers.  */
+  char registers[REGISTER_BYTES];
+
   int breakpoint_proceeded;
   int restore_stack_info;
   int proceed_to_finish;
@@ -65,6 +70,9 @@ save_inferior_status PARAMS ((struct inferior_status *, int));
 
 extern void
 restore_inferior_status PARAMS ((struct inferior_status *));
+
+extern void set_sigint_trap PARAMS ((void));
+extern void clear_sigint_trap PARAMS ((void));
 
 /* File name for default use for standard in/out in the inferior.  */
 
@@ -98,8 +106,7 @@ generic_mourn_inferior PARAMS ((void));
 extern void
 terminal_ours PARAMS ((void));
 
-extern void
-run_stack_dummy PARAMS ((char*, CORE_ADDR, char [REGISTER_BYTES]));
+extern int run_stack_dummy PARAMS ((CORE_ADDR, char [REGISTER_BYTES]));
 
 extern CORE_ADDR
 read_pc PARAMS ((void));
@@ -171,7 +178,7 @@ void
 detach PARAMS ((int));
 
 extern void
-child_resume PARAMS ((int, int));
+child_resume PARAMS ((int, int, int));
 
 #ifndef PTRACE_ARG3_TYPE
 #define PTRACE_ARG3_TYPE int	/* Correct definition for most systems. */
@@ -260,7 +267,12 @@ extern int stopped_by_random_signal;
 
 /* Range to single step within.
    If this is nonzero, respond to a single-step signal
-   by continuing to step if the pc is in this range.  */
+   by continuing to step if the pc is in this range.
+
+   If step_range_start and step_range_end are both 1, it means to step for
+   a single instruction (FIXME: it might clean up wait_for_inferior in a
+   minor way if this were changed to the address of the instruction and
+   that address plus one.  But maybe not.).  */
 
 extern CORE_ADDR step_range_start; /* Inclusive */
 extern CORE_ADDR step_range_end; /* Exclusive */
@@ -301,11 +313,6 @@ extern int proceed_to_finish;
 
 extern char stop_registers[REGISTER_BYTES];
 
-/* Nonzero if pc has been changed by the debugger
-   since the inferior stopped.  */
-
-extern int pc_changed;
-
 /* Nonzero if the child process in inferior_pid was attached rather
    than forked.  */
 
@@ -338,6 +345,7 @@ extern int attach_flag;
 #define ON_STACK 1
 #define BEFORE_TEXT_END 2
 #define AFTER_TEXT_END 3
+#define AT_ENTRY_POINT 4
 
 #if !defined (CALL_DUMMY_LOCATION)
 #define CALL_DUMMY_LOCATION ON_STACK
@@ -352,14 +360,16 @@ extern CORE_ADDR text_end;
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) \
   ((pc) >= text_end - CALL_DUMMY_LENGTH         \
    && (pc) <= text_end + DECR_PC_AFTER_BREAK)
-#else /* Not before text_end.  */
+#endif /* Before text_end.  */
+
 #if CALL_DUMMY_LOCATION == AFTER_TEXT_END
 extern CORE_ADDR text_end;
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) \
   ((pc) >= text_end   \
    && (pc) <= text_end + CALL_DUMMY_LENGTH + DECR_PC_AFTER_BREAK)
-#else /* On stack.  */
+#endif /* After text_end.  */
 
+#if CALL_DUMMY_LOCATION == ON_STACK
 /* Is the PC in a call dummy?  SP and FRAME_ADDRESS are the bottom and
    top of the stack frame which we are checking, where "bottom" and
    "top" refer to some section of memory which contains the code for
@@ -381,7 +391,14 @@ extern CORE_ADDR text_end;
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) \
   ((sp) INNER_THAN (pc) && (frame_address != 0) && (pc) INNER_THAN (frame_address))
 #endif /* On stack.  */
-#endif /* Not before text_end.  */
+
+#if CALL_DUMMY_LOCATION == AT_ENTRY_POINT
+extern CORE_ADDR
+entry_point_address PARAMS ((void));
+#define PC_IN_CALL_DUMMY(pc, sp, frame_address)			\
+  ((pc) >= entry_point_address ()				\
+   && (pc) <= (entry_point_address () + DECR_PC_AFTER_BREAK))
+#endif /* At entry point.  */
 #endif /* No PC_IN_CALL_DUMMY.  */
 
 #endif	/* !defined (INFERIOR_H) */

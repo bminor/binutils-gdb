@@ -179,13 +179,24 @@ extern void
 process_one_symbol PARAMS ((int, int, CORE_ADDR, char *,
 			    struct section_offsets *, struct objfile *));
 
-extern void
-elfstab_build_psymtabs PARAMS ((struct objfile *objfile,
-				struct section_offsets *section_offsets,
-				int mainline,
-				file_ptr staboff, unsigned int stabsize,
-				file_ptr stabstroffset,
-				unsigned int stabstrsize));
+extern void elfstab_build_psymtabs
+  PARAMS ((struct objfile *objfile,
+	   struct section_offsets *section_offsets,
+	   int mainline,
+	   file_ptr staboff, unsigned int stabsize,
+	   file_ptr stabstroffset,
+	   unsigned int stabstrsize));
+
+extern void coffstab_build_psymtabs
+  PARAMS ((struct objfile *objfile,
+	   struct section_offsets *section_offsets,
+	   int mainline,
+	   file_ptr staboff, unsigned int stabsize,
+	   file_ptr stabstroffset,
+	   unsigned int stabstrsize));
+
+extern void elfstab_offset_sections PARAMS ((struct objfile *,
+					     struct partial_symtab *));
 
 extern void
 pastab_build_psymtabs PARAMS ((struct objfile *, struct section_offsets *,

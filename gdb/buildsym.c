@@ -39,6 +39,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "buildsym.h"		/* Our own declarations */
 #undef	EXTERN
 
+/* For cleanup_undefined_types and finish_global_stabs (somewhat
+   questionable--see comment where we call them).  */
+#include "stabsread.h"
+
 static int
 compare_line_numbers PARAMS ((const void *, const void *));
 

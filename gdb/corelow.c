@@ -28,6 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "target.h"
 #include "gdbcore.h"
+#include "thread.h"
 
 static void
 core_files_info PARAMS ((struct target_ops *));
@@ -299,6 +300,7 @@ ignore (addr, contents)
      CORE_ADDR addr;
      char *contents;
 {
+  return 0;
 }
 
 struct target_ops core_ops = {

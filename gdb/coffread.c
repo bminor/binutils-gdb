@@ -513,7 +513,7 @@ static void
 coff_symfile_init (objfile)
      struct objfile *objfile;
 {
-  asection	*section, *strsection;
+  asection	*section;
   bfd *abfd = objfile->obfd;
 
   /* Allocate struct to keep track of stab reading. */

@@ -30,6 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "gdbcore.h"
 #include "dis-asm.h"
+#include "language.h"
 
 extern char registers[];
 

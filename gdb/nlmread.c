@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdb-stabs.h"
+#include "buildsym.h"
 
 static void
 nlm_new_init PARAMS ((struct objfile *));

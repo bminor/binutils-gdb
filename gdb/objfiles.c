@@ -120,79 +120,88 @@ allocate_objfile (abfd, mapped)
      int mapped;
 {
   struct objfile *objfile = NULL;
-  int fd;
-  PTR md;
-  CORE_ADDR mapto;
 
   mapped |= mapped_symbol_files;
 
 #if !defined(NO_MMALLOC) && defined(HAVE_MMAP)
+  {
 
-  /* If we can support mapped symbol files, try to open/reopen the mapped file
-     that corresponds to the file from which we wish to read symbols.  If the
-     objfile is to be mapped, we must malloc the structure itself using the
-     mmap version, and arrange that all memory allocation for the objfile uses
-     the mmap routines.  If we are reusing an existing mapped file, from which
-     we get our objfile pointer, we have to make sure that we update the
-     pointers to the alloc/free functions in the obstack, in case these
-     functions have moved within the current gdb. */
+    /* If we can support mapped symbol files, try to open/reopen the
+       mapped file that corresponds to the file from which we wish to
+       read symbols.  If the objfile is to be mapped, we must malloc
+       the structure itself using the mmap version, and arrange that
+       all memory allocation for the objfile uses the mmap routines.
+       If we are reusing an existing mapped file, from which we get
+       our objfile pointer, we have to make sure that we update the
+       pointers to the alloc/free functions in the obstack, in case
+       these functions have moved within the current gdb.  */
 
-  fd = open_mapped_file (bfd_get_filename (abfd), bfd_get_mtime (abfd),
-			 mapped);
-  if (fd >= 0)
-    {
-      if (((mapto = map_to_address ()) == 0) ||
-	  ((md = mmalloc_attach (fd, (PTR) mapto)) == NULL))
-	{
-	  close (fd);
-	}
-      else if ((objfile = (struct objfile *) mmalloc_getkey (md, 0)) != NULL)
-	{
-	  /* Update memory corruption handler function addresses. */
-	  init_malloc (md);
-	  objfile -> md = md;
-	  objfile -> mmfd = fd;
-	  /* Update pointers to functions to *our* copies */
-	  obstack_chunkfun (&objfile -> psymbol_obstack, xmmalloc);
-	  obstack_freefun (&objfile -> psymbol_obstack, mfree);
-	  obstack_chunkfun (&objfile -> symbol_obstack, xmmalloc);
-	  obstack_freefun (&objfile -> symbol_obstack, mfree);
-	  obstack_chunkfun (&objfile -> type_obstack, xmmalloc);
-	  obstack_freefun (&objfile -> type_obstack, mfree);
-	  /* If already in objfile list, unlink it. */
-	  unlink_objfile (objfile);
-	  /* Forget things specific to a particular gdb, may have changed. */
-	  objfile -> sf = NULL;
-	}
-      else
-	{
-	  /* Set up to detect internal memory corruption.  MUST be done before
-	     the first malloc.  See comments in init_malloc() and mmcheck(). */
-	  init_malloc (md);
-	  objfile = (struct objfile *) xmmalloc (md, sizeof (struct objfile));
-	  memset (objfile, 0, sizeof (struct objfile));
-	  objfile -> md = md;
-	  objfile -> mmfd = fd;
-	  objfile -> flags |= OBJF_MAPPED;
-	  mmalloc_setkey (objfile -> md, 0, objfile);
-	  obstack_specify_allocation_with_arg (&objfile -> psymbol_obstack,
-					       0, 0, xmmalloc, mfree,
-					       objfile -> md);
-	  obstack_specify_allocation_with_arg (&objfile -> symbol_obstack,
-					       0, 0, xmmalloc, mfree,
-					       objfile -> md);
-	  obstack_specify_allocation_with_arg (&objfile -> type_obstack,
-					       0, 0, xmmalloc, mfree,
-					       objfile -> md);
-	}
-    }
+    int fd;
 
-  if (mapped && (objfile == NULL))
-    {
-      warning ("symbol table for '%s' will not be mapped",
-	       bfd_get_filename (abfd));
-    }
+    fd = open_mapped_file (bfd_get_filename (abfd), bfd_get_mtime (abfd),
+			   mapped);
+    if (fd >= 0)
+      {
+	CORE_ADDR mapto;
+	PTR md;
 
+	if (((mapto = map_to_address ()) == 0) ||
+	    ((md = mmalloc_attach (fd, (PTR) mapto)) == NULL))
+	  {
+	    close (fd);
+	  }
+	else if ((objfile = (struct objfile *) mmalloc_getkey (md, 0)) != NULL)
+	  {
+	    /* Update memory corruption handler function addresses. */
+	    init_malloc (md);
+	    objfile -> md = md;
+	    objfile -> mmfd = fd;
+	    /* Update pointers to functions to *our* copies */
+	    obstack_chunkfun (&objfile -> psymbol_obstack, xmmalloc);
+	    obstack_freefun (&objfile -> psymbol_obstack, mfree);
+	    obstack_chunkfun (&objfile -> symbol_obstack, xmmalloc);
+	    obstack_freefun (&objfile -> symbol_obstack, mfree);
+	    obstack_chunkfun (&objfile -> type_obstack, xmmalloc);
+	    obstack_freefun (&objfile -> type_obstack, mfree);
+	    /* If already in objfile list, unlink it. */
+	    unlink_objfile (objfile);
+	    /* Forget things specific to a particular gdb, may have changed. */
+	    objfile -> sf = NULL;
+	  }
+	else
+	  {
+
+	    /* Set up to detect internal memory corruption.  MUST be
+	       done before the first malloc.  See comments in
+	       init_malloc() and mmcheck().  */
+
+	    init_malloc (md);
+
+	    objfile = (struct objfile *)
+	      xmmalloc (md, sizeof (struct objfile));
+	    memset (objfile, 0, sizeof (struct objfile));
+	    objfile -> md = md;
+	    objfile -> mmfd = fd;
+	    objfile -> flags |= OBJF_MAPPED;
+	    mmalloc_setkey (objfile -> md, 0, objfile);
+	    obstack_specify_allocation_with_arg (&objfile -> psymbol_obstack,
+						 0, 0, xmmalloc, mfree,
+						 objfile -> md);
+	    obstack_specify_allocation_with_arg (&objfile -> symbol_obstack,
+						 0, 0, xmmalloc, mfree,
+						 objfile -> md);
+	    obstack_specify_allocation_with_arg (&objfile -> type_obstack,
+						 0, 0, xmmalloc, mfree,
+						 objfile -> md);
+	  }
+      }
+
+    if (mapped && (objfile == NULL))
+      {
+	warning ("symbol table for '%s' will not be mapped",
+		 bfd_get_filename (abfd));
+      }
+  }
 #else	/* defined(NO_MMALLOC) || !defined(HAVE_MMAP) */
 
   if (mapped)
@@ -304,8 +313,6 @@ void
 free_objfile (objfile)
      struct objfile *objfile;
 {
-  int mmfd;
-
   /* First do any symbol file specific actions required when we are
      finished with a particular symbol file.  Note that if the objfile
      is using reusable symbol information (via mmalloc) then each of
@@ -362,6 +369,8 @@ free_objfile (objfile)
     {
       /* Remember the fd so we can close it.  We can't close it before
 	 doing the detach, and after the detach the objfile is gone. */
+      int mmfd;
+
       mmfd = objfile -> mmfd;
       mmalloc_detach (objfile -> md);
       objfile = NULL;

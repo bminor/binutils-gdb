@@ -1,3 +1,41 @@
+Thu Oct 21 12:23:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (c-exp.tab.o): Remove notice about shift/reduce conflicts
+	which no longer occur.
+
+	gcc -Wall lint:
+	* findvar.c (symbol_read_needs_frame), corelow.c (ignore),
+	inflow.c (gdb_has_a_terminal): Make sure to return a value.
+	* regex.h: Declare re_set_syntax.
+	* printcmd.c: Include valprint.h.
+	* infcmd.c, exec.c, maint.c, core.c: Include language.h.
+	* maint.c: Include expression.h.
+	* infrun.c, fork-child.c, corelow.c, inflow.c: Include thread.h.
+	* inftarg.c: Include command.h.
+	* coredep.c: Include value.h.
+	* c-exp.y, m2-exp.y, ch-exp.y: Include bfd.h, symfile.h and objfiles.h.
+	* ch-typeprint.c: Include typeprint.h.
+	* ch-valprint.c: Include c-lang.h.
+	* nlmread.c: Include buildsym.h.
+	* environ.c: Include gdbcore.h.  Only include defs.h once.
+	(set_in_environ): Cast const char * to char * when passing to
+	set_gnutarget.
+	Remove unused variables:
+	* printcmd.c (printf_command): args_to_vprintf.
+	* coffread.c (coff_symfile_init): strsection.
+	Move variables to within the #ifdefs where they are used:
+	* symtab.c (gdb_mangle_name): opname.
+	* inftarg.c (child_attach): pid and exec_file.
+	* inftarg.c (child_detach): siggnal.
+	* objfiles.c (allocate_objfile): mapto, md, and fd.
+	* objfiles.c (free_objfile): mmfd.
+	* infrun.c (wait_for_inferior): Include BPSTAT_WHAT_LAST in switch.
+	* infrun.c (wait_for_inferior): Remove unused same_pid label.
+	* inferior.h: Declare set_sigint_trap and clear_sigint_trap.
+	* parser-defs.h: Declare write_exp_elt_block.
+	* stabsread.h: Declare elfstab_offset_sections and
+	coffstab_build_psymtabs.
+
 Thu Oct 21 12:05:08 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	Patch from Jeff Law:

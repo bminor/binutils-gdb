@@ -24,7 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "wait.h"
 #include "gdbcore.h"
-
+#include "command.h"
 #include <signal.h>
 
 static void
@@ -32,7 +32,7 @@ child_prepare_to_store PARAMS ((void));
 
 #ifndef CHILD_WAIT
 static int
-child_wait PARAMS ((int *));
+child_wait PARAMS ((int, int *));
 #endif /* CHILD_WAIT */
 
 static void
@@ -110,35 +110,38 @@ child_attach (args, from_tty)
      char *args;
      int from_tty;
 {
-  char *exec_file;
-  int pid;
-
   if (!args)
     error_no_arg ("process-id to attach");
 
 #ifndef ATTACH_DETACH
   error ("Can't attach to a process on this machine.");
 #else
-  pid = atoi (args);
+  {
+    char *exec_file;
+    int pid;
 
-  if (pid == getpid())		/* Trying to masturbate? */
-    error ("I refuse to debug myself!");
+    pid = atoi (args);
 
-  if (from_tty)
-    {
-      exec_file = (char *) get_exec_file (0);
+    if (pid == getpid())		/* Trying to masturbate? */
+      error ("I refuse to debug myself!");
 
-      if (exec_file)
-	printf ("Attaching to program `%s', %s\n", exec_file, target_pid_to_str (pid));
-      else
-	printf ("Attaching to %s\n", target_pid_to_str (pid));
+    if (from_tty)
+      {
+	exec_file = (char *) get_exec_file (0);
 
-      fflush (stdout);
-    }
+	if (exec_file)
+	  printf ("Attaching to program `%s', %s\n", exec_file,
+		  target_pid_to_str (pid));
+	else
+	  printf ("Attaching to %s\n", target_pid_to_str (pid));
 
-  attach (pid);
-  inferior_pid = pid;
-  push_target (&child_ops);
+	fflush (stdout);
+      }
+
+    attach (pid);
+    inferior_pid = pid;
+    push_target (&child_ops);
+  }
 #endif  /* ATTACH_DETACH */
 }
 
@@ -156,26 +159,28 @@ child_detach (args, from_tty)
      char *args;
      int from_tty;
 {
-  int siggnal = 0;
-
 #ifdef ATTACH_DETACH
-  if (from_tty)
-    {
-      char *exec_file = get_exec_file (0);
-      if (exec_file == 0)
-	exec_file = "";
-      printf ("Detaching from program: %s %s\n", exec_file,
-	      target_pid_to_str (inferior_pid));
-      fflush (stdout);
-    }
-  if (args)
-    siggnal = atoi (args);
-  
-  detach (siggnal);
-  inferior_pid = 0;
-  unpush_target (&child_ops);		/* Pop out of handling an inferior */
+  {
+    int siggnal = 0;
+
+    if (from_tty)
+      {
+	char *exec_file = get_exec_file (0);
+	if (exec_file == 0)
+	  exec_file = "";
+	printf ("Detaching from program: %s %s\n", exec_file,
+		target_pid_to_str (inferior_pid));
+	fflush (stdout);
+      }
+    if (args)
+      siggnal = atoi (args);
+
+    detach (siggnal);
+    inferior_pid = 0;
+    unpush_target (&child_ops);
+  }
 #else
-    error ("This version of Unix does not support detaching a process.");
+  error ("This version of Unix does not support detaching a process.");
 #endif
 }
 

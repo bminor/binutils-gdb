@@ -25,6 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "wait.h"
 #include "gdbcore.h"
 #include "terminal.h"
+#include "thread.h"
 
 #include <signal.h>
 

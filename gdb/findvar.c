@@ -555,6 +555,7 @@ symbol_read_needs_frame (sym)
     case LOC_OPTIMIZED_OUT:
       return 0;
     }
+  return 1;
 }
 
 /* Given a struct symbol for a variable,
@@ -896,8 +897,12 @@ value_from_register (type, regnum, frame)
 	  /* eg a variable of type `float' in a 68881 register
 	     with raw type `extended' and virtual type `double'.
 	     Fetch it as a `double' and then convert to `float'.  */
+	  /* FIXME: This value will be not_lval, which means we can't assign
+	     to it.  Probably the right fix is to do the cast on a temporary
+	     value, and just copy the VALUE_CONTENTS over.  */
 	  v = allocate_value (REGISTER_VIRTUAL_TYPE (regnum));
-	  memcpy (VALUE_CONTENTS_RAW (v), virtual_buffer, len);
+	  memcpy (VALUE_CONTENTS_RAW (v), virtual_buffer,
+		  REGISTER_VIRTUAL_SIZE (regnum));
 	  v = value_cast (type, v);
 	}
       else

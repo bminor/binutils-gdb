@@ -85,32 +85,25 @@ union type_stack_elt {
 union type_stack_elt *type_stack;
 int type_stack_depth, type_stack_size;
 
-extern void
-write_exp_elt PARAMS ((union exp_element));
+extern void write_exp_elt PARAMS ((union exp_element));
 
-extern void
-write_exp_elt_opcode PARAMS ((enum exp_opcode));
+extern void write_exp_elt_opcode PARAMS ((enum exp_opcode));
 
-extern void
-write_exp_elt_sym PARAMS ((struct symbol *));
+extern void write_exp_elt_sym PARAMS ((struct symbol *));
 
-extern void
-write_exp_elt_longcst PARAMS ((LONGEST));
+extern void write_exp_elt_longcst PARAMS ((LONGEST));
 
-extern void
-write_exp_elt_dblcst PARAMS ((double));
+extern void write_exp_elt_dblcst PARAMS ((double));
 
-extern void
-write_exp_elt_type PARAMS ((struct type *));
+extern void write_exp_elt_type PARAMS ((struct type *));
 
-extern void
-write_exp_elt_intern PARAMS ((struct internalvar *));
+extern void write_exp_elt_intern PARAMS ((struct internalvar *));
 
-extern void
-write_exp_string PARAMS ((struct stoken));
+extern void write_exp_string PARAMS ((struct stoken));
 
-extern void
-write_exp_bitstring PARAMS ((struct stoken));
+extern void write_exp_bitstring PARAMS ((struct stoken));
+
+extern void write_exp_elt_block PARAMS ((struct block *));
 
 extern void
 start_arglist PARAMS ((void));

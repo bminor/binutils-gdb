@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "target.h"
+#include "thread.h"
 
 #include <signal.h>
 
@@ -583,8 +584,6 @@ switch_thread:
 	    }
 	}
 
-same_pid:
-
 #ifdef NO_SINGLE_STEP
       if (one_stepped)
 	single_step (0);	/* This actually cleans up the ss */
@@ -845,6 +844,9 @@ same_pid:
 	       cleanup chain, so no need to worry about it here.  */
 	    goto stop_stepping;
 
+	  case BPSTAT_WHAT_LAST:
+	    /* Not a real code, but listed here to shut up gcc -Wall.  */
+
 	  case BPSTAT_WHAT_KEEP_CHECKING:
 	    break;
 	  }
@@ -1001,7 +1003,7 @@ same_pid:
 	      /* If we end up in certain places, it means we did a subroutine
 		 call.  I'm not completely sure this is necessary now that we
 		 have the above checks with stop_func_start (and now that
-		 find_pc_partial_function is pickier.  */
+		 find_pc_partial_function is pickier).  */
 	      || IN_SOLIB_TRAMPOLINE (stop_pc, stop_func_name)
 
 	      /* If none of the above apply, it is a jump within a function,

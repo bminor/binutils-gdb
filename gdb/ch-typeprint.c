@@ -31,6 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "language.h"
 #include "demangle.h"
 #include "ch-lang.h"
+#include "typeprint.h"
 
 #include <string.h>
 #include <errno.h>

@@ -26,6 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "value.h"
 #include "language.h"
 #include "demangle.h"
+#include "c-lang.h" /* For c_val_print */
 
 static void
 chill_print_value_fields PARAMS ((struct type *, char *, FILE *, int, int,
