@@ -1,3 +1,11 @@
+2003-05-13  Hans-Peter Nilsson  <hp@axis.com>
+
+	* read.c (old_buffer, old_input, old_limit): Remove variables.
+ 	(read_a_source_file): Delete label contin.
+	<handling #APP/#NO_APP>: Use an "sb" to push #APP expansion into
+	input as with macros, instead of in separate old_* variables.
+	Zero-terminate string being scrubbed.
+
 2003-05-12  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-xstormy16.c (skipping_fptr): New local variable.

@@ -168,10 +168,6 @@ static char *buffer_limit;	/*->1 + last char in buffer.  */
    internals manual.  */
 int target_big_endian = TARGET_BYTES_BIG_ENDIAN;
 
-static char *old_buffer;	/* JF a hack.  */
-static char *old_input;
-static char *old_limit;
-
 /* Variables for handling include file directory table.  */
 
 /* Table of pointers to directories to search for .include's.  */
@@ -533,9 +529,7 @@ read_a_source_file (name)
   while ((buffer_limit = input_scrub_next_buffer (&input_line_pointer)) != 0)
     {				/* We have another line to parse.  */
       know (buffer_limit[-1] == '\n');	/* Must have a sentinel.  */
-    contin:			/* JF this goto is my fault I admit it.
-				   Someone brave please re-write the whole
-				   input section here?  Pleeze???  */
+
       while (input_line_pointer < buffer_limit)
 	{
 	  /* We have more of this buffer to parse.  */
@@ -953,6 +947,7 @@ read_a_source_file (name)
 
 	  if (c && strchr (line_comment_chars, c))
 	    {			/* Its a comment.  Better say APP or NO_APP.  */
+	      sb sbuf;
 	      char *ends;
 	      char *new_buf;
 	      char *new_tmp;
@@ -965,6 +960,7 @@ read_a_source_file (name)
 		continue;	/* We ignore it */
 	      s += 4;
 
+	      sb_new (&sbuf);
 	      ends = strstr (s, "#NO_APP\n");
 
 	      if (!ends)
@@ -1026,7 +1022,7 @@ read_a_source_file (name)
 
 		  if (size < space)
 		    {
-		      new_tmp += size;
+		      new_tmp[size] = 0;
 		      break;
 		    }
 
@@ -1037,13 +1033,19 @@ read_a_source_file (name)
 
 	      if (tmp_buf)
 		free (tmp_buf);
-	      old_buffer = buffer;
-	      old_input = input_line_pointer;
-	      old_limit = buffer_limit;
-	      buffer = new_buf;
-	      input_line_pointer = new_buf;
-	      buffer_limit = new_tmp;
 
+	      /* We've "scrubbed" input to the preferred format.  In the
+		 process we may have consumed the whole of the remaining
+		 file (and included files).  We handle this formatted
+		 input similar to that of macro expansion, letting
+		 actual macro expansion (possibly nested) and other
+		 input expansion work.  Beware that in messages, line
+		 numbers and possibly file names will be incorrect.  */
+	      sb_add_string (&sbuf, new_buf);
+	      input_scrub_include_sb (&sbuf, input_line_pointer, 0);
+	      sb_kill (&sbuf);
+	      buffer_limit = input_scrub_next_buffer (&input_line_pointer);
+	      free (new_buf);
 	      continue;
 	    }
 
@@ -1061,20 +1063,6 @@ read_a_source_file (name)
 #ifdef md_after_pass_hook
       md_after_pass_hook ();
 #endif
-
-      if (old_buffer)
-	{
-	  free (buffer);
-	  bump_line_counters ();
-	  if (old_input != 0)
-	    {
-	      buffer = old_buffer;
-	      input_line_pointer = old_input;
-	      buffer_limit = old_limit;
-	      old_buffer = 0;
-	      goto contin;
-	    }
-	}
     }
 
  quit:
