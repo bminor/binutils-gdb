@@ -1,5 +1,14 @@
 2001-12-06  Andrew Cagney  <ac131313@redhat.com>
 
+	* defs.h: Do not include "mmalloc.h".
+	(mcalloc, mmalloc, mrealloc, mfree): Delete declaration.
+	* objfiles.c: Include "mmalloc.h".
+	* utils.c: Include "mmalloc.h".
+	(mmalloc, mfree, mrealloc, mmalloc): Make static, change PTR to
+	void pointer.
+	
+2001-12-06  Andrew Cagney  <ac131313@redhat.com>
+
 	* regcache.c (store_register, fetch_register): Only use
 	fetch/store pseudo-register when function is present.  Assume
 	target can handle all registers.

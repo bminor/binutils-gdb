@@ -56,6 +56,10 @@
 
 #include <readline/readline.h>
 
+#ifdef USE_MMALLOC
+#include "mmalloc.h"
+#endif
+
 #ifndef MALLOC_INCOMPATIBLE
 #ifdef NEED_DECLARATION_MALLOC
 extern PTR malloc ();
@@ -893,14 +897,14 @@ request_quit (int signo)
 /* NOTE: These must use PTR so that their definition matches the
    declaration found in "mmalloc.h". */
 
-PTR
-mmalloc (PTR md, size_t size)
+static void *
+mmalloc (void *md, size_t size)
 {
   return malloc (size); /* NOTE: GDB's only call to malloc() */
 }
 
-PTR
-mrealloc (PTR md, PTR ptr, size_t size)
+static void *
+mrealloc (void *md, void *ptr, size_t size)
 {
   if (ptr == 0)			/* Guard against old realloc's */
     return mmalloc (md, size);
@@ -908,14 +912,14 @@ mrealloc (PTR md, PTR ptr, size_t size)
     return realloc (ptr, size); /* NOTE: GDB's only call to ralloc() */
 }
 
-PTR
-mcalloc (PTR md, size_t number, size_t size)
+static void *
+mcalloc (void *md, size_t number, size_t size)
 {
   return calloc (number, size); /* NOTE: GDB's only call to calloc() */
 }
 
-void
-mfree (PTR md, PTR ptr)
+static void
+mfree (void *md, void *ptr)
 {
   free (ptr); /* NOTE: GDB's only call to free() */
 }

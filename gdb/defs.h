@@ -59,10 +59,6 @@
 
 #include "progress.h"
 
-#ifdef USE_MMALLOC
-#include "mmalloc.h"
-#endif
-
 /* For BFD64 and bfd_vma.  */
 #include "bfd.h"
 
@@ -1028,16 +1024,6 @@ extern char *savestring (const char *, size_t);
 extern char *msavestring (void *, const char *, size_t);
 
 extern char *mstrsave (void *, const char *);
-
-#if !defined (USE_MMALLOC)
-/* NOTE: cagney/2000-03-04: The mmalloc functions need to use PTR
-   rather than void* so that they are consistent with the delcaration
-   in ../mmalloc/mmalloc.h. */
-extern PTR mcalloc (PTR, size_t, size_t);
-extern PTR mmalloc (PTR, size_t);
-extern PTR mrealloc (PTR, PTR, size_t);
-extern void mfree (PTR, PTR);
-#endif
 
 /* Robust versions of same.  Throw an internal error when no memory,
    guard against stray NULL arguments. */

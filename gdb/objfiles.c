@@ -43,6 +43,8 @@
 
 #if defined(USE_MMALLOC) && defined(HAVE_MMAP)
 
+#include "mmalloc.h"
+
 static int open_existing_mapped_file (char *, long, int);
 
 static int open_mapped_file (char *filename, long mtime, int flags);
