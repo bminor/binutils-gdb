@@ -1,3 +1,19 @@
+Mon Jun 15 08:47:43 1992  Michael Tiemann  (tiemann@rtl.cygnus.com)
+
+	* configure.in (my_target): Accept m680?0 for wrs as vxworks68.
+	Also deleted an unreachable path to wrs.
+
+Wed May 27 23:24:19 1992  Michael Tiemann  (tiemann@rtl.cygnus.com)
+
+	* Makefile.in (install): use -d test for $tooldir before
+	installing ld there so that $tooldir can be inherited from
+	top-level Makefile.
+
+Wed May 27 16:56:48 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* ldlang.c:  Two non-substantial changes for the sake of
+	the old Portable C Compiler.
+
 Wed May 27 15:15:58 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
         * ldgram.y, ldlex.l: parse ABSOLUTE

@@ -20,7 +20,6 @@ mips)
 	sgi)	my_host=irix3 ;;
 	esac
 	;;
-
 m88k)
 	case "${host_vendor}" in
 	motorola)
@@ -127,16 +126,18 @@ wrs)
 	case ${target_cpu} in
 	i960) my_target=vxworks960 ;;
 	m68k) my_target=vxworks68;;
+	m680[01234]0) my_target=vxworks68;;
 	esac
 	;;
 tandem)
-	my_target=sun3
+	my_target=st2000
 	;;
 *)
 	case ${target_cpu} in
 	i386)	my_target=go32 ;;
 	m88k)	my_target=m88k-bcs ;;
 	a29k)	case ${target_os} in
+		udi) my_target=sa29200 ;;
 		ebmon) my_target=ebmon29k ;;
 		*) my_target=coff-a29k ;;
 		esac
@@ -151,7 +152,6 @@ tandem)
 		sony)	my_target=news ;;
 		hp)	my_target=hp300bsd ;;
 
-		wrs)	my_target=sun3 ;;
 		*)
 			echo "Unknown m68k target vendor:" ${target_vendor}
 			exit 1
