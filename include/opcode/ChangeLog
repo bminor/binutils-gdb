@@ -1,3 +1,16 @@
+start-sanitize-arc
+Thu Feb  9 18:55:59 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* arc.h (ARC_MACH_{BASE,HOST,GRAPHICS,AUDIO}): Define.
+	(ARC_MACH_MASK, ARC_OPCODE_MACH, ARC_OPVAL_MACH): Define.
+	(ARC_HAVE_MULT_SHIFT): Delete.
+	(ARC_HAVE_MACH): Define.
+	(struct arc_opcode): New field `flags'.
+	(struct arc_operand_value): Ditto.
+	(arc_opcode_supported): New function.
+	(arc_opval_supported): Ditto.
+end-sanitize-arc
+
 Mon Feb  6 10:35:23 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* i386.h: added cpuid instruction , and dr[0-7] aliases for the
