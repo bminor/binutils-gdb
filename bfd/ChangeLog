@@ -1,3 +1,8 @@
+2003-03-21  DJ Delorie  <dj@redhat.com>
+
+	* elf32-xstormy16.c (elf32_xstormy16_relocate_section): Call
+	_bfd_elf_rela_local_sym.
+
 2003-03-20  H.J. Lu <hjl@gnu.org>
 
 	* elfxx-ia64.c (elfNN_ia64_relax_section): Don't try relax for
