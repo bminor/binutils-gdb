@@ -1,3 +1,7 @@
+1999-10-12  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (i386_index_check): Correct #endif location.
+
 Mon Oct 11 14:02:40 1999  Geoffrey Keating  <geoffk@cygnus.com>
 
 	* as.c (show_usage): Document new options.

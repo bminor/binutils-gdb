@@ -3067,11 +3067,11 @@ i386_index_check (operand_string)
 	  fudged = 1;
 	  goto tryprefix;
 	}
-#endif
       if (fudged)
 	as_bad (_("`%s' is not a valid base/index expression"),
 		operand_string);
       else
+#endif
 	as_bad (_("`%s' is not a valid %s bit base/index expression"),
 		operand_string,
 		flag_16bit_code ^ (i.prefix[ADDR_PREFIX] != 0) ? "16" : "32");
