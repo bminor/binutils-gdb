@@ -139,7 +139,7 @@ extern int gdb_context;
 extern int  Gdbtk_Init(Tcl_Interp *interp);
 extern void gdbtk_stop_timer PARAMS ((void));
 extern void gdbtk_start_timer PARAMS ((void));
-extern void gdbtk_ignorable_warning PARAMS ((const char *));
+extern void gdbtk_ignorable_warning PARAMS ((const char *,const char *));
 extern void gdbtk_interactive PARAMS ((void));
 extern void x_event PARAMS ((int));
 extern int gdbtk_two_elem_cmd PARAMS ((char *, char *));
@@ -150,11 +150,7 @@ extern void close_bfds ();
 #endif /* _WIN32 */
 
 extern void
-#ifdef ANSI_PROTOTYPES
-TclDebug (const char *fmt, ...);
-#else
-TclDebug (va_alist);
-#endif
+TclDebug (char level, const char *fmt, ...);
 
 /* A convenience macro for getting the demangled source names,
    regardless of the user's mangling style. */

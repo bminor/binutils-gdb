@@ -196,32 +196,38 @@ close_bfds ()
  */
 
 void
-#ifdef ANSI_PROTOTYPES
-TclDebug (const char *fmt, ...)
-#else
-TclDebug (va_alist)
-     va_dcl
-#endif
+TclDebug (char level, const char *fmt, ...)
 {
   va_list args;
-  char buf[512], *v[2], *merge;
-
-#ifdef ANSI_PROTOTYPES
+  char buf[512], *v[3], *merge, *priority;
+  
+  switch (level)
+    {
+    case 'W':
+      priority = "W";
+      break;
+    case 'E':
+      priority = "E";
+      break;
+    case 'X':
+      priority = "X";
+      break;
+    default:
+      priority = "I";
+    }
+  
   va_start (args, fmt);
-#else
-  char *fmt;
-  va_start (args);
-  fmt = va_arg (args, char *);
-#endif
 
-  v[0] = "debug";
-  v[1] = buf;
+  v[0] = "dbug";
+  v[1] = priority;
+  v[2] = buf;
 
   vsprintf (buf, fmt, args);
   va_end (args);
 
-  merge = Tcl_Merge (2, v);
-  Tcl_Eval (gdbtk_interp, merge);
+  merge = Tcl_Merge (3, v);
+  if (Tcl_Eval (gdbtk_interp, merge) != TCL_OK)
+    Tcl_BackgroundError(gdbtk_interp);
   Tcl_Free (merge);
 }
 

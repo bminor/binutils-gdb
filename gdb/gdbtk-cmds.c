@@ -243,7 +243,6 @@ static void get_register_name PARAMS ((int, void *));
 static int map_arg_registers PARAMS ((int, Tcl_Obj *CONST [], void (*) (int, void *), void *));
 static int perror_with_name_wrapper PARAMS ((PTR args));
 static void register_changed_p PARAMS ((int, void *));
-void TclDebug PARAMS ((const char *fmt, ...));
 static int wrapped_call (PTR opaque_args);
 static void get_frame_name PARAMS ((Tcl_Interp *interp, Tcl_Obj *list, struct frame_info *fi));
 
@@ -2735,9 +2734,12 @@ gdb_loadfile (clientData, interp, objc, objv)
       mtime = bfd_get_mtime(exec_bfd);
  
   if (mtime && mtime < st.st_mtime)
-     gdbtk_ignorable_warning("Source file is more recent than executable.\n");
-
-
+    {
+      gdbtk_ignorable_warning("file_times",\
+			      "Source file is more recent than executable.\n");
+    }
+  
+  
   /* Source linenumbers don't appear to be in order, and a sort is */
   /* too slow so the fastest solution is just to allocate a huge */
   /* array and set the array entry for each linenumber */

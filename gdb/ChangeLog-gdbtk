@@ -1,3 +1,24 @@
+1999-02-09  Martin Hunt  <hunt@cygnus.com>
+
+	* gdbtk-hooks.c: Remove gdbtk_ignorable_warning prototype.
+	It is in gdbtk.h.
+	(report_error): New function. Displays debugging information
+	if a hook function fails.  All hook functions should probably
+	call this.
+	(gdbtk_warning): Call report_error() if there is a problem.
+	(gdbtk_register_changed): Call report_error() if there is a problem.
+	(gdbtk_memory_changed): Call report_error() if there is a problem.
+	(gdbtk_ignorable_warning): Pass along class argument. If there
+	is a problem, call report_error().
+	
+	* gdbtk-cmds.c: Remove TclDebug prototype.  It is in gdbtk.h.
+	(gdb_loadfile): Add class name to gdbtk_ignorable_warning call.
+
+	* gdbtk.c (TclDebug): Add "priority" argument. Calls "dbug"
+	instead of "debug". Removed non-ANSI ifdefs.
+
+	* gdbtk.h: Fixed protos for gdbtk_ignorable_warning and TclDebug.
+	
 1999-02-05  James Ingham  <jingham@cygnus.com>
 
 	* Makefile.in: Add GDBTK_CFLAGS - this is now used to hold

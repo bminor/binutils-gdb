@@ -94,10 +94,9 @@ static void   gdbtk_exec_file_display PARAMS ((char *));
 static void   tk_command_loop PARAMS ((void));
 static void   gdbtk_call_command PARAMS ((struct cmd_list_element *, char *, int));
 static int    gdbtk_wait PARAMS ((int, struct target_waitstatus *));
-       void   x_event PARAMS ((int));
+void   x_event PARAMS ((int));
 static int    gdbtk_query PARAMS ((const char *, va_list));
 static void   gdbtk_warning PARAMS ((const char *, va_list));
-void   gdbtk_ignorable_warning PARAMS ((const char *));
 static char*  gdbtk_readline PARAMS ((char *));
 static void
 #ifdef ANSI_PROTOTYPES
@@ -303,8 +302,25 @@ gdbtk_warning (warning, args)
   char buf[200];
 
   vsprintf (buf, warning, args);
-  gdbtk_two_elem_cmd ("gdbtk_tcl_warning", buf);
+  if (gdbtk_two_elem_cmd ("gdbtk_tcl_warning", buf) != TCL_OK)
+    report_error();
+}
 
+
+/* Error-handling function for all hooks */
+/* Hooks are not like tcl functions, they do not simply return */
+/* TCL_OK or TCL_ERROR.  Also, the calling function typically */
+/* doesn't care about errors in the hook functions.  Therefore */
+/* after every hook function, report_error should be called. */
+/* report_error can just call Tcl_BackgroundError() which will */
+/* pop up a messagebox, or it can silently log the errors through */
+/* the gdbtk dbug command.  */
+
+static void
+report_error ()
+{
+  TclDebug ('E',Tcl_GetVar(gdbtk_interp,"errorInfo",TCL_GLOBAL_ONLY));
+  /*  Tcl_BackgroundError(gdbtk_interp); */
 }
 
 /*
@@ -313,19 +329,22 @@ gdbtk_warning (warning, args)
  */
 
 void
-gdbtk_ignorable_warning (warning)
+gdbtk_ignorable_warning (class, warning)
+     const char *class;
      const char *warning;
 {
   char buf[512];
-  sprintf (buf, warning);
-  gdbtk_two_elem_cmd ("gdbtk_tcl_ignorable_warning", buf);
+  sprintf (buf, "gdbtk_tcl_ignorable_warning {%s} {%s}", class, warning);
+  if (Tcl_Eval (gdbtk_interp, buf) != TCL_OK)
+    report_error();
 }
 
 static void
 gdbtk_register_changed(regno)
      int regno;
 {
-  Tcl_Eval (gdbtk_interp, "gdbtk_register_changed");
+  if (Tcl_Eval (gdbtk_interp, "gdbtk_register_changed") != TCL_OK)
+    report_error();
 }
 
 static void
@@ -333,7 +352,8 @@ gdbtk_memory_changed(addr, len)
      CORE_ADDR addr;
      int len;
 {
-  Tcl_Eval (gdbtk_interp, "gdbtk_memory_changed");
+  if (Tcl_Eval (gdbtk_interp, "gdbtk_memory_changed") != TCL_OK)
+    report_error();
 }
 
 
