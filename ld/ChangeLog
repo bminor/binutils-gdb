@@ -1,3 +1,8 @@
+2000-11-07  Jim Wilson  <wilson@redhat.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): New local
+	hold_sdata.  If SEC_SMALL_DATA set, set place to hold_sdata.
+
 2000-11-06  Nick Clifton  <nickc@redhat.com>
 
 	* ld.texinfo: Add GNU Free Documentation License.

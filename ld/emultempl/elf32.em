@@ -1008,6 +1008,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   static struct orphan_save hold_bss;
   static struct orphan_save hold_rel;
   static struct orphan_save hold_interp;
+  static struct orphan_save hold_sdata;
   static int count = 1;
   struct orphan_save *place;
   lang_statement_list_type *old;
@@ -1071,6 +1072,9 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   else if ((s->flags & SEC_HAS_CONTENTS) == 0
 	   && HAVE_SECTION (hold_bss, ".bss"))
     place = &hold_bss;
+  else if ((s->flags & SEC_SMALL_DATA) != 0
+	   && HAVE_SECTION (hold_sdata, ".sdata"))
+    place = &hold_sdata;
   else if ((s->flags & SEC_READONLY) == 0
 	   && HAVE_SECTION (hold_data, ".data"))
     place = &hold_data;
