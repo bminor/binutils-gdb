@@ -1,3 +1,9 @@
+Fri Sep 17 04:41:17 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+        * gdb.stabs/ecoff.mt:  Remove STABSCC hack.
+        * gdb.stabs/weird.exp:  Handle the case where weird.o is compiled
+	by mips cc and contains no stabs entries.
+
 Thu Sep 16 17:22:12 1993  Rob Savoye  (rob@darkstar.cygnus.com)
 
 	* config/vx-gdb.exp: Use fake device to load files rather than
