@@ -1,5 +1,9 @@
 2004-09-05  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* config/sparclet.exp: Removed.
+
+2004-09-05  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* config/udi.exp: Removed.
 
 2004-09-02  Michael Chastain  <mec.gnu@mindspring.com>
