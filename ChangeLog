@@ -1,3 +1,8 @@
+Wed Aug 31 13:52:08 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* configure.in (alpha-dec-osf*): Use osf*, not osf1*.  Don't
+	configure ld--it works, but it doesn't support shared libraries.
+
 Sun Aug 28 18:13:45 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* config.guess (*-unknown-freebsd*):  Get rid of possible
