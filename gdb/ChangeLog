@@ -1,3 +1,8 @@
+Mon May  3 19:20:20 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* ser-unix.c (wait_for):  New routine to handle read timeouts,
+	etc.  Uses poll() if HAVE_TERMIO[S] is defined, select() otherwise.
+
 Mon May  3 13:52:08 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* mips-pinsn.c (print_insn): Return value.
