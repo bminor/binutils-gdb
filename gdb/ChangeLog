@@ -1,3 +1,13 @@
+Mon Dec 23 02:25:58 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mips-tdep.c (mips_find_saved_regs):  If a frame has been
+	interrupted by a signal, figure out whether the registers that
+	the proc_desc claims are saved have been saved yet.
+	(mips_push_dummy_frame):  Write dummy frame register after all
+	registers have been saved in the dummy frame. Update comments
+	to reflect the fact that we are now using an AT_ENTRY_POINT
+	call dummy.
+
 start-sanitize-d10v
 Sun Dec 22 15:52:25 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
