@@ -1,5 +1,10 @@
 2001-05-10  Fernando Nasser  <fnasser@redhat.com>
 
+	* varobj.c (c_number_of_children): Check for target type of void*,
+	not the target type name.  Allow dereferencing char*.
+
+2001-05-10  Fernando Nasser  <fnasser@redhat.com>
+
 	* symfile.c (symbol_file_add_main_1): New static function. 
 	Passes the flags arguments to  symbol_file_add() and takes care
 	of any necessary reinitializations.
