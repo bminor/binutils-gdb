@@ -1,3 +1,16 @@
+2003-11-22  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c (mips_o32_store_return_value): Delete function.
+	(mips_o32_return_value): Replace mips_o32_xfer_return_value.
+	(mips_o32_extract_return_value): Delete function.
+	(mips_n32n64_return_value): Replace mips_n32n64_xfer_return_value.
+	(mips_n32n64_extract_return_value): Delete function.
+	(mips_n32n64_store_return_value): Delete function.
+	(mips_gdbarch_init): For o32 and n32n64, set "return_value"
+	instead of "store_return_value", "extract_return_value", and
+	"use_struct_convention".
+	(mips_n32n64_use_struct_convention): Delete function.
+
 2003-11-21  Kevin Buettner  <kevinb@redhat.com>
 
 	* frv-tdep.c (frv_frame_this_id): Eliminate call to

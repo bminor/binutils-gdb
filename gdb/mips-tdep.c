@@ -805,12 +805,6 @@ mips_eabi_use_struct_convention (int gcc_p, struct type *type)
   return (TYPE_LENGTH (type) > 2 * MIPS_SAVED_REGSIZE);
 }
 
-static int
-mips_n32n64_use_struct_convention (int gcc_p, struct type *type)
-{
-  return (TYPE_LENGTH (type) > 2 * MIPS_SAVED_REGSIZE);
-}
-
 /* Should call_function pass struct by reference? 
    For each architecture, structs are passed either by
    value or by reference, depending on their size.  */
@@ -4739,22 +4733,30 @@ mips_o64_store_return_value (struct type *valtype, char *valbuf)
 
 /* O32 ABI stuff.  */
 
-static void
-mips_o32_xfer_return_value (struct type *type,
-			    struct regcache *regcache,
-			    bfd_byte *in, const bfd_byte *out)
+static enum return_value_convention
+mips_o32_return_value (struct gdbarch *gdbarch, struct type *type,
+		       struct regcache *regcache,
+		       void *readbuf, const void *writebuf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  if (TYPE_CODE (type) == TYPE_CODE_FLT
-      && TYPE_LENGTH (type) == 4
-      && tdep->mips_fpu_type != MIPS_FPU_NONE)
+
+  if (TYPE_CODE (type)== TYPE_CODE_STRUCT
+      || TYPE_CODE (type)== TYPE_CODE_UNION
+      || TYPE_CODE (type)== TYPE_CODE_ARRAY)
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  else if (TYPE_CODE (type) == TYPE_CODE_FLT
+	   && TYPE_LENGTH (type) == 4
+	   && tdep->mips_fpu_type != MIPS_FPU_NONE)
     {
       /* A single-precision floating-point value.  It fits in the
          least significant part of FP0.  */
       if (mips_debug)
 	fprintf_unfiltered (gdb_stderr, "Return float in $fp0\n");
-      mips_xfer_register (regcache, NUM_REGS + mips_regnum (current_gdbarch)->fp0, TYPE_LENGTH (type),
-			  TARGET_BYTE_ORDER, in, out, 0);
+      mips_xfer_register (regcache,
+			  NUM_REGS + mips_regnum (current_gdbarch)->fp0,
+			  TYPE_LENGTH (type),
+			  TARGET_BYTE_ORDER, readbuf, writebuf, 0);
+      return RETURN_VALUE_REGISTER_CONVENTION;
     }
   else if (TYPE_CODE (type) == TYPE_CODE_FLT
 	   && TYPE_LENGTH (type) == 8
@@ -4768,20 +4770,25 @@ mips_o32_xfer_return_value (struct type *type,
       switch (TARGET_BYTE_ORDER)
 	{
 	case BFD_ENDIAN_LITTLE:
-	  mips_xfer_register (regcache, NUM_REGS + mips_regnum (current_gdbarch)->fp0 + 0, 4,
-			      TARGET_BYTE_ORDER, in, out, 0);
-	  mips_xfer_register (regcache, NUM_REGS + mips_regnum (current_gdbarch)->fp0 + 1, 4,
-			      TARGET_BYTE_ORDER, in, out, 4);
+	  mips_xfer_register (regcache,
+			      NUM_REGS + mips_regnum (current_gdbarch)->fp0 + 0,
+			      4, TARGET_BYTE_ORDER, readbuf, writebuf, 0);
+	  mips_xfer_register (regcache,
+			      NUM_REGS + mips_regnum (current_gdbarch)->fp0 + 1,
+			      4, TARGET_BYTE_ORDER, readbuf, writebuf, 4);
 	  break;
 	case BFD_ENDIAN_BIG:
-	  mips_xfer_register (regcache, NUM_REGS + mips_regnum (current_gdbarch)->fp0 + 1, 4,
-			      TARGET_BYTE_ORDER, in, out, 0);
-	  mips_xfer_register (regcache, NUM_REGS + mips_regnum (current_gdbarch)->fp0 + 0, 4,
-			      TARGET_BYTE_ORDER, in, out, 4);
+	  mips_xfer_register (regcache,
+			      NUM_REGS + mips_regnum (current_gdbarch)->fp0 + 1,
+			      4, TARGET_BYTE_ORDER, readbuf, writebuf, 0);
+	  mips_xfer_register (regcache,
+			      NUM_REGS + mips_regnum (current_gdbarch)->fp0 + 0,
+			      4, TARGET_BYTE_ORDER, readbuf, writebuf, 4);
 	  break;
 	default:
 	  internal_error (__FILE__, __LINE__, "bad switch");
 	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
     }
 #if 0
   else if (TYPE_CODE (type) == TYPE_CODE_STRUCT
@@ -4813,8 +4820,9 @@ mips_o32_xfer_return_value (struct type *type,
 	    fprintf_unfiltered (gdb_stderr, "Return float struct+%d\n", offset);
 	  mips_xfer_register (regcache, NUM_REGS + regnum,
 			      TYPE_LENGTH (TYPE_FIELD_TYPE (type, field)),
-			      TARGET_BYTE_ORDER, in, out, offset);
+			      TARGET_BYTE_ORDER, readbuf, writebuf, offset);
 	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
     }
 #endif
 #if 0
@@ -4837,8 +4845,9 @@ mips_o32_xfer_return_value (struct type *type,
 	    fprintf_unfiltered (gdb_stderr, "Return struct+%d:%d in $%d\n",
 				offset, xfer, regnum);
 	  mips_xfer_register (regcache, NUM_REGS + regnum, xfer,
-			      BFD_ENDIAN_UNKNOWN, in, out, offset);
+			      BFD_ENDIAN_UNKNOWN, readbuf, writebuf, offset);
 	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
     }
 #endif
   else
@@ -4860,42 +4869,37 @@ mips_o32_xfer_return_value (struct type *type,
 	    fprintf_unfiltered (gdb_stderr, "Return scalar+%d:%d in $%d\n",
 				offset, xfer, regnum);
 	  mips_xfer_register (regcache, NUM_REGS + regnum, xfer,
-			      TARGET_BYTE_ORDER, in, out, offset);
+			      TARGET_BYTE_ORDER, readbuf, writebuf, offset);
 	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
     }
-}
-
-static void
-mips_o32_extract_return_value (struct type *type,
-			       struct regcache *regcache,
-			       void *valbuf)
-{
-  mips_o32_xfer_return_value (type, regcache, valbuf, NULL); 
-}
-
-static void
-mips_o32_store_return_value (struct type *type, char *valbuf)
-{
-  mips_o32_xfer_return_value (type, current_regcache, NULL, valbuf); 
 }
 
 /* N32/N44 ABI stuff.  */
 
-static void
-mips_n32n64_xfer_return_value (struct type *type,
-			       struct regcache *regcache,
-			       bfd_byte *in, const bfd_byte *out)
+static enum return_value_convention
+mips_n32n64_return_value (struct gdbarch *gdbarch,
+			  struct type *type, struct regcache *regcache,
+			  void *readbuf, const void *writebuf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  if (TYPE_CODE (type) == TYPE_CODE_FLT
-      && tdep->mips_fpu_type != MIPS_FPU_NONE)
+  if (TYPE_CODE (type)== TYPE_CODE_STRUCT
+      || TYPE_CODE (type)== TYPE_CODE_UNION
+      || TYPE_CODE (type)== TYPE_CODE_ARRAY
+      || TYPE_LENGTH (type) > 2 * MIPS_SAVED_REGSIZE)
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  else if (TYPE_CODE (type) == TYPE_CODE_FLT
+	   && tdep->mips_fpu_type != MIPS_FPU_NONE)
     {
       /* A floating-point value belongs in the least significant part
          of FP0.  */
       if (mips_debug)
 	fprintf_unfiltered (gdb_stderr, "Return float in $fp0\n");
-      mips_xfer_register (regcache, NUM_REGS + mips_regnum (current_gdbarch)->fp0, TYPE_LENGTH (type),
-			  TARGET_BYTE_ORDER, in, out, 0);
+      mips_xfer_register (regcache,
+			  NUM_REGS + mips_regnum (current_gdbarch)->fp0,
+			  TYPE_LENGTH (type),
+			  TARGET_BYTE_ORDER, readbuf, writebuf, 0);
+      return RETURN_VALUE_REGISTER_CONVENTION;
     }
   else if (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	   && TYPE_NFIELDS (type) <= 2
@@ -4926,8 +4930,9 @@ mips_n32n64_xfer_return_value (struct type *type,
 	    fprintf_unfiltered (gdb_stderr, "Return float struct+%d\n", offset);
 	  mips_xfer_register (regcache, NUM_REGS + regnum,
 			      TYPE_LENGTH (TYPE_FIELD_TYPE (type, field)),
-			      TARGET_BYTE_ORDER, in, out, offset);
+			      TARGET_BYTE_ORDER, readbuf, writebuf, offset);
 	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
     }
   else if (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	   || TYPE_CODE (type) == TYPE_CODE_UNION)
@@ -4948,8 +4953,9 @@ mips_n32n64_xfer_return_value (struct type *type,
 	    fprintf_unfiltered (gdb_stderr, "Return struct+%d:%d in $%d\n",
 				offset, xfer, regnum);
 	  mips_xfer_register (regcache, NUM_REGS + regnum, xfer,
-			      BFD_ENDIAN_UNKNOWN, in, out, offset);
+			      BFD_ENDIAN_UNKNOWN, readbuf, writebuf, offset);
 	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
     }
   else
     {
@@ -4969,23 +4975,10 @@ mips_n32n64_xfer_return_value (struct type *type,
 	    fprintf_unfiltered (gdb_stderr, "Return scalar+%d:%d in $%d\n",
 				offset, xfer, regnum);
 	  mips_xfer_register (regcache, NUM_REGS + regnum, xfer,
-			      TARGET_BYTE_ORDER, in, out, offset);
+			      TARGET_BYTE_ORDER, readbuf, writebuf, offset);
 	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
     }
-}
-
-static void
-mips_n32n64_extract_return_value (struct type *type,
-				  struct regcache *regcache,
-				  void *valbuf)
-{
-  mips_n32n64_xfer_return_value (type, regcache, valbuf, NULL);
-}
-
-static void
-mips_n32n64_store_return_value (struct type *type, char *valbuf)
-{
-  mips_n32n64_xfer_return_value (type, current_regcache, NULL, valbuf);
 }
 
 static CORE_ADDR
@@ -5785,8 +5778,7 @@ mips_gdbarch_init (struct gdbarch_info info,
     {
     case MIPS_ABI_O32:
       set_gdbarch_push_dummy_call (gdbarch, mips_o32_push_dummy_call);
-      set_gdbarch_deprecated_store_return_value (gdbarch, mips_o32_store_return_value);
-      set_gdbarch_extract_return_value (gdbarch, mips_o32_extract_return_value);
+      set_gdbarch_return_value (gdbarch, mips_o32_return_value);
       tdep->mips_default_saved_regsize = 4;
       tdep->mips_default_stack_argsize = 4;
       tdep->mips_fp_register_double = 0;
@@ -5798,8 +5790,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_deprecated_reg_struct_has_addr
 	(gdbarch, mips_o32_reg_struct_has_addr);
-      set_gdbarch_use_struct_convention (gdbarch, 
-					 always_use_struct_convention);
       break;
     case MIPS_ABI_O64:
       set_gdbarch_push_dummy_call (gdbarch, mips_o64_push_dummy_call);
@@ -5856,8 +5846,7 @@ mips_gdbarch_init (struct gdbarch_info info,
       break;
     case MIPS_ABI_N32:
       set_gdbarch_push_dummy_call (gdbarch, mips_n32n64_push_dummy_call);
-      set_gdbarch_deprecated_store_return_value (gdbarch, mips_n32n64_store_return_value);
-      set_gdbarch_extract_return_value (gdbarch, mips_n32n64_extract_return_value);
+      set_gdbarch_return_value (gdbarch, mips_n32n64_return_value);
       tdep->mips_default_saved_regsize = 8;
       tdep->mips_default_stack_argsize = 8;
       tdep->mips_fp_register_double = 1;
@@ -5867,15 +5856,12 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
-      set_gdbarch_use_struct_convention (gdbarch, 
-					 mips_n32n64_use_struct_convention);
       set_gdbarch_deprecated_reg_struct_has_addr
 	(gdbarch, mips_n32n64_reg_struct_has_addr);
       break;
     case MIPS_ABI_N64:
       set_gdbarch_push_dummy_call (gdbarch, mips_n32n64_push_dummy_call);
-      set_gdbarch_deprecated_store_return_value (gdbarch, mips_n32n64_store_return_value);
-      set_gdbarch_extract_return_value (gdbarch, mips_n32n64_extract_return_value);
+      set_gdbarch_return_value (gdbarch, mips_n32n64_return_value);
       tdep->mips_default_saved_regsize = 8;
       tdep->mips_default_stack_argsize = 8;
       tdep->mips_fp_register_double = 1;
@@ -5885,8 +5871,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 64);
       set_gdbarch_ptr_bit (gdbarch, 64);
       set_gdbarch_long_long_bit (gdbarch, 64);
-      set_gdbarch_use_struct_convention (gdbarch, 
-					 mips_n32n64_use_struct_convention);
       set_gdbarch_deprecated_reg_struct_has_addr
 	(gdbarch, mips_n32n64_reg_struct_has_addr);
       break;
