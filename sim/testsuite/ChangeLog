@@ -25,6 +25,12 @@ Fri Jun 19 17:57:50 1998 Jillian Ye <jillian@cygnus.com>
 	and accurate respectively; also added and moved
 	files for this purpose.
 
+start-sanitize-sky
+Thu Jun 18 23:53:43 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* sim/sky/vureloc{.brn,-main.c,.dvpasm}: New files.
+
+end-sanitize-sky
 Tue Jun 16 18:39:32 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* sim/sky/sky-defs.tcl: Use --sky-debug option instead of environment
