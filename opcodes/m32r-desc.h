@@ -32,6 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* Selected cpu families.  */
 #define HAVE_CPU_M32RBF
+#define HAVE_CPU_M32RXF
 
 #define CGEN_INSN_LSB0_P 0
 
@@ -49,6 +50,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
    e.g. In "b,a foo" the ",a" is an operand.  If mnemonics have operands
    we can't hash on everything up to the space.  */
 #define CGEN_MNEMONIC_OPERANDS
+
 /* Maximum number of operands any insn or macro-insn has.  */
 #define CGEN_MAX_INSN_OPERANDS 16
 
@@ -96,14 +98,18 @@ typedef enum cr_names {
 
 /* Enum declaration for machine type selection.  */
 typedef enum mach_attr {
-  MACH_BASE, MACH_M32R
- , MACH_MAX
+  MACH_BASE, MACH_M32R, MACH_M32RX, MACH_MAX
 } MACH_ATTR;
 
 /* Enum declaration for instruction set selection.  */
 typedef enum isa_attr {
   ISA_M32R, ISA_MAX
 } ISA_ATTR;
+
+/* Enum declaration for parallel execution pipeline selection.  */
+typedef enum pipe_attr {
+  PIPE_NONE, PIPE_O, PIPE_S, PIPE_OS
+} PIPE_ATTR;
 
 /* Number of architecture variants.  */
 #define MAX_ISAS  1
@@ -131,8 +137,9 @@ typedef enum ifield_type {
  , M32R_F_R1, M32R_F_R2, M32R_F_SIMM8, M32R_F_SIMM16
  , M32R_F_SHIFT_OP2, M32R_F_UIMM4, M32R_F_UIMM5, M32R_F_UIMM16
  , M32R_F_UIMM24, M32R_F_HI16, M32R_F_DISP8, M32R_F_DISP16
- , M32R_F_DISP24
- , M32R_F_MAX
+ , M32R_F_DISP24, M32R_F_OP23, M32R_F_OP3, M32R_F_ACC
+ , M32R_F_ACCS, M32R_F_ACCD, M32R_F_BITS67, M32R_F_BIT14
+ , M32R_F_IMM1, M32R_F_MAX
 } IFIELD_TYPE;
 
 #define MAX_IFLD ((int) M32R_F_MAX)
@@ -153,8 +160,8 @@ typedef enum cgen_hw_type {
   HW_H_MEMORY, HW_H_SINT, HW_H_UINT, HW_H_ADDR
  , HW_H_IADDR, HW_H_PC, HW_H_HI16, HW_H_SLO16
  , HW_H_ULO16, HW_H_GR, HW_H_CR, HW_H_ACCUM
- , HW_H_COND, HW_H_PSW, HW_H_BPSW, HW_H_BBPSW
- , HW_H_LOCK, HW_MAX
+ , HW_H_ACCUMS, HW_H_COND, HW_H_PSW, HW_H_BPSW
+ , HW_H_BBPSW, HW_H_LOCK, HW_MAX
 } CGEN_HW_TYPE;
 
 #define MAX_HW ((int) HW_MAX)
@@ -177,6 +184,7 @@ typedef enum cgen_operand_type {
   M32R_OPERAND_PC, M32R_OPERAND_SR, M32R_OPERAND_DR, M32R_OPERAND_SRC1
  , M32R_OPERAND_SRC2, M32R_OPERAND_SCR, M32R_OPERAND_DCR, M32R_OPERAND_SIMM8
  , M32R_OPERAND_SIMM16, M32R_OPERAND_UIMM4, M32R_OPERAND_UIMM5, M32R_OPERAND_UIMM16
+ , M32R_OPERAND_IMM1, M32R_OPERAND_ACCD, M32R_OPERAND_ACCS, M32R_OPERAND_ACC
  , M32R_OPERAND_HASH, M32R_OPERAND_HI16, M32R_OPERAND_SLO16, M32R_OPERAND_ULO16
  , M32R_OPERAND_UIMM24, M32R_OPERAND_DISP8, M32R_OPERAND_DISP16, M32R_OPERAND_DISP24
  , M32R_OPERAND_CONDBIT, M32R_OPERAND_ACCUM, M32R_OPERAND_MAX
@@ -215,6 +223,7 @@ extern const CGEN_ATTR_TABLE m32r_cgen_insn_attr_table[];
 
 extern CGEN_KEYWORD m32r_cgen_opval_gr_names;
 extern CGEN_KEYWORD m32r_cgen_opval_cr_names;
+extern CGEN_KEYWORD m32r_cgen_opval_h_accums;
 
 
 

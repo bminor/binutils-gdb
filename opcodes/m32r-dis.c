@@ -164,6 +164,15 @@ m32r_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
 
   switch (opindex)
     {
+    case M32R_OPERAND_ACC :
+      print_keyword (cd, info, & m32r_cgen_opval_h_accums, fields->f_acc, 0);
+      break;
+    case M32R_OPERAND_ACCD :
+      print_keyword (cd, info, & m32r_cgen_opval_h_accums, fields->f_accd, 0);
+      break;
+    case M32R_OPERAND_ACCS :
+      print_keyword (cd, info, & m32r_cgen_opval_h_accums, fields->f_accs, 0);
+      break;
     case M32R_OPERAND_DCR :
       print_keyword (cd, info, & m32r_cgen_opval_cr_names, fields->f_r1, 0);
       break;
@@ -184,6 +193,9 @@ m32r_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
       break;
     case M32R_OPERAND_HI16 :
       print_normal (cd, info, fields->f_hi16, 0|(1<<CGEN_OPERAND_SIGN_OPT), pc, length);
+      break;
+    case M32R_OPERAND_IMM1 :
+      print_normal (cd, info, fields->f_imm1, 0|(1<<CGEN_OPERAND_HASH_PREFIX), pc, length);
       break;
     case M32R_OPERAND_SCR :
       print_keyword (cd, info, & m32r_cgen_opval_cr_names, fields->f_r2, 0);

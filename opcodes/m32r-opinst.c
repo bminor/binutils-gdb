@@ -146,6 +146,24 @@ static const CGEN_OPINST sfmt_bl24_ops[] = {
   { END }
 };
 
+static const CGEN_OPINST sfmt_bcl8_ops[] = {
+  { INPUT, "condbit", HW_H_COND, CGEN_MODE_BI, 0, 0, 0 },
+  { INPUT, "disp8", HW_H_IADDR, CGEN_MODE_USI, OP_ENT (DISP8), 0, COND_REF },
+  { INPUT, "pc", HW_H_PC, CGEN_MODE_USI, 0, 0, COND_REF },
+  { OUTPUT, "h_gr_14", HW_H_GR, CGEN_MODE_SI, 0, 14, COND_REF },
+  { OUTPUT, "pc", HW_H_PC, CGEN_MODE_USI, 0, 0, COND_REF },
+  { END }
+};
+
+static const CGEN_OPINST sfmt_bcl24_ops[] = {
+  { INPUT, "condbit", HW_H_COND, CGEN_MODE_BI, 0, 0, 0 },
+  { INPUT, "disp24", HW_H_IADDR, CGEN_MODE_USI, OP_ENT (DISP24), 0, COND_REF },
+  { INPUT, "pc", HW_H_PC, CGEN_MODE_USI, 0, 0, COND_REF },
+  { OUTPUT, "h_gr_14", HW_H_GR, CGEN_MODE_SI, 0, 14, COND_REF },
+  { OUTPUT, "pc", HW_H_PC, CGEN_MODE_USI, 0, 0, COND_REF },
+  { END }
+};
+
 static const CGEN_OPINST sfmt_bra8_ops[] = {
   { INPUT, "disp8", HW_H_IADDR, CGEN_MODE_USI, OP_ENT (DISP8), 0, 0 },
   { OUTPUT, "pc", HW_H_PC, CGEN_MODE_USI, 0, 0, 0 },
@@ -172,10 +190,23 @@ static const CGEN_OPINST sfmt_cmpi_ops[] = {
   { END }
 };
 
+static const CGEN_OPINST sfmt_cmpz_ops[] = {
+  { INPUT, "src2", HW_H_GR, CGEN_MODE_SI, OP_ENT (SRC2), 0, 0 },
+  { OUTPUT, "condbit", HW_H_COND, CGEN_MODE_BI, 0, 0, 0 },
+  { END }
+};
+
 static const CGEN_OPINST sfmt_div_ops[] = {
   { INPUT, "dr", HW_H_GR, CGEN_MODE_SI, OP_ENT (DR), 0, COND_REF },
   { INPUT, "sr", HW_H_GR, CGEN_MODE_SI, OP_ENT (SR), 0, 0 },
   { OUTPUT, "dr", HW_H_GR, CGEN_MODE_SI, OP_ENT (DR), 0, COND_REF },
+  { END }
+};
+
+static const CGEN_OPINST sfmt_jc_ops[] = {
+  { INPUT, "condbit", HW_H_COND, CGEN_MODE_BI, 0, 0, 0 },
+  { INPUT, "sr", HW_H_GR, CGEN_MODE_SI, OP_ENT (SR), 0, COND_REF },
+  { OUTPUT, "pc", HW_H_PC, CGEN_MODE_USI, 0, 0, COND_REF },
   { END }
 };
 
@@ -250,10 +281,25 @@ static const CGEN_OPINST sfmt_machi_ops[] = {
   { END }
 };
 
+static const CGEN_OPINST sfmt_machi_a_ops[] = {
+  { INPUT, "acc", HW_H_ACCUMS, CGEN_MODE_DI, OP_ENT (ACC), 0, 0 },
+  { INPUT, "src1", HW_H_GR, CGEN_MODE_SI, OP_ENT (SRC1), 0, 0 },
+  { INPUT, "src2", HW_H_GR, CGEN_MODE_SI, OP_ENT (SRC2), 0, 0 },
+  { OUTPUT, "acc", HW_H_ACCUMS, CGEN_MODE_DI, OP_ENT (ACC), 0, 0 },
+  { END }
+};
+
 static const CGEN_OPINST sfmt_mulhi_ops[] = {
   { INPUT, "src1", HW_H_GR, CGEN_MODE_SI, OP_ENT (SRC1), 0, 0 },
   { INPUT, "src2", HW_H_GR, CGEN_MODE_SI, OP_ENT (SRC2), 0, 0 },
   { OUTPUT, "accum", HW_H_ACCUM, CGEN_MODE_DI, 0, 0, 0 },
+  { END }
+};
+
+static const CGEN_OPINST sfmt_mulhi_a_ops[] = {
+  { INPUT, "src1", HW_H_GR, CGEN_MODE_SI, OP_ENT (SRC1), 0, 0 },
+  { INPUT, "src2", HW_H_GR, CGEN_MODE_SI, OP_ENT (SRC2), 0, 0 },
+  { OUTPUT, "acc", HW_H_ACCUMS, CGEN_MODE_DI, OP_ENT (ACC), 0, 0 },
   { END }
 };
 
@@ -265,6 +311,12 @@ static const CGEN_OPINST sfmt_mv_ops[] = {
 
 static const CGEN_OPINST sfmt_mvfachi_ops[] = {
   { INPUT, "accum", HW_H_ACCUM, CGEN_MODE_DI, 0, 0, 0 },
+  { OUTPUT, "dr", HW_H_GR, CGEN_MODE_SI, OP_ENT (DR), 0, 0 },
+  { END }
+};
+
+static const CGEN_OPINST sfmt_mvfachi_a_ops[] = {
+  { INPUT, "accs", HW_H_ACCUMS, CGEN_MODE_DI, OP_ENT (ACCS), 0, 0 },
   { OUTPUT, "dr", HW_H_GR, CGEN_MODE_SI, OP_ENT (DR), 0, 0 },
   { END }
 };
@@ -282,6 +334,13 @@ static const CGEN_OPINST sfmt_mvtachi_ops[] = {
   { END }
 };
 
+static const CGEN_OPINST sfmt_mvtachi_a_ops[] = {
+  { INPUT, "accs", HW_H_ACCUMS, CGEN_MODE_DI, OP_ENT (ACCS), 0, 0 },
+  { INPUT, "src1", HW_H_GR, CGEN_MODE_SI, OP_ENT (SRC1), 0, 0 },
+  { OUTPUT, "accs", HW_H_ACCUMS, CGEN_MODE_DI, OP_ENT (ACCS), 0, 0 },
+  { END }
+};
+
 static const CGEN_OPINST sfmt_mvtc_ops[] = {
   { INPUT, "sr", HW_H_GR, CGEN_MODE_SI, OP_ENT (SR), 0, 0 },
   { OUTPUT, "dcr", HW_H_CR, CGEN_MODE_USI, OP_ENT (DCR), 0, 0 },
@@ -295,6 +354,13 @@ static const CGEN_OPINST sfmt_nop_ops[] = {
 static const CGEN_OPINST sfmt_rac_ops[] = {
   { INPUT, "accum", HW_H_ACCUM, CGEN_MODE_DI, 0, 0, 0 },
   { OUTPUT, "accum", HW_H_ACCUM, CGEN_MODE_DI, 0, 0, 0 },
+  { END }
+};
+
+static const CGEN_OPINST sfmt_rac_dsi_ops[] = {
+  { INPUT, "accs", HW_H_ACCUMS, CGEN_MODE_DI, OP_ENT (ACCS), 0, 0 },
+  { INPUT, "imm1", HW_H_UINT, CGEN_MODE_INT, OP_ENT (IMM1), 0, 0 },
+  { OUTPUT, "accd", HW_H_ACCUMS, CGEN_MODE_DI, OP_ENT (ACCD), 0, 0 },
   { END }
 };
 
@@ -407,6 +473,46 @@ static const CGEN_OPINST sfmt_unlock_ops[] = {
   { END }
 };
 
+static const CGEN_OPINST sfmt_satb_ops[] = {
+  { INPUT, "sr", HW_H_GR, CGEN_MODE_SI, OP_ENT (SR), 0, 0 },
+  { OUTPUT, "dr", HW_H_GR, CGEN_MODE_SI, OP_ENT (DR), 0, 0 },
+  { END }
+};
+
+static const CGEN_OPINST sfmt_sat_ops[] = {
+  { INPUT, "condbit", HW_H_COND, CGEN_MODE_BI, 0, 0, 0 },
+  { INPUT, "sr", HW_H_GR, CGEN_MODE_SI, OP_ENT (SR), 0, COND_REF },
+  { OUTPUT, "dr", HW_H_GR, CGEN_MODE_SI, OP_ENT (DR), 0, 0 },
+  { END }
+};
+
+static const CGEN_OPINST sfmt_sadd_ops[] = {
+  { INPUT, "h_accums_0", HW_H_ACCUMS, CGEN_MODE_DI, 0, 0, 0 },
+  { INPUT, "h_accums_1", HW_H_ACCUMS, CGEN_MODE_DI, 0, 1, 0 },
+  { OUTPUT, "h_accums_0", HW_H_ACCUMS, CGEN_MODE_DI, 0, 0, 0 },
+  { END }
+};
+
+static const CGEN_OPINST sfmt_macwu1_ops[] = {
+  { INPUT, "h_accums_1", HW_H_ACCUMS, CGEN_MODE_DI, 0, 1, 0 },
+  { INPUT, "src1", HW_H_GR, CGEN_MODE_SI, OP_ENT (SRC1), 0, 0 },
+  { INPUT, "src2", HW_H_GR, CGEN_MODE_SI, OP_ENT (SRC2), 0, 0 },
+  { OUTPUT, "h_accums_1", HW_H_ACCUMS, CGEN_MODE_DI, 0, 1, 0 },
+  { END }
+};
+
+static const CGEN_OPINST sfmt_mulwu1_ops[] = {
+  { INPUT, "src1", HW_H_GR, CGEN_MODE_SI, OP_ENT (SRC1), 0, 0 },
+  { INPUT, "src2", HW_H_GR, CGEN_MODE_SI, OP_ENT (SRC2), 0, 0 },
+  { OUTPUT, "h_accums_1", HW_H_ACCUMS, CGEN_MODE_DI, 0, 1, 0 },
+  { END }
+};
+
+static const CGEN_OPINST sfmt_sc_ops[] = {
+  { INPUT, "condbit", HW_H_COND, CGEN_MODE_BI, 0, 0, 0 },
+  { END }
+};
+
 #undef INPUT
 #undef OUTPUT
 #undef END
@@ -440,19 +546,28 @@ static const CGEN_OPINST *m32r_cgen_opinst_table[MAX_INSNS] = {
   & sfmt_beqz_ops[0],
   & sfmt_bl8_ops[0],
   & sfmt_bl24_ops[0],
+  & sfmt_bcl8_ops[0],
+  & sfmt_bcl24_ops[0],
   & sfmt_bc8_ops[0],
   & sfmt_bc24_ops[0],
   & sfmt_beq_ops[0],
   & sfmt_bra8_ops[0],
   & sfmt_bra24_ops[0],
+  & sfmt_bcl8_ops[0],
+  & sfmt_bcl24_ops[0],
   & sfmt_cmp_ops[0],
   & sfmt_cmpi_ops[0],
   & sfmt_cmp_ops[0],
   & sfmt_cmpi_ops[0],
+  & sfmt_cmp_ops[0],
+  & sfmt_cmpz_ops[0],
   & sfmt_div_ops[0],
   & sfmt_div_ops[0],
   & sfmt_div_ops[0],
   & sfmt_div_ops[0],
+  & sfmt_div_ops[0],
+  & sfmt_jc_ops[0],
+  & sfmt_jc_ops[0],
   & sfmt_jl_ops[0],
   & sfmt_jmp_ops[0],
   & sfmt_ld_ops[0],
@@ -471,27 +586,42 @@ static const CGEN_OPINST *m32r_cgen_opinst_table[MAX_INSNS] = {
   & sfmt_ldi16_ops[0],
   & sfmt_lock_ops[0],
   & sfmt_machi_ops[0],
+  & sfmt_machi_a_ops[0],
   & sfmt_machi_ops[0],
+  & sfmt_machi_a_ops[0],
   & sfmt_machi_ops[0],
+  & sfmt_machi_a_ops[0],
   & sfmt_machi_ops[0],
+  & sfmt_machi_a_ops[0],
   & sfmt_add_ops[0],
   & sfmt_mulhi_ops[0],
+  & sfmt_mulhi_a_ops[0],
   & sfmt_mulhi_ops[0],
+  & sfmt_mulhi_a_ops[0],
   & sfmt_mulhi_ops[0],
+  & sfmt_mulhi_a_ops[0],
   & sfmt_mulhi_ops[0],
+  & sfmt_mulhi_a_ops[0],
   & sfmt_mv_ops[0],
   & sfmt_mvfachi_ops[0],
+  & sfmt_mvfachi_a_ops[0],
   & sfmt_mvfachi_ops[0],
+  & sfmt_mvfachi_a_ops[0],
   & sfmt_mvfachi_ops[0],
+  & sfmt_mvfachi_a_ops[0],
   & sfmt_mvfc_ops[0],
   & sfmt_mvtachi_ops[0],
+  & sfmt_mvtachi_a_ops[0],
   & sfmt_mvtachi_ops[0],
+  & sfmt_mvtachi_a_ops[0],
   & sfmt_mvtc_ops[0],
   & sfmt_mv_ops[0],
   & sfmt_nop_ops[0],
   & sfmt_mv_ops[0],
   & sfmt_rac_ops[0],
+  & sfmt_rac_dsi_ops[0],
   & sfmt_rac_ops[0],
+  & sfmt_rac_dsi_ops[0],
   & sfmt_rte_ops[0],
   & sfmt_seth_ops[0],
   & sfmt_add_ops[0],
@@ -516,6 +646,17 @@ static const CGEN_OPINST *m32r_cgen_opinst_table[MAX_INSNS] = {
   & sfmt_addx_ops[0],
   & sfmt_trap_ops[0],
   & sfmt_unlock_ops[0],
+  & sfmt_satb_ops[0],
+  & sfmt_satb_ops[0],
+  & sfmt_sat_ops[0],
+  & sfmt_cmpz_ops[0],
+  & sfmt_sadd_ops[0],
+  & sfmt_macwu1_ops[0],
+  & sfmt_machi_ops[0],
+  & sfmt_mulwu1_ops[0],
+  & sfmt_macwu1_ops[0],
+  & sfmt_sc_ops[0],
+  & sfmt_sc_ops[0],
 };
 
 /* Function to call before using the operand instance table.  */

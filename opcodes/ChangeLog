@@ -1,3 +1,9 @@
+1999-10-04  Doug Evans  <devans@casey.cygnus.com>
+
+	* fr30-asm.c,fr30-desc.h: Rebuild.
+	* m32r-asm.c,m32r-desc.c,m32r-desc.h: Rebuild.  Add m32rx support.
+	* m32r-dis.c,m32r-ibld.c,m32r-opc.c,m32r-opc.h,m32r-opinst.c: Ditto.
+
 1999-09-29  Nick Clifton  <nickc@cygnus.com>
 
 	* sh-opc.h: Fix bit patterns for several load and store

@@ -364,9 +364,14 @@ parse_insn_normal (cd, insn, strp, fields)
   p = CGEN_INSN_MNEMONIC (insn);
   while (*p && tolower (*p) == tolower (*str))
     ++p, ++str;
-  
-  if (* p || (* str && !isspace (* str)))
+
+  if (* p)
     return _("unrecognized instruction");
+
+#ifndef CGEN_MNEMONIC_OPERANDS
+  if (* str && !isspace (* str))
+    return _("unrecognized instruction");
+#endif
 
   CGEN_INIT_PARSE (cd);
   cgen_init_parse_operand (cd);
@@ -389,6 +394,10 @@ parse_insn_normal (cd, insn, strp, fields)
       /* Non operand chars must match exactly.  */
       if (CGEN_SYNTAX_CHAR_P (* syn))
 	{
+	  /* FIXME: While we allow for non-GAS callers above, we assume the
+	     first char after the mnemonic part is a space.  */
+	  /* FIXME: We also take inappropriate advantage of the fact that
+	     GAS's input scrubber will remove extraneous blanks.  */
 	  if (*str == CGEN_SYNTAX_CHAR (* syn))
 	    {
 #ifdef CGEN_MNEMONIC_OPERANDS

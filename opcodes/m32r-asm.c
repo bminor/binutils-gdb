@@ -222,6 +222,15 @@ m32r_cgen_parse_operand (cd, opindex, strp, fields)
 
   switch (opindex)
     {
+    case M32R_OPERAND_ACC :
+      errmsg = cgen_parse_keyword (cd, strp, & m32r_cgen_opval_h_accums, & fields->f_acc);
+      break;
+    case M32R_OPERAND_ACCD :
+      errmsg = cgen_parse_keyword (cd, strp, & m32r_cgen_opval_h_accums, & fields->f_accd);
+      break;
+    case M32R_OPERAND_ACCS :
+      errmsg = cgen_parse_keyword (cd, strp, & m32r_cgen_opval_h_accums, & fields->f_accs);
+      break;
     case M32R_OPERAND_DCR :
       errmsg = cgen_parse_keyword (cd, strp, & m32r_cgen_opval_cr_names, & fields->f_r1);
       break;
@@ -254,6 +263,9 @@ m32r_cgen_parse_operand (cd, opindex, strp, fields)
       break;
     case M32R_OPERAND_HI16 :
       errmsg = parse_hi16 (cd, strp, M32R_OPERAND_HI16, &fields->f_hi16);
+      break;
+    case M32R_OPERAND_IMM1 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, M32R_OPERAND_IMM1, &fields->f_imm1);
       break;
     case M32R_OPERAND_SCR :
       errmsg = cgen_parse_keyword (cd, strp, & m32r_cgen_opval_cr_names, & fields->f_r2);
@@ -360,9 +372,14 @@ parse_insn_normal (cd, insn, strp, fields)
   p = CGEN_INSN_MNEMONIC (insn);
   while (*p && tolower (*p) == tolower (*str))
     ++p, ++str;
-  
-  if (* p || (* str && !isspace (* str)))
+
+  if (* p)
     return _("unrecognized instruction");
+
+#ifndef CGEN_MNEMONIC_OPERANDS
+  if (* str && !isspace (* str))
+    return _("unrecognized instruction");
+#endif
 
   CGEN_INIT_PARSE (cd);
   cgen_init_parse_operand (cd);
@@ -385,6 +402,10 @@ parse_insn_normal (cd, insn, strp, fields)
       /* Non operand chars must match exactly.  */
       if (CGEN_SYNTAX_CHAR_P (* syn))
 	{
+	  /* FIXME: While we allow for non-GAS callers above, we assume the
+	     first char after the mnemonic part is a space.  */
+	  /* FIXME: We also take inappropriate advantage of the fact that
+	     GAS's input scrubber will remove extraneous blanks.  */
 	  if (*str == CGEN_SYNTAX_CHAR (* syn))
 	    {
 #ifdef CGEN_MNEMONIC_OPERANDS
