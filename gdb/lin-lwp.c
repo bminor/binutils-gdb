@@ -31,8 +31,11 @@
 #include "target.h"
 #include "regcache.h"
 
-extern int debug_linux_threads;
+#define DEBUG 1
+
+#if DEBUG
 extern const char *strsignal (int sig);
+#endif
 
 /* On Linux there are no real LWP's.  The closest thing to LWP's are
    processes sharing the same VM space.  A multi-threaded process is
@@ -518,9 +521,9 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 	      printf_unfiltered ("[%s exited]\n",
 				 target_pid_to_str (lp->pid));
 	    }
-	  if (debug_linux_threads)
-	    printf ("%s exited.\n", target_pid_to_str (lp->pid));
-
+#if DEBUG
+	  printf ("%s exited.\n", target_pid_to_str (lp->pid));
+#endif
 	  delete_lwp (lp->pid);
 	  return 0;
 	}
@@ -546,21 +549,21 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 		 If we do not do this, then we run the risk that the
 		 user will delete or disable the breakpoint, but the
 		 thread will have already tripped on it.  */
-
-	      if (debug_linux_threads)
-		printf ("Tripped breakpoint at %lx in LWP %d"
-			" while waiting for SIGSTOP.\n",
-			(long) read_pc_pid (lp->pid), pid);
-
+#if DEBUG
+	      printf ("Tripped breakpoint at %lx in LWP %d"
+		      " while waiting for SIGSTOP.\n",
+		      (long) read_pc_pid (lp->pid), pid);
+#endif
 	      /* Set the PC to before the trap.  */
 	      if (DECR_PC_AFTER_BREAK)
 		write_pc_pid (read_pc_pid (pid) - DECR_PC_AFTER_BREAK, pid);
 	    }
 	  else
 	    {
-	      if (debug_linux_threads)
-		printf ("Received %s in LWP %d while waiting for SIGSTOP.\n",
-			strsignal (WSTOPSIG (status)), pid);
+#if DEBUG
+	      printf ("Received %s in LWP %d while waiting for SIGSTOP.\n",
+		      strsignal (WSTOPSIG (status)), pid);
+#endif
 	      /* The thread was stopped with a signal other than
 		 SIGSTOP, and didn't accidentiliy trip a breakpoint.
 		 Record the wait status.  */
@@ -617,9 +620,10 @@ lin_lwp_wait (int pid, struct target_waitstatus *ourstatus)
       lp = iterate_over_lwps (status_callback, NULL);
       if (lp)
 	{
-	  if (debug_linux_threads)
-	    printf ("Using pending wait status for LWP %d.\n",
-		    GET_LWP (lp->pid));
+#if DEBUG
+	  printf ("Using pending wait status for LWP %d.\n",
+		  GET_LWP (lp->pid));
+#endif
 	  status = lp->status;
 	  lp->status = 0;
 	}
@@ -631,18 +635,19 @@ lin_lwp_wait (int pid, struct target_waitstatus *ourstatus)
     }
   else if (is_lwp (pid))
     {
-      if (debug_linux_threads)
-	printf ("Waiting for specific LWP %d.\n", GET_LWP (pid));
-
+#if DEBUG
+      printf ("Waiting for specific LWP %d.\n", GET_LWP (pid));
+#endif
       /* We have a specific LWP to check.  */
       lp = find_lwp_pid (GET_LWP (pid));
       gdb_assert (lp);
       status = lp->status;
       lp->status = 0;
-      if (debug_linux_threads)
-	if (status)
+#if DEBUG
+      if (status)
 	  printf ("Using pending wait status for LWP %d.\n",
 		  GET_LWP (lp->pid));
+#endif
 
       /* If we have to wait, take into account whether PID is a cloned
          process or not.  And we have to convert it to something that
@@ -720,9 +725,9 @@ lin_lwp_wait (int pid, struct target_waitstatus *ourstatus)
 		  printf_unfiltered ("[%s exited]\n",
 				     target_pid_to_str (lp->pid));
 		}
-	      if (debug_linux_threads)
-		printf ("%s exited.\n", target_pid_to_str (lp->pid));
-
+#if DEBUG
+	      printf ("%s exited.\n", target_pid_to_str (lp->pid));
+#endif
 	      delete_lwp (lp->pid);
 
 	      /* Make sure there is at least one thread running.  */
@@ -738,10 +743,10 @@ lin_lwp_wait (int pid, struct target_waitstatus *ourstatus)
 	  if (lp->signalled && WIFSTOPPED (status)
 	      && WSTOPSIG (status) == SIGSTOP)
 	    {
-	      if (debug_linux_threads)
-		printf ("Delayed SIGSTOP caught for %s.\n",
-			target_pid_to_str (lp->pid));
-
+#if DEBUG
+	      printf ("Delayed SIGSTOP caught for %s.\n",
+		      target_pid_to_str (lp->pid));
+#endif
 	      /* This is a delayed SIGSTOP.  */
 	      lp->signalled = 0;
 
