@@ -1,3 +1,7 @@
+Sat Oct  4 19:14:24 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/ieee-fp/x930509a.exp: Accept m68k listing format.
+
 Fri Oct  3 15:46:05 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/ieee-fp/x930509a.exp: Remove setup_xfail; it should now
