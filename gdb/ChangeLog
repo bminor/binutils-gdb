@@ -4,6 +4,8 @@ Fri Jun 11 13:33:40 1993  Ian Lance Taylor  (ian@cygnus.com)
 	in debugging info.
 	(mips_request): Don't check that remote pid is 0, because
 	sometimes it isn't.
+	(mips_fetch_registers): Pass a pointer to SWAP_TARGET_AND_HOST,
+	not an integer.
 
 Fri Jun 11 10:17:41 1993  Jim Kingdon  (kingdon@cygnus.com)
 

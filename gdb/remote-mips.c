@@ -1061,7 +1061,7 @@ mips_fetch_registers (regno)
 
   /* We got the number the register holds, but gdb expects to see a
      value in the target byte ordering.  */
-  SWAP_TARGET_AND_HOST (val, sizeof (REGISTER_TYPE));
+  SWAP_TARGET_AND_HOST (&val, sizeof (REGISTER_TYPE));
   supply_register (regno, (char *) &val);
 }
 
