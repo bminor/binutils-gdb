@@ -5,6 +5,11 @@ Tue May 16 16:29:58 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	OBJ_PROCESS_STAB): New macros.
 	* config/tc-mips.c: Protect against redefining them also when
 	including obj-elf.h.  Test only OBJ_ELF for including elf/mips.h.
+	(mips_init_after_args): New function.  Set byte_order here.
+	(md_parse_option): Not here.
+	(byte_order): Don't bother initializing.
+	* config/tc-mips.h (mips_init_after_args): Declare.
+	(tc_init_after_args): New macro.
 
 	* read.c (s_lcomm): Do ELF/ECOFF test at run time, not compile
 	time.
