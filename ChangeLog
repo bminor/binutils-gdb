@@ -1,3 +1,16 @@
+Thu Jan 21 12:20:55 1993  Per Bothner  (bothner@cygnus.com)
+
+	* guess-systype:  Patches from John Eaton <jwe@che.utexas.edu>:
+	+ Add Convex, Cray/Unicos, and Encore/Multimax support. 
+	+ Execute ./dummy instead of assuming . is in PATH.
+
+Tue Jan 19 17:18:06 1993  Per Bothner  (bothner@cygnus.com)
+
+	* guess-systype:  New shell script.  Attempts to guess the
+	canonical host name of the executing host.
+	Only a few hosts are supported so far.
+	* configure:  Call guess-systype if no host is specified.
+
 Tue Jan 19 08:26:07 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (gcc-no-fixedincludes): Made to work with current
