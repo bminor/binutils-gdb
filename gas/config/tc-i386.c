@@ -127,9 +127,19 @@ struct _i386_insn
 
 typedef struct _i386_insn i386_insn;
 
+/* List of chars besides those in app.c:symbol_chars that can start an
+   operand.  Used to prevent the scrubber eating vital white-space.  */
+#ifdef LEX_AT
+const char extra_symbol_chars[] = "*%-(@";
+#else
+const char extra_symbol_chars[] = "*%-(";
+#endif
+
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful */
-#if defined (TE_I386AIX) || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#if defined (TE_I386AIX) || ((defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)) && ! defined (TE_LINUX))
+/* Putting '/' here makes it impossible to use the divide operator.
+   However, we need it for compatibility with SVR4 systems.  */
 const char comment_chars[] = "#/";
 #define PREFIX_SEPARATOR '\\'
 #else
@@ -145,7 +155,7 @@ const char comment_chars[] = "#";
    #NO_APP at the beginning of its output. */
 /* Also note that comments started like this one will always work if
    '/' isn't otherwise defined.  */
-#if defined (TE_I386AIX) || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#if defined (TE_I386AIX) || ((defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)) && ! defined (TE_LINUX))
 const char line_comment_chars[] = "";
 #else
 const char line_comment_chars[] = "/";
@@ -165,7 +175,6 @@ const char FLT_CHARS[] = "fFdDxX";
 static char opcode_chars[256];
 static char register_chars[256];
 static char operand_chars[256];
-static char space_chars[256];
 static char identifier_chars[256];
 static char digit_chars[256];
 
@@ -173,7 +182,7 @@ static char digit_chars[256];
 #define is_opcode_char(x) (opcode_chars[(unsigned char) x])
 #define is_operand_char(x) (operand_chars[(unsigned char) x])
 #define is_register_char(x) (register_chars[(unsigned char) x])
-#define is_space_char(x) (space_chars[(unsigned char) x])
+#define is_space_char(x) ((x) == ' ')
 #define is_identifier_char(x) (identifier_chars[(unsigned char) x])
 #define is_digit_char(x) (digit_chars[(unsigned char) x])
 
@@ -365,7 +374,8 @@ i386_align_code (fragP, count)
 
 static char *output_invalid PARAMS ((int c));
 static int i386_operand PARAMS ((char *operand_string));
-static const reg_entry *parse_register PARAMS ((const char *reg_string));
+static const reg_entry *parse_register PARAMS ((char *reg_string,
+						char **end_op));
 #ifndef I386COFF
 static void s_bss PARAMS ((int));
 #endif
@@ -581,7 +591,7 @@ md_begin ()
       }
   }
 
-  /* fill in lexical tables:  opcode_chars, operand_chars, space_chars */
+  /* fill in lexical tables:  opcode_chars, operand_chars.  */
   {
     register int c;
     register char *p;
@@ -620,8 +630,6 @@ md_begin ()
     digit_chars['-'] = '-';
     identifier_chars['_'] = '_';
     identifier_chars['.'] = '.';
-    space_chars[' '] = ' ';
-    space_chars['\t'] = '\t';
 
     for (p = operand_special_chars; *p != '\0'; p++)
       operand_chars[(unsigned char) *p] = *p;
@@ -1009,16 +1017,14 @@ md_assemble (line)
 	do
 	  {
 	    /* skip optional white space before operand */
-	    while (!is_operand_char (*l) && *l != END_OF_INSN)
+	    if (is_space_char (*l))
+	      ++l;
+	    if (!is_operand_char (*l) && *l != END_OF_INSN)
 	      {
-		if (!is_space_char (*l))
-		  {
-		    as_bad (_("invalid character %s before operand %d"),
-			    output_invalid (*l),
-			    i.operands + 1);
-		    return;
-		  }
-		l++;
+		as_bad (_("invalid character %s before operand %d"),
+			output_invalid (*l),
+			i.operands + 1);
+		return;
 	      }
 	    token_start = l;	/* after white space */
 	    paren_not_balanced = 0;
@@ -1381,7 +1387,7 @@ md_assemble (line)
       }
 
     /* Make still unresolved immediate matches conform to size of immediate
-       given in i.suffix. Note:  overlap2 cannot be an immediate!
+       given in i.suffix.  Note: overlap2 cannot be an immediate!
        We assume this. */
     if ((overlap0 & (Imm8 | Imm8S | Imm16 | Imm32))
 	&& overlap0 != Imm8 && overlap0 != Imm8S
@@ -2231,7 +2237,9 @@ i386_operand (operand_string)
      for example, 'jmp pc_relative_label' from 'jmp *absolute_label'. */
   if (*op_string == ABSOLUTE_PREFIX)
     {
-      op_string++;
+      ++op_string;
+      if (is_space_char (*op_string))
+	++op_string;
       i.types[this_operand] |= JumpAbsolute;
     }
 
@@ -2239,14 +2247,17 @@ i386_operand (operand_string)
   if (*op_string == REGISTER_PREFIX)
     {
       register const reg_entry *r;
-      if (!(r = parse_register (op_string)))
-	{
-	  as_bad (_("bad register name `%s'"), op_string);
-	  return 0;
-	}
-      /* Check for segment override, rather than segment register by
-	 searching for ':' after %<x>s where <x> = s, c, d, e, f, g. */
-      if ((r->reg_type & (SReg2 | SReg3)) && op_string[3] == ':')
+      char *end_op;
+
+      r = parse_register (op_string, &end_op);
+      if (r == NULL)
+	return 0;
+      /* Check for a segment override by searching for ':' after a
+	 segment register.  */
+      op_string = end_op;
+      if (is_space_char (*op_string))
+	++op_string;
+      if ((r->reg_type & (SReg2 | SReg3)) && *op_string == ':')
 	{
 	  switch (r->reg_num)
 	    {
@@ -2269,7 +2280,12 @@ i386_operand (operand_string)
 	      i.seg[i.mem_operands] = &gs;
 	      break;
 	    }
-	  op_string += 4;	/* skip % <x> s : */
+
+	  /* Skip the ':' and whitespace.  */
+	  ++op_string;
+	  if (is_space_char (*op_string))
+	    ++op_string;
+
 	  operand_string = op_string;	/* Pretend given string starts here. */
 	  if (!is_digit_char (*op_string) && !is_identifier_char (*op_string)
 	      && *op_string != '(' && *op_string != ABSOLUTE_PREFIX)
@@ -2280,7 +2296,9 @@ i386_operand (operand_string)
 	  /* Handle case of %es:*foo. */
 	  if (*op_string == ABSOLUTE_PREFIX)
 	    {
-	      op_string++;
+	      ++op_string;
+	      if (is_space_char (*op_string))
+		++op_string;
 	      i.types[this_operand] |= JumpAbsolute;
 	    }
 	  goto do_memory_reference;
@@ -2303,9 +2321,13 @@ i386_operand (operand_string)
 
       exp = &im_expressions[i.imm_operands++];
       i.imms[this_operand] = exp;
+
+      ++op_string;
+      if (is_space_char (*op_string))
+	++op_string;
+
       save_input_line_pointer = input_line_pointer;
-      input_line_pointer = ++op_string;	/* must advance op_string! */
-      SKIP_WHITESPACE ();
+      input_line_pointer = op_string;
       exp_seg = expression (exp);
       if (*input_line_pointer != '\0')
 	{
@@ -2396,10 +2418,15 @@ i386_operand (operand_string)
       /* Check for base index form.  We detect the base index form by
 	 looking for an ')' at the end of the operand, searching
 	 for the '(' matching it, and finding a REGISTER_PREFIX or ','
-	 after it. */
+	 after the '('.  */
       found_base_index_form = 0;
       end_of_operand_string = op_string + strlen (op_string);
-      base_string = end_of_operand_string - 1;
+
+      --end_of_operand_string;
+      if (is_space_char (*end_of_operand_string))
+	--end_of_operand_string;
+
+      base_string = end_of_operand_string;
       if (*base_string == ')')
 	{
 	  unsigned int parens_balanced = 1;
@@ -2414,7 +2441,16 @@ i386_operand (operand_string)
 		parens_balanced--;
 	    }
 	  while (parens_balanced);
-	  base_string++;	/* Skip past '('. */
+
+	  /* If there is a displacement set-up for it to be parsed later. */
+	  displacement_string_start = op_string;
+	  displacement_string_end = base_string;
+
+	  /* Skip past '(' and whitespace.  */
+	  ++base_string;
+	  if (is_space_char (*base_string))
+	    ++base_string;
+
 	  if (*base_string == REGISTER_PREFIX || *base_string == ',')
 	    found_base_index_form = 1;
 	}
@@ -2425,133 +2461,130 @@ i386_operand (operand_string)
       if (!found_base_index_form)
 	{
 	  displacement_string_start = op_string;
-	  displacement_string_end = end_of_operand_string;
+	  displacement_string_end = end_of_operand_string + 1;
 	}
       else
 	{
-	  char *base_reg_name, *index_reg_name, *num_string;
-	  int num;
-
 	  i.types[this_operand] |= BaseIndex;
-
-	  /* If there is a displacement set-up for it to be parsed later. */
-	  displacement_string_start = NULL;
-	  if (base_string != op_string + 1)
-	    {
-	      displacement_string_start = op_string;
-	      displacement_string_end = base_string - 1;
-	    }
 
 	  /* Find base register (if any). */
 	  if (*base_string != ',')
 	    {
-	      base_reg_name = base_string++;
-	      /* skip past register name & parse it */
-	      while (isalpha (*base_string))
-		base_string++;
-	      if (base_string == base_reg_name + 1)
+	      char *end_op;
+
+	      /* Trim off the closing ')' so that parse_register won't
+		 see it.  */
+	      END_STRING_AND_SAVE (end_of_operand_string);
+	      i.base_reg = parse_register (base_string, &end_op);
+	      if (i.base_reg == NULL)
 		{
-		  as_bad (_("can't find base register name after `(%c'"),
-			  REGISTER_PREFIX);
+		  RESTORE_END_STRING (end_of_operand_string);
 		  return 0;
 		}
-	      END_STRING_AND_SAVE (base_string);
-	      if (!(i.base_reg = parse_register (base_reg_name)))
-		{
-		  as_bad (_("bad base register name `%s'"), base_reg_name);
-		  RESTORE_END_STRING (base_string);
-		  return 0;
-		}
-	      RESTORE_END_STRING (base_string);
+	      RESTORE_END_STRING (end_of_operand_string);
+	      base_string = end_op;
+	      if (is_space_char (*base_string))
+		++base_string;
 	    }
 
-	  /* Now check seperator; must be ',' ==> index reg
-			   OR num ==> no index reg. just scale factor
-			   OR ')' ==> end. (scale factor = 1) */
-	  if (*base_string != ',' && *base_string != ')')
+	  /* There may be an index reg or scale factor here.  */
+	  if (*base_string == ',')
+	    {
+	      ++base_string;
+	      if (is_space_char (*base_string))
+		++base_string;
+
+	      if (*base_string == REGISTER_PREFIX)
+		{
+		  char *end_op;
+
+		  END_STRING_AND_SAVE (end_of_operand_string);
+		  i.index_reg = parse_register (base_string, &end_op);
+		  RESTORE_END_STRING (end_of_operand_string);
+
+		  if (i.index_reg == NULL)
+		    return 0;
+
+		  base_string = end_op;
+		  if (is_space_char (*base_string))
+		    ++base_string;
+		  if (*base_string == ',')
+		    {
+		      ++base_string;
+		      if (is_space_char (*base_string))
+			++base_string;
+		    }
+		  else if (*base_string != ')')
+		    {
+		      as_bad (_("expecting `,' or `)' after index register in `%s'"),
+			      operand_string);
+		      return 0;
+		    }
+		}
+
+	      /* Check for scale factor. */
+	      if (isdigit ((unsigned char) *base_string))
+		{
+		  if (isdigit ((unsigned char) base_string[1]))
+		    goto bad_scale;		/* must be 1 digit scale */
+		  switch (*base_string)
+		    {
+		    case '1':
+		      i.log2_scale_factor = 0;
+		      break;
+		    case '2':
+		      i.log2_scale_factor = 1;
+		      break;
+		    case '4':
+		      i.log2_scale_factor = 2;
+		      break;
+		    case '8':
+		      i.log2_scale_factor = 3;
+		      break;
+		    default:
+		    bad_scale:
+		      as_bad (_("expecting scale factor of 1, 2, 4 or 8; got `%s'"),
+				base_string);
+		      return 0;
+		    }
+
+		  ++base_string;
+		  if (is_space_char (*base_string))
+		    ++base_string;
+		  if (*base_string != ')')
+		    {
+		      as_bad (_("expecting `)' after scale factor in `%s'"),
+			      operand_string);
+		      return 0;
+		    }
+		  if (i.log2_scale_factor != 0 && ! i.index_reg)
+		    {
+		      as_warn (_("scale factor of %d without an index register"),
+			       1 << i.log2_scale_factor);
+#if SCALE1_WHEN_NO_INDEX
+		      i.log2_scale_factor = 0;
+#endif
+		    }
+		}
+	      else if (!i.index_reg)
+		{
+		  as_bad (_("expecting index register or scale factor after `,'; got '%c'"),
+			  *base_string);
+		  return 0;
+		}
+	    }
+	  else if (*base_string != ')')
 	    {
 	      as_bad (_("expecting `,' or `)' after base register in `%s'"),
 		      operand_string);
 	      return 0;
 	    }
-
-	  /* There may index reg here; and there may be a scale factor. */
-	  if (*base_string == ',' && *(base_string + 1) == REGISTER_PREFIX)
-	    {
-	      index_reg_name = ++base_string;
-	      while (isalpha (*++base_string));
-	      END_STRING_AND_SAVE (base_string);
-	      if (!(i.index_reg = parse_register (index_reg_name)))
-		{
-		  as_bad (_("bad index register name `%s'"), index_reg_name);
-		  RESTORE_END_STRING (base_string);
-		  return 0;
-		}
-	      RESTORE_END_STRING (base_string);
-	    }
-
-	  /* Check for scale factor. */
-	  if (*base_string == ',' && isdigit (*(base_string + 1)))
-	    {
-	      num_string = ++base_string;
-	      while (is_digit_char (*base_string))
-		base_string++;
-	      if (base_string == num_string)
-		{
-		  as_bad (_("can't find a scale factor after `,'"));
-		  return 0;
-		}
-	      END_STRING_AND_SAVE (base_string);
-	      /* We've got a scale factor. */
-	      if (!sscanf (num_string, "%d", &num))
-		{
-		  as_bad (_("can't parse scale factor from `%s'"), num_string);
-		  RESTORE_END_STRING (base_string);
-		  return 0;
-		}
-	      RESTORE_END_STRING (base_string);
-	      switch (num)
-		{		/* must be 1 digit scale */
-		case 1:
-		  i.log2_scale_factor = 0;
-		  break;
-		case 2:
-		  i.log2_scale_factor = 1;
-		  break;
-		case 4:
-		  i.log2_scale_factor = 2;
-		  break;
-		case 8:
-		  i.log2_scale_factor = 3;
-		  break;
-		default:
-		  as_bad (_("expecting scale factor of 1, 2, 4, 8; got %d"), num);
-		  return 0;
-		}
-	      if (num != 1 && ! i.index_reg)
-		{
-		  as_warn (_("scale factor of %d without an index register"),
-			   num);
-#if SCALE1_WHEN_NO_INDEX
-		  i.log2_scale_factor = 0;
-#endif
-		}
-	    }
-	  else
-	    {
-	      if (!i.index_reg && *base_string == ',')
-		{
-		  as_bad (_("expecting index register or scale factor after `,'; got '%c'"),
-			  *(base_string + 1));
-		  return 0;
-		}
-	    }
 	}
 
       /* If there's an expression begining the operand, parse it,
-	 assuming displacement_string_start and displacement_string_end
-	 are meaningful. */
-      if (displacement_string_start)
+	 assuming displacement_string_start and
+	 displacement_string_end are meaningful.  */
+      if (displacement_string_start != displacement_string_end)
 	{
 	  register expressionS *exp;
 	  segT exp_seg = 0;
@@ -3199,23 +3232,45 @@ output_invalid (c)
   return output_invalid_buf;
 }
 
-/* reg_string starts *before* REGISTER_PREFIX */
-static const reg_entry *
-parse_register (reg_string)
-     const char *reg_string;
-{
-  register const char *s = reg_string;
-  register char *p;
-  char reg_name_given[MAX_REG_NAME_SIZE];
+/* REG_STRING starts *before* REGISTER_PREFIX.  */
 
-  s++;				/* skip REGISTER_PREFIX */
+static const reg_entry *
+parse_register (reg_string, end_op)
+     char *reg_string;
+     char **end_op;
+{
+  register char *s = reg_string;
+  register char *p;
+  char reg_name_given[MAX_REG_NAME_SIZE + 1];
+  const reg_entry *r;
+
+  /* Skip REGISTER_PREFIX and possible whitespace.  */
+  ++s;
+  if (is_space_char (*s))
+    ++s;
+
   p = reg_name_given;
   while ((*p++ = register_chars[(unsigned char) *s++]) != '\0')
     {
       if (p >= reg_name_given + MAX_REG_NAME_SIZE)
-	return (const reg_entry *) NULL;
+	{
+	  *p = '\0';
+	  as_bad (_("bad register name `%s'"), reg_name_given);
+	  return (const reg_entry *) NULL;
+	}
     }
-  return (const reg_entry *) hash_find (reg_hash, reg_name_given);
+
+  *end_op = s - 1;
+
+  r = (const reg_entry *) hash_find (reg_hash, reg_name_given);
+
+  if (r == NULL)
+    {
+      as_bad (_("bad register name `%s'"), reg_name_given);
+      return (const reg_entry *) NULL;
+    }
+
+  return r;
 }
 
 #ifdef OBJ_ELF
@@ -3337,9 +3392,10 @@ md_section_align (segment, size)
   return size;
 }
 
-/* Exactly what point is a PC-relative offset relative TO?  On the
-   i386, they're relative to the address of the offset, plus its
-   size. (??? Is this right?  FIXME-SOON!) */
+/* On the i386, PC-relative offsets are relative to the start of the
+   next instruction.  That is, the address of the offset, plus its
+   size, since the offset is always the last part of the insn.  */
+
 long
 md_pcrel_from (fixP)
      fixS *fixP;

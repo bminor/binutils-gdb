@@ -1,3 +1,19 @@
+Tue Jul  7 13:00:37 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (space_chars): Remove. The scrubber converts
+	sequences of whitespace to a single space.
+	(is_space_chars): Just compare with space.
+	(md_begin): Don't initialize space_chars.
+	(md_assemble): Just skip a single whitespace character.
+	(i386_operand): Rewrite base-index parsing to use new
+	parse_register, and to skip white space.  Skip white space in a
+	number of other places too.  Don't give error message if
+	parse_register fails.
+	(parse_register): Change reg_string parameter to be non-const.
+	Add end_op parameter.  Skip white space after the `%', and return
+	end of register string.  Give error message here rather than
+	caller.
+
 Fri Jul  3 15:34:34 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	Based on patch from Matt Semersky <matts@scd.hp.com>:
