@@ -1,3 +1,37 @@
+Thu Mar 13 11:00:22 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* remote-sim.h (sim_state, SIM_DESC): New types.
+	(sim_open): Return a `descriptor' as result.
+	(*): New argument of descriptor result from sim_open.
+	* remote-sim.c (gdbsim_desc): Renamed from gdbsim_open_p.
+	(gdbsim_open): Record result of sim_open in gdbsim_desc.
+	Pass argv list to sim_open, argv[0] = pseudo program name.
+	(*): Pass gdbsim_desc to sim_foo fns.
+
+Tue Mar 11 07:25:27 1997  Mark Alexander  <marka@cygnus.com>
+
+	First cut at supporting simulators in gdbserver:
+
+	* configure, configure.in: Allow gdbserver to be configured
+	for cross-target environments.
+	* gdbserver/Makefile.in: Add simulator support.
+	* gdbserver/configure.in: Eliminate assumption that host == target.
+	Simplify using gdb/configure.tgt and gdb/configure.host.
+	Fix other minor configuration errors.
+	* gdbserver/low-sparc.c: Fix compile error.
+	* gdbserver/remote-utils.c: Eliminate assumption that registers
+	and addresses are four bytes.  Fix minor compile errors and warnings.
+	* gdbserver/server.c: Rewrite numerous instances of identical code
+	for starting inferior processes to call new function start_inferior.
+	Eliminate assumption that registers and addresses are four bytes.
+	* gdbserver/server.h: Add missing prototypes to eliminate compiler
+	warnings.
+	* gdbserver/low-sim.c: New file to mate gdbserver with simulators.
+	* config/mips/vr5000.mt: Add Vr5000 simulator support to gdbserver.
+	* config/i386/linux.mh: Eliminate gdbserver support as a first step
+	in moving such support from host to target makefile fragments.
+	* config/i386/linux.mt: Move gdbserver support here from linux.mh.
+
 Mon Mar 10 12:27:47 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* symtab.h (INIT_SAL): New macro to initialize symtab_and_line, 

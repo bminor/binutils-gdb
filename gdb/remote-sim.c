@@ -1,5 +1,5 @@
 /* Generic remote debugging interface for simulators.
-   Copyright 1993, 1994, 1996 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1996, 1997 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Steve Chamberlain (sac@cygnus.com).
 
@@ -95,8 +95,9 @@ static int program_loaded = 0;
 
 /* We must keep track of whether the simulator has been opened or not because
    GDB can call a target's close routine twice, but sim_close doesn't allow
-   this.  */
-static int gdbsim_open_p = 0;
+   this.  We also need to record the result of sim_open so we can pass it
+   back to the other sim_foo routines.  */
+static SIM_DESC gdbsim_desc = 0;
 
 static void
 dump_mem (buf, len)
@@ -138,7 +139,7 @@ init_callbacks ()
       gdb_callback.write_stdout = gdb_os_write_stdout;
       gdb_callback.printf_filtered = gdb_os_printf_filtered;
       gdb_callback.error = gdb_os_error;
-      sim_set_callbacks (&gdb_callback);
+      sim_set_callbacks (gdbsim_desc, &gdb_callback);
       callbacks_initialized = 1;
     }
 }
@@ -252,7 +253,7 @@ int regno;
     {
       char buf[MAX_REGISTER_RAW_SIZE];
 
-      sim_fetch_register (regno, buf);
+      sim_fetch_register (gdbsim_desc, regno, buf);
       supply_register (regno, buf);
       if (sr_get_debug ())
 	{
@@ -278,7 +279,7 @@ int regno;
       /* FIXME: Until read_register() returns LONGEST, we have this.  */
       char tmp[MAX_REGISTER_RAW_SIZE];
       read_register_gen (regno, tmp);
-      sim_store_register (regno, tmp);
+      sim_store_register (gdbsim_desc, regno, tmp);
       if (sr_get_debug ())
 	{
 	  printf_filtered ("gdbsim_store_register: %d", regno);
@@ -297,7 +298,7 @@ gdbsim_kill ()
   if (sr_get_debug ())
     printf_filtered ("gdbsim_kill\n");
 
-  sim_kill ();	/* close fd's, remove mappings */
+  sim_kill (gdbsim_desc);	/* close fd's, remove mappings, etc. */
   inferior_pid = 0;
 }
 
@@ -318,7 +319,7 @@ gdbsim_load (prog, fromtty)
   /* This must be done before calling gr_load_image.  */
   program_loaded = 1;
 
-  if (sim_load (prog, fromtty) != 0)
+  if (sim_load (gdbsim_desc, prog, fromtty) != 0)
     generic_load (prog, fromtty);
 }
 
@@ -365,7 +366,7 @@ gdbsim_create_inferior (exec_file, args, env)
   strcat (arg_buf, args);
   argv = buildargv (arg_buf);
   make_cleanup (freeargv, (char *) argv);
-  sim_create_inferior (entry_pt, argv, env);
+  sim_create_inferior (gdbsim_desc, entry_pt, argv, env);
 
   inferior_pid = 42;
   insert_breakpoints ();	/* Needed to get correct instruction in cache */
@@ -382,6 +383,10 @@ gdbsim_open (args, from_tty)
      char *args;
      int from_tty;
 {
+  int len;
+  char *arg_buf;
+  char **argv;
+
   if (sr_get_debug ())
     printf_filtered ("gdbsim_open: args \"%s\"\n", args ? args : "(null)");
 
@@ -391,13 +396,27 @@ gdbsim_open (args, from_tty)
      sim_close to be called if the simulator is already open, but push_target
      is called after sim_open!  We can't move the call to push_target before
      the call to sim_open because sim_open may invoke `error'.  */
-  if (gdbsim_open_p)
+  if (gdbsim_desc != NULL)
     unpush_target (&gdbsim_ops);
 
   init_callbacks ();
 
-  sim_open (args);
-  gdbsim_open_p = 1;
+  len = 7 + 1 + (args ? strlen (args) : 0) + 1 + /*slop*/ 10;
+  arg_buf = (char *) alloca (len);
+  strcpy (arg_buf, "gdbsim");
+  if (args)
+    {
+      strcat (arg_buf, " ");
+      strcat (arg_buf, args);
+    }
+  argv = buildargv (arg_buf);
+  if (argv == NULL)
+    error ("Insufficient memory available to allocate simulator arg list.");
+  make_cleanup (freeargv, (char *) argv);
+
+  /* FIXME: sim_open may call `error' if it fails, but perhaps it should
+     just return an error indicator and let us call `error'.  */
+  gdbsim_desc = sim_open (argv);
 
   push_target (&gdbsim_ops);
   target_fetch_registers (-1);
@@ -422,10 +441,10 @@ gdbsim_close (quitting)
 
   program_loaded = 0;
 
-  if (gdbsim_open_p)
+  if (gdbsim_desc != NULL)
     {
-      sim_close (quitting);
-      gdbsim_open_p = 0;
+      sim_close (gdbsim_desc, quitting);
+      gdbsim_desc = NULL;
     }
 
   end_callbacks ();
@@ -468,7 +487,7 @@ gdbsim_resume (pid, step, siggnal)
   if (sr_get_debug ())
     printf_filtered ("gdbsim_resume: step %d, signal %d\n", step, siggnal);
 
-  sim_resume (step, target_signal_to_host (siggnal));
+  sim_resume (gdbsim_desc, step, target_signal_to_host (siggnal));
 }
 
 /* Wait for inferior process to do something.  Return pid of child,
@@ -486,7 +505,7 @@ gdbsim_wait (pid, status)
   if (sr_get_debug ())
     printf_filtered ("gdbsim_wait\n");
 
-  sim_stop_reason (&reason, &sigrc);
+  sim_stop_reason (gdbsim_desc, &reason, &sigrc);
   switch (reason)
     {
     case sim_exited:
@@ -543,11 +562,11 @@ gdbsim_xfer_inferior_memory (memaddr, myaddr, len, write, target)
 
   if (write)
     {
-      len = sim_write (memaddr, myaddr, len);
+      len = sim_write (gdbsim_desc, memaddr, myaddr, len);
     }
   else 
     {
-      len = sim_read (memaddr, myaddr, len);
+      len = sim_read (gdbsim_desc, memaddr, myaddr, len);
       if (sr_get_debug () && len > 0)
 	dump_mem(myaddr, len);
     } 
@@ -570,7 +589,7 @@ gdbsim_files_info (target)
     {
       printf_filtered ("\tAttached to %s running program %s\n",
 		       target_shortname, file);
-      sim_info (0);
+      sim_info (gdbsim_desc, 0);
     }
 }
 
@@ -598,7 +617,11 @@ simulator_command (args, from_tty)
      ensure that the callbacks have been set up.  */
   init_callbacks ();
 
-  sim_do_command (args);
+  /* Note that if the simulator hasn't been opened, gdbsim_desc == NULL
+     which is correct (??? assuming of course one wishes to continue to
+     allow commands to be sent to unopened simulators, which isn't entirely
+     unreasonable).  */
+  sim_do_command (gdbsim_desc, args);
 }
 
 /* Define the target subroutine names */
