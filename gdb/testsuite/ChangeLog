@@ -1,5 +1,16 @@
 2004-06-29  Corinna Vinschen  <vinschen@redhat.com>
 
+	* gdb.arch/i386-prologue.c: Add copyright header.  Use preprocessor
+	directives to conditionalize symbol prefixing.
+	* gdb.arch/i386-prologue.exp: Allow symbol prefixing by adding
+	additional_flags handling.  Add underscore prefix for Cygwin.
+	* gdb.arch/i386-unwind.c: Use preprocessor directives to
+	conditionalize symbol prefixing.
+	* gdb.arch/i386-unwind.exp: Allow symbol prefixing by adding
+	additional_flags handling.  Add underscore prefix for Cygwin.
+
+2004-06-29  Corinna Vinschen  <vinschen@redhat.com>
+
 	* gdb.base/bigcore.exp: Skip test on Cygwin.
 
 2004-06-28  Michael Chastain  <mec.gnu@mindspring.com>
