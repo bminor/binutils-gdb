@@ -3169,8 +3169,21 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
 		bfd_archive_filename (ibfd), new_isa, old_isa);
 	      ok = false;
 	    }
-	}
+	  else
+	    {
+	      /* Do we need to update the mach field?  */
+	      if (old_mach == 0 && new_mach != 0) 
+		elf_elfheader (obfd)->e_flags |= new_mach;
 
+	      /* Do we need to update the ISA field?  */
+	      if (new_isa > old_isa)
+		{
+		  elf_elfheader (obfd)->e_flags &= ~EF_MIPS_ARCH;
+		  elf_elfheader (obfd)->e_flags
+		    |= new_flags & EF_MIPS_ARCH;
+		}
+	    }
+	}
       else
 	{
 	  (*_bfd_error_handler)
