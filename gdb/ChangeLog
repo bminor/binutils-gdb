@@ -114,6 +114,12 @@
 
 	* MAINTAINERS: Add myself to write-after-approval.
 
+2002-03-14  Michael Snyder  <msnyder@redhat.com>
+
+	* symfile.c (syms_from_objfile): Return immediately if no syms.
+	(symbol_file_add): Return immediately if no syms.
+	(find_sym_fns): Return immediately if no syms.
+
 2002-03-13  Michal Ludvig  <mludvig@suse.cz>
 
 	* gdbserver/remote-util.c (remote_open): Print remote-side's

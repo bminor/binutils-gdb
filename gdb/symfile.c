@@ -577,6 +577,9 @@ syms_from_objfile (struct objfile *objfile, struct section_addr_info *addrs,
   init_entry_point_info (objfile);
   find_sym_fns (objfile);
 
+  if (objfile->sf == NULL)
+    return;	/* No symbols. */
+
   /* Make sure that partially constructed symbol tables will be cleaned up
      if an error occurs during symbol reading.  */
   old_chain = make_cleanup_free_objfile (objfile);
@@ -858,6 +861,9 @@ symbol_file_add (char *name, int from_tty, struct section_addr_info *addrs,
       syms_from_objfile (objfile, addrs, mainline, from_tty);
     }
 
+  if (objfile->sf == NULL)
+    return objfile;	/* No symbols. */
+
   /* We now have at least a partial symbol table.  Check to see if the
      user requested that all symbols be read on initial access via either
      the gdb startup command line or on a per symbol file basis.  Expand
@@ -1133,6 +1139,11 @@ find_sym_fns (struct objfile *objfile)
   struct sym_fns *sf;
   enum bfd_flavour our_flavour = bfd_get_flavour (objfile->obfd);
   char *our_target = bfd_get_target (objfile->obfd);
+
+  if (our_flavour == bfd_target_srec_flavour
+      || our_flavour == bfd_target_ihex_flavour
+      || our_flavour == bfd_target_tekhex_flavour)
+    return;	/* No symbols. */
 
   /* Special kludge for apollo.  See dstread.c.  */
   if (STREQN (our_target, "apollo", 6))
