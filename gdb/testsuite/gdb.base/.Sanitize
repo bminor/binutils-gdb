@@ -110,6 +110,8 @@ signals.c
 signals.exp
 sparc-aout.u
 sparc-elf.u
+structs2.c
+structs2.exp
 term.exp
 twice.c
 twice.exp
@@ -121,8 +123,6 @@ whatis.exp
 Things-to-lose:
 structs.c
 structs.exp
-structs2.c
-structs2.exp
 
 # The lines between the "Do-last:" line and the end of the file
 # are executed as a /bin/sh shell script after everything else is
