@@ -135,20 +135,20 @@ vx_read_register (int regno)
 
       memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)],
 	      &mips_fpreg_packet[MIPS_R_FP0],
-	      DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM) * 32);
+	      register_size (current_gdbarch, FP0_REGNUM) * 32);
 
       /* Copy the floating point control/status register (fpcsr).  */
 
       memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->fp_control_status)],
 	      &mips_fpreg_packet[MIPS_R_FPCSR],
-	      DEPRECATED_REGISTER_RAW_SIZE (mips_regnum (current_gdbarch)->fp_control_status));
+	      register_size (current_gdbarch, mips_regnum (current_gdbarch)->fp_control_status));
     }
   else
     {
       memset (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)],
-	      0, DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM) * 32);
+	      0, register_size (current_gdbarch, FP0_REGNUM) * 32);
       memset (&deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->fp_control_status)],
-	      0, DEPRECATED_REGISTER_RAW_SIZE (mips_regnum (current_gdbarch)->fp_control_status));
+	      0, register_size (current_gdbarch, mips_regnum (current_gdbarch)->fp_control_status));
     }
 
   /* Mark the register cache valid.  */
@@ -195,13 +195,13 @@ vx_write_register (int regno)
 
       memcpy (&mips_fpreg_packet[MIPS_R_FP0],
 	      &deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)],
-	      DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM) * 32);
+	      register_size (current_gdbarch, FP0_REGNUM) * 32);
 
       /* Copy the floating point control/status register (fpcsr).  */
 
       memcpy (&mips_fpreg_packet[MIPS_R_FPCSR],
 	      &deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->fp_control_status)],
-	      DEPRECATED_REGISTER_RAW_SIZE (mips_regnum (current_gdbarch)->fp_control_status));
+	      register_size (current_gdbarch, mips_regnum (current_gdbarch)->fp_control_status));
 
       net_write_registers (mips_fpreg_packet, MIPS_FPREG_PLEN,
 			   PTRACE_SETFPREGS);

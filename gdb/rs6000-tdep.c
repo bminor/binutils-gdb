@@ -1336,7 +1336,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   for (argno = 0, argbytes = 0; argno < nargs && ii < 8; ++ii)
     {
-      int reg_size = DEPRECATED_REGISTER_RAW_SIZE (ii + 3);
+      int reg_size = register_size (current_gdbarch, ii + 3);
 
       arg = args[argno];
       type = check_typedef (VALUE_TYPE (arg));
@@ -1557,8 +1557,8 @@ rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
     {
       /* return value is copied starting from r3. */
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-	  && TYPE_LENGTH (valtype) < DEPRECATED_REGISTER_RAW_SIZE (3))
-	offset = DEPRECATED_REGISTER_RAW_SIZE (3) - TYPE_LENGTH (valtype);
+	  && TYPE_LENGTH (valtype) < register_size (current_gdbarch, 3))
+	offset = register_size (current_gdbarch, 3) - TYPE_LENGTH (valtype);
 
       memcpy (valbuf,
 	      regbuf + DEPRECATED_REGISTER_BYTE (3) + offset,

@@ -3806,8 +3806,8 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, cris_register_name);
   
   /* Length of ordinary registers used in push_word and a few other
-     places.  DEPRECATED_REGISTER_RAW_SIZE is the real way to know how
-     big a register is.  */
+     places.  register_size() is the real way to know how big a
+     register is.  */
   set_gdbarch_deprecated_register_size (gdbarch, 4);
   set_gdbarch_double_bit (gdbarch, 64);
   /* The default definition of a long double is 2 * TARGET_DOUBLE_BIT,

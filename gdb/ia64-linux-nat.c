@@ -419,7 +419,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 #define COPY_REG(_idx_,_regi_) \
   if ((regno == -1) || regno == _regi_) \
     memcpy (regp + _idx_, &deprecated_registers[DEPRECATED_REGISTER_BYTE (_regi_)], \
-	    DEPRECATED_REGISTER_RAW_SIZE (_regi_))
+	    register_size (current_gdbarch, _regi_))
 
   for (regi = IA64_GR0_REGNUM; regi <= IA64_GR31_REGNUM; regi++)
     {
@@ -485,7 +485,7 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 	{
 	  from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regi)];
 	  to = (char *) &((*fpregsetp)[regi - IA64_FR0_REGNUM]);
-	  memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (regi));
+	  memcpy (to, from, register_size (current_gdbarch, regi));
 	}
     }
 }

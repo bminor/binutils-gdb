@@ -229,7 +229,7 @@ fetch_altivec_register (int tid, int regno)
   int offset = 0;
   gdb_vrregset_t regs;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  int vrregsize = DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
+  int vrregsize = register_size (current_gdbarch, tdep->ppc_vr0_regnum);
 
   ret = ptrace (PTRACE_GETVRREGS, tid, 0, &regs);
   if (ret < 0)
@@ -247,7 +247,7 @@ fetch_altivec_register (int tid, int regno)
      vector.  VRSAVE is at the end of the array in a 4 bytes slot, so
      there is no need to define an offset for it.  */
   if (regno == (tdep->ppc_vrsave_regnum - 1))
-    offset = vrregsize - DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vrsave_regnum);
+    offset = vrregsize - register_size (current_gdbarch, tdep->ppc_vrsave_regnum);
   
   regcache_raw_supply (current_regcache, regno,
 		       regs + (regno - tdep->ppc_vr0_regnum) * vrregsize + offset);
@@ -423,7 +423,7 @@ fetch_register (int tid, int regno)
 
   if (regaddr == -1)
     {
-      memset (buf, '\0', DEPRECATED_REGISTER_RAW_SIZE (regno));   /* Supply zeroes */
+      memset (buf, '\0', register_size (current_gdbarch, regno));   /* Supply zeroes */
       regcache_raw_supply (current_regcache, regno, buf);
       return;
     }
@@ -475,8 +475,8 @@ supply_vrregset (gdb_vrregset_t *vrregsetp)
   int i;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int num_of_vrregs = tdep->ppc_vrsave_regnum - tdep->ppc_vr0_regnum + 1;
-  int vrregsize = DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
-  int offset = vrregsize - DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vrsave_regnum);
+  int vrregsize = register_size (current_gdbarch, tdep->ppc_vr0_regnum);
+  int offset = vrregsize - register_size (current_gdbarch, tdep->ppc_vrsave_regnum);
 
   for (i = 0; i < num_of_vrregs; i++)
     {
@@ -600,7 +600,7 @@ store_altivec_register (int tid, int regno)
   int offset = 0;
   gdb_vrregset_t regs;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  int vrregsize = DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
+  int vrregsize = register_size (current_gdbarch, tdep->ppc_vr0_regnum);
 
   ret = ptrace (PTRACE_GETVRREGS, tid, 0, &regs);
   if (ret < 0)
@@ -616,7 +616,7 @@ store_altivec_register (int tid, int regno)
   /* VSCR is fetched as a 16 bytes quantity, but it is really 4 bytes
      long on the hardware.  */
   if (regno == (tdep->ppc_vrsave_regnum - 1))
-    offset = vrregsize - DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vrsave_regnum);
+    offset = vrregsize - register_size (current_gdbarch, tdep->ppc_vrsave_regnum);
 
   regcache_raw_collect (current_regcache, regno,
 			regs + (regno - tdep->ppc_vr0_regnum) * vrregsize + offset);
@@ -835,8 +835,8 @@ fill_vrregset (gdb_vrregset_t *vrregsetp)
   int i;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int num_of_vrregs = tdep->ppc_vrsave_regnum - tdep->ppc_vr0_regnum + 1;
-  int vrregsize = DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
-  int offset = vrregsize - DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vrsave_regnum);
+  int vrregsize = register_size (current_gdbarch, tdep->ppc_vr0_regnum);
+  int offset = vrregsize - register_size (current_gdbarch, tdep->ppc_vrsave_regnum);
 
   for (i = 0; i < num_of_vrregs; i++)
     {

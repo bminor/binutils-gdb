@@ -1762,11 +1762,11 @@ debug_print_register (const char * func, int regno)
       unsigned char buf[MAX_REGISTER_SIZE];
       deprecated_read_register_gen (regno, buf);
       fprintf_unfiltered (gdb_stdlog, " = ");
-      for (i = 0; i < DEPRECATED_REGISTER_RAW_SIZE (regno); i++)
+      for (i = 0; i < register_size (current_gdbarch, regno); i++)
 	{
 	  fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
 	}
-      if (DEPRECATED_REGISTER_RAW_SIZE (regno) <= sizeof (LONGEST))
+      if (register_size (current_gdbarch, regno) <= sizeof (LONGEST))
 	{
 	  fprintf_unfiltered (gdb_stdlog, " 0x%s %s",
 			      paddr_nz (read_register (regno)),

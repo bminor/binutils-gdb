@@ -532,7 +532,7 @@ v850ice_fetch_registers (int regno)
     error ("v850ice_fetch_registers (%d):  bad value from ICE: %s.",
 	   regno, val);
 
-  store_unsigned_integer (val, DEPRECATED_REGISTER_RAW_SIZE (regno), regval);
+  store_unsigned_integer (val, register_size (current_gdbarch, regno), regval);
   regcache_raw_supply (current_regcache, regno, val);
 }
 
@@ -558,7 +558,7 @@ v850ice_store_registers (int regno)
     }
 
   regval = extract_unsigned_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],
-				     DEPRECATED_REGISTER_RAW_SIZE (regno));
+				     register_size (current_gdbarch, regno));
   strcpy (cmd, "reg ");
   if (!convert_register (regno, &cmd[4]))
     return;

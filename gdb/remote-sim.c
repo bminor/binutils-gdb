@@ -317,14 +317,14 @@ gdbsim_fetch_register (int regno)
 	memset (buf, 0, MAX_REGISTER_SIZE);
 	nr_bytes = sim_fetch_register (gdbsim_desc,
 				       REGISTER_SIM_REGNO (regno),
-				       buf, DEPRECATED_REGISTER_RAW_SIZE (regno));
-	if (nr_bytes > 0 && nr_bytes != DEPRECATED_REGISTER_RAW_SIZE (regno) && warn_user)
+				       buf, register_size (current_gdbarch, regno));
+	if (nr_bytes > 0 && nr_bytes != register_size (current_gdbarch, regno) && warn_user)
 	  {
 	    fprintf_unfiltered (gdb_stderr,
 				"Size of register %s (%d/%d) incorrect (%d instead of %d))",
 				REGISTER_NAME (regno),
 				regno, REGISTER_SIM_REGNO (regno),
-				nr_bytes, DEPRECATED_REGISTER_RAW_SIZE (regno));
+				nr_bytes, register_size (current_gdbarch, regno));
 	    warn_user = 0;
 	  }
 	/* FIXME: cagney/2002-05-27: Should check `nr_bytes == 0'
@@ -337,7 +337,7 @@ gdbsim_fetch_register (int regno)
 	  {
 	    printf_filtered ("gdbsim_fetch_register: %d", regno);
 	    /* FIXME: We could print something more intelligible.  */
-	    dump_mem (buf, DEPRECATED_REGISTER_RAW_SIZE (regno));
+	    dump_mem (buf, register_size (current_gdbarch, regno));
 	  }
 	break;
       }
@@ -361,8 +361,8 @@ gdbsim_store_register (int regno)
       deprecated_read_register_gen (regno, tmp);
       nr_bytes = sim_store_register (gdbsim_desc,
 				     REGISTER_SIM_REGNO (regno),
-				     tmp, DEPRECATED_REGISTER_RAW_SIZE (regno));
-      if (nr_bytes > 0 && nr_bytes != DEPRECATED_REGISTER_RAW_SIZE (regno))
+				     tmp, register_size (current_gdbarch, regno));
+      if (nr_bytes > 0 && nr_bytes != register_size (current_gdbarch, regno))
 	internal_error (__FILE__, __LINE__,
 			"Register size different to expected");
       /* FIXME: cagney/2002-05-27: Should check `nr_bytes == 0'
@@ -372,7 +372,7 @@ gdbsim_store_register (int regno)
 	{
 	  printf_filtered ("gdbsim_store_register: %d", regno);
 	  /* FIXME: We could print something more intelligible.  */
-	  dump_mem (tmp, DEPRECATED_REGISTER_RAW_SIZE (regno));
+	  dump_mem (tmp, register_size (current_gdbarch, regno));
 	}
     }
 }

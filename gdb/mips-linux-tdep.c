@@ -96,7 +96,7 @@ static void
 supply_32bit_reg (int regnum, const void *addr)
 {
   char buf[MAX_REGISTER_SIZE];
-  store_signed_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (regnum),
+  store_signed_integer (buf, register_size (current_gdbarch, regnum),
                         extract_signed_integer (addr, 4));
   regcache_raw_supply (current_regcache, regnum, buf);
 }
@@ -223,13 +223,13 @@ fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
     {
       from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)];
       to = (char *) (*fpregsetp + regno - FP0_REGNUM);
-      memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (regno - FP0_REGNUM));
+      memcpy (to, from, register_size (current_gdbarch, regno - FP0_REGNUM));
     }
   else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
     {
       from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)];
       to = (char *) (*fpregsetp + 32);
-      memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (regno));
+      memcpy (to, from, register_size (current_gdbarch, regno));
     }
   else if (regno == -1)
     {
@@ -502,13 +502,13 @@ mips64_fill_fpregset (mips64_elf_fpregset_t *fpregsetp, int regno)
     {
       from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)];
       to = (char *) (*fpregsetp + regno - FP0_REGNUM);
-      memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (regno - FP0_REGNUM));
+      memcpy (to, from, register_size (current_gdbarch, regno - FP0_REGNUM));
     }
   else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
     {
       from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)];
       to = (char *) (*fpregsetp + 32);
-      memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (regno));
+      memcpy (to, from, register_size (current_gdbarch, regno));
     }
   else if (regno == -1)
     {

@@ -1,5 +1,55 @@
 2004-08-02  Andrew Cagney  <cagney@gnu.org>
 
+	Replace DEPRECATED_REGISTER_RAW_SIZE with register_size.
+	* rs6000-tdep.c (rs6000_push_dummy_call)
+	(rs6000_extract_return_value): Use register_size.
+	* xstormy16-tdep.c (xstormy16_get_saved_register) 
+	(xstormy16_extract_return_value): Ditto.
+	* valops.c (value_assign): Ditto.
+	* v850ice.c (v850ice_fetch_registers, v850ice_store_registers): 
+	* v850-tdep.c (v850_extract_return_value): Ditto.
+	* tracepoint.c (collect_symbol): Ditto.
+	* target.c (debug_print_register): Ditto.
+	* stack.c (frame_info): Ditto.
+	* rs6000-nat.c (ARCH64, fetch_register, store_register): Ditto.
+	* rom68k-rom.c (rom68k_supply_one_register): Ditto.
+	* remote.c (struct packet_reg, remote_wait, remote_async_wait)
+	(store_register_using_P): Ditto.
+	* remote-vxmips.c (vx_read_register, vx_write_register): Ditto.
+	* remote-sim.c (gdbsim_fetch_register, gdbsim_store_register): Ditto.
+	* remote-mips.c (mips_wait, mips_fetch_registers): Ditto.
+	* remote-e7000.c (fetch_regs_from_dump, sub2_from_pc): Ditto.
+	* regcache.c (deprecated_read_register_bytes) 
+	(deprecated_write_register_bytes, read_register) 
+	(write_register): Ditto.
+	* ppc-linux-nat.c (fetch_altivec_register, fetch_register)
+	(supply_vrregset, store_altivec_register, fill_vrregset): Ditto.
+	* monitor.c (monitor_supply_register, monitor_fetch_register) 
+	(monitor_store_register): Ditto.
+	* mn10300-tdep.c (mn10300_pop_frame_regular) 
+	(mn10300_print_register): Ditto.
+	* mipsv4-nat.c (fill_fpregset): Ditto.
+	* mips-linux-tdep.c (supply_32bit_reg, fill_fpregset) 
+	(mips64_fill_fpregset): Ditto.
+	* mi/mi-main.c (register_changed_p, get_register)
+	(mi_cmd_data_write_register_values): Ditto.
+	* lynx-nat.c (fetch_inferior_registers, store_inferior_registers): 
+	* irix5-nat.c (fill_gregset, fetch_core_registers): 
+	* infrun.c (write_inferior_status_register): Ditto.
+	* infptrace.c (fetch_register, store_register): Ditto.
+	* infcmd.c (default_print_registers_info): Ditto.
+	* ia64-linux-nat.c (COPY_REG, fill_fpregset): Ditto.
+	* ia64-aix-nat.c (COPY_REG, fill_gregset): Ditto.
+	* i386gnu-nat.c (gnu_store_registers, fill): Ditto.
+	* hpux-thread.c (hpux_thread_fetch_registers)
+	(hpux_thread_store_registers): Ditto.
+	* hppah-nat.c (store_inferior_registers, fetch_register): 
+	* findvar.c (value_from_register): Ditto.
+	* dve3900-rom.c (fetch_bitmapped_register): 
+	* cris-tdep.c (cris_gdbarch_init): Ditto.
+	* alpha-tdep.h: Ditto.
+	* aix-thread.c (pd_enable, fill_sprs64, fill_sprs32): Ditto.
+
 	* regcache.h: Delete DEPRECATED_REGISTER_VIRTUAL_SIZE and
 	DEPRECATED_REGISTER_RAW_SIZE from comments.
 	* regcache.c (init_regcache_descr, regcache_dump): Do not check or

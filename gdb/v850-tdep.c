@@ -1040,7 +1040,7 @@ v850_extract_return_value (struct type *type, char *regbuf, char *valbuf)
          pointed to by R6. */
       return_buffer =
 	extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (E_V0_REGNUM),
-				  DEPRECATED_REGISTER_RAW_SIZE (E_V0_REGNUM));
+				  register_size (current_gdbarch, E_V0_REGNUM));
 
       read_memory (return_buffer, valbuf, TYPE_LENGTH (type));
     }
@@ -1193,7 +1193,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_register_size (gdbarch, v850_reg_size);
   set_gdbarch_deprecated_register_bytes (gdbarch, E_ALL_REGS_SIZE);
   set_gdbarch_deprecated_register_byte (gdbarch, v850_register_byte);
-  set_gdbarch_deprecated_register_raw_size (gdbarch, v850_register_raw_size);
+  set_gdbarch_deprecated_register_raw_size (current_gdbarch, gdbarch, v850_register_raw_size);
   set_gdbarch_deprecated_register_virtual_size (gdbarch, v850_register_raw_size);
   set_gdbarch_deprecated_register_virtual_type (gdbarch, v850_reg_virtual_type);
 

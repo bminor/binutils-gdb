@@ -549,7 +549,7 @@ deprecated_read_register_bytes (int in_start, char *in_buf, int in_len)
       int byte;
 
       reg_start = DEPRECATED_REGISTER_BYTE (regnum);
-      reg_len = DEPRECATED_REGISTER_RAW_SIZE (regnum);
+      reg_len = register_size (current_gdbarch, regnum);
       reg_end = reg_start + reg_len;
 
       if (reg_end <= in_start || in_end <= reg_start)
@@ -819,7 +819,7 @@ deprecated_write_register_bytes (int myregstart, char *myaddr, int inlen)
       int regstart, regend;
 
       regstart = DEPRECATED_REGISTER_BYTE (regnum);
-      regend = regstart + DEPRECATED_REGISTER_RAW_SIZE (regnum);
+      regend = regstart + register_size (current_gdbarch, regnum);
 
       /* Is this register completely outside the range the user is writing?  */
       if (myregend <= regstart || regend <= myregstart)
@@ -948,9 +948,9 @@ register_offset_hack (struct gdbarch *gdbarch, int regnum)
 ULONGEST
 read_register (int regnum)
 {
-  char *buf = alloca (DEPRECATED_REGISTER_RAW_SIZE (regnum));
+  char *buf = alloca (register_size (current_gdbarch, regnum));
   deprecated_read_register_gen (regnum, buf);
-  return (extract_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (regnum)));
+  return (extract_unsigned_integer (buf, register_size (current_gdbarch, regnum)));
 }
 
 ULONGEST
@@ -981,7 +981,7 @@ write_register (int regnum, LONGEST val)
 {
   void *buf;
   int size;
-  size = DEPRECATED_REGISTER_RAW_SIZE (regnum);
+  size = register_size (current_gdbarch, regnum);
   buf = alloca (size);
   store_signed_integer (buf, size, (LONGEST) val);
   deprecated_write_register_gen (regnum, buf);

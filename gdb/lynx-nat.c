@@ -313,7 +313,7 @@ fetch_inferior_registers (int regno)
 	ptrace_fun = regno == SP_REGNUM ? PTRACE_PEEKUSP : PTRACE_PEEKTHREAD;
 #endif
 	
-	for (i = 0; i < DEPRECATED_REGISTER_RAW_SIZE (regno); i += sizeof (int))
+	for (i = 0; i < register_size (current_gdbarch, regno); i += sizeof (int))
 	  {
 	    unsigned int reg;
 	    
@@ -362,7 +362,7 @@ store_inferior_registers (int regno)
       ptrace_fun = regno == SP_REGNUM ? PTRACE_POKEUSP : PTRACE_POKEUSER;
 #endif
 
-      for (i = 0; i < DEPRECATED_REGISTER_RAW_SIZE (regno); i += sizeof (int))
+      for (i = 0; i < register_size (current_gdbarch, regno); i += sizeof (int))
 	{
 	  unsigned int reg;
 

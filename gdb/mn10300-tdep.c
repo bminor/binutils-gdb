@@ -872,7 +872,7 @@ mn10300_pop_frame_regular (struct frame_info *frame)
         ULONGEST value;
 
         value = read_memory_unsigned_integer (deprecated_get_frame_saved_regs (frame)[regnum],
-                                              DEPRECATED_REGISTER_RAW_SIZE (regnum));
+                                              register_size (current_gdbarch, regnum));
         write_register (regnum, value);
       }
 
@@ -1164,8 +1164,8 @@ mn10300_print_register (const char *name, int regnum, int reg_width)
       int byte;
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	{
-	  for (byte = DEPRECATED_REGISTER_RAW_SIZE (regnum) - DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum);
-	       byte < DEPRECATED_REGISTER_RAW_SIZE (regnum);
+	  for (byte = register_size (current_gdbarch, regnum) - DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum);
+	       byte < register_size (current_gdbarch, regnum);
 	       byte++)
 	    printf_filtered ("%02x", (unsigned char) raw_buffer[byte]);
 	}

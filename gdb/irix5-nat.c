@@ -92,28 +92,28 @@ fill_gregset (gregset_t *gregsetp, int regno)
     if ((regno == -1) || (regno == regi))
       *(regp + regi) =
 	extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (regi)],
-				DEPRECATED_REGISTER_RAW_SIZE (regi));
+				register_size (current_gdbarch, regi));
 
   if ((regno == -1) || (regno == PC_REGNUM))
     *(regp + CTX_EPC) =
       extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->pc)],
-			      DEPRECATED_REGISTER_RAW_SIZE (mips_regnum (current_gdbarch)->pc));
+			      register_size (current_gdbarch, mips_regnum (current_gdbarch)->pc));
 
   if ((regno == -1) || (regno == mips_regnum (current_gdbarch)->cause))
     *(regp + CTX_CAUSE) =
       extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->cause)],
-			      DEPRECATED_REGISTER_RAW_SIZE (mips_regnum (current_gdbarch)->cause));
+			      register_size (current_gdbarch, mips_regnum (current_gdbarch)->cause));
 
   if ((regno == -1)
       || (regno == mips_regnum (current_gdbarch)->hi))
     *(regp + CTX_MDHI) =
       extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->hi)],
-			      DEPRECATED_REGISTER_RAW_SIZE (mips_regnum (current_gdbarch)->hi));
+			      register_size (current_gdbarch, mips_regnum (current_gdbarch)->hi));
 
   if ((regno == -1) || (regno == mips_regnum (current_gdbarch)->lo))
     *(regp + CTX_MDLO) =
       extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->lo)],
-			      DEPRECATED_REGISTER_RAW_SIZE (mips_regnum (current_gdbarch)->lo));
+			      register_size (current_gdbarch, mips_regnum (current_gdbarch)->lo));
 }
 
 /*
@@ -160,7 +160,7 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 	{
 	  from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regi)];
 	  to = (char *) &(fpregsetp->fp_r.fp_regs[regi - FP0_REGNUM]);
-	  memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (regi));
+	  memcpy (to, from, register_size (current_gdbarch, regi));
 	}
     }
 
@@ -233,7 +233,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 	      *dstp++ = *srcp++;
 	      *dstp++ = *srcp++;
 	      *dstp++ = *srcp++;
-	      if (DEPRECATED_REGISTER_RAW_SIZE (regno) == 4)
+	      if (register_size (current_gdbarch, regno) == 4)
 		{
 		  /* copying 4 bytes from eight bytes?
 		     I don't see how this can be right...  */

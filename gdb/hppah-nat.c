@@ -95,7 +95,7 @@ store_inferior_registers (int regno)
 	return;
 
       offset = 0;
-      len = DEPRECATED_REGISTER_RAW_SIZE (regno);
+      len = register_size (current_gdbarch, regno);
 
       /* Requests for register zero actually want the save_state's
 	 ss_flags member.  As RM says: "Oh, what a hack!"  */
@@ -106,11 +106,10 @@ store_inferior_registers (int regno)
 	  len = sizeof (ss.ss_flags);
 
 	  /* Note that ss_flags is always an int, no matter what
-	     DEPRECATED_REGISTER_RAW_SIZE(0) says.  Assuming all HP-UX
-	     PA machines are big-endian, put it at the least
-	     significant end of the value, and zap the rest of the
-	     buffer.  */
-	  offset = DEPRECATED_REGISTER_RAW_SIZE (0) - len;
+	     register_size (0) says.  Assuming all HP-UX PA machines
+	     are big-endian, put it at the least significant end of
+	     the value, and zap the rest of the buffer.  */
+	  offset = register_size (current_gdbarch, 0) - len;
 	}
 
       /* Floating-point registers come from the ss_fpblock area.  */
@@ -213,7 +212,7 @@ fetch_register (int regno)
   int i;
 
   offset = 0;
-  len = DEPRECATED_REGISTER_RAW_SIZE (regno);
+  len = register_size (current_gdbarch, regno);
 
   /* Requests for register zero actually want the save_state's
      ss_flags member.  As RM says: "Oh, what a hack!"  */
@@ -224,10 +223,10 @@ fetch_register (int regno)
       len = sizeof (ss.ss_flags);
 
       /* Note that ss_flags is always an int, no matter what
-	 DEPRECATED_REGISTER_RAW_SIZE(0) says.  Assuming all HP-UX PA
-	 machines are big-endian, put it at the least significant end
-	 of the value, and zap the rest of the buffer.  */
-      offset = DEPRECATED_REGISTER_RAW_SIZE (0) - len;
+	 register_size (0) says.  Assuming all HP-UX PA machines are
+	 big-endian, put it at the least significant end of the value,
+	 and zap the rest of the buffer.  */
+      offset = register_size (current_gdbarch, 0) - len;
       memset (buf, 0, sizeof (buf));
     }
 

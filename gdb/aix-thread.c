@@ -854,7 +854,7 @@ pd_enable (void)
     return;
 
   /* Check application word size.  */
-  arch64 = DEPRECATED_REGISTER_RAW_SIZE (0) == 8;
+  arch64 = register_size (current_gdbarch, 0) == 8;
 
   /* Check whether the application is pthreaded.  */
   stub_name = NULL;
@@ -1315,7 +1315,7 @@ fill_sprs64 (uint64_t *iar, uint64_t *msr, uint32_t *cr,
      they're not, then either GDB has been built incorrectly, or
      there's some other kind of internal error.  To be really safe,
      we should check all of the sizes.   */
-  gdb_assert (sizeof (*iar) == DEPRECATED_REGISTER_RAW_SIZE (PC_REGNUM));
+  gdb_assert (sizeof (*iar) == register_size (current_gdbarch, PC_REGNUM));
 
   if (register_cached (PC_REGNUM))
     regcache_raw_collect (current_regcache, PC_REGNUM, iar);
@@ -1351,7 +1351,7 @@ fill_sprs32 (unsigned long *iar, unsigned long *msr, unsigned long *cr,
      built incorrectly.  In order to make use of many of the header
      files in /usr/include/sys, GDB needs to be configured so that
      sizeof (long) == 4).  */
-  gdb_assert (sizeof (*iar) == DEPRECATED_REGISTER_RAW_SIZE (PC_REGNUM));
+  gdb_assert (sizeof (*iar) == register_size (current_gdbarch, PC_REGNUM));
 
   if (register_cached (PC_REGNUM))
     regcache_raw_collect (current_regcache, PC_REGNUM, iar);

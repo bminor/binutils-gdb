@@ -291,13 +291,13 @@ hpux_thread_fetch_registers (int regno)
 
 	  if (regno == FLAGS_REGNUM)
 	    /* Flags must be 0 to avoid bogus value for SS_INSYSCALL */
-	    memset (buf, '\000', DEPRECATED_REGISTER_RAW_SIZE (regno));
+	    memset (buf, '\000', register_size (current_gdbarch, regno));
 	  else if (regno == SP_REGNUM)
 	    store_unsigned_integer (buf, sizeof sp, sp);
 	  else if (regno == PC_REGNUM)
-	    read_memory (sp - 20, buf, DEPRECATED_REGISTER_RAW_SIZE (regno));
+	    read_memory (sp - 20, buf, register_size (current_gdbarch, regno));
 	  else
-	    read_memory (sp + regmap[regno], buf, DEPRECATED_REGISTER_RAW_SIZE (regno));
+	    read_memory (sp + regmap[regno], buf, register_size (current_gdbarch, regno));
 
 	  regcache_raw_supply (current_regcache, regno, buf);
 	}
@@ -357,19 +357,19 @@ hpux_thread_store_registers (int regno)
 	    {
 	      write_memory ((CORE_ADDR) & tcb_ptr->static_ctx.sp,
 			    &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],
-			    DEPRECATED_REGISTER_RAW_SIZE (regno));
+			    register_size (current_gdbarch, regno));
 	      tcb_ptr->static_ctx.sp = (cma__t_hppa_regs *)
 		(extract_unsigned_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],
-					   DEPRECATED_REGISTER_RAW_SIZE (regno)) + 160);
+					   register_size (current_gdbarch, regno)) + 160);
 	    }
 	  else if (regno == PC_REGNUM)
 	    write_memory (sp - 20,
 			  &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],
-			  DEPRECATED_REGISTER_RAW_SIZE (regno));
+			  register_size (current_gdbarch, regno));
 	  else
 	    write_memory (sp + regmap[regno],
 			  &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],
-			  DEPRECATED_REGISTER_RAW_SIZE (regno));
+			  register_size (current_gdbarch, regno));
 	}
     }
 

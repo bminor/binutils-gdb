@@ -392,13 +392,13 @@ register_changed_p (int regnum)
     return -1;
 
   if (memcmp (&old_regs[DEPRECATED_REGISTER_BYTE (regnum)], raw_buffer,
-	      DEPRECATED_REGISTER_RAW_SIZE (regnum)) == 0)
+	      register_size (current_gdbarch, regnum)) == 0)
     return 0;
 
   /* Found a changed register. Return 1. */
 
   memcpy (&old_regs[DEPRECATED_REGISTER_BYTE (regnum)], raw_buffer,
-	  DEPRECATED_REGISTER_RAW_SIZE (regnum));
+	  register_size (current_gdbarch, regnum));
 
   return 1;
 }
@@ -525,10 +525,10 @@ get_register (int regnum, int format)
 
       strcpy (buf, "0x");
       ptr = buf + 2;
-      for (j = 0; j < DEPRECATED_REGISTER_RAW_SIZE (regnum); j++)
+      for (j = 0; j < register_size (current_gdbarch, regnum); j++)
 	{
 	  int idx = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? j
-	  : DEPRECATED_REGISTER_RAW_SIZE (regnum) - 1 - j;
+	  : register_size (current_gdbarch, regnum) - 1 - j;
 	  sprintf (ptr, "%02x", (unsigned char) buffer[idx]);
 	  ptr += 2;
 	}
@@ -610,7 +610,7 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 	  old_chain = make_cleanup (xfree, buffer);
 	  store_signed_integer (buffer, DEPRECATED_REGISTER_SIZE, value);
 	  /* Write it down */
-	  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (regnum), buffer, DEPRECATED_REGISTER_RAW_SIZE (regnum));
+	  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (regnum), buffer, register_size (current_gdbarch, regnum));
 	  /* Free the buffer.  */
 	  do_cleanups (old_chain);
 	}

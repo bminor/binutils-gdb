@@ -3491,7 +3491,7 @@ void
 write_inferior_status_register (struct inferior_status *inf_status, int regno,
 				LONGEST val)
 {
-  int size = DEPRECATED_REGISTER_RAW_SIZE (regno);
+  int size = register_size (current_gdbarch, regno);
   void *buf = alloca (size);
   store_signed_integer (buf, size, val);
   regcache_raw_write (inf_status->registers, regno, buf);

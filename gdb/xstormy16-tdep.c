@@ -234,7 +234,7 @@ xstormy16_get_saved_register (char *raw_buffer, int *optimized,
 							get_frame_base (frame),
 							regnum);
 		  store_unsigned_integer (raw_buffer,
-					  DEPRECATED_REGISTER_RAW_SIZE (regnum),
+					  register_size (current_gdbarch, regnum),
 					  val);
 		}
 	      return;
@@ -252,7 +252,7 @@ xstormy16_get_saved_register (char *raw_buffer, int *optimized,
 		    /* NOTE: cagney/2003-05-09: In-line store_address()
                        with it's body - store_unsigned_integer().  */
 		    store_unsigned_integer (raw_buffer,
-					    DEPRECATED_REGISTER_RAW_SIZE (regnum),
+					    register_size (current_gdbarch, regnum),
 					    deprecated_get_frame_saved_regs (frame)[regnum]);
 		}
 	      else
@@ -261,7 +261,7 @@ xstormy16_get_saved_register (char *raw_buffer, int *optimized,
 		    *addrp = deprecated_get_frame_saved_regs (frame)[regnum];
 		  if (raw_buffer)
 		    read_memory (deprecated_get_frame_saved_regs (frame)[regnum], raw_buffer,
-				 DEPRECATED_REGISTER_RAW_SIZE (regnum));
+				 register_size (current_gdbarch, regnum));
 		}
 	      return;
 	    }
@@ -319,7 +319,7 @@ xstormy16_extract_return_value (struct type *type, char *regbuf, char *valbuf)
          pointed to by R2. */
       return_buffer =
 	extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (E_PTR_RET_REGNUM),
-				  DEPRECATED_REGISTER_RAW_SIZE (E_PTR_RET_REGNUM));
+				  register_size (current_gdbarch, E_PTR_RET_REGNUM));
 
       read_memory (return_buffer, valbuf, TYPE_LENGTH (type));
     }

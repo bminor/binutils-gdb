@@ -1034,7 +1034,7 @@ frame_info (char *addr_exp, int from_tty)
 	    /* NOTE: cagney/2003-05-22: This is assuming that the
                stack pointer was packed as an unsigned integer.  That
                may or may not be valid.  */
-	    sp = extract_unsigned_integer (value, DEPRECATED_REGISTER_RAW_SIZE (SP_REGNUM));
+	    sp = extract_unsigned_integer (value, register_size (current_gdbarch, SP_REGNUM));
 	    printf_filtered (" Previous frame's sp is ");
 	    print_address_numeric (sp, 1, gdb_stdout);
 	    printf_filtered ("\n");

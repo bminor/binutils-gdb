@@ -879,7 +879,7 @@ fetch_regs_from_dump (int (*nextchar) (), char *want)
 		internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	    }
 	  store_signed_integer (buf,
-				DEPRECATED_REGISTER_RAW_SIZE (regno),
+				register_size (current_gdbarch, regno),
 				(LONGEST) get_hex (&thischar));
 	  regcache_raw_supply (current_regcache, regno, buf);
 	  break;
@@ -1964,7 +1964,7 @@ sub2_from_pc (void)
   char buf2[200];
 
   store_signed_integer (buf,
-			DEPRECATED_REGISTER_RAW_SIZE (PC_REGNUM),
+			register_size (current_gdbarch, PC_REGNUM),
 			read_register (PC_REGNUM) - 2);
   regcache_raw_supply (current_regcache, PC_REGNUM, buf);
   sprintf (buf2, ".PC %s\r", phex_nz (read_register (PC_REGNUM), 0));

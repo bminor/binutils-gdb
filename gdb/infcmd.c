@@ -1568,13 +1568,13 @@ default_print_registers_info (struct gdbarch *gdbarch,
 		     file, 0, 1, 0, Val_pretty_default);
 
 	  fprintf_filtered (file, "\t(raw 0x");
-	  for (j = 0; j < DEPRECATED_REGISTER_RAW_SIZE (i); j++)
+	  for (j = 0; j < register_size (current_gdbarch, i); j++)
 	    {
 	      int idx;
 	      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 		idx = j;
 	      else
-		idx = DEPRECATED_REGISTER_RAW_SIZE (i) - 1 - j;
+		idx = register_size (current_gdbarch, i) - 1 - j;
 	      fprintf_filtered (file, "%02x", (unsigned char) buffer[idx]);
 	    }
 	  fprintf_filtered (file, ")");

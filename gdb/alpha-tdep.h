@@ -23,9 +23,8 @@
 #define ALPHA_TDEP_H
 
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
-   used in push_word and a few other places;
-   DEPRECATED_REGISTER_RAW_SIZE is the real way to know how big a
-   register is.  */
+   used in push_word and a few other places; register_size() is the
+   real way to know how big a register is.  */
 #define ALPHA_REGISTER_SIZE 8
 
 /* Number of machine registers.  */
