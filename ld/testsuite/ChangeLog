@@ -1,3 +1,11 @@
+2004-05-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/frame.exp: New file. Test read-only .eh_frame and
+	.gcc_except_table sections.
+	* ld-elf/frame.s: Likewise.
+	* ld-elf/table.s: Likewise.
+	* ld-elf/tbss.s: Likewise.
+
 2004-05-12  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* ld-sh/tlsbin-2.d: Adjust for section reordering changes
