@@ -1,3 +1,11 @@
+Fri Jun 26 11:09:06 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300.h: Add "machine" field for instructions.
+	(MN103, AM30): Define machine types.
+start-sanitize-am33
+	(AM33): Define machine type.
+end-sanitize-am33
+	
 start-sanitize-am33
 Mon Jun 22 13:28:59 1998  Jeffrey A Law  (law@cygnus.com)
 
