@@ -1,3 +1,11 @@
+Fri Jan 19 07:19:38 1996  Fred Fish  <fnf@cygnus.com>
+
+	* hp300ux-nat.c (getpagesize): Remove unused function
+ 	fetch_core_registers.
+	(hp300ux_core_fns):  Remove, is unused.
+	(_initialize_core_hp300ux):  Remove, is unused.
+	(gdbcore.h):  Remove #include, no longer needed.
+	
 Fri Jan 19 00:59:53 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* rs6000-nat.c (exec_one_dummy_insn): Rework to avoid

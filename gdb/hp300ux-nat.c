@@ -32,8 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/reg.h>
 #include <sys/trap.h>
 
-#include "gdbcore.h"
-
 #include <sys/file.h>
 
 /* Get kernel_u_addr using HPUX-style nlist().  */
@@ -209,77 +207,8 @@ store_inferior_registers (regno)
   return;
 }
 
-
-#if 0
-
-/* This function is no longer used.  The version in coredep.c is used
-   instead.  */
-
-/* Take the register values out of a core file and store
-   them where `read_register' will find them.  */
-
-#ifdef HPUX_VERSION_5
-#define e_PS e_regs[PS]
-#define e_PC e_regs[PC]
-#endif /* HPUX_VERSION_5 */
-
-static void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned int core_reg_size;
-     int which;
-     unsigned int reg_addr;	/* Unused in this version */
-{
-  int val, regno;
-  struct user u;
-  struct exception_stack *pes = (struct exception_stack *) core_reg_sect;
-#define es (*pes)
-  char *buf;
-
-  if (which == 0) {
-    if (core_reg_size < 
-		  ((char *) &es.e_offset - (char *) &es.e_regs[R0]))
-	  error ("Not enough registers in core file");
-    for (regno = 0; (regno < PS_REGNUM); regno++)
-      supply_register (regno, (char *) &es.e_regs[regno + R0]);
-    val = es.e_PS;
-    supply_register (regno++, (char *) &val);
-    supply_register (regno++, (char *) &es.e_PC);
-
-  } else if (which == 2) {
-
-    /* FIXME: This may not work if the float regs and control regs are
-       discontinuous.  */
-    for (regno = FP0_REGNUM, buf = core_reg_sect;
-	 (regno < NUM_REGS);
-	 buf += REGISTER_RAW_SIZE (regno), regno++)
-      {
-	supply_register (regno, buf);
-      }
-  }
-}
-
-#endif /* 0 */
-
 int
 getpagesize ()
 {
   return 4096;
-}
-
-
-/* Register that we are able to handle hp300ux core file formats.
-   FIXME: is this really bfd_target_unknown_flavour? */
-
-static struct core_fns hp300ux_core_fns =
-{
-  bfd_target_unknown_flavour,
-  fetch_core_registers,
-  NULL
-};
-
-void
-_initialize_core_hp300ux ()
-{
-  add_core_fns (&hp300ux_core_fns);
 }
