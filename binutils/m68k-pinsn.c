@@ -18,82 +18,7 @@ You should have received a copy of the GNU General Public License
 along with the binutils; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$
-   $Log$
-   Revision 1.7  1991/12/08 01:14:04  sac
-   	* bucomm.h: created to hold prototypes of bucomm.c
-   	* objdump.h: created to hold prototyes of objdump.c
-   	* am29k-pinsn.c: include objdump.h
-   	* ar.c: include bucomm.h, get ar.h from the right place and
-   	include libbfd.h
-   	* bucomm.c: defunize bfd_fatal
-   	* copy.c: include bucomm.h, lint.
-   	* i960-pinsn.h: include bucomm.h
-   	* m68k-pinsn.h: lint
-   	* nm.c: include bucomm.h, lint
-   	* objdump.c: lint
-   	* sparc-pinsn.c: include objdump.h
 
- * Revision 1.6  1991/12/01  02:58:34  sac
- * Updated to point to where the header files are now
- *
- * Revision 1.5  1991/11/03  22:58:44  bothner
- * 	* Makefile.in ($(DIST_NAME).tar.Z), TODO:  Various fixes.
- * 	* ar.c (get_pos_bfd): Fix to handling of before/after
- * 	positioning options.
- * 	* bucomm.c (fatal):  MISSING_VFPRINTF is no longer an issue,
- * 	since libiberty contains vfprintf etc if otherwise missing.
- * 	* m68k-pinsn.c (print_insn_arg):  Support BB/BW/BL
- * 	type operands, as used by branch instructions.
- * 	* nm.c:  Delegate printing of symbols to BFD,
- * 	by using bfd_print_symbol to do the formatting.
- *
- * Revision 1.4  1991/10/16  18:56:56  bothner
- * 	* Makefile.in, ar.c, bucomm.c, copy.c, cplus-dem.c, filemode.c,
- * 	i960-pinsn.c, m68k-pinsn.c, nm.c, objdump.c, size.c, sparc-pinsn.c,
- * 	* strip.c: Add or update Copyright notice.
- * 	* TODO:  Add note on 'nm -a'.
- * 	* version.c: Update version number to 1.90.
- * 	* Makefile.in: Fix making of documentation for dist.
- *
- * Revision 1.3  1991/10/11  11:22:00  gnu
- * Include bfd.h before sysdep.h, so ansidecl and PROTO() get defined first.
- *
- * Revision 1.2  1991/06/14  22:54:44  steve
- * *** empty log message ***
- *
- * Revision 1.1.1.1  1991/03/21  21:26:46  gumby
- * Back from Intel with Steve
- *
- * Revision 1.1  1991/03/21  21:26:45  gumby
- * Initial revision
- *
- * Revision 1.1  1991/03/13  00:34:06  chrisb
- * Initial revision
- *
- * Revision 1.4  1991/03/09  04:36:34  rich
- *  Modified Files:
- *  	sparc-pinsn.c ostrip.c objdump.c m68k-pinsn.c i960-pinsn.c
- *  	binutils.h
- *
- * Pulled sysdep.h out of bfd.h.
- *
- * Revision 1.3  1991/03/08  21:54:45  rich
- *  Modified Files:
- *  	Makefile ar.c binutils.h bucomm.c copy.c cplus-dem.c getopt.c
- *  	i960-pinsn.c m68k-pinsn.c nm.c objdump.c sparc-opcode.h
- *  	sparc-pinsn.c strip.c
- *
- * Verifying Portland tree with steve's last changes.  Also, some partial
- * porting.
- *
- * Revision 1.2  1991/03/08  07:46:24  sac
- * Added -l option to disassembly - prints line numbers too.
- *
- * Revision 1.1  1991/02/22  16:48:02  sac
- * Initial revision
- *
-*/
 #include "bfd.h"
 #include "sysdep.h"
 #include <stdio.h>
@@ -382,7 +307,7 @@ print_insn_arg (d, buffer, p, addr, stream)
       if (place == 'b')
 	val = NEXTBYTE (p);
       else if (place == 'B')
-	val = buffer[1];
+	val = buffer[1] > 127 ?  buffer[1] - 256 : buffer[1];
       else if (place == 'w' || place == 'W')
 	val = NEXTWORD (p);
       else if (place == 'l' || place == 'L')
