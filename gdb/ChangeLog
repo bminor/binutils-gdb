@@ -1,3 +1,10 @@
+2002-09-18  Michael Snyder  <msnyder@redhat.com>
+
+	* objc-lang.c: New file, support for Objective-C.
+	Preliminary check-in, not yet integrated into gdb.
+	* objc-lang.h: New file.
+	* objc-exp.y:  New file.
+
 2002-09-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* infrun.c (signal_stop_update): Convert definition to ISO C.
