@@ -1,5 +1,6 @@
 /* expr.c -operands, expressions-
-   Copyright (C) 1987, 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 1997
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -14,8 +15,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA. */
 
 /*
  * This is really a branch office of as-read.c. I split it out to clearly
@@ -28,7 +30,6 @@
 #include <string.h>
 
 #include "as.h"
-#include "libiberty.h"
 #include "obstack.h"
 
 static void floating_constant PARAMS ((expressionS * expressionP));
@@ -38,6 +39,19 @@ static void current_location PARAMS ((expressionS *));
 static void clean_up_expression PARAMS ((expressionS * expressionP));
 
 extern const char EXP_CHARS[], FLT_CHARS[];
+
+/* We keep a mapping of expression symbols to file positions, so that
+   we can provide better error messages.  */
+
+struct expr_symbol_line
+{
+  struct expr_symbol_line *next;
+  symbolS *sym;
+  char *file;
+  unsigned int line;
+};
+
+static struct expr_symbol_line *expr_symbol_lines;
 
 /* Build a dummy symbol to hold a complex expression.  This is how we
    build expressions up out of other expressions.  The symbol is put
@@ -49,6 +63,7 @@ make_expr_symbol (expressionP)
 {
   const char *fake;
   symbolS *symbolP;
+  struct expr_symbol_line *n;
 
   if (expressionP->X_op == O_symbol
       && expressionP->X_add_number == 0)
@@ -72,7 +87,38 @@ make_expr_symbol (expressionP)
   if (expressionP->X_op == O_constant)
     resolve_symbol_value (symbolP);
 
+  n = (struct expr_symbol_line *) xmalloc (sizeof *n);
+  n->sym = symbolP;
+  as_where (&n->file, &n->line);
+  n->next = expr_symbol_lines;
+  expr_symbol_lines = n;
+
   return symbolP;
+}
+
+/* Return the file and line number for an expr symbol.  Return
+   non-zero if something was found, 0 if no information is known for
+   the symbol.  */
+
+int
+expr_symbol_where (sym, pfile, pline)
+     symbolS *sym;
+     char **pfile;
+     unsigned int *pline;
+{
+  register struct expr_symbol_line *l;
+
+  for (l = expr_symbol_lines; l != NULL; l = l->next)
+    {
+      if (l->sym == sym)
+	{
+	  *pfile = l->file;
+	  *pline = l->line;
+	  return 1;
+	}
+    }
+
+  return 0;
 }
 
 /*
@@ -166,7 +212,7 @@ integer_constant (radix, expressionP)
 #define valuesize 32
 #endif
 
-  if (flag_mri && radix == 0)
+  if (flag_m68k_mri && radix == 0)
     {
       int flt = 0;
 
@@ -294,7 +340,7 @@ integer_constant (radix, expressionP)
 	}
     }
 
-  if (flag_mri && suffix != NULL && input_line_pointer - 1 == suffix)
+  if (flag_m68k_mri && suffix != NULL && input_line_pointer - 1 == suffix)
     c = *input_line_pointer++;
 
   if (small)
@@ -563,13 +609,13 @@ operand (expressionP)
     case '9':
       input_line_pointer--;
 
-      integer_constant (flag_mri ? 0 : 10, expressionP);
+      integer_constant (flag_m68k_mri ? 0 : 10, expressionP);
       break;
 
     case '0':
       /* non-decimal radix */
 
-      if (flag_mri)
+      if (flag_m68k_mri)
 	{
 	  char *s;
 
@@ -587,9 +633,13 @@ operand (expressionP)
       c = *input_line_pointer;
       switch (c)
 	{
+	case 'o':
+	case 'O':
+	case 'q':
+	case 'Q':
 	case '8':
 	case '9':
-	  if (flag_mri)
+	  if (flag_m68k_mri)
 	    {
 	      integer_constant (0, expressionP);
 	      break;
@@ -614,52 +664,36 @@ operand (expressionP)
 
 	case 'x':
 	case 'X':
-	  if (flag_mri)
+	  if (flag_m68k_mri)
 	    goto default_case;
 	  input_line_pointer++;
 	  integer_constant (16, expressionP);
 	  break;
 
 	case 'b':
-	  if (LOCAL_LABELS_FB)
+	  if (LOCAL_LABELS_FB && ! flag_m68k_mri)
 	    {
-	      switch (input_line_pointer[1])
+	      /* This code used to check for '+' and '-' here, and, in
+		 some conditions, fall through to call
+		 integer_constant.  However, that didn't make sense,
+		 as integer_constant only accepts digits.  */
+	      /* Some of our code elsewhere does permit digits greater
+		 than the expected base; for consistency, do the same
+		 here.  */
+	      if (input_line_pointer[1] < '0'
+		  || input_line_pointer[1] > '9')
 		{
-		case '+':
-		case '-':
-		  /* If unambiguously a difference expression, treat
-		     it as one by indicating a label; otherwise, it's
-		     always a binary number.  */
-		  {
-		    char *cp = input_line_pointer + 1;
-		    while (strchr ("0123456789", *++cp))
-		      ;
-		    if (*cp == 'b' || *cp == 'f')
-		      goto is_0b_label;
-		  }
-		  goto is_0b_binary;
-		case '0':    case '1':
-		  /* Some of our code elsewhere does permit digits
-		     greater than the expected base; for consistency,
-		     do the same here.  */
-		case '2':    case '3':    case '4':    case '5':
-		case '6':    case '7':    case '8':    case '9':
-		  goto is_0b_binary;
-		case 0:
-		  goto is_0b_label;
-		default:
-		  goto is_0b_label;
+		  /* Parse this as a back reference to label 0.  */
+		  input_line_pointer--;
+		  integer_constant (10, expressionP);
+		  break;
 		}
-	    is_0b_label:
-	      input_line_pointer--;
-	      integer_constant (10, expressionP);
-	      break;
-	    is_0b_binary:
-	      ;
+	      /* Otherwise, parse this as a binary number.  */
 	    }
+	  /* Fall through.  */
 	case 'B':
 	  input_line_pointer++;
-	  if (flag_mri)
+	  if (flag_m68k_mri)
 	    goto default_case;
 	  integer_constant (2, expressionP);
 	  break;
@@ -672,7 +706,7 @@ operand (expressionP)
 	case '5':
 	case '6':
 	case '7':
-	  integer_constant (flag_mri ? 0 : 8, expressionP);
+	  integer_constant (flag_m68k_mri ? 0 : 8, expressionP);
 	  break;
 
 	case 'f':
@@ -718,6 +752,12 @@ operand (expressionP)
 
 	case 'd':
 	case 'D':
+	  if (flag_m68k_mri)
+	    {
+	      integer_constant (0, expressionP);
+	      break;
+	    }
+	  /* Fall through.  */
 	case 'F':
 	case 'r':
 	case 'e':
@@ -752,21 +792,22 @@ operand (expressionP)
 	  as_bad ("Missing ')' assumed");
 	  input_line_pointer--;
 	}
+      SKIP_WHITESPACE ();
       /* here with input_line_pointer->char after "(...)" */
       return segment;
 
     case 'E':
-      if (! flag_mri || *input_line_pointer != '\'')
+      if (! flag_m68k_mri || *input_line_pointer != '\'')
 	goto de_fault;
       as_bad ("EBCDIC constants are not supported");
       /* Fall through.  */
     case 'A':
-      if (! flag_mri || *input_line_pointer != '\'')
+      if (! flag_m68k_mri || *input_line_pointer != '\'')
 	goto de_fault;
       ++input_line_pointer;
       /* Fall through.  */
     case '\'':
-      if (! flag_mri)
+      if (! flag_m68k_mri)
 	{
 	  /* Warning: to conform to other people's assemblers NO
 	     ESCAPEMENT is permitted for a single quote. The next
@@ -785,11 +826,15 @@ operand (expressionP)
       break;
 
     case '"':
-      /* Double quote is the logical not operator in MRI mode.  */
-      if (! flag_mri)
+      /* Double quote is the bitwise not operator in MRI mode.  */
+      if (! flag_m68k_mri)
 	goto de_fault;
       /* Fall through.  */
     case '~':
+      /* ~ is permitted to start a label on the Delta.  */
+      if (is_name_beginner (c))
+	goto isname;
+    case '!':
     case '-':
       {
 	operand (expressionP);
@@ -803,8 +848,10 @@ operand (expressionP)
 		   compatible with other people's assemblers. Sigh.  */
 		expressionP->X_unsigned = 0;
 	      }
-	    else
+	    else if (c == '~' || c == '"')
 	      expressionP->X_add_number = ~ expressionP->X_add_number;
+	    else
+	      expressionP->X_add_number = ! expressionP->X_add_number;
 	  }
 	else if (expressionP->X_op != O_illegal
 		 && expressionP->X_op != O_absent)
@@ -812,8 +859,10 @@ operand (expressionP)
 	    expressionP->X_add_symbol = make_expr_symbol (expressionP);
 	    if (c == '-')
 	      expressionP->X_op = O_uminus;
-	    else
+	    else if (c == '~' || c == '"')
 	      expressionP->X_op = O_bit_not;
+	    else
+	      expressionP->X_op = O_logical_not;
 	    expressionP->X_add_number = 0;
 	  }
 	else
@@ -826,10 +875,10 @@ operand (expressionP)
       /* $ is the program counter when in MRI mode, or when DOLLAR_DOT
          is defined.  */
 #ifndef DOLLAR_DOT
-      if (! flag_mri)
+      if (! flag_m68k_mri)
 	goto de_fault;
 #endif
-      if (flag_mri && hex_p (*input_line_pointer))
+      if (flag_m68k_mri && hex_p (*input_line_pointer))
 	{
 	  /* In MRI mode, $ is also used as the prefix for a
              hexadecimal constant.  */
@@ -906,19 +955,19 @@ operand (expressionP)
       break;
 
     case '%':
-      if (! flag_mri)
+      if (! flag_m68k_mri)
 	goto de_fault;
       integer_constant (2, expressionP);
       break;
 
     case '@':
-      if (! flag_mri)
+      if (! flag_m68k_mri)
 	goto de_fault;
       integer_constant (8, expressionP);
       break;
 
     case ':':
-      if (! flag_mri)
+      if (! flag_m68k_mri)
 	goto de_fault;
 
       /* In MRI mode, this is a floating point constant represented
@@ -929,7 +978,7 @@ operand (expressionP)
       break;
 
     case '*':
-      if (! flag_mri || is_part_of_name (*input_line_pointer))
+      if (! flag_m68k_mri || is_part_of_name (*input_line_pointer))
 	goto de_fault;
 
       current_location (expressionP);
@@ -948,6 +997,58 @@ operand (expressionP)
 	isname:
 	  name = --input_line_pointer;
 	  c = get_symbol_end ();
+
+#ifdef md_parse_name
+	  /* This is a hook for the backend to parse certain names
+             specially in certain contexts.  If a name always has a
+             specific value, it can often be handled by simply
+             entering it in the symbol table.  */
+	  if (md_parse_name (name, expressionP))
+	    {
+	      *input_line_pointer = c;
+	      break;
+	    }
+#endif
+
+#ifdef TC_I960
+	  /* The MRI i960 assembler permits
+	         lda sizeof code,g13
+	     FIXME: This should use md_parse_name.  */
+	  if (flag_mri
+	      && (strcasecmp (name, "sizeof") == 0
+		  || strcasecmp (name, "startof") == 0))
+	    {
+	      int start;
+	      char *buf;
+
+	      start = (name[1] == 't'
+		       || name[1] == 'T');
+
+	      *input_line_pointer = c;
+	      SKIP_WHITESPACE ();
+
+	      name = input_line_pointer;
+	      c = get_symbol_end ();
+
+	      buf = (char *) xmalloc (strlen (name) + 10);
+	      if (start)
+		sprintf (buf, ".startof.%s", name);
+	      else
+		sprintf (buf, ".sizeof.%s", name);
+	      symbolP = symbol_make (buf);
+	      free (buf);
+
+	      expressionP->X_op = O_symbol;
+	      expressionP->X_add_symbol = symbolP;
+	      expressionP->X_add_number = 0;
+
+	      *input_line_pointer = c;
+	      SKIP_WHITESPACE ();
+
+	      break;
+	    }	      
+#endif
+
 	  symbolP = symbol_find_or_make (name);
 
 	  /* If we have an absolute symbol or a reg, then we know its
@@ -1127,12 +1228,14 @@ static operatorT op_encoding[256] =
 /*
  *	Rank	Examples
  *	0	operand, (expression)
- *	1	= <> < <= >= >
- *	2	+ -
- *	3	used for * / % in MRI mode
- *	4	& ^ ! |
- *	5	* / % << >>
- *	6	unary - unary ~
+ *	1	||
+ *	2	&&
+ *	3	= <> < <= >= >
+ *	4	+ -
+ *	5	used for * / % in MRI mode
+ *	6	& ^ ! |
+ *	7	* / % << >>
+ *	8	unary - unary ~
  */
 static operator_rankT op_rank[] =
 {
@@ -1140,27 +1243,31 @@ static operator_rankT op_rank[] =
   0,	/* O_absent */
   0,	/* O_constant */
   0,	/* O_symbol */
+  0,	/* O_symbol_rva */
   0,	/* O_register */
   0,	/* O_bit */
-  6,	/* O_uminus */
-  6,	/* O_bit_not */
-  5,	/* O_multiply */
-  5,	/* O_divide */
-  5,	/* O_modulus */
-  5,	/* O_left_shift */
-  5,	/* O_right_shift */
-  4,	/* O_bit_inclusive_or */
-  4,	/* O_bit_or_not */
-  4,	/* O_bit_exclusive_or */
-  4,	/* O_bit_and */
-  2,	/* O_add */
-  2,	/* O_subtract */
-  1,	/* O_eq */
-  1,	/* O_ne */
-  1,	/* O_lt */
-  1,	/* O_le */
-  1,	/* O_ge */
-  1	/* O_gt */
+  8,	/* O_uminus */
+  8,	/* O_bit_not */
+  8,	/* O_logical_not */
+  7,	/* O_multiply */
+  7,	/* O_divide */
+  7,	/* O_modulus */
+  7,	/* O_left_shift */
+  7,	/* O_right_shift */
+  6,	/* O_bit_inclusive_or */
+  6,	/* O_bit_or_not */
+  6,	/* O_bit_exclusive_or */
+  6,	/* O_bit_and */
+  4,	/* O_add */
+  4,	/* O_subtract */
+  3,	/* O_eq */
+  3,	/* O_ne */
+  3,	/* O_lt */
+  3,	/* O_le */
+  3,	/* O_ge */
+  3,	/* O_gt */
+  2,	/* O_logical_and */
+  1	/* O_logical_or */
 };
 
 /* Initialize the expression parser.  */
@@ -1168,15 +1275,22 @@ static operator_rankT op_rank[] =
 void
 expr_begin ()
 {
-  /* In MRI mode, multiplication and division have lower precedence
-     than the bit wise operators.  */
-  if (flag_mri)
+  /* In MRI mode for the m68k, multiplication and division have lower
+     precedence than the bit wise operators.  */
+  if (flag_m68k_mri)
     {
-      op_rank[O_multiply] = 3;
-      op_rank[O_divide] = 3;
-      op_rank[O_modulus] = 3;
+      op_rank[O_multiply] = 5;
+      op_rank[O_divide] = 5;
+      op_rank[O_modulus] = 5;
       op_encoding['"'] = O_bit_not;
     }
+
+  /* Verify that X_op field is wide enough.  */
+  {
+    expressionS e;
+    e.X_op = O_max;
+    assert (e.X_op == O_max);
+  }
 }
 
 /* Return the encoding for the operator at INPUT_LINE_POINTER.
@@ -1233,12 +1347,26 @@ operator ()
       /* We accept !! as equivalent to ^ for MRI compatibility.  */
       if (input_line_pointer[1] != '!')
 	{
-	  if (flag_mri)
+	  if (flag_m68k_mri)
 	    return O_bit_inclusive_or;
 	  return op_encoding[c];
 	}
       ++input_line_pointer;
       return O_bit_exclusive_or;
+
+    case '|':
+      if (input_line_pointer[1] != '|')
+	return op_encoding[c];
+
+      ++input_line_pointer;
+      return O_logical_or;
+
+    case '&':
+      if (input_line_pointer[1] != '&')
+	return op_encoding[c];
+
+      ++input_line_pointer;
+      return O_logical_and;
     }
 
   /*NOTREACHED*/
@@ -1299,7 +1427,8 @@ expr (rank, resultP)
       op_right = operator ();
 
       know (op_right == O_illegal || op_rank[(int) op_right] <= op_rank[(int) op_left]);
-      know ((int) op_left >= (int) O_multiply && (int) op_left <= (int) O_gt);
+      know ((int) op_left >= (int) O_multiply
+	    && (int) op_left <= (int) O_logical_or);
 
       /* input_line_pointer->after right-hand quantity. */
       /* left-hand quantity in resultP */
@@ -1376,7 +1505,12 @@ expr (rank, resultP)
 	    case O_divide:		resultP->X_add_number /= v; break;
 	    case O_modulus:		resultP->X_add_number %= v; break;
 	    case O_left_shift:		resultP->X_add_number <<= v; break;
-	    case O_right_shift:		resultP->X_add_number >>= v; break;
+	    case O_right_shift:
+	      /* We always use unsigned shifts, to avoid relying on
+                 characteristics of the compiler used to compile gas.  */
+	      resultP->X_add_number =
+		(offsetT) ((valueT) resultP->X_add_number >> (valueT) v);
+	      break;
 	    case O_bit_inclusive_or:	resultP->X_add_number |= v; break;
 	    case O_bit_or_not:		resultP->X_add_number |= ~v; break;
 	    case O_bit_exclusive_or:	resultP->X_add_number ^= v; break;
@@ -1406,6 +1540,12 @@ expr (rank, resultP)
 	    case O_gt:
 	      resultP->X_add_number =
 		resultP->X_add_number >  v ? ~ (offsetT) 0 : 0;
+	      break;
+	    case O_logical_and:
+	      resultP->X_add_number = resultP->X_add_number && v;
+	      break;
+	    case O_logical_or:
+	      resultP->X_add_number = resultP->X_add_number || v;
 	      break;
 	    }
 	}
@@ -1466,9 +1606,10 @@ get_symbol_end ()
 
   /* We accept \001 in a name in case this is being called with a
      constructed string.  */
-  while (is_part_of_name (c = *input_line_pointer++)
-	 || c == '\001')
-    ;
+  if (is_name_beginner (c = *input_line_pointer++) || c == '\001')
+    while (is_part_of_name (c = *input_line_pointer++)
+	   || c == '\001')
+      ;
   *--input_line_pointer = 0;
   return (c);
 }
