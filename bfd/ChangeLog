@@ -1,3 +1,8 @@
+Wed Sep 13 13:27:53 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cofflink.c (coff_link_input_bfd): Fail if a section with no
+	contents has relocs.
+
 Thu Sep 12 12:45:34 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* coffcode.h (coff_compute_section_file_positions): Keep the

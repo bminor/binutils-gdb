@@ -1737,7 +1737,20 @@ coff_link_input_bfd (finfo, input_bfd)
       bfd_byte *contents;
 
       if ((o->flags & SEC_HAS_CONTENTS) == 0)
-	continue;
+	{
+	  if ((o->flags & SEC_RELOC) != 0
+	      && o->reloc_count != 0)
+	    {
+	      ((*_bfd_error_handler)
+	       ("%s: relocs in section `%s', but it has no contents",
+		bfd_get_filename (input_bfd),
+		bfd_get_section_name (input_bfd, o)));
+	      bfd_set_error (bfd_error_no_contents);
+	      return false;
+	    }
+
+	  continue;
+	}
 
       if (coff_section_data (input_bfd, o) != NULL
 	  && coff_section_data (input_bfd, o)->contents != NULL)
