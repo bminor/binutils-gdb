@@ -1,3 +1,8 @@
+2002-09-22  H.J. Lu <hjl@gnu.org>
+
+	* elf64-alpha.c (elf64_alpha_merge_ind_symbols): Don't merge
+	the relocation count between different .reloc sections.
+
 2002-09-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Allow ".sbss.*" and
