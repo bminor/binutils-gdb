@@ -12531,6 +12531,29 @@ application automatically.  However, sometimes you need to override its
 conclusions.  Use these commands to manage @value{GDBN}'s view of the
 current ABI.
 
+@cindex OS ABI
+@kindex set osabi
+
+One @value{GDBN} configuration can debug binaries for multiple operating
+system targets, either via remote debugging or native emulation. 
+@value{GDBN} will autodetect the @dfn{OS ABI} (Operating System ABI) in use,
+but you can override its conclusion using the @code{set osabi} command.
+One example where this is useful is in debugging of binaries which use
+an alternate C library (e.g.@: @sc{uClibc} for @sc{gnu}/Linux) which does
+not have the same identifying marks that the standard C library for your
+platform provides.
+
+@table @code
+@item show osabi
+Show the OS ABI currently in use.
+
+@item set osabi
+With no argument, show the list of registered available OS ABI's.
+
+@item set osabi @var{abi}
+Set the current OS ABI to @var{abi}.
+@end table
+
 @cindex float promotion
 @kindex set coerce-float-to-double
 

@@ -1,5 +1,9 @@
 2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.texinfo (Controlling GDB): Document "set osabi".
+
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.texinfo (Backtraces): Document "set backtrace-below-main".
 	* gdbint.texinfo (FRAME_CHAIN_VALID): Update documentation.
 
