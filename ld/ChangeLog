@@ -1,3 +1,7 @@
+Wed Jan 28 16:37:27 1998  J.J. van der Heijden <J.J.vanderHeijden@student.utwente.nl>
+
+	* configure.tgt (i[3456]86-*-mingw32*): New entry.
+
 Wed Jan 28 15:51:58 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* scripttempl/elf.sc: Only include linkonce sections in final
