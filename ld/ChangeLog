@@ -1,3 +1,28 @@
+2003-04-02  Nick Clifton  <nickc@redhat.com>
+
+	* pe-dll.c (pe_detail_list): arm-pe targets use underscores.
+
+2003-04-01  Danny Smith <dannysmith@users.sourceforge.net>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open):
+	Don't call pe_dll_build_section() if link_info.relocateable.
+	(gld_${EMULATION_NAME}_finish): Don't call pe_dll_fill_sections()
+	if link_info.relocateable.
+
+2003-04-01  Fabrizio Gennari  <fabrizio.ge@tiscalinet.it>
+
+	* pe-dll.c (process_def_file): Don't create an export
+	section if there are no exports and we're building an exe
+	(pe_dll_build_sections): Ditto
+	(pe_dll_fill_sections): Conditionalize setting
+	abfd->dll true on info->shared
+	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open):
+	If i386pe or armpe, call pe_dll_build_section()
+	for both exe's and dll's, not just dll's.
+	(gld_${EMULATION_NAME}_finish): For all targets except
+	shpe and mipspe, call pe_dll_fill_sections() for both
+	exe's and dll's, not just dll's.
+
 2003-04-02  Bob Wilson  <bob.wilson@acm.org>
 
 	* emulparams/xtensa-config.sh: Remove comment indicating that this is

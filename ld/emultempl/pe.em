@@ -1019,7 +1019,11 @@ gld_${EMULATION_NAME}_after_open ()
 
   pe_find_data_imports ();
 
+#if ! (defined (TARGET_IS_i386pe) || defined (TARGET_IS_armpe))
   if (link_info.shared)
+#else
+  if (!link_info.relocateable)
+#endif
     pe_dll_build_sections (output_bfd, &link_info);
 
 #ifndef TARGET_IS_i386pe
@@ -1456,7 +1460,11 @@ gld_${EMULATION_NAME}_finish ()
 #endif /* defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe) */
 
 #ifdef DLL_SUPPORT
-  if (link_info.shared)
+  if (link_info.shared
+#if !defined(TARGET_IS_shpe) && !defined(TARGET_IS_mipspe)
+    || (!link_info.relocateable && pe_def_file->num_exports != 0)
+#endif
+    )
     {
       pe_dll_fill_sections (output_bfd, &link_info);
       if (pe_implib_filename)

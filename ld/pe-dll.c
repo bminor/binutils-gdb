@@ -199,7 +199,7 @@ static pe_details_type pe_detail_list[] =
     11 /* ARM_RVA32 */,
     PE_ARCH_arm,
     bfd_arch_arm,
-    0
+    1
   },
   {
     "epoc-pei-arm-little",
@@ -563,6 +563,12 @@ process_def_file (abfd, info)
 	  free (buf);
 	}
     }
+
+  /* If we are not building a DLL, when there are no exports
+     we do not build an export table at all.  */
+  if (!pe_dll_export_everything && pe_def_file->num_exports == 0
+      && !(info->shared))
+    return;
 
   /* Now, maybe export everything else the default way.  */
   if (pe_dll_export_everything || pe_def_file->num_exports == 0)
@@ -2666,6 +2672,9 @@ pe_dll_build_sections (abfd, info)
   pe_dll_id_target (bfd_get_target (abfd));
   process_def_file (abfd, info);
 
+  if (pe_def_file->num_exports == 0 && !(info->shared))
+    return;
+
   generate_edata (abfd, info);
   build_filler_bfd (1);
 }
@@ -2707,7 +2716,8 @@ pe_dll_fill_sections (abfd, info)
 
   fill_edata (abfd, info);
 
-  pe_data (abfd)->dll = 1;
+  if (info->shared)
+    pe_data (abfd)->dll = 1;
 
   edata_s->contents = edata_d;
   reloc_s->contents = reloc_d;
