@@ -324,7 +324,7 @@ tx3904tmr_io_read_buffer (struct hw *me,
     {
       address_word address = base + byte;
       int reg_number = (address - controller->base_address) / 4;
-      int reg_offset = (address - controller->base_address) % 4;
+      int reg_offset = 3 - (address - controller->base_address) % 4;
       unsigned_4 register_value; /* in target byte order */
 
       /* fill in entire register_value word */
@@ -367,7 +367,7 @@ tx3904tmr_io_write_buffer (struct hw *me,
       address_word address = base + byte;
       unsigned_1 write_byte = ((char*) source)[byte];
       int reg_number = (address - controller->base_address) / 4;
-      int reg_offset = (address - controller->base_address) % 4;
+      int reg_offset = 3 - (address - controller->base_address) % 4;
       unsigned_4* register_ptr;
       unsigned_4 register_value;
 
@@ -384,9 +384,8 @@ tx3904tmr_io_write_buffer (struct hw *me,
 	      if(GET_TCR_TCE(controller) == 0 &&
 		 GET_TCR_CRE(controller) == 1)
 		controller->trr = 0;
-
 	    }
-	  HW_TRACE ((me, "tcr: %08lx", (long) controller->tcr));
+	  /* HW_TRACE ((me, "tcr: %08lx", (long) controller->tcr)); */
 	  break;
 
 	case ITMR_REG:
@@ -398,7 +397,7 @@ tx3904tmr_io_write_buffer (struct hw *me,
 	    {
 	      SET_ITMR_TZCE(controller, write_byte & 0x01);
 	    }
-	  HW_TRACE ((me, "itmr: %08lx", (long) controller->itmr));
+	  /* HW_TRACE ((me, "itmr: %08lx", (long) controller->itmr)); */
 	  break;
 
 	case CCDR_REG:
@@ -406,7 +405,7 @@ tx3904tmr_io_write_buffer (struct hw *me,
 	    {
 	      controller->ccdr = write_byte & 0x07;
 	    }
-	  HW_TRACE ((me, "ccdr: %08lx", (long) controller->ccdr));
+	  /* HW_TRACE ((me, "ccdr: %08lx", (long) controller->ccdr)); */
 	  break;
 
 	case PMGR_REG:
@@ -419,7 +418,7 @@ tx3904tmr_io_write_buffer (struct hw *me,
 	    {
 	      SET_PMGR_FFI(controller, write_byte & 0x01);
 	    }
-	  HW_TRACE ((me, "pmgr: %08lx", (long) controller->pmgr));
+	  /* HW_TRACE ((me, "pmgr: %08lx", (long) controller->pmgr)); */
 	  break;
 
 	case WTMR_REG:
@@ -432,7 +431,7 @@ tx3904tmr_io_write_buffer (struct hw *me,
 	      SET_WTMR_WDIS(controller, write_byte & 0x80);
 	      SET_WTMR_TWC(controller, write_byte & 0x01);
 	    }
-	  HW_TRACE ((me, "wtmr: %08lx", (long) controller->wtmr));
+	  /* HW_TRACE ((me, "wtmr: %08lx", (long) controller->wtmr)); */
 	  break;
 
 	case TISR_REG:
@@ -450,23 +449,23 @@ tx3904tmr_io_write_buffer (struct hw *me,
 	      /* clear interrupt status register */
 	      controller->tisr = 0;
 	    }
-	  HW_TRACE ((me, "tisr: %08lx", (long) controller->tisr));
+	  /* HW_TRACE ((me, "tisr: %08lx", (long) controller->tisr)); */
 	  break;
 
 	case CPRA_REG:
 	  if(reg_offset < 3) /* first, second, or third byte */
 	    {
-	      MBLIT32(controller->cpra, (reg_offset*8), (reg_offset*8+7), write_byte);
+	      MBLIT32(controller->cpra, (reg_offset*8)+7, (reg_offset*8), write_byte);
 	    }
-	  HW_TRACE ((me, "cpra: %08lx", (long) controller->cpra));
+	  /* HW_TRACE ((me, "cpra: %08lx", (long) controller->cpra)); */
 	  break;
 
 	case CPRB_REG:
 	  if(reg_offset < 3) /* first, second, or third byte */
 	    {
-	      MBLIT32(controller->cprb, (reg_offset*8), (reg_offset*8+7), write_byte);
+	      MBLIT32(controller->cprb, (reg_offset*8)+7, (reg_offset*8), write_byte);
 	    }
-	  HW_TRACE ((me, "cprb: %08lx", (long) controller->cprb));
+	  /* HW_TRACE ((me, "cprb: %08lx", (long) controller->cprb)); */
 	  break;
 
 	default: 
@@ -667,9 +666,9 @@ deliver_tx3904tmr_tick (struct hw *me,
     } /* end quotient loop */
 
   /* Reschedule a timer event in near future, so we can increment the
-     counter again.  Set the event about 50% of divisor time away, so
-     we will experience roughly two events per counter increment. */
-  hw_event_queue_schedule(me, divisor/2, deliver_tx3904tmr_tick, NULL);
+     counter again.  Set the event about 75% of divisor time away, so
+     we will experience roughly 1.3 events per counter increment. */
+  hw_event_queue_schedule(me, divisor*3/4, deliver_tx3904tmr_tick, NULL);
 }
 
 

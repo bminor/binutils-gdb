@@ -1,3 +1,19 @@
+start-sanitize-tx3904
+Tue Jun  9 12:29:50 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* dv-tx3904cpu.c (deliver_*_interrupt,*_port_event): Set the CAUSE
+ 	register upon non-zero interrupt event level, clear upon zero
+ 	event value.
+	* dv-tx3904irc.c (*_port_event): Handle deactivated interrupt signal
+	by passing zero event value.
+	(*_io_{read,write}_buffer): Endianness fixes.
+	* dv-tx3904tmr.c (*_io_{read,write}_buffer): Endianness fixes.
+	(deliver_*_tick): Reduce sim event interval to 75% of count interval.
+
+	* interp.c (sim_open): Added jmr3904pal board type that adds PAL-based
+	serial I/O and timer module at base address 0xFFFF0000.
+	
+end-sanitize-tx3904
 Tue Jun  9 11:52:29 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* mips.igen (SWC1) : Correct the handling of ReverseEndian 

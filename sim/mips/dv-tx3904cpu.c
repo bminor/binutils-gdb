@@ -1,4 +1,4 @@
-/*  This file is part of the program GDB, the GU debugger.
+/*  This file is part of the program GDB, the GNU debugger.
     
     Copyright (C) 1998 Free Software Foundation, Inc.
     Contributed by Cygnus Solutions.
@@ -163,24 +163,28 @@ deliver_tx3904cpu_interrupt (struct hw *me,
 		 controller->pending_level,
 		 (long) CIA_GET (cpu), (long) SR));
 
-      /* Don't overwrite the CAUSE field since we have no good place to clear
-	 it again.  The specs allow it to be zero by the time the interrupt
-	 handler is invoked. */
-      /* CAUSE &= ~ (cause_IP_mask << cause_IP_shift);
-	 CAUSE |= (controller->pending_level & cause_IP_mask) << cause_IP_shift; */
+      /* Clear CAUSE register.  It may stay this way if the interrupt
+	 was cleared with a negative pending_level. */
+      CAUSE &= ~ (cause_IP_mask << cause_IP_shift);
 
-      /* check for enabled / unmasked interrupts */
-      if((SR & status_IEc) &&
-	 (controller->pending_level & ((SR >> status_IM_shift) & status_IM_mask)))
+      if(controller->pending_level > 0) /* interrupt set */
 	{
-	  controller->pending_level = 0;
-	  SignalExceptionInterrupt();
-	}
-      else
-	{
-	  /* reschedule soon */
-	  hw_event_queue_schedule (me, 1, deliver_tx3904cpu_interrupt, NULL);
-	}
+	  /* set hardware-interrupt subfields of CAUSE register */
+	  CAUSE |= (controller->pending_level & cause_IP_mask) << cause_IP_shift;
+
+	  /* check for enabled / unmasked interrupts */
+	  if((SR & status_IEc) &&
+	     (controller->pending_level & ((SR >> status_IM_shift) & status_IM_mask)))
+	    {
+	      controller->pending_level = 0;
+	      SignalExceptionInterrupt();
+	    }
+	  else
+	    {
+	      /* reschedule soon */
+	      hw_event_queue_schedule (me, 1, deliver_tx3904cpu_interrupt, NULL);
+	    }
+	} /* interrupt set */
     }
 #undef CPU cpu
 #undef SD current_state
@@ -209,7 +213,11 @@ tx3904cpu_port_event (struct hw *me,
       break;
       
     case LEVEL_PORT:
-      controller->pending_level |= level; /* accumulate bits until they are cleared */
+      /* level == 0 means that the interrupt was cleared */
+      if(level == 0)
+	controller->pending_level = -1; /* signal end of interrupt */
+      else
+	controller->pending_level = level;
       HW_TRACE ((me, "port-in level=%d", level));
       break;
       

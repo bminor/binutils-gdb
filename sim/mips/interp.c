@@ -363,6 +363,8 @@ static const OPTION mips_options[] =
 /* start-sanitize-tx3904 */
 #define BOARD_JMR3904 "jmr3904"
            "|" BOARD_JMR3904
+#define BOARD_JMR3904_PAL "jmr3904pal"
+           "|" BOARD_JMR3904_PAL
 #define BOARD_JMR3904_DEBUG "jmr3904debug"
            "|" BOARD_JMR3904_DEBUG
 /* end-sanitize-tx3904 */
@@ -481,6 +483,7 @@ sim_open (kind, cb, abfd, argv)
 #if (WITH_HW)
   if (board != NULL
       && (strcmp(board, BOARD_JMR3904) == 0 ||
+	  strcmp(board, BOARD_JMR3904_PAL) == 0 ||
 	  strcmp(board, BOARD_JMR3904_DEBUG) == 0))
     {
       /* match VIRTUAL memory layout of JMR-TX3904 board */
@@ -517,6 +520,19 @@ sim_open (kind, cb, abfd, argv)
       sim_hw_parse (sd, "/tx3904tmr@0xfffff000 > int tmr0 /tx3904irc");
       sim_hw_parse (sd, "/tx3904tmr@0xfffff100 > int tmr1 /tx3904irc");
       sim_hw_parse (sd, "/tx3904tmr@0xfffff200 > int tmr2 /tx3904irc");
+
+      /* add PAL timer & I/O module */
+      if(! strcmp(board, BOARD_JMR3904_PAL))
+	{
+	 /* the device */
+	 sim_hw_parse (sd, "/pal@0xffff0000");
+	 sim_hw_parse (sd, "/pal@0xffff0000/reg 0xffff0000 64");
+
+	 /* wire up interrupt ports to irc */
+	 sim_hw_parse (sd, "/pal@0x31000000 > countdown tmr0 /tx3904irc");
+	 sim_hw_parse (sd, "/pal@0x31000000 > timer tmr1 /tx3904irc");
+	 sim_hw_parse (sd, "/pal@0x31000000 > int int0 /tx3904irc");
+	}
 
       if(! strcmp(board, BOARD_JMR3904_DEBUG))
 	{
