@@ -1,3 +1,11 @@
+start-sanitize-r5900
+Tue Mar 24 18:21:03 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * gas/mips/vu0.s: Add tests for "bc2f", "bc2fl", "bc2t", "bc2tl",
+        "cfc.i", "cfc.ni", "ctc.i", and "ctc.ni".
+        * gas/mips/vu0.d: Corresponding changes.
+
+end-sanitize-r5900
 start-sanitize-sky
 Mon Mar 23 13:26:12 1998  Doug Evans  <devans@canuck.cygnus.com>
 
