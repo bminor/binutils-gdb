@@ -123,6 +123,17 @@ static void frame_get_saved_regs (struct frame_info * fi,
 				  struct rs6000_framedata * fdatap);
 static CORE_ADDR frame_initial_stack_address (struct frame_info *);
 
+/* Is REGNO an AltiVec register?  Return 1 if so, 0 otherwise.  */
+int
+altivec_register_p (int regno)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  if (tdep->ppc_vr0_regnum < 0 || tdep->ppc_vrsave_regnum < 0)
+    return 0;
+  else
+    return (regno >= tdep->ppc_vr0_regnum && regno <= tdep->ppc_vrsave_regnum);
+}
+
 /* Read a LEN-byte address from debugged memory address MEMADDR. */
 
 static CORE_ADDR
