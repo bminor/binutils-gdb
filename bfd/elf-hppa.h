@@ -1491,12 +1491,25 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 		    (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
 		     bfd_archive_filename (input_bfd), h->root.root.string,
 		     bfd_get_section_name (input_bfd, input_section));
-		  relocation = 0;
 		}
 	      relocation = 0;
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
-	    relocation = 0;
+            {
+	      dyn_name = get_dyn_name (input_section, h, rel,
+				       &dynh_buf, &dynh_buflen);
+	      dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
+						  dyn_name, FALSE, FALSE);
+
+	      if (dyn_h == NULL)
+		{
+		  (*_bfd_error_handler)
+		    (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
+		     bfd_archive_filename (input_bfd), h->root.root.string,
+		     bfd_get_section_name (input_bfd, input_section));
+		}
+	      relocation = 0;
+	    }
 	  else
 	    {
 	      /* Ignore dynamic loader defined symbols.  */

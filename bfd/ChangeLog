@@ -1,3 +1,8 @@
+2003-07-30  Randolph Chung  <tausq@debian.org>
+
+	* elf-hppa.h (elf_hppa_relocate_section): Look up dyn_h for undefweak.
+	* elf64-hppa.c (elf64_hppa_finalize_dlt): Check h->root.type.
+
 2003-07-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c: Convert to C90, remove unnecessary prototypes and casts.
