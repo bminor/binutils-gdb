@@ -1,5 +1,8 @@
 Thu Jul  6 12:54:27 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-sparc.c (s_reserve): Don't permit redefinition, even
+	if the symbol was already in bss_section.  Fix warning message.
+
 	* listing.c (struct file_info_struct): Rename end_pending field to
 	at_end.
 	(file_info): Initialize at_end, not end_pending.

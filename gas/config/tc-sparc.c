@@ -250,8 +250,7 @@ s_reserve (ignore)
   else
     align = 0;
 
-  if ((S_GET_SEGMENT (symbolP) == bss_section
-       || !S_IS_DEFINED (symbolP))
+  if (!S_IS_DEFINED (symbolP)
 #ifdef OBJ_AOUT
       && S_GET_OTHER (symbolP) == 0
       && S_GET_DESC (symbolP) == 0
@@ -285,7 +284,8 @@ s_reserve (ignore)
     }
   else
     {
-      as_warn("Ignoring attempt to re-define symbol %s.", name);
+      as_warn("Ignoring attempt to re-define symbol %s",
+	      S_GET_NAME (symbolP));
     }				/* if not redefining */
 
   demand_empty_rest_of_line ();
