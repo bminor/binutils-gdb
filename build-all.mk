@@ -34,6 +34,9 @@ endif
 ifeq ($(canonhost),mips-sgi-irix4.0.1)
 canonhost := mips-sgi-irix4
 endif
+ifeq ($(canonhost),rs6000-ibm-aix3.2)
+canonhost := rs6000-ibm-aix
+endif
 ifeq ($(canonhost),i486-unknown-sco3.2v4.0)
 canonhost := i386-sco3.2v4
 endif
