@@ -107,13 +107,13 @@ os9k_object_p (abfd)
 
   if (bfd_read ((PTR) &exec_bytes, MHCOM_BYTES_SIZE, 1, abfd)
       != MHCOM_BYTES_SIZE) {
-    bfd_error = wrong_format;
+    bfd_set_error (bfd_error_wrong_format);
     return 0;
   }
 
   anexec.a_info = bfd_h_get_16 (abfd, exec_bytes.m_sync);
   if (N_BADMAG (anexec)) {
-    bfd_error = wrong_format;
+    bfd_set_error (bfd_error_wrong_format);
     return 0;
   }
 
@@ -184,7 +184,7 @@ os9k_mkobject (abfd)
 
   rawptr = (struct bout_data_struct *) bfd_zalloc (abfd, sizeof (struct bout_data_struct));
   if (rawptr == NULL) {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -263,7 +263,7 @@ os9k_set_section_contents (abfd, section, location, offset, count)
   if (abfd->output_has_begun == false) { /* set by bfd.c handler */
     if ((obj_textsec (abfd) == NULL) || (obj_datasec (abfd) == NULL) /*||
         (obj_textsec (abfd)->_cooked_size == 0) || (obj_datasec (abfd)->_cooked_size == 0)*/) {
-      bfd_error = invalid_operation;
+      bfd_set_error (bfd_error_invalid_operation);
       return false;
     }
 

@@ -1,5 +1,7 @@
 Tue Mar  1 13:06:53 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
+	* i386os9k.c: use new functions bfd_set_error and bfd_get_error.
+	* Makefile.in: delete an extra blank.
 	* configure.in : Add i396os9k_vec.
 
 Mon Feb 28 15:41:01 1994  Kung Hsu  (kung@mexican.cygnus.com)
