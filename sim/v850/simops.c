@@ -5,6 +5,7 @@
 #include "bfd.h"
 #include <errno.h>
 #include <sys/stat.h>
+#include <sys/times.h>
 
 enum op_types {
   OP_UNKNOWN,
@@ -2086,6 +2087,27 @@ OP_10007E0 ()
 	case SYS_time:
 	  RETVAL = time (MEMPTR (PARM1));
 	  break;
+	case SYS_times:
+	  {
+	    struct tms tms;
+	    RETVAL = times (&tms);
+	    store_mem (PARM1, 4, tms.tms_utime);
+	    store_mem (PARM1 + 4, 4, tms.tms_stime);
+	    store_mem (PARM1 + 8, 4, tms.tms_cutime);
+	    store_mem (PARM1 + 12, 4, tms.tms_cstime);
+	    break;
+	  }
+	case SYS_gettimeofday:
+	  {
+	    struct timeval t;
+	    struct timezone tz;
+	    RETVAL = gettimeofday (&t, &tz);
+	    store_mem (PARM1, 4, t.tv_sec);
+	    store_mem (PARM1 + 4, 4, t.tv_usec);
+	    store_mem (PARM2, 4, tz.tz_minuteswest);
+	    store_mem (PARM2 + 4, 4, tz.tz_dsttime);
+	    break;
+	  }
 	case SYS_utime:
 	  /* Cast the second argument to void *, to avoid type mismatch
 	     if a prototype is present.  */
