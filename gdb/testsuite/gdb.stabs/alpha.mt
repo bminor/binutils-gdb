@@ -3,4 +3,4 @@
 #
 weird.o: $(srcdir)/weird.def $(srcdir)/ecoff.sed
 	sed -f $(srcdir)/ecoff.sed <$(srcdir)/weird.def >weird.s
-	$(CC) -c weird.s
+	$(CC) $(CFLAGS) -c weird.s
