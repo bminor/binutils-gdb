@@ -1,3 +1,15 @@
+2003-11-22  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* ehopt.c: Convert to ISO-C.
+	* emul.h: Likewise.
+	* expr.c: Likewise.
+	* expr.h: Likewise.
+	* flonum-copy.c: Likewise.
+	* flonum-mult.c: Likewise.
+	* flonum.h: Likewise.
+	* frags.c: Likewise.
+	* frags.h: Likewise.
+
 2003-11-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* doc/c-ppc.texi (PowerPC-Pseudo): Add section.

@@ -30,7 +30,7 @@ extern fragS bss_address_frag;
 /* Initialization for frag routines.  */
 
 void
-frag_init ()
+frag_init (void)
 {
   zero_address_frag.fr_type = rs_fill;
   bss_address_frag.fr_type = rs_fill;
@@ -61,8 +61,7 @@ frag_alloc_check (const struct obstack *ob)
    hackery can be done in just one place.  */
 
 fragS *
-frag_alloc (ob)
-     struct obstack *ob;
+frag_alloc (struct obstack *ob)
 {
   fragS *ptr;
   int oalign;
@@ -82,8 +81,7 @@ frag_alloc (ob)
    do not return. Do not set up any fields of *now_frag.  */
 
 void
-frag_grow (nchars)
-     unsigned int nchars;
+frag_grow (unsigned int nchars)
 {
   if (obstack_room (&frchain_now->frch_obstack) < nchars)
     {
@@ -125,10 +123,9 @@ frag_grow (nchars)
    of frchain_now.  */
 
 void
-frag_new (old_frags_var_max_size)
-     /* Number of chars (already allocated on obstack frags) in
-	variable_length part of frag.  */
-     int old_frags_var_max_size;
+frag_new (int old_frags_var_max_size
+	  /* Number of chars (already allocated on obstack frags) in
+	     variable_length part of frag.  */)
 {
   fragS *former_last_fragP;
   frchainS *frchP;
@@ -178,8 +175,7 @@ frag_new (old_frags_var_max_size)
    frag_now_growth past the new chars.  */
 
 char *
-frag_more (nchars)
-     int nchars;
+frag_more (int nchars)
 {
   register char *retval;
 
@@ -198,14 +194,8 @@ frag_more (nchars)
    to write into.  */
 
 char *
-frag_var (type, max_chars, var, subtype, symbol, offset, opcode)
-     relax_stateT type;
-     int max_chars;
-     int var;
-     relax_substateT subtype;
-     symbolS *symbol;
-     offsetT offset;
-     char *opcode;
+frag_var (relax_stateT type, int max_chars, int var, relax_substateT subtype,
+	  symbolS *symbol, offsetT offset, char *opcode)
 {
   register char *retval;
 
@@ -236,14 +226,9 @@ frag_var (type, max_chars, var, subtype, symbol, offset, opcode)
 	No call to frag_grow is done.  */
 
 char *
-frag_variant (type, max_chars, var, subtype, symbol, offset, opcode)
-     relax_stateT type;
-     int max_chars;
-     int var;
-     relax_substateT subtype;
-     symbolS *symbol;
-     offsetT offset;
-     char *opcode;
+frag_variant (relax_stateT type, int max_chars, int var,
+	      relax_substateT subtype, symbolS *symbol, offsetT offset,
+	      char *opcode)
 {
   register char *retval;
 
@@ -270,8 +255,7 @@ frag_variant (type, max_chars, var, subtype, symbol, offset, opcode)
 /* Reduce the variable end of a frag to a harmless state.  */
 
 void
-frag_wane (fragP)
-     register fragS *fragP;
+frag_wane (register fragS *fragP)
 {
   fragP->fr_type = rs_fill;
   fragP->fr_offset = 0;
@@ -286,10 +270,7 @@ frag_wane (fragP)
    or 0 if there is no maximum.  */
 
 void
-frag_align (alignment, fill_character, max)
-     int alignment;
-     int fill_character;
-     int max;
+frag_align (int alignment, int fill_character, int max)
 {
   if (now_seg == absolute_section)
     {
@@ -319,11 +300,8 @@ frag_align (alignment, fill_character, max)
    doing the alignment, or 0 if there is no maximum.  */
 
 void
-frag_align_pattern (alignment, fill_pattern, n_fill, max)
-     int alignment;
-     const char *fill_pattern;
-     int n_fill;
-     int max;
+frag_align_pattern (int alignment, const char *fill_pattern,
+		    int n_fill, int max)
 {
   char *p;
 
@@ -353,9 +331,7 @@ frag_align_pattern (alignment, fill_pattern, n_fill, max)
 #endif
 
 void
-frag_align_code (alignment, max)
-     int alignment;
-     int max;
+frag_align_code (int alignment, int max)
 {
   char *p;
 
@@ -366,7 +342,7 @@ frag_align_code (alignment, max)
 }
 
 addressT
-frag_now_fix_octets ()
+frag_now_fix_octets (void)
 {
   if (now_seg == absolute_section)
     return abs_section_offset;
@@ -376,14 +352,13 @@ frag_now_fix_octets ()
 }
 
 addressT
-frag_now_fix ()
+frag_now_fix (void)
 {
   return frag_now_fix_octets () / OCTETS_PER_BYTE;
 }
 
 void
-frag_append_1_char (datum)
-     int datum;
+frag_append_1_char (int datum)
 {
   frag_alloc_check (&frchain_now->frch_obstack);
   if (obstack_room (&frchain_now->frch_obstack) <= 1)
