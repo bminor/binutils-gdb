@@ -148,7 +148,7 @@ static struct monitor_ops cpu32bug_cmds =
   MONITOR_OPS_MAGIC		/* magic */
   };
 
-void
+static void
 cpu32bug_open(args, from_tty)
      char *args;
      int from_tty;
