@@ -324,6 +324,8 @@ ALL_EMULATIONS = \
 	esun4.o \
 	etic30aout.o \
 	etic30coff.o \
+	etic3xcoff.o \
+	etic3xcoff_onchip.o \
 	etic4xcoff.o \
 	etic54xcoff.o \
 	etic80coff.o \
@@ -1299,6 +1301,12 @@ etic30aout.c: $(srcdir)/emulparams/tic30aout.sh \
 etic30coff.c: $(srcdir)/emulparams/tic30coff.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/tic30coff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} tic30coff "$(tdir_tic30coff)"
+etic3xcoff.c: $(srcdir)/emulparams/tic3xcoff.sh \
+  $(srcdir)/emultempl/ticoff.em $(srcdir)/scripttempl/tic4xcoff.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} tic3xcoff "$(tdir_tic4xcoff)"
+etic3xcoff_onchip.c: $(srcdir)/emulparams/tic3xcoff_onchip.sh \
+  $(srcdir)/emultempl/ticoff.em $(srcdir)/scripttempl/tic4xcoff.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} tic3xcoff "$(tdir_tic4xcoff)"
 etic4xcoff.c: $(srcdir)/emulparams/tic4xcoff.sh \
   $(srcdir)/emultempl/ticoff.em $(srcdir)/scripttempl/tic4xcoff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} tic4xcoff "$(tdir_tic4xcoff)"

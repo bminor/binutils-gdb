@@ -1,3 +1,7 @@
+2003-01-20  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* coffcode.h (coff_set_flags): Added get/set arch hooks.
+	
 2003-01-20  Fabio Alemagna  <falemagn@aros.org>
 
 	* elf32-sh.c: Treat elfNN_bed like other macros defined in
