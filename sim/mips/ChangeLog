@@ -1,3 +1,9 @@
+2002-03-07  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (BREAK, LUI, ORI, SYSCALL, XORI): Print
+	immediate or code as a hex value with the "%#lx" format.
+	(ANDI): Likewise, and fix printed instruction name.
+
 2002-03-05  Chris Demetriou  <cgd@broadcom.com>
 
 	* sim-main.h (UndefinedResult, Unpredictable): New macros

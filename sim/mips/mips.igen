@@ -408,7 +408,7 @@
 
 
 001100,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ANDI
-"and r<RT>, r<RS>, <IMMEDIATE>"
+"andi r<RT>, r<RS>, %#lx<IMMEDIATE>"
 *mipsI:
 *mipsII:
 *mipsIII:
@@ -800,7 +800,7 @@
 
 
 000000,20.CODE,001101:SPECIAL:32::BREAK
-"break <CODE>"
+"break %#lx<CODE>"
 *mipsI:
 *mipsII:
 *mipsIII:
@@ -1775,7 +1775,7 @@
 
 
 001111,00000,5.RT,16.IMMEDIATE:NORMAL:32::LUI
-"lui r<RT>, <IMMEDIATE>"
+"lui r<RT>, %#lx<IMMEDIATE>"
 *mipsI:
 *mipsII:
 *mipsIII:
@@ -2096,7 +2096,7 @@
 }
 
 001101,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ORI
-"ori r<RT>, r<RS>, <IMMEDIATE>"
+"ori r<RT>, r<RS>, %#lx<IMMEDIATE>"
 *mipsI:
 *mipsII:
 *mipsIII:
@@ -2736,7 +2736,7 @@
 
 
 000000,20.CODE,001100:SPECIAL:32::SYSCALL
-"syscall <CODE>"
+"syscall %#lx<CODE>"
 *mipsI:
 *mipsII:
 *mipsIII:
@@ -2948,7 +2948,7 @@
 }
 
 001110,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::XORI
-"xori r<RT>, r<RS>, <IMMEDIATE>"
+"xori r<RT>, r<RS>, %#lx<IMMEDIATE>"
 *mipsI:
 *mipsII:
 *mipsIII:
