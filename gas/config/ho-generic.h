@@ -1,5 +1,5 @@
 /* ho-generic.h  Generic host-specific header file.
-   Copyright (C) 1987, 1991 Free Software Foundation, Inc.
+   Copyright 1987, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -21,18 +21,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define M_GENERIC 1
 
-/*
- * $Log$
- * Revision 1.2  1991/06/14 14:01:58  rich
- * Version 2 GPL.
- *
- * Revision 1.1.1.1  1991/04/04  18:15:43  rich
- * new gas main line
- *
- * Revision 1.1  1991/04/04  18:15:42  rich
- * Initial revision
- *
- *
- */
+extern int free();
 
 /* end of ho-generic.h */
