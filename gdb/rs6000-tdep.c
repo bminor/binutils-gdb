@@ -770,7 +770,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	       trampolines.  */
 	    break;
 	  if ((op & 0xf4000000) == 0x40000000) /* bxx */
-	    /* Never skip branches. */
+	    /* Never skip branches.  */
 	    break;
 
 	  if (num_skip_non_prologue_insns++ > max_skip_non_prologue_insns)
@@ -791,9 +791,9 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 
   /* If the first thing after skipping a prolog is a branch to a function,
      this might be a call to an initializer in main(), introduced by gcc2.
-     We'd like to skip over it as well. Fortunately, xlc does some extra
+     We'd like to skip over it as well.  Fortunately, xlc does some extra
      work before calling a function right after a prologue, thus we can
-     single out such gcc2 behaviour. */
+     single out such gcc2 behaviour.  */
 
 
   if ((op & 0xfc000001) == 0x48000001)
@@ -803,8 +803,8 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
       if (op == 0x4def7b82)
 	{			/* cror 0xf, 0xf, 0xf (nop) */
 
-	  /* check and see if we are in main. If so, skip over this initializer
-	     function as well. */
+	  /* Check and see if we are in main.  If so, skip over this
+	     initializer function as well.  */
 
 	  tmp = find_pc_misc_function (pc);
 	  if (tmp >= 0 && STREQ (misc_function_vector[tmp].name, main_name ()))
@@ -824,7 +824,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 *************************************************************************/
 
 
-/* Pop the innermost frame, go back to the caller. */
+/* Pop the innermost frame, go back to the caller.  */
 
 static void
 rs6000_pop_frame (void)
@@ -847,9 +847,9 @@ rs6000_pop_frame (void)
   /* Make sure that all registers are valid.  */
   read_register_bytes (0, NULL, REGISTER_BYTES);
 
-  /* figure out previous %pc value. If the function is frameless, it is 
+  /* Figure out previous %pc value.  If the function is frameless, it is 
      still in the link register, otherwise walk the frames and retrieve the
-     saved %pc value in the previous frame. */
+     saved %pc value in the previous frame.  */
 
   addr = get_pc_function_start (frame->pc);
   (void) skip_prologue (addr, frame->pc, &fdata);
@@ -867,7 +867,7 @@ rs6000_pop_frame (void)
   /* reset %pc value. */
   write_register (PC_REGNUM, lr);
 
-  /* reset register values if any was saved earlier. */
+  /* reset register values if any was saved earlier.  */
 
   if (fdata.saved_gpr != -1)
     {
@@ -895,7 +895,7 @@ rs6000_pop_frame (void)
 }
 
 /* Fixup the call sequence of a dummy function, with the real function
-   address.  Its arguments will be passed by gdb. */
+   address.  Its arguments will be passed by gdb.  */
 
 static void
 rs6000_fix_call_dummy (char *dummyname, CORE_ADDR pc, CORE_ADDR fun,
@@ -917,8 +917,8 @@ rs6000_fix_call_dummy (char *dummyname, CORE_ADDR pc, CORE_ADDR fun,
    the first eight words of the argument list (that might be less than
    eight parameters if some parameters occupy more than one word) are
    passed in r3..r10 registers.  float and double parameters are
-   passed in fpr's, in addition to that. Rest of the parameters if any
-   are passed in user stack. There might be cases in which half of the
+   passed in fpr's, in addition to that.  Rest of the parameters if any
+   are passed in user stack.  There might be cases in which half of the
    parameter is copied into registers, the other half is pushed into
    stack.
 
@@ -927,7 +927,7 @@ rs6000_fix_call_dummy (char *dummyname, CORE_ADDR pc, CORE_ADDR fun,
 
    If the function is returning a structure, then the return address is passed
    in r3, then the first 7 words of the parameters can be passed in registers,
-   starting from r4. */
+   starting from r4.  */
 
 static CORE_ADDR
 rs6000_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
@@ -946,13 +946,13 @@ rs6000_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
   CORE_ADDR saved_sp;
 
-  /* The first eight words of ther arguments are passed in registers. Copy
-     them appropriately.
+  /* The first eight words of ther arguments are passed in registers.
+     Copy them appropriately.
 
      If the function is returning a `struct', then the first word (which 
-     will be passed in r3) is used for struct return address. In that
+     will be passed in r3) is used for struct return address.  In that
      case we should advance one word and start from r4 register to copy 
-     parameters. */
+     parameters.  */
 
   ii = struct_return ? 1 : 0;
 
@@ -986,9 +986,9 @@ rs6000_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       if (TYPE_CODE (type) == TYPE_CODE_FLT)
 	{
 
-	  /* floating point arguments are passed in fpr's, as well as gpr's.
+	  /* Floating point arguments are passed in fpr's, as well as gpr's.
 	     There are 13 fpr's reserved for passing parameters. At this point
-	     there is no way we would run out of them. */
+	     there is no way we would run out of them.  */
 
 	  if (len > 8)
 	    printf_unfiltered (
@@ -1003,7 +1003,7 @@ rs6000_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       if (len > reg_size)
 	{
 
-	  /* Argument takes more than one register. */
+	  /* Argument takes more than one register.  */
 	  while (argbytes < len)
 	    {
 	      memset (&registers[REGISTER_BYTE (ii + 3)], 0, reg_size);
@@ -1020,7 +1020,8 @@ rs6000_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	  --ii;
 	}
       else
-	{			/* Argument can fit in one register. No problem. */
+	{
+	  /* Argument can fit in one register.  No problem.  */
 	  int adj = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? reg_size - len : 0;
 	  memset (&registers[REGISTER_BYTE (ii + 3)], 0, reg_size);
 	  memcpy ((char *)&registers[REGISTER_BYTE (ii + 3)] + adj, 
@@ -1033,17 +1034,17 @@ ran_out_of_registers_for_arguments:
 
   saved_sp = read_sp ();
 
-  /* location for 8 parameters are always reserved. */
+  /* Location for 8 parameters are always reserved.  */
   sp -= wordsize * 8;
 
-  /* another six words for back chain, TOC register, link register, etc. */
+  /* Another six words for back chain, TOC register, link register, etc.  */
   sp -= wordsize * 6;
 
-  /* stack pointer must be quadword aligned */
+  /* Stack pointer must be quadword aligned.  */
   sp &= -16;
 
-  /* if there are more arguments, allocate space for them in 
-     the stack, then push them starting from the ninth one. */
+  /* If there are more arguments, allocate space for them in 
+     the stack, then push them starting from the ninth one.  */
 
   if ((argno < nargs) || argbytes)
     {
@@ -1063,19 +1064,20 @@ ran_out_of_registers_for_arguments:
 	  space += ((TYPE_LENGTH (VALUE_TYPE (val))) + 3) & -4;
 	}
 
-      /* add location required for the rest of the parameters */
+      /* Add location required for the rest of the parameters.  */
       space = (space + 15) & -16;
       sp -= space;
 
-      /* This is another instance we need to be concerned about securing our
-         stack space. If we write anything underneath %sp (r1), we might conflict
-         with the kernel who thinks he is free to use this area. So, update %sp
-         first before doing anything else. */
+      /* This is another instance we need to be concerned about
+         securing our stack space. If we write anything underneath %sp
+         (r1), we might conflict with the kernel who thinks he is free
+         to use this area. So, update %sp first before doing anything
+         else.  */
 
       write_register (SP_REGNUM, sp);
 
-      /* if the last argument copied into the registers didn't fit there 
-         completely, push the rest of it into stack. */
+      /* If the last argument copied into the registers didn't fit there 
+         completely, push the rest of it into stack.  */
 
       if (argbytes)
 	{
@@ -1086,7 +1088,7 @@ ran_out_of_registers_for_arguments:
 	  ii += ((len - argbytes + 3) & -4) / 4;
 	}
 
-      /* push the rest of the arguments into stack. */
+      /* Push the rest of the arguments into stack.  */
       for (; argno < nargs; ++argno)
 	{
 
@@ -1095,7 +1097,8 @@ ran_out_of_registers_for_arguments:
 	  len = TYPE_LENGTH (type);
 
 
-	  /* float types should be passed in fpr's, as well as in the stack. */
+	  /* Float types should be passed in fpr's, as well as in the
+             stack.  */
 	  if (TYPE_CODE (type) == TYPE_CODE_FLT && f_argno < 13)
 	    {
 
@@ -1114,7 +1117,7 @@ ran_out_of_registers_for_arguments:
 	}
     }
   else
-    /* Secure stack areas first, before doing anything else. */
+    /* Secure stack areas first, before doing anything else.  */
     write_register (SP_REGNUM, sp);
 
   /* set back chain properly */
@@ -1126,7 +1129,7 @@ ran_out_of_registers_for_arguments:
 }
 
 /* Function: ppc_push_return_address (pc, sp)
-   Set up the return address for the inferior function call. */
+   Set up the return address for the inferior function call.  */
 
 static CORE_ADDR
 ppc_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
@@ -1137,7 +1140,7 @@ ppc_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 }
 
 /* Extract a function return value of type TYPE from raw register array
-   REGBUF, and copy that return value into VALBUF in virtual format. */
+   REGBUF, and copy that return value into VALBUF in virtual format.  */
 
 static void
 rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
@@ -1152,7 +1155,7 @@ rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
       float ff;
       /* floats and doubles are returned in fpr1. fpr's have a size of 8 bytes.
          We need to truncate the return value into float size (4 byte) if
-         necessary. */
+         necessary.  */
 
       if (TYPE_LENGTH (valtype) > 4)	/* this is a double */
 	memcpy (valbuf,
@@ -1301,13 +1304,13 @@ rs6000_frameless_function_invocation (struct frame_info *fi)
   func_start = get_pc_function_start (fi->pc);
 
   /* If we failed to find the start of the function, it is a mistake
-     to inspect the instructions. */
+     to inspect the instructions.  */
 
   if (!func_start)
     {
       /* A frame with a zero PC is usually created by dereferencing a NULL
          function pointer, normally causing an immediate core dump of the
-         inferior. Mark function as frameless, as the inferior has no chance
+         inferior.  Mark function as frameless, as the inferior has no chance
          of setting up a stack frame.  */
       if (fi->pc == 0)
 	return 1;
@@ -1319,7 +1322,7 @@ rs6000_frameless_function_invocation (struct frame_info *fi)
   return fdata.frameless;
 }
 
-/* Return the PC saved in a frame */
+/* Return the PC saved in a frame.  */
 
 CORE_ADDR
 rs6000_frame_saved_pc (struct frame_info *fi)
@@ -1338,7 +1341,7 @@ rs6000_frame_saved_pc (struct frame_info *fi)
   func_start = get_pc_function_start (fi->pc);
 
   /* If we failed to find the start of the function, it is a mistake
-     to inspect the instructions. */
+     to inspect the instructions.  */
   if (!func_start)
     return 0;
 
@@ -1384,9 +1387,9 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
   frame_saved_regs_zalloc (fi);
 
   /* If there were any saved registers, figure out parent's stack
-     pointer. */
+     pointer.  */
   /* The following is true only if the frame doesn't have a call to
-     alloca(), FIXME. */
+     alloca(), FIXME.  */
 
   if (fdatap->saved_fpr == 0
       && fdatap->saved_gpr == 0
@@ -1464,8 +1467,8 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
 }
 
 /* Return the address of a frame. This is the inital %sp value when the frame
-   was first allocated. For functions calling alloca(), it might be saved in
-   an alloca register. */
+   was first allocated.  For functions calling alloca(), it might be saved in
+   an alloca register.  */
 
 static CORE_ADDR
 frame_initial_stack_address (struct frame_info *fi)
@@ -1474,23 +1477,24 @@ frame_initial_stack_address (struct frame_info *fi)
   struct rs6000_framedata fdata;
   struct frame_info *callee_fi;
 
-  /* if the initial stack pointer (frame address) of this frame is known,
-     just return it. */
+  /* If the initial stack pointer (frame address) of this frame is known,
+     just return it.  */
 
   if (fi->extra_info->initial_sp)
     return fi->extra_info->initial_sp;
 
-  /* find out if this function is using an alloca register.. */
+  /* Find out if this function is using an alloca register.  */
 
   (void) skip_prologue (get_pc_function_start (fi->pc), fi->pc, &fdata);
 
-  /* if saved registers of this frame are not known yet, read and cache them. */
+  /* If saved registers of this frame are not known yet, read and
+     cache them.  */
 
   if (!fi->saved_regs)
     frame_get_saved_regs (fi, &fdata);
 
   /* If no alloca register used, then fi->frame is the value of the %sp for
-     this frame, and it is good enough. */
+     this frame, and it is good enough.  */
 
   if (fdata.alloca_reg < 0)
     {
@@ -1521,7 +1525,7 @@ frame_initial_stack_address (struct frame_info *fi)
    (its caller).  */
 
 /* FRAME_CHAIN takes a frame's nominal address
-   and produces the frame's chain-pointer. */
+   and produces the frame's chain-pointer.  */
 
 /* In the case of the RS/6000, the frame's nominal address
    is the address of a 4-byte word containing the calling frame's address.  */
@@ -1561,7 +1565,7 @@ rs6000_frame_chain (struct frame_info *thisframe)
 }
 
 /* Return the size of register REG when words are WORDSIZE bytes long.  If REG
-   isn't available with that word size, return 0. */
+   isn't available with that word size, return 0.  */
 
 static int
 regsize (const struct reg *reg, int wordsize)
@@ -1570,7 +1574,7 @@ regsize (const struct reg *reg, int wordsize)
 }
 
 /* Return the name of register number N, or null if no such register exists
-   in the current architecture. */
+   in the current architecture.  */
 
 static const char *
 rs6000_register_name (int n)
@@ -1593,7 +1597,7 @@ rs6000_register_byte (int n)
 }
 
 /* Return the number of bytes of storage in the actual machine representation
-   for register N if that register is available, else return 0. */
+   for register N if that register is available, else return 0.  */
 
 static int
 rs6000_register_raw_size (int n)
@@ -1635,7 +1639,7 @@ rs6000_register_virtual_type (int n)
 /* For the PowerPC, it appears that the debug info marks float parameters as
    floats regardless of whether the function is prototyped, but the actual
    values are always passed in as doubles.  Tell gdb to always assume that
-   floats are passed as doubles and then converted in the callee. */
+   floats are passed as doubles and then converted in the callee.  */
 
 static int
 rs6000_coerce_float_to_double (struct type *formal, struct type *actual)
@@ -1647,7 +1651,7 @@ rs6000_coerce_float_to_double (struct type *formal, struct type *actual)
    to virtual format.
 
    The register format for RS/6000 floating point registers is always
-   double, we need a conversion if the memory format is float. */
+   double, we need a conversion if the memory format is float.  */
 
 static int
 rs6000_register_convertible (int n)
@@ -1657,7 +1661,7 @@ rs6000_register_convertible (int n)
 }
 
 /* Convert data from raw format for register N in buffer FROM
-   to virtual format with type TYPE in buffer TO. */
+   to virtual format with type TYPE in buffer TO.  */
 
 static void
 rs6000_register_convert_to_virtual (int n, struct type *type,
@@ -1673,7 +1677,7 @@ rs6000_register_convert_to_virtual (int n, struct type *type,
 }
 
 /* Convert data from virtual format with type TYPE in buffer FROM
-   to raw format for register N in buffer TO. */
+   to raw format for register N in buffer TO.  */
 
 static void
 rs6000_register_convert_to_raw (struct type *type, int n,
@@ -1689,7 +1693,7 @@ rs6000_register_convert_to_raw (struct type *type, int n,
 }
 
 /* Convert a dbx stab register number (from `r' declaration) to a gdb
-   REGNUM. */
+   REGNUM.  */
 static int
 rs6000_stab_reg_to_regnum (int num)
 {
@@ -1721,7 +1725,7 @@ rs6000_stab_reg_to_regnum (int num)
    In RS/6000, struct return addresses are passed as an extra parameter in r3.
    In function return, callee is not responsible of returning this address
    back.  Since gdb needs to find it, we will store in a designated variable
-   `rs6000_struct_return_address'. */
+   `rs6000_struct_return_address'.  */
 
 static void
 rs6000_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
@@ -1742,7 +1746,7 @@ rs6000_store_return_value (struct type *type, char *valbuf)
 
     /* Floating point values are returned starting from FPR1 and up.
        Say a double_double_double type could be returned in
-       FPR1/FPR2/FPR3 triple. */
+       FPR1/FPR2/FPR3 triple.  */
 
     write_register_bytes (REGISTER_BYTE (FP0_REGNUM + 1), valbuf,
 			  TYPE_LENGTH (type));
@@ -1754,7 +1758,7 @@ rs6000_store_return_value (struct type *type, char *valbuf)
 			      valbuf, TYPE_LENGTH (type));
     }
   else
-    /* Everything else is returned in GPR3 and up. */
+    /* Everything else is returned in GPR3 and up.  */
     write_register_bytes (REGISTER_BYTE (gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + 3),
 			  valbuf, TYPE_LENGTH (type));
 }
@@ -1772,7 +1776,7 @@ rs6000_extract_struct_value_address (char *regbuf)
 /* Return whether PC is in a dummy function call.
 
    FIXME: This just checks for the end of the stack, which is broken
-   for things like stepping through gcc nested function stubs. */
+   for things like stepping through gcc nested function stubs.  */
 
 static int
 rs6000_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
@@ -1780,7 +1784,7 @@ rs6000_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
   return sp < pc && pc < fp;
 }
 
-/* Hook called when a new child process is started. */
+/* Hook called when a new child process is started.  */
 
 void
 rs6000_create_inferior (int pid)
@@ -1859,43 +1863,43 @@ rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
    would introduce a really large gap between fpscr and the rest of
    the registers for most processors.  */
 
-/* Convenience macros for populating register arrays. */
+/* Convenience macros for populating register arrays.  */
 
-/* Within another macro, convert S to a string. */
+/* Within another macro, convert S to a string.  */
 
 #define STR(s)	#s
 
 /* Return a struct reg defining register NAME that's 32 bits on 32-bit systems
-   and 64 bits on 64-bit systems. */
+   and 64 bits on 64-bit systems.  */
 #define R(name)		{ STR(name), 4, 8, 0, 0 }
 
 /* Return a struct reg defining register NAME that's 32 bits on all
-   systems. */
+   systems.  */
 #define R4(name)	{ STR(name), 4, 4, 0, 0 }
 
 /* Return a struct reg defining register NAME that's 64 bits on all
-   systems. */
+   systems.  */
 #define R8(name)	{ STR(name), 8, 8, 0, 0 }
 
 /* Return a struct reg defining register NAME that's 128 bits on all
-   systems. */
+   systems.  */
 #define R16(name)       { STR(name), 16, 16, 0, 0 }
 
-/* Return a struct reg defining floating-point register NAME. */
+/* Return a struct reg defining floating-point register NAME.  */
 #define F(name)		{ STR(name), 8, 8, 1, 0 }
 
-/* Return a struct reg defining a pseudo register NAME. */
+/* Return a struct reg defining a pseudo register NAME.  */
 #define P(name)		{ STR(name), 4, 8, 0, 1}
 
 /* Return a struct reg defining register NAME that's 32 bits on 32-bit
-   systems and that doesn't exist on 64-bit systems. */
+   systems and that doesn't exist on 64-bit systems.  */
 #define R32(name)	{ STR(name), 4, 0, 0, 0 }
 
 /* Return a struct reg defining register NAME that's 64 bits on 64-bit
-   systems and that doesn't exist on 32-bit systems. */
+   systems and that doesn't exist on 32-bit systems.  */
 #define R64(name)	{ STR(name), 0, 8, 0, 0 }
 
-/* Return a struct reg placeholder for a register that doesn't exist. */
+/* Return a struct reg placeholder for a register that doesn't exist.  */
 #define R0		{ 0, 0, 0, 0, 0 }
 
 /* UISA registers common across all architectures, including POWER.  */
@@ -1945,7 +1949,7 @@ rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
   /* 112 */ R(srr0),   R(srr1),   R(tbl),    R(tbu),    \
   /* 116 */ R4(dec),   R(dabr),   R4(ear)
 
-/* AltiVec registers */
+/* AltiVec registers.  */
 #define PPC_ALTIVEC_REGS \
   /*119*/R16(vr0), R16(vr1), R16(vr2), R16(vr3), R16(vr4), R16(vr5), R16(vr6), R16(vr7),  \
   /*127*/R16(vr8), R16(vr9), R16(vr10),R16(vr11),R16(vr12),R16(vr13),R16(vr14),R16(vr15), \
@@ -1954,7 +1958,7 @@ rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
   /*151*/R4(vscr), R4(vrsave)
 
 /* IBM POWER (pre-PowerPC) architecture, user-level view.  We only cover
-   user-level SPR's. */
+   user-level SPR's.  */
 static const struct reg registers_power[] =
 {
   COMMON_UISA_REGS,
@@ -1963,7 +1967,7 @@ static const struct reg registers_power[] =
 };
 
 /* PowerPC UISA - a PPC processor as viewed by user-level code.  A UISA-only
-   view of the PowerPC. */
+   view of the PowerPC.  */
 static const struct reg registers_powerpc[] =
 {
   COMMON_UISA_REGS,
@@ -1979,7 +1983,7 @@ static const struct reg registers_powerpc_nofp[] =
   PPC_UISA_SPRS
 };
 
-/* IBM PowerPC 403. */
+/* IBM PowerPC 403.  */
 static const struct reg registers_403[] =
 {
   COMMON_UISA_REGS,
@@ -1994,7 +1998,7 @@ static const struct reg registers_403[] =
   /* 139 */ R(pbl1),   R(pbu1), R(pbl2), R(pbu2)
 };
 
-/* IBM PowerPC 403GC. */
+/* IBM PowerPC 403GC.  */
 static const struct reg registers_403GC[] =
 {
   COMMON_UISA_REGS,
@@ -2011,7 +2015,7 @@ static const struct reg registers_403GC[] =
   /* 147 */ R(tbhu),   R(tblu)
 };
 
-/* Motorola PowerPC 505. */
+/* Motorola PowerPC 505.  */
 static const struct reg registers_505[] =
 {
   COMMON_UISA_REGS,
@@ -2021,7 +2025,7 @@ static const struct reg registers_505[] =
   /* 119 */ R(eie), R(eid), R(nri)
 };
 
-/* Motorola PowerPC 860 or 850. */
+/* Motorola PowerPC 860 or 850.  */
 static const struct reg registers_860[] =
 {
   COMMON_UISA_REGS,
@@ -2055,7 +2059,7 @@ static const struct reg registers_601[] =
   /* 123 */ R(pir), R(mq), R(rtcu), R(rtcl)
 };
 
-/* Motorola PowerPC 602. */
+/* Motorola PowerPC 602.  */
 static const struct reg registers_602[] =
 {
   COMMON_UISA_REGS,
@@ -2067,7 +2071,7 @@ static const struct reg registers_602[] =
   /* 127 */ R(sebr), R(ser), R(sp), R(lt)
 };
 
-/* Motorola/IBM PowerPC 603 or 603e. */
+/* Motorola/IBM PowerPC 603 or 603e.  */
 static const struct reg registers_603[] =
 {
   COMMON_UISA_REGS,
@@ -2079,7 +2083,7 @@ static const struct reg registers_603[] =
   /* 127 */ R(hash2), R(imiss), R(icmp), R(rpa)
 };
 
-/* Motorola PowerPC 604 or 604e. */
+/* Motorola PowerPC 604 or 604e.  */
 static const struct reg registers_604[] =
 {
   COMMON_UISA_REGS,
@@ -2091,7 +2095,7 @@ static const struct reg registers_604[] =
   /* 127 */ R(sia), R(sda)
 };
 
-/* Motorola/IBM PowerPC 750 or 740. */
+/* Motorola/IBM PowerPC 750 or 740.  */
 static const struct reg registers_750[] =
 {
   COMMON_UISA_REGS,
@@ -2107,7 +2111,7 @@ static const struct reg registers_750[] =
 };
 
 
-/* Motorola PowerPC 7400. */
+/* Motorola PowerPC 7400.  */
 static const struct reg registers_7400[] =
 {
   /* gpr0-gpr31, fpr0-fpr31 */
@@ -2132,10 +2136,10 @@ struct variant
     /* English description of the variant.  */
     char *description;
 
-    /* bfd_arch_info.arch corresponding to variant. */
+    /* bfd_arch_info.arch corresponding to variant.  */
     enum bfd_architecture arch;
 
-    /* bfd_arch_info.mach corresponding to variant. */
+    /* bfd_arch_info.mach corresponding to variant.  */
     unsigned long mach;
 
     /* Number of real registers.  */
@@ -2250,7 +2254,7 @@ static struct variant variants[] =
    bfd_mach_ppc_rs64iii, -1, -1, tot_num_registers (registers_powerpc),
    registers_powerpc},
 
-  /* FIXME: I haven't checked the register sets of the following. */
+  /* FIXME: I haven't checked the register sets of the following.  */
   {"rs1", "IBM POWER RS1", bfd_arch_rs6000,
    bfd_mach_rs6k_rs1, -1, -1, tot_num_registers (registers_power),
    registers_power},
@@ -2264,7 +2268,7 @@ static struct variant variants[] =
   {0, 0, 0, 0, 0, 0, 0, 0}
 };
 
-/* Initialize the number of registers and pseudo registers in each variant. */
+/* Initialize the number of registers and pseudo registers in each variant.  */
 
 static void
 init_variants (void)
@@ -2281,7 +2285,7 @@ init_variants (void)
 }
 
 /* Return the variant corresponding to architecture ARCH and machine number
-   MACH.  If no such variant exists, return null. */
+   MACH.  If no such variant exists, return null.  */
 
 static const struct variant *
 find_variant_by_arch (enum bfd_architecture arch, unsigned long mach)
@@ -2309,7 +2313,7 @@ gdb_print_insn_powerpc (bfd_vma memaddr, disassemble_info *info)
    during this debugging session.
 
    Called e.g. at program startup, when reading a core file, and when reading
-   a binary file. */
+   a binary file.  */
 
 static struct gdbarch *
 rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
@@ -2337,7 +2341,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     osabi = gdbarch_lookup_osabi (info.abfd);
 
   /* Check word size.  If INFO is from a binary file, infer it from
-     that, else choose a likely default. */
+     that, else choose a likely default.  */
   if (from_xcoff_exec)
     {
       if (bfd_xcoff_is_xcoff64 (info.abfd))
@@ -2361,14 +2365,14 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	wordsize = 4;
     }
 
-  /* Find a candidate among extant architectures. */
+  /* Find a candidate among extant architectures.  */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
       /* Word size in the various PowerPC bfd_arch_info structs isn't
          meaningful, because 64-bit CPUs can run in 32-bit mode.  So, perform
-         separate word size check. */
+         separate word size check.  */
       tdep = gdbarch_tdep (arches->gdbarch);
       if (tdep && tdep->wordsize == wordsize && tdep->osabi == osabi)
 	return arches->gdbarch;
@@ -2403,7 +2407,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Initialize the number of real and pseudo registers in each variant.  */
   init_variants ();
 
-  /* Choose variant. */
+  /* Choose variant.  */
   v = find_variant_by_arch (arch, mach);
   if (!v)
     return NULL;
