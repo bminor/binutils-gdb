@@ -7,7 +7,7 @@
 # Unfortunately though, the AT&T compiler sometimes generates code that
 # the assembler barfs on if -g is used, so disable it by default as well.
 CC = /usr/ccs/ATT/cc
-MINUS_G =
+CFLAGS =
 
 SYSV_DEFINE=-DSYSV
 REGEX=regex.o
