@@ -1,3 +1,14 @@
+Tue May 25 16:05:55 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* elfread.c (elf_symfile_read): Update ELF structure and routine
+	names to specify 32-bit versions.
+	(elf_symtab_read): Retrieve size field directly from symbol,
+	instead of using old kludge.
+
+	* mips-pinsn.c (print_insn): Cast address to bfd_vma before
+	calling opcodes library.
+	* z8k-tdep.c (print_insn): Likewise.
+
 Tue May 25 13:06:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabsread.c: Remove all uses of error().  Make error_type and
