@@ -1,3 +1,8 @@
+2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.c++/pr-1210.cc: New file.
+	* gdb.c++/pr-1210.exp: New file.
+
 2003-06-21  Daniel Jacobowitz  <drow@mvista.com>
 
 	* lib/mi-support.exp (mi_run_cmd): Expect an MI response to
