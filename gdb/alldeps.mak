@@ -37,7 +37,9 @@ ns32k-pinsn.c\
 pyr-pinsn.c\
 pyr-tdep.c\
 pyr-xdep.c\
+remote-adapt.c\
 remote-eb.c\
+remote-mm.c\
 remote-nindy.c\
 remote-vx.c\
 solib.c\
@@ -50,6 +52,7 @@ symm-tdep.c\
 symm-xdep.c\
 tahoe-pinsn.c\
 tdesc.c\
+ultra3-xdep.c\
 umax-xdep.c\
 vax-pinsn.c
 
@@ -93,6 +96,7 @@ tm-sun3os4.h\
 tm-sun4os4.h\
 tm-symmetry.h\
 tm-tahoe.h\
+tm-ultra3.h\
 tm-umax.h\
 tm-vax.h\
 tm-vx68.h\
@@ -116,6 +120,7 @@ xm-news1000.h\
 xm-np1.h\
 xm-pn.h\
 xm-pyr.h\
+xm-rtbsd.h\
 xm-sparc.h\
 xm-sun2.h\
 xm-sun3.h\
@@ -124,14 +129,16 @@ xm-sun3os4.h\
 xm-sun4os4.h\
 xm-symmetry.h\
 xm-tahoe.h\
+xm-ultra3.h\
 xm-umax.h\
 xm-vax.h
 
 ALLCONFIG=\
 ./tconfig/3b1\
+./tconfig/a29k\
+./tconfig/a29k-kern\
 ./tconfig/altos\
 ./tconfig/altosgas\
-./tconfig/am29k\
 ./tconfig/arm\
 ./tconfig/bigmips\
 ./tconfig/convex\
@@ -166,6 +173,7 @@ ALLCONFIG=\
 ./tconfig/sun4os4\
 ./tconfig/symmetry\
 ./tconfig/tahoe\
+./tconfig/ultra3\
 ./tconfig/umax\
 ./tconfig/vax\
 ./tconfig/vxworks68\
@@ -194,6 +202,7 @@ ALLCONFIG=\
 ./xconfig/np1\
 ./xconfig/pn\
 ./xconfig/pyramid\
+./xconfig/rtbsd\
 ./xconfig/sun2os3\
 ./xconfig/sun2os4\
 ./xconfig/sun3\
@@ -205,6 +214,7 @@ ALLCONFIG=\
 ./xconfig/sun4os4\
 ./xconfig/symmetry\
 ./xconfig/tahoe\
+./xconfig/ultra3\
 ./xconfig/umax\
 ./xconfig/vax
 

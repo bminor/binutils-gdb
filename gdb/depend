@@ -1,7 +1,8 @@
 altos-xdep.o : altos-xdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
   inferior.h breakpoint.h value.h symtab.h gdbcore.h ${srcdir}/../include/bfd.h \
   ${srcdir}/../include/ansidecl.h 
-am29k-pinsn.o : am29k-pinsn.c defs.h target.h am29k-opcode.h 
+am29k-pinsn.o : am29k-pinsn.c defs.h target.h ${srcdir}/../include/bfd.h \
+  ${srcdir}/../include/ansidecl.h ${srcdir}/../include/obstack.h am29k-opcode.h 
 am29k-tdep.o : am29k-tdep.c defs.h gdbcore.h ${srcdir}/../include/bfd.h \
   ${srcdir}/../include/ansidecl.h ${srcdir}/../include/obstack.h frame.h param.h tm.h config.status \
   param-no-tm.h xm.h config.status value.h symtab.h inferior.h breakpoint.h 
@@ -42,14 +43,14 @@ cplus-dem.o : cplus-dem.c defs.h param.h tm.h config.status param-no-tm.h xm.h c
 dbxread.o : dbxread.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status \
   ${srcdir}/../include/a.out.gnu.h ${srcdir}/../include/reloc.h ${srcdir}/../include/stab.gnu.h \
   ${srcdir}/../include/stab.def symtab.h breakpoint.h value.h command.h target.h \
-  gdbcore.h ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h ${srcdir}/../bfd/libaout.h \
+  ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h gdbcore.h ${srcdir}/../bfd/libaout.h \
   symfile.h 
 environ.o : environ.c environ.h defs.h 
 eval.o : eval.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h value.h \
-  expression.h target.h frame.h 
+  expression.h target.h ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h frame.h 
 exec.o : exec.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h inferior.h \
-  breakpoint.h value.h symtab.h target.h gdbcmd.h command.h gdbcore.h \
-  ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h 
+  breakpoint.h value.h symtab.h target.h ${srcdir}/../include/bfd.h \
+  ${srcdir}/../include/ansidecl.h gdbcmd.h command.h gdbcore.h 
 expprint.o : expprint.c defs.h symtab.h param.h tm.h config.status param-no-tm.h xm.h config.status \
   expression.h value.h 
 findvar.o : findvar.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h \
@@ -83,17 +84,17 @@ infcmd.o : infcmd.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.
   ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h target.h 
 inflow.o : inflow.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
   inferior.h breakpoint.h value.h symtab.h command.h signals.h terminal.h \
-  target.h 
+  target.h ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h 
 infptrace.o : infptrace.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
-  inferior.h breakpoint.h value.h symtab.h target.h gdbcore.h \
-  ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h 
+  inferior.h breakpoint.h value.h symtab.h target.h ${srcdir}/../include/bfd.h \
+  ${srcdir}/../include/ansidecl.h gdbcore.h 
 infrun.o : infrun.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h frame.h \
   inferior.h breakpoint.h value.h ${srcdir}/../include/wait.h gdbcore.h \
   ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h signame.h command.h terminal.h \
   target.h 
 inftarg.o : inftarg.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
-  inferior.h breakpoint.h value.h symtab.h target.h ${srcdir}/../include/wait.h \
-  gdbcore.h ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h ieee-float.h 
+  inferior.h breakpoint.h value.h symtab.h target.h ${srcdir}/../include/bfd.h \
+  ${srcdir}/../include/ansidecl.h ${srcdir}/../include/wait.h gdbcore.h ieee-float.h 
 m68k-pinsn.o : m68k-pinsn.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h \
   m68k-opcode.h gdbcore.h ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h 
 m68k-tdep.o : m68k-tdep.c defs.h ieee-float.h 
@@ -106,8 +107,9 @@ m88k-xdep.o : m88k-xdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h c
   ${srcdir}/../include/ansidecl.h /usr/include/setjmp.h 
 main.o : main.c defs.h gdbcmd.h command.h param.h tm.h config.status param-no-tm.h xm.h config.status \
   symtab.h inferior.h breakpoint.h value.h frame.h signals.h target.h \
-  ${srcdir}/../include/getopt.h ${srcdir}/../readline/readline.h ${srcdir}/../readline/keymaps.h \
-  ${srcdir}/../readline/chardefs.h ${srcdir}/../readline/history.h 
+  ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h ${srcdir}/../include/getopt.h \
+  ${srcdir}/../readline/readline.h ${srcdir}/../readline/keymaps.h ${srcdir}/../readline/chardefs.h \
+  ${srcdir}/../readline/history.h 
 mem-break.o : mem-break.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status 
 mips-pinsn.o : mips-pinsn.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h \
   mips-opcode.h 
@@ -142,26 +144,32 @@ pyr-tdep.o : pyr-tdep.c
 pyr-xdep.o : pyr-xdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
   inferior.h breakpoint.h value.h symtab.h gdbcore.h ${srcdir}/../include/bfd.h \
   ${srcdir}/../include/ansidecl.h 
+remote-adapt.o : remote-adapt.c defs.h tm.h config.status param-no-tm.h xm.h config.status inferior.h \
+  breakpoint.h value.h symtab.h frame.h param.h ${srcdir}/../include/wait.h \
+  terminal.h target.h ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h gdbcore.h 
 remote-eb.o : remote-eb.c defs.h tm-29k.h param-no-tm.h xm.h config.status inferior.h \
   breakpoint.h value.h symtab.h frame.h param.h ${srcdir}/../include/wait.h \
-  terminal.h target.h 
+  terminal.h target.h ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h 
+remote-mm.o : remote-mm.c defs.h inferior.h breakpoint.h value.h symtab.h \
+  frame.h param.h tm.h config.status param-no-tm.h xm.h config.status ${srcdir}/../include/wait.h terminal.h \
+  minimon.h target.h ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h 
 remote-nindy.o : remote-nindy.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status \
-  frame.h inferior.h breakpoint.h value.h symtab.h target.h gdbcore.h \
-  ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h command.h ieee-float.h \
+  frame.h inferior.h breakpoint.h value.h symtab.h target.h \
+  ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h gdbcore.h command.h ieee-float.h \
   ${srcdir}/../include/wait.h ${srcdir}/nindy-share/ttycntl.h ${srcdir}/nindy-share/demux.h \
   ${srcdir}/nindy-share/env.h ${srcdir}/nindy-share/stop.h 
 remote-vx.o : remote-vx.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
   inferior.h breakpoint.h value.h symtab.h ${srcdir}/../include/wait.h target.h \
-  gdbcore.h ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h command.h symfile.h \
+  ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h gdbcore.h command.h symfile.h \
   ${srcdir}/vx-share/xdr_ptrace.h ${srcdir}/vx-share/xdr_regs.h ${srcdir}/vx-share/reg.h \
   ${srcdir}/vx-share/xdr_ld.h ${srcdir}/vx-share/xdr_rdb.h ${srcdir}/vx-share/dbgRpcLib.h 
 remote.o : remote.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
-  inferior.h breakpoint.h value.h symtab.h target.h ${srcdir}/../include/wait.h \
-  terminal.h 
+  inferior.h breakpoint.h value.h symtab.h target.h ${srcdir}/../include/bfd.h \
+  ${srcdir}/../include/ansidecl.h ${srcdir}/../include/wait.h terminal.h 
 signame.o : signame.c signame.h defs.h param.h tm.h config.status param-no-tm.h xm.h config.status 
 solib.o : solib.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h gdbcore.h \
   ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h command.h target.h frame.h \
-  regex.h 
+  regex.h inferior.h breakpoint.h value.h 
 source.o : source.c defs.h symtab.h param.h tm.h config.status param-no-tm.h xm.h config.status \
   command.h gdbcmd.h frame.h gdbcore.h ${srcdir}/../include/bfd.h \
   ${srcdir}/../include/ansidecl.h regex.h 
@@ -169,11 +177,11 @@ sparc-pinsn.o : sparc-pinsn.c defs.h param.h tm.h config.status param-no-tm.h xm
   symtab.h sparc-opcode.h gdbcore.h ${srcdir}/../include/bfd.h \
   ${srcdir}/../include/ansidecl.h /usr/include/string.h target.h 
 sparc-tdep.o : sparc-tdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
-  inferior.h breakpoint.h value.h symtab.h signame.h target.h ieee-float.h \
-  gdbcore.h ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h 
+  inferior.h breakpoint.h value.h symtab.h signame.h target.h \
+  ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h ieee-float.h gdbcore.h 
 sparc-xdep.o : sparc-xdep.c defs.h tm-sparc.h param-no-tm.h xm.h config.status inferior.h \
-  breakpoint.h value.h symtab.h frame.h param.h target.h gdbcore.h \
-  ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h 
+  breakpoint.h value.h symtab.h frame.h param.h target.h ${srcdir}/../include/bfd.h \
+  ${srcdir}/../include/ansidecl.h gdbcore.h 
 stack.o : stack.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h frame.h \
   gdbcmd.h command.h value.h gdbcore.h ${srcdir}/../include/bfd.h \
   ${srcdir}/../include/ansidecl.h target.h breakpoint.h 
@@ -197,10 +205,14 @@ symtab.o : symtab.c defs.h symtab.h param.h tm.h config.status param-no-tm.h xm.
   value.h symfile.h gdbcmd.h command.h regex.h 
 tahoe-pinsn.o : tahoe-pinsn.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status \
   symtab.h tahoe-opcode.h 
-target.o : target.c defs.h target.h gdbcmd.h command.h symtab.h inferior.h \
-  breakpoint.h value.h frame.h param.h tm.h config.status param-no-tm.h xm.h config.status \
-  ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h symfile.h 
+target.o : target.c defs.h target.h ${srcdir}/../include/bfd.h \
+  ${srcdir}/../include/ansidecl.h ${srcdir}/../include/obstack.h gdbcmd.h command.h symtab.h \
+  inferior.h breakpoint.h value.h frame.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  symfile.h 
 tdesc.o : tdesc.c 
+ultra3-xdep.o : ultra3-xdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  frame.h inferior.h breakpoint.h value.h symtab.h gdbcore.h \
+  ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h 
 umax-xdep.o : umax-xdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
   inferior.h breakpoint.h value.h symtab.h gdbcore.h ${srcdir}/../include/bfd.h \
   ${srcdir}/../include/ansidecl.h 
@@ -208,7 +220,7 @@ utils.o : utils.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.st
   command.h terminal.h ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h \
   ${srcdir}/../include/obstack.h target.h 
 valarith.o : valarith.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status value.h \
-  symtab.h expression.h target.h 
+  symtab.h expression.h target.h ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h 
 valops.o : valops.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h value.h \
   frame.h inferior.h breakpoint.h gdbcore.h ${srcdir}/../include/bfd.h \
   ${srcdir}/../include/ansidecl.h target.h 
