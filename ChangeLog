@@ -1,3 +1,25 @@
+Thu May  5 20:06:45 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/mh-lynxrs6k: Renamed from mh-lynxosrs6k, to make it
+	unique in 8.3 naming schemes.
+	* configure.in (appdirs): New variable.  Currently empty, but will
+	be used in gas distribution.  If nonempty, lists a set of
+	directories at least one of which must get configured, or top
+	level configuration is considered to have failed.
+	(rs6000-*-lynxos*): Use new file name.
+
+Thu May  5 13:38:36 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Eliminate XTRAFLAGS.
+	* Makefile.in (CC_FOR_TARGET): If newlib exists, refer to the
+	newlib include files using -idirafter, and also use -nostdinc.
+	(CXX_FOR_TARGET): Likewise.
+	(XTRAFLAGS): Removed.
+	(BASE_FLAGS_TO_PASS): Remove XTRAFLAGS_FOR_TARGET.
+	(EXTRA_HOST_FLAGS): Remove XTRAFLAGS.
+	(EXTRA_TARGET_FLAGS, EXTRA_GCC_FLAGS): Likewise.
+	($(DO_X)): Don't pass down XTRAFLAGS.
+
 Thu May  5 00:16:36 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* configure.in (mips*-dec-bsd*): New target; do build linker.
