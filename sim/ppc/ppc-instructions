@@ -127,6 +127,7 @@
 	  count_type nr_branches_fallthrough;		/* # conditional branches that fell through */
 	  count_type nr_branch_predict_trues;		/* # branches predicted correctly */
 	  count_type nr_branch_predict_falses;		/* # branches predicted incorrectly */
+	  count_type nr_branch_conditional[32];		/* # of each type of bc */
 	  count_type nr_stalls_data;			/* # of stalls for data */
 	  count_type nr_stalls_unit;			/* # of stalls waiting for a function unit */
 	  count_type nr_stalls_serialize;		/* # of stalls waiting for things to quiet down */
@@ -148,6 +149,41 @@
 	  "floating point functional unit instruction",
 	  "load/store functional unit instruction",
 	  "branch functional unit instruction",
+	};
+
+	STATIC_MODEL const char *const ppc_branch_conditional_name[32] = {
+	  "branch if --CTR != 0 and condition is FALSE",				/* 0000y */
+	  "branch if --CTR != 0 and condition is FALSE, reverse branch likely",
+	  "branch if --CTR == 0 and condition is FALSE",				/* 0001y */
+	  "branch if --CTR == 0 and condition is FALSE, reverse branch likely",
+	  "branch if the condition is FALSE",						/* 001zy */
+	  "branch if the condition is FALSE, reverse branch likely",
+	  "branch if the condition is FALSE (ignored bit 1 set to 1)",			/* 001zy */
+	  "branch if the condition is FALSE, reverse branch likely (ignored bit 4 set to 1)",
+	  "branch if --CTR != 0 and condition is TRUE",					/* 0100y */
+	  "branch if --CTR != 0 and condition is TRUE, reverse branch likely",
+	  "branch if --CTR == 0 and condition is TRUE",					/* 0101y */
+	  "branch if --CTR == 0 and condition is TRUE, reverse branch likely",
+	  "branch if the condition is TRUE",						/* 011zy */
+	  "branch if the condition is TRUE, reverse branch likely",
+	  "branch if the condition is TRUE (ignored bit 1 set to 1)",			/* 011zy */
+	  "branch if the condition is TRUE, reverse branch likely (ignored bit 4 set to 1)",
+	  "branch if --CTR != 0",							/* 1z00y */
+	  "branch if --CTR != 0, reverse branch likely",
+	  "branch if --CTR == 0",							/* 1z01y */
+	  "branch if --CTR == 0, reverse branch likely",
+	  "branch always",								/* 1z1zz */
+	  "branch always (ignored bit 5 set to 1)",
+	  "branch always (ignored bit 4 set to 1)",					/* 1z1zz */
+	  "branch always (ignored bits 4,5 set to 1)",
+	  "branch if --CTR != 0 (ignored bit 1 set to 1)",				/* 1z00y */
+	  "branch if --CTR != 0, reverse branch likely (ignored bit 1 set to 1)",
+	  "branch if --CTR == 0 (ignored bit 1 set to 1)",				/* 1z01y */
+	  "branch if --CTR == 0, reverse branch likely (ignored bit 1 set to 1)",
+	  "branch always (ignored bit 1 set to 1)",					/* 1z1zz */
+	  "branch always (ignored bits 1,5 set to 1)",
+	  "branch always (ignored bits 1,4 set to 1)",					/* 1z1zz */
+	  "branch always (ignored bits 1,4,5 set to 1)",
 	};
 
 
@@ -1101,6 +1137,7 @@ model_print *::model-function::model_mon_info:model_data *model_ptr
 	model_print *tail;
 	ppc_function_unit i;
 	count_type nr_insns;
+	int j;
 
 	head = tail = ZALLOC(model_print);
 	tail->count = model_ptr->nr_cycles;
@@ -1171,6 +1208,17 @@ model_print *::model-function::model_mon_info:model_data *model_ptr
 	  tail->suffix_singular = "";
 	}
 
+	for (j = 0; j < (sizeof(ppc_branch_conditional_name) / sizeof(ppc_branch_conditional_name[0])) ; j++) {
+	  if (model_ptr->nr_branch_conditional[j]) {
+	    tail->next = ZALLOC(model_print);
+	    tail = tail->next;
+	    tail->count = model_ptr->nr_branch_conditional[j];
+	    tail->name = ppc_branch_conditional_name[j];
+	    tail->suffix_plural = " conditional branches";
+	    tail->suffix_singular = " conditional branch";
+	  }
+	}
+
 	nr_insns = 0;
 	for (i = PPC_UNIT_BAD; i < nr_ppc_function_units; i++) {
 	  if (model_ptr->nr_units[i]) {
@@ -1201,12 +1249,14 @@ void::model-function::model_mon_info_free:model_data *model_ptr, model_print *pt
 	  ptr = next;
 	}
 
-void::model-function::model_branches:model_data *model_ptr, int failed
+void::model-function::model_branches:model_data *model_ptr, int failed, int conditional
 	model_ptr->nr_units[PPC_UNIT_BPU]++;
 	if (failed)
 	  model_ptr->nr_branches_fallthrough++;
 	else
 	  model_ptr->nr_branches++;
+	if (conditional >= 0)
+	  model_ptr->nr_branch_conditional[conditional]++;
 	model_new_cycle(model_ptr);	/* A branch always ends the current cycle */
 
 void::model-function::model_branch_predict:model_data *model_ptr, int success
@@ -1698,7 +1748,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	if (AA) NIA = IEA(EXTS(LI_0b00));
 	else    NIA = IEA(CIA + EXTS(LI_0b00));
 	if (LK) LR = (spreg)CIA+4;
-	model_branches(cpu_model(processor), 1);
+	model_branches(cpu_model(processor), 1, -1);
 
 0.16,6.BO,11.BI,16.BD,30.AA,31.LK:B:t::Branch Conditional
 *601: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
@@ -1721,7 +1771,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else
 	  succeed = 0;
 	if (LK) LR = (spreg)IEA(CIA + 4);
-	model_branches(cpu_model(processor), succeed);
+	model_branches(cpu_model(processor), succeed, BO);
 	if (! BO{0}) {
 	  int reverse;
 	  if (BO{4}) {	/* branch prediction bit set, reverse sense of test */
@@ -1752,7 +1802,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else
 	  succeed = 0;
 	if (LK) LR = (spreg)IEA(CIA + 4);
-	model_branches(cpu_model(processor), succeed);
+	model_branches(cpu_model(processor), succeed, BO);
 	if (! BO{0})
 	  model_branch_predict(cpu_model(processor), BO{4} ? !succeed : succeed);
 
@@ -1772,7 +1822,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else
 	  succeed = 0;
 	if (LK) LR = (spreg)IEA(CIA + 4);
-	model_branches(cpu_model(processor), succeed);
+	model_branches(cpu_model(processor), succeed, BO);
 	if (! BO{0})
 	  model_branch_predict(cpu_model(processor), BO{4} ? !succeed : succeed);
 

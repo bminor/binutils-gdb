@@ -1,3 +1,12 @@
+Wed Nov 22 15:24:27 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* ppc-instructions (model_branches): Add conditional argument to
+	count the number of times each type of conditional branch is used.
+	(conditional branches): Pass B0 or -1 to model_branches.
+	(model_mon_info): Print out conditional branch counts.
+	(model-data): Add support for printing out conditional branch
+	types.
+
 Tue Nov 21 16:31:25 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* igen.c (insn_table_load_insns): Add support for model-static for
