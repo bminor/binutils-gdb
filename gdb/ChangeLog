@@ -1,5 +1,12 @@
 2002-01-13  Andrew Cagney  <ac131313@redhat.com>
 
+	From 2002-01-09 John Marshall <johnm@falch.net>:
+	* CONTRIBUTE, README, TODO: Change sourceware.cygnus.com to
+	sources.redhat.com, and tweak some related URLs which had
+	suffered from linkrot.
+
+2002-01-13  Andrew Cagney  <ac131313@redhat.com>
+
 	From Jeff law:
 	* hppa-tdep.c (hppa_push_arguments): Correct handling of 5-7 byte
 	structures passed in registers.

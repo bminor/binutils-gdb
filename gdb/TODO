@@ -1,5 +1,5 @@
 If you find inaccuracies in this list, please send mail to
-gdb-patches@sourceware.cygnus.com.  If you would like to work on any
+gdb-patches@sources.redhat.com.  If you would like to work on any
 of these, you should consider sending mail to the same address, to
 find out whether anyone else is working on it.
 
@@ -20,7 +20,7 @@ Anyway, thanks for reporting.
 The following patch will fix the problems with setting breakpoints in
 dynamically loaded objects:
 
-   http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00230.html
+   http://sources.redhat.com/ml/gdb-patches/2000-05/msg00230.html
 
 This patch isn't checked in yet (ping Michael/JimB), but I hope this
 will be in the next GDB release.
@@ -64,8 +64,8 @@ AUTOMAKE 1.4 incorrectly set the TEXINPUTS environment variable.  It
 contained the full path to texinfo.tex when it should have only
 contained the directory.  The bug has been fixed in the current
 AUTOMAKE sources.  Automake snapshots can be found in:
-	ftp://sourceware.cygnus.com/pub/gdb/snapshots
-and	ftp://sourceware.cygnus.com/pub/binutils
+	ftp://sources.redhat.com/pub/gdb/infrastructure
+and	ftp://sources.redhat.com/pub/binutils
 
 --
 
