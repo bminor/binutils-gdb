@@ -1,3 +1,27 @@
+Thu Nov 26 11:19:15 1998  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* config/alpha/tm-alpha.h (ABOUT_TO_RETURN): Replace macro.
+	* alpha-tdep.c (alpha_about_to_return): With new function.
+	(heuristic_proc_start): Update.
+	* config/mips/tm-mips.h (ABOUT_TO_RETURN), mips-tdep.c
+ 	(heuristic_proc_start, mips_about_to_return): Ditto.
+	* config/ns32k/tm-merlin.h (ABOUT_TO_RETURN),
+ 	config/ns32k/tm-umax.h (ABOUT_TO_RETURN), ns32k-tdep.c
+ 	(ns32k_about_to_return, ns32k_get_enter_addr): Ditto.
+
+	* config/z8k/tm-z8k.h, config/w65/tm-w65.h, config/vax/tm-vax.h,
+ 	config/tahoe/tm-tahoe.h, config/sparc/tm-sparc.h,
+ 	config/sh/tm-sh.h, config/rs6000/tm-rs6000.h, config/pyr/tm-pyr.h,
+ 	config/pa/tm-hppa.h, config/m88k/tm-m88k.h, config/m68k/tm-m68k.h,
+ 	config/i960/tm-i960.h, config/i386/tm-i386.h,
+ 	config/h8500/tm-h8500.h, config/h8300/tm-h8300.h,
+ 	config/gould/tm-pn.h, config/gould/tm-np1.h,
+ 	config/convex/tm-convex.h, config/arm/tm-arm.h,
+ 	config/arc/tm-arc.h, config/a29k/tm-a29k.h: Delete macro
+ 	ABOUT_TO_RETURN.
+	* config/w65/tm-w65.h (RTL, RTS): Delete macros.
+	* h8500-tdep.c (about_to_return): Delete function.
+
 Thu Nov 26 11:19:15 1998  Andrew Cagney  <cagney@chook.cygnus.com>
 
 	* rs6000-tdep.c (rs6000_breakpoint_from_pc): Change big_breakpoint
@@ -36,8 +60,12 @@ Wed Nov 25 00:13:06 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 Wed Nov 25 20:37:00 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* rs6000-tdep.c (rs6000_breakpoint_from_pc): Change big_breakpoint
+ 	and little_breakpoint to char[] from char*.
 	* mem-break.c (memory_insert_breakpoint,
  	memory_remove_breakpoint): Pass address of bplen.
+	* remote-array.c (array_insert_breakpoint): Change bp_addr to
+ 	CORE_ADDR type.
 
 start-sanitize-vr4xxx
 1998-11-24  Gavin Romig-Koch  <gavin@cygnus.com>

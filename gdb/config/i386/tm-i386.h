@@ -70,10 +70,6 @@ extern int i386_skip_prologue PARAMS ((int));
 
 #define DECR_PC_AFTER_BREAK 1
 
-/* Nonzero if instruction at PC is a return instruction.  */
-
-#define ABOUT_TO_RETURN(pc) (read_memory_integer ((pc), 1) == 0xc3)
-
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */

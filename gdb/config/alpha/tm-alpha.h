@@ -25,6 +25,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coff/sym.h"		/* Needed for PDR below.  */
 #include "coff/symconst.h"
 
+#ifdef __STDC__
+struct frame_info;
+struct type;
+struct value;
+struct symbol;
+#endif
+
 #if !defined (TARGET_BYTE_ORDER)
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 #endif
@@ -61,9 +68,6 @@ extern CORE_ADDR alpha_skip_prologue PARAMS ((CORE_ADDR addr, int lenient));
    some instructions.  */
 
 #define SAVED_PC_AFTER_CALL(frame)	alpha_saved_pc_after_call(frame)
-#ifdef __STDC__
-struct frame_info;
-#endif
 extern CORE_ADDR
 alpha_saved_pc_after_call PARAMS ((struct frame_info *));
 
@@ -84,11 +88,6 @@ alpha_saved_pc_after_call PARAMS ((struct frame_info *));
 #ifndef DECR_PC_AFTER_BREAK
 #define DECR_PC_AFTER_BREAK 4
 #endif
-
-/* Nonzero if instruction at PC is a return instruction.
-   "ret $zero,($ra),1" on alpha. */
-
-#define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 4) == 0x6bfa8001)
 
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
@@ -184,9 +183,6 @@ alpha_saved_pc_after_call PARAMS ((struct frame_info *));
 
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM, TYPE, FROM, TO) \
   alpha_register_convert_to_virtual (REGNUM, TYPE, FROM, TO)
-#ifdef __STDC__
-struct type;
-#endif
 extern void
 alpha_register_convert_to_virtual PARAMS ((int, struct type *, char *, char *));
 
@@ -316,10 +312,7 @@ extern void alpha_find_saved_regs PARAMS ((struct frame_info *));
 /* Things needed for making the inferior call functions.  */
 
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
-    sp = alpha_push_arguments(nargs, args, sp, struct_return, struct_addr)
-#ifdef __STDC__
-struct value;
-#endif
+    sp = alpha_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr))
 extern CORE_ADDR
 alpha_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int, CORE_ADDR));
 
@@ -384,6 +377,7 @@ extern CORE_ADDR alpha_call_dummy_address PARAMS ((void));
    alpha_extra_func_info_t's off of this.  */
 
 #define MIPS_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
+extern void ecoff_relocate_efi PARAMS ((struct symbol *, CORE_ADDR));
 
 /* Specific information about a procedure.
    This overlays the ALPHA's PDR records, 

@@ -79,22 +79,10 @@ extern CORE_ADDR arm_saved_pc_after_call PARAMS ((struct frame_info *));
 
 #define INNER_THAN <
 
-/* Sequence of bytes for breakpoint instruction.  */
-
 /* !!!! if we're using RDP, then we're inserting breakpoints and storing
    their handles instread of what was in memory.  It is nice that
    this is the same size as a handle - otherwise remote-rdp will
    have to change. */
-
-#define ARM_LE_BREAKPOINT {0x00,0x00,0x18,0xef} /* BKPT_SWI from <sys/ptrace.h> */
-#define ARM_BE_BREAKPOINT {0xef,0x18,0x00,0x00} /* BKPT_SWI from <sys/ptrace.h> */
-#define THUMB_LE_BREAKPOINT {0x18,0xdf}       /* swi 24 */
-#define THUMB_BE_BREAKPOINT {0xdf,0x18}       /* swi 24 */
-
-/* The following has been superseded by BREAKPOINT_FOR_PC, but
-   is defined merely to keep mem-break.c happy.  */
-#define LITTLE_BREAKPOINT ARM_LE_BREAKPOINT
-#define BIG_BREAKPOINT    ARM_BE_BREAKPOINT
 
 /* BREAKPOINT_FROM_PC uses the program counter value to determine whether a
    16- or 32-bit breakpoint should be used.  It returns a pointer
@@ -103,7 +91,7 @@ extern CORE_ADDR arm_saved_pc_after_call PARAMS ((struct frame_info *));
    point to the actual memory location where the breakpoint should be
    inserted.  */
 
-unsigned char * arm_breakpoint_from_pc PARAMS ((CORE_ADDR * pcptr, int * lenptr));
+extern breakpoint_from_pc_fn arm_breakpoint_from_pc;
 #define BREAKPOINT_FROM_PC(pcptr, lenptr) arm_breakpoint_from_pc (pcptr, lenptr)
 
 /* Amount PC must be decremented by after a breakpoint.
@@ -111,12 +99,6 @@ unsigned char * arm_breakpoint_from_pc PARAMS ((CORE_ADDR * pcptr, int * lenptr)
    but not always.  */
 
 #define DECR_PC_AFTER_BREAK 0
-
-/* Nonzero if instruction at PC is a return instruction.  */
-
-#define ABOUT_TO_RETURN(pc) \
-      ((read_memory_integer(pc, 4) & 0x0fffffff == 0x01b0f00e) || \
-       (read_memory_integer(pc, 4) & 0x0ffff800 == 0x09eba800))
 
 /* code to execute to print interesting information about the
  * floating point processor (if any)

@@ -74,9 +74,6 @@ extern CORE_ADDR sh_skip_prologue ();
    define this before including this file.  */
 #define DECR_PC_AFTER_BREAK 0
 
-/* Nonzero if instruction at PC is a return instruction.  */
-#define ABOUT_TO_RETURN(pc) (read_memory_integer(pc,2) == 0x000b)
-
 /* Say how long registers are.  */
 #define REGISTER_TYPE  long
 

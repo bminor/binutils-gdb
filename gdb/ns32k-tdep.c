@@ -76,6 +76,17 @@ ns32k_localcount (enter_pc)
   return localcount;
 }
 
+
+/* Nonzero if instruction at PC is a return instruction.  */
+
+static int
+ns32k_about_to_return (pc)
+     CORE_ADDR pc;
+{
+  return (read_memory_integer (pc, 1) == 0x12);
+}
+
+
 /*
  * Get the address of the enter opcode for the function
  * containing PC, if there is an enter for the function,
@@ -94,7 +105,7 @@ ns32k_get_enter_addr (pc)
   if (pc == 0)
     return 0;
 
-  if (ABOUT_TO_RETURN (pc))
+  if (ns32k_about_to_return (pc))
     return 1;		/* after exit */
 
   enter_addr = get_pc_function_start (pc);

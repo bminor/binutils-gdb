@@ -84,12 +84,6 @@ CORE_ADDR skip_prologue ();
 
 #define DECR_PC_AFTER_BREAK 0
 
-/* Nonzero if instruction at PC is a return instruction.
-   On the a29k, this is a "jmpi l0" instruction.  */
-
-#define ABOUT_TO_RETURN(pc) \
-  ((read_memory_integer (pc, 4) & 0xff0000ff) == 0xc0000080)
-
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */

@@ -83,13 +83,6 @@ extern CORE_ADDR skip_prologue PARAMS ((CORE_ADDR, int));
 
 #define INNER_THAN <
 
-/* Nonzero if instruction at pc is a return instruction.
-   This is the "j [blink]" insn (with or without conditionals or delay
-   slots).  */
-
-#define ABOUT_TO_RETURN(pc) \
-  ((read_memory_integer(pc, 4) & 0xffffff80) == 0x380f8000)
-
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */

@@ -68,12 +68,6 @@ extern CORE_ADDR saved_pc_after_call PARAMS ((void));
 
 #define DECR_PC_AFTER_BREAK 0
 
-#if 0 /* never used */
-/* Nonzero if instruction at PC is a return instruction.  */
-
-#define ABOUT_TO_RETURN(pc) about_to_return(pc)
-#endif
-
 /* Say how long registers are.  */
 
 #define REGISTER_TYPE  unsigned long

@@ -63,7 +63,8 @@ struct inferior_status;
 #define REG_STRUCT_HAS_ADDR(gcc_p,type) \
   (TYPE_LENGTH (type) > 8)
 
-#define USE_STRUCT_CONVENTION(gcc_p,type) (TYPE_LENGTH (type) > 8)
+extern use_struct_convention_fn hppa_use_struct_convention;
+#define USE_STRUCT_CONVENTION(gcc_p,type) hppa_use_struct_convention (gcc_p,type)
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
@@ -115,10 +116,6 @@ extern CORE_ADDR saved_pc_after_call PARAMS ((struct frame_info *));
    Not on the PA-RISC */
 
 #define DECR_PC_AFTER_BREAK 0
-
-/* return instruction is bv r0(rp) or bv,n r0(rp)*/
-
-#define ABOUT_TO_RETURN(pc) ((read_memory_integer (pc, 4) | 0x2) == 0xE840C002)
 
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
@@ -361,7 +358,8 @@ extern int frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
   (FRAMELESS) = frameless_function_invocation(FI)
 extern int frameless_function_invocation PARAMS ((struct frame_info *));
 
-#define FRAME_SAVED_PC(FRAME) frame_saved_pc (FRAME)
+extern CORE_ADDR hppa_frame_saved_pc PARAMS ((struct frame_info *frame));
+#define FRAME_SAVED_PC(FRAME) hppa_frame_saved_pc (FRAME)
 
 #define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
 
@@ -535,8 +533,14 @@ extern CORE_ADDR
 hppa_fix_call_dummy PARAMS ((char *, CORE_ADDR, CORE_ADDR, int,
 			     struct value **, struct type *, int));
 
+/* Stack must be aligned on 32-bit boundaries when synthesizing
+   function calls.  We still need STACK_ALIGN, PUSH_ARGUMENTS does
+   not do all the work. */
+
+#define STACK_ALIGN(ADDR) (((ADDR) + 7) & -8)
+
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
-    sp = hppa_push_arguments(nargs, args, sp, struct_return, struct_addr)
+    sp = hppa_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr))
 extern CORE_ADDR
 hppa_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int,
 			     CORE_ADDR));
@@ -666,5 +670,3 @@ extern int hpread_adjust_stack_address PARAMS ((CORE_ADDR));
    probably much more common.  (FIXME). */
 
 #define COERCE_FLOAT_TO_DOUBLE (current_language -> la_language == language_c)
-
-#define STACK_ALIGN(ADDR) (((ADDR) + 7) & -8)

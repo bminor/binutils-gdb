@@ -64,12 +64,6 @@ extern CORE_ADDR mz8k_skip_prologue PARAMS ((CORE_ADDR ip));
 
 #define DECR_PC_AFTER_BREAK 0
 
-/* Nonzero if instruction at PC is a return instruction.  */
-/* Allow any of the return instructions, including a trapv and a return
-   from interupt.  */
-
-#define ABOUT_TO_RETURN(pc) about_to_return(pc)
-
 /* Say how long registers are.  */
 
 #define REGISTER_TYPE unsigned int

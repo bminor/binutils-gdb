@@ -139,11 +139,6 @@ extern breakpoint_from_pc_fn mips_breakpoint_from_pc;
 
 #define DECR_PC_AFTER_BREAK 0
 
-/* Nonzero if instruction at PC is a return instruction. "j ra" on mips. */
-
-int mips_about_to_return PARAMS ((CORE_ADDR pc));
-#define ABOUT_TO_RETURN(pc) mips_about_to_return (pc)
-
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */

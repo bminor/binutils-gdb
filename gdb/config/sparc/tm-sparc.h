@@ -127,14 +127,6 @@ extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
 
 #define DECR_PC_AFTER_BREAK 0
 
-/* Nonzero if instruction at PC is a return instruction.  */
-/* For SPARC, this is either a "jmpl %o7+8,%g0" or "jmpl %i7+8,%g0".
-
-   Note: this does not work for functions returning structures under SunOS.
-   v9 does not have such critters though.  */
-#define ABOUT_TO_RETURN(pc) \
-  ((read_memory_integer (pc, 4)|0x00040000) == 0x81c7e008)
-
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */

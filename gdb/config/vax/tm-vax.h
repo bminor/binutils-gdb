@@ -80,10 +80,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define DECR_PC_AFTER_BREAK 0
 
-/* Nonzero if instruction at PC is a return instruction.  */
-
-#define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 1) == 04)
-
 /* Return 1 if P points to an invalid floating point value.
    LEN is the length in bytes -- not relevant on the Vax.  */
 

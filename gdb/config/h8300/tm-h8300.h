@@ -92,12 +92,6 @@ extern CORE_ADDR h8300_skip_prologue ();
 
 #define DECR_PC_AFTER_BREAK 0
 
-/* Nonzero if instruction at PC is a return instruction.  */
-/* Allow any of the return instructions, including a trapv and a return
-   from interupt.  */
-
-#define ABOUT_TO_RETURN(pc) ((read_memory_unsigned_integer (pc, 2) & ~0x3) == 0x4e74)
-
 /* Say how long registers are.  */
 
 #define REGISTER_SIZE 4

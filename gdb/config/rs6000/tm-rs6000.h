@@ -1,5 +1,5 @@
 /* Parameters for target execution on an RS6000, for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1997
    Free Software Foundation, Inc.
    Contributed by IBM Corporation.
 
@@ -151,47 +151,26 @@ extern void aix_process_linenos PARAMS ((void));
 
 #define INNER_THAN <
 
-#if 0
-/* No, we shouldn't use this. push_arguments() should leave stack in a
-   proper alignment! */
-/* Stack has strict alignment. */
-
-#define STACK_ALIGN(ADDR)	(((ADDR)+7)&-8)
-#endif
-
-/* This is how argumets pushed onto stack or passed in registers. */
+/* This is how arguments pushed onto stack or passed in registers.
+   Stack must be aligned on 64-bit boundaries when synthesizing
+   function calls.  We don't need STACK_ALIGN, PUSH_ARGUMENTS will
+   handle it. */
 
 #define	PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
-  sp = push_arguments(nargs, args, sp, struct_return, struct_addr)
+  sp = push_arguments((nargs), (args), (sp), (struct_return), (struct_addr))
 extern CORE_ADDR push_arguments PARAMS ((int, struct value **, CORE_ADDR,
 					 int, CORE_ADDR));
 
-/* Sequence of bytes for breakpoint instruction.  */
-
-#define BIG_BREAKPOINT { 0x7d, 0x82, 0x10, 0x08 }
-#define LITTLE_BREAKPOINT { 0x08, 0x10, 0x82, 0x7d }
-
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
-#define BREAKPOINT BIG_BREAKPOINT
-
-#else
-#if TARGET_BYTE_ORDER == LITTLE_ENDIAN
-#define BREAKPOINT LITTLE_BREAKPOINT
-#endif
-#endif
+/* BREAKPOINT_FROM_PC uses the program counter value to determine the
+   breakpoint that should be used */
+extern breakpoint_from_pc_fn rs6000_breakpoint_from_pc;
+#define BREAKPOINT_FROM_PC(pcptr, lenptr) rs6000_breakpoint_from_pc (pcptr, lenptr)
 
 /* Amount PC must be decremented by after a breakpoint.
    This is often the number of bytes in BREAKPOINT
    but not always.  */
 
 #define DECR_PC_AFTER_BREAK 0
-
-/* Nonzero if instruction at PC is a return instruction.  */
-/* Allow any of the return instructions, including a trapv and a return
-   from interrupt.  */
-
-#define ABOUT_TO_RETURN(pc)  \
-   ((read_memory_integer (pc, 4) & 0xfe8007ff) == 0x4e800020)
 
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
@@ -441,6 +420,7 @@ extern int frameless_function_invocation PARAMS((struct frame_info *));
    frame.
    The following constants were determined by experimentation on AIX 3.2.  */
 #define SIG_FRAME_PC_OFFSET 96
+#define SIG_FRAME_LR_OFFSET 108
 #define SIG_FRAME_FP_OFFSET 284
 
 /* Default offset from SP where the LR is stored */
@@ -601,26 +581,42 @@ extern void pop_frame PARAMS ((void));
 
 #define CALL_DUMMY_START_OFFSET 16
 
-/* Insert the specified number of args and function address
-   into a call sequence of the above form stored at DUMMYNAME.  */
+/* Insert the specified number of args and function address into a
+   call sequence of the above form stored at DUMMYNAME.  */
 
-#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, using_gcc) \
-	fix_call_dummy(dummyname, pc, fun, nargs, (int)type)
-extern void fix_call_dummy PARAMS ((char *, CORE_ADDR, CORE_ADDR, int, int));
+#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p) \
+  rs6000_fix_call_dummy (dummyname, pc, fun, nargs, args, type, gcc_p)
+extern void rs6000_fix_call_dummy PARAMS ((char *, CORE_ADDR, CORE_ADDR,
+					   int, struct value **,
+					   struct type *, int));
 
-/* Usually a function pointer's representation is simply the address of
-   the function. On the RS/6000 however, a function pointer is represented
-   by a pointer to a TOC entry. This TOC entry contains three words,
-   the first word is the address of the function, the second word is the
-   TOC pointer (r2), and the third word is the static chain value.
-   Throughout GDB it is currently assumed that a function pointer contains
-   the address of the function, which is not easy to fix.
-   In addition, the conversion of a function address to a function
-   pointer would require allocation of a TOC entry in the inferior's
-   memory space, with all its drawbacks.
-   To be able to call C++ virtual methods in the inferior (which are called
-   via function pointers), find_function_addr uses this macro to
-   get the function address from a function pointer.  */
+/* Hook in rs6000-tdep.c for determining the TOC address when
+   calling functions in the inferior.  */
+extern CORE_ADDR (*find_toc_address_hook) PARAMS ((CORE_ADDR));
+
+/* xcoffread.c provides a function to determine the TOC offset
+   for a given object file.
+   It is used under native AIX configurations for determining the
+   TOC address when calling functions in the inferior.  */
+#ifdef __STDC__
+struct objfile;
+#endif
+extern CORE_ADDR get_toc_offset PARAMS ((struct objfile *));
+
+/* Usually a function pointer's representation is simply the address
+   of the function. On the RS/6000 however, a function pointer is
+   represented by a pointer to a TOC entry. This TOC entry contains
+   three words, the first word is the address of the function, the
+   second word is the TOC pointer (r2), and the third word is the
+   static chain value.  Throughout GDB it is currently assumed that a
+   function pointer contains the address of the function, which is not
+   easy to fix.  In addition, the conversion of a function address to
+   a function pointer would require allocation of a TOC entry in the
+   inferior's memory space, with all its drawbacks.  To be able to
+   call C++ virtual methods in the inferior (which are called via
+   function pointers), find_function_addr uses this macro to get the
+   function address from a function pointer.  */
+
 #define CONVERT_FROM_FUNC_PTR_ADDR(ADDR) \
   (is_magic_function_pointer (ADDR) ? read_memory_integer (ADDR, 4) : (ADDR))
 extern int is_magic_function_pointer PARAMS ((CORE_ADDR));

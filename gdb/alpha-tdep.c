@@ -399,6 +399,18 @@ alpha_saved_pc_after_call (frame)
 static struct alpha_extra_func_info temp_proc_desc;
 static struct frame_saved_regs temp_saved_regs;
 
+/* Nonzero if instruction at PC is a return instruction.  "ret
+   $zero,($ra),1" on alpha. */
+
+static int
+alpha_about_to_return (pc)
+     CORE_ADDR pc;
+{
+  return read_memory_integer (pc, 4) == 0x6bfa8001;
+}
+
+
+
 /* This fencepost looks highly suspicious to me.  Removing it also
    seems suspicious as it could affect remote debugging across serial
    lines.  */
@@ -449,8 +461,8 @@ Otherwise, you told GDB there was a function where there isn't one, or\n\
 
 	    return 0; 
 	  }
-	else if (ABOUT_TO_RETURN(start_pc))
-	    break;
+	else if (alpha_about_to_return (start_pc))
+	  break;
 
     start_pc += 4; /* skip return */
     return start_pc;

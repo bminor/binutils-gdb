@@ -66,14 +66,6 @@ extern CORE_ADDR w65_skip_prologue ();
    define this before including this file.  */
 #define DECR_PC_AFTER_BREAK 0
 
-/* Nonzero if instruction at PC is a return instruction.  */
-
-#define ABOUT_TO_RETURN(pc) \
-  (read_memory_integer(pc,1) == RTL || read_memory_integer(pc,1) == RTS)
-
-#define RTL 0x6b
-#define RTS 0x60
-
 /* Return 1 if P points to an invalid floating point value.  */
 
 #define INVALID_FLOAT(p, len) 0   /* Just a first guess; not checked */
