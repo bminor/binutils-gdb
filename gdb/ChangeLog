@@ -1,3 +1,12 @@
+Sat May 27 23:54:17 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* configure.in: Use sed instead of awk to get the values of
+	  hostfile, targetfile and nativefile.  Awk is not a utility
+	  required by the GNU coding standards.  This change also 
+	  fixes the rigid whitespace requirements that were required
+	  for awk.
+	* configure: regenerated.
+
 Sat May 27 16:24:04 1995  Angela Marie Thomas  <angela@cirdan.cygnus.com>
 
         * sparclite/{Makefile,configure}.in: Add hooks for building with

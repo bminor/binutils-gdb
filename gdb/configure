@@ -1875,22 +1875,26 @@ target_makefile_frag_path=$target_makefile_frag
 
 
 
+hostfile=`sed -n '
+s/XM_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
+' ${host_makefile_frag}`
 
-#  We really shouldn't depend on there being a space after XM_FILE= ...
-hostfile=`awk '$1 == "XM_FILE=" { print $2 }' ${host_makefile_frag}`
-
-#  We really shouldn't depend on there being a space after TM_FILE= ...
-targetfile=`awk '$1 == "TM_FILE=" { print $2 }' ${target_makefile_frag}`
+targetfile=`sed -n '
+s/TM_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
+' ${target_makefile_frag}`
 
 # these really aren't orthogonal true/false values of the same condition,
 # but shells are slow enough that I like to reuse the test conditions
 # whenever possible
 if test "${target}" = "${host}"; then
-nativefile=`awk '$1 == "NAT_FILE=" { print $2 }' ${host_makefile_frag}`
+nativefile=`sed -n '
+s/NAT_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
+' ${host_makefile_frag}`
 else
 # GDBserver is only useful in a "native" enviroment
 configdirs=`echo $configdirs | sed 's/gdbserver//'`
 fi
+
 
 # If hostfile (XM_FILE) and/or targetfile (TM_FILE) and/or nativefile
 # (NAT_FILE) is not set in config/*/*.m[ht] files, we don't make the
