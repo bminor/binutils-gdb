@@ -1,0 +1,195 @@
+altos-xdep.o : altos-xdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
+  inferior.h breakpoint.h value.h symtab.h gdbcore.h $(INCLUDE_DIR)/bfd.h 
+am29k-pinsn.o : am29k-pinsn.c defs.h target.h am29k-opcode.h 
+am29k-tdep.o : am29k-tdep.c defs.h gdbcore.h $(INCLUDE_DIR)/bfd.h frame.h \
+  param.h tm.h config.status param-no-tm.h xm.h config.status value.h symtab.h inferior.h breakpoint.h 
+arm-pinsn.o : arm-pinsn.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h \
+  arm-opcode.h 
+arm-tdep.o : arm-tdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
+  inferior.h breakpoint.h value.h symtab.h arm-opcode.h gdbcore.h \
+  $(INCLUDE_DIR)/bfd.h 
+arm-xdep.o : arm-xdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
+  inferior.h breakpoint.h value.h symtab.h arm-opcode.h gdbcore.h \
+  $(INCLUDE_DIR)/bfd.h 
+blockframe.o : blockframe.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h \
+  frame.h gdbcore.h $(INCLUDE_DIR)/bfd.h value.h target.h 
+breakpoint.o : breakpoint.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h \
+  frame.h breakpoint.h value.h expression.h gdbcore.h $(INCLUDE_DIR)/bfd.h \
+  gdbcmd.h command.h inferior.h target.h 
+coffread.o : coffread.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h \
+  breakpoint.h value.h $(INCLUDE_DIR)/bfd.h $(BFD_DIR)/libcoff.h symfile.h 
+command.o : command.c defs.h command.h symtab.h value.h 
+convex-pinsn.o : convex-pinsn.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  symtab.h convex-opcode.h 
+convex-tdep.o : convex-tdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  command.h symtab.h value.h frame.h inferior.h breakpoint.h \
+  $(INCLUDE_DIR)/wait.h gdbcore.h $(INCLUDE_DIR)/bfd.h gdbcmd.h 
+convex-xdep.o : convex-xdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  command.h symtab.h value.h frame.h inferior.h breakpoint.h \
+  $(INCLUDE_DIR)/wait.h gdbcore.h $(INCLUDE_DIR)/bfd.h gdbcmd.h 
+core.o : core.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h inferior.h \
+  breakpoint.h value.h symtab.h command.h $(INCLUDE_DIR)/bfd.h target.h \
+  gdbcore.h 
+coredep.o : coredep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status gdbcore.h \
+  $(INCLUDE_DIR)/bfd.h 
+cplus-dem.o : cplus-dem.c 
+dbxread.o : dbxread.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  $(INCLUDE_DIR)/a.out.gnu.h $(INCLUDE_DIR)/target.h $(INCLUDE_DIR)/reloc.h \
+  $(INCLUDE_DIR)/stab.gnu.h $(INCLUDE_DIR)/stab.def symtab.h breakpoint.h value.h \
+  command.h target.h gdbcore.h $(INCLUDE_DIR)/bfd.h $(BFD_DIR)/liba.out.h \
+  symfile.h 
+environ.o : environ.c environ.h 
+eval.o : eval.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h value.h \
+  expression.h target.h 
+exec.o : exec.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h inferior.h \
+  breakpoint.h value.h symtab.h target.h gdbcore.h $(INCLUDE_DIR)/bfd.h 
+expprint.o : expprint.c defs.h symtab.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  expression.h value.h 
+findvar.o : findvar.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h \
+  frame.h value.h gdbcore.h $(INCLUDE_DIR)/bfd.h inferior.h breakpoint.h \
+  target.h 
+gould-pinsn.o : gould-pinsn.c gdbcore.h $(INCLUDE_DIR)/bfd.h defs.h param.h \
+  tm.h config.status param-no-tm.h xm.h config.status symtab.h frame.h np1-opcode.h 
+gould-xdep.o : gould-xdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
+  inferior.h breakpoint.h value.h symtab.h gdbcore.h $(INCLUDE_DIR)/bfd.h 
+hp300hpux-xdep.o : hp300hpux-xdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  frame.h inferior.h breakpoint.h value.h symtab.h gdbcore.h \
+  $(INCLUDE_DIR)/bfd.h 
+i386-pinsn.o : i386-pinsn.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h \
+  frame.h inferior.h breakpoint.h value.h gdbcore.h $(INCLUDE_DIR)/bfd.h 
+i386-tdep.o : i386-tdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
+  inferior.h breakpoint.h value.h symtab.h gdbcore.h $(INCLUDE_DIR)/bfd.h 
+i386-xdep.o : i386-xdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
+  inferior.h breakpoint.h value.h symtab.h gdbcore.h $(INCLUDE_DIR)/bfd.h 
+i960-pinsn.o : i960-pinsn.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
+  inferior.h breakpoint.h value.h symtab.h 
+i960-tdep.o : i960-tdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h \
+  value.h frame.h signame.h ieee-float.h 
+ieee-float.o : ieee-float.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  ieee-float.h 
+infcmd.o : infcmd.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h frame.h \
+  inferior.h breakpoint.h value.h environ.h gdbcmd.h command.h gdbcore.h \
+  $(INCLUDE_DIR)/bfd.h target.h 
+inflow.o : inflow.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
+  inferior.h breakpoint.h value.h symtab.h command.h signals.h terminal.h \
+  target.h 
+infptrace.o : infptrace.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
+  inferior.h breakpoint.h value.h symtab.h target.h gdbcore.h \
+  $(INCLUDE_DIR)/bfd.h 
+infrun.o : infrun.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h frame.h \
+  inferior.h breakpoint.h value.h $(INCLUDE_DIR)/wait.h gdbcore.h \
+  $(INCLUDE_DIR)/bfd.h signame.h command.h terminal.h target.h 
+inftarg.o : inftarg.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
+  inferior.h breakpoint.h value.h symtab.h target.h $(INCLUDE_DIR)/wait.h \
+  gdbcore.h $(INCLUDE_DIR)/bfd.h ieee-float.h 
+m68k-pinsn.o : m68k-pinsn.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h \
+  m68k-opcode.h gdbcore.h $(INCLUDE_DIR)/bfd.h 
+m68k-tdep.o : m68k-tdep.c defs.h ieee-float.h 
+main.o : main.c defs.h gdbcmd.h command.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  symtab.h inferior.h breakpoint.h value.h frame.h signals.h target.h 
+mem-break.o : mem-break.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status 
+mips-pinsn.o : mips-pinsn.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h \
+  mips-opcode.h 
+mips-tdep.o : mips-tdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
+  inferior.h breakpoint.h value.h symtab.h gdbcmd.h command.h gdbcore.h \
+  $(INCLUDE_DIR)/bfd.h 
+mips-xdep.o : mips-xdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
+  inferior.h breakpoint.h value.h symtab.h gdbcore.h $(INCLUDE_DIR)/bfd.h 
+mipsread.o : mipsread.c param.h tm.h config.status param-no-tm.h xm.h config.status obstack.h defs.h \
+  symtab.h gdbcore.h $(INCLUDE_DIR)/bfd.h symfile.h $(INCLUDE_DIR)/intel-coff.h 
+news-xdep.o : news-xdep.c 
+Onindy.o : ${srcdir}/nindy-share/Onindy.c ${srcdir}/nindy-share/ttycntl.h \
+  ${srcdir}/nindy-share/block_io.h $(INCLUDE_DIR)/wait.h ${srcdir}/nindy-share/env.h \
+  /usr/include/string.h 
+nindy.o : ${srcdir}/nindy-share/nindy.c ${srcdir}/nindy-share/ttycntl.h ${srcdir}/nindy-share/block_io.h \
+  $(INCLUDE_DIR)/wait.h ${srcdir}/nindy-share/env.h /usr/include/string.h 
+ttybreak.o : ${srcdir}/nindy-share/ttybreak.c ${srcdir}/nindy-share/ttycntl.h 
+ttyflush.o : ${srcdir}/nindy-share/ttyflush.c ${srcdir}/nindy-share/ttycntl.h 
+nindy-tdep.o : nindy-tdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h \
+  frame.h 
+ns32k-pinsn.o : ns32k-pinsn.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  symtab.h ns32k-opcode.h gdbcore.h $(INCLUDE_DIR)/bfd.h 
+printcmd.o : printcmd.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
+  symtab.h value.h expression.h gdbcore.h $(INCLUDE_DIR)/bfd.h gdbcmd.h \
+  command.h target.h 
+pyr-pinsn.o : pyr-pinsn.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h \
+  pyr-opcode.h gdbcore.h $(INCLUDE_DIR)/bfd.h 
+pyr-tdep.o : pyr-tdep.c 
+pyr-xdep.o : pyr-xdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
+  inferior.h breakpoint.h value.h symtab.h gdbcore.h $(INCLUDE_DIR)/bfd.h 
+remote-eb.o : remote-eb.c defs.h tm-29k.h param-no-tm.h xm.h config.status inferior.h \
+  breakpoint.h value.h symtab.h frame.h param.h $(INCLUDE_DIR)/wait.h \
+  terminal.h target.h 
+remote-nindy.o : remote-nindy.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  frame.h inferior.h breakpoint.h value.h symtab.h target.h gdbcore.h \
+  $(INCLUDE_DIR)/bfd.h command.h ieee-float.h $(INCLUDE_DIR)/wait.h \
+  ${srcdir}/nindy-share/ttycntl.h ${srcdir}/nindy-share/demux.h ${srcdir}/nindy-share/env.h \
+  ${srcdir}/nindy-share/stop.h 
+remote-vx.o : remote-vx.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
+  inferior.h breakpoint.h value.h symtab.h $(INCLUDE_DIR)/wait.h target.h \
+  gdbcore.h $(INCLUDE_DIR)/bfd.h command.h symfile.h ${srcdir}/vx-share/xdr_ptrace.h \
+  ${srcdir}/vx-share/xdr_regs.h ${srcdir}/vx-share/reg.h ${srcdir}/vx-share/xdr_ld.h \
+  ${srcdir}/vx-share/xdr_rdb.h ${srcdir}/vx-share/dbgRpcLib.h 
+remote.o : remote.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
+  inferior.h breakpoint.h value.h symtab.h target.h $(INCLUDE_DIR)/wait.h \
+  terminal.h 
+signame.o : signame.c signame.h 
+solib.o : solib.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h gdbcore.h \
+  $(INCLUDE_DIR)/bfd.h command.h 
+source.o : source.c defs.h symtab.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  command.h frame.h gdbcore.h $(INCLUDE_DIR)/bfd.h 
+sparc-pinsn.o : sparc-pinsn.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  symtab.h sparc-opcode.h gdbcore.h $(INCLUDE_DIR)/bfd.h /usr/include/string.h \
+  target.h 
+sparc-tdep.o : sparc-tdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
+  inferior.h breakpoint.h value.h symtab.h obstack.h signame.h target.h \
+  ieee-float.h gdbcore.h $(INCLUDE_DIR)/bfd.h 
+sparc-xdep.o : sparc-xdep.c defs.h tm-sparc.h param-no-tm.h xm.h config.status inferior.h \
+  breakpoint.h value.h symtab.h frame.h param.h target.h gdbcore.h \
+  $(INCLUDE_DIR)/bfd.h 
+stack.o : stack.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h frame.h \
+  gdbcmd.h command.h value.h gdbcore.h $(INCLUDE_DIR)/bfd.h target.h \
+  breakpoint.h 
+sun3-xdep.o : sun3-xdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status inferior.h \
+  breakpoint.h value.h symtab.h frame.h gdbcore.h $(INCLUDE_DIR)/bfd.h 
+sun386-xdep.o : sun386-xdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  frame.h inferior.h breakpoint.h value.h symtab.h signame.h gdbcore.h \
+  $(INCLUDE_DIR)/bfd.h 
+symfile.o : symfile.c defs.h symtab.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  gdbcore.h $(INCLUDE_DIR)/bfd.h frame.h target.h value.h symfile.h gdbcmd.h \
+  command.h breakpoint.h 
+symmetry-tdep.o : symmetry-tdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  frame.h inferior.h breakpoint.h value.h symtab.h gdbcore.h \
+  $(INCLUDE_DIR)/bfd.h 
+symmetry-xdep.o : symmetry-xdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  frame.h inferior.h breakpoint.h value.h symtab.h gdbcore.h \
+  $(INCLUDE_DIR)/bfd.h 
+symmisc.o : symmisc.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h \
+  breakpoint.h value.h command.h 
+symtab.o : symtab.c defs.h symtab.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  gdbcore.h $(INCLUDE_DIR)/bfd.h frame.h target.h value.h symfile.h gdbcmd.h \
+  command.h 
+target.o : target.c defs.h target.h gdbcmd.h command.h symtab.h inferior.h \
+  breakpoint.h value.h frame.h param.h tm.h config.status param-no-tm.h xm.h config.status \
+  $(INCLUDE_DIR)/bfd.h symfile.h 
+tdesc.o : tdesc.c 
+umax-xdep.o : umax-xdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status frame.h \
+  inferior.h breakpoint.h value.h symtab.h gdbcore.h $(INCLUDE_DIR)/bfd.h 
+utils.o : utils.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status signals.h gdbcmd.h \
+  command.h terminal.h $(INCLUDE_DIR)/bfd.h target.h 
+valarith.o : valarith.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status value.h \
+  symtab.h expression.h target.h 
+valops.o : valops.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h value.h \
+  frame.h inferior.h breakpoint.h gdbcore.h $(INCLUDE_DIR)/bfd.h target.h 
+valprint.o : valprint.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h \
+  value.h gdbcore.h $(INCLUDE_DIR)/bfd.h gdbcmd.h command.h target.h obstack.h 
+values.o : values.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h value.h \
+  gdbcore.h $(INCLUDE_DIR)/bfd.h frame.h command.h 
+vax-pinsn.o : vax-pinsn.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h \
+  vax-opcode.h 
+xdr_ld.o : ${srcdir}/vx-share/xdr_ld.c ${srcdir}/vx-share/vxWorks.h ${srcdir}/vx-share/vxTypes.h \
+  /usr/include/rpc/rpc.h ${srcdir}/vx-share/xdr_ld.h 
+xdr_ptrace.o : ${srcdir}/vx-share/xdr_ptrace.c 
+xdr_rdb.o : ${srcdir}/vx-share/xdr_rdb.c ${srcdir}/vx-share/vxWorks.h ${srcdir}/vx-share/vxTypes.h \
+  ${srcdir}/vx-share/xdr_rdb.h 
+xdr_regs.o : ${srcdir}/vx-share/xdr_regs.c 

@@ -1,0 +1,223 @@
+		GDB 4.0 -- what has changed since 3.5?
+
+ *  New Facilities
+
+Gdb now paginates its output, with a ``more''-like interface.  You can
+set the screen width and screen height with new ``set'' commands; they
+default to your terminal settings.  Wide output is wrapped at good
+places to make the output more readable.
+
+Gdb now reads its input via the ``readline'' interface.  This provides
+inline editing of commands, using familiar Emacs or VI commands (like
+``tcsh'' or the korn shell); history substitutions a la the C shell;
+and storage and recall of your command history across debugging
+sessions.  The default is Emacs mode; to switch temporarily to vi mode,
+use control-meta-J or ESC control-j.  You can switch permanently to vi
+mode by putting the line ``set editing-mode vi'' in the file .inputrc
+in your home directory.   For full details, see the description in
+readline/inc-readline.texinfo and readline/inc-history.texinfo.
+
+Gdb now supports cross-debugging from a host machine of one type to a
+target machine of another type.  Communication with the target system
+is over serial lines.  The ``target'' command handles connecting to the
+remote system; the ``load'' command will download a program into the
+remote system.  It also supports debugging of realtime processes
+running under VxWorks, using SunRPC Remote Procedure Calls over TCP/IP
+to talk to a debugger stub on the target system.
+
+New CPUs supported include the AMD 29000 and Intel 960.
+
+GDB now reads object files and symbol tables via a ``binary file'' 
+library, which allows a single copy of GDB to debug programs of multiple
+object file types such as a.out and coff.
+
+There is now a GDB reference card in "gdbrc.tex".
+
+
+ *  Control-Variable user interface simplified
+
+All variables that control the operation of the debugger can be set
+by the ``set'' command, and displayed by the ``show'' command.
+
+For example, ``set prompt new-gdb=>'' will change your prompt to new-gdb=>.
+``Show prompt'' produces the response:
+Gdb's prompt is new-gdb=>.
+
+What follows are the NEW set commands.  The command ``help set'' will
+print a complete list of old and new set commands.  ``help set FOO''
+will give a longer description of the variable FOO.
+
+caution on/off:  Enables warning questions for operations that are
+		 hard to recover from, e.g. rerunning the program while
+		 it is already running.  Default is ON.
+
+editing on/off:  Enables EMACS style command line editing 
+                 of input.  Previous lines can be recalled with 
+		 control-P, the current line can be edited with control-B,
+		 you can search for commands with control-R, etc.
+		 Default is ON.
+
+history filename NAME:  NAME is where the gdb command history 
+			will be stored.  The default is .gdb_history,
+			or the value of the environment variable
+			GDBHISTFILE.
+
+history size N:  The size, in commands, of the command history.  The 
+		 default is 256, or the value of the environment variable
+		 HISTSIZE.
+
+history write on/off: If this value is set to ON, the history file will
+		      be saved after exiting gdb.  If set to OFF, the 
+		      file will not be saved.  The default is OFF.
+
+history expansion on/off: If this value is set to ON, then csh-like 
+			  history expansion will be performed  on 
+			  command line input.  The default is OFF.
+
+radix N:  Sets the default radix for input and output.  It can be set
+	  to 8, 10, or 16.  Note that the argument to "radix" is interpreted
+	  in the current radix, so "set radix 10" is always a no-op.
+
+screen-height N: This integer value is the number of lines on a page. Default
+                 is 24, the current `stty rows'' setting, or the ``li#''
+		 setting from the termcap entry matching the environment
+		 variable TERM.
+
+screen-width N:  This integer value is the number of characters on a line.
+		 Default is 80, the current `stty cols'' setting, or the ``co#''
+		 setting from the termcap entry matching the environment
+		 variable TERM.
+
+Note: ``set screensize'' is obsolete. Use ``set screen-height'' and
+``set screen-width'' instead.
+
+addressprint on/off:  Print memory addresses in various command displays,
+		      such as stack traces and structure values.  Gdb looks
+		      more ``symbolic'' if you turn this off; it looks more
+		      ``machine level'' with it on.  Default is ON.
+
+arrayprint on/off:  Prettyprint arrays.  New convenient format!  Default 
+                    is OFF.
+
+demangle on/off:   Print C++ symbols in "source" form if on, "raw" form if off.
+
+asm-demangle on/off:  Same, for assembler level printouts like instructions.
+
+vtblprint on/off:  Prettyprint C++ virtual function tables.  Default is OFF.
+
+
+ *  Support for Epoch Environment.
+
+The epoch environment is a version of Emacs v18 with windowing.  One
+new command, ``inspect'', is identical to ``print'', except that if you
+are running in the epoch environment, the value is printed in its own
+window.
+
+
+ *  Support for Shared Libraries
+
+GDB can now debug programs and core files that use SunOS shared libraries.
+Symbols from a shared library cannot be referenced
+before the shared library has been linked with the program (this
+happens after you type ``run'' and before the function main() is entered).
+At any time after this linking (including when examining core files
+from dynamically linked programs), gdb reads the symbols from each
+shared library when you type the ``sharedlibrary'' command.
+It can be abbreviated ``share''.
+
+sharedlibrary REGEXP:  Load shared object library symbols for files 
+                       matching a unix regular expression.  No argument
+		       indicates to load symbols for all shared libraries.
+
+info sharedlibrary:  Status of loaded shared libraries.
+
+
+ *  Watchpoints
+
+A watchpoint stops execution of a program whenever the value of an
+expression changes.  Checking for this slows down execution
+tremendously whenever you are in the scope of the expression, but is
+quite useful for catching tough ``bit-spreader'' or pointer misuse
+problems.  Some machines such as the 386 have hardware for doing this
+more quickly, and future versions of gdb will use this hardware.
+
+watch EXP:  Set a watchpoint (breakpoint) for an expression.
+
+info watchpoints:  Information about your watchpoints.
+
+delete N:   Deletes watchpoint number N (same as breakpoints).
+disable N:  Temporarily turns off watchpoint number N (same as breakpoints).
+enable N:   Re-enables watchpoint number N (same as breakpoints).
+
+
+ *  C++ multiple inheritance
+
+When used with a GCC version 2 compiler, GDB supports multiple inheritance
+for C++ programs.
+
+ *  C++ exception handling
+
+Gdb now supports limited C++ exception handling.  Besides the existing
+ability to breakpoint on an exception handler, gdb can breakpoint on
+the raising of an exception (before the stack is peeled back to the
+handler's context).
+
+catch FOO:  If there is a FOO exception handler in the dynamic scope,
+	    set a breakpoint to catch exceptions which may be raised there.
+	    Multiple exceptions (``catch foo bar baz'') may be caught.
+
+info catch:  Lists all exceptions which may be caught in the
+             current stack frame.
+
+
+ *  Minor command changes
+
+The command ``call func (arg, arg, ...)'' now acts like the print
+command, except it does not print or save a value if the function's result
+is void.  This is similar to dbx usage.
+
+The ``up'' and ``down'' commands now always print the frame they end up
+at; ``up-silently'' and `down-silently'' can be used in scripts to change
+frames without printing.
+
+ *  New directory command
+
+'dir' now adds directories to the FRONT of the source search path.
+The path starts off empty.  Source files that contain debug information
+about the directory in which they were compiled can be found even
+with an empty path; GCC includes this information.  If GDB can't find
+your source file in the current directory, type "dir .".
+
+ *  Features removed in this release
+
+``info types'' has been removed, since it printed builtin types in a
+confusing fashion, and did not do useful things with typedefs.  ``ptype''
+or ``whatis'' are more useful commands for dealing with types..
+
+
+ * Configuring GDB for compilation
+
+For normal use, type ``config.gdb host''.  Hosts now handled are:
+
+3b1 altos altosgas arm bigmips convex hp300bsd hp300hpux i386v i386v-g 
+i386v32 i386v32-g isi littlemips m88k merlin news news1000 none np1 pn
+pyramid sun2os3 sun2os4 sun386 sun3os3 sun3os4 sun4os3 sun4os4 symmetry
+umax vax
+
+Type config.gdb +host to get a full description of each host.
+
+You can now build gdb conveniently for several architectures from the
+same sources.  If config.gdb is run from a subdirectory, it configures
+the Makefile to use source files from '..'.  Each subdirectory can be
+indpendently configured.  An explicit source file directory can also
+be specified with the +srcdir=xxx option.  Due to obscure search rules
+in the C preprocessor, if you have previously built gdb in the main 
+directory, run 'make cleanconfig' in the top level directory before
+building it in a subdirectory.
+
+GDB now handles cross debugging.  If you are remotely debugging between 
+two different machines, type ``config.gdb host target''.
+Host is the machine where gdb will run; target is the machine
+where the program that you are debugging will run.
+
+Type config.gdb +target to get a full description of each target.
