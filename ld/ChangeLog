@@ -1,3 +1,10 @@
+Mon Feb  9 13:44:40 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* scripttempl/elfd10v.sc (.stack): Move stack to 0x00..7FFE.
+
+	* emulparams/d10velf.sh (READONLY_START_ADDR): Read only section
+ 	moved to 0x00.....4.
+
 Sat Feb  7 15:41:26 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure, aclocal.m4: Rebuild with new libtool.
