@@ -1,3 +1,15 @@
+Fri Nov  5 09:49:22 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* inflow.c (terminal_init_inferior): Temporarily use Lynx PIDGET
+	macro to set process groups.
+	* infptrace.c (child_resume): Temporarily use Lynx PIDGET to
+	specify resumption of all threads.
+	* infrun.c (wait_for_inferior):  Fix handling of thread-specific
+	breakpoints for systems where DECR_PC_AFTER_BREAK > 0 (ie: backup
+	PC by the right amount when continuing the thread).
+	* thread.c (thread_apply_command):  Add the  `thread apply'
+	command to apply a given GDB command to a list of threads.
+
 Fri Nov  5 05:58:03 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* Makefile.in (init.c): Don't call sed if filename is empty.

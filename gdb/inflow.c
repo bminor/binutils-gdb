@@ -176,7 +176,11 @@ terminal_init_inferior ()
 	free (inferior_ttystate);
       inferior_ttystate = SERIAL_GET_TTY_STATE (stdin_serial);
 #ifdef PROCESS_GROUP_TYPE
+#ifdef PIDGET			/* XXX Lynx */
+      inferior_process_group = PIDGET (inferior_pid);
+#else
       inferior_process_group = inferior_pid;
+#endif
 #endif
 
       /* Make sure that next time we call terminal_inferior (which will be
