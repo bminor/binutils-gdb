@@ -1,3 +1,7 @@
+Wed Jul 14 09:36:42 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t16/printcmds.exp: Add another printf test.
+
 Wed Jul 14 15:37:13 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure.in: If configured -with-stabs on any target, add
@@ -5,8 +9,8 @@ Wed Jul 14 15:37:13 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 Wed Jul 14 09:36:42 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
-	* printcmds.exp: Change printf "%f\n" to printf "%f is fun" so
-	pattern does not match the command itself.
+	* gdb.t16/printcmds.exp: Change printf "%f\n" to printf "%f is
+	fun" so pattern does not match the command itself.
 
 Mon Jul 12 11:22:06 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
