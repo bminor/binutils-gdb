@@ -22,6 +22,6 @@
 #define NM_NBSD_H
 
 /* Get generic NetBSD native definitions. */
-#include <nm-nbsd.h>
+#include "config/nm-nbsd.h"
 
 #endif /* NM_NBSD_H */
