@@ -279,20 +279,22 @@ typedef struct
 #define Cpu486		 0x10	/* i486 or better required */
 #define Cpu586		 0x20	/* i585 or better required */
 #define Cpu686		 0x40	/* i686 or better required */
-#define CpuK6		 0x80	/* AMD K6 or better required*/
-#define CpuAthlon	0x100	/* AMD Athlon or better required*/
-#define CpuSledgehammer 0x200	/* Sledgehammer or better required */
-#define CpuMMX		0x400	/* MMX support required */
-#define CpuSSE		0x800	/* Streaming SIMD extensions required */
-#define Cpu3dnow       0x1000	/* 3dnow! support required */
-#define CpuUnknown     0x2000	/* The CPU is unknown,  be on the safe side.  */
+#define CpuP4		 0x80	/* Pentium4 or better required */
+#define CpuK6		0x100	/* AMD K6 or better required*/
+#define CpuAthlon	0x200	/* AMD Athlon or better required*/
+#define CpuSledgehammer 0x400	/* Sledgehammer or better required */
+#define CpuMMX		0x800	/* MMX support required */
+#define CpuSSE	       0x1000	/* Streaming SIMD extensions required */
+#define CpuSSE2	       0x2000	/* Streaming SIMD extensions 2 required */
+#define Cpu3dnow       0x4000	/* 3dnow! support required */
+#define CpuUnknown     0x8000	/* The CPU is unknown,  be on the safe side.  */
 
   /* These flags are set by gas depending on the flag_code.  */
 #define Cpu64	     0x4000000   /* 64bit support required  */
 #define CpuNo64      0x8000000   /* Not supported in the 64bit mode  */
 
   /* The default value for unknown CPUs - enable all features to avoid problems.  */
-#define CpuUnknownFlags (Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuSledgehammer|CpuMMX|CpuSSE|Cpu3dnow|CpuK6|CpuAthlon)
+#define CpuUnknownFlags (Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuSledgehammer|CpuMMX|CpuSSE|CpuSSE2|Cpu3dnow|CpuK6|CpuAthlon)
 
   /* the bits in opcode_modifier are used to generate the final opcode from
      the base_opcode.  These bits also are used to detect alternate forms of
