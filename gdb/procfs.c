@@ -1,5 +1,5 @@
 /* Machine independent support for SVR4 /proc (process file system) for GDB.
-   Copyright 1991, 1992-96, 1997 Free Software Foundation, Inc.
+   Copyright 1991, 1992-97, 1998 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.  Changes for sysv4.2mp procfs
    compatibility by Geoffrey Noer at Cygnus Solutions.
 
@@ -5218,7 +5218,7 @@ procfs_lwp_creation_handler (pi, syscall_num, why, rtnvalp, statvalp)
   /* If lwp_create failed, then nothing interesting happened.  Continue the
      process and go back to sleep. */
 
-  if (pi->prstatus.pr_reg[R_PSR] & PS_FLAG_CARRY)
+  if (PROCFS_GET_CARRY (pi->prstatus.pr_reg))
     {				/* _lwp_create failed */
       pi->prrun.pr_flags &= PRSTEP;
       pi->prrun.pr_flags |= PRCFAULT;
@@ -5502,6 +5502,18 @@ procfs_first_available ()
 	return pi->pid;
     }
   return -1;
+}
+
+int
+procfs_get_pid_fd (pid)
+     int pid;
+{
+  struct procinfo *pi = find_procinfo (pid, 1);
+
+  if (pi == NULL)
+    return -1;
+
+  return pi->ctl_fd;
 }
 
 /* Send a SIGINT to the process group.  This acts just like the user typed a

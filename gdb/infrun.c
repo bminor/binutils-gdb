@@ -903,9 +903,15 @@ wait_for_inferior ()
 		    Don't confuse that with hitting the breakpoint.
 		    What we check for is that 1) stepping is going on
 		    and 2) the pc before the last insn does not match
-		    the address of the breakpoint before the current pc.  */
-		 (prev_pc != stop_pc - DECR_PC_AFTER_BREAK
-		  && CURRENTLY_STEPPING ()) :
+		    the address of the breakpoint before the current pc
+		    and 3) we didn't hit a breakpoint in a signal handler
+		    without an intervening stop in sigtramp, which is
+		    detected by a new stack pointer value below
+		    any usual function calling stack adjustments.  */
+		 (CURRENTLY_STEPPING ()
+		  && prev_pc != stop_pc - DECR_PC_AFTER_BREAK
+		  && !(step_range_end
+		       && read_sp () INNER_THAN (step_sp - 16))) :
 		 0)
 		 );
 	      /* Following in case break condition called a

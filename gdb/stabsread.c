@@ -1878,7 +1878,7 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_VALUE_ADDRESS (sym) = valu;
 #ifdef STATIC_TRANSFORM_NAME
-      if (SYMBOL_NAME (sym)[0] == '$')
+      if (IS_STATIC_TRANSFORM_NAME (SYMBOL_NAME (sym)))
       {
 	struct minimal_symbol *msym;
 	msym = lookup_minimal_symbol (SYMBOL_NAME (sym), NULL, objfile);
@@ -2006,7 +2006,7 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_VALUE_ADDRESS (sym) = valu;
 #ifdef STATIC_TRANSFORM_NAME
-      if (SYMBOL_NAME (sym)[0] == '$')
+      if (IS_STATIC_TRANSFORM_NAME (SYMBOL_NAME (sym)))
       {
 	struct minimal_symbol *msym;
 	msym = lookup_minimal_symbol (SYMBOL_NAME (sym), NULL, objfile);

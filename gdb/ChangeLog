@@ -1,3 +1,29 @@
+Fri Apr 10 22:36:28 1998  Peter Schauer (pes@regent.e-technik.tu-muenchen.de)
+
+        Update support for x86 Solaris 2.
+        * config/i386/tm-i386sol2.h, nm-i386sol2.h:  New configuration
+        files for x86 Solaris 2.                                              
+        * config/i386/i386sol2.mt, i386sol2.mh:  Use them.                    
+        * config/sparc/tm-sun4sol2.h (PROCFS_GET_CARRY):  New macro, extract  
+        carry flag from a given regset.                                     
+        (IS_STATIC_TRANSFORM_NAME):  New macro, check if a symbol name      
+        is a SunPro transformed name.                                 
+        * i386-tdep.c (sunpro_static_transform_name):  New function to
+        extract the source name from a SunPro transformed name.           
+        * inferior.h (procfs_first_available, procfs_get_pid_fd):        
+        Add prototypes.                                          
+        * infrun.c (wait_for_inferior):  Handle breakpoint hit in
+        signal handler without intervening stop in sigtramp.     
+        * procfs.c (procfs_lwp_creation_handler):  Use PROCFS_GET_CARRY
+        instead of direct access to the status register.               
+        (procfs_get_pid_fd):  New function, returns procfs fd for a given pid.
+        * sol-thread.c (ps_lgetLDT):  New function, returns LDT for a given   
+        lwpid.                                                                
+        (sol_find_new_threads):  Handle failed libthread_db initialization 
+        gracefully.                                                       
+        * stabsread.c (define_symbol):  Use IS_STATIC_TRANSFORM_NAME      
+        to check for a SunPro transformed symbol name.              
+
 Fri Apr 10 10:35:35 1998  John Metzler  <jmetzler@cygnus.com>
 
 	* utils.c (fmthex): A formatting function for hexdumps
@@ -53,9 +79,11 @@ Mon Apr  6 09:17:48 1998  Andrew Cagney  <cagney@b1.cygnus.com>
  	using MAX_REGISTER_RAW_SIZE.
 
 Sat Apr  4 10:05:00 1998  Dawn Perchik  <dawn@cygnus.com>
+
 	* infrun.c: Fix prototype of signals_info to match static funtion.
 
 Thu Apr  2 12:47:41 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
 	* sol-thread.c (sol_thread_store_registers): Save & restore new
  	value of single updated register to prevent accidental clobbering.
 

@@ -1,5 +1,5 @@
 /* Low level interface for debugging Solaris threads for GDB, the GNU debugger.
-   Copyright 1996 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -717,7 +717,7 @@ sol_thread_store_registers (regno)
 	error ("sol_thread_store_registers: td_thr_getfpregs %s",
 	       td_err_string (val));
 
-      /* restore register value */
+      /* restore new register value */
       memcpy(& registers[REGISTER_BYTE(regno)], old_value, REGISTER_SIZE);
 
 #if 0
@@ -1244,6 +1244,64 @@ ps_lsetfpregs (const struct ps_prochandle *ph, lwpid_t lwpid,
 
   return PS_OK;
 }
+
+#ifdef TM_I386SOL2_H
+
+/* Get local descriptor table.  */
+
+#include <sys/procfs.h>
+#include <sys/reg.h>
+#include <sys/sysi86.h>
+
+static int nldt_allocated = 0;
+static struct ssd *ldt_bufp = NULL;
+
+ps_err_e
+ps_lgetLDT (const struct ps_prochandle *ph, lwpid_t lwpid,
+	     struct ssd *pldt)
+{
+  gregset_t gregset;
+  int lwp_fd;
+  ps_err_e val;
+  int nldt;
+  int i;
+
+  /* Get procfs file descriptor for the LWP.  */
+  lwp_fd = procfs_get_pid_fd (BUILD_LWP (lwpid, PIDGET (inferior_pid)));
+  if (lwp_fd < 0)
+    return PS_BADLID;
+
+  /* Fetch registers und LDT descriptors.  */
+  if (ioctl (lwp_fd, PIOCGREG, &gregset) == -1)
+    return PS_ERR;
+
+  if (ioctl (lwp_fd, PIOCNLDT, &nldt) == -1)
+    return PS_ERR;
+
+  if (nldt_allocated < nldt)
+    {
+      ldt_bufp
+	= (struct ssd *) xrealloc (ldt_bufp, (nldt + 1) * sizeof (struct ssd));
+      nldt_allocated = nldt;
+    }
+
+  if (ioctl (lwp_fd, PIOCLDT, ldt_bufp) == -1)
+    return PS_ERR;
+
+  /* Search LDT for the LWP via register GS.  */
+  for (i = 0; i < nldt; i++)
+    {
+      if (ldt_bufp[i].sel == gregset[GS])
+	{
+	  *pldt = ldt_bufp[i];
+	  return PS_OK;
+	}
+    }
+
+  /* LDT not found.  */
+  return PS_ERR;
+}        
+#endif /* TM_I386SOL2_H */
 
 /* Convert a pid to printable form. */
 
@@ -1306,6 +1364,10 @@ sol_find_new_threads_callback(th, ignored)
 void
 sol_find_new_threads()
 {
+  /* don't do anything if init failed to resolve the libthread_db library */
+  if (!procfs_suppress_run)
+    return;
+
   if (inferior_pid == -1)
     {
       printf_filtered("No process.\n");
