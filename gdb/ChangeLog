@@ -1,3 +1,7 @@
+2000-09-06  H.J. Lu  <hjl@gnu.org>
+
+	* TODO: Add hardware watchpint problems on x86 OSes for 5.1.
+
 2000-09-06  Kevin Buettner  <kevinb@redhat.com>
 
 	* ia64-tdep.c (examine_prologue): Add rotating register rename

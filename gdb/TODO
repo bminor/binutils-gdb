@@ -12,6 +12,26 @@ cycle.  People hope to have these problems fixed in 5.1.
 
 --
 
+Hardware watchpint problems on x86 OSes, including Linux:
+
+1. Delete/disable hardware watchpoints should free hardware debug
+registers. 
+2. Watch for different values on a viariable with one hardware debug
+register.
+
+According to Eli Zaretskii <eliz@delorie.com>:
+
+These are not GDB/ia32 issues per se: the above features are all
+implemented in the DJGPP port of GDB and work in v5.0.  Every
+x86-based target should be able to lift the relevant parts of
+go32-nat.c and use them almost verbatim.  You get debug register
+sharing through reference counts, and the ability to watch large
+regions (up to 16 bytes) using multiple registers.  (The required
+infrastructure in high-level GDB application code, mostly in
+breakpoint.c, is also working since v5.0.)
+
+--
+
 RFD: infrun.c: No bpstat_stop_status call after proceed over break?
 http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00665.html
 
