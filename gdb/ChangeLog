@@ -1,5 +1,8 @@
 Mon Mar 30 16:50:43 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* Makefile.in (alldeps.mak):  Config files are now *.m[ht] as
+	opposed to m[ht]-*!
+
 	* config/irix4.mh:  Don't use coredep.o.  It doesn't work with procfs.
 
 	* mipsread.c (parse_symbol, parse_procedure):  Re-do the way that

@@ -365,7 +365,7 @@ rapp: $(RAPP_OBS)
 
 alldeps.mak: ${srcdir}/config
 	rm -f alldeps.mak alldeps.tmp allparam.tmp allconfig.tmp
-	for i in `ls -d ${srcdir}/config/m[ht]-*` ; do \
+	for i in `ls -d ${srcdir}/config/*.m[ht]` ; do \
 	  echo $$i >>allconfig.tmp; \
 	  awk <$$i ' \
 	    $$1 == "TDEPFILES=" || $$1 == "XDEPFILES=" { \
