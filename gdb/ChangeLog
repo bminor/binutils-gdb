@@ -1,5 +1,9 @@
 2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
 
+	* Makefile.in (cli-cmds.o): Add $(readline_h).
+
+2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
+
 	* cli/cli-cmds.c: Include readline.h.
 	(complete_command): Pass the start of the last word to
 	complete_line.

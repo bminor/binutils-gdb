@@ -2543,7 +2543,7 @@ cli-cmds.o: $(srcdir)/cli/cli-cmds.c $(defs_h) $(completer_h) $(target_h) \
 	$(linespec_h) $(expression_h) $(frame_h) $(value_h) $(language_h) \
 	$(filenames_h) $(objfiles_h) $(source_h) $(disasm_h) $(ui_out_h) \
 	$(top_h) $(cli_decode_h) $(cli_script_h) $(cli_setshow_h) \
-	$(cli_cmds_h)
+	$(cli_cmds_h) $(readline_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-cmds.c
 cli-decode.o: $(srcdir)/cli/cli-decode.c $(defs_h) $(symtab_h) \
 	$(gdb_regex_h) $(gdb_string_h) $(ui_out_h) $(cli_cmds_h) \
