@@ -1,5 +1,8 @@
 2001-02-27  Alan Modra  <alan@linuxcare.com.au>
 
+	* elf32-hppa.c: Correct field selector in stub comments.
+	(clobber_millicode_symbols): Formatting fix.
+
 	* configure.in: Bump version to 2.11.90.
 	* configure: Regenerate.
 	* Makefile.am (CFILES): Rename to SOURCE_CFILES.
