@@ -1,3 +1,8 @@
+2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdbint.texinfo (Item Output Functions): Add new ui_out_field_fmt_int
+	interface definition.
+
 2002-10-03  Marko Mlinar   <markom@opencores.org>
 
 	* gdb.texinfo (Target Commands): Add or1k target specific
