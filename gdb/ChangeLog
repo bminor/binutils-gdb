@@ -1,10 +1,14 @@
 Tue Jan 11 00:53:46 1994  John Gilmore  (gnu@cygnus.com)
 
+	* sparc-tdep.c (sparc_pop_frame):  Pop the fsr and csr (float and
+	coprocessor status regs) when popping a frame.  This fixes 
+	float exceptions that occur after calling inferior functions.
+
 	* sparc-nat.c (fetch_inferior_registers, store_inferior_registers):
 	Read and write the fsr (float status register) to/from the child
-	process.  This avoids random float exceptions when running under
-	GDB, and probably obsoletes Peter Schauer's change of May 24 '93
-	(which remains for safety).
+	process along with the float regs.  Remove Peter Schauer's change
+	of May 24 '93, which has higher overhead and doesn't solve the
+	real problem (which was that FSR wasn't being set).
 
 Mon Jan 10 23:16:42 1994  John Gilmore  (gnu@cygnus.com)
 
