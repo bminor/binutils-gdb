@@ -1,3 +1,16 @@
+Mon Jan 30 17:34:24 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* sparcl-tdep.c:  Add `sparclite' target for doing serial and udp
+	downloads to SPARClite demo boards.
+
+Sun Jan 29 09:43:22 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote.c, remote-pa.c: Remove #if 0'd icache code.  It has had
+	no hope of working as is for a long time (in particular, shebs' 27
+	Jan 95 change confuses the issue further--target_read_memory and
+	xfer_core_file do *not* do the same thing in this context).
+	Revise comment.
+
 Sat Jan 28 13:40:46 1995 Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* elfread.c (elf_symtab_read):  Do not test BSF_GLOBAL for
