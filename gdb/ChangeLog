@@ -1,3 +1,9 @@
+Thu Jul 17 11:38:46 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* partial-stab.h (case N_BINCL): detect missing partial symtab.
+	* dbxread.c: Add a complaint for N_BINCL without a corresponding
+	partial symtab.  Remove earlier change of 5/27/97.
+
 Wed Jul 16 10:38:03 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* sol-thread.c (sol_thread_[store, fetch]_registers): if 

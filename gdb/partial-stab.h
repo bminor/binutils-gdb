@@ -290,6 +290,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 		    || psymtab_language != language_cplus))
 	      psymtab_language = tmp_language;
 
+	    if (pst == NULL)
+	      {
+		/* FIXME: we should not get here without a PST to work on.
+		   Attempt to recover.  */
+		complain (&unclaimed_bincl_complaint, namestring, symnum);
+		continue;
+	      }
 	    add_bincl_to_list (pst, namestring, CUR_SYMBOL_VALUE);
 
 	    /* Mark down an include file in the current psymtab */
