@@ -65,10 +65,18 @@ const struct mn10300_operand mn10300_operands[] = {
 #define IMM16    (IMM8+1)
   {16, 0, MN10300_OPERAND_PROMOTE},
 
+/* 32bit immediate, high 16 bits in the main instruction
+   word, 16bits in the extension word.  */
 #define IMM32    (IMM16+1)
   {32, 0, MN10300_OPERAND_SPLIT},
 
-#define SP    (IMM32+1)
+/* 32bit immediate, high 16 bits in the main instruction
+   word, 16bits in the extension word, low 16bits are left
+   shifted 8 places.  */
+#define IMM32_LOWSHIFT8    (IMM32+1)
+  {32, 8, MN10300_OPERAND_SPLIT},
+
+#define SP    (IMM32_LOWSHIFT8+1)
   {8, 0, MN10300_OPERAND_SP},
 
 #define PSW    (SP+1)
@@ -313,17 +321,20 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "btst",	0xf8ec00,	0xfffc00,	FMT_D1, {IMM8, DN0}},
 { "btst",	0xfaec0000,	0xfffc0000,	FMT_D2, {IMM16, DN0}},
 { "btst",	0xfcec0000,	0xfffc0000,	FMT_D4, {IMM32, DN0}},
-{ "btst",	0xfe020000,	0xffff0000,	FMT_D5, {IMM8, MEM(IMM32)}},
+{ "btst",	0xfe020000,	0xffff0000,	FMT_D5, {IMM8E,
+							 MEM(IMM32_LOWSHIFT8)}},
 { "btst",	0xfaf80000,	0xfffc0000,	FMT_D2,
 					{IMM8, MEM2(SD8N_SHIFT8,AN0)}},
 { "bset",	0xf080,		0xfff0,		FMT_D0, {DM1, MEM(AN0)}},
-{ "bset",	0xfe000000,	0xffff0000,	FMT_D5, {IMM8, MEM(IMM32)}},
+{ "bset",	0xfe000000,	0xffff0000,	FMT_D5, {IMM8E,
+							 MEM(IMM32_LOWSHIFT8)}},
 { "bset",	0xfaf00000,	0xfffc0000,	FMT_D2,
 					{IMM8, MEM2(SD8N_SHIFT8,AN0)}},
 { "bclr",	0xf090,		0xfff0,		FMT_D0, {DM1, MEM(AN0)}},
-{ "bclr",	0xfe010000,	0xffff0000,	FMT_D5, {IMM8, MEM(IMM32)}},
+{ "bclr",	0xfe010000,	0xffff0000,	FMT_D5, {IMM8E,
+							 MEM(IMM32_LOWSHIFT8)}},
 { "bclr",	0xfaf40000,	0xfffc0000,	FMT_D2, {IMM8,
-					MEM2(SD8N_SHIFT8,AN0)}},
+						MEM2(SD8N_SHIFT8,AN0)}},
 
 { "asr",	0xf2b0,		0xfff0,		FMT_D0, {DM1, DN0}},
 { "asr",	0xf8c800,	0xfffc00,	FMT_D1, {IMM8, DN0}},
