@@ -1,5 +1,15 @@
 2001-12-10  Fred Fish  <fnf@redhat.com>
 
+	* values.c (value_fn_field): Add physname variable.  Use a minimal
+	symbol if we don't find a full symbol.  Remove setting of the new
+	value's type since that was already done by allocate_value().
+	Remove obsolete commented out error call since callees need to
+	handle a NULL return, which is possible result not an error.
+	* eval.c (evaluate_subexp_standard): Move check for inlined
+	functions to precede attempt to dereference a NULL argvec[0].
+
+2001-12-10  Fred Fish  <fnf@redhat.com>
+
 	* arm-linux-tdep.c (skip_hurd_resolver): Use NULL rather than
 	zero in args to lookup_minimal_symbol.
 	* linespec.c (decode_line_1): Ditto.

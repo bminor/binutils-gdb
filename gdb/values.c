@@ -954,7 +954,11 @@ value_field (register value_ptr arg1, register int fieldno)
 
 /* Return a non-virtual function as a value.
    F is the list of member functions which contains the desired method.
-   J is an index into F which provides the desired method. */
+   J is an index into F which provides the desired method.
+
+   We only use the symbol for its address, so be happy with either a
+   full symbol or a minimal symbol.
+ */
 
 value_ptr
 value_fn_field (value_ptr *arg1p, struct fn_field *f, int j, struct type *type,
@@ -962,20 +966,28 @@ value_fn_field (value_ptr *arg1p, struct fn_field *f, int j, struct type *type,
 {
   register value_ptr v;
   register struct type *ftype = TYPE_FN_FIELD_TYPE (f, j);
+  char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
   struct symbol *sym;
+  struct minimal_symbol *msym;
 
-  sym = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
-		       0, VAR_NAMESPACE, 0, NULL);
+  sym = lookup_symbol (physname, 0, VAR_NAMESPACE, 0, NULL);
   if (!sym)
+    {
+      msym = lookup_minimal_symbol (physname, NULL, NULL);
+    }
+
+  if (!sym && !msym)
     return NULL;
-/*
-   error ("Internal error: could not find physical method named %s",
-   TYPE_FN_FIELD_PHYSNAME (f, j));
- */
 
   v = allocate_value (ftype);
-  VALUE_ADDRESS (v) = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-  VALUE_TYPE (v) = ftype;
+  if (sym)
+    {
+      VALUE_ADDRESS (v) = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+    }
+  else
+    {
+      VALUE_ADDRESS (v) = SYMBOL_VALUE_ADDRESS (msym);
+    }
 
   if (arg1p)
     {

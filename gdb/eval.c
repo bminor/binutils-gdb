@@ -917,6 +917,8 @@ evaluate_subexp_standard (struct type *expect_type,
 
       if (noside == EVAL_SKIP)
 	goto nosideret;
+      if (argvec[0] == NULL)
+	error ("Cannot evaluate function -- may be inlined");
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
 	  /* If the return type doesn't look like a function type, call an
@@ -934,8 +936,6 @@ evaluate_subexp_standard (struct type *expect_type,
 	  else
 	    error ("Expression of type other than \"Function returning ...\" used as function");
 	}
-      if (argvec[0] == NULL)
-	error ("Cannot evaluate function -- may be inlined");
       return call_function_by_hand (argvec[0], nargs, argvec + 1);
       /* pai: FIXME save value from call_function_by_hand, then adjust pc by adjust_fn_pc if +ve  */
 
