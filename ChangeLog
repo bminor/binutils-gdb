@@ -1,3 +1,12 @@
+Thu Feb 27 14:57:26 1997  Ken Raeburn  <raeburn@cygnus.com>
+
+	* Makefile.in (GAS_SUPPORT_DIRS, BINUTILS_SUPPORT_DIRS): Remove
+	make-all.com, use makefile.vms instead.
+
+Tue Feb 25 18:46:14 1997  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config.sub: Accept -lnews*.
+
 Tue Feb 25 11:41:51 1997  Tom Tromey  <tromey@cygnus.com>
 
 	* configure.in (host_libs): Build itcl after tcl, tk.
