@@ -1,3 +1,22 @@
+Mon Aug  3 00:34:17 1992  Fred Fish  (fnf@cygnus.com)
+
+	* config.sub (ncr3000):  Change i386 to i486.
+
+Tue Jul 21 01:01:50 1992  david d `zoo' zuhn (zoo@cygnus.com)
+
+	* configure.in: grab the HPUX makefile fragment if on HPUX
+
+Mon Jul 20 11:02:09 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
+
+	* Makefile.in: eradicate bison spoor (ditto libgcc).
+	 configure.in: recognise m68{k,000}-ericsson-OSE.
+	 es1800 is alias for m68k-ericsson-OSE
+
+Sun Jul 19 17:49:02 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: rearrange the parts that remove programs from
+	configdirs, based now on HOST==TARGET or by canonical triple.  
+
 Fri Jul 17 22:52:49 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* test-build.mk: recurse explicitly with -f test-build.mk when
