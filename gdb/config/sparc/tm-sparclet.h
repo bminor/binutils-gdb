@@ -21,6 +21,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define TARGET_SPARCLET 1
 
+/* Select the sparclet disassembler.  Slightly different instruction set from
+   the V8 sparc.  */
+
+#undef TM_PRINT_INSN_MACH
+#define TM_PRINT_INSN_MACH bfd_mach_sparc_sparclet
+
 /* overrides of tm-sparc.h */
 
 #undef TARGET_BYTE_ORDER
