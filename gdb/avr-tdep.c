@@ -311,7 +311,7 @@ avr_address_to_pointer (struct type *type, void *buf, CORE_ADDR addr)
       || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD)
     {
       store_unsigned_integer (buf, TYPE_LENGTH (type),
-			      avr_convert_iaddr_to_raw (addr));
+			      avr_convert_iaddr_to_raw (addr >> 1));
     }
   else
     {
@@ -338,7 +338,7 @@ avr_pointer_to_address (struct type *type, const void *buf)
   if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC
       || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD
       || TYPE_CODE_SPACE (TYPE_TARGET_TYPE (type)))
-    return avr_make_iaddr (addr);
+    return avr_make_iaddr (addr << 1);
   else
     return avr_make_saddr (addr);
 }
@@ -409,15 +409,6 @@ avr_remote_translate_xfer_address (struct gdbarch *gdbarch,
 
   *targ_addr = memaddr;
   *targ_len = nr_bytes;
-}
-
-/* Function pointers obtained from the target are half of what gdb expects so
-   multiply by 2. */
-
-static CORE_ADDR
-avr_convert_from_func_ptr_addr (CORE_ADDR addr)
-{
-  return addr * 2;
 }
 
 /* avr_scan_prologue is also used as the
@@ -1213,9 +1204,6 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_address (gdbarch, avr_frame_address);
   set_gdbarch_frame_locals_address (gdbarch, avr_frame_address);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, avr_saved_pc_after_call);
-
-  set_gdbarch_convert_from_func_ptr_addr (gdbarch,
-					  avr_convert_from_func_ptr_addr);
 
   return gdbarch;
 }

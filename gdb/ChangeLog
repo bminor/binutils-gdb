@@ -1,3 +1,11 @@
+2003-06-13  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_address_to_pointer): Shift code addrs right 1 bit.
+	(avr_pointer_to_address): Shift code addrs left 1 bit.
+	(avr_convert_from_func_ptr_addr): Delete function since operation is
+	better handled by avr_address_to_pointer and avr_pointer_to_address.
+	(avr_gdbarch_init): Don't set convert_from_func_ptr_add method.
+
 2003-06-13  Mark Kettenis  <kettenis@gnu.org>
 
 	From Kelley Cook  <kelleycook@wideopenwest.com>:
