@@ -45,6 +45,115 @@ static char *w89k_regnames[NUM_REGS] =
   "CCR", NULL, NULL, "TR0", "TR1",
 };
 
+static void
+w89k_supply_register (regname, regnamelen, val, vallen)
+     char *regname;
+     int regnamelen;
+     char *val;
+     int vallen;
+{
+  int numregs;
+  int regno;
+
+  numregs = 1;
+  regno = -1;
+
+  if (regnamelen == 2)
+    switch (regname[0])
+      {
+      case 'r':
+	numregs = 4;
+	switch (regname[1])
+	  {
+	  case '0':
+	    regno = R0_REGNUM;
+	    break;
+	  case '4':
+	    regno = R0_REGNUM + 4;
+	    break;
+	  case '8':
+	    regno = R0_REGNUM + 8;
+	    break;
+	  }
+	break;
+      case 'P':
+	if (regname[1] == 'C')
+	  regno = PC_REGNUM;
+	break;
+      }
+  else if (regnamelen == 3)
+    switch (regname[0])
+      {
+      case 'r':
+	numregs = 4;
+	if (regname[1] == '1' && regname[2] == '2')
+	  regno = R0_REGNUM + 12;
+	else if (regname[1] == '1' && regname[2] == '6')
+	  regno = R0_REGNUM + 16;
+	else if (regname[1] == '2' && regname[2] == '0')
+	  regno = R0_REGNUM + 20;
+	else if (regname[1] == '2' && regname[2] == '4')
+	  regno = R0_REGNUM + 24;
+	else if (regname[1] == '2' && regname[2] == '8')
+	  regno = R0_REGNUM + 28;
+	break;
+      case 'R':
+	if (regname[1] == 'C' && regname[2] == 'R')
+	  regno = RCR_REGNUM;
+	break;
+      case 'C':
+	if (regname[1] == 'C' && regname[2] == 'R')
+	  regno = CCR_REGNUM;
+	break;
+      case 'S':
+	if (regname[1] == 'A' && regname[2] == 'R')
+	  regno = SAR_REGNUM;
+	break;
+      case 'I':
+	if (regname[1] == 'I' && regname[2] == 'R')
+	  regno = IIR_REGNUM;
+	else if (regname[1] == 'O' && regname[2] == 'R')
+	  regno = IOR_REGNUM;
+	break;
+      case 'T':
+	numregs = 4;
+	if (regname[1] == 'R')
+	  if (regname[2] == '0')
+	    regno = TR0_REGNUM;
+	  else if (regname[2] == '4')
+	    regno = TR0_REGNUM + 4;
+	break;
+      }
+  else if (regnamelen == 4)
+    switch (regname[0])
+      {
+      case 'E':
+	if (regname[1] == 'I')
+	  if (regname[2] == 'E' && regname[3] == 'M')
+	    regno = EIEM_REGNUM;
+	break;
+      case 'I':
+	if (regname[1] == 'P' && regname[2] == 'S' && regname[3] == 'W')
+	  regno = IPSW_REGNUM;
+	break;
+      }
+  else if (regnamelen == 5)
+    switch (regname[0])
+      {
+      case 'I':
+	if (regname[1] == 'A'
+	    && regname[2] == 'O'
+	    && regname[3] == 'Q'
+	    && regname[4] == 'B')
+	  regno = PCOQ_TAIL_REGNUM;
+	break;
+      }
+
+  if (regno >= 0)
+    while (numregs-- > 0)
+      val = monitor_supply_register (regno++, val);
+}
+
 /*
  * Define the monitor command strings. Since these are passed directly
  * through to a printf style function, we need can include formatting
@@ -53,22 +162,22 @@ static char *w89k_regnames[NUM_REGS] =
 
 static struct target_ops w89k_ops;
 
-static char *w89k_loadtypes[] = {"none", "srec", "default", NULL};
-static char *w89k_loadprotos[] = {"none", "xmodem", NULL};
+static char *w89k_loadtypes[] = {"srec", NULL};
+static char *w89k_loadprotos[] = {"xmodem", NULL};
 
 static char *w89k_inits[] = {"\r", NULL};
 
 static struct monitor_ops w89k_cmds =
 {
-  MO_GETMEM_NEEDS_RANGE,	/* flags */
+  MO_GETMEM_NEEDS_RANGE|MO_FILL_USES_ADDR, /* flags */
   w89k_inits,			/* Init strings */
   "g\r",			/* continue command */
   "t\r",			/* single step */
   NULL,				/* Interrupt char */
   "bp %x\r",			/* set a breakpoint */
   "bc %x\r",			/* clear a breakpoint */
-  NULL,				/* clear all breakpoints */
-  NULL,				/* memory fill cmd */
+  "bc *\r",			/* clear all breakpoints */
+  "f %x %x %x\r",		/* memory fill cmd */
   {
     "eb %x %x\r",		/* setmem.cmdb (addr, value) */
     "eh %x %x\r",		/* setmem.cmdw (addr, value) */
@@ -99,11 +208,11 @@ static struct monitor_ops w89k_cmds =
     NULL,			/* getreg.term */
     NULL,			/* getreg.term_cmd */
   },
-  NULL,				/* dump_registers */
-  NULL,				/* register_pattern */
-  NULL,				/* supply_register */
+  "r\r",			/* dump_registers */
+  "\\(\\w+\\)\\( +[0-9a-fA-F]+\\b\\)+",
+  w89k_supply_register,		/* supply_register */
   "u\r",			/* download command */
-  NULL,				/* load response */
+  "u\n\r",			/* load response */
   "ROM>",			/* monitor command prompt */
   NULL,				/* end-of-command delimitor */
   NULL,				/* optional command terminator */

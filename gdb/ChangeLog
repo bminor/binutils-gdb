@@ -1,3 +1,40 @@
+Fri Apr  7 17:43:01 1995  Stu Grossman  (grossman@andros.cygnus.com)
+
+	* monitor.c:  make_xmodem_packet and print_xmodem_packet go away.
+	send_xmodem_packet shows up to do the obvious.  Lots of fixes to
+	xmodem downloads including resetting of block number at start of
+	new transfers, fix for buffer overrun problem, addition of CRC
+	generation code.
+	* (monitor_open):  loadtype_str and loadproto_str now default to
+	first entry in monitor_ops->loadtypes.
+	* (monitor_wait):  Lengthen register dump buf, because of verbose
+	Winbond monitor.
+	* (monitor_fetch_register):  Report unimplemented registers as 0.
+	* (monitor_read_memory):  Only do 16 byte aligned transfers
+	because of formatting weirdness with the Winbond monitor.  Also,
+	ignore non-hex, non-whitespace formatting between bytes (same
+	monitor).
+	* (monitor_load):  Clean up logic.
+	* (monitor_load_srec):  Re-do xmodem support.  Move lots of it
+	into send_xmodem_packet.
+	* (getacknak):  Get rid of polls and timeouts.  Handle CRC
+	requests from receiver.
+	* (monitor_make_srec):  Efficiency improvements.  Don't call
+	sprintf to output two digit hex numbers.
+	* (crcinit, docrc):  New, CRC-16 support routines.
+	* (send_xmodem_packet):  New routine to generate either CRC-16 or
+	checksummed xmodem packets.
+
+	* remote-est.c (est_loadtypes), rom68k-rom.c (rom68k_loadtypes):
+	Reduce tables down to only the load types supported by each
+	monitor.
+
+	* w89k-rom.c  (w89k_supply_register):  Parses output of Winbond
+	register dumps.
+	* (w89k_loadtypes, w89k_loadprotos):  Reduce to just srec/xmodem.
+	* (w89k_cmds):  Add clear all breakpoints, memory fill, and dump
+	registers commands.
+
 Thu Apr  6 17:00:46 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in (X11_INCLUDES): Define as empty.

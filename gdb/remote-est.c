@@ -92,7 +92,7 @@ static char *est_regnames[NUM_REGS] =
 
 static struct target_ops est_ops;
 
-static char *est_loadtypes[] = {"none", "srec", "default", NULL};
+static char *est_loadtypes[] = {"srec", NULL};
 static char *est_loadprotos[] = {"none", NULL};
 
 static char *est_inits[] = {"he\r", /* Resets the prompt, and clears repeated cmds */

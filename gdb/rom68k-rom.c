@@ -96,7 +96,7 @@ static char *rom68k_regnames[NUM_REGS] = {
 
 static struct target_ops rom68k_ops;
 
-static char *rom68k_loadtypes[] = {"none", "srec", "default", NULL};
+static char *rom68k_loadtypes[] = {"srec", NULL};
 static char *rom68k_loadprotos[] = {"none", NULL};
 
 static char *rom68k_inits[] = {".\r\r", NULL}; /* Exits pm/pr & download cmds */
