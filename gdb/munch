@@ -5,8 +5,14 @@
 echo '/* Do not modify this file.  It is created automatically by "munch". */'
 echo 'void initialize_all_files () {'
 
+NMOPT=""
+case $1 in
+-*)	NMOPT=$1; shift ;;
+esac
+
 # make it easy to use a different nm, e.g. for cross-developing
-MUNCH_NM=${MUNCH_NM-nm}
+
+MUNCH_NM="nm $NMOPT"
 if test "`$MUNCH_NM main.o | egrep 'T _?main$'`" = "" ; then
     # System V style nm
     shift;
