@@ -40,20 +40,25 @@ RUNTEST_FOR_TARGET = `\
     fi; \
   fi`
 
-# Note: we want to use dvp-elf-as for the SKY testcase,
-#       not the mips64r5900 one.
+DVPAS_FOR_TARGET = `\
+  if [ -x ${bindir}/dvp-elf-as ]; then \
+    echo ${bindir}/dvp-elf-as ; \
+  else \
+    echo $(target_alias)-as ; \
+  fi`
+
 AS_FOR_TARGET = `\
   if [ -x ${bindir}/dvp-elf-as ]; then \
     echo ${bindir}/dvp-elf-as ; \
   else \
     echo $(target_alias)-as ; \
   fi`
-      
+
 LD_FOR_TARGET = `\
-  if [ -x ../../../ld/ld-new ]; then \
-    echo ../../../ld/ld-new ; \
+  if [ -x ../../../gas/as-new ]; then \
+    echo ../../../gas/as-new ; \
   else \
-    echo $(target_alias)-ld ; \
+    echo $(target_alias)-as ; \
   fi`
 
 OBJCOPY_FOR_TARGET = `\
@@ -62,7 +67,6 @@ OBJCOPY_FOR_TARGET = `\
   else \
     echo $(target_alias)-objcopy ; \
   fi`
-
 
 
 RUNOPTS = 
@@ -104,7 +108,8 @@ TESTS = \
 	tsv332_0.ok tsv332_1.ok \
 	tsv408_0.ok tsv408_1.ok \
 	tsv416_0.ok tsv416_1.ok \
-	tsv432_0.ok tsv432_1.ok
+	tsv432_0.ok tsv432_1.ok \
+	t-cop2.ok
 
 #SCE_TESTS := $(patsubst %.dvpasm, %.ok, $(wildcard sce*.dvpasm))
 SCE_TESTS = \
@@ -123,7 +128,7 @@ SCE_TESTS = \
         sce_test49.ok sce_test50.ok sce_test51.ok sce_test52.ok  \
         sce_test53.ok sce_test54.ok sce_test55.ok sce_test56.ok  \
         sce_test57.ok sce_test58.ok sce_test59.ok 
-	
+
 check: sanity $(TESTS) $(SCE_TESTS)
 
 sanity:
@@ -146,22 +151,22 @@ sce%.exe: sce%.o sce_main.o refresh.o
 
 sce_main.o: sce_main.c
 	$(GCC_FOR_TARGET) -c $(CFLAGS) -o $@ $<
-	
+
 refresh.o: refresh.s
-	$(AS_FOR_TARGET) $(ASFLAGS) -o $@ $<
-        
+	$(DVPAS_FOR_TARGET) $(ASFLAGS) -o $@ $<
+
 sce_%.o: sce_%.dvpasm sce_%.vuasm
-	$(AS_FOR_TARGET) $(ASFLAGS) -o $@ $<
+	$(DVPAS_FOR_TARGET) $(ASFLAGS) -o $@ $<
 
 sce2_%.o: sce2_%.dvpasm sce2_%.vubin
-	$(AS_FOR_TARGET) $(ASFLAGS) -o $@ $<
+	$(DVPAS_FOR_TARGET) $(ASFLAGS) -o $@ $<
 
 sce2_%.vubin: sce2_%.vu.o
 	$(OBJCOPY_FOR_TARGET) -O binary $<  $@
-                           
+
 sce2_%.vu.o: sce2_%.vuasm
-	$(AS_FOR_TARGET) $(ASFLAGS) -o $@ $<
- 
+	$(DVPAS_FOR_TARGET) $(ASFLAGS) -o $@ $<
+
 sce%.ok: sce%.exe
 	rm -f sce$*.ok 
 	ulimit -t 30 ; $(RUN_FOR_TARGET) $<  > sce$*_our_gif.dat; \
@@ -170,11 +175,10 @@ sce%.ok: sce%.exe
 	else 						   \
 	   diff -bitw sce$*_out_dif.dat sce$*_our_gif.dat > sce$*.ok; \
         fi
-	
 
-#------------------------------------
-# Rules for running the TESTS
-#------------------------------------
+#------------------------
+# Rules for running tests
+#------------------------
 
 .run.ok:
 	rm -f tmp-$* $*.hi
@@ -200,7 +204,7 @@ sce%.ok: sce%.exe
 #------------------------------------
 # Rules for building the TESTS
 #------------------------------------
- 
+
 .trc.c:
 	$(C_GEN) $< $@
 .c.run:
@@ -213,7 +217,8 @@ sce%.ok: sce%.exe
 .run.vif1out:
 	rm -f $@
 	-env VIF1_TRACE_FILE=$@ $(RUN_FOR_TARGET) $<
-
+.s.run:
+	$(AS_FOR_TARGET) -mcpu=r5900 -o $@ $<
 
 
 #

@@ -1,3 +1,9 @@
+Tue Apr  7 18:31:47 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* t-cop2.s: New test for COP2 function.
+	
+	* Makefile.in: Added rule to assemble self-contained R5900 asm tests.
+
 Tue Apr  7 16:18:46 1998  Ian Carmichael  <iancarm@cygnus.com>
 
 	* test41.dvpasm, test42.dvpasm, test43.dvpasm,
