@@ -118,17 +118,7 @@ typedef struct {
   int empty;
 } MODEL_TEST_DATA;
 
-/* The ARGBUF struct.  */
-struct argbuf {
-  /* These are the baseclass definitions.  */
-  PCADDR addr;
-  const IDESC *idesc;
-  char trace_p;
-  char profile_p;
-  /* cpu specific data follows */
-  union sem semantic;
-  int written;
-  union {
+union sem_fields {
     struct { /* empty format for unspecified field list */
       int empty;
     } fmt_empty;
@@ -440,29 +430,41 @@ struct argbuf {
 #endif
   } cti;
 #if WITH_SCACHE_PBB
-    /* Writeback handler.  */
-    struct {
-      /* Pointer to argbuf entry for insn whose results need writing back.  */
-      const struct argbuf *abuf;
-    } write;
-    /* x-before handler */
-    struct {
-      /*const SCACHE *insns[MAX_PARALLEL_INSNS];*/
-      int first_p;
-    } before;
-    /* x-after handler */
-    struct {
-      int empty;
-    } after;
-    /* This entry is used to terminate each pbb.  */
-    struct {
-      /* Number of insns in pbb.  */
-      int insn_count;
-      /* Next pbb to execute.  */
-      SCACHE *next;
-    } chain;
+  /* Writeback handler.  */
+  struct {
+    /* Pointer to argbuf entry for insn whose results need writing back.  */
+    const struct argbuf *abuf;
+  } write;
+  /* x-before handler */
+  struct {
+    /*const SCACHE *insns[MAX_PARALLEL_INSNS];*/
+    int first_p;
+  } before;
+  /* x-after handler */
+  struct {
+    int empty;
+  } after;
+  /* This entry is used to terminate each pbb.  */
+  struct {
+    /* Number of insns in pbb.  */
+    int insn_count;
+    /* Next pbb to execute.  */
+    SCACHE *next;
+  } chain;
 #endif
-  } fields;
+};
+
+/* The ARGBUF struct.  */
+struct argbuf {
+  /* These are the baseclass definitions.  */
+  PCADDR addr;
+  const IDESC *idesc;
+  char trace_p;
+  char profile_p;
+  /* cpu specific data follows */
+  union sem semantic;
+  int written;
+  union sem_fields fields;
 };
 
 /* A cached insn.
