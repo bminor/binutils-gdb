@@ -541,6 +541,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	stabsread.c stack.c std-regs.c symfile.c symmisc.c symtab.c \
 	target.c thread.c top.c tracepoint.c \
 	trad-frame.c \
+	tramp-frame.c \
 	typeprint.c \
 	ui-out.c utils.c ui-file.h ui-file.c \
 	user-regs.c \
@@ -757,6 +758,7 @@ terminal_h = terminal.h
 top_h = top.h
 tracepoint_h = tracepoint.h
 trad_frame_h = trad-frame.h $(frame_h)
+tramp_frame_h = tramp-frame.h
 typeprint_h = typeprint.h
 ui_file_h = ui-file.h
 ui_out_h = ui-out.h
@@ -905,7 +907,8 @@ COMMON_OBS = $(DEPFILES) $(YYOBJ) \
 	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o cp-support.o \
 	cp-namespace.o \
 	reggroups.o \
-	trad-frame.o
+	trad-frame.o \
+	tramp-frame.o
 
 TSOBS = inflow.o
 
@@ -2444,6 +2447,9 @@ tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(gdbtypes_h) \
 	$(readline_history_h)
 trad-frame.o: trad-frame.c $(defs_h) $(frame_h) $(trad_frame_h) \
 	$(regcache_h)
+tramp-frame.o: tramp-frame.c $(defs_h) $(tramp_frame_h) $(frame_unwind_h) \
+	$(gdbcore_h) $(symtab_h) $(objfiles_h) $(target_h) $(trad_frame_h) \
+	$(frame_base_h)
 typeprint.o: typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) $(command_h) \
 	$(gdbcmd_h) $(target_h) $(language_h) $(cp_abi_h) $(typeprint_h) \

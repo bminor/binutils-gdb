@@ -1,5 +1,9 @@
 2004-03-23  Andrew Cagney  <cagney@redhat.com>
 
+	* tramp-frame.h, tramp-frame.h: New files.
+	* Makefile.in (SFILES, tramp_frame_h, COMMON_OBS, tramp-frame.o):
+	Update rules to include "tramp-frame.h" and "tramp-frame.c".
+
 	* Makefile.in: Update all dependencies.
 
 2004-03-23  Andrew Cagney  <cagney@redhat.com>
