@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "config.h"
 #include "ldemul.h"
 #include "ldfile.h"
+#include "ldexp.h"
 #include "ldlang.h"
 #include "ldmisc.h"
 
@@ -43,6 +44,11 @@ extern bfd *output_bfd;
 
 static void hppaosf_before_parse()
 {
+  extern char *lprefix;
+  extern unsigned int lprefix_len;
+  lprefix = "L$";
+  lprefix_len = 2;
+
   ldfile_output_architecture = bfd_arch_hppa;
 }
 

@@ -42,8 +42,9 @@ extern char *ldfile_output_machine_name;
 static void
 gld${EMULATION_NAME}_before_parse()
 {
-  extern char lprefix;
-  lprefix = '@';
+  extern char *lprefix;
+  lprefix = "@";
+  lprefix_len = 1;
 
   ldfile_output_architecture = bfd_arch_${ARCH};
 }

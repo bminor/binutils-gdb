@@ -512,7 +512,7 @@ write_file_locals (output_buffer)
 		  {
 		  }
 		else if (discard_locals == DISCARD_L &&
-			 (p->name[0] == lprefix))
+			!strncmp (lprefix, p->name, lprefix_len))
 		  {
 		  }
 		else if (p->flags == BSF_WARNING)
