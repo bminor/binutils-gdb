@@ -1,3 +1,7 @@
+Fri Dec 15 16:07:25 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoff.c (ecoff_build_aux): Use new bfd_big_endian macro.
+
 Fri Dec 15 12:11:48 1995  Raymond Jou  <rjou@mexican.cygnus.com>
 
 	* mpw-make.sed: If linking, edit ALL_CFLAGS to CFLAGS.
