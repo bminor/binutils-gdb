@@ -3862,6 +3862,12 @@ not defined, it will default to @code{0xf}.
 
 @item REMOTE_BPT_VECTOR
 Defaults to @code{1}.
+
+@item NAME_OF_MALLOC
+@findex NAME_OF_MALLOC
+A string containing the name of the function to call in order to
+allocate some memory in the inferior. The default value is "malloc".
+
 @end ftable
 
 @section Adding a New Target
