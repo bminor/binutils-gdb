@@ -23,10 +23,6 @@
 
 #include "floatformat.h"
 
-/* FIXME: kettenis/2001-07-29: Get rid of HOST_BYTE_ORDER when Andrew
-   has erradicated it from the sources.  */
-#define HOST_BYTE_ORDER LITTLE_ENDIAN
-
 #define HOST_FLOAT_FORMAT &floatformat_ieee_single_little
 #define HOST_DOUBLE_FORMAT &floatformat_ieee_double_little
 #define HOST_LONG_DOUBLE_FORMAT &floatformat_i387_ext
