@@ -1,5 +1,9 @@
 2004-08-04  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.base/complex.c: Include <stdlib.h>.
+
+2004-08-04  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.base/complex.c: Add copyright notice.
 
 2004-08-04  Michael Chastain  <mec.gnu@mindspring.com>

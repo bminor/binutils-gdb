@@ -1,4 +1,4 @@
-/* Copyright 2002, 2003
+/* Copyright 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -20,6 +20,8 @@
 
 /* Test taken from GCC.  Verify that we can print a structure containing
    a complex number.  */
+
+#include <stdlib.h>
 
 typedef __complex__ float cf;
 struct x { char c; cf f; } __attribute__ ((__packed__));
