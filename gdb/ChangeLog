@@ -1,5 +1,14 @@
 Fri Jan  7 12:55:25 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* utils.c (print_sys_errmsg): Call gdb_flush (gdb_stdout) before
+	printing to gdb_stderr.
+
+	* remote-udi.c (udi_kill): Don't close the connection, just set
+	inferior_pid to zero.
+	(udi_mourn): Call remove_breakpoints.
+
+	* remote-udi.c: Remove obsolete need_artificial_traps comment.
+
 	* i386b-nat.c (sregmap): If sEAX, etc., not defined, use tEAX, etc.
 
 Thu Jan  6 07:17:53 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)

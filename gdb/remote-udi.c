@@ -115,10 +115,6 @@ extern	char	dfe_errmsg[];		/* error string */
 /* malloc'd name of the program on the remote system.  */
 static char *prog_name = NULL;
 
-/* Number of SIGTRAPs we need to simulate.  That is, the next
-   NEED_ARTIFICIAL_TRAP calls to udi_wait should just return
-   SIGTRAP without actually waiting for anything.  */
-
 /* This is called not only when we first attach, but also when the
    user types "run" after having attached.  */
 
@@ -180,6 +176,9 @@ udi_mourn()
      to work between "target udi" and "run", so why not now?  */
   pop_target ();                /* Pop back to no-child state */
 #endif
+  /* But if we're going to want to run it again, we better remove the
+     breakpoints...  */
+  remove_breakpoints ();
   generic_mourn_inferior ();
 }
 
@@ -993,10 +992,16 @@ just invoke udi_close, which seems to get things right.
 
   if (from_tty)
     printf_unfiltered("Target has been stopped.");
-#else
+#endif /* 0 */
+#if 0
   udi_close(0);
-#endif
   pop_target();
+#endif /* 0 */
+
+  /* Keep the target around, e.g. so "run" can do the right thing when
+     we are already debugging something.  */
+
+  inferior_pid = 0;
 }
 
 /* 
