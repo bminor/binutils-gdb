@@ -1768,6 +1768,8 @@ process_die (struct die_info *die, struct objfile *objfile,
          of a function and make GDB `next' properly over inlined functions.  */
       break;
     case DW_TAG_lexical_block:
+    case DW_TAG_try_block:
+    case DW_TAG_catch_block:
       read_lexical_block_scope (die, objfile, cu_header);
       break;
     case DW_TAG_class_type:

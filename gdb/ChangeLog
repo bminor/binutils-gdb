@@ -1,3 +1,8 @@
+2003-05-28  H.J. Lu <hongjiu.lu@intel.com>
+
+	* dwarf2read.c (process_die): Handle DW_TAG_try_block and
+	DW_TAG_catch_block.
+
 2003-05-26  Elena Zannoni  <ezannoni@redhat.com>
 
 	* stabsread.c (dbx_lookup_type): Make static.
