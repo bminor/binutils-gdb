@@ -1,3 +1,8 @@
+Wed Dec 28 20:57:37 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_subspace): For sections with the ZERO
+	attribute, set the "bss" field in the appropriate seginfo structure.
+
 Wed Dec 28 15:01:01 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* subsegs.h: Include obstack.h.
