@@ -1120,7 +1120,6 @@ irix-core.lo: irix-core.c
 lynx-core.lo: lynx-core.c
 osf-core.lo: osf-core.c
 sco5-core.lo: sco5-core.c libaout.h $(INCDIR)/bfdlink.h
-trad-core.lo: trad-core.c libaout.h $(INCDIR)/bfdlink.h \
-  hosts/i386linux.h
+trad-core.lo: trad-core.c libaout.h $(INCDIR)/bfdlink.h
 cisco-core.lo: cisco-core.c
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
