@@ -1,5 +1,7 @@
 #	@(#)Makefile	5.17 (Berkeley) 5/11/90
 
+srcdir = .
+
 #### host and target dependent Makefile fragments come in here.
 ###
 
@@ -11,9 +13,9 @@ LIBS = ../bfd/libbfd.a ../libiberty/libiberty.a
 OBJS=	gprof.o arcs.o dfn.o lookup.o ${MACHINE}.o hertz.o \
 	printgprof.o printlist.o
 
-CFLAGS=	-I. -I../include -DMACHINE_H=\"${MACHINE}.h\" ${TCFLAGS} ${HCFLAGS}
+CFLAGS=	
 .c.o:
-	$(CC) -c $(CFLAGS) $<
+	$(CC) -c $(CFLAGS) -I$(srcdir) -I$(srcdir)/../include -DMACHINE_H=\"${MACHINE}.h\" ${TCFLAGS} ${HCFLAGS} $<
 
 all:	${PROG}
 
@@ -30,3 +32,12 @@ $(PROG):	$(OBJS)
 
 clean:
 	-rm -f $(OBJS) core gprof nohup.out
+# These get around a bug in Sun Make in SunOS 4.1.1 and Solaris 2
+gprof.o: gprof.c
+arcs.o: arcs.c
+dfn.o: dfn.c
+lookup.o: lookup.c
+${MACHINE}.o: ${MACHINE}.c
+hertz.o: hertz.c
+printgprof.o: printgprof.c
+printlist.o: printlist.c
