@@ -1,3 +1,9 @@
+2001-09-04  Elena Zannoni  <ezannoni@redhat.com>
+	
+	From Daniel Jacobowitz  <drow@mvista.com>	
+	* mdebugread.c (psymtab_to_symtab_1): Handle N_SO stabs without
+	a name specially.
+
 2001-09-01  Mark Kettenis  <kettenis@gnu.org>
 
 	Make GDB use libiberty regex implementation.

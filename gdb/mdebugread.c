@@ -3210,10 +3210,11 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
   void (*swap_sym_in) (bfd *, PTR, SYMR *);
   void (*swap_pdr_in) (bfd *, PTR, PDR *);
   int i;
-  struct symtab *st;
+  struct symtab *st = NULL;
   FDR *fh;
   struct linetable *lines;
   CORE_ADDR lowest_pdr_addr = 0;
+  int last_symtab_ended = 0;
 
   if (pst->readin)
     return;
@@ -3319,8 +3320,30 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 	         complaining about them.  */
 	      if (type_code & N_STAB)
 		{
-		  process_one_symbol (type_code, 0, valu, name,
-				      pst->section_offsets, pst->objfile);
+		  /* If we found a trailing N_SO with no name, process
+                     it here instead of in process_one_symbol, so we
+                     can keep a handle to its symtab.  The symtab
+                     would otherwise be ended twice, once in
+                     process_one_symbol, and once after this loop. */
+		  if (type_code == N_SO
+		      && last_source_file
+		      && previous_stab_code != (unsigned char) N_SO
+		      && *name == '\000')
+		    {
+		      valu += ANOFFSET (pst->section_offsets,
+					SECT_OFF_TEXT (pst->objfile));
+		      previous_stab_code = N_SO;
+		      st = end_symtab (valu, pst->objfile,
+				       SECT_OFF_TEXT (pst->objfile));
+		      end_stabs ();
+		      last_symtab_ended = 1;
+		    }
+		  else
+		    {
+		      last_symtab_ended = 0;
+		      process_one_symbol (type_code, 0, valu, name,
+					  pst->section_offsets, pst->objfile);
+		    }
 		}
 	      /* Similarly a hack.  */
 	      else if (name[0] == '#')
@@ -3369,8 +3392,12 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 	  else
 	    complain (&stab_unknown_complaint, name);
 	}
-      st = end_symtab (pst->texthigh, pst->objfile, SECT_OFF_TEXT (pst->objfile));
-      end_stabs ();
+
+      if (! last_symtab_ended)
+	{
+	  st = end_symtab (pst->texthigh, pst->objfile, SECT_OFF_TEXT (pst->objfile));
+	  end_stabs ();
+	}
 
       /* Sort the symbol table now, we are done adding symbols to it.
          We must do this before parse_procedure calls lookup_symbol.  */
