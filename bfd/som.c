@@ -1,6 +1,6 @@
 /* bfd back-end for HP PA-RISC SOM objects.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002
    Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
@@ -3101,7 +3101,7 @@ som_write_space_strings (abfd, current_offset, string_sizep)
 	      /* Ensure a minimum growth factor to avoid O(n**2) space
                  consumption for n strings.  The optimal minimum
                  factor seems to be 2, as no other value can guarantee
-                 wasting less then 50% space.  (Note that we cannot
+                 wasting less than 50% space.  (Note that we cannot
                  deallocate space allocated by `alloca' without
                  returning from this function.)  The same technique is
                  used a few more times below when a buffer is
