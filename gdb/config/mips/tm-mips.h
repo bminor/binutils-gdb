@@ -44,8 +44,4 @@ extern int mips_step_skips_delay (CORE_ADDR);
 
 #define MDEBUG_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
 
-/* Functions for dealing with MIPS16 call and return stubs.  */
-#define DEPRECATED_IGNORE_HELPER_CALL(pc)			mips_ignore_helper (pc)
-extern int mips_ignore_helper (CORE_ADDR pc);
-
 #endif /* TM_MIPS_H */

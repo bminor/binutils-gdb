@@ -2303,27 +2303,6 @@ process_event_stop_test:
 	  return;
 	}
 
-#ifdef DEPRECATED_IGNORE_HELPER_CALL
-      /* On MIPS16, a function that returns a floating point value may
-         call a library helper function to copy the return value to a
-         floating point register.  The DEPRECATED_IGNORE_HELPER_CALL
-         macro returns non-zero if we should ignore (i.e. step over)
-         this function call.  */
-      /* FIXME: cagney/2004-07-21: These custom ``ignore frame when
-         stepping'' function attributes (SIGTRAMP_FRAME,
-         DEPRECATED_IGNORE_HELPER_CALL, SKIP_TRAMPOLINE_CODE,
-         skip_language_trampoline frame, et.al.) need to be replaced
-         with generic attributes bound to the frame's function.  */
-      if (DEPRECATED_IGNORE_HELPER_CALL (stop_pc))
-	{
-	  /* We're doing a "next", set a breakpoint at callee's return
-	     address (the address at which the caller will
-	     resume).  */
-	  insert_step_resume_breakpoint_at_frame (get_prev_frame (get_current_frame ()));
-	  keep_going (ecs);
-	  return;
-	}
-#endif
       if (step_over_calls == STEP_OVER_ALL)
 	{
 	  /* We're doing a "next", set a breakpoint at callee's return

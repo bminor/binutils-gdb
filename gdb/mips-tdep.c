@@ -4590,27 +4590,6 @@ mips_in_solib_return_trampoline (CORE_ADDR pc, char *name)
   return 0;			/* not a stub */
 }
 
-
-/* Return non-zero if the PC is in a library helper function that
-   should be ignored.  This implements the
-   DEPRECATED_IGNORE_HELPER_CALL macro.  */
-
-int
-mips_ignore_helper (CORE_ADDR pc)
-{
-  char *name;
-
-  /* Find the starting address and name of the function containing the PC.  */
-  if (find_pc_partial_function (pc, &name, NULL, NULL) == 0)
-    return 0;
-
-  /* If the PC is in __mips16_ret_{d,s}f, this is a library helper function
-     that we want to ignore.  */
-  return (strcmp (name, "__mips16_ret_sf") == 0
-	  || strcmp (name, "__mips16_ret_df") == 0);
-}
-
-
 /* Convert a dbx stab register number (from `r' declaration) to a GDB
    [1 * NUM_REGS .. 2 * NUM_REGS) REGNUM.  */
 
