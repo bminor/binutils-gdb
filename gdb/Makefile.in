@@ -29,6 +29,7 @@ libdir = @libdir@
 tooldir = $(libdir)/$(target_alias)
 
 datadir = @datadir@
+localedir = @localedir@
 mandir = @mandir@
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
@@ -64,6 +65,13 @@ RANLIB = @RANLIB@
 DLLTOOL = @DLLTOOL@
 WINDRES = @WINDRES@
 MIG = @MIG@
+
+XGETTEXT = @XGETTEXT@
+GMSGFMT = @GMSGFMT@
+MSGMERGE = msgmerge
+
+PACKAGE = @PACKAGE@
+CATALOGS = @CATALOGS@
 
 # If you are compiling with GCC, make sure that either 1) You have the
 # fixed include files where GCC can reach them, or 2) You use the
@@ -317,7 +325,7 @@ CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 # your system doesn't have fcntl.h in /usr/include (which is where it
 # should be according to Posix).
 DEFS = @DEFS@
-GDB_CFLAGS = -I. -I$(srcdir) -I$(srcdir)/config -DLOCALEDIR="\"$(prefix)/share/locale\"" $(DEFS)
+GDB_CFLAGS = -I. -I$(srcdir) -I$(srcdir)/config -DLOCALEDIR="\"$(localedir)\"" $(DEFS)
 
 # M{H,T}_CFLAGS, if defined, have host- and target-dependent CFLAGS
 # from the config directory.
@@ -1254,7 +1262,7 @@ do-maintainer-clean:
 	@$(MAKE) $(FLAGS_TO_PASS) DO=maintainer-clean "DODIRS=$(SUBDIRS)" \
 		subdir_do
 
-diststuff: $(DISTSTUFF)
+diststuff: $(DISTSTUFF) $(PACKAGE).pot $(CATALOGS)
 	cd doc; $(MAKE) $(MFLAGS) diststuff
 
 subdir_do: force
@@ -1467,6 +1475,80 @@ v850ice.o: $(srcdir)/v850ice.c
 valprint.o: $(srcdir)/valprint.c
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $(srcdir)/valprint.c
 
+
+# Message files.  Based on code in gcc/Makefile.in.
+
+# Rules for generating translated message descriptions.  Disabled by
+# autoconf if the tools are not available.
+
+.SUFFIXES: .po .gmo .pox .pot
+.PHONY: all-po install-po uninstall-po clean-po update-po $(PACKAGE).pot
+
+all-po: $(CATALOGS)
+
+# This notation should be acceptable to all Make implementations used
+# by people who are interested in updating .po files.
+update-po: $(CATALOGS:.gmo=.pox)
+
+# N.B. We do not attempt to copy these into $(srcdir).  The snapshot
+# script does that.
+.po.gmo:
+	-test -d po || mkdir po
+	$(GMSGFMT) --statistics -o $@ $<
+
+# The new .po has to be gone over by hand, so we deposit it into
+# build/po with a different extension.  If build/po/$(PACKAGE).pot
+# exists, use it (it was just created), else use the one in srcdir.
+.po.pox:
+	-test -d po || mkdir po
+	$(MSGMERGE) $< `if test -f po/$(PACKAGE).pot; \
+			then echo po/$(PACKAGE).pot; \
+			else echo $(srcdir)/po/$(PACKAGE).pot; fi` -o $@
+
+# This rule has to look for .gmo modules in both srcdir and the cwd,
+# and has to check that we actually have a catalog for each language,
+# in case they weren't built or included with the distribution.
+install-po:
+	$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(datadir)
+	cats="$(CATALOGS)"; for cat in $$cats; do \
+	  lang=`basename $$cat | sed 's/\.gmo$$//'`; \
+	  if [ -f $$cat ]; then :; \
+	  elif [ -f $(srcdir)/$$cat ]; then cat=$(srcdir)/$$cat; \
+	  else continue; \
+	  fi; \
+	  dir=$(localedir)/$$lang/LC_MESSAGES; \
+	  echo $(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$$dir; \
+	  $(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$$dir || exit 1; \
+	  echo $(INSTALL_DATA) $$cat $(DESTDIR)$$dir/$(PACKAGE).mo; \
+	  $(INSTALL_DATA) $$cat $(DESTDIR)$$dir/$(PACKAGE).mo; \
+	done
+uninstall-po:
+	cats="$(CATALOGS)"; for cat in $$cats; do \
+	  lang=`basename $$cat | sed 's/\.gmo$$//'`; \
+	  if [ -f $$cat ]; then :; \
+	  elif [ -f $(srcdir)/$$cat ]; then cat=$(srcdir)/$$cat; \
+	  else continue; \
+	  fi; \
+	  dir=$(localedir)/$$lang/LC_MESSAGES; \
+	  rm -f $(DESTDIR)$$dir/$(PACKAGE).mo; \
+	done
+# Delete po/*.gmo only if we are not building in the source directory.
+clean-po:
+	-if [ ! -f Makefile.in ]; then rm -f po/*.gmo; fi
+
+# Rule for regenerating the message template (gdb.pot).  Instead of
+# forcing everyone to edit POTFILES.in, which proved impractical, this
+# rule has no dependencies and always regenerates gdb.pot.  This is
+# relatively harmless since the .po files do not directly depend on
+# it.  The .pot file is left in the build directory.  Since GDB's
+# Makefile lacks a cannonical list of sources (missing xm, tm and nm
+# files) force this rule.
+$(PACKAGE).pot: po/$(PACKAGE).pot
+po/$(PACKAGE).pot: force
+	-test -d po || mkdir po
+	sh -e $(srcdir)/po/gdbtext $(XGETTEXT) $(PACKAGE) . $(srcdir)
+
+
 #
 # YACC/LEX dependencies
 #

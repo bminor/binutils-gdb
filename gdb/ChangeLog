@@ -1,3 +1,21 @@
+2004-07-30  Andrew Cagney  <cagney@gnu.org>
+
+	Fix PR i18n/761.
+	* Makefile.in (.SUFFIXES): Add po .gmo, and .pox.
+	(.PHONY): Add all-po install-po, uninstall-po, clean-po,
+	$(PACKAGE).pot and update-po.
+	(all-po, .po.gmo, .po.pox, install-po, $(PACKAGE).pot)
+	(po/$(PACKAGE).pot, clean-po, uninstall-po, install-po)
+	(update-po): New rules.
+	(localedir): Define using autoconf.
+	(diststuff): Add $(PACKAGE).pot and $(CATALOGS)
+	(GDB_CFLAGS): Define LOCALEDIR using $(localedir).
+	(XGETTEXT, GMSGFMT, MSGMERGE, PACKAGE, CATALOGS): Define.
+	* configure.in: Generate CATALOGS and LINGUAS from contents of
+	src/gdb/po/ directory.  Set @localedir@ in Makefile.in.
+	* configure: Re-generate.
+	* po/gdbtext: New file
+	
 2004-07-30  Jerome Guitton  <guitton@gnat.com>
 
 	* MAINTAINERS: Reorder Write After Approval list in alphabetical
