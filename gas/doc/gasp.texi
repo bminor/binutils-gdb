@@ -12,7 +12,7 @@
 @ifinfo
 @format
 START-INFO-DIR-ENTRY
-* gasp:(gasp).                     The GNU Assembler Preprocessor
+* gasp: (gasp).                     The GNU Assembler Preprocessor
 END-INFO-DIR-ENTRY
 @end format
 @end ifinfo
@@ -24,9 +24,10 @@ END-INFO-DIR-ENTRY
 @settitle GASP
 @titlepage
 @c FIXME boring title
+@title DRAFT EDITION
+@sp 4
 @title GASP, an assembly preprocessor
-@c FIXME! Get a version number, global-replace '??'
-@subtitle for GASP version ??
+@subtitle for GASP version 1
 @sp 1
 @subtitle January 1994
 @author Roland Pesch
@@ -80,7 +81,7 @@ into another language, under the above conditions for modified versions.
 
 GASP is a preprocessor for assembly programs.
 
-This file describes version ?? of GASP.
+This file describes version 1 of GASP.
 
 Steve Chamberlain wrote GASP; Roland Pesch wrote this manual.
 
@@ -371,7 +372,6 @@ You can use variables in @sc{gasp} to represent strings, registers, or
 the results of expressions.
 
 You must distinguish two kinds of variables: 
-@c FIXME!  Is this crud true about conditional comparisons vs variables?
 @enumerate
 @item
 Variables defined with @code{.EQU} or @code{.ASSIGN}.  To evaluate this
@@ -391,8 +391,8 @@ while loops; @sc{gasp} only evaluates these variables when writing
 assembly output.
 
 @item
-Variables for use during preprocessing.  These are defined as macro
-arguments, or with @code{.ASSIGNC} or @code{.ASSIGNA}.  To evaluate this
+Variables for use during preprocessing.  You can define these
+with @code{.ASSIGNC} or @code{.ASSIGNA}.  To evaluate this
 kind of variable, write @samp{\&} before the variable name; for example,
 
 @cartouche
@@ -404,6 +404,10 @@ opcit  .ASSIGNA  47
        .AENDW
 @end example
 @end cartouche
+
+@sc{gasp} treats macro arguments almost the same way, but to evaluate
+them you use the prefix @samp{\} rather than @samp{\&}.
+@xref{Macros,, Defining your own directives}.
 @end enumerate
 
 @ftable @code
@@ -439,11 +443,13 @@ that is at the left margin.  You may specify a colon after the variable
 name if you wish; the first example above could have started @samp{eg:}
 with the same effect.
 
+@c pagebreak makes for better aesthetics---ensures macro and expansion together
+@page
 @node Macros
 @section Defining your own directives
 
 The commands @code{.MACRO} and @code{.ENDM} allow you to define macros
-that generate assembly output, and that you can use with a syntax
+that generate assembly output.  You can use these macros with a syntax
 similar to built-in @sc{gasp} or assembler directives.  For example,
 this definition specifies a macro @code{SUM} that adds together a range of
 consecutive registers:
@@ -494,23 +500,27 @@ arguments.
 @item .MACRO PLUS1 P, P1
 @itemx .MACRO PLUS1 P P1
 Either statement begins the definition of a macro called @code{PLUS1},
-which takes two arguments; within the macro definition, these arguments
-are evaluated as @samp{\&P} and @samp{\&P1}.
+which takes two arguments; within the macro definition, write
+@samp{\P} or @samp{\P1} to evaluate the arguments.
 
 @item .MACRO RESERVE_STR P1=0 P2
 Begin the definition of a macro called @code{RESERVE_STR}, with two
 arguments.  The first argument has a default value, but not the second.
 After the definition is complete, you can call the macro either as
-@samp{RESERVE_STR @var{a},@var{b}} (with @samp{\&P1} evaluating to
-@var{a} and @samp{\&P2} evaluating to @var{b}), or as @samp{RESERVE_STR
-,@var{b}} (with @samp{\&P1} evaluating as the default, in this case
-@samp{0}, and @samp{\&P2} evaluating to @var{b}).
+@samp{RESERVE_STR @var{a},@var{b}} (with @samp{\P1} evaluating to
+@var{a} and @samp{\P2} evaluating to @var{b}), or as @samp{RESERVE_STR
+,@var{b}} (with @samp{\P1} evaluating as the default, in this case
+@samp{0}, and @samp{\P2} evaluating to @var{b}).
 @end table
 
-When you call a macro, the values are assigned by position to each
-argument name.  Macro arguments are preprocessor variables in the same
-way as variables you define with @samp{.ASSIGNA} or @samp{.ASSIGNC}, and
-you can therefore use them in conditionals or for loop control.
+When you call a macro, you can specify the argument values either by
+position, or by keyword.  For example, @samp{SUM 9,17} is equivalent to
+@samp{SUM TO=17, FROM=9}.  Macro arguments are preprocessor variables
+similar to the variables you define with @samp{.ASSIGNA} or
+@samp{.ASSIGNC}; in particular, you can use them in conditionals or for
+loop control.  (The only difference is the prefix you write to evaluate
+the variable: for a macro argument, write @samp{\@var{argname}}, but for
+a preprocessor variable, write @samp{\&@var{varname}}.)
 
 @item @var{name} .MACRO
 @itemx @var{name} .MACRO ( @var{macargs} @dots{} )
