@@ -1,3 +1,10 @@
+Mon Nov 23 11:50:00 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* obj-coff.c (obj_coff_endef): Use as_warn, not fprintf.
+
+	* tc-m68k.c (md_assemble): Don't complain about 68000 with 68881;
+	could be doing emulation.
+
 Tue Nov 10 09:50:25 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* tc-m68k.c (m68k_reg_parse): If REGISTER_PREFIX isn't defined,

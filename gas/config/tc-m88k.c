@@ -102,18 +102,22 @@ struct field_val_assoc fcr_regs[] =
 struct field_val_assoc cmpslot[] =
 {
 /* Integer  Floating point */
-		{"nc", 0},
-		{"cp", 1},
+  {"nc", 0},
+  {"cp", 1},
   {"eq", 2},
   {"ne", 3},
   {"gt", 4},
   {"le", 5},
   {"lt", 6},
   {"ge", 7},
-  {"hi", 8},	{"ou", 8},
-  {"ls", 9},	{"ib", 9},
-  {"lo", 10},	{"in", 10},
-  {"hs", 11},	{"ob", 11},
+  {"hi", 8},
+  {"ou", 8},
+  {"ls", 9},
+  {"ib", 9},
+  {"lo", 10},
+  {"in", 10},
+  {"hs", 11},
+  {"ob", 11},
 
   {NULL, 0},
 };
@@ -163,8 +167,8 @@ const char EXP_CHARS[] = "eE";
 /* or    0H1.234E-12 (see exp chars above) */
 const char FLT_CHARS[] = "dDfF";
 
-extern void float_cons (), cons (), s_globl (), s_line (),
-  s_space (), s_set (), stringer (), s_lcomm ();
+extern void float_cons (), cons (), s_globl (), s_line (), s_space (),
+  s_set (), stringer (), s_lcomm ();
 static void s_file ();
 static void s_bss ();
 
@@ -174,11 +178,11 @@ const pseudo_typeS md_pseudo_table[] =
   {"dfloat", float_cons, 'd'},
   {"ffloat", float_cons, 'f'},
   {"global", s_globl, 0},
-  {"half", cons, 2 },
+  {"half", cons, 2},
   {"bss", s_bss, 0},
   {"ln", s_line, 0},
   {"string", stringer, 0},
-  {"word", cons, 4 },
+  {"word", cons, 4},
   {"zero", s_space, 0},
   {0}
 };
@@ -207,7 +211,7 @@ md_begin ()
 
       if (retval != NULL && *retval != '\0')
 	as_fatal ("Can't hash instruction '%s':%s",
-		 m88k_opcodes[i].name, retval);
+		  m88k_opcodes[i].name, retval);
 
       /* skip to next unique mnemonic or end of list */
 
@@ -742,7 +746,7 @@ get_bf (param, valp)
       *param++ = 0;		/* Overwrite the '>' */
 
       width = get_absolute_expression ();
-      xp =  get_bf_offset_expression (xp, &offset);
+      xp = get_bf_offset_expression (xp, &offset);
       input_line_pointer = save_ptr;
 
       if (xp + 1 != param)
@@ -867,7 +871,7 @@ get_vec9 (param, valp)
 
   return param;
 }
-  
+
 #define hexval(z) \
   (isdigit (z) ? (z) - '0' :						\
    islower (z) ? (z) - 'a' + 10 : 					\
@@ -922,9 +926,9 @@ getval (param, valp)
 
 void
 md_number_to_chars (buf, val, nbytes)
-char *buf;
-int val;
-int nbytes;
+     char *buf;
+     int val;
+     int nbytes;
 {
   switch (nbytes)
     {
@@ -944,11 +948,11 @@ int nbytes;
 
 void
 md_number_to_imm (buf, val, nbytes, fixP, seg_type)
-unsigned char *buf;
-unsigned int val;
-int nbytes;
-fixS *fixP;
-int seg_type;
+     unsigned char *buf;
+     unsigned int val;
+     int nbytes;
+     fixS *fixP;
+     int seg_type;
 {
   if (seg_type != N_TEXT || fixP->fx_r_type == NO_RELOC)
     {
@@ -1015,9 +1019,9 @@ int seg_type;
 
 void
 md_number_to_disp (buf, val, nbytes)
-char *buf;
-int val;
-int nbytes;
+     char *buf;
+     int val;
+     int nbytes;
 {
   as_fatal ("md_number_to_disp not defined");
   md_number_to_chars (buf, val, nbytes);
@@ -1025,9 +1029,9 @@ int nbytes;
 
 void
 md_number_to_field (buf, val, nbytes)
-char *buf;
-int val;
-int nbytes;
+     char *buf;
+     int val;
+     int nbytes;
 {
   as_fatal ("md_number_to_field not defined");
   md_number_to_chars (buf, val, nbytes);
@@ -1045,11 +1049,11 @@ md_atof (type, litP, sizeP)
      char *litP;
      int *sizeP;
 {
-  int	prec;
+  int prec;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
   LITTLENUM_TYPE *wordP;
-  char	*t;
-  char	*atof_ieee ();
+  char *t;
+  char *atof_ieee ();
 
   switch (type)
     {
@@ -1078,20 +1082,20 @@ md_atof (type, litP, sizeP)
       break;
 
     default:
-      *sizeP=0;
+      *sizeP = 0;
       return "Bad call to MD_ATOF()";
     }
-  t=atof_ieee (input_line_pointer, type, words);
+  t = atof_ieee (input_line_pointer, type, words);
   if (t)
-    input_line_pointer=t;
+    input_line_pointer = t;
 
-  *sizeP=prec * sizeof (LITTLENUM_TYPE);
-  for (wordP=words;prec--;)
+  *sizeP = prec * sizeof (LITTLENUM_TYPE);
+  for (wordP = words; prec--;)
     {
       md_number_to_chars (litP, (long) (*wordP++), sizeof (LITTLENUM_TYPE));
-      litP+=sizeof (LITTLENUM_TYPE);
+      litP += sizeof (LITTLENUM_TYPE);
     }
-  return "";	/* Someone should teach Dean about null pointers */
+  return "";			/* Someone should teach Dean about null pointers */
 }
 
 int md_short_jump_size = 4;
@@ -1103,7 +1107,10 @@ md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      fragS *frag;
      symbolS *to_symbol;
 {
-  ptr[0] = 0xc0; ptr[1] = 0x00; ptr[2] = 0x00; ptr[3] = 0x00;
+  ptr[0] = 0xc0;
+  ptr[1] = 0x00;
+  ptr[2] = 0x00;
+  ptr[3] = 0x00;
   fix_new (frag,
 	   ptr - frag->fr_literal,
 	   4,
@@ -1123,7 +1130,10 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
      fragS *frag;
      symbolS *to_symbol;
 {
-  ptr[0] = 0xc0; ptr[1] = 0x00; ptr[2] = 0x00; ptr[3] = 0x00;
+  ptr[0] = 0xc0;
+  ptr[1] = 0x00;
+  ptr[2] = 0x00;
+  ptr[3] = 0x00;
   fix_new (frag,
 	   ptr - frag->fr_literal,
 	   4,
@@ -1142,7 +1152,8 @@ md_estimate_size_before_relax (fragP, segment_type)
   as_fatal ("Relaxation should never occur");
 }
 
-const relax_typeS md_relax_table[] = {0};
+const relax_typeS md_relax_table[] =
+{0};
 
 void
 md_convert_frag (fragP)
@@ -1162,104 +1173,114 @@ md_end ()
  */
 void
 emit_relocations (fixP, segment_address_in_file)
-    fixS *fixP;
-    relax_addressT segment_address_in_file;
+     fixS *fixP;
+     relax_addressT segment_address_in_file;
 {
-    struct reloc_info_m88k ri;
-    symbolS *symbolP;
-    extern char *next_object_file_charP;
+  struct reloc_info_m88k ri;
+  symbolS *symbolP;
+  extern char *next_object_file_charP;
 
-    bzero ((char *) &ri, sizeof (ri));
-    for (; fixP; fixP = fixP->fx_next) {
+  bzero ((char *) &ri, sizeof (ri));
+  for (; fixP; fixP = fixP->fx_next)
+    {
 
-	if (fixP->fx_r_type >= NO_RELOC) {
-	    fprintf (stderr, "fixP->fx_r_type = %d\n", fixP->fx_r_type);
-	    abort ();
+      if (fixP->fx_r_type >= NO_RELOC)
+	{
+	  fprintf (stderr, "fixP->fx_r_type = %d\n", fixP->fx_r_type);
+	  abort ();
 	}
 
-	if ((symbolP = fixP->fx_addsy) != NULL) {
-	    ri.r_address = fixP->fx_frag->fr_address +
-	        fixP->fx_where - segment_address_in_file;
-	    if ((symbolP->sy_type & N_TYPE) == N_UNDF) {
-		ri.r_extern = 1;
-		ri.r_symbolnum = symbolP->sy_number;
-	    } else {
-		ri.r_extern = 0;
-		ri.r_symbolnum = symbolP->sy_type & N_TYPE;
+      if ((symbolP = fixP->fx_addsy) != NULL)
+	{
+	  ri.r_address = fixP->fx_frag->fr_address +
+	    fixP->fx_where - segment_address_in_file;
+	  if ((symbolP->sy_type & N_TYPE) == N_UNDF)
+	    {
+	      ri.r_extern = 1;
+	      ri.r_symbolnum = symbolP->sy_number;
 	    }
-	    if (symbolP && symbolP->sy_frag) {
-		ri.r_addend = symbolP->sy_frag->fr_address;
+	  else
+	    {
+	      ri.r_extern = 0;
+	      ri.r_symbolnum = symbolP->sy_type & N_TYPE;
 	    }
-	    ri.r_type = fixP->fx_r_type;
-	    if (fixP->fx_pcrel) {
-/*		ri.r_addend -= fixP->fx_where;          */
-		ri.r_addend -= ri.r_address;            
-	    } else {
-		ri.r_addend = fixP->fx_addnumber;
+	  if (symbolP && symbolP->sy_frag)
+	    {
+	      ri.r_addend = symbolP->sy_frag->fr_address;
+	    }
+	  ri.r_type = fixP->fx_r_type;
+	  if (fixP->fx_pcrel)
+	    {
+	      /*		ri.r_addend -= fixP->fx_where;          */
+	      ri.r_addend -= ri.r_address;
+	    }
+	  else
+	    {
+	      ri.r_addend = fixP->fx_addnumber;
 	    }
 
-/*	    md_ri_to_chars ((char *) &ri, ri);        */
-	    append (&next_object_file_charP, (char *)& ri, sizeof (ri));
+	  /*	    md_ri_to_chars ((char *) &ri, ri);        */
+	  append (&next_object_file_charP, (char *) &ri, sizeof (ri));
 	}
     }
-    return;
+  return;
 }
 
 static void
-s_bss()
+s_bss ()
 {
   char *name;
   char c;
   char *p;
   int temp, bss_align = 1;
   symbolS *symbolP;
-  extern const char is_end_of_line [256];
+  extern const char is_end_of_line[256];
 
   name = input_line_pointer;
-  c = get_symbol_end();
+  c = get_symbol_end ();
   p = input_line_pointer;
   *p = c;
-  SKIP_WHITESPACE();
-  if ( * input_line_pointer != ',' )
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
     {
-      as_warn("Expected comma after name");
-      ignore_rest_of_line();
+      as_warn ("Expected comma after name");
+      ignore_rest_of_line ();
       return;
     }
-  input_line_pointer ++;
-  if ((temp = get_absolute_expression()) < 0)
+  input_line_pointer++;
+  if ((temp = get_absolute_expression ()) < 0)
     {
-      as_warn("BSS length (%d.) <0! Ignored.", temp);
-      ignore_rest_of_line();
+      as_warn ("BSS length (%d.) <0! Ignored.", temp);
+      ignore_rest_of_line ();
       return;
     }
   *p = 0;
-  symbolP = symbol_find_or_make(name);
+  symbolP = symbol_find_or_make (name);
   *p = c;
   if (*input_line_pointer == ',')
     {
       input_line_pointer++;
-      bss_align = get_absolute_expression();
+      bss_align = get_absolute_expression ();
       while (local_bss_counter % bss_align != 0)
 	local_bss_counter++;
     }
 
-  if (symbolP->sy_other == 0 
-      && symbolP->sy_desc  == 0
-      && ((symbolP->sy_type  == N_BSS
+  if (symbolP->sy_other == 0
+      && symbolP->sy_desc == 0
+      && ((symbolP->sy_type == N_BSS
 	   && symbolP->sy_value == local_bss_counter)
 	  || ((symbolP->sy_type & N_TYPE) == N_UNDF
 	      && symbolP->sy_value == 0)))
     {
       symbolP->sy_value = local_bss_counter;
-      symbolP->sy_type  = N_BSS;
-      symbolP->sy_frag  = & bss_address_frag;
+      symbolP->sy_type = N_BSS;
+      symbolP->sy_frag = &bss_address_frag;
       local_bss_counter += temp;
     }
   else
     {
-      as_warn( "Ignoring attempt to re-define symbol from %d. to %d.",
-	      symbolP->sy_value, local_bss_counter );
+      as_warn ("Ignoring attempt to re-define symbol from %d. to %d.",
+	       symbolP->sy_value, local_bss_counter);
     }
   while (!is_end_of_line[*input_line_pointer])
     {

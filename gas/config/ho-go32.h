@@ -19,7 +19,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define HO_I386 1
 
-extern void free();
-extern void *malloc();
+extern void free ();
+extern void *malloc ();
 
 /* end of ho-go32.h */

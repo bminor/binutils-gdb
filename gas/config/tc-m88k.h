@@ -1,3 +1,4 @@
+
 /* m88k.h -- Assembler for the Motorola 88000
    Contributed by Devon Bowen of Buffalo University
    and Torbjorn Granlund of the Swedish Institute of Computer Science.
@@ -34,12 +35,12 @@ enum reloc_type
 
 struct reloc_info_m88k
 {
-    unsigned long int r_address;
-    unsigned int r_symbolnum: 24;
-    unsigned int r_extern   : 1;
-    unsigned int r_pad      : 3;
-    enum reloc_type r_type  : 4;
-    long int r_addend;
+  unsigned long int r_address;
+  unsigned int r_symbolnum:24;
+  unsigned int r_extern:1;
+  unsigned int r_pad:3;
+  enum reloc_type r_type:4;
+  long int r_addend;
 };
 
 #define relocation_info reloc_info_m88k

@@ -1,18 +1,18 @@
 /* b.out object file format
    Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
-   
+
    This file is part of GAS, the GNU Assembler.
-   
+
    GAS is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as
    published by the Free Software Foundation; either version 2,
    or (at your option) any later version.
-   
+
    GAS is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
    the GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public
    License along with GAS; see the file COPYING.  If not, write
    to the Free Software Foundation, 675 Mass Ave, Cambridge, MA
@@ -66,7 +66,7 @@
 #define OBJ_DEFAULT_OUTPUT_FILE_NAME	"b.out"
 
 extern const short seg_N_TYPE[];
-extern const segT  N_TYPE_seg[];
+extern const segT N_TYPE_seg[];
 
 #define BMAGIC	0415
 /* We don't accept the following (see N_BADMAG macro).
@@ -86,25 +86,26 @@ extern const segT  N_TYPE_seg[];
  *		'n' indicates the corresponding segment must begin at an
  *		address that is a multiple of (2**n).
  */
-struct exec {
-	/* Standard stuff */
-	unsigned long a_magic;	/* Identifies this as a b.out file	*/
-	unsigned long a_text;	/* Length of text			*/
-	unsigned long a_data;	/* Length of data			*/
-	unsigned long a_bss;	/* Length of runtime uninitialized data area */
-	unsigned long a_syms;	/* Length of symbol table		*/
-	unsigned long a_entry;	/* Runtime start address		*/
-	unsigned long a_trsize;	/* Length of text relocation info	*/
-	unsigned long a_drsize;	/* Length of data relocation info	*/
-	
-	/* Added for i960 */
-	unsigned long a_tload;	   /* Text runtime load address		*/
-	unsigned long a_dload;	   /* Data runtime load address		*/
-	unsigned char a_talign;	   /* Alignment of text segment		*/
-	unsigned char a_dalign;	   /* Alignment of data segment		*/
-	unsigned char a_balign;	   /* Alignment of bss segment		*/
-	unsigned char a_relaxable; /* Contains enough info to relax     */
-};
+struct exec
+  {
+    /* Standard stuff */
+    unsigned long a_magic;	/* Identifies this as a b.out file	*/
+    unsigned long a_text;	/* Length of text			*/
+    unsigned long a_data;	/* Length of data			*/
+    unsigned long a_bss;	/* Length of runtime uninitialized data area */
+    unsigned long a_syms;	/* Length of symbol table		*/
+    unsigned long a_entry;	/* Runtime start address		*/
+    unsigned long a_trsize;	/* Length of text relocation info	*/
+    unsigned long a_drsize;	/* Length of data relocation info	*/
+
+    /* Added for i960 */
+    unsigned long a_tload;	/* Text runtime load address		*/
+    unsigned long a_dload;	/* Data runtime load address		*/
+    unsigned char a_talign;	/* Alignment of text segment		*/
+    unsigned char a_dalign;	/* Alignment of data segment		*/
+    unsigned char a_balign;	/* Alignment of bss segment		*/
+    unsigned char a_relaxable;	/* Contains enough info to relax     */
+  };
 
 #define N_BADMAG(x)	(((x).a_magic)!=BMAGIC)
 #define N_TXTOFF(x)	( sizeof(struct exec) )
@@ -116,53 +117,57 @@ struct exec {
 
 /* A single entry in the symbol table
  */
-struct nlist {
-	union {
-		char	*n_name;
-		struct nlist *n_next;
-		long	n_strx;		/* Index into string table	*/
-	} n_un;
-	unsigned char n_type;	/* See below				*/
-	char	n_other;	/* Used in i80960 support -- see below	*/
-	short	n_desc;
-	unsigned long n_value;
-};
+struct nlist
+  {
+    union
+      {
+	char *n_name;
+	struct nlist *n_next;
+	long n_strx;		/* Index into string table	*/
+      }
+    n_un;
+    unsigned char n_type;	/* See below				*/
+    char n_other;		/* Used in i80960 support -- see below	*/
+    short n_desc;
+    unsigned long n_value;
+  };
 
 typedef struct nlist obj_symbol_type;
 
 /* Legal values of n_type
  */
-#define N_UNDF	0	/* Undefined symbol	*/
-#define N_ABS	2	/* Absolute symbol	*/
-#define N_TEXT	4	/* Text symbol		*/
-#define N_DATA	6	/* Data symbol		*/
-#define N_BSS	8	/* BSS symbol		*/
-#define N_FN	31	/* Filename symbol	*/
+#define N_UNDF	0		/* Undefined symbol	*/
+#define N_ABS	2		/* Absolute symbol	*/
+#define N_TEXT	4		/* Text symbol		*/
+#define N_DATA	6		/* Data symbol		*/
+#define N_BSS	8		/* BSS symbol		*/
+#define N_FN	31		/* Filename symbol	*/
 
-#define N_EXT	1	/* External symbol (OR'd in with one of above)	*/
-#define N_TYPE	036	/* Mask for all the type bits			*/
-#define N_STAB	0340	/* Mask for all bits used for SDB entries 	*/
+#define N_EXT	1		/* External symbol (OR'd in with one of above)	*/
+#define N_TYPE	036		/* Mask for all the type bits			*/
+#define N_STAB	0340		/* Mask for all bits used for SDB entries 	*/
 
 #ifndef CUSTOM_RELOC_FORMAT
-struct relocation_info {
-	int	 r_address;	/* File address of item to be relocated	*/
-	unsigned
-    r_index:24,/* Index of symbol on which relocation is based*/
-    r_pcrel:1,	/* 1 => relocate PC-relative; else absolute
+struct relocation_info
+  {
+    int r_address;		/* File address of item to be relocated	*/
+    unsigned
+      r_index:24,		/* Index of symbol on which relocation is based*/
+      r_pcrel:1,		/* 1 => relocate PC-relative; else absolute
 		 *	On i960, pc-relative implies 24-bit
 		 *	address, absolute implies 32-bit.
 		 */
-    r_length:2,	/* Number of bytes to relocate:
+      r_length:2,		/* Number of bytes to relocate:
 		 *	0 => 1 byte
 		 *	1 => 2 bytes
 		 *	2 => 4 bytes -- only value used for i960
 		 */
-    r_extern:1,
-    r_bsr:1,	/* Something for the GNU NS32K assembler */
-    r_disp:1,	/* Something for the GNU NS32K assembler */
-    r_callj:1,	/* 1 if relocation target is an i960 'callj' */
-    nuthin:1;	/* Unused				*/
-};
+      r_extern:1, r_bsr:1,	/* Something for the GNU NS32K assembler */
+      r_disp:1,			/* Something for the GNU NS32K assembler */
+      r_callj:1,		/* 1 if relocation target is an i960 'callj' */
+      nuthin:1;			/* Unused				*/
+  };
+
 #endif /* CUSTOM_RELOC_FORMAT */
 
 /*
@@ -279,17 +284,20 @@ struct relocation_info {
 #define H_SET_VERSION(h,v)		((h)->header.a_version = (v))
 #endif /* EXEC_VERSION */
 
-/* 
+/*
  * Current means for getting the name of a segment.
  * This will change for infinite-segments support (e.g. COFF).
  */
 #define	segment_name(seg)  ( seg_name[(int)(seg)] )
 extern char *const seg_name[];
 
-typedef struct {
-	struct exec	header;			/* a.out header */
-	long	string_table_size;	/* names + '\0' + sizeof(int) */
-} object_headers;
+typedef struct
+  {
+    struct exec header;		/* a.out header */
+    long string_table_size;	/* names + '\0' + sizeof(int) */
+  }
+
+object_headers;
 
 /* unused hooks. */
 #define OBJ_EMIT_LINENO(a, b, c)	{;}
@@ -297,9 +305,9 @@ typedef struct {
 
 #if __STDC__
 struct fix;
-void tc_aout_fix_to_chars(char *where, struct fix *fixP, relax_addressT segment_address);
+void tc_aout_fix_to_chars (char *where, struct fix *fixP, relax_addressT segment_address);
 #else /* not __STDC__ */
-void tc_aout_fix_to_chars();
+void tc_aout_fix_to_chars ();
 #endif /* not __STDC__ */
 
 /*
