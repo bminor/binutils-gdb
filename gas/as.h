@@ -147,6 +147,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define N_SEGMENTS 10
 #define SEG_NORMAL(x) ((x) >= SEG_E0 && (x) <= SEG_E9)
 #define SEG_LIST SEG_E0,SEG_E1,SEG_E2,SEG_E3,SEG_E4,SEG_E5,SEG_E6,SEG_E7,SEG_E8,SEG_E9
+#define SEG_DATA SEG_E1
+#define SEG_TEXT SEG_E0
+#define SEG_BSS SEG_E2
 #else
 #define N_SEGMENTS 3
 #define SEG_NORMAL(x) ((x) == SEG_TEXT || (x) == SEG_DATA || (x) == SEG_BSS)
