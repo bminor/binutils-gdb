@@ -21,11 +21,14 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "gdbtypes.h"
+#include "arch-utils.h"
 #include "gdbcore.h"
 #include "regcache.h"
-#include "arch-utils.h"
+#include "regset.h"
 #include "osabi.h"
+
+#include "gdb_assert.h"
+#include "gdb_string.h"
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
@@ -33,116 +36,64 @@
 
 #include "solib-svr4.h"
 
-/* Map a GDB register number to an offset in the reg structure.  */
-static int regmap[] =
+/* From <machine/reg.h>.  */
+static int i386nbsd_r_reg_offset[] =
 {
-  ( 0 * 4),		/* %eax */
-  ( 1 * 4),		/* %ecx */
-  ( 2 * 4),		/* %edx */
-  ( 3 * 4),		/* %ebx */
-  ( 4 * 4),		/* %esp */
-  ( 5 * 4),		/* %epb */
-  ( 6 * 4),		/* %esi */
-  ( 7 * 4),		/* %edi */
-  ( 8 * 4),		/* %eip */
-  ( 9 * 4),		/* %eflags */
-  (10 * 4),		/* %cs */
-  (11 * 4),		/* %ss */
-  (12 * 4),		/* %ds */
-  (13 * 4),		/* %es */
-  (14 * 4),		/* %fs */
-  (15 * 4),		/* %gs */
+  0 * 4,			/* %eax */
+  1 * 4,			/* %ecx */
+  2 * 4,			/* %edx */
+  3 * 4,			/* %ebx */
+  4 * 4,			/* %esp */
+  5 * 4,			/* %ebp */
+  6 * 4,			/* %esi */
+  7 * 4,			/* %edi */
+  8 * 4,			/* %eip */
+  9 * 4,			/* %eflags */
+  10 * 4,			/* %cs */
+  11 * 4,			/* %ss */
+  12 * 4,			/* %ds */
+  13 * 4,			/* %es */
+  14 * 4,			/* %fs */
+  15 * 4			/* %gs */
 };
 
-#define SIZEOF_STRUCT_REG	(16 * 4)
-
 static void
-i386nbsd_supply_reg (char *regs, int regno)
+i386nbsd_aout_supply_regset (const struct regset *regset,
+			     struct regcache *regcache, int regnum,
+			     const void *regs, size_t len)
 {
-  int i;
+  const struct gdbarch_tdep *tdep = regset->descr;
 
-  for (i = 0; i <= 15; i++)
-    if (regno == i || regno == -1)
-      supply_register (i, regs + regmap[i]);
+  gdb_assert (len >= tdep->sizeof_gregset + I387_SIZEOF_FSAVE);
+
+  i386_supply_gregset (regset, regcache, regnum, regs, tdep->sizeof_gregset);
+  i387_supply_fsave (regcache, regnum, (char *) regs + tdep->sizeof_gregset);
 }
 
-static void
-fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
-                      CORE_ADDR ignore)
+const struct regset *
+i386nbsd_aout_regset_from_core_section (struct gdbarch *gdbarch,
+					const char *sect_name,
+					size_t sect_size)
 {
-  char *regs, *fsave;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  /* We get everything from one section.  */
-  if (which != 0)
-    return;
+  /* NetBSD a.out core dumps don't use seperate register sets for the
+     general-purpose and floating-point registers.  */
 
-  if (core_reg_size < (SIZEOF_STRUCT_REG + 108))
+  if (strcmp (sect_name, ".reg") == 0
+      && sect_size >= tdep->sizeof_gregset + I387_SIZEOF_FSAVE)
     {
-      warning ("Wrong size register set in core file.");
-      return;
+      if (tdep->gregset == NULL)
+	{
+	  tdep->gregset = XMALLOC (struct regset);
+	  tdep->gregset->descr = tdep;
+	  tdep->gregset->supply_regset = i386nbsd_aout_supply_regset;
+	}
+      return tdep->gregset;
     }
 
-  regs = core_reg_sect;
-  fsave = core_reg_sect + SIZEOF_STRUCT_REG;
-
-  /* Integer registers.  */
-  i386nbsd_supply_reg (regs, -1);
-
-  /* Floating point registers.  */
-  i387_supply_fsave (current_regcache, -1, fsave);
+  return NULL;
 }
-
-static void
-fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size,
-			 int which, CORE_ADDR ignore)
-{
-  switch (which)
-    {
-    case 0:  /* Integer registers.  */
-      if (core_reg_size != SIZEOF_STRUCT_REG)
-	warning ("Wrong size register set in core file.");
-      else
-	i386nbsd_supply_reg (core_reg_sect, -1);
-      break;
-
-    case 2:  /* Floating point registers.  */
-      if (core_reg_size != 108)
-	warning ("Wrong size FP register set in core file.");
-      else
-	i387_supply_fsave (current_regcache, -1, core_reg_sect);
-      break;
-
-    case 3:  /* "Extended" floating point registers.  This is gdb-speak
-		for SSE/SSE2. */
-      if (core_reg_size != 512)
-	warning ("Wrong size XMM register set in core file.");
-      else
-	i387_supply_fxsave (current_regcache, -1, core_reg_sect);
-      break;
-
-    default:
-      /* Don't know what kind of register request this is; just ignore it.  */
-      break;
-    }
-}
-
-static struct core_fns i386nbsd_core_fns =
-{
-  bfd_target_unknown_flavour,		/* core_flavour */
-  default_check_format,			/* check_format */
-  default_core_sniffer,			/* core_sniffer */
-  fetch_core_registers,			/* core_read_registers */
-  NULL					/* next */
-};
-
-static struct core_fns i386nbsd_elfcore_fns =
-{
-  bfd_target_elf_flavour,		/* core_flavour */
-  default_check_format,			/* check_format */
-  default_core_sniffer,			/* core_sniffer */
-  fetch_elfcore_registers,		/* core_read_registers */
-  NULL					/* next */
-};
 
 /* Under NetBSD/i386, signal handler invocations can be identified by the
    designated code sequence that is used to return from a signal handler.
@@ -240,7 +191,7 @@ i386nbsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
 }
 
 /* From <machine/signal.h>.  */
-int i386nbsd_sc_reg_offset[I386_NUM_GREGS] =
+int i386nbsd_sc_reg_offset[] =
 {
   10 * 4,			/* %eax */
   9 * 4,			/* %ecx */
@@ -268,6 +219,11 @@ i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Obviously NetBSD is BSD-based.  */
   i386bsd_init_abi (info, gdbarch);
 
+  /* NetBSD has a different `struct reg'.  */
+  tdep->gregset_reg_offset = i386nbsd_r_reg_offset;
+  tdep->gregset_num_regs = ARRAY_SIZE (i386nbsd_r_reg_offset);
+  tdep->sizeof_gregset = 16 * 4;
+
   /* NetBSD has different signal trampoline conventions.  */
   set_gdbarch_pc_in_sigtramp (gdbarch, i386nbsd_pc_in_sigtramp);
   /* FIXME: kettenis/20020906: We should probably provide
@@ -282,10 +238,23 @@ i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* NetBSD has a `struct sigcontext' that's different from the
      origional 4.3 BSD.  */
   tdep->sc_reg_offset = i386nbsd_sc_reg_offset;
-  tdep->sc_num_regs = I386_NUM_GREGS;
+  tdep->sc_num_regs = ARRAY_SIZE (i386nbsd_sc_reg_offset);
+}
+
+/* NetBSD a.out.  */
+
+static void
+i386nbsdaout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  i386nbsd_init_abi (info, gdbarch);
+
+  /* NetBSD a.out has a single register set.  */
+  set_gdbarch_regset_from_core_section
+    (gdbarch, i386nbsd_aout_regset_from_core_section);
 }
 
 /* NetBSD ELF.  */
+
 static void
 i386nbsdelf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -300,26 +269,18 @@ i386nbsdelf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* NetBSD ELF uses SVR4-style shared libraries.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch,
                                         generic_in_solib_call_trampoline);
-  set_solib_svr4_fetch_link_map_offsets (gdbarch,
-				 nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
 
   /* NetBSD ELF uses -fpcc-struct-return by default.  */
   tdep->struct_return = pcc_struct_return;
-
-  /* We support the SSE registers on NetBSD ELF.  */
-  tdep->num_xmm_regs = I386_NUM_XREGS - 1;
-  set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS
-                        + I386_NUM_XREGS);
 }
 
 void
 _initialize_i386nbsd_tdep (void)
 {
-  add_core_fns (&i386nbsd_core_fns);
-  add_core_fns (&i386nbsd_elfcore_fns);
-
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_NETBSD_AOUT,
-			  i386nbsd_init_abi);
+			  i386nbsdaout_init_abi);
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_NETBSD_ELF,
 			  i386nbsdelf_init_abi);
 }

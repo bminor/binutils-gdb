@@ -1,5 +1,24 @@
 2003-11-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386nbsd-tdep.c: Don't include "gdbtypes.h".  Include
+	"gdb_assert.h" and "gdb_string.h".
+	(i386nbsd_r_reg_offset): Rename from regmap.
+	(SIZEOF_STRUCT_REG): Remove.
+	(i386nbsd_supply_reg, fetch_core_registers,
+	fetch_elfcore_registers, i386nbsd_core_fns, i386nbsd_elfcore_fns):
+	Remove.
+	(i386nbsd_aout_supply_regset,
+	i386nbsd_aout_regset_from_core_section): New functions.
+	(i386nbsd_sc_reg_offset): Don't explicitly specify size of array.
+	(i386nbsd_init_abi): Initialize TDEP->gregset_reg_offset,
+	TDEP->gregset_num_regs amd sizeof_gregset.  Use ARRAY_SIZE to
+	initialize TDEP->sc_num_regs.
+	(i386nbsdaout_init_abi): New function.
+	(i386nbsdelf_init_abi): Remove initialization of
+	TDEP->num_xmm_regs.  Don't set num_regs here.
+	(_initialize_i386nbsd_tdep): Don't call add_core_fns.  Use
+	i386nbsd_aout_init to register NetBSD a.out OS/ABI.
+
 	* osabi.c (generic_elf_osabi_sniff_abi_tag_sections): Use
 	.note.netbsdcore.procinfo section to recognize NetBSD core files.
 
