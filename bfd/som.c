@@ -4278,7 +4278,7 @@ som_bfd_count_ar_symbols (abfd, lst_header, count)
      symindex *count;
 {
   unsigned int i;
-  unsigned int *hash_table = NULL
+  unsigned int *hash_table = NULL;
   file_ptr lst_filepos = bfd_tell (abfd) - sizeof (struct lst_header);
 
   hash_table = 
