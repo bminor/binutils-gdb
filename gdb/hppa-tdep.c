@@ -574,8 +574,10 @@ frame_chain (frame)
 
       if (!u)
 	{
-	  /* We could find this information by examining prologues.  This
-	     is necessary to deal with stripped executables.  */
+	  /* We could find this information by examining prologues.  I don't
+	     think anyone has actually written any tools (not even "strip")
+	     which leave them out of an executable, so maybe this is a moot
+	     point.  */
 	  warning ("Unable to find unwind for PC 0x%x -- Help!", frame->pc);
 	  return 0;
 	}
