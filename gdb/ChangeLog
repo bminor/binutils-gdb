@@ -1,5 +1,12 @@
 Wed Nov 29 13:35:18 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
+	* expression.h (enum exp_opcode):  Add BINOP_RANGE.
+	* expprint.c (dump_expression):  Support BINOP_RANGE.
+	* eval.c (evaluate_subexp_standard):  Handle BINOP_RANGE (as error).
+	(case MULTI_SUBSCRIPT):  Fix broken f77 value->int ad hoc conversion.
+	* ch-lang.c (chill_op_print_tab):  Support BINOP_RANGE.
+	(evaluate_subexp_chill):  Error on BINOP_COMMA.
+
 	* Makefile.in:  Clean up so doc stuff stays in doc sub-dir.
 
 Wed Nov 29 16:39:50 1995  Michael Meissner  <meissner@tiktok.cygnus.com>

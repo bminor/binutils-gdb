@@ -978,6 +978,13 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       else
 	return value_binop (arg1, arg2, op);
 
+    case BINOP_RANGE:
+      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      if (noside == EVAL_SKIP)
+	goto nosideret;
+      error ("':' operator used in invalid context");
+
     case BINOP_SUBSCRIPT:
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
       arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
@@ -1087,12 +1094,9 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	    /* Evaluate each subscript, It must be a legal integer in F77 */ 
 	    arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
 
-	    if (TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_INT)
-	      error ("Array subscripts must be of type integer");
-
 	    /* Fill in the subscript and array size arrays */ 
 
-	    subscript_array[i] = (* (unsigned int *) VALUE_CONTENTS(arg2)); 
+	    subscript_array[i] = value_as_long (arg2);
                
 	    retcode = f77_get_dynamic_upperbound (tmp_type, &upper);
 	    if (retcode == BOUND_FETCH_ERROR)

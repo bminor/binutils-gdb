@@ -272,6 +272,7 @@ static const struct op_print chill_op_print_tab[] = {
     {"-",   UNOP_NEG, PREC_PREFIX, 0},
     {"->",  UNOP_IND, PREC_SUFFIX, 1},
     {"->",  UNOP_ADDR, PREC_PREFIX, 0},
+    {":",   BINOP_RANGE, PREC_ASSIGN, 0},
     {NULL,  0, 0, 0}
 };
 
@@ -452,6 +453,9 @@ evaluate_subexp_chill (expect_type, exp, pos, noside)
       (*pos)++;
       arg1 = (*exp->language_defn->evaluate_exp) (NULL_TYPE, exp, pos, noside);
       return value_chill_length (arg1);
+
+    case BINOP_COMMA:
+      error ("',' operator used in invalid context");
 
     default:
       break;
