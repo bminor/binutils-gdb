@@ -1,3 +1,9 @@
+2002-09-02  Nick Clifton  <nickc@redhat.com>
+
+	* ldexp.c (exp_fold_tree): If the first attempt to lookup a
+	PROVIDEd symbol fails, look it up again, but this time with
+	the 'create' flag set.
+
 2002-08-30  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/elfd10v.sc (MEMORY): Remove UNIFIED, it is not

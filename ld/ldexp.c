@@ -726,22 +726,20 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 	      if (tree->type.node_class == etree_assign)
 		create = true;
 	      else
-		create = false;
+		create = false;	      
 	      h = bfd_link_hash_lookup (link_info.hash, tree->assign.dst,
 					create, false, false);
+	      
+	      if (tree->type.node_class == etree_provide
+		  && (h == NULL
+		      || h->type == bfd_link_hash_undefined
+		      || h->type == bfd_link_hash_common))
+		h = bfd_link_hash_lookup (link_info.hash, tree->assign.dst,
+					  true, false, false);
+
 	      if (h == (struct bfd_link_hash_entry *) NULL)
-		{
-		  if (tree->type.node_class == etree_assign)
-		    einfo (_("%P%F:%s: hash creation failed\n"),
-			   tree->assign.dst);
-		}
-	      else if (tree->type.node_class == etree_provide
-		       && h->type != bfd_link_hash_undefined
-		       && h->type != bfd_link_hash_common)
-		{
-		  /* Do nothing.  The symbol was defined by some
-		     object.  */
-		}
+		einfo (_("%P%F:%s: hash creation failed\n"),
+		       tree->assign.dst);
 	      else
 		{
 		  /* FIXME: Should we worry if the symbol is already
