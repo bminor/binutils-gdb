@@ -1,3 +1,8 @@
+2005-02-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* dlltool.c: Warning fixes.
+	* objdump.c: Likewise.
+
 2005-02-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (syslex.o, sysinfo.o): Pass AM_CFLAGS to compiler.

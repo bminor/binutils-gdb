@@ -1,6 +1,6 @@
 /* dlltool.c -- tool to generate stuff for PE style DLLs
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
-   Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
+   2005 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -2417,7 +2417,7 @@ make_one_lib_file (export_type *exp, int i)
 	      si->data = xmalloc (si->size);
 	      si->data[0] = idx & 0xff;
 	      si->data[1] = idx >> 8;
-	      strcpy (si->data + 2, xlate (exp->import_name));
+	      strcpy ((char *) si->data + 2, xlate (exp->import_name));
 	    }
 	  break;
 	case IDATA7:
