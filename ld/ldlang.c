@@ -523,7 +523,7 @@ new_statement (type, size, list)
    or prefix it with a -l etc.
 
    We can be supplied with requests for input files more than once;
-   they may, for example be split over serveral lines like foo.o(.text)
+   they may, for example be split over several lines like foo.o(.text)
    foo.o(.data) etc, so when asked for a file we check that we haven't
    got it already so we don't duplicate the bfd.  */
 
@@ -1304,7 +1304,7 @@ lang_add_section (ptr, section, output, file)
       if (section->alignment_power > output->bfd_section->alignment_power)
 	output->bfd_section->alignment_power = section->alignment_power;
 
-      /* If supplied an aligment, then force it.  */
+      /* If supplied an alignment, then force it.  */
       if (output->section_alignment != -1)
 	output->bfd_section->alignment_power = output->section_alignment;
 
@@ -1700,7 +1700,7 @@ stricpy (dest, src)
   *dest = 0;
 }
 
-/* Remove the first occurance of needle (if any) in haystack
+/* Remove the first occurrence of needle (if any) in haystack
    from haystack.  */
 
 static void
@@ -2144,7 +2144,7 @@ lang_place_undefineds ()
     }
 }
 
-/* Open input files and attatch to output sections.  */
+/* Open input files and attach to output sections.  */
 
 static void
 map_input_to_output_sections (s, target, output_section_statement)
@@ -3890,7 +3890,7 @@ lang_place_orphans ()
 	{
 	  if (s->output_section == (asection *) NULL)
 	    {
-	      /* This section of the file is not attatched, root
+	      /* This section of the file is not attached, root
 	         around for a sensible place for it to go.  */
 
 	      if (file->just_syms_flag)

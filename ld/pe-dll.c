@@ -59,7 +59,7 @@
     code modifications).
 
     2. This is done completely in bounds of the PE specification (to be fair,
-    there's a place where it pokes nose out of, but in practise it works).
+    there's a place where it pokes nose out of, but in practice it works).
     So, resulting module can be used with any other PE compiler/linker.
 
     3. Auto-import is fully compatible with standard import method and they
@@ -74,7 +74,7 @@
 
     The obvious and only way to get rid of dllimport insanity is to make client
     access variable directly in the DLL, bypassing extra dereference. I.e.,
-    whenever client contains someting like
+    whenever client contains something like
 
     mov dll_var,%eax,
 
@@ -82,7 +82,7 @@
     DLL. The aim is to make OS loader do so, and than make ld help with that.
     Import section of PE made following way: there's a vector of structures
     each describing imports from particular DLL. Each such structure points
-    to two other parellel vectors: one holding imported names, and one which
+    to two other parallel vectors: one holding imported names, and one which
     will hold address of corresponding imported name. So, the solution is
     de-vectorize these structures, making import locations be sparse and
     pointing directly into code. Before continuing, it is worth a note that,
@@ -104,7 +104,7 @@
     above: PE specification rambles that name vector (OriginalFirstThunk)
     should run in parallel with addresses vector (FirstThunk), i.e. that they
     should have same number of elements and terminated with zero. We violate
-    this, since FirstThunk points directly into machine code. But in practise,
+    this, since FirstThunk points directly into machine code. But in practice,
     OS loader implemented the sane way: it goes thru OriginalFirstThunk and
     puts addresses to FirstThunk, not something else. It once again should be
     noted that dll and symbol name structures are reused across fixup entries
@@ -115,7 +115,7 @@
     in windows9x kernel32.dll, so if you use it, you have two
     IMAGE_IMPORT_DESCRIPTORS for kernel32.dll). Yet other question is whether
     referencing the same PE structures several times is valid. The answer is why
-    not, prohibitting that (detecting violation) would require more work on
+    not, prohibiting that (detecting violation) would require more work on
     behalf of loader than not doing it.
 
     See also: ld/emultempl/pe.em.  */
@@ -2627,7 +2627,7 @@ pe_implied_import_dll (filename)
 
 	  imp = def_file_add_import (pe_def_file, erva + name_rva,
 				     dll_name, i, 0);
- 	  /* Mark symbole type.  */
+ 	  /* Mark symbol type.  */
  	  imp->data = is_data;
  
  	  if (pe_dll_extra_pe_debug)

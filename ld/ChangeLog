@@ -1,3 +1,10 @@
+2003-01-01  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* ldfile.c: Fix comment typos.
+	* ldlang.c: Likewise.
+	* mri.c: Likewise.
+	* pe-dll.c: Likewise.
+
 2003-01-01  Daniel Jacobowitz  <drow@mvista.com>
 
 	Suggested by Manfred Hollstein <manfred.h@gmx.net>:
@@ -5,7 +12,7 @@
 	and ldver.texi.
 	* Makefile.in: Regenerated.
 
-2002-12-24    Dmitry Diky <diwil@mail.ru>
+2002-12-24  Dmitry Diky  <diwil@mail.ru>
 
 	* Makefile.am: Add msp430 target.
 	* configure.tgt: Likewise.

@@ -402,7 +402,7 @@ try_open (name, exten)
 }
 
 /* Try to open NAME; if that fails, look for it in any directories
-   specified with -L, without and with EXTEND apppended.  */
+   specified with -L, without and with EXTEND appended.  */
 
 FILE *
 ldfile_find_command_file (name, extend)

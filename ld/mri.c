@@ -149,7 +149,7 @@ mri_draw_tree ()
 
   /* Now build the statements for the ldlang machine.  */
 
-  /* Attatch the addresses of any which have addresses,
+  /* Attach the addresses of any which have addresses,
      and add the ones not mentioned.  */
   if (address != (struct section_name_struct *) NULL)
     {
