@@ -19,6 +19,6 @@
  *	@(#)pathnames.h	5.2 (Berkeley) 6/1/90
  */
 
-#define	_PATH_FLAT_BLURB	"/usr/share/misc/gprof.flat"
-#define	_PATH_CALLG_BLURB	"/usr/share/misc/gprof.callg"
+#define	_PATH_FLAT_BLURB	"/usr/local/lib/gprof.flat"
+#define	_PATH_CALLG_BLURB	"/usr/local/lib/gprof.callg"
 
