@@ -1,6 +1,6 @@
 y: MODULE
 
-<> USE_SEIZE_FILE "x.grt" <>
+<> USE_SEIZE_FILE "pr-5646-grt.grt" <>
 SEIZE a_ps;
 
 p: PROC ();

@@ -108,6 +108,7 @@ EXECUTABLES = chillvars.exe result.exe \
 # To force pr-4975-grt to be compiled before pr-4975, so the
 # latter can use the former's grant file.
 pr-4975.o: pr-4975-grt.o
+pr-5646.o: pr-5646-grt.o
 
 all:	$(EXECUTABLES)
 
