@@ -96,6 +96,10 @@ struct frame_info
        initialized by INIT_EXTRA_FRAME_INFO */
     struct frame_extra_info *extra_info;
 
+    /* If dwarf2 unwind frame informations is used, this structure holds all
+       related unwind data.  */
+    struct unwind_contect *context;
+
     /* Pointers to the next (down, inner) and previous (up, outer)
        frame_info's in the frame cache.  */
     struct frame_info *next; /* down, inner */

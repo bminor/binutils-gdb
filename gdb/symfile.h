@@ -300,6 +300,7 @@ dwarf_build_psymtabs (struct objfile *, int, file_ptr, unsigned int,
 extern int dwarf2_has_info (bfd * abfd);
 
 extern void dwarf2_build_psymtabs (struct objfile *, int);
+extern void dwarf2_build_frame_info (struct objfile *);
 
 /* From mdebugread.c */
 

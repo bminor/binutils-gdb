@@ -656,6 +656,9 @@ elf_symfile_read (struct objfile *objfile, int mainline)
 			    ei.lnoffset, ei.lnsize);
     }
 
+  if (DWARF2_BUILD_FRAME_INFO_P ())
+    DWARF2_BUILD_FRAME_INFO(objfile);
+
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */
 

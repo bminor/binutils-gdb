@@ -569,6 +569,7 @@ m:::int:in_function_epilogue_p:CORE_ADDR addr:addr::0:generic_in_function_epilog
 # ARGC is the number of elements in the vector.
 # ARGV is an array of strings, one per argument.
 m::CONSTRUCT_INFERIOR_ARGUMENTS:char *:construct_inferior_arguments:int argc, char **argv:argc, argv:::construct_inferior_arguments::0
+F:2:DWARF2_BUILD_FRAME_INFO:void:dwarf2_build_frame_info:struct objfile *objfile:objfile:::0
 EOF
 }
 
@@ -675,7 +676,7 @@ cat <<EOF
 
 struct frame_info;
 struct value;
-
+struct objfile;
 
 extern struct gdbarch *current_gdbarch;
 

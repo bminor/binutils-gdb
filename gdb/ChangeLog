@@ -1,3 +1,22 @@
+2001-12-07  Jiri Smid  <smid@suse.cz>
+
+	* dwarf2cfi.c: New file.
+	* dwarf2cfi.h: New file.
+	* dwarf2read.c (dwarf_frame_offset, dwarf_frame_size): New variables.
+	(dwarf_eh_frame_offset, dwarf_eh_frame_size): New variables.
+	(dwarf2_read_section): Change to non static.
+	(dwarf2_locate_sections): Add .debug_frame and .eh_frame section
+	recognition.
+	(FRAME_SECTION, EH_FRAME_SECTION): New define.
+	* elfread.c (elf_symfile_read): Add call of frame informations build.
+	* frame.h (frame_info): Add pointer to unwind_context.
+	* symfile.h (dwarf2_build_frame_info): Add declaration.
+	* gdbarch.sh (DWARF2_BUILD_FRAME_INFO): Add.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* Makefile.in: Add dwarf2cfi_h, dwarf2cfi.o
+	* x86-64-tdep.c (i386_gdbarch_init): Initialize target vector to
+	use debug frame info.
+
 2001-12-06  Andrew Cagney  <ac131313@redhat.com>
 
 	* defs.h: Do not include "mmalloc.h".

@@ -603,6 +603,7 @@ dcache_h =	dcache.h
 defs_h =	defs.h $(xm_h) $(tm_h) $(nm_h) config.status config.h \
 		gdbarch.h ui-file.h
 doublest_h =	doublest.h $(floatformat_h)
+dwarf2cfi_h =	dwarf2cfi.h
 event_loop_h =  event-loop.h
 event_top_h = 	event-top.h
 expression_h =	expression.h $(doublest_h) $(symtab_h)
@@ -1354,6 +1355,9 @@ dink32-rom.o: dink32-rom.c $(monitor_h) $(bfd_h) gdb_wait.h $(defs_h) \
 dpx2-nat.o: dpx2-nat.c $(defs_h) $(gdbcore_h) $(gdb_string_h)
 
 dstread.o: dstread.c $(gdb_string_h)
+
+dwarf2cfi.o: dwarf2cfi.c $(defs_h) $(symtab_h) $(symfile_h) $(objfiles_h) \
+	$(target_h) $(inferior_h) $(regcache_h) $(dwarf2cfi_h)
 
 dwarfread.o: dwarfread.c $(bfd_h) $(buildsym_h) $(complaints_h) $(defs_h) \
 	$(expression_h) $(gdbtypes_h) $(language_h) $(objfiles_h) \

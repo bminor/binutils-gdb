@@ -974,6 +974,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    number of bytes in BREAKPOINT but not always.  */
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
 
+/* Use dwarf2 debug frame informations.  */
+  set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
   return gdbarch;
 }
 

@@ -132,6 +132,8 @@ static file_ptr dwarf_aranges_offset;
 static file_ptr dwarf_loc_offset;
 static file_ptr dwarf_macinfo_offset;
 static file_ptr dwarf_str_offset;
+file_ptr dwarf_frame_offset;
+file_ptr dwarf_eh_frame_offset;
 
 static unsigned int dwarf_info_size;
 static unsigned int dwarf_abbrev_size;
@@ -141,6 +143,8 @@ static unsigned int dwarf_aranges_size;
 static unsigned int dwarf_loc_size;
 static unsigned int dwarf_macinfo_size;
 static unsigned int dwarf_str_size;
+unsigned int dwarf_frame_size;
+unsigned int dwarf_eh_frame_size;
 
 /* names of the debugging sections */
 
@@ -152,6 +156,8 @@ static unsigned int dwarf_str_size;
 #define LOC_SECTION      ".debug_loc"
 #define MACINFO_SECTION  ".debug_macinfo"
 #define STR_SECTION      ".debug_str"
+#define FRAME_SECTION    ".debug_frame"
+#define EH_FRAME_SECTION ".eh_frame"
 
 /* local data types */
 
@@ -587,7 +593,7 @@ static void dwarf2_psymtab_to_symtab (struct partial_symtab *);
 
 static void psymtab_to_symtab_1 (struct partial_symtab *);
 
-static char *dwarf2_read_section (struct objfile *, file_ptr, unsigned int);
+char *dwarf2_read_section (struct objfile *, file_ptr, unsigned int);
 
 static void dwarf2_read_abbrevs (bfd *, unsigned int);
 
@@ -807,6 +813,7 @@ dwarf2_has_info (bfd *abfd)
 {
   dwarf_info_offset = dwarf_abbrev_offset = dwarf_line_offset = 0;
   dwarf_str_offset = 0;
+  dwarf_frame_offset = dwarf_eh_frame_offset = 0;
   bfd_map_over_sections (abfd, dwarf2_locate_sections, NULL);
   if (dwarf_info_offset && dwarf_abbrev_offset)
     {
@@ -864,6 +871,16 @@ dwarf2_locate_sections (bfd *ignore_abfd, asection *sectp, PTR ignore_ptr)
     {
       dwarf_str_offset = sectp->filepos;
       dwarf_str_size = bfd_get_section_size_before_reloc (sectp);
+    }
+  else if (STREQ (sectp->name, FRAME_SECTION))
+    {
+      dwarf_frame_offset = sectp->filepos;
+      dwarf_frame_size = bfd_get_section_size_before_reloc (sectp);
+    }
+  else if (STREQ (sectp->name, EH_FRAME_SECTION))
+    {
+      dwarf_eh_frame_offset = sectp->filepos;
+      dwarf_eh_frame_size = bfd_get_section_size_before_reloc (sectp);
     }
 }
 
@@ -3045,7 +3062,7 @@ make_cleanup_free_die_list (struct die_info *dies)
 /* Read the contents of the section at OFFSET and of size SIZE from the
    object file specified by OBJFILE into the psymbol_obstack and return it.  */
 
-static char *
+char *
 dwarf2_read_section (struct objfile *objfile, file_ptr offset,
 		     unsigned int size)
 {

@@ -256,6 +256,7 @@ struct gdbarch
   gdbarch_in_solib_call_trampoline_ftype *in_solib_call_trampoline;
   gdbarch_in_function_epilogue_p_ftype *in_function_epilogue_p;
   gdbarch_construct_inferior_arguments_ftype *construct_inferior_arguments;
+  gdbarch_dwarf2_build_frame_info_ftype *dwarf2_build_frame_info;
 };
 
 
@@ -396,6 +397,7 @@ struct gdbarch startup_gdbarch =
   0,
   generic_in_function_epilogue_p,
   construct_inferior_arguments,
+  0,
   /* startup_gdbarch() */
 };
 
@@ -759,6 +761,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of in_solib_call_trampoline, invalid_p == 0 */
   /* Skip verify of in_function_epilogue_p, invalid_p == 0 */
   /* Skip verify of construct_inferior_arguments, invalid_p == 0 */
+  /* Skip verify of dwarf2_build_frame_info, has predicate */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -1002,6 +1005,20 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: DO_REGISTERS_INFO = 0x%08lx\n",
                         (long) current_gdbarch->do_registers_info
                         /*DO_REGISTERS_INFO ()*/);
+#endif
+#ifdef DWARF2_BUILD_FRAME_INFO
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DWARF2_BUILD_FRAME_INFO(objfile)",
+                      XSTRING (DWARF2_BUILD_FRAME_INFO (objfile)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DWARF2_BUILD_FRAME_INFO = 0x%08lx\n",
+                        (long) current_gdbarch->dwarf2_build_frame_info
+                        /*DWARF2_BUILD_FRAME_INFO ()*/);
 #endif
 #ifdef DWARF2_REG_TO_REGNUM
   fprintf_unfiltered (file,
@@ -4306,6 +4323,30 @@ set_gdbarch_construct_inferior_arguments (struct gdbarch *gdbarch,
                                           gdbarch_construct_inferior_arguments_ftype construct_inferior_arguments)
 {
   gdbarch->construct_inferior_arguments = construct_inferior_arguments;
+}
+
+int
+gdbarch_dwarf2_build_frame_info_p (struct gdbarch *gdbarch)
+{
+  return gdbarch->dwarf2_build_frame_info != 0;
+}
+
+void
+gdbarch_dwarf2_build_frame_info (struct gdbarch *gdbarch, struct objfile *objfile)
+{
+  if (gdbarch->dwarf2_build_frame_info == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_dwarf2_build_frame_info invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_dwarf2_build_frame_info called\n");
+  gdbarch->dwarf2_build_frame_info (objfile);
+}
+
+void
+set_gdbarch_dwarf2_build_frame_info (struct gdbarch *gdbarch,
+                                     gdbarch_dwarf2_build_frame_info_ftype dwarf2_build_frame_info)
+{
+  gdbarch->dwarf2_build_frame_info = dwarf2_build_frame_info;
 }
 
 
