@@ -18,7 +18,7 @@
 #define SEEK_CUR 1
 
 /* Make the basic types 64-bit quantities on the host */
-#define	HOST_64_BIT	long long
+#define	BFD_HOST_64_BIT	long long
 
 extern int	abort	PARAMS ((void));
 extern int	close	PARAMS ((int));

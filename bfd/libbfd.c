@@ -567,7 +567,7 @@ DESCRIPTION
 /* Sign extension to bfd_signed_vma.  */
 #define COERCE16(x) (((bfd_signed_vma) (x) ^ 0x8000) - 0x8000)
 #define COERCE32(x) (((bfd_signed_vma) (x) ^ 0x80000000) - 0x80000000)
-#define EIGHT_GAZILLION (((HOST_64_BIT)0x80000000) << 32)
+#define EIGHT_GAZILLION (((BFD_HOST_64_BIT)0x80000000) << 32)
 #define COERCE64(x) \
   (((bfd_signed_vma) (x) ^ EIGHT_GAZILLION) - EIGHT_GAZILLION)
 
