@@ -1,3 +1,9 @@
+Mon Jul 26 17:39:01 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	Yet another trad-core variant:
+	* config/esix.mh, hosts/esix.h: New files.
+	* configure.hosts: Use them.
+
 Mon Jul 26 13:22:15 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* reloc.c (bfd_perform_relocation): Handle the case of
