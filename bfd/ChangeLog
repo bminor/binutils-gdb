@@ -1,3 +1,9 @@
+Fri Sep 10 00:35:14 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-hppa.h (elf_hppa_unmark_useless_dynamic_symbols): New function.
+	(elf_hppa_remark_useless_dynamic_symbols): Similarly.
+	(elf_hppa_final_link): Call them.
+
 1999-09-10  Ian Lance Taylor  <ian@zembu.com>
 
 	* elflink.h (elf_fix_symbol_flags): Move weakdef handling here...

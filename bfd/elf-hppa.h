@@ -63,6 +63,12 @@ static boolean elf_hppa_add_symbol_hook
 static boolean elf_hppa_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
 
+static boolean elf_hppa_unmark_useless_dynamic_symbols
+  PARAMS ((struct elf_link_hash_entry *, PTR));
+
+static boolean elf_hppa_remark_useless_dynamic_symbols
+  PARAMS ((struct elf_link_hash_entry *, PTR));
+
 /* ELF/PA relocation howto entries.  */
 
 static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
@@ -736,6 +742,74 @@ elf_hppa_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
   return true;
 }
 
+static boolean
+elf_hppa_unmark_useless_dynamic_symbols (h, data)
+     struct elf_link_hash_entry *h;
+     PTR data;
+{
+  struct bfd_link_info *info = (struct bfd_link_info *)data;
+
+  /* If we are not creating a shared library, and this symbol is
+     referenced by a shared library but is not defined anywhere, then
+     the generic code will warn that it is undefined.
+
+     This behavior is undesirable on HPs since the standard shared
+     libraries contain reerences to undefined symbols.
+
+     So we twiddle the flags associated with such symbols so that they
+     will not trigger the warning.  ?!? FIXME.  This is horribly fraglie.
+
+     Ultimately we should have better controls over the generic ELF BFD
+     linker code.  */
+  if (! info->relocateable
+      && ! (info->shared
+	    && !info->no_undefined)
+      && h->root.type == bfd_link_hash_undefined
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)
+    {
+      h->elf_link_hash_flags &= ~ELF_LINK_HASH_REF_DYNAMIC;
+      h->elf_link_hash_flags |= 0x8000;
+    }
+
+  return true;
+}
+
+
+static boolean
+elf_hppa_remark_useless_dynamic_symbols (h, data)
+     struct elf_link_hash_entry *h;
+     PTR data;
+{
+  struct bfd_link_info *info = (struct bfd_link_info *)data;
+
+  /* If we are not creating a shared library, and this symbol is
+     referenced by a shared library but is not defined anywhere, then
+     the generic code will warn that it is undefined.
+
+     This behavior is undesirable on HPs since the standard shared
+     libraries contain reerences to undefined symbols.
+
+     So we twiddle the flags associated with such symbols so that they
+     will not trigger the warning.  ?!? FIXME.  This is horribly fraglie.
+
+     Ultimately we should have better controls over the generic ELF BFD
+     linker code.  */
+  if (! info->relocateable
+      && ! (info->shared
+	    && !info->no_undefined)
+      && h->root.type == bfd_link_hash_undefined
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0
+      && (h->elf_link_hash_flags & 0x8000) != 0)
+    {
+      h->elf_link_hash_flags |= ELF_LINK_HASH_REF_DYNAMIC;
+      h->elf_link_hash_flags &= ~0x8000;
+    }
+
+  return true;
+}
+
 /* Called after we have seen all the input files/sections, but before
    final symbol resolution and section placement has been determined.
 
@@ -747,6 +821,8 @@ elf_hppa_final_link (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
+  boolean retval;
+
   /* Make sure we've got ourselves a suitable __gp value.  */
   if (!info->relocateable)
     {
@@ -779,8 +855,27 @@ elf_hppa_final_link (abfd, info)
       _bfd_set_gp_value (abfd, gp_val);
     }
 
+  /* HP's shared libraries have references to symbols that are not
+     defined anywhere.  The generic ELF BFD linker code will complaim
+     about such symbols.
+
+     So we detect the losing case and arrange for the flags on the symbol
+     to indicate that it was never referenced.  This keeps the generic
+     ELF BFD link code happy and appears to not create any secondary
+     problems.  Ultimately we need a way to control the behavior of the
+     generic ELF BFD link code better.  */
+  elf_link_hash_traverse (elf_hash_table (info),
+			  elf_hppa_unmark_useless_dynamic_symbols,
+			  info);
+
   /* Invoke the regular ELF backend linker to do all the work.  */
-  return bfd_elf_bfd_final_link (abfd, info);
+  retval = bfd_elf_bfd_final_link (abfd, info);
+
+  elf_link_hash_traverse (elf_hash_table (info),
+			  elf_hppa_remark_useless_dynamic_symbols,
+			  info);
+
+  return retval;
 }
 
 /* Relocate an HPPA ELF section.  */
@@ -1535,7 +1630,6 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
 
 	return insn | sym_value;
       }
-
 
     default:
       return insn;
