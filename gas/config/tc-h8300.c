@@ -58,7 +58,7 @@ int Smode;
 int Nmode;
 int SXmode;
 
-#define PSIZE (Hmode ? L_32 : L_16)
+#define PSIZE (Hmode && !Nmode ? L_32 : L_16)
 
 int bsize = L_8;		/* Default branch displacement.  */
 
@@ -689,7 +689,7 @@ get_operand (ptr, op, direction)
 	  *ptr = parse_exp (src + 1, op);
 	  if (op->exp.X_add_number >= 0x100)
 	    {
-	      int divisor;
+	      int divisor = 1;
 
 	      op->mode = VECIND;
 	      /* FIXME : 2?  or 4?  */
@@ -718,7 +718,9 @@ get_operand (ptr, op, direction)
 	      return;
 	    }
 
-	  if ((mode & SIZE) != PSIZE)
+	  if (((mode & SIZE) != PSIZE)
+	      /* For Normal mode accept 16 bit and 32 bit pointer registers.  */
+	      && (!Nmode || ((mode & SIZE) != L_32)))
 	    as_bad (_("Wrong size pointer register for architecture."));
 
 	  op->mode = src[0] == '-' ? RDPREDEC : RDPREINC;
@@ -828,7 +830,9 @@ get_operand (ptr, op, direction)
 	  src += len;
 	  if (*src == '+' || *src == '-')
 	    {
-	      if ((mode & SIZE) != PSIZE)
+	      if (((mode & SIZE) != PSIZE)
+		  /* For Normal mode accept 16 bit and 32 bit pointer registers.  */
+		  && (!Nmode || ((mode & SIZE) != L_32)))
 		as_bad (_("Wrong size pointer register for architecture."));
 	      op->mode = *src == '+' ? RSPOSTINC : RSPOSTDEC;
 	      op->reg = num;
@@ -836,7 +840,9 @@ get_operand (ptr, op, direction)
 	      *ptr = src;
 	      return;
 	    }
-	  if ((mode & SIZE) != PSIZE)
+	  if (((mode & SIZE) != PSIZE)
+	      /* For Normal mode accept 16 bit and 32 bit pointer registers.  */
+	      && (!Nmode || ((mode & SIZE) != L_32)))
 	    as_bad (_("Wrong size pointer register for architecture."));
 
 	  op->mode = direction | IND | PSIZE;
@@ -1855,6 +1861,7 @@ fix_operand_size (operand, size)
 	   is safe.  get_specific() will relax L_24 into L_32 where
 	   necessary.  */
 	if (Hmode
+	    && !Nmode 
 	    && (operand->exp.X_add_number < -32768
 		|| operand->exp.X_add_number > 32767
 		|| operand->exp.X_add_symbol != 0

@@ -1,3 +1,15 @@
+2003-10-17  Shrinivas Atre  <shrinivasa@KPITCummins.com>
+	
+	* coff-h8300.c (funcvec_hash_newfunc): Handle normal mode.
+	(h8300_reloc16_extra_cases): Likewise.
+	(h8300_bfd_link_add_symbols): Likewise.
+
+2003-10-17 Dhananjay Deshpande <dhananjayd@kpitcummins.com>
+
+	* cpu-h8300.c (h8300sxn_info_struct): Correct address size.
+	(h8300sn_info_struct): Likewise.
+	(h8300hn_info_struct): Likewise.
+
 2003-10-16  Pavel Roskin  <proski@gnu.org>
 
 	* peXXigen.c (_bfd_XXi_swap_aouthdr_out): Don't calculate image size

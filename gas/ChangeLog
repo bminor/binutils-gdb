@@ -1,3 +1,10 @@
+2003-10-17  Shrinivas Atre  <shrinivasa@KPITCummins.com>
+
+	* config/tc-h8300.c (PSIZE): Correct for Normal mode.
+	(get_operand): Accept both 16 bit 32 bit registers as pointer
+	registers, when operating in Normal mode.
+	(fix_operand_size): Make default address size 16 for Normal mode.
+
 2003-10-17  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* config/tc-arm.c (do_iwmmxt_byte_addr): Reject control
