@@ -1,5 +1,11 @@
 2005-03-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/ppc32elf.em (gld${EMULATION_NAME}_after_allocation): New
+	function.
+	(LDEMUL_AFTER_ALLOCATION): Define.
+
+2005-03-21  Alan Modra  <amodra@bigpond.net.au>
+
 	* emultempl/ppc64elf.em (ppc_finish): Rename from
 	gld${EMULATION_NAME}_finish.  Call gld${EMULATION_NAME}_finish.
 	(LDEMUL_FINISH): Update.

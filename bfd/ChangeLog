@@ -1,5 +1,24 @@
 2005-03-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (struct elf_linker_section): Remove sym_hash and
+	sym_offset.  Add name, bss_name, sym_name, sym_val.
+	(struct ppc_elf_link_hash_table): Remove sdata and sdata2 pointers.
+	Add sdata array of elf_linker_section_t.
+	(ppc_elf_link_hash_table_create): Set name, sym_name, and bss_name.
+	(enum elf_linker_section_enum): Delete.
+	(ppc_elf_create_linker_section): Rewrite.  Don't create syms here.
+	(ppc_elf_check_relocs): Delay ppc_elf_create_linker_section until
+	the special sections are needed.  Adjust htab->sdata refs.
+	Ensure dynobj is set in sreloc code.
+	(ppc_elf_size_dynamic_sections): Strip sdata sections.
+	(ppc_elf_set_sdata_syms): New function.
+	(elf_finish_pointer_linker_section): Use 0x8000 for sym_offset.
+	(ppc_elf_relocate_section): Adjust references to htab->sdata.  Use
+	sym_val instead of sym_hash.
+	* elf32-ppc.h (ppc_elf_set_sdata_syms): Declare.
+
+2005-03-21  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-ppc.c (is_ppc_elf_target): Move to linker part of file.
 	(ppc_elf_merge_private_bfd_data): Likewise.
 

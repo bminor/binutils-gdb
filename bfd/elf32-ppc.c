@@ -1506,12 +1506,16 @@ ppc_elf_unhandled_reloc (bfd *abfd,
 
 typedef struct elf_linker_section
 {
-  /* pointer to the section */
+  /* Pointer to the bfd section.  */
   asection *section;
-  /* pointer to the created symbol hash value */
-  struct elf_link_hash_entry *sym_hash;
-  /* offset of symbol from beginning of section */
-  bfd_vma sym_offset;
+  /* Section name.  */
+  const char *name;
+  /* Associated bss section name.  */
+  const char *bss_name;
+  /* Associated symbol name.  */
+  const char *sym_name;
+  /* Value of symbol.  */
+  bfd_vma sym_val;
 } elf_linker_section_t;
 
 /* Linked list of allocated pointer entries.  This hangs off of the
@@ -2117,8 +2121,7 @@ struct ppc_elf_link_hash_table
   asection *relbss;
   asection *dynsbss;
   asection *relsbss;
-  elf_linker_section_t *sdata;
-  elf_linker_section_t *sdata2;
+  elf_linker_section_t sdata[2];
   asection *sbss;
 
   /* Shortcut to .__tls_get_addr.  */
@@ -2185,6 +2188,14 @@ ppc_elf_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
+
+  ret->sdata[0].name = ".sdata";
+  ret->sdata[0].sym_name = "_SDA_BASE_";
+  ret->sdata[0].bss_name = ".sbss";
+
+  ret->sdata[1].name = ".sdata2";
+  ret->sdata[1].sym_name = "_SDA2_BASE_";
+  ret->sdata[1].bss_name = ".sbss2";
 
   return &ret->elf.root;
 }
@@ -2385,121 +2396,47 @@ ppc_elf_add_symbol_hook (bfd *abfd,
   return TRUE;
 }
 
-/* Enumeration to specify the special section.  */
-enum elf_linker_section_enum
-{
-  LINKER_SECTION_SDATA,
-  LINKER_SECTION_SDATA2
-};
+/* Create a special linker section.  */
 
-/* Create a special linker section */
-static elf_linker_section_t *
+static bfd_boolean
 ppc_elf_create_linker_section (bfd *abfd,
 			       struct bfd_link_info *info,
-			       enum elf_linker_section_enum which)
+			       flagword flags,
+			       elf_linker_section_t *lsect)
 {
-  elf_linker_section_t *lsect;
   struct ppc_elf_link_hash_table *htab = ppc_elf_hash_table (info);
-  asection *s, *sym_sec;
-  bfd_size_type amt;
-  flagword flags;
-  const char *name;
-  const char *rel_name;
-  const char *sym_name;
-  bfd_vma sym_offset;
+  asection *s;
 
-  /* The linker creates these sections so it has somewhere to attach
-     their respective symbols.  Startup code (crt1.o) uses these symbols
-     to initialize a register pointing to the section.  If the output
-     sections corresponding to these input sections were empty it would
-     be OK to set the symbol to 0 (or any random number), because the
-     associated register should never be used.
-     FIXME: Setting a symbol this way is silly.  The symbols ought to 
-     be set the same way other backends set gp.  */
-  flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
-	   | SEC_LINKER_CREATED);
-  sym_offset = 32768;
-
-  switch (which)
-    {
-    default:
-      abort ();
-      return NULL;
-
-    case LINKER_SECTION_SDATA:	/* .sdata/.sbss section */
-      name	= ".sdata";
-      rel_name	= ".rela.sdata";
-      sym_name	= "_SDA_BASE_";
-      break;
-
-    case LINKER_SECTION_SDATA2:	/* .sdata2/.sbss2 section */
-      name	= ".sdata2";
-      rel_name	= ".rela.sdata2";
-      sym_name	= "_SDA2_BASE_";
-      flags    |= SEC_READONLY;
-      break;
-    }
+  flags |= (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+	    | SEC_LINKER_CREATED);
 
   /* Record the first bfd that needs the special sections.  */
   if (!htab->elf.dynobj)
     htab->elf.dynobj = abfd;
 
-  amt = sizeof (elf_linker_section_t);
-  lsect = bfd_zalloc (htab->elf.dynobj, amt);
-
-  lsect->sym_offset = sym_offset;
-
-  /* See if the sections already exist.  */
-  sym_sec = s = bfd_get_section_by_name (htab->elf.dynobj, name);
+  /* See if the section already exists.  */
+  s = bfd_get_section_by_name (htab->elf.dynobj, lsect->name);
   if (s == NULL || (s->flags & flags) != flags)
     {
-      s = bfd_make_section_anyway (htab->elf.dynobj, name);
+      s = bfd_make_section_anyway (htab->elf.dynobj, lsect->name);
       if (s == NULL
 	  || !bfd_set_section_flags (htab->elf.dynobj, s, flags))
-	return NULL;
-      if (sym_sec == NULL)
-	sym_sec = s;
+	return FALSE;
     }
   lsect->section = s;
 
   if (bfd_get_section_alignment (htab->elf.dynobj, s) < 2
       && !bfd_set_section_alignment (htab->elf.dynobj, s, 2))
-    return NULL;
+    return FALSE;
 
   s->size = align_power (s->size, 2);
 
 #ifdef DEBUG
   fprintf (stderr, "Creating section %s, current size = %ld\n",
-	   name, (long) s->size);
+	   lsect->name, (long) s->size);
 #endif
 
-  if (sym_name)
-    {
-      struct elf_link_hash_entry *h;
-      struct bfd_link_hash_entry *bh;
-
-#ifdef DEBUG
-      fprintf (stderr, "Adding %s to section %s\n", sym_name, name);
-#endif
-      bh = bfd_link_hash_lookup (info->hash, sym_name,
-				 FALSE, FALSE, FALSE);
-
-      if ((bh == NULL || bh->type == bfd_link_hash_undefined)
-	  && !(_bfd_generic_link_add_one_symbol
-	       (info, abfd, sym_name, BSF_GLOBAL, sym_sec, sym_offset, NULL,
-		FALSE, get_elf_backend_data (abfd)->collect, &bh)))
-	return NULL;
-      h = (struct elf_link_hash_entry *) bh;
-
-      h->type = STT_OBJECT;
-      lsect->sym_hash = h;
-
-      if (info->shared
-	  && ! bfd_elf_link_record_dynamic_symbol (info, h))
-	return NULL;
-    }
-
-  return lsect;
+  return TRUE;
 }
 
 /* Find a linker generated pointer with a given addend and type.  */
@@ -2675,25 +2612,7 @@ ppc_elf_check_relocs (bfd *abfd,
   if (!ppc_elf_howto_table[R_PPC_ADDR32])
     ppc_elf_howto_init ();
 
-  /* Create the linker generated sections all the time so that the
-     special symbols are created.  */
   htab = ppc_elf_hash_table (info);
-  if (htab->sdata == NULL)
-    {
-      htab->sdata = ppc_elf_create_linker_section (abfd, info,
-						   LINKER_SECTION_SDATA);
-      if (htab->sdata == NULL)
-	return FALSE;
-    }
-
-  if (htab->sdata2 == NULL)
-    {
-      htab->sdata2 = ppc_elf_create_linker_section (abfd, info,
-						    LINKER_SECTION_SDATA2);
-      if (htab->sdata2 == NULL)
-	return FALSE;
-    }
-
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
   sreloc = NULL;
@@ -2793,8 +2712,12 @@ ppc_elf_check_relocs (bfd *abfd,
 	      bad_shared_reloc (abfd, r_type);
 	      return FALSE;
 	    }
+	  if (htab->sdata[0].section == NULL
+	      && !ppc_elf_create_linker_section (abfd, info, 0,
+						 &htab->sdata[0]))
+	    return FALSE;
 	  if (!elf_create_pointer_linker_section (abfd, info,
-						  htab->sdata, h, rel))
+						  &htab->sdata[0], h, rel))
 	    return FALSE;
 	  break;
 
@@ -2805,8 +2728,12 @@ ppc_elf_check_relocs (bfd *abfd,
 	      bad_shared_reloc (abfd, r_type);
 	      return FALSE;
 	    }
+	  if (htab->sdata[1].section == NULL
+	      && !ppc_elf_create_linker_section (abfd, info, SEC_READONLY,
+						 &htab->sdata[1]))
+	    return FALSE;
 	  if (!elf_create_pointer_linker_section (abfd, info,
-						  htab->sdata2, h, rel))
+						  &htab->sdata[1], h, rel))
 	    return FALSE;
 	  break;
 
@@ -3027,6 +2954,8 @@ ppc_elf_check_relocs (bfd *abfd,
 			      && strcmp (bfd_get_section_name (abfd, sec),
 					 name + 5) == 0);
 
+		  if (htab->elf.dynobj == NULL)
+		    htab->elf.dynobj = abfd;
 		  sreloc = bfd_get_section_by_name (htab->elf.dynobj, name);
 		  if (sreloc == NULL)
 		    {
@@ -4129,14 +4058,10 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
 	}
-      else if ((htab->sdata != NULL && s == htab->sdata->section)
-	       || (htab->sdata2 != NULL && s == htab->sdata2->section))
+      else if (s == htab->sdata[0].section
+	       || s == htab->sdata[1].section)
 	{
-	  if (s->size == 0)
-	    /* Don't strip these sections.  We need them because they
-	       define _SDA_BASE_ and _SDA2_BASE_.  crt1.o makes a
-	       reference to _SDA_BASE_ to set up r13.  */
-	    continue;
+	  /* Strip these too.  */
 	}
       else if (strncmp (bfd_get_section_name (dynobj, s), ".rela", 5) == 0)
 	{
@@ -4638,6 +4563,51 @@ ppc_elf_relax_section (bfd *abfd,
   return FALSE;
 }
 
+/* Set _SDA_BASE_ and _SDA2_BASE.  */
+
+bfd_boolean
+ppc_elf_set_sdata_syms (bfd *obfd, struct bfd_link_info *info)
+{
+  struct ppc_elf_link_hash_table *htab;
+  unsigned i;
+
+  htab = ppc_elf_hash_table (info);
+
+  for (i = 0; i < 2; i++)
+    {
+      elf_linker_section_t *lsect = &htab->sdata[i];
+      asection *s;
+      bfd_vma val;
+      struct elf_link_hash_entry *h;
+
+      s = lsect->section;
+      if (s != NULL)
+	s = s->output_section;
+      if (s == NULL)
+	s = bfd_get_section_by_name (obfd, lsect->name);
+      if (s == NULL)
+	s = bfd_get_section_by_name (obfd, lsect->bss_name);
+
+      val = 0;
+      if (s != NULL)
+	val = s->vma + 32768;
+      lsect->sym_val = val;
+
+      h = elf_link_hash_lookup (&htab->elf, lsect->sym_name,
+				FALSE, FALSE, FALSE);
+      if (h != NULL && h->root.type == bfd_link_hash_undefined)
+	{
+	  h->root.type = bfd_link_hash_defined;
+	  h->root.u.def.section = bfd_abs_section_ptr;
+	  h->root.u.def.value = val;
+	  h->def_regular = 1;
+	  h->type = STT_OBJECT;
+	  h->other = STV_HIDDEN;
+	}
+    }
+  return TRUE;
+}
+
 #define bfd_put_ptr(BFD, VAL, ADDR) bfd_put_32 (BFD, VAL, ADDR)
 
 /* Fill in the address for a pointer generated in a linker section.  */
@@ -4715,7 +4685,7 @@ elf_finish_pointer_linker_section (bfd *output_bfd,
 
   relocation = (lsect->section->output_offset
 		+ linker_section_ptr->offset
-		- lsect->sym_offset);
+		- 0x8000);
 
 #ifdef DEBUG
   fprintf (stderr,
@@ -5598,20 +5568,20 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 	  /* Indirect .sdata relocation.  */
 	case R_PPC_EMB_SDAI16:
-	  BFD_ASSERT (htab->sdata != NULL);
+	  BFD_ASSERT (htab->sdata[0].section != NULL);
 	  relocation
 	    = elf_finish_pointer_linker_section (output_bfd, input_bfd, info,
-						 htab->sdata, h, relocation,
-						 rel);
+						 &htab->sdata[0], h,
+						 relocation, rel);
 	  break;
 
 	  /* Indirect .sdata2 relocation.  */
 	case R_PPC_EMB_SDA2I16:
-	  BFD_ASSERT (htab->sdata2 != NULL);
+	  BFD_ASSERT (htab->sdata[1].section != NULL);
 	  relocation
 	    = elf_finish_pointer_linker_section (output_bfd, input_bfd, info,
-						 htab->sdata2, h, relocation,
-						 rel);
+						 &htab->sdata[1], h,
+						 relocation, rel);
 	  break;
 
 	  /* Handle the TOC16 reloc.  We want to use the offset within the .got
@@ -5651,7 +5621,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_SDAREL16:
 	  {
 	    const char *name;
-	    const struct elf_link_hash_entry *sh;
 
 	    BFD_ASSERT (sec != NULL);
 	    name = bfd_get_section_name (abfd, sec->output_section);
@@ -5668,10 +5637,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		   howto->name,
 		   name);
 	      }
-	    sh = htab->sdata->sym_hash;
-	    addend -= (sh->root.u.def.value
-		       + sh->root.u.def.section->output_section->vma
-		       + sh->root.u.def.section->output_offset);
+	    addend -= htab->sdata[0].sym_val;
 	  }
 	  break;
 
@@ -5679,7 +5645,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_EMB_SDA2REL:
 	  {
 	    const char *name;
-	    const struct elf_link_hash_entry *sh;
 
 	    BFD_ASSERT (sec != NULL);
 	    name = bfd_get_section_name (abfd, sec->output_section);
@@ -5698,10 +5663,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		ret = FALSE;
 		continue;
 	      }
-	    sh = htab->sdata2->sym_hash;
-	    addend -= (sh->root.u.def.value
-		       + sh->root.u.def.section->output_section->vma
-		       + sh->root.u.def.section->output_offset);
+	    addend -= htab->sdata[1].sym_val;
 	  }
 	  break;
 
@@ -5710,7 +5672,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_EMB_RELSDA:
 	  {
 	    const char *name;
-	    const struct elf_link_hash_entry *sh;
 	    int reg;
 
 	    BFD_ASSERT (sec != NULL);
@@ -5721,20 +5682,14 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		     && (name[5] == 0 || name[5] == '.'))))
 	      {
 		reg = 13;
-		sh = htab->sdata->sym_hash;
-		addend -= (sh->root.u.def.value
-			   + sh->root.u.def.section->output_section->vma
-			   + sh->root.u.def.section->output_offset);
+		addend -= htab->sdata[0].sym_val;
 	      }
 
 	    else if (strncmp (name, ".sdata2", 7) == 0
 		     || strncmp (name, ".sbss2", 6) == 0)
 	      {
 		reg = 2;
-		sh = htab->sdata2->sym_hash;
-		addend -= (sh->root.u.def.value
-			   + sh->root.u.def.section->output_section->vma
-			   + sh->root.u.def.section->output_offset);
+		addend -= htab->sdata[1].sym_val;
 	      }
 
 	    else if (strcmp (name, ".PPC.EMB.sdata0") == 0

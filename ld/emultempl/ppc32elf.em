@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2003 Free Software Foundation, Inc.
+#   Copyright 2003, 2005 Free Software Foundation, Inc.
 #
 # This file is part of GLD, the Gnu Linker.
 #
@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
-# This file is sourced from elf32.em, and defines extra powerpc64-elf
+# This file is sourced from elf32.em, and defines extra powerpc32-elf
 # specific routines.
 #
 cat >>e${EMULATION_NAME}.c <<EOF
@@ -26,15 +26,15 @@ cat >>e${EMULATION_NAME}.c <<EOF
 #include "libbfd.h"
 #include "elf32-ppc.h"
 
+extern const bfd_target bfd_elf32_powerpc_vec;
+extern const bfd_target bfd_elf32_powerpcle_vec;
+
 /* Whether to run tls optimization.  */
 static int notlsopt = 0;
 
 static void
 ppc_before_allocation (void)
 {
-  extern const bfd_target bfd_elf32_powerpc_vec;
-  extern const bfd_target bfd_elf32_powerpcle_vec;
-
   if (link_info.hash->creator == &bfd_elf32_powerpc_vec
       || link_info.hash->creator == &bfd_elf32_powerpcle_vec)
     {
@@ -48,6 +48,17 @@ ppc_before_allocation (void)
 	}
     }
   gld${EMULATION_NAME}_before_allocation ();
+}
+
+static void
+gld${EMULATION_NAME}_after_allocation (void)
+{
+  if (link_info.hash->creator == &bfd_elf32_powerpc_vec
+      || link_info.hash->creator == &bfd_elf32_powerpcle_vec)
+    {
+      if (!ppc_elf_set_sdata_syms (output_bfd, &link_info))
+	einfo ("%X%P: cannot set sdata syms %E\n");
+    }
 }
 
 EOF
@@ -75,6 +86,7 @@ PARSE_AND_LIST_ARGS_CASES='
       break;
 '
 
-# Put these extra ppc64elf routines in ld_${EMULATION_NAME}_emulation
+# Put these extra ppc32elf routines in ld_${EMULATION_NAME}_emulation
 #
 LDEMUL_BEFORE_ALLOCATION=ppc_before_allocation
+LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation

@@ -1,5 +1,5 @@
 /* PowerPC-specific support for 64-bit ELF.
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2005 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -19,3 +19,4 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 asection *ppc_elf_tls_setup (bfd *, struct bfd_link_info *);
 bfd_boolean ppc_elf_tls_optimize (bfd *, struct bfd_link_info *);
+bfd_boolean ppc_elf_set_sdata_syms (bfd *, struct bfd_link_info *);
