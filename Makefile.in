@@ -1,7 +1,7 @@
 #
 # Makefile for directory with subdirs to build.
 #
-# Last Mod Thu Apr 18 17:41:48 PDT 1991, by rich@cygint.cygnus.com
+# Last Mod Sat May 18 17:24:38 PDT 1991, by rich@cygint.cygnus.com
 #
 
 # $Id$
@@ -16,18 +16,19 @@ RANLIB = ranlib
 AR = ar
 AR_FLAGS = cqv
 
-BOOTSTRAPPABLE = libiberty bfd binutils ld gas gcc gnulib
+SUBDIRS = libiberty bfd binutils ld gas gcc gnulib
 OTHERS = 
 
 #### host and target specific makefile fragments come in here.
 ###
 
 all:
-	$(MAKE) subdir_do DO=all "DODIRS=$(BOOTSTRAPPABLE) $(OTHERS)"
+	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
-subdir_do: $(DODIRS)
+subdir_do: force
 	for i in $(DODIRS); \
 	  do \
+	if [ -d $(srcdir)/$$i -o -d $(srcdir)/$$i.$(target) ] ; then \
 	    if (cd $(srcdir)/$$i`if [ -d $(srcdir)/$$i.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir); \
 		$(MAKE) \
@@ -38,6 +39,7 @@ subdir_do: $(DODIRS)
 	    then true ; \
 	    else exit 1 ; \
 	    fi ;\
+	fi ; \
 	  done
 
 bootstrap:
@@ -56,7 +58,7 @@ bootstrap3:
 	$(MAKE) pass "stagepass=stage2"
 
 pass:
-	$(MAKE) subdir_do DO=all "DODIRS=$(BOOTSTRAPPABLE)" \
+	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)" \
 		"CC=$(srcdir)/../gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/gcc -O \
 		-B$(srcdir)/../gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
@@ -75,28 +77,28 @@ pass:
 
 
 stage1:
-	$(MAKE) subdir_do DO=stage1 "DODIRS=$(BOOTSTRAPPABLE)"
+	$(MAKE) subdir_do DO=stage1 "DODIRS=$(SUBDIRS)"
 
 stage2:
-	$(MAKE) subdir_do DO=stage2 "DODIRS=$(BOOTSTRAPPABLE)"
+	$(MAKE) subdir_do DO=stage2 "DODIRS=$(SUBDIRS)"
 
 stage3:
-	$(MAKE) subdir_do DO=stage3 "DODIRS=$(BOOTSTRAPPABLE)"
+	$(MAKE) subdir_do DO=stage3 "DODIRS=$(SUBDIRS)"
 
 stage4:
-	$(MAKE) subdir_do DO=stage4 "DODIRS=$(BOOTSTRAPPABLE)"
+	$(MAKE) subdir_do DO=stage4 "DODIRS=$(SUBDIRS)"
 
-de-stage1:; $(MAKE) subdir_do DO=de-stage1 "DODIRS=$(BOOTSTRAPPABLE)"
-de-stage2:; $(MAKE) subdir_do DO=de-stage2 "DODIRS=$(BOOTSTRAPPABLE)"
-de-stage3:; $(MAKE) subdir_do DO=de-stage3 "DODIRS=$(BOOTSTRAPPABLE)"
-de-stage4:; $(MAKE) subdir_do DO=de-stage4 "DODIRS=$(BOOTSTRAPPABLE)"
+de-stage1:; $(MAKE) subdir_do DO=de-stage1 "DODIRS=$(SUBDIRS)"
+de-stage2:; $(MAKE) subdir_do DO=de-stage2 "DODIRS=$(SUBDIRS)"
+de-stage3:; $(MAKE) subdir_do DO=de-stage3 "DODIRS=$(SUBDIRS)"
+de-stage4:; $(MAKE) subdir_do DO=de-stage4 "DODIRS=$(SUBDIRS)"
 
 clean:
 	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
-	$(MAKE) subdir_do DO=clean "DODIRS=$(BOOTSTRAPPABLE) $(OTHERS)"
+	$(MAKE) subdir_do DO=clean "DODIRS=$(SUBDIRS) $(OTHERS)"
 
 install:
-	$(MAKE) subdir_do DO=install "DODIRS=$(BOOTSTRAPPABLE) $(OTHERS)"
+	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS) $(OTHERS)"
 
 etags tags: TAGS
 
@@ -116,7 +118,7 @@ ls:
 			done) \
 	done
 
-FORCE:
+force:
 
 # with the gnu make, this is done automatically.
 
@@ -128,7 +130,10 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 
 #
 # $Log$
-# Revision 1.11  1991/05/03 21:30:41  gnu
+# Revision 1.12  1991/05/19 00:36:44  rich
+# Added gdb.
+#
+# Revision 1.11  1991/05/03  21:30:41  gnu
 # Rename getopt to libiberty.
 #
 # Revision 1.10  1991/04/24  16:50:53  rich
