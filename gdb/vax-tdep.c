@@ -32,9 +32,11 @@
 #include "trad-frame.h"
 #include "value.h"
 #include "arch-utils.h"
-#include "gdb_string.h"
 #include "osabi.h"
 #include "dis-asm.h"
+#include "regset.h"
+
+#include "gdb_string.h"
 
 #include "vax-tdep.h"
 
@@ -65,7 +67,47 @@ vax_register_type (struct gdbarch *gdbarch, int regnum)
   return builtin_type_int;
 }
 
+/* Core file support.  */
 
+/* Supply register REGNUM from the buffer specified by GREGS and LEN
+   in the general-purpose register set REGSET to register cache
+   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
+
+static void
+vax_supply_gregset (const struct regset *regset, struct regcache *regcache,
+		    int regnum, const void *gregs, size_t len)
+{
+  const char *regs = gregs;
+  int i;
+
+  for (i = 0; i < VAX_NUM_REGS; i++)
+    {
+      if (regnum == i || regnum == -1)
+	regcache_raw_supply (regcache, i, regs + i * 4);
+    }
+}
+
+/* VAX register set.  */
+
+static struct regset vax_gregset =
+{
+  NULL,
+  vax_supply_gregset
+};
+
+/* Return the appropriate register set for the core section identified
+   by SECT_NAME and SECT_SIZE.  */
+
+static const struct regset *
+vax_regset_from_core_section (struct gdbarch *gdbarch,
+			      const char *sect_name, size_t sect_size)
+{
+  if (strcmp (sect_name, ".reg") == 0 && sect_size >= VAX_NUM_REGS * 4)
+    return &vax_gregset;
+
+  return NULL;
+}
+
 /* The VAX Unix calling convention uses R1 to pass a structure return
    value address instead of passing it as a first (hidden) argument as
    the VMS calling convention suggests.  */
@@ -427,6 +469,9 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, VAX_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, VAX_PC_REGNUM);
   set_gdbarch_ps_regnum (gdbarch, VAX_PS_REGNUM);
+
+  set_gdbarch_regset_from_core_section
+    (gdbarch, vax_regset_from_core_section);
 
   /* Frame and stack info */
   set_gdbarch_skip_prologue (gdbarch, vax_skip_prologue);
