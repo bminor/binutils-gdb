@@ -53,12 +53,15 @@ INSTALL_DATA = $(INSTALL)
 AR = ar
 AR_FLAGS = qv
 CFLAGS = -g
-BISON = bison -y
-FLEX = flex
 MAKEINFO = makeinfo
 RANLIB = ranlib
 BISONFLAGS = -tvd
 TEXI2ROFF=texi2roff
+
+BISON = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/ ; else echo bison -y ; fi`
+# Comment these out if using lex.
+LEX_OPTIONS = -I -Cem 
+LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex -S../flex/flex.skel ; else echo flex ; fi`
 
 # Distribution version
 VERSION=1.97
@@ -166,7 +169,7 @@ arparse.c:arparse.y
 
 
 arlex.c:arlex.l
-	$(FLEX) -I -Cem -t $(VPATH)/arlex.l >arlex.c
+	$(LEX) $(LEX_OPTIONS) -t $(VPATH)/arlex.l >arlex.c
 
 $(AR_PROG): $(ADDL_LIBS) ar.o arparse.o arlex.o not-ranlib.o $(BFD) arsup.o
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o arparse.o arlex.o arsup.o not-ranlib.o $(ADDL_LIBS) $(LOADLIBES)
@@ -327,8 +330,8 @@ dist: $(DIST_NAME).tar.Z
 
 $(DIST_NAME).tar.Z:
 	cd ../..; rm -f $(DIST_NAME); ln -s devo $(DIST_NAME)
-	make binutils.mm -f Makefile.in
-	cd ../ld; make ld.mm -f Makefile.in
+	make arparse.c arlex.c binutils.mm -f Makefile.in
+	cd ../ld; make ldgram.c ldgram.h ldlex.c ld.mm -f Makefile.in
 	cd ../..; tar chf - $(DIST_NAME) | compress >$(DIST_NAME).tar.Z
 	rm -rf ../../$(DIST_NAME)
 

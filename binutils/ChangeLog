@@ -1,3 +1,18 @@
+Fri May 22 13:40:37 1992  Per Bothner  (bothner@cygnus.com)
+
+	* arlex.l:  Make work with lex, for what it's worth.
+	* Makefile.in:  Better lex support.
+	* Makefile.in (dist):  Generate flex and bison outputs
+	for distribution.
+
+Thu May 14 17:17:59 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: get BISON definition right.
+
+Fri May  8 07:47:08 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* sanity.sh: default TMPDIR to ".".
+
 Thu May  7 12:34:50 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* binutils.texi: add doc for ar command language.
