@@ -907,7 +907,8 @@ tc_gen_reloc (section, fixp)
 #undef MAP
 
   reloc = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 #ifndef OBJ_ELF
   if (fixp->fx_pcrel)
@@ -4292,7 +4293,7 @@ md_convert_frag_1 (fragP)
   disp = (disp + fragP->fr_offset) - object_address;
 
 #ifdef BFD_ASSEMBLER
-  disp += fragP->fr_symbol->sy_frag->fr_address;
+  disp += symbol_get_frag (fragP->fr_symbol)->fr_address;
 #endif
 
   switch (fragP->fr_subtype)
@@ -4741,14 +4742,14 @@ md_estimate_size_before_relax (fragP, segment)
 	 word mode.  */
       if (fragP->fr_symbol && S_GET_VALUE (fragP->fr_symbol) == 0)
 	{
+	  fragS *stop;
 	  fragS *l;
 
-	  for (l = fragP->fr_next;
-	       l != fragP->fr_symbol->sy_frag;
-	       l = l->fr_next)
+	  stop = symbol_get_frag (fragP->fr_symbol);
+	  for (l = fragP->fr_next; l != stop; l = l->fr_next)
 	    if (l->fr_fix + l->fr_var != 0)
 	      break;
-	  if (l == fragP->fr_symbol->sy_frag)
+	  if (l == stop)
 	    {
 	      fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), SHORT);
 	      fragP->fr_var += 2;
@@ -5472,7 +5473,7 @@ s_reg (ignore)
 
   S_SET_SEGMENT (line_label, reg_section);
   S_SET_VALUE (line_label, ~mask);
-  line_label->sy_frag = &zero_address_frag;
+  symbol_set_frag (line_label, &zero_address_frag);
 
   if (flag_mri)
     mri_comment_end (stop, stopc);

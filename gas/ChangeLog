@@ -1,3 +1,120 @@
+1999-06-03  Ian Lance Taylor  <ian@zembu.com>
+
+	Add support for storing local symbols in a small structure to save
+	memory when assembling large files.
+	* as.h: Don't include struc-symbol.h.
+	(symbolS): Add typedef.
+	* symbols.c: Include struc-symbol.h.
+	(local_hash): New static variable.
+	(save_symbol_name): New static function, from symbol_create.
+	(symbol_create): Call save_symbol_name.
+	(local_symbol_count): New static variable.
+	(local_symbol_conversion_count): Likewise.
+	(LOCAL_SYMBOL_CHECK): Define.
+	(local_symbol_make): New static function.
+	(local_symbol_convert): New static function.
+	(colon): Handle local symbols.  Create local symbol for local
+	label name.
+	(symbol_table_insert): Handle local symbols.
+	(symbol_find_or_make): Create local symbol for local label name.
+	(symbol_find_base): Check for local symbol.
+	(symbol_append, symbol_insert): Check for local symbols.
+	(symbol_clear_list_pointers, symbol_remove): Likewise.
+	(verify_symbol_chain): Likewise.
+	(copy_symbol_attributes): Likewise.
+	(resolve_symbol_value): Handle local symbols.
+	(resolve_local_symbol): New static function.
+	(resolve_local_symbol_values): New function.
+	(S_GET_VALUE, S_SET_VALUE): Handle local symbols.
+	(S_IS_FUNCTION, S_IS_EXTERNAL, S_IS_WEAK, S_IS_COMMON): Likewise.
+	(S_IS_DEFINED, S_IS_DEBUG, S_IS_LOCAL, S_GET_NAME): Likewise.
+	(S_GET_SEGMENT, S_SET_SEGMENT, S_SET_EXTERNAL): Likewise.
+	(S_CLEAR_EXTERNAL, S_SET_WEAK, S_SET_NAME): Likewise.
+	(symbol_previous, symbol_next): New functions.
+	(symbol_get_value_expression): Likewise.
+	(symbol_set_value_expression): Likewise.
+	(symbol_set_frag, symbol_get_frag): Likewise.
+	(symbol_mark_used, symbol_clear_used, symbol_used_p): Likewise.
+	(symbol_mark_used_in_reloc): Likewise.
+	(symbol_clear_used_in_reloc, symbol_used_in_reloc_p): Likewise.
+	(symbol_mark_mri_common, symbol_clear_mri_common): Likewise.
+	(symbol_mri_common_p): Likewise.
+	(symbol_mark_written, symbol_clear_written): Likewise.
+	(symbol_written_p): Likewise.
+	(symbol_mark_resolved, symbol_resolved_p): Likewise.
+	(symbol_section_p, symbol_equated_p): Likewise.
+	(symbol_constant_p): Likewise.
+	(symbol_get_bfdsym, symbol_set_bfdsym): Likewise.
+	(symbol_get_obj, symbol_set_obj): Likewise.
+	(symbol_get_tc, symbol_set_tc): Likewise.
+	(symbol_begin): Initialize local_hash.
+	(print_symbol_value_1): Handle local symbols.
+	(symbol_print_statistics): Print local symbol statistics.
+	* symbols.h: Include "struc-symbol.h" if not BFD_ASSEMBLER.
+	Declare new symbols.c functions.  Move many declarations here from
+	struc-symbol.h.
+	(SYMBOLS_NEED_BACKPOINTERS): Define if needed.
+	* struc-symbol.h (SYMBOLS_NEED_BACKPOINTERS): Don't set.
+	(struct symbol): Move bsym to make it clearly the first field.
+	Remove TARGET_SYMBOL_FIELDS.
+	(symbolS): Don't typedef.
+	(struct broken_word): Remove.
+	(N_TYPE_seg, seg_N_TYPE): Move to symbol.h.
+	(SEGMENT_TO_SYMBOL_TYPE, N_REGISTER): Likewise.
+	(symbol_clear_list_pointers): Likewise.
+	(symbol_insert, symbol_remove): Likewise.
+	(symbol_previous, symbol_append): Likewise.
+	(verify_symbol_chain, verify_symbol_chain_2): Likewise.
+	(struct local_symbol): Define.
+	(local_symbol_converted_p, local_symbol_mark_converted): Define.
+	(local_symbol_resolved_p, local_symbol_mark_resolved): Define.
+	(local_symbol_get_frag, local_symbol_set_frag): Define.
+	(local_symbol_get_real_symbol): Define.
+	(local_symbol_set_real_symbol): Define.
+	Define.
+	* write.c (write_object_file): Call resolve_local_symbol_values.
+	* config/obj-ecoff.h (OBJ_SYMFIELD_TYPE): Define.
+	(TARGET_SYMBOL_FIELDS): Don't define.
+	* config/obj-elf.h (OBJ_SYMFIELD_TYPE): Add local field.  If
+	ECOFF_DEBUGGING, add ECOFF fields.
+	(ELF_TARGET_SYMBOL_FIELDS, TARGET_SYMBOL_FIELDS): Don't define.
+	* config/obj-multi.h (struct elf_obj_sy): Add local field.  If
+	ECOFF_DEBUGGING, add ECOFF fields.
+	(ELF_TARGET_SYMBOL_FIELDS, TARGET_SYMBOL_FIELDS): Don't define.
+	(ECOFF_DEBUG_TARGET_SYMBOL_FIELDS): Don't define.
+	* config/tc-mcore.h: Don't include struc-symbol.h.
+	(TARGET_SYMBOL_FIELDS): Don't define.
+	(struct mcore_tc_sy): Define.
+	(TC_SYMFIELD_TYPE): Define.
+	* Many files: Use symbolS instead of struct symbol.  Use new
+	accessor functions rather than referring to symbolS fields
+	directly.
+
+	* read.c (s_mri_common): Don't add in value of line_label.
+
+	* config/tc-mips.c (md_apply_fix): Correct parenthesization when
+	checking for SEC_LINK_ONCE.
+
+	* config/tc-sh.h (sh_fix_adjustable): Declare.
+
+	* app.c (input_buffer): New static variable.
+	(app_push): Save saved_input in allocated buffer.
+	(app_pop): Restored saved_input.
+	(do_scrub_chars): Change get parameter to take char * and int as
+	arguments.  Change GET macro to pass input_buffer to get
+	function.  Don't save input into allocated buffer.
+	* as.h (do_scrub_chars): Update declaration.
+	* input-file.c (input_file_get): Change to take char * and int.
+	Read data into passed in buffer.  Remove static buffer.
+	* read.c (scrub_from_string): Change to take char * and int.  Copy
+	data into passed in buffer.
+
+	* hash.h: Neaten.  Declare hash_traverse.
+	* hash.c: Complete rewrite based on BFD hashing code.
+	* gasp.c (chunksize): New variable.
+	* macro.c (macro_expand_body): Call hash_jam with NULL rather than
+	hash_delete.
+
 1999-05-28  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (md_apply_fix3): Add pipeline offset into reloc

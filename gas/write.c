@@ -1,5 +1,5 @@
 /* write.c - emit .o file
-   Copyright (C) 1986, 87, 90, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1986, 87, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -719,23 +719,23 @@ adjust_reloc_syms (abfd, sec, xxx)
 	   point.  It is possible to see unresolved expression
 	   symbols, though, since they are not in the regular symbol
 	   table.  */
-	if (sym != NULL && ! sym->sy_resolved)
+	if (sym != NULL)
 	  resolve_symbol_value (sym, 1);
 	
-	if (fixp->fx_subsy != NULL && ! fixp->fx_subsy->sy_resolved)
+	if (fixp->fx_subsy != NULL)
 	  resolve_symbol_value (fixp->fx_subsy, 1);
 
 	/* If this symbol is equated to an undefined symbol, convert
            the fixup to being against that symbol.  */
-	if (sym != NULL && sym->sy_value.X_op == O_symbol
+	if (sym != NULL && symbol_equated_p (sym)
 	    && (! S_IS_DEFINED (sym) || S_IS_COMMON (sym)))
 	  {
-	    fixp->fx_offset += sym->sy_value.X_add_number;
-	    sym = sym->sy_value.X_add_symbol;
+	    fixp->fx_offset += symbol_get_value_expression (sym)->X_add_number;
+	    sym = symbol_get_value_expression (sym)->X_add_symbol;
 	    fixp->fx_addsy = sym;
 	  }
 
-	if (sym != NULL && sym->sy_mri_common)
+	if (sym != NULL && symbol_mri_common_p (sym))
 	  {
 	    /* These symbols are handled specially in fixup_segment.  */
 	    goto done;
@@ -752,10 +752,10 @@ adjust_reloc_syms (abfd, sec, xxx)
                relocation unless TC_FORCE_RELOCATION returns 1.  */
 	    if (TC_FORCE_RELOCATION (fixp))
 	      {
-		fixp->fx_addsy->sy_used_in_reloc = 1;
+		symbol_mark_used_in_reloc (fixp->fx_addsy);
 #ifdef UNDEFINED_DIFFERENCE_OK
 		if (fixp->fx_subsy != NULL)
-		  fixp->fx_subsy->sy_used_in_reloc = 1;
+		  symbol_mark_used_in_reloc (fixp->fx_subsy);
 #endif
 	      }
 	    goto done;
@@ -769,13 +769,13 @@ adjust_reloc_syms (abfd, sec, xxx)
 	if (bfd_is_und_section (symsec)
 	    || bfd_is_com_section (symsec))
 	  {
-	    fixp->fx_addsy->sy_used_in_reloc = 1;
+	    symbol_mark_used_in_reloc (fixp->fx_addsy);
 #ifdef UNDEFINED_DIFFERENCE_OK
 	    /* We have the difference of an undefined symbol and some
 	       other symbol.  Make sure to mark the other symbol as used
 	       in a relocation so that it will always be output.  */
 	    if (fixp->fx_subsy)
-	      fixp->fx_subsy->sy_used_in_reloc = 1;
+	      symbol_mark_used_in_reloc (fixp->fx_subsy);
 #endif
 	    goto done;
 	  }
@@ -805,10 +805,10 @@ adjust_reloc_syms (abfd, sec, xxx)
 
 	    if (linkonce)
 	      {
-		fixp->fx_addsy->sy_used_in_reloc = 1;
+		symbol_mark_used_in_reloc (fixp->fx_addsy);
 #ifdef UNDEFINED_DIFFERENCE_OK
 		if (fixp->fx_subsy != NULL)
-		  fixp->fx_subsy->sy_used_in_reloc = 1;
+		  symbol_mark_used_in_reloc (fixp->fx_subsy);
 #endif
 		goto done;
 	      }
@@ -816,9 +816,9 @@ adjust_reloc_syms (abfd, sec, xxx)
 
 	/* Since we're reducing to section symbols, don't attempt to reduce
 	   anything that's already using one.  */
-	if (sym->bsym->flags & BSF_SECTION_SYM)
+	if (symbol_section_p (sym))
 	  {
-	    fixp->fx_addsy->sy_used_in_reloc = 1;
+	    symbol_mark_used_in_reloc (fixp->fx_addsy);
 	    goto done;
 	  }
 
@@ -829,7 +829,7 @@ adjust_reloc_syms (abfd, sec, xxx)
            the wrong area of memory.  */
 	if (S_IS_WEAK (sym))
 	  {
-	    fixp->fx_addsy->sy_used_in_reloc = 1;
+	    symbol_mark_used_in_reloc (fixp->fx_addsy);
 	    goto done;
 	  }
 #endif
@@ -839,7 +839,7 @@ adjust_reloc_syms (abfd, sec, xxx)
 #ifdef obj_fix_adjustable
 	if (! obj_fix_adjustable (fixp))
 	  {
-	    fixp->fx_addsy->sy_used_in_reloc = 1;
+	    symbol_mark_used_in_reloc (fixp->fx_addsy);
 	    goto done;
 	  }
 #endif
@@ -850,7 +850,7 @@ adjust_reloc_syms (abfd, sec, xxx)
 #ifdef tc_fix_adjustable
 	if (! tc_fix_adjustable (fixp))
 	  {
-	    fixp->fx_addsy->sy_used_in_reloc = 1;
+	    symbol_mark_used_in_reloc (fixp->fx_addsy);
 	    goto done;
 	  }
 #endif
@@ -864,7 +864,7 @@ adjust_reloc_syms (abfd, sec, xxx)
 	   the section when it calls resolve_symbol_value. */
 	fixp->fx_offset += S_GET_VALUE (sym);
 	fixp->fx_addsy = section_symbol (S_GET_SEGMENT (sym));
-	fixp->fx_addsy->sy_used_in_reloc = 1;
+	symbol_mark_used_in_reloc (fixp->fx_addsy);
 
       done:
 	;
@@ -931,17 +931,17 @@ write_relocs (abfd, sec, xxx)
          symbol, then use generate the reloc against the latter symbol
          rather than the former.  */
       sym = fixp->fx_addsy;
-      while (sym->sy_value.X_op == O_symbol
+      while (symbol_equated_p (sym)
 	     && (! S_IS_DEFINED (sym) || S_IS_COMMON (sym)))
 	{
 	  symbolS *n;
 
 	  /* We must avoid looping, as that can occur with a badly
 	     written program.  */
-	  n = sym->sy_value.X_add_symbol;
+	  n = symbol_get_value_expression (sym)->X_add_symbol;
 	  if (n == sym)
 	    break;
-	  fixp->fx_offset += sym->sy_value.X_add_number;
+	  fixp->fx_offset += symbol_get_value_expression (sym)->X_add_number;
 	  sym = n;
 	}
       fixp->fx_addsy = sym;
@@ -1004,9 +1004,9 @@ write_relocs (abfd, sec, xxx)
          symbol, then use generate the reloc against the latter symbol
          rather than the former.  */
       sym = fixp->fx_addsy;
-      while (sym->sy_value.X_op == O_symbol
+      while (symbol_equated_p (sym)
 	     && (! S_IS_DEFINED (sym) || S_IS_COMMON (sym)))
-	sym = sym->sy_value.X_add_symbol;
+	sym = symbol_get_value_expression (sym)->X_add_symbol;
       fixp->fx_addsy = sym;
 
       reloc = tc_gen_reloc (sec, fixp);
@@ -1333,8 +1333,8 @@ set_symtab ()
       symp = symbol_rootP;
       for (i = 0; i < nsyms; i++, symp = symbol_next (symp))
 	{
-	  asympp[i] = symp->bsym;
-	  symp->written = 1;
+	  asympp[i] = symbol_get_bfdsym (symp);
+	  symbol_mark_written (symp);
 	}
     }
   else
@@ -1623,7 +1623,7 @@ write_object_file ()
 	    /* This is the offset from ??? to table_ptr+0 */
 	    to_addr = table_addr - S_GET_VALUE (lie->sub);
 #ifdef BFD_ASSEMBLER
-	    to_addr -= lie->sub->sy_frag->fr_address;
+	    to_addr -= symbol_get_frag (lie->sub)->fr_address;
 #endif
 	    md_number_to_chars (lie->word_goes_here, to_addr, 2);
 	    for (untruth = lie->next_broken_word; untruth && untruth->dispfrag == fragP; untruth = untruth->next_broken_word)
@@ -1637,7 +1637,7 @@ write_object_file ()
 	    from_addr = table_addr;
 	    to_addr = S_GET_VALUE (lie->add) + lie->addnum;
 #ifdef BFD_ASSEMBLER
-	    to_addr += lie->add->sy_frag->fr_address;
+	    to_addr += symbol_get_frag (lie->add)->fr_address;
 #endif
 	    md_create_long_jump (table_ptr, from_addr, to_addr, lie->dispfrag, lie->add);
 	    table_ptr += md_long_jump_size;
@@ -1770,9 +1770,9 @@ write_object_file ()
       symbolS *symp;
 
       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
-	if (!symp->sy_resolved)
-	  resolve_symbol_value (symp, 1);
+	resolve_symbol_value (symp, 1);
     }
+  resolve_local_symbol_values ();
 
   PROGRESS (1);
 
@@ -1795,7 +1795,7 @@ write_object_file ()
 	  int punt = 0;
 	  const char *name;
 
-	  if (symp->sy_mri_common)
+	  if (symbol_mri_common_p (symp))
 	    {
 	      if (S_IS_EXTERNAL (symp))
 		as_bad (_("%s: global symbols not supported in common sections"),
@@ -1817,23 +1817,11 @@ write_object_file ()
 	  /* Do it again, because adjust_reloc_syms might introduce
 	     more symbols.  They'll probably only be section symbols,
 	     but they'll still need to have the values computed.  */
-	  if (! symp->sy_resolved)
-	    {
-	      if (symp->sy_value.X_op == O_constant)
-		{
-		  /* This is the normal case; skip the call.  */
-		  S_SET_VALUE (symp,
-			       (S_GET_VALUE (symp)
-				+ symp->sy_frag->fr_address));
-		  symp->sy_resolved = 1;
-		}
-	      else
-		resolve_symbol_value (symp, 1);
-	    }
+	  resolve_symbol_value (symp, 1);
 
 	  /* Skip symbols which were equated to undefined or common
              symbols.  */
-	  if (symp->sy_value.X_op == O_symbol
+	  if (symbol_equated_p (symp)
 	      && (! S_IS_DEFINED (symp) || S_IS_COMMON (symp)))
 	    {
 	      symbol_remove (symp, &symbol_rootP, &symbol_lastP);
@@ -1849,15 +1837,15 @@ write_object_file ()
 	  printf ("symbol `%s'\n\t@%x: value=%d flags=%x seg=%s\n",
 		  S_GET_NAME (symp), symp,
 		  S_GET_VALUE (symp),
-		  symp->bsym->flags,
-		  segment_name (symp->bsym->section));
+		  symbol_get_bfdsym (symp)->flags,
+		  segment_name (S_GET_SEGMENT (symp)));
 #endif
 
 #ifdef obj_frob_symbol
 	  obj_frob_symbol (symp, punt);
 #endif
 #ifdef tc_frob_symbol
-	  if (! punt || symp->sy_used_in_reloc)
+	  if (! punt || symbol_used_in_reloc_p (symp))
 	    tc_frob_symbol (symp, punt);
 #endif
 
@@ -1867,13 +1855,13 @@ write_object_file ()
 	     and symbols that the frob_symbol macros told us to punt,
 	     but we keep such symbols if they are used in relocs.  */
 	  if ((! EMIT_SECTION_SYMBOLS
-	       && (symp->bsym->flags & BSF_SECTION_SYM) != 0)
+	       && symbol_section_p (symp))
 	      /* Note that S_IS_EXTERN and S_IS_LOCAL are not always
 		 opposites.  Sometimes the former checks flags and the
 		 latter examines the name...  */
 	      || (!S_IS_EXTERN (symp)
 		  && (S_IS_LOCAL (symp) || punt)
-		  && ! symp->sy_used_in_reloc))
+		  && ! symbol_used_in_reloc_p (symp)))
 	    {
 	      symbol_remove (symp, &symbol_rootP, &symbol_lastP);
 	      /* After symbol_remove, symbol_next(symp) still returns
@@ -1884,16 +1872,16 @@ write_object_file ()
 	    }
 
 	  /* Make sure we really got a value for the symbol.  */
-	  if (! symp->sy_resolved)
+	  if (! symbol_resolved_p (symp))
 	    {
 	      as_bad (_("can't resolve value for symbol \"%s\""),
 		      S_GET_NAME (symp));
-	      symp->sy_resolved = 1;
+	      symbol_mark_resolved (symp);
 	    }
 
 	  /* Set the value into the BFD symbol.  Up til now the value
 	     has only been kept in the gas symbolS struct.  */
-	  symp->bsym->value = S_GET_VALUE (symp);
+	  symbol_get_bfdsym (symp)->value = S_GET_VALUE (symp);
 	}
     }
 
@@ -2002,9 +1990,7 @@ relax_frag (fragP, stretch)
 #endif
       know (!(S_GET_SEGMENT (symbolP) == absolute_section)
 	    || symbolP->sy_frag == &zero_address_frag);
-      target +=
-	S_GET_VALUE (symbolP)
-	  + symbolP->sy_frag->fr_address;
+      target +=	S_GET_VALUE (symbolP) + symbol_get_frag (symbolP)->fr_address;
 
       /* If frag has yet to be reached on this pass,
 	 assume it will move by STRETCH just as we did.
@@ -2015,8 +2001,8 @@ relax_frag (fragP, stretch)
 
 	 There should be a faster way to do this.  */
 
-      if (symbolP->sy_frag->fr_address >= was_address
-	  && is_dnrange (fragP, symbolP->sy_frag))
+      if (symbol_get_frag (symbolP)->fr_address >= was_address
+	  && is_dnrange (fragP, symbol_get_frag (symbolP)))
 	{
 	  target += stretch;
 	}
@@ -2225,10 +2211,10 @@ relax_segment (segment_frag_root, segment)
 		      if (lie->added)
 			continue;
 
-		      offset = (lie->add->sy_frag->fr_address
+		      offset = (symbol_get_frag (lie->add)->fr_address
 				+ S_GET_VALUE (lie->add)
 				+ lie->addnum
-				- (lie->sub->sy_frag->fr_address
+				- (symbol_get_frag (lie->sub)->fr_address
 				   + S_GET_VALUE (lie->sub)));
 		      if (offset <= -32768 || offset >= 32767)
 			{
@@ -2250,8 +2236,10 @@ relax_segment (segment_frag_root, segment)
 			  for (untruth = lie->next_broken_word;
 			       untruth && untruth->dispfrag == lie->dispfrag;
 			       untruth = untruth->next_broken_word)
-			    if ((untruth->add->sy_frag == lie->add->sy_frag)
-				&& S_GET_VALUE (untruth->add) == S_GET_VALUE (lie->add))
+			    if ((symbol_get_frag (untruth->add)
+				 == symbol_get_frag (lie->add))
+				&& (S_GET_VALUE (untruth->add)
+				    == S_GET_VALUE (lie->add)))
 			      {
 				untruth->added = 2;
 				untruth->use_jump = lie;
@@ -2301,8 +2289,8 @@ relax_segment (segment_frag_root, segment)
 		      know (!(S_GET_SEGMENT (symbolP) == SEG_ABSOLUTE)
 			    || (symbolP->sy_frag == &zero_address_frag));
 #endif
-		      target += S_GET_VALUE (symbolP)
-			+ symbolP->sy_frag->fr_address;
+		      target += (S_GET_VALUE (symbolP)
+				 + symbol_get_frag (symbolP)->fr_address);
 		    }		/* if we have a symbol */
 
 		  know (fragP->fr_next);
@@ -2325,7 +2313,7 @@ relax_segment (segment_frag_root, segment)
 		if (symbolP)
 		  {
 		    growth = S_GET_VALUE (symbolP);
-		    if (symbolP->sy_frag != &zero_address_frag
+		    if (symbol_get_frag (symbolP) != &zero_address_frag
 			|| S_IS_COMMON (symbolP)
 			|| ! S_IS_DEFINED (symbolP))
 		      as_bad_where (fragP->fr_file, fragP->fr_line,
@@ -2465,12 +2453,13 @@ fixup_segment (fixP, this_segment_type)
       plt = fixP->fx_plt;
 
       if (add_symbolP != NULL
-	  && add_symbolP->sy_mri_common)
+	  && symbol_mri_common_p (add_symbolP))
 	{
 	  know (add_symbolP->sy_value.X_op == O_symbol);
 	  add_number += S_GET_VALUE (add_symbolP);
 	  fixP->fx_offset = add_number;
-	  add_symbolP = fixP->fx_addsy = add_symbolP->sy_value.X_add_symbol;
+	  add_symbolP = fixP->fx_addsy =
+	    symbol_get_value_expression (add_symbolP)->X_add_symbol;
 	}
 
       if (add_symbolP)
@@ -2702,7 +2691,7 @@ fixup_segment (fixP, this_segment_type)
 #else
 	      fixP->fx_addsy = section_symbol (absolute_section);
 #endif
-	      fixP->fx_addsy->sy_used_in_reloc = 1;
+	      symbol_mark_used_in_reloc (fixP->fx_addsy);
 	      ++seg_reloc_count;
 	    }
 	}

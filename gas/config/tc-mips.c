@@ -1,5 +1,5 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
-   Copyright (C) 1993, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF and R4000 support by Ian Lance Taylor of Cygnus
@@ -54,7 +54,6 @@ static int mips_output_flavor () { return OUTPUT_FLAVOR; }
 #undef S_GET_SIZE
 #undef S_SET_ALIGN
 #undef S_SET_SIZE
-#undef TARGET_SYMBOL_FIELDS
 #undef obj_frob_file
 #undef obj_frob_file_after_relocs
 #undef obj_frob_symbol
@@ -1373,8 +1372,8 @@ mips16_mark_labels ()
 	  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
 	    S_SET_OTHER (l->label, STO_MIPS16);
 #endif
-	  if ((l->label->sy_value.X_add_number & 1) == 0)
-	    ++l->label->sy_value.X_add_number;
+	  if ((S_GET_VALUE (l->label) & 1) == 0)
+	    S_SET_VALUE (l->label, S_GET_VALUE (l->label) + 1);
 	}
     }
 }
@@ -1656,11 +1655,11 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	  for (l = insn_labels; l != NULL; l = l->next)
 	    {
 	      assert (S_GET_SEGMENT (l->label) == now_seg);
-	      l->label->sy_frag = frag_now;
+	      symbol_set_frag (l->label, frag_now);
 	      S_SET_VALUE (l->label, (valueT) frag_now_fix ());
 	      /* mips16 text labels are stored as odd.  */
 	      if (mips_opts.mips16)
-		++l->label->sy_value.X_add_number;
+		S_SET_VALUE (l->label, S_GET_VALUE (l->label) + 1);
 	    }
 
 #ifndef NO_ECOFF_DEBUGGING
@@ -2360,11 +2359,11 @@ mips_emit_delays (insns)
 	  for (l = insn_labels; l != NULL; l = l->next)
 	    {
 	      assert (S_GET_SEGMENT (l->label) == now_seg);
-	      l->label->sy_frag = frag_now;
+	      symbol_set_frag (l->label, frag_now);
 	      S_SET_VALUE (l->label, (valueT) frag_now_fix ());
 	      /* mips16 text labels are stored as odd.  */
 	      if (mips_opts.mips16)
-		++l->label->sy_value.X_add_number;
+		S_SET_VALUE (l->label, S_GET_VALUE (l->label) + 1);
 	    }
 	}
     }
@@ -4103,11 +4102,12 @@ macro (ip)
       if (mips_pic == EMBEDDED_PIC
 	  && offset_expr.X_op == O_subtract
 	  && now_seg == text_section
-	  && (offset_expr.X_op_symbol->sy_value.X_op == O_constant
+	  && (symbol_constant_p (offset_expr.X_op_symbol)
 	      ? S_GET_SEGMENT (offset_expr.X_op_symbol) == text_section
-	      : (offset_expr.X_op_symbol->sy_value.X_op == O_symbol
-		 && (S_GET_SEGMENT (offset_expr.X_op_symbol
-				    ->sy_value.X_add_symbol)
+	      : (symbol_equated_p (offset_expr.X_op_symbol)
+		 && (S_GET_SEGMENT
+		     (symbol_get_value_expression (offset_expr.X_op_symbol)
+		      ->X_add_symbol)
 		     == text_section)))
 	  && breg == 0
 	  && offset_expr.X_add_number == 0)
@@ -8699,10 +8699,10 @@ my_getExpression (ep, str)
       && ep->X_op == O_symbol
       && strcmp (S_GET_NAME (ep->X_add_symbol), FAKE_LABEL_NAME) == 0
       && S_GET_SEGMENT (ep->X_add_symbol) == now_seg
-      && ep->X_add_symbol->sy_frag == frag_now
-      && ep->X_add_symbol->sy_value.X_op == O_constant
-      && ep->X_add_symbol->sy_value.X_add_number == frag_now_fix ())
-    ++ep->X_add_symbol->sy_value.X_add_number;
+      && symbol_get_frag (ep->X_add_symbol) == frag_now
+      && symbol_constant_p (ep->X_add_symbol)
+      && S_GET_VALUE (ep->X_add_symbol) == frag_now_fix ())
+    S_SET_VALUE (ep->X_add_symbol, S_GET_VALUE (ep->X_add_symbol) + 1);
 }
 
 /* Turn a string in input_line_pointer into a floating point constant
@@ -9472,13 +9472,13 @@ md_apply_fix (fixP, valueP)
   if (fixP->fx_addsy != NULL && OUTPUT_FLAVOR == bfd_target_elf_flavour)
     if (S_GET_OTHER (fixP->fx_addsy) == STO_MIPS16 
         || S_IS_WEAK (fixP->fx_addsy)
-        || (fixP->fx_addsy->sy_used_in_reloc
-            && (bfd_get_section_flags (stdoutput,
-                                       S_GET_SEGMENT (fixP->fx_addsy))
-                & SEC_LINK_ONCE != 0)
-               || !strncmp (segment_name (S_GET_SEGMENT (fixP->fx_addsy)),
-                            ".gnu.linkonce",
-                            sizeof (".gnu.linkonce") - 1)))
+        || (symbol_used_in_reloc_p (fixP->fx_addsy)
+            && (((bfd_get_section_flags (stdoutput,
+					 S_GET_SEGMENT (fixP->fx_addsy))
+		  & SEC_LINK_ONCE) != 0)
+		|| !strncmp (segment_name (S_GET_SEGMENT (fixP->fx_addsy)),
+			     ".gnu.linkonce",
+			     sizeof (".gnu.linkonce") - 1))))
 
       {
         value -= S_GET_VALUE (fixP->fx_addsy);
@@ -9529,7 +9529,7 @@ md_apply_fix (fixP, valueP)
     case BFD_RELOC_PCREL_HI16_S:
       /* The addend for this is tricky if it is internal, so we just
 	 do everything here rather than in bfd_install_relocation.  */
-      if ((fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) == 0)
+      if ((symbol_get_bfdsym (fixP->fx_addsy)->flags & BSF_SECTION_SYM) == 0)
 	{
 	  /* For an external symbol adjust by the address to make it
 	     pcrel_offset.  We use the address of the RELLO reloc
@@ -9549,7 +9549,7 @@ md_apply_fix (fixP, valueP)
     case BFD_RELOC_PCREL_LO16:
       /* The addend for this is tricky if it is internal, so we just
 	 do everything here rather than in bfd_install_relocation.  */
-      if ((fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) == 0)
+      if ((symbol_get_bfdsym (fixP->fx_addsy)->flags & BSF_SECTION_SYM) == 0)
 	value += fixP->fx_frag->fr_address + fixP->fx_where;
       buf = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
       if (target_big_endian)
@@ -9818,7 +9818,7 @@ mips_align (to, fill, label)
   if (label != NULL)
     {
       assert (S_GET_SEGMENT (label) == now_seg);
-      label->sy_frag = frag_now;
+      symbol_set_frag (label, frag_now);
       S_SET_VALUE (label, (valueT) frag_now_fix ());
     }
 }
@@ -10002,10 +10002,12 @@ s_float_cons (type)
   mips_emit_delays (false);
 
   if (auto_align)
-    if (type == 'd')
-      mips_align (3, 0, label);
-    else
-      mips_align (2, 0, label);
+    {
+      if (type == 'd')
+	mips_align (3, 0, label);
+      else
+	mips_align (2, 0, label);
+    }
 
   mips_clear_insn_labels ();
 
@@ -10053,7 +10055,7 @@ s_mips_globl (x)
 	flag = BSF_FUNCTION;
     }
 
-  symbolP->bsym->flags |= flag;
+  symbol_get_bfdsym (symbolP)->flags |= flag;
 
   S_SET_EXTERNAL (symbolP);
   demand_empty_rest_of_line ();
@@ -10297,7 +10299,7 @@ s_cpload (ignore)
   ex.X_add_number = 0;
 
   /* In ELF, this symbol is implicitly an STT_OBJECT symbol.  */
-  ex.X_add_symbol->bsym->flags |= BSF_OBJECT;
+  symbol_get_bfdsym (ex.X_add_symbol)->flags |= BSF_OBJECT;
 
   macro_build_lui ((char *) NULL, &icnt, &ex, GP);
   macro_build ((char *) NULL, &icnt, &ex, "addiu", "t,r,j", GP, GP,
@@ -10489,7 +10491,7 @@ s_mips_weakext (ignore)
 	  ignore_rest_of_line();
 	  return;
 	}
-      symbolP->sy_value = exp;
+      symbol_set_value_expression (symbolP, &exp);
     }
 
   demand_empty_rest_of_line ();
@@ -10601,15 +10603,16 @@ nopic_need_relax (sym, before_relaxing)
       else if ((! S_IS_DEFINED (sym) || S_IS_COMMON (sym))
 	       && (0
 #ifndef NO_ECOFF_DEBUGGING
-		   || (sym->ecoff_extern_size != 0
-		       && sym->ecoff_extern_size <= g_switch_value)
+		   || (symbol_get_obj (sym)->ecoff_extern_size != 0
+		       && (symbol_get_obj (sym)->ecoff_extern_size
+			   <= g_switch_value))
 #endif
 		   /* We must defer this decision until after the whole
 		      file has been read, since there might be a .extern
 		      after the first use of this symbol.  */
 		   || (before_relaxing
 #ifndef NO_ECOFF_DEBUGGING
-		       && sym->ecoff_extern_size == 0
+		       && symbol_get_obj (sym)->ecoff_extern_size == 0
 #endif
 		       && S_GET_VALUE (sym) == 0)
 		   || (S_GET_VALUE (sym) != 0
@@ -10679,23 +10682,26 @@ mips16_extended_frag (fragp, sec, stretch)
       maxtiny = (1 << (op->nbits - 1)) - 1;
     }
 
-  /* We can't call S_GET_VALUE here, because we don't want to lock in
-     a particular frag address.  */
-  if (fragp->fr_symbol->sy_value.X_op == O_constant)
+  /* We can't always call S_GET_VALUE here, because we don't want to
+     lock in a particular frag address.  */
+  if (symbol_constant_p (fragp->fr_symbol))
     {
-      val = (fragp->fr_symbol->sy_value.X_add_number
-	     + fragp->fr_symbol->sy_frag->fr_address);
+      val = (S_GET_VALUE (fragp->fr_symbol)
+	     + symbol_get_frag (fragp->fr_symbol)->fr_address);
       symsec = S_GET_SEGMENT (fragp->fr_symbol);
     }
-  else if (fragp->fr_symbol->sy_value.X_op == O_symbol
-	   && (fragp->fr_symbol->sy_value.X_add_symbol->sy_value.X_op
-	       == O_constant))
+  else if (symbol_equated_p (fragp->fr_symbol)
+	   && (symbol_constant_p
+	       (symbol_get_value_expression (fragp->fr_symbol)->X_add_symbol)))
     {
-      val = (fragp->fr_symbol->sy_value.X_add_symbol->sy_value.X_add_number
-	     + fragp->fr_symbol->sy_value.X_add_symbol->sy_frag->fr_address
-	     + fragp->fr_symbol->sy_value.X_add_number
-	     + fragp->fr_symbol->sy_frag->fr_address);
-      symsec = S_GET_SEGMENT (fragp->fr_symbol->sy_value.X_add_symbol);
+      symbolS *eqsym;
+
+      eqsym = symbol_get_value_expression (fragp->fr_symbol)->X_add_symbol;
+      val = (S_GET_VALUE (eqsym)
+	     + symbol_get_frag (eqsym)->fr_address
+	     + symbol_get_value_expression (fragp->fr_symbol)->X_add_number
+	     + symbol_get_frag (fragp->fr_symbol)->fr_address);
+      symsec = S_GET_SEGMENT (eqsym);
     }
   else
     return 1;
@@ -10737,7 +10743,8 @@ mips16_extended_frag (fragp, sec, stretch)
 	 in STRETCH in order to get a better estimate of the address.
 	 This particularly matters because of the shift bits.  */
       if (stretch != 0
-	  && fragp->fr_symbol->sy_frag->fr_address >= fragp->fr_address)
+	  && (symbol_get_frag (fragp->fr_symbol)->fr_address
+	      >= fragp->fr_address))
 	{
 	  fragS *f;
 
@@ -10748,7 +10755,7 @@ mips16_extended_frag (fragp, sec, stretch)
              a maximum number of bytes to skip when doing an
              alignment.  */
 	  for (f = fragp;
-	       f != NULL && f != fragp->fr_symbol->sy_frag;
+	       f != NULL && f != symbol_get_frag (fragp->fr_symbol);
 	       f = f->fr_next)
 	    {
 	      if (f->fr_type == rs_align || f->fr_type == rs_align_code)
@@ -10882,14 +10889,14 @@ md_estimate_size_before_relax (fragp, segtype)
       sym = fragp->fr_symbol;
 
       /* Handle the case of a symbol equated to another symbol.  */
-      while (sym->sy_value.X_op == O_symbol
+      while (symbol_equated_p (sym)
 	     && (! S_IS_DEFINED (sym) || S_IS_COMMON (sym)))
 	{
 	  symbolS *n;
 
 	  /* It's possible to get a loop here in a badly written
              program.  */
-	  n = sym->sy_value.X_add_symbol;
+	  n = symbol_get_value_expression (sym)->X_add_symbol;
 	  if (n == sym)
 	    break;
 	  sym = n;
@@ -10967,7 +10974,8 @@ tc_gen_reloc (section, fixp)
   reloc = retval[0] = (arelent *) xmalloc (sizeof (arelent));
   retval[1] = NULL;
 
-  reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
   if (mips_pic == EMBEDDED_PIC
@@ -10984,7 +10992,7 @@ tc_gen_reloc (section, fixp)
   else if (fixp->fx_r_type == BFD_RELOC_PCREL_LO16)
     {
       /* We use a special addend for an internal RELLO reloc.  */
-      if (fixp->fx_addsy->bsym->flags & BSF_SECTION_SYM)
+      if (symbol_section_p (fixp->fx_addsy))
 	reloc->addend = reloc->address - S_GET_VALUE (fixp->fx_subsy);
       else
 	reloc->addend = fixp->fx_addnumber + reloc->address;
@@ -10996,7 +11004,7 @@ tc_gen_reloc (section, fixp)
       /* We use a special addend for an internal RELHI reloc.  The
 	 reloc is relative to the RELLO; adjust the addend
 	 accordingly.  */
-      if (fixp->fx_addsy->bsym->flags & BSF_SECTION_SYM)
+      if (symbol_section_p (fixp->fx_addsy))
 	reloc->addend = (fixp->fx_next->fx_frag->fr_address
 			 + fixp->fx_next->fx_where
 			 - S_GET_VALUE (fixp->fx_subsy));
@@ -11055,7 +11063,8 @@ tc_gen_reloc (section, fixp)
       reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
       reloc2 = retval[1] = (arelent *) xmalloc (sizeof (arelent));
       retval[2] = NULL;
-      reloc2->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+      reloc2->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+      *reloc2->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       reloc2->address = (reloc->address
 			 + (RELAX_RELOC2 (fixp->fx_frag->fr_subtype)
 			    - RELAX_RELOC1 (fixp->fx_frag->fr_subtype)));
@@ -11433,7 +11442,7 @@ mips_elf_final_processing ()
 
 typedef struct proc
   {
-    struct symbol *isym;
+    symbolS *isym;
     unsigned long reg_mask;
     unsigned long reg_offset;
     unsigned long fpreg_mask;
@@ -11659,7 +11668,7 @@ s_mips_ent (aent)
 
       cur_proc_ptr->isym = symbolP;
 
-      symbolP->bsym->flags |= BSF_FUNCTION;
+      symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
 
       numprocs++;
     }

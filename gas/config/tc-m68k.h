@@ -1,5 +1,5 @@
 /* This file is tc-m68k.h
-   Copyright (C) 1987, 89, 90, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1987, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -22,7 +22,6 @@
 #define TC_M68K 1
 
 #ifdef ANSI_PROTOTYPES
-struct symbol;
 struct fix;
 #endif
 
@@ -138,13 +137,13 @@ extern void m68k_mri_mode_change PARAMS ((int));
 extern int m68k_conditional_pseudoop PARAMS ((pseudo_typeS *));
 #define tc_conditional_pseudoop(pop) m68k_conditional_pseudoop (pop)
 
-extern void m68k_frob_label PARAMS ((struct symbol *));
+extern void m68k_frob_label PARAMS ((symbolS *));
 #define tc_frob_label(sym) m68k_frob_label (sym)
 
 extern void m68k_flush_pending_output PARAMS ((void));
 #define md_flush_pending_output() m68k_flush_pending_output ()
 
-extern void m68k_frob_symbol PARAMS ((struct symbol *));
+extern void m68k_frob_symbol PARAMS ((symbolS *));
 
 #ifdef BFD_ASSEMBLER
 

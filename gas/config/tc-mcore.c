@@ -541,7 +541,7 @@ dump_literals (isforce)
 {
   int i;
   struct literal * p;
-  struct symbol * brarsym;
+  symbolS * brarsym;
   
   if (poolsize == 0)
     return;

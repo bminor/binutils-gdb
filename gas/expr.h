@@ -1,5 +1,5 @@
 /* expr.h -> header file for expr.c
-   Copyright (C) 1987, 92-97, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1987, 92-98, 1999 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -109,9 +109,9 @@ typedef enum
 typedef struct expressionS
 {
   /* The main symbol.  */
-  struct symbol *X_add_symbol;
+  symbolS *X_add_symbol;
   /* The second symbol, if needed.  */
-  struct symbol *X_op_symbol;
+  symbolS *X_op_symbol;
   /* A number to add.  */
   offsetT X_add_number;
   /* The type of the expression.  We can't assume that an arbitrary
@@ -149,14 +149,13 @@ extern void expr_begin PARAMS ((void));
 extern void expr_set_precedence PARAMS ((void));
 extern segT expr PARAMS ((int rank, expressionS * resultP));
 extern unsigned int get_single_number PARAMS ((void));
-extern struct symbol *make_expr_symbol PARAMS ((expressionS * expressionP));
+extern symbolS *make_expr_symbol PARAMS ((expressionS * expressionP));
 extern int expr_symbol_where
-  PARAMS ((struct symbol *, char **, unsigned int *));
+  PARAMS ((symbolS *, char **, unsigned int *));
 
-extern struct symbol * expr_build_uconstant PARAMS ((offsetT));
-extern struct symbol * expr_build_unary PARAMS ((operatorT, struct symbol *));
-extern struct symbol * expr_build_binary
-  PARAMS ((operatorT, struct symbol *, struct symbol *));
-extern struct symbol * expr_build_dot PARAMS ((void));
+extern symbolS *expr_build_uconstant PARAMS ((offsetT));
+extern symbolS *expr_build_unary PARAMS ((operatorT, symbolS *));
+extern symbolS *expr_build_binary PARAMS ((operatorT, symbolS *, symbolS *));
+extern symbolS *expr_build_dot PARAMS ((void));
 
 /* end of expr.h */

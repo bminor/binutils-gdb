@@ -1173,7 +1173,7 @@ md_apply_fix (fixP, valueP)
 	   Therefore they must be completely resolved as constants.  */
 
 	if (fixP->fx_addsy != 0
-	    && fixP->fx_addsy->bsym->section != absolute_section)
+	    && S_GET_SEGMENT (fixP->fx_addsy) != absolute_section)
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			_("non-absolute expression in constant field"));
 
@@ -1393,7 +1393,8 @@ tc_gen_reloc (sec, fixp)
   arelent *reloc;
 
   reloc = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
   /* Make sure none of our internal relocations make it this far.
@@ -1435,7 +1436,7 @@ tc_gen_reloc (sec, fixp)
        */
       if ((S_IS_EXTERN (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy))
 	  && !S_IS_COMMON(fixp->fx_addsy))
-	reloc->addend -= fixp->fx_addsy->bsym->value;
+	reloc->addend -= symbol_get_bfdsym (fixp->fx_addsy)->value;
 #endif
     }
 
@@ -3557,7 +3558,7 @@ s_alpha_ent (dummy)
 	    as_warn (_("nested .ent directives"));
 
 	  sym = symbol_find_or_make (name);
-	  sym->bsym->flags |= BSF_FUNCTION;
+	  symbol_get_bfdsym (sym)->flags |= BSF_FUNCTION;
 	  alpha_cur_ent_sym = sym;
 
 	  /* The .ent directive is sometimes followed by a number.  Not sure
@@ -3604,12 +3605,13 @@ s_alpha_end (dummy)
 	  /* Create an expression to calculate the size of the function.  */
 	  if (sym)
 	    {
-	      sym->sy_obj.size = (expressionS *) xmalloc (sizeof (expressionS));
-	      sym->sy_obj.size->X_op = O_subtract;
-	      sym->sy_obj.size->X_add_symbol
+	      symbol_get_obj (sym)->size =
+		(expressionS *) xmalloc (sizeof (expressionS));
+	      symbol_get_obj (sym)->size->X_op = O_subtract;
+	      symbol_get_obj (sym)->size->X_add_symbol
 	        = symbol_new ("L0\001", now_seg, frag_now_fix (), frag_now);
-	      sym->sy_obj.size->X_op_symbol = sym;
-	      sym->sy_obj.size->X_add_number = 0;
+	      symbol_get_obj (sym)->size->X_op_symbol = sym;
+	      symbol_get_obj (sym)->size->X_add_number = 0;
 	    }
 
 	  alpha_cur_ent_sym = NULL;
@@ -4745,7 +4747,7 @@ alpha_align (n, pfill, label, force)
   if (label != NULL)
     {
       assert (S_GET_SEGMENT (label) == now_seg);
-      label->sy_frag = frag_now;
+      symbol_set_frag (label, frag_now);
       S_SET_VALUE (label, (valueT) frag_now_fix ());
     }
 

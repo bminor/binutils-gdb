@@ -2463,7 +2463,8 @@ md_assemble (line)
 			    && GOT_symbol == i.imms[n]->X_add_symbol
 			    && (i.imms[n]->X_op == O_symbol
 				|| (i.imms[n]->X_op == O_add
-				    && (i.imms[n]->X_op_symbol->sy_value.X_op
+				    && ((symbol_get_value_expression
+					 (i.imms[n]->X_op_symbol)->X_op)
 					== O_subtract))))
 			  {
 			    r_type = BFD_RELOC_386_GOTPC;
@@ -2829,7 +2830,7 @@ i386_displacement (disp_start, disp_end)
       {
         if (S_IS_LOCAL(exp->X_add_symbol)
             && S_GET_SEGMENT (exp->X_add_symbol) != undefined_section)
-          section_symbol(exp->X_add_symbol->bsym->section);
+          section_symbol (S_GET_SEGMENT (exp->X_add_symbol));
         assert (exp->X_op == O_symbol);
         exp->X_op = O_subtract;
         exp->X_op_symbol = GOT_symbol;
@@ -3789,7 +3790,7 @@ md_convert_frag (abfd, sec, fragP)
   /* Address we want to reach in file space. */
   target_address = S_GET_VALUE (fragP->fr_symbol) + fragP->fr_offset;
 #ifdef BFD_ASSEMBLER /* not needed otherwise? */
-  target_address += fragP->fr_symbol->sy_frag->fr_address;
+  target_address += symbol_get_frag (fragP->fr_symbol)->fr_address;
 #endif
 
   /* Address opcode resides at in file space. */
@@ -3943,7 +3944,7 @@ md_apply_fix3 (fixP, valp, seg)
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
       if (OUTPUT_FLAVOR == bfd_target_elf_flavour
 	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg
-	      || (fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0)
+	      || symbol_section_p (fixP->fx_addsy))
 	  && ! S_IS_EXTERNAL (fixP->fx_addsy)
 	  && ! S_IS_WEAK (fixP->fx_addsy)
 	  && S_IS_DEFINED (fixP->fx_addsy)
@@ -4387,7 +4388,8 @@ tc_gen_reloc (section, fixp)
     code = BFD_RELOC_386_GOTPC;
 
   rel = (arelent *) xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  rel->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
   /* HACK: Since i386 ELF uses Rel instead of Rela, encode the

@@ -1,6 +1,6 @@
 /* tc-d10v.c -- Assembler code for the Mitsubishi D10V
 
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation.
+   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -159,7 +159,7 @@ register_name (expressionP)
     {
       expressionP->X_op = O_register;
       /* temporarily store a pointer to the string here */
-      expressionP->X_op_symbol = (struct symbol *)input_line_pointer;
+      expressionP->X_op_symbol = (symbolS *)input_line_pointer;
       expressionP->X_add_number = reg_number;
       input_line_pointer = p;
       return 1;

@@ -789,7 +789,7 @@ list_symbol_table ()
 	{
 #ifdef BFD_ASSEMBLER
 	  /* Don't report section symbols.  They are not interesting.  */
-	  if (ptr->bsym->flags & BSF_SECTION_SYM)
+	  if (symbol_section_p (ptr))
 	    continue;
 #endif
 	  if (S_GET_NAME (ptr))
@@ -821,11 +821,11 @@ list_symbol_table ()
 		  got_some = 1;
 		}
 
-	      if (ptr->sy_frag && ptr->sy_frag->line)
+	      if (symbol_get_frag (ptr) && symbol_get_frag (ptr)->line)
 		{
 		  fprintf (list_file, "%20s:%-5d  %s:%s %s\n",
-			   ptr->sy_frag->line->file->filename,
-			   ptr->sy_frag->line->line,
+			   symbol_get_frag (ptr)->line->file->filename,
+			   symbol_get_frag (ptr)->line->line,
 			   segment_name (S_GET_SEGMENT (ptr)),
 			   buf, S_GET_NAME (ptr));
 		}

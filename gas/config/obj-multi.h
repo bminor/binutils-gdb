@@ -25,26 +25,20 @@
 
 /* FIXME: What's the story here?  Why do we have to define
    OBJ_SYMFIELD_TYPE both here and in obj-elf.h?  */
+
 #ifdef OBJ_MAYBE_ELF
 struct elf_obj_sy
 {
+  int local;
   expressionS *size;
   char *versioned_name;
+#ifdef ECOFF_DEBUGGING
+  /* If we are generating ECOFF debugging information, we need some
+     additional fields for each symbol.  */
+  struct efdr *ecoff_file;
+  struct localsym *ecoff_symbol;
+  valueT ecoff_extern_size;
+#endif
 };
 #define OBJ_SYMFIELD_TYPE struct elf_obj_sy
-#define ELF_TARGET_SYMBOL_FIELDS int local:1;
-#else
-#define ELF_TARGET_SYMBOL_FIELDS
 #endif
-
-#ifdef ECOFF_DEBUGGING
-struct efdr;
-struct localsym;
-#define ECOFF_DEBUG_TARGET_SYMBOL_FIELDS struct efdr *ecoff_file; struct localsym *ecoff_symbol; valueT ecoff_extern_size;
-#else
-#define ECOFF_DEBUG_TARGET_SYMBOL_FIELDS
-#endif
-
-#define TARGET_SYMBOL_FIELDS \
-	ELF_TARGET_SYMBOL_FIELDS \
-	ECOFF_DEBUG_TARGET_SYMBOL_FIELDS

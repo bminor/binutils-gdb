@@ -1,5 +1,5 @@
 /* expr.c -operands, expressions-
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -104,7 +104,7 @@ make_expr_symbol (expressionP)
 			    ? absolute_section
 			    : expr_section),
 			   0, &zero_address_frag);
-  symbolP->sy_value = *expressionP;
+  symbol_set_value_expression (symbolP, expressionP);
 
   if (expressionP->X_op == O_constant)
     resolve_symbol_value (symbolP, 1);
@@ -1309,7 +1309,7 @@ operand (expressionP)
 
   /* The PA port needs this information.  */
   if (expressionP->X_add_symbol)
-    expressionP->X_add_symbol->sy_used = 1;
+    symbol_mark_used (expressionP->X_add_symbol);
 
   switch (expressionP->X_op)
     {
@@ -1356,8 +1356,8 @@ clean_up_expression (expressionP)
       break;
     case O_subtract:
       if (expressionP->X_op_symbol == expressionP->X_add_symbol
-	  || ((expressionP->X_op_symbol->sy_frag
-	       == expressionP->X_add_symbol->sy_frag)
+	  || ((symbol_get_frag (expressionP->X_op_symbol)
+	       == symbol_get_frag (expressionP->X_add_symbol))
 	      && SEG_NORMAL (S_GET_SEGMENT (expressionP->X_add_symbol))
 	      && (S_GET_VALUE (expressionP->X_op_symbol)
 		  == S_GET_VALUE (expressionP->X_add_symbol))))
@@ -1700,8 +1700,8 @@ expr (rank, resultP)
       else if (op_left == O_subtract
 	       && right.X_op == O_symbol
 	       && resultP->X_op == O_symbol
-	       && (right.X_add_symbol->sy_frag
-		   == resultP->X_add_symbol->sy_frag)
+	       && (symbol_get_frag (right.X_add_symbol)
+		   == symbol_get_frag (resultP->X_add_symbol))
 	       && SEG_NORMAL (S_GET_SEGMENT (right.X_add_symbol)))
 
 	{
@@ -1815,7 +1815,7 @@ expr (rank, resultP)
 
   /* The PA port needs this information.  */
   if (resultP->X_add_symbol)
-    resultP->X_add_symbol->sy_used = 1;
+    symbol_mark_used (resultP->X_add_symbol);
 
   return resultP->X_op == O_constant ? absolute_section : retval;
 }

@@ -1,5 +1,5 @@
 /* a.out object file format
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 1996
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
@@ -14,9 +14,10 @@ WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
 the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public
-License along with GAS; see the file COPYING.  If not, write
-to the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+You should have received a copy of the GNU General Public License
+along with GAS; see the file COPYING.  If not, write to the Free
+Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+02111-1307, USA. */
 
 #include "as.h"
 #ifdef BFD_ASSEMBLER
@@ -108,18 +109,21 @@ obj_aout_frob_symbol (sym, punt)
   asection *sec;
   int desc, type, other;
 
-  flags = sym->bsym->flags;
+  flags = symbol_get_bfdsym (sym)->flags;
   desc = S_GET_DESC (sym);
   type = S_GET_TYPE (sym);
   other = S_GET_OTHER (sym);
-  sec = sym->bsym->section;
+  sec = S_GET_SEGMENT (sym);
 
   /* Only frob simple symbols this way right now.  */
   if (! (type & ~ (N_TYPE | N_EXT)))
     {
       if (type == (N_UNDF | N_EXT)
 	  && sec == &bfd_abs_section)
-	sym->bsym->section = sec = bfd_und_section_ptr;
+	{
+	  sec = bfd_und_section_ptr;
+	  S_SET_SEGMENT (sym, sec);
+	}
 
       if ((type & N_TYPE) != N_INDR
 	  && (type & N_TYPE) != N_SETA
@@ -141,7 +145,7 @@ obj_aout_frob_symbol (sym, punt)
 	case N_SETB:
 	  /* Set the debugging flag for constructor symbols so that
 	     BFD leaves them alone.  */
-	  sym->bsym->flags |= BSF_DEBUGGING;
+	  symbol_get_bfdsym (sym)->flags |= BSF_DEBUGGING;
 
 	  /* You can't put a common symbol in a set.  The way a set
 	     element works is that the symbol has a definition and a
@@ -164,29 +168,29 @@ obj_aout_frob_symbol (sym, punt)
 	  break;
 	case N_INDR:
 	  /* Put indirect symbols in the indirect section.  */
-	  sym->bsym->section = bfd_ind_section_ptr;
-	  sym->bsym->flags |= BSF_INDIRECT;
+	  S_SET_SEGMENT (sym, bfd_ind_section_ptr);
+	  symbol_get_bfdsym (sym)->flags |= BSF_INDIRECT;
 	  if (type & N_EXT)
 	    {
-	      sym->bsym->flags |= BSF_EXPORT;
-	      sym->bsym->flags &=~ BSF_LOCAL;
+	      symbol_get_bfdsym (sym)->flags |= BSF_EXPORT;
+	      symbol_get_bfdsym (sym)->flags &=~ BSF_LOCAL;
 	    }
 	  break;
 	case N_WARNING:
 	  /* Mark warning symbols.  */
-	  sym->bsym->flags |= BSF_WARNING;
+	  symbol_get_bfdsym (sym)->flags |= BSF_WARNING;
 	  break;
 	}
     }
   else
     {
-      sym->bsym->flags |= BSF_DEBUGGING;
+      symbol_get_bfdsym (sym)->flags |= BSF_DEBUGGING;
     }
 
   S_SET_TYPE (sym, type);
 
   /* Double check weak symbols.  */
-  if (sym->bsym->flags & BSF_WEAK)
+  if (S_IS_WEAK (sym))
     {
       if (S_IS_COMMON (sym))
 	as_bad (_("Symbol `%s' can not be both weak and common"),

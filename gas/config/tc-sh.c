@@ -1,5 +1,5 @@
 /* tc-sh.c -- Assemble code for the Hitachi Super-H
-   Copyright (C) 1993, 94, 95, 96, 97, 1998 Free Software Foundation.
+   Copyright (C) 1993, 94, 95, 96, 97, 98, 1999 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1450,7 +1450,8 @@ sh_frob_section (abfd, sec, ignore)
 	 We have already adjusted the value of sym to include the
 	 fragment address, so we undo that adjustment here.  */
       subseg_change (sec, 0);
-      fix_new (sym->sy_frag, S_GET_VALUE (sym) - sym->sy_frag->fr_address,
+      fix_new (symbol_get_frag (sym),
+	       S_GET_VALUE (sym) - symbol_get_frag (sym)->fr_address,
 	       4, &abs_symbol, info.count, 0, BFD_RELOC_SH_COUNT);
     }
 }
@@ -2056,7 +2057,11 @@ md_apply_fix (fixP, val)
     case BFD_RELOC_VTABLE_INHERIT:
     case BFD_RELOC_VTABLE_ENTRY:
       fixP->fx_done = 0;
+#ifdef BFD_ASSEMBLER
+      return 0;
+#else
       return;
+#endif
 
     default:
       abort ();
@@ -2377,7 +2382,8 @@ tc_gen_reloc (section, fixp)
   bfd_reloc_code_real_type r_type;
 
   rel = (arelent *) xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  rel->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
   r_type = fixp->fx_r_type;

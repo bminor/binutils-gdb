@@ -1,5 +1,5 @@
 /* Generic stabs parsing for gas.
-   Copyright (C) 1989, 90, 91, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1989, 90, 91, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
@@ -152,14 +152,14 @@ aout_process_stab (what, string, type, other, desc)
   if (what == 's' || what == 'n')
     {
       /* Pick up the value from the input line.  */
-      symbol->sy_frag = &zero_address_frag;
+      symbol_set_frag (symbol, &zero_address_frag);
       pseudo_set (symbol);
     }
   else
     {
       /* .stabd sets the name to NULL.  Why?  */
       S_SET_NAME (symbol, NULL);
-      symbol->sy_frag = frag_now;
+      symbol_set_frag (symbol, frag_now);
       S_SET_VALUE (symbol, (valueT) frag_now_fix ());
     }
 

@@ -1,5 +1,5 @@
 /* tc-sparc.c -- Assemble for the SPARC
-   Copyright (C) 1989, 90-96, 97, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1989, 90-96, 97, 98, 1999 Free Software Foundation, Inc.
    This file is part of GAS, the GNU Assembler.
 
    GAS is free software; you can redistribute it and/or modify
@@ -2504,7 +2504,7 @@ md_apply_fix3 (fixP, value, segment)
      don't want to include the value of an externally visible symbol.  */
   if (fixP->fx_addsy != NULL)
     {
-      if (fixP->fx_addsy->sy_used_in_reloc
+      if (symbol_used_in_reloc_p (fixP->fx_addsy)
 	  && (S_IS_EXTERNAL (fixP->fx_addsy)
 	      || S_IS_WEAK (fixP->fx_addsy)
 	      || (sparc_pic_code && ! fixP->fx_pcrel)
@@ -2549,7 +2549,7 @@ md_apply_fix3 (fixP, value, segment)
       && fixP->fx_r_type != BFD_RELOC_32_PCREL_S2
       && fixP->fx_addsy != NULL
       && ! S_IS_COMMON (fixP->fx_addsy)
-      && (fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) == 0)
+      && symbol_section_p (fixP->fx_addsy))
     fixP->fx_addnumber -= 2 * S_GET_VALUE (fixP->fx_addsy);
 
   /* When generating PIC code, we need to fiddle to get
@@ -2606,7 +2606,7 @@ md_apply_fix3 (fixP, value, segment)
 	     being done!  */
 	  if (! sparc_pic_code
 	      || fixP->fx_addsy == NULL
-	      || (fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0)
+	      || symbol_section_p (fixP->fx_addsy))
 	    ++val;
 	  insn |= val & 0x3fffffff;
 	  break;
@@ -2787,7 +2787,8 @@ tc_gen_reloc (section, fixp)
 
   reloc = (arelent *) xmalloc (sizeof (arelent));
 
-  reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
   switch (fixp->fx_r_type)
@@ -2906,7 +2907,7 @@ tc_gen_reloc (section, fixp)
       || code == BFD_RELOC_SPARC_PC10
       || code == BFD_RELOC_SPARC_PC22)
     reloc->addend = fixp->fx_addnumber;
-  else if ((fixp->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0)
+  else if (symbol_section_p (fixp->fx_addsy))
     reloc->addend = (section->vma
 		     + fixp->fx_addnumber
 		     + md_pcrel_from (fixp));
@@ -2961,7 +2962,7 @@ md_pcrel_from (fixP)
   ret = fixP->fx_where + fixP->fx_frag->fr_address;
   if (! sparc_pic_code
       || fixP->fx_addsy == NULL
-      || (fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0)
+      || symbol_section_p (fixP->fx_addsy))
     ret += fixP->fx_size;
   return ret;
 }
@@ -3110,9 +3111,9 @@ s_reserve (ignore)
 
 	  /* detach from old frag */
 	  if (S_GET_SEGMENT(symbolP) == bss_section)
-	    symbolP->sy_frag->fr_symbol = NULL;
+	    symbol_get_frag (symbolP)->fr_symbol = NULL;
 
-	  symbolP->sy_frag = frag_now;
+	  symbol_set_frag (symbolP, frag_now);
 	  pfrag = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
 			    (offsetT) size, (char *)0);
 	  *pfrag = 0;
@@ -3218,7 +3219,7 @@ s_common (ignore)
 	}
 
 #ifdef OBJ_ELF
-      if (symbolP->local)
+      if (symbol_get_obj (symbolP)->local)
 	{
 	  segT old_sec;
 	  int old_subsec;
@@ -3245,8 +3246,8 @@ s_common (ignore)
 	  if (align)
 	    frag_align (align, 0, 0);
 	  if (S_GET_SEGMENT (symbolP) == bss_section)
-	    symbolP->sy_frag->fr_symbol = 0;
-	  symbolP->sy_frag = frag_now;
+	    symbol_get_frag (symbolP)->fr_symbol = 0;
+	  symbol_set_frag (symbolP, frag_now);
 	  p = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
 			(offsetT) size, (char *) 0);
 	  *p = 0;
@@ -3289,7 +3290,7 @@ s_common (ignore)
     }
 
 #ifdef BFD_ASSEMBLER
-  symbolP->bsym->flags |= BSF_OBJECT;
+  symbol_get_bfdsym (symbolP)->flags |= BSF_OBJECT;
 #endif
 
   demand_empty_rest_of_line ();

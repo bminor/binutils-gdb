@@ -1,5 +1,5 @@
 /* obj-aout.h, a.out object file format for gas, the assembler.
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 1998
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 98, 1999
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -60,18 +60,24 @@ typedef struct nlist obj_symbol_type;	/* Symbol table entry */
 
 #ifdef BFD_ASSEMBLER
 
-#define S_SET_OTHER(S,V)		(aout_symbol((S)->bsym)->other = (V))
-#define S_SET_TYPE(S,T)			(aout_symbol((S)->bsym)->type = (T))
-#define S_SET_DESC(S,D)			(aout_symbol((S)->bsym)->desc = (D))
-#define S_GET_OTHER(S)			(aout_symbol((S)->bsym)->other)
-#define S_GET_TYPE(S)			(aout_symbol((S)->bsym)->type)
-#define S_GET_DESC(S)			(aout_symbol((S)->bsym)->desc)
+#define S_SET_OTHER(S,V) \
+  (aout_symbol (symbol_get_bfdsym (S))->other = (V))
+#define S_SET_TYPE(S,T) \
+  (aout_symbol (symbol_get_bfdsym (S))->type = (T))
+#define S_SET_DESC(S,D)	\
+  (aout_symbol (symbol_get_bfdsym (S))->desc = (D))
+#define S_GET_OTHER(S) \
+  (aout_symbol (symbol_get_bfdsym (S))->other)
+#define S_GET_TYPE(S) \
+  (aout_symbol (symbol_get_bfdsym (S))->type)
+#define S_GET_DESC(S) \
+  (aout_symbol (symbol_get_bfdsym (S))->desc)
 
 asection *text_section, *data_section, *bss_section;
 
 #define obj_frob_symbol(S,PUNT)	obj_aout_frob_symbol (S, &PUNT)
 #define obj_frob_file()		obj_aout_frob_file ()
-extern void obj_aout_frob_symbol PARAMS ((struct symbol *, int *));
+extern void obj_aout_frob_symbol PARAMS ((symbolS *, int *));
 extern void obj_aout_frob_file PARAMS ((void));
 
 #define obj_sec_sym_ok_for_reloc(SEC)	(1)

@@ -1,5 +1,6 @@
 /* tc-hppa.c -- Assemble for the PA
-   Copyright (C) 1989, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1989, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -326,7 +327,7 @@ typedef struct space_dictionary_chain sd_chain_struct;
    label.  */
 typedef struct label_symbol_struct
   {
-    struct symbol *lss_label;
+    symbolS *lss_label;
     sd_chain_struct *lss_space;
     struct label_symbol_struct *lss_next;
   }

@@ -1,5 +1,5 @@
 /* cond.c - conditional assembly pseudo-ops, and .include
-   Copyright (C) 1990, 91, 92, 93, 95, 96, 97, 1998
+   Copyright (C) 1990, 91, 92, 93, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -64,7 +64,7 @@ s_ifdef (arg)
      int arg;
 {
   register char *name;		/* points to name of symbol */
-  register struct symbol *symbolP;	/* Points to symbol */
+  register symbolS *symbolP;	/* Points to symbol */
   struct conditional_frame cframe;
 
   SKIP_WHITESPACE ();		/* Leading whitespace is part of operand. */

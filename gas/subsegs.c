@@ -1,5 +1,5 @@
 /* subsegs.c - subsegments -
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 1997
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -547,7 +547,7 @@ section_symbol (sec)
 	  if (S_GET_SEGMENT (s) == undefined_section)
 	    {
 	      S_SET_SEGMENT (s, sec);
-	      s->sy_frag = &zero_address_frag;
+	      symbol_set_frag (s, &zero_address_frag);
 	    }
 	}
     }
@@ -556,7 +556,7 @@ section_symbol (sec)
 
   /* Use the BFD section symbol, if possible.  */
   if (obj_sec_sym_ok_for_reloc (sec))
-    s->bsym = sec->symbol;
+    symbol_set_bfdsym (s, sec->symbol);
 
   seginfo->sym = s;
   return s;

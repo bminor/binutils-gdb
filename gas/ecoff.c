@@ -1,5 +1,5 @@
 /* ECOFF debugging support.
-   Copyright (C) 1993, 94, 95, 96, 97, 98 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    This file was put together by Ian Lance Taylor <ian@cygnus.com>.  A
    good deal of it comes directly from mips-tfile.c, by Michael
@@ -1513,6 +1513,8 @@ void
 ecoff_symbol_new_hook (symbolP)
      symbolS *symbolP;
 {
+  OBJ_SYMFIELD_TYPE *obj;
+
   /* Make sure that we have a file pointer, but only if we have seen a
      file.  If we haven't seen a file, then this is a probably special
      symbol created by md_begin which may required special handling at
@@ -1521,9 +1523,10 @@ ecoff_symbol_new_hook (symbolP)
   if (cur_file_ptr == (efdr_t *) NULL
       && seen_at_least_1_file ())
     add_file ((const char *) NULL, 0, 1);
-  symbolP->ecoff_file = cur_file_ptr;
-  symbolP->ecoff_symbol = NULL;
-  symbolP->ecoff_extern_size = 0;
+  obj = symbol_get_obj (symbolP);
+  obj->ecoff_file = cur_file_ptr;
+  obj->ecoff_symbol = NULL;
+  obj->ecoff_extern_size = 0;
 }
 
 /* Add a page to a varray object.  */
@@ -1643,7 +1646,7 @@ add_ecoff_symbol (str, type, storage, sym_value, addend, value, indx)
     psym->name = str;
   psym->as_sym = sym_value;
   if (sym_value != (symbolS *) NULL)
-    sym_value->ecoff_symbol = psym;
+    symbol_get_obj (sym_value)->ecoff_symbol = psym;
   psym->addend = addend;
   psym->file_ptr = cur_file_ptr;
   psym->proc_ptr = cur_proc_ptr;
@@ -2170,7 +2173,7 @@ add_procedure (func)
 
   /* Set the BSF_FUNCTION flag for the symbol.  */
   sym = symbol_find_or_make (func);
-  sym->bsym->flags |= BSF_FUNCTION;
+  symbol_get_bfdsym (sym)->flags |= BSF_FUNCTION;
 
   /* Push the start of the function.  */
   new_proc_ptr->sym = add_ecoff_symbol ((const char *) NULL, st_Proc, sc_Text,
@@ -3151,7 +3154,7 @@ ecoff_directive_extern (ignore)
     ++input_line_pointer;
   size = get_absolute_expression ();
 
-  symbolp->ecoff_extern_size = size;
+  symbol_get_obj (symbolp)->ecoff_extern_size = size;
 }
 
 /* Parse .file directives.  */
@@ -3433,7 +3436,7 @@ ecoff_directive_weakext (ignore)
 	      ignore_rest_of_line();
 	      return;
 	    }
-	  symbolP->sy_value = exp;
+	  symbol_set_value_expression (symbolP, &exp);
 	}
     }
 
@@ -3616,12 +3619,12 @@ ecoff_stab (sec, what, string, type, other, desc)
      ECOFF symbol.  We want to compute the type of the ECOFF symbol
      independently.  */
   if (sym != (symbolS *) NULL)
-    hold = sym->ecoff_symbol;
+    hold = symbol_get_obj (sym)->ecoff_symbol;
 
   (void) add_ecoff_symbol (string, st, sc, sym, addend, value, indx);
 
   if (sym != (symbolS *) NULL)
-    sym->ecoff_symbol = hold;
+    symbol_get_obj (sym)->ecoff_symbol = hold;
 
   /* Restore normal file type.  */
   cur_file_ptr = save_file_ptr;
@@ -3658,7 +3661,7 @@ ecoff_frob_symbol (sym)
     }
 
   /* Double check weak symbols.  */
-  if (sym->bsym->flags & BSF_WEAK)
+  if (S_IS_WEAK (sym))
     {
       if (S_IS_COMMON (sym))
 	as_bad (_("Symbol `%s' can not be both weak and common"),
@@ -4084,7 +4087,8 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 				  || S_IS_WEAK (as_sym)
 				  || ! S_IS_DEFINED (as_sym)))
 			    {
-			      if ((as_sym->bsym->flags & BSF_FUNCTION) != 0)
+			      if ((symbol_get_bfdsym (as_sym)->flags
+				   & BSF_FUNCTION) != 0)
 				st = st_Proc;
 			      else
 				st = st_Global;
@@ -4096,18 +4100,19 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 
 			  if (! S_IS_DEFINED (as_sym))
 			    {
-			      if (as_sym->ecoff_extern_size == 0
-				  || (as_sym->ecoff_extern_size
-				      > bfd_get_gp_size (stdoutput)))
+			      valueT s;
+
+			      s = symbol_get_obj (as_sym)->ecoff_extern_size;
+			      if (s == 0
+				  || s > bfd_get_gp_size (stdoutput))
 				sc = sc_Undefined;
 			      else
 				{
 				  sc = sc_SUndefined;
-				  sym_ptr->ecoff_sym.asym.value =
-				    as_sym->ecoff_extern_size;
+				  sym_ptr->ecoff_sym.asym.value = s;
 				}
 #ifdef S_SET_SIZE
-			      S_SET_SIZE (as_sym, as_sym->ecoff_extern_size);
+			      S_SET_SIZE (as_sym, s);
 #endif
 			    }
 			  else if (S_IS_COMMON (as_sym))
@@ -4290,7 +4295,7 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 		     case this is an external symbol.  Note that this
 		     destroys the asym.index field.  */
 		  if (as_sym != (symbolS *) NULL
-		      && as_sym->ecoff_symbol == sym_ptr)
+		      && symbol_get_obj (as_sym)->ecoff_symbol == sym_ptr)
 		    {
 		      if ((sym_ptr->ecoff_sym.asym.st == st_Proc
 			   || sym_ptr->ecoff_sym.asym.st == st_StaticProc)
@@ -4659,7 +4664,7 @@ ecoff_setup_ext ()
 
   for (sym = symbol_rootP; sym != (symbolS *) NULL; sym = symbol_next (sym))
     {
-      if (sym->ecoff_symbol == NULL)
+      if (symbol_get_obj (sym)->ecoff_symbol == NULL)
 	continue;
 
       /* If this is a local symbol, then force the fields to zero.  */
@@ -4667,13 +4672,16 @@ ecoff_setup_ext ()
 	  && ! S_IS_WEAK (sym)
 	  && S_IS_DEFINED (sym))
 	{
-	  sym->ecoff_symbol->ecoff_sym.asym.value = 0;
-	  sym->ecoff_symbol->ecoff_sym.asym.st = (int) st_Nil;
-	  sym->ecoff_symbol->ecoff_sym.asym.sc = (int) sc_Nil;
-	  sym->ecoff_symbol->ecoff_sym.asym.index = indexNil;
+	  struct localsym *lsym;
+
+	  lsym = symbol_get_obj (sym)->ecoff_symbol;
+	  lsym->ecoff_sym.asym.value = 0;
+	  lsym->ecoff_sym.asym.st = (int) st_Nil;
+	  lsym->ecoff_sym.asym.sc = (int) sc_Nil;
+	  lsym->ecoff_sym.asym.index = indexNil;
 	}
 
-      obj_ecoff_set_ext (sym, &sym->ecoff_symbol->ecoff_sym);
+      obj_ecoff_set_ext (sym, &symbol_get_obj (sym)->ecoff_symbol->ecoff_sym);
     }
 }
 
@@ -4723,12 +4731,12 @@ ecoff_build_debug (hdr, bufp, backend)
   cur_proc_ptr = (proc_t *) NULL;
   for (sym = symbol_rootP; sym != (symbolS *) NULL; sym = symbol_next (sym))
     {
-      if (sym->ecoff_symbol != NULL
-	  || sym->ecoff_file == (efdr_t *) NULL
-	  || (sym->bsym->flags & BSF_SECTION_SYM) != 0)
+      if (symbol_get_obj (sym)->ecoff_symbol != NULL
+	  || symbol_get_obj (sym)->ecoff_file == (efdr_t *) NULL
+	  || (symbol_get_bfdsym (sym)->flags & BSF_SECTION_SYM) != 0)
 	continue;
 
-      cur_file_ptr = sym->ecoff_file;
+      cur_file_ptr = symbol_get_obj (sym)->ecoff_file;
       add_ecoff_symbol ((const char *) NULL, st_Nil, sc_Nil, sym,
 			(bfd_vma) 0, S_GET_VALUE (sym), indexNil);
     }

@@ -1,5 +1,6 @@
 /* ELF object file format
-   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -235,8 +236,8 @@ elf_file_symbol (s)
   symbolS *sym;
 
   sym = symbol_new (s, absolute_section, (valueT) 0, (struct frag *) 0);
-  sym->sy_frag = &zero_address_frag;
-  sym->bsym->flags |= BSF_FILE;
+  symbol_set_frag (sym, &zero_address_frag);
+  symbol_get_bfdsym (sym)->flags |= BSF_FILE;
 
   if (symbol_rootP != sym)
     {
@@ -322,7 +323,7 @@ obj_elf_common (ignore)
 	      as_warn (_("Common alignment negative; 0 assumed"));
 	    }
 	}
-      if (symbolP->local)
+      if (symbol_get_obj (symbolP)->local)
 	{
 	  segT old_sec;
 	  int old_subsec;
@@ -350,8 +351,8 @@ obj_elf_common (ignore)
 	  if (align)
 	    frag_align (align, 0, 0);
 	  if (S_GET_SEGMENT (symbolP) == bss_section)
-	    symbolP->sy_frag->fr_symbol = 0;
-	  symbolP->sy_frag = frag_now;
+	    symbol_get_frag (symbolP)->fr_symbol = 0;
+	  symbol_set_frag (symbolP, frag_now);
 	  pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
 			    (offsetT) size, (char *) 0);
 	  *pfrag = 0;
@@ -389,7 +390,7 @@ obj_elf_common (ignore)
       goto allocate_common;
     }
 
-  symbolP->bsym->flags |= BSF_OBJECT;
+  symbol_get_bfdsym (symbolP)->flags |= BSF_OBJECT;
 
   demand_empty_rest_of_line ();
   return;
@@ -425,7 +426,7 @@ obj_elf_local (ignore)
       *input_line_pointer = c;
       SKIP_WHITESPACE ();
       S_CLEAR_EXTERNAL (symbolP);
-      symbolP->local = 1;
+      symbol_get_obj (symbolP)->local = 1;
       if (c == ',')
 	{
 	  input_line_pointer++;
@@ -454,7 +455,7 @@ obj_elf_weak (ignore)
       *input_line_pointer = c;
       SKIP_WHITESPACE ();
       S_SET_WEAK (symbolP);
-      symbolP->local = 1;
+      symbol_get_obj (symbolP)->local = 1;
       if (c == ',')
 	{
 	  input_line_pointer++;
@@ -815,7 +816,7 @@ obj_elf_section (xxx)
   /* Add a symbol for this section to the symbol table.  */
   secsym = symbol_find (string);
   if (secsym != NULL)
-    secsym->bsym = sec->symbol;
+    symbol_set_bfdsym (secsym, sec->symbol);
   else
     symbol_table_insert (section_symbol (sec));
 
@@ -949,7 +950,7 @@ obj_elf_symver (ignore)
 
   *input_line_pointer = c;
 
-  if (sym->sy_obj.versioned_name != NULL)
+  if (symbol_get_obj (sym)->versioned_name != NULL)
     {
       as_bad (_("multiple .symver directives for symbol `%s'"),
 	      S_GET_NAME (sym));
@@ -975,14 +976,14 @@ obj_elf_symver (ignore)
       *input_line_pointer++ = c;
     }
 
-  sym->sy_obj.versioned_name = xstrdup (name);
+  symbol_get_obj (sym)->versioned_name = xstrdup (name);
 
   *input_line_pointer = c;
 
-  if (strchr (sym->sy_obj.versioned_name, ELF_VER_CHR) == NULL)
+  if (strchr (symbol_get_obj (sym)->versioned_name, ELF_VER_CHR) == NULL)
     {
       as_bad (_("missing version name in `%s' for symbol `%s'"),
-	      sym->sy_obj.versioned_name, S_GET_NAME (sym));
+	      symbol_get_obj (sym)->versioned_name, S_GET_NAME (sym));
       ignore_rest_of_line ();
       return;
     }
@@ -1012,7 +1013,7 @@ obj_elf_vtable_inherit (ignore)
      the same child symbol.  Also, we can currently only do this if the
      child symbol is already exists and is placed in a fragment.  */
 
-  if (csym == NULL || csym->sy_frag == NULL)
+  if (csym == NULL || symbol_get_frag (csym) == NULL)
     {
       as_bad ("expected `%s' to have already been set for .vtable_inherit",
 	      cname);
@@ -1055,8 +1056,9 @@ obj_elf_vtable_inherit (ignore)
   if (bad)
     return;
 
-  assert (csym->sy_value.X_op == O_constant);
-  fix_new (csym->sy_frag, csym->sy_value.X_add_number, 0, psym, 0, 0,
+  assert (symbol_get_value_expression (csym)->X_op == O_constant);
+  fix_new (symbol_get_frag (csym),
+	   symbol_get_value_expression (csym)->X_add_number, 0, psym, 0, 0,
 	   BFD_RELOC_VTABLE_INHERIT);
 }
   
@@ -1113,8 +1115,11 @@ void
 obj_symbol_new_hook (symbolP)
      symbolS *symbolP;
 {
-  symbolP->sy_obj.size = NULL;
-  symbolP->sy_obj.versioned_name = NULL;
+  struct elf_obj_sy *sy_obj;
+
+  sy_obj = symbol_get_obj (symbolP);
+  sy_obj->size = NULL;
+  sy_obj->versioned_name = NULL;
 
 #ifdef NEED_ECOFF_DEBUG
   if (ECOFF_DEBUGGING)
@@ -1225,8 +1230,9 @@ obj_elf_size (ignore)
     S_SET_SIZE (sym, exp.X_add_number);
   else
     {
-      sym->sy_obj.size = (expressionS *) xmalloc (sizeof (expressionS));
-      *sym->sy_obj.size = exp;
+      symbol_get_obj (sym)->size =
+	(expressionS *) xmalloc (sizeof (expressionS));
+      *symbol_get_obj (sym)->size = exp;
     }
   demand_empty_rest_of_line ();
 }
@@ -1284,7 +1290,7 @@ obj_elf_type (ignore)
 
   *input_line_pointer = c;
 
-  sym->bsym->flags |= type;
+  symbol_get_bfdsym (sym)->flags |= type;
 
   demand_empty_rest_of_line ();
 }
@@ -1393,7 +1399,7 @@ elf_ecoff_set_ext (sym, ext)
      symbolS *sym;
      struct ecoff_extr *ext;
 {
-  sym->bsym->udata.p = (PTR) ext;
+  symbol_get_bfdsym (sym)->udata.p = (PTR) ext;
 }
 
 /* This function is called by bfd_ecoff_debug_externals.  It is
@@ -1429,35 +1435,39 @@ elf_frob_symbol (symp, puntp)
      symbolS *symp;
      int *puntp;
 {
+  struct elf_obj_sy *sy_obj;
+
 #ifdef NEED_ECOFF_DEBUG
   if (ECOFF_DEBUGGING)
     ecoff_frob_symbol (symp);
 #endif
 
-  if (symp->sy_obj.size != NULL)
+  sy_obj = symbol_get_obj (symp);
+
+  if (sy_obj->size != NULL)
     {
-      switch (symp->sy_obj.size->X_op)
+      switch (sy_obj->size->X_op)
 	{
 	case O_subtract:
 	  S_SET_SIZE (symp,
-		      (S_GET_VALUE (symp->sy_obj.size->X_add_symbol)
-		       + symp->sy_obj.size->X_add_number
-		       - S_GET_VALUE (symp->sy_obj.size->X_op_symbol)));
+		      (S_GET_VALUE (sy_obj->size->X_add_symbol)
+		       + sy_obj->size->X_add_number
+		       - S_GET_VALUE (sy_obj->size->X_op_symbol)));
 	  break;
 	case O_constant:
 	  S_SET_SIZE (symp,
-		      (S_GET_VALUE (symp->sy_obj.size->X_add_symbol)
-		       + symp->sy_obj.size->X_add_number));
+		      (S_GET_VALUE (sy_obj->size->X_add_symbol)
+		       + sy_obj->size->X_add_number));
 	  break;
 	default:
 	  as_bad (_(".size expression too complicated to fix up"));
 	  break;
 	}
-      free (symp->sy_obj.size);
-      symp->sy_obj.size = NULL;
+      free (sy_obj->size);
+      sy_obj->size = NULL;
     }
 
-  if (symp->sy_obj.versioned_name != NULL)
+  if (sy_obj->versioned_name != NULL)
     {
       /* This symbol was given a new name with the .symver directive.
 
@@ -1477,15 +1487,15 @@ elf_frob_symbol (symp, puntp)
 	  /* Verify that the name isn't using the @@ syntax--this is
              reserved for definitions of the default version to link
              against.  */
-	  p = strchr (symp->sy_obj.versioned_name, ELF_VER_CHR);
+	  p = strchr (sy_obj->versioned_name, ELF_VER_CHR);
 	  know (p != NULL);
 	  if (p[1] == ELF_VER_CHR)
 	    {
 	      as_bad (_("invalid attempt to declare external version name as default in symbol `%s'"),
-		      symp->sy_obj.versioned_name);
+		      sy_obj->versioned_name);
 	      *puntp = true;
 	    }
-	  S_SET_NAME (symp, symp->sy_obj.versioned_name);
+	  S_SET_NAME (symp, sy_obj->versioned_name);
 	}
       else
 	{
@@ -1497,7 +1507,7 @@ elf_frob_symbol (symp, puntp)
              where the loop will still see it.  It would probably be
              better to do this in obj_frob_file_before_adjust. */
 
-	  symp2 = symbol_find_or_make (symp->sy_obj.versioned_name);
+	  symp2 = symbol_find_or_make (sy_obj->versioned_name);
 
 	  /* Now we act as though we saw symp2 = sym.  */
 
@@ -1505,9 +1515,11 @@ elf_frob_symbol (symp, puntp)
 
 	  /* Subtracting out the frag address here is a hack because
              we are in the middle of the final loop.  */
-	  S_SET_VALUE (symp2, S_GET_VALUE (symp) - symp->sy_frag->fr_address);
+	  S_SET_VALUE (symp2,
+		       (S_GET_VALUE (symp)
+			- symbol_get_frag (symp)->fr_address));
 
-	  symp2->sy_frag = symp->sy_frag;
+	  symbol_set_frag (symp2, symbol_get_frag (symp));
 
 	  /* This will copy over the size information.  */
 	  copy_symbol_attributes (symp2, symp);
@@ -1521,7 +1533,7 @@ elf_frob_symbol (symp, puntp)
     }
 
   /* Double check weak symbols.  */
-  if (symp->bsym->flags & BSF_WEAK)
+  if (S_IS_WEAK (symp))
     {
       if (S_IS_COMMON (symp))
 	as_bad (_("Symbol `%s' can not be both weak and common"),
@@ -1537,19 +1549,21 @@ elf_frob_symbol (symp, puntp)
      .global directives to mark functions.  */
 
   if (S_IS_COMMON (symp))
-    symp->bsym->flags |= BSF_OBJECT;
+    symbol_get_bfdsym (symp)->flags |= BSF_OBJECT;
 
   if (strstr (TARGET_OS, "irix") != NULL
-      && (! S_IS_DEFINED (symp) && ((symp->bsym->flags & BSF_FUNCTION) == 0)))
-    symp->bsym->flags |= BSF_OBJECT;
+      && ! S_IS_DEFINED (symp)
+      && (symbol_get_bfdsym (symp)->flags & BSF_FUNCTION) == 0)
+    symbol_get_bfdsym (symp)->flags |= BSF_OBJECT;
 #endif
 
 #ifdef TC_PPC
   /* Frob the PowerPC, so that the symbol always has object type
      if it is not some other type.  VxWorks needs this.  */
-  if ((symp->bsym->flags & (BSF_FUNCTION | BSF_FILE | BSF_SECTION_SYM)) == 0
+  if ((symbol_get_bfdsym (symp)->flags
+       & (BSF_FUNCTION | BSF_FILE | BSF_SECTION_SYM)) == 0
       && S_IS_DEFINED (symp))
-    symp->bsym->flags |= BSF_OBJECT;
+    symbol_get_bfdsym (symp)->flags |= BSF_OBJECT;
 #endif
 }
 

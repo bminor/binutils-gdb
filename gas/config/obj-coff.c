@@ -1,5 +1,5 @@
 /* coff object file format
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -249,8 +249,8 @@ SA_SET_SYM_ENDNDX (sym, val)
 {
   combined_entry_type *entry, *p;
 
-  entry = &coffsymbol (sym->bsym)->native[1];
-  p = coffsymbol (val->bsym)->native;
+  entry = &coffsymbol (symbol_get_bfdsym (sym))->native[1];
+  p = coffsymbol (symbol_get_bfdsym (val))->native;
   entry->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p = p;
   entry->fix_end = 1;
 }
@@ -262,8 +262,8 @@ SA_SET_SYM_TAGNDX (sym, val)
 {
   combined_entry_type *entry, *p;
 
-  entry = &coffsymbol (sym->bsym)->native[1];
-  p = coffsymbol (val->bsym)->native;
+  entry = &coffsymbol (symbol_get_bfdsym (sym))->native[1];
+  p = coffsymbol (symbol_get_bfdsym (val))->native;
   entry->u.auxent.x_sym.x_tagndx.p = p;
   entry->fix_tag = 1;
 }
@@ -272,7 +272,7 @@ static int
 S_GET_DATA_TYPE (sym)
      symbolS *sym;
 {
-  return coffsymbol (sym->bsym)->native->u.syment.n_type;
+  return coffsymbol (symbol_get_bfdsym (sym))->native->u.syment.n_type;
 }
 
 int
@@ -280,7 +280,7 @@ S_SET_DATA_TYPE (sym, val)
      symbolS *sym;
      int val;
 {
-  coffsymbol (sym->bsym)->native->u.syment.n_type = val;
+  coffsymbol (symbol_get_bfdsym (sym))->native->u.syment.n_type = val;
   return val;
 }
 
@@ -288,7 +288,7 @@ int
 S_GET_STORAGE_CLASS (sym)
      symbolS *sym;
 {
-  return coffsymbol (sym->bsym)->native->u.syment.n_sclass;
+  return coffsymbol (symbol_get_bfdsym (sym))->native->u.syment.n_sclass;
 }
 
 int
@@ -296,7 +296,7 @@ S_SET_STORAGE_CLASS (sym, val)
      symbolS *sym;
      int val;
 {
-  coffsymbol (sym->bsym)->native->u.syment.n_sclass = val;
+  coffsymbol (symbol_get_bfdsym (sym))->native->u.syment.n_sclass = val;
   return val;
 }
 
@@ -339,7 +339,7 @@ c_dot_file_symbol (filename)
   S_SET_STORAGE_CLASS (symbolP, C_FILE);
   S_SET_NUMBER_AUXILIARY (symbolP, 1);
 
-  symbolP->bsym->flags = BSF_DEBUGGING;
+  symbol_get_bfdsym (symbolP)->flags = BSF_DEBUGGING;
 
 #ifndef NO_LISTING
   {
@@ -385,7 +385,7 @@ coff_obj_symbol_new_hook (symbolP)
   char * s  = (char *) xmalloc (sz);
   
   memset (s, 0, sz);
-  coffsymbol (symbolP->bsym)->native = (combined_entry_type *) s;
+  coffsymbol (symbol_get_bfdsym (symbolP))->native = (combined_entry_type *) s;
 
   S_SET_DATA_TYPE (symbolP, T_NULL);
   S_SET_STORAGE_CLASS (symbolP, 0);
@@ -434,7 +434,8 @@ coff_add_linesym (sym)
 {
   if (line_nos)
     {
-      coffsymbol (current_lineno_sym->bsym)->lineno = (alent *) line_nos;
+      coffsymbol (symbol_get_bfdsym (current_lineno_sym))->lineno =
+	(alent *) line_nos;
       coff_n_line_nos++;
       line_nos = 0;
     }
@@ -532,7 +533,7 @@ obj_coff_def (what)
 
   /* Initialize the new symbol */
   def_symbol_in_progress = symbol_make (symbol_name_copy);
-  def_symbol_in_progress->sy_frag = &zero_address_frag;
+  symbol_set_frag (def_symbol_in_progress, &zero_address_frag);
   S_SET_VALUE (def_symbol_in_progress, 0);
 
   if (S_IS_STRING (def_symbol_in_progress))
@@ -585,7 +586,7 @@ obj_coff_endef (ignore)
 	CONST char *name;
 	S_SET_SEGMENT (def_symbol_in_progress, text_section);
 
-	name = bfd_asymbol_name (def_symbol_in_progress->bsym);
+	name = S_GET_NAME (def_symbol_in_progress);
 	if (name[1] == 'b' && name[2] == 'f')
 	  {
 	    if (! in_function ())
@@ -909,17 +910,19 @@ obj_coff_val (ignore)
 #endif
       if (!strcmp (symbol_name, "."))
 	{
-	  def_symbol_in_progress->sy_frag = frag_now;
+	  symbol_set_frag (def_symbol_in_progress, frag_now);
 	  S_SET_VALUE (def_symbol_in_progress, (valueT) frag_now_fix ());
 	  /* If the .val is != from the .def (e.g. statics) */
 	}
       else if (strcmp (S_GET_NAME (def_symbol_in_progress), symbol_name))
 	{
-	  def_symbol_in_progress->sy_value.X_op = O_symbol;
-	  def_symbol_in_progress->sy_value.X_add_symbol =
-	    symbol_find_or_make (symbol_name);
-	  def_symbol_in_progress->sy_value.X_op_symbol = NULL;
-	  def_symbol_in_progress->sy_value.X_add_number = 0;
+	  expressionS exp;
+
+	  exp.X_op = O_symbol;
+	  exp.X_add_symbol = symbol_find_or_make (symbol_name);
+	  exp.X_op_symbol = NULL;
+	  exp.X_add_number = 0;
+	  symbol_set_value_expression (def_symbol_in_progress, &exp);
 
 	  /* If the segment is undefined when the forward reference is
 	     resolved, then copy the segment id from the forward
@@ -1034,7 +1037,8 @@ coff_frob_symbol (symp, punt)
 	      coff_last_function = symp;
 	      if (S_GET_NUMBER_AUXILIARY (symp) < 1)
 		S_SET_NUMBER_AUXILIARY (symp, 1);
-	      auxp = &coffsymbol (symp->bsym)->native[1].u.auxent;
+	      auxp =
+		&coffsymbol (symbol_get_bfdsym (symp))->native[1].u.auxent;
 	      memset (auxp->x_sym.x_fcnary.x_ary.x_dimen, 0,
 		      sizeof (auxp->x_sym.x_fcnary.x_ary.x_dimen));
 	    }
@@ -1055,7 +1059,7 @@ coff_frob_symbol (symp, punt)
 	*punt = 1;
 
       if (SF_GET_FUNCTION (symp))
-	symp->bsym->flags |= BSF_FUNCTION;
+	symbol_get_bfdsym (symp)->flags |= BSF_FUNCTION;
 
       /* more ... */
     }
@@ -1069,7 +1073,7 @@ coff_frob_symbol (symp, punt)
   /* This is pretty horrible, but we have to set *punt correctly in
      order to call SA_SET_SYM_ENDNDX correctly.  */
   if (! symp->sy_used_in_reloc
-      && ((symp->bsym->flags & BSF_SECTION_SYM) != 0
+      && ((symbol_get_bfdsym (symp)->flags & BSF_SECTION_SYM) != 0
 	  || (! S_IS_EXTERNAL (symp)
 	      && ! symp->sy_tc.output
 	      && S_GET_STORAGE_CLASS (symp) != C_FILE)))
@@ -1078,7 +1082,7 @@ coff_frob_symbol (symp, punt)
 
   if (set_end != (symbolS *) NULL
       && ! *punt
-      && ((symp->bsym->flags & BSF_NOT_AT_END) != 0
+      && ((symbol_get_bfdsym (symp)->flags & BSF_NOT_AT_END) != 0
 	  || (S_IS_DEFINED (symp)
 	      && ! S_IS_COMMON (symp)
 	      && (! S_IS_EXTERNAL (symp) || SF_GET_FUNCTION (symp)))))
@@ -1100,22 +1104,22 @@ coff_frob_symbol (symp, punt)
       coff_last_bf = symp;
     }
 
-  if (coffsymbol (symp->bsym)->lineno)
+  if (coffsymbol (symbol_get_bfdsym (symp))->lineno)
     {
       int i;
       struct line_no *lptr;
       alent *l;
 
-      lptr = (struct line_no *) coffsymbol (symp->bsym)->lineno;
+      lptr = (struct line_no *) coffsymbol (symbol_get_bfdsym (symp))->lineno;
       for (i = 0; lptr; lptr = lptr->next)
 	i++;
-      lptr = (struct line_no *) coffsymbol (symp->bsym)->lineno;
+      lptr = (struct line_no *) coffsymbol (symbol_get_bfdsym (symp))->lineno;
 
       /* We need i entries for line numbers, plus 1 for the first
 	 entry which BFD will override, plus 1 for the last zero
 	 entry (a marker for BFD).  */
       l = (alent *) xmalloc ((i + 2) * sizeof (alent));
-      coffsymbol (symp->bsym)->lineno = l;
+      coffsymbol (symbol_get_bfdsym (symp))->lineno = l;
       l[i + 1].line_number = 0;
       l[i + 1].u.sym = NULL;
       for (; i > 0; i--)

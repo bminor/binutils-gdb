@@ -1,5 +1,5 @@
 /* This file is tc-sh.h
-   Copyright (C) 1993, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -56,6 +56,8 @@ extern int sh_force_relocation ();
 
 #ifdef OBJ_ELF
 #define obj_fix_adjustable(fixP) sh_fix_adjustable(fixP)
+struct fix;
+extern boolean sh_fix_adjustable PARAMS ((struct fix *));
 #endif
 
 #define IGNORE_NONSTANDARD_ESCAPES

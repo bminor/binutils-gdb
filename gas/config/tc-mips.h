@@ -1,5 +1,5 @@
 /* tc-mips.h -- header file for tc-mips.c.
-   Copyright (C) 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 1999 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF support by Ian Lance Taylor of Cygnus Support.
@@ -85,7 +85,7 @@ extern void mips_init_after_args PARAMS ((void));
 extern int mips_parse_long_option PARAMS ((const char *));
 
 #define tc_frob_label(sym) mips_define_label (sym)
-extern void mips_define_label PARAMS ((struct symbol *));
+extern void mips_define_label PARAMS ((symbolS *));
 
 #define tc_frob_file_before_adjust() mips_frob_file_before_adjust ()
 extern void mips_frob_file_before_adjust PARAMS ((void));

@@ -1,5 +1,6 @@
 /* tc-vax.c - vax-specific -
-   Copyright (C) 1987, 91, 92, 93, 94, 95, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1987, 91, 92, 93, 94, 95, 98, 1999
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -335,7 +336,7 @@ md_assemble (instruction_string)
   segT to_seg;
   valueT this_add_number;
   /* Positive (minuend) symbol. */
-  struct symbol *this_add_symbol;
+  symbolS *this_add_symbol;
   /* As a number. */
   long opcode_as_number;
   /* Least significant byte 1st. */

@@ -1,5 +1,5 @@
 /* symbols.c -symbol table-
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -28,6 +28,8 @@
 #include "obstack.h"		/* For "symbols.h" */
 #include "subsegs.h"
 
+#include "struc-symbol.h"
+
 /* This is non-zero if symbols are case sensitive, which is the
    default.  */
 int symbols_case_sensitive = 1;
@@ -38,6 +40,9 @@ extern int new_broken_words;
 
 /* symbol-name => struct symbol pointer */
 static struct hash_control *sy_hash;
+
+/* Table of local symbols.  */
+static struct hash_control *local_hash;
 
 /* Below are commented in "symbols.h". */
 symbolS *symbol_rootP;
@@ -93,6 +98,41 @@ symbol_new (name, segment, valu, frag)
   return symbolP;
 }
 
+/* Save a symbol name on a permanent obstack, and convert it according
+   to the object file format.  */
+
+static char *
+save_symbol_name (name)
+     const char *name;
+{
+  unsigned int name_length;
+  char *ret;
+
+  name_length = strlen (name) + 1;	/* +1 for \0 */
+  obstack_grow (&notes, name, name_length);
+  ret = obstack_finish (&notes);
+
+#ifdef STRIP_UNDERSCORE
+  if (ret[0] == '_')
+    ++ret;
+#endif
+
+#ifdef tc_canonicalize_symbol_name
+  ret = tc_canonicalize_symbol_name (ret);
+#endif
+
+  if (! symbols_case_sensitive)
+    {
+      unsigned char *s;
+
+      for (s = (unsigned char *) ret; *s != '\0'; s++)
+	if (islower (*s))
+	  *s = toupper (*s);
+    }
+
+  return ret;
+}
+
 symbolS *
 symbol_create (name, segment, valu, frag)
      const char *name;		/* It is copied, the caller can destroy/modify */
@@ -100,31 +140,10 @@ symbol_create (name, segment, valu, frag)
      valueT valu;		/* Symbol value */
      fragS *frag;		/* Associated fragment */
 {
-  unsigned int name_length;
   char *preserved_copy_of_name;
   symbolS *symbolP;
 
-  name_length = strlen (name) + 1;	/* +1 for \0 */
-  obstack_grow (&notes, name, name_length);
-  preserved_copy_of_name = obstack_finish (&notes);
-#ifdef STRIP_UNDERSCORE
-  if (preserved_copy_of_name[0] == '_')
-    preserved_copy_of_name++;
-#endif
-
-#ifdef tc_canonicalize_symbol_name
-  preserved_copy_of_name =
-    tc_canonicalize_symbol_name (preserved_copy_of_name);
-#endif
-
-  if (! symbols_case_sensitive)
-    {
-      unsigned char *s;
-
-      for (s = (unsigned char *) preserved_copy_of_name; *s != '\0'; s++)
-	if (islower (*s))
-	  *s = toupper (*s);
-    }
+  preserved_copy_of_name = save_symbol_name (name);
 
   symbolP = (symbolS *) obstack_alloc (&notes, sizeof (symbolS));
 
@@ -157,6 +176,101 @@ symbol_create (name, segment, valu, frag)
 
   return symbolP;
 }
+
+#ifdef BFD_ASSEMBLER
+
+/* Local symbol support.  If we can get away with it, we keep only a
+   small amount of information for local symbols.  */
+
+static struct local_symbol *local_symbol_make PARAMS ((const char *, segT,
+						       valueT, fragS *));
+static symbolS *local_symbol_convert PARAMS ((struct local_symbol *));
+
+/* Used for statistics.  */
+
+static unsigned long local_symbol_count;
+static unsigned long local_symbol_conversion_count;
+
+/* This macro is called with a symbol argument passed by reference.
+   It returns whether this is a local symbol.  If necessary, it
+   changes its argument to the real symbol.  */
+
+#define LOCAL_SYMBOL_CHECK(s)						\
+  (s->bsym == NULL							\
+   ? (local_symbol_converted_p ((struct local_symbol *) s)		\
+      ? (s = local_symbol_get_real_symbol ((struct local_symbol *) s),	\
+	 0)								\
+      : 1)								\
+   : 0)
+
+/* Create a local symbol and insert it into the local hash table.  */
+
+static struct local_symbol *
+local_symbol_make (name, section, offset, frag)
+     const char *name;
+     segT section;
+     valueT offset;
+     fragS *frag;
+{
+  char *name_copy;
+  struct local_symbol *ret;
+
+  ++local_symbol_count;
+
+  name_copy = save_symbol_name (name);
+
+  ret = (struct local_symbol *) obstack_alloc (&notes, sizeof *ret);
+  ret->lsy_marker = NULL;
+  ret->lsy_name = name_copy;
+  ret->lsy_section = section;
+  local_symbol_set_frag (ret, frag);
+  ret->lsy_offset = offset;
+
+  hash_jam (local_hash, name_copy, (PTR) ret);
+
+  return ret;
+}
+
+/* Convert a local symbol into a real symbol.  Note that we do not
+   reclaim the space used by the local symbol.  */
+
+static symbolS *
+local_symbol_convert (locsym)
+     struct local_symbol *locsym;
+{
+  symbolS *ret;
+
+  assert (locsym->lsy_marker == NULL);
+  if (local_symbol_converted_p (locsym))
+    return local_symbol_get_real_symbol (locsym);
+
+  ++local_symbol_conversion_count;
+
+  ret = symbol_new (locsym->lsy_name, locsym->lsy_section, locsym->lsy_offset,
+		    local_symbol_get_frag (locsym));
+
+  if (local_symbol_resolved_p (locsym))
+    ret->sy_resolved = 1;
+
+  /* Local symbols are always either defined or used.  */
+  ret->sy_used = 1;
+
+  symbol_table_insert (ret);
+
+  local_symbol_mark_converted (locsym);
+  local_symbol_set_real_symbol (locsym, ret);
+
+  hash_jam (local_hash, locsym->lsy_name, NULL);
+
+  return ret;
+}
+
+#else /* ! BFD_ASSEMBLER */
+
+#define LOCAL_SYMBOL_CHECK(s) 0
+#define local_symbol_convert(s) ((symbolS *) s)
+
+#endif /* ! BFD_ASSEMBLER */
 
 
 /*
@@ -238,7 +352,24 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
       /*
        *	Now check for undefined symbols
        */
-      if (!S_IS_DEFINED (symbolP) || S_IS_COMMON (symbolP))
+      if (LOCAL_SYMBOL_CHECK (symbolP))
+	{
+	  struct local_symbol *locsym = (struct local_symbol *) symbolP;
+
+	  if (locsym->lsy_section != undefined_section
+	      && (local_symbol_get_frag (locsym) != frag_now
+		  || locsym->lsy_section != now_seg
+		  || locsym->lsy_offset != frag_now_fix ()))
+	    {
+	      as_bad (_("Symbol %s already defined."), sym_name);
+	      return symbolP;
+	    }
+
+	  locsym->lsy_section = now_seg;
+	  local_symbol_set_frag (locsym, frag_now);
+	  locsym->lsy_offset = frag_now_fix ();
+	}
+      else if (!S_IS_DEFINED (symbolP) || S_IS_COMMON (symbolP))
 	{
 	  if (S_GET_VALUE (symbolP) == 0)
 	    {
@@ -329,6 +460,14 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
 	}			/* if this symbol is not yet defined */
 
     }
+#ifdef BFD_ASSEMBLER
+  else if (! flag_keep_locals && bfd_is_local_label_name (stdoutput, sym_name))
+    {
+      symbolP = (symbolS *) local_symbol_make (sym_name, now_seg,
+					       (valueT) frag_now_fix (),
+					       frag_now);
+    }
+#endif /* BFD_ASSEMBLER */
   else
     {
       symbolP = symbol_new (sym_name, now_seg, (valueT) frag_now_fix (),
@@ -344,6 +483,8 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
     {
       /* This symbol is actually being defined within an MRI common
          section.  This requires special handling.  */
+      if (LOCAL_SYMBOL_CHECK (symbolP))
+	symbolP = local_symbol_convert ((struct local_symbol *) symbolP);
       symbolP->sy_value.X_op = O_symbol;
       symbolP->sy_value.X_add_symbol = mri_common_symbol;
       symbolP->sy_value.X_add_number = S_GET_VALUE (mri_common_symbol);
@@ -379,6 +520,16 @@ symbol_table_insert (symbolP)
   know (symbolP);
   know (S_GET_NAME (symbolP));
 
+  if (LOCAL_SYMBOL_CHECK (symbolP))
+    {
+      error_string = hash_jam (local_hash, S_GET_NAME (symbolP),
+			       (PTR) symbolP);
+      if (error_string != NULL)
+	as_fatal (_("Inserting \"%s\" into symbol table failed: %s"),
+		  S_GET_NAME (symbolP), error_string);
+      return;
+    }
+
   if ((error_string = hash_jam (sy_hash, S_GET_NAME (symbolP), (PTR) symbolP)))
     {
       as_fatal (_("Inserting \"%s\" into symbol table failed: %s"),
@@ -402,6 +553,20 @@ symbol_find_or_make (name)
 
   if (symbolP == NULL)
     {
+#ifdef BFD_ASSEMBLER
+      if (! flag_keep_locals && bfd_is_local_label_name (stdoutput, name))
+	{
+	  symbolP = md_undefined_symbol ((char *) name);
+	  if (symbolP != NULL)
+	    return symbolP;
+
+	  symbolP = (symbolS *) local_symbol_make (name, undefined_section,
+						   (valueT) 0,
+						   &zero_address_frag);
+	  return symbolP;
+	}
+#endif
+
       symbolP = symbol_make (name);
 
       symbol_table_insert (symbolP);
@@ -450,6 +615,8 @@ symbol_find_base (name, strip_underscore)
      CONST char *name;
      int strip_underscore;
 {
+  struct local_symbol *locsym;
+
   if (strip_underscore && *name == '_')
     name++;
 
@@ -482,6 +649,10 @@ symbol_find_base (name, strip_underscore)
       *copy = '\0';
     }
 
+  locsym = (struct local_symbol *) hash_find (local_hash, name);
+  if (locsym != NULL)
+    return (symbolS *) locsym;
+
   return ((symbolS *) hash_find (sy_hash, name));
 }
 
@@ -501,6 +672,11 @@ symbol_append (addme, target, rootPP, lastPP)
      symbolS **rootPP;
      symbolS **lastPP;
 {
+  if (LOCAL_SYMBOL_CHECK (addme))
+    abort ();
+  if (target != NULL && LOCAL_SYMBOL_CHECK (target))
+    abort ();
+
   if (target == NULL)
     {
       know (*rootPP == NULL);
@@ -541,6 +717,8 @@ void
 symbol_clear_list_pointers (symbolP)
      symbolS *symbolP;
 {
+  if (LOCAL_SYMBOL_CHECK (symbolP))
+    abort ();
   symbolP->sy_next = NULL;
 #ifdef SYMBOLS_NEED_BACKPOINTERS
   symbolP->sy_previous = NULL;
@@ -555,6 +733,9 @@ symbol_remove (symbolP, rootPP, lastPP)
      symbolS **rootPP;
      symbolS **lastPP;
 {
+  if (LOCAL_SYMBOL_CHECK (symbolP))
+    abort ();
+
   if (symbolP == *rootPP)
     {
       *rootPP = symbolP->sy_next;
@@ -586,6 +767,11 @@ symbol_insert (addme, target, rootPP, lastPP)
      symbolS **rootPP;
      symbolS **lastPP;
 {
+  if (LOCAL_SYMBOL_CHECK (addme))
+    abort ();
+  if (LOCAL_SYMBOL_CHECK (target))
+    abort ();
+
   if (target->sy_previous != NULL)
     {
       target->sy_previous->sy_next = addme;
@@ -617,6 +803,9 @@ verify_symbol_chain (rootP, lastP)
 
   for (; symbol_next (symbolP) != NULL; symbolP = symbol_next (symbolP))
     {
+#ifdef BFD_ASSEMBLER
+      assert (symbolP->bsym != NULL);
+#endif
 #ifdef SYMBOLS_NEED_BACKPOINTERS
       assert (symbolP->sy_next->sy_previous == symbolP);
 #else
@@ -654,6 +843,25 @@ resolve_symbol_value (symp, finalize)
   int resolved;
   valueT final_val;
   segT final_seg;
+
+  if (LOCAL_SYMBOL_CHECK (symp))
+    {
+      struct local_symbol *locsym = (struct local_symbol *) symp;
+
+      if (local_symbol_resolved_p (locsym))
+	return locsym->lsy_offset;
+
+      final_val = (local_symbol_get_frag (locsym)->fr_address
+		   + locsym->lsy_offset);
+
+      if (finalize)
+	{
+	  locsym->lsy_offset = final_val;
+	  local_symbol_mark_resolved (locsym);
+	}
+
+      return final_val;
+    }
 
   if (symp->sy_resolved)
     {
@@ -715,12 +923,17 @@ resolve_symbol_value (symp, finalize)
 	      /* This is a symbol inside an MRI common section.  The
                  relocation routines are going to handle it specially.
                  Don't change the value.  */
-	      resolved = add_symbol->sy_resolved;
+	      resolved = symbol_resolved_p (add_symbol);
 	      break;
 	    }
 
 	  if (finalize && final_val == 0)
-	    copy_symbol_attributes (symp, add_symbol);
+	    {
+	      if (LOCAL_SYMBOL_CHECK (add_symbol))
+		add_symbol = local_symbol_convert ((struct local_symbol *)
+						   add_symbol);
+	      copy_symbol_attributes (symp, add_symbol);
+	    }
 
 	  /* If we have equated this symbol to an undefined symbol, we
              keep X_op set to O_symbol, and we don't change
@@ -738,7 +951,7 @@ resolve_symbol_value (symp, finalize)
 		  symp->sy_value.X_add_number = final_val;
 		}
 	      final_val = 0;
-	      resolved = add_symbol->sy_resolved;
+	      resolved = symbol_resolved_p (add_symbol);
 	      goto exit_dont_set_value;
 	    }
 	  else
@@ -748,7 +961,7 @@ resolve_symbol_value (symp, finalize)
 		final_seg = S_GET_SEGMENT (add_symbol);
 	    }
 
-	  resolved = add_symbol->sy_resolved;
+	  resolved = symbol_resolved_p (add_symbol);
 	  break;
 
 	case O_uminus:
@@ -767,7 +980,7 @@ resolve_symbol_value (symp, finalize)
 	  if (final_seg == expr_section || final_seg == undefined_section)
 	    final_seg = absolute_section;
 
-	  resolved = add_symbol->sy_resolved;
+	  resolved = symbol_resolved_p (add_symbol);
 	  break;
 
 	case O_multiply:
@@ -912,7 +1125,8 @@ resolve_symbol_value (symp, finalize)
 	  final_val += symp->sy_frag->fr_address + left;
 	  if (final_seg == expr_section || final_seg == undefined_section)
 	    final_seg = absolute_section;
-	  resolved = (add_symbol->sy_resolved && op_symbol->sy_resolved);
+	  resolved = (symbol_resolved_p (add_symbol)
+		      && symbol_resolved_p (op_symbol));
    	  break;
 
 	case O_register:
@@ -955,6 +1169,33 @@ exit_dont_set_value:
     }
 
   return final_val;
+}
+
+#ifdef BFD_ASSEMBLER
+
+static void resolve_local_symbol PARAMS ((const char *, PTR));
+
+/* A static function passed to hash_traverse.  */
+
+static void
+resolve_local_symbol (key, value)
+     const char *key;
+     PTR value;
+{
+  if (value != NULL)
+    resolve_symbol_value (value, 1);
+}
+
+#endif
+
+/* Resolve all local symbols.  */
+
+void
+resolve_local_symbol_values ()
+{
+#ifdef BFD_ASSEMBLER
+  hash_traverse (local_hash, resolve_local_symbol);
+#endif
 }
 
 /* Dollar labels look like a number followed by a dollar sign.  Eg, "42$".
@@ -1322,6 +1563,9 @@ valueT
 S_GET_VALUE (s)
      symbolS *s;
 {
+  if (LOCAL_SYMBOL_CHECK (s))
+    return ((struct local_symbol *) s)->lsy_offset;
+
   if (!s->sy_resolved && s->sy_value.X_op != O_constant)
     resolve_symbol_value (s, 1);
   if (s->sy_value.X_op != O_constant)
@@ -1351,6 +1595,12 @@ S_SET_VALUE (s, val)
      symbolS *s;
      valueT val;
 {
+  if (LOCAL_SYMBOL_CHECK (s))
+    {
+      ((struct local_symbol *) s)->lsy_offset = val;
+      return;
+    }
+
   s->sy_value.X_op = O_constant;
   s->sy_value.X_add_number = (offsetT) val;
   s->sy_value.X_unsigned = 0;
@@ -1360,6 +1610,11 @@ void
 copy_symbol_attributes (dest, src)
      symbolS *dest, *src;
 {
+  if (LOCAL_SYMBOL_CHECK (dest))
+    abort ();
+  if (LOCAL_SYMBOL_CHECK (src))
+    abort ();
+
 #ifdef BFD_ASSEMBLER
   /* In an expression, transfer the settings of these flags.
      The user can override later, of course.  */
@@ -1378,7 +1633,12 @@ int
 S_IS_FUNCTION (s)
      symbolS *s;
 {
-  flagword flags = s->bsym->flags;
+  flagword flags;
+
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 0;
+
+  flags = s->bsym->flags;
 
   return (flags & BSF_FUNCTION) != 0;
 }
@@ -1387,7 +1647,12 @@ int
 S_IS_EXTERNAL (s)
      symbolS *s;
 {
-  flagword flags = s->bsym->flags;
+  flagword flags;
+
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 0;
+
+  flags = s->bsym->flags;
 
   /* sanity check */
   if ((flags & BSF_LOCAL) && (flags & BSF_GLOBAL))
@@ -1400,6 +1665,8 @@ int
 S_IS_WEAK (s)
      symbolS *s;
 {
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 0;
   return (s->bsym->flags & BSF_WEAK) != 0;
 }
 
@@ -1407,6 +1674,8 @@ int
 S_IS_COMMON (s)
      symbolS *s;
 {
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 0;
   return bfd_is_com_section (s->bsym->section);
 }
 
@@ -1414,6 +1683,8 @@ int
 S_IS_DEFINED (s)
      symbolS *s;
 {
+  if (LOCAL_SYMBOL_CHECK (s))
+    return ((struct local_symbol *) s)->lsy_section != undefined_section;
   return s->bsym->section != undefined_section;
 }
 
@@ -1421,6 +1692,8 @@ int
 S_IS_DEBUG (s)
      symbolS *s;
 {
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 0;
   if (s->bsym->flags & BSF_DEBUGGING)
     return 1;
   return 0;
@@ -1430,8 +1703,13 @@ int
 S_IS_LOCAL (s)
      symbolS *s;
 {
-  flagword flags = s->bsym->flags;
+  flagword flags;
   const char *name;
+
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 1;
+
+  flags = s->bsym->flags;
 
   /* sanity check */
   if ((flags & BSF_LOCAL) && (flags & BSF_GLOBAL))
@@ -1475,6 +1753,8 @@ CONST char *
 S_GET_NAME (s)
      symbolS *s;
 {
+  if (LOCAL_SYMBOL_CHECK (s))
+    return ((struct local_symbol *) s)->lsy_name;
   return s->bsym->name;
 }
 
@@ -1482,6 +1762,8 @@ segT
 S_GET_SEGMENT (s)
      symbolS *s;
 {
+  if (LOCAL_SYMBOL_CHECK (s))
+    return ((struct local_symbol *) s)->lsy_section;
   return s->bsym->section;
 }
 
@@ -1493,6 +1775,17 @@ S_SET_SEGMENT (s, seg)
   /* Don't reassign section symbols.  The direct reason is to prevent seg
      faults assigning back to const global symbols such as *ABS*, but it
      shouldn't happen anyway.  */
+
+  if (LOCAL_SYMBOL_CHECK (s))
+    {
+      if (seg == reg_section)
+	s = local_symbol_convert ((struct local_symbol *) s);
+      else
+	{
+	  ((struct local_symbol *) s)->lsy_section = seg;
+	  return;
+	}
+    }
 
   if (s->bsym->flags & BSF_SECTION_SYM)
     {
@@ -1507,6 +1800,8 @@ void
 S_SET_EXTERNAL (s)
      symbolS *s;
 {
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
   if ((s->bsym->flags & BSF_WEAK) != 0)
     {
       /* Let .weak override .global.  */
@@ -1520,6 +1815,8 @@ void
 S_CLEAR_EXTERNAL (s)
      symbolS *s;
 {
+  if (LOCAL_SYMBOL_CHECK (s))
+    return;
   if ((s->bsym->flags & BSF_WEAK) != 0)
     {
       /* Let .weak override.  */
@@ -1533,6 +1830,8 @@ void
 S_SET_WEAK (s)
      symbolS *s;
 {
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
   s->bsym->flags |= BSF_WEAK;
   s->bsym->flags &= ~(BSF_GLOBAL|BSF_LOCAL);
 }
@@ -1542,9 +1841,365 @@ S_SET_NAME (s, name)
      symbolS *s;
      char *name;
 {
+  if (LOCAL_SYMBOL_CHECK (s))
+    {
+      ((struct local_symbol *) s)->lsy_name = name;
+      return;
+    }
   s->bsym->name = name;
 }
 #endif /* BFD_ASSEMBLER */
+
+#ifdef SYMBOLS_NEED_BACKPOINTERS
+
+/* Return the previous symbol in a chain.  */
+
+symbolS *
+symbol_previous (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    abort ();
+  return s->sy_previous;
+}
+
+#endif /* SYMBOLS_NEED_BACKPOINTERS */
+
+/* Return the next symbol in a chain.  */
+
+symbolS *
+symbol_next (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    abort ();
+  return s->sy_next;
+}
+
+/* Return a pointer to the value of a symbol as an expression.  */
+
+expressionS *
+symbol_get_value_expression (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
+  return &s->sy_value;
+}
+
+/* Set the value of a symbol to an expression.  */
+
+void
+symbol_set_value_expression (s, exp)
+     symbolS *s;
+     const expressionS *exp;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
+  s->sy_value = *exp;
+}
+
+/* Set the frag of a symbol.  */
+
+void
+symbol_set_frag (s, f)
+     symbolS *s;
+     fragS *f;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    {
+      local_symbol_set_frag ((struct local_symbol *) s, f);
+      return;
+    }
+  s->sy_frag = f;
+}
+
+/* Return the frag of a symbol.  */
+
+fragS *
+symbol_get_frag (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return local_symbol_get_frag ((struct local_symbol *) s);
+  return s->sy_frag;
+}
+
+/* Mark a symbol as having been used.  */
+
+void
+symbol_mark_used (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return;
+  s->sy_used = 1;
+}
+
+/* Clear the mark of whether a symbol has been used.  */
+
+void
+symbol_clear_used (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
+  s->sy_used = 0;
+}
+
+/* Return whether a symbol has been used.  */
+
+int
+symbol_used_p (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 1;
+  return s->sy_used;
+}
+
+/* Mark a symbol as having been used in a reloc.  */
+
+void
+symbol_mark_used_in_reloc (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
+  s->sy_used_in_reloc = 1;
+}
+
+/* Clear the mark of whether a symbol has been used in a reloc.  */
+
+void
+symbol_clear_used_in_reloc (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return;
+  s->sy_used_in_reloc = 0;
+}
+
+/* Return whether a symbol has been used in a reloc.  */
+
+int
+symbol_used_in_reloc_p (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 0;
+  return s->sy_used_in_reloc;
+}
+
+/* Mark a symbol as an MRI common symbol.  */
+
+void
+symbol_mark_mri_common (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
+  s->sy_mri_common = 1;
+}
+
+/* Clear the mark of whether a symbol is an MRI common symbol.  */
+
+void
+symbol_clear_mri_common (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return;
+  s->sy_mri_common = 0;
+}
+
+/* Return whether a symbol is an MRI common symbol.  */
+
+int
+symbol_mri_common_p (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 0;
+  return s->sy_mri_common;
+}
+
+/* Mark a symbol as having been written.  */
+
+void
+symbol_mark_written (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return;
+  s->written = 1;
+}
+
+/* Clear the mark of whether a symbol has been written.  */
+
+void
+symbol_clear_written (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return;
+  s->written = 0;
+}
+
+/* Return whether a symbol has been written.  */
+
+int
+symbol_written_p (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 0;
+  return s->written;
+}
+
+/* Mark a symbol has having been resolved.  */
+
+void
+symbol_mark_resolved (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    {
+      local_symbol_mark_resolved ((struct local_symbol *) s);
+      return;
+    }
+  s->sy_resolved = 1;
+}
+
+/* Return whether a symbol has been resolved.  */
+
+int
+symbol_resolved_p (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return local_symbol_resolved_p ((struct local_symbol *) s);
+  return s->sy_resolved;
+}
+
+/* Return whether a symbol is a section symbol.  */
+
+int
+symbol_section_p (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 0;
+#ifdef BFD_ASSEMBLER
+  return (s->bsym->flags & BSF_SECTION_SYM) != 0;
+#else
+  /* FIXME */
+  return 0;
+#endif
+}
+
+/* Return whether a symbol is equated to another symbol.  */
+
+int
+symbol_equated_p (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 0;
+  return s->sy_value.X_op == O_symbol;
+}
+
+/* Return whether a symbol has a constant value.  */
+
+int
+symbol_constant_p (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 1;
+  return s->sy_value.X_op == O_constant;
+}
+
+#ifdef BFD_ASSEMBLER
+
+/* Return the BFD symbol for a symbol.  */
+
+asymbol *
+symbol_get_bfdsym (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
+  return s->bsym;
+}
+
+/* Set the BFD symbol for a symbol.  */
+
+void
+symbol_set_bfdsym (s, bsym)
+     symbolS *s;
+     asymbol *bsym;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
+  s->bsym = bsym;
+}
+
+#endif /* BFD_ASSEMBLER */
+
+#ifdef OBJ_SYMFIELD_TYPE
+
+/* Get a pointer to the object format information for a symbol.  */
+
+OBJ_SYMFIELD_TYPE *
+symbol_get_obj (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
+  return &s->sy_obj;
+}
+
+/* Set the object format information for a symbol.  */
+
+void
+symbol_set_obj (s, o)
+     symbolS *s;
+     OBJ_SYMFIELD_TYPE *o;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
+  s->sy_obj = *o;
+}
+
+#endif /* OBJ_SYMFIELD_TYPE */
+
+#ifdef TC_SYMFIELD_TYPE
+
+/* Get a pointer to the processor information for a symbol.  */
+
+TC_SYMFIELD_TYPE *
+symbol_get_tc (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
+  return &s->sy_tc;
+}
+
+/* Set the processor information for a symbol.  */
+
+void
+symbol_set_obj (s, o)
+     symbolS *s;
+     TC_SYMFIELD_TYPE *o;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
+  s->sy_tc = *o;
+}
+
+#endif /* TC_SYMFIELD_TYPE */
 
 void
 symbol_begin ()
@@ -1552,6 +2207,9 @@ symbol_begin ()
   symbol_lastP = NULL;
   symbol_rootP = NULL;		/* In case we have 0 symbols (!!) */
   sy_hash = hash_new ();
+#ifdef BFD_ASSEMBLER
+  local_hash = hash_new ();
+#endif
 
   memset ((char *) (&abs_symbol), '\0', sizeof (abs_symbol));
 #ifdef BFD_ASSEMBLER
@@ -1568,6 +2226,7 @@ symbol_begin ()
   if (LOCAL_LABELS_FB)
     fb_label_init ();
 }
+
 
 
 int indent_level;
@@ -1595,28 +2254,42 @@ print_symbol_value_1 (file, sym)
   if (!name || !name[0])
     name = "(unnamed)";
   fprintf (file, "sym %lx %s", (unsigned long) sym, name);
-  if (sym->sy_frag != &zero_address_frag)
-    fprintf (file, " frag %lx", (long) sym->sy_frag);
-  if (sym->written)
-    fprintf (file, " written");
-  if (sym->sy_resolved)
-    fprintf (file, " resolved");
-  else if (sym->sy_resolving)
-    fprintf (file, " resolving");
-  if (sym->sy_used_in_reloc)
-    fprintf (file, " used-in-reloc");
-  if (sym->sy_used)
-    fprintf (file, " used");
-  if (S_IS_LOCAL (sym))
-    fprintf (file, " local");
-  if (S_IS_EXTERN (sym))
-    fprintf (file, " extern");
-  if (S_IS_DEBUG (sym))
-    fprintf (file, " debug");
-  if (S_IS_DEFINED (sym))
-    fprintf (file, " defined");
+
+  if (LOCAL_SYMBOL_CHECK (sym))
+    {
+      struct local_symbol *locsym = (struct local_symbol *) sym;
+      if (local_symbol_get_frag (locsym) != &zero_address_frag
+	  && local_symbol_get_frag (locsym) != NULL)
+	fprintf (file, " frag %lx", (long) local_symbol_get_frag (locsym));
+      if (local_symbol_resolved_p (locsym))
+	fprintf (file, " resolved");
+      fprintf (file, " local");
+    }
+  else
+    {
+      if (sym->sy_frag != &zero_address_frag)
+	fprintf (file, " frag %lx", (long) sym->sy_frag);
+      if (sym->written)
+	fprintf (file, " written");
+      if (sym->sy_resolved)
+	fprintf (file, " resolved");
+      else if (sym->sy_resolving)
+	fprintf (file, " resolving");
+      if (sym->sy_used_in_reloc)
+	fprintf (file, " used-in-reloc");
+      if (sym->sy_used)
+	fprintf (file, " used");
+      if (S_IS_LOCAL (sym))
+	fprintf (file, " local");
+      if (S_IS_EXTERN (sym))
+	fprintf (file, " extern");
+      if (S_IS_DEBUG (sym))
+	fprintf (file, " debug");
+      if (S_IS_DEFINED (sym))
+	fprintf (file, " defined");
+    }
   fprintf (file, " %s", segment_name (S_GET_SEGMENT (sym)));
-  if (sym->sy_resolved)
+  if (symbol_resolved_p (sym))
     {
       segT s = S_GET_SEGMENT (sym);
 
@@ -1629,7 +2302,11 @@ print_symbol_value_1 (file, sym)
     {
       indent_level++;
       fprintf (file, "\n%*s<", indent_level * 4, "");
-      print_expr_1 (file, &sym->sy_value);
+      if (LOCAL_SYMBOL_CHECK (sym))
+	fprintf (file, "constant %lx",
+		 (long) ((struct local_symbol *) sym)->lsy_offset);
+      else
+	print_expr_1 (file, &sym->sy_value);
       fprintf (file, ">");
       indent_level--;
     }
@@ -1787,6 +2464,11 @@ symbol_print_statistics (file)
      FILE *file;
 {
   hash_print_statistics (file, "symbol table", sy_hash);
+#ifdef BFD_ASSEMBLER
+  hash_print_statistics (file, "mini local symbol table", local_hash);
+  fprintf (file, "%lu mini local symbols created, %lu converted\n",
+	   local_symbol_count, local_symbol_conversion_count);
+#endif
 }
 
 /* end of symbols.c */

@@ -1,5 +1,5 @@
 /* tc-ns32k.h -- Opcode table for National Semi 32k processor
-   Copyright (C) 1987, 92, 93, 94, 95, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1987, 92, 93, 94, 95, 97, 1999 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -76,7 +76,7 @@ extern void fix_new_ns32k_exp PARAMS((fragS *frag,
 extern void fix_new_ns32k PARAMS ((fragS *frag,
 				   int where,
 				   int size,
-				   struct symbol *add_symbol,
+				   symbolS *add_symbol,
 				   long offset,
 				   int pcrel,
 				   int im_disp,

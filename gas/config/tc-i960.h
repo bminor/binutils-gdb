@@ -130,7 +130,7 @@ struct relocation_info
 #ifdef OBJ_COFF
 
 /* We store the bal information in the sy_tc field.  */
-#define TC_SYMFIELD_TYPE struct symbol *
+#define TC_SYMFIELD_TYPE symbolS *
 
 #define TC_ADJUST_RELOC_COUNT(FIXP,COUNT) \
   { fixS *tcfixp = (FIXP); \
@@ -140,7 +140,7 @@ struct relocation_info
   }
 #endif
 
-extern int i960_validate_fix PARAMS ((struct fix *, segT, struct symbol **));
+extern int i960_validate_fix PARAMS ((struct fix *, segT, symbolS **));
 #define TC_VALIDATE_FIX(FIXP,SEGTYPE,LABEL) \
 	if (i960_validate_fix (FIXP, SEGTYPE, &add_symbolP) != 0) goto LABEL
 
@@ -167,9 +167,9 @@ extern void brtab_emit PARAMS ((void));
 
 extern void reloc_callj ();
 
-extern void tc_set_bal_of_call PARAMS ((struct symbol *, struct symbol *));
+extern void tc_set_bal_of_call PARAMS ((symbolS *, symbolS *));
 
-extern struct symbol *tc_get_bal_of_call PARAMS ((struct symbol *));
+extern struct symbol *tc_get_bal_of_call PARAMS ((symbolS *));
 
 extern void i960_handle_align ();
 #define HANDLE_ALIGN(FRAG)	i960_handle_align (FRAG)

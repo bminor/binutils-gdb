@@ -1,5 +1,5 @@
 /* tc-310v.h -- Header file for tc-d30v.c.
-   Copyright (C) 1997 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1998, 1999 Free Software Foundation, Inc.
    Written by Martin Hunt, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -15,8 +15,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA. */
 
 #define TC_D30V
 
@@ -52,7 +53,7 @@ int d30v_cleanup PARAMS ((int));
 #define TC_START_LABEL(ch, ptr)      (ch == ':' && d30v_cleanup (false))
 #define md_start_line_hook()	     d30v_start_line (false)
 
-void d30v_frob_label PARAMS ((struct symbol *));
+void d30v_frob_label PARAMS ((symbolS *));
 #define tc_frob_label(sym)	     d30v_frob_label(sym)
 
 void d30v_cons_align PARAMS ((int));

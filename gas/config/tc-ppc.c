@@ -1,5 +1,5 @@
 /* tc-ppc.c -- Assemble for the PowerPC or POWER (RS/6000)
-   Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1994, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -1405,8 +1405,8 @@ ppc_elf_lcomm(xxx)
   if (align2)
     frag_align (align2, 0, 0);
   if (S_GET_SEGMENT (symbolP) == bss_section)
-    symbolP->sy_frag->fr_symbol = 0;
-  symbolP->sy_frag = frag_now;
+    symbol_get_frag (symbolP)->fr_symbol = 0;
+  symbol_set_frag (symbolP, frag_now);
   pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, size,
 		    (char *) 0);
   *pfrag = 0;
@@ -4656,7 +4656,7 @@ md_apply_fix3 (fixp, valuep, seg)
     {
       /* `*valuep' may contain the value of the symbol on which the reloc
 	 will be based; we have to remove it.  */
-      if (fixp->fx_addsy->sy_used_in_reloc
+      if (symbol_used_in_reloc_p (fixp->fx_addsy)
 	  && S_GET_SEGMENT (fixp->fx_addsy) != absolute_section
 	  && S_GET_SEGMENT (fixp->fx_addsy) != undefined_section
 	  && ! bfd_is_com_section (S_GET_SEGMENT (fixp->fx_addsy)))
@@ -4887,7 +4887,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	  if (fixp->fx_pcrel)
 	    abort ();
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
-			      value + 0x8000 >> 16, 2);
+			      (value + 0x8000) >> 16, 2);
 	  break;
 
 	  /* Because SDA21 modifies the register field, the size is set to 4
@@ -4994,7 +4994,8 @@ tc_gen_reloc (seg, fixp)
 
   reloc = (arelent *) xmalloc (sizeof (arelent));
 
-  reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
   if (reloc->howto == (reloc_howto_type *) NULL)

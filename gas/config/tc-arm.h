@@ -1,5 +1,6 @@
 /* This file is tc-arm.h
-   Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999
+   Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
 
@@ -103,7 +104,7 @@
  extern void arm_start_line_hook PARAMS ((void));
 
 #define tc_frob_label(S) arm_frob_label (S)
- extern void arm_frob_label PARAMS ((struct symbol *));
+ extern void arm_frob_label PARAMS ((symbolS *));
 
 /* We also need to mark assembler created symbols:  */
 #define tc_frob_fake_label(S) arm_frob_label (S)

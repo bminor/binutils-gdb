@@ -1,5 +1,6 @@
 /* ELF object file format.
-   Copyright (C) 1992, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -34,6 +35,22 @@
 #define BYTES_IN_WORD 4		/* for now */
 #include "bfd/elf-bfd.h"
 
+#include "targ-cpu.h"
+
+#ifdef TC_ALPHA
+#define ECOFF_DEBUGGING alpha_flag_mdebug
+extern int alpha_flag_mdebug;
+#endif
+
+/* For now, always set ECOFF_DEBUGGING for a MIPS target.  */
+#ifdef TC_MIPS
+#ifdef MIPS_STABS_ELF
+#define ECOFF_DEBUGGING 0
+#else
+#define ECOFF_DEBUGGING 1
+#endif /* MIPS_STABS_ELF */
+#endif /* TC_MIPS */
+
 /* Additional information we keep for each symbol.  */
 
 /* FIXME: For some reason, this structure is needed both here and in
@@ -41,24 +58,27 @@
 #ifndef OBJ_SYMFIELD_TYPE
 struct elf_obj_sy
 {
+  /* Whether the symbol has been marked as local.  */
+  int local;
+
   /* Use this to keep track of .size expressions that involve
      differences that we can't compute yet.  */
   expressionS *size;
 
   /* The name specified by the .symver directive.  */
   char *versioned_name;
+
+#ifdef ECOFF_DEBUGGING
+  /* If we are generating ECOFF debugging information, we need some
+     additional fields for each symbol.  */
+  struct efdr *ecoff_file;
+  struct localsym *ecoff_symbol;
+  valueT ecoff_extern_size;
+#endif
 };
 #endif
 
 #define OBJ_SYMFIELD_TYPE struct elf_obj_sy
-
-/* Symbol fields used by the ELF back end.  */
-#define ELF_TARGET_SYMBOL_FIELDS int local:1;
-
-/* Don't change this; change ELF_TARGET_SYMBOL_FIELDS instead.  */
-#define TARGET_SYMBOL_FIELDS ELF_TARGET_SYMBOL_FIELDS
-
-#include "targ-cpu.h"
 
 #ifndef FALSE
 #define FALSE 0
@@ -71,17 +91,20 @@ extern void elf_begin PARAMS ((void));
 /* should be conditional on address size! */
 #define elf_symbol(asymbol) ((elf_symbol_type *)(&(asymbol)->the_bfd))
 
-#define S_GET_SIZE(S) (elf_symbol ((S)->bsym)->internal_elf_sym.st_size)
+#define S_GET_SIZE(S) \
+  (elf_symbol (symbol_get_bfdsym (S))->internal_elf_sym.st_size)
 #define S_SET_SIZE(S,V) \
-  (elf_symbol((S)->bsym)->internal_elf_sym.st_size = (V))
+  (elf_symbol (symbol_get_bfdsym (S))->internal_elf_sym.st_size = (V))
 
-#define S_GET_ALIGN(S) (elf_symbol ((S)->bsym)->internal_elf_sym.st_value)
+#define S_GET_ALIGN(S) \
+  (elf_symbol (symbol_get_bfdsym (S))->internal_elf_sym.st_value)
 #define S_SET_ALIGN(S,V) \
-  (elf_symbol ((S)->bsym)->internal_elf_sym.st_value = (V))
+  (elf_symbol (symbol_get_bfdsym (S))->internal_elf_sym.st_value = (V))
 
-#define S_GET_OTHER(S) (elf_symbol ((S)->bsym)->internal_elf_sym.st_other)
+#define S_GET_OTHER(S) \
+  (elf_symbol (symbol_get_bfdsym (S))->internal_elf_sym.st_other)
 #define S_SET_OTHER(S,V) \
-  (elf_symbol ((S)->bsym)->internal_elf_sym.st_other = (V))
+  (elf_symbol (symbol_get_bfdsym (S))->internal_elf_sym.st_other = (V))
 
 extern asection *gdb_section;
 
@@ -110,18 +133,20 @@ extern void obj_elf_version PARAMS ((int));
 #define OBJ_COPY_SYMBOL_ATTRIBUTES(DEST,SRC)			\
 do								\
   {								\
-    if ((SRC)->sy_obj.size)					\
+    struct elf_obj_sy *srcelf = symbol_get_obj (SRC);		\
+    struct elf_obj_sy *destelf = symbol_get_obj (DEST);		\
+    if (srcelf->size)						\
       {								\
-	if ((DEST)->sy_obj.size == NULL)			\
-	  (DEST)->sy_obj.size =					\
+	if (destelf->size == NULL)				\
+	  destelf->size =					\
 	    (expressionS *) xmalloc (sizeof (expressionS));	\
-	*(DEST)->sy_obj.size = *(SRC)->sy_obj.size;		\
+	*destelf->size = *srcelf->size;				\
       }								\
     else							\
       {								\
-	if ((DEST)->sy_obj.size != NULL)			\
-	  free ((DEST)->sy_obj.size);				\
-	(DEST)->sy_obj.size = NULL;				\
+	if (destelf->size != NULL)				\
+	  free (destelf->size);					\
+	destelf->size = NULL;					\
       }								\
     S_SET_SIZE ((DEST), S_GET_SIZE (SRC));			\
     S_SET_OTHER ((DEST), S_GET_OTHER (SRC));			\
@@ -136,30 +161,7 @@ while (0)
 extern void obj_elf_init_stab_section PARAMS ((segT));
 #define INIT_STAB_SECTION(seg) obj_elf_init_stab_section (seg)
 
-#ifdef TC_ALPHA
-#define ECOFF_DEBUGGING alpha_flag_mdebug
-extern int alpha_flag_mdebug;
-#endif
-
-/* For now, always set ECOFF_DEBUGGING for a MIPS target.  */
-#ifdef TC_MIPS
-#ifdef MIPS_STABS_ELF
-#define ECOFF_DEBUGGING 0
-#else
-#define ECOFF_DEBUGGING 1
-#endif /* MIPS_STABS_ELF */
-#endif /* TC_MIPS */
-
 #ifdef ECOFF_DEBUGGING
-/* If we are generating ECOFF debugging information, we need some
-   additional fields for each symbol.  */
-#undef TARGET_SYMBOL_FIELDS
-#define TARGET_SYMBOL_FIELDS \
-  ELF_TARGET_SYMBOL_FIELDS \
-  struct efdr *ecoff_file; \
-  struct localsym *ecoff_symbol; \
-  valueT ecoff_extern_size;
-
 /* We smuggle stabs in ECOFF rather than using a separate section.
    The Irix linker can not handle a separate stabs section.  */
 
@@ -175,7 +177,7 @@ extern int alpha_flag_mdebug;
     ecoff_stab ((seg), (what), (string), (type), (other), (desc))
 #endif /* ECOFF_DEBUGGING */
 
-extern void elf_frob_symbol PARAMS ((struct symbol *, int *));
+extern void elf_frob_symbol PARAMS ((symbolS *, int *));
 #ifndef obj_frob_symbol
 #define obj_frob_symbol(symp, punt) elf_frob_symbol (symp, &punt)
 #endif
@@ -188,7 +190,7 @@ extern void elf_pop_insert PARAMS ((void));
 #ifdef ANSI_PROTOTYPES
 struct ecoff_extr;
 #endif
-extern void elf_ecoff_set_ext PARAMS ((struct symbol *, struct ecoff_extr *));
+extern void elf_ecoff_set_ext PARAMS ((symbolS *, struct ecoff_extr *));
 #endif
 
 #endif /* _OBJ_ELF_H */
