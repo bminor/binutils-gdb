@@ -1,3 +1,16 @@
+2003-12-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc64fbsd-tdep.c: Include "frame.h", "frame-unwind.h",
+	"trad-frame.h" and "gdb_assert.h".
+	(BIAS): New define.
+	(sparc64fbsd_pc_in_sigtramp, sparc64fbsd_sigtramp_frame_cache)
+	(sparc64fbsd_sigtramp_frame_this_id)
+	(sparc64fbsd_sigtramp_frame_prev_register): New functions.
+	(sparc64fbsd_sigtramp_frame_unwind): New variable.
+	(sparc64fbsd_sigtramp_frame_sniffer): New function.
+	(sparc64fbsd_init_abi): Set pc_in_sigtramp, append
+	sparc64fbsd_sigtramp_frame_sniffer.
+
 2003-12-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparcbsd-nat.c: Remove file.
