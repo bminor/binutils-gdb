@@ -1,3 +1,8 @@
+2004-06-06  Paul Brook  <paul@codesourcery.com>
+
+	* gdb/dwarf2-frame.c (decode_frame_entry_1): Decode version 3 CIE
+	records.
+
 2004-06-08  Paul N. Hilfinger  <Hilfinger@gnat.com>
 
 	* ada-lang.c (lookup_symbol_in_language): New function to allow

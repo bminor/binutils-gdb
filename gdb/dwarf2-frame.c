@@ -1268,6 +1268,7 @@ decode_frame_entry_1 (struct comp_unit *unit, char *start, int eh_frame_p)
       /* This is a CIE.  */
       struct dwarf2_cie *cie;
       char *augmentation;
+      unsigned int cie_version;
 
       /* Record the offset into the .debug_frame section of this CIE.  */
       cie_pointer = start - unit->dwarf_frame_buffer;
@@ -1288,7 +1289,8 @@ decode_frame_entry_1 (struct comp_unit *unit, char *start, int eh_frame_p)
       cie->encoding = encoding_for_size (unit->addr_size);
 
       /* Check version number.  */
-      if (read_1_byte (unit->abfd, buf) != DW_CIE_VERSION)
+      cie_version = read_1_byte (unit->abfd, buf);
+      if (cie_version != 1 && cie_version != 3)
 	return NULL;
       buf += 1;
 
@@ -1314,8 +1316,15 @@ decode_frame_entry_1 (struct comp_unit *unit, char *start, int eh_frame_p)
 	read_signed_leb128 (unit->abfd, buf, &bytes_read);
       buf += bytes_read;
 
-      cie->return_address_register = read_1_byte (unit->abfd, buf);
-      buf += 1;
+      if (cie_version == 1)
+	{
+	  cie->return_address_register = read_1_byte (unit->abfd, buf);
+	  bytes_read = 1;
+	}
+      else
+	cie->return_address_register = read_unsigned_leb128 (unit->abfd, buf,
+							     &bytes_read);
+      buf += bytes_read;
 
       cie->saw_z_augmentation = (*augmentation == 'z');
       if (cie->saw_z_augmentation)
