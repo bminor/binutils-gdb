@@ -2287,6 +2287,31 @@ unwind_command (char *exp, int from_tty)
   pin (Entry_FR);
   pin (Entry_GR);
   pin (Total_frame_size);
+
+  if (u->stub_unwind.stub_type)
+    {
+      printf_unfiltered ("\tstub type = ");
+      switch (u->stub_unwind.stub_type)
+        {
+	  case LONG_BRANCH:
+	    printf_unfiltered ("long branch\n");
+	    break;
+	  case PARAMETER_RELOCATION:
+	    printf_unfiltered ("parameter relocation\n");
+	    break;
+	  case EXPORT:
+	    printf_unfiltered ("export\n");
+	    break;
+	  case IMPORT:
+	    printf_unfiltered ("import\n");
+	    break;
+	  case IMPORT_SHLIB:
+	    printf_unfiltered ("import shlib\n");
+	    break;
+	  default:
+	    printf_unfiltered ("unknown (%d)\n", u->stub_unwind.stub_type);
+	}
+    }
 }
 
 int
