@@ -264,12 +264,20 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
   int stripped = (bfd_get_symcount (abfd) == 0);
  
   if (dynamic)
-    storage_needed = bfd_get_dynamic_symtab_upper_bound (abfd);
+    {
+      storage_needed = bfd_get_dynamic_symtab_upper_bound (abfd);
+
+      /* Nothing to be done if there is no dynamic symtab.  */
+      if (storage_needed < 0)
+	return;
+    }
   else
-    storage_needed = bfd_get_symtab_upper_bound (abfd);
-  if (storage_needed < 0)
-    error ("Can't read symbols from %s: %s", bfd_get_filename (abfd),
-	   bfd_errmsg (bfd_get_error ()));
+    {
+      storage_needed = bfd_get_symtab_upper_bound (abfd);
+      if (storage_needed < 0)
+	error ("Can't read symbols from %s: %s", bfd_get_filename (abfd),
+	       bfd_errmsg (bfd_get_error ()));
+    }
   if (storage_needed > 0)
     {
       symbol_table = (asymbol **) xmalloc (storage_needed);
