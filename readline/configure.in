@@ -12,47 +12,40 @@ srcname="the readline library"
 files=sysdep-norm.h
 links=sysdep.h
 
-case "${host_os}" in
-solaris*|sysv4*)
-	host_makefile_frag=config/mh-sysv4
-	case "${host_vendor}" in
-	ncr*)
-		host_makefile_frag=config/mh-ncr3000
-		;;
-	esac
-	;;
-
-scosysv*)
-	host_makefile_frag=config/mh-sco
-	files=sysdep-sco.h
-	;;
-
-m88kbcs | sysv*)
-	host_makefile_frag=config/mh-sysv
-	case "${host_vendor}" in
-	apollo)
-		host_makefile_frag=config/mh-apollo68v ;;
-	esac
-	;;
-
-linux)
-	host_makefile_frag=config/mh-posix
-	;;
-aix*)
-	host_makefile_frag=config/mh-sysv
-	case "${host_cpu}" in
-	rs6000)	files=sysdep-aix.h
-	esac
-	;;
-
-irix*)
-	host_makefile_frag=config/mh-sysv
-	files=sysdep-irix.h
-	;;
-
-newsos* | mach*)
-	files=sysdep-obsd.h
-	;;
+case "${host}" in
+  i[34]86-ncr-sysv4*)
+    host_makefile_frag=config/mh-ncr3000
+    ;;
+  mips-sgi-irix*)
+    host_makefile_frag=config/mh-sysv
+    files=sysdep-irix.h
+    ;;
+  *-sun-solaris*| *-*-sysv4*)
+    host_makefile_frag=config/mh-sysv4
+    ;;
+  i[34]86-*-sco)
+    host_makefile_frag=config/mh-sco
+    files=sysdep-sco.h
+    ;;
+  m68k-apollo-sysv*)
+    host_makefile_frag=config/mh-apollo68v 
+    ;;    
+  m88k-motorola-m88kbcs | *-*-sysv*)
+    host_makefile_frag=config/mh-sysv
+    ;;
+  i[34]86-*-linux)
+    host_makefile_frag=config/mh-posix
+    ;;
+  rs6000-ibm-aix*)
+    host_makefile_frag=config/mh-sysv
+    files=sysdep-aix.h
+    ;;
+  *-ibm-aix*)
+    host_makefile_frag=config/mh-sysv
+    ;;
+  m68k-sony-news* | *-*-mach* | *-*-bsd*)
+    files=sysdep-obsd.h
+    ;;
 esac
 
 # per-target:

@@ -1,3 +1,7 @@
+Thu Oct  1 23:38:54 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: use cpu-vendor-os triple instead of nested cases
+
 Wed Sep 30 16:09:20 1992  Michael Werner  (mtw@cygnus.com)
 
 	* z8k-dis.c (unparse_instr): fix bug where opcode returned was

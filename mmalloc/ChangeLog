@@ -1,3 +1,26 @@
+Thu Oct  1 23:34:20 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: use cpu-vendor-os triple instead of nested cases
+
+Sun Aug 23 11:09:46 1992  Fred Fish  (fnf@cygnus.com)
+
+	* sbrk-sup.c (__mmalloc_brk_init):  Ensure base of sbrk'd region
+	is aligned.  Bug reported by Andrew Heybey (ath@lcs.mit.edu).
+
+Wed Aug 19 14:49:23 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in: always create installation directories.
+
+Mon Jul 20 21:15:44 1992  Fred Fish  (fnf@cygnus.com)
+
+	* mrealloc.c:  Minor code format style changes for consistency.
+
+Fri Jul  3 20:25:30 1992  Fred Fish  (fnf@cygnus.com)
+
+	* attach.c, detach.c, mcalloc.c, mmalloc.c, mmtrace.c, mrealloc.c,
+	sbrk-sup.c:  Remove "(void)" casts from function calls where the
+	return value is ignored, in accordance with GNU coding standards.
+
 Tue Jun 30 16:44:41 1992  Fred Fish  (fnf@cygnus.com)
 
 	* mmalloc.h (struct mdesc):  Add FIXME comments to point out the

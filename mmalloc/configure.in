@@ -9,19 +9,19 @@ configdirs=""
 
 # per-host:
 
-case "${host_os}" in
-
-sysv4)
-	host_makefile_frag=config/mh-sysv4
+case "${host}" in
+  mips-sgi-irix4)
+	host_makefile_frag=config/mh-irix4
 	;;
-
-sunos4*)
+  *-sun-sunos4*)
 	host_makefile_frag=config/mh-sunos4
 	;;
-
-*)
+  i[34]86-ncr-sysv4*)
+	host_makefile_frag=config/mh-ncr3000
 	;;
-
+  *-*-sysv4*)
+	host_makefile_frag=config/mh-sysv4
+	;;
 esac
 
 # per-target:

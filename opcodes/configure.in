@@ -8,109 +8,46 @@ srcname="opcodes"
 
 # per-host:
 
-case "${host_cpu}" in
-
-rs6000)	my_host=rs6000
-	;;
-
-hppa*)
-	case "${host_vendor}" in
-	hp)
-		case "${host_os}" in
-		hpux)	my_host=hppahpux ;;
-		bsd)	my_host=hppabsd ;;
-		esac
-		;;
-	esac
-	;;
-mips)
-	case "${host_vendor}" in
-	dec)	my_host=decstation ;;
-	sgi)	my_host=irix3 ;;
-	esac
-	;;
-
-m88k)
-	case "${host_vendor}" in
-	motorola)
-		my_host=delta88 ;;
-	*)
-		case "${host_os}" in
-		dgux)	my_host=dgux ;;
-		esac
-		;;
-	esac
-	;;
-
-m68*)
-	case "${host_vendor}" in
-	cbm)
-		case ${host_os} in
-		amigados)	my_host=amigados ;;
-		svr4)		my_host=amix ;;
-		esac
-		;;
-	hp)	
-		case "${host_os}" in
-		hpux)	my_host=hp9000 ;;
-		bsd)	my_host=hp300bsd ;;
-		esac
-		;;
-	sony)	my_host=news ;;
-	sun)	my_host=sun3 ;;
-	apollo)	
-		case "${host_os}" in
-		sysv*)	my_host=apollov68 ;;
-		bsd*)	my_host=apollo68 ;;
-		esac
-		;;
-	esac
-	;;
-
-i386 | i486)
-	case "${host_vendor}" in
-	ncr*)
-		case "${host_os}" in
-		sysv4*)	my_host=ncr3000 ;;
-		esac
-		;;
-	*)
-		case "${host_os}" in
-		go32)	my_host=go32 ;;
-		sco*)	my_host=i386v ;;
-		sysv)	my_host=i386v ;;
-		sysv4)	my_host=i386v4 ;;
-		mach)	my_host=i386mach ;;
-		msdos)	my_host=dose ;;
-		esac
-		;;
-	esac
-	;;
-
-sparc)
-	case "${host_os}" in
-	sunos64)	my_host=sparc-ll ;;
-	*)		my_host=sparc ;;
-	esac
-	;;
-
-romp)	my_host=rtbsd
-	;;
-
-a29k)	my_host=ultra3
-	;;
-
-tahoe)
-	my_host=tahoe
-	;;
-
-vax)
-	case "${host_os}" in
-	ultrix) my_host=vaxult ;;
-	*) my_host=vaxbsd ;;
-	esac
-	;;
+case "${host}" in
+  a29k-nyu-sym1)          my_host=ultra3 ;;
+  hppa*-hp-bsd)           my_host=hppabsd ;;
+  hppa*-hp-hpux)          my_host=hppahpux ;;
+  i860-stratus-sysv4)     my_host=stratus ;;
+  i[34]86-*-go32)         my_host=go32 ;;
+  i[34]86-*-linux)        my_host=i386linux ;;
+  i[34]86-*-mach)         my_host=i386mach ;;
+  i[34]86-*-msdos*)       my_host=dose ;;
+  i[34]86-*-sysv*)        my_host=i386v ;;
+  i[34]86-*-sco)          my_host=i386v ;;
+  i[34]86-*-sysv4*)       my_host=i386v4 ;;
+  i[34]86-ncr-sysv4*)     my_host=ncr3000 ;;
+  m68k-apollo-bsd*)       my_host=apollo68 ;;
+  m68k-apollo-sysv*)      my_host=apollov68 ;;
+  m68k-cbm-amigados)      my_host=amigados ;;
+  m68k-cbm-sysv4*)        my_host=amix ;;
+  m68k-hp-bsd)            my_host=hp300bsd ;;
+  m68k-hp-hpux)           my_host=hp300 ;;        # renamed from hp9000
+  m68k-sony-*)            my_host=news ;;
+  m68k-sun-sunos*)        my_host=sun3 ;;
+  m88k-dg-dgux)           my_host=dgux ;;
+  m88k-harris-*)          my_host=harris ;;
+  m88k-motorola-*)        my_host=delta88 ;;
+  mips-dec-ultrix)        my_host=decstation ;;
+  mips-sgi-irix | mips-sgi-irix3) my_host=irix3 ;;
+  mips-sgi-irix4)         my_host=irix4 ;;
+  romp-ibm-bsd*)          my_host=rtbsd ;;
+  rs6000-ibm-aix)         my_host=rs6000 ;;
+  sparc-*-sysv4)          my_host=sysv4 ;;
+  sparc-*-sysv64)         my_host=sysv4-ll ;;
+  sparc-sun-solaris2)     my_host=solaris2 ;;
+  sparc-sun-sunos*)       my_host=sparc ;;
+  sparc-sun-sunos64)      my_host=sparc-ll ;;
+  tahoe-*-*)              my_host=tahoe ;;
+  vax-dec-bsd*)           my_host=vaxbsd ;;
+  vax-dec-ultrix*)        my_host=vaxult ;;
+  we32k-*-*)              my_host=we32k ;;
 esac
+
 
 # Set up to make a link between the host's include file and "sysdep.h".
 files="../bfd/hosts/${my_host}.h"
