@@ -601,7 +601,8 @@ kdb:	$(NTSSTART) $(OBS) $(NTSOBS) ${ADD_DEPS} ${CDEPS}
 	ld -o kdb $(NTSSTART) $(OBS) $(NTSOBS) init.o $(ADD_FILES) \
 	  -lc $(CLIBS)
 
-# Put the proper machine-specific files first.
+# Put the proper machine-specific files first, so M-. on a machine
+# specific routine gets the one for the correct machine.
 TAGS:	${TAGFILES}
 	etags `find ${srcdir}/config -name $(TM_FILE) -print` \
 	  `find ${srcdir}/config -name ${XM_FILE} -print` \

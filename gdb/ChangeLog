@@ -1,3 +1,7 @@
+Fri Apr 30 11:05:42 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* Makefile.in (TAGS): Doc fix.
+
 Fri Apr 30 10:06:46 1993  Fred Fish  (fnf@cygnus.com)
 
 	* alldeps.mak, depend:  Update with latest automatically built
