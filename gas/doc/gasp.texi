@@ -29,7 +29,7 @@ END-INFO-DIR-ENTRY
 @title GASP, an assembly preprocessor
 @subtitle for GASP version 1
 @sp 1
-@subtitle January 1994
+@subtitle March 1994
 @author Roland Pesch
 @page
 
@@ -120,7 +120,7 @@ Here is a small example to give the flavor of @sc{gasp}.  This input to
 @example
         .MACRO  saveregs from=8 to=14
 count   .ASSIGNA \from
-        ; save r\from..r\to
+        ! save r\from..r\to
         .AWHILE  \&count LE \to
         mov     r\&count,@@-sp
 count   .ASSIGNA  \&count + 1
@@ -140,7 +140,7 @@ generates this assembly program:
 
 @cartouche
 @example
-        ; save r12..r14
+        ! save r12..r14
         mov     r12,@@-sp
         mov     r13,@@-sp
         mov     r14,@@-sp
@@ -167,12 +167,14 @@ request variations on this basic theme.  Here is the full set of
 possibilities for the @sc{gasp} command line.
 
 @example
-gasp  [ -c ]  [ -o @var{outfile} ]  [ -p ]  [ -s ]  [ -u ]  
+gasp  [ -a | --alternate ]
+      [ -c @var{char} | --commentchar @var{char} ]
+      [ -d | --debug ]  [ -h | --help ]
+      [ -o @var{outfile} | --output @var{outfile} ]
+      [ -p | --print ]  [ -s | --copysource ]
+      [ -u | --unreasonable ]  [ -v | --version ]
       @var{infile} @dots{}
 @end example
-
-@c FIXME!! Aren't all GNU programs supposed to have a -V or --version
-@c         option, that reports version info and exits?
 
 @ftable @code
 @item @var{infile} @dots{}
@@ -184,30 +186,37 @@ in the order you list the @var{infile} arguments.
 Mark the end of each input file with the preprocessor command
 @code{.END}.  @xref{Other Commands,, Miscellaneous commands}.
 
-@item -c
-@c FIXME! Shouldn't there be an option to set the prefix char so it can
-@c      always be the comment char for whatever assembly version we have?
-Copy the source lines to the output file.  Use this option
-to see the effect of each preprocessor line on the @sc{gasp} output.
-@sc{gasp} marks the lines copied from the source file with @samp{!} at
-the beginning, to help you distinguish them from the rest of the output.
+@item -a
+@itemx --alternate
+Use alternative macro syntax.  @xref{Alternate,, Alternate macro
+syntax}, for a discussion of how this syntax differs from the default
+@sc{gasp} syntax.
 
-@item -o @var{outfile}
-Write the output in a file called @var{outfile}.  If you do not use the
-@samp{-o} option, @sc{gasp} writes its output on the standard output
-stream.
+@cindex comment character, changing
+@cindex semicolon, as comment
+@cindex exclamation mark, as comment
+@cindex shriek, as comment
+@cindex bang, as comment
+@cindex @code{!} default comment char
+@cindex @code{;} as comment char
+@item -c '@var{char}'
+@itemx --commentchar '@var{char}'
+Use @var{char} as the comment character.  The default comment character
+is @samp{!}.  For example, to use a semicolon as the comment character,
+specify @w{@samp{-c ';'}} on the @sc{gasp} command line.  Since
+assembler command characters often have special significance to command
+shells, it is a good idea to quote or escape @var{char} when you specify
+a comment character.
 
-@item -p
-Print line numbers.  @sc{gasp} obeys this option @emph{only} if you also
-specify @samp{-c} to copy source lines to its output.  With @samp{-c
--p}, @sc{gasp} displays the line number of each source line copied
-(immediately after the @samp{!} that marks source lines in the output).
+For the sake of simplicity, all examples in this manual use the default
+comment character @samp{!}.
 
-@item -s
-Show statistics.  In this version of @sc{gasp}, this option produces
-statistics about the string buffers that @sc{gasp} allocates internally.
-For each defined buffersize @var{s}, @sc{gasp} shows the number of
-strings @var{n} that it allocated, with a line like this:
+@item -d
+@itemx --debug
+Show debugging statistics.  In this version of @sc{gasp}, this option
+produces statistics about the string buffers that @sc{gasp} allocates
+internally.  For each defined buffersize @var{s}, @sc{gasp} shows the
+number of strings @var{n} that it allocated, with a line like this:
 
 @example
 strings size @var{s} : @var{n}
@@ -217,13 +226,43 @@ strings size @var{s} : @var{n}
 @sc{gasp} displays these statistics on the standard error stream, when
 done preprocessing.
 
+@item -h
+@itemx --help
+Display a summary of the @sc{gasp} command line options.
+
+@item -o @var{outfile}
+@itemx --output @var{outfile}
+Write the output in a file called @var{outfile}.  If you do not use the
+@samp{-o} option, @sc{gasp} writes its output on the standard output
+stream.
+
+@item -p
+@itemx --print
+Print line numbers.  @sc{gasp} obeys this option @emph{only} if you also
+specify @samp{-s} to copy source lines to its output.  With @samp{-s
+-p}, @sc{gasp} displays the line number of each source line copied
+(immediately after the comment character at the beginning of the line).
+
+@item -s
+@itemx --copysource
+Copy the source lines to the output file.  Use this option
+to see the effect of each preprocessor line on the @sc{gasp} output.
+@sc{gasp} places a comment character (@samp{!} by default) at
+the beginning of each source line it copies, so that you can use this
+option and still assemble the result.
+
 @item -u
+@itemx --unreasonable
 Bypass ``unreasonable expansion'' limit.  Since you can define @sc{gasp}
 macros inside other macro definitions, the preprocessor normally
 includes a sanity check.  If your program requires more than 1,000
 nested expansions, @sc{gasp} normally exits with an error message.  Use
 this option to turn off this check, allowing unlimited nested
 expansions.
+
+@item -v
+@itemx --version
+Display the @sc{gasp} version number.
 @end ftable
 
 @node Commands
@@ -245,6 +284,7 @@ Details,, Details of the GASP syntax}, for more information.
 * Listings::
 * Other Commands::
 * Syntax Details::
+* Alternate::
 @end menu
 
 @node Conditionals
@@ -457,7 +497,7 @@ consecutive registers:
 @cartouche
 @example
         .MACRO  SUM FROM=0, TO=9
-        ; \FROM \TO
+        ! \FROM \TO
         mov     r\FROM,r10
 COUNT   .ASSIGNA        \FROM+1
         .AWHILE \&COUNT LE \TO
@@ -473,7 +513,7 @@ With that definition, @samp{SUM 0,5} generates this assembly output:
 
 @cartouche
 @example
-        ; 0 5
+        ! 0 5
         mov     r0,r10
         add     r1,r10
         add     r2,r10
@@ -529,7 +569,7 @@ a preprocessor variable, write @samp{\&@var{varname}}.)
 An alternative form of introducing a macro definition: specify the macro
 name in the label position, and the arguments (if any) between
 parentheses after the name.  Defaulting rules and usage work the same
-way as for the alternate macro definition syntax.
+way as for the other macro definition syntax.
 
 @item .ENDM
 Mark the end of a macro definition.
@@ -544,6 +584,17 @@ Exit early from the current macro definition, @code{.AREPEAT} loop, or
 @sc{gasp} maintains a counter of how many macros it has
 executed in this pseudo-variable; you can copy that number to your
 output with @samp{\@@}, but @emph{only within a macro definition}.
+
+@item LOCAL @var{name} [ , @dots{} ]
+@emph{Warning: @code{LOCAL} is only available if you select ``alternate
+macro syntax'' with @samp{-a} or @samp{--alternate}.}  @xref{Alternate,,
+Alternate macro syntax}.
+
+Generate a string replacement for each of the @var{name} arguments, and
+replace any instances of @var{name} in each macro expansion.  The
+replacement string is unique in the assembly, and different for each
+separate macro expansion.  @code{LOCAL} allows you to write macros that
+define symbols, without fear of conflict between separate macro expansions.
 @end ftable
 
 @node Data
@@ -701,6 +752,10 @@ Force a new page in assembly listings.  Emits @samp{.eject}.
 @section Miscellaneous commands
 
 @ftable @code
+@item .ALTERNATE
+Use the alternate macro syntax henceforth in the assembly.
+@xref{Alternate,, Alternate macro syntax}.
+
 @item .ORG
 @c FIXME!  This is very strange, since _GAS_ understands .org
 This command is recognized, but not yet implemented.  @sc{gasp}
@@ -804,29 +859,37 @@ special marker, @samp{\@@}, works only within macro definitions;
 
 @cindex comments
 The trailing part of any @sc{gasp} source line may be a @dfn{comment}.
-A comment begins with the first unquoted @samp{;} or @samp{\;}, and
-extends to the end of a line.  The two kinds of comment markers lead to
-slightly different treatment:
+A comment begins with the first unquoted comment character (@samp{!} by
+default), or an escaped or doubled comment character (@samp{\!} or
+@samp{!!} by default), and extends to the end of a line.  You can
+specify what comment character to use with the @samp{-c} option
+(@pxref{Invoking GASP,, Command Line Options}).  The two kinds of
+comment markers lead to slightly different treatment:
 
 @table @code
-@item ;
-Generate an assembly comment in the @sc{gasp} output.  @sc{gasp} evaluates any
-preprocessor variables (macro arguments, or variables defined with
-@code{.ASSIGNA} or @code{.ASSIGNC}) present.  For example, a macro that
-begins like this
+@item !
+A single, un-escaped comment character generates an assembly comment in
+the @sc{gasp} output.  @sc{gasp} evaluates any preprocessor variables
+(macro arguments, or variables defined with @code{.ASSIGNA} or
+@code{.ASSIGNC}) present.  For example, a macro that begins like this
 
 @example
         .MACRO  SUM FROM=0, TO=9
-        ; \FROM \TO
+        ! \FROM \TO
 @end example
 
 @noindent
 issues as the first line of output a comment that records the
 values you used to call the macro.
 
-@item \;
-This marks a @sc{gasp} source comment.  @sc{gasp} does not copy such
-comments to the assembly output.
+@c comments, preprocessor-only
+@c preprocessor-only comments
+@c GASP-only comments
+@item \!
+@itemx !!
+Either an escaped comment character, or a double comment character,
+marks a @sc{gasp} source comment.  @sc{gasp} does not copy such comments
+to the assembly output.
 @end table
 
 @cindex continuation character
@@ -841,8 +904,8 @@ second line with the character @samp{+}.
 Occasionally you may want to prevent @sc{gasp} from preprocessing some
 particular bit of text.  To @emph{copy literally} from the @sc{gasp}
 source to its output, place @samp{\(} before the string to copy, and
-@samp{)} at the end.  For example, write @samp{\(\;)} if you need the
-characters @samp{\;} in your assembly output.
+@samp{)} at the end.  For example, write @samp{\(\!)} if you need the
+characters @samp{\!} in your assembly output.
 
 @cindex symbol separator
 @cindex text, separating from symbols
@@ -863,7 +926,9 @@ between double quotes (@code{"@var{str}"}).  Specify an individual
 numeric byte value as an absolute expression between angle brackets
 (@code{<@var{expr}>}.  Directives that output strings allow you to
 specify any number of either kind of value, in whatever order is
-convenient, and concatenate the result.
+convenient, and concatenate the result.  (Alternate syntax mode
+introduces a number of alternative string notations; @pxref{Alternate,,
+Alternate macro syntax}.)
 
 @c Details of numeric notation, e.g. base prefixes
 You can write @dfn{numeric constants} either in a specific base, or in
@@ -959,6 +1024,53 @@ after position @var{ix}.
 The substring of @var{string} beginning at byte number @var{start} and
 extending for @var{len} bytes.
 @end ftable
+
+@node Alternate
+@section Alternate macro syntax
+
+If you specify @samp{-a} or @samp{--alternate} on the @sc{gasp} command
+line, the preprocessor uses somewhat different syntax.  This syntax is
+reminiscent of the syntax of Phar Lap macro assembler, but it
+is @emph{not} meant to be a full emulation of Phar Lap or similar
+assemblers.  In particular, @sc{gasp} does not support directives such
+as @code{DB} and @code{IRP}, even in alternate syntax mode.
+
+In particular, @samp{-a} (or @samp{--alternate}) elicits these
+differences:
+
+@table @emph
+@item Preprocessor directives
+You can use @sc{gasp} preprocessor directives without a leading @samp{.}
+dot.  For example, you can write @samp{SDATA} with the same effect as
+@samp{.SDATA}.
+
+@item LOCAL
+One additional directive, @code{LOCAL}, is available.  @xref{Macros,,
+Defining your own directives}, for an explanation of how to use
+@code{LOCAL}.
+
+@item String delimiters
+You can write strings delimited in two other ways besides
+@code{"@var{string}"}:
+
+@table @code
+@item '@var{string}'
+You can delimit strings with single-quote charaters.
+
+@item <@var{string}>
+You can delimit strings with matching angle brackets.
+
+@item single-character string escape
+To include any single character literally in a string (even if the
+character would otherwise have some special meaning), you can prefix the
+character with @samp{!} (an exclamation mark).  For example, you can
+write @samp{<4.3 !> 5.4!!>} to get the literal text @samp{4.3 > 5.4!}.
+@end table
+
+@item Expression results as strings
+You can write @samp{%@var{expr}} to evaluate the expression @var{expr}
+and use the result as a string.  
+@end table
 
 @node Index
 @unnumbered Index
