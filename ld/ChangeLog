@@ -1,3 +1,9 @@
+Wed Oct 13 16:02:39 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldmain.c (enter_global_ref): Just ignore any weak symbol for
+	which we already have a definition, rather than checking in
+	several different places whether the symbol is weak.
+
 Tue Oct 12 17:30:51 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure.in (mips-*-elf*): New target; use mipsb-elf32.
