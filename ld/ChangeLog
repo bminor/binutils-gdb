@@ -1,4 +1,11 @@
-2003-10-03  Matt Thomas <matt@3am-software.com>
+2003-10-06  Nick Clifton  <nickc@redhat.com>
+
+	* lexsup.c (parse_args): Report unresolved symbols in shared
+	libraries when creating a dynamic executable.  This is a
+	restoration of the default behaviour for previous versions of
+	the linker.
+
+2003-10-06  Matt Thomas <matt@3am-software.com>
 
 	* emulparams/hppanbsd.sh: Remove OUTPUT_FORMAT.
 	* emulparams/hppaobsd.sh: Add OUTPUT_FORMAT="elf32-hppa".

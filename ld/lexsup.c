@@ -660,12 +660,19 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_CALL_SHARED:
 	  config.dynamic_link = TRUE;
-	  /* When linking against shared libraries, the default
-	     behaviour is to ignore any unresolved references.  */
+	  /* When linking against shared libraries, the default behaviour is
+	     to report any unresolved references.  This is for backwards
+	     comptability with previous linker behaviour.  Whilst strictly
+	     speaking it is not a failure to encounter unresolved symbols at
+	     link time - the symbol *might* be available at load time - it is
+	     nevertheless necessary for the correct execution of the autoconf
+	     package.  (It needs to be able to detect functions that are not
+	     provided by the host OS).  Since this package is used by lots of
+	     projects, maintaining the old linker behaviour is important.  */
 	  if (link_info.unresolved_syms_in_objects == RM_NOT_YET_SET)
 	    link_info.unresolved_syms_in_objects = RM_IGNORE;
 	  if (link_info.unresolved_syms_in_shared_libs == RM_NOT_YET_SET)
-	    link_info.unresolved_syms_in_shared_libs = RM_IGNORE;
+	    link_info.unresolved_syms_in_shared_libs = how_to_report_unresolved_symbols;
 	  break;
 	case OPTION_NON_SHARED:
 	  config.dynamic_link = FALSE;
