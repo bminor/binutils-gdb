@@ -1,5 +1,7 @@
 2002-10-20  Mark Kettenis  <kettenis@gnu.org>
 
+	* Makefile.in (i386obsd-tdep.o): New target.
+
 	* solib-sunos.c: Include "bcache.h" and "regcache.h".
 	* Makefile.in (solib-sunos.o): Add $(bcache_h) and $(regcache_h).
 
