@@ -1,5 +1,16 @@
 1999-12-10  Nick Clifton  <nickc@cygnus.com>
 
+	* elflink.h (elf_link_is_defined_archive_symbol): New
+	function: Decide if a symbol, in an archive map is there
+	because it is defined in the archive element, or because it is
+	just another common declaration of it.
+	(elf_link_add_archive_symbols): Use
+	elf_link_is_defined_archive_symbol to decide if an archive
+	element contain a reference to a common symbol should be
+	linked in or not.
+
+1999-12-10  Nick Clifton  <nickc@cygnus.com>
+
 	* elflink.h: Revert previous patch.
 	* targets.c: Revert previous patch.
 	* libbfd-in2.h: Revert previous patch.

@@ -80,6 +80,97 @@ elf_bfd_link_add_symbols (abfd, info)
     }
 }
 
+/* Search the symbol table of the archive element of the archive ABFD
+   whoes archove map contains a mention of SYMDEF, and determine if
+   the symbol is defined in this element.  */
+static boolean
+elf_link_is_defined_archive_symbol (abfd, symdef)
+     bfd * abfd;
+     carsym * symdef;
+{
+  Elf_Internal_Shdr * hdr;
+  Elf_External_Sym *  esym;
+  Elf_External_Sym *  esymend;
+  Elf_External_Sym *  buf = NULL;
+  size_t symcount;
+  size_t extsymcount;
+  size_t extsymoff;
+  boolean result = false;
+  
+  abfd = _bfd_get_elt_at_filepos (abfd, symdef->file_offset);
+  if (abfd == (bfd *) NULL)
+    return false;
+
+  if (! bfd_check_format (abfd, bfd_object))
+    return false;
+
+  /* Select the appropriate symbol table.  */
+  if ((abfd->flags & DYNAMIC) == 0 || elf_dynsymtab (abfd) == 0)
+    hdr = &elf_tdata (abfd)->symtab_hdr;
+  else
+    hdr = &elf_tdata (abfd)->dynsymtab_hdr;
+
+  symcount = hdr->sh_size / sizeof (Elf_External_Sym);
+
+  /* The sh_info field of the symtab header tells us where the
+     external symbols start.  We don't care about the local symbols.  */
+  if (elf_bad_symtab (abfd))
+    {
+      extsymcount = symcount;
+      extsymoff = 0;
+    }
+  else
+    {
+      extsymcount = symcount - hdr->sh_info;
+      extsymoff = hdr->sh_info;
+    }
+
+  buf = ((Elf_External_Sym *)
+	 bfd_malloc (extsymcount * sizeof (Elf_External_Sym)));
+  if (buf == NULL && extsymcount != 0)
+    return false;
+
+  /* Read in the symbol table.
+     FIXME:  This ought to be cached somewhere.  */
+  if (bfd_seek (abfd,
+		hdr->sh_offset + extsymoff * sizeof (Elf_External_Sym),
+		SEEK_SET) != 0
+      || (bfd_read ((PTR) buf, sizeof (Elf_External_Sym), extsymcount, abfd)
+	  != extsymcount * sizeof (Elf_External_Sym)))
+    {
+      free (buf);
+      return false;
+    }
+
+  /* Scan the symbol table looking for SYMDEF.  */
+  esymend = buf + extsymcount;
+  for (esym = buf;
+       esym < esymend;
+       esym++)
+    {
+      Elf_Internal_Sym sym;
+      const char * name;
+
+      elf_swap_symbol_in (abfd, esym, & sym);
+
+      name = bfd_elf_string_from_elf_section (abfd, hdr->sh_link, sym.st_name);
+      if (name == (const char *) NULL)
+	break;
+
+      if (strcmp (name, symdef->name) == 0)
+	{
+	  result =
+	    (ELF_ST_BIND (sym.st_info) == STB_GLOBAL)
+	    && (sym.st_shndx != SHN_UNDEF);
+	  break;
+	}
+    }
+
+  free (buf);
+  
+  return result;
+}
+
 
 /* Add symbols from an ELF archive file to the linker hash table.  We
    don't use _bfd_generic_link_add_archive_symbols because of a
@@ -200,7 +291,24 @@ elf_link_add_archive_symbols (abfd, info)
 	  if (h == NULL)
 	    continue;
 
-	  if (h->root.type != bfd_link_hash_undefined)
+	  if (h->root.type == bfd_link_hash_common)
+	    {
+	      /* We currently have a common symbol.  The archive map contains
+		 a reference to this symbol, so we may want to include it.  We
+		 only want to include it however, if this archive element
+		 contains a definition of the symbol, not just another common
+		 declaration of it.
+
+		 Unfortunately some archivers (including GNU ar) will put
+		 declarations of common symbols into their archive maps, as
+		 well as real definitions, so we cannot just go by the archive
+		 map alone.  Instead we must read in the element's symbol
+		 table and check that to see what kind of symbol definition
+		 this is.  */
+	      if (! elf_link_is_defined_archive_symbol (abfd, symdef))
+		continue;
+	    }
+	  else if (h->root.type != bfd_link_hash_undefined)
 	    {
 	      if (h->root.type != bfd_link_hash_undefweak)
 		defined[i] = true;
