@@ -1,5 +1,6 @@
 /* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
-   Copyright 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994
+   Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
 
@@ -76,19 +77,21 @@ read_next_frame_reg(fi, regno)
      int regno;
 {
   /* If it is the frame for sigtramp we have a complete sigcontext
-     immediately below the frame and we get the saved registers from there.
+     somewhere above the frame and we get the saved registers from there.
      If the stack layout for sigtramp changes we might have to change these
      constants and the companion fixup_sigtramp in mdebugread.c  */
 #ifndef SIGFRAME_BASE
-#define SIGFRAME_BASE		0x12c	/* sizeof(sigcontext) */
-#define SIGFRAME_PC_OFF		(-SIGFRAME_BASE + 2 * 4)
-#define SIGFRAME_REGSAVE_OFF	(-SIGFRAME_BASE + 3 * 4)
+/* To satisfy alignment restrictions the sigcontext is located 4 bytes
+   above the sigtramp frame.  */
+#define SIGFRAME_BASE		4
+#define SIGFRAME_PC_OFF		(SIGFRAME_BASE + 2 * 4)
+#define SIGFRAME_REGSAVE_OFF	(SIGFRAME_BASE + 3 * 4)
 #endif
 #ifndef SIGFRAME_REG_SIZE
 #define SIGFRAME_REG_SIZE	4
 #endif
   for (; fi; fi = fi->next)
-      if (in_sigtramp(fi->pc, 0)) {
+      if (fi->signal_handler_caller) {
 	  int offset;
 	  if (regno == PC_REGNUM) offset = SIGFRAME_PC_OFF;
 	  else if (regno < 32) offset = (SIGFRAME_REGSAVE_OFF
@@ -107,7 +110,10 @@ mips_frame_saved_pc(frame)
      FRAME frame;
 {
   mips_extra_func_info_t proc_desc = frame->proc_desc;
-  int pcreg = proc_desc ? PROC_PC_REG(proc_desc) : RA_REGNUM;
+  /* We have to get the saved pc from the sigcontext
+     if it is a signal handler frame.  */
+  int pcreg = frame->signal_handler_caller ? PC_REGNUM
+	      : (proc_desc ? PROC_PC_REG(proc_desc) : RA_REGNUM);
 
   if (proc_desc && PROC_DESC_IS_DUMMY(proc_desc))
       return read_memory_integer(frame->frame - 4, 4);

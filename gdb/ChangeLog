@@ -1,3 +1,14 @@
+Mon Jan 31 09:40:33 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mdebugread.c (parse_procedure):  Remove _sigtramp kludges for
+	alpha and irix. The _sigtramp case has to be handled properly
+	in the tdep files if we have no ecoff debugging info.
+	* alpha-tdep.c (alpha_frame_saved_pc, alpha_frame_chain),
+	mips-tdep.c (mips_frame_saved_pc):  Handle signal handler frames
+	without PC_REGNUM kludge.
+	* mdebugread.c (fixup_sigtramp), mips-tdep.c (read_next_frame_reg):
+	Clean up handling of mips sigtramp frames, improve comments.
+
 Sat Jan 29 23:25:57 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* paread.c (read_unwind_info): Fix typo.

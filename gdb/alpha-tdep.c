@@ -1,5 +1,5 @@
 /* Target-dependent code for the ALPHA architecture, for GDB, the GNU Debugger.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -165,7 +165,10 @@ alpha_frame_saved_pc(frame)
      FRAME frame;
 {
   alpha_extra_func_info_t proc_desc = frame->proc_desc;
-  int pcreg = proc_desc ? PROC_PC_REG(proc_desc) : RA_REGNUM;
+  /* We have to get the saved pc from the sigcontext
+     if it is a signal handler frame.  */
+  int pcreg = frame->signal_handler_caller ? PC_REGNUM
+	      : (proc_desc ? PROC_PC_REG(proc_desc) : RA_REGNUM);
 
   if (proc_desc && PROC_DESC_IS_DUMMY(proc_desc))
       return read_memory_integer(frame->frame - 8, 8);
@@ -428,17 +431,23 @@ alpha_frame_chain(frame)
        we loop forever if we see a zero size frame.  */
     if (PROC_FRAME_REG (proc_desc) == SP_REGNUM
 	&& PROC_FRAME_OFFSET (proc_desc) == 0
-	/* The alpha __sigtramp routine is frameless and has a frame size
-	   of zero. Luckily it is the only procedure which has PC_REGNUM
-	   as PROC_PC_REG.  */
-	&& PROC_PC_REG (proc_desc) != PC_REGNUM
 	/* The previous frame from a sigtramp frame might be frameless
 	   and have frame size zero.  */
 	&& !frame->signal_handler_caller)
-      return 0;
+      {
+	/* The alpha __sigtramp routine is frameless and has a frame size
+	   of zero, but we are able to backtrace through it. */
+	char *name;
+	find_pc_partial_function (saved_pc, &name,
+				  (CORE_ADDR *)NULL, (CORE_ADDR *)NULL);
+	if (IN_SIGTRAMP (saved_pc, name))
+	  return frame->frame;
+	else
+	  return 0;
+      }
     else
       return read_next_frame_reg(frame, PROC_FRAME_REG(proc_desc))
-	+ PROC_FRAME_OFFSET(proc_desc);
+	     + PROC_FRAME_OFFSET(proc_desc);
 }
 
 void

@@ -1,6 +1,6 @@
 /* Read a symbol table in ECOFF format (Third-Eye).
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993 Free Software
-   Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994
+   Free Software Foundation, Inc.
    Original version contributed by Alessandro Forin (af@cs.cmu.edu) at
    CMU.  Major work by Per Bothner, John Gilmore and Ian Lance Taylor
    at Cygnus Support.
@@ -1815,14 +1815,6 @@ parse_procedure (pr, search_symtab, first_off)
 	  e->pdr.regmask = 0x80000000;
 	  e->pdr.regoffset = -4;
 	}
-
-      /* Fake PC_REGNUM for alpha __sigtramp so that read_next_frame_reg
-	 will use the saved user pc from the sigcontext.  */
-      if (STREQ (sh_name, "__sigtramp"))
-	e->pdr.pcreg = PC_REGNUM;
-      /* Make the same patch for Irix.  */
-      if (STREQ (sh_name, "_sigtramp"))
-	e->pdr.pcreg = PC_REGNUM;
     }
 }
 
@@ -3669,15 +3661,21 @@ fixup_sigtramp ()
        xzalloc (sizeof (struct mips_extra_func_info)));
 
     e->numargs = 0;		/* the kernel thinks otherwise */
-    /* align_longword(sigcontext + SIGFRAME) */
-    e->pdr.frameoffset = 0x150;
+    e->pdr.frameoffset = 32;
     e->pdr.framereg = SP_REGNUM;
-    /* read_next_frame_reg provides the true pc at the time of signal */
+    /* Note that setting pcreg is no longer strictly necessary as
+       mips_frame_saved_pc is now aware of signal handler frames.  */
     e->pdr.pcreg = PC_REGNUM;
     e->pdr.regmask = -2;
-    e->pdr.regoffset = -(41 * sizeof (int));
+    /* Offset to saved r31, in the sigtramp case the saved registers
+       are above the frame in the sigcontext.
+       We have 4 alignment bytes, 12 bytes for onstack, mask and pc,
+       32 * 4 bytes for the general registers, 12 bytes for mdhi, mdlo, ownedfp
+       and 32 * 4 bytes for the floating point registers.  */
+    e->pdr.regoffset = 4 + 12 + 31 * 4;
     e->pdr.fregmask = -1;
-    e->pdr.fregoffset = -(7 * sizeof (int));
+    /* Offset to saved f30 (first saved *double* register).  */
+    e->pdr.fregoffset = 4 + 12 + 32 * 4 + 12 + 30 * 4;
     e->pdr.isym = (long) s;
     e->pdr.adr = sigtramp_address;
 
