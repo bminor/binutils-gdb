@@ -1,3 +1,11 @@
+2002-06-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (objfiles_h): Add $(bcache_h).
+	* objfiles.h: Include "bcache.h".
+
+	* Makefile.in (symtab_h): Remove $(bcache_h).
+	* symtab.h: Do not include "bcache.h".
+
 2002-06-28  David O'Brien  <obrien@FreeBSD.org>
 
 	Merge from mainline:
