@@ -1725,6 +1725,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
        the current function (and is thus equivalent to the "saved"
        stack pointer.  */
     CORE_ADDR this_sp = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
+    CORE_ADDR fp;
 
     if (hppa_debug)
       fprintf_unfiltered (gdb_stdlog, " (this_sp=0x%s, pc=0x%s, "
@@ -1733,7 +1734,38 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 			  paddr_nz (frame_pc_unwind (next_frame)),
 			  paddr_nz (prologue_end));
 
-    if (frame_pc_unwind (next_frame) >= prologue_end)
+     /* Check to see if a frame pointer is available, and use it for
+        frame unwinding if it is.
+ 
+        There are some situations where we need to rely on the frame
+        pointer to do stack unwinding.  For example, if a function calls
+        alloca (), the stack pointer can get adjusted inside the body of
+        the function.  In this case, the ABI requires that the compiler
+        maintain a frame pointer for the function.
+ 
+        The unwind record has a flag (alloca_frame) that indicates that
+        a function has a variable frame; unfortunately, gcc/binutils 
+        does not set this flag.  Instead, whenever a frame pointer is used
+        and saved on the stack, the Save_SP flag is set.  We use this to
+        decide whether to use the frame pointer for unwinding.
+	
+	fp should never be zero here; checking just in case. 
+	
+        TODO: For the HP compiler, maybe we should use the alloca_frame flag 
+	instead of Save_SP.  */
+ 
+     fp = frame_unwind_register_unsigned (next_frame, HPPA_FP_REGNUM);
+ 
+     if (frame_pc_unwind (next_frame) >= prologue_end
+         && u->Save_SP && fp != 0)
+      {
+ 	cache->base = fp;
+ 
+ 	if (hppa_debug)
+	  fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [frame pointer] }",
+ 	    paddr_nz (cache->base));
+      }
+     else if (frame_pc_unwind (next_frame) >= prologue_end)
       {
         if (u->Save_SP && trad_frame_addr_p (cache->saved_regs, HPPA_SP_REGNUM))
           {
