@@ -1532,6 +1532,20 @@ dvp_after_pass_hook ()
 #endif
 }
 
+/* Called after parsing all files via md_end.  */
+
+void
+dvp_end ()
+{
+  /* Check for missing .EndMpg, etc.  */
+  if (CUR_ASM_STATE == ASM_MPG)
+    as_bad ("missing `.endmpg'");
+  else if (CUR_ASM_STATE == ASM_DIRECT)
+    as_bad ("missing `.enddirect'");
+  else if (CUR_ASM_STATE == ASM_UNPACK)
+    as_bad ("missing `.endunpack'");
+}
+
 /* Called via tc_frob_label when a label is defined.  */
 
 void

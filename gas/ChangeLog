@@ -1,3 +1,12 @@
+start-sanitize-sky
+Wed Dec  9 17:06:48 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	Tue Oct 13 14:06:18 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.h (md_end): Define.
+	* config/tc-dvp.c (dvp_end): New function.
+
+end-sanitize-sky
 start-sanitize-r5900
 Wed Dec  9 12:29:23 1998  Jeffrey A Law  (law@cygnus.com)
 
