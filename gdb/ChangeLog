@@ -1,3 +1,8 @@
+2000-10-25  Fernando Nasser  <fnasser@cygnus.com>
+
+        * target.c (generic_mourn_inferior): Notify GUI that inferior is gone
+        by calling detach_hook, if defined.
+
 2000-10-24  Kevin Buettner  <kevinb@redhat.com>
 
 	* coffread.c (coff_end_symtab): When calling end_symtab(),

@@ -1335,6 +1335,9 @@ generic_mourn_inferior (void)
      using hit counts.  So don't clear them if we're counting hits.  */
   if (!show_breakpoint_hit_counts)
     breakpoint_clear_ignore_counts ();
+
+  if (detach_hook)
+    detach_hook ();
 }
 
 /* This table must match in order and size the signals in enum target_signal
