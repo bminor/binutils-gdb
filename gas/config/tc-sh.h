@@ -61,6 +61,10 @@ extern int sh_force_relocation ();
 #define obj_fix_adjustable(fixP) sh_fix_adjustable(fixP)
 struct fix;
 extern boolean sh_fix_adjustable PARAMS ((struct fix *));
+
+/* This arranges for gas/write.c to not apply a relocation if
+   obj_fix_adjustable() says it is not adjustable.  */
+#define TC_FIX_ADJUSTABLE(fixP) obj_fix_adjustable (fixP)
 #endif
 
 #define IGNORE_NONSTANDARD_ESCAPES
@@ -160,6 +164,42 @@ extern int target_big_endian;
 
 #define elf_tc_final_processing sh_elf_final_processing
 extern void sh_elf_final_processing PARAMS ((void));
+
+#define DIFF_EXPR_OK		/* foo-. gets turned into PC relative relocs */
+
+#define GLOBAL_OFFSET_TABLE_NAME "_GLOBAL_OFFSET_TABLE_"
+ 
+/* This is the relocation type for direct references to
+   GLOBAL_OFFSET_TABLE.  It comes up in complicated expressions such
+   as _GLOBAL_OFFSET_TABLE_+[.-.L284], which cannot be expressed
+   normally with the regular expressions.  The fixup specified here
+   when used at runtime implies that we should add the address of the
+   GOT to the specified location, and as a result we have simplified
+   the expression into something we can use.  */
+#define TC_RELOC_GLOBAL_OFFSET_TABLE BFD_RELOC_SH_GOTPC
+
+/* This expression evaluates to false if the relocation is for a local object
+   for which we still want to do the relocation at runtime.  True if we
+   are willing to perform this relocation while building the .o file.
+   This is only used for pcrel relocations, so GOTOFF does not need to be
+   checked here.  I am not sure if some of the others are ever used with
+   pcrel, but it is easier to be safe than sorry.
+
+   We can't resolve references to the GOT or the PLT when creating the
+   object file, since these tables are only created by the linker.
+   Also, if the symbol is global, weak, common or not defined, the
+   assembler can't compute the appropriate reloc, since its location
+   can only be determined at link time.  */
+
+#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)				\
+  ((FIX)->fx_r_type != BFD_RELOC_32_PLT_PCREL			\
+   && (FIX)->fx_r_type != BFD_RELOC_32_GOT_PCREL		\
+   && (FIX)->fx_r_type != BFD_RELOC_SH_GOTPC			\
+   && ((FIX)->fx_addsy == NULL					\
+       || (! S_IS_EXTERNAL ((FIX)->fx_addsy)			\
+	   && ! S_IS_WEAK ((FIX)->fx_addsy)			\
+	   && S_IS_DEFINED ((FIX)->fx_addsy)			\
+	   && ! S_IS_COMMON ((FIX)->fx_addsy))))
 
 #endif /* OBJ_ELF */
 

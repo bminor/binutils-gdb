@@ -1,3 +1,21 @@
+2000-09-01  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-sh.h [OBJ_ELF] (TC_FIX_ADJUSTABLE): Define.
+	* config/tc-sh.c (md_apply_fix): Map 32-bit relocations that
+	become PC-relative to BFD_RELOC_32_PCREL.  Reject 16- or 8-bit
+	similar relocs.
+	(sh_obj_adjustable): Return 1 for PC-relative offsets used in
+	branches.
+
+2000-09-01  Niibe Yutaka  <gniibe@m17n.org>, Kaz Kojima  <kkojima@rr.iij4u.or.jp>, Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-sh.h (DIFF_EXPR_OK, GLOBAL_OFFSET_TABLE_NAME,
+	TC_RELOC_GLOBAL_OFFSET_TABLE, TC_RELOC_RTSYM_LOC_FIXUP): Define.
+	* config/tc-sh.c (sh_elf_cons, sh_elf_suffix): New functions.
+	[OBJ_ELF] (md_pseudo_table) <long, int, word, short>: Use them.
+	(GOT_symbol): New variable.
+	(md_undefined_symbol): Set it.
+
 2000-09-01  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-ia64.c (match): Don't inline.

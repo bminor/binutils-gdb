@@ -51,6 +51,12 @@ static void s_uacons PARAMS ((int));
 static sh_opcode_info *find_cooked_opcode PARAMS ((char **));
 static unsigned int assemble_ppi PARAMS ((char *, sh_opcode_info *));
 
+#ifdef OBJ_ELF
+static void sh_elf_cons PARAMS ((int));
+
+symbolS *GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE_" */
+#endif
+
 int shl = 0;
 
 static void
@@ -69,8 +75,15 @@ little (ignore)
 
 const pseudo_typeS md_pseudo_table[] =
 {
+#ifdef OBJ_ELF
+  {"long", sh_elf_cons, 4},
+  {"int", sh_elf_cons, 4},
+  {"word", sh_elf_cons, 2},
+  {"short", sh_elf_cons, 2},
+#else
   {"int", cons, 4},
   {"word", cons, 2},
+#endif /* OBJ_ELF */
   {"form", listing_psize, 0},
   {"little", little, 0},
   {"heading", listing_title, 0},
@@ -200,6 +213,191 @@ const relax_typeS md_relax_table[C (END, 0)] = {
 
 static struct hash_control *opcode_hash_control;	/* Opcode mnemonics */
 
+
+#ifdef OBJ_ELF
+/* Parse @got, etc. and return the desired relocation. 
+   If we have additional arithmetic expression, then we fill in new_exp_p.  */
+static bfd_reloc_code_real_type
+sh_elf_suffix (str_p, exp_p, new_exp_p)
+     char **str_p;
+     expressionS *exp_p, *new_exp_p;
+{
+  struct map_bfd {
+    char *string;
+    int length;
+    bfd_reloc_code_real_type reloc;
+  };
+
+  char ident[20];
+  char *str = *str_p;
+  char *str2;
+  int ch;
+  int len;
+  struct map_bfd *ptr;
+
+#define MAP(str,reloc) { str, sizeof(str)-1, reloc }
+
+  static struct map_bfd mapping[] = {
+    MAP ("got",		BFD_RELOC_32_GOT_PCREL),
+    MAP ("plt",		BFD_RELOC_32_PLT_PCREL),
+    MAP ("gotoff",	BFD_RELOC_32_GOTOFF),
+    { (char *)0,	0,	BFD_RELOC_UNUSED }
+  };
+
+  if (*str++ != '@')
+    return BFD_RELOC_UNUSED;
+
+  for (ch = *str, str2 = ident;
+       (str2 < ident + sizeof (ident) - 1
+	&& (isalnum (ch) || ch == '@'));
+       ch = *++str)
+    {
+      *str2++ = (islower (ch)) ? ch : tolower (ch);
+    }
+
+  *str2 = '\0';
+  len = str2 - ident;
+
+  ch = ident[0];
+  for (ptr = &mapping[0]; ptr->length > 0; ptr++)
+    if (ch == ptr->string[0]
+	&& len == ptr->length
+	&& memcmp (ident, ptr->string, ptr->length) == 0)
+      {
+	/* Now check for identifier@suffix+constant */
+	if (*str == '-' || *str == '+')
+	  {
+	    char *orig_line = input_line_pointer;
+
+	    input_line_pointer = str;
+	    expression (new_exp_p);
+	    if (new_exp_p->X_op == O_constant)
+	      {
+		exp_p->X_add_number += new_exp_p->X_add_number;
+		str = input_line_pointer;
+	      }
+	    if (new_exp_p->X_op == O_subtract)
+	      str = input_line_pointer;
+
+	    if (&input_line_pointer != str_p)
+	      input_line_pointer = orig_line;
+	  }
+
+	*str_p = str;
+	return ptr->reloc;
+      }
+
+  return BFD_RELOC_UNUSED;
+}
+
+/* The regular cons() function, that reads constants, doesn't support
+   suffixes such as @GOT, @GOTOFF and @PLT, that generate
+   machine-specific relocation types.  So we must define it here.  */
+/* Clobbers input_line_pointer, checks end-of-line.  */
+static void
+sh_elf_cons (nbytes)
+     register int nbytes;	/* 1=.byte, 2=.word, 4=.long */
+{
+  expressionS exp, new_exp;
+  bfd_reloc_code_real_type reloc;
+  const char *name;
+
+  if (is_it_end_of_statement ())
+    {
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  do
+    {
+      expression (&exp);
+      new_exp.X_op = O_absent;
+      new_exp.X_add_symbol = new_exp.X_op_symbol = NULL;
+      /* If the _GLOBAL_OFFSET_TABLE_ symbol hasn't been found yet,
+	 use the name of the symbol to tell whether it's the
+	 _GLOBAL_OFFSET_TABLE_.  If it has, comparing the symbols is
+	 sufficient.  */
+      if (! GOT_symbol && exp.X_add_symbol)
+	name = S_GET_NAME (exp.X_add_symbol);
+      else
+	name = NULL;
+      /* Check whether this expression involves the
+	 _GLOBAL_OFFSET_TABLE_ symbol, by itself or added to a
+	 difference of two other symbols.  */
+      if (((GOT_symbol && GOT_symbol == exp.X_add_symbol)
+	   || (! GOT_symbol && name
+	       && strcmp (name, GLOBAL_OFFSET_TABLE_NAME) == 0))
+	  && (exp.X_op == O_symbol
+	      || (exp.X_op == O_add
+		  && ((symbol_get_value_expression (exp.X_op_symbol)->X_op)
+		      == O_subtract))))
+	{
+	  reloc_howto_type *reloc_howto = bfd_reloc_type_lookup (stdoutput,
+								 BFD_RELOC_32);
+	  int size = bfd_get_reloc_size (reloc_howto);
+
+	  if (GOT_symbol == NULL)
+	    GOT_symbol = symbol_find_or_make (GLOBAL_OFFSET_TABLE_NAME);
+
+	  if (size > nbytes)
+	    as_bad (_("%s relocations do not fit in %d bytes\n"),
+		    reloc_howto->name, nbytes);
+	  else
+	    {
+	      register char *p = frag_more ((int) nbytes);
+	      int offset = nbytes - size;
+
+	      fix_new_exp (frag_now, p - frag_now->fr_literal + offset,
+			   size, &exp, 0, TC_RELOC_GLOBAL_OFFSET_TABLE);
+	    }
+	}
+      /* Check if this symbol involves one of the magic suffixes, such
+	 as @GOT, @GOTOFF or @PLT, and determine which relocation type
+	 to use.  */
+      else if ((exp.X_op == O_symbol || (exp.X_op == O_add && exp.X_op_symbol))
+	  && *input_line_pointer == '@'
+	  && ((reloc = sh_elf_suffix (&input_line_pointer, &exp, &new_exp))
+	      != BFD_RELOC_UNUSED))
+	{
+	  reloc_howto_type *reloc_howto = bfd_reloc_type_lookup (stdoutput,
+								 reloc);
+	  int size = bfd_get_reloc_size (reloc_howto);
+
+	  /* Force a GOT to be generated.  */
+	  if (GOT_symbol == NULL)
+	    GOT_symbol = symbol_find_or_make (GLOBAL_OFFSET_TABLE_NAME);
+
+	  if (size > nbytes)
+	    as_bad (_("%s relocations do not fit in %d bytes\n"),
+		    reloc_howto->name, nbytes);
+	  else
+	    {
+	      register char *p = frag_more ((int) nbytes);
+	      int offset = nbytes - size;
+
+	      fix_new_exp (frag_now, p - frag_now->fr_literal + offset, size,
+			   &exp, 0, reloc);
+	      if (new_exp.X_op != O_absent) 
+		fix_new_exp (frag_now, p - frag_now->fr_literal + offset, size,
+			     &new_exp, 0, BFD_RELOC_32);
+	    }
+	}
+      else
+	emit_expr (&exp, (unsigned int) nbytes);
+    }
+  while (*input_line_pointer++ == ',');
+
+  input_line_pointer--;		/* Put terminator back into stream. */
+  if (*input_line_pointer == '#' || *input_line_pointer == '!')
+    {
+       while (! is_end_of_line[*input_line_pointer++]);
+    }
+  else
+    demand_empty_rest_of_line ();
+}
+#endif /* OBJ_ELF */
+
+
 /* This function is called once, at assembler startup time.  This should
    set up all the tables, etc that the MD part of the assembler needs.  */
 
@@ -1795,6 +1993,24 @@ symbolS *
 md_undefined_symbol (name)
      char *name;
 {
+#ifdef OBJ_ELF
+  /* Under ELF we need to default _GLOBAL_OFFSET_TABLE.  Otherwise we
+     have no need to default values of symbols.  */
+  if (strcmp (name, GLOBAL_OFFSET_TABLE_NAME) == 0)
+    {
+      if (!GOT_symbol)
+	{
+	  if (symbol_find (name))
+	    as_bad ("GOT already in the symbol table");
+	  
+	  GOT_symbol = symbol_new (name, undefined_section,
+				   (valueT)0, & zero_address_frag);
+	}
+      
+      return GOT_symbol;
+    }
+#endif /* OBJ_ELF */
+  
   return 0;
 }
 
@@ -2544,6 +2760,20 @@ sh_fix_adjustable (fixP)
   if (fixP->fx_addsy == NULL)
     return 1;
 
+  if (fixP->fx_r_type == BFD_RELOC_SH_PCDISP8BY2
+      || fixP->fx_r_type == BFD_RELOC_SH_PCDISP12BY2
+      || fixP->fx_r_type == BFD_RELOC_SH_PCRELIMM8BY2
+      || fixP->fx_r_type == BFD_RELOC_SH_PCRELIMM8BY4
+      || fixP->fx_r_type == BFD_RELOC_8_PCREL
+      || fixP->fx_r_type == BFD_RELOC_SH_SWITCH16
+      || fixP->fx_r_type == BFD_RELOC_SH_SWITCH32)
+    return 1;
+
+  if (! TC_RELOC_RTSYM_LOC_FIXUP (fixP)
+      || fixP->fx_r_type == BFD_RELOC_32_GOTOFF
+      || fixP->fx_r_type == BFD_RELOC_RVA)
+    return 0;
+
   /* We need the symbol name for the VTABLE entries */
   if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
@@ -2605,6 +2835,35 @@ md_apply_fix (fixP, val)
   int shift;
 
 #ifdef BFD_ASSEMBLER
+  /* A difference between two symbols, the second of which is in the
+     current section, is transformed in a PC-relative relocation to
+     the other symbol.  We have to adjust the relocation type here.  */
+  if (fixP->fx_pcrel)
+    {
+      switch (fixP->fx_r_type)
+	{
+	default:
+	  break;
+
+	case BFD_RELOC_32:
+	  fixP->fx_r_type = BFD_RELOC_32_PCREL;
+	  break;
+
+	  /* Currently, we only support 32-bit PCREL relocations.
+	     We'd need a new reloc type to handle 16_PCREL, and
+	     8_PCREL is already taken for R_SH_SWITCH8, which
+	     apparently does something completely different than what
+	     we need.  FIXME.  */
+	case BFD_RELOC_16:
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	  
+	case BFD_RELOC_8:
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+    }
+
   /* The function adjust_reloc_syms won't convert a reloc against a weak
      symbol into a reloc against a section, but bfd_install_relocation
      will screw up if the symbol is defined, so we have to adjust val here
@@ -2715,6 +2974,7 @@ md_apply_fix (fixP, val)
       break;
 
     case BFD_RELOC_32:
+    case BFD_RELOC_32_PCREL:
       md_number_to_chars (buf, val, 4);
       break;
 
@@ -2745,6 +3005,43 @@ md_apply_fix (fixP, val)
       return 0;
 #else
       return;
+#endif
+
+#ifdef OBJ_ELF
+    case BFD_RELOC_32_PLT_PCREL:
+      /* Make the jump instruction point to the address of the operand.  At
+	 runtime we merely add the offset to the actual PLT entry. */
+      *valp = 0xfffffffc;
+      break;
+
+    case BFD_RELOC_SH_GOTPC:
+      /* This is tough to explain.  We end up with this one if we have
+         operands that look like "_GLOBAL_OFFSET_TABLE_+[.-.L284]".
+         The goal here is to obtain the absolute address of the GOT,
+         and it is strongly preferable from a performance point of
+         view to avoid using a runtime relocation for this.  There are
+         cases where you have something like:
+        
+         .long	_GLOBAL_OFFSET_TABLE_+[.-.L66]
+        
+         and here no correction would be required.  Internally in the
+         assembler we treat operands of this form as not being pcrel
+         since the '.' is explicitly mentioned, and I wonder whether
+         it would simplify matters to do it this way.  Who knows.  In
+         earlier versions of the PIC patches, the pcrel_adjust field
+         was used to store the correction, but since the expression is
+         not pcrel, I felt it would be confusing to do it this way.  */
+      *valp -= 1;
+      md_number_to_chars (buf, val, 4);
+      break;
+
+    case BFD_RELOC_32_GOT_PCREL:
+      *valp = 0; /* Fully resolved at runtime.  No addend.  */
+      md_number_to_chars (buf, 0, 4);
+      break;
+
+    case BFD_RELOC_32_GOTOFF:
+      break;
 #endif
 
     default:
@@ -3097,6 +3394,8 @@ tc_gen_reloc (section, fixp)
       rel->address = rel->addend = fixp->fx_offset;
     }
   else if (fixp->fx_pcrel)
+    rel->addend = fixp->fx_addnumber;
+  else if (r_type == BFD_RELOC_32 || r_type == BFD_RELOC_32_GOTOFF)
     rel->addend = fixp->fx_addnumber;
   else
     rel->addend = 0;
