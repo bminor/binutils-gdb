@@ -24,6 +24,15 @@ won't do) a file suitable for formatting.  See the text in "pretex.m4"
 for a fuller explanation (and the macro definitions).
 
 _fi__(0)
+@tex
+\def\$#1${{#1}}  % Kluge: collect RCS revision info without $...$
+\xdef\manvers{\$Revision$}  % For use in headers, footers too
+{\parskip=0pt
+\hfill rms\@ai.mit.edu, pesch\@cygnus.com\par
+\hfill {\it Using _GDBN__}, \manvers\par
+\hfill \TeX{}info \texinfoversion\par
+}
+@end tex
 _include__(gdb.top-m4)
 _include__(gdb.sample-m4)
 _include__(gdb.invoc-m4)

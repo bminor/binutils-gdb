@@ -62,16 +62,6 @@ _fi__(!_GENERIC__)
 @author{Roland H. Pesch@qquad @hfill Cygnus Support}
 @page
 
-@tex
-\def\$#1${{#1}}  % Kluge: collect RCS revision info without $...$
-\xdef\manvers{\$Revision$}  % For use in headers, footers too
-{\parskip=0pt
-\hfill rms\@ai.mit.edu, pesch\@cygnus.com\par
-\hfill {\it Using _GDBN__}, \manvers\par
-\hfill \TeX{}info \texinfoversion\par
-}
-@end tex
-
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
 
