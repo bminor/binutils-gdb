@@ -1,3 +1,18 @@
+2002-10-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* elfxx-target.h (USE_REL): Don't define as 1.
+	* elf32-arm.h (USE_REL): Provide a default define of 0.
+	Use #if rather than #ifdef when testing USE_REL.
+	* elf32-m32r.c: Likewise.
+
+	* elf32-arc.c (USE_REL): Define as 1.
+	* elf32-d10v.c (USE_REL): Likewise.
+	* elf32-m32r.c (USE_REL): Likewise.
+	* elf32-m68hc11.c (USE_REL): Likewise.
+	* elf32-m68hc12.c (USE_REL): Likewise.
+	* elf32-or32.c (USE_REL): Likewise.
+	* elfarm-nabi.c (USE_REL): Likewise.
+
 2002-10-16  Jakub Jelinek  <jakub@redhat.com>
 
 	* config.bfd (s390-*-linux*): Add targ64_selvecs.

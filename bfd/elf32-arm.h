@@ -17,6 +17,10 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#ifndef USE_REL
+#define USE_REL	0
+#endif
+
 typedef unsigned long int insn32;
 typedef unsigned short int insn16;
 
@@ -76,7 +80,7 @@ static boolean elf32_arm_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static struct bfd_hash_entry * elf32_arm_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
-#ifdef USE_REL
+#if USE_REL
 static void arm_add_to_rel
   PARAMS ((bfd *, bfd_byte *, reloc_howto_type *, bfd_signed_vma));
 #endif
@@ -1094,7 +1098,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
   local_got_offsets = elf_local_got_offsets (input_bfd);
   r_symndx = ELF32_R_SYM (rel->r_info);
 
-#ifdef USE_REL
+#if USE_REL
   addend = bfd_get_32 (input_bfd, hit_data) & howto->src_mask;
 
   if (addend & ((howto->src_mask + 1) >> 1))
@@ -1370,7 +1374,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 
     case R_ARM_THM_ABS5:
       /* Support ldr and str instructions for the thumb.  */
-#ifdef USE_REL
+#if USE_REL
       /* Need to refetch addend.  */
       addend = bfd_get_16 (input_bfd, hit_data) & howto->src_mask;
       /* ??? Need to determine shift amount from operand size.  */
@@ -1402,7 +1406,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	bfd_vma        check;
 	bfd_signed_vma signed_check;
 
-#ifdef USE_REL
+#if USE_REL
 	/* Need to refetch the addend and squish the two 11 bit pieces
 	   together.  */
 	{
@@ -1507,7 +1511,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	bfd_signed_vma reloc_signed_min = ~ reloc_signed_max;
 	bfd_signed_vma signed_check;
 
-#ifdef USE_REL
+#if USE_REL
 	/* Need to refetch addend.  */
 	addend = bfd_get_16 (input_bfd, hit_data) & howto->src_mask;
 	if (addend & ((howto->src_mask + 1) >> 1))
@@ -1745,7 +1749,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
     }
 }
 
-#ifdef USE_REL
+#if USE_REL
 /* Add INCREMENT to the reloc (of type HOWTO) at ADDRESS.  */
 static void
 arm_add_to_rel (abfd, address, howto, increment)
@@ -1837,7 +1841,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *           relend;
   const char *                  name;
 
-#ifndef USE_REL
+#if !USE_REL
   if (info->relocateable)
     return true;
 #endif
@@ -1866,7 +1870,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
           || r_type == R_ARM_GNU_VTINHERIT)
         continue;
 
-#ifdef USE_REL
+#if USE_REL
       elf32_arm_info_to_howto (input_bfd, & bfd_reloc,
 			       (Elf_Internal_Rel *) rel);
 #else
@@ -1874,7 +1878,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 #endif
       howto = bfd_reloc.howto;
 
-#ifdef USE_REL
+#if USE_REL
       if (info->relocateable)
 	{
 	  /* This is a relocateable link.  We don't have to change
@@ -1907,7 +1911,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
-#ifdef USE_REL
+#if USE_REL
 	  relocation = (sec->output_section->vma
 			+ sec->output_offset
 			+ sym->st_value);
@@ -3676,7 +3680,7 @@ elf32_arm_reloc_type_class (rela)
 #define elf_backend_plt_readonly    1
 #define elf_backend_want_got_plt    1
 #define elf_backend_want_plt_sym    0
-#ifndef USE_REL
+#if !USE_REL
 #define elf_backend_rela_normal     1
 #endif
 
