@@ -7554,8 +7554,7 @@ macro2 (struct mips_cl_insn *ip)
       if (treg == tempreg)
         return;
       /* Protect second load's delay slot.  */
-      if (!gpr_interlocks)
-	macro_build (NULL, "nop", "");
+      load_delay_nop ();
       move_register (treg, tempreg);
       break;
 
