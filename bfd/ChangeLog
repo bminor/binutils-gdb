@@ -1,3 +1,8 @@
+2002-05-29  Ralf Habacker  <ralf.habacker@freenet.de>
+
+	* peXXigen.c (pe_print_idata): Fix seg faults on printing import tables
+	with auto-imported symbols.
+
 2002-05-29  Adam Nemet  <anemet@lnxw.com>
 
 	* elf32-arm.h (bfd_elf32_arm_get_bfd_for_interworking): Don't add glue

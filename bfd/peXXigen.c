@@ -1142,6 +1142,7 @@ pe_print_idata (abfd, vfile)
 
   adj = section->vma - extra->ImageBase;
 
+  /* print all image import descriptors */ 
   for (i = 0; i < datasize; i += onaline)
     {
       bfd_vma hint_addr;
@@ -1181,19 +1182,79 @@ pe_print_idata (abfd, vfile)
 
       if (hint_addr != 0)
 	{
+	  bfd_byte *ft_data;
+	  asection *ft_section;
+	  bfd_vma ft_addr;
+	  bfd_size_type ft_datasize;
+	  int ft_idx;
+	  int differ = 0;
+	  int ft_allocated = 0;
+
 	  fprintf (file, _("\tvma:  Hint/Ord Member-Name\n"));
 
 	  idx = hint_addr - adj;
 
+		ft_addr = first_thunk + extra->ImageBase;
+	  ft_data = data;
+	  ft_idx = first_thunk - adj;
+	  ft_allocated = 0; 
+      
+	  if (first_thunk != hint_addr) 
+	    {
+	      /* Find the section which contains the first thunk.  */
+	      for (ft_section = abfd->sections;
+		   ft_section != NULL;
+		   ft_section = ft_section->next)
+		{
+		  ft_datasize = bfd_section_size (abfd, ft_section);
+		  if (ft_addr >= ft_section->vma
+		      && ft_addr < ft_section->vma + ft_datasize)
+		    break;
+		}
+
+	      if (ft_section == NULL)
+		{
+		  fprintf (file,
+		       _("\nThere is a first thunk, but the section containing it could not be found\n"));
+		  continue;
+		}
+
+	      /* Now check to see if this section is the same as our current
+		 section.  If it is not then we will have to load its data in.  */
+	      if (ft_section == section)
+		{
+		  ft_data = data;
+		  ft_idx = first_thunk - adj;
+		}
+	      else
+		{
+		  ft_idx = first_thunk - (ft_section->vma - extra->ImageBase);
+		  ft_data = (bfd_byte *) bfd_malloc (datasize);
+		  if (ft_data == NULL)
+		    continue;
+
+		  /* Read datasize bfd_bytes starting at offset ft_idx.  */
+		  if (! bfd_get_section_contents (abfd, ft_section, (PTR) ft_data, (bfd_vma) ft_idx, datasize))
+		    {
+		      free (ft_data);
+		      continue;
+		    }
+
+		  ft_idx = 0;
+		  ft_allocated = 1;
+		}
+	    }
+	  /* print HintName vector entries */ 
 	  for (j = 0; j < datasize; j += 4)
 	    {
 	      unsigned long member = bfd_get_32 (abfd, data + idx + j);
 
+	      /* print single IMAGE_IMPORT_BY_NAME vector */ 
 	      if (member == 0)
 		break;
 	      if (member & 0x80000000)
 		fprintf (file, "\t%04lx\t %4lu", member,
-			 member & 0x7fffffff);
+	       member & 0x7fffffff);
 	      else
 		{
 		  int ordinal;
@@ -1204,72 +1265,14 @@ pe_print_idata (abfd, vfile)
 		  fprintf (file, "\t%04lx\t %4d  %s",
 			   member, ordinal, member_name);
 		}
-
+	
 	      /* If the time stamp is not zero, the import address
-                 table holds actual addresses.  */
-	      if (time_stamp != 0
-		  && first_thunk != 0
-		  && first_thunk != hint_addr)
+		       table holds actual addresses. */
+	      if (time_stamp != 0 && first_thunk != 0 && first_thunk != hint_addr)
 		fprintf (file, "\t%04lx",
-			 (long) bfd_get_32 (abfd, data + first_thunk - adj + j));
+			 (long) bfd_get_32 (abfd, ft_data + ft_idx + j));
 
 	      fprintf (file, "\n");
-	    }
-	}
-
-      if (hint_addr != first_thunk && time_stamp == 0)
-	{
-          bfd_byte *ft_data;
-	  asection *ft_section;
-	  bfd_vma ft_addr;
-	  bfd_size_type ft_datasize;
-	  int ft_idx;
-	  int differ = 0;
-	  int ft_allocated = 0;
-
-          ft_addr = first_thunk + extra->ImageBase;
-
-	  /* Find the section which contains the first thunk.  */
-	  for (ft_section = abfd->sections;
-	       ft_section != NULL;
-	       ft_section = ft_section->next)
-	    {
-	      ft_datasize = bfd_section_size (abfd, ft_section);
-	      if (ft_addr >= ft_section->vma
-		  && ft_addr < ft_section->vma + ft_datasize)
-		break;
-	    }
-
-	  if (ft_section == NULL)
-	    {
-	      fprintf (file,
-		   _("\nThere is a first thunk, but the section containing it could not be found\n"));
-	      continue;
-	    }
-
-	  /* Now check to see if this section is the same as our current
-	     section.  If it is not then we will have to load its data in.  */
-	  if (ft_section == section)
-	    {
-	      ft_data = data;
-              ft_idx = first_thunk - adj;
-	    }
-	  else
-	    {
-              ft_idx = first_thunk - (ft_section->vma - extra->ImageBase);
-	      ft_data = (bfd_byte *) bfd_malloc (datasize);
-	      if (ft_data == NULL)
-		continue;
-
-	      /* Read datasize bfd_bytes starting at offset ft_idx.  */
-	      if (! bfd_get_section_contents (abfd, ft_section, (PTR) ft_data, (bfd_vma) ft_idx, datasize))
-		{
-		  free (ft_data);
-		  continue;
-		}
-
-	      ft_idx = 0;
-	      ft_allocated = 1;
 	    }
 
 	  for (j = 0; j < datasize; j += 4)
@@ -1299,14 +1302,13 @@ pe_print_idata (abfd, vfile)
 		  if (iat_member == 0)
 		    fprintf (file,
 			     _("\t>>> Ran out of IAT members!\n"));
-		  else
+
+		  else if (hint_member != 0)
 		    {
-		      ordinal = bfd_get_16 (abfd, data + iat_member - adj);
-		      member_name = (char *) data + iat_member - adj + 2;
+		      ordinal = bfd_get_16 (abfd, data + hint_member - adj);
+		      member_name = (char *) data + hint_member - adj + 2;
 		      fprintf (file, "\t%04lx\t %4d  %s\n",
-			      (unsigned long) iat_member,
-			      ordinal,
-			      member_name);
+			       (unsigned long) iat_member, ordinal, member_name);
 		    }
 		}
 
@@ -1315,8 +1317,7 @@ pe_print_idata (abfd, vfile)
 	    }
 
 	  if (differ == 0)
-	    fprintf (file,
-		     _("\tThe Import Address Table is identical\n"));
+	    fprintf (file, _("\tThe Import Address Table is identical\n"));
 
 	  if (ft_allocated)
 	    free (ft_data);
