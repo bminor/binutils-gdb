@@ -1,5 +1,10 @@
 Wed Mar 16 07:18:43 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* main.c (main): Don't init_source_path for the -cd argument.  Now
+	that source_path doesn't contain the current_directory from when
+	GDB started up, init_source_path is no longer useful (and is
+	harmful because it clobbers a source_path set in $HOME/.gdbinit).
+
 	* TODO: Remove item about line numbers being off.  It is useless
 	and confusing without a reproducible test case (it mentions
 	proceed(), but I was able to step through proceed without trouble).
