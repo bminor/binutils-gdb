@@ -4,6 +4,8 @@ Mon Mar 11 09:53:25 1996  Doug Evans  <dje@charmed.cygnus.com>
  	(sim_resume, sleep insn): Check program exit status in r0.
 	* run.c: #include <signal.h>.
 	(main): Abort if program got SIGILL.
+	Print error message if argument is invalid.
+	(usage): Improve text.
 
 Wed Feb 21 12:15:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 
