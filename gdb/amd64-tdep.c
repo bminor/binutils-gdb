@@ -1048,9 +1048,9 @@ amd64_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 }
 
 
-/* Supply register REGNUM from the floating-point register set REGSET
-   to register cache REGCACHE.  If REGNUM is -1, do this for all
-   registers in REGSET.  */
+/* Supply register REGNUM from the buffer specified by FPREGS and LEN
+   in the floating-point register set REGSET to register cache
+   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
 
 static void
 amd64_supply_fpregset (const struct regset *regset, struct regcache *regcache,
@@ -1060,6 +1060,22 @@ amd64_supply_fpregset (const struct regset *regset, struct regcache *regcache,
 
   gdb_assert (len == tdep->sizeof_fpregset);
   amd64_supply_fxsave (regcache, regnum, fpregs);
+}
+
+/* Collect register REGNUM from the register cache REGCACHE and store
+   it in the buffer specified by FPREGS and LEN as described by the
+   floating-point register set REGSET.  If REGNUM is -1, do this for
+   all registers in REGSET.  */
+
+static void
+amd64_collect_fpregset (const struct regset *regset,
+			const struct regcache *regcache,
+			int regnum, void *fpregs, size_t len)
+{
+  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
+
+  gdb_assert (len == tdep->sizeof_fpregset);
+  amd64_collect_fxsave (regcache, regnum, fpregs);
 }
 
 /* Return the appropriate register set for the core section identified
@@ -1074,7 +1090,8 @@ amd64_regset_from_core_section (struct gdbarch *gdbarch,
   if (strcmp (sect_name, ".reg2") == 0 && sect_size == tdep->sizeof_fpregset)
     {
       if (tdep->fpregset == NULL)
-        tdep->fpregset = regset_alloc (gdbarch, amd64_supply_fpregset, NULL);
+	tdep->fpregset = regset_alloc (gdbarch, amd64_supply_fpregset,
+				       amd64_collect_fpregset);
 
       return tdep->fpregset;
     }
