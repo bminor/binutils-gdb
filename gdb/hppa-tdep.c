@@ -996,7 +996,7 @@ restore_pc_queue (fsr)
 CORE_ADDR
 hppa_push_arguments (nargs, args, sp, struct_return, struct_addr)
      int nargs;
-     value *args;
+     value_ptr *args;
      CORE_ADDR sp;
      int struct_return;
      CORE_ADDR struct_addr;
@@ -1047,7 +1047,7 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
      CORE_ADDR pc;
      CORE_ADDR fun;
      int nargs;
-     value *args;
+     value_ptr *args;
      struct type *type;
      int gcc_p;
 {

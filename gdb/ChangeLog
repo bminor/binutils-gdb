@@ -1,3 +1,8 @@
+Mon Mar 21 11:50:28 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* hppa-tdep.c (hppa_fix_call_dummy): Use value_ptr.
+	(hppa_push_arguments): Likewise.
+
 Sun Mar 20 15:21:57 1994  Doug Evans  (dje@cygnus.com)
 
 	* sparc-tdep.c (sparc_frame_find_save_regs): Use REGISTER_RAW_SIZE
