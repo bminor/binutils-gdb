@@ -1,5 +1,9 @@
 2001-05-23  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* reloc.c (bfd_reloc_code_real): Add MIPS ELF64 relocations.
+	* libbfd.h: Regenerate.
+	* bfd0in2.h: Regenerate.
+
 	* aoutx.h (aout_@var{size}_machine_type): Add MIPS r12k support.
 	* archures.c (bfd_mach_mips12000): Define.
 	* cpu-mips.c (arch_info_struct): Add MIPS r12k support.
