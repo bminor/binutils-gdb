@@ -1,3 +1,8 @@
+2003-01-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.in: Version 2.13.2.1 released, set is_release.
+	* configure: Regenerate.
+
 2002-12-29  Daniel Jacobowitz  <drow@mvista.com>
 
 	* configure.in: Clear is_release on the branch again.
