@@ -1,3 +1,17 @@
+Mon Dec  7 00:39:09 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* as.h: If BROKEN_ASSERT, just redefine `assert' to be trivial,
+	and leave everything else alone.
+
+Fri Dec  4 16:58:42 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* Makefile.in (as.new): Don't bother saving as.old.
+
+	* write.c: Conditionalize on OBJ_VMS, not VMS.
+	(magic_number_for_object_file): Don't define if OBJ_VMS.
+
+	* config/obj-vms.c: Changes for traditional C.
+
 Thu Dec  3 01:24:07 1992  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* config/ho-generic.h (malloc, realloc): Declare.
