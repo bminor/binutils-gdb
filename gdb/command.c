@@ -1678,6 +1678,12 @@ _initialize_command ()
 	   "Execute the rest of the line as a shell command.  \n\
 With no arguments, run an inferior shell.");
 
+  /* NOTE: cagney/2000-03-20: Being able to enter ``(gdb) !ls'' would
+     be a really useful feature.  Unfortunatly, the below wont do
+     this.  Instead it adds support for the form ``(gdb) ! ls''
+     (i.e. the space is required).  If the ``!'' command below is
+     added the complains about no ``!'' command would be replaced by
+     complains about how the ``!'' command is broken :-) */
   if (xdb_commands)
     add_com_alias ("!", "shell", class_support, 0);
 
