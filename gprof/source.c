@@ -1,8 +1,6 @@
 /*
  * Keeps track of source files.
  */
-#include <sys/stat.h>
-
 #include "gprof.h"
 #include "libiberty.h"
 #include "filenames.h"
