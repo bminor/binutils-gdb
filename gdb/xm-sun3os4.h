@@ -20,9 +20,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "xm-sun3.h"
 #define FPU
 
-/* There is a bug which can cause alloca to fail to allocate large
-   areas of memory one time in every 4096 (we think).  */
-/* chase@orc.olivetti.com says that 4 megabyte alloca's consistently fail,
-   even though the stack limit (SET_STACK_LIMIT_HUGE) has been set
-   to 250 megabytes.  */
+/* Large alloca's fail because the attempt to increase the stack limit in
+   main() fails because shared libraries are allocated just below the initial
+   stack limit.  The SunOS kernel will not allow the stack to grow into
+   the area occupied by the shared libraries.  Sun knows about this bug
+   but has no obvious fix for it.  */
 #define BROKEN_LARGE_ALLOCA
