@@ -71,6 +71,7 @@ PROTO(PTR, bfd_zalloc,(bfd *abfd, bfd_size_type size));
 PROTO(PTR, bfd_realloc,(bfd *abfd, PTR orig, bfd_size_type new));
 PROTO(void, bfd_alloc_grow,(bfd *abfd, PTR thing, bfd_size_type size));
 PROTO(PTR, bfd_alloc_finish,(bfd *abfd));
+PROTO(PTR, bfd_alloc_by_size_t,(bfd *abfd, size_t wanted));
 
 #define bfd_release(x,y) (void) obstack_free(&(x->memory),y)
 
@@ -204,7 +205,7 @@ extern bfd *bfd_last_cache;
       (FILE*)(bfd_last_cache->iostream): \
        bfd_cache_lookup_worker(x))
 void  EXFUN(bfd_cache_init , (bfd *));
-void EXFUN(bfd_cache_close , (bfd *));
+boolean EXFUN(bfd_cache_close , (bfd *));
 FILE* EXFUN(bfd_open_file, (bfd *));
 FILE *EXFUN(bfd_cache_lookup_worker, (bfd *));
 void EXFUN(bfd_constructor_entry, (bfd *abfd, 
@@ -233,3 +234,4 @@ CONST bfd_arch_info_type *EXFUN(bfd_default_compatible
     , (CONST bfd_arch_info_type *a,
     CONST bfd_arch_info_type *b));
 boolean EXFUN(bfd_default_scan, (CONST struct bfd_arch_info *, CONST char *));
+struct elf_internal_shdr *EXFUN(bfd_elf_find_section , (bfd *abfd, char *name));

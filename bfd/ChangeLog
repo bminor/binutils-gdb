@@ -1,3 +1,12 @@
+Fri Oct 23 13:55:35 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Check fclose return value for errors.
+	libbfd.h: bfd_cache_close now returns a boolean.
+	cache.c (bfd_cache_delete): return fclose success value.
+	(bfd_cache_close): return bfd_cache_delete return value.
+	opncls.c (bfd_close, bfd_close_all_done): return result of
+	bfd_cache_close.
+
 Fri Oct 23 10:32:36 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* seclet.c (rel): don't load sections without the SEC_LOAD bit.

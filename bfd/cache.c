@@ -1,6 +1,5 @@
-
 /* BFD library -- caching of file descriptors.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Hacked by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -36,8 +35,6 @@ SECTION
 
 */
 
-/* $Id$ */
-
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
@@ -47,7 +44,7 @@ INTERNAL_FUNCTION
 	BFD_CACHE_MAX_OPEN macro
 
 DESCRIPTION
-	The maxiumum number of files which the cache will keep open at
+	The maximum number of files which the cache will keep open at
 	one time.
 
 .#define BFD_CACHE_MAX_OPEN 10
@@ -93,7 +90,7 @@ bfd *bfd_last_cache;
  *
  */
 
-static void bfd_cache_delete();
+static boolean EXFUN(bfd_cache_delete,(bfd *));
 
 
 static void
@@ -111,7 +108,7 @@ DEFUN_VOID(close_one)
     }
 
     kill->where = ftell((FILE *)(kill->iostream));
-    bfd_cache_delete(kill);
+    (void) bfd_cache_delete(kill);
 }
 
 /* Cuts the BFD abfd out of the chain in the cache */
@@ -124,15 +121,21 @@ DEFUN(snip,(abfd),
   if (cache_sentinel == abfd) cache_sentinel = (bfd *)NULL;
 }
 
-static void
+static boolean
 DEFUN(bfd_cache_delete,(abfd),
       bfd *abfd)
 {
-  fclose ((FILE *)(abfd->iostream));
+  boolean ret;
+
+  if (fclose ((FILE *)(abfd->iostream)) == EOF)
+    ret = false;
+  else
+    ret = true;
   snip (abfd);
   abfd->iostream = NULL;
   open_files--;
   bfd_last_cache = 0;
+  return ret;
 }
   
 static bfd *
@@ -183,16 +186,24 @@ DESCRIPTION
 	then close it too.
 
 SYNOPSIS
-	void bfd_cache_close (bfd *);
+	boolean bfd_cache_close (bfd *);
+
+RETURNS
+	<<false>> is returned if closing the file fails, <<true>> is
+	returned if all is well.
 */
-void
+boolean
 DEFUN(bfd_cache_close,(abfd),
       bfd *abfd)
 {
   /* If this file is open then remove from the chain */
   if (abfd->iostream) 
     {
-      bfd_cache_delete(abfd);
+      return bfd_cache_delete(abfd);
+    }
+  else
+    {
+      return true;
     }
 }
 
