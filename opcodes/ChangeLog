@@ -1,3 +1,7 @@
+2003-01-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (powerpc_macros <extrwi>): Accept a shift of 32.
+
 2002-01-02  Ben Elliston  <bje@redhat.com>
 	    Jeff Johnston  <jjohnstn@redhat.com>
 
