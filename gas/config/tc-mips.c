@@ -801,6 +801,10 @@ static int mips_relax_branch;
 
 enum mips_regclass { MIPS_GR_REG, MIPS_FP_REG, MIPS16_REG };
 
+static inline bfd_boolean reloc_needs_lo_p
+  PARAMS ((bfd_reloc_code_real_type));
+static inline bfd_boolean fixup_has_matching_lo_p
+  PARAMS ((fixS *));
 static int insn_uses_reg
   PARAMS ((struct mips_cl_insn *ip, unsigned int reg,
 	   enum mips_regclass class));
@@ -932,6 +936,8 @@ static void s_mips_file
   PARAMS ((int));
 static void s_mips_loc
   PARAMS ((int));
+static bfd_boolean pic_need_relax
+  PARAMS ((symbolS *, asection *));
 static int mips16_extended_frag
   PARAMS ((fragS *, asection *, long));
 static int relaxed_branch_length (fragS *, asection *, int);
@@ -1439,6 +1445,31 @@ md_assemble (str)
     }
 }
 
+/* Return true if the given relocation might need a matching %lo().
+   Note that R_MIPS_GOT16 relocations only need a matching %lo() when
+   applied to local symbols.  */
+
+static inline bfd_boolean
+reloc_needs_lo_p (reloc)
+     bfd_reloc_code_real_type reloc;
+{
+  return (reloc == BFD_RELOC_HI16_S
+	  || reloc == BFD_RELOC_MIPS_GOT16);
+}
+
+/* Return true if the given fixup is followed by a matching R_MIPS_LO16
+   relocation.  */
+
+static inline bfd_boolean
+fixup_has_matching_lo_p (fixp)
+     fixS *fixp;
+{
+  return (fixp->fx_next != NULL
+	  && fixp->fx_next->fx_r_type == BFD_RELOC_LO16
+	  && fixp->fx_addsy == fixp->fx_next->fx_addsy
+	  && fixp->fx_offset == fixp->fx_next->fx_offset);
+}
+
 /* See whether instruction IP reads register REG.  CLASS is the type
    of register.  */
 
@@ -1593,14 +1624,12 @@ append_insn (place, ip, address_expr, reloc_type)
   char *f;
   fixS *fixp[3];
   int nops = 0;
-  bfd_boolean unmatched_reloc_p;
 
   /* Mark instruction labels in mips16 mode.  */
   mips16_mark_labels ();
 
   prev_pinfo = prev_insn.insn_mo->pinfo;
   pinfo = ip->insn_mo->pinfo;
-  unmatched_reloc_p = FALSE;
 
   if (place == NULL && (! mips_opts.noreorder || prev_nop_frag != NULL))
     {
@@ -2144,17 +2173,22 @@ append_insn (place, ip, address_expr, reloc_type)
 		   || *reloc_type == BFD_RELOC_MIPS_RELGOT))
 		fixp[0]->fx_no_overflow = 1;
 
-	      if (reloc_type[0] == BFD_RELOC_HI16_S)
+	      if (reloc_needs_lo_p (*reloc_type))
 		{
 		  struct mips_hi_fixup *hi_fixup;
 
-		  hi_fixup = ((struct mips_hi_fixup *)
-			      xmalloc (sizeof (struct mips_hi_fixup)));
+		  /* Reuse the last entry if it already has a matching %lo.  */
+		  hi_fixup = mips_hi_fixup_list;
+		  if (hi_fixup == 0
+		      || !fixup_has_matching_lo_p (hi_fixup->fixp))
+		    {
+		      hi_fixup = ((struct mips_hi_fixup *)
+				  xmalloc (sizeof (struct mips_hi_fixup)));
+		      hi_fixup->next = mips_hi_fixup_list;
+		      mips_hi_fixup_list = hi_fixup;
+		    }
 		  hi_fixup->fixp = fixp[0];
 		  hi_fixup->seg = now_seg;
-		  hi_fixup->next = mips_hi_fixup_list;
-		  mips_hi_fixup_list = hi_fixup;
-		  unmatched_reloc_p = TRUE;
 		}
 
 	      if (reloc_type[1] != BFD_RELOC_UNUSED)
@@ -2706,16 +2740,6 @@ append_insn (place, ip, address_expr, reloc_type)
 
   /* We just output an insn, so the next one doesn't have a label.  */
   mips_clear_insn_labels ();
-
-  /* We must ensure that a fixup associated with an unmatched %hi
-     reloc does not become a variant frag.  Otherwise, the
-     rearrangement of %hi relocs in frob_file may confuse
-     tc_gen_reloc.  */
-  if (unmatched_reloc_p)
-    {
-      frag_wane (frag_now);
-      frag_new (0);
-    }
 }
 
 /* This function forgets that there was any previous instruction or
@@ -4069,6 +4093,27 @@ macro (ip)
   expr1.X_op_symbol = NULL;
   expr1.X_add_symbol = NULL;
   expr1.X_add_number = 1;
+
+  /* Umatched fixups should not be put in the same frag as a relaxable
+     macro.  For example, suppose we have:
+
+	lui $4,%hi(l1)		# 1
+	la $5,l2		# 2
+	addiu $4,$4,%lo(l1)	# 3
+
+     If instructions 1 and 2 were put in the same frag, md_frob_file would
+     move the fixup for #1 after the fixups for the "unrelaxed" version of
+     #2.  This would confuse tc_gen_reloc, which expects the relocations
+     for #2 to be the last for that frag.
+
+     If it looks like this situation could happen, put the macro
+     in a new frag.  */
+  if (mips_hi_fixup_list != 0
+      && mips_hi_fixup_list->fixp->fx_frag == frag_now)
+    {
+      frag_wane (frag_now);
+      frag_new (0);
+    }
 
   switch (mask)
     {
@@ -10858,14 +10903,16 @@ mips_frob_file ()
       segment_info_type *seginfo;
       int pass;
 
-      assert (l->fixp->fx_r_type == BFD_RELOC_HI16_S);
+      assert (reloc_needs_lo_p (l->fixp->fx_r_type));
 
-      /* Check quickly whether the next fixup happens to be a matching
-         %lo.  */
-      if (l->fixp->fx_next != NULL
-	  && l->fixp->fx_next->fx_r_type == BFD_RELOC_LO16
-	  && l->fixp->fx_addsy == l->fixp->fx_next->fx_addsy
-	  && l->fixp->fx_offset == l->fixp->fx_next->fx_offset)
+      /* If a GOT16 relocation turns out to be against a global symbol,
+	 there isn't supposed to be a matching LO.  */
+      if (l->fixp->fx_r_type == BFD_RELOC_MIPS_GOT16
+	  && !pic_need_relax (l->fixp->fx_addsy, l->seg))
+	continue;
+
+      /* Check quickly whether the next fixup happens to be a matching %lo.  */
+      if (fixup_has_matching_lo_p (l->fixp))
 	continue;
 
       /* Look through the fixups for this segment for a matching %lo.
@@ -10887,9 +10934,8 @@ mips_frob_file ()
 		  && f->fx_offset == l->fixp->fx_offset
 		  && (pass == 1
 		      || prev == NULL
-		      || prev->fx_r_type != BFD_RELOC_HI16_S
-		      || prev->fx_addsy != f->fx_addsy
-		      || prev->fx_offset !=  f->fx_offset))
+		      || !reloc_needs_lo_p (prev->fx_r_type)
+		      || !fixup_has_matching_lo_p (prev)))
 		{
 		  fixS **pf;
 
@@ -12672,6 +12718,64 @@ nopic_need_relax (sym, before_relaxing)
     return 1;
 }
 
+
+/* Return true if the given symbol should be considered local for SVR4 PIC.  */
+
+static bfd_boolean
+pic_need_relax (sym, segtype)
+     symbolS *sym;
+     asection *segtype;
+{
+  asection *symsec;
+  bfd_boolean linkonce;
+
+  /* Handle the case of a symbol equated to another symbol.  */
+  while (symbol_equated_reloc_p (sym))
+    {
+      symbolS *n;
+
+      /* It's possible to get a loop here in a badly written
+	 program.  */
+      n = symbol_get_value_expression (sym)->X_add_symbol;
+      if (n == sym)
+	break;
+      sym = n;
+    }
+
+  symsec = S_GET_SEGMENT (sym);
+
+  /* duplicate the test for LINK_ONCE sections as in adjust_reloc_syms */
+  linkonce = FALSE;
+  if (symsec != segtype && ! S_IS_LOCAL (sym))
+    {
+      if ((bfd_get_section_flags (stdoutput, symsec) & SEC_LINK_ONCE)
+	  != 0)
+	linkonce = TRUE;
+
+      /* The GNU toolchain uses an extension for ELF: a section
+	 beginning with the magic string .gnu.linkonce is a linkonce
+	 section.  */
+      if (strncmp (segment_name (symsec), ".gnu.linkonce",
+		   sizeof ".gnu.linkonce" - 1) == 0)
+	linkonce = TRUE;
+    }
+
+  /* This must duplicate the test in adjust_reloc_syms.  */
+  return (symsec != &bfd_und_section
+	  && symsec != &bfd_abs_section
+	  && ! bfd_is_com_section (symsec)
+	  && !linkonce
+#ifdef OBJ_ELF
+	  /* A global or weak symbol is treated as external.  */
+	  && (OUTPUT_FLAVOR != bfd_target_elf_flavour
+	      || (! S_IS_WEAK (sym)
+		  && (! S_IS_EXTERNAL (sym)
+		      || mips_pic == EMBEDDED_PIC)))
+#endif
+	  );
+}
+
+
 /* Given a mips16 variant frag FRAGP, return non-zero if it needs an
    extended opcode.  SEC is the section the frag is in.  */
 
@@ -12950,8 +13054,7 @@ md_estimate_size_before_relax (fragp, segtype)
      fragS *fragp;
      asection *segtype;
 {
-  int change = 0;
-  bfd_boolean linkonce = FALSE;
+  int change;
 
   if (RELAX_BRANCH_P (fragp->fr_subtype))
     {
@@ -12967,60 +13070,9 @@ md_estimate_size_before_relax (fragp, segtype)
     return (RELAX_MIPS16_EXTENDED (fragp->fr_subtype) ? 4 : 2);
 
   if (mips_pic == NO_PIC)
-    {
-      change = nopic_need_relax (fragp->fr_symbol, 0);
-    }
+    change = nopic_need_relax (fragp->fr_symbol, 0);
   else if (mips_pic == SVR4_PIC)
-    {
-      symbolS *sym;
-      asection *symsec;
-
-      sym = fragp->fr_symbol;
-
-      /* Handle the case of a symbol equated to another symbol.  */
-      while (symbol_equated_reloc_p (sym))
-	{
-	  symbolS *n;
-
-	  /* It's possible to get a loop here in a badly written
-             program.  */
-	  n = symbol_get_value_expression (sym)->X_add_symbol;
-	  if (n == sym)
-	    break;
-	  sym = n;
-	}
-
-      symsec = S_GET_SEGMENT (sym);
-
-      /* duplicate the test for LINK_ONCE sections as in adjust_reloc_syms */
-      if (symsec != segtype && ! S_IS_LOCAL (sym))
-	{
-	  if ((bfd_get_section_flags (stdoutput, symsec) & SEC_LINK_ONCE)
-	      != 0)
-	    linkonce = TRUE;
-
-	  /* The GNU toolchain uses an extension for ELF: a section
-	     beginning with the magic string .gnu.linkonce is a linkonce
-	     section.  */
-	  if (strncmp (segment_name (symsec), ".gnu.linkonce",
-		       sizeof ".gnu.linkonce" - 1) == 0)
-	    linkonce = TRUE;
-	}
-
-      /* This must duplicate the test in adjust_reloc_syms.  */
-      change = (symsec != &bfd_und_section
-		&& symsec != &bfd_abs_section
-		&& ! bfd_is_com_section (symsec)
-		&& !linkonce
-#ifdef OBJ_ELF
-		/* A global or weak symbol is treated as external.  */
-	  	&& (OUTPUT_FLAVOR != bfd_target_elf_flavour
-		    || (! S_IS_WEAK (sym)
-			&& (! S_IS_EXTERNAL (sym)
-			    || mips_pic == EMBEDDED_PIC)))
-#endif
-		);
-    }
+    change = pic_need_relax (fragp->fr_symbol, segtype);
   else
     abort ();
 

@@ -1,3 +1,17 @@
+2003-02-08  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (reloc_needs_lo_p): New function.
+	(fixup_has_matching_lo_p): New function.
+	(append_insn): Use reloc_needs_lo_p to check whether a relocation
+	might need a matching %lo().  Reuse the head of mips_hi_fixup_list
+	if that fixup already has a matching %lo().  Don't call frag_wane here.
+	(macro): Call frag_wane here if the last unmatched hi was in the
+	current frag.
+	(pic_need_relax): New function, split out from...
+	(md_estimate_size_before_relax): ...here.
+	(mips_frob_file): Use reloc_needs_lo_p.  Use pic_need_relax to test
+	whether BFD_RELOC_MIPS_GOT16 fixups refer to global symbols.
+
 2003-02-07  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mips.c (my_getSmallExpression): Rework bracket handling.
