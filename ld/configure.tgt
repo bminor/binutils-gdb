@@ -95,6 +95,7 @@ mips*-sgi-irix*)	targ_emul=mipsbig ;;
 mips*el-*-ecoff*)	targ_emul=mipsidtl ;;
 mips*-*-ecoff*)		targ_emul=mipsidt ;;
 mips*-dec-bsd*)		targ_emul=mipsbsd ;;
+mips*-*-bsd*)		targ_emul=mipsbig ;;
 mips*vr4300el-*-elf*)	targ_emul=elf32vr4300el ;;
 mips*vr4300-*-elf*)	targ_emul=elf32vr4300 ;;
 mips*el-*-elf*)		targ_emul=elf32lmip ;;
