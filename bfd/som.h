@@ -24,6 +24,7 @@
 #define _SOM_H
 
 #include "../bfd/sysdep.h"
+#include "libhppa.h"
 
 #include <a.out.h>
 #include <lst.h>

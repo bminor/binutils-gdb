@@ -40,7 +40,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	November 19, 1992.  */
 
 #include "elf32-hppa.h"
-#include "libhppa.h"
 #include "aout/aout64.h"
 #include "hppa_stubs.h"
 

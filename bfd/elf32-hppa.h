@@ -32,6 +32,7 @@
 #define _ELF32_HPPA_H
 
 #include "libelf.h"
+#include "libhppa.h"
 
 /* ELF/HPPA relocation types */
 
