@@ -1,4 +1,4 @@
-/* Target-dependent code for Linux/MIPS.
+/* Target-dependent code for GNU/Linux on MIPS processors.
    Copyright 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -298,11 +298,11 @@ static struct core_fns regset_core_fns =
 };
 
 /* Fetch (and possibly build) an appropriate link_map_offsets
-   structure for native Linux/MIPS targets using the struct offsets
+   structure for native GNU/Linux MIPS targets using the struct offsets
    defined in link.h (but without actual reference to that file).
 
-   This makes it possible to access Linux/MIPS shared libraries from a
-   GDB that was not built on an Linux/MIPS host (for cross debugging).  */
+   This makes it possible to access GNU/Linux MIPS shared libraries from a
+   GDB that was built on a different host platform (for cross debugging).  */
 
 struct link_map_offsets *
 mips_linux_svr4_fetch_link_map_offsets (void)

@@ -1,5 +1,11 @@
 2002-02-20  Daniel Jacobowitz  <drow@mvista.com>
 
+	* mips-linux-nat.c: Call the operating system GNU/Linux.
+	* mips-linux-tdep.c: Likewise.
+	* mips-tdep.c: Likewise.
+
+2002-02-20  Daniel Jacobowitz  <drow@mvista.com>
+
 	Fix PR gdb/265.
 	* jv-exp.y (parse_number): Handle 64-bit integers.
 

@@ -1,4 +1,4 @@
-/* Native-dependent code for Linux/MIPS.
+/* Native-dependent code for GNU/Linux on MIPS processors.
    Copyright 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.

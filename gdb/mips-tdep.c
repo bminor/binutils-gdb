@@ -1403,7 +1403,7 @@ mips_addr_bits_remove (CORE_ADDR addr)
 
 /* mips_software_single_step() is called just before we want to resume
    the inferior, if we want to single-step it but there is no hardware
-   or kernel single-step support (MIPS on Linux for example).  We find
+   or kernel single-step support (MIPS on GNU/Linux for example).  We find
    the target of the coming instruction and breakpoint it.
 
    single_step is also called just after the inferior stops.  If we had
