@@ -542,7 +542,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	memattr.c mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c \
 	macrotab.c macroexp.c macrocmd.c macroscope.c \
-	printcmd.c remote.c remote-nrom.c scm-exp.c scm-lang.c \
+	printcmd.c remote.c scm-exp.c scm-lang.c \
 	scm-valprint.c source.c stabsread.c stack.c symfile.c \
 	symmisc.c symtab.c linespec.c target.c thread.c top.c tracepoint.c \
 	typeprint.c utils.c valarith.c valops.c valprint.c values.c \
@@ -1359,7 +1359,6 @@ ALLDEPFILES = a68v-nat.c \
 	i387-tdep.c \
 	i386-linux-tdep.c i386-nat.c \
 	i386gnu-nat.c i386gnu-tdep.c \
-	i960-tdep.c \
 	ia64-linux-nat.c ia64-linux-tdep.c ia64-tdep.c \
 	infptrace.c inftarg.c irix4-nat.c irix5-nat.c \
 	lynx-nat.c m3-nat.c \
@@ -1381,7 +1380,7 @@ ALLDEPFILES = a68v-nat.c \
 	procfs.c \
 	remote-array.c remote-e7000.c \
 	remote-es.c remote-hms.c remote-mips.c \
-	remote-nindy.c remote-rdp.c remote-sim.c \
+	remote-rdp.c remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
 	remote-vx.c \
 	rs6000-nat.c rs6000-tdep.c \
@@ -1794,8 +1793,8 @@ i386v4-nat.o: i386v4-nat.c $(defs_h) $(regcache_h)
 i387-tdep.o: i387-tdep.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) $(language_h) $(regcache_h) $(doublest_h) i386-tdep.h
 
-i960-tdep.o: i960-tdep.c $(defs_h) $(symtab_h) $(value_h) $(frame_h) \
-	$(floatformat_h) $(target_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
+# OBSOLETE i960-tdep.o: i960-tdep.c $(defs_h) $(symtab_h) $(value_h) $(frame_h) \
+# OBSOLETE 	$(floatformat_h) $(target_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 
 ia64-linux-nat.o: ia64-linux-nat.c  $(defs_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(regcache_h)
@@ -2101,10 +2100,10 @@ remote-mips.o: remote-mips.c $(defs_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(inferior_h) $(serial_h) $(symfile_h) $(target_h) \
 	$(regcache_h)
 
-remote-nindy.o: remote-nindy.c $(floatformat_h) $(command_h) \
-	$(defs_h) $(gdbcore_h) $(inferior_h) \
-	nindy-share/env.h nindy-share/stop.h $(remote_utils_h) \
-	$(symfile_h) $(regcache_h)
+# OBSOLETE remote-nindy.o: remote-nindy.c $(floatformat_h) $(command_h) \
+# OBSOLETE 	$(defs_h) $(gdbcore_h) $(inferior_h) \
+# OBSOLETE 	nindy-share/env.h nindy-share/stop.h $(remote_utils_h) \
+# OBSOLETE 	$(symfile_h) $(regcache_h)
 
 # OBSOLETE remote-os9k.o: remote-os9k.c $(defs_h) $(gdbcore_h) \
 # OBSOLETE 	$(command_h) $(monitor_h) $(remote_utils_h) $(symtab_h) $(symfile_h) \
@@ -2145,8 +2144,8 @@ remote.o: remote.c $(bfd_h) $(gdb_wait_h) $(defs_h) $(gdbcmd_h) \
 	$(gdb_string_h) $(event_loop_h) $(event_top_h) $(remote_h) \
 	$(inf_loop_h) $(value_h)
 
-remote-nrom.o: remote-nrom.c $(bfd_h) $(gdb_wait_h) $(defs_h) $(gdbcmd_h) \
-	$(inferior_h) $(remote_utils_h) $(symfile_h) $(terminal_h)
+# OBSOLETE remote-nrom.o: remote-nrom.c $(bfd_h) $(gdb_wait_h) $(defs_h) $(gdbcmd_h) \
+# OBSOLETE 	$(inferior_h) $(remote_utils_h) $(symfile_h) $(terminal_h)
 
 rom68k-rom.o: rom68k-rom.c $(monitor_h) $(bfd_h) $(gdb_wait_h) $(defs_h) \
 	$(gdbcmd_h) $(inferior_h) $(target_h) $(serial_h) $(terminal_h) \

@@ -91,9 +91,7 @@ maintainer works with the native maintainer when resolving API issues.
 	i386		--target=i386-elf ,-Werror
 			Mark Kettenis           kettenis@gnu.org
 
-	i960		--target=i960-coff ,-Werror
-			Maintenance only
-			OBSOLETE candidate, not multi-arch
+	i960		(--target=i960-coff OBSOLETE)
 
 	ia64		--target=ia64-linux-gnu ,-Werror
 			(--target=ia64-elf broken)

@@ -120,13 +120,13 @@ i[3456]86-*-cygwin*)	gdb_target=cygwin  ;;
 i[3456]86-*-vxworks*)	gdb_target=vxworks ;;
 i[3456]86-*-*)		gdb_target=embed ;;
 
-i960-*-bout*)		gdb_target=vxworks960 ;;
-i960-nindy-coff*)	gdb_target=nindy960 ;;
-i960-*-coff*)		gdb_target=mon960 ;;
-i960-nindy-elf*)	gdb_target=nindy960 ;;
-i960-*-elf*)		gdb_target=mon960 ;;
-i960-*-nindy*)		gdb_target=nindy960 ;;
-i960-*-vxworks*)	gdb_target=vxworks960 ;;
+# OBSOLETE i960-*-bout*)		gdb_target=vxworks960 ;;
+# OBSOLETE i960-nindy-coff*)	gdb_target=nindy960 ;;
+# OBSOLETE i960-*-coff*)		gdb_target=mon960 ;;
+# OBSOLETE i960-nindy-elf*)	gdb_target=nindy960 ;;
+# OBSOLETE i960-*-elf*)		gdb_target=mon960 ;;
+# OBSOLETE i960-*-nindy*)		gdb_target=nindy960 ;;
+# OBSOLETE i960-*-vxworks*)	gdb_target=vxworks960 ;;
 
 ia64-*-aix*)		gdb_target=aix ;;
 ia64-*-linux*)		gdb_target=linux

@@ -67,6 +67,7 @@ i386 running OSF/1				i[3456]86-*osf1mk*
 HP/Apollo 68k Family				m68*-apollo*-sysv*,
 						m68*-apollo*-bsd*,
 						m68*-hp-bsd*, m68*-hp-hpux*
+I960 with MON960				i960-*-coff
 
 * OBSOLETE languages
 

@@ -1,3 +1,21 @@
+2002-08-22  Andrew Cagney  <cagney@redhat.com>
+
+	* NEWS: Mention that the i960 has been made obsolete.
+	* Makefile.in (SFILES): Delete remote-nrom.c, remote-nindy.c and
+	i960-tdep.c
+	(remote-nrom.o): Obsolete target.
+	(remote-nindy.o, i960-tdep.o): Ditto.
+	* remote-nrom.c: Make file obsolete.
+	* remote-nindy.c, remote-vx960.c: Ditto.
+	* config/i960/vxworks960.mt, config/i960/nindy960.mt: Ditto.
+	* config/i960/mon960.mt, config/i960/tm-i960.h: Ditto.
+	* config/i960/tm-vx960.h, config/i960/tm-nindy960.h: Ditto.
+	* config/i960/tm-mon960.h, i960-tdep.c: Ditto.
+	* configure.tgt: Make i960-*-bout*, i960-nindy-coff*,
+	i960-*-coff*, i960-nindy-elf*, i960-*-elf*, i960-*-nindy* and
+	i960-*-vxworks* obsolete.
+	* MAINTAINERS: Note that the i960 is obsolete.
+
 2002-08-21  Corinna Vinschen  <vinschen@redhat.com
 
 	* aix-thread.c (aix_thread_detach): Disable thread debugging on
