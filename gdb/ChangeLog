@@ -1,3 +1,8 @@
+2005-01-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.ac: Remove extra check for ranlib.
+	* configure: Regenerated.
+
 2005-01-28  Andrew Cagney  <cagney@gnu.org>
 
 	* language.h (struct language_defn): Make la_val_print's buffer

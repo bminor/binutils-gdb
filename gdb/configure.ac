@@ -34,14 +34,6 @@ AM_PROG_CC_STDC
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
 AC_CANONICAL_SYSTEM
 
-# FIXME: kettenis/20030102: The AC_PROG_RANLIB from Autoconf 2.13
-# doesn't support cross-compilation, but the one from Autoconf 2.5x
-# does.  Override RANLIB here (i.e. before running AC_PROG_RANLIB) to
-# deal with the lossage.  Note that CY_GNU_GETTEXT currently calls
-# AC_PROG_RANLIB.  This can be removed when we switch to Autoconf
-# 2.5x.
-AC_CHECK_TOOL(RANLIB, ranlib, :)
-
 dnl List of object files and targets accumulated by configure.
 
 CONFIG_OBS=
