@@ -1,3 +1,8 @@
+Mon Feb  1 14:36:11 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* remote-z8k.c, z8k-tdep.c: support for the Z8001 and Z8002.
+	* parse.c (std_regs): Only declare if NO_STD_REGS is defined.
+
 Sun Jan 31 04:32:48 1993  Michael Tiemann  (tiemann@rtl.cygnus.com)
 
 	* values.c (value_headof): Fix typo in which VTBL and ARG were
