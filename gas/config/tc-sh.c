@@ -1139,7 +1139,6 @@ sh_coff_frob_file ()
 	{
 	  symbolS *sym;
 	  bfd_vma val;
-	  bfd_vma paddr;
 	  fixS *fscan;
 	  int iscan;
 	  int count;
@@ -1164,11 +1163,10 @@ sh_coff_frob_file ()
 	  /* Look through the fixups again, this time looking for one
              at the same location as sym.  */
 	  val = S_GET_VALUE (sym);
-	  paddr = segment_info[iseg].scnhdr.s_paddr;
 	  for (fscan = segment_info[iseg].fix_root;
 	       fscan != NULL;
 	       fscan = fscan->fx_next)
-	    if (val == paddr + fscan->fx_frag->fr_address + fscan->fx_where)
+	    if (val == fscan->fx_frag->fr_address + fscan->fx_where)
 	      break;
 	  if (fscan == NULL)
 	    {
@@ -1202,7 +1200,6 @@ sh_coff_frob_file ()
 	  count = 0;
 	  for (iscan = SEG_E0; iscan < SEG_UNKNOWN; iscan++)
 	    {
-	      paddr = segment_info[iscan].scnhdr.s_paddr;
 	      for (fscan = segment_info[iscan].fix_root;
 		   fscan != NULL;
 		   fscan = fscan->fx_next)

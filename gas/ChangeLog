@@ -1,5 +1,9 @@
 Thu Feb 22 16:39:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-sh.c (sh_coff_frob_file): Don't consider the address
+	of the section when looking for the R_SH_USES fixup, because the
+	frag addresses have not yet been adjusted.
+
 	* gdbinit.in: Set a breakpoint on as_warn_where.
 
 	* config/tc-mips.c (macro): Add missing arguments to macro_build
