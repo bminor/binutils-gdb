@@ -17,7 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define TARGET_BYTE_ORDER_SELECTABLE
-#define TARGET_MONITOR_PROMPT { '<', 'R', 'I', 'S', 'Q', '>', ' ' }
+#define TARGET_MONITOR_PROMPT "<RISQ> "
 
 /* Hack to allow 64bit register reads, from 32bit BFD world */
 #define CC_HAS_LONG_LONG 1
