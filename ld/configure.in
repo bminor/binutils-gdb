@@ -31,7 +31,7 @@ case "${host}" in
 			;;
   m68k-cbm-svr4)	my_host=amix
 			;;
-  m68k-hp-hpux)		my_host=hp9000    # FIXME this should 9000/xxx
+  m68k-hp-hpux)		my_host=hp300    
 			;;
   m68k-hp-bsd)		my_host=hp300bsd
 			;;
@@ -119,6 +119,8 @@ case "${target}" in
 			;;
   i386-*-coff)          my_target=i386-coff
 			;;
+  i386-*-aout)		my_target=i386-aout
+			;;
   m88k-*-*)		my_target=m88k-bcs
 			;;
   a29k-*-udi)		my_target=sa29200
@@ -141,6 +143,8 @@ case "${target}" in
 			;;
   m68*-*-*)		echo '***' "Unknown m68k target vendor for ld:" ${target_vendor} 1>&2
 			exit 1
+			;;
+  z8k-*sim)		my_target=z8ksim
 			;;
   *-*-aout)		my_target=${target_cpu}-${target_vendor} 
 			;;
