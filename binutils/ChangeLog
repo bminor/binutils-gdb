@@ -1,5 +1,9 @@
 Mon Aug  4 11:47:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.am (install-exec-local): Create $(tooldir)/bin before
+	trying to install anything into it.
+	* Makefile.in: Rebuild.
+
 	* Makefile.am (TOOL_PROGS): Use an explicit $(EXEEXT).
 	(install-exec-local): When handling $(noinst_PROGRAMS), only use
 	$(EXEEXT) on the installed file.  When handling $(TOOL_PROGS),

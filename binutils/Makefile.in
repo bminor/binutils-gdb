@@ -1008,6 +1008,7 @@ install-exec-local: $(bin_PROGRAMS) $(noinst_PROGRAMS)
 	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/.new//'|sed '$(transform)'`$(EXEEXT); \
 	  else :; fi; \
 	done
+	$(mkinstalldirs) $(tooldir)/bin
 	for i in $(TOOL_PROGS); do \
 	  if [ -f $$i ]; then \
 	    j=`echo $$i | sed -e 's/.new//' -e 's/$(EXEEXT)//'`; \
