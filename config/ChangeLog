@@ -1,3 +1,20 @@
+Fri Oct 13 14:44:25 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* mh-aix, mh-sun:  Removed.
+
+	* mh-decstation (X11_EXTRA_CFLAGS): Define.
+
+	* mh-sco, mh-solaris, mh-sysv4 (X11_EXTRA_LIBS): Define.
+
+        * mh-hp300, mh-hpux, mh-hpux8, mh-solaris, mh-sun3, mh-sysv4: Don't 
+	hardcode location of X stuff here.
+
+Thu Sep 28 13:14:56 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-mh-mpw: Add definitions for various 68K and PowerMac
+	compilers, add definitions for library and link steps for
+	PowerMacs.
+
 Thu Sep 14 08:20:04 1995  Fred Fish  <fnf@cygnus.com>
 
 	* mh-hp300 (CC): Add "CC = cc -Wp,-H256000" to avoid

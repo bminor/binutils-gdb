@@ -11,7 +11,3 @@ RANLIB = ar ts
 # native cc.  Neither (a) nor (b) has a trivial fix though.
 
 CFLAGS =
-
-# X11 
-X11_INCLUDE_FLAGS = -I/usr/include/X11R5
-X11_LIB_FLAGS = -L/usr/lib/X11R5
