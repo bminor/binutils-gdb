@@ -172,16 +172,19 @@ struct ecoff_section_tdata
   bfd_byte *contents;
 
   /* Offset adjustments for PC relative branches.  A number other than
-   1 is an addend for a PC relative branch; this addend arises because
-   it crosses one or more branches which were expanded into a larger
-   code sequence.  A 1 means that this branch was itself expanded into
-   a larger code sequence.  1 is not a possible offset, since all
-   offsets must be multiples of the instruction size, which is 4;
-   also, the only relocs with non-zero offsets will be PC relative
-   branches within the same object file.  If this field is NULL, no
-   branches were expanded and no offsets are required.  Otherwise
-   there are as many entries as there are relocs in the section, and
-   the entry for any reloc that is not PC relative is zero.  */
+     1 is an addend for a PC relative branch, or a switch table entry
+     which is the difference of two .text locations; this addend
+     arises because the branch or difference crosses one or more
+     branches which were expanded into a larger code sequence.  A 1
+     means that this branch was itself expanded into a larger code
+     sequence.  1 is not a possible offset, since all offsets must be
+     multiples of the instruction size, which is 4; also, the only
+     relocs with non-zero offsets will be PC relative branches or
+     switch table entries within the same object file.  If this field
+     is NULL, no branches were expanded and no offsets are required.
+     Otherwise there are as many entries as there are relocs in the
+     section, and the entry for any reloc that is not PC relative is
+     zero.  */
   long *offsets;
 };
 
