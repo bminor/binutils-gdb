@@ -1,3 +1,17 @@
+2000-04-03  Jim Blandy  <jimb@redhat.com>
+
+	* solib.c (solib_add): Move all the code for loading symbol tables
+	below the code to sort out additions and removals.  That way, we
+	always catch all loaded shared libraries whose symbols we haven't
+	grabbed yet.
+
+	* solib.c (solib_add): Don't try to free a shared object's objfile
+	if it doesn't have one.  Duh.
+
+	* solib.c (solib_add): If a pattern was given, but it doesn't
+	match any currently loaded shared libraries, print a message;
+	don't just be silent.
+
 2000-04-03  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* go32-nat.c (go32_handle_nonaligned_watchpoint): Use a
@@ -149,6 +163,7 @@ Thu Mar 30 12:09:50 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in: -linux-gnu*, not -linux-gnu.
 
+>>>>>>> 1.227
 Tue Mar 28 18:28:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote.c (remote_threads_extra_info): Replace qfThreadExtraInfo
