@@ -347,7 +347,7 @@ get_discrete_bounds (type, lowp, highp)
 {
   switch (TYPE_CODE (type))
     {
-    TYPE_CODE_RANGE:
+    case TYPE_CODE_RANGE:
       *lowp = TYPE_LOW_BOUND (type);
       *highp = TYPE_HIGH_BOUND (type);
       return 1;
