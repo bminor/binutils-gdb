@@ -1,26 +1,7 @@
-Tue Apr  6 00:24:32 1993  Per Bothner  (bothner@rtl.cygnus.com)
-
-	* ch-exp.y:  Remove ambiguities.  Fix or add support for
-	UNOP_IND, UNOP_CAST, UNOP_ADDR, STRUCOP_STRUCT, OP_TYPE.
-	* ch-typeprint.c (chill_print_type):  Move support
-	for TYPE_CODE_ARRAY and TYPE_CODE_STRING from here ...
-	* ch-typeprint.c (chill_type_print_base): ... here.
-	* ch-typeprint.c (chill_type_print_base):  Improve
-	support for PTR, REF, and FUNC types.
-	* ch-valprint.c:  Prefer H'%x format to 0x%s.
-	* ch-valprint.c (chill_val_print):  Add support for printing
-	TYPE_CODE_REF (return for LOC parameters and variables).
-	Use c_val_print to print random types (including ENUM).
-	* ch-valprint,c (chill_print_value_fields):  Make
-	output look more like Chill tuples.
-	* stabsread.c (read_struct_type):  Factor common code.
-
-Wed Apr  7 11:22:43 1993  Fred Fish  (fnf@cygnus.com)
-
-	* sparclite/Makefile.in:  Add dummy mostlyclean, clean,
-	distclean, and realclean targets.
-
 Wed Apr  7 10:11:22 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* xcoffread.c (struct coff_symbol): Change c_sclass to unsigned char.
+	Remove FIXME comment regarding this.
 
 	* symfile.h: Change NULL->'\0' in comment (that wasn't a typo).
 

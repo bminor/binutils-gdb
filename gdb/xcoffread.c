@@ -73,7 +73,7 @@ struct coff_symbol {
   int c_symnum;		/* symbol number of this entry */
   int c_nsyms;		/* 0 if syment only, 1 if syment + auxent */
   long c_value;
-  int c_sclass;
+  unsigned char c_sclass;
   int c_secnum;
   unsigned int c_type;
 };
@@ -1083,13 +1083,7 @@ read_xcoff_symtab (objfile, nsyms)
 	symname_alloced = 1;
       }
       cs->c_value = symbol->n_value;
-      /* n_sclass is signed (FIXME), so we had better not mask off any
-	 high bits it contains, since the values we will be comparing
-	 it to are also signed (FIXME).  Defined in <coff/internal.h>.
-	 At this point (3Jun92, gnu@cygnus.com) I think the fix is to
-	 make the fields and values unsigned chars, but changing the next
-	 line is a simple patch late in the release cycle, for now.  */
-      cs->c_sclass = symbol->n_sclass /* & 0xff */;
+      cs->c_sclass = symbol->n_sclass;
       cs->c_secnum = symbol->n_scnum;
       cs->c_type = (unsigned)symbol->n_type;
 
