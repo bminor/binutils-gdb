@@ -1,3 +1,17 @@
+2001-10-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-m10200.c (mn10200_elf_relax_section): Cast assignment to
+	Elf_Internal_Shdr.contents now that it's no longer a PTR.
+	* elf-m10300.c (mn10300_elf_relax_section): Likewise.
+	* elf32-h8300.c (elf32_h8_relax_section): Likewise.
+	* elf32-m68k.c (bfd_m68k_elf32_create_embedded_relocs): Likewise.
+	* elf32-sh.c (sh_elf_relax_section): Likewise.
+	* elf64-alpha.c (elf64_alpha_relax_section): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Likewise.
+	* elf.c (setup_group): Warning fixes.
+	* elflink.h (elf_link_sort_relocs): Likewise.
+	* pdp11.c (slurp_reloc_table): Likewise.
+
 2001-10-16  Jeff Holcomb  <jeffh@redhat.com>
 
 	* elflink.h (elf_link_sort_relocs): Remove unnecessary pointer

@@ -384,7 +384,7 @@ setup_group (abfd, hdr, newsect)
 	}
 
       if (num_group == 0)
-	num_group = -1;
+	num_group = (unsigned) -1;
       elf_tdata (abfd)->num_group = num_group;
 
       if (num_group > 0)
@@ -402,7 +402,7 @@ setup_group (abfd, hdr, newsect)
 	      Elf_Internal_Shdr *shdr = elf_elfsections (abfd)[i];
 	      if (shdr->sh_type == SHT_GROUP && shdr->sh_size >= 8)
 		{
-		  char *src;
+		  unsigned char *src;
 		  Elf_Internal_Group *dest;
 
 		  /* Add to list of sections.  */
@@ -502,7 +502,7 @@ setup_group (abfd, hdr, newsect)
 		    pos = elf_tdata (abfd)->symtab_hdr.sh_offset;
 		    pos += shdr->sh_info * bed->s->sizeof_sym;
 		    if (bfd_seek (abfd, pos, SEEK_SET) != 0
-			|| bfd_bread (ename, 4, abfd) != 4)
+			|| bfd_bread (ename, (bfd_size_type) 4, abfd) != 4)
 		      return false;
 		    iname = H_GET_32 (abfd, ename);
 		    gname = elf_string_from_elf_strtab (abfd, iname);

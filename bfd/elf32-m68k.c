@@ -2202,7 +2202,7 @@ bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
 	      != symtab_hdr->sh_size))
 	goto error_return;
       if (info->keep_memory)
-	symtab_hdr->contents = extsyms;
+	symtab_hdr->contents = (unsigned char *) extsyms;
     }
 
   /* Get a copy of the native relocations.  */

@@ -1572,7 +1572,7 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
       else
 	{
 	  /* Cache the symbols for elf_link_input_bfd.  */
-	  symtab_hdr->contents = extsyms;
+	  symtab_hdr->contents = (unsigned char *) extsyms;
 	}
     }
 

@@ -2247,7 +2247,7 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
       {
 	int x;
 
-	x = GET_WORD (abfd, relocs + each_size * counter);
+	x = GET_WORD (abfd, (char *) relocs + each_size * counter);
 	if (x != 0)
 	  real_count++;
       }

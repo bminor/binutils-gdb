@@ -4480,7 +4480,7 @@ elf_link_sort_relocs (abfd, info, psec)
 	  }
       }
 
-  qsort (rela, count, sizeof (*rela), elf_link_sort_cmp1);
+  qsort (rela, (size_t) count, sizeof (*rela), elf_link_sort_cmp1);
   for (ret = 0; ret < count && rela[ret].type == reloc_class_relative; ret++)
     ;
   for (i = ret, j = ret; i < count; i++)
@@ -4489,7 +4489,7 @@ elf_link_sort_relocs (abfd, info, psec)
 	j = i;
       rela[i].offset = rela[j].u.rel.r_offset;
     }
-  qsort (rela + ret, count - ret, sizeof (*rela), elf_link_sort_cmp2);
+  qsort (rela + ret, (size_t) count - ret, sizeof (*rela), elf_link_sort_cmp2);
 
   for (o = dynobj->sections; o != NULL; o = o->next)
     if ((o->flags & (SEC_HAS_CONTENTS|SEC_LINKER_CREATED))
