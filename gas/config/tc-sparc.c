@@ -140,8 +140,6 @@ const pseudo_typeS md_pseudo_table[] =
   {"uaxword", s_uacons, 8},
 #ifdef OBJ_ELF
   /* these are specific to sparc/svr4 */
-  {"pushsection", obj_elf_section, 0},
-  {"popsection", obj_elf_previous, 0},
   {"2byte", s_uacons, 2},
   {"4byte", s_uacons, 4},
   {"8byte", s_uacons, 8},
