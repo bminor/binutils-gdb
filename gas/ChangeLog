@@ -1,3 +1,24 @@
+2002-10-12  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-mips.h (mips_relax_frag): Take segment as argument.
+	(md_relax_frag): Adjust macro.
+	* config/tc-mips.c (mips_relax_branch): New variable.
+	(RELAX_BRANCH_ENCODE, RELAX_BRANCH_P, RELAX_BRANCH_LIKELY,
+	RELAX_BRANCH_LINK, RELAX_BRANCH_TOOBAR): New.
+	(RELAX_MIPS16_P): Adjust.
+	(append_insn): Emit branch to non-constant in a frag_var if
+	branch-relaxation is desirable and possible.
+	(OPTION_RELAX_BRANCH, OPTION_NO_RELAX_BRANCH): New options.
+	(OPTION_ELF_BASE): Adjust.
+	(md_parse_option): Handle new options.
+	(md_apply_fix3): Update comment on EMBEDDED_PIC conditional
+	branch relaxation.
+	(relaxed_branch_length): New function.
+	(md_estimate_size_before_relax): Handle branch frags.
+	(mips_relax_frag): Likewise.
+	(md_convert_frag): Handle branch frags.  Warn if branch is
+	relaxed.
+
 2002-10-11  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* config/tc-sh.c (sh_force_relocation): Make sure TLS relocs get

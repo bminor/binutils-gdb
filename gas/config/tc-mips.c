@@ -563,6 +563,13 @@ static const unsigned int mips16_to_32_reg_map[] =
 };
 
 static int mips_fix_4122_bugs;
+
+/* We don't relax branches by default, since this causes us to expand
+   `la .l2 - .l1' if there's a branch between .l1 and .l2, because we
+   fail to compute the offset before expanding the macro to the most
+   efficient expansion.  */
+
+static int mips_relax_branch;
 
 /* Since the MIPS does not have multiple forms of PC relative
    instructions, we do not have to do relaxing as is done on other
@@ -640,6 +647,88 @@ static int mips_fix_4122_bugs;
 #define RELAX_RELOC3(i) (((i) >> 1) & 1)
 #define RELAX_WARN(i) ((i) & 1)
 
+/* Branch without likely bit.  If label is out of range, we turn:
+
+ 	beq reg1, reg2, label
+	delay slot
+
+   into
+
+        bne reg1, reg2, 0f
+        nop
+        j label
+     0: delay slot
+
+   with the following opcode replacements:
+
+	beq <-> bne
+	blez <-> bgtz
+	bltz <-> bgez
+	bc1f <-> bc1t
+
+	bltzal <-> bgezal  (with jal label instead of j label)
+
+   Even though keeping the delay slot instruction in the delay slot of
+   the branch would be more efficient, it would be very tricky to do
+   correctly, because we'd have to introduce a variable frag *after*
+   the delay slot instruction, and expand that instead.  Let's do it
+   the easy way for now, even if the branch-not-taken case now costs
+   one additional instruction.  Out-of-range branches are not supposed
+   to be common, anyway.
+
+   Branch likely.  If label is out of range, we turn:
+
+	beql reg1, reg2, label
+	delay slot (annulled if branch not taken)
+
+   into
+
+        beql reg1, reg2, 1f
+        nop
+        beql $0, $0, 2f
+        nop
+     1: j[al] label
+        delay slot (executed only if branch taken)
+     2:
+
+   It would be possible to generate a shorter sequence by losing the
+   likely bit, generating something like:
+     
+	bne reg1, reg2, 0f
+	nop
+	j[al] label
+	delay slot (executed only if branch taken)
+     0:
+
+	beql -> bne
+	bnel -> beq
+	blezl -> bgtz
+	bgtzl -> blez
+	bltzl -> bgez
+	bgezl -> bltz
+	bc1fl -> bc1t
+	bc1tl -> bc1f
+
+	bltzall -> bgezal  (with jal label instead of j label)
+	bgezall -> bltzal  (ditto)
+
+
+   but it's not clear that it would actually improve performance.  */
+#define RELAX_BRANCH_ENCODE(reloc_s2, uncond, likely, link, toofar) \
+  ((relax_substateT) \
+   (0xc0000000 \
+    | ((toofar) ? 1 : 0) \
+    | ((link) ? 2 : 0) \
+    | ((likely) ? 4 : 0) \
+    | ((uncond) ? 8 : 0) \
+    | ((reloc_s2) ? 16 : 0)))
+#define RELAX_BRANCH_P(i) (((i) & 0xf0000000) == 0xc0000000)
+#define RELAX_BRANCH_RELOC_S2(i) (((i) & 16) != 0)
+#define RELAX_BRANCH_UNCOND(i) (((i) & 8) != 0)
+#define RELAX_BRANCH_LIKELY(i) (((i) & 4) != 0)
+#define RELAX_BRANCH_LINK(i) (((i) & 2) != 0)
+#define RELAX_BRANCH_TOOFAR(i) (((i) & 1))
+
 /* For mips16 code, we use an entirely different form of relaxation.
    mips16 supports two versions of most instructions which take
    immediate values: a small one which takes some small value, and a
@@ -667,7 +756,7 @@ static int mips_fix_4122_bugs;
    | ((ext) ? 0x200 : 0)					\
    | ((dslot) ? 0x400 : 0)					\
    | ((jal_dslot) ? 0x800 : 0))
-#define RELAX_MIPS16_P(i) (((i) & 0x80000000) != 0)
+#define RELAX_MIPS16_P(i) (((i) & 0xc0000000) == 0x80000000)
 #define RELAX_MIPS16_TYPE(i) ((i) & 0xff)
 #define RELAX_MIPS16_USER_SMALL(i) (((i) & 0x100) != 0)
 #define RELAX_MIPS16_USER_EXT(i) (((i) & 0x200) != 0)
@@ -785,6 +874,7 @@ static void s_mips_weakext PARAMS ((int));
 static void s_mips_file PARAMS ((int));
 static void s_mips_loc PARAMS ((int));
 static int mips16_extended_frag PARAMS ((fragS *, asection *, long));
+static int relaxed_branch_length (fragS *, asection *, int);
 static int validate_mips_insn PARAMS ((const struct mips_opcode *));
 static void show PARAMS ((FILE *, const char *, int *, int *));
 #ifdef OBJ_ELF
@@ -1840,7 +1930,38 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	}
     }
 
-  if (*reloc_type > BFD_RELOC_UNUSED)
+  if (place == NULL
+      && address_expr
+      && ((*reloc_type == BFD_RELOC_16_PCREL
+	   && address_expr->X_op != O_constant)
+	  || *reloc_type == BFD_RELOC_16_PCREL_S2)
+      && (pinfo & INSN_UNCOND_BRANCH_DELAY || pinfo & INSN_COND_BRANCH_DELAY
+	  || pinfo & INSN_COND_BRANCH_LIKELY)
+      && mips_relax_branch
+      /* Don't try branch relaxation within .set nomacro, or within
+	 .set noat if we use $at for PIC computations.  If it turns
+	 out that the branch was out-of-range, we'll get an error.  */
+      && !mips_opts.warn_about_macros
+      && !(mips_opts.noat && mips_pic != NO_PIC)
+      && !mips_opts.mips16)
+    {
+      f = frag_var (rs_machine_dependent,
+		    relaxed_branch_length
+		    (NULL, NULL,
+		     (pinfo & INSN_UNCOND_BRANCH_DELAY) ? -1
+		     : (pinfo & INSN_COND_BRANCH_LIKELY) ? 1 : 0), 4,
+		    RELAX_BRANCH_ENCODE
+		    (*reloc_type == BFD_RELOC_16_PCREL_S2,
+		     pinfo & INSN_UNCOND_BRANCH_DELAY,
+		     pinfo & INSN_COND_BRANCH_LIKELY,
+		     pinfo & INSN_WRITE_GPR_31,
+		     0),
+		    address_expr->X_add_symbol,
+		    address_expr->X_add_number,
+		    0);
+      *reloc_type = BFD_RELOC_UNUSED;
+    }
+  else if (*reloc_type > BFD_RELOC_UNUSED)
     {
       /* We need to set up a variant frag.  */
       assert (mips_opts.mips16 && address_expr != NULL);
@@ -10125,8 +10246,12 @@ struct option md_longopts[] =
 #define OPTION_NO_FIX_VR4122 (OPTION_MD_BASE + 38)
   {"mfix-vr4122-bugs",    no_argument, NULL, OPTION_FIX_VR4122},
   {"no-mfix-vr4122-bugs", no_argument, NULL, OPTION_NO_FIX_VR4122},
+#define OPTION_RELAX_BRANCH (OPTION_MD_BASE + 39)
+#define OPTION_NO_RELAX_BRANCH (OPTION_MD_BASE + 40)
+  {"relax-branch", no_argument, NULL, OPTION_RELAX_BRANCH},
+  {"no-relax-branch", no_argument, NULL, OPTION_NO_RELAX_BRANCH},
 #ifdef OBJ_ELF
-#define OPTION_ELF_BASE    (OPTION_MD_BASE + 39)
+#define OPTION_ELF_BASE    (OPTION_MD_BASE + 41)
 #define OPTION_CALL_SHARED (OPTION_ELF_BASE + 0)
   {"KPIC",        no_argument, NULL, OPTION_CALL_SHARED},
   {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
@@ -10333,6 +10458,14 @@ md_parse_option (c, arg)
 
     case OPTION_NO_FIX_VR4122:
       mips_fix_4122_bugs = 0;
+      break;
+
+    case OPTION_RELAX_BRANCH:
+      mips_relax_branch = 1;
+      break;
+
+    case OPTION_NO_RELAX_BRANCH:
+      mips_relax_branch = 0;
       break;
 
 #ifdef OBJ_ELF
@@ -11186,13 +11319,9 @@ md_apply_fix3 (fixP, valP, seg)
 	    }
 	  else
 	    {
-	      /* FIXME.  It would be possible in principle to handle
-                 conditional branches which overflow.  They could be
-                 transformed into a branch around a jump.  This would
-                 require setting up variant frags for each different
-                 branch type.  The native MIPS assembler attempts to
-                 handle these cases, but it appears to do it
-                 incorrectly.  */
+	      /* If we got here, we have branch-relaxation disabled,
+		 and there's nothing we can do to fix this instruction
+		 without turning it into a longer sequence.  */
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    _("Branch out of range"));
 	    }
@@ -12662,6 +12791,74 @@ mips16_extended_frag (fragp, sec, stretch)
     return 0;
 }
 
+/* Compute the length of a branch sequence, and adjust the
+   RELAX_BRANCH_TOOFAR bit accordingly.  If FRAGP is NULL, the
+   worst-case length is computed, with UPDATE being used to indicate
+   whether an unconditional (-1), branch-likely (+1) or regular (0)
+   branch is to be computed.  */
+static int
+relaxed_branch_length (fragp, sec, update)
+     fragS *fragp;
+     asection *sec;
+     int update;
+{
+  boolean toofar;
+  int length;
+
+  if (fragp
+      && S_IS_DEFINED (fragp->fr_symbol)
+      && sec == S_GET_SEGMENT (fragp->fr_symbol))
+    {
+      addressT addr;
+      offsetT val;
+
+      val = S_GET_VALUE (fragp->fr_symbol) + fragp->fr_offset;
+
+      addr = fragp->fr_address + fragp->fr_fix + 4;
+
+      val -= addr;
+
+      toofar = val < - (0x8000 << 2) || val >= (0x8000 << 2);
+    }
+  else if (fragp)
+    /* If the symbol is not defined or it's in a different segment,
+       assume the user knows what's going on and emit a short
+       branch.  */
+    toofar = false;
+  else
+    toofar = true;
+
+  if (fragp && update && toofar != RELAX_BRANCH_TOOFAR (fragp->fr_subtype))
+    fragp->fr_subtype
+      = RELAX_BRANCH_ENCODE (RELAX_BRANCH_RELOC_S2 (fragp->fr_subtype),
+			     RELAX_BRANCH_UNCOND (fragp->fr_subtype),
+			     RELAX_BRANCH_LIKELY (fragp->fr_subtype),
+			     RELAX_BRANCH_LINK (fragp->fr_subtype),
+			     toofar);
+
+  length = 4;
+  if (toofar)
+    {
+      if (fragp ? RELAX_BRANCH_LIKELY (fragp->fr_subtype) : (update > 0))
+	length += 8;
+
+      if (mips_pic != NO_PIC)
+	{
+	  /* Additional space for PIC loading of target address.  */
+	  length += 8;
+	  if (mips_opts.isa == ISA_MIPS1)
+	    /* Additional space for $at-stabilizing nop.  */
+	    length += 4;
+	}
+
+      /* If branch is conditional.  */
+      if (fragp ? !RELAX_BRANCH_UNCOND (fragp->fr_subtype) : (update >= 0))
+	length += 8;
+    }
+  
+  return length;
+}
+
 /* Estimate the size of a frag before relaxing.  Unless this is the
    mips16, we are not really relaxing here, and the final size is
    encoded in the subtype information.  For the mips16, we have to
@@ -12674,6 +12871,14 @@ md_estimate_size_before_relax (fragp, segtype)
 {
   int change = 0;
   boolean linkonce = false;
+
+  if (RELAX_BRANCH_P (fragp->fr_subtype))
+    {
+
+      fragp->fr_var = relaxed_branch_length (fragp, segtype, false);
+      
+      return fragp->fr_var;
+    }
 
   if (RELAX_MIPS16_P (fragp->fr_subtype))
     /* We don't want to modify the EXTENDED bit here; it might get us
@@ -13049,10 +13254,20 @@ tc_gen_reloc (section, fixp)
    the current size of the frag should change.  */
 
 int
-mips_relax_frag (fragp, stretch)
+mips_relax_frag (sec, fragp, stretch)
+     asection *sec;
      fragS *fragp;
      long stretch;
 {
+  if (RELAX_BRANCH_P (fragp->fr_subtype))
+    {
+      offsetT old_var = fragp->fr_var;
+      
+      fragp->fr_var = relaxed_branch_length (fragp, sec, true);
+
+      return fragp->fr_var - old_var;
+    }
+
   if (! RELAX_MIPS16_P (fragp->fr_subtype))
     return 0;
 
@@ -13084,6 +13299,216 @@ md_convert_frag (abfd, asec, fragp)
 {
   int old, new;
   char *fixptr;
+
+  if (RELAX_BRANCH_P (fragp->fr_subtype))
+    {
+      bfd_byte *buf;
+      unsigned long insn;
+      expressionS exp;
+      fixS *fixp;
+      
+      buf = (bfd_byte *)fragp->fr_literal + fragp->fr_fix;
+
+      if (target_big_endian)
+	insn = bfd_getb32 (buf);
+      else
+	insn = bfd_getl32 (buf);
+	  
+      if (!RELAX_BRANCH_TOOFAR (fragp->fr_subtype))
+	{
+	  /* We generate a fixup instead of applying it right now
+	     because, if there are linker relaxations, we're going to
+	     need the relocations.  */
+	  exp.X_op = O_symbol;
+	  exp.X_add_symbol = fragp->fr_symbol;
+	  exp.X_add_number = fragp->fr_offset;
+
+	  fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
+			      4, &exp, 1,
+			      RELAX_BRANCH_RELOC_S2 (fragp->fr_subtype)
+			      ? BFD_RELOC_16_PCREL_S2
+			      : BFD_RELOC_16_PCREL);
+	  fixp->fx_file = fragp->fr_file;
+	  fixp->fx_line = fragp->fr_line;
+	  
+	  md_number_to_chars ((char *)buf, insn, 4);
+	  buf += 4;
+	}
+      else
+	{
+	  int i;
+
+	  as_warn_where (fragp->fr_file, fragp->fr_line,
+			 _("relaxed out-of-range branch into a jump"));
+
+	  if (RELAX_BRANCH_UNCOND (fragp->fr_subtype))
+	    goto uncond;
+
+	  if (!RELAX_BRANCH_LIKELY (fragp->fr_subtype))
+	    {
+	      /* Reverse the branch.  */
+	      switch ((insn >> 28) & 0xf)
+		{
+		case 4:
+		  /* bc[0-3][tf]l? and bc1any[24][ft] instructions can
+		     have the condition reversed by tweaking a single
+		     bit, and their opcodes all have 0x4???????.  */
+		  assert ((insn & 0xf1000000) == 0x41000000);
+		  insn ^= 0x00010000;
+		  break;
+
+		case 0:
+		  /* bltz	0x04000000	bgez	0x04010000
+		     bltzal	0x04100000	bgezal	0x04110000 */
+		  assert ((insn & 0xfc0e0000) == 0x04000000);
+		  insn ^= 0x00010000;
+		  break;
+		  
+		case 1:
+		  /* beq	0x10000000	bne	0x14000000
+		     blez	0x18000000	bgtz	0x1c000000 */
+		  insn ^= 0x04000000;
+		  break;
+
+		default:
+		  abort ();
+		}
+	    }
+
+	  if (RELAX_BRANCH_LINK (fragp->fr_subtype))
+	    {
+	      /* Clear the and-link bit.  */
+	      assert ((insn & 0xfc1c0000) == 0x04100000);
+
+	      /* bltzal	0x04100000	bgezal	0x04110000
+		bltzall	0x04120000     bgezall	0x04130000 */
+	      insn &= ~0x00100000;
+	    }
+
+	  /* Branch over the branch (if the branch was likely) or the
+	     full jump (not likely case).  Compute the offset from the
+	     current instruction to branch to.  */
+	  if (RELAX_BRANCH_LIKELY (fragp->fr_subtype))
+	    i = 16;
+	  else
+	    {
+	      /* How many bytes in instructions we've already emitted?  */
+	      i = buf - (bfd_byte *)fragp->fr_literal - fragp->fr_fix;
+	      /* How many bytes in instructions from here to the end?  */
+	      i = fragp->fr_var - i;
+	    }
+	  /* Convert to instruction count.  */
+	  i >>= 2;
+	  /* Branch counts from the next instruction.  */
+	  i--; 
+	  insn |= i;
+	  /* Branch over the jump.  */
+	  md_number_to_chars ((char *)buf, insn, 4);
+	  buf += 4;
+
+	  /* Nop */
+	  md_number_to_chars ((char*)buf, 0, 4);
+	  buf += 4;
+
+	  if (RELAX_BRANCH_LIKELY (fragp->fr_subtype))
+	    {
+	      /* beql $0, $0, 2f */
+	      insn = 0x50000000;
+	      /* Compute the PC offset from the current instruction to
+		 the end of the variable frag.  */
+	      /* How many bytes in instructions we've already emitted?  */
+	      i = buf - (bfd_byte *)fragp->fr_literal - fragp->fr_fix;
+	      /* How many bytes in instructions from here to the end?  */
+	      i = fragp->fr_var - i;
+	      /* Convert to instruction count.  */
+	      i >>= 2;
+	      /* Don't decrement i, because we want to branch over the
+		 delay slot.  */
+
+	      insn |= i;
+	      md_number_to_chars ((char *)buf, insn, 4);
+	      buf += 4;
+
+	      md_number_to_chars ((char *)buf, 0, 4);
+	      buf += 4;
+	    }
+
+	uncond:
+	  if (mips_pic == NO_PIC)
+	    {
+	      /* j or jal.  */
+	      insn = (RELAX_BRANCH_LINK (fragp->fr_subtype)
+		      ? 0x0c000000 : 0x08000000);
+	      exp.X_op = O_symbol;
+	      exp.X_add_symbol = fragp->fr_symbol;
+	      exp.X_add_number = fragp->fr_offset;
+
+	      fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
+				  4, &exp, 0, BFD_RELOC_MIPS_JMP);
+	      fixp->fx_file = fragp->fr_file;
+	      fixp->fx_line = fragp->fr_line;
+
+	      md_number_to_chars ((char*)buf, insn, 4);
+	      buf += 4;
+	    }
+	  else
+	    {
+	      /* lw/ld $at, <sym>($gp)  R_MIPS_GOT16 */
+	      insn = HAVE_64BIT_ADDRESSES ? 0xdf810000 : 0x8f810000;
+	      exp.X_op = O_symbol;
+	      exp.X_add_symbol = fragp->fr_symbol;
+	      exp.X_add_number = fragp->fr_offset;
+
+	      if (fragp->fr_offset)
+		{
+		  exp.X_add_symbol = make_expr_symbol (&exp);
+		  exp.X_add_number = 0;
+		}
+
+	      fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
+				  4, &exp, 0, BFD_RELOC_MIPS_GOT16);
+	      fixp->fx_file = fragp->fr_file;
+	      fixp->fx_line = fragp->fr_line;
+
+	      md_number_to_chars ((char*)buf, insn, 4);
+	      buf += 4;
+	      
+	      if (mips_opts.isa == ISA_MIPS1)
+		{
+		  /* nop */
+		  md_number_to_chars ((char*)buf, 0, 4);
+		  buf += 4;
+		}
+
+	      /* d/addiu $at, $at, <sym>  R_MIPS_LO16 */
+	      insn = HAVE_64BIT_ADDRESSES ? 0x64210000 : 0x24210000;
+
+	      fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
+				  4, &exp, 0, BFD_RELOC_LO16);
+	      fixp->fx_file = fragp->fr_file;
+	      fixp->fx_line = fragp->fr_line;
+	      
+	      md_number_to_chars ((char*)buf, insn, 4);
+	      buf += 4;
+
+	      /* j(al)r $at.  */
+	      if (RELAX_BRANCH_LINK (fragp->fr_subtype))
+		insn = 0x0020f809;
+	      else
+		insn = 0x00200008;
+
+	      md_number_to_chars ((char*)buf, insn, 4);
+	      buf += 4;
+	    }
+	}
+
+      assert (buf == (bfd_byte *)fragp->fr_literal
+	      + fragp->fr_fix + fragp->fr_var);
+
+      fragp->fr_fix += fragp->fr_var;
+
+      return;
+    }
 
   if (RELAX_MIPS16_P (fragp->fr_subtype))
     {
