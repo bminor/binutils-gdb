@@ -24,6 +24,8 @@
 #include "gdbcore.h"
 #include "regcache.h"
 
+#include "gdb_string.h"
+
 #include "i386-tdep.h"
 
 /* Support for signal handlers.  */
