@@ -1,6 +1,30 @@
+Sun Dec  5 19:32:08 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_hppa_howto_table): Add missing R_END_TRY.  Delete 
+	extra R_DATA_OVERRIDE.
+	(hppa_som_gen_reloc_type): Generate a relocation for the rounding
+	mode selector if needed.
+	(som_write_fixups): Handle requests for a change in the default
+	rounding mode.  Rounding modes do not consume input bytes, but
+	are just markers much like R_ENTRY and R_EXIT.
+
 Sat Dec  4 19:40:32 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	Fri Dec  3 09:55:17 1993  Pete Hoogenboom  (hoogen@cs.utah.edu)
+
+	* elf32-hppa.c: (hppa_elf_reloc):  Do not do code reordering when
+	the branch instruction as originally been nullified.
+	hppa_elf_reloc):  Avoid useless call to bfd_put_32 () in the
+	case of no code reordering due to an LDO instruction in the
+	delay slot of the branch.  Make sure to relocate the correct
+	instruction.  Do not perform instruction reordering for millicode
+	calls.
+	(hppa_elf_build_arg_reloc_stub):  Change the relocation type
+	to R_HPPA_STUB_CALL_17 when special processing might be needed.
+	(hppa_elf_build_long_branch_stub): Prevent code reordering on
+	a call from a linker stub to another linker stub and for millicode
+	calls.  Do not trash the return register for calls from one linker
+	stub to a second linker stub.
 
 	* elf32-hppa.c: (elf_hppa_howto_table):  PLABEL and DLT
 	relocations are not pc-relative.

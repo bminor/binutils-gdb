@@ -102,6 +102,12 @@ typedef enum
   SYMBOL_TYPE_SEC_PROG,
 } pa_symbol_type;
 
+struct section_to_type
+{
+  char *section;
+  char type;
+};
+
 /* Forward declarations */
 
 static boolean som_mkobject PARAMS ((bfd *));
@@ -182,6 +188,37 @@ static boolean som_write_symbol_strings PARAMS ((bfd *, unsigned long,
 static boolean som_begin_writing PARAMS ((bfd *));
 static const reloc_howto_type * som_bfd_reloc_type_lookup
 	PARAMS ((bfd_arch_info_type *, bfd_reloc_code_real_type));
+static char som_section_type PARAMS ((const char *));
+static int som_decode_symclass PARAMS ((asymbol *));
+
+
+/* Map SOM section names to POSIX/BSD single-character symbol types.
+
+   This table includes all the standard subspaces as defined in the 
+   current "PRO ABI for PA-RISC Systems", $UNWIND$ which for 
+   some reason was left out, and sections specific to embedded stabs.  */
+
+static const struct section_to_type stt[] = {
+  {"$TEXT$", 't'},
+  {"$SHLIB_INFO$", 't'},
+  {"$MILLICODE$", 't'},
+  {"$LIT$", 't'},
+  {"$CODE$", 't'},
+  {"$UNWIND_START$", 't'},
+  {"$UNWIND$", 't'},
+  {"$PRIVATE$", 'd'},
+  {"$PLT$", 'd'},
+  {"$SHLIB_DATA$", 'd'},
+  {"$DATA$", 'd'},
+  {"$SHORTDATA$", 'g'},
+  {"$DLT$", 'd'},
+  {"$GLOBAL$", 'g'},
+  {"$SHORTBSS$", 's'},
+  {"$BSS$", 'b'},
+  {"$GDB_STRINGS$", 'N'},
+  {"$GDB_SYMBOLS$", 'N'},
+  {0, 0}
+};
 
 /* About the relocation formatting table...
 
@@ -803,6 +840,7 @@ static reloc_howto_type som_hppa_howto_table[] =
   {R_BEGIN_TRY, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_BEGIN_TRY"},
   {R_END_TRY, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_END_TRY"},
   {R_END_TRY, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_END_TRY"},
+  {R_END_TRY, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_END_TRY"},
   {R_BEGIN_BRTAB, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_BEGIN_BRTAB"},
   {R_END_BRTAB, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_END_BRTAB"},
   {R_STATEMENT, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_STATEMENT"},
@@ -817,7 +855,6 @@ static reloc_howto_type som_hppa_howto_table[] =
   {R_S_MODE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_S_MODE"},
   {R_D_MODE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_D_MODE"},
   {R_R_MODE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_R_MODE"},
-  {R_DATA_OVERRIDE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DATA_OVERRIDE"},
   {R_DATA_OVERRIDE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DATA_OVERRIDE"},
   {R_DATA_OVERRIDE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DATA_OVERRIDE"},
   {R_DATA_OVERRIDE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DATA_OVERRIDE"},
@@ -1290,20 +1327,70 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
      bfd *abfd;
      int base_type;
      int format;
-     int field;
+     enum hppa_reloc_field_selector_type field;
 {
   int *final_type, **final_types;
 
-  final_types = (int **) bfd_alloc_by_size_t (abfd, sizeof (int *) * 2);
+  final_types = (int **) bfd_alloc_by_size_t (abfd, sizeof (int *) * 3);
   final_type = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
 
+  /* The field selector may require additional relocations to be 
+     generated.  It's impossible to know at this moment if additional
+     relocations will be needed, so we make them.  The code to actually
+     write the relocation/fixup stream is responsible for removing
+     any redundant relocations.  */
+  switch (field)
+    {
+      case e_fsel:
+      case e_psel:
+      case e_lpsel:
+      case e_rpsel:
+      case e_tsel:
+      case e_ltsel:
+      case e_rtsel:
+	final_types[0] = final_type;
+	final_types[1] = NULL;
+	final_types[2] = NULL;
+	*final_type = base_type;
+	break;
 
-  final_types[0] = final_type;
-  final_types[1] = NULL;
+      case e_lssel:
+      case e_rssel:
+	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	*final_types[0] = R_S_MODE;
+	final_types[1] = final_type;
+	final_types[2] = NULL;
+	*final_type = base_type;
+	break;
 
-  /* Default to the basic relocation passed in.  */
-  *final_type = base_type;
+      case e_lsel:
+      case e_rsel:
+	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	*final_types[0] = R_N_MODE;
+	final_types[1] = final_type;
+	final_types[2] = NULL;
+	*final_type = base_type;
+	break;
 
+      case e_ldsel:
+      case e_rdsel:
+	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	*final_types[0] = R_D_MODE;
+	final_types[1] = final_type;
+	final_types[2] = NULL;
+	*final_type = base_type;
+	break;
+
+      case e_lrsel:
+      case e_rrsel:
+	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+	*final_types[0] = R_R_MODE;
+	final_types[1] = final_type;
+	final_types[2] = NULL;
+	*final_type = base_type;
+	break;
+    }
+  
   switch (base_type)
     {
     case R_HPPA:
@@ -1649,6 +1736,9 @@ som_object_p (abfd)
 #endif
 #ifdef EXECLIBMAGIC
     case EXECLIBMAGIC:
+#endif
+#ifdef SHARED_MAGIC_CNX
+    case SHARED_MAGIC_CNX:
 #endif
       break;
     default:
@@ -2002,7 +2092,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 	   subsection != NULL;
 	   subsection = subsection->next)
 	{
-	  int reloc_offset;
+	  int reloc_offset, current_rounding_mode;
 
 	  /* Find a subspace of this space.  */
 	  if (som_section_data (subsection)->is_subspace == 0
@@ -2039,6 +2129,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 	  subspace_reloc_size = 0;
 	  reloc_offset = 0;
 	  som_initialize_reloc_queue (reloc_queue);
+	  current_rounding_mode = R_N_MODE;
 
 	  /* Translate each BFD relocation into one or more SOM 
 	     relocations.  */
@@ -2082,14 +2173,26 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 
 	      /* Update reloc_offset for the next iteration.
 
-		 Note R_ENTRY and R_EXIT relocations are just markers,
-		 they do not consume input bytes.  */ 
-	      if (bfd_reloc->howto->type != R_ENTRY
-		  && bfd_reloc->howto->type != R_EXIT)
-		reloc_offset = bfd_reloc->address + 4;
-	      else
-		reloc_offset = bfd_reloc->address;
+		 Many relocations do not consume input bytes.  They
+		 are markers, or set state necessary to perform some
+		 later relocation.  */
+	      switch (bfd_reloc->howto->type)
+		{
+		/* This only needs to handle relocations that may be
+		   made by hppa_som_gen_reloc.  */
+		case R_ENTRY:
+		case R_EXIT:
+		case R_N_MODE:
+		case R_S_MODE:
+		case R_D_MODE:
+		case R_R_MODE:
+		  reloc_offset = bfd_reloc->address;
+		  break;
 
+		default:
+		  reloc_offset = bfd_reloc->address + 4;
+		  break;
+		}
 
 	      /* Now the actual relocation we care about.  */
 	      switch (bfd_reloc->howto->type)
@@ -2177,6 +2280,21 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		  p += 1;
 		  break;
 
+		case R_N_MODE:
+		case R_S_MODE:
+		case R_D_MODE:
+		case R_R_MODE:
+		  /* If this relocation requests the current rounding
+		     mode, then it is redundant.  */
+		  if (bfd_reloc->howto->type != current_rounding_mode)
+		    {
+		      bfd_put_8 (abfd, bfd_reloc->howto->type, p);
+		      subspace_reloc_size += 1;
+		      p += 1;
+		      current_rounding_mode = bfd_reloc->howto->type;
+		    }
+		  break;
+
 		/* Put a "R_RESERVED" relocation in the stream if
 		   we hit something we do not understand.  The linker
 		   will complain loudly if this ever happens.  */
@@ -2184,6 +2302,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		  bfd_put_8 (abfd, 0xff, p);
 		  subspace_reloc_size += 1;
 		  p += 1;
+		  break;
 		}
 	    }
 
@@ -3168,6 +3287,10 @@ som_slurp_symbol_table (abfd)
 	   so the section associated with this symbol can't be known.  */
 	case SS_EXTERNAL:
 	case SS_UNSAT:
+	  if (bufp->symbol_type != ST_STORAGE)
+	    sym->symbol.section = &bfd_und_section;
+	  else
+	    sym->symbol.section = &bfd_com_section;
 	  sym->symbol.flags |= (BSF_EXPORT | BSF_GLOBAL);
 	  break;
 
@@ -3816,15 +3939,61 @@ som_sizeof_headers (abfd, reloc)
   return (0);
 }
 
+/* Return the single-character symbol type corresponding to
+   SOM section S, or '?' for an unknown SOM section.  */
+
+static char
+som_section_type (s)
+     const char *s;
+{
+  const struct section_to_type *t;
+
+  for (t = &stt[0]; t->section; t++)
+    if (!strcmp (s, t->section))
+      return t->type;
+  return '?';
+}
+
+static int
+som_decode_symclass (symbol)
+     asymbol *symbol;
+{
+  char c;
+
+  if (bfd_is_com_section (symbol->section))
+    return 'C';
+  if (symbol->section == &bfd_und_section)
+    return 'U';
+  if (symbol->section == &bfd_ind_section)
+    return 'I';
+  if (!(symbol->flags & (BSF_GLOBAL|BSF_LOCAL)))
+    return '?';
+
+  if (symbol->section == &bfd_abs_section)
+    c = 'a';
+  else if (symbol->section)
+    c = som_section_type (symbol->section->name);
+  else
+    return '?';
+  if (symbol->flags & BSF_GLOBAL)
+    c = toupper (c);
+  return c;
+}
+
 /* Return information about SOM symbol SYMBOL in RET.  */
 
 static void
 som_get_symbol_info (ignore_abfd, symbol, ret)
-     bfd *ignore_abfd;		/* Ignored.  */
+     bfd *ignore_abfd;
      asymbol *symbol;
      symbol_info *ret;
 {
-  bfd_symbol_info (symbol, ret);
+  ret->type = som_decode_symclass (symbol);
+  if (ret->type != 'U')
+    ret->value = symbol->value+symbol->section->vma;
+  else
+    ret->value = 0;
+  ret->name = symbol->name;
 }
 
 /* End of miscellaneous support functions. */
