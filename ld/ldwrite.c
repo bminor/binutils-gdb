@@ -64,6 +64,58 @@ build_link_order (statement)
 
 	value = statement->data_statement.value;
 
+	/* If the endianness of the output BFD is not known, then we
+	   base the endianness of the data on the first input file.
+	   By convention, the bfd_put routines for an unknown
+	   endianness are big endian, so we must swap here if the
+	   input file is little endian.  */
+	if (! bfd_big_endian (output_bfd)
+	    && ! bfd_little_endian (output_bfd))
+	  {
+	    boolean swap;
+
+	    swap = false;
+	    if (command_line.endian == ENDIAN_LITTLE)
+	      swap = true;
+	    else if (command_line.endian == ENDIAN_UNSET)
+	      {
+		LANG_FOR_EACH_INPUT_STATEMENT (s)
+		  {
+		    if (s->the_bfd != NULL)
+		      {
+			if (bfd_little_endian (s->the_bfd))
+			  swap = true;
+			break;
+		      }
+		  }
+	      }
+
+	    if (swap)
+	      {
+		bfd_byte buffer[8];
+
+		switch (statement->data_statement.type)
+		  {
+		  case QUAD:
+		    bfd_putl64 (value, buffer);
+		    value = bfd_getb64 (buffer);
+		    break;
+		  case LONG:
+		    bfd_putl32 (value, buffer);
+		    value = bfd_getb32 (buffer);
+		    break;
+		  case SHORT:
+		    bfd_putl16 (value, buffer);
+		    value = bfd_getb16 (buffer);
+		    break;
+		  case BYTE:
+		    break;
+		  default:
+		    abort ();
+		  }
+	      }
+	  }
+
 	ASSERT (output_section->owner == output_bfd);
 	switch (statement->data_statement.type)
 	  {
@@ -114,9 +166,8 @@ build_link_order (statement)
 	link_order->u.reloc.p->reloc = rs->reloc;
 	link_order->u.reloc.p->addend = rs->addend_value;
 
-	if (rs->section != (asection *) NULL)
+	if (rs->name == NULL)
 	  {
-	    ASSERT (rs->name == (const char *) NULL);
 	    link_order->type = bfd_section_reloc_link_order;
 	    if (rs->section->owner == output_bfd)
 	      link_order->u.reloc.p->u.section = rs->section;
@@ -128,7 +179,6 @@ build_link_order (statement)
 	  }
 	else
 	  {
-	    ASSERT (rs->name != (const char *) NULL);
 	    link_order->type = bfd_symbol_reloc_link_order;
 	    link_order->u.reloc.p->u.name = rs->name;
 	  }
@@ -453,7 +503,7 @@ ldwrite ()
 static void
 print_symbol_table ()
 {
-  fprintf (config.map_file, "**FILES**\n\n");
+  fprintf (config.map_file, "\n**FILES**\n\n");
   lang_for_each_file (print_file_stuff);
 
   fprintf (config.map_file, "**GLOBAL SYMBOLS**\n\n");

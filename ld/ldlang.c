@@ -2592,9 +2592,51 @@ lang_one_common (h, info)
   section->flags |= SEC_ALLOC;
 
   if (config.map_file != NULL)
-    fprintf (config.map_file, "Allocating common %s: %lx at %lx %s\n",
-	     h->root.string, (unsigned long) size,
-	     (unsigned long) h->u.def.value, section->owner->filename);
+    {
+      static boolean header_printed;
+      int len;
+      char *name;
+      char buf[50];
+
+      if (! header_printed)
+	{
+	  minfo ("\nAllocating common symbols\n");
+	  minfo ("Common symbol       size              file\n\n");
+	  header_printed = true;
+	}
+
+      name = demangle (h->root.string);
+      minfo ("%s", name);
+      len = strlen (name);
+      free (name);
+
+      if (len >= 19)
+	{
+	  print_nl ();
+	  len = 0;
+	}
+      while (len < 20)
+	{
+	  print_space ();
+	  ++len;
+	}
+
+      minfo ("0x");
+      if (size <= 0xffffffff)
+	sprintf (buf, "%lx", (unsigned long) size);
+      else
+	sprintf_vma (buf, size);
+      minfo ("%s", buf);
+      len = strlen (buf);
+
+      while (len < 16)
+	{
+	  print_space ();
+	  ++len;
+	}
+
+      minfo ("%B\n", section->owner);
+    }
 
   return true;
 }

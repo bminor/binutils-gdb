@@ -637,7 +637,82 @@ add_archive_element (info, abfd, name)
   ldlang_add_file (input);
 
   if (config.map_file != (FILE *) NULL)
-    minfo ("%s needed due to %T\n", abfd->filename, name);
+    {
+      static boolean header_printed;
+      struct bfd_link_hash_entry *h;
+      bfd *from;
+      int len;
+
+      h = bfd_link_hash_lookup (link_info.hash, name, false, false, true);
+
+      if (h == NULL)
+	from = NULL;
+      else
+	{
+	  switch (h->type)
+	    {
+	    default:
+	      from = NULL;
+	      break;
+
+	    case bfd_link_hash_defined:
+	    case bfd_link_hash_defweak:
+	      from = h->u.def.section->owner;
+	      break;
+
+	    case bfd_link_hash_undefined:
+	    case bfd_link_hash_undefweak:
+	      from = h->u.undef.abfd;
+	      break;
+
+	    case bfd_link_hash_common:
+	      from = h->u.c.p->section->owner;
+	      break;
+	    }
+	}
+
+      if (! header_printed)
+	{
+	  char buf[100];
+
+	  sprintf (buf, "%-29s %s\n\n", "Archive member included",
+		   "because of file (symbol)");
+	  minfo ("%s", buf);
+	  header_printed = true;
+	}
+
+      if (bfd_my_archive (abfd) == NULL)
+	{
+	  minfo ("%s", bfd_get_filename (abfd));
+	  len = strlen (bfd_get_filename (abfd));
+	}
+      else
+	{
+	  minfo ("%s(%s)", bfd_get_filename (bfd_my_archive (abfd)),
+		 bfd_get_filename (abfd));
+	  len = (strlen (bfd_get_filename (bfd_my_archive (abfd)))
+		 + strlen (bfd_get_filename (abfd))
+		 + 2);
+	}
+
+      if (len >= 29)
+	{
+	  print_nl ();
+	  len = 0;
+	}
+      while (len < 30)
+	{
+	  print_space ();
+	  ++len;
+	}
+
+      if (from != NULL)
+	minfo ("%B ", from);
+      if (h != NULL)
+	minfo ("(%T)\n", h->root.string);
+      else
+	minfo ("(%s)\n", name);
+    }
 
   if (trace_files || trace_file_tries)
     info_msg ("%I\n", input);
@@ -819,10 +894,6 @@ constructor_callback (info, constructor, name, abfd, section, value)
     strcpy (s, "__CTOR_LIST__");
   else
     strcpy (s, "__DTOR_LIST__");
-
-  if (config.map_file != (FILE *) NULL)
-    fprintf (config.map_file,
-	     "Adding %s to constructor/destructor set %s\n", name, set_name);
 
   h = bfd_link_hash_lookup (info->hash, set_name, true, true, true);
   if (h == (struct bfd_link_hash_entry *) NULL)

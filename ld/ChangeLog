@@ -1,5 +1,24 @@
 Fri Apr 26 14:42:27 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ldmisc.h (demangle): Declare.
+	* ldmisc.c: Include "libiberty.h".  Include demangle.h with "",
+ 	not <>.
+	(demangle): Make non-static.  Remove remove_underscore paramter.
+	Always return an allocated string.
+	(vfinfo): Free result of demangle.  Add case 'G'.  Use %T to print
+	functionname, rather than calling demangle.  Print a colon between
+	the BFD(section+offset) and the line number.
+	* ldmain.c (add_archive_element): Improve format of archive
+	information in map file.
+	(constructor_callback): Don't print anything to the map file.
+	* ldlang.c (lang_one_common): Improve format of common symbol
+	information in map file.
+	* ldctor.c (ldctor_build_sets): If producing a map file, print set
+	information.
+	* ldwrite.c (print_symbol_table): Print a newline before the
+	header in the map file.
+	* Makefile.in: Rebuild dependencies.
+
 	* ldmisc.c (vfinfo): Reindent.
 
 Mon Apr 22 12:07:32 1996  Ian Lance Taylor  <ian@cygnus.com>

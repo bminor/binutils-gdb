@@ -20,7 +20,8 @@ the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307
 
 #include "bfd.h"
 #include "sysdep.h"
-#include <demangle.h>
+#include "libiberty.h"
+#include "demangle.h"
 
 #ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
@@ -46,8 +47,6 @@ static void finfo PARAMS ((FILE *, const char *, ...));
 /* VARARGS*/
 static void finfo ();
 #endif
-static const char *demangle PARAMS ((const char *string,
-				     int remove_underscore));
 
 /*
  %% literal %
@@ -63,34 +62,29 @@ static const char *demangle PARAMS ((const char *string,
  %v hex bfd_vma, no leading zeros
  %C clever filename:linenumber with function
  %D like %C, but no function name
+ %G like %D, but only function name
  %R info about a relent
  %s arbitrary string, like printf
  %d integer, like printf
  %u integer, like printf
 */
 
-static const char *
-demangle (string, remove_underscore)
+char *
+demangle (string)
      const char *string;
-     int remove_underscore;
 {
-  const char *res;
+  char *res;
 
-  if (remove_underscore
-      && output_bfd != NULL
+  if (output_bfd != NULL
       && bfd_get_symbol_leading_char (output_bfd) == string[0])
     ++string;
 
   /* This is a hack for better error reporting on XCOFF.  */
-  if (remove_underscore && string[0] == '.')
+  if (string[0] == '.')
     ++string;
 
-  /* Note that there's a memory leak here, we keep buying memory for
-     demangled names, and never free.  But if you have so many errors
-     that you run out of VM with the error messages, then there's
-     something up.  */
   res = cplus_demangle (string, DMGL_ANSI | DMGL_PARAMS);
-  return res ? res : string;
+  return res ? res : xstrdup (string);
 }
 
 static void
@@ -156,10 +150,16 @@ vfinfo (fp, fmt, arg)
 	      {
 		const char *name = va_arg (arg, const char *);
 
-		if (name != (const char *) NULL)
-		  fprintf (fp, "%s", demangle (name, 1));
-		else
+		if (name == (const char *) NULL)
 		  fprintf (fp, "no symbol");
+		else
+		  {
+		    char *demangled;
+
+		    demangled = demangle (name);
+		    fprintf (fp, "%s", demangled);
+		    free (demangled);
+		  }
 	      }
 	      break;
 
@@ -230,6 +230,7 @@ vfinfo (fp, fmt, arg)
 	
 	    case 'C':
 	    case 'D':
+	    case 'G':
 	      /* Clever filename:linenumber with function name if possible,
 		 or section name as a last resort.  The arguments are a BFD,
 		 a section, and an offset.  */
@@ -279,7 +280,15 @@ vfinfo (fp, fmt, arg)
 					   &filename, &functionname,
 					   &linenumber))
 		  {
-		    if (functionname != NULL && fmt[-1] == 'C')
+		    if (functionname != NULL && fmt[-1] == 'G')
+		      {
+			finfo (fp, "%B:", abfd);
+			if (filename != NULL
+			    && strcmp (filename, bfd_get_filename (abfd)) != 0)
+			  fprintf (fp, "%s:", filename);
+			finfo (fp, "%T", functionname);
+		      }
+		    else if (functionname != NULL && fmt[-1] == 'C')
 		      {
 			if (filename == (char *) NULL)
 			  filename = abfd->filename;
@@ -294,8 +303,8 @@ vfinfo (fp, fmt, arg)
 			    /* We use abfd->filename in this initial line,
 			       in case filename is a .h file or something
 			       similarly unhelpful.  */
-			    finfo (fp, "%B: In function `%s':\n",
-				   abfd, demangle (functionname, 1));
+			    finfo (fp, "%B: In function `%T':\n",
+				   abfd, functionname);
 
 			    last_bfd = abfd;
 			    if (last_file != NULL)
@@ -317,7 +326,7 @@ vfinfo (fp, fmt, arg)
 		      {
 			finfo (fp, "%B(%s+0x%v)", abfd, section->name, offset);
 			if (linenumber != 0)
-			  finfo (fp, "%u", linenumber);
+			  finfo (fp, ":%u", linenumber);
 		      }
 		    else if (linenumber != 0) 
 		      finfo (fp, "%B:%s:%u", abfd, filename, linenumber);
@@ -357,7 +366,7 @@ vfinfo (fp, fmt, arg)
 
 	    case 'u':
 	      /* unsigned integer, like printf */
-	      fprintf (fp,"%u", va_arg (arg, unsigned int));
+	      fprintf (fp, "%u", va_arg (arg, unsigned int));
 	      break;
 	    }
 	}

@@ -1,5 +1,5 @@
 /* ldmisc.h -
-   Copyright (C) 1991, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
 
@@ -49,5 +49,6 @@ do { info_assert(__FILE__,__LINE__); } while (0)
 extern void print_space PARAMS ((void));
 extern void print_nl PARAMS ((void));
 extern void print_address PARAMS ((bfd_vma value));
+extern char *demangle PARAMS ((const char *));
 
 #endif
