@@ -22,7 +22,6 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #include "ansidecl.h"
 #include "opcode/d30v.h"
 
-
 /* This table is sorted. */
 /* If you add anything, it MUST be in alphabetical order */
 /* The first field is the name the assembler uses when looking */
@@ -253,8 +252,8 @@ const struct d30v_opcode d30v_opcode_table[] = {
   { "jsrtnz", BRA, 0x7, { SHORT_B3b, LONG_2b }, MU, FLAG_JSR, 0, RELOC_ABS },
   { "jsrtzr", BRA, 0x7, { SHORT_B3, LONG_2 }, MU, FLAG_JSR, 0, RELOC_ABS },
   { "ld2h", IMEM, 0x3, { SHORT_M2, LONG_M2 }, MU, FLAG_MEM, 0, 0 },
-  { "ld2w", IMEM, 0x6, { SHORT_M2, LONG_M2 }, MU, FLAG_MEM | FLAG_2WORD, 0, 0 },
-  { "ld4bh", IMEM, 0x5, { SHORT_M2, LONG_M2 }, MU, FLAG_MEM | FLAG_2WORD, 0, 0 },
+  { "ld2w", IMEM, 0x6, { SHORT_M2, LONG_M2 }, MU, FLAG_MEM | FLAG_NOT_WITH_ADDSUBppp, 0, 0 },
+  { "ld4bh", IMEM, 0x5, { SHORT_M2, LONG_M2 }, MU, FLAG_MEM | FLAG_NOT_WITH_ADDSUBppp, 0, 0 },
   { "ld4bhu", IMEM, 0xd, { SHORT_M2, LONG_M2 }, MU, FLAG_MEM, 0, 0 },
   { "ldb", IMEM, 0, { SHORT_M, LONG_M }, MU, FLAG_MEM, 0, 0 },
   { "ldbu", IMEM, 0x9, { SHORT_M, LONG_M }, MU, FLAG_MEM, 0, 0 },
@@ -311,13 +310,13 @@ const struct d30v_opcode d30v_opcode_table[] = {
   { "srl2h", LOGIC, 0x13, { SHORT_A }, EITHER, 0, 0, 0 },
   { "srlhh", LOGIC, 0x7, { SHORT_A }, EITHER, 0, 0, 0 },
   { "srlhl", LOGIC, 0x6, { SHORT_A }, EITHER, 0, 0, 0 },
-  { "st2h", IMEM, 0x13, { SHORT_M2, LONG_M2 }, MU, 0, FLAG_MEM, 0 },
-  { "st2w", IMEM, 0x16, { SHORT_M2, LONG_M2 }, MU, 0, FLAG_MEM | FLAG_2WORD, 0 },
-  { "st4hb", IMEM, 0x15, { SHORT_M2, LONG_M2 }, MU, 0, FLAG_MEM | FLAG_2WORD, 0 },
-  { "stb", IMEM, 0x10, { SHORT_M, LONG_M }, MU, 0, FLAG_MEM, 0 },
-  { "sth", IMEM, 0x12, { SHORT_M, LONG_M }, MU, 0, FLAG_MEM, 0 },
-  { "sthh", IMEM, 0x11, { SHORT_M, LONG_M }, MU, 0, FLAG_MEM, 0 },
-  { "stw", IMEM, 0x14, { SHORT_M, LONG_M }, MU, 0, FLAG_MEM, 0 },
+  { "st2h", IMEM, 0x13, { SHORT_M2, LONG_M2 }, MU, 0, FLAG_MEM | FLAG_NOT_WITH_ADDSUBppp, 0 },
+  { "st2w", IMEM, 0x16, { SHORT_M2, LONG_M2 }, MU, 0, FLAG_MEM | FLAG_NOT_WITH_ADDSUBppp, 0 },
+  { "st4hb", IMEM, 0x15, { SHORT_M2, LONG_M2 }, MU, 0, FLAG_MEM | FLAG_NOT_WITH_ADDSUBppp, 0 },
+  { "stb", IMEM, 0x10, { SHORT_M, LONG_M }, MU, 0, FLAG_MEM | FLAG_NOT_WITH_ADDSUBppp, 0 },
+  { "sth", IMEM, 0x12, { SHORT_M, LONG_M }, MU, 0, FLAG_MEM | FLAG_NOT_WITH_ADDSUBppp, 0 },
+  { "sthh", IMEM, 0x11, { SHORT_M, LONG_M }, MU, 0, FLAG_MEM | FLAG_NOT_WITH_ADDSUBppp, 0 },
+  { "stw", IMEM, 0x14, { SHORT_M, LONG_M }, MU, 0, FLAG_MEM | FLAG_NOT_WITH_ADDSUBppp, 0 },
   { "sub", IALU1, 0x2, { SHORT_A, LONG}, EITHER, 0, FLAG_CVVA, 0 },
   { "sub2h", IALU1, 0x3, { SHORT_A, LONG}, EITHER, 0, 0, 0 },
   { "subb", IALU1, 0x5, { SHORT_A, LONG}, EITHER, FLAG_C, FLAG_CVVA, 0 },

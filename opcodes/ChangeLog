@@ -1,3 +1,9 @@
+2000-02-22  Chandra Chavva   <cchavva@cygnus.com>
+
+	* d30v-opc.c (d30v_opcode_tab) : Added FLAG_NOT_WITH_ADDSUBppp to
+	ST2H, STB, STH, STHH, STW and ST2H opcodes to prohibit parallel
+	procedure.
+
 1999-12-30  Andrew Haley  <aph@cygnus.com>
 
 	* mips-dis.c (_print_insn_mips): New arg for OPCODE_IS_MEMBER:
