@@ -21,22 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "frame.h"
 #include "inferior.h"
 #include "value.h"
-
-#include <sys/types.h>
-#include <sys/param.h>
-#include <signal.h>
 #include "gdbcore.h"
-#include <sys/dir.h>	/* needed by sys/user.h on delta88 running SVR3.  */
-#include <sys/user.h>
-#ifndef USER			/* added to support BCS ptrace_user */
-
-#define USER ptrace_user
-#endif
-#include <sys/ioctl.h>
-#include <fcntl.h>
-
-#include <sys/file.h>
-#include <sys/stat.h>
 
 #include "symtab.h"
 #include "setjmp.h"

@@ -1,12 +1,11 @@
 Thu Sep  2 00:07:36 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* m88k-tdep.c: Remove a bunch of unused #includes.
+
 	* language.h: Add comment about current_language.
 
 	* mips-tdep.c (_initialize_mips_tdep): Change heuristic-fence-post
 	from var_uinteger to var_zinteger.
-
-	* m88k-tdep.c: Include sys/dir.h before sys/user.h.
-	Include sys/types.h regardless of USG.
 
 	* configure.in: Fix typo (delta88r4 -> delta88v4).
 
