@@ -1,3 +1,9 @@
+Sat Sep 30 09:35:02 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* configure.in: X_INCDIR and X_LIBDIR added.
+	* Makefile.in: @X_INCDIR@ and @X_LIBDIR@ added.
+	* configure: Regnerated.
+
 Fri Sep 29 02:10:05 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* config/arm/tm-arm.h (FRAME_CHAIN, FRAME_CHAIN_VALID):

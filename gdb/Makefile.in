@@ -136,8 +136,8 @@ TCL_CFLAGS = @TCLHDIR@
 TK = @TKLIB@
 TK_CFLAGS = @TKHDIR@
 
-X11 = @X_LIBS@ @X_PRE_LIBS@ -lX11 @X_EXTRA_LIBS@
-X11_CFLAGS = @X_CFLAGS@
+X11 = @X_LIBDIR@ @X_PRE_LIBS@ -lX11 @X_EXTRA_LIBS@
+X11_CFLAGS = @X_INCDIR@ @X_CFLAGS@
 
 ENABLE_GDBTK= @ENABLE_GDBTK@
 #end-sanitize-gdbtk
@@ -1339,7 +1339,7 @@ remote-adapt.o: remote-adapt.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h
 
 remote-rdp.o: remote-rdp.c $(wait_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) remote-rdp.h
+	$(inferior_h) 
 
 remote-bug.o: remote-bug.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h $(remote_utils_h)
