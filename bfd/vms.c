@@ -1183,8 +1183,6 @@ vms_print_symbol (abfd, file, symbol, how)
 	fprintf ((FILE *)file," %s", symbol->name);
       break;
 
-      break;
-
       case bfd_print_symbol_all:
 	{
 	  CONST char *section_name = symbol->section->name;

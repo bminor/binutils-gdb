@@ -1,3 +1,7 @@
+2001-02-13  Kazu Hirata  <kazu@hxi.com>
+
+	* vms.c (vms_print_symbol): Remove unreachable code.
+
 2001-02-13  David Mosberger  <davidm@hpl.hp.com>
 
 	* peicode.h (coff_swap_filehdr_out) [COFF_IMAGE_WITH_PE]: Define
