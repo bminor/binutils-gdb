@@ -901,7 +901,7 @@ i386_get_longjmp_target (CORE_ADDR *pc)
   char buf[8];
   CORE_ADDR sp, jb_addr;
   int jb_pc_offset = gdbarch_tdep (current_gdbarch)->jb_pc_offset;
-  int len = TARGET_PTR_BIT / TARGET_CHAR_BIT;
+  int len = TYPE_LENGTH (builtin_type_void_func_ptr);
 
   /* If JB_PC_OFFSET is -1, we have no way to find out where the
      longjmp will land.  */
@@ -912,11 +912,11 @@ i386_get_longjmp_target (CORE_ADDR *pc)
   if (target_read_memory (sp + len, buf, len))
     return 0;
 
-  jb_addr = extract_address (buf, len);
+  jb_addr = extract_typed_address (buf, builtin_type_void_func_ptr);
   if (target_read_memory (jb_addr + jb_pc_offset, buf, len))
     return 0;
 
-  *pc = extract_address (buf, len);
+  *pc = extract_typed_address (buf, builtin_type_void_func_ptr);
   return 1;
 }
 

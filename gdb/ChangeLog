@@ -1,5 +1,12 @@
 2003-04-19  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_get_longjmp_target): Use
+	TYPE_LENGTH(builtin_type_void_func_ptr) instead of TARGET_PTR_BIT
+	and TARGET_CHAR_BIT.  Use extract_typed_address instead of
+	extract_address.
+
+2003-04-19  Mark Kettenis  <kettenis@gnu.org>
+
 	* core-regset.c: Update comments to reflect reality.  Re-order
 	includes.
 	(fetch_core_registers): Use switch instead of if.  Remove
