@@ -1,3 +1,12 @@
+Fri Oct  9 04:43:43 1992  John Gilmore (gnu@cygnus.com)
+
+	First cut at support for all BSD variants on 386.
+
+	* tm-i386bsd.h, xm-i386bsd.h:  New config files.
+	* i386b-nat.c:  New native support file.
+	* configure.in:  Add host and target for i[34]86-*-bsd*.
+	* config/i386bsd.mh, config/i386bsd.mt:  New config files.
+
 Fri Oct  9 00:31:33 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	Sun2 native support (untested).

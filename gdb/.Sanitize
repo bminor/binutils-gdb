@@ -105,6 +105,7 @@ i386-pinsn.c
 i386-stub.c
 i386-tdep.c
 i386-xdep.c
+i386b-nat.c
 i387-tdep.c
 i960-pinsn.c
 i960-tdep.c
@@ -226,6 +227,7 @@ tm-hp300hpux.h
 tm-hppa.h
 tm-hppab.h
 tm-hppah.h
+tm-i386bsd.h
 tm-i386v.h
 tm-i386v4.h
 tm-i960.h
@@ -291,6 +293,7 @@ xm-hp300bsd.h
 xm-hp300hpux.h
 xm-hppab.h
 xm-hppah.h
+xm-i386bsd.h
 xm-i386mach.h
 xm-i386sco.h
 xm-i386v.h
