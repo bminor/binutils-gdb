@@ -146,7 +146,7 @@ fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
   fixP->fx_tcbit = 0;
   fixP->fx_done = 0;
 
-#if defined (TC_I960) || defined (TC_NS32k)
+#if defined (TC_I960) || defined (TC_NS32K)
   fixP->fx_bsr = 0;
 #endif
 
@@ -340,7 +340,10 @@ chain_frchains_together_1 (section, frchp)
      struct frchain *frchp;
 {
   fragS dummy, *prev_frag = &dummy;
-  fixS fix_dummy, *prev_fix = &fix_dummy;
+  fixS fix_dummy;
+#ifdef BFD_ASSEMBLER
+  fixS *prev_fix = &fix_dummy;
+#endif
 
   for (; frchp && frchp->frch_seg == section; frchp = frchp->frch_next)
     {
@@ -942,7 +945,7 @@ write_contents (abfd, sec, xxx)
 	     * often as necessary. This saves on the overhead of potentially
 	     * lots of bfd_set_section_contents calls.
 	     */
-	    int n_per_buf, bytes, i;
+	    int n_per_buf, i;
 	    if (fill_size == 1)
 	      {
 		n_per_buf = sizeof (buf);
@@ -2416,6 +2419,7 @@ number_to_chars_littleendian (buf, val, n)
 
 /* for debugging */
 extern int indent_level;
+extern void print_symbol_value_1 ();
 
 void
 print_fixup (fixp)
