@@ -1,5 +1,11 @@
 Wed May 20 00:10:40 1998  Doug Evans  <devans@seba.cygnus.com>
 
+	* m32r-sim.h (PROFILE_COUNT_PARINSNS): New macro.
+	* mloopx.in (extract): Set abuf.addr for proper fill nop counting.
+	(execute): Count parallel insns.
+	* sim-if.c (print_m32r_misc_cpu): Print count.
+	* sim-main.h (M32R_MISC_PROFILE): New member parallel_count.
+
 	Zero bottom two bits of pc in jmp,jl insns.
 	* sem.c,sem-switch.c: Regenerate.
 start-sanitize-m32rx
