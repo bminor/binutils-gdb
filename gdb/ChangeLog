@@ -1,3 +1,51 @@
+2000-07-19  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        Multiarch the sh target.
+	* sh-tdep.c:
+	(sh_generic_reg_names, sh_reg_names,sh3_reg_names, sh3e_reg_names,
+ 	sh_dsp_reg_names, sh3_dsp_reg_names, sh_processor_type_table):
+ 	Remove.
+	(XMALLOC): Define.
+	(struct frame_extra_info): Define.
+	(sh_register_raw_size, sh_register_virtual_size,
+ 	sh_register_virtual_type, sh_register_byte, sh_breakpoint_from_pc,
+ 	sh_frame_saved_pc, sh_skip_prologue,
+ 	sh_nofp_frame_init_saved_regs, sh_fp_frame_init_saved_regs,
+ 	sh_extract_struct_value_address, sh_use_struct_convention,
+ 	sh_store_struct_return, sh_push_arguments, sh_push_return_address,
+ 	sh_saved_pc_after_call, sh_generic_register_name,
+ 	sh_sh_register_name, sh_sh3_register_name, sh_sh3e_register_name,
+ 	sh_sh_dsp_register_name, sh_sh3_dsp_register_name,
+ 	sh_frame_args_address, sh_frame_locals_address,
+ 	sh_coerce_float_to_double, sh_default_store_return_value,
+ 	sh3e_sh4_store_return_value, sh_generic_show_regs,
+ 	sh3_show_regs,sh3e_show_regs, sh3_dsp_show_regs, sh4_show_regs,
+ 	sh_dsp_show_regs, sh_register_byte, sh_register_raw_size,
+ 	sh_register_virtual_size, sh_sh3e_register_virtual_type,
+ 	sh_default_register_virtual_type, sh_gdbarch_init): New functions.
+	(sh_target_architecture_hook, sh_frame_find_saved_regs,
+ 	sh_show_regs): Delete functions.
+	(sh_frame_chain, sh_find_callers_reg, sh_init_extra_frame_info,
+ 	sh_pop_frame, sh_extract_return_value): Update
+
+	* config/sh/tm-sh.h (GDB_MULTI_ARCH): Define to 1.
+	(struct gdbarch_tdep): Define.
+	Remove all unnecessary defines. 	
+
+	* remote-e7000.c ({PR,GBR,SR,MACL,VBR,MACH}_REGNUM): Define to -1,
+ 	for h8300 case.
+	(want_sh,want_nopc_sh,want_nopc_sh3): Make nomenclature
+ 	consistent.
+	(e7000_fetch_registers): Remove ifdef GDB_TARGET_IS_SH, use
+ 	runtime check instead.
+	(e7000_wait): Ditto.
+
+	* sh3-rom.c (sh3_supply_register): Use gdbarch_tdep to get the SSR
+ 	and SPC register numbers.
+	(sh3_regnames, sh3e_regnames): Don't specify a size.
+
+	* config/h8300/tm-h8300.h: Add comment.
+
 Wed Jul 19 12:50:16 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* solib.c (elf_locate_base, info_sharedlibrary_command): Rename
