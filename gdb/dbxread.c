@@ -56,7 +56,9 @@
 #include "demangle.h"
 #include "complaints.h"
 #include "cp-abi.h"
+
 #include "gdb_assert.h"
+#include "gdb_string.h"
 
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native, now */
@@ -481,7 +483,7 @@ record_minimal_symbol (char *name, CORE_ADDR address, int type,
          Record it as global even if it's local, not global, so
          lookup_minimal_symbol can find it.  We don't check symbol_leading_char
          because for SunOS4 it always is '_'.  */
-      if (name[8] == 'C' && DEPRECATED_STREQ ("__DYNAMIC", name))
+      if (name[8] == 'C' && strcmp ("__DYNAMIC", name) == 0)
 	ms_type = mst_data;
 
       /* Same with virtual function tables, both global and static.  */
@@ -2503,13 +2505,13 @@ read_ofile_symtab (struct partial_symtab *pst)
 	{
 	  const char *tempstring = namestring;
 
-	  if (DEPRECATED_STREQ (namestring, GCC_COMPILED_FLAG_SYMBOL))
+	  if (strcmp (namestring, GCC_COMPILED_FLAG_SYMBOL) == 0)
 	    processing_gcc_compilation = 1;
-	  else if (DEPRECATED_STREQ (namestring, GCC2_COMPILED_FLAG_SYMBOL))
+	  else if (strcmp (namestring, GCC2_COMPILED_FLAG_SYMBOL) == 0)
 	    processing_gcc_compilation = 2;
 	  if (tempstring[0] == bfd_get_symbol_leading_char (symfile_bfd))
 	    ++tempstring;
-	  if (DEPRECATED_STREQN (tempstring, "__gnu_compiled", 14))
+	  if (strncmp (tempstring, "__gnu_compiled", 14) == 0)
 	    processing_gcc_compilation = 2;
 	}
 
@@ -2575,9 +2577,9 @@ read_ofile_symtab (struct partial_symtab *pst)
 	     However, there is no reason not to accept
 	     the GCC_COMPILED_FLAG_SYMBOL anywhere.  */
 
-	  if (DEPRECATED_STREQ (namestring, GCC_COMPILED_FLAG_SYMBOL))
+	  if (strcmp (namestring, GCC_COMPILED_FLAG_SYMBOL) == 0)
 	    processing_gcc_compilation = 1;
-	  else if (DEPRECATED_STREQ (namestring, GCC2_COMPILED_FLAG_SYMBOL))
+	  else if (strcmp (namestring, GCC2_COMPILED_FLAG_SYMBOL) == 0)
 	    processing_gcc_compilation = 2;
 
 #if 0
