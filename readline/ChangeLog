@@ -1,3 +1,8 @@
+Sat Feb  5 08:32:30 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in: Remove obsolete rules for history.info and
+	readline.info.
+
 Thu Jan 27 17:04:01 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* chardefs.h: Only declare strrchr if it is not #define'd.
