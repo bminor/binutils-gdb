@@ -1,3 +1,31 @@
+2001-01-11  Peter Targett  <peter.targett@arccores.com>
+
+	* as.h (TC_ARC): Ensure struc-symbol.h included.
+	* as.c (dwarf2dbg.h): Include to remove implicit declaration
+	warnings.
+	* struc-symbol.h (SYMBOLS_NEED_BACKPOINTERS): Define.
+	(TARGET_SYMBOL_FIELDS) added.
+
+	* doc/Makefile.am (CPU_DOCS): Added c-arc.texi.
+	* doc/c-arc.texi: New file.
+	Some sections to be expanded.
+	* doc/as.texinfo: Update command-line options.
+	Removed outdated text for ARC dependant features, instead include
+	text from above file.
+
+	* config/obj-elf.h (ELF_TARGET_SYMBOL_FIELDS): Define local flag.
+	(TARGET_SYMBOL_FIELDS): Alias to previous definition.
+	(targ-cpu.h) header.
+	* config/tc-arc.h:
+	* config/tc-arc.c: New updated configuration for
+	ARC, including selection of core variants, and extensibility of
+	instructions, registers etc. through directives.
+
+	* config/tc-arc.c (arc_extinst): Minor corrections for
+	error messages.
+	(arc_common) Likewise. Make alignment argument optional for local
+	symbols also, with default of zero.
+
 2001-01-11  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* config/tc-m68hc11.c (md_estimate_size_before_relax): Fix

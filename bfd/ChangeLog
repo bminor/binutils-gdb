@@ -1,3 +1,16 @@
+2001-01-11  Peter Targett  <peter.targett@arccores.com>
+
+	* bfd-in2.h (bfd_architecture): Add bfd_mach_arc_5,
+	bfd_mach_arc_6, bfd_mach_arc_7, bfd_mach_arc_8 for ARC variants.
+	* cpu-arc.c (arch_info_struct): Add entries for variants.
+	(bfd_arc_arch) Set default to bfd_mach_arc_5.
+	(arc_get_mach) Don't assume machine names prefixed arc- before
+	testing.
+	* elf32-arc.c (arc_elf_object_p): Set machine number based on new
+	selections.
+	(arc_elf_final_write_processing) Likewise.
+	(ELF_MACHINE_CODE) Use EM_ARC.
+
 2001-01-10  Nick Clifton  <nickc@redhat.com>
 
 	* coff-arm.c (LOCAL_LABEL_PREFIX): Change definition to "".

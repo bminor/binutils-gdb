@@ -1,3 +1,8 @@
+2001-01-11  Peter Targett  <peter.targett@arccores.com>
+
+	* readelf.c (dump_relocations): Include selection with EM_ARC.
+	(get_machine_name) Update name to "ARC".
+
 2001-01-09  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am: Add rule to build objdump.o from objdump.c and

@@ -222,8 +222,11 @@ DESCRIPTION
 .#define bfd_mach_v850          0
 .#define bfd_mach_v850e 	'E'
 .#define bfd_mach_v850ea	'A'
-.  bfd_arch_arc,       {* Argonaut RISC Core *}
-.#define bfd_mach_arc_base 0
+.  bfd_arch_arc,       {* ARC Cores *}
+.#define bfd_mach_arc_5         0
+.#define bfd_mach_arc_6         1
+.#define bfd_mach_arc_7         2
+.#define bfd_mach_arc_8         3
 .  bfd_arch_m32r,      {* Mitsubishi M32R/D *}
 .#define bfd_mach_m32r		0 {* backwards compatibility *}
 .#define bfd_mach_m32rx		'x'

@@ -29,6 +29,11 @@ if { (   [istarget "*-*-elf*"] || [istarget "*-*-linux*"])
         return
     }
 
+    # not yet supported by ARC
+    if {[istarget "arc*-*-*"]} {
+      return
+    }
+
     run_dump_test "inherit0" 
     run_list_test "inherit1" "-al"
 

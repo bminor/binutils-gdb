@@ -17,6 +17,7 @@ asconfig.texi: $(CONFIG).texi
 
 CPU_DOCS = \
 	c-a29k.texi \
+	c-arc.texi \
 	c-arm.texi \
 	c-d10v.texi \
 	c-h8300.texi \

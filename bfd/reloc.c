@@ -2336,7 +2336,7 @@ ENUMDOC
 ENUM
   BFD_RELOC_ARC_B22_PCREL
 ENUMDOC
-  Argonaut RISC Core (ARC) relocs.
+  ARC Cores relocs.
   ARC 22 bit pc-relative branch.  The lowest two bits must be zero and are
   not stored in the instruction.  The high 20 bits are installed in bits 26
   through 7 of the instruction.

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-12-21 10:38-0800\n"
+"POT-Creation-Date: 2001-01-11 11:54-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -375,7 +375,7 @@ msgstr ""
 msgid "uncertain calling convention for non-COFF symbol"
 msgstr ""
 
-#: cofflink.c:526 elflink.h:1649
+#: cofflink.c:526 elflink.h:1648
 #, c-format
 msgid "Warning: type of symbol `%s' changed from %d to %d in %s"
 msgstr ""
@@ -1276,7 +1276,7 @@ msgstr ""
 msgid "%s: unsupported relocation type %s"
 msgstr ""
 
-#: elfcode.h:1076
+#: elfcode.h:1084
 #, c-format
 msgid "%s: version count (%ld) does not match symbol count (%ld)"
 msgstr ""
@@ -1286,37 +1286,37 @@ msgstr ""
 msgid "%s: Section %s is already to large to put hole of %ld bytes in"
 msgstr ""
 
-#: elflink.h:1466
+#: elflink.h:1465
 #, c-format
 msgid "%s: %s: invalid version %u (max %d)"
 msgstr ""
 
-#: elflink.h:1507
+#: elflink.h:1506
 #, c-format
 msgid "%s: %s: invalid needed version %d"
 msgstr ""
 
-#: elflink.h:1627
+#: elflink.h:1626
 #, c-format
 msgid "Warning: size of symbol `%s' changed from %lu to %lu in %s"
 msgstr ""
 
-#: elflink.h:1873
+#: elflink.h:1872
 #, c-format
 msgid "%s: warning: unexpected redefinition of `%s'"
 msgstr ""
 
-#: elflink.h:3660
+#: elflink.h:3659
 #, c-format
 msgid "warning: type and size of dynamic symbol `%s' are not defined"
 msgstr ""
 
-#: elflink.h:3932
+#: elflink.h:3931
 #, c-format
 msgid "%s: undefined versioned symbol name %s"
 msgstr ""
 
-#: elflink.h:5181
+#: elflink.h:5180
 #, c-format
 msgid "%s: could not find output section %s for input section %s"
 msgstr ""
@@ -1416,26 +1416,26 @@ msgstr ""
 msgid "%s: address 0x%s out of range for Intex Hex file"
 msgstr ""
 
-#: libbfd.c:484
+#: libbfd.c:471
 #, c-format
 msgid "not mapping: data=%lx mapped=%d\n"
 msgstr ""
 
-#: libbfd.c:487
+#: libbfd.c:474
 msgid "not mapping: env var not set\n"
 msgstr ""
 
-#: libbfd.c:1383
+#: libbfd.c:1370
 #, c-format
 msgid "%s: compiled for a big endian system and target is little endian"
 msgstr ""
 
-#: libbfd.c:1385
+#: libbfd.c:1372
 #, c-format
 msgid "%s: compiled for a little endian system and target is big endian"
 msgstr ""
 
-#: linker.c:2679
+#: linker.c:2678
 #, c-format
 msgid "Attempt to do relocateable link with %s input and %s output"
 msgstr ""
@@ -1451,39 +1451,39 @@ msgid "Unhandled OSF/1 core file section type %d\n"
 msgstr ""
 
 #. XXX code yet to be written.
-#: peicode.h:809
+#: peicode.h:807
 #, c-format
 msgid "%s: Unhandled import type; %x"
 msgstr ""
 
-#: peicode.h:814
+#: peicode.h:812
 #, c-format
 msgid "%s: Unrecognised import type; %x"
 msgstr ""
 
-#: peicode.h:828
+#: peicode.h:826
 #, c-format
 msgid "%s: Unrecognised import name type; %x"
 msgstr ""
 
-#: peicode.h:1185
+#: peicode.h:1183
 #, c-format
 msgid "%s: Unrecognised machine type (0x%x) in Import Library Format archive"
 msgstr ""
 
-#: peicode.h:1197
+#: peicode.h:1195
 #, c-format
 msgid ""
 "%s: Recognised but unhandled machine type (0x%x) in Import Library Format "
 "archive"
 msgstr ""
 
-#: peicode.h:1214
+#: peicode.h:1212
 #, c-format
 msgid "%s: size field is zero in Import Library Format header"
 msgstr ""
 
-#: peicode.h:1242
+#: peicode.h:1240
 #, c-format
 msgid "%s: string not null terminated in ILF object file."
 msgstr ""
@@ -1787,7 +1787,7 @@ msgid ""
 "Characteristics 0x%x\n"
 msgstr ""
 
-#: pe-mips.c:657
+#: pe-mips.c:653
 #, c-format
 msgid "%s: `ld -r' not supported with PE MIPS objects\n"
 msgstr ""
@@ -1797,17 +1797,17 @@ msgstr ""
 #. mem = pointer to memory we're fixing up
 #. val = VMA of what we need to refer to
 #.
-#: pe-mips.c:794
+#: pe-mips.c:789
 #, c-format
 msgid "%s: unimplemented %s\n"
 msgstr ""
 
-#: pe-mips.c:820
+#: pe-mips.c:815
 #, c-format
 msgid "%s: jump too far away\n"
 msgstr ""
 
-#: pe-mips.c:847
+#: pe-mips.c:842
 #, c-format
 msgid "%s: bad pair/reflo after refhi\n"
 msgstr ""
@@ -1860,7 +1860,7 @@ msgstr ""
 msgid "Partition[%d] length = 0x%.8lx (%ld)\n"
 msgstr ""
 
-#: som.c:5365
+#: som.c:5355
 msgid "som_sizeof_headers unimplemented"
 msgstr ""
 
@@ -1873,149 +1873,149 @@ msgstr ""
 msgid "Unsupported .stab relocation"
 msgstr ""
 
-#: vms-gsd.c:357
+#: vms-gsd.c:354
 #, c-format
 msgid "bfd_make_section (%s) failed"
 msgstr ""
 
-#: vms-gsd.c:371
+#: vms-gsd.c:368
 #, c-format
 msgid "bfd_set_section_flags (%s, %x) failed"
 msgstr ""
 
-#: vms-gsd.c:407
+#: vms-gsd.c:404
 #, c-format
 msgid "Size mismatch section %s=%lx, %s=%lx"
 msgstr ""
 
-#: vms-gsd.c:702
+#: vms-gsd.c:699
 #, c-format
 msgid "unknown gsd/egsd subtype %d"
 msgstr ""
 
-#: vms-hdr.c:408
+#: vms-hdr.c:403
 msgid "Object module NOT error-free !\n"
 msgstr ""
 
-#: vms-misc.c:545
+#: vms-misc.c:539
 #, c-format
 msgid "Stack overflow (%d) in _bfd_vms_push"
 msgstr ""
 
-#: vms-misc.c:564
+#: vms-misc.c:557
 msgid "Stack underflow in _bfd_vms_pop"
 msgstr ""
 
-#: vms-misc.c:935
+#: vms-misc.c:915
 msgid "_bfd_vms_output_counted called with zero bytes"
 msgstr ""
 
-#: vms-misc.c:940
+#: vms-misc.c:920
 msgid "_bfd_vms_output_counted called with too many bytes"
 msgstr ""
 
-#: vms-misc.c:1073
+#: vms-misc.c:1051
 #, c-format
 msgid "Symbol %s replaced by %s\n"
 msgstr ""
 
-#: vms-misc.c:1137
+#: vms-misc.c:1113
 #, c-format
 msgid "failed to enter %s"
 msgstr ""
 
-#: vms-tir.c:69
+#: vms-tir.c:68
 msgid "No Mem !"
 msgstr ""
 
-#: vms-tir.c:309
+#: vms-tir.c:302
 msgid "Bad section index in ETIR_S_C_STA_PQ"
 msgstr ""
 
-#: vms-tir.c:324
+#: vms-tir.c:317
 #, c-format
 msgid "Unsupported STA cmd %d"
 msgstr ""
 
-#: vms-tir.c:329 vms-tir.c:1287
+#: vms-tir.c:322 vms-tir.c:1274
 #, c-format
 msgid "Reserved STA cmd %d"
 msgstr ""
 
-#: vms-tir.c:436
+#: vms-tir.c:428
 #, c-format
 msgid "ETIR_S_C_STO_GBL: no symbol \"%s\""
 msgstr ""
 
-#: vms-tir.c:457
+#: vms-tir.c:449
 #, c-format
 msgid "ETIR_S_C_STO_CA: no symbol \"%s\""
 msgstr ""
 
-#: vms-tir.c:470
+#: vms-tir.c:462
 msgid "ETIR_S_C_STO_RB/AB: Not supported"
 msgstr ""
 
-#: vms-tir.c:528
+#: vms-tir.c:520
 msgid "ETIR_S_C_STO_LP_PSB: Not supported"
 msgstr ""
 
-#: vms-tir.c:534
+#: vms-tir.c:526
 msgid "ETIR_S_C_STO_HINT_GBL: not implemented"
 msgstr ""
 
-#: vms-tir.c:540
+#: vms-tir.c:532
 msgid "ETIR_S_C_STO_HINT_PS: not implemented"
 msgstr ""
 
-#: vms-tir.c:544 vms-tir.c:1460
+#: vms-tir.c:536 vms-tir.c:1446
 #, c-format
 msgid "Reserved STO cmd %d"
 msgstr ""
 
-#: vms-tir.c:657
+#: vms-tir.c:649
 msgid "ETIR_S_C_OPR_INSV: Not supported"
 msgstr ""
 
-#: vms-tir.c:675
+#: vms-tir.c:667
 msgid "ETIR_S_C_OPR_USH: Not supported"
 msgstr ""
 
-#: vms-tir.c:681
+#: vms-tir.c:673
 msgid "ETIR_S_C_OPR_ROT: Not supported"
 msgstr ""
 
-#: vms-tir.c:700
+#: vms-tir.c:692
 msgid "ETIR_S_C_OPR_REDEF: Not supported"
 msgstr ""
 
-#: vms-tir.c:706
+#: vms-tir.c:698
 msgid "ETIR_S_C_OPR_DFLIT: Not supported"
 msgstr ""
 
-#: vms-tir.c:710 vms-tir.c:1656
+#: vms-tir.c:702 vms-tir.c:1641
 #, c-format
 msgid "Reserved OPR cmd %d"
 msgstr ""
 
-#: vms-tir.c:779 vms-tir.c:1726
+#: vms-tir.c:770 vms-tir.c:1710
 #, c-format
 msgid "Reserved CTL cmd %d"
 msgstr ""
 
-#: vms-tir.c:808
+#: vms-tir.c:798
 msgid "ETIR_S_C_STC_LP: not supported"
 msgstr ""
 
-#: vms-tir.c:826
+#: vms-tir.c:816
 msgid "ETIR_S_C_STC_GBL: not supported"
 msgstr ""
 
-#: vms-tir.c:834
+#: vms-tir.c:824
 msgid "ETIR_S_C_STC_GCA: not supported"
 msgstr ""
 
-#: vms-tir.c:843
+#: vms-tir.c:833
 msgid "ETIR_S_C_STC_PS: not supported"
 msgstr ""
 
@@ -2024,11 +2024,11 @@ msgstr ""
 #. * arg: -
 #. *
 #.
-#: vms-tir.c:1187
+#: vms-tir.c:1174
 msgid "Stack-from-image not implemented"
 msgstr ""
 
-#: vms-tir.c:1207
+#: vms-tir.c:1194
 msgid "Stack-entry-mask not fully implemented"
 msgstr ""
 
@@ -2041,76 +2041,76 @@ msgstr ""
 #. * compare argument descriptor with symbol argument (ARG$V_PASSMECH)
 #. * and stack TRUE (args match) or FALSE (args dont match) value
 #.
-#: vms-tir.c:1223
+#: vms-tir.c:1210
 msgid "PASSMECH not fully implemented"
 msgstr ""
 
-#: vms-tir.c:1243
+#: vms-tir.c:1230
 msgid "Stack-local-symbol not fully implemented"
 msgstr ""
 
-#: vms-tir.c:1258
+#: vms-tir.c:1245
 msgid "Stack-literal not fully implemented"
 msgstr ""
 
-#: vms-tir.c:1280
+#: vms-tir.c:1267
 msgid "Stack-local-symbol-entry-point-mask not fully implemented"
 msgstr ""
 
-#: vms-tir.c:1456
+#: vms-tir.c:1442
 #, c-format
 msgid "Unimplemented STO cmd %d"
 msgstr ""
 
-#: vms-tir.c:1596
+#: vms-tir.c:1581
 msgid "TIR_S_C_OPR_ASH incomplete"
 msgstr ""
 
-#: vms-tir.c:1610
+#: vms-tir.c:1595
 msgid "TIR_S_C_OPR_USH incomplete"
 msgstr ""
 
-#: vms-tir.c:1624
+#: vms-tir.c:1609
 msgid "TIR_S_C_OPR_ROT incomplete"
 msgstr ""
 
 #.
 #. * redefine symbol to current location
 #.
-#: vms-tir.c:1645
+#: vms-tir.c:1630
 msgid "TIR_S_C_OPR_REDEF not supported"
 msgstr ""
 
 #.
 #. * define a literal
 #.
-#: vms-tir.c:1652
+#: vms-tir.c:1637
 msgid "TIR_S_C_OPR_DFLIT not supported"
 msgstr ""
 
-#: vms-tir.c:1707
+#: vms-tir.c:1691
 msgid "TIR_S_C_CTL_DFLOC not fully implemented"
 msgstr ""
 
-#: vms-tir.c:1715
+#: vms-tir.c:1699
 msgid "TIR_S_C_CTL_STLOC not fully implemented"
 msgstr ""
 
-#: vms-tir.c:1723
+#: vms-tir.c:1707
 msgid "TIR_S_C_CTL_STKDL not fully implemented"
 msgstr ""
 
-#: vms-tir.c:1778
+#: vms-tir.c:1761
 #, c-format
 msgid "Obj code %d not found"
 msgstr ""
 
-#: vms-tir.c:2127
+#: vms-tir.c:2102
 #, c-format
 msgid "SEC_RELOC with no relocs in section %s"
 msgstr ""
 
-#: vms-tir.c:2401
+#: vms-tir.c:2376
 #, c-format
 msgid "Unhandled relocation %s"
 msgstr ""

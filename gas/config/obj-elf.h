@@ -85,6 +85,14 @@ struct elf_obj_sy
 
 #define OBJ_SYMFIELD_TYPE struct elf_obj_sy
 
+/* Symbol fields used by the ELF back end.  */
+#define ELF_TARGET_SYMBOL_FIELDS int local:1;
+
+/* Don't change this; change ELF_TARGET_SYMBOL_FIELDS instead.  */
+#define TARGET_SYMBOL_FIELDS ELF_TARGET_SYMBOL_FIELDS
+
+/* #include "targ-cpu.h" */
+
 #ifndef FALSE
 #define FALSE 0
 #define TRUE  !FALSE

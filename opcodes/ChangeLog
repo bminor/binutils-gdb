@@ -1,4 +1,19 @@
-Wed Jan 10 15:13:21 MET 2001  Jan Hubicka  <jh@suse.cz>
+2001-01-11  Peter Targett  <peter.targett@arccores.com>
+
+	* configure.in: Add arc-ext.lo for bfd_arc_arch selection.
+	* Makefile.am (C_FILES): Add arc-ext.c.
+	(ALL_MACHINES) Add arc-ext.lo.
+	(INCLUDES) Add opcode directory to list.
+	New dependency entry for arc-ext.lo.
+	* disassemble.c (disassembler): Correct call to
+	arc_get_disassembler.
+	* arc-opc.c: New update for ARC, including full base
+	instructions for ARC variants.
+	* arc-dis.h, arc-dis.c: New update for ARC, including
+	extensibility functionality.
+	* arc-ext.h, arc-ext.c: New files for handling extensibility.
+
+2001-01-10  Jan Hubicka  <jh@suse.cz>
 
 	* i386-dis.c (PREGRP15 - PREGRP24): New.
 	(dis386_twobyt): Add SSE2 instructions.
@@ -29,7 +44,7 @@ Wed Jan 10 15:13:21 MET 2001  Jan Hubicka  <jh@suse.cz>
 	* cgen-dis.in (print_insn_normal): Ditto.
 	* cgen-ibld.in (insert_insn_normal, extract_insn_normal): Ditto.
 
-Fri Jan  5 11:31:07 MET 2001  Jan Hubicka  <jh@suse.cz>
+2001-01-05  Jan Hubicka  <jh@suse.cz>
 
 	* i386-dis.c: Add x86_64 support.
 	(rex): New static variable.
@@ -249,7 +264,7 @@ Fri Jan  5 11:31:07 MET 2001  Jan Hubicka  <jh@suse.cz>
 	* m32r-desc.h: Regenerate.
 	* m32r-ibld.c: Regenerate.
 
-2000-10-05  Jim Wilson  <wilson@cygnus.com>
+2000-10-05  Jim Wilson  <wilson@redhat.com>
 
 	* ia64-ic.tbl: Update from Intel.
 	* ia64-asmtab.c: Regenerate.
@@ -273,7 +288,7 @@ Fri Jan  5 11:31:07 MET 2001  Jan Hubicka  <jh@suse.cz>
 	New.
 	* disassemble.c (disassembler) [ARCH_cris]: Call cris_get_disassembler.
 
-2000-09-22  Jim Wilson  <wilson@cygnus.com>
+2000-09-22  Jim Wilson  <wilson@redhat.com>
 
 	* ia64-opc-f.c (ia64_opcodes_f): Add fpcmp pseudo-ops for
 	gt, ge, ngt, and nge.
@@ -342,7 +357,7 @@ Fri Jan  5 11:31:07 MET 2001  Jan Hubicka  <jh@suse.cz>
 	instructions.  Added extended mnemonic mftbl as defined in the
 	405GP manual for all PPCs.
 
-2000-08-28  Jim Wilson  <wilson@cygnus.com>
+2000-08-28  Jim Wilson  <wilson@redhat.com>
 
 	* ia64-dis.c (print_insn_ia64): Add failed label after ia64_free_opcode
 	call.  Change last goto to use failed instead of done.
@@ -388,7 +403,7 @@ Fri Jan  5 11:31:07 MET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* z8k-dis.c: Fix formatting.
 
-2000-08-16  Jim Wilson  <wilson@cygnus.com>
+2000-08-16  Jim Wilson  <wilson@redhat.com>
 
 	* ia64-ic.tbl (pr-readers-nobr-nomovpr): Add addl, adds.  Delete
 	break, mov-immediate, nop.
@@ -398,16 +413,16 @@ Fri Jan  5 11:31:07 MET 2001  Jan Hubicka  <jh@suse.cz>
 	* ia64-opc.h (POSTINC): Define.
 	* ia64-asmtab.c: Regenerate.
 
-2000-08-15  Jim Wilson  <wilson@cygnus.com>
+2000-08-15  Jim Wilson  <wilson@redhat.com>
 
 	* ia64-ic.tbl: Add missing entries.
 
-2000-08-08  Jason Eckhardt  <jle@cygnus.com>
+2000-08-08  Jason Eckhardt  <jle@redhat.com>
 
 	* i860-dis.c (print_br_address): Change third argument from int
 	to long.
 
-2000-08-07  Richard Henderson  <rth@cygnus.com>
+2000-08-07  Richard Henderson  <rth@redhat.com>
 
 	* ia64-dis.c (print_insn_ia64): Get byte skip count correct
 	for MLI templates.  Handle IA64_OPND_TGT64.
@@ -417,7 +432,7 @@ Fri Jan  5 11:31:07 MET 2001  Jan Hubicka  <jh@suse.cz>
 	* cgen-dis.in, cgen-asm.in, cgen-ibld.in: New files.
 	* cgen.sh: Likewise.
 
-2000-08-02  Jim Wilson  <wilson@cygnus.com>
+2000-08-02  Jim Wilson  <wilson@redhat.com>
 	
 	* ia64-dis.c (print_insn_ia64): Call ia64_free_opcode at end.
 
@@ -454,7 +469,7 @@ Fri Jan  5 11:31:07 MET 2001  Jan Hubicka  <jh@suse.cz>
 	ATTRIBUTE_UNUSED.
 	(cgen_parse_keyword): Ditto.
 
-2000-07-22  Jason Eckhardt  <jle@cygnus.com>
+2000-07-22  Jason Eckhardt  <jle@redhat.com>
 
 	* i860-dis.c: New file.
 	(print_insn_i860): New function.
@@ -494,7 +509,7 @@ Fri Jan  5 11:31:07 MET 2001  Jan Hubicka  <jh@suse.cz>
 	* sparc-opc.c (sparc_opcodes): popc has 0 in rs1, not rs2.
 	Reported by Bill Clarke <llib@computer.org>.
 
-2000-07-09  Geoffrey Keating  <geoffk@cygnus.com>
+2000-07-09  Geoffrey Keating  <geoffk@redhat.com>
 
 	* ppc-opc.c (powerpc_opcodes): Correct suffix for vslw.
 	Patch by Randall J Fisher <rfisher@ecn.purdue.edu>.
@@ -574,11 +589,11 @@ Fri Jan  5 11:31:07 MET 2001  Jan Hubicka  <jh@suse.cz>
 	(bfd_h8_disassemble): Distinguish adds/subs, inc/dec.[wl]
 	correctly.
 
-Fri Jun  9 21:49:02 2000  Denis Chertykov  <denisc@overta.ru>
+2000-06-09  Denis Chertykov  <denisc@overta.ru>
 
 	* avr-dis.c (avr_operand): Bugfix for jmp/call address.
 
-Wed Jun  7 21:36:45 2000  Denis Chertykov  <denisc@overta.ru>
+2000-06-07  Denis Chertykov  <denisc@overta.ru>
 
 	* avr-dis.c: completely rewritten.
 
@@ -593,12 +608,12 @@ Wed Jun  7 21:36:45 2000  Denis Chertykov  <denisc@overta.ru>
 	(bfd_h8_disassemble): Distinguish the operand size of inc/dev.[wl]
 	correctly.  Fix a typo.
 
-2000-05-31  Nick Clifton  <nickc@cygnus.com>
+2000-05-31  Nick Clifton  <nickc@redhat.com>
 
 	* opintl.h (_(String)): Explain why dgettext is used instead of
 	gettext.
 
-2000-05-30  Nick Clifton  <nickc@cygnus.com>
+2000-05-30  Nick Clifton  <nickc@redhat.com>
 
 	* opintl.h (gettext, dgettext, dcgettext, textdomain,
 	bindtextdomain): Replace defines with those from intl/libgettext.h
@@ -609,21 +624,21 @@ Wed Jun  7 21:36:45 2000  Denis Chertykov  <denisc@overta.ru>
 	* Makefile.am: Update dependencies with "make dep-am"
 	* Makefile.in: Regenerate.
 
-Thu May 25 22:53:20 2000  Alexandre Oliva  <aoliva@cygnus.com>
+2000-05-25  Alexandre Oliva  <aoliva@redhat.com>
 
 	* m10300-dis.c (disassemble): Don't assume 32-bit longs when
 	sign-extending operands.
 
-Mon May 15 15:18:07 2000  Donald Lindsay  <dlindsay@cygnus.com>
+2000-05-15  Donald Lindsay  <dlindsay@redhat.com>
 
 	* d10v-opc.c (d10v_opcodes): add ALONE tag to all short branches
 	except brf's.
 
-2000-05-21  Nick Clifton  <nickc@cygnus.com>
+2000-05-21  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am (LIBIBERTY): Define.
 
-Fri May 19 12:29:27 EDT 2000	Diego Novillo <dnovillo@redhat.com>
+2000-05-19 Diego Novillo <dnovillo@redhat.com>
 
 	* mips-dis.c (REGISTER_NAMES): Rename to STD_REGISTER_NAMES.
 	(STD_REGISTER_NAMES): New name for REGISTER_NAMES.
@@ -639,7 +654,7 @@ Fri May 19 12:29:27 EDT 2000	Diego Novillo <dnovillo@redhat.com>
 	CGEN_MAX_* -> CGEN_ACTUAL_MAX_* macros.
 	* m32r-desc.h: Ditto.
 
-2000-05-15  Nick Clifton  <nickc@cygnus.com>
+2000-05-15  Nick Clifton  <nickc@redhat.com>
 
 	* arm-opc.h: Use upper case for flasg in MSR and MRS
 	instructions.  Allow any bit to be set in the field_mask of
@@ -658,7 +673,7 @@ Fri May 19 12:29:27 EDT 2000	Diego Novillo <dnovillo@redhat.com>
 	* mips-dis.c (print_insn_arg): Don't mask top 32 bits of 64-bit
 	target addresses for 'jal' and 'j'.
 
-2000-05-10  Geoff Keating  <geoffk@cygnus.com>
+2000-05-10  Geoff Keating  <geoffk@redhat.com>
 
 	* ppc-opc.c (powerpc_opcodes): Make the predicted-branch opcodes
 	also available in common mode when powerpc syntax is being used.
@@ -668,7 +683,7 @@ Fri May 19 12:29:27 EDT 2000	Diego Novillo <dnovillo@redhat.com>
 	* m68k-dis.c (dummy_printer): Add ATTRIBUTE_UNUSED to args.
 	(dummy_print_address): Ditto.
 
-2000-05-04  Timothy Wall  <twall@cygnus.com>
+2000-05-04  Timothy Wall  <twall@redhat.com>
 
 	* tic54x-opc.c: New.
 	* tic54x-dis.c: New.
@@ -692,18 +707,18 @@ Fri May 19 12:29:27 EDT 2000	Diego Novillo <dnovillo@redhat.com>
 	(print_insn_little_powerpc): Likewise.
 	(print_insn_powerpc): Prepend 'v' when printing vector registers.
 
-Mon Apr 24 15:21:35 2000  Clinton Popetz  <cpopetz@cygnus.com>
+2000-04-24  Clinton Popetz  <cpopetz@redhat.com>
 
 	* configure.in: Add bfd_powerpc_64_arch.
 	* disassemble.c (disassembler): Use print_insn_big_powerpc for
 	64 bit code.
 
-2000-04-24  Nick Clifton  <nickc@cygnus.com>
+2000-04-24  Nick Clifton  <nickc@redhat.com>
 
 	* fr30-desc.c (fr30_cgen_cpu_open): Initialise signed_overflow
 	field.
 
-Sun Apr 23 17:54:14 2000  Denis Chertykov  <denisc@overta.ru>
+2000-04-23  Denis Chertykov  <denisc@overta.ru>
 
 	* avr-dis.c (reg_fmul_d): New. Extract destination register from
 	FMUL instruction.
@@ -715,7 +730,7 @@ Sun Apr 23 17:54:14 2000  Denis Chertykov  <denisc@overta.ru>
 	(print_insn_avr): Handle MOVW, MULS, MULSU, FMUL, FMULS, FMULSU,
 	EICALL, EIJMP, LPM r,Z, ELPM r,Z, SPM, ESPM instructions.
 
-2000-04-22  Timothy Wall  <twall@cygnus.com>
+2000-04-22  Timothy Wall  <twall@redhat.com>
 
 	* ia64-gen.c (general): Add an ordered table of primary
 	opcode names, as well as priority fields to disassembly data
@@ -732,17 +747,17 @@ Sun Apr 23 17:54:14 2000  Denis Chertykov  <denisc@overta.ru>
 	* ia64-opc-b.c: Use more abbreviations.
 	* ia64-asmtab.c: Regenerate.
 
-Fri Apr 21 16:03:39 2000  Jason Eckhardt  <jle@cygnus.com>
+2000-04-21  Jason Eckhardt  <jle@redhat.com>
 
 	* hppa-dis.c (extract_16): New function.
 	(print_insn_hppa): Fix incorrect handling of 'fe'. Added handling of
 	new operand types l,y,&,fe,fE,fx.
 
-Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
-			  David Mosberger  <davidm@hpl.hp.com>
-			  Timothy Wall <twall@cygnus.com>
-			  Bob Manson  <manson@charmed.cygnus.com>
-			  Jim Wilson  <wilson@cygnus.com>
+2000-04-21  Richard Henderson  <rth@redhat.com>
+	    David Mosberger  <davidm@hpl.hp.com>
+	    Timothy Wall <twall@redhat.com>
+	    Bob Manson  <manson@charmed.cygnus.com>
+	    Jim Wilson  <wilson@redhat.com>
 
 	* Makefile.am (HFILES): Add ia64-asmtab.h, ia64-opc.h.
 	(CFILES): Add ia64-dis.c, ia64-opc-a.c, ia64-opc-b.c, ia64-opc-f.c,
@@ -761,7 +776,7 @@ Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
 	ia64-opc-m.c, ia64-opc-x.c, ia64-opc.c, ia64-opc.h, ia64-raw.tbl,
 	ia64-war.tbl, ia64-waw.tbl): New files.
 
-2000-04-20  Alexandre Oliva  <aoliva@cygnus.com>
+2000-04-20  Alexandre Oliva  <aoliva@redhat.com>
 
 	* m10300-dis.c (HAVE_AM30, HAVE_AM33): Define.
 	(disassemble): Use them.
@@ -785,21 +800,21 @@ Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
 	w65-dis.c, z8k-dis.c, z8kgen.c: Include sysdep.h.  Remove
 	ansidecl.h as sysdep.h includes it.
 
-Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+2000-04-7  Andrew Cagney  <cagney@b1.redhat.com>
 
 	* configure.in (WARN_CFLAGS): Set to -W -Wall by default.  Add
 	--enable-build-warnings option.
 	* Makefile.am (AM_CFLAGS, WARN_CFLAGS): Add definitions.
 	* Makefile.in, configure: Re-generate.
 
-Wed Apr  5 22:28:18 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+2000-04-05  J"orn Rennecke <amylaar@redhat.com>
 
 	* sh-opc.c (sh_table): Use A_DISP_PC / PCRELIMM_8BY2 for ldre & ldrs.
 	stc GBR,@-<REG_N> is available for arch_sh1_up.
 	Group parallel processing insn with identical mnemonics together.
 	Make three-operand psha / pshl come first.
 
-Wed Apr  5 22:05:40 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+2000-04-05  J"orn Rennecke <amylaar@redhat.co.uk>
 
 	* sh-opc.h (sh_nibble_type): Remove DISP_8 and DISP_4.
 	Split IMM_[48]{,BY[24]} into IMM[01]_[48]{,BY[24]}.  Add REPEAT.
@@ -832,7 +847,7 @@ Wed Apr  5 22:05:40 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	the parameter ATTRIBUTE_UNUSED.
 	* ppc-opc.c: Add ATTRIBUTE_UNUSED as needed.
 
-2000-04-01  Alexandre Oliva  <aoliva@cygnus.com>
+2000-04-01  Alexandre Oliva  <aoliva@redhat.com>
 
 	* m10300-opc.c: SP-based offsets are always unsigned.
 
@@ -841,7 +856,7 @@ Wed Apr  5 22:05:40 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	* arm-opc.h (thumb_opcodes): Disassemble 0xde.. to "bal"
 	[branch always] instead of "undefined".
 
-2000-03-27  Nick Clifton  <nickc@cygnus.com>
+2000-03-27  Nick Clifton  <nickc@redhat.com>
 
 	* d30v-opc.c (d30v_format_table): Move SHORT_AR to end of list of
 	short instructions, from end of list of long instructions.
@@ -868,11 +883,11 @@ Wed Apr  5 22:05:40 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	* disassemble.c: Likewise.
 	* configure: Regenerate.
 
-Mon Mar  6 19:52:05 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+2000-03-06  J"oern Rennecke <amylaar@redhat.com>
 
 	* sh-opc.h (sh_table): ldre and ldrs have a *signed* displacement.
 
-2000-03-02  J"orn Rennecke <amylaar@cygnus.co.uk>
+2000-03-02  J"orn Rennecke <amylaar@redhat.co.uk>
 
 	* d30v-dis.c (print_insn): Remove d*i hacks.  Use per-operand
 	flag to determine if operand is pc-relative.
@@ -893,7 +908,7 @@ Mon Mar  6 19:52:05 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	(SHORT_U, SHORT_A5S): Removed stray alternatives.
 	(d30v_opcode_table): Use new *r formats.
 
-2000-02-28  Nick Clifton  <nickc@cygnus.com>
+2000-02-28  Nick Clifton  <nickc@redhat.com>
 
 	* m32r-desc.c (m32r_cgen_cpu_open): Replace 'flags' with
 	'signed_overflow_ok_p'.
@@ -904,13 +919,13 @@ Mon Mar  6 19:52:05 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	name of the libtool directory.
 	* Makefile.in: Rebuild.
 
-2000-02-24  Nick Clifton  <nickc@cygnus.com>
+2000-02-24  Nick Clifton  <nickc@redhat.com>
 
 	* cgen-opc.c (cgen_set_signed_overflow_ok): New function.
 	(cgen_clear_signed_overflow_ok): New function.
 	(cgen_signed_overflow_ok_p): New function.
 
-2000-02-23  Andrew Haley  <aph@cygnus.com>
+2000-02-23  Andrew Haley  <aph@redhat.com>
 
 	* m32r-asm.c, m32r-desc.c, m32r-desc.h, m32r-dis.c,
 	m32r-ibld.c,m32r-opc.h: Rebuild.
@@ -928,13 +943,13 @@ Mon Mar  6 19:52:05 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	* Makefile.in: Regenerate.
 	* configure: Likewise.
 
-2000-02-22  Chandra Chavva   <cchavva@cygnus.com>
+2000-02-22  Chandra Chavva   <cchavva@redhat.com>
 
 	* d30v-opc.c (d30v_opcode_tab) : Added FLAG_NOT_WITH_ADDSUBppp to
 	ST2H, STB, STH, STHH, STW and ST2H opcodes to prohibit parallel
 	procedure.
 
-2000-02-22  Andrew Haley  <aph@cygnus.com>
+2000-02-22  Andrew Haley  <aph@redhat.com>
 
 	* mips-dis.c (_print_insn_mips): New arg for OPCODE_IS_MEMBER:
 	force gp32 to zero.
@@ -951,7 +966,7 @@ Mon Mar  6 19:52:05 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	* dis-buf.c (buffer_read_memory): Change `length' param and all int
 	vars to unsigned.
 
-Thu Feb 17 00:18:12 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+2000-02-17 J"orn Rennecke <amylaar@redhat.co.uk>
 
 	* sh-dis.c (print_movxy, print_insn_ddt, print_dsp_reg): New functions.
 	(print_insn_ppi): Likewise.
@@ -968,7 +983,7 @@ Thu Feb 17 00:18:12 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	(sh_table): Split up insn with FD_REG_N into ones with F_REG_N and
 	D_REG_N.  Fill in arch field.  Add sh-dsp insns.
 
-2000-02-14  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+2000-02-14  Fernando Nasser  <fnasser@totem.to.redhat.com>
 
 	* arm-dis.c: Change flavor name from atpcs-special to
 	special-atpcs to prevent name conflict in gdb.
@@ -978,7 +993,7 @@ Thu Feb 17 00:18:12 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	(print_insn_thumb): Use the register name entry from the currently
 	selected flavor for LR and PC.
 
-2000-02-10  Nick Clifton  <nickc@cygnus.com>
+2000-02-10  Nick Clifton  <nickc@redhat.com>
 
 	* mcore-opc.h (enum mcore_opclass): Add MULSH and OPSR
 	classes.
@@ -989,7 +1004,7 @@ Thu Feb 17 00:18:12 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	(print_insn_mcore): Add support for little endian targets.
 	Add support for MULSH and OPSR classes.
 
-2000-02-07  Nick Clifton  <nickc@cygnus.com>
+2000-02-07  Nick Clifton  <nickc@redhat.com>
 
 	* arm-dis.c (parse_arm_diassembler_option): Rename again.
 	Previous delat did not take.
@@ -1034,7 +1049,7 @@ Thu Feb 17 00:18:12 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	* arm-dis.c (printf_insn_thumb): Prevent double dumping
 	of raw thumb instructions.
 
-2000-01-20  Nick Clifton  <nickc@cygnus.com>
+2000-01-20  Nick Clifton  <nickc@redhat.com>
 
 	* mcore-opc.h (mcore_table): Add "add" as an alias for "addu".
 

@@ -170,7 +170,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_a29k_arch)		ta="$ta a29k-dis.lo" ;;
 	bfd_alliant_arch)	;;
 	bfd_alpha_arch)		ta="$ta alpha-dis.lo alpha-opc.lo" ;;
-	bfd_arc_arch)		ta="$ta arc-dis.lo arc-opc.lo" ;;
+	bfd_arc_arch)		ta="$ta arc-dis.lo arc-opc.lo arc-ext.lo" ;;
 	bfd_arm_arch)		ta="$ta arm-dis.lo" ;;
 	bfd_avr_arch)		ta="$ta avr-dis.lo" ;;
 	bfd_convex_arch)	;;

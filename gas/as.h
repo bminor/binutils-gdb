@@ -622,6 +622,10 @@ void eh_frame_convert_frag PARAMS ((fragS *));
 /* this one starts the chain of target dependant headers */
 #include "targ-env.h"
 
+#ifdef TC_ARC
+#include "struc-symbol.h"
+#endif
+
 #include "write.h"
 #include "frags.h"
 #include "hash.h"

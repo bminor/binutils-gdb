@@ -2,6 +2,7 @@ a29k-dis.c
 alpha-dis.c
 alpha-opc.c
 arc-dis.c
+arc-ext.c
 arc-opc.c
 arm-dis.c
 arm-opc.h

@@ -813,13 +813,13 @@ bfd_make_readable PARAMS ((bfd *abfd));
 /* Byte swapping macros for user section data.  */
 
 #define bfd_put_8(abfd, val, ptr) \
-                ((void) (*((unsigned char *)(ptr)) = (unsigned char)(val)))
+                ((void) (*((unsigned char *) (ptr)) = (unsigned char) (val)))
 #define bfd_put_signed_8 \
                bfd_put_8
 #define bfd_get_8(abfd, ptr) \
-                (*(unsigned char *)(ptr))
+                (*(unsigned char *) (ptr))
 #define bfd_get_signed_8(abfd, ptr) \
-               ((*(unsigned char *)(ptr) ^ 0x80) - 0x80)
+               ((*(unsigned char *) (ptr) ^ 0x80) - 0x80)
 
 #define bfd_put_16(abfd, val, ptr) \
                 BFD_SEND(abfd, bfd_putx16, ((val),(ptr)))
@@ -1495,8 +1495,11 @@ enum bfd_architecture
 #define bfd_mach_v850          0
 #define bfd_mach_v850e         'E'
 #define bfd_mach_v850ea        'A'
-  bfd_arch_arc,       /* Argonaut RISC Core */
-#define bfd_mach_arc_base 0
+  bfd_arch_arc,       /* ARC Cores */
+#define bfd_mach_arc_5         0
+#define bfd_mach_arc_6         1
+#define bfd_mach_arc_7         2
+#define bfd_mach_arc_8         3
   bfd_arch_m32r,      /* Mitsubishi M32R/D */
 #define bfd_mach_m32r          0 /* backwards compatibility */
 #define bfd_mach_m32rx         'x'
@@ -2218,7 +2221,7 @@ be zero and is not stored in the instruction. */
   BFD_RELOC_THUMB_PCREL_BRANCH12,
   BFD_RELOC_THUMB_PCREL_BRANCH23,
 
-/* Argonaut RISC Core (ARC) relocs.
+/* ARC Cores relocs.
 ARC 22 bit pc-relative branch.  The lowest two bits must be zero and are
 not stored in the instruction.  The high 20 bits are installed in bits 26
 through 7 of the instruction. */
@@ -2407,13 +2410,13 @@ significant 9 bits of the opcode. */
 /* This is an extended address 23-bit reloc for the tms320c54x. */
   BFD_RELOC_TIC54X_23,
 
-/* This is a 16-bit reloc for the tms320c54x, where the least 
-significant 16 bits of a 23-bit extended address are placed into 
+/* This is a 16-bit reloc for the tms320c54x, where the least
+significant 16 bits of a 23-bit extended address are placed into
 the opcode. */
   BFD_RELOC_TIC54X_16_OF_23,
 
 /* This is a reloc for the tms320c54x, where the most
-significant 7 bits of a 23-bit extended address are placed into 
+significant 7 bits of a 23-bit extended address are placed into
 the opcode. */
   BFD_RELOC_TIC54X_MS7_OF_23,
 

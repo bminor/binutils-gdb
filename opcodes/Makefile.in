@@ -151,6 +151,7 @@ CFILES = \
 	alpha-opc.c \
 	arc-dis.c \
 	arc-opc.c \
+	arc-ext.c \
 	arm-dis.c \
 	avr-dis.c \
 	cgen-asm.c \
@@ -233,6 +234,7 @@ ALL_MACHINES = \
 	alpha-opc.lo \
 	arc-dis.lo \
 	arc-opc.lo \
+	arc-ext.lo \
 	arm-dis.lo \
 	avr-dis.lo \
 	cgen-asm.lo \
@@ -852,9 +854,10 @@ arc-dis.lo: arc-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/arc.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/arc.h \
-  $(INCDIR)/elf/reloc-macros.h opintl.h
+  $(INCDIR)/elf/reloc-macros.h opintl.h arc-dis.h arc-ext.h
 arc-opc.lo: arc-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/arc.h opintl.h
+arc-ext.lo: $(BFD_H) $(INCDIR)/libiberty.h arc-ext.h
 arm-dis.lo: arm-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) arm-opc.h $(INCDIR)/coff/internal.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h opintl.h $(BFDDIR)/elf-bfd.h \

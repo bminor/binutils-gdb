@@ -1,3 +1,53 @@
+2001-01-11  Peter Targett <peter.targett@arccores.com>
+
+	* gas/arc/alias.*: Removed.
+	* gas/arc/branch.*: Likewise.
+	* gas/arc/insn3.*: Likewise.
+	* gas/arc/math.*: Likewise.
+	* gas/arc/sshift.*: Likewise.
+	* gas/arc/arc.exp: Simplified test process for base case
+	instruction set by adding run_dump_test cases for all base
+	instructions.
+ 	* gas/arc/adc.s, gas/arc/adc.d: New test cases and dump.
+ 	* gas/arc/add.s, gas/arc/add.d: Likewise.
+ 	* gas/arc/and.s, gas/arc/and.d: Likewise.
+ 	* gas/arc/asl.s, gas/arc/asl.d: Likewise.
+ 	* gas/arc/asr.s, gas/arc/asr.d: Likewise.
+ 	* gas/arc/b.s, gas/arc/b.d: Likewise.
+ 	* gas/arc/bic.s, gas/arc/bic.d: Likewise.
+ 	* gas/arc/bl.s, gas/arc/bl.d: Likewise.
+ 	* gas/arc/brk.s, gas/arc/brk.d: Likewise.
+ 	* gas/arc/extb.s, gas/arc/extb.d: Likewise.
+ 	* gas/arc/extw.s, gas/arc/extw.d: Likewise.
+ 	* gas/arc/flag.s, gas/arc/flag.d: Likewise.
+ 	* gas/arc/j.s, gas/arc/j.d: Likewise.
+ 	* gas/arc/jl.s, gas/arc/jl.d: Likewise.
+ 	* gas/arc/ld.s, gas/arc/ld.d: Likewise.
+ 	* gas/arc/ld2.s, gas/arc/ld2.d: Likewise.
+ 	* gas/arc/lp.s, gas/arc/lp.d: Likewise.
+ 	* gas/arc/lsr.s, gas/arc/lsr.d: Likewise.
+ 	* gas/arc/mov.s, gas/arc/mov.d: Likewise.
+ 	* gas/arc/nop.s, gas/arc/nop.d: Likewise.
+ 	* gas/arc/or.s, gas/arc/or.d: Likewise.
+ 	* gas/arc/rlc.s, gas/arc/rlc.d: Likewise.
+ 	* gas/arc/ror.s, gas/arc/ror.d: Likewise.
+ 	* gas/arc/rrc.s, gas/arc/rrc.d: Likewise.
+ 	* gas/arc/sbc.s, gas/arc/sbc.d: Likewise.
+ 	* gas/arc/sexb.s, gas/arc/sexb.d: Likewise.
+ 	* gas/arc/sexw.s, gas/arc/sexw.d: Likewise.
+ 	* gas/arc/sleep.s, gas/arc/sleep.d: Likewise.
+ 	* gas/arc/add.s, gas/arc/add.d: Likewise.
+ 	* gas/arc/st.s, gas/arc/st.d: Likewise.
+ 	* gas/arc/sub.s, gas/arc/sub.d: Likewise.
+ 	* gas/arc/swi.s, gas/arc/swi.d: Likewise.
+ 	* gas/arc/xor.s, gas/arc/xor.d: Likewise.
+	* gas/arc/warn.s: Removed warning test case for setting of flags
+	followed by conditional branch, an arc5 only feature.
+
+	* gas/ieee-fp/x930509a.exp: Skip test if target also arc*-*-*.
+
+	* gas/vtable/vtable.exp: Skip tests if target also arc*-*-*.
+
 2001-01-11  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* gas/m68hc11/opers12.s: Add more tests for index post byte.

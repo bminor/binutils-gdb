@@ -208,7 +208,8 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @c am29k has no machine-dependent assembler options
 @end ifset
 @ifset ARC
- [ -mbig-endian | -mlittle-endian ]
+ [ -marc[5|6|7|8] ]
+ [ -EB | -EL ]
 @end ifset
 @ifset ARM
  [ -m[arm]1 | -m[arm]2 | -m[arm]250 | -m[arm]3 | -m[arm]6 | -m[arm]60 |
@@ -416,17 +417,10 @@ The following options are available when @value{AS} is configured for
 an ARC processor.
 
 @table @code
-
-@cindex ARC endianness
-@cindex endianness, ARC
-@cindex big endian output, ARC
-@item -mbig-endian
-Generate ``big endian'' format output.
-
-@cindex little endian output, ARC
-@item -mlittle-endian
-Generate ``little endian'' format output.
-
+@item -marc[5|6|7|8]
+This option selects the core processor variant.
+@item -EB | -EL
+Select either big-endian (-EB) or little-endian (-EL) output.
 @end table
 @end ifset
 
@@ -5302,80 +5296,7 @@ subject, see the hardware manufacturer's manual.
 @c in both conditional blocks.
 
 @ifset ARC
-@ifset GENERIC
-@page
-@node ARC-Dependent
-@chapter ARC Dependent Features
-@end ifset
-@ifclear GENERIC
-@node Machine Dependencies
-@chapter ARC Dependent Features
-@end ifclear
-
-@cindex ARC support
-@menu
-* ARC-Opts::                    Options
-* ARC-Float::                   Floating Point
-* ARC-Directives::              Sparc Machine Directives
-@end menu
-
-@node ARC-Opts
-@section Options
-
-@cindex options for ARC
-@cindex ARC options
-@cindex architectures, ARC
-@cindex ARC architectures
-The ARC chip family includes several successive levels (or other
-variants) of chip, using the same core instruction set, but including
-a few additional instructions at each level.
-
-By default, @code{@value{AS}} assumes the core instruction set (ARC
-base).  The @code{.cpu} pseudo-op is intended to be used to select
-the variant.
-
-@table @code
-@cindex @code{-mbig-endian} option (ARC)
-@cindex @code{-mlittle-endian} option (ARC)
-@cindex ARC big-endian output
-@cindex ARC little-endian output
-@cindex big-endian output, ARC
-@cindex little-endian output, ARC
-@item -mbig-endian
-@itemx -mlittle-endian
-Any @sc{arc} configuration of @code{@value{AS}} can select big-endian or
-little-endian output at run time (unlike most other @sc{gnu} development
-tools, which must be configured for one or the other).  Use
-@samp{-mbig-endian} to select big-endian output, and @samp{-mlittle-endian}
-for little-endian.
-@end table
-
-@node ARC-Float
-@section Floating Point
-
-@cindex floating point, ARC (@sc{ieee})
-@cindex ARC floating point (@sc{ieee})
-The ARC cpu family currently does not have hardware floating point
-support.  Software floating point support is provided by @code{GCC}
-and uses @sc{ieee} floating-point numbers.
-
-@node ARC-Directives
-@section ARC Machine Directives
-
-@cindex ARC machine directives
-@cindex machine directives, ARC
-The ARC version of @code{@value{AS}} supports the following additional
-machine directives:
-
-@table @code
-@item .cpu
-@cindex @code{cpu} directive, SPARC
-This must be followed by the desired cpu.
-The ARC is intended to be customizable, @code{.cpu} is used to
-select the desired variant [though currently there are none].
-
-@end table
-
+@include c-arc.texi
 @end ifset
 
 @ifset A29K

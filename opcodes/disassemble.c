@@ -87,8 +87,7 @@ disassembler (abfd)
 #ifdef ARCH_arc
     case bfd_arch_arc:
       {
-	disassemble = arc_get_disassembler (bfd_get_mach (abfd),
-					    bfd_big_endian (abfd));
+	disassemble = arc_get_disassembler (abfd);
 	break;
       }
 #endif

@@ -22,6 +22,12 @@
 #ifndef __struc_symbol_h__
 #define __struc_symbol_h__
 
+#ifdef BFD_ASSEMBLER
+/* The BFD code wants to walk the list in both directions.  */
+#undef  SYMBOLS_NEED_BACKPOINTERS
+#define SYMBOLS_NEED_BACKPOINTERS
+#endif
+
 /* The information we keep for a symbol.  Note that the symbol table
    holds pointers both to this and to local_symbol structures.  See
    below.  */
@@ -88,6 +94,10 @@ struct symbol
 
 #ifdef TC_SYMFIELD_TYPE
   TC_SYMFIELD_TYPE sy_tc;
+#endif
+
+#ifdef TARGET_SYMBOL_FIELDS
+  TARGET_SYMBOL_FIELDS
 #endif
 };
 

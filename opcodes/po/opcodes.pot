@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2001-01-09 12:07-0800\n"
+"POT-Creation-Date: 2001-01-11 12:44-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,31 +22,8 @@ msgstr ""
 msgid "jump hint unaligned"
 msgstr ""
 
-#. Default text to print if an instruction isn't recognized.
-#: arc-dis.c:232 fr30-dis.c:39 m32r-dis.c:39
-msgid "*unknown*"
-msgstr ""
-
-#: arc-opc.c:629
-msgid "unable to fit different valued constants into instruction"
-msgstr ""
-
-#: arc-opc.c:639
-msgid "auxiliary register not allowed here"
-msgstr ""
-
-#: arc-opc.c:652
-#, c-format
-msgid "invalid register number `%d'"
-msgstr ""
-
-#: arc-opc.c:775
-#, c-format
-msgid "value won't fit in range %ld - %ld"
-msgstr ""
-
-#: arc-opc.c:871
-msgid "branch address not on 4 byte boundary"
+#: arc-dis.c:52
+msgid "Illegal limm reference in last instruction!\n"
 msgstr ""
 
 #: arm-dis.c:489
@@ -143,6 +120,11 @@ msgstr ""
 msgid "bad instruction `%.50s'"
 msgstr ""
 
+#. Default text to print if an instruction isn't recognized.
+#: fr30-dis.c:39 m32r-dis.c:39
+msgid "*unknown*"
+msgstr ""
+
 #: fr30-dis.c:300 m32r-dis.c:239
 #, c-format
 msgid "Unrecognized field %d while printing insn.\n"
@@ -204,7 +186,7 @@ msgstr ""
 msgid "%02x\t\t*unknown*"
 msgstr ""
 
-#: i386-dis.c:2624
+#: i386-dis.c:2740
 msgid "<internal disassembler error>"
 msgstr ""
 
