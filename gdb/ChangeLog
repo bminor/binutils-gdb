@@ -1,3 +1,39 @@
+2004-10-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* mipsread.c: Cleanup coding style.
+	(mipscoff_new_init, mipscoff_symfile_init, mipscoff_symfile_read)
+	(mipscoff_symfile_finish): Remove prototypes.
+
+2004-10-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* mips-tdep.c (mips_fetch_instruction, mips16_fetch_instruction)
+	(mips_mdebug_frame_cache, mips16_scan_prologue)
+	(mips32_scan_prologue, mips_stub_frame_cache)
+	(heuristic_proc_start, heuristic_proc_desc)
+	(mips_eabi_push_dummy_call, mips_n32n64_push_dummy_call)
+	(mips_n32n64_return_value, mips_o32_push_dummy_call)
+	(mips_o32_return_value, mips_o64_push_dummy_call)
+	(mips_step_skips_delay, mips_skip_trampoline_code)
+	(mips_gdbarch_init): Use MIPS_A0_REGNUM instead of A0_REGNUM,
+	MIPS_RA_REGNUM instead of RA_REGNUM, MIPS_T9_REGNUM instead of
+	T9_REGNUM, MIPS_V0_REGNUM instead of V0_REGNUM, MIPS_ZERO_REGNUM
+	instead of ZERO_REGNUM, MIPS32_SIZE_INSN instead of MIPS_INSTLEN
+	and MIPS16_INSN_SIZE instead of MIPS16_INSTLEN.
+	(mips_dump_tdep): Don't print A0_REGNUM, RA_REGNUM,
+	T9_REGNUM, V0_REGNUM, ZERO_REGNUM, MIPS_INSTLEN and
+	MIPS16_INSTLEN.  Use MIPS_A0_REGNUM instead of A0_REGNUM.
+	* mips-linux-tdep.c (mips_linux_o32_sigframe_init)
+	(mips_linux_n32n64_sigframe_init): Use MIPS_ZERO_REGNUM instead of
+	ZERO_REGNUM.
+	* mipsnbsd-tdep.c (mipsnbsd_cannot_fetch_register)
+	(mipsnbsd_cannot_store_register): Use MIPS_ZERO_REGNUM instead of
+	ZERO_REGNUM.
+	(mipsnbsd_get_longjmp_target): Use MIPS_A0_REGNUM instead of
+	A0_REGNUM.
+	* mipsnbsd-nat.c: Include "mips-tdep.h".
+	(getregs_supplies): Use MIPS_ZERO_REGNUM instead of ZERO_REGNUM.
+	* Makefile.in (mipsnbsd-nat.o): Update dependencies.
+
 2004-10-29  Andrew Cagney  <cagney@gnu.org>
 
 	* stack.c (parse_frame_specification_1): New function based on
