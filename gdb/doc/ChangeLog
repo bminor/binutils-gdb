@@ -1,3 +1,13 @@
+2004-01-08  Jason Molenda  <jmolenda@apple.com>
+            Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdb.texinfo: Update copyright.
+	(Objective-C): "methodName" typeo fixed.  Add @code/@var markup
+	around names, as appropriate.  Minor syntax cleanup of
+	_NSPrintForDebugger explanation.  Two spaces after periods.
+	GDBN used instead of lit. "gdb".  Index entries added for
+	print-object and _NSPrintForDebugger.  @noindent added in one spot.
+
 2003-11-11  Elena Zannoni  <ezannoni@redhat.com>
 
 	* stabs.texinfo: Add dircategory and direntry commands.
