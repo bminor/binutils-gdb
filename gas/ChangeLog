@@ -1,3 +1,10 @@
+Thu Sep 22 13:39:10 1994  Kung Hsu  (kung@x1.cygnus.com)
+
+	* ecoff.c (ecoff_generate_asm_lineno): check if
+	current_stabs_filename is NULL before strcmp.
+	* read.c (read_a_source_file): fxi a bug in generate_asm_lineno
+	checking.
+
 Wed Sep 21 18:17:35 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/ho-*.h: Now-unused files deleted.
