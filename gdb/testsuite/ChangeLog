@@ -1,6 +1,6 @@
 Sat Mar 22 19:50:25 1997  Bob Manson  <manson@charmed.cygnus.com>
 
-	* config/udi.exp(gdb_target_udi): Make sure UDICONF is set
+	* config/udi.exp(gdb_start): Make sure UDICONF is set
 	properly before starting gdb.
 
 Tue Mar 11 11:42:58 1997  Bob Manson  <manson@charmed.cygnus.com>

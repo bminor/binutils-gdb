@@ -30,10 +30,8 @@ proc gdb_target_udi { } {
     global gdb_prompt
     global verbose
     global exit_status
-    global env;
 
     set targetname [target_info mondfe,name];
-    set env(UDICONF) [target_info mondfe,udi_soc];
     # set targets hostname
     send_gdb "target udi $targetname\n"
     set timeout 60
@@ -89,6 +87,9 @@ proc gdb_load { arg } {
 #              UDICONF enviroment variable is set.
 #
 proc gdb_start { } {
+    global env;
+
+    set env(UDICONF) [target_info mondfe,udi_soc];
     default_gdb_start
     verbose "Setting up target, Please wait..."
     gdb_target_udi
