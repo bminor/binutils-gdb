@@ -1,3 +1,19 @@
+2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* config/tc-m68hc11.c (md_begin): Take into account additional
+	page operand for call instruction.
+	(print_opcode_format): Likewise.
+	(check_range): Likewise for page range checking.
+	(get_operand): Don't skip a possible comma in operands.
+	(fixup8): Generate BFD_RELOC_M68HC11_PAGE reloc.
+	(fixup16): Likwise with BFD_RELOC_M68HC11_LO16.
+	(fixup24): New to handle call reloc.
+	(build_insn): Handle missing page operand for call instruction.
+	(find): Likewise.
+	(md_apply_fix3): Take into account new relocs.
+	(get_operand): Fix the mode for indexed indirect addressing.
+	(build_indexed_byte): Fix post index byte for indexed indirect mode.
+
 2002-08-12  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mips.c (mips_ip): Don't work out the value of
