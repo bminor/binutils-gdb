@@ -1,5 +1,11 @@
 Wed Nov  8 19:59:36 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/obj-coff.c (fixup_segment): Don't subtract md_pcrel_from
+	from a PC relative reloc if TC_A29K.
+
+	* config/tc-a29k.c (line_separator_chars): Restore '@'.  Existing
+	code depends upon it.
+
 	* config/tc-a29k.c (md_operand): Handle $float, $double, and
 	$extend.  Based on code from Eric Freudenthal
 	<freudenthal@nyu.edu>.
