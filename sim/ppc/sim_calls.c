@@ -194,7 +194,11 @@ sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
      But there are loops that just walk through the entire list of
      names and try to get everything.  */
   regname = gdbarch_register_name (current_gdbarch, regno);
-  if (! regname || regname[0] == '\0')
+  /* FIXME: ezannoni 2002/04/15 Remove the 'vr' and 'vscr' check
+     once AltiVec support is committed.  */
+  if (! regname || regname[0] == '\0'
+      || (regname[0] == 'v' && regname[1] == 'r')
+      || (strcmp (regname, "vscr") == 0))
     return -1;
 
   TRACE(trace_gdb, ("sim_fetch_register(regno=%d(%s), buf=0x%lx)\n",
@@ -215,7 +219,11 @@ sim_store_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
 
   /* See comments in sim_fetch_register, above.  */
   regname = gdbarch_register_name (current_gdbarch, regno);
-  if (! regname || regname[0] == '\0')
+  /* FIXME: ezannoni 2002/04/15 Remove the 'vr' and 'vscr' check
+     once AltiVec support is committed.  */
+  if (! regname || regname[0] == '\0'
+      || (regname[0] == 'v' && regname[1] == 'r')
+      || (strcmp (regname, "vscr") == 0))
     return -1;
 
   TRACE(trace_gdb, ("sim_store_register(regno=%d(%s), buf=0x%lx)\n",

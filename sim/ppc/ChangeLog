@@ -1,3 +1,8 @@
+2002-04-15  Elena Zannoni  <ezannoni@redhat.com>
+
+        * sim_calls.c (sim_fetch_register, sim_store_register): Return -1 for
+        AltiVec registers as a temporary stopgap.
+
 2002-03-24  David O'Brien  <obrien@FreeBSD.org>
 
 	* ppc/hw_disk.c: Export a disk device property.
