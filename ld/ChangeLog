@@ -1,7 +1,15 @@
+Tue Oct 12 17:30:51 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* configure.in (mips-*-elf*): New target; use mipsb-elf32.
+	* scripttempl/elf.sc: Only use OTHER_READONLY_SECTIONS and
+	OTHER_READWRITE_SECTIONS if relocating.  Shell variables are not
+	expanded within them.
+	* config/mipsb-elf32.mt: New file.
+	* emulparams/elf32mipb.sh: New file.
+	* Makefile.in (em_elf32mipb.c): New target.
+
 Thu Sep 30 17:00:36 1993  Rob Savoye  (rob@darkstar.cygnus.com)
 
-	* ldlang.c (lang_add_input_file): If it's a library brought in by
-	INPUT(), then change the file type to lang_input_file_is_l_enum.
 	* ldgram.y: In input_list, change lang_input_file_is_file_enum to
 	lang_input_file_is_search_file_enum so objects brought in using
 	INPUT() do a path lookup.
