@@ -1,3 +1,18 @@
+1999-08-18  Donn Terry  <donn@interix.com>
+
+	* coff-i386.c (coff_i386_reloc): Handle R_IMAGEBASE.
+	(RTYPE2HOWTO): Return NULL if reloc type is out of range.
+	(coff_i386_rtype_to_howto): Likewise.
+	* coffcode.h (coff_slurp_symbol_table): Change a -2 to N_DEBUG.
+	Completely ignore symbols which are all zero.
+	(dummy_reloc16_estimate): Add return 0.
+	* cofflink.c (_bfd_coff_link_input_bfd): Rename inner scope
+	variable copy to name_copy to avoid shadowing outer scope
+	variable.
+	* libcoff-in.h (coff_data_type): Change raw_syment_count field
+	from unsigned int to unsigned long.  Add timestamp field.
+	* libcoff.h: Rebuild.
+
 1999-08-17  H.J. Lu  <hjl@gnu.org>
 
 	* elf32-hppa.c (bfd_elf32_bfd_is_local_label_name): Fix typo in

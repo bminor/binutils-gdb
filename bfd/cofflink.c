@@ -1523,7 +1523,7 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 	    {
 	      const char *elename;
 	      char elebuf[SYMNMLEN + 1];
-	      char *copy;
+	      char *name_copy;
 
 	      bfd_coff_swap_sym_in (input_bfd, (PTR) esl, (PTR) islp);
 
@@ -1538,12 +1538,13 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 	      if (elename == NULL)
 		return false;
 
-	      copy = (char *) bfd_alloc (input_bfd, strlen (elename) + 1);
-	      if (copy == NULL)
+	      name_copy = (char *) bfd_alloc (input_bfd,
+					      strlen (elename) + 1);
+	      if (name_copy == NULL)
 		return false;
-	      strcpy (copy, elename);
+	      strcpy (name_copy, elename);
 
-	      (*epp)->name = copy;
+	      (*epp)->name = name_copy;
 	      (*epp)->type = islp->n_type;
 	      (*epp)->tagndx = 0;
 	      if (islp->n_numaux >= 1

@@ -42,8 +42,10 @@ static bfd_reloc_status_type coff_i386_reloc
 static reloc_howto_type *coff_i386_rtype_to_howto
   PARAMS ((bfd *, asection *, struct internal_reloc *,
 	   struct coff_link_hash_entry *, struct internal_syment *,
-
 	   bfd_vma *));
+static reloc_howto_type *coff_i386_reloc_type_lookup
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
+static const bfd_target *i3coff_object_p PARAMS ((bfd *));
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
 /* The page size is a guess based on ELF.  */
@@ -106,8 +108,8 @@ coff_i386_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 
 #ifdef COFF_WITH_PE
   /* FIXME: How should this case be handled?  */
-  if (reloc_entry->howto->type == R_IMAGEBASE && diff != 0)
-    abort ();
+  if (reloc_entry->howto->type == R_IMAGEBASE)
+    diff -= pe_data (output_bfd)->pe_opthdr.ImageBase;
 #endif
 
 #define DOIT(x) \
@@ -190,7 +192,7 @@ static reloc_howto_type howto_table[] =
 	 0xffffffff,            /* src_mask */                             
 	 0xffffffff,            /* dst_mask */                             
 	 true),                /* pcrel_offset */
-  /* {7}, */
+  /* PE IMAGE_REL_I386_DIR32NB relocation (7).  */
   HOWTO (R_IMAGEBASE,            /* type */                                 
 	 0,	                /* rightshift */                           
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
@@ -211,7 +213,8 @@ static reloc_howto_type howto_table[] =
   EMPTY_HOWTO (014),
   EMPTY_HOWTO (015),
   EMPTY_HOWTO (016),
-  HOWTO (R_RELBYTE,		/* type */                                 
+  /* Byte relocation (017).  */
+  HOWTO (R_RELBYTE,		/* type */
 	 0,			/* rightshift */                           
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */ 
 	 8,			/* bitsize */                   
@@ -224,6 +227,7 @@ static reloc_howto_type howto_table[] =
 	 0x000000ff,		/* src_mask */                             
 	 0x000000ff,		/* dst_mask */                             
 	 PCRELOFFSET),		/* pcrel_offset */
+  /* 16-bit word relocation (020).  */
   HOWTO (R_RELWORD,		/* type */                                 
 	 0,			/* rightshift */                           
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */ 
@@ -237,6 +241,7 @@ static reloc_howto_type howto_table[] =
 	 0x0000ffff,		/* src_mask */                             
 	 0x0000ffff,		/* dst_mask */                             
 	 PCRELOFFSET),		/* pcrel_offset */
+  /* 32-bit longword relocation (021).  */
   HOWTO (R_RELLONG,		/* type */                                 
 	 0,			/* rightshift */                           
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */ 
@@ -250,6 +255,7 @@ static reloc_howto_type howto_table[] =
 	 0xffffffff,		/* src_mask */                             
 	 0xffffffff,		/* dst_mask */                             
 	 PCRELOFFSET),		/* pcrel_offset */
+  /* Byte PC relative relocation (022).  */
   HOWTO (R_PCRBYTE,		/* type */                                 
 	 0,			/* rightshift */                           
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */ 
@@ -263,6 +269,7 @@ static reloc_howto_type howto_table[] =
 	 0x000000ff,		/* src_mask */                             
 	 0x000000ff,		/* dst_mask */                             
 	 PCRELOFFSET),		/* pcrel_offset */
+  /* 16-bit word PC relative relocation (023).  */
   HOWTO (R_PCRWORD,		/* type */                                 
 	 0,			/* rightshift */                           
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */ 
@@ -276,6 +283,7 @@ static reloc_howto_type howto_table[] =
 	 0x0000ffff,		/* src_mask */                             
 	 0x0000ffff,		/* dst_mask */                             
 	 PCRELOFFSET),		/* pcrel_offset */
+  /* 32-bit longword PC relative relocation (024).  */
   HOWTO (R_PCRLONG,		/* type */                                 
 	 0,			/* rightshift */                           
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */ 
@@ -297,8 +305,11 @@ static reloc_howto_type howto_table[] =
 #define BADMAG(x) I386BADMAG(x)
 #define I386 1			/* Customize coffcode.h */
 
-#define RTYPE2HOWTO(cache_ptr, dst) \
-	    (cache_ptr)->howto = howto_table + (dst)->r_type;
+#define RTYPE2HOWTO(cache_ptr, dst)					\
+  ((cache_ptr)->howto =							\
+   ((dst)->r_type < sizeof (howto_table) / sizeof (howto_table[0])	\
+    ? howto_table + (dst)->r_type					\
+    : NULL))
 
 /* For 386 COFF a STYP_NOLOAD | STYP_BSS section is part of a shared
    library.  On some other COFF targets STYP_BSS is normally
@@ -392,12 +403,18 @@ coff_i386_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
      struct internal_syment *sym;
      bfd_vma *addendp;
 {
-
   reloc_howto_type *howto;
+
+  if (rel->r_type > sizeof (howto_table) / sizeof (howto_table[0]))
+    {
+      bfd_set_error (bfd_error_bad_value);
+      return NULL;
+    }
 
   howto = howto_table + rel->r_type;
 
 #ifdef COFF_WITH_PE
+  /* Cancel out code in _bfd_coff_generic_relocate_section.  */
   *addendp = 0;
 #endif
 
@@ -458,9 +475,7 @@ coff_i386_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
   return howto;
 }
 
-
 #define coff_bfd_reloc_type_lookup coff_i386_reloc_type_lookup
-
 
 static reloc_howto_type *
 coff_i386_reloc_type_lookup (abfd, code)

@@ -131,7 +131,7 @@ SUBSUBSECTION
 	moment. To port BFD, that person will have to add more @code{#defines}.
 	Three of the bit twiddling routines are exported to
 	@code{gdb}; @code{coff_swap_aux_in}, @code{coff_swap_sym_in}
-	and @code{coff_swap_linno_in}. @code{GDB} reads the symbol
+	and @code{coff_swap_lineno_in}. @code{GDB} reads the symbol
 	table on its own, but uses BFD to fix things up.  More of the
 	bit twiddlers are exported for @code{gas};
 	@code{coff_swap_aux_out}, @code{coff_swap_sym_out},
@@ -2749,7 +2749,7 @@ coff_write_object_contents (abfd)
 
 #ifdef COFF_LONG_SECTION_NAMES
       /* Handle long section names as in PE.  This must be compatible
-         with the code in coff_write_symbols.  */
+         with the code in coff_write_symbols and _bfd_coff_final_link.  */
       {
 	size_t len;
 
@@ -2844,10 +2844,11 @@ coff_write_object_contents (abfd)
 #endif
 
 #ifdef COFF_IMAGE_WITH_PE
-      /* suppress output of the sections if they are null.  ld includes
-	 the bss and data sections even if there is no size assigned
-	 to them.  NT loader doesn't like it if these section headers are
-	 included if the sections themselves are not needed */
+      /* Suppress output of the sections if they are null.  ld
+	 includes the bss and data sections even if there is no size
+	 assigned to them.  NT loader doesn't like it if these section
+	 headers are included if the sections themselves are not
+	 needed.  See also coff_compute_section_file_positions.  */
       if (section.s_size == 0)
 	internal_f.f_nscns--;
       else
@@ -3472,6 +3473,9 @@ SUBSUBSECTION
 	base of the line number information for the table is stored in
 	the symbol associated with the function.
 
+	Note: The PE format uses line number 0 for a flag indicating a
+	new source file.
+
 	The information is copied from the external to the internal
 	table, and each symbol which marks a function is marked by
 	pointing its...
@@ -3560,6 +3564,10 @@ coff_slurp_line_table (abfd, asect)
   /* FIXME, free native_lineno here, or use alloca or something. */
   return true;
 }
+
+/* Slurp in the symbol table, converting it to generic form.  Note
+   that if coff_relocate_section is defined, the linker will read
+   symbols via coff_link_add_symbols, rather than via this routine.  */
 
 static boolean
 coff_slurp_symbol_table (abfd)
@@ -3726,7 +3734,7 @@ coff_slurp_symbol_table (abfd)
             case C_THUMBSTATFUNC:/* Thumb static function        */
 #endif
 	    case C_LABEL:	/* label			 */
-	      if (src->u.syment.n_scnum == -2)
+	      if (src->u.syment.n_scnum == N_DEBUG)
 		dst->symbol.flags = BSF_DEBUGGING;
 	      else
 		dst->symbol.flags = BSF_LOCAL;
@@ -3854,6 +3862,13 @@ coff_slurp_symbol_table (abfd)
 	      break;
 
 	    case C_NULL:
+	      /* PE DLLs sometimes have zeroed out symbols for some
+                 reason.  Just ignore them without a warning.  */
+	      if (src->u.syment.n_type == 0
+		  && src->u.syment.n_value == 0
+		  && src->u.syment.n_scnum == 0)
+		break;
+	      /* Fall through.  */
 	    case C_EXTDEF:	/* external definition		 */
 	    case C_ULABEL:	/* undefined label		 */
 	    case C_USTATIC:	/* undefined static		 */
@@ -4269,6 +4284,7 @@ dummy_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
      struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
 {
   abort ();
+  return 0;
 }
 
 #endif

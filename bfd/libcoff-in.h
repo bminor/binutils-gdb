@@ -56,7 +56,7 @@ typedef struct coff_tdata
   file_ptr sym_filepos;
 
   struct coff_ptr_struct *raw_syments;
-  unsigned int raw_syment_count;
+  unsigned long raw_syment_count;
 
   /* These are only valid once writing has begun */
   long int relocbase;
@@ -96,6 +96,9 @@ typedef struct coff_tdata
 
   /* Used by coff_find_nearest_line.  */
   PTR line_info;
+
+  /* The timestamp from the COFF file header.  */
+  long timestamp;
 
   /* Copy of some of the f_flags bits in the COFF filehdr structure,
      used by ARM code.  */
