@@ -2841,6 +2841,19 @@ proc_parent_pid (procinfo *pi)
 }
 
 
+/* Convert a target address (a.k.a. CORE_ADDR) into a host address
+   (a.k.a void pointer)!  */
+
+static void *
+procfs_address_to_host_pointer (CORE_ADDR addr)
+{
+  void *ptr;
+
+  gdb_assert (sizeof (ptr) == TYPE_LENGTH (builtin_type_void_data_ptr));
+  ADDRESS_TO_POINTER (builtin_type_void_data_ptr, &ptr, addr);
+  return ptr;
+}
+
 /*
  * Function: proc_set_watchpoint
  *
@@ -2863,10 +2876,13 @@ proc_set_watchpoint (procinfo *pi, CORE_ADDR addr, int len, int wflags)
   prwatch_t *pwatch;
 
   pwatch            = (prwatch_t *) &arg.watch;
+  /* NOTE: cagney/2003-02-01: Even more horrible hack.  Need to
+     convert a target address into something that can be stored in a
+     native data structure.  */
 #ifdef PCAGENT	/* Horrible hack: only defined on Solaris 2.6+ */
-  pwatch->pr_vaddr  = (uintptr_t) address_to_host_pointer (addr);
+  pwatch->pr_vaddr  = (uintptr_t) procfs_address_to_host_pointer (addr);
 #else
-  pwatch->pr_vaddr  = (caddr_t) address_to_host_pointer (addr);
+  pwatch->pr_vaddr  = (caddr_t) procfs_address_to_host_pointer (addr);
 #endif
   pwatch->pr_size   = len;
   pwatch->pr_wflags = wflags;
@@ -5163,10 +5179,11 @@ procfs_can_use_hw_breakpoint (int type, int cnt, int othertype)
   /* Due to the way that proc_set_watchpoint() is implemented, host
      and target pointers must be of the same size.  If they are not,
      we can't use hardware watchpoints.  This limitation is due to the
-     fact that proc_set_watchpoint() calls address_to_host_pointer();
-     a close inspection of address_to_host_pointer will reveal that
-     an internal error will be generated when the host and target
-     pointer sizes are different.  */
+     fact that proc_set_watchpoint() calls
+     procfs_address_to_host_pointer(); a close inspection of
+     procfs_address_to_host_pointer will reveal that an internal error
+     will be generated when the host and target pointer sizes are
+     different.  */
   if (sizeof (void *) != TYPE_LENGTH (builtin_type_void_data_ptr))
     return 0;
 

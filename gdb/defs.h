@@ -374,9 +374,6 @@ extern int query (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
 extern void init_page_info (void);
 
-extern CORE_ADDR host_pointer_to_address (void *ptr);
-extern void *address_to_host_pointer (CORE_ADDR addr);
-
 extern char *gdb_realpath (const char *);
 extern char *xfullpath (const char *);
 

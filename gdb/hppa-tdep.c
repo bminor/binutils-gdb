@@ -4555,6 +4555,16 @@ child_get_current_exception_event (void)
   return &current_ex_event;
 }
 
+/* Instead of this nasty cast, add a method pvoid() that prints out a
+   host VOID data type (remember %p isn't portable).  */
+
+static CORE_ADDR
+hppa_pointer_to_address_hack (void *ptr)
+{
+  gdb_assert (sizeof (ptr) == TYPE_LENGTH (builtin_type_void_data_ptr));
+  return POINTER_TO_ADDRESS (builtin_type_void_data_ptr, &ptr);
+}
+
 static void
 unwind_command (char *exp, int from_tty)
 {
@@ -4577,7 +4587,7 @@ unwind_command (char *exp, int from_tty)
     }
 
   printf_unfiltered ("unwind_table_entry (0x%s):\n",
-		     paddr_nz (host_pointer_to_address (u)));
+		     paddr_nz (hppa_pointer_to_address_hack (u)));
 
   printf_unfiltered ("\tregion_start = ");
   print_address (u->region_start, gdb_stdout);

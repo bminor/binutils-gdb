@@ -401,6 +401,21 @@ som_solib_load_symbols (struct so_list *so, char *name, int from_tty,
 }
 
 
+/* FIXME: cagney/2003-02-01: This just isn't right.  Given an address
+   within the target's address space, this converts the value into an
+   address within the host's (i.e., GDB's) address space.  Given that
+   the host/target address spaces are separate, this can't be right.  */
+
+static void *
+hpux_address_to_host_pointer_hack (CORE_ADDR addr)
+{
+  void *ptr;
+
+  gdb_assert (sizeof (ptr) == TYPE_LENGTH (builtin_type_void_data_ptr));
+  ADDRESS_TO_POINTER (builtin_type_void_data_ptr, &ptr, addr);
+  return ptr;
+}
+
 /* Add symbols from shared libraries into the symtab list, unless the
    size threshold specified by auto_solib_limit (in megabytes) would
    be exceeded.  */
@@ -715,8 +730,10 @@ som_solib_add (char *arg_string, int from_tty, struct target_ops *target, int re
       if (status != 0)
 	goto err;
 
+      /* FIXME: cagney/2003-02-01: I think som_solib.next should be a
+         CORE_ADDR.  */
       new_so->som_solib.next =
-	address_to_host_pointer (extract_unsigned_integer (buf, 4));
+	hpux_address_to_host_pointer_hack (extract_unsigned_integer (buf, 4));
 
       /* Note that we don't re-set "addr" to the next pointer
        * until after we've read the trailing data.

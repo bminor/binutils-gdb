@@ -1,5 +1,19 @@
 2003-02-01  Andrew Cagney  <ac131313@redhat.com>
 
+	* defs.h (host_pointer_to_address): Delete declaration.
+	(address_to_host_pointer): Delete declaration.
+	* utils.c (host_pointer_to_address): Delete function.
+	(address_to_host_pointer): Delete function.
+	* procfs.c (procfs_address_to_host_pointer): New function.
+	* procfs.c (proc_set_watchpoint): Use.
+	(procfs_can_use_hw_breakpoint): Update comments.
+	* somsolib.c (hpux_address_to_host_pointer_hack): New function.
+	(som_solib_add): Use.
+	* hppa-tdep.c (hppa_pointer_to_address_hack): New function.
+	* hppa-tdep.c (unwind_command): Use.
+	
+2003-02-01  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdb_dirent.h: Mark up valid uses of <dirent.h>, d_namelen and
 	strlen d_name.
 

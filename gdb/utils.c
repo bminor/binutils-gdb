@@ -2602,25 +2602,6 @@ phex_nz (ULONGEST l, int sizeof_l)
 }
 
 
-/* Convert to / from the hosts pointer to GDB's internal CORE_ADDR
-   using the target's conversion routines. */
-CORE_ADDR
-host_pointer_to_address (void *ptr)
-{
-  gdb_assert (sizeof (ptr) == TYPE_LENGTH (builtin_type_void_data_ptr));
-  return POINTER_TO_ADDRESS (builtin_type_void_data_ptr, &ptr);
-}
-
-void *
-address_to_host_pointer (CORE_ADDR addr)
-{
-  void *ptr;
-
-  gdb_assert (sizeof (ptr) == TYPE_LENGTH (builtin_type_void_data_ptr));
-  ADDRESS_TO_POINTER (builtin_type_void_data_ptr, &ptr, addr);
-  return ptr;
-}
-
 /* Convert a CORE_ADDR into a string.  */
 const char *
 core_addr_to_string (const CORE_ADDR addr)
