@@ -1,0 +1,32 @@
+1999-02-09  Doug Evans  <devans@casey.cygnus.com>
+
+	* Makefile.in (SPARC64_OBJS): Add dev64.o.
+	(CPU_OBJS): New variable.
+	(SIM_OBJS): Add sparc-desc.o.
+	(SIM_EXTRA_DEPS): Replace cpu-opc.h with sparc-desc.h.
+	(sim-core.o): Add dev64.h dependency.
+	(dev64.o): Add rule.
+	(stamp-arch,stamp-cpu32): Update FLAGS variable, option syntax changed.
+	(stamp-cpu64): Ditto.
+	(stamp-desc): New rule.
+	* configure.in (sim_link_files,sim_link_links): Delete.
+	Set cpu_objs to one of SPARC32_OBJS,SPARC64_OBJS.
+	* configure: Rebuild.
+	* acconfig.h: Rebuild.
+	* config.in: Rebuild.
+	* dev64.c: New file.
+	* dev64.h: New file.
+	* sparc64.c: New file.
+	* trap64.h: New file.
+	* arch.c,arch.h,cpuall.h: Rebuild.
+	* cpu32.c,decode32.c,decode32.h,model32.c,sem32.c: Rebuild.
+	* sim-if.c (sparc_disassemble_insn): New function.
+	(sim_open): sparc_cgen_cpu_open renamed from sparc_cgen_opcode_open.
+	Set disassembler.
+	(sim_close): sparc_cgen_cpu_open renamed from sparc_cgen_opcode_open.
+	* sim-main.h: Don't include cpu-opc.h,cpu-sim.h. Include
+	sparc-desc.h,sparc-opc.h,sparc-sim.h.
+
+1999-02-02  Doug Evans  <devans@casey.cygnus.com>
+
+	* Directory created.

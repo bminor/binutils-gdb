@@ -13,3 +13,6 @@
 
 /* Define if your locale.h file contains LC_MESSAGES.  */
 #undef HAVE_LC_MESSAGES
+
+/* Define if sparc64 target.  */
+#undef SPARC64_P

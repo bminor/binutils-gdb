@@ -38,6 +38,8 @@ decode32.c
 decode32.h
 dev32.c
 dev32.h
+dev64.c
+dev64.h
 mloop32.in
 model32.c
 regs32.h
@@ -47,9 +49,11 @@ sim-main.h
 sparc-sim.h
 sparc.c
 sparc32.c
+sparc64.c
 tconfig.in
 trap32.c
 trap32.h
+trap64.h
 
 Things-to-lose:
 
