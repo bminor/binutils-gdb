@@ -1,3 +1,8 @@
+Tue Dec 20 12:35:21 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/printcmds.exp: New test, for printing register before
+	program is running.
+
 Mon Dec 19 00:32:55 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/list.exp:  Correct some alternate expect patterns
