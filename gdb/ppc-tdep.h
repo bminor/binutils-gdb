@@ -35,7 +35,18 @@ int ppc_linux_frameless_function_invocation (struct frame_info *);
 void ppc_linux_frame_init_saved_regs (struct frame_info *);
 CORE_ADDR ppc_linux_frame_chain (struct frame_info *);
 int ppc_sysv_abi_use_struct_convention (int, struct type *);
-int ppc_sysv_abi_broken_use_struct_convention (int, struct type *);
+void ppc_sysv_abi_store_return_value (struct type *type,
+				      struct regcache *regcache,
+				      const void *valbuf);
+void ppc_sysv_abi_extract_return_value (struct type *type,
+					struct regcache *regcache,
+					void *valbuf);
+void ppc_sysv_abi_broken_store_return_value (struct type *type,
+					     struct regcache *regcache,
+					     const void *valbuf);
+void ppc_sysv_abi_broken_extract_return_value (struct type *type,
+					       struct regcache *regcache,
+					       void *valbuf);
 CORE_ADDR ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 					CORE_ADDR func_addr,
 					struct regcache *regcache,

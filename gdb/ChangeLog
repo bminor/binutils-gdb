@@ -1,3 +1,25 @@
+2003-10-10  Andrew Cagney  <cagney@redhat.com>
+
+	* rs6000-tdep.c (e500_store_return_value): Delete function.
+	(e500_extract_return_value): Delete function.
+	(rs6000_gdbarch_init): When SYSV, set "extract_return_value" and
+	"restore_return_value" to "ppc_sysv_abi_extract_return_value" and
+	"ppc_sysv_abi_restore_return_value" where applicable.
+	* ppc-tdep.h: (ppc_sysv_abi_store_return_value): Declare.
+	(ppc_sysv_abi_extract_return_value): Declare.
+	(ppc_sysv_abi_broken_store_return_value): Declare.
+	(ppc_sysv_abi_broken_extract_return_value): Declare.
+	(ppc_sysv_abi_broken_use_struct_convention:) Delete declaration.
+	* ppc-sysv-tdep.c (return_value_convention): Move definition to
+	start of file.
+	(do_ppc_sysv_return_value): New function.
+	(ppc_sysv_abi_extract_return_value): New function.
+	(ppc_sysv_abi_store_return_value): New function.
+	(ppc_sysv_abi_broken_extract_return_value): New function.
+	(ppc_sysv_abi_broken_store_return_value): New function.
+	(ppc_sysv_abi_use_struct_convention): Call
+	do_ppc_sysv_return_value.
+
 2003-10-10  J. Brobecker  <brobecker@gnat.com>
 
 	* blockframe.c (inside_main_func): No longer use symbol_lookup()

@@ -226,8 +226,11 @@ ppcnbsd_init_abi (struct gdbarch_info info,
                   struct gdbarch *gdbarch)
 {
   set_gdbarch_pc_in_sigtramp (gdbarch, ppcnbsd_pc_in_sigtramp);
-
+  /* For NetBSD, this is an on again, off again thing.  Some systems
+     do use the broken struct convention, and some don't.  */
   set_gdbarch_use_struct_convention (gdbarch, ppcnbsd_use_struct_convention);
+  set_gdbarch_extract_return_value (gdbarch, ppc_sysv_abi_broken_extract_return_value);
+  set_gdbarch_store_return_value (gdbarch, ppc_sysv_abi_broken_store_return_value);
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
                                 nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
 }

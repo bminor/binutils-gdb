@@ -1313,65 +1313,6 @@ ran_out_of_registers_for_arguments:
   return sp;
 }
 
-/* Extract a function return value of type TYPE from raw register array
-   REGBUF, and copy that return value into VALBUF in virtual format.  */
-static void
-e500_extract_return_value (struct type *valtype, struct regcache *regbuf, void *valbuf)
-{
-  int offset = 0;
-  int vallen = TYPE_LENGTH (valtype);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-  if (TYPE_CODE (valtype) == TYPE_CODE_ARRAY
-      && vallen == 8
-      && TYPE_VECTOR (valtype))
-    {
-      regcache_raw_read (regbuf, tdep->ppc_ev0_regnum + 3, valbuf);
-    }
-  else
-    {
-      /* Return value is copied starting from r3.  Note that r3 for us
-         is a pseudo register.  */
-      int offset = 0;
-      int return_regnum = tdep->ppc_gp0_regnum + 3;
-      int reg_size = DEPRECATED_REGISTER_RAW_SIZE (return_regnum);
-      int reg_part_size;
-      char *val_buffer;
-      int copied = 0;
-      int i = 0;
-
-      /* Compute where we will start storing the value from.  */ 
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-        {
-	  if (vallen <= reg_size)
-	    offset = reg_size - vallen;
-	  else
-	    offset = reg_size + (reg_size - vallen);
-        }
-
-      /* How big does the local buffer need to be?  */
-      if (vallen <= reg_size)
-	val_buffer = alloca (reg_size);
-      else
-	val_buffer = alloca (vallen);
-
-      /* Read all we need into our private buffer.  We copy it in
-         chunks that are as long as one register, never shorter, even
-         if the value is smaller than the register.  */
-      while (copied < vallen)
-        {
-          reg_part_size = DEPRECATED_REGISTER_RAW_SIZE (return_regnum + i);
-	  /* It is a pseudo/cooked register.  */
-          regcache_cooked_read (regbuf, return_regnum + i,
-				val_buffer + copied);
-          copied += reg_part_size;
-          i++;
-        }
-      /* Put the stuff in the return buffer.  */
-      memcpy (valbuf, val_buffer + offset, vallen);
-    }
-}
-
 /* PowerOpen always puts structures in memory.  Vectors, which were
    added later, do get returned in a register though.  */
 
@@ -2044,30 +1985,6 @@ rs6000_stab_reg_to_regnum (int num)
       break;
     }
   return regnum;
-}
-
-/* Write into appropriate registers a function return value
-   of type TYPE, given in virtual format.  */
-static void
-e500_store_return_value (struct type *type, char *valbuf)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-  /* Everything is returned in GPR3 and up.  */
-  int copied = 0;
-  int i = 0;
-  int len = TYPE_LENGTH (type);
-  while (copied < len)
-    {
-      int regnum = gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + 3 + i;
-      int reg_size = DEPRECATED_REGISTER_RAW_SIZE (regnum);
-      char *reg_val_buf = alloca (reg_size);
-
-      memcpy (reg_val_buf, valbuf + copied, reg_size);
-      copied += reg_size;
-      deprecated_write_register_gen (regnum, reg_val_buf);
-      i++;
-    }
 }
 
 static void
@@ -2835,6 +2752,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_extract_return_value (gdbarch, ppc64_sysv_abi_extract_return_value);
       set_gdbarch_store_return_value (gdbarch, ppc64_sysv_abi_store_return_value);
     }
+  else if (sysv_abi && wordsize == 4)
+    {
+      set_gdbarch_extract_return_value (gdbarch, ppc_sysv_abi_extract_return_value);
+      set_gdbarch_store_return_value (gdbarch, ppc_sysv_abi_store_return_value);
+    }
   else
     {
       set_gdbarch_deprecated_extract_return_value (gdbarch, rs6000_extract_return_value);
@@ -2873,8 +2795,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
         set_gdbarch_dwarf2_reg_to_regnum (gdbarch, e500_dwarf2_reg_to_regnum);
         set_gdbarch_pseudo_register_read (gdbarch, e500_pseudo_register_read);
         set_gdbarch_pseudo_register_write (gdbarch, e500_pseudo_register_write);
-        set_gdbarch_extract_return_value (gdbarch, e500_extract_return_value);
-        set_gdbarch_deprecated_store_return_value (gdbarch, e500_store_return_value);
 	break;
       default:
 	tdep->ppc_vr0_regnum = -1;
