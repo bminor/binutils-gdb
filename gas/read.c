@@ -327,6 +327,7 @@ static const pseudo_typeS potable[] =
   {"irepc", s_irp, 1},
   {"lcomm", s_lcomm, 0},
   {"lflags", listing_flags, 0},	/* Listing flags */
+  {"linkonce", s_linkonce, 0},
   {"list", listing_list, 1},	/* Turn listing on */
   {"llen", listing_psize, 1},
   {"long", cons, 4},
@@ -1687,6 +1688,83 @@ s_irp (irpc)
   input_scrub_include_sb (&out, input_line_pointer);
   sb_kill (&out);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
+}
+
+/* Handle the .linkonce pseudo-op.  This tells the assembler to mark
+   the section to only be linked once.  However, this is not supported
+   by most object file formats.  This takes an optional argument,
+   which is what to do about duplicates.  */
+
+void
+s_linkonce (ignore)
+     int ignore;
+{
+  enum linkonce_type type;
+
+  SKIP_WHITESPACE ();
+
+  type = LINKONCE_DISCARD;
+
+  if (! is_end_of_line[(unsigned char) *input_line_pointer])
+    {
+      char *s;
+      char c;
+
+      s = input_line_pointer;
+      c = get_symbol_end ();
+      if (strcasecmp (s, "discard") == 0)
+	type = LINKONCE_DISCARD;
+      else if (strcasecmp (s, "one_only") == 0)
+	type = LINKONCE_ONE_ONLY;
+      else if (strcasecmp (s, "same_size") == 0)
+	type = LINKONCE_SAME_SIZE;
+      else if (strcasecmp (s, "same_contents") == 0)
+	type = LINKONCE_SAME_CONTENTS;
+      else
+	as_warn ("unrecognized .linkonce type `%s'", s);
+
+      *input_line_pointer = c;
+    }
+
+#ifdef obj_handle_link_once
+  obj_handle_link_once (type);
+#else /* ! defined (obj_handle_link_once) */
+#ifdef BFD_ASSEMBLER
+  {
+    flagword flags;
+
+    if ((bfd_applicable_section_flags (stdoutput) & SEC_LINK_ONCE) == 0)
+      as_warn (".linkonce is not supported for this object file format");
+
+    flags = bfd_get_section_flags (stdoutput, now_seg);
+    flags |= SEC_LINK_ONCE;
+    switch (type)
+      {
+      default:
+	abort ();
+      case LINKONCE_DISCARD:
+	flags |= SEC_LINK_DUPLICATES_DISCARD;
+	break;
+      case LINKONCE_ONE_ONLY:
+	flags |= SEC_LINK_DUPLICATES_ONE_ONLY;
+	break;
+      case LINKONCE_SAME_SIZE:
+	flags |= SEC_LINK_DUPLICATES_SAME_SIZE;
+	break;
+      case LINKONCE_SAME_CONTENTS:
+	flags |= SEC_LINK_DUPLICATES_SAME_CONTENTS;
+	break;
+      }
+    if (! bfd_set_section_flags (stdoutput, now_seg, flags))
+      as_bad ("bfd_set_section_flags: %s",
+	      bfd_errmsg (bfd_get_error ()));
+  }
+#else /* ! defined (BFD_ASSEMBLER) */
+  as_warn (".linkonce is not supported for this object file format");
+#endif /* ! defined (BFD_ASSEMBLER) */
+#endif /* ! defined (obj_handle_link_once) */
+
+  demand_empty_rest_of_line ();
 }
 
 void 

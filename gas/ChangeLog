@@ -1,3 +1,20 @@
+Fri Mar 29 16:15:06 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* read.h (enum linkonce_type): Define.
+	(s_linkonce): Declare.
+	* read.c (potable): Add "linkonce".
+	(s_linkonce): New function.
+	* subsegs.h (segment_info_type): Add linkonce field to
+	MANY_SEGMENTS && ! BFD_ASSEMBLER section.
+	* config/obj-coff.h (obj_handle_link_once): Define if TE_PE.
+	(obj_coff_pe_handle_link_once): Declare if TE_PE.
+	* config/obj-coff.c: If TE_PE and not BFD_ASSEMBLER, #include
+	"coff/pe.h".
+	(obj_coff_pe_handle_link_once): New function, defined if TE_PE.
+	(c_section_symbol): If TE_PE, set the x_comdat field in the aux
+	entry based on the linkonce field in segment_info.
+	* doc/as.texinfo: Document .linkonce.
+
 Fri Mar 29 11:31:27 1996  J.T. Conklin  (jtc@lisa.cygnus.com)
 
 	* doc/as.1: Changed to be recognized by catman -w on Solaris.
