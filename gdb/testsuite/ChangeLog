@@ -1,3 +1,9 @@
+2004-08-15  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/ctti.exp: Tweak srcfile and objfile to have no slashes.
+	* gdb.cp/m-static.exp: Likewise.
+	* gdb.cp/rtti.exp: Likewise.
+
 2004-08-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/bigcore.c: Include <sys/types.h> and <sys/time.h>.
