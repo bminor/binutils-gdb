@@ -1,3 +1,13 @@
+Wed Jan 22 01:31:16 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	Start mn10200 gdb port by adding copies of mn10300
+	target-specific files with all instances of mn10300 changed
+	to mn10200 to start with.
+	* mn10200-tdep.c: new
+	* config/mn10200/tm-mn10200.h: new, REGISTER_SIZE is 24 bits not 32,
+	SP_REGNUM and FP_REGNUM are different, also no lar or lir.
+	* config/mn10200/mn10200.mt: new
+
 Tue Jan 21 18:32:23 1997  Stu Grossman  (grossman@lisa.cygnus.com)
 
 	* configure.in configure:  Check if host has libdl if doing
