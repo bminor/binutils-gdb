@@ -281,6 +281,7 @@ DESCRIPTION
 .#define bfd_mach_fr400		400
 .#define bfd_mach_frvtomcat	499	{* fr500 prototype *}
 .#define bfd_mach_fr500		500
+.#define bfd_mach_fr550		550
 .  bfd_arch_mcore,
 .  bfd_arch_ia64,      {* HP/Intel ia64 *}
 .#define bfd_mach_ia64_elf64	64

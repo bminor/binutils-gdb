@@ -1,3 +1,11 @@
+2003-10-08  Dave Brolley  <brolley@redhat.com>
+	On behalf of Michael Snyder  <msnyder@redhat.com>
+
+	* archures.c: Add FRV fr550 machine.
+	* cpu-frv.c: Ditto.
+	* elf32-frv.c: Ditto.
+	* bfd-in2.h: Regenerate.
+
 2003-10-08  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* elfxx-mips.c (STUB_MOVE,STUB_LI16): Fix stub code
