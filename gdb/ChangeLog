@@ -1,3 +1,8 @@
+2004-02-16  Andrew Cagney  <cagney@redhat.com>
+
+	* arm-tdep.c (arm_set_call_dummy_breakpoint_offset): Delete unused
+	function.
+
 2004-02-16  Daniel Jacobowitz  <drow@mvista.com>
 
 	* objfiles.c (terminate_minimal_symbol_table): Remove unnecessary

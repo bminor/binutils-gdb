@@ -1201,25 +1201,6 @@ static LONGEST arm_call_dummy_words[] =
   0xe1a0e00f, 0xe1a0f004, 0xe7ffdefe
 };
 
-/* Adjust the call_dummy_breakpoint_offset for the bp_call_dummy
-   breakpoint to the proper address in the call dummy, so that
-   `finish' after a stop in a call dummy works.
-
-   FIXME rearnsha 2002-02018: Tweeking current_gdbarch is not an
-   optimal solution, but the call to arm_fix_call_dummy is immediately
-   followed by a call to call_function_by_hand, which is the only
-   function where call_dummy_breakpoint_offset is actually used.  */
-
-
-static void
-arm_set_call_dummy_breakpoint_offset (void)
-{
-  if (caller_is_thumb)
-    set_gdbarch_deprecated_call_dummy_breakpoint_offset (current_gdbarch, 4);
-  else
-    set_gdbarch_deprecated_call_dummy_breakpoint_offset (current_gdbarch, 8);
-}
-
 /* When arguments must be pushed onto the stack, they go on in reverse
    order.  The code below implements a FILO (stack) to do this.  */
 
