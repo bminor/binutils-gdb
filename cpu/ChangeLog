@@ -1,3 +1,7 @@
+2003-10-06  Dave Brolley  <brolley@redhat.com>
+
+	* frv.cpu, frv.opc: Add support for fr550.
+
 2003-09-24  Dave Brolley  <brolley@redhat.com>
 
 	* frv.cpu (u-commit): New modelling unit for fr500.

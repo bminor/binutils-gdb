@@ -28,7 +28,7 @@
   (name frv) ; name of cpu architecture
   (comment "Fujitsu FRV")
   (insn-lsb0? #t)
-  (machs frv fr500 fr400 tomcat simple)
+  (machs frv fr550 fr500 fr400 tomcat simple)
   (isas frv)
 )
 
@@ -38,7 +38,7 @@
   ; Initial bitnumbers to decode insns by.
   (decode-assist (24 23 22 21 20 19 18))
   (liw-insns 1)       ; The frv fetches  up to 1 insns at a time.
-  (parallel-insns 4)  ; The frv executes up to 4 insns at a time.
+  (parallel-insns 8)  ; The frv executes up to 8 insns at a time.
 )
 
 ; Cpu family definitions.
@@ -77,6 +77,428 @@
 	)
 )
 
+; FR550 machine
+(define-mach
+  (name fr550)
+  (comment "FR550 cpu")
+  (cpu frvbf)
+)
+(define-model
+  (name fr550) (comment "FR550 model") (attrs)
+  (mach fr550)
+
+  (pipeline all "" () ((fetch) (decode) (execute) (writeback)))
+
+  ; `state' is a list of variables for recording model state
+  (state
+   ; State items
+   ; These are all masks with each bit representing one register.
+   (prev-fr-load      DI) ; Previous use of FR  register was target of a load
+   (prev-fr-complex-1 DI) ; Previous use of FR  register has variable latency
+   (prev-fr-complex-2 DI) ; Previous use of FR  register has variable latency
+   (prev-ccr-complex  DI) ; Previous use of CCR register has variable latency
+   (prev-acc-mmac     DI) ; Previous use of ACC register was a MMAC category
+   (cur-fr-load       DI) ; Current  use of FR  register was target of a load
+   (cur-fr-complex-1  DI) ; Current  use of FR  register has variable latency
+   (cur-fr-complex-2  DI) ; Current  use of FR  register has variable latency
+   (cur-ccr-complex   SI) ; Current  use of CCR register has variable latency
+   (cur-acc-mmac      DI) ; Current  use of ACC register was a MMAC category
+  )
+  ; Basic unit for instructions with no latency penalties
+  (unit u-exec "Execution Unit" ()
+	1 1 ; issue done
+	() ; state
+	() ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  ; Basic integer insn unit
+  (unit u-integer "Integer Unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRi INT -1) (GRj INT -1)) ; inputs
+	((GRk INT -1) (ICCi_1 INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; Integer multiplication unit
+  (unit u-imul "Integer Multiplication Unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRi INT -1) (GRj INT -1)) ; inputs
+	((GRdoublek INT -1) (ICCi_1 INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; Integer division unit
+  (unit u-idiv "Integer Division Unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRi INT -1) (GRj INT -1)) ; inputs
+	((GRk INT -1) (ICCi_1 INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; Branch unit
+  (unit u-branch "Branch Unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRi INT -1) (GRj INT -1)
+	 (ICCi_2 INT -1) (FCCi_2 INT -1)) ; inputs
+	((pc)) ; outputs
+	() ; profile action (default)
+	)
+  ; Trap unit
+  (unit u-trap "Trap Unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRi INT -1) (GRj INT -1)
+	 (ICCi_2 INT -1) (FCCi_2 INT -1)) ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  ; Condition code check unit
+  (unit u-check "Check Unit" ()
+	1 1 ; issue done
+	() ; state
+	((ICCi_3 INT -1) (FCCi_3 INT -1)) ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  ; Float Arithmetic unit
+  (unit u-float-arith "Float Arithmetic unit" ()
+	1 1 ; issue done
+	() ; state
+	((FRi INT -1) (FRj INT -1) ; inputs
+	 (FRdoublei INT -1) (FRdoublej INT -1)) ; inputs
+	((FRk INT -1) (FRdoublek INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; Float Dual Arithmetic unit
+  (unit u-float-dual-arith "Float Arithmetic unit" ()
+	; This unit has a 2 cycle penalty -- see table 14-14 in the fr550 LSI
+	1 3 ; issue done
+	() ; state
+	((FRi INT -1) (FRj INT -1) ; inputs
+	 (FRdoublei INT -1) (FRdoublej INT -1)) ; inputs
+	((FRk INT -1) (FRdoublek INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; Float Div unit
+  (unit u-float-div "Float Div unit" ()
+	1 1 ; issue done
+	() ; state
+	((FRi INT -1) (FRj INT -1)) ; inputs
+	((FRk INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; Float Square Root unit
+  (unit u-float-sqrt "Float Square Root unit" ()
+	1 1 ; issue done
+	() ; state
+	((FRj INT -1) (FRdoublej INT -1)) ; inputs
+	((FRk INT -1) (FRdoublek INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; Float Compare unit
+  (unit u-float-compare "Float Compare unit" ()
+	1 1 ; issue done
+	() ; state
+	((FRi INT -1) (FRj INT -1)
+	 (FRdoublei INT -1) (FRdoublej INT -1)) ; inputs
+	((FCCi_2 INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; Dual Float Compare unit
+  (unit u-float-dual-compare "Float Dual Compare unit" ()
+	; This unit has a 2 cycle penalty -- see table 14-14 in the fr550 LSI
+	1 3 ; issue done
+	() ; state
+	((FRi INT -1) (FRj INT -1)) ; inputs
+	((FCCi_2 INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; FR Move to GR unit
+  (unit u-fr2gr "FR Move to GR Unit" ()
+	1 1 ; issue done
+	() ; state
+	((FRintk INT -1)) ; inputs
+	((GRj INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; GR Move to FR unit
+  (unit u-gr2fr "GR Move to FR Unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRj INT -1)) ; inputs
+	((FRintk INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; SPR Move to GR unit
+  (unit u-spr2gr "SPR Move to GR Unit" ()
+	1 1 ; issue done
+	() ; state
+	((spr INT -1)) ; inputs
+	((GRj INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; GR Move to SPR unit
+  (unit u-gr2spr "GR Move to SPR Unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRj INT -1)) ; inputs
+	((spr INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; GR set half unit
+  (unit u-set-hilo "GR Set Half" ()
+	1 1 ; issue done
+	() ; state
+	() ; inputs
+	((GRkhi INT -1) (GRklo INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; GR load unit
+  (unit u-gr-load "GR Load Unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRi INT -1) (GRj INT -1)) ; inputs
+	((GRk INT -1) (GRdoublek INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; GR store unit
+  (unit u-gr-store "GR Store Unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRi INT -1) (GRj INT -1) (GRk INT -1) (GRdoublek INT -1)) ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  ; FR load unit
+  (unit u-fr-load "FR Load Unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRi INT -1) (GRj INT -1)) ; inputs
+	((FRintk INT -1) (FRdoublek INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; FR store unit
+  (unit u-fr-store "FR Store Unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRi INT -1) (GRj INT -1) (FRintk INT -1) (FRdoublek INT -1)) ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  ; Swap unit
+  (unit u-swap "Swap Unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRi INT -1) (GRj INT -1)) ; inputs
+	((GRk INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; FR Move to FR unit
+  (unit u-fr2fr "FR Move to FR Unit" ()
+	1 1 ; issue done
+	() ; state
+	((FRi INT -1)) ; inputs
+	((FRk INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; Clrgr unit
+  (unit u-clrgr "Clrgr Unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRk INT -1)) ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  ; Clrfr unit
+  (unit u-clrfr "Clrfr Unit" ()
+	1 1 ; issue done
+	() ; state
+	((FRk INT -1)) ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  ; Insn cache invalidate unit
+  (unit u-ici "Insn cache invalidate unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRi INT -1) (GRj INT -1)) ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  ; Data cache invalidate unit
+  (unit u-dci "Data cache invalidate unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRi INT -1) (GRj INT -1)) ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  ; Data cache flush unit
+  (unit u-dcf "Data cache flush unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRi INT -1) (GRj INT -1)) ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  ; Insn cache preload unit
+  (unit u-icpl "Insn cache preload unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRi INT -1) (GRj INT -1)) ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  ; Data cache preload unit
+  (unit u-dcpl "Data cache preload unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRi INT -1) (GRj INT -1)) ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  ; Insn cache unlock unit
+  (unit u-icul "Insn cache unlock unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRi INT -1) (GRj INT -1)) ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  ; Data cache unlock unit
+  (unit u-dcul "Data cache unlock unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRi INT -1) (GRj INT -1)) ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  ; commit unit
+  (unit u-commit "Commit Unit" ()
+	1 1 ; issue done
+	() ; state
+	((GRk INT -1) (FRk INT -1)) ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  ; Float Conversion unit
+  (unit u-float-convert "Float Conversion unit" ()
+	1 1 ; issue done
+	() ; state
+	((FRj INT -1) (FRintj INT -1) (FRdoublej INT -1)) ; inputs
+	((FRk INT -1) (FRintk INT -1) (FRdoublek INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  ; Media units
+  (unit u-media "Media unit" ()
+	1 1 ; issue done
+	() ; state
+	((FRinti INT -1) (FRintj INT -1)) ; inputs
+	((FRintk INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  (unit u-media-quad "Media-quad unit" ()
+	1 1 ; issue done
+	() ; state
+	((FRintieven INT -1) (FRintjeven INT -1)) ; inputs
+	((FRintkeven INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  (unit u-media-dual-expand "Media Dual Expand unit" ()
+	1 1 ; issue done
+	() ; state
+	((FRinti INT -1)) ; inputs
+	((FRintkeven INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  (unit u-media-3-dual "Media-3-dual unit" ()
+	1 1 ; issue done
+	() ; state
+	((FRinti INT -1)) ; inputs
+	((FRintk INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  (unit u-media-3-acc "Media unit for M-3 using ACC" ()
+	1 1 ; issue done
+	() ; state
+	((FRintj INT -1) (ACC40Si INT -1)) ; inputs
+	((FRintk INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  (unit u-media-3-acc-dual "Media-3-acc-dual unit" ()
+	1 1 ; issue done
+	() ; state
+	((ACC40Si INT -1)) ; inputs
+	((FRintkeven INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  (unit u-media-3-wtacc "Media-3-wtacc unit" ()
+	1 1 ; issue done
+	() ; state
+	((FRinti INT -1) (ACC40Sk INT -1)) ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  (unit u-media-3-mclracc "Media-3-mclracc unit" ()
+	1 1 ; issue done
+	() ; state
+	() ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+  (unit u-media-set "Media set" ()
+	1 1 ; issue done
+	() ; state
+	() ; inputs
+	((FRintk INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  (unit u-media-4 "Media-4 unit" ()
+	1 1 ; issue done
+	() ; state
+	((FRinti INT -1) (FRintj INT -1)) ; inputs
+	((ACC40Sk INT -1) (ACC40Uk INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  (unit u-media-4-acc "Media-4-acc unit" ()
+	1 1 ; issue done
+	() ; state
+	((ACC40Si INT -1)) ; inputs
+	((ACC40Sk INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  (unit u-media-4-acc-dual "Media-4-acc-dual unit" ()
+	1 1 ; issue done
+	() ; state
+	((ACC40Si INT -1)) ; inputs
+	((ACC40Sk INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  (unit u-media-4-add-sub "Media-4-add-sub unit" ()
+	1 1 ; issue done
+	() ; state
+	((ACC40Si INT -1)) ; inputs
+	((ACC40Sk INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  (unit u-media-4-add-sub-dual "Media-4-add-sub-dual unit" ()
+	1 1 ; issue done
+	() ; state
+	((ACC40Si INT -1)) ; inputs
+	((ACC40Sk INT -1)) ; outputs
+	() ; profile action (default)
+	)
+  (unit u-media-4-quad "Media-4-quad unit" ()
+	1 1 ; issue done
+	() ; state
+	((FRintieven INT -1) (FRintjeven INT -1)) ; inputs
+	((ACC40Sk INT -1) (ACC40Uk INT -1)) ; outputs
+	() ; profile action (default)
+	)
+)
+
 ; FR500 machine.
 (define-mach
   (name fr500)
@@ -961,8 +1383,8 @@
   ; Keep the '01' variant immediately after the '1' variant in each unit.
   ; Keep the 'ALL' variations immediately after the last numbered variant in each unit.
   (values NIL
-	  I0 I1 I01 IALL
-	  FM0 FM1 FM01 FMALL FMLOW
+	  I0 I1 I01 I2 I3 IALL
+	  FM0 FM1 FM01 FM2 FM3 FMALL FMLOW
 	  B0 B1 B01
 	  C
 	  MULT-DIV ; multiply/division slotted differently on different machines
@@ -1003,6 +1425,21 @@
 	  C-1 C-2
 	  F-1 F-2 F-3 F-4 F-5 F-6 F-7 F-8
 	  M-1 M-2 M-3 M-4 M-5 M-6 M-7 M-8
+  )
+)
+(define-attr
+  (for insn)
+  (type enum)
+  (name FR550-MAJOR)
+  (comment "fr550 major insn categories")
+  ; The order of declaration is significant. Keep variations on the same major
+  ; together.
+  (values NONE
+	  I-1 I-2 I-3 I-4 I-5 I-6 I-7 I-8
+	  B-1 B-2 B-3 B-4 B-5 B-6
+	  C-1 C-2
+	  F-1 F-2 F-3 F-4
+	  M-1 M-2 M-3 M-4 M-5
   )
 )
 ; Privileged insn
@@ -1610,7 +2047,7 @@
    (hsr56     72) (hsr57     73) (hsr58     74) (hsr59     75)
    (hsr60     76) (hsr61     77) (hsr62     78) (hsr63     79)
 
-   (ccr      256) (cccr     263) (lr       272) (lcr      273) (isr      288)
+   (ccr      256) (cccr     263) (lr       272) (lcr      273) (iacc0h   280) (iacc0l   281) (isr      288)
 
    (neear0   352) (neear1   353) (neear2   354) (neear3   355)
    (neear4   356) (neear5   357) (neear6   358) (neear7   359)
@@ -1955,6 +2392,8 @@
 (define-pmacro (spr-bpcsr) (reg h-spr   2))
 (define-pmacro (spr-lr)    (reg h-spr 272))
 (define-pmacro (spr-lcr)   (reg h-spr 273))
+(define-pmacro (spr-iacc0h) (reg h-spr 280))
+(define-pmacro (spr-iacc0l) (reg h-spr 281))
 (define-pmacro (spr-sr0)   (reg h-spr 768))
 (define-pmacro (spr-sr1)   (reg h-spr 769))
 (define-pmacro (spr-sr2)   (reg h-spr 770))
@@ -2062,6 +2501,31 @@
 			       (add index 1472)) (and (srl newval 32) #xff))
 		 (set (raw-reg UWI h-spr
 			       (add index 1408)) (trunc USI newval))))
+)
+; 64-bit signed accumulator.  Composed of iacc0h and iacc0l registers
+; concatenated, but referenced more often as the composed 64 bits.
+(define-keyword
+  ; This is totally hokey -- I have to have an index!
+  (name iacc0-names)
+  (print-name h-iacc0)
+  (prefix "")
+  (values (iacc0 0))
+)
+
+(define-hardware
+  (name h-iacc0)
+  (comment "64 bit signed accumulator")
+  (attrs PROFILE VIRTUAL (MACH fr400))
+  (type register DI (1))
+  (indices extern-keyword iacc0-names)
+  ; The single 64-bit integer accumulator is made up of two 32 bit
+  ; registers, iacc0h and iacc0l.  We want to extract this as a
+  ; combined 64 signed bits.
+  (get (idx) (or DI (sll DI (ext DI (spr-iacc0h)) 32) (zext DI (spr-iacc0l))))
+  (set (idx newval)
+       (sequence ()
+		 (set (spr-iacc0h) (trunc SI (srl newval 32)))
+		 (set (spr-iacc0l) (trunc SI newval))))
 )
 
 ; Integer condition code registers (CCR)
@@ -2506,12 +2970,12 @@
 (define-pmacro (int-logic-r-r name operation op ope comment)
   (dni name
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
        (.str name "$pack $GRi,$GRj,$GRk")
        (+ pack GRk op GRi (ICCi_1-null) ope GRj)
        (set GRk (operation GRi GRj))
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
@@ -2523,17 +2987,17 @@
 
 (dni not
      ("not")
-     ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+     ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
      ("not$pack $GRj,$GRk")
      (+ pack GRk OP_01 (rs-null) (ICCi_1-null) OPE2_06 GRj)
      (set GRk (inv GRj))
      ((fr400 (unit u-integer))
-      (fr500 (unit u-integer)))
+      (fr500 (unit u-integer)) (fr550 (unit u-integer)))
 )
 
 (dni sdiv
      "signed division"
-     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR550-MAJOR I-2) (FR400-MAJOR I-1))
      "sdiv$pack $GRi,$GRj,$GRk"
      (+ pack GRk OP_00 GRi (ICCi_1-null) OPE2_0E GRj)
      (sequence ()
@@ -2541,13 +3005,13 @@
 		       GRi GRj (index-of GRk) 0)
 	       (clobber GRk))
      ((fr400 (unit u-idiv))
-      (fr500 (unit u-idiv)))
+      (fr500 (unit u-idiv)) (fr550 (unit u-idiv)))
 )
 
 (dni nsdiv
      "non excepting signed division"
-     ((UNIT MULT-DIV) (FR500-MAJOR I-1) NON-EXCEPTING
-      (MACH simple,tomcat,fr500,frv))
+     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR550-MAJOR I-2) NON-EXCEPTING
+      (MACH simple,tomcat,fr500,fr550,frv))
      "nsdiv$pack $GRi,$GRj,$GRk"
      (+ pack GRk OP_01 GRi (ICCi_1-null) OPE2_0E GRj)
      (sequence ()
@@ -2555,12 +3019,12 @@
 		       GRi GRj (index-of GRk) 1)
 	       (clobber GRk))
      ((fr400 (unit u-idiv))
-      (fr500 (unit u-idiv)))
+      (fr500 (unit u-idiv)) (fr550 (unit u-idiv)))
 )
 
 (dni udiv
      "unsigned division reg/reg"
-     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR550-MAJOR I-2) (FR400-MAJOR I-1))
      "udiv$pack $GRi,$GRj,$GRk"
      (+ pack GRk OP_00 GRi (ICCi_1-null) OPE2_0F GRj)
      (sequence ()
@@ -2568,13 +3032,13 @@
 		       GRi GRj (index-of GRk) 0)
 	       (clobber GRk))
      ((fr400 (unit u-idiv))
-      (fr500 (unit u-idiv)))
+      (fr500 (unit u-idiv)) (fr550 (unit u-idiv)))
 )
 
 (dni nudiv
      "non excepting unsigned division"
-     ((UNIT MULT-DIV) (FR500-MAJOR I-1) NON-EXCEPTING
-      (MACH simple,tomcat,fr500,frv))
+     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR550-MAJOR I-2) NON-EXCEPTING
+      (MACH simple,tomcat,fr500,fr550,frv))
      "nudiv$pack $GRi,$GRj,$GRk"
      (+ pack GRk OP_01 GRi (ICCi_1-null) OPE2_0F GRj)
      (sequence ()
@@ -2582,7 +3046,7 @@
 		       GRi GRj (index-of GRk) 1)
 	       (clobber GRk))
      ((fr400 (unit u-idiv))
-      (fr500 (unit u-idiv)))
+      (fr500 (unit u-idiv)) (fr550 (unit u-idiv)))
 )
 
 ; Multiplication
@@ -2590,33 +3054,102 @@
 (define-pmacro (multiply-r-r name signop op ope comment)
   (dni name
        (comment)
-       ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+       ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR550-MAJOR I-2) (FR400-MAJOR I-1))
        (.str name "$pack $GRi,$GRj,$GRdoublek")
        (+ pack GRdoublek op GRi (ICCi_1-null) ope GRj) 
        (set GRdoublek (mul DI (signop DI GRi) (signop DI GRj)))
        ((fr400 (unit u-imul))
-	(fr500 (unit u-imul)))
+	(fr500 (unit u-imul)) (fr550 (unit u-imul)))
   )
 )
 
 (multiply-r-r smul ext  OP_00 OPE2_08 "signed   multiply reg/reg")
 (multiply-r-r umul zext OP_00 OPE2_0A "unsigned multiply reg/reg")
 
+; Multiplication with integer accumulator IACC
+;
+
+(define-pmacro (iacc-set value) 
+  (set (reg h-iacc0 0) value))
+
+(define-pmacro (iacc-add value) 
+  (set (reg h-iacc0 0)
+       (cond DI
+	     ((andif (andif (gt value 0) (gt (reg h-iacc0 0) 0))
+		     (lt (sub DI #x7fffffffffffffff value) (reg h-iacc0 0)))
+	      ; Positive overflow
+	      (const DI #x7fffffffffffffff))
+	     ((andif (andif (lt value 0) (lt (reg h-iacc0 0) 0))
+		     (gt (sub DI #x8000000000000000 value) (reg h-iacc0 0)))
+	      ; Negative overflow
+	      (const DI #x8000000000000000))
+	     (else
+	      (add DI (reg h-iacc0 0) value))))
+)
+
+(define-pmacro (iacc-sub value) 
+  (set (reg h-iacc0 0)
+       (cond DI
+	     ((andif (andif (lt value 0) (gt (reg h-iacc0 0) 0))
+		     (lt (add DI #x7fffffffffffffff value) (reg h-iacc0 0)))
+	      ; Positive overflow
+	      (const DI #x7fffffffffffffff))
+	     ((andif (andif (gt value 0) (lt (reg h-iacc0 0) 0))
+		     (gt (add DI #x8000000000000000 value) (reg h-iacc0 0)))
+	      ; Negative overflow
+	      (const DI #x8000000000000000))
+	     (else
+	      (sub DI (reg h-iacc0 0) value))))
+)
+
+(define-pmacro (iacc-multiply-r-r name operation op ope comment)
+  (dni name
+       (comment)
+       ((UNIT MULT-DIV) (FR400-MAJOR I-1) (MACH fr400))
+       (.str name "$pack $GRi,$GRj")
+       (+ pack (rd-null) op GRi ope GRj)
+       ((.sym iacc- operation) (mul DI (ext DI GRi) (ext DI GRj)))
+       ((fr400 (unit u-integer)))
+  )
+)
+
+(iacc-multiply-r-r smu   set OP_46 OPE1_05 "Signed multiply     reg/reg/iacc")
+(iacc-multiply-r-r smass add OP_46 OPE1_06 "Signed multiply/add reg/reg/iacc")
+(iacc-multiply-r-r smsss sub OP_46 OPE1_07 "Signed multiply/sub reg/reg/iacc")
+
 (define-pmacro (int-shift-r-r name op ope comment)
   (dni name
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
        (.str name "$pack $GRi,$GRj,$GRk")
        (+ pack GRk op GRi (ICCi_1-null) ope GRj)
        (set GRk (name GRi (and GRj #x1f)))
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
 (int-shift-r-r sll OP_01 OPE2_08 "shift left  logical reg/reg")
 (int-shift-r-r srl OP_01 OPE2_0A "shift right logical reg/reg")
 (int-shift-r-r sra OP_01 OPE2_0C "shift right arith   reg/reg")
+
+(dni slass
+     "shift left arith reg/reg with saturation"
+     ((UNIT IALL) (FR400-MAJOR I-1) (MACH fr400))
+     "slass$pack $GRi,$GRj,$GRk"
+     (+ pack GRk OP_46 GRi OPE1_02 GRj)
+     (set GRk (c-call SI "@cpu@_shift_left_arith_saturate" GRi GRj))
+     ()
+)
+
+(dni scutss
+     "Integer accumulator cut with saturation"
+     ((UNIT IALL) (FR400-MAJOR I-1) (MACH fr400))
+     "scutss$pack $GRj,$GRk"
+     (+ pack GRk OP_46 (rs-null) OPE1_04 GRj)
+     (set GRk (c-call SI "@cpu@_iacc_cut" (reg h-iacc0 0) GRj))
+     ()
+)
 
 (define-pmacro (scan-semantics arg1 arg2 targ)
   (sequence ((WI tmp1) (WI tmp2))
@@ -2627,12 +3160,12 @@
 
 (dni scan
      "scan"
-     ((UNIT SCAN) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+     ((UNIT SCAN) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
      "scan$pack $GRi,$GRj,$GRk"
      (+ pack GRk OP_0B GRi (ICCi_1-null) OPE2_00 GRj)
      (scan-semantics GRi GRj GRk)
      ((fr400 (unit u-integer))
-      (fr500 (unit u-integer)))
+      (fr500 (unit u-integer)) (fr550 (unit u-integer)))
 )
 
 ; Format: conditional INT, Logic, Shift r-r
@@ -2640,13 +3173,13 @@
 (define-pmacro (conditional-int-logic name operation op ope comment)
   (dni name
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1) CONDITIONAL)
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1) CONDITIONAL)
        (.str name "$pack $GRi,$GRj,$GRk,$CCi,$cond")
        (+ pack GRk op GRi CCi cond ope GRj)
        (if (eq CCi (or cond 2))
 	   (set GRk (operation GRi GRj)))
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
@@ -2658,29 +3191,29 @@
 
 (dni cnot
      "conditional not"
-     ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1) CONDITIONAL)
+     ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1) CONDITIONAL)
      "cnot$pack $GRj,$GRk,$CCi,$cond"
      (+ pack GRk OP_5A (rs-null) CCi cond OPE4_3 GRj)
      (if (eq CCi (or cond 2))
 	 (set GRk (inv GRj)))
      ((fr400 (unit u-integer))
-      (fr500 (unit u-integer)))
+      (fr500 (unit u-integer)) (fr550 (unit u-integer)))
 )
 
 (dni csmul
      "conditional signed multiply"
-     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR400-MAJOR I-1) CONDITIONAL)
+     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR550-MAJOR I-2) (FR400-MAJOR I-1) CONDITIONAL)
      "csmul$pack $GRi,$GRj,$GRdoublek,$CCi,$cond"
      (+ pack GRdoublek OP_58 GRi CCi cond OPE4_2 GRj)
      (if (eq CCi (or cond 2))
 	 (set GRdoublek (mul DI (ext DI GRi) (ext DI GRj))))
      ((fr400 (unit u-imul))
-      (fr500 (unit u-imul)))
+      (fr500 (unit u-imul)) (fr550 (unit u-imul)))
 )
 
 (dni csdiv
      "conditional signed division"
-     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR400-MAJOR I-1) CONDITIONAL)
+     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR550-MAJOR I-2) (FR400-MAJOR I-1) CONDITIONAL)
      "csdiv$pack $GRi,$GRj,$GRk,$CCi,$cond"
      (+ pack GRk OP_58 GRi CCi cond OPE4_3 GRj)
      (if (eq CCi (or cond 2))
@@ -2689,12 +3222,12 @@
 			   GRi GRj (index-of GRk) 0)
 		   (clobber GRk)))
      ((fr400 (unit u-idiv))
-      (fr500 (unit u-idiv)))
+      (fr500 (unit u-idiv)) (fr550 (unit u-idiv)))
 )
 
 (dni cudiv
      "conditional unsigned division"
-     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR400-MAJOR I-1) CONDITIONAL)
+     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR550-MAJOR I-2) (FR400-MAJOR I-1) CONDITIONAL)
      "cudiv$pack $GRi,$GRj,$GRk,$CCi,$cond"
      (+ pack GRk OP_59 GRi CCi cond OPE4_3 GRj)
      (if (eq CCi (or cond 2))
@@ -2703,19 +3236,19 @@
 			   GRi GRj (index-of GRk) 0)
 		   (clobber GRk)))
      ((fr400 (unit u-idiv))
-      (fr500 (unit u-idiv)))
+      (fr500 (unit u-idiv)) (fr550 (unit u-idiv)))
 )
 
 (define-pmacro (conditional-shift name operation op ope comment)
   (dni name
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1) CONDITIONAL)
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1) CONDITIONAL)
        (.str name "$pack $GRi,$GRj,$GRk,$CCi,$cond")
        (+ pack GRk op GRi CCi cond ope GRj)
        (if (eq CCi (or cond 2))
 	   (set GRk (operation GRi (and GRj #x1f))))
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
@@ -2725,13 +3258,13 @@
 
 (dni cscan
      "conditional scan"
-     ((UNIT SCAN) (FR500-MAJOR I-1) (FR400-MAJOR I-1) CONDITIONAL)
+     ((UNIT SCAN) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1) CONDITIONAL)
      "cscan$pack $GRi,$GRj,$GRk,$CCi,$cond"
      (+ pack GRk OP_65 GRi CCi cond OPE4_3 GRj)
      (if (eq CCi (or cond 2))
 	 (scan-semantics GRi GRj GRk))
      ((fr400 (unit u-integer))
-      (fr500 (unit u-integer)))
+      (fr500 (unit u-integer)) (fr550 (unit u-integer)))
 )
 
 ; Format: INT, Logic, Shift, cc r-r
@@ -2752,12 +3285,12 @@
 (define-pmacro (int-arith-cc-r-r name operation op ope comment)
   (dni name
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
        (.str name "$pack $GRi,$GRj,$GRk,$ICCi_1")
        (+ pack GRk op GRi ICCi_1 ope GRj)
        (int-arith-cc-semantics operation ICCi_1)
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
@@ -2774,12 +3307,12 @@
 (define-pmacro (int-logic-cc-r-r name op ope comment)
   (dni (.sym name cc)
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
        (.str (.sym name cc) "$pack $GRi,$GRj,$GRk,$ICCi_1")
        (+ pack GRk op GRi ICCi_1 ope GRj)
        (int-logic-cc-semantics name ICCi_1)
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
@@ -2801,12 +3334,12 @@
 (define-pmacro (int-shift-cc-r-r name l-r op ope comment)
   (dni (.sym name cc)
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
        (.str (.sym name cc) "$pack $GRi,$GRj,$GRk,$ICCi_1")
        (+ pack GRk op GRi ICCi_1 ope GRj)
        (int-shift-cc-semantics name l-r ICCi_1)
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
@@ -2827,12 +3360,12 @@
 (define-pmacro (multiply-cc-r-r name signop op ope comment)
   (dni name
        (comment)
-       ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+       ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR550-MAJOR I-2) (FR400-MAJOR I-1))
        (.str name "$pack $GRi,$GRj,$GRdoublek,$ICCi_1")
        (+ pack GRdoublek op GRi ICCi_1 ope GRj)
        (multiply-cc-semantics signop GRi GRj GRdoublek ICCi_1)
        ((fr400 (unit u-imul))
-	(fr500 (unit u-imul)))
+	(fr500 (unit u-imul)) (fr550 (unit u-imul)))
   )
 )
 
@@ -2845,14 +3378,14 @@
 (define-pmacro (conditional-int-arith-cc name operation op ope comment)
   (dni name
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1) CONDITIONAL)
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1) CONDITIONAL)
        (.str name "$pack $GRi,$GRj,$GRk,$CCi,$cond")
        (+ pack GRk op GRi CCi cond ope GRj)
        (if (eq CCi (or cond 2))
 	   (int-arith-cc-semantics operation
 				   (reg h-iccr (and (index-of CCi) 3))))
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
@@ -2861,27 +3394,27 @@
 
 (dni csmulcc
      "conditional signed multiply and set condition code"
-     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR400-MAJOR I-1) CONDITIONAL)
+     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR550-MAJOR I-2) (FR400-MAJOR I-1) CONDITIONAL)
      "csmulcc$pack $GRi,$GRj,$GRdoublek,$CCi,$cond"
      (+ pack GRdoublek OP_59 GRi CCi cond OPE4_2 GRj)
      (if (eq CCi (or cond 2))
 	 (multiply-cc-semantics ext GRi GRj GRdoublek
 				(reg h-iccr (and (index-of CCi) 3))))
      ((fr400 (unit u-imul))
-      (fr500 (unit u-imul)))
+      (fr500 (unit u-imul)) (fr550 (unit u-imul)))
 )
 
 (define-pmacro (conditional-int-logic-cc name operation op ope comment)
   (dni name
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1) CONDITIONAL)
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1) CONDITIONAL)
        (.str name "$pack $GRi,$GRj,$GRk,$CCi,$cond")
        (+ pack GRk op GRi CCi cond ope GRj)
        (if (eq CCi (or cond 2))
 	   (int-logic-cc-semantics operation
 				   (reg h-iccr (and (index-of CCi) 3))))
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
@@ -2892,14 +3425,14 @@
 (define-pmacro (conditional-int-shift-cc name l-r op ope comment)
   (dni (.sym c name cc)
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1) CONDITIONAL)
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1) CONDITIONAL)
        (.str (.sym c name cc) "$pack $GRi,$GRj,$GRk,$CCi,$cond")
        (+ pack GRk op GRi CCi cond ope GRj)
        (if (eq CCi (or cond 2))
 	   (int-shift-cc-semantics name l-r
 				   (reg h-iccr (and (index-of CCi) 3))))
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
@@ -2912,12 +3445,12 @@
 (define-pmacro (int-arith-x-r-r name operation op ope comment)
   (dni name
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
        (.str name "$pack $GRi,$GRj,$GRk,$ICCi_1")
        (+ pack GRk op GRi ICCi_1 ope GRj)
        (set GRk ((.sym operation c) GRi GRj (cbit ICCi_1)))
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
@@ -2927,7 +3460,7 @@
 (define-pmacro (int-arith-x-cc-r-r name operation op ope comment)
   (dni name
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
        (.str name "$pack $GRi,$GRj,$GRk,$ICCi_1")
        (+ pack GRk op GRi ICCi_1 ope GRj)
        (sequence ((WI tmp) (QI cc))
@@ -2939,24 +3472,50 @@
 		 (set GRk tmp)
 		 (set ICCi_1 cc))
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
 (int-arith-x-cc-r-r addxcc add OP_00 OPE2_03 "Add reg/reg, use/set carry")
 (int-arith-x-cc-r-r subxcc sub OP_00 OPE2_07 "Sub reg/reg, use/set carry")
+; Add and subtract with saturation
+;
+(define-pmacro (int-arith-ss-r-r name operation op ope comment)
+  (dni name
+       (comment)
+       ((UNIT IALL) (FR400-MAJOR I-1) (MACH fr400))
+       (.str name "$pack $GRi,$GRj,$GRk")
+       (+ pack GRk op GRi ope GRj)
+       (sequence ()
+		 (set GRk (operation GRi GRj))
+		 (if ((.sym operation -oflag) GRi GRj (const 0))
+					; Overflow, saturate.
+					; Sign of result will be
+					; same as sign of first operand.
+		     (set GRk
+			  (cond SI
+				((gt GRi 0) (const #x7fffffff))
+				((lt GRi 0) (const #x80000000))
+				(else (const 0)))))
+       )
+       ((fr400 (unit u-integer)))
+  )
+)
+
+(int-arith-ss-r-r addss add OP_46 OPE1_00 "add reg/reg, with saturation")
+(int-arith-ss-r-r subss sub OP_46 OPE1_01 "sub reg/reg, with saturation")
 
 ; Format: INT, Logic, Shift r-simm
 ;
 (define-pmacro (int-logic-r-simm name operation op comment)
   (dni name
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
        (.str name "$pack $GRi,$s12,$GRk")
        (+ pack GRk op GRi s12)
        (set GRk (operation GRi s12))
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
@@ -2968,7 +3527,7 @@
 
 (dni sdivi
      "signed division reg/immed"
-     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR550-MAJOR I-2) (FR400-MAJOR I-1))
      "sdivi$pack $GRi,$s12,$GRk"
      (+ pack GRk OP_1E GRi s12)
      (sequence ()
@@ -2976,13 +3535,13 @@
 		       GRi s12 (index-of GRk) 0)
 	       (clobber GRk))
      ((fr400 (unit u-idiv))
-      (fr500 (unit u-idiv)))
+      (fr500 (unit u-idiv)) (fr550 (unit u-idiv)))
 )
 
 (dni nsdivi
      "non excepting signed division reg/immed"
-     ((UNIT MULT-DIV) (FR500-MAJOR I-1) NON-EXCEPTING
-      (MACH simple,tomcat,fr500,frv))
+     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR550-MAJOR I-2) NON-EXCEPTING
+      (MACH simple,tomcat,fr500,fr550,frv))
      "nsdivi$pack $GRi,$s12,$GRk"
      (+ pack GRk OP_2E GRi s12)
      (sequence ()
@@ -2990,12 +3549,12 @@
 		       GRi s12 (index-of GRk) 1)
 	       (clobber GRk))
      ((fr400 (unit u-idiv))
-      (fr500 (unit u-idiv)))
+      (fr500 (unit u-idiv)) (fr550 (unit u-idiv)))
 )
 
 (dni udivi
      "unsigned division reg/immed"
-     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR550-MAJOR I-2) (FR400-MAJOR I-1))
      "udivi$pack $GRi,$s12,$GRk"
      (+ pack GRk OP_1F GRi s12)
      (sequence ()
@@ -3003,13 +3562,13 @@
 		       GRi s12 (index-of GRk) 0)
 	       (clobber GRk))
      ((fr400 (unit u-idiv))
-      (fr500 (unit u-idiv)))
+      (fr500 (unit u-idiv)) (fr550 (unit u-idiv)))
 )
 
 (dni nudivi
      "non excepting unsigned division reg/immed"
-     ((UNIT MULT-DIV) (FR500-MAJOR I-1) NON-EXCEPTING
-      (MACH simple,tomcat,fr500,frv))
+     ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR550-MAJOR I-2) NON-EXCEPTING
+      (MACH simple,tomcat,fr500,fr550,frv))
      "nudivi$pack $GRi,$s12,$GRk"
      (+ pack GRk OP_2F GRi s12)
      (sequence ()
@@ -3017,18 +3576,18 @@
 		       GRi s12 (index-of GRk) 1)
 	       (clobber GRk))
      ((fr400 (unit u-idiv))
-      (fr500 (unit u-idiv)))
+      (fr500 (unit u-idiv)) (fr550 (unit u-idiv)))
 )
 
 (define-pmacro (multiply-r-simm name signop op comment)
   (dni name
        (comment)
-       ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+       ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR550-MAJOR I-2) (FR400-MAJOR I-1))
        (.str name "$pack $GRi,$s12,$GRdoublek")
        (+ pack GRdoublek op GRi s12)
        (set GRdoublek (mul DI (signop DI GRi) (signop DI s12)))
        ((fr400 (unit u-imul))
-	(fr500 (unit u-imul)))
+	(fr500 (unit u-imul)) (fr550 (unit u-imul)))
   )
 )
 
@@ -3038,12 +3597,12 @@
 (define-pmacro (int-shift-r-simm name op comment)
   (dni (.sym name i)
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
        (.str (.sym name i) "$pack $GRi,$s12,$GRk")
        (+ pack GRk op GRi s12)
        (set GRk (name GRi (and s12 #x1f)))
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
@@ -3053,12 +3612,12 @@
 
 (dni scani
      "scan immediate"
-     ((UNIT SCAN) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+     ((UNIT SCAN) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
      "scani$pack $GRi,$s12,$GRk"
      (+ pack GRk OP_47 GRi s12)
      (scan-semantics GRi s12 GRk)
      ((fr400 (unit u-integer))
-      (fr500 (unit u-integer)))
+      (fr500 (unit u-integer)) (fr550 (unit u-integer)))
 )
 
 ; Format: INT, Logic, Shift cc r-simm
@@ -3066,7 +3625,7 @@
 (define-pmacro (int-arith-cc-r-simm name operation op comment)
   (dni name
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
        (.str name "$pack $GRi,$s10,$GRk,$ICCi_1")
        (+ pack GRk op GRi ICCi_1 s10)
        (sequence ((BI tmp) (QI cc) (SI result))
@@ -3080,7 +3639,7 @@
 		 (set GRk result)
 		 (set ICCi_1 cc))
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
@@ -3090,7 +3649,7 @@
 (define-pmacro (int-logic-cc-r-simm name op comment)
   (dni (.sym name icc)
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
        (.str (.sym name icc) "$pack $GRi,$s10,$GRk,$ICCi_1")
        (+ pack GRk op GRi ICCi_1 s10)
        (sequence ((SI tmp))
@@ -3098,7 +3657,7 @@
 		 (set GRk tmp)
 		 (set-z-and-n ICCi_1 tmp))
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
@@ -3109,12 +3668,12 @@
 (define-pmacro (multiply-cc-r-simm name signop op comment)
   (dni name
        (comment)
-       ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+       ((UNIT MULT-DIV) (FR500-MAJOR I-1) (FR550-MAJOR I-2) (FR400-MAJOR I-1))
        (.str name "$pack $GRi,$s10,$GRdoublek,$ICCi_1")
        (+ pack GRdoublek op GRi ICCi_1 s10)
        (multiply-cc-semantics signop GRi s10 GRdoublek ICCi_1)
        ((fr400 (unit u-imul))
-	(fr500 (unit u-imul)))
+	(fr500 (unit u-imul)) (fr550 (unit u-imul)))
   )
 )
 
@@ -3124,7 +3683,7 @@
 (define-pmacro (int-shift-cc-r-simm name l-r op comment)
   (dni (.sym name icc)
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
        (.str (.sym name icc) "$pack $GRi,$s10,$GRk,$ICCi_1")
        (+ pack GRk op GRi ICCi_1 s10)
        (sequence ((WI shift) (SI tmp) (QI cc))
@@ -3136,7 +3695,7 @@
 		 (set-z-and-n cc tmp)
 		 (set ICCi_1 cc))
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
@@ -3147,12 +3706,12 @@
 (define-pmacro (int-arith-x-r-simm name operation op comment)
   (dni name
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
        (.str name "$pack $GRi,$s10,$GRk,$ICCi_1")
        (+ pack GRk op GRi ICCi_1 s10)
        (set GRk ((.sym operation c) GRi s10 (cbit ICCi_1)))
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
@@ -3162,7 +3721,7 @@
 (define-pmacro (int-arith-x-cc-r-simm name operation op comment)
   (dni name
        (comment)
-       ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+       ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
        (.str name "$pack $GRi,$s10,$GRk,$ICCi_1")
        (+ pack GRk op GRi ICCi_1 s10)
        (sequence ((WI tmp) (QI cc))
@@ -3174,7 +3733,7 @@
 		 (set GRk tmp)
 		 (set ICCi_1 cc))
        ((fr400 (unit u-integer))
-	(fr500 (unit u-integer)))
+	(fr500 (unit u-integer)) (fr550 (unit u-integer)))
   )
 )
 
@@ -3185,7 +3744,7 @@
 
 (dni cmpb
      "Compare bytes"
-     ((UNIT IALL) (FR400-MAJOR I-1) (MACH fr400))
+     ((UNIT IALL) (FR400-MAJOR I-1) (FR550-MAJOR I-1) (MACH fr400,fr550))
      "cmpb$pack $GRi,$GRj,$ICCi_1"
      (+ pack (GRk-null) OP_00 GRi ICCi_1 OPE2_0C GRj)
      (sequence ((QI cc))
@@ -3194,12 +3753,12 @@
 	       (set-v cc (eq (and GRi #x0000ff00) (and GRj #x0000ff00)))
 	       (set-c cc (eq (and GRi #x000000ff) (and GRj #x000000ff)))
 	       (set ICCi_1 cc))
-     ((fr400 (unit u-integer)))
+     ((fr400 (unit u-integer)) (fr550 (unit u-integer)))
 )
 
 (dni cmpba
      "OR of Compare bytes"
-     ((UNIT IALL) (FR400-MAJOR I-1) (MACH fr400))
+     ((UNIT IALL) (FR400-MAJOR I-1) (FR550-MAJOR I-1) (MACH fr400,fr550))
      "cmpba$pack $GRi,$GRj,$ICCi_1"
      (+ pack (GRk-null) OP_00 GRi ICCi_1 OPE2_0D GRj)
      (sequence ((QI cc))
@@ -3212,50 +3771,50 @@
 					 (eq (and GRi #x000000ff)
 					    (and GRj #x000000ff))))))
 	       (set ICCi_1 cc))
-     ((fr400 (unit u-integer)))
+     ((fr400 (unit u-integer)) (fr550 (unit u-integer)))
 )
 
 ; Format: Load immediate
 ;
 (dni setlo
      "set low order bits"
-     ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+     ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
      "setlo$pack $ulo16,$GRklo"
      (+ pack GRk OP_3D (misc-null-4) u16)
      (set GRklo u16)
      ((fr400 (unit u-set-hilo))
-      (fr500 (unit u-set-hilo)))
+      (fr500 (unit u-set-hilo)) (fr550 (unit u-set-hilo)))
 )
 
 (dni sethi
      "set high order bits"
-     ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+     ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
      "sethi$pack $uhi16,$GRkhi"
      (+ pack GRkhi OP_3E (misc-null-4) u16)
      (set GRkhi u16)
      ((fr400 (unit u-set-hilo))
-      (fr500 (unit u-set-hilo)))
+      (fr500 (unit u-set-hilo)) (fr550 (unit u-set-hilo)))
 )
 
 (dni setlos
      "set low order bits and extend sign"
-     ((UNIT IALL) (FR500-MAJOR I-1) (FR400-MAJOR I-1))
+     ((UNIT IALL) (FR500-MAJOR I-1) (FR550-MAJOR I-1) (FR400-MAJOR I-1))
      "setlos$pack $slo16,$GRk"
      (+ pack GRk OP_3F (misc-null-4) s16)
      (set GRk s16)
      ((fr400 (unit u-integer))
-      (fr500 (unit u-integer)))
+      (fr500 (unit u-integer)) (fr550 (unit u-integer)))
 )
 
 (define-pmacro (load-gr-r name mode op ope comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) (FR400-MAJOR I-2))
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) (FR400-MAJOR I-2))
        (.str name "$pack @($GRi,$GRj),$GRk")
        (+ pack GRk op GRi ope GRj)
        (set GRk (c-call mode (.str "@cpu@_read_mem_" mode) pc (add GRi GRj)))
        ((fr400 (unit u-gr-load))
-	(fr500 (unit u-gr-load)))
+	(fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
   )
 )
 
@@ -3268,12 +3827,12 @@
 (define-pmacro (load-fr-r name mode op ope comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) (FR400-MAJOR I-2) FR-ACCESS)
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) (FR400-MAJOR I-2) FR-ACCESS)
        (.str name "$pack @($GRi,$GRj),$FRintk")
        (+ pack FRintk op GRi ope GRj)
        (set FRintk (c-call mode (.str "@cpu@_read_mem_" mode) pc (add GRi GRj)))
        ((fr400 (unit u-fr-load))
-	(fr500 (unit u-fr-load)))
+	(fr500 (unit u-fr-load)) (fr550 (unit u-fr-load)))
   )
 )
 
@@ -3316,15 +3875,15 @@
 (define-pmacro (ne-load-gr-r name mode op ope size comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) NON-EXCEPTING
-	(MACH simple,tomcat,fr500,frv))
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) NON-EXCEPTING
+	(MACH simple,tomcat,fr500,fr550,frv))
        (.str name "$pack @($GRi,$GRj),$GRk")
        (+ pack GRk op GRi ope GRj)
        (ne-load-semantics GRi (index-of GRj) GRk 0 size 0
 			  (set GRk
 			       (c-call mode (.str "@cpu@_read_mem_" mode)
 				       pc (add GRi GRj))))
-       ((fr500 (unit u-gr-load)))
+       ((fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
   )
 )
 
@@ -3337,15 +3896,15 @@
 (define-pmacro (ne-load-fr-r name mode op ope size comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) NON-EXCEPTING FR-ACCESS
-	(MACH simple,tomcat,fr500,frv))
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) NON-EXCEPTING FR-ACCESS
+	(MACH simple,tomcat,fr500,fr550,frv))
        (.str name "$pack @($GRi,$GRj),$FRintk")
        (+ pack FRintk op GRi ope GRj)
        (ne-load-semantics GRi (index-of GRj) FRintk 0 size 1
 			  (set FRintk
 			       (c-call mode (.str "@cpu@_read_mem_" mode)
 				       pc (add GRi GRj))))
-       ((fr500 (unit u-fr-load)))
+       ((fr500 (unit u-fr-load)) (fr550 (unit u-fr-load)))
   )
 )
 
@@ -3367,7 +3926,7 @@
 		name not_gr mode op ope regtype attr profile comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) (FR400-MAJOR I-2) attr)
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) (FR400-MAJOR I-2) attr)
        (.str name "$pack @($GRi,$GRj),$" regtype "doublek")
        (+ pack (.sym regtype doublek) op GRi ope GRj)
        (sequence ((WI address))
@@ -3377,10 +3936,10 @@
 )
 
 (load-double-r-r ldd  0 DI OP_02 OPE1_05 GR  NA
-		 ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)))
+		 ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
 		 "Load double word")
 (load-double-r-r lddf 1 DF OP_02 OPE1_0B FR  FR-ACCESS
-		 ((fr400 (unit u-fr-load)) (fr500 (unit u-fr-load)))
+		 ((fr400 (unit u-fr-load)) (fr500 (unit u-fr-load)) (fr550 (unit u-fr-load)))
 		 "Load double float")
 (load-double-r-r lddc 1 DI OP_02 OPE1_0E CPR (MACH frv) ()
 		 "Load coprocessor double")
@@ -3390,8 +3949,8 @@
 		comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) NON-EXCEPTING attr
-	(MACH simple,tomcat,fr500,frv))
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) NON-EXCEPTING attr
+	(MACH simple,tomcat,fr500,fr550,frv))
        (.str name "$pack @($GRi,$GRj),$" regtype "doublek")
        (+ pack (.sym regtype doublek) op GRi ope GRj)
        (sequence ((WI address))
@@ -3405,9 +3964,9 @@
 )
 
 (ne-load-double-r-r nldd  0 DI OP_02 OPE1_25 GR (ne-DI-size) 0 NA
-		    ((fr500 (unit u-gr-load))) "Load double   word")
+		    ((fr500 (unit u-gr-load)) (fr550 (unit u-gr-load))) "Load double   word")
 (ne-load-double-r-r nlddf 1 DF OP_02 OPE1_2B FR (ne-DI-size) 1 FR-ACCESS
-		    ((fr500 (unit u-fr-load))) "Load double float")
+		    ((fr500 (unit u-fr-load)) (fr550 (unit u-fr-load))) "Load double float")
 
 ; Semantics for a load-quad insn
 ;
@@ -3471,12 +4030,12 @@
 (define-pmacro (load-gr-u name mode op ope comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) (FR400-MAJOR I-2))
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) (FR400-MAJOR I-2))
        (.str name "$pack @($GRi,$GRj),$GRk")
        (+ pack GRk op GRi ope GRj)
        (load-gr-u-semantics mode)
        ((fr400 (unit u-gr-load))
-	(fr500 (unit u-gr-load)))
+	(fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
   )
 )
 
@@ -3489,12 +4048,12 @@
 (define-pmacro (ne-load-gr-u name mode op ope size comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) NON-EXCEPTING
-	(MACH simple,tomcat,fr500,frv))
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) NON-EXCEPTING
+	(MACH simple,tomcat,fr500,fr550,frv))
        (.str name "$pack @($GRi,$GRj),$GRk")
        (+ pack GRk op GRi ope GRj)
        (ne-load-semantics GRi (index-of GRj) GRk 0 size 0 (load-gr-u-semantics mode))
-       ((fr500 (unit u-gr-load)))
+       ((fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
   )
 )
 
@@ -3516,12 +4075,12 @@
 (define-pmacro (load-fr-u name mode op ope comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) (FR400-MAJOR I-2) FR-ACCESS)
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) (FR400-MAJOR I-2) FR-ACCESS)
        (.str name "$pack @($GRi,$GRj),$FRintk")
        (+ pack FRintk op GRi ope GRj)
        (load-non-gr-u-semantics mode FRint)
        ((fr400 (unit u-fr-load))
-	(fr500 (unit u-fr-load)))
+	(fr500 (unit u-fr-load)) (fr550 (unit u-fr-load)))
   )
 )
 
@@ -3545,13 +4104,13 @@
 (define-pmacro (ne-load-non-gr-u name mode op ope regtype size comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) NON-EXCEPTING FR-ACCESS
-	(MACH simple,tomcat,fr500,frv))
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) NON-EXCEPTING FR-ACCESS
+	(MACH simple,tomcat,fr500,fr550,frv))
        (.str name "$pack @($GRi,$GRj),$" regtype "k")
        (+ pack (.sym regtype k) op GRi ope GRj)
        (ne-load-semantics GRi (index-of GRj) (.sym regtype k) 0 size 1
 			  (load-non-gr-u-semantics mode regtype))
-       ((fr500 (unit u-fr-load)))
+       ((fr500 (unit u-fr-load)) (fr550 (unit u-fr-load)))
   )
 )
 
@@ -3571,12 +4130,12 @@
 (define-pmacro (load-double-gr-u name op ope comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) (FR400-MAJOR I-2))
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) (FR400-MAJOR I-2))
        (.str name "$pack @($GRi,$GRj),$GRdoublek")
        (+ pack GRdoublek op GRi ope GRj)
        (load-double-gr-u-semantics)
        ((fr400 (unit u-gr-load))
-	(fr500 (unit u-gr-load)))
+	(fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
   )
 )
 
@@ -3585,13 +4144,13 @@
 (define-pmacro (ne-load-double-gr-u name op ope size comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) NON-EXCEPTING
-	(MACH simple,tomcat,fr500,frv))
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) NON-EXCEPTING
+	(MACH simple,tomcat,fr500,fr550,frv))
        (.str name "$pack @($GRi,$GRj),$GRdoublek")
        (+ pack GRdoublek op GRi ope GRj)
        (ne-load-semantics GRi (index-of GRj) GRdoublek 0 size 0
 			  (load-double-gr-u-semantics))
-       ((fr500 (unit u-gr-load)))
+       ((fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
 
   )
 )
@@ -3609,7 +4168,7 @@
 		name mode op ope regtype attr profile comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) (FR400-MAJOR I-2) attr)
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) (FR400-MAJOR I-2) attr)
        (.str name "$pack @($GRi,$GRj),$" regtype "doublek")
        (+ pack (.sym regtype doublek) op GRi ope GRj)
        (load-double-non-gr-u-semantics mode regtype)
@@ -3618,7 +4177,7 @@
 )
 
 (load-double-non-gr-u lddfu DF OP_02 OPE1_1B FR  FR-ACCESS
-		      ((fr400 (unit u-fr-load)) (fr500 (unit u-fr-load)))
+		      ((fr400 (unit u-fr-load)) (fr500 (unit u-fr-load)) (fr550 (unit u-fr-load)))
 		      "Load double float, update index")
 (load-double-non-gr-u lddcu DI OP_02 OPE1_1E CPR (MACH frv)
 		      () "Load coprocessor double float, update index")
@@ -3626,13 +4185,13 @@
 (define-pmacro (ne-load-double-non-gr-u name mode op ope regtype size comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) NON-EXCEPTING FR-ACCESS
-	(MACH simple,tomcat,fr500,frv))
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) NON-EXCEPTING FR-ACCESS
+	(MACH simple,tomcat,fr500,fr550,frv))
        (.str name "$pack @($GRi,$GRj),$" regtype "doublek")
        (+ pack (.sym regtype doublek) op GRi ope GRj)
        (ne-load-semantics GRi (index-of GRj) (.sym regtype doublek) 0 size 1
 			  (load-double-non-gr-u-semantics mode regtype))
-       ((fr500 (unit u-fr-load)))
+       ((fr500 (unit u-fr-load)) (fr550 (unit u-fr-load)))
   )
 )
 
@@ -3716,7 +4275,7 @@
 (define-pmacro (load-r-simm name mode op regtype attr profile comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) (FR400-MAJOR I-2) attr)
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) (FR400-MAJOR I-2) attr)
        (.str name "$pack @($GRi,$d12),$" regtype "k")
        (+ pack (.sym regtype k) op GRi d12)
        (set (.sym regtype k)
@@ -3726,37 +4285,37 @@
 )
 
 (load-r-simm ldsbi  QI OP_30 GR NA
-	     ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)))
+	     ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
 	     "Load   signed byte")
 (load-r-simm ldshi  HI OP_31 GR NA
-	     ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)))
+	     ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
 	     "Load   signed half")
 (load-r-simm ldi    SI OP_32 GR NA
-	     ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)))
+	     ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
 	     "Load          word")
 (load-r-simm ldubi UQI OP_35 GR NA
-	     ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)))
+	     ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
 	     "Load unsigned byte")
 (load-r-simm lduhi UHI OP_36 GR NA
-	     ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)))
+	     ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
 	     "Load unsigned half")
 
 (load-r-simm ldbfi UQI OP_38 FRint FR-ACCESS
-	     ((fr400 (unit u-fr-load)) (fr500 (unit u-fr-load)))
+	     ((fr400 (unit u-fr-load)) (fr500 (unit u-fr-load)) (fr550 (unit u-fr-load)))
 	     "Load byte float")
 (load-r-simm ldhfi UHI OP_39 FRint FR-ACCESS
-	     ((fr400 (unit u-fr-load)) (fr500 (unit u-fr-load)))
+	     ((fr400 (unit u-fr-load)) (fr500 (unit u-fr-load)) (fr550 (unit u-fr-load)))
 	     "Load half float")
 (load-r-simm ldfi   SI OP_3A FRint FR-ACCESS
-	     ((fr400 (unit u-fr-load)) (fr500 (unit u-fr-load)))
+	     ((fr400 (unit u-fr-load)) (fr500 (unit u-fr-load)) (fr550 (unit u-fr-load)))
 	     "Load word float")
 
 (define-pmacro (ne-load-r-simm
 		name mode op regtype size is_float attr profile comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) NON-EXCEPTING attr
-	(MACH simple,tomcat,fr500,frv))
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) NON-EXCEPTING attr
+	(MACH simple,tomcat,fr500,fr550,frv))
        (.str name "$pack @($GRi,$d12),$" regtype "k")
        (+ pack (.sym regtype k) op GRi d12)
        (ne-load-semantics GRi -1 (.sym regtype k) d12 size is_float
@@ -3768,28 +4327,28 @@
 )
 
 (ne-load-r-simm nldsbi  QI OP_40 GR (ne-QI-size)  0 NA
-		((fr500 (unit u-gr-load))) "Load   signed byte")
+		((fr500 (unit u-gr-load)) (fr550 (unit u-gr-load))) "Load   signed byte")
 (ne-load-r-simm nldubi UQI OP_41 GR (ne-UQI-size) 0 NA
-		((fr500 (unit u-gr-load))) "Load unsigned byte")
+		((fr500 (unit u-gr-load)) (fr550 (unit u-gr-load))) "Load unsigned byte")
 (ne-load-r-simm nldshi  HI OP_42 GR (ne-HI-size)  0 NA
-		((fr500 (unit u-gr-load))) "Load   signed half")
+		((fr500 (unit u-gr-load)) (fr550 (unit u-gr-load))) "Load   signed half")
 (ne-load-r-simm nlduhi UHI OP_43 GR (ne-UHI-size) 0 NA
-		((fr500 (unit u-gr-load))) "Load unsigned half")
+		((fr500 (unit u-gr-load)) (fr550 (unit u-gr-load))) "Load unsigned half")
 (ne-load-r-simm nldi    SI OP_44 GR (ne-SI-size)  0 NA
-		((fr500 (unit u-gr-load))) "Load          word")
+		((fr500 (unit u-gr-load)) (fr550 (unit u-gr-load))) "Load          word")
 
 (ne-load-r-simm nldbfi UQI OP_48 FRint (ne-UQI-size) 1 FR-ACCESS
-		((fr500 (unit u-fr-load))) "Load byte float")
+		((fr500 (unit u-fr-load)) (fr550 (unit u-fr-load))) "Load byte float")
 (ne-load-r-simm nldhfi UHI OP_49 FRint (ne-UHI-size) 1 FR-ACCESS
-		((fr500 (unit u-fr-load))) "Load half float")
+		((fr500 (unit u-fr-load)) (fr550 (unit u-fr-load))) "Load half float")
 (ne-load-r-simm nldfi   SI OP_4A FRint (ne-SI-size)  1 FR-ACCESS
-		((fr500 (unit u-fr-load))) "Load word float")
+		((fr500 (unit u-fr-load)) (fr550 (unit u-fr-load))) "Load word float")
 
 (define-pmacro (load-double-r-simm
 		name not_gr mode op regtype attr profile comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) (FR400-MAJOR I-2) attr)
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) (FR400-MAJOR I-2) attr)
        (.str name "$pack @($GRi,$d12),$" regtype "doublek")
        (+ pack (.sym regtype doublek) op GRi d12)
        (sequence ((WI address))
@@ -3799,18 +4358,18 @@
 )
 
 (load-double-r-simm lddi  0 DI OP_33 GR NA
-		    ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)))
+		    ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
 		    "Load double word")
 (load-double-r-simm lddfi 1 DF OP_3B FR FR-ACCESS
-		    ((fr400 (unit u-fr-load)) (fr500 (unit u-fr-load)))
+		    ((fr400 (unit u-fr-load)) (fr500 (unit u-fr-load)) (fr550 (unit u-fr-load)))
 		    "Load double float")
 
 (define-pmacro (ne-load-double-r-simm
 		name not_gr mode op regtype size is_float attr profile comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) NON-EXCEPTING attr
-	(MACH simple,tomcat,fr500,frv))
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) NON-EXCEPTING attr
+	(MACH simple,tomcat,fr500,fr550,frv))
        (.str name "$pack @($GRi,$d12),$" regtype "doublek")
        (+ pack (.sym regtype doublek) op GRi d12)
        (sequence ((WI address))
@@ -3824,9 +4383,9 @@
 )
 
 (ne-load-double-r-simm nlddi  0 DI OP_45 GR (ne-DI-size) 0 NA
-		       ((fr500 (unit u-gr-load))) "Load double word")
+		       ((fr500 (unit u-gr-load)) (fr550 (unit u-gr-load))) "Load double word")
 (ne-load-double-r-simm nlddfi 1 DF OP_4B FR (ne-DI-size) 1 FR-ACCESS
-		       ((fr500 (unit u-fr-load))) "Load double float")
+		       ((fr500 (unit u-fr-load)) (fr550 (unit u-fr-load))) "Load double float")
 
 (define-pmacro (load-quad-r-simm name op regtype attr profile comment)
   (dni name
@@ -3865,7 +4424,7 @@
 (define-pmacro (store-r-r name mode op ope reg attr profile comment)
   (dni name
        (comment)
-       ((UNIT STORE) (FR500-MAJOR I-3) (FR400-MAJOR I-3) attr)
+       ((UNIT STORE) (FR550-MAJOR I-4) (FR500-MAJOR I-3) (FR400-MAJOR I-3) attr)
        (.str name "$pack $" reg "k,@($GRi,$GRj)")
        (+ pack (.sym reg k) op GRi ope GRj)
        (c-call VOID (.str "@cpu@_write_mem_" mode)
@@ -3875,23 +4434,23 @@
 )
 
 (store-r-r stb   QI OP_03 OPE1_00 GR NA
-	   ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+	   ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 	   "Store unsigned byte")
 (store-r-r sth   HI OP_03 OPE1_01 GR NA
-	   ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+	   ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 	   "Store unsigned half")
 (store-r-r st    SI OP_03 OPE1_02 GR NA
-	   ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+	   ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 	   "Store          word")
 
 (store-r-r stbf  QI OP_03 OPE1_08 FRint FR-ACCESS
-	   ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+	   ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 	   "Store byte float")
 (store-r-r sthf  HI OP_03 OPE1_09 FRint FR-ACCESS
-	   ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+	   ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 	   "Store half float")
 (store-r-r stf   SI OP_03 OPE1_0A FRint FR-ACCESS
-	   ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+	   ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 	   "Store word float")
 
 (store-r-r stc   SI OP_03 OPE1_25 CPR (MACH frv) () "Store coprocessor word")
@@ -3938,7 +4497,7 @@
 (define-pmacro (store-double-r-r name mode op ope regtype attr profile comment)
   (dni name
        (comment)
-       ((UNIT STORE) (FR500-MAJOR I-3) (FR400-MAJOR I-3) attr)
+       ((UNIT STORE) (FR550-MAJOR I-4) (FR500-MAJOR I-3) (FR400-MAJOR I-3) attr)
        (.str name "$pack $" regtype "k,@($GRi,$GRj)")
        (+ pack (.sym regtype k) op GRi ope GRj)
        (sequence ((WI address))
@@ -3948,10 +4507,10 @@
 )
 
 (store-double-r-r std  DI OP_03 OPE1_03 GR  NA
-		  ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+		  ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 		  "Store double word")
 (store-double-r-r stdf DF OP_03 OPE1_0B FR  FR-ACCESS
-		  ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+		  ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 		  "Store double float")
 
 (store-double-r-r stdc DI OP_03 OPE1_26 CPR (MACH frv)
@@ -4028,7 +4587,7 @@
 (define-pmacro (store-r-r-u name mode op ope regtype attr profile comment)
   (dni name
        (comment)
-       ((UNIT STORE) (FR500-MAJOR I-3) (FR400-MAJOR I-3) attr)
+       ((UNIT STORE) (FR550-MAJOR I-4) (FR500-MAJOR I-3) (FR400-MAJOR I-3) attr)
        (.str name "$pack $" regtype "k,@($GRi,$GRj)")
        (+ pack (.sym regtype k) op GRi ope GRj)
        (sequence ((UWI address))
@@ -4041,23 +4600,23 @@
 )
 
 (store-r-r-u stbu  QI OP_03 OPE1_10 GR NA
-	     ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+	     ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 	     "Store unsigned byte, update index")
 (store-r-r-u sthu  HI OP_03 OPE1_11 GR NA
-	     ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+	     ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 	     "Store unsigned half, update index")
 (store-r-r-u stu   WI OP_03 OPE1_12 GR NA
-	     ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+	     ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 	     "Store          word, update index")
 
 (store-r-r-u stbfu QI OP_03 OPE1_18 FRint FR-ACCESS
-	     ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+	     ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 	     "Store byte float, update index")
 (store-r-r-u sthfu HI OP_03 OPE1_19 FRint FR-ACCESS
-	     ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+	     ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 	     "Store half float, update index")
 (store-r-r-u stfu  SI OP_03 OPE1_1A FRint FR-ACCESS
-	     ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+	     ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 	     "Store word float, update index")
 
 (store-r-r-u stcu  SI OP_03 OPE1_2D CPR (MACH frv) ()
@@ -4067,7 +4626,7 @@
 		name mode op ope regtype attr profile comment)
   (dni name
        (comment)
-       ((UNIT STORE) (FR500-MAJOR I-3) (FR400-MAJOR I-3) attr)
+       ((UNIT STORE) (FR550-MAJOR I-4) (FR500-MAJOR I-3) (FR400-MAJOR I-3) attr)
        (.str name "$pack $" regtype "k,@($GRi,$GRj)")
        (+ pack (.sym regtype k) op GRi ope GRj)
        (sequence ((WI address))
@@ -4078,10 +4637,10 @@
 )
 
 (store-double-r-r-u stdu  DI OP_03 OPE1_13 GR  NA
-		    ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+		    ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 		    "Store double word, update index")
 (store-double-r-r-u stdfu DF OP_03 OPE1_1B FR  FR-ACCESS
-		    ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+		    ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 		    "Store double float,update index")
 (store-double-r-r-u stdcu DI OP_03 OPE1_2E CPR (MACH frv) ()
 		    "Store coprocessor double word, update index")
@@ -4111,7 +4670,7 @@
 (define-pmacro (conditional-load name mode op ope regtype profile comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) (FR400-MAJOR I-2) CONDITIONAL)
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) (FR400-MAJOR I-2) CONDITIONAL)
        (.str name "$pack @($GRi,$GRj),$" regtype "k,$CCi,$cond")
        (+ pack (.sym regtype k) op GRi CCi  cond ope GRj)
        (if (eq CCi (or cond 2))
@@ -4122,36 +4681,36 @@
 )
 
 (conditional-load cldsb  QI OP_5E OPE4_0 GR
-		  ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)))
+		  ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
 		  "Load   signed byte")
 (conditional-load cldub UQI OP_5E OPE4_1 GR
-		  ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)))
+		  ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
 		  "Load unsigned byte")
 (conditional-load cldsh  HI OP_5E OPE4_2 GR
-		  ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)))
+		  ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
 		  "Load   signed half")
 (conditional-load clduh UHI OP_5E OPE4_3 GR
-		  ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)))
+		  ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
 		  "Load unsigned half")
 (conditional-load cld    SI OP_5F OPE4_0 GR
-		  ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)))
+		  ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
 		  "Load          word")
 
 (conditional-load cldbf UQI OP_60 OPE4_0 FRint
-		  ((fr400 (unit u-fr-load)) (fr500 (unit u-fr-load)))
+		  ((fr400 (unit u-fr-load)) (fr500 (unit u-fr-load)) (fr550 (unit u-fr-load)))
 		  "Load byte float")
 (conditional-load cldhf UHI OP_60 OPE4_1 FRint
-		  ((fr400 (unit u-fr-load)) (fr500 (unit u-fr-load)))
+		  ((fr400 (unit u-fr-load)) (fr500 (unit u-fr-load)) (fr550 (unit u-fr-load)))
 		  "Load half float")
 (conditional-load cldf   SI OP_60 OPE4_2 FRint
-		  ((fr400 (unit u-fr-load)) (fr500 (unit u-fr-load)))
+		  ((fr400 (unit u-fr-load)) (fr500 (unit u-fr-load)) (fr550 (unit u-fr-load)))
 		  "Load word float")
 
 (define-pmacro (conditional-load-double
 		name not_gr mode op ope regtype attr profile comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) (FR400-MAJOR I-2) CONDITIONAL attr)
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) (FR400-MAJOR I-2) CONDITIONAL attr)
        (.str name "$pack @($GRi,$GRj),$" regtype "doublek,$CCi,$cond")
        (+ pack (.sym regtype doublek) op GRi CCi  cond ope GRj)
        (if (eq CCi (or cond 2))
@@ -4162,10 +4721,10 @@
 )
 
 (conditional-load-double cldd  0 DI OP_5F OPE4_1 GR NA
-			 ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)))
+			 ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
 			 "Load double word")
 (conditional-load-double clddf 1 DF OP_60 OPE4_3 FR FR-ACCESS
-			 ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)))
+			 ((fr400 (unit u-gr-load)) (fr500 (unit u-gr-load)) (fr550 (unit u-fr-load)))
 			 "Load double float")
 
 (dni cldq
@@ -4182,7 +4741,7 @@
 (define-pmacro (conditional-load-gr-u name mode op ope comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) (FR400-MAJOR I-2) CONDITIONAL)
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) (FR400-MAJOR I-2) CONDITIONAL)
        (.str name "$pack @($GRi,$GRj),$GRk,$CCi,$cond")
        (+ pack GRk op GRi CCi  cond ope GRj)
        (if (eq CCi (or cond 2))
@@ -4194,7 +4753,7 @@
 		     (if (ne (index-of GRi) (index-of GRk))
 			 (set GRi address))))
        ((fr400 (unit u-gr-load))
-	(fr500 (unit u-gr-load)))
+	(fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
   )
 )
 
@@ -4207,7 +4766,7 @@
 (define-pmacro (conditional-load-non-gr-u name mode op ope regtype comment)
   (dni name
        (comment)
-       ((UNIT LOAD) (FR500-MAJOR I-2) (FR400-MAJOR I-2) CONDITIONAL FR-ACCESS)
+       ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) (FR400-MAJOR I-2) CONDITIONAL FR-ACCESS)
        (.str name "$pack @($GRi,$GRj),$" regtype "k,$CCi,$cond")
        (+ pack (.sym regtype k) op GRi CCi  cond ope GRj)
        (if (eq CCi (or cond 2))
@@ -4218,7 +4777,7 @@
 				  pc address))
 		     (set GRi address)))
        ((fr400 (unit u-fr-load))
-	(fr500 (unit u-fr-load)))
+	(fr500 (unit u-fr-load)) (fr550 (unit u-fr-load)))
   )
 )
 
@@ -4229,7 +4788,7 @@
 
 (dni clddu
      "Load double word,  update"
-     ((UNIT LOAD) (FR500-MAJOR I-2) (FR400-MAJOR I-2) CONDITIONAL)
+     ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) (FR400-MAJOR I-2) CONDITIONAL)
      "clddu$pack @($GRi,$GRj),$GRdoublek,$CCi,$cond"
      (+ pack GRdoublek OP_62 GRi CCi cond OPE4_1 GRj)
      (if (eq CCi (or cond 2))
@@ -4238,12 +4797,12 @@
 		   (if (ne (index-of GRi) (index-of GRdoublek))
 		       (set GRi address))))
      ((fr400 (unit u-gr-load))
-      (fr500 (unit u-gr-load)))
+      (fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
 )
 
 (dni clddfu
      "Load double float, update"
-     ((UNIT LOAD) (FR500-MAJOR I-2) (FR400-MAJOR I-2) CONDITIONAL FR-ACCESS)
+     ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2) (FR400-MAJOR I-2) CONDITIONAL FR-ACCESS)
      "clddfu$pack @($GRi,$GRj),$FRdoublek,$CCi,$cond"
      (+ pack FRdoublek OP_63 GRi CCi cond OPE4_3 GRj)
      (if (eq CCi (or cond 2))
@@ -4251,7 +4810,7 @@
 		   (load-double-semantics 1 DF FR address GRj)
 		   (set GRi address)))
      ((fr400 (unit u-fr-load))
-      (fr500 (unit u-fr-load)))
+      (fr500 (unit u-fr-load)) (fr550 (unit u-fr-load)))
 )
 
 (dni cldqu
@@ -4270,7 +4829,7 @@
 (define-pmacro (conditional-store name mode op ope regtype profile comment)
   (dni name
        (comment)
-       ((UNIT STORE) (FR500-MAJOR I-3) (FR400-MAJOR I-3) CONDITIONAL)
+       ((UNIT STORE) (FR550-MAJOR I-4) (FR500-MAJOR I-3) (FR400-MAJOR I-3) CONDITIONAL)
        (.str name "$pack $" regtype "k,@($GRi,$GRj),$CCi,$cond")
        (+ pack (.sym regtype k) op GRi CCi cond ope GRj)
        (if (eq CCi (or cond 2))
@@ -4281,30 +4840,30 @@
 )
 
 (conditional-store cstb  QI OP_64 OPE4_0 GR
-		   ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+		   ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 		   "Store unsigned byte")
 (conditional-store csth  HI OP_64 OPE4_1 GR
-		   ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+		   ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 		   "Store unsigned half")
 (conditional-store cst   SI OP_64 OPE4_2 GR
-		   ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+		   ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 		   "Store          word")
 
 (conditional-store cstbf QI OP_66 OPE4_0 FRint
-		   ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+		   ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 		   "Store byte float")
 (conditional-store csthf HI OP_66 OPE4_1 FRint
-		   ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+		   ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 		   "Store half float")
 (conditional-store cstf  SI OP_66 OPE4_2 FRint
-		   ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+		   ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 		   "Store word float")
 
 (define-pmacro (conditional-store-double
 		name mode op ope regtype attr profile comment)
   (dni name
        (comment)
-       ((UNIT STORE) (FR500-MAJOR I-3) (FR400-MAJOR I-3) CONDITIONAL attr)
+       ((UNIT STORE) (FR550-MAJOR I-4) (FR500-MAJOR I-3) (FR400-MAJOR I-3) CONDITIONAL attr)
        (.str name "$pack $" regtype "k,@($GRi,$GRj),$CCi,$cond")
        (+ pack (.sym regtype k) op GRi CCi  cond ope GRj)
        (if (eq CCi (or cond 2))
@@ -4315,10 +4874,10 @@
 )
 
 (conditional-store-double cstd  DI OP_64 OPE4_3 GR NA
-			  ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+			  ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 			  "Store double word")
 (conditional-store-double cstdf DF OP_66 OPE4_3 FR FR-ACCESS
-			  ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+			  ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 			  "Store double float")
 
 (dni cstq
@@ -4336,7 +4895,7 @@
 		name mode op ope regtype attr profile comment)
   (dni name
        (comment)
-       ((UNIT STORE) (FR500-MAJOR I-3) (FR400-MAJOR I-3) CONDITIONAL attr)
+       ((UNIT STORE) (FR550-MAJOR I-4) (FR500-MAJOR I-3) (FR400-MAJOR I-3) CONDITIONAL attr)
        (.str name "$pack $" regtype "k,@($GRi,$GRj),$CCi,$cond")
        (+ pack (.sym regtype k) op GRi CCi  cond ope GRj)
        (if (eq CCi (or cond 2))
@@ -4350,30 +4909,30 @@
 )
 
 (conditional-store-u cstbu QI OP_67 OPE4_0 GR NA
-		     ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+		     ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 		     "Store unsigned byte, update index")
 (conditional-store-u csthu HI OP_67 OPE4_1 GR NA
-		     ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+		     ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 		     "Store unsigned half, update index")
 (conditional-store-u cstu  SI OP_67 OPE4_2 GR NA
-		     ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+		     ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 		     "Store          word, update index")
 
 (conditional-store-u cstbfu QI OP_68 OPE4_0 FRint FR-ACCESS
-		     ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+		     ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 		     "Store byte float, update index")
 (conditional-store-u csthfu HI OP_68 OPE4_1 FRint FR-ACCESS
-		     ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+		     ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 		     "Store half float, update index")
 (conditional-store-u cstfu  SI OP_68 OPE4_2 FRint FR-ACCESS
-		     ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+		     ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 		     "Store word float, update index")
 
 (define-pmacro (conditional-store-double-u
 		name mode op ope regtype attr profile comment)
   (dni name
        (comment)
-       ((UNIT STORE) (FR500-MAJOR I-3) (FR400-MAJOR I-3) CONDITIONAL attr)
+       ((UNIT STORE) (FR550-MAJOR I-4) (FR500-MAJOR I-3) (FR400-MAJOR I-3) CONDITIONAL attr)
        (.str name "$pack $" regtype "k,@($GRi,$GRj),$CCi,$cond")
        (+ pack (.sym regtype k) op GRi CCi  cond ope GRj)
        (if (eq CCi (or cond 2))
@@ -4386,16 +4945,17 @@
 
 (conditional-store-double-u cstdu  DI OP_67 OPE4_3 GR NA
 			    ((fr400 (unit u-gr-store))
-			     (fr500 (unit u-gr-store)))
+			     (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 			    "Store double word, update index")
 (conditional-store-double-u cstdfu DF OP_68 OPE4_3 FR FR-ACCESS
-			    ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+			    ((fr400 (unit u-fr-store))
+			     (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 			    "Store double float, update index")
 
 (define-pmacro (store-r-simm name mode op regtype attr profile comment)
   (dni name
        (comment)
-       ((UNIT STORE) (FR500-MAJOR I-3) (FR400-MAJOR I-3) attr)
+       ((UNIT STORE) (FR550-MAJOR I-4) (FR500-MAJOR I-3) (FR400-MAJOR I-3) attr)
        (.str name "$pack $" regtype "k,@($GRi,$d12)")
        (+ pack (.sym regtype k) op GRi d12)
        (c-call VOID (.str "@cpu@_write_mem_" mode)
@@ -4405,29 +4965,29 @@
 )
 
 (store-r-simm stbi QI OP_50 GR NA
-	      ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+	      ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 	      "Store unsigned byte")
 (store-r-simm sthi HI OP_51 GR NA
-	      ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+	      ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 	      "Store unsigned half")
 (store-r-simm sti  SI OP_52 GR NA
-	      ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+	      ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 	      "Store          word")
 
 (store-r-simm stbfi QI OP_4E FRint FR-ACCESS
-	      ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+	      ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 	      "Store byte float")
 (store-r-simm sthfi HI OP_4F FRint FR-ACCESS
-	      ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+	      ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 	      "Store half float")
 (store-r-simm stfi  SI OP_55 FRint FR-ACCESS
-	      ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+	      ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 	      "Store word float")
 
 (define-pmacro (store-double-r-simm name mode op regtype attr profile comment)
   (dni name
        (comment)
-       ((UNIT STORE) (FR500-MAJOR I-3) (FR400-MAJOR I-3) attr)
+       ((UNIT STORE) (FR550-MAJOR I-4) (FR500-MAJOR I-3) (FR400-MAJOR I-3) attr)
        (.str name "$pack $" regtype "k,@($GRi,$d12)")
        (+ pack (.sym regtype k) op GRi d12)
        (sequence ((WI address))
@@ -4437,10 +4997,12 @@
 )
 
 (store-double-r-simm stdi  DI OP_53 GR NA
-		     ((fr400 (unit u-gr-store)) (fr500 (unit u-gr-store)))
+		     ((fr400 (unit u-gr-store))
+		      (fr500 (unit u-gr-store)) (fr550 (unit u-gr-store)))
 		     "Store double word")
 (store-double-r-simm stdfi DF OP_56 FR FR-ACCESS
-		     ((fr400 (unit u-fr-store)) (fr500 (unit u-fr-store)))
+		     ((fr400 (unit u-fr-store))
+		      (fr500 (unit u-fr-store)) (fr550 (unit u-fr-store)))
 		     "Store double float")
 
 (define-pmacro (store-quad-r-simm name op regtype attr profile comment)
@@ -4464,39 +5026,40 @@
   (sequence ((WI tmp) (WI address))
 	    (set tmp arg)
 	    (set address (add base offset))
+	    (c-call VOID "@cpu@_check_swap_address" address)
 	    (set arg (c-call WI "@cpu@_read_mem_WI" pc address))
 	    (c-call VOID "@cpu@_write_mem_WI" pc address tmp))
 )
 
 (dni swap
      "Swap contents of memory with GR"
-     ((UNIT C) (FR500-MAJOR C-2) (FR400-MAJOR C-2))
+     ((UNIT C) (FR500-MAJOR C-2) (FR550-MAJOR C-2) (FR400-MAJOR C-2))
      "swap$pack @($GRi,$GRj),$GRk"
      (+ pack GRk OP_03 GRi OPE1_05 GRj)
      (swap-semantics GRi GRj GRk)
      ((fr400 (unit u-swap))
-      (fr500 (unit u-swap)))
+      (fr500 (unit u-swap)) (fr550 (unit u-swap)))
 )
 
 (dni "swapi"
      "Swap contents of memory with GR"
-     ((UNIT C) (FR500-MAJOR C-2) (FR400-MAJOR C-2))
+     ((UNIT C) (FR500-MAJOR C-2) (FR550-MAJOR C-2) (FR400-MAJOR C-2))
      ("swapi$pack @($GRi,$d12),$GRk")
      (+ pack GRk OP_4D GRi d12)
      (swap-semantics GRi d12 GRk)
      ((fr400 (unit u-swap))
-      (fr500 (unit u-swap)))
+      (fr500 (unit u-swap)) (fr550 (unit u-swap)))
 )
 
 (dni cswap
      "Conditionally swap contents of memory with GR"
-     ((UNIT C) (FR500-MAJOR C-2) (FR400-MAJOR C-2) CONDITIONAL)
+     ((UNIT C) (FR500-MAJOR C-2) (FR550-MAJOR C-2) (FR400-MAJOR C-2) CONDITIONAL)
      "cswap$pack @($GRi,$GRj),$GRk,$CCi,$cond"
      (+ pack GRk OP_65 GRi CCi cond OPE4_2 GRj)
      (if (eq CCi (or cond 2))
 	 (swap-semantics GRi GRj GRk))
      ((fr400 (unit u-swap))
-      (fr500 (unit u-swap)))
+      (fr500 (unit u-swap)) (fr550 (unit u-swap)))
 )
 
 (define-pmacro (register-transfer
@@ -4513,13 +5076,13 @@
 
 (register-transfer movgf OP_03 OPE1_15
 		   GRj FRintk I0
-		   ((FR500-MAJOR I-4) (FR400-MAJOR I-4) FR-ACCESS)
-		   ((fr400 (unit u-gr2fr)) (fr500 (unit u-gr2fr)))
+		   ((FR500-MAJOR I-4) (FR550-MAJOR I-5) (FR400-MAJOR I-4) FR-ACCESS)
+		   ((fr400 (unit u-gr2fr)) (fr500 (unit u-gr2fr)) (fr550 (unit u-gr2fr)))
 		   "transfer gr to fr")
 (register-transfer movfg OP_03 OPE1_0D
 		   FRintk GRj I0
-		   ((FR500-MAJOR I-4) (FR400-MAJOR I-4) FR-ACCESS)
-		   ((fr400 (unit u-fr2gr)) (fr500 (unit u-fr2gr)))
+		   ((FR500-MAJOR I-4) (FR550-MAJOR I-5) (FR400-MAJOR I-4) FR-ACCESS)
+		   ((fr400 (unit u-fr2gr)) (fr500 (unit u-fr2gr)) (fr550 (unit u-fr2gr)))
 		   "transfer fr to gr")
 
 (define-pmacro (nextreg hw r offset) (reg hw (add (index-of r) offset)))
@@ -4537,13 +5100,13 @@
 
 (dni movgfd
      "move GR for FR double"
-     ((UNIT I0) (FR500-MAJOR I-4) (FR400-MAJOR I-4) FR-ACCESS)
+     ((UNIT I0) (FR500-MAJOR I-4) (FR550-MAJOR I-5) (FR400-MAJOR I-4) FR-ACCESS)
      "movgfd$pack $GRj,$FRintk"
      (+ pack FRintk OP_03 (rs-null) OPE1_16 GRj)
      (register-transfer-double-from-gr-semantics 1)
      ; TODO -- doesn't handle second register in the pair
      ((fr400 (unit u-gr2fr))
-      (fr500 (unit u-gr2fr)))
+      (fr500 (unit u-gr2fr)) (fr550 (unit u-gr2fr)))
 )
 
 (define-pmacro (register-transfer-double-to-gr-semantics cond)
@@ -4555,13 +5118,13 @@
 
 (dni movfgd
      "move FR for GR double"
-     ((UNIT I0) (FR500-MAJOR I-4) (FR400-MAJOR I-4) FR-ACCESS)
+     ((UNIT I0) (FR500-MAJOR I-4) (FR550-MAJOR I-5) (FR400-MAJOR I-4) FR-ACCESS)
      "movfgd$pack $FRintk,$GRj"
      (+ pack FRintk OP_03 (rs-null) OPE1_0E GRj)
      (register-transfer-double-to-gr-semantics 1)
      ; TODO -- doesn't handle second register in the pair
      ((fr400 (unit u-fr2gr))
-      (fr500 (unit u-fr2gr)))
+      (fr500 (unit u-fr2gr)) (fr550 (unit u-fr2gr)))
 )
 
 (dni movgfq
@@ -4617,47 +5180,47 @@
 )
 
 (conditional-register-transfer cmovgf OP_69 OPE4_0 GRj FRintk I0
-			       ((FR500-MAJOR I-4) (FR400-MAJOR I-4))
-			       ((fr400 (unit u-gr2fr)) (fr500 (unit u-gr2fr)))
+			       ((FR500-MAJOR I-4) (FR550-MAJOR I-5) (FR400-MAJOR I-4))
+			       ((fr400 (unit u-gr2fr)) (fr500 (unit u-gr2fr)) (fr550 (unit u-gr2fr)))
 			       "transfer gr to fr")
 (conditional-register-transfer cmovfg OP_69 OPE4_2 FRintk GRj I0
-			       ((FR500-MAJOR I-4) (FR400-MAJOR I-4))
-			       ((fr400 (unit u-fr2gr)) (fr500 (unit u-fr2gr)))
+			       ((FR500-MAJOR I-4) (FR550-MAJOR I-5) (FR400-MAJOR I-4))
+			       ((fr400 (unit u-fr2gr)) (fr500 (unit u-fr2gr)) (fr550 (unit u-fr2gr)))
 			       "transfer fr to gr")
 
 
 (dni cmovgfd
      "Conditional move GR to FR double"
-     ((UNIT I0) (FR500-MAJOR I-4) (FR400-MAJOR I-4) CONDITIONAL FR-ACCESS)
+     ((UNIT I0) (FR500-MAJOR I-4) (FR550-MAJOR I-5) (FR400-MAJOR I-4) CONDITIONAL FR-ACCESS)
      "cmovgfd$pack $GRj,$FRintk,$CCi,$cond"
      (+ pack FRintk OP_69 (rs-null) CCi cond OPE4_1 GRj)
      (register-transfer-double-from-gr-semantics (eq CCi (or cond 2)))
      ; TODO -- doesn't handle extra registers in double
      ((fr400 (unit u-gr2fr))
-      (fr500 (unit u-gr2fr)))
+      (fr500 (unit u-gr2fr)) (fr550 (unit u-gr2fr)))
 )
 
 (dni cmovfgd
      "Conditional move FR to GR double"
-     ((UNIT I0) (FR500-MAJOR I-4) (FR400-MAJOR I-4) CONDITIONAL FR-ACCESS)
+     ((UNIT I0) (FR500-MAJOR I-4) (FR550-MAJOR I-5) (FR400-MAJOR I-4) CONDITIONAL FR-ACCESS)
      "cmovfgd$pack $FRintk,$GRj,$CCi,$cond"
      (+ pack FRintk OP_69 (rs-null) CCi cond OPE4_3 GRj)
      (register-transfer-double-to-gr-semantics (eq CCi (or cond 2)))
      ; TODO -- doesn't handle second register in the pair
      ((fr400 (unit u-fr2gr))
-      (fr500 (unit u-fr2gr)))
+      (fr500 (unit u-fr2gr)) (fr550 (unit u-fr2gr)))
 )
 
 (define-pmacro (register-transfer-spr
 		name op ope reg_src reg_targ unitname comment)
   (dni name
        (comment)
-       ((UNIT C) (FR500-MAJOR C-2) (FR400-MAJOR C-2))
+       ((UNIT C) (FR500-MAJOR C-2) (FR550-MAJOR C-2) (FR400-MAJOR C-2))
        (.str name "$pack $" reg_src ",$" reg_targ)
        (+ pack reg_targ op ope reg_src)
        (set reg_targ reg_src)
        ((fr400 (unit unitname))
-	(fr500 (unit unitname)))
+	(fr500 (unit unitname)) (fr550 (unit unitname)))
   )
 )
 
@@ -4703,7 +5266,7 @@
 (define-pmacro (conditional-branch-i prefix cc op cond comment)
   (dni (.sym prefix cc)
        (comment)
-       ((UNIT B01) (FR500-MAJOR B-1) (FR400-MAJOR B-1))
+       ((UNIT B01) (FR500-MAJOR B-1) (FR550-MAJOR B-1) (FR400-MAJOR B-1))
        (.str (.sym prefix cc) "$pack $ICCi_2,$hint,$label16")
        (+ pack (.sym ICC_ cc) ICCi_2 op hint label16)
        (sequence ()
@@ -4711,30 +5274,30 @@
 		 (if (cond ICCi_2)
 		     (set pc label16)))
        ((fr400 (unit u-branch))
-	(fr500 (unit u-branch)))
+	(fr500 (unit u-branch)) (fr550 (unit u-branch)))
   )
 )
 
 (dni bra
      "integer branch equal"
-      ((UNIT B01) (FR500-MAJOR B-1) (FR400-MAJOR B-1))
+      ((UNIT B01) (FR500-MAJOR B-1) (FR550-MAJOR B-1) (FR400-MAJOR B-1))
       "bra$pack $hint_taken$label16"
       (+ pack ICC_ra (ICCi_2-null) OP_06 hint_taken label16)
       (sequence ()
 		(c-call VOID "@cpu@_model_branch" label16 hint_taken)
 		(set pc label16))
       ((fr400 (unit u-branch))
-       (fr500 (unit u-branch)))
+       (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (dni bno
      "integer branch never"
-      ((UNIT B01) (FR500-MAJOR B-1) (FR400-MAJOR B-1))
+      ((UNIT B01) (FR500-MAJOR B-1) (FR550-MAJOR B-1) (FR400-MAJOR B-1))
       "bno$pack$hint_not_taken"
       (+ pack ICC_nev (ICCi_2-null) OP_06 hint_not_taken (label16-null))
       (c-call VOID "@cpu@_model_branch" label16 hint_not_taken)
       ((fr400 (unit u-branch))
-       (fr500 (unit u-branch)))
+       (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (conditional-branch-i b eq  OP_06 Ieq  "integer branch equal")
@@ -4755,37 +5318,37 @@
 (define-pmacro (conditional-branch-f prefix cc op cond comment)
   (dni (.sym prefix cc)
        (comment)
-       ((UNIT B01) (FR500-MAJOR B-1) (FR400-MAJOR B-1) FR-ACCESS)
+       ((UNIT B01) (FR500-MAJOR B-1) (FR550-MAJOR B-1) (FR400-MAJOR B-1) FR-ACCESS)
        (.str (.sym prefix cc) "$pack $FCCi_2,$hint,$label16")
        (+ pack (.sym FCC_ cc) FCCi_2 op hint label16)
        (sequence ()
 		 (c-call VOID "@cpu@_model_branch" label16 hint)
 		 (if (cond FCCi_2) (set pc label16)))
        ((fr400 (unit u-branch))
-	(fr500 (unit u-branch)))
+	(fr500 (unit u-branch)) (fr550 (unit u-branch)))
   )
 )
 
 (dni fbra
      "float branch equal"
-      ((UNIT B01) (FR500-MAJOR B-1) (FR400-MAJOR B-1) FR-ACCESS)
+      ((UNIT B01) (FR500-MAJOR B-1) (FR550-MAJOR B-1) (FR400-MAJOR B-1) FR-ACCESS)
       "fbra$pack $hint_taken$label16"
       (+ pack FCC_ra (FCCi_2-null) OP_07 hint_taken label16)
       (sequence ()
 		(c-call VOID "@cpu@_model_branch" label16 hint_taken)
 		(set pc label16))
       ((fr400 (unit u-branch))
-       (fr500 (unit u-branch)))
+       (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (dni fbno
      "float branch never"
-      ((UNIT B01) (FR500-MAJOR B-1) (FR400-MAJOR B-1) FR-ACCESS)
+      ((UNIT B01) (FR500-MAJOR B-1) (FR550-MAJOR B-1) (FR400-MAJOR B-1) FR-ACCESS)
       "fbno$pack$hint_not_taken"
       (+ pack FCC_nev (FCCi_2-null) OP_07 hint_not_taken (label16-null))
       (c-call VOID "@cpu@_model_branch" label16 hint_not_taken)
       ((fr400 (unit u-branch))
-       (fr500 (unit u-branch)))
+       (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (conditional-branch-f fb ne  OP_07 Fne  "float branch not equal")
@@ -4817,20 +5380,20 @@
 
 (dni bctrlr
      "LCR conditional branch to lr"
-     ((UNIT B0) (FR500-MAJOR B-2) (FR400-MAJOR B-2))
+     ((UNIT B0) (FR500-MAJOR B-2) (FR550-MAJOR B-2) (FR400-MAJOR B-2))
      ("bctrlr$pack $ccond,$hint")
      (+ pack (cond-null) (ICCi_2-null) OP_0E hint OPE3_01 ccond (s12-null))
      (sequence ()
 	       (c-call VOID "@cpu@_model_branch" (spr-lr) hint)
 	       (ctrlr-branch-semantics (const BI 1) ccond))
      ((fr400 (unit u-branch))
-      (fr500 (unit u-branch)))
+      (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (define-pmacro (conditional-branch-cclr prefix cc i-f op ope cond attr comment)
   (dni (.sym prefix cc lr)
        (comment)
-       ((UNIT B01) (FR500-MAJOR B-3) (FR400-MAJOR B-3) attr)
+       ((UNIT B01) (FR500-MAJOR B-3) (FR550-MAJOR B-3) (FR400-MAJOR B-3) attr)
        (.str (.sym prefix cc lr) "$pack $" i-f "CCi_2,$hint")
        (+ pack (.sym i-f CC_ cc) (.sym i-f CCi_2) op hint ope
 	  (ccond-null) (s12-null))
@@ -4838,30 +5401,30 @@
 		 (c-call VOID "@cpu@_model_branch" (spr-lr) hint)
 		 (if (cond (.sym i-f CCi_2)) (set pc (spr-lr))))
        ((fr400 (unit u-branch))
-	(fr500 (unit u-branch)))
+	(fr500 (unit u-branch)) (fr550 (unit u-branch)))
   )
 )
 
 (dni bralr
      "integer cclr branch always"
-     ((UNIT B01) (FR500-MAJOR B-3) (FR400-MAJOR B-3))
+     ((UNIT B01) (FR500-MAJOR B-3) (FR550-MAJOR B-3) (FR400-MAJOR B-3))
      "bralr$pack$hint_taken"
      (+ pack ICC_ra (ICCi_2-null) OP_0E hint_taken OPE3_02 (ccond-null) (s12-null))
      (sequence ()
 	       (c-call VOID "@cpu@_model_branch" (spr-lr) hint_taken)
 	       (set pc (spr-lr)))
      ((fr400 (unit u-branch))
-      (fr500 (unit u-branch)))
+      (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (dni bnolr
      "integer cclr branch never"
-     ((UNIT B01) (FR500-MAJOR B-3) (FR400-MAJOR B-3))
+     ((UNIT B01) (FR500-MAJOR B-3) (FR550-MAJOR B-3) (FR400-MAJOR B-3))
      "bnolr$pack$hint_not_taken"
      (+ pack ICC_nev (ICCi_2-null) OP_0E hint_not_taken OPE3_02 (ccond-null) (s12-null))
      (c-call VOID "@cpu@_model_branch" (spr-lr) hint_not_taken)
      ((fr400 (unit u-branch))
-      (fr500 (unit u-branch)))
+      (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (conditional-branch-cclr b eq  I OP_0E OPE3_02 Ieq  NA "integer cclr branch equal")
@@ -4881,24 +5444,24 @@
 
 (dni fbralr
      "float cclr branch always"
-     ((UNIT B01) (FR500-MAJOR B-3) (FR400-MAJOR B-3) FR-ACCESS)
+     ((UNIT B01) (FR500-MAJOR B-3) (FR550-MAJOR B-3) (FR400-MAJOR B-3) FR-ACCESS)
      "fbralr$pack$hint_taken"
      (+ pack FCC_ra (FCCi_2-null) OP_0E hint_taken OPE3_06 (ccond-null) (s12-null))
      (sequence ()
 	       (c-call VOID "@cpu@_model_branch" (spr-lr) hint_taken)
 	       (set pc (spr-lr)))
      ((fr400 (unit u-branch))
-      (fr500 (unit u-branch)))
+      (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (dni fbnolr
      "float cclr branch never"
-     ((UNIT B01) (FR500-MAJOR B-3) (FR400-MAJOR B-3) FR-ACCESS)
+     ((UNIT B01) (FR500-MAJOR B-3) (FR550-MAJOR B-3) (FR400-MAJOR B-3) FR-ACCESS)
      "fbnolr$pack$hint_not_taken"
      (+ pack FCC_nev (FCCi_2-null) OP_0E hint_not_taken OPE3_06 (ccond-null) (s12-null))
      (c-call VOID "@cpu@_model_branch" (spr-lr) hint_not_taken)
      ((fr400 (unit u-branch))
-      (fr500 (unit u-branch)))
+      (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (conditional-branch-cclr fb eq  F OP_0E OPE3_06 Feq  FR-ACCESS "float cclr branch equal")
@@ -4919,39 +5482,39 @@
 (define-pmacro (conditional-branch-ctrlr prefix cc i-f op ope cond attr comment)
   (dni (.sym prefix cc lr)
        (comment)
-       ((UNIT B0) (FR500-MAJOR B-2) (FR400-MAJOR B-2) attr)
+       ((UNIT B0) (FR500-MAJOR B-2) (FR550-MAJOR B-2) (FR400-MAJOR B-2) attr)
        (.str (.sym prefix cc lr) "$pack $" i-f "CCi_2,$ccond,$hint")
        (+ pack (.sym i-f CC_ cc) (.sym i-f CCi_2) op hint ope ccond (s12-null))
        (sequence ()
 		 (c-call VOID "@cpu@_model_branch" (spr-lr) hint)
 		 (ctrlr-branch-semantics (cond (.sym i-f CCi_2)) ccond))
        ((fr400 (unit u-branch))
-	(fr500 (unit u-branch)))
+	(fr500 (unit u-branch)) (fr550 (unit u-branch)))
   )
 )
 
 (dni bcralr
      "integer ctrlr branch always"
-     ((UNIT B0) (FR500-MAJOR B-2) (FR400-MAJOR B-2))
+     ((UNIT B0) (FR500-MAJOR B-2) (FR550-MAJOR B-2) (FR400-MAJOR B-2))
      "bcralr$pack $ccond$hint_taken"
      (+ pack ICC_ra (ICCi_2-null) OP_0E hint_taken OPE3_03 ccond (s12-null))
      (sequence ()
 	       (c-call VOID "@cpu@_model_branch" (spr-lr) hint_taken)
 	       (ctrlr-branch-semantics (const BI 1) ccond))
      ((fr400 (unit u-branch))
-      (fr500 (unit u-branch)))
+      (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (dni bcnolr
      "integer ctrlr branch never"
-     ((UNIT B0) (FR500-MAJOR B-2) (FR400-MAJOR B-2))
+     ((UNIT B0) (FR500-MAJOR B-2) (FR550-MAJOR B-2) (FR400-MAJOR B-2))
      "bcnolr$pack$hint_not_taken"
      (+ pack ICC_nev (ICCi_2-null) OP_0E hint_not_taken OPE3_03 (ccond-null) (s12-null))
      (sequence ()
 	       (c-call VOID "@cpu@_model_branch" (spr-lr) hint_not_taken)
 	       (ctrlr-branch-semantics (const BI 0) ccond))
      ((fr400 (unit u-branch))
-      (fr500 (unit u-branch)))
+      (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (conditional-branch-ctrlr bc eq  I OP_0E OPE3_03 Ieq  NA "integer ctrlr branch equal")
@@ -4971,26 +5534,26 @@
 
 (dni fcbralr
      "float ctrlr branch always"
-     ((UNIT B0) (FR500-MAJOR B-2) (FR400-MAJOR B-2) FR-ACCESS)
+     ((UNIT B0) (FR500-MAJOR B-2) (FR550-MAJOR B-2) (FR400-MAJOR B-2) FR-ACCESS)
      "fcbralr$pack $ccond$hint_taken"
      (+ pack FCC_ra (FCCi_2-null) OP_0E hint_taken OPE3_07 ccond (s12-null))
      (sequence ()
 	       (c-call VOID "@cpu@_model_branch" (spr-lr) hint_taken)
 	       (ctrlr-branch-semantics (const BI 1) ccond))
      ((fr400 (unit u-branch))
-      (fr500 (unit u-branch)))
+      (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (dni fcbnolr
      "float ctrlr branch never"
-     ((UNIT B0) (FR500-MAJOR B-2) (FR400-MAJOR B-2) FR-ACCESS)
+     ((UNIT B0) (FR500-MAJOR B-2) (FR550-MAJOR B-2) (FR400-MAJOR B-2) FR-ACCESS)
      "fcbnolr$pack$hint_not_taken"
      (+ pack FCC_nev (FCCi_2-null) OP_0E hint_not_taken OPE3_07 (ccond-null) (s12-null))
      (sequence ()
 	       (c-call VOID "@cpu@_model_branch" (spr-lr) hint_not_taken)
 	       (ctrlr-branch-semantics (const BI 0) ccond))
      ((fr400 (unit u-branch))
-      (fr500 (unit u-branch)))
+      (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (conditional-branch-ctrlr fcb eq  F OP_0E OPE3_07 Feq  FR-ACCESS "float cclr branch equal")
@@ -5019,12 +5582,12 @@
 
 (dni jmpl
      "jump and link"
-     ((UNIT I0) (FR500-MAJOR I-5) (FR400-MAJOR I-5))
+     ((UNIT I0) (FR500-MAJOR I-5) (FR550-MAJOR I-6) (FR400-MAJOR I-5))
      "jmpl$pack @($GRi,$GRj)"
      (+ pack (misc-null-1) (LI-off) OP_0C GRi (misc-null-2) GRj)
      (jump-and-link-semantics GRi GRj LI)
      ((fr400 (unit u-branch))
-      (fr500 (unit u-branch)))
+      (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (dni calll
@@ -5039,12 +5602,12 @@
 
 (dni jmpil
      "jump immediate and link"
-     ((UNIT I0) (FR500-MAJOR I-5) (FR400-MAJOR I-5))
+     ((UNIT I0) (FR500-MAJOR I-5) (FR550-MAJOR I-6) (FR400-MAJOR I-5))
      "jmpil$pack @($GRi,$s12)"
      (+ pack (misc-null-1) (LI-off) OP_0D GRi s12)
      (jump-and-link-semantics GRi s12 LI)
      ((fr400 (unit u-branch))
-      (fr500 (unit u-branch)))
+      (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (dni callil
@@ -5059,7 +5622,7 @@
 
 (dni call
      "call and link"
-     ((UNIT B0) (FR500-MAJOR B-4) (FR400-MAJOR B-4))
+     ((UNIT B0) (FR500-MAJOR B-4) (FR550-MAJOR B-4) (FR400-MAJOR B-4))
      "call$pack $label24"
      (+ pack OP_0F label24)
      (sequence ()
@@ -5067,12 +5630,12 @@
 	       (set pc label24)
 	       (c-call VOID "@cpu@_model_branch" pc #x2)) ; hint branch taken
      ((fr400 (unit u-branch))
-      (fr500 (unit u-branch)))
+      (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (dni rett
     "return from trap"
-    ((UNIT C) (FR500-MAJOR C-2) (FR400-MAJOR C-2) PRIVILEGED)
+    ((UNIT C) (FR500-MAJOR C-2) (FR550-MAJOR C-2) (FR400-MAJOR C-2) PRIVILEGED)
     "rett$pack $debug"
     (+ pack (misc-null-1) debug OP_05 (rs-null) (s12-null))
     ; frv_rett handles operating vs user mode
@@ -5123,33 +5686,33 @@
 (define-pmacro (trap-r prefix cc i-f op ope cond attr comment)
   (dni (.sym prefix cc)
        (comment)
-       ((UNIT C) (FR500-MAJOR C-1) (FR400-MAJOR C-1) attr)
+       ((UNIT C) (FR500-MAJOR C-1) (FR550-MAJOR C-1) (FR400-MAJOR C-1) attr)
        (.str (.sym prefix cc) "$pack $" i-f "CCi_2,$GRi,$GRj")
        (+ pack (.sym i-f CC_ cc) (.sym i-f CCi_2) op GRi (misc-null-3) ope GRj)
        (trap-semantics (cond (.sym i-f CCi_2)) GRi GRj)
        ((fr400 (unit u-trap))
-	(fr500 (unit u-trap)))
+	(fr500 (unit u-trap)) (fr550 (unit u-trap)))
   )
 )
 
 (dni tra
      "integer trap always"
-     ((UNIT C) (FR500-MAJOR C-1) (FR400-MAJOR C-1))
+     ((UNIT C) (FR500-MAJOR C-1) (FR550-MAJOR C-1) (FR400-MAJOR C-1))
      "tra$pack $GRi,$GRj"
      (+ pack ICC_ra (ICCi_2-null) OP_04 GRi (misc-null-3) OPE4_0 GRj)
      (trap-semantics (const BI 1) GRi GRj)
      ((fr400 (unit u-trap))
-      (fr500 (unit u-trap)))
+      (fr500 (unit u-trap)) (fr550 (unit u-trap)))
 )
 
 (dni tno
      "integer trap never"
-     ((UNIT C) (FR500-MAJOR C-1) (FR400-MAJOR C-1))
+     ((UNIT C) (FR500-MAJOR C-1) (FR550-MAJOR C-1) (FR400-MAJOR C-1))
      "tno$pack"
      (+ pack ICC_nev (ICCi_2-null) OP_04 (GRi-null) (misc-null-3) OPE4_0 (GRj-null))
      (trap-semantics (const BI 0) GRi GRj)
      ((fr400 (unit u-trap))
-      (fr500 (unit u-trap)))
+      (fr500 (unit u-trap)) (fr550 (unit u-trap)))
 )
 
 (trap-r t eq  I OP_04 OPE4_0 Ieq  NA "integer trap equal")
@@ -5169,22 +5732,22 @@
 
 (dni ftra
      "float trap always"
-     ((UNIT C) (FR500-MAJOR C-1) (FR400-MAJOR C-1) FR-ACCESS)
+     ((UNIT C) (FR500-MAJOR C-1) (FR550-MAJOR C-1) (FR400-MAJOR C-1) FR-ACCESS)
      "ftra$pack $GRi,$GRj"
      (+ pack FCC_ra (FCCi_2-null) OP_04 GRi (misc-null-3) OPE4_1 GRj)
      (trap-semantics (const BI 1) GRi GRj)
      ((fr400 (unit u-trap))
-      (fr500 (unit u-trap)))
+      (fr500 (unit u-trap)) (fr550 (unit u-trap)))
 )
 
 (dni ftno
      "flost trap never"
-     ((UNIT C) (FR500-MAJOR C-1) (FR400-MAJOR C-1) FR-ACCESS)
+     ((UNIT C) (FR500-MAJOR C-1) (FR550-MAJOR C-1) (FR400-MAJOR C-1) FR-ACCESS)
      "ftno$pack"
      (+ pack FCC_nev (FCCi_2-null) OP_04 (GRi-null) (misc-null-3) OPE4_1 (GRj-null))
      (trap-semantics (const BI 0) GRi GRj)
      ((fr400 (unit u-trap))
-      (fr500 (unit u-trap)))
+      (fr500 (unit u-trap)) (fr550 (unit u-trap)))
 )
 
 (trap-r ft ne  F OP_04 OPE4_1 Fne  FR-ACCESS "float trap not equal")
@@ -5205,33 +5768,33 @@
 (define-pmacro (trap-immed prefix cc i-f op cond attr comment)
   (dni (.sym prefix cc)
        (comment)
-       ((UNIT C) (FR500-MAJOR C-1) (FR400-MAJOR C-1) attr)
+       ((UNIT C) (FR500-MAJOR C-1) (FR550-MAJOR C-1) (FR400-MAJOR C-1) attr)
        (.str (.sym prefix cc) "$pack $" i-f "CCi_2,$GRi,$s12")
        (+ pack (.sym i-f CC_ cc) (.sym i-f CCi_2) op GRi s12)
        (trap-semantics (cond (.sym i-f CCi_2)) GRi s12)
        ((fr400 (unit u-trap))
-	(fr500 (unit u-trap)))
+	(fr500 (unit u-trap)) (fr550 (unit u-trap)))
   )
 )
 
 (dni tira
      "integer trap always"
-     ((UNIT C) (FR500-MAJOR C-1) (FR400-MAJOR C-1))
+     ((UNIT C) (FR500-MAJOR C-1) (FR550-MAJOR C-1) (FR400-MAJOR C-1))
      "tira$pack $GRi,$s12"
      (+ pack ICC_ra (ICCi_2-null) OP_1C GRi s12)
      (trap-semantics (const BI 1) GRi s12)
      ((fr400 (unit u-trap))
-      (fr500 (unit u-trap)))
+      (fr500 (unit u-trap)) (fr550 (unit u-trap)))
 )
 
 (dni tino
      "integer trap never"
-     ((UNIT C) (FR500-MAJOR C-1) (FR400-MAJOR C-1))
+     ((UNIT C) (FR500-MAJOR C-1) (FR550-MAJOR C-1) (FR400-MAJOR C-1))
      "tino$pack"
      (+ pack ICC_nev (ICCi_2-null) OP_1C (GRi-null) (s12-null))
      (trap-semantics (const BI 0) GRi s12)
      ((fr400 (unit u-trap))
-      (fr500 (unit u-trap)))
+      (fr500 (unit u-trap)) (fr550 (unit u-trap)))
 )
 
 (trap-immed ti eq  I OP_1C Ieq  NA "integer trap equal")
@@ -5251,22 +5814,22 @@
 
 (dni ftira
      "float trap always"
-     ((UNIT C) (FR500-MAJOR C-1) (FR400-MAJOR C-1) FR-ACCESS)
+     ((UNIT C) (FR500-MAJOR C-1) (FR550-MAJOR C-1) (FR400-MAJOR C-1) FR-ACCESS)
      "ftira$pack $GRi,$s12"
      (+ pack FCC_ra (ICCi_2-null) OP_1D GRi s12)
      (trap-semantics (const BI 1) GRi s12)
      ((fr400 (unit u-trap))
-      (fr500 (unit u-trap)))
+      (fr500 (unit u-trap)) (fr550 (unit u-trap)))
 )
 
 (dni ftino
      "float trap never"
-     ((UNIT C) (FR500-MAJOR C-1) (FR400-MAJOR C-1) FR-ACCESS)
+     ((UNIT C) (FR500-MAJOR C-1) (FR550-MAJOR C-1) (FR400-MAJOR C-1) FR-ACCESS)
      "ftino$pack"
      (+ pack FCC_nev (FCCi_2-null) OP_1D (GRi-null) (s12-null))
      (trap-semantics (const BI 0) GRi s12)
      ((fr400 (unit u-trap))
-      (fr500 (unit u-trap)))
+      (fr500 (unit u-trap)) (fr550 (unit u-trap)))
 )
 
 (trap-immed fti ne  F OP_1D Fne  FR-ACCESS "float trap not equal")
@@ -5286,7 +5849,7 @@
 
 (dni break
      "break trap"
-     ((UNIT C) (FR500-MAJOR C-1) (FR400-MAJOR C-1))
+     ((UNIT C) (FR500-MAJOR C-1) (FR550-MAJOR C-1) (FR400-MAJOR C-1))
      "break$pack"
      (+ pack (rd-null) OP_04 (rs-null) (misc-null-3) OPE4_3 (GRj-null))
      (sequence ()
@@ -5314,7 +5877,7 @@
 
 (dni mtrap
      "media trap"
-     ((UNIT C) (FR500-MAJOR C-1) (FR400-MAJOR C-1) FR-ACCESS)
+     ((UNIT C) (FR500-MAJOR C-1) (FR550-MAJOR C-1) (FR400-MAJOR C-1) FR-ACCESS)
      "mtrap$pack"
      (+ pack (rd-null) OP_04 (rs-null) (misc-null-3) OPE4_2 (GRj-null))
      (c-call VOID "frv_mtrap")
@@ -5324,7 +5887,7 @@
 (define-pmacro (condition-code-logic name operation ope comment)
   (dni name
        (comment)
-       ((UNIT B01) (FR500-MAJOR B-6) (FR400-MAJOR B-6))
+       ((UNIT B01) (FR500-MAJOR B-6) (FR550-MAJOR B-6) (FR400-MAJOR B-6))
        (.str name "$pack $CRi,$CRj,$CRk")
        (+ pack (misc-null-6) CRk OP_0A (misc-null-7) CRi ope (misc-null-8) CRj)
        (set CRk (c-call UQI "@cpu@_cr_logic" operation CRi CRj))
@@ -5357,7 +5920,7 @@
 
 (dni notcr
      ("not cccr register")
-     ((UNIT B01) (FR500-MAJOR B-6) (FR400-MAJOR B-6))
+     ((UNIT B01) (FR500-MAJOR B-6) (FR550-MAJOR B-6) (FR400-MAJOR B-6))
      (.str notcr "$pack $CRj,$CRk")
      (+ pack (misc-null-6) CRk OP_0A (rs-null) OPE1_0B (misc-null-8) CRj)
      (set CRk (xor CRj 1))
@@ -5371,33 +5934,33 @@
 (define-pmacro (check-int-condition-code prefix cc op cond comment)
   (dni (.sym prefix cc)
        (comment)
-       ((UNIT B01) (FR500-MAJOR B-5) (FR400-MAJOR B-5))
+       ((UNIT B01) (FR500-MAJOR B-5) (FR550-MAJOR B-5) (FR400-MAJOR B-5))
        (.str (.sym prefix cc) "$pack $ICCi_3,$CRj_int")
        (+ pack (.sym ICC_ cc) CRj_int op (misc-null-5) ICCi_3)
        (check-semantics (cond ICCi_3) CRj_int)
        ((fr400 (unit u-check))
-	(fr500 (unit u-check)))
+	(fr500 (unit u-check)) (fr550 (unit u-check)))
   )
 )
 
 (dni ckra
      "check integer cc always"
-     ((UNIT B01) (FR500-MAJOR B-5) (FR400-MAJOR B-5))
+     ((UNIT B01) (FR500-MAJOR B-5) (FR550-MAJOR B-5) (FR400-MAJOR B-5))
      "ckra$pack $CRj_int"
      (+ pack ICC_ra CRj_int OP_08 (misc-null-5) (ICCi_3-null))
      (check-semantics (const BI 1) CRj_int)
      ((fr400 (unit u-check))
-      (fr500 (unit u-check)))
+      (fr500 (unit u-check)) (fr550 (unit u-check)))
 )
 
 (dni ckno
      "check integer cc never"
-     ((UNIT B01) (FR500-MAJOR B-5) (FR400-MAJOR B-5))
+     ((UNIT B01) (FR500-MAJOR B-5) (FR550-MAJOR B-5) (FR400-MAJOR B-5))
      "ckno$pack $CRj_int"
      (+ pack ICC_nev CRj_int OP_08 (misc-null-5) (ICCi_3-null))
      (check-semantics (const BI 0) CRj_int)
      ((fr400 (unit u-check))
-      (fr500 (unit u-check)))
+      (fr500 (unit u-check)) (fr550 (unit u-check)))
 )
 
 (check-int-condition-code ck eq  OP_08 Ieq  "check integer cc equal")
@@ -5418,33 +5981,33 @@
 (define-pmacro (check-float-condition-code prefix cc op cond comment)
   (dni (.sym prefix cc)
        (comment)
-       ((UNIT B01) (FR500-MAJOR B-5) (FR400-MAJOR B-5) FR-ACCESS)
+       ((UNIT B01) (FR500-MAJOR B-5) (FR550-MAJOR B-5) (FR400-MAJOR B-5) FR-ACCESS)
        (.str (.sym prefix cc) "$pack $FCCi_3,$CRj_float")
        (+ pack (.sym FCC_ cc) CRj_float op (misc-null-5) FCCi_3)
        (check-semantics (cond FCCi_3) CRj_float)
        ((fr400 (unit u-check))
-	(fr500 (unit u-check)))
+	(fr500 (unit u-check)) (fr550 (unit u-check)))
   )
 )
 
 (dni fckra
      "check float cc always"
-     ((UNIT B01) (FR500-MAJOR B-5) (FR400-MAJOR B-5) FR-ACCESS)
+     ((UNIT B01) (FR500-MAJOR B-5) (FR550-MAJOR B-5) (FR400-MAJOR B-5) FR-ACCESS)
      "fckra$pack $CRj_float"
      (+ pack FCC_ra CRj_float OP_09 (misc-null-5) FCCi_3)
      (check-semantics (const BI 1) CRj_float)
      ((fr400 (unit u-check))
-      (fr500 (unit u-check)))
+      (fr500 (unit u-check)) (fr550 (unit u-check)))
 )
 
 (dni fckno
      "check float cc never"
-     ((UNIT B01) (FR500-MAJOR B-5) (FR400-MAJOR B-5) FR-ACCESS)
+     ((UNIT B01) (FR500-MAJOR B-5) (FR550-MAJOR B-5) (FR400-MAJOR B-5) FR-ACCESS)
      "fckno$pack $CRj_float"
      (+ pack FCC_nev CRj_float OP_09 (misc-null-5) FCCi_3)
      (check-semantics (const BI 0) CRj_float)
      ((fr400 (unit u-check))
-      (fr500 (unit u-check)))
+      (fr500 (unit u-check)) (fr550 (unit u-check)))
 )
 
 (check-float-condition-code fck ne  OP_09 Fne  "check float cc not equal")
@@ -5465,7 +6028,7 @@
 (define-pmacro (conditional-check-int-condition-code prefix cc op ope test comment)
   (dni (.sym prefix cc)
        (comment)
-       ((UNIT B01) (FR500-MAJOR B-5) (FR400-MAJOR B-5) CONDITIONAL)
+       ((UNIT B01) (FR500-MAJOR B-5) (FR550-MAJOR B-5) (FR400-MAJOR B-5) CONDITIONAL)
        (.str (.sym prefix cc) "$pack $ICCi_3,$CRj_int,$CCi,$cond")
        (+ pack (.sym ICC_ cc) CRj_int op (rs-null) CCi cond ope
 	  (misc-null-9) ICCi_3)
@@ -5473,13 +6036,13 @@
 	   (check-semantics (test ICCi_3) CRj_int)
 	   (set CRj_int (cr-undefined)))
        ((fr400 (unit u-check))
-	(fr500 (unit u-check)))
+	(fr500 (unit u-check)) (fr550 (unit u-check)))
   )
 )
 
 (dni cckra
      "conditional check integer cc always"
-     ((UNIT B01) (FR500-MAJOR B-5) (FR400-MAJOR B-5) CONDITIONAL)
+     ((UNIT B01) (FR500-MAJOR B-5) (FR550-MAJOR B-5) (FR400-MAJOR B-5) CONDITIONAL)
      "cckra$pack $CRj_int,$CCi,$cond"
      (+ pack ICC_ra CRj_int OP_6A (rs-null) CCi cond OPE4_0
 	(misc-null-9) (ICCi_3-null))
@@ -5487,12 +6050,12 @@
 	 (check-semantics (const BI 1) CRj_int)
 	 (set CRj_int (cr-undefined)))
      ((fr400 (unit u-check))
-      (fr500 (unit u-check)))
+      (fr500 (unit u-check)) (fr550 (unit u-check)))
 )
 
 (dni cckno
      "conditional check integer cc never"
-     ((UNIT B01) (FR500-MAJOR B-5) (FR400-MAJOR B-5) CONDITIONAL)
+     ((UNIT B01) (FR500-MAJOR B-5) (FR550-MAJOR B-5) (FR400-MAJOR B-5) CONDITIONAL)
      "cckno$pack $CRj_int,$CCi,$cond"
      (+ pack ICC_nev CRj_int OP_6A (rs-null) CCi cond OPE4_0
 	(misc-null-9) (ICCi_3-null))
@@ -5500,7 +6063,7 @@
 	 (check-semantics (const BI 0) CRj_int)
 	 (set CRj_int (cr-undefined)))
      ((fr400 (unit u-check))
-      (fr500 (unit u-check)))
+      (fr500 (unit u-check)) (fr550 (unit u-check)))
 )
 
 (conditional-check-int-condition-code cck eq  OP_6A OPE4_0 Ieq  "check integer cc equal")
@@ -5521,7 +6084,7 @@
 (define-pmacro (conditional-check-float-condition-code prefix cc op ope test comment)
   (dni (.sym prefix cc)
        (comment)
-       ((UNIT B01) (FR500-MAJOR B-5) (FR400-MAJOR B-5) CONDITIONAL FR-ACCESS)
+       ((UNIT B01) (FR500-MAJOR B-5) (FR550-MAJOR B-5) (FR400-MAJOR B-5) CONDITIONAL FR-ACCESS)
        (.str (.sym prefix cc) "$pack $FCCi_3,$CRj_float,$CCi,$cond")
        (+ pack (.sym FCC_ cc) CRj_float op (rs-null) CCi cond ope
 	  (misc-null-9) FCCi_3)
@@ -5529,13 +6092,13 @@
 	   (check-semantics (test FCCi_3) CRj_float)
 	   (set CRj_float (cr-undefined)))
        ((fr400 (unit u-check))
-	(fr500 (unit u-check)))
+	(fr500 (unit u-check)) (fr550 (unit u-check)))
   )
 )
 
 (dni cfckra
      "conditional check float cc always"
-     ((UNIT B01) (FR500-MAJOR B-5) (FR400-MAJOR B-5) CONDITIONAL FR-ACCESS)
+     ((UNIT B01) (FR500-MAJOR B-5) (FR550-MAJOR B-5) (FR400-MAJOR B-5) CONDITIONAL FR-ACCESS)
      "cfckra$pack $CRj_float,$CCi,$cond"
      (+ pack FCC_ra CRj_float OP_6A (rs-null) CCi cond OPE4_1
 	(misc-null-9) (FCCi_3-null))
@@ -5543,12 +6106,12 @@
 	 (check-semantics (const BI 1) CRj_float)
 	 (set CRj_float (cr-undefined)))
      ((fr400 (unit u-check))
-      (fr500 (unit u-check)))
+      (fr500 (unit u-check)) (fr550 (unit u-check)))
 )
 
 (dni cfckno
      "conditional check float cc never"
-     ((UNIT B01) (FR500-MAJOR B-5) (FR400-MAJOR B-5) CONDITIONAL FR-ACCESS)
+     ((UNIT B01) (FR500-MAJOR B-5) (FR550-MAJOR B-5) (FR400-MAJOR B-5) CONDITIONAL FR-ACCESS)
      "cfckno$pack $CRj_float,$CCi,$cond"
      (+ pack FCC_nev CRj_float OP_6A (rs-null) CCi cond OPE4_1
 	(misc-null-9) (FCCi_3-null))
@@ -5556,7 +6119,7 @@
 	 (check-semantics (const BI 0) CRj_float)
 	 (set CRj_float (cr-undefined)))
      ((fr400 (unit u-check))
-      (fr500 (unit u-check)))
+      (fr500 (unit u-check)) (fr550 (unit u-check)))
 )
 
 (conditional-check-float-condition-code cfck ne  OP_6A OPE4_1 Fne  "check float cc not equal")
@@ -5576,13 +6139,13 @@
 
 (dni cjmpl
      "conditional jump and link"
-     ((UNIT I0) (FR500-MAJOR I-5) (FR400-MAJOR I-5) CONDITIONAL)
+     ((UNIT I0) (FR500-MAJOR I-5) (FR550-MAJOR I-6) (FR400-MAJOR I-5) CONDITIONAL)
      "cjmpl$pack @($GRi,$GRj),$CCi,$cond"
      (+ pack (misc-null-1) (LI-off) OP_6A GRi CCi cond OPE4_2 GRj)
      (if (eq CCi (or cond 2))
 	 (jump-and-link-semantics GRi GRj LI))
      ((fr400 (unit u-branch))
-      (fr500 (unit u-branch)))
+      (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (dni ccalll
@@ -5599,7 +6162,7 @@
 (define-pmacro (cache-invalidate name cache all op ope profile comment)
   (dni name
        (comment)
-       ((UNIT C) (FR500-MAJOR C-2) (FR400-MAJOR C-2))
+       ((UNIT C) (FR500-MAJOR C-2) (FR550-MAJOR C-2) (FR400-MAJOR C-2))
        (.str name "$pack @($GRi,$GRj)")
        (+ pack (rd-null) op GRi ope GRj)
        (c-call VOID (.str "@cpu@_" cache "_cache_invalidate") (add GRi GRj) all)
@@ -5608,16 +6171,16 @@
 )
 
 (cache-invalidate ici insn 0 OP_03 OPE1_38
-		  ((fr400 (unit u-ici)) (fr500 (unit u-ici)))
+		  ((fr400 (unit u-ici)) (fr500 (unit u-ici)) (fr550 (unit u-ici)))
 		  "invalidate insn cache")
 (cache-invalidate dci data 0 OP_03 OPE1_3C
-		  ((fr400 (unit u-dci)) (fr500 (unit u-dci)))
+		  ((fr400 (unit u-dci)) (fr500 (unit u-dci)) (fr550 (unit u-dci)))
 		  "invalidate data cache")
 
 (define-pmacro (cache-invalidate-entry name cache op ope profile comment)
   (dni name
        (comment)
-       ((UNIT C) (FR400-MAJOR C-2) (MACH fr400))
+       ((UNIT C) (FR400-MAJOR C-2) (FR550-MAJOR C-2) (MACH fr400,fr550))
        (.str name "$pack @($GRi,$GRj),$ae")
        (+ pack (misc-null-1) ae op GRi ope GRj)
        (if (eq ae 0)
@@ -5628,31 +6191,31 @@
 )
 
 (cache-invalidate-entry icei insn OP_03 OPE1_39
-			((fr400 (unit u-ici)))
+			((fr400 (unit u-ici)) (fr550 (unit u-ici)))
 			"invalidate insn cache entry")
 (cache-invalidate-entry dcei data OP_03 OPE1_3A
-			((fr400 (unit u-dci)))
+			((fr400 (unit u-dci)) (fr550 (unit u-dci)))
 			"invalidate data cache entry")
 
 (dni dcf
      "Data cache flush"
-     ((UNIT C) (FR500-MAJOR C-2) (FR400-MAJOR C-2))
+     ((UNIT C) (FR500-MAJOR C-2) (FR550-MAJOR C-2) (FR400-MAJOR C-2))
      "dcf$pack @($GRi,$GRj)"
      (+ pack (rd-null) OP_03 GRi OPE1_3D GRj)
      (c-call VOID "@cpu@_data_cache_flush" (add GRi GRj) 0)
      ((fr400 (unit u-dcf))
-      (fr500 (unit u-dcf)))
+      (fr500 (unit u-dcf)) (fr550 (unit u-dcf)))
 )
 
 (dni dcef
      "Data cache entry flush"
-     ((UNIT C) (FR400-MAJOR C-2) (MACH fr400))
+     ((UNIT C) (FR400-MAJOR C-2) (FR550-MAJOR C-2) (MACH fr400,fr550))
      "dcef$pack @($GRi,$GRj),$ae"
      (+ pack (misc-null-1) ae OP_03 GRi OPE1_3B GRj)
      (if (eq ae 0)
 	 (c-call VOID "@cpu@_data_cache_flush" (add GRi GRj) -1)
 	 (c-call VOID "@cpu@_data_cache_flush" (add GRi GRj) ae))
-     ((fr400 (unit u-dcf)))
+     ((fr400 (unit u-dcf)) (fr550 (unit u-dcf)))
 )
 
 (define-pmacro (write-TLB name insn op ope comment)
@@ -5694,17 +6257,17 @@
   )
 )
 
-(cache-preload icpl insn C () OP_03 OPE1_30
-	       ((fr400 (unit u-icpl)) (fr500 (unit u-icpl)))
+(cache-preload icpl insn C ((FR550-MAJOR C-2)) OP_03 OPE1_30
+	       ((fr400 (unit u-icpl)) (fr500 (unit u-icpl)) (fr550 (unit u-icpl)))
 	       "preload insn cache")
-(cache-preload dcpl data DCPL () OP_03 OPE1_34
-	       ((fr400 (unit u-dcpl)) (fr500 (unit u-dcpl)))
+(cache-preload dcpl data DCPL ((FR550-MAJOR I-8)) OP_03 OPE1_34
+	       ((fr400 (unit u-dcpl)) (fr500 (unit u-dcpl)) (fr550 (unit u-dcpl)))
 	       "preload data cache")
 
 (define-pmacro (cache-unlock name cache op ope profile comment)
   (dni name
        (comment)
-       ((UNIT C) (FR500-MAJOR C-2) (FR400-MAJOR C-2))
+       ((UNIT C) (FR500-MAJOR C-2) (FR550-MAJOR C-2) (FR400-MAJOR C-2))
        (.str name "$pack $GRi")
        (+ pack (rd-null) op GRi ope (GRj-null))
        (c-call VOID (.str "@cpu@_" cache "_cache_unlock") GRi)
@@ -5713,16 +6276,16 @@
 )
 
 (cache-unlock icul insn OP_03 OPE1_31
-	      ((fr400 (unit u-icul)) (fr500 (unit u-icul)))
+	      ((fr400 (unit u-icul)) (fr500 (unit u-icul)) (fr550 (unit u-icul)))
 	      "unlock insn cache")
 (cache-unlock dcul data OP_03 OPE1_35
-	      ((fr400 (unit u-dcul)) (fr500 (unit u-dcul)))
+	      ((fr400 (unit u-dcul)) (fr500 (unit u-dcul)) (fr550 (unit u-dcul)))
 	      "unlock data cache")
 
 (define-pmacro (barrier name insn op ope profile comment)
   (dni name
        (comment)
-       ((UNIT C) (FR500-MAJOR C-2) (FR400-MAJOR C-2))
+       ((UNIT C) (FR500-MAJOR C-2) (FR550-MAJOR C-2) (FR400-MAJOR C-2))
        (.str insn "$pack")
        (+ pack (rd-null) op (rs-null) ope (GRj-null))
        (nop) ; sufficient implementation
@@ -5759,7 +6322,7 @@
 (define-pmacro (clear-ne-flag-r name op ope reg is_float attr profile comment)
   (dni name
        (comment)
-       ((UNIT I01) (FR500-MAJOR I-6) (MACH simple,tomcat,fr500,frv) attr)
+       ((UNIT I01) (FR500-MAJOR I-6) (FR550-MAJOR I-7) (MACH simple,tomcat,fr500,fr550,frv) attr)
        (.str name "$pack $" reg "k")
        (+ pack (.sym reg k) op (rs-null) ope (GRj-null))
        (sequence ()
@@ -5771,16 +6334,16 @@
 )
 
 (clear-ne-flag-r clrgr OP_0A OPE1_00 GR 0 NA
-		 ((fr500 (unit u-clrgr)))
+		 ((fr500 (unit u-clrgr)) (fr550 (unit u-clrgr)))
 		 "Clear GR NE flag")
 (clear-ne-flag-r clrfr OP_0A OPE1_02 FR 1 FR-ACCESS
-		 ((fr500 (unit u-clrfr)))
+		 ((fr500 (unit u-clrfr)) (fr550 (unit u-clrfr)))
 		 "Clear FR NE flag")
 
 (define-pmacro (clear-ne-flag-all name op ope is_float attr profile comment)
   (dni name
        (comment)
-       ((UNIT I01) (FR500-MAJOR I-6) (MACH simple,tomcat,fr500,frv) attr)
+       ((UNIT I01) (FR500-MAJOR I-6) (FR550-MAJOR I-7) (MACH simple,tomcat,fr500,fr550,frv) attr)
        (.str name "$pack")
        (+ pack (rd-null) op (rs-null) ope (GRj-null))
        (clear-ne-flag-semantics -1 is_float)
@@ -5789,10 +6352,10 @@
 )
 
 (clear-ne-flag-all clrga OP_0A OPE1_01 0 NA
-		   ((fr500 (unit u-clrgr)))
+		 ((fr500 (unit u-clrgr)) (fr550 (unit u-clrgr)))
 		   "Clear GR NE flag ALL")
 (clear-ne-flag-all clrfa OP_0A OPE1_03 1 FR-ACCESS
-		   ((fr500 (unit u-clrfr)))
+		 ((fr500 (unit u-clrfr)) (fr550 (unit u-clrfr)))
 		   "Clear FR NE flag ALL")
 
 (define-pmacro (commit-semantics target_index is_float)
@@ -5802,11 +6365,11 @@
 (define-pmacro (commit-r name op ope reg is_float attr comment)
   (dni name
        (comment)
-       ((UNIT I01) (FR500-MAJOR I-6) (MACH frv,fr500) attr)
+       ((UNIT I01) (FR500-MAJOR I-6) (FR550-MAJOR I-7) (MACH frv,fr500,fr550) attr)
        (.str name "$pack $" reg "k")
        (+ pack (.sym reg k) op (rs-null) ope (GRj-null))
        (commit-semantics (index-of (.sym reg k)) is_float)
-       ((fr500 (unit u-commit)))
+       ((fr500 (unit u-commit)) (fr550 (unit u-commit)))
   )
 )
 
@@ -5816,11 +6379,11 @@
 (define-pmacro (commit name op ope is_float attr comment)
   (dni name
        (comment)
-       ((UNIT I01) (FR500-MAJOR I-6) (MACH frv,fr500) attr)
+       ((UNIT I01) (FR500-MAJOR I-6) (FR550-MAJOR I-7) (MACH frv,fr500,fr550) attr)
        (.str name "$pack")
        (+ pack (rd-null) op (rs-null) ope (GRj-null))
        (commit-semantics -1 is_float)
-       ((fr500 (unit u-commit)))
+       ((fr500 (unit u-commit)) (fr550 (unit u-commit)))
   )
 )
 
@@ -5835,15 +6398,15 @@
        (.str name "$pack $" src ",$" targ)
        (+ pack targ op (rs-null) ope src)
        (set targ (conv mode src))
-       ((fr500 (unit u-float-convert)))
+       ((fr500 (unit u-float-convert)) (fr550 (unit u-float-convert)))
   )
 )
 
 (floating-point-conversion fitos OP_79 OPE1_00 float SF FRintj FRk
-			   ((MACH simple,tomcat,fr500,frv))
+			   ((FR550-MAJOR F-2) (MACH simple,tomcat,fr500,fr550,frv))
 			   "Convert Integer to Single")
 (floating-point-conversion fstoi OP_79 OPE1_01 fix   SI FRj FRintk
-			   ((MACH simple,tomcat,fr500,frv))
+			   ((FR550-MAJOR F-2) (MACH simple,tomcat,fr500,fr550,frv))
 			   "Convert Single  to Integer")
 (floating-point-conversion fitod OP_7A OPE1_00 float DF FRintj FRdoublek
 			   ((MACH frv))
@@ -5894,12 +6457,12 @@
 		name op ope conv mode src targ comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR F-1) (MACH simple,tomcat,fr500,frv))
+       ((UNIT FMALL) (FR500-MAJOR F-1) (FR550-MAJOR F-2) (MACH simple,tomcat,fr500,fr550,frv))
        (.str name "$pack $" src ",$" targ ",$CCi,$cond")
        (+ pack targ op (rs-null) CCi cond ope src)
        (if (eq CCi (or cond 2))
 	   (set targ (conv mode src)))
-       ((fr500 (unit u-float-convert)))
+       ((fr500 (unit u-float-convert)) (fr550 (unit u-float-convert)))
   )
 )
 
@@ -5910,13 +6473,13 @@
 		name op ope conv mode src targ comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR F-1) (MACH simple,tomcat,fr500,frv))
+       ((UNIT FMALL) (FR500-MAJOR F-1) (FR550-MAJOR F-2) (MACH simple,tomcat,fr500,fr550,frv))
        (.str name "$pack $" src ",$" targ)
        (+ pack targ op (rs-null) ope src)
        (sequence ()
 		 (c-call VOID "@cpu@_set_ne_index" (index-of targ))
 		 (set targ (conv mode src)))
-       ((fr500 (unit u-float-convert)))
+       ((fr500 (unit u-float-convert)) (fr550 (unit u-float-convert)))
   )
 )
 
@@ -5925,14 +6488,14 @@
 
 (register-transfer fmovs OP_79 OPE1_02
 		   FRj FRk FM01
-		   ((FR500-MAJOR F-1) (MACH simple,tomcat,fr500,frv))
+		   ((FR500-MAJOR F-1) (FR550-MAJOR F-2) (MACH simple,tomcat,fr500,fr550,frv))
 		   ((fr500 (unit u-fr2fr)))
 		   "Move Single Float")
 (register-transfer fmovd OP_7A OPE1_02
 		   ; TODO -- unit doesn't handle extra register
 		   FRdoublej FRdoublek FM01
 		   ((FR500-MAJOR F-1) (MACH frv))
-		   ((fr500 (unit u-fr2fr)))
+		   ((fr500 (unit u-fr2fr)) (fr550 (unit u-fr2fr)))
 		   "Move Double Float")
 
 (dni fdmovs
@@ -5948,9 +6511,9 @@
 )
 
 (conditional-register-transfer cfmovs OP_6C OPE4_0 FRj FRk FM01
-			       ((FR500-MAJOR F-1)
-				(MACH simple,tomcat,fr500,frv))
-			       ((fr500 (unit u-fr2fr)))
+			       ((FR500-MAJOR F-1) (FR550-MAJOR F-2)
+				(MACH simple,tomcat,fr500,fr550,frv))
+			       ((fr500 (unit u-fr2fr)) (fr550 (unit u-fr2fr)))
 			       "Conditional move Single Float")
 
 (define-pmacro (floating-point-neg name src targ op ope attr comment)
@@ -5960,11 +6523,11 @@
        (.str name "$pack $" src ",$" targ)
        (+ pack src op (rs-null) ope targ)
        (set targ (neg src))
-       ((fr500 (unit u-float-arith)))
+       ((fr500 (unit u-float-arith)) (fr550 (unit u-float-arith)))
   )
 )
 
-(floating-point-neg fnegs FRj FRk OP_79 OPE1_03 ((MACH simple,tomcat,fr500,frv)) "Floating point negate, single")
+(floating-point-neg fnegs FRj FRk OP_79 OPE1_03 ((FR550-MAJOR F-2) (MACH simple,tomcat,fr500,fr550,frv)) "Floating point negate, single")
 (floating-point-neg fnegd FRdoublej FRdoublek OP_7A OPE1_03 ((MACH frv)) "Floating point negate, double")
 
 (dni fdnegs
@@ -5980,12 +6543,12 @@
 
 (dni cfnegs
      "Conditional floating point negate, single"
-     ((UNIT FMALL) (FR500-MAJOR F-1) (MACH simple,tomcat,fr500,frv))
+     ((UNIT FMALL) (FR500-MAJOR F-1) (FR550-MAJOR F-2) (MACH simple,tomcat,fr500,fr550,frv))
      "cfnegs$pack $FRj,$FRk,$CCi,$cond"
      (+ pack FRj OP_6C (rs-null) CCi cond OPE4_1 FRk)
      (if (eq CCi (or cond 2))
 	 (set FRk (neg FRj)))
-     ((fr500 (unit u-float-arith)))
+     ((fr500 (unit u-float-arith)) (fr550 (unit u-float-arith)))
 )
 
 (define-pmacro (float-abs name src targ op ope attr comment)
@@ -5995,11 +6558,11 @@
        (.str name "$pack $" src ",$" targ )
        (+ pack targ op (rs-null) ope src)
        (set targ (abs src))
-       ((fr500 (unit u-float-arith)))
+       ((fr500 (unit u-float-arith)) (fr550 (unit u-float-arith)))
   )
 )
 
-(float-abs fabss FRj FRk OP_79 OPE1_04 ((MACH simple,tomcat,fr500,frv)) "Float absolute value, single")
+(float-abs fabss FRj FRk OP_79 OPE1_04 ((FR550-MAJOR F-2) (MACH simple,tomcat,fr500,fr550,frv)) "Float absolute value, single")
 (float-abs fabsd FRdoublej FRdoublek OP_7A OPE1_04 ((MACH frv)) "Float absolute value, double")
 
 (dni fdabss
@@ -6015,21 +6578,21 @@
 
 (dni cfabss
      "Conditional floating point absolute value, single"
-     ((UNIT FMALL) (FR500-MAJOR F-1) (MACH simple,tomcat,fr500,frv))
+     ((UNIT FMALL) (FR500-MAJOR F-1) (FR550-MAJOR F-2) (MACH simple,tomcat,fr500,fr550,frv))
      "cfabss$pack $FRj,$FRk,$CCi,$cond"
      (+ pack FRj OP_6C (rs-null) CCi cond OPE4_2 FRk)
      (if (eq CCi (or cond 2))
 	 (set FRk (abs FRj)))
-     ((fr500 (unit u-float-arith)))
+     ((fr500 (unit u-float-arith)) (fr550 (unit u-float-arith)))
 )
 
 (dni fsqrts
      "Square root single"
-     ((UNIT FM01) (FR500-MAJOR F-4) (MACH simple,tomcat,fr500,frv))
+     ((UNIT FM01) (FR500-MAJOR F-4) (FR550-MAJOR F-3) (MACH simple,tomcat,fr500,fr550,frv))
      "fsqrts$pack $FRj,$FRk"
      (+ pack FRk OP_79 (rs-null) OPE1_05 FRj)
      (set FRk (sqrt SF FRj))
-     ((fr500 (unit u-float-sqrt)))
+     ((fr500 (unit u-float-sqrt)) (fr550 (unit u-float-sqrt)))
 )
 
 (dni fdsqrts
@@ -6067,47 +6630,48 @@
 
 (dni cfsqrts
      "Conditional square root single"
-     ((UNIT FM01) (FR500-MAJOR F-4) (MACH simple,tomcat,fr500,frv))
+     ((UNIT FM01) (FR500-MAJOR F-4) (FR550-MAJOR F-3) (MACH simple,tomcat,fr500,fr550,frv))
      "cfsqrts$pack $FRj,$FRk,$CCi,$cond"
      (+ pack FRk OP_6E (rs-null) CCi cond OPE4_2 FRj)
      (if (eq CCi (or cond 2))
 	 (set FRk (sqrt SF FRj)))
-     ((fr500 (unit u-float-sqrt)))
+     ((fr500 (unit u-float-sqrt)) (fr550 (unit u-float-sqrt)))
 )
 
 (dni nfsqrts
      "Non exception square root, single"
-     ((UNIT FM01) (FR500-MAJOR F-4) (MACH simple,tomcat,fr500,frv))
+     ((UNIT FM01) (FR500-MAJOR F-4) (FR550-MAJOR F-3) (MACH simple,tomcat,fr500,fr550,frv))
      "nfsqrts$pack $FRj,$FRk"
      (+ pack FRk OP_79 (rs-null) OPE1_25 FRj)
      (sequence ()
 	       (c-call VOID "@cpu@_set_ne_index" (index-of FRk))
 	       (set FRk (sqrt SF FRj)))
-     ((fr500 (unit u-float-sqrt)))
+     ((fr500 (unit u-float-sqrt)) (fr550 (unit u-float-sqrt)))
 )
 
 (define-pmacro (float-binary-op-s name pipe attr operation op ope comment)
   (dni name
        (comment)
-       (.splice (UNIT pipe) (MACH simple,tomcat,fr500,frv) (.unsplice attr))
+       (.splice (UNIT pipe) (MACH simple,tomcat,fr500,fr550,frv) (.unsplice attr))
        (.str name "$pack $FRi,$FRj,$FRk")
        (+ pack FRk op FRi ope FRj)
        (set FRk (operation FRi FRj))
-       ((fr500 (unit u-float-arith)))
+       ((fr500 (unit u-float-arith)) (fr550 (unit u-float-arith)))
   )
 )
 
-(float-binary-op-s fadds FMALL ((FR500-MAJOR F-2)) add OP_79 OPE1_06 "add single float")
-(float-binary-op-s fsubs FMALL ((FR500-MAJOR F-2)) sub OP_79 OPE1_07 "sub single float")
-(float-binary-op-s fmuls FM01  ((FR500-MAJOR F-3)) mul OP_79 OPE1_08 "mul single float")
+(float-binary-op-s fadds FMALL ((FR500-MAJOR F-2) (FR550-MAJOR F-2)) add OP_79 OPE1_06 "add single float")
+(float-binary-op-s fsubs FMALL ((FR500-MAJOR F-2) (FR550-MAJOR F-2)) sub OP_79 OPE1_07 "sub single float")
+(float-binary-op-s fmuls FM01  ((FR500-MAJOR F-3) (FR550-MAJOR F-3)) mul OP_79 OPE1_08 "mul single float")
 
 (dni fdivs
      "div single float"
-     ((UNIT FM01) (FR500-MAJOR F-4) (MACH simple,tomcat,fr500,frv))
+     ((UNIT FM01) (FR500-MAJOR F-4) (FR550-MAJOR F-3) (MACH simple,tomcat,fr500,fr550,frv))
      "fdivs$pack $FRi,$FRj,$FRk"
      (+ pack FRk OP_79 FRi OPE1_09 FRj)
      (set FRk (div FRi FRj))
-     ((fr500 (unit u-float-div)))
+     ((fr500 (unit u-float-div))
+      (fr550 (unit u-float-div)))
 )
 
 (define-pmacro (float-binary-op-d name operation op ope major comment)
@@ -6129,7 +6693,7 @@
 (define-pmacro (conditional-float-binary-op name pipe attr operation op ope profile comment)
   (dni name
        (comment)
-       (.splice (UNIT pipe) (MACH simple,tomcat,fr500,frv)
+       (.splice (UNIT pipe) (MACH simple,tomcat,fr500,fr550,frv)
 		(.unsplice attr))
        (.str name "$pack $FRi,$FRj,$FRk,$CCi,$cond")
        (+ pack FRk op FRi CCi cond ope FRj)
@@ -6139,23 +6703,23 @@
   )
 )
 
-(conditional-float-binary-op cfadds FMALL ((FR500-MAJOR F-2)) add OP_6D OPE4_0
-			     ((fr500 (unit u-float-arith)))
+(conditional-float-binary-op cfadds FMALL ((FR500-MAJOR F-2) (FR550-MAJOR F-2)) add OP_6D OPE4_0
+			     ((fr500 (unit u-float-arith)) (fr550 (unit u-float-arith)))
 			     "cond add single")
-(conditional-float-binary-op cfsubs FMALL ((FR500-MAJOR F-2)) sub OP_6D OPE4_1
-			     ((fr500 (unit u-float-arith)))
+(conditional-float-binary-op cfsubs FMALL ((FR500-MAJOR F-2) (FR550-MAJOR F-2)) sub OP_6D OPE4_1
+			     ((fr500 (unit u-float-arith)) (fr550 (unit u-float-arith)))
 			     "cond sub single")
-(conditional-float-binary-op cfmuls FM01  ((FR500-MAJOR F-3)) mul OP_6E OPE4_0
-			     ((fr500 (unit u-float-arith)))
+(conditional-float-binary-op cfmuls FM01  ((FR500-MAJOR F-3) (FR550-MAJOR F-3)) mul OP_6E OPE4_0
+			     ((fr500 (unit u-float-arith)) (fr550 (unit u-float-arith)))
 			     "cond mul single")
-(conditional-float-binary-op cfdivs FM01  ((FR500-MAJOR F-4)) div OP_6E OPE4_1
-			     ((fr500 (unit u-float-div)))
+(conditional-float-binary-op cfdivs FM01  ((FR500-MAJOR F-4) (FR550-MAJOR F-3)) div OP_6E OPE4_1
+			     ((fr500 (unit u-float-div)) (fr550 (unit u-float-div)))
 			     "cond div single")
 
 (define-pmacro (ne-float-binary-op name pipe attr operation op ope profile comment)
   (dni name
        (comment)
-       (.splice (UNIT pipe) (MACH simple,tomcat,fr500,frv)
+       (.splice (UNIT pipe) (MACH simple,tomcat,fr500,fr550,frv)
 		(.unsplice attr))
        (.str name "$pack $FRi,$FRj,$FRk")
        (+ pack FRk op FRi ope FRj)
@@ -6166,17 +6730,17 @@
   )
 )
 
-(ne-float-binary-op nfadds FMALL ((FR500-MAJOR F-2)) add OP_79 OPE1_26
-		    ((fr500 (unit u-float-arith)))
+(ne-float-binary-op nfadds FMALL ((FR500-MAJOR F-2) (FR550-MAJOR F-2)) add OP_79 OPE1_26
+		    ((fr500 (unit u-float-arith)) (fr550 (unit u-float-arith)))
 		    "ne add single")
-(ne-float-binary-op nfsubs FMALL ((FR500-MAJOR F-2)) sub OP_79 OPE1_27
-		    ((fr500 (unit u-float-arith)))
+(ne-float-binary-op nfsubs FMALL ((FR500-MAJOR F-2) (FR550-MAJOR F-2)) sub OP_79 OPE1_27
+		    ((fr500 (unit u-float-arith)) (fr550 (unit u-float-arith)))
 		    "ne sub single")
-(ne-float-binary-op nfmuls FM01  ((FR500-MAJOR F-3)) mul OP_79 OPE1_28
-		    ((fr500 (unit u-float-arith)))
+(ne-float-binary-op nfmuls FM01  ((FR500-MAJOR F-3) (FR550-MAJOR F-3)) mul OP_79 OPE1_28
+		    ((fr500 (unit u-float-arith)) (fr550 (unit u-float-arith)))
 		    "ne mul single")
-(ne-float-binary-op nfdivs FM01  ((FR500-MAJOR F-4)) div OP_79 OPE1_29
-		    ((fr500 (unit u-float-div)))
+(ne-float-binary-op nfdivs FM01  ((FR500-MAJOR F-4) (FR550-MAJOR F-3)) div OP_79 OPE1_29
+		    ((fr500 (unit u-float-div)) (fr550 (unit u-float-div)))
 		    "ne div single")
 
 (define-pmacro (fcc-eq) 8)
@@ -6196,11 +6760,11 @@
 
 (dni fcmps
      "compare single float"
-     ((UNIT FMALL) (FR500-MAJOR F-2) (MACH simple,tomcat,fr500,frv))
+     ((UNIT FMALL) (FR500-MAJOR F-2) (FR550-MAJOR F-2) (MACH simple,tomcat,fr500,fr550,frv))
      "fcmps$pack $FRi,$FRj,$FCCi_2"
      (+ pack (cond-null) FCCi_2 OP_79 FRi OPE1_0A FRj)
      (compare-and-set-fcc FRi FRj FCCi_2)
-     ((fr500 (unit u-float-compare)))
+     ((fr500 (unit u-float-compare)) (fr550 (unit u-float-compare)))
 )
 
 (dni fcmpd
@@ -6214,24 +6778,24 @@
 
 (dni cfcmps
      "Conditional compare single, float"
-     ((UNIT FMALL) (FR500-MAJOR F-2) (MACH simple,tomcat,fr500,frv))
+     ((UNIT FMALL) (FR500-MAJOR F-2) (FR550-MAJOR F-2) (MACH simple,tomcat,fr500,fr550,frv))
      "cfcmps$pack $FRi,$FRj,$FCCi_2,$CCi,$cond"
      (+ pack (cond-null) FCCi_2 OP_6D FRi CCi cond OPE4_2 FRj)
      (if (eq CCi (or cond 2))
 	 (compare-and-set-fcc FRi FRj FCCi_2))
-     ((fr500 (unit u-float-compare)))
+     ((fr500 (unit u-float-compare)) (fr550 (unit u-float-compare)))
 )
 
 (dni fdcmps
      "float dual compare single"
-     ((UNIT FMALL) (FR500-MAJOR F-6) (MACH simple,tomcat,fr500,frv))
+     ((UNIT FMALL) (FR500-MAJOR F-6) (FR550-MAJOR F-4) (MACH simple,tomcat,fr500,fr550,frv))
      "fdcmps$pack $FRi,$FRj,$FCCi_2"
      (+ pack (cond-null) FCCi_2 OP_79 FRi OPE1_1A FRj)
      (sequence ()
 	       (compare-and-set-fcc FRi FRj FCCi_2)
 	       (compare-and-set-fcc (nextreg h-fr FRi 1) (nextreg h-fr FRj 1)
 				    (nextreg h-fccr FCCi_2 1)))
-     ((fr500 (unit u-float-dual-compare)))
+     ((fr500 (unit u-float-dual-compare)) (fr550 (unit u-float-dual-compare)))
 )
 
 (define-pmacro (float-mul-with-add name add_sub arg1 arg2 targ op ope comment)
@@ -6325,11 +6889,11 @@
 		name add_sub arg1 arg2 targ op ope comment)
   (dni name
        (comment)
-       ((UNIT FM01) (FR500-MAJOR F-5) (MACH simple,tomcat,fr500,frv))
+       ((UNIT FM01) (FR500-MAJOR F-5) (FR550-MAJOR F-4) (MACH simple,tomcat,fr500,fr550,frv))
        (.str name "$pack $" arg1 ",$" arg2 ",$" targ)
        (+ pack targ op arg1 ope arg2)
        (float-parallel-mul-add-semantics 1 add_sub arg1 arg2 targ)
-       ((fr500 (unit u-float-dual-arith)))
+       ((fr500 (unit u-float-dual-arith)) (fr550 (unit u-float-dual-arith)))
   )
 )
 
@@ -6395,12 +6959,12 @@
 (define-pmacro (conditional-float-parallel-mul-add name add_sub op ope comment)
   (dni name
        (comment)
-       ((UNIT FM01) (FR500-MAJOR F-5) CONDITIONAL (MACH simple,tomcat,fr500,frv))
+       ((UNIT FM01) (FR500-MAJOR F-5) (FR550-MAJOR F-4) CONDITIONAL (MACH simple,tomcat,fr500,fr550,frv))
        (.str name "$pack $FRi,$FRj,$FRk,$CCi,$cond")
        (+ pack FRk op FRi CCi cond ope FRj)
        (float-parallel-mul-add-semantics (eq CCi (or cond 2))
 					 add_sub FRi FRj FRk)
-       ((fr500 (unit u-float-dual-arith)))
+       ((fr500 (unit u-float-dual-arith)) (fr550 (unit u-float-dual-arith)))
   )
 )
 
@@ -6434,7 +6998,7 @@
 (define-pmacro (ne-float-parallel-mul-add name add_sub op ope comment)
   (dni name
        (comment)
-       ((UNIT FM01) (FR500-MAJOR F-5) (MACH simple,tomcat,fr500,frv))
+       ((UNIT FM01) (FR500-MAJOR F-5) (FR550-MAJOR F-4) (MACH simple,tomcat,fr500,fr550,frv))
        (.str name "$pack $FRi,$FRj,$FRk")
        (+ pack FRk op FRi ope FRj)
        (sequence ()
@@ -6443,7 +7007,7 @@
 		 (c-call VOID "@cpu@_set_ne_index" (add (index-of FRk) 1))
 		 (set (nextreg h-fr FRk 1)
 		      (add_sub (nextreg h-fr FRi 1) (nextreg h-fr FRj 1))))
-       ((fr500 (unit u-float-dual-arith)))
+       ((fr500 (unit u-float-dual-arith)) (fr550 (unit u-float-dual-arith)))
   )
 )
 
@@ -6460,30 +7024,30 @@
 		 (set FRk (oper1 FRi FRj))
 		 (set (nextreg h-fr FRk 1)
 		      (oper2 (nextreg h-fr FRi 1) (nextreg h-fr FRj 1))))
-       ((fr500 (unit u-float-dual-arith)))
+       ((fr500 (unit u-float-dual-arith)) (fr550 (unit u-float-dual-arith)))
   )
 )
 
-(float-dual-arith fdadds ((FR500-MAJOR F-6) (MACH simple,tomcat,fr500,frv)) add add OP_79 OPE1_16 "dual add, single")
-(float-dual-arith fdsubs ((FR500-MAJOR F-6) (MACH simple,tomcat,fr500,frv)) sub sub OP_79 OPE1_17 "dual sub, single")
-(float-dual-arith fdmuls ((FR500-MAJOR F-7) (MACH simple,tomcat,fr500,frv)) mul mul OP_79 OPE1_18 "dual mul, single")
-(float-dual-arith fddivs ((FR500-MAJOR F-7) (MACH frv))                     div div OP_79 OPE1_19 "dual div,single")
-(float-dual-arith fdsads ((FR500-MAJOR F-6) (MACH simple,tomcat,fr500,frv)) add sub OP_79 OPE1_1E "dual add/sub, single")
+(float-dual-arith fdadds ((FR500-MAJOR F-6) (FR550-MAJOR F-4) (MACH simple,tomcat,fr500,fr550,frv)) add add OP_79 OPE1_16 "dual add, single")
+(float-dual-arith fdsubs ((FR500-MAJOR F-6) (FR550-MAJOR F-4) (MACH simple,tomcat,fr500,fr550,frv)) sub sub OP_79 OPE1_17 "dual sub, single")
+(float-dual-arith fdmuls ((FR500-MAJOR F-7) (FR550-MAJOR F-4) (MACH simple,tomcat,fr500,fr550,frv)) mul mul OP_79 OPE1_18 "dual mul, single")
+(float-dual-arith fddivs ((FR500-MAJOR F-7) (MACH frv))                           div div OP_79 OPE1_19 "dual div,single")
+(float-dual-arith fdsads ((FR500-MAJOR F-6) (FR550-MAJOR F-4) (MACH simple,tomcat,fr500,fr550,frv)) add sub OP_79 OPE1_1E "dual add/sub, single")
 
 (dni fdmulcs
      "Float dual cross multiply single"
-     ((UNIT FM01) (FR500-MAJOR F-7) (MACH simple,tomcat,fr500,frv))
+     ((UNIT FM01) (FR500-MAJOR F-7) (FR550-MAJOR F-4) (MACH simple,tomcat,fr500,fr550,frv))
      "fdmulcs$pack $FRi,$FRj,$FRk"
      (+ pack FRk OP_79 FRi OPE1_1F FRj)
      (sequence ()
 	       (set FRk (mul FRi (nextreg h-fr FRj 1)))
 	       (set (nextreg h-fr FRk 1) (mul (nextreg h-fr FRi 1) FRj)))
-     ((fr500 (unit u-float-dual-arith)))
+     ((fr500 (unit u-float-dual-arith)) (fr550 (unit u-float-dual-arith)))
 )
 
 (dni nfdmulcs
      "NE float dual cross multiply single"
-     ((UNIT FM01) (FR500-MAJOR F-7) (MACH simple,tomcat,fr500,frv))
+     ((UNIT FM01) (FR500-MAJOR F-7) (FR550-MAJOR F-4) (MACH simple,tomcat,fr500,fr550,frv))
      "nfdmulcs$pack $FRi,$FRj,$FRk"
      (+ pack FRk OP_79 FRi OPE1_3F FRj)
      (sequence ()
@@ -6491,7 +7055,7 @@
 	       (set FRk (mul FRi (nextreg h-fr FRj 1)))
 	       (c-call VOID "@cpu@_set_ne_index" (add (index-of FRk) 1))
 	       (set (nextreg h-fr FRk 1) (mul (nextreg h-fr FRi 1) FRj)))
-     ((fr500 (unit u-float-dual-arith)))
+     ((fr500 (unit u-float-dual-arith)) (fr550 (unit u-float-dual-arith)))
 )
 
 (define-pmacro (ne-float-dual-arith name attr oper1 oper2 op ope comment)
@@ -6506,15 +7070,15 @@
 		 (c-call VOID "@cpu@_set_ne_index" (add (index-of FRk) 1))
 		 (set (nextreg h-fr FRk 1)
 		      (oper2 (nextreg h-fr FRi 1) (nextreg h-fr FRj 1))))
-       ((fr500 (unit u-float-dual-arith)))
+       ((fr500 (unit u-float-dual-arith)) (fr550 (unit u-float-dual-arith)))
   )
 )
 
-(ne-float-dual-arith nfdadds ((FR500-MAJOR F-6) (MACH simple,tomcat,fr500,frv)) add add OP_79 OPE1_36 "ne dual add, single")
-(ne-float-dual-arith nfdsubs ((FR500-MAJOR F-6) (MACH simple,tomcat,fr500,frv)) sub sub OP_79 OPE1_37 "ne dual sub, single")
-(ne-float-dual-arith nfdmuls ((FR500-MAJOR F-7) (MACH simple,tomcat,fr500,frv)) mul mul OP_79 OPE1_38 "ne dual mul, single")
-(ne-float-dual-arith nfddivs ((FR500-MAJOR F-7) (MACH frv))                     div div OP_79 OPE1_39 "ne dual div,single")
-(ne-float-dual-arith nfdsads ((FR500-MAJOR F-6) (MACH simple,tomcat,fr500,frv)) add sub OP_79 OPE1_3E "ne dual add/sub, single")
+(ne-float-dual-arith nfdadds ((FR500-MAJOR F-6) (FR550-MAJOR F-4) (MACH simple,tomcat,fr500,fr550,frv)) add add OP_79 OPE1_36 "ne dual add, single")
+(ne-float-dual-arith nfdsubs ((FR500-MAJOR F-6) (FR550-MAJOR F-4) (MACH simple,tomcat,fr500,fr550,frv)) sub sub OP_79 OPE1_37 "ne dual sub, single")
+(ne-float-dual-arith nfdmuls ((FR500-MAJOR F-7) (FR550-MAJOR F-4) (MACH simple,tomcat,fr500,fr550,frv)) mul mul OP_79 OPE1_38 "ne dual mul, single")
+(ne-float-dual-arith nfddivs ((FR500-MAJOR F-7) (MACH frv))                           div div OP_79 OPE1_39 "ne dual div,single")
+(ne-float-dual-arith nfdsads ((FR500-MAJOR F-6) (FR550-MAJOR F-4) (MACH simple,tomcat,fr500,fr550,frv)) add sub OP_79 OPE1_3E "ne dual add/sub, single")
 
 (dni nfdcmps
      "non-excepting dual float compare"
@@ -6537,25 +7101,25 @@
 
 (dni mhsetlos
      "Media set lower signed 12 bits"
-     ((UNIT FMALL) (MACH fr400) (FR400-MAJOR M-1))
+     ((UNIT FMALL) (MACH fr400,fr550) (FR550-MAJOR M-5) (FR400-MAJOR M-1))
      "mhsetlos$pack $u12,$FRklo"
      (+ pack FRklo OP_78 OPE1_20 u12)
      (set FRklo u12)
-     ((fr400 (unit u-media-hilo)))
+     ((fr400 (unit u-media-hilo)) (fr550 (unit u-media-set (out FRintk FRklo))))
 )
 
 (dni mhsethis
      "Media set upper signed 12 bits"
-     ((UNIT FMALL) (MACH fr400) (FR400-MAJOR M-1))
+     ((UNIT FMALL) (MACH fr400,fr550) (FR550-MAJOR M-5) (FR400-MAJOR M-1))
      "mhsethis$pack $u12,$FRkhi"
      (+ pack FRkhi OP_78 OPE1_22 u12)
      (set FRkhi u12)
-     ((fr400 (unit u-media-hilo)))
+     ((fr400 (unit u-media-hilo)) (fr550 (unit u-media-set (out FRintk FRkhi))))
 )
 
 (dni mhdsets
      "Media dual set halfword signed 12 bits"
-     ((UNIT FMALL) (MACH fr400) (FR400-MAJOR M-1))
+     ((UNIT FMALL) (MACH fr400,fr550) (FR550-MAJOR M-5) (FR400-MAJOR M-1))
      "mhdsets$pack $u12,$FRintk"
      (+ pack FRintk OP_78 OPE1_24 u12)
      (sequence ()
@@ -6563,7 +7127,7 @@
 	       (set FRintk (c-raw-call SI "frv_ref_SI" FRintk))
 	       (set (halfword hi FRintk 0) u12)
 	       (set (halfword lo FRintk 0) u12))
-     ((fr400 (unit u-media-1)))
+     ((fr400 (unit u-media-1)) (fr550 (unit u-media-set)))
 )
 
 (define-pmacro (set-5-semantics target value)
@@ -6577,11 +7141,11 @@
 (define-pmacro (media-set-5 name hilo op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (MACH fr400) (FR400-MAJOR M-1))
+       ((UNIT FMALL) (MACH fr400,fr550) (FR550-MAJOR M-5) (FR400-MAJOR M-1))
        (.str name "$pack $s5,$FRk" hilo)
        (+ pack (.sym FRk hilo) op (FRi-null) ope (misc-null-11) s5)
        (set-5-semantics (.sym FRk hilo) s5)
-       ((fr400 (unit u-media-hilo)))
+       ((fr400 (unit u-media-hilo)) (fr550 (unit u-media-set (out FRintk (.sym FRk hilo)))))
   )
 )
 
@@ -6590,7 +7154,7 @@
 
 (dni mhdseth
      "Media dual set halfword upper 5 bits"
-     ((UNIT FMALL) (MACH fr400) (FR400-MAJOR M-1))
+     ((UNIT FMALL) (MACH fr400,fr550) (FR550-MAJOR M-5) (FR400-MAJOR M-1))
      "mhdseth$pack $s5,$FRintk"
      (+ pack FRintk OP_78 (FRi-null) OPE1_25 (misc-null-11) s5)
      (sequence ()
@@ -6598,18 +7162,18 @@
 	       (set FRintk (c-raw-call SI "frv_ref_SI" FRintk))
 	       (set-5-semantics (halfword hi FRintk 0) s5)
 	       (set-5-semantics (halfword lo FRintk 0) s5))
-     ((fr400 (unit u-media-1)))
+     ((fr400 (unit u-media-1)) (fr550 (unit u-media-set)))
 )
 
 (define-pmacro (media-logic-r-r name operation op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-1) (FR400-MAJOR M-1))
+       ((UNIT FMALL) (FR500-MAJOR M-1) (FR550-MAJOR M-2) (FR400-MAJOR M-1))
        (.str name "$pack $FRinti,$FRintj,$FRintk")
        (+ pack FRintk op FRinti ope FRintj)
        (set FRintk (operation FRinti FRintj))
        ((fr400 (unit u-media-1))
-	(fr500 (unit u-media)))
+	(fr500 (unit u-media)) (fr550 (unit u-media)))
   )
 )
 
@@ -6620,13 +7184,13 @@
 (define-pmacro (conditional-media-logic name operation op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-1) (FR400-MAJOR M-1) CONDITIONAL)
+       ((UNIT FMALL) (FR500-MAJOR M-1) (FR550-MAJOR M-2) (FR400-MAJOR M-1) CONDITIONAL)
        (.str name "$pack $FRinti,$FRintj,$FRintk,$CCi,$cond")
        (+ pack FRintk op FRinti CCi cond ope FRintj)
        (if (eq CCi (or cond 2))
 	   (set FRintk (operation FRinti FRintj)))
        ((fr400 (unit u-media-1))
-	(fr500 (unit u-media)))
+	(fr500 (unit u-media)) (fr550 (unit u-media)))
   )
 )
 
@@ -6636,34 +7200,34 @@
 
 (dni mnot
      ("mnot")
-     ((UNIT FMALL) (FR500-MAJOR M-1) (FR400-MAJOR M-1))
+     ((UNIT FMALL) (FR500-MAJOR M-1) (FR550-MAJOR M-2) (FR400-MAJOR M-1))
      ("mnot$pack $FRintj,$FRintk")
      (+ pack FRintk OP_7B (rs-null) OPE1_03 FRintj)
      (set FRintk (inv FRintj))
      ((fr400 (unit u-media-1))
-      (fr500 (unit u-media)))
+      (fr500 (unit u-media)) (fr550 (unit u-media)))
 )
 
 (dni cmnot
      ("cmnot")
-     ((UNIT FMALL) (FR500-MAJOR M-1) (FR400-MAJOR M-1) CONDITIONAL)
+     ((UNIT FMALL) (FR500-MAJOR M-1) (FR550-MAJOR M-2) (FR400-MAJOR M-1) CONDITIONAL)
      ("cmnot$pack $FRintj,$FRintk,$CCi,$cond")
      (+ pack FRintk OP_70 (rs-null) CCi cond OPE4_3 FRintj)
      (if (eq CCi (or cond 2))
 	 (set FRintk (inv FRintj)))
      ((fr400 (unit u-media-1))
-      (fr500 (unit u-media)))
+      (fr500 (unit u-media)) (fr550 (unit u-media)))
 )
 
 (define-pmacro (media-rotate-r-r name operation op ope comment)
   (dni name
        (comment)
-       ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-1))
+       ((UNIT FM01) (FR500-MAJOR M-2) (FR550-MAJOR M-3) (FR400-MAJOR M-1))
        (.str name "$pack $FRinti,$u6,$FRintk")
        (+ pack FRintk op FRinti ope u6)
        (set FRintk (operation FRinti (and u6 #x1f)))
        ((fr400 (unit u-media-3))
-	(fr500 (unit u-media)))
+	(fr500 (unit u-media)) (fr550 (unit u-media)))
   )
 )
 
@@ -6673,12 +7237,12 @@
 (define-pmacro (media-cut-r-r name arg op ope comment)
   (dni name
        (comment)
-       ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-2))
+       ((UNIT FM01) (FR500-MAJOR M-2) (FR550-MAJOR M-3) (FR400-MAJOR M-2))
        (.str name "$pack $FRinti,$" arg ",$FRintk")
        (+ pack FRintk op FRinti ope arg)
        (set FRintk (c-call SI "@cpu@_cut" FRinti (nextreg h-fr_int FRinti 1) arg))
        ((fr400 (unit u-media-3))
-	(fr500 (unit u-media)))
+	(fr500 (unit u-media)) (fr550 (unit u-media)))
   )
 )
 
@@ -6688,12 +7252,12 @@
 (define-pmacro (media-cut-acc name arg op ope comment)
   (dni name
        (comment)
-       ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-1))
+       ((UNIT FM01) (FR500-MAJOR M-2) (FR550-MAJOR M-3) (FR400-MAJOR M-1))
        (.str name "$pack $ACC40Si,$" arg ",$FRintk")
        (+ pack FRintk op ACC40Si ope arg)
        (set FRintk (c-call SI "@cpu@_media_cut" ACC40Si arg))
        ((fr400 (unit u-media-4))
-	(fr500 (unit u-media)))
+	(fr500 (unit u-media)) (fr550 (unit u-media-3-acc)))
   )
 )
 
@@ -6703,12 +7267,12 @@
 (define-pmacro (media-cut-acc-ss name arg op ope comment)
   (dni name
        (comment)
-       ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-1))
+       ((UNIT FM01) (FR500-MAJOR M-2) (FR550-MAJOR M-3) (FR400-MAJOR M-1))
        (.str name "$pack $ACC40Si,$" arg ",$FRintk")
        (+ pack FRintk op ACC40Si ope arg)
        (set FRintk (c-call SI "@cpu@_media_cut_ss" ACC40Si arg))
        ((fr400 (unit u-media-4))
-	(fr500 (unit u-media)))
+	(fr500 (unit u-media)) (fr550 (unit u-media-3-acc)))
   )
 )
 
@@ -6723,7 +7287,7 @@
 
 (dni mdcutssi
      "Media dual cut with signed saturation"
-     ((UNIT FMLOW) (MACH fr400) (FR400-MAJOR M-2))
+     ((UNIT FMLOW) (MACH fr400,fr550) (FR550-MAJOR M-3) (FR400-MAJOR M-2))
      "mdcutssi$pack $ACC40Si,$s6,$FRintkeven"
      (+ pack FRintkeven OP_78 ACC40Si OPE1_0E s6)
      (if (register-unaligned ACC40Si 2)
@@ -6736,7 +7300,7 @@
 			    (c-call SI "@cpu@_media_cut_ss"
 				    (nextreg h-acc40S ACC40Si 1) s6)))))
      ((fr400 (unit u-media-4-acc-dual
-		   (out FRintk FRintkeven))))
+		   (out FRintk FRintkeven))) (fr550 (unit u-media-3-acc-dual)))
 )
 
 ; The (add (xxxx) (mul arg 0)) is a hack to get a reference to arg generated
@@ -6751,18 +7315,18 @@
 
 (dni maveh
      "Media dual average"
-     ((UNIT FMALL) (FR500-MAJOR M-1) (FR400-MAJOR M-1))
+     ((UNIT FMALL) (FR500-MAJOR M-1) (FR550-MAJOR M-2) (FR400-MAJOR M-1))
      "maveh$pack $FRinti,$FRintj,$FRintk"
      (+ pack FRintk OP_7B FRinti OPE1_08 FRintj)
      (set FRintk (c-call SI "@cpu@_media_average" FRinti FRintj))
      ((fr400 (unit u-media-1))
-      (fr500 (unit u-media)))
+      (fr500 (unit u-media)) (fr550 (unit u-media)))
 )
 
 (define-pmacro (media-dual-shift name operation op ope profile comment)
   (dni name
        (comment)
-       ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-1))
+       ((UNIT FM01) (FR500-MAJOR M-2) (FR550-MAJOR M-3) (FR400-MAJOR M-1))
        (.str name "$pack $FRinti,$u6,$FRintk")
        (+ pack FRintk op FRinti ope u6)
        (sequence ()
@@ -6778,19 +7342,19 @@
 )
 
 (media-dual-shift msllhi sll OP_7B OPE1_09
-		  ((fr400 (unit u-media-3)) (fr500 (unit u-media)))
+		  ((fr400 (unit u-media-3)) (fr500 (unit u-media)) (fr550 (unit u-media)))
 		  "Media dual shift left  logical")
 (media-dual-shift msrlhi srl OP_7B OPE1_0A
-		  ((fr400 (unit u-media-3)) (fr500 (unit u-media)))
+		  ((fr400 (unit u-media-3)) (fr500 (unit u-media)) (fr550 (unit u-media)))
 		  "Media dual shift right logical")
 (media-dual-shift msrahi sra OP_7B OPE1_0B
-		  ((fr400 (unit u-media-6)) (fr500 (unit u-media)))
+		  ((fr400 (unit u-media-6)) (fr500 (unit u-media)) (fr550 (unit u-media)))
 		  "Media dual shift right arithmetic")
 
 (define-pmacro (media-dual-word-rotate-r-r name operation op ope comment)
   (dni name
        (comment)
-       ((UNIT FMLOW) (MACH fr400) (FR400-MAJOR M-2))
+       ((UNIT FMLOW) (MACH fr400,fr550) (FR550-MAJOR M-3) (FR400-MAJOR M-2))
        (.str name "$pack $FRintieven,$s6,$FRintkeven")
        (+ pack FRintkeven op FRintieven ope s6)
        (if (orif (register-unaligned FRintieven 2)
@@ -6803,15 +7367,15 @@
 				     (and s6 #x1f)))))
        ((fr400 (unit u-media-3-quad
 		     (in  FRinti FRintieven)
-		     (out FRintk FRintkeven))))
+		     (out FRintk FRintkeven))) (fr550 (unit u-media-quad)))
   )
 )
 
 (media-dual-word-rotate-r-r mdrotli rol OP_78 OPE1_0B "rotate left reg/reg")
 
 (dni mcplhi
-     "Media dual couple, halfword"
-     ((UNIT FMLOW) (MACH fr400) (FR400-MAJOR M-2))
+     "Media bit concatenate, halfword"
+     ((UNIT FMLOW) (MACH fr400,fr550) (FR550-MAJOR M-3) (FR400-MAJOR M-2))
      "mcplhi$pack $FRinti,$u6,$FRintk"
      (+ pack FRintk OP_78 FRinti OPE1_0C u6)
      (sequence ((HI arg1) (HI arg2) (HI shift))
@@ -6826,12 +7390,12 @@
 					    (sub 15 shift)))
 			     (set arg1 (or HI arg1 arg2))))
 	       (set (halfword hi FRintk 0) arg1))
-     ((fr400 (unit u-media-3-dual)))
+     ((fr400 (unit u-media-3-dual)) (fr550 (unit u-media-3-dual)))
 )
 
 (dni mcpli
-     "Media dual couple, word"
-     ((UNIT FMLOW) (MACH fr400) (FR400-MAJOR M-2))
+     "Media bit concatenate, word"
+     ((UNIT FMLOW) (MACH fr400,fr550) (FR550-MAJOR M-3) (FR400-MAJOR M-2))
      "mcpli$pack $FRinti,$u6,$FRintk"
      (+ pack FRintk OP_78 FRinti OPE1_0D u6)
      (sequence ((SI tmp) (SI shift))
@@ -6844,7 +7408,7 @@
 					    (sub 31 shift)))
 			     (set tmp (or tmp tmp1))))
 	       (set FRintk tmp))
-     ((fr400 (unit u-media-3-dual)))
+     ((fr400 (unit u-media-3-dual)) (fr550 (unit u-media-3-dual)))
 )
 
 (define-pmacro (saturate arg max min result)
@@ -6857,7 +7421,7 @@
 
 (dni msaths
      "Media dual saturation signed"
-     ((UNIT FMALL) (FR500-MAJOR M-1) (FR400-MAJOR M-1))
+     ((UNIT FMALL) (FR500-MAJOR M-1) (FR550-MAJOR M-2) (FR400-MAJOR M-1))
      "msaths$pack $FRinti,$FRintj,$FRintk"
      (+ pack FRintk OP_7B FRinti OPE1_0C FRintj)
      (sequence ((HI argihi) (HI argilo) (HI argjhi) (HI argjlo))
@@ -6865,12 +7429,12 @@
 	       (saturate argihi argjhi (inv argjhi) (halfword hi FRintk 0))
 	       (saturate argilo argjlo (inv argjlo) (halfword lo FRintk 0)))
      ((fr400 (unit u-media-1))
-      (fr500 (unit u-media)))
+      (fr500 (unit u-media)) (fr550 (unit u-media)))
 )
 
 (dni mqsaths
      "Media quad saturation signed"
-     ((UNIT FMALL) (MACH fr400) (FR400-MAJOR M-1))
+     ((UNIT FMALL) (MACH fr400,fr550) (FR550-MAJOR M-2) (FR400-MAJOR M-1))
      "mqsaths$pack $FRintieven,$FRintjeven,$FRintkeven"
      (+ pack FRintkeven OP_78 FRintieven OPE1_0F FRintjeven)
      (if (orif (register-unaligned FRintieven 2)
@@ -6889,7 +7453,7 @@
      ((fr400 (unit u-media-1-quad
 		   (in  FRinti FRintieven)
 		   (in  FRintj FRintjeven)
-		   (out FRintk FRintkeven))))
+		   (out FRintk FRintkeven))) (fr550 (unit u-media-quad)))
 )
 
 (define-pmacro (saturate-unsigned arg max result)
@@ -6900,7 +7464,7 @@
 
 (dni msathu
      "Media dual saturation unsigned"
-     ((UNIT FMALL) (FR500-MAJOR M-1) (FR400-MAJOR M-1))
+     ((UNIT FMALL) (FR500-MAJOR M-1) (FR550-MAJOR M-2) (FR400-MAJOR M-1))
      "msathu$pack $FRinti,$FRintj,$FRintk"
      (+ pack FRintk OP_7B FRinti OPE1_0D FRintj)
      (sequence ((UHI argihi) (UHI argilo) (UHI argjhi) (UHI argjlo))
@@ -6908,13 +7472,13 @@
 	       (saturate-unsigned argihi argjhi (halfword hi FRintk 0))
 	       (saturate-unsigned argilo argjlo (halfword lo FRintk 0)))
      ((fr400 (unit u-media-1))
-      (fr500 (unit u-media)))
+      (fr500 (unit u-media)) (fr550 (unit u-media)))
 )
 
 (define-pmacro (media-dual-compare name mode op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-1) (FR400-MAJOR M-1))
+       ((UNIT FMALL) (FR500-MAJOR M-1) (FR550-MAJOR M-2) (FR400-MAJOR M-1))
        (.str name "$pack $FRinti,$FRintj,$FCCk")
        (+ pack (cond-null) FCCk op FRinti ope FRintj)
        (if (register-unaligned FCCk 2)
@@ -6926,7 +7490,7 @@
 		     (compare-and-set-fcc argilo argjlo (nextreg h-fccr FCCk 1))))
        ; TODO - doesn't handle second FCC
        ((fr400 (unit u-media-7))
-	(fr500 (unit u-media)))
+	(fr500 (unit u-media)) (fr550 (unit u-media)))
   )
 )
 
@@ -6958,7 +7522,7 @@
 
 (dni mabshs
      "Media dual absolute value, halfword"
-     ((UNIT FMALL) (MACH fr400) (FR400-MAJOR M-1))
+     ((UNIT FMALL) (MACH fr400,fr550) (FR550-MAJOR M-2) (FR400-MAJOR M-1))
      "mabshs$pack $FRintj,$FRintk"
      (+ pack FRintk OP_78 (FRi-null) OPE1_0A FRintj)
      (sequence ((HI arghi) (HI arglo))
@@ -6970,7 +7534,7 @@
 			   (halfword hi FRintk 0))
 	       (saturate-v (abs arglo) 32767 -32768 (msr-sie-fri-lo)
 			   (halfword lo FRintk 0)))
-     ((fr400 (unit u-media-1)))
+     ((fr400 (unit u-media-1)) (fr550 (unit u-media)))
 )
 
 (define-pmacro (media-arith-sat-semantics
@@ -6994,12 +7558,12 @@
 (define-pmacro (media-dual-arith-sat name operation mode max min op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-1) (FR400-MAJOR M-1))
+       ((UNIT FMALL) (FR500-MAJOR M-1) (FR550-MAJOR M-2) (FR400-MAJOR M-1))
        (.str name "$pack $FRinti,$FRintj,$FRintk")
        (+ pack FRintk op FRinti ope FRintj)
        (media-dual-arith-sat-semantics operation mode max min)
        ((fr400 (unit u-media-1))
-	(fr500 (unit u-media)))
+	(fr500 (unit u-media)) (fr550 (unit u-media)))
   )
 )
 
@@ -7013,13 +7577,13 @@
 		name operation mode max min op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-1) (FR400-MAJOR M-1) CONDITIONAL)
+       ((UNIT FMALL) (FR500-MAJOR M-1) (FR550-MAJOR M-2) (FR400-MAJOR M-1) CONDITIONAL)
        (.str name "$pack $FRinti,$FRintj,$FRintk,$CCi,$cond")
        (+ pack FRintk op FRinti CCi cond ope FRintj)
        (if (eq CCi (or cond 2))
 	   (media-dual-arith-sat-semantics operation mode max min))
        ((fr400 (unit u-media-1))
-	(fr500 (unit u-media)))
+	(fr500 (unit u-media)) (fr550 (unit u-media)))
   )
 )
 
@@ -7059,7 +7623,7 @@
 (define-pmacro (media-quad-arith-sat name operation mode max min op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-1) (FR400-MAJOR M-2))
+       ((UNIT FMALL) (FR500-MAJOR M-1) (FR550-MAJOR M-2) (FR400-MAJOR M-2))
        (.str name "$pack $FRintieven,$FRintjeven,$FRintkeven")
        (+ pack FRintkeven op FRintieven ope FRintjeven)
        (media-quad-arith-sat-semantics 1 operation mode max min)
@@ -7070,7 +7634,7 @@
 	(fr500 (unit u-media-quad-arith
 		     (in  FRinti FRintieven)
 		     (in  FRintj FRintjeven)
-		     (out FRintk FRintkeven))))
+		     (out FRintk FRintkeven))) (fr550 (unit u-media-quad)))
   )
 )
 
@@ -7084,7 +7648,7 @@
 		name operation mode max min op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-1) (FR400-MAJOR M-2) CONDITIONAL)
+       ((UNIT FMALL) (FR500-MAJOR M-1) (FR550-MAJOR M-2) (FR400-MAJOR M-2) CONDITIONAL)
        (.str name "$pack $FRintieven,$FRintjeven,$FRintkeven,$CCi,$cond")
        (+ pack FRintkeven op FRintieven CCi cond ope FRintjeven)
        (media-quad-arith-sat-semantics (eq CCi (or cond 2))
@@ -7096,7 +7660,7 @@
 	(fr500 (unit u-media-quad-arith
 		     (in  FRinti FRintieven)
 		     (in  FRintj FRintjeven)
-		     (out FRintk FRintkeven))))
+		     (out FRintk FRintkeven))) (fr550 (unit u-media-quad)))
   )
 )
 
@@ -7109,15 +7673,17 @@
 (define-pmacro (media-acc-arith-sat name operation mode max min op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (MACH fr400) (FR400-MAJOR M-1))
+       ((UNIT FMALL) (MACH fr400,fr550) (FR550-MAJOR M-4) (FR400-MAJOR M-1))
        (.str name "$pack $ACC40Si,$ACC40Sk")
        (+ pack ACC40Sk op ACC40Si ope (ACCj-null))
-       (if (register-unaligned ACC40Si 2)
-	   (c-call VOID "@cpu@_media_acc_not_aligned")
-	   (media-arith-sat-semantics operation ACC40Si
-				      (nextreg h-acc40S ACC40Si 1)
-				      ACC40Sk mode max min (msr-sie-acci)))
-       ((fr400 (unit u-media-2-acc)))
+       (if (c-call SI "@cpu@_check_acc_range" (index-of ACC40Si))
+	   (if (c-call SI "@cpu@_check_acc_range" (index-of ACC40Sk))
+	       (if (register-unaligned ACC40Si 2)
+		   (c-call VOID "@cpu@_media_acc_not_aligned")
+		   (media-arith-sat-semantics operation ACC40Si
+					      (nextreg h-acc40S ACC40Si 1)
+					      ACC40Sk mode max min (msr-sie-acci)))))
+       ((fr400 (unit u-media-2-acc)) (fr550 (unit u-media-4-acc)))
   )
 )
 
@@ -7130,25 +7696,27 @@
 					 comment)
   (dni name
        (comment)
-       ((UNIT MDUALACC) (MACH fr400) (FR400-MAJOR M-2))
+       ((UNIT MDUALACC) (MACH fr400,fr550) (FR550-MAJOR M-4) (FR400-MAJOR M-2))
        (.str name "$pack $ACC40Si,$ACC40Sk")
        (+ pack ACC40Sk op ACC40Si ope (ACCj-null))
-       (if (register-unaligned ACC40Si 4)
-	   (c-call VOID "@cpu@_media_acc_not_aligned")
-	   (if (register-unaligned ACC40Sk 2)
-	       (c-call VOID "@cpu@_media_acc_not_aligned")
-	       (sequence ()
-			 (media-arith-sat-semantics operation ACC40Si
-						    (nextreg h-acc40S ACC40Si 1)
-						    ACC40Sk mode max min
-						    (msr-sie-acci))
-			 (media-arith-sat-semantics operation
-						    (nextreg h-acc40S ACC40Si 2)
-						    (nextreg h-acc40S ACC40Si 3)
-						    (nextreg h-acc40S ACC40Sk 1)
-						    mode max min
-						    (msr-sie-acci-1)))))
-       ((fr400 (unit u-media-2-acc-dual)))
+       (if (c-call SI "@cpu@_check_acc_range" (index-of ACC40Si))
+	   (if (c-call SI "@cpu@_check_acc_range" (index-of ACC40Sk))
+	       (if (register-unaligned ACC40Si 4)
+		   (c-call VOID "@cpu@_media_acc_not_aligned")
+		   (if (register-unaligned ACC40Sk 2)
+		       (c-call VOID "@cpu@_media_acc_not_aligned")
+		       (sequence ()
+				 (media-arith-sat-semantics operation ACC40Si
+							    (nextreg h-acc40S ACC40Si 1)
+							    ACC40Sk mode max min
+							    (msr-sie-acci))
+				 (media-arith-sat-semantics operation
+							    (nextreg h-acc40S ACC40Si 2)
+							    (nextreg h-acc40S ACC40Si 3)
+							    (nextreg h-acc40S ACC40Sk 1)
+							    mode max min
+							    (msr-sie-acci-1)))))))
+       ((fr400 (unit u-media-2-acc-dual)) (fr550 (unit u-media-4-acc-dual)))
   )
 )
 
@@ -7159,70 +7727,74 @@
 
 (dni masaccs
      "Media add and subtract signed accumulator with saturation"
-       ((UNIT FMALL) (MACH fr400) (FR400-MAJOR M-1))
+       ((UNIT FMALL) (MACH fr400,fr550) (FR550-MAJOR M-4) (FR400-MAJOR M-1))
        "masaccs$pack $ACC40Si,$ACC40Sk"
        (+ pack ACC40Sk OP_78 ACC40Si OPE1_08 (ACCj-null))
-       (if (register-unaligned ACC40Si 2)
-	   (c-call VOID "@cpu@_media_acc_not_aligned")
-	   (if (register-unaligned ACC40Sk 2)
-	       (c-call VOID "@cpu@_media_acc_not_aligned")
-	       (sequence ()
-			 (media-arith-sat-semantics add ACC40Si
-						    (nextreg h-acc40S ACC40Si 1)
-						    ACC40Sk DI
-						    #x7fffffffff
-						    (inv DI #x7fffffffff)
-						    (msr-sie-acci))
-			 (media-arith-sat-semantics sub ACC40Si
-						    (nextreg h-acc40S ACC40Si 1)
-						    (nextreg h-acc40S ACC40Sk 1)
-						    DI
-						    #x7fffffffff
-						    (inv DI #x7fffffffff)
-						    (msr-sie-acci-1)))))
-       ((fr400 (unit u-media-2-add-sub)))
+       (if (c-call SI "@cpu@_check_acc_range" (index-of ACC40Si))
+	   (if (c-call SI "@cpu@_check_acc_range" (index-of ACC40Sk))
+	       (if (register-unaligned ACC40Si 2)
+		   (c-call VOID "@cpu@_media_acc_not_aligned")
+		   (if (register-unaligned ACC40Sk 2)
+		       (c-call VOID "@cpu@_media_acc_not_aligned")
+		       (sequence ()
+				 (media-arith-sat-semantics add ACC40Si
+							    (nextreg h-acc40S ACC40Si 1)
+							    ACC40Sk DI
+							    #x7fffffffff
+							    (inv DI #x7fffffffff)
+							    (msr-sie-acci))
+				 (media-arith-sat-semantics sub ACC40Si
+							    (nextreg h-acc40S ACC40Si 1)
+							    (nextreg h-acc40S ACC40Sk 1)
+							    DI
+							    #x7fffffffff
+							    (inv DI #x7fffffffff)
+							    (msr-sie-acci-1)))))))
+       ((fr400 (unit u-media-2-add-sub)) (fr550 (unit u-media-4-add-sub)))
   )
 
 (dni mdasaccs
      "Media add and subtract signed accumulator with saturation"
-       ((UNIT MDUALACC) (MACH fr400) (FR400-MAJOR M-2))
+       ((UNIT MDUALACC) (MACH fr400,fr550) (FR550-MAJOR M-4) (FR400-MAJOR M-2))
        "mdasaccs$pack $ACC40Si,$ACC40Sk"
        (+ pack ACC40Sk OP_78 ACC40Si OPE1_09 (ACCj-null))
-       (if (register-unaligned ACC40Si 4)
-	   (c-call VOID "@cpu@_media_acc_not_aligned")
-	   (if (register-unaligned ACC40Sk 4)
-	       (c-call VOID "@cpu@_media_acc_not_aligned")
-	       (sequence ()
-			 (media-arith-sat-semantics add ACC40Si
-						    (nextreg h-acc40S ACC40Si 1)
-						    ACC40Sk DI
-						    #x7fffffffff
-						    (inv DI #x7fffffffff)
-						    (msr-sie-acci))
-			 (media-arith-sat-semantics sub ACC40Si
-						    (nextreg h-acc40S ACC40Si 1)
-						    (nextreg h-acc40S ACC40Sk 1)
-						    DI
-						    #x7fffffffff
-						    (inv DI #x7fffffffff)
-						    (msr-sie-acci-1))
-			 (media-arith-sat-semantics add
-						    (nextreg h-acc40S ACC40Si 2)
-						    (nextreg h-acc40S ACC40Si 3)
-						    (nextreg h-acc40S ACC40Sk 2)
-						    DI
-						    #x7fffffffff
-						    (inv DI #x7fffffffff)
-						    (msr-sie-acci-2))
-			 (media-arith-sat-semantics sub
-						    (nextreg h-acc40S ACC40Si 2)
-						    (nextreg h-acc40S ACC40Si 3)
-						    (nextreg h-acc40S ACC40Sk 3)
-						    DI
-						    #x7fffffffff
-						    (inv DI #x7fffffffff)
-						    (msr-sie-acci-3)))))
-       ((fr400 (unit u-media-2-add-sub-dual)))
+       (if (c-call SI "@cpu@_check_acc_range" (index-of ACC40Si))
+	   (if (c-call SI "@cpu@_check_acc_range" (index-of ACC40Sk))
+	       (if (register-unaligned ACC40Si 4)
+		   (c-call VOID "@cpu@_media_acc_not_aligned")
+		   (if (register-unaligned ACC40Sk 4)
+		       (c-call VOID "@cpu@_media_acc_not_aligned")
+		       (sequence ()
+				 (media-arith-sat-semantics add ACC40Si
+							    (nextreg h-acc40S ACC40Si 1)
+							    ACC40Sk DI
+							    #x7fffffffff
+							    (inv DI #x7fffffffff)
+							    (msr-sie-acci))
+				 (media-arith-sat-semantics sub ACC40Si
+							    (nextreg h-acc40S ACC40Si 1)
+							    (nextreg h-acc40S ACC40Sk 1)
+							    DI
+							    #x7fffffffff
+							    (inv DI #x7fffffffff)
+							    (msr-sie-acci-1))
+				 (media-arith-sat-semantics add
+							    (nextreg h-acc40S ACC40Si 2)
+							    (nextreg h-acc40S ACC40Si 3)
+							    (nextreg h-acc40S ACC40Sk 2)
+							    DI
+							    #x7fffffffff
+							    (inv DI #x7fffffffff)
+							    (msr-sie-acci-2))
+				 (media-arith-sat-semantics sub
+							    (nextreg h-acc40S ACC40Si 2)
+							    (nextreg h-acc40S ACC40Si 3)
+							    (nextreg h-acc40S ACC40Sk 3)
+							    DI
+							    #x7fffffffff
+							    (inv DI #x7fffffffff)
+							    (msr-sie-acci-3)))))))
+       ((fr400 (unit u-media-2-add-sub-dual)) (fr550 (unit u-media-4-add-sub-dual)))
   )
 
 (define-pmacro (media-multiply-semantics conv arg1 arg2 res)
@@ -7230,26 +7802,27 @@
 )
 
 (define-pmacro (media-dual-multiply-semantics cond mode conv rhs1 rhs2)
-  (if (register-unaligned ACC40Sk 2)
-      (c-call VOID "@cpu@_media_acc_not_aligned")
-      (if cond
-	  (sequence ((mode argihi) (mode argilo) (mode argjhi) (mode argjlo))
-		    (extract-hilo FRinti 0 FRintj 0
-				  argihi argilo argjhi argjlo)
-		    (media-multiply-semantics conv argihi rhs1 ACC40Sk)
-		    (media-multiply-semantics conv argilo rhs2
-					      (nextreg h-acc40S ACC40Sk 1)))))
+  (if (c-call SI "@cpu@_check_acc_range" (index-of ACC40Sk))
+      (if (register-unaligned ACC40Sk 2)
+	  (c-call VOID "@cpu@_media_acc_not_aligned")
+	  (if cond
+	      (sequence ((mode argihi) (mode argilo) (mode argjhi) (mode argjlo))
+			(extract-hilo FRinti 0 FRintj 0
+				      argihi argilo argjhi argjlo)
+			(media-multiply-semantics conv argihi rhs1 ACC40Sk)
+			(media-multiply-semantics conv argilo rhs2
+						  (nextreg h-acc40S ACC40Sk 1))))))
 )
 
 (define-pmacro (media-dual-multiply name mode conv rhs1 rhs2 op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-4) (FR400-MAJOR M-1) PRESERVE-OVF)
+       ((UNIT FMALL) (FR500-MAJOR M-4) (FR550-MAJOR M-4) (FR400-MAJOR M-1) PRESERVE-OVF)
        (.str name "$pack $FRinti,$FRintj,$ACC40Sk")
        (+ pack ACC40Sk op FRinti ope FRintj)
        (media-dual-multiply-semantics 1 mode conv rhs1 rhs2)
        ((fr400 (unit u-media-2))
-	(fr500 (unit u-media-dual-mul)))
+	(fr500 (unit u-media-dual-mul)) (fr550 (unit u-media-4)))
   )
 )
 
@@ -7263,13 +7836,13 @@
 		name mode conv rhs1 rhs2 op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-4) (FR400-MAJOR M-1)
+       ((UNIT FMALL) (FR500-MAJOR M-4) (FR550-MAJOR M-4) (FR400-MAJOR M-1)
 	PRESERVE-OVF CONDITIONAL)
        (.str name "$pack $FRinti,$FRintj,$ACC40Sk,$CCi,$cond")
        (+ pack ACC40Sk op FRinti CCi cond ope FRintj)
        (media-dual-multiply-semantics (eq CCi (or cond 2)) mode conv rhs1 rhs2)
        ((fr400 (unit u-media-2))
-	(fr500 (unit u-media-dual-mul)))
+	(fr500 (unit u-media-dual-mul)) (fr550 (unit u-media-4)))
   )
 )
 
@@ -7277,31 +7850,32 @@
 (conditional-media-dual-multiply cmmulhu UHI zext argjhi argjlo OP_72 OPE4_1 "Conditional Media dual multiply unsigned")
 
 (define-pmacro (media-quad-multiply-semantics cond mode conv rhs1 rhs2)
-  (if (register-unaligned ACC40Sk 4)
-      (c-call VOID "@cpu@_media_acc_not_aligned")
-      (if (orif (register-unaligned FRintieven 2)
-		(register-unaligned FRintjeven 2))
-	  (c-call VOID "@cpu@_media_register_not_aligned")
-	  (if cond
-	      (sequence ((mode argihi) (mode argilo)
-			 (mode argjhi) (mode argjlo))
-			(extract-hilo FRintieven 0 FRintjeven 0
-				      argihi argilo argjhi argjlo)
-			(media-multiply-semantics conv argihi rhs1 ACC40Sk)
-			(media-multiply-semantics conv argilo rhs2
-						  (nextreg h-acc40S ACC40Sk 1))
-			(extract-hilo FRintieven 1 FRintjeven 1
-				      argihi argilo argjhi argjlo)
-			(media-multiply-semantics conv argihi rhs1
-						  (nextreg h-acc40S ACC40Sk 2))
-			(media-multiply-semantics conv argilo rhs2
-						  (nextreg h-acc40S ACC40Sk 3))))))
+  (if (c-call SI "@cpu@_check_acc_range" (index-of ACC40Sk))
+      (if (register-unaligned ACC40Sk 4)
+	  (c-call VOID "@cpu@_media_acc_not_aligned")
+	  (if (orif (register-unaligned FRintieven 2)
+		    (register-unaligned FRintjeven 2))
+	      (c-call VOID "@cpu@_media_register_not_aligned")
+	      (if cond
+		  (sequence ((mode argihi) (mode argilo)
+			     (mode argjhi) (mode argjlo))
+			    (extract-hilo FRintieven 0 FRintjeven 0
+					  argihi argilo argjhi argjlo)
+			    (media-multiply-semantics conv argihi rhs1 ACC40Sk)
+			    (media-multiply-semantics conv argilo rhs2
+						      (nextreg h-acc40S ACC40Sk 1))
+			    (extract-hilo FRintieven 1 FRintjeven 1
+					  argihi argilo argjhi argjlo)
+			    (media-multiply-semantics conv argihi rhs1
+						      (nextreg h-acc40S ACC40Sk 2))
+			    (media-multiply-semantics conv argilo rhs2
+						      (nextreg h-acc40S ACC40Sk 3)))))))
 )
 
 (define-pmacro (media-quad-multiply name mode conv rhs1 rhs2 op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-4) (FR400-MAJOR M-2) PRESERVE-OVF)
+       ((UNIT FMALL) (FR500-MAJOR M-4) (FR550-MAJOR M-4) (FR400-MAJOR M-2) PRESERVE-OVF)
        (.str name "$pack $FRintieven,$FRintjeven,$ACC40Sk")
        (+ pack ACC40Sk op FRintieven ope FRintjeven)
        (media-quad-multiply-semantics 1 mode conv rhs1 rhs2) 
@@ -7310,7 +7884,7 @@
 		     (in  FRintj FRintjeven)))
 	(fr500 (unit u-media-quad-mul
 		     (in  FRinti FRintieven)
-		     (in  FRintj FRintjeven))))
+		     (in  FRintj FRintjeven))) (fr550 (unit u-media-4-quad)))
   )
 )
 
@@ -7324,7 +7898,7 @@
 		name mode conv rhs1 rhs2 op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-4) (FR400-MAJOR M-2)
+       ((UNIT FMALL) (FR500-MAJOR M-4) (FR550-MAJOR M-4) (FR400-MAJOR M-2)
 	PRESERVE-OVF CONDITIONAL)
        (.str name "$pack $FRintieven,$FRintjeven,$ACC40Sk,$CCi,$cond")
        (+ pack ACC40Sk op FRintieven CCi cond ope FRintjeven)
@@ -7334,7 +7908,7 @@
 		     (in  FRintj FRintjeven)))
 	(fr500 (unit u-media-quad-mul
 		     (in  FRinti FRintieven)
-		     (in  FRintj FRintjeven))))	     
+		     (in  FRintj FRintjeven))) (fr550 (unit u-media-4-quad)))
   )
 )
 
@@ -7350,30 +7924,31 @@
 
 (define-pmacro (media-dual-multiply-acc-semantics
 		cond mode conv addop rhw res max min)
-  (if (register-unaligned res 2)
-      (c-call VOID "@cpu@_media_acc_not_aligned")
-      (if cond
-	  (sequence ((mode argihi) (mode argilo) (mode argjhi) (mode argjlo))
-		    (extract-hilo FRinti 0 FRintj 0
-				  argihi argilo argjhi argjlo)
-		    (media-multiply-acc-semantics conv argihi addop argjhi
-						  res
-						  max min (msr-sie-acci))
-		    (media-multiply-acc-semantics conv argilo addop argjlo
-						  (nextreg rhw res 1)
-						  max min (msr-sie-acci-1)))))
+  (if (c-call SI "@cpu@_check_acc_range" (index-of res))
+      (if (register-unaligned res 2)
+	  (c-call VOID "@cpu@_media_acc_not_aligned")
+	  (if cond
+	      (sequence ((mode argihi) (mode argilo) (mode argjhi) (mode argjlo))
+			(extract-hilo FRinti 0 FRintj 0
+				      argihi argilo argjhi argjlo)
+			(media-multiply-acc-semantics conv argihi addop argjhi
+						      res
+						      max min (msr-sie-acci))
+			(media-multiply-acc-semantics conv argilo addop argjlo
+						      (nextreg rhw res 1)
+						      max min (msr-sie-acci-1))))))
 )
 
 (define-pmacro (media-dual-multiply-acc
 		name mode conv addop rhw res max min op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-4) (FR400-MAJOR M-1))
+       ((UNIT FMALL) (FR500-MAJOR M-4) (FR550-MAJOR M-4) (FR400-MAJOR M-1))
        (.str name "$pack $FRinti,$FRintj,$" res)
        (+ pack res op FRinti ope FRintj)
        (media-dual-multiply-acc-semantics 1 mode conv addop rhw res max min)
        ((fr400 (unit u-media-2))
-	(fr500 (unit u-media-dual-mul)))
+	(fr500 (unit u-media-dual-mul)) (fr550 (unit u-media-4)))
   )
 )
 
@@ -7401,13 +7976,13 @@
 		name mode conv addop rhw res max min op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-4) (FR400-MAJOR M-1) CONDITIONAL)
+       ((UNIT FMALL) (FR500-MAJOR M-4) (FR550-MAJOR M-4) (FR400-MAJOR M-1) CONDITIONAL)
        (.str name "$pack $FRinti,$FRintj,$" res ",$CCi,$cond")
        (+ pack res op FRinti CCi cond ope FRintj)
        (media-dual-multiply-acc-semantics (eq CCi (or cond 2))
 					  mode conv addop rhw res max min)
        ((fr400 (unit u-media-2))
-	(fr500 (unit u-media-dual-mul)))
+	(fr500 (unit u-media-dual-mul)) (fr550 (unit u-media-4)))
   )
 )
 
@@ -7423,38 +7998,39 @@
 
 (define-pmacro (media-quad-multiply-acc-semantics
 		cond mode conv addop rhw res max min)
-  (if (register-unaligned res 4)
-      (c-call VOID "@cpu@_media_acc_not_aligned")
-      (if (orif (register-unaligned FRintieven 2)
-		(register-unaligned FRintjeven 2))
-	  (c-call VOID "@cpu@_media_register_not_aligned")
-	  (if cond
-	      (sequence ((mode argihi) (mode argilo)
-			 (mode argjhi) (mode argjlo))
-			(extract-hilo FRintieven 0 FRintjeven 0
-				      argihi argilo argjhi argjlo)
-			(media-multiply-acc-semantics conv argihi addop argjhi
-						      res
-						      max min (msr-sie-acci))
-			(media-multiply-acc-semantics conv argilo addop argjlo
-						      (nextreg rhw res 1)
-						      max min (msr-sie-acci-1))
-			(extract-hilo FRintieven 1 FRintjeven 1
-				      argihi argilo argjhi argjlo)
-			(media-multiply-acc-semantics conv argihi addop argjhi
-						      (nextreg rhw res 2)
-						      max min (msr-sie-acci-2))
-			(media-multiply-acc-semantics conv argilo addop argjlo
-						      (nextreg rhw res 3)
-						      max min
-						      (msr-sie-acci-3))))))
+  (if (c-call SI "@cpu@_check_acc_range" (index-of res))
+      (if (register-unaligned res 4)
+	  (c-call VOID "@cpu@_media_acc_not_aligned")
+	  (if (orif (register-unaligned FRintieven 2)
+		    (register-unaligned FRintjeven 2))
+	      (c-call VOID "@cpu@_media_register_not_aligned")
+	      (if cond
+		  (sequence ((mode argihi) (mode argilo)
+			     (mode argjhi) (mode argjlo))
+			    (extract-hilo FRintieven 0 FRintjeven 0
+					  argihi argilo argjhi argjlo)
+			    (media-multiply-acc-semantics conv argihi addop argjhi
+							  res
+							  max min (msr-sie-acci))
+			    (media-multiply-acc-semantics conv argilo addop argjlo
+							  (nextreg rhw res 1)
+							  max min (msr-sie-acci-1))
+			    (extract-hilo FRintieven 1 FRintjeven 1
+					  argihi argilo argjhi argjlo)
+			    (media-multiply-acc-semantics conv argihi addop argjhi
+							  (nextreg rhw res 2)
+							  max min (msr-sie-acci-2))
+			    (media-multiply-acc-semantics conv argilo addop argjlo
+							  (nextreg rhw res 3)
+							  max min
+							  (msr-sie-acci-3)))))))
 )
 
 (define-pmacro (media-quad-multiply-acc
 		name mode conv addop rhw res max min op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-4) (FR400-MAJOR M-2))
+       ((UNIT FMALL) (FR500-MAJOR M-4) (FR550-MAJOR M-4) (FR400-MAJOR M-2))
        (.str name "$pack $FRintieven,$FRintjeven,$" res)
        (+ pack res op FRintieven ope FRintjeven)
        (media-quad-multiply-acc-semantics 1 mode conv addop rhw res max min)
@@ -7463,7 +8039,7 @@
 		     (in  FRintj FRintjeven)))
 	(fr500 (unit u-media-quad-mul
 		     (in  FRinti FRintieven)
-		     (in  FRintj FRintjeven))))
+		     (in  FRintj FRintjeven))) (fr550 (unit u-media-4-quad)))
   )
 )
 
@@ -7481,7 +8057,7 @@
 		name mode conv addop rhw res max min op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-4) (FR400-MAJOR M-2) CONDITIONAL)
+       ((UNIT FMALL) (FR500-MAJOR M-4) (FR550-MAJOR M-4) (FR400-MAJOR M-2) CONDITIONAL)
        (.str name "$pack $FRintieven,$FRintjeven,$" res ",$CCi,$cond")
        (+ pack res op FRintieven CCi cond ope FRintjeven)
        (media-quad-multiply-acc-semantics (eq CCi (or cond 2))
@@ -7491,7 +8067,7 @@
 		     (in  FRintj FRintjeven)))
 	(fr500 (unit u-media-quad-mul
 		     (in  FRinti FRintieven)
-		     (in  FRintj FRintjeven))))
+		     (in  FRintj FRintjeven))) (fr550 (unit u-media-4-quad)))
   )
 )
 
@@ -7507,45 +8083,46 @@
 
 (define-pmacro (media-quad-multiply-cross-acc-semantics
 		cond mode conv addop rhw res max min)
-  (if (register-unaligned res 4)
-      (c-call VOID "@cpu@_media_acc_not_aligned")
-      (if (orif (register-unaligned FRintieven 2)
-		(register-unaligned FRintjeven 2))
-	  (c-call VOID "@cpu@_media_register_not_aligned")
-	  (if cond
-	      (sequence ((mode argihi) (mode argilo)
-			 (mode argjhi) (mode argjlo))
-			(extract-hilo FRintieven 0 FRintjeven 0
-				      argihi argilo argjhi argjlo)
-			(media-multiply-acc-semantics conv argihi addop argjhi
-						      (nextreg rhw res 2)
-						      max min (msr-sie-acci-2))
-			(media-multiply-acc-semantics conv argilo addop argjlo
-						      (nextreg rhw res 3)
-						      max min (msr-sie-acci-3))
-			(extract-hilo FRintieven 1 FRintjeven 1
-				      argihi argilo argjhi argjlo)
-			(media-multiply-acc-semantics conv argihi addop argjhi
-						      res
-						      max min (msr-sie-acci))
-			(media-multiply-acc-semantics conv argilo addop argjlo
-						      (nextreg rhw res 1)
-						      max min
-						      (msr-sie-acci-1))))))
+  (if (c-call SI "@cpu@_check_acc_range" (index-of res))
+      (if (register-unaligned res 4)
+	  (c-call VOID "@cpu@_media_acc_not_aligned")
+	  (if (orif (register-unaligned FRintieven 2)
+		    (register-unaligned FRintjeven 2))
+	      (c-call VOID "@cpu@_media_register_not_aligned")
+	      (if cond
+		  (sequence ((mode argihi) (mode argilo)
+			     (mode argjhi) (mode argjlo))
+			    (extract-hilo FRintieven 0 FRintjeven 0
+					  argihi argilo argjhi argjlo)
+			    (media-multiply-acc-semantics conv argihi addop argjhi
+							  (nextreg rhw res 2)
+							  max min (msr-sie-acci-2))
+			    (media-multiply-acc-semantics conv argilo addop argjlo
+							  (nextreg rhw res 3)
+							  max min (msr-sie-acci-3))
+			    (extract-hilo FRintieven 1 FRintjeven 1
+					  argihi argilo argjhi argjlo)
+			    (media-multiply-acc-semantics conv argihi addop argjhi
+							  res
+							  max min (msr-sie-acci))
+			    (media-multiply-acc-semantics conv argilo addop argjlo
+							  (nextreg rhw res 1)
+							  max min
+							  (msr-sie-acci-1)))))))
 )
 
 (define-pmacro (media-quad-multiply-cross-acc
 		name mode conv addop rhw res max min op ope comment)
   (dni name
        (comment)
-       ((UNIT MDUALACC) (MACH fr400) (FR400-MAJOR M-2))
+       ((UNIT MDUALACC) (MACH fr400,fr550) (FR550-MAJOR M-4) (FR400-MAJOR M-2))
        (.str name "$pack $FRintieven,$FRintjeven,$" res)
        (+ pack res op FRintieven ope FRintjeven)
        (media-quad-multiply-cross-acc-semantics 1 mode conv addop rhw res
 						max min)
        ((fr400 (unit u-media-2-quad
 		     (in  FRinti FRintieven)
-		     (in  FRintj FRintjeven))))
+		     (in  FRintj FRintjeven))) (fr550 (unit u-media-4-quad)))
   )
 )
 
@@ -7556,45 +8133,46 @@
 
 (define-pmacro (media-quad-cross-multiply-cross-acc-semantics
 		cond mode conv addop rhw res max min)
-  (if (register-unaligned res 4)
-      (c-call VOID "@cpu@_media_acc_not_aligned")
-      (if (orif (register-unaligned FRintieven 2)
-		(register-unaligned FRintjeven 2))
-	  (c-call VOID "@cpu@_media_register_not_aligned")
-	  (if cond
-	      (sequence ((mode argihi) (mode argilo)
-			 (mode argjhi) (mode argjlo))
-			(extract-hilo FRintieven 0 FRintjeven 0
-				      argihi argilo argjhi argjlo)
-			(media-multiply-acc-semantics conv argihi addop argjlo
-						      (nextreg rhw res 2)
-						      max min (msr-sie-acci-2))
-			(media-multiply-acc-semantics conv argilo addop argjhi
-						      (nextreg rhw res 3)
-						      max min (msr-sie-acci-3))
-			(extract-hilo FRintieven 1 FRintjeven 1
-				      argihi argilo argjhi argjlo)
-			(media-multiply-acc-semantics conv argihi addop argjlo
-						      res
-						      max min (msr-sie-acci))
-			(media-multiply-acc-semantics conv argilo addop argjhi
-						      (nextreg rhw res 1)
-						      max min
-						      (msr-sie-acci-1))))))
+  (if (c-call SI "@cpu@_check_acc_range" (index-of res))
+      (if (register-unaligned res 4)
+	  (c-call VOID "@cpu@_media_acc_not_aligned")
+	  (if (orif (register-unaligned FRintieven 2)
+		    (register-unaligned FRintjeven 2))
+	      (c-call VOID "@cpu@_media_register_not_aligned")
+	      (if cond
+		  (sequence ((mode argihi) (mode argilo)
+			     (mode argjhi) (mode argjlo))
+			    (extract-hilo FRintieven 0 FRintjeven 0
+					  argihi argilo argjhi argjlo)
+			    (media-multiply-acc-semantics conv argihi addop argjlo
+							  (nextreg rhw res 2)
+							  max min (msr-sie-acci-2))
+			    (media-multiply-acc-semantics conv argilo addop argjhi
+							  (nextreg rhw res 3)
+							  max min (msr-sie-acci-3))
+			    (extract-hilo FRintieven 1 FRintjeven 1
+					  argihi argilo argjhi argjlo)
+			    (media-multiply-acc-semantics conv argihi addop argjlo
+							  res
+							  max min (msr-sie-acci))
+			    (media-multiply-acc-semantics conv argilo addop argjhi
+							  (nextreg rhw res 1)
+							  max min
+							  (msr-sie-acci-1)))))))
 )
 
 (define-pmacro (media-quad-cross-multiply-cross-acc
 		name mode conv addop rhw res max min op ope comment)
   (dni name
        (comment)
-       ((UNIT MDUALACC) (MACH fr400) (FR400-MAJOR M-2))
+       ((UNIT MDUALACC) (MACH fr400,fr550) (FR550-MAJOR M-4) (FR400-MAJOR M-2))
        (.str name "$pack $FRintieven,$FRintjeven,$" res)
        (+ pack res op FRintieven ope FRintjeven)
        (media-quad-cross-multiply-cross-acc-semantics 1 mode conv addop rhw res
 						      max min)
        ((fr400 (unit u-media-2-quad
 		     (in  FRinti FRintieven)
-		     (in  FRintj FRintjeven))))
+		     (in  FRintj FRintjeven))) (fr550 (unit u-media-4-quad)))
   )
 )
 
@@ -7605,45 +8183,46 @@
 
 (define-pmacro (media-quad-cross-multiply-acc-semantics
 		cond mode conv addop rhw res max min)
-  (if (register-unaligned res 4)
-      (c-call VOID "@cpu@_media_acc_not_aligned")
-      (if (orif (register-unaligned FRintieven 2)
-		(register-unaligned FRintjeven 2))
-	  (c-call VOID "@cpu@_media_register_not_aligned")
-	  (if cond
-	      (sequence ((mode argihi) (mode argilo)
-			 (mode argjhi) (mode argjlo))
-			(extract-hilo FRintieven 0 FRintjeven 0
-				      argihi argilo argjhi argjlo)
-			(media-multiply-acc-semantics conv argihi addop argjlo
-						      res
-						      max min (msr-sie-acci))
-			(media-multiply-acc-semantics conv argilo addop argjhi
-						      (nextreg rhw res 1)
-						      max min (msr-sie-acci-1))
-			(extract-hilo FRintieven 1 FRintjeven 1
-				      argihi argilo argjhi argjlo)
-			(media-multiply-acc-semantics conv argihi addop argjlo
-						      (nextreg rhw res 2)
-						      max min (msr-sie-acci-2))
-			(media-multiply-acc-semantics conv argilo addop argjhi
-						      (nextreg rhw res 3)
-						      max min
-						      (msr-sie-acci-3))))))
+  (if (c-call SI "@cpu@_check_acc_range" (index-of res))
+      (if (register-unaligned res 4)
+	  (c-call VOID "@cpu@_media_acc_not_aligned")
+	  (if (orif (register-unaligned FRintieven 2)
+		    (register-unaligned FRintjeven 2))
+	      (c-call VOID "@cpu@_media_register_not_aligned")
+	      (if cond
+		  (sequence ((mode argihi) (mode argilo)
+			     (mode argjhi) (mode argjlo))
+			    (extract-hilo FRintieven 0 FRintjeven 0
+					  argihi argilo argjhi argjlo)
+			    (media-multiply-acc-semantics conv argihi addop argjlo
+							  res
+							  max min (msr-sie-acci))
+			    (media-multiply-acc-semantics conv argilo addop argjhi
+							  (nextreg rhw res 1)
+							  max min (msr-sie-acci-1))
+			    (extract-hilo FRintieven 1 FRintjeven 1
+					  argihi argilo argjhi argjlo)
+			    (media-multiply-acc-semantics conv argihi addop argjlo
+							  (nextreg rhw res 2)
+							  max min (msr-sie-acci-2))
+			    (media-multiply-acc-semantics conv argilo addop argjhi
+							  (nextreg rhw res 3)
+							  max min
+							  (msr-sie-acci-3)))))))
 )
 
 (define-pmacro (media-quad-cross-multiply-acc
 		name mode conv addop rhw res max min op ope comment)
   (dni name
        (comment)
-       ((UNIT MDUALACC) (MACH fr400) (FR400-MAJOR M-2))
+       ((UNIT MDUALACC) (MACH fr400,fr550) (FR550-MAJOR M-4) (FR400-MAJOR M-2))
        (.str name "$pack $FRintieven,$FRintjeven,$" res)
        (+ pack res op FRintieven ope FRintjeven)
        (media-quad-cross-multiply-acc-semantics 1 mode conv addop rhw res
 						max min)
        ((fr400 (unit u-media-2-quad
 		     (in FRinti FRintieven)
-		     (in FRintj FRintjeven))))
+		     (in FRintj FRintjeven))) (fr550 (unit u-media-4-quad)))
   )
 )
 
@@ -7671,29 +8250,31 @@
 )
 
 (define-pmacro (media-dual-complex-semantics mode conv rhs1 rhs2 max min)
-  (sequence ((mode argihi) (mode argilo) (mode argjhi) (mode argjlo))
-	    (extract-hilo FRinti 0 FRintj 0 argihi argilo argjhi argjlo)
-	    (media-complex-semantics conv argihi rhs1 argilo rhs2 ACC40Sk
-				     max min (msr-sie-acci)))
+  (if (c-call SI "@cpu@_check_acc_range" (index-of ACC40Sk))
+      (sequence ((mode argihi) (mode argilo) (mode argjhi) (mode argjlo))
+		(extract-hilo FRinti 0 FRintj 0 argihi argilo argjhi argjlo)
+		(media-complex-semantics conv argihi rhs1 argilo rhs2 ACC40Sk
+					 max min (msr-sie-acci))))
 )
 
 (define-pmacro (media-dual-complex-semantics-i mode conv rhs1 rhs2 max min)
-  (sequence ((mode argihi) (mode argilo) (mode argjhi) (mode argjlo))
-	    (extract-hilo FRinti 0 FRintj 0 argihi argilo argjhi argjlo)
-	    (media-complex-semantics-i conv argihi rhs1 argilo rhs2 ACC40Sk
-				     max min (msr-sie-acci)))
+  (if (c-call SI "@cpu@_check_acc_range" (index-of ACC40Sk))
+      (sequence ((mode argihi) (mode argilo) (mode argjhi) (mode argjlo))
+		(extract-hilo FRinti 0 FRintj 0 argihi argilo argjhi argjlo)
+		(media-complex-semantics-i conv argihi rhs1 argilo rhs2 ACC40Sk
+					   max min (msr-sie-acci))))
 )
 
 (define-pmacro (media-dual-complex
 		name mode conv rhs1 rhs2 max min op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-4) (FR400-MAJOR M-1))
+       ((UNIT FMALL) (FR500-MAJOR M-4) (FR550-MAJOR M-4) (FR400-MAJOR M-1))
        (.str name "$pack $FRinti,$FRintj,$ACC40Sk")
        (+ pack ACC40Sk op FRinti ope FRintj)
        (media-dual-complex-semantics mode conv rhs1 rhs2 max min)
        ((fr400 (unit u-media-2))
-	(fr500 (unit u-media)))
+	(fr500 (unit u-media-dual-mul)) (fr550 (unit u-media-4)))
   )
 )
 
@@ -7701,12 +8282,12 @@
 		name mode conv rhs1 rhs2 max min op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-4) (FR400-MAJOR M-1))
+       ((UNIT FMALL) (FR500-MAJOR M-4) (FR550-MAJOR M-4) (FR400-MAJOR M-1))
        (.str name "$pack $FRinti,$FRintj,$ACC40Sk")
        (+ pack ACC40Sk op FRinti ope FRintj)
        (media-dual-complex-semantics-i mode conv rhs1 rhs2 max min)
        ((fr400 (unit u-media-2))
-	(fr500 (unit u-media-dual-mul)))
+	(fr500 (unit u-media-dual-mul)) (fr550 (unit u-media-4)))
   )
 )
 
@@ -7734,13 +8315,13 @@
 		name mode conv rhs1 rhs2 max min op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-4) (FR400-MAJOR M-1) CONDITIONAL)
+       ((UNIT FMALL) (FR500-MAJOR M-4) (FR550-MAJOR M-4) (FR400-MAJOR M-1) CONDITIONAL)
        (.str name "$pack $FRinti,$FRintj,$ACC40Sk,$CCi,$cond")
        (+ pack ACC40Sk op FRinti CCi cond ope FRintj)
        (if (eq CCi (or cond 2))
 	   (media-dual-complex-semantics mode conv rhs1 rhs2 max min))
        ((fr400 (unit u-media-2))
-	(fr500 (unit u-media)))
+	(fr500 (unit u-media-dual-mul)) (fr550 (unit u-media-4)))
   )
 )
 
@@ -7748,13 +8329,13 @@
 		name mode conv rhs1 rhs2 max min op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-4) (FR400-MAJOR M-1) CONDITIONAL)
+       ((UNIT FMALL) (FR500-MAJOR M-4) (FR550-MAJOR M-4) (FR400-MAJOR M-1) CONDITIONAL)
        (.str name "$pack $FRinti,$FRintj,$ACC40Sk,$CCi,$cond")
        (+ pack ACC40Sk op FRinti CCi cond ope FRintj)
        (if (eq CCi (or cond 2))
 	   (media-dual-complex-semantics-i mode conv rhs1 rhs2 max min))
        ((fr400 (unit u-media-2))
-	(fr500 (unit u-media-dual-mul)))
+	(fr500 (unit u-media-dual-mul)) (fr550 (unit u-media-4)))
   )
 )
 
@@ -7782,32 +8363,33 @@
 		name mode conv rhs1 rhs2 max min op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-4) (FR400-MAJOR M-2))
+       ((UNIT FMALL) (FR500-MAJOR M-4) (FR550-MAJOR M-4) (FR400-MAJOR M-2))
        (.str name "$pack $FRintieven,$FRintjeven,$ACC40Sk")
        (+ pack ACC40Sk op FRintieven ope FRintjeven)
-       (if (register-unaligned ACC40Sk 2)
-	   (c-call VOID "@cpu@_media_acc_not_aligned")
-	   (if (orif (register-unaligned FRintieven 2)
-		     (register-unaligned FRintjeven 2))
-	       (c-call VOID "@cpu@_media_register_not_aligned")
-	       (sequence ((mode argihi) (mode argilo)
-			  (mode argjhi) (mode argjlo))
-			 (extract-hilo FRintieven 0 FRintjeven 0
-				       argihi argilo argjhi argjlo)
-			 (media-complex-semantics conv argihi rhs1 argilo rhs2
-						  ACC40Sk
-						  max min (msr-sie-acci))
-			 (extract-hilo FRintieven 1 FRintjeven 1
-				       argihi argilo argjhi argjlo)
-			 (media-complex-semantics conv argihi rhs1 argilo rhs2
-						  (nextreg h-acc40S ACC40Sk 1)
-						  max min (msr-sie-acci-1)))))
+       (if (c-call SI "@cpu@_check_acc_range" (index-of ACC40Sk))
+	   (if (register-unaligned ACC40Sk 2)
+	       (c-call VOID "@cpu@_media_acc_not_aligned")
+	       (if (orif (register-unaligned FRintieven 2)
+			 (register-unaligned FRintjeven 2))
+		   (c-call VOID "@cpu@_media_register_not_aligned")
+		   (sequence ((mode argihi) (mode argilo)
+			      (mode argjhi) (mode argjlo))
+			     (extract-hilo FRintieven 0 FRintjeven 0
+					   argihi argilo argjhi argjlo)
+			     (media-complex-semantics conv argihi rhs1 argilo rhs2
+						      ACC40Sk
+						      max min (msr-sie-acci))
+			     (extract-hilo FRintieven 1 FRintjeven 1
+					   argihi argilo argjhi argjlo)
+			     (media-complex-semantics conv argihi rhs1 argilo rhs2
+						      (nextreg h-acc40S ACC40Sk 1)
+						      max min (msr-sie-acci-1))))))
        ((fr400 (unit u-media-2-quad
 		     (in FRinti FRintieven)
 		     (in FRintj FRintjeven)))
 	(fr500 (unit u-media-quad-complex
 		     (in FRinti FRintieven)
-		     (in FRintj FRintjeven))))
+		     (in FRintj FRintjeven))) (fr550 (unit u-media-4-quad)))
   )
 )
 
@@ -7815,32 +8397,33 @@
 		name mode conv rhs1 rhs2 max min op ope comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR M-4) (FR400-MAJOR M-2))
+       ((UNIT FMALL) (FR500-MAJOR M-4) (FR550-MAJOR M-4) (FR400-MAJOR M-2))
        (.str name "$pack $FRintieven,$FRintjeven,$ACC40Sk")
        (+ pack ACC40Sk op FRintieven ope FRintjeven)
-       (if (register-unaligned ACC40Sk 2)
-	   (c-call VOID "@cpu@_media_acc_not_aligned")
-	   (if (orif (register-unaligned FRintieven 2)
-		     (register-unaligned FRintjeven 2))
-	       (c-call VOID "@cpu@_media_register_not_aligned")
-	       (sequence ((mode argihi) (mode argilo)
-			  (mode argjhi) (mode argjlo))
-			 (extract-hilo FRintieven 0 FRintjeven 0
-				       argihi argilo argjhi argjlo)
-			 (media-complex-semantics-i conv argihi rhs1 argilo rhs2
-						  ACC40Sk
-						  max min (msr-sie-acci))
-			 (extract-hilo FRintieven 1 FRintjeven 1
-				       argihi argilo argjhi argjlo)
-			 (media-complex-semantics-i conv argihi rhs1 argilo rhs2
-						  (nextreg h-acc40S ACC40Sk 1)
-						  max min (msr-sie-acci-1)))))
+       (if (c-call SI "@cpu@_check_acc_range" (index-of ACC40Sk))
+	   (if (register-unaligned ACC40Sk 2)
+	       (c-call VOID "@cpu@_media_acc_not_aligned")
+	       (if (orif (register-unaligned FRintieven 2)
+			 (register-unaligned FRintjeven 2))
+		   (c-call VOID "@cpu@_media_register_not_aligned")
+		   (sequence ((mode argihi) (mode argilo)
+			      (mode argjhi) (mode argjlo))
+			     (extract-hilo FRintieven 0 FRintjeven 0
+					   argihi argilo argjhi argjlo)
+			     (media-complex-semantics-i conv argihi rhs1 argilo rhs2
+							ACC40Sk
+							max min (msr-sie-acci))
+			     (extract-hilo FRintieven 1 FRintjeven 1
+					   argihi argilo argjhi argjlo)
+			     (media-complex-semantics-i conv argihi rhs1 argilo rhs2
+							(nextreg h-acc40S ACC40Sk 1)
+							max min (msr-sie-acci-1))))))
        ((fr400 (unit u-media-2-quad
 		     (in FRinti FRintieven)
 		     (in FRintj FRintjeven)))
 	(fr500 (unit u-media-quad-complex
 		     (in FRinti FRintieven)
-		     (in FRintj FRintjeven))))
+		     (in FRintj FRintjeven))) (fr550 (unit u-media-4-quad)))
   )
 )
 
@@ -7882,22 +8465,22 @@
 
 (dni mexpdhw
      "Media expand halfword to word"
-     ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-1))
+     ((UNIT FM01) (FR500-MAJOR M-2) (FR550-MAJOR M-3) (FR400-MAJOR M-1))
      "mexpdhw$pack $FRinti,$u6,$FRintk"
      (+ pack FRintk OP_7B FRinti OPE1_32 u6)
      (media-expand-halfword-to-word-semantics 1)
      ((fr400 (unit u-media-3))
-      (fr500 (unit u-media)))
+      (fr500 (unit u-media)) (fr550 (unit u-media)))
 )
 
 (dni cmexpdhw
      "Conditional media expand halfword to word"
-     ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-1) CONDITIONAL)
+     ((UNIT FM01) (FR500-MAJOR M-2) (FR550-MAJOR M-3) (FR400-MAJOR M-1) CONDITIONAL)
      "cmexpdhw$pack $FRinti,$u6,$FRintk,$CCi,$cond"
      (+ pack FRintk OP_76 FRinti CCi cond OPE4_2 u6)
      (media-expand-halfword-to-word-semantics (eq CCi (or cond 2)))
      ((fr400 (unit u-media-3))
-      (fr500 (unit u-media)))
+      (fr500 (unit u-media)) (fr550 (unit u-media)))
 )
 
 (define-pmacro (media-expand-halfword-to-double-semantics cond)
@@ -7918,41 +8501,41 @@
 
 (dni mexpdhd
      "Media expand halfword to double"
-     ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-2))
+     ((UNIT FM01) (FR500-MAJOR M-2) (FR550-MAJOR M-3) (FR400-MAJOR M-2))
      "mexpdhd$pack $FRinti,$u6,$FRintkeven"
      (+ pack FRintkeven OP_7B FRinti OPE1_33 u6)
      (media-expand-halfword-to-double-semantics 1)
      ((fr400 (unit u-media-dual-expand
 		     (out FRintk FRintkeven)))
       (fr500 (unit u-media-dual-expand
-		     (out FRintk FRintkeven))))
+		     (out FRintk FRintkeven))) (fr550 (unit u-media-dual-expand)))
 )
 
 (dni cmexpdhd
      "Conditional media expand halfword to double"
-     ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-2) CONDITIONAL)
+     ((UNIT FM01) (FR500-MAJOR M-2) (FR550-MAJOR M-3) (FR400-MAJOR M-2) CONDITIONAL)
      "cmexpdhd$pack $FRinti,$u6,$FRintkeven,$CCi,$cond"
      (+ pack FRintkeven OP_76 FRinti CCi cond OPE4_3 u6)
      (media-expand-halfword-to-double-semantics (eq CCi (or cond 2)))
      ((fr400 (unit u-media-dual-expand
 		   (out FRintk FRintkeven)))
       (fr500 (unit u-media-dual-expand
-		   (out FRintk FRintkeven))))
+		   (out FRintk FRintkeven))) (fr550 (unit u-media-dual-expand)))
 )
 
 (dni mpackh
      "Media halfword pack"
-     ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-1))
+     ((UNIT FM01) (FR500-MAJOR M-2) (FR550-MAJOR M-3) (FR400-MAJOR M-1))
      "mpackh$pack $FRinti,$FRintj,$FRintk"
      (+ pack FRintk OP_7B FRinti OPE1_34 FRintj)
      (media-pack FRinti FRintj FRintk 0)
      ((fr400 (unit u-media-3))
-      (fr500 (unit u-media)))
+      (fr500 (unit u-media)) (fr550 (unit u-media)))
 )
 
 (dni mdpackh
      "Media dual pack"
-     ((UNIT FM01) (FR500-MAJOR M-5) (FR400-MAJOR M-2))
+     ((UNIT FM01) (FR500-MAJOR M-5) (FR550-MAJOR M-3) (FR400-MAJOR M-2))
      "mdpackh$pack $FRintieven,$FRintjeven,$FRintkeven"
      (+ pack FRintkeven OP_7B FRintieven OPE1_36 FRintjeven)
      (if (orif (register-unaligned FRintieven 2)
@@ -7973,7 +8556,7 @@
       (fr500 (unit u-media-quad-arith
 		   (in  FRinti FRintieven)
 		   (in  FRintj FRintjeven)
-		   (out FRintk FRintkeven))))
+		   (out FRintk FRintkeven))) (fr550 (unit u-media-quad)))
 )
 
 (define-pmacro (media-unpack src soff targ toff)
@@ -7986,7 +8569,7 @@
 
 (dni munpackh
      "Media halfword unpack"
-     ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-2))
+     ((UNIT FM01) (FR500-MAJOR M-2) (FR550-MAJOR M-3) (FR400-MAJOR M-2))
      "munpackh$pack $FRinti,$FRintkeven"
      (+ pack FRintkeven OP_7B FRinti OPE1_35 (FRj-null))
      (if (register-unaligned FRintkeven 2)
@@ -7999,7 +8582,7 @@
      ((fr400 (unit u-media-dual-expand
 		   (out FRintk FRintkeven)))
       (fr500 (unit u-media-dual-expand
-		   (out FRintk FRintkeven))))
+		   (out FRintk FRintkeven))) (fr550 (unit u-media-dual-expand)))
 )
 
 (dni mdunpackh
@@ -8035,7 +8618,7 @@
 
 (dni mbtoh
      "Media convert byte to halfword"
-     ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-2))
+     ((UNIT FM01) (FR500-MAJOR M-2) (FR550-MAJOR M-3) (FR400-MAJOR M-2))
      "mbtoh$pack $FRintj,$FRintkeven"
      (+ pack FRintkeven OP_7B (FRi-null) OPE1_38 FRintj)
      (sequence ()
@@ -8046,12 +8629,12 @@
      ((fr400 (unit u-media-dual-expand
 		   (out FRintk FRintkeven)))
       (fr500 (unit u-media-dual-btoh
-		   (out FRintk FRintkeven))))
+		   (out FRintk FRintkeven))) (fr550 (unit u-media-dual-expand)))
 )
 
 (dni cmbtoh
      "Conditional media convert byte to halfword"
-     ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-2) CONDITIONAL)
+     ((UNIT FM01) (FR500-MAJOR M-2) (FR550-MAJOR M-3) (FR400-MAJOR M-2) CONDITIONAL)
      "cmbtoh$pack $FRintj,$FRintkeven,$CCi,$cond"
      (+ pack FRintkeven OP_77 (FRi-null) CCi cond OPE4_0 FRintj)
      (sequence ()
@@ -8062,7 +8645,7 @@
      ((fr400 (unit u-media-dual-expand
 		   (out FRintk FRintkeven)))
       (fr500 (unit u-media-dual-btoh
-		   (out FRintk FRintkeven))))
+		   (out FRintk FRintkeven))) (fr550 (unit u-media-dual-expand (in FRinti FRintj))))
 )
 
 (define-pmacro (mhtob-semantics cond)
@@ -8078,7 +8661,7 @@
 
 (dni mhtob
      "Media convert halfword to byte"
-     ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-2))
+     ((UNIT FM01) (FR500-MAJOR M-2) (FR550-MAJOR M-3) (FR400-MAJOR M-2))
      "mhtob$pack $FRintjeven,$FRintk"
      (+ pack FRintk OP_7B (FRi-null) OPE1_39 FRintjeven)
      (sequence ()
@@ -8089,12 +8672,12 @@
      ((fr400 (unit u-media-dual-htob
 		   (in FRintj FRintjeven)))
       (fr500 (unit u-media-dual-htob
-		   (in FRintj FRintjeven))))
+		   (in FRintj FRintjeven))) (fr550 (unit u-media-3-dual (in FRinti FRintjeven))))
 )
 
 (dni cmhtob
      "Conditional media convert halfword to byte"
-     ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-2) CONDITIONAL)
+     ((UNIT FM01) (FR500-MAJOR M-2) (FR550-MAJOR M-3) (FR400-MAJOR M-2) CONDITIONAL)
      "cmhtob$pack $FRintjeven,$FRintk,$CCi,$cond"
      (+ pack FRintk OP_77 (FRi-null) CCi cond OPE4_1 FRintjeven)
      (sequence ()
@@ -8105,7 +8688,7 @@
      ((fr400 (unit u-media-dual-htob
 		   (in FRintj FRintjeven)))
       (fr500 (unit u-media-dual-htob
-		   (in FRintj FRintjeven))))
+		   (in FRintj FRintjeven))) (fr550 (unit u-media-3-dual (in FRinti FRintjeven))))
 )
 
 (define-pmacro (mbtohe-semantics cond)
@@ -8152,7 +8735,7 @@
 ; Media NOP
 ; A special case of mclracc
 (dni mnop "Media nop"
-     ((UNIT FMALL) (FR500-MAJOR M-1) (FR400-MAJOR M-1))
+     ((UNIT FMALL) (FR500-MAJOR M-1) (FR550-MAJOR M-1) (FR400-MAJOR M-1))
      "mnop$pack"
      (+ pack (f-ACC40Sk 63) OP_7B (f-A 1) (misc-null-10) OPE1_3B (FRj-null))
      (nop)
@@ -8162,59 +8745,59 @@
 ; mclracc with #A==0
 (dni mclracc-0
      "Media clear accumulator(s)"
-     ((UNIT FM01) (FR500-MAJOR M-3) (FR400-MAJOR M-1))
+     ((UNIT FM01) (FR500-MAJOR M-3) (FR550-MAJOR M-3) (FR400-MAJOR M-1))
      "mclracc$pack $ACC40Sk,$A0"
      (+ pack ACC40Sk OP_7B (f-A 0) (misc-null-10) OPE1_3B (FRj-null))
      (c-call VOID "@cpu@_clear_accumulators" (index-of ACC40Sk) 0)
      ((fr400 (unit u-media-4))
-      (fr500 (unit u-media)))
+      (fr500 (unit u-media)) (fr550 (unit u-media-3-mclracc)))
 )
 
 ; mclracc with #A==1
 (dni mclracc-1
      "Media clear accumulator(s)"
-     ((UNIT MCLRACC-1) (FR500-MAJOR M-6) (FR400-MAJOR M-2))
+     ((UNIT MCLRACC-1) (FR500-MAJOR M-6) (FR550-MAJOR M-3) (FR400-MAJOR M-2))
      "mclracc$pack $ACC40Sk,$A1"
      (+ pack ACC40Sk OP_7B (f-A 1) (misc-null-10) OPE1_3B (FRj-null))
      (c-call VOID "@cpu@_clear_accumulators" (index-of ACC40Sk) 1)
      ((fr400 (unit u-media-4))
-      (fr500 (unit u-media)))
+      (fr500 (unit u-media)) (fr550 (unit u-media-3-mclracc)))
 )
 
 (dni mrdacc
      "Media read accumulator"
-     ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-1))
+     ((UNIT FM01) (FR500-MAJOR M-2) (FR550-MAJOR M-3) (FR400-MAJOR M-1))
      "mrdacc$pack $ACC40Si,$FRintk"
      (+ pack FRintk OP_7B ACC40Si OPE1_3C (FRj-null))
      (set FRintk ACC40Si)
      ((fr400 (unit u-media-4))
-      (fr500 (unit u-media)))
+      (fr500 (unit u-media)) (fr550 (unit u-media-3-acc)))
 )
 
 (dni mrdaccg
      "Media read accumulator guard"
-     ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-1))
+     ((UNIT FM01) (FR500-MAJOR M-2) (FR550-MAJOR M-3) (FR400-MAJOR M-1))
      "mrdaccg$pack $ACCGi,$FRintk"
      (+ pack FRintk OP_7B ACCGi OPE1_3E (FRj-null))
      (set FRintk ACCGi)
      ((fr400 (unit u-media-4-accg))
-      (fr500 (unit u-media)))
+      (fr500 (unit u-media)) (fr550 (unit u-media-3-acc (in ACC40Si ACCGi))))
 )
 
 (dni mwtacc
      "Media write accumulator"
-     ((UNIT FM01) (FR500-MAJOR M-3) (FR400-MAJOR M-1))
+     ((UNIT FM01) (FR500-MAJOR M-3) (FR550-MAJOR M-3) (FR400-MAJOR M-1))
      "mwtacc$pack $FRinti,$ACC40Sk"
      (+ pack ACC40Sk OP_7B FRinti OPE1_3D (FRj-null))
      (set ACC40Sk (or (and ACC40Sk (const DI #xffffffff00000000))
 		     FRinti))
      ((fr400 (unit u-media-4))
-      (fr500 (unit u-media)))
+      (fr500 (unit u-media)) (fr550 (unit u-media-3-wtacc)))
 )
 
 (dni mwtaccg
      "Media write accumulator guard"
-     ((UNIT FM01) (FR500-MAJOR M-3) (FR400-MAJOR M-1))
+     ((UNIT FM01) (FR500-MAJOR M-3) (FR550-MAJOR M-3) (FR400-MAJOR M-1))
      "mwtaccg$pack $FRinti,$ACCGk"
      (+ pack ACCGk OP_7B FRinti OPE1_3F (FRj-null))
      (sequence ()
@@ -8222,7 +8805,7 @@
 	       (c-raw-call VOID "frv_ref_SI" ACCGk)
 	       (set ACCGk FRinti))
      ((fr400 (unit u-media-4-accg))
-      (fr500 (unit u-media)))
+      (fr500 (unit u-media)) (fr550 (unit u-media-3-wtacc (in ACC40Sk ACCGk))))
 )
 
 (define-pmacro (media-cop num op)
@@ -8253,7 +8836,7 @@
 ; Floating point NOP
 (dni fnop
      "Floating point nop"
-     ((UNIT FMALL) (FR500-MAJOR F-8) (MACH simple,tomcat,fr500,frv))
+     ((UNIT FMALL) (FR500-MAJOR F-8) (FR550-MAJOR F-1) (MACH simple,tomcat,fr500,fr550,frv))
      "fnop$pack"
      (+ pack (rd-null) OP_79 (FRi-null) OPE1_0D (FRj-null))
      (nop)
