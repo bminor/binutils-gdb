@@ -1,3 +1,10 @@
+2002-09-16  Bruno Haible  <bruno@clisp.org>
+
+	* emulparams/elf_i386_fbsd.sh: Set OUTPUT_FORMAT to
+	elf32-i386-freebsd.
+	* emulparams/elf64alpha_fbsd.sh: Set OUTPUT_FORMAT to
+	elf64-alpha-freebsd.
+
 2002-09-11  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: New TI port supports both C4x and C3x series of DSPs.

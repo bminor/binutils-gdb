@@ -216,6 +216,7 @@ BFD32_BACKENDS = \
 	elf32-hppa.lo \
 	elf32-i370.lo \
 	elf32-i386.lo \
+	elf32-i386-fbsd.lo \
 	elf32-i386qnx.lo \
 	elf32-i860.lo \
 	elf32-i960.lo \
@@ -378,6 +379,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-hppa.c \
 	elf32-i370.c \
 	elf32-i386.c \
+	elf32-i386-fbsd.c \
 	elf32-i386qnx.c \
 	elf32-i860.c \
 	elf32-i960.c \
@@ -487,6 +489,7 @@ BFD64_BACKENDS = \
 	efi-app-ia64.lo \
 	elf64-x86-64.lo \
 	elf64-alpha.lo \
+	elf64-alpha-fbsd.lo \
 	elf64-hppa.lo \
 	elf64-ia64.lo \
 	elf64-gen.lo \
@@ -513,6 +516,7 @@ BFD64_BACKENDS_CFILES = \
 	efi-app-ia64.c \
 	elf64-x86-64.c \
 	elf64-alpha.c \
+	elf64-alpha-fbsd.c \
 	elf64-hppa.c \
 	elf64-gen.c \
 	elfn32-mips.c \
@@ -1164,6 +1168,10 @@ elf32-i386.lo: elf32-i386.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/i386.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
+elf32-i386-fbsd.lo: elf32-i386-fbsd.c elf32-i386.c $(INCDIR)/filenames.h \
+  $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/i386.h \
+  $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-i386qnx.lo: elf32-i386qnx.c elf32-i386.c $(INCDIR)/filenames.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/i386.h \
@@ -1519,6 +1527,13 @@ elf64-x86-64.lo: elf64-x86-64.c $(INCDIR)/filenames.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/x86-64.h \
   $(INCDIR)/elf/reloc-macros.h elf64-target.h
 elf64-alpha.lo: elf64-alpha.c $(INCDIR)/filenames.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/alpha.h \
+  $(INCDIR)/elf/reloc-macros.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h \
+  $(INCDIR)/coff/alpha.h $(INCDIR)/aout/ar.h libcoff.h \
+  libecoff.h ecoffswap.h elf64-target.h
+elf64-alpha-fbsd.lo: elf64-alpha-fbsd.c elf64-alpha.c $(INCDIR)/filenames.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/alpha.h \
   $(INCDIR)/elf/reloc-macros.h $(INCDIR)/coff/internal.h \

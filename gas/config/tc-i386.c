@@ -4953,7 +4953,7 @@ i386_target_format ()
       {
 	if (flag_code == CODE_64BIT)
 	  use_rela_relocations = 1;
-	return flag_code == CODE_64BIT ? "elf64-x86-64" : "elf32-i386";
+	return flag_code == CODE_64BIT ? "elf64-x86-64" : ELF_TARGET_FORMAT;
       }
 #endif
     default:

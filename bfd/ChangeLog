@@ -1,3 +1,22 @@
+2002-09-16  Bruno Haible  <bruno@clisp.org>
+
+	* elf32-i386.c: Don't defined ELF_ARCH etc. if this file is included
+	by a target variant implementation.
+	* elf64-alpha.c: Likewise.
+	* elf32-i386-fbsd.c: New file.
+	* elf64-alpha-fbsd.c: New file.
+	* targets.c: Support bfd_elf32_i386_freebsd_vec and
+	bfd_elf64_alpha_freebsd_vec.
+	* configure.in: Accept the vectors bfd_elf32_i386_freebsd_vec,
+	bfd_elf64_alpha_freebsd_vec.
+	* Makefile.am (BFD32_BACKENDS): Add elf32-i386-fbsd.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-i386-fbsd.c.
+	(BFD64_BACKENDS): Add elf64-alpha-fbsd.lo.
+	(BFD64_BACKENDS_CFILES): Add elf64-alpha-fbsd.c.
+	(elf32-i386-fbsd.lo, elf64-alpha-fbsd.lo): Add dependencies.
+	* config.bfd: For FreeBSD targets, set targ_defvec to a FreeBSD
+	specific targets. Define OLD_FREEBSD_ABI_LABEL if appropriate.
+
 2002-09-12  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf32-i386.c (dtpoff_base, tpoff): Don't crash if tls_segment is

@@ -5509,11 +5509,13 @@ const struct elf_size_info alpha_elf_size_info =
   NULL
 };
 
+#ifndef ELF_ARCH
 #define TARGET_LITTLE_SYM	bfd_elf64_alpha_vec
 #define TARGET_LITTLE_NAME	"elf64-alpha"
 #define ELF_ARCH		bfd_arch_alpha
 #define ELF_MACHINE_CODE	EM_ALPHA
 #define ELF_MAXPAGESIZE	0x10000
+#endif /* ELF_ARCH */
 
 #define bfd_elf64_bfd_link_hash_table_create \
   elf64_alpha_bfd_link_hash_table_create
