@@ -72,6 +72,9 @@ Thu Feb 13 14:48:03 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 Thu Feb 13 11:40:58 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-sparc.c (md_show_usage): Add missing backslash at end
+	of continued line.
+
 	* config/tc-mips.c (mips16_extended_frag): Correct base address
 	for an extended PC relative instruction.
 	(md_convert_frag): Likewise.
