@@ -33,6 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include <string.h>
+#include <strings.h>
 
 #if defined(USG) || defined(__CYGNUSCLIB__)
 #include <sys/types.h>
@@ -1618,16 +1619,18 @@ process_one_symbol (type, desc, valu, name, offset, objfile)
 	     sanity checks).  If so, that one was actually the directory
 	     name, and the current one is the real file name.
 	     Patch things up. */	   
-	  if (previous_stab_code == N_SO
-	      && current_subfile && current_subfile->dirname == NULL
-	      && current_subfile->name != NULL
-	      && current_subfile->name[strlen(current_subfile->name)-1] == '/')
+	  if (previous_stab_code == N_SO)
 	    {
-	      current_subfile->dirname = current_subfile->name;
-	      current_subfile->name =
-		  obsavestring (name, strlen (name),
-				&objfile -> symbol_obstack);
-	      break;
+	      if (current_subfile && current_subfile->dirname == NULL
+		  && current_subfile->name != NULL
+		  && current_subfile->name[strlen(current_subfile->name)-1] == '/')
+		{
+		  current_subfile->dirname = current_subfile->name;
+		  current_subfile->name =
+		    obsavestring (name, strlen (name),
+				  &objfile -> symbol_obstack);
+		}
+	      break;		/* Ignore repeated SOs */
 	    }
 	  (void) end_symtab (valu, 0, 0, objfile);
 	}

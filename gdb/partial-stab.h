@@ -186,9 +186,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 	case N_SO: {
 	  unsigned long valu = CUR_SYMBOL_VALUE;
-	  /* Symbol number of the first symbol of this file (i.e. the N_SO
-	     if there is just one, or the first if we have a pair).  */
-	  int first_symnum = symnum;
+	  static int last_so_symnum = -10;
+	  static int dir_so_symnum = -1;
+	  int tmp;
+	  char *p;
 	  
 	  /* End the current partial symtab and start a new one */
 
@@ -196,40 +197,47 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 	  valu += addr;		/* Relocate */
 
-	  if (pst && past_first_source_file)
+	  /* Some compilers (including gcc) emit a pair of initial N_SOs.
+	     The first one is a directory name; the second the file name.
+	     If pst exists, is empty, and has a filename ending in '/',
+	     we assume the previous N_SO was a directory name. */
+
+	  p = rindex(namestring, '/');
+	  if (p && *(p+1) == '\000')
 	    {
-	      /* Some compilers (including gcc) emit a pair of initial N_SOs.
-		 The first one is a directory name; the second the file name.
-		 If pst exists, is empty, and has a filename ending in '/',
-		 we assume the previous N_SO was a directory name. */
-	      if (pst -> objfile -> global_psymbols.next
-		  ==  (pst -> objfile -> global_psymbols.list + pst->globals_offset)
-		&& pst -> objfile -> static_psymbols.next
-		  == (pst -> objfile -> static_psymbols.list + pst->statics_offset)
-		&& pst->filename && pst->filename[0]
-		&& pst->filename[strlen(pst->filename)-1] == '/') {
-		  /* Just replace the directory name with the real filename. */
-		  pst->filename =
-		      (char *) obstack_alloc (&pst->objfile->psymbol_obstack,
-					      strlen (namestring) + 1);
-		  strcpy (pst->filename, namestring);
-		  continue;
-	      }
+	      dir_so_symnum = symnum;
+	      continue;		/* Simply ignore directory name SOs */
+	    }
+
+	  /* Some other compilers (C++ ones in particular) emit useless
+	     SOs for non-existant .c files. */
+
+	  if (last_so_symnum == symnum - 1)
+	    continue;		/* Ignore repeated SOs */
+	  last_so_symnum = symnum;
+
+	  if (pst)
+	    {
 	      END_PSYMTAB (pst, psymtab_include_list, includes_used,
-			   first_symnum * symbol_size, valu,
+			   symnum * symbol_size, valu,
 			   dependency_list, dependencies_used);
 	      pst = (struct partial_symtab *) 0;
 	      includes_used = 0;
 	      dependencies_used = 0;
 	    }
-	  else
-	    past_first_source_file = 1;
 
+	  past_first_source_file = 1;
+
+	  if (dir_so_symnum == symnum - 1) /* Was prev. SO a directory? */
+	    tmp = dir_so_symnum;
+	  else
+	    tmp = symnum;
 	  pst = START_PSYMTAB (objfile, addr,
 			       namestring, valu,
-			       first_symnum * symbol_size,
+			       tmp * symbol_size,
 			       objfile -> global_psymbols.next,
 			       objfile -> static_psymbols.next);
+	  dir_so_symnum = -1;
 	  continue;
 	}
 
