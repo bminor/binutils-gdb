@@ -1,3 +1,8 @@
+2000-11-09  Ben Elliston  <bje@redhat.com>
+
+	* sim-fpu.c (sim_fpu_one): Set exponent to 0.
+	(sim_fpu_two): Set exponent to 1.
+
 2000-10-26  Ben Elliston  <bje@redhat.com>
 
         * cgen.sh: Handle an isa argument between cpu and mach. Default to

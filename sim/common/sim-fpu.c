@@ -2456,10 +2456,10 @@ const sim_fpu sim_fpu_qnan = {
   sim_fpu_class_qnan,
 };
 const sim_fpu sim_fpu_one = {
-  sim_fpu_class_number, 0, IMPLICIT_1, 1
+  sim_fpu_class_number, 0, IMPLICIT_1, 0
 };
 const sim_fpu sim_fpu_two = {
-  sim_fpu_class_number, 0, IMPLICIT_1, 2
+  sim_fpu_class_number, 0, IMPLICIT_1, 1
 };
 const sim_fpu sim_fpu_max32 = {
   sim_fpu_class_number, 0, LSMASK64 (NR_FRAC_GUARD, NR_GUARDS32), NORMAL_EXPMAX32
