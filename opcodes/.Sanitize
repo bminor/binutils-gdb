@@ -74,6 +74,10 @@ d30v-opc.c
 dep-in.sed
 dis-buf.c
 disassemble.c
+fr30-asm.c
+fr30-dis.c
+fr30-opc.c
+fr30-opc.h
 h8300-dis.c
 h8500-dis.c
 h8500-opc.h
@@ -467,7 +471,7 @@ if ( echo $* | grep keep\-nortel-ppc750 > /dev/null ) ; then
 	for i in $nortel_ppc750_files ; do
 		if test -f $i && (grep sanitize-nortel-ppc750 $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
-				echo Keeping m32rx stuff in $i
+				echo Keeping nortel-ppc750 stuff in $i
 			fi
 		fi
 	done
@@ -475,7 +479,7 @@ else
 	for i in $nortel_ppc750_files ; do
 		if test -f $i && (grep sanitize-nortel-ppc750 $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"m32rx\" from $i...
+				echo Removing traces of \"nortel-ppc750\" from $i...
 			fi
 			cp $i new
 			# The PIPE sanitization will be much cleaner with redact.
