@@ -1,5 +1,14 @@
 Wed Feb  2 11:16:45 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* command.c (add_set_cmd, no_just_help_class_command): Change
+	to make this the sfunc, not cfunc, since that is how we call it.
+	* command.h: Comment difference between sfunc and cfunc.
+	* demangle.c (set_demangling_command): Add third arg since that
+	is how it is called.
+	(_initialize_demangler): Use sfunc, not cfunc, for
+	set_demangling_command, since that is how it is called.
+	Remove show_demangling_command; it has no effect.
+
 	* command.c (shell_escape): Report errors correctly (with error
 	message from strerror).
 

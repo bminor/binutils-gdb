@@ -192,9 +192,10 @@ add_abbrev_prefix_cmd (name, class, fun, doc, prefixlist, prefixname,
 
 /* ARGSUSED */
 void
-not_just_help_class_command (args, from_tty)
+not_just_help_class_command (args, from_tty, c)
      char *args;
      int from_tty;
+     struct cmd_list_element *c;
 {
 }
 
@@ -214,17 +215,15 @@ add_set_cmd (name, class, var_type, var, doc, list)
      char *doc;
      struct cmd_list_element **list;
 {
-  /* For set/show, we have to call do_setshow_command
-     differently than an ordinary function (take commandlist as
-     well as arg), so the function field isn't helpful.  However,
-     function == NULL means that it's a help class, so set the function
-     to not_just_help_class_command.  */
   struct cmd_list_element *c
-    = add_cmd (name, class, not_just_help_class_command, doc, list);
+    = add_cmd (name, class, NO_FUNCTION, doc, list);
 
   c->type = set_cmd;
   c->var_type = var_type;
   c->var = var;
+  /* This needs to be something besides NO_FUNCTION so that this isn't
+     treated as a help class.  */
+  c->function.sfunc = not_just_help_class_command;
   return c;
 }
 

@@ -70,17 +70,6 @@ static const struct demangler
   {NULL, unknown_demangling, NULL}
 };
 
-/* show current demangling style. */
-
-static void
-show_demangling_command (ignore, from_tty)
-   char *ignore;
-   int from_tty;
-{
-  /* done automatically by show command. */
-}
-
-
 /* set current demangling style.  called by the "set demangling" command
    after it has updated the current_demangling_style_string to match
    what the user has entered.
@@ -98,9 +87,10 @@ show_demangling_command (ignore, from_tty)
    a malloc'd string, even if it is a null-string. */
 
 static void
-set_demangling_command (ignore, from_tty)
-   char *ignore;
-   int from_tty;
+set_demangling_command (ignore, from_tty, c)
+     char *ignore;
+     int from_tty;
+     struct cmd_list_element *c;
 {
   const struct demangler *dem;
 
@@ -181,8 +171,7 @@ _initialize_demangler ()
 Use `set demangle-style' without arguments for a list of demangling styles.",
 		      &setlist);
    show = add_show_from_set (set, &showlist);
-   set -> function.cfunc = set_demangling_command;
-   show -> function.cfunc = show_demangling_command;
+   set -> function.sfunc = set_demangling_command;
 
    /* Set the default demangling style chosen at compilation time. */
    set_demangling_style (DEFAULT_DEMANGLING_STYLE);
