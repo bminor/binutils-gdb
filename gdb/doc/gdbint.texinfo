@@ -743,7 +743,7 @@ aliases to set the deprecated flag.  @code{deprecate_cmd} takes a
 return value from @code{add_com} or @code{add_cmd} to deprecate the
 command immediately after it is created.
 
-The first time a comamnd is used the user will be warned and offered a
+The first time a command is used the user will be warned and offered a
 replacement (if one exists). Note that the replacement string passed to
 @code{deprecate_cmd} should be the full name of the command, i.e. the
 entire string the user should type at the command line.
@@ -808,157 +808,183 @@ machine oriented formatting--a more terse formatting to allow for easy
 parsing by programs which read @value{GDBN}'s output
 
 @item
-annotation, whose purpose is to help a GUI (such as GDBTK or Emacs) to
-identify interesting parts in the output
+annotation, whose purpose is to help legacy GUIs to identify interesting
+parts in the output
 @end itemize
 
 The @code{ui_out} routines take care of the first three aspects.
-Annotations are provided by separate annotation routines.  Note that
-use of annotations for an interface between a GUI and @value{GDBN} is
+Annotations are provided by separate annotation routines.  Note that use
+of annotations for an interface between a GUI and @value{GDBN} is
 deprecated.
 
-Output can be in the form of a single item, which we call a
-@dfn{field}; a @dfn{list} of fields; or a @dfn{table}, which is a list
-of fields with a header.  In a BNF-like form:
+Output can be in the form of a single item, which we call a @dfn{field};
+a @dfn{list} consisting of identical fields; a @dfn{tuple} consisting of
+non-identical fields; or a @dfn{table}, which is a tuple consisting of a
+header and a body.  In a BNF-like form:
 
-@example
-<field> ::= any single item of data kept by gdb ;;
-
-<list> ::= @{ <field> @} ;;
-
-<table> ::= <header> @{ <list> @} ;;
-
-<header> ::= @{ <column> @} ;;
-
-<column> ::= <width> <alignment> <title> ;;
-@end example
+@table @code
+@item <table> @expansion{}
+@code{<header> <body>}
+@item <header> @expansion{}
+@code{@{ <column> @}}
+@item <column> @expansion{}
+@code{<width> <alignment> <title>}
+@item <body> @expansion{}
+@code{@{<row>@}}
+@end table
 
 
 @subsection General Conventions
 
-All @code{ui_out} routines currently are of type @code{void}, except
-for @code{ui_out_stream_new} which returns a pointer to the newly
-created object.
+Most @code{ui_out} routines are of type @code{void}, the exceptions are
+@code{ui_out_stream_new} (which returns a pointer to the newly created
+object) and the @code{make_cleanup} routines.
 
-The first parameter is always the @code{ui_out} vector object, a
-pointer to a @code{struct ui_out}.
+The first parameter is always the @code{ui_out} vector object, a pointer
+to a @code{struct ui_out}.
 
-The @var{format} parameter is like in @code{printf} family of
-functions.  When it is present, there is usually also a variable list
-of arguments used to satisfy the @code{%} specifiers in the supplied
+The @var{format} parameter is like in @code{printf} family of functions.
+When it is present, there must also be a variable list of arguments
+sufficient used to satisfy the @code{%} specifiers in the supplied
 format.
 
-When a character string argument is not used in a @code{ui_out}
-function call, a @code{NULL} pointer has to be supplied instead.
+When a character string argument is not used in a @code{ui_out} function
+call, a @code{NULL} pointer has to be supplied instead.
 
 
-@subsection Table and List Functions
+@subsection Table, Tuple and List Functions
 
 @cindex list output functions
 @cindex table output functions
-This section introduces @code{ui_out} routines for building lists and
-tables.  The routines to output the actual data items (fields) are
-presented in the next section.
+@cindex tuple output functions
+This section introduces @code{ui_out} routines for building lists,
+tuples and tables.  The routines to output the actual data items
+(fields) are presented in the next section.
 
-To recap: A @dfn{list} is a sequence of @dfn{fields} with information
-about an object; a @dfn{table} is a list of lists, each on a separate
-line, prefixed by a @dfn{header} line with the column @dfn{titles}.
+To recap: A @dfn{tuple} is a sequence of @dfn{fields}, each field
+containing information about an object; a @dfn{list} is a sequence of
+fields where each field describes an identical object.
 
-Use the table functions if your output is composed of a list of fields
-for several objects and the console output should have a header.  Use
-this even when you are listing just one object but you still want the
-header.
-
-Use the list functions for the output of each object of a table or if
-your output consists of a single list of fields.
-
-You can nest a list into a table, but not the other way around.
+Use the @dfn{table} functions when your output consists of a list of
+rows (tuples) and the console output should include a heading.  Use this
+even when you are listing just one object but you still want the header.
 
 @cindex nesting level in @code{ui_out} functions
-Lists can also be nested: some of your fields may be lists or
-@dfn{tuples}--@code{@{@var{name},@var{value}@}} pairs.  The maximum
-nesting level is currently 4.
+Tables can not be nested.  Tuples and lists can be nested up to a
+maximum of five levels.
 
 The overall structure of the table output code is something like this:
 
 @example
   ui_out_table_begin
     ui_out_table_header
-    ...
+    @dots{}
     ui_out_table_body
-      ui_out_list_begin
+      ui_out_tuple_begin
         ui_out_field_*
-        ...
-      ui_out_list_end
-      ...
+        @dots{}
+      ui_out_tuple_end
+      @dots{}
   ui_out_table_end
 @end example
 
-Here's the description of table- and list-related @code{ui_out}
+Here is the description of table-, tuple- and list-related @code{ui_out}
 functions:
 
-@deftypefun void ui_out_table_begin (struct ui_out *@var{uiout}, int @var{nbrofcols}, char *@var{tblid})
-The function @code{ui_out_table_begin} marks the beginning of the
-output of a table.  It should always be called before any other
-@code{ui_out} function for a given table.  @var{nbrofcols} is the
-number of columns in the table, and @var{tblid} is an optional string
-identifying the table.  The string pointed to by @var{tblid} is copied
-by the implementation of @code{ui_out_table_begin}, so the application
-can free the string if it was @code{malloc}ed.
+@deftypefun void ui_out_table_begin (struct ui_out *@var{uiout}, int @var{nbrofcols}, int @var{nr_rows}, const char *@var{tblid})
+The function @code{ui_out_table_begin} marks the beginning of the output
+of a table.  It should always be called before any other @code{ui_out}
+function for a given table.  @var{nbrofcols} is the number of columns in
+the table. @var{nr_rows} is the number of rows in the table.
+@var{tblid} is an optional string identifying the table.  The string
+pointed to by @var{tblid} is copied by the implementation of
+@code{ui_out_table_begin}, so the application can free the string if it
+was @code{malloc}ed.
 
 The companion function @code{ui_out_table_end}, described below, marks
 the end of the table's output.
 @end deftypefun
 
-@deftypefun void ui_out_table_header (struct ui_out *@var{uiout}, int @var{width}, enum ui_align @var{alignment}, char *@var{colhdr})
-@code{ui_out_table_header} provides the header information for a
-single table column.  You call this function several times, one each
-for every column of the table, after @code{ui_out_table_begin}, but
-before @code{ui_out_table_body}.
+@deftypefun void ui_out_table_header (struct ui_out *@var{uiout}, int @var{width}, enum ui_align @var{alignment}, const char *@var{colhdr})
+@code{ui_out_table_header} provides the header information for a single
+table column.  You call this function several times, one each for every
+column of the table, after @code{ui_out_table_begin}, but before
+@code{ui_out_table_body}.
 
 The value of @var{width} gives the column width in characters.  The
 value of @var{alignment} is one of @code{left}, @code{center}, and
 @code{right}, and it specifies how to align the header: left-justify,
 center, or right-justify it.  @var{colhdr} points to a string that
 specifies the column header; the implementation copies that string, so
-column header strings in @code{malloc}ed storage can be freed after
-the call.
+column header strings in @code{malloc}ed storage can be freed after the
+call.
 @end deftypefun
 
 @deftypefun void ui_out_table_body (struct ui_out *@var{uiout})
-This function marks the end of header information and the beginning of
-table body output.  It doesn't by itself produce any data output; that
-is done by the list and field output functions described below.
+This function delimits the table header from the table body.
 @end deftypefun
 
 @deftypefun void ui_out_table_end (struct ui_out *@var{uiout})
-This function signals the end of a table's output.  It should be
-called after the table body has been produced by the list and field
-output functions.
+This function signals the end of a table's output.  It should be called
+after the table body has been produced by the list and field output
+functions.
 
 There should be exactly one call to @code{ui_out_table_end} for each
-call to @code{ui_out_table_begin}, otherwise the @code{ui_out}
-functions will signal an internal error.
+call to @code{ui_out_table_begin}, otherwise the @code{ui_out} functions
+will signal an internal error.
 @end deftypefun
 
-The output of the lists that represent the table rows must follow the
+The output of the tuples that represent the table rows must follow the
 call to @code{ui_out_table_body} and precede the call to
-@code{ui_out_table_end}.  You produce the lists by calling
-@code{ui_out_list_begin} and @code{ui_out_list_end}, with suitable
+@code{ui_out_table_end}.  You build a tuple by calling
+@code{ui_out_tuple_begin} and @code{ui_out_tuple_end}, with suitable
 calls to functions which actually output fields between them.
 
-@deftypefun void ui_out_list_begin (struct ui_out *@var{uiout}, char *@var{lstid})
-This function marks the beginning or a list output.  @var{lstid}
-points to an optional string that identifies the list; it is copied by
-the implementation, and so strings in @code{malloc}ed storage can be
-freed after the call.
+@deftypefun void ui_out_tuple_begin (struct ui_out *@var{uiout}, const char *@var{id})
+This function marks the beginning of a tuple output.  @var{id} points
+to an optional string that identifies the tuple; it is copied by the
+implementation, and so strings in @code{malloc}ed storage can be freed
+after the call.
+@end deftypefun
+
+@deftypefun void ui_out_tuple_end (struct ui_out *@var{uiout})
+This function signals an end of a tuple output.  There should be exactly
+one call to @code{ui_out_tuple_end} for each call to
+@code{ui_out_tuple_begin}, otherwise an internal @value{GDBN} error will
+be signaled.
+@end deftypefun
+
+@deftypefun struct cleanup *make_cleanup_ui_out_tuple_begin_end (struct ui_out *@var{uiout}, const char *@var{id})
+This function first opens the tuple and then establishes a cleanup
+(@pxref{Coding, Cleanups}) to close the tuple.  It provides a convenient
+and correct implementation of the non-portable@footnote{The function
+cast is not portable ISO-C.} code sequence:
+@smallexample
+struct cleanup *old_cleanup;
+ui_out_tuple_begin (uiout, "...");
+old_cleanup = make_cleanup ((void(*)(void *)) ui_out_tuple_end,
+                            uiout);
+@end smallexample
+@end deftypefun
+
+@deftypefun void ui_out_list_begin (struct ui_out *@var{uiout}, const char *@var{id})
+This function marks the beginning of a list output.  @var{id} points to
+an optional string that identifies the list; it is copied by the
+implementation, and so strings in @code{malloc}ed storage can be freed
+after the call.
 @end deftypefun
 
 @deftypefun void ui_out_list_end (struct ui_out *@var{uiout})
-This function signals an end of a list output.  There should be
-exactly one call to @code{ui_out_list_end} for each call to
-@code{ui_out_list_begin}, otherwise an internal @value{GDBN} error
-will be signaled.
+This function signals an end of a list output.  There should be exactly
+one call to @code{ui_out_list_end} for each call to
+@code{ui_out_list_begin}, otherwise an internal @value{GDBN} error will
+be signaled.
+@end deftypefun
+
+@deftypefun struct cleanup *make_cleanup_ui_out_list_begin_end (struct ui_out *@var{uiout}, const char *@var{id})
+Similar to @code{make_cleanup_ui_out_tuple_begin_end}, this function
+opens a list and then establishes cleanup (@pxref{Coding, Cleanups})
+that will close the list.list.
 @end deftypefun
 
 @subsection Item Output Functions
@@ -983,17 +1009,17 @@ This generic function should be used only when it is not possible to
 use one of the specialized versions (see below).
 @end deftypefun
 
-@deftypefun void ui_out_field_int (struct ui_out *@var{uiout}, char *@var{fldname}, int @var{value})
+@deftypefun void ui_out_field_int (struct ui_out *@var{uiout}, const char *@var{fldname}, int @var{value})
 This function outputs a value of an @code{int} variable.  It uses the
 @code{"%d"} output conversion specification.  @var{fldname} specifies
 the name of the field.
 @end deftypefun
 
-@deftypefun void ui_out_field_core_addr (struct ui_out *@var{uiout}, char *@var{fldname}, CORE_ADDR @var{address})
+@deftypefun void ui_out_field_core_addr (struct ui_out *@var{uiout}, const char *@var{fldname}, CORE_ADDR @var{address})
 This function outputs an address.
 @end deftypefun
 
-@deftypefun void ui_out_field_string (struct ui_out *@var{uiout}, char *@var{fldname}, const char *@var{string})
+@deftypefun void ui_out_field_string (struct ui_out *@var{uiout}, const char *@var{fldname}, const char *@var{string})
 This function outputs a string using the @code{"%s"} conversion
 specification.
 @end deftypefun
@@ -1025,7 +1051,7 @@ This functions destroys a @code{ui_stream} object specified by
 @var{streambuf}.
 @end deftypefun
 
-@deftypefun void ui_out_field_stream (struct ui_out *@var{uiout}, char *@var{fieldname}, struct ui_stream *@var{streambuf})
+@deftypefun void ui_out_field_stream (struct ui_out *@var{uiout}, const char *@var{fieldname}, struct ui_stream *@var{streambuf})
 This function consumes all the data accumulated in
 @code{streambuf->stream} and outputs it like
 @code{ui_out_field_string} does.  After a call to
@@ -1060,13 +1086,13 @@ same buffer twice.
 
 @subsection Utility Output Functions
 
-@deftypefun void ui_out_field_skip (struct ui_out *@var{uiout}, char *@var{fldname})
+@deftypefun void ui_out_field_skip (struct ui_out *@var{uiout}, const char *@var{fldname})
 This function skips a field in a table.  Use it if you have to leave
 an empty field without disrupting the table alignment.  The argument
 @var{fldname} specifies a name for the (missing) filed.
 @end deftypefun
 
-@deftypefun void ui_out_text (struct ui_out *@var{uiout}, char *@var{string})
+@deftypefun void ui_out_text (struct ui_out *@var{uiout}, const char *@var{string})
 This function outputs the text in @var{string} in a way that makes it
 easy to be read by humans.  For example, the console implementation of
 this method filters the text through a built-in pager, to prevent it
@@ -1085,7 +1111,7 @@ text produced by @code{ui_out_text} with the rest of the table or
 list.
 @end deftypefun
 
-@deftypefun void ui_out_message (struct ui_out *@var{uiout}, int @var{verbosity}, char *@var{format}, ...)
+@deftypefun void ui_out_message (struct ui_out *@var{uiout}, int @var{verbosity}, const char *@var{format}, ...)
 This function produces a formatted message, provided that the current
 verbosity level is at least as large as given by @var{verbosity}.  The
 current verbosity level is specified by the user with the @samp{set
@@ -1153,33 +1179,42 @@ The original code was:
 Here's the new version:
 
 @example
- if (!found_a_breakpoint++)
-   @{
-     annotate_breakpoints_headers ();
-     if (addressprint)
-       ui_out_table_begin (ui, 6);
+  nr_printable_breakpoints = @dots{};
+
+  if (addressprint)
+    ui_out_table_begin (ui, 6, nr_printable_breakpoints, "BreakpointTable");
+  else
+    ui_out_table_begin (ui, 5, nr_printable_breakpoints, "BreakpointTable");
+
+  if (nr_printable_breakpoints > 0)
+    annotate_breakpoints_headers ();
+  if (nr_printable_breakpoints > 0)
+    annotate_field (0);
+  ui_out_table_header (uiout, 3, ui_left, "number", "Num");		/* 1 */
+  if (nr_printable_breakpoints > 0)
+    annotate_field (1);
+  ui_out_table_header (uiout, 14, ui_left, "type", "Type");		/* 2 */
+  if (nr_printable_breakpoints > 0)
+    annotate_field (2);
+  ui_out_table_header (uiout, 4, ui_left, "disp", "Disp");		/* 3 */
+  if (nr_printable_breakpoints > 0)
+    annotate_field (3);
+  ui_out_table_header (uiout, 3, ui_left, "enabled", "Enb");	/* 4 */
+  if (addressprint)
+    @{
+     if (nr_printable_breakpoints > 0)
+       annotate_field (4);
+     if (TARGET_ADDR_BIT <= 32)
+       ui_out_table_header (uiout, 10, ui_left, "addr", "Address");/* 5 */
      else
-       ui_out_table_begin (ui, 5);
-
-     annotate_field (0);
-     ui_out_table_header (ui, 4, left, "Num");
-     annotate_field (1);
-     ui_out_table_header (ui, 15, left, "Type");
-     annotate_field (2);
-     ui_out_table_header (ui, 5, left, "Disp");
-     annotate_field (3);
-     ui_out_table_header (ui, 4, left, "Enb");
-     if (addressprint)
-       @{
-         annotate_field (4);
-         ui_out_table_header (ui, 11, left, "Address");
-       @}
-     annotate_field (5);
-     ui_out_table_header (ui, 40, left, "What");
-
-     ui_out_table_body (ui);
-     annotate_breakpoints_table ();
-   @}
+       ui_out_table_header (uiout, 18, ui_left, "addr", "Address");/* 5 */
+    @}
+  if (nr_printable_breakpoints > 0)
+    annotate_field (5);
+  ui_out_table_header (uiout, 40, ui_noalign, "what", "What");	/* 6 */
+  ui_out_table_body (uiout);
+  if (nr_printable_breakpoints > 0)
+    annotate_breakpoints_table ();
 @end example
 
 This example, from the @code{print_one_breakpoint} function, shows how
@@ -1200,13 +1235,14 @@ in the above example.  The original code was:
    printf_filtered ("%-4s ", bpdisps[(int)b->disposition]);
    annotate_field (3);
    printf_filtered ("%-3c ", bpenables[(int)b->enable]);
+   @dots{}
 @end example
 
 This is the new version:
 
 @example
    annotate_record ();
-   ui_out_list_begin (uiout, "bkpt");
+   ui_out_tuple_begin (uiout, "bkpt");
    annotate_field (0);
    ui_out_field_int (uiout, "number", b->number);
    annotate_field (1);
@@ -1219,6 +1255,7 @@ This is the new version:
    ui_out_field_string (uiout, "disp", bpdisps[(int)b->disposition]);
    annotate_field (3);
    ui_out_field_fmt (uiout, "enabled", "%c", bpenables[(int)b->enable]);
+   @dots{}
 @end example
 
 This example, also from @code{print_one_breakpoint}, shows how to

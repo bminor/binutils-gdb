@@ -1,5 +1,10 @@
 2001-07-04  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbint.texinfo (User Interface): Update ui-out documentation to
+	refelect recent UI/MI updates.
+
+2001-07-04  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdb.texinfo (Mode Options): Mention the mi0 and mi1
 	interpreters.
 
