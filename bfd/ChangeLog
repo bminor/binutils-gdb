@@ -1,3 +1,8 @@
+2002-04-02  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* ihex.c (ihex_write_object_contents): Do not allow records to
+	cross a 64K boundary - wrap if necessary.
+
 2002-04-01  Nathan Williams  <nathanw@wasabisystems.com>
 
 	* elf.c (elfcore_netbsd_get_lwpid): Fix off-by-one error
