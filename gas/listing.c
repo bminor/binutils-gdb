@@ -128,7 +128,7 @@ typedef struct file_info_struct
   int linenum;
   FILE *file;
   struct file_info_struct *next;
-  int end_pending;
+  int at_end;
 }
 
 file_info_type;
@@ -273,7 +273,7 @@ file_info (file_name)
   p->filename = xmalloc ((unsigned long) strlen (file_name) + 1);
   strcpy (p->filename, file_name);
   p->linenum = 0;
-  p->end_pending = 0;
+  p->at_end = 0;
 
   p->file = fopen (p->filename, "r");
   if (p->file)
@@ -303,7 +303,7 @@ listing_newline (ps)
   list_info_type *new;
 
   as_where (&file, &line);
-  if (line != last_line || last_file && file && strcmp(file, last_file))
+  if (line != last_line || (last_file && file && strcmp(file, last_file)))
     {
       last_line = line;
       last_file = file;
@@ -379,7 +379,7 @@ buffer_line (file, line, size)
   char *p = line;
 
   /* If we couldn't open the file, return an empty line */
-  if (file->file == (FILE *) NULL)
+  if (file->file == (FILE *) NULL || file->at_end)
     {
       return "";
     }
@@ -387,19 +387,7 @@ buffer_line (file, line, size)
   if (file->linenum == 0)
     rewind (file->file);
 
-  if (file->end_pending == 10)
-    {
-      *p++ = '\n';
-#if 1
-      fseek (file->file, 0, 0);
-      file->linenum = 0;
-#else
-      file->linenum = 9999999;
-#endif
-      file->end_pending = 0;
-    }
   c = fgetc (file->file);
-
 
   size -= 1;			/* leave room for null */
 
@@ -414,7 +402,7 @@ buffer_line (file, line, size)
     }
   if (c == EOF)
     {
-      file->end_pending++;
+      file->at_end = 1;
       *p++ = '.';
       *p++ = '.';
       *p++ = '.';
@@ -687,7 +675,8 @@ list_symbol_table ()
 		sprintf (buf, "%08lx", (unsigned long) val);
 	      else if (sizeof (val) <= sizeof (unsigned long))
 		{
-		  sprintf (fmt, "%%0%dlx", sizeof (val) * 2);
+		  sprintf (fmt, "%%0%lulx",
+			   (unsigned long) (sizeof (val) * 2));
 		  sprintf (buf, fmt, (unsigned long) val);
 		}
 #if defined (BFD64)
@@ -773,7 +762,7 @@ print_source (current_file, list, buffer, width)
   if (current_file->file)
     {
       while (current_file->linenum < list->hll_line
-	     && current_file->end_pending == 0)
+	     && !current_file->at_end)
 	{
 	  char *p = buffer_line (current_file, buffer, width);
 	  printf ("%4d:%-13s **** %s\n", current_file->linenum, current_file->filename, p);
@@ -900,7 +889,7 @@ listing_listing (name)
 
 	  while (list->file->file
 		 && list->file->linenum < list->line
-		 && !list->file->end_pending)
+		 && !list->file->at_end)
 	    {
 	      p = buffer_line (list->file, buffer, width);
 
@@ -919,7 +908,7 @@ listing_listing (name)
 	{
 	  while (list->file->file
 		 && list->file->linenum < list->line
-		 && !list->file->end_pending)
+		 && !list->file->at_end)
 	    p = buffer_line (list->file, buffer, width);
 	}
 

@@ -1,5 +1,13 @@
 Thu Jul  6 12:54:27 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* listing.c (struct file_info_struct): Rename end_pending field to
+	at_end.
+	(file_info): Initialize at_end, not end_pending.
+	(buffer_line): If at_end set, just return immediately.  Don't
+	worry about end_pending cases.  Set at_end when EOF is read.
+	(print_source): Check at_end, not end_pending.
+	(listing_listing): Likewise.
+
 	* config/tc-alpha.h (alpha_do_align): Don't declare.
 	(md_do_align): Don't define.
 	(tc_frob_label): Define.
