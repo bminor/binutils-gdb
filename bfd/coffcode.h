@@ -2158,6 +2158,13 @@ coff_set_arch_mach_hook (abfd, filehdr)
       arch = bfd_arch_mcore;
       break;
 #endif
+
+#ifdef W65MAGIC
+    case W65MAGIC:
+      arch = bfd_arch_w65;
+      break;
+#endif
+
     default:			/* Unreadable input file type */
       arch = bfd_arch_obscure;
       break;
