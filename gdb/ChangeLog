@@ -1,3 +1,10 @@
+Sat Jul  6 01:34:15 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* main.c (command_line_input):  Flush stdout and stderr
+	before every call to readline.  This reportedly fixes a bug
+	that comes up in Sys V running emacs-gdb and/or xxgdb,
+	when stdin/out are pipes or sockets.
+
 Thu Jul  4 14:47:06 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* configure.in, Makefile.in:  Avoid rebuilding "depend" as much.
