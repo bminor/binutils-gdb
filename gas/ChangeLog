@@ -1,5 +1,10 @@
 2001-08-01  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-i386.c (lex_got): Match lower case relocation tokens.
+	Don't allocate more space than necessary for the input line copy.
+
+2001-08-01  Alan Modra  <amodra@bigpond.net.au>
+
 	* read.c: Standardize error/warning messages - don't capitalise, no
 	final period or newline, don't say "ignored" or "zero assumed" for
 	as_bad messages.  In some cases, change the wording to that used

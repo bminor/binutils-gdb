@@ -3181,27 +3181,41 @@ lex_got (reloc, adjust)
       int len;
 
       len = strlen (gotrel[j].str);
-      if (strncmp (cp + 1, gotrel[j].str, len) == 0)
+      if (strncasecmp (cp + 1, gotrel[j].str, len) == 0)
 	{
 	  if (gotrel[j].rel[(unsigned int) flag_code] != 0)
 	    {
-	      int first;
-	      char *tmpbuf;
+	      int first, second;
+	      char *tmpbuf, *past_reloc;
 
 	      *reloc = gotrel[j].rel[(unsigned int) flag_code];
+	      if (adjust)
+		*adjust = len;
 
 	      if (GOT_symbol == NULL)
 		GOT_symbol = symbol_find_or_make (GLOBAL_OFFSET_TABLE_NAME);
 
 	      /* Replace the relocation token with ' ', so that
 		 errors like foo@GOTOFF1 will be detected.  */
+
+	      /* The length of the first part of our input line.  */
 	      first = cp - input_line_pointer;
-	      tmpbuf = xmalloc (strlen (input_line_pointer));
+
+	      /* The second part goes from after the reloc token until
+		 (and including) an end_of_line char.  Don't use strlen
+		 here as the end_of_line char may not be a NUL.  */
+	      past_reloc = cp + 1 + len;
+	      for (cp = past_reloc; !is_end_of_line[(unsigned char) *cp++]; )
+		;
+	      second = cp - past_reloc;
+
+	      /* Allocate and copy string.  The trailing NUL shouldn't
+		 be necessary, but be safe.  */
+	      tmpbuf = xmalloc (first + second + 2);
 	      memcpy (tmpbuf, input_line_pointer, first);
 	      tmpbuf[first] = ' ';
-	      strcpy (tmpbuf + first + 1, cp + 1 + len);
-	      if (adjust)
-		*adjust = len;
+	      memcpy (tmpbuf + first + 1, past_reloc, second);
+	      tmpbuf[first + second + 1] = '\0';
 	      return tmpbuf;
 	    }
 
