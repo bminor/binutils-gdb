@@ -47,6 +47,7 @@ i386v.mt
 m68k.mt
 m68kv.mt
 m88k-bcs.mt
+sa29200.mt
 news.mt
 sun3.mt
 sun4.mt
