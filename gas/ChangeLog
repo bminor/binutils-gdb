@@ -1,3 +1,8 @@
+2001-01-30  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-hppa.c (pa_ip): Support 12 bit branches to absolute
+	destinations.  Correct range check for 17 and 22 bit branches.
+
 2001-01-25  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-m68k.c (tc_gen_reloc): Do not abort if tcbit is

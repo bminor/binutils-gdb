@@ -3193,7 +3193,9 @@ pa_ip (str)
 	      get_expression (s);
 	      s = expr_end;
 	      the_insn.pcrel = 1;
-	      if (!strcmp (S_GET_NAME (the_insn.exp.X_add_symbol), "L$0\001"))
+	      if (!the_insn.exp.X_add_symbol
+		  || !strcmp (S_GET_NAME (the_insn.exp.X_add_symbol),
+			      "L$0\001"))
 		{
 		  num = evaluate_absolute (&the_insn);
 		  if (num % 4)
@@ -3201,9 +3203,10 @@ pa_ip (str)
 		      as_bad (_("Branch to unaligned address"));
 		      break;
 		    }
-		  CHECK_FIELD (num, 8199, -8184, 0);
-
-		  opcode |= re_assemble_12 ((num - 8) >> 2);
+		  if (the_insn.exp.X_add_symbol)
+		    num -= 8;
+		  CHECK_FIELD (num, 8191, -8192, 0);
+		  opcode |= re_assemble_12 (num >> 2);
 		  continue;
 		}
 	      else
@@ -3232,11 +3235,9 @@ pa_ip (str)
 		      as_bad (_("Branch to unaligned address"));
 		      break;
 		    }
-		  CHECK_FIELD (num, 262143, -262144, 0);
-
 		  if (the_insn.exp.X_add_symbol)
 		    num -= 8;
-
+		  CHECK_FIELD (num, 262143, -262144, 0);
 		  opcode |= re_assemble_17 (num >> 2);
 		  continue;
 		}
@@ -3265,11 +3266,9 @@ pa_ip (str)
 		      as_bad (_("Branch to unaligned address"));
 		      break;
 		    }
-		  CHECK_FIELD (num, 8388607, -8388608, 0);
-
 		  if (the_insn.exp.X_add_symbol)
 		    num -= 8;
-
+		  CHECK_FIELD (num, 8388607, -8388608, 0);
 		  opcode |= re_assemble_22 (num >> 2);
 		}
 	      else
@@ -3297,11 +3296,9 @@ pa_ip (str)
 		      as_bad (_("Branch to unaligned address"));
 		      break;
 		    }
-		  CHECK_FIELD (num, 262143, -262144, 0);
-
 		  if (the_insn.exp.X_add_symbol)
 		    num -= 8;
-
+		  CHECK_FIELD (num, 262143, -262144, 0);
 		  opcode |= re_assemble_17 (num >> 2);
 		  continue;
 		}
