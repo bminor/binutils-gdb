@@ -1,16 +1,7 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes in GDB-4.15:
-
-* Remote targets use caching
-
-Remote targets now use a data cache to speed up communication with the
-remote side.
-The data cache could lead to incorrect results because it doesn't know
-about volatile variables, thus making it impossible to debug targets
-which use memory mapped I/O devices. `set remotecache off' turns the
-the data cache off.
+*** Changes since GDB-4.15:
 
 * New native configurations
 
@@ -19,6 +10,61 @@ Microsoft NT and Microsoft Windows95		i[345]86-*-win32
 * New Targets
 
 ARM via RDP protocol				arm-*-*
+
+*** Changes in GDB-4.15:
+
+* Psymtabs for XCOFF
+
+The symbol reader for AIX GDB now uses partial symbol tables.  This
+can greatly improve startup time, especially for large executables.
+
+* Remote targets use caching
+
+Remote targets now use a data cache to speed up communication with the
+remote side.  The data cache could lead to incorrect results because
+it doesn't know about volatile variables, thus making it impossible to
+debug targets which use memory mapped I/O devices. `set remotecache
+off' turns the the data cache off.
+
+* Remote targets may have threads
+
+The standard remote protocol now includes support for multiple threads
+in the target system, using new protocol commands 'H' and 'T'.  See
+gdb/remote.c for details.
+
+* NetROM support
+
+If GDB is configured with `--enable-netrom', then it will include
+support for the NetROM ROM emulator from XLNT Designs.  The NetROM
+acts as though it is a bank of ROM on the target board, but you can
+write into it over the network.  GDB's support consists only of
+support for fast loading into the emulated ROM; to debug, you must use
+another protocol, such as standard remote protocol.  The usual
+sequence is something like
+
+	target nrom <netrom-hostname>
+	load <prog>
+	target remote <netrom-hostname>:1235
+
+* Macintosh host
+
+GDB now includes support for the Apple Macintosh, as a host only.  It
+may be run as either an MPW tool or as a standalone application, and
+it can debug through the serial port.  All the usual GDB commands are
+available, but to the target command, you must supply "serial" as the
+device type instead of "/dev/ttyXX".  See mpw-README in the main
+directory for more information on how to build.  The MPW configuration
+scripts */mpw-config.in support only a few targets, and only the
+mips-idt-ecoff target has been tested.
+
+* Autoconf
+
+GDB configuration now uses autoconf.  This is not user-visible,
+but does simplify configuration and building.
+
+* hpux10
+
+Get now supports hpux10.
 
 *** Changes in GDB-4.14:
 

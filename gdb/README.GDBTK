@@ -1,5 +1,6 @@
-			README.GDBTK for gdb-4.14 release
-		     Created April 11, 1995 by Stu Grossman
+				 README.GDBTK
+			   Written by Stu Grossman
+	      Updated 9/26/95 by Fred Fish for gdb 4.15 release
 
 This file describes how to build, install, use and hack on GDBtk, a TK based
 GUI for GDB, the GNU debugger.
@@ -50,7 +51,7 @@ In the current version, you can have up to 6 windows active at once.  They are:
 
 	1) Command
 	2) Source
-	3) Disassembly
+	3) Assembly
 	4) Register
 	5) Auto Command
 	6) Expression
@@ -101,7 +102,7 @@ Source window:
 	The mouse can also be used to set and clear breakpoints when clicked
 	in the margin (on a breakpoint indicator).
 
-Disassembly window:
+Assembly window:
 
 	This displays a disassembly of the current function.  It's buttons are
 	similar to those of the source window, except that it uses Stepi and
@@ -279,3 +280,106 @@ then GDBtk wasn't installed properly.  You can set the GDBTK_FILENAME
 environment variable to point at the gdbtk.tcl in your source directory.  Note
 that the stack trace displayed here is not valid.  If you actually get an error
 in gdbtk.tcl, the stack trace is useful to pinpoint the location.
+
+Known Bugs
+==========
+
+generic problems
+
+    o	If you open an Assembly window before you have run the program, gdbtk
+	pops up a dialog box titled "Error in Tcl Script" with the contents
+	"Error: No function contains the specified address".  Trying to then
+	do other things brings up a dialog box with the contents "Error:
+	can't read 'current_asm_label': no such variable.
+
+	Solution:  Close Assembly window when there is no program running.
+
+    o	If you open Registers window before you have run the program, gdbtk
+	pops up a dialog box titled "Error in Tcl Script" with the contents
+	"Error: No registers".  Trying to then do other things, like use the
+	Start button to run the program, repeatedly produce the same dialog
+	box and the action is not performed.
+
+	Solution:  Close Registers window when there is no program running.
+
+    o	Expressions are sometimes not displayed correctly in the Expression
+	window.  I.E. "argc" works, as does "*(argv+argc)" but not "argv[argc]".
+
+	Solution:  None
+
+    o	The Breakpoint window does not get automatically updated and changes
+	made in the window are not reflected back in the results from "info br".
+	I.E. the breakpoint count in the window is not updated at each hit and
+	enabling/disabling the breakpoint from the Breakpoint window has no effect.
+
+	Solution:  Use the command interface to control breakpoints and don't
+	open a Breakpoint window.
+
+    o	Sometimes while an expression window is active you get a dialog box
+	that complains "Error: invalide command name ".expr.e5.expr" for 
+	example.  The Tcl stack trace looks something like:
+
+		invalid command name ".expr.e5.expr"
+		    while executing
+		"$e.expr get 0.0 end"
+		    invoked from within
+		"set expr [$e.expr get 0.0 end]..."
+		    (procedure "update_expr" line 17)
+		    invoked from within
+		"update_expr $expr_num"
+		    invoked from within
+		"if $expr_update_list($expr_num) {
+		    update_expr $expr_num
+			.
+			.
+			.
+
+	Solution:  None except close expression window and reopen it.
+	
+    o	If you select the "Down" button in either the Source or Assembly
+	window while in the bottom (innermost) frame, the error message that
+	results goes just to the command window and may be missed if the
+	command window is not open.  This may also apply to other messages
+	as well.  It should probably put up a notification box instead.
+
+	Solution:  Keep Command window open to see error messages.
+
+    o	Not really a problem, but it would be nice to have a backtrace
+	window.
+
+	Solution:  Do bt in command window?
+
+    o	Also not really a problem, but it might be nice to have a frame/stack
+	window that displays the last N words on the stack, along with
+	indications about which function owns a particular frame, how the
+	frame pointers are chained, and possibly the names of variables
+	alongside their frame slots.
+
+m68k-hp-hpux9.00:
+
+    o	Attempting to use a Register window results in a Tcl Script Error
+	"Error: Erroneous arithmetic operation".  The Tcl stack trace is:
+
+	    while executing
+	"gdb_fetch_registers $reg_format $regnum"
+	    invoked from within
+	"set regval [gdb_fetch_registers $reg_format $regnum]..."
+	    ("foreach" body line 2)
+	    invoked from within
+	"foreach regnum $reg_display_list {
+				set regval [gdb_fetch_registers $reg_format $regnum]
+				set regval [format "%-*s" $valwidth $regval]
+				$win del ..."
+	    invoked from within
+	"if {$which == "all"} {
+			set lineindex 1
+			foreach regnum $reg_display_list {
+				set regval [gdb_fetch_registers $reg_format $regnum]
+				set regval [f ..."
+	    (procedure "update_registers" line 16)
+	    invoked from within
+	"update_registers all"
+		. 
+		. 
+		. 
+
