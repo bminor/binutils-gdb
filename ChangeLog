@@ -1,3 +1,7 @@
+Mon Oct 20 15:28:49 1997  Klaus K"ampf  <kkaempf@progis.de>
+
+	* makefile.vms: Fix to work with DEC C.
+
 Tue Oct  7 23:58:57 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* config.sub: Add mips-tx39-elf to marketing names.

@@ -3,24 +3,38 @@
 #
 # Created by Klaus K"ampf (kkaempf@progis.de)
 #
-# You must use Version 3.75p (proGIS enhanced) of GNU Make
+# You must use Version 3.76 of GNU Make
 #
 #
-CC = gcc
+CC =
 
-all:
-	$$ @setup
+ifeq ($(CC),cc)
+  CHECK-COMPILER = check_compiler
+else
+  CHECK-COMPILER =
+endif
+
+all:	check_cc $(CHECK-COMPILER)
 	$(CD) [.bfd]
-	gmake "CC=$(CC)"
+	@gmake "CC=$(CC)"
 	$(CD) [-.opcodes]
-	gmake "CC=$(CC)"
+	@gmake "CC=$(CC)"
 	$(CD) [-.libiberty]
-	gmake "CC=$(CC)"
+	@gmake "CC=$(CC)"
 	$(CD) [-.binutils]
-	gmake "CC=$(CC)"
+	@gmake "CC=$(CC)"
 	$(CD) [-.gas]
-	gmake "CC=$(CC)"
+	@gmake "CC=$(CC)"
 	$(CD) [-]
+
+check_cc:
+ifeq ($CC,)
+	@$(ECHO) "Please edit MAKEFILE.VMS and select a C Compiler."
+	stop
+endif
+
+check_compiler:
+	@$(ECHO) "Perform a '$$ @setup' before starting make"
 
 clean:
 	$(CD) [.bfd]
