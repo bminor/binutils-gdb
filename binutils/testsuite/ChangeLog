@@ -1,5 +1,16 @@
 Mon Oct  2 12:41:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* binutils-all/ar.exp: New file.
+	* binutils-all/bintest.s: Make text_symbol and data_symbol global.
+	Add new static symbols static_text_symbol and static_data_symbol.
+	* binutils-all/nm.exp: Adjust accordingly.
+	* config/default.exp (AR): Set if not set.
+	(binutils_remove): New procedure.
+	* lib/utils-lib.exp (default_binutils_run): Call
+	prune_system_crud on program output.  Use verbose -log instead of
+	both verbose and send_log.
+	(default_binutils_remove): New procedure.
+
 	* lib/utils-lib.exp (default_binutils_assemble): Call
 	prune_system_crud on assembler output.
 

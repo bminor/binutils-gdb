@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-dejagnu@prep.ai.mit.edu
@@ -38,24 +38,28 @@ if {![binutils_assemble $AS $srcdir$subdir/bintest.s tmpdir/bintest.o]} then {
 # stores most symbols twice, which messes up the nm output.
 setup_xfail "alpha*-*-osf*" "alpha*-*-netware*"
 setup_xfail "mips*-*-ultrix*" "mips*-*-ecoff*" "mips*-*-irix4*"
-setup_xfail "mips*-*-riscos*" "mips*-*-sysv3*"
+setup_xfail "mips*-*-riscos*" "mips*-*-sysv3*" "mips*-sony-bsd*"
 
 set got [binutils_run $NM "$NMFLAGS tmpdir/bintest.o"]
 
 if [info exists vars] then { unset vars }
-while {[regexp "(\[a-zA-Z\]) (\[a-z\]*_symbol)(.*)" $got all type symbol rest]} {
+while {[regexp "(\[a-zA-Z\]) (\[a-z_\]*_symbol)(.*)" $got all type symbol rest]} {
     set vars($symbol) $type
     set got $rest
 }
 
 if {![info exists vars(text_symbol)] \
-     || $vars(text_symbol) != "t" \
+     || $vars(text_symbol) != "T" \
      || ![info exists vars(data_symbol)] \
-     || $vars(data_symbol) != "d" \
+     || $vars(data_symbol) != "D" \
      || ![info exists vars(common_symbol)] \
      || $vars(common_symbol) != "C" \
      || ![info exists vars(external_symbol)] \
-     || $vars(external_symbol) != "U"} then {
+     || $vars(external_symbol) != "U" \
+     || ![info exists vars(static_text_symbol)] \
+     || $vars(static_text_symbol) != "t" \
+     || ![info exists vars(static_data_symbol)] \
+     || $vars(static_data_symbol) != "d"} {
     fail "nm (no arguments)"
 } else {
     pass "nm (no arguments)"
@@ -66,15 +70,17 @@ if {![info exists vars(text_symbol)] \
 set got [binutils_run $NM "$NMFLAGS -g tmpdir/bintest.o"]
 
 if [info exists vars] then { unset vars }
-while {[regexp "(\[a-z\]*_symbol)(.*)" $got all symbol rest]} {
+while {[regexp "(\[a-z_\]*_symbol)(.*)" $got all symbol rest]} {
     set vars($symbol) 1
     set got $rest
 }
 
-if {[info exists vars(text_symbol)] \
-     || [info exists vars(data_symbol)] \
+if {![info exists vars(text_symbol)] \
+     || ![info exists vars(data_symbol)] \
      || ![info exists vars(common_symbol)] \
-     || ![info exists vars(external_symbol)]} then {
+     || ![info exists vars(external_symbol)] \
+     || [info exists vars(static_text_symbol)] \
+     || [info exists vars(static_data_symbol)]} {
     fail "nm -g"
 } else {
     pass "nm -g"
@@ -86,11 +92,11 @@ if {[info exists vars(text_symbol)] \
 # stores most symbols twice, which messes up the nm output.
 setup_xfail "alpha*-*-osf*" "alpha*-*-netware*"
 setup_xfail "mips*-*-ultrix*" "mips*-*-ecoff*" "mips*-*-irix4*"
-setup_xfail "mips*-*-riscos*" "mips*-*-sysv3*"
+setup_xfail "mips*-*-riscos*" "mips*-*-sysv3*" "mips*-sony-bsd*"
 
 set got [binutils_run $NM "$NMFLAGS -P tmpdir/bintest.o"]
 
-set want "common_symbol C \[0\]*4.*data_symbol d \[0-9a-fA-F\]*.*external_symbol U.*text_symbol t \[0-9a-fA-F\]*"
+set want "common_symbol C \[0\]*4.*data_symbol D \[0-9a-fA-F\]*.*external_symbol U.*static_data_symbol d \[0-9a-fA-F\]*.*static_text_symbol t \[0-9a-fA-F\]*.*text_symbol T \[0-9a-fA-F\]*"
 
 if [regexp $want $got] then {
     pass "nm -P"

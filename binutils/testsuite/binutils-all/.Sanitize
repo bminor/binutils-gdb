@@ -23,6 +23,7 @@ Do-first:
 
 Things-to-keep:
 
+ar.exp
 bintest.s
 hppa
 nm.exp
