@@ -1,3 +1,14 @@
+Thu Apr 23 12:56:19 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* gdb.c++/virtfunc.cc: Declare extern "C" printf to return int,
+	not void.
+
+Thu Apr 16 10:52:34 1998  John Metzler  <jmetzler@cygnus.com>
+
+	* gdb.base/branches.c: Code with lots of loops and
+ 	subroutines. Used to test gdbs ability to single step through PC
+ 	changes, especially to test mips-tdep.c:mips_next_pc
+
 Mon Apr 13 22:32:51 1998 Frank Ch. Eigler <fche@cygnus.com>
 
 	* gdb.c++/virtfunc.cc: Make extern "C" printf declaration pass
