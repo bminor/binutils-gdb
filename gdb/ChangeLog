@@ -1,3 +1,16 @@
+2004-02-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* target.h (target_object): Add TARGET_OBJECT_WCOOKIE.
+	* inftarg.c: Update copyright year.
+	(child_xfer_partial): Add support for TARGET_OBJECT_WCOOKIE.
+	* sparc-nat.c: Include "target.h" and "gdb_assert.h".
+	(sparc_xfer_wcookie): New function.
+	* sparc-tdep.c (sparc_fetch_wcookie): New function.
+	* Makefile.in (sparc-nat.o): Update dependencies.
+	* config/sparc/nm-nbsd.h: Include "target.h".
+	(NATIVE_XFER_WCOOKIE): New define.
+	(sparc_xfer_wcookie): New prototype.
+
 2004-02-04  Andrew Cagney  <cagney@redhat.com>
 
 	* m68k-tdep.c (m68k_saved_pc_after_call): Delete #ifdef
