@@ -124,6 +124,12 @@ one but it is not quite right as of 19 Nov 1993).
 
 Test that "x" command sets $_ and $__.  Test $_ in general.
 
+Given `char abc[] = "abc\0def";' test "x/s abc" followed by "x/s"
+(should display "abc" followed by "def").  Test this works with no
+error message even if this is the last thing in the section (tests
+that val_print_string ignores an error if the error occurs after the
+'\0').
+
 Test ability to process NMAGIC a.out files.
 
 If there are two breakpoints in the same place, and exactly one of
