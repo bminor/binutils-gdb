@@ -1,4 +1,57 @@
+Mon Aug 16 02:56:01 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* blockframe.c (create_new_frame, get_prev_frame_info):
+	Use the function name when calling IN_SIGTRAMP.
+	* config/m68k/tm-m68k.h (SIG_PC_FP_OFFSET, SIG_SP_FP_OFFSET):
+	Define for correct handling of bachtraces through _sigtramp.
+	* m68k-tdep.c (m68k_find_saved_regs):  Adjust saved sp for fake
+	sigtramp frames.
+	* mipsread.c (parse_type):  Handle corrupt TIR info with complaint
+	instead of core dump.
+	* mipsread.c (parse_partial_symbols):  Put static symbols into the
+	mimimal symbol table, use proper mst_types for all minimal symbols.
+	* stack.c (frame_info, print_frame_info):  Use the starting source
+	line number on a line boundary if backtracing through sigtramp.
+
 Fri Aug 13 14:37:05 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* remote-bug.c: include gdbcmd.h.
+	  (sleep, remque, insque): forward decls added.
+	  (bug_fetch_registers, bug_store_registers): forward decls
+	  removed.
+	  (bug_read_inferior_memory, bug_write_inferior_memory): forward
+	  decls added.
+	  (srec_frame, srec_max_retries, srec_bytes, srec_echo_pace,
+	  srec_sleep, srec_noise): new static variables for user settable
+	  options.  Mostly these are for debugging and tuning.  I don't
+	  expect them to stay user settable options for long.
+	  (timeout): change default to 4 seconds.
+	  (check_open): declare funtion static, force return value.
+	  (readchar_nofail): if timeout, then say so if not being quiet.
+	  (pollchar, double_scan, bug_scan, bug_srec_write_cr,
+	  start_load): new functions.
+	  (bug_wait): rewritten to use double scan.
+	  (expect): while (1) -> for (;;)
+	  (get_hex_digit): rewrite if condition to avoid gcc complaints.
+	  (bug_load, bug_create_inferior, bug_open, bug_store_register):
+	  removed unused variables.
+	  (bug_load): replaced DELTA macro with user settable srec_frame
+	  variable.  Other minor lint.
+	  (find_end_of_word, is_baudrate_right, set_rate, not_bug_wait,
+	  gethex, timed_read, translate_addr, bug_before_main_loop):
+	  unsused and removed.
+	  (bug_resume): add missing first arg, pid.
+	  (get_reg_name): use ip rather than cr04.
+	  (bug_write, bug_write_cr, but_clear_breakpoints, bug_quiet):
+	  declare type, args, and explicitly return.
+	  (bug_store_register): straighten out the ip vs cr04 confusion.
+	  (bug_write_inferior_memory): rewrite to cope with errors while
+	  downloading s-records.
+	  (bug_read_inferior_memory): declare static.
+	  (bug_clear_breakpoints): expect nobr before prompt.
+	  (_initialize_remote_bug): add initializations for srec-bytes,
+	  srec-max-retries, srec-frame, srec-noise, srec-sleep,
+	  srec-echo-pace.
 
 	* Makefile.in (remote-bug.o): new rule.
 	  (ALLDEPFILES): added remote-bug.c
