@@ -1600,6 +1600,7 @@ enum bfd_architecture
 #define bfd_mach_mips6000              6000
 #define bfd_mach_mips7000              7000
 #define bfd_mach_mips8000              8000
+#define bfd_mach_mips9000              9000
 #define bfd_mach_mips10000             10000
 #define bfd_mach_mips12000             12000
 #define bfd_mach_mips16                16

@@ -4023,6 +4023,9 @@ _bfd_elf_mips_mach (flagword flags)
     case E_MIPS_MACH_5500:
       return bfd_mach_mips5500;
 
+    case E_MIPS_MACH_9000:
+      return bfd_mach_mips9000;
+
     case E_MIPS_MACH_SB1:
       return bfd_mach_mips_sb1;
 
@@ -7073,6 +7076,10 @@ mips_set_isa_flags (bfd *abfd)
       val = E_MIPS_ARCH_4 | E_MIPS_MACH_5500;
       break;
 
+    case bfd_mach_mips9000:
+      val = E_MIPS_ARCH_4 | E_MIPS_MACH_9000;
+      break;
+
     case bfd_mach_mips5000:
     case bfd_mach_mips7000:
     case bfd_mach_mips8000:
@@ -8803,6 +8810,7 @@ static const struct mips_mach_extension mips_mach_extensions[] = {
   { bfd_mach_mips10000, bfd_mach_mips8000 },
   { bfd_mach_mips5000, bfd_mach_mips8000 },
   { bfd_mach_mips7000, bfd_mach_mips8000 },
+  { bfd_mach_mips9000, bfd_mach_mips8000 },
 
   /* VR4100 extensions.  */
   { bfd_mach_mips4120, bfd_mach_mips4100 },
