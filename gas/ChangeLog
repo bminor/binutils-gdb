@@ -1,3 +1,8 @@
+2001-09-30  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* Makefile.am: Update dependencies with "make dep-am".
+	* Makefile.in: Regenerate.
+
 2001-09-30  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* config/tc-m68hc11.c (cmp_opcode): Define prototype.
