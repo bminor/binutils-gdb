@@ -1,3 +1,7 @@
+2004-08-30  Manoj Iyer  <manjo@austin.ibm.com>
+
+	* MAINTAINERS: Add self to Write-After-Approval.
+
 2004-08-30  Andrew Cagney  <cagney@gnu.org>
 
 	Fix PR breakpoints/1757.
