@@ -135,7 +135,7 @@ DEFUN(bfd_constructor_entry,(abfd, symbol_ptr_ptr, type),
 							 sizeof(arelent_chain));
        if (!reloc)
 	 {
-	   bfd_error = no_memory;
+	   bfd_set_error (bfd_error_no_memory);
 	   return false;
 	 }
 

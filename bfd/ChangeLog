@@ -1,3 +1,23 @@
+Thu Feb 17 08:30:53 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* bfd.c (bfd_get_error, bfd_set_error): New functions.
+	(bfd_error): Make static.
+	(bfd_error_type): Renamed from bfd_ec.  Prepend "bfd_error_" to
+	all values.
+	* bfd-in2.h: Regenerated.
+	* aix386-core.c, aout-adobe.c, aout-encap.c, aout-target.h, 
+	aoutf1.h, aoutx.h, archive.c, archures.c, 
+	bfd.c, bout.c, cache.c, coff-alpha.c, coff-mips.c, 
+	coff-rs6000.c, coffcode.h, coffgen.c, core.c, ctor.c, 
+	ecoff.c, ecofflink.c, elf.c, elf32-hppa.c, elf32-mips.c, 
+	elfcode.h, format.c, hash.c, hp300hpux.c, hppabsd-core.c, 
+	i386lynx.c, ieee.c, libbfd.c, libelf.h, linker.c, 
+	lynx-core.c, nlm.c, nlm32-alpha.c, nlm32-i386.c, 
+	nlm32-sparc.c, nlmcode.h, oasys.c, opncls.c, osf-core.c, 
+	ptrace-core.c, reloc16.c, rs6000-core.c, section.c, som.c, 
+	srec.c, sunos.c, syms.c, targets.c, tekhex.c, 
+	trad-core.c: Change callers.
+
 Tue Feb 15 22:27:27 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.c: Remove FIXMEs for things which have been dealt with.

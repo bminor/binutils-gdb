@@ -74,7 +74,7 @@ ecoff_add_bytes (buf, bufend, need)
     newbuf = (char *) realloc (*buf, have + want);
   if (newbuf == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   *buf = newbuf;
@@ -117,7 +117,7 @@ string_hash_newfunc (entry, table, string)
 	   bfd_hash_allocate (table, sizeof (struct string_hash_entry)));
   if (ret == (struct string_hash_entry *) NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
 
@@ -237,7 +237,7 @@ add_file_shuffle (ainfo, head, tail, input_bfd, offset, size)
 					sizeof (struct shuffle));
   if (!n)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   n->next = NULL;
@@ -276,7 +276,7 @@ add_memory_shuffle (ainfo, head, tail, data, size)
 					sizeof (struct shuffle));
   if (!n)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   n->next = NULL;
@@ -307,7 +307,7 @@ bfd_ecoff_debug_init (output_bfd, output_debug, output_swap, info)
   ainfo = (struct accumulate *) malloc (sizeof (struct accumulate));
   if (!ainfo)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
   if (! bfd_hash_table_init_n (&ainfo->fdr_hash.table, string_hash_newfunc,
@@ -346,7 +346,7 @@ bfd_ecoff_debug_init (output_bfd, output_debug, output_swap, info)
 
   if (!obstack_begin (&ainfo->memory, 4050))
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
 
@@ -478,7 +478,7 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
   rfd_out = (bfd_byte *) obstack_alloc (&ainfo->memory, sz);
   if (!input_debug->ifdmap || !rfd_out)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   if (!add_memory_shuffle (ainfo, &ainfo->rfd, &ainfo->rfd_end, rfd_out, sz))
@@ -574,7 +574,7 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
   fdr_out = (bfd_byte *) obstack_alloc (&ainfo->memory, sz);
   if (!fdr_out)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   if (!add_memory_shuffle (ainfo, &ainfo->fdr, &ainfo->fdr_end, fdr_out, sz))
@@ -612,7 +612,7 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
       sym_out = (bfd_byte *) obstack_alloc (&ainfo->memory, sz);
       if (!sym_out)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
       if (!add_memory_shuffle (ainfo, &ainfo->sym, &ainfo->sym_end, sym_out, sz))
@@ -792,7 +792,7 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	  out = (bfd_byte *) obstack_alloc (&ainfo->memory, sz);
 	  if (!out)
 	    {
-	      bfd_error = no_memory;
+	      bfd_set_error (bfd_error_no_memory);
 	      return false;
 	    }
 	  if (!add_memory_shuffle (ainfo, &ainfo->pdr, &ainfo->pdr_end, out, sz))
@@ -815,7 +815,7 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	  out = (bfd_byte *) obstack_alloc (&ainfo->memory, sz);
 	  if (!out)
 	    {
-	      bfd_error = no_memory;
+	      bfd_set_error (bfd_error_no_memory);
 	      return false;
 	    }
 	  if (!add_memory_shuffle (ainfo, &ainfo->opt, &ainfo->opt_end, out, sz))
@@ -956,7 +956,7 @@ bfd_ecoff_debug_accumulate_other (handle, output_bfd, output_debug,
 				    get_symtab_upper_bound (input_bfd));
   if (symbols == (asymbol **) NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   sym_end = symbols + bfd_canonicalize_symtab (input_bfd, symbols);
@@ -992,7 +992,7 @@ bfd_ecoff_debug_accumulate_other (handle, output_bfd, output_debug,
 					  output_swap->external_sym_size);
       if (!external_sym)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
       (*swap_sym_out) (output_bfd, &internal_sym, external_sym);
@@ -1012,7 +1012,7 @@ bfd_ecoff_debug_accumulate_other (handle, output_bfd, output_debug,
 				      output_swap->external_fdr_size);
   if (!external_fdr)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   (*output_swap->swap_fdr_out) (output_bfd, &fdr, external_fdr);

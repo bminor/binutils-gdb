@@ -975,6 +975,7 @@ enum bfd_architecture
   bfd_arch_h8300,      /* Hitachi H8/300 */
 #define bfd_mach_h8300   1
 #define bfd_mach_h8300h  2
+  bfd_arch_powerpc,    /* PowerPC */
   bfd_arch_rs6000,     /* IBM RS/6000 */
   bfd_arch_hppa,       /* HP PA RISC */
   bfd_arch_z8k,        /* Zilog Z8000 */
@@ -1494,6 +1495,15 @@ typedef enum bfd_reloc_code_real
   BFD_RELOC_386_GOTOFF,
   BFD_RELOC_386_GOTPC,
 
+   /* PowerPC/POWER (RS/6000) relocs.  */
+   /* 26 bit relative branch.  Low two bits must be zero.  High 24
+     bits installed in bits 6 through 29 of instruction.  */
+  BFD_RELOC_PPC_B26,
+   /* 26 bit absolute branch, like BFD_RELOC_PPC_B26 but absolute.  */
+  BFD_RELOC_PPC_BA26,
+   /* 16 bit TOC relative reference.  */
+  BFD_RELOC_PPC_TOC16,
+
    /* this must be the highest numeric value */
   BFD_RELOC_UNUSED
  } bfd_reloc_code_real_type;
@@ -1782,29 +1792,33 @@ struct _bfd
 
 typedef enum bfd_error
 {
-  no_error = 0,
-  system_call_error,
-  invalid_target,
-  wrong_format,
-  invalid_operation,
-  no_memory,
-  no_symbols,
-  no_more_archived_files,
-  malformed_archive,
-  file_not_recognized,
-  file_ambiguously_recognized,
-  no_contents,
-  nonrepresentable_section,
-  no_debug_section,
-  bad_value,
-  file_truncated,
-  invalid_error_code
-} bfd_ec;
+  bfd_error_no_error = 0,
+  bfd_error_system_call,
+  bfd_error_invalid_target,
+  bfd_error_wrong_format,
+  bfd_error_invalid_operation,
+  bfd_error_no_memory,
+  bfd_error_no_symbols,
+  bfd_error_no_more_archived_files,
+  bfd_error_malformed_archive,
+  bfd_error_file_not_recognized,
+  bfd_error_file_ambiguously_recognized,
+  bfd_error_no_contents,
+  bfd_error_nonrepresentable_section,
+  bfd_error_no_debug_section,
+  bfd_error_bad_value,
+  bfd_error_file_truncated,
+  bfd_error_invalid_error_code
+} bfd_error_type;
 
-extern bfd_ec bfd_error;
+bfd_error_type 
+bfd_get_error  PARAMS ((void));
+
+void 
+bfd_set_error  PARAMS ((bfd_error_type error_tag));
 
 CONST char *
-bfd_errmsg  PARAMS ((bfd_ec error_tag));
+bfd_errmsg  PARAMS ((bfd_error_type error_tag));
 
 void 
 bfd_perror  PARAMS ((CONST char *message));

@@ -1,5 +1,5 @@
 /* Generic target-file-type support for the BFD library.
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -39,7 +39,7 @@ DESCRIPTION
 	how to interpret the file. The operations performed are:
 
 	o Create a BFD by calling the internal routine
-	<<new_bfd>>, then call <<bfd_find_target>> with the
+	<<_bfd_new_bfd>>, then call <<bfd_find_target>> with the
 	target string supplied to <<bfd_openr>> and the new BFD pointer. 
 
 	o If a null target string was provided to <<bfd_find_target>>,
@@ -56,7 +56,7 @@ DESCRIPTION
 	one by one, until a match on target name is found. When found,
 	use it. 
 
-	o Otherwise return the error <<invalid_target>> to
+	o Otherwise return the error <<bfd_error_invalid_target>> to
 	<<bfd_openr>>.
 
 	o <<bfd_openr>> attempts to open the file using
@@ -414,7 +414,7 @@ extern bfd_target sco_core_vec;
 extern bfd_target trad_core_vec;
 extern bfd_target ptrace_core_vec;
 
-bfd_target *target_vector[] = {
+bfd_target *bfd_target_vector[] = {
 
 #ifdef SELECT_VECS
 
@@ -482,7 +482,7 @@ bfd_target *target_vector[] = {
 	&hp300bsd_vec,
 #endif
 	&hp300hpux_vec,
-#if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD)
+#if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD) || defined (HOST_HPPAOSF)
         &som_vec,
 #endif
 	&i386aout_vec,
@@ -563,20 +563,20 @@ bfd_target *target_vector[] = {
 	NULL /* end of list marker */
 };
 
-/* default_vector[0] contains either the address of the default vector,
+/* bfd_default_vector[0] contains either the address of the default vector,
    if there is one, or zero if there isn't.  */
 
-bfd_target *default_vector[] = {
+bfd_target *bfd_default_vector[] = {
 #ifdef DEFAULT_VECTOR
 	&DEFAULT_VECTOR,
 #endif
 	NULL
 };
 
-/* When there is an ambiguous match, bfd_check_format_ambig puts the names
-   of the matching targets in an array.  This variable is the maximum
-   number of entries that array could possibly need.  */
-CONST size_t bfd_default_vector_entries = sizeof(target_vector)/sizeof(*target_vector);
+/* When there is an ambiguous match, bfd_check_format_matches puts the
+   names of the matching targets in an array.  This variable is the maximum
+   number of entries that the array could possibly need.  */
+CONST size_t _bfd_target_vector_entries = sizeof(bfd_target_vector)/sizeof(*bfd_target_vector);
 
 /*
 FUNCTION
@@ -610,17 +610,17 @@ DEFUN(bfd_find_target,(target_name, abfd),
   /* This is safe; the vector cannot be null */
   if (targname == NULL || !strcmp (targname, "default")) {
     abfd->target_defaulted = true;
-    return abfd->xvec = target_vector[0];
+    return abfd->xvec = bfd_target_vector[0];
   }
 
   abfd->target_defaulted = false;
 
-  for (target = &target_vector[0]; *target != NULL; target++) {
+  for (target = &bfd_target_vector[0]; *target != NULL; target++) {
     if (!strcmp (targname, (*target)->name))
       return abfd->xvec = *target;
   }
 
-  bfd_error = invalid_target;
+  bfd_set_error (bfd_error_invalid_target);
   return NULL;
 }
 
@@ -651,18 +651,18 @@ DEFUN_VOID(bfd_target_list)
     bfd_target **target;
   CONST  char **name_list, **name_ptr;
 
-  for (target = &target_vector[0]; *target != NULL; target++)
+  for (target = &bfd_target_vector[0]; *target != NULL; target++)
     vec_length++;
 
-  name_ptr = 
-    name_list = (CONST char **) zalloc ((vec_length + 1) * sizeof (char **));
+  name_ptr = name_list = (CONST char **)
+    bfd_zmalloc ((vec_length + 1) * sizeof (char **));
 
   if (name_list == NULL) {
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return NULL;
   }
 
-  for (target = &target_vector[0]; *target != NULL; target++)
+  for (target = &bfd_target_vector[0]; *target != NULL; target++)
     *(name_ptr++) = (*target)->name;
 
   return name_list;

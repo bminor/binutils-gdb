@@ -79,7 +79,7 @@ ecoff_mkobject (abfd)
 				bfd_zalloc (abfd, sizeof (ecoff_data_type)));
   if (abfd->tdata.ecoff_obj_data == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -627,7 +627,7 @@ ecoff_slurp_symbolic_header (abfd)
   external_hdr_size = backend->debug_swap.external_hdr_size;
   if (bfd_get_symcount (abfd) != external_hdr_size)
     {
-      bfd_error = bad_value;
+      bfd_set_error (bfd_error_bad_value);
       return false;
     }
 
@@ -637,7 +637,7 @@ ecoff_slurp_symbolic_header (abfd)
       || (bfd_read (raw, external_hdr_size, 1, abfd)
 	  != external_hdr_size))
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
   internal_symhdr = &ecoff_data (abfd)->debug_info.symbolic_header;
@@ -645,7 +645,7 @@ ecoff_slurp_symbolic_header (abfd)
 
   if (internal_symhdr->magic != backend->debug_swap.sym_magic)
     {
-      bfd_error = bad_value;
+      bfd_set_error (bfd_error_bad_value);
       return false;
     }
 
@@ -730,7 +730,7 @@ ecoff_slurp_symbolic_info (abfd)
   raw = (PTR) bfd_alloc (abfd, raw_size);
   if (raw == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   if (bfd_seek (abfd,
@@ -739,7 +739,7 @@ ecoff_slurp_symbolic_info (abfd)
 		SEEK_SET) != 0
       || bfd_read (raw, raw_size, 1, abfd) != raw_size)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       bfd_release (abfd, raw);
       return false;
     }
@@ -781,7 +781,7 @@ ecoff_slurp_symbolic_info (abfd)
 			       sizeof (struct fdr)));
   if (ecoff_data (abfd)->debug_info.fdr == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   external_fdr_size = backend->debug_swap.external_fdr_size;
@@ -817,7 +817,7 @@ ecoff_make_empty_symbol (abfd)
   new = (ecoff_symbol_type *) bfd_alloc (abfd, sizeof (ecoff_symbol_type));
   if (new == (ecoff_symbol_type *) NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return (asymbol *) NULL;
     }
   memset (new, 0, sizeof *new);
@@ -1044,7 +1044,7 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
 		copy = (char *) bfd_alloc (abfd, strlen (name) + 1);
 		if (!copy)
 		  {
-		    bfd_error = no_memory;
+		    bfd_set_error (bfd_error_no_memory);
 		    return false;
 		  }
 		strcpy (copy, name);
@@ -1056,7 +1056,7 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
 	      (arelent_chain *) bfd_alloc (abfd, sizeof (arelent_chain));
 	    if (!reloc_chain)
 	      {
-		bfd_error = no_memory;
+		bfd_set_error (bfd_error_no_memory);
 		return false;
 	      }
 	    reloc_chain->relent.sym_ptr_ptr =
@@ -1130,7 +1130,7 @@ ecoff_slurp_symbol_table (abfd)
   internal = (ecoff_symbol_type *) bfd_alloc (abfd, internal_size);
   if (internal == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -1808,7 +1808,7 @@ ecoff_slurp_reloc_table (abfd, section, symbols)
   if (internal_relocs == (arelent *) NULL
       || external_relocs == (char *) NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   if (bfd_seek (abfd, section->rel_filepos, SEEK_SET) != 0)
@@ -1816,7 +1816,7 @@ ecoff_slurp_reloc_table (abfd, section, symbols)
   if (bfd_read (external_relocs, 1, external_relocs_size, abfd)
       != external_relocs_size)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
@@ -2486,7 +2486,7 @@ ecoff_write_object_contents (abfd)
   struct internal_aouthdr internal_a;
   int i;
 
-  bfd_error = system_call_error;
+  bfd_set_error (bfd_error_system_call);
 
   /* Determine where the sections and relocs will go in the output
      file.  */
@@ -2742,7 +2742,7 @@ ecoff_write_object_contents (abfd)
 	  buff = bfd_alloc (abfd, current->reloc_count * external_reloc_size);
 	  if (buff == NULL)
 	    {
-	      bfd_error = no_memory;
+	      bfd_set_error (bfd_error_no_memory);
 	      return false;
 	    }
 
@@ -2976,7 +2976,7 @@ ecoff_slurp_armap (abfd)
       || ((nextname[ARMAP_OBJECT_ENDIAN_INDEX] == ARMAP_BIG_ENDIAN)
 	  ^ (abfd->xvec->byteorder_big_p != false)))
     {
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       return false;
     }
 
@@ -2991,13 +2991,13 @@ ecoff_slurp_armap (abfd)
   raw_armap = (char *) bfd_alloc (abfd, parsed_size);
   if (raw_armap == (char *) NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
     
   if (bfd_read ((PTR) raw_armap, 1, parsed_size, abfd) != parsed_size)
     {
-      bfd_error = malformed_archive;
+      bfd_set_error (bfd_error_malformed_archive);
       bfd_release (abfd, (PTR) raw_armap);
       return false;
     }
@@ -3062,7 +3062,7 @@ ecoff_slurp_armap (abfd)
 			   ardata->symdef_count * sizeof (struct symdef)));
   if (!symdef_ptr)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -3179,7 +3179,7 @@ ecoff_write_armap (abfd, elength, map, orl_count, stridx)
   hashtable = (bfd_byte *) bfd_zalloc (abfd, symdefsize);
   if (!hashtable)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -3268,7 +3268,7 @@ ecoff_archive_p (abfd)
   if (bfd_read ((PTR) armag, 1, SARMAG, abfd) != SARMAG
       || strncmp (armag, ARMAG, SARMAG) != 0)
     {
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       return (bfd_target *) NULL;
     }
 
@@ -3280,7 +3280,7 @@ ecoff_archive_p (abfd)
 
   if (bfd_ardata (abfd) == (struct artdata *) NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return (bfd_target *) NULL;
     }
 
@@ -3334,7 +3334,7 @@ ecoff_link_hash_newfunc (entry, table, string)
 	   bfd_hash_allocate (table, sizeof (struct ecoff_link_hash_entry)));
   if (ret == (struct ecoff_link_hash_entry *) NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
 
@@ -3366,7 +3366,7 @@ ecoff_bfd_link_hash_table_create (abfd)
 	 malloc (sizeof (struct ecoff_link_hash_table)));
   if (!ret)
       {
-	bfd_error = no_memory;
+	bfd_set_error (bfd_error_no_memory);
 	return NULL;
       }
   if (! _bfd_link_hash_table_init (&ret->root, abfd,
@@ -3412,7 +3412,7 @@ ecoff_bfd_link_add_symbols (abfd, info)
     case bfd_archive:
       return ecoff_link_add_archive_symbols (abfd, info);
     default:
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       return false;
     }
 }
@@ -3439,7 +3439,7 @@ ecoff_link_add_archive_symbols (abfd, info)
 
   if (! bfd_has_map (abfd))
     {
-      bfd_error = no_symbols;
+      bfd_set_error (bfd_error_no_symbols);
       return false;
     }
 
@@ -3744,7 +3744,7 @@ ecoff_link_add_externals (abfd, info, external_ext, ssext)
 			 ext_count * sizeof (struct bfd_link_hash_entry *)));
   if (!sym_hash)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   ecoff_data (abfd)->sym_hashes = sym_hash;

@@ -474,9 +474,9 @@ DESCRIPTION
 	before it was rewritten....
 
 	Possible errors are:
-	o <<invalid_operation>> -
+	o <<bfd_error_invalid_operation>> -
 	If output has already started for this BFD.
-	o <<no_memory>> -
+	o <<bfd_error_no_memory>> -
 	If obstack alloc fails.
 
 */
@@ -508,8 +508,8 @@ DESCRIPTION
    is already a section with that name.  
 
    Return <<NULL>> and set <<bfd_error>> on error; possible errors are:
-   o <<invalid_operation>> - If output has already started for @var{abfd}.
-   o <<no_memory>> - If obstack alloc fails.
+   o <<bfd_error_invalid_operation>> - If output has already started for @var{abfd}.
+   o <<bfd_error_no_memory>> - If obstack alloc fails.
 */
 
 sec_ptr
@@ -523,7 +523,7 @@ bfd_make_section_anyway (abfd, name)
 
   if (abfd->output_has_begun)
     {
-      bfd_error = invalid_operation;
+      bfd_set_error (bfd_error_invalid_operation);
       return NULL;
     }
 
@@ -534,7 +534,7 @@ bfd_make_section_anyway (abfd, name)
 
   newsect = (asection *) bfd_zalloc(abfd, sizeof (asection));
   if (newsect == NULL) {
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return NULL;
   }
 
@@ -579,8 +579,8 @@ SYNOPSIS
 	asection *bfd_make_section(bfd *, CONST char *name);
 
 DESCRIPTION
-   Like <<bfd_make_section_anyway>>, but return <<NULL>> (without setting
-   bfd_error) without changing the section chain if there is already a
+   Like <<bfd_make_section_anyway>>, but return <<NULL>> (without calling
+   bfd_set_error ()) without changing the section chain if there is already a
    section named @var{name}.  If there is an error, return <<NULL>> and set
    <<bfd_error>>.
 */
@@ -632,7 +632,7 @@ DESCRIPTION
 	@var{abfd} to the value @var{flags}. Return <<true>> on success,
 	<<false>> on error. Possible error returns are:
 
-	o <<invalid_operation>> -
+	o <<bfd_error_invalid_operation>> -
 	The section cannot have one or more of the attributes
 	requested. For example, a .bss section in <<a.out>> may not
 	have the <<SEC_HAS_CONTENTS>> field set.
@@ -653,7 +653,7 @@ DEFUN(bfd_set_section_flags,(abfd, section, flags),
      set - which it doesn't, at least not for a.out.  FIXME */
 
   if ((flags & bfd_applicable_section_flags (abfd)) != flags) {
-    bfd_error = invalid_operation;
+    bfd_set_error (bfd_error_invalid_operation);
     return false;
   }
 #endif
@@ -721,7 +721,7 @@ DESCRIPTION
 	ok, then <<true>> is returned, else <<false>>. 
 
 	Possible error returns:
-	o <<invalid_operation>> -
+	o <<bfd_error_invalid_operation>> -
 	Writing has started to the BFD, so setting the size is invalid.
 
 */
@@ -736,7 +736,7 @@ DEFUN(bfd_set_section_size,(abfd, ptr, val),
      the size of any others. */
 
   if (abfd->output_has_begun) {
-    bfd_error = invalid_operation;
+    bfd_set_error (bfd_error_invalid_operation);
     return false;
   }
 
@@ -769,7 +769,7 @@ DESCRIPTION
 
 	Normally <<true>> is returned, else <<false>>. Possible error
 	returns are:
-	o <<no_contents>> -
+	o <<bfd_error_no_contents>> -
 	The output section does not have the <<SEC_HAS_CONTENTS>>
 	attribute, so nothing can be written to it.
 	o and some more too
@@ -797,14 +797,14 @@ DEFUN(bfd_set_section_contents,(abfd, section, location, offset, count),
 
   if (!bfd_get_section_flags(abfd, section) & SEC_HAS_CONTENTS) 
       {
-        bfd_error = no_contents;
+        bfd_set_error (bfd_error_no_contents);
         return(false);
       }
 
   if (offset < 0)
     {
     bad_val:
-      bfd_error = bad_value;
+      bfd_set_error (bfd_error_bad_value);
       return false;
     }
   sz = bfd_get_section_size_now (abfd, section);
@@ -817,7 +817,7 @@ DEFUN(bfd_set_section_contents,(abfd, section, location, offset, count),
     {
       case read_direction:
       case no_direction:
-	bfd_error = invalid_operation;
+	bfd_set_error (bfd_error_invalid_operation);
 	return false;
 
       case write_direction:
@@ -884,7 +884,7 @@ DEFUN(bfd_get_section_contents,(abfd, section, location, offset, count),
   if (offset < 0)
     {
     bad_val:
-      bfd_error = bad_value;
+      bfd_set_error (bfd_error_bad_value);
       return false;
     }
   /* Even if reloc_done is true, this function reads unrelocated

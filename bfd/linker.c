@@ -445,7 +445,7 @@ _bfd_link_hash_newfunc (entry, table, string)
 	   bfd_hash_allocate (table, sizeof (struct bfd_link_hash_entry)));
   if (ret == (struct bfd_link_hash_entry *) NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
 
@@ -559,7 +559,7 @@ generic_link_hash_newfunc (entry, table, string)
 	   bfd_hash_allocate (table, sizeof (struct generic_link_hash_entry)));
   if (ret == (struct generic_link_hash_entry *) NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
 
@@ -589,7 +589,7 @@ _bfd_generic_link_hash_table_create (abfd)
 	 malloc (sizeof (struct generic_link_hash_table)));
   if (!ret)
       {
-	bfd_error = no_memory;
+	bfd_set_error (bfd_error_no_memory);
 	return (struct bfd_link_hash_table *) NULL;
       }
   if (! _bfd_link_hash_table_init (&ret->root, abfd,
@@ -621,7 +621,7 @@ _bfd_generic_link_add_symbols (abfd, info)
 	(abfd, info, generic_link_check_archive_element);
       break;
     default:
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       ret = false;
     }
 
@@ -706,7 +706,7 @@ archive_hash_newfunc (entry, table, string)
 	   bfd_hash_allocate (table, sizeof (struct archive_hash_entry)));
   if (ret == (struct archive_hash_entry *) NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
 
@@ -795,7 +795,7 @@ _bfd_generic_link_add_archive_symbols (abfd, info, checkfn)
 
   if (! bfd_has_map (abfd))
     {
-      bfd_error = no_symbols;
+      bfd_set_error (bfd_error_no_symbols);
       return false;
     }
 
@@ -1436,7 +1436,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 				      sizeof (struct bfd_link_hash_entry)));
 	    if (!sub)
 	      {
-		bfd_error = no_memory;
+		bfd_set_error (bfd_error_no_memory);
 		return false;
 	      }
 	    *sub = *h;
@@ -1520,7 +1520,7 @@ _bfd_generic_final_link (abfd, info)
 		  relocs = (arelent **) malloc ((size_t) relsize);
 		  if (!relocs)
 		    {
-		      bfd_error = no_memory;
+		      bfd_set_error (bfd_error_no_memory);
 		      return false;
 		    }
 		  reloc_count =
@@ -1540,7 +1540,7 @@ _bfd_generic_final_link (abfd, info)
 					    * sizeof (arelent *))));
 	      if (!o->orelocation)
 		{
-		  bfd_error = no_memory;
+		  bfd_set_error (bfd_error_no_memory);
 		  return false;
 		}
 	      /* Reset the count so that it can be used as an index
@@ -1590,7 +1590,7 @@ generic_add_output_symbol (output_bfd, psymalloc, sym)
 					*psymalloc * sizeof (asymbol *));
       if (newsyms == (asymbol **) NULL)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
       output_bfd->outsymbols = newsyms;
@@ -1619,7 +1619,7 @@ _bfd_generic_link_output_symbols (output_bfd, input_bfd, info, psymalloc)
   input_bfd->outsymbols = (asymbol **) bfd_alloc (input_bfd, symsize);
   if (!input_bfd->outsymbols)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   input_bfd->symcount = bfd_canonicalize_symtab (input_bfd,
@@ -1898,7 +1898,7 @@ bfd_new_link_order (abfd, section)
 	 bfd_alloc_by_size_t (abfd, sizeof (struct bfd_link_order)));
   if (!new)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
 
@@ -2015,7 +2015,7 @@ default_indirect_link_order (output_bfd, info, output_section, link_order)
       input_bfd->outsymbols = (asymbol **) bfd_alloc (input_bfd, symsize);
       if (!input_bfd->outsymbols)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
       input_bfd->symcount = bfd_canonicalize_symtab (input_bfd,

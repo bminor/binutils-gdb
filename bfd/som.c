@@ -1377,7 +1377,7 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
   final_type = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
   if (!final_types || !final_type)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
 
@@ -1404,7 +1404,7 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
 	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
 	if (!final_types[0])
 	  {
-	    bfd_error = no_memory;
+	    bfd_set_error (bfd_error_no_memory);
 	    return NULL;
 	  }
 	if (field == e_tsel)
@@ -1423,7 +1423,7 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
 	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
 	if (!final_types[0])
 	  {
-	    bfd_error = no_memory;
+	    bfd_set_error (bfd_error_no_memory);
 	    return NULL;
 	  }
 	*final_types[0] = R_S_MODE;
@@ -1437,7 +1437,7 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
 	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
 	if (!final_types[0])
 	  {
-	    bfd_error = no_memory;
+	    bfd_set_error (bfd_error_no_memory);
 	    return NULL;
 	  }
 	*final_types[0] = R_N_MODE;
@@ -1451,7 +1451,7 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
 	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
 	if (!final_types[0])
 	  {
-	    bfd_error = no_memory;
+	    bfd_set_error (bfd_error_no_memory);
 	    return NULL;
 	  }
 	*final_types[0] = R_D_MODE;
@@ -1465,7 +1465,7 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
 	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
 	if (!final_types[0])
 	  {
-	    bfd_error = no_memory;
+	    bfd_set_error (bfd_error_no_memory);
 	    return NULL;
 	  }
 	*final_types[0] = R_R_MODE;
@@ -1601,7 +1601,7 @@ make_unique_section (abfd, name, num)
   newname = bfd_alloc (abfd, strlen (sect->name) + 1);
   if (!newname)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
   strcpy (newname, sect->name);
@@ -1806,13 +1806,13 @@ som_object_p (abfd)
 
   if (bfd_read ((PTR) & file_hdr, 1, FILE_HDR_SIZE, abfd) != FILE_HDR_SIZE)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return 0;
     }
 
   if (!_PA_RISC_ID (file_hdr.system_id))
     {
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       return 0;
     }
 
@@ -1836,14 +1836,14 @@ som_object_p (abfd)
 #endif
       break;
     default:
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       return 0;
     }
 
   if (file_hdr.version_id != VERSION_ID
       && file_hdr.version_id != NEW_VERSION_ID)
     {
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       return 0;
     }
 
@@ -1855,7 +1855,7 @@ som_object_p (abfd)
     {
       if (bfd_read ((PTR) & aux_hdr, 1, AUX_HDR_SIZE, abfd) != AUX_HDR_SIZE)
 	{
-	  bfd_error = wrong_format;
+	  bfd_set_error (bfd_error_wrong_format);
 	  return 0;
 	}
     }
@@ -1863,7 +1863,7 @@ som_object_p (abfd)
   if (!setup_sections (abfd, &file_hdr))
     {
       /* setup_sections does not bubble up a bfd error code.  */
-      bfd_error = bad_value;
+      bfd_set_error (bfd_error_bad_value);
       return 0;
     }
 
@@ -1882,7 +1882,7 @@ som_mkobject (abfd)
     bfd_zalloc (abfd, sizeof (struct som_data_struct));
   if (abfd->tdata.som_data == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   obj_som_file_hdr (abfd)
@@ -1890,7 +1890,7 @@ som_mkobject (abfd)
   if (obj_som_file_hdr (abfd) == NULL)
 
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   return true;
@@ -2212,7 +2212,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 	     stream.  */
 	  if (bfd_seek (abfd, current_offset + total_reloc_size, SEEK_SET) != 0)
 	    {
-	      bfd_error = system_call_error;
+	      bfd_set_error (bfd_error_system_call);
 	      return false;
 	    }
 
@@ -2251,7 +2251,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		  if (bfd_write ((PTR) tmp_space, p - tmp_space, 1, abfd)
 		      != p - tmp_space)
 		    {
-		      bfd_error = system_call_error;
+		      bfd_set_error (bfd_error_system_call);
 		      return false;
 		    }
 		  p = tmp_space;
@@ -2421,7 +2421,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 	  if (bfd_write ((PTR) tmp_space, p - tmp_space, 1, abfd)
 	      != p - tmp_space)
 	    {
-	      bfd_error = system_call_error;
+	      bfd_set_error (bfd_error_system_call);
 	      return false;
 	    }
 	  p = tmp_space;
@@ -2458,7 +2458,7 @@ som_write_space_strings (abfd, current_offset, string_sizep)
      them out.  */
   if (bfd_seek (abfd, current_offset, SEEK_SET) != 0)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
@@ -2485,7 +2485,7 @@ som_write_space_strings (abfd, current_offset, string_sizep)
 	  if (bfd_write ((PTR) tmp_space, p - tmp_space, 1, abfd)
 	      != p - tmp_space) 
 	    {
-	      bfd_error = system_call_error;
+	      bfd_set_error (bfd_error_system_call);
 	      return false;
 	    }
 	  /* Reset to beginning of the buffer space.  */
@@ -2522,7 +2522,7 @@ som_write_space_strings (abfd, current_offset, string_sizep)
      contained in a partial block.  */
   if (bfd_write ((PTR) tmp_space, p - tmp_space, 1, abfd) != p - tmp_space)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
   *string_sizep = strings_size;
@@ -2553,7 +2553,7 @@ som_write_symbol_strings (abfd, current_offset, syms, num_syms, string_sizep)
      them out.  */
   if (bfd_seek (abfd, current_offset, SEEK_SET) != 0)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
@@ -2568,7 +2568,7 @@ som_write_symbol_strings (abfd, current_offset, syms, num_syms, string_sizep)
 	  if (bfd_write ((PTR) tmp_space, p - tmp_space, 1, abfd)
 	      != p - tmp_space)
 	    {
-	      bfd_error = system_call_error;
+	      bfd_set_error (bfd_error_system_call);
 	      return false;
 	    }
 	  /* Reset to beginning of the buffer space.  */
@@ -2603,7 +2603,7 @@ som_write_symbol_strings (abfd, current_offset, syms, num_syms, string_sizep)
   /* Scribble out any partial block.  */
   if (bfd_write ((PTR) tmp_space, p - tmp_space, 1, abfd) != p - tmp_space)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
@@ -2657,7 +2657,7 @@ som_begin_writing (abfd)
       current_offset += len;
       if (bfd_write ((PTR) obj_som_version_hdr (abfd), len, 1, abfd) != len)
 	{
-	  bfd_error = system_call_error;
+	  bfd_set_error (bfd_error_system_call);
 	  return false;
 	}
 
@@ -2668,7 +2668,7 @@ som_begin_writing (abfd)
       if (bfd_write ((PTR) obj_som_version_hdr (abfd)->user_string,
 		     len, 1, abfd) != len)
 	{
-	  bfd_error = system_call_error;
+	  bfd_set_error (bfd_error_system_call);
 	  return false;
 	}
     }
@@ -2685,7 +2685,7 @@ som_begin_writing (abfd)
       current_offset += len;
       if (bfd_write ((PTR) obj_som_copyright_hdr (abfd), len, 1, abfd) != len)
 	{
-	  bfd_error = system_call_error;
+	  bfd_set_error (bfd_error_system_call);
 	  return false;
 	}
 
@@ -2696,7 +2696,7 @@ som_begin_writing (abfd)
       if (bfd_write ((PTR) obj_som_copyright_hdr (abfd)->copyright,
 		     len, 1, abfd) != len)
 	{
-	  bfd_error = system_call_error;
+	  bfd_set_error (bfd_error_system_call);
 	  return false;
 	}
     }
@@ -2973,7 +2973,7 @@ som_write_headers (abfd)
 			 sizeof (struct subspace_dictionary_record), 1, abfd)
 	      != sizeof (struct subspace_dictionary_record))
 	    {
-	      bfd_error = system_call_error;
+	      bfd_set_error (bfd_error_system_call);
 	      return false;
 	    }
 	}
@@ -3032,7 +3032,7 @@ som_write_headers (abfd)
 			 sizeof (struct subspace_dictionary_record), 1, abfd)
 	      != sizeof (struct subspace_dictionary_record))
 	    {
-	      bfd_error = system_call_error;
+	      bfd_set_error (bfd_error_system_call);
 	      return false;
 	    }
 	}
@@ -3061,7 +3061,7 @@ som_write_headers (abfd)
 		     sizeof (struct space_dictionary_record), 1, abfd)
 	  != sizeof (struct space_dictionary_record))
 	{
-	  bfd_error = system_call_error;
+	  bfd_set_error (bfd_error_system_call);
 	  return false;
 	}
 
@@ -3076,7 +3076,7 @@ som_write_headers (abfd)
 		 sizeof (struct header), 1, abfd)
       != sizeof (struct header))
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
   return true;
@@ -3245,13 +3245,13 @@ som_build_and_write_symbol_table (abfd)
      scribble out the symbol table.  */
   if (bfd_seek (abfd, symtab_location, SEEK_SET) != 0)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
   if (bfd_write ((PTR) som_symtab, symtab_size, 1, abfd) != symtab_size)
     {
-      bfd_error  = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
   return true; 
@@ -3302,20 +3302,20 @@ som_slurp_string_table (abfd)
   stringtab = bfd_zalloc (abfd, obj_som_stringtab_size (abfd));
   if (stringtab == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
   if (bfd_seek (abfd, obj_som_str_filepos (abfd), SEEK_SET) < 0)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
   
   if (bfd_read (stringtab, obj_som_stringtab_size (abfd), 1, abfd)
       != obj_som_stringtab_size (abfd))
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
@@ -3383,7 +3383,7 @@ som_slurp_symbol_table (abfd)
     bfd_zalloc (abfd, symbol_count * sizeof (som_symbol_type));
   if (symbase == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -3391,18 +3391,18 @@ som_slurp_symbol_table (abfd)
   buf = alloca (symbol_count * symsize);
   if (buf == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   if (bfd_seek (abfd, obj_som_sym_filepos (abfd), SEEK_SET) < 0)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
   if (bfd_read (buf, symbol_count * symsize, 1, abfd) 
       != symbol_count * symsize)
     {
-      bfd_error = no_symbols;
+      bfd_set_error (bfd_error_no_symbols);
       return (false);
     }
 
@@ -3550,7 +3550,7 @@ som_make_empty_symbol (abfd)
   (som_symbol_type *) bfd_zalloc (abfd, sizeof (som_symbol_type));
   if (new == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return 0;
     }
   new->symbol.the_bfd = abfd;
@@ -3852,7 +3852,7 @@ som_slurp_reloc_table (abfd, section, symbols, just_count)
       external_relocs = (char *) bfd_zalloc (abfd, fixup_stream_size);
       if (external_relocs == (char *) NULL)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
       /* Read in the external forms. */
@@ -3861,13 +3861,13 @@ som_slurp_reloc_table (abfd, section, symbols, just_count)
 		    SEEK_SET)
 	  != 0)
 	{
-	  bfd_error = system_call_error;
+	  bfd_set_error (bfd_error_system_call);
 	  return false;
 	}
       if (bfd_read (external_relocs, 1, fixup_stream_size, abfd)
 	  != fixup_stream_size)
 	{
-	  bfd_error = system_call_error;
+	  bfd_set_error (bfd_error_system_call);
 	  return false;
 	}
       /* Let callers know how many relocations found.
@@ -3894,7 +3894,7 @@ som_slurp_reloc_table (abfd, section, symbols, just_count)
 					    num_relocs * sizeof (arelent));
   if (internal_relocs == (arelent *) NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -3968,7 +3968,7 @@ som_new_section_hook (abfd, newsect)
     (PTR) bfd_zalloc (abfd, sizeof (struct som_section_data_struct));
   if (!newsect->used_by_bfd)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   newsect->alignment_power = 3;
@@ -4069,7 +4069,7 @@ bfd_som_attach_aux_hdr (abfd, type, string)
 			      + sizeof (unsigned int) + len + pad);
       if (!obj_som_version_hdr (abfd))
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  abort();		/* FIXME */
 	}
       obj_som_version_hdr (abfd)->header_id.type = VERSION_AUX_ID;
@@ -4090,7 +4090,7 @@ bfd_som_attach_aux_hdr (abfd, type, string)
 			    + sizeof (unsigned int) + len + pad);
       if (!obj_som_copyright_hdr (abfd))
 	{
-	  bfd_error = no_error;
+	  bfd_set_error (bfd_error_no_error);
 	  abort();		/* FIXME */
 	}
       obj_som_copyright_hdr (abfd)->header_id.type = COPYRIGHT_AUX_ID;
@@ -4133,13 +4133,13 @@ som_set_section_contents (abfd, section, location, offset, count)
   offset += som_section_data (section)->subspace_dict.file_loc_init_value; 
   if (bfd_seek (abfd, offset, SEEK_SET) == -1)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
   if (bfd_write ((PTR) location, 1, count, abfd) != count)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
   return true;
@@ -4261,7 +4261,7 @@ som_bfd_count_ar_symbols (abfd, lst_header, count)
   if (bfd_read ((PTR) hash_table, lst_header->hash_size, 4, abfd)
       != lst_header->hash_size * 4)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
@@ -4278,7 +4278,7 @@ som_bfd_count_ar_symbols (abfd, lst_header, count)
       /* Seek to the first symbol in this hash chain.  */
       if (bfd_seek (abfd, lst_filepos + hash_table[i], SEEK_SET) < 0)
 	{
-	  bfd_error = system_call_error;
+	  bfd_set_error (bfd_error_system_call);
 	  return false;
 	}
 
@@ -4286,7 +4286,7 @@ som_bfd_count_ar_symbols (abfd, lst_header, count)
       if (bfd_read ((PTR) & lst_symbol, 1, sizeof (lst_symbol), abfd)
 	  != sizeof (lst_symbol))
 	{
-	  bfd_error = system_call_error;
+	  bfd_set_error (bfd_error_system_call);
 	  return false;
 	}
       (*count)++;
@@ -4299,7 +4299,7 @@ som_bfd_count_ar_symbols (abfd, lst_header, count)
 	  if (bfd_seek (abfd, lst_filepos + lst_symbol.next_entry, SEEK_SET)
 	      < 0)
 	    {
-	      bfd_error = system_call_error;
+	      bfd_set_error (bfd_error_system_call);
 	      return false;
 	    }
 
@@ -4307,7 +4307,7 @@ som_bfd_count_ar_symbols (abfd, lst_header, count)
 	  if (bfd_read ((PTR) & lst_symbol, 1, sizeof (lst_symbol), abfd)
 	      != sizeof (lst_symbol))
 	    {
-	      bfd_error = system_call_error;
+	      bfd_set_error (bfd_error_system_call);
 	      return false;
 	    }
 	  (*count)++;
@@ -4336,7 +4336,7 @@ som_bfd_fill_in_ar_symbols (abfd, lst_header, syms)
   if (bfd_read ((PTR) hash_table, lst_header->hash_size, 4, abfd)
       != lst_header->hash_size * 4)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
@@ -4344,7 +4344,7 @@ som_bfd_fill_in_ar_symbols (abfd, lst_header, syms)
      in the carsym's filepos field.  */
   if (bfd_seek (abfd, lst_filepos + lst_header->dir_loc, SEEK_SET) < 0)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
@@ -4352,7 +4352,7 @@ som_bfd_fill_in_ar_symbols (abfd, lst_header, syms)
 		sizeof (struct som_entry), abfd)
       != lst_header->module_count * sizeof (struct som_entry))
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
@@ -4368,14 +4368,14 @@ som_bfd_fill_in_ar_symbols (abfd, lst_header, syms)
       /* Seek to and read the first symbol on the chain.  */
       if (bfd_seek (abfd, lst_filepos + hash_table[i], SEEK_SET) < 0)
 	{
-	  bfd_error = system_call_error;
+	  bfd_set_error (bfd_error_system_call);
 	  return false;
 	}
 
       if (bfd_read ((PTR) & lst_symbol, 1, sizeof (lst_symbol), abfd)
 	  != sizeof (lst_symbol))
 	{
-	  bfd_error = system_call_error;
+	  bfd_set_error (bfd_error_system_call);
 	  return false;
 	}
 
@@ -4389,13 +4389,13 @@ som_bfd_fill_in_ar_symbols (abfd, lst_header, syms)
       if (bfd_seek (abfd, lst_filepos + lst_header->string_loc
 			    + lst_symbol.name.n_strx - 4, SEEK_SET) < 0)
 	{
-	  bfd_error = system_call_error;
+	  bfd_set_error (bfd_error_system_call);
 	  return false;
 	}
 
       if (bfd_read (&len, 1, 4, abfd) != 4)
 	{
-	  bfd_error = system_call_error;
+	  bfd_set_error (bfd_error_system_call);
 	  return false;
 	}
 
@@ -4403,12 +4403,12 @@ som_bfd_fill_in_ar_symbols (abfd, lst_header, syms)
       set->name = bfd_zalloc (abfd, len + 1);
       if (!set->name)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
       if (bfd_read (set->name, 1, len, abfd) != len)
 	{
-	  bfd_error = system_call_error;
+	  bfd_set_error (bfd_error_system_call);
 	  return false;
 	}
       set->name[len] = 0;
@@ -4428,14 +4428,14 @@ som_bfd_fill_in_ar_symbols (abfd, lst_header, syms)
 	  if (bfd_seek (abfd, lst_filepos + lst_symbol.next_entry, SEEK_SET)
 	      < 0)
 	    {
-	      bfd_error = system_call_error;
+	      bfd_set_error (bfd_error_system_call);
 	      return false;
 	    }
 
 	  if (bfd_read ((PTR) & lst_symbol, 1, sizeof (lst_symbol), abfd)
 	      != sizeof (lst_symbol))
 	    {
-	      bfd_error = system_call_error;
+	      bfd_set_error (bfd_error_system_call);
 	      return false;
 	    }
 
@@ -4443,13 +4443,13 @@ som_bfd_fill_in_ar_symbols (abfd, lst_header, syms)
 	  if (bfd_seek (abfd, lst_filepos + lst_header->string_loc 
 				+ lst_symbol.name.n_strx - 4, SEEK_SET) < 0)
 	    {
-	      bfd_error = system_call_error;
+	      bfd_set_error (bfd_error_system_call);
 	      return false;
 	    }
 
 	  if (bfd_read (&len, 1, 4, abfd) != 4)
 	    {
-	      bfd_error = system_call_error;
+	      bfd_set_error (bfd_error_system_call);
 	      return false;
 	    }
 
@@ -4457,12 +4457,12 @@ som_bfd_fill_in_ar_symbols (abfd, lst_header, syms)
 	  set->name = bfd_zalloc (abfd, len + 1);
 	  if (!set->name)
 	    {
-	      bfd_error = no_memory;
+	      bfd_set_error (bfd_error_no_memory);
 	      return false;
 	    }
 	  if (bfd_read (set->name, 1, len, abfd) != len)
 	    {
-	      bfd_error = system_call_error;
+	      bfd_set_error (bfd_error_system_call);
 	      return false;
 	    }
 	  set->name[len] = 0;
@@ -4501,7 +4501,7 @@ som_slurp_armap (abfd)
 
   if (bfd_seek (abfd, (file_ptr) - 16, SEEK_CUR) < 0)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
@@ -4516,13 +4516,13 @@ som_slurp_armap (abfd)
   if (bfd_read ((PTR) &ar_header, 1, sizeof (struct ar_hdr), abfd)
       != sizeof (struct ar_hdr))
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
   if (strncmp (ar_header.ar_fmag, ARFMAG, 2))
     {
-      bfd_error = malformed_archive;
+      bfd_set_error (bfd_error_malformed_archive);
       return NULL;
     }
 
@@ -4531,7 +4531,7 @@ som_slurp_armap (abfd)
   parsed_size = strtol (ar_header.ar_size, NULL, 10);
   if (errno != 0)
     {
-      bfd_error = malformed_archive;
+      bfd_set_error (bfd_error_malformed_archive);
       return NULL;
     }
 
@@ -4543,14 +4543,14 @@ som_slurp_armap (abfd)
   if (bfd_read ((PTR) & lst_header, 1, sizeof (struct lst_header), abfd)
       != sizeof (struct lst_header))
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
   /* Sanity check.  */
   if (lst_header.a_magic != LIBMAGIC)
     {
-      bfd_error = malformed_archive;
+      bfd_set_error (bfd_error_malformed_archive);
       return NULL;
     }
 
@@ -4563,7 +4563,7 @@ som_slurp_armap (abfd)
   if (bfd_seek (abfd, ardata->first_file_filepos - parsed_size 
 			+ sizeof (struct lst_header), SEEK_SET) < 0)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
@@ -4574,7 +4574,7 @@ som_slurp_armap (abfd)
 					   * sizeof (carsym)));
   if (!ardata->symdefs)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -4840,7 +4840,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
   if (bfd_write ((PTR) hash_table, lst.hash_size, 4, abfd)
       != lst.hash_size * 4)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
@@ -4849,7 +4849,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
 		 sizeof (struct som_entry), abfd)
       != lst.module_count * sizeof (struct som_entry))
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
@@ -4857,14 +4857,14 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
   if (bfd_write ((PTR) lst_syms, nsyms, sizeof (struct lst_symbol_record), abfd)
       != nsyms * sizeof (struct lst_symbol_record))
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
   /* And finally the strings.  */
   if (bfd_write ((PTR) strings, string_size, 1, abfd) != string_size)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
@@ -4889,7 +4889,7 @@ som_write_armap (abfd)
   /* We'll use this for the archive's date and mode later.  */
   if (stat (abfd->filename, &statbuf) != 0)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
   /* Fudge factor.  */
@@ -4975,7 +4975,7 @@ som_write_armap (abfd)
   if (bfd_write ((PTR) &hdr, 1, sizeof (struct ar_hdr), abfd)
       != sizeof (struct ar_hdr))
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
@@ -4983,7 +4983,7 @@ som_write_armap (abfd)
   if (bfd_write ((PTR) &lst, 1, sizeof (struct lst_header), abfd)
       != sizeof (struct lst_header))
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 

@@ -1325,7 +1325,7 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 				       * sizeof (asection *))));
       if (!symndx_to_section)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
 

@@ -109,7 +109,7 @@ struct elf_backend_data
      permit the backend to set any global information it wishes.  When
      this is called elf_elfheader is set, but anything else should be
      used with caution.  If this returns false, the check_format
-     routine will return a wrong_format error.  */
+     routine will return a bfd_error_wrong_format error.  */
   boolean (*elf_backend_object_p) PARAMS ((bfd *));
 
   /* A function to do additional symbol processing when reading the

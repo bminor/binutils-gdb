@@ -57,7 +57,7 @@ DEFUN(make_a_section_from_file,(abfd, hdr, target_index),
   /* Assorted wastage to null-terminate the name, thanks AT&T! */
   name = bfd_alloc(abfd, sizeof (hdr->s_name)+1);
   if (name == NULL) {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   strncpy(name, (char *) &hdr->s_name[0], sizeof (hdr->s_name));
@@ -134,7 +134,7 @@ DEFUN(coff_real_object_p,(abfd, nscns, internal_f, internal_a),
   external_sections = (char *)bfd_alloc(abfd, readsize);
   if (!external_sections)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       goto fail;
     }
 
@@ -183,7 +183,7 @@ DEFUN(coff_real_object_p,(abfd, nscns, internal_f, internal_a),
   return (bfd_target *)NULL;
 }
 
-/* Turn a COFF file into a BFD, but fail with wrong_format if it is
+/* Turn a COFF file into a BFD, but fail with bfd_error_wrong_format if it is
    not a COFF file.  This is also used by ECOFF.  */
 
 bfd_target *
@@ -197,7 +197,7 @@ DEFUN(coff_object_p,(abfd),
   struct internal_filehdr internal_f;
   struct internal_aouthdr internal_a;
 
-  bfd_error = system_call_error;
+  bfd_set_error (bfd_error_system_call);
 
   /* figure out how much to read */
   filhsz = bfd_coff_filhsz (abfd);
@@ -212,7 +212,7 @@ DEFUN(coff_object_p,(abfd),
   bfd_release (abfd, filehdr);
 
   if (bfd_coff_bad_format_hook (abfd, &internal_f) == false) {
-    bfd_error = wrong_format;
+    bfd_set_error (bfd_error_wrong_format);
     return 0;
   }
   nscns =internal_f.f_nscns;
@@ -451,7 +451,7 @@ DEFUN(coff_renumber_symbols,(bfd_ptr),
 						* (symbol_count + 1));
     if (!newsyms)
       {
-	bfd_error = no_memory;
+	bfd_set_error (bfd_error_no_memory);
 	return false;
       }
     bfd_ptr->outsymbols = newsyms;
@@ -688,7 +688,7 @@ unsigned int written)
   buf = bfd_alloc (abfd, symesz);
   if (!buf)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       abort();			/* FIXME */
     }
   bfd_coff_swap_sym_out(abfd, &native->u.syment, buf);
@@ -704,7 +704,7 @@ unsigned int written)
       buf = bfd_alloc (abfd, auxesz);
       if (!buf)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  abort();		/* FIXME */
 	}
       for (j = 0; j < native->u.syment.n_numaux;  j++)
@@ -940,7 +940,7 @@ DEFUN(coff_write_linenumbers,(abfd),
   buff = bfd_alloc (abfd, linesz);
   if (!buff)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return;
     }
   for (s = abfd->sections; s != (asection *) NULL; s = s->next) {
@@ -1011,7 +1011,7 @@ coff_section_symbol (abfd, name)
       f = (struct foo *) bfd_alloc_by_size_t (abfd, sizeof (*f));
       if (!f)
 	{
-	  bfd_error = no_error;
+	  bfd_set_error (bfd_error_no_error);
 	  return NULL;
 	}
       memset ((char *) f, 0, sizeof (*f));
@@ -1078,18 +1078,18 @@ bfd *abfd)
   if (bfd_read((char *) string_table_size_buffer,
 	       sizeof(string_table_size_buffer),
 	       1, abfd) != sizeof(string_table_size)) {
-    bfd_error = system_call_error;
+    bfd_set_error (bfd_error_system_call);
     return (NULL);
   }				/* on error */
 
   string_table_size = bfd_h_get_32(abfd, (bfd_byte *) string_table_size_buffer);
 
   if ((string_table = (PTR) bfd_alloc(abfd, string_table_size -= 4)) == NULL) {
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return (NULL);
   }				/* on mallocation error */
   if (bfd_read(string_table, string_table_size, 1, abfd) != string_table_size) {
-    bfd_error = system_call_error;
+    bfd_set_error (bfd_error_system_call);
     return (NULL);
   }
   return string_table;
@@ -1109,14 +1109,14 @@ DEFUN(build_debug_section,(abfd),
   asection *sect = bfd_get_section_by_name (abfd, ".debug");
 
   if (!sect) {
-     bfd_error = no_debug_section;
+     bfd_set_error (bfd_error_no_debug_section);
      return NULL;
   }
 
   debug_section = (PTR) bfd_alloc (abfd,
 				   bfd_get_section_size_before_reloc (sect));
   if (debug_section == NULL) {
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return NULL;
   }
 
@@ -1129,7 +1129,7 @@ DEFUN(build_debug_section,(abfd),
   if (bfd_read (debug_section, 
 		bfd_get_section_size_before_reloc (sect), 1, abfd)
       != bfd_get_section_size_before_reloc(sect)) {
-    bfd_error = system_call_error;
+    bfd_set_error (bfd_error_system_call);
     return NULL;
   }
   bfd_seek (abfd, position, SEEK_SET);
@@ -1156,7 +1156,7 @@ DEFUN(copy_name,(abfd, name, maxlen),
   }
 
   if ((newname = (PTR) bfd_alloc(abfd, len+1)) == NULL) {
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return (NULL);
   }
   strncpy(newname, name, len);
@@ -1190,14 +1190,14 @@ bfd            *abfd)
       return obj_raw_syments(abfd);
     }
   if ((size = bfd_get_symcount(abfd) * sizeof(combined_entry_type)) == 0) {
-      bfd_error = no_symbols;
+      bfd_set_error (bfd_error_no_symbols);
       return (NULL);
     }
 
   internal = (combined_entry_type *)bfd_alloc(abfd, size);
   if (!internal)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
   internal_end = internal + bfd_get_symcount(abfd);
@@ -1207,13 +1207,13 @@ bfd            *abfd)
   raw = bfd_alloc(abfd,raw_size);
   if (!raw)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
 
   if (bfd_seek(abfd, obj_sym_filepos(abfd), SEEK_SET) == -1
       || bfd_read(raw, raw_size, 1, abfd) != raw_size) {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return (NULL);
     }
   /* mark the end of the symbols */
@@ -1307,7 +1307,7 @@ bfd            *abfd)
 	      }			/* possible lengths of this string. */
 
 	    if ((newstring = (PTR) bfd_alloc(abfd, ++i)) == NULL) {
-		bfd_error = no_memory;
+		bfd_set_error (bfd_error_no_memory);
 		return (NULL);
 	      }			/* on error */
 	    memset(newstring, 0, i);
@@ -1349,7 +1349,7 @@ DEFUN (coff_get_reloc_upper_bound, (abfd, asect),
        sec_ptr         asect)
 {
   if (bfd_get_format(abfd) != bfd_object) {
-    bfd_error = invalid_operation;
+    bfd_set_error (bfd_error_invalid_operation);
     return 0;
   }
   return (asect->reloc_count + 1) * sizeof(arelent *);
@@ -1361,7 +1361,7 @@ DEFUN (coff_make_empty_symbol, (abfd),
 {
   coff_symbol_type *new = (coff_symbol_type *) bfd_alloc(abfd, sizeof(coff_symbol_type));
   if (new == NULL) {
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return (NULL);
   }				/* on error */
   memset (new, 0, sizeof *new);
@@ -1383,14 +1383,14 @@ coff_bfd_make_debug_symbol (abfd, ptr, sz)
 {
   coff_symbol_type *new = (coff_symbol_type *) bfd_alloc(abfd, sizeof(coff_symbol_type));
   if (new == NULL) {
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return (NULL);
   }				/* on error */
   /* @@ This shouldn't be using a constant multiplier.  */
   new->native = (combined_entry_type *) bfd_zalloc (abfd, sizeof (combined_entry_type) * 10);
   if (!new->native)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return (NULL);
     }				/* on error */
   new->symbol.section = &bfd_debug_section;

@@ -47,7 +47,7 @@ DEFUN(encap_object_p,(abfd),
   struct external_exec exec_bytes;
   struct internal_exec exec;
 
-  bfd_error = system_call_error;
+  bfd_set_error (bfd_error_system_call);
 
   if (bfd_read ((PTR)magicbuf, 1, sizeof (magicbuf), abfd) !=
       sizeof (magicbuf))
@@ -67,7 +67,7 @@ DEFUN(encap_object_p,(abfd),
   struct external_exec exec_bytes;
   if (bfd_read ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd)
       != EXEC_BYTES_SIZE) {
-    bfd_error = wrong_format;
+    bfd_set_error (bfd_error_wrong_format);
     return 0;
   }
   NAME(aout,swap_exec_header_in)(abfd, &exec_bytes, &exec);

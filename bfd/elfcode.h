@@ -383,13 +383,13 @@ DEFUN (bfd_new_strtab, (abfd),
   ss = (struct strtab *) malloc (sizeof (struct strtab));
   if (!ss)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
   ss->tab = malloc (1);
   if (!ss->tab)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
   *ss->tab = 0;
@@ -712,7 +712,7 @@ DEFUN (elf_new_section_hook, (abfd, sec),
   sdata = (struct bfd_elf_section_data *) bfd_alloc (abfd, sizeof (*sdata));
   if (!sdata)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   sec->used_by_bfd = (PTR) sdata;
@@ -760,7 +760,7 @@ DEFUN (bfd_section_from_phdr, (abfd, hdr, index),
   name = bfd_alloc (abfd, strlen (namebuf) + 1);
   if (!name)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   strcpy (name, namebuf);
@@ -791,7 +791,7 @@ DEFUN (bfd_section_from_phdr, (abfd, hdr, index),
       name = bfd_alloc (abfd, strlen (namebuf) + 1);
       if (!name)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
       strcpy (name, namebuf);
@@ -854,7 +854,7 @@ DEFUN (elf_object_p, (abfd), bfd * abfd)
   /* Read in the ELF header in external format.  */
 
   if (bfd_read ((PTR) & x_ehdr, sizeof (x_ehdr), 1, abfd) != sizeof (x_ehdr))
-    goto got_system_call_error;
+    goto got_system_call;
 
   /* Now check to see if we have a valid ELF file, and one that BFD can
      make use of.  The magic number must match, the address size ('class')
@@ -968,11 +968,11 @@ DEFUN (elf_object_p, (abfd), bfd * abfd)
   if (!i_shdrp || !elf_elfsections(abfd))
     goto got_no_memory_error;
   if (bfd_seek (abfd, i_ehdrp->e_shoff, SEEK_SET) == -1)
-    goto got_system_call_error;
+    goto got_system_call;
   for (shindex = 0; shindex < i_ehdrp->e_shnum; shindex++)
     {
       if (bfd_read ((PTR) & x_shdr, sizeof x_shdr, 1, abfd) != sizeof (x_shdr))
-	goto got_system_call_error;
+	goto got_system_call;
       elf_swap_shdr_in (abfd, &x_shdr, i_shdrp + shindex);
       elf_elfsections(abfd)[shindex] = i_shdrp + shindex;
 
@@ -1035,14 +1035,14 @@ DEFUN (elf_object_p, (abfd), bfd * abfd)
   /* If we are going to use goto's to avoid duplicating error setting
      and return(NULL) code, then this at least makes it more maintainable. */
 
- got_system_call_error:
-  bfd_error = system_call_error;
+ got_system_call:
+  bfd_set_error (bfd_error_system_call);
   goto got_no_match;
  got_wrong_format_error:
-  bfd_error = wrong_format;
+  bfd_set_error (bfd_error_wrong_format);
   goto got_no_match;
  got_no_memory_error:
-  bfd_error = no_memory;
+  bfd_set_error (bfd_error_no_memory);
   goto got_no_match;
  got_no_match:
   elf_tdata (abfd) = preserved_tdata;
@@ -1166,7 +1166,7 @@ write_relocs (abfd, sec, xxx)
   rela_hdr->contents = (void *) bfd_alloc (abfd, rela_hdr->sh_size);
   if (!rela_hdr->contents)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       abort();			/* FIXME */
     }
 
@@ -1436,7 +1436,7 @@ DEFUN (elf_map_symbols, (abfd), bfd * abfd)
 
   if (sect_syms == 0)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -1445,7 +1445,7 @@ DEFUN (elf_map_symbols, (abfd), bfd * abfd)
       asymbol *sym = bfd_make_empty_symbol (abfd);
       if (!sym)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
       sym->the_bfd = abfd;
@@ -1473,7 +1473,7 @@ DEFUN (elf_map_symbols, (abfd), bfd * abfd)
 				       (num_sections + 1) * sizeof (asymbol *));
       if (!syms)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
 
@@ -1491,7 +1491,7 @@ DEFUN (elf_map_symbols, (abfd), bfd * abfd)
     = (Elf_Sym_Extra *) bfd_alloc (abfd, symcount * sizeof (Elf_Sym_Extra));
   if (!sym_extra)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -1617,7 +1617,7 @@ assign_section_numbers (abfd)
     bfd_alloc (abfd, section_number * sizeof (Elf_Internal_Shdr *));
   if (!i_shdrp)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   elf_elfsections(abfd) = i_shdrp;
@@ -1758,7 +1758,7 @@ map_program_segments (abfd)
 	s = (struct seg_info *) bfd_alloc (abfd, sizeof (struct seg_info));
 	if (!s)
 	  {
-	    bfd_error = no_memory;
+	    bfd_set_error (bfd_error_no_memory);
 	    return false;
 	  }
 	s->next = seg;
@@ -1842,7 +1842,7 @@ map_program_segments (abfd)
 					   n_segs * sizeof (Elf_Internal_Phdr));
     if (!phdr)
       {
-	bfd_error = no_memory;
+	bfd_set_error (bfd_error_no_memory);
 	abort();		/* FIXME */
       }
     elf_tdata (abfd)->phdr = phdr;
@@ -2143,7 +2143,7 @@ swap_out_syms (abfd)
       bfd_alloc (abfd, (1 + symcount) * sizeof (Elf_External_Sym));
     if (!outbound_syms)
       {
-	bfd_error = no_memory;
+	bfd_set_error (bfd_error_no_memory);
 	return false;
       }
     /* now generate the data (for "contents") */
@@ -2305,7 +2305,7 @@ write_shdrs_and_ehdr (abfd)
     bfd_alloc (abfd, sizeof (*x_shdrp) * (i_ehdrp->e_shnum));
   if (!x_shdrp)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -2356,7 +2356,7 @@ DEFUN (NAME(bfd_elf,write_object_contents), (abfd), bfd * abfd)
   if ((abfd->flags & DYNAMIC) != 0)
     {
       fprintf (stderr, "Writing ELF dynamic objects is not supported\n");
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       return false;
     }
 
@@ -2586,7 +2586,7 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
 
   if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) == -1)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
@@ -2598,7 +2598,7 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
   x_symp = (Elf_External_Sym *) malloc (symcount * sizeof (Elf_External_Sym));
   if (!symbase || !x_symp)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -2606,7 +2606,7 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
       != symcount * sizeof (Elf_External_Sym))
     {
       free ((PTR) x_symp);
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
   /* Skip first symbol, which is a null dummy.  */
@@ -2777,7 +2777,7 @@ DEFUN (elf_slurp_reloca_table, (abfd, asect, symbols),
   if (!native_relocs)
   if (!reloc_cache)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   bfd_read ((PTR) native_relocs,
@@ -2788,7 +2788,7 @@ DEFUN (elf_slurp_reloca_table, (abfd, asect, symbols),
 
   if (!reloc_cache)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -2924,7 +2924,7 @@ DEFUN (elf_slurp_reloc_table, (abfd, asect, symbols),
     bfd_alloc (abfd, asect->reloc_count * sizeof (Elf_External_Rel));
   if (!native_relocs)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   bfd_read ((PTR) native_relocs,
@@ -2935,7 +2935,7 @@ DEFUN (elf_slurp_reloc_table, (abfd, asect, symbols),
 
   if (!reloc_cache)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -3066,7 +3066,7 @@ DEFUN (elf_make_empty_symbol, (abfd),
   newsym = (elf_symbol_type *) bfd_zalloc (abfd, sizeof (elf_symbol_type));
   if (!newsym)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
   else
@@ -3375,7 +3375,7 @@ DEFUN (elf_core_file_matches_executable_p, (core_bfd, exec_bfd),
 
   if (core_bfd->xvec != exec_bfd->xvec)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
@@ -3505,7 +3505,7 @@ DEFUN (elf_corefile_note, (abfd, hdr),
     }
   else if (hdr->p_filesz > 0)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   return true;
@@ -3538,7 +3538,7 @@ DEFUN (elf_core_file_p, (abfd), bfd * abfd)
 
   if (bfd_read ((PTR) & x_ehdr, sizeof (x_ehdr), 1, abfd) != sizeof (x_ehdr))
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return NULL;
     }
 
@@ -3551,7 +3551,7 @@ DEFUN (elf_core_file_p, (abfd), bfd * abfd)
   if (elf_file_p (&x_ehdr) == false)
     {
     wrong:
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       return NULL;
     }
 
@@ -3592,7 +3592,7 @@ DEFUN (elf_core_file_p, (abfd), bfd * abfd)
     (struct elf_obj_tdata *) bfd_zalloc (abfd, sizeof (struct elf_obj_tdata));
   if (elf_tdata (abfd) == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
 
@@ -3622,12 +3622,12 @@ DEFUN (elf_core_file_p, (abfd), bfd * abfd)
     bfd_alloc (abfd, sizeof (*i_phdrp) * i_ehdrp->e_phnum);
   if (!i_phdrp)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
   if (bfd_seek (abfd, i_ehdrp->e_phoff, SEEK_SET) == -1)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return NULL;
     }
   for (phindex = 0; phindex < i_ehdrp->e_phnum; phindex++)
@@ -3635,7 +3635,7 @@ DEFUN (elf_core_file_p, (abfd), bfd * abfd)
       if (bfd_read ((PTR) & x_phdr, sizeof (x_phdr), 1, abfd)
 	  != sizeof (x_phdr))
 	{
-	  bfd_error = system_call_error;
+	  bfd_set_error (bfd_error_system_call);
 	  return NULL;
 	}
       elf_swap_phdr_in (abfd, &x_phdr, i_phdrp + phindex);
