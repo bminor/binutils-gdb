@@ -1,3 +1,24 @@
+2001-11-12  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (mips_abi_level): Move in front of
+	mips_set_options.
+	(mips_set_options): Add members gp32, fp32, abi.
+	(file_mips_gp32): New flag.
+	(file_mips_fp32): New flag.
+	(mips_opts): Initialize the new members.
+	(mips_gp32): Remove.
+	(mips_fp32): Remove.
+	(HAVE_32BIT_GPRS): Use the new values from mips_opts.
+	(HAVE_32BIT_FPRS): Likewise.
+	(HAVE_NEWABI): Likewise.
+	(HAVE_64BIT_OBJECTS): Likewise.
+	(md_begin): Likewise. Save default (file) values.
+	(md_parse_option): Use the new values from mips_opts.
+	(s_mipsset): Likewise. Fix logic to keep the ABI selection if
+	possible. Let .set mipsN work together with .set push/pop.
+	Enhance error messages.
+	(mips_elf_final_processing): Use file_mips_* for header processing.
+
 2001-11-09  Marek Michalkiewicz  <marekm@amelek.gda.pl>
 
 	* config/tc-avr.c (mcu_types): Update for new devices.

@@ -113,6 +113,20 @@ extern int target_big_endian;
 			    ? ".rodata" \
 			    : (abort (), ""))
 
+/* The ABI to use.  */
+enum mips_abi_level
+{
+  NO_ABI = 0,
+  O32_ABI,
+  O64_ABI,
+  N32_ABI,
+  N64_ABI,
+  EABI_ABI
+};
+
+/* MIPS ABI we are using for this output file.  */
+static enum mips_abi_level file_mips_abi = NO_ABI;
+
 /* This is the set of options which may be modified by the .set
    pseudo-op.  We use a struct so that .set push and .set pop are more
    reliable.  */
@@ -149,7 +163,21 @@ struct mips_set_options
   /* Non-zero if we should not autoextend mips16 instructions.
      Changed by `.set autoextend' and `.set noautoextend'.  */
   int noautoextend;
+  /* Restrict general purpose registers and floating point registers
+     to 32 bit.  This is initially determined when -mgp32 or -mfp32
+     is passed but can changed if the assembler code uses .set mipsN.  */
+  int gp32;
+  int fp32;
+  /* The ABI currently in use. This is changed by .set mipsN to loosen
+     restrictions and doesn't affect the whole file.  */
+  enum mips_abi_level abi;
 };
+
+/* True if -mgp32 was passed.  */
+static int file_mips_gp32 = 0;
+
+/* True if -mfp32 was passed.  */
+static int file_mips_fp32 = 0;
 
 /* This is the struct we use to hold the current set of options.  Note
    that we must set the isa field to ISA_UNKNOWN and the mips16 field to
@@ -157,7 +185,7 @@ struct mips_set_options
 
 static struct mips_set_options mips_opts =
 {
-  ISA_UNKNOWN, -1, 0, 0, 0, 0, 0, 0
+  ISA_UNKNOWN, -1, 0, 0, 0, 0, 0, 0, 0, 0, NO_ABI
 };
 
 /* These variables are filled in with the masks of registers used.
@@ -179,31 +207,12 @@ static int mips_arch = CPU_UNKNOWN;
    are optimizing.  */
 static int mips_tune = CPU_UNKNOWN;
 
-/* The ABI to use.  */
-enum mips_abi_level
-{
-  NO_ABI = 0,
-  O32_ABI,
-  O64_ABI,
-  N32_ABI,
-  N64_ABI,
-  EABI_ABI
-};
-
-static enum mips_abi_level mips_abi = NO_ABI;
-
 /* Whether we should mark the file EABI64 or EABI32.  */
 static int mips_eabi64 = 0;
 
 /* If they asked for mips1 or mips2 and a cpu that is
    mips3 or greater, then mark the object file 32BITMODE.  */
 static int mips_32bitmode = 0;
-
-/* True if -mgp32 was passed.  */
-static int mips_gp32 = 0;
-
-/* True if -mfp32 was passed.  */
-static int mips_fp32 = 0;
 
 /* Some ISA's have delay slots for instructions which read or write
    from a coprocessor (eg. mips1-mips3); some don't (eg mips4).
@@ -228,21 +237,21 @@ static int mips_fp32 = 0;
    )
 
 #define HAVE_32BIT_GPRS		                   \
-    (mips_gp32                                     \
-     || mips_abi == O32_ABI                        \
+    (mips_opts.gp32                                \
+     || mips_opts.abi == O32_ABI                   \
      || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
 
 #define HAVE_32BIT_FPRS                            \
-    (mips_fp32                                     \
-     || mips_abi == O32_ABI                        \
+    (mips_opts.fp32                                \
+     || mips_opts.abi == O32_ABI                   \
      || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
 
 #define HAVE_64BIT_GPRS (! HAVE_32BIT_GPRS)
 #define HAVE_64BIT_FPRS (! HAVE_32BIT_FPRS)
 
-#define HAVE_NEWABI (mips_abi == N32_ABI || mips_abi == N64_ABI)
+#define HAVE_NEWABI (mips_opts.abi == N32_ABI || mips_opts.abi == N64_ABI)
 
-#define HAVE_64BIT_OBJECTS (mips_abi == N64_ABI)
+#define HAVE_64BIT_OBJECTS (mips_opts.abi == N64_ABI)
 
 /* We can only have 64bit addresses if the object file format
    supports it.  */
@@ -1123,7 +1132,7 @@ md_begin ()
      to change the ISA with directives.  This isn't really
      the best, but then neither is basing the abi on the isa.  */
   if (ISA_HAS_64BIT_REGS (mips_opts.isa)
-      && mips_abi == EABI_ABI)
+      && mips_opts.abi == EABI_ABI)
     mips_eabi64 = 1;
 
   /* If they asked for mips1 or mips2 and a cpu that is
@@ -1137,6 +1146,9 @@ md_begin ()
     as_warn (_("Could not set architecture and machine"));
 
   file_mips_isa = mips_opts.isa;
+  file_mips_abi = mips_opts.abi;
+  mips_opts.gp32 = file_mips_gp32;
+  mips_opts.fp32 = file_mips_fp32;
 
   op_hash = hash_new ();
 
@@ -9802,55 +9814,55 @@ md_parse_option (c, arg)
       /* The -32 and -64 options tell the assembler to output the 32
          bit or the 64 bit MIPS ELF format.  */
     case OPTION_32:
-      mips_abi = O32_ABI;
+      mips_opts.abi = O32_ABI;
       break;
 
     case OPTION_N32:
-      mips_abi = N32_ABI;
+      mips_opts.abi = N32_ABI;
       break;
 
     case OPTION_64:
-      mips_abi = N64_ABI;
+      mips_opts.abi = N64_ABI;
       if (! support_64bit_objects())
 	as_fatal (_("No compiled in support for 64 bit object file format"));
       break;
 
     case OPTION_GP32:
-      mips_gp32 = 1;
-      if (mips_abi != O32_ABI)
-	mips_abi = NO_ABI;
+      file_mips_gp32 = 1;
+      if (mips_opts.abi != O32_ABI)
+	mips_opts.abi = NO_ABI;
       break;
 
     case OPTION_GP64:
-      mips_gp32 = 0;
-      if (mips_abi == O32_ABI)
-	mips_abi = NO_ABI;
+      file_mips_gp32 = 0;
+      if (mips_opts.abi == O32_ABI)
+	mips_opts.abi = NO_ABI;
       break;
 
     case OPTION_FP32:
-      mips_fp32 = 1;
-      if (mips_abi != O32_ABI)
-	mips_abi = NO_ABI;
+      file_mips_fp32 = 1;
+      if (mips_opts.abi != O32_ABI)
+	mips_opts.abi = NO_ABI;
       break;
 
     case OPTION_MABI:
       if (strcmp (arg, "32") == 0)
-	mips_abi = O32_ABI;
+	mips_opts.abi = O32_ABI;
       else if (strcmp (arg, "o64") == 0)
-	mips_abi = O64_ABI;
+	mips_opts.abi = O64_ABI;
       else if (strcmp (arg, "n32") == 0)
-	mips_abi = N32_ABI;
+	mips_opts.abi = N32_ABI;
       else if (strcmp (arg, "64") == 0)
 	{
-	  mips_abi = N64_ABI;
+	  mips_opts.abi = N64_ABI;
 	  if (! support_64bit_objects())
 	    as_fatal (_("No compiled in support for 64 bit object file "
 			"format"));
 	}
       else if (strcmp (arg, "eabi") == 0)
-	mips_abi = EABI_ABI;
+	mips_opts.abi = EABI_ABI;
       else
-	mips_abi = NO_ABI;
+	mips_opts.abi = NO_ABI;
       break;
 #endif /* OBJ_ELF */
 
@@ -11005,10 +11017,6 @@ s_mipsset (x)
   else if (strncmp (name, "mips", 4) == 0)
     {
       int isa;
-      static int saved_mips_gp32;
-      static int saved_mips_fp32;
-      static enum mips_abi_level saved_mips_abi;
-      static int is_saved;
 
       /* Permit the user to change the ISA on the fly.  Needless to
 	 say, misuse can cause serious problems.  */
@@ -11016,41 +11024,28 @@ s_mipsset (x)
       switch (isa)
       {
       case  0:
-	mips_gp32 = saved_mips_gp32;
-	mips_fp32 = saved_mips_fp32;
-	mips_abi = saved_mips_abi;
-	is_saved = 0;
+	mips_opts.gp32 = file_mips_gp32;
+	mips_opts.fp32 = file_mips_fp32;
+	mips_opts.abi = file_mips_abi;
 	break;
       case  1:
       case  2:
       case 32:
-	if (! is_saved)
-	  {
-	    saved_mips_gp32 = mips_gp32;
-	    saved_mips_fp32 = mips_fp32;
-	    saved_mips_abi = mips_abi;
-	  }
-	mips_gp32 = 1;
-	mips_fp32 = 1;
-	is_saved = 1;
+	mips_opts.gp32 = 1;
+	mips_opts.fp32 = 1;
 	break;
       case  3:
       case  4:
       case  5:
       case 64:
-	if (! is_saved)
-	  {
-	    saved_mips_gp32 = mips_gp32;
-	    saved_mips_fp32 = mips_fp32;
-	    saved_mips_abi = mips_abi;
-	  }
-	mips_gp32 = 0;
-	mips_fp32 = 0;
-	mips_abi = NO_ABI;
-	is_saved = 1;
+	/* Loosen ABI register width restriction.  */
+	if (mips_opts.abi == O32_ABI)
+	  mips_opts.abi = NO_ABI;
+	mips_opts.gp32 = 0;
+	mips_opts.fp32 = 0;
 	break;
       default:
-	as_bad (_("unknown ISA level"));
+	as_bad (_("unknown ISA level %s"), name + 4);
 	break;
       }
 
@@ -11064,7 +11059,7 @@ s_mipsset (x)
       case  5: mips_opts.isa = ISA_MIPS5;       break;
       case 32: mips_opts.isa = ISA_MIPS32;      break;
       case 64: mips_opts.isa = ISA_MIPS64;      break;
-      default: as_bad (_("unknown ISA level")); break;
+      default: as_bad (_("unknown ISA level %s"), name + 4); break;
       }
     }
   else if (strcmp (name, "autoextend") == 0)
@@ -12477,20 +12472,20 @@ mips_elf_final_processing ()
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_PIC;
 
   /* Set the MIPS ELF ABI flags.  */
-  if (mips_abi == NO_ABI)
+  if (file_mips_abi == NO_ABI)
     ;
-  else if (mips_abi == O32_ABI)
+  else if (file_mips_abi == O32_ABI)
     elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_O32;
-  else if (mips_abi == O64_ABI)
+  else if (file_mips_abi == O64_ABI)
     elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_O64;
-  else if (mips_abi == EABI_ABI)
+  else if (file_mips_abi == EABI_ABI)
     {
       if (mips_eabi64)
 	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI64;
       else
 	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI32;
     }
-  else if (mips_abi == N32_ABI)
+  else if (file_mips_abi == N32_ABI)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_ABI2;
 
   /* Nothing to do for "64".  */
