@@ -1,5 +1,11 @@
 Wed Jul 14 13:51:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* ch-valprint.c (chill_val_print, case TYPE_CODE_STRING): Print
+	address, not addr.
+
+	* hppah-nat.c (store_inferior_registers): Don't print i in cases
+	where we aren't using it.
+
 	* a29k-tdep.c (get_saved_register): Fix typo.
 
 Wed Jul 14 09:45:52 1993  Doug Evans  (dje@canuck.cygnus.com)

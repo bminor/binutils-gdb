@@ -121,7 +121,7 @@ store_inferior_registers (regno)
                   scratch, 0);
           if (errno != 0)
             {
-              sprintf (buf, "writing register number %d(%d)", regno, i);
+              sprintf (buf, "writing register number %d", regno);
               perror_with_name (buf);
             }
         }
@@ -154,7 +154,7 @@ store_inferior_registers (regno)
                       scratch, 0);
               if (errno != 0)
                 {
-                  sprintf (buf, "writing register number %d(%d)", regno, i);
+                  sprintf (buf, "writing register number %d", regno);
                   perror_with_name (buf);
                 }
             }
