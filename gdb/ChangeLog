@@ -1,4 +1,10 @@
+2001-11-29  Jim Blandy  <jimb@redhat.com>
+
+	* values.c (value_being_returned): Make error message a proper
+ 	sentence.
+
 2001-11-27 Keith Walker <keith.walker@arm.com>
+
 	* dwarf2read.c (read_attribute_value): New function to handle
 	DW_FORM_indirect
 	(read_attribute): uses read_attribute_value

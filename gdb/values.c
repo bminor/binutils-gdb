@@ -1388,7 +1388,7 @@ value_being_returned (struct type *valtype, char *retbuf, int struct_return)
       {
 	addr = EXTRACT_STRUCT_VALUE_ADDRESS (retbuf);
 	if (!addr)
-	  error ("Function return value unknown");
+	  error ("Function return value unknown.");
 	return value_at (valtype, addr, NULL);
       }
 
