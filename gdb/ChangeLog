@@ -1,3 +1,7 @@
+Wed Jun 30 20:06:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/vax/xm-vaxult2.h: Define FD_SET and FD_ZERO.
+
 Tue Jun 29 11:02:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* inftarg.c: Remove unused include of terminal.h.
