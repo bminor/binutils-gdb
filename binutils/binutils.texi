@@ -818,6 +818,7 @@ objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
         [ --set-section-flags=@var{section}=@var{flags} ]
         [ --add-section=@var{sectionname}=@var{filename} ]
         [ --change-leading-char ] [ --remove-leading-char ]
+        [ --weaken ]
         [ -v | --verbose ] [ -V | --version ]  [ --help ]
         @var{infile} [@var{outfile}]
 @end smallexample
@@ -1007,6 +1008,12 @@ different conventions for symbol names.  This is different from
 @code{--change-leading-char} because it always changes the symbol name
 when appropriate, regardless of the object file format of the output
 file.
+
+@item --weaken
+Change all global symbols in the file to be weak.  This can be useful
+when building an object which will be linked against other objects using
+the @code{-R} option to the linker.  This option is only effective when
+using an object file format which supports weak symbols.
 
 @item -V
 @itemx --version

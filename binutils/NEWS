@@ -11,6 +11,8 @@ Changes since binutils 2.7
 
 * Added --change-leading-char argument to objcopy.
 
+* Added --weaken argument to objcopy.
+
 * objdump --dynamic-reloc now works on ELF executables and shared libraries.
 
 Changes since binutils 2.6

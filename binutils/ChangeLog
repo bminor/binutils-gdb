@@ -1,3 +1,20 @@
+Thu Dec 19 13:11:20 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Based on patch from Andrew J Klossner <andrew@pogo.wv.tek.com>:
+	* objcopy.c (OPTION_WEAKEN): Define.
+	(copy_options): Add "weaken".
+	(copy_usage): Mention --weaken.
+	(weaken): New static variable.
+	(filter_symbols): Handle weaken.
+	(copy_object): Call filter_symbols if weaken.
+	(copy_main): Handle OPTION_WEAKEN.
+	* binutils.texi, objcopy.1: Document --weaken.
+
+Sat Dec  7 10:17:25 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* Makefile.in (install): Add "else true" clause to cater to
+	broken "make" on some systems.
+
 Fri Dec  6 17:21:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c (parse_ieee_bb): Always initialize namcopy to avoid gcc

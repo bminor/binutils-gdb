@@ -41,6 +41,7 @@ objcopy \- copy and translate object files
 .RB "[\|" \-\-add\-section=\fIsectionname=filename\fR "\|]"
 .RB "[\|" \-\-change\-leading\-char\fR "\|]"
 .RB "[\|" \-\-remove\-leading\-char\fR "\|]"
+.RB "[\|" \-\-weaken\fR "\|]"
 .RB "[\|" \-v\ |\ \-\-verbose\fR "\|]" 
 .RB "[\|" \-V\ |\ \-\-version\fR "\|]" 
 .RB "[\|" \-\-help\fR "\|]" 
@@ -240,6 +241,9 @@ useful if you want to link together objects of different file formats
 with different conventions for symbol names.  This is different from
 @code{--change-leading-char} because it always changes the symbol name
 when appropriate, regardless of the object file format of the output
+.TP
+.B\-\-weaken
+Change all global symbols in the file to be weak.
 .TP
 .B \-v\fR, \fB\-\-verbose
 Verbose output: list all object files modified.  In the case of
