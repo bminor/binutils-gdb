@@ -1,3 +1,10 @@
+2002-01-29  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* elf32-i386 (elf_i386_adjust_dynamic_symbol): Do not replace PLT32
+	relocations with PC32 relocations for undefined or weak symbols.
+	* elf32-s390 (elf_i386_adjust_dynamic_symbol): Likewise.
+	* elf64-s390x (elf_i386_adjust_dynamic_symbol): Likewise.
+
 2002-01-28  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* elfcore.h (elf_core_file_p): Improve comment for last change.
