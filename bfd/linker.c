@@ -455,7 +455,9 @@ _bfd_link_hash_newfunc (struct bfd_hash_entry *entry,
 
       /* Initialize the local fields.  */
       h->type = bfd_link_hash_new;
-      h->u.undef.next = NULL;
+      memset (&h->u.undef.next, 0,
+	      (sizeof (struct bfd_link_hash_entry)
+	       - offsetof (struct bfd_link_hash_entry, u.undef.next)));
     }
 
   return entry;
