@@ -1,3 +1,9 @@
+Thu Jul  2 16:24:58 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* doc/as.texinfo (Statements): Remove paragraph discussing
+	continuing lines with a backslash.  This hasn't worked for years,
+	if it ever did.
+
 Thu Jul  2 14:06:22 1998  Klaus Kaempf  <kkaempf@rmi.de>
 
         * obj-vms.c: Add C++ support with ctors/dtors sections.  Add weak

@@ -1646,16 +1646,6 @@ exception: they do not end statements.
 It is an error to end any statement with end-of-file:  the last
 character of any input file should be a newline.@refill
 
-@cindex continuing statements
-@cindex multi-line statements
-@cindex statement on multiple lines
-You may write a statement on more than one line if you put a
-backslash (@kbd{\}) immediately in front of any newlines within the
-statement.  When @code{@value{AS}} reads a backslashed newline both
-characters are ignored.  You can even put backslashed newlines in
-the middle of symbol names without changing the meaning of your
-source program.
-
 An empty statement is allowed, and may include whitespace.  It is ignored.
 
 @cindex instructions and directives
@@ -3571,7 +3561,8 @@ in @sc{ieee} format.
 is ignored unless the file is assembled with debugging enabled.
 Only @samp{--gstabs} is currently supported.
 @var{label} is the entry point of the function and if omitted @var{name}
-is used.
+prepended with the @samp{leading char} is used.
+@samp{leading char} is usually @code{_} or nothing, depending on the target.
 All functions are currently defined to have @code{void} return type.
 The function must be terminated with @code{.endfunc}.
 
