@@ -13,6 +13,6 @@ srcname="DejaGnu"
 # All the tests are run on the host, which we're assuming is unix.
 # But it looks like dejagnu wants `where the tests are run' to be
 # in target_abbrev.
-target_abbrev=unix
+target_abbrev=default
 
 # post-target:
