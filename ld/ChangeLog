@@ -1,3 +1,8 @@
+Fri Sep 11 10:24:22 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* Makefile.in, configure.in: modified to support i386-coff
+	* i386coff.sh: new file
+
 Wed Sep  9 11:52:58 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in, m68kcoff.sh, m68kcoff.sc-sh, config/m68k-coff.mt:

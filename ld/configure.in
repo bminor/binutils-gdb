@@ -117,6 +117,8 @@ case "${target}" in
 			;;
   i386-go32-*)		my_target=go32
 			;;
+  i386-*-coff)          my_target=i386-coff
+			;;
   m88k-*-*)		my_target=m88k-bcs
 			;;
   a29k-*-udi)		my_target=sa29200
