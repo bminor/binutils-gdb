@@ -1,3 +1,14 @@
+2001-07-08  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* go32-nat.c (go32_get_windows_version, print_mem, go32_sysinfo)
+	(read_memory_region, get_descriptor, display_descriptor)
+	(go32_sldt, go32_sgdt, go32_sidt): New functions.
+	(top-level): Include ctype.h, utsname.h, dos.h, and go32.h.  Ifdef
+	away `disable' from dos.h, since breakpoint.h defines an enum
+	member of the same name, and GCC 2.7.2 barfs.
+	(_initialize_go32_nat): Provide new commands dos-sysinfo, dos-ldt,
+	dos-gdt, and dos-idt, all of them in the "info" class
+
 2001-07-07  Kevin Buettner  <kevinb@redhat.com>
 
 	* procfs.c (create_procinfo): Allocate space for saved_entryset
