@@ -61,8 +61,7 @@ struct mips_got_entry
   unsigned long gotidx;
 };
 
-/* This structure is used to hold .got information when linking.  It
-   is stored in the tdata field of the bfd_elf_section_data structure.  */
+/* This structure is used to hold .got information when linking.  */
 
 struct mips_got_info
 {
@@ -78,6 +77,19 @@ struct mips_got_info
   /* A hash table holding members of the got.  */
   struct htab *got_entries;
 };
+
+struct _mips_elf_section_data
+{
+  struct bfd_elf_section_data elf;
+  union
+  {
+    struct mips_got_info *got_info;
+    bfd_byte *tdata;
+  } u;
+};
+
+#define mips_elf_section_data(sec) \
+  ((struct _mips_elf_section_data *) (sec)->used_by_bfd)
 
 /* This structure is passed to mips_elf_sort_hash_table_f when sorting
    the dynamic symbols.  */
@@ -637,6 +649,22 @@ mips_elf_link_hash_newfunc (entry, table, string)
     }
 
   return (struct bfd_hash_entry *) ret;
+}
+
+bfd_boolean
+_bfd_mips_elf_new_section_hook (abfd, sec)
+     bfd *abfd;
+     asection *sec;
+{
+  struct _mips_elf_section_data *sdata;
+  bfd_size_type amt = sizeof (*sdata);
+
+  sdata = (struct _mips_elf_section_data *) bfd_zalloc (abfd, amt);
+  if (sdata == NULL)
+    return FALSE;
+  sec->used_by_bfd = (PTR) sdata;
+
+  return _bfd_elf_new_section_hook (abfd, sec);
 }
 
 /* Read ECOFF debugging information from a .mdebug section into a
@@ -1467,8 +1495,8 @@ mips_elf_got_info (abfd, sgotp)
 
   sgot = mips_elf_got_section (abfd);
   BFD_ASSERT (sgot != NULL);
-  BFD_ASSERT (elf_section_data (sgot) != NULL);
-  g = (struct mips_got_info *) elf_section_data (sgot)->tdata;
+  BFD_ASSERT (mips_elf_section_data (sgot) != NULL);
+  g = mips_elf_section_data (sgot)->u.got_info;
   BFD_ASSERT (g != NULL);
 
   if (sgotp)
@@ -1997,15 +2025,8 @@ mips_elf_create_got_section (abfd, info)
 				    (htab_del) NULL);
   if (g->got_entries == NULL)
     return FALSE;
-  if (elf_section_data (s) == NULL)
-    {
-      amt = sizeof (struct bfd_elf_section_data);
-      s->used_by_bfd = (PTR) bfd_zalloc (abfd, amt);
-      if (elf_section_data (s) == NULL)
-	return FALSE;
-    }
-  elf_section_data (s)->tdata = (PTR) g;
-  elf_section_data (s)->this_hdr.sh_flags
+  mips_elf_section_data (s)->u.got_info = g;
+  mips_elf_section_data (s)->elf.this_hdr.sh_flags
     |= SHF_ALLOC | SHF_WRITE | SHF_MIPS_GPREL;
 
   return TRUE;
@@ -3310,19 +3331,19 @@ _bfd_mips_elf_section_processing (abfd, hdr)
 
   if (hdr->sh_type == SHT_MIPS_OPTIONS
       && hdr->bfd_section != NULL
-      && elf_section_data (hdr->bfd_section) != NULL
-      && elf_section_data (hdr->bfd_section)->tdata != NULL)
+      && mips_elf_section_data (hdr->bfd_section) != NULL
+      && mips_elf_section_data (hdr->bfd_section)->u.tdata != NULL)
     {
       bfd_byte *contents, *l, *lend;
 
-      /* We stored the section contents in the elf_section_data tdata
-	 field in the set_section_contents routine.  We save the
-	 section contents so that we don't have to read them again.
+      /* We stored the section contents in the tdata field in the
+	 set_section_contents routine.  We save the section contents
+	 so that we don't have to read them again.
 	 At this point we know that elf_gp is set, so we can look
 	 through the section contents to see if there is an
 	 ODK_REGINFO structure.  */
 
-      contents = (bfd_byte *) elf_section_data (hdr->bfd_section)->tdata;
+      contents = mips_elf_section_data (hdr->bfd_section)->u.tdata;
       l = contents;
       lend = contents + hdr->sh_size;
       while (l + sizeof (Elf_External_Options) <= lend)
@@ -4289,8 +4310,8 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 	g = NULL;
       else
 	{
-	  BFD_ASSERT (elf_section_data (sgot) != NULL);
-	  g = (struct mips_got_info *) elf_section_data (sgot)->tdata;
+	  BFD_ASSERT (mips_elf_section_data (sgot) != NULL);
+	  g = mips_elf_section_data (sgot)->u.got_info;
 	  BFD_ASSERT (g != NULL);
 	}
     }
@@ -4803,8 +4824,8 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
 	  bfd_size_type local_gotno;
 	  bfd *sub;
 
-	  BFD_ASSERT (elf_section_data (s) != NULL);
-	  g = (struct mips_got_info *) elf_section_data (s)->tdata;
+	  BFD_ASSERT (mips_elf_section_data (s) != NULL);
+	  g = mips_elf_section_data (s)->u.got_info;
 	  BFD_ASSERT (g != NULL);
 
 	  /* Calculate the total loadable size of the output.  That
@@ -5527,7 +5548,7 @@ _bfd_mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
   sgot = mips_elf_got_section (dynobj);
   BFD_ASSERT (sgot != NULL);
   BFD_ASSERT (elf_section_data (sgot) != NULL);
-  g = (struct mips_got_info *) elf_section_data (sgot)->tdata;
+  g = mips_elf_section_data (sgot)->u.got_info;
   BFD_ASSERT (g != NULL);
 
   /* Run through the global symbol table, creating GOT entries for all
@@ -5675,7 +5696,7 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
   else
     {
       BFD_ASSERT (elf_section_data (sgot) != NULL);
-      g = (struct mips_got_info *) elf_section_data (sgot)->tdata;
+      g = mips_elf_section_data (sgot)->u.got_info;
       BFD_ASSERT (g != NULL);
     }
 
@@ -6504,7 +6525,7 @@ _bfd_mips_elf_hide_symbol (info, entry, force_local)
 
   dynobj = elf_hash_table (info)->dynobj;
   got = bfd_get_section_by_name (dynobj, ".got");
-  g = (struct mips_got_info *) elf_section_data (got)->tdata;
+  g = mips_elf_section_data (got)->u.got_info;
 
   _bfd_elf_link_hash_hide_symbol (info, &h->root, force_local);
 
@@ -6565,7 +6586,7 @@ _bfd_mips_elf_discard_info (abfd, cookie, info)
 
   if (skip != 0)
     {
-      elf_section_data (o)->tdata = tdata;
+      mips_elf_section_data (o)->u.tdata = tdata;
       o->_cooked_size = o->_raw_size - skip * PDR_SIZE;
       ret = TRUE;
     }
@@ -6599,7 +6620,7 @@ _bfd_mips_elf_write_section (output_bfd, sec, contents)
   if (strcmp (sec->name, ".pdr") != 0)
     return FALSE;
 
-  if (elf_section_data (sec)->tdata == NULL)
+  if (mips_elf_section_data (sec)->u.tdata == NULL)
     return FALSE;
 
   to = contents;
@@ -6608,7 +6629,7 @@ _bfd_mips_elf_write_section (output_bfd, sec, contents)
        from < end;
        from += PDR_SIZE, i++)
     {
-      if (((unsigned char *) elf_section_data (sec)->tdata)[i] == 1)
+      if ((mips_elf_section_data (sec)->u.tdata)[i] == 1)
 	continue;
       if (to != from)
 	memcpy (to, from, PDR_SIZE);
@@ -6758,7 +6779,7 @@ _bfd_mips_elf_set_section_contents (abfd, section, location, offset, count)
 	  if (elf_section_data (section) == NULL)
 	    return FALSE;
 	}
-      c = (bfd_byte *) elf_section_data (section)->tdata;
+      c = mips_elf_section_data (section)->u.tdata;
       if (c == NULL)
 	{
 	  bfd_size_type size;
@@ -6770,7 +6791,7 @@ _bfd_mips_elf_set_section_contents (abfd, section, location, offset, count)
 	  c = (bfd_byte *) bfd_zalloc (abfd, size);
 	  if (c == NULL)
 	    return FALSE;
-	  elf_section_data (section)->tdata = (PTR) c;
+	  mips_elf_section_data (section)->u.tdata = c;
 	}
 
       memcpy (c + offset, location, (size_t) count);
@@ -7070,7 +7091,7 @@ _bfd_mips_elf_final_link (abfd, info)
       /* Make sure we didn't grow the global .got region.  */
       dynobj = elf_hash_table (info)->dynobj;
       got = bfd_get_section_by_name (dynobj, ".got");
-      g = (struct mips_got_info *) elf_section_data (got)->tdata;
+      g = mips_elf_section_data (got)->u.got_info;
 
       if (g->global_gotsym != NULL)
 	BFD_ASSERT ((elf_hash_table (info)->dynsymcount

@@ -1,5 +1,5 @@
 /* tc-sh64.c -- Assemble code for the Hitachi Super-H SHcompact and SHmedia.
-   Copyright 2000, 2001, 2002 Free Software Foundation.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -463,11 +463,11 @@ shmedia_frob_section_type (sec)
       else if (seginfo->tc_segment_info_data.contents_type == CRT_SH5_ISA32)
 	sec_type = SHF_SH5_ISA32;
 
-      sec_elf_data = sh64_elf_section_data (sec);
+      sec_elf_data = sh64_elf_section_data (sec)->sh64_info;
       if (sec_elf_data == NULL)
 	{
 	  sec_elf_data = xcalloc (1, sizeof (*sec_elf_data));
-	  sh64_elf_section_data (sec) = sec_elf_data;
+	  sh64_elf_section_data (sec)->sh64_info = sec_elf_data;
 	}
 
       sec_elf_data->contents_flags = sec_type;

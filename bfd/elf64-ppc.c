@@ -56,6 +56,8 @@ static bfd_boolean ppc64_elf_object_p
   PARAMS ((bfd *));
 static bfd_boolean ppc64_elf_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
+static bfd_boolean ppc64_elf_new_section_hook
+  PARAMS ((bfd *, asection *));
 
 
 /* The name of the dynamic interpreter.  This is put in the .interp
@@ -1675,6 +1677,35 @@ ppc64_elf_merge_private_bfd_data (ibfd, obfd)
 
   return TRUE;
 }
+
+struct _ppc64_elf_section_data
+{
+  struct bfd_elf_section_data elf;
+  union
+  {
+    asection **func_sec;
+    long *adjust;
+  } opd;
+};
+
+#define ppc64_elf_section_data(sec) \
+  ((struct _ppc64_elf_section_data *) (sec)->used_by_bfd)
+
+static bfd_boolean
+ppc64_elf_new_section_hook (abfd, sec)
+     bfd *abfd;
+     asection *sec;
+{
+  struct _ppc64_elf_section_data *sdata;
+  bfd_size_type amt = sizeof (*sdata);
+
+  sdata = (struct _ppc64_elf_section_data *) bfd_zalloc (abfd, amt);
+  if (sdata == NULL)
+    return FALSE;
+  sec->used_by_bfd = (PTR) sdata;
+
+  return _bfd_elf_new_section_hook (abfd, sec);
+}
 
 /* The following functions are specific to the ELF linker, while
    functions above are used generally.  Those named ppc64_elf_* are
@@ -2564,7 +2595,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
       opd_sym_map = (asection **) bfd_zalloc (abfd, amt);
       if (opd_sym_map == NULL)
 	return FALSE;
-      elf_section_data (sec)->tdata = opd_sym_map;
+      ppc64_elf_section_data (sec)->opd.func_sec = opd_sym_map;
     }
 
   if (htab->elf.dynobj == NULL)
@@ -2939,7 +2970,7 @@ ppc64_elf_gc_mark_hook (sec, info, rel, h, sym)
 		 sections, as all functions are referenced in .opd.  */
 	      else if ((fdh->oh != NULL
 			&& ((struct ppc_link_hash_entry *) fdh->oh)->is_entry)
-		       || elf_section_data (sec)->tdata == NULL)
+		       || ppc64_elf_section_data (sec)->opd.func_sec == NULL)
 		rsec = h->root.u.def.section;
 	      break;
 
@@ -2957,10 +2988,10 @@ ppc64_elf_gc_mark_hook (sec, info, rel, h, sym)
       asection **opd_sym_section;
 
       rsec = bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-      opd_sym_section = (asection **) elf_section_data (rsec)->tdata;
+      opd_sym_section = ppc64_elf_section_data (rsec)->opd.func_sec;
       if (opd_sym_section != NULL)
 	rsec = opd_sym_section[sym->st_value / 24];
-      else if (elf_section_data (sec)->tdata != NULL)
+      else if (ppc64_elf_section_data (sec)->opd.func_sec != NULL)
 	rsec = NULL;
     }
 
@@ -3563,13 +3594,13 @@ ppc64_elf_edit_opd (obfd, info)
 	continue;
 
       amt = sec->_raw_size * sizeof (long) / 24;
-      adjust = (long *) elf_section_data (sec)->tdata;
+      adjust = ppc64_elf_section_data (sec)->opd.adjust;
       if (adjust == NULL)
 	{
 	  /* Must be a ld -r link.  ie. check_relocs hasn't been
 	     called.  */
 	  adjust = (long *) bfd_zalloc (obfd, amt);
-	  elf_section_data (sec)->tdata = adjust;
+	  ppc64_elf_section_data (sec)->opd.adjust = adjust;
 	}
       memset (adjust, 0, (size_t) amt);
 
@@ -5305,7 +5336,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   TOCstart = elf_gp (output_bfd);
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
-  is_opd = elf_section_data (input_section)->tdata != NULL;
+  is_opd = ppc64_elf_section_data (input_section)->opd.adjust != NULL;
 
   rel = relocs;
   relend = relocs + input_section->reloc_count;
@@ -5361,7 +5392,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      long *opd_sym_adjust;
 
-	      opd_sym_adjust = (long *) elf_section_data (sec)->tdata;
+	      opd_sym_adjust = ppc64_elf_section_data (sec)->opd.adjust;
 	      if (opd_sym_adjust != NULL && sym->st_value % 24 == 0)
 		relocation += opd_sym_adjust[sym->st_value / 24];
 	    }
@@ -6338,6 +6369,7 @@ ppc64_elf_finish_dynamic_sections (output_bfd, info)
 
 #define bfd_elf64_bfd_reloc_type_lookup	      ppc64_elf_reloc_type_lookup
 #define bfd_elf64_bfd_merge_private_bfd_data  ppc64_elf_merge_private_bfd_data
+#define bfd_elf64_new_section_hook	      ppc64_elf_new_section_hook
 #define bfd_elf64_bfd_link_hash_table_create  ppc64_elf_link_hash_table_create
 #define bfd_elf64_bfd_link_hash_table_free    ppc64_elf_link_hash_table_free
 

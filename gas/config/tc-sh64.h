@@ -1,5 +1,5 @@
 /* This file is tc-sh64.h
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -21,6 +21,7 @@
 #define TC_SH64
 #include "config/tc-sh.h"
 #include "elf/sh.h"
+#include "elf32-sh64.h"
 
 /* We need to override the tc-sh.h settings of HANDLE_ALIGN and
    MAX_MEM_FOR_RS_ALIGN_CODE; we might need to put in SHmedia NOP:s, not

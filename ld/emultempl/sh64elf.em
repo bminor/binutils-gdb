@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+#   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 #
 # This file is part of GLD, the Gnu Linker.
 #
@@ -31,6 +31,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/sh.h"
+#include "elf32-sh64.h"
 
 static void sh64_elf_${EMULATION_NAME}_before_allocation PARAMS ((void));
 static void sh64_elf_${EMULATION_NAME}_after_allocation PARAMS ((void));
@@ -129,7 +130,7 @@ sh64_elf_${EMULATION_NAME}_before_allocation ()
       if (bfd_get_flavour (output_bfd) != bfd_target_elf_flavour)
 	einfo (_("%FError: non-ELF output formats are not supported by this target's linker.\n"));
 
-      sh64_sec_data = sh64_elf_section_data (osec);
+      sh64_sec_data = sh64_elf_section_data (osec)->sh64_info;
 
       /* Omit excluded or garbage-collected sections.  */
       if (bfd_get_section_flags (output_bfd, osec) & SEC_EXCLUDE)
@@ -139,7 +140,7 @@ sh64_elf_${EMULATION_NAME}_before_allocation ()
       if (sh64_sec_data == NULL)
 	{
 	  sh64_sec_data = xcalloc (1, sizeof (struct sh64_section_data));
-	  sh64_elf_section_data (osec) = sh64_sec_data;
+	  sh64_elf_section_data (osec)->sh64_info = sh64_sec_data;
 	}
 
       /* First find an input section so we have flags to compare with; the
@@ -330,9 +331,9 @@ sh64_elf_${EMULATION_NAME}_after_allocation ()
 		      {
 			oflags_isa = SHF_SH5_ISA32_MIXED;
 
-			BFD_ASSERT (sh64_elf_section_data (osec) != NULL);
+			BFD_ASSERT (sh64_elf_section_data (osec)->sh64_info);
 
-			sh64_elf_section_data (osec)->contents_flags
+			sh64_elf_section_data (osec)->sh64_info->contents_flags
 			  = SHF_SH5_ISA32_MIXED;
 			need_check_cranges = TRUE;
 			goto break_2;
@@ -378,7 +379,7 @@ sh64_elf_${EMULATION_NAME}_after_allocation ()
     }
 
   BFD_ASSERT (cranges->contents == NULL);
-  BFD_ASSERT (sh64_elf_section_data (cranges) != NULL);
+  BFD_ASSERT (sh64_elf_section_data (cranges)->sh64_info != NULL);
 
   /* Make sure we have .cranges in memory even if there were only
      assembler-generated .cranges.  */
@@ -395,7 +396,7 @@ sh64_elf_${EMULATION_NAME}_after_allocation ()
      out the number of generated .cranges.  */
   if (new_cranges == 0)
     {
-      sh64_elf_section_data (cranges)->cranges_growth = 0;
+      sh64_elf_section_data (cranges)->sh64_info->cranges_growth = 0;
       return;
     }
 
@@ -415,7 +416,7 @@ sh64_elf_${EMULATION_NAME}_after_allocation ()
       /* Omit excluded or garbage-collected sections, and output sections
 	 which were not marked as needing further processing.  */
       if ((bfd_get_section_flags (output_bfd, osec) & SEC_EXCLUDE) != 0
-	  || (sh64_elf_section_data (osec)->contents_flags
+	  || (sh64_elf_section_data (osec)->sh64_info->contents_flags
 	      != SHF_SH5_ISA32_MIXED))
 	continue;
 
@@ -561,7 +562,7 @@ sh64_elf_${EMULATION_NAME}_after_allocation ()
      Sorting before writing is done by sh64_elf_final_write_processing.  */
 
   cranges->_cooked_size = crangesp - cranges->contents;
-  sh64_elf_section_data (cranges)->cranges_growth
+  sh64_elf_section_data (cranges)->sh64_info->cranges_growth
     = cranges->_cooked_size - cranges->_raw_size;
   cranges->_raw_size = cranges->_cooked_size;
 }

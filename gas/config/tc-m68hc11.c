@@ -19,7 +19,6 @@
    the Free Software Foundation, 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include <stdio.h>
 #include "as.h"
 #include "safe-ctype.h"
 #include "subsegs.h"
@@ -376,7 +375,7 @@ md_show_usage (stream)
   get_default_target ();
   fprintf (stream, _("\
 Motorola 68HC11/68HC12/68HCS12 options:\n\
-  -m68hc11 | -m68hc12 |
+  -m68hc11 | -m68hc12 |\n\
   -m68hcs12               specify the processor [default %s]\n\
   -mshort                 use 16-bit int ABI (default)\n\
   -mlong                  use 32-bit int ABI\n\

@@ -1398,7 +1398,7 @@ DEPTC_sh64_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh64.h \
   $(srcdir)/config/tc-sh.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
-  $(INCDIR)/safe-ctype.h $(srcdir)/../opcodes/sh64-opc.h \
+  $(BFDDIR)/elf32-sh64.h $(INCDIR)/safe-ctype.h $(srcdir)/../opcodes/sh64-opc.h \
   $(srcdir)/config/tc-sh.c subsegs.h $(INCDIR)/obstack.h \
   $(srcdir)/../opcodes/sh-opc.h struc-symbol.h dwarf2dbg.h
 DEPTC_sparc_aout = $(INCDIR)/symcat.h $(srcdir)/config/obj-aout.h \
@@ -2290,7 +2290,8 @@ DEP_sh_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
 DEP_sh64_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh64.h \
-  $(srcdir)/config/tc-sh.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h
+  $(srcdir)/config/tc-sh.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
+  $(BFDDIR)/elf32-sh64.h
 DEP_sparc_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-sparc.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h
 DEP_sparc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-sparc.h \

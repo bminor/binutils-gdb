@@ -1,6 +1,6 @@
 /* SPARC-specific support for 32-bit ELF
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+   2003 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -37,6 +37,8 @@ static bfd_boolean elf32_sparc_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static bfd_boolean elf32_sparc_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+static bfd_boolean elf32_sparc_new_section_hook
+  PARAMS ((bfd *, asection *));
 static bfd_boolean elf32_sparc_relax_section
   PARAMS ((bfd *, asection *, struct bfd_link_info *, bfd_boolean *));
 static bfd_boolean elf32_sparc_relocate_section
@@ -1067,8 +1069,30 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
   return TRUE;
 }
 
-#define SET_SEC_DO_RELAX(section) do { elf_section_data(section)->tdata = (void *)1; } while (0)
-#define SEC_DO_RELAX(section) (elf_section_data(section)->tdata == (void *)1)
+struct elf32_sparc_section_data
+{
+  struct bfd_elf_section_data elf;
+  unsigned int do_relax;
+};
+
+#define sec_do_relax(sec) \
+  ((struct elf32_sparc_section_data *) (sec)->used_by_bfd)->do_relax
+
+static bfd_boolean
+elf32_sparc_new_section_hook (abfd, sec)
+     bfd *abfd;
+     asection *sec;
+{
+  struct elf32_sparc_section_data *sdata;
+  bfd_size_type amt = sizeof (*sdata);
+
+  sdata = (struct elf32_sparc_section_data *) bfd_zalloc (abfd, amt);
+  if (sdata == NULL)
+    return FALSE;
+  sec->used_by_bfd = (PTR) sdata;
+
+  return _bfd_elf_new_section_hook (abfd, sec);
+}
 
 static bfd_boolean
 elf32_sparc_relax_section (abfd, section, link_info, again)
@@ -1078,7 +1102,7 @@ elf32_sparc_relax_section (abfd, section, link_info, again)
      bfd_boolean *again;
 {
   *again = FALSE;
-  SET_SEC_DO_RELAX (section);
+  sec_do_relax (section) = 1;
   return TRUE;
 }
 
@@ -1590,7 +1614,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	  r = bfd_reloc_ok;
 	}
       else if ((r_type == R_SPARC_WDISP30 || r_type == R_SPARC_WPLT30)
-	       && SEC_DO_RELAX (input_section)
+	       && sec_do_relax (input_section)
 	       && rel->r_offset + 4 < input_section->_raw_size)
 	{
 #define G0		0

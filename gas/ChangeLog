@@ -1,3 +1,13 @@
+2003-01-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-sh64.c (shmedia_frob_section_type): Adjust for changed
+	sh64_elf_section_data.
+	* config/tc-sh64.h: Include elf32-sh64.h.
+	* config/tc-m68hc11.c: Don't include stdio.h.
+	(md_show_usage): Fix missing continuation.
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2003-01-22  Nick Clifton  <nickc@redhat.com>
 
 	* as.h: Include fopen-bin.h not fopen-same.h for mingw32 hosts.

@@ -1,5 +1,5 @@
 /* MIPS-specific support for 64-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Ian Lance Taylor, Cygnus Support
    Linker support added by Mark Mitchell, CodeSourcery, LLC.
@@ -2746,6 +2746,7 @@ const struct elf_size_info mips_elf64_size_info =
    MIPS-specific function only applies to IRIX5, which had no 64-bit
    ABI.  */
 #define bfd_elf64_find_nearest_line	_bfd_mips_elf_find_nearest_line
+#define bfd_elf64_new_section_hook	_bfd_mips_elf_new_section_hook
 #define bfd_elf64_set_section_contents	_bfd_mips_elf_set_section_contents
 #define bfd_elf64_bfd_get_relocated_section_contents \
 				_bfd_elf_mips_get_relocated_section_contents

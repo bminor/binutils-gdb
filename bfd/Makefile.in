@@ -1786,12 +1786,12 @@ elf32-ppc.lo: elf32-ppc.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
 elf32-sh64.lo: elf32-sh64.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/../opcodes/sh64-opc.h \
-  elf32-sh.c $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
+  elf32-sh64.h elf32-sh.c $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
 elf32-sh64-com.lo: elf32-sh64-com.c $(INCDIR)/filenames.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/sh.h \
-  $(INCDIR)/elf/reloc-macros.h $(srcdir)/../opcodes/sh64-opc.h
+  $(INCDIR)/elf/reloc-macros.h elf32-sh64.h $(srcdir)/../opcodes/sh64-opc.h
 elf32-s390.lo: elf32-s390.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/s390.h $(INCDIR)/elf/reloc-macros.h \

@@ -1,3 +1,10 @@
+2003-01-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/sh64elf.em: Include elf32-sh64.h.
+	(sh64_elf_${EMULATION_NAME}_before_allocation): Adjust for changed
+	sh64_elf_section_data.
+	(sh64_elf_${EMULATION_NAME}_after_allocation): Likewise.
+
 2003-01-23  Wu Yongwei  <adah@netstd.com>
 
 	* ld.texinfo: Remove an extra "i" in --dll-search-prefix.

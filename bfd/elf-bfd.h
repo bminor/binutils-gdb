@@ -1,6 +1,6 @@
 /* BFD back-end data structures for ELF files.
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002 Free Software Foundation, Inc.
+   2002, 2003 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -941,13 +941,6 @@ struct bfd_elf_section_data
   /* The number of relocations currently assigned to REL_HDR2.  */
   unsigned int rel_count2;
 
-  /* A pointer to a linked list tracking dynamic relocs copied for
-     local symbols.  */
-  PTR local_dynrel;
-
-  /* A pointer to the bfd section used for dynamic relocs.  */
-  asection *sreloc;
-
   /* The ELF section number of this section.  Only used for an output
      file.  */
   int this_idx;
@@ -960,6 +953,12 @@ struct bfd_elf_section_data
      REL_HDR2 if any.  Only used for an output file.  */
   int rel_idx2;
 
+  /* Used by the backend linker when generating a shared library to
+     record the dynamic symbol index for a section symbol
+     corresponding to this section.  A value of 0 means that there is
+     no dynamic symbol for this section.  */
+  int dynindx;
+
   /* Used by the backend linker to store the symbol hash table entries
      associated with relocs against global symbols.  */
   struct elf_link_hash_entry **rel_hashes;
@@ -969,17 +968,12 @@ struct bfd_elf_section_data
      pointer may be NULL.  It is used by the backend linker.  */
   Elf_Internal_Rela *relocs;
 
-  /* Used by the backend linker when generating a shared library to
-     record the dynamic symbol index for a section symbol
-     corresponding to this section.  A value of 0 means that there is
-     no dynamic symbol for this section.  */
-  long dynindx;
+  /* A pointer to a linked list tracking dynamic relocs copied for
+     local symbols.  */
+  PTR local_dynrel;
 
-  /* A pointer used for various section optimizations.  */
-  PTR sec_info;
-
-  /* Type of that information.  */
-  enum elf_link_info_type sec_info_type;
+  /* A pointer to the bfd section used for dynamic relocs.  */
+  asection *sreloc;
 
   union {
     /* Group name, if this section is a member of a group.  */
@@ -993,8 +987,11 @@ struct bfd_elf_section_data
      the linker.  */
   asection *next_in_group;
 
-  /* A pointer available for the processor specific ELF backend.  */
-  PTR tdata;
+  /* A pointer used for various section optimizations.  */
+  PTR sec_info;
+
+  /* Type of sec_info information.  */
+  enum elf_link_info_type sec_info_type;
 
   /* Nonzero if this section uses RELA relocations, rather than REL.  */
   unsigned int use_rela_p:1;

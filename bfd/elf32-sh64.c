@@ -23,6 +23,7 @@
 #include "sysdep.h"
 #include "elf-bfd.h"
 #include "../opcodes/sh64-opc.h"
+#include "elf32-sh64.h"
 
 /* Add a suffix for datalabel indirection symbols.  It must not match any
    other symbols; user symbols with or without version or other
@@ -37,6 +38,8 @@ struct sh64_find_section_vma_data
    bfd_vma addr;
  };
 
+static bfd_boolean sh64_elf_new_section_hook
+  PARAMS ((bfd *, asection *));
 static bfd_boolean sh64_elf_copy_private_data
   PARAMS ((bfd *, bfd *));
 static bfd_boolean sh64_elf_merge_private_data
@@ -85,6 +88,8 @@ static void sh64_find_section_for_address
 #define elf_backend_final_write_processing 	sh64_elf_final_write_processing
 #define elf_backend_section_from_shdr		sh64_backend_section_from_shdr
 
+#define bfd_elf32_new_section_hook		sh64_elf_new_section_hook
+
 /* For objcopy, we need to set up sh64_elf_section_data (asection *) from
    incoming section flags.  This is otherwise done in sh64elf.em when
    linking or tc-sh64.c when assembling.  */
@@ -100,6 +105,24 @@ static void sh64_find_section_for_address
 #define INCLUDE_SHMEDIA
 #include "elf32-sh.c"
 
+/* Tack some extra info on struct bfd_elf_section_data.  */
+
+static bfd_boolean
+sh64_elf_new_section_hook (abfd, sec)
+     bfd *abfd;
+     asection *sec;
+{
+  struct _sh64_elf_section_data *sdata;
+  bfd_size_type amt = sizeof (*sdata);
+
+  sdata = (struct _sh64_elf_section_data *) bfd_zalloc (abfd, amt);
+  if (sdata == NULL)
+    return FALSE;
+  sec->used_by_bfd = (PTR) sdata;
+
+  return _bfd_elf_new_section_hook (abfd, sec);
+}
+
 /* Set the SHF_SH5_ISA32 flag for ISA SHmedia code sections, and pass
    through SHT_SH5_CR_SORTED on a sorted .cranges section.  */
 
@@ -109,9 +132,9 @@ sh64_elf_fake_sections (output_bfd, elf_section_hdr, asect)
      Elf_Internal_Shdr *elf_section_hdr;
      asection *asect;
 {
-  if (sh64_elf_section_data (asect) != NULL)
+  if (sh64_elf_section_data (asect)->sh64_info != NULL)
     elf_section_hdr->sh_flags
-      |= sh64_elf_section_data (asect)->contents_flags;
+      |= sh64_elf_section_data (asect)->sh64_info->contents_flags;
 
   /* If this section has the SEC_SORT_ENTRIES flag set, it is a sorted
      .cranges section passing through objcopy.  */
@@ -300,7 +323,7 @@ sh64_bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
   if (! _bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec))
     return FALSE;
 
-  sh64_sec_data = sh64_elf_section_data (isec);
+  sh64_sec_data = sh64_elf_section_data (isec)->sh64_info;
   if (sh64_sec_data == NULL)
     {
       sh64_sec_data = bfd_zmalloc (sizeof (struct sh64_section_data));
@@ -312,7 +335,7 @@ sh64_bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
 	= (elf_section_data (isec)->this_hdr.sh_flags
 	   & (SHF_SH5_ISA32 | SHF_SH5_ISA32_MIXED));
 
-      sh64_elf_section_data (osec) = sh64_sec_data;
+      sh64_elf_section_data (osec)->sh64_info = sh64_sec_data;
     }
 
   return TRUE;
@@ -656,7 +679,7 @@ sh64_elf_final_write_processing (abfd, linker)
       && cranges != NULL
       && elf_elfheader (abfd)->e_type != ET_EXEC
       && (ld_generated_cranges_size
-	  = sh64_elf_section_data (cranges)->cranges_growth) != 0)
+	  = sh64_elf_section_data (cranges)->sh64_info->cranges_growth) != 0)
     {
       bfd_vma incoming_cranges_size
 	= ((cranges->_cooked_size != 0

@@ -1,3 +1,51 @@
+2003-01-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct bfd_elf_section_data): Remove tdata.  Change
+	dynindx to an int.  Rearrange for better packing.
+	* elf.c (_bfd_elf_new_section_hook): Don't alloc if already done.
+	* elf32-mips.c (bfd_elf32_new_section_hook): Define.
+	* elf32-sh64.h: New.  Split out from include/elf/sh.h.
+	(struct _sh64_elf_section_data): New struct.
+	(sh64_elf_section_data): Don't dereference sh64_info (was tdata).
+	* elf32-sh64-com.c: Include elf32-sh64.h.
+	* elf32-sh64.c: Likewise.
+	(sh64_elf_new_section_hook): New function.
+	(bfd_elf32_new_section_hook): Define.
+	(sh64_elf_fake_sections): Adjust for sh64_elf_section_data change.
+	(sh64_bfd_elf_copy_private_section_data): Likewise.
+	(sh64_elf_final_write_processing): Likewise.
+	* elf32-sparc.c (struct elf32_sparc_section_data): New.
+	(elf32_sparc_new_section_hook): New function.
+	(SET_SEC_DO_RELAX, SEC_DO_RELAX): Delete.
+	(sec_do_relax): Define.
+	(elf32_sparc_relax_section): Adjust to use sec_do_relax.
+	(elf32_sparc_relocate_section): Likewise.
+	* elf64-mips.c (bfd_elf64_new_section_hook): Define.
+	* elf64-mmix.c (struct _mmix_elf_section_data): New.
+	(mmix_elf_section_data): Define.  Use throughout file.
+	(mmix_elf_new_section_hook): New function.
+	(bfd_elf64_new_section_hook): Define.
+	* elf64-ppc.c (struct _ppc64_elf_section_data): New.
+	(ppc64_elf_section_data): Define.  Use throughout.
+	(ppc64_elf_new_section_hook): New function.
+	(bfd_elf64_new_section_hook): Define.
+	* elf64-sparc.c (struct sparc64_elf_section_data): New.
+	(sparc64_elf_new_section_hook): New function.
+	(SET_SEC_DO_RELAX, SEC_DO_RELAX): Delete.
+	(sec_do_relax): Define.
+	(sparc64_elf_relax_section): Adjust to use sec_do_relax.
+	(sparc64_elf_relocate_section): Likewise.
+	(bfd_elf64_new_section_hook): Define.
+	* elfn32-mips.c (bfd_elf32_new_section_hook): Define.
+	* elfxx-mips.c (struct _mips_elf_section_data): New.
+	(mips_elf_section_data): Define.  Use throughout.
+	(_bfd_mips_elf_new_section_hook): New function.
+	(mips_elf_create_got_section): Don't alloc used_by_bfd.
+	* elfxx-mips.h (_bfd_mips_elf_new_section_hook): Declare.
+	* elfxx-target.h (bfd_elfNN_new_section_hook): Add #ifndef.
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2003-01-21  Richard Henderson  <rth@redhat.com>
 
 	* elf64-alpha.c (ALPHA_ELF_LINK_HASH_PLT_LOC): New.
