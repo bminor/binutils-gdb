@@ -110,12 +110,6 @@ output_file_create (name)
     }
 
   stdoutput = fopen (name, FOPEN_WB);
-
-  /* Some systems don't grok "b" in fopen modes.  */
-  /* XXX - is this still necessary now that we use FOPEN_WB ?  */
-  if (stdoutput == NULL)
-    stdoutput = fopen (name, FOPEN_W);
-
   if (stdoutput == NULL)
     {
       as_perror (_("FATAL: can't create %s"), name);
