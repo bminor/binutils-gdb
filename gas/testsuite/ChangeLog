@@ -1,3 +1,11 @@
+Sun Sep 29 07:55:58 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* gas/sparc/splet.d: Fix typo in cpusha result.
+
+Mon Sep 23 12:33:31 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/m68k/fmoveml.s, gas/m68k/fmoveml.d: Add tests for fmovemx.
+
 Wed Sep 18 12:14:06 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/all/cofftag.s: Use .p2align rather than .align.
