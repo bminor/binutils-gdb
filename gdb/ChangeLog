@@ -1,3 +1,7 @@
+Mon Oct  2 13:08:01 1995  Jason Molenda   (crash@phydeaux.cygnus.com)
+
+	* Makefile.in (X11_CFLAGS): Set only to @X_INCDIR@.
+
 Sat Sep 30 16:13:36 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* scm-lang.c:  Moved Scheme value printing code to ...
