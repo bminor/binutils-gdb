@@ -1,3 +1,12 @@
+Fri Jul 24 14:25:43 1998  Keith Seitz  <keiths@cygnus.com>
+
+	* gdbtk-cmds.c (gdb_search): Add missing NULL to switches.
+	Add missing flags to result_ptr.
+	Pass along any errors caused by getting the list of files from
+	tcl.
+	Allocate correct amount of memory for the file list.
+	Don't do any unecessary cleanups.
+
 Fri Jul 24 01:08:37 1998  Martin M. Hunt  <hunt@cygnus.com>
 
 	* gdbtk-cmds.c (gdb_loadfile): When there are no

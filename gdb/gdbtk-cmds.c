@@ -1263,7 +1263,7 @@ gdb_search (clientData, interp, objc, objv)
      int objc;
      Tcl_Obj *CONST objv[];
 {
-  struct symbol_search *ss;
+  struct symbol_search *ss = NULL;
   struct symbol_search *p;
   struct cleanup *old_chain;
   Tcl_Obj *list, *result, *CONST *switch_objv;
@@ -1274,19 +1274,23 @@ gdb_search (clientData, interp, objc, objv)
   Tcl_Obj **file_list;
   char **files;
   static char *search_options[] = { "functions", "variables", "types", (char *) NULL };
-  static char *switches[] = { "-files", "-static" };
+  static char *switches[] = { "-files", "-static", (char *) NULL };
   enum search_opts { SEARCH_FUNCTIONS, SEARCH_VARIABLES, SEARCH_TYPES };
   enum switches_opts { SWITCH_FILES, SWITCH_STATIC_ONLY };
 
   if (objc < 3)
     {
       Tcl_WrongNumArgs (interp, 1, objv, "option regexp ?arg ...?");
+          result_ptr->flags |= GDBTK_IN_TCL_RESULT;
       return TCL_ERROR;
     }
 
   if (Tcl_GetIndexFromObj (interp, objv[1], search_options, "option", 0,
                            &index) != TCL_OK)
-    return TCL_ERROR;
+    {
+      result_ptr->flags |= GDBTK_IN_TCL_RESULT;
+      return TCL_ERROR;
+    }
 
   /* Unfortunately, we cannot teach search_symbols to search on
      multiple regexps, so we have to do a two-tier search for
@@ -1313,56 +1317,58 @@ gdb_search (clientData, interp, objc, objv)
     {
       if (Tcl_GetIndexFromObj (interp, switch_objv[0], switches,
                                "option", 0, &index) != TCL_OK)
-	{
-	  result_ptr->flags |= GDBTK_IN_TCL_RESULT;
-	  return TCL_ERROR;
-	}
+        {
+          result_ptr->flags |= GDBTK_IN_TCL_RESULT;
+          return TCL_ERROR;
+        }
 
       switch ((enum switches_opts) index)
         {
         case SWITCH_FILES:
-          if (switch_objc < 2)
-            {
-              Tcl_WrongNumArgs (interp, 2, objv, "[-files fileList -static 1|0]");
-	      result_ptr->flags |= GDBTK_IN_TCL_RESULT;
-              return TCL_ERROR;
-            }              
-          Tcl_ListObjGetElements (interp, switch_objv[1], &nfiles, &file_list);
-          files = (char **) xmalloc (nfiles);
-          old_chain = make_cleanup (free, files);
-          
-          for (i = 0; i < nfiles; i++)
+          {
+            int result;
+            if (switch_objc < 2)
+              {
+                Tcl_WrongNumArgs (interp, 2, objv, "[-files fileList -static 1|0]");
+                result_ptr->flags |= GDBTK_IN_TCL_RESULT;
+                return TCL_ERROR;
+              }
+            result = Tcl_ListObjGetElements (interp, switch_objv[1], &nfiles, &file_list);
+            if (result != TCL_OK)
+              return result;
+
+            files = (char **) xmalloc (nfiles * sizeof (char *));
+            for (i = 0; i < nfiles; i++)
               files[i] = Tcl_GetStringFromObj (file_list[i], NULL);
-          switch_objc--;
-          switch_objv++;
+            switch_objc--;
+            switch_objv++;
+          }
           break;
         case SWITCH_STATIC_ONLY:
           if (switch_objc < 2)
             {
               Tcl_WrongNumArgs (interp, 2, objv, "[-files fileList] [-static 1|0]");
-	      result_ptr->flags |= GDBTK_IN_TCL_RESULT;
+              result_ptr->flags |= GDBTK_IN_TCL_RESULT;
               return TCL_ERROR;
             }              
           if ( Tcl_GetBooleanFromObj (interp, switch_objv[1], &static_only) !=
-	       TCL_OK) {
-	    result_ptr->flags |= GDBTK_IN_TCL_RESULT;
-	    return TCL_ERROR;
-	  }
+               TCL_OK) {
+            result_ptr->flags |= GDBTK_IN_TCL_RESULT;
+            return TCL_ERROR;
+          }
           switch_objc--;
           switch_objv++;
         }
-
       switch_objc--;
       switch_objv++;
     }
 
   search_symbols (regexp, space, nfiles, files, &ss);
-  if (files != NULL && ss != NULL)
-    do_cleanups (old_chain);
-  old_chain = make_cleanup (free_search_symbols, ss);
-  
-  Tcl_SetListObj(result_ptr->obj_ptr, 0, NULL);
-  
+  if (ss != NULL)
+    old_chain = make_cleanup (free_search_symbols, ss);
+
+  Tcl_SetListObj(result_ptr->obj_ptr, 0, NULL);  
+
   for (p = ss; p != NULL; p = p->next)
     {
       Tcl_Obj *elem;
@@ -1382,7 +1388,9 @@ gdb_search (clientData, interp, objc, objv)
       Tcl_ListObjAppendElement (interp, result_ptr->obj_ptr, elem);
     }
   
-  do_cleanups (old_chain);
+  if (ss != NULL)
+    do_cleanups (old_chain);
+
   return TCL_OK;
 }
 
