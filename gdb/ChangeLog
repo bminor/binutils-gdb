@@ -1,5 +1,8 @@
 Thu Mar 24 07:12:09 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* stabsread.c (patch_block_stabs): Don't create LOC_OPTIMIZED_OUT
+	symbols.  Reverts change of 2 Apr 1993.
+
 	* dbxread.c (end_psymtab): Add comment about empty psymtabs.
 
 Wed Mar 23 07:50:33 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
@@ -11,6 +14,7 @@ Wed Mar 23 07:50:33 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	(show_commands): Don't declare history_base; it is declared in
 	history.h.
 	* command.c (lookup_cmd): Don't delete trailing whitespace.
+	Reverts change of 14 May 1989.
 
 Wed Mar 23 16:14:52 1994  Stu Grossman  (grossman at cygnus.com)
 
