@@ -1,5 +1,10 @@
 2002-03-01  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips.igen (do_dsll, do_dsllv, DSLL32, do_dsra, DSRA32, do_dsrl,
+	DSRL32, do_dsrlv): Trace inputs and results.
+
+2002-03-01  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips.igen (CACHE): Provide instruction-printing string.
 
 	* interp.c (signal_exception): Comment tokens after #endif.

@@ -1180,13 +1180,17 @@
 
 :function:::void:do_dsll:int rt, int rd, int shift
 {
+  TRACE_ALU_INPUT2 (GPR[rt], shift);
   GPR[rd] = GPR[rt] << shift;
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 :function:::void:do_dsllv:int rs, int rt, int rd
 {
   int s = MASKED64 (GPR[rs], 5, 0);
+  TRACE_ALU_INPUT2 (GPR[rt], s);
   GPR[rd] = GPR[rt] << s;
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 
@@ -1213,7 +1217,9 @@
 {
   int s = 32 + SHIFT;
   check_u64 (SD_, instruction_0);
+  TRACE_ALU_INPUT2 (GPR[RT], s);
   GPR[RD] = GPR[RT] << s;
+  TRACE_ALU_RESULT (GPR[RD]);
 }
 
 000000,5.RS,5.RT,5.RD,00000,010100:SPECIAL:64::DSLLV
@@ -1230,7 +1236,9 @@
 
 :function:::void:do_dsra:int rt, int rd, int shift
 {
+  TRACE_ALU_INPUT2 (GPR[rt], shift);
   GPR[rd] = ((signed64) GPR[rt]) >> shift;
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 
@@ -1257,7 +1265,9 @@
 {
   int s = 32 + SHIFT;
   check_u64 (SD_, instruction_0);
+  TRACE_ALU_INPUT2 (GPR[RT], s);
   GPR[RD] = ((signed64) GPR[RT]) >> s;
+  TRACE_ALU_RESULT (GPR[RD]);
 }
 
 
@@ -1283,7 +1293,9 @@
 
 :function:::void:do_dsrl:int rt, int rd, int shift
 {
+  TRACE_ALU_INPUT2 (GPR[rt], shift);
   GPR[rd] = (unsigned64) GPR[rt] >> shift;
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 
@@ -1310,14 +1322,18 @@
 {
   int s = 32 + SHIFT;
   check_u64 (SD_, instruction_0);
+  TRACE_ALU_INPUT2 (GPR[RT], s);
   GPR[RD] = (unsigned64) GPR[RT] >> s;
+  TRACE_ALU_RESULT (GPR[RD]);
 }
 
 
 :function:::void:do_dsrlv:int rs, int rt, int rd
 {
   int s = MASKED64 (GPR[rs], 5, 0);
+  TRACE_ALU_INPUT2 (GPR[rt], s);
   GPR[rd] = (unsigned64) GPR[rt] >> s;
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 
