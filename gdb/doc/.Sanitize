@@ -49,48 +49,4 @@ Do-last:
 
 echo Done in `pwd`.
 
-#
-#
-# $Log$
-# Revision 2.11  1992/02/01 02:22:07  grossman
-# threecol.tex no longer exists.
-#
-# Revision 2.10  1992/02/01  00:41:18  grossman
-# Distribute lpsrc.sed, remove rc-*.
-#
-# Revision 2.9  1992/01/18  00:44:04  grossman
-# Add psrc.sed
-#
-# Revision 2.8  1991/12/10  02:13:54  pesch
-# rdl-apps.texi is no longer used, with the new improved doc Makefile.in.
-#
-# Revision 2.7  1991/11/21  02:44:53  gnu
-# For configure-able doc dir.
-#
-# Revision 2.6  1991/08/23  22:35:41  pesch
-# 	* rdl-apps.texi: renamed from rdl-apps.texinfo
-#
-# 	* Makefile, .Sanitize, gdb.texinfo: reflect above name change
-#
-# Revision 2.5  1991/08/22  07:59:45  gnu
-# Keep rdl-apps.texi for users who don't read the doc on how to build the doc.
-#
-# Revision 2.4  1991/08/07  00:15:02  pesch
-# Makefile: GDB documentation nos has its own Makefile
-# .Sanitize: add Makefile; recognize renamed refcard.tex (formerly gdbrc.tex)
-# gdbint.texinfo: add markup in "Cleanups" chapter
-#
-# Revision 2.3  1991/08/01  22:34:55  pesch
-# *** empty log message ***
-#
-# Revision 2.2  1991/07/29  22:38:53  pesch
-# Updated list of files to keep to reflect reintegration of most fragments
-# into gdb.texinfo.
-#
-# Revision 2.1  1991/05/23  21:57:03  rich
-# First cut.
-#
-#
-#
-
 # End of file.
