@@ -134,14 +134,48 @@ object_headers *headers;
 
 	headers->header.a_relaxable = linkrelax;
 
+#ifdef CROSS_COMPILE
+	md_number_to_chars(*where, headers->header.a_magic, sizeof(headers->header.a_magic));
+	*where += sizeof(headers->header.a_magic);
+	md_number_to_chars(*where, headers->header.a_text, sizeof(headers->header.a_text));
+	*where += sizeof(headers->header.a_text);
+	md_number_to_chars(*where, headers->header.a_data, sizeof(headers->header.a_data));
+	*where += sizeof(headers->header.a_data);
+	md_number_to_chars(*where, headers->header.a_bss, sizeof(headers->header.a_bss));
+	*where += sizeof(headers->header.a_bss);
+	md_number_to_chars(*where, headers->header.a_syms, sizeof(headers->header.a_syms));
+	*where += sizeof(headers->header.a_syms);
+	md_number_to_chars(*where, headers->header.a_entry, sizeof(headers->header.a_entry));
+	*where += sizeof(headers->header.a_entry);
+	md_number_to_chars(*where, headers->header.a_trsize, sizeof(headers->header.a_trsize));
+	*where += sizeof(headers->header.a_trsize);
+	md_number_to_chars(*where, headers->header.a_drsize, sizeof(headers->header.a_drsize));
+	*where += sizeof(headers->header.a_drsize);
+	md_number_to_chars(*where, headers->header.a_tload, sizeof(headers->header.a_tload));
+	*where += sizeof(headers->header.a_tload);
+	md_number_to_chars(*where, headers->header.a_dload, sizeof(headers->header.a_dload));
+	*where += sizeof(headers->header.a_dload);
+	md_number_to_chars(*where, headers->header.a_talign, sizeof(headers->header.a_talign));
+	*where += sizeof(headers->header.a_talign);
+	md_number_to_chars(*where, headers->header.a_dalign, sizeof(headers->header.a_dalign));
+	*where += sizeof(headers->header.a_dalign);
+	md_number_to_chars(*where, headers->header.a_balign, sizeof(headers->header.a_balign));
+	*where += sizeof(headers->header.a_balign);
+	md_number_to_chars(*where, headers->header.a_relaxable, sizeof(headers->header.a_relaxable));
+	*where += sizeof(headers->header.a_relaxable);
+#else /* ! CROSS_COMPILE */
 	append(where, (char *) &headers->header, sizeof(headers->header));
+#endif /* ! CROSS_COMPILE */
 } /* a_header_append() */
 
 void obj_symbol_to_chars(where, symbolP)
 char **where;
 symbolS *symbolP;
 {
-	/* leave in host byte order */
+	md_number_to_chars((char *)&(S_GET_OFFSET(symbolP)), S_GET_OFFSET(symbolP), sizeof(S_GET_OFFSET(symbolP)));
+	md_number_to_chars((char *)&(S_GET_DESC(symbolP)), S_GET_DESC(symbolP), sizeof(S_GET_DESC(symbolP)));
+	md_number_to_chars((char *)&(S_GET_VALUE(symbolP)), S_GET_VALUE(symbolP), sizeof(S_GET_VALUE(symbolP)));
+
 	append(where, (char *)&symbolP->sy_symbol, sizeof(obj_symbol_type));
 } /* obj_symbol_to_chars() */
 

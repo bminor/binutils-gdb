@@ -1,3 +1,9 @@
+Fri Aug 28 16:25:22 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* obj-bout.h, obj-bout.c (obj_header_append, obj_symbol_to_chars),
+	tc-i960.c (md_ri_to_chars): Always output bout object file in
+	little endian byte order (used to use endianness of host).
+
 Tue Aug 25 15:11:08 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* z8k.c, z8k.h, z8k.mt: z8000 support stuff

@@ -45,6 +45,9 @@
  *	  are in host byte-order:  object files CANNOT be lifted from a
  *	  little-end host and used on a big-endian (or vice versa) without
  *	  modification.
+ * ==> THIS IS NO LONGER TRUE USING BFD.  WE CAN GENERATE ANY BYTE ORDER
+ *     FOR THE HEADER, AND READ ANY BYTE ORDER.  PREFERENCE WOULD BE TO
+ *     USE LITTLE-ENDIAN BYTE ORDER THROUGHOUT, REGARDLESS OF HOST.  <==
  *
  *	o The downloader ('comm960') takes care to generate a pseudo-header
  *	  with correct (i80960) byte-ordering before shipping text and data
@@ -56,11 +59,6 @@
 #define OBJ_BOUT 1
 
 #include "targ-cpu.h"
-
-/* bout uses host byte order for headers */
-#ifdef CROSS_COMPILE
-#undef CROSS_COMPILE
-#endif /* CROSS_COMPILE */
 
 /* We want \v. */
 #define BACKSLASH_V 1

@@ -29,6 +29,10 @@
  *	the downloader converts the file format and corrects the byte-ordering
  *	of the relevant fields while doing so.)
  *
+ * ==> THIS IS NO LONGER TRUE USING BFD.  WE CAN GENERATE ANY BYTE ORDER
+ *     FOR THE HEADER, AND READ ANY BYTE ORDER.  PREFERENCE WOULD BE TO
+ *     USE LITTLE-ENDIAN BYTE ORDER THROUGHOUT, REGARDLESS OF HOST.  <==
+ *
  ***************************************************************************** */
 
 /* There are 4 different lengths of (potentially) symbol-based displacements
@@ -955,12 +959,25 @@ register segT segment_type;
  *	executable code is actually downloaded to the i80960).  Therefore,
  *	we leave it in host byte order.
  *
+ *	The above comment is no longer true.  This routine now really
+ *	does do the reordering (Ian Taylor 28 Aug 92).
+ *
  **************************************************************************** */
 void md_ri_to_chars(where, ri)
 char *where;
 struct relocation_info *ri;
 {
-	*((struct relocation_info *) where) = *ri; /* structure assignment */
+	md_number_to_chars (where, ri->r_address,
+			    sizeof (ri->r_address));
+	where[4] = ri->r_index & 0x0ff;
+	where[5] = (ri->r_index >> 8) & 0x0ff;
+	where[6] = (ri->r_index >> 16) & 0x0ff;
+	where[7] = ((ri->r_pcrel << 0)
+		    | (ri->r_length << 1)
+		    | (ri->r_extern << 3)
+		    | (ri->r_bsr << 4)
+		    | (ri->r_disp << 5)
+		    | (ri->r_callj << 6));
 } /* md_ri_to_chars() */
 
 #ifndef WORKING_DOT_WORD
