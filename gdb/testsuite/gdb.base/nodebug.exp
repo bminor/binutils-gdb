@@ -89,9 +89,13 @@ if ![file exists $binfile] then {
 	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
 	gdb_test "ptype bsslocal" "<(data variable|variable), no debug info>"
 
-	gdb_test "backtrace" "#0.*inner.*#1.*middle.*#2.*top.*#3.*main.*"
+	gdb_test "backtrace" "#0.*inner.*#1.*middle.*#2.*top.*#3.*main.*" \
+	    "backtrace in nodebug.exp"
 	# Or if that doesn't work, at least hope for the external symbols
-	gdb_test "backtrace" "#0.*inner.*#1.*#2.*top.*#3.*main.*"
+	# Commented out because if we aren't going to xfail the above test
+	# ever, why bother with a weaker test?
+	#gdb_test "backtrace" "#0.*inner.*#1.*#2.*top.*#3.*main.*" \
+	#    "backtrace in nodebug.exp for externals"
 
 	# This test is not as obscure as it might look.  `p getenv ("TERM")'
 	# is a real-world example, at least on many systems.
