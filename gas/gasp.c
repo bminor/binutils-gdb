@@ -2330,7 +2330,7 @@ istrue (idx, in)
 	  res = 0;
 	}
       else
-	res = cond == EQ && same;
+	res = (cond != EQ) ^ same;
     }
   else
     /* This is a numeric expression */

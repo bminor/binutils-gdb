@@ -1,3 +1,7 @@
+Fri May 19 16:37:39 1995  Richard Earnshaw (rearnsha@armltd.co.uk)
+
+	* gasp.c (istrue): Correctly test for string inequality.
+
 Thu May 18 04:25:11 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 
 	Wed May 10 14:28:16 1995 Richard Earnshaw (rearnsha@armltd.co.uk)
