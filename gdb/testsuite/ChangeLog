@@ -1,3 +1,9 @@
+2005-04-01  Paul Gilliam  <pgilliam@us.ibm.com>
+
+	* gdb.arch/altivec-abi.exp: Check for compiler and set
+	use altivec' flag accordingly.
+	* gdb.arch/altivec-regs.exp: Likewise.
+
 2005-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/ptr-typedef.exp, gdb.base/ptr-typedef.c: New files.
