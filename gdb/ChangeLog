@@ -1,5 +1,7 @@
 Tue Jul 14 00:12:30 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* Makefile.in (VERSION):  4.5.9.
+
 	* xm-hp300bsd.h:  Add decl for strdup().
 	* mips-tdep.c (heuristic_proc_desc):  Fill in proc start addr in
 	PDR.  Cleanup a few things, fix compilation warnings.
