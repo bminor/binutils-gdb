@@ -6,6 +6,11 @@ Mon Jun 10 14:52:29 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 Mon Jun 10 11:45:51 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m68k.c (m68k_ip): Accept ABSL for 'O', so that `bfextu
+	d0{24:1},d0' works without an immediate prefix on the bit numbers.
+	(md_begin): Add digits to alt_notend_table.
+	(md_parse_option): Make s a const pointer.
+
 	* config/tc-sparc.c (md_pseudo_table): Add "empty".
 	(s_empty): New static function.
 
