@@ -1,3 +1,8 @@
+2002-10-23  Jakub Jelinek  <jakub@redhat.com>
+
+	* emultempl/elf32.em (place_orphan): Don't put non-allocated .rel*
+	sections into .rel{,a}.dyn.
+
 2002-10-23  Nick Clifton  <nickc@redhat.com>
 
 	* lexsup.c (OPTION_NO_OMAGIC): Define.

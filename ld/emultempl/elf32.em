@@ -1098,6 +1098,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   secname = bfd_get_section_name (s->owner, s);
   if (! link_info.relocateable
       && link_info.combreloc
+      && (s->flags & SEC_ALLOC)
       && strncmp (secname, ".rel", 4) == 0)
     {
       if (secname[4] == 'a')
