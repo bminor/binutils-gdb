@@ -4386,7 +4386,7 @@ procfs_stopped_by_watchpoint(pid)
 /* Why is this necessary?  Shouldn't dead threads just be removed from the
    thread database?  */
 
-int
+static int
 procfs_thread_alive (pid)
      int pid;
 {
@@ -4399,14 +4399,28 @@ procfs_thread_alive (pid)
    XXX - This may not be correct for all systems.  Some may want to use
    killpg() instead of kill (-pgrp). */
 
-void
+static void
 procfs_stop ()
 {
   extern pid_t inferior_process_group;
 
   kill (-inferior_process_group, SIGINT);
 }
+
+/* Convert a pid to printable form. */
 
+#ifdef TIDGET
+char *
+procfs_pid_to_str (pid)
+     int pid;
+{
+  static char buf[100];
+
+  sprintf (buf, "Kernel thread %d", TIDGET (pid));
+
+  return buf;
+}
+#endif /* TIDGET */
 
 struct target_ops procfs_ops = {
   "procfs",			/* to_shortname */

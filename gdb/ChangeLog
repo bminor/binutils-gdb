@@ -1,3 +1,14 @@
+Tue May 14 18:05:16 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* procfs.c (procfs_thread_alive procfs_stop):  Make static.
+	* (procfs_pid_to_str):  New routine to print out thread id's in an
+	intelligible manner.
+	* sol-thread.c (sol_thread_fetch_registers):  Re-order manner in
+	which supply_register is called to fix bug with writing writing
+	individual regs.
+	* config/sparc/tm-sun4sol2.h:  Define default for
+	target_pid_to_str in case host lacks libthread_db.
+
 Mon May 13 23:53:30 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* Makefile.in config.in configure configure.in

@@ -504,7 +504,7 @@ sol_thread_fetch_registers (regno)
   thread_t thread;
   td_thrhandle_t thandle;
   td_err_e val;
-  prgregset_t regset;
+  prgregset_t gregset;
   prfpregset_t fpregset;
 #if 0
   int xregsize;
@@ -525,32 +525,29 @@ sol_thread_fetch_registers (regno)
 
   /* Get the integer regs */
 
-  val = td_thr_getgregs (&thandle, regset);
-  if (val == TD_OK)
-    supply_gregset (regset);
-  else if (val == TD_PARTIALREG)
-    {
-      /* For the sparc, only i0->i7, l0->l7, pc and sp are saved by a thread
-	 context switch.  */
-
-      supply_gregset (regset);	/* This is not entirely correct, as it sets
-				   the valid bits for the o, g, ps, y, npc,
-				   wim and tbr.  That should be harmless
-				   though, as the context switch routine
-				   doesn't need to save them.  */
-    }
-  else
+  val = td_thr_getgregs (&thandle, gregset);
+  if (val != TD_OK
+      && val != TD_PARTIALREG)
     error ("sol_thread_fetch_registers: td_thr_getgregs %s",
 	   td_err_string (val));
+
+  /* For the sparc, TD_PARTIALREG means that only i0->i7, l0->l7, pc and sp
+     are saved (by a thread context switch).  */
 
   /* And, now the fp regs */
 
   val = td_thr_getfpregs (&thandle, &fpregset);
-  if (val == TD_OK)
-    supply_fpregset (fpregset);
-  else if (val != TD_NOFPREGS)
+  if (val != TD_OK
+      && val != TD_NOFPREGS)
     error ("sol_thread_fetch_registers: td_thr_getfpregs %s",
 	   td_err_string (val));
+
+/* Note that we must call supply_{g fp}regset *after* calling the td routines
+   because the td routines call ps_lget* which affect the values stored in the
+   registers array.  */
+
+  supply_gregset (gregset);
+  supply_fpregset (fpregset);
 
 #if 0
 /* thread_db doesn't seem to handle this right */

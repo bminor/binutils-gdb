@@ -81,4 +81,9 @@ extern char *sunpro_static_transform_name PARAMS ((char *));
 extern char *solaris_pid_to_str PARAMS ((int pid));
 #define target_pid_to_str(PID) solaris_pid_to_str (PID)
 
+#else
+
+extern char *procfs_pid_to_str PARAMS ((int pid));
+#define target_pid_to_str(PID) procfs_pid_to_str (PID)
+
 #endif
