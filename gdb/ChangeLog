@@ -1,5 +1,11 @@
 2003-08-02  Andrew Cagney  <cagney@redhat.com>
 
+	* config/djgpp/fnchange.lst: Fix up testsuite/gdb.c++/annota3.cc,
+	gdb/testsuite/gdb.c++/annota3.exp, amd64fbsd-tdep.c and
+	amd64fbsd-nat.c.
+
+2003-08-02  Andrew Cagney  <cagney@redhat.com>
+
 	* Makefile.in: Update all dependencies and definitions.
 
 2003-08-01  Andrew Cagney  <cagney@redhat.com>
