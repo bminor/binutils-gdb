@@ -2,6 +2,12 @@ Wed Nov 12 12:18:08 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* aclocal.m4 (SIM_AC_OPTION_SCACHE): Fix typo.
 
+	* Make-common.in (BUILT_SRC_FROM_COMMON): Remove files no longer
+	built this way.
+	(sim-config.o): Remove non-existent $(sim-nconfig_h) dependency.
+	(clean): Don't delete $(BUILT_SRC_FROM_COMMON) if building in
+	source tree.
+
 Tue Nov 11 13:28:02 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-events.c (sim_events_process): Re-compute the time -

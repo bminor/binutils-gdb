@@ -247,13 +247,7 @@ sim-break_h = $(srcdir)/../common/sim-break.h
 # necessary, the reason should be documented here.
 
 BUILT_SRC_FROM_COMMON= \
-	sim-endian.c \
-	sim-inline.c \
-	sim-bits.c \
-	sim-events.c \
-	sim-core.c \
-	sim-config.c \
-	sim-io.c
+	sim-inline.c
 
 sim-abort.o: $(srcdir)/../common/sim-abort.c \
 	$(SIM_EXTRA_DEPS)
@@ -263,7 +257,7 @@ sim-bits.o: $(srcdir)/../common/sim-bits.c $(sim-bits_h) $(sim-n-bits_h) \
 	$(SIM_EXTRA_DEPS)
 	$(CC) -c $(srcdir)/../common/sim-bits.c $(ALL_CFLAGS)
 
-sim-config.o: $(srcdir)/../common/sim-config.c $(sim-config_h) $(sim-nconfig_h) \
+sim-config.o: $(srcdir)/../common/sim-config.c $(sim-config_h) \
 	$(SIM_EXTRA_DEPS)
 	$(CC) -c $(srcdir)/../common/sim-config.c $(ALL_CFLAGS)
 
@@ -411,7 +405,9 @@ clean: $(SIM_EXTRA_CLEAN)
 	rm -f *.[oa] *~ core
 	rm -f run libsim.a
 	rm -f gentmap targ-map.c targ-vals.h
-	rm -f $(BUILT_SRC_FROM_COMMON)
+	if [ "cd $(srcdir) && pwd" != `pwd` ] ; then \
+		rm -f $(BUILT_SRC_FROM_COMMON) ; \
+	fi
 
 distclean mostlyclean maintainer-clean realclean: clean
 	rm -f TAGS
