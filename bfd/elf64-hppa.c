@@ -213,6 +213,9 @@ static int elf64_hppa_additional_program_headers PARAMS ((bfd *));
 
 static boolean elf64_hppa_modify_segment_map PARAMS ((bfd *));
 
+static enum elf_reloc_type_class elf64_hppa_reloc_type_class
+  PARAMS ((const Elf_Internal_Rela *));
+
 static boolean elf64_hppa_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
@@ -2470,6 +2473,27 @@ elf64_hppa_finalize_dynreloc (dyn_h, data)
   return true;
 }
 
+/* Used to decide how to sort relocs in an optimal manner for the
+   dynamic linker, before writing them out.  */
+
+static enum elf_reloc_type_class
+elf64_hppa_reloc_type_class (rela)
+     const Elf_Internal_Rela *rela;
+{
+  if (ELF64_R_SYM (rela->r_info) == 0)
+    return reloc_class_relative;
+
+  switch ((int) ELF64_R_TYPE (rela->r_info))
+    {
+    case R_PARISC_IPLT:
+      return reloc_class_plt;
+    case R_PARISC_COPY:
+      return reloc_class_copy;
+    default:
+      return reloc_class_normal;
+    }
+}
+
 /* Finish up the dynamic sections.  */
 
 static boolean
@@ -2553,8 +2577,10 @@ elf64_hppa_finish_dynamic_sections (output_bfd, info)
 
 	    case DT_RELA:
 	      s = hppa_info->other_rel_sec;
-	      if (! s)
+	      if (! s || ! s->_raw_size)
 		s = hppa_info->dlt_rel_sec;
+	      if (! s || ! s->_raw_size)
+		s = hppa_info->opd_rel_sec;
 	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
@@ -2780,6 +2806,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #define elf_backend_plt_header_size     0
 #define elf_backend_type_change_ok true
 #define elf_backend_get_symbol_type	     elf64_hppa_elf_get_symbol_type
+#define elf_backend_reloc_type_class	     elf64_hppa_reloc_type_class
 
 #include "elf64-target.h"
 

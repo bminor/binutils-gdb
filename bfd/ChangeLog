@@ -1,3 +1,10 @@
+2002-06-27  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* elf64-hppa.c (elf64_hppa_reloc_type_class): New function.
+	(elf64_hppa_finish_dynamic_sections): Check other_rel_sec, dlt_rel_sec
+	and opd_rel_sec in order for starting rela section.  Check _raw_size.
+	(elf_backend_reloc_type_class): Define.
+
 2002-06-27  Kevin Buettner <kevinb@redhat.com>
 
 	* dwarf2.c (decode_line_info): Handle older, non-standard, 64-bit
