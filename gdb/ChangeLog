@@ -1,3 +1,8 @@
+2002-04-05  Kevin Buettner  <kevinb@redhat.com>
+
+	* rs6000-tdep.c (skip_prologue): Eliminate unused/unreachable
+	clause.
+
 2002-03-29  Jim Blandy  <jimb@redhat.com>
 
 	* stack.c (get_selected_block): Add new argument `addr_in_block',

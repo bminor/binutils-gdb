@@ -592,15 +592,6 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	  break;
 
 	}
-      else if (((op & 0xffff0000) == 0x801e0000 ||   /* lwz 0,NUM(r30), used
-						        in V.4 -mrelocatable */
-		op == 0x7fc0f214) &&	/* add r30,r0,r30, used
-					   in V.4 -mrelocatable */
-	       lr_reg == 0x901e0000)
-	{
-	  continue;
-
-	}
       else if ((op & 0xffff0000) == 0x3fc00000 ||  /* addis 30,0,foo@ha, used
 						      in V.4 -mminimal-toc */
 	       (op & 0xffff0000) == 0x3bde0000)
