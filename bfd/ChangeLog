@@ -1,3 +1,20 @@
+1999-05-10  DJ Delorie  <dj@cygnus.com>
+
+	* ecoff.c (_bfd_ecoff_write_armap): give the symtab element a
+	reasonable mode until "ar x" is smart enough to skip it (fixes
+	gcc/libgcc.a builds on mips-ecoff targets
+
+	* coffcode.h (styp_to_sec_flags): Explain how COMDATs are supposed
+	to work.  Hack to support MS import libraries, which use different
+	COMDAT types than GNU.
+	(coff_slurp_symbol_table): C_SECTION symbols are local; they refer
+	to implied zero-length sections (see peicode below)
+	* coffgen.c (coff_get_normalized_symtab): Properly read long MS
+	filename symbols, which use one *or more* auxents.
+	* coffswap.h (coff_swap_aux_in): ditto
+	* peicode.h (coff_swap_sym_in): Build the implied zero-length
+	sections
+	
 Tue May 11 15:51:58 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-v850.c (v850_elf_howto_table): Make partial_inplace false

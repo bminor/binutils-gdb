@@ -588,6 +588,12 @@ styp_to_sec_flags (abfd, hdr, name)
          can't call slurp_symtab, because the linker doesn't want the
          swapped symbols.  */
 
+      /* COMDAT sections are special.  The first symbol is the section
+	 symbol, which tells what kind of COMDAT section it is.  The
+	 *second* symbol is the "comdat symbol" - the one with the
+	 unique name.  GNU uses the section symbol for the unique
+	 name; MS uses ".text" for every comdat section.  Sigh.  - DJ */
+
       if (_bfd_coff_get_external_symbols (abfd))
 	{
 	  bfd_byte *esym, *esymend;
@@ -629,10 +635,23 @@ styp_to_sec_flags (abfd, hdr, name)
 					    isym.n_type, isym.n_sclass,
 					    0, isym.n_numaux, (PTR) &aux);
 
+		      /* FIXME: Microsoft uses NODUPLICATES and
+			 ASSOCIATIVE, but gnu uses ANY and SAME_SIZE.
+			 Unfortunately, gnu doesn't do the comdat
+			 symbols right.  So, until we can fix it to do
+			 the right thing, we are temporarily disabling
+			 comdats for the MS types (they're used in
+			 DLLs and C++, but we don't support *their*
+			 C++ libraries anyway - DJ */
+
 		      switch (aux.x_scn.x_comdat)
 			{
 			case IMAGE_COMDAT_SELECT_NODUPLICATES:
+#if 0
 			  sec_flags |= SEC_LINK_DUPLICATES_ONE_ONLY;
+#else
+			  sec_flags &= ~SEC_LINK_ONCE;
+#endif
 			  break;
 
 			default:
@@ -649,8 +668,12 @@ styp_to_sec_flags (abfd, hdr, name)
 			  break;
 
 			case IMAGE_COMDAT_SELECT_ASSOCIATIVE:
+#if 0
 			  /* FIXME: This is not currently implemented.  */
 			  sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
+#else
+			  sec_flags &= ~SEC_LINK_ONCE;
+#endif
 			  break;
 			}
 
@@ -3581,6 +3604,11 @@ coff_slurp_symbol_table (abfd)
 #ifdef COFF_WITH_PE
 	      if (src->u.syment.n_sclass == C_NT_WEAK)
 		dst->symbol.flags = BSF_WEAK;
+	      if (src->u.syment.n_sclass == C_SECTION
+		  && src->u.syment.n_scnum > 0)
+		{
+		  dst->symbol.flags = BSF_LOCAL;
+		}
 #endif
 
 	      if (src->u.syment.n_sclass == C_WEAKEXT)
