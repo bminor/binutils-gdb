@@ -2589,8 +2589,10 @@ output_unw_records (list, ptr)
   /* Clear the padding area and personality.  */
   memset (mem + 8 + size, 0 , extra + 8);
   /* Initialize the header area.  */
-  md_number_to_chars (mem, (  ((bfd_vma) 1 << 48)     /* version */
-			    | ((bfd_vma) 3 << 32)     /* U & E handler flags */
+  md_number_to_chars (mem, (((bfd_vma) 1 << 48)     /* version */
+			    | (unwind.personality_routine
+			       ? ((bfd_vma) 3 << 32) /* U & E handler flags */
+			       : 0)
 			    | ((size + extra) / 8)),  /* length (dwords) */
 		      8);
 

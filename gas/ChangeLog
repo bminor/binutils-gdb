@@ -1,3 +1,8 @@
+2000-08-23  Jim Wilson  <wilson@cygnus.com>
+
+	* config/tc-ia64.c (output_unw_records): Set U & E flags only if
+	unwind.personality_routine is set.
+
 2000-08-23  H.J. Lu  <hjl@gnu.org>
 
 	* write.c (TC_FIX_ADJUSTABLE): Remove the duplicate.
