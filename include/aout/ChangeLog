@@ -1,3 +1,36 @@
+Sat Feb 26 10:25:53 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* aout64.h: Add casts to avoid warnings from SVR4 cc.
+
+Fri Feb 11 12:56:04 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* ar.h (ARMAG, ARMAGB, ARFMAG): Change '\n' to '\012', for greater
+	portability.
+
+Fri Jan 21 00:59:06 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* sun4.h: Added information about SunOS shared libraries.
+
+Fri Jan  7 08:20:13 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* aout64.h (N_TXTADDR): Add comment regarding OMAGIC and NMAGIC.
+
+Sat Dec 25 14:55:41 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* aout64.h (N_DATOFF): Don't pad (revert change of 8 Jul 1993).
+
+Tue Nov 16 15:43:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* aout64.h: New macros ZMAGIC_DISK_BLOCK_SIZE and N_DISK_BLOCK_SIZE
+	for Linux ZMAGIC.
+	(N_TXTOFF, N_DATOFF): Use them.
+
+Thu Nov  4 00:33:48 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* aout64.h (RELOC_STD_BITS_RELATIVE_LITTLE): Fixed value to match
+	sun3 system; used to overlap other fields.
+	(RELOC_STD_BITS_JMPTABLE_LITTLE): Likewise.
+
 Wed Nov  3 13:48:27 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* aout64.h (RELOC_STD_BITS_BASEREL_LITTLE): Make it 0x10 (Ken's
