@@ -1,3 +1,10 @@
+2002-06-18  Andrew Cagney  <cagney@redhat.com>
+
+	* MAINTAINERS: Note that cris-elf target can be compiled with
+	-Werror.
+	* cris-tdep.c (cris_register_name): Make return type constant.
+	(cris_breakpoint_from_pc): Ditto.
+
 2002-06-18  Michal Ludvig  <mludvig@suse.cz>
 
 	* frame.h (struct frame_info): Change type of context to 

@@ -72,7 +72,7 @@ maintainer works with the native maintainer when resolving API issues.
 	avr		--target=avr ,-Werror
 			Theodore A. Roth	troth@verinet.com
 
-	cris		--target=cris-elf -w
+	cris		--target=cris-elf ,-Werror
 			Orjan Friberg		orjanf@axis.com
 
 	d10v		--target=d10v-elf ,-Werror
