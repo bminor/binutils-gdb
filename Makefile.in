@@ -34,7 +34,7 @@ man6dir = $(mandir)/man6
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
-infodir = $(prefix)/info
+infodir = $(datadir)/info
 includedir = $(prefix)/include
 docdir = $(datadir)/doc
 
@@ -1430,14 +1430,9 @@ install-info-dirs: force
 		if [ -d $$i ] ; then true ; else mkdir $$i ; fi ; \
 	done
 
-install-dir.info-in-place: force
-	rdir=`cd $(srcdir)/texinfo ; pwd` \
-	&& cd $(infodir) \
-	&& ($${rdir}/gen-info-dir `pwd`) > dir
-
 dir.info: force
-#	$(srcdir)/texinfo/gen-info-dir . > dir.info.new
-#	mv -f dir.info.new dir.info
+	$(srcdir)/texinfo/gen-info-dir $(infodir) > dir.info.new
+	mv -f dir.info.new dir.info
 
 etags tags: TAGS
 

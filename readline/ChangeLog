@@ -1,3 +1,7 @@
+Tue Dec 10 04:07:20 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: infodir belongs in datadir.
+
 Fri Dec  6 23:23:14 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
 	* Makefile.in: remove spaces following hyphens, bsd make can't

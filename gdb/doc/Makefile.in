@@ -34,7 +34,7 @@ man6dir = $(mandir)/man6
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
-infodir = $(prefix)/info
+infodir = $(datadir)/info
 includedir = $(prefix)/include
 docdir = $(datadir)/doc
 
