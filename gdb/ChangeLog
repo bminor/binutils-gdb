@@ -1,7 +1,7 @@
 Mon May 25 13:31:27 1998  Keith Seitz  <keiths@cygnus.com>
 
-	* remote.c (remote_open_1): If an error occurs starting the remote, pop the
-	target AND return.
+	* remote.c (remote_open_1): If an error occurs starting the remote, 
+	pop the target AND return.
 
 Sat May 23 02:23:09 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
@@ -534,15 +534,17 @@ Tue Apr 14 16:52:59 1998  Mark Alexander  <marka@cygnus.com>
 Tue Apr 14 15:43:49 1998  John Metzler  <jmetzler@cygnus.com>
 
 	* gdbcfgxref (xref_menu): Call new regex and wild card searches
-	Now you can type in a specific triple like mips64-vr4320-elf or
+	Now you can type in a specific triple like mips64-vr4300-elf or
 	somthing like mips*.h
 	(triple_search) wildcardsearch): The new functions
 
+start-sanitize-vr4320
 	* configure.tgt: Switch over to use tm-4320.h. Since I switched to
  	MIPS EABI the fixes are no longer backward compatible with 4300.
 	* tm-vr4320.h: Added
 	* vr4320.mt:   Added
 
+end-sanitize-vr4320
 Mon Apr 13 16:28:07 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* utils.c: (warning) added call to warning_hook
