@@ -1,3 +1,7 @@
+2004-03-17  Ralf Corsepius <corsepiu@faw.uni-ulm.de>
+
+	* configure.tgt: Switch sh-*-rtems* to ELF.  Add sh-*-rtemscoff*.
+
 2004-03-08  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* pe-dll.c (pe_dll_generate_implib): Skip sections marked as

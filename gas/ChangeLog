@@ -1,3 +1,8 @@
+2004-03-17  Ralf Corsepius <corsepiu@faw.uni-ulm.de>
+
+	* configure.in: Switch sh-*-rtems* to ELF.  Add sh-*-rtemscoff*.
+	* configure: Regenerate.
+
 2004-03-12  Bob Wilson  <bob.wilson@acm.org>
 
 	* read.c (s_leb128): Call md_flush_pending_output.

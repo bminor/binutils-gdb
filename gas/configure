@@ -4502,8 +4502,8 @@ echo "$as_me: error: Solaris must be configured little endian" >&2;}
       sh-*-coff*)			fmt=coff ;;
       sh-*-nto*)			fmt=elf ;;
       sh-*-pe*)				fmt=coff em=pe bfd_gas=yes endian=little ;;
-      sh-*-rtemself*)			fmt=elf ;;
-      sh-*-rtems*)			fmt=coff ;;
+      sh-*-rtemscoff*)			fmt=coff ;;
+      sh-*-rtems*)			fmt=elf ;;
       sh-*-kaos*)			fmt=elf ;;
       shle*-*-kaos*)			fmt=elf ;;
       sh64-*-elf*)			fmt=elf ;;
