@@ -63,7 +63,8 @@ netbsd_core_file_p (abfd)
      bfd *abfd;
 
 {
-  int i, val;
+  int val;
+  unsigned i;
   file_ptr offset;
   asection *asect;
   struct core core;

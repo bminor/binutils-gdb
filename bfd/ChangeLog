@@ -1,3 +1,7 @@
+2004-12-07  Ben Elliston  <bje@gnu.org>
+
+	* netbsd-core.c (netbsd_core_file_p): Make `i' unsigned.
+
 2004-12-06  Daniel Jacobowitz  <dan@debian.org>
 
 	Suggested by Fergal Daly <fergal@esatclear.ie>:
