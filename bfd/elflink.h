@@ -2542,7 +2542,14 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
 	      for (n = t->deps; n != NULL; n = n->next)
 		{
-		  defaux.vda_name = n->version_needed->name_indx;
+		  if (n->version_needed == NULL)
+		    {
+		      /* This can happen if there was an error in the
+			 version script.  */
+		      defaux.vda_name = 0;
+		    }
+		  else
+		    defaux.vda_name = n->version_needed->name_indx;
 		  if (n->next == NULL)
 		    defaux.vda_next = 0;
 		  else

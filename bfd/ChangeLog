@@ -1,3 +1,8 @@
+Mon Nov 10 14:32:40 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Don't crash if
+	a version dependency could not be found.
+
 Tue Nov  4 12:05:56 1997  Klaus K"ampf  <kkaempf@progis.de>
 
 	* configure.com: Get version info from configure.in
