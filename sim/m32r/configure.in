@@ -9,43 +9,12 @@ sim_link_files="${sim_link_files} m32r-sim.h ../../opcodes/m32r-opc.h"
 sim_link_links="${sim_link_links} cpu-sim.h cpu-opc.h"
 
 SIM_AC_OPTION_ENDIAN(BIG_ENDIAN)
-SIM_AC_OPTION_ALIGNMENT(NONSTRICT_ALIGNMENT)
+SIM_AC_OPTION_ALIGNMENT(STRICT_ALIGNMENT)
 SIM_AC_OPTION_HOSTENDIAN
 SIM_AC_OPTION_SCACHE(16384)
 SIM_AC_OPTION_DEFAULT_MODEL(m32r/d)
 SIM_AC_OPTION_ENVIRONMENT
 SIM_AC_OPTION_INLINE()
-
-cgen_maint=no
-# Default is to use one in build tree.
-cgen=../../cgen/cgen
-cgendir='$(srcdir)/../../cgen'
-# Having --enable-maintainer-mode take arguments is another way to go.
-# ??? One can argue --with is more appropriate if one wants to specify
-# a directory name, but what we're doing here is an enable/disable kind
-# of thing and specifying both --enable and --with is klunky.
-# If you reeely want this to be --with, go ahead and change it.
-AC_ARG_ENABLE(cgen-maint,
-[  --enable-cgen-maint[=dir]    build cgen generated files],
-[case "${enableval}" in
-  yes)	cgen_maint=yes ;;
-  no)	cgen_maint=no ;;
-  *)
-	# argument is cgen install directory (not implemented yet).
-	# Having a `share' directory might be more appropriate for the .scm,
-	# .cpu, etc. files.
-	cgendir=${cgen_maint}/lib/cgen
-	cgen=${cgendir}/bin/cgen
-	;;
-esac])dnl
-dnl AM_CONDITIONAL(CGEN_MAINT, test x${cgen_maint} != xno)
-if test x${cgen_maint} != xno ; then
-  CGEN_MAINT=''
-else
-  CGEN_MAINT='#'
-fi
-AC_SUBST(CGEN_MAINT)
-AC_SUBST(cgendir)
-AC_SUBST(cgen)
+SIM_AC_OPTION_CGEN_MAINT
 
 SIM_AC_OUTPUT
