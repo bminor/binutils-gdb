@@ -1,3 +1,25 @@
+start-sanitize-arc
+Thu Feb  9 17:44:29 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/tc-arc.c (md_pseudo_table): Add .cpu.
+	(comment_chars): Add ';'.
+	(arc_mach_type, mach_type_specified, cpu_tables_init_p): New globals.
+	(md_parse_option): Delete support for -mmult.  Add -mcpu=xxx.
+	(md_begin): Current ARCs are little endian.
+	Call bfd_set_arch_mach to set the cpu type.
+	(init_opcode_tables): New function.
+	(md_begin): Ignore suffixes and registers not supported by cpu.
+	(md_assemble): Initialize opcode tables here.
+	Ignore opcodes not supported by selected cpu.
+	Always ask for more memory in one piece.
+	(arc_cpu): New function.
+	(md_numbers_to_chars): Support both endians (will probably be needed
+	eventually anyway).
+	(md_apply_fix): Likewise.
+	* config/tc-arc.h (LOCAL_LABEL): Delete "_.L_", gcc works around
+	dwarfout.c quirk.
+end-sanitize-arc
+
 Thu Feb  9 18:16:34 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i386.c (md_assemble): Adjust conditions for changing
