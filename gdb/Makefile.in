@@ -2245,7 +2245,7 @@ mips-mdebug-tdep.o: mips-mdebug-tdep.c $(defs_h) $(frame_h) $(mips_tdep_h) \
 	$(elf_bfd_h) $(gdb_assert_h) $(frame_unwind_h) $(frame_base_h) \
 	$(mips_mdebug_tdep_h) $(mdebugread_h)
 mipsnbsd-nat.o: mipsnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
-	$(mips_tdep_h) $(mipsnbsd_tdep_h)
+	$(target_h) $(mips_tdep_h) $(mipsnbsd_tdep_h) $(inf_ptrace_h)
 mipsnbsd-tdep.o: mipsnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
 	$(regset_h) $(target_h) $(value_h) $(osabi_h) $(gdb_assert_h) \
 	$(gdb_string_h) $(nbsd_tdep_h) $(mipsnbsd_tdep_h) $(mips_tdep_h) \

@@ -22,13 +22,15 @@
 #include "defs.h"
 #include "inferior.h"
 #include "regcache.h"
-
-#include "mips-tdep.h"
-#include "mipsnbsd-tdep.h"
+#include "target.h"
 
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <machine/reg.h>
+
+#include "mips-tdep.h"
+#include "mipsnbsd-tdep.h"
+#include "inf-ptrace.h"
 
 /* Determine if PT_GETREGS fetches this register.  */
 static int
@@ -37,8 +39,8 @@ getregs_supplies (int regno)
   return ((regno) >= MIPS_ZERO_REGNUM && (regno) <= PC_REGNUM);
 }
 
-void
-fetch_inferior_registers (int regno)
+static void
+mipsnbsd_fetch_inferior_registers (int regno)
 {
   if (regno == -1 || getregs_supplies (regno))
     {
@@ -65,8 +67,8 @@ fetch_inferior_registers (int regno)
     }
 }
 
-void
-store_inferior_registers (int regno)
+static void
+mipsnbsd_store_inferior_registers (int regno)
 {
   if (regno == -1 || getregs_supplies (regno))
     {
@@ -100,4 +102,19 @@ store_inferior_registers (int regno)
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't write floating point status");
     }
+}
+
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void _initialize_mipsnbsd_nat (void);
+
+void
+_initialize_mipsnbsd_nat (void)
+{
+  struct target_ops *t;
+
+  t = inf_ptrace_target ();
+  t->to_fetch_registers = mipsnbsd_fetch_inferior_registers;
+  t->to_store_registers = mipsnbsd_store_inferior_registers;
+  add_target (t);
 }

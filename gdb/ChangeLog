@@ -1,3 +1,16 @@
+2004-10-31  Mark Kettenis  <kettenis@gnu.org>
+
+	* mipsnbsd-nat.c: Include "target.h" and "inf-ptrace.h".
+	(mipsnbsd_fetch_inferior_registers): Rename from
+	fetch_inferior_registers.  Make static.
+	(mipsnbsd_store_inferior_registers): Rename from
+	store_inferior_registers.  Make static.
+	(_initialize_mipsnbsd_nat): New function and prototype.
+	* Makefile.in (mipsnbsd-nat.o): Update dependencies.
+	* config/mips/nbsd.mh (NAT_CLIBS, NAT_FILE): Remove variables.
+	(NATDEPFILES): Remove infptrace.o and inftarg.o.  Add
+	inf-ptrace.o.
+
 2004-10-31  Andrew Cagney  <cagney@gnu.org>
 
 	* xstormy16-tdep.c (xstormy16_in_solib_call_trampoline)
