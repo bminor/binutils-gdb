@@ -802,6 +802,8 @@ value_primitive_field (arg1, offset, fieldno, arg_type)
 						    fieldno));
       VALUE_BITPOS (v) = TYPE_FIELD_BITPOS (arg_type, fieldno) % 8;
       VALUE_BITSIZE (v) = TYPE_FIELD_BITSIZE (arg_type, fieldno);
+      VALUE_OFFSET (v) = VALUE_OFFSET (arg1) + offset
+	+ TYPE_FIELD_BITPOS (arg_type, fieldno) / 8;
     }
   else if (fieldno < TYPE_N_BASECLASSES (arg_type))
     {

@@ -1,3 +1,16 @@
+2000-03-20  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* breakpoint.c (insert_breakpoints, remove_breakpoint)
+	(bpstat_stop_status, can_use_hardware_watchpoint): Don't insert,
+	remove, or check status of hardware watchpoints for entire structs
+	and arrays unless the user explicitly asked to watch that struct
+	or array.  
+	(insert_breakpoints): Try to insert watchpoints for all the values
+	on the value chain, even if some of them fail to insert.
+
+	* values.c (value_primitive_field): Set the offset in struct value
+	we return when the field is a packed bitfield.
+
 2000-03-20  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* remote.c (remote_threads_extra_info): new function.

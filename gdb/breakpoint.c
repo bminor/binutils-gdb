@@ -973,24 +973,39 @@ insert_breakpoints ()
 		if (VALUE_LVAL (v) == lval_memory
 		    && ! VALUE_LAZY (v))
 		  {
-		    CORE_ADDR addr;
-		    int len, type;
+		    struct type *vtype = check_typedef (VALUE_TYPE (v));
 
-		    addr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
-		    len = TYPE_LENGTH (VALUE_TYPE (v));
-		    type   = hw_write;
-		    if (b->type == bp_read_watchpoint)
-		      type = hw_read;
-		    else if (b->type == bp_access_watchpoint)
-		      type = hw_access;
-
-		    val = target_insert_watchpoint (addr, len, type);
-		    if (val == -1)
+		    /* We only watch structs and arrays if user asked
+		       for it explicitly, never if they just happen to
+		       appear in the middle of some value chain.  */
+		    if (v == b->val_chain
+			|| (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
+			    && TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
 		      {
-			b->inserted = 0;
-			break;
+			CORE_ADDR addr;
+			int len, type;
+
+			addr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
+			len = TYPE_LENGTH (VALUE_TYPE (v));
+			type   = hw_write;
+			if (b->type == bp_read_watchpoint)
+			  type = hw_read;
+			else if (b->type == bp_access_watchpoint)
+			  type = hw_access;
+
+			val = target_insert_watchpoint (addr, len, type);
+			if (val == -1)
+			  {
+			    /* Don't exit the loop, try to insert
+			       every value on the value chain.  That's
+			       because we will be removing all the
+			       watches below, and removing a
+			       watchpoint we didn't insert could have
+			       adverse effects.  */
+			    b->inserted = 0;
+			  }
+			val = 0;
 		      }
-		    val = 0;
 		  }
 	      }
 	    /* Failure to insert a watchpoint on any memory value in the
@@ -1326,21 +1341,28 @@ remove_breakpoint (b, is)
 	  if (VALUE_LVAL (v) == lval_memory
 	      && ! VALUE_LAZY (v))
 	    {
-	      CORE_ADDR addr;
-	      int len, type;
+	      struct type *vtype = check_typedef (VALUE_TYPE (v));
 
-	      addr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
-	      len = TYPE_LENGTH (VALUE_TYPE (v));
-	      type   = hw_write;
-	      if (b->type == bp_read_watchpoint)
-		type = hw_read;
-	      else if (b->type == bp_access_watchpoint)
-		type = hw_access;
+	      if (v == b->val_chain
+		  || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
+		      && TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
+		{
+		  CORE_ADDR addr;
+		  int len, type;
 
-	      val = target_remove_watchpoint (addr, len, type);
-	      if (val == -1)
-		b->inserted = 1;
-	      val = 0;
+		  addr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
+		  len = TYPE_LENGTH (VALUE_TYPE (v));
+		  type   = hw_write;
+		  if (b->type == bp_read_watchpoint)
+		    type = hw_read;
+		  else if (b->type == bp_access_watchpoint)
+		    type = hw_access;
+
+		  val = target_remove_watchpoint (addr, len, type);
+		  if (val == -1)
+		    b->inserted = 1;
+		  val = 0;
+		}
 	    }
 	}
       /* Failure to remove any of the hardware watchpoints comes here.  */
@@ -2570,14 +2592,21 @@ bpstat_stop_status (pc, not_a_breakpoint)
 	    if (VALUE_LVAL (v) == lval_memory
 		&& ! VALUE_LAZY (v))
 	      {
-		CORE_ADDR vaddr;
+		struct type *vtype = check_typedef (VALUE_TYPE (v));
 
-		vaddr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
-		/* Exact match not required.  Within range is sufficient.  
-		 */
-		if (addr >= vaddr &&
-		    addr < vaddr + TYPE_LENGTH (VALUE_TYPE (v)))
-		  found = 1;
+		if (v == b->val_chain
+		    || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
+			&& TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
+		  {
+		    CORE_ADDR vaddr;
+
+		    vaddr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
+		    /* Exact match not required.  Within range is
+                       sufficient.  */
+		    if (addr >= vaddr &&
+			addr < vaddr + TYPE_LENGTH (VALUE_TYPE (v)))
+		      found = 1;
+		  }
 	      }
 	  }
 	if (found)
@@ -5514,6 +5543,7 @@ can_use_hardware_watchpoint (v)
      struct value *v;
 {
   int found_memory_cnt = 0;
+  struct value *head = v;
 
   /* Did the user specifically forbid us to use hardware watchpoints? */
   if (!can_use_hw_watchpoints)
@@ -5551,13 +5581,23 @@ can_use_hardware_watchpoint (v)
 	    {
 	      /* Ahh, memory we actually used!  Check if we can cover
                  it with hardware watchpoints.  */
-	      CORE_ADDR vaddr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
-	      int       len   = TYPE_LENGTH (VALUE_TYPE (v));
+	      struct type *vtype = check_typedef (VALUE_TYPE (v));
 
-	      if (!TARGET_REGION_OK_FOR_HW_WATCHPOINT (vaddr, len))
-		return 0;
-	      else
-		found_memory_cnt++;
+	      /* We only watch structs and arrays if user asked for it
+		 explicitly, never if they just happen to appear in a
+		 middle of some value chain.  */
+	      if (v == head
+		  || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
+		      && TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
+		{
+		  CORE_ADDR vaddr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
+		  int       len   = TYPE_LENGTH (VALUE_TYPE (v));
+
+		  if (!TARGET_REGION_OK_FOR_HW_WATCHPOINT (vaddr, len))
+		    return 0;
+		  else
+		    found_memory_cnt++;
+		}
 	    }
 	}
       else if (v->lval != not_lval && v->modifiable == 0)
