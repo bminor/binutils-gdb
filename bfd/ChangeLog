@@ -1,3 +1,8 @@
+Thu Mar 12 11:15:02 1992  Per Bothner  (bothner@cygnus.com)
+
+	* libbfd-in.h (set_tdata):  Make change of Feb 27 in the
+	actual source file, not just the generated libbfd.h.
+
 Sat Mar  7 10:33:41 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* coff-i960.c (icoff_little_vec): add COFF_SWAP_TABLE so we can run
