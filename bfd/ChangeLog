@@ -1,3 +1,25 @@
+Sun Sep 11 22:50:49 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* cf-i386lynx.c: Remove #if 0 code.
+	(i386_lynxos_coff_object_p): Remove unused function.
+	(coff_bfd_link_add_symbols): Define.
+	(lynx_link_add_symbols): New static function.
+	* coffcode.h (coff_bfd_link_hash_table_create): If
+	coff_relocate_section is defined, only define this if not already
+	defined.
+	(coff_bfd_link_add_symbols, coff_bfd_final_link): Likewise.
+
+	* linker.c (_bfd_generic_final_link): Handle
+	bfd_indirect_link_order explicitly, rather than via
+	_bfd_default_link_order.
+	(set_symbol_from_hash): New static function, broken out of
+	_bfd_generic_link_write_global_symbol.
+	(_bfd_generic_link_write_global_symbol): Symbol setting code moved
+	to set_symbol_from_hash; call it.
+	(default_indirect_link_order): Add generic_linker argument.
+	Change all callers.  If false, set the generic symbols based on
+	the hash table entries.
+
 Fri Sep  9 11:51:49 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* coffgen.c (coff_get_symtab): Reindented.  Removed commented out
