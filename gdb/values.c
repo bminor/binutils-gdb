@@ -1070,7 +1070,7 @@ value_headof (arg, btype, dtype)
     {
       pc_for_sym = value_as_pointer (value_field (best_entry, 2));
       sym = find_pc_function (pc_for_sym);
-      demangled_name = cplus_demangle (SYMBOL_NAME (sym), -1);
+      demangled_name = cplus_demangle (SYMBOL_NAME (sym), 0);
       *(strchr (demangled_name, ':')) = '\0';
     }
   sym = lookup_symbol (demangled_name, 0, VAR_NAMESPACE, 0, 0);

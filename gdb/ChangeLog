@@ -1,3 +1,23 @@
+Tue May  5 11:10:27 1992  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (DEMANGLER):  Define and default to cplus-dem.
+	Allows selection of C++ demangler to be a configuration option
+	until multiple demanglers are supported.
+	* demangle.h:  New include file for extended demangler support.
+	* breakpoint.c, gdbtypes.c, printcmd.c, stack.c, symtab.c,
+	utils.c, valprint.c:  Include "demangle.h" and change all calls
+	to cplus_demangle() or fputs_demangled() to use individual
+	demangling options.
+	* valprint.c (type_print_1):  Change options to cplus_demangle
+	to print demangled function args.  Still broken, but now less so.
+	* cplus-dem.c:  Include demangle.h, reorganize and update some
+	comments to reflect reality.
+	* cplus-dem.c (cplus_demangle, cplus_mangle_opname):  Change
+	second arg from fixed integer to bit based multiple options.
+	* cplus-dem.c (optable):  Reformat and replace ansi members with
+	bit based options.
+	* cplus-dem.c (do_type):  Fix bug with parsing missing return type.
+
 Mon May  4 22:26:59 1992  John Gilmore  (gnu at cygnus.com)
 
 	* values.c (set_internalvar):  Force evaluation of lazy values.

@@ -27,6 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "obstack.h"
 #include "language.h"
+#include "demangle.h"
 
 #include <errno.h>
 
@@ -1032,7 +1033,8 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
 	      if ((msymbol != NULL) && (vt_address == msymbol -> address))
 		{
 		  fputs_filtered (" <", stream);
-		  fputs_demangled (msymbol -> name, stream, 1);
+		  fputs_demangled (msymbol -> name, stream,
+				   DMGL_ANSI | DMGL_PARAMS);
 		  fputs_filtered (">", stream);
 		}
 	      if (vtblprint)
@@ -1363,8 +1365,12 @@ type_print_1 (type, varstring, stream, show, level)
 	|| code == TYPE_CODE_REF)))
     fprintf_filtered (stream, " ");
   type_print_varspec_prefix (type, stream, show, 0);
-  fputs_demangled (varstring, stream, -1);	/* Print demangled name
-						   without arguments */
+  /* FIXME:  Previously this printed demangled names without function args,
+     which is a lose since you can't distinguish between overloaded function
+     names (try "info func" for example).  This change is still not optimal,
+     since you now get a superflous pair of parens for functions, but at
+     least you can distinguish them. */
+  fputs_demangled (varstring, stream, DMGL_PARAMS);
   type_print_varspec_suffix (type, stream, show, 0);
 }
 
@@ -1378,8 +1384,8 @@ type_print_method_args (args, prefix, varstring, staticp, stream)
 {
   int i;
 
-  fputs_demangled (prefix, stream, 1);
-  fputs_demangled (varstring, stream, 1);
+  fputs_demangled (prefix, stream, DMGL_ANSI | DMGL_PARAMS);
+  fputs_demangled (varstring, stream, DMGL_ANSI | DMGL_PARAMS);
   fputs_filtered (" (", stream);
   if (args && args[!staticp] && args[!staticp]->code != TYPE_CODE_VOID)
     {
@@ -1790,7 +1796,9 @@ type_print_base (type, stream, show, level)
 		    {
 		      /* Build something we can demangle.  */
 		      char *mangled_name = gdb_mangle_name (type, i, j);
-		      char *demangled_name = cplus_demangle (mangled_name, 1);
+		      char *demangled_name =
+			  cplus_demangle (mangled_name,
+					  DMGL_ANSI | DMGL_PARAMS);
 		      if (demangled_name == 0)
 			fprintf_filtered (stream, "<badly mangled name %s>",
 			    mangled_name);

@@ -18,29 +18,7 @@
 
 /* This is for g++ 1.95.03 (November 13 verison).  */
 
-/* This file exports one function
-
-   char *cplus_demangle (const char *name, int mode)
-
-   If NAME is a mangled function name produced by GNU C++, then
-   a pointer to a malloced string giving a C++ representation
-   of the name will be returned; otherwise NULL will be returned.
-   It is the caller's responsibility to free the string which
-   is returned.
-
-   If MODE > 0, then ANSI qualifiers such as `const' and `void' are output.
-   Otherwise they are not.
-   If MODE >= 0, parameters are emitted; otherwise not.
-
-   For example,
-   
-   cplus_demangle ("foo__1Ai",  0)	=> "A::foo(int)"
-   cplus_demangle ("foo__1Ai",  1)	=> "A::foo(int)"
-   cplus_demangle ("foo__1Ai", -1)	=> "A::foo"
-
-   cplus_demangle ("foo__1Afe",  0)	=> "A::foo(float,...)"
-   cplus_demangle ("foo__1Afe",  1)	=> "A::foo(float,...)"
-   cplus_demangle ("foo__1Afe", -1)	=> "A::foo"
+/* This file exports two functions; cplus_mangle_opname and cplus_demangle.
 
    This file imports xmalloc and xrealloc, which are like malloc and
    realloc except that they generate a fatal error if there is no
@@ -51,6 +29,7 @@
 
 /* GDB-specific, FIXME.  */
 #include "defs.h"
+#include "demangle.h"
 
 #include <ctype.h>
 
@@ -73,16 +52,18 @@
 #endif
 
 #ifdef __STDC__
-extern char *cplus_demangle (const char *type, int mode);
+extern char *cplus_demangle (const char *type, int options);
+extern char *cplus_mangle_opname (char *opname, int options);
 #else
 extern char *cplus_demangle ();
+extern char *cplus_mangle_opname ();
 #endif
 
 /* Stuff that is shared betwen sub-routines.
  * Using a shared structure allows cplus_demange to be reentrant. */
 
 struct work_stuff {
-  int arg_mode;
+  int options;
   char **typevec;
   int ntypes;
   int typevec_size;
@@ -91,81 +72,82 @@ struct work_stuff {
 const static struct optable {
   const char *in;
   const char *out;
-  int ansi;
+  int flags;
 } optable[] = {
-  "nw", " new",	1,		/* new (1.92, ansi) */
-  "dl", " delete", 1,		/* new (1.92, ansi) */
-  "new", " new", 0,		/* old (1.91, and 1.x) */
-  "delete", " delete", 0,	/* old (1.91, and 1.x) */
-  "as", "=", 1,			/* ansi */
-  "ne", "!=", 1,		/* old, ansi */
-  "eq", "==", 1,		/* old, ansi */
-  "ge", ">=", 1,		/* old, ansi */
-  "gt", ">", 1,			/* old, ansi */
-  "le", "<=", 1,		/* old, ansi */
-  "lt", "<", 1,			/* old, ansi */
-  "plus", "+", 0,		/* old */
-  "pl", "+", 1,			/* ansi */
-  "apl", "+=", 1,		/* ansi */
-  "minus", "-", 0,		/* old */
-  "mi", "-", 1,			/* ansi */
-  "ami", "-=", 1,		/* ansi */
-  "mult", "*", 0,		/* old */
-  "ml", "*", 1,			/* ansi */
-  "aml", "*=", 1,		/* ansi */
-  "convert", "+", 0,		/* old (unary +) */
-  "negate", "-", 0,		/* old (unary -) */
-  "trunc_mod", "%", 0,		/* old */
-  "md", "%", 1,			/* ansi */
-  "amd", "%=", 1,		/* ansi */
-  "trunc_div", "/", 0,		/* old */
-  "dv", "/", 1,			/* ansi */
-  "adv", "/=", 1,		/* ansi */
-  "truth_andif", "&&", 0,	/* old */
-  "aa", "&&", 1,		/* ansi */
-  "truth_orif", "||", 0,	/* old */
-  "oo", "||", 1,		/* ansi */
-  "truth_not", "!", 0,		/* old */
-  "nt", "!", 1,			/* ansi */
-  "postincrement", "++", 0,	/* old */
-  "pp", "++", 1,		/* ansi */
-  "postdecrement", "--", 0,	/* old */
-  "mm", "--", 1,		/* ansi */
-  "bit_ior", "|", 0,		/* old */
-  "or", "|", 1,			/* ansi */
-  "aor", "|=", 1,		/* ansi */
-  "bit_xor", "^", 0,		/* old */
-  "er", "^", 1,			/* ansi */
-  "aer", "^=", 1,		/* ansi */
-  "bit_and", "&", 0,		/* old */
-  "ad", "&", 1,			/* ansi */
-  "aad", "&=", 1,		/* ansi */
-  "bit_not", "~", 0,		/* old */
-  "co", "~", 1,			/* ansi */
-  "call", "()", 0,		/* old */
-  "cl", "()", 1,		/* ansi */
-  "alshift", "<<", 0,		/* old */
-  "ls", "<<", 1,		/* ansi */
-  "als", "<<=", 1,		/* ansi */
-  "arshift", ">>", 0,		/* old */
-  "rs", ">>", 1,		/* ansi */
-  "ars", ">>=", 1,		/* ansi */
-  "component", "->", 0,		/* old */
-  "rf", "->", 1,		/* ansi */
-  "indirect", "*", 0,		/* old */
-  "method_call", "->()", 0,	/* old */
-  "addr", "&", 0,		/* old (unary &) */
-  "array", "[]", 0,		/* old */
-  "vc", "[]", 1,		/* ansi */
-  "compound", ",", 0,		/* old */
-  "cm", ",", 1,			/* ansi */
-  "cond", "?:", 0,		/* old */
-  "cn", "?:", 1,		/* psuedo-ansi */
-  "max", ">?", 0,		/* old */
-  "mx", ">?", 1,		/* psuedo-ansi */
-  "min", "<?", 0,		/* old */
-  "mn", "<?", 1,		/* psuedo-ansi */
-  "nop", "", 0,			/* old (for operator=) */
+  "nw",		  " new",	DMGL_ANSI,	/* new (1.92,	 ansi) */
+  "dl",		  " delete",	DMGL_ANSI,	/* new (1.92,	 ansi) */
+  "new",	  " new",	0,		/* old (1.91,	 and 1.x) */
+  "delete",	  " delete",	0,		/* old (1.91,	 and 1.x) */
+  "as",		  "=",		DMGL_ANSI,	/* ansi */
+  "ne",		  "!=",		DMGL_ANSI,	/* old, ansi */
+  "eq",		  "==",		DMGL_ANSI,	/* old,	ansi */
+  "ge",		  ">=",		DMGL_ANSI,	/* old,	ansi */
+  "gt",		  ">",		DMGL_ANSI,	/* old,	ansi */
+  "le",		  "<=",		DMGL_ANSI,	/* old,	ansi */
+  "lt",		  "<",		DMGL_ANSI,	/* old,	ansi */
+  "plus",	  "+",		0,		/* old */
+  "pl",		  "+",		DMGL_ANSI,	/* ansi */
+  "apl",	  "+=",		DMGL_ANSI,	/* ansi */
+  "minus",	  "-",		0,		/* old */
+  "mi",		  "-",		DMGL_ANSI,	/* ansi */
+  "ami",	  "-=",		DMGL_ANSI,	/* ansi */
+  "mult",	  "*",		0,		/* old */
+  "ml",		  "*",		DMGL_ANSI,	/* ansi */
+  "aml",	  "*=",		DMGL_ANSI,	/* ansi */
+  "convert",	  "+",		0,		/* old (unary +) */
+  "negate",	  "-",		0,		/* old (unary -) */
+  "trunc_mod",	  "%",		0,		/* old */
+  "md",		  "%",		DMGL_ANSI,	/* ansi */
+  "amd",	  "%=",		DMGL_ANSI,	/* ansi */
+  "trunc_div",	  "/",		0,		/* old */
+  "dv",		  "/",		DMGL_ANSI,	/* ansi */
+  "adv",	  "/=",		DMGL_ANSI,	/* ansi */
+  "truth_andif",  "&&",		0,		/* old */
+  "aa",		  "&&",		DMGL_ANSI,	/* ansi */
+  "truth_orif",	  "||",		0,		/* old */
+  "oo",		  "||",		DMGL_ANSI,	/* ansi */
+  "truth_not",	  "!",		0,		/* old */
+  "nt",		  "!",		DMGL_ANSI,	/* ansi */
+  "postincrement","++",		0,		/* old */
+  "pp",		  "++",		DMGL_ANSI,	/* ansi */
+  "postdecrement","--",		0,		/* old */
+  "mm",		  "--",		DMGL_ANSI,	/* ansi */
+  "bit_ior",	  "|",		0,		/* old */
+  "or",		  "|",		DMGL_ANSI,	/* ansi */
+  "aor",	  "|=",		DMGL_ANSI,	/* ansi */
+  "bit_xor",	  "^",		0,		/* old */
+  "er",		  "^",		DMGL_ANSI,	/* ansi */
+  "aer",	  "^=",		DMGL_ANSI,	/* ansi */
+  "bit_and",	  "&",		0,		/* old */
+  "ad",		  "&",		DMGL_ANSI,	/* ansi */
+  "aad",	  "&=",		DMGL_ANSI,	/* ansi */
+  "bit_not",	  "~",		0,		/* old */
+  "co",		  "~",		DMGL_ANSI,	/* ansi */
+  "call",	  "()",		0,		/* old */
+  "cl",		  "()",		DMGL_ANSI,	/* ansi */
+  "alshift",	  "<<",		0,		/* old */
+  "ls",		  "<<",		DMGL_ANSI,	/* ansi */
+  "als",	  "<<=",	DMGL_ANSI,	/* ansi */
+  "arshift",	  ">>",		0,		/* old */
+  "rs",		  ">>",		DMGL_ANSI,	/* ansi */
+  "ars",	  ">>=",	DMGL_ANSI,	/* ansi */
+  "component",	  "->",		0,		/* old */
+  "rf",		  "->",		DMGL_ANSI,	/* ansi */
+  "indirect",	  "*",		0,		/* old */
+  "method_call",  "->()",	0,		/* old */
+  "addr",	  "&",		0,		/* old (unary &) */
+  "array",	  "[]",		0,		/* old */
+  "vc",		  "[]",		DMGL_ANSI,	/* ansi */
+  "compound",	  ", ",		0,		/* old */
+  "cm",		  ", ",		DMGL_ANSI,	/* ansi */
+  "cond",	  "?:",		0,		/* old */
+  "cn",		  "?:",		DMGL_ANSI,	/* psuedo-ansi */
+  "max",	  ">?",		0,		/* old */
+  "mx",		  ">?",		DMGL_ANSI,	/* psuedo-ansi */
+  "min",	  "<?",		0,		/* old */
+  "mn",		  "<?",		DMGL_ANSI,	/* psuedo-ansi */
+  "nop",	  "",		0,		/* old (for operator=) */
+  "rm",		  "->*",	DMGL_ANSI,	/* ansi */
 };
 
 /* Beware: these aren't '\0' terminated. */
@@ -233,32 +215,55 @@ string_prepends PARAMS ((string *, string *));
 /* Takes operator name as e.g. "++" and returns mangled
    operator name (e.g. "postincrement_expr"), or NULL if not found.
 
-   If ARG_MODE == 1, return the ANSI name;
-   if ARG_MODE == 0 return the old GNU name.  */
+   If OPTIONS & DMGL_ANSI == 1, return the ANSI name;
+   if OPTIONS & DMGL_ANSI == 0, return the old GNU name.  */
+
 char *
-cplus_mangle_opname (opname, arg_mode)
+cplus_mangle_opname (opname, options)
      char *opname;
-     int arg_mode;
+     int options;
 {
   int i, len = strlen (opname);
 
-  if (arg_mode != 0 && arg_mode != 1)
-    error ("invalid arg_mode");
-
-  for (i = 0; i < sizeof (optable)/sizeof (optable[0]); i++)
+  for (i = 0; i < sizeof (optable) / sizeof (optable[0]); i++)
     {
       if (strlen (optable[i].out) == len
-	  && arg_mode == optable[i].ansi
+	  && (options & DMGL_ANSI) == (optable[i].flags & DMGL_ANSI)
 	  && memcmp (optable[i].out, opname, len) == 0)
 	return (char *)optable[i].in;
     }
   return 0;
 }
 
+/* char *cplus_demangle (const char *name, int options)
+
+   If NAME is a mangled function name produced by GNU C++, then
+   a pointer to a malloced string giving a C++ representation
+   of the name will be returned; otherwise NULL will be returned.
+   It is the caller's responsibility to free the string which
+   is returned.
+
+   The OPTIONS arg may contain one or more of the following bits:
+
+   	DMGL_ANSI	ANSI qualifiers such as `const' and `void' are
+			included.
+	DMGL_PARAMS	Function parameters are included.
+
+   For example,
+   
+   cplus_demangle ("foo__1Ai", DMGL_PARAMS)		=> "A::foo(int)"
+   cplus_demangle ("foo__1Ai", DMGL_PARAMS | DMGL_ANSI)	=> "A::foo(int)"
+   cplus_demangle ("foo__1Ai", 0)			=> "A::foo"
+
+   cplus_demangle ("foo__1Afe", DMGL_PARAMS)		=> "A::foo(float,...)"
+   cplus_demangle ("foo__1Afe", DMGL_PARAMS | DMGL_ANSI)=> "A::foo(float,...)"
+   cplus_demangle ("foo__1Afe", 0)			=> "A::foo"
+   */
+
 char *
-cplus_demangle (type, arg_mode)
+cplus_demangle (type, options)
      const char *type;
-     int arg_mode;
+     int options;
 {
   string decl;
   int n;
@@ -274,8 +279,8 @@ cplus_demangle (type, arg_mode)
   const char *premangle;
 #endif
 
-# define print_ansi_qualifiers (work->arg_mode >  0)
-# define print_arg_types       (work->arg_mode >= 0)
+# define PRINT_ANSI_QUALIFIERS (work->options & DMGL_ANSI)
+# define PRINT_ARG_TYPES       (work->options & DMGL_PARAMS)
 
   if (type == NULL || *type == '\0')
     return NULL;
@@ -284,7 +289,7 @@ cplus_demangle (type, arg_mode)
     return NULL;
 #endif
 
-  work->arg_mode = arg_mode;
+  work->options = options;
   work->typevec = NULL;
   work->ntypes = 0;
   work->typevec_size = 0;
@@ -311,7 +316,7 @@ cplus_demangle (type, arg_mode)
 	  strcpy (tem, type);
 	  strcat (tem, "::~");
 	  strcat (tem, type);
-	  if (print_arg_types)
+	  if (PRINT_ARG_TYPES)
 	    strcat (tem, "()");
 	  return tem;
 	}
@@ -357,7 +362,7 @@ cplus_demangle (type, arg_mode)
 	  string_appendn (&decl, type, p - type);
 	  string_need (&decl, 1);
 	  *(decl.p) = '\0';
-	  munge_function_name (&decl, work); /* arg_mode=1 ?? */
+	  munge_function_name (&decl, work); /* options ?? */
 	  if (decl.b[0] == '_')
 	    {
 	      string_delete (&decl);
@@ -471,7 +476,7 @@ cplus_demangle (type, arg_mode)
 	}
       else
 	success = do_args (&p, &decl, work);
-      if (const_flag && print_arg_types)
+      if (const_flag && PRINT_ARG_TYPES)
 	string_append (&decl, " const");
       break;
     case 'F':
@@ -777,9 +782,12 @@ do_type (type, result, work)
 	      string_prepend (&decl, "(");
 	      string_append (&decl, ")");
 	    }
-	  if (!do_args (type, &decl, work) || **type != '_')
+	  /* After picking off the function args, we expect to either find the
+	     function type (preceded by an '_') or the end of the string. */
+	  if (!do_args (type, &decl, work)
+	      || (**type != '_' && **type != '\0'))
 	    success = 0;
-	  else
+	  if (success && (**type == '_'))
 	    *type += 1;
 	  break;
 
@@ -838,7 +846,7 @@ do_type (type, result, work)
 		break;
 	      }
 	    *type += 1;
-	    if (! print_ansi_qualifiers)
+	    if (! PRINT_ANSI_QUALIFIERS)
 	      break;
 	    if (constp)
 	      {
@@ -863,7 +871,7 @@ do_type (type, result, work)
 	  if ((*type)[1] == 'P')
 	    {
 	      *type += 1;
-	      if (print_ansi_qualifiers)
+	      if (PRINT_ANSI_QUALIFIERS)
 		{
 		  if (!string_empty (&decl))
 		    string_prepend (&decl, " ");
@@ -887,7 +895,7 @@ do_type (type, result, work)
 	{
 	case 'C':
 	  *type += 1;
-	  if (print_ansi_qualifiers)
+	  if (PRINT_ANSI_QUALIFIERS)
 	    {
 	      if (non_empty)
 		string_append (result, " ");
@@ -914,7 +922,7 @@ do_type (type, result, work)
 	  break;
 	case 'V':
 	  *type += 1;
-	  if (print_ansi_qualifiers)
+	  if (PRINT_ANSI_QUALIFIERS)
 	    {
 	      if (non_empty)
 		string_append (result, " ");
@@ -1103,7 +1111,7 @@ do_args (type, decl, work)
   string arg;
   int need_comma = 0;
 
-  if (print_arg_types)
+  if (PRINT_ARG_TYPES)
     string_append (decl, "(");
 
   while (**type != '_' && **type != '\0' && **type != 'e' && **type != 'v')
@@ -1118,11 +1126,11 @@ do_args (type, decl, work)
 	  while (--r >= 0)
 	    {
 	      const char *tem = work->typevec[t];
-	      if (need_comma && print_arg_types)
+	      if (need_comma && PRINT_ARG_TYPES)
 		string_append (decl, ", ");
 	      if (!do_arg (&tem, &arg, work))
 		return 0;
-	      if (print_arg_types)
+	      if (PRINT_ARG_TYPES)
 		string_appends (decl, &arg);
 	      string_delete (&arg);
 	      need_comma = 1;
@@ -1130,11 +1138,11 @@ do_args (type, decl, work)
 	}
       else
 	{
-	  if (need_comma & print_arg_types)
+	  if (need_comma & PRINT_ARG_TYPES)
 	    string_append (decl, ", ");
 	  if (!do_arg (type, &arg, work))
 	    return 0;
-	  if (print_arg_types)
+	  if (PRINT_ARG_TYPES)
 	    string_appends (decl, &arg);
 	  string_delete (&arg);
 	  need_comma = 1;
@@ -1146,7 +1154,7 @@ do_args (type, decl, work)
   else if (**type == 'e')
     {
       *type += 1;
-      if (print_arg_types)
+      if (PRINT_ARG_TYPES)
 	{
 	  if (need_comma)
 	    string_append (decl, ",");
@@ -1154,7 +1162,7 @@ do_args (type, decl, work)
 	}
     }
 
-  if (print_arg_types)
+  if (PRINT_ARG_TYPES)
     string_append (decl, ")");
   return 1;
 }

@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "language.h"
 #include "target.h"
 #include "value.h"
+#include "demangle.h"
 
 /* Alloc a new type structure and fill it with some defaults.  If
    OBJFILE is non-NULL, then allocate the space for the type structure
@@ -739,7 +740,7 @@ check_stub_method (type, i, j)
 {
   struct fn_field *f;
   char *mangled_name = gdb_mangle_name (type, i, j);
-  char *demangled_name = cplus_demangle (mangled_name, 0);
+  char *demangled_name = cplus_demangle (mangled_name, DMGL_PARAMS);
   char *argtypetext, *p;
   int depth = 0, argcount = 1;
   struct type **argtypes;
