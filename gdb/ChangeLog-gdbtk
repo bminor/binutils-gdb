@@ -1,0 +1,1196 @@
+Tue Dec 16 21:16:42 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (LIBGUI): New variable.
+	(GUI_CFLAGS_X): New variable.
+	(IDE_CFLAGS): Add $(GUI_CFLAGS_X).
+	* configure.in: Add $(LIBGUI) to TCL_LIBS and CONFIG_DEPS.
+	* configure: Rebuild.
+
+Wed Dec  10 13:16:45 1997  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* gdbtk.c (gdb_get_tracepoint_info): Use info in struct 
+	symtab_and_line (not struct tracepoint) so that we get the
+	real line info for an address. Arrange data more like
+	gdb_get_breakpoint_info.
+	(tracepoint_notify): Use info in struct symtab_and_line again.
+	(gdbtk_init): Add command "gdb_get_tracepoint_list" into
+	interpreter.
+	(gdb_get_tracepoint_list): New function that aids the source
+	window in displaying tracepoints when the file changes.
+	
+Fri Dec  5 10:31:23 1997  Keith Seitz  <keiths@pizza.cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Add gdb_find_file into interpreter.
+	(gdb_find_file_command): New function which searches source path
+	to find the real full filename of a file.
+
+Mon Dec  1 10:19:44 1997  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* gdbtk.c: Move include of "guitcl.h" back out of IDE ifdef.
+	(gdbtk_init): Move ide_initialize_paths out of IDE ifdef.
+
+	* configure.in (TCL_LIBS, CONFIG_DEPS): Add IDE libraries for all
+	builds.
+	(CONFIG_OBS): Remove tracepoint.o, which should always be included.
+
+	* configure: regenerate
+
+	* Makefile.in (install-only): ALWAYS install the new gdbtk
+	(REMOTE_OBS): add tracepoint.o
+	
+Thu Nov 27 09:07:18 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* configure.in ({TCL_LIBS,CONFIG_DEPS}): Don't add IDE libraries
+	if not --enable-ide.
+	(CONFIG_OBS): Add tracepoint.o to list if --enable-gdbtk.
+	* configure: Regenerate.
+
+	* gdbtk.c (gdb_get_breakpoint_info): Add missing filename
+	argument.
+	(toplevel): Move include of guitcl.h into #ifdef IDE region.
+	(gdbtk_init): Move ide_initialize_paths call into #ifdef IDE
+	section.
+
+	* Makefile.in (gdbtk.o): Update dependencies.
+
+Wed Nov 26 15:02:43 1997  Keith Seitz  <keiths@onions.cygnus.com>
+
+    	* gdbtk.c (gdb_loc): symtab_to_filename can return NULL.
+	(breakpoint_notify): Ditto.
+	(gdb_get_breakpoint_info): Ditto.
+
+Wed Nov 26 11:33:09 1997  Keith Seitz  <keiths@onions.cygnus.com>
+
+	Merge in code from Foundry branch:
+	
+	* Makefile.in (install-only): install the new gdbtk, not the old
+
+	* gdbtk.c (gdbtk_call_command): also run idle hooks for class_trace
+	commands
+	(gdbtk_init): Add new commands "gdb_get_locals", "gdb_get_args",
+	"gdb_get_function", "gdb_get_line", "gdb_get_file",
+	"gdb_tracepoint_exists", "gdb_get_tracepoint_info", "gdb_actions",
+	and "gdb_prompt".
+	(gdb_get_vars_command): New function.
+	(gdb_get_line_command): New.
+	(gdb_get_file_command): New.
+	(gdb_get_function_command): New.
+	(gdb_get_tracepoint_info): New.
+	(gdbtk_create_tracepoint): New.
+	(gdbtk_delete_tracepoint): New.
+	(tracepoint_notify): New.
+	(tracepoint_exists): New.
+	(gdb_actions_command): New.
+	(gdb_tracepoint_exists_command): New.
+	(gdb_prompt_command): New.
+
+Thu Nov 13 18:15:54 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbtk.c: Move include of gdbcore.h to top of file.
+	(close_bfds): New static function if _WIN32.
+	(gdbtk_readline): Call close_bfds.
+	(call_wrapper, tk_command_loop): Likewise.
+	(gdb_clear_file): New static function.
+	(gdbtk_init): Create gdb_clear_file Tcl command.
+
+Wed Nov 12 14:58:39 1997  Jeff Holcomb  <jeffh@cygnus.com>
+
+	* gdbtk.c: gdbtk_load_hash and ui_load_progress_hook return an
+	int result.
+	(gdbtk_load_hash): download hash routine returns an int result.
+
+Mon Nov 10 15:11:51 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Call ide_create_shell_execute_command if
+	__CYGWIN32__.
+	* configure.in: Add -lshell32 to WIN32LIBS on cygwin32.
+	* configure: Rebuild.
+
+Sun Nov  9 16:25:34 1997  Tom Tromey  <tromey@cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Run ide_create_help_command.
+
+Tue Oct 28 17:31:47 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Call ide_create_winprint_command.
+
+Thu Oct 23 15:53:37 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Add -lgdi32 to WIN32LIBS when linking gdbtk on
+	cygwin32.
+	* configure: Rebuild.
+
+Wed Oct 22 21:32:54 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Create sizebox command on Windows.
+
+Thu Oct  9 14:33:21 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Remove assertion argument from call to
+	ide_create_window_register_command.
+
+Wed Oct  1 11:09:52 1997  Tom Tromey  <tromey@cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Pass name of restore interface to
+	ide_create_window_register_command.
+
+Fri Sep 26 21:08:22 1997  Keith Seitz  <keiths@pizza.cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Initialize ui_load_progress_hook.
+
+Thu Sep 25 03:05:00 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk.c (gdb_load_info): New function.  Returns a list
+	of section names and sizes for an executable.
+	(gdbtk_load_hash): Stub function to call tcl function
+	download_hash.
+
+Tue Sep 23 01:29:00 1997  Martin M. Hunt  <hunt@cygnus.com>	
+
+	* gdbtk.c (gdb_get_mem): Fix compiler warning.
+
+Sun Sep 21 00:15:00 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk.c (gdb_get_mem): Fix problem with ASCII dump.
+
+Tue Sep 16 18:07:17 1997  Martin M. Hunt  <hunt@cygnus.com>	
+
+	* gdbtk.c (gdb_get_mem): New function.  Returns
+	a formatted memory dump with optional ASCII dump.
+
+Mon Sep  8 12:48:50 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbtk.c: Include ilutk.h if IDE.
+	(gdb_confirm_quit, gdb_force_quit): New static functions.
+	(gdbtk_init): Add Tcl commands gdb_confirm_quit and
+	gdb_force_quit.
+
+Mon Sep  8 03:05:33 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk.c (gdb_get_breakpoint_info): Now returns the
+	function a breakpoint is in.
+
+Fri Sep  5 20:23:58 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Call ide_create_exit_command.
+
+Wed Sep  3 19:39:15 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbtk.c: Include guitcl.h.
+	(gdbtk_init): Always call ide_initialize_paths.  Set the Tcl
+	variable IDE to 1 when using the IDE.  Always try using auto path
+	to find main.tcl.
+	* Makefile.in (IDE_CFLAGS_X): Always include libide.
+	(LIBIDE): New variable.
+	(IDE_X): Omit -lide.
+	(IDE_DEPS): Omit libide.
+	* configure.in: Add LIBIDE to TCL_LIBS and CONFIG_DEPS.
+	* configure: Rebuild.
+
+Mon Aug 25 02:28:55 1997  Keith Seitz  <keiths@pizza.cygnus.com>
+
+	* gdbtk.c: (gdb_target_has_inferior) check if inferior_pid is non-zero
+	before assuming that the inferior is running.
+
+Mon Aug 25 01:06:48 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbtk.c (gdbtk_start_timer): Pass third argument to setitimer.
+	(gdbtk_stop_timer): Likewise.
+
+Mon Aug 25 00:23:08 1997  Keith Seitz  <keiths@pizza.cygnus.com>
+
+	* gdbtk.c: (gdbtk_init) create new command "gdb_target_has_execution"
+	(gdb_target_has_execution_command) new function
+
+Sun Aug 24 20:27:22 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbtk.c (gdb_loc): If there are no symbols, just bail
+	immediately.
+	(tk_command_loop): Print errors encountered while running
+	gdbtk_tcl_preloop.
+
+Sun Aug 24 13:44:03 1997  Tom Tromey  <tromey@cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Run ide_create_build_command.
+
+Sat Aug 23 21:53:39 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbtk.c: If CYGWIN32, include <sys/time.h>.
+	(x_fd): Don't define if WINNT.
+	(gdbtk_start_timer, gdbtk_stop_timer): New static functions if
+	CYGWIN32.
+	(gdbtk_wait): Don't set up signal handling if WINNT.  If CYGWIN32,
+	call gdbtk_start_timer and gdbtk_stop_timer.
+	(gdbtk_init): Don't set up signal handling or make x_fd
+	asynchronous if CYGWIN32.
+
+Fri Aug 22 15:23:15 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbtk.c (error_string_ptr): New static variable.
+	(gdbtk_fputs): If result_ptr is NULL, and error_string_ptr is not
+	NULL, and we're outputting to stderr, append string to
+	error_string_ptr rather than calling gdbtk_tcl_fputs.
+	(call_wrapper): Set up error_string_ptr.  Put both error string
+	and normal string in Tcl result.
+
+	* gdbtk.c (gdbtk_init): Don't call ide_run_server_init until after
+	gdb has initialized.
+
+Thu Aug 21 19:14:38 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbtk.c: If _WIN32, include winuser.h.
+	(gdbtk_init): If _WIN32, use MessageBox to display an error
+	evaluating main.tcl.
+
+Thu Aug 21 00:48:00 1997  Martin M. Hunt  <hunt@pern.cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Add call to ide_run_server_init().
+	(gdb_cmd): For the load command, don't buffer the I/O.
+
+Wed Aug 20 11:41:22 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk.c (gdbtk_query): Chaneg free() call to Tcl_Free().
+ 	
+Tue Aug 19 17:09:19 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (TCL_DEPS, TK_DEPS): New variables.
+	(ITCL_DEPS, TIX_DEPS): New variables.
+	(IDE_DEPS): New variable.
+	(CDEPS): Include @CONFIG_DEPS@.
+	* configure.in: Set and substitute CONFIG_DEPS and TIX_DEPS.
+	* configure: Rebuild.
+
+Sun Aug 17 00:42:11 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk.c (gdb_listfuncs): New function that returns
+	a list of all the functions in a source file.
+
+Tue Aug 12 16:35:21 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (install-only): Install tclIndex if ENABLE_IDE.
+
+Mon Aug 11 10:43:04 1997  Tom Tromey  <tromey@cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Use ide_event_init_from_environment.
+
+Fri Aug  8 15:59:24 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Change gdbtk_lib_tmp and gdbtk_file to be
+	dynamically allocated, rather than fixed size.  Pass "gdbtcl" to
+	ide_initialize_paths to match installed directory name.  If IDE,
+	use auto_path to search for main.tcl.
+	* Makefile.in (install-only): If ENABLE_IDE, install from gdbtcl2
+	rather than gdbtcl.
+
+	* gdbtk.c (gdbtk_cleanup): New static function.
+	(gdbtk_init): Add gdbtk_cleanup as a final cleanup.  Uncomment
+	call to ide_initialize_paths.  If we can't initialize the event
+	system, set GDBTK_IDE to 0 in the Tcl interpreter.  Create the
+	ide_window_register and the ide_window commands.  Initialize tk,
+	itcl, and tix after initializing the IDE.
+
+	* configure.in (tixdir): Update for cygwin32 case for Tcl 8.0.
+	* configure: Rebuild.
+
+Fri Aug  8 00:13:32 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk.c (breakpoint_notify): Change buffer size from 100
+	to 256 to avoid memory corruption with very long pathnames.
+
+Thu Aug  7 14:08:23 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* configure.in: Change required Tix version to 4.1.8.0 .
+	* configure: Rebuilt.
+
+Fri Aug  1 15:21:44 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbtk.c (Tcl_Alloc): Don't provide our own version of this if
+	_WIN32.
+	(Tcl_Realloc, Tcl_Free): Likewise.
+	* configure.in: Check for cygwin32 environment.  Define and
+	substitute WIN32LIBS and WIN32LDAPP.  Always set configdir to
+	unix; setting it to win was for an old Tcl/Tk configuration
+	scheme.
+	* aclocal.m4 (CY_AC_LOAD_TKCONFIG): Substitute TK_BUILD_INCLUDES.
+	* Makefile.in (TK_CFLAGS): Add @TK_BUILD_INCLUDES@.
+	(WIN32LDAPP, WIN32LIBS): Define.
+	(CLIBS): Add $(WIN32LIBS).
+	(gdb): Use $(WIN32LDAPP).
+	* configure: Rebuild.
+
+Tue Jul 22 19:45:37 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* configure.in, aclocal.m4: Another fix to find the
+	correct Tix library name.
+
+	* configure: Rebuilt.
+	
+Mon Jul 21 22:24:07 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* aclocal.m4: Search for the correct tix library. 
+
+Thu Jul 10 00:02:41 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* Makefile.in, configure.in, aclocal.m4: Add Itcl, Tix, and 
+	IDE configuration information.
+
+	* gdbtk.c (breakpoint_notify): Send address, linenumber and 
+	filename when a breakpoint is set.  Avoids call to bp_info.
+ 	(gdbtk_init): Call Tcl_FindExecutable(). Add code to handle 
+	Itcl, Tix and IDE initialization.
+
+	* configure: Regenerated.
+
+Fri Jun 13 10:28:09 1997  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Make truth value test explicit.
+	Remove unused static variable "Gdbtk_Library".
+
+Sat Jun  7 02:34:19 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdbtk.c (gdb_get_breakpoint_info):  Add string for new
+	enumeration del_at_next_stop to bpdisp array.
+
+Tue Jun  3 15:46:51 1997  Tom Tromey  <tromey@cygnus.com>
+
+	* Makefile.in (LIB_RUNTIME_DIR): New variable.
+
+Wed May  7 19:10:19 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbtk.c (wrapped_call): New function - make actual call to tk
+ 	worker function.
+	(call_wrapper): Rewrite to use top.c:catch_errors.
+
+	* gdbtk.c (gdb_stop): If No target_stop set quit flag and hope for
+ 	best.
+
+Mon Apr 21 14:00:08 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* gdbtk.c (gdb_disassemble): Store endian-ness in `di'.
+
+Wed Apr 16 12:33:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (install-only): Make list of gdbtcl files to install
+ 	explicit - was picking up files such as ChangeLog etc.
+	(install-only): Don't blindly create the directory.
+
+Tue Apr  1 15:04:21 1997  Jason Molenda  (crash@godzilla.cygnus.co.jp)
+
+	* configure.in (gdbtcl): Create soft-link for gdbtcl/ directory
+ 	instead of gdbtk.tcl.
+
+Fri Mar 28 17:04:02 1997  Jason Molenda  (crash@godzilla.cygnus.co.jp)
+
+	* Makefile.in (gdbtk.o): look for GDBTK_LIBRARY in $(datadir) by
+	default, not $(srcdir).
+
+Wed Mar 19 15:16:17 1997  Martin M. Hunt  <hunt@onions.cygnus.com>
+
+	* Makefile.in:  Install gdbtcl dir instead of gdbtk.tcl.
+	
+	* gdbtk.c: Added some ifdefs for Windows.  Changed GDBTK_FILENAME
+	to GDBTK_LIBRARY, which is now a path to search.
+	(gdb_path_conv): New function.  Convert Cygwin32 pathname to
+	DOS-style pathname.
+
+	* {aclocal.m4,configure.in}: Changes for Windows builds.
+
+	* configure: Rebuilt.
+
+Fri Mar 14 10:01:29 1997  Tom Tromey  <tromey@cygnus.com>
+
+	* configure: Regenerated.
+	* configure.in (LIBS): Re-reverse order of TCL_LIBS and TK_LIBS.
+
+Wed Mar 12 14:29:52 1997  Tom Tromey  <tromey@cygnus.com>
+
+	* gdbtk.c (x_event): Use Tcl_DoOneEvent, TCL_DONT_WAIT,
+	TCL_ALL_EVENTS.
+
+	* configure: Regenerated.
+	* configure.in (ENABLE_GDBTK): Put TCL_LIBS after TK_LIBS in
+	LIBS.
+
+Mon Feb 10 13:50:53 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* gdbtk.c (call_wrapper):  Clear running_now if an error occurs.
+
+Wed Dec 11 18:51:35 1996  Mark Alexander  <marka@cygnus.com>
+
+	* gdbtk.c (gdb_loc): Correct truncation of PC on 64-bit MIPS.
+
+Tue Nov 19 09:26:14 1996  Tom Tromey  <tromey@cygnus.com>
+
+	* gdbtk.c (gdbtk_readline): Fix memory leak.
+
+Mon Nov 18 23:43:05 1996  Tom Tromey  <tromey@cygnus.com>
+
+	Fixes for Tcl 7.6 / Tk 4.2:
+	* gdbtk.tcl (apply_filespec): Use tk_getOpenFile.
+	Remove old fileselect code.
+	* gdbtk.c (Tcl_Alloc): Rename from Tcl_Malloc.
+
+Fri Sep 27 10:25:30 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.tcl (create_copyright_window): Increase timeout from
+	15 seconds to 30 seconds.
+
+Wed Sep  4 17:28:40 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* configure configure.in:  Add host *windows* to list of hosts
+	that don't support GDBtk.
+
+Fri Aug 23 00:44:57 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Check for a DISPLAY env variable and
+	gracefully degrade to using command line interface if none is
+	found.
+
+Fri Aug  9 12:32:53 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* Makefile.in (LIB_INSTALL_DIR): New macro.
+	(TCL): Include @TCL_LD_SEARCH_FLAGS@.
+
+Thu Aug  1 20:35:01 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* gdbtk.c (mainWindow): Deleted.
+	(cleanup_init): Don't destroy main window.
+	(gdbtk_init): Main window now created by Tk_Init.
+
+	* configure.in: Most X checks now handled automatically by Tk.
+	Use new macros to find Tcl/Tk.
+	* aclocal.m4: New version for new Tcl/Tk; from Don Libes.
+	* config.in, configure: Regenerated.
+
+	* Makefile.in (TCL, TCL_CFLAGS, TK, TK_CFLAGS, X11_CFLAGS,
+	X11_LDFLAGS, X11_LIBS): Changed for new Tcl and Tk.
+
+Thu Aug  1 16:12:05 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
+
+	* Makefile.in (gdbtk.tcl): put in $(datadir), not $(libdir).
+
+Fri Jul 26 14:07:37 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbtk.c (gdb_disassemble): Initialize di.flavour.
+
+Thu Jul 25 19:41:31 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.c (null_routine): Ditto.
+	(gdbtk_flush): Ditto.
+ 	(gdbtk_fputs): Ditto.
+ 	(gdbtk_query): Ditto.
+	(gdbtk_readline): Ditto.
+ 	(gdbtk_readline_end): Ditto.
+ 	(gdb_get_breakpoint_list): Ditto.
+	(gdb_get_breakpoint_info): Ditto.
+ 	(breakpoint_notify): Ditto.
+ 	(gdbtk_create_breakpoint): Ditto.
+	(gdbtk_delete_breakpoint): Ditto.
+ 	(gdbtk_modify_breakpoint): Ditto.
+ 	(gdb_loc): Ditto.
+ 	(gdb_eval): Ditto.
+	(gdb_sourcelines): Ditto.
+ 	(map_arg_registers): Ditto.
+ 	(get_register_name): Ditto.
+ 	(gdb_regnames): Ditto.
+	(get_register): Ditto.
+ 	(gdb_fetch_registers): Ditto.
+ 	(register_changed_p): Ditto.
+	(gdb_changed_register_list): Ditto.
+ 	(gdb_cmd): Ditto.
+ 	(call_wrapper): Ditto.
+ 	(gdb_listfiles): Ditto.
+	(gdb_stop): Ditto.
+ 	(gdbtk_dis_asm_read_memory): Ditto.
+ 	(compare_lines): Ditto.
+ 	(gdb_disassemble): Ditto.
+	(tk_command): Ditto.
+ 	(cleanup_init): Ditto.
+ 	(gdbtk_interactive): Ditto.
+ 	(x_event): Ditto.
+ 	(gdbtk_wait): Ditto.
+	(gdbtk_call_command): Ditto.
+ 	(tk_command_loop): Ditto.
+ 	(gdbtk_init): Ditto.
+
+	* gdbtk.c (register_changed_p): Remove unused local variable "buf".
+
+Sat Jul 20 17:46:40 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.tcl (files_command): Reorder the binding tags for
+	the listbox widget to avoid referencing the listbox after
+	the containing widget has been destroyed by the action of
+	a previous binding.
+
+Sat Jul 20 10:09:28 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.tcl (delete_expr): Unset corresponding element of
+	expr_update_list when destroying an expression.
+	(create_expr_window): Initialize expr_num, delete_expr_num,
+	and expr_update_list here when each new expression window
+	is created, rather than once at startup.
+
+Mon Jul 15 16:44:05 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* gdbtk.c (gdb_disassemble):  Setup di.mach from
+	tm_print_insn_info.mach, and set endian from TARGET_BYTE_ORDER.
+
+Fri Jun 21 11:04:47 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.tcl (create_register_windows): Include missing '$'s.
+	Add global declarations for various reg_format_* variables.
+	* gdbtk.tcl (populate_register_window): Make initial window one
+	line taller to account for new column header line.
+
+Fri Jun 21 09:46:47 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.c (get_register): Support for printing raw formats.
+	* gdbtk.tcl: Add hint for using debug_interface.
+	(center_window, add_breakpoint_frame, delete_breakpoint_frame):
+	Enclose arg in braces for consistency.
+	(create_registers_window, populate_reg_window, update_registers):
+	Major rewrite to support displaying multiple formats in the register
+ 	window.
+	(init_reg_info): New function.
+	(recompute_reg_display_list):  Reset reg_display_list, start
+	register display lines at line 2.
+
+Thu Jun 20 08:18:59 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.tcl (gdbtk_tcl_readline_begin): Handle backspace to
+	avoid backing up over prompt.  At every input, make sure insert
+	point is at least after command start, handle control-u to delete
+	current input line.
+	(tclsh): Handle backspace to avoid backing up over prompt.  Handle
+	control-u to delete current input line.
+
+Wed Jun 19 17:23:38 1996  Geoffrey Noer  <noer@cygnus.com>
+
+	* configure.in: disable gdbtk for *cygwin32* hosted compiles
+	* configure: regenerated with autoconf 2.8
+
+Sun May 19 16:49:37 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.c (gdbtk_readline_begin, gdbtk_readline, gdbtk_readline_end):
+	New functions.
+	(tk_command_loop): Set instream to NULL to enable Tk user interaction.
+	(gdbtk_init): Set readline_begin_hook, readline_hook,
+	and readline_end_hook.
+	* gdbtk.tcl (gdbtk_tcl_readline_begin, gdbtk_tcl_readline,
+	gdbtk_tcl_readline_end): New functions.
+	(tclsh): Pack scroll bar on right side of window, not left.
+
+Fri May 17 13:54:34 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.tcl (create_command_window): Change a misspelled "get"
+	to the intended "cget".
+	(delete_line): Fix so it deletes the current line at the
+	insertion cursor.
+
+Thu May 16 19:20:29 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.tcl (gdb_prompt): Set this early on.
+	(create_command_window): Use gdb_prompt rather than "(gdb) ".
+	(gdbtk_tcl_preloop): Proc executed just prior to Tk main loop.
+	(tclsh): If an evaluation window already exists, just bring it
+	to the front instead of trying to create another.
+	* gdbtk.c (tk_command_loop): New function.
+	(gdbtk_init): Call tk_command_loop rather than Tk_MainLoop.
+
+Thu May 16 16:16:35 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.tcl (evaluate_tcl_command, tclsh):  New functions that
+	implement a tcl evaluation window for gdbtk maintainers to use.
+
+Thu May 16 11:42:58 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* gdbtk.tcl (files_command): Correctly insert list of files into
+	listbox widget.
+
+	* gdbtk.tcl (files_command): listbox command no longer accepts
+	-geometry.
+
+Wed May 15 16:04:09 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdbtk.tcl (create_command_window): If command window's buffer
+	is disabled, don't execute any of the key bindings.
+
+Mon May 13 13:43:25 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.c (tk_command): Catch case where no argument is given
+	since this will cause the tcl interpreter to dump core.
+
+Wed May  8 20:33:24 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.c: Fix a couple of misspellings.
+
+Thu May  2 19:17:49 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdbtk.tcl (debug_interface): New global, use to aid debugging.
+	(insert_breakpoint_tag, delete_breakpoint_tag): Fix range.
+	(file_popup_menu): Delete, never used.
+	(listing_window_popup): Rename from listing_window_button_1,
+	remove breakpoint toggling code.
+	(toggle_breakpoint): New procedure.
+	(create_file_win): Bind popup menu to button 2, toggle breakpoints
+ 	with button 1 in breakpoint area, add display of tagged areas if
+ 	debugging on.
+
+Fri Apr  5 13:44:40 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdbtk.c (running_now): New global variable.
+	(gdb_cmd): Test it before executing any command.
+	(gdbtk_call_command): Set it when inferior is running.
+	* gdbtk.tcl (gdbtk_tcl_busy, gdbtk_tcl_idle): Enable and
+	disable interaction with command window's text appropriately.
+
+Fri Apr  5 13:25:42 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* gdbtk.c (SIOCSPGRP, linux): If on Linux, undef SIOCSPGRP, since
+	some versions of the kernel don't support it.
+
+Tue Feb  6 16:31:25 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* gdbtk.tcl (create_file_win): Eliminate text widget B1 binding so
+	double-clicking will work again.
+	(create_asm_win): Put "break" at end of all B1 bindings.
+	(create_file_win): Lower "sel" tag, don't raise it.
+	(ensure_line_visible): New proc.
+	(update_listing, update_assembly): Use it.
+	(create_copyright_window): Destroy window on Leave event.
+	(create_command_window): Put "break" at end of all B2 bindings.
+
+Wed Jan 24 15:28:41 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* gdbtk.tcl, gdbtk.c: Updated copyrights.
+
+	* configure.in: Look for -ldl or -ldld when using Tcl 7.5 or
+	greater.
+	* configure: Rebuilt.
+
+Tue Jan 23 09:00:48 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* gdbtk.c (gdb_disassemble): Pass fprintf_unfiltered to
+ 	INIT_DISASSEMBLE_INFO.
+
+Mon Jan 15 09:58:41 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* gdbtk.tcl (create_expr_window): Many changes to update GUI.
+	(add_expr): Changes from create_expr_window.
+	(create_command_window): Set focus.
+	(delete_expr): Rewrote.
+	(expr_update_button): New proc.
+	(add_expr): Put bindings on FocusIn, FocusOut.
+	Don't allow .file_popup to be torn off.
+
+Fri Jan 12 09:36:17 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* gdbtk.tcl (gdbtk_tcl_query): Swap Yes and No buttons.
+	(update_listing): Use lassign.  Use "see" to scroll.  Don't need
+	screen_top, screen_bot, screen_height.
+	(update_assembly): Use "see" to scroll.
+	(textscrollproc): Removed.
+	(create_file_win): Don't use textscrollproc.
+	(asmscrollproc): Removed.
+	(create_asm_window): Don't use asmscrollproc.
+	(create_asm_win): Ditto.
+	(screen_height, screen_top, screen_bot): Removed.
+	(run_editor): New proc.
+	(build_framework): Use it.
+	(create_file_win, create_source_window): Don't use textscrollproc.
+	(create_breakpoints_window): Set -xscrollcommand on canvas.
+	(not_implemented_yet): Default button is 0.
+	(delete_char): Don't use tk_textBackspace.
+	(create_command_window): Allow Tk bindings to fire after deleting
+	character.
+	(create_command_window): Make Delete delete left, not right.
+
+Thu Jan 11 10:08:14 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* gdbtk.tcl (FSBox): Don't use tk_listboxSingleSelect.
+
+	Changes in sync with expect:
+	* configure.in (ENABLE_GDBTK): Use CY_AC_PATH_TCL and
+	CY_AC_PATH_TK.
+	* aclocal.m4: Replaced with version from expect.
+	* configure: Regenerated.
+
+Wed Jan 10 09:07:22 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* gdbtk.tcl (gdbtk_tcl_fputs, gdbtk_tcl_fputs_error,
+	gdbtk_tcl_flush): Use "see", not "yview".
+	(gdbtk_tcl_query): Use questhead bitmap.
+	various: Always wrap condition of 'if' in {...}.
+	(add_breakpoint_frame): Set -value on radiobuttons.
+	(lassign): New proc.
+	(add_breakpoint_frame): Use lassign, not series of assignments.
+	(decr): Made faster.
+	(interactive_cmd): Use "see", not "yview".
+	(not_implemented_yet): Use warning bitmap.
+	(update_expr): Don't allow $expr to be evalled by Tcl.
+	(create_expr_window): Don't use "focus".
+	(delete_char, delete_line): Define globally.
+	(delete_line, delete_char, create_command_window, update_autocmd,
+	build_framework, create_asm_win, create_file_win): Use "see", not
+	"yview".
+	(create_copyright_window, center_window, bind_widget_after_class):
+	New procs.
+	(FSBox,create_command_window, create_autocmd_window): Binding
+	changes for Tk4.
+	(textscrollproc): Define globally.
+	(build_framework): tk_menuBar no longer needed.  Keys Prior, Next,
+	Home, End, Up, and Down are all defined by Tk.
+	(apply_filespec): Use error bitmap in dialog.
+	(files_command): Don't use tk_listboxSingleSelect.
+	(files_command): Don't use "uniq" to remove duplicates from a
+	list.
+	(update_assembly): Use lassign.
+	(create_asm_win): Removed redundant bindings.
+	(listing_window_button_1, file_popup_menu): Use tk_popup.
+	(ButtonRelease-1 binding): Just remove tag from window; rest
+	handled by Tk.
+
+	* gdbtk.c (gdbtk_query): Use Tcl_Merge to provide quoting.
+	(call_wrapper): Use Tcl_Eval, not Tcl_VarEval.
+	(gdbtk_call_command): Ditto.
+
+Thu Jan  4 16:04:54 1996  Stu Grossman  (grossman@cygnus.com)
+
+	* configure configure.in:  Make --enable-gdbtk be the default.
+
+Thu Dec 28 15:10:49 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* README.GDBTK: Polish introductory paragraph.
+
+Mon Oct 16 11:27:06 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c (gdb_disassemble):  Use fprintf_unfiltered instead of
+	fprintf_filtered.
+
+Tue Oct 10 15:26:39 1995  Fred Fish  <fnf@cygnus.com>
+
+	* README.GDBTK: Updated for version 4.15.
+	
+Sat Aug 19 17:20:22 1995  Michael Tiemann  <tiemann@axon.cygnus.com>
+
+	* gdbtk.tcl: ENABLE comes back as "1" or "0", not "enable" or
+	"disable".
+	Also, wire up the breakpoint window so that it can be demo'd.
+
+Tue Aug  1 11:44:53 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* gdbtk.c: Include "gdb_string.h" instead of <string.h>.
+
+Tue Jun 20 10:19:40 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c:  Add functions Tcl_Malloc, Tcl_Realloc, and Tcl_Free.
+
+	* gdbtk.tcl (add_breakpoint_frame):  Add more fields.
+	* (create_file_win create_asm_win build_framework):  Create null
+	bindings for meta keys to keep window from dropping down to
+	insertion point when meta is pressed by itself.  New bindings:
+	   Up/Down - Scroll up/down one line at a time
+	   Next/Prior - Scroll up/down one page at a time
+	   Home/End - Warp to current pc/end of file
+	* (build_framework):  Turn on breakpoint menu.
+	* (create_command_window):  Implement tab completion.  Add binding
+	for ^C to stop target.
+
+Fri May 19 06:15:40 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* gdbtk.c: Conditionalize use of stdarg rather than varargs on
+ 	ANSI_PROTOTYPES not __STDC__; it must match the definition of
+ 	PARAMS.
+
+Thu May 18 15:58:46 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* gdbtk.c (gdbtk_query): Use stdarg.h macros when compiling with
+ 	an ANSI compiler.
+
+Sat Apr 15 13:52:24 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdbtk.c (gdb_disassemble): Read from inferior if connected
+	to a VxWorks target.
+
+Fri Apr 14 10:18:20 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* README.GDBTK:  New file.  Contains the obvious.
+
+Tue Apr 11 11:07:12 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* gdbtk.c (gdbtk_init): If SIOCSPGRP is not available, but
+	F_SETOWN is, use that.
+
+Thu Apr  6 17:00:46 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (X11_INCLUDES): Define as empty.
+	(X11_CFLAGS): Define as including $(X11_INCLUDES).
+	(X11_LIB_SWITCHES): Define as empty.
+	(X11_LIBS): Define as -lX11.
+
+	* configure.in (enable_gdbtk): If gdbtk, support the --x-includes
+	and --x-libraries switches, setting the X11_INCLUDES and
+	X11_LIB_SWITCHES respectively.  Instead of using a hardcoded -lX11
+	in ENABLE_CLIBS, use the X11_LIB_SWITCHES and X11_LIBS variables.
+
+	* gdbtk.c (gdbtk_init): If SIOCSPGRP is not available, don't use
+	it.  This means that the stop button doesn't work, but is better
+	than nothing.
+
+Wed Mar 29 17:09:29 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* Makefile.in (gdbtk.o):  Use X11_CFLAGS to provide alternate
+	locations (per-host) for X11 include files.
+	* config/pa/hppahpux.mh (XM_CLIBS):  Add -L/usr/lib/X11R5 to force
+	the use of R5 libs.
+	(X11_CFLAGS):  Add this to indicate the locs
+	of the R5 include files.
+
+Wed Mar  8 16:12:21 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c (gdb_get_breakpoint_info):  Return error if breakpoint
+	type is not bp_breakpoint.
+
+Tue Feb 14 17:16:41 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c: Ditto.
+	* gdbtk.c: General cleanups, get rid of unused variables.  Redo
+	handling of stdout/stderr to just return output as the result of
+	the tcl command that caused the output.  Cleanup -Wall stuff.
+	* (breakpoint_notify):  Now returns just action and breakpoint
+	number.
+	* (gdb_get_breakpoint_list):  New routine.  Does the obvious.
+	* (gdb_get_breakpoint_info):  Mostly derived from the old
+	breakpoint_notify, but returns lots more info.
+	* (dsprintf_append_element):  Helper routine, works like printf,
+	but appends a tcl element onto the specified DString.  Good for
+	building up lists as return values.
+	* (gdbtk_enable/disable_breakpoint):  Go away.  Replaced with
+	gdbtk_modify_breakpoint.
+	* (*many routines*):  Use new result protocol.
+	* (call_wrapper):  Make sure that recursive calls don't trash results.
+	* gdbtk.tcl:  New windows, autocmd, and breakpoints.
+	* (gdbtk_tcl_fputs):  Don't use $current_output_win redirection
+	anymore.  It's not needed (in fact, this routine may not be needed
+	anymore).
+	* (gdbtk_tcl_breakpoint):  Change to reflect new breakpoint
+	notification protocol.
+	* (gdbtk_tcl_busy gdbtk_tcl_idle):  Straighten out buttons, remove
+	catches.
+	* (interactive_cmd):  Use this wrapper around button invocations
+	of many commands.  This will catch errors and put the results into
+	the command window.  It also updates all the other windows.
+	* Also, change reliefs of most things to sunken.  This actually
+	looks better.
+	* (create_file_win):  Fix margin binding to allow breakpoints to
+	work again.
+	* (create_asm_win):  Use return value of gdb_disassemble instead
+	of implicit I/O to the command window.	
+	* (create_command_window):  Use new result protocol to get output
+	from commands.
+
+Sun Feb  5 20:32:44 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdbtk.c (gdb_disassemble): Deference pointer to function before
+	calling it (pre-ANSI compilers generally require this).
+
+Fri Feb  3 11:19:20 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c (gdb_disassemble): Get rid of
+	dis_asm_read_memory_hook.  We can now call the disassemblers
+	directly and have no need for this hook anymore.
+
+Mon Jan 30 17:34:24 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.tcl (create_file_win):  Disable old popup menu for source
+	window.
+
+Wed Jan 25 18:23:46 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c (gdbtk_init):  Prevent segfault when gdbtk.tcl can't be
+	found.
+	* gdbtk.tcl:  Initialize expr_update_list() to prevent errors when
+	popping up expression window for the first time.
+
+Tue Jan 24 12:10:28 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.tcl (create_registers_window):  Work around a radiobutton
+	widget bug to make Options|Natural button work.
+
+	* gdbtk.c (gdb_disassemble):  Fix problem with source+assembly and
+	g++ caused by out-of-order pc's.
+	* gdbtk.tcl (files_command):  Remove duplicate file names.  Also,
+	add scrollbar.
+
+Mon Jan 23 17:21:09 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.tcl:  Take .gdbtkinit if it exists.  Makes gdbtk match the
+	doc!
+
+Thu Jan 12 15:02:40 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c, gdbtk.tcl:  Update/add copyright.
+	* gdbtk.tcl (build_framework):  Several fixes for filespec widget,
+	including dismiss button, and better error handling.
+	* (create_command_win):  Bind button 2 to retrieve selection.
+
+Wed Jan 11 17:06:55 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.tcl:  Add button to control mixed source disassembly.
+	Use text widgets in expr window.  The give me more control over
+	layout.
+	Add auto-updating of exprs in expression window.
+	Handle expressions out of scope a bit better.
+	Make selected window pop up to the top when invoked via the
+	menubar.
+	Make copyright message have raised relief.
+
+	* gdbtk.c (gdbtk_init):  Improve handling for errors in gdbtk.tcl
+	during startup.
+
+Thu Jan  5 17:38:29 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c (finish_saving_output):  Don't do anything if not saving
+	output.
+	* (breakpoint_notify):  Don't send null filename to tcl.
+	* (gdb_eval):  New tcl command to eval an expression.
+	* (gdb_disassemble):  New tcl command to do disassembly.  This
+	allows tcl code to choose between exec file and target memeory,
+	and can also do mixed source and assembly.
+	* (gdbtk_init):  Move reading of gdbtk.tcl to the end to make sure
+	that more of the environment is set up.  Also, create link between
+	gdb and tcl vars disassemble{-_}from{-_}exec.
+
+	* gdbtk.tcl:  New expression window support.
+	* Make assembly window be 80 columns wide.
+	* Use new disassembly method.  Add menu items to select
+	disassembly from exec file or target.
+	* Change View menubar item to Options.
+
+	* Get rid of Stack, Breakpoints, Signals, and Variables Windows,
+	since they don't exist yet.
+
+	* Pop up a copyright window on startup.
+
+Wed Jan  4 19:49:10 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdbtk.tcl (build_framework): Add standard commands menu, more
+	windows to standard windows menu.
+	(not_implemented_yet): Clarify message.
+
+Fri Dec 30 15:49:00 1994  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdbtk.tcl (FSBox): New proc, File Selection Box code from exmh.
+	(not_implemented_yet): New proc.
+	(build_framework): Add various file commands to file menu.
+
+Fri Dec 23 16:18:50 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c (gdbtk_wait gdbtk_init):  Portability improvements for
+	SIGIO handling.
+
+Mon Dec 19 09:55:47 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.tcl (update_assembly):  Force update to make sure that pc
+	is visible when creating new assembly windows.
+
+Sun Dec 18 23:31:20 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c (gdbtk_wait gdbtk_init):  Use different method of
+	enabling I/O interrupts for SVR4 (streams).
+	* (start_saving_output save_output get_saved_output
+	finish_saving_output flush_holdbuf gdbtk_flush gdbtk_fputs
+	gdbtk_init):
+	Totally revamp to use TCLs dynamic string functions.  Also, quote
+	all data passed back to TCL to prevent errors with unmatched
+	braces, odd characters, etc...  This fixes several wierd problems
+	with outputting strings containing unmatched braces.
+	* (breakpoint_notify gdb_loc):  Use long hex format to output
+	addresses of breakpoints and PCs.  This fixes some Alpha problems.
+	* (breakpoint_notify):  Add stream arg to call to gdbtk_fputs.
+	* (gdb_listfiles):  Also, go through the symtabs when looking for
+	files.  This makes xcoff work (sort of), but probably breaks
+	something else.
+	* (gdb_stop):  Return TCL_OK instead of nothing.  This fixes odd
+	TCL errors when hitting stop button.
+	* (tk_command):  Don't pass interp->result on to Tcl_{Var}Eval, as
+	that will trash the result.  strdup the result instead and pass
+	that on.  Improve error handling as well.
+
+	* gdbtk.tcl (gdbtk_tcl_flush):  Use global def of
+	current_output_win.  Makes flushing actually work!
+	* (asm_win_name create_asm_win update_assembly):  Bunch of fixes
+	to make assembly windows stop flashing when loading a new file.
+	* (gdbtk_tcl_busy gdbtk_tcl_idle):  Use catch to prevent gdb_cmd
+	errors from losing control.
+	* (create_source_window):  Add source file selection to View menu.
+	* (create_command_window (<Key-Return> binding):  Quote text fed
+	into gdb_cmd to prevent eval errors.
+
+Thu Dec 15 16:40:10 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c: Improve mechanism for capturing output values.
+	(full_filename): Remove.
+	(gdb_cmd call_wrapper gdbtk_init): Protect all calls from tcl land
+	with call_wrapper.  This prevents longjmps (usually via error())
+	from jumping out of tcl/tk and leaving things in an indeterminate
+	state.
+	(gdbtk_fputs): Differentiate stdout from stderr when passing text
+	into tcl land.
+	* gdbtk.tcl: New view option to disable line numbers.  Put catch
+	around most uses of gdb_cmd.  Add update button to reg config
+	window.  Stop doing immediate updates when selecting registers.
+	Change register view values into checkbuttons.
+
+Mon Dec 12 16:59:29 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.tcl (reg_config_menu create_registers_window
+	recompute_reg_display_list):  Use array instead of individual vars
+	for register display list.
+	* (recompute_reg_display_list update_registers):  Fix bug with not
+	displaying all registers.
+
+Mon Dec 12 12:22:21 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c:  New tcl commands:  gdb_fetch_registers,
+	gdb_changed_register_list, and gdb_regnames.
+	* gdbtk.tcl:  Use monochrome color model for now.
+	* (delete_breakpoint_tag create_file_win):  Add breakdot support.
+	* (create_file_win create_asm_win update_listing build_framework
+	create_source_window create_command_window):  Re-org window
+	creation to give all windows consistent look and feel.
+	* (update_listing update_asm):  Change pc pointer to '->'.
+	* (registers_command reg_config_menu create_registers_window
+	populate_reg_window update_registers):  Revamp register window.
+	Allow selection of registers to be displayed.  Highlight changed
+	registers.
+
+Mon Nov 28 09:17:20 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.tcl (build_framework):  Fix bug with setting window titles.
+
+	* gdbtk.tcl (build_framework):  Add "Report bug" to help menu.
+
+	* gdbtk.tcl:  Re-arrange windows using new, consistent layout. Clean
+	up lots of code and centralize framework initialization.
+
+Wed Nov 16 15:28:29 1994  Rob Savoye  (rob@cygnus.com)
+
+	* Makefile.in: Fix the test for installing gdbtk.
+
+Mon Nov 14 08:51:29 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* Makefile.in:  Install gdbtk.tcl.
+	* configure.in:  Add ENABLE_GDBTK flag.
+	* gdbtk.c (gdb_sourcelines):  Returns list of source lines
+	containing code.  (gdb_regnames):  Returns list of register names.
+
+Thu Nov  3 14:25:24 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c (gdb_stop):  Switch to target_stop().
+
+Tue Nov  1 16:41:12 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* Makefile.in:  Use $(objdir)/tcl and $(objdir)/tk if they are
+	available.
+	* configure.in (ENABLE_CLIBS):  Use $(TCL) and $(TK) instead of
+	-ltcl and -ltk.
+	* gdbtk.c:  Get rid of lots of unnecessary #includes.
+	* (gdbtk_init):  Use ConnectionNumber macro instead of referencing
+	Display structure directly.
+	* gdbtk.tcl:  Change exit button to quit button.
+
+Wed Oct 26 15:41:07 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c: Change sense and name of no_windows variable.  Now
+ 	called use_windows, and defaults to off (for compatibility).
+
+Thu Oct 20 17:35:45 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c (gdb_cmd):  Force GUI into idle mode when errors occur.
+	* (gdb_stop):  New tcl command to stop the target process.
+	* (x_event, gdbtk_wait):  Allow GUI to interrupt gdb out of target
+	waits.
+	* (gdbtk_call_command):  Wrapper around command processing to
+	alert GUI of target state changes.
+	* (gdbtk_init):  Get the fd of X server for doing async
+	notification of X events (via x_event).  Setup new hooks.
+	* gdbtk.tcl:  Add scrollbars to assembly and command windows.
+	* Change window foreground & background colors.
+	* Create margin tag for breakpoints in source and assembly windows.
+	* Add new routines to be invoked when target state changes to/from
+	idle.
+	* Add start of expression window.
+	* Change bindings of mouse button 1 in assembly and source window
+	to just set or clear breakpoints when in the margin tag.
+	* Change shape of register window to be more vertical to better
+	reflect its contents.
+	* Add stop button.
+	* Cleanup some code around command window bindings.
+
+Sat Sep 17 17:05:14 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.tcl:  Let ^U delete lines in the command window.
+
+Fri Sep 16 15:40:34 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c:  Replace calls to full_filename with symtab_to_filename.  
+	* gdbtk.tcl:  New routine pc_to_line replaces in line code.  New
+	routine decr replaces in line code.
+	* (create_file_win):  Use catch to handle open failures more
+	elegantly.  Also, create special window to display file open
+	failure message.  Move opening of file prior to creation of text
+	widget.
+	* (create_asm_win):  Add PC as argument.  We now base disassembly
+	on PC instead of function name, since function names can be
+	ambiguous (usually seen with shared libs).  Also, use catch to
+	simplify code where we don't care about failures.
+
+Wed Sep 14 00:55:26 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.tcl:  Add ref counts to breakpoint tags.
+	* Put quotes around function name in disassemble command to better
+	handle assembler names containing `.'.
+	* Make pclist element 0 be filler to avoid off-by-one problem with
+	line numbers.
+	* Set names of top-level windows.
+	* Add register display window.
+	* Add PC to label of assembly window.
+
+Tue Sep 13 08:59:04 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.c (gdbtk_flush gdbtk_fputs):  Buffer up output to make
+	disassembly more efficient.
+	* (breakpoint_notify):  Include pc in gdbtk_tcl_breakpoint
+	callback.
+	* (gdb_loc):  Include pc in return value.  Also, return function
+	name if arg was specified.
+	* (gdb_cmd_stub):  Call gdb_flush to drain internal GDB buffers
+	after command completes.
+	* (gdbtk_init):  Improve error handling.
+
+	* gdbtk.tcl:  Add lots of comments.  Clean up code.
+	* (gdbtk_tcl_fputs):  Make output window redirectable.
+	* Add assembly window, and breapoint support.
+	* Make button 1 in margin toggle breakpoints.
+	* Use stippling to indicate breakpoint disabling.
+
+Fri Sep  2 19:11:40 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* configure.in: Don't symlink to gdbtk.tcl if it's already there.
+
+Thu Jul 28 14:37:36 1994  Stu Grossman  (grossman@cygnus.com)
+
+	Support for TK GUI.
+	* Makefile.in:  Add rule for gdbtk.o.
+	* configure.in:  Add support for --enable-gdbtk.
+	* gdbtk.c:  New file.  Contains support routines for TK interface.
+	* gdbtk.tcl:  New file.  Implements GUI policy.
+
+
+Local Variables:
+mode: indented-text
+left-margin: 8
+fill-column: 74
+version-control: never
+End:

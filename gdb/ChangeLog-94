@@ -2,13 +2,6 @@ Fri Dec 30 17:58:55 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* config/m68k/tm-est.h:  Remove cruft.
 
-start-sanitize-gdbtk
-Fri Dec 30 15:49:00 1994  Stan Shebs  <shebs@andros.cygnus.com>
-
-	* gdbtk.tcl (FSBox): New proc, File Selection Box code from exmh.
-	(not_implemented_yet): New proc.
-	(build_framework): Add various file commands to file menu.
-end-sanitize-gdbtk
 
 Thu Dec 29 22:40:00 1994  Jeff Law  (law@snake.cs.utah.edu)
 
@@ -104,10 +97,6 @@ Fri Dec 23 17:03:13 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 Fri Dec 23 16:18:50 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* Makefile.in (CLIBS):  Put LIBIBERTY last.
-start-sanitize-gdbtk
-	* gdbtk.c (gdbtk_wait gdbtk_init):  Portability improvements for
-	SIGIO handling.
-end-sanitize-gdbtk
 
 Thu Dec 22 09:27:16 1994  Jim Kingdon  <kingdon@deneb.cygnus.com>
 
@@ -136,45 +125,6 @@ Tue Dec 20 11:44:28 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* value.h: Remove obsolete comments about FRAME vs struct
 	frame_info *.
 
-start-sanitize-gdbtk
-Mon Dec 19 09:55:47 1994  Stu Grossman  (grossman@cygnus.com)
-
-	* gdbtk.tcl (update_assembly):  Force update to make sure that pc
-	is visible when creating new assembly windows.
-
-Sun Dec 18 23:31:20 1994  Stu Grossman  (grossman@cygnus.com)
-
-	* gdbtk.c (gdbtk_wait gdbtk_init):  Use different method of
-	enabling I/O interrupts for SVR4 (streams).
-	* (start_saving_output save_output get_saved_output
-	finish_saving_output flush_holdbuf gdbtk_flush gdbtk_fputs
-	gdbtk_init):
-	Totally revamp to use TCLs dynamic string functions.  Also, quote
-	all data passed back to TCL to prevent errors with unmatched
-	braces, odd characters, etc...  This fixes several wierd problems
-	with outputting strings containing unmatched braces.
-	* (breakpoint_notify gdb_loc):  Use long hex format to output
-	addresses of breakpoints and PCs.  This fixes some Alpha problems.
-	* (breakpoint_notify):  Add stream arg to call to gdbtk_fputs.
-	* (gdb_listfiles):  Also, go through the symtabs when looking for
-	files.  This makes xcoff work (sort of), but probably breaks
-	something else.
-	* (gdb_stop):  Return TCL_OK instead of nothing.  This fixes odd
-	TCL errors when hitting stop button.
-	* (tk_command):  Don't pass interp->result on to Tcl_{Var}Eval, as
-	that will trash the result.  strdup the result instead and pass
-	that on.  Improve error handling as well.
-
-	* gdbtk.tcl (gdbtk_tcl_flush):  Use global def of
-	current_output_win.  Makes flushing actually work!
-	* (asm_win_name create_asm_win update_assembly):  Bunch of fixes
-	to make assembly windows stop flashing when loading a new file.
-	* (gdbtk_tcl_busy gdbtk_tcl_idle):  Use catch to prevent gdb_cmd
-	errors from losing control.
-	* (create_source_window):  Add source file selection to View menu.
-	* (create_command_window (<Key-Return> binding):  Quote text fed
-	into gdb_cmd to prevent eval errors.
-end-sanitize-gdbtk
 
 Sun Dec 18 11:52:58 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
@@ -266,20 +216,6 @@ Thu Dec 15 16:40:10 1994  Stu Grossman  (grossman@cygnus.com)
 	* defs.h, main.c (gdb_fputs), top.c: Add stream arg to
 	fputs_unfiltered_hook.
 	* defs.h, top.c, utils.c (error): Add error_hook.
-start-sanitize-gdbtk
-	* gdbtk.c: Improve mechanism for capturing output values.
-	(full_filename): Remove.
-	(gdb_cmd call_wrapper gdbtk_init): Protect all calls from tcl land
-	with call_wrapper.  This prevents longjmps (usually via error())
-	from jumping out of tcl/tk and leaving things in an indeterminate
-	state.
-	(gdbtk_fputs): Differentiate stdout from stderr when passing text
-	into tcl land.
-	* gdbtk.tcl: New view option to disable line numbers.  Put catch
-	around most uses of gdb_cmd.  Add update button to reg config
-	window.  Stop doing immediate updates when selecting registers.
-	Change register view values into checkbuttons.
-end-sanitize-gdbtk
 
 Tue Dec 13 15:15:33 1994  Stan Shebs  <shebs@andros.cygnus.com>
 
@@ -300,15 +236,6 @@ Mon Dec 12 17:08:02 1994  Stan Shebs  <shebs@andros.cygnus.com>
 	(INIT_EXTRA_FRAME_INFO): Call sparc_init_extra_frame_info.
 	(PRINT_EXTRA_FRAME_INFO): Define.
 
-start-sanitize-gdbtk
-Mon Dec 12 16:59:29 1994  Stu Grossman  (grossman@cygnus.com)
-
-	* gdbtk.tcl (reg_config_menu create_registers_window
-	recompute_reg_display_list):  Use array instead of individual vars
-	for register display list.
-	* (recompute_reg_display_list update_registers):  Fix bug with not
-	displaying all registers.
-end-sanitize-gdbtk
 
 Mon Dec 12 13:06:59 1994  Jim Kingdon  <kingdon@deneb.cygnus.com>
 
@@ -320,22 +247,6 @@ Mon Dec 12 13:06:59 1994  Jim Kingdon  <kingdon@deneb.cygnus.com>
 	not OBJ_UNWIND_INFO.  Assigning to a cast is a GCC-ism which
 	the HP compiler doesn't like.
 
-start-sanitize-gdbtk
-Mon Dec 12 12:22:21 1994  Stu Grossman  (grossman@cygnus.com)
-
-	* gdbtk.c:  New tcl commands:  gdb_fetch_registers,
-	gdb_changed_register_list, and gdb_regnames.
-	* gdbtk.tcl:  Use monochrome color model for now.
-	* (delete_breakpoint_tag create_file_win):  Add breakdot support.
-	* (create_file_win create_asm_win update_listing build_framework
-	create_source_window create_command_window):  Re-org window
-	creation to give all windows consistent look and feel.
-	* (update_listing update_asm):  Change pc pointer to '->'.
-	* (registers_command reg_config_menu create_registers_window
-	populate_reg_window update_registers):  Revamp register window.
-	Allow selection of registers to be displayed.  Highlight changed
-	registers.
-end-sanitize-gdbtk
 
 Fri Dec  9 15:50:05 1994  Stan Shebs  <shebs@andros.cygnus.com>
 
@@ -454,16 +365,6 @@ Mon Nov 28 11:03:14 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
 	* config/rs6000/tm-rs6000.h (setpgrp): move defn from here...
 	* config/rs6000/xm-rs6000.h: ...to here.
 
-start-sanitize-gdbtk
-Mon Nov 28 09:17:20 1994  Stu Grossman  (grossman@cygnus.com)
-
-	* gdbtk.tcl (build_framework):  Fix bug with setting window titles.
-
-	* gdbtk.tcl (build_framework):  Add "Report bug" to help menu.
-
-	* gdbtk.tcl:  Re-arrange windows using new, consistent layout. Clean
-	up lots of code and centralize framework initialization.
-end-sanitize-gdbtk
 
 Fri Nov 25 21:26:02 1994  Jeff Law  (law@snake.cs.utah.edu)
 
@@ -597,9 +498,6 @@ Wed Nov 16 16:41:52 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 Wed Nov 16 15:28:29 1994  Rob Savoye  (rob@cygnus.com)
 
-start-sanitize-gdbtk
-	* Makefile.in: Fix the test for installing gdbtk.
-end-sanitize-gdbtk
 
 	* hppa-tdep.c: Remove including sys/dir.h from a target file.
 
@@ -633,14 +531,6 @@ Tue Nov 15 01:03:56 1994  Rob Savoye  (rob@slipknot.cygnus.com)
 	to set remote load type and protocol.
 	* rom68k-rom.c: Add to_stop in target_ops.
 
-start-sanitize-gdbtk
-Mon Nov 14 08:51:29 1994  Stu Grossman  (grossman@cygnus.com)
-
-	* Makefile.in:  Install gdbtk.tcl.
-	* configure.in:  Add ENABLE_GDBTK flag.
-	* gdbtk.c (gdb_sourcelines):  Returns list of source lines
-	containing code.  (gdb_regnames):  Returns list of register names.
-end-sanitize-gdbtk
 
 Sat Nov 12 21:55:47 1994  Jeff Law  (law@snake.cs.utah.edu)
 
@@ -821,9 +711,6 @@ Thu Nov  3 14:25:24 1994  Stu Grossman  (grossman@cygnus.com)
 	remote-nindy.c, remote-os9k.c, remote-pa.c, remote-sim.c,
 	remote-st.c, remote-udi.c, remote-vx.c, remote-z8k.c, remote.c,
 	w89k-rom.c, target.c, target.h:  Add support for target_stop().
-start-sanitize-gdbtk
-	* gdbtk.c (gdb_stop):  Switch to target_stop().
-end-sanitize-gdbtk
 
 Thu Nov  3 01:23:45 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
@@ -844,18 +731,6 @@ Wed Nov  2 11:01:55 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* nlm/Makefile.in: install gdbserve.nlm.
 
-start-sanitize-gdbtk
-Tue Nov  1 16:41:12 1994  Stu Grossman  (grossman@cygnus.com)
-
-	* Makefile.in:  Use $(objdir)/tcl and $(objdir)/tk if they are
-	available.
-	* configure.in (ENABLE_CLIBS):  Use $(TCL) and $(TK) instead of
-	-ltcl and -ltk.
-	* gdbtk.c:  Get rid of lots of unnecessary #includes.
-	* (gdbtk_init):  Use ConnectionNumber macro instead of referencing
-	Display structure directly.
-	* gdbtk.tcl:  Change exit button to quit button.
-end-sanitize-gdbtk
 
 Tue Nov  1 13:00:46 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
@@ -928,9 +803,6 @@ Wed Oct 26 15:41:07 1994  Stu Grossman  (grossman@cygnus.com)
 	* defs.h, main.c, top.c:  Change sense and name of
 	no_windows variable.  Now called use_windows, and defaults to off
 	(for compatibility).
-start-sanitize-gdbtk
-	* gdbtk.c: Ditto.
-end-sanitize-gdbtk
 
 Wed Oct 26 12:20:53 1994  Jim Kingdon  <kingdon@cygnus.com>
 
@@ -959,28 +831,6 @@ Thu Oct 20 17:35:45 1994  Stu Grossman  (grossman@cygnus.com)
 	target_wait_hook to allow GUI to handle blocking for inferior.  Call
 	call_command_hook in execute_command to provide means for wrapping
 	commands with GUI state change updates.
-start-sanitize-gdbtk
-	* gdbtk.c (gdb_cmd):  Force GUI into idle mode when errors occur.
-	* (gdb_stop):  New tcl command to stop the target process.
-	* (x_event, gdbtk_wait):  Allow GUI to interrupt gdb out of target
-	waits.
-	* (gdbtk_call_command):  Wrapper around command processing to
-	alert GUI of target state changes.
-	* (gdbtk_init):  Get the fd of X server for doing async
-	notification of X events (via x_event).  Setup new hooks.
-	* gdbtk.tcl:  Add scrollbars to assembly and command windows.
-	* Change window foreground & background colors.
-	* Create margin tag for breakpoints in source and assembly windows.
-	* Add new routines to be invoked when target state changes to/from
-	idle.
-	* Add start of expression window.
-	* Change bindings of mouse button 1 in assembly and source window
-	to just set or clear breakpoints when in the margin tag.
-	* Change shape of register window to be more vertical to better
-	reflect its contents.
-	* Add stop button.
-	* Cleanup some code around command window bindings.
-end-sanitize-gdbtk
 
 	* infrun.c (wait_for_inferior):  Make sure
 	through_sigtramp_breakpoint is non-null before deleting.
@@ -1561,11 +1411,6 @@ Mon Sep 19 07:48:36 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	char * (from const char *) before assigning.  Don't save string we
 	pass to record_minimal_symbol (it already saves it).
 
-start-sanitize-gdbtk
-Sat Sep 17 17:05:14 1994  Stu Grossman  (grossman@cygnus.com)
-
-	* gdbtk.tcl:  Let ^U delete lines in the command window.
-end-sanitize-gdbtk
 
 Sat Sep 17 02:26:58 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
@@ -1615,19 +1460,6 @@ Fri Sep 16 15:40:34 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* defs.h (QUIT):  Call interactive_hook to allow GUI to interrupt.
 	Also, add decl for symtab_to_filename.
-start-sanitize-gdbtk
-	* gdbtk.c:  Replace calls to full_filename with symtab_to_filename.  
-	* gdbtk.tcl:  New routine pc_to_line replaces in line code.  New
-	routine decr replaces in line code.
-	* (create_file_win):  Use catch to handle open failures more
-	elegantly.  Also, create special window to display file open
-	failure message.  Move opening of file prior to creation of text
-	widget.
-	* (create_asm_win):  Add PC as argument.  We now base disassembly
-	on PC instead of function name, since function names can be
-	ambiguous (usually seen with shared libs).  Also, use catch to
-	simplify code where we don't care about failures.
-end-sanitize-gdbtk
 	* source.c (symtab_to_filename):  New.  Returns the file
 	associated with a symtab.
 	* top.c:  Define interactive_hook.  Called during QUIT to animate
@@ -1674,18 +1506,6 @@ Wed Sep 14 14:26:21 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	Having the objfile point to bfd_asymbol_name directly doesn't work
 	if we save and restore a mapped symbol file.
 
-start-sanitize-gdbtk
-Wed Sep 14 00:55:26 1994  Stu Grossman  (grossman@cygnus.com)
-
-	* gdbtk.tcl:  Add ref counts to breakpoint tags.
-	* Put quotes around function name in disassemble command to better
-	handle assembler names containing `.'.
-	* Make pclist element 0 be filler to avoid off-by-one problem with
-	line numbers.
-	* Set names of top-level windows.
-	* Add register display window.
-	* Add PC to label of assembly window.
-end-sanitize-gdbtk
 
 Tue Sep 13 18:23:26 1994  Rob Savoye  (rob@darkstar.cygnus.com)
 
@@ -1693,25 +1513,6 @@ Tue Sep 13 18:23:26 1994  Rob Savoye  (rob@darkstar.cygnus.com)
 	to add a generic ROM monitor interface, and support file for the
 	WinBond W89K and the Oki OP50N PA based target boards.
 
-start-sanitize-gdbtk
-Tue Sep 13 08:59:04 1994  Stu Grossman  (grossman@cygnus.com)
-
-	* gdbtk.c (gdbtk_flush gdbtk_fputs):  Buffer up output to make
-	disassembly more efficient.
-	* (breakpoint_notify):  Include pc in gdbtk_tcl_breakpoint
-	callback.
-	* (gdb_loc):  Include pc in return value.  Also, return function
-	name if arg was specified.
-	* (gdb_cmd_stub):  Call gdb_flush to drain internal GDB buffers
-	after command completes.
-	* (gdbtk_init):  Improve error handling.
-
-	* gdbtk.tcl:  Add lots of comments.  Clean up code.
-	* (gdbtk_tcl_fputs):  Make output window redirectable.
-	* Add assembly window, and breapoint support.
-	* Make button 1 in margin toggle breakpoints.
-	* Use stippling to indicate breakpoint disabling.
-end-sanitize-gdbtk
 
 Sun Sep 11 22:34:57 1994  Jeff Law  (law@snake.cs.utah.edu)
 
@@ -1839,11 +1640,6 @@ Sun Sep  4 16:06:34 1994  Stan Shebs  (shebs@andros.cygnus.com)
 	* config/mips/nm-sysv4.h: New file, includes config/nm-sysv4.h.
 	* config/sparc/nm-sysv4.h: New file, includes config/nm-sysv4.h.
 
-start-sanitize-gdbtk
-Fri Sep  2 19:11:40 1994  Stu Grossman  (grossman@cygnus.com)
-
-	* configure.in: Don't symlink to gdbtk.tcl if it's already there.
-end-sanitize-gdbtk
 
 Fri Sep  2 17:35:55 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
@@ -2497,13 +2293,6 @@ Thu Jul 28 14:37:36 1994  Stu Grossman  (grossman@cygnus.com)
 	* Change _initialize_utils to initialize_utils cuz we don't use
 	automatic initialization of utils.c anymore.
 
-start-sanitize-gdbtk
-	* Support for TK GUI.
-	* Makefile.in:  Add rule for gdbtk.o.
-	* configure.in:  Add support for --enable-gdbtk.
-	* gdbtk.c:  New file.  Contains support routines for TK interface.
-	* gdbtk.tcl:  New file.  Implements GUI policy.
-end-sanitize-gdbtk
 
 	* remote.c:  Get rid of #ifdef DONT_USE_REMOTE.  It's no longer
 	necessary.

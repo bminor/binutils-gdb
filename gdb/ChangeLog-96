@@ -188,10 +188,6 @@ Thu Dec 12 13:29:14 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	* config/powerpc/ppc{,le}-sim.mt (SIM): Add the simulator common
 	library ../sim/common/libcommon.a.
 
-Wed Dec 11 18:51:35 1996  Mark Alexander  <marka@cygnus.com>
-
-	* gdbtk.c (gdb_loc): Correct truncation of PC on 64-bit MIPS.
-
 Wed Dec 11 11:15:08 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* monitor.c (monitor_load): Add support for load address argument.
@@ -609,19 +605,6 @@ Wed Nov 20 00:43:09 1996  Doug Evans  <dje@canuck.cygnus.com>
 	* config/h8300/h8300.mt (SIM): Change to ../sim/h8300/libsim.a.
 	* config/h8500/h8500.mt (SIM): Change to ../sim/h8500/libsim.a.
 
-start-sanitize-gdbtk
-Tue Nov 19 09:26:14 1996  Tom Tromey  <tromey@cygnus.com>
-
-	* gdbtk.c (gdbtk_readline): Fix memory leak.
-
-Mon Nov 18 23:43:05 1996  Tom Tromey  <tromey@cygnus.com>
-
-	Fixes for Tcl 7.6 / Tk 4.2:
-	* gdbtk.tcl (apply_filespec): Use tk_getOpenFile.
-	Remove old fileselect code.
-	* gdbtk.c (Tcl_Alloc): Rename from Tcl_Malloc.
-
-end-sanitize-gdbtk
 Mon Nov 18 15:58:05 1996  Jim Wilson  <wilson@cygnus.com>
 
 	* config/mips/tm-mips.h (FIX_CALL_DUMMY): Change unsigned LONGEST
@@ -1192,10 +1175,6 @@ Fri Sep 27 10:25:30 1996  Fred Fish  <fnf@cygnus.com>
 	add prototype.
 	(main): Call print_gdb_help rather than inlining it.
 	(main): Remove call to print_gnu_advertisement.
-start-sanitize-gdbtk
-	* gdbtk.tcl (create_copyright_window): Increase timeout from
-	15 seconds to 30 seconds.
-end-sanitize-gdbtk
 	
 Fri Sep 27 13:32:53 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
@@ -1349,10 +1328,6 @@ Wed Sep  4 17:28:40 1996  Stu Grossman  (grossman@critters.cygnus.com)
 	* (breakpoint_inserted_here_p):  New func, just like
 	breakpoint_here_p, except it's honest.  Honestly.
 	* breakpoint.h:  Proto for above.
-start-sanitize-gdbtk
-	* configure configure.in:  Add host *windows* to list of hosts
-	that don't support GDBtk.
-end-sanitize-gdbtk
 	* configure configure.in:  Add mswin to configdirs if host is
 	i[3456]86-*-windows.
 	* core-aout.c (fetch_core_registers register_addr) gdbcore.h:
@@ -1468,12 +1443,6 @@ Fri Aug 23 13:55:05 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* infrun.c (wait_for_inferior):  Try to reenable shared library
 	breakpoints even if auto_solib_load is not set.
-
-Fri Aug 23 00:44:57 1996  Fred Fish  <fnf@cygnus.com>
-
-	* gdbtk.c (gdbtk_init): Check for a DISPLAY env variable and
-	gracefully degrade to using command line interface if none is
-	found.
 
 Wed Aug 21 16:31:27 1996  Fred Fish  <fnf@cygnus.com>
 
@@ -1656,13 +1625,6 @@ Sun Aug 11 20:54:16 1996  Stu Grossman  (grossman@critters.cygnus.com)
 	* main.c (main):  Make sure command loop is used with cygwin32.
 	* terminal.h:  Allow cygwin32 to use termios.h.
 
-start-sanitize-gdbtk
-Fri Aug  9 12:32:53 1996  Tom Tromey  <tromey@creche.cygnus.com>
-
-	* Makefile.in (LIB_INSTALL_DIR): New macro.
-	(TCL): Include @TCL_LD_SEARCH_FLAGS@.
-
-end-sanitize-gdbtk
 Fri Aug  9 12:42:49 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* somread.c (som_symtab_read): Handle secondary definition
@@ -1731,22 +1693,6 @@ Sat Aug  3 04:02:46 1996  Fred Fish  <fnf@cygnus.com>
 	(MMALLOC_CFLAGS): Define NO_MMCHECK to not install consistency
 	checks.
 
-start-sanitize-gdbtk
-Thu Aug  1 20:35:01 1996  Tom Tromey  <tromey@creche.cygnus.com>
-
-	* gdbtk.c (mainWindow): Deleted.
-	(cleanup_init): Don't destroy main window.
-	(gdbtk_init): Main window now created by Tk_Init.
-
-	* configure.in: Most X checks now handled automatically by Tk.
-	Use new macros to find Tcl/Tk.
-	* aclocal.m4: New version for new Tcl/Tk; from Don Libes.
-	* config.in, configure: Regenerated.
-
-	* Makefile.in (TCL, TCL_CFLAGS, TK, TK_CFLAGS, X11_CFLAGS,
-	X11_LDFLAGS, X11_LIBS): Changed for new Tcl and Tk.
-
-end-sanitize-gdbtk
 Thu Aug  1 10:11:34 1996  Fred Fish  <fnf@cygnus.com>
 
 	* config/mips/tm-mips.h (TM_MIPS_H): Enclose file contents in
@@ -1756,12 +1702,6 @@ Thu Aug  1 10:11:34 1996  Fred Fish  <fnf@cygnus.com>
 	* mdebugread.c (ecoff_relocate_efi): Add prototype.
 	(fixup_sigtramp): Only needed when TM_MIPS_H is defined.
 
-start-sanitize-gdbtk 
-Thu Aug  1 16:12:05 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
-
-	* Makefile.in (gdbtk.tcl): put in $(datadir), not $(libdir).
-
-end-sanitize-gdbtk
 Wed Jul 31 20:21:24 1996  Fred Fish  <fnf@cygnus.com>
 
 	* rs6000-nat.c (add_vmap): Return 0 to caller rather than random value.
@@ -1993,9 +1933,6 @@ Fri Jul 26 14:07:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* printcmd.c (_initialize_printcmd): Initialize
 	tm_print_insn_info.flavour.
-start-sanitize-gdbtk
-	* gdbtk.c (gdb_disassemble): Initialize di.flavour.
-end-sanitize-gdbtk
 
 Thu Jul 25 19:41:31 1996  Fred Fish  <fnf@cygnus.com>
 
@@ -2278,45 +2215,6 @@ Thu Jul 25 19:41:31 1996  Fred Fish  <fnf@cygnus.com>
  	(debug_to_notice_signals): Ditto.
 	(debug_to_thread_alive): Ditto.
  	(debug_to_stop): Ditto.
-start-sanitize-gdbtk
-	* gdbtk.c (null_routine): Ditto.
-	(gdbtk_flush): Ditto.
- 	(gdbtk_fputs): Ditto.
- 	(gdbtk_query): Ditto.
-	(gdbtk_readline): Ditto.
- 	(gdbtk_readline_end): Ditto.
- 	(gdb_get_breakpoint_list): Ditto.
-	(gdb_get_breakpoint_info): Ditto.
- 	(breakpoint_notify): Ditto.
- 	(gdbtk_create_breakpoint): Ditto.
-	(gdbtk_delete_breakpoint): Ditto.
- 	(gdbtk_modify_breakpoint): Ditto.
- 	(gdb_loc): Ditto.
- 	(gdb_eval): Ditto.
-	(gdb_sourcelines): Ditto.
- 	(map_arg_registers): Ditto.
- 	(get_register_name): Ditto.
- 	(gdb_regnames): Ditto.
-	(get_register): Ditto.
- 	(gdb_fetch_registers): Ditto.
- 	(register_changed_p): Ditto.
-	(gdb_changed_register_list): Ditto.
- 	(gdb_cmd): Ditto.
- 	(call_wrapper): Ditto.
- 	(gdb_listfiles): Ditto.
-	(gdb_stop): Ditto.
- 	(gdbtk_dis_asm_read_memory): Ditto.
- 	(compare_lines): Ditto.
- 	(gdb_disassemble): Ditto.
-	(tk_command): Ditto.
- 	(cleanup_init): Ditto.
- 	(gdbtk_interactive): Ditto.
- 	(x_event): Ditto.
- 	(gdbtk_wait): Ditto.
-	(gdbtk_call_command): Ditto.
- 	(tk_command_loop): Ditto.
- 	(gdbtk_init): Ditto.
-end-sanitize-gdbtk
 	* breakpoint.h (set_breakpoint_sal): Ditto.
 	* remote-utils.c (usage): Ditto.
 	* remote.c (set_thread): Ditto.
@@ -2505,11 +2403,6 @@ end-sanitize-gdbtk
 	uninitialized.
 	* utils.c (vfprintf_maybe_filtered): Change second arg from "char *"
 	to "const char *".
-start-sanitize-gdbtk
-	* gdbtk.c (gdb_fetch_registers): Cast fourth arg to map_arg_registers
-	to proper pointer type, from int.
-	(gdbtk_query): Change first arg to "const char *" from "char *".
-end-sanitize-gdbtk
 	* infptrace.c (udot_info): Add two dummy args so that the type is
 	correct for passing to add_info.
 	* f-lang.c (saved_fcn): Move decl to head of file so it can be used
@@ -2536,9 +2429,6 @@ end-sanitize-gdbtk
  	* eval.c (init_array_element): Declare previously undeclared
 	last two args as LONGEST.
 	* dcache.c (dcache_xfer_memory):  Change xfunc decls to prototype form.
-start-sanitize-gdbtk
-	* gdbtk.c (register_changed_p): Remove unused local variable "buf".
-end-sanitize-gdbtk
 
 Thu Jul 25 16:11:54 1996  Doug Evans  <dje@canuck.cygnus.com>
 
@@ -2555,30 +2445,11 @@ Mon Jul 22 18:13:27 1996  Stu Grossman  (grossman@critters.cygnus.com)
 	partial-stab.h.
 	* stabsread.h (end_psymtab):  Add textlow_not_set arg to prototype.
 
-start-sanitize-gdbtk
-Sat Jul 20 17:46:40 1996  Fred Fish  <fnf@cygnus.com>
-
-	* gdbtk.tcl (files_command): Reorder the binding tags for
-	the listbox widget to avoid referencing the listbox after
-	the containing widget has been destroyed by the action of
-	a previous binding.
-end-sanitize-gdbtk
-
 Sat Jul 20 10:41:06 1996  Fred Fish  <fnf@cygnus.com>
 
 	* dwarf2read.c (struct filenames): Change internal "struct file"
 	to "struct fileinfo" to avoid conflict with "struct file" in
 	<sys/file.h> on HPUX and Solaris.
-
-start-sanitize-gdbtk
-Sat Jul 20 10:09:28 1996  Fred Fish  <fnf@cygnus.com>
-
-	* gdbtk.tcl (delete_expr): Unset corresponding element of
-	expr_update_list when destroying an expression.
-	(create_expr_window): Initialize expr_num, delete_expr_num,
-	and expr_update_list here when each new expression window
-	is created, rather than once at startup.
-end-sanitize-gdbtk
 
 Fri Jul 19 14:05:57 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
@@ -2625,10 +2496,6 @@ Mon Jul 15 16:44:05 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* defs.h printcmd.c:  Create global disassemble_info structure
 	tm_print_insn_info.
-start-sanitize-gdbtk
-	* gdbtk.c (gdb_disassemble):  Setup di.mach from
-	tm_print_insn_info.mach, and set endian from TARGET_BYTE_ORDER.
-end-sanitize-gdbtk
 	* i386-tdep.c (set_assembly_language_command):  set
 	tm_print_insn_info.mach to the appropriate value for 386 or 8086
 	disassembly.
@@ -2906,28 +2773,6 @@ Sun Jun 23 23:40:48 1996  Doug Evans  <dje@canuck.cygnus.com>
 	(set_pathstyle_dos): Delete.
 	(_initialize_inftarg): Delete dos-path-style command.
 
-start-sanitize-gdbtk
-Fri Jun 21 11:04:47 1996  Fred Fish  <fnf@cygnus.com>
-
-	* gdbtk.tcl (create_register_windows): Include missing '$'s.
-	Add global declarations for various reg_format_* variables.
-	* gdbtk.tcl (populate_register_window): Make initial window one
-	line taller to account for new column header line.
-
-Fri Jun 21 09:46:47 1996  Fred Fish  <fnf@cygnus.com>
-
-	* gdbtk.c (get_register): Support for printing raw formats.
-	* gdbtk.tcl: Add hint for using debug_interface.
-	(center_window, add_breakpoint_frame, delete_breakpoint_frame):
-	Enclose arg in braces for consistency.
-	(create_registers_window, populate_reg_window, update_registers):
-	Major rewrite to support displaying multiple formats in the register
- 	window.
-	(init_reg_info): New function.
-	(recompute_reg_display_list):  Reset reg_display_list, start
-	register display lines at line 2.
-
-end-sanitize-gdbtk
 Thu Jun 20 13:42:23 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.in: Revise sol-thread.o test.
@@ -2935,22 +2780,6 @@ Thu Jun 20 13:42:23 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* source.c (find_source_lines): Reassign size to result of read.
 
-start-sanitize-gdbtk
-Thu Jun 20 08:18:59 1996  Fred Fish  <fnf@cygnus.com>
-
-	* gdbtk.tcl (gdbtk_tcl_readline_begin): Handle backspace to
-	avoid backing up over prompt.  At every input, make sure insert
-	point is at least after command start, handle control-u to delete
-	current input line.
-	(tclsh): Handle backspace to avoid backing up over prompt.  Handle
-	control-u to delete current input line.
-
-Wed Jun 19 17:23:38 1996  Geoffrey Noer  <noer@cygnus.com>
-
-	* configure.in: disable gdbtk for *cygwin32* hosted compiles
-	* configure: regenerated with autoconf 2.8
-
-end-sanitize-gdbtk
 Tue Jun 18 16:25:54 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* h8300-dep.c (gdb_print_insn_h8300): Handle the H8/S.
@@ -3205,16 +3034,6 @@ Sun May 19 16:49:37 1996  Fred Fish  <fnf@cygnus.com>
 	(define_command, document_command): Build message in a temporary
 	buffer and pass it to read_command_lines, along with tty flag.
 
-start-sanitize-gdbtk
-	* gdbtk.c (gdbtk_readline_begin, gdbtk_readline, gdbtk_readline_end):
-	New functions.
-	(tk_command_loop): Set instream to NULL to enable Tk user interaction.
-	(gdbtk_init): Set readline_begin_hook, readline_hook,
-	and readline_end_hook.
-	* gdbtk.tcl (gdbtk_tcl_readline_begin, gdbtk_tcl_readline,
-	gdbtk_tcl_readline_end): New functions.
-	(tclsh): Pack scroll bar on right side of window, not left.
-end-sanitize-gdbtk
 
 Sat May 18 02:43:58 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
@@ -3225,48 +3044,11 @@ Sat May 18 02:43:58 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	* stack.c (print_frame_info):  Remove check for fi->pc in known
 	section, now handled by lookup_minimal_symbol_by_pc.
 
-start-sanitize-gdbtk
-Fri May 17 13:54:34 1996  Fred Fish  <fnf@cygnus.com>
-
-	* gdbtk.tcl (create_command_window): Change a misspelled "get"
-	to the intended "cget".
-	(delete_line): Fix so it deletes the current line at the
-	insertion cursor.
-end-sanitize-gdbtk
 
 Fri May 17 13:31:04 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* sh-stub.c: New file, was config/sh/stub.c.
 
-start-sanitize-gdbtk
-Thu May 16 19:20:29 1996  Fred Fish  <fnf@cygnus.com>
-
-	* gdbtk.tcl (gdb_prompt): Set this early on.
-	(create_command_window): Use gdb_prompt rather than "(gdb) ".
-	(gdbtk_tcl_preloop): Proc executed just prior to Tk main loop.
-	(tclsh): If an evaluation window already exists, just bring it
-	to the front instead of trying to create another.
-	* gdbtk.c (tk_command_loop): New function.
-	(gdbtk_init): Call tk_command_loop rather than Tk_MainLoop.
-
-Thu May 16 16:16:35 1996  Fred Fish  <fnf@cygnus.com>
-
-	* gdbtk.tcl (evaluate_tcl_command, tclsh):  New functions that
-	implement a tcl evaluation window for gdbtk maintainers to use.
-
-Thu May 16 11:42:58 1996  Tom Tromey  <tromey@creche.cygnus.com>
-
-	* gdbtk.tcl (files_command): Correctly insert list of files into
-	listbox widget.
-
-	* gdbtk.tcl (files_command): listbox command no longer accepts
-	-geometry.
-
-Wed May 15 16:04:09 1996  Stan Shebs  <shebs@andros.cygnus.com>
-
-	* gdbtk.tcl (create_command_window): If command window's buffer
-	is disabled, don't execute any of the key bindings.
-end-sanitize-gdbtk
 
 Wed May 15 08:25:12 1996  Jeffrey A Law  (law@cygnus.com)
 
@@ -3301,13 +3083,6 @@ Mon May 13 23:53:30 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* procfs.c (info_proc):  Use int instead of id_t.  Old versions of
 	Irix don't seem to define this.
-
-start-sanitize-gdbtk
-Mon May 13 13:43:25 1996  Fred Fish  <fnf@cygnus.com>
-
-	* gdbtk.c (tk_command): Catch case where no argument is given
-	since this will cause the tcl interpreter to dump core.
-end-sanitize-gdbtk
 
 Mon May 13 17:40:58 1996  Jeffrey A Law  (law@cygnus.com)
 
@@ -3386,9 +3161,6 @@ Wed May  8 20:33:24 1996  Fred Fish  <fnf@cygnus.com>
 	(enable_delete_breakpoint): Ditto.
 	* breakpoint.h (clear_momentary_breakpoints): Remove prototype.
 	* symtab.c (find_pc_line): Improve comments.
-start-sanitize-gdbtk
-	* gdbtk.c: Fix a couple of misspellings.
-end-sanitize-gdbtk
 	* xcoffread.c: Ditto.
 
 Tue May  7 18:37:06 1996  Stan Shebs  <shebs@andros.cygnus.com>
@@ -3441,20 +3213,6 @@ Mon May  6 07:52:48 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	hooks under ELF.
 
 	* config/powerpc/tm-ppc-eabi.h: Define ELF_OBJECT_FORMAT.
-
-start-sanitize-gdbtk
-Thu May  2 19:17:49 1996  Stan Shebs  <shebs@andros.cygnus.com>
-
-	* gdbtk.tcl (debug_interface): New global, use to aid debugging.
-	(insert_breakpoint_tag, delete_breakpoint_tag): Fix range.
-	(file_popup_menu): Delete, never used.
-	(listing_window_popup): Rename from listing_window_button_1,
-	remove breakpoint toggling code.
-	(toggle_breakpoint): New procedure.
-	(create_file_win): Bind popup menu to button 2, toggle breakpoints
- 	with button 1 in breakpoint area, add display of tagged areas if
- 	debugging on.
-end-sanitize-gdbtk
 
 Thu May  2 12:46:14 1996  Jeffrey A Law  (law@cygnus.com)
 
@@ -3841,21 +3599,6 @@ Sat Apr  6 00:46:26 1996  Fred Fish  <fnf@cygnus.com>
 	* hpread.c (hpread_build_psymtabs): Ditto.
 	(hpread_build_psymtabs): Ditto.
 	(demangle.h): Include
-
-start-sanitize-gdbtk
-Fri Apr  5 13:44:40 1996  Stan Shebs  <shebs@andros.cygnus.com>
-
-	* gdbtk.c (running_now): New global variable.
-	(gdb_cmd): Test it before executing any command.
-	(gdbtk_call_command): Set it when inferior is running.
-	* gdbtk.tcl (gdbtk_tcl_busy, gdbtk_tcl_idle): Enable and
-	disable interaction with command window's text appropriately.
-
-Fri Apr  5 13:25:42 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
-
-	* gdbtk.c (SIOCSPGRP, linux): If on Linux, undef SIOCSPGRP, since
-	some versions of the kernel don't support it.
-end-sanitize-gdbtk
 
 Thu Apr  4 20:16:55 1996  Fred Fish  <fnf@cygnus.com>
 
@@ -4814,19 +4557,6 @@ Tue Feb  6 18:38:51 1996  J.T. Conklin  <jtc@slave.cygnus.com>
 	* nindy-share/nindy.c (say): Use stdarg.h macros when compiling
         with an ANSI compiler.
 
-start-sanitize-gdbtk
-Tue Feb  6 16:31:25 1996  Tom Tromey  <tromey@creche.cygnus.com>
-
-	* gdbtk.tcl (create_file_win): Eliminate text widget B1 binding so
-	double-clicking will work again.
-	(create_asm_win): Put "break" at end of all B1 bindings.
-	(create_file_win): Lower "sel" tag, don't raise it.
-	(ensure_line_visible): New proc.
-	(update_listing, update_assembly): Use it.
-	(create_copyright_window): Destroy window on Leave event.
-	(create_command_window): Put "break" at end of all B2 bindings.
-
-end-sanitize-gdbtk	
 Mon Feb  5 18:24:28 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	From Michael_Snyder@NeXT.COM (Michael Snyder):
@@ -5004,10 +4734,8 @@ Thu Jan 25 13:08:51 1996  Doug Evans (dje@cygnus.com)
 Thu Jan 25 03:26:38 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* configure.in (sparc64-*-*): Add default host configuration.
-start-sanitize-gdbtk
-	(sparc64-*-solaris2* host): Link statically if GCC used.
-end-sanitize-gdbtk
 	(sparc64-*-solaris2*): Add target configuration.
+	(sparc64-*-solaris2* host): Link statically if GCC used.
 	* configure: Regenerated.
 	* sparc/sp64sol2.mt: New file.
 
@@ -5019,16 +4747,6 @@ Wed Jan 24 15:42:24 1996  Tom Tromey  <tromey@creche.cygnus.com>
 
 	* Makefile.in (lint): Close backquotes.
 
-start-sanitize-gdbtk
-Wed Jan 24 15:28:41 1996  Tom Tromey  <tromey@creche.cygnus.com>
-
-	* gdbtk.tcl, gdbtk.c: Updated copyrights.
-
-	* configure.in: Look for -ldl or -ldld when using Tcl 7.5 or
-	greater.
-	* configure: Rebuilt.
-
-end-sanitize-gdbtk	
 Wed Jan 24 13:19:10 1996  Fred Fish  <fnf@cygnus.com>
 
 	* NEWS: Make note of new record and replay feature for
@@ -5122,9 +4840,6 @@ Tue Jan 23 09:00:48 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* printcmd.c (print_insn): Pass fprintf_unfiltered to
  	INIT_DISASSEMBLE_INFO.
-start-sanitize-gdbtk
-	* gdbtk.c (gdb_disassemble): Likewise.
-end-sanitize-gdbtk
 
 Mon Jan 22 16:59:40 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
@@ -5173,17 +4888,6 @@ Tue Jan 16 11:22:58 1996  Stu Grossman  (grossman@cygnus.com)
 	* Makefile.in (CLIBS):  Add LIBS to allow libraries to be
 	specified on the make command line (via make LIBS=xxx).
 
-start-sanitize-gdbtk
-Mon Jan 15 09:58:41 1996  Tom Tromey  <tromey@creche.cygnus.com>
-
-	* gdbtk.tcl (create_expr_window): Many changes to update GUI.
-	(add_expr): Changes from create_expr_window.
-	(create_command_window): Set focus.
-	(delete_expr): Rewrote.
-	(expr_update_button): New proc.
-	(add_expr): Put bindings on FocusIn, FocusOut.
-	Don't allow .file_popup to be torn off.
-end-sanitize-gdbtk
 
 Fri Jan 12 21:41:58 1996  Jeffrey A Law  (law@cygnus.com)
 
@@ -5209,30 +4913,6 @@ Fri Jan 12 13:11:42 1996  Stan Shebs  <shebs@andros.cygnus.com>
 	From Wilfried Moser <wilfried.moser@aut.alcatel.at>:
 	* remote.c (remotetimeout): New GDB variable, use to set the
 	remote timeout for reading.
-
-start-sanitize-gdbtk
-Fri Jan 12 09:36:17 1996  Tom Tromey  <tromey@creche.cygnus.com>
-
-	* gdbtk.tcl (gdbtk_tcl_query): Swap Yes and No buttons.
-	(update_listing): Use lassign.  Use "see" to scroll.  Don't need
-	screen_top, screen_bot, screen_height.
-	(update_assembly): Use "see" to scroll.
-	(textscrollproc): Removed.
-	(create_file_win): Don't use textscrollproc.
-	(asmscrollproc): Removed.
-	(create_asm_window): Don't use asmscrollproc.
-	(create_asm_win): Ditto.
-	(screen_height, screen_top, screen_bot): Removed.
-	(run_editor): New proc.
-	(build_framework): Use it.
-	(create_file_win, create_source_window): Don't use textscrollproc.
-	(create_breakpoints_window): Set -xscrollcommand on canvas.
-	(not_implemented_yet): Default button is 0.
-	(delete_char): Don't use tk_textBackspace.
-	(create_command_window): Allow Tk bindings to fire after deleting
-	character.
-	(create_command_window): Make Delete delete left, not right.
-end-sanitize-gdbtk
 
 Fri Jan 12 07:14:27 1996  Fred Fish  <fnf@cygnus.com>
 
@@ -5260,20 +4940,10 @@ Thu Jan 11 17:21:25 1996  Per Bothner  <bothner@kalessin.cygnus.com>
 	parameter type as the expected type when evaluating arg expressions.
 	* ch-lang.c (evaluate_subexp_chill):  Likewise (for MULTI_SUBSCRIPT).
 
-start-sanitize-gdbtk
 Thu Jan 11 10:08:14 1996  Tom Tromey  <tromey@creche.cygnus.com>
 
 	* main.c (main): Disable window interface if --help or --version
 	specified.
-
-	* gdbtk.tcl (FSBox): Don't use tk_listboxSingleSelect.
-
-	Changes in sync with expect:
-	* configure.in (ENABLE_GDBTK): Use CY_AC_PATH_TCL and
-	CY_AC_PATH_TK.
-	* aclocal.m4: Replaced with version from expect.
-	* configure: Regenerated.
-end-sanitize-gdbtk
 
 Wed Jan 10 16:08:49 1996  Brendan Kehoe  <brendan@lisa.cygnus.com>
 
@@ -5293,47 +4963,6 @@ Wed Jan 10 11:25:37 1996  Fred Fish  <fnf@cygnus.com>
 	Define.
 	* stabsread.c (define_symbol): If register value is too large,
 	tell what it is and what max is.
-
-start-sanitize-gdbtk
-Wed Jan 10 09:07:22 1996  Tom Tromey  <tromey@creche.cygnus.com>
-
-	* gdbtk.tcl (gdbtk_tcl_fputs, gdbtk_tcl_fputs_error,
-	gdbtk_tcl_flush): Use "see", not "yview".
-	(gdbtk_tcl_query): Use questhead bitmap.
-	various: Always wrap condition of 'if' in {...}.
-	(add_breakpoint_frame): Set -value on radiobuttons.
-	(lassign): New proc.
-	(add_breakpoint_frame): Use lassign, not series of assignments.
-	(decr): Made faster.
-	(interactive_cmd): Use "see", not "yview".
-	(not_implemented_yet): Use warning bitmap.
-	(update_expr): Don't allow $expr to be evalled by Tcl.
-	(create_expr_window): Don't use "focus".
-	(delete_char, delete_line): Define globally.
-	(delete_line, delete_char, create_command_window, update_autocmd,
-	build_framework, create_asm_win, create_file_win): Use "see", not
-	"yview".
-	(create_copyright_window, center_window, bind_widget_after_class):
-	New procs.
-	(FSBox,create_command_window, create_autocmd_window): Binding
-	changes for Tk4.
-	(textscrollproc): Define globally.
-	(build_framework): tk_menuBar no longer needed.  Keys Prior, Next,
-	Home, End, Up, and Down are all defined by Tk.
-	(apply_filespec): Use error bitmap in dialog.
-	(files_command): Don't use tk_listboxSingleSelect.
-	(files_command): Don't use "uniq" to remove duplicates from a
-	list.
-	(update_assembly): Use lassign.
-	(create_asm_win): Removed redundant bindings.
-	(listing_window_button_1, file_popup_menu): Use tk_popup.
-	(ButtonRelease-1 binding): Just remove tag from window; rest
-	handled by Tk.
-
-	* gdbtk.c (gdbtk_query): Use Tcl_Merge to provide quoting.
-	(call_wrapper): Use Tcl_Eval, not Tcl_VarEval.
-	(gdbtk_call_command): Ditto.
-end-sanitize-gdbtk
 
 Tue Jan  9 09:33:53 1996  Jeffrey A Law  (law@cygnus.com)
 
@@ -5400,9 +5029,6 @@ Thu Jan  4 16:04:54 1996  Stu Grossman  (grossman@cygnus.com)
 	* breakpoint.c (remove_breakpoint):  Change error to warning so
 	that hardware watchpoint removal problems won't leave breakpoint
 	traps in the target.
-start-sanitize-gdbtk
-	* configure configure.in:  Make --enable-gdbtk be the default.
-end-sanitize-gdbtk
 	* remote-e7000.c (e7000_insert_breakpoint,
 	e7000_remove_breakpoint):  Use e7000 based breakpoints, not memory
 	breakpoints.

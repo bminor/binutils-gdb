@@ -15,7 +15,7 @@
 
 Do-first:
 
-gdbtk_files="README.GDBTK gdbtk.c gdbtcl gdbtcl2 gdbtk.tcl"
+gdbtk_files="ChangeLog-gdbtk README.GDBTK gdbtk.c gdbtcl gdbtcl2 gdbtk.tcl"
 
 if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
 	lose_these_too="${gdbtk_files} ${lose_these_too}"

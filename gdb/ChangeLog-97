@@ -102,16 +102,6 @@ start-sanitize-tx19
 	* configure.tgt: Change little-endian tx19 target name to tx19l.
 end-sanitize-tx19
 
-start-sanitize-gdbtk
-Tue Dec 16 21:16:42 1997  Ian Lance Taylor  <ian@cygnus.com>
-
-	* Makefile.in (LIBGUI): New variable.
-	(GUI_CFLAGS_X): New variable.
-	(IDE_CFLAGS): Add $(GUI_CFLAGS_X).
-	* configure.in: Add $(LIBGUI) to TCL_LIBS and CONFIG_DEPS.
-	* configure: Rebuild.
-
-end-sanitize-gdbtk
 Tue Dec 16 11:24:30 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* remote-sim.c (gdbsim_open): Use "--architecture" instead of
@@ -183,18 +173,6 @@ Thu Dec 11 14:28:01 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 	backwards thru the trace buffer in a loop.
 	* (struct tracepoint): delete unused field.
 
-Wed Dec  10 13:16:45 1997  Keith Seitz  <keiths@onions.cygnus.com>
-
-	* gdbtk.c (gdb_get_tracepoint_info): Use info in struct 
-	symtab_and_line (not struct tracepoint) so that we get the
-	real line info for an address. Arrange data more like
-	gdb_get_breakpoint_info.
-	(tracepoint_notify): Use info in struct symtab_and_line again.
-	(gdbtk_init): Add command "gdb_get_tracepoint_list" into
-	interpreter.
-	(gdb_get_tracepoint_list): New function that aids the source
-	window in displaying tracepoints when the file changes.
-	
 start-sanitize-d30v
 Wed Dec 10 17:57:00 1997  David Taylor  <taylor@texas.cygnus.com>
 
@@ -227,12 +205,6 @@ Mon Dec  8 14:28:49 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* tracepoint.c (memrange_sortmerge): allow for memranges 
 	that overlap.  (collect_pseudocommand etc.) cleanup decls.
-
-Fri Dec  5 10:31:23 1997  Keith Seitz  <keiths@pizza.cygnus.com>
-
-	* gdbtk.c (gdbtk_init): Add gdb_find_file into interpreter.
-	(gdb_find_file_command): New function which searches source path
-	to find the real full filename of a file.
 
 Fri Dec  5 09:22:35 1997  Nick Clifton  <nickc@cygnus.com>
 
@@ -281,81 +253,25 @@ Tue Dec  2 10:14:15 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 	* tracepoint.c: move prototype of validate_actionline(), and
 	make it consistent with the function declaration.
 
-Mon Dec  1 10:19:44 1997  Keith Seitz  <keiths@onions.cygnus.com>
-
-	* gdbtk.c: move include of "guitcl.h" back out of IDE ifdef
-	(gdbtk_init): move ide_initialize_paths out of IDE ifdef
-
-	* configure.in (TCL_LIBS, CONFIG_DEPS): add IDE libraries for all
-	builds
-	(CONFIG_OBS): remove tracepoint.o, which should always be included
-
-	* configure: regenerate
-
-	* Makefile.in (install-only): ALWAYS install the new gdbtk
-	(REMOTE_OBS): add tracepoint.o
-	
 Thu Nov 27 09:07:18 1997  Michael Meissner  <meissner@cygnus.com>
-
-	* configure.in ({TCL_LIBS,CONFIG_DEPS}): Don't add IDE libraries
-	if not --enable-ide.
-	(CONFIG_OBS): Add tracepoint.o to list if --enable-gdbtk.
-	* configure: Regenerate.
-
-	* gdbtk.c (gdb_get_breakpoint_info): Add missing filename
-	argument.
-	(toplevel): Move include of guitcl.h into #ifdef IDE region.
-	(gdbtk_init): Move ide_initialize_paths call into #ifdef IDE
-	section.
 
 	* Makefile.in (tracepoint_h): New macro for tracepoint.h
 	includes.
 	(tracepoint.o): Add rule to build.
-	(gdbtk.o): Update dependencies.
 
 Wed Nov 26 22:59:04 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* remote-sim.c (gdbsim_cntrl_c): Lose ANSI prototype.
 
-Wed Nov 26 15:02:43 1997  Keith Seitz  <keiths@onions.cygnus.com>
-
-    	* gdbtk.c (gdb_loc): symtab_to_filename can return NULL
-	(breakpoint_notify): symtab_to_filename can return NULL
-	(gdb_get_breakpoint_info): symtab_to_filename can return NULL
-
 	* tracepoint.c (set_raw_tracepoint): fix typo
 
 Wed Nov 26 11:33:09 1997  Keith Seitz  <keiths@onions.cygnus.com>
 
-	* tracepoint.c (set_raw_tracepoint): make sure there's a trailing slash on
-	the directory name
+	* tracepoint.c (set_raw_tracepoint): Make sure there's a trailing
+ 	slash on the directory name.
 
-	* Merge (lots) with foundry's 11/18/97 build
-	
-	* Makefile.in (install-only): install the new gdbtk, not the old
-
-	* top.h: add declaration of get_prompt
-
-	* top.c (get_prompt): new function
-
-	* gdbtk.c (gdbtk_call_command): also run idle hooks for class_trace
-	commands
-	(gdbtk_init): add new commands "gdb_get_locals", "gdb_get_args",
-	"gdb_get_function", "gdb_get_line", "gdb_get_file",
-	"gdb_tracepoint_exists", "gdb_get_tracepoint_info", "gdb_actions",
-	and "gdb_prompt"
-	(gdb_get_vars_command): new function
-	(gdb_get_line_command): new function
-	(gdb_get_file_command): new function
-	(gdb_get_function_command): new function
-	(gdb_get_tracepoint_info): new function
-	(gdbtk_create_tracepoint): new function
-	(gdbtk_delete_tracepoint): new function
-	(tracepoint_notify): new function
-	(tracepoint_exists): new function
-	(gdb_actions_command): new function
-	(gdb_tracepoint_exists_command): new function
-	(gdb_prompt_command): new function
+	* top.c (get_prompt): New function.
+	* top.h: Declare it.
 
 Wed Nov 26 09:59:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -465,15 +381,6 @@ Fri Nov 14 13:04:34 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* jv-exp.y (copy_exp, insert_exp): Avoid ANSI prototypes.
 
-Thu Nov 13 18:15:54 1997  Ian Lance Taylor  <ian@cygnus.com>
-
-	* gdbtk.c: Move include of gdbcore.h to top of file.
-	(close_bfds): New static function if _WIN32.
-	(gdbtk_readline): Call close_bfds.
-	(call_wrapper, tk_command_loop): Likewise.
-	(gdb_clear_file): New static function.
-	(gdbtk_init): Create gdb_clear_file Tcl command.
-
 start-sanitize-d30v
 Thu Nov 13 09:47:35 1997  Michael Meissner  <meissner@cygnus.com>
 
@@ -491,9 +398,6 @@ end-sanitize-d30v
 
 Wed Nov 12 14:58:39 1997  Jeff Holcomb  <jeffh@cygnus.com>
 
-	* gdbtk.c: gdbtk_load_hash and ui_load_progress_hook return an
-	int result.
-	(gdbtk_load_hash): download hash routine returns an int result.
 	* symfile.c (generic_load): Handle cancel from the
 	ui_load_progress_hook routine.
 	* dsrec.c (load_srec): Handle cancel from the
@@ -504,20 +408,9 @@ Mon Nov 10 15:13:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* valprint.c (print_longest): The b, h, w, and g format specifiers
  	print unsigned values.
 
-Mon Nov 10 15:11:51 1997  Ian Lance Taylor  <ian@cygnus.com>
-
-	* gdbtk.c (gdbtk_init): Call ide_create_shell_execute_command if
-	__CYGWIN32__.
-	* configure.in: Add -lshell32 to WIN32LIBS on cygwin32.
-	* configure: Rebuild.
-
 Mon Nov 10 02:02:49 1997  Martin M. Hunt  <hunt@cygnus.com>
 
 	* top.c (quit_confirm): Change exit message.
-
-Sun Nov  9 16:25:34 1997  Tom Tromey  <tromey@cygnus.com>
-
-	* gdbtk.c (gdbtk_init): Run ide_create_help_command.
 
 Tue Nov  4 16:52:50 1997  Geoffrey Noer  <noer@cygnus.com>
 
@@ -551,8 +444,6 @@ Wed Oct 29 15:53:24 1997  David Taylor  <taylor@texas.cygnus.com>
 
 Tue Oct 28 17:31:47 1997  Martin M. Hunt  <hunt@cygnus.com>
 
-	* gdbtk.c (gdbtk_init): Call ide_create_winprint_command.
-
 	* configure.in (configdir): Add  -lcomdlg32 and -ladvapi32
 	to WIN32LIBS.
 
@@ -575,16 +466,6 @@ Thu Oct 23 16:16:04 1997  Jeff Law  (law@fast.cs.utah.edu)
 	* stabsread.c (symbol_reference_defined): Return -1 for error/not
 	found.  All callers changed appropriately.
 	(define_symbol): Don't perform assignment inside conditionals.
-
-Thu Oct 23 15:53:37 1997  Ian Lance Taylor  <ian@cygnus.com>
-
-	* configure.in: Add -lgdi32 to WIN32LIBS when linking gdbtk on
-	cygwin32.
-	* configure: Rebuild.
-
-Wed Oct 22 21:32:54 1997  Martin M. Hunt  <hunt@cygnus.com>
-
-	* gdbtk.c (gdbtk_init): Create sizebox command on Windows.
 
 Wed Oct 22 13:04:52 1997  Jeffrey A Law  (law@cygnus.com)
 
@@ -648,12 +529,6 @@ Tue Oct 14 22:13:27 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* stabsread.c: Make ref_map entries dynamically allocated.
 
-Thu Oct  9 14:33:21 1997  Ian Lance Taylor  <ian@cygnus.com>
-
-	* gdbtk.c (gdbtk_init): Remove assertion argument from call to
-	ide_create_window_register_command.
-	* gdbtcl2/main.tcl: Call ide_window_register restorer.
-
 Thu Oct  9 12:37:57 1997  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* printcmd.c (print_address_symbolic, address_info): Mask
@@ -697,11 +572,6 @@ start-sanitize-r5900
 	to disable use of FP registers for function arguments.
 end-sanitize-r5900
 
-Wed Oct  1 11:09:52 1997  Tom Tromey  <tromey@cygnus.com>
-
-	* gdbtk.c (gdbtk_init): Pass name of restore interface to
-	ide_create_window_register_command.
-
 Mon Sep 29 23:03:03 1997  Mark Alexander  <marka@cygnus.com>
 
 	* mips-tdep.c (set_reg_offset): New function.
@@ -729,8 +599,6 @@ end-sanitize-r5900
 	(REGISTER_NAMES): Ditto.
 
 Fri Sep 26 21:08:22 1997  Keith Seitz  <keiths@pizza.cygnus.com>
-
-	* gdbtk.c (gdbtk_init): initialize ui_load_progress_hook
 
 	* dsrec.c (load_srec): add ui_load_progress_hook to 
 	display some feedback to user
@@ -774,13 +642,6 @@ Fri Sep 26 10:33:54 1997  Felix Lee  <flee@cygnus.com>
 
 	* configure.tgt (v850-*-*): necmsg.lib instead of v850.lib.
 
-Thu Sep 25 03:05:00 1997  Martin M. Hunt  <hunt@cygnus.com>
-
-	* gdbtk.c (gdb_load_info): New function.  Returns a list
-	of section names and sizes for an executable.
-	(gdbtk_load_hash): Stub function to call tcl function
-	download_hash.
-
 Wed Sep 24 14:02:09 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/v850/tm-v850.h (BREAKPOINT): Use 1 word DIVH insn with
@@ -815,10 +676,6 @@ Tue Sep 23 11:24:13 1997  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* Makefile.in (ALLCONFIG): Remove, inaccurate and never used.
 
-Tue Sep 23 01:29:00 1997  Martin M. Hunt  <hunt@cygnus.com>	
-
-	* gdbtk.c (gdb_get_mem): Fix compiler warning.
-
 Tue Sep 23 00:08:18 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mips-tdep.c (mips_push_arguments):  Tweak alignment of register
@@ -832,10 +689,6 @@ Mon Sep 22 15:32:06 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* stabsread.h, symtab.h, dbxread.c, symtab.c, stabsread.c:
 	Fix prototypes.  Remove function scoped function declarations.
-
-Sun Sep 21 00:15:00 1997  Martin M. Hunt  <hunt@cygnus.com>
-
-	* gdbtk.c (gdb_get_mem): Fix problem with ASCII dump.
 
 Fri Sep 19 18:51:26 1997  Felix Lee  <flee@cygnus.com>
 
@@ -873,11 +726,6 @@ Tue Sep 16 19:56:23 1997  Per Bothner  <bothner@cygnus.com>
 	* solib.c (find_solib):  Register cleanup to call clear_solib
 	on a new 'run' command.
 	(symbol_add_stub):  First look for existing objfile with same name.
-
-Tue Sep 16 18:07:17 1997  Martin M. Hunt  <hunt@cygnus.com>	
-
-	* gdbtk.c (gdb_get_mem): New function.  Returns
-	a formatted memory dump with optional ASCII dump.
 
 Tue Sep 16 16:00:01 1997  Stan Shebs  <shebs@andros.cygnus.com>
 
@@ -947,19 +795,10 @@ Mon Sep  8 16:45:51 1997  Stu Grossman  <grossman@cygnus.com>
 
 Mon Sep  8 12:48:50 1997  Ian Lance Taylor  <ian@cygnus.com>
 
-	* gdbtk.c: Include ilutk.h if IDE.
-	(gdb_confirm_quit, gdb_force_quit): New static functions.
-	(gdbtk_init): Add Tcl commands gdb_confirm_quit and
-	gdb_force_quit.
 	* top.c (quit_confirm, quit_force): New functions, broken out of
 	quit_command.
 	(quit_command): Just call quit_confirm and quit_force.
 	* top.h (quit_confirm, quit_force): Declare.
-
-Mon Sep  8 03:05:33 1997  Martin M. Hunt  <hunt@cygnus.com>
-
-	* gdbtk.c (gdb_get_breakpoint_info): Now returns the
-	function a breakpoint is in.
 
 Sun Sep  7 17:26:30 1997  Dawn Perchik  <dawn@cygnus.com>
 
@@ -967,23 +806,6 @@ Sun Sep  7 17:26:30 1997  Dawn Perchik  <dawn@cygnus.com>
 	reading stabs extensions for live range information.
 	* stabsread.h, partial-stab.h: Add prototypes for new functions.
 	* symtab.h: Add structure for storing live range information.
-
-Fri Sep  5 20:23:58 1997  Ian Lance Taylor  <ian@cygnus.com>
-
-	* gdbtk.c (gdbtk_init): Call ide_create_exit_command.
-
-Wed Sep  3 19:39:15 1997  Ian Lance Taylor  <ian@cygnus.com>
-
-	* gdbtk.c: Include guitcl.h.
-	(gdbtk_init): Always call ide_initialize_paths.  Set the Tcl
-	variable IDE to 1 when using the IDE.  Always try using auto path
-	to find main.tcl.
-	* Makefile.in (IDE_CFLAGS_X): Always include libide.
-	(LIBIDE): New variable.
-	(IDE_X): Omit -lide.
-	(IDE_DEPS): Omit libide.
-	* configure.in: Add LIBIDE to TCL_LIBS and CONFIG_DEPS.
-	* configure: Rebuild.
 
 Wed Sep  3 16:39:39 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -1068,69 +890,10 @@ Mon Aug 25 12:21:46 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-sim.c (gdbsim_open): Pass exec_bfd to sim_open call.
 
-Mon Aug 25 02:28:55 1997  Keith Seitz  <keiths@pizza.cygnus.com>
-
-	* gdbtk.c: (gdb_target_has_inferior) check if inferior_pid is non-zero
-	before assuming that the inferior is running.
-
-
-Mon Aug 25 01:06:48 1997  Ian Lance Taylor  <ian@cygnus.com>
-
-	* gdbtk.c (gdbtk_start_timer): Pass third argument to setitimer.
-	(gdbtk_stop_timer): Likewise.
-
-Mon Aug 25 00:23:08 1997  Keith Seitz  <keiths@pizza.cygnus.com>
-
-	* gdbtk.c: (gdbtk_init) create new command "gdb_target_has_execution"
-	(gdb_target_has_execution_command) new function
-
 Sun Aug 24 21:16:59 1997  Geoffrey Noer  <noer@cygnus.com>
 
         * ocd.c: comment out sections that create and flush wigglers.log
         log file when using the wiggler.
-
-Sun Aug 24 20:27:22 1997  Ian Lance Taylor  <ian@cygnus.com>
-
-	* gdbtk.c (gdb_loc): If there are no symbols, just bail
-	immediately.
-	(tk_command_loop): Print errors encountered while running
-	gdbtk_tcl_preloop.
-
-start-sanitize-gdbtk
-Sun Aug 24 13:44:03 1997  Tom Tromey  <tromey@cygnus.com>
-
-	* gdbtk.c (gdbtk_init): Run ide_create_build_command.
-
-end-sanitize-gdbtk
-
-Sat Aug 23 21:53:39 1997  Ian Lance Taylor  <ian@cygnus.com>
-
-	* gdbtk.c: If CYGWIN32, include <sys/time.h>.
-	(x_fd): Don't define if WINNT.
-	(gdbtk_start_timer, gdbtk_stop_timer): New static functions if
-	CYGWIN32.
-	(gdbtk_wait): Don't set up signal handling if WINNT.  If CYGWIN32,
-	call gdbtk_start_timer and gdbtk_stop_timer.
-	(gdbtk_init): Don't set up signal handling or make x_fd
-	asynchronous if CYGWIN32.
-
-Fri Aug 22 15:23:15 1997  Ian Lance Taylor  <ian@cygnus.com>
-
-	* gdbtk.c (error_string_ptr): New static variable.
-	(gdbtk_fputs): If result_ptr is NULL, and error_string_ptr is not
-	NULL, and we're outputting to stderr, append string to
-	error_string_ptr rather than calling gdbtk_tcl_fputs.
-	(call_wrapper): Set up error_string_ptr.  Put both error string
-	and normal string in Tcl result.
-
-	* gdbtk.c (gdbtk_init): Don't call ide_run_server_init until after
-	gdb has initialized.
-
-Thu Aug 21 19:14:38 1997  Ian Lance Taylor  <ian@cygnus.com>
-
-	* gdbtk.c: If _WIN32, include winuser.h.
-	(gdbtk_init): If _WIN32, use MessageBox to display an error
-	evaluating main.tcl.
 
 Thu Aug 21 16:18:08 1997  Geoffrey Noer  <noer@cygnus.com>
 
@@ -1152,34 +915,12 @@ Thu Aug 21 14:56:04 1997  Geoffrey Noer  <noer@cygnus.com>
         * ser-ocd.c (ocd_readchar): error if we attempt to read past
         the end of the from_wiggler_buffer.
 
-start-sanitize-gdbtk
-Thu Aug 21 00:48:00 1997  Martin M. Hunt  <hunt@pern.cygnus.com>
-
-	* gdbtk.c (gdbtk_init): Add call to ide_run_server_init().
-	(gdb_cmd): For the load command, don't buffer the I/O.
-
-end-sanitize-gdbtk	
 
 Wed Aug 20 14:08:39 1997  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* dink32-rom.c: Don't use "mf" command to fill, is too picky
 	about alignment.
 
-start-sanitize-gdbtk
-Wed Aug 20 11:41:22 1997  Martin M. Hunt  <hunt@cygnus.com>
-
-	* gdbtk.c (gdbtk_query): Chaneg free() call to Tcl_Free().
- 	
-Tue Aug 19 17:09:19 1997  Ian Lance Taylor  <ian@cygnus.com>
-
-	* Makefile.in (TCL_DEPS, TK_DEPS): New variables.
-	(ITCL_DEPS, TIX_DEPS): New variables.
-	(IDE_DEPS): New variable.
-	(CDEPS): Include @CONFIG_DEPS@.
-	* configure.in: Set and substitute CONFIG_DEPS and TIX_DEPS.
-	* configure: Rebuild.
-
-end-sanitize-gdbtk
 
 Tue Aug 19 08:41:36 1997  Fred Fish  <fnf@cygnus.com>
 
@@ -1223,14 +964,6 @@ Sun Aug 17 17:33:34 1997  Stan Shebs  <shebs@andros.cygnus.com>
 	(sds_store_registers): Get the right values from registers array.
 	(putmessage): Tweak length handling so checksum comes out right.
 	(sds_insert_breakpoint, sds_remove_breakpoint): Do correctly.
-
-start-sanitize-gdbtk
-Sun Aug 17 00:42:11 1997  Martin M. Hunt  <hunt@cygnus.com>
-
-	* gdbtk.c (gdb_listfuncs): New function that returns
-	a list of all the functions in a source file.
-
-end-sanitize-gdbtk
 
 Fri Aug 15 20:53:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -1287,12 +1020,6 @@ Tue Aug 12 14:37:18 1997  Geoffrey Noer  <noer@cygnus.com>
 	* ocd.c (ocd_wait): loop until we're in BDM mode instead of
 	assuming control has returned to GDB.
 
-start-sanitize-gdbtk
-Tue Aug 12 16:35:21 1997  Ian Lance Taylor  <ian@cygnus.com>
-
-	* Makefile.in (install-only): Install tclIndex if ENABLE_IDE.
-
-end-sanitize-gdbtk
 Mon Aug 11 19:16:04 1997  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* dink32-rom.c: New file, support for DINK32 monitor.
@@ -1330,12 +1057,6 @@ Mon Aug 11 16:08:52 1997  Fred Fish  <fnf@cygnus.com>
 	* frame.h (enum lval_type): Conditionalize on __GNUC__
  	instead of __STDC__.
 
-start-sanitize-gdbtk
-Mon Aug 11 10:43:04 1997  Tom Tromey  <tromey@cygnus.com>
-
-	* gdbtk.c (gdbtk_init): Use ide_event_init_from_environment.
-
-end-sanitize-gdbtk
 Sun Aug 10 19:08:26 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* utils.c (error): Fix return type for !ANSI_PROTOTYPES.
@@ -1391,43 +1112,15 @@ Fri Aug  8 15:59:24 1997  Ian Lance Taylor  <ian@cygnus.com>
 	($(BDM_LIBNAME)): Remove target.
 	* wigglers.def: Remove.
 
-start-sanitize-gdbtk
-	* gdbtk.c (gdbtk_init): Change gdbtk_lib_tmp and gdbtk_file to be
-	dynamically allocated, rather than fixed size.  Pass "gdbtcl" to
-	ide_initialize_paths to match installed directory name.  If IDE,
-	use auto_path to search for main.tcl.
-	* Makefile.in (install-only): If ENABLE_IDE, install from gdbtcl2
-	rather than gdbtcl.
-
-end-sanitize-gdbtk
 	* config/i386/cygwin32.mh ($(BDM_LIBNAME)): Rename target from
 	libwigglers.def.
 	(libwigglers.a): Remove target.
 
-start-sanitize-gdbtk
-	* gdbtk.c (gdbtk_cleanup): New static function.
-	(gdbtk_init): Add gdbtk_cleanup as a final cleanup.  Uncomment
-	call to ide_initialize_paths.  If we can't initialize the event
-	system, set GDBTK_IDE to 0 in the Tcl interpreter.  Create the
-	ide_window_register and the ide_window commands.  Initialize tk,
-	itcl, and tix after initializing the IDE.
-
-	* configure.in (tixdir): Update for cygwin32 case for Tcl 8.0.
-	* configure: Rebuild.
-
-end-sanitize-gdbtk
 Fri Aug  8 13:11:01 1997  Mike Meissner  <meissner@cygnus.com>
 
 	* config/powerpc/ppc{,le}-{eabi,sim}.mt (TDEPFILES): Make sure
 	ppc-bdm.o and ocd.o are used for all powerpc-eabi targets.
 
-start-sanitize-gdbtk
-Fri Aug  8 00:13:32 1997  Martin M. Hunt  <hunt@cygnus.com>
-
-	* gdbtk.c (breakpoint_notify): Change buffer size from 100
-	to 256 to avoid memory corruption with very long pathnames.
-
-end-sanitize-gdbtk	
 Thu Aug  7 19:40:52 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	Changes to OCD support to support wiggler box as well as
@@ -1449,13 +1142,6 @@ Thu Aug  7 19:40:52 1997  Geoffrey Noer  <noer@cygnus.com>
 	return buffer and initializing curr location ptr to start of
 	buffer.
 
-start-sanitize-gdbtk	
-Thu Aug  7 14:08:23 1997  Martin M. Hunt  <hunt@cygnus.com>
-
-	* configure.in: Change required Tix version to 4.1.8.0 .
-	* configure: Rebuilt.
-
-end-sanitize-gdbtk
 Thu Aug  7 13:39:31 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	* ocd.h: add OCD_SET_CONNECTION
@@ -1587,14 +1273,10 @@ Sun Aug  3 08:18:09 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 Fri Aug  1 15:21:44 1997  Ian Lance Taylor  <ian@cygnus.com>
 
-	* gdbtk.c (Tcl_Alloc): Don't provide our own version of this if
-	_WIN32.
-	(Tcl_Realloc, Tcl_Free): Likewise.
 	* configure.in: Check for cygwin32 environment.  Define and
 	substitute WIN32LIBS and WIN32LDAPP.  Always set configdir to
 	unix; setting it to win was for an old Tcl/Tk configuration
 	scheme.
-	* aclocal.m4 (CY_AC_LOAD_TKCONFIG): Substitute TK_BUILD_INCLUDES.
 	* Makefile.in (TK_CFLAGS): Add @TK_BUILD_INCLUDES@.
 	(WIN32LDAPP, WIN32LIBS): Define.
 	(CLIBS): Add $(WIN32LIBS).
@@ -1655,27 +1337,12 @@ Fri Jul 25 15:37:15 1997  Stu Grossman  <grossman@cygnus.com>
 	* v850ice.c:  Include <windows.h>.  Support new v850 DLL interface.
 	* Add defs for target status.
 
-start-sanitize-gdbtk
-Tue Jul 22 19:45:37 1997  Martin M. Hunt  <hunt@cygnus.com>
-
-	* configure.in, aclocal.m4: Another fix to find the
-	correct Tix library name.
-
-	* configure: Rebuilt.
-	
-end-sanitize-gdbtk	
 
 Tue Jul 22 12:11:48 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* config/mips/tm-mips64.h: longs, long longs, and pointers
 	are all 64 bits on EABI mips targets.
 
-start-sanitize-gdbtk
-Mon Jul 21 22:24:07 1997  Martin M. Hunt  <hunt@cygnus.com>
-
-	* aclocal.m4: Search for the correct tix library. 
-end-sanitize-gdbtk
-	
 Thu Jul 17 11:38:46 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* partial-stab.h (case N_BINCL): detect missing partial symtab.
@@ -1702,35 +1369,13 @@ Mon Jul 14 18:02:53 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 	* procfs.c (wait_fd): Handle an fd that has "hung up" or 
 	otherwise terminated (Solaris threads).
 
-start-sanitize-gdbtk
 Thu Jul 10 00:02:41 1997  Martin M. Hunt  <hunt@cygnus.com>
 
-	* Makefile.in, configure.in, aclocal.m4: Add Itcl, Tix, and 
-	IDE configuration information.
-
-	* gdbtk.c (breakpoint_notify): Send address, linenumber and 
-	filename when a breakpoint is set.  Avoids call to bp_info.
- 	(gdbtk_init): Call Tcl_FindExecutable(). Add code to handle 
-	Itcl, Tix and IDE initialization.
-
 	* defs.h (init_ui_hook): Change prototype to accept one arg.
-
 	* main.c (gdb_init): Change prototype to accept one arg.
-
 	* top.c (gdb_init): Accepts one argument which it uses to
-	call (*init_ui_hook), which will be gdbtk_init(). This is
- 	used for calling Tcl_FindExecutable().
-	
-	* gdbtcl/breakpoint.tcl (gdbtk_tcl_breakpoint): Change to
-	accept variable number of args for compatibility with
-	cchanges in gdbtk.c.
-	
-	* configure: Regenerated.
+	call (*init_ui_hook).
 
-	* gdbtcl/tclIndex: Regenerated.
-	
-end-sanitize-gdbtk
-	
 Fri Jul  4 14:49:33 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* source.c (OPEN_MODE, FDOPEN_MODE): Define; value depends upon
@@ -1963,11 +1608,6 @@ Fri Jun 13 10:28:09 1997  Fred Fish  <fnf@cygnus.com>
 	(java-exp.tab.c): Ditto.
 	(f-exp.tab.c): Ditto.
 	(m2-exp.tab.c): Ditto.
-start-sanitize-gdbtk
-
-	* gdbtk.c (gdbtk_init): Make truth value test explicit.
-	Remove unused static variable "Gdbtk_Library".
-end-sanitize-gdbtk
 
 	* sh-tdep.c (symfile.h): Include.
 	(gdb_string.h): Include.
@@ -1977,11 +1617,6 @@ end-sanitize-gdbtk
 
 Sat Jun  7 02:34:19 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
-start-sanitize-gdbtk
-	* gdbtk.c (gdb_get_breakpoint_info):  Add string for new
-	enumeration del_at_next_stop to bpdisp array.
-
-end-sanitize-gdbtk
 	* eval.c (evaluate_subexp_for_sizeof):  Handle dereferencing
 	of non-pointer values.
 
@@ -2025,12 +1660,6 @@ Tue Jun  3 16:24:46 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 	* configure.tgt: add mipsr3900-elf target
 	* config/mips/r3900.mt r3900l.mt tm-r3900.h tm-r3900l.h: ditto
 
-start-sanitize-gdbtk
-Tue Jun  3 15:46:51 1997  Tom Tromey  <tromey@cygnus.com>
-
-	* Makefile.in (LIB_RUNTIME_DIR): New variable.
-
-end-sanitize-gdbtk
 Tue May 27 10:34:11 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* dbxread.c: Check malloc's return for null, prevent segv.
@@ -2134,17 +1763,6 @@ Thu May  8 08:42:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 	* configure: Re-generate.
 	* remote-sim.c: Signal returns RETSIGTYPE.
 	
-start-sanitize-gdbtk
-Wed May  7 19:10:19 1997  Andrew Cagney  <cagney@b1.cygnus.com>
-
-	* gdbtk.c (wrapped_call): New function - make actual call to tk
- 	worker function.
-	(call_wrapper): Rewrite to use top.c:catch_errors.
-
-	* gdbtk.c (gdb_stop): If No target_stop set quit flag and hope for
- 	best.
-
-end-sanitize-gdbtk
 Wed May  7 20:05:07 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* target.h (target_stop): Drop argument so it can be tested for
@@ -2299,12 +1917,6 @@ Tue Apr 22 09:02:10 1997  Stu Grossman  (grossman@critters.cygnus.com)
 	* Makefile.in (maintainer-clean):  Add distclean to dependencies.
 	Remove duplicate rm's of files.
 
-start-sanitize-gdbtk
-Mon Apr 21 14:00:08 1997  Doug Evans  <dje@canuck.cygnus.com>
-
-	* gdbtk.c (gdb_disassemble): Store endian-ness in `di'.
-
-end-sanitize-gdbtk
 Mon Apr 21 09:49:25 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* remote-pa.c:  Remove.  It's broken and no longer necessary.
@@ -2403,14 +2015,6 @@ Fri Apr 18 16:52:41 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 	(gdb_os_poll_quit): New function. Check for a quit pending on the
  	console.
 
-start-sanitize-gdbtk
-Wed Apr 16 12:33:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
-
-	* Makefile.in (install-only): Make list of gdbtcl files to install
- 	explicit - was picking up files such as ChangeLog etc.
-	(install-only): Don't blindly create the directory.
-
-end-sanitize-gdbtk
 Thu Apr 17 14:30:04 1997  Per Bothner  <bothner@deneb.cygnus.com>
 
 	* defs.h (enum language):  Add language_java.
@@ -2616,13 +2220,6 @@ Wed Apr  2 14:16:51 1997  Doug Evans  <dje@canuck.cygnus.com>
 	* remote-sim.c (gdbsim_open): Check return code from sim_open.
 	Update call to sim_open (new arg SIM_OPEN_DEBUG).
 
-start-sanitize-gdbtk
-Tue Apr  1 15:04:21 1997  Jason Molenda  (crash@godzilla.cygnus.co.jp)
-
-	* configure.in (gdbtcl): Create soft-link for gdbtcl/ directory instead
-	of gdbtk.tcl.
-
-end-sanitize-gdbtk	
 Mon Mar 31 14:55:53 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gdbinit.in: New file.
@@ -2658,13 +2255,6 @@ Fri Mar 28 15:38:04 1997  Mike Meissner  <meissner@cygnus.com>
 	to va_list from void *, since va_list might not be a pointer
 	type.
 
-start-sanitize-gdbtk
-Fri Mar 28 17:04:02 1997  Jason Molenda  (crash@godzilla.cygnus.co.jp)
-
-	* Makefile.in (gdbtk.o): look for GDBTK_LIBRARY in $(datadir) by
-	default, not $(srcdir).
-
-end-sanitize-gdbtk	
 Thu Mar 27 14:21:46 1997  Mark Alexander  <marka@cygnus.com>
 
 	* remote-mips.c: Clean up comment and extraneous semicolon
@@ -2770,21 +2360,6 @@ Wed Mar 19 16:13:22 1997  Geoffrey Noer  <noer@pizza.cygnus.com>
 	* configure.tgt: added new entries
 	* configure.host: added new entries
 
-start-sanitize-gdbtk
-Wed Mar 19 15:16:17 1997  Martin M. Hunt  <hunt@onions.cygnus.com>
-
-	* Makefile.in:  Install gdbtcl dir instead of gdbtk.tcl.
-	
-	* gdbtk.c: Added some ifdefs for Windows.  Changed GDBTK_FILENAME
-	to GDBTK_LIBRARY, which is now a path to search.
-	(gdb_path_conv): New function.  Convert Cygwin32 pathname to
-	DOS-style pathname.
-
-	* {aclocal.m4,configure.in}: Changes for Windows builds.
-
-	* configure: Rebuilt.
-
-end-sanitize-gdbtk	
 Mon Mar 17 17:52:00 1997  J.T. Conklin  <jtc@cygnus.com>
 
 	* dsrec.c (load_srec): Print leading zeroes when printing section
@@ -2816,13 +2391,6 @@ Fri Mar 14 15:44:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (elfread.o): Depend upon elf-bfd.h and elf/mips.h.
 
-start-sanitize-gdbtk
-Fri Mar 14 10:01:29 1997  Tom Tromey  <tromey@cygnus.com>
-
-	* configure: Regenerated.
-	* configure.in (LIBS): Re-reverse order of TCL_LIBS and TK_LIBS.
-
-end-sanitize-gdbtk
 Thu Mar 13 22:51:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* utils.c (pollquit, notice_quit): If _WIN32, limit test for
@@ -2852,17 +2420,6 @@ Wed Mar 12 14:40:06 1997  Tom Tromey  <tromey@cygnus.com>
 	* acconfig.h (START_INFERIOR_TRAPS_EXPECTED, sys_quotactl,
 	HAVE_HPUX_THREAD_SUPPORT): Define.
 
-start-sanitize-gdbtk
-Wed Mar 12 14:29:52 1997  Tom Tromey  <tromey@cygnus.com>
-
-	* gdbtk.c (x_event): Use Tcl_DoOneEvent, TCL_DONT_WAIT,
-	TCL_ALL_EVENTS.
-
-	* configure: Regenerated.
-	* configure.in (ENABLE_GDBTK): Put TCL_LIBS after TK_LIBS in
-	LIBS.
-
-end-sanitize-gdbtk
 Tue Mar 11 07:25:27 1997  Mark Alexander  <marka@cygnus.com>
 
 	First cut at supporting simulators in gdbserver:
@@ -3125,12 +2682,6 @@ Mon Feb 10 16:11:57 1997  Jeffrey A Law  (law@cygnus.com)
 	(value_arg_coerce): Similarly.
 	(value_of_variable): Provide dummy initialization of "frame".
 
-start-sanitize-gdbtk
-Mon Feb 10 13:50:53 1997  Stu Grossman  (grossman@critters.cygnus.com)
-
-	* gdbtk.c (call_wrapper):  Clear running_now if an error occurs.
-
-end-sanitize-gdbtk
 Mon Feb 10 07:54:26 1997  Fred Fish  <fnf@cygnus.com>
 
 	* xcoffread.c (RECORD_MINIMAL_SYMBOL): Add NULL asection* parameter
