@@ -1,4 +1,4 @@
-2000-27-01  Thomas de Lellis  <tdel@windriver.com>
+2000-01-27  Thomas de Lellis  <tdel@windriver.com>
 
         * nm.c (print_symbol_info_bsd): Use bfd_is_undefined_symclass to
 	check to unresolved symbols.
