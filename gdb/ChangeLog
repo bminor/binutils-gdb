@@ -1,3 +1,11 @@
+2001-09-27  J. Brobecker <brobecker@gnat.com>
+
+	* infttrace.c (kill_inferior): Issue a TT_PROC_EXIT request rather
+	than a TT_PROC_STOP request to kill the inferior and its child
+	processes. Otherwise, the inferior is not killed on HPUX 11.0.
+	Removed the code that detaches the child processes since we just
+	killed them.
+
 2001-09-26  Andrew Cagney  <ac131313@redhat.com>
 
 	* serial.c (serial_set_cmdlist, serial_show_cmdlist): New
