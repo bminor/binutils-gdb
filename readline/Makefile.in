@@ -81,10 +81,22 @@ CP = cp
 
 LOCAL_INCLUDES = -I$(srcdir)/../
 
-CSOURCES = readline.c history.c funmap.c keymaps.c vi_mode.c \
-	   emacs_keymap.c vi_keymap.c
+# The name of the main library target.
+LIBRARY_NAME = libreadline.a
 
-HSOURCES = readline.h chardefs.h history.h keymaps.h
+# The C code source files for this library.
+CSOURCES = readline.c funmap.c keymaps.c vi_mode.c parens.c \
+	   rltty.c complete.c bind.c isearch.c display.c signals.c \
+	   emacs_keymap.c vi_keymap.c history.c tilde.c xmalloc.c
+
+# The header files for this library.
+HSOURCES = readline.h rldefs.h chardefs.h keymaps.h history.h \
+	   posixstat.h tilde.h
+
+OBJECTS = readline.o vi_mode.o funmap.o keymaps.o parens.o search.o \
+	  rltty.o complete.o bind.o isearch.o display.o signals.o \
+	  history.o tilde.o xmalloc.o
+
 SOURCES  = $(CSOURCES) $(HSOURCES)
 
 DOCUMENTATION = readline.texi inc-read.texi \
@@ -93,6 +105,17 @@ DOCUMENTATION = readline.texi inc-read.texi \
 SUPPORT = COPYING Makefile $(DOCUMENTATION) ChangeLog
 
 THINGS_TO_TAR = $(SOURCES) $(SUPPORT)
+
+FLAGS_TO_PASS = \
+	"prefix=$(prefix)" \
+	"exec_prefix=$(exec_prefix)" \
+	"against=$(against)" \
+	"MAKEINFO=$(MAKEINFO)" \
+	"INSTALL=$(INSTALL)" \
+	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
+	"INSTALL_DATA=$(INSTALL_DATA)"
+
+SUBDIRS = doc
 
 #### Host, target, and site specific Makefile fragments come in here.
 ###
@@ -106,11 +129,18 @@ all: libreadline.a
 
 check:
 installcheck:
-info:
-dvi:
 
-clean-info: force
-	-rm -f *.info*
+info dvi install-info clean-info: force
+	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
+
+subdir_do: force
+	@for i in $(DODIRS); do \
+		if [ -f ./$$i/Makefile ] ; then \
+			if (cd ./$$i; \
+				$(MAKE) $(FLAGS_TO_PASS) $(DO)) ; then true ; \
+			else exit 1 ; fi ; \
+		else true ; fi ; \
+	done
 
 history.info: $(srcdir)/history.texi
 	$(MAKEINFO) -o history.info $(srcdir)/history.texi
@@ -118,9 +148,9 @@ history.info: $(srcdir)/history.texi
 readline.info: $(srcdir)/readline.texi $(srcdir)/inc-read.texi
 	$(MAKEINFO) -o readline.info $(srcdir)/readline.texi
 
-libreadline.a:	readline.o history.o funmap.o keymaps.o tilde.o vi_mode.o
+libreadline.a: $(OBJECTS)
 	$(RM) -f libreadline.a
-	$(AR) $(AR_FLAGS) libreadline.a readline.o history.o funmap.o keymaps.o tilde.o vi_mode.o
+	$(AR) $(AR_FLAGS) libreadline.a $(OBJECTS)
 	$(RANLIB) libreadline.a
 
 readline.o:	readline.h chardefs.h  keymaps.h history.h readline.c vi_mode.c
@@ -146,35 +176,13 @@ readline.tar.Z:	readline.tar
 		compress -f readline.tar
 
 install:
-		-parent=`echo $(libdir)|sed -e 's@/[^/]*$$@@'`; \
-		if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-		-if [ -d $(libdir) ] ; then true ; else mkdir $(libdir) ; fi
 		$(INSTALL_DATA) libreadline.a $(libdir)/libreadline.a
 		$(RANLIB) $(libdir)/libreadline.a
-		-parent=`echo $(includedir)|sed -e 's@/[^/]*$$@@'`; \
-		if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-		-if [ -d $(includedir) ] ; then true ; else mkdir $(includedir) ; fi
-		-if [ -d $(includedir)/readline ] ; then true ; else mkdir $(includedir)/readline ; fi
 		$(INSTALL_DATA) $(srcdir)/readline.h $(includedir)/readline/readline.h
 		$(INSTALL_DATA) $(srcdir)/keymaps.h $(includedir)/readline/keymaps.h
 		$(INSTALL_DATA) $(srcdir)/chardefs.h $(includedir)/readline/chardefs.h
 
-install-info: info
-#		-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
-#		if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-#		-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
-#		for i in *.info* ; do \
-#			$(INSTALL_DATA) $$i $(infodir)/$$i ; \
-#		done
-
 includes:
-		-parent=`echo $(includedir)|sed -e 's@/[^/]*$$@@'`; \
-		if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-		-if [ -d $(includedir) ] ; then true ; else mkdir $(includedir) ; fi
-		-if [ ! -r $(includedir)/readline ]; then\
-		 mkdir $(includedir)/readline;\
-		 chmod a+r $(includedir)/readline;\
-		fi
 		$(INSTALL_FILE) $(srcdir)/readline.h $(includedir)/readline/readline.h
 		$(INSTALL_FILE) $(srcdir)/keymaps.h $(includedir)/readline/keymaps.h
 		$(INSTALL_FILE) $(srcdir)/chardefs.h $(includedir)/readline/chardefs.h
