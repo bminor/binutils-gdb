@@ -2,20 +2,24 @@
 
 forward-include "{srcroot}"bfd:hosts:mpw.h sysdep.h
 
-Set BFD_MACHINES " "
-
 Set target_arch `echo {target_canonical} | sed -e 's/-.*-.*//'`
+
+Set archname ARCH_{target_arch}
 
 If "{target_arch}" =~ /m68k/
 	Set BFD_MACHINES  '"{o}"m68k-dis.c.o'
-	Set archname ARCH_m68k
-Else If "{target_arch}" =~ /mips/
-	Set BFD_MACHINES  '"{o}"mips-dis.c.o "{o}"mips-opc.c.o'
-	Set archname ARCH_mips
 Else If "{target_arch}" =~ /powerpc/
 	Set BFD_MACHINES  '"{o}"ppc-dis.c.o "{o}"ppc-opc.c.o'
-	Set archname ARCH_powerpc
+Else If "{target_arch}" =~ /mips/
+	Set BFD_MACHINES  '"{o}"mips-dis.c.o "{o}"mips-opc.c.o'
 Else If "{target_arch}" =~ /sparc/
 	Set BFD_MACHINES  '"{o}"sparc-dis.c.o "{o}"sparc-opc.c.o'
-	Set archname ARCH_sparc
 End If
+
+Echo '# Start from mpw-config.in' > "{o}"mk.tmp
+
+Echo "BFD_MACHINES = " {BFD_MACHINES} >> "{o}"mk.tmp
+
+Echo "ARCHDEFS = -d" {archname} >> "{o}"mk.tmp
+
+Echo '# End from mpw-config.in' >> "{o}"mk.tmp
