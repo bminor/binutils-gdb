@@ -1,3 +1,9 @@
+Thu Jul 27 13:31:05 1995  Fred Fish  (fnf@cygnus.com)
+
+	* config.guess (*:Linux:*:*): First try asking the linker what the
+	default object file format is (elf, aout, or coff).  Then if this
+	fails, try previous methods.
+
 Thu Jul 27 11:28:17 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* configure.in: Don't build newlib for *-*-vxworks5.1.
