@@ -1,3 +1,17 @@
+Sun Sep 19 17:01:41 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* Makefile.in: define M4, and pass it down to sub-makes;
+	all-autoconf now depends on all-m4
+
+Sat Sep 18 00:38:23 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* Makefile.in ({AR,RANLIB}_FOR_TARGET): make contingent on
+	presence of {ar,ranlib} instead of a configured directory
+
+Wed Sep 15 08:41:44 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
+
+	* config.guess: Accept 34?? as well as 33?? for NCR.
+
 Mon Sep 13 12:28:43 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
 	* configure.in: grab mt-hppa for HPPA targets; use 'gas ' instead
