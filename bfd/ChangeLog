@@ -1,3 +1,17 @@
+Wed Apr 20 14:15:21 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+start-sanitize-powerpc-netware
+
+	* nlm32-ppc.c: Complete rewrite for new version of PowerPC
+	NetWare.  Old code still present, but ifdeffed out.
+end-sanitize-powerpc-netware
+
+	* nlmcode.h (nlm_swap_auxiliary_headers_in): Don't assume a
+	particular format for the customer header.  Allocate a block of
+	memory and read it into that.
+	(nlm_swap_auxiliary_headers_out): Write out the block of memory.
+	(nlm_compute_section_file_positions): Include length of customer
+	header when computing its size.
+
 Mon Apr 18 14:27:17 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_prep_headers): Get the space's number from the

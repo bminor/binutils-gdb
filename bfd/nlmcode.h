@@ -491,16 +491,20 @@ nlm_swap_auxiliary_headers_in (abfd)
       else if (strncmp (tempstr, "CuStHeAd", 8) == 0)
 	{
 	  Nlm_External_Custom_Header thdr;
-	  if (bfd_read ((PTR) & thdr, sizeof (thdr), 1, abfd) != sizeof (thdr))
-	    return (false);
+	  if (bfd_read ((PTR) &thdr, sizeof (thdr), 1, abfd) != sizeof (thdr))
+	    return false;
 	  memcpy (nlm_custom_header (abfd)->stamp, thdr.stamp,
 		  sizeof (thdr.stamp));
 	  nlm_custom_header (abfd)->dataLength =
 	    get_word (abfd, (bfd_byte *) thdr.dataLength);
-	  nlm_custom_header (abfd)->debugRecOffset =
-	    get_word (abfd, (bfd_byte *) thdr.debugRecOffset);
-	  nlm_custom_header (abfd)->debugRecLength =
-	    get_word (abfd, (bfd_byte *) thdr.debugRecLength);
+	  nlm_custom_header (abfd)->data =
+	    bfd_alloc (abfd, nlm_custom_header (abfd)->dataLength);
+	  if (nlm_custom_header (abfd)->data == NULL)
+	    return false;
+	  if (bfd_read (nlm_custom_header (abfd)->data, 1,
+			nlm_custom_header (abfd)->dataLength, abfd)
+	      != nlm_custom_header (abfd)->dataLength)
+	    return false;
 	}
       else if (strncmp (tempstr, "CoPyRiGhT=", 10) == 0)
 	{
@@ -685,11 +689,11 @@ nlm_swap_auxiliary_headers_out (abfd)
       memcpy (thdr.stamp, "CuStHeAd", 8);
       put_word (abfd, (bfd_vma) nlm_custom_header (abfd)->dataLength,
 		(bfd_byte *) thdr.dataLength);
-      put_word (abfd, (bfd_vma) nlm_custom_header (abfd)->debugRecOffset,
-		(bfd_byte *) thdr.debugRecOffset);
-      put_word (abfd, (bfd_vma) nlm_custom_header (abfd)->debugRecLength,
-		(bfd_byte *) thdr.debugRecLength);
-      if (bfd_write ((PTR) & thdr, sizeof (thdr), 1, abfd) != sizeof (thdr))
+      if (bfd_write ((PTR) &thdr, sizeof (thdr), 1, abfd) != sizeof (thdr))
+	return false;
+      if (bfd_write (nlm_custom_header (abfd)->data, 1,
+		     nlm_custom_header (abfd)->dataLength, abfd)
+	  != nlm_custom_header (abfd)->dataLength)
 	return false;
     }
 
@@ -1249,7 +1253,8 @@ nlm_compute_section_file_positions (abfd)
     sofar += sizeof (Nlm_External_Extended_Header);
   if (find_nonzero ((PTR) nlm_custom_header (abfd),
 		    sizeof (Nlm_Internal_Custom_Header)))
-    sofar += sizeof (Nlm_External_Custom_Header);
+    sofar += (sizeof (Nlm_External_Custom_Header)
+	      + nlm_custom_header (abfd)->dataLength);
   if (find_nonzero ((PTR) nlm_copyright_header (abfd),
 		    sizeof (Nlm_Internal_Copyright_Header)))
     sofar += (sizeof (Nlm_External_Copyright_Header)

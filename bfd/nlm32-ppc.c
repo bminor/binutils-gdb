@@ -21,6 +21,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 
+/* The format of a PowerPC NLM changed.  Define OLDFORMAT to get the
+   old format.  */
+
 #define ARCH_SIZE 32
 
 #include "nlm/ppc-ext.h"
@@ -28,23 +31,41 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "libnlm.h"
 
+#ifdef OLDFORMAT
 static boolean nlm_powerpc_backend_object_p
   PARAMS ((bfd *));
 static boolean nlm_powerpc_write_prefix
   PARAMS ((bfd *));
+#endif
+
 static boolean nlm_powerpc_read_reloc
   PARAMS ((bfd *, nlmNAME(symbol_type) *, asection **, arelent *));
 static boolean nlm_powerpc_mangle_relocs
   PARAMS ((bfd *, asection *, PTR, bfd_vma, bfd_size_type));
 static boolean nlm_powerpc_read_import
   PARAMS ((bfd *, nlmNAME(symbol_type) *));
+
+#ifdef OLDFORMAT
 static boolean nlm_powerpc_write_reloc
   PARAMS ((bfd *, asection *, arelent *, int));
+#endif
+
 static boolean nlm_powerpc_write_import
   PARAMS ((bfd *, asection *, arelent *));
 static boolean nlm_powerpc_write_external
   PARAMS ((bfd *, bfd_size_type, asymbol *, struct reloc_and_sec *));
+
+#ifndef OLDFORMAT
+static boolean nlm_powerpc_set_public_section
+  PARAMS ((bfd *, nlmNAME(symbol_type) *));
+static bfd_vma nlm_powerpc_get_public_offset
+  PARAMS ((bfd *, asymbol *));
+#endif
 
+#ifdef OLDFORMAT
+
+/* The prefix header is only used in the old format.  */
+
 /* PowerPC NLM's have a prefix header before the standard NLM.  This
    function reads it in, verifies the version, and seeks the bfd to
    the location before the regular NLM header.  */
@@ -85,7 +106,94 @@ nlm_powerpc_write_prefix (abfd)
 
   return true;
 }
+
+#endif /* OLDFORMAT */
 
+#ifndef OLDFORMAT
+
+/* There is only one type of reloc in a PowerPC NLM.  */
+
+static reloc_howto_type nlm_powerpc_howto =
+  HOWTO (0,			/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "32",			/* name */
+	 true,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 false);		/* pcrel_offset */
+
+/* Read a PowerPC NLM reloc.  */
+
+static boolean
+nlm_powerpc_read_reloc (abfd, sym, secp, rel)
+     bfd *abfd;
+     nlmNAME(symbol_type) *sym;
+     asection **secp;
+     arelent *rel;
+{
+  bfd_byte temp[4];
+  bfd_vma val;
+  const char *name;
+
+  if (bfd_read (temp, sizeof (temp), 1, abfd) != sizeof (temp))
+    return false;
+
+  val = bfd_get_32 (abfd, temp);
+
+  /* The value is a word offset into either the code or data segment.
+     This is the location which needs to be adjusted.
+
+     The high bit is 0 if the value is an offset into the data
+     segment, or 1 if the value is an offset into the text segment.
+
+     If this is a relocation fixup rather than an imported symbol (the
+     sym argument is NULL), then the second most significant bit is 0
+     if the address of the data segment should be added to the
+     location addressed by the value, or 1 if the address of the text
+     segment should be added.
+
+     If this is an imported symbol, the second most significant bit is
+     not used and must be 0.  */
+
+  if ((val & NLM_HIBIT) == 0)
+    name = NLM_INITIALIZED_DATA_NAME;
+  else
+    {
+      name = NLM_CODE_NAME;
+      val &=~ NLM_HIBIT;
+    }
+  *secp = bfd_get_section_by_name (abfd, NLM_CODE_NAME);
+
+  if (sym == NULL)
+    {
+      if ((val & (NLM_HIBIT >> 1)) == 0)
+	name = NLM_INITIALIZED_DATA_NAME;
+      else
+	{
+	  name = NLM_CODE_NAME;
+	  val &=~ (NLM_HIBIT >> 1);
+	}
+      rel->sym_ptr_ptr = bfd_get_section_by_name (abfd, name)->symbol_ptr_ptr;
+    }
+
+  rel->howto = &nlm_powerpc_howto;
+
+  rel->address = val << 2;
+  rel->addend = 0;
+
+  return true;
+}
+
+#else /* OLDFORMAT */
+
+/* This reloc handling is only applicable to the old format.  */
+
 /* How to process the various reloc types.  PowerPC NLMs use XCOFF
    reloc types, and I have just copied the XCOFF reloc table here.  */
 
@@ -525,6 +633,8 @@ nlm_powerpc_read_reloc (abfd, sym, secp, rel)
   return true;
 }
 
+#endif /* OLDFORMAT */
+
 /* Mangle PowerPC NLM relocs for output.  */
 
 static boolean
@@ -594,6 +704,79 @@ nlm_powerpc_read_import (abfd, sym)
     }
   return true;
 }
+
+#ifndef OLDFORMAT
+
+/* Write a PowerPC NLM reloc.  */
+
+static boolean
+nlm_powerpc_write_import (abfd, sec, rel)
+     bfd *abfd;
+     asection *sec;
+     arelent *rel;
+{
+  asymbol *sym;
+  bfd_vma val;
+  bfd_byte temp[4];
+
+  /* PowerPC NetWare only supports one kind of reloc.  */
+  if (rel->addend != 0
+      || rel->howto == NULL
+      || rel->howto->rightshift != 0
+      || rel->howto->size != 2
+      || rel->howto->bitsize != 32
+      || rel->howto->bitpos != 0
+      || rel->howto->pc_relative
+      || (rel->howto->src_mask != 0xffffffff && rel->addend != 0)
+      || rel->howto->dst_mask != 0xffffffff)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return false;
+    }
+
+  sym = *rel->sym_ptr_ptr;
+
+  /* The value we write out is the offset into the appropriate
+     segment, rightshifted by two.  This offset is the section vma,
+     adjusted by the vma of the lowest section in that segment, plus
+     the address of the relocation.  */
+  val = bfd_get_section_vma (abfd, sec) + rel->address;
+  if ((val & 3) != 0)
+    {
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
+  val >>= 2;
+
+  /* The high bit is 0 if the reloc is in the data section, or 1 if
+     the reloc is in the code section.  */
+  if (bfd_get_section_flags (abfd, sec) & SEC_DATA)
+    val -= nlm_get_data_low (abfd);
+  else
+    {
+      val -= nlm_get_text_low (abfd);
+      val |= NLM_HIBIT;
+    }
+    
+  if (bfd_get_section (sym) != &bfd_und_section)
+    {
+      /* This is an internal relocation fixup.  The second most
+	 significant bit is 0 if this is a reloc against the data
+	 segment, or 1 if it is a reloc against the text segment.  */
+      if (bfd_get_section_flags (abfd, bfd_get_section (sym)) & SEC_CODE)
+	val |= NLM_HIBIT >> 1;
+    }
+
+  bfd_put_32 (abfd, val, temp);
+  if (bfd_write (temp, sizeof (temp), 1, abfd) != sizeof (temp))
+    return false;
+
+  return true;
+}
+
+#else /* OLDFORMAT */
+
+/* This is used for the reloc handling in the old format.  */
 
 /* Write a PowerPC NLM reloc.  */
 
@@ -709,6 +892,8 @@ nlm_powerpc_write_import (abfd, sec, rel)
   return nlm_powerpc_write_reloc (abfd, sec, rel, -1);
 }
 
+#endif /* OLDFORMAT */
+
 /* Write a PowerPC NLM external symbol.  This routine keeps a static
    count of the symbol index.  FIXME: I don't know if this is
    necessary, and the index never gets reset.  */
@@ -723,7 +908,9 @@ nlm_powerpc_write_external (abfd, count, sym, relocs)
   int i;
   bfd_byte len;
   unsigned char temp[NLM_TARGET_LONG_SIZE];
+#ifdef OLDFORMAT
   static int indx;
+#endif
 
   len = strlen (sym->name);
   if ((bfd_write (&len, sizeof (bfd_byte), 1, abfd) != sizeof(bfd_byte))
@@ -736,34 +923,121 @@ nlm_powerpc_write_external (abfd, count, sym, relocs)
 
   for (i = 0; i < count; i++)
     {
-      if (nlm_powerpc_write_reloc (abfd, relocs[i].sec,
-				   relocs[i].rel, indx) == false)
+#ifndef OLDFORMAT
+      if (! nlm_powerpc_write_import (abfd, relocs[i].sec, relocs[i].rel))
 	return false;
+#else
+      if (! nlm_powerpc_write_reloc (abfd, relocs[i].sec,
+				     relocs[i].rel, indx))
+	return false;
+#endif
     }
 
+#ifdef OLDFORMAT
   ++indx;
+#endif
+
+  return true;
+}
+
+#ifndef OLDFORMAT
+
+/* PowerPC Netware uses a word offset, not a byte offset, for public
+   symbols.  */
+
+/* Set the section for a public symbol.  */
+
+static boolean
+nlm_powerpc_set_public_section (abfd, sym)
+     bfd *abfd;
+     nlmNAME(symbol_type) *sym;
+{
+  if (sym->symbol.value & NLM_HIBIT)
+    {
+      sym->symbol.value &= ~NLM_HIBIT;
+      sym->symbol.flags |= BSF_FUNCTION;
+      sym->symbol.section =
+	bfd_get_section_by_name (abfd, NLM_CODE_NAME);
+    }
+  else
+    {
+      sym->symbol.section =
+	bfd_get_section_by_name (abfd, NLM_INITIALIZED_DATA_NAME);
+    }
+
+  sym->symbol.value <<= 2;
 
   return true;
 }
 
+/* Get the offset to write out for a public symbol.  */
+
+static bfd_vma
+nlm_powerpc_get_public_offset (abfd, sym)
+     bfd *abfd;
+     asymbol *sym;
+{
+  bfd_vma offset;
+  asection *sec;
+
+  offset = bfd_asymbol_value (sym);
+  sec = bfd_get_section (sym);
+  if (sec->flags & SEC_CODE)
+    {
+      offset -= nlm_get_text_low (abfd);
+      offset |= NLM_HIBIT;
+    }
+  else if (sec->flags & (SEC_DATA | SEC_ALLOC))
+    {
+      /* SEC_ALLOC is for the .bss section.  */
+      offset -= nlm_get_data_low (abfd);
+    }
+  else
+    {
+      /* We can't handle an exported symbol that is not in the code or
+	 data segment.  */
+      bfd_set_error (bfd_error_invalid_operation);
+      /* FIXME: No way to return error.  */
+      abort ();
+    }
+
+  return offset;
+}
+
+#endif /* ! defined (OLDFORMAT) */
+
 #include "nlmswap.h"
 
 static const struct nlm_backend_data nlm32_powerpc_backend =
 {
   "NetWare PowerPC Module \032",
   sizeof (Nlm32_powerpc_External_Fixed_Header),
+#ifndef OLDFORMAT
+  0,	/* optional_prefix_size */
+#else
   sizeof (struct nlm32_powerpc_external_prefix_header),
+#endif
   bfd_arch_powerpc,
   0,
   false,
+#ifndef OLDFORMAT
+  0,	/* backend_object_p */
+  0,	/* write_prefix */
+#else
   nlm_powerpc_backend_object_p,
   nlm_powerpc_write_prefix,
+#endif
   nlm_powerpc_read_reloc,
   nlm_powerpc_mangle_relocs,
   nlm_powerpc_read_import,
   nlm_powerpc_write_import,
+#ifndef OLDFORMAT
+  nlm_powerpc_set_public_section,
+  nlm_powerpc_get_public_offset,
+#else
   0,	/* set_public_section */
   0,	/* get_public_offset */
+#endif
   nlm_swap_fixed_header_in,
   nlm_swap_fixed_header_out,
   nlm_powerpc_write_external,
