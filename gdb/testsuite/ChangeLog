@@ -1,3 +1,28 @@
+Tue Feb 23 11:55:06 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t00/teststrategy.exp:  Track reversion in gdb to not print
+	the null byte at the end of strings.
+	* gdb.t00/default.exp:  Make show version insensitive to copyright
+	date.
+	* gdb.t16/in-gdbme.c (ctable1, ctable2):  Make explicitly unsigned
+	to avoid dependencies on target char signedness.
+	* gdb.t16/printcmds.exp:  Update expected results for explicitly
+	unsigned char.
+	* gdb.t16/printcmds.exp:  Remove setup_xfails for i960 that should
+	now work.
+	* gdb.t21/demangle.exp:  Add many more patterns for template
+	demangling, most of them being expected failures.
+	* gdb.t21/demangle.exp (proc demangle):  Quote the demangled
+	string we are matching for, to match on the whole string.
+	* gdb.t21/demangle.exp:  Add many new test strings to demangle,
+	and fix a whole bunch that had incorrect expected output but were
+	passing anyway because of the bug in "proc demangle".
+	**** start-sanitize-chill ****
+	* gdb.t31/chillvars.exp:  Remove setup_xfail for printing string
+	type.
+	* gdb.t31/in-gdbme.ch:  Uncomment string4, now compiles.
+	**** end-sanitize-chill ****
+
 Mon Feb 22 07:54:03 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 
         * gdb/testsuite: made modifications to testcases, etc., to allow
