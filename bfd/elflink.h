@@ -5227,8 +5227,7 @@ elf_link_output_extsym (h, data)
      warnings for them.  */
   if (! finfo->info->relocateable
       && ! finfo->info->allow_shlib_undefined
-      && ! (finfo->info->shared
-	    && !finfo->info->no_undefined)
+      && ! finfo->info->shared
       && h->root.type == bfd_link_hash_undefined
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)

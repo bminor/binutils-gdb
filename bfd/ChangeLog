@@ -1,3 +1,7 @@
+2001-06-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_link_output_extsym): Revert 1999-04-10.
+
 2001-06-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-hppa.c (elf32_hppa_check_relocs): Don't make syms dynamic
