@@ -14,14 +14,13 @@
    outside of main memory refers to the eightbit area (in theory, this
    can only happen when simulating H8/300H programs).  We make no attempt
    to catch overlapping addresses, wrapped addresses, etc etc.  */
-#define H8300_MSIZE (1<<16)
+#define H8300_MSIZE (1 << 16)
 
 /* avolkov: 
    Next 2 macros are ugly for any workstation, but while they're work.
-   Memory size MUST be configurable.
- */
-#define H8300H_MSIZE (1<<18) 
-#define H8300S_MSIZE (1<<24) 
+   Memory size MUST be configurable.  */
+#define H8300H_MSIZE (1 << 18) 
+#define H8300S_MSIZE (1 << 24) 
 
 #define CSIZE 1000
 

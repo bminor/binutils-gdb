@@ -83,8 +83,9 @@ void sim_set_simcache_size PARAMS ((int));
 #define HIGH_BYTE(x) (((x) >> 8) & 0xff)
 #define P(X,Y) ((X << 8) | Y)
 
-#define BUILDSR()   cpu.ccr = (I << 7) | (UI << 6)| (H<<5) | (U<<4) | \
-                              (N << 3) | (Z << 2) | (V<<1) | C;
+#define BUILDSR()					\
+  cpu.ccr = ((I << 7) | (UI << 6) | (H << 5) | (U << 4)	\
+	     | (N << 3) | (Z << 2) | (V << 1) | C);
 
 #define BUILDEXR()	    \
   if (h8300smode) cpu.exr = (trace<<7) | intMask;
@@ -99,17 +100,19 @@ void sim_set_simcache_size PARAMS ((int));
   ui = ((cpu.ccr >> 6) & 1);\
   intMaskBit = (cpu.ccr >> 7) & 1;
 
-#define GETEXR()	    \
-  if (h8300smode) { \
-    trace = (cpu.exr >> 7) & 1;\
-    intMask = cpu.exr & 7; }
+#define GETEXR()				\
+  if (h8300smode)				\
+    {						\
+      trace = (cpu.exr >> 7) & 1;		\
+      intMask = cpu.exr & 7;			\
+    }
 
 #ifdef __CHAR_IS_SIGNED__
 #define SEXTCHAR(x) ((char) (x))
 #endif
 
 #ifndef SEXTCHAR
-#define SEXTCHAR(x) ((x & 0x80) ? (x | ~0xff): x & 0xff)
+#define SEXTCHAR(x) ((x & 0x80) ? (x | ~0xff) : x & 0xff)
 #endif
 
 #define UEXTCHAR(x) ((x) & 0xff)
@@ -1022,15 +1025,15 @@ sim_resume (sd, step, siggnal)
 
 
 #define ALUOP(STORE, NAME, HOW) \
-    case O (NAME,SB):  HOW; if (STORE)goto alu8;else goto just_flags_alu8;  \
-    case O (NAME, SW): HOW; if (STORE)goto alu16;else goto just_flags_alu16; \
-    case O (NAME,SL):  HOW; if (STORE)goto alu32;else goto just_flags_alu32;
+    case O (NAME, SB): HOW; if (STORE) goto alu8;  else goto just_flags_alu8;  \
+    case O (NAME, SW): HOW; if (STORE) goto alu16; else goto just_flags_alu16; \
+    case O (NAME, SL): HOW; if (STORE) goto alu32; else goto just_flags_alu32;
 
 
-#define LOGOP(NAME, HOW) \
-    case O (NAME,SB): HOW; goto log8;\
-    case O (NAME, SW): HOW; goto log16;\
-    case O (NAME,SL): HOW; goto log32;
+#define LOGOP(NAME, HOW)			\
+    case O (NAME, SB): HOW; goto log8;		\
+    case O (NAME, SW): HOW; goto log16;		\
+    case O (NAME, SL): HOW; goto log32;
 
 
 
@@ -1140,32 +1143,36 @@ sim_resume (sd, step, siggnal)
 
 	case O (O_EEPMOV, SB):
 	case O (O_EEPMOV, SW):
-	  if (h8300hmode||h8300smode)
+	  if (h8300hmode || h8300smode)
 	    {
-	      register unsigned char *_src,*_dst;
-	      unsigned int count = (code->opcode == O(O_EEPMOV, SW))?cpu.regs[R4_REGNUM]&0xffff:
-		cpu.regs[R4_REGNUM]&0xff;
+	      register unsigned char *_src, *_dst;
+	      unsigned int count = ((code->opcode == O (O_EEPMOV, SW))
+				    ? cpu.regs[R4_REGNUM] & 0xffff
+				    : cpu.regs[R4_REGNUM] & 0xff);
 
-	      _src = cpu.regs[R5_REGNUM] < memory_size ? cpu.memory+cpu.regs[R5_REGNUM] :
-		cpu.eightbit + (cpu.regs[R5_REGNUM] & 0xff);
-	      if ((_src+count)>=(cpu.memory+memory_size))
+	      _src = (cpu.regs[R5_REGNUM] < memory_size
+		      ? cpu.memory + cpu.regs[R5_REGNUM]
+		      : cpu.eightbit + (cpu.regs[R5_REGNUM] & 0xff));
+	      if ((_src + count) >= (cpu.memory + memory_size))
 		{
-		  if ((_src+count)>=(cpu.eightbit+0x100))
+		  if ((_src + count) >= (cpu.eightbit + 0x100))
 		    goto illegal;
 		}
-	      _dst = cpu.regs[R6_REGNUM] < memory_size ? cpu.memory+cpu.regs[R6_REGNUM] :
-	           				       	      cpu.eightbit + (cpu.regs[R6_REGNUM] & 0xff);
-	      if ((_dst+count)>=(cpu.memory+memory_size))
+	      _dst = (cpu.regs[R6_REGNUM] < memory_size
+		      ? cpu.memory + cpu.regs[R6_REGNUM]
+		      : cpu.eightbit + (cpu.regs[R6_REGNUM] & 0xff));
+	      if ((_dst + count) >= (cpu.memory + memory_size))
 		{
-		  if ((_dst+count)>=(cpu.eightbit+0x100))
+		  if ((_dst + count) >= (cpu.eightbit + 0x100))
 		    goto illegal;
 		}
-	      memcpy(_dst,_src,count);
+	      memcpy (_dst, _src, count);
 
-	      cpu.regs[R5_REGNUM]+=count;
-	      cpu.regs[R6_REGNUM]+=count;
-	      cpu.regs[R4_REGNUM]&=(code->opcode == O(O_EEPMOV, SW))?(~0xffff):(~0xff);
-	      cycles += 2*count;
+	      cpu.regs[R5_REGNUM] += count;
+	      cpu.regs[R6_REGNUM] += count;
+	      cpu.regs[R4_REGNUM] &= ((code->opcode == O (O_EEPMOV, SW))
+				      ? (~0xffff) : (~0xff));
+	      cycles += 2 * count;
 	      goto next;
 	    }
 	  goto illegal;
@@ -1548,7 +1555,7 @@ sim_resume (sd, step, siggnal)
 	      goto illegal;
 	    }
 	  res = fetch (&code->src);
-	  store (&code->src,res|0x80);
+	  store (&code->src, res | 0x80);
 	  goto just_flags_log8;
 
 	case O (O_DIVU, SB):
@@ -1673,7 +1680,7 @@ sim_resume (sd, step, siggnal)
 	  goto next;
 
 	default:
-        illegal:
+	illegal:
 	  cpu.state = SIM_STATE_STOPPED;
 	  cpu.exception = SIGILL;
 	  goto end;
@@ -1995,7 +2002,7 @@ sim_fetch_register (sd, rn, buf, length)
 
   init_pointers ();
 
-  if (!h8300smode && rn >=EXR_REGNUM)
+  if (!h8300smode && rn >= EXR_REGNUM)
     rn++;
   switch (rn)
     {

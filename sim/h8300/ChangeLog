@@ -1,3 +1,8 @@
+2002-12-26  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* compile.c: Fix formatting.
+	* inst.h: Likewise.
+
 2002-07-29  Andrey Volkov  <avolkov@transas.com>
 
  	* compile.c: Include "gdb/sim-h8300.h"
