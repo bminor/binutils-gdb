@@ -1,5 +1,28 @@
 2001-03-18  Kevin Buettner  <kevinb@redhat.com>
 
+	* acconfig.h (HAVE_STRUCT_LINK_MAP_WITH_L_MEMBERS)
+	(HAVE_STRUCT_LINK_MAP_WITH_LM_MEMBERS)
+	(HAVE_STRUCT_SO_MAP_WITH_SOM_MEMBERS): New configure macros.
+	* configure.in (HAVE_STRUCT_LINK_MAP32): Move this test out
+	of the Solaris procfs testing section.  Instead, group with...
+	(HAVE_STRUCT_LINK_MAP_WITH_L_MEMBERS)
+	(HAVE_STRUCT_LINK_MAP_WITH_LM_MEMBERS)
+	(HAVE_STRUCT_SO_MAP_WITH_SOM_MEMBERS): New <link.h> tests.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+	* solib-legacy.c (legacy_svr4_fetch_link_map_offsets): Use
+	new configure macros to choose which (if any) code to
+	compile in.  Added code to explicitly handle *BSD systems;
+	these systems were previously handled only through macro
+	redefinition.  Also, due to the way the autoconf tests are set
+	up, this function will no longer return a non-zero value when
+	GDB is configured as a cross debugger.  I.e, cross debuggers
+	will no longer be able to "accidentally" get the host system's
+	link map offsets.
+
+2001-03-18  Kevin Buettner  <kevinb@redhat.com>
+
 	* config/i386/nbsd.mh (NATDEPFILES): List all files on the same
 	line to avoid build problem on NetBSD 1.4.
 
