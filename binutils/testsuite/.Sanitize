@@ -23,14 +23,15 @@ Do-first:
 
 Things-to-keep:
 
-# The lines between the "Do-last:" line and the end of the file
-
 ChangeLog
 Makefile.in
 binutils.all
 config
 configure.in
 
+Things-to-lose:
+
+# The lines between the "Do-last:" line and the end of the file
 # are executed as a /bin/sh shell script after everything else is
 # done.
 

@@ -22,6 +22,7 @@ Do-first:
 # with rm -rf.
 
 Things-to-keep:
+
 COPYING
 PORTING
 doc
@@ -135,6 +136,8 @@ syms.c
 targets.c
 tekhex.c
 trad-core.c
+
+Things-to-lose:
 
 Do-last:
 

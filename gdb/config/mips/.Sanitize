@@ -42,6 +42,8 @@ xm-irix3.h
 xm-irix4.h
 xm-mips.h
 
+Things-to-lose:
+
 Do-last:
 
 # End of file.

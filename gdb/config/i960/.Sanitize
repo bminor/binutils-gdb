@@ -27,6 +27,8 @@ tm-nindy960.h
 tm-vx960.h
 vxworks960.mt
 
+Things-to-lose:
+
 Do-last:
 
 # End of file.

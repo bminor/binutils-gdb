@@ -32,12 +32,17 @@ as.1
 as.texinfo
 h8.texi
 
+Things-to-lose:
+
 Do-last:
 
 #
 #
 # $Log$
-# Revision 1.13  1993/05/17 20:10:15  raeburn
+# Revision 1.14  1993/05/27 06:21:59  rich
+# added things-to-lose sections
+#
+# Revision 1.13  1993/05/17  20:10:15  raeburn
 # Steve sez SH stuff is public now
 #
 # Revision 1.12  1993/04/21  01:00:59  pesch

@@ -28,6 +28,8 @@ Things-to-keep:
 
 unix-gas.exp
 
+Things-to-lose:
+
 Do-last:
 
 # End of file.

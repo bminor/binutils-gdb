@@ -41,6 +41,8 @@ stab.def
 stab_gnu.h
 sun4.h
 
+Things-to-lose:
+
 Do-last:
 
 v9dirty="aout64.h"

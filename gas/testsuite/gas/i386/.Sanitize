@@ -29,6 +29,8 @@ Things-to-keep:
 all.exp
 inout.s
 
+Things-to-lose:
+
 Do-last:
 
 # End of file.

@@ -22,6 +22,7 @@ Do-first:
 # with rm -rf.
 
 Things-to-keep:
+
 ChangeLog
 Makefile.in
 alpha-dis.c
@@ -46,6 +47,8 @@ z8k-opc.h
 z8kgen.c
 alpha-opc.h
 alpha-dis.c
+
+Things-to-lose:
 
 Do-last:
 

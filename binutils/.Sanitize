@@ -66,4 +66,6 @@ strip.1
 testsuite
 version.c
 
+Things-to-lose:
+
 Do-last:

@@ -47,6 +47,8 @@ sparc.h
 tahoe.h
 vax.h
 
+Things-to-lose:
+
 Do-last:
 
 v9dirty="sparc.h"

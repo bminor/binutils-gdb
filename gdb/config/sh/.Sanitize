@@ -24,6 +24,8 @@ Things-to-keep:
 sh.mt
 tm-sh.h
 
+Things-to-lose:
+
 Do-last:
 
 # End of file.

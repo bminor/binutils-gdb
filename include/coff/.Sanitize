@@ -43,6 +43,8 @@ symconst.h
 we32k.h
 z8k.h
 
+Things-to-lose:
+
 Do-last:
 
 # End of file.

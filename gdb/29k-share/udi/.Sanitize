@@ -35,6 +35,8 @@ udiptcfg.h
 udisoc.h
 udr.c
 
+Things-to-lose:
+
 Do-last:
 
 # End of file.

@@ -35,6 +35,8 @@ dounsreloc
 dounssym
 run
 
+Things-to-lose:
+
 Do-last:
 
 # End of file.

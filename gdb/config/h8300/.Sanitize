@@ -24,6 +24,8 @@ Things-to-keep:
 h8300hms.mt
 tm-h8300.h
 
+Things-to-lose:
+
 Do-last:
 
 # End of file.

@@ -35,6 +35,8 @@ configure.in
 gas
 lib
 
+Things-to-lose:
+
 Do-last:
 
 # End of file.

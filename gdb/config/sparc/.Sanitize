@@ -37,6 +37,8 @@ xm-sparc.h
 xm-sun4os4.h
 xm-sun4sol2.h
 
+Things-to-lose:
+
 Do-last:
 
 # End of file.

@@ -51,6 +51,8 @@ sysdep-sysv4.h
 vi_keymap.c
 vi_mode.c
 
+Things-to-lose:
+
 Do-last:
 
 # End of file.

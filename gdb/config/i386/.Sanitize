@@ -73,6 +73,8 @@ xm-linux.h
 xm-sun386.h
 xm-symmetry.h
 
+Things-to-lose:
+
 Do-last:
 
 # End of file.

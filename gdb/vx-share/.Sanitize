@@ -37,6 +37,8 @@ xdr_ptrace.h
 xdr_rdb.c
 xdr_rdb.h
 
+Things-to-lose:
+
 Do-last:
 
 # End of file.

@@ -32,6 +32,8 @@ dwarf.h
 external.h
 internal.h
 
+Things-to-lose:
+
 Do-last:
 
 v9dirty="common.h"

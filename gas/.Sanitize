@@ -89,6 +89,8 @@ write.c
 write.h
 xmalloc.c
 
+Things-to-lose:
+
 Do-last:
 
 if ( echo $* | grep keep-v9 > /dev/null ) ; then
@@ -106,7 +108,10 @@ fi
 #
 #
 # $Log$
-# Revision 1.18  1993/05/17 19:35:50  raeburn
+# Revision 1.19  1993/05/27 06:21:49  rich
+# added things-to-lose sections
+#
+# Revision 1.18  1993/05/17  19:35:50  raeburn
 # don't keep testscripts subdir
 #
 # Revision 1.17  1993/04/22  06:39:01  raeburn

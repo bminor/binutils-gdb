@@ -28,6 +28,7 @@ fi
 # with rm -rf.
 
 Things-to-keep:
+
 ChangeLog
 Makefile.in
 NEWS
@@ -141,6 +142,8 @@ vax.sh
 z8ksim.em
 z8ksim.sc-sh
 z8ksim.sh
+
+Things-to-lose:
 
 Do-last:
 

@@ -52,4 +52,8 @@ sbrk-sup.c
 #
 # fsf.shar	- Shell archive of the original fsf sources used as base.
 
+Things-to-lose:
+
+fsf.shar
+
 Do-last:

@@ -49,8 +49,13 @@ vax
 xm-sysv4.h
 z8k
 
+
 # Things which are explicitly *not* kept, for now.
 # i860		- Not yet ready for prime time.
+
+Things-to-lose:
+
+i860
 
 Do-last:
 

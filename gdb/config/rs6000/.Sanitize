@@ -27,6 +27,8 @@ rs6000.mt
 tm-rs6000.h
 xm-rs6000.h
 
+Things-to-lose:
+
 Do-last:
 
 # End of file.

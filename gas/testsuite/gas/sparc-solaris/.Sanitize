@@ -30,6 +30,8 @@ gas.exp
 sol-cc.s
 sol-gcc.s
 
+Things-to-lose:
+
 Do-last:
 
 # End of file.

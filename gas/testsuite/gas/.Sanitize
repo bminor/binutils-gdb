@@ -34,6 +34,8 @@ m68k-coff
 sparc-solaris
 template
 
+Things-to-lose:
+
 Do-last:
 
 # End of file.

@@ -24,6 +24,8 @@ Things-to-keep:
 tm-z8k.h
 z8ksim.mt
 
+Things-to-lose:
+
 Do-last:
 
 # End of file.

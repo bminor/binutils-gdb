@@ -23,6 +23,7 @@ Do-first:
 # with rm -rf.
 
 Things-to-keep:
+
 ChangeLog
 Makefile.in
 arcs.c
@@ -52,6 +53,8 @@ tahoe.c
 tahoe.h
 vax.c
 vax.h
+
+Things-to-lose:
 
 Do-last:
 

@@ -44,6 +44,10 @@ stabs.texinfo
 # Things which are explicitly *not* kept by default.
 # snapshot.readme	- The README file for gdb testers using snapshots.
 
+Things-to-lose:
+
+snapshot.readme
+
 Do-last:
 
 # End of file.
