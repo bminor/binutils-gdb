@@ -17,8 +17,6 @@
 
 Do-first:
 
-echo Sanitizing `pwd`...
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -49,7 +47,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.1  1991/05/23 22:05:02  rich
+# Revision 1.2  1991/11/21 03:20:09  gnu
+# echo echo echo
+#
+# Revision 1.1  1991/05/23  22:05:02  rich
 # Initial revision
 #
 #
