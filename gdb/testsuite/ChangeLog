@@ -1,5 +1,9 @@
 2004-08-13  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.gdb/selftest.exp: Revert removal of call to init_malloc.
+
+2004-08-13  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/inherit.exp: Use cp_test_ptype_class.
 
 2004-08-13  Michael Chastain  <mec.gnu@mindspring.com>

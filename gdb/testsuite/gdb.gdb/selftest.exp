@@ -1,5 +1,5 @@
-#   Copyright 1988, 1990, 1991, 1992, 1994, 1997, 1999, 2000, 2002, 2003
-#   Free Software Foundation, Inc.
+# Copyright 1988, 1990, 1991, 1992, 1994, 1997, 1999, 2000, 2002,
+# 2003, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -103,6 +103,11 @@ proc do_steps_and_nexts {} {
 	    }
 	    -re ".*mac_init.*$gdb_prompt $" {
 		set description "next over mac_init and everything it calls"
+		set command "next"
+	    }
+	    -re ".*init_malloc.*$gdb_prompt $" {
+		# gdb 6.2.X is the last gdb which called init_malloc
+		set description "next over init_malloc and everything it calls"
 		set command "next"
 	    }
 	    -re ".*lim_at_start.*$gdb_prompt $" {
