@@ -173,9 +173,9 @@ _initialize_abug_rom (void)
   init_monitor_ops (&abug_ops);
 
   abug_ops.to_shortname = "abug";
-  abug_ops.to_longname = "ABug monitor";
-  abug_ops.to_doc = "Debug via the ABug monitor.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya).";
+  abug_ops.to_longname = _("ABug monitor");
+  abug_ops.to_doc = _("Debug via the ABug monitor.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).");
   abug_ops.to_open = abug_open;
 
   add_target (&abug_ops);

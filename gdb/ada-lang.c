@@ -369,7 +369,7 @@ ada_get_field_index (const struct type *type, const char *field_name,
       return fieldno;
 
   if (!maybe_missing)
-    error ("Unable to find field %s in struct %s.  Aborting",
+    error (_("Unable to find field %s in struct %s.  Aborting"),
            field_name, TYPE_NAME (type));
 
   return -1;
@@ -505,7 +505,7 @@ static void
 check_size (const struct type *type)
 {
   if (TYPE_LENGTH (type) > varsize_limit)
-    error ("object size is larger than varsize-limit");
+    error (_("object size is larger than varsize-limit"));
 }
 
 
@@ -573,7 +573,7 @@ discrete_type_high_bound (struct type *type)
     case TYPE_CODE_INT:
       return value_from_longest (type, max_of_type (type));
     default:
-      error ("Unexpected type in discrete_type_high_bound.");
+      error (_("Unexpected type in discrete_type_high_bound."));
     }
 }
 
@@ -591,7 +591,7 @@ discrete_type_low_bound (struct type *type)
     case TYPE_CODE_INT:
       return value_from_longest (type, min_of_type (type));
     default:
-      error ("Unexpected type in discrete_type_low_bound.");
+      error (_("Unexpected type in discrete_type_low_bound."));
     }
 }
 
@@ -651,7 +651,7 @@ ada_main_name (void)
     {
       main_program_name_addr = SYMBOL_VALUE_ADDRESS (msym);
       if (main_program_name_addr == 0)
-        error ("Invalid address for Ada main program name.");
+        error (_("Invalid address for Ada main program name."));
 
       extract_string (main_program_name_addr, main_program_name);
       return main_program_name;
@@ -762,7 +762,7 @@ ada_encode (const char *decoded)
                            strlen (mapping->decoded)) != 0; mapping += 1)
             ;
           if (mapping->encoded == NULL)
-            error ("invalid Ada operator name: %s", p);
+            error (_("invalid Ada operator name: %s"), p);
           strcpy (encoding_buffer + k, mapping->encoded);
           k += strlen (mapping->encoded);
           break;
@@ -1208,7 +1208,7 @@ desc_bounds (struct value *arr)
       LONGEST addr;
 
       if (desc_bounds_type == NULL)
-        error ("Bad GNAT array descriptor");
+        error (_("Bad GNAT array descriptor"));
 
       /* NOTE: The following calculation is not really kosher, but
          since desc_type is an XVE-encoded type (and shouldn't be),
@@ -1225,7 +1225,7 @@ desc_bounds (struct value *arr)
 
   else if (is_thick_pntr (type))
     return value_struct_elt (&arr, NULL, "P_BOUNDS", NULL,
-                             "Bad GNAT array descriptor");
+                             _("Bad GNAT array descriptor"));
   else
     return NULL;
 }
@@ -1284,7 +1284,7 @@ desc_data (struct value *arr)
     return thin_data_pntr (arr);
   else if (is_thick_pntr (type))
     return value_struct_elt (&arr, NULL, "P_ARRAY", NULL,
-                             "Bad GNAT array descriptor");
+                             _("Bad GNAT array descriptor"));
   else
     return NULL;
 }
@@ -1321,7 +1321,7 @@ static struct value *
 desc_one_bound (struct value *bounds, int i, int which)
 {
   return value_struct_elt (&bounds, NULL, bound_name[2 * i + which - 2], NULL,
-                           "Bad GNAT array descriptor bounds");
+                           _("Bad GNAT array descriptor bounds"));
 }
 
 /* If BOUNDS is an array-bounds structure type, return the bit position
@@ -1524,7 +1524,7 @@ ada_coerce_to_simple_array (struct value *arr)
     {
       struct value *arrVal = ada_coerce_to_simple_array_ptr (arr);
       if (arrVal == NULL)
-        error ("Bounds unavailable for null array pointer.");
+        error (_("Bounds unavailable for null array pointer."));
       return value_ind (arrVal);
     }
   else if (ada_is_packed_array_type (value_type (arr)))
@@ -1628,21 +1628,21 @@ decode_packed_array_type (struct type *type)
   sym = standard_lookup (name, get_selected_block (0), VAR_DOMAIN);
   if (sym == NULL || SYMBOL_TYPE (sym) == NULL)
     {
-      lim_warning ("could not find bounds information on packed array");
+      lim_warning (_("could not find bounds information on packed array"));
       return NULL;
     }
   shadow_type = SYMBOL_TYPE (sym);
 
   if (TYPE_CODE (shadow_type) != TYPE_CODE_ARRAY)
     {
-      lim_warning ("could not understand bounds information on packed array");
+      lim_warning (_("could not understand bounds information on packed array"));
       return NULL;
     }
 
   if (sscanf (tail + sizeof ("___XP") - 1, "%ld", &bits) != 1)
     {
       lim_warning
-	("could not understand bit size information on packed array");
+	(_("could not understand bit size information on packed array"));
       return NULL;
     }
 
@@ -1667,7 +1667,7 @@ decode_packed_array (struct value *arr)
   type = decode_packed_array_type (value_type (arr));
   if (type == NULL)
     {
-      error ("can't unpack array");
+      error (_("can't unpack array"));
       return NULL;
     }
 
@@ -1719,7 +1719,7 @@ value_subscript_packed (struct value *arr, int arity, struct value **ind)
       if (TYPE_CODE (elt_type) != TYPE_CODE_ARRAY
           || TYPE_FIELD_BITSIZE (elt_type, 0) == 0)
         error
-          ("attempt to do packed indexing of something other than a packed array");
+          (_("attempt to do packed indexing of something other than a packed array"));
       else
         {
           struct type *range_type = TYPE_INDEX_TYPE (elt_type);
@@ -1728,13 +1728,13 @@ value_subscript_packed (struct value *arr, int arity, struct value **ind)
 
           if (get_discrete_bounds (range_type, &lowerbound, &upperbound) < 0)
             {
-              lim_warning ("don't know bounds of array");
+              lim_warning (_("don't know bounds of array"));
               lowerbound = upperbound = 0;
             }
 
           idx = value_as_long (value_pos_atr (ind[i]));
           if (idx < lowerbound || idx > upperbound)
-            lim_warning ("packed array index %ld out of bounds", (long) idx);
+            lim_warning (_("packed array index %ld out of bounds"), (long) idx);
           bits = TYPE_FIELD_BITSIZE (elt_type, 0);
           elt_total_bit_offset += (idx - lowerbound) * bits;
           elt_type = ada_check_typedef (TYPE_TARGET_TYPE (elt_type));
@@ -2004,7 +2004,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
   int bits = value_bitsize (toval);
 
   if (!toval->modifiable)
-    error ("Left operand of assignment is not a modifiable lvalue.");
+    error (_("Left operand of assignment is not a modifiable lvalue."));
 
   toval = coerce_ref (toval);
 
@@ -2066,7 +2066,7 @@ ada_value_subscript (struct value *arr, int arity, struct value **ind)
   for (k = 0; k < arity; k += 1)
     {
       if (TYPE_CODE (elt_type) != TYPE_CODE_ARRAY)
-        error ("too many subscripts (%d expected)", k);
+        error (_("too many subscripts (%d expected)"), k);
       elt = value_subscript (elt, value_pos_atr (ind[k]));
     }
   return elt;
@@ -2088,7 +2088,7 @@ ada_value_ptr_subscript (struct value *arr, struct type *type, int arity,
       struct value *idx;
 
       if (TYPE_CODE (type) != TYPE_CODE_ARRAY)
-        error ("too many subscripts (%d expected)", k);
+        error (_("too many subscripts (%d expected)"), k);
       arr = value_cast (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
                         value_copy (arr));
       get_discrete_bounds (TYPE_INDEX_TYPE (type), &lwb, &upb);
@@ -2386,7 +2386,7 @@ ada_decoded_op_name (enum exp_opcode op)
       if (ada_opname_table[i].op == op)
         return ada_opname_table[i].decoded;
     }
-  error ("Could not find operator name for opcode");
+  error (_("Could not find operator name for opcode"));
 }
 
 
@@ -2579,7 +2579,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
       break;
 
     default:
-      error ("Unexpected operator during name resolution");
+      error (_("Unexpected operator during name resolution"));
     }
 
   argvec = (struct value * *) alloca (sizeof (struct value *) * (nargs + 1));
@@ -2648,7 +2648,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
             }
 
           if (n_candidates == 0)
-            error ("No definition found for %s",
+            error (_("No definition found for %s"),
                    SYMBOL_PRINT_NAME (exp->elts[pc + 2].symbol));
           else if (n_candidates == 1)
             i = 0;
@@ -2660,12 +2660,12 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
                  SYMBOL_LINKAGE_NAME (exp->elts[pc + 2].symbol),
                  context_type);
               if (i < 0)
-                error ("Could not find a match for %s",
+                error (_("Could not find a match for %s"),
                        SYMBOL_PRINT_NAME (exp->elts[pc + 2].symbol));
             }
           else
             {
-              printf_filtered ("Multiple matches for %s\n",
+              printf_filtered (_("Multiple matches for %s\n"),
                                SYMBOL_PRINT_NAME (exp->elts[pc + 2].symbol));
               user_select_syms (candidates, n_candidates, 1);
               i = 0;
@@ -2712,7 +2712,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
                    SYMBOL_LINKAGE_NAME (exp->elts[pc + 5].symbol),
                    context_type);
                 if (i < 0)
-                  error ("Could not find a match for %s",
+                  error (_("Could not find a match for %s"),
                          SYMBOL_PRINT_NAME (exp->elts[pc + 5].symbol));
               }
 
@@ -2956,7 +2956,7 @@ ada_resolve_function (struct ada_symbol_info syms[],
     return -1;
   else if (m > 1)
     {
-      printf_filtered ("Multiple matches for %s\n", name);
+      printf_filtered (_("Multiple matches for %s\n"), name);
       user_select_syms (syms, m, 1);
       return 0;
     }
@@ -3040,13 +3040,13 @@ user_select_syms (struct ada_symbol_info *syms, int nsyms, int max_results)
   int first_choice = (max_results == 1) ? 1 : 2;
 
   if (max_results < 1)
-    error ("Request to select 0 symbols!");
+    error (_("Request to select 0 symbols!"));
   if (nsyms <= 1)
     return nsyms;
 
-  printf_unfiltered ("[0] cancel\n");
+  printf_unfiltered (_("[0] cancel\n"));
   if (max_results > 1)
-    printf_unfiltered ("[1] all\n");
+    printf_unfiltered (_("[1] all\n"));
 
   sort_choices (syms, nsyms);
 
@@ -3059,11 +3059,15 @@ user_select_syms (struct ada_symbol_info *syms, int nsyms, int max_results)
         {
           struct symtab_and_line sal =
             find_function_start_sal (syms[i].sym, 1);
-          printf_unfiltered ("[%d] %s at %s:%d\n", i + first_choice,
-                             SYMBOL_PRINT_NAME (syms[i].sym),
-                             (sal.symtab == NULL
-                              ? "<no source file available>"
-                              : sal.symtab->filename), sal.line);
+	  if (sal.symtab == NULL)
+	    printf_unfiltered (_("[%d] %s at <no source file available>:%d\n"),
+			       i + first_choice,
+			       SYMBOL_PRINT_NAME (syms[i].sym),
+			       sal.line);
+	  else
+	    printf_unfiltered (_("[%d] %s at %s:%d\n"), i + first_choice,
+			       SYMBOL_PRINT_NAME (syms[i].sym),
+			       sal.symtab->filename, sal.line);
           continue;
         }
       else
@@ -3075,7 +3079,7 @@ user_select_syms (struct ada_symbol_info *syms, int nsyms, int max_results)
           struct symtab *symtab = symtab_for_sym (syms[i].sym);
 
           if (SYMBOL_LINE (syms[i].sym) != 0 && symtab != NULL)
-            printf_unfiltered ("[%d] %s at %s:%d\n",
+            printf_unfiltered (_("[%d] %s at %s:%d\n"),
                                i + first_choice,
                                SYMBOL_PRINT_NAME (syms[i].sym),
                                symtab->filename, SYMBOL_LINE (syms[i].sym));
@@ -3085,20 +3089,20 @@ user_select_syms (struct ada_symbol_info *syms, int nsyms, int max_results)
               printf_unfiltered ("[%d] ", i + first_choice);
               ada_print_type (SYMBOL_TYPE (syms[i].sym), NULL,
                               gdb_stdout, -1, 0);
-              printf_unfiltered ("'(%s) (enumeral)\n",
+              printf_unfiltered (_("'(%s) (enumeral)\n"),
                                  SYMBOL_PRINT_NAME (syms[i].sym));
             }
           else if (symtab != NULL)
             printf_unfiltered (is_enumeral
-                               ? "[%d] %s in %s (enumeral)\n"
-                               : "[%d] %s at %s:?\n",
+                               ? _("[%d] %s in %s (enumeral)\n")
+                               : _("[%d] %s at %s:?\n"),
                                i + first_choice,
                                SYMBOL_PRINT_NAME (syms[i].sym),
                                symtab->filename);
           else
             printf_unfiltered (is_enumeral
-                               ? "[%d] %s (enumeral)\n"
-                               : "[%d] %s at ?\n",
+                               ? _("[%d] %s (enumeral)\n")
+                               : _("[%d] %s at ?\n"),
                                i + first_choice,
                                SYMBOL_PRINT_NAME (syms[i].sym));
         }
@@ -3148,7 +3152,7 @@ get_selections (int *choices, int n_choices, int max_results,
   args = command_line_input ((char *) NULL, 0, annotation_suffix);
 
   if (args == NULL)
-    error_no_arg ("one or more choice numbers");
+    error_no_arg (_("one or more choice numbers"));
 
   n_chosen = 0;
 
@@ -3162,18 +3166,18 @@ get_selections (int *choices, int n_choices, int max_results,
       while (isspace (*args))
         args += 1;
       if (*args == '\0' && n_chosen == 0)
-        error_no_arg ("one or more choice numbers");
+        error_no_arg (_("one or more choice numbers"));
       else if (*args == '\0')
         break;
 
       choice = strtol (args, &args2, 10);
       if (args == args2 || choice < 0
           || choice > n_choices + first_choice - 1)
-        error ("Argument must be choice number");
+        error (_("Argument must be choice number"));
       args = args2;
 
       if (choice == 0)
-        error ("cancelled");
+        error (_("cancelled"));
 
       if (choice < first_choice)
         {
@@ -3199,7 +3203,7 @@ get_selections (int *choices, int n_choices, int max_results,
     }
 
   if (n_chosen > max_results)
-    error ("Select no more than %d of the above", max_results);
+    error (_("Select no more than %d of the above"), max_results);
 
   return n_chosen;
 }
@@ -3443,12 +3447,12 @@ ada_simple_renamed_entity (struct symbol *sym)
 
   type = SYMBOL_TYPE (sym);
   if (type == NULL || TYPE_NFIELDS (type) < 1)
-    error ("Improperly encoded renaming.");
+    error (_("Improperly encoded renaming."));
 
   raw_name = TYPE_FIELD_NAME (type, 0);
   len = (raw_name == NULL ? 0 : strlen (raw_name)) - 5;
   if (len <= 0)
-    error ("Improperly encoded renaming.");
+    error (_("Improperly encoded renaming."));
 
   result = xmalloc (len + 1);
   strncpy (result, raw_name, len);
@@ -5474,7 +5478,7 @@ ada_value_struct_elt (struct value *arg, char *name, char *err)
           if (err == NULL)
             return NULL;
           else
-            error ("Bad value type in a %s.", err);
+            error (_("Bad value type in a %s."), err);
         }
       t1 = ada_check_typedef (t1);
       if (TYPE_CODE (t1) == TYPE_CODE_PTR)
@@ -5492,7 +5496,7 @@ ada_value_struct_elt (struct value *arg, char *name, char *err)
           if (err == NULL)
             return NULL;
           else
-            error ("Bad value type in a %s.", err);
+            error (_("Bad value type in a %s."), err);
         }
       t1 = ada_check_typedef (t1);
       if (TYPE_CODE (t1) == TYPE_CODE_PTR)
@@ -5509,7 +5513,7 @@ ada_value_struct_elt (struct value *arg, char *name, char *err)
       if (err == NULL)
         return NULL;
       else
-        error ("Attempt to extract a component of a value that is not a %s.",
+        error (_("Attempt to extract a component of a value that is not a %s."),
                err);
     }
 
@@ -5548,7 +5552,7 @@ ada_value_struct_elt (struct value *arg, char *name, char *err)
     }
 
   if (v == NULL && err != NULL)
-    error ("There is no member named %s.", name);
+    error (_("There is no member named %s."), name);
 
   return v;
 }
@@ -5599,12 +5603,15 @@ ada_lookup_struct_elt_type (struct type *type, char *name, int refok,
         {
           target_terminal_ours ();
           gdb_flush (gdb_stdout);
-          fprintf_unfiltered (gdb_stderr, "Type ");
-          if (type == NULL)
-            fprintf_unfiltered (gdb_stderr, "(null)");
-          else
-            type_print (type, "", gdb_stderr, -1);
-          error (" is not a structure or union type");
+	  if (type == NULL)
+	    error (_("Type (null) is not a structure or union type"));
+	  else
+	    {
+	      /* XXX: type_sprint */
+	      fprintf_unfiltered (gdb_stderr, _("Type "));
+	      type_print (type, "", gdb_stderr, -1);
+	      error (_(" is not a structure or union type"));
+	    }
         }
     }
 
@@ -5665,10 +5672,20 @@ BadName:
     {
       target_terminal_ours ();
       gdb_flush (gdb_stdout);
-      fprintf_unfiltered (gdb_stderr, "Type ");
-      type_print (type, "", gdb_stderr, -1);
-      fprintf_unfiltered (gdb_stderr, " has no component named ");
-      error ("%s", name == NULL ? "<null>" : name);
+      if (name == NULL)
+        {
+	  /* XXX: type_sprint */
+	  fprintf_unfiltered (gdb_stderr, _("Type "));
+	  type_print (type, "", gdb_stderr, -1);
+	  error (_(" has no component named <null>"));
+	}
+      else
+	{
+	  /* XXX: type_sprint */
+	  fprintf_unfiltered (gdb_stderr, _("Type "));
+	  type_print (type, "", gdb_stderr, -1);
+	  error (_(" has no component named %s"), name);
+	}
     }
 
   return NULL;
@@ -6168,9 +6185,12 @@ ada_template_to_fixed_record_type_1 (struct type *type, char *valaddr,
      the current RTYPE length might be good enough for our purposes.  */
   if (TYPE_LENGTH (type) <= 0)
     {
-      warning ("Invalid type size for `%s' detected: %d.",
-               TYPE_NAME (rtype) ? TYPE_NAME (rtype) : "<unnamed>",
-               TYPE_LENGTH (type));
+      if (TYPE_NAME (rtype))
+	warning (_("Invalid type size for `%s' detected: %d."),
+		 TYPE_NAME (rtype), TYPE_LENGTH (type));
+      else
+	warning (_("Invalid type size for <unnamed> detected: %d."),
+		 TYPE_LENGTH (type));
     }
   else
     {
@@ -6180,7 +6200,7 @@ ada_template_to_fixed_record_type_1 (struct type *type, char *valaddr,
 
   value_free_to_mark (mark);
   if (TYPE_LENGTH (rtype) > varsize_limit)
-    error ("record type with dynamic size is larger than varsize-limit");
+    error (_("record type with dynamic size is larger than varsize-limit"));
   return rtype;
 }
 
@@ -6459,7 +6479,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
                                       result, range_type);
         }
       if (!ignore_too_big && TYPE_LENGTH (result) > varsize_limit)
-        error ("array type with dynamic size is larger than varsize-limit");
+        error (_("array type with dynamic size is larger than varsize-limit"));
     }
 
   TYPE_FLAGS (result) |= TYPE_FLAG_FIXED_INSTANCE;
@@ -6679,7 +6699,7 @@ pos_atr (struct value *arg)
   struct type *type = value_type (arg);
 
   if (!discrete_type_p (type))
-    error ("'POS only defined on discrete types");
+    error (_("'POS only defined on discrete types"));
 
   if (TYPE_CODE (type) == TYPE_CODE_ENUM)
     {
@@ -6691,7 +6711,7 @@ pos_atr (struct value *arg)
           if (v == TYPE_FIELD_BITPOS (type, i))
             return i;
         }
-      error ("enumeration value is invalid: can't find 'POS");
+      error (_("enumeration value is invalid: can't find 'POS"));
     }
   else
     return value_as_long (arg);
@@ -6709,15 +6729,15 @@ static struct value *
 value_val_atr (struct type *type, struct value *arg)
 {
   if (!discrete_type_p (type))
-    error ("'VAL only defined on discrete types");
+    error (_("'VAL only defined on discrete types"));
   if (!integer_type_p (value_type (arg)))
-    error ("'VAL requires integral argument");
+    error (_("'VAL requires integral argument"));
 
   if (TYPE_CODE (type) == TYPE_CODE_ENUM)
     {
       long pos = value_as_long (arg);
       if (pos < 0 || pos >= TYPE_NFIELDS (type))
-        error ("argument to 'VAL out of range");
+        error (_("argument to 'VAL out of range"));
       return value_from_longest (type, TYPE_FIELD_BITPOS (type, pos));
     }
   else
@@ -7017,7 +7037,7 @@ coerce_for_assign (struct type *type, struct value *val)
       if (TYPE_LENGTH (type2) != TYPE_LENGTH (type)
           || TYPE_LENGTH (TYPE_TARGET_TYPE (type2))
           != TYPE_LENGTH (TYPE_TARGET_TYPE (type2)))
-        error ("Incompatible types in assignment");
+        error (_("Incompatible types in assignment"));
       val->type = type;
     }
   return val;
@@ -7051,7 +7071,7 @@ ada_value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
   v2 = value_as_long (arg2);
   if (v2 == 0)
-    error ("second operand of %s must not be zero.", op_string (op));
+    error (_("second operand of %s must not be zero."), op_string (op));
 
   if (TYPE_UNSIGNED (type1) || op == BINOP_MOD)
     return value_binop (arg1, arg2, op);
@@ -7090,7 +7110,7 @@ ada_value_equal (struct value *arg1, struct value *arg2)
       arg2 = ada_coerce_to_simple_array (arg2);
       if (TYPE_CODE (value_type (arg1)) != TYPE_CODE_ARRAY
           || TYPE_CODE (value_type (arg2)) != TYPE_CODE_ARRAY)
-        error ("Attempt to compare array with non-array");
+        error (_("Attempt to compare array with non-array"));
       /* FIXME: The following works only for types whose
          representations use all bits (no padding or undefined bits)
          and do not have user-defined equality.  */
@@ -7182,7 +7202,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         arg2 = cast_to_fixed (value_type (arg1), arg2);
       else if (ada_is_fixed_point_type (value_type (arg2)))
         error
-          ("Fixed-point values must be assigned to fixed-point variables");
+          (_("Fixed-point values must be assigned to fixed-point variables"));
       else
         arg2 = coerce_for_assign (value_type (arg1), arg2);
       return ada_value_assign (arg1, arg2);
@@ -7195,7 +7215,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       if ((ada_is_fixed_point_type (value_type (arg1))
            || ada_is_fixed_point_type (value_type (arg2)))
           && value_type (arg1) != value_type (arg2))
-        error ("Operands of fixed-point addition must have the same type");
+        error (_("Operands of fixed-point addition must have the same type"));
       return value_cast (value_type (arg1), value_add (arg1, arg2));
 
     case BINOP_SUB:
@@ -7206,7 +7226,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       if ((ada_is_fixed_point_type (value_type (arg1))
            || ada_is_fixed_point_type (value_type (arg2)))
           && value_type (arg1) != value_type (arg2))
-        error ("Operands of fixed-point subtraction must have the same type");
+        error (_("Operands of fixed-point subtraction must have the same type"));
       return value_cast (value_type (arg1), value_sub (arg1, arg2));
 
     case BINOP_MUL:
@@ -7273,7 +7293,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         /* Only encountered when an unresolved symbol occurs in a
            context other than a function call, in which case, it is
            illegal.  */
-        error ("Unexpected unresolved symbol, %s, during evaluation",
+        error (_("Unexpected unresolved symbol, %s, during evaluation"),
                SYMBOL_PRINT_NAME (exp->elts[pc + 2].symbol));
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
         {
@@ -7302,7 +7322,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
       if (exp->elts[*pos].opcode == OP_VAR_VALUE
           && SYMBOL_DOMAIN (exp->elts[pc + 5].symbol) == UNDEF_DOMAIN)
-        error ("Unexpected unresolved symbol, %s, during evaluation",
+        error (_("Unexpected unresolved symbol, %s, during evaluation"),
                SYMBOL_PRINT_NAME (exp->elts[pc + 5].symbol));
       else
         {
@@ -7337,7 +7357,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
               type = ada_check_typedef (TYPE_TARGET_TYPE (type));
               break;
             default:
-              error ("cannot subscript or call something of type `%s'",
+              error (_("cannot subscript or call something of type `%s'"),
                      ada_type_name (value_type (argvec[0])));
               break;
             }
@@ -7356,9 +7376,9 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             arity = ada_array_arity (type);
             type = ada_array_element_type (type, nargs);
             if (type == NULL)
-              error ("cannot subscript or call a record");
+              error (_("cannot subscript or call a record"));
             if (arity != nargs)
-              error ("wrong number of subscripts; expecting %d", arity);
+              error (_("wrong number of subscripts; expecting %d"), arity);
             if (noside == EVAL_AVOID_SIDE_EFFECTS)
               return allocate_value (ada_aligned_type (type));
             return
@@ -7370,7 +7390,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             {
               type = ada_array_element_type (type, nargs);
               if (type == NULL)
-                error ("element type of array unknown");
+                error (_("element type of array unknown"));
               else
                 return allocate_value (ada_aligned_type (type));
             }
@@ -7384,7 +7404,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             {
               type = ada_array_element_type (type, nargs);
               if (type == NULL)
-                error ("element type of array unknown");
+                error (_("element type of array unknown"));
               else
                 return allocate_value (ada_aligned_type (type));
             }
@@ -7393,8 +7413,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                                                    nargs, argvec + 1));
 
         default:
-          error ("Attempt to index or call something other than an "
-		 "array or function");
+          error (_("Attempt to index or call something other than an \
+array or function"));
         }
 
     case TERNOP_SLICE:
@@ -7422,7 +7442,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             ada_aligned_type (TYPE_TARGET_TYPE (value_type (array)));
 
         if (ada_is_packed_array_type (value_type (array)))
-          error ("cannot slice a packed array");
+          error (_("cannot slice a packed array"));
 
         /* If this is a reference to an array or an array lvalue,
            convert to a pointer.  */
@@ -7450,7 +7470,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
            type later down the road if the debug info generated by
            the compiler is incorrect or incomplete.  */
         if (!ada_is_simple_array_type (value_type (array)))
-          error ("cannot take slice of non-array");
+          error (_("cannot take slice of non-array"));
 
         if (TYPE_CODE (value_type (array)) == TYPE_CODE_PTR)
           {
@@ -7486,8 +7506,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       switch (TYPE_CODE (type))
         {
         default:
-          lim_warning ("Membership test incompletely implemented; "
-                       "always returns true");
+          lim_warning (_("Membership test incompletely implemented; \
+always returns true"));
           return value_from_longest (builtin_type_int, (LONGEST) 1);
 
         case TYPE_CODE_RANGE:
@@ -7516,7 +7536,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       tem = longest_to_int (exp->elts[pc + 1].longconst);
 
       if (tem < 1 || tem > ada_array_arity (value_type (arg2)))
-        error ("invalid dimension number to '%s", "range");
+        error (_("invalid dimension number to 'range"));
 
       arg3 = ada_array_bound (arg2, tem, 1);
       arg2 = ada_array_bound (arg2, tem, 0);
@@ -7561,7 +7581,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
           }
 
         if (exp->elts[*pos].opcode != OP_LONG)
-          error ("illegal operand to '%s", ada_attribute_name (op));
+          error (_("Invalid operand to '%s"), ada_attribute_name (op));
         tem = longest_to_int (exp->elts[*pos + 2].longconst);
         *pos += 4;
 
@@ -7576,7 +7596,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
               arg1 = ada_coerce_to_simple_array (arg1);
 
             if (tem < 1 || tem > ada_array_arity (value_type (arg1)))
-              error ("invalid dimension number to '%s",
+              error (_("invalid dimension number to '%s"),
                      ada_attribute_name (op));
 
             if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -7584,14 +7604,14 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                 type = ada_index_type (value_type (arg1), tem);
                 if (type == NULL)
                   error
-                    ("attempt to take bound of something that is not an array");
+                    (_("attempt to take bound of something that is not an array"));
                 return allocate_value (type);
               }
 
             switch (op)
               {
               default:          /* Should never happen.  */
-                error ("unexpected attribute encountered");
+                error (_("unexpected attribute encountered"));
               case OP_ATR_FIRST:
                 return ada_array_bound (arg1, tem, 0);
               case OP_ATR_LAST:
@@ -7613,17 +7633,17 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             switch (op)
               {
               default:
-                error ("unexpected attribute encountered");
+                error (_("unexpected attribute encountered"));
               case OP_ATR_FIRST:
                 return discrete_type_low_bound (range_type);
               case OP_ATR_LAST:
                 return discrete_type_high_bound (range_type);
               case OP_ATR_LENGTH:
-                error ("the 'length attribute applies only to array types");
+                error (_("the 'length attribute applies only to array types"));
               }
           }
         else if (TYPE_CODE (type_arg) == TYPE_CODE_FLT)
-          error ("unimplemented type attribute");
+          error (_("unimplemented type attribute"));
         else
           {
             LONGEST low, high;
@@ -7632,20 +7652,20 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
               type_arg = decode_packed_array_type (type_arg);
 
             if (tem < 1 || tem > ada_array_arity (type_arg))
-              error ("invalid dimension number to '%s",
+              error (_("invalid dimension number to '%s"),
                      ada_attribute_name (op));
 
             type = ada_index_type (type_arg, tem);
             if (type == NULL)
               error
-                ("attempt to take bound of something that is not an array");
+                (_("attempt to take bound of something that is not an array"));
             if (noside == EVAL_AVOID_SIDE_EFFECTS)
               return allocate_value (type);
 
             switch (op)
               {
               default:
-                error ("unexpected attribute encountered");
+                error (_("unexpected attribute encountered"));
               case OP_ATR_FIRST:
                 low = ada_array_bound_from_type (type_arg, tem, 0, &type);
                 return value_from_longest (type, low);
@@ -7692,7 +7712,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
           goto nosideret;
 
         if (!ada_is_modular_type (type_arg))
-          error ("'modulus must be applied to modular type");
+          error (_("'modulus must be applied to modular type"));
 
         return value_from_longest (TYPE_TARGET_TYPE (type_arg),
                                    ada_modulus (type_arg));
@@ -7771,7 +7791,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             {
               struct type *arrType = ada_type_of_array (arg1, 0);
               if (arrType == NULL)
-                error ("Attempt to dereference null array pointer.");
+                error (_("Attempt to dereference null array pointer."));
               return value_at_lazy (arrType, 0);
             }
           else if (TYPE_CODE (type) == TYPE_CODE_PTR
@@ -7789,7 +7809,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             /* GDB allows dereferencing an int.  */
             return value_zero (builtin_type_int, lval_memory);
           else
-            error ("Attempt to take contents of a non-pointer value.");
+            error (_("Attempt to take contents of a non-pointer value."));
         }
       arg1 = ada_coerce_ref (arg1);     /* FIXME: What is this for?? */
       type = ada_check_typedef (value_type (arg1));
@@ -7842,7 +7862,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
         return allocate_value (builtin_type_void);
       else
-        error ("Attempt to use a type name as an expression");
+        error (_("Attempt to use a type name as an expression"));
     }
 
 nosideret:
@@ -7991,7 +8011,7 @@ ada_vax_float_print_function (struct type *type)
     case 'G':
       return get_var_value ("DEBUG_STRING_G", 0);
     default:
-      error ("invalid VAX floating-point type");
+      error (_("invalid VAX floating-point type"));
     }
 }
 
@@ -8151,7 +8171,7 @@ to_fixed_range_type (char *name, struct value *dval, struct objfile *objfile)
           L = get_int_var_value (name_buf, &ok);
           if (!ok)
             {
-              lim_warning ("Unknown lower bound, using 1.");
+              lim_warning (_("Unknown lower bound, using 1."));
               L = 1;
             }
         }
@@ -8169,7 +8189,7 @@ to_fixed_range_type (char *name, struct value *dval, struct objfile *objfile)
           U = get_int_var_value (name_buf, &ok);
           if (!ok)
             {
-              lim_warning ("Unknown upper bound, using %ld.", (long) L);
+              lim_warning (_("Unknown upper bound, using %ld."), (long) L);
               U = L;
             }
         }
@@ -8313,7 +8333,8 @@ ada_dump_subexp_body (struct expression *exp, struct ui_file *stream, int elt)
 
     case UNOP_IN_RANGE:
     case UNOP_QUAL:
-      fprintf_filtered (stream, "Type @");
+      /* XXX: gdb_sprint_host_address, type_sprint */
+      fprintf_filtered (stream, _("Type @"));
       gdb_print_host_address (exp->elts[pc + 1].type, stream);
       fprintf_filtered (stream, " (");
       type_print (exp->elts[pc + 1].type, NULL, stream, 0);
@@ -8360,11 +8381,12 @@ ada_print_subexp (struct expression *exp, int *pos,
       return;
 
     case BINOP_IN_BOUNDS:
+      /* XXX: sprint_subexp */
       *pos += oplen;
       print_subexp (exp, pos, stream, PREC_SUFFIX);
-      fputs_filtered (" in ", stream);
+      fputs_filtered (_(" in "), stream);
       print_subexp (exp, pos, stream, PREC_SUFFIX);
-      fputs_filtered ("'range", stream);
+      fputs_filtered (_("'range"), stream);
       if (exp->elts[pc + 1].longconst > 1)
         fprintf_filtered (stream, "(%ld)",
                           (long) exp->elts[pc + 1].longconst);
@@ -8374,8 +8396,9 @@ ada_print_subexp (struct expression *exp, int *pos,
       *pos += oplen;
       if (prec >= PREC_EQUAL)
         fputs_filtered ("(", stream);
+      /* XXX: sprint_subexp */
       print_subexp (exp, pos, stream, PREC_SUFFIX);
-      fputs_filtered (" in ", stream);
+      fputs_filtered (_(" in "), stream);
       print_subexp (exp, pos, stream, PREC_EQUAL);
       fputs_filtered (" .. ", stream);
       print_subexp (exp, pos, stream, PREC_EQUAL);
@@ -8426,8 +8449,9 @@ ada_print_subexp (struct expression *exp, int *pos,
 
     case UNOP_IN_RANGE:
       *pos += oplen;
+      /* XXX: sprint_subexp */
       print_subexp (exp, pos, stream, PREC_SUFFIX);
-      fputs_filtered (" in ", stream);
+      fputs_filtered (_(" in "), stream);
       LA_PRINT_TYPE (exp->elts[pc + 1].type, "", stream, 1, 0);
       return;
     }
@@ -8511,7 +8535,7 @@ ada_create_fundamental_type (struct objfile *objfile, int typeid)
       type = init_type (TYPE_CODE_INT,
                         TARGET_INT_BIT / TARGET_CHAR_BIT,
                         0, "<?type?>", objfile);
-      warning ("internal error: no Ada fundamental type %d", typeid);
+      warning (_("internal error: no Ada fundamental type %d"), typeid);
       break;
     case FT_VOID:
       type = init_type (TYPE_CODE_VOID,

@@ -224,7 +224,7 @@ alpha_register_to_value (struct frame_info *frame, int regnum,
       memcpy (out, in, 8);
       break;
     default:
-      error ("Cannot retrieve value from floating point register");
+      error (_("Cannot retrieve value from floating point register"));
     }
 }
 
@@ -242,7 +242,7 @@ alpha_value_to_register (struct frame_info *frame, int regnum,
       memcpy (out, in, 8);
       break;
     default:
-      error ("Cannot store value in floating point register");
+      error (_("Cannot store value in floating point register"));
     }
   put_frame_register (frame, regnum, out);
 }
@@ -464,7 +464,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 	  break;
 
 	default:
-	  internal_error (__FILE__, __LINE__, "unknown floating point width");
+	  internal_error (__FILE__, __LINE__, _("unknown floating point width"));
 	}
       break;
 
@@ -488,7 +488,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 	  break;
 
 	default:
-	  internal_error (__FILE__, __LINE__, "unknown floating point width");
+	  internal_error (__FILE__, __LINE__, _("unknown floating point width"));
 	}
       break;
 
@@ -540,10 +540,10 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 	  /* FIXME: 128-bit long doubles are returned like structures:
 	     by writing into indirect storage provided by the caller
 	     as the first argument.  */
-	  error ("Cannot set a 128-bit long double return value.");
+	  error (_("Cannot set a 128-bit long double return value."));
 
 	default:
-	  internal_error (__FILE__, __LINE__, "unknown floating point width");
+	  internal_error (__FILE__, __LINE__, _("unknown floating point width"));
 	}
       break;
 
@@ -565,10 +565,10 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 	  /* FIXME: 128-bit long doubles are returned like structures:
 	     by writing into indirect storage provided by the caller
 	     as the first argument.  */
-	  error ("Cannot set a 128-bit long double return value.");
+	  error (_("Cannot set a 128-bit long double return value."));
 
 	default:
-	  internal_error (__FILE__, __LINE__, "unknown floating point width");
+	  internal_error (__FILE__, __LINE__, _("unknown floating point width"));
 	}
       break;
 
@@ -955,20 +955,21 @@ alpha_heuristic_proc_start (CORE_ADDR pc)
       static int blurb_printed = 0;
 
       if (fence == tdep->vm_min_address)
-	warning ("Hit beginning of text section without finding");
+	warning (_("Hit beginning of text section without finding \
+enclosing function for address 0x%s"), paddr_nz (orig_pc));
       else
-	warning ("Hit heuristic-fence-post without finding");
-      warning ("enclosing function for address 0x%s", paddr_nz (orig_pc));
+	warning (_("Hit heuristic-fence-post without finding \
+enclosing function for address 0x%s"), paddr_nz (orig_pc));
 
       if (!blurb_printed)
 	{
-	  printf_filtered ("\
+	  printf_filtered (_("\
 This warning occurs if you are debugging a function without any symbols\n\
 (for example, in a stripped executable).  In that case, you may wish to\n\
 increase the size of the search with the `set heuristic-fence-post' command.\n\
 \n\
 Otherwise, you told GDB there was a function where there isn't one, or\n\
-(more likely) you have encountered a bug in GDB.\n");
+(more likely) you have encountered a bug in GDB.\n"));
 	  blurb_printed = 1;
 	}
     }
@@ -1583,11 +1584,11 @@ _initialize_alpha_tdep (void)
      because the user can always use "999999" or some such for unlimited.  */
   c = add_set_cmd ("heuristic-fence-post", class_support, var_zinteger,
 		   (char *) &heuristic_fence_post,
-		   "\
+		   _("\
 Set the distance searched for the start of a function.\n\
 If you are debugging a stripped executable, GDB needs to search through the\n\
 program for the start of a function.  This command sets the distance of the\n\
-search.  The only need to set it is when debugging a stripped executable.",
+search.  The only need to set it is when debugging a stripped executable."),
 		   &setlist);
   /* We need to throw away the frame cache when we set this, since it
      might change our ability to get backtraces.  */
