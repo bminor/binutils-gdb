@@ -34,11 +34,11 @@ SECTIONS
     *(COMMON)
     ${RELOCATING+ end = .};
   }
-  .stab  . (NOLOAD) : 
+  .stab  0 ${RELOCATING+(NOLOAD)} : 
   {
     [ .stab ]
   }
-  .stabstr  . (NOLOAD) :
+  .stabstr  0 ${RELOCATING+(NOLOAD)} :
   {
     [ .stabstr ]
   }
