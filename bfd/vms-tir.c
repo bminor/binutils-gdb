@@ -1,6 +1,6 @@
 /* vms-tir.c -- BFD back-end for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
    TIR record handling functions
    ETIR record handling functions
@@ -49,6 +49,17 @@ static void image_write_b PARAMS ((bfd *abfd, unsigned int value));
 static void image_write_w PARAMS ((bfd *abfd, unsigned int value));
 static void image_write_l PARAMS ((bfd *abfd, unsigned long value));
 static void image_write_q PARAMS ((bfd *abfd, uquad value));
+static int check_section PARAMS ((bfd *, int));
+static boolean etir_sta PARAMS ((bfd *, int, unsigned char *));
+static boolean etir_sto PARAMS ((bfd *, int, unsigned char *));
+static boolean etir_opr PARAMS ((bfd *, int, unsigned char *));
+static boolean etir_ctl PARAMS ((bfd *, int, unsigned char *));
+static boolean etir_stc PARAMS ((bfd *, int, unsigned char *));
+static asection *new_section PARAMS ((bfd *, int));
+static int alloc_section PARAMS ((bfd *, unsigned int));
+static int etir_cmd PARAMS ((bfd *, int, unsigned char *));
+static int analyze_tir PARAMS ((bfd *, unsigned char *, unsigned int));
+static int analyze_etir PARAMS ((bfd *, unsigned char *, unsigned int));
 
 /*-----------------------------------------------------------------------------*/
 

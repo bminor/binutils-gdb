@@ -1,6 +1,6 @@
 /* vms-hdr.c -- BFD back-end for VMS/VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
    HDR record handling functions
    EMH record handling functions
@@ -36,6 +36,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
+
+static unsigned char *get_vms_time_string PARAMS ((void));
+
+
 /*---------------------------------------------------------------------------*/
 
 /* Read & process emh record

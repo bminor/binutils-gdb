@@ -1,3 +1,10 @@
+2001-09-01  Andreas Jaeger  <aj@suse.de>
+
+	* vms-tir.c: Add missing prototypes.
+	* vms-hdr.c: Likewise.
+	* vms-gsd.c: Likewise.
+	* vms-misc.c: Likewise.
+
 2001-08-31  H.J. Lu  <hjl@gnu.org>
 
 	* elf32-mips.c (_bfd_mips_elf_check_relocs): Report filename
@@ -77,8 +84,8 @@
 
 2001-08-29  Tom Rix <trix@redhat.com>
 
- 	* xcofflink.c (xcoff_link_add_symbols):  Fix XTY_LD symbol that
- 	does not follow a XTY_SD.
+	* xcofflink.c (xcoff_link_add_symbols):  Fix XTY_LD symbol that
+	does not follow a XTY_SD.
 
 2001-08-29  Alan Modra  <amodra@bigpond.net.au>
 

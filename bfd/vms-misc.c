@@ -30,6 +30,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "vms.h"
 
+static vms_section *add_new_contents PARAMS ((bfd *, sec_ptr));
+static int hash_string PARAMS ((const char *));
+static asymbol *new_symbol PARAMS ((bfd *, char *));
+  
 /*-----------------------------------------------------------------------------*/
 #if VMS_DEBUG
 /* debug functions */

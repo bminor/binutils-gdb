@@ -1,6 +1,6 @@
 /* vms-gsd.c -- BFD back-end for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
    go and read the openVMS linker manual (esp. appendix B)
    if you don't know what's going on here :-)
@@ -138,6 +138,9 @@ static struct sec_flags_struct evax_section_flags[] = {
 	(EGPS_S_V_REL|EGPS_S_V_RD|EGPS_S_V_WRT),
 	(SEC_IN_MEMORY|SEC_DATA|SEC_HAS_CONTENTS|SEC_ALLOC|SEC_LOAD) }
 };
+
+static flagword vms_secflag_by_name PARAMS ((bfd *, struct sec_flags_struct *, char *, int));
+static flagword vms_esecflag_by_name PARAMS ((struct sec_flags_struct *, char *, int));
 
 /* Retrieve bfd section flags by name and size  */
 
