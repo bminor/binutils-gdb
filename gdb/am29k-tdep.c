@@ -605,9 +605,9 @@ pop_frame ()
 	write_register
 	  (SR_REGNUM (i + 128),
 	   read_register (LR0_REGNUM + DUMMY_ARG / 4 + i));
-      for (i = 0; i < DUMMY_SAVE_GR96; ++i)
+      for (i = 0; i < DUMMY_SAVE_GREGS; ++i)
 	write_register
-	  (GR96_REGNUM + i,
+	  (RETURN_REGNUM + i,
 	   read_register (LR0_REGNUM + DUMMY_ARG / 4 + DUMMY_SAVE_SR128 + i));
     }
 
@@ -689,7 +689,7 @@ push_dummy_frame ()
   for (i = 0; i < DUMMY_SAVE_SR128; ++i)
     write_register (LR0_REGNUM + DUMMY_ARG / 4 + i,
 		    read_register (SR_REGNUM (i + 128)));
-  for (i = 0; i < DUMMY_SAVE_GR96; ++i)
+  for (i = 0; i < DUMMY_SAVE_GREGS; ++i)
     write_register (LR0_REGNUM + DUMMY_ARG / 4 + DUMMY_SAVE_SR128 + i,
-		    read_register (GR96_REGNUM + i));
+		    read_register (RETURN_REGNUM + i));
 }
