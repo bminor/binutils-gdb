@@ -1,3 +1,8 @@
+2002-12-02  J. Brobecker  <brobecker@gnat.com>
+
+	* config/powerpc/aix432.mh (NATDEPFILES): Add a comment explaining
+	why aix-thread.o is not listed.
+
 2002-12-01  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_PC_IN_CALL_DUMMY): Rename
