@@ -1,3 +1,7 @@
+2003-07-31  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (new_symbol): Use var_decode_location for parameters.
+
 2003-07-30  Michael Snyder  <msnyder@redhat.com>
 
 	* structs.h (value_being_returned): Add a struct_addr argument.
