@@ -1161,10 +1161,9 @@ elfNN_ia64_aix_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 {
   if (strcmp (*namep, "__GLOB_DATA_PTR") == 0)
     {
-      /* Define __GLOB_DATA_PTR.  This is expected to be a linker-defined
-	 symbol by the Aix C runtime startup code.  Define the symbol
-	 when it is encountered.  IBM sez no one else should use it b/c it is
-	 undocumented.  */
+      /* Define __GLOB_DATA_PTR when it is encountered.  This is expected to
+	 be a linker-defined symbol by the Aix C runtime startup code. IBM sez
+	 no one else should use it b/c it is undocumented.  */
       struct elf_link_hash_entry *h;
 
       h = (struct elf_link_hash_entry *) bfd_link_hash_lookup (info->hash, *namep, false, false, false);
@@ -1177,7 +1176,8 @@ elfNN_ia64_aix_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	  ia64_info = elfNN_ia64_hash_table (info);
 	  
 	  if (!(_bfd_generic_link_add_one_symbol
-		(info, abfd, *namep, BSF_GLOBAL, ia64_info->got_sec,
+		(info, abfd, *namep, BSF_GLOBAL, 
+		 bfd_get_section_by_name (abfd, ".bss"),
 		 bed->got_symbol_offset, (const char *) NULL, false,
 		 bed->collect, (struct bfd_link_hash_entry **) &h)))
 	    return false;
@@ -1185,8 +1185,7 @@ elfNN_ia64_aix_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 	  h->type = STT_OBJECT;
 	  
-	  if (info->shared
-	      && ! _bfd_elf_link_record_dynamic_symbol (info, h))
+	  if (! _bfd_elf_link_record_dynamic_symbol (info, h))
 	    return false;
 	}
 
@@ -1198,9 +1197,8 @@ elfNN_ia64_aix_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
       
       /* SHN_AIX_SYSCALL: Treat this as any other symbol.  The special symbol
 	 is only relevant when compiling code for extended system calls.
-	 Replace the "special" section with .text, if possible. */
-      /* FIXME need to determine the proper section instead of defaulting to
-	 .text.  */
+	 Replace the "special" section with .text, if possible. 
+	 Note that these symbols are always assumed to be in .text. */
       for (i = 1; i < elf_elfheader (abfd)->e_shnum; i++)
 	{
 	  asection * sec = bfd_section_from_elf_index (abfd, i);
@@ -2019,9 +2017,7 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	case R_IA64_FPTR32LSB:
 	case R_IA64_FPTR64MSB:
 	case R_IA64_FPTR64LSB:
-	  if (elfNN_ia64_aix_vec (abfd->xvec))
-	    need_entry = NEED_FPTR | NEED_DYNREL;
-	  else if (info->shared || h)
+	  if (info->shared || h || elfNN_ia64_aix_vec (abfd->xvec))
 	    need_entry = NEED_FPTR | NEED_DYNREL;
 	  else
 	    need_entry = NEED_FPTR;
@@ -2071,10 +2067,8 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	case R_IA64_DIR64LSB:
 	  /* Shared objects will always need at least a REL relocation.  */
 	  if (info->shared || maybe_dynamic
-	      /* On AIX, we always need a relocation, but make sure
-		 __GLOB_DATA_PTR doesn't get an entry.  */ 
 	      || (elfNN_ia64_aix_vec (abfd->xvec)
-		  && (!h || strcmp (h->root.root.string, 
+		  && (!h || strcmp (h->root.root.string,
 				    "__GLOB_DATA_PTR") != 0)))
 	    need_entry = NEED_DYNREL;
 	  dynrel_type = R_IA64_DIR64LSB;
@@ -2198,7 +2192,9 @@ allocate_global_data_got (dyn_i, data)
   if (dyn_i->want_got
       && ! dyn_i->want_fptr
       && (elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info)
-	  || elfNN_ia64_aix_vec (x->info->hash->creator)))
+	  || (elfNN_ia64_aix_vec (x->info->hash->creator)
+	      && (!dyn_i->h || strcmp (dyn_i->h->root.root.string,
+				       "__GLOB_DATA_PTR") != 0))))
      {
        dyn_i->got_offset = x->ofs;
        x->ofs += 8;
@@ -2412,7 +2408,10 @@ allocate_dynrel_entries (dyn_i, data)
 
   ia64_info = elfNN_ia64_hash_table (x->info);
   dynamic_symbol = elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info)
-    || elfNN_ia64_aix_vec (x->info->hash->creator);
+    || (elfNN_ia64_aix_vec (x->info->hash->creator)
+	/* Don't allocate an entry for __GLOB_DATA_PTR */
+	&& (!dyn_i->h || strcmp (dyn_i->h->root.root.string,
+	  "__GLOB_DATA_PTR") != 0));
   shared = x->info->shared;
 
   /* Take care of the normal data relocations.  */
@@ -3528,11 +3527,9 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* Install a dynamic relocation for this reloc.  */
 	  if ((dynamic_symbol_p || info->shared
 	       || (elfNN_ia64_aix_vec (info->hash->creator)
-		   /* We want REL relocation for _GLOB_DATA_PTR, which would
-		      otherwise be an IMM64, which isn't handled below.  The
-		      symbol comes from the C runtime.  */
-		   && (!h || 
-		       strcmp (h->root.root.string, "__GLOB_DATA_PTR") != 0)))
+		   /* Don't emit relocs for __GLOB_DATA_PTR on AIX. */
+		   && (!h || strcmp (h->root.root.string, 
+				     "__GLOB_DATA_PTR") != 0)))
 	      && (input_section->flags & SEC_ALLOC) != 0)
 	    {
 	      unsigned int dyn_r_type;

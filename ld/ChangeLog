@@ -1,3 +1,8 @@
+2001-05-25  Timothy Wall  <twall@oculustech.com>
+
+	* emulparams/elf64_aix.sh: Change settings to match IBM linker
+	output. 
+
 2001-05-25  Alan Modra  <amodra@one.net.au>
 
 	* configure.host: Replace linuxoldld with linux*oldld.

@@ -1,3 +1,8 @@
+2001-05-25  Timothy Wall  <twall@redhat.com>
+
+	* elfxx-ia64.c (allocate_dynrel_entries): Don't allocate an entry
+	for __GLOB_DATA_PTR on AIX5.  Clean up some relocation bugs.
+
 2001-05-25  H.J. Lu  <hjl@gnu.org>
 
 	* bfd-in2.h: Regenerated.
@@ -2217,7 +2222,7 @@
 	* elf.c (elf_fake_sections): Do not mark the section SHT_NOBITS if
 	is has the SEC_HAS_CONTENTS flag set.
 
-2000-09-28  ÷rjan Friberg  <orjanf@axis.com>
+2000-09-28  Å÷rjan Friberg  <orjanf@axis.com>
 	    Hans-Peter Nilsson  <hp@axis.com>
 
 	* aout-cris.c (N_TXTADDR): Define.
@@ -4066,7 +4071,7 @@
 
 	* libhppa.h (HPPA_R_CONSTANT): Cast argument to bfd_signed_vma.
 
-2000-05-03  Martin v. Lˆwis  <loewis@informatik.hu-berlin.de>
+2000-05-03  Martin v. LÅˆwis  <loewis@informatik.hu-berlin.de>
 
 	* elflink.h (elf_link_add_object_symbols): Reset dynindx for
 	hidden and internal symbols.
