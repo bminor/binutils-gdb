@@ -1,5 +1,13 @@
 2001-12-04  Orjan Friberg  <orjanf@axis.com>
 
+	* cris-tdep.c (cris_regnums): Add DCCR_REGNUM for completeness.
+	(cris_examine): Add comment about solib prologue parsing.
+	(bdap_prefix): Read offset with correct signedness and size.
+	(move_to_preg_op): Don't rely on register numbering for register size.
+	(none_reg_mode_move_from_preg_op): Ditto.
+
+2001-12-04  Orjan Friberg  <orjanf@axis.com>
+
 	* solib.c (solib_open): Make path relative if search for absolute path
 	failed.  If search for relative path in solib_search_path failed, fall
 	back to search for basename only.

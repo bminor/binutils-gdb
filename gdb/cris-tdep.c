@@ -88,6 +88,7 @@ enum cris_regnums
   IRP_REGNUM  = 26,
   SRP_REGNUM  = 27,
   BAR_REGNUM  = 28,
+  DCCR_REGNUM = 29,
   BRP_REGNUM  = 30,
   USP_REGNUM  = 31
 };
@@ -591,6 +592,14 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
               return ip;
             }
           source_register = cris_get_operand1 (insn);
+
+          /* FIXME?  In the glibc solibs, the prologue might contain something
+             like (this example taken from relocate_doit):
+             move.d $pc,$r0
+             sub.d 0xfffef426,$r0
+             which isn't covered by the source_register check below.  Question
+             is whether to add a check for this combo, or make better use of
+             the limit variable instead.  */
           if (source_register < ARG1_REGNUM || source_register > ARG4_REGNUM)
             {
               /* The prologue ended before the limit was reached.  */
@@ -1860,6 +1869,11 @@ process_autoincrement (int size, unsigned short inst, inst_env_type *inst_env)
     }
 }
 
+/* Just a forward declaration.  */
+
+unsigned long
+get_data_from_address (unsigned short *inst, CORE_ADDR address);
+
 /* Calculates the prefix value for the general case of offset addressing 
    mode.  */
 
@@ -1884,9 +1898,8 @@ bdap_prefix (unsigned short inst, inst_env_type *inst_env)
 
   /* The offset is an indirection of the contents of the operand1 register.  */
   inst_env->prefix_value += 
-    read_memory_integer (inst_env->reg[cris_get_operand1 (inst)], 
-                         cris_get_size (inst));
-
+    get_data_from_address (&inst, inst_env->reg[cris_get_operand1 (inst)]);
+  
   if (cris_get_mode (inst) == AUTOINC_MODE)
     {
       process_autoincrement (cris_get_size (inst), inst, inst_env); 
@@ -2580,14 +2593,13 @@ move_to_preg_op (unsigned short inst, inst_env_type *inst_env)
               inst_env->invalid = 1;
               return;
             }
-          /* The increment depends on the size of the special register. 
-             Register P0 to P3 has the size byte, register P4 to P7 has the 
-             size word and register P8 to P15 has the size dword.  */
-          if (cris_get_operand2 (inst) < 4)
+
+          /* The increment depends on the size of the special register.  */
+          if (cris_register_size (cris_get_operand2 (inst)) == 1)
             {
               process_autoincrement (INST_BYTE_SIZE, inst, inst_env);
             }
-          if (cris_get_operand2 (inst) < 8)
+          else if (cris_register_size (cris_get_operand2 (inst)) == 2)
             {
               process_autoincrement (INST_WORD_SIZE, inst, inst_env);
             }
@@ -2636,14 +2648,13 @@ none_reg_mode_move_from_preg_op (unsigned short inst, inst_env_type *inst_env)
               inst_env->invalid = 1;
               return;
             }
-          /* The increment depends on the size of the special register.  
-             Register P0 to P3 has the size byte, register P4 to P7 has 
-             the size word and register P8 to P15 has the size dword.  */
-          if (cris_get_operand2 (inst) < 4)
+          
+          /* The increment depends on the size of the special register.  */
+          if (cris_register_size (cris_get_operand2 (inst)) == 1)
             {
               process_autoincrement (INST_BYTE_SIZE, inst, inst_env);
             }
-          if (cris_get_operand2 (inst) < 8)
+          else if (cris_register_size (cris_get_operand2 (inst)) == 2)
             {
               process_autoincrement (INST_WORD_SIZE, inst, inst_env);
             }
