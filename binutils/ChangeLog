@@ -1,3 +1,9 @@
+Wed Feb 12 16:12:02 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (disassemble_data): Correct VMA argument to
+	find_symbol_for_address.  Improve handling of code with no symbol
+	followed by code with a symbol.
+
 Wed Feb 12 12:16:47 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* objdump.c (disassemble_bytes): Make output of raw instructions
