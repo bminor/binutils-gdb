@@ -1,5 +1,9 @@
 2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.c++/printmethod.exp (print virtual method): Accept "(void)".
+
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.base/printcmds.exp: Enable setup_kfail for gdb/538
 	(ptype &*"foo").
 	* gdb.c++/local.exp: Enable setup_kfail for gdb/482.
