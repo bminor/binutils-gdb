@@ -1,3 +1,9 @@
+Wed Jan 25 23:26:13 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-sh.c (CALC_ADDEND): Don't define.
+	(coff_sh_relocate_section): Remove.
+	(coff_relocate_section): Use _bfd_coff_generic_relocate_section.
+
 Tue Jan 24 14:22:47 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* elf32-mips.c (mips_elf_output_extsym): Set the value of the
