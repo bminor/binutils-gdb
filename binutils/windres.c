@@ -443,11 +443,9 @@ define_resource (resources, cids, ids, dupok)
 
   re->u.res = ((struct res_resource *)
 	       res_alloc (sizeof (struct res_resource)));
+  memset (re->u.res, 0, sizeof (struct res_resource));
 
   re->u.res->type = RES_TYPE_UNINITIALIZED;
-  memset (&re->u.res->res_info, 0, sizeof (struct res_res_info));
-  memset (&re->u.res->coff_info, 0, sizeof (struct res_coff_info));
-
   return re->u.res;
 }
 
