@@ -1,3 +1,35 @@
+2005-02-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* fr30-desc.c: Regenerate.
+	* fr30-desc.h: Regenerate.
+	* fr30-opc.c: Regenerate.
+	* fr30-opc.h: Regenerate.
+	* frv-desc.c: Regenerate.
+	* frv-desc.h: Regenerate.
+	* frv-opc.c: Regenerate.
+	* frv-opc.h: Regenerate.
+	* ip2k-desc.c: Regenerate.
+	* ip2k-desc.h: Regenerate.
+	* ip2k-opc.c: Regenerate.
+	* ip2k-opc.h: Regenerate.
+	* iq2000-desc.c: Regenerate.
+	* iq2000-desc.h: Regenerate.
+	* iq2000-opc.c: Regenerate.
+	* iq2000-opc.h: Regenerate.
+	* m32r-desc.c: Regenerate.
+	* m32r-desc.h: Regenerate.
+	* m32r-opc.c: Regenerate.
+	* m32r-opc.h: Regenerate.
+	* m32r-opinst.c: Regenerate.
+	* openrisc-desc.c: Regenerate.
+	* openrisc-desc.h: Regenerate.
+	* openrisc-opc.c: Regenerate.
+	* openrisc-opc.h: Regenerate.
+	* xstormy16-desc.c: Regenerate.
+	* xstormy16-desc.h: Regenerate.
+	* xstormy16-opc.c: Regenerate.
+	* xstormy16-opc.h: Regenerate.
+
 2005-02-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am"
@@ -139,7 +171,7 @@
 	easier for the testsuite.
 	(arch_sh4_nofp_up): Likewise, rename arch_sh4_nofpu_up.
 	(arch_sh4a_nofp_up): Likewise, rename arch_sh4a_nofpu_up.
-	(arch_sh2a_nofpu_or_sh4_nommu_nofpu_up): Add missing 
+	(arch_sh2a_nofpu_or_sh4_nommu_nofpu_up): Add missing
 	arch_sh2a_or_sh4_up child.
 	(sh_table): Do renaming as above.
 	Correct comment for ldc.l for gas testsuite to read.
@@ -219,7 +251,7 @@
 
 	* maxq-dis.c: New file.
 	* disassemble.c (ARCH_maxq): Define.
- 	(disassembler): Add 'print_insn_maxq_little' for handling maxq
+	(disassembler): Add 'print_insn_maxq_little' for handling maxq
 	instructions..
 	* configure.in: Add case for bfd_maxq_arch.
 	* configure: Regenerate.
@@ -312,11 +344,11 @@
 
 	* crx-dis.c (enum REG_ARG_TYPE): New, replacing COP_ARG_TYPE.
 	(getregliststring): Support HI/LO and user registers.
-	* crx-opc.c (crx_instruction): Update data structure according to the 
+	* crx-opc.c (crx_instruction): Update data structure according to the
 	rearrangement done in CRX opcode header file.
 	(crx_regtab):  Likewise.
 	(crx_optab):  Likewise.
-	(crx_instruction): Reorder load/stor instructions, remove unsupported 
+	(crx_instruction): Reorder load/stor instructions, remove unsupported
 	formats.
 	support new Co-Processor instruction 'cpi'.
 
@@ -612,11 +644,11 @@
 2004-05-24  Peter Barada  <peter@the-baradas.com>
 
 	* m68k-dis.c(print_insn_m68k): Strip body of diassembly out
-        into new match_insn_m68k function.  Loop over canidate
-        matches and select first that completely matches.
+	into new match_insn_m68k function.  Loop over canidate
+	matches and select first that completely matches.
 	* m68k-dis.c(print_insn_arg): Fix 'g' case to only extract 1 bit.
 	* m68k-dis.c(print_insn_arg): Call new function m68k_valid_ea
-        to verify addressing for MAC/EMAC. 
+	to verify addressing for MAC/EMAC.
 	* m68k-dis.c(print_insn_arg): Use reg_half_names for MAC/EMAC
 	reigster halves since 'fpu' and 'spl' look misleading.
 	* m68k-dis.c(fetch_arg): Fix 'G', 'H', 'I', 'f', 'M', 'N' cases.
@@ -674,7 +706,7 @@
 	macro.  Adjust all users.
 
 2004-04-15  Anil Paranjpe  <anilp1@kpitcummins.com>
-	
+
 	* h8300-dis.c (bfd_h8_disassemble) : Treat "adds" & "subs"
 	separately.
 
