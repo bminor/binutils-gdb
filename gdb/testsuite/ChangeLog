@@ -1,3 +1,8 @@
+Wed Sep 16 01:23:11 1998  Felix Lee  <flee@cygnus.com>
+
+	* gdb.trace/configure.in(AC_INIT): typo
+	* gdb.trace/configure: regenerated
+
 Mon Sep 14 20:00:04 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* config/m68k-emc.exp: New file.

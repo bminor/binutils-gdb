@@ -5,7 +5,7 @@ dnl script appropriate for this directory.  For more information, check
 dnl any existing configure script.
 
 AC_PREREQ(2.5)
-AC_INIT(collect.c)
+AC_INIT(collection.c)
 
 CC=${CC-cc}
 AC_SUBST(CC)
