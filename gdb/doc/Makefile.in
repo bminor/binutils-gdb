@@ -176,16 +176,16 @@ gdbVN.m4 : $(srcdir)/${gdbdir}/Makefile.in
 #   VPATH will often tell make not to bother building it, because the one
 #   in the srcdir is up to date.  (if not, then make should build one here).
 
-#gdb-all.texi: ${SFILES_DOCDIR}
-#	if [ ! -f ./gdbVN.m4 ]; then \
-#		ln -s $(srcdir)/gdbVN.m4 . || \
-#		ln $(srcdir)/gdbVN.m4 . || \
-#		cp $(srcdir)/gdbVN.m4 . ; else true; fi
-#	rm -f foobus.texinfo
-#	${M4} $(srcdir)/pretex.m4 $(srcdir)/none.m4 $(srcdir)/all.m4 \
-#		gdbVN.m4 $(srcdir)/gdb.texinfo  >foobus.texinfo
-#	rm -f gdb-all.texi
-#	mv foobus.texinfo ./gdb-all.texi
+gdb-all.texi: ${SFILES_DOCDIR}
+	if [ ! -f ./gdbVN.m4 ]; then \
+		ln -s $(srcdir)/gdbVN.m4 . || \
+		ln $(srcdir)/gdbVN.m4 . || \
+		cp $(srcdir)/gdbVN.m4 . ; else true; fi
+	rm -f foobus.texinfo
+	${M4} $(srcdir)/pretex.m4 $(srcdir)/none.m4 $(srcdir)/all.m4 \
+		gdbVN.m4 $(srcdir)/gdb.texinfo  >foobus.texinfo
+	rm -f gdb-all.texi
+	mv foobus.texinfo ./gdb-all.texi
 
 # GDB MANUAL: TeX dvi file
 gdb.dvi : gdb-${CONFIG}.texi rluser.texinfo inc-hist.texi
