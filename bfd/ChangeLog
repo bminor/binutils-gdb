@@ -1,5 +1,12 @@
 Thu Jun 13 10:23:40 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* cofflink.c (_bfd_coff_final_link): Handle long section names.
+	* coffcode.h (coff_write_object_contents): If there are long
+	section names, always set the f_symptr field, even if there are no
+	symbols.
+	* peicode.h (coff_swap_filehdr_in): Don't clear the f_symptr field
+	if there are no symbols.
+
 	* coffgen.c (make_a_section_from_file): Check return value of
 	_bfd_coff_read_string_table.
 	(coff_real_object_p): Check return value of

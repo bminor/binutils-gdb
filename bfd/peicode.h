@@ -241,7 +241,6 @@ coff_swap_filehdr_in (abfd, src, dst)
     }
   else 
     {
-      filehdr_dst->f_symptr = 0;
       filehdr_dst->f_nsyms = 0;
       filehdr_dst->f_flags &= ~HAS_SYMS;
     }
@@ -1272,7 +1271,7 @@ pe_print_idata(abfd, vfile)
 	}
 
       /* the image base is present in the section->vma */
-      dll = data + dll_name + adj;
+      dll = (char *) data + dll_name + adj;
       fprintf(file, "\n\tDLL Name: %s\n", dll);
       fprintf(file, "\tvma:  Ordinal  Member-Name\n");
 
@@ -1287,7 +1286,7 @@ pe_print_idata(abfd, vfile)
 	    break;
 	  ordinal = bfd_get_16(abfd,
 			       data + member + adj);
-	  member_name = data + member + adj + 2;
+	  member_name = (char *) data + member + adj + 2;
 	  fprintf(file, "\t%04lx\t %4d  %s\n",
 		  member, ordinal, member_name);
 	}
@@ -1323,7 +1322,7 @@ pe_print_idata(abfd, vfile)
 		    {
 		      ordinal = bfd_get_16(abfd,
 					   data + iat_member + adj);
-		      member_name = data + iat_member + adj + 2;
+		      member_name = (char *) data + iat_member + adj + 2;
 		      fprintf(file, "\t%04lx\t %4d  %s\n",
 			      iat_member, ordinal, member_name);
 		    }
@@ -1517,7 +1516,7 @@ pe_print_edata(abfd, vfile)
 				    edt.npt_addr
 				    + (i*4) + adj);
       
-      char *name = data + name_ptr + adj;
+      char *name = (char *) data + name_ptr + adj;
 
       bfd_vma ord = bfd_get_16(abfd, 
 				    data + 
@@ -1676,8 +1675,7 @@ pe_print_reloc(abfd, vfile)
     return true;
 
   fprintf(file,
-	  "\n\nPE File Base Relocations (interpreted .reloc"
-	  " section contents)\n");
+	  "\n\nPE File Base Relocations (interpreted .reloc section contents)\n");
 
   data = (bfd_byte *) bfd_malloc ((size_t) bfd_section_size (abfd, section));
   datasize = bfd_section_size (abfd, section);
@@ -1873,3 +1871,45 @@ pe_bfd_copy_private_bfd_data (ibfd, obfd)
 
   return true;
 }
+
+#ifdef COFF_IMAGE_WITH_PE
+
+/* Copy private section data.  */
+
+#define coff_bfd_copy_private_section_data pe_bfd_copy_private_section_data
+
+static boolean pe_bfd_copy_private_section_data
+  PARAMS ((bfd *, asection *, bfd *, asection *));
+
+static boolean
+pe_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
+     bfd *ibfd;
+     asection *isec;
+     bfd *obfd;
+     asection *osec;
+{
+  if (coff_section_data (ibfd, isec) != NULL
+      && pei_section_data (ibfd, isec) != NULL)
+    {
+      if (coff_section_data (obfd, osec) == NULL)
+	{
+	  osec->used_by_bfd =
+	    (PTR) bfd_zalloc (obfd, sizeof (struct coff_section_tdata));
+	  if (osec->used_by_bfd == NULL)
+	    return false;
+	}
+      if (pei_section_data (obfd, osec) == NULL)
+	{
+	  coff_section_data (obfd, osec)->tdata =
+	    (PTR) bfd_zalloc (obfd, sizeof (struct pei_section_tdata));
+	  if (coff_section_data (obfd, osec)->tdata == NULL)
+	    return false;
+	}
+      pei_section_data (obfd, osec)->virt_size =
+	pei_section_data (ibfd, isec)->virt_size;
+    }
+
+  return true;
+}
+
+#endif
