@@ -151,6 +151,12 @@ ld:
 	test_h_gr  	0xdeadbeef,r7
 	testr_h_gr	sp,r9		; should have been incremented
 
+	mvr_h_gr	r8,sp		; restore original stack pointer
+	set_cc          0x0f		; condition codes should not change
+	ld		@r15+,sp
+	test_cc		1 1 1 1
+	test_h_gr  	0xdeadbeef,sp	; should not have been incremented
+
 	; Test ld @$R15+,$Rs
 	mvr_h_gr	r8,sp		; restore original stack pointer
 	set_cc          0x0f		; condition codes should not change
@@ -210,11 +216,5 @@ ld:
 	test_cc		1 1 1 1
 	test_h_dr  	0xdeadbeef,ssp
 	test_h_gr	0xdeadbeef,sp	; should not have been incremented
-
-	mvr_h_gr	r8,sp		; restore original stack pointer
-	set_cc          0x0f		; condition codes should not change
-	ld		@r15+,sp
-	test_cc		1 1 1 1
-	test_h_gr  	0xdeadbeef,sp	; should not have been incremented
 
 	pass

@@ -1,4 +1,16 @@
+Tue Dec  8 13:16:53 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/fr30/testutils.inc (set_s_user): Correct Mask.
+	(set_s_system): Correct Mask.
+	* sim/fr30/ld.cgs (ld): Move previously failing test back
+	into place.
+
 Thu Dec  3 14:20:03 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/fr30/ld.cgs: Implement more loads.
+	* sim/fr30/call.cgs: New testcase.
+	* sim/fr30/testutils.inc (testr_h_dr): New macro.
+	(set_s_user,set_s_system): New macros.
 
 	* sim/fr30: New Directory.
 

@@ -120,6 +120,12 @@ testr_gr\@:
 	test_h_gr \val r5
 	.endm
 
+; Compare a general register with word in memory
+	.macro testr_h_mem reg addr
+	ldmem_h_gr \addr r5
+	testr_h_gr \reg r5
+	.endm
+
 ; Set the condition codes
 	.macro set_cc mask
 	andccr	0xf0
@@ -128,11 +134,11 @@ testr_gr\@:
 
 ; Set the stack mode
 	.macro set_s_user
-	orccr	0x10
+	orccr	0x20
 	.endm
 
 	.macro set_s_system
-	andccr	0xef
+	andccr	0x1f
 	.endm
 
 ; Test the condition codes
