@@ -1,3 +1,8 @@
+2005-03-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote-rdi.c (arm_rdi_insert_breakpoint): Don't call
+	arm_pc_is_thumb_dummy.
+
 2005-03-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64nbsd-tdep.c (sparc64nbsd_sigcontext_saved_regs): Handle
