@@ -1383,7 +1383,7 @@ push_stack_item (struct stack_item *prev, void *contents, int len)
 {
   struct stack_item *si;
   si = xmalloc (sizeof (struct stack_item));
-  si->data = malloc (len);
+  si->data = xmalloc (len);
   si->len = len;
   si->prev = prev;
   memcpy (si->data, contents, len);
