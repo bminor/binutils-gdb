@@ -1,3 +1,7 @@
+2003-10-08  Dave Brolley  <brolley@redhat.com>
+
+	* frv-desc.[ch], frv-opc.[ch]: Regenerated.
+
 2003-09-30  Bob Wilson  <bob.wilson@acm.org>
 
 	* xtensa-dis.c (fetch_data): Remove numBytes parameter.
