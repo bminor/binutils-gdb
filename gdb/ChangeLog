@@ -1,5 +1,10 @@
 Tue Dec 27 12:32:43 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* breakpoint.c (watchpoint_check): Don't bother restoring the
+	"selected" frame anymore, it's not necessary.  Initialize the
+	frame cache before trying to find the current frame in the frame
+	chain.
+
 	* somsolib.c (som_solib_add): Return without loading any shared
 	libraries if symfile_objfile is NULL.
 	(som_solib_create_inferior_hook): Likewise.
