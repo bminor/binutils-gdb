@@ -571,7 +571,7 @@ extern char *strsave PARAMS ((const char *));
 
 extern char *mstrsave PARAMS ((void *, const char *));
 
-#ifdef _WIN32 /* FIXME; was long, but this causes compile errors in msvc if already defined */
+#ifdef _MSC_VER /* FIXME; was long, but this causes compile errors in msvc if already defined */
 extern PTR xmmalloc PARAMS ((PTR, size_t));
 
 extern PTR xmrealloc PARAMS ((PTR, PTR, size_t));

@@ -16,7 +16,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
 
 /* by Steve Chamberlain, sac@cygnus.com */
 
@@ -32,7 +33,14 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <fcntl.h>
+#include <stdlib.h>
+
+#ifdef _MSC_VER
 #include "windefs.h"
+#else /* other WIN32 compiler */
+#include <windows.h>
+#endif
+
 #include "buildsym.h"
 #include "symfile.h"
 #include "objfiles.h"
@@ -95,7 +103,6 @@ struct regmappings
     char *incontext;
     int mask;
   };
-
 
 static const struct regmappings  mappings[] =
 {
@@ -172,7 +179,6 @@ static const struct regmappings  mappings[] =
   {(char *) &context.Fpr30, CONTEXT_FLOATING_POINT},
   {(char *) &context.Fpr31, CONTEXT_FLOATING_POINT},
 
-
   {(char *) &context.Iar, CONTEXT_CONTROL},
   {(char *) &context.Msr, CONTEXT_CONTROL},
   {(char *) &context.Cr,  CONTEXT_INTEGER},
@@ -209,7 +215,6 @@ static const struct regmappings  mappings[] =
 #endif
 };
 
-
 /* This vector maps the target's idea of an exception (extracted
    from the DEBUG_EVENT structure) to GDB's idea. */
 
@@ -218,7 +223,6 @@ struct xlate_exception
     int them;
     enum target_signal us;
   };
-
 
 static const struct xlate_exception
   xlate[] =
@@ -229,7 +233,6 @@ static const struct xlate_exception
   {DBG_CONTROL_C, TARGET_SIGNAL_INT},
   {EXCEPTION_SINGLE_STEP, TARGET_SIGNAL_TRAP},
   {-1, -1}};
-
 
 static void 
 check (BOOL ok, const char *file, int line)
@@ -269,7 +272,6 @@ child_store_inferior_registers (int r)
 
 /* Wait for child to do something.  Return pid of child, or -1 in case
    of error; store status through argument pointer OURSTATUS.  */
-
 
 static int
 handle_load_dll (char *eventp)
@@ -352,7 +354,6 @@ handle_load_dll (char *eventp)
  	      return 1;
  	    }
  	}
- 
 
       context.ContextFlags = CONTEXT_FULL | CONTEXT_FLOATING_POINT;
       GetThreadContext (current_thread, &context);
@@ -519,7 +520,6 @@ child_wait (int pid, struct target_waitstatus *ourstatus)
     }
 }
 
-
 /* Attach to process PID, then initialize for debugging it.  */
 
 static void
@@ -538,7 +538,6 @@ child_attach (args, from_tty)
 
   if (!ok)
     error ("Can't attach to process.");
-
 
   exception_count = 0;
   event_count = 0;
@@ -561,7 +560,6 @@ child_attach (args, from_tty)
   push_target (&child_ops);
 }
 
-
 static void
 child_detach (args, from_tty)
      char *args;
@@ -579,7 +577,6 @@ child_detach (args, from_tty)
   inferior_pid = 0;
   unpush_target (&child_ops);
 }
-
 
 /* Print status information about what we're accessing.  */
 
@@ -762,7 +759,6 @@ child_mourn_inferior ()
   unpush_target (&child_ops);
   generic_mourn_inferior ();
 }
-
 
 /* Send a SIGINT to the process group.  This acts just like the user typed a
    ^C on the controlling terminal. */

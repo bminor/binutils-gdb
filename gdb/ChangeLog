@@ -1,3 +1,13 @@
+Mon Nov 11 17:15:59 1996  Geoffrey Noer  <noer@cygnus.com>
+
+	* defs.h: modify Nov 11 12:59:00 change so _MSC_VER is checked
+	instead of _WIN32
+	* win32-nat.c: fix Nov 11 12:59:00 change (windows.h should
+	be included instead of windefs.h for compilers other than
+	VC++).
+	* mswin/windefs.h: remove ^Ms and change C++ style comments
+	to C style comments
+
 Mon Nov 11 14:32:38 1996  Mark Alexander  <marka@cygnus.com>
 
 	* utils.c (get_cell): Fix off-by-one bug.
