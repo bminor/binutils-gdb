@@ -200,7 +200,7 @@ static const char *       get_data_encoding           PARAMS ((unsigned char));
 static const char *       get_osabi_name              PARAMS ((unsigned char));
 static int		  guess_is_rela               PARAMS ((unsigned long));
 static char * 		  get_note_type		         PARAMS ((unsigned int));
-static int		  process_note		         PARAMS ((Elf_External_Note *));
+static int		  process_note		         PARAMS ((Elf32_Internal_Note *));
 static int		  process_corefile_note_segment  PARAMS ((FILE *, unsigned long, unsigned long));
 static int		  process_corefile_note_segments PARAMS ((FILE *));
 static int 		  process_corefile_contents	 PARAMS ((FILE *));
@@ -6605,32 +6605,21 @@ get_note_type (e_type)
     }
 }
 
+/* Note that by the ELF standard, the name field is already null byte
+   terminated, and namesz includes the terminating null byte.
+   I.E. the value of namesz for the name "FSF" is 4.
+
+   If the value of namesz is zero, there is no name present. */
 static int
 process_note (pnote)
-  Elf_External_Note * pnote;
+  Elf32_Internal_Note * pnote;
 {
-  Elf32_Internal_Note * internal;
-  char * pname;
-
-  internal = (Elf32_Internal_Note *) pnote;
-  pname = malloc (internal->namesz + 1);
-
-  if (pname == NULL)
-    {
-      error (_("Out of memory\n"));
-      return 0;
-    }
-
-  memcpy (pname, pnote->name, internal->namesz);
-  pname[internal->namesz] = '\0';
-
   printf ("  %s\t\t0x%08lx\t%s\n",
-  	  pname, internal->descsz, get_note_type (internal->type));
-
-  free (pname);
-
+	  pnote->namesz ? pnote->namedata : "(NONE)",
+  	  pnote->descsz, get_note_type (pnote->type));
   return 1;
 }
+
 
 static int
 process_corefile_note_segment (file, offset, length)
@@ -6640,10 +6629,6 @@ process_corefile_note_segment (file, offset, length)
 {
   Elf_External_Note *  pnotes;
   Elf_External_Note *  external;
-  Elf32_Internal_Note* internal;
-  unsigned int	       notesz;
-  unsigned int         nlength;
-  unsigned char *      p;
   int                  res = 1;
 
   if (length <= 0)
@@ -6652,21 +6637,53 @@ process_corefile_note_segment (file, offset, length)
   GET_DATA_ALLOC (offset, length, pnotes, Elf_External_Note *, "notes");
 
   external = pnotes;
-  p = (unsigned char *) pnotes;
-  nlength = length;
 
   printf (_("\nNotes at offset 0x%08lx with length 0x%08lx:\n"), offset, length);
   printf (_("  Owner\t\tData size\tDescription\n"));
 
-  while (nlength > 0)
+  while (external < (Elf_External_Note *)((char *) pnotes + length))
     {
-      res &= process_note (external);
+      Elf32_Internal_Note inote;
+      char * temp = NULL;
 
-      internal = (Elf32_Internal_Note *) p;
-      notesz   = 3 * sizeof(unsigned long) + internal->namesz + internal->descsz;
-      nlength -= notesz;
-      p       += notesz;
-      external = (Elf_External_Note *) p;
+      inote.type     = BYTE_GET (external->type);
+      inote.namesz   = BYTE_GET (external->namesz);
+      inote.namedata = external->name;
+      inote.descsz   = BYTE_GET (external->descsz);
+      inote.descdata = inote.namedata + align_power (inote.namesz, 2);
+      inote.descpos  = offset + (inote.descdata - (char *) pnotes);
+      
+      external = (Elf_External_Note *)(inote.descdata + align_power (inote.descsz, 2));
+
+      /* Verify that name is null terminated.  It appears that at least
+	 one version of Linux (RedHat 6.0) generates corefiles that don't
+	 comply with the ELF spec by failing to include the null byte in
+	 namesz.  */
+      if (inote.namedata[inote.namesz] != '\0')
+	{
+	  temp = malloc (inote.namesz + 1);
+	  
+	  if (temp == NULL)
+	    {
+	      error (_("Out of memory\n"));
+	      res = 0;
+	      break;
+	    }
+	  
+	  strncpy (temp, inote.namedata, inote.namesz);
+	  temp[inote.namesz] = 0;
+	  
+	  /* warn (_("'%s' NOTE name not properly null terminated\n"), temp);  */
+	  inote.namedata = temp;
+	}
+
+      res &= process_note (& inote);
+
+      if (temp != NULL)
+	{
+	  free (temp);
+	  temp = NULL;
+	}
     }
 
   free (pnotes);

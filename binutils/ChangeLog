@@ -1,3 +1,13 @@
+1999-11-25  Fred Fish  <fnf@cygnus.com>
+
+	* readelf.c (process_note): Change arg from Elf_External_Note
+	to Elf32_Internal_Note, which also turns the function body
+	into little more than a call to printf.
+	(process_corefile_note_segment):  Substantially rewritten
+	to properly handle case where target and host are different
+	endianness, handle note sections with padding, and add some
+	cruft to handle notes with unterminated name data.
+
 1999-11-22  Nick Clifton  <nickc@cygnus.com>
 
 	* objcopy.c (copy_usage): Reformat.
