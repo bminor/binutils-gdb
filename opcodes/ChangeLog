@@ -1,3 +1,8 @@
+2000-06-16  Nick Duffek  <nsd@redhat.com>
+
+	* disassemble.c (disassembler): Refer to the PowerPC 620 using
+	bfd_mach_ppc_620 instead of 620.
+
 2000-06-12  Kazu Hirata  <kazu@hxi.com>
 
 	* h8300-dis.c: Fix formatting.
