@@ -1,3 +1,7 @@
+/* Declarations of constants for internal format of MIPS ECOFF symbols.
+   Originally contributed by MIPS Computer Systems and Third Eye Software.
+   Changes contributed by Cygnus Support are in the public domain.  */
+
 /*
  * |-----------------------------------------------------------|
  * | Copyright (c) 1992, 1991, 1990 MIPS Computer Systems, Inc.|
@@ -36,8 +40,10 @@
 #define langAda		6
 #define langPl1		7
 #define langCobol	8
-#define langStdc	9
-#define langMax		10	/* maximun allowed 32 -- 5 bits */
+#define langStdc	9	/* FIXME: Collides with SGI langCplusplus
+#define langCplusplus	9	/* FIXME: Collides with langStdc */
+#define langCplusplusV2	10	/* SGI addition */
+#define langMax		11	/* maximun allowed 32 -- 5 bits */
 
 /* The following are value definitions for the fields in the SYMR */
 
@@ -97,6 +103,10 @@
 #define stStaticProc	14	/* load time only static procs */
 #define stConstant	15	/* const */
 #define stStaParam	16	/* Fortran static parameters */
+    /* Additions to match sgi version */
+#define stStruct	26	/* begin struct kind of stBlock */
+#define stUnion		27	/* begin Union kind of stBlock */
+#define stEnum		28	/* begin Enum kind of stBlock */
     /* Psuedo-symbols - internal to debugger */
 #define stStr		60	/* string */
 #define stNumber	61	/* pure number (ie. 4 NOR 2+2) */

@@ -1,0 +1,33 @@
+Tue Apr 14 14:30:05 1992  Fred Fish  (fnf@cygnus.com)
+
+	* symconst.h:  Pick up SGI defines for stStruct, stUnion, stEnum,
+	langCplusplus, and langCplusplusV2.
+
+Thu Apr  2 19:47:43 1992  John Gilmore  (gnu at cygnus.com)
+
+	* sym.h, symconst.h:  MIPS has provided redistributable versions
+	of these files.  Thanks!
+	* ecoff-ext.h:  Add weakext bit to match new sym.h.
+
+Fri Mar  6 00:10:46 1992  John Gilmore  (gnu at cygnus.com)
+
+	* ecoff-ext.h:  Add relative file descriptors.
+
+Thu Feb 27 11:53:04 1992  John Gilmore  (gnu at cygnus.com)
+
+	* ecoff-ext.h:  New file for external (in-file) form of ecoff
+	symbol structures.
+
+Thu Feb  6 11:33:32 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* h8300.h: made the external_lineno l_lnno field 4 bytes wide.
+	andded GET/PUT_LINENO_LNNO macros
+
+Sat Nov 30 20:38:35 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* ChangeLog, a29k.h, h8300.h, i386.h, i960.h, internal.h, m68k.h,
+	m88k.h, mips.h, rs6000.h: move from above coff-<foo>.h
+
+
+
+
