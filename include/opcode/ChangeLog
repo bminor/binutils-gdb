@@ -1,3 +1,11 @@
+Thu Jul 10 12:53:25 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mips.h (FP_S, FP_D): Define.  Bitmasks indicating if an insn
+	uses single or double precision floating point resources.
+	(INSN_NO_ISA, INSN_ISA1): Define.
+	(cpu specific INSN macros): Tweak into bitmasks outside the range
+	of INSN_ISA field.
+
 Mon Jun 16 14:10:00 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 	* i386.h: Fix pand opcode.
