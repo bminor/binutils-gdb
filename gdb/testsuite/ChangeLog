@@ -1,3 +1,12 @@
+Tue Mar 23 08:53:42 1993  Fred Fish  (fnf@cygnus.com)
+
+	**** start-sanitize-chill ****
+	* gdb.t31/gdbme.ch:  Comment out code that causes chill compiler
+	coredump.
+	* gdb.t31/chillvars.exp:  Comment out tests that depend on that
+	code.
+	**** end-sanitize-chill ****
+
 Sun Mar 21 17:56:47 1993  Rob Savoye  (rob at darkstar.cygnus.com)
 
 	* gdb.t03/ptype.exp: tests for return code from gdb_test.
