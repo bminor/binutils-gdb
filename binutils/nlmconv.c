@@ -864,7 +864,7 @@ main (argc, argv)
      is what NLMLINK does.  */
   strncpy (nlm_extended_header (outbfd)->stamp, "MeSsAgEs", 8);
 
-  strncpy (nlm_cygnus_section_header (outbfd)->stamp, "CyGnUsSeCs", 10);
+  strncpy (nlm_cygnus_ext_header (outbfd)->stamp, "CyGnUsEx", 8);
 
   /* If the date was not given, force it in.  */
   if (nlm_version_header (outbfd)->month == 0
@@ -1078,9 +1078,8 @@ main (argc, argv)
   strncpy (nlm_variable_header (outbfd)->oldThreadName, " LONG",
 	   NLM_OLD_THREAD_NAME_LENGTH);
 
-  nlm_cygnus_section_header (outbfd)->offset = secsec->filepos;
-  nlm_cygnus_section_header (outbfd)->length =
-    bfd_section_size (outbfd, secsec);
+  nlm_cygnus_ext_header (outbfd)->offset = secsec->filepos;
+  nlm_cygnus_ext_header (outbfd)->length = bfd_section_size (outbfd, secsec);
 
   if (! bfd_close (outbfd))
     bfd_fatal (output_file);

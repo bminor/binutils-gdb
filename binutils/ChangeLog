@@ -1,3 +1,8 @@
+Fri Apr 22 11:14:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nlmconv.c (main): Use CyGnUsEx rather than CyGnUsSeCs for
+	sections header.  Rename from cygnus_sections to cygnus_ext.
+
 Thu Apr 21 12:12:26 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* objdump.c (_DUMMY_NAME_): Don't define.
