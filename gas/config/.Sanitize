@@ -27,6 +27,7 @@ echo Sanitizing `pwd`...
 
 Things-to-keep:
 
+ChangeLog
 a.out.h
 atof-ieee.c
 atof-ns32k.c
@@ -122,7 +123,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.17  1992/02/18 10:13:57  rich
+# Revision 1.18  1992/02/18 10:18:32  rich
+# keep ChangeLog
+#
+# Revision 1.17  1992/02/18  10:13:57  rich
 # keep the new file
 #
 # Revision 1.16  1992/02/17  16:02:58  rich
