@@ -45,7 +45,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 */
 
 #include "elf32-hppa.h"
-#include "libhppa.h"
+/*#include "libhppa.h"*/
+#define BYTES_IN_WORD 4
 #include "aout/aout64.h"
 
 /* ELF/PA relocation howto entries */
@@ -1294,8 +1295,8 @@ DEFUN (hppa_elf_reloc, (abfd, reloc_entry, symbol_in, data, input_section, outpu
 
   if (global_symbol == (asymbol *) NULL)
     {
-      struct elf32_backend_data *bed
-      = (struct elf32_backend_data *) abfd->xvec->backend_data;
+      struct elf_backend_data *bed
+      = (struct elf_backend_data *) abfd->xvec->backend_data;
 
       if (bed && bed->global_sym)
 	{
@@ -2229,13 +2230,13 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, reloc_entry, stub_types)
   if (!stub_desc->stub_contents)
     {
       stub_desc->allocated_size = STUB_BUFFER_INCR;
-      stub_desc->stub_contents = (char *) malloc (STUB_BUFFER_INCR);
+      stub_desc->stub_contents = (char *) xmalloc (STUB_BUFFER_INCR);
     }
   else if ((stub_desc->allocated_size - stub_desc->real_size) < STUB_MAX_SIZE)
     {
       stub_desc->allocated_size = stub_desc->allocated_size + STUB_BUFFER_INCR;
-      stub_desc->stub_contents = (char *) realloc (stub_desc->stub_contents,
-						 stub_desc->allocated_size);
+      stub_desc->stub_contents = (char *) xrealloc (stub_desc->stub_contents,
+						    stub_desc->allocated_size);
     }
 
   stub_desc->stub_secp = (int *) (stub_desc->stub_contents + stub_desc->real_size);
