@@ -241,7 +241,7 @@ code for @value{TARGET} architectures.
 @cindex option summary
 @cindex summary of options
 Here is a brief summary of how to invoke @command{@value{AS}}.  For details,
-@pxref{Invoking,,Comand-Line Options}.
+@pxref{Invoking,,Command-Line Options}.
 
 @c man title AS the portable GNU assembler.
 
@@ -686,7 +686,7 @@ Scenix IP2K series.
 Specifies that the extended IP2022 instructions are allowed.
 
 @item -mip2022
-Restores the default behaviour, which restricts the permited instructions to
+Restores the default behaviour, which restricts the permitted instructions to
 just the basic IP2022 ones.
 
 @end table
@@ -1580,7 +1580,7 @@ dump appears on the left hand side of the listing output.
 @kindex --listing-lhs-width2
 @cindex Width of continuation lines of disassembly output
 Sets the maximum width, in words, of any further lines of the hex byte dump for
-a given inut source line.  If this value is not specified, it defaults to being
+a given input source line.  If this value is not specified, it defaults to being
 the same as the value specified for @samp{--listing-lhs-width}.  If neither
 switch is used the default is to one.
 
@@ -4074,7 +4074,9 @@ The syntax for @code{equ} on the HPPA is
 @section @code{.equiv @var{symbol}, @var{expression}}
 @cindex @code{equiv} directive
 The @code{.equiv} directive is like @code{.equ} and @code{.set}, except that
-the assembler will signal an error if @var{symbol} is already defined.
+the assembler will signal an error if @var{symbol} is already defined.  Note a
+symbol which has been referenced but not actually defined is considered to be
+undefined.
 
 Except for the contents of the error message, this is roughly equivalent to 
 @smallexample
@@ -4273,7 +4275,8 @@ The following variants of @code{.if} are also supported:
 @cindex @code{ifdef} directive
 @item .ifdef @var{symbol}
 Assembles the following section of code if the specified @var{symbol}
-has been defined.
+has been defined.  Note a symbol which has been referenced but not yet defined
+is considered to be undefined.
 
 @cindex @code{ifc} directive
 @item .ifc @var{string1},@var{string2}
@@ -4319,7 +4322,8 @@ following section of code if the two strings are not the same.
 @item .ifndef @var{symbol}
 @itemx .ifnotdef @var{symbol}
 Assembles the following section of code if the specified @var{symbol}
-has not been defined.  Both spelling variants are equivalent.
+has not been defined.  Both spelling variants are equivalent.  Note a symbol
+which has been referenced but not yet defined is considered to be undefined.
 
 @cindex @code{ifne} directive
 @item .ifne @var{absolute expression}

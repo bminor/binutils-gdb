@@ -1,3 +1,14 @@
+2002-07-19  Miroslav Tichy <tichm9am@ss1000.ms.mff.cuni.cz>
+            Nick Clifton  <nickc@redhat.com>
+
+	* cond.c (s_ifdef): Treat a referenced but not yet defined
+	symbol as if it were undefined, in exactly the same way as
+	.equiv.
+
+        * doc/as.texinfo: Document that .ifdef, .ifndef and .equiv
+        consider referenced bug not yet defined symbols to be
+        undefined.
+
 2002-07-18  Denis Chertykov  <denisc@overta.ru>
 	    Frank Ch. Eigler  <fche@redhat.com>
 	    Alan Lehotsky  <alehotsky@cygnus.com>
