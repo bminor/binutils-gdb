@@ -5127,11 +5127,13 @@ elfcore_grok_prstatus (abfd, note)
   char buf[100];
   char* name;
   asection* sect;
+  int raw_size;
 
   if (note->descsz == sizeof (prstatus_t))
     {
       prstatus_t prstat;
 
+      raw_size = sizeof (prstat.pr_reg);
       memcpy (&prstat, note->descdata, sizeof (prstat));
 
       elf_tdata (abfd)->core_signal = prstat.pr_cursig;
@@ -5153,6 +5155,7 @@ elfcore_grok_prstatus (abfd, note)
       /* 64-bit host, 32-bit corefile */
       prstatus32_t prstat;
 
+      raw_size = sizeof (prstat.pr_reg);
       memcpy (&prstat, note->descdata, sizeof (prstat));
 
       elf_tdata (abfd)->core_signal = prstat.pr_cursig;
@@ -5190,13 +5193,13 @@ elfcore_grok_prstatus (abfd, note)
 
   if (note->descsz == sizeof (prstatus_t))
     {
-      sect->_raw_size = sizeof (prgregset_t);
+      sect->_raw_size = raw_size;
       sect->filepos = note->descpos + offsetof (prstatus_t, pr_reg);
     }
 #if defined (__sparcv9)
   else if (note->descsz == sizeof (prstatus32_t))
     {
-      sect->_raw_size = sizeof (prgregset32_t);
+      sect->_raw_size = raw_size;
       sect->filepos = note->descpos + offsetof (prstatus32_t, pr_reg);
     }
 #endif

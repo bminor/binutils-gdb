@@ -1,3 +1,7 @@
+2000-06-06  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* elf.c (elf_grok_pr_status): Eliminate reference to prgregset_t.
+
 2000-06-05  H.J. Lu  <hjl@gnu.org>
 
 	* elflink.c (_bfd_elf_link_record_dynamic_symbol): Don't flag
