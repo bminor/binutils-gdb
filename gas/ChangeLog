@@ -1,3 +1,8 @@
+Wed Nov  8 16:38:14 1995  Eric Freudenthal <freudenthal@nyu.edu>
+
+	* configure.in (a29k-nyu-sym1): New target, just like other a29k
+	targets.
+
 Wed Nov  8 11:38:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.c (c_dot_file_symbol): Cast xmalloc return.
