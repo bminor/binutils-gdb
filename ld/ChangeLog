@@ -1,3 +1,7 @@
+2004-02-23  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* ldlang.c (lang_check): Use %P, not %E, in error message.
+
 2004-02-23  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ldlang.h (struct lang_output_section_state): Change processed
