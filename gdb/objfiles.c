@@ -450,7 +450,7 @@ objfile_relocate (objfile, new_offsets)
   {
     struct symtab *s;
 
-    for (s = objfile->symtabs; s; s = s->next)
+    ALL_OBJFILE_SYMTABS (objfile, s)
       {
 	struct linetable *l;
 	struct blockvector *bv;
@@ -492,6 +492,15 @@ objfile_relocate (objfile, new_offsets)
 		    SYMBOL_VALUE_ADDRESS (sym) +=
 		      ANOFFSET (delta, SYMBOL_SECTION (sym));
 		  }
+#ifdef MIPS_EFI_SYMBOL_NAME
+		/* Relocate Extra Function Info for ecoff.  */
+
+		else
+		  if (SYMBOL_CLASS (sym) == LOC_CONST
+		      && SYMBOL_NAMESPACE (sym) == LABEL_NAMESPACE
+		      && STRCMP (SYMBOL_NAME (sym), MIPS_EFI_SYMBOL_NAME) == 0)
+		    ecoff_relocate_efi (sym, ANOFFSET (delta, s->block_line_section));
+#endif
 	      }
 	  }
       }
@@ -537,6 +546,37 @@ objfile_relocate (objfile, new_offsets)
     int i;
     for (i = 0; i < objfile->num_sections; ++i)
       ANOFFSET (objfile->section_offsets, i) = ANOFFSET (new_offsets, i);
+  }
+
+  {
+    struct obj_section *s;
+    bfd *abfd;
+
+    abfd = symfile_objfile->obfd;
+
+    for (s = symfile_objfile->sections;
+	 s < symfile_objfile->sections_end; ++s)
+      {
+	flagword flags;
+
+	flags = bfd_get_section_flags (abfd, s->the_bfd_section);
+
+	if (flags & SEC_CODE)
+	  {
+	    s->addr += ANOFFSET (delta, SECT_OFF_TEXT);
+	    s->endaddr += ANOFFSET (delta, SECT_OFF_TEXT);
+	  }
+	else if (flags & (SEC_DATA | SEC_LOAD))
+	  {
+	    s->addr += ANOFFSET (delta, SECT_OFF_DATA);
+	    s->endaddr += ANOFFSET (delta, SECT_OFF_DATA);
+	  }
+	else if (flags & SEC_ALLOC)
+	  {
+	    s->addr += ANOFFSET (delta, SECT_OFF_BSS);
+	    s->endaddr += ANOFFSET (delta, SECT_OFF_BSS);
+	  }
+      }
   }
 }
 

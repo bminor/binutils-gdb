@@ -3,6 +3,38 @@ Mon Mar 21 11:50:28 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	* hppa-tdep.c (hppa_fix_call_dummy): Use value_ptr.
 	(hppa_push_arguments): Likewise.
 
+Mon Mar 21 11:02:51 1994  Stu Grossman  (grossman at cygnus.com)
+
+	* alpha-tdep.c:  Gobs of changes (many imported from mips-tdep) to
+	improve remote debugging efficiency.  Also fixed problems with
+	doing function calls for programs with no entry points.
+	* infcmd.c (run_stack_dummy):  Use CALL_DUMMY_ADDRESS instead of
+	entry_point_address.
+	* inferior.h (PC_IN_CALL_DUMMY):  ditto.
+	* mdebugread.c (parse_symbol, parse_procedure, parse_external,
+	parse_lines):  Pass section_offsets info to these routines so that
+	we can relocate symbol table entries upon readin.
+	* (psymtab_to_symtab_1):  Set symtab->primary to tell
+	objfile_relocate to do relocations for our symbols.
+	* (ecoff_relocate_efi):  New routine to relocate adr field of PDRs
+	(which hang off of the symbol table).
+	* Use prim_record_minimal_symbols_and_info instead of
+	prim_record_minimal_symbols to supply section info to make minimal
+	symbol relocations work.
+	* minsyms.c (prim_record_minimal_symbols_and_info):  If section is
+	-1, try to deduce it from ms_type.
+	* objfiles.c (objfile_relocate):  Use ALL_OBJFILE_SYMTABS where
+	appropriate.  Handle relocation of MIPS_EFI symbols special. Also,
+	add code to relocate objfile->sections data structure.
+	* remote.c (get_offsets):  Use new protocol message to acquire
+	section offsets from the target.
+	* (remote_wait):  Get rid of relocation stuff.  That's all handled
+	by objfile_relocate now.
+	* config/alpha/alpha-nw.mt (TM_FILE):  Use tm-alphanw.h.
+	* config/alpha/tm-alpha.h:  Define CALL_DUMMY_ADDRESS, and
+	VM_MIN_ADDRESS.
+	* config/alpha/tm-alphanw.h:  DECR_PC_AFTER_BREAK=0, VM_MIN_ADDRESS=0.
+
 Sun Mar 20 15:21:57 1994  Doug Evans  (dje@cygnus.com)
 
 	* sparc-tdep.c (sparc_frame_find_save_regs): Use REGISTER_RAW_SIZE

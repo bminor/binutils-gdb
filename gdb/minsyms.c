@@ -44,6 +44,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 #include "demangle.h"
+#include "gdb-stabs.h"
 
 /* Accumulate the minimal symbols for each objfile in bunches of BUNCH_SIZE.
    At the end, copy them all into one newly allocated location on an objfile's
@@ -327,7 +328,27 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
   SYMBOL_NAME (msymbol) = (char *) name;
   SYMBOL_INIT_LANGUAGE_SPECIFIC (msymbol, language_unknown);
   SYMBOL_VALUE_ADDRESS (msymbol) = address;
-  SYMBOL_SECTION (msymbol) = section;
+  if (section == -1)
+    switch (ms_type)
+      {
+      case mst_text:
+      case mst_file_text:
+	SYMBOL_SECTION (msymbol) = SECT_OFF_TEXT;
+	break;
+      case mst_data:
+      case mst_file_data:
+	SYMBOL_SECTION (msymbol) = SECT_OFF_DATA;
+	break;
+      case mst_bss:
+      case mst_file_bss:
+	SYMBOL_SECTION (msymbol) = SECT_OFF_BSS;
+	break;
+      default:
+	SYMBOL_SECTION (msymbol) = -1;
+      }
+  else
+    SYMBOL_SECTION (msymbol) = section;
+
   MSYMBOL_TYPE (msymbol) = ms_type;
   /* FIXME:  This info, if it remains, needs its own field.  */
   MSYMBOL_INFO (msymbol) = info; /* FIXME! */

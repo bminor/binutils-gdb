@@ -90,22 +90,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 					AA = signal number
 					n... = register number
 					r... = register contents
-	or...		WAA		The process extited, and AA is
+	or...		WAA		The process exited, and AA is
 					the exit status.  This is only
 					applicable for certains sorts of
 					targets.
-	or...		NAATT;DD;BB	Relocate the object file.
-					AA = signal number
-					TT = text address
-					DD = data address
-					BB = bss address
-					This is used by the NLM stub,
-					which is why it only has three
-					addresses rather than one per
-					section: the NLM stub always
-					sees only three sections, even
-					though gdb may see more.
-
 	kill request	k
 
 	toggle debug	d		toggle debug flag (see 386 & 68k stubs)
@@ -116,17 +104,33 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 					we can extend the protocol and GDB
 					can tell whether the stub it is
 					talking to uses the old or the new.
+<<<<<<< remote.c
+	search		tAA:PP,MM	Search backwards starting at address
+||||||| 1.81
+	search		tAA:PP,MM	Search backword starting at address
+=======
 	search		tAA:PP,MM	Search backward starting at address
+>>>>>>> 1.82
 					AA for a match with pattern PP and
 					mask MM.  PP and MM are 4 bytes.
 					Not supported by all stubs.
 
+<<<<<<< remote.c
+	general query	qXXXX		Request info about XXXX.
+	general set	QXXXX=yyyy	Set value of XXXX to yyyy.
+	query sect offs	qOffsets	Get section offsets.  Reply is
+					Text=xxx;Data=yyy;Bss=zzz
+*/
+
+||||||| 1.81
+=======
 	Responses can be run-length encoded to save space.  A '*' means that
 	the next two characters are hex digits giving a repeat count which
 	stands for that many repititions of the character preceding the '*'.
 	Note that this means that responses cannot contain '*'.  Example:
         "0*03" means the same as "0000".  */
 
+>>>>>>> 1.82
 #include "defs.h"
 #include <string.h>
 #include <fcntl.h>
@@ -265,6 +269,49 @@ remote_close (quitting)
   remote_desc = NULL;
 }
 
+/* Query the remote side for the text, data and bss offsets. */
+
+static void
+get_offsets ()
+{
+  unsigned char buf [PBUFSIZ];
+  int nvals;
+  CORE_ADDR text_addr, data_addr, bss_addr;
+  struct section_offsets *offs;
+
+  putpkt ("qOffsets");
+
+  getpkt (buf, 1);
+
+  if (buf[0] == 'E')
+    {
+      warning ("Remote failure reply: %s", buf);
+      return;
+    }
+
+  nvals = sscanf (buf, "Text=%lx;Data=%lx;Bss=%lx", &text_addr, &data_addr,
+		  &bss_addr);
+  if (nvals != 3)
+    error ("Malformed response to offset query, %s", buf);
+
+  if (symfile_objfile == NULL)
+    return;
+
+  offs = (struct section_offsets *) alloca (sizeof (struct section_offsets)
+					    + symfile_objfile->num_sections
+					    * sizeof (offs->offsets));
+  memcpy (offs, symfile_objfile->section_offsets,
+	  sizeof (struct section_offsets)
+	  + symfile_objfile->num_sections
+	  * sizeof (offs->offsets));
+
+  ANOFFSET (offs, SECT_OFF_TEXT) = text_addr;
+  ANOFFSET (offs, SECT_OFF_DATA) = data_addr;
+  ANOFFSET (offs, SECT_OFF_BSS) = bss_addr;
+
+  objfile_relocate (symfile_objfile, offs);
+}
+
 /* Stub for catch_errors.  */
 
 static int
@@ -274,13 +321,16 @@ remote_start_remote (dummy)
   immediate_quit = 1;		/* Allow user to interrupt it */
 
   /* Ack any packet which the remote side has already sent.  */
-  /* I'm not sure this \r is needed; we don't use it any other time we
-     send an ack.  */
-  SERIAL_WRITE (remote_desc, "+\r", 2);
+
+  SERIAL_WRITE (remote_desc, "+", 1);
+
+  get_offsets ();		/* Get text, data & bss offsets */
+
   putpkt ("?");			/* initiate a query from remote machine */
   immediate_quit = 0;
 
   start_remote ();		/* Initialize gdb process mechanisms */
+
   return 1;
 }
 
@@ -533,90 +583,6 @@ remote_wait (pid, status)
 		warning ("Remote register badly formatted: %s", buf);
 
 	      supply_register (regno, regs);
-	    }
-	  break;
-	}
-      else if (buf[0] == 'N')
-	{
-	  unsigned char *p1;
-	  bfd_vma text_addr, data_addr, bss_addr;
-
-	  /* Relocate object file.  Format is NAATT;DD;BB where AA is
-	     the signal number, TT is the new text address, DD is the
-	     new data address, and BB is the new bss address.  This is
-	     used by the NLM stub; gdb may see more sections.  */
-	  p = &buf[3];
-	  text_addr = strtoul (p, &p1, 16);
-	  if (p1 == p || *p1 != ';')
-	    warning ("Malformed relocation packet: Packet '%s'", buf);
-	  p = p1 + 1;
-	  data_addr = strtoul (p, &p1, 16);
-	  if (p1 == p || *p1 != ';')
-	    warning ("Malformed relocation packet: Packet '%s'", buf);
-	  p = p1 + 1;
-	  bss_addr = strtoul (p, &p1, 16);
-	  if (p1 == p)
-	    warning ("Malformed relocation packet: Packet '%s'", buf);
-
-	  if (symfile_objfile != NULL
-	      && (ANOFFSET (symfile_objfile->section_offsets,
-			    SECT_OFF_TEXT) != text_addr
-		  || ANOFFSET (symfile_objfile->section_offsets,
-			       SECT_OFF_DATA) != data_addr
-		  || ANOFFSET (symfile_objfile->section_offsets,
-			       SECT_OFF_BSS) != bss_addr))
-	    {
-	      struct section_offsets *offs;
-
-	      /* FIXME: This code assumes gdb-stabs.h is being used;
-		 it's broken for xcoff, dwarf, sdb-coff, etc.  But
-		 there is no simple canonical representation for this
-		 stuff.  (Just what does "text" as seen by the stub
-		 mean, anyway?).  */
-
-	      offs = ((struct section_offsets *)
-		      alloca (sizeof (struct section_offsets)
-			      + (symfile_objfile->num_sections
-				 * sizeof (offs->offsets))));
-	      memcpy (offs, symfile_objfile->section_offsets,
-		      (sizeof (struct section_offsets)
-		       + (symfile_objfile->num_sections
-			  * sizeof (offs->offsets))));
-	      ANOFFSET (offs, SECT_OFF_TEXT) = text_addr;
-	      ANOFFSET (offs, SECT_OFF_DATA) = data_addr;
-	      ANOFFSET (offs, SECT_OFF_BSS) = bss_addr;
-
-	      objfile_relocate (symfile_objfile, offs);
-	      {
-		struct obj_section *s;
-		bfd *abfd;
-
-		abfd = symfile_objfile->obfd;
-
-		for (s = symfile_objfile->sections;
-		     s < symfile_objfile->sections_end; ++s)
-		  {
-		    flagword flags;
-
-		    flags = bfd_get_section_flags (abfd, s->the_bfd_section);
-
-		    if (flags & SEC_CODE)
-		      {
-			s->addr += text_addr;
-			s->endaddr += text_addr;
-		      }
-		    else if (flags & (SEC_DATA | SEC_LOAD))
-		      {
-			s->addr += data_addr;
-			s->endaddr += data_addr;
-		      }
-		    else if (flags & SEC_ALLOC)
-		      {
-			s->addr += bss_addr;
-			s->endaddr += bss_addr;
-		      }
-		  }
-	      }
 	    }
 	  break;
 	}

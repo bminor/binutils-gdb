@@ -315,7 +315,7 @@ static struct blockvector *
 new_bvect PARAMS ((int));
 
 static int
-parse_symbol PARAMS ((SYMR *, union aux_ext *, char *, int));
+parse_symbol PARAMS ((SYMR *, union aux_ext *, char *, int, struct section_offsets *));
 
 static struct type *
 parse_type PARAMS ((int, union aux_ext *, unsigned int, int *, int, char *));
@@ -648,11 +648,12 @@ add_pending (fh, sh, t)
    SYMR's handled (normally one).  */
 
 static int
-parse_symbol (sh, ax, ext_sh, bigend)
+parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
      SYMR *sh;
      union aux_ext *ax;
      char *ext_sh;
      int bigend;
+     struct section_offsets *section_offsets;
 {
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
   void (* const swap_sym_in) PARAMS ((bfd *, PTR, SYMR *)) =
@@ -673,6 +674,19 @@ parse_symbol (sh, ax, ext_sh, bigend)
     name = debug_info->ssext + sh->iss;
   else
     name = debug_info->ss + cur_fdr->issBase + sh->iss;
+
+  switch (sh->sc)
+    {
+    case scText:
+      sh->value += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+      break;
+    case scData:
+      sh->value += ANOFFSET (section_offsets, SECT_OFF_DATA);
+      break;
+    case scBss:
+      sh->value += ANOFFSET (section_offsets, SECT_OFF_BSS);
+      break;
+    }
 
   switch (sh->st)
     {
@@ -1699,13 +1713,15 @@ upgrade_type (fd, tpp, tq, ax, bigend, sym_name)
    to look for the function which contains the MIPS_EFI_SYMBOL_NAME symbol
    in question, or NULL to use top_stack->cur_block.  */
 
-static void parse_procedure PARAMS ((PDR *, struct symtab *, unsigned long));
+static void parse_procedure PARAMS ((PDR *, struct symtab *, unsigned long,
+				     struct section_offsets *));
 
 static void
-parse_procedure (pr, search_symtab, first_off)
+parse_procedure (pr, search_symtab, first_off, section_offsets)
      PDR *pr;
      struct symtab *search_symtab;
      unsigned long first_off;
+     struct section_offsets *section_offsets;
 {
   struct symbol *s, *i;
   struct block *b;
@@ -1810,7 +1826,8 @@ parse_procedure (pr, search_symtab, first_off)
       e = (struct mips_extra_func_info *) SYMBOL_VALUE (i);
       e->pdr = *pr;
       e->pdr.isym = (long) s;
-      e->pdr.adr += cur_fdr->adr - first_off;
+      e->pdr.adr += cur_fdr->adr - first_off
+	+ ANOFFSET (section_offsets, SECT_OFF_TEXT);
 
       /* Correct incorrect setjmp procedure descriptor from the library
 	 to make backtrace through setjmp work.  */
@@ -1824,6 +1841,20 @@ parse_procedure (pr, search_symtab, first_off)
     }
 }
 
+/* Relocate the extra function info pointed to by the symbol table.  */
+
+void
+ecoff_relocate_efi (sym, delta)
+     struct symbol *sym;
+     CORE_ADDR delta;
+{
+  struct mips_extra_func_info *e;
+
+  e = (struct mips_extra_func_info *) SYMBOL_VALUE (sym);
+  
+  e->pdr.adr += delta;
+}
+
 /* Parse the external symbol ES. Just call parse_symbol() after
    making sure we know where the aux are for it. For procedures,
    parsing of the PDRs has already provided all the needed
@@ -1834,10 +1865,11 @@ parse_procedure (pr, search_symtab, first_off)
    This routine clobbers top_stack->cur_block and ->cur_st. */
 
 static void
-parse_external (es, skip_procedures, bigend)
+parse_external (es, skip_procedures, bigend, section_offsets)
      EXTR *es;
      int skip_procedures;
      int bigend;
+     struct section_offsets *section_offsets;
 {
   union aux_ext *ax;
 
@@ -1904,7 +1936,7 @@ parse_external (es, skip_procedures, bigend)
     case stLabel:
       /* Note that the case of a symbol with indexNil must be handled
 	 anyways by parse_symbol().  */
-      parse_symbol (&es->asym, ax, (char *) NULL, bigend);
+      parse_symbol (&es->asym, ax, (char *) NULL, bigend, section_offsets);
       break;
     default:
       break;
@@ -1918,11 +1950,12 @@ parse_external (es, skip_procedures, bigend)
    with that and do not need to reorder our linetables */
 
 static void
-parse_lines (fh, pr, lt, maxlines)
+parse_lines (fh, pr, lt, maxlines, section_offsets)
      FDR *fh;
      PDR *pr;
      struct linetable *lt;
      int maxlines;
+     struct section_offsets *section_offsets;
 {
   unsigned char *base;
   int j, k;
@@ -1931,8 +1964,6 @@ parse_lines (fh, pr, lt, maxlines)
 
   if (fh->cbLine == 0)
     return;
-
-  base = debug_info->line + fh->cbLineOffset;
 
   /* Scan by procedure descriptors */
   k = 0;
@@ -1956,7 +1987,9 @@ parse_lines (fh, pr, lt, maxlines)
  	halt = base + fh->cbLine;
       base += pr->cbLineOffset;
 
-      adr = fh->adr + pr->adr - first_off;
+      adr = fh->adr + pr->adr - first_off
+	+ ANOFFSET (section_offsets, SECT_OFF_TEXT);
+
       l = adr >> 2;		/* in words */
       for (lineno = pr->lnLow; base < halt; )
 	{
@@ -2286,9 +2319,11 @@ parse_partial_symbols (objfile, section_offsets)
 		{
 		  if (sh.st == stProc || sh.st == stStaticProc)
 		    {
-		      long procaddr = sh.value;
+		      long procaddr;
 		      long isym;
-
+	
+		      sh.value += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+		      procaddr = sh.value;
 
 		      isym = AUX_GET_ISYM (fh->fBigendian,
 					   (debug_info->external_aux
@@ -2358,8 +2393,9 @@ parse_partial_symbols (objfile, section_offsets)
 		  int new_sdx;
 
 		case stStaticProc:
-		  prim_record_minimal_symbol (name, sh.value, mst_file_text,
-					      objfile);
+		  prim_record_minimal_symbol_and_info (name, sh.value,
+						       mst_file_text, NULL,
+						       SECT_OFF_TEXT, objfile);
 
 		  /* FALLTHROUGH */
 
@@ -2427,11 +2463,15 @@ parse_partial_symbols (objfile, section_offsets)
 		      || sh.sc == scRData
 		      || sh.sc == scPData
 		      || sh.sc == scXData)
-		    prim_record_minimal_symbol (name, sh.value, mst_file_data,
-						objfile);
+		    prim_record_minimal_symbol_and_info (name, sh.value,
+							 mst_file_data, NULL,
+							 SECT_OFF_DATA,
+							 objfile);
 		  else
-		    prim_record_minimal_symbol (name, sh.value, mst_file_bss,
-						objfile);
+		    prim_record_minimal_symbol_and_info (name, sh.value,
+							 mst_file_bss, NULL,
+							 SECT_OFF_BSS,
+							 objfile);
 		  class = LOC_STATIC;
 		  break;
 
@@ -2899,7 +2939,7 @@ psymtab_to_symtab_1 (pst, filename)
 	      first_off = pr.adr;
 	      first_pdr = 0;
 	    }
-	  parse_procedure (&pr, st, first_off);
+	  parse_procedure (&pr, st, first_off, pst->section_offsets);
 	}
     }
   else
@@ -2966,7 +3006,7 @@ psymtab_to_symtab_1 (pst, filename)
 	      (*swap_sym_in) (cur_bfd, sym_ptr, &sh);
 	      c = parse_symbol (&sh,
 				debug_info->external_aux + fh->iauxBase,
-				sym_ptr, fh->fBigendian);
+				sym_ptr, fh->fBigendian, pst->section_offsets);
 	      sym_ptr += c * external_sym_size;
 	    }
 
@@ -2995,7 +3035,8 @@ psymtab_to_symtab_1 (pst, filename)
 		   pdr_ptr += external_pdr_size, pdr_in++)
 		(*swap_pdr_in) (cur_bfd, pdr_ptr, pdr_in);
 
-	      parse_lines (fh, pr_block, lines, maxlines);
+	      parse_lines (fh, pr_block, lines, maxlines,
+			   pst->section_offsets);
 	      if (lines->nitems < fh->cline)
 		lines = shrink_linetable (lines);
 
@@ -3003,7 +3044,8 @@ psymtab_to_symtab_1 (pst, filename)
 	      pdr_in = pr_block;
 	      pdr_in_end = pdr_in + fh->cpd;
 	      for (; pdr_in < pdr_in_end; pdr_in++)
-		parse_procedure (pdr_in, 0, pr_block->adr);
+		parse_procedure (pdr_in, 0, pr_block->adr,
+				 pst->section_offsets);
 
 	      do_cleanups (old_chain);
 	    }
@@ -3025,7 +3067,7 @@ psymtab_to_symtab_1 (pst, filename)
 
       ext_ptr = PST_PRIVATE (pst)->extern_tab;
       for (i = PST_PRIVATE (pst)->extern_count; --i >= 0; ext_ptr++)
-	parse_external (ext_ptr, 1, fh->fBigendian);
+	parse_external (ext_ptr, 1, fh->fBigendian, pst->section_offsets);
 
       /* If there are undefined symbols, tell the user.
 	 The alpha has an undefined symbol for every symbol that is
@@ -3040,6 +3082,8 @@ psymtab_to_symtab_1 (pst, filename)
 
 	}
       pop_parse_stack ();
+
+      st->primary = 1;
 
       /* Sort the symbol table now, we are done adding symbols to it.*/
       sort_symtab_syms (st);

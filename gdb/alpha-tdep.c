@@ -25,10 +25,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "dis-asm.h"
+#include "symfile.h"
+#include "objfiles.h"
 
 /* FIXME: Some of this code should perhaps be merged with mips-tdep.c.  */
 
-#define VM_MIN_ADDRESS (CORE_ADDR)0x120000000
+/* FIXME: Put this declaration in frame.h.  */
+extern struct obstack frame_cache_obstack;
 
 
 /* Forward declarations.  */
@@ -50,6 +53,12 @@ alpha_in_lenient_prologue PARAMS ((CORE_ADDR, CORE_ADDR));
 
 static void
 reinit_frame_cache_sfunc PARAMS ((char *, int, struct cmd_list_element *));
+
+static CORE_ADDR after_prologue PARAMS ((CORE_ADDR pc,
+					 alpha_extra_func_info_t proc_desc));
+
+static int in_prologue PARAMS ((CORE_ADDR pc,
+				alpha_extra_func_info_t proc_desc));
 
 /* Heuristic_proc_start may hunt through the text section for a long
    time across a 2400 baud serial line.  Allows the user to limit this
@@ -122,7 +131,70 @@ struct linked_proc_info
 } *linked_proc_desc_table = NULL;
 
 
-#define READ_FRAME_REG(fi, regno) read_next_frame_reg((fi)->next, regno)
+/* Guaranteed to set fci->saved_regs to some values (it never leaves it
+   NULL).  */
+
+void
+alpha_find_saved_regs (fci)
+     FRAME fci;
+{
+  int ireg;
+  CORE_ADDR reg_position;
+  unsigned long mask;
+  alpha_extra_func_info_t proc_desc;
+  int returnreg;
+
+  fci->saved_regs = (struct frame_saved_regs *)
+    obstack_alloc (&frame_cache_obstack, sizeof(struct frame_saved_regs));
+  memset (fci->saved_regs, 0, sizeof (struct frame_saved_regs));
+
+  proc_desc = fci->proc_desc;
+  if (proc_desc == NULL)
+    /* I'm not sure how/whether this can happen.  Normally when we can't
+       find a proc_desc, we "synthesize" one using heuristic_proc_desc
+       and set the saved_regs right away.  */
+    return;
+
+  /* Fill in the offsets for the registers which gen_mask says
+     were saved.  */
+
+  reg_position = fci->frame + PROC_REG_OFFSET (proc_desc);
+  mask = PROC_REG_MASK (proc_desc);
+
+  returnreg = PROC_PC_REG (proc_desc);
+
+  /* Note that RA is always saved first, regardless of it's actual
+     register number.  */
+  if (mask & (1 << returnreg))
+    {
+      fci->saved_regs->regs[returnreg] = reg_position;
+      reg_position += 8;
+      mask &= ~(1 << returnreg); /* Clear bit for RA so we
+				    don't save again later. */
+    }
+
+  for (ireg = 0; ireg <= 31 ; ++ireg)
+    if (mask & (1 << ireg))
+      {
+	fci->saved_regs->regs[ireg] = reg_position;
+	reg_position += 8;
+      }
+
+  /* Fill in the offsets for the registers which float_mask says
+     were saved.  */
+
+  reg_position = fci->frame + PROC_FREG_OFFSET (proc_desc);
+  mask = PROC_FREG_MASK (proc_desc);
+
+  for (ireg = 0; ireg <= 31 ; ++ireg)
+    if (mask & (1 << ireg))
+      {
+	fci->saved_regs->regs[FP0_REGNUM+ireg] = reg_position;
+	reg_position += 8;
+      }
+
+  fci->saved_regs->regs[PC_REGNUM] = fci->saved_regs->regs[returnreg];
+}
 
 static CORE_ADDR
 read_next_frame_reg(fi, regno)
@@ -154,8 +226,13 @@ read_next_frame_reg(fi, regno)
         }
       else if (regno == SP_REGNUM)
 	return fi->frame;
-      else if (fi->saved_regs->regs[regno])
-	return read_memory_integer(fi->saved_regs->regs[regno], 8);
+      else
+	{
+	  if (fi->saved_regs == NULL)
+	    alpha_find_saved_regs (fi);
+	  if (fi->saved_regs->regs[regno])
+	    return read_memory_integer(fi->saved_regs->regs[regno], 8);
+	}
     }
   return read_register(regno);
 }
@@ -297,7 +374,65 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
     PROC_FRAME_OFFSET(&temp_proc_desc) = frame_size;
     PROC_REG_MASK(&temp_proc_desc) = reg_mask;
     PROC_PC_REG(&temp_proc_desc) = RA_REGNUM;
+    PROC_LOCALOFF(&temp_proc_desc) = 0;	/* XXX - bogus */
     return &temp_proc_desc;
+}
+
+/* This returns the PC of the first inst after the prologue.  If we can't
+   find the prologue, then return 0.  */
+
+static CORE_ADDR
+after_prologue (pc, proc_desc)
+     CORE_ADDR pc;
+     alpha_extra_func_info_t proc_desc;
+{
+  struct block *b;
+  struct symtab_and_line sal;
+  CORE_ADDR func_addr, func_end;
+
+  if (!proc_desc)
+    proc_desc = find_proc_desc (pc, NULL);
+
+  if (proc_desc)
+    {
+      /* If function is frameless, then we need to do it the hard way.  I
+	 strongly suspect that frameless always means prologueless... */
+      if (PROC_FRAME_REG (proc_desc) == SP_REGNUM
+	  && PROC_FRAME_OFFSET (proc_desc) == 0)
+	return 0;
+    }
+
+  if (!find_pc_partial_function (pc, NULL, &func_addr, &func_end))
+    return 0;			/* Unknown */
+
+  sal = find_pc_line (func_addr, 0);
+
+  if (sal.end < func_end)
+    return sal.end;
+
+  /* The line after the prologue is after the end of the function.  In this
+     case, tell the caller to find the prologue the hard way.  */
+
+  return 0;
+}
+
+/* Return non-zero if we *might* be in a function prologue.  Return zero if we
+   are definatly *not* in a function prologue.  */
+
+static int
+in_prologue (pc, proc_desc)
+     CORE_ADDR pc;
+     alpha_extra_func_info_t proc_desc;
+{
+  CORE_ADDR after_prologue_pc;
+
+  after_prologue_pc = after_prologue (pc, proc_desc);
+
+  if (after_prologue_pc == 0
+      || pc < after_prologue_pc)
+    return 1;
+  else
+    return 0;
 }
 
 static alpha_extra_func_info_t
@@ -317,6 +452,7 @@ find_proc_desc(pc, next_frame)
      as it will be contained in the proc_desc we are searching for.
      So we have to find the proc_desc whose frame is closest to the current
      stack pointer.  */
+
   if (PC_IN_CALL_DUMMY (pc, 0, 0))
     {
       struct linked_proc_info *link;
@@ -338,6 +474,7 @@ find_proc_desc(pc, next_frame)
     }
 
   b = block_for_pc(pc);
+
   find_pc_partial_function (pc, NULL, &startaddr, NULL);
   if (b == NULL)
     sym = NULL;
@@ -355,45 +492,39 @@ find_proc_desc(pc, next_frame)
 
   if (sym)
     {
-	/* IF (this is the topmost frame OR a frame interrupted by a signal)
-	 * AND (this proc does not have debugging information OR
+	/* IF this is the topmost frame AND
+	 * (this proc does not have debugging information OR
 	 * the PC is in the procedure prologue)
 	 * THEN create a "heuristic" proc_desc (by analyzing
 	 * the actual code) to replace the "official" proc_desc.
 	 */
 	proc_desc = (alpha_extra_func_info_t)SYMBOL_VALUE(sym);
-	if (next_frame == NULL || next_frame->signal_handler_caller) {
-	    struct symtab_and_line val;
-	    struct symbol *proc_symbol =
-		PROC_DESC_IS_DUMMY(proc_desc) ? 0 : PROC_SYMBOL(proc_desc);
-
-	    if (proc_symbol) {
-		val = find_pc_line (BLOCK_START
-				    (SYMBOL_BLOCK_VALUE(proc_symbol)),
-				    0);
-		val.pc = val.end ? val.end : pc;
-	    }
-	    if (!proc_symbol || pc < val.pc) {
+	if (next_frame == NULL)
+	  {
+	    if (PROC_DESC_IS_DUMMY (proc_desc) || in_prologue (pc, proc_desc))
+	      {
 		alpha_extra_func_info_t found_heuristic =
-		    heuristic_proc_desc(PROC_LOW_ADDR(proc_desc),
-					pc, next_frame);
+		  heuristic_proc_desc (PROC_LOW_ADDR (proc_desc),
+				       pc, next_frame);
+		PROC_LOCALOFF (found_heuristic) = PROC_LOCALOFF (proc_desc);
 		if (found_heuristic)
-		  {
-		    /* The call to heuristic_proc_desc determines
-		       which registers have been saved so far and if the
-		       frame is already set up.
-		       The heuristic algorithm doesn't work well for other
-		       information in the procedure descriptor, so copy
-		       it from the found procedure descriptor.  */
-		    PROC_LOCALOFF(found_heuristic) = PROC_LOCALOFF(proc_desc);
-		    PROC_PC_REG(found_heuristic) = PROC_PC_REG(proc_desc);
-		    proc_desc = found_heuristic;
-		  }
-	    }
-	}
+		  proc_desc = found_heuristic;
+	      }
+	  }
     }
   else
     {
+      /* Is linked_proc_desc_table really necessary?  It only seems to be used
+	 by procedure call dummys.  However, the procedures being called ought
+	 to have their own proc_descs, and even if they don't,
+	 heuristic_proc_desc knows how to create them! */
+
+      register struct linked_proc_info *link;
+      for (link = linked_proc_desc_table; link; link = link->next)
+	  if (PROC_LOW_ADDR(&link->info) <= pc
+	      && PROC_HIGH_ADDR(&link->info) > pc)
+	      return &link->info;
+
       if (startaddr == 0)
 	startaddr = heuristic_proc_start (pc);
 
@@ -454,104 +585,43 @@ void
 init_extra_frame_info(fci)
      struct frame_info *fci;
 {
-  extern struct obstack frame_cache_obstack;
   /* Use proc_desc calculated in frame_chain */
   alpha_extra_func_info_t proc_desc =
     fci->next ? cached_proc_desc : find_proc_desc(fci->pc, fci->next);
 
-  fci->saved_regs = (struct frame_saved_regs*)
-    obstack_alloc (&frame_cache_obstack, sizeof(struct frame_saved_regs));
-  memset (fci->saved_regs, 0, sizeof (struct frame_saved_regs));
+  fci->saved_regs = NULL;
   fci->proc_desc =
     proc_desc == &temp_proc_desc ? 0 : proc_desc;
   if (proc_desc)
     {
-      int ireg;
-      CORE_ADDR reg_position;
-      unsigned long mask;
-      int returnreg;
-
       /* Get the locals offset from the procedure descriptor, it is valid
 	 even if we are in the middle of the prologue.  */
       fci->localoff = PROC_LOCALOFF(proc_desc);
 
       /* Fixup frame-pointer - only needed for top frame */
+
       /* Fetch the frame pointer for a dummy frame from the procedure
 	 descriptor.  */
       if (PROC_DESC_IS_DUMMY(proc_desc))
 	fci->frame = (FRAME_ADDR) PROC_DUMMY_FRAME(proc_desc);
+
       /* This may not be quite right, if proc has a real frame register.
 	 Get the value of the frame relative sp, procedure might have been
 	 interrupted by a signal at it's very start.  */
-      else if (fci->pc == PROC_LOW_ADDR(proc_desc))
-	fci->frame = READ_FRAME_REG(fci, SP_REGNUM);
+      else if (fci->pc == PROC_LOW_ADDR (proc_desc) && !PROC_DESC_IS_DUMMY (proc_desc))
+	fci->frame = read_next_frame_reg (fci->next, SP_REGNUM);
       else
-	fci->frame = READ_FRAME_REG(fci, PROC_FRAME_REG(proc_desc))
-		      + PROC_FRAME_OFFSET(proc_desc);
-
-      /* If this is the innermost frame, and we are still in the
-	 prologue (loosely defined), then the registers may not have
-	 been saved yet.  */
-      if (fci->next == NULL
-          && !PROC_DESC_IS_DUMMY(proc_desc)
-	  && alpha_in_lenient_prologue (PROC_LOW_ADDR (proc_desc), fci->pc))
-	{
-	  /* Can't just say that the registers are not saved, because they
-	     might get clobbered halfway through the prologue.
-	     heuristic_proc_desc already has the right code to figure out
-	     exactly what has been saved, so use it.  As far as I know we
-	     could be doing this (as we do on the 68k, for example)
-	     regardless of whether we are in the prologue; I'm leaving in
-	     the check for being in the prologue only out of conservatism
-	     (I'm not sure whether heuristic_proc_desc handles all cases,
-	     for example).
-
-	     This stuff is ugly (and getting uglier by the minute).  Probably
-	     the best way to clean it up is to ignore the proc_desc's from
-	     the symbols altogher, and get all the information we need by
-	     examining the prologue (provided we can make the prologue
-	     examining code good enough to get all the cases...).  */
-	  proc_desc =
-	    heuristic_proc_desc (PROC_LOW_ADDR (proc_desc),
-				 fci->pc,
-				 fci->next);
-	}
+	fci->frame = read_next_frame_reg (fci->next, PROC_FRAME_REG (proc_desc))
+			+ PROC_FRAME_OFFSET (proc_desc);
 
       if (proc_desc == &temp_proc_desc)
-	*fci->saved_regs = temp_saved_regs;
-      else
 	{
-	  /* Find which general-purpose registers were saved.
-	     The return address register is the first saved register,
-	     the other registers follow in ascending order.  */
-	  reg_position = fci->frame + PROC_REG_OFFSET(proc_desc);
-	  mask = PROC_REG_MASK(proc_desc) & 0xffffffffL;
-	  returnreg = PROC_PC_REG(proc_desc);
-	  if (mask & (1 << returnreg))
-	    {
-	      fci->saved_regs->regs[returnreg] = reg_position;
-	      reg_position += 8;
-	    }
-	  for (ireg = 0; mask; ireg++, mask >>= 1)
-	    if (mask & 1)
-	      {
-		if (ireg == returnreg)
-		  continue;
-		fci->saved_regs->regs[ireg] = reg_position;
-		reg_position += 8;
-	      }
-	  /* find which floating-point registers were saved */
-	  reg_position = fci->frame + PROC_FREG_OFFSET(proc_desc);
-	  mask = PROC_FREG_MASK(proc_desc) & 0xffffffffL;
-	  for (ireg = 0; mask; ireg++, mask >>= 1)
-	    if (mask & 1)
-	      {
-		fci->saved_regs->regs[FP0_REGNUM+ireg] = reg_position;
-		reg_position += 8;
-	      }
+	  fci->saved_regs = (struct frame_saved_regs*)
+	    obstack_alloc (&frame_cache_obstack,
+			   sizeof (struct frame_saved_regs));
+	  *fci->saved_regs = temp_saved_regs;
+	  fci->saved_regs->regs[PC_REGNUM] = fci->saved_regs->regs[RA_REGNUM];
 	}
-
-      fci->saved_regs->regs[PC_REGNUM] = fci->saved_regs->regs[PROC_PC_REG(proc_desc)];
     }
 }
 
@@ -661,16 +731,18 @@ void
 alpha_push_dummy_frame()
 {
   int ireg;
-  struct linked_proc_info *link = (struct linked_proc_info*)
-      xmalloc(sizeof (struct linked_proc_info));
-  alpha_extra_func_info_t proc_desc = &link->info;
+  struct linked_proc_info *link;
+  alpha_extra_func_info_t proc_desc;
   CORE_ADDR sp = read_register (SP_REGNUM);
   CORE_ADDR save_address;
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
   unsigned long mask;
 
+  link = (struct linked_proc_info *) xmalloc(sizeof (struct linked_proc_info));
   link->next = linked_proc_desc_table;
   linked_proc_desc_table = link;
+ 
+  proc_desc = &link->info;
 
   /*
    * The registers we must save are all those not preserved across
@@ -764,7 +836,7 @@ alpha_push_dummy_frame()
   sp += PROC_REG_OFFSET(proc_desc);
   write_register (SP_REGNUM, sp);
 
-  PROC_LOW_ADDR(proc_desc) = entry_point_address ();
+  PROC_LOW_ADDR(proc_desc) = CALL_DUMMY_ADDRESS ();
   PROC_HIGH_ADDR(proc_desc) = PROC_LOW_ADDR(proc_desc) + 4;
 
   SET_PROC_DESC_IS_DUMMY(proc_desc);
@@ -781,6 +853,8 @@ alpha_pop_frame()
   alpha_extra_func_info_t proc_desc = frame->proc_desc;
 
   write_register (PC_REGNUM, FRAME_SAVED_PC(frame));
+  if (frame->saved_regs == NULL)
+    alpha_find_saved_regs (frame);
   if (proc_desc)
     {
       for (regnum = 32; --regnum >= 0; )
@@ -838,6 +912,19 @@ alpha_skip_prologue (pc, lenient)
 {
     unsigned long inst;
     int offset;
+    CORE_ADDR post_prologue_pc;
+
+    /* See if we can determine the end of the prologue via the symbol table.
+       If so, then return either PC, or the PC after the prologue, whichever
+       is greater.  */
+
+    post_prologue_pc = after_prologue (pc, NULL);
+
+    if (post_prologue_pc != 0)
+      return max (pc, post_prologue_pc);
+
+    /* Can't determine prologue from the symbol table, need to examine
+       instructions.  */
 
     /* Skip the typical prologue instructions. These are the stack adjustment
        instruction and the instructions that save registers on the stack
@@ -1013,6 +1100,30 @@ reinit_frame_cache_sfunc (args, from_tty, c)
      struct cmd_list_element *c;
 {
   reinit_frame_cache ();
+}
+
+/* This is the definition of CALL_DUMMY_ADDRESS.  It's a heuristic that is used
+   to find a convenient place in the text segment to stick a breakpoint to
+   detect the completion of a target function call (ala call_function_by_hand).
+ */
+
+CORE_ADDR
+alpha_call_dummy_address ()
+{
+  CORE_ADDR entry;
+  struct minimal_symbol *sym;
+
+  entry = entry_point_address ();
+
+  if (entry != 0)
+    return entry;
+
+  sym = lookup_minimal_symbol ("_Prelude", symfile_objfile);
+
+  if (!sym || MSYMBOL_TYPE (sym) != mst_text)
+    return 0;
+  else
+    return SYMBOL_VALUE_ADDRESS (sym) + 4;
 }
 
 void
