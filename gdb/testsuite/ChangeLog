@@ -1,5 +1,7 @@
 Thu Feb  9 12:43:56 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.base/signals.exp: Rename a bunch of tests to give unique names.
+
 	* gdb.base/corefile.exp: Give backtrace test unique name.  xfail
 	for hp300.
 
