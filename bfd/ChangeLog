@@ -1,5 +1,10 @@
 Wed Aug 26 14:20:16 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
+	* bout.c: added support for relaxable alignment relocs.
+
+	* seclet.c (rel, seclet_dump_seclet, seclet_dump): get the app to
+	pass down pointer to play area rather than use alloca
+
 	* cpu-z8k.c (compatible): made static to reduce name space
 	polution.
 

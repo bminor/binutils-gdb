@@ -371,6 +371,8 @@ DEFUN (callj_callback, (abfd, reloc_entry,  data, srcidx,dstidx, input_section),
 #define ABS32_MAYBE_RELAXABLE 1
 #define ABS32_WAS_RELAXABLE 2
 
+#define ALIGN 10
+#define ALIGNDONE 11
 static reloc_howto_type howto_reloc_callj =
 HOWTO(CALLJ, 0, 2, 24, true, 0, true, true, 0,"callj", true, 0x00ffffff, 0x00ffffff,false);
 static  reloc_howto_type howto_reloc_abs32 =
@@ -387,6 +389,21 @@ HOWTO(ABS32CODE_SHRUNK, 0, 2, 24, true, 0, true, true, 0,"callx->callj", true, 0
 
 static  reloc_howto_type howto_reloc_abs32code =
 HOWTO(ABS32CODE, 0, 2, 32, false, 0, true, true,0,"callx", true, 0xffffffff,0xffffffff,false);
+
+static reloc_howto_type howto_align_table[] = {
+  HOWTO (ALIGN, 0, 0x1, 0, 0, 0, 0, 0, 0, "align16", 0, 0, 0, 0),
+  HOWTO (ALIGN, 0, 0x3, 0, 0, 0, 0, 0, 0, "align32", 0, 0, 0, 0),
+  HOWTO (ALIGN, 0, 0x7, 0, 0, 0, 0, 0, 0, "align64", 0, 0, 0, 0),
+  HOWTO (ALIGN, 0, 0xf, 0, 0, 0, 0, 0, 0, "align128", 0, 0, 0, 0),
+};
+
+static reloc_howto_type howto_done_align_table[] = {
+  HOWTO (ALIGNDONE, 0x1, 0x1, 0, 0, 0, 0, 0, 0, "donealign16", 0, 0, 0,0),
+  HOWTO (ALIGNDONE, 0x3, 0x3, 0, 0, 0, 0, 0, 0, "donealign32", 0, 0, 0,0),
+  HOWTO (ALIGNDONE, 0x7, 0x7, 0, 0, 0, 0, 0, 0, "donealign64", 0, 0, 0,0),
+  HOWTO (ALIGNDONE, 0xf, 0xf, 0, 0, 0, 0, 0, 0, "donealign128", 0, 0, 0,0),
+
+};
 
 static reloc_howto_type *
 b_out_reloc_type_lookup (abfd, code)
@@ -417,7 +434,7 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
   register struct relocation_info *rptr;
   unsigned int counter ;
   arelent *cache_ptr ;
-  int extern_mask, pcrel_mask, callj_mask;
+  int extern_mask, pcrel_mask, callj_mask, length_shift;
   int incode_mask;
   int size_mask;
   bfd_vma prev_addr = 0;
@@ -474,6 +491,7 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
     incode_mask = 0x08;
     callj_mask  = 0x02;
     size_mask =   0x20;
+    length_shift = 5;
   } else {
     /* little-endian bit field allocation order */
     pcrel_mask  = 0x01;
@@ -481,6 +499,7 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
     incode_mask = 0x10;
     callj_mask  = 0x40;
     size_mask   = 0x02;
+    length_shift = 1;
   }
 
   for (rptr = relocs, cache_ptr = reloc_cache, counter = 0;
@@ -516,8 +535,15 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
        * the reloc entry addend has added to it the offset into the
        * file of the data, so subtract the base to make the reloc
        * section relative */
+      int s;
+      {
+	/* sign-extend symnum from 24 bits to whatever host uses */
+	s = symnum;
+	if (s & (1 << 23))
+	  s |= (~0) << 24;
+      }
       cache_ptr->sym_ptr_ptr = (asymbol **)NULL;
-      switch (symnum) 
+      switch (s)
       {
        case N_TEXT:
        case N_TEXT | N_EXT:
@@ -539,6 +565,19 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
 	cache_ptr->sym_ptr_ptr = obj_bsssec(abfd)->symbol_ptr_ptr;
 	cache_ptr->addend = 0;
 	break;
+      case -2: /* .align */
+	if (raw[7] & pcrel_mask)
+	  {
+	    cache_ptr->howto = &howto_align_table[(raw[7] >> length_shift) & 3];
+	    cache_ptr->sym_ptr_ptr = &bfd_abs_symbol;
+	  }
+	else
+	  {
+	    /* .org? */
+	    abort ();
+	  }
+	cache_ptr->addend = 0;
+	break;
        default:
 	BFD_ASSERT(0);
 	break;
@@ -548,7 +587,9 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
 
     /* the i960 only has a few relocation types:
        abs 32-bit and pcrel 24bit.   except for callj's!  */
-    if (raw[7] & callj_mask)
+    if (cache_ptr->howto != 0)
+      ;
+    else if (raw[7] & callj_mask)
     {
       cache_ptr->howto = &howto_reloc_callj;
     }
@@ -579,7 +620,7 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
       unsigned int where = counter;
       bfd_vma stop = cache_ptr->address;
       tmp  = *cache_ptr;
-      while (cursor->address > stop)
+      while (cursor->address > stop && cursor >= reloc_cache)
       {
 	cursor[1] = cursor[0];
 	cursor--;
@@ -888,7 +929,7 @@ DEFUN(perform_slip,(s, slip, input_section, value),
 	
   }    
 }
-
+#if 1
 /* This routine works out if the thing we want to get to can be
    reached with a 24bit offset instead of a 32 bit one.
    If it can, then it changes the amode */
@@ -901,8 +942,6 @@ DEFUN(abs32code,(input_section, symbols, r, shrink),
       unsigned int shrink) 
 {
   bfd_vma value = get_value(r,0);
-	
-	
   bfd_vma dot = input_section->output_section->vma +  input_section->output_offset + r->address;	
   bfd_vma gap;
   
@@ -928,6 +967,60 @@ DEFUN(abs32code,(input_section, symbols, r, shrink),
     perform_slip(symbols, 4, input_section, r->address-shrink +4);
 
 	  
+  }      
+  return shrink;      
+}
+
+static int 
+DEFUN(aligncode,(input_section, symbols, r, shrink),
+      asection *input_section AND
+      asymbol **symbols AND
+      arelent *r AND
+      unsigned int shrink) 
+{
+  bfd_vma value = get_value(r,0);
+	
+
+  bfd_vma dot = input_section->output_section->vma +  input_section->output_offset + r->address;	
+  bfd_vma gap;
+  bfd_vma this_dot;
+  bfd_vma old_end;
+  bfd_vma new_end;
+    int shrink_delta;
+int size = r->howto->size;
+  /* Reduce the size of the alignment so that it's still aligned but
+     smaller  - the current size is already the same size as or bigger
+     than the alignment required.  */
+
+
+
+  /* calculate the first byte following the padding before we optimize */
+  old_end = ((dot + size ) & ~size) + size+1;
+  /* work out where the new end will be - remember that we're smaller
+     than we used to be */
+  new_end = ((dot - shrink + size) & ~size);
+
+  /* This is the new end */
+  gap = old_end - ((dot + size) & ~size);
+
+  shrink_delta = (old_end - new_end) - shrink;
+
+  if (shrink_delta)
+  { 
+
+    /* Change the reloc so that it knows how far to align to */
+    r->howto = howto_done_align_table + (r->howto - howto_align_table);
+
+    /* Encode the stuff into the addend - for future use we need to
+       know how big the reloc used to be */
+    r->addend = old_end ;
+
+    /* This will be N bytes smaller in the long run, adjust all the symbols */
+
+    
+
+    perform_slip(symbols, shrink_delta, input_section, r->address - shrink );
+    shrink += shrink_delta;
   }      
   return shrink;      
 }
@@ -961,6 +1054,11 @@ DEFUN(b_out_relax_section,(abfd, i, symbols),
     {
       arelent *r = *parent;
       switch (r->howto->type) {
+       case ALIGN:
+	/* An alignment reloc */
+	shrink = aligncode(input_section, symbols, r,shrink);
+	new=true;
+	break;
        case ABS32CODE:
 	/* A 32bit reloc in an addressing mode */
 	shrink = abs32code(input_section, symbols, r,shrink);
@@ -977,6 +1075,7 @@ DEFUN(b_out_relax_section,(abfd, i, symbols),
   return new;
 }
 
+#endif
 static bfd_byte *
 DEFUN(b_out_get_relocated_section_contents,(in_abfd, seclet, data),
       bfd *in_abfd AND
@@ -1059,6 +1158,10 @@ DEFUN(b_out_get_relocated_section_contents,(in_abfd, seclet, data),
 	  src_address+=4;
 	  dst_address+=4;
 	  break;
+	 case ALIGNDONE:
+	  src_address = reloc->addend;
+	  dst_address = (dst_address + reloc->howto->size) & ~reloc->howto->size;
+	  break;
 	 case ABS32CODE_SHRUNK: 
 	  /* This used to be a callx, but we've found out that a
 	     callj will reach, so do the right thing */
@@ -1080,11 +1183,11 @@ DEFUN(b_out_get_relocated_section_contents,(in_abfd, seclet, data),
 	     & BAL_MASK);
 
 	   bfd_put_32(in_abfd,word,  data+dst_address);
-	  dst_address+=4;
-	  src_address+=4;
+	   dst_address+=4;
+	   src_address+=4;
 
 	 }
-break;
+	  break;
 
 	 case PCREL13:
 	 {
@@ -1099,13 +1202,13 @@ break;
 	     & PCREL13_MASK);
 
 	   bfd_put_32(in_abfd,word,  data+dst_address);
-	  dst_address+=4;
-	  src_address+=4;
+	   dst_address+=4;
+	   src_address+=4;
 
 	 }
-break;
+	  break;
 
-	default:
+	 default:
 
 	  abort();
 	}

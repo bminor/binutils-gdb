@@ -52,17 +52,17 @@ extern bfd_error_vector_type bfd_error_vector;
 
 
 void
-DEFUN(rel,(abfd, seclet, output_section),
+DEFUN(rel,(abfd, seclet, output_section, data),
       bfd *abfd AND
       bfd_seclet_type *seclet AND
-      asection *output_section)
+      asection *output_section AND
+      PTR data)
 {
 
   if (output_section->flags & SEC_HAS_CONTENTS 
       && !(output_section->flags & SEC_NEVER_LOAD)
       && seclet->size)
   {
-    bfd_byte *data = (bfd_byte *)alloca(seclet->size);
     data = bfd_get_relocated_section_contents(abfd, seclet, data);
     if(bfd_set_section_contents(abfd,
 				output_section,
@@ -72,22 +72,22 @@ DEFUN(rel,(abfd, seclet, output_section),
     {
       abort();
     }
-
   }
 }
 
 void
-DEFUN(seclet_dump_seclet,(abfd, seclet, section),
+DEFUN(seclet_dump_seclet,(abfd, seclet, section, data),
       bfd *abfd AND
       bfd_seclet_type *seclet AND
-      asection *section)
+      asection *section AND
+      PTR data)
 {
   switch (seclet->type) 
   {
    case bfd_indirect_seclet:
     /* The contents of this section come from another one somewhere
        else */
-    rel(abfd, seclet, section);
+    rel(abfd, seclet, section, data);
     break;
    case bfd_fill_seclet:
     /* Fill in the section with us */
@@ -110,8 +110,9 @@ DEFUN(seclet_dump_seclet,(abfd, seclet, section),
 }
 
 void
-DEFUN(seclet_dump,(abfd),
-      bfd *abfd)
+DEFUN(seclet_dump,(abfd, data),
+      bfd *abfd AND
+      PTR data)
 {
   /* Write all the seclets on the bfd out, relocate etc according to the
      rules */
@@ -122,7 +123,7 @@ DEFUN(seclet_dump,(abfd),
     bfd_seclet_type *p = o->seclets_head;
     while (p != (bfd_seclet_type *)NULL) 
     {
-      seclet_dump_seclet(abfd, p, o);
+      seclet_dump_seclet(abfd, p, o, data);
       p = p ->next;
     }
     o = o->next;
