@@ -179,6 +179,8 @@ LINTFLAGS= -I${BFD_DIR}
 # End of host and target-dependent makefile fragments
 
 FLAGS_TO_PASS = \
+	"prefix=$(prefix)" \
+	"exec_prefix=$(exec_prefix)" \
 	"against=$(against)" \
 	"AR=$(AR)" \
 	"AR_FLAGS=$(AR_FLAGS)" \
@@ -333,14 +335,14 @@ YYOBJ = c-exp.tab.o m2-exp.tab.o ch-exp.tab.o
 	${CC} -c ${INTERNAL_CFLAGS} $<
 
 all: gdb
-	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+	$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=$(SUBDIRS)" subdir_do
 check:
 info: force
-	$(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+	$(MAKE) $(FLAGS_TO_PASS) DO=info "DODIRS=$(SUBDIRS)" subdir_do
 install-info: force
-	$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+	$(MAKE) $(FLAGS_TO_PASS) DO=install-info "DODIRS=$(SUBDIRS)" subdir_do
 clean-info: force
-	$(MAKE) subdir_do DO=clean-info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+	$(MAKE) $(FLAGS_TO_PASS) DO=clean-info "DODIRS=$(SUBDIRS)" subdir_do
 
 gdb.z:gdb.1
 	nroff -man $(srcdir)/gdb.1 | col -b > gdb.t 
@@ -358,7 +360,7 @@ install: gdb
 	$(INSTALL_PROGRAM) gdb $(bindir)/$$n; \
 	$(INSTALL_DATA) $(srcdir)/gdb.1 $(man1dir)/$$n.1
 	$(M_INSTALL)
-	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+	$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do
 
 init.c: $(srcdir)/munch $(OBS) $(TSOBS)
 	$(srcdir)/munch ${MUNCH_DEFINE} $(OBS) $(TSOBS) > init.c
@@ -619,19 +621,19 @@ clean:
 	rm -f init.c version.c
 	rm -f gdb core gdb.tar gdb.tar.Z make.log
 	rm -f gdb[0-9]
-	@$(MAKE) subdir_do DO=clean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do 
 
 distclean: clean c-exp.tab.c m2-exp.tab.c ch-exp.tab.c TAGS
 	rm -f tm.h xm.h config.status
 	rm -f y.output yacc.acts yacc.tmp
 	rm -f ${TESTS} Makefile depend
-	@$(MAKE) subdir_do DO=distclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+	@$(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(SUBDIRS)" subdir_do 
 
 realclean: clean
 	rm -f c-exp.tab.c m2-exp.tab.c ch-exp.tab.c TAGS
 	rm -f tm.h xm.h config.status
 	rm -f Makefile depend
-	@$(MAKE) subdir_do DO=realclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+	@$(MAKE) $(FLAGS_TO_PASS) DO=realclean "DODIRS=$(SUBDIRS)" subdir_do
 
 STAGESTUFF=${OBS} ${TSOBS} ${NTSOBS} ${ADD_FILES} init.c init.o version.c gdb
 
@@ -704,7 +706,7 @@ c-exp.tab.c: $(srcdir)/c-exp.y Makefile
 # else.
 ch-exp.tab.o: ch-exp.tab.c
 ch-exp.tab.c: $(srcdir)/ch-exp.y Makefile
-	@echo 'Expect rules never reduced, and lots of reduce/reduce conflicts.'
+	@echo 'Expect rules never reduced and {shift,reduce}/reduce conflicts.'
 	${YACC} $(srcdir)/ch-exp.y
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
@@ -760,6 +762,9 @@ xcoffread.o: ${srcdir}/xcoffread.c
 
 xcoffexec.o: ${srcdir}/xcoffexec.c
 	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/xcoffexec.c
+
+paread.o: ${srcdir}/paread.c
+	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/paread.c
 
 # Drag in the files that are in another directory.
 

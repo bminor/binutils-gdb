@@ -139,7 +139,36 @@ yyerror PARAMS ((char *));
     int *ivec;
   }
 
-%token <voidval> FIXME
+%token <voidval> FIXME_01
+%token <voidval> FIXME_02
+%token <voidval> FIXME_03
+%token <voidval> FIXME_04
+%token <voidval> FIXME_05
+%token <voidval> FIXME_06
+%token <voidval> FIXME_07
+%token <voidval> FIXME_08
+%token <voidval> FIXME_09
+%token <voidval> FIXME_10
+%token <voidval> FIXME_11
+%token <voidval> FIXME_12
+%token <voidval> FIXME_13
+%token <voidval> FIXME_14
+%token <voidval> FIXME_15
+%token <voidval> FIXME_16
+%token <voidval> FIXME_17
+%token <voidval> FIXME_18
+%token <voidval> FIXME_19
+%token <voidval> FIXME_20
+%token <voidval> FIXME_21
+%token <voidval> FIXME_22
+%token <voidval> FIXME_23
+%token <voidval> FIXME_24
+%token <voidval> FIXME_25
+%token <voidval> FIXME_26
+%token <voidval> FIXME_27
+%token <voidval> FIXME_28
+%token <voidval> FIXME_29
+%token <voidval> FIXME_30
 
 %token <typed_val>	INTEGER_LITERAL
 %token <ulval>		BOOLEAN_LITERAL
@@ -152,8 +181,6 @@ yyerror PARAMS ((char *));
 %token <sval>		CHARACTER_STRING_LITERAL
 %token <sval>		BIT_STRING_LITERAL
 
-%token <voidval>	STRING
-%token <voidval>	CONSTANT
 %token <voidval>	'.'
 %token <voidval>	';'
 %token <voidval>	':'
@@ -182,7 +209,6 @@ yyerror PARAMS ((char *));
 %token <voidval>	NOT
 %token <voidval>	POINTER
 %token <voidval>	RECEIVE
-%token <voidval>	SC
 %token <voidval>	'['
 %token <voidval>	']'
 %token <voidval>	'('
@@ -249,7 +275,6 @@ yyerror PARAMS ((char *));
 %type <voidval>		operand_4
 %type <voidval>		operand_5
 %type <voidval>		operand_6
-%type <voidval>		integer_literal_expression
 %type <voidval>		synonym_name
 %type <voidval>		value_enumeration_name
 %type <voidval>		value_do_with_name
@@ -295,7 +320,7 @@ value		:	expression
 			}
 		;
 
-undefined_value	:	FIXME
+undefined_value	:	FIXME_01
 			{
 			  $$ = 0;	/* FIXME */
 			}
@@ -307,7 +332,7 @@ location	:	access_name
 			{
 			  $$ = 0;	/* FIXME */
 			}
-  		|	FIXME
+  		|	FIXME_02
 			{
 			  $$ = 0;	/* FIXME */
 			}
@@ -339,7 +364,7 @@ access_name	:	LOCATION_NAME
 			  write_exp_elt_intern ($1);
 			  write_exp_elt_opcode (OP_INTERNALVAR); 
 			}
-  		|	FIXME
+  		|	FIXME_03
 			{
 			  $$ = 0;	/* FIXME */
 			}
@@ -507,7 +532,7 @@ literal		:	INTEGER_LITERAL
 
 /* Z.200, 5.2.5 */
 
-tuple		:	FIXME
+tuple		:	FIXME_04
 			{
 			  $$ = 0;	/* FIXME */
 			}
@@ -570,7 +595,7 @@ value_structure_field:	structure_primitive_value '.' field_name
 
 /* Z.200, 5.2.11 */
 
-expression_conversion:	mode_name '(' expression ')'
+expression_conversion:	mode_name parenthesised_expression
 			{
 			  $$ = 0;	/* FIXME */
 			}
@@ -578,7 +603,7 @@ expression_conversion:	mode_name '(' expression ')'
 
 /* Z.200, 5.2.12 */
 
-value_procedure_call:	FIXME
+value_procedure_call:	FIXME_05
 			{
 			  $$ = 0;	/* FIXME */
 			}
@@ -594,7 +619,7 @@ value_built_in_routine_call:	chill_value_built_in_routine_call
 
 /* Z.200, 5.2.14 */
 
-start_expression:	FIXME
+start_expression:	FIXME_06
 			{
 			  $$ = 0;	/* FIXME */
 			}	/* Not in GNU-Chill */
@@ -602,7 +627,7 @@ start_expression:	FIXME
 
 /* Z.200, 5.2.15 */
 
-zero_adic_operator:	FIXME
+zero_adic_operator:	FIXME_07
 			{
 			  $$ = 0;	/* FIXME */
 			}
@@ -788,6 +813,8 @@ operand_4	:	operand_5
 		;
 
 /* Z.200, 5.3.8 */
+/* Note that we accept any expression for BINOP_CONCAT, not just
+   integer literal expressions. (FIXME?) */
 
 operand_5	:	operand_6
 			{
@@ -801,9 +828,9 @@ operand_5	:	operand_6
 			{
 			  write_exp_elt_opcode (UNOP_LOGICAL_NOT);
 			}
-		|	'(' integer_literal_expression ')' operand_6
+		|	parenthesised_expression operand_6
 			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (BINOP_CONCAT);
 			}
 		;
 
@@ -929,16 +956,6 @@ length_argument :	location
 		;
 
 /* Z.200, 12.4.3 */
-/* FIXME:  For now we just accept only a single integer literal. */
-
-integer_literal_expression:
-			INTEGER_LITERAL
-			{
-			  $$ = 0;
-			}
-		;
-
-/* Z.200, 12.4.3 */
 
 array_primitive_value :	primitive_value
 			{
@@ -949,29 +966,29 @@ array_primitive_value :	primitive_value
 
 /* Things which still need productions... */
 
-array_mode_name	 	:	FIXME { $$ = 0; }
-string_mode_name 	:	FIXME { $$ = 0; }
-variant_structure_mode_name:	FIXME { $$ = 0; }
-synonym_name	 	:	FIXME { $$ = 0; }
-value_enumeration_name 	:	FIXME { $$ = 0; }
-value_do_with_name 	:	FIXME { $$ = 0; }
-value_receive_name 	:	FIXME { $$ = 0; }
-string_primitive_value 	:	FIXME { $$ = 0; }
-start_element 		:	FIXME { $$ = 0; }
-left_element 		:	FIXME { $$ = 0; }
-right_element 		:	FIXME { $$ = 0; }
-slice_size 		:	FIXME { $$ = 0; }
-lower_element 		:	FIXME { $$ = 0; }
-upper_element 		:	FIXME { $$ = 0; }
-first_element 		:	FIXME { $$ = 0; }
-structure_primitive_value:	FIXME { $$ = 0; }
-field_name 		:	FIXME { $$ = 0; }
-mode_name 		:	FIXME { $$ = 0; }
-boolean_expression 	:	FIXME { $$ = 0; }
-case_selector_list 	:	FIXME { $$ = 0; }
-subexpression 		:	FIXME { $$ = 0; }
-case_label_specification:	FIXME { $$ = 0; }
-buffer_location 	:	FIXME { $$ = 0; }
+array_mode_name	 	:	FIXME_08 { $$ = 0; }
+string_mode_name 	:	FIXME_09 { $$ = 0; }
+variant_structure_mode_name:	FIXME_10 { $$ = 0; }
+synonym_name	 	:	FIXME_11 { $$ = 0; }
+value_enumeration_name 	:	FIXME_12 { $$ = 0; }
+value_do_with_name 	:	FIXME_13 { $$ = 0; }
+value_receive_name 	:	FIXME_14 { $$ = 0; }
+string_primitive_value 	:	FIXME_15 { $$ = 0; }
+start_element 		:	FIXME_16 { $$ = 0; }
+left_element 		:	FIXME_17 { $$ = 0; }
+right_element 		:	FIXME_18 { $$ = 0; }
+slice_size 		:	FIXME_19 { $$ = 0; }
+lower_element 		:	FIXME_20 { $$ = 0; }
+upper_element 		:	FIXME_21 { $$ = 0; }
+first_element 		:	FIXME_22 { $$ = 0; }
+structure_primitive_value:	FIXME_23 { $$ = 0; }
+field_name 		:	FIXME_24 { $$ = 0; }
+mode_name 		:	FIXME_25 { $$ = 0; }
+boolean_expression 	:	FIXME_26 { $$ = 0; }
+case_selector_list 	:	FIXME_27 { $$ = 0; }
+subexpression 		:	FIXME_28 { $$ = 0; }
+case_label_specification:	FIXME_29 { $$ = 0; }
+buffer_location 	:	FIXME_30 { $$ = 0; }
 
 %%
 

@@ -1,3 +1,64 @@
+Wed Jan 27 21:34:21 1993  Fred Fish  (fnf@cygnus.com)
+
+	* expression.h (BINOP_CONCAT): Document use for self concatenation
+	an integral number of times.
+	* language.c (binop_type_check):  Extend BINOP_CONCAT for self
+	concatenation case.
+	* valarith.c (value_concat):  Rewrite to support self
+	concatenation an integral number of times.
+	**** start-sanitize-chill ****
+	* Makefile.in (ch-exp.tab.c):  Change "expect" message.
+	* ch-exp.y (FIXME's):  Make all FIXME tokens distinct, to
+	eliminate hundreds of spurious shift/reduce and reduce/reduce
+	conflicts that mask the 5 real ones.
+	* ch-exp.y (STRING, CONSTANT, SC):  Remove unused tokens.
+	* ch-exp.y (integer_literal_expression):  Remove production,
+	no longer used.
+	**** end-sanitize-chill ****
+
+Thu Jan 21 09:58:36 1993  Fred Fish  (fnf@cygnus.com)
+
+	* eval.c (evaluate_subexp):  Fix OP_ARRAY, remove code that
+	implied that "no side effects" was nonfunctional.
+	* eval.c (evaluate_subexp):  Add BINOP_CONCAT case to deal with
+	character string and bitstring concatenation.
+	* expprint.c (dump_expression):  Add case for BINOP_CONCAT.
+	* expression.h (exp_opcode):  Add BINOP_CONCAT.
+	* gdbtypes.h (type_code):  Add TYPE_CODE_BITSTRING.
+	* language.c (string_type):  Add function to determine if a type
+	is a string type.
+	* language.c (binop_type_check):  Add case for BINOP_CONCAT.
+	* valarith.c (value_concat):  New function to concatenate two
+	values, such as character strings or bitstrings.
+	* valops.c (value_string):  Remove error stub and implement
+	function body.
+	* value.h (value_concat):  Add prototype.
+	**** start-sanitize-chill ****
+	* ch-exp.y (operand_3):  Add actions for SLASH_SLASH (//).
+	* ch-exp.y (yylex):  Recognize SLASH_SLASH.
+	* ch-lang.c (chill_op_print_tab):  Add SLASH_SLASH (//) as
+	BINOP_CONCAT.
+	**** end-sanitize-chill ****
+
+Tue Jan 19 14:26:15 1993  Fred Fish  (fnf@cygnus.com)
+
+	* c-exp.y (exp):  Add production to support direct creation
+	of array constants using the obvious syntax.
+	* c-valprint.c (c_val_print):  Set printed string length.
+	* dwarfread.c (read_tag_string_type):  New prototype and
+	function that handles TAG_string_type DIEs.
+	* dwarfread.c (process_dies):  Add case for TAG_string_type
+	that calls new read_tag_string_type function.
+	* expprint.c (print_subexp):  Add support for OP_ARRAY.
+	* gdbtypes.c (create_range_type, create_array_type):  Inherit
+	objfile from the index type.
+	**** start-sanitize-chill ****
+	* ch-typeprint.c (chill_print_type):  Add case for
+	TYPE_CODE_STRING.
+	* ch-valprint.c (chill_val_print):  Fix case for
+	TYPE_CODE_STRING.
+	**** end-sanitize-chill ****
+
 Mon Jan 18 11:58:45 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* mipsread.c (CODE_MASK, MIPS_IS_STAB, MIPS_MARK_STAB,

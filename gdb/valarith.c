@@ -23,7 +23,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbtypes.h"
 #include "expression.h"
 #include "target.h"
+#include "language.h"
 #include <string.h>
+
+/* Define whether or not the C operator '/' truncates towards zero for
+   differently signed operands (truncation direction is undefined in C). */
+
+#ifndef TRUNCATION_TOWARDS_ZERO
+#define TRUNCATION_TOWARDS_ZERO ((-5 / 2) == -2)
+#endif
 
 static value
 value_subscripted_rvalue PARAMS ((value, value));
@@ -268,6 +276,7 @@ value_x_binop (arg1, arg2, op, otherop)
 	case BINOP_BITWISE_AND:	strcpy(ptr,"&="); break;
 	case BINOP_BITWISE_IOR:	strcpy(ptr,"|="); break;
 	case BINOP_BITWISE_XOR:	strcpy(ptr,"^="); break;
+	case BINOP_MOD:		/* invalid */
 	default:
 	  error ("Invalid binary operation specified.");
 	}
@@ -279,6 +288,7 @@ value_x_binop (arg1, arg2, op, otherop)
     case BINOP_GTR:       strcpy(ptr,">"); break;
     case BINOP_GEQ:       strcpy(ptr,">="); break;
     case BINOP_LEQ:       strcpy(ptr,"<="); break;
+    case BINOP_MOD:	  /* invalid */
     default:
       error ("Invalid binary operation specified.");
     }
@@ -354,8 +364,151 @@ value_x_unop (arg1, op)
   error ("member function %s not found", tstr);
   return 0;  /* For lint -- never reached */
 }
+
 
-/* Perform a binary operation on two integers or two floats.
+/* Concatenate two values with the following conditions:
+
+   (1)	Both values must be either bitstring values or character string
+	values and the resulting value consists of the concatenation of
+	ARG1 followed by ARG2.
+
+	or
+
+	One value must be an integer value and the other value must be
+	either a bitstring value or character string value, which is
+	to be repeated by the number of times specified by the integer
+	value.
+
+
+    (2)	Boolean values are also allowed and are treated as bit string
+    	values of length 1.
+
+    (3)	Character values are also allowed and are treated as character
+    	string values of length 1.
+*/
+
+value
+value_concat (arg1, arg2)
+     value arg1, arg2;
+{
+  register value inval1, inval2, outval;
+  int inval1len, inval2len;
+  int count, idx;
+  char *ptr;
+  char inchar;
+
+  /* First figure out if we are dealing with two values to be concatenated
+     or a repeat count and a value to be repeated.  INVAL1 is set to the
+     first of two concatenated values, or the repeat count.  INVAL2 is set
+     to the second of the two concatenated values or the value to be 
+     repeated. */
+
+  if (TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_INT)
+    {
+      inval1 = arg2;
+      inval2 = arg1;
+    }
+  else
+    {
+      inval1 = arg1;
+      inval2 = arg2;
+    }
+
+  /* Now process the input values. */
+
+  if (TYPE_CODE (VALUE_TYPE (inval1)) == TYPE_CODE_INT)
+    {
+      /* We have a repeat count.  Validate the second value and then
+	 construct a value repeated that many times. */
+      if (TYPE_CODE (VALUE_TYPE (inval2)) == TYPE_CODE_STRING
+	  || TYPE_CODE (VALUE_TYPE (inval2)) == TYPE_CODE_CHAR)
+	{
+	  count = longest_to_int (value_as_long (inval1));
+	  inval2len = TYPE_LENGTH (VALUE_TYPE (inval2));
+	  ptr = (char *) alloca (count * inval2len);
+	  if (TYPE_CODE (VALUE_TYPE (inval2)) == TYPE_CODE_CHAR)
+	    {
+	      inchar = (char) unpack_long (VALUE_TYPE (inval2),
+					   VALUE_CONTENTS (inval2));
+	      for (idx = 0; idx < count; idx++)
+		{
+		  *(ptr + idx) = inchar;
+		}
+	    }
+	  else
+	    {
+	      for (idx = 0; idx < count; idx++)
+		{
+		  memcpy (ptr + (idx * inval2len), VALUE_CONTENTS (inval2),
+			  inval2len);
+		}
+	    }
+	  outval = value_string (ptr, count * inval2len);
+	}
+      else if (TYPE_CODE (VALUE_TYPE (inval2)) == TYPE_CODE_BITSTRING
+	       || TYPE_CODE (VALUE_TYPE (inval2)) == TYPE_CODE_BOOL)
+	{
+	  error ("unimplemented support for bitstring/boolean repeats");
+	}
+      else
+	{
+	  error ("can't repeat values of that type");
+	}
+    }
+  else if (TYPE_CODE (VALUE_TYPE (inval1)) == TYPE_CODE_STRING
+      || TYPE_CODE (VALUE_TYPE (inval1)) == TYPE_CODE_CHAR)
+    {
+      /* We have two character strings to concatenate. */
+      if (TYPE_CODE (VALUE_TYPE (inval2)) != TYPE_CODE_STRING
+	  && TYPE_CODE (VALUE_TYPE (inval2)) != TYPE_CODE_CHAR)
+	{
+	  error ("Strings can only be concatenated with other strings.");
+	}
+      inval1len = TYPE_LENGTH (VALUE_TYPE (inval1));
+      inval2len = TYPE_LENGTH (VALUE_TYPE (inval2));
+      ptr = (char *) alloca (inval1len + inval2len);
+      if (TYPE_CODE (VALUE_TYPE (inval1)) == TYPE_CODE_CHAR)
+	{
+	  *ptr = (char) unpack_long (VALUE_TYPE (inval1), VALUE_CONTENTS (inval1));
+	}
+      else
+	{
+	  memcpy (ptr, VALUE_CONTENTS (inval1), inval1len);
+	}
+      if (TYPE_CODE (VALUE_TYPE (inval2)) == TYPE_CODE_CHAR)
+	{
+	  *(ptr + inval1len) = 
+	    (char) unpack_long (VALUE_TYPE (inval2), VALUE_CONTENTS (inval2));
+	}
+      else
+	{
+	  memcpy (ptr + inval1len, VALUE_CONTENTS (inval2), inval2len);
+	}
+      outval = value_string (ptr, inval1len + inval2len);
+    }
+  else if (TYPE_CODE (VALUE_TYPE (inval1)) == TYPE_CODE_BITSTRING
+	   || TYPE_CODE (VALUE_TYPE (inval1)) == TYPE_CODE_BOOL)
+    {
+      /* We have two bitstrings to concatenate. */
+      if (TYPE_CODE (VALUE_TYPE (inval2)) != TYPE_CODE_BITSTRING
+	  && TYPE_CODE (VALUE_TYPE (inval2)) != TYPE_CODE_BOOL)
+	{
+	  error ("Bitstrings or booleans can only be concatenated with other bitstrings or booleans.");
+	}
+      error ("unimplemented support for bitstring/boolean concatenation.");
+    }      
+  else
+    {
+      /* We don't know how to concatenate these operands. */
+      error ("illegal operands for concatenation.");
+    }
+  return (outval);
+}
+
+
+/* Perform a binary operation on two operands which have reasonable
+   representations as integers or floats.  This includes booleans,
+   characters, integers, or floats.
    Does not support addition and subtraction on pointers;
    use value_add or value_sub if you want to handle those possibilities.  */
 
@@ -371,11 +524,15 @@ value_binop (arg1, arg2, op)
 
   if ((TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_FLT
        &&
+       TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_CHAR
+       &&
        TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_INT
        &&
        TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_BOOL)
       ||
       (TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_FLT
+       &&
+       TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_CHAR
        &&
        TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_INT
        &&
@@ -483,6 +640,29 @@ value_binop (arg1, arg2, op)
 	      v = v1 % v2;
 	      break;
 	      
+	    case BINOP_MOD:
+	      /* Knuth 1.2.4, integer only.  Note that unlike the C '%' op,
+	         v1 mod 0 has a defined value, v1. */
+	      /* start-sanitize-chill */
+	      /* Chill specifies that v2 must be > 0, so check for that. */
+	      if (current_language -> la_language == language_chill
+		  && value_as_long (arg2) <= 0)
+		{
+		  error ("Second operand of MOD must be greater than zero.");
+		}
+	      /* end-sanitize-chill */
+	      if (v2 == 0)
+		{
+		  v = v1;
+		}
+	      else
+		{
+		  v = v1/v2;
+		  /* Note floor(v1/v2) == v1/v2 for unsigned. */
+		  v = v1 - (v2 * v);
+		}
+	      break;
+	      
 	    case BINOP_LSH:
 	      v = v1 << v2;
 	      break;
@@ -553,6 +733,33 @@ value_binop (arg1, arg2, op)
 	      
 	    case BINOP_REM:
 	      v = v1 % v2;
+	      break;
+	      
+	    case BINOP_MOD:
+	      /* Knuth 1.2.4, integer only.  Note that unlike the C '%' op,
+	         X mod 0 has a defined value, X. */
+	      /* start-sanitize-chill */
+	      /* Chill specifies that v2 must be > 0, so check for that. */
+	      if (current_language -> la_language == language_chill
+		  && v2 <= 0)
+		{
+		  error ("Second operand of MOD must be greater than zero.");
+		}
+	      /* end-sanitize-chill */
+	      if (v2 == 0)
+		{
+		  v = v1;
+		}
+	      else
+		{
+		  v = v1/v2;
+		  /* Compute floor. */
+		  if (TRUNCATION_TOWARDS_ZERO && (v < 0) && ((v1 % v2) != 0))
+		    {
+		      v--;
+		    }
+		  v = v1 - (v2 * v);
+		}
 	      break;
 	      
 	    case BINOP_LSH:

@@ -894,8 +894,9 @@ binop_type_check(arg1,arg2,op)
       break;
 
     case BINOP_CONCAT:
-      if (!(string_type(t1) || character_type(t1))
-	  || !(string_type(t2) || character_type(t2)))
+      /* FIXME:  Needs to handle bitstrings as well. */
+      if (!(string_type(t1) || character_type(t1) || integral_type(t1))
+	  || !(string_type(t2) || character_type(t2) || integral_type(t2)))
 	  type_op_error ("Arguments to %s must be strings or characters.", op);
       break;
 
