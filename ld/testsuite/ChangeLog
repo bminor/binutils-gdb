@@ -1,3 +1,7 @@
+2002-01-14  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* ld-selective/selective.exp: For ARM targets, link with libgcc.a.
+
 2002-01-02  Chris Demetriou  <cgd@broadcom.com>
 
 	* ld-mips-elf/empic1-ln.d: New file to test basic linking of

@@ -1,5 +1,5 @@
 # Expect script for LD selective linking tests
-#   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+#   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -101,6 +101,11 @@ foreach testitem $seltests {
 	set objfile "$objfile -L ../gcc -lgcc"
     }
     
+    # ARM targets need libgcc.a in THUMB mode so that __call_via_r3 is provided
+    if {[istarget arm-*-*] || [istarget xscale-*-*]} {
+	set objfile "$objfile -L ../gcc -lgcc"
+    }
+    
     # m6811/m6812 code has references to soft registers.
     if {[istarget m6811-*-*] || [istarget m6812-*-*]} {
 	set objfile "$objfile --defsym _.frame=0 --defsym _.d1=0"
@@ -184,4 +189,3 @@ foreach testitem $seltests {
 	pass $testname
     }
 }
-
