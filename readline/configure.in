@@ -13,39 +13,28 @@ files=sysdep-norm.h
 links=sysdep.h
 
 case "${host}" in
-  i[34]86-ncr-sysv4*)
-    host_makefile_frag=config/mh-ncr3000
-    ;;
-  mips-sgi-irix*)
-    host_makefile_frag=config/mh-sysv
-    files=sysdep-irix.h
-    ;;
-  *-sun-solaris*| *-*-sysv4*)
-    host_makefile_frag=config/mh-sysv4
-    ;;
-  i[34]86-*-sco)
-    host_makefile_frag=config/mh-sco
-    files=sysdep-sco.h
-    ;;
-  m68k-apollo-sysv*)
-    host_makefile_frag=config/mh-apollo68v 
-    ;;    
-  m88k-motorola-m88kbcs | *-*-sysv*)
-    host_makefile_frag=config/mh-sysv
-    ;;
-  i[34]86-*-linux)
-    host_makefile_frag=config/mh-posix
-    ;;
-  rs6000-ibm-aix*)
-    host_makefile_frag=config/mh-sysv
-    files=sysdep-aix.h
-    ;;
-  *-ibm-aix*)
-    host_makefile_frag=config/mh-sysv
-    ;;
-  m68k-sony-news* | *-*-mach* | *-*-bsd*)
-    files=sysdep-obsd.h
-    ;;
+  *-*-irix*)		host_makefile_frag=config/mh-sysv; files=sysdep-irix.h;;
+  i[34]86-ncr-sysv4*)	host_makefile_frag=config/mh-ncr3000 ;;
+  m88k-*-sysv4*)	host_makefile_frag=config/mh-sysv ;
+			# defining POSIX_SOURCE causes stack_t to be undefined
+			# even though it's used in <setjmp.h>
+			files=sysdep-norm.h ;;
+  *-*-sysv4*)		host_makefile_frag=config/mh-sysv4 ; files=sysdep-sysv4.h;;
+  *-*-solaris2*)	host_makefile_frag=config/mh-sysv4 ;;
+  i[34]86-*-sco3.2v4*)	host_makefile_frag=config/mh-sco4; files=sysdep-sco.h ;;
+  i[34]86-*-sco*)	host_makefile_frag=config/mh-sco; files=sysdep-sco.h ;;
+  i[34]86-*-isc*)	host_makefile_frag=config/mh-isc ;;
+  m68k-apollo-sysv*)	host_makefile_frag=config/mh-apollo68v ;;    
+  *-*-sysv*)		host_makefile_frag=config/mh-sysv ;;
+  *-*-m88kbcs)		host_makefile_frag=config/mh-sysv ;;
+  i[34]86-*-linux)	host_makefile_frag=config/mh-posix ;;
+  rs6000-ibm-aix*)	host_makefile_frag=config/mh-sysv; files=sysdep-aix.h ;;
+  *-ibm-aix*)		host_makefile_frag=config/mh-sysv ;;
+  m68k-sony-news*)					files=sysdep-obsd.h ;;
+  *-*-bsd*)						files=sysdep-obsd.h ;;
+  *-*-mach*)						files=sysdep-obsd.h ;;
+  *-*-sunos3*)						files=sysdep-obsd.h ;;
+  *-*-ultrix2*)						files=sysdep-obsd.h ;;
 esac
 
 # per-target:

@@ -1,3 +1,7 @@
+Mon Jun 14 14:28:55 1993  Jim Kingdon  (kingdon@eric)
+
+	* configure.in (m88k-*-sysvr4*): Use sysdep-norm.h.
+
 Sun Jun 13 13:04:09 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* Makefile.in ({real,dist}clean): Remove sysdep.h.
