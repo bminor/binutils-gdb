@@ -55,7 +55,7 @@ LD_FOR_TARGET = `\
     echo $(target_alias)-ld ; \
   fi`
 
-RUNOPTS = --memory-size=0x1000000
+RUNOPTS = 
 
 RUN_FOR_TARGET = `\
   if [ -x ../../../sim/mips/run ]; then \
@@ -84,8 +84,7 @@ TESTS = \
 	t-pke2.vif1ok \
 	t-pke3.c \
 	t-pke3.run \
-	t-pke3.ok \
-	t-pke4.ok
+	t-pke3.ok
 
 check: sanity $(TESTS)
 sanity:

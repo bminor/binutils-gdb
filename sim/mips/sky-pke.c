@@ -13,11 +13,7 @@
 #include "sky-vu0.h"
 #include "sky-vu1.h"
 #include "sky-gpuif.h"
-
-
-/* Imported functions */
-
-void device_error (device *me, char* message);  /* device.c */
+#include "sky-device.h"
 
 
 /* Internal function declarations */
@@ -526,7 +522,24 @@ pke_issue(SIM_DESC sd, struct pke_device* me)
   unsigned_4 cmd, intr, num;
   unsigned_4 imm;
 
-  /* 1 -- test go / no-go for PKE execution */
+  /* 1 -- fetch PKE instruction */
+
+  /* confirm availability of new quadword of PKE instructions */
+  if(me->fifo_num_elements <= me->fifo_pc)
+    return;
+
+  /* skip over DMA tag, if present */
+  pke_pc_advance(me, 0);
+
+  /* "fetch" instruction quadword and word */ 
+  fqw = & me->fifo[me->fifo_pc];
+  fw = fqw->data[me->qw_pc];
+
+  /* store word in PKECODE register */
+  me->regs[PKE_REG_CODE][0] = fw;
+
+
+  /* 2 -- test go / no-go for PKE execution */
 
   /* switch on STAT:PSS if PSS-pending and in idle state */
   if((PKE_REG_MASK_GET(me, STAT, PPS) == PKE_REG_STAT_PPS_IDLE) &&
@@ -542,118 +555,109 @@ pke_issue(SIM_DESC sd, struct pke_device* me)
      /* PEW bit not a reason to keep stalling - it's re-checked below */
      /* PGW bit not a reason to keep stalling - it's re-checked below */
      /* maskable stall controls: ER0, ER1, PIS */
-     (PKE_REG_MASK_GET(me, STAT, ER0) && !PKE_REG_MASK_GET(me, ERR, ME0)) ||
-     (PKE_REG_MASK_GET(me, STAT, ER1) && !PKE_REG_MASK_GET(me, ERR, ME1)) ||
-     (PKE_REG_MASK_GET(me, STAT, PIS) && !PKE_REG_MASK_GET(me, ERR, MII)))
+     PKE_REG_MASK_GET(me, STAT, ER0) ||
+     PKE_REG_MASK_GET(me, STAT, ER1) ||
+     PKE_REG_MASK_GET(me, STAT, PIS))
     {
-      /* try again next cycle; no state change */
+      /* (still) stalled */
+      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
+      /* try again next cycle */
       return;
     }
 
-  /* confirm availability of new quadword of PKE instructions */
-  if(me->fifo_num_elements <= me->fifo_pc)
-    return;
-
-
-  /* 2 -- fetch PKE instruction */
-
-  /* skip over DMA tag, if present */
-  pke_pc_advance(me, 0);
-
-  /* "fetch" instruction quadword and word */ 
-  fqw = & me->fifo[me->fifo_pc];
-  fw = fqw->data[me->qw_pc];
-
-  /* store word in PKECODE register */
-  me->regs[PKE_REG_CODE][0] = fw;
-
 
   /* 3 -- decode PKE instruction */
-
-  /* PKE instruction format: [intr 0:0][pke-command 6:0][num 7:0][immediate 15:0],
-     so op-code is in top byte. */
-  intr = BIT_MASK_GET(fw, PKE_OPCODE_I_B,   PKE_OPCODE_I_E);
-  cmd  = BIT_MASK_GET(fw, PKE_OPCODE_CMD_B, PKE_OPCODE_CMD_E);
-  num  = BIT_MASK_GET(fw, PKE_OPCODE_NUM_B, PKE_OPCODE_NUM_E);
-  imm  = BIT_MASK_GET(fw, PKE_OPCODE_IMM_B, PKE_OPCODE_IMM_E);
-
-  /* handle interrupts */
-  if(intr)
-    {
-      /* are we resuming an interrupt-flagged instruction? */
-      if(me->flags & PKE_FLAG_INT_NOLOOP)
-	{
-	  /* clear loop-prevention flag */
-	  me->flags &= ~PKE_FLAG_INT_NOLOOP;
-	  /* mask interrupt bit from instruction word so re-decoded instructions don't stall */
-	  BIT_MASK_SET(fw, PKE_OPCODE_I_B, PKE_OPCODE_I_E, 0);
-	  intr = 0;
-	}
-      else /* new interrupt-flagged instruction */
-	{
-	  /* set INT flag in STAT register */
-	  PKE_REG_MASK_SET(me, STAT, INT, 1);
-	  /* set loop-prevention flag */
-	  me->flags |= PKE_FLAG_INT_NOLOOP;
-
-	  /* XXX: send interrupt to 5900? */
-	}
-    }
 
   /* decoding */
   if(PKE_REG_MASK_GET(me, STAT, PPS) == PKE_REG_STAT_PPS_IDLE)
     PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_DECODE);
 
-  /* handle [new - first time] interrupts */
+  /* Extract relevant bits from PKEcode */
+  intr = BIT_MASK_GET(fw, PKE_OPCODE_I_B,   PKE_OPCODE_I_E);
+  cmd  = BIT_MASK_GET(fw, PKE_OPCODE_CMD_B, PKE_OPCODE_CMD_E);
+
+  /* handle interrupts */
   if(intr)
     {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      /* presume stall state follows; only PKEMARK may go ahead anyway */
+      /* are we resuming an interrupt-stalled instruction? */
+      if(me->flags & PKE_FLAG_INT_NOLOOP)
+	{
+	  /* clear loop-prevention flag */
+	  me->flags &= ~PKE_FLAG_INT_NOLOOP;
+
+	  /* fall through to decode & execute */
+	  /* The pke_code_* functions should not check the MSB in the
+             pkecode. */
+	}
+      else /* new interrupt-flagged instruction */
+	{
+	  /* XXX: send interrupt to 5900? */
+
+	  /* set INT flag in STAT register */
+	  PKE_REG_MASK_SET(me, STAT, INT, 1);
+	  /* set loop-prevention flag */
+	  me->flags |= PKE_FLAG_INT_NOLOOP;
+
+	  /* set PIS if stall not masked */
+	  if(!PKE_REG_MASK_GET(me, ERR, MII))
+	    PKE_REG_MASK_SET(me, STAT, PIS, 1);
+
+	  /* suspend this instruction unless it's PKEMARK */
+	  if(!IS_PKE_CMD(cmd, PKEMARK))
+	    {
+	      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
+	      return;
+	    }
+	  else
+	    {
+	      ; /* fall through to decode & execute */
+	    }
+	}
     }
 
+
   /* decode & execute */
-  if(IS_PKE_CMD(cmd, PKENOP) && !intr)
+  if(IS_PKE_CMD(cmd, PKENOP))
     pke_code_nop(me, fw);
-  else if(IS_PKE_CMD(cmd, STCYCL) && !intr)
+  else if(IS_PKE_CMD(cmd, STCYCL))
     pke_code_stcycl(me, fw);
-  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, OFFSET) && !intr)
+  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, OFFSET))
     pke_code_offset(me, fw);
-  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, BASE) && !intr)
+  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, BASE))
     pke_code_base(me, fw);
-  else if(IS_PKE_CMD(cmd, ITOP) && !intr)
+  else if(IS_PKE_CMD(cmd, ITOP))
     pke_code_itop(me, fw);
-  else if(IS_PKE_CMD(cmd, STMOD) && !intr)
+  else if(IS_PKE_CMD(cmd, STMOD))
     pke_code_stmod(me, fw);
-  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, MSKPATH3) && !intr)
+  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, MSKPATH3))
     pke_code_mskpath3(me, fw);
   else if(IS_PKE_CMD(cmd, PKEMARK))
     pke_code_pkemark(me, fw);
-  else if(IS_PKE_CMD(cmd, FLUSHE) && !intr)
+  else if(IS_PKE_CMD(cmd, FLUSHE))
     pke_code_flushe(me, fw);
-  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, FLUSH) && !intr)
+  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, FLUSH))
     pke_code_flush(me, fw);
-  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, FLUSHA) && !intr)
+  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, FLUSHA))
     pke_code_flusha(me, fw);
-  else if(IS_PKE_CMD(cmd, PKEMSCAL) && !intr)
+  else if(IS_PKE_CMD(cmd, PKEMSCAL))
     pke_code_pkemscal(me, fw);
-  else if(IS_PKE_CMD(cmd, PKEMSCNT) && !intr)
+  else if(IS_PKE_CMD(cmd, PKEMSCNT))
     pke_code_pkemscnt(me, fw);
-  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, PKEMSCALF) && !intr)
+  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, PKEMSCALF))
     pke_code_pkemscalf(me, fw);
-  else if(IS_PKE_CMD(cmd, STMASK) && !intr)
+  else if(IS_PKE_CMD(cmd, STMASK))
     pke_code_stmask(me, fw);
-  else if(IS_PKE_CMD(cmd, STROW) && !intr)
+  else if(IS_PKE_CMD(cmd, STROW))
     pke_code_strow(me, fw);
-  else if(IS_PKE_CMD(cmd, STCOL) && !intr)
+  else if(IS_PKE_CMD(cmd, STCOL))
     pke_code_stcol(me, fw);
-  else if(IS_PKE_CMD(cmd, MPG) && !intr)
+  else if(IS_PKE_CMD(cmd, MPG))
     pke_code_mpg(me, fw);
-  else if(IS_PKE_CMD(cmd, DIRECT) && !intr)
+  else if(IS_PKE_CMD(cmd, DIRECT))
     pke_code_direct(me, fw);
-  else if(IS_PKE_CMD(cmd, DIRECTHL) && !intr)
+  else if(IS_PKE_CMD(cmd, DIRECTHL))
     pke_code_directhl(me, fw);
-  else if(IS_PKE_CMD(cmd, UNPACK) && !intr)
+  else if(IS_PKE_CMD(cmd, UNPACK))
     pke_code_unpack(me, fw);
   /* ... no other commands ... */
   else
@@ -786,7 +790,12 @@ pke_pc_fifo(struct pke_device* me, int operand_num, unsigned_4** operand)
       if(fq->word_class[new_qw_pc] == wc_dma)
 	{
 	  /* mismatch error! */
-	  PKE_REG_MASK_SET(me, STAT, ER0, 1);
+	  if(! PKE_REG_MASK_GET(me, ERR, ME0))
+	    {
+	      PKE_REG_MASK_SET(me, STAT, ER0, 1);
+	      /* don't stall just yet -- finish this instruction */
+	      /* the PPS_STALL state will be entered by pke_issue() next time */
+	    }
 	  /* skip by going around loop an extra time */
 	  num ++;
 	}
@@ -1604,7 +1613,7 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
     n = num;
   else
     n = cl * (num/wl) + PKE_LIMIT(num % wl, cl);
-  num_operands = ((32 >> vl) * (vn+1) * n)/32;
+  num_operands = (31 + (32 >> vl) * (vn+1) * n)/32; /* round up to next word */
   
   /* confirm that FIFO has enough words in it */
   if(num_operands > 0)
@@ -1662,14 +1671,16 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 	      /* map zero to max+1 */
 	      int addrwl = (wl == 0) ? 0x0100 : wl;
 	      vu_addr = vu_addr_base + 16 * (BIT_MASK_GET(imm, 0, 9) +
-					     (r ? PKE_REG_MASK_GET(me, TOPS, TOPS) : 0) +
-					     cl*(vector_num_out/addrwl) +
-					     (vector_num_out%addrwl));
+					     (vector_num_out / addrwl) * cl +
+					     (vector_num_out % addrwl));
 	    }
 	  else
 	    vu_addr = vu_addr_base + 16 * (BIT_MASK_GET(imm, 0, 9) +
-					   (r ? PKE_REG_MASK_GET(me, TOPS, TOPS) : 0) +
 					   vector_num_out);
+	  
+	  /* handle "R" double-buffering bit */
+	  if(r)
+	    vu_addr += 16 * PKE_REG_MASK_GET(me, TOPS, TOPS);
 
 	  /* check for vu_addr overflow */
 	  while(vu_addr >= vu_addr_base + vu_addr_max_size)
@@ -1693,7 +1704,7 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 	  /* For cyclic unpack, next operand quadword may come from instruction stream
 	     or be zero. */
 	  if((num == 0 && cl == 0 && wl == 0) || /* shortcut clear */
-	     ((cl < wl) && ((vector_num_out % wl) >= cl))) /* wl != 0, set above */
+	     ((cl < wl) && ((vector_num_out % wl) >= cl))) /* && short-circuit asserts wl != 0 */
 	    {
 	      /* clear operand - used only in a "indeterminate" state */
 	      for(i = 0; i < 4; i++)
@@ -1743,6 +1754,10 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 		  else
 		    unpacked_data[i] = SEXT32(operand, unitbits-1);
 		}
+
+	      /* clear remaining top words in vector */
+	      for(; i<4; i++)
+		unpacked_data[i] = 0;
 
 	      /* consumed a vector from the PKE instruction stream */
 	      vector_num_in ++;
@@ -1863,9 +1878,17 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 void
 pke_code_error(struct pke_device* me, unsigned_4 pkecode)
 {
-  /* set ER1 flag in STAT register */
-  PKE_REG_MASK_SET(me, STAT, ER1, 1);
+  if(! PKE_REG_MASK_GET(me, ERR, ME1))
+    {
+      /* set ER1 flag in STAT register */
+      PKE_REG_MASK_SET(me, STAT, ER1, 1);
+      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
+    }
+  else
+    {
+      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
+    }
+
   /* advance over faulty word */
-  PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
   pke_pc_advance(me, 1);
 }

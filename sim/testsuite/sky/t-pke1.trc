@@ -1,6 +1,7 @@
 # PKE tests from SCEI PKE simulator
 # Converted by FChE using emacs macros from "sce-project/scei/pke/sample/tsv432.in"
 # Regenerated with word classification using PKE trace output.
+# [test.code.unpack] [test.unpack.V4_32]
 0 0x55555555_20000000_00000000_31000066 0x00000000 .PDD
 0 0x0000ffff_0000ffff_0000ffff_30000000 0x00000000 ...P
 0 0x30000000_7c000000_01000000_0000ffff 0x00000000 PPP.

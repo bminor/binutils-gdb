@@ -310,13 +310,22 @@ sim_open (kind, cb, abfd, argv)
      are the kernel spaces K0 & K1.  Both of these map to a single
      smaller sub region */
   sim_do_command(sd," memory region 0x7fff8000,0x8000") ; /* MTZ- 32 k stack */
+/* start-sanitize-sky */
+#ifndef TARGET_SKY
+/* end-sanitize-sky */
   sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx%%0x%lx,0x%0x",
 		   K1BASE, K0SIZE,
 		   MEM_SIZE, /* actual size */
 		   K0BASE);
-#ifdef TARGET_SKY
-  sim_do_command (sd, "memory region 0x00000000,0x00100000"); /* 1M */
+/* start-sanitize-sky */
+#else
+  sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx%%0x%lx,0x%0x,0x%0x",
+		   K1BASE, K0SIZE,
+		   MEM_SIZE, /* actual size */
+		   K0BASE, 
+		   0); /* add alias at 0x0000 */
 #endif
+/* end-sanitize-sky */
 
   device_init(sd);
 

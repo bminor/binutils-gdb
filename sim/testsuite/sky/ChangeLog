@@ -1,3 +1,19 @@
+Fri Mar  6 17:30:31 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* t-pke4.run: Removed test, since it succeeds yet returns a
+ 	non-zero exit code.
+
+	* Makefile.in (RUNOPTS): Removed --memory-size flag, made
+ 	unnecessary by sim/mips/interp.c changes.
+	(TESTS): Removed t-pke4.ok target.
+
+	* t-pke3.trc: Classified tests with [---] indicators, to match
+ 	items up with entries documented in testplan.sgml.  Added numerous
+ 	additional tests.  They assert behavior that assumes certain
+ 	favorable answers to PKE question set #6 to SCEI.
+
+	* t-pke1.trc: Added some [---] indicators.
+
 Mon Mar  2 18:54:26 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* t-pke3.trc: Added FLUSH* / PKEMS* tests.

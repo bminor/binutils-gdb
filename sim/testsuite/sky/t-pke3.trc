@@ -1,8 +1,7 @@
-# PKE tests for code coverage
+# PKE tests for code coverage / functional testing
 #
 #
-#
-# ---- STCYCL/CYCLE ----
+# ---- STCYCL/CYCLE ---- [test.code.stcycl]
 #
 # Test STCYCL instruction
 0 0x0100fedc_00000000_00000000_00000000 0x00000000 PPPP
@@ -14,7 +13,25 @@
 ? 0x10003800 0x00000000 0x00002000
 #
 #
-# ---- OFFSET/OFST ----
+# ---- BASE/BASE ---- [test.code.base] [test.dbf.base]
+#
+# Read TOPS register; confirm original TOPS
+? 0x10003cc0 0x00000000 0xffffffff
+# Test BASE instruction on PKE1
+1 0x0300fedc_00000000_00000000_00000000 0x00000000 PPPP
+# Attempt erroneous write to BASE register
+! 0x10003ca0 0x0000dead
+# Read BASE register; confirm proper 10-bit value
+? 0x10003ca0 0x000002dc 0xffffffff
+# Read TOPS register; confirm unmodified TOPS
+? 0x10003cc0 0x00000000 0xffffffff
+# Read STAT register; confirm DBF=0
+? 0x10003c00 0x00000000 0x00000080
+# Read DBF register; confirm DBF=0
+? 0x10003cf0 0x00000000 0x00000001
+#
+#
+# ---- OFFSET/OFST ---- [test.code.offset] [test.dbf.offset]
 #
 # Test OFFSET instruction on PKE1
 1 0x0200ffff_00000000_00000000_00000000 0x00000000 PPPP
@@ -22,6 +39,8 @@
 ! 0x10003cb0 0x0000dead
 # Read OFST register; confirm proper 10-bit value
 ? 0x10003cb0 0x000003ff 0xffffffff
+# Read TOPS register; confirm recomputed TOPS
+? 0x10003cc0 0x000002dc 0xffffffff
 # Read STAT register; confirm DBF=0
 ? 0x10003c00 0x00000000 0x00000080
 # Read DBF register; confirm DBF=0
@@ -30,21 +49,7 @@
 ? 0x10003c00 0x00000000 0x00002000
 #
 #
-# ---- BASE/BASE ----
-#
-# Test BASE instruction on PKE1
-1 0x0300ffff_00000000_00000000_00000000 0x00000000 PPPP
-# Attempt erroneous write to BASE register
-! 0x10003ca0 0x0000dead
-# Read BASE register; confirm proper 10-bit value
-? 0x10003ca0 0x000003ff 0xffffffff
-# Read STAT register; confirm DBF=0
-? 0x10003c00 0x00000000 0x00000080
-# Read DBF register; confirm DBF=0
-? 0x10003cf0 0x00000000 0x00000001
-#
-#
-# ---- ITOP/ITOPS ----
+# ---- ITOP/ITOPS ---- [test.code.itop]
 #
 # Test ITOP instruction
 0 0x0400ffff_00000000_00000000_00000000 0x00000000 PPPP
@@ -56,7 +61,7 @@
 ? 0x10003800 0x00000000 0x00002000
 #
 #
-# ---- STMOD/MODE ----
+# ---- STMOD/MODE ---- [test.code.stmod]
 #
 # Test STMOD instruction
 0 0x05000003_00000000_00000000_00000000 0x00000000 PPPP
@@ -72,7 +77,7 @@
 ? 0x10003800 0x00000000 0x00002000
 #
 #
-# ---- STMARK/MARK ----
+# ---- STMARK/MARK ---- [test.code.stmark]
 #
 # Test MARK instruction
 0 0x0700abcd_00000000_00000000_00000000 0x00000000 PPPP
@@ -88,15 +93,15 @@
 ? 0x10003830 0x00001234 0xffffffff
 #
 #
-# ---- bad PKEcode/ER1, interrupts ----
+# ---- bad PKEcode/ER1, interrupts ---- [test.code.bad] [test.stall.er1]
 #
 # A bad PKEcode
-1 0x00000000_00000000_00000000_08000000 0x00000000 PPPP
+1 0x00000000_00000000_01000001_08000000 0x00000000 PPPP
 # should put PKE into stalled mode, not executing following PKENOPs
 # Read STAT register; confirm ER1 bit set
 ? 0x10003c00 0x00002000 0x00002000
-# Read CODE register; confirm PKE is stuck at bad code
-? 0x10003c80 0x08000000 0xffffffff
+# Read CODE register; confirm PKE is stuck just after bad code
+? 0x10003c80 0x01000001 0xffffffff
 # Reset PKE
 ! 0x10003c10 0x00000001
 # Read STAT register; confirm ER1 no longer set
@@ -107,32 +112,56 @@
 # A bad PKEcode with ER1 masked
 1 0x00000000_00000000_00000000_08000000 0x00000000 PPPP
 # should not put PKE into stalled mode, should execute following PKENOPs
-# Read STAT register; confirm ER1 bit set
-? 0x10003c00 0x00002000 0x00002000
+# Read STAT register; confirm ER1 bit not set
+? 0x10003c00 0x00000000 0x00002000
 # Read CODE register; confirm PKE went past bad code
 ? 0x10003c80 0x00000000 0xffffffff
 # Reset PKE
 ! 0x10003c10 0x00000001
-# Read STAT register; confirm ER1 no longer set
-? 0x10003c00 0x00000000 0x00002000
 #
-#
+# [test.stall.pis] [test.stall.int]
 # A good PKEcode (STMOD) with interrupt
-1 0x00000000_00000000_00000000_85000000 0x00000000 PPPP
+1 0x01000000_00000000_00000000_85000000 0x00000000 PPPP
 # should put PKE into stalled mode, not executing following PKENOPs
-# Read STAT register; confirm PIS & INT bits set
-? 0x10003c00 0x00000c00 0x00000c00
+# Read STAT register; confirm PIS & INT bits set, no ER1
+? 0x10003c00 0x00000c00 0x00002c00
 # Read CODE register; confirm PKE is stuck at bad code
 ? 0x10003c80 0x85000000 0xffffffff
 # Resume PKE with STC
 ! 0x10003c10 0x00000008
-# Read STAT register; confirm PIS & INT no longer set
-? 0x10003c00 0x00000000 0x00000c00
-# Read CODE register; confirm PKE executed trailing no-ops
-? 0x10003c80 0x00000000 0xffffffff
+# Read STAT register; confirm PIS & INT no longer set, no ER1
+? 0x10003c00 0x00000000 0x00002c00
+# Read CODE register; confirm PKE executed last instruction
+? 0x10003c80 0x01000000 0xffffffff
+#
+# [test.stall.pis] [test.stall.int] [test.stall.int-masked]
+# Mask INT stall: set ERR:MII
+! 0x10003c20 0x00000001
+# A good PKEcode (STMOD) with interrupt
+1 0x01000001_00000000_00000000_85000000 0x00000000 PPPP
+# should NOT put PKE into stalled mode
+# Read STAT register; confirm INT bits set but no PIS, and no ER1
+? 0x10003c00 0x00000800 0x00002c00
+# Read CODE register; confirm PKE executed last instruction
+? 0x10003c80 0x01000001 0xffffffff
+#
+# [test.stall.int-mark]
+# Reset the PKE, unmasking interrupt
+! 0x10003c10 0x00000001
+# A good PKEcode (PKEMARK) with interrupt
+1 0x01000002_01000001_0100000f_8700b00f 0x00000000 PPPP
+# should NOT put PKE into stalled mode
+# Read MARK register; confirm its value
+? 0x10003c30 0x0000b00f 0xffffffff
+# Read STAT register; confirm INT & PIS bits are set, and no ER1
+? 0x10003c00 0x00000c00 0x00002c00
+# Read CODE register; confirm PKE is stalled with following NOP instruction
+? 0x10003c80 0x0100000f 0xffffffff
+# Reset the PKE
+! 0x10003c10 0x00000001
 #
 #
-# ---- STMASK/MASK ----
+# ---- STMASK/MASK ---- [test.code.stmask]
 #
 # Test STMASK instruction; leave operand out for now
 0 0x20000000_00000000_00000000_00000000 0x00000000 PPPP
@@ -148,7 +177,7 @@
 ? 0x10003800 0x00000000 0x00002000
 #
 #
-# ---- DIRECT ----
+# ---- DIRECT/DIRECTHL ---- [test.code.direct] [test.code.directhl]
 #
 # Test DIRECT instruction; leave operand out for now
 1 0x50000001_00000000_00000000_00000000 0x00000000 PPPP
@@ -164,16 +193,16 @@
 ! 0x10003c10 0x00000001
 # Read STAT register; confirm ER1 no longer set
 ? 0x10003c00 0x00000000 0x00002000
-# Test DIRECT instruction with bad operand alignment
-1 0x00000000_00000000_50000001_00000000 0x00000000 PPPP
+# Test DIRECTHL instruction with bad operand alignment
+1 0x00000000_00000000_51000001_00000000 0x00000000 PPPP
 # Read STAT register; confirm ER1 bit set
 ? 0x10003c00 0x00002000 0x00002000
 # Reset PKE
 ! 0x10003c10 0x00000001
 # Read STAT register; confirm ER1 no longer set
 ? 0x10003c00 0x00000000 0x00002000
-# Test DIRECT instruction with bad operand alignment
-1 0x00000000_00000000_00000000_50000001 0x00000000 PPPP
+# Test DIRECTHL instruction with bad operand alignment
+1 0x00000000_00000000_00000000_51000001 0x00000000 PPPP
 # Read STAT register; confirm ER1 bit set
 ? 0x10003c00 0x00002000 0x00002000
 # Reset PKE
@@ -182,7 +211,7 @@
 ? 0x10003c00 0x00000000 0x00002000
 #
 #
-# ---- MPG - PKE0 ----
+# ---- MPG - PKE0 ---- [test.code.mpg]
 #
 # Test MPG instruction; leave operand out for now
 0 0x4a080000_00000000_00000000_00000000 0x00000000 PPPP
@@ -230,7 +259,7 @@
 ? 0x10003800 0x00000000 0x00002000
 #
 #
-# ---- MPG - PKE1 ----
+# ---- MPG - PKE1 ---- [test.code.mpg]
 #
 # Test MPG instruction; leave operand out for now
 1 0x4a080000_00000000_00000000_00000000 0x00000000 PPPP
@@ -278,19 +307,24 @@
 ? 0x10003c00 0x00000000 0x00002000
 #
 #
-# ---- STROW/ROW + DMA mismatch ----
+# ---- STROW/ROW + DMA mismatch ---- [test.code.strow] [test.dma.er0]
 #
+# Don't mask anything (including ER0)
+! 0x10003820 0x00000000
 # Test STROW instruction; leave operand out for now
 0 0x30000000_00000000_00000000_00000000 0x00000000 PPPP
 # Read STAT register; confirm PPS field set at WAIT
 ? 0x10003800 0x00000001 0x00000003
-# Write ERR register; mask ER0 stalling
-! 0x10003820 0x00000002
 # Supply operand - four words
 0 0x1234abcd_2345bcde_ffffffff_ffffffff 0x00000000 ..DD
-0 0x00000000_00000000_5432dcba_76543210 0x00000000 PP..
 # Read STAT register; confirm ER0 (DMA mismatch)
 ? 0x10003800 0x00001000 0x00001000
+# Confirm that PKE is stalled at STROW instruction
+? 0x10003880 0x30000000 0xffffffff
+# Supply final few operand words
+0 0x00000000_01000020_5432dcba_76543210 0x00000000 PP..
+# Resume PKE with STC
+! 0x10003810 0x00000008
 # Make erroneous write
 ! 0x10003900 0x11111111
 ! 0x10003910 0x22222222
@@ -301,13 +335,11 @@
 ? 0x10003910 0x1234abcd 0xffffffff
 ? 0x10003920 0x76543210 0xffffffff
 ? 0x10003930 0x5432dcba 0xffffffff
-# Read STAT register; confirm ER1 not set
-? 0x10003800 0x00000000 0x00002000
 # Reset PKE
 ! 0x10003810 0x00000001
 #
 #
-# ---- STCOL/COL + STOP/CONTINUE ----
+# ---- STCOL/COL + STOP/CONTINUE ---- [test.code.stcol] [test.stall.fbk] [test.stall.pfs]
 #
 # Test STCOL instruction; leave operand out for now
 0 0x31000000_00000000_00000000_00000000 0x00000000 PPPP
@@ -334,6 +366,7 @@
 ? 0x10003800 0x00000000 0x00002000
 #
 # Try stopping using STP bit this time
+# [test.stall.stp]  [test.stall.wait] [test.stall.pss]
 # Test STCOL instruction; leave operand out for now
 1 0x31000000_00000000_00000000_00000000 0x00000000 PPPP
 # Read STAT register; confirm PPS field set at WAIT
@@ -365,10 +398,11 @@
 ? 0x10003c00 0x00000000 0x00002000
 #
 #
-# ---- MSKPATH3 ----
+# ---- MSKPATH3 ---- [test.code.mskpath3]
 #
 # Set then clear MSKPATH3 on PKE1
 1 0x06008000_00000000_06000000_00000000 0x00000000 PPPP
+# XXX: test M3P register of GPUIF XXX
 # Read STAT register; confirm ER1 not set
 ? 0x10003c00 0x00000000 0x00002000
 # Erroneously run this on PKE0
@@ -379,7 +413,7 @@
 ! 0x10003810 0x00000001
 #
 #
-# ---- memory-mapped port reading ----
+# ---- memory-mapped port reading ---- [test.mmap]
 #
 # Erroneously read words from FIFO ports
 ? 0x10004000 0x00000000 0xffffffff
@@ -432,8 +466,18 @@
 ! 0x10003d60 0x00000000
 ! 0x10003d70 0x00000000
 #
+# Erroneously read/write words between registers
+! 0x10003c14 0xffffffff
+! 0x10003c18 0xffffffff
+! 0x10003c1c 0xffffffff
+! 0x10003874 0xffffffff
+! 0x10003884 0xffffffff
+! 0x100038fc 0xffffffff
 #
-# ---- FLUSH/FLUSHE/FLUSHA & CALL/CALLF/CONT ----
+#
+# ---- FLUSH/FLUSHE/FLUSHA & CALL/CALLF/CONT ---- [test.code.flush] [test.code.flushe]
+# [test.code.flusha] [test.code.pkemscal] [test.code.pkemscalf] [test.code.pkemscnt]
+# [test.stall.vu]
 #
 # Load a bunch of NOP[e]/NOP instructions into the VU
 # 0x000002ff_8000033c == NOP NOP
@@ -447,6 +491,8 @@
 1 0x400002ff_8000033c_000002ff_8000033c 0x00000000 ....
 # Start VU; FLUSH
 1 0x10000000_14000000_00000000_00000000 0x00000000 PPPP
+# Assert PEW bit on while waiting for VU
+? 0x10003c00 0x00000004 0x00000004
 # Send a few more NOPs to let VU get to first END
 1 0x00000000_00000000_00000000_00000000 0x00000000 PPPP
 1 0x00000000_00000000_00000000_00000000 0x00000000 PPPP
@@ -472,4 +518,99 @@
 1 0x00000000_00000000_00000000_00000000 0x00000000 PPPP
 # Assert VU is in idle state
 ? 0x110073d0 0x00000000 0x00000200
-
+#
+#
+# ---- DBF ---- [test.code.base] [test.code.offset] [test.dbf]
+# [test.code.pkemscal] [test.code.pkemscalf] [test.code.pkemscnt]
+#
+# Load a bunch of NOP[e]/NOP instructions into the VU
+# 0x000002ff_8000033c == NOP NOP
+# 0x400002ff_8000033c == NOP[e] NOP
+# MPG 10 instructions with lots of ENDs
+1 0x4a0a0000_00000000_00000000_00000000 0x00000000 PPPP
+1 0x400002ff_8000033c_000002ff_8000033c 0x00000000 ....
+1 0x000002ff_8000033c_000002ff_8000033c 0x00000000 ....
+1 0x000002ff_8000033c_400002ff_8000033c 0x00000000 ....
+1 0x400002ff_8000033c_000002ff_8000033c 0x00000000 ....
+1 0x000002ff_8000033c_000002ff_8000033c 0x00000000 ....
+# Load BASE & OFFSET registers; stick in some DMA tags too [test.dma]
+1 0x02000200_03000100_77777777_77777777 0x00000000 PPDD
+# Confirm BASE & OFFSET & TOPS & TOP & DBF registers
+? 0x10003ca0 0x00000100 0xffffffff
+? 0x10003cb0 0x00000200 0xffffffff
+? 0x10003cc0 0x00000100 0xffffffff
+? 0x10003ce0 0x00000000 0xffffffff
+? 0x10003cf0 0x00000000 0xffffffff
+# Make one CALL
+1 0x00000000_00000000_00000000_14000000 0x00000000 PPPP
+# Confirm TOP & DBF & TOPS registers after DBF flip
+? 0x10003ce0 0x00000100 0xffffffff
+? 0x10003cf0 0x00000001 0xffffffff
+? 0x10003cc0 0x00000300 0xffffffff
+# Make one CALLF
+1 0x00000000_00000000_00000000_15000000 0x00000000 PPPP
+# Confirm TOP & DBF & TOPS registers after DBF flip
+? 0x10003ce0 0x00000300 0xffffffff
+? 0x10003cf0 0x00000000 0xffffffff
+? 0x10003cc0 0x00000100 0xffffffff
+# Make one CONT
+1 0x00000000_00000000_00000000_17000000 0x00000000 PPPP
+# Confirm TOP & DBF & TOPS registers after DBF flip
+? 0x10003ce0 0x00000100 0xffffffff
+? 0x10003cf0 0x00000001 0xffffffff
+? 0x10003cc0 0x00000300 0xffffffff
+#
+#
+# ---- MPG/UNPACK address overflow tests ---- [test.ext.mpgaddr]
+#
+# MPG to PKE0 near top of address range
+# [test.unpack.V3_32] [test.code.stcycl] [test.unpack.endian] [test.unpack.unsigned]
+# [test.unpack.no-r]
+0 0x6804ffff_01000000_77777777_55555555 0x00000000 PPDD
+0 0x33330333_22222022_11111101_ccccccc0 0x00000000 ....
+0 0x07777777_60666666_55055555_44404444 0x00000000 ....
+0 0xbbbb0bbb_aaaaa0aa_99999909_88888880 0x00000000 ....
+# Assert that all words were written correctly
+? 0x11004ff0 0xccccccc0 0xffffffff
+? 0x11004ff4 0x11111101 0xffffffff
+? 0x11004ff8 0x22222022 0xffffffff
+? 0x11004ffc 0x00000000 0xffffffff
+? 0x11004000 0x33330333 0xffffffff
+? 0x11004004 0x44404444 0xffffffff
+? 0x11004008 0x55055555 0xffffffff
+? 0x1100400c 0x00000000 0xffffffff
+? 0x11004010 0x60666666 0xffffffff
+? 0x11004014 0x07777777 0xffffffff
+? 0x11004018 0x88888880 0xffffffff
+? 0x1100401c 0x00000000 0xffffffff
+? 0x11004020 0x99999909 0xffffffff
+? 0x11004024 0xaaaaa0aa 0xffffffff
+? 0x11004028 0xbbbb0bbb 0xffffffff
+? 0x1100402c 0x00000000 0xffffffff
+#
+# MPG to PKE1 near top of PKE1 address range [test.unpack.V4_5]
+# [test.unpack.signed] [test.unpack.r]
+1 0x02000100_00000100_99999999_33333333 0x00000000 PPDD
+1 0x6f058eff_01000000_77777777_55555555 0x00000000 PPDD
+1 0x00000000_77779999_deadbeef_aaaa5555 0x00000000 P...
+# Assert that all words were written correctly
+? 0x1100fff0 0xfffffff5 0xffffffff
+? 0x1100fff4 0x0000000a 0xffffffff
+? 0x1100fff8 0xfffffff5 0xffffffff
+? 0x1100fffc 0x00000000 0xffffffff
+? 0x1100c000 0x0000000a 0xffffffff
+? 0x1100c004 0xfffffff5 0xffffffff
+? 0x1100c008 0x0000000a 0xffffffff
+? 0x1100c00c 0x00000001 0xffffffff
+? 0x1100c010 0x0000000f 0xffffffff
+? 0x1100c014 0xfffffff7 0xffffffff
+? 0x1100c018 0x0000000f 0xffffffff
+? 0x1100c01c 0x00000001 0xffffffff
+? 0x1100c020 0x0000000d 0xffffffff
+? 0x1100c024 0xfffffff5 0xffffffff
+? 0x1100c028 0xfffffff7 0xffffffff
+? 0x1100c02c 0x00000001 0xffffffff
+? 0x1100c030 0xfffffff9 0xffffffff
+? 0x1100c034 0x0000000c 0xffffffff
+? 0x1100c038 0x00000006 0xffffffff
+? 0x1100c03c 0x00000001 0xffffffff
