@@ -692,7 +692,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @multitable @columnfractions .20 .20 .20 .20
 @item @samp{i8086} @tab @samp{i186} @tab @samp{i286} @tab @samp{i386}
 @item @samp{i486} @tab @samp{i586} @tab @samp{i686} @tab @samp{pentium}
-@item @samp{pentiumpro} @tab @samp {pentium4} @tab @samp {k6} @tab @samp {athlon}
+@item @samp{pentiumpro} @tab @samp{pentium4} @tab @samp{k6} @tab @samp{athlon}
 @item @samp{sledgehammer}
 @end multitable
 
