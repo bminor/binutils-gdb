@@ -603,7 +603,8 @@ xcoff_read_internal_relocs (abfd, sec, cache, external_relocs,
       if (enclosing != NULL
 	  && (coff_section_data (abfd, enclosing) == NULL
 	      || coff_section_data (abfd, enclosing)->relocs == NULL)
-	  && cache)
+	  && cache
+	  && enclosing->reloc_count > 0)
 	{
 	  if (_bfd_coff_read_internal_relocs (abfd, enclosing, true,
 					      external_relocs, false,
@@ -1478,6 +1479,7 @@ xcoff_link_add_symbols (abfd, info)
 	  if (sym.n_sclass == C_EXT)
 	    {
 	      csect->flags |= SEC_IS_COMMON;
+	      csect->_raw_size = 0;
 	      section = csect;
 	      value = aux.x_csect.x_scnlen.l;
 	    }
@@ -1533,7 +1535,7 @@ xcoff_link_add_symbols (abfd, info)
 
 	  if (! (_bfd_generic_link_add_one_symbol
 		 (info, abfd, name, flags, section, value,
-		  (const char *) NULL, copy, false,
+		  (const char *) NULL, copy, true,
 		  (struct bfd_link_hash_entry **) sym_hash)))
 	    goto error_return;
 
@@ -1640,7 +1642,7 @@ xcoff_link_add_symbols (abfd, info)
 				 (info, abfd, hds->root.root.string,
 				  (flagword) 0, bfd_und_section_ptr,
 				  (bfd_vma) 0, (const char *) NULL, false,
-				  false,
+				  true,
 				  (struct bfd_link_hash_entry **) NULL)))
 			    goto error_return;
 			}
@@ -2576,6 +2578,18 @@ xcoff_build_ldsyms (h, p)
              because we may already have passed hds on the traversal.  */
 	  xcoff_build_ldsyms (hds, p);
 	}
+    }
+
+  /* If this is still a common symbol, and it wasn't garbage
+     collected, we need to actually allocate space for it in the .bss
+     section.  */
+  if (h->root.type == bfd_link_hash_common
+      && (! xcoff_hash_table (ldinfo->info)->gc
+	  || (h->flags & XCOFF_MARK) != 0)
+      && h->root.u.c.p->section->_raw_size == 0)
+    {
+      BFD_ASSERT (bfd_is_com_section (h->root.u.c.p->section));
+      h->root.u.c.p->section->_raw_size = h->root.u.c.size;
     }
 
   /* We need to add a symbol to the .loader section if it is mentioned
@@ -4790,6 +4804,14 @@ _bfd_ppc_xcoff_relocate_section (output_bfd, info, input_bfd,
 	      sec = h->root.u.def.section;
 	      val = (h->root.u.def.value
 		     + sec->output_section->vma
+		     + sec->output_offset);
+	    }
+	  else if (h->root.type == bfd_link_hash_common)
+	    {
+	      asection *sec;
+
+	      sec = h->root.u.c.p->section;
+	      val = (sec->output_section->vma
 		     + sec->output_offset);
 	    }
 	  else if ((h->flags & XCOFF_REF_DYNAMIC) != 0

@@ -506,6 +506,7 @@ xcoff_reloc_type_lookup (abfd, code)
     case BFD_RELOC_PPC_TOC16:
       return &xcoff_howto_table[3];
     case BFD_RELOC_32:
+    case BFD_RELOC_CTOR:
       return &xcoff_howto_table[0];
     default:
       return NULL;
@@ -1352,7 +1353,8 @@ const bfd_target rs6000coff_vec =
    HAS_SYMS | HAS_LOCALS | WP_TEXT),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-  0,				/* leading char */
+  /* Making the leading_char a period should make for nicer messages.  */
+  '.',				/* leading char */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen??? FIXMEmgo */
 
