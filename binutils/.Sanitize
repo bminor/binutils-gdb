@@ -65,7 +65,7 @@ ieee.c
 is-ranlib.c
 is-strip.c
 mac-binutils.r
-makefile.vms
+makefile.vms-in
 maybe-ranlib.c
 maybe-strip.c
 mpw-config.in

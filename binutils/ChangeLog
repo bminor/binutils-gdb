@@ -1,3 +1,9 @@
+Thu Jul  2 14:01:34 1998  Klaus Kaempf  <kkaempf@rmi.de>
+
+	* configure.com: Add vax/vms support. 
+	* makefile.vms-in: Renamed from makefile.vms.  Add substitutions
+	now done by configure.com.
+
 Wed Jul  1 20:43:52 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* stabs.c (parse_stab_range_type): Handle 4 and 8 byte signed
