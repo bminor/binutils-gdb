@@ -79,6 +79,7 @@
 #include "elf/or32.h"
 #include "elf/pj.h"
 #include "elf/ppc.h"
+#include "elf/ppc64.h"
 #include "elf/s390.h"
 #include "elf/sh.h"
 #include "elf/sparc.h"
@@ -1165,8 +1166,11 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	  break;
 
 	case EM_PPC:
-	case EM_PPC64:
 	  rtype = elf_ppc_reloc_type (type);
+	  break;
+
+	case EM_PPC64:
+	  rtype = elf_ppc64_reloc_type (type);
 	  break;
 
 	case EM_MIPS:
