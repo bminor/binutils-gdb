@@ -1,3 +1,14 @@
+Tue May  7 17:28:12 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* hw_pal.c (hw_pal_instance_read_callback): Remove unused
+	variable.
+
+	* misc.c ({,target_}a2i): Rewrite to not use strtoul.
+
+	* Makefile.in ({spreg,misc}.o): Add dependency on .c file.
+	({i,d}gen): Don't link in liberity.  Use BUILD_LIBS instead of
+	LIBS.
+
 Mon May  6 11:31:43 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* hw_pal.c (hw_pal_instance_read_callback): If using stdio, use
