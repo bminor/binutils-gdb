@@ -1,3 +1,7 @@
+2002-10-30  Daniel Jacobowitz  <drow@mvista.com>
+
+	* coffcode.h: Remove extraneous '\'.
+
 2002-10-28  H.J. Lu <hjl@gnu.org>
 
 	* Makefile.am (targets.lo): Depend on Makefile instead of
