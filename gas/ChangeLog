@@ -1,3 +1,18 @@
+Wed Jan 12 13:29:31 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* read.c (read_a_source_file): Cast array argument to unsigned
+	char.
+	* write.c (adjust_reloc_syms): Remove unused variable symseginfo.
+	(write_object_file): Don't define punt_it if it won't be used.
+	(fixup_segment): Don't define skip if it won't be used.
+
+	* config/tc-mips.h (TARGET_FORMAT): Define as mips_target_format.
+	(mips_target_format): Declare.
+	* config/tc-mips.c (mips_target_format): Define with appropriate
+	default definition.
+	(md_parse_option): If -EL or -EB is used, change byte_order and
+	mips_target_format as appropriate.
+
 Tue Jan 11 21:52:36 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* app.c (do_scrub_next_char): Another attempt to fix bugs
