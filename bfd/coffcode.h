@@ -1607,6 +1607,23 @@ coff_set_alignment_hook (abfd, section, scnhdr)
   pei_section_data (abfd, section)->pe_flags = hdr->s_flags;
 
   section->lma = hdr->s_vaddr;
+
+  /* check for extended relocs */
+  if (hdr->s_flags & IMAGE_SCN_LNK_NRELOC_OVFL)
+    {
+      struct external_reloc dst;
+      struct internal_reloc n;
+      int oldpos = bfd_tell (abfd);
+      bfd_seek (abfd, hdr->s_relptr, 0);
+      if (bfd_read ((PTR) & dst, 1, bfd_coff_relsz (abfd), abfd)
+	  != bfd_coff_relsz (abfd))
+	return;
+      
+      coff_swap_reloc_in (abfd, &dst, &n);
+      bfd_seek (abfd, oldpos, 0);
+      section->reloc_count =
+	hdr->s_nreloc = n.r_vaddr;
+    }
 }
 #undef ALIGN_SET
 #undef ELIFALIGN_SET
@@ -2336,6 +2353,22 @@ coff_write_relocs (abfd, first_undef)
 
       if (bfd_seek (abfd, s->rel_filepos, SEEK_SET) != 0)
 	return false;
+
+#ifdef COFF_WITH_PE
+      if (s->reloc_count > 0xffff)
+	{
+	  /* encode real count here as first reloc */
+	  struct internal_reloc n;
+	  memset ((PTR) & n, 0, sizeof (n));
+	  /* add one to count *this* reloc (grr) */
+	  n.r_vaddr = s->reloc_count + 1;
+	  coff_swap_reloc_out (abfd, &n, &dst);
+	  if (bfd_write ((PTR) & dst, 1, bfd_coff_relsz (abfd), abfd)
+	      != bfd_coff_relsz (abfd))
+	    return false;
+	}
+#endif
+
       for (i = 0; i < s->reloc_count; i++)
 	{
 	  struct internal_reloc n;
@@ -3176,7 +3209,7 @@ coff_write_object_contents (abfd)
   file_ptr reloc_base;
   file_ptr lineno_base;
   file_ptr sym_base;
-  unsigned long reloc_size = 0;
+  unsigned long reloc_size = 0, reloc_count = 0;
   unsigned long lnno_size = 0;
   boolean long_section_names;
   asection *text_sec = NULL;
@@ -3207,7 +3240,16 @@ coff_write_object_contents (abfd)
 
   for (current = abfd->sections; current != NULL; current =
        current->next)
-    reloc_size += current->reloc_count * bfd_coff_relsz (abfd);
+    {
+#ifdef COFF_WITH_PE
+      /* we store the actual reloc count in the first reloc's addr */
+      if (current->reloc_count > 0xffff)
+	reloc_count ++;
+#endif
+      reloc_count += current->reloc_count;
+    }
+
+  reloc_size = reloc_count * bfd_coff_relsz (abfd);
 
   lineno_base = reloc_base + reloc_size;
   sym_base = lineno_base + lnno_size;
@@ -3230,6 +3272,11 @@ coff_write_object_contents (abfd)
 	{
 	  current->rel_filepos = reloc_base;
 	  reloc_base += current->reloc_count * bfd_coff_relsz (abfd);
+#ifdef COFF_WITH_PE
+	  /* extra reloc to hold real count */
+	  if (current->reloc_count > 0xffff)
+	    reloc_base += bfd_coff_relsz (abfd);
+#endif
 	}
       else
 	{

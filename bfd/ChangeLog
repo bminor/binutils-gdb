@@ -1,3 +1,10 @@
+2000-10-05  DJ Delorie  <dj@redhat.com>
+
+	* peigen.c (_bfd_pei_swap_scnhdr_out): note extended relocs
+	* coffcode.h (coff_set_alignment_hook): read extended reloc count
+	(coff_write_relocs): write extended reloc count
+	(coff_write_object_contents): account for extended relocs
+
 2000-10-05  Jim Wilson  <wilson@cygnus.com>
 
 	* elf-bfd.h (struct elf_backend_data): Add elf_backend_section_flags

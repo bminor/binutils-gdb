@@ -991,12 +991,19 @@ _bfd_pei_swap_scnhdr_out (abfd, in, out)
 		      (bfd_byte *) scnhdr_ext->s_nreloc);
       else
 	{
-	  (*_bfd_error_handler) (_("%s: reloc overflow: 0x%lx > 0xffff"),
+	  /* PE can deal with large #s of relocs, but not here */
+	  bfd_h_put_16 (abfd, 0xffff, (bfd_byte *) scnhdr_ext->s_nreloc);
+	  scnhdr_int->s_flags |= IMAGE_SCN_LNK_NRELOC_OVFL;
+	  bfd_h_put_32(abfd, scnhdr_int->s_flags,
+		       (bfd_byte *) scnhdr_ext->s_flags);
+#if 0
+	  (*_bfd_error_handler) (_("%s: reloc overflow 1: 0x%lx > 0xffff"),
 				 bfd_get_filename (abfd),
 				 scnhdr_int->s_nreloc);
 	  bfd_set_error (bfd_error_file_truncated);
 	  bfd_h_put_16 (abfd, 0xffff, (bfd_byte *) scnhdr_ext->s_nreloc);
 	  ret = 0;
+#endif
 	}
     }
   return ret;
