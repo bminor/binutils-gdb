@@ -67,7 +67,7 @@ for this_target in $target $canon_targets ; do
       arm*)		cpu_type=arm endian=little ;;
       hppa*)		cpu_type=hppa ;;
 changequote(,)dnl
-      i[45]86)		cpu_type=i386 ;;
+      i[456]86)		cpu_type=i386 ;;
       m680[012346]0)	cpu_type=m68k ;;
       m68008)		cpu_type=m68k ;;
       m683??)		cpu_type=m68k ;;
@@ -293,8 +293,15 @@ changequote([,])dnl
 
     # do we need the opcodes library?
     case ${cpu_type} in
-      alpha | vax) ;;
-      *) need_opcodes=yes ;;
+      alpha | vax | i386)
+	;;
+      *)
+	need_opcodes=yes
+	if test "${shared}" = "true"; then
+	  # A shared libopcodes must be linked against libbfd.
+	  need_bfd=yes
+	fi
+	;;
     esac
 
     test -n "$want_sparc_v9" && AC_DEFINE(SPARC_V9)
