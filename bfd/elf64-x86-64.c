@@ -1745,6 +1745,24 @@ tpoff (struct bfd_link_info *info, bfd_vma address)
   return address - htab->tls_size - htab->tls_sec->vma;
 }
 
+/* Is the instruction before OFFSET in CONTENTS a 32bit relative
+   branch?  */
+
+static bfd_boolean
+is_32bit_relative_branch (bfd_byte *contents, bfd_vma offset)
+{
+  /* Opcode		Instruction
+     0xe8		call
+     0xe9		jump
+     0x0f 0x8x		conditional jump */
+  return ((offset > 0
+	   && (contents [offset - 1] == 0xe8
+	       || contents [offset - 1] == 0xe9))
+	  || (offset > 1
+	      && contents [offset - 2] == 0x0f
+	      && (contents [offset - 1] & 0xf0) == 0x80));
+}
+
 /* Relocate an x86_64 ELF section.  */
 
 static bfd_boolean
@@ -1950,13 +1968,26 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  if (info->shared
 	      && !SYMBOL_REFERENCES_LOCAL (info, h)
 	      && (input_section->flags & SEC_ALLOC) != 0
-	      && (input_section->flags & SEC_READONLY) != 0)
+	      && (input_section->flags & SEC_READONLY) != 0
+	      && (!h->def_regular
+		  || r_type != R_X86_64_PC32
+		  || h->type != STT_FUNC
+		  || ELF_ST_VISIBILITY (h->other) != STV_PROTECTED
+		  || !is_32bit_relative_branch (contents,
+						rel->r_offset)))
 	    {
-	      (*_bfd_error_handler)
-		(_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
-		 input_bfd,
-		 x86_64_elf_howto_table[r_type].name,
-		 (h) ? h->root.root.string : "a local symbol");
+	      if (h->def_regular
+		  && r_type == R_X86_64_PC32
+		  && h->type == STT_FUNC
+		  && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)
+		(*_bfd_error_handler)
+		   (_("%B: relocation R_X86_64_PC32 against protected function `%s' can not be used when making a shared object"),
+		    input_bfd, h->root.root.string);
+	      else
+		(*_bfd_error_handler)
+		  (_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
+		   input_bfd, x86_64_elf_howto_table[r_type].name,
+		   h->root.root.string);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }

@@ -2274,6 +2274,22 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  /* Relocation is relative to the start of the global offset
 	     table.  */
 
+	  /* Check to make sure it isn't a protected function symbol
+	     for shared library since it may not be local when used
+	     as function address.  */
+	  if (info->shared
+	      && h
+	      && h->def_regular
+	      && h->type == STT_FUNC
+	      && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)
+	    {
+	      (*_bfd_error_handler)
+		(_("%B: relocation R_386_GOTOFF against protected function `%s' can not be used when making a shared object"),
+		 input_bfd, h->root.root.string);
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
+
 	  /* Note that sgot is not involved in this
 	     calculation.  We always want the start of .got.plt.  If we
 	     defined _GLOBAL_OFFSET_TABLE_ in a different way, as is

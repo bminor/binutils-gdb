@@ -1,3 +1,14 @@
+2005-02-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Disallow R_386_GOTOFF
+	against protected function when building shared library.
+
+	PR 584
+	* elf64-x86-64.c (is_32bit_relative_branch): New.
+	(elf64_x86_64_relocate_section): Alllow R_X86_64_PC32 on a
+	protected function symbol when building shared library for
+	32bit relative branch instruction.
+
 2005-02-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (add_symbol_adjust): Don't create fake descriptor
