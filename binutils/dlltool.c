@@ -166,7 +166,6 @@
 #include "libiberty.h"
 #include "bucomm.h"
 #include "getopt.h"
-#include <sys/types.h>
 #include "demangle.h"
 #include <ctype.h>
 #ifdef HAVE_SYS_WAIT_H

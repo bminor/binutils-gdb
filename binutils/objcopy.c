@@ -18,13 +18,12 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
-#include "sysdep.h"
 #include "progress.h"
 #include "bucomm.h"
 #include <getopt.h>
 #include "libiberty.h"
+#include <sys/stat.h>
 
-static bfd_vma parse_vma PARAMS ((const char *, const char *));
 static flagword parse_flags PARAMS ((const char *));
 static struct section_list *find_section_list PARAMS ((const char *, boolean));
 static void setup_section PARAMS ((bfd *, asection *, PTR));
@@ -256,26 +255,6 @@ Usage: %s [-vVsSgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-R section]\n\
 	   program_name);
   list_supported_targets (program_name, stream);
   exit (exit_status);
-}
-
-/* Parse a string into a VMA, with a fatal error if it can't be
-   parsed.  */
-
-static bfd_vma
-parse_vma (s, arg)
-     const char *s;
-     const char *arg;
-{
-  bfd_vma ret;
-  const char *end;
-
-  ret = bfd_scan_vma (s, &end, 0);
-  if (*end != '\0')
-    {
-      fprintf (stderr, "%s: %s: bad number: %s\n", program_name, arg, s);
-      exit (1);
-    }
-  return ret;
 }
 
 /* Parse section flags into a flagword, with a fatal error if the
@@ -1254,7 +1233,7 @@ mark_symbols_used_in_relocations (ibfd, isection, symbolsarg)
     bfd_fatal (bfd_get_filename (ibfd));
 
   if (relsize == 0)
-    return 0;
+    return;
 
   relpp = (arelent **) xmalloc (relsize);
   relcount = bfd_canonicalize_reloc (ibfd, isection, relpp, symbols);
@@ -1292,7 +1271,7 @@ simple_copy (from, to)
   fromfd = open (from, O_RDONLY);
   if (fromfd < 0)
     return -1;
-  tofd = open (to, O_WRONLY | O_CREAT | O_TRUNC);
+  tofd = creat (to, 0777);
   if (tofd < 0)
     {
       saved = errno;

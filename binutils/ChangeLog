@@ -1,3 +1,9 @@
+Mon Nov  6 15:00:50 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* bucomm.h: Include <sys/types.h>.
+	* ar.c: Don't include <sys/types.h> or <stdio.h>.
+	* bucomm.c, dlltool.c, nlmconv.c, objcopy.c, objdump.c: Likewise.
+
 Fri Nov  3 12:38:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objdump.c: Include <sys/types.h>.
