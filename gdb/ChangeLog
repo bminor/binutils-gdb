@@ -1,5 +1,12 @@
 2001-11-16  Ben Harris  <bjh21@netbsd.org>
 
+	* Makefile.in (os9kread.o): Replace $< with autoconf-approved
+	$(srcdir)/....
+	(procfs.o): Ditto.
+	(z8k-tdep.o): Ditto.
+
+2001-11-16  Ben Harris  <bjh21@netbsd.org>
+
 	* MAINTAINERS (write-after-approval): Add self.
 
 2001-11-15  Jim Blandy  <jimb@redhat.com>

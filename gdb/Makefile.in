@@ -1713,7 +1713,8 @@ os9kread.o: os9kread.c $(buildsym_h) $(complaints_h) $(bfd_h) $(defs_h) \
 	        $(expression_h) $(gdb_stabs_h) $(gdbcore_h) $(gdbtypes_h) \
 		$(language_h) $(objfiles_h) $(stabsread_h) $(symfile_h) \
 		$(symtab_h) $(target_h) $(gdb_string_h)
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
+		$(srcdir)/os9kread.c
 
 mem-break.o: mem-break.c $(defs_h) 
 
@@ -1823,7 +1824,7 @@ printcmd.o: printcmd.c $(breakpoint_h) $(defs_h) $(expression_h) \
 # match output format strings.
 procfs.o: procfs.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(target_h) $(gdb_string_h) $(gdbthread_h) proc-utils.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $(srcdir)/procfs.c
 
 proc-api.o: proc-api.c $(defs_h) $(gdbcmd_h) proc-utils.h $(completer_h)
 
@@ -2164,7 +2165,8 @@ xcoffsolib.o: xcoffsolib.c $(bfd_h) $(defs_h) $(xcoffsolib_h) $(inferior_h) \
 z8k-tdep.o: z8k-tdep.c $(bfd_h) $(dis_asm_h) $(defs_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbtypes_h) $(symtab_h) $(gdbcore_h) $(value_h) \
 	$(regcache_h)
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
+		$(srcdir)/z8k-tdep.c
 
 c-exp.tab.o: c-exp.tab.c c-lang.h $(defs_h) $(expression_h) \
 	$(gdbtypes_h) $(language_h) $(parser_defs_h) $(symtab_h) $(value_h) \
