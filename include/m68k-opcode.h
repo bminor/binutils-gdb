@@ -25,7 +25,7 @@ enum m68k_architecture {
 	ARCH_68040,
 };
 
-static const char *architecture_pname[] = {
+static char *architecture_pname[] = {
 	"68000",
 	"68010",
 	"68020",
@@ -220,18 +220,18 @@ struct m68k_opcode {
  */
 struct m68k_opcode m68k_opcodes[] =
 {
-{"abcd",	one(0140400),		one(0170770), "DsDd", m68000 },
-{"abcd",	one(0140410),		one(0170770), "-s-d", m68000 },
+{"abcd",	one(0140400),		one(0170770), "DsDd", ARCH_68000 },
+{"abcd",	one(0140410),		one(0170770), "-s-d", ARCH_68000 },
 
 		/* Add instructions */
-{"addal",	one(0150700),		one(0170700), "*lAd", m68000 },
-{"addaw",	one(0150300),		one(0170700), "*wAd", m68000 },
-{"addib",	one(0003000),		one(0177700), "#b$b", m68000 },
-{"addil",	one(0003200),		one(0177700), "#l$l", m68000 },
-{"addiw",	one(0003100),		one(0177700), "#w$w", m68000 },
-{"addqb",	one(0050000),		one(0170700), "Qd$b", m68000 },
-{"addql",	one(0050200),		one(0170700), "Qd%l", m68000 },
-{"addqw",	one(0050100),		one(0170700), "Qd%w", m68000 },
+{"addal",	one(0150700),		one(0170700), "*lAd", ARCH_68000 },
+{"addaw",	one(0150300),		one(0170700), "*wAd", ARCH_68000 },
+{"addib",	one(0003000),		one(0177700), "#b$b", ARCH_68000 },
+{"addil",	one(0003200),		one(0177700), "#l$l", ARCH_68000 },
+{"addiw",	one(0003100),		one(0177700), "#w$w", ARCH_68000 },
+{"addqb",	one(0050000),		one(0170700), "Qd$b", ARCH_68000 },
+{"addql",	one(0050200),		one(0170700), "Qd%l", ARCH_68000 },
+{"addqw",	one(0050100),		one(0170700), "Qd%w", ARCH_68000 },
 
 {"addb",	one(0050000),		one(0170700),		"Qd$b"},	/* addq written as add */
 {"addb",	one(0003000),		one(0177700),		"#b$b"},	/* addi written as add */
