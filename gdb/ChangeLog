@@ -1,5 +1,23 @@
 2002-06-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/tm-i386.h (REGISTER_SIZE): Remove define.
+	(NUM_GREGS, NUM_FREGS, NUM_SSE_REGS): Remove defines.
+	(FP_REGNUM, SP_REGNUM, PC_REGNUM, PS_REGNUM): Remove defines.
+	(FP0_REGNUM): Remove define.
+	(MAX_REGISTER_RAW_SIZE, MAX_REGISTER_VIRTUAL_SIZE,
+	MAX_REGISTER_VIRTUAL_SIZE): Remove define.
+	(i386_register_virtual_size): Remove protoype.
+	* i386-tdep.c (i386_register_virtual_size): Removed.
+	(i386_extract_return_value, i386_store_return_value): Use
+	FP0_REGNUM instead of NUM_FREGS to determine whether the
+	floating-point registers are available.
+	(i386_gdbarch_init): Tweak FIXME about FPU registers.
+	Adjust for removal of macros mentioned above.
+
+2002-06-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_gdbarch_init): Tewak
+
 	* i386v4-nat.c: Include "i386-tdep.h".  Reformat and tweak various
 	comments.
 	(fill_gregset, supply_gregset, supply_fpregset, fill_fpregset):

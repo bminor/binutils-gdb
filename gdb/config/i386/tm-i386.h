@@ -56,73 +56,7 @@ extern int i386_skip_prologue (int);
    number of bytes in BREAKPOINT but not always. */
 
 #define DECR_PC_AFTER_BREAK 1
-
-/* Say how long (ordinary) registers are.  This is a piece of bogosity
-   used in push_word and a few other places; REGISTER_RAW_SIZE is the
-   real way to know how big a register is.  */
-
-#define REGISTER_SIZE 4
-
-/* This register file is parameterized by two macros:
-   HAVE_I387_REGS --- register file should include i387 registers
-   HAVE_SSE_REGS  --- register file should include SSE registers
-   If HAVE_SSE_REGS is #defined, then HAVE_I387_REGS must also be #defined.
-   
-   However, GDB code should not test those macros with #ifdef, since
-   that makes code which is annoying to multi-arch.  Instead, GDB code
-   should check the values of NUM_GREGS, NUM_FREGS, and NUM_SSE_REGS,
-   which will eventually get mapped onto architecture vector entries.
-
-   It's okay to use the macros in tm-*.h files, though, since those
-   files will get completely replaced when we multi-arch anyway.  */
-
-/* Number of general registers, present on every 32-bit x86 variant.  */
-#define NUM_GREGS (16)
-
-/* Number of floating-point unit registers.  */
-#ifdef HAVE_I387_REGS
-#define NUM_FREGS (16)
-#else
-#define NUM_FREGS (0)
-#endif
-
-/* Number of SSE registers.  */
-#ifdef HAVE_SSE_REGS
-#define NUM_SSE_REGS (9)
-#else
-#define NUM_SSE_REGS (0)
-#endif
-
-/* Register numbers of various important registers.
-   Note that some of these values are "real" register numbers,
-   and correspond to the general registers of the machine,
-   and some are "phony" register numbers which are too large
-   to be actual register numbers as far as the user is concerned
-   but do serve to get the desired values when passed to read_register.  */
-
-#define FP_REGNUM 5		/* (ebp) Contains address of executing stack
-				   frame */
-#define SP_REGNUM 4		/* (usp) Contains address of top of stack */
-#define PC_REGNUM 8		/* (eip) Contains program counter */
-#define PS_REGNUM 9		/* (ps)  Contains processor status */
-
-/* First FPU data register.  */
-#ifdef HAVE_I387_REGS
-#define FP0_REGNUM 16
-#else
-#define FP0_REGNUM 0
-#endif
 
-
-/* Largest value REGISTER_RAW_SIZE can have.  */
-#define MAX_REGISTER_RAW_SIZE 16
-
-/* Return the size in bytes of the virtual type of register REG.  */
-#define REGISTER_VIRTUAL_SIZE(reg) i386_register_virtual_size ((reg))
-extern int i386_register_virtual_size (int reg);
-
-/* Largest value REGISTER_VIRTUAL_SIZE can have.  */
-#define MAX_REGISTER_VIRTUAL_SIZE 16
 
 /* Return the GDB type object for the "standard" data type of data in
    register REGNUM.  */
