@@ -25,6 +25,7 @@ MAKEINFOFLAGS =
 
 log	= 1>$(canonhost)-build-log 2>&1
 cyglog    = 1> $(canonhost)-x-$$i-cygnus-build-log 2>&1
+latestlog = 1> $(canonhost)-x-$$i-latest-build-log 2>&1
 natlog    = 1> $(canonhost)-x-$$i-native-build-log 2>&1
 
 canonhost := $(shell $(TREE)/config.sub $(host))
@@ -70,13 +71,14 @@ TARGETS = $(NATIVE) \
 	a29k-amd-udi 	\
 	h8300-hms 	h8500-hms \
 	i386-aout	i386-coff \
+	i386-lynx 	i386-netware \
 	i960-intel-nindy		i960-vxworks \
 	mips-idt-ecoff	\
 	m68k-aout	m68k-vxworks 	m68k-coff \
 	m88k-coff \
 	sh-hms \
 	sparc-aout	sparc-vxworks	sparclite-aout \
-	z8k-sim		z8k-coff
+	z8k-coff
 GCC = gcc -O -pipe
 all: all-cygnus
 endif
@@ -120,17 +122,18 @@ endif
 
 ifeq ($(canonhost),rs6000-ibm-aix)
 TARGETS	= $(NATIVE) \
-	i960-vxworks	i960-intel-nindy \
-	m68k-aout	m68k-vxworks 
-#	a29k-amd-udi 	\
-#	h8300-hms 	h8500-hms \
-#	i386-aout	i386-coff \
-#	mips-idt-ecoff	\
-#	m68k-coff \
-#	m88k-coff \
-#	sh-hms \
-#	sparc-aout	sparc-vxworks	sparclite-aout \
-#	z8k-sim		z8k-coff
+	a29k-amd-udi 	\
+	h8300-hms 	h8500-hms \
+	i386-aout	i386-coff \
+	i386-lynx 	i386-netware \
+	i960-intel-nindy		i960-vxworks \
+	mips-idt-ecoff	\
+	m68k-aout	m68k-vxworks 	m68k-coff \
+	m88k-coff \
+	sh-hms \
+	sparc-aout	sparc-vxworks	sparclite-aout \
+	i386-go32 \
+	z8k-coff
 all: all-cygnus
 endif
 
@@ -279,6 +282,17 @@ build-cygnus:
 	  else \
 	    echo "building $(canonhost) cross to $$i:" `date` ; \
             $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build-cygnus $(cyglog) && \
+	       echo "     completed successfully" ; \
+	  fi ; \
+	done
+	@echo done at `date`
+
+build-latest:
+	@echo build started at `date`
+	@for i in $(TARGETS) ; do \
+	  if [ "$$i" != "native" ] ; then \
+	    echo "building $(canonhost) cross to $$i:" `date` ; \
+	    $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build-latest $(latestlog) && \
 	       echo "     completed successfully" ; \
 	  fi ; \
 	done
