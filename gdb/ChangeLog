@@ -1,8 +1,15 @@
+Fri Jul 25 16:48:18 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* top.c (execute_command): Force cleanup of alloca areas.
+	* findvar.c (registers_changed): Likewise.
+
+start-sanitize-v850
 Fri Jul 25 15:37:15 1997  Stu Grossman  <grossman@cygnus.com>
 
 	* v850ice.c:  Include <windows.h>.  Support new v850 DLL interface.
 	* Add defs for target status.
-	
+
+end-sanitize-v850
 start-sanitize-gdbtk
 Tue Jul 22 19:45:37 1997  Martin M. Hunt  <hunt@cygnus.com>
 

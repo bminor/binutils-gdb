@@ -1209,6 +1209,10 @@ execute_command (p, from_tty)
 
   free_all_values ();
 
+  /* Force cleanup of any alloca areas if using C alloca instead of
+     a builtin alloca.  */
+  alloca (0);
+
   /* This can happen when command_line_input hits end of file.  */
   if (p == NULL)
       return;
