@@ -88,6 +88,7 @@ SECTIONS
 
   .data	${RELOCATING-0} : ${RELOCATING+AT (ADDR (.text) + SIZEOF (.text))}
   {
+    ${RELOCATING+ PROVIDE (__data_start = .) ; }
     *(.data)
     *(.gnu.linkonce.d*)
     ${RELOCATING+. = ALIGN(2);}
@@ -144,6 +145,7 @@ SECTIONS
   .debug_loc      0 : { *(.debug_loc) }
   .debug_macinfo  0 : { *(.debug_macinfo) }
 
+  PROVIDE (__stack = ${STACK}) ;
 }
 EOF
 

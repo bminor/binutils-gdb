@@ -1,3 +1,16 @@
+2000-05-23  Marek Michalkiewicz  <marekm@linux.org.pl>
+
+	* emulparams/avr1200.sh (STACK): Define as 0.
+	* emulparams/avr23xx.sh (STACK): Define as last internal SRAM address.
+	* emulparams/avr4433.sh (STACK): Likewise.
+	* emulparams/avr44x4.sh (STACK): Likewise.
+	* emulparams/avr85xx.sh (STACK): Likewise.
+	* emulparams/avrmega103.sh (STACK): Likewise.
+	* emulparams/avrmega161.sh (STACK): Likewise.
+	* emulparams/avrmega603.sh (STACK): Likewise.
+	* scripttempl/elf32avr.sc (__data_start): Define for gcrt1.
+	(__stack): Define from ${STACK} for main().
+
 2000-05-26  Alan Modra  <alan@linuxcare.com.au>
 
 	* Makefile.am: Update dependencies with "make dep-am"
