@@ -80,7 +80,7 @@ m68kbsd_collect_gregset (const struct regcache *regcache,
   for (i = M68K_D0_REGNUM; i <= M68K_PC_REGNUM; i++)
     {
       if (regnum == -1 || regnum == i)
-	regcache_raw_collect (regcache, regnum, regs + i * 4);
+	regcache_raw_collect (regcache, i, regs + i * 4);
     }
 }
 
@@ -97,8 +97,7 @@ m68kbsd_collect_fpregset (struct regcache *regcache,
   for (i = M68K_FP0_REGNUM; i <= M68K_FPI_REGNUM; i++)
     {
       if (regnum == -1 || regnum == i)
-	regcache_raw_collect (regcache, regnum,
-			      regs + m68kbsd_fpreg_offset (i));
+	regcache_raw_collect (regcache, i, regs + m68kbsd_fpreg_offset (i));
     }
 }
 

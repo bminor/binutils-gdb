@@ -1,5 +1,10 @@
 2004-05-24  Mark Kettenis  <kettenis@gnu.org>
 
+	* m68kbsd-nat.c (m68kbsd_collect_gregset): Specify correct
+	register number in regcache_raw_collect call.
+	(m68kbsd_collect_fpregset): Likewise.
+	* vaxbsd-nat.c (vaxbsd_collect_gregset): Likewise.
+
 	* regset.h (struct regset): Add back `regset' member.
 
 2004-05-23  Mark Kettenis  <kettenis@gnu.org>

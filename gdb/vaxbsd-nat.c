@@ -54,7 +54,7 @@ vaxbsd_collect_gregset (const struct regcache *regcache,
   for (i = 0; i <= VAX_NUM_REGS; i++)
     {
       if (regnum == -1 || regnum == i)
-	regcache_raw_collect (regcache, regnum, regs + i * 4);
+	regcache_raw_collect (regcache, i, regs + i * 4);
     }
 }
 
