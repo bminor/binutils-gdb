@@ -1,3 +1,8 @@
+Tue Jul 16 23:37:25 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* command.c (do_setshow_command):  Don't segfault when showing
+	var_string and var_string_noescape vars that are NULL.
+
 Mon Jul 15 16:55:48 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* win32-nat.c (handle_load_dll): dos_path_to_unix_path renamed to
@@ -420,6 +425,12 @@ Tue May 28 11:14:58 1996  Tom Tromey  <tromey@creche.cygnus.com>
 	* configure: Regenerated.
 	* aclocal.m4 (CY_AC_PATH_TCLH): Don't use AC_TRY_RUN.
 	(CY_AC_PATH_TKH): Don't use AC_TRY_RUN.
+
+Sun May 26 16:56:35 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* solib.c (solib_absolute_prefix, solib_search_path): New variables.
+	(_initialize_solib): Add set/show commands for those variables.
+	(solib_map_sections): Implement searching using them.
 
 Sun May 26 14:14:49 1996  Fred Fish  <fnf@cygnus.com>
 

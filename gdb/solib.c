@@ -198,6 +198,15 @@ solib_add_common_symbols PARAMS ((struct rtc_symb *));
 
 #endif
 
+/* If non-zero, this is a prefix that will be added to the front of the name
+   shared libraries with an absolute filename for loading.  */
+static char *solib_absolute_prefix = NULL;
+
+/* If non-empty, this is a search path for loading non-absolute shared library
+   symbol files.  This takes precedence over the environment variables PATH
+   and LD_LIBRARY_PATH.  */
+static char *solib_search_path = NULL;
+
 /*
 
 LOCAL FUNCTION
@@ -237,10 +246,38 @@ solib_map_sections (so)
   bfd *abfd;
   
   filename = tilde_expand (so -> so_name);
-  old_chain = make_cleanup (free, filename);
   
-  scratch_chan = openp (get_in_environ (inferior_environ, "PATH"), 
-		        1, filename, O_RDONLY, 0, &scratch_pathname);
+  if (solib_absolute_prefix && ROOTED_P (filename))
+    /* Prefix shared libraries with absolute filenames with
+       SOLIB_ABSOLUTE_PREFIX.  */
+    {
+      char *pfxed_fn;
+      int pfx_len;
+
+      pfx_len = strlen (solib_absolute_prefix);
+
+      /* Remove trailing slashes.  */
+      while (pfx_len > 0 && SLASH_P (solib_absolute_prefix[pfx_len - 1]))
+	pfx_len--;
+
+      pfxed_fn = xmalloc (pfx_len + strlen (filename) + 1);
+      strcpy (pfxed_fn, solib_absolute_prefix);
+      strcat (pfxed_fn, filename);
+      free (filename);
+
+      filename = pfxed_fn;
+    }
+
+  old_chain = make_cleanup (free, filename);
+
+  scratch_chan = -1;
+
+  if (solib_search_path)
+    scratch_chan = openp (solib_search_path,
+			  1, filename, O_RDONLY, 0, &scratch_pathname);
+  if (scratch_chan < 0)
+    scratch_chan = openp (get_in_environ (inferior_environ, "PATH"), 
+			  1, filename, O_RDONLY, 0, &scratch_pathname);
   if (scratch_chan < 0)
     {
       scratch_chan = openp (get_in_environ 
@@ -1704,6 +1741,21 @@ If nonzero, symbols from all shared object libraries will be loaded\n\
 automatically when the inferior begins execution or when the dynamic linker\n\
 informs gdb that a new library has been loaded.  Otherwise, symbols\n\
 must be loaded manually, using `sharedlibrary'.",
+		  &setlist),
+     &showlist);
+
+  add_show_from_set
+    (add_set_cmd ("solib-absolute-prefix", class_support, var_filename,
+		  (char *) &solib_absolute_prefix,
+		  "Set prefix for loading absolute shared library symbol files.\n
+For other (relative) files, you can add values using `set solib-search-path'.",
+		  &setlist),
+     &showlist);
+  add_show_from_set
+    (add_set_cmd ("solib-search-path", class_support, var_string,
+		  (char *) &solib_search_path,
+		  "Set the search path for loading non-absolute shared library symbol files.\n
+This takes precedence over the environment variables PATH and LD_LIBRARY_PATH.",
 		  &setlist),
      &showlist);
 

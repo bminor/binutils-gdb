@@ -1273,9 +1273,11 @@ do_setshow_command (arg, from_tty, c)
       case var_string:
 	{
 	  unsigned char *p;
+
 	  fputs_filtered ("\"", gdb_stdout);
-	  for (p = *(unsigned char **) c->var; *p != '\0'; p++)
-	    gdb_printchar (*p, gdb_stdout, '"');
+	  if (*(unsigned char **)c->var)
+	    for (p = *(unsigned char **) c->var; *p != '\0'; p++)
+	      gdb_printchar (*p, gdb_stdout, '"');
 	  fputs_filtered ("\"", gdb_stdout);
 	}
 	break;
@@ -1283,7 +1285,8 @@ do_setshow_command (arg, from_tty, c)
       case var_filename:
       case var_enum:
 	fputs_filtered ("\"", gdb_stdout);
-	fputs_filtered (*(char **) c->var, gdb_stdout);
+	if (*(char **)c->var)
+	  fputs_filtered (*(char **) c->var, gdb_stdout);
 	fputs_filtered ("\"", gdb_stdout);
 	break;
       case var_boolean:
