@@ -96,6 +96,14 @@ struct dwarf2_debug
   /* Pointer to the end of the .debug_info section memory buffer.  */
   char* info_ptr_end;
 
+  /* Pointer to the section and address of the beginning of the
+     section.  */
+  asection* sec;
+  char* sec_info_ptr;
+
+  /* Pointer to the symbol table.  */
+  asymbol** syms;
+
   /* Pointer to the .debug_abbrev section loaded into memory.  */
   char* dwarf_abbrev_buffer;
 
@@ -1219,6 +1227,60 @@ scan_unit_for_functions (unit)
   return true;
 }
 
+/* Look for a RELA relocation to be applied on OFFSET of section SEC,
+   and return the addend if such a relocation is found.  Since this is
+   only used to find relocations referring to the .debug_abbrev
+   section, we make sure the relocation refers to this section, but
+   this is not strictly necessary, and it can probably be safely
+   removed if needed.  However, it is important to note that this
+   function only returns the addend, it doesn't serve the purpose of
+   applying a generic relocation.
+
+   If no suitable relocation is found, or if it is not a real RELA
+   relocation, this function returns 0.  */
+
+static bfd_vma
+find_rela_addend (abfd, sec, offset, syms)
+     bfd* abfd;
+     asection* sec;
+     bfd_size_type offset;
+     asymbol** syms;
+{
+  long reloc_size = bfd_get_reloc_upper_bound (abfd, sec);
+  arelent **relocs = NULL;
+  long reloc_count, relc;
+
+  if (reloc_size <= 0)
+    return 0;
+
+  relocs = (arelent **) bfd_malloc ((size_t) reloc_size);
+  if (relocs == NULL)
+    return 0;
+
+  reloc_count = bfd_canonicalize_reloc (abfd, sec, relocs, syms);
+
+  if (reloc_count <= 0)
+    {
+      free (relocs);
+      return 0;
+    }
+
+  for (relc = 0; relc < reloc_count; relc++)
+    if (relocs[relc]->address == offset
+	&& (*relocs[relc]->sym_ptr_ptr)->flags & BSF_SECTION_SYM
+	&& strcmp ((*relocs[relc]->sym_ptr_ptr)->name,
+		   ".debug_abbrev") == 0)
+      {
+	bfd_vma addend = (relocs[relc]->howto->partial_inplace
+			  ? 0 : relocs[relc]->addend);
+	free (relocs);
+	return addend;
+      }
+  
+  free (relocs);
+  return 0;
+}
+
 /* Parse a DWARF2 compilation unit starting at INFO_PTR.  This
    includes the compilation unit header that proceeds the DIE's, but
    does not include the length field that preceeds each compilation
@@ -1259,6 +1321,13 @@ parse_comp_unit (abfd, stash, unit_length, abbrev_length)
     abbrev_offset = read_4_bytes (abfd, info_ptr);
   else if (abbrev_length == 8)
     abbrev_offset = read_8_bytes (abfd, info_ptr);
+  /* The abbrev offset is generally a relocation pointing to
+     .debug_abbrev+offset.  On RELA targets, we have to find the
+     relocation and extract the addend to obtain the actual
+     abbrev_offset, so do it here.  */
+  abbrev_offset += find_rela_addend (abfd, stash->sec,
+				     info_ptr - stash->sec_info_ptr,
+				     stash->syms);
   info_ptr += abbrev_length;
   addr_size = read_1_byte (abfd, info_ptr);
   info_ptr += 1;
@@ -1498,7 +1567,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 			       addr_size, pinfo)
      bfd *abfd;
      asection *section;
-     asymbol **symbols ATTRIBUTE_UNUSED;
+     asymbol **symbols;
      bfd_vma offset;
      const char **filename_ptr;
      const char **functionname_ptr;
@@ -1584,7 +1653,11 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 	  stash->info_ptr_end = stash->info_ptr + start + size;
 	}
 
-      BFD_ASSERT (stash->info_ptr_end = stash->info_ptr + total_size);
+      BFD_ASSERT (stash->info_ptr_end == stash->info_ptr + total_size);
+
+      stash->sec = find_debug_info (abfd, NULL);
+      stash->sec_info_ptr = stash->info_ptr;
+      stash->syms = symbols;
     }
 
   /* FIXME: There is a problem with the contents of the
@@ -1631,6 +1704,13 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
         {
 	  each = parse_comp_unit (abfd, stash, length, addr_size);
 	  stash->info_ptr += length;
+
+	  if ((bfd_vma) (stash->info_ptr - stash->sec_info_ptr)
+	      == stash->sec->_raw_size)
+	    {
+	      stash->sec = find_debug_info (abfd, stash->sec);
+	      stash->sec_info_ptr = stash->info_ptr;
+	    }
 
 	  if (each)
 	    {

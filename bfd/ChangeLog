@@ -1,3 +1,11 @@
+2001-08-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	* dwarf2.c (struct dwarf2_debug): Add sec, sec_info_ptr and syms.
+	(find_rela_addend): New function.
+	(parse_comp_unit): Call it to find the abbrev offset addend.
+	(_bfd_dwarf2_find_nearest_line): Initialize and maintain the new
+	members of dwarf2_debug as debugging information is read.
+
 2001-08-07  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* coff-sh.c (sh_coff_reloc_type_lookup): Provide for sh-coff
