@@ -1,3 +1,18 @@
+Wed Sep 27 07:23:39 1995  Kim Knuttila  <krk@nellie>
+
+	* coff-ppc.c, pe-ppc.c, pei-ppc.c: Initial bfd for coff/PE 
+        support on powerpc.
+	* Makefile.in: added *-ppc files
+	* coffcode.h: ppc MAGIC, and use peicode.h rather than coffswap.h to
+        allow pe based .o's to be shared with other tools on ppc/NT
+	* config.bfd: added powerpc[le]-[pe|winnt] config support
+	* configure, configure.in: added bfd_powerpc[le]_pe[i]_vec 
+	* peicode.h: Added more section flags for PE on ppc
+	             Added coff_swap_filehdr_out to allow peicode.h to be
+		     used for non-image PE files on ppc.
+		     Check for image, or not, before copying pe_opthdr
+	* targets.c: Added new bfd's
+
 Tue Sep 26 14:06:41 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-ppc.c (ppc_reloc_type): Rename from reloc_type, and use
