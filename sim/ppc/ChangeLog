@@ -1,3 +1,10 @@
+Wed Apr 29 15:44:52 1998  Geoffrey Noer  <noer@cygnus.com>
+
+	* aclocal.m4: new file for AM_EXEEXT macro
+	* configure.in: call AM_EXEEXT
+	* configure: regenerate with autoconf 2.12.1.
+	* Makefile.in: add EXEEXT support
+
 Sun Apr 26 15:31:55 1998  Tom Tromey  <tromey@creche>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

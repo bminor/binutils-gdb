@@ -41,6 +41,7 @@ Makefile.in
 README
 RUN
 acconfig.h
+aclocal.m4
 basics.h
 bits.c
 bits.h

@@ -689,6 +689,9 @@ else
   sim_targ_vals=""
 fi
 
+dnl Check for exe extension
+AM_EXEEXT
+
 AC_SUBST(CC_FOR_BUILD)
 AC_SUBST(CFLAGS)
 AC_SUBST(HDEFINES)
