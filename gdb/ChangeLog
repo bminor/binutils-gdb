@@ -1,5 +1,15 @@
 2001-12-01  Andrew Cagney  <ac131313@redhat.com>
 
+	* NEWS: Note that a29k-nyu-sym1 and a29k-*-kern* were deleted.
+	* configure.host: Delete a29k-*-* host.
+	* configure.tgt: Delete a29k-*-kern* and a29k-*-sym1* targets.
+	* config/a29k/a29k-kern.mt: Delete file.
+	* config/a29k/nm-ultra3.h: Delete file.
+	* config/a29k/tm-ultra3.h: Delete file.
+	* config/a29k/ultra3.mh: Delete file.
+	* config/a29k/ultra3.mt: Delete file.
+	* config/a29k/xm-ultra3.h: Delete file.
+
 	* NEWS: Note that i[3456]86-*-sunos* was deleted.
 	* Makefile.in (sun386-nat.o): Delete.
 	* configure.tgt: Delete i[3456]86-*-sunos* target.
