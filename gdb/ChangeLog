@@ -1,15 +1,15 @@
 2000-03-30  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
-	* defs.h (struct continuation_arg): make 'data' a union, to avoid
+	* defs.h (struct continuation_arg): Make 'data' a union, to avoid
 	casting problems when int and pointer are not the  same size.
-	* event-top.c (command_handler): use data as a union.
-	(command_line_handler_continuation): ditto.
-	* infcmd.c (step_1_continuation): use data as a union.  Re-indent.
-	(step_once): ditto.  (finish_command_continuation): ditto.
-	(finish_command): ditto.  
-	* breakpoint.c (until_break_command): use data as a union.
-	(until_break_command_continuation): ditto.
-	* utils.c (add_intermediate_continuation): fix typo in comment.
+	* event-top.c (command_handler): Use data as a union.
+	(command_line_handler_continuation): Ditto.
+	* infcmd.c (step_1_continuation): Use data as a union.  Re-indent.
+	(step_once): ditto.  (finish_command_continuation): Ditto.
+	(finish_command): Ditto.  
+	* breakpoint.c (until_break_command): Use data as a union.
+	(until_break_command_continuation): Ditto.
+	* utils.c (add_intermediate_continuation): Fix typo in comment.
 
 Thu Mar 30 12:09:50 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -61,7 +61,7 @@ Wed Mar 29 10:16:35 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 2000-03-28  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
-	* Makefile.in: anchor tui-file.h dependency to $srcdir.
+	* Makefile.in: Anchor tui-file.h dependency to $srcdir.
 
 2000-03-28  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
@@ -254,7 +254,7 @@ Fri Mar 24 13:44:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 2000-03-23  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
-	* solib.c (open_symbol_file_object): to sneak an int argument
+	* solib.c (open_symbol_file_object): To sneak an int argument
 	past catch_errors, instead of casting it to a pointer, simply
 	pass it by address.
 
@@ -305,8 +305,8 @@ Fri Mar 24 13:44:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	paddr_t to psaddr_t.  This mistake appears to date from an
 	erroneous man page in Solaris 2.5 -- the correct type from the
 	system headers has always been psaddr_t.
-	(ps_pdread, ps_pdwrite, ps_ptread, ps_ptwrite): ditto.
-	(rw_common): ditto.
+	(ps_pdread, ps_pdwrite, ps_ptread, ps_ptwrite): Ditto.
+	(rw_common): Ditto.
 
 2000-03-22  Kevin Buettner  <kevinb@redhat.com>
 
@@ -431,15 +431,15 @@ Wed Mar 22 11:18:59 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 2000-03-20  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
-	* remote.c (remote_threads_extra_info): new function.
+	* remote.c (remote_threads_extra_info): New function.
 	Implement the extra thread info query for "info threads".
-	(remote_threads_info): clean up a bit.
-	(use_threadinfo_query, use_threadextra_query): new variables.
+	(remote_threads_info): Clean up a bit.
+	(use_threadinfo_query, use_threadextra_query): New variables.
 	Control whether GDB will use the new or old protocol for
 	thread info queries.
-	(remote_open_1): initialize new variables.
-	(remote_async_open_1): ditto.
-	(remote_cisco_open): ditto.
+	(remote_open_1): Initialize new variables.
+	(remote_async_open_1): Ditto.
+	(remote_cisco_open): Ditto.
 
 2000-03-20  Kevin Buettner  <kevinb@redhat.com>
 
