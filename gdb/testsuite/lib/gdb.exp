@@ -1417,26 +1417,28 @@ proc get_debug_format { } {
     }
 }
 
+# Return true if FORMAT matches the debug format the current test was
+# compiled with.  FORMAT is a shell-style globbing pattern; it can use
+# `*', `[...]', and so on.
+#
+# This function depends on variables set by `get_debug_format', above.
+
+proc test_debug_format {format} {
+    global debug_format
+
+    return [expr [string match $format $debug_format] != 0]
+}
+
 # Like setup_xfail, but takes the name of a debug format (DWARF 1,
 # COFF, stabs, etc).  If that format matches the format that the
 # current test was compiled with, then the next test is expected to
 # fail for any target.  Returns 1 if the next test or set of tests is
 # expected to fail, 0 otherwise (or if it is unknown).  Must have
 # previously called get_debug_format.
-
-proc test_debug_format { format } {
-    global debug_format
-
-    if [string match $debug_format $format] then {
-	return 1;
-    }
-    return 0
-}
-
 proc setup_xfail_format { format } {
-    set ret [test_debug_format format];
+    set ret [test_debug_format $format];
 
-    if [expr $ret != 0] then {
+    if {$ret} then {
 	setup_xfail "*-*-*"
     }
     return $ret;

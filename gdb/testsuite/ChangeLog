@@ -1,3 +1,10 @@
+2001-10-02  Jim Blandy  <jimb@redhat.com>
+
+	* lib/gdb.exp (test_xfail_format): Simplify.
+
+	* lib/gdb.exp (setup_xfail_format): Don't forget to put a `$' in
+	front of the variable name `format'.  Simplify `if'.
+
 2001-10-01  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.threads/pthreads.exp: Wait for output and delay
