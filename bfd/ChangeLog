@@ -1,5 +1,8 @@
 Tue Oct  4 11:23:12 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* cofflink.c (coff_link_input_bfd): Don't try to convert a long
+	filename if the offset field is zero.
+
 	* elfcode.h (swap_out_syms): If the alignment of a common symbol
 	was not set, use a sensible default rather than zero.
 
