@@ -20,6 +20,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #if !defined (EXPRESSION_H)
 #define EXPRESSION_H 1
 
+#include "value.h"
+
 #ifdef __STDC__
 struct block;	/* Forward declaration for prototypes */
 #endif
@@ -351,6 +353,9 @@ enum noside
 
 extern struct value* evaluate_subexp_standard
 PARAMS ((struct type *, struct expression *, int*, enum noside));
+
+extern value_ptr evaluate_subexp_with_coercion PARAMS ((struct expression *,
+							int *, enum noside));
 
 /* From expprint.c */
 

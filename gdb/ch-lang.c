@@ -324,6 +324,8 @@ evaluate_subexp_chill (expect_type, exp, pos, noside)
 	  argvec[tem] = 0; /* signal end of arglist */
 
 	  return call_function_by_hand (argvec[0], nargs, argvec + 1);
+	default:
+	  break;
 	}
 
       while (nargs-- > 0)
@@ -332,6 +334,8 @@ evaluate_subexp_chill (expect_type, exp, pos, noside)
 	  arg1 = value_subscript (arg1, index);
 	}
       return (arg1);
+    default:
+      break;
     }
 
   return evaluate_subexp_standard (expect_type, exp, pos, noside);

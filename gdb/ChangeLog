@@ -1,3 +1,14 @@
+Sun Feb 12 12:36:38 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* valops.c (value_arg_coerce): Use VALUE_TYPE not SYMBOL_TYPE on
+	arg, it is a value not a symbol.
+
+	gcc -Wall lint:
+	* eval.c: Move declaration of evaluate_subexp_with_coercion from here..
+	* expression.h: ..to here.
+	* expression.h: Include value.h.
+	* ch-lang.c (evaluate_subexp_chill): Add default case in switch.
+
 Sun Feb 12 11:03:47 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* language.h (struct language_defn):  New field evaluate_exp.
