@@ -1,5 +1,5 @@
 /* Native-dependent code for LynxOS.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 
 #include <sys/ptrace.h>
-#include "/usr/include/sys/wait.h"
+#include <sys/wait.h>
 
 static unsigned long registers_addr PARAMS ((int pid));
 
