@@ -1,3 +1,22 @@
+2003-01-20  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.arch/altivec-abi.exp: Set variable 'srcfile' differently, to
+	allow for different test tree configurations.  Update some
+	tescases accordingly.
+	* gdb.arch/altivec-regs.exp: Ditto.
+	* gdb.asm/asm-source.exp: Ditto.
+	* gdb.base/advance.exp: Ditto.
+	* gdb.base/display.exp: Ditto.
+	* gdb.base/long_long.exp: Ditto. 
+	* gdb.base/mips_pro.exp: Ditto.
+	* gdb.base/overlays.exp: Ditto.
+	* gdb.base/relocate.exp: Ditto.
+	* gdb.base/setshow.exp: Ditto.
+	* gdb.base/step-line.exp: Ditto.
+	* gdb.base/step-test.exp: Ditto.
+	* gdb.base/until.exp: Ditto.
+	* gdb.c++/virtfunc.exp: Get rid of variable 'src'.
+
 2003-01-17  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/demangle.exp (test_lucid_style_demangling): KFAIL test

@@ -39,8 +39,7 @@ if [get_compiler_info ${binfile} "c++"] {
 
 source ${binfile}.ci
 
-set src "${srcdir}/${subdir}/${srcfile}"
-if  { [gdb_compile "${src}" "${binfile}" executable {c++ debug}] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {c++ debug}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 

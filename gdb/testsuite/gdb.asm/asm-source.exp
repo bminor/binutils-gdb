@@ -1,4 +1,4 @@
-# Copyright 1998, 2000, 2002 Free Software Foundation, Inc.
+# Copyright 1998, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -99,8 +99,8 @@ if [board_info $dest exists multilib_flags] {
 
 set testfile "asm-source"
 set binfile ${objdir}/${subdir}/${testfile}
-set src1 ${srcdir}/${subdir}/asmsrc1.s
-set src2 ${srcdir}/${subdir}/asmsrc2.s
+set srcfile1 asmsrc1.s
+set srcfile2 asmsrc2.s
 
 remote_exec build "rm -f ${subdir}/arch.inc"
 remote_download host ${srcdir}/${subdir}/${asm-arch}.inc ${subdir}/arch.inc
@@ -110,10 +110,10 @@ if { "${asm-flags}" == "" } {
     set asm-flags "-gstabs -I${srcdir}/${subdir} -I${objdir}/${subdir}"
 }
 
-if {[target_assemble ${src1} asmsrc1.o "${asm-flags}"] != ""} then {
+if {[target_assemble ${srcdir}/${subdir}/${srcfile1} asmsrc1.o "${asm-flags}"] != ""} then {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
-if {[target_assemble ${src2} asmsrc2.o "${asm-flags}"] != ""} then {
+if {[target_assemble ${srcdir}/${subdir}/${srcfile2} asmsrc2.o "${asm-flags}"] != ""} then {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
