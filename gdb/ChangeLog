@@ -1,3 +1,14 @@
+2002-11-29  Andrew Cagney  <cagney@redhat.com>
+
+	* remote-mips.c (mips_initialize): Force a selected frame rebuild
+	by calling get_selected_frame.
+	* ocd.c (ocd_start_remote): Use get_selected frame instead of
+	set_current_frame, create_new_frame, select_frame and
+	get_current_frame.
+	* remote-e7000.c (e7000_start_remote): Ditto.
+	* remote-mips.c (common_open): Ditto
+	* remote-rdp.c (remote_rdp_open): Ditto.
+
 2002-11-29  Andreas Schwab  <schwab@suse.de>
 
 	* m68k-tdep.c (m68k_frame_chain, m68k_frame_saved_pc)

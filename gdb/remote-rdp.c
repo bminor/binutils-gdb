@@ -1163,9 +1163,7 @@ remote_rdp_open (char *args, int from_tty)
   flush_cached_frames ();
   registers_changed ();
   stop_pc = read_pc ();
-  set_current_frame (create_new_frame (read_fp (), stop_pc));
-  select_frame (get_current_frame ());
-  print_stack_frame (deprecated_selected_frame, -1, 1);
+  print_stack_frame (get_selected_frame (), -1, 1);
 }
 
 

@@ -1494,8 +1494,10 @@ mips_initialize (void)
      the request itself succeeds or fails.  */
 
   mips_request ('r', 0, 0, &err, mips_receive_wait, NULL);
-  set_current_frame (create_new_frame (read_fp (), read_pc ()));
-  select_frame (get_current_frame ());
+  /* FIXME: cagney/2002-11-29: Force the update of selected frame.
+     This shouldn't be necessary, only many many places still refer to
+     selected_frame directly (instead of using get_selected_frame().  */
+  get_selected_frame (); /* Hack!!!  */
 }
 
 /* Open a connection to the remote board.  */
@@ -1612,17 +1614,15 @@ device is attached to the target board (e.g., /dev/ttya).\n"
   if (ptype)
     mips_set_processor_type_command (xstrdup (ptype), 0);
 
-/* This is really the job of start_remote however, that makes an assumption
-   that the target is about to print out a status message of some sort.  That
-   doesn't happen here (in fact, it may not be possible to get the monitor to
-   send the appropriate packet).  */
+  /* This is really the job of start_remote however, that makes an
+     assumption that the target is about to print out a status message
+     of some sort.  That doesn't happen here (in fact, it may not be
+     possible to get the monitor to send the appropriate packet).  */
 
   flush_cached_frames ();
   registers_changed ();
   stop_pc = read_pc ();
-  set_current_frame (create_new_frame (read_fp (), stop_pc));
-  select_frame (get_current_frame ());
-  print_stack_frame (deprecated_selected_frame, -1, 1);
+  print_stack_frame (get_selected_frame (), -1, 1);
   xfree (serial_port_name);
 }
 
