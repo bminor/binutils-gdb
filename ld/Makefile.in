@@ -1282,9 +1282,6 @@ configdoc.texi:	${DOCVER}-doc.texi
 	  || ln ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi >/dev/null 2>&1 \
 	  || cp ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi
 
-ld.info: $(srcdir)/ld.texinfo configdoc.texi bfdsumm.texi
-ld.dvi: $(srcdir)/ld.texinfo configdoc.texi bfdsumm.texi
-
 ld.info: $(srcdir)/ld.texinfo configdoc.texi
 	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
 	$(MAKEINFO) -I $(srcdir) -I $(BFDDIR)/doc $(srcdir)/ld.texinfo
