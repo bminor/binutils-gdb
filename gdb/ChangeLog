@@ -1,3 +1,9 @@
+2003-01-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* lin-lwp.c (child_wait): Ignore exit statuses for processes other
+	than inferior_ptid.
+	(lin_lwp_wait): Ignore exit statuses for unknown LWPs.
+
 2003-01-09  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.h (frame_obstack_zalloc): Replace frame_obstack_alloc.

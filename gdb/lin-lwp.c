@@ -1,5 +1,5 @@
 /* Multi-threaded debugging support for GNU/Linux (LWP layer).
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1062,6 +1062,14 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
       save_errno = errno;
 
+      /* Make sure we don't report an event for the exit of the
+	 original program, if we've detached from it.  */
+      if (pid != -1 && ! WIFSTOPPED (status) && pid != GET_PID (inferior_ptid))
+	{
+	  pid = -1;
+	  save_errno = EINTR;
+	}
+
       clear_sigio_trap ();
       clear_sigint_trap ();
     }
@@ -1206,6 +1214,17 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	    }
 
 	  lp = find_lwp_pid (pid_to_ptid (lwpid));
+
+	  /* Make sure we don't report an event for the exit of an LWP not in
+	     our list, i.e.  not part of the current process.  This can happen
+	     if we detach from a program we original forked and then it
+	     exits.  */
+	  if (! WIFSTOPPED (status) && ! lp)
+	    {
+	      status = 0;
+	      continue;
+	    }
+
 	  if (! lp)
 	    {
 	      lp = add_lwp (BUILD_LWP (lwpid, GET_PID (inferior_ptid)));
