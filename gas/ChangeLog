@@ -1,3 +1,8 @@
+Tue Oct 11 16:48:11 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-sparc.c (tc_gen_reloc): For non-a.out relocations, if
+	pc-relative, use fx_offset only, ignore address of relocation.
+
 Tue Oct 11 15:24:00 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* config/tc-mips.c (mips_ip): Don't use S_IS_LOCAL when checking
