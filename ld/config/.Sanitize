@@ -43,6 +43,7 @@ m68kv.mt
 m88k-bcs.mt
 mipsbsd.mt
 mips-big.mt
+mips-idt.mt
 mips-lit.mt
 news.mt
 ose68.mt

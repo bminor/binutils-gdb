@@ -120,7 +120,7 @@ ALL_EMULATIONS=em_lnk960.o em_sun3.o em_i386aout.o em_go32.o \
 	em_h8300hms.o em_ebmon29k.o em_sun4.o em_gld960.o \
 	em_m68kcoff.o em_h8300xray.o em_st2000.o em_sa29200.o \
 	em_vanilla.o em_i386coff.o em_z8ksim.o em_mipslit.o em_i386bsd.o \
-	em_mipsbig.o em_mipsbsd.o
+	em_mipsbig.o em_mipsbsd.o em_mipsidt.o
 
 EMULATION_OFILES=${ALL_EMULATIONS}
 #EMULATION_OFILES=em_${EMUL}.o ${OTHER_EMULATIONS}
@@ -268,6 +268,9 @@ em_mipsbig.c:  $(srcdir)/mipsbig.sh \
 em_mipsbsd.c: $(srcdir)/mipsbsd.sh \
   $(srcdir)/generic.em $(srcdir)/aout.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} mipsbsd.sh
+em_mipsidt.c: $(srcdir)/mipsidt.sh \
+  $(srcdir)/generic.em $(srcdir)/mips.sc-sh ${GEN_DEPENDS}
+	${GENSCRIPTS} mipsidt.sh
 
 $(LD_PROG): $(OFILES) $(BFDLIB) $(LIBIBERTY)
 	$(CC) $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(LDFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(LOADLIBES)

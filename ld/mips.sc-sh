@@ -1,22 +1,27 @@
-# Linker script for MIPS.  This works on a DECstation running Ultrix,
-# and may work on other platforms as well.
+# Linker script for MIPS systems.
 # Ian Lance Taylor <ian@cygnus.com>.
+# These variables may be overridden by the emulation file.  The
+# defaults are appropriate for a DECstation running Ultrix.
+test -z "$ENTRY" && ENTRY=__start
+test -z "$TEXT_START_ADDR" && TEXT_START_ADDR="0x400000 + SIZEOF_HEADERS"
+test -z "$DATA_ADDR" && DATA_ADDR=0x10000000
+test -z "$BSS_VAR" && BSS_VAR=
 cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 ${LIB_SEARCH_DIRS}
 
-ENTRY(__start)
+ENTRY(${ENTRY})
 
 SECTIONS
 {
-  .text ${RELOCATING+ 0x400000 + SIZEOF_HEADERS} : {
+  .text ${RELOCATING+ ${TEXT_START_ADDR}} : {
     *(.init)
     ${RELOCATING+ eprol  =  .};
     *(.text)
     *(.fini)
     ${RELOCATING+ etext  =  .};
   }
-  .rdata ${RELOCATING+ 0x10000000} : {
+  .rdata ${RELOCATING+ ${DATA_ADDR}} : {
     *(.rdata)
   }
   .data ${RELOCATING+ .} : {
@@ -33,6 +38,7 @@ SECTIONS
     *(.sdata)
   }
   ${RELOCATING+ edata  =  .;}
+  ${BSS_VAR}
   .sbss ${RELOCATING+ .} : {
     *(.sbss)
     *(.scommon)

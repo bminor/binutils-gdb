@@ -108,6 +108,7 @@ m88kbcs.sh
 mips.sc-sh
 mipsbig.sh
 mipsbsd.sh
+mipsidt.sh
 mipslit.sh
 mri.c
 mri.h
@@ -161,7 +162,16 @@ fi
 #
 #
 # $Log$
-# Revision 1.52  1993/02/28 14:42:15  raeburn
+# Revision 1.53  1993/03/04 20:49:05  ian
+# 	* mips.sc-sh: Added variables which may be overridden by a
+# 	specific emulation.
+# 	* mipsidt.sh: New file; emulation for IDT MIPS board.
+# 	* Makefile.in (ALL_EMULATIONS): Added em_mipsidt.o.
+# 	(em_mipsidt.c): New target.  Uses mipsidt.sh and mips.sc-sh.
+# 	* config/mips-idt.mt: New file; sets EMUL to mipsidt.
+# 	* configure.in (mips-idt-ecoff): New target; uses mips-idt.
+#
+# Revision 1.52  1993/02/28  14:42:15  raeburn
 # mips-bsd and 386bsd support
 #
 # Revision 1.51  1993/02/26  18:53:13  dje
