@@ -551,7 +551,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"max.s",   "D,S,T",    0x46000028, 0xffe0003f, WR_D|RD_S|RD_T|FP_S,    T5 },
 {"min.s",   "D,S,T",    0x46000030, 0xffe0003f, WR_D|RD_S|RD_T|FP_S,    T5 },
 {"msuba.s", "S,T",      0x4600001f, 0xffe007ff, RD_S|RD_T|FP_S,         T5 },
-{"mult.s",  "S,T",      0x4600001a, 0xffe007ff, RD_S|RD_T|FP_S,         T5 },
+{"mula.s",  "S,T",      0x4600001a, 0xffe007ff, RD_S|RD_T|FP_S,         T5 },
 {"suba.s",  "S,T",      0x46000019, 0xffe007ff, RD_S|RD_T|FP_S,         T5 },
 {"di",      "",         0x42000039, 0xffffffff, WR_C0,          T5      },
 {"ei",      "",         0x42000038, 0xffffffff, WR_C0,          T5      },
