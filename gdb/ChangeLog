@@ -1,5 +1,13 @@
 2002-11-25  Jim Blandy  <jimb@redhat.com>
 
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): New function,
+	like the old symbol_file_add, but taking new arguments: you can
+	now pass in either a `struct section_addr_info' list to say where
+	each section is loaded, or a `struct section_offsets' table.  Pass
+	these new arguments through to syms_from_objfile as appropriate.
+	(symbol_file_add): Just call symbol_file_add_with_addrs_or_offsets, 
+	with the appropriate quiescent values for the new arguments.
+	
 	* symfile.c: #include "gdb_assert.h".
 	(syms_from_objfile): Add the ability to pass in a section offset
 	table directly, as an alternative to the section_addr_info table.
