@@ -25,6 +25,12 @@ start-sanitize-gdbtk
 	Remove unused static variable "Gdbtk_Library".
 end-sanitize-gdbtk
 
+	* sh-tdep.c (symfile.h): Include.
+	(gdb_string.h): Include.
+	(sh_fix_call_dummy): Ifdef away, currently unused.
+	* config/sh/tm-sh.h (pop_frame): Add prototype.
+	* config/sh/tm-sh.h (sh_set_processor_type): Add prototype.
+
 Sat Jun  7 02:34:19 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 start-sanitize-gdbtk

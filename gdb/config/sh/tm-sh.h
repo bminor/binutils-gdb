@@ -204,6 +204,7 @@ extern void sh_extract_return_value PARAMS ((struct type *, void *, void *));
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) \
     sh_init_extra_frame_info(fromleaf, fi) 
+extern void sh_init_extra_frame_info PARAMS ((int, struct frame_info *));
 
 /* A macro that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  If it
@@ -261,6 +262,7 @@ extern CORE_ADDR sh_push_return_address   PARAMS ((CORE_ADDR, CORE_ADDR));
 #define PUSH_RETURN_ADDRESS(PC, SP)  sh_push_return_address (PC, SP)
 
 
+extern CORE_ADDR sh_frame_chain PARAMS ((struct frame_info *));
 #define FRAME_CHAIN(FRAME)           sh_frame_chain(FRAME)
 #define PUSH_DUMMY_FRAME             generic_push_dummy_frame ()
 #define FRAME_CHAIN_VALID(FP, FRAME) generic_frame_chain_valid (FP, FRAME)
@@ -275,6 +277,7 @@ extern CORE_ADDR sh_push_return_address   PARAMS ((CORE_ADDR, CORE_ADDR));
 /* Discard from the stack the innermost frame, restoring all saved
    registers.  */
 
+extern void sh_pop_frame PARAMS ((void));
 #define POP_FRAME sh_pop_frame();
 
 #define NOP   {0x20, 0x0b}
@@ -285,3 +288,5 @@ extern CORE_ADDR sh_push_return_address   PARAMS ((CORE_ADDR, CORE_ADDR));
 
 /* Need this for WinGDB.  See gdb/mswin/{regdoc.h, gdbwin.c, gui.cpp}.  */
 #define TARGET_SH
+
+extern int sh_set_processor_type PARAMS ((char *));

@@ -26,12 +26,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "frame.h"
 #include "obstack.h"
 #include "symtab.h"
+#include "symfile.h"
 #include "gdbtypes.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "value.h"
 #include "dis-asm.h"
 #include "inferior.h"		/* for BEFORE_TEXT_END etc. */
+#include "gdb_string.h"
 
 extern int remote_write_size;	/* in remote.c */
 
@@ -531,7 +533,8 @@ sh_push_return_address (pc, sp)
         <destination>
   */
 
-int
+#if 0
+void
 sh_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
      char *dummy;
      CORE_ADDR pc;
@@ -543,6 +546,7 @@ sh_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 {
   *(unsigned long *) (dummy + 8) = fun;
 }
+#endif
 
 /* Function: get_saved_register
    Just call the generic_get_saved_register function.  */
