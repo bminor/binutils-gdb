@@ -100,11 +100,19 @@ char* pr_uword64 PARAMS ((uword64 addr));
 /* The following reserved instruction value is used when a simulator
    trap is required. NOTE: Care must be taken, since this value may be
    used in later revisions of the MIPS ISA. */
+
 #define RSVD_INSTRUCTION           (0x00000005)
 #define RSVD_INSTRUCTION_MASK      (0xFC00003F)
 
 #define RSVD_INSTRUCTION_ARG_SHIFT 6
 #define RSVD_INSTRUCTION_ARG_MASK  0xFFFFF  
+
+
+/* The following reserved instruction value is used when a simulator
+   halt is required.  NOTE: Care must be taken, since this value may
+   be used in later revisions of the MIPS ISA. */
+#define HALT_INSTRUCTION       (0x03ff000d)
+#define HALT_INSTRUCTION_MASK  (0x03FFFFC0)
 
 
 /* Bits in the Debug register */
@@ -454,6 +462,19 @@ sim_open (kind, cb, abfd, argv)
   if (STATE & simTRACE)
     open_trace(sd);
 #endif /* TRACE */
+
+  /* Write an abort sequence into the TRAP (common) exception vector
+     addresses.  This is to catch code executing a TRAP (et.al.)
+     instruction without installing a trap handler. */
+  {
+    unsigned32 halt[2] = { 0x2404002f /* addiu r4, r0, 47 */,
+			   HALT_INSTRUCTION /* BREAK */ };
+    H2T (halt[0]);
+    H2T (halt[1]);
+    sim_write (sd, 0x80000180, (char *) halt, sizeof (halt));
+    sim_write (sd, 0xBFC00380, (char *) halt, sizeof (halt));
+  }
+
 
   /* Write the monitor trap address handlers into the monitor (eeprom)
      address space.  This can only be done once the target endianness
@@ -1574,13 +1595,6 @@ signal_exception (SIM_DESC sd,
   LLBIT = 0;
 
   switch (exception) {
-    /* TODO: For testing purposes I have been ignoring TRAPs. In
-       reality we should either simulate them, or allow the user to
-       ignore them at run-time.
-       Same for SYSCALL */
-    case Trap :
-     sim_io_eprintf(sd,"Ignoring instruction TRAP (PC 0x%s)\n",pr_addr(cia));
-     break;
 
     case SystemCall :
       {
@@ -1668,14 +1682,16 @@ signal_exception (SIM_DESC sd,
       {
 	va_list ap;
 	unsigned int instruction;
-	va_start(ap,exception);
+	va_start(ap, exception);
 	instruction = va_arg(ap,unsigned int);
 	va_end(ap);
 	/* Check for our special terminating BREAK: */
-	if ((instruction & 0x03FFFFC0) == 0x03ff0000) {
-	  sim_engine_halt (SD, CPU, NULL, cia,
-			   sim_exited, (unsigned int)(A0 & 0xFFFFFFFF));
-	}
+	if ((instruction & HALT_INSTRUCTION_MASK)
+	    == (HALT_INSTRUCTION & HALT_INSTRUCTION_MASK))
+	  {
+	    sim_engine_halt (SD, CPU, NULL, cia,
+			     sim_exited, (unsigned int)(A0 & 0xFFFFFFFF));
+	  }
       }
       if (STATE & simDELAYSLOT)
 	PC = cia - 4; /* reference the branch instruction */
@@ -1751,6 +1767,9 @@ signal_exception (SIM_DESC sd,
 			  sim_stopped, SIM_SIGFPE);
 
        case Trap:
+	 sim_engine_restart (SD, CPU, NULL, PC);
+	 break;
+
        case Watch:
        case SystemCall:
 	 PC = EPC;
@@ -3140,6 +3159,12 @@ decode_coproc (SIM_DESC sd,
 		  CAUSE = GPR[rt];
 		break;
 		/* 14 = EPC                R4000   VR4100  VR4300 */
+	      case 14:
+		if (code == 0x00)
+		  GPR[rt] = (signed_word) (signed_address) EPC;
+		else
+		  EPC = GPR[rt];
+		break;
 		/* 15 = PRId               R4000   VR4100  VR4300 */
 #ifdef SUBTARGET_R3900
                 /* 16 = Debug */

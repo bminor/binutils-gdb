@@ -65,15 +65,18 @@ typedef unsigned long unsigned32;
 #if defined __GNUC__ || defined _MSC_VER
 #ifdef __GNUC__
 
+/* GDB sometimes likes to make what appear to be signed `0x*L' values
+   unsigned by default */
+
 typedef long long natural64;
 typedef signed long long signed64;
 typedef unsigned long long unsigned64;
 
 #define UNSIGNED64(X) (X##ULL)
-#define SIGNED64(X) (X##LL)
+#define SIGNED64(X) ((signed64) X##LL)
 
 #define UNSIGNED32(X) (X##UL)
-#define SIGNED32(X) (X##L)
+#define SIGNED32(X) ((signed32) X##L)
 
 #else	/* _MSC_VER */
 
@@ -137,11 +140,14 @@ typedef signed32 signed_word;
 
 /* Other instructions */
 #if (WITH_TARGET_ADDRESS_BITSIZE == 64)
-typedef unsigned64 address_word;
+typedef unsigned64 unsigned_address;
+typedef signed64 signed_address;
 #endif
 #if (WITH_TARGET_ADDRESS_BITSIZE == 32)
-typedef unsigned32 address_word;
+typedef unsigned32 unsigned_address;
+typedef signed32 signed_address;
 #endif
+typedef unsigned_address address_word;
 
 /* IEEE 1275 cell size */
 #if (WITH_TARGET_CELL_BITSIZE == 64)
@@ -154,5 +160,14 @@ typedef natural32 natural_cell;
 typedef unsigned32 unsigned_cell;
 typedef signed32 signed_cell;
 #endif
+
+/* Floating point registers */
+#if (WITH_TARGET_FLOATING_POINT_BITSIZE == 64)
+typedef unsigned64 fp_word;
+#endif
+#if (WITH_TARGET_FLOATING_POINT_BITSIZE == 32)
+typedef unsigned32 fp_word;
+#endif
+
 
 #endif /* _SIM_TYPES_H_ */

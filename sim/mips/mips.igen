@@ -349,7 +349,9 @@
 *tx19:
 // end-sanitize-tx19
 {
+  TRACE_ALU_INPUT2 (GPR[RS], IMMEDIATE);
   GPR[RT] = GPR[RS] & IMMEDIATE;
+  TRACE_ALU_RESULT (GPR[RT]);
 }
 
 
@@ -1933,7 +1935,9 @@
 *tx19:
 // end-sanitize-tx19
 {
+  TRACE_ALU_INPUT1 (IMMEDIATE);
   GPR[RT] = EXTEND32 (IMMEDIATE << 16);
+  TRACE_ALU_RESULT (GPR[RT]);
 }
 
 
@@ -5288,6 +5292,20 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
+{
+  if (SR & status_ERL)
+    {
+      /* Oops, not yet available */
+      sim_io_printf (SD, "Warning: ERET when SR[ERL] set not supported");
+      NIA = EPC;
+      SR &= ~status_ERL;
+    }
+  else
+    {
+      NIA = EPC;
+      SR &= ~status_EXL;
+    }
+}
 
 
 010000,00000,5.RT,5.RD,00000,6.REGX:COP0:32::MFC0
@@ -5304,7 +5322,9 @@
 *r5900:
 // end-sanitize-r5900
 {
+  TRACE_ALU_INPUT0 ();
   DecodeCoproc (instruction_0);
+  TRACE_ALU_RESULT (GPR[RT]);
 }
 
 010000,00100,5.RT,5.RD,00000,6.REGX:COP0:32::MTC0

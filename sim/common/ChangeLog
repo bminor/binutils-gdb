@@ -1,3 +1,12 @@
+Tue Apr 21 13:18:41 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-types.h (signed_address, unsigned_address): Define.
+
+Mon Apr 20 21:47:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-fpu.c (sim_fpu_2d): Don't return an SNaN, convert it into a
+ 	QNaN.
+
 Thu Apr 16 10:30:14 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-fpu.c, sim-fpu.h (sim_fpu_fractionto, sim_fpu_tofraction):

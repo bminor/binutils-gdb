@@ -1,3 +1,16 @@
+Tue Apr 21 11:59:50 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips.igen (ERET): Implement.
+
+	* interp.c (decode_coproc): Return sign-extended EPC.
+
+	* mips.igen (ANDI, LUI, MFC0): Add tracing code.
+
+	* interp.c (signal_exception): Do not ignore Trap.
+	(signal_exception): On TRAP, restart at exception address.
+	(HALT_INSTRUCTION, HALT_INSTRUCTION_MASK): Define.
+	(signal_exception): Update.
+
 Mon Apr 20 11:26:55 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-main.h (struct hilo_access, struct hilo_history): Define,
