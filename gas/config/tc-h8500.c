@@ -967,6 +967,8 @@ build_bytes (opcode, operand)
 	      output[index] |= rn;
 	      break;
 	    case RD:
+	    case RDIND:
+	      
 	      output[index] |= rd;
 	      break;
 	    case RS:
@@ -1029,15 +1031,15 @@ build_bytes (opcode, operand)
 	      output[0] |= 0x8;
 	      break;
 	    case ABS24:
-	      insert (output, index, absolute, R_H8500_IMM24, 0);
+	      insert (output, index, &absolute, R_H8500_IMM24, 0);
 	      index += 2;
 	      break;
 	    case ABS16:
-	      insert (output, index, absolute, R_H8500_IMM16, 0);
+	      insert (output, index, &absolute, R_H8500_IMM16, 0);
 	      index++;
 	      break;
 	    case ABS8:
-	      insert (output, index, absolute, R_H8500_IMM8, 0);
+	      insert (output, index, &absolute, R_H8500_IMM8, 0);
 	      break;
 	    case QIM:
 	      switch (immediate.X_add_number)
@@ -1621,7 +1623,7 @@ tc_reloc_mangle (fix_ptr, intr, base)
 
 }
 
-/* end of tc-h8500.c */
+
 
 int
 start_label (ptr)
@@ -1635,3 +1637,5 @@ start_label (ptr)
     return 0;
   return 1;
 }
+
+/* end of tc-h8500.c */
