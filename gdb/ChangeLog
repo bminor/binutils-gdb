@@ -1,3 +1,17 @@
+2001-06-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* ui-out.h (ui_out_table_header): Add parameter ``col_name''.
+	(table_header_ftype): Ditto.
+	* cli-out.c (cli_table_header): Update.
+	* ui-out.c (ui_out_table_header): Update.
+	(uo_table_header): Update.
+	(default_table_header): Update.
+	(append_header_to_list): Update.
+	(struct ui_out_header): Add field ``col_name''.
+	(append_header_to_list): Use xstrdup.  Initialize col_name.
+	* breakpoint.c (breakpoint_1): Pass COL_NAME to
+	ui_out_table_header.
+
 2001-06-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* cli-out.c: Include "gdb_assert.h'.

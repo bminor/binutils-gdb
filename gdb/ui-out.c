@@ -39,6 +39,7 @@ struct ui_out_hdr
     int colno;
     int width;
     int alignment;
+    char *col_name;
     char *colhdr;
     struct ui_out_hdr *next;
   };
@@ -139,7 +140,7 @@ static void default_table_begin (struct ui_out *uiout, int nbrofcols,
 static void default_table_body (struct ui_out *uiout);
 static void default_table_end (struct ui_out *uiout);
 static void default_table_header (struct ui_out *uiout, int width,
-				  enum ui_align alig,
+				  enum ui_align alig, const char *col_name,
 				  const char *colhdr);
 static void default_begin (struct ui_out *uiout,
 			   enum ui_out_type type,
@@ -213,7 +214,8 @@ static void uo_table_begin (struct ui_out *uiout, int nbrofcols,
 static void uo_table_body (struct ui_out *uiout);
 static void uo_table_end (struct ui_out *uiout);
 static void uo_table_header (struct ui_out *uiout, int width,
-			     enum ui_align align, const char *colhdr);
+			     enum ui_align align, const char *col_name,
+			     const char *colhdr);
 static void uo_begin (struct ui_out *uiout,
 		      enum ui_out_type type,
 		      int level, const char *id);
@@ -241,7 +243,8 @@ static void uo_flush (struct ui_out *uiout);
 
 extern void _initialize_ui_out (void);
 static void append_header_to_list (struct ui_out *uiout, int width,
-				   int alignment, const char *colhdr);
+				   int alignment, const char *col_name,
+				   const char *colhdr);
 static int get_curr_header (struct ui_out *uiout, int *colno, int *width,
 			    int *alignment, char **colhdr);
 static void clear_header_list (struct ui_out *uiout);
@@ -316,6 +319,7 @@ ui_out_table_end (struct ui_out *uiout)
 
 void
 ui_out_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
+		     const char *col_name,
 		     const char *colhdr)
 {
   if (!uiout->table_flag || uiout->body_flag)
@@ -323,9 +327,9 @@ ui_out_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
 		    "table header must be specified after table_begin \
 and before table_body.");
 
-  append_header_to_list (uiout, width, alignment, colhdr);
+  append_header_to_list (uiout, width, alignment, col_name, colhdr);
 
-  uo_table_header (uiout, width, alignment, colhdr);
+  uo_table_header (uiout, width, alignment, col_name, colhdr);
 }
 
 void
@@ -729,6 +733,7 @@ default_table_end (struct ui_out *uiout)
 
 static void
 default_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
+		      const char *col_name,
 		      const char *colhdr)
 {
 }
@@ -837,11 +842,12 @@ uo_table_end (struct ui_out *uiout)
 
 void
 uo_table_header (struct ui_out *uiout, int width, enum ui_align align,
+		 const char *col_name,
 		 const char *colhdr)
 {
   if (!uiout->impl->table_header)
     return;
-  uiout->impl->table_header (uiout, width, align, colhdr);
+  uiout->impl->table_header (uiout, width, align, col_name, colhdr);
 }
 
 void
@@ -972,6 +978,7 @@ static void
 append_header_to_list (struct ui_out *uiout,
 		       int width,
 		       int alignment,
+		       const char *col_name,
 		       const char *colhdr)
 {
   struct ui_out_hdr *temphdr;
@@ -981,10 +988,13 @@ append_header_to_list (struct ui_out *uiout,
   temphdr->alignment = alignment;
   /* we have to copy the column title as the original may be an automatic */
   if (colhdr != NULL)
-    {
-      temphdr->colhdr = xmalloc (strlen (colhdr) + 1);
-      strcpy (temphdr->colhdr, colhdr);
-    }
+    temphdr->colhdr = xstrdup (colhdr);
+  else
+    temphdr->colhdr = NULL;
+  if (col_name != NULL)
+    temphdr->col_name = xstrdup (colhdr);
+  else
+    temphdr->col_name = xstrdup (colhdr);
   temphdr->next = NULL;
   if (uiout->headerfirst == NULL)
     {

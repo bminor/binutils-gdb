@@ -93,7 +93,8 @@ extern void ui_out_table_begin (struct ui_out *uiout, int nbrofcols,
 				int nr_rows, const char *tblid);
 
 extern void ui_out_table_header (struct ui_out *uiout, int width,
-				 enum ui_align align, const char *colhdr);
+				 enum ui_align align, const char *col_name,
+				 const char *colhdr);
 
 extern void ui_out_table_body (struct ui_out *uiout);
 
@@ -197,7 +198,7 @@ typedef void (table_begin_ftype) (struct ui_out * uiout,
 typedef void (table_body_ftype) (struct ui_out * uiout);
 typedef void (table_end_ftype) (struct ui_out * uiout);
 typedef void (table_header_ftype) (struct ui_out * uiout, int width,
-				   enum ui_align align,
+				   enum ui_align align, const char *col_name,
 				   const char *colhdr);
 /* Note: level 0 is the top-level so LEVEL is always greater than
    zero. */

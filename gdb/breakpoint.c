@@ -3601,23 +3601,23 @@ breakpoint_1 (int bnum, int allflag)
     {
       annotate_breakpoints_headers ();
       annotate_field (0);
-      ui_out_table_header (uiout, 3, ui_left, "Num");	/* 1 */
+      ui_out_table_header (uiout, 3, ui_left, "number", "Num");		/* 1 */
       annotate_field (1);
-      ui_out_table_header (uiout, 14, ui_left, "Type");	/* 2 */
+      ui_out_table_header (uiout, 14, ui_left, "type", "Type");		/* 2 */
       annotate_field (2);
-      ui_out_table_header (uiout, 4, ui_left, "Disp");	/* 3 */
+      ui_out_table_header (uiout, 4, ui_left, "disp", "Disp");		/* 3 */
       annotate_field (3);
-      ui_out_table_header (uiout, 3, ui_left, "Enb");	/* 4 */
+      ui_out_table_header (uiout, 3, ui_left, "enabled", "Enb");	/* 4 */
       if (addressprint)
 	{
 	  annotate_field (4);
 	  if (TARGET_ADDR_BIT <= 32)
-	    ui_out_table_header (uiout, 10, ui_left, "Address");	/* 5 */
+	    ui_out_table_header (uiout, 10, ui_left, "addr", "Address");/* 5 */
 	  else
-	    ui_out_table_header (uiout, 18, ui_left, "Address");	/* 5 */
+	    ui_out_table_header (uiout, 18, ui_left, "addr", "Address");/* 5 */
 	}
       annotate_field (5);
-      ui_out_table_header (uiout, 40, ui_noalign, "What");	/* 6 */
+      ui_out_table_header (uiout, 40, ui_noalign, "what", "What");	/* 6 */
       ui_out_table_body (uiout);
       annotate_breakpoints_table ();
     }

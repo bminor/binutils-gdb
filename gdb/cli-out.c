@@ -45,7 +45,7 @@ static void cli_table_begin (struct ui_out *uiout, int nbrofcols,
 static void cli_table_body (struct ui_out *uiout);
 static void cli_table_end (struct ui_out *uiout);
 static void cli_table_header (struct ui_out *uiout, int width,
-			      enum ui_align alig,
+			      enum ui_align alig, const char *col_name,
 			      const char *colhdr);
 static void cli_begin (struct ui_out *uiout, enum ui_out_type type,
 		       int level, const char *lstid);
@@ -147,6 +147,7 @@ cli_table_end (struct ui_out *uiout)
 
 void
 cli_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
+		  const char *col_name,
 		  const char *colhdr)
 {
   struct ui_out_data *data = ui_out_data (uiout);
