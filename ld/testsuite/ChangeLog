@@ -1,5 +1,8 @@
 Thu Oct 26 22:53:17 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ld-bootstrap/bootstrap.exp: On AIX, pass -bI/lib/syscalls.exp
+	along with --static.
+
 	* ld-scripts/script.s: Make symbols global.
 
 Fri Oct 20 12:22:16 1995  Ian Lance Taylor  <ian@cygnus.com>
