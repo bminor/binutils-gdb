@@ -106,9 +106,13 @@ proc default_ld_compile { cc source object } {
     global CFLAGS
     global srcdir
     global subdir
-    
-    if {[which $cc] == 0} then {
-	perror "$cc does not exist"
+
+    set cc_prog $cc
+    if {[llength $cc_prog] > 1} then {
+	set cc_prog [lindex $cc_prog 0]
+    }
+    if {[which $cc_prog] == 0} then {
+	perror "$cc_prog does not exist"
 	return 0
     }
 
