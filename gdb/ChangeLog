@@ -1,5 +1,10 @@
 2004-11-13  Andrew Cagney  <cagney@gnu.org>
 
+	* config/i386/i386lynx.mh: Delete file.
+	* config/i386/i386lynx.mt: Delete file.
+	* Makefile.in (ALLDEPFILES, i386ly-tdep.o): Remove i386ly-tdep.c.
+	* i386ly-tdep.c: Delete.
+
 	* config/tm-lynx.h: Delete, inline contents ...
 	* config/rs6000/tm-rs6000ly.h: ... here.
 
