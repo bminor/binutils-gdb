@@ -1250,7 +1250,7 @@ jv-exp.tab.c: jv-exp.y
 # See comments above ...
 .PRECIOUS: f-exp.tab.c
 f-exp.tab.o: f-exp.tab.c
-f-exp.tab.c: f-exp.y c-exp.tab.c
+f-exp.tab.c: f-exp.y
 	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/f-exp.y  y.tab.c f-exp.tmp -- $(YFLAGS) 
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \

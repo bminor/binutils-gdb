@@ -1559,7 +1559,9 @@ add_partial_symbol (struct partial_die_info *pdi, struct objfile *objfile,
 	return;
       add_psymbol_to_list (actual_name, strlen (actual_name),
 			   STRUCT_NAMESPACE, LOC_TYPEDEF,
-			   &objfile->global_psymbols,
+			   cu_language == language_cplus
+			   ? &objfile->global_psymbols
+			   : &objfile->static_psymbols,
 			   0, (CORE_ADDR) 0, cu_language, objfile);
 
       if (cu_language == language_cplus)
@@ -1574,7 +1576,9 @@ add_partial_symbol (struct partial_die_info *pdi, struct objfile *objfile,
     case DW_TAG_enumerator:
       add_psymbol_to_list (actual_name, strlen (actual_name),
 			   VAR_NAMESPACE, LOC_CONST,
-			   &objfile->global_psymbols,
+			   cu_language == language_cplus
+			   ? &objfile->static_psymbols
+			   : &objfile->global_psymbols,
 			   0, (CORE_ADDR) 0, cu_language, objfile);
       break;
     default:
@@ -5243,19 +5247,18 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 	    }
 
 	  {
-	    /* NOTE: carlton/2002-11-29: Class symbols shouldn't
+	    /* NOTE: carlton/2002-11-29: C++ class symbols shouldn't
 	       really ever be static objects: otherwise, if you try
 	       to, say, break of a class's method and you're in a file
 	       which doesn't mention that class, it won't work unless
 	       the check for all static symbols in lookup_symbol_aux
-	       saves you.  Though perhaps C allows different files to
-	       define different structs with the same name; if so,
-	       this should be conditional on C++.  See the
-	       OtherFileClass tests in gdb.c++/namespace.exp.  */
+	       saves you.  See the OtherFileClass tests in
+	       gdb.c++/namespace.exp.  */
 
 	    struct pending **list_to_add;
 
 	    list_to_add = (list_in_scope == &file_symbols
+			   && cu_language == language_cplus
 			   ? &global_symbols : list_in_scope);
 	  
 	    add_symbol_to_list (sym, list_to_add);
@@ -5318,6 +5321,7 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 	    struct pending **list_to_add;
 
 	    list_to_add = (list_in_scope == &file_symbols
+			   && cu_language == language_cplus
 			   ? &global_symbols : list_in_scope);
 	  
 	    add_symbol_to_list (sym, list_to_add);

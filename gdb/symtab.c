@@ -1472,6 +1472,52 @@ lookup_symbol_aux_minsyms (int block_index, const char *name,
   return NULL;
 }
 
+/* Look up a type named NESTED_NAME that is nested inside the C++
+   class or namespace given by PARENT_TYPE, from within the context
+   given by BLOCK.  */
+
+struct type *
+lookup_nested_type (struct type *parent_type,
+		    const char *nested_name,
+		    const struct block *block)
+{
+  switch (TYPE_CODE (parent_type))
+    {
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_NAMESPACE:
+      {
+	/* NOTE: carlton/2002-12-17: As of this writing, C++ class
+	   members of classes aren't treated like, say, data or
+	   function members.  Instead, they're just represented by
+	   symbols whose names are qualified by the name of the
+	   surrounding class.  This is just like members of
+	   namespaces; in particular, lookup_symbol_namespace works
+	   when looking them up.  */
+
+	/* NOTE: carlton/2002-12-17: The above is, actually, lying:
+	   there are still situations where nested types are
+	   represented by symbols that include only the member name,
+	   not the parent name.  Sigh.  Blame it on stabs, or
+	   something.  */
+	const char *parent_name = TYPE_TAG_NAME (parent_type);
+	struct symbol *sym = lookup_symbol_namespace (parent_name,
+						      strlen (parent_name),
+						      nested_name,
+						      NULL,
+						      block,
+						      VAR_NAMESPACE,
+						      NULL);
+	if (sym == NULL || SYMBOL_CLASS (sym) != LOC_TYPEDEF)
+	  return NULL;
+	else
+	  return SYMBOL_TYPE (sym);
+      }
+    default:
+      error ("\"%s\" is not defined as a compound type.",
+	     TYPE_NAME (parent_type));
+    }
+}
+
 /* Look, in partial_symtab PST, for symbol NAME.  Check the global
    symbols if GLOBAL, the static symbols if not */
 
@@ -1481,7 +1527,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 {
   struct partial_symbol *temp;
   struct partial_symbol **start, **psym;
-  struct partial_symbol **top, **bottom, **center;
+  struct partial_symbol **top, **real_top, **bottom, **center;
   int length = (global ? pst->n_global_syms : pst->n_static_syms);
   int do_linear_search = 1;
 
@@ -1504,6 +1550,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 
       bottom = start;
       top = start + length - 1;
+      real_top = top;
       while (top > bottom)
 	{
 	  center = bottom + (top - bottom) / 2;
@@ -1531,7 +1578,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
       /* djb - 2000-06-03 - Use SYMBOL_MATCHES_NAME, not a strcmp, so
          we don't have to force a linear search on C++. Probably holds true
          for JAVA as well, no way to check. */
-      while (SYMBOL_MATCHES_NAME (*top, name))
+      while (top <= real_top && SYMBOL_MATCHES_NAME (*top, name))
 	{
 	  if (SYMBOL_NAMESPACE (*top) == namespace)
 	    {

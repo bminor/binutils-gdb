@@ -196,6 +196,7 @@ namespace C
       //cc;
       C::cc;
       cd;
+      //C::D::cd;
       E::cde;
       shadow;
       //E::ce;

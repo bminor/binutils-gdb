@@ -1,6 +1,6 @@
 // 2002-05-13
 
-enum 	region { oriental, egyptian, greek, etruscan, roman };
+enum region { oriental, egyptian, greek, etruscan, roman };
 
 // Test one.
 class gnu_obj_1

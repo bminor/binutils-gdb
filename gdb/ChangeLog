@@ -1,3 +1,19 @@
+2002-12-17  David Carlton  <carlton@math.stanford.edu>
+
+	* c-exp.y (yylex): Modify the #if 1 block to handle nested types
+	in a more honest manner.
+	* symtab.c (lookup_nested_type): New function.
+	* symtab.h: Declare lookup_nested_type.
+
+2002-12-16  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (lookup_partial_symbol): Don't search past the end of
+	the partial symbols.
+	* Makefile.in (f-exp.tab.c): Don't depend on c-exp.tab.c.
+	* dwarf2read.c (new_symbol): Only make global symbols associated
+	to structures, etc. if the current language is C++.
+	(add_partial_symbol): Ditto (for partial symbols).
+
 2002-11-29  David Carlton  <carlton@bactrian.org>
 
 	* dwarf2read.c (add_partial_symbol): Add partial symbols

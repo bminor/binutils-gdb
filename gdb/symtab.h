@@ -953,6 +953,12 @@ extern struct symbol *lookup_symbol_namespace (const char *namespace_name,
 					       namespace_enum name_space,
 					       struct symtab **symtab);
 
+/* Lookup a type within a class or a namespace.  */
+
+extern struct type *lookup_nested_type (struct type *parent_type,
+					const char *nested_name,
+					const struct block *block);
+
 /* lookup a symbol by name, within a specified block */
 
 extern struct symbol *lookup_block_symbol (const struct block *, const char *,

@@ -1,3 +1,20 @@
+2002-12-17  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/m-data.cc: Whitespace cleanup, to match mainline patch.
+	* gdb.c++/m-static.cc: Ditto.
+	* gdb.c++/namespace.exp: Fix comment.  Delete third argument to
+	all the gdb_tests.
+
+2002-12-16  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/namespace.exp: Change KFAIL messages to point to c++/XXX
+	instead of gdb/XXX.
+
+2002-12-02  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/namespace.exp: Add format strings after all the
+	setup_kfails.
+
 2002-11-29  David Carlton  <carlton@bactrian.org>
 
 	* gdb.c++/namespace.exp: Add OtherFileClass tests.

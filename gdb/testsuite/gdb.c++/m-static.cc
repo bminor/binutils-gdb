@@ -1,6 +1,6 @@
 // 2002-05-13
 
-enum 	region { oriental, egyptian, greek, etruscan, roman };
+enum region { oriental, egyptian, greek, etruscan, roman };
 
 // Test one.
 class gnu_obj_1
@@ -43,8 +43,8 @@ class gnu_obj_3
 {
 public:
   typedef region antiquities;
-  static gnu_obj_2<int>   	data;
-  
+  static gnu_obj_2<int> data;
+      
 public:
   gnu_obj_3(antiquities b) { }
 }; 

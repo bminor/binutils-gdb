@@ -1,6 +1,6 @@
 /* YACC parser for C expressions, for GDB.
    Copyright 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000
+   1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -1641,7 +1641,14 @@ yylex ()
      string to get a reasonable class/namespace spec or a
      fully-qualified name.  This is a kludge to get around the
      HP aCC compiler's generation of symbol names with embedded
-     colons for namespace and nested classes. */ 
+     colons for namespace and nested classes. */
+
+  /* NOTE: carlton/2002-12-17: I really don't understand this
+     HP-specific stuff (here or in linespec), but it has to go away.
+     It's actually possible that it would be best to start from the
+     current HP case than from the current non-HP case: the
+     description of HP symbol names sounds like what I'm trying to get
+     symbol names to look like.  */
   if (unquoted_expr)
     {
       /* Only do it if not inside single quotes */ 
@@ -1696,18 +1703,9 @@ yylex ()
     if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
         {
 #if 1
-	  /* Despite the following flaw, we need to keep this code enabled.
-	     Because we can get called from check_stub_method, if we don't
-	     handle nested types then it screws many operations in any
-	     program which uses nested types.  */
-	  /* In "A::x", if x is a member function of A and there happens
-	     to be a type (nested or not, since the stabs don't make that
-	     distinction) named x, then this code incorrectly thinks we
-	     are dealing with nested types rather than a member function.  */
-
 	  char *p;
 	  char *namestart;
-	  struct symbol *best_sym;
+	  struct type *best_type;
 
 	  /* Look ahead to detect nested types.  This probably should be
 	     done in the grammar, but trying seemed to introduce a lot
@@ -1715,13 +1713,27 @@ yylex ()
 	     that it could be done, though.  Or perhaps a non-grammar, but
 	     less ad hoc, approach would work well.  */
 
-	  /* Since we do not currently have any way of distinguishing
-	     a nested type from a non-nested one (the stabs don't tell
-	     us whether a type is nested), we just ignore the
-	     containing type.  */
+	  /* NOTE: carlton/2002-12-17: The idea of doing this in the
+	     lexer rather than the grammar seems awful to me.
+	     Unfortunately, there currently seems to be no way around
+	     it that I can see: the grammar is for either expressions
+	     or types (see the 'start' rule), so it can be used for
+	     the commands 'print' and 'ptype', and furthermore it's
+	     the parser's job to evaluate types whereas it's
+	     evaluate_expression's job to evaluate other expressions,
+	     which combine to make an awful mess.
+
+	     So, for now, we 'handle' nested types here.  Sigh.  But I
+	     really don't think this setup is a good idea: it papers
+	     over :: issues, and should fall flat on its face when
+	     dealing with initial :: operators.
+
+	     An earlier version of this code was even worse: it
+	     'dealt' with nested types by pretending they weren't
+	     nested, because of stabs limitations.  Sigh.  */
 
 	  p = lexptr;
-	  best_sym = sym;
+	  best_type = SYMBOL_TYPE (sym);
 	  while (1)
 	    {
 	      /* Skip whitespace.  */
@@ -1741,31 +1753,17 @@ yylex ()
 		    ++p;
 		  if (p != namestart)
 		    {
-		      struct symbol *cur_sym;
-		      /* As big as the whole rest of the expression, which is
-			 at least big enough.  */
-		      char *ncopy = alloca (strlen (tmp)+strlen (namestart)+3);
-		      char *tmp1;
-
-		      tmp1 = ncopy;
-		      memcpy (tmp1, tmp, strlen (tmp));
-		      tmp1 += strlen (tmp);
-		      memcpy (tmp1, "::", 2);
-		      tmp1 += 2;
-		      memcpy (tmp1, namestart, p - namestart);
-		      tmp1[p - namestart] = '\0';
-		      cur_sym = lookup_symbol (ncopy, expression_context_block,
-					       VAR_NAMESPACE, (int *) NULL,
-					       (struct symtab **) NULL);
-		      if (cur_sym)
+		      struct type *cur_type;
+		      char *ncopy = alloca (p - namestart + 1);
+		      memcpy (ncopy, namestart, p - namestart);
+		      ncopy[p - namestart] = '\0';
+		      cur_type = lookup_nested_type (best_type,
+						     ncopy,
+						     expression_context_block);
+		      if (cur_type != NULL)
 			{
-			  if (SYMBOL_CLASS (cur_sym) == LOC_TYPEDEF)
-			    {
-			      best_sym = cur_sym;
-			      lexptr = p;
-			    }
-			  else
-			    break;
+			  best_type = cur_type;
+			  lexptr = p;
 			}
 		      else
 			break;
@@ -1777,10 +1775,10 @@ yylex ()
 		break;
 	    }
 
-	  yylval.tsym.type = SYMBOL_TYPE (best_sym);
-#else /* not 0 */
+	  yylval.tsym.type = best_type;
+#else /* not 1 */
 	  yylval.tsym.type = SYMBOL_TYPE (sym);
-#endif /* not 0 */
+#endif /* not 1 */
 	  return TYPENAME;
         }
     if ((yylval.tsym.type = lookup_primitive_typename (tmp)) != 0)
