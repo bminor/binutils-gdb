@@ -624,18 +624,6 @@ struct linked_proc_info
   }
  *linked_proc_desc_table = NULL;
 
-void
-mips_print_extra_frame_info (struct frame_info *fi)
-{
-  if (fi
-      && get_frame_extra_info (fi)
-      && get_frame_extra_info (fi)->proc_desc
-      && get_frame_extra_info (fi)->proc_desc->pdr.framereg < NUM_REGS)
-    printf_filtered (" frame pointer is at %s+%s\n",
-		     REGISTER_NAME (get_frame_extra_info (fi)->proc_desc->pdr.framereg),
-		     paddr_d (get_frame_extra_info (fi)->proc_desc->pdr.frameoffset));
-}
-
 /* Number of bytes of storage in the actual machine representation for
    register N.  NOTE: This indirectly defines the register size
    transfered by the GDB protocol.  */
@@ -6359,9 +6347,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: PRID_REGNUM = %d\n",
 		      PRID_REGNUM);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: PRINT_EXTRA_FRAME_INFO # %s\n",
-		      XSTRING (PRINT_EXTRA_FRAME_INFO (FRAME)));
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: PROC_DESC_IS_DUMMY = function?\n");
   fprintf_unfiltered (file,

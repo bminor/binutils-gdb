@@ -204,7 +204,7 @@ extern const unsigned char *sparc_breakpoint_from_pc (CORE_ADDR *pc, int *len);
 
 #define CANNOT_STORE_REGISTER(regno) ((regno) == G0_REGNUM)
 
-#define	PRINT_EXTRA_FRAME_INFO(FI) \
+#define	DEPRECATED_PRINT_EXTRA_FRAME_INFO(FI) \
      sparc_print_extra_frame_info (FI)
 extern void sparc_print_extra_frame_info (struct frame_info *);
 

@@ -1,3 +1,14 @@
+2003-11-05  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c (mips_dump_tdep): Do not print
+	PRINT_EXTRA_FRAME_INFO.
+	* config/sparc/tm-sparc.h (DEPRECATED_PRINT_EXTRA_FRAME_INFO):
+	Rename PRINT_EXTRA_FRAME_INFO.
+	* mips-tdep.c (mips_print_extra_frame_info): Delete function.
+	* config/mips/tm-mips.h (PRINT_EXTRA_FRAME_INFO): Delete macro.
+	(mips_print_extra_frame_info): Delete declaration.
+	* stack.c (frame_info): Use DEPRECATED_PRINT_EXTRA_FRAME_INFO.
+
 2003-11-05 Elena Zannoni  <ezannoni@redhat.com>
 
 	* coffread.c (coff_symtab_read): Remove passing of info parameter

@@ -968,8 +968,8 @@ frame_info (char *addr_exp, int from_tty)
     printf_filtered (" source language %s.\n",
 		     language_str (s->language));
 
-#ifdef PRINT_EXTRA_FRAME_INFO
-  PRINT_EXTRA_FRAME_INFO (fi);
+#ifdef DEPRECATED_PRINT_EXTRA_FRAME_INFO
+  DEPRECATED_PRINT_EXTRA_FRAME_INFO (fi);
 #endif
 
   {
