@@ -1,3 +1,7 @@
+Tue Sep 22 00:34:15 1992  John Gilmore  (gnu@cygnus.com)
+
+	* gdbint.texinfo:  Describe coding style of GDB.
+
 Mon Sep 21 19:32:16 1992  John Gilmore  (gnu@cygnus.com)
 
 	* stabs.texinfo:  Minor wording changes.
