@@ -1,3 +1,8 @@
+Wed Nov  8 23:08:48 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* m68k-tdep.c (m68k_get_longjmp_target): Work around targets that
+ 	don't define JB_PC or JB_ELEMENT_SIZE.
+
 Wed Nov  8 22:46:43 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* m68k-tdep.c (m68k_get_longjmp_target): Rename function

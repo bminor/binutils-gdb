@@ -642,9 +642,15 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
    we extract the pc (JB_PC) that we will land at.  The pc is copied into PC.
    This routine returns true on success. */
 
+/* NOTE: cagney/2000-11-08: For this function to be fully multi-arched
+   the macro's JB_PC and JB_ELEMENT_SIZE would need to be moved into
+   the ``struct gdbarch_tdep'' object and then set on a target ISA/ABI
+   dependant basis. */
+
 int
 m68k_get_longjmp_target (CORE_ADDR *pc)
 {
+#if defined (JB_PC) && defined (JB_ELEMENT_SIZE)
   char *buf;
   CORE_ADDR sp, jb_addr;
 
@@ -665,6 +671,10 @@ m68k_get_longjmp_target (CORE_ADDR *pc)
   *pc = extract_address (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
 
   return 1;
+#else
+  internal_error ("m68k_get_longjmp_target: not implemented");
+  return 0;
+#endif
 }
 
 /* Immediately after a function call, return the saved pc before the frame
