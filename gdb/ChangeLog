@@ -1,5 +1,10 @@
 2002-07-26  Kevin Buettner  <kevinb@redhat.com>
 
+	* aix-thread.c: (coff/internal.h, bfd/libcoff.h, pthread.h): Remove
+	disabled (via ``#if 0'') includes.
+
+2002-07-26  Kevin Buettner  <kevinb@redhat.com>
+
 	* aix-thread.c (special_register_p, supply_sprs64, supply_sprs32)
 	(fetch_regs_user_thread, fetch_regs_kernel_thread, fill_sprs64)
 	(fill_sprs32, store_regs_user_thread, store_regs_kernel_thread):

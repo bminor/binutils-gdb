@@ -51,18 +51,10 @@
 #include "language.h"		/* for local_hex_string() */
 #include "ppc-tdep.h"
 
-#if 0
-#include "coff/internal.h"	/* for libcoff.h */
-#include "bfd/libcoff.h"	/* for xcoff_data */
-#endif
-
 #include <procinfo.h>
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <sys/reg.h>
-#if 0
-#include <pthread.h>
-#endif
 #include <sched.h>
 #include <sys/pthdebug.h>
 
