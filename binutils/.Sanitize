@@ -94,6 +94,7 @@ readelf.c
 resbin.c
 rescoff.c
 resrc.c
+resres.c
 sanity.sh
 size.1
 size.c
