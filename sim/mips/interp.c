@@ -39,9 +39,7 @@ code on the hardware.
 #include "sim-assert.h"
 #include "sim-hw.h"
 
-#if WITH_IGEN
 #include "itable.h"
-#endif
 
 /* start-sanitize-sky */
 #ifdef TARGET_SKY
@@ -88,13 +86,6 @@ code on the hardware.
 char* pr_addr PARAMS ((SIM_ADDR addr));
 char* pr_uword64 PARAMS ((uword64 addr));
 
-
-/* Get the simulator engine description, without including the code: */
-#if !(WITH_IGEN)
-#define SIM_MANIFESTS
-#include "oengine.c"
-#undef SIM_MANIFESTS
-#endif
 
 /* Within interp.c we refer to the sim_state and sim_cpu directly. */
 #define CPU cpu
@@ -174,9 +165,7 @@ FILE *tracefh = NULL;
 static void open_trace PARAMS((SIM_DESC sd));
 #endif /* TRACE */
 
-#if WITH_IGEN
 static const char * get_insn_name (sim_cpu *, int);
-#endif
 
 /* simulation target board.  NULL=canonical */
 static char* board = NULL;
@@ -314,14 +303,12 @@ static const OPTION mips_options[] =
   { {"board", required_argument, NULL, OPTION_BOARD},
      '\0', "none" /* rely on compile-time string concatenation for other options */
 
-/* start-sanitize-tx3904 */
 #define BOARD_JMR3904 "jmr3904"
            "|" BOARD_JMR3904
 #define BOARD_JMR3904_PAL "jmr3904pal"
            "|" BOARD_JMR3904_PAL
 #define BOARD_JMR3904_DEBUG "jmr3904debug"
            "|" BOARD_JMR3904_DEBUG
-/* end-sanitize-tx3904 */
 
     , "Customize simulation for a particular board.", mips_option_handler },
 
@@ -377,11 +364,9 @@ sim_open (kind, cb, abfd, argv)
   STATE_WATCHPOINTS (sd)->sizeof_pc = sizeof (PC);
   STATE_WATCHPOINTS (sd)->interrupt_handler = interrupt_event;
 
-#if WITH_IGEN
   /* Initialize the mechanism for doing insn profiling.  */
   CPU_INSN_NAME (cpu) = get_insn_name;
   CPU_MAX_INSNS (cpu) = nr_itable_entries;
-#endif
 
   STATE = 0;
   
@@ -438,7 +423,6 @@ sim_open (kind, cb, abfd, argv)
       device_init(sd);
     }
   
-  /* start-sanitize-tx3904 */
 #if (WITH_HW)
   if (board != NULL
       && (strcmp(board, BOARD_JMR3904) == 0 ||
@@ -446,6 +430,7 @@ sim_open (kind, cb, abfd, argv)
 	  strcmp(board, BOARD_JMR3904_DEBUG) == 0))
     {
       /* match VIRTUAL memory layout of JMR-TX3904 board */
+      int i;
 
       /* --- environment --- */
 
@@ -466,10 +451,14 @@ sim_open (kind, cb, abfd, argv)
 		       0xA0000000);
 
       /* DRAM: 0x8800_0000 - 0x89FF_FFFF and 0xA800_0000 - 0xA9FF_FFFF */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
-		       0x88000000, 
-		       32 * 1024 * 1024, /* 32 MB */
-		       0xA8000000);
+      for (i=0; i<8; i++) /* 32 MB total */
+	{
+	  unsigned size = 4 * 1024 * 1024;  /* 4 MB */
+	  sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+			   0x88000000 + (i * size), 
+			   size, 
+			   0xA8000000 + (i * size));
+	}
 
       /* Dummy memory regions for unsimulated devices */
 
@@ -544,7 +533,6 @@ sim_open (kind, cb, abfd, argv)
       device_init(sd);
     }
 #endif
-  /* end-sanitize-tx3904 */
 
 
   /* check for/establish the a reference program image */
@@ -756,14 +744,12 @@ open_trace(sd)
 }
 #endif /* TRACE */
 
-#if WITH_IGEN
 /* Return name of an insn, used by insn profiling.  */
 static const char *
 get_insn_name (sim_cpu *cpu, int i)
 {
   return itable[i].name;
 }
-#endif
 
 void
 sim_close (sd, quitting)
@@ -780,8 +766,10 @@ sim_close (sd, quitting)
 #endif
 /* end-sanitize-sky */
 
-
   /* "quitting" is non-zero if we cannot hang on errors */
+
+  /* shut down modules */
+  sim_module_uninstall (sd);
 
   /* Ensure that any resources allocated through the callback
      mechanism are released: */
@@ -1113,7 +1101,9 @@ sim_fetch_register (sd,rn,memory,length)
   /* NOTE: gdb (the client) stores registers in target byte order
      while the simulator uses host byte order */
 #ifdef DEBUG
+#if 0  /* FIXME: doesn't compile */
   sim_io_printf(sd,"sim_fetch_register(%d=0x%s,mem) : place simulator registers into memory\n",rn,pr_addr(registers[rn]));
+#endif
 #endif /* DEBUG */
 
   if (cpu->register_widths[rn] == 0)
@@ -1352,8 +1342,10 @@ sim_create_inferior (sd, abfd, argv,env)
 {
 
 #ifdef DEBUG
+#if 0 /* FIXME: doesn't compile */
   printf("DBG: sim_create_inferior entered: start_address = 0x%s\n",
 	 pr_addr(PC));
+#endif
 #endif /* DEBUG */
 
   ColdReset(sd);
@@ -1416,7 +1408,7 @@ fetch_str (SIM_DESC sd,
 }
 
 /* Simple monitor interface (currently setup for the IDT and PMON monitors) */
-static void
+void
 sim_monitor (SIM_DESC sd,
 	     sim_cpu *cpu,
 	     address_word cia,
@@ -1692,7 +1684,9 @@ load_word (SIM_DESC sd,
 	   uword64 vaddr)
 {
   if ((vaddr & 3) != 0)
-    SignalExceptionAddressLoad ();
+    {
+      SIM_CORE_SIGNAL (SD, cpu, cia, read_map, AccessLength_WORD+1, vaddr, read_transfer, sim_core_unaligned_signal);
+    }
   else
     {
       address_word paddr;
@@ -2199,6 +2193,11 @@ signal_exception (SIM_DESC sd,
   /* Ensure that any active atomic read/modify/write operation will fail: */
   LLBIT = 0;
 
+  /* Save registers before interrupt dispatching */
+#ifdef SIM_CPU_EXCEPTION_TRIGGER
+  SIM_CPU_EXCEPTION_TRIGGER(sd, cpu, cia);
+#endif
+
   switch (exception) {
 
     case DebugBreakPoint :
@@ -2343,23 +2342,25 @@ signal_exception (SIM_DESC sd,
        case InstructionFetch:
        case DataReference:
 	 /* The following is so that the simulator will continue from the
-	    exception address on breakpoint operations. */
-	 PC = EPC;
-	 sim_engine_halt (SD, CPU, NULL, NULL_CIA,
+	    exception handler address. */
+	 sim_engine_halt (SD, CPU, NULL, PC,
 			  sim_stopped, SIM_SIGBUS);
 
        case ReservedInstruction:
        case CoProcessorUnusable:
 	 PC = EPC;
-	 sim_engine_halt (SD, CPU, NULL, NULL_CIA,
+	 sim_engine_halt (SD, CPU, NULL, PC,
 			  sim_stopped, SIM_SIGILL);
 
        case IntegerOverflow:
        case FPE:
-	 sim_engine_halt (SD, CPU, NULL, NULL_CIA,
+	 sim_engine_halt (SD, CPU, NULL, PC,
 			  sim_stopped, SIM_SIGFPE);
-
+	 
        case BreakPoint:
+	 sim_engine_halt (SD, CPU, NULL, PC, sim_stopped, SIM_SIGTRAP);
+	 break;
+
        case SystemCall:
        case Trap:
 	 sim_engine_restart (SD, CPU, NULL, PC);
@@ -2367,12 +2368,12 @@ signal_exception (SIM_DESC sd,
 
        case Watch:
 	 PC = EPC;
-	 sim_engine_halt (SD, CPU, NULL, NULL_CIA,
+	 sim_engine_halt (SD, CPU, NULL, PC,
 			  sim_stopped, SIM_SIGTRAP);
 
        default : /* Unknown internal exception */
 	 PC = EPC;
-	 sim_engine_halt (SD, CPU, NULL, NULL_CIA,
+	 sim_engine_halt (SD, CPU, NULL, PC,
 			  sim_stopped, SIM_SIGABRT);
 
        }
@@ -2473,10 +2474,8 @@ undefined_result(sd,cia)
 #define FPINF_SINGLE    (0x7F800000)
 #define FPINF_DOUBLE    (((uword64)0x7FF00000 << 32) | 0x00000000)
 
-#if 1 /* def DEBUG */
 #define RMMODE(v) (((v) == FP_RM_NEAREST) ? "Round" : (((v) == FP_RM_TOZERO) ? "Trunc" : (((v) == FP_RM_TOPINF) ? "Ceil" : "Floor")))
-#define DOFMT(v)  (((v) == fmt_single) ? "single" : (((v) == fmt_double) ? "double" : (((v) == fmt_word) ? "word" : (((v) == fmt_long) ? "long" : (((v) == fmt_unknown) ? "<unknown>" : (((v) == fmt_uninterpreted) ? "<uninterpreted>" : "<format error>"))))))
-#endif /* DEBUG */
+#define DOFMT(v)  (((v) == fmt_single) ? "single" : (((v) == fmt_double) ? "double" : (((v) == fmt_word) ? "word" : (((v) == fmt_long) ? "long" : (((v) == fmt_unknown) ? "<unknown>" : (((v) == fmt_uninterpreted) ? "<uninterpreted>" : (((v) == fmt_uninterpreted_32) ? "<uninterpreted_32>" : (((v) == fmt_uninterpreted_64) ? "<uninterpreted_64>" : "<format error>"))))))))
 
 uword64
 value_fpr (SIM_DESC sd,
@@ -2561,6 +2560,11 @@ value_fpr (SIM_DESC sd,
      case fmt_double:
      case fmt_long:
       if ((fpr & 1) == 0) { /* even registers only */
+#ifdef DEBUG
+	printf("DBG: ValueFPR: FGR[%d] = %s, FGR[%d] = %s\n", 
+	       fpr+1, pr_uword64( (uword64) FGR[fpr+1] ),
+	       fpr, pr_uword64( (uword64) FGR[fpr] ));
+#endif
 	value = ((((uword64)FGR[fpr+1]) << 32) | (FGR[fpr] & 0xFFFFFFFF));
       } else {
 	SignalException(ReservedInstruction,0);
@@ -2577,7 +2581,7 @@ value_fpr (SIM_DESC sd,
    SignalExceptionSimulatorFault ("Unrecognised FP format in ValueFPR()");
 
 #ifdef DEBUG
-  printf("DBG: ValueFPR: fpr = %d, fmt = %s, value = 0x%s : PC = 0x%s : SizeFGR() = %d\n",fpr,DOFMT(fmt),pr_addr(value),pr_addr(cia),SizeFGR());
+  printf("DBG: ValueFPR: fpr = %d, fmt = %s, value = 0x%s : PC = 0x%s : SizeFGR() = %d\n",fpr,DOFMT(fmt),pr_uword64(value),pr_addr(cia),SizeFGR());
 #endif /* DEBUG */
 
   return(value);
@@ -2594,7 +2598,7 @@ store_fpr (SIM_DESC sd,
   int err = 0;
 
 #ifdef DEBUG
-  printf("DBG: StoreFPR: fpr = %d, fmt = %s, value = 0x%s : PC = 0x%s : SizeFGR() = %d\n",fpr,DOFMT(fmt),pr_addr(value),pr_addr(cia),SizeFGR());
+  printf("DBG: StoreFPR: fpr = %d, fmt = %s, value = 0x%s : PC = 0x%s : SizeFGR() = %d,\n",fpr,DOFMT(fmt),pr_uword64(value),pr_addr(cia),SizeFGR());
 #endif /* DEBUG */
 
   if (SizeFGR() == 64) {
@@ -2663,7 +2667,7 @@ store_fpr (SIM_DESC sd,
    SignalExceptionSimulatorFault ("Unrecognised FP format in StoreFPR()");
 
 #ifdef DEBUG
-  printf("DBG: StoreFPR: fpr[%d] = 0x%s (format %s)\n",fpr,pr_addr(FGR[fpr]),DOFMT(fmt));
+  printf("DBG: StoreFPR: fpr[%d] = 0x%s (format %s)\n",fpr,pr_uword64(FGR[fpr]),DOFMT(fmt));
 #endif /* DEBUG */
 
   return;
@@ -3391,7 +3395,9 @@ convert (SIM_DESC sd,
   unsigned64 result64;
 
 #ifdef DEBUG
+#if 0 /* FIXME: doesn't compile */
   printf("DBG: Convert: mode %s : op 0x%s : from %s : to %s : (PC = 0x%s)\n",RMMODE(rm),pr_addr(op),DOFMT(from),DOFMT(to),pr_addr(IPC));
+#endif
 #endif /* DEBUG */
 
   switch (rm)
@@ -3530,6 +3536,11 @@ cop_ld (SIM_DESC sd,
 	int coproc_reg,
 	uword64 memword)
 {
+
+#ifdef DEBUG
+  printf("DBG: COP_LD: coproc_num = %d, coproc_reg = %d, value = 0x%s : PC = 0x%s\n", coproc_num, coproc_reg, pr_uword64(memword), pr_addr(cia) );
+#endif
+
   switch (coproc_num) {
     case 1:
       if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
@@ -3743,14 +3754,22 @@ decode_coproc (SIM_DESC sd,
 		/* 12 = SR                 R4000   VR4100  VR4300 */
 #ifdef SUBTARGET_R3900
 	      case 3:
-		/* ignore */
-		break;
 		/* 3 = Config              R3900                  */
-
 	      case 7:
+		/* 7 = Cache               R3900                  */
+	      case 15:
+		/* 15 = PRID               R3900                  */
+
 		/* ignore */
 		break;
-		/* 3 = Cache               R3900                  */
+
+	      case 8:
+		/* 8 = BadVAddr            R4000   VR4100  VR4300 */
+		if (code == 0x00)
+		  GPR[rt] = COP0_BADVADDR;
+		else
+		  COP0_BADVADDR = GPR[rt];
+		break;
 
 #endif /* SUBTARGET_R3900 */
 	      case 12:
@@ -3819,9 +3838,9 @@ decode_coproc (SIM_DESC sd,
 		  COP0_GPR[rd] = GPR[rt];
 #if 0
 		if (code == 0x00)
-		  sim_io_printf(sd,"Warning: MFC0 %d,%d ignored (architecture specific)\n",rt,rd);
+		  sim_io_printf(sd,"Warning: MFC0 %d,%d ignored, PC=%08x (architecture specific)\n",rt,rd, (unsigned)cia);
 		else
-		  sim_io_printf(sd,"Warning: MTC0 %d,%d ignored (architecture specific)\n",rt,rd);
+		  sim_io_printf(sd,"Warning: MTC0 %d,%d ignored, PC=%08x (architecture specific)\n",rt,rd, (unsigned)cia);
 #endif
 	      }
 	  }
@@ -4084,215 +4103,6 @@ decode_coproc (SIM_DESC sd,
 }
 
 
-/*-- instruction simulation -------------------------------------------------*/
-
-/* When the IGEN simulator is being built, the function below is be
-   replaced by a generated version.  However, WITH_IGEN == 2 indicates
-   that the fubction below should be compiled but under a different
-   name (to allow backward compatibility) */
-
-#if (WITH_IGEN != 1)
-#if (WITH_IGEN > 1)
-void old_engine_run PARAMS ((SIM_DESC sd, int next_cpu_nr, int siggnal));
-void
-old_engine_run (sd, next_cpu_nr, nr_cpus, siggnal)
-#else
-void
-sim_engine_run (sd, next_cpu_nr, nr_cpus, siggnal)
-#endif
-     SIM_DESC sd;
-     int next_cpu_nr; /* ignore */
-     int nr_cpus; /* ignore */
-     int siggnal; /* ignore */
-{
-  sim_cpu *cpu = STATE_CPU (sd, 0); /* hardwire to cpu 0 */
-#if !defined(FASTSIM)
-  unsigned int pipeline_count = 1;
-#endif
-
-#ifdef DEBUG
-  if (STATE_MEMORY (sd) == NULL) {
-    printf("DBG: simulate() entered with no memory\n");
-    exit(1);
-  }
-#endif /* DEBUG */
-
-#if 0 /* Disabled to check that everything works OK */
-  /* The VR4300 seems to sign-extend the PC on its first
-     access. However, this may just be because it is currently
-     configured in 32bit mode. However... */
-  PC = SIGNEXTEND(PC,32);
-#endif
-
-  /* main controlling loop */
-  while (1) {
-    /* vaddr is slowly being replaced with cia - current instruction
-       address */
-    address_word cia = (uword64)PC;
-    address_word vaddr = cia;
-    address_word paddr;
-    int cca;
-    unsigned int instruction;	/* uword64? what's this used for?  FIXME! */
-
-#ifdef DEBUG
-    {
-      printf("DBG: state = 0x%08X :",state);
-      if (state & simHALTEX) printf(" simHALTEX");
-      if (state & simHALTIN) printf(" simHALTIN");
-      printf("\n");
-    }
-#endif /* DEBUG */
-
-    DSSTATE = (STATE & simDELAYSLOT);
-#ifdef DEBUG
-    if (dsstate)
-     sim_io_printf(sd,"DBG: DSPC = 0x%s\n",pr_addr(DSPC));
-#endif /* DEBUG */
-
-    /* Fetch the next instruction from the simulator memory: */
-    if (AddressTranslation(cia,isINSTRUCTION,isLOAD,&paddr,&cca,isTARGET,isREAL)) {
-      if ((vaddr & 1) == 0) {
-	/* Copy the action of the LW instruction */
-	unsigned int reverse = (ReverseEndian ? (LOADDRMASK >> 2) : 0);
-	unsigned int bigend = (BigEndianCPU ? (LOADDRMASK >> 2) : 0);
-	uword64 value;
-	unsigned int byte;
-	paddr = ((paddr & ~LOADDRMASK) | ((paddr & LOADDRMASK) ^ (reverse << 2)));
-	LoadMemory(&value,NULL,cca,AccessLength_WORD,paddr,vaddr,isINSTRUCTION,isREAL);
-	byte = ((vaddr & LOADDRMASK) ^ (bigend << 2));
-	instruction = ((value >> (8 * byte)) & 0xFFFFFFFF);
-      } else {
-	/* Copy the action of the LH instruction */
-	unsigned int reverse = (ReverseEndian ? (LOADDRMASK >> 1) : 0);
-	unsigned int bigend = (BigEndianCPU ? (LOADDRMASK >> 1) : 0);
-	uword64 value;
-	unsigned int byte;
-	paddr = (((paddr & ~ (uword64) 1) & ~LOADDRMASK)
-		 | (((paddr & ~ (uword64) 1) & LOADDRMASK) ^ (reverse << 1)));
-	LoadMemory(&value,NULL,cca, AccessLength_HALFWORD,
-			   paddr & ~ (uword64) 1,
-			   vaddr, isINSTRUCTION, isREAL);
-	byte = (((vaddr &~ (uword64) 1) & LOADDRMASK) ^ (bigend << 1));
-	instruction = ((value >> (8 * byte)) & 0xFFFF);
-      }
-    } else {
-      fprintf(stderr,"Cannot translate address for PC = 0x%s failed\n",pr_addr(PC));
-      exit(1);
-    }
-
-#ifdef DEBUG
-    sim_io_printf(sd,"DBG: fetched 0x%08X from PC = 0x%s\n",instruction,pr_addr(PC));
-#endif /* DEBUG */
-
-    /* This is required by exception processing, to ensure that we can
-       cope with exceptions in the delay slots of branches that may
-       already have changed the PC. */
-    if ((vaddr & 1) == 0)
-      PC += 4; /* increment ready for the next fetch */
-    else
-      PC += 2;
-    /* NOTE: If we perform a delay slot change to the PC, this
-       increment is not requuired. However, it would make the
-       simulator more complicated to try and avoid this small hit. */
-
-    /* Currently this code provides a simple model. For more
-       complicated models we could perform exception status checks at
-       this point, and set the simSTOP state as required. This could
-       also include processing any hardware interrupts raised by any
-       I/O model attached to the simulator context.
-
-       Support for "asynchronous" I/O events within the simulated world
-       could be providing by managing a counter, and calling a I/O
-       specific handler when a particular threshold is reached. On most
-       architectures a decrement and check for zero operation is
-       usually quicker than an increment and compare. However, the
-       process of managing a known value decrement to zero, is higher
-       than the cost of using an explicit value UINT_MAX into the
-       future. Which system is used will depend on how complicated the
-       I/O model is, and how much it is likely to affect the simulator
-       bandwidth.
-
-       If events need to be scheduled further in the future than
-       UINT_MAX event ticks, then the I/O model should just provide its
-       own counter, triggered from the event system. */
-
-    /* MIPS pipeline ticks. To allow for future support where the
-       pipeline hit of individual instructions is known, this control
-       loop manages a "pipeline_count" variable. It is initialised to
-       1 (one), and will only be changed by the simulator engine when
-       executing an instruction. If the engine does not have access to
-       pipeline cycle count information then all instructions will be
-       treated as using a single cycle. NOTE: A standard system is not
-       provided by the default simulator because different MIPS
-       architectures have different cycle counts for the same
-       instructions.
-
-       [NOTE: pipeline_count has been replaced the event queue] */
-
-    /* shuffle the floating point status pipeline state */
-    ENGINE_ISSUE_PREFIX_HOOK();
-
-/* NOTE: For multi-context simulation environments the "instruction"
-   variable should be local to this routine. */
-
-/* Shorthand accesses for engine. Note: If we wanted to use global
-   variables (and a single-threaded simulator engine), then we can
-   create the actual variables with these names. */
-
-    if (!(STATE & simSKIPNEXT)) {
-      /* Include the simulator engine */
-#include "oengine.c"
-#if ((GPRLEN == 64) && !PROCESSOR_64BIT) || ((GPRLEN == 32) && PROCESSOR_64BIT)
-#error "Mismatch between run-time simulator code and simulation engine"
-#endif
-#if (WITH_TARGET_WORD_BITSIZE != GPRLEN)
-#error "Mismatch between configure WITH_TARGET_WORD_BITSIZE and gencode GPRLEN"
-#endif
-#if ((WITH_FLOATING_POINT == HARD_FLOATING_POINT) != defined (HASFPU))
-#error "Mismatch between configure WITH_FLOATING_POINT and gencode HASFPU"
-#endif
-
-      /* For certain MIPS architectures, GPR[0] is hardwired to zero. We
-         should check for it being changed. It is better doing it here,
-         than within the simulator, since it will help keep the simulator
-         small. */
-      if (ZERO != 0) {
-#if defined(WARN_ZERO)
-        sim_io_eprintf(sd,"The ZERO register has been updated with 0x%s (PC = 0x%s) (reset back to zero)\n",pr_addr(ZERO),pr_addr(cia));
-#endif /* WARN_ZERO */
-        ZERO = 0; /* reset back to zero before next instruction */
-      }
-    } else /* simSKIPNEXT check */
-     STATE &= ~simSKIPNEXT;
-
-    /* If the delay slot was active before the instruction is
-       executed, then update the PC to its new value: */
-    if (DSSTATE) {
-#ifdef DEBUG
-      printf("DBG: dsstate set before instruction execution - updating PC to 0x%s\n",pr_addr(DSPC));
-#endif /* DEBUG */
-      PC = DSPC;
-      CANCELDELAYSLOT();
-    }
-
-#if !defined(FASTSIM)
-    if (sim_events_tickn (sd, pipeline_count))
-      {
-	/* cpu->cia = cia; */
-	sim_events_process (sd);
-      }
-#else
-    if (sim_events_tick (sd))
-      {
-	/* cpu->cia = cia; */
-	sim_events_process (sd);
-      }
-#endif /* FASTSIM */
-  }
-}
-#endif
-
-
 /* This code copied from gdb's utils.c.  Would like to share this code,
    but don't know of a common place where both could get to it. */
 
@@ -4346,6 +4156,101 @@ pr_uword64(addr)
   return paddr_str;
 }
 
+
+void
+mips_core_signal (SIM_DESC sd,
+                 sim_cpu *cpu,
+                 sim_cia cia,
+                 unsigned map,
+                 int nr_bytes,
+                 address_word addr,
+                 transfer_type transfer,
+                 sim_core_signals sig)
+{
+  const char *copy = (transfer == read_transfer ? "read" : "write");
+  address_word ip = CIA_ADDR (cia);
+
+  switch (sig)
+    {
+    case sim_core_unmapped_signal:
+      sim_io_eprintf (sd, "mips-core: %d byte %s to unmapped address 0x%lx at 0x%lx\n",
+                      nr_bytes, copy, 
+		      (unsigned long) addr, (unsigned long) ip);
+      COP0_BADVADDR = addr;
+      SignalExceptionDataReference();
+      break;
+
+    case sim_core_unaligned_signal:
+      sim_io_eprintf (sd, "mips-core: %d byte %s to unaligned address 0x%lx at 0x%lx\n",
+                      nr_bytes, copy, 
+		      (unsigned long) addr, (unsigned long) ip);
+      COP0_BADVADDR = addr;
+      if(transfer == read_transfer) 
+	SignalExceptionAddressLoad();
+      else
+	SignalExceptionAddressStore();
+      break;
+
+    default:
+      sim_engine_abort (sd, cpu, cia,
+                        "mips_core_signal - internal error - bad switch");
+    }
+}
+
+
+void
+mips_cpu_exception_trigger(SIM_DESC sd, sim_cpu* cpu, address_word cia)
+{
+  ASSERT(cpu != NULL);
+
+  if(cpu->exc_suspended > 0)
+    sim_io_eprintf(sd, "Warning, nested exception triggered (%d)\n", cpu->exc_suspended); 
+
+  PC = cia;
+  memcpy(cpu->exc_trigger_registers, cpu->registers, sizeof(cpu->exc_trigger_registers));
+  cpu->exc_suspended = 0;
+}
+
+void
+mips_cpu_exception_suspend(SIM_DESC sd, sim_cpu* cpu, int exception)
+{
+  ASSERT(cpu != NULL);
+
+  if(cpu->exc_suspended > 0)
+    sim_io_eprintf(sd, "Warning, nested exception signal (%d then %d)\n", 
+		   cpu->exc_suspended, exception); 
+
+  memcpy(cpu->exc_suspend_registers, cpu->registers, sizeof(cpu->exc_suspend_registers));
+  memcpy(cpu->registers, cpu->exc_trigger_registers, sizeof(cpu->registers));
+  cpu->exc_suspended = exception;
+}
+
+void
+mips_cpu_exception_resume(SIM_DESC sd, sim_cpu* cpu, int exception)
+{
+  ASSERT(cpu != NULL);
+
+  if(exception == 0 && cpu->exc_suspended > 0)
+    {
+      /* warn not for breakpoints */
+      if(cpu->exc_suspended != sim_signal_to_host(sd, SIM_SIGTRAP))
+	sim_io_eprintf(sd, "Warning, resuming but ignoring pending exception signal (%d)\n",
+		       cpu->exc_suspended); 
+    }
+  else if(exception != 0 && cpu->exc_suspended > 0)
+    {
+      if(exception != cpu->exc_suspended) 
+	sim_io_eprintf(sd, "Warning, resuming with unmatching exception signal (%d vs %d)\n",
+		       cpu->exc_suspended, exception); 
+      
+      memcpy(cpu->registers, cpu->exc_suspend_registers, sizeof(cpu->registers)); 
+    }
+  else if(exception != 0 && cpu->exc_suspended == 0)
+    {
+      sim_io_eprintf(sd, "Warning, ignoring spontanous exception signal (%d)\n", exception); 
+    }
+  cpu->exc_suspended = 0; 
+}
 
 
 /*---------------------------------------------------------------------------*/

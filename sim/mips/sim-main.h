@@ -32,6 +32,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define WITH_WATCHPOINTS 1
 #define WITH_MODULO_MEMORY 1
 
+
+#define SIM_CORE_SIGNAL(SD,CPU,CIA,MAP,NR_BYTES,ADDR,TRANSFER,ERROR) \
+mips_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), (TRANSFER), (ERROR))
+
 #include "sim-basics.h"
 
 typedef address_word sim_cia;
@@ -124,11 +128,13 @@ convert (SD, CPU, cia, rm, op, from, to)
    instruction: */
 #define PREVCOC1() ((STATE & simPCOC1) ? 1 : 0)
 
-#if 1
-#define SizeFGR() (WITH_TARGET_FLOATING_POINT_BITSIZE)
+#ifdef TARGET_ENABLE_FR
+/* FIXME: this should be enabled for all targets, but needs testing first. */
+#define SizeFGR() (((WITH_TARGET_FLOATING_POINT_BITSIZE) == 64) \
+   ? ((SR & status_FR) ? 64 : 32) \
+   : (WITH_TARGET_FLOATING_POINT_BITSIZE))
 #else
-/* They depend on the CPU being simulated */
-#define SizeFGR() ((WITH_TARGET_WORD_BITSIZE == 64 && ((SR & status_FR) == 1)) ? 64 : 32)
+#define SizeFGR() (WITH_TARGET_FLOATING_POINT_BITSIZE)
 #endif
 
 /* Standard FCRS bits: */
@@ -608,6 +614,7 @@ enum float_operation
    manifests to access the correct slot. */
 
   unsigned_word registers[LAST_EMBED_REGNUM + 1];
+
   int register_widths[NUM_REGS];
 #define REGISTERS       ((CPU)->registers)
 
@@ -639,6 +646,16 @@ enum float_operation
 #define DEPC	(REGISTERS[87])
 #define EPC	(REGISTERS[88])
 #define COCIDX  (LAST_EMBED_REGNUM + 2) /* special case : outside the normal range */
+
+  /* All internal state modified by signal_exception() that may need to be
+     rolled back for passing moment-of-exception image back to gdb. */
+  unsigned_word exc_trigger_registers[LAST_EMBED_REGNUM + 1];
+  unsigned_word exc_suspend_registers[LAST_EMBED_REGNUM + 1];
+  int exc_suspended;
+
+#define SIM_CPU_EXCEPTION_TRIGGER(SD,CPU,CIA) mips_cpu_exception_trigger(SD,CPU,CIA)
+#define SIM_CPU_EXCEPTION_SUSPEND(SD,CPU,EXC) mips_cpu_exception_suspend(SD,CPU,EXC)
+#define SIM_CPU_EXCEPTION_RESUME(SD,CPU,EXC) mips_cpu_exception_resume(SD,CPU,EXC)
 
   unsigned_word c0_config_reg;
 #define C0_CONFIG ((CPU)->c0_config_reg)
@@ -679,7 +696,9 @@ enum float_operation
 #define COP0_CONTEXT  ((unsigned32)(COP0_GPR[4]))
 #define COP0_PAGEMASK ((unsigned32)(COP0_GPR[5]))
 #define COP0_WIRED    ((unsigned32)(COP0_GPR[6]))
+  /* end-sanitize-r5900 */
 #define COP0_BADVADDR ((unsigned32)(COP0_GPR[8]))
+  /* start-sanitize-r5900 */
 #define COP0_COUNT    ((unsigned32)(COP0_GPR[9]))
 #define COP0_ENTRYHI  ((unsigned32)(COP0_GPR[10]))
 #define COP0_COMPARE  ((unsigned32)(COP0_GPR[11]))
@@ -995,6 +1014,7 @@ void signal_exception (SIM_DESC sd, sim_cpu *cpu, address_word cia, int exceptio
 #define SignalExceptionInstructionFetch()    signal_exception (SD, CPU, cia, InstructionFetch)
 #define SignalExceptionAddressStore()        signal_exception (SD, CPU, cia, AddressStore)
 #define SignalExceptionAddressLoad()         signal_exception (SD, CPU, cia, AddressLoad)
+#define SignalExceptionDataReference()       signal_exception (SD, CPU, cia, DataReference)
 #define SignalExceptionSimulatorFault(buf)   signal_exception (SD, CPU, cia, SimulatorFault, buf)
 #define SignalExceptionFPE()                 signal_exception (SD, CPU, cia, FPE)
 #define SignalExceptionIntegerOverflow()     signal_exception (SD, CPU, cia, IntegerOverflow)
@@ -1116,6 +1136,7 @@ void dotrace PARAMS ((SIM_DESC sd, sim_cpu *cpu, FILE *tracefh, int type, SIM_AD
 extern FILE *tracefh;
 
 INLINE_SIM_MAIN (void) pending_tick PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia));
+extern SIM_CORE_SIGNAL_FN mips_core_signal;
 
 char* pr_addr PARAMS ((SIM_ADDR addr));
 char* pr_uword64 PARAMS ((uword64 addr));
@@ -1175,6 +1196,11 @@ enum txvu_cpu_context
 #endif /* !TM_TXVU_H */
 #endif /* TARGET_SKY */
 /* end-sanitize-sky */
+
+void mips_cpu_exception_trigger(SIM_DESC sd, sim_cpu* cpu, address_word pc);
+void mips_cpu_exception_suspend(SIM_DESC sd, sim_cpu* cpu, int exception);
+void mips_cpu_exception_resume(SIM_DESC sd, sim_cpu* cpu, int exception);
+
 
 #if H_REVEALS_MODULE_P (SIM_MAIN_INLINE)
 #include "sim-main.c"

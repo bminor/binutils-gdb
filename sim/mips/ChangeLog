@@ -1,3 +1,21 @@
+1998-12-29  Frank Ch. Eigler  <fche@cygnus.com>
+	
+	* interp.c (sim_open): Allocate jm3904 memory in smaller chunks. 
+	(load_word): Call SIM_CORE_SIGNAL hook on error.
+	(signal_exception): Call SIM_CPU_EXCEPTION_TRIGGER hook before
+	starting.  For exception dispatching, pass PC instead of NULL_CIA.
+	(decode_coproc): Use COP0_BADVADDR to store faulting address.
+	* sim-main.h (COP0_BADVADDR): Define. 
+	(SIM_CORE_SIGNAL): Define hook to call mips_core_signal.
+	(SIM_CPU_EXCEPTION*): Define hooks to call mips_cpu_exception*().
+	(_sim_cpu): Add exc_* fields to store register value snapshots.	
+	* mips.igen (*): Replace memory-related SignalException* calls
+	with references to SIM_CORE_SIGNAL hook.
+	
+	* dv-tx3904irc.c (tx3904irc_port_event): printf format warning
+	fix.
+	* sim-main.c (*): Minor warning cleanups.
+	
 1998-12-24  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* m16.igen (DADDIU5): Correct type-o.
@@ -88,13 +106,11 @@ end-sanitize-vr4xxx
 
     * mips/interp.c (DEBUG): Cleanups.
 
-start-sanitize-tx3904
 1998-12-10  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* dv-tx3904sio.c (tx3904sio_io_read_buffer): Endianness fixes.
 	(tx3904sio_tickle): fflush after a stdout character output.
 	
-end-sanitize-tx3904
 1998-12-03  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* interp.c (sim_close): Uninstall modules.
@@ -219,14 +235,12 @@ Thu Nov  5 19:40:12 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	(r59fp_store): Clarify "bad value" abort messages.
 
 end-sanitize-r5900
-start-sanitize-tx3904
 Sat Oct 30 09:49:10 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* dv-tx3904cpu.c (deliver_tx3904cpu_interrupt): Add dummy
 	interrupt level number to match changed SignalExceptionInterrupt
 	macro.
 
-end-sanitize-tx3904
 start-sanitize-sky
 Thu Oct 29 12:47:46 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
@@ -293,7 +307,6 @@ Fri Sep  4 10:37:57 1998  Frank Ch. Eigler  <fche@cygnus.com>
 	macros to store output result during computation.
 
 end-sanitize-r5900
-start-sanitize-tx3904
 Tue Sep  1 15:39:18 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* dv-tx3904sio.c: Include sim-assert.h.
@@ -313,7 +326,6 @@ Tue Aug 25 12:49:46 1998  Frank Ch. Eigler  <fche@cygnus.com>
 	* dv-tx3904tmr.c: Compiler warning clean-up.  Remove particularly
 	frequent hw-trace messages.
 
-end-sanitize-tx3904
 start-sanitize-sky	
 Tue Aug 11 13:52:16 1998  Frank Ch. Eigler  <fche@cygnus.com>
  
@@ -445,22 +457,18 @@ start-sanitize-sky
 end-sanitize-sky
 	* sim-main.h (interrupt_event): Add prototype.
 
-start-sanitize-tx3904
 	* dv-tx3904tmr.c (tx3904tmr_io_write_buffer): Delete unused
  	register_ptr, register_value.
 	(deliver_tx3904tmr_tick): Fix types passed to printf fmt.
 
-end-sanitize-tx3904
 	* sim-main.h (tracefh): Make extern.
 
-start-sanitize-tx3904
 Tue Jun 16 14:39:00 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* dv-tx3904tmr.c: Deschedule timer event after dispatching.
 	Reduce unnecessarily high timer event frequency.  
 	* dv-tx3904cpu.c: Ditto for interrupt event.
 	
-end-sanitize-tx3904
 start-sanitize-sky
 Tue Jun 16 14:12:09 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
@@ -475,12 +483,10 @@ Wed Jun 10 13:22:32 1998  Frank Ch. Eigler  <fche@cygnus.com>
 	* interp.c (decode_coproc): For TX39, add stub COP0 register #7,
  	to allay warnings.
 	(interrupt_event): Made non-static.
-start-sanitize-tx3904
 	
 	* dv-tx3904tmr.c (deliver_tx3904tmr_tick): Correct accidental
  	interchange of configuration values for external vs. internal
  	clock dividers.
-end-sanitize-tx3904
 	
 Tue Jun  9 12:46:24 1998  Ian Carmichael  <iancarm@cygnus.com>
 
@@ -492,7 +498,6 @@ Tue Jun  9 12:46:24 1998  Ian Carmichael  <iancarm@cygnus.com>
 	than halting sim.
 	* sim-main.h: Moved magic constants to here.
 
-start-sanitize-tx3904
 Tue Jun  9 12:29:50 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* dv-tx3904cpu.c (deliver_*_interrupt,*_port_event): Set the CAUSE
@@ -507,7 +512,6 @@ Tue Jun  9 12:29:50 1998  Frank Ch. Eigler  <fche@cygnus.com>
 	* interp.c (sim_open): Added jmr3904pal board type that adds PAL-based
 	serial I/O and timer module at base address 0xFFFF0000.
 	
-end-sanitize-tx3904
 Tue Jun  9 11:52:29 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* mips.igen (SWC1) : Correct the handling of ReverseEndian 
@@ -519,7 +523,6 @@ Tue Jun  9 11:40:57 1998  Gavin Koch  <gavin@cygnus.com>
 	parts.
 	* configure: Update.
 
-start-sanitize-tx3904
 Thu Jun  4 15:37:33 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* dv-tx3904tmr.c: New file - implements tx3904 timer.
@@ -529,7 +532,6 @@ Thu Jun  4 15:37:33 1998  Frank Ch. Eigler  <fche@cygnus.com>
 	* interp.c (sim_open): Instantiate three timer instances.
 	Fix address typo of tx3904irc instance.
 
-end-sanitize-tx3904
 start-sanitize-r5900
 Thu Jun  4 16:47:27 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -563,7 +565,6 @@ Fri May 29 11:40:39 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (sim_igen_filter): Match mips*tx39 not mipst*tx39.
 
-start-sanitize-tx3904
 Mon May 25 20:47:45 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* dv-tx3904cpu.c, dv-tx3904irc.c: Rename *_callback to *_method.
@@ -572,7 +573,6 @@ Mon May 25 20:47:45 1998  Andrew Cagney  <cagney@b1.cygnus.com>
  	sim-main.h. Declare a struct hw_descriptor instead of struct
  	hw_device_descriptor.
 
-end-sanitize-tx3904
 Mon May 25 12:41:38 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips.igen (do_store_left, do_load_left): Compute nr of left and
@@ -580,7 +580,6 @@ Mon May 25 12:41:38 1998  Andrew Cagney  <cagney@b1.cygnus.com>
  	lanes.  Fix incorrect computation in do_store_left when loading
  	bytes from second word.
 
-start-sanitize-tx3904
 Fri May 22 13:34:20 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (SIM_AC_OPTION_HARDWARE): Only enable when tx3904.
@@ -590,7 +589,6 @@ Fri May 22 13:34:20 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	* dv-tx3904irc.c (tx3904irc_finish): Pacify GCC.
 	* interp.c (signal_exception): Ditto.
 
-end-sanitize-tx3904
 Thu May 21 14:24:11 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* gencode.c: Mark BEGEZALL as LIKELY.
@@ -626,13 +624,11 @@ Mon May 18 18:22:42 1998  Frank Ch. Eigler  <fche@cygnus.com>
  	exit.
 	(decode_coproc): Implement RFE instruction for TX39.
 	(mips.igen): Decode RFE instruction as such.
-start-sanitize-tx3904
 	* configure.in (tx3904cpu,tx3904irc): Added devices for tx3904.
 	* interp.c: Define "jmr3904" and "jmr3904debug" board types and
 	bbegin to implement memory map.
 	* dv-tx3904cpu.c: New file.
 	* dv-tx3904irc.c: New file.
-end-sanitize-tx3904
 
 Wed May 13 14:40:11 1998  Gavin Koch  <gavin@cygnus.com>
 

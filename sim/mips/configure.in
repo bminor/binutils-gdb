@@ -217,14 +217,12 @@ AC_SUBST(sim_gen)
 #
 hw_enabled=no
 case "${target}" in
-# start-sanitize-tx3904
   mips*tx39*)
 	hw_enabled=yes
 	hw_extra_devices="tx3904cpu tx3904irc tx3904tmr tx3904sio" 
 	mips_extra_objs="dv-sockser.o"
 	SIM_SUBTARGET="$SIM_SUBTARGET -DTARGET_TX3904=1"
 	;;
-# end-sanitize-tx3904
 # start-sanitize-sky
   mips64r59*-sky-*)
 	mips_extra_objs='$(SIM_SKY_OBJS)' 

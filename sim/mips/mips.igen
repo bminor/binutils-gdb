@@ -1288,7 +1288,7 @@
 
 
 
-:function:64::void:do_daddiu:int rs, int rt, unsigned16 immediate
+:function:::void:do_daddiu:int rs, int rt, unsigned16 immediate
 {
   TRACE_ALU_INPUT2 (GPR[rs], EXTEND16 (immediate));
   GPR[rt] = GPR[rs] + EXTEND16 (immediate);
@@ -1356,28 +1356,32 @@
 
 
 
-:function:64::void:do_ddiv:int rs, int rt
+:function:::void:do_ddiv:int rs, int rt
 {
   check_div_hilo (SD_, HIHISTORY, LOHISTORY);
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   {
     signed64 n = GPR[rs];
     signed64 d = GPR[rt];
+    signed64 hi;
+    signed64 lo;
     if (d == 0)
       {
-	LO = SIGNED64 (0x8000000000000000);
-	HI = 0;
+	lo = SIGNED64 (0x8000000000000000);
+	hi = 0;
       }
     else if (d == -1 && n == SIGNED64 (0x8000000000000000))
       {
-	LO = SIGNED64 (0x8000000000000000);
-	HI = 0;
+	lo = SIGNED64 (0x8000000000000000);
+	hi = 0;
       }
     else
       {
-	LO = (n / d);
-	HI = (n % d);
+	lo = (n / d);
+	hi = (n % d);
       }
+    HI = hi;
+    LO = lo;
   }
   TRACE_ALU_RESULT2 (HI, LO);
 }
@@ -1409,23 +1413,27 @@
 
 
 
-:function:64::void:do_ddivu:int rs, int rt
+:function:::void:do_ddivu:int rs, int rt
 {
   check_div_hilo (SD_, HIHISTORY, LOHISTORY);
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   {
     unsigned64 n = GPR[rs];
     unsigned64 d = GPR[rt];
+    unsigned64 hi;
+    unsigned64 lo;
     if (d == 0)
       {
-	LO = SIGNED64 (0x8000000000000000);
-	HI = 0;
+	lo = SIGNED64 (0x8000000000000000);
+	hi = 0;
       }
     else
       {
-	LO = (n / d);
-	HI = (n % d);
+	lo = (n / d);
+	hi = (n % d);
       }
+    HI = hi;
+    LO = lo;
   }
   TRACE_ALU_RESULT2 (HI, LO);
 }
@@ -1683,6 +1691,16 @@
   do_dmultu (SD_, RS, RT, RD);
 }
 
+:function:::void:do_dsll:int rt, int rd, int shift
+{
+  GPR[rd] = GPR[rt] << shift;
+}
+
+:function:::void:do_dsllv:int rs, int rt, int rd
+{
+  int s = MASKED64 (GPR[rs], 5, 0);
+  GPR[rd] = GPR[rt] << s;
+}
 
 
 00000000000,5.RT,5.RD,5.SHIFT,111000:SPECIAL:64::DSLL
@@ -1707,8 +1725,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = SHIFT;
-  GPR[RD] = GPR[RT] << s;
+  do_dsll (SD_, RT, RD, SHIFT);
 }
 
 
@@ -1738,8 +1755,6 @@
   GPR[RD] = GPR[RT] << s;
 }
 
-
-
 000000,5.RS,5.RT,5.RD,00000010100:SPECIAL:64::DSLLV
 "dsllv r<RD>, r<RT>, r<RS>"
 *mipsIII:
@@ -1762,10 +1777,13 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = MASKED64 (GPR[RS], 5, 0);
-  GPR[RD] = GPR[RT] << s;
+  do_dsllv (SD_, RS, RT, RD);
 }
 
+:function:::void:do_dsra:int rt, int rd, int shift
+{
+  GPR[rd] = ((signed64) GPR[rt]) >> shift;
+}
 
 
 00000000000,5.RT,5.RD,5.SHIFT,111011:SPECIAL:64::DSRA
@@ -1790,8 +1808,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = SHIFT;
-  GPR[RD] = ((signed64) GPR[RT]) >> s;
+  do_dsra (SD_, RT, RD, SHIFT);
 }
 
 
@@ -1855,6 +1872,11 @@
   do_dsrav (SD_, RS, RT, RD);
 }
 
+:function:::void:do_dsrl:int rt, int rd, int shift
+{
+  GPR[rd] = (unsigned64) GPR[rt] >> shift;
+}
+
 
 00000000000,5.RT,5.RD,5.SHIFT,111010:SPECIAL:64::DSRL
 "dsrl r<RD>, r<RT>, <SHIFT>"
@@ -1878,8 +1900,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = SHIFT;
-  GPR[RD] = (unsigned64) GPR[RT] >> s;
+  do_dsrl (SD_, RT, RD, SHIFT);
 }
 
 
@@ -1910,6 +1931,14 @@
 }
 
 
+:function:::void:do_dsrlv:int rs, int rt, int rd
+{
+  int s = MASKED64 (GPR[rs], 5, 0);
+  GPR[rd] = (unsigned64) GPR[rt] >> s;
+}
+
+
+
 000000,5.RS,5.RT,5.RD,00000010110:SPECIAL:64::DSRLV
 "dsrl32 r<RD>, r<RT>, r<RS>"
 *mipsIII:
@@ -1932,8 +1961,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = MASKED64 (GPR[RS], 5, 0);
-  GPR[RD] = (unsigned64) GPR[RT] >> s;
+  do_dsrlv (SD_, RS, RT, RD);
 }
 
 
@@ -2060,7 +2088,6 @@
   DELAY_SLOT (region | (INSTR_INDEX << 2));
 }
 
-
 000000,5.RS,00000,5.RD,00000001001:SPECIAL:32::JALR
 "jalr r<RS>":RD == 31
 "jalr r<RD>, r<RS>"
@@ -2129,7 +2156,9 @@
 
   vaddr = base + offset;
   if ((vaddr & access) != 0)
-    SignalExceptionAddressLoad ();
+    {
+      SIM_CORE_SIGNAL (SD, STATE_CPU (SD, 0), cia, read_map, access+1, vaddr, read_transfer, sim_core_unaligned_signal);
+    }
   AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &uncached, isTARGET, isREAL);
   paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverseendian));
   LoadMemory (&memval, NULL, uncached, access, paddr, vaddr, isDATA, isREAL);
@@ -2379,7 +2408,9 @@
     address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
-      SignalExceptionAddressLoad();
+      {
+        SIM_CORE_SIGNAL (SD, CPU, cia, read_map, 4, vaddr, read_transfer, sim_core_unaligned_signal);
+      }
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -2433,7 +2464,9 @@
     address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
-      SignalExceptionAddressLoad();
+      {
+	SIM_CORE_SIGNAL (SD, CPU, cia, read_map, 8, vaddr, read_transfer, sim_core_unaligned_signal);
+      }
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -3098,7 +3131,9 @@
 
   vaddr = base + offset;
   if ((vaddr & access) != 0)
-    SignalExceptionAddressStore ();
+    {
+      SIM_CORE_SIGNAL (SD, STATE_CPU(SD, 0), cia, read_map, access+1, vaddr, write_transfer, sim_core_unaligned_signal);
+    }
   AddressTranslation (vaddr, isDATA, isSTORE, &paddr, &uncached, isTARGET, isREAL);
   paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverseendian));
   byte = ((vaddr & mask) ^ bigendiancpu);
@@ -3165,7 +3200,9 @@
     address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
-      SignalExceptionAddressStore();
+      {
+	SIM_CORE_SIGNAL (SD, CPU, cia, read_map, 4, vaddr, write_transfer, sim_core_unaligned_signal);
+      }
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -3219,7 +3256,9 @@
     address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
-      SignalExceptionAddressStore();
+      {
+	SIM_CORE_SIGNAL (SD, CPU, cia, read_map, 8, vaddr, write_transfer, sim_core_unaligned_signal);
+      }
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -4544,13 +4583,6 @@
 010001,01000,3.0,1.ND,1.TF,16.OFFSET:COP1S:32,f::BC1a
 "bc1%s<TF>%s<ND> <OFFSET>"
 *mipsI,mipsII,mipsIII:
-*vr4100:
-// start-sanitize-vr4xxx
-*vr4121:
-// end-sanitize-vr4xxx
-// start-sanitize-vr4320
-*vr4320:
-// end-sanitize-vr4320
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4575,11 +4607,23 @@
     }
 }
 
+// start-sanitize-vr4xxx
+// FIXME: vr4100,vr4320, and 4121 all should be in the
+// previous insn, but the renameing thing wasn't working
+// so I cheated -gavin
+// end-sanitize-vr4xxx
 010001,01000,3.CC,1.ND,1.TF,16.OFFSET:COP1S:32,f::BC1b
 "bc1%s<TF>%s<ND> <OFFSET>":CC == 0
 "bc1%s<TF>%s<ND> <CC>, <OFFSET>"
 *mipsIV:
 *vr5000:
+#*vr4100:
+// start-sanitize-vr4320
+//*vr4320:
+// end-sanitize-vr4320
+// start-sanitize-vr4xxx
+*vr4121:
+// end-sanitize-vr4xxx
 // start-sanitize-cygnus
 *vr5400:
 // end-sanitize-cygnus
@@ -4751,7 +4795,7 @@
 
 // CFC1
 // CTC1
-010001,00,X,10,5.RT,5.FS,00000000000:COP1S:32::CxC1
+010001,00,X,10,5.RT,5.FS,00000000000:COP1Sa:32::CxC1
 "c%s<X>c1 r<RT>, f<FS>"
 *mipsI:
 *mipsII:
@@ -4775,7 +4819,7 @@
       /* else NOP */
     }
 }
-010001,00,X,10,5.RT,5.FS,00000000000:COP1S:32::CxC1
+010001,00,X,10,5.RT,5.FS,00000000000:COP1Sb:32::CxC1
 "c%s<X>c1 r<RT>, f<FS>"
 *mipsIV:
 *vr4100:
@@ -5003,7 +5047,7 @@
 
 // DMFC1
 // DMTC1
-010001,00,X,01,5.RT,5.FS,00000000000:COP1S:64::DMxC1
+010001,00,X,01,5.RT,5.FS,00000000000:COP1Sa:64::DMxC1
 "dm%s<X>c1 r<RT>, f<FS>"
 *mipsIII:
 {
@@ -5027,7 +5071,7 @@
 	PENDING_FILL(RT,SET64HI(0xDEADC0DE) | 0xBAD0BAD0);
     }
 }
-010001,00,X,01,5.RT,5.FS,00000000000:COP1S:64::DMxC1
+010001,00,X,01,5.RT,5.FS,00000000000:COP1Sb:64::DMxC1
 "dm%s<X>c1 r<RT>, f<FS>"
 *mipsIV:
 *vr4100:
@@ -5273,7 +5317,7 @@
 
 // MFC1
 // MTC1
-010001,00,X,00,5.RT,5.FS,00000000000:COP1S:32::MxC1
+010001,00,X,00,5.RT,5.FS,00000000000:COP1Sa:32::MxC1
 "m%s<X>c1 r<RT>, f<FS>"
 *mipsI:
 *mipsII:
@@ -5289,7 +5333,7 @@
   else /*MFC1*/
     PENDING_FILL (RT, SIGNEXTEND(FGR[FS],32));
 }
-010001,00,X,00,5.RT,5.FS,00000000000:COP1S:32::MxC1
+010001,00,X,00,5.RT,5.FS,00000000000:COP1Sb:32::MxC1
 "m%s<X>c1 r<RT>, f<FS>"
 *mipsIV:
 *vr4100:
@@ -5942,7 +5986,9 @@
     address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
-      SignalExceptionAddressStore();
+      {
+	SIM_CORE_SIGNAL (SD, CPU, cia, read_map, AccessLength_WORD+1, vaddr, write_transfer, sim_core_unaligned_signal);
+      }
     else
       {
 	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
@@ -5983,7 +6029,9 @@
    address_word paddr;
    int uncached;
    if ((vaddr & 3) != 0)
-    SignalExceptionAddressStore();
+     {
+       SIM_CORE_SIGNAL (SD, CPU, cia, read_map, 4, vaddr, write_transfer, sim_core_unaligned_signal);
+     }
    else
    {
     if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
