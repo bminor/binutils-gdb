@@ -1,5 +1,5 @@
 /* BFD back-end for Sparc COFF files.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -33,6 +33,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* The page size is a guess based on ELF.  */
 #define COFF_PAGE_SIZE 0x10000
 
+
+static reloc_howto_type *coff_sparc_reloc_type_lookup
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
+static void rtype2howto PARAMS ((arelent *, struct internal_reloc *));
+  
 enum reloc_type
   {
     R_SPARC_NONE = 0,

@@ -250,6 +250,8 @@ MY_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
    file header, symbols, and relocation.  */
 
 #ifndef MY_write_object_contents
+static boolean MY(write_object_contents) PARAMS ((bfd *));
+
 static boolean
 MY(write_object_contents) (abfd)
      bfd *abfd;

@@ -1,3 +1,10 @@
+2001-08-20  Andreas Jaeger  <aj@suse.de>
+
+	* coff-sparc.c: Add missing prototypes.
+	* elf32-s390.c: Likewise.
+	* elf32-i960.c: Likewise.
+	* aout-target.h: Likewise.
+
 2001-08-20  H.J. Lu  <hjl@gnu.org>
 
 	* elf-bfd.h (elf_obj_tdata): Add num_section_syms.
@@ -124,7 +131,7 @@
 	(do_as_repeat): Write out ieee_set_current_pc_enum value as for
 	do_with_relocs, ie. as a symbol for relocatable files.
 	(ieee_vec): Add comments showing functions referenced by macros.
-	
+
 2001-08-14  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* aout-tic30.c: Add missing prototypes.  Fix formatting.

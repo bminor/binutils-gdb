@@ -37,6 +37,12 @@ static struct bfd_link_hash_table *elf_s390_link_hash_table_create
 static boolean elf_s390_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
+static asection *elf_s390_gc_mark_hook
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+	   struct elf_link_hash_entry *, Elf_Internal_Sym *sym));
+static boolean elf_s390_gc_sweep_hook
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
 static boolean elf_s390_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static boolean elf_s390_size_dynamic_sections
@@ -49,6 +55,7 @@ static boolean elf_s390_finish_dynamic_symbol
 	   Elf_Internal_Sym *));
 static boolean elf_s390_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+static boolean elf_s390_object_p PARAMS ((bfd *));
 
 #define USE_RELA 1		/* We want RELA relocations, not REL.  */
 
