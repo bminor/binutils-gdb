@@ -1396,7 +1396,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global,
 	    {
 	      do_linear_search = 1;
 	    }
-	  if (strcmp (SYMBOL_SOURCE_NAME (*center), name) >= 0)
+	  if (strcmp (SYMBOL_PRINT_NAME (*center), name) >= 0)
 	    {
 	      top = center;
 	    }
@@ -1642,15 +1642,15 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	    {
 	      do_linear_search = 1;
 	    }
-	  if (SYMBOL_SOURCE_NAME (sym)[0] < name[0])
+	  if (SYMBOL_PRINT_NAME (sym)[0] < name[0])
 	    {
 	      bot = inc;
 	    }
-	  else if (SYMBOL_SOURCE_NAME (sym)[0] > name[0])
+	  else if (SYMBOL_PRINT_NAME (sym)[0] > name[0])
 	    {
 	      top = inc;
 	    }
-	  else if (strcmp (SYMBOL_SOURCE_NAME (sym), name) < 0)
+	  else if (strcmp (SYMBOL_PRINT_NAME (sym), name) < 0)
 	    {
 	      bot = inc;
 	    }
@@ -1682,7 +1682,7 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	    {
 	      return sym;
 	    }
-          if (SYMBOL_SOURCE_NAME (sym)[0] > name[0])
+          if (SYMBOL_PRINT_NAME (sym)[0] > name[0])
             {
               break;
             }
@@ -2737,8 +2737,8 @@ compare_search_syms (const void *sa, const void *sb)
   struct symbol_search **sym_a = (struct symbol_search **) sa;
   struct symbol_search **sym_b = (struct symbol_search **) sb;
 
-  return strcmp (SYMBOL_SOURCE_NAME ((*sym_a)->symbol),
-		 SYMBOL_SOURCE_NAME ((*sym_b)->symbol));
+  return strcmp (SYMBOL_PRINT_NAME ((*sym_a)->symbol),
+		 SYMBOL_PRINT_NAME ((*sym_b)->symbol));
 }
 
 /* Sort the ``nfound'' symbols in the list after prevtail.  Leave
@@ -3126,7 +3126,7 @@ print_symbol_info (namespace_enum kind, struct symtab *s, struct symbol *sym,
     {
       type_print (SYMBOL_TYPE (sym),
 		  (SYMBOL_CLASS (sym) == LOC_TYPEDEF
-		   ? "" : SYMBOL_SOURCE_NAME (sym)),
+		   ? "" : SYMBOL_PRINT_NAME (sym)),
 		  gdb_stdout, 0);
 
       printf_filtered (";\n");
@@ -3149,7 +3149,7 @@ print_msymbol_info (struct minimal_symbol *msymbol)
     tmp = local_hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol),
 				   "016l");
   printf_filtered ("%s  %s\n",
-		   tmp, SYMBOL_SOURCE_NAME (msymbol));
+		   tmp, SYMBOL_PRINT_NAME (msymbol));
 }
 
 /* This is the guts of the commands "info functions", "info types", and
@@ -3264,7 +3264,7 @@ rbreak_command (char *regexp, int from_tty)
 	{
 	  break_command (SYMBOL_NAME (p->msymbol), from_tty);
 	  printf_filtered ("<function, no debug info> %s;\n",
-			   SYMBOL_SOURCE_NAME (p->msymbol));
+			   SYMBOL_PRINT_NAME (p->msymbol));
 	}
     }
 

@@ -1,6 +1,6 @@
 /* Objective-C language support routines for GDB, the GNU debugger.
 
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by Apple Computer, Inc.
    Written by Michael Snyder.
@@ -799,8 +799,8 @@ compare_selectors (const void *a, const void *b)
 {
   char *aname, *bname;
 
-  aname = SYMBOL_SOURCE_NAME (*(struct symbol **) a);
-  bname = SYMBOL_SOURCE_NAME (*(struct symbol **) b);
+  aname = SYMBOL_PRINT_NAME (*(struct symbol **) a);
+  bname = SYMBOL_PRINT_NAME (*(struct symbol **) b);
   if (aname == NULL || bname == NULL)
     error ("internal: compare_selectors(1)");
 
@@ -957,8 +957,8 @@ compare_classes (const void *a, const void *b)
 {
   char *aname, *bname;
 
-  aname = SYMBOL_SOURCE_NAME (*(struct symbol **) a);
-  bname = SYMBOL_SOURCE_NAME (*(struct symbol **) b);
+  aname = SYMBOL_PRINT_NAME (*(struct symbol **) a);
+  bname = SYMBOL_PRINT_NAME (*(struct symbol **) b);
   if (aname == NULL || bname == NULL)
     error ("internal: compare_classes(1)");
 

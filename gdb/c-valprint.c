@@ -205,7 +205,7 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
 		  (vt_address == SYMBOL_VALUE_ADDRESS (msymbol)))
 		{
 		  fputs_filtered (" <", stream);
-		  fputs_filtered (SYMBOL_SOURCE_NAME (msymbol), stream);
+		  fputs_filtered (SYMBOL_PRINT_NAME (msymbol), stream);
 		  fputs_filtered (">", stream);
 		}
 	      if (vt_address && vtblprint)

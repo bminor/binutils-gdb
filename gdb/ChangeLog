@@ -1,3 +1,39 @@
+2003-02-20  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.h (SYMBOL_PRINT_NAME): Rename from SYMBOL_SOURCE_NAME;
+	expand comment.
+	* ada-lang.c (user_select_syms, ada_finish_decode_line_1): Replace
+	SYMBOL_PRINT_NAME with SYMBOL_SOURCE_NAME.
+	* ada-typeprint.c (ada_typedef_print): Ditto.
+	* ax-gdb.c (gen_var_ref): Ditto.
+	* breakpoint.c (print_one_breakpoint): Ditto.
+	* buildsym.c (finish_block): Ditto.
+	* c-valprint.c (c_val_print): Ditto.
+	* expprint.c (print_subexp): Ditto.
+	* findvar.c (locate_var_value): Ditto.
+	* infcmd.c (jump_command): Ditto. 
+	* linespec.c (decode_line_2, decode_compound): Ditto. 
+	* maint.c (maintenance_translate_address): Ditto. 
+	* objc-lang.c (compare_selectors, compare_classes): Ditto. 
+	* printcmd.c (build_address_symbolic, sym_info, print_frame_args):
+	Ditto.
+	* p-valprint.c (pascal_val_print): Ditto. 
+	* stabsread.c (define_symbol): Ditto. 
+	* stack.c (print_frame, frame_info, print_block_frame_locals)
+	(print_frame_arg_vars, return_command): Ditto. 
+	* symfile.c (compare_symbols, compare_psymbols): Ditto. 
+	* symmisc.c (print_symbol): Ditto. 
+	* symtab.c (lookup_partial_symbol, lookup_block_symbol)
+	(compare_search_syms, print_symbol_info, print_msymbol_info)
+	(rbreak_command): Ditto. 
+	* tracepoint.c (tracepoints_info): Ditto. 
+	* typeprint.c (typedef_print): Ditto. 
+	* valops.c (value_of_variable, hand_function_call): Ditto. 
+	* cli/cli-cmds.c (edit_command, list_command): Ditto.
+	* ada-typeprint.c: Update Copyright.
+	* infcmd.c, objc-lang.c, p-valprint.c, symmisc.c: Ditto.
+	* tracepoint.c, cli/cli-cmds.c: Ditto.
+
 2003-02-20  Kevin Buettner  <kevinb@redhat.com>
 
 	* frame.c (generic_unwind_get_saved_register): Make non-static.

@@ -395,7 +395,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	{
 	  complaint (&symfile_complaints,
 		     "block end address less than block start address in %s (patched it)",
-		     SYMBOL_SOURCE_NAME (symbol));
+		     SYMBOL_PRINT_NAME (symbol));
 	}
       else
 	{
@@ -429,7 +429,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		{
 		  complaint (&symfile_complaints,
 			     "inner block not inside outer block in %s",
-			     SYMBOL_SOURCE_NAME (symbol));
+			     SYMBOL_PRINT_NAME (symbol));
 		}
 	      else
 		{

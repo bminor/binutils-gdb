@@ -172,12 +172,15 @@ extern char *symbol_demangled_name (struct general_symbol_info *symbol);
 #define SYMBOL_OBJC_DEMANGLED_NAME(symbol)				\
    (symbol)->ginfo.language_specific.objc_specific.demangled_name
 
-/* Macro that returns the "natural source name" of a symbol.  In C++ this is
-   the "demangled" form of the name if demangle is on and the "mangled" form
-   of the name if demangle is off.  In other languages this is just the
-   symbol name.  The result should never be NULL. */
+/* Macro that returns a version of the name of a symbol that is
+   suitable for output.  In C++ this is the "demangled" form of the
+   name if demangle is on and the "mangled" form of the name if
+   demangle is off.  In other languages this is just the symbol name.
+   The result should never be NULL.  Don't use this for internal
+   purposes (e.g. storing in a hashtable): it's only suitable for
+   output.  */
 
-#define SYMBOL_SOURCE_NAME(symbol)					\
+#define SYMBOL_PRINT_NAME(symbol)					\
   (demangle && SYMBOL_DEMANGLED_NAME (symbol) != NULL			\
    ? SYMBOL_DEMANGLED_NAME (symbol)					\
    : SYMBOL_NAME (symbol))

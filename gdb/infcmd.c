@@ -1,6 +1,6 @@
 /* Memory-access and commands for "inferior" process, for GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -855,7 +855,7 @@ jump_command (char *arg, int from_tty)
   if (fn != NULL && sfn != fn)
     {
       if (!query ("Line %d is not in `%s'.  Jump anyway? ", sal.line,
-		  SYMBOL_SOURCE_NAME (fn)))
+		  SYMBOL_PRINT_NAME (fn)))
 	{
 	  error ("Not confirmed.");
 	  /* NOTREACHED */

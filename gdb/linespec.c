@@ -430,7 +430,7 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
 	  values.sals[i] = find_function_start_sal (sym_arr[i], funfirstline);
 	  printf_unfiltered ("[%d] %s at %s:%d\n",
 			     (i + 2),
-			     SYMBOL_SOURCE_NAME (sym_arr[i]),
+			     SYMBOL_PRINT_NAME (sym_arr[i]),
 			     values.sals[i].symtab->filename,
 			     values.sals[i].line);
 	}
@@ -1101,11 +1101,11 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	      if (tmp[0] == '~')
 		cplusplus_error (saved_arg,
 				 "the class `%s' does not have destructor defined\n",
-				 SYMBOL_SOURCE_NAME (sym_class));
+				 SYMBOL_PRINT_NAME (sym_class));
 	      else
 		cplusplus_error (saved_arg,
 				 "the class %s does not have any method named %s\n",
-				 SYMBOL_SOURCE_NAME (sym_class), tmp);
+				 SYMBOL_PRINT_NAME (sym_class), tmp);
 	    }
 	}
 

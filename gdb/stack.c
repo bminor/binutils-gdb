@@ -361,7 +361,7 @@ print_frame (struct frame_info *fi,
 	}
       else
 	{
-	  /* I'd like to use SYMBOL_SOURCE_NAME() here, to display the
+	  /* I'd like to use SYMBOL_PRINT_NAME() here, to display the
 	     demangled name that we already have stored in the symbol
 	     table, but we stored a version with DMGL_PARAMS turned
 	     on, and here we don't want to display parameters. So call
@@ -382,7 +382,7 @@ print_frame (struct frame_info *fi,
 		/* If the demangler fails, try the demangled name from
 		   the symbol table. This'll have parameters, but
 		   that's preferable to diplaying a mangled name. */
-		funname = SYMBOL_SOURCE_NAME (func);
+		funname = SYMBOL_PRINT_NAME (func);
 	    }
 	}
     }
@@ -639,7 +639,7 @@ frame_info (char *addr_exp, int from_tty)
   s = find_pc_symtab (get_frame_pc (fi));
   if (func)
     {
-      /* I'd like to use SYMBOL_SOURCE_NAME() here, to display
+      /* I'd like to use SYMBOL_PRINT_NAME() here, to display
        * the demangled name that we already have stored in
        * the symbol table, but we stored a version with
        * DMGL_PARAMS turned on, and here we don't want
@@ -663,7 +663,7 @@ frame_info (char *addr_exp, int from_tty)
 	   * but that's preferable to diplaying a mangled name.
 	   */
 	  if (demangled == NULL)
-	    funname = SYMBOL_SOURCE_NAME (func);
+	    funname = SYMBOL_PRINT_NAME (func);
 	}
     }
   else
@@ -1086,7 +1086,7 @@ print_block_frame_locals (struct block *b, register struct frame_info *fi,
 	  values_printed = 1;
 	  for (j = 0; j < num_tabs; j++)
 	    fputs_filtered ("\t", stream);
-	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), stream);
+	  fputs_filtered (SYMBOL_PRINT_NAME (sym), stream);
 	  fputs_filtered (" = ", stream);
 	  print_variable_value (sym, fi, stream);
 	  fprintf_filtered (stream, "\n");
@@ -1123,7 +1123,7 @@ print_block_frame_labels (struct block *b, int *have_default,
 	  struct symtab_and_line sal;
 	  sal = find_pc_line (SYMBOL_VALUE_ADDRESS (sym), 0);
 	  values_printed = 1;
-	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), stream);
+	  fputs_filtered (SYMBOL_PRINT_NAME (sym), stream);
 	  if (addressprint)
 	    {
 	      fprintf_filtered (stream, " ");
@@ -1310,7 +1310,7 @@ print_frame_arg_vars (register struct frame_info *fi,
 	case LOC_REGPARM_ADDR:
 	case LOC_BASEREG_ARG:
 	  values_printed = 1;
-	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), stream);
+	  fputs_filtered (SYMBOL_PRINT_NAME (sym), stream);
 	  fputs_filtered (" = ", stream);
 
 	  /* We have to look up the symbol because arguments can have
@@ -1622,7 +1622,7 @@ return_command (char *retval_exp, int from_tty)
     {
       if (thisfun != 0)
 	{
-	  if (!query ("Make %s return now? ", SYMBOL_SOURCE_NAME (thisfun)))
+	  if (!query ("Make %s return now? ", SYMBOL_PRINT_NAME (thisfun)))
 	    {
 	      error ("Not confirmed.");
 	      /* NOTREACHED */
