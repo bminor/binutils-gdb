@@ -1,3 +1,14 @@
+2002-05-20  Keith Seitz  <keiths@redhat.com>
+
+	* mi-main.c (captured_mi_execute_command): Add uiout parameter.
+	"data" is now a structure which is used to pass data to/from this
+	function to mi_execute_command.
+	Modify function to comply with requirements from catch_exceptions.
+	Store real return result and command's return result in data.
+	(mi_execute_command): Use catch_exceptions.
+	Use enum to handle actions to be performed instead of overloading
+	catch_errors return result and the mi return result.
+
 2002-04-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-main.c (mi_cmd_exec_return): 
