@@ -313,6 +313,7 @@ procfs.c
 ptx4-nat.c
 pyr-tdep.c
 pyr-xdep.c
+rdi-share
 remote-adapt.c
 remote-array.c
 remote-bug.c
@@ -326,6 +327,7 @@ remote-mm.c
 remote-nindy.c
 remote-nrom.c
 remote-os9k.c
+remote-rdi.c
 remote-rdp.c
 remote-sds.c
 remote-sim.c
