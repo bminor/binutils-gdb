@@ -1,3 +1,8 @@
+2005-04-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Return -1 on errors
+	rather than 0.
+
 2005-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_check_relocs): Increment count for all
