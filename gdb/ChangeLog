@@ -1,3 +1,9 @@
+2000-11-05  Kevin Buettner  <kevinb@redhat.com>
+
+	* v850-tdep.c (handle_prepare, handle_pushm): Remove extraneous
+	blank line after function declarator.
+	* v850ice.c (v850ice_xfer_memory, do_gdb): Protoize.
+
 2000-11-03  Kevin Buettner  <kevinb@redhat.com>
 
 	* utils.c (add_continuation, add_intermediate_continuation,

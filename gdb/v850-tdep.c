@@ -114,7 +114,6 @@ struct reg_list
 static void
 handle_prepare (int insn, int insn2, CORE_ADDR * current_pc_ptr,
 		struct prologue_info *pi, struct pifsr **pifsr_ptr)
-
 {
   CORE_ADDR current_pc = *current_pc_ptr;
   struct pifsr *pifsr = *pifsr_ptr;
@@ -191,7 +190,6 @@ handle_prepare (int insn, int insn2, CORE_ADDR * current_pc_ptr,
 static void
 handle_pushm (int insn, int insn2, struct prologue_info *pi,
 	      struct pifsr **pifsr_ptr)
-
 {
   struct pifsr *pifsr = *pifsr_ptr;
   long list12 = ((insn & 0x0f) << 16) + (insn2 & 0xfff0);

@@ -584,18 +584,15 @@ v850ice_prepare_to_store (void)
 
 /* Read or write LEN bytes from inferior memory at MEMADDR, transferring
    to or from debugger address MYADDR.  Write to inferior if SHOULD_WRITE is
-   nonzero.  Returns length of data written or read; 0 for error.
+   nonzero.  TARGET is unused.  Returns length of data written or read;
+   0 for error.
 
    We can only read/write MAX_BLOCK_SIZE bytes at a time, though, or the DLL
-   dies */
+   dies.  */
 /* ARGSUSED */
 static int
-v850ice_xfer_memory (memaddr, myaddr, len, should_write, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int should_write;
-     struct target_ops *target;	/* ignored */
+v850ice_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
+		     int should_write, struct target_ops *target)
 {
   long retval;
   char cmd[100];
@@ -826,11 +823,7 @@ ice_cont (char *c)
 }
 
 static void
-do_gdb (cmd, str, func, count)
-     char *cmd;
-     char *str;
-     void (*func) (char *, int);
-     int count;
+do_gdb (char *cmd, char *str, void (*func) (char *, int), int count)
 {
   ReplyMessage ((LRESULT) 1);
 
