@@ -2,7 +2,7 @@
 #objdump: -Dr
 #name: xcoff64 AltiVec tests
 
-.*:     file format aixcoff64-rs6000
+.*:     file format aix5?coff64-rs6000
 
 Disassembly of section .text:
 
