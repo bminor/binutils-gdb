@@ -44,7 +44,8 @@ sparc64_gregset_supplies_p (int regnum)
   if (regnum == SPARC64_PC_REGNUM
       || regnum == SPARC64_NPC_REGNUM
       || regnum == SPARC64_STATE_REGNUM
-      || regnum == SPARC64_Y_REGNUM)
+      || regnum == SPARC64_Y_REGNUM
+      || regnum == SPARC64_FPRS_REGNUM)
     return 1;
 
   return 0;

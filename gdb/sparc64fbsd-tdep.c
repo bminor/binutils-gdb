@@ -30,157 +30,23 @@
 #include "sparc64-tdep.h"
 
 /* From <machine/reg.h>.  */
-
-/* Offset of registers in `struct reg'.  */
-int sparc64fbsd_r_global_offset = (0 * 8);
-int sparc64fbsd_r_out_offset = (8 * 8);
-int sparc64fbsd_r_fprs_offset = (16 * 8);
-int sparc64fbsd_r_tnpc_offset = (24 * 8);
-int sparc64fbsd_r_tpc_offset = (25 * 8);
-int sparc64fbsd_r_tstate_offset = (26 * 8);
-int sparc64fbsd_r_y_offset = (28 * 8);
+const struct sparc_gregset sparc64fbsd_gregset =
+{
+  26 * 8,			/* "tstate" */
+  25 * 8,			/* %pc */
+  24 * 8,			/* %npc */
+  28 * 8,			/* %y */
+  16 * 8,			/* %fprs */
+  -1,
+  1 * 8,			/* %g1 */
+  -1,				/* %l0 */
+  8				/* sizeof (%y) */
+};
+
 
 /* Size of `struct reg' and `struct fpreg'.  */
-int sparc64fbsd_sizeof_struct_reg = 256;
-int sparc64fbsd_sizeof_struct_fpreg = 272;
-
-void
-sparc64fbsd_supply_reg (const char *regs, int regnum)
-{
-  char buf[8];
-  int i;
-
-  if (regnum == SPARC64_PC_REGNUM || regnum == -1)
-    supply_register (SPARC64_PC_REGNUM, regs + sparc64fbsd_r_tpc_offset);
-
-  if (regnum == SPARC64_NPC_REGNUM || regnum == -1)
-    supply_register (SPARC64_NPC_REGNUM, regs + sparc64fbsd_r_tnpc_offset);
-
-  if (regnum == SPARC64_STATE_REGNUM || regnum == -1)
-    supply_register (SPARC64_STATE_REGNUM, regs + sparc64fbsd_r_tstate_offset);
-
-  if (regnum == SPARC64_FPRS_REGNUM || regnum == -1)
-    supply_register (SPARC64_FPRS_REGNUM, regs + sparc64fbsd_r_fprs_offset);
-
-  if (regnum == SPARC64_Y_REGNUM || regnum == -1)
-    supply_register (SPARC64_Y_REGNUM, regs + sparc64fbsd_r_y_offset);
-
-  if ((regnum >= SPARC_G0_REGNUM && regnum <= SPARC_G7_REGNUM) || regnum == -1)
-    {
-      if (regnum == SPARC_G0_REGNUM || regnum == -1)
-	supply_register (SPARC_G0_REGNUM, NULL); /* %g0 is always zero.  */
-      for (i = SPARC_G1_REGNUM; i <= SPARC_G7_REGNUM; i++)
-	{
-	  if (regnum == i || regnum == -1)
-	    supply_register (i, (regs + sparc64fbsd_r_global_offset
-				 + ((i - SPARC_G0_REGNUM) * 8)));
-	}
-    }
-
-  if ((regnum >= SPARC_O0_REGNUM && regnum <= SPARC_O7_REGNUM) || regnum == -1)
-    {
-      for (i = SPARC_O0_REGNUM; i <= SPARC_O7_REGNUM; i++)
-	{
-	  if (regnum == i || regnum == -1)
-	    supply_register (i, (regs + sparc64fbsd_r_out_offset
-				 + ((i - SPARC_O0_REGNUM) * 8)));
-        }
-    }
-
-  /* Inputs and Locals are stored onto the stack by by the kernel.  */
-  if ((regnum >= SPARC_L0_REGNUM && regnum <= SPARC_I7_REGNUM) || regnum == -1)
-    {
-      ULONGEST sp;
-
-      regcache_cooked_read_unsigned (current_regcache, SPARC_SP_REGNUM, &sp);
-      sparc_supply_rwindow (current_regcache, sp, regnum);
-    }
-}
-
-void
-sparc64fbsd_fill_reg (char *regs, int regnum)
-{
-  char buf[8];
-  int i;
-
-  if (regnum == SPARC64_PC_REGNUM || regnum == -1)
-    regcache_collect (SPARC64_PC_REGNUM, regs + sparc64fbsd_r_tpc_offset);
-
-  if (regnum == SPARC64_NPC_REGNUM || regnum == -1)
-    regcache_collect (SPARC64_NPC_REGNUM, regs + sparc64fbsd_r_tnpc_offset);
-
-  if (regnum == SPARC64_FPRS_REGNUM || regnum == -1)
-    regcache_collect (SPARC64_FPRS_REGNUM, regs + sparc64fbsd_r_fprs_offset);
-
-  if (regnum == SPARC64_Y_REGNUM || regnum == -1)
-    regcache_collect (SPARC64_Y_REGNUM, regs + sparc64fbsd_r_y_offset);
-
-  if ((regnum >= SPARC_G0_REGNUM && regnum <= SPARC_G7_REGNUM) || regnum == -1)
-    {
-      /* %g0 is always zero.  */
-      for (i = SPARC_G1_REGNUM; i <= SPARC_G7_REGNUM; i++)
-	{
-	  if (regnum == i || regnum == -1)
-	    regcache_collect (i, (regs + sparc64fbsd_r_global_offset
-				  + ((i - SPARC_G0_REGNUM) * 8)));
-	}
-    }
-
-  if ((regnum >= SPARC_O0_REGNUM && regnum <= SPARC_O7_REGNUM) || regnum == -1)
-    {
-      for (i = SPARC_O0_REGNUM; i <= SPARC_O7_REGNUM; i++)
-	{
-	  if (regnum == i || regnum == -1)
-	    regcache_collect (i, (regs + sparc64fbsd_r_out_offset
-				  + ((i - SPARC_O0_REGNUM) * 8)));
-        }
-    }
-
-  /* Responsibility for the stack regs is pushed off onto the caller.  */
-}
-
-void
-sparc64fbsd_supply_fpreg (const char *fpregs, int regnum)
-{
-  int i;
-
-  for (i = 0; i < 32; i++)
-    {
-      if (regnum == (SPARC_F0_REGNUM + i) || regnum == -1)
-	supply_register (SPARC_F0_REGNUM + i, fpregs + (i * 4));
-    }
-
-  for (i = 0; i < 16; i++)
-    {
-      if (regnum == (SPARC64_F32_REGNUM + i) || regnum == -1)
-	supply_register (SPARC64_F32_REGNUM + i, fpregs + (32 * 4) + (i * 8));
-    }
-
-  if (regnum == SPARC64_FSR_REGNUM || regnum == -1)
-    supply_register (SPARC64_FSR_REGNUM, fpregs + (32 * 4) + (16 * 8));
-}
-
-void
-sparc64fbsd_fill_fpreg (char *fpregs, int regnum)
-{
-  int i;
-
-  for (i = 0; i < 32; i++)
-    {
-      if (regnum == (SPARC_F0_REGNUM + i) || regnum == -1)
-	regcache_collect (SPARC_F0_REGNUM + i, fpregs + (i * 4));
-    }
-
-  for (i = 0; i < 16; i++)
-    {
-      if (regnum == (SPARC64_F32_REGNUM + i) || regnum == -1)
-	regcache_collect (SPARC64_F32_REGNUM + i, fpregs + (32 * 4) + (i * 8));
-    }
-
-  if (regnum == SPARC64_FSR_REGNUM || regnum == -1)
-    regcache_collect (SPARC64_FSR_REGNUM, fpregs + (32 * 4) + (16 * 8));
-}
-
+static const int sparc64fbsd_sizeof_struct_reg = 256;
+static const int sparc64fbsd_sizeof_struct_fpreg = 272;
 
 static void
 fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
@@ -192,14 +58,15 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
       if (core_reg_size != sparc64fbsd_sizeof_struct_reg)
 	warning ("Wrong size register set in core file.");
       else
-	sparc64fbsd_supply_reg (core_reg_sect, -1);
+	sparc64_supply_gregset (&sparc64fbsd_gregset, current_regcache,
+				-1, core_reg_sect);
       break;
 
     case 2:  /* Floating pointer registers */
       if (core_reg_size != sparc64fbsd_sizeof_struct_fpreg)
 	warning ("Wrong size FP register set in core file.");
       else
-	sparc64fbsd_supply_fpreg (core_reg_sect, -1);
+	sparc64_supply_fpregset (current_regcache, -1, core_reg_sect);
       break;
 
     default:

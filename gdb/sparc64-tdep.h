@@ -29,6 +29,9 @@
 /* UltraSPARC doesn't have %psr.  */
 #define r_tstate_offset r_psr_offset
 
+/* UltraSPARC doesn't have %wim either.  */
+#define r_fprs_offset r_wim_offset
+
 /* Register numbers of various important registers.  */
 
 enum sparc64_regnum
@@ -91,11 +94,9 @@ extern const struct sparc_gregset sparc64_sol2_gregset;
 extern void sparc64_sol2_init_abi (struct gdbarch_info info,
 				   struct gdbarch *gdbarch);
 
-/* Functions exported from sparc64fbsd-tdep.c.  */
+/* Variables exported from sparc64fbsd-tdep.c.  */
 
-extern void sparc64fbsd_supply_reg (const char *regs, int regnum);
-extern void sparc64fbsd_fill_reg (char *regs, int regnum);
-extern void sparc64fbsd_supply_fpreg (const char *regs, int regnum);
-extern void sparc64fbsd_fill_fpreg (char *regs, int regnum);
+/* Register offsets for FreeBSD/sparc64.  */
+extern const struct sparc_gregset sparc64fbsd_gregset;
 
 #endif /* sparc64-tdep.h */

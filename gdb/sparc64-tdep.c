@@ -1205,6 +1205,11 @@ sparc64_supply_gregset (const struct sparc_gregset *gregset,
 		  regs + gregset->r_y_offset, gregset->r_y_size);
 	  regcache_raw_supply (regcache, SPARC64_Y_REGNUM, buf);
 	}
+
+      if ((regnum == SPARC64_FPRS_REGNUM || regnum == -1)
+	  && gregset->r_fprs_offset != -1)
+	regcache_raw_supply (regcache, SPARC64_FPRS_REGNUM,
+			     regs + gregset->r_fprs_offset);
     }
 
   if (regnum == SPARC_G0_REGNUM || regnum == -1)
@@ -1316,6 +1321,12 @@ sparc64_collect_gregset (const struct sparc_gregset *gregset,
 	  memcpy (regs + gregset->r_y_offset,
 		  buf + 8 - gregset->r_y_size, gregset->r_y_size);
 	}
+
+      if ((regnum == SPARC64_FPRS_REGNUM || regnum == -1)
+	  && gregset->r_fprs_offset != -1)
+	regcache_raw_collect (regcache, SPARC64_FPRS_REGNUM,
+			      regs + gregset->r_fprs_offset);
+
     }
 
   if ((regnum >= SPARC_G1_REGNUM && regnum <= SPARC_O7_REGNUM) || regnum == -1)

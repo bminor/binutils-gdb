@@ -2343,7 +2343,7 @@ sparc64-sol2-tdep.o: sparc64-sol2-tdep.c $(defs_h) $(gdbarch_h) $(symtab_h) \
 sparc64fbsd-tdep.o: sparc64fbsd-tdep.c $(defs_h) $(gdbcore_h) $(osabi_h) \
 	$(regcache_h) $(target_h) $(gdb_string_h) $(sparc64_tdep_h)
 sparc64fbsd-nat.o: sparc64fbsd-nat.c $(defs_h) $(sparc64_tdep_h) \
-	$(sparcbsd_nat_h)
+	$(sparc_nat_h)
 sparc-stub.o: sparc-stub.c
 stabsread.o: stabsread.c $(defs_h) $(gdb_string_h) $(bfd_h) $(gdb_obstack_h) \
 	$(symtab_h) $(gdbtypes_h) $(expression_h) $(symfile_h) $(objfiles_h) \

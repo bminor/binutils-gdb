@@ -1,3 +1,38 @@
+2003-12-26  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc64-nat.c (sparc64_gregset_supplies_p): Return non-zero if
+	REGNUM is SPARC64_FPRS_REGNUM.
+	* sparc64-tdep.c (sparc64_supply_gregset): Deal with
+	SPARC64_FPRS_REGNUM.
+	(sparc64_collect_gregset): Likewise.
+	* sparc64-tdep.h (r_fprs_offset): New define.
+	(sparc64fbsd_gregset): Add define.
+	(sparc64fbsd_supply_reg, sparc64fbsd_fill_reg)
+	(sparc64fbsd_supply_fpreg, sparc64fbsd_fill_fpreg): Remove
+	declarations.
+	* sparc64fbsd-nat.c (sparc64fbsd_reg_supplies_p)
+	(sparc64fbsd_fpreg_supplies_p): Remove functions.
+	(_initialize_sparc64fbsd_nat): Remove initialization of
+	sparcbsd_supply_reg, sparcbsd_fill_reg, sparcbsd_supply_fpreg,
+	sparcbsd_fill_fpreg, sparcbsd_reg_supplies_p,
+	sparcbsd_fpreg_supplies_p.  Initialize sparc_gregset.
+	* sparc64fbsd-tdep.c (sparc64fbsd_gregset): New variable.
+	(sparc64fbsd_r_global_offset, sparc64fbsd_r_out_offset)
+	(sparc64fbsd_r_fprs_offset, sparc64fbsd_r_tnpc_offset)
+	(sparc64fbsd_r_tpc_offset, sparc64fbsd_r_tstate_offset)
+	(sparc64fbsd_r_y_offset): Remove variables.
+	(sparc64fbsd_sizeof_struct_reg, sparc64fbsd_sizeof_struct_fpreg):
+	Make static and const.
+	(sparc64fbsd_supply_reg, sparc64fbsd_fill_reg)
+	(sparc64fbsd_supply_fpreg, sparc64fbsd_fill_fpreg): Remove
+	functions.
+	(fetch_core_registers): Replace calls to sparc64fbsd_supply_reg
+	and sparc64fbsd_supply_fpreg with calls to sparc64_supply_gregset
+	and sparc64_supply_fpregset.
+	* Makefile.in (sparc64fbsd-nat.o): Update dependencies.
+	* config/sparc/fbsd.mh (NATDEPFILES): Remove sparcbsd-nat.o.  Add
+	sparc64-nat.o and sparc-nat.o.
+
 2003-12-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc-tdep.h (struct sparc_frame_cache): Rename from `struct

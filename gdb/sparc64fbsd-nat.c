@@ -22,47 +22,7 @@
 #include "defs.h"
 
 #include "sparc64-tdep.h"
-#include "sparcbsd-nat.h"
-
-/* Determine whether `struct reg' contains register REGNUM.  */
-
-static int
-sparc64fbsd_reg_supplies_p (int regnum)
-{
-  /* Integer registers.  */
-  if ((regnum >= SPARC_G0_REGNUM && regnum <= SPARC_G7_REGNUM)
-      || (regnum >= SPARC_O0_REGNUM && regnum <= SPARC_O7_REGNUM)
-      || (regnum >= SPARC_L0_REGNUM && regnum <= SPARC_L7_REGNUM)
-      || (regnum >= SPARC_I0_REGNUM && regnum <= SPARC_I7_REGNUM))
-    return 1;
-
-  /* Control registers.  */
-  if (regnum == SPARC64_PC_REGNUM
-      || regnum == SPARC64_NPC_REGNUM
-      || regnum == SPARC64_STATE_REGNUM
-      || regnum == SPARC64_FPRS_REGNUM
-      || regnum == SPARC64_Y_REGNUM)
-    return 1;
-
-  return 0;
-}
-
-/* Determine whether `struct fpreg' contains register REGNUM.  */
-
-static int
-sparc64fbsd_fpreg_supplies_p (int regnum)
-{
-  /* Floating-point registers.  */
-  if ((regnum >= SPARC_F0_REGNUM && regnum <= SPARC_F31_REGNUM)
-      || (regnum >= SPARC64_F32_REGNUM && regnum <= SPARC64_F62_REGNUM))
-    return 1;
-
-  /* Control registers.  */
-  if (regnum == SPARC64_FSR_REGNUM)
-    return 1;
-
-  return 0;
-}
+#include "sparc-nat.h"
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_sparc64fbsd_nat (void);
@@ -70,11 +30,5 @@ void _initialize_sparc64fbsd_nat (void);
 void
 _initialize_sparc64fbsd_nat (void)
 {
-  sparcbsd_supply_reg = sparc64fbsd_supply_reg;
-  sparcbsd_fill_reg = sparc64fbsd_fill_reg;
-  sparcbsd_supply_fpreg = sparc64fbsd_supply_fpreg;
-  sparcbsd_fill_fpreg = sparc64fbsd_fill_fpreg;
-
-  sparcbsd_reg_supplies_p = sparc64fbsd_reg_supplies_p;
-  sparcbsd_fpreg_supplies_p = sparc64fbsd_fpreg_supplies_p;
+  sparc_gregset = &sparc64fbsd_gregset;
 }
