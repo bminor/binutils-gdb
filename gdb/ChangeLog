@@ -1,7 +1,7 @@
 Thu Apr 15 02:37:48 1993  John Gilmore  (gnu@cacophony.cygnus.com)
 
 	* dbxread.c (unknown_symchar_complaint):  Add new complaint.
-	* stabsread.c:  Declare it.
+	* stabsread.h:  Declare it.
 	* partial-stab.h:  Use it.
 
 	* utils.c (malloc_botch):  Don't forward-declare if NO_MMALLOC.

@@ -1,5 +1,5 @@
 /* Include file for stabs debugging format support functions.
-   Copyright 1986-1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986-1991, 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -134,6 +134,7 @@ EXTERN int n_this_object_header_files;
 EXTERN int n_allocated_this_object_header_files;
 
 extern struct complaint unknown_symtype_complaint;
+extern struct complaint unknown_symchar_complaint;
 
 extern void
 read_type_number PARAMS ((char **, int *));
