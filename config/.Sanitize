@@ -1,4 +1,4 @@
-# .Sanitize for devo/config.
+# .Sanitize for devo/config
 
 # Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -28,7 +28,7 @@ else
 fi
 
 # All files listed between the "Things-to-keep:" line and the
-# "Files-to-sed:" line will be kept.  All other files will be removed.
+# "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
 # called.  Directories not listed will be removed in their entirety
 # with rm -rf.
@@ -78,6 +78,7 @@ mt-elfalphapic
 mt-linux
 mt-m68kpic
 mt-netware
+mt-ospace
 mt-papic
 mt-ppcpic
 mt-sparcpic
@@ -86,10 +87,15 @@ mt-x86pic
 
 Things-to-lose:
 
+
+
+# The lines between the "Do-last:" line and the end of the file
+# are executed as a /bin/sh shell script after everything else is
+# done.
+
 Do-last:
 
 r5900_files="ChangeLog"
-
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
 	for i in $r5900_files ; do
 		if test ! -d $i && (grep sanitize-r5900 $i > /dev/null) ; then
@@ -118,7 +124,6 @@ else
 fi
 
 cygnus_files="mh-go32"
-
 if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
 	for i in $cygnus_files ; do
 		if test ! -d $i && (grep sanitize-cygnus $i > /dev/null) ; then
@@ -146,4 +151,4 @@ else
 	done
 fi
 
-# End of file.
+# eof
