@@ -1,3 +1,9 @@
+Wed Sep 27 12:53:58 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: No need to check whether ${cpu_type} is powerpc;
+	it never will be.
+	* configure: Rebuild.
+
 Wed Sep 27 11:33:38 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (md_apply_fix3): Remove Sep 26 changes to this
