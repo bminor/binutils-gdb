@@ -1,5 +1,11 @@
 Fri Aug  2 00:13:06 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
+	* expprint.c (print_subexp):  Print UNOP_MEMVAL of an OP_LONG that
+	ends up as a function specially, since we know the actual type of
+	the pointed-to address.  This (somewhat) fixes display of
+	expressions that include misc_function_vector names.  Try `cond 1
+	!strcmp("a","b")' then `i b'.
+
 	* infrun.c:  Move DO_DEFERRED_STORES from proceed() to resume().
 	The child can be proceeded from inside wait_for_inferior in
 	evaluating breakpoint conditions, and DO_DEFERRED_STORES was
