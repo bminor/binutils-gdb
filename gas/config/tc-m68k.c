@@ -1022,9 +1022,9 @@ char	*instring;
 	register struct m68k_op *opP;
 	register struct m68_incant *opcode;
 	register char *s;
-	register int tmpreg,
-		baseo,
-		outro,
+	register int tmpreg = 0,
+		baseo = 0,
+		outro = 0,
 		nextword;
 	int	siz1,
 		siz2;
@@ -1201,7 +1201,10 @@ char	*instring;
 				break;
 
 			case 'B':	/* FOO */
-				if(opP->mode!=ABSL)
+				if(opP->mode!=ABSL || (flagseen['S'] && instring[0] == 'j'
+									  && instring[1] == 'b'
+									  && instring[2] == 's'
+									  && instring[3] == 'r'))
 					losing++;
 				break;
 
@@ -1687,12 +1690,13 @@ char	*instring;
 					}
 					/* Don't generate pc relative code
 					   on 68010 and 68000 */
-					if(isvar(opP->con1) &&
-					   !subs(opP->con1) &&
-					   seg(opP->con1)==SEG_TEXT &&
-					   now_seg==SEG_TEXT &&
-					   flagseen['m']==0 &&
-					    !strchr("~%&$?", s[0])) {
+					if(isvar(opP->con1)
+					   && !subs(opP->con1)
+					   && seg(opP->con1) == SEG_TEXT
+					   && now_seg == SEG_TEXT
+					   && flagseen['m'] == 0
+					   && !flagseen['S']
+					   && !strchr("~%&$?", s[0])) {
 						tmpreg=0x3A; /* 7.2 */
 						add_frag(adds(opP->con1),
 							 offs(opP->con1),
@@ -1821,13 +1825,12 @@ char	*instring;
 				   where opnd is absolute (it needs
 				   to use the 68000 hack since no
 				   conditional abs jumps).  */
-				if(
-				 (flagseen['m'] || (0==adds(opP->con1)))
-				 && (the_ins.opcode[0] >= 0x6200) &&
-				    (the_ins.opcode[0] <= 0x6f00)) {
-				  add_frag(adds(opP->con1),offs(opP->con1),TAB(BCC68000,SZ_UNDEF));
+				if ((flagseen['m'] || (0==adds(opP->con1)))
+				    && (the_ins.opcode[0] >= 0x6200)
+				    && (the_ins.opcode[0] <= 0x6f00)) {
+					add_frag(adds(opP->con1),offs(opP->con1),TAB(BCC68000,SZ_UNDEF));
 				} else {
-				  add_frag(adds(opP->con1),offs(opP->con1),TAB(BRANCH,SZ_UNDEF));
+					add_frag(adds(opP->con1),offs(opP->con1),TAB(BRANCH,SZ_UNDEF));
 				}
 				break;
 			case 'w':
@@ -2385,8 +2388,8 @@ char *str;
 {
 	char *er;
 	short	*fromP;
-	char	*toP;
-	int	m,n;
+	char	*toP = NULL;
+	int	m,n = 0;
 	char	*to_beg_P;
 	int	shorts_this_frag;
 
@@ -2733,7 +2736,7 @@ object_headers *headers;
 register fragS *fragP;
 {
   long disp;
-  long ext;
+  long ext = 0;
 
   /* Address in object code of the displacement.  */
   register int object_address = fragP -> fr_fix + fragP -> fr_address;
@@ -2774,8 +2777,8 @@ register fragS *fragP;
     ext=2;
     break;
   case TAB(BRANCH,LONG):
-    if(flagseen['m']) {
-      if(fragP->fr_opcode[0]==0x61) {
+    if (flagseen['m']) {
+      if (fragP->fr_opcode[0]==0x61) {
 	fragP->fr_opcode[0]= 0x4E;
 	fragP->fr_opcode[1]= 0xB9;	/* JBSR with ABSL LONG offset */
 	subseg_change(SEG_TEXT, 0);
@@ -2791,7 +2794,7 @@ register fragS *fragP;
 
 	fragP->fr_fix+=4;
 	ext=0;
-      } else if(fragP->fr_opcode[0]==0x60) {
+      } else if (fragP->fr_opcode[0]==0x60) {
         fragP->fr_opcode[0]= 0x4E;
         fragP->fr_opcode[1]= 0xF9;      /* JMP  with ABSL LONG offset */
         subseg_change(SEG_TEXT, 0);
@@ -2799,7 +2802,7 @@ register fragS *fragP;
 				NO_RELOC);
         fragP->fr_fix+=4;
         ext=0;
-      }else {
+      } else {
         as_bad("Long branch offset not supported.");
       }
     } else {
@@ -2900,10 +2903,6 @@ register fragS *fragP;
 /*	  H_SET_TEXT_SIZE(headers, H_GET_TEXT_SIZE(headers) + ext); */
   } /* if extending */
 
-  know((fragP->fr_next == NULL)
-       || ((fragP->fr_next->fr_address - fragP->fr_address)
-	   == (fragP->fr_fix)));
-
   return;
 } /* md_convert_frag() */
 
@@ -2915,9 +2914,9 @@ register fragS *fragP;
 segT segment;
 {
 	int	old_fix;
-	register char *buffer_address = fragP -> fr_fix + fragP -> fr_literal;
+	register char *buffer_address = fragP->fr_fix + fragP->fr_literal;
 
-	old_fix=fragP->fr_fix;
+	old_fix = fragP->fr_fix;
 
 	/* handle SZ_UNDEF first, it can be changed to BYTE or SHORT */
 	switch(fragP->fr_subtype) {
@@ -3030,6 +3029,8 @@ segT segment;
 			frag_wane(fragP);
 			break;
 		}
+
+		break;
 	} /* case TAB(BRANCH,SZ_UNDEF) */
 
 	case TAB(PCLEA,SZ_UNDEF): {
@@ -3056,7 +3057,8 @@ segT segment;
 
 	default:
 		break;
-	}
+
+	} /* switch on subtype looking for SZ_UNDEF's. */
 
 	/* now that SZ_UNDEF are taken care of, check others */
 	switch(fragP->fr_subtype) {
@@ -3384,6 +3386,9 @@ char ***vecP;
 	switch(**argP) {
 	case 'l':	/* -l means keep external to 2 bit offset
 			   rather than 16 bit one */
+		break;
+
+	case 'S': /* -S means that jbsr's always turn into jsr's.  */
 		break;
 
 	case 'm':
