@@ -59,9 +59,9 @@ hp300bsd.sh
 h8300hms.em
 h8300hms.sc-sh
 h8300hms.sh
-h8300xray.em
-h8300xray.sc-sh
-h8300xray.sh
+h8500hms.em
+h8500hms.sc-sh
+h8500hms.sh
 i386aout.sh
 i386bsd.sh
 i386coff.sc-sh
@@ -163,7 +163,10 @@ fi
 #
 #
 # $Log$
-# Revision 1.55  1993/03/30 23:24:53  pesch
+# Revision 1.56  1993/04/09 17:44:54  sac
+# Support for the H8/500
+#
+# Revision 1.55  1993/03/30  23:24:53  pesch
 # ld.texinfo:
 # Conditionalize manual to maintain Cygnus, Hitachi versions in parallel.
 # (Texinfo conditionals are stable enough to permit this, at last!)

@@ -1,5 +1,5 @@
 cat >em_${EMULATION_NAME}.c <<EOF
-/* Copyright (C) 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1993 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -18,10 +18,10 @@ along with GLD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* 
- Written by Steve Chamberlain steve@cygnus.com
+ Written by Steve Chamberlain sac@cygnus.com
 
  The controller which tells the gnu linker how to behave like one for
- the Hitach H8/300 with IEEE records.
+ the Hitach H8/500.
 */
 
 #include "bfd.h"
@@ -44,37 +44,37 @@ extern bfd *output_bfd;
 
 
 
-static void h8300xray_before_parse()
+static void h8500hms_before_parse()
 {
-  ldfile_output_architecture = bfd_arch_h8300;
+  ldfile_output_architecture = bfd_arch_h8500;
 }
 
-static char *h8300xray_script =  
-#include "h8300xray.x"
+static char *h8500hms_script =  
+#include "h8500hms.x"
 ;
-static char *h8300xray_script_option_Ur  =  
-#include "h8300xray.x"
+static char *h8500hms_script_option_Ur  =  
+#include "h8500hms.xu"
 ;
-static char *h8300xray_script_option_r  =  
-#include "h8300xray.x"
+static char *h8500hms_script_option_r  =  
+#include "h8500hms.xr"
 ;
 
-static char *h8300xray_get_script()
+static char *h8500hms_get_script()
 {			     
   extern ld_config_type config;
   if (config.relocateable_output == true &&
       config.build_constructors == true) {
-    return h8300xray_script_option_Ur;
+    return h8500hms_script_option_Ur;
   }
   if (config.relocateable_output) {
-    return h8300xray_script_option_r;
+    return h8500hms_script_option_r;
   }
 	
-  return h8300xray_script;
+  return h8500hms_script;
 }
-struct ld_emulation_xfer_struct ld_h8300xray_emulation = 
+struct ld_emulation_xfer_struct ld_h8500hms_emulation = 
 {
-  h8300xray_before_parse,
+  h8500hms_before_parse,
   syslib_default,
   hll_default,
   after_parse_default,
@@ -82,7 +82,7 @@ struct ld_emulation_xfer_struct ld_h8300xray_emulation =
   set_output_arch_default,
   ldemul_default_target,
   before_allocation_default,
-  h8300xray_get_script,
-  "h8300xray"
+  h8500hms_get_script,
+  "h8500hms"
 };
 EOF

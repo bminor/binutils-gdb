@@ -25,6 +25,7 @@ Things-to-keep:
 
 coff-a29k.mt
 coff-h8300.mt
+coff-h8500.mt
 delta88.mh
 dgux.mh
 ebmon29k.mt
