@@ -1,3 +1,17 @@
+
+Mon Nov 18 16:34:00 1996  Dawn Perchik  <dawn@critters.cygnus.com>
+
+	* libiberty.h: Checkin again; last checkin failed due to sticky tag.
+
+Wed Nov 13 08:22:00 1996  Dawn Perchik  <dawn@critters.cygnus.com>
+
+	* libiberty.h: Revert last commit due to conflicts with hpux 
+	system headers.
+
+Tue Nov 12 16:31:00 1996  Dawn Perchik  <dawn@critters.cygnus.com>
+
+	* libiberty.h: Move prototypes from argv.c here.
+
 Thu Oct 31 14:56:18 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* ansidecl.h (VPARAMS,VA_START): Define.
