@@ -1,3 +1,15 @@
+Thu Mar 27 14:24:43 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-opc.c: Add cast when setting mips_opcodes.
+
+start-sanitize-v850
+Tue Mar 25 23:04:00 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* v850-dis.c (disassemble):  Fix sign extension problem.
+	* v850-opc.c (extract_d*):  Fix sign extension problems to make
+	disassembly calculate branch offsets correctly.
+
+end-sanitize-v850
 Mon Mar 24 13:22:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sh-opc.h: Add bf/s and bt/s as synonyms for bf.s and bt.s.

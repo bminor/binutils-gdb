@@ -1,5 +1,5 @@
 /* mips.h.  Mips opcode list for GDB, the GNU debugger.
-   Copyright 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
    Contributed by Ralph Campbell and OSF
    Commented and modified by Ian Lance Taylor, Cygnus Support
 
@@ -310,6 +310,9 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"daddiu",  "t,r,j",	0x64000000, 0xfc000000, WR_t|RD_s|I3	},
 {"daddu",   "d,v,t",	0x0000002d, 0xfc0007ff, WR_d|RD_s|RD_t|I3},
 {"daddu",   "t,r,I",	3,    (int) M_DADDU_I,	INSN_MACRO	},
+/* dctr and dctw are used on the r5000.  */
+{"dctr",    "o(b)",	0xbc050000, 0xfc1f0000, RD_b|I3 	},
+{"dctw",    "o(b)",	0xbc090000, 0xfc1f0000, RD_b|I3 	},
 /* For ddiv, see the comments about div.  */
 {"ddiv",    "z,s,t",	0x0000001e, 0xfc00ffff, RD_s|RD_t|WR_HI|WR_LO|I3 },
 {"ddiv",    "d,v,t",	3,    (int) M_DDIV_3,	INSN_MACRO	},
@@ -960,10 +963,13 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"cop3",     "C",	0,    (int) M_COP3,	    INSN_MACRO	},
 };
 
-/* const removed from definition to allow for dynamic extensions to the 
- * built-in instruction set. */
-const int bfd_mips_num_builtin_opcodes =
-  ((sizeof mips_builtin_opcodes) / (sizeof (mips_builtin_opcodes[0])));
+#define MIPS_NUM_OPCODES \
+	((sizeof mips_builtin_opcodes) / (sizeof (mips_builtin_opcodes[0])))
+const int bfd_mips_num_builtin_opcodes = MIPS_NUM_OPCODES;
 
-struct mips_opcode *mips_opcodes = 0; 
-int bfd_mips_num_opcodes = 0; 
+/* const removed from the following to allow for dynamic extensions to the 
+ * built-in instruction set. */
+struct mips_opcode *mips_opcodes =
+  (struct mips_opcode *) mips_builtin_opcodes;
+int bfd_mips_num_opcodes = MIPS_NUM_OPCODES;
+#undef MIPS_NUM_OPCODES
