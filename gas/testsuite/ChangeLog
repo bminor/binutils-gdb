@@ -1,3 +1,8 @@
+Mon Nov  4 12:55:11 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mn10300/basic.exp: Check bit patterns for a
+	couple more mov and cmp instructions.
+
 Tue Oct 29 17:05:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mips/*.d: Update for disassembler changes.
@@ -36,7 +41,7 @@ Wed Oct  9 14:15:18 1996  Jeffrey A Law  (law@cygnus.com)
 
 Thu Oct  3 09:57:03 1996  Jeffrey A Law  (law@cygnus.com)
 
-	* gas/mn10200, gas/mn10300: New directorys for Matsushita
+	* gas/mn10200, gas/mn10300: New directories for Matsushita
 	mn10200 and mn10300 tests.
 
 Tue Oct  1 15:38:28 1996  Ian Lance Taylor  <ian@cygnus.com>
