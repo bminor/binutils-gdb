@@ -1,5 +1,7 @@
 2004-08-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/vax/vax.mh (NATDEPFILES): Add vax-nat.c.
+
 	* amd64obsd-tdep.c (amd64obsd_sigtramp_p): Use
 	safe_frame_unwind_memory instead of target_read_memory.
 
