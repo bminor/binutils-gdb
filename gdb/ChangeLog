@@ -2,6 +2,90 @@
 
 	Committed by Jim Blandy  <jimb@redhat.com>.
 
+	* s390-tdep.c: Include "trad-frame.h", "frame-base.h", and
+	"frame-unwind.h".
+	(s390_readinstruction): Reformat.  Use read_memory_nobpt.
+	(GDB_TARGET_IS_ESAME, S390_GPR_SIZE, S390_FPR_SIZE): Remove.
+	(S390_SYSCALL_OPCODE, S390_SYSCALL_SIZE): Remove.
+	(S390_SIGCONTEXT_SREGS_OFFSET, S390X_SIGCONTEXT_SREGS_OFFSET,
+	S390_SIGREGS_FP0_OFFSET, S390X_SIGREGS_FP0_OFFSET,
+	S390_UC_MCONTEXT_OFFSET, S390X_UC_MCONTEXT_OFFSET,
+	S390_SIGNAL_FRAMESIZE, 
+	s390_NR_sigreturn, s390_NR_rt_sigreturn): Remove.
+	(struct frame_extra_info): Remove.
+	(s390_memset_extra_info): Remove.
+	(op_*, op1_*, op2_* enums): Add several new opcodes.
+	(is_rse): Renamed to ...
+	(is_rsy): ... this.  Support long displacements.
+	(is_rxe): Renamed to ...
+	(is_rxy): ... this.  Support long displacements.
+	(compute_x_addr): Support long displacements.
+	(struct s390_prologue_data): New data type.
+	(s390_on_stack): Change API to use struct s390_prologue_data.
+	(s390_store): Reimplement.
+	(s390_load): New function.
+	(s390_get_signal_frame_info): Remove.
+	(s390_get_frame_info): Remove, replace by ...
+	(s390_analyze_prolog): ... this new function.
+	(s390_check_function_end): Remove.
+	(s390_function_start): Remove.
+	(s390_frameless_function_invokation): Remove.
+	(s390_is_sigreturn): Remove.
+	(s390_init_frame_pc_first): Remove.
+	(s390_init_frame_extra_info): Remove.
+	(s390_frame_init_saved_regs): Remove.
+	(s390_frame_saved_pc_nofix): Remove.
+	(s390_frame_saved_pc): Remove.
+	(s390_frame_chain): Remove.
+	(s390_fp_regnum, s390_read_fp): Remove.
+	(s390_pop_frame_regular, s390_pop_frame): Remove.
+	(s390_saved_pc_after_call): Remove.
+	(s390_skip_prologue): Reimplement.
+	(s390_in_function_epilogue_p): Support long displacements.
+	(struct s390_unwind_cache): New data structure.
+	(s390_frame_unwind_cache): New function.
+	(s390_prologue_frame_unwind_cache): Likewise.
+	(s390_backchain_frame_unwind_cache): Likewise.
+	(s390_frame_this_id, s390_frame_prev_register): Likewise.
+	(s390_frame_unwind): Define.
+	(s390_frame_sniffer): New function.
+	(struct s390_pltstub_unwind_cache): New data structure.
+	(s390_pltstub_frame_unwind_cache): New function.
+	(s390_pltstub_frame_this_id): Likewise.
+	(s390_pltstub_frame_prev_register): Likewise.
+	(s390_pltstub_frame_unwind): Define.
+	(s390_pltstub_frame_sniffer): New function.
+	(struct s390_sigtramp_unwind_cache): New data structure.
+	(s390_sigtramp_frame_unwind_cache): New function.
+	(s390_sigtramp_frame_this_id): Likewise.
+	(s390_sigtramp_frame_prev_register): Likewise.
+	(s390_sigtramp_frame_unwind): Define.
+	(s390_sigtramp_frame_sniffer): New function.
+	(s390_frame_base_address, s390_local_base_address): New functions.
+	(s390_frame_base): Define.
+	(s390_unwind_pc, s390_unwind_sp): New function.
+	(s390_push_dummy_call): Use new frame base location.
+	(s390_unwind_dummy_id): Likewise.
+	(s390_gdbarch_init): Remove calls to:
+	set_gdbarch_frameless_function_invocation,
+	set_gdbarch_deprecated_init_frame_pc,
+	set_gdbarch_deprecated_frame_chain,
+	set_gdbarch_deprecated_frame_init_saved_regs,
+	set_gdbarch_deprecated_pop_frame,
+	set_gdbarch_deprecated_init_extra_frame_info,
+	set_gdbarch_deprecated_init_frame_pc_first,
+	set_gdbarch_deprecated_target_read_fp,
+	set_gdbarch_deprecated_frame_saved_pc,
+	set_gdbarch_deprecated_saved_pc_after_call,
+	set_gdbarch_deprecated_fp_regnum.
+	Add calls to:
+	set_gdbarch_in_solib_call_trampoline,
+	frame_unwind_append_sniffer,
+	frame_base_set_default,
+	set_gdbarch_unwind_pc,
+	set_gdbarch_unwind_sp.
+	* Makefile.in (s390-tdep.o): Update dependencies.
+
 	* s390-tdep.c (struct gdbarch_tdep): Add 'abi' member.
 	(S390_STACK_FRAME_OVERHEAD): Remove.
 	(S390_STACK_PARAMETER_ALIGNMENT): Remove.
