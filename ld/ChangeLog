@@ -1,3 +1,9 @@
+2001-02-04  Philip Blundell  <philb@gnu.org>
+
+	* emulparams/armelf_linux.sh (TEXT_START_ADDR): Set to 0x8000.
+	* emulparams/armelf_linux26.sh: Delete.
+	* configure.tgt: Remove mention of armelf_linux26 emulation.
+
 2001-02-01  Nick Clifton  <nickc@redhat.com>
 
 	* ld.1: Replace occurances of -oformat with --oformat.
