@@ -27,3 +27,5 @@ configdirs=${sim_target}
 AC_CONFIG_SUBDIRS($configdirs)
 
 AC_OUTPUT(Makefile)
+
+exit 0

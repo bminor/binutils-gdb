@@ -1,3 +1,8 @@
+Sun Oct  8 04:26:27 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* configure.in:  Explicitly `exit 0' for broken shells.
+	* configure:  Rebuilt.
+
 Fri Oct  6 12:03:27 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* common/run.c (main): Initialize the callbacks.
