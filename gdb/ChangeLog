@@ -1,5 +1,18 @@
 Mon Mar  1 17:54:41 1993  John Gilmore  (gnu@cygnus.com)
 
+	* coffread.c (process_coff_symbol):  Change PCC argument correction
+	so that it only happens on big-endian targets; so that it only
+	happens if the short or char argument is aligned on an int
+	boundary; and so that it changes the location, rather than the
+	type, of the argument.  These changes tend to parallel similar
+	(old) changes in stabsread.c.
+
+	* coffread.c (coff_read_enum_type):  Use the specified size for
+	enums, don't assume that they are int-sized.
+
+	* c-valprint.c (c_val_print):  Don't assume enums are the same as
+	ints.
+
 	* coredep.c:  Handle NO_PTRACE_H in coredep.c.  Fix by Michael
 	Rendell, <michael@mercury.cs.mun.ca>.
 

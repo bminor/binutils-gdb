@@ -289,7 +289,7 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	  break;
 	}
       len = TYPE_NFIELDS (type);
-      val = unpack_long (builtin_type_int, valaddr);
+      val = unpack_long (type, valaddr);
       for (i = 0; i < len; i++)
 	{
 	  QUIT;
