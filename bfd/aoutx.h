@@ -1251,6 +1251,13 @@ translate_from_native_sym_flags (abfd, cache_ptr)
       cache_ptr->symbol.flags = visible;
       break;
 
+      /* N_SETV symbols used to represent set vectors placed in the
+	 data section.  They are no longer generated.  Theoretically,
+	 it was possible to extract the entries and combine them with
+	 new ones, although I don't know if that was ever actually
+	 done.  Unless that feature is restored, treat them as data
+	 symbols.  */
+    case N_SETV: case N_SETV | N_EXT:
     case N_DATA: case N_DATA | N_EXT:
       cache_ptr->symbol.section = obj_datasec (abfd);
       cache_ptr->symbol.value -= cache_ptr->symbol.section->vma;
@@ -3116,6 +3123,9 @@ aout_link_add_symbols (abfd, info)
 	  value -= bfd_get_section_vma (abfd, section);
 	  break;
 	case N_DATA | N_EXT:
+	case N_SETV | N_EXT:
+	  /* Treat N_SETV symbols as N_DATA symbol; see comment in
+	     translate_from_native_sym_flags.  */
 	  section = obj_datasec (abfd);
 	  value -= bfd_get_section_vma (abfd, section);
 	  break;

@@ -1,5 +1,9 @@
 Wed Jun 15 01:34:07 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* aoutx.h (translate_from_native_sym_flags): Treat N_SETV symbols
+	as N_DATA symbols.
+	(aout_link_add_symbols): Likewise.
+
 	* aoutx.h: Rewrite symbol duplicate elimination to use BFD hash
 	tables.
 	(struct stringtab_entry, struct stringtab_data): Remove.
