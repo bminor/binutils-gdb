@@ -529,7 +529,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	mdebugread.c memattr.c mem-break.c minsyms.c mipsread.c \
 	nlmread.c \
 	objc-exp.y objc-lang.c \
-	objfiles.c osabi.c \
+	objfiles.c osabi.c observer.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c printcmd.c \
 	regcache.c reggroups.c remote.c \
 	scm-exp.c scm-lang.c scm-valprint.c \
@@ -684,6 +684,7 @@ nbsd_tdep_h = nbsd-tdep.h
 ns32k_tdep_h = ns32k-tdep.h
 objc_lang_h = objc-lang.h
 objfiles_h = objfiles.h $(gdb_obstack_h) $(symfile_h)
+observer_h = observer.h
 ocd_h = ocd.h
 osabi_h = osabi.h
 p_lang_h = p-lang.h
@@ -836,7 +837,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	signals.o \
 	kod.o kod-cisco.o \
 	gdb-events.o \
-	exec.o bcache.o objfiles.o minsyms.o maint.o demangle.o \
+	exec.o bcache.o objfiles.o observer.o minsyms.o maint.o demangle.o \
 	dbxread.o coffread.o coff-pe-read.o elfread.o \
 	dwarfread.o dwarf2read.o mipsread.o stabsread.o corefile.o \
 	dwarf2expr.o dwarf2loc.o \
@@ -1969,6 +1970,7 @@ objfiles.o: objfiles.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
 	$(objfiles_h) $(gdb_stabs_h) $(target_h) $(bcache_h) $(gdb_stat_h) \
 	$(gdb_obstack_h) $(gdb_string_h) $(breakpoint_h) $(mmalloc_h) \
 	$(block_h)
+observer.o: observer.c $(observer_h) $(defs_h)
 ocd.o: ocd.c $(defs_h) $(gdbcore_h) $(gdb_string_h) $(frame_h) $(inferior_h) \
 	$(bfd_h) $(symfile_h) $(target_h) $(gdbcmd_h) $(objfiles_h) \
 	$(gdb_stabs_h) $(serial_h) $(ocd_h) $(regcache_h)

@@ -1,3 +1,7 @@
+2003-02-28  J. Brobecker  <brobecker@gnat.com>
+
+	* Makefile.in: Add rules to build and link in observer.o.
+
 2003-02-27  J. Brobecker  <brobecker@gnat.com>
 
 	* observer.c: Minor comments edits.
