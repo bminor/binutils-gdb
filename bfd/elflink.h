@@ -643,8 +643,13 @@ elf_link_add_object_symbols (abfd, info)
 	     the dynamic object handling right.  We pass the hash
 	     table entry in to _bfd_generic_link_add_one_symbol so
 	     that it does not have to look it up again.  */
-	  h = elf_link_hash_lookup (elf_hash_table (info), name,
-				    true, false, false);
+	  if (! bfd_is_und_section (sec))
+	    h = elf_link_hash_lookup (elf_hash_table (info), name,
+				      true, false, false);
+	  else
+	    h = ((struct elf_link_hash_entry *)
+		 bfd_wrapped_link_hash_lookup (abfd, info, name, true,
+					       false, false));
 	  if (h == NULL)
 	    goto error_return;
 	  *sym_hash = h;
@@ -3075,9 +3080,10 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
 
       /* Treat a reloc against a defined symbol as though it were
          actually against the section.  */
-      h = elf_link_hash_lookup (elf_hash_table (info),
-				link_order->u.reloc.p->u.name,
-				false, false, true);
+      h = ((struct elf_link_hash_entry *)
+	   bfd_wrapped_link_hash_lookup (output_bfd, info,
+					 link_order->u.reloc.p->u.name,
+					 false, false, true));
       if (h != NULL
 	  && (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak))

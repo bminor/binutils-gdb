@@ -6,6 +6,34 @@ Tue Mar 12 12:41:17 1996  David Mosberger-Tang  <davidm@koala.azstarnet.com>
 
 Tue Mar 12 12:10:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* linker.c (bfd_wrapped_link_hash_lookup): New function.
+	(_bfd_generic_link_add_one_symbol): Remove BFD_ASSERT on hash
+	table string.  Use bfd_wrapped_link_hash_lookup.
+	(_bfd_generic_link_write_global_symbol): Remove BFD_ASSERT on hash
+	table string.
+	* aoutx.h (aout_link_write_symbols): Use the name from the hash
+	table, if any, when writing out symbols.
+	(aout_link_input_section_std): Use the name from the hash table,
+	if any, when reporting undefined symbols.
+	(aout_link_input_section_ext): Likewise.
+	(aout_link_reloc_link_order): Use bfd_wrapped_link_hash_lookup.
+	* bout.c (get_value): Likewise.
+	* cofflink.c (_bfd_coff_reloc_link_order): Likewise.
+	* ecoff.c (ecoff_reloc_link_order): Likewise.
+	* elflink.h (elf_link_add_object_symbols): Likewise.
+	(elf_reloc_link_order): Likewise.	
+	* linker.c (_bfd_generic_link_output_symbols): Likewise.
+	(_bfd_generic_reloc_link_order): Likewise.
+	(default_indirect_link_order): Likewise.
+	* reloc16.c (bfd_coff_reloc16_get_value): Likewise.
+	* sunos.c (sunos_add_one_symbol): Likewise.
+	* xcofflink.c (xcoff_link_add_symbols): Likewise.
+	(bfd_xcoff_link_count_reloc): Likewise.
+	(xcoff_reloc_link_order): Likewise.
+
+	* ecoffswap.h (ecoff_swap_fdr_in): If ECOFF_64, turn 0xffffffff
+	into -1 for intern->rss.
+
 	* configure: Rebuild with autoconf 2.8.
 
 Mon Mar 11 12:28:31 1996  Ian Lance Taylor  <ian@cygnus.com>
