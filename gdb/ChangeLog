@@ -1,5 +1,7 @@
 Fri Apr 19 09:36:50 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
+	* tm-68k.h: Put declaration of ext_format_68881 outside the macros.
+
 	* main.c: New HAVE_SIGSETMASK #ifdefs.
 
 	* coffread.c (read_coff_symtab): Check for "LF%" with all the
