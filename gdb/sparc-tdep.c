@@ -1210,11 +1210,12 @@ sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
 
 /* Discard from the stack the innermost frame, restoring all saved registers.
 
-   Note that the values stored in fsr by get_frame_saved_regs are *in
-   the context of the called frame*.  What this means is that the i
-   regs of fsr must be restored into the o regs of the (calling) frame that
-   we pop into.  We don't care about the output regs of the calling frame,
-   since unless it's a dummy frame, it won't have any output regs in it.
+   Note that the values stored in fsr by
+   deprecated_get_frame_saved_regs are *in the context of the called
+   frame*.  What this means is that the i regs of fsr must be restored
+   into the o regs of the (calling) frame that we pop into.  We don't
+   care about the output regs of the calling frame, since unless it's
+   a dummy frame, it won't have any output regs in it.
 
    We never have to bother with %l (local) regs, since the called routine's
    locals get tossed, and the calling routine's locals are already saved

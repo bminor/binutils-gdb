@@ -165,7 +165,7 @@ h8500_pop_frame (void)
   struct frame_saved_regs fsr;
   struct frame_info *frame = get_current_frame ();
 
-  get_frame_saved_regs (frame, &fsr);
+  deprecated_get_frame_saved_regs (frame, &fsr);
 
   for (regnum = 0; regnum < 8; regnum++)
     {

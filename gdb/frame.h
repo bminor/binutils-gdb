@@ -478,9 +478,9 @@ extern void generic_save_dummy_frame_tos (CORE_ADDR sp);
 
 #ifdef FRAME_FIND_SAVED_REGS
 /* XXX - deprecated */
-#define FRAME_INIT_SAVED_REGS(FI) get_frame_saved_regs (FI, NULL)
-extern void get_frame_saved_regs (struct frame_info *,
-				  struct frame_saved_regs *);
+#define FRAME_INIT_SAVED_REGS(FI) deprecated_get_frame_saved_regs (FI, NULL)
+extern void deprecated_get_frame_saved_regs (struct frame_info *,
+					     struct frame_saved_regs *);
 #endif
 
 extern struct block *get_frame_block (struct frame_info *,

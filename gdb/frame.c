@@ -1181,8 +1181,8 @@ deprecated_set_frame_type (struct frame_info *frame, enum frame_type type)
 /* Find the addresses in which registers are saved in FRAME.  */
 
 void
-get_frame_saved_regs (struct frame_info *frame,
-		      struct frame_saved_regs *saved_regs_addr)
+deprecated_get_frame_saved_regs (struct frame_info *frame,
+				 struct frame_saved_regs *saved_regs_addr)
 {
   if (frame->saved_regs == NULL)
     {

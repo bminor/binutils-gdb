@@ -916,7 +916,7 @@ hppa_frame_saved_pc (struct frame_info *frame)
 	{
 	  struct frame_saved_regs saved_regs;
 
-	  get_frame_saved_regs (frame->next, &saved_regs);
+	  deprecated_get_frame_saved_regs (frame->next, &saved_regs);
 	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM],
 				   TARGET_PTR_BIT / 8) & 0x2)
 	    {
@@ -956,7 +956,7 @@ hppa_frame_saved_pc (struct frame_info *frame)
 	{
 	  struct frame_saved_regs saved_regs;
 
-	  get_frame_saved_regs (frame->next, &saved_regs);
+	  deprecated_get_frame_saved_regs (frame->next, &saved_regs);
 	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM],
 				   TARGET_PTR_BIT / 8) & 0x2)
 	    {
@@ -1228,7 +1228,7 @@ frame_chain (struct frame_info *frame)
 	  /* The unwind entry claims that r3 is saved here.  However,
 	     in optimized code, GCC often doesn't actually save r3.
 	     We'll discover this if we look at the prologue.  */
-	  get_frame_saved_regs (tmp_frame, &saved_regs);
+	  deprecated_get_frame_saved_regs (tmp_frame, &saved_regs);
 	  saved_regs_frame = tmp_frame;
 
 	  /* If we have an address for r3, that's good.  */
@@ -1277,7 +1277,7 @@ frame_chain (struct frame_info *frame)
 	     system call has a variable sized stack frame.  */
 
 	  if (tmp_frame != saved_regs_frame)
-	    get_frame_saved_regs (tmp_frame, &saved_regs);
+	    deprecated_get_frame_saved_regs (tmp_frame, &saved_regs);
 
 	  /* Abominable hack.  */
 	  if (current_target.to_has_execution == 0
@@ -1312,7 +1312,7 @@ frame_chain (struct frame_info *frame)
 	tmp_frame = tmp_frame->next;
 
       if (tmp_frame != saved_regs_frame)
-	get_frame_saved_regs (tmp_frame, &saved_regs);
+	deprecated_get_frame_saved_regs (tmp_frame, &saved_regs);
 
       /* Abominable hack.  See above.  */
       if (current_target.to_has_execution == 0
@@ -1535,7 +1535,7 @@ hppa_pop_frame (void)
   double freg_buffer;
 
   fp = get_frame_base (frame);
-  get_frame_saved_regs (frame, &fsr);
+  deprecated_get_frame_saved_regs (frame, &fsr);
 
 #ifndef NO_PC_SPACE_QUEUE_RESTORE
   if (fsr.regs[IPSW_REGNUM])	/* Restoring a call dummy frame */

@@ -1,3 +1,12 @@
+2002-12-11  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (deprecated_get_frame_saved_regs): Rename
+	get_frame_saved_regs.
+	* frame.h (deprecated_get_frame_saved_regs): Update declaration.
+	* sparc-tdep.c: Update.
+	* hppa-tdep.c: Update.
+	* h8500-tdep.c: Update.
+
 2002-12-11  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdbarch.sh (ADDRESS_CLASS_TYPE_FLAGS_TO_NAME)
