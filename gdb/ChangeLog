@@ -1,3 +1,10 @@
+2002-04-20  David S. Miller  <davem@redhat.com>
+
+	* config/sparc/tm-linux.h (GDB_MULTI_ARCH): Define to
+	GDB_MULTI_ARCH_PARTIAL
+	* config/sparc/tm-sp64linux.h (GDB_MULTI_ARCH): Do not
+	define, let tm-sp64.h do it.
+
 2002-04-20  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* frame.c (find_saved_register): Avoid a NULL pointer
