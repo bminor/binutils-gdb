@@ -1,3 +1,10 @@
+1999-05-25  DJ Delorie  <dj@cygnus.com>
+
+	* peicode.h (coff_swap_sym_in): When we create the actual section
+	to reflect the not-there section C_SECTION symbols refer to,
+	change the symbol class to C_STAT as the section is now really
+	there.
+
 1999-05-24  Philip Blundell  <pb@nexus.co.uk>
 
 	* elf32-arm.h (elf32_arm_relocate_section): Undo change of

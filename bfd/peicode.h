@@ -567,6 +567,7 @@ coff_swap_sym_in (abfd, ext1, in1)
 
 	  in->n_scnum = unused_section_number;
 	}
+      in->n_sclass = C_STAT;
 #endif
     }
 
