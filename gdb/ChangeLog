@@ -1,3 +1,17 @@
+Tue Oct 18 20:53:29 1994  Rob Savoye  <rob@darkstar.cygnus.com>
+
+	* monitor.c (monitor_load_srec,monitor_make_srec): Add an asrecord
+	loader that reads files using BFD and converts it on the fly.
+
+Mon Oct 17 18:52:06 1994  Rob Savoye  <rob@darkstar.cygnus.com>
+
+	* monitor.c (set_loadtype_command): Fixed so it doesn't core dump.
+	* monitor.c (monitor_load): check the load type and load the file
+	accordingly. Default to gr_load_image().
+	* monitor.c (monitor_load_ascii_srec): Load an ascii file in
+	srecord format by downloading to the monitor.
+	* w89k-rom.c, op50n-rom.c: set supported load types.
+
 Mon Oct 17 10:29:08 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (ALLDEPFILES): Remove xcoffexec.c.
