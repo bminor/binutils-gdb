@@ -11,11 +11,13 @@ if { ([istarget "*-*-elf*"]
      && ![istarget *-*-linux*oldld*]
 } then {
 
-    # FIXME: This doesn't work for MIPS targets because of the .reginfo
-    # and .mdebug sections.
+    # FIXME: This doesn't work for MIPS and alpha targets because of
+    # the .reginfo and .mdebug sections.
     setup_xfail mips*-*-*
+    setup_xfail alpha*-*-*
     run_dump_test "section0" 
 
     setup_xfail mips*-*-*
+    setup_xfail alpha*-*-*
     run_dump_test "section1" 
 }

@@ -1,3 +1,7 @@
+1999-08-17  H.J. Lu  <hjl@gnu.org>
+
+	* gas/elf/elf.exp: Expected to fail on alpha*-*-*.
+
 1999-08-09  Ian Lance Taylor  <ian@zembu.com>
 
 	* gas/i386/float.s, gas/i386/float.l: Modify to work correctly
