@@ -45,5 +45,6 @@ extern char *sunpro_static_transform_name PARAMS ((char *));
 /* Macros to extract process id and thread id from a composite pid/tid */
 #define PIDGET(pid) ((pid) & 0xffff)
 #define TIDGET(pid) (((pid) >> 16) & 0xffff)
+#define MERGEPID(pid, tid) (((tid) << 16) | (pid))
 
 #endif /* ifndef TM_I386SOL2_H */

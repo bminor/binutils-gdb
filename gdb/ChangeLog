@@ -1,3 +1,8 @@
+Wed Mar  1 00:34:55 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From 2000-02-26 Peter Schauer <pes@regent.e-technik.tu-muenchen.de>:
+	* config/i386/tm-i386sol2.h (MERGEPID): Define.
+
 Wed Mar  1 00:06:19 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 1999-08-13 J.T. Conklin <jtc@redback.com>:
