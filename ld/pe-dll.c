@@ -1351,6 +1351,7 @@ pe_dll_generate_implib (def, impfilename)
       head = n;
     }
 
+#if BFD_OPEN_OLDWAY
   unlink ("dh.o");
   unlink ("dt.o");
   for (i=0; i<tmp_seq; i++)
@@ -1359,6 +1360,7 @@ pe_dll_generate_implib (def, impfilename)
       sprintf (buf, "ds%d.o", i);
       unlink (buf);
     }
+#endif
 }
 
 /************************************************************************
