@@ -1589,7 +1589,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       stop_pc = read_pc ();
 
-      stop_bpstat = bpstat_stop_status (stop_pc);
+      stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
 
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
 
@@ -1638,7 +1638,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       ecs->saved_inferior_ptid = inferior_ptid;
       inferior_ptid = ecs->ptid;
 
-      stop_bpstat = bpstat_stop_status (stop_pc);
+      stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
 
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
       inferior_ptid = ecs->saved_inferior_ptid;
@@ -2028,7 +2028,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       else
 	{
 	  /* See if there is a breakpoint at the current PC.  */
-	  stop_bpstat = bpstat_stop_status (stop_pc);
+	  stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
 
 	  /* Following in case break condition called a
 	     function.  */

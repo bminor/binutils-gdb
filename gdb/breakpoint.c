@@ -2588,7 +2588,7 @@ which its expression is valid.\n");
    commands, FIXME??? fields.  */
 
 bpstat
-bpstat_stop_status (CORE_ADDR bp_addr)
+bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 {
   struct breakpoint *b, *temp;
   /* True if we've hit a breakpoint (as opposed to a watchpoint).  */
@@ -2597,6 +2597,7 @@ bpstat_stop_status (CORE_ADDR bp_addr)
   struct bpstats root_bs[1];
   /* Pointer to the last thing in the chain currently.  */
   bpstat bs = root_bs;
+  int thread_id = pid_to_thread_id (ptid);
 
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
@@ -2845,6 +2846,12 @@ bpstat_stop_status (CORE_ADDR bp_addr)
 	    free_all_values ();
 	  }
 	if (b->cond && value_is_zero)
+	  {
+	    bs->stop = 0;
+	    /* Don't consider this a hit.  */
+	    --(b->hit_count);
+	  }
+	else if (b->thread != -1 && b->thread != thread_id)
 	  {
 	    bs->stop = 0;
 	    /* Don't consider this a hit.  */

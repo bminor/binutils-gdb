@@ -1,5 +1,13 @@
 2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
 
+	* breakpoint.c (bpstat_stop_status): Take a ptid_t argument,
+	and check the specified thread for each breakpoint.
+	* breakpoint.h (bpstat_stop_status): Update prototype.
+	* infrun.c (handle_inferior_event): Update calls to
+	bpstat_stop_status.
+
+2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
+
 	* Makefile.in (cli-cmds.o): Add $(readline_h).
 
 2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
