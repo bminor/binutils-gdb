@@ -1,3 +1,11 @@
+Sat Apr  8 02:47:45 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/nodebug.c:  Change return type of top and middle to
+	short.
+	* gdb.base/nodebug.exp:  Remove xfails for ecoff systems, they
+	are fixed by the recent mdebugread.c changes. Allow `short ()'
+	as type for top and middle.
+
 Thu Apr  6 08:54:18 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.base/break.exp: Remove commented out if $usestubs {}.  As
