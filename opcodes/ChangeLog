@@ -1,3 +1,10 @@
+Fri Apr  5 17:12:27 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* h8300-dis.c (bfd_h8_disassemble): Use "bit" for L_3 immediates,
+	not "abs", which may be needed for the absolute in something
+	like btst #0,@10:8.  Print L_3 immediates separately from other
+	immediates.  Change ABSMOV reference to ABS8MEM.
+
 Wed Apr  3 10:40:45 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-dis.c (opcodes_initialized): Move inside print_insn_sparc.
