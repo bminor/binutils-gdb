@@ -8,6 +8,7 @@ Thu Oct 24 22:11:11 1991  John Gilmore  (gnu at cygnus.com)
 	* internalcoff.h:  Add more F_ codes for filehdr.  Add
 	rs/6000-dependent fields to aouthdr.  Add storage classes
 	to syments.  Add 6000-specific auxent.  Add r_size in reloc.
+	* rs6000coff.c:  New file.
 
 Thu Oct 24 04:13:20 1991  Fred Fish  (fnf at cygnus.com)
 
