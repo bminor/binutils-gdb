@@ -1,5 +1,7 @@
 Sat Jul 23 15:05:47 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
+	* gdb.base/whatis.exp (v_signed_short_array): Fix a typo.
+
 	* gdb.base/help.exp: Update expected add-symbol-file, ignore, and
 	condition help.
 
