@@ -173,7 +173,7 @@ ALL_EMULATIONS = em_lnk960.o em_sun3.o em_i386aout.o em_go32.o em_vsta.o \
 	em_h8500b.o em_h8500s.o em_h8500c.o em_h8500m.o \
 	em_hppaelf.o em_mipsidtl.o em_sh.o em_elf_i386.o em_alpha.o \
 	em_i386lynx.o em_m68klynx.o em_sparclynx.o em_coff_sparc.o \
-	em_delta68.o \
+	em_delta68.o em_elf32ppc.o \
 	$(OTHER_EMULATIONS)
 
 # This is now set by configure.in.
@@ -377,13 +377,17 @@ em_alpha.c: $(srcdir)/emulparams/alpha.sh \
 em_coff_sparc.c: $(srcdir)/emulparams/coff_sparc.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sparccoff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} coff_sparc
+em_elf32ppc.c: $(srcdir)/emulparams/elf32ppc.sh \
+  $(srcdir)/emultempl/ppc.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32ppc
 
 $(LD_PROG): $(OFILES) $(BFDLIB) $(LIBIBERTY)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(EXTRALIBS)
 
 # The generated emulation files mostly have the same dependencies.
 $(EMULATION_OFILES): ../bfd/bfd.h ../bfd/sysdep.h $(INCDIR)/bfdlink.h \
-  ld.h ldmain.h ldemul.h ldfile.h ldmisc.h ldexp.h ldlang.h config.h ldctor.h
+  ld.h ldmain.h ldemul.h ldfile.h ldmisc.h ldexp.h ldlang.h config.h \
+  ldctor.h ldexp.h ldlang.h
 
 # These targets are for the dejagnu testsuites. The file site.exp 
 # contains global variables that all the testsuites will use.

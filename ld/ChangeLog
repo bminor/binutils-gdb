@@ -1,3 +1,13 @@
+Thu Feb 24 16:47:33 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure.in (powerpc-*-elf*): New target; use ppc-elf32.
+	* config/ppc-elf32.mt: New file.
+	* emulparams/elf32ppc.sh: New file.
+	* emultempl/ppc.em: New file.
+	* Makefile.in (ALL_EMULATIONS): Added em_elf32ppc.o.
+	(em_elf32ppc.c): New target; uses elf32ppc.sh, ppc.em and elf.sc.
+	(EMULATION_OFILES): Added dependencies on ldexp.h and ldlang.h.
+
 Thu Feb 24 12:27:07 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	Use getopt instead of lex and yacc to parse the command line.

@@ -68,6 +68,7 @@ mips-lit.mt
 mipsb-elf32.mt
 news.mt
 ose68.mt
+ppc-elf32.mt
 rtbsd.mh
 sa29200.mt
 solaris2.mh

@@ -1,0 +1,1 @@
+EMUL=elf32ppc
