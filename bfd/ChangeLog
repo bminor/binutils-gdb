@@ -1,3 +1,7 @@
+2003-04-24  Roland McGrath  <roland@redhat.com>
+
+	* elf.c (bfd_section_from_phdr): Map PT_GNU_EH_FRAME to "eh_frame_hdr".
+
 2003-04-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c: Formatting and comment fixes.

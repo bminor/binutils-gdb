@@ -1,12 +1,17 @@
-2003-04-23 Dhananjay Deshpande <dhananjayd@kpitcummins.com> 
-	
-	* Makefile.am (ALL_EMULATIONS): Add eh8300hn.o, eh8300sn.o, 
+2003-04-24  Roland McGrath  <roland@redhat.com>
+
+	* ldgram.y (phdr_type): Grok PT_TLS and PT_GNU_EH_FRAME names.
+	If a name string is unknown, give an error rather than crashing later.
+
+2003-04-23 Dhananjay Deshpande <dhananjayd@kpitcummins.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add eh8300hn.o, eh8300sn.o,
 	eh8300hnelf.o, eh8300snelf.o and respective rules.
 	* Makefile.in: Regenerate.
 	* configure.tgt: Add h8300hn, h8300sn, h8300hnelf, h8300snelf
 	* emulparams/h8300hn.sh: New
 	* emulparams/h8300sn.sh: New
-	* emulparams/h8300hnelf.sh: New	
+	* emulparams/h8300hnelf.sh: New
 	* emulparams/h8300snelf.sh: New
 	* scripttempl/h8300hn.sc: new
 	* scripttempl/h8300sn.sc: new
