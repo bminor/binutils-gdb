@@ -5295,9 +5295,19 @@ macro (ip)
 		 subtract it out, and then subtract another 4 to make
 		 the first reloc come out right.  The second reloc
 		 will come out right because we are going to add 4 to
-		 offset_expr when we build its instruction below.  */
-	      offset_expr.X_add_number -= 8;
-	      offset_expr.X_op = O_constant;
+		 offset_expr when we build its instruction below.
+
+		 If we have a symbol, then we don't want to include
+		 the offset, because it will wind up being included
+		 when we generate the reloc.  */
+
+	      if (offset_expr.X_op == O_constant)
+		offset_expr.X_add_number -= 8;
+	      else
+		{
+		  offset_expr.X_add_number = -4;
+		  offset_expr.X_op = O_constant;
+		}
 	    }
 	  macro_build_lui (p, &icnt, &offset_expr, AT);
 	  if (p != NULL)

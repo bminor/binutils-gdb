@@ -1,5 +1,8 @@
 Mon Aug  4 11:28:35 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (macro): Fix handling of a double load from a
+	symbol plus an offset.
+
 	* ecoff.c (ecoff_build_symbols): Set fMerge to 0 for an FDR which
 	has an associated external symbol.
 
