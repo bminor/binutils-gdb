@@ -1,3 +1,37 @@
+Fri Mar 24 13:41:09 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* gdb.base/callfuncs.exp: call runto_main instead of runto main.
+	runto_main is a proc in gdb.exp that will do 'step' for target use
+	stubs.
+	* gdb.base/exprs.exp: ditto.
+	* gdb.base/interrupt.exp: ditto.
+	* gdb.base/opaque.exp: ditto.
+	* gdb.base/printcmds.exp: ditto.
+	* gdb.base/ptype.exp: ditto.
+	* gdb.base/scope.exp: ditto.
+	* gdb.base/setvar.exp: ditto.
+	* gdb.base/signals.exp: ditto.
+	* gdb.base/twice.exp: ditto.
+	* gdb.c++/classes.exp: ditto.
+	* gdb.c++/inherit.exp: ditto.
+	* gdb.c++/templates.exp: ditto.
+	* gdb.base/break.exp: no run and hit main for stubs. Change line
+	numbers for breakpoints and info breakpoint.
+	* gdb.base/break.c: Add #ifdef usestubs for set_debug_traps() and
+	breakpoint().
+	* gdb.base/callfuncs.c: ditto.
+	* gdb.base/exprs: ditto.
+	* gdb.base/interrupt.c: ditto.
+	* gdb.base/opaque0.c: ditto.
+	* gdb.base/printcmds.c: ditto.
+	* gdb.base/ptype.c: ditto.
+	* gdb.base/scope0.c: ditto.
+	* gdb.base/setvar.c: ditto.
+	* gdb.base/signals.c: ditto.
+	* gdb.base/twice.c: ditto.
+	* gdb.c++/misc.cc: ditto.
+	* gdb.c++/templates.cc: ditto.
+
 Fri Mar 24 06:11:05 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/vx-gdb.exp, lib/gdb.exp: Regexp cleanups (\[(\] -> \\(, etc.).
