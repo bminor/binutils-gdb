@@ -158,6 +158,9 @@ resume_cleanups PARAMS ((int));
 
 extern char **environ;
 
+extern int sys_nerr;
+extern char *sys_errlist[];
+
 extern struct target_ops child_ops;	/* In inftarg.c */
 
 /* Sigtramp is a routine that the kernel calls (which then calls the
@@ -196,6 +199,12 @@ extern struct target_ops child_ops;	/* In inftarg.c */
    to nonzero if we are current stopped in one of these. */
 #ifndef IN_SOLIB_TRAMPOLINE
 #define IN_SOLIB_TRAMPOLINE(pc,name)	0
+#endif
+
+/* Notify other parts of gdb that might care that signal handling may
+   have changed for one or more signals. */
+#ifndef NOTICE_SIGNAL_HANDLING_CHANGE
+#define NOTICE_SIGNAL_HANDLING_CHANGE	/* No actions */
 #endif
 
 #ifdef TDESC
@@ -466,8 +475,6 @@ child_create_inferior (exec_file, allargs, env)
 {
   int pid;
   char *shell_command;
-  extern int sys_nerr;
-  extern char *sys_errlist[];
   char *shell_file;
   static char default_shell_file[] = SHELL_FILE;
   int len;
@@ -1128,7 +1135,7 @@ wait_for_inferior ()
 #if 0
 	    if (* step_frame_address == 0
 		|| (step_frame_address == stop_frame_address))
-#endif 0
+#endif
 	      {
 		remove_step_breakpoint ();
 		step_resume_break_address = 0;
@@ -1579,6 +1586,24 @@ remove_step_breakpoint ()
 			      step_resume_break_shadow);
 }
 
+int signal_stop_state (signo)
+     int signo;
+{
+  return ((signo >= 0 && signo < NSIG) ? signal_stop[signo] : 0);
+}
+
+int signal_print_state (signo)
+     int signo;
+{
+  return ((signo >= 0 && signo < NSIG) ? signal_print[signo] : 0);
+}
+
+int signal_pass_state (signo)
+     int signo;
+{
+  return ((signo >= 0 && signo < NSIG) ? signal_program[signo] : 0);
+}
+
 static void
 sig_print_header ()
 {
@@ -1688,13 +1713,15 @@ handle_command (args, from_tty)
       /* Not a number and not a recognized flag word => complain.  */
       else
 	{
-	  error ("Unrecognized flag word: \"%s\".", p);
+	  error ("Unrecognized or ambiguous flag word: \"%s\".", p);
 	}
 
       /* Find start of next word.  */
       p = nextarg;
       while (*p == ' ' || *p == '\t') p++;
     }
+
+  NOTICE_SIGNAL_HANDLING_CHANGE;
 
   if (from_tty)
     {

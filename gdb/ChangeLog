@@ -1,3 +1,70 @@
+Wed Apr  1 11:39:52 1992  Fred Fish  (fnf@cygnus.com)
+
+	* breakpoint.h (bpdisp, bptype):  Remove trailing comma.
+	* symtab.h (current_source_symtab):  Make extern
+	* symtab.h (current_source_line): Make extern
+	* inferior.h:  Move all procfs.c prototypes to one place, add
+	prototype for proc_signal_handling_change.  Add prototypes for
+	signal_stop_state, signal_print_state, and signal_pass_state.
+	* inferior.h (stop_soon_quietly):  Make extern
+	* inferior.h (attach_flag):  Make extern
+	* infrun.c (NOTICE_SIGNAL_HANDLING_CHANGE):  Default is null.
+	* infrun.c (signal_stop_state, signal_print_state,
+	signal_pass_state):  New functions to query specific signal
+	handling flags.
+	* infrun.c (handle_command):  Minor error message change, add
+	NOTICE_SIGNAL_HANDLING_CHANGE.
+	* procfs.c (open_proc_file):  Remove iris specific reset of
+	inherit-on-fork flag, moved to proc_set_exec_trap().
+	* procfs.c (proc_set_exec_trap):  Add SVR4 and iris code
+	to reset inherit-on-fork flag, bash comment to GNU form.
+	* procfs.c (proc_base_address, set_proc_siginfo,
+	fetch_core_registers):  Conform to code style.
+	* procfs.c (signame.h):  Include.
+	* procfs.c (MAX_SYSCALLS, syscall_table[], init_syscalltable(),
+	syscallname(), info_proc_syscalls()):  New macros, tables, and
+	functions to organize and report system call information.
+	* procfs.c (saved_fltset, saved_trace, saved_sighold,
+	saved_exitset, saved_entryset):  Add to procinfo struct.
+	* procfs.c (struct trans):  Add.
+	* procfs.c (pr_flag_table, pr_why_table, faults_table,
+	siginfo_table, errno_table):  Tables to translate numeric values
+	to symbolic names and short descriptions.
+	* procfs.c (signalname, info_proc_signals):  Add function and
+	prototype.
+	* procfs.c (proc_info):  Now info_proc.
+	* procfs.c (proc_info_address_map):  Now info_proc_mappings.
+	* procfs.c (info_proc_flags, info_proc_stop, info_proc_siginfo,
+	info_proc_faults, lookupname, lookupdesc, sigcodename,
+	sigcodedesc):  New functions.
+	* procfs.c (proc_signal_handling_change):  New function to set
+	the trace flags based on the state of gdb's signal handling flags.
+	* procfs.c (inferior_proc_init):  Call proc_signal_handling_change
+	and remove code to do PIOCSTRACE ioctl.
+	* procfs.c (attach, detach):  Preserve and restore process flags
+	using saved_* fields in procinfo struct.
+	* procfs.c (attach):  Call proc_signal_handling_change.
+	* procfs.c (info_proc):  Major rework to expand "info proc" cmd.
+	* procfs.c (proc_desc):  Update for latest changes.
+	* xm-irix4.h (CREATE_INFERIOR_HOOK):  Protect by USE_PROC_FS.
+	* xm-irix4.h (NOTICE_SIGNAL_HANDLING_CHANGE):  Add definition.
+	* xm-sysv4.h (NOTICE_SIGNAL_HANDLING_CHANGE):  Add definition.
+
+Tue Mar 31 18:38:28 1992  Fred Fish  (fnf@cygnus.com)
+
+	* procfs.c (set_proc_siginfo):  Add prototype and new function.
+	* procfs.c (detach, child_resume):  Call set_proc_siginfo to set
+	up inferior siginfo struct.
+	* elfread.c (elf_symfile_read):  Compute the relocation amount
+	by subtracting off the address of the ".text" section.
+	* solib.c:  Add pointer to ".text" section to so_list struct.
+	* solib.c (solib_map_sections):  Initialize pointer to ".text"
+	section in so_list struct.
+	* solib.c (symbol_add_stub):  Pass base address of ".text"
+	section to symbol_file_add, rather than the load address of
+	the shared library.  On SunOS they are the same.  On SVR4 they
+	are not.
+
 Tue Mar 31 17:48:15 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* mipsread.c (parse_procedure):  PDR.isym should get pointer to

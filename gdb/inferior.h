@@ -1,6 +1,6 @@
 /* Variables that describe the inferior process running under GDB:
    Where it is, why it stopped, and how to step it.
-   Copyright (C) 1986, 1989 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -17,6 +17,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+#if !defined (INFERIOR_H)
+#define INFERIOR_H 1
+
+/* For symtab_and_line */
+#include "symtab.h"
 
 /* For bpstat.  */
 #include "breakpoint.h"
@@ -57,7 +63,11 @@ struct inferior_status {
   int proceed_to_finish;
 };
 
-void save_inferior_status (), restore_inferior_status ();
+extern void
+save_inferior_status PARAMS ((struct inferior_status *, int));
+
+extern void
+restore_inferior_status PARAMS ((struct inferior_status *));
 
 /* File name for default use for standard in/out in the inferior.  */
 
@@ -71,29 +81,142 @@ extern int inferior_pid;
 
 extern char registers[];
 
-extern void clear_proceed_status ();
-extern void start_inferior ();
-extern void proceed ();
-extern void kill_inferior ();
-extern void kill_inferior_fast ();
-extern void generic_mourn_inferior ();
-extern void terminal_ours ();
-extern void detach ();
-extern void run_stack_dummy ();
-extern CORE_ADDR read_pc ();
-extern void write_pc ();
-extern void wait_for_inferior ();
-extern void init_wait_for_inferior ();
-extern void close_exec_file ();
-extern void reopen_exec_file ();
+extern void
+clear_proceed_status PARAMS ((void));
+
+extern void
+proceed PARAMS ((CORE_ADDR, int, int));
+
+extern void
+kill_inferior PARAMS ((void));
+
+extern void
+kill_inferior_fast PARAMS ((void));
+
+extern void
+generic_mourn_inferior PARAMS ((void));
+
+extern void
+terminal_ours PARAMS ((void));
+
+extern void
+run_stack_dummy PARAMS ((CORE_ADDR, char [REGISTER_BYTES]));
+
+extern CORE_ADDR
+read_pc PARAMS ((void));
+
+extern void
+write_pc PARAMS ((CORE_ADDR));
+
+extern void
+wait_for_inferior PARAMS ((void));
+
+extern void
+init_wait_for_inferior PARAMS ((void));
+
+extern void
+close_exec_file PARAMS ((void));
+
+extern void
+reopen_exec_file PARAMS ((void));
+
+/* From misc files */
+
+extern void
+store_inferior_registers PARAMS ((int));
+
+extern void
+fetch_inferior_registers PARAMS ((int));
+
+extern void 
+solib_create_inferior_hook PARAMS ((void));
+
+extern void
+child_mourn_inferior PARAMS ((void));
+
+extern void
+child_terminal_info PARAMS ((char *, int));
+
+extern void
+term_info PARAMS ((char *, int));
+
+extern void
+terminal_ours_for_output PARAMS ((void));
+
+extern void
+terminal_inferior PARAMS ((void));
+
+extern void
+terminal_init_inferior PARAMS ((void));
+
+/* From infptrace.c or procfs.c */
+
+extern int
+attach PARAMS ((int));
+
+void
+detach PARAMS ((int));
+
+extern void
+child_resume PARAMS ((int, int));
+
+/* From procfs.c */
+
+#ifdef USE_PROC_FS
+
+extern int
+proc_iterate_over_mappings PARAMS ((int (*) (int, CORE_ADDR)));
+
+extern int
+proc_wait PARAMS ((int *));
+
+extern void
+inferior_proc_init PARAMS ((int));
+
+extern void
+proc_signal_handling_change PARAMS ((void));
+
+extern void
+proc_set_exec_trap PARAMS ((void));
+
+#endif
+
+/* From inflow.c */
+
+extern void
+new_tty_prefork PARAMS ((char *));
+
+/* From infrun.c */
+
+extern void
+start_remote PARAMS ((void));
+
+extern void
+child_create_inferior PARAMS ((char *, char *, char **));
+
+extern void
+child_attach PARAMS ((char *, int));
+
+extern void
+normal_stop PARAMS ((void));
+
+extern int
+signal_stop_state PARAMS ((int));
+
+extern int
+signal_print_state PARAMS ((int));
+
+extern int
+signal_pass_state PARAMS ((int));
 
 /* From infcmd.c */
-void attach_command (
-#ifdef __STDC__
-		     char *arg, int from_tty
-#endif
-		     );
-		     
+
+extern void
+tty_command PARAMS ((char *, int));
+
+extern void
+attach_command PARAMS ((char *, int));
+
 /* Last signal that the inferior received (why it stopped).  */
 
 extern int stop_signal;
@@ -157,7 +280,7 @@ extern int step_multi;
    when running in the shell before the child program has been exec'd;
    and when running some kinds of remote stuff (FIXME?).  */
 
-int stop_soon_quietly;
+extern int stop_soon_quietly;
 
 /* Nonzero if proceed is being used for a "finish" command or a similar
    situation when stop_registers should be saved.  */
@@ -179,7 +302,7 @@ extern int pc_changed;
 /* Nonzero if the child process in inferior_pid was attached rather
    than forked.  */
 
-int attach_flag;
+extern int attach_flag;
 
 /* Possible values for CALL_DUMMY_LOCATION.  */
 #define ON_STACK 1
@@ -195,11 +318,13 @@ int attach_flag;
    subtracted out.  */
 #if !defined (PC_IN_CALL_DUMMY)
 #if CALL_DUMMY_LOCATION == BEFORE_TEXT_END
+extern CORE_ADDR text_end;
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) \
   ((pc) >= text_end - CALL_DUMMY_LENGTH         \
    && (pc) < text_end + DECR_PC_AFTER_BREAK)
 #else /* Not before text_end.  */
 #if CALL_DUMMY_LOCATION == AFTER_TEXT_END
+extern CORE_ADDR text_end;
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) \
   ((pc) >= text_end   \
    && (pc) < text_end + CALL_DUMMY_LENGTH + DECR_PC_AFTER_BREAK)
@@ -209,3 +334,5 @@ int attach_flag;
 #endif /* On stack.  */
 #endif /* Not before text_end.  */
 #endif /* No PC_IN_CALL_DUMMY.  */
+
+#endif	/* !defined (INFERIOR_H) */
