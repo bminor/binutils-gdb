@@ -1475,10 +1475,9 @@ print_symbol_info_bsd (info, abfd)
   if (bfd_is_undefined_symclass (info->type))
     {
 #ifdef BFD64
-      printf ("%*s", 16, "");
-#else
-      printf ("%*s", 8, "");
+      printf ("        ");
 #endif
+      printf ("        ");
     }
   else
     print_value (info->value);

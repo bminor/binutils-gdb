@@ -17,7 +17,7 @@ Ian Taylor <ian@zembu.com>
 Jeff Law <law@redhat.com>
 Jim Wilson <wilson@redhat.com>
 DJ Delorie <dj@redhat.com>
-Alan Modra <alan@linuxcare.com.au>
+Alan Modra <amodra@one.net.au>
 Michael Meissner <meissner@redhat.com>
 
 		    --------- Maintainers ---------
@@ -36,10 +36,10 @@ other maintainers.
 ARM		Nick Clifton <nickc@redhat.com>
 AVR		Denis Chertykov <denisc@overta.ru>
 CRIS		Hans-Peter Nilsson <hp@axis.com>
-HPPA elf32	Alan Modra <alan@linuxcare.com.au>
+HPPA elf32	Alan Modra <amodra@one.net.au>
 IA64		Jim Wilson <wilson@redhat.com>
 i860		Jason Eckhardt <jle@redhat.com>
-ix86		Alan Modra <alan@linuxcare.com.au>
+ix86		Alan Modra <amodra@one.net.au>
 ix86 COFF,PE	DJ Delorie <dj@redhat.com>
 ix86		H.J.Lu <hjl@gnu.org>
 ix86 INTEL MODE Diego Novillo <dnovillo@redhat.com>
