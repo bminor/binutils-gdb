@@ -181,14 +181,12 @@ DEFUN(ldsym_get_soft,(key),
       CONST char *key)
 {
   register int hashval;
-  register ldsym_type *bp;
-
   /* Determine which bucket.  */
 
   hashval = hash_string (key) % TABSIZE;
 
   /* Search the bucket.  */
-return search(key, hashval);
+  return search(key, hashval);
 }
 
 

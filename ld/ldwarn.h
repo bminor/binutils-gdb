@@ -22,3 +22,4 @@
 
 void EXFUN(add_warning,(asymbol *));
 CONST char * EXFUN(fetch_warning,(asymbol *));
+void EXFUN(produce_warnings,(ldsym_type *, asymbol *));

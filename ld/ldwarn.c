@@ -1,7 +1,8 @@
 #include "sysdep.h"
 #include "bfd.h"
 #include "ldsym.h"
-
+#include "ldwarn.h"
+#include "ldmisc.h"
 
 /* we keep all the warning symbols in a list, if we ever get a
    warning, we'll search it the hard way. This won't be to bad since
