@@ -328,12 +328,13 @@ extern CORE_ADDR i386_extract_struct_value_address (char *regbuf);
 #define FRAME_CHAIN(frame) i386_frame_chain ((frame))
 extern CORE_ADDR i386_frame_chain (struct frame_info *frame);
 
-/* A macro that tells us whether the function invocation represented
-   by FI does not have a frame on the stack associated with it.  If it
-   does not, FRAMELESS is set to 1, else 0.  */
+/* Determine whether the function invocation represented by FRAME does
+   not have a from on the stack associated with it.  If it does not,
+   return non-zero, otherwise return zero.  */
 
-#define FRAMELESS_FUNCTION_INVOCATION(FI) \
-     (((FI)->signal_handler_caller) ? 0 : frameless_look_for_prologue(FI))
+#define FRAMELESS_FUNCTION_INVOCATION(frame) \
+  i386_frameless_function_invocation (frame)
+extern int i386_frameless_function_invocation (struct frame_info *frame);
 
 /* Saved Pc.  Get it from sigcontext if within sigtramp.  */
 

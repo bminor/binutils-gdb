@@ -1,3 +1,10 @@
+2001-04-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_frameless_function_invocation): New function.
+	* config/i386/tm-i386.h (FRAMELESS_FUNCTION_INVOCATION): Redefine
+	in terms of i386_frameless_function_invocation.  Adjust comment.
+	(i386_frameless_function_invocation): New prototype.
+
 2001-04-18  Martin M. Hunt  <hunt@redhat.com>
 
 	* top.c (gdb_init): Don't call cli_out_new() to

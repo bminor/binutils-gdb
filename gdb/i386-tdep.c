@@ -365,6 +365,19 @@ i386_frame_chain (struct frame_info *frame)
   return 0;
 }
 
+/* Determine whether the function invocation represented by FRAME does
+   not have a from on the stack associated with it.  If it does not,
+   return non-zero, otherwise return zero.  */
+
+int
+i386_frameless_function_invocation (struct frame_info *frame)
+{
+  if (frame->signal_handler_caller)
+    return 0;
+
+  return frameless_look_for_prologue (frame);
+}
+
 /* Immediately after a function call, return the saved pc.  */
 
 CORE_ADDR
