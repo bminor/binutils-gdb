@@ -135,27 +135,54 @@ frame_find_by_id (struct frame_id id)
 }
 
 CORE_ADDR
-frame_pc_unwind (struct frame_info *this_frame)
+frame_pc_unwind (struct frame_info *next_frame)
 {
-  if (!this_frame->pc_unwind_cache_p)
+  if (!next_frame->pc_unwind_cache_p)
     {
-      this_frame->pc_unwind_cache
-	= this_frame->unwind->pc (this_frame->next, &this_frame->unwind_cache);
-      this_frame->pc_unwind_cache_p = 1;
-    }
-  return this_frame->pc_unwind_cache;
-}
+      CORE_ADDR pc;
+      if (gdbarch_unwind_pc_p (current_gdbarch))
+	{
+	  /* The right way.  The `pure' way.  The one true way.  This
+	     method depends solely on the register-unwind code to
+	     determine the value of registers in THIS frame, and hence
+	     the value of this frame's PC (resume address).  A typical
+	     implementation is no more than:
+	   
+	     frame_unwind_register (next_frame, ISA_PC_REGNUM, buf);
+	     return extract_address (buf, size of ISA_PC_REGNUM);
 
-struct frame_id
-frame_id_unwind (struct frame_info *this_frame)
-{
-  if (!this_frame->id_unwind_cache_p)
-    {
-      this_frame->unwind->id (this_frame->next, &this_frame->unwind_cache,
-			      &this_frame->id_unwind_cache);
-      this_frame->id_unwind_cache_p = 1;
+	     Note: this method is very heavily dependent on a correct
+	     register-unwind implementation, it pays to fix that
+	     method first; this method is frame type agnostic, since
+	     it only deals with register values, it works with any
+	     frame.  This is all in stark contrast to the old
+	     FRAME_SAVED_PC which would try to directly handle all the
+	     different ways that a PC could be unwound.  */
+	  pc = gdbarch_unwind_pc (current_gdbarch, next_frame);
+	}
+      else if (next_frame->level < 0)
+	{
+	  /* FIXME: cagney/2003-03-06: Old code and and a sentinel
+             frame.  Do like was always done.  Fetch the PC's value
+             direct from the global registers array (via read_pc).
+             This assumes that this frame belongs to the current
+             global register cache.  The assumption is dangerous.  */
+	  pc = read_pc ();
+	}
+      else if (FRAME_SAVED_PC_P ())
+	{
+	  /* FIXME: cagney/2003-03-06: Old code, but not a sentinel
+             frame.  Do like was always done.  Note that this method,
+             unlike unwind_pc(), tries to handle all the different
+             frame cases directly.  It fails.  */
+	  pc = FRAME_SAVED_PC (next_frame);
+	}
+      else
+	internal_error (__FILE__, __LINE__, "No gdbarch_unwind_pc method");
+      next_frame->pc_unwind_cache = pc;
+      next_frame->pc_unwind_cache_p = 1;
     }
-  return this_frame->id_unwind_cache;
+  return next_frame->pc_unwind_cache;
 }
 
 void
@@ -682,13 +709,6 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
 		  bufferp);
 }
 
-static CORE_ADDR
-frame_saved_regs_pc_unwind (struct frame_info *frame, void **cache)
-{
-  gdb_assert (FRAME_SAVED_PC_P ());
-  return FRAME_SAVED_PC (frame);
-}
-	
 static void
 frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache,
 			    struct frame_id *id)
@@ -760,7 +780,6 @@ frame_saved_regs_pop (struct frame_info *fi, void **cache,
 
 const struct frame_unwind trad_frame_unwinder = {
   frame_saved_regs_pop,
-  frame_saved_regs_pc_unwind,
   frame_saved_regs_id_unwind,
   frame_saved_regs_register_unwind
 };
@@ -1346,83 +1365,87 @@ get_prev_frame (struct frame_info *next_frame)
 						prev_frame->pc);
 
   /* Find the prev's frame's ID.  */
-  {
-    switch (prev_frame->type)
-      {
-      case DUMMY_FRAME:
-	/* A dummy doesn't have anything resembling either a sane
-	   frame or PC.  The PC is sitting in the entry code and the
-	   stack, which has nothing to do with that entry address, is
-	   a down right mess.  Trying to use the standard frame ID
-	   unwind code to get the previous frame ID is just asking for
-	   trouble.  */
-	if (gdbarch_unwind_dummy_id_p (current_gdbarch))
-	  {
-	    /* Assume hand_function_call(), via SAVE_DUMMY_FRAME_TOS,
-               previously saved the dummy ID that is being obtained
-               here.  Things only work if the two match.  */
-	    gdb_assert (SAVE_DUMMY_FRAME_TOS_P ());
-	    /* Use an architecture specific method to extract the
-	       prev's dummy ID from the next frame.  Note that this
-	       method typically uses frame_register_unwind to obtain
-	       register values needed to determine the dummy ID.  */
-	    next_frame->id_unwind_cache =
-	      gdbarch_unwind_dummy_id (current_gdbarch, next_frame);
-	  }
-	else if (next_frame->level == 0)
-	  {
-	    /* We're `unwinding' the sentinel frame.  Just fake up the
-               ID the same way that the traditional hacks did it.  */
-	    next_frame->id_unwind_cache.pc = read_pc ();
-	    next_frame->id_unwind_cache.pc = read_fp ();
-	  }
-	else
-	  {
-	    /* Outch!  We're not on the innermost frame yet we're
-               trying to unwind to a dummy.  The architecture must
-               provide the unwind_dummy_id() method.  */
-	    internal_error (__FILE__, __LINE__,
+  switch (prev_frame->type)
+    {
+    case DUMMY_FRAME:
+      /* When unwinding a normal frame, the stack structure is
+	 determined by analyzing the frame's function's code (be it
+	 using brute force prologue analysis, or the dwarf2 CFI).  In
+	 the case of a dummy frame, that simply isn't possible.  The
+	 The PC is either the program entry point, or some random
+	 address on the stack.  Trying to use that PC to apply
+	 standard frame ID unwind techniques is just asking for
+	 trouble.  */
+      if (gdbarch_unwind_dummy_id_p (current_gdbarch))
+	{
+	  /* Assume hand_function_call(), via SAVE_DUMMY_FRAME_TOS,
+	     previously saved the dummy frame's ID.  Things only work
+	     if the two return the same value.  */
+	  gdb_assert (SAVE_DUMMY_FRAME_TOS_P ());
+	  /* Use an architecture specific method to extract the prev's
+	     dummy ID from the next frame.  Note that this method uses
+	     frame_register_unwind to obtain the register values
+	     needed to determine the dummy frame's ID.  */
+	  prev_frame->id = gdbarch_unwind_dummy_id (current_gdbarch,
+						    next_frame);
+	}
+      else if (next_frame->level < 0)
+	{
+	  /* We're unwinding a sentinel frame, the PC of which is
+	     pointing at a stack dummy.  Fake up the dummy frame's ID
+	     using the same sequence as is found a traditional
+	     unwinder.  Once all architectures supply the
+	     unwind_dummy_id method, this code can go away.  */
+	  prev_frame->id.base = read_fp ();
+	  prev_frame->id.pc = read_pc ();
+	}
+      else
+	{
+	  /* Outch!  We're not on the innermost frame yet we're trying
+	     to unwind to a dummy.  The architecture must provide the
+	     unwind_dummy_id() method.  Abandon the unwind process but
+	     only after first warning the user.  */
+	  internal_warning (__FILE__, __LINE__,
 			    "Missing unwind_dummy_id architecture method");
-	  }
-	break;
-      case NORMAL_FRAME:
-      case SIGTRAMP_FRAME:
-	prev_frame->unwind->id (next_frame, &prev_frame->unwind_cache,
-				&next_frame->id_unwind_cache);
-	/* Check that the unwound ID is valid.  */
-	if (!frame_id_p (next_frame->id_unwind_cache))
-	  {
-	    if (frame_debug)
-	      fprintf_unfiltered (gdb_stdlog,
-				  "Outermost frame - unwound frame ID invalid\n");
-	    return NULL;
-	  }
-	/* Check that the new frame isn't inner to (younger, below,
-	   next) the old frame.  If that happens the frame unwind is
-	   going backwards.  */
-	/* FIXME: cagney/2003-02-25: Ignore the sentinel frame since
-	   that doesn't have a valid frame ID.  Should instead set the
-	   sentinel frame's frame ID to a `sentinel'.  Leave it until
-	   after the switch to storing the frame ID, instead of the
-	   frame base, in the frame object.  */
-	if (next_frame->level >= 0
-	    && frame_id_inner (next_frame->id_unwind_cache,
-			       get_frame_id (next_frame)))
-	  error ("Unwound frame inner-to selected frame (corrupt stack?)");
-	/* Note that, due to frameless functions, the stronger test of
-	   the new frame being outer to the old frame can't be used -
-	   frameless functions differ by only their PC value.  */
-	break;
-      default:
-	internal_error (__FILE__, __LINE__, "bad switch");
-      }
-    /* FIXME: cagney/2002-12-18: Instead of this hack, the frame ID
-       should be directly stored in the `struct frame_info'.
-       Unfortunatly, GDB isn't quite ready for this, need to get HP/UX
-       multi-arch and make 'struct frame_info' opaque.  */
-    next_frame->id_unwind_cache_p = 1;
-    prev_frame->frame = next_frame->id_unwind_cache.base;
-  }
+	  return NULL;
+	}
+      break;
+    case NORMAL_FRAME:
+    case SIGTRAMP_FRAME:
+      prev_frame->unwind->id (next_frame, &prev_frame->unwind_cache,
+			      &prev_frame->id);
+      /* Check that the unwound ID is valid.  */
+      if (!frame_id_p (prev_frame->id))
+	{
+	  if (frame_debug)
+	    fprintf_unfiltered (gdb_stdlog,
+				"Outermost frame - unwound frame ID invalid\n");
+	  return NULL;
+	}
+      /* Check that the new frame isn't inner to (younger, below,
+	 next) the old frame.  If that happens the frame unwind is
+	 going backwards.  */
+      /* FIXME: cagney/2003-02-25: Ignore the sentinel frame since
+	 that doesn't have a valid frame ID.  Should instead set the
+	 sentinel frame's frame ID to a `sentinel'.  Leave it until
+	 after the switch to storing the frame ID, instead of the
+	 frame base, in the frame object.  */
+      if (next_frame->level >= 0
+	  && frame_id_inner (prev_frame->id, get_frame_id (next_frame)))
+	error ("Unwound frame inner-to selected frame (corrupt stack?)");
+      /* Note that, due to frameless functions, the stronger test of
+	 the new frame being outer to the old frame can't be used -
+	 frameless functions differ by only their PC value.  */
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
+    }
+
+  /* FIXME: cagney/2002-12-18: Instead of this hack, should only store
+     the frame ID in PREV_FRAME.  Unfortunatly, some architectures
+     (HP/UX) still reply on EXTRA_FRAME_INFO and, hence, still poke at
+     the "struct frame_info" object directly.  */
+  prev_frame->frame = prev_frame->id.base;
 
   /* Link it in.  */
   next_frame->prev = prev_frame;
@@ -1557,11 +1580,11 @@ void
 deprecated_update_frame_pc_hack (struct frame_info *frame, CORE_ADDR pc)
 {
   /* See comment in "frame.h".  */
-  gdb_assert (frame->next != NULL);
-  /* Fix up this PC's value.  */
   frame->pc = pc;
-  /* While we're at it, also update the cache, in NEXT, that also
-     contains that value.  */
+  /* While we're at it, update this frame's cached PC value, found in
+     the next frame.  Oh, for the day when "struct frame_info" is
+     opaque and this hack on hack can go.  */
+  gdb_assert (frame->next != NULL);
   frame->next->pc_unwind_cache = pc;
   frame->next->pc_unwind_cache_p = 1;
 }

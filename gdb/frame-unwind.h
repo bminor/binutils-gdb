@@ -104,26 +104,6 @@ typedef void (frame_unwind_reg_ftype) (struct frame_info *next_frame,
 
 /* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
    use the NEXT frame, and its register unwind method, to unwind THIS
-   frame's PC, returning the value of PC (the return address) in PREV
-   frame.
-
-   Traditionally, THIS frame's PC was unwound by examining THIS
-   frame's function prolog and identifying where (in a register or on
-   the stack) that return address was saved.
-
-   Please note that this per-frame method may be superseeded by an
-   architecture specific method that determines the unwound PC (aka
-   return address) using just the register unwind methods.
-
-   THIS_CACHE can be used to share any prologue analysis data with the
-   other unwind methods.  Memory for that cache should be allocated
-   using frame_obstack_zalloc().  */
-
-typedef CORE_ADDR (frame_unwind_pc_ftype) (struct frame_info *next_frame,
-					   void **this_cache);
-
-/* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
-   use the NEXT frame, and its register unwind method, to unwind THIS
    frame's entire stack, writing PREV's frames register values into
    REGCACHE.
 
@@ -151,7 +131,6 @@ struct frame_unwind
   /* Should an attribute indicating the frame's address-in-block go
      here?  */
   frame_unwind_pop_ftype *pop;
-  frame_unwind_pc_ftype *pc;
   frame_unwind_id_ftype *id;
   frame_unwind_reg_ftype *reg;
 };

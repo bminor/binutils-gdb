@@ -242,6 +242,7 @@ struct gdbarch
   gdbarch_frame_chain_ftype *frame_chain;
   gdbarch_frame_chain_valid_ftype *frame_chain_valid;
   gdbarch_frame_saved_pc_ftype *frame_saved_pc;
+  gdbarch_unwind_pc_ftype *unwind_pc;
   gdbarch_frame_args_address_ftype *frame_args_address;
   gdbarch_frame_locals_address_ftype *frame_locals_address;
   gdbarch_saved_pc_after_call_ftype *saved_pc_after_call;
@@ -358,6 +359,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   generic_pc_in_call_dummy,
+  0,
   0,
   0,
   0,
@@ -759,6 +761,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of frame_chain, has predicate */
   /* Skip verify of frame_chain_valid, has predicate */
   /* Skip verify of frame_saved_pc, has predicate */
+  /* Skip verify of unwind_pc, has predicate */
   /* Skip verify of frame_args_address, invalid_p == 0 */
   /* Skip verify of frame_locals_address, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
@@ -2578,6 +2581,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
     fprintf_unfiltered (file,
                         "gdbarch_dump: unwind_dummy_id = 0x%08lx\n",
                         (long) current_gdbarch->unwind_dummy_id);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: gdbarch_unwind_pc_p() = %d\n",
+                        gdbarch_unwind_pc_p (current_gdbarch));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: unwind_pc = 0x%08lx\n",
+                        (long) current_gdbarch->unwind_pc);
 #ifdef USE_STRUCT_CONVENTION
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -4843,6 +4854,32 @@ set_gdbarch_frame_saved_pc (struct gdbarch *gdbarch,
                             gdbarch_frame_saved_pc_ftype frame_saved_pc)
 {
   gdbarch->frame_saved_pc = frame_saved_pc;
+}
+
+int
+gdbarch_unwind_pc_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->unwind_pc != 0;
+}
+
+CORE_ADDR
+gdbarch_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->unwind_pc == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_unwind_pc invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_unwind_pc called\n");
+  return gdbarch->unwind_pc (gdbarch, next_frame);
+}
+
+void
+set_gdbarch_unwind_pc (struct gdbarch *gdbarch,
+                       gdbarch_unwind_pc_ftype unwind_pc)
+{
+  gdbarch->unwind_pc = unwind_pc;
 }
 
 CORE_ADDR

@@ -108,8 +108,13 @@ struct dummy_frame *
 cached_find_dummy_frame (struct frame_info *next_frame, void **this_cache)
 {
   if ((*this_cache) == NULL)
-    (*this_cache) = find_dummy_frame (frame_pc_unwind (next_frame),
-				      frame_id_unwind (next_frame).base);
+    {
+      /* FIXME: hack to find the frame ID of this frame.  Need to do
+	 this better.  */
+      gdb_assert (next_frame->prev != NULL);
+      (*this_cache) = find_dummy_frame (frame_pc_unwind (next_frame),
+					next_frame->prev->frame);
+    }
   return (*this_cache);
 }
 
@@ -371,23 +376,6 @@ dummy_frame_register_unwind (struct frame_info *next_frame, void **this_cache,
     }
 }
 
-/* Assuming that FRAME is a dummy, return the resume address for the
-   previous frame.  */
-
-static CORE_ADDR
-dummy_frame_pc_unwind (struct frame_info *next_frame,
-		       void **this_cache)
-{
-  struct dummy_frame *dummy = cached_find_dummy_frame (next_frame, this_cache);
-  /* Oops!  In a dummy-frame but can't find the stack dummy.  Pretend
-     that the frame doesn't unwind.  Should this function instead
-     return a has-no-caller indication?  */
-  if (dummy == NULL)
-    return 0;
-  return dummy->pc;
-}
-
-
 /* Assuming that FRAME is a dummy, return the ID of the calling frame
    (the frame that the dummy has the saved state of).  */
 
@@ -396,6 +384,7 @@ dummy_frame_id_unwind (struct frame_info *next_frame,
 		       void **this_cache,
 		       struct frame_id *this_id)
 {
+#if 0
   struct dummy_frame *dummy = cached_find_dummy_frame (next_frame, this_cache);
   /* Oops!  In a dummy-frame but can't find the stack dummy.  Pretend
      that the frame doesn't unwind.  Should this function instead
@@ -404,12 +393,19 @@ dummy_frame_id_unwind (struct frame_info *next_frame,
     (*this_id) = null_frame_id;
   else
     (*this_id) = dummy->id;
+#else
+  /* FIXME - with all the frames shuffled by one, it becomes possible
+     to move the dummy frame unwind code to here.  This is because,
+     unlike the mainline, this function is called when determining the
+     ID of the dummy, and not the ID of the dummy's caller.  For the
+     moment, this function is never called.  */
+  internal_error (__FILE__, __LINE__, "dummy_frame_pc_unwind called");
+#endif
 }
 
 static struct frame_unwind dummy_frame_unwind =
 {
   dummy_frame_pop,
-  dummy_frame_pc_unwind,
   dummy_frame_id_unwind,
   dummy_frame_register_unwind
 };

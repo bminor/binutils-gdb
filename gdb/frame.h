@@ -310,10 +310,6 @@ extern const char *frame_map_regnum_to_name (int regnum);
 
 extern CORE_ADDR frame_pc_unwind (struct frame_info *frame);
 
-/* Unwind the frame ID.  Return an ID that uniquely identifies the
-   caller's frame.  */
-extern struct frame_id frame_id_unwind (struct frame_info *frame);
-
 /* Discard the specified frame.  Restoring the registers to the state
    of the caller.  */
 extern void frame_pop (struct frame_info *frame);
@@ -412,9 +408,9 @@ struct frame_info
     int pc_unwind_cache_p;
     CORE_ADDR pc_unwind_cache;
 
-    /* Cached copy of the previous frame's ID.  */
-    int id_unwind_cache_p;
-    struct frame_id id_unwind_cache;
+    /* This frame's ID.  Note that the frame's ID, base and PC contain
+       redundant information.  */
+    struct frame_id id;
 
     /* Pointers to the next (down, inner, younger) and previous (up,
        outer, older) frame_info's in the frame cache.  */
