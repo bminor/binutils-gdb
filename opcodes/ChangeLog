@@ -1,3 +1,7 @@
+Thu Nov 19 07:54:15 1998  Doug Evans  <devans@charmed.cygnus.com>
+
+	* mips-opc.c (sync.p,sync.l): Swap insn values.
+
 start-sanitize-fr30
 Wed Nov 18 21:36:37 1998  Dave Brolley  <brolley@cygnus.com>
 
