@@ -1,5 +1,13 @@
 2001-08-27  H.J. Lu  <hjl@gnu.org>
 
+	* elf32-mips.c (mips_elf_create_dynamic_relocation): Add more
+	sanity check.
+	(mips_elf_calculate_relocation): Create dynamic relocation for
+	symbols with weak definition or the ELF_LINK_HASH_DEF_REGULAR
+	bit is not set.
+
+2001-08-27  H.J. Lu  <hjl@gnu.org>
+
 	* elf32-mips.c (_bfd_mips_elf_hide_symbol): Add prototype.
 	(_bfd_mips_elf_copy_indirect_symbol): Likewise.
 	(_bfd_elf32_mips_grok_prstatus): Likewise.

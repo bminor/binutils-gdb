@@ -5830,6 +5830,8 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
 			       MIPS_ELF_REL_DYN_SECTION_NAME (output_bfd));
   BFD_ASSERT (sreloc != NULL);
   BFD_ASSERT (sreloc->contents != NULL);
+  BFD_ASSERT (sreloc->reloc_count * MIPS_ELF_REL_SIZE (output_bfd)
+	      < sreloc->_raw_size);
 
   skip = false;
 
@@ -6330,8 +6332,9 @@ mips_elf_calculate_relocation (abfd,
       if ((info->shared
 	   || (elf_hash_table (info)->dynamic_sections_created
 	       && h != NULL
-	       && ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC)
-		   != 0)))
+	       && (h->root.type == bfd_link_hash_defweak
+		   || (h->root.elf_link_hash_flags
+		       & ELF_LINK_HASH_DEF_REGULAR) == 0)))
 	  && (input_section->flags & SEC_ALLOC) != 0)
 	{
 	  /* If we're creating a shared library, or this relocation is
