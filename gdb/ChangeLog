@@ -1,5 +1,6 @@
 2002-02-10  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/mips/tm-mips.h (CALL_DUMMY_LOCATION): Delete.
 	* gdbarch.sh (PUSH_RETURN_ADDRESS): Don't require when multi-arch
 	partial.
 

@@ -370,8 +370,6 @@ extern void mips_pop_frame (void);
 #define FIX_CALL_DUMMY(dummyname, start_sp, fun, nargs, args, rettype, gcc_p) \
     write_register(T9_REGNUM, fun)
 
-#define CALL_DUMMY_LOCATION AT_ENTRY_POINT
-
 #define CALL_DUMMY_ADDRESS() (mips_call_dummy_address ())
 extern CORE_ADDR mips_call_dummy_address (void);
 
