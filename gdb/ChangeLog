@@ -7,6 +7,12 @@
 	(arm_skip_prologue): Ditto.  Also make disassembly 
 	order-independent by placing it in a loop.
 
+2002-05-06  Michael Snyder  <msnyder@redhat.com>
+
+	* stabsread.c (read_type): Add recognition for new attribute:
+	"@V;" means that an array type is actually a vector.
+	This is analogous to the vector flag that's been added to dwarf2.
+
 2002-05-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.h (i386_abi): New enum.

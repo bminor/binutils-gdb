@@ -1904,6 +1904,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       break;
 
     case 't':
+      /* Typedef */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
 
       /* For a nameless type, we don't want a create a symbol, thus we
@@ -2359,6 +2360,9 @@ read_type (register char **pp, struct objfile *objfile)
   /* Used to distinguish string and bitstring from char-array and set. */
   int is_string = 0;
 
+  /* Used to distinguish vector from array. */
+  int is_vector = 0;
+
   /* Read type number if present.  The type number may be omitted.
      for instance in a two-dimensional array declared with type
      "ar1;1;10;ar1;1;10;4".  */
@@ -2574,7 +2578,7 @@ again:
          forward-referenced), and we must change it to a pointer, function,
          reference, or whatever, *in-place*.  */
 
-    case '*':
+    case '*':			/* Pointer to another type */
       type1 = read_type (pp, objfile);
       type = make_pointer_type (type1, dbx_lookup_type (typenums));
       break;
@@ -2732,14 +2736,20 @@ again:
 
 	  switch (*attr)
 	    {
-	    case 's':
+	    case 's':		/* Size attribute */
 	      type_size = atoi (attr + 1);
 	      if (type_size <= 0)
 		type_size = -1;
 	      break;
 
-	    case 'S':
+	    case 'S':		/* String attribute */
+	      /* FIXME: check to see if following type is array? */
 	      is_string = 1;
+	      break;
+
+	    case 'V':		/* Vector attribute */
+	      /* FIXME: check to see if following type is array? */
+	      is_vector = 1;
 	      break;
 
 	    default:
@@ -2844,9 +2854,11 @@ again:
       type = read_array_type (pp, type, objfile);
       if (is_string)
 	TYPE_CODE (type) = TYPE_CODE_STRING;
+      if (is_vector)
+	TYPE_FLAGS (type) |= TYPE_FLAG_VECTOR;
       break;
 
-    case 'S':
+    case 'S':			/* Set or bitstring  type */
       type1 = read_type (pp, objfile);
       type = create_set_type ((struct type *) NULL, type1);
       if (is_string)
