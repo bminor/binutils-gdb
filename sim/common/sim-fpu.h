@@ -164,9 +164,9 @@ typedef enum
    When converting from the sim_fpu internal type to 32/64 bit packed
    format, the operation may result in a loss of precision. The
    configuration macro WITH_FPU_CONVERSION controls this.  By default,
-   silent round to nearest is performed.  Alternativly, round up,
+   silent round to nearest is performed.  Alternatively, round up,
    round down and round to zero can be performed.  In a simulator
-   emulating exact FPU behavour, sim_fpu_round_{32,64} should be
+   emulating exact FPU behavior, sim_fpu_round_{32,64} should be
    called before packing the sim_fpu value.  */
 
 INLINE_SIM_FPU (void) sim_fpu_32to (sim_fpu *f, unsigned32 s);
@@ -189,7 +189,7 @@ INLINE_SIM_FPU (void) sim_fpu_to64 (unsigned64 *d, const sim_fpu *f);
 
 INLINE_SIM_FPU (void) sim_fpu_fractionto (sim_fpu *f, int sign, int normal_exp, unsigned64 fraction, int precision);
 
-/* Reverse operaton.  If S is a non-zero number, discards the implied
+/* Reverse operation.  If S is a non-zero number, discards the implied
    leading one and returns PRECISION fraction bits.  No rounding is
    performed. */
 INLINE_SIM_FPU (unsigned64) sim_fpu_tofraction (const sim_fpu *s, int precision);
@@ -210,7 +210,7 @@ INLINE_SIM_FPU (int) sim_fpu_round_64 (sim_fpu *f,
 
 
 
-/* Arrithmetic operators.
+/* Arithmetic operators.
 
    FIXME: In the future, additional arguments ROUNDING and BITSIZE may
    be added. */
@@ -283,7 +283,7 @@ INLINE_SIM_FPU (int) sim_fpu_to232u (unsigned64 *h, unsigned64 *l, const sim_fpu
 
 /* Conversion of internal sim_fpu type to host double format.
 
-   For debuging/tracing only.  A SNaN is never returned. */
+   For debugging/tracing only.  A SNaN is never returned. */
 
 /* INLINE_SIM_FPU (float) sim_fpu_2f (const sim_fpu *f); */
 INLINE_SIM_FPU (double) sim_fpu_2d (const sim_fpu *d);
