@@ -450,7 +450,6 @@ else
 configdirs=`echo $configdirs | sed 's/gdbserver//'`
 fi
 
-
 # If hostfile (XM_FILE) and/or targetfile (TM_FILE) and/or nativefile
 # (NAT_FILE) is not set in config/*/*.m[ht] files, we don't make the
 # corresponding links.  But we have to remove the xm.h files and tm.h
@@ -515,4 +514,9 @@ case ${srcdir} in
 grep "source ${srcdir}/.gdbinit" .gdbinit >/dev/null 2>/dev/null || \
 echo "source ${srcdir}/.gdbinit" >> .gdbinit
 esac
+],
+[
+gdb_host_cpu=$gdb_host_cpu
+gdb_target_cpu=$gdb_target_cpu
+nativefile=$nativefile
 ])

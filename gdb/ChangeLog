@@ -1,3 +1,9 @@
+Tue May 16 13:16:06 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* configure.in: Added INIT-CMDS argument to AC_OUTPUT which sets
+	  gdb_host_cpu, gdb_target_cpu and nativefile.
+	* configure: regenerated.
+
 Mon May 15 23:50:51 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mdebugread.c (parse_symbol):  Do not relocate stBlock/scText

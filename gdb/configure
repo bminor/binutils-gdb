@@ -1892,7 +1892,6 @@ else
 configdirs=`echo $configdirs | sed 's/gdbserver//'`
 fi
 
-
 # If hostfile (XM_FILE) and/or targetfile (TM_FILE) and/or nativefile
 # (NAT_FILE) is not set in config/*/*.m[ht] files, we don't make the
 # corresponding links.  But we have to remove the xm.h files and tm.h
@@ -2193,7 +2192,15 @@ while test -n "$ac_sources"; do
     { echo "configure: error: can not link $ac_dest to $srcdir/$ac_source" 1>&2; exit 1; }
   fi
 done
+EOF
+cat >> $CONFIG_STATUS <<EOF
 
+gdb_host_cpu=$gdb_host_cpu
+gdb_target_cpu=$gdb_target_cpu
+nativefile=$nativefile
+
+EOF
+cat >> $CONFIG_STATUS <<\EOF
 
 if test "${nativefile}" = ""; then
 sed -e '/^NATDEPFILES= /s//# NATDEPFILES= /' \
