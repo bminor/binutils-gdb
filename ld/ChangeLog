@@ -4,6 +4,8 @@ Tue Jul 20 12:01:49 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 	there's no change log entry yet, tsk tsk) from the list of
 	emulations compiled in until Mark gets around to checking in
 	emulparams/i386linux.sh.
+	(ldemul-list.h): Depend on Makefile, so if EMULATION_OFILES is
+	changed, this file gets updated.
 
 Fri Jul 16 14:14:32 1993  Ian Lance Taylor  (ian@cygnus.com)
 
