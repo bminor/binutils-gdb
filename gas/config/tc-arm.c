@@ -4,6 +4,8 @@
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
 	Cirrus coprocessor mods by Aldy Hernandez (aldyh@redhat.com)
+	Cirrus coprocessor fixes by Petko Manolov (petkan@nucleusys.com)
+	Cirrus coprocessor fixes by Vladimir Ivanov (vladitx@nucleusys.com)
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1111,8 +1113,8 @@ static int cp_byte_address_required_here  PARAMS ((char **));
 /* "INSN<cond> X,Y" where X:bit16, Y:bit12.  */
 #define MAV_MODE2	0x0c10
 
-/* "INSN<cond> X,Y" where X:0, Y:bit16.  */
-#define MAV_MODE3	0x1000
+/* "INSN<cond> X,Y" where X:bit12, Y:bit16.  */
+#define MAV_MODE3	0x100c
 
 /* "INSN<cond> X,Y,Z" where X:16, Y:0, Z:12.  */
 #define MAV_MODE4	0x0c0010
@@ -2175,18 +2177,18 @@ static const struct asm_opcode insns[] =
   {"cfmvr64l",   0xee100510, 8,  ARM_CEXT_MAVERICK, do_mav_binops_1c},
   {"cfmv64hr",   0xee000530, 8,  ARM_CEXT_MAVERICK, do_mav_binops_2c},
   {"cfmvr64h",   0xee100530, 8,  ARM_CEXT_MAVERICK, do_mav_binops_1c},
-  {"cfmval32",   0xee100610, 8,  ARM_CEXT_MAVERICK, do_mav_binops_3a},
-  {"cfmv32al",   0xee000610, 8,  ARM_CEXT_MAVERICK, do_mav_binops_3b},
-  {"cfmvam32",   0xee100630, 8,  ARM_CEXT_MAVERICK, do_mav_binops_3a},
-  {"cfmv32am",   0xee000630, 8,  ARM_CEXT_MAVERICK, do_mav_binops_3b},
-  {"cfmvah32",   0xee100650, 8,  ARM_CEXT_MAVERICK, do_mav_binops_3a},
-  {"cfmv32ah",   0xee000650, 8,  ARM_CEXT_MAVERICK, do_mav_binops_3b},
-  {"cfmva32",    0xee100670, 7,  ARM_CEXT_MAVERICK, do_mav_binops_3a},
-  {"cfmv32a",    0xee000670, 7,  ARM_CEXT_MAVERICK, do_mav_binops_3b},
-  {"cfmva64",    0xee100690, 7,  ARM_CEXT_MAVERICK, do_mav_binops_3c},
-  {"cfmv64a",    0xee000690, 7,  ARM_CEXT_MAVERICK, do_mav_binops_3d},
-  {"cfmvsc32",   0xee1006b0, 8,  ARM_CEXT_MAVERICK, do_mav_dspsc_1},
-  {"cfmv32sc",   0xee0006b0, 8,  ARM_CEXT_MAVERICK, do_mav_dspsc_2},
+  {"cfmval32",   0xee200440, 8,  ARM_CEXT_MAVERICK, do_mav_binops_3a},
+  {"cfmv32al",   0xee100440, 8,  ARM_CEXT_MAVERICK, do_mav_binops_3b},
+  {"cfmvam32",   0xee200460, 8,  ARM_CEXT_MAVERICK, do_mav_binops_3a},
+  {"cfmv32am",   0xee100460, 8,  ARM_CEXT_MAVERICK, do_mav_binops_3b},
+  {"cfmvah32",   0xee200480, 8,  ARM_CEXT_MAVERICK, do_mav_binops_3a},
+  {"cfmv32ah",   0xee100480, 8,  ARM_CEXT_MAVERICK, do_mav_binops_3b},
+  {"cfmva32",    0xee2004a0, 7,  ARM_CEXT_MAVERICK, do_mav_binops_3a},
+  {"cfmv32a",    0xee1004a0, 7,  ARM_CEXT_MAVERICK, do_mav_binops_3b},
+  {"cfmva64",    0xee2004c0, 7,  ARM_CEXT_MAVERICK, do_mav_binops_3c},
+  {"cfmv64a",    0xee1004c0, 7,  ARM_CEXT_MAVERICK, do_mav_binops_3d},
+  {"cfmvsc32",   0xee2004e0, 8,  ARM_CEXT_MAVERICK, do_mav_dspsc_1},
+  {"cfmv32sc",   0xee1004e0, 8,  ARM_CEXT_MAVERICK, do_mav_dspsc_2},
   {"cfcpys",     0xee000400, 6,  ARM_CEXT_MAVERICK, do_mav_binops_1d},
   {"cfcpyd",     0xee000420, 6,  ARM_CEXT_MAVERICK, do_mav_binops_1e},
   {"cfcvtsd",    0xee000460, 7,  ARM_CEXT_MAVERICK, do_mav_binops_1f},
@@ -10575,7 +10577,7 @@ do_mav_quad_6b (str)
 	     REG_TYPE_MVFX);
 }
 
-/* cfmvsc32<cond> DSPSC,MVFX[15:0].  */
+/* cfmvsc32<cond> DSPSC,MVDX[15:0].  */
 static void
 do_mav_dspsc_1 (str)
      char * str;
@@ -10585,7 +10587,7 @@ do_mav_dspsc_1 (str)
   /* cfmvsc32.  */
   if (mav_reg_required_here (&str, -1, REG_TYPE_DSPSC) == FAIL
       || skip_past_comma (&str) == FAIL
-      || mav_reg_required_here (&str, 16, REG_TYPE_MVFX) == FAIL)
+      || mav_reg_required_here (&str, 12, REG_TYPE_MVDX) == FAIL)
     {
       if (!inst.error)
 	inst.error = BAD_ARGS;
@@ -10596,7 +10598,7 @@ do_mav_dspsc_1 (str)
   end_of_line (str);
 }
 
-/* cfmv32sc<cond> MVFX[15:0],DSPSC.  */
+/* cfmv32sc<cond> MVDX[15:0],DSPSC.  */
 static void
 do_mav_dspsc_2 (str)
      char * str;
@@ -10604,7 +10606,7 @@ do_mav_dspsc_2 (str)
   skip_whitespace (str);
 
   /* cfmv32sc.  */
-  if (mav_reg_required_here (&str, 0, REG_TYPE_MVFX) == FAIL
+  if (mav_reg_required_here (&str, 12, REG_TYPE_MVDX) == FAIL
       || skip_past_comma (&str) == FAIL
       || mav_reg_required_here (&str, -1, REG_TYPE_DSPSC) == FAIL)
     {

@@ -1,3 +1,8 @@
+2004-02-14  Andrew Cagney  <cagney@redhat.com>
+
+	* ar.c (remove_output): Use bfd_cache_close.
+	* arsup.c (ar_end): Ditto.
+
 2004-01-21  Roland McGrath  <roland@redhat.com>
 
 	* readelf.c (get_note_type): Match NT_AUXV.

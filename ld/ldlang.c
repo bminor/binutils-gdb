@@ -775,6 +775,10 @@ exp_init_os (etree_type *exp)
       exp_init_os (exp->trinary.rhs);
       break;
 
+    case etree_assert:
+      exp_init_os (exp->assert_s.child);
+      break;
+      
     case etree_unary:
       exp_init_os (exp->unary.child);
       break;

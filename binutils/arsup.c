@@ -433,7 +433,7 @@ ar_end (void)
 {
   if (obfd)
     {
-      fclose ((FILE *)(obfd->iostream));
+      bfd_cache_close (obfd);
       unlink (bfd_get_filename (obfd));
     }
 }

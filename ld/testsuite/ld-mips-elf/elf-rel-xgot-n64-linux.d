@@ -28,8 +28,8 @@ Disassembly of section \.text:
    1200000fc:	3c050000 	lui	a1,0x0
    120000100:	00bc282d 	daddu	a1,a1,gp
    120000104:	dca58058 	ld	a1,-32680\(a1\)
-   120000108:	3c010002 	lui	at,0x2
-   12000010c:	6421e240 	daddiu	at,at,-7616
+   120000108:	3c010001 	lui	at,0x1
+   12000010c:	3421e240 	ori	at,at,0xe240
    120000110:	00a1282d 	daddu	a1,a1,at
    120000114:	3c050000 	lui	a1,0x0
    120000118:	00bc282d 	daddu	a1,a1,gp
@@ -43,8 +43,8 @@ Disassembly of section \.text:
    120000138:	3c050000 	lui	a1,0x0
    12000013c:	00bc282d 	daddu	a1,a1,gp
    120000140:	dca58058 	ld	a1,-32680\(a1\)
-   120000144:	3c010002 	lui	at,0x2
-   120000148:	6421e240 	daddiu	at,at,-7616
+   120000144:	3c010001 	lui	at,0x1
+   120000148:	3421e240 	ori	at,at,0xe240
    12000014c:	00a1282d 	daddu	a1,a1,at
    120000150:	00b1282d 	daddu	a1,a1,s1
    120000154:	3c050000 	lui	a1,0x0
@@ -201,8 +201,8 @@ Disassembly of section \.text:
    1200003b0:	3c050000 	lui	a1,0x0
    1200003b4:	00bc282d 	daddu	a1,a1,gp
    1200003b8:	dca58060 	ld	a1,-32672\(a1\)
-   1200003bc:	3c010002 	lui	at,0x2
-   1200003c0:	6421e240 	daddiu	at,at,-7616
+   1200003bc:	3c010001 	lui	at,0x1
+   1200003c0:	3421e240 	ori	at,at,0xe240
    1200003c4:	00a1282d 	daddu	a1,a1,at
    1200003c8:	3c050000 	lui	a1,0x0
    1200003cc:	00bc282d 	daddu	a1,a1,gp
@@ -216,8 +216,8 @@ Disassembly of section \.text:
    1200003ec:	3c050000 	lui	a1,0x0
    1200003f0:	00bc282d 	daddu	a1,a1,gp
    1200003f4:	dca58060 	ld	a1,-32672\(a1\)
-   1200003f8:	3c010002 	lui	at,0x2
-   1200003fc:	6421e240 	daddiu	at,at,-7616
+   1200003f8:	3c010001 	lui	at,0x1
+   1200003fc:	3421e240 	ori	at,at,0xe240
    120000400:	00a1282d 	daddu	a1,a1,at
    120000404:	00b1282d 	daddu	a1,a1,s1
    120000408:	3c050000 	lui	a1,0x0
@@ -434,3 +434,4 @@ Disassembly of section \.got:
    12010081c:	2010071c 	.*
    120100820:	00000001 	.*
    120100824:	20100794 	.*
+#pass

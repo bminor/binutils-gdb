@@ -1,3 +1,9 @@
+2004-02-17  Petko Manolov  <petkan@nucleusys.com>
+
+	* gas/arm/maverick.c: DSPSC to/from opcode fixes.
+	* gas/arm/maverick.d: Likewise.
+	* gas/arm/maverick.s: Likewise.
+
 2004-02-09  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* gas/sh/basic.exp: Don't do sh4a tests for sh5.
