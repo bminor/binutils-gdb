@@ -1,3 +1,14 @@
+2001-12-19  Jim Blandy  <jimb@redhat.com>
+
+	* gdbarch.sh (TARGET_CHAR_SIGNED): New macro.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* gdbtypes.c (build_gdbtypes): If TARGET_CHAR_SIGNED is zero,
+	set the TYPE_FLAG_UNSIGNED bit on the type.
+	* s390-tdep.c (s390_gdbarch_init): On the S/390, characters
+	are unsigned by default.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Same for PowerPC and
+	RS6000.
+
 2001-12-19  Elena Zannoni  <ezannoni@redhat.com>
 
         * corefile.c (do_captured_read_memory_integer,
