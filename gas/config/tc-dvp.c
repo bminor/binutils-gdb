@@ -96,10 +96,14 @@ const char FLT_CHARS[] = "dD";
    seen).
 
    Allowed state transitions:
-   ASM_INIT -> ASM_MPG
-               ASM_DIRECT -> ASM_GIF
-               ASM_UNPACK
-               ASM_VU
+   ASM_INIT <--> ASM_MPG
+                 ASM_DIRECT <--> ASM_GIF
+                 ASM_UNPACK
+                 ASM_VU
+
+   FIXME: Make the ASM_INIT -> ASM_VU a one way transition.
+   ".vu" must be seen at the top of the file,
+   and cannot be switched out of.
 */
 
 typedef enum {
