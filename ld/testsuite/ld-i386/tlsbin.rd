@@ -66,13 +66,13 @@ Relocation section '.rel.dyn' at offset 0x[0-9a-f]+ contains 9 entries:
 0+804a114  0000060e R_386_TLS_TPOFF +0+ +sG4
 0+804a118  00000825 R_386_TLS_TPOFF32 0+ +sG6
 0+804a11c  00000925 R_386_TLS_TPOFF32 0+ +sG1
-0+804a120  00000d0e R_386_TLS_TPOFF +0+ +sG8
+0+804a120  00000c0e R_386_TLS_TPOFF +0+ +sG8
 
-Relocation section '.rel.plt' at offset 0x30c contains 1 entries:
+Relocation section '.rel.plt' at offset 0x[0-9a-f]+ contains 1 entries:
  Offset +Info +Type +Sym.Value  Sym. Name
-0+804a130  00000e07 R_386_JUMP_SLOT +[0-9a-f]+ +___tls_get_addr
+0+804a130  00000d07 R_386_JUMP_SLOT +[0-9a-f]+ +___tls_get_addr
 
-Symbol table '.dynsym' contains 15 entries:
+Symbol table '.dynsym' contains 14 entries:
  +Num: +Value  Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG3
@@ -85,7 +85,6 @@ Symbol table '.dynsym' contains 15 entries:
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG6
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG1
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _edata
- +[0-9]+: [0-9a-f]+ +0 OBJECT  GLOBAL DEFAULT  ABS _GLOBAL_OFFSET_TABLE_
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _end
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG8
  +[0-9]+: [0-9a-f]+ +0 FUNC +GLOBAL DEFAULT  UND ___tls_get_addr
@@ -158,7 +157,7 @@ Symbol table '.symtab' contains 75 entries:
  +[0-9]+: 00000014 +0 TLS +GLOBAL DEFAULT +9 sg6
  +[0-9]+: 00000018 +0 TLS +GLOBAL DEFAULT +9 sg7
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _edata
- +[0-9]+: [0-9a-f]+ +0 OBJECT  GLOBAL DEFAULT  ABS _GLOBAL_OFFSET_TABLE_
+ +[0-9]+: [0-9a-f]+ +0 OBJECT  GLOBAL HIDDEN   13 _GLOBAL_OFFSET_TABLE_
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _end
  +[0-9]+: 00000044 +0 TLS +GLOBAL HIDDEN +9 sh2
  +[0-9]+: 00000054 +0 TLS +GLOBAL HIDDEN +9 sh6

@@ -18,10 +18,10 @@ Section Headers:
   \[ 6\] .rela.plt +.*
   \[ 7\] .plt +.*
   \[ 8\] .text +PROGBITS +.*
-  \[ 9\] .tdata +PROGBITS +0+4014c0 0+4c0 0+60 00 WAT +0 +0 +32
-  \[10\] .tbss +NOBITS +0+401520 0+520 0+40 00 WAT +0 +0 +1
-  \[11\] .dynamic +DYNAMIC +0+401520 0+520 0+a0 08 +WA +4 +0 +4
-  \[12\] .got +PROGBITS +0+4015c0 0+5c0 0+2c 04 +WA +0 +0 +4
+  \[ 9\] .tdata +PROGBITS +0+401480 0+480 0+60 00 WAT +0 +0 +32
+  \[10\] .tbss +NOBITS +0+4014e0 0+4e0 0+40 00 WAT +0 +0 +1
+  \[11\] .dynamic +DYNAMIC +0+4014e0 0+4e0 0+a0 08 +WA +4 +0 +4
+  \[12\] .got +PROGBITS +0+401580 0+580 0+2c 04 +WA +0 +0 +4
   \[13\] .data +.*
   \[14\] .bss +.*
   \[15\] .shstrtab +.*
@@ -42,9 +42,9 @@ Program Headers:
   INTERP +0x0+f4 0x0+4000f4 0x0+4000f4 0x0+11 0x0+11 R +0x1
 .*Requesting program interpreter.*
   LOAD +0x0+ 0x0+400000 0x0+400000 0x[0-9a-f]+ 0x[0-9a-f]+ R E 0x1000
-  LOAD +0x0+4c0 0x0+4014c0 0x0+4014c0 0x0+12c 0x0+12c RW  0x1000
-  DYNAMIC +0x0+520 0x0+401520 0x0+401520 0x0+a0 0x0+a0 RW  0x4
-  TLS +0x0+4c0 0x0+4014c0 0x0+4014c0 0x0+60 0x0+a0 R +0x20
+  LOAD +0x0+480 0x0+401480 0x0+401480 0x0+12c 0x0+12c RW  0x1000
+  DYNAMIC +0x0+4e0 0x0+4014e0 0x0+4014e0 0x0+a0 0x0+a0 RW  0x4
+  TLS +0x0+480 0x0+401480 0x0+401480 0x0+60 0x0+a0 R +0x20
 
  Section to Segment mapping:
   Segment Sections...
@@ -55,7 +55,7 @@ Program Headers:
    04 +.dynamic *
    05 +.tdata .tbss *
 
-Relocation section '.rela.dyn' at offset 0x268 contains 4 entries:
+Relocation section '.rela.dyn' at offset 0x23c contains 4 entries:
  Offset +Info +Type +Sym.Value  Sym. Name \+ Addend
 [0-9a-f]+  0+138 R_390_TLS_TPOFF +0+ +sG3 \+ 0
 [0-9a-f]+  0+338 R_390_TLS_TPOFF +0+ +sG2 \+ 0
@@ -64,9 +64,9 @@ Relocation section '.rela.dyn' at offset 0x268 contains 4 entries:
 
 Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
  Offset +Info +Type +Sym.Value  Sym. Name \+ Addend
-[0-9a-f]+  0+40b R_390_JMP_SLOT +0+40+2c4 +__tls_get_offset \+ 0
+[0-9a-f]+  0+40b R_390_JMP_SLOT +0+40+298 +__tls_get_offset \+ 0
 
-Symbol table '.dynsym' contains 11 entries:
+Symbol table '.dynsym' contains 10 entries:
  +Num: +Value  Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND 
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG3
@@ -77,7 +77,6 @@ Symbol table '.dynsym' contains 11 entries:
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG6
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG1
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _edata
- +[0-9]+: [0-9a-f]+ +0 OBJECT  GLOBAL DEFAULT  ABS _GLOBAL_OFFSET_TABLE_
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _end
 
 Symbol table '.symtab' contains 70 entries:
@@ -145,7 +144,7 @@ Symbol table '.symtab' contains 70 entries:
  +[0-9]+: 0+14 +0 TLS +GLOBAL DEFAULT +9 sg6
  +[0-9]+: 0+18 +0 TLS +GLOBAL DEFAULT +9 sg7
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _edata
- +[0-9]+: [0-9a-f]+ +0 OBJECT  GLOBAL DEFAULT  ABS _GLOBAL_OFFSET_TABLE_
+ +[0-9]+: [0-9a-f]+ +0 OBJECT  GLOBAL HIDDEN   12 _GLOBAL_OFFSET_TABLE_
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _end
  +[0-9]+: 0+44 +0 TLS +GLOBAL HIDDEN +9 sh2
  +[0-9]+: 0+54 +0 TLS +GLOBAL HIDDEN +9 sh6

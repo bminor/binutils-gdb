@@ -61,7 +61,7 @@ Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
  Offset +Info +Type +Sym. Value +Symbol's Name \+ Addend
 0+12174 +0+c15 R_SPARC_JMP_SLOT +0+ +__tls_get_addr \+ 0
 
-Symbol table '.dynsym' contains 22 entries:
+Symbol table '.dynsym' contains 21 entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +0: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +6 *
@@ -83,7 +83,6 @@ Symbol table '.dynsym' contains 22 entries:
  +[0-9]+: 0+14 +0 TLS +GLOBAL DEFAULT +7 sg6
  +[0-9]+: 0+18 +0 TLS +GLOBAL DEFAULT +7 sg7
  +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
- +[0-9]+: 0+120f8 +0 OBJECT +GLOBAL DEFAULT +ABS _GLOBAL_OFFSET_TABLE_
  +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _end
 
 Symbol table '.symtab' contains 57 entries:
@@ -127,6 +126,7 @@ Symbol table '.symtab' contains 57 entries:
  +[0-9]+: 0+74 +0 TLS +LOCAL +HIDDEN +8 sH6
  +[0-9]+: 0+7c +0 TLS +LOCAL +HIDDEN +8 sH8
  +[0-9]+: 0+40 +0 TLS +LOCAL +HIDDEN +7 sh1
+ +[0-9]+: 0+120f8 +0 OBJECT +LOCAL  HIDDEN +ABS _GLOBAL_OFFSET_TABLE_
  +[0-9]+: 0+44 +0 TLS +LOCAL +HIDDEN +7 sh2
  +[0-9]+: 0+54 +0 TLS +LOCAL +HIDDEN +7 sh6
  +[0-9]+: 0+1c +0 TLS +GLOBAL DEFAULT +7 sg8
@@ -143,5 +143,4 @@ Symbol table '.symtab' contains 57 entries:
  +[0-9]+: 0+14 +0 TLS +GLOBAL DEFAULT +7 sg6
  +[0-9]+: 0+18 +0 TLS +GLOBAL DEFAULT +7 sg7
  +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
- +[0-9]+: 0+120f8 +0 OBJECT +GLOBAL DEFAULT +ABS _GLOBAL_OFFSET_TABLE_
  +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _end

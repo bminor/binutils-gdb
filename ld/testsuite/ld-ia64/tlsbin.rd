@@ -59,7 +59,7 @@ Relocation section '.rela.IA_64.pltoff' at offset 0x[0-9a-f]+ contains 1 entries
  +Offset +Info +Type +Symbol's Value  Symbol's Name \+ Addend
 60+2050  0+300000081 R_IA64_IPLTLSB +0+ __tls_get_addr \+ 0
 
-Symbol table '.dynsym' contains 9 entries:
+Symbol table '.dynsym' contains 8 entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +0: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND *
  +1: 60+11d0 +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
@@ -68,8 +68,7 @@ Symbol table '.dynsym' contains 9 entries:
  +4: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS __bss_start
  +5: 0+ +0 TLS +GLOBAL DEFAULT +UND sG1
  +6: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
- +7: 60+2000 +0 OBJECT +GLOBAL DEFAULT +ABS _GLOBAL_OFFSET_TABLE_
- +8: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _end
+ +7: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _end
 
 Symbol table '.symtab' contains 72 entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
@@ -138,7 +137,7 @@ Symbol table '.symtab' contains 72 entries:
  +62: 0+14 +0 TLS +GLOBAL DEFAULT +11 sg6
  +63: 0+18 +0 TLS +GLOBAL DEFAULT +11 sg7
  +64: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
- +65: [0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +ABS _GLOBAL_OFFSET_TABLE_
+ +65: [0-9a-f]+ +0 OBJECT +GLOBAL HIDDEN +15 _GLOBAL_OFFSET_TABLE_
  +66: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _end
  +67: 0+44 +0 TLS +GLOBAL HIDDEN +11 sh2
  +68: 0+54 +0 TLS +GLOBAL HIDDEN +11 sh6

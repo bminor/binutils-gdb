@@ -9,6 +9,6 @@
 
 DYNAMIC SYMBOL TABLE:
 #...
-00080206 g    DF .text	00000002 expfn
+00080... g    DF .text	00000002 expfn
 00082... g    DO .data	00000000 expobj
 #pass

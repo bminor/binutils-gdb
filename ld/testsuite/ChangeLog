@@ -1,3 +1,19 @@
+2004-11-02  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/expdyn1.d, ld-cris/expdyn5.d, ld-cris/expdyn6.d,
+	ld-cris/expdyn7.d, ld-cris/gotplt1.d, ld-cris/gotplt2.d,
+	ld-cris/gotplt3.d, ld-cris/hiddef1.d, ld-cris/libdso-2.d,
+	ld-cris/locref1.d, ld-cris/locref2.d, ld-cris/weakref2.d,
+	ld-i386/tlsbin.rd, ld-i386/tlsnopic.rd, ld-i386/tlspic.rd,
+	ld-ia64/tlsbin.dd, ld-ia64/tlsbin.rd, ld-ia64/tlspic.dd,
+	ld-ia64/tlspic.rd, ld-powerpc/tlsexe32.d, ld-powerpc/tlsexe32.g,
+	ld-powerpc/tlsexe32.r, ld-powerpc/tlsexe32.t,
+	ld-powerpc/tlsso32.d, ld-powerpc/tlsso32.g, ld-powerpc/tlsso32.r,
+	ld-powerpc/tlsso32.t, ld-s390/tlsbin.dd, ld-s390/tlsbin.rd,
+	ld-s390/tlspic.rd, ld-sparc/tlssunbin32.rd,
+	ld-sparc/tlssunpic32.rd, ld-x86-64/tlsbin.rd, ld-x86-64/tlspic.dd,
+	ld-x86-64/tlspic.rd: Adjust for _GLOBAL_OFFSET_TABLE_ now hidden.
+
 2004-10-26  Paul Brook  <paul@codesourcery.com>
 
 	* ld-elfvers/vers.exp (build_binary): Add ldargs parameter.

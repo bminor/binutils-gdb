@@ -72,7 +72,7 @@ Relocation section '.rel.dyn' at offset 0x[0-9a-f]+ contains 20 entries:
 0+208c  0+d0e R_386_TLS_TPOFF   0+   sg2
 
 
-Symbol table '.dynsym' contains 17 entries:
+Symbol table '.dynsym' contains 16 entries:
  +Num: +Value  Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +5 *
@@ -89,7 +89,6 @@ Symbol table '.dynsym' contains 17 entries:
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS __bss_start
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sg2
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _edata
- +[0-9]+: 0+2098 +0 OBJECT  GLOBAL DEFAULT  ABS _GLOBAL_OFFSET_TABLE_
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _end
 
 Symbol table '.symtab' contains 36 entries:
@@ -118,6 +117,7 @@ Symbol table '.symtab' contains 36 entries:
  +[0-9]+: 0+1c +0 TLS +LOCAL  HIDDEN +6 sh3
  +[0-9]+: 0+20 +0 TLS +LOCAL  HIDDEN +6 sh4
  +[0-9]+: 0+14 +0 TLS +LOCAL  HIDDEN +6 sh1
+ +[0-9]+: 0+2098 +0 OBJECT  LOCAL  HIDDEN  ABS _GLOBAL_OFFSET_TABLE_
  +[0-9]+: 0+18 +0 TLS +LOCAL  HIDDEN +6 sh2
  +[0-9]+: [0-9a-f]+ +0 OBJECT  GLOBAL DEFAULT  ABS _DYNAMIC
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sg3
@@ -128,5 +128,4 @@ Symbol table '.symtab' contains 36 entries:
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS __bss_start
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sg2
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _edata
- +[0-9]+: 0+2098 +0 OBJECT  GLOBAL DEFAULT  ABS _GLOBAL_OFFSET_TABLE_
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _end
