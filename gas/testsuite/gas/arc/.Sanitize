@@ -35,12 +35,17 @@ insn3.s
 insn3.d
 j.s
 j.d
+ld.s
+ld.s
 math.s
 math.d
 mul64.s
 mul64.d
 sshift.s
 sshift.d
+st.s
+st.d
+
 Things-to-lose:
 
 Do-last:
