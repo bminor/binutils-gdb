@@ -781,8 +781,9 @@ varobj_set_value (struct varobj *var, char *expression)
       value_ptr temp;
 
       input_radix = 10;		/* ALWAYS reset to decimal temporarily */
-      /* FIXME: Callee may longjump */
-      exp = parse_exp_1 (&s, 0, 0);
+      if (!gdb_parse_exp_1 (&s, 0, 0, &exp))
+	/* We cannot proceed without a well-formed expression. */
+	return 0;
       if (!gdb_evaluate_expression (exp, &value))
 	{
 	  /* We cannot proceed without a valid expression. */

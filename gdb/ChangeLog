@@ -1,3 +1,14 @@
+2000-09-15  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (varobj_set_value): Call wrapped version of
+	parse_exp_1() to avoid longjumps.
+
+2000-09-15  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* remote.c (putpkt_binary): Call read_frame, not getpkt. Log message.
+	(read_frame): Do not call error() on communication error when
+	reading checksum, but return failure instead and log message.
+
 2000-09-15  Fernando Nasser  <fnasser@cygnus.com>
 
 	* ser-unix.c (do_unix_readchar): Prevent infinite read wait to be
