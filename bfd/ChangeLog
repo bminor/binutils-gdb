@@ -1,3 +1,13 @@
+Fri Sep 16 12:12:27 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* aoutx.h (aout_link_write_other_symbol): If h->indx is -2, then
+	always write it out even if it would normally be stripped.
+	(aout_link_input_section_std): If we find a reloc against a
+	stripped global symbol, force it to be written out rather than
+	merely calling unattached_reloc.
+	(aout_link_input_section_ext): Likewise.
+	(aout_link_reloc_link_order): Likewise.
+
 Wed Sep 14 15:37:19 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.h (struct somdata): New field sorted_syms.
