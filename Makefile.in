@@ -1055,7 +1055,7 @@ DISTSTUFFDIRS= ld gprof gdb libg++ binutils
 # Files where "byacc" (Cygnus version) should be changed to "bison -y" (FSF).
 DISTBISONFILES= binutils/Makefile.in gas/Makefile.in gdb/Makefile.in
 # Directories where "info" should be built.
-DISTDOCDIRS= ld gprof binutils gas bfd libg++ libio gdb
+DISTDOCDIRS= ld gprof binutils gas bfd libg++ libio gdb gnats send-pr
 
 .PHONY: taz
 
@@ -1127,7 +1127,7 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) \
 		echo "==> Making $(TOOL)-$$VER.tar.gz"; \
 		rm -f $(TOOL)-$$VER; ln -s proto-toplev $(TOOL)-$$VER; \
 		tar cfh - $(TOOL)-$$VER \
-		| $(GZIP) -v -9 >$(TOOL)-$$VER.tar.gz)
+		| $(GZIP) -v -9 > $(TOOL)-$$VER.tar.gz )
 
 TEXINFO_SUPPORT= texinfo/texinfo.tex texinfo/gpl.texinfo texinfo/lgpl.texinfo
 DIST_SUPPORT= $(DEVO_SUPPORT) $(TEXINFO_SUPPORT)
@@ -1159,7 +1159,7 @@ libg++.tar.gz: $(DIST_SUPPORT) libg++
 
 GNATS_SUPPORT_DIRS=include libiberty send-pr
 gnats.tar.gz: $(DIST_SUPPORT) $(GNATS_SUPPORT_DIRS) gnats
-	$(MAKE) -f  Makefile.in taz TOOL=gnats
+	$(MAKE) -f  Makefile.in taz TOOL=gnats \
 		SUPPORT_FILES="$(GNATS_SUPPORT_DIRS)"
 
 .NOEXPORT:
