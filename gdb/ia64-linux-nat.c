@@ -630,7 +630,7 @@ ia64_linux_stopped_by_watchpoint (int pid)
   errno = 0;
   ptrace (PTRACE_GETSIGINFO, tid, (PTRACE_ARG3_TYPE) 0, &siginfo);
 
-  if (errno != 0 || siginfo.si_code != 0x30004 /* TRAP_HWBKPT */)
+  if (errno != 0 || (siginfo.si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
     return 0;
 
   psr = read_register_pid (IA64_PSR_REGNUM, pid);

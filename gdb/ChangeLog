@@ -1,3 +1,9 @@
+2001-03-31  Kevin Buettner  <kevinb@redhat.com>
+
+	* ia64-linux-nat.c (ia64_linux_stopped_by_watchpoint): Adjust
+	comparison against TRAP_HWBKPT constant yet again to account
+	for the various values used by different kernel versions.
+
 2001-04-16  Daniel Berlin  <dan@cgsoftware.com>
 
 	* demangle.c (_initialize_demangler): Use xcalloc on the
