@@ -30,6 +30,7 @@ alpha.sc
 aout.sc
 ebmon29k.sc
 elf.sc
+go32coff.sc
 h8300.sc
 h8300h.sc
 h8500.sc
