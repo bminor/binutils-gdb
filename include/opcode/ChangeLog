@@ -1,3 +1,23 @@
+start-sanitize-d30v
+Mon Sep 15 11:29:43 1997  Ken Raeburn  <raeburn@cygnus.com>
+
+	Merge changes from Martin Hunt:
+
+	* d30v.h: Allow up to 64 control registers. Add 
+	SHORT_A5S format.
+
+	* d30v.h (LONG_Db): New form for delayed branches.
+
+	* d30v.h: (LONG_Db): New form for repeati.
+
+	* d30v.h (SHORT_D2B): New form.
+
+	* d30v.h (SHORT_A2): New form. 
+
+	* d30v.h (OPERAND_2REG): Add new operand to indicate 2 
+	registers are used.  Needed for VLIW optimization.
+
+end-sanitize-d30v
 Mon Sep  8 14:05:45 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* cgen.h: Move assembler interface section
