@@ -1,3 +1,7 @@
+Sun May 10 22:35:33 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* po/Make-in (install-info): New target.
+
 Tue May  5 18:28:40 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* gprof.h (_): Undefine BFD's version.

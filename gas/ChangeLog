@@ -1,3 +1,7 @@
+Sun May 10 22:35:02 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* po/Make-in (install-info): New target.
+
 Thu May  7 15:49:07 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10200.c (md_assemble): Handle "bra" just like "jmp"
