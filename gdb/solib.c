@@ -1315,7 +1315,7 @@ solib_add (char *pattern, int from_tty, struct target_ops *target)
 	  *gdb_link = gdb->next;
 
 	  /* Unless the user loaded it explicitly, free SO's objfile.  */
-	  if (! (gdb->objfile->flags & OBJF_USERLOADED))
+	  if (gdb->objfile && ! (gdb->objfile->flags & OBJF_USERLOADED))
 	    free_objfile (gdb->objfile);
 
 	  /* Some targets' section tables might be referring to
@@ -1329,8 +1329,7 @@ solib_add (char *pattern, int from_tty, struct target_ops *target)
 
   /* Now the inferior's list contains only shared objects that don't
      appear in GDB's list --- those that are newly loaded.  Add them
-     to GDB's shared object list, and read in their symbols, if
-     appropriate.  */
+     to GDB's shared object list.  */
   if (inferior)
     {
       struct so_list *i;
@@ -1338,8 +1337,7 @@ solib_add (char *pattern, int from_tty, struct target_ops *target)
       /* Add the new shared objects to GDB's list.  */
       *gdb_link = inferior;
 
-      /* Fill in the rest of each of the `struct so_list' nodes, and
-	 read symbols for those files whose names match PATTERN.  */
+      /* Fill in the rest of each of the `struct so_list' nodes.  */
       for (i = inferior; i; i = i->next)
 	{
 	  i->from_tty = from_tty;
@@ -1348,29 +1346,6 @@ solib_add (char *pattern, int from_tty, struct target_ops *target)
 	  catch_errors (solib_map_sections, i,
 			"Error while mapping shared library sections:\n",
 			RETURN_MASK_ALL);
-
-	  if (! pattern || re_exec (i->so_name))
-	    {
-	      if (i->symbols_loaded)
-		{
-		  if (from_tty)
-		    printf_unfiltered ("Symbols already loaded for %s\n",
-				       i->so_name);
-		}
-	      else
-		{
-		  if (catch_errors
-		      (symbol_add_stub, i,
-		       "Error while reading shared library symbols:\n",
-		       RETURN_MASK_ALL))
-		    {
-		      if (from_tty)
-			printf_unfiltered ("Loaded symbols for %s\n",
-					   i->so_name);
-		      i->symbols_loaded = 1;
-		    }
-		}
-	    }
 	}
 
       /* If requested, add the shared objects' sections to the the
@@ -1398,13 +1373,56 @@ solib_add (char *pattern, int from_tty, struct target_ops *target)
 		}
 	    }
 	}
-
-      /* Getting new symbols may change our opinion about what is
-         frameless.  */
-      reinit_frame_cache ();
-
-      special_symbol_handling ();
     }
+
+  /* Finally, read the symbols as requested.  Walk the list of
+     currently loaded shared libraries, and read symbols for any that
+     match the pattern --- or any whose symbols aren't already loaded,
+     if no pattern was given.  */
+  {
+    int any_matches = 0;
+    int loaded_any_symbols = 0;
+
+    for (gdb = so_list_head; gdb; gdb = gdb->next)
+      if (! pattern || re_exec (gdb->so_name))
+	{
+	  any_matches = 1;
+
+	  if (gdb->symbols_loaded)
+	    {
+	      if (from_tty)
+		printf_unfiltered ("Symbols already loaded for %s\n",
+				   gdb->so_name);
+	    }
+	  else
+	    {
+	      if (catch_errors
+		  (symbol_add_stub, gdb,
+		   "Error while reading shared library symbols:\n",
+		   RETURN_MASK_ALL))
+		{
+		  if (from_tty)
+		    printf_unfiltered ("Loaded symbols for %s\n",
+				       gdb->so_name);
+		  gdb->symbols_loaded = 1;
+		  loaded_any_symbols = 1;
+		}
+	    }
+	}
+
+    if (from_tty && pattern && ! any_matches)
+      printf_unfiltered
+	("No loaded shared libraries match the pattern `%s'.\n", pattern);
+
+    if (loaded_any_symbols)
+      {
+	/* Getting new symbols may change our opinion about what is
+	   frameless.  */
+	reinit_frame_cache ();
+
+	special_symbol_handling ();
+      }
+  }
 }
 
 
