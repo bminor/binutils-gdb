@@ -2,21 +2,32 @@
 MACHINE=
 SCRIPT_NAME=elf
 TEMPLATE_NAME=elf32
-OUTPUT_FORMAT="elf32-cris"
+
+# Symbols have underscore prepended.
+OUTPUT_FORMAT="elf32-us-cris"
 ARCH=cris
 MAXPAGESIZE=32
-ENTRY=_start
+ENTRY=__start
 EMBEDDED=yes
 ALIGNMENT=32
 TEXT_START_ADDR=0
 
 # Put crt0 for flash/eprom etc. in this section.
-INITIAL_READONLY_SECTIONS='.startup : { *(.startup) }'
+INITIAL_READONLY_SECTIONS='.startup : { KEEP(*(.startup)) }'
 
 # TEXT_START_SYMBOLS doesn't get what we want which is the start of
 # all read-only sections; there's at least .init and .fini before it.
 # We have to resort to trickery.
-EXECUTABLE_SYMBOLS='PROVIDE (__Stext = .);'
+#
+# The __start dance is to get us through assumptions about entry
+# symbols, and to clear _start for normal use with sane programs.
+EXECUTABLE_SYMBOLS='
+PROVIDE (__Stext = .);
+__start = DEFINED(__start) ? __start : 
+  DEFINED(_start) ? _start : 
+    DEFINED(start) ? start :
+      DEFINED(.startup) ? .startup + 2 : 2;
+'
 
 # Smuggle an "OTHER_TEXT_END_SYMBOLS" here.
 OTHER_READONLY_SECTIONS='PROVIDE (__Etext = .);'

@@ -1,3 +1,16 @@
+2000-09-29  Hans-Peter Nilsson  <hp@axis.com>
+
+	* scripttempl/crisaout.sc (ENTRY): Now __start.
+	(.text): Add default setting for __start.
+	Remove CONSTRUCTORS handling.
+	(/DISCARD/): Add .gnu.warning.*.
+	* emulparams/crislinux.sh (ENTRY): Now __start.
+	(TEXT_START_SYMBOLS): New; provide __Stext and __start default.
+	* emulparams/criself.sh (OUTPUT_FORMAT): Now elf32-us-cris.
+	(ENTRY): Now __start.
+	(INITIAL_READONLY_SECTIONS): Add KEEP for .startup.
+	(EXECUTABLE_SYMBOLS): Add default setting for __start.
+
 2000-09-29  Kazu Hirata  <kazu@hxi.com>
 
 	* deffile.h: Fix formatting.

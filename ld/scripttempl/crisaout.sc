@@ -1,7 +1,7 @@
 cat <<EOF
 OUTPUT_FORMAT("a.out-cris")
 OUTPUT_ARCH(cris)
-ENTRY(_start)
+ENTRY(__start)
 SECTIONS
 {
   .text ${RELOCATING+ ${TEXT_START_ADDR}}:
@@ -10,6 +10,10 @@ SECTIONS
     ${RELOCATING+ __Stext = .;}
     ${RELOCATING+*(.startup)}
     *(.text)
+    ${RELOCATING+__start = DEFINED(__start) ? __start : 
+		   DEFINED(_start) ? _start :
+		     DEFINED(start) ? start :
+		        DEFINED(.startup) ? .startup + 2 : 2;}
     ${RELOCATING+*(.text.*)}
     ${RELOCATING+*(.gnu.linkonce.t*)}
     ${RELOCATING+*(.rodata)}
@@ -40,14 +44,6 @@ SECTIONS
     ${RELOCATING+SHORT (0x0d3e); /* jump [sp+] */}
     ${RELOCATING+PROVIDE (__fini__end = .);}
     ${RELOCATING+ ___fini__end = .;}
-
-    /* Putting constructors in constant store is sane as long as
-       there's no need for dynamic fixups.  */
-    /* The constructors and destructors set symbols are unused now that
-       collect2 has its wicked way.  */
-    ${CONSTRUCTING+ ___aout_ctors_dtors_begin = .;}
-    ${CONSTRUCTING+ SORT(CONSTRUCTORS);}
-    ${CONSTRUCTING+ ___aout_ctors_dtors_end = .;}
 
     /* Cater to linking from ELF.  */
     ${CONSTRUCTING+ PROVIDE(___ctors = .);}
@@ -111,7 +107,8 @@ SECTIONS
 
   /* Unfortunately, stabs are not mappable from ELF to a.out.
      It can probably be fixed with some amount of work.  */
-  /DISCARD/ : { *(.stab) *(.stab*) *(.debug) *(.debug*) *(.comment) }
+  /DISCARD/ :
+  { *(.stab) *(.stab*) *(.debug) *(.debug*) *(.comment) *(.gnu.warning.*) }
 
   /* For the rsim and xsim simulators.  */
   ${RELOCATING+ PROVIDE(__Endmem = 0x10000000);}

@@ -4,7 +4,7 @@ SCRIPT_NAME=elf
 OUTPUT_FORMAT="elf32-cris"
 ARCH=cris
 TEMPLATE_NAME=elf32
-ENTRY=_start
+ENTRY=__start
 # Needed?  Perhaps should be page-size alignment.
 ALIGNMENT=32
 GENERATE_SHLIB_SCRIPT=yes
@@ -12,10 +12,16 @@ GENERATE_SHLIB_SCRIPT=yes
 # Is this high enough and low enough?
 TEXT_START_ADDR=0x80000
 
-# Do we need to set this higher?
 MAXPAGESIZE=8192
 
 # FIXME: GOT, PLT...
+
+TEXT_START_SYMBOLS='PROVIDE (__Stext = .);
+__start = DEFINED(__start) ? __start : 
+  DEFINED(_start) ? _start : 
+    DEFINED(start) ? start :
+      DEFINED(.startup) ? .startup + 2 : 2;
+'
 
 # Smuggle an "OTHER_TEXT_END_SYMBOLS" here.
 OTHER_READONLY_SECTIONS='PROVIDE (__Etext = .);'
