@@ -1,3 +1,8 @@
+2002-11-18  Alexandre Oliva  <aoliva@redhat.com>, Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (tc_gen_reloc): Fix typo in handling of
+	GOT_LO16 on NEWABI.
+
 2002-11-18  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* config/tc-tic4x.c: Fixed proper commandline

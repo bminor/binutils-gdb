@@ -13229,7 +13229,7 @@ tc_gen_reloc (section, fixp)
 	abort ();
 
       /* newabi uses R_MIPS_GOT_DISP for local symbols */
-      if (HAVE_NEWABI && BFD_RELOC_MIPS_GOT_LO16)
+      if (HAVE_NEWABI && fixp->fx_r_type == BFD_RELOC_MIPS_GOT_LO16)
 	{
 	  fixp->fx_r_type = BFD_RELOC_MIPS_GOT_DISP;
 	  retval[1] = NULL;
