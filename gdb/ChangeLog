@@ -1,3 +1,25 @@
+Fri Mar 12 09:33:23 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* xcoffread.c (retrieve_tracebackinfo): Move assignment out
+	of while condition.
+
+	* xcoffread.c (enter_line_range): complain() on bad endoffset.
+	xcoffread.c: Doc fixes.
+
+Tue Mar  9 09:56:12 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* tm-rs6000.h (CORE_NEEDS_RELOCATION): Just call xcoff_relocate_core.
+	xcoffexec.c (xcoff_relocate_core): New function.
+	(text_adjustment): Removed.
+	(add_vmap): Return the vmap.
+	rs6000-tdep.c (add_text_to_loadinfo): No longer static.
+
+Fri Mar  5 05:22:46 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* xcoffsolib.h: Add objfile member to struct vmap.
+	xcoff{exec,solib}.c: Use it, not lookup_objfile_bfd.
+	xcoffexec.c (add_vmap): Allocate objfiles here.
+
 Sun Mar 14 02:54:15 1993  John Gilmore  (gnu@cygnus.com)
 
 	Support 68000 series without floating point.
