@@ -29,6 +29,12 @@ else
 	lose_these_too="tic80 ${lose_these_too}"
 fi
 
+if ( echo $* | grep keep\-sky > /dev/null ) ; then
+	keep_these_too="txvu ${keep_these_too}"
+else
+	lose_these_too="txvu ${lose_these_too}"
+fi
+
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
 	keep_these_too="d30v ${keep_these_too}"
 else
