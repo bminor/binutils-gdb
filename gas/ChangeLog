@@ -1,3 +1,7 @@
+Wed Jul 12 23:33:40 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-coff.c (fixup_segment): Support MD_APPLY_FIX3.
+
 Wed Jul 12 01:12:12 1995  Ken Raeburn  <raeburn@kr-pc.cygnus.com>
 
 	* write.c (fix_new): Use int, not short int, for argument type.
@@ -252,7 +256,7 @@ Mon Jul  3 14:22:59 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 Thu Jun 29 17:25:43 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
-	Support for long filenames non-bfd coff. bfd/7288
+	Support for long filenames non-bfd coff.
 	* config/obj-coff.c (filename_list_head, filename_list_tail): New.
 	(yank_symbols): Notice and record filenames which are too long.
 	(w_strings): Write out filename strings.
@@ -321,7 +325,7 @@ Wed Jun 21 18:07:59 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 Wed Jun 21 14:18:37 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* gasp.c (do_print, do_form, buffer_and_nest): Use case insensitive
-	string compares. gas/7274.
+	string compares.
 
 Tue Jun 20 14:55:02 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
