@@ -2063,7 +2063,7 @@ process_event_stop_test:
 	  set_longjmp_resume_breakpoint (jmp_buf_pc, get_current_frame ());
 	else
 #endif /* 0 */
-	  set_longjmp_resume_breakpoint (jmp_buf_pc, NULL);
+	  set_longjmp_resume_breakpoint (jmp_buf_pc, null_frame_id);
 	ecs->handling_longjmp = 1;	/* FIXME */
 	keep_going (ecs);
 	return;
@@ -2356,7 +2356,7 @@ process_event_stop_test:
 
 	  check_for_old_step_resume_breakpoint ();
 	  step_resume_breakpoint =
-	    set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
+	    set_momentary_breakpoint (sr_sal, null_frame_id, bp_step_resume);
 	  if (breakpoints_inserted)
 	    insert_breakpoints ();
 	}
@@ -2412,7 +2412,7 @@ process_event_stop_test:
 	       step_frame_id; I don't think anyone thought to try it.  */
 	    check_for_old_step_resume_breakpoint ();
 	    step_resume_breakpoint =
-	      set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
+	      set_momentary_breakpoint (sr_sal, null_frame_id, bp_step_resume);
 	    if (breakpoints_inserted)
 	      insert_breakpoints ();
 	  }
@@ -2521,7 +2521,7 @@ process_event_stop_test:
 	      xxx.section = find_pc_overlay (xxx.pc);
 	      check_for_old_step_resume_breakpoint ();
 	      step_resume_breakpoint =
-		set_momentary_breakpoint (xxx, NULL, bp_step_resume);
+		set_momentary_breakpoint (xxx, null_frame_id, bp_step_resume);
 	      insert_breakpoints ();
 	      keep_going (ecs);
 	      return;
@@ -2599,7 +2599,7 @@ process_event_stop_test:
 	     is where the new fp value is established.  */
 	  check_for_old_step_resume_breakpoint ();
 	  step_resume_breakpoint =
-	    set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
+	    set_momentary_breakpoint (sr_sal, null_frame_id, bp_step_resume);
 	  if (breakpoints_inserted)
 	    insert_breakpoints ();
 
@@ -2713,7 +2713,7 @@ check_sigtramp2 (struct execution_control_state *ecs)
       /* We perhaps could set the frame if we kept track of what the
          frame corresponding to prev_pc was.  But we don't, so don't.  */
       through_sigtramp_breakpoint =
-	set_momentary_breakpoint (sr_sal, NULL, bp_through_sigtramp);
+	set_momentary_breakpoint (sr_sal, null_frame_id, bp_through_sigtramp);
       if (breakpoints_inserted)
 	insert_breakpoints ();
 
@@ -2771,7 +2771,7 @@ step_into_function (struct execution_control_state *ecs)
          established.  */
       check_for_old_step_resume_breakpoint ();
       step_resume_breakpoint =
-	set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
+	set_momentary_breakpoint (sr_sal, null_frame_id, bp_step_resume);
       if (breakpoints_inserted)
 	insert_breakpoints ();
 
@@ -2804,13 +2804,12 @@ step_over_function (struct execution_control_state *ecs)
 
   check_for_old_step_resume_breakpoint ();
   step_resume_breakpoint =
-    set_momentary_breakpoint (sr_sal, get_current_frame (), bp_step_resume);
+    set_momentary_breakpoint (sr_sal, get_frame_id (get_current_frame ()),
+			      bp_step_resume);
 
   if (frame_id_p (step_frame_id)
       && !IN_SOLIB_DYNSYM_RESOLVE_CODE (sr_sal.pc))
-    /* FIXME: cagney/2002-12-01: Someone should modify the breakpoint
-       code so that it uses a frame ID, instead of a frame address.  */
-    step_resume_breakpoint->frame = step_frame_id.base;
+    step_resume_breakpoint->frame_id = step_frame_id;
 
   if (breakpoints_inserted)
     insert_breakpoints ();

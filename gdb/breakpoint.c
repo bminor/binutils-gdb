@@ -1704,7 +1704,7 @@ deprecated_frame_in_dummy (struct frame_info *frame)
   ALL_BREAKPOINTS (b)
   {
     if (b->type == bp_call_dummy
-	&& b->frame == get_frame_base (frame)
+	&& frame_id_eq (b->frame_id, get_frame_id (frame))
     /* We need to check the PC as well as the frame on the sparc,
        for signals.exp in the testsuite.  */
 	&& (get_frame_pc (frame)
@@ -2727,8 +2727,8 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 	real_breakpoint = 1;
       }
 
-    if (b->frame &&
-	b->frame != get_frame_base (get_current_frame ()))
+    if (frame_id_p (b->frame_id)
+	&& !frame_id_eq (b->frame_id, get_frame_id (get_current_frame ())))
       bs->stop = 0;
     else
       {
@@ -3417,11 +3417,13 @@ print_one_breakpoint (struct breakpoint *b,
   
   ui_out_text (uiout, "\n");
   
-  if (b->frame)
+  if (frame_id_p (b->frame_id))
     {
       annotate_field (6);
       ui_out_text (uiout, "\tstop only in stack frame at ");
-      ui_out_field_core_addr (uiout, "frame", b->frame);
+      /* FIXME: cagney/2002-12-01: Shouldn't be poeking around inside
+         the frame ID.  */
+      ui_out_field_core_addr (uiout, "frame", b->frame_id.base);
       ui_out_text (uiout, "\n");
     }
   
@@ -3842,7 +3844,7 @@ set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
   b->silent = 0;
   b->ignore_count = 0;
   b->commands = NULL;
-  b->frame = 0;
+  b->frame_id = null_frame_id;
   b->dll_pathname = NULL;
   b->triggered_dll_pathname = NULL;
   b->forked_inferior_pid = 0;
@@ -4308,7 +4310,7 @@ hw_watchpoint_used_count (enum bptype type, int *other_type_used)
    that gets deleted automatically... */
 
 void
-set_longjmp_resume_breakpoint (CORE_ADDR pc, struct frame_info *frame)
+set_longjmp_resume_breakpoint (CORE_ADDR pc, struct frame_id frame_id)
 {
   register struct breakpoint *b;
 
@@ -4317,10 +4319,7 @@ set_longjmp_resume_breakpoint (CORE_ADDR pc, struct frame_info *frame)
     {
       b->address = pc;
       b->enable_state = bp_enabled;
-      if (frame != NULL)
-	b->frame = get_frame_base (frame);
-      else
-	b->frame = 0;
+      b->frame_id = frame_id;
       check_duplicates (b);
       return;
     }
@@ -4372,14 +4371,14 @@ enable_watchpoints_after_interactive_call_stop (void)
    Restrict it to frame FRAME if FRAME is nonzero.  */
 
 struct breakpoint *
-set_momentary_breakpoint (struct symtab_and_line sal, struct frame_info *frame,
+set_momentary_breakpoint (struct symtab_and_line sal, struct frame_id frame_id,
 			  enum bptype type)
 {
   register struct breakpoint *b;
   b = set_raw_breakpoint (sal, type);
   b->enable_state = bp_enabled;
   b->disposition = disp_donttouch;
-  b->frame = (frame ? get_frame_base (frame) : 0);
+  b->frame_id = frame_id;
 
   /* If we're debugging a multi-threaded program, then we
      want momentary breakpoints to be active in only a 
@@ -5428,7 +5427,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
 	  scope_breakpoint->disposition = disp_del;
 
 	  /* Only break in the proper frame (help with recursion).  */
-	  scope_breakpoint->frame = get_frame_base (prev_frame);
+	  scope_breakpoint->frame_id = get_frame_id (prev_frame);
 
 	  /* Set the address at which we will stop.  */
 	  scope_breakpoint->address = get_frame_pc (prev_frame);
@@ -5616,7 +5615,9 @@ until_break_command (char *arg, int from_tty)
 
   resolve_sal_pc (&sal);
 
-  breakpoint = set_momentary_breakpoint (sal, deprecated_selected_frame, bp_until);
+  breakpoint = 
+    set_momentary_breakpoint (sal,get_frame_id (deprecated_selected_frame),
+			      bp_until);
 
   if (!event_loop_p || !target_can_async_p ())
     old_chain = make_cleanup_delete_breakpoint (breakpoint);
@@ -5648,9 +5649,10 @@ until_break_command (char *arg, int from_tty)
 
   if (prev_frame)
     {
-      sal = find_pc_line (get_frame_pc (prev_frame), 0);
-      sal.pc = get_frame_pc (prev_frame);
-      breakpoint = set_momentary_breakpoint (sal, prev_frame, bp_until);
+      sal = find_pc_line (prev_frame->pc, 0);
+      sal.pc = prev_frame->pc;
+      breakpoint = set_momentary_breakpoint (sal, get_frame_id (prev_frame),
+					     bp_until);
       if (!event_loop_p || !target_can_async_p ())
 	make_cleanup_delete_breakpoint (breakpoint);
       else

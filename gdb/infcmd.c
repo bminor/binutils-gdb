@@ -1018,8 +1018,11 @@ run_stack_dummy (CORE_ADDR addr, struct regcache *buffer)
 
          addr is the address of the call dummy plus the CALL_DUMMY_START_OFFSET,
          so we need to subtract the CALL_DUMMY_START_OFFSET.  */
+      /* FIXME: cagney/2002-12-01: Rather than pass in curent frame,
+         why not just create, and then pass in a frame ID.  This would
+         make it possible to eliminate set_current_frame().  */
       bpt = set_momentary_breakpoint (sal,
-				      get_current_frame (),
+				      get_frame_id (get_current_frame ()),
 				      bp_call_dummy);
       bpt->disposition = disp_del;
 
@@ -1284,7 +1287,7 @@ finish_command (char *arg, int from_tty)
   sal = find_pc_line (get_frame_pc (frame), 0);
   sal.pc = get_frame_pc (frame);
 
-  breakpoint = set_momentary_breakpoint (sal, frame, bp_finish);
+  breakpoint = set_momentary_breakpoint (sal, get_frame_id (frame), bp_finish);
 
   if (!event_loop_p || !target_can_async_p ())
     old_chain = make_cleanup_delete_breakpoint (breakpoint);

@@ -1,3 +1,18 @@
+2002-12-11  Andrew Cagney  <ac131313@redhat.com>
+
+	* breakpoint.h (struct breakpoint): Replace frame with frame_id.
+	(set_momentary_breaokpoint): Replace `struct frame_info' parameter
+	with `struct frame_id'.
+	(set_longjmp_resume_breakpoint): Ditto.
+	* infrun.c (handle_inferior_event): Update.
+	* breakpoint.c (watch_command_1, until_break_command): Update.
+	* infrun.c (handle_inferior_event, check_sigtramp2): Update.
+	(handle_inferior_event, step_over_function): Update.
+	* breakpoint.c (bpstat_stop_status, print_one_breakpoint): Update.
+	(set_raw_breakpoint, set_longjmp_resume_breakpoint): Update.
+	(set_momentary_breakpoint, deprecated_frame_in_dummy): Update.
+	* infcmd.c (finish_command, run_stack_dummy): Update.
+
 2002-12-11  Kevin Buettner  <kevinb@redhat.com>
 
 	* dwarf2read.c (dwarf2_const_ignored, dwarf2_volatile_ignored)
