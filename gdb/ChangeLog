@@ -1,5 +1,12 @@
 2002-04-25  Theodore A. Roth  <troth@verinet.com>
 
+	* Makefile.in: Add support for AVR target.
+	* configure.tgt: Add support for AVR target.
+	* avr-tdep.c: New file
+ 	* config/avr/avr.mt: New file.
+
+2002-04-25  Theodore A. Roth  <troth@verinet.com>
+
 	* MAINTAINERS: Add myself to write-after-approval.
 
 2002-04-24  Pierre Muller  <ics.u-strasbg.fr>

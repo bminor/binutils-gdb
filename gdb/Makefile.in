@@ -1183,6 +1183,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	alphafbsd-tdep.c \
 	arm-linux-nat.c arm-linux-tdep.c arm-tdep.c \
 	armnbsd-nat.c armnbsd-tdep.c \
+	avr-tdep.c \
 	coff-solib.c \
 	core-sol2.c core-regset.c core-aout.c corelow.c \
 	dcache.c delta68-nat.c dpx2-nat.c dstread.c exec.c fork-child.c \
@@ -1284,6 +1285,9 @@ armnbsd-nat.o: armnbsd-nat.c $(defs_h) arm-tdep.h $(inferior_h) $(regcache_h) \
 	$(gdbcore_h)
 
 armnbsd-tdep.o: armnbsd-tdep.c $(defs_h) arm-tdep.h
+
+avr-tdep.o: avr-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
+	$(symfile_h) $(regcache_h) $(arch_utils_h)
 
 bcache.o: bcache.c $(bcache_h) $(defs_h)
 
