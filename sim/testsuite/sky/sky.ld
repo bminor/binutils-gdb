@@ -8,7 +8,7 @@
 
 ENTRY(_start)
 OUTPUT_ARCH("mips:5900")
-OUTPUT_FORMAT("elf32-bigmips", "elf32-bigmips", "elf32-littlemips")
+OUTPUT_FORMAT("elf32-littlemips")
 GROUP(-lc -lidt -lgcc)
 SEARCH_DIR(.)
 __DYNAMIC  =  0;

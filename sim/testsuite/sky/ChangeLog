@@ -1,3 +1,7 @@
+Tue Jun 9 11:52:23 1998 Jim Lemke <jlemke@cygnus.com>
+
+	* sky.ld: Remove big endian stuff in OUTPUT_FORMAT
+
 Wed May 20 18:10:28 1998 Jillian Ye <jillian@cygnus.com>
 
 	* c_gen.pl: Added subroutine "print_comment"
