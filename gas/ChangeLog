@@ -506,7 +506,6 @@ Sat Mar 28 22:28:02 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* config/tc-sparc.c (sparc_memory_model): Only define if OBJ_ELF.
 	* config/tc-sparc.c (tc_gen_reloc): Add return to default case.
 
-
 Fri Mar 27 12:46:47 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-m68k.c (m68k_ip): Check legal addressing modes for
