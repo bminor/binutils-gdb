@@ -132,6 +132,9 @@ static void cvt_frag_to_fill PARAMS ((object_headers *, segT, fragS *));
 static void remove_subsegs PARAMS ((frchainS *, int, fragS **, fragS **));
 static void relax_and_size_all_segments PARAMS ((void));
 #endif
+#if defined (BFD_ASSEMBLER) && defined (OBJ_COFF) && !defined (TE_PE)
+static void set_segment_vma PARAMS ((bfd *, asection *, PTR));
+#endif
 
 /*
  *			fix_new()
@@ -1348,6 +1351,20 @@ set_symtab ()
 }
 #endif
 
+#if defined (BFD_ASSEMBLER) && defined (OBJ_COFF) && !defined (TE_PE)
+static void
+set_segment_vma (abfd, sec, xxx)
+     bfd *abfd;
+     asection *sec;
+     PTR xxx ATTRIBUTE_UNUSED;
+{
+  static bfd_vma addr = 0;
+  
+  bfd_set_section_vma (abfd, sec, addr);
+  addr += bfd_section_size (abfd, sec);
+}
+#endif /* BFD_ASSEMBLER && OBJ_COFF && !TE_PE */
+
 /* Finish the subsegments.  After every sub-segment, we fake an
    ".align ...".  This conforms to BSD4.2 brane-damage.  We then fake
    ".fill 0" because that is the kind of frag that requires least
@@ -1479,6 +1496,13 @@ write_object_file ()
 #else
   relax_and_size_all_segments ();
 #endif /* BFD_ASSEMBLER */
+
+#if defined (BFD_ASSEMBLER) && defined (OBJ_COFF) && !defined (TE_PE)
+  /* Now that the segments have their final sizes, run through the
+     sections and set their vma and lma. The !BFD_ASSEMBLER case takes
+     care of this in write_object_file in config/obj-coff.c.  */
+  bfd_map_over_sections (stdoutput, set_segment_vma, (char *) 0);
+#endif
 
 #ifndef BFD_ASSEMBLER
   /*

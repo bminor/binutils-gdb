@@ -1,3 +1,8 @@
+2000-06-29 Mark Elbrecht <snowball3@bigfoot.com>
+
+	* write.c (set_segment_vma): New: Set vma and lma for a segment.
+	(write_object_file) [BFD_ASSEMBLER && OBJ_COFF && !TE_PE]: Use it.
+
 2000-06-27  Aldy Hernandez  <aldyh@redhat.com>
 
 	* config/tc-mips.c (mips_ip): handle "(foo-.-4)" type of
