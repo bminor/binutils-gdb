@@ -1,5 +1,9 @@
 Wed Sep  8 17:56:11 1999  Jeffrey A Law  (law@cygnus.com)
 
+	* elf-hppa.h (elf_hppa_final_link_relocate): Handle PCREL* relocs.
+	Consistently deal with addends.  Handle DLTIND14F and DLTREL14F.
+	(elf_hppa_relocate_insn): Handle PCREL* relocs.
+
 	* elf-hppa.h (elf_hppa_final_link_relocate): Handle LT_OFF_FPTR*,
 	DIR32, DIR64 and FPTR64 relocations.
 	(elf_hppa_relocate_insn): Similarly.

@@ -1012,31 +1012,39 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
    The list will be deleted eventually.
 
    27210 R_PARISC_SEGREL32
-   1120 R_PARISC_PCREL64
    1096 R_PARISC_LTOFF_TP14DR
    982 R_PARISC_LTOFF_TP21L
    791 R_PARISC_GPREL64
    772 R_PARISC_PLTOFF14DR
    386 R_PARISC_PLTOFF21L
    6 R_PARISC_LTOFF64
-   5 R_PARISC_SEGREL64
-   1 R_PARISC_PCREL21L
-   1 R_PARISC_PCREL14R */
+   5 R_PARISC_SEGREL64  */
 
   switch (r_type)
     {
     case R_PARISC_NONE:
       break;
 
-    /* Basic function call support.  I'm not entirely sure if PCREL14F is
-       actually needed or even handled correctly.
-
-       Note for a call to a function defined in another dynamic library
-       we want to redirect the call to a stub.  */
-    case R_PARISC_PCREL22F:
-    case R_PARISC_PCREL17F:
-    case R_PARISC_PCREL14F:
+    /* Random PC relative relocs.  */
+    case R_PARISC_PCREL21L;
+    case R_PARISC_PCREL14R;
+    case R_PARISC_PCREL14F;
+    case R_PARISC_PCREL14WR:
+    case R_PARISC_PCREL14DR:
+    case R_PARISC_PCREL16F:
+    case R_PARISC_PCREL16WF:
+    case R_PARISC_PCREL16DF:
       {
+	if (r_type == R_PARISC_PCREL21L)
+	  r_field = e_lsel;
+	else if (r_type == R_PARISC_PCREL14F
+		 || r_type == R_PARISC_PCREL16F
+		 || r_type == R_PARISC_PCREL16WF
+		 || r_type == R_PARISC_PCREL16DF)
+	  r_field = e_fsel;
+	else
+	  r_field = e_rsel;
+
 	/* If this is a call to a function defined in another dynamic
 	   library, then redirect the call to the local stub for this
 	   function.  */
@@ -1048,7 +1056,41 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 		  + input_section->output_section->vma);
 
 	/* Adjust for any field selectors.  */
-	value = hppa_field_adjust (value, -8, e_fsel);
+	value = hppa_field_adjust (value, -8 + addend, r_field);
+
+	/* Apply the relocation to the given instruction.  */
+	insn = elf_hppa_relocate_insn (insn, value, r_type);
+	break;
+      }
+
+    /* Basic function call support.  I'm not entirely sure if PCREL14F is
+       actually needed or even handled correctly.
+
+       Note for a call to a function defined in another dynamic library
+       we want to redirect the call to a stub.  */
+    case R_PARISC_PCREL22F:
+    case R_PARISC_PCREL17F:
+    case R_PARISC_PCREL22C:
+    case R_PARISC_PCREL17C:
+    case R_PARISC_PCREL17R:
+      {
+	if (r_type == R_PARISC_PCREL17R)
+	  r_field = e_rsel;
+	else
+	  r_field = e_fsel;
+
+	/* If this is a call to a function defined in another dynamic
+	   library, then redirect the call to the local stub for this
+	   function.  */
+	if (sym_sec->output_section == NULL)
+	  value = dyn_h->stub_offset;
+  
+	/* Turn VALUE into a proper PC relative address.  */
+	value -= (offset + input_section->output_offset
+		  + input_section->output_section->vma);
+
+	/* Adjust for any field selectors.  */
+	value = hppa_field_adjust (value, -8 + addend, e_fsel);
 
 	/* All branches are implicitly shifted by 2 places.  */
 	value >>= 2;
@@ -1060,6 +1102,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 
     /* Indirect references to data through the DLT.  */
     case R_PARISC_DLTIND14R:
+    case R_PARISC_DLTIND14F:
     case R_PARISC_DLTIND14DR:
     case R_PARISC_DLTIND14WR:
     case R_PARISC_DLTIND21L:
@@ -1070,7 +1113,6 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
     case R_PARISC_LTOFF_FPTR16F:
     case R_PARISC_LTOFF_FPTR16WF:
     case R_PARISC_LTOFF_FPTR16DF:
-
       {
 	/* We want the value of the DLT offset for this symbol, not
 	   the symbol's actual address.  */
@@ -1082,8 +1124,10 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	if (r_type == R_PARISC_DLTIND21L
 	    || r_type == R_PARISC_LTOFF_FPTR21L)
 	  value = hppa_field_adjust (value, addend, e_lrsel);
-	else if (r_type == R_PARISC_LTOFF_FPTR16F
-		 || R_PARISC_LTOFF_FPTR16WF)
+	else if (r_type == R_PARISC_DLTIND14F
+		 || r_type == R_PARISC_LTOFF_FPTR16F
+		 || r_type == R_PARISC_LTOFF_FPTR16WF
+		 || r_type == R_PARISC_LTOFF_FPTR16DF)
 	  value = hppa_field_adjust (value, addend, e_fsel);
 	else
 	  value = hppa_field_adjust (value, addend, e_rrsel);
@@ -1093,6 +1137,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
       }
 
     case R_PARISC_DLTREL14R:
+    case R_PARISC_DLTREL14F:
     case R_PARISC_DLTREL14DR:
     case R_PARISC_DLTREL14WR:
     case R_PARISC_DLTREL21L:
@@ -1106,6 +1151,8 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	   version vs the 14bit versions.  */
 	if (r_type == R_PARISC_DLTREL21L)
 	  value = hppa_field_adjust (value, addend, e_lrsel);
+	else if (r_type == R_PARISC_DLTREL14F)
+	  value = hppa_field_adjust (value, addend, e_fsel);
 	else
 	  value = hppa_field_adjust (value, addend, e_rrsel);
 
@@ -1122,7 +1169,6 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	return bfd_reloc_ok;
       }
 
-
     case R_PARISC_LTOFF_FPTR64:
       {
 	/* We want the value of the DLT offset for this symbol, not
@@ -1133,12 +1179,49 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
       }
 
     case R_PARISC_DIR32:
-      bfd_put_32 (input_bfd, value, hit_data);
+      bfd_put_32 (input_bfd, value + addend, hit_data);
       return bfd_reloc_ok;
 
     case R_PARISC_DIR64:
-      bfd_put_64 (input_bfd, value, hit_data);
+      bfd_put_64 (input_bfd, value + addend, hit_data);
       return bfd_reloc_ok;
+
+    case R_PARISC_PCREL32:
+      {
+	/* If this is a call to a function defined in another dynamic
+	   library, then redirect the call to the local stub for this
+	   function.  */
+	if (sym_sec->output_section == NULL)
+	  value = dyn_h->stub_offset;
+  
+	/* Turn VALUE into a proper PC relative address.  */
+	value -= (offset + input_section->output_offset
+		  + input_section->output_section->vma);
+
+	value += addend
+	value -= 8;
+	bfd_put_64 (input_bfd, value, hit_data);
+	return bfd_reloc_ok;
+      }
+
+    case R_PARISC_PCREL64:
+      {
+	/* If this is a call to a function defined in another dynamic
+	   library, then redirect the call to the local stub for this
+	   function.  */
+	if (sym_sec->output_section == NULL)
+	  value = dyn_h->stub_offset;
+  
+	/* Turn VALUE into a proper PC relative address.  */
+	value -= (offset + input_section->output_offset
+		  + input_section->output_section->vma);
+
+	value += addend
+	value -= 8;
+	bfd_put_64 (input_bfd, value, hit_data);
+	return bfd_reloc_ok;
+      }
+
 
     /* These do not require any work here.  They are simply passed
        through as dynamic relocations.  */
@@ -1181,6 +1264,7 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     /* This is any 22bit branch.  In PA2.0 syntax it corresponds to
        the "B" instruction.  */
     case R_PARISC_PCREL22F:
+    case R_PARISC_PCREL22C:
       {
 	unsigned int w3, w2, w1, w;
 
@@ -1204,6 +1288,8 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
        the "B" instruction as well as BE.  */
     case R_PARISC_PCREL17F:
     case R_PARISC_DIR17F:
+    case R_PARISC_PCREL17C:
+    case R_PARISC_PCREL17R:
       {
 	unsigned int w2, w1, w;
 
@@ -1227,6 +1313,7 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DLTREL21L:
     case R_PARISC_DLTIND21L:
     case R_PARISC_LTOFF_FPTR21L:
+    case R_PARISC_PCREL21L;
       {
         int w;
 
@@ -1247,6 +1334,9 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DLTIND14F:
     case R_PARISC_LTOFF_FPTR14R:
     case R_PARISC_LTOFF_FPTR16F:
+    case R_PARISC_PCREL14R;
+    case R_PARISC_PCREL14F:
+    case R_PARISC_PCREL16F:
       {
         int w;
 
@@ -1265,6 +1355,8 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DLTIND14DR:
     case R_PARISC_LTOFF_FPTR14DR:
     case R_PARISC_LTOFF_FPTR16DF:
+    case R_PARISC_PCREL14DR:
+    case R_PARISC_PCREL16DF:
       {
         int w;
 
@@ -1289,6 +1381,8 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DLTIND14WR:
     case R_PARISC_LTOFF_FPTR14WR:
     case R_PARISC_LTOFF_FPTR16WF:
+    case R_PARISC_PCREL14WR:
+    case R_PARISC_PCREL16WF:
       {
         int w;
 
