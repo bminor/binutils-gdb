@@ -1138,7 +1138,7 @@ Usage: %s [-dhV] [-I bfdname] [-O bfdname] [-T header-file] [-l linker]\n\
        [in-file [out-file]]\n"),
 	   program_name);
   if (status == 0)
-    fprintf (file, REPORT_BUGS_TO);
+    fprintf (file, _("Report bugs to %s\n"), REPORT_BUGS_TO);
   exit (status);
 }
 

@@ -341,7 +341,7 @@ copy_usage (stream, exit_status)
 "));
   list_supported_targets (program_name, stream);
   if (exit_status == 0)
-    fprintf (stream, REPORT_BUGS_TO);
+    fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
   exit (exit_status);
 }
 
@@ -373,7 +373,7 @@ strip_usage (stream, exit_status)
 
   list_supported_targets (program_name, stream);
   if (exit_status == 0)
-    fprintf (stream, REPORT_BUGS_TO);
+    fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
   exit (exit_status);
 }
 

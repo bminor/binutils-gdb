@@ -734,7 +734,7 @@ extension if not specified.  A single file name is an input file.\n\
 No input-file is stdin, default rc.  No output-file is stdout, default rc.\n"));
   list_supported_targets (program_name, stream);
   if (status == 0)
-    fprintf (stream, REPORT_BUGS_TO);
+    fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
   exit (status);
 }
 

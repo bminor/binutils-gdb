@@ -1,5 +1,19 @@
 2000-04-04  Alan Modra  <alan@linuxcare.com.au>
 
+	* po/binutils.pot: Regenerate.
+
+	* addr2line.c (usage): Restore translated part of bug string.
+	* ar.c (usage): Likewise.
+	* nlmconv.c (show_usage): Likewise.
+	* nm.c (usage): Likewise.
+	* objcopy.c (copy_usage): Likewise.
+	(strip_usage): Likewise.
+	* objdump.c (usage): Likewise.
+	* readelf.c (usage): Likewise.
+	* size.c (usage): Likewise.
+	* strings.c (usage): Likewise.
+	* windres.c (usage): Likewise.
+
 	* Makefile.am (MKDEP): Use gcc -MM rather than mkdep.
 	(DEP): Quote when passing vars to sub-make.  Add warning
 	message to end.

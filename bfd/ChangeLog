@@ -1,5 +1,7 @@
 2000-04-04  Alan Modra  <alan@linuxcare.com.au>
 
+	* po/bfd.pot: Regenerate.
+
 	* Makefile.am: Remove extraneous mkdep comment.
 	(MKDEP): Use gcc -MM rather than mkdep.
 	(DEP): Quote when passing vars to sub-make.  Add warning

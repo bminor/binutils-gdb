@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-02-22 02:24-0500\n"
+"POT-Creation-Date: 2000-04-04 23:21+0930\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -344,7 +344,8 @@ msgid ""
 msgstr ""
 
 #: gprof.c:160
-msgid "Report bugs to bug-gnu-utils@gnu.org\n"
+#, c-format
+msgid "Report bugs to %s\n"
 msgstr ""
 
 #: gprof.c:229

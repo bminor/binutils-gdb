@@ -323,7 +323,7 @@ Options:\n\
   md_show_usage (stream);
 
   fputc ('\n', stream);
-  fprintf (stream, REPORT_BUGS_TO);
+  fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
 }
 
 /*

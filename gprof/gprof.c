@@ -157,7 +157,7 @@ Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
 	[image-file] [profile-file...]\n"),
 	   whoami);
   if (status == 0)
-    fprintf (stream, REPORT_BUGS_TO);
+    fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
   done (status);
 }
 

@@ -3551,7 +3551,7 @@ Usage: %s \n\
   [-Ipath]                        add to include path list\n\
   [in-file]\n"));
   if (status == 0)
-    printf (REPORT_BUGS_TO);
+    printf (_("Report bugs to %s\n"), REPORT_BUGS_TO);
   exit (status);
 }
 

@@ -1163,5 +1163,5 @@ help ()
   ldemul_list_emulation_options (stdout);
   printf ("\n");
 
-  printf (REPORT_BUGS_TO);
+  printf (_("Report bugs to %s\n"), REPORT_BUGS_TO);
 }
