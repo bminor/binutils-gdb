@@ -1,3 +1,11 @@
+Tue Jul  7 18:03:22 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (ldver.texi): New target.
+	(ld.info, ld.dvi): Depend upon ldver.texi.
+	* ld.texinfo: Include ldver.texi.  Mention version number on title
+	page and in top node.
+	* Makefile.in: Rebuild.
+
 Mon Jul  6 14:55:13 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.tgt (i[3456]86-*-solaris*): New target.

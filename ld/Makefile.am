@@ -678,16 +678,21 @@ configdoc.texi:	${DOCVER}-doc.texi
 	  || ln ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi >/dev/null 2>&1 \
 	  || cp ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi
 
-ld.info: $(srcdir)/ld.texinfo configdoc.texi
+ldver.texi: Makefile
+	rm -f $@
+	echo '@set VERSION $(VERSION)' > $@
+
+ld.info: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
 	$(MAKEINFO) -I $(srcdir) -I $(BFDDIR)/doc $(srcdir)/ld.texinfo
 
-ld.dvi: $(srcdir)/ld.texinfo configdoc.texi
+ld.dvi: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
 	  MAKEINFO='$(MAKEINFO) -I $(srcdir) -I $(BFDDIR)/doc' $(TEXI2DVI) $(srcdir)/ld.texinfo
 
 # We want to reconfigure if configure.host or configure.tgt changes.
-Makefile: configure.host configure.tgt
+config.status: $(srcdir)/configure $(srcdir)/configure.host $(srcdir)/configure.tgt
+	$(SHELL) ./config.status --recheck
 
 MOSTLYCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
 	ldemul-list.h crtbegin.o crtend.o ld.log ld.sum
@@ -701,8 +706,8 @@ install-exec-local: ld-new$(EXEEXT)
 	$(mkinstalldirs) $(bindir) $(tooldir)/bin
 	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/-new//'|sed '$(transform)'`"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/-new//'|sed '$(transform)'`; \
+	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
 	  else :; fi; \
 	done
 	rm -f $(tooldir)/bin/ld$(EXEEXT)
@@ -713,7 +718,7 @@ install-exec-local: ld-new$(EXEEXT)
 	fi
 
 install-data-local:
-	$(mkinstalldirs) $(scriptdir)
+	$(mkinstalldirs) $(scriptdir)/ldscripts
 	for f in ldscripts/*; do \
 	  $(INSTALL_DATA) $$f $(scriptdir)/$$f ; \
 	done
