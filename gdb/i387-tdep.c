@@ -160,7 +160,7 @@ print_387_status_word (unsigned int status)
 
 /* Print the floating point number specified by RAW.  */
 static void
-print_i387_value (char *raw)
+print_i387_value (char *raw, struct ui_file *file)
 {
   DOUBLEST value;
 
@@ -175,15 +175,15 @@ print_i387_value (char *raw)
      to print the value, 1 position for the sign, 1 for the decimal
      point, 19 for the digits and 6 for the exponent adds up to 27.  */
 #ifdef PRINTF_HAS_LONG_DOUBLE
-  printf_filtered (" %-+27.19Lg", (long double) value);
+  fprintf_filtered (file, " %-+27.19Lg", (long double) value);
 #else
-  printf_filtered (" %-+27.19g", (double) value);
+  fprintf_filtered (file, " %-+27.19g", (double) value);
 #endif
 }
 
 /* Print the classification for the register contents RAW.  */
 static void
-print_i387_ext (unsigned char *raw)
+print_i387_ext (unsigned char *raw, struct ui_file *file)
 {
   int sign;
   int integer;
@@ -201,119 +201,121 @@ print_i387_ext (unsigned char *raw)
     {
       if (fraction[0] == 0x00000000 && fraction[1] == 0x00000000)
 	/* Infinity.  */
-	printf_filtered (" %cInf", (sign ? '-' : '+'));
+	fprintf_filtered (file, " %cInf", (sign ? '-' : '+'));
       else if (sign && fraction[0] == 0x00000000 && fraction[1] == 0x40000000)
 	/* Real Indefinite (QNaN).  */
-	puts_unfiltered (" Real Indefinite (QNaN)");
+	fputs_unfiltered (" Real Indefinite (QNaN)", file);
       else if (fraction[1] & 0x40000000)
 	/* QNaN.  */
-	puts_filtered (" QNaN");
+	fputs_filtered (" QNaN", file);
       else
 	/* SNaN.  */
-	puts_filtered (" SNaN");
+	fputs_filtered (" SNaN", file);
     }
   else if (exponent < 0x7fff && exponent > 0x0000 && integer)
     /* Normal.  */
-    print_i387_value (raw);
+    print_i387_value (raw, file);
   else if (exponent == 0x0000)
     {
       /* Denormal or zero.  */
-      print_i387_value (raw);
+      print_i387_value (raw, file);
       
       if (integer)
 	/* Pseudo-denormal.  */
-	puts_filtered (" Pseudo-denormal");
+	fputs_filtered (" Pseudo-denormal", file);
       else if (fraction[0] || fraction[1])
 	/* Denormal.  */
-	puts_filtered (" Denormal");
+	fputs_filtered (" Denormal", file);
     }
   else
     /* Unsupported.  */
-    puts_filtered (" Unsupported");
+    fputs_filtered (" Unsupported", file);
 }
 
 /* Print the status word STATUS.  */
 static void
-print_i387_status_word (unsigned int status)
+print_i387_status_word (unsigned int status, struct ui_file *file)
 {
-  printf_filtered ("Status Word:         %s",
+  fprintf_filtered (file, "Status Word:         %s",
 		   local_hex_string_custom (status, "04"));
-  puts_filtered ("  ");
-  printf_filtered (" %s", (status & 0x0001) ? "IE" : "  ");
-  printf_filtered (" %s", (status & 0x0002) ? "DE" : "  ");
-  printf_filtered (" %s", (status & 0x0004) ? "ZE" : "  ");
-  printf_filtered (" %s", (status & 0x0008) ? "OE" : "  ");
-  printf_filtered (" %s", (status & 0x0010) ? "UE" : "  ");
-  printf_filtered (" %s", (status & 0x0020) ? "PE" : "  ");
-  puts_filtered ("  ");
-  printf_filtered (" %s", (status & 0x0080) ? "ES" : "  ");
-  puts_filtered ("  ");
-  printf_filtered (" %s", (status & 0x0040) ? "SF" : "  ");
-  puts_filtered ("  ");
-  printf_filtered (" %s", (status & 0x0100) ? "C0" : "  ");
-  printf_filtered (" %s", (status & 0x0200) ? "C1" : "  ");
-  printf_filtered (" %s", (status & 0x0400) ? "C2" : "  ");
-  printf_filtered (" %s", (status & 0x4000) ? "C3" : "  ");
+  fputs_filtered ("  ", file);
+  fprintf_filtered (file, " %s", (status & 0x0001) ? "IE" : "  ");
+  fprintf_filtered (file, " %s", (status & 0x0002) ? "DE" : "  ");
+  fprintf_filtered (file, " %s", (status & 0x0004) ? "ZE" : "  ");
+  fprintf_filtered (file, " %s", (status & 0x0008) ? "OE" : "  ");
+  fprintf_filtered (file, " %s", (status & 0x0010) ? "UE" : "  ");
+  fprintf_filtered (file, " %s", (status & 0x0020) ? "PE" : "  ");
+  fputs_filtered ("  ", file);
+  fprintf_filtered (file, " %s", (status & 0x0080) ? "ES" : "  ");
+  fputs_filtered ("  ", file);
+  fprintf_filtered (file, " %s", (status & 0x0040) ? "SF" : "  ");
+  fputs_filtered ("  ", file);
+  fprintf_filtered (file, " %s", (status & 0x0100) ? "C0" : "  ");
+  fprintf_filtered (file, " %s", (status & 0x0200) ? "C1" : "  ");
+  fprintf_filtered (file, " %s", (status & 0x0400) ? "C2" : "  ");
+  fprintf_filtered (file, " %s", (status & 0x4000) ? "C3" : "  ");
 
-  puts_filtered ("\n");
+  fputs_filtered ("\n", file);
 
-  printf_filtered ("                       TOP: %d\n", ((status >> 11) & 7));
+  fprintf_filtered (file,
+		    "                       TOP: %d\n", ((status >> 11) & 7));
 }
 
 /* Print the control word CONTROL.  */
 static void
-print_i387_control_word (unsigned int control)
+print_i387_control_word (unsigned int control, struct ui_file *file)
 {
-  printf_filtered ("Control Word:        %s",
+  fprintf_filtered (file, "Control Word:        %s",
 		   local_hex_string_custom (control, "04"));
-  puts_filtered ("  ");
-  printf_filtered (" %s", (control & 0x0001) ? "IM" : "  ");
-  printf_filtered (" %s", (control & 0x0002) ? "DM" : "  ");
-  printf_filtered (" %s", (control & 0x0004) ? "ZM" : "  ");
-  printf_filtered (" %s", (control & 0x0008) ? "OM" : "  ");
-  printf_filtered (" %s", (control & 0x0010) ? "UM" : "  ");
-  printf_filtered (" %s", (control & 0x0020) ? "PM" : "  ");
+  fputs_filtered ("  ", file);
+  fprintf_filtered (file, " %s", (control & 0x0001) ? "IM" : "  ");
+  fprintf_filtered (file, " %s", (control & 0x0002) ? "DM" : "  ");
+  fprintf_filtered (file, " %s", (control & 0x0004) ? "ZM" : "  ");
+  fprintf_filtered (file, " %s", (control & 0x0008) ? "OM" : "  ");
+  fprintf_filtered (file, " %s", (control & 0x0010) ? "UM" : "  ");
+  fprintf_filtered (file, " %s", (control & 0x0020) ? "PM" : "  ");
 
-  puts_filtered ("\n");
+  fputs_filtered ("\n", file);
 
-  puts_filtered ("                       PC: ");
+  fputs_filtered ("                       PC: ", file);
   switch ((control >> 8) & 3)
     {
     case 0:
-      puts_filtered ("Single Precision (24-bits)\n");
+      fputs_filtered ("Single Precision (24-bits)\n", file);
       break;
     case 1:
-      puts_filtered ("Reserved\n");
+      fputs_filtered ("Reserved\n", file);
       break;
     case 2:
-      puts_filtered ("Double Precision (53-bits)\n");
+      fputs_filtered ("Double Precision (53-bits)\n", file);
       break;
     case 3:
-      puts_filtered ("Extended Precision (64-bits)\n");
+      fputs_filtered ("Extended Precision (64-bits)\n", file);
       break;
     }
       
-  puts_filtered ("                       RC: ");
+  fputs_filtered ("                       RC: ", file);
   switch ((control >> 10) & 3)
     {
     case 0:
-      puts_filtered ("Round to nearest\n");
+      fputs_filtered ("Round to nearest\n", file);
       break;
     case 1:
-      puts_filtered ("Round down\n");
+      fputs_filtered ("Round down\n", file);
       break;
     case 2:
-      puts_filtered ("Round up\n");
+      fputs_filtered ("Round up\n", file);
       break;
     case 3:
-      puts_filtered ("Round toward zero\n");
+      fputs_filtered ("Round toward zero\n", file);
       break;
     }
 }
 
 /* Print out the i387 floating poin state.  */
 void
-i387_float_info (void)
+i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
+		       struct frame_info *frame)
 {
   unsigned int fctrl;
   unsigned int fstat;
@@ -343,50 +345,50 @@ i387_float_info (void)
       int tag = (ftag >> (fpreg * 2)) & 3;
       int i;
 
-      printf_filtered ("%sR%d: ", fpreg == top ? "=>" : "  ", fpreg);
+      fprintf_filtered (file, "%sR%d: ", fpreg == top ? "=>" : "  ", fpreg);
 
       switch (tag)
 	{
 	case 0:
-	  puts_filtered ("Valid   ");
+	  fputs_filtered ("Valid   ", file);
 	  break;
 	case 1:
-	  puts_filtered ("Zero    ");
+	  fputs_filtered ("Zero    ", file);
 	  break;
 	case 2:
-	  puts_filtered ("Special ");
+	  fputs_filtered ("Special ", file);
 	  break;
 	case 3:
-	  puts_filtered ("Empty   ");
+	  fputs_filtered ("Empty   ", file);
 	  break;
 	}
 
       read_register_gen ((fpreg + 8 - top) % 8 + FP0_REGNUM, raw);
 
-      puts_filtered ("0x");
+      fputs_filtered ("0x", file);
       for (i = 9; i >= 0; i--)
-	printf_filtered ("%02x", raw[i]);
+	fprintf_filtered (file, "%02x", raw[i]);
 
       if (tag != 3)
-	print_i387_ext (raw);
+	print_i387_ext (raw, file);
 
-      puts_filtered ("\n");
+      fputs_filtered ("\n", file);
     }
 
   puts_filtered ("\n");
 
-  print_i387_status_word (fstat);
-  print_i387_control_word (fctrl);
-  printf_filtered ("Tag Word:            %s\n",
-		   local_hex_string_custom (ftag, "04"));
-  printf_filtered ("Instruction Pointer: %s:",
-		   local_hex_string_custom (fiseg, "02"));
-  printf_filtered ("%s\n", local_hex_string_custom (fioff, "08"));
-  printf_filtered ("Operand Pointer:     %s:",
-		   local_hex_string_custom (foseg, "02"));
-  printf_filtered ("%s\n", local_hex_string_custom (fooff, "08"));
-  printf_filtered ("Opcode:              %s\n",
-		   local_hex_string_custom (fop ? (fop | 0xd800) : 0, "04"));
+  print_i387_status_word (fstat, file);
+  print_i387_control_word (fctrl, file);
+  fprintf_filtered (file, "Tag Word:            %s\n",
+		    local_hex_string_custom (ftag, "04"));
+  fprintf_filtered (file, "Instruction Pointer: %s:",
+		    local_hex_string_custom (fiseg, "02"));
+  fprintf_filtered (file, "%s\n", local_hex_string_custom (fioff, "08"));
+  fprintf_filtered (file, "Operand Pointer:     %s:",
+		    local_hex_string_custom (foseg, "02"));
+  fprintf_filtered (file, "%s\n", local_hex_string_custom (fooff, "08"));
+  fprintf_filtered (file, "Opcode:              %s\n",
+		    local_hex_string_custom (fop ? (fop | 0xd800) : 0, "04"));
 }
 
 /* FIXME: kettenis/2000-05-21: Right now more than a few i386 targets

@@ -26,11 +26,6 @@
 
 #include "regcache.h"
 
-/* Print out the i387 floating point state.  */
-extern void i387_float_info (void);
-#define FLOAT_INFO { i387_float_info (); }
-
-
 /* FIXME: kettenis/2000-06-12: These do not belong here.  */
 extern void print_387_control_word (unsigned int);
 extern void print_387_status_word (unsigned int);

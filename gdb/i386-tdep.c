@@ -38,6 +38,7 @@
 #include "gdb_assert.h"
 
 #include "i386-tdep.h"
+#include "i387-tdep.h"
 
 /* Names of the registers.  The first 10 registers match the register
    numbering scheme used by GCC for stabs and DWARF.  */
@@ -1487,6 +1488,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_max_register_raw_size (gdbarch, I386_MAX_REGISTER_SIZE);
   set_gdbarch_max_register_virtual_size (gdbarch, I386_MAX_REGISTER_SIZE);
   set_gdbarch_register_virtual_type (gdbarch, i386_register_virtual_type);
+
+  set_gdbarch_print_float_info (gdbarch, i387_print_float_info);
 
   set_gdbarch_get_longjmp_target (gdbarch, i386_get_longjmp_target);
 

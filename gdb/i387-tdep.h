@@ -21,6 +21,12 @@
 #ifndef I387_TDEP_H
 #define I387_TDEP_H
 
+/* Print out the i387 floating point state.  */
+
+extern void i387_print_float_info (struct gdbarch *gdbarch,
+				   struct ui_file *file,
+				   struct frame_info *frame);
+
 /* Fill register REGNUM in GDB's register array with the appropriate
    value from *FSAVE.  This function masks off any of the reserved
    bits in *FSAVE.  */

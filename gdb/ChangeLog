@@ -1,3 +1,17 @@
+2002-08-15  Mark Kettenis  <kettenis@elgar.kettenis.dyndns.org>
+
+	* i387-tdep.h (i387_print_float_info): New prototype.
+	* i387-tdep.c (print_i387_value, print_i387_ext,
+	print_i387_status_word, print_i387_control_word): Add `struct
+	ui_file *' argument and use it for output.
+	(i387_print_float_info): Renamed from i387_float_info.  Add
+	`struct gdbarch *' and `struct ui_file *' arguments and use the
+	latter for output.
+	* i386-tdep.c: Include "i387-tdep.h".
+	(i386_gdbarch_init): Set print_float_info.
+	* config/i386/tm-i386.h (i387_float_info): Remove prototype.
+	(FLOAT_INFO): Remove define.
+
 2002-08-13  Michael Snyder  <msnyder@redhat.com>
 
 	* mips-tdep.c (mips_push_arguments): Rename to
