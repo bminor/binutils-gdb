@@ -1,3 +1,12 @@
+1998-11-30  Doug Evans  <devans@casey.cygnus.com>
+
+	* cgen-utils.c (cgen_virtual_opcode_table): Update.
+
+Tue Nov 24 18:40:03 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gennltvals.sh: Add v850 and d10v. Sort alphabetically.
+	* nltvals.def: Re-generate.
+
 Mon Nov 23 13:28:38 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-core.c (reverse_n, sim_core_uninstall, sim_core_init,
