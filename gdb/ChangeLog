@@ -1,5 +1,8 @@
 2004-05-23  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.in: Check for td_pcb in `struct thread'.
+	* configure, config.in: Regenerated.
+
 	* dpx2-nat.c: Remove file.
 	* Makefile.in (ALLDEPFILES): Remove dpx2-nat.c.
 	(dpx2-nat.o): Remove dependencies.

@@ -462,6 +462,9 @@
 /* Define to 1 if the regex included in libiberty should be used. */
 #undef USE_INCLUDED_REGEX
 
+/* Define to 1 if your system has td_pcb in struct thread. */
+#undef HAVE_STRUCT_THREAD_TD_PCB
+
 /* Define to 1 if your system has struct reg in <machine/reg.h>. */
 #undef HAVE_STRUCT_REG
 

@@ -494,6 +494,15 @@ if test "$gdb_with_regex" = yes; then
     [Define to 1 if the regex included in libiberty should be used.])
 fi
 
+# See if <sys/proc.h> defines `struct thread' with a td_pcb member.
+AC_CACHE_CHECK([for td_pcb in struct thread], gdb_cv_struct_thread_td_pcb,
+[AC_TRY_COMPILE([#include <sys/proc.h>], [struct thread td; td.td_pcb;],
+gdb_cv_struct_thread_td_pcb=yes, gdb_cv_struct_thread_td_pcb=no)])
+if test $gdb_cv_struct_thread_td_pcb = yes; then
+  AC_DEFINE(HAVE_STRUCT_THREAD_TD_PCB, 1,
+            [Define to 1 if your system has td_pcb in struct thread.])
+fi
+
 # See if <machine/reg.h> degines `struct reg'.
 AC_CACHE_CHECK([for struct reg in machine/reg.h], gdb_cv_struct_reg,
 [AC_TRY_COMPILE([#include <sys/types.h>
