@@ -54,7 +54,7 @@
    At the end, copy them all into one newly allocated location on an objfile's
    symbol obstack.  */
 
-#define BUNCH_SIZE 127
+#define BUNCH_SIZE 4096
 
 struct msym_bunch
   {
@@ -85,21 +85,69 @@ compact_minimal_symbols (struct minimal_symbol *, int, struct objfile *);
 static void add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
 						struct minimal_symbol **table);
 
-/* Compute a hash code based using the same criteria as `strcmp_iw'.  */
+/* Compute a hash code based using the same criteria as `strcmp_iw'. 
+   Based on FNV-1 hash used in bcache.c.
 
-unsigned int
-msymbol_hash_iw (const char *string)
-{
-  unsigned int hash = 0;
+   Note, we used to have a loop that, with the new hashing algorithm, would have looked like:
+   
+  unsigned int hash = 0x811c9dc5;
   while (*string && *string != '(')
     {
       while (isspace (*string))
 	++string;
       if (*string && *string != '(')
-	hash = (31 * hash) + *string;
+	{
+	  hash *= 16777619;
+	  hash ^= *string;
+	}
       ++string;
     }
-  return hash % MINIMAL_SYMBOL_HASH_SIZE;
+  return hash;
+}
+
+This loop is over twice as slow as the loop used in the function.
+
+The other possibility would have been
+
+  unsigned int hash = 0x811c9dc5;
+  for (*string; *string && *string != '('; ++string)
+  {
+	  if (isspace (*string))
+	     continue;
+	  hash *= 16777619;
+	  hash ^= *string;
+  }
+  return hash;
+
+This loop is 1.5 times as slow as below.
+
+All three were hand verified to give the same hash values for symbols
+with/without spaces in them, ending/not ending in parens, etc.
+
+These timings are consistent on a 500mhz G3 PPC, a 266mhz PII, and a
+500mhz PIII, and a 300mhz Ultrasparc IIi, using gcc 2.95.3 on all of
+them, so AFAIK, it's because the compiler can better optimize the loop
+below , not because of the  platform I tested on.
+
+Since this function now almost completely dominates symbol lookup
+time, please be careful in changing it.
+
+*/
+
+unsigned int
+msymbol_hash_iw (const char *string)
+{
+  unsigned int hash = 0x811c9dc5;
+  unsigned int c;
+  unsigned int len = strlen(string);
+  for (c=0; c < len && string[c] != '('; c++)
+    {
+      if (isspace (string[c]))
+	continue;
+      hash *= 16777619;
+      hash ^= string[c];
+    }
+  return hash;
 }
 
 /* Compute a hash code for a string.  */
@@ -107,10 +155,7 @@ msymbol_hash_iw (const char *string)
 unsigned int
 msymbol_hash (const char *string)
 {
-  unsigned int hash = 0;
-  for (; *string; ++string)
-    hash = (31 * hash) + *string;
-  return hash % MINIMAL_SYMBOL_HASH_SIZE;
+  return hash((char *)string, strlen(string));
 }
 
 /* Add the minimal symbol SYM to an objfile's minsym hash table, TABLE.  */
@@ -120,7 +165,7 @@ add_minsym_to_hash_table (struct minimal_symbol *sym,
 {
   if (sym->hash_next == NULL)
     {
-      unsigned int hash = msymbol_hash (SYMBOL_NAME (sym));
+      unsigned int hash = msymbol_hash (SYMBOL_NAME (sym)) % MINIMAL_SYMBOL_HASH_SIZE;
       sym->hash_next = table[hash];
       table[hash] = sym;
     }
@@ -134,7 +179,7 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
 {
   if (sym->demangled_hash_next == NULL)
     {
-      unsigned int hash = msymbol_hash_iw (SYMBOL_DEMANGLED_NAME (sym));
+      unsigned int hash = msymbol_hash_iw (SYMBOL_DEMANGLED_NAME (sym)) % MINIMAL_SYMBOL_HASH_SIZE;
       sym->demangled_hash_next = table[hash];
       table[hash] = sym;
     }
@@ -162,8 +207,8 @@ lookup_minimal_symbol (register const char *name, const char *sfile,
   struct minimal_symbol *found_file_symbol = NULL;
   struct minimal_symbol *trampoline_symbol = NULL;
 
-  unsigned int hash = msymbol_hash (name);
-  unsigned int dem_hash = msymbol_hash_iw (name);
+  unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
+  unsigned int dem_hash = msymbol_hash_iw (name)  % MINIMAL_SYMBOL_HASH_SIZE;
 
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
   if (sfile != NULL)

@@ -96,7 +96,7 @@ add_to_objfile_sections (bfd *abfd, sec_ptr asect, PTR objfile_p_char)
   section.ovly_mapped = 0;
   section.addr = bfd_section_vma (abfd, asect);
   section.endaddr = section.addr + bfd_section_size (abfd, asect);
-  obstack_grow (&objfile->psymbol_obstack, (char *) &section, sizeof (section));
+  obstack_grow (&objfile->misc_obstack, (char *) &section, sizeof (section));
   objfile->sections_end = (struct obj_section *) (((unsigned long) objfile->sections_end) + 1);
 }
 
@@ -121,14 +121,17 @@ build_objfile_section_table (struct objfile *objfile)
 {
   /* objfile->sections can be already set when reading a mapped symbol
      file.  I believe that we do need to rebuild the section table in
-     this case (we rebuild other things derived from the bfd), but we
-     can't free the old one (it's in the psymbol_obstack).  So we just
-     waste some memory.  */
+     this case (we rebuild other things derived from the bfd).
+     DJB - 05-27-2001 
+     It's in the misc_obstack now, feel free to do what you need to.
+     All the stuff in objfile that was on the psymbol obstack, but didnt' belong, is in the misc obstack, which 
+     I think is all the stuff you want to blow away anyway.
+     */
 
   objfile->sections_end = 0;
   bfd_map_over_sections (objfile->obfd, add_to_objfile_sections, (char *) objfile);
   objfile->sections = (struct obj_section *)
-    obstack_finish (&objfile->psymbol_obstack);
+    obstack_finish (&objfile->misc_obstack);
   objfile->sections_end = objfile->sections + (unsigned long) objfile->sections_end;
   return (0);
 }
@@ -188,6 +191,8 @@ allocate_objfile (bfd *abfd, int flags)
 	      /* Update pointers to functions to *our* copies */
 	      obstack_chunkfun (&objfile->psymbol_cache.cache, xmmalloc);
 	      obstack_freefun (&objfile->psymbol_cache.cache, mfree);
+	      obstack_chunkfun (&objfile->misc_obstack, xmmalloc);
+	      obstack_freefun (&objfile->misc_obstack, mfree);
 	      obstack_chunkfun (&objfile->psymbol_obstack, xmmalloc);
 	      obstack_freefun (&objfile->psymbol_obstack, mfree);
 	      obstack_chunkfun (&objfile->symbol_obstack, xmmalloc);
@@ -216,6 +221,9 @@ allocate_objfile (bfd *abfd, int flags)
 	      objfile->flags |= OBJF_MAPPED;
 	      mmalloc_setkey (objfile->md, 0, objfile);
 	      obstack_specify_allocation_with_arg (&objfile->psymbol_cache.cache,
+						   0, 0, xmmalloc, mfree,
+						   objfile->md);
+	      obstack_specify_allocation_with_arg (&objfile->misc_obstack,
 						   0, 0, xmmalloc, mfree,
 						   objfile->md);
 	      obstack_specify_allocation_with_arg (&objfile->psymbol_obstack,
@@ -264,6 +272,8 @@ allocate_objfile (bfd *abfd, int flags)
       objfile->md = NULL;
       obstack_specify_allocation (&objfile->psymbol_cache.cache, 0, 0,
 				  xmalloc, xfree);
+      obstack_specify_allocation (&objfile->misc_obstack, 0, 0, xmalloc,
+				  xfree);
       obstack_specify_allocation (&objfile->psymbol_obstack, 0, 0, xmalloc,
 				  xfree);
       obstack_specify_allocation (&objfile->symbol_obstack, 0, 0, xmalloc,
@@ -475,6 +485,7 @@ free_objfile (struct objfile *objfile)
 	mfree (objfile->md, objfile->static_psymbols.list);
       /* Free the obstacks for non-reusable objfiles */
       free_bcache (&objfile->psymbol_cache);
+      obstack_free (&objfile->misc_obstack, 0);
       obstack_free (&objfile->psymbol_obstack, 0);
       obstack_free (&objfile->symbol_obstack, 0);
       obstack_free (&objfile->type_obstack, 0);

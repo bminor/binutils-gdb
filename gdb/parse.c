@@ -531,7 +531,8 @@ write_dollar_variable (struct stoken str)
       if (msym)
 	{
 	  write_exp_msymbol (msym,
-			     lookup_function_type (builtin_type_int),
+			     (struct type *)make_function_type (NULL, builtin_type_int, 0, NULL, 0)
+			     /*lookup_function_type (builtin_type_int)*/,
 			     builtin_type_int);
 	  return;
 	}
@@ -1255,7 +1256,7 @@ follow_types (struct type *follow_type)
 {
   int done = 0;
   int array_size;
-  struct type *range_type;
+  struct range_type *range_type;
 
   while (!done)
     switch (pop_type ())
@@ -1271,23 +1272,23 @@ follow_types (struct type *follow_type)
 	break;
       case tp_array:
 	array_size = pop_type_int ();
-	/* FIXME-type-allocation: need a way to free this type when we are
+	/* TYPEFIX -type-allocation: need a way to free this type when we are
 	   done with it.  */
 	range_type =
-	  create_range_type ((struct type *) NULL,
+	  make_range_type (NULL, 
 			     builtin_type_int, 0,
 			     array_size >= 0 ? array_size - 1 : 0);
-	follow_type =
-	  create_array_type ((struct type *) NULL,
+	follow_type = (struct type *)
+	  make_array_type (NULL,  
 			     follow_type, range_type);
 	if (array_size < 0)
 	  TYPE_ARRAY_UPPER_BOUND_TYPE (follow_type)
-	    = BOUND_CANNOT_BE_DETERMINED;
+	    = BT_cannot_be_determined;
 	break;
       case tp_function:
-	/* FIXME-type-allocation: need a way to free this type when we are
+	/* TYPEFIX-type-allocation: need a way to free this type when we are
 	   done with it.  */
-	follow_type = lookup_function_type (follow_type);
+	follow_type = (struct type *)make_function_type (NULL, follow_type, 0, NULL, 0);
 	break;
       }
   return follow_type;
@@ -1299,9 +1300,9 @@ build_parse (void)
 {
   int i;
 
-  msym_text_symbol_type =
-    init_type (TYPE_CODE_FUNC, 1, 0, "<text variable, no debug info>", NULL);
-  TYPE_TARGET_TYPE (msym_text_symbol_type) = builtin_type_int;
+  msym_text_symbol_type = (struct type *)
+    make_function_type (NULL, builtin_type_int, 0, NULL, 0);
+  TYPE_NAME (msym_text_symbol_type) = "<text variable, no debug info>";
   msym_data_symbol_type =
     init_type (TYPE_CODE_INT, TARGET_INT_BIT / HOST_CHAR_BIT, 0,
 	       "<data variable, no debug info>", NULL);

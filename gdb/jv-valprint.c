@@ -70,7 +70,7 @@ java_value_print (value_ptr val, struct ui_file *stream, int format,
     }
 
   if (TYPE_CODE (type) == TYPE_CODE_PTR && !value_logical_not (val))
-    type_print (TYPE_TARGET_TYPE (type), "", stream, -1);
+    type_print (POINTER_TARGET_TYPE (type), "", stream, -1);
 
   name = TYPE_TAG_NAME (type);
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT && name != NULL
@@ -197,7 +197,7 @@ java_value_print (value_ptr val, struct ui_file *stream, int format,
   /* If it's type String, print it */
 
   if (TYPE_CODE (type) == TYPE_CODE_PTR
-      && TYPE_TARGET_TYPE (type)
+      && POINTER_TARGET_TYPE (type)
       && TYPE_NAME (TYPE_TARGET_TYPE (type))
       && strcmp (TYPE_NAME (TYPE_TARGET_TYPE (type)), "java.lang.String") == 0
       && (format == 0 || format == 's')
@@ -261,7 +261,7 @@ java_print_value_fields (struct type *type, char *valaddr, CORE_ADDR address,
 	{
 	  int boffset;
 	  struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
-	  char *basename = TYPE_NAME (baseclass);
+	  const char *basename = TYPE_NAME (baseclass);
 	  char *base_valaddr;
 
 	  if (BASETYPE_VIA_VIRTUAL (type, i))

@@ -128,7 +128,7 @@ c_print_type (struct type *type, char *varstring, struct ui_file *stream,
 static void
 cp_type_print_derivation_info (struct ui_file *stream, struct type *type)
 {
-  char *name;
+  const char *name;
   int i;
 
   for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
@@ -157,7 +157,7 @@ cp_type_print_method_args (struct type **args, char *prefix, char *varstring,
   fprintf_symbol_filtered (stream, prefix, language_cplus, DMGL_ANSI);
   fprintf_symbol_filtered (stream, varstring, language_cplus, DMGL_ANSI);
   fputs_filtered ("(", stream);
-  if (args && args[!staticp] && args[!staticp]->code != TYPE_CODE_VOID)
+  if (args && args[!staticp] && TYPE_CODE(args[!staticp]) != TYPE_CODE_VOID)
     {
       i = !staticp;		/* skip the class variable */
       while (1)
@@ -168,7 +168,7 @@ cp_type_print_method_args (struct type **args, char *prefix, char *varstring,
 	      fprintf_filtered (stream, " ...");
 	      break;
 	    }
-	  else if (args[i]->code != TYPE_CODE_VOID)
+	  else if (TYPE_CODE(args[i]) != TYPE_CODE_VOID)
 	    {
 	      fprintf_filtered (stream, ", ");
 	    }
@@ -197,7 +197,7 @@ void
 c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
 			     int show, int passed_a_ptr)
 {
-  char *name;
+  const char *name;
   if (type == 0)
     return;
 
@@ -209,7 +209,7 @@ c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_PTR:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
+      c_type_print_varspec_prefix (POINTER_TARGET_TYPE (type), stream, 0, 1);
       fprintf_filtered (stream, "*");
       c_type_print_cv_qualifier (type, stream, 1, 0);
       break;
@@ -240,19 +240,19 @@ c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
       break;
 
     case TYPE_CODE_REF:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
+      c_type_print_varspec_prefix (POINTER_TARGET_TYPE (type), stream, 0, 1);
       fprintf_filtered (stream, "&");
       c_type_print_cv_qualifier (type, stream, 1, 0);
       break;
 
     case TYPE_CODE_FUNC:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      c_type_print_varspec_prefix (FUNCTION_RETURN_VALUE (type), stream, 0, 0);
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
       break;
 
     case TYPE_CODE_ARRAY:
-      c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      c_type_print_varspec_prefix (ARRAY_ELEMENT_TYPE (type), stream, 0, 0);
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
       break;
@@ -335,7 +335,7 @@ c_type_print_args (struct type *type, struct ui_file *stream)
 	{
 	  fprintf_filtered (stream, "...");
 	}
-      else if ((args[1]->code == TYPE_CODE_VOID) &&
+      else if ((TYPE_CODE(args[1]) == TYPE_CODE_VOID) &&
 	       (current_language->la_language == language_cplus))
 	{
 	  fprintf_filtered (stream, "void");
@@ -343,7 +343,7 @@ c_type_print_args (struct type *type, struct ui_file *stream)
       else
 	{
 	  for (i = 1;
-	       args[i] != NULL && args[i]->code != TYPE_CODE_VOID;
+	       args[i] != NULL && TYPE_CODE(args[i]) != TYPE_CODE_VOID;
 	       i++)
 	    {
 	      c_print_type (args[i], "", stream, -1, 0);
@@ -351,7 +351,7 @@ c_type_print_args (struct type *type, struct ui_file *stream)
 		{
 		  fprintf_filtered (stream, "...");
 		}
-	      else if (args[i + 1]->code != TYPE_CODE_VOID)
+	      else if (TYPE_CODE(args[i + 1]) != TYPE_CODE_VOID)
 		{
 		  fprintf_filtered (stream, ",");
 		  wrap_here ("    ");
@@ -519,11 +519,10 @@ c_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	fprintf_filtered (stream, ")");
 
       fprintf_filtered (stream, "[");
-      if (TYPE_LENGTH (type) >= 0 && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0
-	&& TYPE_ARRAY_UPPER_BOUND_TYPE (type) != BOUND_CANNOT_BE_DETERMINED)
+      if (TYPE_LENGTH (type) >= 0 && TYPE_LENGTH (ARRAY_ELEMENT_TYPE (type)) > 0)
 	fprintf_filtered (stream, "%d",
 			  (TYPE_LENGTH (type)
-			   / TYPE_LENGTH (TYPE_TARGET_TYPE (type))));
+			   / TYPE_LENGTH (ARRAY_ELEMENT_TYPE (type))));
       fprintf_filtered (stream, "]");
 
       c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
@@ -546,8 +545,10 @@ c_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
       break;
 
     case TYPE_CODE_PTR:
+      c_type_print_varspec_suffix (POINTER_TARGET_TYPE (type), stream, 0, 1, 0);
+      break;
     case TYPE_CODE_REF:
-      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 1, 0);
+      c_type_print_varspec_suffix (POINTER_TARGET_TYPE (type), stream, 0, 1, 0);
       break;
 
     case TYPE_CODE_FUNC:
@@ -555,7 +556,7 @@ c_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	fprintf_filtered (stream, ")");
       if (!demangled_args)
 	{
-	  int i, len = TYPE_NFIELDS (type);
+	  int i, len = FUNCTION_NUM_ARGUMENTS (type);
 	  fprintf_filtered (stream, "(");
 	  if ((len == 0) && (current_language->la_language == language_cplus))
 	    {
@@ -569,11 +570,11 @@ c_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 		    fputs_filtered (", ", stream);
 		    wrap_here ("    ");
 		  }
-		c_print_type (TYPE_FIELD_TYPE (type, i), "", stream, -1, 0);
+		c_print_type (FUNCTION_ARGUMENT_TYPE (type, i), "", stream, -1, 0);
 	      }
 	  fprintf_filtered (stream, ")");
 	}
-      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
+      c_type_print_varspec_suffix (FUNCTION_RETURN_VALUE (type), stream, 0,
 				   passed_a_ptr, 0);
       break;
 
@@ -664,12 +665,18 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 
   switch (TYPE_CODE (type))
     {
-    case TYPE_CODE_TYPEDEF:
-    case TYPE_CODE_ARRAY:
     case TYPE_CODE_PTR:
-    case TYPE_CODE_MEMBER:
     case TYPE_CODE_REF:
+      c_type_print_base (POINTER_TARGET_TYPE (type), stream, show, level);
+      break;
+    case TYPE_CODE_ARRAY:
+      c_type_print_base (ARRAY_ELEMENT_TYPE (type), stream, show, level);
+      break;
     case TYPE_CODE_FUNC:
+      c_type_print_base (FUNCTION_RETURN_VALUE (type), stream, show, level);
+      break;
+    case TYPE_CODE_TYPEDEF:
+    case TYPE_CODE_MEMBER:
     case TYPE_CODE_METHOD:
       c_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
       break;
@@ -683,13 +690,13 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 	{
 	  switch (TYPE_DECLARED_TYPE (type))
 	    {
-	    case DECLARED_TYPE_CLASS:
+	    case DT_class:
 	      fprintf_filtered (stream, "class ");
 	      break;
-	    case DECLARED_TYPE_UNION:
+	    case DT_union:
 	      fprintf_filtered (stream, "union ");
 	      break;
-	    case DECLARED_TYPE_STRUCT:
+	    case DT_struct:
 	      fprintf_filtered (stream, "struct ");
 	      break;
 	    default:
@@ -757,8 +764,8 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 	     masquerading as a class, if all members are public, there's
 	     no need for a "public:" label. */
 
-	  if ((TYPE_DECLARED_TYPE (type) == DECLARED_TYPE_CLASS) ||
-	      (TYPE_DECLARED_TYPE (type) == DECLARED_TYPE_TEMPLATE))
+	  if ((TYPE_DECLARED_TYPE (type) == DT_class) ||
+	      (TYPE_DECLARED_TYPE (type) == DT_template))
 	    {
 	      QUIT;
 	      len = TYPE_NFIELDS (type);
@@ -786,8 +793,8 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 		    }
 		}
 	    }
-	  else if ((TYPE_DECLARED_TYPE (type) == DECLARED_TYPE_STRUCT) ||
-		   (TYPE_DECLARED_TYPE (type) == DECLARED_TYPE_UNION))
+	  else if ((TYPE_DECLARED_TYPE (type) == DT_struct) ||
+		   (TYPE_DECLARED_TYPE (type) == DT_union))
 	    {
 	      QUIT;
 	      len = TYPE_NFIELDS (type);
@@ -899,7 +906,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
 	      int j, len2 = TYPE_FN_FIELDLIST_LENGTH (type, i);
 	      char *method_name = TYPE_FN_FIELDLIST_NAME (type, i);
-	      char *name = type_name_no_tag (type);
+	      const char *name = type_name_no_tag (type);
 	      int is_constructor = name && STREQ (method_name, name);
 	      for (j = 0; j < len2; j++)
 		{
@@ -1061,7 +1068,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
       else if (show > 0 || TYPE_TAG_NAME (type) == NULL)
 	{
 	  fprintf_filtered (stream, "{");
-	  len = TYPE_NFIELDS (type);
+	  len = ENUM_NUM_VALUES (type);
 	  lastval = 0;
 	  for (i = 0; i < len; i++)
 	    {
@@ -1069,11 +1076,11 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      if (i)
 		fprintf_filtered (stream, ", ");
 	      wrap_here ("    ");
-	      fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
-	      if (lastval != TYPE_FIELD_BITPOS (type, i))
+	      fputs_filtered (ENUM_VALUE_NAME (type, i), stream);
+	      if (lastval != ENUM_VALUE_VALUE (type, i))
 		{
-		  fprintf_filtered (stream, " = %d", TYPE_FIELD_BITPOS (type, i));
-		  lastval = TYPE_FIELD_BITPOS (type, i);
+		  fprintf_filtered (stream, " = %d", ENUM_VALUE_VALUE (type, i));
+		  lastval = ENUM_VALUE_VALUE (type, i);
 		}
 	      lastval++;
 	    }

@@ -1001,7 +1001,7 @@ val_print_array_elements (struct type *type, char *valaddr, CORE_ADDR address,
   /* Number of repetitions we have detected so far.  */
   unsigned int reps;
 
-  elttype = TYPE_TARGET_TYPE (type);
+  elttype = ARRAY_ELEMENT_TYPE (type);
   eltlen = TYPE_LENGTH (check_typedef (elttype));
   len = TYPE_LENGTH (type) / eltlen;
 

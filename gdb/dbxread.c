@@ -1020,6 +1020,12 @@ add_bincl_to_list (struct partial_symtab *pst, char *name, int instance)
   next_bincl++->name = name;
 }
 
+static struct symtab *
+find_corresponding_bincl_symtab (char *name, int instance)
+{
+  struct header_file_location *bincl;
+  return lookup_symtab (name);
+}
 /* Given a name, value pair, find the corresponding
    bincl in the list.  Return the partial symtab associated
    with that header_file_location.  */

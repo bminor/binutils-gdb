@@ -232,9 +232,7 @@ c_create_fundamental_type (struct objfile *objfile, int typeid)
       warning ("internal error: no C/C++ fundamental type %d", typeid);
       break;
     case FT_VOID:
-      type = init_type (TYPE_CODE_VOID,
-			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			0, "void", objfile);
+      type = builtin_type_void;
       break;
     case FT_BOOLEAN:
       type = init_type (TYPE_CODE_BOOL,
@@ -243,80 +241,49 @@ c_create_fundamental_type (struct objfile *objfile, int typeid)
 
       break;
     case FT_CHAR:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			0, "char", objfile);
-      TYPE_FLAGS (type) |= TYPE_FLAG_NOSIGN;
+      type = builtin_type_char;
       break;
     case FT_SIGNED_CHAR:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			0, "signed char", objfile);
+      type = builtin_type_signed_char;
       break;
     case FT_UNSIGNED_CHAR:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, "unsigned char", objfile);
+      type = builtin_type_unsigned_char;
       break;
     case FT_SHORT:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_SHORT_BIT / TARGET_CHAR_BIT,
-			0, "short", objfile);
+      type = builtin_type_short;
       break;
     case FT_SIGNED_SHORT:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_SHORT_BIT / TARGET_CHAR_BIT,
-			0, "short", objfile);	/* FIXME-fnf */
+      type = builtin_type_short;
       break;
     case FT_UNSIGNED_SHORT:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_SHORT_BIT / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, "unsigned short", objfile);
+      type = builtin_type_unsigned_short;
       break;
     case FT_INTEGER:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_INT_BIT / TARGET_CHAR_BIT,
-			0, "int", objfile);
+      type = builtin_type_int; 
       break;
     case FT_SIGNED_INTEGER:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_INT_BIT / TARGET_CHAR_BIT,
-			0, "int", objfile);	/* FIXME -fnf */
+      type = builtin_type_int;
       break;
     case FT_UNSIGNED_INTEGER:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_INT_BIT / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, "unsigned int", objfile);
+      type = builtin_type_unsigned_int;
       break;
     case FT_LONG:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_LONG_BIT / TARGET_CHAR_BIT,
-			0, "long", objfile);
+      type = builtin_type_long;
       break;
     case FT_SIGNED_LONG:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_LONG_BIT / TARGET_CHAR_BIT,
-			0, "long", objfile);	/* FIXME -fnf */
+      type = builtin_type_long;
       break;
     case FT_UNSIGNED_LONG:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_LONG_BIT / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, "unsigned long", objfile);
+      type = builtin_type_unsigned_long;
       break;
     case FT_LONG_LONG:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-			0, "long long", objfile);
+      type = builtin_type_long_long;
       break;
     case FT_SIGNED_LONG_LONG:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-			0, "signed long long", objfile);
+      type = builtin_type_long_long;
       break;
     case FT_UNSIGNED_LONG_LONG:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, "unsigned long long", objfile);
+      type = builtin_type_unsigned_long_long;
       break;
     case FT_FLOAT:
       type = init_type (TYPE_CODE_FLT,

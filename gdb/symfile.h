@@ -141,8 +141,6 @@ extend_psymbol_list (struct psymbol_allocation_list *, struct objfile *);
 
 /* Add any kind of symbol to a psymbol_allocation_list. */
 
-/* #include "demangle.h" */
-
 extern void
 add_psymbol_to_list (char *, int, namespace_enum, enum address_class,
 		     struct psymbol_allocation_list *, long, CORE_ADDR,

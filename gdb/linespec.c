@@ -105,7 +105,7 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 {
   int i1 = 0;
   int ibase;
-  char *class_name = type_name_no_tag (t);
+  const char *class_name = type_name_no_tag (t);
 
   /* Ignore this class if it doesn't have a name.  This is ugly, but
      unless we figure out how to get the physname without the name of
@@ -274,9 +274,9 @@ find_toplevel_char (char *s, char c)
 	return scan;
       else if (*scan == '"' || *scan == '\'')
 	quoted = *scan;
-      else if (*scan == '(')
+      else if (*scan == '(' || *scan == '<')
 	depth++;
-      else if (*scan == ')' && depth > 0)
+      else if ((*scan == ')' || *scan == '>') && depth > 0)
 	depth--;
     }
 

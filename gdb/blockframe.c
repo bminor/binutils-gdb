@@ -1270,7 +1270,10 @@ generic_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
      saved by frames INTERIOR TO the current frame, we skip examining
      the current frame itself: otherwise, we would be getting the
      previous frame's registers which were saved by the current frame.  */
-
+  if (frame)
+  {
+	  struct symbol *sym = get_frame_function (frame);
+  }
   while (frame && ((frame = frame->next) != NULL))
     {
       if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
@@ -1284,29 +1287,39 @@ generic_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 		    REGISTER_RAW_SIZE (regnum));
 	  return;
 	}
-
-      FRAME_INIT_SAVED_REGS (frame);
-      if (frame->saved_regs != NULL
-	  && frame->saved_regs[regnum] != 0)
+#if 0
+      if (dwarf2_get_cfa_for_addr (frame->pc) != 0)
 	{
-	  if (lval)		/* found it saved on the stack */
-	    *lval = lval_memory;
-	  if (regnum == SP_REGNUM)
-	    {
-	      if (raw_buffer)	/* SP register treated specially */
-		store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
-			       frame->saved_regs[regnum]);
-	    }
-	  else
-	    {
-	      if (addrp)	/* any other register */
-		*addrp = frame->saved_regs[regnum];
-	      if (raw_buffer)
-		read_memory (frame->saved_regs[regnum], raw_buffer,
-			     REGISTER_RAW_SIZE (regnum));
-	    }
-	  return;
+		dwarf2_execute_cfa_program(frame);
 	}
+	else
+	{
+#endif
+		FRAME_INIT_SAVED_REGS (frame);
+#if 0
+	}
+#endif
+		if (frame->saved_regs != NULL
+				&& frame->saved_regs[regnum] != 0)
+		{
+			if (lval)		/* found it saved on the stack */
+				*lval = lval_memory;
+			if (regnum == SP_REGNUM)
+			{
+				if (raw_buffer)	/* SP register treated specially */
+					store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
+							frame->saved_regs[regnum]);
+			}
+			else
+			{
+				if (addrp)	/* any other register */
+					*addrp = frame->saved_regs[regnum];
+				if (raw_buffer)
+					read_memory (frame->saved_regs[regnum], raw_buffer,
+							REGISTER_RAW_SIZE (regnum));
+			}
+			return;
+		}
     }
 
   /* If we get thru the loop to this point, it means the register was

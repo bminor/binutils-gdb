@@ -834,7 +834,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       else
 	{
 	  t = parse_type (cur_fd, ax, sh->index + 1, 0, bigend, name);
-	  if (STREQ (name, "malloc") && t->code == TYPE_CODE_VOID)
+	  if (STREQ (name, "malloc") && TYPE_CODE(t) == TYPE_CODE_VOID)
 	    {
 	      /* I don't know why, but, at least under Alpha GNU/Linux,
 	         when linking against a malloc without debugging
@@ -846,7 +846,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	         patch up the type and make it void*
 	         instead. (davidm@azstarnet.com)
 	       */
-	      t = make_pointer_type (t, NULL);
+	      t = (struct type *) make_pointer_type (NULL, t);
 	    }
 	}
       b = top_stack->cur_block;
@@ -1133,8 +1133,10 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		count++;
 		f++;
 	      }
+#if TYPEFIX
 	    if (unsigned_enum)
 	      TYPE_FLAGS (t) |= TYPE_FLAG_UNSIGNED;
+#endif
 	  }
 	/* make this the current type */
 	top_stack->cur_type = t;
@@ -1603,9 +1605,13 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 
       /* DEC c89 produces cross references to qualified aggregate types,
          dereference them.  */
-      while (TYPE_CODE (tp) == TYPE_CODE_PTR
-	     || TYPE_CODE (tp) == TYPE_CODE_ARRAY)
-	tp = tp->target_type;
+      while (TYPE_CODE (tp) == TYPE_CODE_PTR || TYPE_CODE (tp) == TYPE_CODE_ARRAY)
+	{
+	  while (TYPE_CODE (tp) == TYPE_CODE_PTR)
+	    tp = POINTER_TARGET_TYPE (tp);
+	  while (TYPE_CODE (tp) == TYPE_CODE_ARRAY)
+	    tp = ARRAY_ELEMENT_TYPE(tp);
+	}
 
       /* Make sure that TYPE_CODE(tp) has an expected type code.
          Any type may be returned from cross_ref if file indirect entries
@@ -1761,7 +1767,7 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
   /* Used in array processing */
   int rf, id;
   FDR *fh;
-  struct type *range;
+  struct range_type *range;
   struct type *indx;
   int lower, upper;
   RNDXR rndx;
@@ -1813,10 +1819,10 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
       ax++;
       rf = AUX_GET_WIDTH (bigend, ax);	/* bit size of array element */
 
-      range = create_range_type ((struct type *) NULL, indx,
+      range = make_range_type (NULL, indx,
 				 lower, upper);
 
-      t = create_array_type ((struct type *) NULL, *tpp, range);
+      t = (struct type *)make_array_type (NULL,  *tpp, range);
 
       /* We used to fill in the supplied array element bitsize
          here if the TYPE_LENGTH of the target type was zero.
@@ -4247,7 +4253,7 @@ fixup_sigtramp (void)
 
   /* But what symtab does it live in ? */
   st = find_pc_symtab (SYMBOL_VALUE (s));
-
+#if TYPEFIX
   /*
    * Ok, there goes the fix: turn it into a procedure, with all the
    * needed info.  Note we make it a nested procedure of sigvec,
@@ -4258,7 +4264,7 @@ fixup_sigtramp (void)
   SYMBOL_TYPE (s) = init_type (TYPE_CODE_FUNC, 4, 0, (char *) NULL,
 			       st->objfile);
   TYPE_TARGET_TYPE (SYMBOL_TYPE (s)) = mdebug_type_void;
-
+#endif
   /* Need a block to allocate MIPS_EFI_SYMBOL_NAME in */
   b = new_block (1);
   SYMBOL_BLOCK_VALUE (s) = b;
@@ -4311,6 +4317,7 @@ fixup_sigtramp (void)
 void
 _initialize_mdebugread (void)
 {
+#if TYPEFIX
   mdebug_type_void =
     init_type (TYPE_CODE_VOID, 1,
 	       0,
@@ -4423,10 +4430,10 @@ _initialize_mdebugread (void)
 	       0, "floating decimal",
 	       (struct objfile *) NULL);
 
-  nodebug_func_symbol_type = init_type (TYPE_CODE_FUNC, 1, 0,
-					"<function, no debug info>", NULL);
-  TYPE_TARGET_TYPE (nodebug_func_symbol_type) = mdebug_type_int;
+  nodebug_func_symbol_type = (struct type *) make_function_type (NULL, mdebug_type_int, 0, NULL, 0, 0);
+  TYPE_NAME (nodebug_func_symbol_type)  = "<function, no debug info>";
   nodebug_var_symbol_type =
     init_type (TYPE_CODE_INT, TARGET_INT_BIT / HOST_CHAR_BIT, 0,
 	       "<variable, no debug info>", NULL);
+#endif
 }

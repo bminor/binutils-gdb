@@ -723,7 +723,6 @@ execute_command (char *p, int from_tty)
   extern void serial_log_command (const char *);
   
   free_all_values ();
-
   /* Force cleanup of any alloca areas if using C alloca instead of
      a builtin alloca.  */
   alloca (0);
@@ -1512,7 +1511,7 @@ get_prompt_1 (void *data)
 	      switch (TYPE_CODE (arg_type))
 		{
 		case TYPE_CODE_ARRAY:
-		  elt_type = check_typedef (TYPE_TARGET_TYPE (arg_type));
+		  elt_type = check_typedef (ARRAY_ELEMENT_TYPE (arg_type));
 		  if (TYPE_LENGTH (arg_type) > 0 &&
 		      TYPE_LENGTH (elt_type) == 1 &&
 		      TYPE_CODE (elt_type) == TYPE_CODE_INT)
@@ -1617,15 +1616,15 @@ get_prompt_1 (void *data)
 		  {
 		    /* no default format for enum */
 		    longval = value_as_long (arg_val);
-		    len = TYPE_NFIELDS (arg_type);
+		    len = ENUM_NUM_VALUES (arg_type);
 		    /* find enum name if possible */
 		    for (i = 0; i < len; i++)
-		      if (TYPE_FIELD_BITPOS (arg_type, i) == longval)
+		      if (ENUM_VALUE_VALUE (arg_type, i) == longval)
 			break;	/* match -- end loop */
 
 		    if (i < len)	/* enum name found */
 		      {
-			char *name = TYPE_FIELD_NAME (arg_type, i);
+			const char *name = ENUM_VALUE_NAME (arg_type, i);
 
 			strncpy (outp, name, available);
 			/* in casel available < strlen (name), */

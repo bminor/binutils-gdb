@@ -75,7 +75,7 @@ value_add (value_ptr arg1, value_ptr arg2)
 	  valint = arg1;
 	  valptrtype = type2;
 	}
-      len = TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (valptrtype)));
+      len = TYPE_LENGTH (check_typedef (POINTER_TARGET_TYPE (valptrtype)));
       if (len == 0)
 	len = 1;		/* For (void *) */
       retval = value_from_pointer (valptrtype,
@@ -102,17 +102,17 @@ value_sub (value_ptr arg1, value_ptr arg2)
       if (TYPE_CODE (type2) == TYPE_CODE_INT)
 	{
 	  /* pointer - integer.  */
-	  LONGEST sz = TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)));
+	  LONGEST sz = TYPE_LENGTH (check_typedef (POINTER_TARGET_TYPE (type1)));
 	  return value_from_pointer (VALUE_TYPE (arg1),
 				     (value_as_pointer (arg1)
 				      - (sz * value_as_long (arg2))));
 	}
       else if (TYPE_CODE (type2) == TYPE_CODE_PTR
-	       && TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)))
-	       == TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type2))))
+	       && TYPE_LENGTH (check_typedef (POINTER_TARGET_TYPE (type1)))
+	       == TYPE_LENGTH (check_typedef (POINTER_TARGET_TYPE (type2))))
 	{
 	  /* pointer to <type x> - pointer to <type x>.  */
-	  LONGEST sz = TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)));
+	  LONGEST sz = TYPE_LENGTH (check_typedef (POINTER_TARGET_TYPE (type1)));
 	  return value_from_longest
 	    (builtin_type_long,	/* FIXME -- should be ptrdiff_t */
 	     (value_as_long (arg1) - value_as_long (arg2)) / sz);
@@ -148,9 +148,10 @@ value_subscript (value_ptr array, value_ptr idx)
   if (TYPE_CODE (tarray) == TYPE_CODE_ARRAY
       || TYPE_CODE (tarray) == TYPE_CODE_STRING)
     {
-      struct type *range_type = TYPE_INDEX_TYPE (tarray);
+      struct range_type *range_type = ARRAY_RANGE_TYPE (tarray);
       LONGEST lowerbound, upperbound;
-      get_discrete_bounds (range_type, &lowerbound, &upperbound);
+      lowerbound = RANGE_LOWER_BOUND (range_type);
+      upperbound = RANGE_UPPER_BOUND (range_type);
 
       if (VALUE_LVAL (array) != lval_memory)
 	return value_subscripted_rvalue (array, idx, lowerbound);
@@ -173,15 +174,15 @@ value_subscript (value_ptr array, value_ptr idx)
 
       array = value_coerce_array (array);
     }
-
   if (TYPE_CODE (tarray) == TYPE_CODE_BITSTRING)
     {
-      struct type *range_type = TYPE_INDEX_TYPE (tarray);
+      struct range_type *range_type = SET_RANGE_TYPE (tarray);
       LONGEST index = value_as_long (idx);
       value_ptr v;
       int offset, byte, bit_index;
       LONGEST lowerbound, upperbound;
-      get_discrete_bounds (range_type, &lowerbound, &upperbound);
+      lowerbound = RANGE_LOWER_BOUND (range_type);
+      upperbound = RANGE_UPPER_BOUND (range_type);
       if (index < lowerbound || index > upperbound)
 	error ("bitstring index out of range");
       index -= lowerbound;
@@ -1335,8 +1336,10 @@ value_bit_index (struct type *type, char *valaddr, int index)
   LONGEST low_bound, high_bound;
   LONGEST word;
   unsigned rel_index;
-  struct type *range = TYPE_FIELD_TYPE (type, 0);
-  if (get_discrete_bounds (range, &low_bound, &high_bound) < 0)
+  struct range_type *range = SET_RANGE_TYPE (type);
+  low_bound = RANGE_LOWER_BOUND (range);
+  high_bound = RANGE_UPPER_BOUND (range);
+  if (low_bound < 0 || high_bound < 0)
     return -2;
   if (index < low_bound || index > high_bound)
     return -1;
@@ -1356,7 +1359,7 @@ value_in (value_ptr element, value_ptr set)
   struct type *settype = check_typedef (VALUE_TYPE (set));
   struct type *eltype = check_typedef (VALUE_TYPE (element));
   if (TYPE_CODE (eltype) == TYPE_CODE_RANGE)
-    eltype = TYPE_TARGET_TYPE (eltype);
+    eltype = RANGE_INDEX_TYPE (eltype);
   if (TYPE_CODE (settype) != TYPE_CODE_SET)
     error ("Second argument of 'IN' has wrong type");
   if (TYPE_CODE (eltype) != TYPE_CODE_INT

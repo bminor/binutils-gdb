@@ -1280,7 +1280,7 @@ decode_subscript_data_item (char *scan, char *end)
   struct type *typep = NULL;	/* Array type we are building */
   struct type *nexttype;	/* Type of each element (may be array) */
   struct type *indextype;	/* Type of this index */
-  struct type *rangetype;
+  struct range_type *rangetype;
   unsigned int format;
   unsigned short fundtype;
   unsigned long lowbound;
@@ -1312,9 +1312,9 @@ decode_subscript_data_item (char *scan, char *end)
 	  complain (&subscript_data_items, DIE_ID, DIE_NAME);
 	  nexttype = dwarf_fundamental_type (current_objfile, FT_INTEGER);
 	}
-      rangetype = create_range_type ((struct type *) NULL, indextype,
+      rangetype = make_range_type (current_objfile, indextype,
 				     lowbound, highbound);
-      typep = create_array_type ((struct type *) NULL, nexttype, rangetype);
+      typep = (struct type *) make_array_type (current_objfile, nexttype, rangetype);
       break;
     case FMT_FT_C_X:
     case FMT_FT_X_C:
@@ -1325,14 +1325,14 @@ decode_subscript_data_item (char *scan, char *end)
     case FMT_UT_X_X:
       complain (&unhandled_array_subscript_format, DIE_ID, DIE_NAME, format);
       nexttype = dwarf_fundamental_type (current_objfile, FT_INTEGER);
-      rangetype = create_range_type ((struct type *) NULL, nexttype, 0, 0);
-      typep = create_array_type ((struct type *) NULL, nexttype, rangetype);
+      rangetype = make_range_type (current_objfile, nexttype, 0, 0);
+      typep = (struct type *)make_array_type (current_objfile,  nexttype, rangetype);
       break;
     default:
       complain (&unknown_array_subscript_format, DIE_ID, DIE_NAME, format);
       nexttype = dwarf_fundamental_type (current_objfile, FT_INTEGER);
-      rangetype = create_range_type ((struct type *) NULL, nexttype, 0, 0);
-      typep = create_array_type ((struct type *) NULL, nexttype, rangetype);
+      rangetype = make_range_type (current_objfile, nexttype, 0, 0);
+      typep = (struct type *)make_array_type (current_objfile, nexttype, rangetype);
       break;
     }
   return (typep);
@@ -1432,7 +1432,7 @@ read_tag_pointer_type (struct dieinfo *dip)
     }
   else
     {
-      TYPE_TARGET_TYPE (utype) = type;
+      POINTER_TARGET_TYPE (utype) = type;
       TYPE_POINTER_TYPE (type) = utype;
 
       /* We assume the machine has only one representation for pointers!  */
@@ -1465,7 +1465,7 @@ read_tag_string_type (struct dieinfo *dip)
 {
   struct type *utype;
   struct type *indextype;
-  struct type *rangetype;
+  struct range_type *rangetype;
   unsigned long lowbound = 0;
   unsigned long highbound;
 
@@ -1480,7 +1480,7 @@ read_tag_string_type (struct dieinfo *dip)
       highbound = 1;
     }
   indextype = dwarf_fundamental_type (current_objfile, FT_INTEGER);
-  rangetype = create_range_type ((struct type *) NULL, indextype, lowbound,
+  rangetype = make_range_type (current_objfile, indextype, lowbound,
 				 highbound);
 
   utype = lookup_utype (dip->die_ref);
@@ -1501,7 +1501,7 @@ read_tag_string_type (struct dieinfo *dip)
     }
 
   /* Create the string type using the blank type we either found or created. */
-  utype = create_string_type (utype, rangetype);
+  utype = (struct type *)make_string_type (current_objfile, rangetype);
 }
 
 /*
@@ -1548,16 +1548,18 @@ read_subroutine_type (struct dieinfo *dip, char *thisdie, char *enddie)
     {
       /* This is the first reference to one of these types.  Make
          a new one and place it in the user defined types. */
-      ftype = lookup_function_type (type);
+      ftype = (struct type *)make_function_type (current_objfile, type, 0, NULL, 0);
       alloc_utype (dip->die_ref, ftype);
     }
   else if (TYPE_CODE (ftype) == TYPE_CODE_UNDEF)
     {
+#if TYPEFIX
       /* We have an existing partially constructed type, so bash it
          into the correct type. */
       TYPE_TARGET_TYPE (ftype) = type;
       TYPE_LENGTH (ftype) = 1;
       TYPE_CODE (ftype) = TYPE_CODE_FUNC;
+#endif
     }
   else
     {
@@ -1728,8 +1730,10 @@ enum_type (struct dieinfo *dip, struct objfile *objfile)
          vector. */
       if (nfields > 0)
 	{
+#if TYPEFIX
 	  if (unsigned_enum)
 	    TYPE_FLAGS (type) |= TYPE_FLAG_UNSIGNED;
+#endif
 	  TYPE_NFIELDS (type) = nfields;
 	  TYPE_FIELDS (type) = (struct field *)
 	    obstack_alloc (&objfile->symbol_obstack, sizeof (struct field) * nfields);
@@ -2875,7 +2879,7 @@ new_symbol (struct dieinfo *dip, struct objfile *objfile)
 	case TAG_global_subroutine:
 	case TAG_subroutine:
 	  SYMBOL_VALUE_ADDRESS (sym) = dip->at_low_pc;
-	  SYMBOL_TYPE (sym) = lookup_function_type (SYMBOL_TYPE (sym));
+	  SYMBOL_TYPE (sym) =  (struct type *)make_function_type (objfile, SYMBOL_TYPE (sym), 0, NULL, 0);
 	  if (dip->at_prototyped)
 	    TYPE_FLAGS (SYMBOL_TYPE (sym)) |= TYPE_FLAG_PROTOTYPED;
 	  SYMBOL_CLASS (sym) = LOC_BLOCK;

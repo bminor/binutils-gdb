@@ -371,7 +371,6 @@ psymtab_to_symtab (register struct partial_symtab *pst)
       (*pst->read_symtab) (pst);
       do_cleanups (back_to);
     }
-
   return pst->symtab;
 }
 
@@ -496,7 +495,7 @@ default_symfile_offsets (struct objfile *objfile,
 
   objfile->num_sections = SECT_OFF_MAX;
   objfile->section_offsets = (struct section_offsets *)
-    obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
+    obstack_alloc (&objfile->misc_obstack, SIZEOF_SECTION_OFFSETS);
   memset (objfile->section_offsets, 0, SIZEOF_SECTION_OFFSETS);
 
   /* Now calculate offsets for section that were specified by the
@@ -1675,6 +1674,7 @@ reread_symbols (void)
 
 	      /* Free the obstacks for non-reusable objfiles */
 	      free_bcache (&objfile->psymbol_cache);
+	      obstack_free (&objfile->misc_obstack, 0);
 	      obstack_free (&objfile->psymbol_obstack, 0);
 	      obstack_free (&objfile->symbol_obstack, 0);
 	      obstack_free (&objfile->type_obstack, 0);
@@ -1700,6 +1700,8 @@ reread_symbols (void)
 	         it is empty.  */
 	      obstack_specify_allocation (&objfile->psymbol_cache.cache, 0, 0,
 					  xmalloc, xfree);
+	      obstack_specify_allocation (&objfile->misc_obstack, 0, 0,
+					  xmalloc, xfree);
 	      obstack_specify_allocation (&objfile->psymbol_obstack, 0, 0,
 					  xmalloc, xfree);
 	      obstack_specify_allocation (&objfile->symbol_obstack, 0, 0,
@@ -1715,7 +1717,7 @@ reread_symbols (void)
 	      /* We use the same section offsets as from last time.  I'm not
 	         sure whether that is always correct for shared libraries.  */
 	      objfile->section_offsets = (struct section_offsets *)
-		obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
+		obstack_alloc (&objfile->misc_obstack, SIZEOF_SECTION_OFFSETS);
 	      memcpy (objfile->section_offsets, offsets, SIZEOF_SECTION_OFFSETS);
 	      objfile->num_sections = num_offsets;
 
@@ -1977,13 +1979,10 @@ allocate_psymtab (char *filename, struct objfile *objfile)
       objfile->free_psymtabs = psymtab->next;
     }
   else
-    psymtab = (struct partial_symtab *)
-      obstack_alloc (&objfile->psymbol_obstack,
-		     sizeof (struct partial_symtab));
+    psymtab = (struct partial_symtab *) obstack_alloc (&objfile->misc_obstack, sizeof (struct partial_symtab));
 
   memset (psymtab, 0, sizeof (struct partial_symtab));
-  psymtab->filename = obsavestring (filename, strlen (filename),
-				    &objfile->psymbol_obstack);
+  psymtab->filename = obsavestring (filename, strlen(filename), &objfile->misc_obstack);
   psymtab->symtab = NULL;
 
   /* Prepend it to the psymtab list for the objfile it belongs to.

@@ -29,7 +29,6 @@
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free xfree
 #include "bcache.h"
-
 /* Don't do this; it means that if some .o's are compiled with GNU C
    and some are not (easy to do accidentally the way we configure
    things; also it is a pain to have to "make clean" every time you
@@ -40,7 +39,8 @@
 #else
 #define	BYTE_BITFIELD		/*nothing */
 #endif
-
+#include "bitmap.h"
+#include "splay-tree.h"
 /* Define a structure for the information that is common to all symbol types,
    including minimal symbols, partial symbols, and full symbols.  In a
    multilanguage environment, some language specific information may need to
@@ -119,6 +119,7 @@ struct general_symbol_info
     /* The bfd section associated with this symbol. */
 
     asection *bfd_section;
+
   };
 
 extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
@@ -167,7 +168,6 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
    so we can avoid doing this work again the next time we encounter
    the symbol.  Any required space to store the name is obtained from the
    specified obstack. */
-
 #define SYMBOL_INIT_DEMANGLED_NAME(symbol,obstack)			\
   do {									\
     char *demangled = NULL;						\
@@ -175,7 +175,8 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
           SYMBOL_LANGUAGE (symbol) = language_auto;                    \
     if (SYMBOL_LANGUAGE (symbol) == language_cplus			\
 	|| SYMBOL_LANGUAGE (symbol) == language_auto)			\
-      {									\
+      {	\
+	 if (SYMBOL_CPLUS_DEMANGLED_NAME (symbol) == NULL )			{ \
 	demangled =							\
 	  cplus_demangle (SYMBOL_NAME (symbol), DMGL_PARAMS | DMGL_ANSI);\
 	if (demangled != NULL)						\
@@ -189,6 +190,7 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 	  {								\
 	    SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = NULL;		\
 	  }								\
+	 } \
       }									\
     if (SYMBOL_LANGUAGE (symbol) == language_java)			\
       {									\
@@ -361,10 +363,6 @@ struct minimal_symbol
        list.  This is the link.  */
 
     struct minimal_symbol *hash_next;
-
-    /* Minimal symbols are stored in two different hash tables.  This is
-       the `next' pointer for the demangled hash table.  */
-
     struct minimal_symbol *demangled_hash_next;
   };
 
@@ -415,10 +413,14 @@ struct blockvector
 #define GLOBAL_BLOCK		0
 #define	STATIC_BLOCK		1
 #define	FIRST_LOCAL_BLOCK	2
-
+struct block_splay_data
+{
+	bitmap blocks;
+};
 struct block
   {
-
+    /* Unique block ID */
+    unsigned int id;
     /* Addresses in the executable code that are in this block.  */
 
     CORE_ADDR startaddr;
@@ -448,31 +450,22 @@ struct block
        of this flag is undefined.  */
 
     unsigned char gcc_compile_flag;
-
-    /* Number of local symbols.  */
-
-    int nsyms;
-
-    /* The symbols.  If some of them are arguments, then they must be
-       in the order in which we would like to print them.  */
-
+    unsigned int nsyms;
     struct symbol *sym[1];
   };
 
 #define BLOCK_START(bl)		(bl)->startaddr
 #define BLOCK_END(bl)		(bl)->endaddr
-#define BLOCK_NSYMS(bl)		(bl)->nsyms
-#define BLOCK_SYM(bl, n)	(bl)->sym[n]
 #define BLOCK_FUNCTION(bl)	(bl)->function
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
 #define BLOCK_GCC_COMPILED(bl)	(bl)->gcc_compile_flag
+#define BLOCK_NBUCKETS(bl)	(bl)->nsyms
+#define BLOCK_NSYMS(bl)		(bl)->nsyms
+#define BLOCK_ID(bl)		(bl)->id
+#define BLOCK_BUCKET(bl, i)	(bl)->sym[i]
+#define BLOCK_SYM(bl, i)	(bl)->sym[i]
+#define BLOCK_SHOULD_SORT(bl)   0
 
-/* Nonzero if symbols of block BL should be sorted alphabetically.
-   Don't sort a block which corresponds to a function.  If we did the
-   sorting would have to preserve the order of the symbols for the
-   arguments.  */
-
-#define BLOCK_SHOULD_SORT(bl) ((bl)->nsyms >= 40 && BLOCK_FUNCTION (bl) == NULL)
 
 
 /* Represent one symbol name; a variable, constant, function or typedef.  */
@@ -654,7 +647,12 @@ enum address_class
      * with a level of indirection.
      */
 
-    LOC_INDIRECT
+    LOC_INDIRECT,
+
+    /* Location is a location expression */
+    LOC_LOC_EXPR,
+    /* Location is a location list (ranges + location expressions) */
+    LOC_LOC_LIST
 
   };
 
@@ -673,6 +671,10 @@ struct alias_list
     struct symbol *sym;
     struct alias_list *next;
   };
+
+/* This is purposely an incomplete type. If you get a compiler error,
+   it means your code is relying on the internal structure of location
+   expressions, and thus, broken. Fix it. */
 
 struct symbol
   {
@@ -713,6 +715,11 @@ struct symbol
 	short basereg;
       }
     aux_value;
+    struct 
+    {
+	    struct locexpr *loc;
+	    struct locexpr *frameloc;
+    } dynamic_location;
 
 
     /* Link to a list of aliases for this symbol.
@@ -722,6 +729,9 @@ struct symbol
     /* List of ranges where this symbol is active.  This is only
        used by alias symbols at the current time.  */
     struct range_list *ranges;
+    
+    struct symbol *hash_next;
+
   };
 
 
@@ -730,6 +740,8 @@ struct symbol
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_BASEREG(symbol)		(symbol)->aux_value.basereg
+#define SYMBOL_LOC_EXPR(symbol)  	(symbol)->dynamic_location.loc
+#define SYMBOL_FRAME_LOC_EXPR(symbol)   (symbol)->dynamic_location.frameloc
 #define SYMBOL_ALIASES(symbol)		(symbol)->aliases
 #define SYMBOL_RANGES(symbol)		(symbol)->ranges
 
@@ -805,6 +817,7 @@ struct linetable
     struct linetable_entry item[1];
   };
 
+struct locexpr;
 /* All the information on one source file.  */
 
 struct source
@@ -1033,19 +1046,8 @@ struct partial_symtab
     ((pst) -> symtab != NULL ? (pst) -> symtab : psymtab_to_symtab (pst))
 
 
-/* The virtual function table is now an array of structures which have the
-   form { int16 offset, delta; void *pfn; }. 
 
-   In normal virtual function tables, OFFSET is unused.
-   DELTA is the amount which is added to the apparent object's base
-   address in order to point to the actual object to which the
-   virtual function should be applied.
-   PFN is a pointer to the virtual function.
-
-   Note that this macro is g++ specific (FIXME). */
-
-#define VTBL_FNADDR_OFFSET 2
-
+
 /* External variables and functions for the objects described above. */
 
 /* This symtab variable specifies the current file for printing source lines */

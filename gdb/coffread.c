@@ -1424,12 +1424,9 @@ patch_type (struct type *type, struct type *real_type)
   TYPE_FIELDS (target) = (struct field *) TYPE_ALLOC (target, field_size);
 
   memcpy (TYPE_FIELDS (target), TYPE_FIELDS (real_target), field_size);
-
   if (TYPE_NAME (real_target))
     {
-      if (TYPE_NAME (target))
-	xfree (TYPE_NAME (target));
-      TYPE_NAME (target) = concat (TYPE_NAME (real_target), NULL);
+      TYPE_NAME (target) = TYPE_NAME (real_target);
     }
 }
 
@@ -1445,52 +1442,54 @@ patch_opaque_types (struct symtab *s)
 
   /* Go through the per-file symbols only */
   b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
-  for (i = BLOCK_NSYMS (b) - 1; i >= 0; i--)
+  for (i = BLOCK_NBUCKETS (b) - 1; i >= 0; i--)
     {
       /* Find completed typedefs to use to fix opaque ones.
          Remove syms from the chain when their types are stored,
          but search the whole chain, as there may be several syms
          from different files with the same name.  */
-      real_sym = BLOCK_SYM (b, i);
-      if (SYMBOL_CLASS (real_sym) == LOC_TYPEDEF &&
-	  SYMBOL_NAMESPACE (real_sym) == VAR_NAMESPACE &&
-	  TYPE_CODE (SYMBOL_TYPE (real_sym)) == TYPE_CODE_PTR &&
-	  TYPE_LENGTH (TYPE_TARGET_TYPE (SYMBOL_TYPE (real_sym))) != 0)
+      for (real_sym = BLOCK_BUCKET (b, i); real_sym; real_sym = real_sym->hash_next)
 	{
-	  register char *name = SYMBOL_NAME (real_sym);
-	  register int hash = hashname (name);
-	  register struct symbol *sym, *prev;
-
-	  prev = 0;
-	  for (sym = opaque_type_chain[hash]; sym;)
+	  if (SYMBOL_CLASS (real_sym) == LOC_TYPEDEF &&
+	      SYMBOL_NAMESPACE (real_sym) == VAR_NAMESPACE &&
+	      TYPE_CODE (SYMBOL_TYPE (real_sym)) == TYPE_CODE_PTR &&
+	      TYPE_LENGTH (POINTER_TARGET_TYPE (SYMBOL_TYPE (real_sym))) != 0)
 	    {
-	      if (name[0] == SYMBOL_NAME (sym)[0] &&
-		  STREQ (name + 1, SYMBOL_NAME (sym) + 1))
+	      register char *name = SYMBOL_NAME (real_sym);
+	      register int hash = hashname (name);
+	      register struct symbol *sym, *prev;
+	      
+	      prev = 0;
+	      for (sym = opaque_type_chain[hash]; sym;)
 		{
-		  if (prev)
+		  if (name[0] == SYMBOL_NAME (sym)[0] &&
+		      STREQ (name + 1, SYMBOL_NAME (sym) + 1))
 		    {
-		      SYMBOL_VALUE_CHAIN (prev) = SYMBOL_VALUE_CHAIN (sym);
+		      if (prev)
+			{
+			  SYMBOL_VALUE_CHAIN (prev) = SYMBOL_VALUE_CHAIN (sym);
+			}
+		      else
+			{
+			  opaque_type_chain[hash] = SYMBOL_VALUE_CHAIN (sym);
+			}
+		      
+		      patch_type (SYMBOL_TYPE (sym), SYMBOL_TYPE (real_sym));
+		      
+		      if (prev)
+			{
+			  sym = SYMBOL_VALUE_CHAIN (prev);
+			}
+		      else
+			{
+			  sym = opaque_type_chain[hash];
+			}
 		    }
 		  else
 		    {
-		      opaque_type_chain[hash] = SYMBOL_VALUE_CHAIN (sym);
+		      prev = sym;
+		      sym = SYMBOL_VALUE_CHAIN (sym);
 		    }
-
-		  patch_type (SYMBOL_TYPE (sym), SYMBOL_TYPE (real_sym));
-
-		  if (prev)
-		    {
-		      sym = SYMBOL_VALUE_CHAIN (prev);
-		    }
-		  else
-		    {
-		      sym = opaque_type_chain[hash];
-		    }
-		}
-	      else
-		{
-		  prev = sym;
-		  sym = SYMBOL_VALUE_CHAIN (sym);
 		}
 	    }
 	}
@@ -1523,8 +1522,8 @@ process_coff_symbol (register struct coff_symbol *cs,
   if (ISFCN (cs->c_type))
     {
       SYMBOL_VALUE (sym) += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-      SYMBOL_TYPE (sym) =
-	lookup_function_type (decode_function_type (cs, cs->c_type, aux));
+      SYMBOL_TYPE (sym) = (struct type *)
+	make_function_type (objfile, decode_function_type (cs, cs->c_type, aux), 0, NULL, 0);
 
       SYMBOL_CLASS (sym) = LOC_BLOCK;
       if (cs->c_sclass == C_STAT || cs->c_sclass == C_THUMBSTAT
@@ -1683,8 +1682,8 @@ process_coff_symbol (register struct coff_symbol *cs,
 	     empty structured type, though; the forward references
 	     work themselves out via the magic of coff_lookup_type.  */
 	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR &&
-	      TYPE_LENGTH (TYPE_TARGET_TYPE (SYMBOL_TYPE (sym))) == 0 &&
-	      TYPE_CODE (TYPE_TARGET_TYPE (SYMBOL_TYPE (sym))) !=
+	      TYPE_LENGTH (POINTER_TARGET_TYPE (SYMBOL_TYPE (sym))) == 0 &&
+	      TYPE_CODE (POINTER_TARGET_TYPE (SYMBOL_TYPE (sym))) !=
 	      TYPE_CODE_UNDEF)
 	    {
 	      register int i = hashname (SYMBOL_NAME (sym));
@@ -1741,13 +1740,15 @@ decode_type (register struct coff_symbol *cs, unsigned int c_type,
       else if (ISFCN (c_type))
 	{
 	  type = decode_type (cs, new_c_type, aux);
-	  type = lookup_function_type (type);
+	  type = (struct type *) make_function_type (current_objfile, type, 0, NULL, 0);
+
 	}
       else if (ISARY (c_type))
 	{
 	  int i, n;
 	  register unsigned short *dim;
-	  struct type *base_type, *index_type, *range_type;
+	  struct type *base_type, *index_type;
+	  struct range_type *range_type;
 
 	  /* Define an array type.  */
 	  /* auxent refers to array, not base type */
@@ -1765,9 +1766,9 @@ decode_type (register struct coff_symbol *cs, unsigned int c_type,
 	  base_type = decode_type (cs, new_c_type, aux);
 	  index_type = lookup_fundamental_type (current_objfile, FT_INTEGER);
 	  range_type =
-	    create_range_type ((struct type *) NULL, index_type, 0, n - 1);
-	  type =
-	    create_array_type ((struct type *) NULL, base_type, range_type);
+	    make_range_type (current_objfile, index_type, 0, n - 1);
+	  type = (struct type *)
+	    make_array_type (current_objfile, base_type, range_type);
 	}
       return type;
     }
@@ -2158,10 +2159,10 @@ coff_read_enum_type (int index, int length, int lastsym)
       if (syms == osyms)
 	break;
     }
-
+#if FIXTYPE
   if (unsigned_enum)
     TYPE_FLAGS (type) |= TYPE_FLAG_UNSIGNED;
-
+#endif
   return type;
 }
 

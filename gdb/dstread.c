@@ -1308,7 +1308,7 @@ process_dst_function (struct objfile *objfile, dst_rec_ptr_t entry, char *name,
     {
       ftype = create_new_type (objfile);
       type->function_type = ftype;
-      ftype->target_type = type;
+      FUNCTION_RETURN_VALUE (ftype) = type;
       ftype->code = TYPE_CODE_FUNC;
     }
   SYMBOL_TYPE (sym) = type->function_type;

@@ -1017,8 +1017,8 @@ d10v_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
 	     then store */
 	  long val = extract_signed_integer (contents, len);
 	  len = 2;
-	  if (TYPE_TARGET_TYPE (type)
-	      && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
+	  if (POINTER_TARGET_TYPE (type)
+	      && (TYPE_CODE (POINTER_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
 	    {
 	      /* function pointer */
 	      val = d10v_convert_iaddr_to_raw (val);
@@ -1099,8 +1099,8 @@ d10v_extract_return_value (struct type *type, char regbuf[REGISTER_BYTES],
   int len;
   /*    printf("RET: TYPE=%d len=%d r%d=0x%x\n",type->code, TYPE_LENGTH (type), RET1_REGNUM - R0_REGNUM, (int) extract_unsigned_integer (regbuf + REGISTER_BYTE(RET1_REGNUM), REGISTER_RAW_SIZE (RET1_REGNUM)));  */
   if (TYPE_CODE (type) == TYPE_CODE_PTR
-      && TYPE_TARGET_TYPE (type)
-      && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
+      && POINTER_TARGET_TYPE (type)
+      && (TYPE_CODE (POINTER_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
     {
       /* pointer to function */
       int num;

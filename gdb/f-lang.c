@@ -250,7 +250,8 @@ f_printstr (struct ui_file *stream, char *string, unsigned int length,
 static struct type *
 f_create_fundamental_type (struct objfile *objfile, int typeid)
 {
-  register struct type *type = NULL;
+#if TYPEFIX
+	register struct type *type = NULL;
 
   switch (typeid)
     {
@@ -399,6 +400,9 @@ f_create_fundamental_type (struct objfile *objfile, int typeid)
       break;
     }
   return (type);
+#else
+  return NULL;
+#endif
 }
 
 
@@ -486,6 +490,8 @@ const struct language_defn f_language_defn =
 void
 _initialize_f_language (void)
 {
+#if TYPEFIX
+
   builtin_type_f_void =
     init_type (TYPE_CODE_VOID, 1,
 	       0,
@@ -563,6 +569,7 @@ _initialize_f_language (void)
 	       "character string", (struct objfile *) NULL);
 
   add_language (&f_language_defn);
+#endif
 }
 
 #if 0

@@ -1353,8 +1353,8 @@ arm_push_arguments (int nargs, value_ptr * args, CORE_ADDR sp,
       /* If the argument is a pointer to a function, and it is a Thumb
          function, set the low bit of the pointer.  */
       if (TYPE_CODE_PTR == typecode
-	  && NULL != target_type
-	  && TYPE_CODE_FUNC == TYPE_CODE (target_type))
+	  && POINTER_TARGET_TYPE (arg_type) != NULL
+	  && TYPE_CODE_FUNC == TYPE_CODE (POINTER_TARGET_TYPE (arg_type)))
 	{
 	  CORE_ADDR regval = extract_address (val, len);
 	  if (arm_pc_is_thumb (regval))

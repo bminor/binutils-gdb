@@ -25,7 +25,6 @@
 #include <ctype.h>
 #include "gdb_string.h"
 #include "event-top.h"
-
 #ifdef HAVE_CURSES_H
 #include <curses.h>
 #endif
@@ -660,8 +659,10 @@ error_stream (struct ui_file *stream)
 {
   long size;
   char *msg = ui_file_xstrdup (stream, &size);
-  make_cleanup (xfree, msg);
+  struct cleanup *err_msg_cleanup;
+  err_msg_cleanup = make_cleanup (xfree, msg);
   error ("%s", msg);
+  do_cleanups (err_msg_cleanup);
 }
 
 /* Get the last error message issued by gdb */
@@ -890,8 +891,6 @@ request_quit (int signo)
 
 #if !defined (USE_MMALLOC)
 
-/* NOTE: These must use PTR so that their definition matches the
-   declaration found in "mmalloc.h". */
 
 PTR
 mmalloc (PTR md, size_t size)
@@ -923,7 +922,6 @@ mfree (PTR md, PTR ptr)
 #endif /* USE_MMALLOC */
 
 #if !defined (USE_MMALLOC) || defined (NO_MMCHECK)
-
 void
 init_malloc (void *md)
 {

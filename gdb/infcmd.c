@@ -42,6 +42,7 @@
 #endif
 #include "event-top.h"
 #include "parser-defs.h"
+#include "completer.h"
 
 /* Functions exported for general use: */
 
@@ -1705,7 +1706,7 @@ attach_command (char *args, int from_tty)
 	    full_exec_path = savestring (exec_file, strlen (exec_file));
 
 	  exec_file_attach (full_exec_path, from_tty);
-	  symbol_file_add_main (full_exec_path, from_tty);
+	  symbol_file_command(full_exec_path, from_tty);
 	}
     }
 

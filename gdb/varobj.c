@@ -1402,6 +1402,7 @@ get_type_deref (struct varobj *var)
 static struct type *
 get_target_type (struct type *type)
 {
+#if TYPEFIX
   if (type != NULL)
     {
       type = TYPE_TARGET_TYPE (type);
@@ -1410,6 +1411,10 @@ get_target_type (struct type *type)
     }
 
   return type;
+#else
+  return NULL;
+#endif
+
 }
 
 /* What is the default display for this variable? We assume that
@@ -1746,8 +1751,7 @@ c_number_of_children (struct varobj *var)
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
-      if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (target) > 0
-	&& TYPE_ARRAY_UPPER_BOUND_TYPE (type) != BOUND_CANNOT_BE_DETERMINED)
+      if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (target) > 0)
 	children = TYPE_LENGTH (type) / TYPE_LENGTH (target);
       else
 	children = -1;
@@ -1922,6 +1926,7 @@ c_value_of_child (struct varobj *parent, int index)
   char *name;
 
   type = get_type (parent);
+  /* TYPEFIX */
   target = get_target_type (type);
   name = name_of_child (parent, index);
   temp = parent->value;
@@ -1982,7 +1987,7 @@ c_type_of_child (struct varobj *parent, int index)
   switch (TYPE_CODE (parent->type))
     {
     case TYPE_CODE_ARRAY:
-      type = TYPE_TARGET_TYPE (parent->type);
+      type = ARRAY_ELEMENT_TYPE (parent->type);
       break;
 
     case TYPE_CODE_STRUCT:
@@ -1991,7 +1996,7 @@ c_type_of_child (struct varobj *parent, int index)
       break;
 
     case TYPE_CODE_PTR:
-      switch (TYPE_CODE (TYPE_TARGET_TYPE (parent->type)))
+      switch (TYPE_CODE (POINTER_TARGET_TYPE (parent->type)))
 	{
 	case TYPE_CODE_STRUCT:
 	case TYPE_CODE_UNION:
@@ -1999,7 +2004,7 @@ c_type_of_child (struct varobj *parent, int index)
 	  break;
 
 	default:
-	  type = TYPE_TARGET_TYPE (parent->type);
+	  type = POINTER_TARGET_TYPE (parent->type);
 	  break;
 	}
       break;

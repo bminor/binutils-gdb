@@ -31,8 +31,8 @@
 #include "gdbcmd.h"
 #include "target.h"
 #include "language.h"
+#include "demangle.h"
 #include "cp-abi.h"
-
 #include "gdb_string.h"
 #include <errno.h>
 
@@ -150,7 +150,7 @@ whatis_exp (char *exp, int show)
       if (((TYPE_CODE (type) == TYPE_CODE_PTR) ||
            (TYPE_CODE (type) == TYPE_CODE_REF))
           &&
-          (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
+          (TYPE_CODE (POINTER_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
         {
           real_type = value_rtti_target_type (val, &full, &top, &using_enc);
           if (real_type)
@@ -269,17 +269,17 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
     {
 
     case TYPE_CODE_ENUM:
-      len = TYPE_NFIELDS (type);
+      len = ENUM_NUM_VALUES (type);
       for (i = 0; i < len; i++)
 	{
-	  if (TYPE_FIELD_BITPOS (type, i) == val)
+	  if (ENUM_VALUE_VALUE (type, i) == val)
 	    {
 	      break;
 	    }
 	}
       if (i < len)
 	{
-	  fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	  fputs_filtered (ENUM_VALUE_NAME (type, i), stream);
 	}
       else
 	{
@@ -300,7 +300,7 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
       break;
 
     case TYPE_CODE_RANGE:
-      print_type_scalar (TYPE_TARGET_TYPE (type), val, stream);
+      print_type_scalar (RANGE_INDEX_TYPE (type), val, stream);
       return;
 
     case TYPE_CODE_UNDEF:

@@ -173,7 +173,6 @@ filename_completer (char *text, char *word)
 #endif
   return return_val;
 }
-
 /* Complete on locations, which might be of two possible forms:
 
        file:line

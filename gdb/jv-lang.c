@@ -230,7 +230,7 @@ java_class_from_object (value_ptr obj_val)
   value_ptr vtable_val;
 
   if (TYPE_CODE (VALUE_TYPE (obj_val)) == TYPE_CODE_PTR
-      && TYPE_LENGTH (TYPE_TARGET_TYPE (VALUE_TYPE (obj_val))) == 0)
+      && TYPE_LENGTH (POINTER_TARGET_TYPE (VALUE_TYPE (obj_val))) == 0)
     obj_val = value_at (get_java_object_type (),
 			value_as_pointer (obj_val), NULL);
 
@@ -363,7 +363,7 @@ java_link_class_type (struct type *type, value_ptr clas)
     {
       tsuper = get_java_object_type ();
       if (tsuper && TYPE_CODE (tsuper) == TYPE_CODE_PTR)
-	tsuper = TYPE_TARGET_TYPE (tsuper);
+	tsuper = POINTER_TARGET_TYPE (tsuper);
       type_is_object = 1;
     }
   else
@@ -604,7 +604,7 @@ is_object_type (struct type *type)
   CHECK_TYPEDEF (type);
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
     {
-      struct type *ttype = check_typedef (TYPE_TARGET_TYPE (type));
+      struct type *ttype = check_typedef (POINTER_TARGET_TYPE (type));
       char *name;
       if (TYPE_CODE (ttype) != TYPE_CODE_STRUCT)
 	return 0;
@@ -743,7 +743,7 @@ java_demangled_signature_copy (char *result, char *signature)
 	}
       break;
     default:
-      ptr = TYPE_NAME (java_primitive_type (signature[0]));
+      ptr = (char *)TYPE_NAME (java_primitive_type (signature[0]));
       i = strlen (ptr);
       strcpy (result, ptr);
       ptr = result + i;
@@ -788,13 +788,13 @@ java_lookup_type (char *signature)
 struct type *
 java_array_type (struct type *type, int dims)
 {
-  struct type *range_type;
+  struct range_type *range_type;
 
   while (dims-- > 0)
     {
-      range_type = create_range_type (NULL, builtin_type_int, 0, 0);
-      /* FIXME  This is bogus!  Java arrays are not gdb arrays! */
-      type = create_array_type (NULL, type, range_type);
+      range_type = make_range_type (NULL, builtin_type_int, 0, 0);
+      /* TYPEFIX  This is bogus!  Java arrays are not gdb arrays! */
+      type = (struct type *)make_array_type (NULL,  type, range_type);
     }
 
   return type;
@@ -851,7 +851,7 @@ evaluate_subexp_java (struct type *expect_type, register struct expression *exp,
 {
   int pc = *pos;
   int i;
-  char *name;
+  const char *name;
   enum exp_opcode op = exp->elts[*pos].opcode;
   value_ptr arg1, arg2;
   struct type *type;
@@ -886,7 +886,7 @@ evaluate_subexp_java (struct type *expect_type, register struct expression *exp,
       COERCE_REF (arg1);
       type = check_typedef (VALUE_TYPE (arg1));
       if (TYPE_CODE (type) == TYPE_CODE_PTR)
-	type = check_typedef (TYPE_TARGET_TYPE (type));
+	type = check_typedef (POINTER_TARGET_TYPE (type));
       name = TYPE_NAME (type);
       if (name == NULL)
 	name = TYPE_TAG_NAME (type);
@@ -925,7 +925,7 @@ evaluate_subexp_java (struct type *expect_type, register struct expression *exp,
       else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
 	{
 	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	    return value_zero (TYPE_TARGET_TYPE (type), VALUE_LVAL (arg1));
+	    return value_zero (ARRAY_ELEMENT_TYPE (type), VALUE_LVAL (arg1));
 	  else
 	    return value_subscript (arg1, arg2);
 	}
@@ -1066,7 +1066,7 @@ _initialize_java_language (void)
   java_long_type = init_type (TYPE_CODE_INT, 8, 0, "long", NULL);
   java_byte_type = init_type (TYPE_CODE_INT, 1, 0, "byte", NULL);
   java_boolean_type = init_type (TYPE_CODE_BOOL, 1, 0, "boolean", NULL);
-  java_char_type = init_type (TYPE_CODE_CHAR, 2, TYPE_FLAG_UNSIGNED, "char", NULL);
+  java_char_type = (struct type *)make_character_type (NULL, "char", 2, ST_unsigned);
   java_float_type = init_type (TYPE_CODE_FLT, 4, 0, "float", NULL);
   java_double_type = init_type (TYPE_CODE_FLT, 8, 0, "double", NULL);
   java_void_type = init_type (TYPE_CODE_VOID, 1, 0, "void", NULL);

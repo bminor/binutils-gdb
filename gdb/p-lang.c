@@ -212,6 +212,8 @@ pascal_printstr (struct ui_file *stream, char *string, unsigned int length,
 struct type *
 pascal_create_fundamental_type (struct objfile *objfile, int typeid)
 {
+#if TYPEFIX
+
   register struct type *type = NULL;
 
   switch (typeid)
@@ -323,6 +325,9 @@ pascal_create_fundamental_type (struct objfile *objfile, int typeid)
       break;
     }
   return (type);
+#else
+  return NULL;
+#endif
 }
 
 

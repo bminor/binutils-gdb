@@ -68,7 +68,7 @@ chill_type_print_base (struct type *type, struct ui_file *stream, int show,
   register int len;
   register int i;
   struct type *index_type;
-  struct type *range_type;
+  struct range_type *range_type;
   LONGEST low_bound;
   LONGEST high_bound;
 
@@ -99,14 +99,14 @@ chill_type_print_base (struct type *type, struct ui_file *stream, int show,
       chill_type_print_base (TYPE_TARGET_TYPE (type), stream, 0, level);
       break;
     case TYPE_CODE_PTR:
-      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_VOID)
+      if (TYPE_CODE (POINTER_TARGET_TYPE (type)) == TYPE_CODE_VOID)
 	{
 	  fprintf_filtered (stream,
 			    TYPE_NAME (type) ? TYPE_NAME (type) : "PTR");
 	  break;
 	}
       fprintf_filtered (stream, "REF ");
-      chill_type_print_base (TYPE_TARGET_TYPE (type), stream, 0, level);
+      chill_type_print_base (POINTER_TARGET_TYPE (type), stream, 0, level);
       break;
 
     case TYPE_CODE_BOOL:
@@ -120,14 +120,14 @@ chill_type_print_base (struct type *type, struct ui_file *stream, int show,
 
     case TYPE_CODE_ARRAY:
       fputs_filtered ("ARRAY (", stream);
-      range_type = TYPE_FIELD_TYPE (type, 0);
+      range_type = ARRAY_RANGE_TYPE (type);
       if (TYPE_CODE (range_type) != TYPE_CODE_RANGE)
-	chill_print_type (range_type, "", stream, 0, level);
+	chill_print_type ((struct type *)range_type, "", stream, 0, level);
       else
 	{
-	  index_type = TYPE_TARGET_TYPE (range_type);
-	  low_bound = TYPE_FIELD_BITPOS (range_type, 0);
-	  high_bound = TYPE_FIELD_BITPOS (range_type, 1);
+	  index_type = RANGE_INDEX_TYPE (range_type);
+	  low_bound = RANGE_LOWER_BOUND (range_type);
+	  high_bound = RANGE_UPPER_BOUND (range_type);
 	  print_type_scalar (index_type, low_bound, stream);
 	  fputs_filtered (":", stream);
 	  print_type_scalar (index_type, high_bound, stream);
@@ -140,17 +140,15 @@ chill_type_print_base (struct type *type, struct ui_file *stream, int show,
       fprintf_filtered (stream, "BOOLS (%d)",
 		      TYPE_FIELD_BITPOS (TYPE_FIELD_TYPE (type, 0), 1) + 1);
       break;
-
     case TYPE_CODE_SET:
       fputs_filtered ("POWERSET ", stream);
-      chill_print_type (TYPE_INDEX_TYPE (type), "", stream,
+      chill_print_type ((struct type *)SET_RANGE_TYPE (type), "", stream,
 			show - 1, level);
       break;
-
     case TYPE_CODE_STRING:
-      range_type = TYPE_FIELD_TYPE (type, 0);
-      index_type = TYPE_TARGET_TYPE (range_type);
-      high_bound = TYPE_FIELD_BITPOS (range_type, 1);
+      range_type = ARRAY_RANGE_TYPE (type);
+      index_type = RANGE_INDEX_TYPE (range_type);
+      high_bound = RANGE_UPPER_BOUND (range_type);
       fputs_filtered ("CHARS (", stream);
       print_type_scalar (index_type, high_bound + 1, stream);
       fputs_filtered (")", stream);
@@ -162,14 +160,14 @@ chill_type_print_base (struct type *type, struct ui_file *stream, int show,
       break;
     case TYPE_CODE_REF:
       fprintf_filtered (stream, "/*LOC*/ ");
-      chill_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+      chill_type_print_base (POINTER_TARGET_TYPE (type), stream, show, level);
       break;
     case TYPE_CODE_FUNC:
       fprintf_filtered (stream, "PROC (");
-      len = TYPE_NFIELDS (type);
+      len = FUNCTION_NUM_ARGUMENTS (type);
       for (i = 0; i < len; i++)
 	{
-	  struct type *param_type = TYPE_FIELD_TYPE (type, i);
+	  struct type *param_type = FUNCTION_ARGUMENT_TYPE (type, i);
 	  if (i > 0)
 	    {
 	      fputs_filtered (", ", stream);
@@ -177,7 +175,7 @@ chill_type_print_base (struct type *type, struct ui_file *stream, int show,
 	    }
 	  if (TYPE_CODE (param_type) == TYPE_CODE_REF)
 	    {
-	      chill_type_print_base (TYPE_TARGET_TYPE (param_type),
+	      chill_type_print_base (POINTER_TARGET_TYPE (param_type),
 				     stream, 0, level);
 	      fputs_filtered (" LOC", stream);
 	    }
@@ -185,10 +183,10 @@ chill_type_print_base (struct type *type, struct ui_file *stream, int show,
 	    chill_type_print_base (param_type, stream, show, level);
 	}
       fprintf_filtered (stream, ")");
-      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
+      if (TYPE_CODE (FUNCTION_RETURN_TYPE (type)) != TYPE_CODE_VOID)
 	{
 	  fputs_filtered (" RETURNS (", stream);
-	  chill_type_print_base (TYPE_TARGET_TYPE (type), stream, 0, level);
+	  chill_type_print_base (FUNCTION_RETURN_TYPE (type), stream, 0, level);
 	  fputs_filtered (")", stream);
 	}
       break;
@@ -281,9 +279,9 @@ chill_type_print_base (struct type *type, struct ui_file *stream, int show,
 	if (target == NULL)
 	  target = builtin_type_long;
 	fputs_filtered (" (", stream);
-	print_type_scalar (target, TYPE_LOW_BOUND (type), stream);
+	print_type_scalar (target, RANGE_LOWER_BOUND (type), stream);
 	fputs_filtered (":", stream);
-	print_type_scalar (target, TYPE_HIGH_BOUND (type), stream);
+	print_type_scalar (target, RANGE_UPPER_BOUND (type), stream);
 	fputs_filtered (")", stream);
       }
       break;
@@ -292,18 +290,18 @@ chill_type_print_base (struct type *type, struct ui_file *stream, int show,
       {
 	register int lastval = 0;
 	fprintf_filtered (stream, "SET (");
-	len = TYPE_NFIELDS (type);
+	len = ENUM_NUM_VALUES (type);
 	for (i = 0; i < len; i++)
 	  {
 	    QUIT;
 	    if (i)
 	      fprintf_filtered (stream, ", ");
 	    wrap_here ("    ");
-	    fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
-	    if (lastval != TYPE_FIELD_BITPOS (type, i))
+	    fputs_filtered (ENUM_VALUE_NAME (type, i), stream);
+	    if (lastval != ENUM_VALUE_VALUE (type, i))
 	      {
-		fprintf_filtered (stream, " = %d", TYPE_FIELD_BITPOS (type, i));
-		lastval = TYPE_FIELD_BITPOS (type, i);
+		fprintf_filtered (stream, " = %d", ENUM_VALUE_VALUE (type, i));
+		lastval = ENUM_VALUE_VALUE (type, i);
 	      }
 	    lastval++;
 	  }

@@ -1,6 +1,5 @@
 /* YACC parser for C expressions, for GDB.
-   Copyright 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000
+   Copyright (C) 1986, 1989, 1990, 1991, 1993, 1994, 1996, 1997
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -49,9 +48,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h" /* Required by objfiles.h.  */
 #include "symfile.h" /* Required by objfiles.h.  */
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
-
-/* Flag indicating we're dealing with HP-compiled objects */ 
-extern int hp_som_som_object_present;
+#include "inferior.h"
 
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
    as well as gratuitiously global symbol names, so we can have multiple
@@ -100,7 +97,7 @@ extern int hp_som_som_object_present;
 #define yycheck	 c_yycheck
 
 #ifndef YYDEBUG
-#define	YYDEBUG	0		/* Default to no yydebug support */
+#define	YYDEBUG	1		/* Default to no yydebug support */
 #endif
 
 int yyparse (void);
@@ -650,7 +647,7 @@ variable:	qualified_name
 			  if (msymbol != NULL)
 			    {
 			      write_exp_msymbol (msymbol,
-						 lookup_function_type (builtin_type_int),
+						 (struct type *) make_function_type (NULL, builtin_type_int, 0, NULL, 0),
 						 builtin_type_int);
 			    }
 			  else
@@ -706,7 +703,7 @@ variable:	name_not_typename
 			      if (msymbol != NULL)
 				{
 				  write_exp_msymbol (msymbol,
-						     lookup_function_type (builtin_type_int),
+						     (struct type *)make_function_type (NULL, builtin_type_int, 0, NULL, 0),
 						     builtin_type_int);
 				}
 			      else if (!have_full_symbols () && !have_partial_symbols ())
@@ -1212,7 +1209,7 @@ yylex ()
 	return tokentab2[i].token;
       }
 
-  switch (c = *tokstart)
+  switch ( (c = *tokstart))
     {
     case 0:
       return 0;
@@ -1544,6 +1541,98 @@ yylex ()
       /* Only do it if not inside single quotes */ 
       sym_class = parse_nested_classes_for_hpacc (yylval.sval.ptr, yylval.sval.length,
                                                   &token_string, &class_prefix, &lexptr);
+
+      /* Some compilers generate a fully qualified name for a nested
+         class. If the program counter is inside a nested class, no sym_class
+         can be found for an expression like 'inner::x' as the full class name
+         is like 'outer::inner'.
+         
+         If the program counter is within a function of a nested class,
+         construct an expression as 'outer::inner::x' to find the sym_class.
+      */   
+      if (!sym_class && (*lexptr == ':') && (*(lexptr+1) == ':'))
+      {
+         char * symname, * last_colon;
+         int fieldlen, tokenlen;
+
+         symname = 0;
+
+         /* Find the symbol name that can used to construct a full name. */
+         if (yylval.ssym.sym != 0 &&
+             (SYMBOL_CLASS (yylval.ssym.sym) == LOC_ARG ||
+              SYMBOL_CLASS (yylval.ssym.sym) == LOC_LOCAL ||
+              SYMBOL_CLASS (yylval.ssym.sym) == LOC_STATIC ||
+              SYMBOL_CLASS (yylval.ssym.sym) == LOC_LOCAL_ARG ||
+              SYMBOL_CLASS (yylval.ssym.sym) == LOC_REGISTER))
+           {
+             /* The previous token is a local variable or parameter. Use its
+                type name to construct a full name. */
+             symname = TYPE_TAG_NAME(SYMBOL_TYPE(yylval.ssym.sym));
+           }
+         else
+           {
+             /* Use the function name of the current program counter to
+                construct a full name. */ 
+             struct symbol * sym = find_pc_function(read_pc());
+             if (sym)
+               symname = SYMBOL_DEMANGLED_NAME(sym);
+           }
+
+         /* Find the last colon of yylval.sval.ptr. */
+         last_colon = strrchr(yylval.sval.ptr, ':');
+
+         /* If the symbol name is 'outer::inner::func', we need to check
+            if yylval.sval.ptr points to 'inner::x'. I.e., the symbol name
+            and yylval.sval.ptr must have a common nested class name 'inner'.
+            must have a common class name 'inner'.
+         */
+         if (symname != 0 && *(--last_colon) == ':')
+           {
+             boolean found = false;
+             char *cur_index, *fullname_index, *i;
+             tokenlen = strlen(yylval.sval.ptr);
+             /* Calculate the length of the field, e.g., ::x. */
+             fieldlen = tokenlen - (last_colon - yylval.sval.ptr);
+
+
+             /*Set the full name index to the beginning to the symbol name.*/
+             fullname_index = symname;
+
+             /* Search for the name after each '::' until a match is found. */
+             for (cur_index = symname; !found && cur_index;)
+             {
+               /* Search for "::". */
+               cur_index = strstr (cur_index, "::");
+
+               /* Move the index after "::'. */
+               if (cur_index)
+	         {
+		   cur_index += 2;
+
+		   /* Compare the nested class names. */
+		   if (!strncmp (cur_index, yylval.sval.ptr,
+				 tokenlen - fieldlen))
+		     {
+		       /* Reconstruct the fully qualified name. */
+		       char *fullname = alloca (strlen (symname) + fieldlen);
+  
+		       /* Copy 'outer::' to the full name. */
+		       strncpy (fullname, fullname_index,
+				(cur_index - fullname_index));
+		       fullname[cur_index - fullname_index] = '\0';
+  
+		       /* Append 'inner::x' to the full name. */
+		       strcat (fullname, yylval.sval.ptr);
+		       sym_class = parse_nested_classes_for_hpacc (
+                               fullname, strlen(fullname) - fieldlen,
+                               &token_string, &class_prefix, &lexptr);
+		       found = true;
+		     }
+		 }
+	     }
+	 }
+      }
+
       if (sym_class)
         {
           /* Replace the current token with the bigger one we found */ 
@@ -1568,6 +1657,16 @@ yylex ()
 			 current_language->la_language == language_cplus
 			 ? &is_a_field_of_this : (int *) NULL,
 			 (struct symtab **) NULL);
+
+    /* If no symbol is found, and the symbol is within a class, try
+       to look for the symbol one more time without checking if the name
+       is a field of 'this'. */
+    if ((*lexptr == ':') && (*(lexptr+1) == ':') && !sym && sym_class)
+      sym = lookup_symbol (tmp, expression_context_block,
+                           VAR_NAMESPACE,
+                           (int *) NULL,
+                           (struct symtab **) NULL);
+
     /* Call lookup_symtab, not lookup_partial_symtab, in case there are
        no psymtabs (coff, xcoff, or some future change to blow away the
        psymtabs once once symbols are read).  */
@@ -1660,6 +1759,9 @@ yylex ()
 			    {
 			      best_sym = cur_sym;
 			      lexptr = p;
+
+                              /* Update tmp to be used in the next iteration.*/
+				tmp = ncopy;
 			    }
 			  else
 			    break;
@@ -1673,6 +1775,24 @@ yylex ()
 	      else
 		break;
 	    }
+
+          /* If the best symbol found contains '::', the previous token is
+             a local variable or parameter, and the type names of the current
+             and the best symbol do not match, return NAME. */
+	  if (yylval.ssym.sym)
+          if (strstr (SYMBOL_NAME(best_sym), "::") != 0 &&
+              (TYPE_CODE (SYMBOL_TYPE (yylval.ssym.sym)) == TYPE_CODE_STRUCT) &&
+              (TYPE_CODE (SYMBOL_TYPE (best_sym)) == TYPE_CODE_STRUCT) &&
+              (SYMBOL_CLASS (yylval.ssym.sym) == LOC_ARG ||
+               SYMBOL_CLASS (yylval.ssym.sym) == LOC_LOCAL ||
+               SYMBOL_CLASS (yylval.ssym.sym) == LOC_STATIC ||
+               SYMBOL_CLASS (yylval.ssym.sym) == LOC_LOCAL_ARG ||
+               SYMBOL_CLASS (yylval.ssym.sym) == LOC_REGISTER) &&
+               strcmp (TYPE_TAG_NAME (SYMBOL_TYPE (yylval.ssym.sym)),
+                    TYPE_TAG_NAME (SYMBOL_TYPE (best_sym))) != 0)
+            {
+              return NAME; 
+            }
 
 	  yylval.tsym.type = SYMBOL_TYPE (best_sym);
 #else /* not 0 */

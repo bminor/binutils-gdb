@@ -108,14 +108,14 @@ value_ptr
 allocate_repeat_value (struct type *type, int count)
 {
   int low_bound = current_language->string_lower_bound;		/* ??? */
-  /* FIXME-type-allocation: need a way to free this type when we are
+  /* TYPEFIX-type-allocation: need a way to free this type when we are
      done with it.  */
-  struct type *range_type
-  = create_range_type ((struct type *) NULL, builtin_type_int,
+  struct range_type *range_type
+  = make_range_type (NULL, builtin_type_int,
 		       low_bound, count + low_bound - 1);
-  /* FIXME-type-allocation: need a way to free this type when we are
+  /* TYPEFIX-type-allocation: need a way to free this type when we are
      done with it.  */
-  return allocate_value (create_array_type ((struct type *) NULL,
+  return allocate_value ((struct type *)make_array_type (NULL, 
 					    type, range_type));
 }
 
@@ -757,18 +757,18 @@ value_static_field (struct type *type, int fieldno)
 	}
       else
 	{
- 	  /* Anything static that isn't a constant, has an address */
- 	  if (SYMBOL_CLASS (sym) != LOC_CONST)
- 	    {
+	  /* Anything static that isn't a constant, has an address */
+	  if (SYMBOL_CLASS (sym) != LOC_CONST)
+	    {
 	      addr = SYMBOL_VALUE_ADDRESS (sym);
 	      sect = SYMBOL_BFD_SECTION (sym);
+	    }	 
+	  /* However, static const's do not, the value is already known.  */
+	  else
+	    {
+	      return value_from_longest (TYPE_FIELD_TYPE (type, fieldno), SYMBOL_VALUE (sym));
 	    }
- 	  /* However, static const's do not, the value is already known.  */
- 	  else
- 	    {
- 	      return value_from_longest (TYPE_FIELD_TYPE (type, fieldno), SYMBOL_VALUE (sym));
- 	    }
- 	}
+	}
       SET_FIELD_PHYSADDR (TYPE_FIELD (type, fieldno), addr);
     }
   return value_at (TYPE_FIELD_TYPE (type, fieldno), addr, sect);
@@ -779,7 +779,7 @@ value_static_field (struct type *type, int fieldno)
    is set by the length of the enclosing type.  So if NEW_ENCL_TYPE is bigger 
    than the old enclosing type, you have to allocate more space for the data.  
    The return value is a pointer to the new version of this value structure. */
-
+   
 value_ptr
 value_change_enclosing_type (value_ptr val, struct type *new_encl_type)
 {
@@ -790,32 +790,31 @@ value_change_enclosing_type (value_ptr val, struct type *new_encl_type)
     }
   else
     {
-      value_ptr new_val;
-      register value_ptr prev;
-      
-      new_val = (value_ptr) xrealloc (val, sizeof (struct value) + TYPE_LENGTH (new_encl_type));
-      
-      /* We have to make sure this ends up in the same place in the value
-	 chain as the original copy, so it's clean-up behavior is the same. 
-	 If the value has been released, this is a waste of time, but there
-	 is no way to tell that in advance, so... */
-      
-      if (val != all_values) 
-	{
-	  for (prev = all_values; prev != NULL; prev = prev->next)
-	    {
-	      if (prev->next == val) 
-		{
-		  prev->next = new_val;
-		  break;
-		}
-	    }
-	}
-      
-      return new_val;
+       value_ptr new_val;
+       register value_ptr prev;
+
+       new_val = (value_ptr) xrealloc (val, sizeof (struct value) + TYPE_LENGTH (new_encl_type));
+       
+       /* We have to make sure this ends up in the same place in the value
+          chain as the original copy, so it's clean-up behavior is the same. 
+          If the value has been released, this is a waste of time, but there
+          is no way to tell that in advance, so... */
+
+       if (val != all_values) 
+         {
+           for (prev = all_values; prev != NULL; prev = prev->next)
+             {
+               if (prev->next == val) 
+                 {
+                   prev->next = new_val;
+                   break;
+                 }
+             }
+          }
+          
+       return new_val;
     }
 }
-
 /* Given a value ARG1 (offset by OFFSET bytes)
    of a struct or union type ARG_TYPE,
    extract and return the value of one of its (non-static) fields.
@@ -978,7 +977,7 @@ value_headof (value_ptr in_arg, struct type *btype, struct type *dtype)
 
   vtbl = value_ind (value_field (value_ind (arg), TYPE_VPTR_FIELDNO (btype)));
   /* Turn vtable into typeinfo function */
-  VALUE_OFFSET(vtbl)+=4;
+  VALUE_OFFSET (vtbl) += 4;
 
   msymbol = lookup_minimal_symbol_by_pc ( value_as_pointer(value_ind(vtbl)) );
   if (msymbol == NULL
@@ -1022,100 +1021,6 @@ value_from_vtable_info (value_ptr arg, struct type *type)
   return value_headof (arg, 0, type);
 }
 
-/* Return true if the INDEXth field of TYPE is a virtual baseclass
-   pointer which is for the base class whose type is BASECLASS.  */
-
-static int
-vb_match (struct type *type, int index, struct type *basetype)
-{
-  struct type *fieldtype;
-  char *name = TYPE_FIELD_NAME (type, index);
-  char *field_class_name = NULL;
-
-  if (*name != '_')
-    return 0;
-  /* gcc 2.4 uses _vb$.  */
-  if (name[1] == 'v' && name[2] == 'b' && is_cplus_marker (name[3]))
-    field_class_name = name + 4;
-  /* gcc 2.5 will use __vb_.  */
-  if (name[1] == '_' && name[2] == 'v' && name[3] == 'b' && name[4] == '_')
-    field_class_name = name + 5;
-
-  if (field_class_name == NULL)
-    /* This field is not a virtual base class pointer.  */
-    return 0;
-
-  /* It's a virtual baseclass pointer, now we just need to find out whether
-     it is for this baseclass.  */
-  fieldtype = TYPE_FIELD_TYPE (type, index);
-  if (fieldtype == NULL
-      || TYPE_CODE (fieldtype) != TYPE_CODE_PTR)
-    /* "Can't happen".  */
-    return 0;
-
-  /* What we check for is that either the types are equal (needed for
-     nameless types) or have the same name.  This is ugly, and a more
-     elegant solution should be devised (which would probably just push
-     the ugliness into symbol reading unless we change the stabs format).  */
-  if (TYPE_TARGET_TYPE (fieldtype) == basetype)
-    return 1;
-
-  if (TYPE_NAME (basetype) != NULL
-      && TYPE_NAME (TYPE_TARGET_TYPE (fieldtype)) != NULL
-      && STREQ (TYPE_NAME (basetype),
-		TYPE_NAME (TYPE_TARGET_TYPE (fieldtype))))
-    return 1;
-  return 0;
-}
-
-/* Compute the offset of the baseclass which is
-   the INDEXth baseclass of class TYPE,
-   for value at VALADDR (in host) at ADDRESS (in target).
-   The result is the offset of the baseclass value relative
-   to (the address of)(ARG) + OFFSET.
-
-   -1 is returned on error. */
-
-int
-baseclass_offset (struct type *type, int index, char *valaddr,
-		  CORE_ADDR address)
-{
-  struct type *basetype = TYPE_BASECLASS (type, index);
-
-  if (BASETYPE_VIA_VIRTUAL (type, index))
-    {
-      /* Must hunt for the pointer to this virtual baseclass.  */
-      register int i, len = TYPE_NFIELDS (type);
-      register int n_baseclasses = TYPE_N_BASECLASSES (type);
-
-      /* First look for the virtual baseclass pointer
-         in the fields.  */
-      for (i = n_baseclasses; i < len; i++)
-	{
-	  if (vb_match (type, i, basetype))
-	    {
-	      CORE_ADDR addr
-	      = unpack_pointer (TYPE_FIELD_TYPE (type, i),
-				valaddr + (TYPE_FIELD_BITPOS (type, i) / 8));
-
-	      return addr - (LONGEST) address;
-	    }
-	}
-      /* Not in the fields, so try looking through the baseclasses.  */
-      for (i = index + 1; i < n_baseclasses; i++)
-	{
-	  int boffset =
-	  baseclass_offset (type, i, valaddr, address);
-	  if (boffset)
-	    return boffset;
-	}
-      /* Not found.  */
-      return -1;
-    }
-
-  /* Baseclass is easily computed.  */
-  return TYPE_BASECLASS_BITPOS (type, index) / 8;
-}
 
 /* Unpack a field FIELDNO of the specified TYPE, from the anonymous object at
    VALADDR.
@@ -1274,12 +1179,12 @@ value_from_string (char *ptr)
   value_ptr val;
   int len = strlen (ptr);
   int lowbound = current_language->string_lower_bound;
-  struct type *rangetype =
-  create_range_type ((struct type *) NULL,
+  struct range_type *rangetype =
+  make_range_type (NULL, 
 		     builtin_type_int,
 		     lowbound, len + lowbound - 1);
-  struct type *stringtype =
-  create_array_type ((struct type *) NULL,
+  struct type *stringtype = (struct type *)
+  make_array_type ( NULL, 
 		     *current_language->string_char_type,
 		     rangetype);
 

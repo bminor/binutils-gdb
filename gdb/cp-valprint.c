@@ -33,6 +33,7 @@
 #include "gdb_string.h"
 #include "c-lang.h"
 #include "target.h"
+#include "cp-abi.h"
 
 /* Indication of presence of HP-compiled object files */
 extern int hp_som_som_object_present;	/* defined in symtab.c */
@@ -187,7 +188,7 @@ const char hpacc_vtbl_ptr_type_name[] = "__vftyp";
 int
 cp_is_vtbl_ptr_type (struct type *type)
 {
-  char *typename = type_name_no_tag (type);
+  const char *typename = type_name_no_tag (type);
 
   return (typename != NULL
 	  && (STREQ (typename, vtbl_ptr_name)
@@ -202,10 +203,10 @@ cp_is_vtbl_member (struct type *type)
 {
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
     {
-      type = TYPE_TARGET_TYPE (type);
+      type = POINTER_TARGET_TYPE (type);
       if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
 	{
-	  type = TYPE_TARGET_TYPE (type);
+	  type = ARRAY_ELEMENT_TYPE (type);
 	  if (TYPE_CODE (type) == TYPE_CODE_STRUCT	/* if not using thunks */
 	      || TYPE_CODE (type) == TYPE_CODE_PTR)	/* if using thunks */
 	    {
@@ -520,7 +521,7 @@ cp_print_value (struct type *type, struct type *real_type, char *valaddr,
       int boffset;
       int skip;
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
-      char *basename = TYPE_NAME (baseclass);
+      const char *basename = TYPE_NAME (baseclass);
       char *base_valaddr;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
@@ -537,46 +538,30 @@ cp_print_value (struct type *type, struct type *real_type, char *valaddr,
 
 	  obstack_ptr_grow (&dont_print_vb_obstack, baseclass);
 	}
-
-      if (TYPE_HAS_VTABLE (type) && BASETYPE_VIA_VIRTUAL (type, i))
-	{
-	  /* Assume HP/Taligent runtime convention */
-	  find_rt_vbase_offset (type, TYPE_BASECLASS (type, i),
-				valaddr, offset, &boffset, &skip);
-	  if (skip >= 0)
-	    error ("Virtual base class offset not found from vtable while"
-		   " printing");
-	  base_valaddr = valaddr;
-	}
-      else
-	{
-	  boffset = baseclass_offset (type, i,
-				      valaddr + offset,
-				      address + offset);
-	  skip = ((boffset == -1) || (boffset + offset) < 0) ? 1 : -1;
-
-	  if (BASETYPE_VIA_VIRTUAL (type, i))
+      
+      boffset = baseclass_offset (type, i, NULL, valaddr + offset, address + offset, offset);
+      base_valaddr = valaddr;
+      skip = ((boffset == -1) || (boffset + offset) < 0) ? 1 : -1;
+      
+      if (BASETYPE_VIA_VIRTUAL (type, i))
+        {
+	  /* The virtual base class pointer might have been clobbered by the
+	     user program. Make sure that it still points to a valid memory
+	     location.  */
+	  
+	  if (boffset != -1 && ((boffset + offset) < 0 || (boffset + offset) >= TYPE_LENGTH (type)))
 	    {
-	      /* The virtual base class pointer might have been
-	         clobbered by the user program. Make sure that it
-	         still points to a valid memory location.  */
-
-	      if (boffset != -1
-		  && ((boffset + offset) < 0
-		      || (boffset + offset) >= TYPE_LENGTH (type)))
-		{
-		  base_valaddr = (char *) alloca (TYPE_LENGTH (baseclass));
-		  if (target_read_memory (address + boffset, base_valaddr,
-					  TYPE_LENGTH (baseclass)) != 0)
-		    skip = 1;
-		}
-	      else
-		base_valaddr = valaddr;
+	      base_valaddr = (char *) alloca (TYPE_LENGTH (baseclass));
+	      if (target_read_memory (address + boffset, base_valaddr,
+				      TYPE_LENGTH (baseclass)) != 0)
+		skip = 1;
 	    }
-	  else
+	  else 
 	    base_valaddr = valaddr;
 	}
-
+      else
+	base_valaddr = valaddr;
+      
       /* now do the printing */
       if (pretty)
 	{
@@ -593,12 +578,12 @@ cp_print_value (struct type *type, struct type *real_type, char *valaddr,
       if (skip >= 1)
 	fprintf_filtered (stream, "<invalid address>");
       else
-	cp_print_value_fields (baseclass, real_type, base_valaddr,
-			       offset + boffset, address, stream, format,
-			       recurse, pretty,
-			       ((struct type **)
-				obstack_base (&dont_print_vb_obstack)),
+      {
+	cp_print_value_fields (baseclass, real_type, base_valaddr, offset + boffset, address,
+			       stream, format, recurse, pretty,
+		     (struct type **) obstack_base (&dont_print_vb_obstack),
 			       0);
+      }
       fputs_filtered (", ", stream);
 
     flush_it:
@@ -711,7 +696,7 @@ cp_print_class_member (char *valaddr, struct type *domain,
     }
   if (i < len)
     {
-      char *name;
+      const char *name;
       fprintf_filtered (stream, prefix);
       name = type_name_no_tag (domain);
       if (name)

@@ -28,25 +28,27 @@
 #include "bcache.h"
 #include "gdb_string.h"		/* For memcpy declaration */
 
-/* The old hash function was stolen from SDBM. This is what DB 3.0 uses now,
+/* The old hash function was stolen from SDBM. This is what DB 3.1 uses now,
  * and is better than the old one. 
+ * It's the FNV hash.
  */
 
 unsigned long
-hash(void *addr, int length)
+hash (void *addr, int length)
 {
-		const unsigned char *k, *e;
-		unsigned long h;
-		
-		k = (const unsigned char *)addr;
-		e = k+length;
-		for (h=0; k< e;++k)
-		{
-				h *=16777619;
-				h ^= *k;
-		}
-		return (h);
+  const unsigned char *k, *e;
+  unsigned long h;
+  
+  k = (const unsigned char *)addr;
+  e = k+length;
+  for (h=0x811c9dc5; k< e;++k)
+    {
+      h *=16777619;
+      h ^= *k;
+    }
+  return (h);
 }
+
 
 /* Growing the bcache's hash table.  */
 
@@ -159,7 +161,6 @@ bcache (void *addr, int length, struct bcache *bcache)
     bcache->unique_count++;
     bcache->unique_size += length;
     bcache->structure_size += BSTRING_SIZE (length);
-
     return &new->d.data;
   }
 }

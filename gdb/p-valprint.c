@@ -36,6 +36,7 @@
 #include "target.h"
 #include "annotate.h"
 #include "p-lang.h"
+#include "cp-abi.h"
 
 
 
@@ -70,9 +71,9 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
-      if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
+      if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (ARRAY_ELEMENT_TYPE (type)) > 0)
 	{
-	  elttype = check_typedef (TYPE_TARGET_TYPE (type));
+	  elttype = check_typedef (ARRAY_ELEMENT_TYPE (type));
 	  eltlen = TYPE_LENGTH (elttype);
 	  len = TYPE_LENGTH (type) / eltlen;
 	  if (prettyprint_arrays)
@@ -142,7 +143,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 				  stream, demangle);
 	  break;
 	}
-      elttype = check_typedef (TYPE_TARGET_TYPE (type));
+      elttype = check_typedef (POINTER_TARGET_TYPE (type));
       if (TYPE_CODE (elttype) == TYPE_CODE_METHOD)
 	{
 	  pascal_object_print_class_method (valaddr + embedded_offset, type, stream);
@@ -157,7 +158,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 	{
 	  addr = unpack_pointer (type, valaddr + embedded_offset);
 	print_unpacked_pointer:
-	  elttype = check_typedef (TYPE_TARGET_TYPE (type));
+	  elttype = check_typedef (POINTER_TARGET_TYPE (type));
 
 	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
 	    {
@@ -257,7 +258,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
       break;
 
     case TYPE_CODE_REF:
-      elttype = check_typedef (TYPE_TARGET_TYPE (type));
+      elttype = check_typedef (POINTER_TARGET_TYPE (type));
       if (TYPE_CODE (elttype) == TYPE_CODE_MEMBER)
 	{
 	  pascal_object_print_class_member (valaddr + embedded_offset,
@@ -281,7 +282,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 	    {
 	      value_ptr deref_val =
 	      value_at
-	      (TYPE_TARGET_TYPE (type),
+	      (POINTER_TARGET_TYPE (type),
 	       unpack_pointer (lookup_pointer_type (builtin_type_void),
 			       valaddr + embedded_offset),
 	       NULL);
@@ -309,8 +310,8 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 	  /* Print vtable entry - we only get here if NOT using
 	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_PTR.) */
 	  print_address_demangle (extract_address (
-						    valaddr + embedded_offset + TYPE_FIELD_BITPOS (type, VTBL_FNADDR_OFFSET) / 8,
-		  TYPE_LENGTH (TYPE_FIELD_TYPE (type, VTBL_FNADDR_OFFSET))),
+						    valaddr + embedded_offset + TYPE_FIELD_BITPOS (type, 2) / 8,
+		  TYPE_LENGTH (TYPE_FIELD_TYPE (type, 2))),
 				  stream, demangle);
 	}
       else
@@ -334,19 +335,19 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 	  print_scalar_formatted (valaddr + embedded_offset, type, format, 0, stream);
 	  break;
 	}
-      len = TYPE_NFIELDS (type);
+      len = ENUM_NUM_VALUES (type);
       val = unpack_long (type, valaddr + embedded_offset);
       for (i = 0; i < len; i++)
 	{
 	  QUIT;
-	  if (val == TYPE_FIELD_BITPOS (type, i))
+	  if (val == ENUM_VALUE_VALUE (type, i))
 	    {
 	      break;
 	    }
 	}
       if (i < len)
 	{
-	  fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	  fputs_filtered (ENUM_VALUE_NAME (type, i), stream);
 	}
       else
 	{
@@ -438,10 +439,9 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 	  print_floating (valaddr + embedded_offset, type, stream);
 	}
       break;
-
     case TYPE_CODE_BITSTRING:
     case TYPE_CODE_SET:
-      elttype = TYPE_INDEX_TYPE (type);
+      elttype = (struct type *)SET_RANGE_TYPE (type);
       CHECK_TYPEDEF (elttype);
       if (TYPE_FLAGS (elttype) & TYPE_FLAG_STUB)
 	{
@@ -451,7 +451,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 	}
       else
 	{
-	  struct type *range = elttype;
+	  struct range_type *range = (struct range_type *)elttype;
 	  LONGEST low_bound, high_bound;
 	  int i;
 	  int is_bitstring = TYPE_CODE (type) == TYPE_CODE_BITSTRING;
@@ -462,7 +462,9 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 	  else
 	    fputs_filtered ("[", stream);
 
-	  i = get_discrete_bounds (range, &low_bound, &high_bound);
+	low_bound = RANGE_LOWER_BOUND (range);
+	high_bound = RANGE_UPPER_BOUND (range);
+	i = (low_bound < 0 || high_bound < 0) ? -1 : 0;
 	maybe_bad_bstring:
 	  if (i < 0)
 	    {
@@ -484,7 +486,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 		{
 		  if (need_comma)
 		    fputs_filtered (", ", stream);
-		  print_type_scalar (range, i, stream);
+		  print_type_scalar ((struct type *)range, i, stream);
 		  need_comma = 1;
 
 		  if (i + 1 <= high_bound && value_bit_index (type, valaddr + embedded_offset, ++i))
@@ -494,7 +496,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 		      while (i + 1 <= high_bound
 			     && value_bit_index (type, valaddr + embedded_offset, ++i))
 			j = i;
-		      print_type_scalar (range, j, stream);
+		      print_type_scalar ((struct type *)range, j, stream);
 		    }
 		}
 	    }
@@ -505,7 +507,6 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 	    fputs_filtered ("]", stream);
 	}
       break;
-
     case TYPE_CODE_VOID:
       fprintf_filtered (stream, "void");
       break;
@@ -547,8 +548,8 @@ pascal_value_print (value_ptr val, struct ui_file *stream, int format,
          type is indicated by the quoted string anyway. */
       if (TYPE_CODE (type) == TYPE_CODE_PTR &&
 	  TYPE_NAME (type) == NULL &&
-	  TYPE_NAME (TYPE_TARGET_TYPE (type)) != NULL &&
-	  STREQ (TYPE_NAME (TYPE_TARGET_TYPE (type)), "char"))
+	  TYPE_NAME (POINTER_TARGET_TYPE (type)) != NULL &&
+	  STREQ (TYPE_NAME (POINTER_TARGET_TYPE (type)), "char"))
 	{
 	  /* Print nothing */
 	}
@@ -691,7 +692,7 @@ const char pascal_vtbl_ptr_name[] =
 int
 pascal_object_is_vtbl_ptr_type (struct type *type)
 {
-  char *typename = type_name_no_tag (type);
+  const char *typename = type_name_no_tag (type);
 
   return (typename != NULL
 	  && (STREQ (typename, pascal_vtbl_ptr_name)));
@@ -705,10 +706,10 @@ pascal_object_is_vtbl_member (struct type *type)
 {
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
     {
-      type = TYPE_TARGET_TYPE (type);
+      type = POINTER_TARGET_TYPE (type);
       if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
 	{
-	  type = TYPE_TARGET_TYPE (type);
+	  type = ARRAY_ELEMENT_TYPE (type);
 	  if (TYPE_CODE (type) == TYPE_CODE_STRUCT	/* if not using thunks */
 	      || TYPE_CODE (type) == TYPE_CODE_PTR)	/* if using thunks */
 	    {
@@ -929,7 +930,7 @@ pascal_object_print_value (struct type *type, char *valaddr, CORE_ADDR address,
     {
       int boffset;
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
-      char *basename = TYPE_NAME (baseclass);
+      const char *basename = TYPE_NAME (baseclass);
       char *base_valaddr;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
@@ -947,7 +948,7 @@ pascal_object_print_value (struct type *type, char *valaddr, CORE_ADDR address,
 	  obstack_ptr_grow (&dont_print_vb_obstack, baseclass);
 	}
 
-      boffset = baseclass_offset (type, i, valaddr, address);
+      boffset = baseclass_offset (type, i, NULL, valaddr, address, 0);
 
       if (pretty)
 	{
@@ -1079,7 +1080,7 @@ pascal_object_print_class_member (char *valaddr, struct type *domain,
     }
   if (i < len)
     {
-      char *name;
+      const char *name;
       fprintf_filtered (stream, prefix);
       name = type_name_no_tag (domain);
       if (name)

@@ -80,8 +80,8 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
-      elttype = check_typedef (TYPE_TARGET_TYPE (type));
-      if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
+      elttype = check_typedef (ARRAY_ELEMENT_TYPE (type));
+      if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (ARRAY_ELEMENT_TYPE (type)) > 0)
 	{
 	  eltlen = TYPE_LENGTH (elttype);
 	  len = TYPE_LENGTH (type) / eltlen;
@@ -153,7 +153,7 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
 	  print_function_pointer_address (addr, stream);
 	  break;
 	}
-      elttype = check_typedef (TYPE_TARGET_TYPE (type));
+      elttype = check_typedef (POINTER_TARGET_TYPE (type));
       if (TYPE_CODE (elttype) == TYPE_CODE_METHOD)
 	{
 	  cp_print_class_method (valaddr + embedded_offset, type, stream);
@@ -161,14 +161,14 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
       else if (TYPE_CODE (elttype) == TYPE_CODE_MEMBER)
 	{
 	  cp_print_class_member (valaddr + embedded_offset,
-				 TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (type)),
+				 TYPE_DOMAIN_TYPE (POINTER_TARGET_TYPE (type)),
 				 stream, "&");
 	}
       else
 	{
 	  addr = unpack_pointer (type, valaddr + embedded_offset);
 	print_unpacked_pointer:
-	  elttype = check_typedef (TYPE_TARGET_TYPE (type));
+	  elttype = check_typedef (POINTER_TARGET_TYPE (type));
 
 	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
 	    {
@@ -227,7 +227,7 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
 		    }
 		  else
 		    {
-		      wtype = TYPE_TARGET_TYPE (type);
+		      wtype = POINTER_TARGET_TYPE (type);
 		    }
 		  vt_val = value_at (wtype, vt_address, NULL);
 		  val_print (VALUE_TYPE (vt_val), VALUE_CONTENTS (vt_val), 0,
@@ -253,7 +253,7 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
       break;
 
     case TYPE_CODE_REF:
-      elttype = check_typedef (TYPE_TARGET_TYPE (type));
+      elttype = check_typedef (POINTER_TARGET_TYPE (type));
       if (TYPE_CODE (elttype) == TYPE_CODE_MEMBER)
 	{
 	  cp_print_class_member (valaddr + embedded_offset,
@@ -277,7 +277,7 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
 	    {
 	      value_ptr deref_val =
 	      value_at
-	      (TYPE_TARGET_TYPE (type),
+	      (POINTER_TARGET_TYPE (type),
 	       unpack_pointer (lookup_pointer_type (builtin_type_void),
 			       valaddr + embedded_offset),
 	       NULL);
@@ -311,8 +311,8 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
 	  /* Print vtable entry - we only get here if NOT using
 	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_PTR.) */
 	  int offset = (embedded_offset +
-			TYPE_FIELD_BITPOS (type, VTBL_FNADDR_OFFSET) / 8);
-	  struct type *field_type = TYPE_FIELD_TYPE (type, VTBL_FNADDR_OFFSET);
+			TYPE_FIELD_BITPOS (type, 2) / 8);
+	  struct type *field_type = TYPE_FIELD_TYPE (type, 2);
 	  CORE_ADDR addr
 	    = extract_typed_address (valaddr + offset, field_type);
 
@@ -329,19 +329,19 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
 	  print_scalar_formatted (valaddr + embedded_offset, type, format, 0, stream);
 	  break;
 	}
-      len = TYPE_NFIELDS (type);
+      len = ENUM_NUM_VALUES (type);
       val = unpack_long (type, valaddr + embedded_offset);
       for (i = 0; i < len; i++)
 	{
 	  QUIT;
-	  if (val == TYPE_FIELD_BITPOS (type, i))
+	  if (val == ENUM_VALUE_VALUE (type, i))
 	    {
 	      break;
 	    }
 	}
       if (i < len)
 	{
-	  fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	  fputs_filtered (ENUM_VALUE_NAME (type, i), stream);
 	}
       else
 	{
@@ -488,8 +488,8 @@ c_value_print (value_ptr val, struct ui_file *stream, int format,
          type is indicated by the quoted string anyway. */
       if (TYPE_CODE (type) == TYPE_CODE_PTR &&
 	  TYPE_NAME (type) == NULL &&
-	  TYPE_NAME (TYPE_TARGET_TYPE (type)) != NULL &&
-	  STREQ (TYPE_NAME (TYPE_TARGET_TYPE (type)), "char"))
+	  TYPE_NAME (POINTER_TARGET_TYPE (type)) != NULL &&
+	  STREQ (TYPE_NAME (POINTER_TARGET_TYPE (type)), "char"))
 	{
 	  /* Print nothing */
 	}
@@ -503,7 +503,7 @@ c_value_print (value_ptr val, struct ui_file *stream, int format,
 	       */
 	      value_ptr temparg;
 	      temparg=value_copy(val);
-	      VALUE_TYPE (temparg) = lookup_pointer_type(TYPE_TARGET_TYPE(type));
+	      VALUE_TYPE (temparg) = lookup_pointer_type (POINTER_TARGET_TYPE (type));
 	      val=temparg;
 	    }
 	  /* Pointer to class, check real type of object */

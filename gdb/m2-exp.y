@@ -618,7 +618,8 @@ variable:	NAME
 				{
 				  write_exp_msymbol
 				    (msymbol,
-				     lookup_function_type (builtin_type_int),
+				     (struct type *) make_function_type (NULL, builtin_type_int, 0, NULL, 0),
+
 				     builtin_type_int);
 				}
 			      else if (!have_full_symbols () && !have_partial_symbols ())

@@ -374,7 +374,7 @@ extern value_ptr value_struct_elt_for_reference (struct type *domain,
 						 int offset,
 						 struct type *curtype,
 						 char *name,
-						 struct type *intype);
+						 struct type *intype, int look_for_this);
 
 extern value_ptr value_static_field (struct type *type, int fieldno);
 
@@ -539,7 +539,6 @@ extern void clear_internalvars (void);
 
 extern value_ptr value_copy (value_ptr);
 
-extern int baseclass_offset (struct type *, int, char *, CORE_ADDR);
 
 /* From valops.c */
 
@@ -555,8 +554,6 @@ extern int standard_coerce_float_to_double (struct type *, struct type *);
 
 extern value_ptr value_literal_complex (value_ptr, value_ptr, struct type *);
 
-extern void find_rt_vbase_offset (struct type *, struct type *, char *, int,
-				  int *, int *);
 
 extern value_ptr find_function_in_inferior (char *);
 

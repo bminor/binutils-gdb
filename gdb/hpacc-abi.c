@@ -173,6 +173,115 @@ hpacc_virtual_fn_field (value_ptr * arg1p, struct fn_field * f, int j,
   return vp;
 }
 
+static void find_rt_vbase_offset (struct type *, struct type *, char *, int,
+				  int *, int *);
+/* Return the offset (in bytes) of the virtual base of type BASETYPE
+ * in an object pointed to by VALADDR (on the host), assumed to be of
+ * type TYPE.  OFFSET is number of bytes beyond start of ARG to start
+ * looking (in case VALADDR is the contents of an enclosing object).
+ *
+ * This routine recurses on the primary base of the derived class because
+ * the virtual base entries of the primary base appear before the other
+ * virtual base entries.
+ *
+ * If the virtual base is not found, a negative integer is returned.
+ * The magnitude of the negative integer is the number of entries in
+ * the virtual table to skip over (entries corresponding to various
+ * ancestral classes in the chain of primary bases).
+ *
+ */
+
+int
+hpacc_baseclass_offset (struct type *type, int index, value_ptr * arg1p,
+			char *valaddr, CORE_ADDR address, int offset)
+{
+  int skip;
+  int boffset;
+  if (arg1p != NULL)
+    find_rt_vbase_offset (type, TYPE_BASECLASS (type, index),
+			  VALUE_CONTENTS_ALL (*arg1p),
+			  offset + VALUE_EMBEDDED_OFFSET (*arg1p), &boffset,
+			  &skip);
+  else
+    find_rt_vbase_offset (type, TYPE_BASECLASS (type, index),
+			  valaddr - offset, offset, &boffset, &skip);
+
+  if (skip >= 0)
+    error ("Virtual base class offset not found in vtable");
+  return boffset;
+}
+
+static void
+find_rt_vbase_offset (struct type *type, struct type *basetype, char *valaddr,
+		      int offset, int *boffset_p, int *skip_p)
+{
+  int boffset;			/* offset of virtual base */
+  int index;			/* displacement to use in virtual table */
+  int skip;
+
+  value_ptr vp;
+  CORE_ADDR vtbl;		/* the virtual table pointer */
+  struct type *pbc;		/* the primary base class */
+
+  /* Look for the virtual base recursively in the primary base, first.
+   * This is because the derived class object and its primary base
+   * subobject share the primary virtual table.  */
+
+  boffset = 0;
+  pbc = TYPE_PRIMARY_BASE (type);
+  if (pbc)
+    {
+      find_rt_vbase_offset (pbc, basetype, valaddr, offset, &boffset, &skip);
+      if (skip < 0)
+	{
+	  *boffset_p = boffset;
+	  *skip_p = -1;
+	  return;
+	}
+    }
+  else
+    skip = 0;
+
+
+  /* Find the index of the virtual base according to HP/Taligent
+     runtime spec. (Depth-first, left-to-right.)  */
+  index = virtual_base_index_skip_primaries (basetype, type);
+
+  if (index < 0)
+    {
+      *skip_p = skip + virtual_base_list_length_skip_primaries (type);
+      *boffset_p = 0;
+      return;
+    }
+
+  /* pai: FIXME -- 32x64 possible problem */
+  /* First word (4 bytes) in object layout is the vtable pointer */
+  vtbl = *(CORE_ADDR *) (valaddr + offset);
+
+  /* Before the constructor is invoked, things are usually zero'd out. */
+  if (vtbl == 0)
+    error
+      ("Couldn't find virtual table -- object may not be constructed yet.");
+
+
+  /* Find virtual base's offset -- jump over entries for primary base
+   * ancestors, then use the index computed above.  But also adjust by
+   * HP_ACC_VBASE_START for the vtable slots before the start of the
+   * virtual base entries.  Offset is negative -- virtual base entries
+   * appear _before_ the address point of the virtual table. */
+
+  /* pai: FIXME -- 32x64 problem, if word = 8 bytes, change multiplier
+     & use long type */
+
+  /* epstein : FIXME -- added param for overlay section. May not be correct */
+  vp =
+    value_at (builtin_type_int,
+	      vtbl + 4 * (-skip - index - HP_ACC_VBASE_START), NULL);
+  boffset = value_as_long (vp);
+  *skip_p = -1;
+  *boffset_p = boffset;
+  return;
+}
 
 static struct type *
 hpacc_value_rtti_type (value_ptr v, int *full, int *top, int *using_enc)
@@ -300,6 +409,8 @@ init_hpacc_ops (void)
   hpacc_abi_ops.is_operator_name = hpacc_is_operator_name;
   hpacc_abi_ops.virtual_fn_field = hpacc_virtual_fn_field;
   hpacc_abi_ops.rtti_type = hpacc_value_rtti_type;
+  hpacc_abi_ops.baseclass_offset = hpacc_baseclass_offset;
+
 }
 
 

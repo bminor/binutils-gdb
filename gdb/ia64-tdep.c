@@ -1828,7 +1828,7 @@ ia64_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
       /* Special handling for function parameters */
       if (len == 8 
           && TYPE_CODE (type) == TYPE_CODE_PTR 
-	  && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC)
+	  && TYPE_CODE (POINTER_TARGET_TYPE (type)) == TYPE_CODE_FUNC)
 	{
 	  char val_buf[8];
 

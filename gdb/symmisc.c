@@ -86,14 +86,17 @@ static void
 free_symtab_block (struct objfile *objfile, struct block *b)
 {
   register int i, n;
-  n = BLOCK_NSYMS (b);
+  n = BLOCK_NBUCKETS (b);
   for (i = 0; i < n; i++)
     {
+      register struct symbol *sym;
       mfree (objfile->md, SYMBOL_NAME (BLOCK_SYM (b, i)));
-      mfree (objfile->md, (PTR) BLOCK_SYM (b, i));
+      for (sym = BLOCK_BUCKET (b, i); sym; sym = sym->hash_next)
+	      mfree (objfile->md, (PTR) sym);
     }
   mfree (objfile->md, (PTR) b);
 }
+
 
 /* Free all the storage associated with the struct symtab <- S.
    Note that some symtabs have contents malloc'ed structure by structure,
@@ -455,7 +458,10 @@ dump_symtab (struct objfile *objfile, struct symtab *symtab,
 	      gdb_print_host_address (BLOCK_SUPERBLOCK (b), outfile);
 	    }
 	  blen = BLOCK_NSYMS (b);
-	  fprintf_filtered (outfile, ", %d syms in ", blen);
+	  if (BLOCK_FUNCTION (b))
+	    fprintf_filtered (outfile, ", %d syms in ", blen);
+	  else
+	    fprintf_filtered (outfile, ", %d buckets of symbols in ", blen);
 	  print_address_numeric (BLOCK_START (b), 1, outfile);
 	  fprintf_filtered (outfile, "..");
 	  print_address_numeric (BLOCK_END (b), 1, outfile);
@@ -475,11 +481,13 @@ dump_symtab (struct objfile *objfile, struct symtab *symtab,
 	  for (j = 0; j < blen; j++)
 	    {
 	      struct print_symbol_args s;
-	      s.symbol = BLOCK_SYM (b, j);
-	      s.depth = depth + 1;
-	      s.outfile = outfile;
-	      catch_errors (print_symbol, &s, "Error printing symbol:\n",
-			    RETURN_MASK_ALL);
+	      for (s.symbol = BLOCK_BUCKET (b, j); s.symbol; s.symbol = s.symbol->hash_next)
+		{
+		  s.depth = depth + 1;
+		  s.outfile = outfile;
+		  catch_errors (print_symbol, &s, "Error printing symbol:\n",
+				RETURN_MASK_ALL);
+		}
 	    }
 	}
       fprintf_filtered (outfile, "\n");

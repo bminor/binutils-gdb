@@ -108,17 +108,17 @@ f_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_PTR:
-      f_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
+      f_type_print_varspec_prefix (POINTER_TARGET_TYPE (type), stream, 0, 1);
       break;
 
     case TYPE_CODE_FUNC:
-      f_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      f_type_print_varspec_prefix (FUNCTION_RETURN_VALUE (type), stream, 0, 0);
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
       break;
 
     case TYPE_CODE_ARRAY:
-      f_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      f_type_print_varspec_prefix (ARRAY_ELEMENT_TYPE (type), stream, 0, 0);
       break;
 
     case TYPE_CODE_UNDEF:
@@ -205,14 +205,16 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 
   switch (TYPE_CODE (type))
     {
+
+      /* TYPEFIX - handle fortran arrays properly again */
     case TYPE_CODE_ARRAY:
       arrayprint_recurse_level++;
 
       if (arrayprint_recurse_level == 1)
 	fprintf_filtered (stream, "(");
 
-      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_ARRAY)
-	f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
+      if (TYPE_CODE (ARRAY_ELEMENT_TYPE (type)) == TYPE_CODE_ARRAY)
+	f_type_print_varspec_suffix (ARRAY_ELEMENT_TYPE (type), stream, 0, 0, 0);
 
       retcode = f77_get_dynamic_lowerbound (type, &lower_bound);
 
@@ -233,7 +235,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
       /* Make sure that, if we have an assumed size array, we
          print out a warning and print the upperbound as '*' */
 
-      if (TYPE_ARRAY_UPPER_BOUND_TYPE (type) == BOUND_CANNOT_BE_DETERMINED)
+      if (TYPE_ARRAY_UPPER_BOUND_TYPE (type) == BT_cannot_be_determined)
 	fprintf_filtered (stream, "*");
       else
 	{
@@ -256,12 +258,12 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
-      f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 1, 0);
+      f_type_print_varspec_suffix (POINTER_TARGET_TYPE (type), stream, 0, 1, 0);
       fprintf_filtered (stream, ")");
       break;
 
     case TYPE_CODE_FUNC:
-      f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
+      f_type_print_varspec_suffix (FUNCTION_RETURN_VALUE (type), stream, 0,
 				   passed_a_ptr, 0);
       if (passed_a_ptr)
 	fprintf_filtered (stream, ")");
@@ -354,13 +356,15 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
       break;
 
     case TYPE_CODE_ARRAY:
+      f_type_print_base (ARRAY_ELEMENT_TYPE (type), stream, show, level);
+      break;
     case TYPE_CODE_FUNC:
-      f_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+      f_type_print_base (FUNCTION_RETURN_VALUE (type), stream, show, level);
       break;
 
     case TYPE_CODE_PTR:
       fprintf_filtered (stream, "PTR TO -> ( ");
-      f_type_print_base (TYPE_TARGET_TYPE (type), stream, 0, level);
+      f_type_print_base (POINTER_TARGET_TYPE (type), stream, 0, level);
       break;
 
     case TYPE_CODE_VOID:
@@ -407,7 +411,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
     case TYPE_CODE_STRING:
       /* Strings may have dynamic upperbounds (lengths) like arrays. */
 
-      if (TYPE_ARRAY_UPPER_BOUND_TYPE (type) == BOUND_CANNOT_BE_DETERMINED)
+      if (TYPE_ARRAY_UPPER_BOUND_TYPE (type) == BT_cannot_be_determined)
 	fprintf_filtered (stream, "character*(*)");
       else
 	{

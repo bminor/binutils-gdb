@@ -20,6 +20,7 @@
 
 #include "defs.h"
 #include "value.h"
+#include "gdbcmd.h"
 #include "cp-abi.h"
 
 struct cp_abi_ops current_cp_abi;
@@ -60,6 +61,16 @@ is_operator_name (const char *name)
   return (*current_cp_abi.is_operator_name) (name);
 }
 
+int
+baseclass_offset (struct type *type, int index, value_ptr * arg1p,
+		  char *valaddr, CORE_ADDR address, int offset)
+{
+  if ((current_cp_abi.baseclass_offset) == NULL)
+    error ("ABI doesn't define required function baseclass_offset");
+  return (*current_cp_abi.baseclass_offset) (type, index, arg1p, valaddr,
+						 address, offset);
+}
+
 value_ptr
 value_virtual_fn_field (value_ptr * arg1p, struct fn_field * f, int j,
 			struct type * type, int offset)
@@ -97,3 +108,17 @@ switch_to_cp_abi (const char *short_name)
   return 1;
 }
 
+static void 
+maintenance_print_cpabi (char *args, int from_tty)
+{
+  fprintf_unfiltered (gdb_stdout, "Current C++ ABI is %s (%s)\n%s\n", 
+		      current_cp_abi.shortname, current_cp_abi.longname, 
+		      current_cp_abi.doc);
+}
+void
+_initialize_cp_abi (void)
+{
+  add_cmd ("c++-abi", class_maintenance, maintenance_print_cpabi,
+	   "Print out the current C++ ABI being used\n",
+	   &maintenanceprintlist);
+}

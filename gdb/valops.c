@@ -30,6 +30,7 @@
 #include "demangle.h"
 #include "language.h"
 #include "gdbcmd.h"
+#include "cp-abi.h"
 #include "regcache.h"
 #include "cp-abi.h"
 
@@ -43,6 +44,12 @@ extern int hp_som_som_object_present;
 extern int overload_debug;
 /* Local functions.  */
 
+enum looking_for_baseclass_type
+  {
+    no_baseclass,
+    only_baseclass,
+    struct_or_baseclass
+  };
 static int typecmp (int staticp, struct type *t1[], value_ptr t2[]);
 
 static CORE_ADDR find_function_addr (value_ptr, struct type **);
@@ -50,11 +57,14 @@ static value_ptr value_arg_coerce (value_ptr, struct type *, int);
 
 
 static CORE_ADDR value_push (CORE_ADDR, value_ptr);
-
-static value_ptr search_struct_field (char *, value_ptr, int,
-				      struct type *, int);
-
-static value_ptr search_struct_method (char *, value_ptr *,
+static value_ptr
+search_struct_field (const char *, value_ptr, int, struct type *,
+		     enum looking_for_baseclass_type, char *);
+static value_ptr
+search_struct_field_aux (const char *, value_ptr, int, struct type *,
+			 enum looking_for_baseclass_type,
+			 int *, char *, struct type **, char *);
+static value_ptr search_struct_method (const char *, value_ptr *,
 				       value_ptr *,
 				       int, int *, struct type *);
 
@@ -113,7 +123,7 @@ find_function_in_inferior (char *name)
 	  struct type *type;
 	  CORE_ADDR maddr;
 	  type = lookup_pointer_type (builtin_type_char);
-	  type = lookup_function_type (type);
+	  type = (struct type *)make_function_type (NULL, type, 0, NULL, 0);
 	  type = lookup_pointer_type (type);
 	  maddr = SYMBOL_VALUE_ADDRESS (msymbol);
 	  return value_from_pointer (type, maddr);
@@ -183,10 +193,11 @@ value_cast (struct type *type, register value_ptr arg2)
      where N is sizeof(OBJECT)/sizeof(TYPE). */
   if (code1 == TYPE_CODE_ARRAY)
     {
-      struct type *element_type = TYPE_TARGET_TYPE (type);
+      struct type *element_type = ARRAY_ELEMENT_TYPE (type);
       unsigned element_length = TYPE_LENGTH (check_typedef (element_type));
-      if (element_length > 0
-	&& TYPE_ARRAY_UPPER_BOUND_TYPE (type) == BOUND_CANNOT_BE_DETERMINED)
+#if TYPEFIX
+      if (current_language->la_language == language_fortran && element_length > 0
+	&& TYPE_ARRAY_UPPER_BOUND_TYPE (type) == BT_cannot_be_determined)
 	{
 	  struct type *range_type = TYPE_INDEX_TYPE (type);
 	  int val_length = TYPE_LENGTH (type2);
@@ -196,7 +207,7 @@ value_cast (struct type *type, register value_ptr arg2)
 	  new_length = val_length / element_length;
 	  if (val_length % element_length != 0)
 	    warning ("array element type size does not divide object size in cast");
-	  /* FIXME-type-allocation: need a way to free this type when we are
+	  /* TYPEFIX-type-allocation: need a way to free this type when we are
 	     done with it.  */
 	  range_type = create_range_type ((struct type *) NULL,
 					  TYPE_TARGET_TYPE (range_type),
@@ -206,6 +217,7 @@ value_cast (struct type *type, register value_ptr arg2)
 						 element_type, range_type);
 	  return arg2;
 	}
+#endif
     }
 
   if (current_language->c_style_arrays
@@ -242,7 +254,7 @@ value_cast (struct type *type, register value_ptr arg2)
          type of the target as a superclass.  If so, we'll need to
          offset the object in addition to changing its type.  */
       value_ptr v = search_struct_field (type_name_no_tag (type),
-					 arg2, 0, type2, 1);
+					 arg2, 0, type2, only_baseclass, 0);
       if (v)
 	{
 	  VALUE_TYPE (v) = type;
@@ -263,7 +275,7 @@ value_cast (struct type *type, register value_ptr arg2)
 	  unsigned int *ptr;
 	  value_ptr retvalp;
 
-	  switch (TYPE_CODE (TYPE_TARGET_TYPE (type2)))
+	  switch (TYPE_CODE (POINTER_TARGET_TYPE (type2)))
 	    {
 	      /* With HP aCC, pointers to data members have a bias */
 	    case TYPE_CODE_MEMBER:
@@ -314,8 +326,8 @@ value_cast (struct type *type, register value_ptr arg2)
     {
       if (code1 == TYPE_CODE_PTR && code2 == TYPE_CODE_PTR)
 	{
-	  struct type *t1 = check_typedef (TYPE_TARGET_TYPE (type));
-	  struct type *t2 = check_typedef (TYPE_TARGET_TYPE (type2));
+	  struct type *t1 = check_typedef (POINTER_TARGET_TYPE (type));
+	  struct type *t2 = check_typedef (POINTER_TARGET_TYPE (type2));
 	  if (TYPE_CODE (t1) == TYPE_CODE_STRUCT
 	      && TYPE_CODE (t2) == TYPE_CODE_STRUCT
 	      && !value_logical_not (arg2))
@@ -328,7 +340,7 @@ value_cast (struct type *type, register value_ptr arg2)
 	      if (TYPE_NAME (t1) != NULL)
 		{
 		  v = search_struct_field (type_name_no_tag (t1),
-					   value_ind (arg2), 0, t2, 1);
+					   value_ind (arg2), 0, t2, only_baseclass, 0);
 		  if (v)
 		    {
 		      v = value_addr (v);
@@ -344,7 +356,7 @@ value_cast (struct type *type, register value_ptr arg2)
 	      if (TYPE_NAME (t2) != NULL)
 		{
 		  v = search_struct_field (type_name_no_tag (t2),
-				       value_zero (t1, not_lval), 0, t1, 1);
+				       value_zero (t1, not_lval), 0, t1, only_baseclass, 0);
 		  if (v)
 		    {
 		      value_ptr v2 = value_ind (arg2);
@@ -369,6 +381,7 @@ value_cast (struct type *type, register value_ptr arg2)
       VALUE_POINTED_TO_OFFSET (arg2) = 0;	/* pai: chk_val */
       return arg2;
     }
+#if TYPEFIX
   else if (chill_varying_type (type))
     {
       struct type *range1, *range2, *eltype1, *eltype2;
@@ -412,6 +425,7 @@ value_cast (struct type *type, register value_ptr arg2)
 	      (count1 - count2) * TYPE_LENGTH (eltype2));
       return val;
     }
+#endif
   else if (VALUE_LVAL (arg2) == lval_memory)
     {
       return value_at_lazy (type, VALUE_ADDRESS (arg2) + VALUE_OFFSET (arg2),
@@ -465,8 +479,8 @@ value_at (struct type *type, CORE_ADDR addr, asection *sect)
 
   if (GDB_TARGET_IS_D10V
       && TYPE_CODE (type) == TYPE_CODE_PTR
-      && TYPE_TARGET_TYPE (type)
-      && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
+      && POINTER_TARGET_TYPE (type)
+      && (TYPE_CODE (POINTER_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
     {
       /* pointer to function */
       unsigned long num;
@@ -536,8 +550,8 @@ value_fetch_lazy (register value_ptr val)
   struct type *type = VALUE_TYPE (val);
   if (GDB_TARGET_IS_D10V
       && TYPE_CODE (type) == TYPE_CODE_PTR
-      && TYPE_TARGET_TYPE (type)
-      && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
+      && POINTER_TARGET_TYPE (type)
+      && (TYPE_CODE (POINTER_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
     {
       /* pointer to function */
       unsigned long num;
@@ -1001,13 +1015,13 @@ value_ind (value_ptr arg1)
       /* We may be pointing to something embedded in a larger object */
       /* Get the real type of the enclosing object */
       enc_type = check_typedef (VALUE_ENCLOSING_TYPE (arg1));
-      enc_type = TYPE_TARGET_TYPE (enc_type);
+      enc_type = POINTER_TARGET_TYPE (enc_type);
       /* Retrieve the enclosing object pointed to */
       arg2 = value_at_lazy (enc_type,
 		   value_as_pointer (arg1) - VALUE_POINTED_TO_OFFSET (arg1),
 			    VALUE_BFD_SECTION (arg1));
       /* Re-adjust type */
-      VALUE_TYPE (arg2) = TYPE_TARGET_TYPE (base_type);
+      VALUE_TYPE (arg2) = POINTER_TARGET_TYPE (base_type);
       /* Add embedding info */
       arg2 = value_change_enclosing_type (arg2, enc_type);
       VALUE_EMBEDDED_OFFSET (arg2) = VALUE_POINTED_TO_OFFSET (arg1);
@@ -1211,7 +1225,7 @@ value_arg_coerce (value_ptr arg, struct type *param_type, int is_prototyped)
       break;
     case TYPE_CODE_ARRAY:
       if (current_language->c_style_arrays)
-	type = lookup_pointer_type (TYPE_TARGET_TYPE (type));
+	type = lookup_pointer_type (ARRAY_ELEMENT_TYPE (type));
       break;
     case TYPE_CODE_UNDEF:
     case TYPE_CODE_PTR:
@@ -1248,7 +1262,12 @@ find_function_addr (value_ptr function, struct type **retval_type)
      part of it.  */
 
   /* Determine address to call.  */
-  if (code == TYPE_CODE_FUNC || code == TYPE_CODE_METHOD)
+  if (code == TYPE_CODE_FUNC)
+    {
+      funaddr = VALUE_ADDRESS (function);
+      value_type = FUNCTION_RETURN_VALUE (ftype);
+    }
+  else if (code == TYPE_CODE_METHOD)
     {
       funaddr = VALUE_ADDRESS (function);
       value_type = TYPE_TARGET_TYPE (ftype);
@@ -1256,9 +1275,13 @@ find_function_addr (value_ptr function, struct type **retval_type)
   else if (code == TYPE_CODE_PTR)
     {
       funaddr = value_as_pointer (function);
-      ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
-      if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
-	  || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
+      ftype = check_typedef (POINTER_TARGET_TYPE (ftype));
+      if (TYPE_CODE (ftype) == TYPE_CODE_FUNC)
+	{
+	  funaddr =CONVERT_FROM_FUNC_PTR_ADDR (funaddr);
+	  value_type = FUNCTION_RETURN_VALUE (ftype);
+	}
+      else if (TYPE_CODE (ftype) == TYPE_CODE_METHOD)
 	{
 	  funaddr = CONVERT_FROM_FUNC_PTR_ADDR (funaddr);
 	  value_type = TYPE_TARGET_TYPE (ftype);
@@ -1476,7 +1499,7 @@ hand_function_call (value_ptr function, int nargs, value_ptr *args)
 	if (param_type)
 	  /* if this parameter is a pointer to function */
 	  if (TYPE_CODE (param_type) == TYPE_CODE_PTR)
-	    if (TYPE_CODE (param_type->target_type) == TYPE_CODE_FUNC)
+	    if (TYPE_CODE (POINTER_TARGET_TYPE(param_type)) == TYPE_CODE_FUNC)
 	      /* elz: FIXME here should go the test about the compiler used
 	         to compile the target. We want to issue the error
 	         message only if the compiler used was HP's aCC.
@@ -1817,7 +1840,7 @@ value_array (int lowbound, int highbound, value_ptr *elemvec)
   int idx;
   unsigned int typelength;
   value_ptr val;
-  struct type *rangetype;
+  struct range_type *rangetype;
   struct type *arraytype;
   CORE_ADDR addr;
 
@@ -1838,9 +1861,9 @@ value_array (int lowbound, int highbound, value_ptr *elemvec)
 	}
     }
 
-  rangetype = create_range_type ((struct type *) NULL, builtin_type_int,
+  rangetype = make_range_type (NULL, builtin_type_int,
 				 lowbound, highbound);
-  arraytype = create_array_type ((struct type *) NULL,
+  arraytype = (struct type *)make_array_type (NULL,  
 			      VALUE_ENCLOSING_TYPE (elemvec[0]), rangetype);
 
   if (!current_language->c_style_arrays)
@@ -1887,11 +1910,9 @@ value_string (char *ptr, int len)
 {
   value_ptr val;
   int lowbound = current_language->string_lower_bound;
-  struct type *rangetype = create_range_type ((struct type *) NULL,
-					      builtin_type_int,
-					      lowbound, len + lowbound - 1);
-  struct type *stringtype
-  = create_string_type ((struct type *) NULL, rangetype);
+  struct range_type *rangetype = make_range_type (NULL, builtin_type_int,
+						  lowbound, len + lowbound - 1);
+  struct type *stringtype = (struct type *)make_string_type (NULL, rangetype);
   CORE_ADDR addr;
 
   if (current_language->c_style_arrays == 0)
@@ -1916,9 +1937,8 @@ value_ptr
 value_bitstring (char *ptr, int len)
 {
   value_ptr val;
-  struct type *domain_type = create_range_type (NULL, builtin_type_int,
-						0, len - 1);
-  struct type *type = create_set_type ((struct type *) NULL, domain_type);
+  struct range_type *domain_type = make_range_type (NULL, builtin_type_int, 0, len - 1);
+  struct type *type = (struct type *)make_set_type (NULL, domain_type);
   TYPE_CODE (type) = TYPE_CODE_BITSTRING;
   val = allocate_value (type);
   memcpy (VALUE_CONTENTS_RAW (val), ptr, TYPE_LENGTH (type));
@@ -1982,13 +2002,16 @@ typecmp (int staticp, struct type *t1[], value_ptr t2[])
       while ( TYPE_CODE(tt1) == TYPE_CODE_REF ||
 	      TYPE_CODE (tt1) == TYPE_CODE_PTR)
 	{
-	  tt1 = check_typedef( TYPE_TARGET_TYPE(tt1) );
+	  tt1 = check_typedef( POINTER_TARGET_TYPE(tt1) );
 	}
       while ( TYPE_CODE(tt2) == TYPE_CODE_ARRAY ||
 	      TYPE_CODE(tt2) == TYPE_CODE_PTR ||
 	      TYPE_CODE(tt2) == TYPE_CODE_REF)
 	{
-	  tt2 = check_typedef( TYPE_TARGET_TYPE(tt2) );
+	  while (TYPE_CODE (tt2) == TYPE_CODE_REF || TYPE_CODE (tt2) == TYPE_CODE_PTR)
+	    tt2 = check_typedef (POINTER_TARGET_TYPE (tt2));
+	  while (TYPE_CODE (tt2) == TYPE_CODE_ARRAY)
+	    tt2 = check_typedef (ARRAY_ELEMENT_TYPE (tt2));
 	}
       if (TYPE_CODE (tt1) == TYPE_CODE (tt2))
 	continue;
@@ -2010,34 +2033,123 @@ typecmp (int staticp, struct type *t1[], value_ptr t2[])
    and search in it assuming it has (class) type TYPE.
    If found, return value, else return NULL.
 
-   If LOOKING_FOR_BASECLASS, then instead of looking for struct fields,
-   look for a baseclass named NAME.  */
+   looking_for_baseclass has three possible values :
+   1) no_baseclass : look for structure field. 
+   2) only_baseclass : look for baseclass named NAME.
+   3) struct_or_baseclass : look for structure field first, and then
+   the baseclass named NAME. Return the first
+   structure field if it is found.
+   The value is used when hp_som_som_object_present
+   is true. */
 
 static value_ptr
-search_struct_field (char *name, register value_ptr arg1, int offset,
-		     register struct type *type, int looking_for_baseclass)
+search_struct_field (name, arg1, offset, type, looking_for_baseclass,
+                     domain_name)
+     const char *name;
+     register value_ptr arg1;
+     int offset;
+     register struct type *type;
+     enum looking_for_baseclass_type looking_for_baseclass;
+     char *domain_name;
+{
+  int found = 0;
+  char found_class[1024];
+  value_ptr v;
+  struct type *vbase = NULL;
+
+  found_class[0] = '\000';
+
+  v = search_struct_field_aux (name, arg1, offset, type,
+			       looking_for_baseclass, &found,
+			       found_class, &vbase, domain_name);
+  if (found > 1)
+    warning ("%s ambiguous; using %s::%s. Use a cast to disambiguate.",
+             name, found_class, name);
+
+  return v;
+}
+
+static value_ptr
+search_struct_field_aux (name, arg1, offset, type,
+			 looking_for_baseclass, found,
+			 found_class_name, vbase, domain_name)
+     const char *name;
+     value_ptr arg1;
+     int offset;
+     register struct type *type;
+     enum looking_for_baseclass_type looking_for_baseclass;
+     int *found;
+     char *found_class_name;
+     struct type **vbase;
+     char *domain_name;
 {
   int i;
+  value_ptr retval = NULL;
+  char tmp_class_name[1024];
+  int tmp_found = 0;
+  int assigned = 0;
   int nbases = TYPE_N_BASECLASSES (type);
+
+  tmp_class_name[0] = '\000';
 
   CHECK_TYPEDEF (type);
 
-  if (!looking_for_baseclass)
+  if (looking_for_baseclass == no_baseclass ||
+       looking_for_baseclass == struct_or_baseclass)
     for (i = TYPE_NFIELDS (type) - 1; i >= nbases; i--)
       {
 	char *t_field_name = TYPE_FIELD_NAME (type, i);
 
 	if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	  {
-	    value_ptr v;
+	    value_ptr v = NULL;
 	    if (TYPE_FIELD_STATIC (type, i))
 	      v = value_static_field (type, i);
+            if (v != NULL)
+              {
+                if (!*found)
+                  {
+                    /* Record return value and class name, and continue
+                       looking for possible ambiguous members */
+                    char *class_name = TYPE_TAG_NAME (type);
+                    retval = v;
+                    if (class_name)
+                      strcpy (found_class_name, class_name);
+                    else
+                      found_class_name = NULL;
+                  }
+                (*found)++;
+              }
 	    else
-	      v = value_primitive_field (arg1, offset, i, type);
-	    if (v == 0)
-	      error ("there is no field named %s", name);
-	    return v;
-	  }
+	      {
+		char *fullname = (domain_name ?
+				  (strncmp (domain_name, "data member of", 14) ?
+				   NULL : &domain_name[15])
+				  : NULL );
+		if (!fullname || !strcmp(TYPE_TAG_NAME(type), fullname))
+		  {
+		    v = value_primitive_field (arg1, offset, i, type);
+                    if (v != NULL)
+                      {
+                        if (!*found)
+                          {
+                            /* Record return value and class name, and continue
+                               looking for possible ambiguous members */
+                            char *class_name = TYPE_TAG_NAME (type);
+                            retval = v;
+                            if (class_name)
+                              strcpy (found_class_name, class_name);
+                            else
+                              found_class_name = NULL;
+                          }
+                        (*found)++;
+                      }
+                  }
+              }
+
+            if (v == 0 && looking_for_baseclass != struct_or_baseclass)
+              error ("Couldn't retrieve field named %s", name);
+          }
 
 	if (t_field_name
 	    && (t_field_name[0] == '\0'
@@ -2070,13 +2182,39 @@ search_struct_field (char *name, register value_ptr arg1, int offset,
 			&& TYPE_FIELD_BITPOS (field_type, 0) == 0))
 		  new_offset += TYPE_FIELD_BITPOS (type, i) / 8;
 
-		v = search_struct_field (name, arg1, new_offset, field_type,
-					 looking_for_baseclass);
-		if (v)
-		  return v;
-	      }
-	  }
+		v = search_struct_field_aux (name, arg1, new_offset,
+					     field_type,
+					     looking_for_baseclass,
+					     &tmp_found, tmp_class_name,
+					     vbase, domain_name);
+                if (!*found && v)
+                  {
+                    /* Record return value and class name, and continue
+                       looking for possible ambiguous members */
+                    retval = v;
+                    /* TYPE_TAG_NAME can be null in case of an anonymous union */
+                    if (TYPE_TAG_NAME (type))
+                      strcpy (found_class_name, TYPE_TAG_NAME (type));
+                    else
+                      strcpy (found_class_name, " ");
+                    strcat (found_class_name, "::");
+                    strcat (found_class_name, tmp_class_name);
+                  }
+                *found += tmp_found;
+                tmp_found = 0;
+              }
+          }
       }
+
+  /* Return the structure field if it is found. */
+  if (*found > 0 && looking_for_baseclass == struct_or_baseclass)
+    return retval;
+
+  /* RM: If we are looking for a structure field, and we have found
+     one, don't look through the baseclasses -- names there are
+     hidden. ANSI C++ standard, section 10.2 */
+  if (*found > 0 && looking_for_baseclass == no_baseclass)
+    return retval;
 
   for (i = 0; i < nbases; i++)
     {
@@ -2092,12 +2230,12 @@ search_struct_field (char *name, register value_ptr arg1, int offset,
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
 	  int boffset;
-	  value_ptr v2 = allocate_value (basetype);
+	  value_ptr v2 = allocate_value (VALUE_ENCLOSING_TYPE (arg1));
 
 	  boffset = baseclass_offset (type, i,
-				      VALUE_CONTENTS (arg1) + offset,
+				      &arg1, VALUE_CONTENTS (arg1) + offset,
 				      VALUE_ADDRESS (arg1)
-				      + VALUE_OFFSET (arg1) + offset);
+				      + VALUE_OFFSET (arg1) + offset, offset);
 	  if (boffset == -1)
 	    error ("virtual baseclass botch");
 
@@ -2110,12 +2248,13 @@ search_struct_field (char *name, register value_ptr arg1, int offset,
 	    {
 	      CORE_ADDR base_addr;
 
-	      base_addr = VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1) + boffset;
+	      base_addr = VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1)  + boffset;
 	      if (target_read_memory (base_addr, VALUE_CONTENTS_RAW (v2),
 				      TYPE_LENGTH (basetype)) != 0)
 		error ("virtual baseclass botch");
 	      VALUE_LVAL (v2) = lval_memory;
 	      VALUE_ADDRESS (v2) = base_addr;
+	      assigned = 1;
 	    }
 	  else
 	    {
@@ -2129,112 +2268,124 @@ search_struct_field (char *name, register value_ptr arg1, int offset,
 			VALUE_CONTENTS_RAW (arg1) + boffset,
 			TYPE_LENGTH (basetype));
 	    }
+#if 0
+          if (!assigned)
+            {
+              VALUE_LVAL (v2) = VALUE_LVAL (arg1);
+              VALUE_ADDRESS (v2) = VALUE_ADDRESS (arg1);
+            }
+          /* Earlier, this code used to allocate a value of type
+             basetype and copy the contents of arg1 at the
+             appropriate offset into the new value.  This doesn't
+             work because there is important stuff (virtual bases,
+             for example) that could be anywhere in the contents
+             of arg1, and not just within the length of a basetype
+             object.  In particular the boffset below could be
+             negative, with the HP/Taligent C++ runtime system.
+             So, the only way to ensure that required information
+             is not lost is to always allocate a value of the same
+             type as arg1 and to fill it with the _entire_
+             contents of arg1.  It sounds wasteful, but there is
+             really no way around it if later member lookup,
+             casts, etc. have to work correctly with the returned
+             value.  */
 
-	  if (found_baseclass)
-	    return v2;
-	  v = search_struct_field (name, v2, 0, TYPE_BASECLASS (type, i),
-				   looking_for_baseclass);
-	}
+
+          VALUE_TYPE (v2) = basetype;
+          VALUE_OFFSET (v2) = VALUE_OFFSET (arg1);
+          VALUE_EMBEDDED_OFFSET (v2)
+            = VALUE_EMBEDDED_OFFSET (arg1) + offset + boffset;
+          if (VALUE_LAZY (arg1))
+            VALUE_LAZY (v2) = 1;
+          else
+            memcpy ((char *) (v2)->aligner.contents,
+                    (char *) (arg1)->aligner.contents,
+                    TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg1)));
+#endif
+          if (found_baseclass)
+            {
+              /*return v2; */
+
+              if (!*found)      /* not yet found anything */
+                {
+                  /* Record return value and class name, and continue
+                     looking for possible ambiguous members */
+                  retval = v2;
+                  strcpy (found_class_name, TYPE_TAG_NAME (type));
+                }
+              /* Don't count virtual bases twice when deciding ambiguity */
+              if (*vbase != basetype)   /* works for null *vbase */
+                (*found)++;
+              /* Is this the first virtual base where we "found" something? */
+              if (!*vbase)
+                *vbase = basetype;
+            }
+          else
+            /* base not found, or looking for member */
+            {
+              v = search_struct_field_aux (name, /*arg1*/v2, 0/*offset + boffset*/,
+                                           TYPE_BASECLASS (type, i),
+                                           looking_for_baseclass, &tmp_found,
+                                        tmp_class_name, vbase, domain_name);
+              if (!*found && v)
+                {
+                  /* Record return value and class name, and continue
+                     looking for possible ambiguous members */
+                  retval = v;
+                  /* TYPE_TAG_NAME can be null in case of an anonymous union */
+                  if (TYPE_TAG_NAME (type))
+                    strcpy (found_class_name, TYPE_TAG_NAME (type));
+                  else
+                    strcpy (found_class_name, " ");
+                  strcat (found_class_name, "::");
+                  strcat (found_class_name, tmp_class_name);
+                }
+              /* Don't count virtual bases twice when deciding ambiguity */
+              if (*vbase != basetype)   /* works for null *vbase */
+                *found += tmp_found;
+              /* Is this the first virtual base where we "found" something? */
+              if (!*vbase)
+                *vbase = basetype;
+              tmp_found = 0;
+            }
+        }
       else if (found_baseclass)
-	v = value_primitive_field (arg1, offset, i, type);
+        {
+          v = value_primitive_field (arg1, offset, i, type);
+          if (!*found)
+            {
+              /* Record return value and class name, and continue
+                 looking for possible ambiguous members */
+              retval = v;
+              strcpy (found_class_name, TYPE_TAG_NAME (type));
+            }
+          (*found)++;
+        }
       else
-	v = search_struct_field (name, arg1,
-			       offset + TYPE_BASECLASS_BITPOS (type, i) / 8,
-				 basetype, looking_for_baseclass);
-      if (v)
-	return v;
+        {
+          v = search_struct_field_aux (name, arg1,
+                               offset + TYPE_BASECLASS_BITPOS (type, i) / 8,
+                                basetype, looking_for_baseclass, &tmp_found,
+                                       tmp_class_name, vbase, domain_name);
+          if (!*found && v)
+            {
+              /* Record return value and class name, and continue
+                 looking for possible ambiguous members */
+              retval = v;
+              /* TYPE_TAG_NAME can be null in case of an anonymous union */
+              if (TYPE_TAG_NAME (type))
+                strcpy (found_class_name, TYPE_TAG_NAME (type));
+              else
+                strcpy (found_class_name, " ");
+              strcat (found_class_name, "::");
+              strcat (found_class_name, tmp_class_name);
+            }
+          *found += tmp_found;
+          tmp_found = 0;
+        }
     }
-  return NULL;
+  return retval;
 }
-
-
-/* Return the offset (in bytes) of the virtual base of type BASETYPE
- * in an object pointed to by VALADDR (on the host), assumed to be of
- * type TYPE.  OFFSET is number of bytes beyond start of ARG to start
- * looking (in case VALADDR is the contents of an enclosing object).
- *
- * This routine recurses on the primary base of the derived class because
- * the virtual base entries of the primary base appear before the other
- * virtual base entries.
- *
- * If the virtual base is not found, a negative integer is returned.
- * The magnitude of the negative integer is the number of entries in
- * the virtual table to skip over (entries corresponding to various
- * ancestral classes in the chain of primary bases).
- *
- * Important: This assumes the HP / Taligent C++ runtime
- * conventions. Use baseclass_offset() instead to deal with g++
- * conventions.  */
-
-void
-find_rt_vbase_offset (struct type *type, struct type *basetype, char *valaddr,
-		      int offset, int *boffset_p, int *skip_p)
-{
-  int boffset;			/* offset of virtual base */
-  int index;			/* displacement to use in virtual table */
-  int skip;
-
-  value_ptr vp;
-  CORE_ADDR vtbl;		/* the virtual table pointer */
-  struct type *pbc;		/* the primary base class */
-
-  /* Look for the virtual base recursively in the primary base, first.
-   * This is because the derived class object and its primary base
-   * subobject share the primary virtual table.  */
-
-  boffset = 0;
-  pbc = TYPE_PRIMARY_BASE (type);
-  if (pbc)
-    {
-      find_rt_vbase_offset (pbc, basetype, valaddr, offset, &boffset, &skip);
-      if (skip < 0)
-	{
-	  *boffset_p = boffset;
-	  *skip_p = -1;
-	  return;
-	}
-    }
-  else
-    skip = 0;
-
-
-  /* Find the index of the virtual base according to HP/Taligent
-     runtime spec. (Depth-first, left-to-right.)  */
-  index = virtual_base_index_skip_primaries (basetype, type);
-
-  if (index < 0)
-    {
-      *skip_p = skip + virtual_base_list_length_skip_primaries (type);
-      *boffset_p = 0;
-      return;
-    }
-
-  /* pai: FIXME -- 32x64 possible problem */
-  /* First word (4 bytes) in object layout is the vtable pointer */
-  vtbl = *(CORE_ADDR *) (valaddr + offset);
-
-  /* Before the constructor is invoked, things are usually zero'd out. */
-  if (vtbl == 0)
-    error ("Couldn't find virtual table -- object may not be constructed yet.");
-
-
-  /* Find virtual base's offset -- jump over entries for primary base
-   * ancestors, then use the index computed above.  But also adjust by
-   * HP_ACC_VBASE_START for the vtable slots before the start of the
-   * virtual base entries.  Offset is negative -- virtual base entries
-   * appear _before_ the address point of the virtual table. */
-
-  /* pai: FIXME -- 32x64 problem, if word = 8 bytes, change multiplier
-     & use long type */
-
-  /* epstein : FIXME -- added param for overlay section. May not be correct */
-  vp = value_at (builtin_type_int, vtbl + 4 * (-skip - index - HP_ACC_VBASE_START), NULL);
-  boffset = value_as_long (vp);
-  *skip_p = -1;
-  *boffset_p = boffset;
-  return;
-}
-
 
 /* Helper function used by value_struct_elt to recurse through baseclasses.
    Look for a field NAME in ARG1. Adjust the address of ARG1 by OFFSET bytes,
@@ -2243,7 +2394,7 @@ find_rt_vbase_offset (struct type *type, struct type *basetype, char *valaddr,
    else return NULL. */
 
 static value_ptr
-search_struct_method (char *name, register value_ptr *arg1p,
+search_struct_method (const char *name, register value_ptr *arg1p,
 		      register value_ptr *args, int offset,
 		      int *static_memfuncp, register struct type *type)
 {
@@ -2300,46 +2451,31 @@ search_struct_method (char *name, register value_ptr *arg1p,
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
-	  if (TYPE_HAS_VTABLE (type))
+	  struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
+	  char *base_valaddr;
+	  
+	  /* The virtual base class pointer might have been clobbered by the
+	     user program. Make sure that it still points to a valid memory
+	     location.  */
+	  
+	  if (offset < 0 || offset >= TYPE_LENGTH (type))
 	    {
-	      /* HP aCC compiled type, search for virtual base offset
-	         according to HP/Taligent runtime spec.  */
-	      int skip;
-	      find_rt_vbase_offset (type, TYPE_BASECLASS (type, i),
-				    VALUE_CONTENTS_ALL (*arg1p),
-				    offset + VALUE_EMBEDDED_OFFSET (*arg1p),
-				    &base_offset, &skip);
-	      if (skip >= 0)
-		error ("Virtual base class offset not found in vtable");
-	    }
-	  else
-	    {
-	      struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
-	      char *base_valaddr;
-
-	      /* The virtual base class pointer might have been clobbered by the
-	         user program. Make sure that it still points to a valid memory
-	         location.  */
-
-	      if (offset < 0 || offset >= TYPE_LENGTH (type))
-		{
-		  base_valaddr = (char *) alloca (TYPE_LENGTH (baseclass));
-		  if (target_read_memory (VALUE_ADDRESS (*arg1p)
-					  + VALUE_OFFSET (*arg1p) + offset,
-					  base_valaddr,
-					  TYPE_LENGTH (baseclass)) != 0)
-		    error ("virtual baseclass botch");
-		}
-	      else
-		base_valaddr = VALUE_CONTENTS (*arg1p) + offset;
-
-	      base_offset =
-		baseclass_offset (type, i, base_valaddr,
-				  VALUE_ADDRESS (*arg1p)
-				  + VALUE_OFFSET (*arg1p) + offset);
-	      if (base_offset == -1)
+	      base_valaddr = (char *) alloca (TYPE_LENGTH (baseclass));
+	      if (target_read_memory (VALUE_ADDRESS (*arg1p)
+				      + VALUE_OFFSET (*arg1p) + offset,
+				      base_valaddr,
+				      TYPE_LENGTH (baseclass)) != 0)
 		error ("virtual baseclass botch");
 	    }
+	  else
+	    base_valaddr = VALUE_CONTENTS (*arg1p) + offset;
+	  
+	  base_offset =
+	    baseclass_offset (type, i, arg1p,  base_valaddr,
+			      VALUE_ADDRESS (*arg1p)
+			      + VALUE_OFFSET (*arg1p) + offset, offset);
+	  if (base_offset == -1)
+	    error ("virtual baseclass botch");
 	}
       else
 	{
@@ -2414,13 +2550,20 @@ value_struct_elt (register value_ptr *argp, register value_ptr *args,
   if (!args)
     {
       /* if there are no arguments ...do this...  */
-
+      
       /* Try as a field first, because if we succeed, there
          is less work to be done.  */
-      v = search_struct_field (name, *argp, 0, t, 0);
+      if (strncmp (err, "data member", 11))
+	{
+	  v = search_struct_field (name, *argp, VALUE_EMBEDDED_OFFSET (*argp), t, no_baseclass, NULL);
+	}
+      else
+	{
+	  v = search_struct_field (name, *argp, VALUE_EMBEDDED_OFFSET (*argp), t, struct_or_baseclass, err);
+	}
       if (v)
 	return v;
-
+      
       /* C++: If it was not found as a data field, then try to
          return it as a pointer to a method.  */
 
@@ -2476,7 +2619,7 @@ value_struct_elt (register value_ptr *argp, register value_ptr *args,
       /* See if user tried to invoke data as function.  If so,
          hand it back.  If it's not callable (i.e., a pointer to function),
          gdb should give an error.  */
-      v = search_struct_field (name, *argp, 0, t, 0);
+      v = search_struct_field (name, *argp, 0, t, no_baseclass, NULL);
     }
 
   if (!v)
@@ -2528,29 +2671,13 @@ find_method_list (value_ptr *argp, char *method, int offset,
       int base_offset;
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
-	  if (TYPE_HAS_VTABLE (type))
-	    {
-	      /* HP aCC compiled type, search for virtual base offset
-	       * according to HP/Taligent runtime spec.  */
-	      int skip;
-	      find_rt_vbase_offset (type, TYPE_BASECLASS (type, i),
-				    VALUE_CONTENTS_ALL (*argp),
-				    offset + VALUE_EMBEDDED_OFFSET (*argp),
-				    &base_offset, &skip);
-	      if (skip >= 0)
-		error ("Virtual base class offset not found in vtable");
-	    }
-	  else
-	    {
-	      /* probably g++ runtime model */
-	      base_offset = VALUE_OFFSET (*argp) + offset;
-	      base_offset =
-		baseclass_offset (type, i,
-				  VALUE_CONTENTS (*argp) + base_offset,
-				  VALUE_ADDRESS (*argp) + base_offset);
-	      if (base_offset == -1)
-		error ("virtual baseclass botch");
-	    }
+	  base_offset = VALUE_OFFSET (*argp) + offset;
+	  base_offset =
+	    baseclass_offset (type, i, argp, 
+			      VALUE_CONTENTS (*argp) + base_offset,
+			      VALUE_ADDRESS (*argp) + base_offset, offset);
+	  if (base_offset == -1)
+	    error ("virtual baseclass botch");
 	}
       else
 	/* non-virtual base, simply use bit position from debug info */
@@ -2664,7 +2791,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   register int jj;
   register int ix;
 
-  char *obj_type_name = NULL;
+  const char *obj_type_name = NULL;
   char *func_name = NULL;
 
   /* Get the list of overloaded methods or functions */
@@ -2678,7 +2805,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
          value rather than the object itself, so try again */
       if ((!obj_type_name || !*obj_type_name) &&
 	  (TYPE_CODE (VALUE_TYPE (obj)) == TYPE_CODE_PTR))
-	obj_type_name = TYPE_NAME (TYPE_TARGET_TYPE (VALUE_TYPE (obj)));
+	obj_type_name = TYPE_NAME (POINTER_TARGET_TYPE (VALUE_TYPE (obj)));
 
       fns_ptr = value_find_oload_method_list (&temp, name, 0,
 					      staticp,
@@ -2880,7 +3007,7 @@ destructor_name_p (const char *name, const struct type *type)
 
   if (name[0] == '~')
     {
-      char *dname = type_name_no_tag (type);
+      const char *dname = type_name_no_tag (type);
       char *cp = strchr (dname, '<');
       unsigned int len;
 
@@ -2958,7 +3085,7 @@ check_field (register value_ptr arg1, const char *name)
       CHECK_TYPEDEF (t);
       if (TYPE_CODE (t) != TYPE_CODE_PTR && TYPE_CODE (t) != TYPE_CODE_REF)
 	break;
-      t = TYPE_TARGET_TYPE (t);
+      t = POINTER_TARGET_TYPE (t);
     }
 
   if (TYPE_CODE (t) == TYPE_CODE_MEMBER)
@@ -2981,12 +3108,12 @@ check_field (register value_ptr arg1, const char *name)
 value_ptr
 value_struct_elt_for_reference (struct type *domain, int offset,
 				struct type *curtype, char *name,
-				struct type *intype)
+				struct type *intype, int look_for_this)
 {
   register struct type *t = curtype;
   register int i;
   value_ptr v;
-
+  
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION)
     error ("Internal error: non-aggregate type to value_struct_elt_for_reference");
@@ -2997,6 +3124,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 
       if (t_field_name && STREQ (t_field_name, name))
 	{
+		value_ptr argp;
 	  if (TYPE_FIELD_STATIC (t, i))
 	    {
 	      v = value_static_field (t, i);
@@ -3007,14 +3135,28 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	    }
 	  if (TYPE_FIELD_PACKED (t, i))
 	    error ("pointers to bitfield members not allowed");
-
+	  if (look_for_this)
+	    {
+	      /* It can be a class data member. */
+	      argp = value_of_this (1);
+	      if (argp != 0)
+		{
+		  char *class_name;
+		  class_name = alloca (strlen (TYPE_TAG_NAME(domain)) +strlen ("data member of ")+1);
+		  strcat (class_name, "data member of ");
+		  strcat (class_name, TYPE_TAG_NAME(domain));
+		  v = value_struct_elt (&argp, NULL, name, NULL, class_name);
+		  if (v != 0)
+		    return v;
+		}
+	    }
 	  return value_from_longest
 	    (lookup_reference_type (lookup_member_type (TYPE_FIELD_TYPE (t, i),
 							domain)),
 	     offset + (LONGEST) (TYPE_FIELD_BITPOS (t, i) >> 3));
 	}
     }
-
+  
   /* C++: If it was not found as a data field, then try to
      return it as a pointer to a method.  */
 
@@ -3026,7 +3168,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 
   /* Perform all necessary dereferencing.  */
   while (intype && TYPE_CODE (intype) == TYPE_CODE_PTR)
-    intype = TYPE_TARGET_TYPE (intype);
+    intype = POINTER_TARGET_TYPE (intype);
 
   for (i = TYPE_NFN_FIELDS (t) - 1; i >= 0; --i)
     {
@@ -3104,7 +3246,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 					  offset + base_offset,
 					  TYPE_BASECLASS (t, i),
 					  name,
-					  intype);
+					  intype, look_for_this);
       if (v)
 	return v;
     }
@@ -3256,7 +3398,8 @@ value_of_this (int complain)
 value_ptr
 value_slice (value_ptr array, int lowbound, int length)
 {
-  struct type *slice_range_type, *slice_type, *range_type;
+  struct type *slice_type;
+  struct range_type *slice_range_type, *range_type;
   LONGEST lowerbound, upperbound, offset;
   value_ptr slice;
   struct type *array_type;
@@ -3266,24 +3409,24 @@ value_slice (value_ptr array, int lowbound, int length)
       && TYPE_CODE (array_type) != TYPE_CODE_STRING
       && TYPE_CODE (array_type) != TYPE_CODE_BITSTRING)
     error ("cannot take slice of non-array");
-  range_type = TYPE_INDEX_TYPE (array_type);
-  if (get_discrete_bounds (range_type, &lowerbound, &upperbound) < 0)
-    error ("slice from bad array or bitstring");
+  range_type = ARRAY_RANGE_TYPE (array_type);
+  lowerbound = RANGE_LOWER_BOUND (range_type);
+  upperbound = RANGE_UPPER_BOUND (range_type);
   if (lowbound < lowerbound || length < 0
       || lowbound + length - 1 > upperbound
   /* Chill allows zero-length strings but not arrays. */
       || (current_language->la_language == language_chill
 	  && length == 0 && TYPE_CODE (array_type) == TYPE_CODE_ARRAY))
     error ("slice out of range");
-  /* FIXME-type-allocation: need a way to free this type when we are
+  /* TYPEFIX-type-allocation: need a way to free this type when we are
      done with it.  */
-  slice_range_type = create_range_type ((struct type *) NULL,
-					TYPE_TARGET_TYPE (range_type),
+  slice_range_type = make_range_type (NULL, 
+					RANGE_INDEX_TYPE (range_type),
 					lowbound, lowbound + length - 1);
   if (TYPE_CODE (array_type) == TYPE_CODE_BITSTRING)
     {
       int i;
-      slice_type = create_set_type ((struct type *) NULL, slice_range_type);
+      slice_type = (struct type *)make_set_type (NULL, slice_range_type);
       TYPE_CODE (slice_type) = TYPE_CODE_BITSTRING;
       slice = value_zero (slice_type, not_lval);
       for (i = 0; i < length; i++)
@@ -3307,10 +3450,10 @@ value_slice (value_ptr array, int lowbound, int length)
     }
   else
     {
-      struct type *element_type = TYPE_TARGET_TYPE (array_type);
+      struct type *element_type = ARRAY_ELEMENT_TYPE (array_type);
       offset
 	= (lowbound - lowerbound) * TYPE_LENGTH (check_typedef (element_type));
-      slice_type = create_array_type ((struct type *) NULL, element_type,
+      slice_type = (struct type *)make_array_type (NULL,  element_type,
 				      slice_range_type);
       TYPE_CODE (slice_type) = TYPE_CODE (array_type);
       slice = allocate_value (slice_type);

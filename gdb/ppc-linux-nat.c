@@ -35,7 +35,7 @@
 
 /* Prototypes for supply_gregset etc. */
 #include "gregset.h"
-
+typedef elf_greg_t greg_t;
 int
 kernel_u_size (void)
 {

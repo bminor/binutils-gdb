@@ -372,7 +372,59 @@ init_array_element (value_ptr array, value_ptr element,
     }
   return index;
 }
+/* Given a function "f" which is a member of a class, find
+ * the classname that it is a member of. Used to construct
+ * the name (e.g., "c::f") which GDB will put in the
+ * "demangled name" field of the function's symbol.
+ * Called from hpread_process_one_debug_symbol()
+ * If "f" is not a member function, return NULL.
+ */
+const char *
+class_of (functype)
+     struct type *functype;
+{
+  struct type *first_param_type;
+  char *first_param_name;
+  struct type *pointed_to_type;
+  const char *class_name;
 
+  /* Check that the function has a first argument "this",
+   * and that "this" is a pointer to a class. If not,
+   * functype is not a member function, so return NULL.
+   */
+  if (TYPE_NFIELDS (functype) == 0)
+    return NULL;
+  first_param_name = TYPE_FIELD_NAME (functype, 0);
+  if (first_param_name == NULL)
+    return NULL;		/* paranoia */
+  if (strcmp (first_param_name, "this"))
+    return NULL;
+  first_param_type = TYPE_FIELD_TYPE (functype, 0);
+  if (first_param_type == NULL)
+    return NULL;		/* paranoia */
+  if (TYPE_CODE (first_param_type) != TYPE_CODE_PTR)
+    return NULL;
+
+  /* Get the thing that "this" points to, check that
+   * it's a class, and get its class name.
+   */
+  pointed_to_type = POINTER_TARGET_TYPE (first_param_type);
+  if (pointed_to_type == NULL)
+    return NULL;		/* paranoia */
+  if (TYPE_CODE (pointed_to_type) != TYPE_CODE_CLASS)
+    return NULL;
+  class_name = TYPE_NAME (pointed_to_type);
+  if (class_name == NULL)
+    return NULL;		/* paranoia */
+
+  /* The class name may be of the form "class c", in which case
+   * we want to strip off the leading "class ".
+   */
+  if (strncmp (class_name, "class ", 6) == 0)
+    class_name += 6;
+
+  return class_name;
+}
 value_ptr
 evaluate_subexp_standard (struct type *expect_type,
 			  register struct expression *exp, register int *pos,
@@ -398,17 +450,74 @@ evaluate_subexp_standard (struct type *expect_type,
   switch (op)
     {
     case OP_SCOPE:
+      {
+      int look_for_this = 0;
       tem = longest_to_int (exp->elts[pc + 2].longconst);
       (*pos) += 4 + BYTES_TO_EXP_ELEM (tem + 1);
+	/* Handle class_name::member. If it is a static data member,
+	   the compiler generates a fully qualified symbol name for it. 'yylex'
+	   routine has already looked ahead in order to get a symbol for it.
+	   However, if it is not a static data member, it is simply a field of
+	   its class. To get around the problem, a flag 'look_for_this' is
+	   used to tell the callees to check if it is a data member of 'this'.
+	*/
+	if (current_language->la_language == language_cplus)
+          {
+	    if (pc && exp->elts[pc - 1].opcode == UNOP_ADDR)
+              {
+		/* If we see 'object.class_name::member', it is not a member of
+		   'this'. */
+                look_for_this = 0;                                 
+	      }
+	    else
+              {
+		char * class_name = TYPE_TAG_NAME(exp->elts[pc + 1].type);
+		if (selected_frame)
+                  {
+		    /* If pc is in a member function of its class or the class
+		       is dervied from virtual class, it can be member of
+		       'this'. */ 
+		    struct symbol * func_sym =
+		      find_pc_function (selected_frame->pc);
+
+		    if (func_sym)
+                      {
+
+			const char * func_class_name =
+			  class_of (SYMBOL_TYPE (func_sym));
+
+			/* it could be a data member in which case we
+			   will just save some time digging up info for
+			   class functions. */
+			if (func_class_name != NULL)
+			  {
+			    if (!strcmp(class_name, func_class_name))
+			      look_for_this = 1;
+			    else
+			      {
+				struct symbol * func_class_sym = 
+				  lookup_symbol (func_class_name, 0,
+						 VAR_NAMESPACE, 0, 0);
+
+				fill_in_vptr_fieldno (SYMBOL_TYPE (func_class_sym));
+				if (func_class_sym && 
+				    TYPE_VPTR_FIELDNO (SYMBOL_TYPE (func_class_sym)) != -1)
+				  look_for_this = 1;
+			      }
+			  }
+		      }
+		  }
+	      }
+	  }
       arg1 = value_struct_elt_for_reference (exp->elts[pc + 1].type,
 					     0,
 					     exp->elts[pc + 1].type,
 					     &exp->elts[pc + 3].string,
-					     NULL_TYPE);
+					     NULL_TYPE, look_for_this);
       if (arg1 == NULL)
 	error ("There is no field named %s", &exp->elts[pc + 3].string);
       return arg1;
-
+      }
     case OP_LONG:
       (*pos) += 3;
       return value_from_longest (exp->elts[pc + 1].type,
@@ -495,16 +604,13 @@ evaluate_subexp_standard (struct type *expect_type,
       if (expect_type != NULL_TYPE && noside != EVAL_SKIP
 	  && TYPE_CODE (type) == TYPE_CODE_ARRAY)
 	{
-	  struct type *range_type = TYPE_FIELD_TYPE (type, 0);
-	  struct type *element_type = TYPE_TARGET_TYPE (type);
+	  struct range_type *range_type = ARRAY_RANGE_TYPE (type);
+	  struct type *element_type = ARRAY_ELEMENT_TYPE (type);
 	  value_ptr array = allocate_value (expect_type);
 	  int element_size = TYPE_LENGTH (check_typedef (element_type));
 	  LONGEST low_bound, high_bound, index;
-	  if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
-	    {
-	      low_bound = 0;
-	      high_bound = (TYPE_LENGTH (type) / element_size) - 1;
-	    }
+	  low_bound = RANGE_LOWER_BOUND (range_type);
+	  high_bound = RANGE_UPPER_BOUND (range_type);
 	  index = low_bound;
 	  memset (VALUE_CONTENTS_RAW (array), 0, TYPE_LENGTH (expect_type));
 	  for (tem = nargs; --nargs >= 0;)
@@ -541,22 +647,20 @@ evaluate_subexp_standard (struct type *expect_type,
 	    }
 	  return array;
 	}
-
       if (expect_type != NULL_TYPE && noside != EVAL_SKIP
 	  && TYPE_CODE (type) == TYPE_CODE_SET)
 	{
 	  value_ptr set = allocate_value (expect_type);
 	  char *valaddr = VALUE_CONTENTS_RAW (set);
-	  struct type *element_type = TYPE_INDEX_TYPE (type);
-	  struct type *check_type = element_type;
+	  struct range_type *element_type = SET_RANGE_TYPE (type);
+	  struct type *check_type;
 	  LONGEST low_bound, high_bound;
-
-	  /* get targettype of elementtype */
-	  while (TYPE_CODE (check_type) == TYPE_CODE_RANGE ||
-		 TYPE_CODE (check_type) == TYPE_CODE_TYPEDEF)
-	    check_type = TYPE_TARGET_TYPE (check_type);
-
-	  if (get_discrete_bounds (element_type, &low_bound, &high_bound) < 0)
+	  check_type = check_typedef ((struct type *)element_type);
+	  while (TYPE_CODE (check_type) == TYPE_CODE_RANGE)
+		  check_type = check_typedef (RANGE_INDEX_TYPE (check_type));
+	  low_bound = RANGE_LOWER_BOUND (element_type);
+	  high_bound = RANGE_UPPER_BOUND (element_type);
+	  if (low_bound < 0 || high_bound < 0)
 	    error ("(power)set type with unknown size");
 	  memset (valaddr, '\0', TYPE_LENGTH (type));
 	  for (tem = 0; tem < nargs; tem++)
@@ -567,16 +671,16 @@ evaluate_subexp_standard (struct type *expect_type,
 	      if (exp->elts[*pos].opcode == BINOP_RANGE)
 		{
 		  (*pos)++;
-		  elem_val = evaluate_subexp (element_type, exp, pos, noside);
+		  elem_val = evaluate_subexp ((struct type *)element_type, exp, pos, noside);
 		  range_low_type = VALUE_TYPE (elem_val);
 		  range_low = value_as_long (elem_val);
-		  elem_val = evaluate_subexp (element_type, exp, pos, noside);
+		  elem_val = evaluate_subexp ((struct type *)element_type, exp, pos, noside);
 		  range_high_type = VALUE_TYPE (elem_val);
 		  range_high = value_as_long (elem_val);
 		}
 	      else
 		{
-		  elem_val = evaluate_subexp (element_type, exp, pos, noside);
+		  elem_val = evaluate_subexp ((struct type *)element_type, exp, pos, noside);
 		  range_low_type = range_high_type = VALUE_TYPE (elem_val);
 		  range_low = range_high = value_as_long (elem_val);
 		}
@@ -584,9 +688,9 @@ evaluate_subexp_standard (struct type *expect_type,
 	         different types. Also check if type of element is "compatible"
 	         with element type of powerset */
 	      if (TYPE_CODE (range_low_type) == TYPE_CODE_RANGE)
-		range_low_type = TYPE_TARGET_TYPE (range_low_type);
+		range_low_type = RANGE_INDEX_TYPE (range_low_type);
 	      if (TYPE_CODE (range_high_type) == TYPE_CODE_RANGE)
-		range_high_type = TYPE_TARGET_TYPE (range_high_type);
+		range_high_type = RANGE_INDEX_TYPE (range_high_type);
 	      if ((TYPE_CODE (range_low_type) != TYPE_CODE (range_high_type)) ||
 		  (TYPE_CODE (range_low_type) == TYPE_CODE_ENUM &&
 		   (range_low_type != range_high_type)))
@@ -616,7 +720,6 @@ evaluate_subexp_standard (struct type *expect_type,
 	    }
 	  return set;
 	}
-
       argvec = (value_ptr *) alloca (sizeof (value_ptr) * nargs);
       for (tem = 0; tem < nargs; tem++)
 	{
@@ -792,14 +895,14 @@ evaluate_subexp_standard (struct type *expect_type,
 	  tem = 1;
 	  type = VALUE_TYPE (argvec[0]);
 	  if (type && TYPE_CODE (type) == TYPE_CODE_PTR)
-	    type = TYPE_TARGET_TYPE (type);
+	    type = POINTER_TARGET_TYPE (type);
 	  if (type && TYPE_CODE (type) == TYPE_CODE_FUNC)
 	    {
-	      for (; tem <= nargs && tem <= TYPE_NFIELDS (type); tem++)
+	      for (; tem <= nargs && tem <= FUNCTION_NUM_ARGUMENTS (type); tem++)
 		{
 		  /* pai: FIXME This seems to be coercing arguments before
 		   * overload resolution has been done! */
-		  argvec[tem] = evaluate_subexp (TYPE_FIELD_TYPE (type, tem - 1),
+		  argvec[tem] = evaluate_subexp (FUNCTION_ARGUMENT_TYPE (type, tem - 1),
 						 exp, pos, noside);
 		}
 	    }
@@ -1039,9 +1142,8 @@ evaluate_subexp_standard (struct type *expect_type,
         struct type *type = VALUE_TYPE (arg1);
         struct type *real_type;
         int full, top, using_enc;
-        
-        if (objectprint && TYPE_TARGET_TYPE(type) &&
-            (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
+        if (objectprint && POINTER_TARGET_TYPE(type) &&
+            (TYPE_CODE (POINTER_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
           {
             real_type = value_rtti_target_type (arg1, &full, &top, &using_enc);
             if (real_type)
@@ -1075,7 +1177,7 @@ evaluate_subexp_standard (struct type *expect_type,
       /* With HP aCC, pointers to methods do not point to the function code */
       if (hp_som_som_object_present &&
 	  (TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_PTR) &&
-      (TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg2))) == TYPE_CODE_METHOD))
+      (TYPE_CODE (POINTER_TARGET_TYPE (VALUE_TYPE (arg2))) == TYPE_CODE_METHOD))
 	error ("Pointers to methods not supported with HP aCC");	/* 1997-08-19 */
 
       mem_offset = value_as_long (arg2);
@@ -1088,7 +1190,7 @@ evaluate_subexp_standard (struct type *expect_type,
       /* With HP aCC, pointers to methods do not point to the function code */
       if (hp_som_som_object_present &&
 	  (TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_PTR) &&
-      (TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg2))) == TYPE_CODE_METHOD))
+      (TYPE_CODE (POINTER_TARGET_TYPE (VALUE_TYPE (arg2))) == TYPE_CODE_METHOD))
 	error ("Pointers to methods not supported with HP aCC");	/* 1997-08-19 */
 
       mem_offset = value_as_long (arg2);
@@ -1107,7 +1209,7 @@ evaluate_subexp_standard (struct type *expect_type,
       type = check_typedef (VALUE_TYPE (arg2));
       if (TYPE_CODE (type) != TYPE_CODE_PTR)
 	goto bad_pointer_to_member;
-      type = check_typedef (TYPE_TARGET_TYPE (type));
+      type = check_typedef (POINTER_TARGET_TYPE (type));
       if (TYPE_CODE (type) == TYPE_CODE_METHOD)
 	error ("not implemented: pointer-to-method in pointer-to-member construct");
       if (TYPE_CODE (type) != TYPE_CODE_MEMBER)
@@ -1143,12 +1245,12 @@ evaluate_subexp_standard (struct type *expect_type,
 	     sequence (thunk) in memory -- in any case it is *not* the address
 	     of the function as it would be in a naive implementation. */
 	  if ((TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_PTR) &&
-	      (TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg1))) == TYPE_CODE_METHOD))
+	      (TYPE_CODE (POINTER_TARGET_TYPE (VALUE_TYPE (arg1))) == TYPE_CODE_METHOD))
 	    error ("Assignment to pointers to methods not implemented with HP aCC");
 
 	  /* HP aCC pointers to data members require a constant bias */
 	  if ((TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_PTR) &&
-	      (TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg1))) == TYPE_CODE_MEMBER))
+	      (TYPE_CODE (POINTER_TARGET_TYPE (VALUE_TYPE (arg1))) == TYPE_CODE_MEMBER))
 	    {
 	      unsigned int *ptr = (unsigned int *) VALUE_CONTENTS (arg2);	/* forces evaluation */
 	      *ptr |= 0x20000000;	/* set 29th bit */
@@ -1253,7 +1355,12 @@ evaluate_subexp_standard (struct type *expect_type,
 	    }
 
 	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	    return value_zero (TYPE_TARGET_TYPE (type), VALUE_LVAL (arg1));
+	  {
+	    if (TYPE_CODE (type) == TYPE_CODE_PTR)
+		    return value_zero (POINTER_TARGET_TYPE (type), VALUE_LVAL (arg1));
+	    else
+		    return value_zero (TYPE_TARGET_TYPE (type), VALUE_LVAL (arg1));
+	  }
 	  else
 	    return value_subscript (arg1, arg2);
 	}
@@ -1591,11 +1698,11 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case UNOP_IND:
       if (expect_type && TYPE_CODE (expect_type) == TYPE_CODE_PTR)
-	expect_type = TYPE_TARGET_TYPE (check_typedef (expect_type));
+	expect_type = POINTER_TARGET_TYPE (check_typedef (expect_type));
       arg1 = evaluate_subexp (expect_type, exp, pos, noside);
-      if ((TYPE_TARGET_TYPE (VALUE_TYPE (arg1))) &&
-	  ((TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg1))) == TYPE_CODE_METHOD) ||
-	   (TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg1))) == TYPE_CODE_MEMBER)))
+      if ((POINTER_TARGET_TYPE (VALUE_TYPE (arg1))) &&
+	  ((TYPE_CODE (POINTER_TARGET_TYPE (VALUE_TYPE (arg1))) == TYPE_CODE_METHOD) ||
+	   (TYPE_CODE (POINTER_TARGET_TYPE (VALUE_TYPE (arg1))) == TYPE_CODE_MEMBER)))
 	error ("Attempt to dereference pointer to member without an object");
       if (noside == EVAL_SKIP)
 	goto nosideret;
@@ -1604,13 +1711,14 @@ evaluate_subexp_standard (struct type *expect_type,
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
 	  type = check_typedef (VALUE_TYPE (arg1));
+	  /* TYPEFIX */
 	  if (TYPE_CODE (type) == TYPE_CODE_PTR
-	      || TYPE_CODE (type) == TYPE_CODE_REF
-	  /* In C you can dereference an array to get the 1st elt.  */
-	      || TYPE_CODE (type) == TYPE_CODE_ARRAY
-	    )
-	    return value_zero (TYPE_TARGET_TYPE (type),
+	      || TYPE_CODE (type) == TYPE_CODE_REF)
+	    return value_zero (POINTER_TARGET_TYPE (type),
 			       lval_memory);
+	  /* In C you can dereference an array to get the 1st elt. */
+	  else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+	    return value_zero (ARRAY_ELEMENT_TYPE (type), lval_memory);
 	  else if (TYPE_CODE (type) == TYPE_CODE_INT)
 	    /* GDB allows dereferencing an int.  */
 	    return value_zero (builtin_type_int, lval_memory);
@@ -1641,7 +1749,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  /* If HP aCC object, use bias for pointers to members */
 	  if (hp_som_som_object_present &&
 	      (TYPE_CODE (VALUE_TYPE (retvalp)) == TYPE_CODE_PTR) &&
-	      (TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (retvalp))) == TYPE_CODE_MEMBER))
+	      (TYPE_CODE (POINTER_TARGET_TYPE (VALUE_TYPE (retvalp))) == TYPE_CODE_MEMBER))
 	    {
 	      unsigned int *ptr = (unsigned int *) VALUE_CONTENTS (retvalp);	/* forces evaluation */
 	      *ptr |= 0x20000000;	/* set 29th bit */
@@ -1876,7 +1984,7 @@ evaluate_subexp_with_coercion (register struct expression *exp,
 	  val =
 	    locate_var_value
 	    (var, block_innermost_frame (exp->elts[pc + 1].block));
-	  return value_cast (lookup_pointer_type (TYPE_TARGET_TYPE (check_typedef (SYMBOL_TYPE (var)))),
+	  return value_cast (lookup_pointer_type (ARRAY_ELEMENT_TYPE (check_typedef (SYMBOL_TYPE (var)))),
 			     val);
 	}
       /* FALLTHROUGH */
@@ -1915,9 +2023,19 @@ evaluate_subexp_for_sizeof (register struct expression *exp, register int *pos)
 	  && TYPE_CODE (type) != TYPE_CODE_REF
 	  && TYPE_CODE (type) != TYPE_CODE_ARRAY)
 	error ("Attempt to take contents of a non-pointer value.");
-      type = check_typedef (TYPE_TARGET_TYPE (type));
-      return value_from_longest (builtin_type_int, (LONGEST)
-				 TYPE_LENGTH (type));
+	if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+	  {
+	    type = check_typedef (ARRAY_ELEMENT_TYPE (type));
+	    return value_from_longest (builtin_type_int, (LONGEST) TYPE_LENGTH (type));
+	  }
+	else
+	  {    
+	    type = check_typedef (POINTER_TARGET_TYPE (type));
+	    return value_from_longest (builtin_type_int, (LONGEST)
+				       TYPE_LENGTH (type));
+	  }
+	
+      
 
     case UNOP_MEMVAL:
       (*pos) += 3;
@@ -1967,7 +2085,7 @@ calc_f77_array_dims (struct type *array_type)
 
   tmp_type = array_type;
 
-  while ((tmp_type = TYPE_TARGET_TYPE (tmp_type)))
+  while ((tmp_type = ARRAY_ELEMENT_TYPE (tmp_type)))
     {
       if (TYPE_CODE (tmp_type) == TYPE_CODE_ARRAY)
 	++ndimen;

@@ -202,7 +202,7 @@ extern void print_objfile_statistics (void);
 extern void print_symbol_bcache_statistics (void);
 
 /* Number of entries in the minimal symbol hash table.  */
-#define MINIMAL_SYMBOL_HASH_SIZE 349
+#define MINIMAL_SYMBOL_HASH_SIZE 1024
 
 /* Master structure for keeping track of each file from which
    gdb reads symbols.  There are several ways these get allocated: 1.
@@ -269,6 +269,7 @@ struct objfile
     /* Obstacks to hold objects that should be freed when we load a new symbol
        table from this object file. */
 
+    struct obstack misc_obstack;	/* Misc stuff */
     struct obstack psymbol_obstack;	/* Partial symbols */
     struct obstack symbol_obstack;	/* Full symbols */
     struct obstack type_obstack;	/* Types */

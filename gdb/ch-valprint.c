@@ -205,7 +205,7 @@ chill_val_print (struct type *type, char *valaddr, int embedded_offset,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
-      if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
+      if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (ARRAY_RANGE_TYPE (type)) > 0)
 	{
 	  if (prettyprint_arrays)
 	    {
@@ -286,7 +286,7 @@ chill_val_print (struct type *type, char *valaddr, int embedded_offset,
 	  break;
 	}
       addr = unpack_pointer (type, valaddr);
-      elttype = check_typedef (TYPE_TARGET_TYPE (type));
+      elttype = check_typedef (POINTER_TARGET_TYPE (type));
 
       /* We assume a NULL pointer is all zeros ... */
       if (addr == 0)
@@ -330,10 +330,9 @@ chill_val_print (struct type *type, char *valaddr, int embedded_offset,
          null if we have "reached the end".  */
       return (i + (print_max && i != print_max));
       break;
-
     case TYPE_CODE_BITSTRING:
     case TYPE_CODE_SET:
-      elttype = TYPE_INDEX_TYPE (type);
+      elttype = (struct type *) SET_RANGE_TYPE (type);
       CHECK_TYPEDEF (elttype);
       if (TYPE_FLAGS (elttype) & TYPE_FLAG_STUB)
 	{
@@ -342,7 +341,7 @@ chill_val_print (struct type *type, char *valaddr, int embedded_offset,
 	  break;
 	}
       {
-	struct type *range = elttype;
+	struct range_type *range = (struct range_type *) elttype;
 	LONGEST low_bound, high_bound;
 	int i;
 	int is_bitstring = TYPE_CODE (type) == TYPE_CODE_BITSTRING;
@@ -353,7 +352,9 @@ chill_val_print (struct type *type, char *valaddr, int embedded_offset,
 	else
 	  fputs_filtered ("[", stream);
 
-	i = get_discrete_bounds (range, &low_bound, &high_bound);
+	low_bound = RANGE_LOWER_BOUND (range);
+	high_bound = RANGE_UPPER_BOUND (range);
+	i = (low_bound < 0 || high_bound < 0) ? -1 : 0;
       maybe_bad_bstring:
 	if (i < 0)
 	  {
@@ -375,7 +376,7 @@ chill_val_print (struct type *type, char *valaddr, int embedded_offset,
 	      {
 		if (need_comma)
 		  fputs_filtered (", ", stream);
-		chill_print_type_scalar (range, (LONGEST) i, stream);
+		chill_print_type_scalar ((struct type *)range, (LONGEST) i, stream);
 		need_comma = 1;
 
 		/* Look for a continuous range of true elements. */
@@ -386,7 +387,7 @@ chill_val_print (struct type *type, char *valaddr, int embedded_offset,
 		    while (i + 1 <= high_bound
 			   && value_bit_index (type, valaddr, ++i))
 		      j = i;
-		    chill_print_type_scalar (range, (LONGEST) j, stream);
+		    chill_print_type_scalar ((struct type *)range, (LONGEST) j, stream);
 		  }
 	      }
 	  }
@@ -397,7 +398,6 @@ chill_val_print (struct type *type, char *valaddr, int embedded_offset,
 	  fputs_filtered ("]", stream);
       }
       break;
-
     case TYPE_CODE_STRUCT:
       if (chill_varying_type (type))
 	{
@@ -443,11 +443,11 @@ chill_val_print (struct type *type, char *valaddr, int embedded_offset,
       /* De-reference the reference.  */
       if (deref_ref)
 	{
-	  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_UNDEF)
+	  if (TYPE_CODE (POINTER_TARGET_TYPE (type)) != TYPE_CODE_UNDEF)
 	    {
 	      value_ptr deref_val =
 	      value_at
-	      (TYPE_TARGET_TYPE (type),
+	      (POINTER_TARGET_TYPE (type),
 	       unpack_pointer (lookup_pointer_type (builtin_type_void),
 			       valaddr),
 	       NULL);
@@ -573,7 +573,6 @@ chill_value_print (value_ptr val, struct ui_file *stream, int format,
   /* If it is a pointer, indicate what it points to.
 
      Print type also if it is a reference. */
-
   if (TYPE_CODE (real_type) == TYPE_CODE_PTR ||
       TYPE_CODE (real_type) == TYPE_CODE_REF)
     {
@@ -582,10 +581,10 @@ chill_value_print (value_ptr val, struct ui_file *stream, int format,
       if (TYPE_CODE (type) != TYPE_CODE_PTR || addr != 0)
 	{
 	  int i;
-	  char *name = TYPE_NAME (type);
+	  const char *name = TYPE_NAME (type);
 	  if (name)
 	    fputs_filtered (name, stream);
-	  else if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_VOID)
+	  else if (TYPE_CODE (POINTER_TARGET_TYPE (type)) == TYPE_CODE_VOID)
 	    fputs_filtered ("PTR", stream);
 	  else
 	    {

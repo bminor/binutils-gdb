@@ -841,7 +841,7 @@ thread_db_store_registers (int regno)
   if (err != TD_OK)
     error ("Cannot store general-purpose registers for thread %ld: %s",
 	   (long) GET_THREAD (inferior_ptid), thread_db_err_str (err));
-  err = td_thr_setfpregs_p (&th, &fpregset);
+  err = td_thr_setfpregs_p (&th, (const gdb_prfpregset_t *)&fpregset);
   if (err != TD_OK)
     error ("Cannot store floating-point registers  for thread %ld: %s",
 	   (long) GET_THREAD (inferior_ptid), thread_db_err_str (err));

@@ -254,7 +254,7 @@ static void
 set_traceframe_context (CORE_ADDR trace_pc)
 {
   static struct type *func_string, *file_string;
-  static struct type *func_range, *file_range;
+  static struct range_type *func_range, *file_range;
   static value_ptr func_val, file_val;
   static struct type *charstar;
   int len;
@@ -293,9 +293,9 @@ set_traceframe_context (CORE_ADDR trace_pc)
   else
     {
       len = strlen (SYMBOL_NAME (traceframe_fun));
-      func_range = create_range_type (func_range,
+      func_range = make_range_type (NULL, 
 				      builtin_type_int, 0, len - 1);
-      func_string = create_array_type (func_string,
+      func_string = (struct type *)make_array_type (NULL, 
 				       builtin_type_char, func_range);
       func_val = allocate_value (func_string);
       VALUE_TYPE (func_val) = func_string;
@@ -314,9 +314,9 @@ set_traceframe_context (CORE_ADDR trace_pc)
   else
     {
       len = strlen (traceframe_sal.symtab->filename);
-      file_range = create_range_type (file_range,
+      file_range = make_range_type (NULL, 
 				      builtin_type_int, 0, len - 1);
-      file_string = create_array_type (file_string,
+      file_string = (struct type *)make_array_type (NULL,  
 				       builtin_type_char, file_range);
       file_val = allocate_value (file_string);
       VALUE_TYPE (file_val) = file_string;

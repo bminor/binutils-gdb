@@ -567,18 +567,18 @@ parse_tuple_element (struct type *type)
 	      if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
 		{
 		  /* do this as a range from low to high */
-		  struct type *range_type = TYPE_FIELD_TYPE (type, 0);
+		  struct range_type *range_type = ARRAY_RANGE_TYPE (type);
 		  LONGEST low_bound, high_bound;
-		  if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
-		    error ("cannot determine bounds for (*)");
+		  low_bound = RANGE_LOWER_BOUND (range_type);
+		  high_bound = RANGE_UPPER_BOUND (range_type);
 		  /* lower bound */
 		  write_exp_elt_opcode (OP_LONG);
-		  write_exp_elt_type (range_type);
+		  write_exp_elt_type ((struct type *)range_type);
 		  write_exp_elt_longcst (low_bound);
 		  write_exp_elt_opcode (OP_LONG);
 		  /* upper bound */
 		  write_exp_elt_opcode (OP_LONG);
-		  write_exp_elt_type (range_type);
+		  write_exp_elt_type ((struct type *)range_type);
 		  write_exp_elt_longcst (high_bound);
 		  write_exp_elt_opcode (OP_LONG);
 		  write_exp_elt_opcode (BINOP_RANGE);
@@ -709,6 +709,7 @@ parse_primval (void)
       FORWARD_TOKEN ();
       break;
     case ARRAY:
+#if TYPEFIX
       FORWARD_TOKEN ();
       /* This is pseudo-Chill, similar to C's '(TYPE[])EXPR'
          which casts to an artificial array. */
@@ -724,10 +725,11 @@ parse_primval (void)
       type = create_array_type ((struct type *) NULL, type,
 				create_range_type ((struct type *) NULL,
 						   builtin_type_int, 0, 0));
-      TYPE_ARRAY_UPPER_BOUND_TYPE (type) = BOUND_CANNOT_BE_DETERMINED;
+      TYPE_ARRAY_UPPER_BOUND_TYPE (type) = BT_cannot_be_determined;
       write_exp_elt_opcode (UNOP_CAST);
       write_exp_elt_type (type);
       write_exp_elt_opcode (UNOP_CAST);
+#endif
       break;
 #if 0
     case CONST:

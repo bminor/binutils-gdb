@@ -146,6 +146,15 @@ struct cp_abi_ops
 				 int j, struct type * type, int offset);
   struct type *(*rtti_type) (value_ptr v, int *full, int *top,
 			     int *using_enc);
+  
+  /* Compute the offset of the INDEXth baseclass of class TYPE, for
+     value at VALADDR (in host) at ADDRESS (in target). The result
+     should be the offset of the baseclass value relative to the
+     ADDRESS. */
+  int (*baseclass_offset) (struct type * type, int index,
+			       value_ptr * arg1p, char *valaddr,
+			       CORE_ADDR address, int offset);
+
 };
 
 
@@ -154,6 +163,8 @@ extern int num_cp_abis;
 extern struct cp_abi_ops current_cp_abi;
 extern int register_cp_abi (struct cp_abi_ops abi);
 extern int switch_to_cp_abi (const char *short_name);
+extern int baseclass_offset (struct type *type, int index, value_ptr * arg1p,
+			     char *valaddr, CORE_ADDR address, int offset);
 
 #endif
 

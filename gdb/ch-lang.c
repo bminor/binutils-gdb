@@ -224,51 +224,45 @@ chill_printstr (struct ui_file *stream, char *string, unsigned int length,
 static struct type *
 chill_create_fundamental_type (struct objfile *objfile, int typeid)
 {
+  
   register struct type *type = NULL;
 
   switch (typeid)
     {
     default:
-      /* FIXME:  For now, if we are asked to produce a type not in this
-         language, create the equivalent of a C integer type with the
-         name "<?type?>".  When all the dust settles from the type
-         reconstruction work, this should probably become an error. */
-      type = init_type (TYPE_CODE_INT, 2, 0, "<?type?>", objfile);
       warning ("internal error: no chill fundamental type %d", typeid);
+      type = NULL;
       break;
     case FT_VOID:
-      /* FIXME:  Currently the GNU Chill compiler emits some DWARF entries for
-         typedefs, unrelated to anything directly in the code being compiled,
-         that have some FT_VOID types.  Just fake it for now. */
-      type = init_type (TYPE_CODE_VOID, 0, 0, "<?VOID?>", objfile);
+        type = (struct type *) make_void_type (objfile, "VOID");
       break;
     case FT_BOOLEAN:
-      type = init_type (TYPE_CODE_BOOL, 1, TYPE_FLAG_UNSIGNED, "BOOL", objfile);
+      type = (struct type *) make_boolean_type (objfile, "BOOL");
       break;
     case FT_CHAR:
-      type = init_type (TYPE_CODE_CHAR, 1, TYPE_FLAG_UNSIGNED, "CHAR", objfile);
+      type = (struct type *) make_character_type (objfile, "CHAR", 1, ST_unsigned);
       break;
     case FT_SIGNED_CHAR:
-      type = init_type (TYPE_CODE_INT, 1, 0, "BYTE", objfile);
+      type = (struct type *) make_integer_type (objfile, "BYTE", 1, ST_signed);
       break;
     case FT_UNSIGNED_CHAR:
-      type = init_type (TYPE_CODE_INT, 1, TYPE_FLAG_UNSIGNED, "UBYTE", objfile);
+      type = (struct type *) make_integer_type (objfile, "UBYTE", 1, ST_unsigned);
       break;
     case FT_SHORT:		/* Chill ints are 2 bytes */
-      type = init_type (TYPE_CODE_INT, 2, 0, "INT", objfile);
+      type = (struct type *) make_integer_type (objfile, "INT", 2, ST_signed);
       break;
     case FT_UNSIGNED_SHORT:	/* Chill ints are 2 bytes */
-      type = init_type (TYPE_CODE_INT, 2, TYPE_FLAG_UNSIGNED, "UINT", objfile);
+      type = (struct type *) make_integer_type (objfile, "UINT", 2, ST_unsigned);
       break;
     case FT_INTEGER:		/* FIXME? */
     case FT_SIGNED_INTEGER:	/* FIXME? */
     case FT_LONG:		/* Chill longs are 4 bytes */
     case FT_SIGNED_LONG:	/* Chill longs are 4 bytes */
-      type = init_type (TYPE_CODE_INT, 4, 0, "LONG", objfile);
+      type = (struct type *) make_integer_type (objfile, "LONG", 4, ST_signed);
       break;
     case FT_UNSIGNED_INTEGER:	/* FIXME? */
     case FT_UNSIGNED_LONG:	/* Chill longs are 4 bytes */
-      type = init_type (TYPE_CODE_INT, 4, TYPE_FLAG_UNSIGNED, "ULONG", objfile);
+      type = (struct type *) make_integer_type (objfile, "ULONG", 4, ST_unsigned);
       break;
     case FT_FLOAT:
       type = init_type (TYPE_CODE_FLT, 4, 0, "REAL", objfile);
@@ -351,26 +345,33 @@ type_lower_upper (enum exp_opcode op,	/* Either UNOP_LOWER or UNOP_UPPER */
       if (chill_varying_type (type))
 	return type_lower_upper (op, TYPE_FIELD_TYPE (type, 1), result_type);
       break;
-    case TYPE_CODE_ARRAY:
+      /* TYPEFIX - Check if bitstring is really *always a set* */
     case TYPE_CODE_BITSTRING:
+      type = (struct type *) SET_RANGE_TYPE (type);
+      /* ... fall through ... */
+    case TYPE_CODE_ARRAY:
     case TYPE_CODE_STRING:
-      type = TYPE_FIELD_TYPE (type, 0);		/* Get index type */
+      type = (struct type *) ARRAY_RANGE_TYPE (type);		/* Get index type */
 
       /* ... fall through ... */
     case TYPE_CODE_RANGE:
-      *result_type = TYPE_TARGET_TYPE (type);
-      return op == UNOP_LOWER ? TYPE_LOW_BOUND (type) : TYPE_HIGH_BOUND (type);
+      *result_type = RANGE_INDEX_TYPE (type);
+      return op == UNOP_LOWER ? RANGE_LOWER_BOUND (type) : RANGE_UPPER_BOUND (type);
 
     case TYPE_CODE_ENUM:
     case TYPE_CODE_BOOL:
     case TYPE_CODE_INT:
     case TYPE_CODE_CHAR:
+#if TYPEFIX
       if (get_discrete_bounds (type, &low, &high) >= 0)
 	{
 	  *result_type = type;
 	  return op == UNOP_LOWER ? low : high;
 	}
       break;
+#else
+      break;
+#endif
     case TYPE_CODE_UNDEF:
     case TYPE_CODE_PTR:
     case TYPE_CODE_UNION:
@@ -423,14 +424,14 @@ value_chill_card (value_ptr val)
   LONGEST tmp = 0;
   struct type *type = VALUE_TYPE (val);
   CHECK_TYPEDEF (type);
-
   if (TYPE_CODE (type) == TYPE_CODE_SET)
     {
-      struct type *range_type = TYPE_INDEX_TYPE (type);
+      struct range_type *range_type = SET_RANGE_TYPE (type);
       LONGEST lower_bound, upper_bound;
       int i;
 
-      get_discrete_bounds (range_type, &lower_bound, &upper_bound);
+      lower_bound = RANGE_LOWER_BOUND (range_type);
+      upper_bound = RANGE_UPPER_BOUND (range_type);
       for (i = lower_bound; i <= upper_bound; i++)
 	if (value_bit_index (type, VALUE_CONTENTS (val), i) > 0)
 	  tmp++;
@@ -446,17 +447,17 @@ value_chill_max_min (enum exp_opcode op, value_ptr val)
 {
   LONGEST tmp = 0;
   struct type *type = VALUE_TYPE (val);
-  struct type *elttype;
+  struct range_type *elttype;
   CHECK_TYPEDEF (type);
-
   if (TYPE_CODE (type) == TYPE_CODE_SET)
     {
       LONGEST lower_bound, upper_bound;
       int i, empty = 1;
 
-      elttype = TYPE_INDEX_TYPE (type);
-      CHECK_TYPEDEF (elttype);
-      get_discrete_bounds (elttype, &lower_bound, &upper_bound);
+      elttype = SET_RANGE_TYPE (type);
+      CHECK_TYPEDEF ((struct type *)elttype);
+      lower_bound = RANGE_LOWER_BOUND (elttype);
+      upper_bound = RANGE_UPPER_BOUND (elttype);
 
       if (op == UNOP_CHMAX)
 	{
@@ -489,8 +490,8 @@ value_chill_max_min (enum exp_opcode op, value_ptr val)
     error ("bad argument to %s builtin", op == UNOP_CHMAX ? "MAX" : "MIN");
 
   return value_from_longest (TYPE_CODE (elttype) == TYPE_CODE_RANGE
-			     ? TYPE_TARGET_TYPE (elttype)
-			     : elttype,
+			     ? (struct type *)RANGE_INDEX_TYPE (elttype)
+			     : (struct type *)elttype,
 			     tmp);
 }
 
@@ -525,7 +526,7 @@ evaluate_subexp_chill (struct type *expect_type,
       switch (TYPE_CODE (type))
 	{
 	case TYPE_CODE_PTR:
-	  type = check_typedef (TYPE_TARGET_TYPE (type));
+	  type = check_typedef (POINTER_TARGET_TYPE (type));
 	  if (!type || TYPE_CODE (type) != TYPE_CODE_FUNC)
 	    error ("reference value used as function");
 	  /* ... fall through ... */
@@ -539,10 +540,10 @@ evaluate_subexp_chill (struct type *expect_type,
 	  argvec = (value_ptr *) alloca (sizeof (value_ptr) * (nargs + 2));
 	  argvec[0] = arg1;
 	  tem = 1;
-	  for (; tem <= nargs && tem <= TYPE_NFIELDS (type); tem++)
+	  for (; tem <= nargs && tem <= FUNCTION_NUM_ARGUMENTS (type); tem++)
 	    {
 	      argvec[tem]
-		= evaluate_subexp_chill (TYPE_FIELD_TYPE (type, tem - 1),
+		= evaluate_subexp_chill (FUNCTION_ARGUMENT_TYPE (type, tem),
 					 exp, pos, noside);
 	    }
 	  for (; tem <= nargs; tem++)
@@ -636,22 +637,10 @@ const struct language_defn chill_language_defn =
 void
 _initialize_chill_language (void)
 {
-  builtin_type_chill_bool =
-    init_type (TYPE_CODE_BOOL, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "BOOL", (struct objfile *) NULL);
-  builtin_type_chill_char =
-    init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "CHAR", (struct objfile *) NULL);
-  builtin_type_chill_long =
-    init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "LONG", (struct objfile *) NULL);
-  builtin_type_chill_ulong =
-    init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "ULONG", (struct objfile *) NULL);
+  builtin_type_chill_bool = (struct type *) make_boolean_type (NULL, "BOOL");
+  builtin_type_chill_char = (struct type *) make_character_type (NULL, "CHAR", 1, ST_unsigned);
+  builtin_type_chill_long = (struct type *) make_integer_type (NULL, "LONG", TARGET_LONG_BIT / TARGET_CHAR_BIT, ST_signed);
+  builtin_type_chill_ulong = (struct type *) make_integer_type (NULL, "ULONG", TARGET_LONG_BIT / TARGET_CHAR_BIT, ST_unsigned);
   builtin_type_chill_real =
     init_type (TYPE_CODE_FLT, TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
 	       0,

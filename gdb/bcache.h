@@ -81,7 +81,7 @@ struct bstring {
 
   union
   {
-    char data[1];
+    char *data;
     double dummy;
   }
   d;

@@ -4553,7 +4553,8 @@ alloc_gdbarch_data (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch->data == NULL);
   gdbarch->nr_data = gdbarch_data_registry.nr;
-  gdbarch->data = xcalloc (gdbarch->nr_data, sizeof (void*));
+  if (gdbarch->nr_data != 0)
+	  gdbarch->data = xcalloc (gdbarch->nr_data, sizeof (void*));
 }
 
 static void

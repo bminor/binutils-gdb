@@ -127,8 +127,8 @@ build_gdb_vtable_type (struct gdbarch *arch)
   /* ptrdiff_t vcall_and_vbase_offsets[0]; */
   FIELD_NAME (*field) = "vcall_and_vbase_offsets";
   FIELD_TYPE (*field)
-    = create_array_type (0, ptrdiff_type,
-                         create_range_type (0, builtin_type_int, 0, -1));
+    = (struct type *)make_array_type (NULL, ptrdiff_type,
+                         make_range_type (NULL, builtin_type_int, 0, -1));
   FIELD_BITPOS (*field) = offset * TARGET_CHAR_BIT;
   offset += TYPE_LENGTH (FIELD_TYPE (*field));
   field++;
@@ -150,8 +150,8 @@ build_gdb_vtable_type (struct gdbarch *arch)
   /* void (*virtual_functions[0]) (); */
   FIELD_NAME (*field) = "virtual_functions";
   FIELD_TYPE (*field)
-    = create_array_type (0, ptr_to_void_fn_type,
-                         create_range_type (0, builtin_type_int, 0, -1));
+    = (struct type *)make_array_type (NULL,  ptr_to_void_fn_type,
+                         make_range_type (NULL, builtin_type_int, 0, -1));
   FIELD_BITPOS (*field) = offset * TARGET_CHAR_BIT;
   offset += TYPE_LENGTH (FIELD_TYPE (*field));
   field++;
@@ -179,6 +179,81 @@ vtable_address_point_offset ()
   return (TYPE_FIELD_BITPOS (vtable_type, vtable_field_virtual_functions)
           / TARGET_CHAR_BIT);
 }
+/* Since this appears to work okay, we might as well share it */
+/* Return true if the INDEXth field of TYPE is a virtual baseclass
+   pointer which is for the base class whose type is BASECLASS.  */
+
+static int
+vb_match (struct type *type, int index, struct type *basetype)
+{
+  struct type *fieldtype;
+  char *name = TYPE_FIELD_NAME (type, index);
+  char *field_class_name = NULL;
+
+  if (*name != '_')
+    return 0;
+  if (strncmp (name, "_vptr.", 6) == 0)
+    field_class_name = name + 6;
+
+  if (field_class_name == NULL)
+    /* This field is not a virtual base class pointer.  */
+    return 0;
+
+  /* It's a virtual baseclass pointer, now we just need to find out whether
+     it is for this baseclass.  */
+  fieldtype = TYPE_FIELD_TYPE (type, index);
+  if (fieldtype == NULL || TYPE_CODE (fieldtype) != TYPE_CODE_PTR)
+    /* "Can't happen".  */
+    return 0;
+
+  /* What we check for is that either the types are equal (needed for
+     nameless types) or have the same name.  This is ugly, and a more
+     elegant solution should be devised (which would probably just push
+     the ugliness into symbol reading unless we change the stabs format).  */
+  if (POINTER_TARGET_TYPE (fieldtype) == basetype)
+    return 1;
+
+  if (TYPE_NAME (basetype) != NULL
+      && TYPE_NAME (TYPE_TARGET_TYPE (fieldtype)) != NULL
+      && STREQ (TYPE_NAME (basetype),
+		TYPE_NAME (TYPE_TARGET_TYPE (fieldtype))))
+    return 1;
+  return 0;
+}
+
+/* Compute the offset of the baseclass which is
+   the INDEXth baseclass of class TYPE,
+   for value at VALADDR (in host) at ADDRESS (in target).
+   The result is the offset of the baseclass value relative
+   to (the address of)(ARG) + OFFSET.
+
+   -1 is returned on error. */
+
+int
+gnuv3_baseclass_offset (struct type *type, int index, value_ptr * arg1p,
+			char *valaddr, CORE_ADDR address, int offset)
+{
+  struct type *basetype = TYPE_BASECLASS (type, index);
+  CORE_ADDR coreptr;
+  struct type *pbc;
+  value_ptr testptr;
+  if (BASETYPE_VIA_VIRTUAL (type, index))
+    {
+      struct type **vbases;
+      if (arg1p)
+	offset -= VALUE_EMBEDDED_OFFSET (*arg1p);
+      vbases = virtual_base_list (type);
+
+      /* Completely wrong for non-trivial cases, i'm working on the correct way */
+      coreptr = (*((CORE_ADDR *) (valaddr)));
+      coreptr -= 12;
+      coreptr = value_as_long (value_at (builtin_type_int, coreptr, NULL));
+      return coreptr - offset;
+    }
+  /* Baseclass is easily computed.  */
+  return (TYPE_BASECLASS_BITPOS (type, index) / 8) /*- offset*/ ;
+}
+
 
 
 static struct type *
@@ -343,6 +418,7 @@ init_gnuv3_ops (void)
   gnu_v3_abi_ops.is_operator_name = gnuv3_is_operator_name;
   gnu_v3_abi_ops.rtti_type = gnuv3_rtti_type;
   gnu_v3_abi_ops.virtual_fn_field = gnuv3_virtual_fn_field;
+  gnu_v3_abi_ops.baseclass_offset = gnuv3_baseclass_offset;
 }
 
 

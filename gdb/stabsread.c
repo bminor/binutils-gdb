@@ -414,7 +414,9 @@ dbx_alloc_type (int typenums[2], struct objfile *objfile)
      We will fill it in later if we find out how.  */
   if (*type_addr == 0)
     {
-      *type_addr = alloc_type (objfile);
+	    enum language old_language;
+	    old_language = current_language->la_language;
+	    *type_addr = alloc_type (objfile);
     }
 
   return (*type_addr);
@@ -731,7 +733,7 @@ read_cfront_baseclasses (struct field_info *fip, char **pp, struct type *type,
 	if (bsym)
 	  {
 	    new->field.type = SYMBOL_TYPE (bsym);
-	    new->field.name = type_name_no_tag (new->field.type);
+	    new->field.name = xstrdup(type_name_no_tag (new->field.type));
 	  }
 	else
 	  {
@@ -837,7 +839,7 @@ read_cfront_member_functions (struct field_info *fip, char **pp,
 	    else
 	      dem_len = dem_args - dem_p;
 	    main_fn_name =
-	      obsavestring (dem_p, dem_len, &objfile->type_obstack);
+	    obsavestring (dem_p, dem_len, &objfile->type_obstack);
 	  }
 	else
 	  {
@@ -1329,8 +1331,9 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       switch (string[1])
 	{
 	case 't':
-	  SYMBOL_NAME (sym) = obsavestring ("this", strlen ("this"),
-					    &objfile->symbol_obstack);
+	  SYMBOL_NAME (sym) = bcache("this", strlen("this")+1, &objfile->psymbol_cache);
+	 /* obsavestring ("this", strlen ("this"),
+					    &objfile->symbol_obstack);*/
 	  break;
 
 	case 'v':		/* $vtbl_ptr_type */
@@ -1580,8 +1583,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       /* Function result types are described as the result type in stabs.
          We need to convert this to the function-returning-type-X type
          in GDB.  E.g. "int" is converted to "function returning int".  */
-      if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_FUNC)
-	SYMBOL_TYPE (sym) = lookup_function_type (SYMBOL_TYPE (sym));
+      if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_FUNC)       
+	SYMBOL_TYPE (sym) = (struct type *)make_function_type (objfile, SYMBOL_TYPE (sym), 0, NULL, 0);
 
       /* All functions in C++ have prototypes.  */
       if (SYMBOL_LANGUAGE (sym) == language_cplus)
@@ -1710,14 +1713,13 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       /* If it's gcc-compiled, if it says `short', believe it.  */
       if (processing_gcc_compilation || BELIEVE_PCC_PROMOTION)
 	break;
-
+#if TYPEFIX
       if (!BELIEVE_PCC_PROMOTION)
 	{
 	  /* This is the signed type which arguments get promoted to.  */
 	  static struct type *pcc_promotion_type;
 	  /* This is the unsigned type which arguments get promoted to.  */
 	  static struct type *pcc_unsigned_promotion_type;
-
 	  /* Call it "int" because this is mainly C lossage.  */
 	  if (pcc_promotion_type == NULL)
 	    pcc_promotion_type =
@@ -1785,6 +1787,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	      break;
 	    }
 	}
+#endif
 
     case 'P':
       /* acc seems to use P to declare the prototypes of functions that
@@ -1924,7 +1927,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	    for (j = TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)) - 1; j >= 0; j--)
 	      if (TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), j) == 0)
 		TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), j) =
-		  type_name_no_tag (TYPE_BASECLASS (SYMBOL_TYPE (sym), j));
+		  xstrdup(type_name_no_tag (TYPE_BASECLASS (SYMBOL_TYPE (sym), j)));
 	  }
 
       if (TYPE_NAME (SYMBOL_TYPE (sym)) == NULL)
@@ -2549,13 +2552,25 @@ again:
          reference, or whatever, *in-place*.  */
 
     case '*':
-      type1 = read_type (pp, objfile);
-      type = make_pointer_type (type1, dbx_lookup_type (typenums));
+      {
+	struct type **oldtype;
+	type1 = read_type (pp, objfile);
+	oldtype = dbx_lookup_type (typenums);	
+	type = (struct type *)make_pointer_type (objfile, type1);
+	if (oldtype != NULL)
+	  *oldtype = type;
+      }
       break;
-
+      
     case '&':			/* Reference to another type */
-      type1 = read_type (pp, objfile);
-      type = make_reference_type (type1, dbx_lookup_type (typenums));
+      {
+	struct type **oldtype;
+	type1 = read_type (pp, objfile);
+	oldtype = dbx_lookup_type (typenums);
+	type = (struct type *)make_reference_type (objfile, type1);
+	if (oldtype != NULL)
+	  *oldtype = type;
+      }
       break;
 
     case 'f':			/* Function returning another type */
@@ -2599,6 +2614,7 @@ again:
       break;
 
     case '@':
+      current_subfile->language = language_cplus;
       if (isdigit (**pp) || **pp == '(' || **pp == '-')
 	{			/* Member (class & variable) type */
 	  /* FIXME -- we should be doing smash_to_XXX types here.  */
@@ -2742,7 +2758,7 @@ again:
 
     case 'S':
       type1 = read_type (pp, objfile);
-      type = create_set_type ((struct type *) NULL, type1);
+      type = (struct type *)make_set_type (objfile, (struct range_type *)type1);
       if (is_string)
 	TYPE_CODE (type) = TYPE_CODE_BITSTRING;
       if (typenums[0] != -1)
@@ -2804,41 +2820,36 @@ rs6000_builtin_type (int typenum)
          is other than 32 bits, then it should use a new negative type
          number (or avoid negative type numbers for that case).
          See stabs.texinfo.  */
-      rettype = init_type (TYPE_CODE_INT, 4, 0, "int", NULL);
+      rettype = builtin_type_int;
       break;
     case 2:
-      rettype = init_type (TYPE_CODE_INT, 1, 0, "char", NULL);
+      rettype = builtin_type_char;
       break;
     case 3:
-      rettype = init_type (TYPE_CODE_INT, 2, 0, "short", NULL);
+      rettype = builtin_type_short;
       break;
     case 4:
-      rettype = init_type (TYPE_CODE_INT, 4, 0, "long", NULL);
+      rettype = builtin_type_long;
       break;
     case 5:
-      rettype = init_type (TYPE_CODE_INT, 1, TYPE_FLAG_UNSIGNED,
-			   "unsigned char", NULL);
+      rettype = builtin_type_unsigned_char;
       break;
     case 6:
-      rettype = init_type (TYPE_CODE_INT, 1, 0, "signed char", NULL);
+      rettype = builtin_type_signed_char;
       break;
     case 7:
-      rettype = init_type (TYPE_CODE_INT, 2, TYPE_FLAG_UNSIGNED,
-			   "unsigned short", NULL);
+      rettype = builtin_type_unsigned_short;
       break;
     case 8:
-      rettype = init_type (TYPE_CODE_INT, 4, TYPE_FLAG_UNSIGNED,
-			   "unsigned int", NULL);
+      rettype = builtin_type_unsigned_int;
       break;
     case 9:
-      rettype = init_type (TYPE_CODE_INT, 4, TYPE_FLAG_UNSIGNED,
-			   "unsigned", NULL);
+      rettype = (struct type *)make_integer_type (NULL, "unsigned", 4, ST_unsigned);
     case 10:
-      rettype = init_type (TYPE_CODE_INT, 4, TYPE_FLAG_UNSIGNED,
-			   "unsigned long", NULL);
+      rettype = builtin_type_unsigned_long;
       break;
     case 11:
-      rettype = init_type (TYPE_CODE_VOID, 1, 0, "void", NULL);
+      rettype = builtin_type_void;
       break;
     case 12:
       /* IEEE single precision (32 bit).  */
@@ -2857,6 +2868,7 @@ rs6000_builtin_type (int typenum)
     case 15:
       rettype = init_type (TYPE_CODE_INT, 4, 0, "integer", NULL);
       break;
+#if TYPEFIX
     case 16:
       rettype = init_type (TYPE_CODE_BOOL, 4, TYPE_FLAG_UNSIGNED,
 			   "boolean", NULL);
@@ -2910,13 +2922,14 @@ rs6000_builtin_type (int typenum)
     case 30:
       rettype = init_type (TYPE_CODE_CHAR, 2, 0, "wchar", NULL);
       break;
+#endif
     case 31:
-      rettype = init_type (TYPE_CODE_INT, 8, 0, "long long", NULL);
+      rettype = builtin_type_long_long;
       break;
     case 32:
-      rettype = init_type (TYPE_CODE_INT, 8, TYPE_FLAG_UNSIGNED,
-			   "unsigned long long", NULL);
+      rettype = builtin_type_unsigned_long_long;
       break;
+#if TYPEFIX
     case 33:
       rettype = init_type (TYPE_CODE_INT, 8, TYPE_FLAG_UNSIGNED,
 			   "logical*8", NULL);
@@ -2924,6 +2937,7 @@ rs6000_builtin_type (int typenum)
     case 34:
       rettype = init_type (TYPE_CODE_INT, 8, 0, "integer*8", NULL);
       break;
+#endif
     }
   negative_types[-typenum] = rettype;
   return rettype;
@@ -3242,7 +3256,7 @@ read_cpp_abbrev (struct field_info *fip, char **pp, struct type *type,
 		 struct objfile *objfile)
 {
   register char *p;
-  char *name;
+  const char *name;
   char cpp_abbrev;
   struct type *context;
 
@@ -3362,7 +3376,7 @@ read_one_struct_field (struct field_info *fip, char **pp, char *p,
 
   else
     fip->list->field.name =
-      obsavestring (*pp, p - *pp, &objfile->type_obstack);
+ obsavestring (*pp, p - *pp, &objfile->type_obstack);
   *pp = p + 1;
 
   /* This means we have a visibility for a field coming. */
@@ -3700,7 +3714,7 @@ read_baseclasses (struct field_info *fip, char **pp, struct type *type,
          field's name. */
 
       new->field.type = read_type (pp, objfile);
-      new->field.name = type_name_no_tag (new->field.type);
+      new->field.name = xstrdup(type_name_no_tag (new->field.type));
 
       /* skip trailing ';' and bump count of number of fields seen */
       if (**pp == ';')
@@ -3886,13 +3900,11 @@ read_cfront_static_fields (struct field_info *fip, char **pp, struct type *type,
 	      dem_p = strrchr (dem, ':');
 	      if (dem_p != 0 && *(dem_p - 1) == ':')
 		dem_p++;
-	      fip->list->field.name =
-		obsavestring (dem_p, strlen (dem_p), &objfile->type_obstack);
+	      fip->list->field.name = obsavestring (dem_p, strlen (dem_p), &objfile->type_obstack);
 	    }
 	  else
 	    {
-	      fip->list->field.name =
-		obsavestring (sname, strlen (sname), &objfile->type_obstack);
+	      fip->list->field.name = obsavestring (sname, strlen (sname), &objfile->type_obstack);
 	    }
 	}			/* end of code for cfront work around */
     }				/* loop again for next static field */
@@ -4102,7 +4114,8 @@ static struct type *
 read_array_type (register char **pp, register struct type *type,
 		 struct objfile *objfile)
 {
-  struct type *index_type, *element_type, *range_type;
+  struct type *index_type, *element_type;
+  struct range_type *range_type;
   int lower, upper;
   int adjustable = 0;
   int nbits;
@@ -4152,8 +4165,8 @@ read_array_type (register char **pp, register struct type *type,
     }
 
   range_type =
-    create_range_type ((struct type *) NULL, index_type, lower, upper);
-  type = create_array_type (type, element_type, range_type);
+    make_range_type (objfile, index_type, lower, upper);
+  type = (struct type *)make_array_type (objfile,  element_type, range_type);
 
   return type;
 }
@@ -4176,8 +4189,7 @@ read_enum_type (register char **pp, register struct type *type,
   struct pending *osyms, *syms;
   int o_nsyms;
   int nbits;
-  int unsigned_enum = 1;
-
+  struct enum_pair *pairs;
 #if 0
   /* FIXME!  The stabs produced by Sun CC merrily define things that ought
      to be file-scope, between N_FN entries, using N_LSYM.  What's a mother
@@ -4235,8 +4247,6 @@ read_enum_type (register char **pp, register struct type *type,
       SYMBOL_CLASS (sym) = LOC_CONST;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       SYMBOL_VALUE (sym) = n;
-      if (n < 0)
-	unsigned_enum = 0;
       add_symbol_to_list (sym, symlist);
       nsyms++;
     }
@@ -4244,18 +4254,10 @@ read_enum_type (register char **pp, register struct type *type,
   if (**pp == ';')
     (*pp)++;			/* Skip the semicolon.  */
 
-  /* Now fill in the fields of the type-structure.  */
-
-  TYPE_LENGTH (type) = TARGET_INT_BIT / HOST_CHAR_BIT;
-  TYPE_CODE (type) = TYPE_CODE_ENUM;
-  TYPE_FLAGS (type) &= ~TYPE_FLAG_STUB;
-  if (unsigned_enum)
-    TYPE_FLAGS (type) |= TYPE_FLAG_UNSIGNED;
-  TYPE_NFIELDS (type) = nsyms;
-  TYPE_FIELDS (type) = (struct field *)
-    TYPE_ALLOC (type, sizeof (struct field) * nsyms);
-  memset (TYPE_FIELDS (type), 0, sizeof (struct field) * nsyms);
-
+  pairs = (struct enum_pair *) obstack_alloc (&objfile->symbol_obstack, 
+					      sizeof (struct enum_pair) *  nsyms);
+  type = (struct type *)  make_enum_type (objfile,  nsyms, &pairs);
+  
   /* Find the symbols for the values and put them into the type.
      The symbols can be found in the symlist that we put them on
      to cause them to be defined.  osyms contains the old value
@@ -4272,9 +4274,10 @@ read_enum_type (register char **pp, register struct type *type,
 	{
 	  struct symbol *xsym = syms->symbol[j];
 	  SYMBOL_TYPE (xsym) = type;
-	  TYPE_FIELD_NAME (type, n) = SYMBOL_NAME (xsym);
-	  TYPE_FIELD_BITPOS (type, n) = SYMBOL_VALUE (xsym);
-	  TYPE_FIELD_BITSIZE (type, n) = 0;
+	  ENUM_VALUE_NAME (type, n) = SYMBOL_NAME (xsym);
+	  ENUM_VALUE_VALUE (type, n) = SYMBOL_VALUE (xsym);
+	  if (SYMBOL_VALUE (xsym) < 0)
+	    SIGNED_TYPE_SIGN (type) = ST_signed;	 
 	}
       if (syms == osyms)
 	break;
@@ -4358,14 +4361,15 @@ read_sun_builtin_type (char **pp, int typenums[2], struct objfile *objfile)
     ++(*pp);
 
   if (type_bits == 0)
-    return init_type (TYPE_CODE_VOID, 1,
-		      signed_type ? 0 : TYPE_FLAG_UNSIGNED, (char *) NULL,
-		      objfile);
+    return builtin_type_void;
+#if TYPEFIX
   else
     return init_type (code,
 		      type_bits / TARGET_CHAR_BIT,
 		      signed_type ? 0 : TYPE_FLAG_UNSIGNED, (char *) NULL,
 		      objfile);
+#endif
+  return NULL;
 }
 
 static struct type *
@@ -4517,7 +4521,7 @@ read_range_type (char **pp, int typenums[2], struct objfile *objfile)
   long n2, n3;
   int n2bits, n3bits;
   int self_subrange;
-  struct type *result_type;
+  struct range_type *result_type;
   struct type *index_type = NULL;
 
   /* First comes a type we are a subrange of.
@@ -4577,7 +4581,11 @@ read_range_type (char **pp, int typenums[2], struct objfile *objfile)
       if (got_signed || got_unsigned)
 	{
 	  return init_type (TYPE_CODE_INT, nbits / TARGET_CHAR_BIT,
-			    got_unsigned ? TYPE_FLAG_UNSIGNED : 0, NULL,
+			    got_unsigned ? 
+#if TYPEFIX
+			    TYPE_FLAG_UNSIGNED :
+#endif
+0 : 0, NULL,
 			    objfile);
 	}
       else
@@ -4623,14 +4631,13 @@ read_range_type (char **pp, int typenums[2], struct objfile *objfile)
       /* It is unsigned int or unsigned long.  */
       /* GCC 2.3.3 uses this for long long too, but that is just a GDB 3.5
          compatibility hack.  */
-      return init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, NULL, objfile);
+      return builtin_type_unsigned_int;
     }
 
   /* Special case: char is defined (Who knows why) as a subrange of
      itself with range 0-127.  */
   else if (self_subrange && n2 == 0 && n3 == 127)
-    return init_type (TYPE_CODE_INT, 1, 0, NULL, objfile);
+    return builtin_type_char;
 
   else if (current_symbol && SYMBOL_LANGUAGE (current_symbol) == language_chill
 	   && !self_subrange)
@@ -4644,9 +4651,7 @@ read_range_type (char **pp, int typenums[2], struct objfile *objfile)
          so don't need to test for it here.  */
 
       if (n3 < 0)
-	/* n3 actually gives the size.  */
-	return init_type (TYPE_CODE_INT, -n3, TYPE_FLAG_UNSIGNED,
-			  NULL, objfile);
+         return (struct type *)make_integer_type (objfile, NULL, -n3, ST_unsigned);
 
       /* Is n3 == 2**(8n)-1 for some integer n?  Then it's an
          unsigned n-byte integer.  But do require n to be a power of
@@ -4660,8 +4665,7 @@ read_range_type (char **pp, int typenums[2], struct objfile *objfile)
 	  bits >>= 8;
 	if (bits == 0
 	    && ((bytes - 1) & bytes) == 0) /* "bytes is a power of two" */
-	  return init_type (TYPE_CODE_INT, bytes, TYPE_FLAG_UNSIGNED, NULL,
-			    objfile);
+	  return (struct type *) make_integer_type (objfile, NULL, bytes, ST_unsigned);
       }
     }
   /* I think this is for Convex "long long".  Since I don't know whether
@@ -4704,8 +4708,8 @@ handle_true_range:
       index_type = range_type_index;
     }
 
-  result_type = create_range_type ((struct type *) NULL, index_type, n2, n3);
-  return (result_type);
+  result_type = make_range_type (objfile, index_type, n2, n3);
+  return (struct type *)(result_type);
 }
 
 /* Read in an argument list.  This is a list of types, separated by commas
@@ -4779,8 +4783,7 @@ common_block_start (char *name, struct objfile *objfile)
     }
   common_block = local_symbols;
   common_block_i = local_symbols ? local_symbols->nsyms : 0;
-  common_block_name = obsavestring (name, strlen (name),
-				    &objfile->symbol_obstack);
+  common_block_name = obsavestring (name, strlen (name), &objfile->symbol_obstack);
 }
 
 /* Process a N_ECOMM symbol.  */

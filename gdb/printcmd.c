@@ -923,9 +923,10 @@ print_command_1 (char *exp, int inspect, int voidprint)
       if (objectprint
 	  && (TYPE_CODE (type) == TYPE_CODE_PTR
 	      || TYPE_CODE (type) == TYPE_CODE_REF)
-	  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT
-	      || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_UNION))
+	  && (TYPE_CODE (POINTER_TARGET_TYPE (type)) == TYPE_CODE_STRUCT
+	      || TYPE_CODE (POINTER_TARGET_TYPE (type)) == TYPE_CODE_UNION))
 	{
+#if 0
 	  value_ptr v;
 
 	  v = value_from_vtable_info (val, TYPE_TARGET_TYPE (type));
@@ -934,6 +935,7 @@ print_command_1 (char *exp, int inspect, int voidprint)
 	      val = v;
 	      type = VALUE_TYPE (val);
 	    }
+#endif
 	}
     }
   else

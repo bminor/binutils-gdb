@@ -475,7 +475,7 @@ variable:	name_not_typename
 			      if (msymbol != NULL)
 				{
 				  write_exp_msymbol (msymbol,
-						     lookup_function_type (builtin_type_int),
+						     (struct type *)make_function_type (NULL, builtin_type_int, 0, NULL, 0),
 						     builtin_type_int);
 				}
 			      else if (!have_full_symbols () && !have_partial_symbols ())
@@ -498,7 +498,7 @@ ptype	:	typebase
 		  int done = 0;
 		  int array_size;
 		  struct type *follow_type = $1;
-		  struct type *range_type;
+		  struct range_type *range_type;
 		  
 		  while (!done)
 		    switch (pop_type ())
@@ -517,18 +517,18 @@ ptype	:	typebase
 			if (array_size != -1)
 			  {
 			    range_type =
-			      create_range_type ((struct type *) NULL,
+			      make_range_type (NULL,
 						 builtin_type_f_integer, 0,
 						 array_size - 1);
-			    follow_type =
-			      create_array_type ((struct type *) NULL,
+			    follow_type = (struct type *)
+			      make_array_type (NULL, 
 						 follow_type, range_type);
 			  }
 			else
 			  follow_type = lookup_pointer_type (follow_type);
 			break;
 		      case tp_function:
-			follow_type = lookup_function_type (follow_type);
+			follow_type = (struct type *)make_function_type (NULL, follow_type, 0, NULL, 0);
 			break;
 		      }
 		  $$ = follow_type;

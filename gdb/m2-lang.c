@@ -199,6 +199,7 @@ m2_printstr (struct ui_file *stream, char *string, unsigned int length,
 static struct type *
 m2_create_fundamental_type (struct objfile *objfile, int typeid)
 {
+#if TYPEFIX
   register struct type *type = NULL;
 
   switch (typeid)
@@ -351,6 +352,9 @@ m2_create_fundamental_type (struct objfile *objfile, int typeid)
       break;
     }
   return (type);
+#else
+  return NULL;
+#endif
 }
 
 
@@ -442,6 +446,8 @@ const struct language_defn m2_language_defn =
 void
 _initialize_m2_language (void)
 {
+#if TYPEFIX
+
   /* Modula-2 "pervasive" types.  NOTE:  these can be redefined!!! */
   builtin_type_m2_int =
     init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
@@ -463,6 +469,6 @@ _initialize_m2_language (void)
     init_type (TYPE_CODE_BOOL, TARGET_INT_BIT / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED,
 	       "BOOLEAN", (struct objfile *) NULL);
-
   add_language (&m2_language_defn);
+#endif
 }

@@ -501,7 +501,6 @@ symbol_read_needs_frame (struct symbol *sym)
     }
   return 1;
 }
-
 /* Given a struct symbol for a variable,
    and a stack frame id, read the value of the variable
    and return a (pointer to a) struct value containing the value. 
@@ -524,7 +523,6 @@ read_var_value (register struct symbol *var, struct frame_info *frame)
 
   if (frame == NULL)
     frame = selected_frame;
-
   switch (SYMBOL_CLASS (var))
     {
     case LOC_CONST:
@@ -942,8 +940,8 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
       snum = (unsigned short)
 	extract_unsigned_integer (VALUE_CONTENTS_RAW (v), 2);
 
-      if (TYPE_TARGET_TYPE (type)	  /* pointer to function */
-	  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
+      if (POINTER_TARGET_TYPE (type)	  /* pointer to function */
+	  && (TYPE_CODE (POINTER_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
 	num = D10V_MAKE_IADDR (snum);
       else 				  /* pointer to data */
 	num = D10V_MAKE_DADDR (snum);

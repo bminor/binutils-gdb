@@ -312,7 +312,7 @@ GLOBAL_CFLAGS = $(MT_CFLAGS) $(MH_CFLAGS)
 
 # CFLAGS is specifically reserved for setting from the command line
 # when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
-CFLAGS = @CFLAGS@
+CFLAGS = @CFLAGS@ -Werror -O
 
 # Need to pass this to testsuite for "make check".  Probably should be
 # consistent with top-level Makefile.in and gdb/testsuite/Makefile.in
@@ -511,7 +511,7 @@ TARGET_FLAGS_TO_PASS = \
 # SFILES is used in building the distribution archive.
 
 SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
-	buildsym.c c-exp.y c-lang.c c-typeprint.c c-valprint.c \
+	bitmap.c buildsym.c c-exp.y c-lang.c c-typeprint.c c-valprint.c \
 	ch-exp.c ch-lang.c ch-typeprint.c ch-valprint.c coffread.c \
 	complaints.c completer.c corefile.c cp-valprint.c dbxread.c \
 	demangle.c dwarfread.c dwarf2read.c elfread.c environ.c eval.c \
@@ -596,7 +596,6 @@ xm_h =		@xm_h@
 tm_h =		@tm_h@
 nm_h =		@nm_h@
 defs_h =	defs.h $(xm_h) $(tm_h) $(nm_h) config.status config.h gdbarch.h ui-file.h
-
 top_h =		top.h
 inferior_h =	inferior.h $(breakpoint_h)
 target_h =      target.h $(bfd_h) $(symtab_h) $(dcache_h) $(memattr_h)
@@ -627,7 +626,7 @@ cp_abi_h = cp-abi.h
 # wrong if TAGS has files twice).  Because this is tricky to get
 # right, it is probably easiest just to list .h files here directly.
 
-HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
+HFILES_NO_SRCDIR = bcache.h bitmap.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	dst.h environ.h $(gdbcmd_h) gdbcore.h \
 	gdb-stabs.h hpread.h $(inferior_h) language.h minimon.h monitor.h \
 	objfiles.h parser-defs.h partial-stab.h serial.h solib.h \
@@ -678,7 +677,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	expprint.o environ.o stack.o thread.o \
 	event-loop.o event-top.o inf-loop.o completer.o \
 	gdbarch.o arch-utils.o gdbtypes.o copying.o $(DEPFILES) \
-	memattr.o mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
+	memattr.o mem-break.o target.o parse.o language.o $(YYOBJ) bitmap.o buildsym.o \
 	kod.o kod-cisco.o \
 	gdb-events.o \
 	exec.o bcache.o objfiles.o minsyms.o maint.o demangle.o \
@@ -1027,7 +1026,7 @@ version.o: version.c $(version_h)
 
 # If we said c-exp.tab.c rather than ./c-exp.tab.c some makes
 # would sometimes re-write it into $(srcdir)/c-exp.tab.c.
-
+YFLAGS +=  --debug
 # Remove bogus decls for malloc/realloc/free which conflict with everything
 # else.  Strictly speaking c-exp.tab.c should therefore depend on
 # Makefile.in, but that was a pretty big annoyance.
@@ -1225,7 +1224,7 @@ breakpoint.o: breakpoint.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	gdb-events.h linespec.h $(ui_out_h)
 
 buildsym.o: buildsym.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
-	objfiles.h symfile.h $(symtab_h) $(gdb_string_h)
+	objfiles.h symfile.h $(symtab_h) $(gdb_string_h) $(gdbtypes_h)
 
 c-lang.o: c-lang.c c-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h parser-defs.h $(symtab_h)
@@ -1291,7 +1290,7 @@ corelow.o: corelow.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 cp-abi.o: cp-abi.c $(defs_h) $(value_h) $(cp_abi_h)
 
 cp-valprint.o: cp-valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
-	$(gdbtypes_h) $(symtab_h) $(value_h) $(gdb_string_h)
+	$(gdbtypes_h) $(symtab_h) $(value_h) $(gdb_string_h) $(cp_abi_h)
 
 dcache.o: dcache.c $(dcache_h) $(defs_h) $(gdbcmd_h) $(gdb_string_h) \
 	$(gdbcore_h) target.h
@@ -1347,7 +1346,7 @@ expprint.o: expprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h parser-defs.h $(symtab_h) $(value_h)
 
 findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
-	$(gdb_string_h) $(regcache_h)
+	$(gdb_string_h) $(regcache_h) 
 
 frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
 	$(regcache_h)
@@ -1492,18 +1491,20 @@ go32-nat.o: go32-nat.c $(defs_h) $(inferior_h) gdb_wait.h $(gdbcore_h) \
 gnu-nat.o: process_reply_S.h exc_request_S.h notify_S.h msg_reply_S.h \
 	exc_request_U.h msg_U.h gnu-nat.h
 
-gnu-v2-abi.o: gnu-v2-abi.c $(defs_h) $(gdb_string_h) $(symtab_h) \
-	$(gdbtypes_h) $(value_h) $(demangle_h) $(cp_abi_h) 
+gnu-v3-abi.o: gnu-v3-abi.c $(cp_abi_h) $(defs_h) $(gdb_string_h) $(symtab_h) \
+	$(gdbtypes_h) $(value_h) $(demangle_h)
 
-gnu-v3-abi.o: gnu-v2-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(demangle_h)
- 
+gnu-v2-abi.o: gnu-v2-abi.c $(defs_h) $(cp_abi_h) $(gdb_string_h $(symtab_h) \
+	$(gdbtypes_h) $(value_h) $(demangle_h) $(cp_abi_h)
+
 h8300-tdep.o: h8300-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(regcache_h)
 
-h8500-tdep.o: h8500-tdep.c $(bfd_h) $(dis-asm_h) $(defs_h) \
-	$(expression_h) $(frame_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) \
-	$(value_h) $(regcache_h)
+h8300-tdep.o: h8300-tdep.c $(defs_h) $(frame_h) $(symtab_h)
 
-hp300ux-nat.o: hp300ux-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
+h8500-tdep.o: h8500-tdep.c $(bfd_h) $(dis-asm_h) $(defs_h) \
+	$(expression_h) $(frame_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) 
+
+hp300ux-nat.o: hp300ux-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(value_h) $(regcache_h)
 
 hpacc-abi.o: hpacc-abi.c $(defs_h) $(cp_abi_h) $(gdb_string_h) $(gdbtypes_h) \
 	$(value_h) $(gdbcore_h)
@@ -1636,7 +1637,7 @@ p-typeprint.o: p-typeprint.c p-lang.h $(defs_h) $(expression_h) \
 	target.h typeprint.h $(value_h) $(gdb_string_h)
 
 p-valprint.o: p-valprint.c p-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
-	language.h $(symtab_h) valprint.h $(value_h) $(gdb_string_h)
+	language.h $(symtab_h) valprint.h $(value_h) $(gdb_string_h) $(cp_abi_h)
 
 m68k-tdep.o: m68k-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(value_h) \
 	$(gdbcore_h) $(gdb_string_h) $(regcache_h)
@@ -2023,7 +2024,10 @@ linespec.o: linespec.c linespec.h $(defs_h) $(frame_h) $(value_h) \
 	objfiles.h symfile.h completer.h $(symtab_h) \
 	$(demangle_h) command.h $(cp_abi_h)
 
-tic80-tdep.o: tic80-tdep.c $(defs_h) $(regcache_h)
+# OBSOLETE tahoe-tdep.o: tahoe-tdep.c $(OP_INCLUDE)/tahoe.h $(defs_h) \
+# OBSOLETE	$(symtab_h)
+
+tic80-tdep.o: tic80-tdep.c $(defs_h)
 
 target.o: target.c $(bfd_h) $(defs_h) $(gdbcmd_h) $(inferior_h) \
 	objfiles.h symfile.h target.h $(gdb_string_h) $(regcache_h)
@@ -2066,7 +2070,7 @@ valprint.o: valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 
 values.o: values.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) $(symtab_h) target.h $(value_h) \
-	$(gdb_string_h) scm-lang.h
+	$(gdb_string_h) scm-lang.h $(cp_abi_h)
 
 vax-tdep.o: vax-tdep.c $(OP_INCLUDE)/vax.h $(defs_h) $(symtab_h)
 
@@ -2132,6 +2136,7 @@ varobj.o: varobj.c $(defs_h) $(frame_h) $(value_h) \
 	$(language_h) valprint.h varobj.h wrapper.h
 
 wrapper.o: wrapper.c $(defs_h) $(frame_h) $(value_h) wrapper.h
+
 
 #
 # CLI dependencies

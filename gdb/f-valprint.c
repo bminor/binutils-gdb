@@ -73,7 +73,7 @@ f77_get_dynamic_lowerbound (struct type *type, int *lower_bound)
 
   switch (TYPE_ARRAY_LOWER_BOUND_TYPE (type))
     {
-    case BOUND_BY_VALUE_ON_STACK:
+    case BT_by_value_on_stack:
       current_frame_addr = selected_frame->frame;
       if (current_frame_addr > 0)
 	{
@@ -89,15 +89,15 @@ f77_get_dynamic_lowerbound (struct type *type, int *lower_bound)
 	}
       break;
 
-    case BOUND_SIMPLE:
+    case BT_simple:
       *lower_bound = TYPE_ARRAY_LOWER_BOUND_VALUE (type);
       break;
 
-    case BOUND_CANNOT_BE_DETERMINED:
+    case BT_cannot_be_determined:
       error ("Lower bound may not be '*' in F77");
       break;
 
-    case BOUND_BY_REF_ON_STACK:
+    case BT_by_ref_on_stack:
       current_frame_addr = selected_frame->frame;
       if (current_frame_addr > 0)
 	{
@@ -114,8 +114,8 @@ f77_get_dynamic_lowerbound (struct type *type, int *lower_bound)
 	}
       break;
 
-    case BOUND_BY_REF_IN_REG:
-    case BOUND_BY_VALUE_IN_REG:
+    case BT_by_ref_in_reg:
+    case BT_by_value_in_reg:
     default:
       error ("??? unhandled dynamic array bound type ???");
       break;
@@ -131,7 +131,7 @@ f77_get_dynamic_upperbound (struct type *type, int *upper_bound)
 
   switch (TYPE_ARRAY_UPPER_BOUND_TYPE (type))
     {
-    case BOUND_BY_VALUE_ON_STACK:
+    case BT_by_value_on_stack:
       current_frame_addr = selected_frame->frame;
       if (current_frame_addr > 0)
 	{
@@ -147,11 +147,11 @@ f77_get_dynamic_upperbound (struct type *type, int *upper_bound)
 	}
       break;
 
-    case BOUND_SIMPLE:
+    case BT_simple:
       *upper_bound = TYPE_ARRAY_UPPER_BOUND_VALUE (type);
       break;
 
-    case BOUND_CANNOT_BE_DETERMINED:
+    case BT_cannot_be_determined:
       /* we have an assumed size array on our hands. Assume that 
          upper_bound == lower_bound so that we show at least 
          1 element.If the user wants to see more elements, let 
@@ -160,7 +160,7 @@ f77_get_dynamic_upperbound (struct type *type, int *upper_bound)
       f77_get_dynamic_lowerbound (type, upper_bound);
       break;
 
-    case BOUND_BY_REF_ON_STACK:
+    case BT_by_ref_on_stack:
       current_frame_addr = selected_frame->frame;
       if (current_frame_addr > 0)
 	{
@@ -177,8 +177,8 @@ f77_get_dynamic_upperbound (struct type *type, int *upper_bound)
 	}
       break;
 
-    case BOUND_BY_REF_IN_REG:
-    case BOUND_BY_VALUE_IN_REG:
+    case BT_by_ref_in_reg:
+    case BT_by_value_in_reg:
     default:
       error ("??? unhandled dynamic array bound type ???");
       break;
@@ -204,9 +204,9 @@ f77_get_dynamic_length_of_aggregate (struct type *type)
      This function also works for strings which behave very 
      similarly to arrays.  */
 
-  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_ARRAY
-      || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRING)
-    f77_get_dynamic_length_of_aggregate (TYPE_TARGET_TYPE (type));
+  if (TYPE_CODE (ARRAY_ELEMENT_TYPE (type)) == TYPE_CODE_ARRAY
+      || TYPE_CODE (ARRAY_ELEMENT_TYPE (type)) == TYPE_CODE_STRING)
+    f77_get_dynamic_length_of_aggregate (ARRAY_ELEMENT_TYPE (type));
 
   /* Recursion ends here, start setting up lengths.  */
   retcode = f77_get_dynamic_lowerbound (type, &lower_bound);
@@ -220,7 +220,7 @@ f77_get_dynamic_length_of_aggregate (struct type *type)
   /* Patch in a valid length value. */
 
   TYPE_LENGTH (type) =
-    (upper_bound - lower_bound + 1) * TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type)));
+    (upper_bound - lower_bound + 1) * TYPE_LENGTH (check_typedef (ARRAY_ELEMENT_TYPE (type)));
 }
 
 /* Function that sets up the array offset,size table for the array 
@@ -238,7 +238,8 @@ f77_create_arrayprint_offset_tbl (struct type *type, struct ui_file *stream)
 
   while ((TYPE_CODE (tmp_type) == TYPE_CODE_ARRAY))
     {
-      if (TYPE_ARRAY_UPPER_BOUND_TYPE (tmp_type) == BOUND_CANNOT_BE_DETERMINED)
+#if TYPEFIX
+      if (TYPE_ARRAY_UPPER_BOUND_TYPE (tmp_type) == BT_cannot_be_determined)
 	fprintf_filtered (stream, "<assumed size array> ");
 
       retcode = f77_get_dynamic_upperbound (tmp_type, &upper);
@@ -252,6 +253,7 @@ f77_create_arrayprint_offset_tbl (struct type *type, struct ui_file *stream)
       F77_DIM_SIZE (ndimen) = upper - lower + 1;
 
       tmp_type = TYPE_TARGET_TYPE (tmp_type);
+#endif
       ndimen++;
     }
 
@@ -389,7 +391,7 @@ f_val_print (struct type *type, char *valaddr, int embedded_offset,
       else
 	{
 	  addr = unpack_pointer (type, valaddr);
-	  elttype = check_typedef (TYPE_TARGET_TYPE (type));
+	  elttype = check_typedef (POINTER_TARGET_TYPE (type));
 
 	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
 	    {

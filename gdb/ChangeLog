@@ -1,3 +1,85 @@
+2001-05-30  Daniel Berlin  <dan@cgsoftware.com>
+
+	* coffread.c (patch_opaque_types): Use BLOCK_NBUCKETS,
+	BLOCK_BUCKETS, handle the fact that we now have symbol chains.
+
+2001-05-29  Daniel Berlin  <dan@cgsoftware.com>
+
+	* bcache.c (hash): Fix indenting, make it FNV-1 hash rather than
+	FNV-0 hash (just a change in the starting constant).
+
+	* minsyms.c (msymbol_hash_iw): Rewrite, based on FNV-1 hash from
+	bcache.c.  Don't modulo the hash by the table size here, so we can
+	reuse this function elsewhere. 
+	Add comments about changing the loop this function uses, and how
+	symbol lookup is dominated by this function now.
+	(msymbol_hash): Just use FNV-1 hash from bcache.c. Also don't
+	modulo the hash by the table size here, so we can reuse this
+	function.
+	(add_minsym_to_hash_table): Modulo the msymbol_hash return value
+	by the hash table size.
+	(add_minsym_to_demangled_hash_table): Ditto for msymbol_hash_iw.
+	(lookup_minimal_symbol): Ditto for both.
+
+	* symtab.c (lookup_block_symbol): Complete rewrite.
+	(search_symbols): Use BLOCK_NBUCKETS, BLOCK_BUCKET, and walk the
+	chain, since it's trying to go through all the symbols in blocks
+	we know to be in hash table form.
+	(make_symbol_completion_list): Ditto.
+	(make_symbol_overload_list): Ditto.
+
+	* buildsym.c (finish_block): Use the syms array in the block as a
+	hash table if possible (IE, the block isn't a function).  Default
+	number of buckets is 1/4 the number of symbols. 
+
+	* symtab.h: (BLOCK_BUCKET): New macro. Currently the same as
+	BLOCK_SYM, since we reuse the sym array as the hash table.
+	(BLOCK_NBUCKETS): New macro. Currently the same as BLOCK_NSYMS,
+	for the same reason.
+	(BLOCK_SHOULD_SHORT): Never sort, not necessary anymore.
+	(struct symbol): Add hash_next member.
+
+	
+2001-05-29  Daniel Berlin  <dan@cgsoftware.co>
+
+	* Makefile.in (SFILES): Add symeval.c.
+	(symeval_h): New.
+	(COMMON_OBS): Add symeval.o
+	(symeval.o): New. 
+	(findvar.o): Depend on $(symeval_h), too.
+
+	* symtab.h: Add LOC_LOC_EXPR and LOC_LOC_LIST to the location types.
+	Add dynamic_location and loc/frameloc to the symbol structure.
+	(SYMBOL_LOC_EXPR): New macro.
+	(SYMBOL_FRAME_LOC_EXPR): Ditto.
+	Add forward declaration of locexpr struct.
+
+	* symeval.c: New file.
+
+	* symeval.def: New file.
+
+	* symeval.h: New file.
+
+
+2001-05-27  Daniel Berlin  <dan@cgsoftware.com>
+
+	* symfile.c (default_symfile_offsets): Allocate in misc_obstack.
+	(reread_symbols): Handle misc_obstack too, and use it where
+	psymbol_obstack didn't belong. 
+	(allocate_psymtab): Ditto.
+
+	* objfiles.c (add_to_objfile_sections):  Use misc_obstack, not psymbol_obstack.
+	(build_objfile_section_table): Ditto.
+	(free_objfile): Free the misc_obstack.
+	(allocate_objfile): Setup misc_obstack too.
+
+	* objfiles.h: Add misc_obstack to object file.
+
+2001-05-22  Daniel Berlin  <dan@cgsoftware.com>
+
+	* linespec.c (find_toplevel_char): '<' and '>' also increase and
+	decrease the depth we are at, in the case of templates.
+
 2001-07-06  Jim Blandy  <jimb@redhat.com>
 
 	* gdbtypes.h (builtin_type_void_func_ptr): New builtin type.
