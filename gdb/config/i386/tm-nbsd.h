@@ -1,5 +1,5 @@
 /* Macro definitions for i386 running under NetBSD.
-   Copyright 1994 Free Software Foundation, Inc.
+   Copyright 1994, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,7 +24,7 @@
 #define HAVE_I387_REGS
 
 #include "i386/tm-i386.h"
-#include "tm-nbsd.h"
+#include "config/tm-nbsd.h"
 
 extern use_struct_convention_fn i386nbsd_use_struct_convention;
 #define USE_STRUCT_CONVENTION(gcc_p, type) \

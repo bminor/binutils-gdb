@@ -1,3 +1,12 @@
+2000-06-02  J.T. Conklin  <jtc@redback.com>
+
+	* configure.tgt: Add pattern for i[3456]86-*-netbsdelf*.
+	* config/i386/nbsdelf.mt: New file.
+	* config/i386/tm-nbsdelf.h: New file.
+	
+	* config/i386/tm-nbsd.h: change include of tm-nbsd.h to 
+	the more explicit config/tm-nbsd.h.
+
 2000-06-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* alphabsd-nat.c (supply_fpregset): Substract FP0_REGNUM from
