@@ -1,3 +1,9 @@
+Fri Dec 13 10:19:57 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* Makefile.in (emn10200.c): Add dependencies.
+	* configure.tgt: Handle mn10200.
+	* emulparms/mn10200.sh: New file.
+
 Thu Dec 12 17:04:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/gld960c.em: Include <ctype.h>.

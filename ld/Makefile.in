@@ -386,7 +386,7 @@ ecoff_sparc.c: $(srcdir)/emulparams/coff_sparc.sh \
 	${GENSCRIPTS} coff_sparc "$(tdir_coff_sparc)"
 # start-sanitize-d10v
 ed10velf.c: $(srcdir)/emulparams/d10velf.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfd10v.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} d10velf "$(tdir_d10v)"
 # end-sanitize-d10v
 edelta68.c: $(srcdir)/emulparams/delta68.sh \
@@ -562,6 +562,12 @@ emipsidtl.c: $(srcdir)/emulparams/mipsidtl.sh \
 emipslit.c:  $(srcdir)/emulparams/mipslit.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mipslit "$(tdir_mipslit)"
+emn10300.c: $(srcdir)/emulparams/mn10300.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} mn10300 "$(tdir_mn10300)"
+emn10200.c: $(srcdir)/emulparams/mn10200.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} mn10200 "$(tdir_mn10200)"
 enews.c: $(srcdir)/emulparams/news.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} news "$(tdir_news)"

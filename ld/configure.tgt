@@ -23,7 +23,6 @@ sparc64-*-elf*)		targ_emul=elf64_sparc ;;
 sparc-sun-sunos4*) 	targ_emul=sun4 ;;
 sparclite*-*-coff)	targ_emul=coff_sparc ;;
 sparclite*-fujitsu-*)	targ_emul=sparcaout ;;
-sparclet*-*-aout)	targ_emul=sparcaout targ_extra_emuls=sparclaout ;;
 sparc*-*-aout)		targ_emul=sparcaout ;;
 sparc*-*-coff)		targ_emul=coff_sparc ;;
 sparc*-*-elf)		targ_emul=elf32_sparc ;;
@@ -141,6 +140,9 @@ mips*vr5000el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr5000-*-elf*)	targ_emul=elf32b4300 ;;
 mips*el-*-elf*)		targ_emul=elf32elmip ;;
 mips*-*-elf*)		targ_emul=elf32ebmip ;;
+mips*-*-rtems*)		targ_emul=elf32ebmip ;;
+mn10200-*-*)		targ_emul=mn10200 ;;
+mn10300-*-*)		targ_emul=mn10300 ;;
 alpha-*-linuxecoff*)	targ_emul=alpha targ_extra_emuls=elf64alpha
 			tdir_elf64alpha=`echo ${targ_alias} | sed -e 's/ecoff//'`
 			;;
