@@ -1,5 +1,11 @@
 2002-01-30  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.base/annota1.exp (backtrace from shlibrary): Fix spelling.
+	Allow a start function above main.
+	* gdb.threads/linux-dp.exp: Fix copyright date.
+
+2002-01-30  Daniel Jacobowitz  <drow@mvista.com>
+
         * gdb.threads/linux-dp.exp: Use 'array unset', not 'array set'.
         (check_philosopher_stack): Check for manager thread before checking
         for a just-starting thread.

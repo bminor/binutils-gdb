@@ -1,4 +1,4 @@
-#   Copyright 1999, 2000, 2001
+#   Copyright 1999, 2000, 2001, 2002
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -247,8 +247,8 @@ gdb_expect {
 #
 send_gdb "backtrace\n"
 gdb_expect {
-  -re "\r\n\032\032post-prompt\r\n\r\n\032\032frame-begin 0 $hex\r\n.0  \r\n(\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n)*\032\032frame-function-name\r\nprintf\r\n\032\032frame-args\r\n \\(.*frame-end\r\n\r\n\032\032frame-begin 1 $hex\r\n.1  \r\n\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n${srcdir}/${subdir}/${srcfile}\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n.*\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032frame-end\r\n$gdb_prompt$" \
-	  { pass "bactrace from shlibrary" }
+  -re "\r\n\032\032post-prompt\r\n\r\n\032\032frame-begin 0 $hex\r\n.0  \r\n(\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n)*\032\032frame-function-name\r\nprintf\r\n\032\032frame-args\r\n \\(.*frame-end\r\n\r\n\032\032frame-begin 1 $hex\r\n.1  \r\n\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n${srcdir}/${subdir}/${srcfile}\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n.*\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032frame-end\r\n(\r\n\032\032frame-begin .*\r\n\r\n\032\032frame-end\r\n)*$gdb_prompt$" \
+	  { pass "backtrace from shlibrary" }
   -re ".*$gdb_prompt$"     { fail "backtrace from shlibrary" }
   timeout	            { fail "backtrace from shlibrary (timeout)" }
 }
