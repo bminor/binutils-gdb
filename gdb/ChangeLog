@@ -1,3 +1,14 @@
+Sat Feb 22 02:00:32 1992  John Gilmore  (gnu at cygnus.com)
+
+	* symfile.c (symbol_file_command):  strcmp => !strcmp.
+	* breakpoint.h:  Move prototypes to follow enum definition they need.
+	* breakpoint.c, infrun.c:  Lint.
+	* printcmd.c:  Use `enum enable' rather than `enum
+	display_status'.
+	* mipsread.c:  First pass at making it compile with the new
+	objfile changes.  Probably seriously broken still, but it
+	compiles.  FIXME.
+
 Sat Feb 22 00:56:39 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* infrun.c, infcmd.c, breakpoint.c, main.c, symfile.c,

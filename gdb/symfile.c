@@ -585,11 +585,11 @@ symbol_file_command (args, from_tty)
       name = *argv;
       while (*++argv != NULL)
 	{
-	  if (strcmp (*argv, "dumpable"))
+	  if (!strcmp (*argv, "dumpable"))
 	    {
 	      dumpable = 1;
 	    }
-	  else if (strcmp (*argv, "readnow"))
+	  else if (!strcmp (*argv, "readnow"))
 	    {
 	      readnow = 1;
 	    }
