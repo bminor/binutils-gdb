@@ -1584,7 +1584,7 @@ find_format (opcode, myops, fsize, cmp_hack)
 		      || ((flags & OPERAND_ACC) && !(num & OPERAND_ACC))
 		      || (!(flags & OPERAND_ACC) && (num & OPERAND_ACC))
 		      || ((flags & OPERAND_FLAG) && !(num & OPERAND_FLAG))
-		      || (!(flags & OPERAND_FLAG) && (num & OPERAND_FLAG))
+		      || (!(flags & (OPERAND_FLAG | OPERAND_CONTROL)) && (num & OPERAND_FLAG))
 		      || ((flags & OPERAND_CONTROL)
 			  && !(num & (OPERAND_CONTROL | OPERAND_FLAG))))
 		    {

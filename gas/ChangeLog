@@ -1,3 +1,8 @@
+Thu Oct  8 10:18:33 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d30v.c (find_format): Test for missing flag and
+	control registers.
+
 Wed Oct  7 14:09:14 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (md_apply_fix3): Do not assume that bad
