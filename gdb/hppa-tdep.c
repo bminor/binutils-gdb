@@ -1562,6 +1562,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
   long frame_size;
   struct unwind_table_entry *u;
   CORE_ADDR prologue_end;
+  int fp_in_r1 = 0;
   int i;
 
   if (hppa_debug)
@@ -1694,6 +1695,10 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 	    looking_for_sp = 0;
 	    cache->saved_regs[HPPA_FP_REGNUM].addr = 0;
 	  }
+	else if (inst == 0x08030241) /* copy %r3, %r1 */
+	  {
+	    fp_in_r1 = 1;
+	  }
 	
 	/* Account for general and floating-point register saves.  */
 	reg = inst_saves_gr (inst);
@@ -1802,9 +1807,6 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
         and saved on the stack, the Save_SP flag is set.  We use this to
         decide whether to use the frame pointer for unwinding.
 	
-	fp may be zero if it is not available in an inner frame because
-	it has been modified by not yet saved.
-	
         TODO: For the HP compiler, maybe we should use the alloca_frame flag 
 	instead of Save_SP.  */
  
@@ -1867,13 +1869,26 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 	}
     }
 
-  /* If the frame pointer was not saved in this frame, but we should be saving
-     it, set it to an invalid value so that another frame will not pick up the 
-     wrong frame pointer.  This can happen if we start unwinding after the 
-     frame pointer has been modified, but before we've saved it to the
-     stack.  */
-  if (u->Save_SP && !trad_frame_addr_p (cache->saved_regs, HPPA_FP_REGNUM))
-    trad_frame_set_value (cache->saved_regs, HPPA_FP_REGNUM, 0);
+  /* If Save_SP is set, then we expect the frame pointer to be saved in the
+     frame.  However, there is a one-insn window where we haven't saved it
+     yet, but we've already clobbered it.  Detect this case and fix it up.
+
+     The prologue sequence for frame-pointer functions is:
+	0: stw %rp, -20(%sp)
+	4: copy %r3, %r1
+	8: copy %sp, %r3
+	c: stw,ma %r1, XX(%sp)
+
+     So if we are at offset c, the r3 value that we want is not yet saved
+     on the stack, but it's been overwritten.  The prologue analyzer will
+     set fp_in_r1 when it sees the copy insn so we know to get the value 
+     from r1 instead.  */
+  if (u->Save_SP && !trad_frame_addr_p (cache->saved_regs, HPPA_FP_REGNUM)
+      && fp_in_r1)
+    {
+      ULONGEST r1 = frame_unwind_register_unsigned (next_frame, 1);
+      trad_frame_set_value (cache->saved_regs, HPPA_FP_REGNUM, r1);
+    }
 
   {
     /* Convert all the offsets into addresses.  */
