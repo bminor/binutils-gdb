@@ -2104,20 +2104,7 @@ sparc_print_registers (struct gdbarch *gdbarch,
 	  continue;
 	}
 
-      /* FIXME: cagney/2002-08-03: This code shouldn't be necessary.
-         The function frame_register_read() should have returned the
-         pre-cooked register so no conversion is necessary.  */
-      /* Convert raw data to virtual format if necessary.  */
-      if (REGISTER_CONVERTIBLE (i))
-	{
-	  REGISTER_CONVERT_TO_VIRTUAL (i, REGISTER_VIRTUAL_TYPE (i),
-				       raw_buffer, virtual_buffer);
-	}
-      else
-	{
-	  memcpy (virtual_buffer, raw_buffer,
-		  REGISTER_VIRTUAL_SIZE (i));
-	}
+      memcpy (virtual_buffer, raw_buffer, REGISTER_VIRTUAL_SIZE (i));
 
       /* If virtual format is floating, print it that way, and in raw
          hex.  */
@@ -3351,8 +3338,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_convert_to_raw (gdbarch, sparc_convert_to_raw);
   set_gdbarch_register_convert_to_virtual (gdbarch, 
 					   sparc_convert_to_virtual);
-  set_gdbarch_register_convertible (gdbarch, 
-				    generic_register_convertible_not);
   set_gdbarch_reg_struct_has_addr (gdbarch, sparc_reg_struct_has_addr);
   set_gdbarch_return_value_on_stack (gdbarch, sparc_return_value_on_stack);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, sparc_saved_pc_after_call);
