@@ -1,3 +1,7 @@
+2002-06-17  Tom Rix <trix@redhat.com>
+
+	* config/tc-i370.h (tc_comment_chars): Define for i370-elf.
+
 2002-06-14  H.J. Lu  <hjl@gnu.org>
 	    Daniel Jacobowitz  <drow@mvista.com>
 

@@ -65,3 +65,6 @@ extern int target_big_endian;
 extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 
 #define md_operand(x)
+
+#define tc_comment_chars i370_comment_chars
+extern const char *i370_comment_chars;
