@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <time.h>
 
 #include "adp.h"
 #include "sys.h"
