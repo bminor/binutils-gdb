@@ -1,3 +1,17 @@
+start-sanitize-ide
+Fri Apr 18 18:10:44 1997  Tom Tromey  <tromey@cygnus.com>
+
+	* configure.in (host_libs): Added libide.
+	Skip libide, vmake if no X.  Also skip these everywhere that sn is
+	skipped.
+
+	* Makefile.in (ALL_MODULES): Added all-vmake, all-libide.
+	(CROSS_CHECK_MODULES): Added check-vmake, check-libide.
+	(INSTALL_MODULES): Added install-vmake, install-libide.
+	(CLEAN_MODULES): Added clean-vmake, clean-libide.
+	(all-vmake, all-libide): New targets.
+
+end-sanitize-ide
 Thu Apr 17 13:57:06 1997  Per Fogelstrom  <pefo@openbsd.org>
 
 	* config.guess: Fixes for MIPS OpenBSD systems.

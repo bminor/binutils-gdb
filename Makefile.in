@@ -453,6 +453,9 @@ ALL_MODULES = \
 	all-itcl \
 	all-ld \
 	all-libiberty \
+	$(start-sanitize-ide) \
+	all-libide \
+	$(end-sanitize-ide) \
 	all-m4 \
 	all-make \
 	all-mmalloc \
@@ -476,6 +479,9 @@ ALL_MODULES = \
 	all-tgas \
 	all-time \
 	all-uudecode \
+	$(start-sanitize-ide) \
+	all-vmake \
+	$(end-sanitize-ide) \
 	all-wdiff 
 
 # This is a list of the check targets for all of the modules which are
@@ -514,6 +520,9 @@ CROSS_CHECK_MODULES = \
 	check-itcl \
 	check-ld \
 	check-libiberty \
+	$(start-sanitize-ide) \
+	check-libide \
+	$(end-sanitize-ide) \
 	check-m4 \
 	check-make \
 	check-mmcheckoc \
@@ -536,6 +545,9 @@ CROSS_CHECK_MODULES = \
 	check-tgas \
 	check-time \
 	check-uudecode \
+	$(start-sanitize-ide) \
+	check-vmake \
+	$(end-sanitize-ide) \
 	check-wdiff
 
 CHECK_MODULES=$(NATIVE_CHECK_MODULES) $(CROSS_CHECK_MODULES)
@@ -572,6 +584,9 @@ INSTALL_MODULES = \
 	install-itcl \
 	install-ld \
 	install-libiberty \
+	$(start-sanitize-ide) \
+	install-libide \
+	$(end-sanitize-ide) \
 	install-m4 \
 	install-make \
 	install-mmalloc \
@@ -594,6 +609,9 @@ INSTALL_MODULES = \
 	install-tgas \
 	install-time \
 	install-uudecode \
+	$(start-sanitize-ide) \
+	install-vmake \
+	$(end-sanitize-ide) \
 	install-wdiff
 
 # This is a list of the targets for all of the modules which are compiled
@@ -708,6 +726,9 @@ CLEAN_MODULES = \
 	clean-itcl \
 	clean-ld \
 	clean-libiberty \
+	$(start-sanitize-ide) \
+	clean-libide \
+	$(end-sanitize-ide) \
 	clean-m4 \
 	clean-make \
 	clean-mmalloc \
@@ -731,6 +752,9 @@ CLEAN_MODULES = \
 	clean-tgas \
 	clean-time \
 	clean-uudecode \
+	$(start-sanitize-ide) \
+	clean-vmake \
+	$(end-sanitize-ide) \
 	clean-wdiff
 
 # All of the target modules that can be cleaned
@@ -1336,6 +1360,9 @@ all-target-libgloss: configure-target-libgloss configure-target-newlib
 configure-target-libio: $(ALL_GCC)
 all-target-libio: configure-target-libio all-gas all-ld all-gcc all-target-libiberty all-target-newlib
 all-libiberty:
+# start-sanitize-ide
+all-libide: all-tcl all-tk all-itcl
+# end-sanitize-ide
 configure-target-librx: $(ALL_GCC) configure-target-newlib
 all-target-librx: configure-target-librx
 configure-target-libstdc++: $(ALL_GCC)
@@ -1365,6 +1392,9 @@ all-texinfo: all-libiberty
 all-textutils:
 all-tgas: all-libiberty all-bfd all-opcodes
 all-time:
+# start-sanitize-ide
+all-vmake: all-tcl all-tk all-itcl all-libide
+# end-sanitize-ide
 all-wdiff:
 all-target-winsup: all-target-newlib all-target-libiberty all-target-librx all-target-libio configure-target-winsup 
 configure-target-winsup: configure-target-newlib

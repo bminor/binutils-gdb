@@ -105,6 +105,15 @@ else
 	keep_these_too="${keep_these_too} ${inet_files}"
 fi
 
+ide_files="itcl libide vmake"
+
+if (echo $* | grep keep\-ide > /dev/null); then
+	lose_these_too="${lose_these_too} ${ide_files}"
+	test -n "$verbose" && echo Keeping ${ide_files}
+else
+	keep_these_too="${keep_these_too} ${ide_files}"
+fi
+
 
 # This top-level directory is special.  We often check out only subsets
 # of this directory, and complaining about directories or files we didn't
@@ -393,6 +402,33 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-gm/,/end-\sanitize\-gm/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+if ( echo $* | grep keep\-ide > /dev/null ) ; then
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-ide $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping ide stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-ide $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"ide\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-ide/,/end-\sanitize\-ide/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
