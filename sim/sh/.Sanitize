@@ -1,4 +1,6 @@
-# .Sanitize for devo/sim.
+# Sanitize.in for devo.
+# $Id$
+#
 
 # Each directory to survive it's way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -26,11 +28,10 @@ Things-to-keep:
 ChangeLog
 Makefile.in
 configure.in
-endian.c
-h8300
-h8500
-sh
-z8k
+interp.c
+gencode.c
+run.c
+
 
 Do-last:
 
