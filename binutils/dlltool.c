@@ -1,5 +1,5 @@
 /* dlltool.c -- tool to generate stuff for PE style DLLs 
-   Copyright (C) 1995, 96, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1995, 96, 97, 1998 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -46,7 +46,7 @@
    LIBRARY <name> [ , <base> ]    
    The result is going to be <name>.DLL
 
-   EXPORTS  ( <name1> [ = <name2> ] [ @ <integer> ] [ NONAME ] [CONSTANT] ) *
+   EXPORTS  ( <name1> [ = <name2> ] [ @ <integer> ] [ NONAME ] [CONSTANT] [DATA] ) *
    Declares name1 as an exported symbol from the
    DLL, with optional ordinal number <integer>
 
@@ -238,10 +238,6 @@
 #endif
 #endif
 
-#ifdef HAVE_VFORK_H
-#include <vfork.h>
-#endif
-
 static char *as_name = "as";
 
 static int no_idata4;
@@ -377,6 +373,7 @@ typedef struct export
     int ordinal;
     int constant;
     int noname;
+    int data;
     int hint;
     struct export *next;
   }
@@ -522,12 +519,13 @@ yyerror (err)
 }
 
 void
-def_exports (name, internal_name, ordinal, noname, constant)
+def_exports (name, internal_name, ordinal, noname, constant, data)
      const char *name;
      const char *internal_name;
      int ordinal;
      int noname;
      int constant;
+     int data;
 {
   struct export *p = (struct export *) xmalloc (sizeof (*p));
 
@@ -536,6 +534,7 @@ def_exports (name, internal_name, ordinal, noname, constant)
   p->ordinal = ordinal;
   p->constant = constant;
   p->noname = noname;
+  p->data = data;
   p->next = d_exports;
   d_exports = p;
   d_nfuncs++;
@@ -680,9 +679,11 @@ run (what, args)
      char *args;
 {
   char *s;
-  int pid;
+  int pid, wait_status;
   int i;
   const char **argv;
+  char *errmsg_fmt, *errmsg_arg;
+  char *temp_base = choose_temp_base ();
 
   if (verbose)
     fprintf (stderr, "%s %s\n", what, args);
@@ -708,41 +709,39 @@ run (what, args)
     }
   argv[i++] = NULL;
 
-  pid = vfork ();
+  pid = pexecute (argv[0], (char * const *) argv, program_name, temp_base,
+		  &errmsg_fmt, &errmsg_arg, PEXECUTE_ONE | PEXECUTE_SEARCH);
 
-  if (pid == 0)
+  if (pid == -1)
     {
-      execvp (what, (char **) argv);
-      fprintf (stderr, "%s: can't exec %s\n", program_name, what);
+      int errno_val = errno;
+
+      fprintf (stderr, "%s: ", program_name);
+      fprintf (stderr, errmsg_fmt, errmsg_arg);
+      fprintf (stderr, ": %s\n", strerror (errno_val));
       exit (1);
     }
-  else if (pid == -1)
+
+  pid = pwait (pid, &wait_status, 0);
+  if (pid == -1)
     {
-      extern int errno;
-      fprintf (stderr, "%s: vfork failed, %d\n", program_name, errno);
+      fprintf (stderr, "%s: wait: %s\n", program_name, strerror (errno));
       exit (1);
+    }
+  else if (WIFSIGNALED (wait_status))
+    {
+      fprintf (stderr, "%s: subprocess got fatal signal %d\n",
+	       program_name, WTERMSIG (wait_status));
+      exit (1);
+    }
+  else if (WIFEXITED (wait_status))
+    {
+      if (WEXITSTATUS (wait_status) != 0)
+	fprintf (stderr, "%s: %s exited with status %d\n",
+		 program_name, what, WEXITSTATUS (wait_status));
     }
   else
-    {
-      int status;
-      waitpid (pid, &status, 0);
-      if (status)
-	{
-	  if (WIFSIGNALED (status))
-	    {
-	      fprintf (stderr, "%s: %s %s terminated with signal %d\n",
-		       program_name, what, args, WTERMSIG (status));
-	      exit (1);
-	    }
-
-	  if (WIFEXITED (status))
-	    {
-	      fprintf (stderr, "%s: %s %s terminated with exit status %d\n",
-		       program_name, what, args, WEXITSTATUS (status));
-	      exit (1);
-	    }
-	}
-    }
+    abort ();
 }
 
 /* read in and block out the base relocations */
@@ -790,7 +789,7 @@ scan_open_obj_file (abfd)
 	      /* FIXME: The 5th arg is for the `constant' field.
 		 What should it be?  Not that it matters since it's not
 		 currently useful.  */
-	      def_exports (c, 0, -1, 0, 0);
+	      def_exports (c, 0, -1, 0, 0, 0);
 	    }
 	  else
 	    p++;
@@ -851,14 +850,15 @@ dump_def_info (f)
   fprintf (f, "\n");
   for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
     {
-      fprintf (f, "%s  %d = %s %s @ %d %s%s\n",
+      fprintf (f, "%s  %d = %s %s @ %d %s%s%s\n",
 	       ASM_C,
 	       i,
 	       exp->name,
 	       exp->internal_name,
 	       exp->ordinal,
 	       exp->noname ? "NONAME " : "",
-	       exp->constant ? "CONSTANT" : "");
+	       exp->constant ? "CONSTANT" : "",
+	       exp->data ? "DATA" : "");
     }
 }
 
@@ -914,12 +914,13 @@ gen_def_file ()
   for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
     {
       char *quote = strchr (exp->name, '.') ? "\"" : "";
-      fprintf (output_def, "\t%s%s%s @ %d%s ; %s\n",
+      fprintf (output_def, "\t%s%s%s @ %d%s%s ; %s\n",
 	       quote,
 	       exp->name,
 	       quote,
 	       exp->ordinal,
 	       exp->noname ? " NONAME" : "",
+	       exp->data ? " DATA" : "",
 	       cplus_demangle (exp->internal_name, DMGL_ANSI | DMGL_PARAMS));
     }
 }
@@ -1425,28 +1426,33 @@ make_one_lib_file (exp, i)
 	  si->sym->value = 0;
 	  ptrs[oidx] = si->sym;
 	  si->sympp = ptrs + oidx;
+	  si->size = 0;
+	  si->data = NULL;
 
 	  oidx++;
 	}
 
-      exp_label = bfd_make_empty_symbol(abfd);
-      exp_label->name = make_label ("",exp->name);
+      if (! exp->data)
+	{
+	  exp_label = bfd_make_empty_symbol (abfd);
+	  exp_label->name = make_label ("", exp->name);
 
-      /* On PowerPC, the function name points to a descriptor in the
-	 rdata section, the first element of which is a pointer to the
-	 code (..function_name), and the second points to the .toc
-      */
+	  /* On PowerPC, the function name points to a descriptor in
+	     the rdata section, the first element of which is a
+	     pointer to the code (..function_name), and the second
+	     points to the .toc */
 #ifdef DLLTOOL_PPC
-      if (machine == MPPC)
-	exp_label->section = secdata[RDATA].sec;
-      else
+	  if (machine == MPPC)
+	    exp_label->section = secdata[RDATA].sec;
+	  else
 #endif
-	exp_label->section = secdata[TEXT].sec;
+	    exp_label->section = secdata[TEXT].sec;
 
-      exp_label->flags = BSF_GLOBAL;
-      exp_label->value = 0;
+	  exp_label->flags = BSF_GLOBAL;
+	  exp_label->value = 0;
 
-      ptrs[oidx++] = exp_label;
+	  ptrs[oidx++] = exp_label;
+	}
 
       iname = bfd_make_empty_symbol(abfd);
       iname->name = make_label ("__imp_", exp->name);
@@ -1511,31 +1517,34 @@ make_one_lib_file (exp, i)
 	  switch (i) 
 	    {
 	    case TEXT:
-	      si->size = HOW_JTAB_SIZE;
-	      si->data = xmalloc (HOW_JTAB_SIZE);
-	      memcpy (si->data, HOW_JTAB, HOW_JTAB_SIZE);
+	      if (! exp->data)
+		{
+		  si->size = HOW_JTAB_SIZE;
+		  si->data = xmalloc (HOW_JTAB_SIZE);
+		  memcpy (si->data, HOW_JTAB, HOW_JTAB_SIZE);
 	      
-	      /* add the reloc into idata$5 */
-	      rel = xmalloc (sizeof (arelent));
-	      rpp = xmalloc (sizeof (arelent *) * 2);
-	      rpp[0] = rel;
-	      rpp[1] = 0;
-	      rel->address = HOW_JTAB_ROFF;
-	      rel->addend = 0;
+		  /* add the reloqc into idata$5 */
+		  rel = xmalloc (sizeof (arelent));
+		  rpp = xmalloc (sizeof (arelent *) * 2);
+		  rpp[0] = rel;
+		  rpp[1] = 0;
+		  rel->address = HOW_JTAB_ROFF;
+		  rel->addend = 0;
 
-	      if (machine == MPPC)
-		{
-		  rel->howto = bfd_reloc_type_lookup (abfd, 
-						      BFD_RELOC_16_GOTOFF);
-		  rel->sym_ptr_ptr = iname_pp;
+		  if (machine == MPPC)
+		    {
+		      rel->howto = bfd_reloc_type_lookup (abfd, 
+							  BFD_RELOC_16_GOTOFF);
+		      rel->sym_ptr_ptr = iname_pp;
+		    }
+		  else
+		    {
+		      rel->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_32);
+		      rel->sym_ptr_ptr = secdata[IDATA5].sympp;
+		    }
+		  sec->orelocation = rpp;
+		  sec->reloc_count = 1;
 		}
-	      else
-		{
-		  rel->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_32);
-		  rel->sym_ptr_ptr = secdata[IDATA5].sympp;
-		}
-	      sec->orelocation = rpp;
-	      sec->reloc_count = 1;
 	      break;
 	    case IDATA4:
 	    case IDATA5:
@@ -1892,8 +1901,17 @@ gen_lib_file ()
   ar_tail->next = ar_head;
   head = ar_tail;
 
-  bfd_set_archive_head (outarch, head);
-  bfd_close (outarch);
+  if (! bfd_set_archive_head (outarch, head))
+    bfd_fatal ("bfd_set_archive_head");
+  if (! bfd_close (outarch))
+    bfd_fatal (imp_name);
+
+  while (head != NULL)
+    {
+      bfd *n = head->next;
+      bfd_close (head);
+      head = n;
+    }
 
   /* Delete all the temp files */
 
@@ -1977,10 +1995,11 @@ dtab (ptr)
     {
       if (ptr[i])
 	{
-	  printf ("%d %s @ %d %s%s\n",
+	  printf ("%d %s @ %d %s%s%s\n",
 		  i, ptr[i]->name, ptr[i]->ordinal,
 		  ptr[i]->noname ? "NONAME " : "",
-		  ptr[i]->constant ? "CONSTANT" : "");
+		  ptr[i]->constant ? "CONSTANT" : "",
+		  ptr[i]->data ? "DATA" : "");
 	}
       else
 	printf ("empty\n");
@@ -2029,6 +2048,7 @@ process_duplicates (d_export_vec)
 	      b->ordinal = a->ordinal > 0 ? a->ordinal : b->ordinal;
 	      b->constant |= a->constant;
 	      b->noname |= a->noname;
+	      b->data |= a->data;
 	      d_export_vec[i] = 0;
 	    }
 
