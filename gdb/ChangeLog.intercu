@@ -1,5 +1,20 @@
 2004-04-01  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (struct partial_die_info): Replace full_name and
+	full_name_set with scope and scope_set.
+	(partial_die_parent_scope): New function.
+	(partial_die_full_name): Use it.
+	(add_partial_symbol): Don't check full_name_set or set full_name.
+	(add_partial_namespace): Remove unused variable.
+	(guess_partial_structure): New function, broken out from
+	add_partial_structure.  Set the name field of the partial DIE.
+	(add_partial_structure): Simplify.
+	(find_partial_die): Always set *TARGET_CU.
+	(fixup_partial_die): Call guess_structure_scope.  Set the names
+	of anonymous classes and namespaces.
+
+2004-04-01  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (struct dwarf2_cu): Add has_form_ref_addr and
 	has_namespace_info.
 	(dwarf2_read_abbrevs): Set the new flags.  Change return type back

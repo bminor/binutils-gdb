@@ -526,9 +526,14 @@ struct partial_die_info
     unsigned int has_type : 1;
     unsigned int has_specification : 1;
     unsigned int has_pc_info : 1;
-    unsigned int full_name_set : 1;
+    unsigned int scope_set : 1;
     char *name;
-    char *full_name;
+
+    /* The scope to prepend to our children.  This is generally
+       allocated on the partial_die_obstack, so will disappear
+       when this compilation unit leaves the cache.  */
+    char *scope;
+
     struct dwarf_block *locdesc;
     CORE_ADDR lowpc;
     CORE_ADDR highpc;
@@ -1747,64 +1752,98 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
     }
 }
 
-/* Return the fully scoped name associated with PDI, from compilation unit
-   CU.  The result will be allocated with malloc, or NULL if PDI->NAME should
-   be used.  */
+/* Functions used to compute the fully scoped name of a partial DIE.
+
+   Normally, this is simple.  For C++, the parent DIE's fully scoped
+   name is concatenated with "::" and the partial DIE's name.
+   Enumerators are an exception; they use the scope of their parent
+   enumeration type, i.e. the name of the enumeration type is not
+   prepended to the enumerator.
+
+   There are two complexities.  One is DW_AT_specification; in this
+   case "parent" means the parent of the target of the specification,
+   instead of the direct parent of the DIE.  The other is compilers
+   which do not emit DW_TAG_namespace; in this case we try to guess
+   the fully qualified name of structure types from their members'
+   linkage names.  This must be done using the DIE's children rather
+   than the children of any DW_AT_specification target.  We only need
+   to do this for structures at the top level, i.e. if the target of
+   any DW_AT_specification (if any; otherwise the DIE itself) does not
+   have a parent.  */
+
+/* Compute the scope prefix associated with PDI's parent, in
+   compilation unit CU.  The result will be allocated on CU's
+   partial_die_obstack, or a copy of the already allocated PDI->NAME
+   field.  NULL is returned if no prefix is necessary.  */
 static char *
-partial_die_full_name (struct partial_die_info *pdi,
-		       struct dwarf2_cu *cu)
+partial_die_parent_scope (struct partial_die_info *pdi,
+			  struct dwarf2_cu *cu)
 {
-  char *parent_name = NULL, *full_name;
-  struct partial_die_info *real_pdi, *real_parent;
+  char *grandparent_scope;
+  struct partial_die_info *parent, *real_pdi;
   struct dwarf2_cu *spec_cu;
-  int free_parent_name = 0;
 
-  /* We shouldn't even have been called in this case.  */
-  gdb_assert (!pdi->full_name_set);
-
-  /* Note: this code could probably be micro-optimized.  We may be
-     able to avoid redoing the hash table lookup, and we might be able
-     to use real_pdi->full_name if there is a specification.  */
+  /* We need to look at our parent DIE; if we have a DW_AT_specification,
+     then this means the parent of the specification DIE.  */
 
   real_pdi = pdi;
   spec_cu = cu;
   while (real_pdi->has_specification)
     real_pdi = find_partial_die (real_pdi->spec_offset, spec_cu, &spec_cu);
 
-  /* NOTE drow/2004-02-22: The following code is a hack.  It's only used when
-     visiting the DIEs out of order, i.e. due to DW_AT_specification in another
-     CU or later in this CU.  It's correct, but somewhat inefficient.  */
+  parent = real_pdi->die_parent;
+  if (parent == NULL)
+    return NULL;
 
-  if (real_pdi->full_name_set)
-    return xstrdup (real_pdi->full_name);
+  if (parent->scope_set)
+    return parent->scope;
 
-  real_parent = real_pdi->die_parent;
-  if (real_parent == NULL)
+  fixup_partial_die (parent, cu);
+
+  grandparent_scope = partial_die_parent_scope (parent, spec_cu);
+
+  if (parent->tag == DW_TAG_namespace
+      || parent->tag == DW_TAG_structure_type
+      || parent->tag == DW_TAG_class_type
+      || parent->tag == DW_TAG_union_type)
     {
-      real_pdi->full_name_set = 1;
-      return NULL;
+      if (grandparent_scope == NULL)
+	parent->scope = parent->name;
+      else
+	parent->scope = obconcat (&cu->partial_die_obstack, grandparent_scope,
+				  "::", parent->name);
     }
-
-  if (!real_parent->full_name_set)
+  else if (parent->tag == DW_TAG_enumeration_type)
+    /* Enumerators should not get the name of the enumeration as a prefix.  */
+    parent->scope = grandparent_scope;
+  else
     {
-      fixup_partial_die (real_parent, spec_cu);
-      parent_name = partial_die_full_name (real_parent, spec_cu);
-      /* Could cache the full name, too.  */
-      if (parent_name != NULL)
-	free_parent_name = 1;
+      /* FIXME drow/2004-04-01: What should we be doing with
+	 function-local names?  For partial symbols, we should probably be
+	 ignoring them.  */
+      complaint (&symfile_complaints,
+		 "unhandled containing DIE tag %d for DIE at %d",
+		 parent->tag, pdi->offset);
+      parent->scope = grandparent_scope;
     }
+  
+  parent->scope_set = 1;
+  return parent->scope;
+}
 
-  /* End hack zone.  */
+/* Return the fully scoped name associated with PDI, from compilation unit
+   CU.  The result will be allocated with malloc.  */
+static char *
+partial_die_full_name (struct partial_die_info *pdi,
+		       struct dwarf2_cu *cu)
+{
+  char *parent_scope;
 
-  if (parent_name == NULL)
-    parent_name = real_parent->full_name;
-  if (parent_name == NULL)
-    parent_name = real_parent->name;
-
-  full_name = concat (parent_name, "::", real_pdi->name, NULL);
-  if (free_parent_name)
-    free (parent_name);
-  return full_name;
+  parent_scope = partial_die_parent_scope (pdi, cu);
+  if (parent_scope == NULL)
+    return NULL;
+  else
+    return concat (parent_scope, "::", pdi->name, NULL);
 }
 
 static void
@@ -1821,9 +1860,8 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
   actual_name = NULL;
-  if (!pdi->full_name_set
-      && pdi_needs_namespace (pdi->tag)
-      && pdi->full_name == NULL)
+
+  if (pdi_needs_namespace (pdi->tag))
     {
       actual_name = partial_die_full_name (pdi, cu);
       if (actual_name)
@@ -1831,14 +1869,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
     }
 
   if (actual_name == NULL)
-    {
-      if (pdi->full_name != NULL)
-	actual_name = pdi->full_name;
-      else
-	actual_name = pdi->name;
-    }
-
-  pdi->full_name_set = 1;
+    actual_name = pdi->name;
 
   switch (pdi->tag)
     {
@@ -1976,7 +2007,6 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
       /* psym2 should always be set in the built_actual_name case,
 	 because the same set are used in pdi_needs_namespace.  See
 	 FIXME above.  */
-      pdi->full_name = SYMBOL_LINKAGE_NAME (psym2);
       xfree (actual_name);
     }
 }
@@ -2013,7 +2043,6 @@ add_partial_namespace (struct partial_die_info *pdi,
 		       struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
-  char *full_name;
 
   /* Calculate the full name of the namespace that we just entered.  */
 
@@ -2028,27 +2057,18 @@ add_partial_namespace (struct partial_die_info *pdi,
     scan_partial_symbols (pdi->die_child, lowpc, highpc, cu);
 }
 
-/* Read a partial die corresponding to a class or structure.  */
+/* See if we can figure out if the class lives in a namespace.  We do
+   this by looking for a member function; its demangled name will
+   contain namespace info, if there is any.  */
 
-static void
-add_partial_structure (struct partial_die_info *struct_pdi,
-		       struct dwarf2_cu *cu)
+void
+guess_structure_name (struct partial_die_info *struct_pdi,
+		      struct dwarf2_cu *cu)
 {
-  bfd *abfd = cu->objfile->obfd;
-  char *full_name;
-
-  if (struct_pdi->name == NULL)
-    struct_pdi->name = "(anonymous class)";
-
   if (cu->language == language_cplus
       && cu->has_namespace_info == 0
       && struct_pdi->has_children)
     {
-      /* See if we can figure out if the class lives in a namespace
-	 (or is nested within another class.)  We do this by looking
-	 for a member function; its demangled name will contain
-	 namespace info, if there is any.  */
-
       /* NOTE: carlton/2003-10-07: Getting the info this way changes
 	 what template types look like, because the demangler
 	 frequently doesn't give the same name as the debug info.  We
@@ -2056,6 +2076,20 @@ add_partial_structure (struct partial_die_info *struct_pdi,
 	 prefix (but see comment in read_structure_type).  */
 
       struct partial_die_info *child_pdi = struct_pdi->die_child;
+      struct partial_die_info *real_pdi;
+      struct dwarf2_cu *spec_cu;
+
+      /* If this DIE (this DIE's specification, if any) has a parent, then
+	 we should not do this.  We'll prepend the parent's fully qualified
+         name when we create the partial symbol.  */
+
+      real_pdi = struct_pdi;
+      spec_cu = cu;
+      while (real_pdi->has_specification)
+	real_pdi = find_partial_die (real_pdi->spec_offset, spec_cu, &spec_cu);
+
+      if (real_pdi->die_parent != NULL)
+	return;
 
       while (child_pdi != NULL)
 	{
@@ -2065,7 +2099,7 @@ add_partial_structure (struct partial_die_info *struct_pdi,
 		= class_name_from_physname (child_pdi->name);
 	      if (actual_class_name != NULL)
 		{
-		  struct_pdi->full_name
+		  struct_pdi->name
 		    = obsavestring (actual_class_name,
 				    strlen (actual_class_name),
 				    &cu->partial_die_obstack);
@@ -2077,6 +2111,18 @@ add_partial_structure (struct partial_die_info *struct_pdi,
 	  child_pdi = child_pdi->die_sibling;
 	}
     }
+}
+
+/* Read a partial die corresponding to a class or structure.  */
+
+static void
+add_partial_structure (struct partial_die_info *struct_pdi,
+		       struct dwarf2_cu *cu)
+{
+  bfd *abfd = cu->objfile->obfd;
+
+  if (struct_pdi->name == NULL)
+    struct_pdi->name = "(anonymous class)";
 
   add_partial_symbol (struct_pdi, cu);
 }
@@ -5362,7 +5408,10 @@ find_partial_die (unsigned long offset, struct dwarf2_cu *cu,
 
   if (offset >= cu->header.offset
       && offset < cu->header.offset + cu->header.length)
-    return find_partial_die_in_comp_unit (offset, cu);
+    {
+      *target_cu = cu;
+      return find_partial_die_in_comp_unit (offset, cu);
+    }
 
   per_cu = dwarf2_find_containing_comp_unit (offset, cu);
   gdb_assert (per_cu != NULL);
@@ -5383,8 +5432,8 @@ static void
 fixup_partial_die (struct partial_die_info *part_die,
 		   struct dwarf2_cu *cu)
 {
-  /* If we found a reference attribute and the die has no name, try
-     to find a name in the referred to die.  */
+  /* If we found a reference attribute and the DIE has no name, try
+     to find a name in the referred to DIE.  */
 
   if (part_die->name == NULL && part_die->has_specification)
     {
@@ -5404,6 +5453,19 @@ fixup_partial_die (struct partial_die_info *part_die,
 	    part_die->is_external = spec_die->is_external;
 	}
     }
+
+  /* Set default names for some unnamed DIEs.  */
+  if (part_die->name == NULL && (part_die->tag == DW_TAG_structure_type
+				 || part_die->tag == DW_TAG_class_type))
+    part_die->name = "(anonymous class)";
+
+  if (part_die->name == NULL && part_die->tag == DW_TAG_namespace)
+    part_die->name = "(anonymous namespace)";
+
+  if (part_die->tag == DW_TAG_structure_type
+      || part_die->tag == DW_TAG_structure_type
+      || part_die->tag == DW_TAG_union_type)
+    guess_structure_name (part_die, cu);
 }
 
 /* Read the die from the .debug_info section buffer.  Set DIEP to
