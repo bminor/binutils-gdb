@@ -1,5 +1,11 @@
 2001-06-02  H.J. Lu  <hjl@gnu.org>
 
+	* elf32-hppa.c (elf32_hppa_object_p): Check ELFOSABI_LINUX
+	and ELFOSABI_HPUX.
+	* elf64-hppa.c (elf64_hppa_object_p): Likewise.
+
+2001-06-02  H.J. Lu  <hjl@gnu.org>
+
 	* aout-cris.c (MACHTYPE_OK): New. Defined.
 
 2001-06-02  Hans-Peter Nilsson  <hp@axis.com>
