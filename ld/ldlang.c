@@ -1,5 +1,5 @@
 /* Linker command language support.
-   Copyright (C) 1991, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94, 1995 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -1779,28 +1779,35 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 
        /* Replace into region ? */
        if (os->region != (lang_memory_region_type *) NULL)
-       {
-	 os->region->current = dot;
-	 /* Make sure this isn't silly */
-	 if (( os->region->current
-              > os->region->origin + os->region->length)
-	     || ( os->region->origin > os->region->current ))
-	   {
-	     einfo ("%X%P: region %s is full (%B section %s)\n",
-		    os->region->name,
-		    os->bfd_section->owner,
-		    os->bfd_section->name);
-	     /* Reset the region pointer */
-	     os->region->current = 0;
-
-	   }
-
-       }
-
-
+	 {
+	   os->region->current = dot;
+	   /* Make sure this isn't silly.  */
+	   if ((os->region->current < os->region->origin)
+	       || (os->region->current
+		   > os->region->origin + os->region->length))
+	     {
+	       if (os->addr_tree != (etree_type *) NULL)
+		 {
+		   einfo ("%X%P: address 0x%v of %B section %s is not within region %s\n",
+			  os->region->current,
+			  os->bfd_section->owner,
+			  os->bfd_section->name,
+			  os->region->name);
+		 }
+	       else
+		 {
+		   einfo ("%X%P: region %s is full (%B section %s)\n",
+			  os->region->name,
+			  os->bfd_section->owner,
+			  os->bfd_section->name);
+		 }
+	       /* Reset the region pointer.  */
+	       os->region->current = os->region->origin;
+	     }
+	 }
      }
+     break;
 
-      break;
      case lang_constructors_statement_enum:
       dot = lang_size_sections (constructor_list.head,
 				output_section_statement,
@@ -2294,9 +2301,6 @@ lang_place_orphans ()
     {
       asection *s;
 
-      if (file->just_syms_flag)
-	continue;
-
       for (s = file->the_bfd->sections;
 	   s != (asection *) NULL;
 	   s = s->next)
@@ -2306,7 +2310,15 @@ lang_place_orphans ()
 	      /* This section of the file is not attatched, root
 	         around for a sensible place for it to go */
 
-	      if (file->common_section == s)
+	      if (file->just_syms_flag)
+		{
+		  /* We are only retrieving symbol values from this
+                     file.  We want the symbols to act as though the
+                     values in the file are absolute.  */
+		  s->output_section = bfd_abs_section_ptr;
+		  s->output_offset = s->vma;
+		}
+	      else if (file->common_section == s)
 		{
 		  /* This is a lonely common section which must
 		     have come from an archive. We attatch to the

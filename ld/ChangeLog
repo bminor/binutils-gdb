@@ -1,3 +1,9 @@
+Tue Jan 31 16:20:52 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* ldlang.c (lang_size_sections): Clarify error message when user
+	specified start addr conflicts with region.  Fix resetting of
+	region pointer.
+
 Tue Jan 31 12:37:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldexp.c (fold_name): In case NAME, permit an absolute symbol
