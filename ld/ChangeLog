@@ -440,7 +440,7 @@
 	* ldmain.c: Initialise the new fields in bfd_link_info to
 	NOT_YET_SET.
 	* lexsup.c (enum option_values): New enum.  Use this to
-	replace the handed coded values for the long switch options.
+	replace the hand coded values for the long switch options.
 	(ld_options): Add 'unresolved-symbols',
 	'warn-unresolved-symbols' and 'error-unresolved-symbols'.
 	(parse_args): Handle the new switches.  Set the values of
