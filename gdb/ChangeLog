@@ -1,3 +1,16 @@
+2003-05-26  Elena Zannoni  <ezannoni@redhat.com>
+
+	* hpread.c (hpread_has_name): Make static.
+	(hpread_psymtab_to_symtab): Ditto.
+	(file_exists): Ditto.
+	(hpread_call_pxdb): Ditto.
+	(hpread_pxdb_needed): Ditto.
+	(hpread_quick_traverse): Ditto.
+	(hpread_get_header): Ditto.
+	(hpread_get_lntt): Ditto.
+	(hpread_get_slt): Ditto.
+	(class_of): Ditto.
+
 2003-05-25  Andreas Schwab  <schwab@suse.de>
 
 	* m68k-tdep.c (m68k_gdbarch_init): Set parm_boundary instead of
