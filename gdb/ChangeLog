@@ -1,3 +1,7 @@
+2003-05-30  Richard Henderson  <rth@redhat.com>
+
+	* alpha-tdep.c (alpha_heuristic_frame_unwind_cache): Fix loop increment.
+
 2003-05-29  Jim Blandy  <jimb@redhat.com>
 
 	Use gdbarch methods for solib stuff on PowerPC Linux.

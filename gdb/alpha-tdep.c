@@ -856,6 +856,8 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
 		  return_reg = (word >> 16) & 0x1f;
 		  break;
 		}
+
+	      cur_pc += 4;
 	    }
 	}
     }
