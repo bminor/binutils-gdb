@@ -1,3 +1,10 @@
+Tue Oct 25 14:44:33 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* config/tc-mips.c (mips_cpu): Initialize to -1.
+	(md_begin): Don't mips_cpu if it was already set.
+	(md_parse_option): For -mipsN, don't set mips_cpu if it was
+	already set.  For -mcpu=, just set mips_cpu, not mips_isa.
+
 Fri Oct 21 20:42:29 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* config/tc-mips.c (md_pseudo_table): If OBJ_ELF, handle .section.

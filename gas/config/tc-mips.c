@@ -116,7 +116,7 @@ static int mips_isa = -1;
 static int file_mips_isa;
 
 /* The CPU type as a number: 2000, 3000, 4000, 4400, etc.  */
-static int mips_cpu;
+static int mips_cpu = -1;
 
 /* MIPS PIC level.  */
 
@@ -530,36 +530,42 @@ md_begin ()
       if (strcmp (cpu, "mips") == 0)
 	{
 	  mips_isa = 1;
-	  mips_cpu = 3000;
+	  if (mips_cpu == -1)
+	    mips_cpu = 3000;
 	}
       else if (strcmp (cpu, "r6000") == 0
 	       || strcmp (cpu, "mips2") == 0)
 	{
 	  mips_isa = 2;
-	  mips_cpu = 6000;
+	  if (mips_cpu == -1)
+	    mips_cpu = 6000;
 	}
       else if (strcmp (cpu, "mips64") == 0
 	       || strcmp (cpu, "r4000") == 0
 	       || strcmp (cpu, "mips3") == 0)
 	{
 	  mips_isa = 3;
-	  mips_cpu = 4000;
+	  if (mips_cpu == -1)
+	    mips_cpu = 4000;
 	}
       else if (strcmp (cpu, "r4400") == 0)
 	{
 	  mips_isa = 3;
-	  mips_cpu = 4400;
+	  if (mips_cpu == -1)
+	    mips_cpu = 4400;
 	}
       else if (strcmp (cpu, "mips64orion") == 0
 	       || strcmp (cpu, "r4600") == 0)
 	{
 	  mips_isa = 3;
-	  mips_cpu = 4600;
+	  if (mips_cpu == -1)
+	    mips_cpu = 4600;
 	}
       else
 	{
 	  mips_isa = 1;
-	  mips_cpu = 3000;
+	  if (mips_cpu == -1)
+	    mips_cpu = 3000;
 	}
 
       if (a != NULL)
@@ -5055,17 +5061,20 @@ md_parse_option (c, arg)
 
     case OPTION_MIPS1:
       mips_isa = 1;
-      mips_cpu = 3000;
+      if (mips_cpu == -1)
+	mips_cpu = 3000;
       break;
 
     case OPTION_MIPS2:
       mips_isa = 2;
-      mips_cpu = 6000;
+      if (mips_cpu == -1)
+	mips_cpu = 6000;
       break;
 
     case OPTION_MIPS3:
       mips_isa = 3;
-      mips_cpu = 4000;
+      if (mips_cpu == -1)
+	mips_cpu = 4000;
       break;
 
     case OPTION_MCPU:
@@ -5076,75 +5085,54 @@ md_parse_option (c, arg)
 	p = arg;
 	if (strcmp (p, "default") == 0
 	    || strcmp (p, "DEFAULT") == 0)
-	  mips_isa = -1;
+	  mips_cpu = -1;
 	else
 	  {
 	    if (*p == 'r' || *p == 'R')
 	      p++;
 
-	    mips_isa = -1;
+	    mips_cpu = -1;
 	    switch (*p)
 	      {
 	      case '2':
 		if (strcmp (p, "2000") == 0
 		    || strcmp (p, "2k") == 0
 		    || strcmp (p, "2K") == 0)
-		  {
-		    mips_isa = 1;
-		    mips_cpu = 2000;
-		  }
+		  mips_cpu = 2000;
 		break;
 
 	      case '3':
 		if (strcmp (p, "3000") == 0
 		    || strcmp (p, "3k") == 0
 		    || strcmp (p, "3K") == 0)
-		  {
-		    mips_isa = 1;
-		    mips_cpu = 3000;
-		  }
+		  mips_cpu = 3000;
 		break;
 
 	      case '4':
 		if (strcmp (p, "4000") == 0
 		    || strcmp (p, "4k") == 0
 		    || strcmp (p, "4K") == 0)
-		  {
-		    mips_isa = 3;
-		    mips_cpu = 4000;
-		  }
+		  mips_cpu = 4000;
 		else if (strcmp (p, "4400") == 0)
-		  {
-		    mips_isa = 3;
-		    mips_cpu = 4400;
-		  }
+		  mips_cpu = 4400;
 		else if (strcmp (p, "4600") == 0)
-		  {
-		    mips_isa = 3;
-		    mips_cpu = 4600;
-		  }
+		  mips_cpu = 4600;
 		break;
 
 	      case '6':
 		if (strcmp (p, "6000") == 0
 		    || strcmp (p, "6k") == 0
 		    || strcmp (p, "6K") == 0)
-		  {
-		    mips_isa = 2;
-		    mips_cpu = 6000;
-		  }
+		  mips_cpu = 6000;
 		break;
 
 	      case 'o':
 		if (strcmp (p, "orion") == 0)
-		  {
-		    mips_isa = 3;
-		    mips_cpu = 4600;
-		  }
+		  mips_cpu = 4600;
 		break;
 	      }
 
-	    if (mips_isa == -1)
+	    if (mips_cpu == -1)
 	      {
 		as_bad ("invalid architecture -mcpu=%s", arg);
 		return 0;
