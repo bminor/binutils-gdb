@@ -525,6 +525,7 @@ ALL_MODULES = \
 	all-libide \
 	all-libidetcl \
 	$(end-sanitize-ide) \
+	all-libtool \
 	all-m4 \
 	all-make \
 	all-mmalloc \
@@ -606,6 +607,7 @@ CROSS_CHECK_MODULES = \
 	check-libide \
 	check-libidetcl \
 	$(end-sanitize-ide) \
+	check-libtool \
 	check-m4 \
 	check-make \
 	check-mmcheckoc \
@@ -691,6 +693,7 @@ INSTALL_MODULES = \
 	install-libide \
 	install-libidetcl \
 	$(end-sanitize-ide) \
+	install-libtool \
 	install-m4 \
 	install-make \
 	install-mmalloc \
@@ -855,6 +858,7 @@ CLEAN_MODULES = \
 	clean-libide \
 	clean-libidetcl \
 	$(end-sanitize-ide) \
+	clean-libtool \
 	clean-m4 \
 	clean-make \
 	clean-mmalloc \
@@ -1541,6 +1545,7 @@ configure-target-librx: $(ALL_GCC) configure-target-newlib
 all-target-librx: configure-target-librx
 configure-target-libstdc++: $(ALL_GCC)
 all-target-libstdc++: configure-target-libstdc++ all-gas all-ld all-gcc all-target-libiberty all-target-newlib all-target-libio
+all-libtool:
 all-m4: all-libiberty
 all-make: all-libiberty
 all-mmalloc:
