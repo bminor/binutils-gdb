@@ -98,17 +98,20 @@ disassemble (memaddr, info, insn)
 	      bfd_byte	buffer[ 4 ];
 	      
 	      operand = &v850_operands[*opindex_ptr];
-
+	      
 	      if (operand->extract)
 		value = (operand->extract) (insn, 0);
-	      else if (operand->bits == -1)
-		value = (insn & operand->shift);
 	      else
-		value = (insn >> operand->shift) & ((1 << operand->bits) - 1);
+		{
+		  if (operand->bits == -1)
+		    value = (insn & operand->shift);
+		  else
+		    value = (insn >> operand->shift) & ((1 << operand->bits) - 1);
 
-	      if (operand->flags & V850_OPERAND_SIGNED)
-		value = ((long)(value << (32 - operand->bits))
-			  >> (32 - operand->bits));
+		  if (operand->flags & V850_OPERAND_SIGNED)
+		    value = ((long)(value << (32 - operand->bits))
+			     >> (32 - operand->bits));
+		}
 
 	      /* The first operand is always output without any
 		 special handling.
@@ -143,7 +146,6 @@ disassemble (memaddr, info, insn)
 	      flag = operand->flags;
 	      flag &= ~ V850_OPERAND_SIGNED;
 	      flag &= ~ V850_OPERAND_RELAX;
-	      flag &= ~ V850_OPERAND_ADJUST_SHORT_MEMORY;
 	      flag &= - flag;
 	      
 	      switch (flag)

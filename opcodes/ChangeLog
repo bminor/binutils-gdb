@@ -1,4 +1,15 @@
 start-sanitize-v850
+Tue Sep  2 15:41:55 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* v850-dis.c (disassemble): Only signed extend values that are not
+	returned by extract functions.
+	Remove use of V850_OPERAND_ADJUST_SHORT_MEMORY flag.
+
+Tue Sep  2 15:39:40 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* v850-opc.c: Update comments.  Remove use of
+	V850_OPERAND_ADJUST_SHORT_MEMORY.  Fix several operand patterns.
+
 Tue Aug 26 09:42:28 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850-opc.c (MOVHI): Immediate parameter is unsigned.

@@ -108,7 +108,7 @@ insert_d16_15 (insn, value, errmsg)
 static unsigned long
 extract_d16_15 (insn, invalid)
      unsigned long insn;
-     int *invalid;
+     int *         invalid;
 {
   signed long ret = (insn & 0xfffe0000);
 
@@ -335,6 +335,9 @@ extract_i5div (insn, invalid)
 /* end-sanitize-v850eq */
 
 
+/* Warning: code in gas/config/tc-v850.c examines the contents of this array.
+   If you change any of the values here, be sure to look for side effects in
+   that code. */
 const struct v850_operand v850_operands[] =
 {
 #define UNUSED	0
@@ -344,7 +347,7 @@ const struct v850_operand v850_operands[] =
 #define R1	(UNUSED+1)
   { 5, 0, 0, 0, V850_OPERAND_REG }, 
 
-/* The R1 field in a format 1, 6, 7, or 9 insn. */
+/* As above, but register 0 is not allowed.  */
 #define R1_NOTR0 (R1 + 1)
   { 5, 0, 0, 0, V850_OPERAND_REG | V850_NOT_R0 }, 
 
@@ -352,89 +355,90 @@ const struct v850_operand v850_operands[] =
 #define R2	(R1_NOTR0 + 1)
   { 5, 11, 0, 0, V850_OPERAND_REG },
 
-/* The R2 field in a format 1, 2, 4, 5, 6, 7, 9 insn. */
+/* As above, but register 0 is not allowed.  */
 #define R2_NOTR0 (R2 + 1)
   { 5, 11, 0, 0, V850_OPERAND_REG | V850_NOT_R0 },
 
-/* The IMM5 field in a format 2 insn. */
+/* The imm5 field in a format 2 insn. */
 #define I5	(R2_NOTR0 + 1)
   { 5, 0, 0, 0, V850_OPERAND_SIGNED }, 
 
-#define I5U	(I5+1)
+/* The unsigned imm5 field in a format 2 insn. */
+#define I5U	(I5 + 1)
   { 5, 0, 0, 0, 0 },
 
-/* The IMM16 field in a format 6 insn. */
-#define I16	(I5U+1)
+/* The imm16 field in a format 6 insn. */
+#define I16	(I5U + 1)
   { 16, 16, 0, 0, V850_OPERAND_SIGNED }, 
 
-/* The signed DISP7 field in a format 4 insn. */
-#define D7	(I16+1)
+/* The signed disp7 field in a format 4 insn. */
+#define D7	(I16 + 1)
   { 7, 0, 0, 0, 0},
 
-/* The DISP16 field in a format 6 insn. */
-#define D16_15	(D7+1)
-  { 16, 16, insert_d16_15, extract_d16_15, V850_OPERAND_SIGNED }, 
+/* The disp16 field in a format 6 insn. */
+#define D16_15	(D7 + 1)
+  { 15, 17, insert_d16_15, extract_d16_15, V850_OPERAND_SIGNED }, 
 
-#define B3	(D16_15+1)
 /* The 3 bit immediate field in format 8 insn.  */
+#define B3	(D16_15 + 1)
   { 3, 11, 0, 0, 0 },
 
-#define CCCC	(B3+1)
 /* The 4 bit condition code in a setf instruction */
+#define CCCC	(B3 + 1)
   { 4, 0, 0, 0, V850_OPERAND_CC },
 
-/* The unsigned DISP8_7 field in a format 4 insn. */
-#define D8_7	(CCCC+1)
-  { 8, 0, insert_d8_7, extract_d8_7, V850_OPERAND_ADJUST_SHORT_MEMORY },
+/* The unsigned DISP8 field in a format 4 insn. */
+#define D8_7	(CCCC + 1)
+  { 7, 0, insert_d8_7, extract_d8_7, 0 },
 
-/* The unsigned DISP8_6 field in a format 4 insn. */
-#define D8_6	(D8_7+1)
-  { 8, 0, insert_d8_6, extract_d8_6, V850_OPERAND_ADJUST_SHORT_MEMORY },
+/* The unsigned DISP8 field in a format 4 insn. */
+#define D8_6	(D8_7 + 1)
+  { 6, 1, insert_d8_6, extract_d8_6, 0 },
 
 /* System register operands.  */
-#define SR1	(D8_6+1)
+#define SR1	(D8_6 + 1)
   { 5, 0, 0, 0, V850_OPERAND_SRG },
 
 /* EP Register.  */
-#define EP	(SR1+1)
+#define EP	(SR1 + 1)
   { 0, 0, 0, 0, V850_OPERAND_EP },
 
-/* The IMM16 field (unsigned0 in a format 6 insn. */
-#define I16U	(EP+1)
+/* The imm16 field (unsigned) in a format 6 insn. */
+#define I16U	(EP + 1)
   { 16, 16, 0, 0, 0}, 
 
 /* The R2 field as a system register.  */
-#define SR2	(I16U+1)
+#define SR2	(I16U + 1)
   { 5, 11, 0, 0, V850_OPERAND_SRG },
 
-/* The DISP16 field in a format 8 insn. */
-#define D16	(SR2+1)
+/* The disp16 field in a format 8 insn. */
+#define D16	(SR2 + 1)
   { 16, 16, 0, 0, V850_OPERAND_SIGNED }, 
 
 /* The DISP22 field in a format 4 insn, relaxable. */
-#define D9_RELAX	(D16+1)
+#define D9_RELAX	(D16 + 1)
   { 9, 0, insert_d9, extract_d9, V850_OPERAND_RELAX | V850_OPERAND_SIGNED | V850_OPERAND_DISP },
 
 /* The DISP22 field in a format 4 insn.
 
    This _must_ follow D9_RELAX; the assembler assumes that the longer
    version immediately follows the shorter version for relaxing.  */
-#define D22	(D9_RELAX+1)
+#define D22	(D9_RELAX + 1)
   { 22, 0, insert_d22, extract_d22, V850_OPERAND_SIGNED | V850_OPERAND_DISP },
 
 /* start-sanitize-v850e */
   
-/* The signed DISP4 field in a format 4 insn. */
-#define D4	(D22+1)
+/* The signed disp4 field in a format 4 insn. */
+#define D4	(D22 + 1)
   { 4, 0, 0, 0, 0},
 
-/* The unsigned DISP5_4 field in a format 4 insn. */
+/* The unsigned disp5 field in a format 4 insn. */
 #define D5_4	(D4 + 1)
-  { 5, 0, insert_d5_4, extract_d5_4, V850_OPERAND_ADJUST_SHORT_MEMORY },
+  { 4, 0, insert_d5_4, extract_d5_4, 0 },
 
-/* The DISP16 field in an unsigned format 7 byte load insn. */
+/* The disp16 field in an format 7 unsigned byte load insn. */
 #define D16_16	(D5_4 + 1)
-  { 16, 16, insert_d16_16, extract_d16_16, 0 }, 
+  { -1, 0xfffe0020, insert_d16_16, extract_d16_16, 0 }, 
 
 /* Third register in conditional moves. */
 #define R3	(D16_16 + 1)
@@ -444,11 +448,11 @@ const struct v850_operand v850_operands[] =
 #define MOVCC	(R3 + 1)
   { 4, 17, 0, 0, V850_OPERAND_CC },
 
-/* The IMM9 field in a multiply word. */
+/* The imm9 field in a multiply word. */
 #define I9	(MOVCC + 1)
   { 9, 0, insert_i9, extract_i9, V850_OPERAND_SIGNED }, 
 
-/* The IMM9 field in a multiply word. */
+/* The unsigned imm9 field in a multiply word. */
 #define U9	(I9 + 1)
   { 9, 0, insert_u9, extract_u9, 0 }, 
 
@@ -468,7 +472,7 @@ const struct v850_operand v850_operands[] =
 #define IMM32	(IMM16 + 1)
   { 0, 0, 0, 0, V850E_IMMEDIATE32 }, 
 
-/* The IMM5 field in a push/pop instruction. */
+/* The imm5 field in a push/pop instruction. */
 #define IMM5	(IMM32 + 1)
   { 5, 1, 0, 0, 0 }, 
 
