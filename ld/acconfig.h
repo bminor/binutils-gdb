@@ -7,6 +7,9 @@
 
 /* Whether sbrk must be declared even if <unistd.h> is included.  */
 #undef NEED_DECLARATION_SBRK
+
+/* Whether getenv must be declared even if <stdlib.h> is included.  */
+#undef NEED_DECLARATION_GETENV
 @TOP@
 
 /* Do we need to use the b modifier when opening binary files?  */
