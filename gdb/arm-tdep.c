@@ -812,98 +812,104 @@ arm_scan_prologue (struct frame_info *fi)
      traceback.
 
      In the APCS, the prologue should start with  "mov ip, sp" so
-     if we don't see this as the first insn, we will stop.  */
+     if we don't see this as the first insn, we will stop.  [Note:
+     This doesn't seem to be true any longer, so it's now an optional
+     part of the prologue.  - Kevin Buettner, 2001-11-20]  */
 
   sp_offset = fp_offset = 0;
 
   if (read_memory_unsigned_integer (prologue_start, 4)
       == 0xe1a0c00d)		/* mov ip, sp */
+    current_pc = prologue_start + 4;
+  else
+    current_pc = prologue_start;
+
+  for (; current_pc < prologue_end; current_pc += 4)
     {
-      for (current_pc = prologue_start + 4; current_pc < prologue_end;
-	   current_pc += 4)
+      unsigned int insn = read_memory_unsigned_integer (current_pc, 4);
+
+      if ((insn & 0xffff0000) == 0xe92d0000)
+	/* stmfd sp!, {..., fp, ip, lr, pc}
+	   or
+	   stmfd sp!, {a1, a2, a3, a4}  */
 	{
-	  unsigned int insn = read_memory_unsigned_integer (current_pc, 4);
+	  int mask = insn & 0xffff;
 
-	  if ((insn & 0xffff0000) == 0xe92d0000)
-	    /* stmfd sp!, {..., fp, ip, lr, pc}
-	       or
-	       stmfd sp!, {a1, a2, a3, a4}  */
-	    {
-	      int mask = insn & 0xffff;
+	  /* Calculate offsets of saved registers. */
+	  for (regno = PC_REGNUM; regno >= 0; regno--)
+	    if (mask & (1 << regno))
+	      {
+		sp_offset -= 4;
+		fi->fsr.regs[regno] = sp_offset;
+	      }
+	}
+      else if ((insn & 0xfffff000) == 0xe24cb000)	/* sub fp, ip #n */
+	{
+	  unsigned imm = insn & 0xff;	/* immediate value */
+	  unsigned rot = (insn & 0xf00) >> 7;	/* rotate amount */
+	  imm = (imm >> rot) | (imm << (32 - rot));
+	  fp_offset = -imm;
+	  fi->framereg = FP_REGNUM;
+	}
+      else if ((insn & 0xfffff000) == 0xe24dd000)	/* sub sp, sp #n */
+	{
+	  unsigned imm = insn & 0xff;	/* immediate value */
+	  unsigned rot = (insn & 0xf00) >> 7;	/* rotate amount */
+	  imm = (imm >> rot) | (imm << (32 - rot));
+	  sp_offset -= imm;
+	}
+      else if ((insn & 0xffff7fff) == 0xed6d0103)	/* stfe f?, [sp, -#c]! */
+	{
+	  sp_offset -= 12;
+	  regno = F0_REGNUM + ((insn >> 12) & 0x07);
+	  fi->fsr.regs[regno] = sp_offset;
+	}
+      else if ((insn & 0xffbf0fff) == 0xec2d0200)	/* sfmfd f0, 4, [sp!] */
+	{
+	  int n_saved_fp_regs;
+	  unsigned int fp_start_reg, fp_bound_reg;
 
-	      /* Calculate offsets of saved registers. */
-	      for (regno = PC_REGNUM; regno >= 0; regno--)
-		if (mask & (1 << regno))
-		  {
-		    sp_offset -= 4;
-		    fi->fsr.regs[regno] = sp_offset;
-		  }
-	    }
-	  else if ((insn & 0xfffff000) == 0xe24cb000)	/* sub fp, ip #n */
+	  if ((insn & 0x800) == 0x800)	/* N0 is set */
 	    {
-	      unsigned imm = insn & 0xff;	/* immediate value */
-	      unsigned rot = (insn & 0xf00) >> 7;	/* rotate amount */
-	      imm = (imm >> rot) | (imm << (32 - rot));
-	      fp_offset = -imm;
-	      fi->framereg = FP_REGNUM;
+	      if ((insn & 0x40000) == 0x40000)	/* N1 is set */
+		n_saved_fp_regs = 3;
+	      else
+		n_saved_fp_regs = 1;
 	    }
-	  else if ((insn & 0xfffff000) == 0xe24dd000)	/* sub sp, sp #n */
+	  else
 	    {
-	      unsigned imm = insn & 0xff;	/* immediate value */
-	      unsigned rot = (insn & 0xf00) >> 7;	/* rotate amount */
-	      imm = (imm >> rot) | (imm << (32 - rot));
-	      sp_offset -= imm;
+	      if ((insn & 0x40000) == 0x40000)	/* N1 is set */
+		n_saved_fp_regs = 2;
+	      else
+		n_saved_fp_regs = 4;
 	    }
-	  else if ((insn & 0xffff7fff) == 0xed6d0103)	/* stfe f?, [sp, -#c]! */
+
+	  fp_start_reg = F0_REGNUM + ((insn >> 12) & 0x7);
+	  fp_bound_reg = fp_start_reg + n_saved_fp_regs;
+	  for (; fp_start_reg < fp_bound_reg; fp_start_reg++)
 	    {
 	      sp_offset -= 12;
-	      regno = F0_REGNUM + ((insn >> 12) & 0x07);
-	      fi->fsr.regs[regno] = sp_offset;
+	      fi->fsr.regs[fp_start_reg++] = sp_offset;
 	    }
-	  else if ((insn & 0xffbf0fff) == 0xec2d0200)	/* sfmfd f0, 4, [sp!] */
-	    {
-	      int n_saved_fp_regs;
-	      unsigned int fp_start_reg, fp_bound_reg;
-
-	      if ((insn & 0x800) == 0x800)	/* N0 is set */
-		{
-		  if ((insn & 0x40000) == 0x40000)	/* N1 is set */
-		    n_saved_fp_regs = 3;
-		  else
-		    n_saved_fp_regs = 1;
-		}
-	      else
-		{
-		  if ((insn & 0x40000) == 0x40000)	/* N1 is set */
-		    n_saved_fp_regs = 2;
-		  else
-		    n_saved_fp_regs = 4;
-		}
-
-	      fp_start_reg = F0_REGNUM + ((insn >> 12) & 0x7);
-	      fp_bound_reg = fp_start_reg + n_saved_fp_regs;
-	      for (; fp_start_reg < fp_bound_reg; fp_start_reg++)
-		{
-		  sp_offset -= 12;
-		  fi->fsr.regs[fp_start_reg++] = sp_offset;
-		}
-	    }
-	  else if ((insn & 0xf0000000) != 0xe0000000)
-	    break;	/* Condition not true, exit early */
-	  else if ((insn & 0xfe200000) == 0xe8200000) /* ldm? */
-	    break;	/* Don't scan past a block load */
-	  else
-	    /* The optimizer might shove anything into the prologue,
-	       so we just skip what we don't recognize. */
-	    continue;
 	}
+      else if ((insn & 0xf0000000) != 0xe0000000)
+	break;	/* Condition not true, exit early */
+      else if ((insn & 0xfe200000) == 0xe8200000) /* ldm? */
+	break;	/* Don't scan past a block load */
+      else
+	/* The optimizer might shove anything into the prologue,
+	   so we just skip what we don't recognize. */
+	continue;
     }
 
   /* The frame size is just the negative of the offset (from the original SP)
      of the last thing thing we pushed on the stack.  The frame offset is
      [new FP] - [new SP].  */
   fi->framesize = -sp_offset;
-  fi->frameoffset = fp_offset - sp_offset;
+  if (fi->framereg == FP_REGNUM)
+    fi->frameoffset = fp_offset - sp_offset;
+  else
+    fi->frameoffset = 0;
 
   save_prologue_cache (fi);
 }

@@ -8,6 +8,10 @@
 	is no longer needed now that the frame info is being properly
 	initialized.
 
+	* arm-tdep.c (arm_scan_prologue): Don't require "mov ip, sp"
+	to be the first instruction in the prologue.  Also, revise
+	the way the frame offset is computed for frameless functions.
+
 2001-12-20  Michael Snyder  <msnyder@redhat.com>
 
 	* maint.c (maintenance_info_sections): Pass string argument to
