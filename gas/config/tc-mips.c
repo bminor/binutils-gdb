@@ -3818,7 +3818,7 @@ load_address (counter, reg, ep, used_at)
 	 If there is a constant, it must be added in after.  */
       ex.X_add_number = ep->X_add_number;
       ep->X_add_number = 0;
-      if (reg_needs_delay (GP))
+      if (reg_needs_delay (mips_gp_register))
 	off = 4;
       else
 	off = 0;
@@ -3826,9 +3826,11 @@ load_address (counter, reg, ep, used_at)
       macro_build ((char *) NULL, counter, ep, "lui", "t,u", reg,
 		   (int) BFD_RELOC_MIPS_GOT_HI16);
       macro_build ((char *) NULL, counter, (expressionS *) NULL,
-		   dbl ? "daddu" : "addu", "d,v,t", reg, reg, GP);
-      macro_build ((char *) NULL, counter, ep, dbl ? "ld" : "lw",
-		   "t,o(b)", reg, (int) BFD_RELOC_MIPS_GOT_LO16, reg);
+		   HAVE_32BIT_ADDRESSES ? "addu" : "daddu", "d,v,t", reg,
+		   reg, mips_gp_register);
+      macro_build ((char *) NULL, counter, ep,
+		   HAVE_32BIT_ADDRESSES ? "lw" : "ld", "t,o(b)", reg,
+		   (int) BFD_RELOC_MIPS_GOT_LO16, reg);
       p = frag_var (rs_machine_dependent, 12 + off, 0,
 		    RELAX_ENCODE (12, 12 + off, off, 8 + off, 0,
 				  mips_opts.warn_about_macros),
@@ -3842,19 +3844,21 @@ load_address (counter, reg, ep, used_at)
 	  macro_build (p, counter, (expressionS *) NULL, "nop", "");
 	  p += 4;
 	}
-      macro_build (p, counter, ep, dbl ? "ld" : "lw",
-		   "t,o(b)", reg, (int) BFD_RELOC_MIPS_GOT16, GP);
+      macro_build (p, counter, ep, HAVE_32BIT_ADDRESSES ? "lw" : "ld",
+		   "t,o(b)", reg, (int) BFD_RELOC_MIPS_GOT16,
+		   mips_gp_register);
       p += 4;
       macro_build (p, counter, (expressionS *) NULL, "nop", "");
       p += 4;
-      macro_build (p, counter, ep, dbl ? "daddiu" : "addiu",
+      macro_build (p, counter, ep, HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
 		   "t,r,j", reg, reg, (int) BFD_RELOC_LO16);
       if (ex.X_add_number != 0)
 	{
 	  if (ex.X_add_number < -0x8000 || ex.X_add_number >= 0x8000)
 	    as_bad (_("PIC code offset overflow (max 16 signed bits)"));
 	  ex.X_op = O_constant;
-	  macro_build ((char *) NULL, counter, &ex, dbl ? "daddiu" : "addiu",
+	  macro_build ((char *) NULL, counter, &ex,
+		       HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
 		       "t,r,j", reg, reg, (int) BFD_RELOC_LO16);
 	}
     }
@@ -4940,7 +4944,7 @@ macro (ip)
 	  expr1.X_add_number = offset_expr.X_add_number;
 	  offset_expr.X_add_number = 0;
 	  frag_grow (52);
-	  if (reg_needs_delay (GP))
+	  if (reg_needs_delay (mips_gp_register))
 	    gpdel = 4;
 	  else
 	    gpdel = 0;
@@ -5232,7 +5236,7 @@ macro (ip)
 	      macro_build ((char *) NULL, &icnt, &offset_expr,
 			   HAVE_32BIT_ADDRESSES ? "lw" : "ld",
 			   "t,o(b)", PIC_CALL_REG,
-			   (int) BFD_RELOC_MIPS_CALL16, GP);
+			   (int) BFD_RELOC_MIPS_CALL16, mips_gp_register);
 	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 			   "nop", "");
 	      p = frag_var (rs_machine_dependent, 4, 0,
@@ -5243,7 +5247,7 @@ macro (ip)
 	    {
 	      int gpdel;
 
-	      if (reg_needs_delay (GP))
+	      if (reg_needs_delay (mips_gp_register))
 		gpdel = 4;
 	      else
 		gpdel = 0;
@@ -5251,7 +5255,8 @@ macro (ip)
 			   PIC_CALL_REG, (int) BFD_RELOC_MIPS_CALL_HI16);
 	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 			   HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
-			   "d,v,t", PIC_CALL_REG, PIC_CALL_REG, GP);
+			   "d,v,t", PIC_CALL_REG, PIC_CALL_REG,
+			   mips_gp_register);
 	      macro_build ((char *) NULL, &icnt, &offset_expr,
 			   HAVE_32BIT_ADDRESSES ? "lw" : "ld",
 			   "t,o(b)", PIC_CALL_REG,
@@ -5270,7 +5275,7 @@ macro (ip)
 	      macro_build (p, &icnt, &offset_expr,
 			   HAVE_32BIT_ADDRESSES ? "lw" : "ld",
 			   "t,o(b)", PIC_CALL_REG,
-			   (int) BFD_RELOC_MIPS_GOT16, GP);
+			   (int) BFD_RELOC_MIPS_GOT16, mips_gp_register);
 	      p += 4;
 	      macro_build (p, &icnt, (expressionS *) NULL, "nop", "");
 	      p += 4;
@@ -5784,7 +5789,7 @@ macro (ip)
 	  if (expr1.X_add_number < -0x8000
 	      || expr1.X_add_number >= 0x8000)
 	    as_bad (_("PIC code offset overflow (max 16 signed bits)"));
-	  if (reg_needs_delay (GP))
+	  if (reg_needs_delay (mips_gp_register))
 	    gpdel = 4;
 	  else
 	    gpdel = 0;
