@@ -20,8 +20,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef SOLIB_SVR4
-#define SOLIB_SVR4
+#ifndef SOLIB_SVR4_H
+#define SOLIB_SVR4_H
 
 struct objfile;
 
@@ -92,4 +92,4 @@ extern struct link_map_offsets *(*legacy_svr4_fetch_link_map_offsets_hook)(void)
 extern struct link_map_offsets *svr4_ilp32_fetch_link_map_offsets (void);
 extern struct link_map_offsets *svr4_lp64_fetch_link_map_offsets (void);
 
-#endif
+#endif /* solib-svr4.h */
