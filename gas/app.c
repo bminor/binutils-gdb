@@ -374,6 +374,12 @@ do_scrub_chars (get, tostart, tolen)
 	 13: After seeing a vertical bar, looking for a second
 	     vertical bar as a parallel expression separator.
 #endif
+#ifdef TC_IA64
+	 14: After seeing a `(' at state 0, looking for a `)' as
+	     predicate.
+	 15: After seeing a `(' at state 1, looking for a `)' as
+	     predicate.
+#endif
 	  */
 
   /* I added states 9 and 10 because the MIPS ECOFF assembler uses
@@ -673,6 +679,25 @@ do_scrub_chars (get, tostart, tolen)
 
       /* flushchar: */
       ch = GET ();
+
+#ifdef TC_IA64
+      if (ch == '(' && (state == 0 || state == 1))
+	{
+	  state += 14;
+	  PUT (ch);
+	  continue;
+	}
+      else if (state == 14 || state == 15)
+	{
+	  if (ch == ')')
+	    state -= 14;
+	  else
+	    {
+	      PUT (ch);
+	      continue;
+	    }
+	}
+#endif
 
     recycle:
 

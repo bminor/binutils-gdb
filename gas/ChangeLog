@@ -1,3 +1,8 @@
+2003-06-07  H.J. Lu <hongjiu.lu@intel.com>
+
+	* app.c (do_scrub_chars): Add states 14 and 15 to handle
+	predicate for ia64.
+
 2003-06-05  Michael Snyder  <msnyder@redhat.com>
 
 	* config/tc-h8sx.c (get_specific): Distinguish h8h from h8s ops.
