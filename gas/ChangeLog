@@ -1,5 +1,12 @@
 2005-03-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* configure.tgt: Handle setting of bfd_gas for fmt=multi targets
+	along with other formats that set bfd_gas.  Remove unnecessary
+	setting of bfd_gas.  Delete strongarm cases in generic_target
+	switch.
+
+2005-03-21  Alan Modra  <amodra@bigpond.net.au>
+
 	PR gas/780
 	* config/tc-m68k.c (TRUNC, SEXT): Define.
 	(issbyte, isubyte, issword, isuword, isbyte, isword): Use the above.

@@ -19,8 +19,8 @@
 
 cpu_type=
 fmt=
-em=
-bfd_gas=
+em=generic
+bfd_gas=no
 arch=
 endian=
 
@@ -86,8 +86,6 @@ esac
 
 # Assign object format.  Set fmt, em, and bfd_gas.
 generic_target=${cpu_type}-$vendor-$os
-bfd_gas=no
-em=generic
 # Note: This table is alpha-sorted, please try to keep it that way.
 case ${generic_target} in
   a29k-*-coff)				fmt=coff ;;
@@ -129,8 +127,8 @@ case ${generic_target} in
   avr-*-*)				fmt=elf ;;
 
   cris-*-linux-gnu* | crisv32-*-linux-gnu*)
-					fmt=multi bfd_gas=yes em=linux ;;
-  cris-*-* | crisv32-*-*)		fmt=multi bfd_gas=yes ;;
+					fmt=multi em=linux ;;
+  cris-*-* | crisv32-*-*)		fmt=multi ;;
 
   crx-*-elf*)	    			fmt=elf ;;
 
@@ -193,7 +191,7 @@ case ${generic_target} in
   i386-*-linux*oldld)			fmt=aout em=linux ;;
   i386-*-linux*coff*)			fmt=coff em=linux ;;
   i386-*-linux-gnu*)			fmt=elf em=linux ;;
-  i386-*-lynxos*)			fmt=elf em=lynx bfd_gas=yes ;;
+  i386-*-lynxos*)			fmt=elf em=lynx ;;
   i386-*-sysv[45]*)			fmt=elf ;;
   i386-*-solaris*)			fmt=elf ;;
   i386-*-freebsdaout*)			fmt=aout em=386bsd ;;
@@ -244,7 +242,7 @@ case ${generic_target} in
 
   ip2k-*-*)				fmt=elf ;;
 
-  iq2000-*-elf)         		fmt=elf bfd_gas=yes ;;
+  iq2000-*-elf)         		fmt=elf ;;
 
   m32r-*-elf*)				fmt=elf ;;
   m32r-*-linux*)			fmt=elf em=linux;;
@@ -306,7 +304,7 @@ case ${generic_target} in
   mn10200-*-*)				fmt=elf ;;
 
   # cpu_type for am33_2.0 is set to mn10300
-  mn10300-*-linux*)			fmt=elf bfd_gas=yes em=linux ;;
+  mn10300-*-linux*)			fmt=elf em=linux ;;
   mn10300-*-*)				fmt=elf ;;
 
   msp430-*-*)				fmt=elf ;;
@@ -338,7 +336,7 @@ case ${generic_target} in
   ppc-*-macos*)				fmt=coff em=macos ;;
   ppc-*-nto*)				fmt=elf ;;
   ppc-*-kaos*)				fmt=elf ;;
-  ppc-*-lynxos*)			fmt=elf em=lynx bfd_gas=yes ;;
+  ppc-*-lynxos*)			fmt=elf em=lynx ;;
 
   s390-*-linux-gnu*)			fmt=elf em=linux ;;
   s390-*-tpf*)				fmt=elf ;;
@@ -381,10 +379,6 @@ case ${generic_target} in
       *)				fmt=aout em=nbsd ;;
     esac ;;
 
-  strongarm-*-coff)			fmt=coff ;;
-  strongarm-*-elf)			fmt=elf ;;
-  strongarm-*-kaos*)			fmt=elf ;;
-
   tic30-*-*aout*)			fmt=aout bfd_gas=yes ;;
   tic30-*-*coff*)			fmt=coff bfd_gas=yes ;;
   tic4x-*-* | c4x-*-*)			fmt=coff bfd_gas=yes ;;
@@ -398,7 +392,7 @@ case ${generic_target} in
   vax-*-netbsdelf*)			fmt=elf em=nbsd ;;
   vax-*-netbsd*)			fmt=aout em=nbsd ;;
   vax-*-bsd* | vax-*-ultrix*)		fmt=aout ;;
-  vax-*-linux-gnu*)			fmt=elf em=linux bfd_gas=yes ;;
+  vax-*-linux-gnu*)			fmt=elf em=linux ;;
 
   w65-*-*)				fmt=coff ;;
 
@@ -419,7 +413,7 @@ case ${generic_target} in
   *-*-xray | *-*-hms)			fmt=coff ;;
   *-*-sim)				fmt=coff ;;
   *-*-elf | *-*-sysv4* | *-*-solaris*)	fmt=elf ;;
-  *-*-aros*)				fmt=elf em=linux bfd_gas=yes ;;
+  *-*-aros*)				fmt=elf em=linux ;;
   *-*-vxworks | *-*-windiss)		fmt=elf em=vxworks ;;
   *-*-netware)				fmt=elf em=netware ;;
 esac
@@ -430,7 +424,7 @@ case ${cpu_type} in
     ;;
 esac
 case ${fmt} in
-  elf | ecoff | som)
+  elf | ecoff | multi | som)
     bfd_gas=yes
     ;;
 esac
