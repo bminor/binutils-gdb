@@ -771,8 +771,9 @@ INLINE_SIM_MAIN (void) prefetch PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word
 #define Prefetch(CCA,pAddr,vAddr,DATA,hint) \
 prefetch (SD, CPU, cia, CCA, pAddr, vAddr, DATA, hint)
 
-#define UndefinedResult()
-#define Unpredictable()
+void unpredictable_action (sim_cpu *cpu, address_word cia);
+#define NotWordValue(val)	not_word_value (SD_, (val))
+#define Unpredictable()		unpredictable (SD_)
 
 INLINE_SIM_MAIN (unsigned32) ifetch32 PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, address_word vaddr));
 #define IMEM32(CIA) ifetch32 (SD, CPU, (CIA), (CIA))

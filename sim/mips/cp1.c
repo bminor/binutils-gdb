@@ -279,10 +279,6 @@ store_fpr (SIM_DESC sd,
 	  break;
 	}
     }
-#if defined(WARN_RESULT)
-  else
-    UndefinedResult ();
-#endif /* WARN_RESULT */
 
   if (err)
     SignalExceptionSimulatorFault ("Unrecognised FP format in StoreFPR ()");

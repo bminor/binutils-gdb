@@ -1869,28 +1869,31 @@ signal_exception (SIM_DESC sd,
 
 
 
-#if defined(WARN_RESULT)
-/* Description from page A-26 of the "MIPS IV Instruction Set" manual (revision 3.1) */
-/* This function indicates that the result of the operation is
-   undefined. However, this should not affect the instruction
-   stream. All that is meant to happen is that the destination
-   register is set to an undefined result. To keep the simulator
-   simple, we just don't bother updating the destination register, so
-   the overall result will be undefined. If desired we can stop the
-   simulator by raising a pseudo-exception. */
-#define UndefinedResult() undefined_result (sd,cia)
-static void
-undefined_result(sd,cia)
-     SIM_DESC sd;
-     address_word cia;
+/* This function implements what the MIPS32 and MIPS64 ISAs define as
+   "UNPREDICTABLE" behaviour.
+
+   About UNPREDICTABLE behaviour they say: "UNPREDICTABLE results
+   may vary from processor implementation to processor implementation,
+   instruction to instruction, or as a function of time on the same
+   implementation or instruction.  Software can never depend on results
+   that are UNPREDICTABLE. ..."  (MIPS64 Architecture for Programmers
+   Volume II, The MIPS64 Instruction Set.  MIPS Document MD00087 revision
+   0.95, page 2.)
+  
+   For UNPREDICTABLE behaviour, we print a message, if possible print
+   the offending instructions mips.igen instruction name (provided by
+   the caller), and stop the simulator.
+
+   XXX FIXME: eventually, stopping the simulator should be made conditional
+   on a command-line option.  */
+void
+unpredictable_action(sim_cpu *cpu, address_word cia)
 {
-  sim_io_eprintf(sd,"UndefinedResult: PC = 0x%s\n",pr_addr(cia));
-#if 0 /* Disabled for the moment, since it actually happens a lot at the moment. */
-  state |= simSTOP;
-#endif
-  return;
+  SIM_DESC sd = CPU_STATE(cpu);
+
+  sim_io_eprintf(sd, "UNPREDICTABLE: PC = 0x%s\n", pr_addr (cia));
+  sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIM_SIGABRT);
 }
-#endif /* WARN_RESULT */
 
 
 /*-- co-processor support routines ------------------------------------------*/

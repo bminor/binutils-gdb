@@ -144,6 +144,70 @@
 
 // Helper:
 //
+// Check that a 32-bit register value is properly sign-extended.
+// (See NotWordValue in ISA spec.)
+//
+
+:function:::int:not_word_value:unsigned_word value
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
+*mipsV:
+*vr4100:
+*vr5000:
+*r3900:
+{
+  /* For historical simulator compatibility (until documentation is
+     found that makes these operations unpredictable on some of these
+     architectures), this check never returns true.  */
+  return 0;
+}
+
+:function:::int:not_word_value:unsigned_word value
+*mips32:
+{
+  /* On MIPS32, since registers are 32-bits, there's no check to be done.  */
+  return 0;
+}
+
+:function:::int:not_word_value:unsigned_word value
+*mips64:
+{
+  return ((value >> 32) != (value & 0x80000000 ? 0xFFFFFFFF : 0));
+}
+
+
+// Helper:
+//
+// Handle UNPREDICTABLE operation behaviour.  The goal here is to prevent
+// theoretically portable code which invokes non-portable behaviour from
+// running with no indication of the portability issue.
+// (See definition of UNPREDICTABLE in ISA spec.)
+//
+
+:function:::void:unpredictable:
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
+*mipsV:
+*vr4100:
+*vr5000:
+*r3900:
+{
+}
+
+:function:::void:unpredictable:
+*mips32:
+*mips64:
+{
+  unpredictable_action (CPU, CIA);
+}
+
+
+// Helper:
+//
 // Check that an access to a HI/LO register meets timing requirements
 //
 // The following requirements exist:
@@ -340,6 +404,8 @@
 *vr5000:
 *r3900:
 {
+  if (NotWordValue (GPR[RS]) || NotWordValue (GPR[RT]))
+    Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
   {
     ALU32_BEGIN (GPR[RS]);
@@ -364,6 +430,8 @@
 *vr5000:
 *r3900:
 {
+  if (NotWordValue (GPR[RS]))
+    Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[RS], EXTEND16 (IMMEDIATE));
   {
     ALU32_BEGIN (GPR[RS]);
@@ -377,6 +445,8 @@
 
 :function:::void:do_addiu:int rs, int rt, unsigned16 immediate
 {
+  if (NotWordValue (GPR[rs]))
+    Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rs], EXTEND16 (immediate));
   GPR[rt] = EXTEND32 (GPR[rs] + EXTEND16 (immediate));
   TRACE_ALU_RESULT (GPR[rt]);
@@ -402,6 +472,8 @@
 
 :function:::void:do_addu:int rs, int rt, int rd
 {
+  if (NotWordValue (GPR[rs]) || NotWordValue (GPR[rt]))
+    Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   GPR[rd] = EXTEND32 (GPR[rs] + GPR[rt]);
   TRACE_ALU_RESULT (GPR[rd]);
@@ -558,6 +630,8 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   check_branch_bug ();
+  if (RS == 31)
+    Unpredictable ();
   RA = (CIA + 8);
   if ((signed_word) GPR[RS] >= 0)
     {
@@ -582,6 +656,8 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   check_branch_bug ();
+  if (RS == 31)
+    Unpredictable ();
   RA = (CIA + 8);
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
@@ -762,6 +838,8 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   check_branch_bug ();
+  if (RS == 31)
+    Unpredictable ();
   RA = (CIA + 8);
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
@@ -788,6 +866,8 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   check_branch_bug ();
+  if (RS == 31)
+    Unpredictable ();
   RA = (CIA + 8);
   if ((signed_word) GPR[RS] < 0)
     {
@@ -926,6 +1006,8 @@
   unsigned32 i, mask;
   if (RT != RD)
     Unpredictable ();
+  if (NotWordValue (GPR[RS]))
+    Unpredictable ();
   TRACE_ALU_INPUT1 (GPR[RS]);
   for (mask = ((unsigned32)1<<31), i = 0; i < 32; ++i)
     {
@@ -947,6 +1029,8 @@
   unsigned32 temp = GPR[RS];
   unsigned32 i, mask;
   if (RT != RD)
+    Unpredictable ();
+  if (NotWordValue (GPR[RS]))
     Unpredictable ();
   TRACE_ALU_INPUT1 (GPR[RS]);
   for (mask = ((unsigned32)1<<31), i = 0; i < 32; ++i)
@@ -2099,6 +2183,8 @@
 {
   signed64 temp;
   check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
+  if (NotWordValue (GPR[RS]) || NotWordValue (GPR[RT]))
+    Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
   temp = (U8_4 (VL4_8 (HI), VL4_8 (LO))
           + ((signed64) EXTEND32 (GPR[RT]) * (signed64) EXTEND32 (GPR[RS])));
@@ -2116,6 +2202,8 @@
 {
   unsigned64 temp;
   check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
+  if (NotWordValue (GPR[RS]) || NotWordValue (GPR[RT]))
+    Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
   temp = (U8_4 (VL4_8 (HI), VL4_8 (LO))
           + ((unsigned64) VL4_8 (GPR[RS]) * (unsigned64) VL4_8 (GPR[RT])));
@@ -2212,6 +2300,8 @@
 {
   signed64 temp;
   check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
+  if (NotWordValue (GPR[RS]) || NotWordValue (GPR[RT]))
+    Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
   temp = (U8_4 (VL4_8 (HI), VL4_8 (LO))
           - ((signed64) EXTEND32 (GPR[RT]) * (signed64) EXTEND32 (GPR[RS])));
@@ -2229,6 +2319,8 @@
 {
   unsigned64 temp;
   check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
+  if (NotWordValue (GPR[RS]) || NotWordValue (GPR[RT]))
+    Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
   temp = (U8_4 (VL4_8 (HI), VL4_8 (LO))
           - ((unsigned64) VL4_8 (GPR[RS]) * (unsigned64) VL4_8 (GPR[RT])));
@@ -2283,6 +2375,8 @@
 *mips64:
 {
   signed64 prod;
+  if (NotWordValue (GPR[RS]) || NotWordValue (GPR[RT]))
+    Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
   prod = (((signed64)(signed32) GPR[RS])
           * ((signed64)(signed32) GPR[RT]));
@@ -2296,6 +2390,8 @@
 {
   signed64 prod;
   check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
+  if (NotWordValue (GPR[rs]) || NotWordValue (GPR[rt]))
+    Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   prod = (((signed64)(signed32) GPR[rs])
 	  * ((signed64)(signed32) GPR[rt]));
@@ -2335,6 +2431,8 @@
 {
   unsigned64 prod;
   check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
+  if (NotWordValue (GPR[rs]) || NotWordValue (GPR[rt]))
+    Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   prod = (((unsigned64)(unsigned32) GPR[rs])
 	  * ((unsigned64)(unsigned32) GPR[rt]));
@@ -2893,6 +2991,8 @@
 :function:::void:do_sra:int rt, int rd, int shift
 {
   signed32 temp = (signed32) GPR[rt] >> shift;
+  if (NotWordValue (GPR[rt]))
+    Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rt], shift);
   GPR[rd] = EXTEND32 (temp);
   TRACE_ALU_RESULT (GPR[rd]);
@@ -2920,6 +3020,8 @@
 {
   int s = MASKED (GPR[rs], 4, 0);
   signed32 temp = (signed32) GPR[rt] >> s;
+  if (NotWordValue (GPR[rt]))
+    Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rt], s);
   GPR[rd] = EXTEND32 (temp);
   TRACE_ALU_RESULT (GPR[rd]);
@@ -2946,6 +3048,8 @@
 :function:::void:do_srl:int rt, int rd, int shift
 {
   unsigned32 temp = (unsigned32) GPR[rt] >> shift;
+  if (NotWordValue (GPR[rt]))
+    Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rt], shift);
   GPR[rd] = EXTEND32 (temp);
   TRACE_ALU_RESULT (GPR[rd]);
@@ -2972,6 +3076,8 @@
 {
   int s = MASKED (GPR[rs], 4, 0);
   unsigned32 temp = (unsigned32) GPR[rt] >> s;
+  if (NotWordValue (GPR[rt]))
+    Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rt], s);
   GPR[rd] = EXTEND32 (temp);
   TRACE_ALU_RESULT (GPR[rd]);
@@ -3007,6 +3113,8 @@
 *vr5000:
 *r3900:
 {
+  if (NotWordValue (GPR[RS]) || NotWordValue (GPR[RT]))
+    Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
   {
     ALU32_BEGIN (GPR[RS]);
@@ -3019,6 +3127,8 @@
 
 :function:::void:do_subu:int rs, int rt, int rd
 {
+  if (NotWordValue (GPR[rs]) || NotWordValue (GPR[rt]))
+    Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   GPR[rd] = EXTEND32 (GPR[rs] - GPR[rt]);
   TRACE_ALU_RESULT (GPR[rd]);

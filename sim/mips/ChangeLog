@@ -1,3 +1,20 @@
+2002-05-01  Chris Demetriou  <cgd@broadcom.com>
+
+	* cp1.c (store_fpr): Remove #ifdef'd out call to UndefinedResult
+	which wouldn't compile anyway.
+	* sim-main.h (unpredictable_action): New function prototype.
+	(Unpredictable): Define to call igen function unpredictable().
+	(NotWordValue): New macro to call igen function not_word_value().
+	(UndefinedResult): Remove.
+	* interp.c (undefined_result): Remove.
+	(unpredictable_action): New function.
+	* mips.igen (not_word_value, unpredictable): New functions.
+	(ADD, ADDI, do_addiu, do_addu, BGEZAL, BGEZALL, BLTZAL, BLTZALL)
+	(CLO, CLZ, MADD, MADDU, MSUB, MSUBU, MUL, do_mult, do_multu)
+	(do_sra, do_srav, do_srl, do_srlv, SUB, do_subu): Invoke
+	NotWordValue() to check for unpredictable inputs, then
+	Unpredictable() to handle them.
+
 2002-02-24  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips.igen: Fix formatting of calls to Unpredictable().
