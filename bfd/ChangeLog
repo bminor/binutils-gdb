@@ -1,3 +1,11 @@
+2005-01-15  Andrew Cagney  <cagney@gnu.org>
+
+	* bfd.m4: New file.
+	* acinclude.m4: Move BFD_NEED_DECLARATION,
+	BFD_HAVE_SYS_PROCFS_TYPE and BFD_HAVE_SYS_PROCFS_TYPE_MEMBER to
+	the new file bfd.m4.  Include ../bfd/bfd.m4.
+	* configure: Re-generate.
+	
 2005-01-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_howto_raw): Delete RELAX32* entries.
