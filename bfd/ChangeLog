@@ -1,3 +1,9 @@
+2000-09-08  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Do not
+	initialise flags in output bfd if the input bfd is the default
+	architecture with the default flags.
+
 2000-09-08  Kazu Hirata  <kazu@hxi.com>
 
 	* archive.c: Fix formatting.

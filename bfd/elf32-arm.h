@@ -2038,13 +2038,14 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
 
   if (!elf_flags_init (obfd))
     {
-      /* If the input is the default architecture then do not
-         bother setting the flags for the output architecture,
-         instead allow future merges to do this.  If no future
-         merges ever set these flags then they will retain their
-         unitialised values, which surprise surprise, correspond
+      /* If the input is the default architecture and had the default
+	 flags then do not bother setting the flags for the output
+	 architecture, instead allow future merges to do this.  If no
+	 future merges ever set these flags then they will retain their
+         uninitialised values, which surprise surprise, correspond
          to the default values.  */
-      if (bfd_get_arch_info (ibfd)->the_default)
+      if (bfd_get_arch_info (ibfd)->the_default
+	  && elf_elfheader (ibfd)->e_flags == 0)
 	return true;
 
       elf_flags_init (obfd) = true;
