@@ -1,4 +1,4 @@
-#   Copyright 1997, 1999, 2002, 2004 Free Software Foundation, Inc.
+#   Copyright 1997, 1999, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -89,6 +89,11 @@ proc do_attach_tests {} {
    #
    set testpid [eval exec $binfile &]
    exec sleep 2
+   if { [istarget "*-*-cygwin*"] } {
+       # testpid is the Cygwin PID, GDB uses the Windows PID, which might be
+       # different due to the way fork/exec works.
+       set testpid [ exec ps -e | gawk "{ if (\$1 == $testpid) print \$4; }" ]
+   }
 
    # Verify that we cannot attach to nonsense.
    #
@@ -100,6 +105,11 @@ proc do_attach_tests {} {
                       {
                         # Response expected from /proc-based systems.
                         pass "attach to nonsense is prohibited" 
+                      }
+      -re ".*Can't attach to process..*$gdb_prompt $"\
+                      {
+                        # Response expected on Cygwin
+                        pass "attach to nonsense is prohibited"
                       }
       -re "Attaching to.*$gdb_prompt $"\
                       {fail "attach to nonsense is prohibited (bogus pid allowed)"}
@@ -140,6 +150,11 @@ proc do_attach_tests {} {
 	   # Response expected from /proc-based systems.
 	   pass "attach to nonexistent process is prohibited"
        }
+       -re ".*Can't attach to process..*$gdb_prompt $"\
+               {
+           # Response expected on Cygwin
+           pass "attach to nonexistent process is prohibited"
+       }
        -re "$gdb_prompt $" {fail "attach to nonexistent process is prohibited"}
        timeout {
 	   fail "(timeout) attach to nonexistent process is prohibited"
@@ -175,6 +190,11 @@ proc do_attach_tests {} {
    gdb_expect {
       -re "Attaching to program.*`?$escapedbinfile'?, process $testpid.*main.*at .*$srcfile:.*$gdb_prompt $"\
                       {pass "attach1, after setting file"}
+      -re "Attaching to program.*`?$escapedbinfile\.exe'?, process $testpid.*\[Switching to thread $testpid\..*\].*$gdb_prompt $"\
+                      {
+                         # Response expected on Cygwin
+                         pass "attach1, after setting file"
+                      }
       -re "$gdb_prompt $" {fail "attach1, after setting file"}
       timeout         {fail "(timeout) attach1, after setting file"}
    }
@@ -236,6 +256,20 @@ proc do_attach_tests {} {
    #
    send_gdb "attach $testpid\n"
    gdb_expect {
+      -re "Attaching to process $testpid.*Load new symbol table from \"$escapedbinfile\.exe\".*y or n.*$" {
+	# On Cygwin, the DLL's symbol tables are loaded prior to the
+	# executable's symbol table.  This in turn always results in
+	# asking the user for actually loading the symbol table of the
+	# executable.
+        send_gdb "y\n"
+	gdb_expect {
+	  -re "Reading symbols from $escapedbinfile\.\.\.*done.*$gdb_prompt $"\
+		      {pass "(re)set file, before attach2"}
+	  -re "$gdb_prompt $"\
+		      {fail "(re)set file, before attach2"}
+	  timeout     {fail "(timeout) (re)set file, before attach2"}
+        }
+      }
       -re "Attaching to process $testpid.*Reading symbols from $escapedbinfile.*main.*at .*$gdb_prompt $"\
                       {pass "attach2"}
       -re "$gdb_prompt $" {fail "attach2"}
@@ -289,6 +323,11 @@ proc do_attach_tests {} {
    #
    set testpid [eval exec $binfile &]
    exec sleep 2
+   if { [istarget "*-*-cygwin*"] } {
+       # testpid is the Cygwin PID, GDB uses the Windows PID, which might be
+       # different due to the way fork/exec works.
+       set testpid [ exec ps -e | gawk "{ if (\$1 == $testpid) print \$4; }" ]
+   }
 
    # Verify that we can attach to the process, and find its a.out
    # when we're cd'd to some directory that doesn't contain the
@@ -369,19 +408,27 @@ proc do_call_attach_tests {} {
    #
    set testpid [eval exec $binfile2 &]
    exec sleep 2
+   if { [istarget "*-*-cygwin*"] } {
+       # testpid is the Cygwin PID, GDB uses the Windows PID, which might be
+       # different due to the way fork/exec works.
+       set testpid [ exec ps -e | gawk "{ if (\$1 == $testpid) print \$4; }" ]
+   }
 
    # Attach
    #
    gdb_test "file $binfile2" ".*" "force switch to gdb64, if necessary"
    send_gdb "attach $testpid\n"
    gdb_expect {
-      -re ".*warning: reading register.*I.*O error.*$gdb_prompt $" {
+     -re ".*warning: reading register.*I.*O error.*$gdb_prompt $" {
          fail "attach call, read register 3 error"
      }
      -re "Attaching to.*process $testpid.*libc.*$gdb_prompt $" {
          pass "attach call"
      }
-      -re "$gdb_prompt $" {fail "attach call"}
+     -re "Attaching to.*process $testpid.*\[Switching to thread $testpid\..*\].*$gdb_prompt $" {
+	 pass "attach call"
+     }
+     -re "$gdb_prompt $" {fail "attach call"}
       timeout         {fail "(timeout) attach call"}
    }
 

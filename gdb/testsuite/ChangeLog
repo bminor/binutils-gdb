@@ -1,3 +1,11 @@
+2004-06-28  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/attach.exp: Fix copyright date.  Set testpid to Windows
+	PID for Cygwin.  Add Cygwin specific strings to check for in some
+	tests.
+	(do_attach_tests): Add a test for user interaction when attaching
+	to a process with no matching symbol table already loaded.
+
 2004-06-26  Andrew Cagney  <cagney@gnu.org>
 
 	Test PR java/1567 and PR java/1565.
