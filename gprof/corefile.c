@@ -590,6 +590,7 @@ core_create_line_syms ()
   const char *filename;
   int prev_line_num;
   Sym_Table ltab;
+  bfd_vma vma_high;
 
   /* Create symbols for functions as usual.  This is necessary in
      cases where parts of a program were not compiled with -g.  For
@@ -612,7 +613,7 @@ core_create_line_syms ()
   ltab.len = 0;
   prev_line_num = 0;
 
-  bfd_vma vma_high = core_text_sect->vma + core_text_sect->_raw_size;
+  vma_high = core_text_sect->vma + core_text_sect->_raw_size;
   for (vma = core_text_sect->vma; vma < vma_high; vma += min_insn_size)
     {
       unsigned int len;

@@ -1,3 +1,8 @@
+2004-05-26  Andrew Cagney  <cagney@gnu.org>
+
+	* corefile.c (core_create_line_syms): Per ISO C '90, move
+	vma_high's declaration to the function's start.
+
 2004-05-26  Ben Elliston  <bje@au.ibm.com>
 
 	* gprof.c (main): Clean up some more.
