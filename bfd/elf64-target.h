@@ -216,7 +216,7 @@ bfd_target TARGET_BIG_SYM =
      FIXME:  this really has nothing to do with ELF, this is a characteristic
      of the archiver and should be independently tunable.  This value is
      a WAG (wild a** guess) */
-  15,
+  14,
 
   /* align_power_min: minimum alignment restriction for any section
      FIXME:  this value may be target machine dependent */
@@ -304,7 +304,7 @@ bfd_target TARGET_LITTLE_SYM =
      FIXME:  this really has nothing to do with ELF, this is a characteristic
      of the archiver and should be independently tunable.  This value is
      a WAG (wild a** guess) */
-  15,
+  14,
 
   /* align_power_min: minimum alignment restriction for any section
      FIXME:  this value may be target machine dependent */

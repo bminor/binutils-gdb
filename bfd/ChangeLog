@@ -1,5 +1,8 @@
 Thu May 19 11:37:11 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* elf32-target.h, elf64-target.h: Change ar_max_namelen value from
+	15 to 14 to match SVR4 ar.
+
 	Add support for ELF shared libraries.  Loosely based on work by
 	Eric Youngdale <ericy@cais.com>.
 	* libelf.h (struct elf_backend_data): Add new fields for dynamic
