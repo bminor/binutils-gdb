@@ -180,7 +180,7 @@ typedef char *ArgvType;
 #  define FILENAME_MAX 256
 #endif
 
-#if (!defined(__STDC__) && !defined(__cplusplus) || defined(COMPILING_ON_SUNOS)
+#if (!defined(__STDC__) && !defined(__cplusplus)) || defined(COMPILING_ON_SUNOS)
 /* Use bcopy rather than memmove, as memmove is not available.     */
 /* There does not seem to be a header for bcopy.                   */
 void bcopy(const char *src, char *dst, int length);

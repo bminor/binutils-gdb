@@ -1,3 +1,8 @@
+2001-06-24  Fernando Nasser  <fnasser@redhat.com>
+
+	* remote-rdi.c (arm_rdi_wait): Fix return type in prototype.
+	* rdi-share/host.h: Add missing parenthesis in conditional.
+
 2001-06-22  J.T. Conklin  <jtc@redback.com>
 
 	* configure.in: include nlist.h when checking for member som_addr
