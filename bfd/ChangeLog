@@ -1,5 +1,7 @@
 2002-08-22  Nick Clifton  <nickc@redhat.com>
 
+	* po/tr.po: Updated Turkish translation.
+
 	* syms.c (_bfd_generic_read_minisymbols): Set bfd_error if the
 	symbols are not read.
 
