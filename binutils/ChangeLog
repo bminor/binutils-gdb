@@ -1,3 +1,17 @@
+1999-06-13  Ian Lance Taylor  <ian@zembu.com>
+
+	* defparse.y (explist): Remove separate expline to eliminate
+	shift/reduce conflict.
+
+	From Kai-Uwe Rommel <rommel@ars.de>:
+	* defparse.y: Add tokens NONSHARED, SINGLE, MULTIPLE,
+	INITINSTANCE, INITGLOBAL, TERMINSTANCE, and TERMGLOBAL.
+	(command): Add option_list after LIBRARY.
+	(attr): Accept and ignore NONSHARED, SINGLE, and MULTIPLE.
+	(option_list, option): New nonterminals.
+	* deflex.l: Recognize NONSHARED, SINGLE, MULTIPLE, INITINSTANCE,
+	INITGLOBAL, TERMINSTANCE, and TERMGLOBAL.
+
 1999-06-12  Ian Lance Taylor  <ian@zembu.com>
 
 	* ar.c (O_BINARY): Define as 0 if not defined.
