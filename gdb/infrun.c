@@ -265,6 +265,34 @@ void init_wait_for_inferior ();
 void normal_stop ();
 
 
+/* Things to clean up if we QUIT out of resume ().  */
+static void
+resume_cleanups (arg)
+     int arg;
+{
+  normal_stop ();
+}
+
+/* Resume the inferior, but allow a QUIT.  This is useful if the user
+   wants to interrupt some lengthy single-stepping operation
+   (for child processes, the SIGINT goes to the inferior, and so
+   we get a SIGINT random_signal, but for remote debugging and perhaps
+   other targets, that's not true).
+
+   STEP nonzero if we should step (zero to continue instead).
+   SIG is the signal to give the inferior (zero for none).  */
+static void
+resume (step, sig)
+     int step;
+     int sig;
+{
+  struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
+  QUIT;
+  target_resume (step, sig);
+  discard_cleanups (old_cleanups);
+}
+
+
 /* Clear out all variables saying what to do when inferior is continued.
    First do this, then set the ones you want, then call `proceed'.  */
 
@@ -373,7 +401,7 @@ The same program may be running in another process.");
 #endif
 
   /* Resume inferior.  */
-  target_resume (oneproc || step || bpstat_should_step (), stop_signal);
+  resume (oneproc || step || bpstat_should_step (), stop_signal);
 
   /* Wait for it to stop (if not standalone)
      and in any case decode why it stopped, and act accordingly.  */
@@ -406,6 +434,7 @@ static CORE_ADDR prev_sp;
 static CORE_ADDR prev_func_start;
 static char *prev_func_name;
 
+
 /* Start an inferior Unix child process and sets inferior_pid to its pid.
    EXEC_FILE is the file to run.
    ALLARGS is a string containing the arguments to the program.
@@ -563,14 +592,14 @@ child_create_inferior (exec_file, allargs, env)
 	{
 	  /* Let shell child handle its own signals in its own way */
 	  /* FIXME, what if child has exit()ed?  Must exit loop somehow */
-	  target_resume (0, stop_signal);
+	  resume (0, stop_signal);
 	}
       else
 	{
 	  /* We handle SIGTRAP, however; it means child did an exec.  */
 	  if (0 == --pending_execs)
 	    break;
-	  target_resume (0, 0);		/* Just make it go on */
+	  resume (0, 0);		/* Just make it go on */
 	}
     }
   stop_soon_quietly = 0;
@@ -584,7 +613,7 @@ child_create_inferior (exec_file, allargs, env)
       target_terminal_inferior();
       /* Start the child program going on its first instruction, single-
 	 stepping if we need to.  */
-      target_resume (bpstat_should_step (), 0);
+      resume (bpstat_should_step (), 0);
       wait_for_inferior ();
       normal_stop ();
     }
@@ -1181,7 +1210,7 @@ wait_for_inferior ()
 	  /* We took a signal (which we are supposed to pass through to
 	     the inferior, else we'd have done a break above) and we
 	     haven't yet gotten our trap.  Simply continue.  */
-	  target_resume ((step_range_end && !step_resume_break_address)
+	  resume ((step_range_end && !step_resume_break_address)
 		  || (trap_expected && !step_resume_break_address)
 		  || bpstat_should_step (),
 		  stop_signal);
@@ -1241,7 +1270,7 @@ wait_for_inferior ()
             }
 #endif /* SHIFT_INST_REGS */
 
-	  target_resume ((step_range_end && !step_resume_break_address)
+	  resume ((step_range_end && !step_resume_break_address)
 		  || (trap_expected && !step_resume_break_address)
 		  || bpstat_should_step (),
 		  stop_signal);
