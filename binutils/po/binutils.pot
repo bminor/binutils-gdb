@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-12-19 14:20-0800\n"
+"POT-Creation-Date: 2001-01-09 12:08-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,7 +33,7 @@ msgstr ""
 msgid "%s: can not get addresses from archive"
 msgstr ""
 
-#: addr2line.c:310 nm.c:436 objdump.c:2844
+#: addr2line.c:310 nm.c:436 objdump.c:2857
 #, c-format
 msgid "unknown demangling style `%s'"
 msgstr ""
@@ -1866,98 +1866,98 @@ msgstr ""
 msgid "Out of virtual memory"
 msgstr ""
 
-#: objdump.c:1606
+#: objdump.c:1616
 #, c-format
 msgid "Can't use supplied machine %s"
 msgstr ""
 
-#: objdump.c:1624
+#: objdump.c:1634
 #, c-format
 msgid "Can't disassemble for architecture %s\n"
 msgstr ""
 
-#: objdump.c:1703
+#: objdump.c:1716
 #, c-format
 msgid "Disassembly of section %s:\n"
 msgstr ""
 
-#: objdump.c:1877
+#: objdump.c:1890
 #, c-format
 msgid ""
 "No %s section present\n"
 "\n"
 msgstr ""
 
-#: objdump.c:1884
+#: objdump.c:1897
 #, c-format
 msgid "%s has no %s section"
 msgstr ""
 
-#: objdump.c:1898
+#: objdump.c:1911
 #, c-format
 msgid "Reading %s section of %s failed: %s"
 msgstr ""
 
-#: objdump.c:1910
+#: objdump.c:1923
 #, c-format
 msgid "Reading %s section of %s failed: %s\n"
 msgstr ""
 
-#: objdump.c:1953
+#: objdump.c:1966
 #, c-format
 msgid ""
 "Contents of %s section:\n"
 "\n"
 msgstr ""
 
-#: objdump.c:2053
+#: objdump.c:2066
 #, c-format
 msgid "architecture: %s, "
 msgstr ""
 
-#: objdump.c:2056
+#: objdump.c:2069
 #, c-format
 msgid "flags 0x%08x:\n"
 msgstr ""
 
-#: objdump.c:2069
+#: objdump.c:2082
 msgid ""
 "\n"
 "start address 0x"
 msgstr ""
 
-#: objdump.c:2101
+#: objdump.c:2114
 #, c-format
 msgid ""
 "\n"
 "%s:     file format %s\n"
 msgstr ""
 
-#: objdump.c:2143
+#: objdump.c:2156
 #, c-format
 msgid "%s: printing debugging information failed"
 msgstr ""
 
-#: objdump.c:2220
+#: objdump.c:2233
 #, c-format
 msgid "In archive %s:\n"
 msgstr ""
 
-#: objdump.c:2272
+#: objdump.c:2285
 #, c-format
 msgid "Contents of section %s:\n"
 msgstr ""
 
-#: objdump.c:2785
+#: objdump.c:2798
 #, c-format
 msgid "BFD header file version %s\n"
 msgstr ""
 
-#: objdump.c:2869
+#: objdump.c:2882
 msgid "unrecognized -E option"
 msgstr ""
 
-#: objdump.c:2880
+#: objdump.c:2893
 #, c-format
 msgid "unrecognized --endian type `%s'"
 msgstr ""

@@ -171,6 +171,9 @@ nm_new_SOURCES = nm.c $(BULIBS)
 objdump_SOURCES = objdump.c prdbg.c $(DEBUG_SRCS) $(BULIBS)
 objdump_LDADD = $(OPCODES) $(BFDLIB) $(LIBIBERTY) $(INTLLIBS)
 
+objdump.o:objdump.c
+	$(COMPILE) -c $(OBJDUMP_DEFS) $(srcdir)/objdump.c
+
 underscore.c: stamp-under ; @true
 
 stamp-under: Makefile

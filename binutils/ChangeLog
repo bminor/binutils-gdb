@@ -1,3 +1,18 @@
+2001-01-09  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am: Add rule to build objdump.o from objdump.c and
+	using OBJDUMP_DEFS.
+	* Makefile.in: Regenerate.
+
+	* configure.in: Define OBJDUMP_DEFS.  Default to empty.
+	(arm, xscale, d10v): For these targets define OBJDUMP_DEFS to
+	-DDISASSEMBLER_NEEDS_RELOCS.
+	* confgiure: Regenerate.
+
+	* objdump.c (disassemble_bytes): If DISASSEMBLER_NEEDS_RELOCS
+	is defined read in the relocs even if dump_reloc_info is
+	false.
+
 2001-01-07  Philip Blundell  <philb@gnu.org>
 
 	* binutils.texi (Bug Reporting): Replace `bug-gnu-utils' with

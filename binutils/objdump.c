@@ -1358,13 +1358,15 @@ disassemble_bytes (info, disassemble_fn, insns, data,
 	      info->bytes_per_line = 0;
 	      info->bytes_per_chunk = 0;
 
+#ifdef DISASSEMBLER_NEEDS_RELOCS
 	      /* FIXME: This is wrong.  It tests the number of octets
                  in the last instruction, not the current one.  */
 	      if (*relppp < relppend
 		  && (**relppp)->address >= addr_offset
-		  && (**relppp)->address < addr_offset + octets / opb)
+		  && (**relppp)->address <= addr_offset + octets / opb)
 		info->flags = INSN_HAS_RELOC;
 	      else
+#endif
 		info->flags = 0;
 
 	      octets = (*disassemble_fn) (section->vma + addr_offset, info);
@@ -1504,12 +1506,20 @@ disassemble_bytes (info, disassemble_fn, insns, data,
 	    need_nl = true;
 	}
 
-      if (dump_reloc_info
-	  && (section->flags & SEC_RELOC) != 0)
+      if ((section->flags & SEC_RELOC) != 0
+#ifndef DISASSEMBLER_NEEDS_RELOCS	  
+  	  && dump_reloc_info
+#endif
+	  )
 	{
 	  while ((*relppp) < relppend
 		 && ((**relppp)->address >= (bfd_vma) addr_offset
 		     && (**relppp)->address < (bfd_vma) addr_offset + octets / opb))
+#ifdef DISASSEMBLER_NEEDS_RELOCS
+	    if (! dump_reloc_info)
+	      ++(*relppp);
+	    else
+#endif
 	    {
 	      arelent *q;
 
@@ -1665,8 +1675,11 @@ disassemble_data (abfd)
       if (only != (char *) NULL && strcmp (only, section->name) != 0)
 	continue;
 
-      if (dump_reloc_info
-	  && (section->flags & SEC_RELOC) != 0)
+      if ((section->flags & SEC_RELOC) != 0
+#ifndef DISASSEMBLER_NEEDS_RELOCS	  
+	  && dump_reloc_info
+#endif
+	  ) 
 	{
 	  long relsize;
 

@@ -100,6 +100,7 @@ MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
 NLMCONV_DEFS = @NLMCONV_DEFS@
 OBJDUMP = @OBJDUMP@
+OBJDUMP_DEFS = @OBJDUMP_DEFS@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 POFILES = @POFILES@
@@ -1097,6 +1098,9 @@ check-DEJAGNU: site.exp
 
 installcheck:
 	/bin/sh $(srcdir)/sanity.sh $(bindir)
+
+objdump.o:objdump.c
+	$(COMPILE) -c $(OBJDUMP_DEFS) $(srcdir)/objdump.c
 
 underscore.c: stamp-under ; @true
 
