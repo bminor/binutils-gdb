@@ -24,6 +24,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf-bfd.h"
 #include "elf/mn10300.h"
 
+static bfd_reloc_status_type mn10300_elf_final_link_relocate
+  PARAMS ((reloc_howto_type *, bfd *, bfd *, asection *, bfd_byte *,
+	   bfd_vma, bfd_vma, bfd_vma, struct bfd_link_info *,
+	   asection *, int));
+static boolean mn10300_elf_relocate_section
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+static boolean mn10300_elf_relax_section
+  PARAMS ((bfd *, asection *, struct bfd_link_info *, boolean *));
+static bfd_byte * mn10300_elf_get_relocated_section_contents
+  PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *,
+	   bfd_byte *, boolean, asymbol **));
+static int elf_mn10300_mach PARAMS ((flagword));
+
+void    _bfd_mn10300_elf_final_write_processing PARAMS ((bfd *, boolean));
+boolean _bfd_mn10300_elf_object_p PARAMS ((bfd *));
+boolean _bfd_mn10300_elf_merge_private_bfd_data PARAMS ((bfd *,bfd *));
+
 struct elf32_mn10300_link_hash_entry {
   /* The basic elf link hash table entry.  */
   struct elf_link_hash_entry root;

@@ -39,9 +39,9 @@ static bfd_reloc_status_type elf32_arm_final_link_relocate
 static insn32 insert_thumb_branch
   PARAMS ((insn32, int));
 static struct elf_link_hash_entry *find_thumb_glue
-  PARAMS ((struct bfd_link_info *, CONST char *, bfd *));
+  PARAMS ((struct bfd_link_info *, const char *, bfd *));
 static struct elf_link_hash_entry *find_arm_glue
-  PARAMS ((struct bfd_link_info *, CONST char *, bfd *));
+  PARAMS ((struct bfd_link_info *, const char *, bfd *));
 static void record_arm_to_thumb_glue
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static void record_thumb_to_arm_glue
@@ -54,7 +54,43 @@ static int elf32_arm_to_thumb_stub
 static int elf32_thumb_to_arm_stub
   PARAMS ((struct bfd_link_info *, const char *, bfd *, bfd *, asection *,
 	   bfd_byte *, asection *, bfd_vma, bfd_signed_vma, bfd_vma));
+static boolean elf32_arm_relocate_section
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+static asection * elf32_arm_gc_mark_hook
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
+static boolean elf32_arm_gc_sweep_hook
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
+static boolean elf32_arm_check_relocs
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
+static boolean elf32_arm_find_nearest_line
+  PARAMS ((bfd *, asection *, asymbol **, bfd_vma, const char **,
+	   const char **, unsigned int *));
+static boolean elf32_arm_adjust_dynamic_symbol
+  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+static boolean elf32_arm_size_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
+static boolean elf32_arm_finish_dynamic_symbol
+  PARAMS ((bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
+	   Elf_Internal_Sym *));
+static boolean elf32_arm_finish_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
+static struct bfd_hash_entry * elf32_arm_link_hash_newfunc
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+#ifdef USE_REL
+static void arm_add_to_rel
+  PARAMS ((bfd *, bfd_byte *, reloc_howto_type *, bfd_signed_vma));
+#endif
 
+boolean bfd_elf32_arm_allocate_interworking_sections
+  PARAMS ((struct bfd_link_info *));
+boolean bfd_elf32_arm_get_bfd_for_interworking
+  PARAMS ((bfd *, struct bfd_link_info *));
+boolean bfd_elf32_arm_process_before_allocation
+  PARAMS ((bfd *, struct bfd_link_info *, int));
 #define INTERWORK_FLAG(abfd)   (elf_elfheader (abfd)->e_flags & EF_ARM_INTERWORK)
 
 /* The linker script knows the section names for placement.
@@ -79,22 +115,22 @@ static int elf32_thumb_to_arm_stub
    called before the relocation has been set up calls the dynamic
    linker first.  */
 static const unsigned long elf32_arm_plt0_entry [PLT_ENTRY_SIZE / 4] =
-{
-  0xe52de004,	/* str   lr, [sp, #-4]!     */
-  0xe59fe010,	/* ldr   lr, [pc, #16]      */
-  0xe08fe00e,	/* add   lr, pc, lr         */
-  0xe5bef008	/* ldr   pc, [lr, #8]!      */
-};
+  {
+    0xe52de004,	/* str   lr, [sp, #-4]!     */
+    0xe59fe010,	/* ldr   lr, [pc, #16]      */
+    0xe08fe00e,	/* add   lr, pc, lr         */
+    0xe5bef008	/* ldr   pc, [lr, #8]!      */
+  };
 
 /* Subsequent entries in a procedure linkage table look like
    this.  */
 static const unsigned long elf32_arm_plt_entry [PLT_ENTRY_SIZE / 4] =
-{
-  0xe59fc004,	/* ldr   ip, [pc, #4]       */
-  0xe08fc00c,	/* add   ip, pc, ip         */
-  0xe59cf000,	/* ldr   pc, [ip]           */
-  0x00000000	/* offset to symbol in got  */
-};
+ { 
+   0xe59fc004,	/* ldr   ip, [pc, #4]       */
+   0xe08fc00c,	/* add   ip, pc, ip         */
+   0xe59cf000,	/* ldr   pc, [ip]           */
+   0x00000000	/* offset to symbol in got  */
+ };
 
 /* The ARM linker needs to keep track of the number of relocs that it
    decides to copy in check_relocs for each symbol.  This is so that
@@ -105,23 +141,23 @@ static const unsigned long elf32_arm_plt_entry [PLT_ENTRY_SIZE / 4] =
 /* This structure keeps track of the number of PC relative relocs we
    have copied for a given symbol.  */
 struct elf32_arm_pcrel_relocs_copied
-{
-  /* Next section.  */
-  struct elf32_arm_pcrel_relocs_copied * next;
-  /* A section in dynobj.  */
-  asection * section;
-  /* Number of relocs copied in this section.  */
-  bfd_size_type count;
-};
+  {
+    /* Next section.  */
+    struct elf32_arm_pcrel_relocs_copied * next;
+    /* A section in dynobj.  */
+    asection * section;
+    /* Number of relocs copied in this section.  */
+    bfd_size_type count;
+  };
 
 /* Arm ELF linker hash entry.  */
 struct elf32_arm_link_hash_entry
-{
-  struct elf_link_hash_entry root;
+  {
+    struct elf_link_hash_entry root;
 
-  /* Number of PC relative relocs copied for this symbol.  */
-  struct elf32_arm_pcrel_relocs_copied * pcrel_relocs_copied;
-};
+    /* Number of PC relative relocs copied for this symbol.  */
+    struct elf32_arm_pcrel_relocs_copied * pcrel_relocs_copied;
+  };
 
 /* Declare this now that the above structures are defined.  */
 static boolean elf32_arm_discard_copies
@@ -140,23 +176,23 @@ static boolean elf32_arm_discard_copies
 
 /* ARM ELF linker hash table.  */
 struct elf32_arm_link_hash_table
-{
-  /* The main hash table.  */
-  struct elf_link_hash_table root;
+  {
+    /* The main hash table.  */
+    struct elf_link_hash_table root;
 
-  /* The size in bytes of the section containg the Thumb-to-ARM glue.  */
-  long int thumb_glue_size;
+    /* The size in bytes of the section containg the Thumb-to-ARM glue.  */
+    long int thumb_glue_size;
 
-  /* The size in bytes of the section containg the ARM-to-Thumb glue.  */
-  long int arm_glue_size;
+    /* The size in bytes of the section containg the ARM-to-Thumb glue.  */
+    long int arm_glue_size;
 
-  /* An arbitary input BFD chosen to hold the glue sections.  */
-  bfd * bfd_of_glue_owner;
+    /* An arbitary input BFD chosen to hold the glue sections.  */
+    bfd * bfd_of_glue_owner;
 
-  /* A boolean indicating whether knowledge of the ARM's pipeline
-     length should be applied by the linker.  */
-  int no_pipeline_knowledge;
-};
+    /* A boolean indicating whether knowledge of the ARM's pipeline
+       length should be applied by the linker.  */
+    int no_pipeline_knowledge;
+  };
 
 /* Create an entry in an ARM ELF linker hash table.  */
 
@@ -221,7 +257,7 @@ elf32_arm_link_hash_table_create (abfd)
 static struct elf_link_hash_entry *
 find_thumb_glue (link_info, name, input_bfd)
      struct bfd_link_info *link_info;
-     CONST char *name;
+     const char *name;
      bfd *input_bfd;
 {
   char *tmp_name;
@@ -256,7 +292,7 @@ find_thumb_glue (link_info, name, input_bfd)
 static struct elf_link_hash_entry *
 find_arm_glue (link_info, name, input_bfd)
      struct bfd_link_info *link_info;
-     CONST char *name;
+     const char *name;
      bfd *input_bfd;
 {
   char *tmp_name;
@@ -2672,8 +2708,8 @@ elf32_arm_find_nearest_line
      asection *     section;
      asymbol **     symbols;
      bfd_vma        offset;
-     CONST char **  filename_ptr;
-     CONST char **  functionname_ptr;
+     const char **  filename_ptr;
+     const char **  functionname_ptr;
      unsigned int * line_ptr;
 {
   boolean      found;

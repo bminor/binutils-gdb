@@ -424,16 +424,17 @@ _bfd_xcoff_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
 }
 
 
+unsigned int _bfd_xcoff_swap_aux_out PARAMS ((bfd *, PTR, int, int, int, int, PTR));
 
 unsigned int
 _bfd_xcoff_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
-     bfd   *abfd;
-     PTR 	inp;
+     bfd * abfd;
+     PTR   inp;
      int   type;
      int   class;
      int   indx ATTRIBUTE_UNUSED;
      int   numaux ATTRIBUTE_UNUSED;
-     PTR	extp;
+     PTR   extp;
 {
   union internal_auxent *in = (union internal_auxent *)inp;
   AUXENT *ext = (AUXENT *)extp;

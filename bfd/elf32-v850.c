@@ -478,7 +478,7 @@ struct v850_elf_reloc_map
   /* BFD_RELOC_V850_CALLT_16_16_OFFSET is 258, which will not fix in an
      unsigned char.  */
   bfd_reloc_code_real_type bfd_reloc_val;
-  unsigned char elf_reloc_val;
+  unsigned int elf_reloc_val;
 };
 
 static const struct v850_elf_reloc_map v850_elf_reloc_map[] =
@@ -523,7 +523,7 @@ v850_elf_reloc_type_lookup (abfd, code)
   for (i = ARRAY_SIZE (v850_elf_reloc_map); i --;)
     if (v850_elf_reloc_map[i].bfd_reloc_val == code)
       {
-	int elf_reloc_val = v850_elf_reloc_map[i].elf_reloc_val;
+	unsigned int elf_reloc_val = v850_elf_reloc_map[i].elf_reloc_val;
 	
 	BFD_ASSERT (v850_elf_howto_table[elf_reloc_val].type == elf_reloc_val);
 

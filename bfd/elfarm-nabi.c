@@ -578,6 +578,9 @@ static reloc_howto_type elf32_arm_thm_pc9_howto =
 	 0x000000ff,		/* dst_mask */
 	 true);			/* pcrel_offset */
 
+static void elf32_arm_info_to_howto
+  PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+
 static void
 elf32_arm_info_to_howto (abfd, bfd_reloc, elf_reloc)
      bfd * abfd ATTRIBUTE_UNUSED;
@@ -622,27 +625,27 @@ struct elf32_arm_reloc_map
   };
 
 static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
-{
-  {BFD_RELOC_NONE,                 R_ARM_NONE},
-  {BFD_RELOC_ARM_PCREL_BRANCH,     R_ARM_PC24},
-  {BFD_RELOC_ARM_PCREL_BLX,        R_ARM_XPC25},
-  {BFD_RELOC_THUMB_PCREL_BLX,      R_ARM_THM_XPC22},
-  {BFD_RELOC_32,                   R_ARM_ABS32},
-  {BFD_RELOC_32_PCREL,             R_ARM_REL32},
-  {BFD_RELOC_8,                    R_ARM_ABS8},
-  {BFD_RELOC_16,                   R_ARM_ABS16},
-  {BFD_RELOC_ARM_OFFSET_IMM,       R_ARM_ABS12},
-  {BFD_RELOC_ARM_THUMB_OFFSET,     R_ARM_THM_ABS5},
-  {BFD_RELOC_THUMB_PCREL_BRANCH23, R_ARM_THM_PC22},
-  {BFD_RELOC_ARM_COPY,             R_ARM_COPY},
-  {BFD_RELOC_ARM_GLOB_DAT,         R_ARM_GLOB_DAT},
-  {BFD_RELOC_ARM_JUMP_SLOT,        R_ARM_JUMP_SLOT},
-  {BFD_RELOC_ARM_RELATIVE,         R_ARM_RELATIVE},
-  {BFD_RELOC_ARM_GOTOFF,           R_ARM_GOTOFF},
-  {BFD_RELOC_ARM_GOTPC,            R_ARM_GOTPC},
-  {BFD_RELOC_ARM_GOT32,            R_ARM_GOT32},
-  {BFD_RELOC_ARM_PLT32,            R_ARM_PLT32}
-};
+  {
+    {BFD_RELOC_NONE,                 R_ARM_NONE},
+    {BFD_RELOC_ARM_PCREL_BRANCH,     R_ARM_PC24},
+    {BFD_RELOC_ARM_PCREL_BLX,        R_ARM_XPC25},
+    {BFD_RELOC_THUMB_PCREL_BLX,      R_ARM_THM_XPC22},
+    {BFD_RELOC_32,                   R_ARM_ABS32},
+    {BFD_RELOC_32_PCREL,             R_ARM_REL32},
+    {BFD_RELOC_8,                    R_ARM_ABS8},
+    {BFD_RELOC_16,                   R_ARM_ABS16},
+    {BFD_RELOC_ARM_OFFSET_IMM,       R_ARM_ABS12},
+    {BFD_RELOC_ARM_THUMB_OFFSET,     R_ARM_THM_ABS5},
+    {BFD_RELOC_THUMB_PCREL_BRANCH23, R_ARM_THM_PC22},
+    {BFD_RELOC_ARM_COPY,             R_ARM_COPY},
+    {BFD_RELOC_ARM_GLOB_DAT,         R_ARM_GLOB_DAT},
+    {BFD_RELOC_ARM_JUMP_SLOT,        R_ARM_JUMP_SLOT},
+    {BFD_RELOC_ARM_RELATIVE,         R_ARM_RELATIVE},
+    {BFD_RELOC_ARM_GOTOFF,           R_ARM_GOTOFF},
+    {BFD_RELOC_ARM_GOTPC,            R_ARM_GOTPC},
+    {BFD_RELOC_ARM_GOT32,            R_ARM_GOT32},
+    {BFD_RELOC_ARM_PLT32,            R_ARM_PLT32}
+  };
 
 static reloc_howto_type *
 elf32_arm_reloc_type_lookup (abfd, code)

@@ -54,6 +54,12 @@ static void elf32_sparc_final_write_processing
   PARAMS ((bfd *, boolean));
 static enum elf_reloc_type_class elf32_sparc_reloc_type_class
   PARAMS ((int));
+static asection * elf32_sparc_gc_mark_hook
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
+static boolean elf32_sparc_gc_sweep_hook
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
 
 /* The relocation "howto" table.  */
 

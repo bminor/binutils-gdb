@@ -40,9 +40,16 @@ static bfd_reloc_status_type openrisc_final_link_relocate
 static boolean openrisc_elf_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *, 
            const Elf_Internal_Rela *));
-static asection *openrisc_elf_gc_mark_hook
+static asection * openrisc_elf_gc_mark_hook
   PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
+static boolean openrisc_elf_check_relocs
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
+static boolean openrisc_elf_object_p
+  PARAMS ((bfd *));
+static void openrisc_elf_final_write_processing
+  PARAMS ((bfd *, boolean));
 
 
 static reloc_howto_type openrisc_elf_howto_table[] =

@@ -1,5 +1,5 @@
 /* BFD back-end for Texas Instruments TMS320C80 Multimedia Video Processor (MVP).
-   Copyright 1996, 1997, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1999, 2000, 2001 Free Software Foundation, Inc.
 
    Written by Fred Fish (fnf@cygnus.com)
 
@@ -51,6 +51,10 @@ static bfd_reloc_status_type local16_reloc
 static boolean coff_tic80_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   struct internal_reloc *, struct internal_syment *, asection **));
+static reloc_howto_type * coff_tic80_rtype_to_howto
+  PARAMS ((bfd *, asection *, struct internal_reloc *,
+	   struct coff_link_hash_entry *, struct internal_syment *,
+	   bfd_vma *));
 
 static reloc_howto_type tic80_howto_table[] =
 {

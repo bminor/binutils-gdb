@@ -72,6 +72,17 @@ static boolean sh_elf_finish_dynamic_symbol
 	   Elf_Internal_Sym *));
 static boolean sh_elf_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+static bfd_reloc_status_type sh_elf_reloc_loop
+  PARAMS ((int, bfd *, asection *, bfd_byte *, bfd_vma, asection *,
+	   bfd_vma, bfd_vma));
+static boolean sh_elf_create_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
+static asection * sh_elf_gc_mark_hook
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
+static boolean sh_elf_gc_sweep_hook
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
 
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
@@ -3641,6 +3652,7 @@ sh_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
     free (sections);
   return NULL;
 }
+
 static asection *
 sh_elf_gc_mark_hook (abfd, info, rel, h, sym)
      bfd *abfd;

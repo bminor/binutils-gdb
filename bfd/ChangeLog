@@ -1,3 +1,24 @@
+2001-08-25  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* coff-a29k.c: Add missing prototypes.
+	* coff-apollo.c: Add missing prototypes.
+	* coff-arm.c: Add missing prototypes.
+	* coff-i860.c: Add missing prototypes.
+	* coff-rs6000.c: Add missing prototypes.
+	* coff-tic80.c: Add missing prototypes.
+	* elf-m10200.c: Add missing prototypes.
+	* elf-m10300.c: Add missing prototypes.
+	* elf32-arm.h: Add missing prototypes.
+	* elf32-d10v.c: Add missing prototypes.
+	* elf32-m32r.c: Add missing prototypes.
+	* elf32-mcore.c: Add missing prototypes.
+	* elf32-openrisc.c: Add missing prototypes.
+	* elf32-sh.c: Add missing prototypes.
+	* elf32-sparc.c: Add missing prototypes.
+	* elf32-v850.c: Add missing prototypes.
+	* elfarm-nabi.c: Add missing prototypes.
+	* elfarm-oabi.c: Add missing prototypes.
+
 2001-08-25  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* elf32-mips.c (elf_mips_abi_name): Return the right ABI string for

@@ -31,6 +31,19 @@ static boolean mn10200_elf_relax_delete_bytes
   PARAMS ((bfd *, asection *, bfd_vma, int));
 static boolean mn10200_elf_symbol_address_p
   PARAMS ((bfd *, asection *, Elf32_External_Sym *, bfd_vma));
+static bfd_reloc_status_type mn10200_elf_final_link_relocate
+  PARAMS ((reloc_howto_type *, bfd *, bfd *, asection *,
+	   bfd_byte *, bfd_vma, bfd_vma, bfd_vma,
+	   struct bfd_link_info *, asection *, int));
+static boolean mn10200_elf_relocate_section
+PARAMS (( bfd *, struct bfd_link_info *, bfd *, asection *,
+	  bfd_byte *, Elf_Internal_Rela *, Elf_Internal_Sym *,
+	  asection **));
+static boolean mn10200_elf_relax_section
+  PARAMS ((bfd *, asection *, struct bfd_link_info *, boolean *));
+static bfd_byte * mn10200_elf_get_relocated_section_contents
+  PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *,
+	   bfd_byte *, boolean, asymbol **));
 
 /* We have to use RELA instructions since md_apply_fix3 in the assembler
    does absolutely nothing.  */
@@ -214,6 +227,7 @@ mn10200_info_to_howto (abfd, cache_ptr, dst)
 }
 
 /* Perform a relocation as part of a final link.  */
+
 static bfd_reloc_status_type
 mn10200_elf_final_link_relocate (howto, input_bfd, output_bfd,
 				 input_section, contents, offset, value,
