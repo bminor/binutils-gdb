@@ -261,7 +261,6 @@ notice_args_read (char *args, int from_tty, struct cmd_list_element *c)
 
 /* Compute command-line string given argument vector.  This does the
    same shell processing as fork_inferior.  */
-/* ARGSUSED */
 char *
 construct_inferior_arguments (struct gdbarch *gdbarch, int argc, char **argv)
 {
@@ -370,7 +369,6 @@ strip_bg_char (char **args)
   return 0;
 }
 
-/* ARGSUSED */
 void
 tty_command (char *file, int from_tty)
 {
@@ -543,7 +541,6 @@ continue_command (char *proc_count_exp, int from_tty)
 
 /* Step until outside of current statement.  */
 
-/* ARGSUSED */
 static void
 step_command (char *count_string, int from_tty)
 {
@@ -552,7 +549,6 @@ step_command (char *count_string, int from_tty)
 
 /* Likewise, but skip over subroutine calls as if single instructions.  */
 
-/* ARGSUSED */
 static void
 next_command (char *count_string, int from_tty)
 {
@@ -561,14 +557,12 @@ next_command (char *count_string, int from_tty)
 
 /* Likewise, but step only one instruction.  */
 
-/* ARGSUSED */
 void
 stepi_command (char *count_string, int from_tty)
 {
   step_1 (0, 1, count_string);
 }
 
-/* ARGSUSED */
 void
 nexti_command (char *count_string, int from_tty)
 {
@@ -958,7 +952,6 @@ signal_command (char *signum_exp, int from_tty)
    we set.  This may involve changes to wait_for_inferior and the
    proceed status code.  */
 
-/* ARGSUSED */
 static void
 until_next_command (int from_tty)
 {
@@ -1284,7 +1277,6 @@ finish_command (char *arg, int from_tty)
     }
 }
 
-/* ARGSUSED */
 static void
 program_info (char *args, int from_tty)
 {
@@ -1446,7 +1438,6 @@ unset_environment_command (char *var, int from_tty)
 
 static const char path_var_name[] = "PATH";
 
-/* ARGSUSED */
 static void
 path_info (char *args, int from_tty)
 {
@@ -1904,7 +1895,6 @@ interrupt_target_command (char *args, int from_tty)
     }
 }
 
-/* ARGSUSED */
 static void
 print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 		  struct frame_info *frame, const char *args)
@@ -1941,7 +1931,6 @@ float_info (char *args, int from_tty)
   print_float_info (current_gdbarch, gdb_stdout, deprecated_selected_frame, args);
 }
 
-/* ARGSUSED */
 static void
 unset_command (char *args, int from_tty)
 {

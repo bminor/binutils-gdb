@@ -524,7 +524,6 @@ arm_rdi_wait (ptid_t ptid, struct target_waitstatus *status)
 
 /* Read the remote registers into the block REGS.  */
 
-/* ARGSUSED */
 static void
 arm_rdi_fetch_registers (int regno)
 {
@@ -624,7 +623,6 @@ arm_rdi_store_registers (int regno)
    if SHOULD_WRITE is nonzero.  Returns length of data written or
    read; 0 for error.  TARGET is unused.  */
 
-/* ARGSUSED */
 static int
 arm_rdi_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
 		     int should_write, struct mem_attrib *attrib,

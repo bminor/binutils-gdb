@@ -159,7 +159,6 @@ ocd_thread_alive (ptid_t th)
 
 /* Clean up connection to a remote debugger.  */
 
-/* ARGSUSED */
 void
 ocd_close (int quitting)
 {
@@ -737,7 +736,6 @@ ocd_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
    nonzero.  Returns length of data written or read; 0 for error.  TARGET
    is ignored.  */
 
-/* ARGSUSED */
 int
 ocd_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int should_write,
 		 struct mem_attrib *attrib, struct target_ops *target)

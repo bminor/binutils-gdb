@@ -1527,7 +1527,6 @@ child_files_info (struct target_ops *ignore)
 		     target_pid_to_str (inferior_ptid));
 }
 
-/* ARGSUSED */
 static void
 child_open (char *arg, int from_tty)
 {

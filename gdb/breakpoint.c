@@ -560,7 +560,6 @@ condition_command (char *arg, int from_tty)
   error ("No breakpoint number %d.", bnum);
 }
 
-/* ARGSUSED */
 static void
 commands_command (char *arg, int from_tty)
 {
@@ -1924,7 +1923,6 @@ bpstat_clear_actions (bpstat bs)
 }
 
 /* Stub for cleaning up our state if we error-out of a breakpoint command */
-/* ARGSUSED */
 static void
 cleanup_executing_breakpoints (void *ignore)
 {
@@ -3666,7 +3664,6 @@ breakpoint_1 (int bnum, int allflag)
   annotate_breakpoints_table_end ();
 }
 
-/* ARGSUSED */
 static void
 breakpoints_info (char *bnum_exp, int from_tty)
 {
@@ -3678,7 +3675,6 @@ breakpoints_info (char *bnum_exp, int from_tty)
   breakpoint_1 (bnum, 0);
 }
 
-/* ARGSUSED */
 static void
 maintenance_info_breakpoints (char *bnum_exp, int from_tty)
 {
@@ -5320,7 +5316,6 @@ stopat_command (char *arg, int from_tty)
     break_command_1 (arg, 0, from_tty);
 }
 
-/* ARGSUSED */
 /* accessflag:  hw_write:  watch write, 
                 hw_read:   watch read, 
 		hw_access: watch access (read or write) */
@@ -5623,7 +5618,6 @@ until_break_command_continuation (struct continuation_arg *arg)
   do_exec_cleanups (cleanups);
 }
 
-/* ARGSUSED */
 void
 until_break_command (char *arg, int from_tty, int anywhere)
 {
@@ -7132,7 +7126,6 @@ disable_breakpoint (struct breakpoint *bpt)
   breakpoint_modify_event (bpt->number);
 }
 
-/* ARGSUSED */
 static void
 disable_command (char *args, int from_tty)
 {
@@ -7266,7 +7259,6 @@ enable_breakpoint (struct breakpoint *bpt)
    breakpoints) so they once again become (or continue to be) effective
    in stopping the inferior. */
 
-/* ARGSUSED */
 static void
 enable_command (char *args, int from_tty)
 {
@@ -7306,7 +7298,6 @@ enable_once_breakpoint (struct breakpoint *bpt)
   do_enable_breakpoint (bpt, disp_disable);
 }
 
-/* ARGSUSED */
 static void
 enable_once_command (char *args, int from_tty)
 {
@@ -7319,7 +7310,6 @@ enable_delete_breakpoint (struct breakpoint *bpt)
   do_enable_breakpoint (bpt, disp_del);
 }
 
-/* ARGSUSED */
 static void
 enable_delete_command (char *args, int from_tty)
 {

@@ -1903,7 +1903,6 @@ extended_remote_restart (void)
 
 /* Clean up connection to a remote debugger.  */
 
-/* ARGSUSED */
 static void
 remote_close (int quitting)
 {
@@ -3413,7 +3412,6 @@ static int register_bytes_found;
 /* Read the remote registers into the block REGS.  */
 /* Currently we just read all the registers, so we don't use regnum.  */
 
-/* ARGSUSED */
 static void
 remote_fetch_registers (int regnum)
 {
@@ -3967,7 +3965,6 @@ remote_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
    SHOULD_WRITE is nonzero.  Returns length of data written or read; 0
    for error.  TARGET is unused.  */
 
-/* ARGSUSED */
 static int
 remote_xfer_memory (CORE_ADDR mem_addr, char *buffer, int mem_len,
 		    int should_write, struct mem_attrib *attrib,

@@ -164,7 +164,6 @@ find_symbol_in_list (struct pending *list, char *name, int length)
 /* At end of reading syms, or in case of quit, really free as many
    `struct pending's as we can easily find. */
 
-/* ARGSUSED */
 void
 really_free_pendings (void *dummy)
 {

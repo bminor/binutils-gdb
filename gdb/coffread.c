@@ -469,7 +469,6 @@ coff_symfile_init (struct objfile *objfile)
    of the line table (minimum and maximum file offset) so that the
    mainline code can read the whole thing for efficiency.  */
 
-/* ARGSUSED */
 static void
 find_linenos (bfd *abfd, sec_ptr asect, void *vpinfo)
 {
@@ -506,7 +505,6 @@ static bfd *symfile_bfd;
 
 /* Read a symbol file, after initialization by coff_symfile_init.  */
 
-/* ARGSUSED */
 static void
 coff_symfile_read (struct objfile *objfile, int mainline)
 {
@@ -2036,7 +2034,6 @@ coff_read_struct_type (int index, int length, int lastsym)
    and create and return a suitable type object.
    Also defines the symbols that represent the values of the type.  */
 
-/* ARGSUSED */
 static struct type *
 coff_read_enum_type (int index, int length, int lastsym)
 {

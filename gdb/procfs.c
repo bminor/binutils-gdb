@@ -5519,7 +5519,6 @@ mappingflags (long flags)
  * Callback function, does the actual work for 'info proc mappings'.
  */
 
-/* ARGSUSED */
 static int
 info_mappings_callback (struct prmap *map, int (*ignore) (), void *unused)
 {

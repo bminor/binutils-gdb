@@ -1211,7 +1211,6 @@ symbol_reference_defined (char **string)
     }
 }
 
-/* ARGSUSED */
 struct symbol *
 define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	       struct objfile *objfile)

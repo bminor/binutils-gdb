@@ -1216,7 +1216,6 @@ value_from_double (struct type *type, DOUBLEST num)
    0 when it is using the value returning conventions (this often
    means returning pointer to where structure is vs. returning value). */
 
-/* ARGSUSED */
 struct value *
 value_being_returned (struct type *valtype, struct regcache *retbuf,
 		      int struct_return)

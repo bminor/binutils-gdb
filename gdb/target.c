@@ -206,7 +206,6 @@ DCACHE *target_dcache;
 
 /* The user just typed 'target' without the name of a target.  */
 
-/* ARGSUSED */
 static void
 target_command (char *arg, int from_tty)
 {
@@ -260,7 +259,6 @@ target_load (char *arg, int from_tty)
   (*current_target.to_load) (arg, from_tty);
 }
 
-/* ARGSUSED */
 static int
 nomemory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	  struct target_ops *t)
@@ -282,14 +280,12 @@ noprocess (void)
   error ("You can't do that without a process to debug.");
 }
 
-/* ARGSUSED */
 static int
 nosymbol (char *name, CORE_ADDR *addrp)
 {
   return 1;			/* Symbol does not exist in target env */
 }
 
-/* ARGSUSED */
 static void
 nosupport_runtime (void)
 {
@@ -300,7 +296,6 @@ nosupport_runtime (void)
 }
 
 
-/* ARGSUSED */
 static void
 default_terminal_info (char *args, int from_tty)
 {
@@ -1077,7 +1072,6 @@ target_write_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
   return target_xfer_memory_partial (memaddr, buf, len, 1, err);
 }
 
-/* ARGSUSED */
 static void
 target_info (char *args, int from_tty)
 {
@@ -1500,7 +1494,6 @@ normal_target_post_startup_inferior (ptid_t ptid)
 }
 
 /* Error-catcher for target_find_memory_regions */
-/* ARGSUSED */
 static int dummy_find_memory_regions (int (*ignore1) (), void *ignore2)
 {
   error ("No target.");
@@ -1508,7 +1501,6 @@ static int dummy_find_memory_regions (int (*ignore1) (), void *ignore2)
 }
 
 /* Error-catcher for target_make_corefile_notes */
-/* ARGSUSED */
 static char * dummy_make_corefile_notes (bfd *ignore1, int *ignore2)
 {
   error ("No target.");

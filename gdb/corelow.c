@@ -179,7 +179,6 @@ gdb_check_format (bfd *abfd)
 /* Discard all vestiges of any previous core file and mark data and stack
    spaces as empty.  */
 
-/* ARGSUSED */
 static void
 core_close (int quitting)
 {
@@ -449,7 +448,6 @@ get_core_register_section (char *name,
 
 /* We just get all the registers, so we don't use regno.  */
 
-/* ARGSUSED */
 static void
 get_core_registers (int regno)
 {

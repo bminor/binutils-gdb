@@ -401,8 +401,6 @@ lwp_to_thread (ptid_t lwp)
 /* Most target vector functions from here on actually just pass through to
    procfs.c, as they don't need to do anything specific for threads.  */
 
-
-/* ARGSUSED */
 static void
 sol_thread_open (char *arg, int from_tty)
 {

@@ -1488,7 +1488,6 @@ print_frame_label_vars (struct frame_info *fi, int this_level_only,
     }
 }
 
-/* ARGSUSED */
 void
 locals_info (char *args, int from_tty)
 {
@@ -1736,7 +1735,6 @@ current_frame_command (char *level_exp, int from_tty)
 /* Select the frame up one or COUNT stack levels
    from the previously selected frame, and print it briefly.  */
 
-/* ARGSUSED */
 static void
 up_silently_base (char *count_exp)
 {
@@ -1773,7 +1771,6 @@ up_command (char *count_exp, int from_tty)
 /* Select the frame down one or COUNT stack levels
    from the previously selected frame, and print it briefly.  */
 
-/* ARGSUSED */
 static void
 down_silently_base (char *count_exp)
 {
@@ -1802,7 +1799,6 @@ down_silently_base (char *count_exp)
   selected_frame_level_changed_event (frame_relative_level (deprecated_selected_frame));
 }
 
-/* ARGSUSED */
 static void
 down_silently_command (char *count_exp, int from_tty)
 {

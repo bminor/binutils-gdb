@@ -1407,7 +1407,6 @@ deprecated_read_fp (void)
     internal_error (__FILE__, __LINE__, "deprecated_read_fp");
 }
 
-/* ARGSUSED */
 static void
 reg_flush_command (char *command, int from_tty)
 {

@@ -1,5 +1,16 @@
 2003-09-20  Andrew Cagney  <cagney@redhat.com>
 
+	* breakpoint.c: Eliminate ARGSUSED.
+	* buildsym.c, cli/cli-cmds.c, cli/cli-script.c: Ditto.
+	* coffread.c, corelow.c, dwarf2read.c, event-top.c: Ditto.
+	* exec.c, gcore.c, hpux-thread.c, infcmd.c, inflow.c: Ditto.
+	* infrun.c, inftarg.c, maint.c, ocd.c, printcmd.c: Ditto.
+	* procfs.c, regcache.c, remote-rdi.c, remote-sds.c: Ditto.
+	* remote.c, sol-thread.c, source.c, stabsread.c: Ditto.
+	* stack.c, symfile.c, target.c, top.c, typeprint.c: Ditto.
+	* utils.c, v850ice.c, valprint.c, values.c, win32-nat.c: Ditto.
+	* wince.c, remote-vx.c: Ditto.
+
 	* cli/cli-script.c: Remove "register" attributes.
 	* config/pa/tm-hppa.h: Ditto.
 	* cli/cli-decode.c: Ditto.

@@ -184,7 +184,6 @@ error_no_arg (char *why)
 /* The "info" command is defined as a prefix, with allow_unknown = 0.
    Therefore, its own definition is called only for "info" with no args.  */
 
-/* ARGSUSED */
 static void
 info_command (char *arg, int from_tty)
 {
@@ -194,7 +193,6 @@ info_command (char *arg, int from_tty)
 
 /* The "show" command with no arguments shows all the settings.  */
 
-/* ARGSUSED */
 static void
 show_command (char *arg, int from_tty)
 {
@@ -204,7 +202,6 @@ show_command (char *arg, int from_tty)
 /* Provide documentation on command or list given by COMMAND.  FROM_TTY
    is ignored.  */
 
-/* ARGSUSED */
 static void
 help_command (char *command, int from_tty)
 {
@@ -222,7 +219,6 @@ compare_strings (const void *arg1, const void *arg2)
 
 /* The "complete" command is used by Emacs to implement completion.  */
 
-/* ARGSUSED */
 static void
 complete_command (char *arg, int from_tty)
 {
@@ -275,7 +271,6 @@ is_complete_command (struct cmd_list_element *c)
   return cmd_cfunc_eq (c, complete_command);
 }
 
-/* ARGSUSED */
 static void
 show_version (char *args, int from_tty)
 {
@@ -295,7 +290,6 @@ quit_command (char *args, int from_tty)
   quit_force (args, from_tty);
 }
 
-/* ARGSUSED */
 static void
 pwd_command (char *args, int from_tty)
 {
@@ -439,7 +433,6 @@ source_command (char *args, int from_tty)
   do_cleanups (old_cleanups);
 }
 
-/* ARGSUSED */
 static void
 echo_command (char *text, int from_tty)
 {
@@ -469,7 +462,6 @@ echo_command (char *text, int from_tty)
   gdb_flush (gdb_stdout);
 }
 
-/* ARGSUSED */
 static void
 shell_escape (char *arg, int from_tty)
 {
@@ -820,7 +812,6 @@ list_command (char *arg, int from_tty)
    Two arguments are interpeted as bounds within which to dump
    assembly.  */
 
-/* ARGSUSED */
 static void
 disassemble_command (char *arg, int from_tty)
 {
@@ -920,7 +911,6 @@ make_command (char *arg, int from_tty)
   shell_escape (p, from_tty);
 }
 
-/* ARGSUSED */
 static void
 show_user (char *args, int from_tty)
 {

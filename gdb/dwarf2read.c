@@ -3981,7 +3981,6 @@ dwarf2_read_abbrevs (bfd *abfd, struct comp_unit_head *cu_header)
 
 /* Empty the abbrev table for a new compilation unit.  */
 
-/* ARGSUSED */
 static void
 dwarf2_empty_abbrev_table (void *ptr_to_abbrevs_table)
 {
@@ -7164,7 +7163,6 @@ decode_locdesc (struct dwarf_block *blk, struct objfile *objfile,
 
 /* memory allocation interface */
 
-/* ARGSUSED */
 static void
 dwarf2_free_tmp_obstack (void *ignore)
 {

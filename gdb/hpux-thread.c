@@ -131,7 +131,6 @@ find_tcb (ptid_t ptid)
 /* Most target vector functions from here on actually just pass through to
    inftarg.c, as they don't need to do anything specific for threads.  */
 
-/* ARGSUSED */
 static void
 hpux_thread_open (char *arg, int from_tty)
 {

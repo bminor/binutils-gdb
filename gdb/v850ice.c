@@ -371,7 +371,6 @@ v850ice_open (char *name, int from_tty)
 
 /* Clean up connection to a remote debugger.  */
 
-/* ARGSUSED */
 static void
 v850ice_close (int quitting)
 {
@@ -587,7 +586,6 @@ v850ice_prepare_to_store (void)
 
    We can only read/write MAX_BLOCK_SIZE bytes at a time, though, or the DLL
    dies.  */
-/* ARGSUSED */
 static int
 v850ice_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
 		     int should_write, struct target_ops *target)

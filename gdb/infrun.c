@@ -495,7 +495,6 @@ static int singlestep_breakpoints_inserted_p = 0;
 
 
 /* Things to clean up if we QUIT out of resume ().  */
-/* ARGSUSED */
 static void
 resume_cleanups (void *ignore)
 {

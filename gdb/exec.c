@@ -94,7 +94,6 @@ exec_open (char *args, int from_tty)
   exec_file_attach (args, from_tty);
 }
 
-/* ARGSUSED */
 static void
 exec_close (int quitting)
 {

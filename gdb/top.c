@@ -1504,7 +1504,6 @@ input_from_terminal_p (void)
   return gdb_has_a_terminal () && (instream == stdin) & caution;
 }
 
-/* ARGSUSED */
 static void
 dont_repeat_command (char *ignored, int from_tty)
 {
@@ -1590,7 +1589,6 @@ show_commands (char *args, int from_tty)
 }
 
 /* Called by do_setshow_command.  */
-/* ARGSUSED */
 static void
 set_history_size_command (char *args, int from_tty, struct cmd_list_element *c)
 {
@@ -1605,7 +1603,6 @@ set_history_size_command (char *args, int from_tty, struct cmd_list_element *c)
     }
 }
 
-/* ARGSUSED */
 void
 set_history (char *args, int from_tty)
 {
@@ -1613,7 +1610,6 @@ set_history (char *args, int from_tty)
   help_list (sethistlist, "set history ", -1, gdb_stdout);
 }
 
-/* ARGSUSED */
 void
 show_history (char *args, int from_tty)
 {
@@ -1623,7 +1619,6 @@ show_history (char *args, int from_tty)
 int info_verbose = 0;		/* Default verbose msgs off */
 
 /* Called by do_setshow_command.  An elaborate joke.  */
-/* ARGSUSED */
 void
 set_verbose (char *args, int from_tty, struct cmd_list_element *c)
 {

@@ -285,7 +285,6 @@ derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
   return 0;
 }
 
-/* ARGSUSED */
 static void
 make_output_phdrs (bfd *obfd, asection *osec, void *ignored)
 {

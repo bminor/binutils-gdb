@@ -1666,7 +1666,6 @@ print_transfer_performance (struct ui_file *stream,
    instead a call to target_link() (in target.c) would supply the
    value to use. We are now discontinuing this type of ad hoc syntax. */
 
-/* ARGSUSED */
 static void
 add_symbol_file_command (char *args, int from_tty)
 {

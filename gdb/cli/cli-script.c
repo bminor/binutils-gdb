@@ -1233,7 +1233,6 @@ source_cleanup_lines (void *args)
   error_pre_print = p->old_error_pre_print;
 }
 
-/* ARGSUSED */
 static void
 do_fclose_cleanup (void *stream)
 {
