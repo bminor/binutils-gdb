@@ -1,5 +1,7 @@
 Thu Mar 18 11:57:49 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* xcoffexec.c (exec_close): Don't close exec_bfd twice.
+
 	* xcoffread.c (enter_line_range): endaddr is exclusive, not inclusive.
 
 Wed Mar 17 09:46:31 1993  Jim Kingdon  (kingdon@cygnus.com)

@@ -103,10 +103,9 @@ exec_close(quitting)
   
   vmap = 0;
 
-  if (exec_bfd) {
-    bfd_close (exec_bfd);
-    exec_bfd = NULL;
-  }
+  /* exec_bfd was already closed (the exec file has a vmap entry).  */
+  exec_bfd = NULL;
+
   if (exec_ops.to_sections) {
     free (exec_ops.to_sections);
     exec_ops.to_sections = NULL;
