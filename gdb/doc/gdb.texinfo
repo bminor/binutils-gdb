@@ -1,5 +1,5 @@
 \input texinfo      @c -*-texinfo-*-
-@c Copyright 1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 1998 1999
+@c Copyright 1988-1999
 @c Free Software Foundation, Inc.
 @c
 @c %**start of header 
@@ -56,8 +56,7 @@ This is the @value{EDITION} Edition, @value{DATE},
 of @cite{Debugging with @value{GDBN}: the @sc{gnu} Source-Level Debugger}
 for @value{GDBN} Version @value{GDBVN}.
 
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999
-Free Software Foundation, Inc.
+Copyright (C) 1988-1999 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -103,7 +102,6 @@ into another language, under the above conditions for modified versions.
 \hfill (Send bugs and comments on @value{GDBN} to bug-gdb\@prep.ai.mit.edu.)\par
 \hfill {\it Debugging with @value{GDBN}}\par
 \hfill \TeX{}info \texinfoversion\par
-\hfill doc\@cygnus.com\par
 }
 @end tex
 @end ifclear
@@ -117,8 +115,7 @@ into another language, under the above conditions for modified versions.
 @end ifset
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999
-Free Software Foundation, Inc. 
+Copyright @copyright{} 1988-1999 Free Software Foundation, Inc. 
 @sp 2
 @ifclear HPPA
 Published by the Free Software Foundation @*
@@ -151,8 +148,7 @@ This file describes @value{GDBN}, the @sc{gnu} symbolic debugger.
 This is the @value{EDITION} Edition, @value{DATE}, for @value{GDBN} Version 
 @value{GDBVN}.
 
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1997, 1998, 1999
-Free Software Foundation, Inc.
+Copyright (C) 1988-1999 Free Software Foundation, Inc.
 @menu
 * Summary::                     Summary of @value{GDBN}
 @ifclear BARETARGET
@@ -272,9 +268,7 @@ Examining the Stack
 * Backtrace::                   Backtraces
 * Selection::                   Selecting a frame
 * Frame Info::                  Information on a frame
-@ifset MIPS
-* MIPS Stack::                  MIPS machines and the function stack
-@end ifset
+* Alpha/MIPS Stack::            Alpha and MIPS machines and the function stack
 
 Examining Source Files
 
@@ -551,16 +545,18 @@ omitted from this list, we would like to add your names!
 @end quotation
 
 So that they may not regard their long labor as thankless, we
-particularly thank those who shepherded GDB through major releases:
+particularly thank those who shepherded @value{GDBN} through major
+releases:
+Jason Molenda (release 4.17),
 Stan Shebs (release 4.14),
-Fred Fish (releases 4.13, 4.12, 4.11, 4.10, and 4.9),
+Fred Fish (releases 4.16, 4.15, 4.13, 4.12, 4.11, 4.10, and 4.9),
 Stu Grossman and John Gilmore (releases 4.8, 4.7, 4.6, 4.5, and 4.4),
 John Gilmore (releases 4.3, 4.2, 4.1, 4.0, and 3.9);
 Jim Kingdon (releases 3.5, 3.4, and 3.3);
 and Randy Smith (releases 3.2, 3.1, and 3.0).
-As major maintainer of @value{GDBN} for some period, each
-contributed significantly to the structure, stability, and capabilities
-of the entire debugger.
+As major maintainer of @value{GDBN} for some period, each contributed
+significantly to the structure, stability, and capabilities of the
+entire debugger.
 
 Richard Stallman, assisted at various times by Peter TerMaat, Chris
 Hanson, and Richard Mlynarik, handled releases through 2.8.
@@ -708,7 +704,7 @@ $ @b{@value{GDBP} m4}
 There is absolutely no warranty for @value{GDBN}; type "show warranty" 
  for details.
 
-@value{GDBN} @value{GDBVN}, Copyright 1995 Free Software Foundation, Inc...
+@value{GDBN} @value{GDBVN}, Copyright 1999 Free Software Foundation, Inc...
 (@value{GDBP})
 @end smallexample
 @end ifclear
@@ -3844,9 +3840,7 @@ currently executing frame and describes it briefly, similar to the
 * Backtrace::                   Backtraces
 * Selection::                   Selecting a frame
 * Frame Info::                  Information on a frame
-@ifset MIPS
-* MIPS Stack::                  MIPS machines and the function stack
-@end ifset
+* Alpha/MIPS Stack::            Alpha and MIPS machines and the function stack
 
 @end menu
 
@@ -4069,14 +4063,8 @@ in @value{GDBN} command scripts, where the output might be unnecessary and
 distracting.
 @end table
 
-@ifset MIPS
-@node Frame Info, MIPS Stack, Selection, Stack
+@node Frame Info, Alpha/MIPS Stack, Selection, Stack
 @section Information about a frame
-@end ifset
-@ifclear MIPS
-@node Frame Info,  , Selection, Stack
-@section Information about a frame
-@end ifclear
 
 There are several other commands to print information about the selected
 stack frame.
@@ -4151,15 +4139,16 @@ exception handlers, visit the associated frame (using the @code{up},
 @end ifclear
 @end table
 
-@ifset MIPS
-@node MIPS Stack,  , Frame Info, Stack
-@section MIPS machines and the function stack
+@node Alpha/MIPS Stack,  , Frame Info, Stack
+@section MIPS/Alpha machines and the function stack
 
+@cindex stack on Alpha
 @cindex stack on MIPS
+@cindex Alpha stack
 @cindex MIPS stack
-MIPS based computers use an unusual stack frame, which sometimes
-requires @value{GDBN} to search backward in the object code to find the
-beginning of a function.
+Alpha- and MIPS-based computers use an unusual stack frame, which
+sometimes requires @value{GDBN} to search backward in the object code to
+find the beginning of a function.
 
 @cindex response time, MIPS debugging
 To improve response time (especially for embedded applications, where
@@ -4168,7 +4157,7 @@ you may want to limit the size of this search, using one of these
 commands:
 
 @table @code
-@cindex @code{heuristic-fence-post} (MIPS)
+@cindex @code{heuristic-fence-post} (Alpha,MIPS)
 @item set heuristic-fence-post @var{limit}
 Restrict @value{GDBN} to examining at most @var{limit} bytes in its search
 for the beginning of a function.  A value of @var{0} (the default)
@@ -4182,8 +4171,8 @@ Display the current limit.
 
 @noindent
 These commands are available @emph{only} when @value{GDBN} is configured
-for debugging programs on MIPS processors.
-@end ifset
+for debugging programs on Alpha or MIPS processors.
+
 
 @node Source, Data, Stack, Top
 @chapter Examining Source Files
@@ -5889,16 +5878,7 @@ Assembler source file.  This actually behaves almost like C, but
 @end table
 
 In addition, you may set the language associated with a filename
-extension.
-
-@kindex set extensions
-@kindex show extensions
-@table @code
-@item set extension-language @var{.ext} @var{language}
-
-@item info extensions
-
-@end table
+extension.  @xref{Show, , Displaying the language}.
 
 @node Manually, Automatically, Filenames, Setting
 @subsection Setting the working language
@@ -6005,8 +5985,8 @@ with a language explicitly:
 @kindex set extension-language
 @kindex info extensions
 @table @code
-@item set extension-language @var{ext} @var{language}
-Set source files with extension @var{ext} to be assumed to be in
+@item set extension-language @var{.ext} @var{language}
+Set source files with extension @var{.ext} to be assumed to be in
 the source language @var{language}.
 
 @item info extensions
@@ -8662,6 +8642,11 @@ W89K monitor, running on a Winbond HPPA board.
 @end ifclear
 @end table
 
+@ifset GENERIC
+Different targets are available on different configurations of @value{GDBN}; 
+your configuration may have more or fewer targets.
+@end ifset
+
 Many remote targets require you to download the executable's code
 once you've successfully established a connection.
 
@@ -8715,11 +8700,6 @@ opens it as the current executable target for @value{GDBN} on your host
 @code{load} does not repeat if you press @key{RET} again after using it.
 @end table
 
-@ifset GENERIC
-Different targets are available on different configurations of @value{GDBN}; 
-your configuration may have more or fewer targets.
-@end ifset
-
 @ifset REMOTESTUB
 @node Byte Order, Remote, Target Commands, Targets
 @section Choosing target byte order
@@ -8740,9 +8720,11 @@ GDB's idea of processor endian-ness manually.
 @table @code
 @kindex set endian big
 @item set endian big
+Instruct @value{GDBN} to assume the target is big-endian.
 
 @kindex set endian little
 @item set endian little
+Instruct @value{GDBN} to assume the target is little-endian.
 
 @kindex set endian auto
 @item set endian auto
@@ -9907,22 +9889,22 @@ on-line information and a printed manual.  You can use one of the Info
 formatting commands to create the on-line version of the documentation
 and @TeX{} (or @code{texi2roff}) to typeset the printed version.
 
-@value{GDBN} includes an already formatted copy of the on-line Info version of
-this manual in the @file{gdb} subdirectory.  The main Info file is
-@file{gdb-@r{version-number}/gdb/gdb.info}, and it refers to
+@value{GDBN} includes an already formatted copy of the on-line Info
+version of this manual in the @file{gdb} subdirectory.  The main Info
+file is @file{gdb-@value{GDBVN}/gdb/gdb.info}, and it refers to
 subordinate files matching @samp{gdb.info*} in the same directory.  If
 necessary, you can print out these files, or read them with any editor;
-but they are easier to read using the @code{info} subsystem in @sc{gnu} Emacs
-or the standalone @code{info} program, available as part of the @sc{gnu}
-Texinfo distribution.
+but they are easier to read using the @code{info} subsystem in @sc{gnu}
+Emacs or the standalone @code{info} program, available as part of the
+@sc{gnu} Texinfo distribution.
 
 If you want to format these Info files yourself, you need one of the
 Info formatting programs, such as @code{texinfo-format-buffer} or
 @code{makeinfo}.
 
-If you have @code{makeinfo} installed, and are in the top level @value{GDBN}
-source directory (@file{gdb-@value{GDBVN}}, in the case of version @value{GDBVN}), you can
-make the Info file by typing:
+If you have @code{makeinfo} installed, and are in the top level
+@value{GDBN} source directory (@file{gdb-@value{GDBVN}}, in the case of
+version @value{GDBVN}), you can make the Info file by typing:
 
 @example
 cd gdb
@@ -9951,11 +9933,13 @@ directory.
 If you have @TeX{} and a @sc{dvi} printer program installed, you can
 typeset and print this manual.  First switch to the the @file{gdb}
 subdirectory of the main source directory (for example, to
-@file{gdb-@value{GDBVN}/gdb}) and then type:
+@file{gdb-@value{GDBVN}/gdb}) and type:
 
 @example
 make gdb.dvi
 @end example
+
+Then give @file{gdb.dvi} to your @sc{dvi} printing program.
 @end ifclear
 
 @node Installing GDB, Index, Using History Interactively, Top
