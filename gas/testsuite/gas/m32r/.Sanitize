@@ -15,6 +15,13 @@
 
 Do-first:
 
+m32rx_files="m32rx.s m32rx.d m32rx.exp"
+if ( echo $* | grep keep\-m32rx > /dev/null ) ; then
+        keep_these_too="${m32rx_files} ${keep_these_too}"
+else
+        lose_these_too="${m32rx_files} ${lose_these_too}"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -35,6 +42,13 @@ uppercase.d
 uppercase.s
 
 Things-to-lose:
+
+for i in * ; do
+	if test ! -d $i && (grep sanitize $i > /dev/null) ; then
+		echo '***' Some mentions of Sanitize are still left in $i! 1>&2
+	fi
+done
+
 
 Do-last:
 
