@@ -2670,18 +2670,46 @@ md_assemble(str)
 	int	shorts_this_frag;
 
 
-	if (current_architecture == 0)
-	  current_architecture = (m68020
+	if (cpu_of_arch (current_architecture) == 0)
+	  {
+	    enum m68k_architecture cpu_type;
+
+#ifndef TARGET_CPU
+	    cpu_type = m68020;
+#else
+	    if (strcmp (TARGET_CPU, "m68000") == 0)
+	      cpu_type = m68000;
+	    else if (strcmp (TARGET_CPU, "m68010") == 0)
+	      cpu_type = m68010;	    
+	    else if (strcmp (TARGET_CPU, "m68020") == 0
+		     || strcmp (TARGET_CPU, "m68k") == 0)
+	      cpu_type = m68020;
+	    else if (strcmp (TARGET_CPU, "m68030") == 0)
+	      cpu_type = m68030;
+	    else if (strcmp (TARGET_CPU, "m68040") == 0)
+	      cpu_type = m68040;
+	    else
+	      cpu_type = m68020;
+#endif
+
+	    /* If float or mmu were specified, just default cpu.  */
+	    if (current_architecture != 0)
+	      current_architecture |= cpu_type;
+	    else
+	      {
+		if ((cpu_type & m68020up) != 0)
+		  current_architecture = (cpu_type
 #ifndef NO_68881
-				  | m68881
+					  | m68881
 #endif
 #ifndef NO_68851
-				  | m68851
+					  | m68851
 #endif
-				  );
-	/* If only float and mmu were specified, default cpu.  */
-	else if (cpu_of_arch (current_architecture) == 0)
-	  current_architecture |= m68020;
+					  );
+		else
+		  current_architecture = cpu_type;
+	      }
+	  }
 
 	memset((char *)(&the_ins), '\0', sizeof(the_ins));	/* JF for paranoia sake */
 	m68k_ip(str);

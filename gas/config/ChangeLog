@@ -1,3 +1,10 @@
+Mon Aug 24 12:45:12 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* tc-m68k.c: use TARGET_CPU to choose default cpu type.
+
+	* te-generic.h: default to LOCAL_LABELS_DOLLAR and LOCAL_LABELS_FB
+	so that we can assemble hand-written libgcc code.
+
 Wed Aug 19 11:20:59 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* tc-m68k.c, tc-m68kmote.c: the cas2 instruction is supposed to be
