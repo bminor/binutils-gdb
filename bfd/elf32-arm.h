@@ -2000,10 +2000,6 @@ elf32_arm_copy_private_bfd_data (ibfd, obfd)
       && EF_ARM_EABI_VERSION (out_flags) == EF_ARM_EABI_UNKNOWN
       && in_flags != out_flags)
     {
-      /* Cannot mix PIC and non-PIC code.  */
-      if ((in_flags & EF_PIC) != (out_flags & EF_PIC))
-	return false;
-
       /* Cannot mix APCS26 and APCS32 code.  */
       if ((in_flags & EF_APCS_26) != (out_flags & EF_APCS_26))
 	return false;
@@ -2023,6 +2019,10 @@ Warning: Clearing the interwork flag in %s because non-interworking code in %s h
 
 	  in_flags &= ~EF_INTERWORK;
 	}
+
+      /* Likewise for PIC, though don't warn for this case.  */
+      if ((in_flags & EF_PIC) != (out_flags & EF_PIC))
+	in_flags &= ~EF_PIC;
     }
 
   elf_elfheader (obfd)->e_flags = in_flags;
@@ -2041,6 +2041,7 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
 {
   flagword out_flags;
   flagword in_flags;
+  boolean flags_compatible = true;
 
   /* Check if we have the same endianess.  */
   if (_bfd_generic_verify_endian_match (ibfd, obfd) == false)
@@ -2081,7 +2082,7 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
       return true;
     }
 
-  /* Check flag compatibility.  */
+  /* Identical flags must be compatible.  */
   if (in_flags == out_flags)
     return true;
 
@@ -2094,47 +2095,56 @@ Error: %s compiled for EABI version %d, whereas %s is compiled for version %d"),
 			 (in_flags & EF_ARM_EABIMASK) >> 24,
 			 bfd_get_filename (obfd),
 			 (out_flags & EF_ARM_EABIMASK) >> 24);
+      return false;
     }
-  else if (EF_ARM_EABI_VERSION (in_flags) != EF_ARM_EABI_UNKNOWN)
-    /* Not sure what needs to be checked for EABI versions >= 1.  */
-    return true;
 
-  if ((in_flags & EF_APCS_26) != (out_flags & EF_APCS_26))
-    _bfd_error_handler (_("\
+  /* Not sure what needs to be checked for EABI versions >= 1.  */
+  if (EF_ARM_EABI_VERSION (in_flags) == EF_ARM_EABI_UNKNOWN)
+    {
+      if ((in_flags & EF_APCS_26) != (out_flags & EF_APCS_26))
+	{
+	  _bfd_error_handler (_("\
 Error: %s compiled for APCS-%d, whereas %s is compiled for APCS-%d"),
 			bfd_get_filename (ibfd),
 			in_flags & EF_APCS_26 ? 26 : 32,
 			bfd_get_filename (obfd),
 			out_flags & EF_APCS_26 ? 26 : 32);
+	  flags_compatible = false;
+	}
 
-  if ((in_flags & EF_APCS_FLOAT) != (out_flags & EF_APCS_FLOAT))
-    _bfd_error_handler (_("\
+      if ((in_flags & EF_APCS_FLOAT) != (out_flags & EF_APCS_FLOAT))
+	{
+	  _bfd_error_handler (_("\
 Error: %s passes floats in %s registers, whereas %s passes them in %s registers"),
 			bfd_get_filename (ibfd),
 		     in_flags & EF_APCS_FLOAT ? _("float") : _("integer"),
 			bfd_get_filename (obfd),
 		      out_flags & EF_APCS_26 ? _("float") : _("integer"));
+	  flags_compatible = false;
+	}
 
-  if ((in_flags & EF_PIC) != (out_flags & EF_PIC))
-    _bfd_error_handler (_("\
-Error: %s is compiled as position %s code, whereas %s is not"),
-			bfd_get_filename (ibfd),
-		    in_flags & EF_PIC ? _("independent") : _("dependent"),
-			bfd_get_filename (obfd));
+      if ((in_flags & EF_SOFT_FLOAT) != (out_flags & EF_SOFT_FLOAT))
+	{
+	  _bfd_error_handler (_ ("\
+Error: %s uses %s floating point, whereas %s uses %s floating point"),
+			      bfd_get_filename (ibfd),
+			      in_flags & EF_SOFT_FLOAT ? _("soft") : _("hard"),
+			      bfd_get_filename (obfd),
+			      out_flags & EF_SOFT_FLOAT ? _("soft") : _("hard"));
+	  flags_compatible = false;
+	}
 
-  /* Interworking mismatch is only a warning.  */
-  if ((in_flags & EF_INTERWORK) != (out_flags & EF_INTERWORK))
-    {
-      _bfd_error_handler (_("\
+      /* Interworking mismatch is only a warning.  */
+      if ((in_flags & EF_INTERWORK) != (out_flags & EF_INTERWORK))
+	_bfd_error_handler (_("\
 Warning: %s %s interworking, whereas %s %s"),
 			  bfd_get_filename (ibfd),
 	  in_flags & EF_INTERWORK ? _("supports") : _("does not support"),
 			  bfd_get_filename (obfd),
 		    out_flags & EF_INTERWORK ? _("does not") : _("does"));
-      return true;
     }
 
-  return false;
+  return flags_compatible;
 }
 
 /* Display the flags field.  */

@@ -1,3 +1,12 @@
+2000-10-27  Philip Blundell  <philb@gnu.org>
+
+	* elf32-arm.h (elf32_arm_copy_private_bfd_data): Don't refuse
+	attempts to mix PIC code with non-PIC, just mark the output as
+	being position dependent.
+	(elf32_arm_merge_private_bfd_data): Likewise.  Print an error 
+	message for EF_SOFT_FLOAT mismatches.  Display diagnostics for 
+	all mismatches, not just the first one.
+	
 2000-10-25  Chris Demetriou  <cgd@sibyte.com>
 
 	* ieee.c (ieee_archive_p): Plug one of many possible
