@@ -1,20 +1,20 @@
 /* tc-m68k.c  All the m68020 specific stuff in one convenient, huge,
    slow to compile, easy to find file.
-   
+
    Copyright (C) 1987, 1991, 1992 Free Software Foundation, Inc.
-   
+
    This file is part of GAS, the GNU Assembler.
-   
+
    GAS is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2, or (at your option)
    any later version.
-   
+
    GAS is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
@@ -85,7 +85,7 @@ static struct obstack robyn;
 #define PCLEA		6
 
 /* Operands we can parse:  (And associated modes)
-   
+
    numb:	8 bit num
    numw:	16 bit num
    numl:	32 bit num
@@ -97,7 +97,7 @@ static struct obstack robyn;
    num2:	like num
    sz:	w or l		if omitted, l assumed
    scale:	1 2 4 or 8	if omitted, 1 assumed
-   
+
    7.4 IMMED #num				--> NUM
    0.? DREG  dreg				--> dreg
    1.? AREG  areg				--> areg
@@ -117,7 +117,7 @@ static struct obstack robyn;
    *** MSCR  otherreg			--> Magic
    With -l option
    5.? AOFF  apc@(num)			--> *(apc+num) -- empty string and ZPC not allowed here still
-   
+
    examples:
    #foo	#0x35	#12
    d2
@@ -129,11 +129,11 @@ static struct obstack robyn;
    a1@(5,d2:w:1)	@(45,d6:l:4)
    pc@(a2)		@(d4)
    etc . . .
-   
-   
+
+
    #name@(numw)	-->turn into PC rel mode
    apc@(num8,reg:sz:scale)		--> *(apc+num8+reg*scale)
-   
+
    */
 
 enum operand_type {
@@ -174,7 +174,7 @@ enum _register {
 	DATA5,
 	DATA6,
 	DATA7,
-	
+
 	ADDR,
 	ADDR0 = ADDR,
 	ADDR1,
@@ -184,12 +184,12 @@ enum _register {
 	ADDR5,
 	ADDR6,
 	ADDR7,
-	
+
 	/* Note that COPNUM==processor #1 -- COPNUM+7==#8, which stores as 000 */
 	/* I think. . .  */
-	
+
 	SP = ADDR7,
-	
+
 	FPREG, /* Eight FP registers */
 	FP0 = FPREG,
 	FP1,
@@ -212,7 +212,7 @@ enum _register {
 	ZPC, /* Hack for Program space, but 0 addressing */
 	SR,	/* Status Reg */
 	CCR, /* Condition code Reg */
-	
+
 	/* These have to be in order for the movec instruction to work. */
 	USP,	/*  User Stack Pointer */
 	ISP,	/*  Interrupt stack pointer */
@@ -231,11 +231,11 @@ enum _register {
 	SRP,
 	URP,
 	/* end of movec ordering constraints */
-	
+
 	FPI,
 	FPS,
 	FPC,
-	
+
 	DRP,
 	CRP,
 	CAL,
@@ -262,12 +262,12 @@ enum _register {
 	BAC7,
 	PSR,
 	PCSR,
-	
+
 	IC,	/* instruction cache token */
 	DC,	/* data cache token */
 	NC,	/* no cache token */
 	BC,	/* both caches token */
-	
+
 };
 
 /* Internal form of an operand.  */
@@ -287,15 +287,15 @@ struct m68k_it {
 	char	*error;
 	char	*args;		/* list of opcode info */
 	int	numargs;
-	
+
 	int	numo;		/* Number of shorts in opcode */
 	short	opcode[11];
-	
+
 	struct m68k_op operands[6];
-	
+
 	int	nexp;		/* number of exprs in use */
 	struct m68k_exp exprs[4];
-	
+
 	int	nfrag;		/* Number of frags we have to produce */
 	struct {
 		int fragoff;	/* Where in the current opcode[] the frag ends */
@@ -303,7 +303,7 @@ struct m68k_it {
 		long foff;
 		int fragty;
 	} fragb[4];
-	
+
 	int	nrel;		/* Num of reloc strucs in use */
 	struct	{
 		int	n;
@@ -439,37 +439,37 @@ const relax_typeS
 	    { 1,		1,		0,	0 },	/* For no good reason except */
 	    { 1,		1,		0,	0 },	/* that the VAX doesn't either */
 	    { 1,		1,		0,	0 },
-	    
+
 	    { (127),	(-128),		0,	TAB(BRANCH,SHORT)},
 	    { (32767),	(-32768),	2,	TAB(BRANCH,LONG) },
 	    { 0,		0,		4,	0 },
 	    { 1,		1,		0,	0 },
-	    
+
 	    { 1,		1,		0,	0 },	/* FBRANCH doesn't come BYTE */
 	    { (32767),	(-32768),	2,	TAB(FBRANCH,LONG)},
 	    { 0,		0,		4,	0 },
 	    { 1,		1,		0,	0 },
-	    
+
 	    { 1,		1,		0,	0 },	/* PCREL doesn't come BYTE */
 	    { (32767),	(-32768),	2,	TAB(PCREL,LONG)},
 	    { 0,		0,		4,	0 },
 	    { 1,		1,		0,	0 },
-	    
+
 	    { (127),	(-128),		0,	TAB(BCC68000,SHORT)},
 	    { (32767),	(-32768),	2,	TAB(BCC68000,LONG) },
 	    { 0,		0,		6,	0 },	/* jmp long space */
 	    { 1,		1,		0,	0 },
-	    
+
 	    { 1,		1,		0,	0 },	/* DBCC doesn't come BYTE */
 	    { (32767),	(-32768),	2,	TAB(DBCC,LONG) },
 	    { 0,		0,		10,	0 },	/* bra/jmp long space */
 	    { 1,		1,		0,	0 },
-	    
+
 	    { 1,		1,		0,	0 },	/* PCLEA doesn't come BYTE */
 	    { 32767,	-32768,		2,	TAB(PCLEA,LONG) },
 	    { 0,		0,		6,	0 },
 	    { 1,		1,		0,	0 },
-	    
+
     };
 
 /* These are the machine dependent pseudo-ops.  These are included so
@@ -542,19 +542,19 @@ register char **ccp;
 {
   char *start = *ccp;
 
-  if (isalpha(*start) &&  is_name_beginner(*start)) 
+  if (isalpha(*start) &&  is_name_beginner(*start))
   {
     char c;
     char *p = start;
     symbolS *symbolP;
-    
+
     while (is_part_of_name(c = *p++))
      ;
     * -- p = 0;
     symbolP = symbol_find(start);
     *p  = c;
 
-    if (symbolP && S_GET_SEGMENT(symbolP) == SEG_REGISTER) 
+    if (symbolP && S_GET_SEGMENT(symbolP) == SEG_REGISTER)
     {
       *ccp = p;
       return  S_GET_VALUE(symbolP);
@@ -571,7 +571,7 @@ register char **ccp;
  * m68k_ip_op := '#' + <anything>
  *	| <register> + range_sep + get_regs
  *	;
- * 
+ *
  * range_sep := '/' | '-' ;
  *
  * SKIP_WHITE := <empty> | ' ' ;
@@ -590,30 +590,30 @@ register struct m68k_op *opP;
 	if (*str==' ') {
 		str++;
 	} /* Find the beginning of the string */
-	
+
 	if(!*str) {
 		opP->error="Missing operand";
 		return FAIL;
 	} /* Out of gas */
-	
+
 	for(strend = str; *strend; strend++) ;;
-	
+
 	--strend;
-	
+
 	if(*str=='#') {
 		str++;
 		opP->con1=add_exp(str,strend);
 		opP->mode=IMMED;
 		return OK;
 	} /* Guess what:  A constant.  Shar and enjoy */
-	
+
 	i = m68k_reg_parse(&str);
-	
+
 	/* is a register, is exactly a register, and is followed by '@' */
-	
+
 	if((i==FAIL || *str!='\0') && *str!='@') {
 		char *stmp;
-		
+
 		if(i!=FAIL && (*str=='/' || *str=='-')) {
 			opP->mode=REGLST;
 			return(get_regs(i,str,opP));
@@ -624,11 +624,11 @@ register struct m68k_op *opP;
 				opP->mode=AINDX;
 				return(OK);
 			}
-			
+
 			if ((current_architecture & m68020up) == 0) {
 				return(FAIL);
 			} /* if target is not a '20 or better */
-			
+
 			stmp++;
 			if(*stmp++!='(' || *strend--!=')') {
 				opP->error="Malformed operand";
@@ -636,7 +636,7 @@ register struct m68k_op *opP;
 			}
 			i=try_index(&stmp,opP);
 			opP->con2=add_exp(stmp,strend);
-			
+
 			if (i == FAIL) {
 				opP->mode=AMIND;
 			} else {
@@ -648,9 +648,9 @@ register struct m68k_op *opP;
 		opP->con1 = add_exp(str,strend);
 		return(OK);
 	} /* not a register, not exactly a register, or no '@' */
-	
+
 	opP->reg=i;
-	
+
 	if (*str=='\0') {
 		if(i>=DATA+0 && i<=DATA+7)
 		    opP->mode=DREG;
@@ -660,13 +660,13 @@ register struct m68k_op *opP;
 		    opP->mode=MSCR;
 		return OK;
 	}
-	
+
 	if((i<ADDR+0 || i>ADDR+7) && i!=PC && i!=ZPC && i!=FAIL) {	/* Can't indirect off non address regs */
 		opP->error="Invalid indirect register";
 		return FAIL;
 	}
 	know(*str == '@');
-	
+
 	str++;
 	switch(*str) {
 	case '\0':
@@ -690,7 +690,7 @@ register struct m68k_op *opP;
 	/* Didn't start with an index reg, maybe its offset or offset,reg */
 	if(i==FAIL) {
 		char *beg_str;
-		
+
 		beg_str=str;
 		for(i=1;i;) {
 			switch(*str++) {
@@ -704,7 +704,7 @@ register struct m68k_op *opP;
 		}
 		/* if(str[-3]==':') {
 		   int siz;
-		   
+
 		   switch(str[-2]) {
 		   case 'b':
 		   case 'B':
@@ -736,7 +736,7 @@ register struct m68k_op *opP;
 		}
 	}
 	/* We've now got offset)   offset,reg)   or    reg) */
-	
+
 	if (*str == '\0') {
 		/* Th-the-thats all folks */
 		if (opP->reg == FAIL) opP->mode = AINDX;	/* Other form of indirect */
@@ -755,15 +755,15 @@ register struct m68k_op *opP;
 	    str++;
 	  }
 	}
-	
+
 	if ((current_architecture & m68020up) == 0) {
 		return(FAIL);
 	} /* if target is not a '20 or better */
-	
-	
+
+
 	if(opP->ireg != FAIL) {
 		opP->mode = APRDX;
-		
+
 		i = try_index(&str, opP);
 		if (i != FAIL) {
 			opP->error = "Two index registers!  not allowed!";
@@ -772,12 +772,12 @@ register struct m68k_op *opP;
 	} else {
 		i = try_index(&str, opP);
 	}
-	
+
 	if (i == FAIL) {
 		char *beg_str;
-		
+
 		beg_str = str;
-		
+
 		for (i = 1; i; ) {
 			switch(*str++) {
 			case '\0':
@@ -790,22 +790,22 @@ register struct m68k_op *opP;
 			case ')': --i; break;
 			}
 		}
-		
+
 		opP->con2=add_exp(beg_str,str-2);
-		
+
 		if (str[-1] == ',') {
 			if (opP->ireg != FAIL) {
 				opP->error = "Can't have two index regs";
 				return(FAIL);
 			}
-			
+
 			i = try_index(&str, opP);
-			
+
 			if (i == FAIL) {
 				opP->error = "malformed index reg";
 				return(FAIL);
 			}
-			
+
 			opP->mode = APODX;
 		} else if (opP->ireg != FAIL) {
 			opP->mode = APRDX;
@@ -815,7 +815,7 @@ register struct m68k_op *opP;
 	} else {
 		opP->mode = APODX;
 	}
-	
+
 	if(*str!='\0') {
 		opP->error="Junk after indirect";
 		return FAIL;
@@ -824,7 +824,7 @@ register struct m68k_op *opP;
 } /* m68k_ip_op() */
 
 /*
- * 
+ *
  * try_index := data_or_address_register + ')' + SKIP_W
  *	| data_or_address_register + ':' + SKIP_W + size_spec + SKIP_W + multiplier + ')' + SKIP_W
  *
@@ -847,7 +847,7 @@ struct m68k_op *opP;
 	register int	i;
 	char	*ss;
 #define SKIP_W()	{ ss++; if (*ss==' ') ss++;}
-	
+
 	ss= *s;
 	/* SKIP_W(); */
 	i=m68k_reg_parse(&ss);
@@ -916,7 +916,7 @@ main()
 {
 	char buf[128];
 	struct m68k_op thark;
-	
+
 	for(;;) {
 		if(!gets(buf))
 		    break;
@@ -969,1191 +969,1187 @@ static struct hash_control*   op_hash = NULL;	/* handle of the OPCODE hash table
 
 /* JF this function no longer returns a useful value.  Sorry */
 void m68k_ip (instring)
-char *instring;
+     char *instring;
 {
-	register char *p;
-	register struct m68k_op *opP;
-	register struct m68k_incant *opcode;
-	register char *s;
-	register int tmpreg = 0,
-	baseo = 0,
-	outro = 0,
-	nextword;
-	int	siz1,
-	siz2;
-	char	c;
-	int	losing;
-	int	opsfound;
-	char	*crack_operand();
-	LITTLENUM_TYPE words[6];
-	LITTLENUM_TYPE *wordp;
-	
-	if (*instring == ' ')
-	    instring++;			/* skip leading whitespace */
-	
-	/* Scan up to end of operation-code, which MUST end in end-of-string
-	   or exactly 1 space. */
-	for (p = instring; *p != '\0'; p++)
-	    if (*p == ' ')
-		break;
-	
-	
-	if (p == instring) {
-		the_ins.error = "No operator";
-		the_ins.opcode[0] = NULL;
-		/* the_ins.numo=1; */
-		return;
-	}
-	
-	/* p now points to the end of the opcode name, probably whitespace.
-	   make sure the name is null terminated by clobbering the whitespace,
-	   look it up in the hash table, then fix it back. */   
-	c = *p;
-	*p = '\0';
-	opcode = (struct m68k_incant *)hash_find (op_hash, instring);
-	*p = c;
-	
-	if (opcode == NULL) {
-		the_ins.error = "Unknown operator";
-		the_ins.opcode[0] = NULL;
-		/* the_ins.numo=1; */
-		return;
-	}
-	
-	/* found a legitimate opcode, start matching operands */
-	while (*p == ' ') ++p;
-	
-	for(opP = &the_ins.operands[0]; *p; opP++) {
-		
-		p = crack_operand(p, opP);
-		
-		if (opP->error) {
-			the_ins.error=opP->error;
-			return;
+  register char *p;
+  register struct m68k_op *opP;
+  register struct m68k_incant *opcode;
+  register char *s;
+  register int tmpreg = 0, baseo = 0, outro = 0, nextword;
+  int siz1, siz2;
+  char	c;
+  int	losing;
+  int	opsfound;
+  char	*crack_operand();
+  LITTLENUM_TYPE words[6];
+  LITTLENUM_TYPE *wordp;
+
+  if (*instring == ' ')
+    instring++;			/* skip leading whitespace */
+
+  /* Scan up to end of operation-code, which MUST end in end-of-string
+     or exactly 1 space. */
+  for (p = instring; *p != '\0'; p++)
+    if (*p == ' ')
+      break;
+
+
+  if (p == instring) {
+    the_ins.error = "No operator";
+    the_ins.opcode[0] = NULL;
+    /* the_ins.numo=1; */
+    return;
+  }
+
+  /* p now points to the end of the opcode name, probably whitespace.
+     make sure the name is null terminated by clobbering the whitespace,
+     look it up in the hash table, then fix it back. */
+  c = *p;
+  *p = '\0';
+  opcode = (struct m68k_incant *)hash_find (op_hash, instring);
+  *p = c;
+
+  if (opcode == NULL) {
+    the_ins.error = "Unknown operator";
+    the_ins.opcode[0] = NULL;
+    /* the_ins.numo=1; */
+    return;
+  }
+
+  /* found a legitimate opcode, start matching operands */
+  while (*p == ' ') ++p;
+
+  for(opP = &the_ins.operands[0]; *p; opP++) {
+
+    p = crack_operand(p, opP);
+
+    if (opP->error) {
+      the_ins.error=opP->error;
+      return;
+    }
+  }
+
+  opsfound = opP - &the_ins.operands[0];
+
+  /* This ugly hack is to support the floating pt opcodes in their standard form */
+  /* Essentially, we fake a first enty of type COP#1 */
+  if (opcode->m_operands[0]=='I') {
+    int	n;
+
+    for(n=opsfound;n>0;--n)
+      the_ins.operands[n]=the_ins.operands[n-1];
+
+    /* memcpy((char *)(&the_ins.operands[1]), (char *)(&the_ins.operands[0]), opsfound*sizeof(the_ins.operands[0])); */
+    memset((char *)(&the_ins.operands[0]), '\0', sizeof(the_ins.operands[0]));
+    the_ins.operands[0].mode=MSCR;
+    the_ins.operands[0].reg=COPNUM; /* COP #1 */
+    opsfound++;
+  }
+
+  /* We've got the operands.  Find an opcode that'll accept them */
+  for (losing = 0; ; ) {
+    /* if we didn't get the right number of ops,
+       or we have no common model with this pattern
+       then reject this pattern. */
+
+    if (opsfound != opcode->m_opnum
+	|| ((opcode->m_arch & current_architecture) == 0)) {
+
+      ++losing;
+
+	} else {
+	  for (s=opcode->m_operands, opP = &the_ins.operands[0]; *s && !losing; s += 2, opP++) {
+	    /* Warning: this switch is huge! */
+	    /* I've tried to organize the cases into  this order:
+	       non-alpha first, then alpha by letter.  lower-case goes directly
+	       before uppercase counterpart. */
+	    /* Code with multiple case ...: gets sorted by the lowest case ...
+	       it belongs to.  I hope this makes sense. */
+	    switch(*s) {
+	    case '!':
+	      if (opP->mode == MSCR || opP->mode == IMMED
+		  || opP->mode == DREG || opP->mode == AREG
+		  || opP->mode == AINC || opP->mode == ADEC
+		  || opP->mode == REGLST)
+		losing++;
+	      break;
+
+	    case '#':
+	      if(opP->mode!=IMMED)
+		losing++;
+	      else {
+		long t;
+
+		t=get_num(opP->con1,80);
+		if(s[1]=='b' && !isbyte(t))
+		  losing++;
+		else if(s[1]=='w' && !isword(t))
+		  losing++;
+	      }
+	      break;
+
+	    case '^':
+	    case 'T':
+	      if(opP->mode!=IMMED)
+		losing++;
+	      break;
+
+	    case '$':
+	      if(opP->mode==MSCR || opP->mode==AREG ||
+		 opP->mode==IMMED || opP->reg==PC || opP->reg==ZPC || opP->mode==REGLST)
+		losing++;
+	      break;
+
+	    case '%':
+	      if(opP->mode==MSCR || opP->reg==PC ||
+		 opP->reg==ZPC || opP->mode==REGLST)
+		losing++;
+	      break;
+
+
+	    case '&':
+	      if(opP->mode==MSCR || opP->mode==DREG ||
+		 opP->mode==AREG || opP->mode==IMMED || opP->reg==PC || opP->reg==ZPC ||
+		 opP->mode==AINC || opP->mode==ADEC || opP->mode==REGLST)
+		losing++;
+	      break;
+
+	    case '*':
+	      if(opP->mode==MSCR || opP->mode==REGLST)
+		losing++;
+	      break;
+
+	    case '+':
+	      if(opP->mode!=AINC)
+		losing++;
+	      break;
+
+	    case '-':
+	      if(opP->mode!=ADEC)
+		losing++;
+	      break;
+
+	    case '/':
+	      if(opP->mode==MSCR || opP->mode==AREG ||
+		 opP->mode==AINC || opP->mode==ADEC || opP->mode==IMMED || opP->mode==REGLST)
+		losing++;
+	      break;
+
+	    case ';':
+	      if(opP->mode==MSCR || opP->mode==AREG || opP->mode==REGLST)
+		losing++;
+	      break;
+
+	    case '?':
+	      if(opP->mode==MSCR || opP->mode==AREG ||
+		 opP->mode==AINC || opP->mode==ADEC || opP->mode==IMMED || opP->reg==PC ||
+		 opP->reg==ZPC || opP->mode==REGLST)
+		losing++;
+	      break;
+
+	    case '@':
+	      if(opP->mode==MSCR || opP->mode==AREG ||
+		 opP->mode==IMMED || opP->mode==REGLST)
+		losing++;
+	      break;
+
+	    case '~':			/* For now! (JF FOO is this right?) */
+	      if(opP->mode==MSCR || opP->mode==DREG ||
+		 opP->mode==AREG || opP->mode==IMMED || opP->reg==PC || opP->reg==ZPC || opP->mode==REGLST)
+		losing++;
+	      break;
+
+	    case 'A':
+	      if(opP->mode!=AREG)
+		losing++;
+	      break;
+	    case 'a':
+	      if (opP->mode != AINDR) {
+		++losing;
+	      } /* if not address register indirect */
+	      break;
+	    case 'B':			/* FOO */
+	      if(opP->mode!=ABSL || (flagseen['S'] && instring[0] == 'j'
+				     && instring[1] == 'b'
+				     && instring[2] == 's'
+				     && instring[3] == 'r'))
+		losing++;
+	      break;
+
+	    case 'C':
+	      if(opP->mode!=MSCR || opP->reg!=CCR)
+		losing++;
+	      break;
+
+	    case 'd':			/* FOO This mode is a KLUDGE!! */
+	      if(opP->mode!=AOFF && (opP->mode!=ABSL ||
+				     opP->con1->e_beg[0]!='(' || opP->con1->e_end[0]!=')'))
+		losing++;
+	      break;
+
+	    case 'D':
+	      if(opP->mode!=DREG)
+		losing++;
+	      break;
+
+	    case 'F':
+	      if(opP->mode!=MSCR || opP->reg<(FPREG+0) || opP->reg>(FPREG+7))
+		losing++;
+	      break;
+
+	    case 'I':
+	      if(opP->mode!=MSCR || opP->reg<COPNUM ||
+		 opP->reg>=COPNUM+7)
+		losing++;
+	      break;
+
+	    case 'J':
+	      if (opP->mode != MSCR
+		  || opP->reg < USP
+		  || opP->reg > URP
+		  || cpu_of_arch(current_architecture) < m68010 /* before 68010 had none */
+		  || (cpu_of_arch(current_architecture) < m68020
+		      && opP->reg != SFC
+		      && opP->reg != DFC
+		      && opP->reg != USP
+		      && opP->reg != VBR) /* 68010's had only these */
+		  || (cpu_of_arch(current_architecture) < m68040
+		      && opP->reg != SFC
+		      && opP->reg != DFC
+		      && opP->reg != USP
+		      && opP->reg != VBR
+		      && opP->reg != CACR
+		      && opP->reg != CAAR
+		      && opP->reg != MSP
+		      && opP->reg != ISP) /* 680[23]0's have only these */
+		  || (cpu_of_arch(current_architecture) == m68040 /* 68040 has all but this */
+		      && opP->reg == CAAR)) {
+		losing++;
+	      } /* doesn't cut it */
+	      break;
+
+	    case 'k':
+	      if(opP->mode!=IMMED)
+		losing++;
+	      break;
+
+	    case 'l':
+	    case 'L':
+	      if(opP->mode==DREG || opP->mode==AREG || opP->mode==FPREG) {
+		if(s[1]=='8')
+		  losing++;
+		else {
+		  opP->mode=REGLST;
+		  opP->reg=1<<(opP->reg-DATA);
 		}
-	}
-	
-	opsfound = opP - &the_ins.operands[0];
-	
-	/* This ugly hack is to support the floating pt opcodes in their standard form */
-	/* Essentially, we fake a first enty of type COP#1 */
-	if (opcode->m_operands[0]=='I') {
-		int	n;
-		
-		for(n=opsfound;n>0;--n)
-		    the_ins.operands[n]=the_ins.operands[n-1];
-		
-		/* memcpy((char *)(&the_ins.operands[1]), (char *)(&the_ins.operands[0]), opsfound*sizeof(the_ins.operands[0])); */
-		memset((char *)(&the_ins.operands[0]), '\0', sizeof(the_ins.operands[0]));
-		the_ins.operands[0].mode=MSCR;
-		the_ins.operands[0].reg=COPNUM;		/* COP #1 */
-		opsfound++;
-	}
-	
-	/* We've got the operands.  Find an opcode that'll accept them */
-	for (losing = 0; ; ) {
-		/* if we didn't get the right number of ops,
-		   or we have no common model with this pattern
-		   then reject this pattern. */
-		
-		if (opsfound != opcode->m_opnum
-		    || ((opcode->m_arch & current_architecture) == 0)) {
-			
-			++losing;
-			
-		} else {
-			for (s=opcode->m_operands, opP = &the_ins.operands[0]; *s && !losing; s += 2, opP++) {
-				/* Warning: this switch is huge! */
-				/* I've tried to organize the cases into  this order:
-				   non-alpha first, then alpha by letter.  lower-case goes directly
-				   before uppercase counterpart. */
-				/* Code with multiple case ...: gets sorted by the lowest case ...
-				   it belongs to.  I hope this makes sense. */
-				switch(*s) {
-				case '!':
-					if (opP->mode == MSCR || opP->mode == IMMED
-					    || opP->mode == DREG || opP->mode == AREG
-					    || opP->mode == AINC || opP->mode == ADEC
-					    || opP->mode == REGLST)
-					    losing++;
-					break;
-					
-				case '#':
-					if(opP->mode!=IMMED)
-					    losing++;
-					else {
-						long t;
-						
-						t=get_num(opP->con1,80);
-						if(s[1]=='b' && !isbyte(t))
-						    losing++;
-						else if(s[1]=='w' && !isword(t))
-						    losing++;
-					}
-					break;
-					
-				case '^':
-				case 'T':
-					if(opP->mode!=IMMED)
-					    losing++;
-					break;
-					
-				case '$':
-					if(opP->mode==MSCR || opP->mode==AREG ||
-					   opP->mode==IMMED || opP->reg==PC || opP->reg==ZPC || opP->mode==REGLST)
-					    losing++;
-					break;
-					
-				case '%':
-					if(opP->mode==MSCR || opP->reg==PC ||
-					   opP->reg==ZPC || opP->mode==REGLST)
-					    losing++;
-					break;
-					
-					
-				case '&':
-					if(opP->mode==MSCR || opP->mode==DREG ||
-					   opP->mode==AREG || opP->mode==IMMED || opP->reg==PC || opP->reg==ZPC ||
-					   opP->mode==AINC || opP->mode==ADEC || opP->mode==REGLST)
-					    losing++;
-					break;
-					
-				case '*':
-					if(opP->mode==MSCR || opP->mode==REGLST)
-					    losing++;
-					break;
-					
-				case '+':
-					if(opP->mode!=AINC)
-					    losing++;
-					break;
-					
-				case '-':
-					if(opP->mode!=ADEC)
-					    losing++;
-					break;
-					
-				case '/':
-					if(opP->mode==MSCR || opP->mode==AREG ||
-					   opP->mode==AINC || opP->mode==ADEC || opP->mode==IMMED || opP->mode==REGLST)
-					    losing++;
-					break;
-					
-				case ';':
-					if(opP->mode==MSCR || opP->mode==AREG || opP->mode==REGLST)
-					    losing++;
-					break;
-					
-				case '?':
-					if(opP->mode==MSCR || opP->mode==AREG ||
-					   opP->mode==AINC || opP->mode==ADEC || opP->mode==IMMED || opP->reg==PC ||
-					   opP->reg==ZPC || opP->mode==REGLST)
-					    losing++;
-					break;
-					
-				case '@':
-					if(opP->mode==MSCR || opP->mode==AREG ||
-					   opP->mode==IMMED || opP->mode==REGLST)
-					    losing++;
-					break;
-					
-				case '~':		/* For now! (JF FOO is this right?) */
-					if(opP->mode==MSCR || opP->mode==DREG ||
-					   opP->mode==AREG || opP->mode==IMMED || opP->reg==PC || opP->reg==ZPC || opP->mode==REGLST)
-					    losing++;
-					break;
-					
-				case 'A':
-					if(opP->mode!=AREG)
-					    losing++;
-					break;
-				case 'a':
-					if (opP->mode != AINDR) {
-						++losing;
-					} /* if not address register indirect */
-					break;
-				case 'B':	/* FOO */
-					if(opP->mode!=ABSL || (flagseen['S'] && instring[0] == 'j'
-							       && instring[1] == 'b'
-							       && instring[2] == 's'
-							       && instring[3] == 'r'))
-					    losing++;
-					break;
-					
-				case 'C':
-					if(opP->mode!=MSCR || opP->reg!=CCR)
-					    losing++;
-					break;
-					
-				case 'd':	/* FOO This mode is a KLUDGE!! */
-					if(opP->mode!=AOFF && (opP->mode!=ABSL ||
-							       opP->con1->e_beg[0]!='(' || opP->con1->e_end[0]!=')'))
-					    losing++;
-					break;
-					
-				case 'D':
-					if(opP->mode!=DREG)
-					    losing++;
-					break;
-					
-				case 'F':
-					if(opP->mode!=MSCR || opP->reg<(FPREG+0) || opP->reg>(FPREG+7))
-					    losing++;
-					break;
-					
-				case 'I':
-					if(opP->mode!=MSCR || opP->reg<COPNUM ||
-					   opP->reg>=COPNUM+7)
-					    losing++;
-					break;
-					
-				case 'J':
-					if (opP->mode != MSCR
-					    || opP->reg < USP
-					    || opP->reg > URP
-					    || cpu_of_arch(current_architecture) < m68010 /* before 68010 had none */
-					    || (cpu_of_arch(current_architecture) < m68020
-						&& opP->reg != SFC
-						&& opP->reg != DFC
-						&& opP->reg != USP
-						&& opP->reg != VBR) /* 68010's had only these */
-					    || (cpu_of_arch(current_architecture) < m68040
-						&& opP->reg != SFC
-						&& opP->reg != DFC
-						&& opP->reg != USP
-						&& opP->reg != VBR
-						&& opP->reg != CACR
-						&& opP->reg != CAAR
-						&& opP->reg != MSP
-						&& opP->reg != ISP) /* 680[23]0's have only these */
-					    || (cpu_of_arch(current_architecture) == m68040 /* 68040 has all but this */
-						&& opP->reg == CAAR)) {
-						losing++;
-					} /* doesn't cut it */
-					break;
-					
-				case 'k':
-					if(opP->mode!=IMMED)
-					    losing++;
-					break;
-					
-				case 'l':
-				case 'L':
-					if(opP->mode==DREG || opP->mode==AREG || opP->mode==FPREG) {
-						if(s[1]=='8')
-						    losing++;
-						else {
-							opP->mode=REGLST;
-							opP->reg=1<<(opP->reg-DATA);
-						}
-					} else if(opP->mode!=REGLST) {
-						losing++;
-					} else if(s[1]=='8' && opP->reg&0x0FFffFF)
-					    losing++;
-					else if(s[1]=='3' && opP->reg&0x7000000)
-					    losing++;
-					break;
-					
-				case 'M':
-					if(opP->mode!=IMMED)
-					    losing++;
-					else {
-						long t;
-						
-						t=get_num(opP->con1,80);
-						if(!issbyte(t) || isvar(opP->con1))
-						    losing++;
-					}
-					break;
-					
-				case 'O':
-					if(opP->mode!=DREG && opP->mode!=IMMED)
-					    losing++;
-					break;
-					
-				case 'Q':
-					if(opP->mode!=IMMED)
-					    losing++;
-					else {
-						long t;
-						
-						t=get_num(opP->con1,80);
-						if(t<1 || t>8 || isvar(opP->con1))
-						    losing++;
-					}
-					break;
-					
-				case 'R':
-					if(opP->mode!=DREG && opP->mode!=AREG)
-					    losing++;
-					break;
-					
-				case 's':
-					if(opP->mode!=MSCR || !(opP->reg==FPI || opP->reg==FPS || opP->reg==FPC))
-					    losing++;
-					break;
-					
-				case 'S':
-					if(opP->mode!=MSCR || opP->reg!=SR)
-					    losing++;
-					break;
-					
-				case 'U':
-					if(opP->mode!=MSCR || opP->reg!=USP)
-					    losing++;
-					break;
-					
-					/* JF these are out of order.  We could put them
-					   in order if we were willing to put up with
-					   bunches of #ifdef m68851s in the code */
+	      } else if(opP->mode!=REGLST) {
+		losing++;
+	      } else if(s[1]=='8' && opP->reg&0x0FFffFF)
+		losing++;
+	      else if(s[1]=='3' && opP->reg&0x7000000)
+		losing++;
+	      break;
+
+	    case 'M':
+	      if(opP->mode!=IMMED)
+		losing++;
+	      else {
+		long t;
+
+		t=get_num(opP->con1,80);
+		if(!issbyte(t) || isvar(opP->con1))
+		  losing++;
+	      }
+	      break;
+
+	    case 'O':
+	      if(opP->mode!=DREG && opP->mode!=IMMED)
+		losing++;
+	      break;
+
+	    case 'Q':
+	      if(opP->mode!=IMMED)
+		losing++;
+	      else {
+		long t;
+
+		t=get_num(opP->con1,80);
+		if(t<1 || t>8 || isvar(opP->con1))
+		  losing++;
+	      }
+	      break;
+
+	    case 'R':
+	      if(opP->mode!=DREG && opP->mode!=AREG)
+		losing++;
+	      break;
+
+	    case 's':
+	      if(opP->mode!=MSCR || !(opP->reg==FPI || opP->reg==FPS || opP->reg==FPC))
+		losing++;
+	      break;
+
+	    case 'S':
+	      if(opP->mode!=MSCR || opP->reg!=SR)
+		losing++;
+	      break;
+
+	    case 'U':
+	      if(opP->mode!=MSCR || opP->reg!=USP)
+		losing++;
+	      break;
+
+	      /* JF these are out of order.  We could put them
+		 in order if we were willing to put up with
+		 bunches of #ifdef m68851s in the code */
 #ifndef NO_68851
-					/* Memory addressing mode used by pflushr */
-				case '|':
-					if(opP->mode==MSCR || opP->mode==DREG ||
-					   opP->mode==AREG || opP->mode==REGLST)
-					    losing++;
-					break;
-					
-				case 'f':
-					if (opP->mode != MSCR || (opP->reg != SFC && opP->reg != DFC))
-					    losing++;
-					break;
-					
-				case 'P':
-					if (opP->mode != MSCR || (opP->reg != TC && opP->reg != CAL &&
-								  opP->reg != VAL && opP->reg != SCC && opP->reg != AC))
-					    losing++;
-					break;
-					
-				case 'V':
-					if (opP->reg != VAL)
-					    losing++;
-					break;
-					
-				case 'W':
-					if (opP->mode != MSCR || (opP->reg != DRP && opP->reg != SRP &&
-								  opP->reg != CRP))
-					    losing++;
-					break;
-					
-				case 'X':
-					if (opP->mode != MSCR ||
-					    (!(opP->reg >= BAD && opP->reg <= BAD+7) &&
-					     !(opP->reg >= BAC && opP->reg <= BAC+7)))
-					    losing++;
-					break;
-					
-				case 'Y':
-					if (opP->reg != PSR)
-					    losing++;
-					break;
-					
-				case 'Z':
-					if (opP->reg != PCSR)
-					    losing++;
-					break;
+	      /* Memory addressing mode used by pflushr */
+	    case '|':
+	      if(opP->mode==MSCR || opP->mode==DREG ||
+		 opP->mode==AREG || opP->mode==REGLST)
+		losing++;
+	      break;
+
+	    case 'f':
+	      if (opP->mode != MSCR || (opP->reg != SFC && opP->reg != DFC))
+		losing++;
+	      break;
+
+	    case 'P':
+	      if (opP->mode != MSCR || (opP->reg != TC && opP->reg != CAL &&
+					opP->reg != VAL && opP->reg != SCC && opP->reg != AC))
+		losing++;
+	      break;
+
+	    case 'V':
+	      if (opP->reg != VAL)
+		losing++;
+	      break;
+
+	    case 'W':
+	      if (opP->mode != MSCR || (opP->reg != DRP && opP->reg != SRP &&
+					opP->reg != CRP))
+		losing++;
+	      break;
+
+	    case 'X':
+	      if (opP->mode != MSCR ||
+		  (!(opP->reg >= BAD && opP->reg <= BAD+7) &&
+		   !(opP->reg >= BAC && opP->reg <= BAC+7)))
+		losing++;
+	      break;
+
+	    case 'Y':
+	      if (opP->reg != PSR)
+		losing++;
+	      break;
+
+	    case 'Z':
+	      if (opP->reg != PCSR)
+		losing++;
+	      break;
 #endif
-				case 'c':
-					if (opP->reg != NC
-					    && opP->reg != IC
-					    && opP->reg != DC
-					    && opP->reg != BC) {
-						losing++;
-					} /* not a cache specifier. */
-					break;
-					
-				case '_':
-					if (opP->mode != ABSL) {
-						++losing;
-					} /* not absolute */
-					break;
-					
-				default:
-					as_fatal("Internal error:  Operand mode %c unknown in line %s of file \"%s\"",
-						 *s, __LINE__, __FILE__);
-				} /* switch on type of operand */
-				
-				if (losing) break;
-			} /* for each operand */
-		} /* if immediately wrong */
-		
-		if (!losing) {
-			break;
-		} /* got it. */
-		
-		opcode = opcode->m_next;
-		
-		if (!opcode) {
-			the_ins.error = "instruction/operands mismatch";
-			return;
-		} /* Fell off the end */
-		
-		losing = 0;
-	}
-	
-	/* now assemble it */
-	
-	the_ins.args=opcode->m_operands;
-	the_ins.numargs=opcode->m_opnum;
-	the_ins.numo=opcode->m_codenum;
-	the_ins.opcode[0]=getone(opcode);
-	the_ins.opcode[1]=gettwo(opcode);
-	
-	for (s = the_ins.args, opP = &the_ins.operands[0]; *s; s += 2, opP++) {
-		/* This switch is a doozy.
-		   Watch the first step; its a big one! */
-		switch(s[0]) {
-			
-		case '*':
-		case '~':
-		case '%':
-		case ';':
-		case '@':
-		case '!':
-		case '&':
-		case '$':
-		case '?':
-		case '/':
+	    case 'c':
+	      if (opP->reg != NC
+		  && opP->reg != IC
+		  && opP->reg != DC
+		  && opP->reg != BC) {
+		losing++;
+	      } /* not a cache specifier. */
+	      break;
+
+	    case '_':
+	      if (opP->mode != ABSL) {
+		++losing;
+	      } /* not absolute */
+	      break;
+
+	    default:
+	      as_fatal("Internal error:  Operand mode %c unknown in line %s of file \"%s\"",
+		       *s, __LINE__, __FILE__);
+	    } /* switch on type of operand */
+
+	    if (losing) break;
+	  } /* for each operand */
+	} /* if immediately wrong */
+
+    if (!losing) {
+      break;
+    } /* got it. */
+
+    opcode = opcode->m_next;
+
+    if (!opcode) {
+      the_ins.error = "instruction/operands mismatch or invalid\n    instruction for this architecture";
+      return;
+    } /* Fell off the end */
+
+    losing = 0;
+  }
+
+  /* now assemble it */
+
+  the_ins.args=opcode->m_operands;
+  the_ins.numargs=opcode->m_opnum;
+  the_ins.numo=opcode->m_codenum;
+  the_ins.opcode[0]=getone(opcode);
+  the_ins.opcode[1]=gettwo(opcode);
+
+  for (s = the_ins.args, opP = &the_ins.operands[0]; *s; s += 2, opP++) {
+    /* This switch is a doozy.
+       Watch the first step; its a big one! */
+    switch(s[0]) {
+
+    case '*':
+    case '~':
+    case '%':
+    case ';':
+    case '@':
+    case '!':
+    case '&':
+    case '$':
+    case '?':
+    case '/':
 #ifndef NO_68851
-		case '|':
+    case '|':
 #endif
-			switch(opP->mode) {
-			case IMMED:
-				tmpreg=0x3c;	/* 7.4 */
-				if (strchr("bwl",s[1])) nextword=get_num(opP->con1,80);
-				else nextword=nextword=get_num(opP->con1,0);
-				if(isvar(opP->con1))
-				    add_fix(s[1],opP->con1,0);
-				switch(s[1]) {
-				case 'b':
-					if(!isbyte(nextword))
-					    opP->error="operand out of range";
-					addword(nextword);
-					baseo=0;
-					break;
-				case 'w':
-					if(!isword(nextword))
-					    opP->error="operand out of range";
-					addword(nextword);
-					baseo=0;
-					break;
-				case 'l':
-					addword(nextword>>16);
-					addword(nextword);
-					baseo=0;
-					break;
-					
-				case 'f':
-					baseo=2;
-					outro=8;
-					break;
-				case 'F':
-					baseo=4;
-					outro=11;
-					break;
-				case 'x':
-					baseo=6;
-					outro=15;
-					break;
-				case 'p':
-					baseo=6;
-					outro= -1;
-					break;
-				default:
-					as_fatal("Internal error:  Can't decode %c%c in line %s of file \"%s\"",
-						 *s, s[1], __LINE__, __FILE__);
-				}
-				if(!baseo)
-				    break;
-				
-				/* We gotta put out some float */
-				if(seg(opP->con1)!=SEG_BIG) {
-					int_to_gen(nextword);
-					gen_to_words(words,baseo,(long int)outro);
-					for(wordp=words;baseo--;wordp++)
-					    addword(*wordp);
-					break;
-				}		/* Its BIG */
-				if(offs(opP->con1)>0) {
-					as_warn("Bignum assumed to be binary bit-pattern");
-					if(offs(opP->con1)>baseo) {
-						as_warn("Bignum too big for %c format; truncated",s[1]);
-						offs(opP->con1)=baseo;
-					}
-					baseo-=offs(opP->con1);
-					for(wordp=generic_bignum+offs(opP->con1)-1;offs(opP->con1)--;--wordp)
-					    addword(*wordp);
-					while(baseo--)
-					    addword(0);
-					break;
-				}
-				gen_to_words(words,baseo,(long)outro);
-				for (wordp=words;baseo--;wordp++)
-				    addword(*wordp);
-				break;
-			case DREG:
-				tmpreg=opP->reg-DATA; /* 0.dreg */
-				break;
-			case AREG:
-				tmpreg=0x08+opP->reg-ADDR; /* 1.areg */
-				break;
-			case AINDR:
-				tmpreg=0x10+opP->reg-ADDR; /* 2.areg */
-				break;
-			case ADEC:
-				tmpreg=0x20+opP->reg-ADDR; /* 4.areg */
-				break;
-			case AINC:
-				tmpreg=0x18+opP->reg-ADDR; /* 3.areg */
-				break;
-			case AOFF:
-				
-				nextword=get_num(opP->con1,80);
-				/* Force into index mode.  Hope this works */
-				
-				/* We do the first bit for 32-bit displacements,
-				   and the second bit for 16 bit ones.  It is
-				   possible that we should make the default be
-				   WORD instead of LONG, but I think that'd
-				   break GCC, so we put up with a little
-				   inefficiency for the sake of working output.
-				   */
-				
-				if(   !issword(nextword)
-				   || (   isvar(opP->con1)
-				       && (  (   opP->con1->e_siz==0
-					      && flagseen['l']==0)
-					   || opP->con1->e_siz==3))) {
-					
-					if(opP->reg==PC)
-					    tmpreg=0x3B;	/* 7.3 */
-					else
-					    tmpreg=0x30+opP->reg-ADDR;	/* 6.areg */
-					if(isvar(opP->con1)) {
-						if(opP->reg==PC) {
-							add_frag(adds(opP->con1),
-								 offs(opP->con1),
-								 TAB(PCLEA,SZ_UNDEF));
-							break;
-						} else {
-							addword(0x0170);
-							add_fix('l',opP->con1,1);
-						}
-					} else
-					    addword(0x0170);
-					addword(nextword>>16);
-				} else {
-					if(opP->reg==PC)
-					    tmpreg=0x3A; /* 7.2 */
-					else
-					    tmpreg=0x28+opP->reg-ADDR; /* 5.areg */
-					
-					if(isvar(opP->con1)) {
-						if(opP->reg==PC) {
-							add_fix('w',opP->con1,1);
-						} else
-						    add_fix('w',opP->con1,0);
-					}
-				}
-				addword(nextword);
-				break;
-				
-			case APODX:
-			case AMIND:
-			case APRDX:
-				know(current_architecture & m68020up);
-				/* intentional fall-through */
-			case AINDX:
-				nextword=0;
-				baseo=get_num(opP->con1,80);
-				outro=get_num(opP->con2,80);
-				/* Figure out the 'addressing mode' */
-				/* Also turn on the BASE_DISABLE bit, if needed */
-				if(opP->reg==PC || opP->reg==ZPC) {
-					tmpreg=0x3b; /* 7.3 */
-					if(opP->reg==ZPC)
-					    nextword|=0x80;
-				} else if(opP->reg==FAIL) {
-					nextword|=0x80;
-					tmpreg=0x30;	/* 6.garbage */
-				} else tmpreg=0x30+opP->reg-ADDR; /* 6.areg */
-				
-				siz1= (opP->con1) ? opP->con1->e_siz : 0;
-				siz2= (opP->con2) ? opP->con2->e_siz : 0;
-				
-				/* Index register stuff */
-				if(opP->ireg>=DATA+0 && opP->ireg<=ADDR+7) {
-					nextword|=(opP->ireg-DATA)<<12;
-					
-					if(opP->isiz==0 || opP->isiz==3)
-					    nextword|=0x800;
-					switch(opP->imul) {
-					case 1: break;
-					case 2: nextword|=0x200; break;
-					case 4: nextword|=0x400; break;
-					case 8: nextword|=0x600; break;
-					default: as_fatal("failed sanity check.");
-					}
-					/* IF its simple,
-					   GET US OUT OF HERE! */
-					
-					/* Must be INDEX, with an index
-					   register.  Address register
-					   cannot be ZERO-PC, and either
-					   :b was forced, or we know
-					   it will fit */
-					if(   opP->mode==AINDX
-					   && opP->reg!=FAIL
-					   && opP->reg!=ZPC
-					   && (   siz1==1
-					       || (   issbyte(baseo)
-						   && !isvar(opP->con1)))) {
-						nextword +=baseo&0xff;
-						addword(nextword);
-						if(isvar(opP->con1))
-						    add_fix('B',opP->con1,0);
-						break;
-					}
-				} else
-				    nextword|=0x40;	/* No index reg */
-				
-				/* It aint simple */
-				nextword|=0x100;
-				/* If the guy specified a width, we assume that
-				   it is wide enough.  Maybe it isn't.  If so, we lose
-				   */
-				switch(siz1) {
-				case 0:
-					if(isvar(opP->con1) || !issword(baseo)) {
-						siz1=3;
-						nextword|=0x30;
-					} else if(baseo==0)
-					    nextword|=0x10;
-					else {	
-						nextword|=0x20;
-						siz1=2;
-					}
-					break;
-				case 1:
-					as_warn("Byte dispacement won't work.  Defaulting to :w");
-				case 2:
-					nextword|=0x20;
-					break;
-				case 3:
-					nextword|=0x30;
-					break;
-				}
-				
-				/* Figure out innner displacement stuff */
-				if(opP->mode!=AINDX) {
-					switch(siz2) {
-					case 0:
-						if(isvar(opP->con2) || !issword(outro)) {
-							siz2=3;
-							nextword|=0x3;
-						} else if(outro==0)
-						    nextword|=0x1;
-						else {	
-							nextword|=0x2;
-							siz2=2;
-						}
-						break;
-					case 1:
-						as_warn("Byte dispacement won't work.  Defaulting to :w");
-					case 2:
-						nextword|=0x2;
-						break;
-					case 3:
-						nextword|=0x3;
-						break;
-					}
-					if(opP->mode==APODX) nextword|=0x04;
-					else if(opP->mode==AMIND) nextword|=0x40;
-				}
-				addword(nextword);
-				
-				if(isvar(opP->con1)) {
-					if(opP->reg==PC || opP->reg==ZPC) {
-						add_fix(siz1==3 ? 'l' : 'w',opP->con1,1);
-						opP->con1->e_exp.X_add_number+=6;
-					} else
-					    add_fix(siz1==3 ? 'l' : 'w',opP->con1,0);
-				}
-				if(siz1==3)
-				    addword(baseo>>16);
-				if(siz1)
-				    addword(baseo);
-				
-				if(isvar(opP->con2)) {
-					if(opP->reg==PC || opP->reg==ZPC) {
-						add_fix(siz2==3 ? 'l' : 'w',opP->con2,1);
-						opP->con1->e_exp.X_add_number+=6;
-					} else
-					    add_fix(siz2==3 ? 'l' : 'w',opP->con2,0);
-				}
-				if(siz2==3)
-				    addword(outro>>16);
-				if(siz2)
-				    addword(outro);
-				
-				break;
-				
-			case ABSL:
-				nextword=get_num(opP->con1,80);
-				switch(opP->con1->e_siz) {
-				default:
-					as_warn("Unknown size for absolute reference");
-				case 0:
-					if(!isvar(opP->con1) && issword(offs(opP->con1))) {
-						tmpreg=0x38; /* 7.0 */
-						addword(nextword);
-						break;
-					}
-					/* Don't generate pc relative code
-					   on 68010 and 68000 */
-					if(isvar(opP->con1)
-					   && !subs(opP->con1)
-					   && seg(opP->con1) == SEG_TEXT
-					   && now_seg == SEG_TEXT
-					   && cpu_of_arch(current_architecture) >= m68020
-					   && !flagseen['S']
-					   && !strchr("~%&$?", s[0])) {
-						tmpreg=0x3A; /* 7.2 */
-						add_frag(adds(opP->con1),
-							 offs(opP->con1),
-							 TAB(PCREL,SZ_UNDEF));
-						break;
-					}
-				case 3:		/* Fall through into long */
-					if(isvar(opP->con1))
-					    add_fix('l',opP->con1,0);
-					
-					tmpreg=0x39;	/* 7.1 mode */
-					addword(nextword>>16);
-					addword(nextword);
-					break;
-					
-				case 2:		/* Word */
-					if(isvar(opP->con1))
-					    add_fix('w',opP->con1,0);
-					
-					tmpreg=0x38;	/* 7.0 mode */
-					addword(nextword);
-					break;
-				}
-				break;
-			case MSCR:
-			default:
-				as_bad("unknown/incorrect operand");
-				/* abort(); */
-			}
-			install_gen_operand(s[1],tmpreg);
-			break;
-			
-		case '#':
-		case '^':
-			switch(s[1]) {	/* JF: I hate floating point! */
-			case 'j':
-				tmpreg=70;
-				break;
-			case '8':
-				tmpreg=20;
-				break;
-			case 'C':
-				tmpreg=50;
-				break;
-			case '3':
-			default:
-				tmpreg=80;
-				break;
-			}
-			tmpreg=get_num(opP->con1,tmpreg);
-			if(isvar(opP->con1))
-			    add_fix(s[1],opP->con1,0);
-			switch(s[1]) {
-			case 'b':	/* Danger:  These do no check for
-					   certain types of overflow.
-					   user beware! */
-				if(!isbyte(tmpreg))
-				    opP->error="out of range";
-				insop(tmpreg);
-				if(isvar(opP->con1))
-				    the_ins.reloc[the_ins.nrel-1].n=(opcode->m_codenum)*2;
-				break;
-			case 'w':
-				if(!isword(tmpreg))
-				    opP->error="out of range";
-				insop(tmpreg);
-				if(isvar(opP->con1))
-				    the_ins.reloc[the_ins.nrel-1].n=(opcode->m_codenum)*2;
-				break;
-			case 'l':
-				insop(tmpreg);		/* Because of the way insop works, we put these two out backwards */
-				insop(tmpreg>>16);
-				if(isvar(opP->con1))
-				    the_ins.reloc[the_ins.nrel-1].n=(opcode->m_codenum)*2;
-				break;
-			case '3':
-				tmpreg&=0xFF;
-			case '8':
-			case 'C':
-				install_operand(s[1],tmpreg);
-				break;
-			default:
-				as_fatal("Internal error:  Unknown mode #%c in line %s of file \"%s\"", s[1], __LINE__, __FILE__);
-			}
-			break;
-			
-		case '+':
-		case '-':
-		case 'A':
-		case 'a':
-			install_operand(s[1],opP->reg-ADDR);
-			break;
-			
-		case 'B':
-			tmpreg=get_num(opP->con1,80);
-			switch(s[1]) {
-			case 'B':
-				/* Needs no offsetting */
-				add_fix('B',opP->con1,1);
-				break;
-			case 'W':
-				/* Offset the displacement to be relative to byte disp location */
-				opP->con1->e_exp.X_add_number+=2;
-				add_fix('w',opP->con1,1);
-				addword(0);
-				break;
-			case 'L':
-			long_branch:
-				if (cpu_of_arch(current_architecture) < m68020) 	/* 68000 or 010 */
-				    as_warn("Can't use long branches on 68000/68010");
-				the_ins.opcode[the_ins.numo-1]|=0xff;
-				/* Offset the displacement to be relative to byte disp location */
-				opP->con1->e_exp.X_add_number+=4;
-				add_fix('l',opP->con1,1);
-				addword(0);
-				addword(0);
-				break;
-			case 'g':
-				if(subs(opP->con1))	 /* We can't relax it */
-				    goto long_branch;
-				
-				/* This could either be a symbol, or an
-				   absolute address.  No matter, the
-				   frag hacking will finger it out.
-				   Not quite: it can't switch from
-				   BRANCH to BCC68000 for the case
-				   where opnd is absolute (it needs
-				   to use the 68000 hack since no
-				   conditional abs jumps).  */
-				if (((cpu_of_arch(current_architecture) < m68020) || (0==adds(opP->con1)))
-				    && (the_ins.opcode[0] >= 0x6200)
-				    && (the_ins.opcode[0] <= 0x6f00)) {
-					add_frag(adds(opP->con1),offs(opP->con1),TAB(BCC68000,SZ_UNDEF));
-				} else {
-					add_frag(adds(opP->con1),offs(opP->con1),TAB(BRANCH,SZ_UNDEF));
-				}
-				break;
-			case 'w':
-				if(isvar(opP->con1)) {
-					/* check for DBcc instruction */
-					if ((the_ins.opcode[0] & 0xf0f8) ==0x50c8) {
-						/* size varies if patch */
-						/* needed for long form */
-						add_frag(adds(opP->con1),offs(opP->con1),TAB(DBCC,SZ_UNDEF));
-						break;
-					}
-					
-					/* Don't ask! */
-					opP->con1->e_exp.X_add_number+=2;
-					add_fix('w',opP->con1,1);
-				}
-				addword(0);
-				break;
-			case 'C':		/* Fixed size LONG coproc branches */
-				the_ins.opcode[the_ins.numo-1]|=0x40;
-				/* Offset the displacement to be relative to byte disp location */
-				/* Coproc branches don't have a byte disp option, but they are
-				   compatible with the ordinary branches, which do... */
-				opP->con1->e_exp.X_add_number+=4;
-				add_fix('l',opP->con1,1);
-				addword(0);
-				addword(0);
-				break;
-			case 'c':		/* Var size Coprocesssor branches */
-				if(subs(opP->con1)) {
-					add_fix('l',opP->con1,1);
-					add_frag((symbolS *)0,(long)0,TAB(FBRANCH,LONG));
-				} else if(adds(opP->con1)) {
-					add_frag(adds(opP->con1),offs(opP->con1),TAB(FBRANCH,SZ_UNDEF));
-				} else {
-					/* add_frag((symbolS *)0,offs(opP->con1),TAB(FBRANCH,SHORT)); */
-					the_ins.opcode[the_ins.numo-1]|=0x40;
-					add_fix('l',opP->con1,1);
-					addword(0);
-					addword(4);
-				}
-				break;
-			default:
-				as_fatal("Internal error:  operand type B%c unknown in line %s of file \"%s\"",
-					 s[1], __LINE__, __FILE__);
-			}
-			break;
-			
-		case 'C':		/* Ignore it */
-			break;
-			
-		case 'd':		/* JF this is a kludge */
-			if(opP->mode==AOFF) {
-				install_operand('s',opP->reg-ADDR);
-			} else {
-				char *tmpP;
-				
-				tmpP=opP->con1->e_end-2;
-				opP->con1->e_beg++;
-				opP->con1->e_end-=4;	/* point to the , */
-				baseo=m68k_reg_parse(&tmpP);
-				if(baseo<ADDR+0 || baseo>ADDR+7) {
-					as_bad("Unknown address reg, using A0");
-					baseo=0;
-				} else baseo-=ADDR;
-				install_operand('s',baseo);
-			}
-			tmpreg=get_num(opP->con1,80);
-			if(!issword(tmpreg)) {
-				as_warn("Expression out of range, using 0");
-				tmpreg=0;
-			}
-			addword(tmpreg);
-			break;
-			
-		case 'D':
-			install_operand(s[1],opP->reg-DATA);
-			break;
-			
-		case 'F':
-			install_operand(s[1],opP->reg-FPREG);
-			break;
-			
-		case 'I':
-			tmpreg=1+opP->reg-COPNUM;
-			if(tmpreg==8)
-			    tmpreg=0;
-			install_operand(s[1],tmpreg);
-			break;
-			
-		case 'J':		/* JF foo */
-			switch(opP->reg) {
-			case SFC:   tmpreg=0x000; break;
-			case DFC:   tmpreg=0x001; break;
-			case CACR:  tmpreg=0x002; break;
-			case TC:    tmpreg=0x003; break;
-			case ITT0:  tmpreg=0x004; break;
-			case ITT1:  tmpreg=0x005; break;
-			case DTT0:  tmpreg=0x006; break;
-			case DTT1:  tmpreg=0x007; break;
-				
-			case USP:   tmpreg=0x800; break;
-			case VBR:   tmpreg=0x801; break;
-			case CAAR:  tmpreg=0x802; break;
-			case MSP:   tmpreg=0x803; break;
-			case ISP:   tmpreg=0x804; break;
-			case MMUSR: tmpreg=0x805; break;
-			case URP:   tmpreg=0x806; break;
-			case SRP:   tmpreg=0x807; break;
-			default:
-				as_fatal("failed sanity check.");
-			}
-			install_operand(s[1],tmpreg);
-			break;
-			
-		case 'k':
-			tmpreg=get_num(opP->con1,55);
-			install_operand(s[1],tmpreg&0x7f);
-			break;
-			
-		case 'l':
-			tmpreg=opP->reg;
-			if(s[1]=='w') {
-				if(tmpreg&0x7FF0000)
-				    as_bad("Floating point register in register list");
-				insop(reverse_16_bits(tmpreg));
-			} else {
-				if(tmpreg&0x700FFFF)
-				    as_bad("Wrong register in floating-point reglist");
-				install_operand(s[1],reverse_8_bits(tmpreg>>16));
-			}
-			break;
-			
-		case 'L':
-			tmpreg=opP->reg;
-			if(s[1]=='w') {
-				if(tmpreg&0x7FF0000)
-				    as_bad("Floating point register in register list");
-				insop(tmpreg);
-			} else if(s[1]=='8') {
-				if(tmpreg&0x0FFFFFF)
-				    as_bad("incorrect register in reglist");
-				install_operand(s[1],tmpreg>>24);
-			} else {
-				if(tmpreg&0x700FFFF)
-				    as_bad("wrong register in floating-point reglist");
-				else
-				    install_operand(s[1],tmpreg>>16);
-			}
-			break;
-			
-		case 'M':
-			install_operand(s[1],get_num(opP->con1,60));
-			break;
-			
-		case 'O':
-			tmpreg= (opP->mode==DREG)
-			    ? 0x20+opP->reg-DATA
-				: (get_num(opP->con1,40)&0x1F);
-			install_operand(s[1],tmpreg);
-			break;
-			
-		case 'Q':
-			tmpreg=get_num(opP->con1,10);
-			if(tmpreg==8)
-			    tmpreg=0;
-			install_operand(s[1],tmpreg);
-			break;
-			
-		case 'R':
-			/* This depends on the fact that ADDR registers are
-			   eight more than their corresponding DATA regs, so
-			   the result will have the ADDR_REG bit set */
-			install_operand(s[1],opP->reg-DATA);
-			break;
-			
-		case 's':
-			if(opP->reg==FPI) tmpreg=0x1;
-			else if(opP->reg==FPS) tmpreg=0x2;
-			else if(opP->reg==FPC) tmpreg=0x4;
-			else as_fatal("failed sanity check.");
-			install_operand(s[1],tmpreg);
-			break;
-			
-		case 'S':	/* Ignore it */
-			break;
-			
-		case 'T':
-			install_operand(s[1],get_num(opP->con1,30));
-			break;
-			
-		case 'U':	/* Ignore it */
-			break;
-			
-		case 'c':
-			switch (opP->reg) {
-			case NC: tmpreg = 0; break;
-			case DC: tmpreg = 1; break;
-			case IC: tmpreg = 2; break;
-			case BC: tmpreg = 3; break;
-			default:
-				as_fatal("failed sanity check");
-			} /* switch on cache token */
-			install_operand(s[1], tmpreg);
-			break;
+      switch(opP->mode) {
+      case IMMED:
+	tmpreg=0x3c;		/* 7.4 */
+	if (strchr("bwl",s[1])) nextword=get_num(opP->con1,80);
+	else nextword=nextword=get_num(opP->con1,0);
+	if(isvar(opP->con1))
+	  add_fix(s[1],opP->con1,0);
+	switch(s[1]) {
+	case 'b':
+	  if(!isbyte(nextword))
+	    opP->error="operand out of range";
+	  addword(nextword);
+	  baseo=0;
+	  break;
+	case 'w':
+	  if(!isword(nextword))
+	    opP->error="operand out of range";
+	  addword(nextword);
+	  baseo=0;
+	  break;
+	case 'l':
+	  addword(nextword>>16);
+	  addword(nextword);
+	  baseo=0;
+	  break;
+
+	case 'f':
+	  baseo=2;
+	  outro=8;
+	  break;
+	case 'F':
+	  baseo=4;
+	  outro=11;
+	  break;
+	case 'x':
+	  baseo=6;
+	  outro=15;
+	  break;
+	case 'p':
+	  baseo=6;
+	  outro= -1;
+	  break;
+	default:
+	  as_fatal("Internal error:  Can't decode %c%c in line %s of file \"%s\"",
+		   *s, s[1], __LINE__, __FILE__);
+	}
+	if(!baseo)
+	  break;
+
+	/* We gotta put out some float */
+	if(seg(opP->con1)!=SEG_BIG) {
+	  int_to_gen(nextword);
+	  gen_to_words(words,baseo,(long int)outro);
+	  for(wordp=words;baseo--;wordp++)
+	    addword(*wordp);
+	  break;
+	} /* Its BIG */
+	if(offs(opP->con1)>0) {
+	  as_warn("Bignum assumed to be binary bit-pattern");
+	  if(offs(opP->con1)>baseo) {
+	    as_warn("Bignum too big for %c format; truncated",s[1]);
+	    offs(opP->con1)=baseo;
+	  }
+	  baseo-=offs(opP->con1);
+	  for(wordp=generic_bignum+offs(opP->con1)-1;offs(opP->con1)--;--wordp)
+	    addword(*wordp);
+	  while(baseo--)
+	    addword(0);
+	  break;
+	}
+	gen_to_words(words,baseo,(long)outro);
+	for (wordp=words;baseo--;wordp++)
+	  addword(*wordp);
+	break;
+      case DREG:
+	tmpreg=opP->reg-DATA;	/* 0.dreg */
+	break;
+      case AREG:
+	tmpreg=0x08+opP->reg-ADDR; /* 1.areg */
+	break;
+      case AINDR:
+	tmpreg=0x10+opP->reg-ADDR; /* 2.areg */
+	break;
+      case ADEC:
+	tmpreg=0x20+opP->reg-ADDR; /* 4.areg */
+	break;
+      case AINC:
+	tmpreg=0x18+opP->reg-ADDR; /* 3.areg */
+	break;
+      case AOFF:
+
+	nextword=get_num(opP->con1,80);
+	/* Force into index mode.  Hope this works */
+
+	/* We do the first bit for 32-bit displacements,
+	   and the second bit for 16 bit ones.  It is
+	   possible that we should make the default be
+	   WORD instead of LONG, but I think that'd
+	   break GCC, so we put up with a little
+	   inefficiency for the sake of working output.
+	   */
+
+	if(   !issword(nextword)
+	   || (   isvar(opP->con1)
+	       && (  (   opP->con1->e_siz==0
+		      && flagseen['l']==0)
+		   || opP->con1->e_siz==3))) {
+
+	  if(opP->reg==PC)
+	    tmpreg=0x3B;		/* 7.3 */
+	  else
+	    tmpreg=0x30+opP->reg-ADDR; /* 6.areg */
+	  if(isvar(opP->con1)) {
+	    if(opP->reg==PC) {
+	      add_frag(adds(opP->con1),
+		       offs(opP->con1),
+		       TAB(PCLEA,SZ_UNDEF));
+	      break;
+	    } else {
+	      addword(0x0170);
+	      add_fix('l',opP->con1,1);
+	    }
+	  } else
+	    addword(0x0170);
+	  addword(nextword>>16);
+		   } else {
+		     if(opP->reg==PC)
+		       tmpreg=0x3A;		/* 7.2 */
+		     else
+		       tmpreg=0x28+opP->reg-ADDR; /* 5.areg */
+
+		     if(isvar(opP->con1)) {
+		       if(opP->reg==PC) {
+			 add_fix('w',opP->con1,1);
+		       } else
+			 add_fix('w',opP->con1,0);
+		     }
+		   }
+	addword(nextword);
+	break;
+
+      case APODX:
+      case AMIND:
+      case APRDX:
+	know(current_architecture & m68020up);
+	/* intentional fall-through */
+      case AINDX:
+	nextword=0;
+	baseo=get_num(opP->con1,80);
+	outro=get_num(opP->con2,80);
+	/* Figure out the 'addressing mode' */
+	/* Also turn on the BASE_DISABLE bit, if needed */
+	if(opP->reg==PC || opP->reg==ZPC) {
+	  tmpreg=0x3b;		/* 7.3 */
+	  if(opP->reg==ZPC)
+	    nextword|=0x80;
+	} else if(opP->reg==FAIL) {
+	  nextword|=0x80;
+	  tmpreg=0x30;		/* 6.garbage */
+	} else tmpreg=0x30+opP->reg-ADDR; /* 6.areg */
+
+	siz1= (opP->con1) ? opP->con1->e_siz : 0;
+	siz2= (opP->con2) ? opP->con2->e_siz : 0;
+
+	/* Index register stuff */
+	if(opP->ireg>=DATA+0 && opP->ireg<=ADDR+7) {
+	  nextword|=(opP->ireg-DATA)<<12;
+
+	  if(opP->isiz==0 || opP->isiz==3)
+	    nextword|=0x800;
+	  switch(opP->imul) {
+	  case 1: break;
+	  case 2: nextword|=0x200; break;
+	  case 4: nextword|=0x400; break;
+	  case 8: nextword|=0x600; break;
+	  default: as_fatal("failed sanity check.");
+	  }
+	  /* IF its simple,
+	     GET US OUT OF HERE! */
+
+	  /* Must be INDEX, with an index
+	     register.  Address register
+	     cannot be ZERO-PC, and either
+	     :b was forced, or we know
+	     it will fit */
+	  if(   opP->mode==AINDX
+	     && opP->reg!=FAIL
+	     && opP->reg!=ZPC
+	     && (   siz1==1
+		 || (   issbyte(baseo)
+		     && !isvar(opP->con1)))) {
+	    nextword +=baseo&0xff;
+	    addword(nextword);
+	    if(isvar(opP->con1))
+	      add_fix('B',opP->con1,0);
+	    break;
+	  }
+	} else
+	  nextword|=0x40;		/* No index reg */
+
+	/* It aint simple */
+	nextword|=0x100;
+	/* If the guy specified a width, we assume that
+	   it is wide enough.  Maybe it isn't.  If so, we lose
+	   */
+	switch(siz1) {
+	case 0:
+	  if(isvar(opP->con1) || !issword(baseo)) {
+	    siz1=3;
+	    nextword|=0x30;
+	  } else if(baseo==0)
+	    nextword|=0x10;
+	  else {
+	    nextword|=0x20;
+	    siz1=2;
+	  }
+	  break;
+	case 1:
+	  as_warn("Byte dispacement won't work.  Defaulting to :w");
+	case 2:
+	  nextword|=0x20;
+	  break;
+	case 3:
+	  nextword|=0x30;
+	  break;
+	}
+
+	/* Figure out innner displacement stuff */
+	if(opP->mode!=AINDX) {
+	  switch(siz2) {
+	  case 0:
+	    if(isvar(opP->con2) || !issword(outro)) {
+	      siz2=3;
+	      nextword|=0x3;
+	    } else if(outro==0)
+	      nextword|=0x1;
+	    else {
+	      nextword|=0x2;
+	      siz2=2;
+	    }
+	    break;
+	  case 1:
+	    as_warn("Byte dispacement won't work.  Defaulting to :w");
+	  case 2:
+	    nextword|=0x2;
+	    break;
+	  case 3:
+	    nextword|=0x3;
+	    break;
+	  }
+	  if(opP->mode==APODX) nextword|=0x04;
+	  else if(opP->mode==AMIND) nextword|=0x40;
+	}
+	addword(nextword);
+
+	if(isvar(opP->con1)) {
+	  if(opP->reg==PC || opP->reg==ZPC) {
+	    add_fix(siz1==3 ? 'l' : 'w',opP->con1,1);
+	    opP->con1->e_exp.X_add_number+=6;
+	  } else
+	    add_fix(siz1==3 ? 'l' : 'w',opP->con1,0);
+	}
+	if(siz1==3)
+	  addword(baseo>>16);
+	if(siz1)
+	  addword(baseo);
+
+	if(isvar(opP->con2)) {
+	  if(opP->reg==PC || opP->reg==ZPC) {
+	    add_fix(siz2==3 ? 'l' : 'w',opP->con2,1);
+	    opP->con1->e_exp.X_add_number+=6;
+	  } else
+	    add_fix(siz2==3 ? 'l' : 'w',opP->con2,0);
+	}
+	if(siz2==3)
+	  addword(outro>>16);
+	if(siz2)
+	  addword(outro);
+
+	break;
+
+      case ABSL:
+	nextword=get_num(opP->con1,80);
+	switch(opP->con1->e_siz) {
+	default:
+	  as_warn("Unknown size for absolute reference");
+	case 0:
+	  if(!isvar(opP->con1) && issword(offs(opP->con1))) {
+	    tmpreg=0x38;		/* 7.0 */
+	    addword(nextword);
+	    break;
+	  }
+	  /* Don't generate pc relative code
+	     on 68010 and 68000 */
+	  if(isvar(opP->con1)
+	     && !subs(opP->con1)
+	     && seg(opP->con1) == SEG_TEXT
+	     && now_seg == SEG_TEXT
+	     && cpu_of_arch(current_architecture) >= m68020
+	     && !flagseen['S']
+	     && !strchr("~%&$?", s[0])) {
+	    tmpreg=0x3A;		/* 7.2 */
+	    add_frag(adds(opP->con1),
+		     offs(opP->con1),
+		     TAB(PCREL,SZ_UNDEF));
+	    break;
+	  }
+	case 3:			/* Fall through into long */
+	  if(isvar(opP->con1))
+	    add_fix('l',opP->con1,0);
+
+	  tmpreg=0x39;		/* 7.1 mode */
+	  addword(nextword>>16);
+	  addword(nextword);
+	  break;
+
+	case 2:			/* Word */
+	  if(isvar(opP->con1))
+	    add_fix('w',opP->con1,0);
+
+	  tmpreg=0x38;		/* 7.0 mode */
+	  addword(nextword);
+	  break;
+	}
+	break;
+      case MSCR:
+      default:
+	as_bad("unknown/incorrect operand");
+	/* abort(); */
+      }
+      install_gen_operand(s[1],tmpreg);
+      break;
+
+    case '#':
+    case '^':
+      switch(s[1]) {		/* JF: I hate floating point! */
+      case 'j':
+	tmpreg=70;
+	break;
+      case '8':
+	tmpreg=20;
+	break;
+      case 'C':
+	tmpreg=50;
+	break;
+      case '3':
+      default:
+	tmpreg=80;
+	break;
+      }
+      tmpreg=get_num(opP->con1,tmpreg);
+      if(isvar(opP->con1))
+	add_fix(s[1],opP->con1,0);
+      switch(s[1]) {
+      case 'b':			/* Danger:  These do no check for
+				   certain types of overflow.
+				   user beware! */
+	if(!isbyte(tmpreg))
+	  opP->error="out of range";
+	insop(tmpreg);
+	if(isvar(opP->con1))
+	  the_ins.reloc[the_ins.nrel-1].n=(opcode->m_codenum)*2;
+	break;
+      case 'w':
+	if(!isword(tmpreg))
+	  opP->error="out of range";
+	insop(tmpreg);
+	if(isvar(opP->con1))
+	  the_ins.reloc[the_ins.nrel-1].n=(opcode->m_codenum)*2;
+	break;
+      case 'l':
+	insop(tmpreg);		/* Because of the way insop works, we put these two out backwards */
+	insop(tmpreg>>16);
+	if(isvar(opP->con1))
+	  the_ins.reloc[the_ins.nrel-1].n=(opcode->m_codenum)*2;
+	break;
+      case '3':
+	tmpreg&=0xFF;
+      case '8':
+      case 'C':
+	install_operand(s[1],tmpreg);
+	break;
+      default:
+	as_fatal("Internal error:  Unknown mode #%c in line %s of file \"%s\"", s[1], __LINE__, __FILE__);
+      }
+      break;
+
+    case '+':
+    case '-':
+    case 'A':
+    case 'a':
+      install_operand(s[1],opP->reg-ADDR);
+      break;
+
+    case 'B':
+      tmpreg=get_num(opP->con1,80);
+      switch(s[1]) {
+      case 'B':
+	/* Needs no offsetting */
+	add_fix('B',opP->con1,1);
+	break;
+      case 'W':
+	/* Offset the displacement to be relative to byte disp location */
+	opP->con1->e_exp.X_add_number+=2;
+	add_fix('w',opP->con1,1);
+	addword(0);
+	break;
+      case 'L':
+      long_branch:
+	if (cpu_of_arch(current_architecture) < m68020) /* 68000 or 010 */
+	  as_warn("Can't use long branches on 68000/68010");
+	the_ins.opcode[the_ins.numo-1]|=0xff;
+	/* Offset the displacement to be relative to byte disp location */
+	opP->con1->e_exp.X_add_number+=4;
+	add_fix('l',opP->con1,1);
+	addword(0);
+	addword(0);
+	break;
+      case 'g':
+	if(subs(opP->con1))	/* We can't relax it */
+	  goto long_branch;
+
+	/* This could either be a symbol, or an
+	   absolute address.  No matter, the
+	   frag hacking will finger it out.
+	   Not quite: it can't switch from
+	   BRANCH to BCC68000 for the case
+	   where opnd is absolute (it needs
+	   to use the 68000 hack since no
+	   conditional abs jumps).  */
+	if (((cpu_of_arch(current_architecture) < m68020) || (0==adds(opP->con1)))
+	    && (the_ins.opcode[0] >= 0x6200)
+	    && (the_ins.opcode[0] <= 0x6f00)) {
+	  add_frag(adds(opP->con1),offs(opP->con1),TAB(BCC68000,SZ_UNDEF));
+	    } else {
+	      add_frag(adds(opP->con1),offs(opP->con1),TAB(BRANCH,SZ_UNDEF));
+	    }
+	break;
+      case 'w':
+	if(isvar(opP->con1)) {
+	  /* check for DBcc instruction */
+	  if ((the_ins.opcode[0] & 0xf0f8) ==0x50c8) {
+	    /* size varies if patch */
+	    /* needed for long form */
+	    add_frag(adds(opP->con1),offs(opP->con1),TAB(DBCC,SZ_UNDEF));
+	    break;
+	  }
+
+	  /* Don't ask! */
+	  opP->con1->e_exp.X_add_number+=2;
+	  add_fix('w',opP->con1,1);
+	}
+	addword(0);
+	break;
+      case 'C':			/* Fixed size LONG coproc branches */
+	the_ins.opcode[the_ins.numo-1]|=0x40;
+	/* Offset the displacement to be relative to byte disp location */
+	/* Coproc branches don't have a byte disp option, but they are
+	   compatible with the ordinary branches, which do... */
+	opP->con1->e_exp.X_add_number+=4;
+	add_fix('l',opP->con1,1);
+	addword(0);
+	addword(0);
+	break;
+      case 'c':			/* Var size Coprocesssor branches */
+	if(subs(opP->con1)) {
+	  add_fix('l',opP->con1,1);
+	  add_frag((symbolS *)0,(long)0,TAB(FBRANCH,LONG));
+	} else if(adds(opP->con1)) {
+	  add_frag(adds(opP->con1),offs(opP->con1),TAB(FBRANCH,SZ_UNDEF));
+	} else {
+	  /* add_frag((symbolS *)0,offs(opP->con1),TAB(FBRANCH,SHORT)); */
+	  the_ins.opcode[the_ins.numo-1]|=0x40;
+	  add_fix('l',opP->con1,1);
+	  addword(0);
+	  addword(4);
+	}
+	break;
+      default:
+	as_fatal("Internal error:  operand type B%c unknown in line %s of file \"%s\"",
+		 s[1], __LINE__, __FILE__);
+      }
+      break;
+
+    case 'C':			/* Ignore it */
+      break;
+
+    case 'd':			/* JF this is a kludge */
+      if(opP->mode==AOFF) {
+	install_operand('s',opP->reg-ADDR);
+      } else {
+	char *tmpP;
+
+	tmpP=opP->con1->e_end-2;
+	opP->con1->e_beg++;
+	opP->con1->e_end-=4;	/* point to the , */
+	baseo=m68k_reg_parse(&tmpP);
+	if(baseo<ADDR+0 || baseo>ADDR+7) {
+	  as_bad("Unknown address reg, using A0");
+	  baseo=0;
+	} else baseo-=ADDR;
+	install_operand('s',baseo);
+      }
+      tmpreg=get_num(opP->con1,80);
+      if(!issword(tmpreg)) {
+	as_warn("Expression out of range, using 0");
+	tmpreg=0;
+      }
+      addword(tmpreg);
+      break;
+
+    case 'D':
+      install_operand(s[1],opP->reg-DATA);
+      break;
+
+    case 'F':
+      install_operand(s[1],opP->reg-FPREG);
+      break;
+
+    case 'I':
+      tmpreg=1+opP->reg-COPNUM;
+      if(tmpreg==8)
+	tmpreg=0;
+      install_operand(s[1],tmpreg);
+      break;
+
+    case 'J':			/* JF foo */
+      switch(opP->reg) {
+      case SFC:   tmpreg=0x000; break;
+      case DFC:   tmpreg=0x001; break;
+      case CACR:  tmpreg=0x002; break;
+      case TC:    tmpreg=0x003; break;
+      case ITT0:  tmpreg=0x004; break;
+      case ITT1:  tmpreg=0x005; break;
+      case DTT0:  tmpreg=0x006; break;
+      case DTT1:  tmpreg=0x007; break;
+
+      case USP:   tmpreg=0x800; break;
+      case VBR:   tmpreg=0x801; break;
+      case CAAR:  tmpreg=0x802; break;
+      case MSP:   tmpreg=0x803; break;
+      case ISP:   tmpreg=0x804; break;
+      case MMUSR: tmpreg=0x805; break;
+      case URP:   tmpreg=0x806; break;
+      case SRP:   tmpreg=0x807; break;
+      default:
+	as_fatal("failed sanity check.");
+      }
+      install_operand(s[1],tmpreg);
+      break;
+
+    case 'k':
+      tmpreg=get_num(opP->con1,55);
+      install_operand(s[1],tmpreg&0x7f);
+      break;
+
+    case 'l':
+      tmpreg=opP->reg;
+      if(s[1]=='w') {
+	if(tmpreg&0x7FF0000)
+	  as_bad("Floating point register in register list");
+	insop(reverse_16_bits(tmpreg));
+      } else {
+	if(tmpreg&0x700FFFF)
+	  as_bad("Wrong register in floating-point reglist");
+	install_operand(s[1],reverse_8_bits(tmpreg>>16));
+      }
+      break;
+
+    case 'L':
+      tmpreg=opP->reg;
+      if(s[1]=='w') {
+	if(tmpreg&0x7FF0000)
+	  as_bad("Floating point register in register list");
+	insop(tmpreg);
+      } else if(s[1]=='8') {
+	if(tmpreg&0x0FFFFFF)
+	  as_bad("incorrect register in reglist");
+	install_operand(s[1],tmpreg>>24);
+      } else {
+	if(tmpreg&0x700FFFF)
+	  as_bad("wrong register in floating-point reglist");
+	else
+	  install_operand(s[1],tmpreg>>16);
+      }
+      break;
+
+    case 'M':
+      install_operand(s[1],get_num(opP->con1,60));
+      break;
+
+    case 'O':
+      tmpreg= (opP->mode==DREG)
+	? 0x20+opP->reg-DATA
+	  : (get_num(opP->con1,40)&0x1F);
+      install_operand(s[1],tmpreg);
+      break;
+
+    case 'Q':
+      tmpreg=get_num(opP->con1,10);
+      if(tmpreg==8)
+	tmpreg=0;
+      install_operand(s[1],tmpreg);
+      break;
+
+    case 'R':
+      /* This depends on the fact that ADDR registers are
+	 eight more than their corresponding DATA regs, so
+	 the result will have the ADDR_REG bit set */
+      install_operand(s[1],opP->reg-DATA);
+      break;
+
+    case 's':
+      if(opP->reg==FPI) tmpreg=0x1;
+      else if(opP->reg==FPS) tmpreg=0x2;
+      else if(opP->reg==FPC) tmpreg=0x4;
+      else as_fatal("failed sanity check.");
+      install_operand(s[1],tmpreg);
+      break;
+
+    case 'S':			/* Ignore it */
+      break;
+
+    case 'T':
+      install_operand(s[1],get_num(opP->con1,30));
+      break;
+
+    case 'U':			/* Ignore it */
+      break;
+
+    case 'c':
+      switch (opP->reg) {
+      case NC: tmpreg = 0; break;
+      case DC: tmpreg = 1; break;
+      case IC: tmpreg = 2; break;
+      case BC: tmpreg = 3; break;
+      default:
+	as_fatal("failed sanity check");
+      } /* switch on cache token */
+      install_operand(s[1], tmpreg);
+      break;
 #ifndef NO_68851
-			/* JF: These are out of order, I fear. */
-		case 'f':
-			switch (opP->reg) {
-			case SFC:
-				tmpreg=0;
-				break;
-			case DFC:
-				tmpreg=1;
-				break;
-			default:
-				as_fatal("failed sanity check.");
-			}
-			install_operand(s[1],tmpreg);
-			break;
-			
-		case 'P':
-			switch(opP->reg) {
-			case TC:
-				tmpreg=0;
-				break;
-			case CAL:
-				tmpreg=4;
-				break;
-			case VAL:
-				tmpreg=5;
-				break;
-			case SCC:
-				tmpreg=6;
-				break;
-			case AC:
-				tmpreg=7;
-				break;
-			default:
-				as_fatal("failed sanity check.");
-			}
-			install_operand(s[1],tmpreg);
-			break;
-			
-		case 'V':
-			if (opP->reg == VAL)
-			    break;
-			as_fatal("failed sanity check.");
-			
-		case 'W':
-			switch(opP->reg) {
-				
-			case DRP:
-				tmpreg=1;
-				break;
-			case SRP:
-				tmpreg=2;
-				break;
-			case CRP:
-				tmpreg=3;
-				break;
-			default:
-				as_fatal("failed sanity check.");
-			}
-			install_operand(s[1],tmpreg);
-			break;
-			
-		case 'X':
-			switch (opP->reg) {
-			case BAD: case BAD+1: case BAD+2: case BAD+3:
-			case BAD+4: case BAD+5: case BAD+6: case BAD+7:
-				tmpreg = (4 << 10) | ((opP->reg - BAD) << 2);
-				break;
-				
-			case BAC: case BAC+1: case BAC+2: case BAC+3:
-			case BAC+4: case BAC+5: case BAC+6: case BAC+7:
-				tmpreg = (5 << 10) | ((opP->reg - BAC) << 2);
-				break;
-				
-			default:
-				as_fatal("failed sanity check.");
-			}
-			install_operand(s[1], tmpreg);
-			break;
-		case 'Y':
-			know(opP->reg == PSR);
-			break;
-		case 'Z':
-			know(opP->reg == PCSR);
-			break;
+      /* JF: These are out of order, I fear. */
+    case 'f':
+      switch (opP->reg) {
+      case SFC:
+	tmpreg=0;
+	break;
+      case DFC:
+	tmpreg=1;
+	break;
+      default:
+	as_fatal("failed sanity check.");
+      }
+      install_operand(s[1],tmpreg);
+      break;
+
+    case 'P':
+      switch(opP->reg) {
+      case TC:
+	tmpreg=0;
+	break;
+      case CAL:
+	tmpreg=4;
+	break;
+      case VAL:
+	tmpreg=5;
+	break;
+      case SCC:
+	tmpreg=6;
+	break;
+      case AC:
+	tmpreg=7;
+	break;
+      default:
+	as_fatal("failed sanity check.");
+      }
+      install_operand(s[1],tmpreg);
+      break;
+
+    case 'V':
+      if (opP->reg == VAL)
+	break;
+      as_fatal("failed sanity check.");
+
+    case 'W':
+      switch(opP->reg) {
+
+      case DRP:
+	tmpreg=1;
+	break;
+      case SRP:
+	tmpreg=2;
+	break;
+      case CRP:
+	tmpreg=3;
+	break;
+      default:
+	as_fatal("failed sanity check.");
+      }
+      install_operand(s[1],tmpreg);
+      break;
+
+    case 'X':
+      switch (opP->reg) {
+      case BAD: case BAD+1: case BAD+2: case BAD+3:
+      case BAD+4: case BAD+5: case BAD+6: case BAD+7:
+	tmpreg = (4 << 10) | ((opP->reg - BAD) << 2);
+	break;
+
+      case BAC: case BAC+1: case BAC+2: case BAC+3:
+      case BAC+4: case BAC+5: case BAC+6: case BAC+7:
+	tmpreg = (5 << 10) | ((opP->reg - BAC) << 2);
+	break;
+
+      default:
+	as_fatal("failed sanity check.");
+      }
+      install_operand(s[1], tmpreg);
+      break;
+    case 'Y':
+      know(opP->reg == PSR);
+      break;
+    case 'Z':
+      know(opP->reg == PCSR);
+      break;
 #endif /* m68851 */
-		case '_':
-			tmpreg=get_num(opP->con1,80);
-			install_operand(s[1], tmpreg);
-			break;
-		default:
-			as_fatal("Internal error:  Operand type %c unknown in line %s of file \"%s\"", s[0], __LINE__, __FILE__);
-		}
-	}
-	/* By the time whe get here (FINALLY) the_ins contains the complete
-	   instruction, ready to be emitted. . . */
+    case '_':
+      tmpreg=get_num(opP->con1,80);
+      install_operand(s[1], tmpreg);
+      break;
+    default:
+      as_fatal("Internal error:  Operand type %c unknown in line %s of file \"%s\"", s[0], __LINE__, __FILE__);
+    }
+  }
+  /* By the time whe get here (FINALLY) the_ins contains the complete
+     instruction, ready to be emitted. . . */
 } /* m68k_ip() */
 
 /*
@@ -2163,12 +2159,12 @@ char *instring;
  *	| <empty>
  *	;
  *
- 
+
  * The idea here must be to scan in a set of registers but I don't
  * understand it.  Looks awfully sloppy to me but I don't have any doc on
  * this format so...
- 
- * 
+
+ *
  *
  */
 
@@ -2182,12 +2178,12 @@ char *str;
 	unsigned long cur_regs = 0;
 	int	reg1,
 	reg2;
-	
+
 #define ADD_REG(x)	{     if(x==FPI) cur_regs|=(1<<24);\
 else if(x==FPS) cur_regs|=(1<<25);\
 else if(x==FPC) cur_regs|=(1<<26);\
 else cur_regs|=(1<<(x-1));  }
-	
+
 	reg1=i;
 	for(;;) {
 		if(*str=='/') {
@@ -2231,7 +2227,7 @@ int in;
 {
 	int out=0;
 	int n;
-	
+
 	static int mask[16] = {
 		0x0001,0x0002,0x0004,0x0008,0x0010,0x0020,0x0040,0x0080,
 		0x0100,0x0200,0x0400,0x0800,0x1000,0x2000,0x4000,0x8000
@@ -2248,11 +2244,11 @@ int in;
 {
 	int out=0;
 	int n;
-	
+
 	static int mask[8] = {
 		0x0001,0x0002,0x0004,0x0008,0x0010,0x0020,0x0040,0x0080,
 	};
-	
+
 	for(n=0;n<8;n++) {
 		if(in&mask[n])
 		    out|=mask[7-n];
@@ -2303,7 +2299,7 @@ int val;
 		the_ins.opcode[1]|=val<<5;
 		break;
 #endif
-		
+
 	case 't':
 		the_ins.opcode[1]|=(val<<10)|(val<<7);
 		break;
@@ -2382,7 +2378,7 @@ register struct m68k_op *opP;
 	register int parens;
 	register int c;
 	register char *beg_str;
-	
+
 	if(!str) {
 		return str;
 	}
@@ -2450,14 +2446,14 @@ int regnum;
   for (i = 0; regname[i]; i++)
    buf[i] = islower (regname[i]) ? toupper (regname[i]) : regname[i];
   buf[i] = '\0';
-	
+
   symbol_table_insert(symbol_new(buf, SEG_REGISTER, regnum, &zero_address_frag));
 }
 
 static struct {
-char *name; 
+char *name;
 int number;
-} init_table[] = 
+} init_table[] =
 {
   "d0",	    	DATA0,
   "d1",		DATA1,
@@ -2501,15 +2497,15 @@ int number;
   "cop5",	COP5,
   "cop6",	COP6,
   "cop7",	COP7,
-  "pc",	        PC,	
-  "zpc",	ZPC, 
-  "sr",	        SR,	
+  "pc",	        PC,
+  "zpc",	ZPC,
+  "sr",	        SR,
 
-  "ccr",	CCR, 
-  "cc",   	CCR, 
+  "ccr",	CCR,
+  "cc",   	CCR,
 
-  "usp",	USP,	
-  "isp",	ISP,	
+  "usp",	USP,
+  "isp",	ISP,
   "sfc",	SFC,
   "dfc",	DFC,
   "cacr",	CACR,
@@ -2568,16 +2564,16 @@ void
 init_regtable()
 {
   int i;
-  for (i = 0; init_table[i].name; i++) 
+  for (i = 0; init_table[i].name; i++)
   {
     insert_reg(init_table[i].name, init_table[i].number);
   }
 }
-	
+
 
 void
-    md_assemble(str)
-char *str;
+md_assemble(str)
+     char *str;
 {
 	char *er;
 	short	*fromP;
@@ -2585,19 +2581,21 @@ char *str;
 	int	m,n = 0;
 	char	*to_beg_P;
 	int	shorts_this_frag;
-	
-	
-	if (current_architecture == 0) {
-		current_architecture = (m68020
+
+
+	if (current_architecture == 0)
+	  current_architecture = (m68020
 #ifndef NO_68881
-					| m68881
+				  | m68881
 #endif
 #ifndef NO_68851
-					| m68851
+				  | m68851
 #endif
-					);
-	} /* default current_architecture */
-	
+				  );
+	/* If only float and mmu were specified, default cpu.  */
+	else if (cpu_of_arch (current_architecture) == 0)
+	  current_architecture |= m68020;
+
 	memset((char *)(&the_ins), '\0', sizeof(the_ins));	/* JF for paranoia sake */
 	m68k_ip(str);
 	er=the_ins.error;
@@ -2609,10 +2607,10 @@ char *str;
 		    }
 	}
 	if(er) {
-		as_bad("\"%s\" -- Statement '%s' ignored",er,str);
+		as_bad("%s -- statement `%s' ignored",er,str);
 		return;
 	}
-	
+
 	if(the_ins.nfrag==0) {	/* No frag hacking involved; just put it out */
 		toP=frag_more(2*the_ins.numo);
 		fromP= &the_ins.opcode[0];
@@ -2642,7 +2640,7 @@ char *str;
 			default:
 				as_fatal("Don't know how to figure width of %c in md_assemble()",the_ins.reloc[m].wid);
 			}
-			
+
 			fix_new(frag_now,
 				(toP-frag_now->fr_literal)-the_ins.numo*2+the_ins.reloc[m].n,
 				n,
@@ -2654,11 +2652,11 @@ char *str;
 		}
 		return;
 	}
-	
+
 	/* There's some frag hacking */
 	for(n=0,fromP= &the_ins.opcode[0];n<the_ins.nfrag;n++) {
 		int wid;
-		
+
 		if(n==0) wid=2*the_ins.fragb[n].fragoff;
 		else wid=2*(the_ins.numo-the_ins.fragb[n-1].fragoff);
 		toP=frag_more(wid);
@@ -2680,7 +2678,7 @@ char *str;
 			    continue;
 			the_ins.reloc[m].wid=0;
 			wid = (wid=='b') ? 1 : (wid=='w') ? 2 : (wid=='l') ? 4 : 4000;
-			
+
 			fix_new(frag_now,
 				(toP-frag_now->fr_literal)-the_ins.numo*2+the_ins.reloc[m].n,
 				wid,
@@ -2707,13 +2705,13 @@ char *str;
 	}
 	for(m=0;m<the_ins.nrel;m++) {
 		int wid;
-		
+
 		wid=the_ins.reloc[m].wid;
 		if(wid==0)
 		    continue;
 		the_ins.reloc[m].wid=0;
 		wid = (wid=='b') ? 1 : (wid=='w') ? 2 : (wid=='l') ? 4 : 4000;
-		
+
 		fix_new(frag_now,
 			(the_ins.reloc[m].n + toP-frag_now->fr_literal)-/* the_ins.numo */ shorts_this_frag*2,
 			wid,
@@ -2725,142 +2723,9 @@ char *str;
 	}
 }
 
-/* This function is called once, at assembler startup time.  This should
-   set up all the tables, etc that the MD part of the assembler needs
-   */
-
-void
-insert_reg(regname, regnum)
-char *regname;
-int regnum;
-{
-  char buf[100];
-  int i;
-  symbol_table_insert(symbol_new(regname, SEG_REGISTER, regnum, &zero_address_frag));
-
-  for (i = 0; regname[i]; i++)
-   buf[i] = islower (regname[i]) ? toupper (regname[i]) : regname[i];
-  buf[i] = '\0';
-	
-  symbol_table_insert(symbol_new(buf, SEG_REGISTER, regnum, &zero_address_frag));
-}
-
-static struct {
-char *name; 
-int number;
-} init_table[] = 
-{
-  "d0",	    	DATA0,
-  "d1",		DATA1,
-  "d2",		DATA2,
-  "d3",		DATA3,
-  "d4",		DATA4,
-  "d5",		DATA5,
-  "d6",		DATA6,
-  "d7",		DATA7,
-  "a0",		ADDR0,
-  "a1",		ADDR1,
-  "a2",		ADDR2,
-  "a3",		ADDR3,
-  "a4",		ADDR4,
-  "a5",		ADDR5,
-  "a6",		ADDR6,
-  "fp",		ADDR6,
-  "a7",		ADDR7,
-  "sp",		ADDR7,
-  "fp0",	FP0,
-  "fp1",	FP1,
-  "fp2",	FP2,
-  "fp3",	FP3,
-  "fp4",	FP4,
-  "fp5",	FP5,
-  "fp6",	FP6,
-  "fp7",	FP7,
-  "fpi",	FPI,
-  "fps",	FPS,
-  "fpc",	FPC,
-
-  "cop0",	COP0,
-  "cop1",	COP1,
-  "cop2",	COP2,
-  "cop3",	COP3,
-  "cop4",	COP4,
-  "cop5",	COP5,
-  "cop6",	COP6,
-  "cop7",	COP7,
-  "pc",	        PC,	
-  "zpc",	ZPC, 
-  "sr",	        SR,	
-
-  "ccr",	CCR, 
-  "cc",   	CCR, 
-
-  "usp",	USP,	
-  "isp",	ISP,	
-  "sfc",	SFC,
-  "dfc",	DFC,
-  "cacr",	CACR,
-  "caar",	CAAR,
-
-  "vbr",	VBR,
-
-  "msp",	MSP,
-  "itt0",	ITT0,
-  "itt1",	ITT1,
-  "dtt0",	DTT0,
-  "dtt1",	DTT1,
-  "mmusr",      MMUSR,
-  "tc",	        TC,
-  "srp",	SRP,
-  "urp",	URP,
-
-#ifndef NO_68851
-  "ac",	        AC,
-  "bc",	        BC,
-  "cal",	CAL,
-  "crp",	CRP,
-  "drp",	DRP,
-  "pcsr",	PCSR,
-  "psr",	PSR,
-  "scc",	SCC,
-  "val",	VAL,
-  "bad0",	BAD0,
-  "bad1",	BAD1,
-  "bad2",	BAD2,
-  "bad3",	BAD3,
-  "bad4",	BAD4,
-  "bad5",	BAD5,
-  "bad6",	BAD6,
-  "bad7",	BAD7,
-  "bac0",	BAC0,
-  "bac1",	BAC1,
-  "bac2",	BAC2,
-  "bac3",	BAC3,
-  "bac4",	BAC4,
-  "bac5",	BAC5,
-  "bac6",	BAC6,
-  "bac7",	BAC7,
-#endif
-
-  "ic",	        IC,
-  "dc",	        DC,
-  "nc",	        NC,
-
-  0,
-
-};
 
 
-void
-init_regtable()
-{
-  int i;
-  for (i = 0; init_table[i].name; i++) 
-  {
-    insert_reg(init_table[i].name, init_table[i].number);
-  }
-}
-	
+
 
 void
     md_begin()
@@ -2875,17 +2740,17 @@ void
 	   at compile time.  Or even just xstr the table and use it as-is.  But
 	   my lord ghod hath spoken, so we do it this way.  Excuse the ugly var
 	   names.  */
-	
+
 	register const struct m68k_opcode *ins;
 	register struct m68k_incant *hack,
 	*slak;
 	register char *retval = 0;		/* empty string, or error msg text */
 	register unsigned int i;
 	register char c;
-	
+
 	if ((op_hash = hash_new()) == NULL)
 	    as_fatal("Virtual memory exhausted");
-	
+
 	obstack_begin(&robyn,4000);
 	for (ins = m68k_opcodes; ins < endop; ins++) {
 		hack=slak=(struct m68k_incant *)obstack_alloc(&robyn,sizeof(struct m68k_incant));
@@ -2906,16 +2771,16 @@ void
 			    slak->m_next=0;
 			slak=slak->m_next;
 		} while(slak);
-		
+
 		retval = hash_insert (op_hash, ins->name,(char *)hack);
 		/* Didn't his mommy tell him about null pointers? */
 		if(retval && *retval)
 		    as_fatal("Internal Error:  Can't hash %s: %s",ins->name,retval);
 	}
-	
+
 	for (i = 0; i < sizeof(mklower_table) ; i++)
 	    mklower_table[i] = (isupper(c = (char) i)) ? tolower(c) : c;
-	
+
 	for (i = 0 ; i < sizeof(notend_table) ; i++) {
 		notend_table[i] = 0;
 		alt_notend_table[i] = 0;
@@ -2969,7 +2834,7 @@ int *sizeP;
 	LITTLENUM_TYPE *wordP;
 	char	*t;
 	char	*atof_ieee();
-	
+
 	switch(type) {
 	case 'f':
 	case 'F':
@@ -2977,24 +2842,24 @@ int *sizeP;
 	case 'S':
 		prec = 2;
 		break;
-		
+
 	case 'd':
 	case 'D':
 	case 'r':
 	case 'R':
 		prec = 4;
 		break;
-		
+
 	case 'x':
 	case 'X':
 		prec = 6;
 		break;
-		
+
 	case 'p':
 	case 'P':
 		prec = 6;
 		break;
-		
+
 	default:
 		*sizeP=0;
 		return "Bad call to MD_ATOF()";
@@ -3002,7 +2867,7 @@ int *sizeP;
 	t=atof_ieee(input_line_pointer,type,words);
 	if(t)
 	    input_line_pointer=t;
-	
+
 	*sizeP=prec * sizeof(LITTLENUM_TYPE);
 	for(wordP=words;prec--;) {
 		md_number_to_chars(litP,(long)(*wordP++),sizeof(LITTLENUM_TYPE));
@@ -3049,7 +2914,7 @@ fixS *fixP;
 long val;
 {
 	char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-	
+
 	switch(fixP->fx_size) {
 	case 1:
 		*buf++=val;
@@ -3081,10 +2946,10 @@ register fragS *fragP;
 {
 	long disp;
 	long ext = 0;
-	
+
 	/* Address in object code of the displacement.  */
 	register int object_address = fragP -> fr_fix + fragP -> fr_address;
-	
+
 #ifdef IBM_COMPILER_SUX
 	/* This is wrong but it convinces the native rs6000 compiler to
 	   generate the code we want. */
@@ -3094,13 +2959,13 @@ register fragS *fragP;
 	/* Address in gas core of the place to store the displacement.  */
 	register char *buffer_address = fragP->fr_fix + fragP->fr_literal;
 #endif /* IBM_COMPILER_SUX */
-	
+
 	/* No longer true:   know(fragP->fr_symbol); */
-	
+
 	/* The displacement of the address, from current location.  */
 	disp = fragP->fr_symbol ? S_GET_VALUE(fragP->fr_symbol) : 0;
 	disp = (disp + fragP->fr_offset) - object_address;
-	
+
 	switch(fragP->fr_subtype) {
 	case TAB(BCC68000,BYTE):
     case TAB(BRANCH,BYTE):
@@ -3126,7 +2991,7 @@ register fragS *fragP;
 		     fragP->fr_opcode[0]= 0x4E;
 		     fragP->fr_opcode[1]= 0xB9;	/* JBSR with ABSL LONG offset */
 		     subseg_change(SEG_TEXT, 0);
-		     
+
 		     fix_new(fragP,
 			     fragP->fr_fix,
 			     4,
@@ -3135,7 +3000,7 @@ register fragS *fragP;
 			     fragP->fr_offset,
 			     0,
 			     NO_RELOC);
-		     
+
 		     fragP->fr_fix+=4;
 		     ext=0;
 	     } else if (fragP->fr_opcode[0]==0x60) {
@@ -3159,15 +3024,15 @@ register fragS *fragP;
      /* change bcc into b!cc/jmp absl long */
      fragP->fr_opcode[0] ^= 0x01; /* invert bcc */
         fragP->fr_opcode[1] = 0x6;   /* branch offset = 6 */
-	
+
 	/* JF: these used to be fr_opcode[2,3], but they may be in a
 	   different frag, in which case refering to them is a no-no.
 	   Only fr_opcode[0,1] are guaranteed to work. */
-        *buffer_address++ = 0x4e;  /* put in jmp long (0x4ef9) */ 
-        *buffer_address++ = 0xf9;  
+        *buffer_address++ = 0x4e;  /* put in jmp long (0x4ef9) */
+        *buffer_address++ = 0xf9;
         fragP->fr_fix += 2;	     /* account for jmp instruction */
         subseg_change(SEG_TEXT,0);
-        fix_new(fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0, 
+        fix_new(fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0,
 		fragP->fr_offset,0,
 		NO_RELOC);
         fragP->fr_fix += 4;
@@ -3178,15 +3043,15 @@ register fragS *fragP;
      /* change dbcc into dbcc/jmp absl long */
      /* JF: these used to be fr_opcode[2-7], but that's wrong */
      *buffer_address++ = 0x00;  /* branch offset = 4 */
-        *buffer_address++ = 0x04;  
-        *buffer_address++ = 0x60;  /* put in bra pc+6 */ 
-        *buffer_address++ = 0x06;  
-        *buffer_address++ = 0x4e;  /* put in jmp long (0x4ef9) */ 
-        *buffer_address++ = 0xf9;  
-	
+        *buffer_address++ = 0x04;
+        *buffer_address++ = 0x60;  /* put in bra pc+6 */
+        *buffer_address++ = 0x06;
+        *buffer_address++ = 0x4e;  /* put in jmp long (0x4ef9) */
+        *buffer_address++ = 0xf9;
+
         fragP->fr_fix += 6;	     /* account for bra/jmp instructions */
         subseg_change(SEG_TEXT,0);
-        fix_new(fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0, 
+        fix_new(fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0,
 		fragP->fr_offset,0,
 		NO_RELOC);
         fragP->fr_fix += 4;
@@ -3238,15 +3103,15 @@ register fragS *fragP;
 	/* buffer_address+=2; */
 	ext=4;
 	break;
-	
+
 } /* switch on subtype */
-	
+
 	if (ext) {
 		md_number_to_chars(buffer_address, (long) disp, (int) ext);
 		fragP->fr_fix += ext;
 		/*	  H_SET_TEXT_SIZE(headers, H_GET_TEXT_SIZE(headers) + ext); */
 	} /* if extending */
-	
+
 	return;
 } /* md_convert_frag() */
 
@@ -3259,12 +3124,12 @@ segT segment;
 {
 	int	old_fix;
 	register char *buffer_address = fragP->fr_fix + fragP->fr_literal;
-	
+
 	old_fix = fragP->fr_fix;
-	
+
 	/* handle SZ_UNDEF first, it can be changed to BYTE or SHORT */
 	switch (fragP->fr_subtype) {
-		
+
 	case TAB(BRANCH,SZ_UNDEF): {
 		if((fragP->fr_symbol != NULL) 	/* Not absolute */
 		   && S_GET_SEGMENT(fragP->fr_symbol) == segment) {
@@ -3277,7 +3142,7 @@ segT segment;
 				fragP->fr_opcode[0]= 0x4E;
 				fragP->fr_opcode[1]= 0xB9;	/* JBSR with ABSL LONG offset */
 				subseg_change(SEG_TEXT, 0);
-				fix_new(fragP, fragP->fr_fix, 4, 
+				fix_new(fragP, fragP->fr_fix, 4,
 					fragP->fr_symbol, 0, fragP->fr_offset, 0, NO_RELOC);
 				fragP->fr_fix+=4;
 				frag_wane(fragP);
@@ -3285,7 +3150,7 @@ segT segment;
 				fragP->fr_opcode[0]= 0x4E;
 				fragP->fr_opcode[1]= 0xF9;  /* JMP  with ABSL LONG offset */
 				subseg_change(SEG_TEXT, 0);
-				fix_new(fragP, fragP->fr_fix, 4, 
+				fix_new(fragP, fragP->fr_fix, 4,
 					fragP->fr_symbol, 0, fragP->fr_offset, 0, NO_RELOC);
 				fragP->fr_fix+=4;
 				frag_wane(fragP);
@@ -3300,10 +3165,10 @@ segT segment;
 			frag_wane(fragP);
 			break;
 		}
-		
+
 		break;
 	} /* case TAB(BRANCH,SZ_UNDEF) */
-		
+
 	case TAB(FBRANCH,SZ_UNDEF): {
 		if(S_GET_SEGMENT(fragP->fr_symbol) == segment || flagseen['l']) {
 			fragP->fr_subtype = TAB(FBRANCH,SHORT);
@@ -3314,7 +3179,7 @@ segT segment;
 		}
 		break;
 	} /* TAB(FBRANCH,SZ_UNDEF) */
-		
+
 	case TAB(PCREL,SZ_UNDEF): {
 		if(S_GET_SEGMENT(fragP->fr_symbol) == segment || flagseen['l']) {
 			fragP->fr_subtype = TAB(PCREL,SHORT);
@@ -3325,7 +3190,7 @@ segT segment;
 		}
 		break;
 	} /* TAB(PCREL,SZ_UNDEF) */
-		
+
 	case TAB(BCC68000,SZ_UNDEF): {
 		if((fragP->fr_symbol != NULL)
 		   && S_GET_SEGMENT(fragP->fr_symbol) == segment) {
@@ -3338,28 +3203,28 @@ segT segment;
 		if(flagseen['l']) {
 			fragP->fr_opcode[1] = 0x04;   /* branch offset = 6 */
 			/* JF: these were fr_opcode[2,3] */
-			buffer_address[0] = 0x4e;  /* put in jmp long (0x4ef9) */ 
+			buffer_address[0] = 0x4e;  /* put in jmp long (0x4ef9) */
 			buffer_address[1] = 0xf8;
 			fragP->fr_fix += 2;	     /* account for jmp instruction */
 			subseg_change(SEG_TEXT,0);
-			fix_new(fragP, fragP->fr_fix, 2, fragP->fr_symbol, 0, 
+			fix_new(fragP, fragP->fr_fix, 2, fragP->fr_symbol, 0,
 				fragP->fr_offset, 0, NO_RELOC);
 			fragP->fr_fix += 2;
 		} else {
 			fragP->fr_opcode[1] = 0x06;   /* branch offset = 6 */
 			/* JF: these were fr_opcode[2,3] */
-			buffer_address[0] = 0x4e;  /* put in jmp long (0x4ef9) */ 
+			buffer_address[0] = 0x4e;  /* put in jmp long (0x4ef9) */
 			buffer_address[1] = 0xf9;
 			fragP->fr_fix += 2;	     /* account for jmp instruction */
 			subseg_change(SEG_TEXT,0);
-			fix_new(fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0, 
+			fix_new(fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0,
 				fragP->fr_offset, 0, NO_RELOC);
 			fragP->fr_fix += 4;
 		}
 		frag_wane(fragP);
 		break;
 	} /* case TAB(BCC68000,SZ_UNDEF) */
-		
+
 	case TAB(DBCC,SZ_UNDEF): {
 		if (fragP->fr_symbol != NULL && S_GET_SEGMENT(fragP->fr_symbol) == segment) {
 			fragP->fr_subtype=TAB(DBCC,SHORT);
@@ -3370,9 +3235,9 @@ segT segment;
 		/* change dbcc into dbcc/jmp absl long */
 		/* JF: these used to be fr_opcode[2-4], which is wrong. */
 		buffer_address[0] = 0x00;  /* branch offset = 4 */
-		buffer_address[1] = 0x04;  
+		buffer_address[1] = 0x04;
 		buffer_address[2] = 0x60;  /* put in bra pc + ... */
-		
+
 		if(flagseen['l']) {
 			/* JF: these were fr_opcode[5-7] */
 			buffer_address[3] = 0x04; /* plus 4 */
@@ -3380,7 +3245,7 @@ segT segment;
 			buffer_address[5] = 0xf8;
 			fragP->fr_fix += 6;	  /* account for bra/jmp instruction */
 			subseg_change(SEG_TEXT,0);
-			fix_new(fragP, fragP->fr_fix, 2, fragP->fr_symbol, 0, 
+			fix_new(fragP, fragP->fr_fix, 2, fragP->fr_symbol, 0,
 
 
 				fragP->fr_offset, 0, NO_RELOC);
@@ -3388,19 +3253,19 @@ segT segment;
 		} else {
 			/* JF: these were fr_opcode[5-7] */
 			buffer_address[3] = 0x06;  /* Plus 6 */
-			buffer_address[4] = 0x4e;  /* put in jmp long (0x4ef9) */ 
-			buffer_address[5] = 0xf9;  
+			buffer_address[4] = 0x4e;  /* put in jmp long (0x4ef9) */
+			buffer_address[5] = 0xf9;
 			fragP->fr_fix += 6;	  /* account for bra/jmp instruction */
 			subseg_change(SEG_TEXT,0);
-			fix_new(fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0, 
+			fix_new(fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0,
 				fragP->fr_offset, 0, NO_RELOC);
 			fragP->fr_fix += 4;
 		}
-		
+
 		frag_wane(fragP);
 		break;
 	} /* case TAB(DBCC,SZ_UNDEF) */
-		
+
 	case TAB(PCLEA,SZ_UNDEF): {
 		if ((S_GET_SEGMENT(fragP->fr_symbol))==segment || flagseen['l']) {
 			fragP->fr_subtype=TAB(PCLEA,SHORT);
@@ -3411,12 +3276,12 @@ segT segment;
 		}
 		break;
 	} /* TAB(PCLEA,SZ_UNDEF) */
-		
+
 	default:
 		break;
-		
+
 	} /* switch on subtype looking for SZ_UNDEF's. */
-	
+
 	/* now that SZ_UNDEF are taken care of, check others */
 	switch (fragP->fr_subtype) {
 	case TAB(BCC68000,BYTE):
@@ -3436,7 +3301,7 @@ segT segment;
 }
 
 #if defined(OBJ_AOUT) | defined(OBJ_BOUT)
-/* the bit-field entries in the relocation_info struct plays hell 
+/* the bit-field entries in the relocation_info struct plays hell
    with the byte-order problems of cross-assembly.  So as a hack,
    I added this mach. dependent ri twiddler.  Ugly, but it gets
    you there. -KWK */
@@ -3458,8 +3323,8 @@ struct reloc_info_generic *ri;
 	the_bytes[4] = (ri->r_symbolnum >> 16) & 0x0ff;
 	the_bytes[5] = (ri->r_symbolnum >> 8) & 0x0ff;
 	the_bytes[6] = ri->r_symbolnum & 0x0ff;
-	the_bytes[7] = (((ri->r_pcrel << 7)  & 0x80) | ((ri->r_length << 5) & 0x60) | 
-			((ri->r_extern << 4)  & 0x10)); 
+	the_bytes[7] = (((ri->r_pcrel << 7)  & 0x80) | ((ri->r_length << 5) & 0x60) |
+			((ri->r_extern << 4)  & 0x10));
 }
 #endif /* comment */
 
@@ -3472,26 +3337,26 @@ relax_addressT segment_address_in_file;
 	 * In: length of relocation (or of address) in chars: 1, 2 or 4.
 	 * Out: GNU LD relocation length code: 0, 1, or 2.
 	 */
-	
+
 	static unsigned char nbytes_r_length [] = { 42, 0, 1, 42, 2 };
 	long r_symbolnum;
-	
+
 	know(fixP->fx_addsy != NULL);
-	
+
 	md_number_to_chars(where,
 			   fixP->fx_frag->fr_address + fixP->fx_where - segment_address_in_file,
 			   4);
-	
+
 	r_symbolnum = (S_IS_DEFINED(fixP->fx_addsy)
 		       ? S_GET_TYPE(fixP->fx_addsy)
 		       : fixP->fx_addsy->sy_number);
-	
+
 	where[4] = (r_symbolnum >> 16) & 0x0ff;
 	where[5] = (r_symbolnum >> 8) & 0x0ff;
 	where[6] = r_symbolnum & 0x0ff;
-	where[7] = (((fixP->fx_pcrel << 7)  & 0x80) | ((nbytes_r_length[fixP->fx_size] << 5) & 0x60) | 
+	where[7] = (((fixP->fx_pcrel << 7)  & 0x80) | ((nbytes_r_length[fixP->fx_size] << 5) & 0x60) |
 		    (((!S_IS_DEFINED(fixP->fx_addsy)) << 4)  & 0x10));
-	
+
 	return;
 } /* tc_aout_fix_to_chars() */
 
@@ -3510,9 +3375,9 @@ fragS	*frag;
 symbolS	*to_symbol;
 {
 	long offset;
-	
+
 	offset = to_addr - (from_addr+2);
-	
+
 	md_number_to_chars(ptr  ,(long)0x6000,2);
 	md_number_to_chars(ptr+2,(long)offset,2);
 }
@@ -3526,7 +3391,7 @@ fragS	*frag;
 symbolS	*to_symbol;
 {
 	long offset;
-	
+
 	if (cpu_of_arch(current_architecture) < m68020) {
 		offset=to_addr-S_GET_VALUE(to_symbol);
 		md_number_to_chars(ptr  ,(long)0x4EF9,2);
@@ -3542,7 +3407,7 @@ symbolS	*to_symbol;
 
 #endif
 /* Different values of OK tell what its OK to return.  Things that aren't OK are an error (what a shock, no?)
-   
+
    0:  Everything is OK
    10:  Absolute 1:8	only
    20:  Absolute 0:7	only
@@ -3553,7 +3418,7 @@ symbolS	*to_symbol;
    60:  absolute -128:127	only
    70:  absolute 0:4095	only
    80:  No bignums
-   
+
    */
 
 static int get_num(exp,ok)
@@ -3562,7 +3427,7 @@ int ok;
 {
 #ifdef TEST2
 	long	l = 0;
-	
+
 	if(!exp->e_beg)
 	    return 0;
 	if(*exp->e_beg=='0') {
@@ -3576,7 +3441,7 @@ int ok;
 #else
 	char	*save_in;
 	char	c_save;
-	
+
 	if(!exp) {
 		/* Can't do anything */
 		return 0;
@@ -3589,7 +3454,7 @@ int ok;
 		as_warn("Null expression defaults to %ld",offs(exp));
 		return 0;
 	}
-	
+
 	exp->e_siz=0;
 	if(/* ok!=80 && */exp->e_end[-1]==':' && (exp->e_end-exp->e_beg)>=2) {
 		switch(exp->e_end[0]) {
@@ -3624,7 +3489,7 @@ int ok;
 		offs(exp)= (ok==10) ? 1 : 0;
 		as_warn("Unknown expression: '%s' defaulting to %d",exp->e_beg,offs(exp));
 		break;
-		
+
 	case SEG_ABSENT:
 		/* Do the same thing the VAX asm does */
 		seg(exp)=SEG_ABSOLUTE;
@@ -3695,7 +3560,7 @@ int ok;
 	case SEG_BIG:
 		if(ok==80 && offs(exp)<0) {	/* HACK! Turn it into a long */
 			LITTLENUM_TYPE words[6];
-			
+
 			gen_to_words(words,2,8L);/* These numbers are magic! */
 			seg(exp)=SEG_ABSOLUTE;
 			adds(exp)=0;
@@ -3745,9 +3610,9 @@ static void s_data2() {
 	demand_empty_rest_of_line();
 } /* s_data2() */
 
-static void s_bss() 
+static void s_bss()
 {
-	/* We don't support putting frags in the BSS segment, we fake it 
+	/* We don't support putting frags in the BSS segment, we fake it
 	   by marking in_bss, then looking at s_skip for clues */
 
         subseg_new(SEG_BSS, 0);
@@ -3757,7 +3622,7 @@ static void s_bss()
 static void s_even() {
 	register int temp;
 	register long temp_fill;
-	
+
 	temp = 1;		/* JF should be 2? */
 	temp_fill = get_absolute_expression ();
 	if ( ! need_pass_2 ) /* Never make frag if expect extra pass. */
@@ -3804,20 +3669,20 @@ char ***vecP;
 	case 'l':	/* -l means keep external to 2 bit offset
 			   rather than 16 bit one */
 		break;
-		
+
 	case 'S': /* -S means that jbsr's always turn into jsr's.  */
 		break;
-		
+
 	case 'A':
 		(*argP)++;
 		/* intentional fall-through */
 	case 'm':
 		(*argP)++;
-		
+
 		if (**argP=='c') {
 			(*argP)++;
 		} /* allow an optional "c" */
-		
+
 		if (!strcmp(*argP, "68000")
 		    || !strcmp(*argP, "68008")) {
 			current_architecture |= m68000;
@@ -3826,37 +3691,37 @@ char ***vecP;
 			omagic= 1<<16|OMAGIC;
 #endif
 			current_architecture |= m68010;
-			
-		} else if (!strcmp(*argP, "68020")) { 
+
+		} else if (!strcmp(*argP, "68020")) {
 			current_architecture |= m68020 | MAYBE_FLOAT_TOO;
-			
-		} else if (!strcmp(*argP, "68030")) { 
+
+		} else if (!strcmp(*argP, "68030")) {
 			current_architecture |= m68030 | MAYBE_FLOAT_TOO;
-			
-		} else if (!strcmp(*argP, "68040")) { 
+
+		} else if (!strcmp(*argP, "68040")) {
 			current_architecture |= m68040 | MAYBE_FLOAT_TOO;
-			
+
 #ifndef NO_68881
 		} else if (!strcmp(*argP, "68881")) {
 			current_architecture |= m68881;
-			
+
 		} else if (!strcmp(*argP, "68882")) {
 			current_architecture |= m68882;
-			
+
 #endif /* NO_68881 */
 #ifndef NO_68851
-		} else if (!strcmp(*argP,"68851")) { 
+		} else if (!strcmp(*argP,"68851")) {
 			current_architecture |= m68851;
-			
+
 #endif /* NO_68851 */
 		} else {
 			as_warn("Unknown architecture, \"%s\". option ignored", *argP);
 		} /* switch on architecture */
-		
+
 		while(**argP) (*argP)++;
-		
+
 		break;
-		
+
 	case 'p':
 		if (!strcmp(*argP,"pic")) {
 			(*argP) += 3;
@@ -3864,7 +3729,7 @@ char ***vecP;
 		} else {
 			return(0);
 		} /* pic or not */
-		
+
 	default:
 		return 0;
 	}
@@ -3883,7 +3748,7 @@ main()
 	char buf[120];
 	char *cp;
 	int	n;
-	
+
 	m68k_ip_begin();
 	for(;;) {
 		if(!gets(buf) || !*buf)
@@ -3940,20 +3805,20 @@ char *str;
 #endif
 
 /* Possible states for relaxation:
-   
+
    0 0	branch offset	byte	(bra, etc)
    0 1			word
    0 2			long
-   
+
    1 0	indexed offsets	byte	a0@(32,d4:w:1) etc
    1 1			word
    1 2			long
-   
+
    2 0	two-offset index word-word a0@(32,d4)@(45) etc
    2 1			word-long
    2 2			long-word
    2 3			long-long
-   
+
    */
 
 
@@ -3969,7 +3834,7 @@ print_frags()
 {
 	fragS *fragP;
 	extern fragS *text_frag_root;
-	
+
 	for(fragP=text_frag_root;fragP;fragP=fragP->fr_next) {
 		printf("addr %lu  next 0x%x  fix %ld  var %ld  symbol 0x%x  offset %ld\n",
 		       fragP->fr_address,fragP->fr_next,fragP->fr_fix,fragP->fr_var,fragP->fr_symbol,fragP->fr_offset);
@@ -4003,7 +3868,7 @@ char *name;
 	return 0;
 }
 
-/* Parse an operand that is machine-specific.  
+/* Parse an operand that is machine-specific.
    We just return without modifying the expression if we have nothing
    to do.  */
 
