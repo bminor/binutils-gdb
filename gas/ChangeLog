@@ -1,3 +1,8 @@
+Fri Mar  3 17:41:50 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* write.c (write_contents): If bfd_set_section_contents fails,
+	print a message and exit, instead of aborting.
+
 Fri Mar  3 16:26:19 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* tc.h (md_apply_fix3): If MD_APPLY_FIX3 is defined, declare
