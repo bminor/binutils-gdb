@@ -1,3 +1,8 @@
+Sun Aug 30 18:12:13 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* cplus-dem.c:  Removed.  Use the version in libiberty now.
+	* ldmisc.c:  Use new libiberty version of cplus_demangle().
+
 Thu Aug 27 16:38:42 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* gld960.em (gld960_choose_target): default to little endian, not

@@ -22,6 +22,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include <varargs.h>
+#include <demangle.h>
 
 #include "ld.h"
 #include "ldmisc.h"
@@ -60,7 +61,6 @@ vfinfo(fp, fmt, arg)
      char *fmt;
      va_list arg;
 {
-  extern char *cplus_demangle();
   boolean fatal = false;
   while (*fmt) 
   {
@@ -91,7 +91,8 @@ vfinfo(fp, fmt, arg)
 
 	    
 	   asection *section = symbol->section;
-	   char *cplusname = cplus_demangle(symbol->name, 1);
+	   char *cplusname =
+	       cplus_demangle(symbol->name, DMGL_ANSI|DMGL_PARAMS);
 	   CONST char *section_name =  section->name;
 	   if (section != &bfd_und_section) 
 	   {
@@ -208,7 +209,7 @@ vfinfo(fp, fmt, arg)
 	    filename = abfd->filename;
 	   if (functionname != (char *)NULL) 
 	   {
-	     cplus_name = cplus_demangle(functionname, 1);
+	     cplus_name = cplus_demangle(functionname, DMGL_ANSI|DMGL_PARAMS);
 	     fprintf(fp,"%s:%u: (%s)", filename, linenumber,
 		     cplus_name? cplus_name: functionname);
 	     if (cplus_name) 

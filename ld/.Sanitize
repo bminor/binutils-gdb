@@ -42,7 +42,6 @@ config
 config.h
 configure.bat
 configure.in
-cplus-dem.c
 ebmon29k.sc-sh
 ebmon29k.sh
 generic.em
@@ -122,7 +121,11 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.40  1992/08/17 18:35:55  pesch
+# Revision 1.41  1992/08/31 01:14:44  bothner
+# 	* cplus-dem.c:  Removed.  Use the version in libiberty now.
+# 	* ldmisc.c:  Use new libiberty version of cplus_demangle().
+#
+# Revision 1.40  1992/08/17  18:35:55  pesch
 # Use new name of man page (ld.1).
 #
 # Revision 1.39  1992/08/07  01:37:34  bothner
