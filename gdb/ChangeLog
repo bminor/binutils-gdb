@@ -1,3 +1,7 @@
+Thu Oct 22 11:24:18 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* alldeps.mak, depend:  Update.
+
 Thu Oct 22 03:14:36 1992  John Gilmore  (gnu@cygnus.com)
 
 	* partial-stab.h ('f', 'F'):  Don't reference pst->textlow if pst
