@@ -7,6 +7,7 @@
 
 	* exec.c (xfer_memory): Add attrib argument.
 	* infptrace.c (child_xfer_memory): Likewise.
+	* lin-lwp.c (lin_lwp_xfer_memory): Likewise.
 	* monitor.c (monitor_xfer_memory): Likewise.
 	* remote-adapt.c (adapt_xfer_inferior_memory): Likewise.
 	* remote-array.c (array_xfer_memory): Likewise.
@@ -28,6 +29,7 @@
 	* remote.c (remote_xfer_memory): Likewise.
 	* target.c (debug_to_xfer_memory, do_xfer_memory): Likewise.
 	* target.h (child_xfer_memory, do_xfer_memory, xfer_memory): Likewise.
+	* thread-db.c (thread_db_xfer_memory): Likewise.
 
 	* target.h (#include "memattr.h"): Added.
 	(target_ops.to_xfer_memory): Add attrib argument.

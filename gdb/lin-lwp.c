@@ -935,6 +935,7 @@ lin_lwp_store_registers (int regno)
 
 static int
 lin_lwp_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		     struct mem_attrib *attrib,
 		     struct target_ops *target)
 {
   struct cleanup *old_chain = save_inferior_pid ();
@@ -943,7 +944,7 @@ lin_lwp_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   if (is_lwp (inferior_pid))
     inferior_pid = GET_LWP (inferior_pid);
 
-  xfer = child_xfer_memory (memaddr, myaddr, len, write, target);
+  xfer = child_xfer_memory (memaddr, myaddr, len, write, attrib, target);
 
   do_cleanups (old_chain);
   return xfer;

@@ -753,6 +753,7 @@ thread_db_wait (int pid, struct target_waitstatus *ourstatus)
 
 static int
 thread_db_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		       struct mem_attrib *attrib,
 		       struct target_ops *target)
 {
   struct cleanup *old_chain = save_inferior_pid ();
@@ -768,7 +769,7 @@ thread_db_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	inferior_pid = lwp_from_thread (inferior_pid);
     }
 
-  xfer = target_beneath->to_xfer_memory (memaddr, myaddr, len, write, target);
+  xfer = target_beneath->to_xfer_memory (memaddr, myaddr, len, write, attrib, target);
 
   do_cleanups (old_chain);
   return xfer;
