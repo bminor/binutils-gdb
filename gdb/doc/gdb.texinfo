@@ -872,14 +872,15 @@ _fi__(!_GENERIC__)
 @subsection Choosing Files
 
 As shown above, any arguments other than options specify an executable
-file and core file; that is, the first argument encountered with no
-associated option flag is equivalent to a @samp{-se} option, and the
-second, if any, is equivalent to a @samp{-c} option.  Many options have
-both long and short forms; both are shown here.  The long forms are also
-recognized if you truncate them, so long as enough of the option is
-present to be unambiguous.  (If you prefer, you can flag option
-arguments with @samp{+} rather than @samp{-}, though we illustrate the
-more usual convention.)
+file and core file (or process ID); that is, the first argument
+encountered with no associated option flag is equivalent to a @samp{-se}
+option, and the second, if any, is equivalent to a @samp{-c} option if
+it's the name of a file.
+Many options have both long and short forms; both are shown here.  The
+long forms are also recognized if you truncate them, so long as enough
+of the option is present to be unambiguous.  (If you prefer, you can
+flag option arguments with @samp{+} rather than @samp{-}, though we
+illustrate the more usual convention.)
 
 @table @code
 @item -symbols=@var{file}
