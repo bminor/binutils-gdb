@@ -1,3 +1,7 @@
+Wed Oct 21 00:14:34 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* xm-mips.h (offsetof):  Don't define this if __STDC__.
+
 Tue Oct 20 21:32:18 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	umax native support (untested).

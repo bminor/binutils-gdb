@@ -43,7 +43,7 @@ extern void *memcpy();
 extern void *memset();
 #define	MEM_FNS_DECLARED
 
-#if !defined (offsetof)
+#if ! defined (__STDC__) && ! defined (offsetof)
 # define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
 #endif
 
