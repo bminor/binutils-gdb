@@ -166,7 +166,11 @@ enum i386_regnum
   I386_EFLAGS_REGNUM,		/* %eflags */
   I386_CS_REGNUM,		/* %cs */
   I386_SS_REGNUM,		/* %ss */
-  I386_ST0_REGNUM = 16,		/* %st(0) */
+  I386_DS_REGNUM,		/* %ds */
+  I386_ES_REGNUM,		/* %es */
+  I386_FS_REGNUM,		/* %fs */
+  I386_GS_REGNUM,		/* %gs */
+  I386_ST0_REGNUM		/* %st(0) */
 };
 
 #define I386_NUM_GREGS	16
