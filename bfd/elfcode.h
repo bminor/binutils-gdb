@@ -332,13 +332,13 @@ DEFUN (elf_swap_phdr_out, (abfd, src, dst),
 {
   /* note that all elements of dst are *arrays of unsigned char* already... */
   bfd_h_put_32 (abfd, src->p_type, dst->p_type);
-  bfd_h_put_32 (abfd, src->p_offset, dst->p_offset);
-  bfd_h_put_32 (abfd, src->p_vaddr, dst->p_vaddr);
-  bfd_h_put_32 (abfd, src->p_paddr, dst->p_paddr);
-  bfd_h_put_32 (abfd, src->p_filesz, dst->p_filesz);
-  bfd_h_put_32 (abfd, src->p_memsz, dst->p_memsz);
+  put_word (abfd, src->p_offset, dst->p_offset);
+  put_word (abfd, src->p_vaddr, dst->p_vaddr);
+  put_word (abfd, src->p_paddr, dst->p_paddr);
+  put_word (abfd, src->p_filesz, dst->p_filesz);
+  put_word (abfd, src->p_memsz, dst->p_memsz);
   bfd_h_put_32 (abfd, src->p_flags, dst->p_flags);
-  bfd_h_put_32 (abfd, src->p_align, dst->p_align);
+  put_word (abfd, src->p_align, dst->p_align);
 }
 
 /* Translate an ELF reloc from external format to internal format. */
@@ -348,8 +348,8 @@ DEFUN (elf_swap_reloc_in, (abfd, src, dst),
        Elf_External_Rel * src AND
        Elf_Internal_Rel * dst)
 {
-  dst->r_offset = bfd_h_get_32 (abfd, (bfd_byte *) src->r_offset);
-  dst->r_info = bfd_h_get_32 (abfd, (bfd_byte *) src->r_info);
+  dst->r_offset = get_word (abfd, (bfd_byte *) src->r_offset);
+  dst->r_info = get_word (abfd, (bfd_byte *) src->r_info);
 }
 
 static void
@@ -358,9 +358,9 @@ DEFUN (elf_swap_reloca_in, (abfd, src, dst),
        Elf_External_Rela * src AND
        Elf_Internal_Rela * dst)
 {
-  dst->r_offset = bfd_h_get_32 (abfd, (bfd_byte *) src->r_offset);
-  dst->r_info = bfd_h_get_32 (abfd, (bfd_byte *) src->r_info);
-  dst->r_addend = bfd_h_get_32 (abfd, (bfd_byte *) src->r_addend);
+  dst->r_offset = get_word (abfd, (bfd_byte *) src->r_offset);
+  dst->r_info = get_word (abfd, (bfd_byte *) src->r_info);
+  dst->r_addend = get_word (abfd, (bfd_byte *) src->r_addend);
 }
 
 /* Translate an ELF reloc from internal format to external format. */
@@ -370,8 +370,8 @@ DEFUN (elf_swap_reloc_out, (abfd, src, dst),
        Elf_Internal_Rel * src AND
        Elf_External_Rel * dst)
 {
-  bfd_h_put_32 (abfd, src->r_offset, dst->r_offset);
-  bfd_h_put_32 (abfd, src->r_info, dst->r_info);
+  put_word (abfd, src->r_offset, dst->r_offset);
+  put_word (abfd, src->r_info, dst->r_info);
 }
 
 static void
@@ -380,9 +380,9 @@ DEFUN (elf_swap_reloca_out, (abfd, src, dst),
        Elf_Internal_Rela * src AND
        Elf_External_Rela * dst)
 {
-  bfd_h_put_32 (abfd, src->r_offset, dst->r_offset);
-  bfd_h_put_32 (abfd, src->r_info, dst->r_info);
-  bfd_h_put_32 (abfd, src->r_addend, dst->r_addend);
+  put_word (abfd, src->r_offset, dst->r_offset);
+  put_word (abfd, src->r_info, dst->r_info);
+  put_word (abfd, src->r_addend, dst->r_addend);
 }
 
 /*
@@ -537,6 +537,8 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
 
 	      hdr->rawdata = (void *) newsect;
 	    }
+	  else
+	    hdr->rawdata = (void *) bfd_get_section_by_name (abfd, name);
 	}
       return true;
 
@@ -2624,7 +2626,7 @@ DEFUN (section_from_elf_index, (abfd, index),
      be returned from this routine?  */
 
   if (index == SHN_ABS)
-    return &bfd_com_section;
+    return &bfd_com_section;	/* not abs? */
   if (index == SHN_COMMON)
     return &bfd_com_section;
 
@@ -2639,6 +2641,8 @@ DEFUN (section_from_elf_index, (abfd, index),
       case SHT_NOBITS:
 	if (!hdr->rawdata)
 	  bfd_section_from_shdr (abfd, index);
+	if (!hdr->rawdata)
+	  abort ();
 	return (struct sec *) hdr->rawdata;
 
       default:
