@@ -61,6 +61,10 @@ Wed Apr 13 14:52:46 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	(TARGET_CAN_USE_HARDWARE_WATCHPOINT): Define.
 	(target_{insert,delete}_watchpoint): Define.
 
+	* config/mips/nm-irix4.h (TARGET_CAN_USE_HARDWARE_WATCHPOINT): Define.
+	(STOPPED_BY_WATCHPOINT, HAVE_NONSTEPPABLE_WATCHPOINT): Likewise.
+	(target_{insert,remove}_watchpoint): Likewise.
+
 Mon Apr 11 19:21:27 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* xcoffread.c (read_xcoff_symtab):  Ignore symbols of class C_EXT,
