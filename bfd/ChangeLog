@@ -1,3 +1,12 @@
+Thu Mar 24 09:21:13 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_bfd_prep_for_ar_write): Ignore non-SOM objects.
+	(som_bfd_ar_write_symbol_stuff, som_write_armap): Likewise.
+
+Wed Mar 23 14:29:31 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* netbsd386.c (N_SET_FLAGS): Delete the old definition.
+
 Wed Mar 23 14:58:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Clean up the relaxing code for the new linker.

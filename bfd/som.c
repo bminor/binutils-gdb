@@ -3118,7 +3118,7 @@ som_begin_writing (abfd)
      zeros are filled in.  Ugh.  */
   if (abfd->flags & EXEC_P)
     current_offset = SOM_ALIGN (current_offset, PA_PAGESIZE);
-  if (bfd_seek (abfd, current_offset, SEEK_SET) < 0)
+  if (bfd_seek (abfd, current_offset - 1, SEEK_SET) < 0)
     {
       bfd_set_error (bfd_error_system_call);
       return false;
@@ -5071,6 +5071,14 @@ som_bfd_prep_for_ar_write (abfd, num_syms, stringsize)
       unsigned int curr_count, i;
       som_symbol_type *sym;
 
+      /* Don't bother for non-SOM objects.  */
+      if (curr_bfd->format != bfd_object
+	  || curr_bfd->xvec->flavour != bfd_target_som_flavour)
+	{
+	  curr_bfd = curr_bfd->next;
+	  continue;
+	}
+
       /* Make sure the symbol table has been read, then snag a pointer
 	 to it.  It's a little slimey to grab the symbols via obj_som_symtab,
 	 but doing so avoids allocating lots of extra memory.  */
@@ -5259,6 +5267,14 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
     {
       unsigned int curr_count, i;
       som_symbol_type *sym;
+
+      /* Don't bother for non-SOM objects.  */
+      if (curr_bfd->format != bfd_object
+	  || curr_bfd->xvec->flavour != bfd_target_som_flavour)
+	{
+	  curr_bfd = curr_bfd->next;
+	  continue;
+	}
 
       /* Make sure the symbol table has been read, then snag a pointer
 	 to it.  It's a little slimey to grab the symbols via obj_som_symtab,
@@ -5478,7 +5494,10 @@ som_write_armap (abfd)
   lst.module_count = 0;
   while (curr_bfd != NULL)
     {
-      lst.module_count++;
+      /* Only true SOM objects count.  */
+      if (curr_bfd->format == bfd_object
+	  && curr_bfd->xvec->flavour == bfd_target_som_flavour)
+	lst.module_count++;
       curr_bfd = curr_bfd->next;
     }
   lst.module_limit = lst.module_count;
