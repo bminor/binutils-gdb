@@ -139,7 +139,7 @@ static definfo init[] =
   D(MajorSubsystemVersion,"__major_subsystem_version__", 4),
   D(MinorSubsystemVersion,"__minor_subsystem_version__", 0),
   D(Subsystem,"__subsystem__", 3),
-  D(SizeOfStackReserve,"__size_of_stack_reserve__", 0x100000),
+  D(SizeOfStackReserve,"__size_of_stack_reserve__", 0x2000000),
   D(SizeOfStackCommit,"__size_of_stack_commit__", 0x1000),
   D(SizeOfHeapReserve,"__size_of_heap_reserve__", 0x100000),
   D(SizeOfHeapCommit,"__size_of_heap_commit__", 0x1000),
@@ -460,7 +460,8 @@ sort_sections (s)
 	  lang_statement_union_type **p = &s->wild_statement.children.head;
 
 	  /* Is this the .idata section?  */
-	  if (strncmp (s->wild_statement.section_name, ".idata", 6) == 0)
+	  if (s->wild_statement.section_name != NULL
+	      && strncmp (s->wild_statement.section_name, ".idata", 6) == 0)
 	    {
 	      /* Sort any children in the same archive.  Run through all
 		 the children of this wild statement, when an
@@ -498,24 +499,25 @@ sort_sections (s)
 	     Don't sort them if \$ is not the last character (not sure if
 	     this is really useful, but it allows explicitly mentioning
 	     some \$ sections and letting the linker handle the rest).  */
-	  {
-	    char *q = strchr (s->wild_statement.section_name, '\$');
+	  if (s->wild_statement.section_name != NULL)
+	    {
+	      char *q = strchr (s->wild_statement.section_name, '\$');
 
-	    if (q && q[1] == 0)
-	      {
-		lang_statement_union_type *end;
-		int count;
+	      if (q && q[1] == 0)
+		{
+		  lang_statement_union_type *end;
+		  int count;
 
-		for (end = *p, count = 0; end; end = end->next)
-		  {
-		    if (end->header.type != lang_input_section_enum)
-		      abort ();
-		    count++;
-		  }
-		(void) sort_sections_1 (p, end, count, sort_by_section_name);
-	      }
-	    break;
-	  }
+		  for (end = *p, count = 0; end; end = end->next)
+		    {
+		      if (end->header.type != lang_input_section_enum)
+			abort ();
+		      count++;
+		    }
+		  (void) sort_sections_1 (p, end, count, sort_by_section_name);
+		}
+	      break;
+	    }
 	}
 	break;
       default:
@@ -533,7 +535,10 @@ gld_${EMULATION_NAME}_before_allocation()
   {
     LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
-	ppc_process_before_allocation(is->the_bfd, &link_info);
+	if (!ppc_process_before_allocation(is->the_bfd, &link_info))
+	  {
+	    einfo("Errors encountered processing file %s", is->filename);
+	  }
       }
   }
 
