@@ -180,6 +180,8 @@ print_type_scalar (type, val, stream)
   unsigned int i;
   unsigned len;
 
+  CHECK_TYPEDEF (type);
+
   switch (TYPE_CODE (type))
     {
 
@@ -214,6 +216,10 @@ print_type_scalar (type, val, stream)
       fprintf_filtered (stream, val ? "TRUE" : "FALSE");
       break;
 
+    case TYPE_CODE_RANGE:
+      print_type_scalar (TYPE_TARGET_TYPE (type), val, stream);
+      return;
+
     case TYPE_CODE_UNDEF:
     case TYPE_CODE_PTR:
     case TYPE_CODE_ARRAY:
@@ -223,7 +229,6 @@ print_type_scalar (type, val, stream)
     case TYPE_CODE_FLT:
     case TYPE_CODE_VOID:
     case TYPE_CODE_SET:
-    case TYPE_CODE_RANGE:
     case TYPE_CODE_STRING:
     case TYPE_CODE_ERROR:
     case TYPE_CODE_MEMBER:

@@ -314,16 +314,7 @@ print_equivalent_f77_float_type (type, stream)
      appropriate real. XLC stupidly outputs -12 as a type
      for real when it really should be outputting -18 */
 
-  switch (TYPE_LENGTH (type))
-    {
-    case 4:
-      fprintf_filtered (stream, "real*4");
-      break;
-
-    case 8:
-      fprintf_filtered(stream,"real*8");
-      break;
-    }
+  fprintf_filtered (stream, "real*%d", TYPE_LENGTH (type));
 }
 
 /* Print the name of the type (or the ultimate pointer target,
@@ -370,19 +361,23 @@ f_type_print_base (type, stream, show, level)
       return;
     }
 
+  if (TYPE_CODE (type) != TYPE_CODE_TYPEDEF)
+    CHECK_TYPEDEF (type);
+
   switch (TYPE_CODE (type))
     {
-    case TYPE_CODE_ARRAY:
-      f_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+    case TYPE_CODE_TYPEDEF:
+      f_type_print_base (TYPE_TARGET_TYPE (type), stream, 0, level);
       break;
 
+    case TYPE_CODE_ARRAY:
     case TYPE_CODE_FUNC:
       f_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
       break;
 
    case TYPE_CODE_PTR:
       fprintf_filtered (stream, "PTR TO -> ( ");
-      f_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+      f_type_print_base (TYPE_TARGET_TYPE (type), stream, 0, level);
       break;
 
     case TYPE_CODE_VOID:
@@ -419,8 +414,7 @@ f_type_print_base (type, stream, show, level)
       break;
 
     case TYPE_CODE_COMPLEX:
-      fprintf_filtered (stream, "complex*");
-      fprintf_filtered (stream, "%d", TYPE_LENGTH (type));
+      fprintf_filtered (stream, "complex*%d", TYPE_LENGTH (type));
       break;
 
     case TYPE_CODE_FLT:

@@ -177,13 +177,13 @@ evaluate_struct_tuple (struct_val, exp, pos, noside, nargs)
      enum noside noside;
      int nargs;
 {
-  struct type *struct_type = VALUE_TYPE (struct_val);
+  struct type *struct_type = check_typedef (VALUE_TYPE (struct_val));
   struct type *substruct_type = struct_type;
   struct type *field_type;
   int fieldno = -1;
   int variantno = -1;
   int subfieldno = -1;
-  while (--nargs >= 0)
+   while (--nargs >= 0)
     {
       int pc = *pos;
       value_ptr val = NULL;
@@ -305,6 +305,58 @@ evaluate_struct_tuple (struct_val, exp, pos, noside, nargs)
 	} while (--nlabels > 0);
     }
   return struct_val;
+}
+
+/* Recursive helper function for setting elements of array tuples for Chill.
+   The target is ARRAY (which has bounds LOW_BOUND to HIGH_BOUND);
+   the element value is ELEMENT;
+   EXP, POS and NOSIDE are as usual.
+   Evaluates index expresions and sets the specified element(s) of
+   ARRAY to ELEMENT.
+   Returns last index value.  */
+
+static LONGEST
+init_array_element (array, element, exp, pos, noside, low_bound, high_bound)
+     value_ptr array, element;
+     register struct expression *exp;
+     register int *pos;
+     enum noside noside;
+{
+  LONGEST index;
+  int element_size = TYPE_LENGTH (VALUE_TYPE (element));
+  if (exp->elts[*pos].opcode == BINOP_COMMA)
+    {
+      (*pos)++;
+      init_array_element (array, element, exp, pos, noside,
+			  low_bound, high_bound);
+      return init_array_element (array, element,
+				 exp, pos, noside, low_bound, high_bound);
+    }
+  else if (exp->elts[*pos].opcode == BINOP_RANGE)
+    {
+      LONGEST low, high;
+      value_ptr val;
+      (*pos)++;
+      low = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+      high = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+      if (low < low_bound || high > high_bound)
+	error ("tuple range index out of range");
+      for (index = low ; index <= high; index++)
+	{
+	  memcpy (VALUE_CONTENTS_RAW (array)
+		  + (index - low_bound) * element_size,
+		  VALUE_CONTENTS (element), element_size);
+	}
+    }
+  else
+    {
+      index = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+      if (index < low_bound || index > high_bound)
+	error ("tuple index out of range");
+      memcpy (VALUE_CONTENTS_RAW (array) + (index - low_bound) * element_size,
+	      VALUE_CONTENTS (element), element_size);
+    }
+  return index;
 }
 
 value_ptr
@@ -440,62 +492,107 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       tem2 = longest_to_int (exp->elts[pc + 1].longconst);
       tem3 = longest_to_int (exp->elts[pc + 2].longconst);
       nargs = tem3 - tem2 + 1;
+      type = expect_type ? check_typedef (expect_type) : NULL_TYPE;
 
       if (expect_type != NULL_TYPE && noside != EVAL_SKIP
-	  && TYPE_CODE (expect_type) == TYPE_CODE_STRUCT)
+	  && TYPE_CODE (type) == TYPE_CODE_STRUCT)
 	{
 	  value_ptr rec = allocate_value (expect_type);
-	  memset (VALUE_CONTENTS_RAW (rec), '\0', TYPE_LENGTH (expect_type));
+	  memset (VALUE_CONTENTS_RAW (rec), '\0', TYPE_LENGTH (type));
 	  return evaluate_struct_tuple (rec, exp, pos, noside, nargs);
 	}
 
       if (expect_type != NULL_TYPE && noside != EVAL_SKIP
-	  && TYPE_CODE (expect_type) == TYPE_CODE_ARRAY)
+	  && TYPE_CODE (type) == TYPE_CODE_ARRAY)
 	{
-	  struct type *range_type = TYPE_FIELD_TYPE (expect_type, 0);
-	  struct type *element_type = TYPE_TARGET_TYPE (expect_type);
-	  LONGEST low_bound =  TYPE_FIELD_BITPOS (range_type, 0);
-	  LONGEST high_bound = TYPE_FIELD_BITPOS (range_type, 1);
-	  int element_size = TYPE_LENGTH (element_type);
+	  struct type *range_type = TYPE_FIELD_TYPE (type, 0);
+	  struct type *element_type = TYPE_TARGET_TYPE (type);
 	  value_ptr array = allocate_value (expect_type);
-	  if (nargs != (high_bound - low_bound + 1))
-	    error ("wrong number of initialiers for array type");
-	  for (tem = low_bound;  tem <= high_bound;  tem++)
+	  int element_size = TYPE_LENGTH (check_typedef (element_type));
+	  LONGEST low_bound, high_bound, index;
+	  if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
 	    {
-	      value_ptr element = evaluate_subexp (element_type,
-						   exp, pos, noside);
+	      low_bound = 0;
+	      high_bound = (TYPE_LENGTH (type) / element_size) - 1;
+	    }
+	  index = low_bound;
+	  memset (VALUE_CONTENTS_RAW (array), 0, TYPE_LENGTH (expect_type));
+	  for (tem = nargs;  --nargs >= 0;  )
+	    {
+	      value_ptr element;
+	      int index_pc = 0;
+	      if (exp->elts[*pos].opcode == BINOP_RANGE)
+		{
+		  index_pc = ++(*pos);
+		  evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
+		}
+	      element = evaluate_subexp (element_type, exp, pos, noside);
 	      if (VALUE_TYPE (element) != element_type)
 		element = value_cast (element_type, element);
-	      memcpy (VALUE_CONTENTS_RAW (array)
-		      + (tem - low_bound) * element_size,
-		      VALUE_CONTENTS (element),
-		      element_size);
+	      if (index_pc)
+		{
+		  int continue_pc = *pos;
+		  *pos = index_pc;
+		  index = init_array_element (array, element, exp, pos, noside,
+					      low_bound, high_bound);
+		  *pos = continue_pc;
+		}
+	      else
+		{
+		  memcpy (VALUE_CONTENTS_RAW (array)
+			  + (index - low_bound) * element_size,
+			  VALUE_CONTENTS (element),
+			  element_size);
+		}
+	      index++;
 	    }
 	  return array;
 	}
 
       if (expect_type != NULL_TYPE && noside != EVAL_SKIP
-	  && TYPE_CODE (expect_type) == TYPE_CODE_SET)
+	  && TYPE_CODE (type) == TYPE_CODE_SET)
 	{
 	  value_ptr set = allocate_value (expect_type);
-	  struct type *element_type = TYPE_INDEX_TYPE (expect_type);
-	  int low_bound = TYPE_LOW_BOUND (element_type);
-	  int high_bound = TYPE_HIGH_BOUND (element_type);
 	  char *valaddr = VALUE_CONTENTS_RAW (set);
-	  memset (valaddr, '\0', TYPE_LENGTH (expect_type));
+	  struct type *element_type = TYPE_INDEX_TYPE (type);
+	  LONGEST low_bound, high_bound;
+	  if (get_discrete_bounds (element_type, &low_bound, &high_bound) < 0)
+	    error ("(power)set type with unknown size");
+	  memset (valaddr, '\0', TYPE_LENGTH (type));
 	  for (tem = 0; tem < nargs; tem++)
 	    {
-	      value_ptr element_val = evaluate_subexp (element_type,
-						       exp, pos, noside);
-	      LONGEST element = value_as_long (element_val);
-	      int bit_index;
-	      if (element < low_bound || element > high_bound)
+	      LONGEST range_low, range_high;
+	      value_ptr elem_val;
+	      if (exp->elts[*pos].opcode == BINOP_RANGE)
+		{
+		  (*pos)++;
+		  elem_val = evaluate_subexp (element_type, exp, pos, noside);
+		  range_low = value_as_long (elem_val);
+		  elem_val = evaluate_subexp (element_type, exp, pos, noside);
+		  range_high = value_as_long (elem_val);
+		}
+	      else
+		{
+		  elem_val = evaluate_subexp (element_type, exp, pos, noside);
+		  range_low = range_high = value_as_long (elem_val);
+		}
+	      if (range_low > range_high)
+		{
+		  warning ("empty POWERSET tuple range");
+		  continue;
+		}
+	      if (range_low < low_bound || range_high > high_bound)
 		error ("POWERSET tuple element out of range");
-	      element -= low_bound;
-	      bit_index = (unsigned) element % TARGET_CHAR_BIT;
-	      if (BITS_BIG_ENDIAN)
-		bit_index = TARGET_CHAR_BIT - 1 - bit_index;
-	      valaddr [(unsigned) element / TARGET_CHAR_BIT] |= 1 << bit_index;
+	      range_low -= low_bound;
+	      range_high -= low_bound;
+	      for ( ; range_low <= range_high; range_low++)
+		{
+		  int bit_index = (unsigned) range_low % TARGET_CHAR_BIT;
+		  if (BITS_BIG_ENDIAN)
+		    bit_index = TARGET_CHAR_BIT - 1 - bit_index;
+		  valaddr [(unsigned) range_low / TARGET_CHAR_BIT]
+		    |= 1 << bit_index;
+		}
 	    }
 	  return set;
 	}
@@ -517,6 +614,8 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	  = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
 	int upper
 	  = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+	if (noside == EVAL_SKIP)
+	  goto nosideret;
 	return value_slice (array, lowbound, upper - lowbound + 1);
       }
 
@@ -740,7 +839,8 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 
       /* First determine the type code we are dealing with.  */ 
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      code = TYPE_CODE (VALUE_TYPE (arg1)); 
+      type = check_typedef (VALUE_TYPE (arg1));
+      code = TYPE_CODE (type);
 
       switch (code) 
 	{
@@ -775,28 +875,16 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 
       arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
 
-      if (TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_INT)
-         error ("Substring arguments must be of type integer");
-
       if (nargs < 2)
 	return value_subscript (arg1, arg2);
 
       arg3 = evaluate_subexp_with_coercion (exp, pos, noside);
 
-      if (TYPE_CODE (VALUE_TYPE (arg3)) != TYPE_CODE_INT)
-         error ("Substring arguments must be of type integer");
-
-      tem2 = *((int *) VALUE_CONTENTS_RAW (arg2)); 
-      tem3 = *((int *) VALUE_CONTENTS_RAW (arg3)); 
-
-      if ((tem2 < 1) || (tem2 > tem3))
-         error ("Bad 'from' value %d on substring operation", tem2); 
-
-      if ((tem3 < tem2) || (tem3 > (TYPE_LENGTH (VALUE_TYPE (arg1)))))
-         error ("Bad 'to' value %d on substring operation", tem3); 
-      
       if (noside == EVAL_SKIP)
         goto nosideret;
+      
+      tem2 = value_as_long (arg2);
+      tem2 = value_as_long (arg3);
       
       return value_slice (arg1, tem2, tem3 - tem2 + 1);
 
@@ -883,9 +971,10 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      if (TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_PTR)
+      type = check_typedef (VALUE_TYPE (arg2));
+      if (TYPE_CODE (type) != TYPE_CODE_PTR)
 	goto bad_pointer_to_member;
-      type = TYPE_TARGET_TYPE (VALUE_TYPE (arg2));
+      type = check_typedef (TYPE_TARGET_TYPE (type));
       if (TYPE_CODE (type) == TYPE_CODE_METHOD)
 	error ("not implemented: pointer-to-method in pointer-to-member construct");
       if (TYPE_CODE (type) != TYPE_CODE_MEMBER)
@@ -996,7 +1085,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	     type (like a plain int variable for example), then report this
 	     as an error. */
 
-	  type = TYPE_TARGET_TYPE (VALUE_TYPE (arg1));
+	  type = TYPE_TARGET_TYPE (check_typedef (VALUE_TYPE (arg1)));
 	  if (type)
 	    return value_zero (type, VALUE_LVAL (arg1));
 	  else
@@ -1042,7 +1131,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 		 type (like a plain int variable for example), then report this
 		 as an error. */
 	      
-	      type = TYPE_TARGET_TYPE (VALUE_TYPE (arg1));
+	      type = TYPE_TARGET_TYPE (check_typedef (VALUE_TYPE (arg1)));
 	      if (type != NULL)
 		{
 		  arg1 = value_zero (type, VALUE_LVAL (arg1));
@@ -1078,8 +1167,9 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 
 	if (nargs > MAX_FORTRAN_DIMS)
 	  error ("Too many subscripts for F77 (%d Max)", MAX_FORTRAN_DIMS);
-         
-	ndimensions = calc_f77_array_dims (VALUE_TYPE (arg1)); 
+
+	tmp_type = check_typedef (VALUE_TYPE (arg1));
+	ndimensions = calc_f77_array_dims (type);
 
 	if (nargs != ndimensions)
 	  error ("Wrong number of subscripts");
@@ -1087,7 +1177,6 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	/* Now that we know we have a legal array subscript expression 
 	   let us actually find out where this element exists in the array. */ 
 
-	tmp_type = VALUE_TYPE (arg1);
 	offset_item = 0; 
 	for (i = 1; i <= nargs; i++)
 	  {
@@ -1121,7 +1210,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	       offset to. */ 
 
 	    if (i < nargs) 
-	      tmp_type = TYPE_TARGET_TYPE (tmp_type); 
+	      tmp_type = check_typedef (TYPE_TARGET_TYPE (tmp_type)); 
 	  }
 
 	/* Now let us calculate the offset for this item */
@@ -1341,20 +1430,21 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 
     case UNOP_IND:
       if (expect_type && TYPE_CODE (expect_type) == TYPE_CODE_PTR)
-        expect_type = TYPE_TARGET_TYPE (expect_type);
+        expect_type = TYPE_TARGET_TYPE (check_typedef (expect_type));
       arg1 = evaluate_subexp (expect_type, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
-	  if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_PTR
-	      || TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_REF
+	  type = check_typedef (VALUE_TYPE (arg1));
+	  if (TYPE_CODE (type) == TYPE_CODE_PTR
+	      || TYPE_CODE (type) == TYPE_CODE_REF
 	      /* In C you can dereference an array to get the 1st elt.  */
-	      || TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_ARRAY
+	      || TYPE_CODE (type) == TYPE_CODE_ARRAY
 	      )
-	    return value_zero (TYPE_TARGET_TYPE (VALUE_TYPE (arg1)),
+	    return value_zero (TYPE_TARGET_TYPE (type),
 			       lval_memory);
-	  else if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_INT)
+	  else if (TYPE_CODE (type) == TYPE_CODE_INT)
 	    /* GDB allows dereferencing an int.  */
 	    return value_zero (builtin_type_int, lval_memory);
 	  else
@@ -1605,7 +1695,7 @@ evaluate_subexp_with_coercion (exp, pos, noside)
     {
     case OP_VAR_VALUE:
       var = exp->elts[pc + 2].symbol;
-      if (TYPE_CODE (SYMBOL_TYPE (var)) == TYPE_CODE_ARRAY
+      if (TYPE_CODE (check_typedef (SYMBOL_TYPE (var))) == TYPE_CODE_ARRAY
 	  && CAST_IS_CONVERSION)
 	{
 	  (*pos) += 4;
@@ -1633,6 +1723,7 @@ evaluate_subexp_for_sizeof (exp, pos)
 {
   enum exp_opcode op;
   register int pc;
+  struct type *type;
   value_ptr val;
 
   pc = (*pos);
@@ -1647,20 +1738,22 @@ evaluate_subexp_for_sizeof (exp, pos)
     case UNOP_IND:
       (*pos)++;
       val = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
+      type = check_typedef (VALUE_TYPE (val));
+      type = check_typedef (TYPE_TARGET_TYPE (type));
       return value_from_longest (builtin_type_int, (LONGEST)
-		      TYPE_LENGTH (TYPE_TARGET_TYPE (VALUE_TYPE (val))));
+		      TYPE_LENGTH (type));
 
     case UNOP_MEMVAL:
       (*pos) += 3;
-      return value_from_longest (builtin_type_int, 
-			      (LONGEST) TYPE_LENGTH (exp->elts[pc + 1].type));
+      type = check_typedef (exp->elts[pc + 1].type);
+      return value_from_longest (builtin_type_int,
+				 (LONGEST) TYPE_LENGTH (type));
 
     case OP_VAR_VALUE:
       (*pos) += 4;
+      type = check_typedef (SYMBOL_TYPE (exp->elts[pc + 2].symbol));
       return
-	value_from_longest
-	  (builtin_type_int,
-	   (LONGEST) TYPE_LENGTH (SYMBOL_TYPE (exp->elts[pc + 2].symbol)));
+	value_from_longest (builtin_type_int, (LONGEST) TYPE_LENGTH (type));
 
     default:
       val = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_AVOID_SIDE_EFFECTS);

@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "value.h"
@@ -44,30 +44,35 @@ value_add (arg1, arg2)
 {
   register value_ptr valint, valptr;
   register int len;
+  struct type *type1, *type2, *valptrtype;
 
   COERCE_ARRAY (arg1);
   COERCE_ARRAY (arg2);
+  type1 = check_typedef (VALUE_TYPE (arg1));
+  type2 = check_typedef (VALUE_TYPE (arg2));
 
-  if ((TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_PTR
-       || TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_PTR)
+  if ((TYPE_CODE (type1) == TYPE_CODE_PTR
+       || TYPE_CODE (type2) == TYPE_CODE_PTR)
       &&
-      (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_INT
-       || TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_INT))
+      (TYPE_CODE (type1) == TYPE_CODE_INT
+       || TYPE_CODE (type2) == TYPE_CODE_INT))
     /* Exactly one argument is a pointer, and one is an integer.  */
     {
-      if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_PTR)
+      if (TYPE_CODE (type1) == TYPE_CODE_PTR)
 	{
 	  valptr = arg1;
 	  valint = arg2;
+	  valptrtype = type1;
 	}
       else
 	{
 	  valptr = arg2;
 	  valint = arg1;
+	  valptrtype = type2;
 	}
-      len = TYPE_LENGTH (TYPE_TARGET_TYPE (VALUE_TYPE (valptr)));
+      len = TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (valptrtype)));
       if (len == 0) len = 1;	/* For (void *) */
-      return value_from_longest (VALUE_TYPE (valptr),
+      return value_from_longest (valptrtype,
 			      value_as_long (valptr)
 			      + (len * value_as_long (valint)));
     }
@@ -79,30 +84,31 @@ value_ptr
 value_sub (arg1, arg2)
      value_ptr arg1, arg2;
 {
-
+  struct type *type1, *type2;
   COERCE_ARRAY (arg1);
   COERCE_ARRAY (arg2);
+  type1 = check_typedef (VALUE_TYPE (arg1));
+  type2 = check_typedef (VALUE_TYPE (arg2));
 
-  if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_PTR)
+  if (TYPE_CODE (type1) == TYPE_CODE_PTR)
     {
-      if (TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_INT)
+      if (TYPE_CODE (type2) == TYPE_CODE_INT)
 	{
 	  /* pointer - integer.  */
+	  LONGEST sz = TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)));
 	  return value_from_longest
 	    (VALUE_TYPE (arg1),
-	     value_as_long (arg1)
-	     - (TYPE_LENGTH (TYPE_TARGET_TYPE (VALUE_TYPE (arg1)))
-		* value_as_long (arg2)));
+	     value_as_long (arg1) - (sz * value_as_long (arg2)));
 	}
-      else if (TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_PTR
-	       && TYPE_LENGTH (TYPE_TARGET_TYPE (VALUE_TYPE (arg1)))
-		  == TYPE_LENGTH (TYPE_TARGET_TYPE (VALUE_TYPE (arg2))))
+      else if (TYPE_CODE (type2) == TYPE_CODE_PTR
+	       && TYPE_LENGTH (TYPE_TARGET_TYPE (type1))
+		  == TYPE_LENGTH (TYPE_TARGET_TYPE (type2)))
 	{
 	  /* pointer to <type x> - pointer to <type x>.  */
+	  LONGEST sz = TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)));
 	  return value_from_longest
 	    (builtin_type_long,		/* FIXME -- should be ptrdiff_t */
-	     (value_as_long (arg1) - value_as_long (arg2))
-	     / (LONGEST) (TYPE_LENGTH (TYPE_TARGET_TYPE (VALUE_TYPE (arg1)))));
+	     (value_as_long (arg1) - value_as_long (arg2)) / sz);
 	}
       else
 	{
@@ -127,16 +133,18 @@ value_subscript (array, idx)
 {
   value_ptr bound;
   int c_style = current_language->c_style_arrays;
+  struct type *tarray, *tint;
 
   COERCE_REF (array);
-  COERCE_VARYING_ARRAY (array);
+  tarray = check_typedef (VALUE_TYPE (array));
+  COERCE_VARYING_ARRAY (array, tarray);
 
-  if (TYPE_CODE (VALUE_TYPE (array)) == TYPE_CODE_ARRAY
-      || TYPE_CODE (VALUE_TYPE (array)) == TYPE_CODE_STRING)
+  if (TYPE_CODE (tarray) == TYPE_CODE_ARRAY
+      || TYPE_CODE (tarray) == TYPE_CODE_STRING)
     {
-      struct type *range_type = TYPE_FIELD_TYPE (VALUE_TYPE (array), 0);
-      int lowerbound = TYPE_LOW_BOUND (range_type);
-      int upperbound = TYPE_HIGH_BOUND (range_type);
+      struct type *range_type = TYPE_INDEX_TYPE (tarray);
+      LONGEST lowerbound, upperbound;
+      get_discrete_bounds (range_type, &lowerbound, &upperbound);
 
       if (VALUE_LVAL (array) != lval_memory)
 	return value_subscripted_rvalue (array, idx, lowerbound);
@@ -159,6 +167,33 @@ value_subscript (array, idx)
 
       array = value_coerce_array (array);
     }
+
+  if (TYPE_CODE (tarray) == TYPE_CODE_BITSTRING)
+    {
+      struct type *range_type = TYPE_INDEX_TYPE (tarray);
+      LONGEST index = value_as_long (idx);
+      value_ptr v;
+      int offset, byte, bit_index;
+      LONGEST lowerbound, upperbound, word;
+      get_discrete_bounds (range_type, &lowerbound, &upperbound);
+      if (index < lowerbound || index > upperbound)
+	error ("bitstring index out of range");
+      index -= lowerbound;
+      offset = index / TARGET_CHAR_BIT;
+      byte = *((char*)VALUE_CONTENTS (array) + offset);
+      bit_index = index % TARGET_CHAR_BIT;
+      byte >>= (BITS_BIG_ENDIAN ? TARGET_CHAR_BIT - 1 - bit_index : bit_index);
+      v = value_from_longest (builtin_type_int, byte & 1);
+      VALUE_BITPOS (v) = bit_index;
+      VALUE_BITSIZE (v) = 1;
+      VALUE_LVAL (v) = VALUE_LVAL (array);
+      if (VALUE_LVAL (array) == lval_internalvar)
+	VALUE_LVAL (v) = lval_internalvar_component;
+      VALUE_ADDRESS (v) = VALUE_ADDRESS (array);
+      VALUE_OFFSET (v) = offset + VALUE_OFFSET (array);
+      return v;
+    }
+
   if (c_style)
     return value_ind (value_add (array, idx));
   else
@@ -174,13 +209,14 @@ value_subscripted_rvalue (array, idx, lowerbound)
      value_ptr array, idx;
      int lowerbound;
 {
-  struct type *elt_type = TYPE_TARGET_TYPE (VALUE_TYPE (array));
+  struct type *array_type = check_typedef (VALUE_TYPE (array));
+  struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (array_type));
   int elt_size = TYPE_LENGTH (elt_type);
   LONGEST index = value_as_long (idx);
   int elt_offs = elt_size * longest_to_int (index - lowerbound);
   value_ptr v;
 
-  if (index < lowerbound || elt_offs >= TYPE_LENGTH (VALUE_TYPE (array)))
+  if (index < lowerbound || elt_offs >= TYPE_LENGTH (array_type))
     error ("no such vector element");
 
   v = allocate_value (elt_type);
@@ -195,7 +231,6 @@ value_subscripted_rvalue (array, idx, lowerbound)
     VALUE_LVAL (v) = VALUE_LVAL (array);
   VALUE_ADDRESS (v) = VALUE_ADDRESS (array);
   VALUE_OFFSET (v) = VALUE_OFFSET (array) + elt_offs;
-  VALUE_BITSIZE (v) = elt_size * 8;
   return v;
 }
 
@@ -210,14 +245,17 @@ binop_user_defined_p (op, arg1, arg2)
      enum exp_opcode op;
      value_ptr arg1, arg2;
 {
+  struct type *type1, *type2;
   if (op == BINOP_ASSIGN)
     return 0;
-  return (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_STRUCT
-	  || TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_STRUCT
-	  || (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_REF
-	      && TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg1))) == TYPE_CODE_STRUCT)
-	  || (TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_REF
-	      && TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg2))) == TYPE_CODE_STRUCT));
+  type1 = check_typedef (VALUE_TYPE (arg1));
+  type2 = check_typedef (VALUE_TYPE (arg2));
+  return (TYPE_CODE (type1) == TYPE_CODE_STRUCT
+	  || TYPE_CODE (type2) == TYPE_CODE_STRUCT
+	  || (TYPE_CODE (type1) == TYPE_CODE_REF
+	      && TYPE_CODE (TYPE_TARGET_TYPE (type1)) == TYPE_CODE_STRUCT)
+	  || (TYPE_CODE (type2) == TYPE_CODE_REF
+	      && TYPE_CODE (TYPE_TARGET_TYPE (type2)) == TYPE_CODE_STRUCT));
 }
 
 /* Check to see if argument is a structure.  This is called so
@@ -230,11 +268,19 @@ int unop_user_defined_p (op, arg1)
      enum exp_opcode op;
      value_ptr arg1;
 {
+  struct type *type1;
   if (op == UNOP_ADDR)
     return 0;
-  return (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_STRUCT
-	  || (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_REF
-	      && TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg1))) == TYPE_CODE_STRUCT));
+  type1 = check_typedef (VALUE_TYPE (arg1));
+  for (;;)
+    {
+      if (TYPE_CODE (type1) == TYPE_CODE_STRUCT)
+	return 1;
+      else if (TYPE_CODE (type1) == TYPE_CODE_REF)
+	type1 = TYPE_TARGET_TYPE (type1);
+      else
+	return 0;
+    }
 }
 
 /* We know either arg1 or arg2 is a structure, so try to find the right
@@ -264,7 +310,7 @@ value_x_binop (arg1, arg2, op, otherop)
   /* now we know that what we have to do is construct our
      arg vector and find the right function to call it with.  */
 
-  if (TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_STRUCT)
+  if (TYPE_CODE (check_typedef (VALUE_TYPE (arg1))) != TYPE_CODE_STRUCT)
     error ("Can't do that binary op on that type");  /* FIXME be explicit */
 
   argvec = (value_ptr *) alloca (sizeof (value_ptr) * 4);
@@ -358,7 +404,7 @@ value_x_unop (arg1, op)
   /* now we know that what we have to do is construct our
      arg vector and find the right function to call it with.  */
 
-  if (TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_STRUCT)
+  if (TYPE_CODE (check_typedef (VALUE_TYPE (arg1))) != TYPE_CODE_STRUCT)
     error ("Can't do that unary op on that type");  /* FIXME be explicit */
 
   argvec = (value_ptr *) alloca (sizeof (value_ptr) * 3);
@@ -429,6 +475,8 @@ value_concat (arg1, arg2)
   int count, idx;
   char *ptr;
   char inchar;
+  struct type *type1 = check_typedef (VALUE_TYPE (arg1));
+  struct type *type2 = check_typedef (VALUE_TYPE (arg2));
 
   /* First figure out if we are dealing with two values to be concatenated
      or a repeat count and a value to be repeated.  INVAL1 is set to the
@@ -436,8 +484,11 @@ value_concat (arg1, arg2)
      to the second of the two concatenated values or the value to be 
      repeated. */
 
-  if (TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_INT)
+  if (TYPE_CODE (type2) == TYPE_CODE_INT)
     {
+      struct type *tmp = type1;
+      type1 = tmp;
+      tmp = type2;
       inval1 = arg2;
       inval2 = arg1;
     }
@@ -449,19 +500,19 @@ value_concat (arg1, arg2)
 
   /* Now process the input values. */
 
-  if (TYPE_CODE (VALUE_TYPE (inval1)) == TYPE_CODE_INT)
+  if (TYPE_CODE (type1) == TYPE_CODE_INT)
     {
       /* We have a repeat count.  Validate the second value and then
 	 construct a value repeated that many times. */
-      if (TYPE_CODE (VALUE_TYPE (inval2)) == TYPE_CODE_STRING
-	  || TYPE_CODE (VALUE_TYPE (inval2)) == TYPE_CODE_CHAR)
+      if (TYPE_CODE (type2) == TYPE_CODE_STRING
+	  || TYPE_CODE (type2) == TYPE_CODE_CHAR)
 	{
 	  count = longest_to_int (value_as_long (inval1));
-	  inval2len = TYPE_LENGTH (VALUE_TYPE (inval2));
+	  inval2len = TYPE_LENGTH (type2);
 	  ptr = (char *) alloca (count * inval2len);
-	  if (TYPE_CODE (VALUE_TYPE (inval2)) == TYPE_CODE_CHAR)
+	  if (TYPE_CODE (type2) == TYPE_CODE_CHAR)
 	    {
-	      inchar = (char) unpack_long (VALUE_TYPE (inval2),
+	      inchar = (char) unpack_long (type2,
 					   VALUE_CONTENTS (inval2));
 	      for (idx = 0; idx < count; idx++)
 		{
@@ -478,8 +529,8 @@ value_concat (arg1, arg2)
 	    }
 	  outval = value_string (ptr, count * inval2len);
 	}
-      else if (TYPE_CODE (VALUE_TYPE (inval2)) == TYPE_CODE_BITSTRING
-	       || TYPE_CODE (VALUE_TYPE (inval2)) == TYPE_CODE_BOOL)
+      else if (TYPE_CODE (type2) == TYPE_CODE_BITSTRING
+	       || TYPE_CODE (type2) == TYPE_CODE_BOOL)
 	{
 	  error ("unimplemented support for bitstring/boolean repeats");
 	}
@@ -488,30 +539,30 @@ value_concat (arg1, arg2)
 	  error ("can't repeat values of that type");
 	}
     }
-  else if (TYPE_CODE (VALUE_TYPE (inval1)) == TYPE_CODE_STRING
-      || TYPE_CODE (VALUE_TYPE (inval1)) == TYPE_CODE_CHAR)
+  else if (TYPE_CODE (type1) == TYPE_CODE_STRING
+      || TYPE_CODE (type1) == TYPE_CODE_CHAR)
     {
       /* We have two character strings to concatenate. */
-      if (TYPE_CODE (VALUE_TYPE (inval2)) != TYPE_CODE_STRING
-	  && TYPE_CODE (VALUE_TYPE (inval2)) != TYPE_CODE_CHAR)
+      if (TYPE_CODE (type2) != TYPE_CODE_STRING
+	  && TYPE_CODE (type2) != TYPE_CODE_CHAR)
 	{
 	  error ("Strings can only be concatenated with other strings.");
 	}
-      inval1len = TYPE_LENGTH (VALUE_TYPE (inval1));
-      inval2len = TYPE_LENGTH (VALUE_TYPE (inval2));
+      inval1len = TYPE_LENGTH (type1);
+      inval2len = TYPE_LENGTH (type2);
       ptr = (char *) alloca (inval1len + inval2len);
-      if (TYPE_CODE (VALUE_TYPE (inval1)) == TYPE_CODE_CHAR)
+      if (TYPE_CODE (type1) == TYPE_CODE_CHAR)
 	{
-	  *ptr = (char) unpack_long (VALUE_TYPE (inval1), VALUE_CONTENTS (inval1));
+	  *ptr = (char) unpack_long (type1, VALUE_CONTENTS (inval1));
 	}
       else
 	{
 	  memcpy (ptr, VALUE_CONTENTS (inval1), inval1len);
 	}
-      if (TYPE_CODE (VALUE_TYPE (inval2)) == TYPE_CODE_CHAR)
+      if (TYPE_CODE (type2) == TYPE_CODE_CHAR)
 	{
 	  *(ptr + inval1len) = 
-	    (char) unpack_long (VALUE_TYPE (inval2), VALUE_CONTENTS (inval2));
+	    (char) unpack_long (type2, VALUE_CONTENTS (inval2));
 	}
       else
 	{
@@ -519,12 +570,12 @@ value_concat (arg1, arg2)
 	}
       outval = value_string (ptr, inval1len + inval2len);
     }
-  else if (TYPE_CODE (VALUE_TYPE (inval1)) == TYPE_CODE_BITSTRING
-	   || TYPE_CODE (VALUE_TYPE (inval1)) == TYPE_CODE_BOOL)
+  else if (TYPE_CODE (type1) == TYPE_CODE_BITSTRING
+	   || TYPE_CODE (type1) == TYPE_CODE_BOOL)
     {
       /* We have two bitstrings to concatenate. */
-      if (TYPE_CODE (VALUE_TYPE (inval2)) != TYPE_CODE_BITSTRING
-	  && TYPE_CODE (VALUE_TYPE (inval2)) != TYPE_CODE_BOOL)
+      if (TYPE_CODE (type2) != TYPE_CODE_BITSTRING
+	  && TYPE_CODE (type2) != TYPE_CODE_BOOL)
 	{
 	  error ("Bitstrings or booleans can only be concatenated with other bitstrings or booleans.");
 	}
@@ -552,26 +603,29 @@ value_binop (arg1, arg2, op)
      enum exp_opcode op;
 {
   register value_ptr val;
+  struct type *type1, *type2;
 
   COERCE_ENUM (arg1);
   COERCE_ENUM (arg2);
+  type1 = check_typedef (VALUE_TYPE (arg1));
+  type2 = check_typedef (VALUE_TYPE (arg2));
 
-  if ((TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_FLT
-       && TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_CHAR
-       && TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_INT
-       && TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_BOOL
-       && TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_RANGE)
+  if ((TYPE_CODE (type1) != TYPE_CODE_FLT
+       && TYPE_CODE (type1) != TYPE_CODE_CHAR
+       && TYPE_CODE (type1) != TYPE_CODE_INT
+       && TYPE_CODE (type1) != TYPE_CODE_BOOL
+       && TYPE_CODE (type1) != TYPE_CODE_RANGE)
       ||
-      (TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_FLT
-       && TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_CHAR
-       && TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_INT
-       && TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_BOOL
-       && TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_RANGE))
+      (TYPE_CODE (type2) != TYPE_CODE_FLT
+       && TYPE_CODE (type2) != TYPE_CODE_CHAR
+       && TYPE_CODE (type2) != TYPE_CODE_INT
+       && TYPE_CODE (type2) != TYPE_CODE_BOOL
+       && TYPE_CODE (type2) != TYPE_CODE_RANGE))
     error ("Argument to arithmetic operation not a number or boolean.");
 
-  if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_FLT
+  if (TYPE_CODE (type1) == TYPE_CODE_FLT
       ||
-      TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_FLT)
+      TYPE_CODE (type2) == TYPE_CODE_FLT)
     {
       /* FIXME-if-picky-about-floating-accuracy: Should be doing this
 	 in target format.  real.c in GCC probably has the necessary
@@ -605,9 +659,9 @@ value_binop (arg1, arg2, op)
       store_floating (VALUE_CONTENTS_RAW (val), TYPE_LENGTH (VALUE_TYPE (val)),
 		      v);
     }
-  else if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_BOOL
+  else if (TYPE_CODE (type1) == TYPE_CODE_BOOL
 	   &&
-	   TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_BOOL)
+	   TYPE_CODE (type2) == TYPE_CODE_BOOL)
       {
 	  LONGEST v1, v2, v;
 	  v1 = value_as_long (arg1);
@@ -631,9 +685,9 @@ value_binop (arg1, arg2, op)
 	      error ("Invalid operation on booleans.");
 	    }
 	  
-	  val = allocate_value (builtin_type_chill_bool);
+	  val = allocate_value (type1);
 	  store_signed_integer (VALUE_CONTENTS_RAW (val),
-				TYPE_LENGTH (VALUE_TYPE (val)),
+				TYPE_LENGTH (type1),
 				v);
       }
   else
@@ -642,8 +696,6 @@ value_binop (arg1, arg2, op)
     /* FIXME: This implements ANSI C rules (also correct for C++).
        What about FORTRAN and chill?  */
     {
-      struct type *type1 = VALUE_TYPE (arg1);
-      struct type *type2 = VALUE_TYPE (arg2);
       int promoted_len1 = TYPE_LENGTH (type1);
       int promoted_len2 = TYPE_LENGTH (type2);
       int is_unsigned1 = TYPE_UNSIGNED (type1);
@@ -937,13 +989,15 @@ value_logical_not (arg1)
 {
   register int len;
   register char *p;
+  struct type *type1;
 
   COERCE_ARRAY (arg1);
+  type1 = check_typedef (VALUE_TYPE (arg1));
 
-  if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_FLT)
+  if (TYPE_CODE (type1) == TYPE_CODE_FLT)
     return 0 == value_as_double (arg1);
 
-  len = TYPE_LENGTH (VALUE_TYPE (arg1));
+  len = TYPE_LENGTH (type1);
   p = VALUE_CONTENTS (arg1);
 
   while (--len >= 0)
@@ -965,14 +1019,17 @@ value_equal (arg1, arg2)
 {
   register int len;
   register char *p1, *p2;
+  struct type *type1, *type2;
   enum type_code code1;
   enum type_code code2;
 
   COERCE_ARRAY (arg1);
   COERCE_ARRAY (arg2);
 
-  code1 = TYPE_CODE (VALUE_TYPE (arg1));
-  code2 = TYPE_CODE (VALUE_TYPE (arg2));
+  type1 = check_typedef (VALUE_TYPE (arg1));
+  type2 = check_typedef (VALUE_TYPE (arg2));
+  code1 = TYPE_CODE (type1);
+  code2 = TYPE_CODE (type2);
 
   if (code1 == TYPE_CODE_INT && code2 == TYPE_CODE_INT)
     return longest_to_int (value_as_long (value_binop (arg1, arg2,
@@ -989,8 +1046,8 @@ value_equal (arg1, arg2)
     return (CORE_ADDR) value_as_long (arg1) == value_as_pointer (arg2);
 
   else if (code1 == code2
-	   && ((len = TYPE_LENGTH (VALUE_TYPE (arg1)))
-	       == TYPE_LENGTH (VALUE_TYPE (arg2))))
+	   && ((len = TYPE_LENGTH (type1))
+	       == TYPE_LENGTH (type2)))
     {
       p1 = VALUE_CONTENTS (arg1);
       p2 = VALUE_CONTENTS (arg2);
@@ -1017,12 +1074,15 @@ value_less (arg1, arg2)
 {
   register enum type_code code1;
   register enum type_code code2;
+  struct type *type1, *type2;
 
   COERCE_ARRAY (arg1);
   COERCE_ARRAY (arg2);
 
-  code1 = TYPE_CODE (VALUE_TYPE (arg1));
-  code2 = TYPE_CODE (VALUE_TYPE (arg2));
+  type1 = check_typedef (VALUE_TYPE (arg1));
+  type2 = check_typedef (VALUE_TYPE (arg2));
+  code1 = TYPE_CODE (type1);
+  code2 = TYPE_CODE (type2);
 
   if (code1 == TYPE_CODE_INT && code2 == TYPE_CODE_INT)
     return longest_to_int (value_as_long (value_binop (arg1, arg2,
@@ -1057,7 +1117,7 @@ value_neg (arg1)
 
   COERCE_ENUM (arg1);
 
-  type = VALUE_TYPE (arg1);
+  type = check_typedef (VALUE_TYPE (arg1));
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     return value_from_double (type, - value_as_double (arg1));
@@ -1075,7 +1135,7 @@ value_complement (arg1)
 {
   COERCE_ENUM (arg1);
 
-  if (TYPE_CODE (VALUE_TYPE (arg1)) != TYPE_CODE_INT)
+  if (TYPE_CODE (check_typedef (VALUE_TYPE (arg1))) != TYPE_CODE_INT)
     error ("Argument to complement operation not an integer.");
 
   return value_from_longest (VALUE_TYPE (arg1), ~ value_as_long (arg1));
@@ -1091,15 +1151,12 @@ value_bit_index (type, valaddr, index)
      char *valaddr;
      int index;
 {
-  struct type *range;
-  int low_bound, high_bound;
+  LONGEST low_bound, high_bound;
   LONGEST word;
   unsigned rel_index;
-  range = TYPE_FIELD_TYPE (type, 0);
-  if (TYPE_CODE (range) != TYPE_CODE_RANGE)
+  struct type *range = TYPE_FIELD_TYPE (type, 0);
+  if (get_discrete_bounds (range, &low_bound, &high_bound) < 0)
     return -2;
-  low_bound = TYPE_LOW_BOUND (range);
-  high_bound = TYPE_HIGH_BOUND (range);
   if (index < low_bound || index > high_bound)
     return -1;
   rel_index = index - low_bound;
@@ -1116,14 +1173,16 @@ value_in (element, set)
      value_ptr element, set;
 {
   int member;
-  if (TYPE_CODE (VALUE_TYPE (set)) != TYPE_CODE_SET)
+  struct type *settype = check_typedef (VALUE_TYPE (set));
+  struct type *eltype = check_typedef (VALUE_TYPE (element));
+  if (TYPE_CODE (settype) != TYPE_CODE_SET)
     error ("Second argument of 'IN' has wrong type");
-  if (TYPE_CODE (VALUE_TYPE (element)) != TYPE_CODE_INT
-      && TYPE_CODE (VALUE_TYPE (element)) != TYPE_CODE_CHAR
-      && TYPE_CODE (VALUE_TYPE (element)) != TYPE_CODE_ENUM
-      && TYPE_CODE (VALUE_TYPE (element)) != TYPE_CODE_BOOL)
+  if (TYPE_CODE (eltype) != TYPE_CODE_INT
+      && TYPE_CODE (eltype) != TYPE_CODE_CHAR
+      && TYPE_CODE (eltype) != TYPE_CODE_ENUM
+      && TYPE_CODE (eltype) != TYPE_CODE_BOOL)
     error ("First argument of 'IN' has wrong type");
-  member = value_bit_index (VALUE_TYPE (set), VALUE_CONTENTS (set),
+  member = value_bit_index (settype, VALUE_CONTENTS (set),
 			    value_as_long (element));
   if (member < 0)
     error ("First argument of 'IN' not in range");

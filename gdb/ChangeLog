@@ -27,6 +27,15 @@ Wed Nov 29 13:35:18 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 	findvar.c, hppa-tdep.c, infcmd.c, language.c, printcmd.c,
  	rs6000-tdep.c, symmisc.c, symtab.c:
 	Add check_typedef/CHECK_TYPEDEF as needed.
+
+	* f-typeprint.c, valarith.c, valprint.c, typeprint.c, eval.c:
+	Add check_typedef/CHECK_TYPEDEF as needed.
+	* f-typeprint.c:  Various cleaning up.
+	* valarith.c (value_subscript):  Also subscript bitstrings (for Chill).
+	* typeprint.c (print_type_scalar):  Also support TYPE_CODE_RANGE.
+	* eval.c (evaluate_subexp_standard case OP_ARRAY):  Implement
+	support for labelled array tuples and ranges in powerset tuples.
+	(init_array_element):  New function.
 	
 	* top.c (command_line_input):  Only strip out an initial #-comment.
 	Looking for internal comments is language-specific (breaks Scheme).

@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "gdb_string.h"
@@ -135,6 +135,7 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
      int recurse;
      enum val_prettyprint pretty;
 {
+  struct type *real_type = check_typedef (type);
   if (pretty == Val_pretty_default)
     {
       pretty = prettyprint_structs ? Val_prettyprint : Val_no_prettyprint;
@@ -146,8 +147,8 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
      only a stub and we can't find and substitute its complete type, then
      print appropriate string and return.  */
 
-  check_stub_type (type);
-  if (TYPE_FLAGS (type) & TYPE_FLAG_STUB)
+  if (TYPE_FLAGS (real_type) & TYPE_FLAG_STUB
+      || TYPE_LENGTH (real_type) == 0)
     {
       fprintf_filtered (stream, "<incomplete type>");
       gdb_flush (stream);
@@ -576,7 +577,7 @@ val_print_array_elements (type, valaddr, address, stream, format, deref_ref,
   unsigned int reps;
       
   elttype = TYPE_TARGET_TYPE (type);
-  eltlen = TYPE_LENGTH (elttype);
+  eltlen = TYPE_LENGTH (check_typedef (elttype));
   len = TYPE_LENGTH (type) / eltlen;
 
   annotate_array_section_begin (i, elttype);
@@ -627,63 +628,6 @@ val_print_array_elements (type, valaddr, address, stream, format, deref_ref,
     }
   annotate_array_section_end ();
   if (i < len)
-    {
-      fprintf_filtered (stream, "...");
-    }
-}
-
-void
-value_print_array_elements (val, stream, format, pretty)
-     value_ptr val;
-     GDB_FILE *stream;
-     int format;
-     enum val_prettyprint pretty;
-{
-  unsigned int things_printed = 0;
-  register unsigned int i, n, typelen;
-  /* Position of the array elem we are examining to see if it is repeated.  */
-  unsigned int rep1;
-  /* Number of repetitions we have detected so far.  */
-  unsigned int reps;
-    
-  n = VALUE_REPETITIONS (val);
-  typelen = TYPE_LENGTH (VALUE_TYPE (val));
-  for (i = 0; i < n && things_printed < print_max; i++)
-    {
-      if (i != 0)
-	{
-	  fprintf_filtered (stream, ", ");
-	}
-      wrap_here ("");
-      
-      rep1 = i + 1;
-      reps = 1;
-      while (rep1 < n && !memcmp (VALUE_CONTENTS (val) + typelen * i,
-				  VALUE_CONTENTS (val) + typelen * rep1,
-				  typelen))
-	{
-	  ++reps;
-	  ++rep1;
-	}
-      
-      if (reps > repeat_count_threshold)
-	{
-	  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val) + typelen * i,
-		     VALUE_ADDRESS (val) + typelen * i, stream, format, 1,
-		     0, pretty);
-	  fprintf_filtered (stream, " <repeats %u times>", reps);
-	  i = rep1 - 1;
-	  things_printed += repeat_count_threshold;
-	}
-      else
-	{
-	  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val) + typelen * i,
-		     VALUE_ADDRESS (val) + typelen * i, stream, format, 1,
-		     0, pretty);
-	  things_printed++;
-	}
-    }
-  if (i < n)
     {
       fprintf_filtered (stream, "...");
     }
