@@ -6313,11 +6313,11 @@ arm_frob_label (sym)
 #define S_GET_STORAGE_CLASS(S)   (elf_symbol ((S)->bsym)->internal_elf_sym.st_info)
 #define S_SET_STORAGE_CLASS(S,V) (elf_symbol ((S)->bsym)->internal_elf_sym.st_info = (V))
 #endif
-#ifdef OBJ_COFF
 void
 arm_adjust_symtab ()
 {
   symbolS * sym;
+#ifdef OBJ_COFF
 
   for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
     {
@@ -6354,8 +6354,8 @@ arm_adjust_symtab ()
       if (ARM_IS_INTERWORK (sym))
 	coffsymbol(sym->bsym)->native->u.syment.n_flags = 0xFF;
     }
-}
 #endif /* OBJ_COFF */
+}
 #ifdef OBJ_ELF
 void
 armelf_adjust_symtab ()

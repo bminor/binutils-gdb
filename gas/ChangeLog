@@ -1,3 +1,8 @@
+Tue Sep  8 18:10:01 1998  Catherine Moore  <clm@cygnus.com>
+ 
+        * config/tc-arm.c (arm_adjust_symtab):  Move #ifdef
+        OBJ_COFF so that routine is defined for a.out format.
+
 Tue Sep  8 15:56:19 1998  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-i386.c (i386_operand): Detect non-segment registers
