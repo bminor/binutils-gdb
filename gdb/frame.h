@@ -71,10 +71,6 @@ struct block;
 struct gdbarch;
 struct ui_file;
 
-/* A legacy unwinder to prop up architectures using the old style
-   saved regs array.  */
-extern const struct frame_unwind *legacy_saved_regs_unwind;
-
 /* The frame object.  */
 
 struct frame_info;
@@ -375,11 +371,6 @@ extern int frame_relative_level (struct frame_info *fi);
 
 enum frame_type
 {
-  /* The frame's type hasn't yet been defined.  This is a catch-all
-     for legacy_get_prev_frame that uses really strange techniques to
-     determine the frame's type.  New code should not use this
-     value.  */
-  UNKNOWN_FRAME,
   /* A true stack frame, created by the target program during normal
      execution.  */
   NORMAL_FRAME,
@@ -526,15 +517,6 @@ enum print_what
 extern void *frame_obstack_zalloc (unsigned long size);
 #define FRAME_OBSTACK_ZALLOC(TYPE) ((TYPE *) frame_obstack_zalloc (sizeof (TYPE)))
 #define FRAME_OBSTACK_CALLOC(NUMBER,TYPE) ((TYPE *) frame_obstack_zalloc ((NUMBER) * sizeof (TYPE)))
-
-/* If legacy_frame_chain_valid() returns zero it means that the given
-   frame is the outermost one and has no caller.
-
-   This method has been superseded by the per-architecture
-   frame_unwind_pc() (returns 0 to indicate an invalid return address)
-   and per-frame this_id() (returns a NULL frame ID to indicate an
-   invalid frame).  */
-extern int legacy_frame_chain_valid (CORE_ADDR, struct frame_info *);
 
 extern void generic_save_dummy_frame_tos (CORE_ADDR sp);
 
@@ -717,9 +699,5 @@ extern void deprecated_update_frame_base_hack (struct frame_info *frame,
    common cache parameter and a frame.  */
 extern struct frame_info *deprecated_frame_xmalloc_with_cleanup (long sizeof_saved_regs,
 								 long sizeof_extra_info);
-
-/* Return non-zero if the architecture is relying on legacy frame
-   code.  */
-extern int legacy_frame_p (struct gdbarch *gdbarch);
 
 #endif /* !defined (FRAME_H)  */

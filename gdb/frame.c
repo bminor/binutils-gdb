@@ -66,13 +66,6 @@ struct frame_info
      moment leave this as speculation.  */
   int level;
 
-  /* The frame's type.  */
-  /* FIXME: cagney/2004-05-01: Should instead just use ->unwind->type.
-     Unfortunately, legacy_get_prev_frame is still explicitly setting
-     the type.  Eliminate that method and this field can be
-     eliminated.  */
-  enum frame_type type;
-
   /* For each register, address of where it was saved on entry to the
      frame, or zero if it was not saved on entry to this frame.  This
      includes special registers such as pc and fp saved in special
@@ -165,9 +158,6 @@ fprint_frame_type (struct ui_file *file, enum frame_type type)
 {
   switch (type)
     {
-    case UNKNOWN_FRAME:
-      fprintf_unfiltered (file, "UNKNOWN_FRAME");
-      return;
     case NORMAL_FRAME:
       fprintf_unfiltered (file, "NORMAL_FRAME");
       return;
@@ -195,7 +185,10 @@ fprint_frame (struct ui_file *file, struct frame_info *fi)
   fprintf_unfiltered (file, "level=%d", fi->level);
   fprintf_unfiltered (file, ",");
   fprintf_unfiltered (file, "type=");
-  fprint_frame_type (file, fi->type);
+  if (fi->unwind != NULL)
+    fprint_frame_type (file, fi->unwind->type);
+  else
+    fprintf_unfiltered (file, "<unknown>");
   fprintf_unfiltered (file, ",");
   fprintf_unfiltered (file, "unwind=");
   if (fi->unwind != NULL)
@@ -235,21 +228,13 @@ get_frame_id (struct frame_info *fi)
     }
   if (!fi->this_id.p)
     {
-      gdb_assert (!legacy_frame_p (current_gdbarch));
       if (frame_debug)
 	fprintf_unfiltered (gdb_stdlog, "{ get_frame_id (fi=%d) ",
 			    fi->level);
       /* Find the unwinder.  */
       if (fi->unwind == NULL)
-	{
-	  fi->unwind = frame_unwind_find_by_frame (fi->next,
-						   &fi->prologue_cache);
-	  /* FIXME: cagney/2004-05-01: Should instead just use
-	     ->unwind->type.  Unfortunately, legacy_get_prev_frame is
-	     still explicitly setting the type.  Eliminate that method
-	     and this field can be eliminated.  */
-	  fi->type = fi->unwind->type;
-	}
+	fi->unwind = frame_unwind_find_by_frame (fi->next,
+						 &fi->prologue_cache);
       /* Find THIS frame's ID.  */
       fi->unwind->this_id (fi->next, &fi->prologue_cache, &fi->this_id.value);
       fi->this_id.p = 1;
@@ -504,39 +489,27 @@ do_frame_unwind_register (void *src, int regnum, void *buf)
 void
 frame_pop (struct frame_info *this_frame)
 {
-  struct regcache *scratch_regcache;
-  struct cleanup *cleanups;
+  /* Make a copy of all the register values unwound from this frame.
+     Save them in a scratch buffer so that there isn't a race between
+     trying to extract the old values from the current_regcache while
+     at the same time writing new values into that same cache.  */
+  struct regcache *scratch = regcache_xmalloc (current_gdbarch);
+  struct cleanup *cleanups = make_cleanup_regcache_xfree (scratch);
+  regcache_save (scratch, do_frame_unwind_register, this_frame);
 
-  if (DEPRECATED_POP_FRAME_P ())
-    {
-      /* A legacy architecture that has implemented a custom pop
-	 function.  All new architectures should instead be using the
-	 generic code below.  */
-      DEPRECATED_POP_FRAME;
-    }
-  else
-    {
-      /* Make a copy of all the register values unwound from this
-	 frame.  Save them in a scratch buffer so that there isn't a
-	 race between trying to extract the old values from the
-	 current_regcache while at the same time writing new values
-	 into that same cache.  */
-      struct regcache *scratch = regcache_xmalloc (current_gdbarch);
-      struct cleanup *cleanups = make_cleanup_regcache_xfree (scratch);
-      regcache_save (scratch, do_frame_unwind_register, this_frame);
-      /* FIXME: cagney/2003-03-16: It should be possible to tell the
-         target's register cache that it is about to be hit with a
-         burst register transfer and that the sequence of register
-         writes should be batched.  The pair target_prepare_to_store()
-         and target_store_registers() kind of suggest this
-         functionality.  Unfortunately, they don't implement it.  Their
-         lack of a formal definition can lead to targets writing back
-         bogus values (arguably a bug in the target code mind).  */
-      /* Now copy those saved registers into the current regcache.
-         Here, regcache_cpy() calls regcache_restore().  */
-      regcache_cpy (current_regcache, scratch);
-      do_cleanups (cleanups);
-    }
+  /* FIXME: cagney/2003-03-16: It should be possible to tell the
+     target's register cache that it is about to be hit with a burst
+     register transfer and that the sequence of register writes should
+     be batched.  The pair target_prepare_to_store() and
+     target_store_registers() kind of suggest this functionality.
+     Unfortunately, they don't implement it.  Their lack of a formal
+     definition can lead to targets writing back bogus values
+     (arguably a bug in the target code mind).  */
+  /* Now copy those saved registers into the current regcache.
+     Here, regcache_cpy() calls regcache_restore().  */
+  regcache_cpy (current_regcache, scratch);
+  do_cleanups (cleanups);
+
   /* We've made right mess of GDB's local state, just discard
      everything.  */
   flush_cached_frames ();
@@ -573,15 +546,8 @@ frame_register_unwind (struct frame_info *frame, int regnum,
 
   /* Find the unwinder.  */
   if (frame->unwind == NULL)
-    {
-      frame->unwind = frame_unwind_find_by_frame (frame->next,
-						  &frame->prologue_cache);
-      /* FIXME: cagney/2004-05-01: Should instead just use ->unwind->type.
-	 Unfortunately, legacy_get_prev_frame is still explicitly setting
-	 the type.  Eliminate that method and this field can be
-	 eliminated.  */
-      frame->type = frame->unwind->type;
-    }
+    frame->unwind = frame_unwind_find_by_frame (frame->next,
+						&frame->prologue_cache);
 
   /* Ask this frame to unwind its register.  See comment in
      "frame-unwind.h" for why NEXT frame and this unwind cache are
@@ -796,7 +762,6 @@ static struct frame_info *
 create_sentinel_frame (struct regcache *regcache)
 {
   struct frame_info *frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
-  frame->type = SENTINEL_FRAME;
   frame->level = -1;
   /* Explicitly initialize the sentinel frame's cache.  Provide it
      with the underlying regcache.  In the future additional
@@ -974,131 +939,7 @@ select_frame (struct frame_info *fi)
 	}
     }
 }
-
-/* Return the register saved in the simplistic ``saved_regs'' cache.
-   If the value isn't here AND a value is needed, try the next inner
-   most frame.  */
-
-static void
-legacy_saved_regs_prev_register (struct frame_info *next_frame,
-				 void **this_prologue_cache,
-				 int regnum, int *optimizedp,
-				 enum lval_type *lvalp, CORE_ADDR *addrp,
-				 int *realnump, void *bufferp)
-{
-  /* HACK: New code is passed the next frame and this cache.
-     Unfortunately, old code expects this frame.  Since this is a
-     backward compatibility hack, cheat by walking one level along the
-     prologue chain to the frame the old code expects.
-
-     Do not try this at home.  Professional driver, closed course.  */
-  struct frame_info *frame = next_frame->prev;
-  gdb_assert (frame != NULL);
-
-  if (deprecated_get_frame_saved_regs (frame) == NULL)
-    {
-      /* If nothing has initialized the saved regs, do it now.  */
-      gdb_assert (DEPRECATED_FRAME_INIT_SAVED_REGS_P ());
-      DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
-      gdb_assert (deprecated_get_frame_saved_regs (frame) != NULL);
-    }
-
-  if (deprecated_get_frame_saved_regs (frame) != NULL
-      && deprecated_get_frame_saved_regs (frame)[regnum] != 0)
-    {
-      if (regnum == SP_REGNUM)
-	{
-	  /* SP register treated specially.  */
-	  *optimizedp = 0;
-	  *lvalp = not_lval;
-	  *addrp = 0;
-	  *realnump = -1;
-	  if (bufferp != NULL)
-	    /* NOTE: cagney/2003-05-09: In-lined store_address() with
-               it's body - store_unsigned_integer().  */
-	    store_unsigned_integer (bufferp, DEPRECATED_REGISTER_RAW_SIZE (regnum),
-				    deprecated_get_frame_saved_regs (frame)[regnum]);
-	}
-      else
-	{
-	  /* Any other register is saved in memory, fetch it but cache
-             a local copy of its value.  */
-	  *optimizedp = 0;
-	  *lvalp = lval_memory;
-	  *addrp = deprecated_get_frame_saved_regs (frame)[regnum];
-	  *realnump = -1;
-	  if (bufferp != NULL)
-	    {
-#if 1
-	      /* Save each register value, as it is read in, in a
-                 frame based cache.  */
-	      void **regs = (*this_prologue_cache);
-	      if (regs == NULL)
-		{
-		  int sizeof_cache = ((NUM_REGS + NUM_PSEUDO_REGS)
-				      * sizeof (void *));
-		  regs = frame_obstack_zalloc (sizeof_cache);
-		  (*this_prologue_cache) = regs;
-		}
-	      if (regs[regnum] == NULL)
-		{
-		  regs[regnum]
-		    = frame_obstack_zalloc (DEPRECATED_REGISTER_RAW_SIZE (regnum));
-		  read_memory (deprecated_get_frame_saved_regs (frame)[regnum], regs[regnum],
-			       DEPRECATED_REGISTER_RAW_SIZE (regnum));
-		}
-	      memcpy (bufferp, regs[regnum], DEPRECATED_REGISTER_RAW_SIZE (regnum));
-#else
-	      /* Read the value in from memory.  */
-	      read_memory (deprecated_get_frame_saved_regs (frame)[regnum], bufferp,
-			   DEPRECATED_REGISTER_RAW_SIZE (regnum));
-#endif
-	    }
-	}
-      return;
-    }
-
-  /* No luck.  Assume this and the next frame have the same register
-     value.  Pass the unwind request down the frame chain to the next
-     frame.  Hopefully that frame will find the register's location.  */
-  frame_register_unwind (next_frame, regnum, optimizedp, lvalp, addrp,
-			 realnump, bufferp);
-}
-
-static void
-legacy_saved_regs_this_id (struct frame_info *next_frame,
-			   void **this_prologue_cache,
-			   struct frame_id *id)
-{
-  /* A developer is trying to bring up a new architecture, help them
-     by providing a default unwinder that refuses to unwind anything
-     (the ID is always NULL).  In the case of legacy code,
-     legacy_get_prev_frame() will have previously set ->this_id.p, so
-     this code won't be called.  */
-  (*id) = null_frame_id;
-}
 	
-const struct frame_unwind legacy_saved_regs_unwinder = {
-  /* Not really.  It gets overridden by legacy_get_prev_frame().  */
-  UNKNOWN_FRAME,
-  legacy_saved_regs_this_id,
-  legacy_saved_regs_prev_register
-};
-const struct frame_unwind *legacy_saved_regs_unwind = &legacy_saved_regs_unwinder;
-
-/* Determine the frame's type based on its PC.  */
-
-static enum frame_type
-frame_type_from_pc (CORE_ADDR pc)
-{
-  /* NOTE: cagney/2004-05-08: Eliminating this function depends on all
-     architectures being forced to use the frame-unwind code.  */
-  if (deprecated_pc_in_call_dummy (pc))
-    return DUMMY_FRAME;
-  else
-    return NORMAL_FRAME;
-}
-
 /* Create an arbitrary (i.e. address specified by user) or innermost frame.
    Always returns a non-NULL value.  */
 
@@ -1121,10 +962,6 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
   /* Select/initialize both the unwind function and the frame's type
      based on the PC.  */
   fi->unwind = frame_unwind_find_by_frame (fi->next, &fi->prologue_cache);
-  if (fi->unwind->type != UNKNOWN_FRAME)
-    fi->type = fi->unwind->type;
-  else
-    fi->type = frame_type_from_pc (pc);
 
   fi->this_id.p = 1;
   deprecated_update_frame_base_hack (fi, addr);
@@ -1194,440 +1031,6 @@ reinit_frame_cache (void)
     }
 }
 
-/* Create the previous frame using the deprecated methods
-   INIT_EXTRA_INFO, and INIT_FRAME_PC.  */
-
-static struct frame_info *
-legacy_get_prev_frame (struct frame_info *this_frame)
-{
-  CORE_ADDR address = 0;
-  struct frame_info *prev;
-  int fromleaf;
-
-  /* Don't frame_debug print legacy_get_prev_frame() here, just
-     confuses the output.  */
-
-  /* Allocate the new frame.
-
-     There is no reason to worry about memory leaks, should the
-     remainder of the function fail.  The allocated memory will be
-     quickly reclaimed when the frame cache is flushed, and the `we've
-     been here before' check, in get_prev_frame() will stop repeated
-     memory allocation calls.  */
-  prev = FRAME_OBSTACK_ZALLOC (struct frame_info);
-  prev->level = this_frame->level + 1;
-
-  /* Do not completely wire it in to the frame chain.  Some (bad) code
-     in INIT_FRAME_EXTRA_INFO tries to look along frame->prev to pull
-     some fancy tricks (of course such code is, by definition,
-     recursive).
-  
-     On the other hand, methods, such as get_frame_pc() and
-     get_frame_base() rely on being able to walk along the frame
-     chain.  Make certain that at least they work by providing that
-     link.  Of course things manipulating prev can't go back.  */
-  prev->next = this_frame;
-
-  /* NOTE: cagney/2002-11-18: Should have been correctly setting the
-     frame's type here, before anything else, and not last, at the
-     bottom of this function.  The various
-     DEPRECATED_INIT_EXTRA_FRAME_INFO, DEPRECATED_INIT_FRAME_PC, and
-     DEPRECATED_FRAME_INIT_SAVED_REGS methods are full of work-arounds
-     that handle the frame not being correctly set from the start.
-     Unfortunately those same work-arounds rely on the type defaulting
-     to NORMAL_FRAME.  Ulgh!  The new frame code does not have this
-     problem.  */
-  prev->type = UNKNOWN_FRAME;
-
-  /* A legacy frame's ID is always computed here.  Mark it as valid.  */
-  prev->this_id.p = 1;
-
-  /* Handle sentinel frame unwind as a special case.  */
-  if (this_frame->level < 0)
-    {
-      /* Try to unwind the PC.  If that doesn't work, assume we've reached
-	 the oldest frame and simply return.  Is there a better sentinal
-	 value?  The unwound PC value is then used to initialize the new
-	 previous frame's type.
-
-	 Note that the pc-unwind is intentionally performed before the
-	 frame chain.  This is ok since, for old targets, both
-	 frame_pc_unwind() (nee, DEPRECATED_FRAME_SAVED_PC) and
-	 DEPRECATED_FRAME_CHAIN()) assume THIS_FRAME's data structures
-	 have already been initialized (using
-	 DEPRECATED_INIT_EXTRA_FRAME_INFO) and hence the call order
-	 doesn't matter.
-	 
-	 By unwinding the PC first, it becomes possible to, in the case of
-	 a dummy frame, avoid also unwinding the frame ID.  This is
-	 because (well ignoring the PPC) a dummy frame can be located
-	 using THIS_FRAME's frame ID.  */
-      
-      deprecated_update_frame_pc_hack (prev, frame_pc_unwind (this_frame));
-      if (get_frame_pc (prev) == 0)
-	{
-	  /* The allocated PREV_FRAME will be reclaimed when the frame
-	     obstack is next purged.  */
-	  if (frame_debug)
-	    {
-	      fprintf_unfiltered (gdb_stdlog, "-> ");
-	      fprint_frame (gdb_stdlog, NULL);
-	      fprintf_unfiltered (gdb_stdlog,
-				  " // unwound legacy PC zero }\n");
-	    }
-	  return NULL;
-	}
-
-      /* Set the unwind functions based on that identified PC.  Ditto
-         for the "type" but strongly prefer the unwinder's frame type.  */
-      prev->unwind = frame_unwind_find_by_frame (prev->next,
-						 &prev->prologue_cache);
-      if (prev->unwind->type == UNKNOWN_FRAME)
-	prev->type = frame_type_from_pc (get_frame_pc (prev));
-      else
-	prev->type = prev->unwind->type;
-
-      /* Find the prev's frame's ID.  */
-      if (prev->type == DUMMY_FRAME
-	  && gdbarch_unwind_dummy_id_p (current_gdbarch))
-	{
-	  /* When unwinding a normal frame, the stack structure is
-	     determined by analyzing the frame's function's code (be
-	     it using brute force prologue analysis, or the dwarf2
-	     CFI).  In the case of a dummy frame, that simply isn't
-	     possible.  The The PC is either the program entry point,
-	     or some random address on the stack.  Trying to use that
-	     PC to apply standard frame ID unwind techniques is just
-	     asking for trouble.  */
-	  /* Use an architecture specific method to extract the prev's
-	     dummy ID from the next frame.  Note that this method uses
-	     frame_register_unwind to obtain the register values
-	     needed to determine the dummy frame's ID.  */
-	  prev->this_id.value = gdbarch_unwind_dummy_id (current_gdbarch,
-							 this_frame);
-	}
-      else
-	{
-	  /* We're unwinding a sentinel frame, the PC of which is
-	     pointing at a stack dummy.  Fake up the dummy frame's ID
-	     using the same sequence as is found a traditional
-	     unwinder.  Once all architectures supply the
-	     unwind_dummy_id method, this code can go away.  */
-	  prev->this_id.value = frame_id_build (deprecated_read_fp (),
-						read_pc ());
-	}
-
-      /* Check that the unwound ID is valid.  */
-      if (!frame_id_p (prev->this_id.value))
-	{
-	  if (frame_debug)
-	    {
-	      fprintf_unfiltered (gdb_stdlog, "-> ");
-	      fprint_frame (gdb_stdlog, NULL);
-	      fprintf_unfiltered (gdb_stdlog,
-				  " // unwound legacy ID invalid }\n");
-	    }
-	  return NULL;
-	}
-
-      /* Check that the new frame isn't inner to (younger, below,
-	 next) the old frame.  If that happens the frame unwind is
-	 going backwards.  */
-      /* FIXME: cagney/2003-02-25: Ignore the sentinel frame since
-	 that doesn't have a valid frame ID.  Should instead set the
-	 sentinel frame's frame ID to a `sentinel'.  Leave it until
-	 after the switch to storing the frame ID, instead of the
-	 frame base, in the frame object.  */
-
-      /* Link it in.  */
-      this_frame->prev = prev;
-
-      /* FIXME: cagney/2002-01-19: This call will go away.  Instead of
-	 initializing extra info, all frames will use the frame_cache
-	 (passed to the unwind functions) to store additional frame
-	 info.  Unfortunately legacy targets can't use
-	 legacy_get_prev_frame() to unwind the sentinel frame and,
-	 consequently, are forced to take this code path and rely on
-	 the below call to DEPRECATED_INIT_EXTRA_FRAME_INFO to
-	 initialize the inner-most frame.  */
-      if (DEPRECATED_INIT_EXTRA_FRAME_INFO_P ())
-	{
-	  DEPRECATED_INIT_EXTRA_FRAME_INFO (0, prev);
-	}
-
-      if (prev->type == NORMAL_FRAME)
-	prev->this_id.value.code_addr
-	  = get_pc_function_start (prev->this_id.value.code_addr);
-
-      if (frame_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "-> ");
-	  fprint_frame (gdb_stdlog, prev);
-	  fprintf_unfiltered (gdb_stdlog, " } // legacy innermost frame\n");
-	}
-      return prev;
-    }
-
-  /* This code only works on normal frames.  A sentinel frame, where
-     the level is -1, should never reach this code.  */
-  gdb_assert (this_frame->level >= 0);
-
-  /* On some machines it is possible to call a function without
-     setting up a stack frame for it.  On these machines, we
-     define this macro to take two args; a frameinfo pointer
-     identifying a frame and a variable to set or clear if it is
-     or isn't leafless.  */
-
-  /* Still don't want to worry about this except on the innermost
-     frame.  This macro will set FROMLEAF if THIS_FRAME is a frameless
-     function invocation.  */
-  if (this_frame->level == 0)
-    /* FIXME: 2002-11-09: Frameless functions can occur anywhere in
-       the frame chain, not just the inner most frame!  The generic,
-       per-architecture, frame code should handle this and the below
-       should simply be removed.  */
-    fromleaf = (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P ()
-		&& DEPRECATED_FRAMELESS_FUNCTION_INVOCATION (this_frame));
-  else
-    fromleaf = 0;
-
-  if (fromleaf)
-    /* A frameless inner-most frame.  The `FP' (which isn't an
-       architecture frame-pointer register!) of the caller is the same
-       as the callee.  */
-    /* FIXME: 2002-11-09: There isn't any reason to special case this
-       edge condition.  Instead the per-architecture code should handle
-       it locally.  */
-    /* FIXME: cagney/2003-06-16: This returns the inner most stack
-       address for the previous frame, that, however, is wrong.  It
-       should be the inner most stack address for the previous to
-       previous frame.  This is because it is the previous to previous
-       frame's innermost stack address that is constant through out
-       the lifetime of the previous frame (trust me :-).  */
-    address = get_frame_base (this_frame);
-  else
-    {
-      /* Two macros defined in tm.h specify the machine-dependent
-         actions to be performed here.
-
-         First, get the frame's chain-pointer.
-
-         If that is zero, the frame is the outermost frame or a leaf
-         called by the outermost frame.  This means that if start
-         calls main without a frame, we'll return 0 (which is fine
-         anyway).
-
-         Nope; there's a problem.  This also returns when the current
-         routine is a leaf of main.  This is unacceptable.  We move
-         this to after the ffi test; I'd rather have backtraces from
-         start go curfluy than have an abort called from main not show
-         main.  */
-      if (DEPRECATED_FRAME_CHAIN_P ())
-	address = DEPRECATED_FRAME_CHAIN (this_frame);
-      else
-	{
-	  /* Someone is part way through coverting an old architecture
-             to the new frame code.  Implement FRAME_CHAIN the way the
-             new frame will.  */
-	  /* Find PREV frame's unwinder.  */
-	  prev->unwind = frame_unwind_find_by_frame (this_frame,
-						     &prev->prologue_cache);
-	  /* FIXME: cagney/2004-05-01: Should instead just use
-	     ->unwind->type.  Unfortunately, legacy_get_prev_frame is
-	     still explicitly setting the type.  Eliminate that method
-	     and this field can be eliminated.  */
-	  prev->type = prev->unwind->type;
-	  /* Find PREV frame's ID.  */
-	  prev->unwind->this_id (this_frame,
-				 &prev->prologue_cache,
-				 &prev->this_id.value);
-	  prev->this_id.p = 1;
-	  address = prev->this_id.value.stack_addr;
-	}
-
-      if (!legacy_frame_chain_valid (address, this_frame))
-	{
-	  if (frame_debug)
-	    {
-	      fprintf_unfiltered (gdb_stdlog, "-> ");
-	      fprint_frame (gdb_stdlog, NULL);
-	      fprintf_unfiltered (gdb_stdlog,
-				  " // legacy frame chain invalid }\n");
-	    }
-	  return NULL;
-	}
-    }
-  if (address == 0)
-    {
-      if (frame_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "-> ");
-	  fprint_frame (gdb_stdlog, NULL);
-	  fprintf_unfiltered (gdb_stdlog,
-			      " // legacy frame chain NULL }\n");
-	}
-      return NULL;
-    }
-
-  /* Link in the already allocated prev frame.  */
-  this_frame->prev = prev;
-  deprecated_update_frame_base_hack (prev, address);
-
-  /* This change should not be needed, FIXME!  We should determine
-     whether any targets *need* DEPRECATED_INIT_FRAME_PC to happen
-     after DEPRECATED_INIT_EXTRA_FRAME_INFO and come up with a simple
-     way to express what goes on here.
-
-     DEPRECATED_INIT_EXTRA_FRAME_INFO is called from two places:
-     create_new_frame (where the PC is already set up) and here (where
-     it isn't).  DEPRECATED_INIT_FRAME_PC is only called from here,
-     always after DEPRECATED_INIT_EXTRA_FRAME_INFO.
-
-     The catch is the MIPS, where DEPRECATED_INIT_EXTRA_FRAME_INFO
-     requires the PC value (which hasn't been set yet).  Some other
-     machines appear to require DEPRECATED_INIT_EXTRA_FRAME_INFO
-     before they can do DEPRECATED_INIT_FRAME_PC.  Phoo.
-
-     Assuming that some machines need DEPRECATED_INIT_FRAME_PC after
-     DEPRECATED_INIT_EXTRA_FRAME_INFO, one possible scheme:
-
-     SETUP_INNERMOST_FRAME(): Default version is just create_new_frame
-     (deprecated_read_fp ()), read_pc ()).  Machines with extra frame
-     info would do that (or the local equivalent) and then set the
-     extra fields.
-
-     SETUP_ARBITRARY_FRAME(argc, argv): Only change here is that
-     create_new_frame would no longer init extra frame info;
-     SETUP_ARBITRARY_FRAME would have to do that.
-
-     INIT_PREV_FRAME(fromleaf, prev) Replace
-     DEPRECATED_INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC.
-     This should also return a flag saying whether to keep the new
-     frame, or whether to discard it, because on some machines (e.g.
-     mips) it is really awkward to have DEPRECATED_FRAME_CHAIN_VALID
-     called BEFORE DEPRECATED_INIT_EXTRA_FRAME_INFO (there is no good
-     way to get information deduced in DEPRECATED_FRAME_CHAIN_VALID
-     into the extra fields of the new frame).  std_frame_pc(fromleaf,
-     prev)
-
-     This is the default setting for INIT_PREV_FRAME.  It just does
-     what the default DEPRECATED_INIT_FRAME_PC does.  Some machines
-     will call it from INIT_PREV_FRAME (either at the beginning, the
-     end, or in the middle).  Some machines won't use it.
-
-     kingdon@cygnus.com, 13Apr93, 31Jan94, 14Dec94.  */
-
-  /* NOTE: cagney/2002-11-09: Just ignore the above!  There is no
-     reason for things to be this complicated.
-
-     The trick is to assume that there is always a frame.  Instead of
-     special casing the inner-most frame, create a fake frame
-     (containing the hardware registers) that is inner to the
-     user-visible inner-most frame (...) and then unwind from that.
-     That way architecture code can use the standard
-     frame_XX_unwind() functions and not differentiate between the
-     inner most and any other case.
-
-     Since there is always a frame to unwind from, there is always
-     somewhere (THIS_FRAME) to store all the info needed to construct
-     a new (previous) frame without having to first create it.  This
-     means that the convolution below - needing to carefully order a
-     frame's initialization - isn't needed.
-
-     The irony here though, is that DEPRECATED_FRAME_CHAIN(), at least
-     for a more up-to-date architecture, always calls
-     FRAME_SAVED_PC(), and FRAME_SAVED_PC() computes the PC but
-     without first needing the frame!  Instead of the convolution
-     below, we could have simply called FRAME_SAVED_PC() and been done
-     with it!  Note that FRAME_SAVED_PC() is being superseded by
-     frame_pc_unwind() and that function does have somewhere to cache
-     that PC value.  */
-
-  if (DEPRECATED_INIT_EXTRA_FRAME_INFO_P ())
-    DEPRECATED_INIT_EXTRA_FRAME_INFO (fromleaf, prev);
-
-  /* This entry is in the frame queue now, which is good since
-     FRAME_SAVED_PC may use that queue to figure out its value (see
-     tm-sparc.h).  We want the PC saved in the inferior frame. */
-  if (DEPRECATED_INIT_FRAME_PC_P ())
-    deprecated_update_frame_pc_hack (prev,
-				     DEPRECATED_INIT_FRAME_PC (fromleaf,
-							       prev));
-
-  /* If ->frame and ->pc are unchanged, we are in the process of
-     getting ourselves into an infinite backtrace.  Some architectures
-     check this in DEPRECATED_FRAME_CHAIN or thereabouts, but it seems
-     like there is no reason this can't be an architecture-independent
-     check.  */
-  if (get_frame_base (prev) == get_frame_base (this_frame)
-      && get_frame_pc (prev) == get_frame_pc (this_frame))
-    {
-      this_frame->prev = NULL;
-      obstack_free (&frame_cache_obstack, prev);
-      if (frame_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "-> ");
-	  fprint_frame (gdb_stdlog, NULL);
-	  fprintf_unfiltered (gdb_stdlog,
-			      " // legacy this.id == prev.id }\n");
-	}
-      return NULL;
-    }
-
-  /* Initialize the code used to unwind the frame PREV based on the PC
-     (and probably other architectural information).  The PC lets you
-     check things like the debug info at that point (dwarf2cfi?) and
-     use that to decide how the frame should be unwound.
-
-     If there isn't a FRAME_CHAIN, the code above will have already
-     done this.  */
-  if (prev->unwind == NULL)
-    prev->unwind = frame_unwind_find_by_frame (prev->next,
-					       &prev->prologue_cache);
-
-  /* If the unwinder provides a frame type, use it.  Otherwise
-     continue on to that heuristic mess.  */
-  if (prev->unwind->type != UNKNOWN_FRAME)
-    {
-      prev->type = prev->unwind->type;
-      if (prev->type == NORMAL_FRAME)
-	/* FIXME: cagney/2003-06-16: would get_frame_pc() be better?  */
-	prev->this_id.value.code_addr
-	  = get_pc_function_start (prev->this_id.value.code_addr);
-      if (frame_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "-> ");
-	  fprint_frame (gdb_stdlog, prev);
-	  fprintf_unfiltered (gdb_stdlog, " } // legacy with unwound type\n");
-	}
-      return prev;
-    }
-
-  /* NOTE: cagney/2002-11-18: The code segments, found in
-     create_new_frame() and get_prev_frame(), that initialize the
-     frame's type is subtly different.  The latter only updates ->type
-     when it encounters a SIGTRAMP_FRAME or DUMMY_FRAME.  This stops
-     get_prev_frame() overriding the frame's type when the INIT code
-     has previously set it.  This is really somewhat bogus.  The
-     initialization, as seen in create_new_frame(), should occur
-     before the INIT function has been called.  */
-  if (deprecated_pc_in_call_dummy (get_frame_pc (prev)))
-    prev->type = DUMMY_FRAME;
-
-  if (prev->type == NORMAL_FRAME)
-    prev->this_id.value.code_addr
-      = get_pc_function_start (prev->this_id.value.code_addr);
-
-  if (frame_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "-> ");
-      fprint_frame (gdb_stdlog, prev);
-      fprintf_unfiltered (gdb_stdlog, " } // legacy with confused type\n");
-    }
-
-  return prev;
-}
-
 /* Return a "struct frame_info" corresponding to the frame that called
    THIS_FRAME.  Returns NULL if there is no such frame.
 
@@ -1665,14 +1068,6 @@ get_prev_frame_1 (struct frame_info *this_frame)
     }
   this_frame->prev_p = 1;
 
-  /* If any of the old frame initialization methods are around, use
-     the legacy get_prev_frame() method.  */
-  if (legacy_frame_p (current_gdbarch))
-    {
-      prev_frame = legacy_get_prev_frame (this_frame);
-      return prev_frame;
-    }
-
   /* Check that this frame's ID was valid.  If it wasn't, don't try to
      unwind to the prev frame.  Be careful to not apply this test to
      the sentinel frame.  */
@@ -1693,7 +1088,7 @@ get_prev_frame_1 (struct frame_info *this_frame)
      Exclude signal trampolines (due to sigaltstack the frame ID can
      go backwards) and sentinel frames (the test is meaningless).  */
   if (this_frame->next->level >= 0
-      && this_frame->next->type != SIGTRAMP_FRAME
+      && this_frame->next->unwind->type != SIGTRAMP_FRAME
       && frame_id_inner (this_id, get_frame_id (this_frame->next)))
     error ("Previous frame inner to this frame (corrupt stack?)");
 
@@ -1870,7 +1265,7 @@ get_prev_frame (struct frame_info *this_frame)
 #if 0
       && backtrace_beyond_entry_func
 #endif
-      && this_frame->type != DUMMY_FRAME && this_frame->level >= 0
+      && this_frame->unwind->type != DUMMY_FRAME && this_frame->level >= 0
       && inside_entry_func (this_frame))
     {
       frame_debug_got_null_frame (gdb_stdlog, this_frame, "inside entry func");
@@ -2012,26 +1407,12 @@ frame_relative_level (struct frame_info *fi)
 enum frame_type
 get_frame_type (struct frame_info *frame)
 {
-  /* Some legacy code, e.g, mips_init_extra_frame_info() wants
-     to determine the frame's type prior to it being completely
-     initialized.  Don't attempt to lazily initialize ->unwind for
-     legacy code.  It will be initialized in legacy_get_prev_frame().  */
-  if (frame->unwind == NULL && !legacy_frame_p (current_gdbarch))
-    {
-      /* Initialize the frame's unwinder because that's what
-         provides the frame's type.  */
-      frame->unwind = frame_unwind_find_by_frame (frame->next, 
-						  &frame->prologue_cache);
-      /* FIXME: cagney/2004-05-01: Should instead just use
-	 ->unwind->type.  Unfortunately, legacy_get_prev_frame is
-	 still explicitly setting the type.  Eliminate that method and
-	 this field can be eliminated.  */
-      frame->type = frame->unwind->type;
-    }
-  if (frame->type == UNKNOWN_FRAME)
-    return NORMAL_FRAME;
-  else
-    return frame->type;
+  if (frame->unwind == NULL)
+    /* Initialize the frame's unwinder because that's what
+       provides the frame's type.  */
+    frame->unwind = frame_unwind_find_by_frame (frame->next, 
+						&frame->prologue_cache);
+  return frame->unwind->type;
 }
 
 struct frame_extra_info *
@@ -2167,33 +1548,6 @@ frame_sp_unwind (struct frame_info *next_frame)
       return sp;
     }
   internal_error (__FILE__, __LINE__, "Missing unwind SP method");
-}
-
-
-int
-legacy_frame_p (struct gdbarch *current_gdbarch)
-{
-  if (DEPRECATED_INIT_FRAME_PC_P ()
-      || DEPRECATED_INIT_EXTRA_FRAME_INFO_P ()
-      || DEPRECATED_FRAME_CHAIN_P ())
-    /* No question, it's a legacy frame.  */
-    return 1;
-  if (gdbarch_unwind_dummy_id_p (current_gdbarch))
-    /* No question, it's not a legacy frame (provided none of the
-       deprecated methods checked above are present that is).  */
-    return 0;
-  if (DEPRECATED_TARGET_READ_FP_P ()
-      || DEPRECATED_FP_REGNUM >= 0)
-    /* Assume it's legacy.  If you're trying to convert a legacy frame
-       target to the new mechanism, get rid of these.  legacy
-       get_prev_frame() requires these when unwind_frame_id() isn't
-       available.  */
-    return 1;
-  /* Default to assuming that it's brand new code, and hence not
-     legacy.  Force it down the non-legacy path so that the new code
-     uses the new frame mechanism from day one.  Dummy frames won't
-     work very well but we can live with that.  */
-  return 0;
 }
 
 extern initialize_file_ftype _initialize_frame; /* -Wmissing-prototypes */
