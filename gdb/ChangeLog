@@ -131,6 +131,24 @@ Mon May 29 15:41:10 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	xcoffsolib.c, xmodem.h, z8k-tdep.c: Remove PARAMS from function
 	declarations.
 
+2000-05-26  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* gregset.h: New file.  Typedefs for gdb_gregset_t and 
+	gdb_fpregset_t, prototypes for supply_gregset and friends.
+	* procfs.c: Include gregset.h.  Delete local prototypes for
+	supply_gregset etc., and local typedef gdb_gregset_t etc.
+	* sol-thread.c: Include gregset.h, delete local prototypes, 
+	add appropriate casts to gdb_gregset_t.
+	* uw-thread.c, lin-thread.c, core-sol2.c, core-regset.c, 
+	sparc-tdep.c, ptx4-nat.c, ppc-linux-nat.c, mipsv4-nat.c, 
+	m88k-nat.c, m68klinux-nat.c, m68k-tdep.c, irix5-nat.c, 
+	irix4-nat.c, ia64-linux-nat.c, i386v4-nat.c, cxux-nat.c,
+	arm-linux-nat.c, alpha-nat.c: Include gregset.h.
+	* config/nm-linux.h: Define GDB_GREGSET_T, GDB_FPREGET_T.
+	* config/sparc/nm-sun4sol2.h: Ditto.
+	* config/sparc/xm-sun4sol2.h: (GDB_GREGSET_TYPE,
+ 	GDB_FPREGSET_TYPE): Delete (replaced by GDB_GREGSET_T etc.)
+
 Thu May 25 16:56:05 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (AC_CHECK_HEADERS): Check for ncurses.h.
