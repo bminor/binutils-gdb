@@ -159,7 +159,7 @@ ar_emul_parse_arg (arg)
 
 boolean
 ar_emul_default_parse_arg (arg)
-     char *arg;
+     char *arg ATTRIBUTE_UNUSED;
 {
   return false;
 }

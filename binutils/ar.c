@@ -1302,7 +1302,6 @@ replace_members (arch, files_to_move, quick)
   bfd **after_bfd;		/* New entries go after this one */
   bfd *current;
   bfd **current_ptr;
-  bfd *temp;
 
   while (files_to_move && *files_to_move)
     {
@@ -1331,7 +1330,8 @@ replace_members (arch, files_to_move, quick)
 			}
 		      if (bfd_stat_arch_elt (current, &asbuf) != 0)
 			/* xgettext:c-format */
-			fatal (_("internal stat error on %s"), current->filename);
+			fatal (_("internal stat error on %s"),
+			       current->filename);
 
 		      if (fsbuf.st_mtime <= asbuf.st_mtime)
 			goto next_file;

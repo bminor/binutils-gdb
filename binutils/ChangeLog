@@ -1,5 +1,8 @@
 2002-05-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* ar.c (replace_members): Remove unused var.  Formatting fix.
+	* binemul.c (ar_emul_default_parse_arg): Add ATTRIBUTE_UNUSED.
+
 	* MAINTAINERS: Sort port maintainers by CPU.
 
 2002-05-04  Bob Byrnes  <byrnes@curl.com>
