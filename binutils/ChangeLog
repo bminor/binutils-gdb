@@ -1,3 +1,7 @@
+2000-02-25  H.J. Lu  <hjl@gnu.org>
+
+	* configure.in (AC_SEARCH_LIBS): Pass lm, not -lm.
+
 2000-02-24  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.in: Add arm-wince, mips-pe and sh-pe targets.
