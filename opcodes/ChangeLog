@@ -1,3 +1,10 @@
+start-sanitize-am33
+Wed Jul  8 11:32:44 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* m10300-dis.c (disassemble): When printing RREGs and XRREGs, map
+	from raw register #s to symbolic names to make debugging easier.
+
+end-sanitize-am33
 Thu Jul  2 17:11:27 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* m32r-opc.h (CGEN_MIN_INSN_SIZE): New #define.
