@@ -1,5 +1,9 @@
 Thu Jan 26 19:20:34 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.disasm/hppa.mt (hppa), gdb.stabs/hppa.mt (weird.o): Check
+	for HP assembler versus GNU assembler based on actual behavior of
+	$(CC), rather than assuming that $(AS) is always the GNU assembler.
+
 	* TODO: Suggest a few more stepping tests.
 
 Wed Jan 25 14:52:41 1995  Stan Shebs  <shebs@andros.cygnus.com>
