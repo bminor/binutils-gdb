@@ -1,5 +1,7 @@
 Wed Jul  5 12:01:49 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* conf.in: Add undef of HAVE_SBRK.
+
 	* config/obj-coff.c (obj_coff_line): Call listing_source_line, in
 	both BFD_ASSEMBLER and non BFD_ASSEMBLER versions of the function.
 
