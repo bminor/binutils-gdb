@@ -1,3 +1,12 @@
+Sun Nov  5 03:08:28 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* emulparams/i386nbsd.sh (EXECUTABLE_SYMBOLS): Set __DYNAMIC to 0
+	for now, as with m68k4kbsd, until shared library support gets
+	done.
+
+	* configure.host: For i386 BSD variants, crt0.o lives in
+	/usr/lib.  (True for NetBSD at least, unconfirmed for others.)
+
 Wed Nov  1 15:42:45 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
 
 	* Makefile.in (ALL_EMULATIONS): Add edelta68.o.
