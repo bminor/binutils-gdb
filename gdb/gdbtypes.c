@@ -542,13 +542,11 @@ allocate_stub_method (struct type *type)
 {
   struct type *mtype;
 
-  mtype = alloc_type (TYPE_OBJFILE (type));
+  mtype = init_type (TYPE_CODE_METHOD, 1, TYPE_FLAG_STUB, NULL,
+		     TYPE_OBJFILE (type));
   TYPE_TARGET_TYPE (mtype) = type;
   /*  _DOMAIN_TYPE (mtype) = unknown yet */
   /*  _ARG_TYPES (mtype) = unknown yet */
-  TYPE_FLAGS (mtype) = TYPE_FLAG_STUB;
-  TYPE_CODE (mtype) = TYPE_CODE_METHOD;
-  TYPE_LENGTH (mtype) = 1;
   return (mtype);
 }
 

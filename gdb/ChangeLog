@@ -1,3 +1,8 @@
+2001-12-09  Fred Fish  <fnf@redhat.com>
+
+	* gdbtypes.c (allocate_stub_method): Replace hand crafted type
+	initialization with call to the init_type() function.
+
 2001-12-09  Andrew Cagney  <ac131313@redhat.com>
 
 	* arch-utils.c (generic_register_raw_size): New function.
