@@ -1,3 +1,13 @@
+Sat Feb 22 03:39:50 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* stabsread.c (read_type):  Fix handling of template names
+	with template parameters containing `::'.
+
+	* valops.c (search_struct_field, search_struct_method):
+	Pass correct valaddr parameter to baseclass_offset.
+	Prevent gdb crashes by making sure that the virtual base pointer
+	from an user object still points to accessible memory.
+
 Tue Feb 18 13:36:34 1997  Mark Alexander  <marka@cygnus.com>
 
 	* maint.c: Eliminate -Wall warnings by including some header files.

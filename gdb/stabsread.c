@@ -1,5 +1,5 @@
 /* Support routines for decoding "stabs" debugging information format.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
+   Copyright 1986, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 1997
              Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -1957,15 +1957,21 @@ read_type (pp, objfile)
 	  p = strchr(*pp, ':');
 	  if (p == NULL)
 	    return error_type (pp, objfile);
-	  while (q1 && p > q1 && p[1] == ':')
+	  if (q1 && p > q1 && p[1] == ':')
 	    {
-	       q2 = strchr(q1, '>');
-	       if (!q2 || q2 < p)
-		 break;
-	       p += 2;
-	       p = strchr(p, ':');
-	       if (p == NULL)
-		 return error_type (pp, objfile);
+	      int nesting_level = 0;
+	      for (q2 = q1; *q2; q2++)
+		{
+		  if (*q2 == '<')
+		    nesting_level++;
+		  else if (*q2 == '>')
+		    nesting_level--;
+		  else if (*q2 == ':' && nesting_level == 0)
+		    break;
+		}
+	      p = q2;
+	      if (*p != ':')
+		return error_type (pp, objfile);
 	    }
 	  to = type_name = 
 		(char *)obstack_alloc (&objfile->type_obstack, p - *pp + 1);
