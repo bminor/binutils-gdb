@@ -1,3 +1,9 @@
+Tue Jul  7 13:26:13 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objcopy.c (filter_bytes): Set size correctly if the size of the
+	section is not an even multiple of the interleave.  Based on patch
+	from Brion Stone <Brion.Stone@attws.com>.
+
 Thu Jul  2 14:01:34 1998  Klaus Kaempf  <kkaempf@rmi.de>
 
 	* configure.com: Add vax/vms support. 
