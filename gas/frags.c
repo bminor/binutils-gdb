@@ -1,6 +1,6 @@
 /* frags.c - manage frags -
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000
+   1999, 2000, 2001, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -36,6 +36,26 @@ frag_init ()
   bss_address_frag.fr_type = rs_fill;
 }
 
+/* Check that we're not trying to assemble into a section that can't
+   allocate frags (currently, this is only possible in the absolute
+   section), or into an mri common.  */
+
+static void
+frag_alloc_check (const struct obstack *ob)
+{
+  if (ob->chunk_size == 0)
+    {
+      as_bad (_("attempt to allocate data in absolute section"));
+      subseg_set (text_section, 0);
+    }
+
+  if (mri_common_symbol != NULL)
+    {
+      as_bad (_("attempt to allocate data in common section"));
+      mri_common_symbol = NULL;
+    }
+}
+
 /* Allocate a frag on the specified obstack.
    Call this routine from everywhere else, so that all the weird alignment
    hackery can be done in just one place.  */
@@ -163,18 +183,7 @@ frag_more (nchars)
 {
   register char *retval;
 
-  if (now_seg == absolute_section)
-    {
-      as_bad (_("attempt to allocate data in absolute section"));
-      subseg_set (text_section, 0);
-    }
-
-  if (mri_common_symbol != NULL)
-    {
-      as_bad (_("attempt to allocate data in common section"));
-      mri_common_symbol = NULL;
-    }
-
+  frag_alloc_check (&frchain_now->frch_obstack);
   frag_grow (nchars);
   retval = obstack_next_free (&frchain_now->frch_obstack);
   obstack_blank_fast (&frchain_now->frch_obstack, nchars);
@@ -376,6 +385,7 @@ void
 frag_append_1_char (datum)
      int datum;
 {
+  frag_alloc_check (&frchain_now->frch_obstack);
   if (obstack_room (&frchain_now->frch_obstack) <= 1)
     {
       frag_wane (frag_now);

@@ -1,3 +1,9 @@
+2003-07-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* frags.c (frag_more): Move segment checks to..
+	(frag_alloc_check): ..here.  New function.
+	(frag_append_1_char): Call frag_alloc_check.
+
 2003-07-14  Nick Clifton  <nickc@redhat.com>
 
 	* po/tr.po: Update with latest version.
@@ -216,7 +222,7 @@
 	(relax_and_size_all_segments): Likewise.
 	(relax_frag): Likewise.
 	(relax_segment): Likewise.
-	
+
 2003-06-23  Mark Mitchell  <mark@codesourcery.com>
 
 	* config/tc-ppc.c (ppc_cleanup): Use bytes to count APUinfo slots.
@@ -258,7 +264,7 @@
 	(get_operand): For CLASS_IR remember register size in mode struct.
 	(get_specific): Handle new CLASS_IRO type.  Add register size
 	checks for CLASS_IR and CLASS_IRO.
-        (md_apply_fix3): Fix undefined usage of buf.
+	(md_apply_fix3): Fix undefined usage of buf.
 
 2003-06-19  Alan Modra  <amodra@bigpond.net.au>
 
