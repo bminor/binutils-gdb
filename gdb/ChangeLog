@@ -1,5 +1,9 @@
 2003-04-19  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_extract_return_value,
+	i386_store_return_value): Correct check for availability of
+	floating-point registers.
+
 	* i386-tdep.c (i386_frame_num_args): Remove function.
 	(i386_gdbarch_init): Set frame_num_args to frame_num_args_unknown.
 

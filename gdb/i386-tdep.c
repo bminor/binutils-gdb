@@ -892,7 +892,7 @@ i386_extract_return_value (struct type *type, struct regcache *regcache,
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      if (FP0_REGNUM == 0)
+      if (FP0_REGNUM < 0)
 	{
 	  warning ("Cannot find floating-point return value.");
 	  memset (valbuf, 0, len);
@@ -950,7 +950,7 @@ i386_store_return_value (struct type *type, struct regcache *regcache,
       ULONGEST fstat;
       char buf[FPU_REG_RAW_SIZE];
 
-      if (FP0_REGNUM == 0)
+      if (FP0_REGNUM < 0)
 	{
 	  warning ("Cannot set floating-point return value.");
 	  return;
