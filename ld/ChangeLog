@@ -1,3 +1,7 @@
+2005-02-10  Ben Elliston  <bje@au.ibm.com>
+
+	* emultempl/beos.em: Remove #if 0 and #if 1 blocks.
+
 2005-02-08  Richard Sandiford  <rsandifo@redhat.com>
 
 	* configure.tgt (mips64*el-*-linux-gnu*): Define targ_extra_libpath
