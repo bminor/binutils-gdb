@@ -1093,8 +1093,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_extract_return_value (gdbarch, m68k_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, m68k_store_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch,
-					    m68k_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, m68k_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, m68k_use_struct_convention);
 
   set_gdbarch_frameless_function_invocation (gdbarch,

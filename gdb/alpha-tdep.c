@@ -1537,8 +1537,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
   set_gdbarch_extract_return_value (gdbarch, alpha_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, alpha_store_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch,
-					    alpha_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, alpha_extract_struct_value_address);
 
   /* Settings for calling functions in the inferior.  */
   set_gdbarch_push_dummy_call (gdbarch, alpha_push_dummy_call);

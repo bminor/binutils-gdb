@@ -2239,8 +2239,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_store_return_value (gdbarch, sh_default_store_return_value);
   set_gdbarch_extract_return_value (gdbarch, sh_default_extract_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch,
-					    sh_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
 
   set_gdbarch_skip_prologue (gdbarch, sh_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

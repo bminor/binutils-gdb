@@ -2709,9 +2709,9 @@ static struct libunwind_descr ia64_libunwind_descr =
 
 #endif /* HAVE_LIBUNWIND_IA64_H  */
 
-/* Should we use EXTRACT_STRUCT_VALUE_ADDRESS instead of
-   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc
-   and TYPE is the type (which is known to be struct, union or array).  */
+/* Should we use DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS instead of
+   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc and TYPE
+   is the type (which is known to be struct, union or array).  */
 int
 ia64_use_struct_convention (int gcc_p, struct type *type)
 {
@@ -3400,7 +3400,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_extract_return_value (gdbarch, ia64_extract_return_value);
 
   set_gdbarch_store_return_value (gdbarch, ia64_store_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch, ia64_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, ia64_extract_struct_value_address);
 
   set_gdbarch_memory_insert_breakpoint (gdbarch, ia64_memory_insert_breakpoint);
   set_gdbarch_memory_remove_breakpoint (gdbarch, ia64_memory_remove_breakpoint);

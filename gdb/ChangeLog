@@ -1,5 +1,32 @@
 2004-01-26  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (EXTRACT_STRUCT_VALUE_ADDRESS): Deprecate.  Add
+	comments mentioning extract_returned_value_address.
+	* infcmd.c (print_return_value): Update.  Add comments on
+	extract_returned_value_address.
+	* stack.c (return_command): Add comments on
+	extract_returned_value_address.
+	* values.c: Update comment.
+	* m32r-tdep.c: Update comment.
+	* sparc-tdep.c: Update comment.
+	* ia64-tdep.c (ia64_use_struct_convention): Update comment.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+	* sh64-tdep.c (sh64_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* m68klinux-tdep.c (m68k_linux_init_abi): Update.
+	* m68k-tdep.c (m68k_gdbarch_init): Update.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Update.
+	* m32r-tdep.c (m32r_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	* h8300-tdep.c (h8300_gdbarch_init): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* alpha-tdep.c (alpha_gdbarch_init): Update.
+
+2004-01-26  Andrew Cagney  <cagney@redhat.com>
+
 	* dwarf2loc.c (dwarf_expr_frame_base): Use SYMBOL_OPS instead of
 	SYMBOL_LOCATION_FUNCS
 	(dwarf2_loclist_funcs, dwarf2_locexpr_funcs): Change type to

@@ -3174,18 +3174,18 @@ into @var{valbuf}.
 This method has been deprecated in favour of @code{gdbarch_return_value}
 (@pxref{gdbarch_return_value}).
 
-@item EXTRACT_STRUCT_VALUE_ADDRESS(@var{regbuf})
-@findex EXTRACT_STRUCT_VALUE_ADDRESS
-@anchor{EXTRACT_STRUCT_VALUE_ADDRESS}
+@item DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(@var{regbuf})
+@findex DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS
+@anchor{DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS}
 When defined, extract from the array @var{regbuf} (containing the raw
 register state) the @code{CORE_ADDR} at which a function should return
 its structure value.
 
 @xref{gdbarch_return_value}.
 
-@item EXTRACT_STRUCT_VALUE_ADDRESS_P()
-@findex EXTRACT_STRUCT_VALUE_ADDRESS_P
-Predicate for @code{EXTRACT_STRUCT_VALUE_ADDRESS}.
+@item DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P()
+@findex DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P
+Predicate for @code{DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS}.
 
 @item DEPRECATED_FP_REGNUM
 @findex DEPRECATED_FP_REGNUM
@@ -3794,7 +3794,7 @@ non-@code{NULL}, also copy the return value from @var{regcache} into
 @var{readbuf} (@var{regcache} contains a copy of the registers from the
 just returned function).
 
-@xref{EXTRACT_STRUCT_VALUE_ADDRESS}, for a description of how
+@xref{DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS}, for a description of how
 return-values that use the struct convention are handled.
 
 @emph{Maintainer note: This method replaces separate predicate, extract,

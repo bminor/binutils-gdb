@@ -839,8 +839,8 @@ sparc32_return_value (struct gdbarch *gdbarch, struct type *type,
 #if 0
 /* NOTE: cagney/2004-01-17: For the moment disable this method.  The
    architecture and CORE-gdb will need new code (and a replacement for
-   EXTRACT_STRUCT_VALUE_ADDRESS) before this can be made to work
-   robustly.  Here is a possible function signature: */
+   DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS) before this can be made to
+   work robustly.  Here is a possible function signature: */
 /* NOTE: cagney/2004-01-17: So far only the 32-bit SPARC ABI has been
    identifed as having a way to robustly recover the address of a
    struct-convention return-value (after the function has returned).

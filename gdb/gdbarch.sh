@@ -606,11 +606,7 @@ M:::enum return_value_convention:return_value:struct type *valtype, struct regca
 
 # The deprecated methods RETURN_VALUE_ON_STACK, EXTRACT_RETURN_VALUE,
 # STORE_RETURN_VALUE and USE_STRUCT_CONVENTION have all been folded
-# into RETURN_VALUE.  For the moment do not try to fold in
-# EXTRACT_STRUCT_VALUE_ADDRESS as, dependant on the ABI, the debug
-# info, and the level of effort, it may well be possible to find the
-# address of a structure being return on the stack.  Someone else can
-# make that change.
+# into RETURN_VALUE.
 
 f:2:RETURN_VALUE_ON_STACK:int:return_value_on_stack:struct type *type:type:::generic_return_value_on_stack_not::0
 f:2:EXTRACT_RETURN_VALUE:void:extract_return_value:struct type *type, struct regcache *regcache, void *valbuf:type, regcache, valbuf:::legacy_extract_return_value::0
@@ -619,8 +615,27 @@ f:2:DEPRECATED_EXTRACT_RETURN_VALUE:void:deprecated_extract_return_value:struct 
 f:2:DEPRECATED_STORE_RETURN_VALUE:void:deprecated_store_return_value:struct type *type, char *valbuf:type, valbuf
 f:2:USE_STRUCT_CONVENTION:int:use_struct_convention:int gcc_p, struct type *value_type:gcc_p, value_type:::generic_use_struct_convention::0
 
-F:2:EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:extract_struct_value_address:struct regcache *regcache:regcache
-#
+# As of 2004-01-17 only the 32-bit SPARC ABI has been identified as an
+# ABI suitable for the implementation of a robust extract
+# struct-convention return-value address method (the sparc saves the
+# address in the callers frame).  All the other cases so far examined,
+# the DEPRECATED_EXTRACT_STRUCT_VALUE implementation has been
+# erreneous - the code was incorrectly assuming that the return-value
+# address, stored in a register, was preserved across the entire
+# function call.
+
+# For the moment retain DEPRECATED_EXTRACT_STRUCT_VALUE as a marker of
+# the ABIs that are still to be analyzed - perhaps this should simply
+# be deleted.  The commented out extract_returned_value_address method
+# is provided as a starting point for the 32-bit SPARC.  It, or
+# something like it, along with changes to both infcmd.c and stack.c
+# will be needed for that case to work.  NB: It is passed the callers
+# frame since it is only after the callee has returned that this
+# function is used.
+
+#M:::CORE_ADDR:extract_returned_value_address:struct frame_info *caller_frame:caller_frame
+F:2:DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:deprecated_extract_struct_value_address:struct regcache *regcache:regcache
+
 F:2:DEPRECATED_FRAME_INIT_SAVED_REGS:void:deprecated_frame_init_saved_regs:struct frame_info *frame:frame
 F:2:DEPRECATED_INIT_EXTRA_FRAME_INFO:void:deprecated_init_extra_frame_info:int fromleaf, struct frame_info *frame:fromleaf, frame
 #

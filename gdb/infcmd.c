@@ -1061,6 +1061,9 @@ print_return_value (int struct_return, struct type *value_type)
       /* The return value can be found in the inferior's registers.  */
       value = register_value_being_returned (value_type, stop_registers);
     }
+  /* FIXME: cagney/2004-01-17: When both return_value and
+     extract_returned_value_address are available, should use that to
+     find the address of and then extract the returned value.  */
   /* FIXME: 2003-09-27: When returning from a nested inferior function
      call, it's possible (with no help from the architecture vector)
      to locate and return/print a "struct return" value.  This is just
@@ -1084,9 +1087,9 @@ print_return_value (int struct_return, struct type *value_type)
     }
   else
     {
-      if (EXTRACT_STRUCT_VALUE_ADDRESS_P ())
+      if (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ())
 	{
-	  CORE_ADDR addr = EXTRACT_STRUCT_VALUE_ADDRESS (stop_registers);
+	  CORE_ADDR addr = DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (stop_registers);
 	  if (!addr)
 	    error ("Function return value unknown.");
 	  value = value_at (value_type, addr, NULL);

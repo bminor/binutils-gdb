@@ -2628,7 +2628,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_stab_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
   set_gdbarch_dwarf_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
-  set_gdbarch_extract_struct_value_address (gdbarch, s390_cannot_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, s390_cannot_extract_struct_value_address);
 
   /* Parameters for inferior function calls.  */
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);

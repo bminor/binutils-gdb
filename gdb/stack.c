@@ -1857,6 +1857,9 @@ return_command (char *retval_exp, int from_tty)
            is discarded, side effects such as "return i++" still
            occure.  */
 	return_value = NULL;
+      /* FIXME: cagney/2004-01-17: If the architecture implements both
+         return_value and extract_returned_value_address, should allow
+         "return" to work - don't set return_value to NULL.  */
       else if (!gdbarch_return_value_p (current_gdbarch)
 	       && (TYPE_CODE (return_type) == TYPE_CODE_STRUCT
 		   || TYPE_CODE (return_type) == TYPE_CODE_UNION))
@@ -1926,6 +1929,10 @@ If you continue, the return value that you specified will be ignored.\n";
 	  STORE_RETURN_VALUE (return_type, current_regcache,
 			      VALUE_CONTENTS (return_value));
 	}
+      /* FIXME: cagney/2004-01-17: If extract_returned_value_address
+         is available and the function is using
+         RETURN_VALUE_STRUCT_CONVENTION, should use it to find the
+         address of the returned value so that it can be assigned.  */
       else
 	{
 	  gdb_assert (gdbarch_return_value (current_gdbarch, return_type,
