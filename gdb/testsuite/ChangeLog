@@ -1,4 +1,11 @@
+Wed Mar 23 07:43:33 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* TODO: Add suggestions for static member function tests, and
+	completion tests.
+
 Wed Mar 16 08:28:28 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* TODO: Add suggestions for "p/a" tests.
 
 	* lib/gdb.exp: Set prompt to (gdb) if it isn't already set.
 	(default_gdb_exit): Replace all the hair with sending "quit" to
