@@ -1,3 +1,10 @@
+start-sanitize-sky
+Tue Feb 17 18:44:12 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/dvp/{basic-1,lower-1,upper-1,upper-2}.d: Update to remove dest
+	spec on operands.
+
+end-sanitize-sky
 start-sanitize-m32rx
 Fri Feb 13 14:44:32 1998  Nick Clifton  <nickc@cygnus.com>
 
