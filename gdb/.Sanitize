@@ -82,6 +82,7 @@ core-svr4.c
 cp-valprint.c
 dbxread.c
 defs.h
+delta68-nat.c
 demangle.c
 doc
 dpx2-nat.c
