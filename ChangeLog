@@ -1,3 +1,17 @@
+Wed Nov 18 19:33:11 1992  John Gilmore  (gnu@cygnus.com)
+
+	* README:  Update references to files moved into etc/.
+
+Sun Nov 15 09:36:08 1992  Fred Fish  (fnf@cygnus.com)
+
+	* config.sub (i386sol2, i486sol2):  i[34]86-unknown-solaris2.
+	* configure.in (i[34]86-*-solaris2*):  Use config/mh-sysv4.
+
+Thu Nov 12 08:50:42 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure: accept dash as well as underscore in long option
+	names for FSF compatibility.
+
 Wed Nov 11 08:04:37 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config.sub: added -sco3.2v4 support from FSF.
