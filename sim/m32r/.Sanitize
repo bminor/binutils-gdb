@@ -16,11 +16,11 @@
 
 Do-first:
 
-m32rx_files="cpux.c cpux.h decodex.c decodex.h m32rx.c mloopx.in modelx.c semx-switch.c"
-if ( echo $* | grep keep\-m32rx > /dev/null ) ; then
-        keep_these_too="${m32rx_files} ${keep_these_too}"
+cygnus_files="cpux.c cpux.h decodex.c decodex.h m32rx.c mloopx.in modelx.c semx-switch.c"
+if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
+        keep_these_too="${cygnus_files} ${keep_these_too}"
 else
-        lose_these_too="${m32rx_files} ${lose_these_too}"
+        lose_these_too="${cygnus_files} ${lose_these_too}"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
@@ -62,7 +62,7 @@ Things-to-lose:
 
 Do-last:
 
-cygnus_files="ChangeLog Makefile.in"
+cygnus_files="ChangeLog Makefile.in sim-if.c sim-main.h arch.h arch.c cpuall.h cpu.h m32r-sim.h tconfig.in"
 if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
         for i in $cygnus_files ; do
                 if test ! -d $i && (grep sanitize-cygnus $i > /dev/null) ; then
@@ -79,34 +79,6 @@ else
                         fi
                         cp $i new
                         sed '/start\-sanitize\-cygnus/,/end-\sanitize\-cygnus/d' < $i > new
-                        if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-                                if [ -n "${verbose}" ] ; then
-                                        echo Caching $i in .Recover...
-                                fi
-                                mv $i .Recover
-                        fi
-                        mv new $i
-                fi
-        done
-fi
-
-m32rx_files="ChangeLog Makefile.in sim-if.c sim-main.h arch.h arch.c cpuall.h cpu.h m32r-sim.h tconfig.in"
-if ( echo $* | grep keep\-m32rx > /dev/null ) ; then
-        for i in $m32rx_files ; do
-                if test ! -d $i && (grep sanitize-m32rx $i > /dev/null) ; then
-                        if [ -n "${verbose}" ] ; then
-                                echo Keeping m32rx stuff in $i
-                        fi
-                fi
-        done
-else
-        for i in $m32rx_files ; do
-                if test ! -d $i && (grep sanitize-m32rx $i > /dev/null) ; then
-                        if [ -n "${verbose}" ] ; then
-                                echo Removing traces of \"m32rx\" from $i...
-                        fi
-                        cp $i new
-                        sed '/start\-sanitize\-m32rx/,/end-\sanitize\-m32rx/d' < $i > new
                         if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
                                 if [ -n "${verbose}" ] ; then
                                         echo Caching $i in .Recover...
