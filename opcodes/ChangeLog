@@ -1,5 +1,9 @@
 2005-01-12  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (OP_E): Don't ignore scale in SIB for 64 bit mode.
+
+2005-01-12  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (OP_E): Ignore scale when index == 0x4 in SIB.
 
 2005-01-10  Andreas Schwab  <schwab@suse.de>
