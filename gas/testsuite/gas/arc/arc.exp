@@ -30,8 +30,15 @@ proc test_template_insn { tmpl opcode icode } {
 	#send_user "$line\n"
 	if [string match "*@IC+?@*" $line] {
 	    # Insert the opcode.  It occupies the top 5 bits.
-	    regexp "^(.*)@(IC\\+)(.)@(.*)$" $line junk leftpart icodepart n rightpart
+	    regexp "^(.*)@IC\\+(.)@(.*)$" $line junk leftpart n rightpart
 	    set n [expr ($icode << 3) + $n]
+	    set n [format "%02x" $n]
+	    puts $out_fd "$leftpart$n$rightpart"
+	} elseif [string match "*@I3+??@*" $line] {
+	    # Insert insn 3 code (register C field)
+	    # b15=8/0, b8=1/0 (their respective hex values in the objdump)
+	    regexp "^(.*)@I3\\+(.)(.)@(.*)$" $line junk leftpart b15 b8 rightpart
+	    set n [expr ($icode << 1) + ($b15 << 4) + ($b8 << 0)]
 	    set n [format "%02x" $n]
 	    puts $out_fd "$leftpart$n$rightpart"
 	} else {
@@ -60,24 +67,25 @@ if [istarget arc*-*-*] then {
     test_template_insn math sub 10
     test_template_insn math xor 15
 
-#    test_shift "asl" 8
-#    test_shift "asr" 3
-#    test_shift "lsl" 8
-#    test_shift "lsr" 3
-#    test_shift "ror" 3
-#    test_shift "rrc" 3
+    test_template_insn alias mov 12
+    test_template_insn alias rlc 9
+    test_template_insn alias asl 8
+# `lsl' gets dumped as `asl' so this must be tested elsewhere.
+#   test_template_insn alias lsl 8
 
-#    test_branch "b" 4
-#    test_branch "bl" 5
-#    test_branch "lp" 5
+    test_template_insn sshift asr 1
+    test_template_insn sshift lsr 2
+    test_template_insn sshift ror 3
+    test_template_insn sshift rrc 4
+
+    test_template_insn branch b 4
+    test_template_insn branch bl 5
+    test_template_insn branch lp 6
 
     run_dump_test "j"
 
 #    test_special "ext" 3
 #    test_special "sex" 3
-
-#    test_macro "mov" 12
-#    test_macro "rlc" 9
 
     run_dump_test "flag"
 #    run_dump_test "ld"
