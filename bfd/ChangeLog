@@ -1,3 +1,15 @@
+Wed Dec 13 15:44:06 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aoutx.h: Include <ctype.h>.
+	(struct aout_link_includes_table): Define.
+	(struct aout_link_includes_totals): Define.
+	(struct aout_link_includes_entry): Define.
+	(aout_link_includes_lookup): Define macro.
+	(struct aout_final_link_info): Add includes field.
+	(aout_link_includes_newfunc): New static function.
+	(NAME(aout,final_link)): Initialize includes hash table.
+	(aout_link_write_symbols): Eliminate duplicate N_BINCL entries.
+
 Wed Dec 13 10:52:14 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-config.in: Match on mips-*-* instead of mips-idt-ecoff.

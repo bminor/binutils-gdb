@@ -120,6 +120,7 @@ DESCRIPTION
 #define KEEPIT udata.i
 
 #include <string.h>		/* For strchr and friends */
+#include <ctype.h>
 #include "bfd.h"
 #include <sysdep.h>
 #include "bfdlink.h"
@@ -3369,6 +3370,37 @@ aout_link_add_symbols (abfd, info)
 
   return true;
 }
+
+/* A hash table used for header files with N_BINCL entries.  */
+
+struct aout_link_includes_table
+{
+  struct bfd_hash_table root;
+};
+
+/* A linked list of totals that we have found for a particular header
+   file.  */
+
+struct aout_link_includes_totals
+{
+  struct aout_link_includes_totals *next;
+  bfd_vma total;
+};
+
+/* An entry in the header file hash table.  */
+
+struct aout_link_includes_entry
+{
+  struct bfd_hash_entry root;
+  /* List of totals we have found for this file.  */
+  struct aout_link_includes_totals *totals;
+};
+
+/* Look up an entry in an the header file hash table.  */
+
+#define aout_link_includes_lookup(table, string, create, copy) \
+  ((struct aout_link_includes_entry *) \
+   bfd_hash_lookup (&(table)->root, (string), (create), (copy)))
 
 /* During the final link step we need to pass around a bunch of
    information, so we do it in an instance of this structure.  */
@@ -3385,6 +3417,8 @@ struct aout_final_link_info
   file_ptr symoff;
   /* String table.  */
   struct bfd_strtab_hash *strtab;
+  /* Header file hash table.  */
+  struct aout_link_includes_table includes;
   /* A buffer large enough to hold the contents of any section.  */
   bfd_byte *contents;
   /* A buffer large enough to hold the relocs of any section.  */
@@ -3395,6 +3429,8 @@ struct aout_final_link_info
   struct external_nlist *output_syms;
 };
 
+static struct bfd_hash_entry *aout_link_includes_newfunc
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 static boolean aout_link_input_bfd
   PARAMS ((struct aout_final_link_info *, bfd *input_bfd));
 static boolean aout_link_write_symbols
@@ -3419,6 +3455,38 @@ static boolean aout_link_reloc_link_order
   PARAMS ((struct aout_final_link_info *, asection *,
 	   struct bfd_link_order *));
 
+/* The function to create a new entry in the header file hash table.  */
+
+static struct bfd_hash_entry *
+aout_link_includes_newfunc (entry, table, string)
+     struct bfd_hash_entry *entry;
+     struct bfd_hash_table *table;
+     const char *string;
+{
+  struct aout_link_includes_entry *ret =
+    (struct aout_link_includes_entry *) entry;
+
+  /* Allocate the structure if it has not already been allocated by a
+     subclass.  */
+  if (ret == (struct aout_link_includes_entry *) NULL)
+    ret = ((struct aout_link_includes_entry *)
+	   bfd_hash_allocate (table,
+			      sizeof (struct aout_link_includes_entry)));
+  if (ret == (struct aout_link_includes_entry *) NULL)
+    return (struct bfd_hash_entry *) ret;
+
+  /* Call the allocation method of the superclass.  */
+  ret = ((struct aout_link_includes_entry *)
+	 bfd_hash_newfunc ((struct bfd_hash_entry *) ret, table, string));
+  if (ret)
+    {
+      /* Set local fields.  */
+      ret->totals = NULL;
+    }
+
+  return (struct bfd_hash_entry *) ret;
+}
+
 /* Do the final link step.  This is called on the output BFD.  The
    INFO structure should point to a list of BFDs linked through the
    link_next field which can be used to find each BFD which takes part
@@ -3433,6 +3501,7 @@ NAME(aout,final_link) (abfd, info, callback)
      void (*callback) PARAMS ((bfd *, file_ptr *, file_ptr *, file_ptr *));
 {
   struct aout_final_link_info aout_info;
+  boolean includes_hash_initialized = false;
   register bfd *sub;
   bfd_size_type trsize, drsize;
   size_t max_contents_size;
@@ -3451,6 +3520,14 @@ NAME(aout,final_link) (abfd, info, callback)
   aout_info.output_bfd = abfd;
   aout_info.contents = NULL;
   aout_info.relocs = NULL;
+  aout_info.symbol_map = NULL;
+  aout_info.output_syms = NULL;
+
+  if (! bfd_hash_table_init_n (&aout_info.includes.root,
+			       aout_link_includes_newfunc,
+			       251))
+    goto error_return;
+  includes_hash_initialized = true;
 
   /* Figure out the largest section size.  Also, if generating
      relocateable output, count the relocs.  */
@@ -3684,6 +3761,11 @@ NAME(aout,final_link) (abfd, info, callback)
       free (aout_info.output_syms);
       aout_info.output_syms = NULL;
     }
+  if (includes_hash_initialized)
+    {
+      bfd_hash_table_free (&aout_info.includes.root);
+      includes_hash_initialized = false;
+    }
 
   /* Finish up any dynamic linking we may be doing.  */
   if (aout_backend_info (abfd)->finish_dynamic_link != NULL)
@@ -3715,6 +3797,8 @@ NAME(aout,final_link) (abfd, info, callback)
     free (aout_info.symbol_map);
   if (aout_info.output_syms != NULL)
     free (aout_info.output_syms);
+  if (includes_hash_initialized)
+    bfd_hash_table_free (&aout_info.includes.root);
   return false;
 }
 
@@ -3833,6 +3917,7 @@ aout_link_write_symbols (finfo, input_bfd)
   sym_end = sym + sym_count;
   sym_hash = obj_aout_sym_hashes (input_bfd);
   symbol_map = finfo->symbol_map;
+  memset (symbol_map, 0, sym_count * sizeof *symbol_map);
   for (; sym < sym_end; sym++, sym_hash++, symbol_map++)
     {
       const char *name;
@@ -3843,6 +3928,16 @@ aout_link_write_symbols (finfo, input_bfd)
       bfd_vma val = 0;
       boolean copy;
 
+      /* We set *symbol_map to 0 above for all symbols.  If it has
+         already been set to -1 for this symbol, it means that we are
+         discarding it because it appears in a duplicate header file.
+         See the N_BINCL code below.  */
+      if (*symbol_map == -1)
+	continue;
+
+      /* Initialize *symbol_map to -1, which means that the symbol was
+         not copied into the output file.  We will change it later if
+         we do copy the symbol over.  */
       *symbol_map = -1;
 
       type = bfd_h_get_8 (input_bfd, sym->e_type);
@@ -4090,6 +4185,112 @@ aout_link_write_symbols (finfo, input_bfd)
 		{
 		  pass = false;
 		  continue;
+		}
+	    }
+
+	  /* An N_BINCL symbol indicates the start of the stabs
+	     entries for a header file.  We need to scan ahead to the
+	     next N_EINCL symbol, ignoring nesting, adding up all the
+	     characters in the symbol names, not including the file
+	     numbers in types (the first number after an open
+	     parenthesis).  */
+	  if (type == N_BINCL)
+	    {
+	      struct external_nlist *incl_sym;
+	      int nest;
+	      struct aout_link_includes_entry *incl_entry;
+	      struct aout_link_includes_totals *t;
+
+	      val = 0;
+	      nest = 0;
+	      for (incl_sym = sym + 1; incl_sym < sym_end; incl_sym++)
+		{
+		  int incl_type;
+
+		  incl_type = bfd_h_get_8 (input_bfd, incl_sym->e_type);
+		  if (incl_type == N_EINCL)
+		    {
+		      if (nest == 0)
+			break;
+		      --nest;
+		    }
+		  else if (incl_type == N_BINCL)
+		    ++nest;
+		  else if (nest == 0)
+		    {
+		      const char *s;
+
+		      s = strings + GET_WORD (input_bfd, incl_sym->e_strx);
+		      for (; *s != '\0'; s++)
+			{
+			  val += *s;
+			  if (*s == '(')
+			    {
+			      /* Skip the file number.  */
+			      ++s;
+			      while (isdigit ((unsigned char) *s))
+				++s;
+			      --s;
+			    }
+			}
+		    }
+		}
+
+	      /* If we have already included a header file with the
+                 same value, then replace this one with an N_EXCL
+                 symbol.  */
+	      copy = ! finfo->info->keep_memory;
+	      incl_entry = aout_link_includes_lookup (&finfo->includes,
+						      name, true, copy);
+	      if (incl_entry == NULL)
+		return false;
+	      for (t = incl_entry->totals; t != NULL; t = t->next)
+		if (t->total == val)
+		  break;
+	      if (t == NULL)
+		{
+		  /* This is the first time we have seen this header
+                     file with this set of stabs strings.  */
+		  t = ((struct aout_link_includes_totals *)
+		       bfd_hash_allocate (&finfo->includes.root,
+					  sizeof *t));
+		  if (t == NULL)
+		    return false;
+		  t->total = val;
+		  t->next = incl_entry->totals;
+		  incl_entry->totals = t;
+		}
+	      else
+		{
+		  int *incl_map;
+
+		  /* This is a duplicate header file.  We must change
+                     it to be an N_EXCL entry, and mark all the
+                     included symbols to prevent outputting them.  */
+		  type = N_EXCL;
+
+		  nest = 0;
+		  for (incl_sym = sym + 1, incl_map = symbol_map + 1;
+		       incl_sym < sym_end;
+		       incl_sym++, incl_map++)
+		    {
+		      int incl_type;
+
+		      incl_type = bfd_h_get_8 (input_bfd, incl_sym->e_type);
+		      if (incl_type == N_EINCL)
+			{
+			  if (nest == 0)
+			    {
+			      *incl_map = -1;
+			      break;
+			    }
+			  --nest;
+			}
+		      else if (incl_type == N_BINCL)
+			++nest;
+		      else if (nest == 0)
+			*incl_map = -1;
+		    }
 		}
 	    }
 	}
