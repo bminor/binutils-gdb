@@ -4,4 +4,4 @@
 TDEPFILES= hppa-pinsn.o hppa-tdep.o
 REMOTE_O=dcache.o remote.o remote-utils.o op50-rom.o w89k-rom.o monitor.o
 XDEPFILES= ser-tcp.o
-TM_FILE= tm-hppap.h
+TM_FILE= tm-pro.h
