@@ -133,54 +133,59 @@ static void init_sol_core_ops PARAMS ((void));
 
 /* Pointers to routines from lithread_db resolved by dlopen() */
 
-static void
-  (*p_td_log) (const int on_off);
-static td_err_e
-  (*p_td_ta_new) (const struct ps_prochandle * ph_p, td_thragent_t ** ta_pp);
-static td_err_e
-  (*p_td_ta_delete) (td_thragent_t * ta_p);
-static td_err_e
-  (*p_td_init) (void);
-static td_err_e
-  (*p_td_ta_get_ph) (const td_thragent_t * ta_p, struct ps_prochandle ** ph_pp);
-static td_err_e
-  (*p_td_ta_get_nthreads) (const td_thragent_t * ta_p, int *nthread_p);
-static td_err_e
-  (*p_td_ta_tsd_iter) (const td_thragent_t * ta_p, td_key_iter_f * cb, void *cbdata_p);
-static td_err_e
-  (*p_td_ta_thr_iter) (const td_thragent_t * ta_p, td_thr_iter_f * cb, void *cbdata_p, td_thr_state_e state,
-	       int ti_pri, sigset_t * ti_sigmask_p, unsigned ti_user_flags);
-static td_err_e
-  (*p_td_thr_validate) (const td_thrhandle_t * th_p);
-static td_err_e
-  (*p_td_thr_tsd) (const td_thrhandle_t * th_p, const thread_key_t key, void **data_pp);
-static td_err_e
-  (*p_td_thr_get_info) (const td_thrhandle_t * th_p, td_thrinfo_t * ti_p);
-static td_err_e
-  (*p_td_thr_getfpregs) (const td_thrhandle_t * th_p, prfpregset_t * fpregset);
-static td_err_e
-  (*p_td_thr_getxregsize) (const td_thrhandle_t * th_p, int *xregsize);
-static td_err_e
-  (*p_td_thr_getxregs) (const td_thrhandle_t * th_p, const caddr_t xregset);
-static td_err_e
-  (*p_td_thr_sigsetmask) (const td_thrhandle_t * th_p, const sigset_t ti_sigmask);
-static td_err_e
-  (*p_td_thr_setprio) (const td_thrhandle_t * th_p, const int ti_pri);
-static td_err_e
-  (*p_td_thr_setsigpending) (const td_thrhandle_t * th_p, const uchar_t ti_pending_flag, const sigset_t ti_pending);
-static td_err_e
-  (*p_td_thr_setfpregs) (const td_thrhandle_t * th_p, const prfpregset_t * fpregset);
-static td_err_e
-  (*p_td_thr_setxregs) (const td_thrhandle_t * th_p, const caddr_t xregset);
-static td_err_e
-  (*p_td_ta_map_id2thr) (const td_thragent_t * ta_p, thread_t tid, td_thrhandle_t * th_p);
-static td_err_e
-  (*p_td_ta_map_lwp2thr) (const td_thragent_t * ta_p, lwpid_t lwpid, td_thrhandle_t * th_p);
-static td_err_e
-  (*p_td_thr_getgregs) (const td_thrhandle_t * th_p, prgregset_t regset);
-static td_err_e
-  (*p_td_thr_setgregs) (const td_thrhandle_t * th_p, const prgregset_t regset);
-
+static void     (*p_td_log)               (const int on_off);
+static td_err_e (*p_td_ta_new)            (const struct ps_prochandle * ph_p, 
+					   td_thragent_t ** ta_pp);
+static td_err_e (*p_td_ta_delete)         (td_thragent_t * ta_p);
+static td_err_e (*p_td_init)              (void);
+static td_err_e (*p_td_ta_get_ph)         (const td_thragent_t * ta_p, 
+					   struct ps_prochandle ** ph_pp);
+static td_err_e (*p_td_ta_get_nthreads)   (const td_thragent_t * ta_p, 
+					   int *nthread_p);
+static td_err_e (*p_td_ta_tsd_iter)       (const td_thragent_t * ta_p, 
+					   td_key_iter_f * cb, 
+					   void *cbdata_p);
+static td_err_e (*p_td_ta_thr_iter)       (const td_thragent_t * ta_p, 
+					   td_thr_iter_f * cb, 
+					   void *cbdata_p, 
+					   td_thr_state_e state,
+					   int ti_pri, 
+					   sigset_t * ti_sigmask_p, 
+					   unsigned ti_user_flags);
+static td_err_e (*p_td_thr_validate)      (const td_thrhandle_t * th_p);
+static td_err_e (*p_td_thr_tsd)           (const td_thrhandle_t * th_p, 
+					   const thread_key_t key, 
+					   void **data_pp);
+static td_err_e (*p_td_thr_get_info)      (const td_thrhandle_t * th_p, 
+					   td_thrinfo_t * ti_p);
+static td_err_e (*p_td_thr_getfpregs)     (const td_thrhandle_t * th_p, 
+					   prfpregset_t * fpregset);
+static td_err_e (*p_td_thr_getxregsize)   (const td_thrhandle_t * th_p, 
+					   int *xregsize);
+static td_err_e (*p_td_thr_getxregs)      (const td_thrhandle_t * th_p, 
+					   const caddr_t xregset);
+static td_err_e (*p_td_thr_sigsetmask)    (const td_thrhandle_t * th_p, 
+					   const sigset_t ti_sigmask);
+static td_err_e (*p_td_thr_setprio)       (const td_thrhandle_t * th_p, 
+					   const int ti_pri);
+static td_err_e (*p_td_thr_setsigpending) (const td_thrhandle_t * th_p, 
+					   const uchar_t ti_pending_flag, 
+					   const sigset_t ti_pending);
+static td_err_e (*p_td_thr_setfpregs)     (const td_thrhandle_t * th_p, 
+					   const prfpregset_t * fpregset);
+static td_err_e (*p_td_thr_setxregs)      (const td_thrhandle_t * th_p, 
+					   const caddr_t xregset);
+static td_err_e (*p_td_ta_map_id2thr)     (const td_thragent_t * ta_p, 
+					   thread_t tid, 
+					   td_thrhandle_t * th_p);
+static td_err_e (*p_td_ta_map_lwp2thr)    (const td_thragent_t * ta_p, 
+					   lwpid_t lwpid, 
+					   td_thrhandle_t * th_p);
+static td_err_e (*p_td_thr_getgregs)      (const td_thrhandle_t * th_p, 
+					   prgregset_t regset);
+static td_err_e (*p_td_thr_setgregs)      (const td_thrhandle_t * th_p, 
+					   const prgregset_t regset);
+
 /*
 
    LOCAL FUNCTION
@@ -390,7 +395,8 @@ lwp_to_thread (lwp)
 
   val = p_td_thr_validate (&th);
   if (val == TD_NOTHR)
-    return lwp;			/* libthread doesn't know about it, just return lwp */
+    return lwp;			/* libthread doesn't know about it;
+				   just return lwp */
   else if (val != TD_OK)
     error ("lwp_to_thread: td_thr_validate: %s.", td_err_string (val));
 
@@ -847,7 +853,8 @@ sol_thread_create_inferior (exec_file, allargs, env)
       if (inferior_pid == -1)
 	inferior_pid = main_ph.pid;
 
-      add_thread (inferior_pid);
+      if (!in_thread_list (inferior_pid))
+	add_thread (inferior_pid);
     }
 }
 

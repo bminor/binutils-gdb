@@ -1,3 +1,9 @@
+2000-05-08  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* sol-thread.c (sol_thread_create_inferior): only add the thread
+	to the thread list if it is not already in there.
+	(prototypes for thread_db func ptrs): pretty up formatting.
+
 2000-05-08  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* config/djgpp/djconfig.sh: Use more warning switches.
