@@ -642,6 +642,10 @@ vx_load_command (arg_string, from_tty)
 
   /* FIXME, for now we ignore data_addr and bss_addr.  */
   symbol_file_add (arg_string, from_tty, text_addr, 0, 0, 0);
+
+  /* Getting new symbols may change our opinion about what is
+     frameless.  */
+  reinit_frame_cache ();
 }
 
 #ifdef FIXME  /* Not ready for prime time */
@@ -1002,6 +1006,7 @@ vx_open (args, from_tty)
   struct ldfile *pLoadFile;
   int i;
   extern CLIENT *pClient;
+  int symbols_added = 0;
 
   if (!args)
     error_no_arg ("target machine name");
@@ -1077,13 +1082,19 @@ vx_open (args, from_tty)
       /* Botches, FIXME:
 	 (1)  Searches the PATH, not the source path.
 	 (2)  data and bss are assumed to be at the usual offsets from text.  */
-      catch_errors (add_symbol_stub, (char *)pLoadFile, (char *)0,
-		    RETURN_MASK_ALL);
+      if (catch_errors (add_symbol_stub, (char *)pLoadFile, (char *)0,
+			RETURN_MASK_ALL))
+	symbols_added = 1;
 #endif
     }
   printf_filtered ("Done.\n");
 
   clnt_freeres (pClient, xdr_ldtabl, &loadTable);
+
+  /* Getting new symbols may change our opinion about what is
+     frameless.  */
+  if (symbols_added)
+    reinit_frame_cache ();
 }
 
 /* Takes a task started up outside of gdb and ``attaches'' to it.

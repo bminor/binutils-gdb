@@ -392,6 +392,10 @@ add_shared_symbol_files ()
 	 the symbols the user actually gets. */
       lm = lms.l_prev;
     }
+
+  /* Getting new symbols may change our opinion about what is
+     frameless.  */
+  reinit_frame_cache ();
 }
 
 int target_is_m88110;

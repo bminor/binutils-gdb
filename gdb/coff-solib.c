@@ -20,6 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 
+#include "frame.h"
 #include "bfd.h"
 #include "gdbcore.h"
 #include "symtab.h"
@@ -97,6 +98,10 @@ coff_solib_add (arg_string, from_tty, target)
 	  libsize -= len * 4;
 	  lib += len * 4;
 	}
+
+      /* Getting new symbols may change our opinion about what is
+	 frameless.  */
+      reinit_frame_cache ();
     }
 }
 

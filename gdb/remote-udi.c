@@ -32,6 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    	MiniMON interface with UDI-p interface.	  */
  
 #include "defs.h"
+#include "frame.h"
 #include "inferior.h"
 #include "wait.h"
 #include "value.h"
@@ -1293,6 +1294,10 @@ udi_load(args, from_tty)
   download (args, from_tty);
 
   symbol_file_add (strtok (args, " \t"), from_tty, 0, 0, 0, 0);
+
+  /* Getting new symbols may change our opinion about what is
+     frameless.  */
+  reinit_frame_cache ();
 }
 
 /*************************************************** UDI_WRITE_INFERIOR_MEMORY

@@ -1,3 +1,17 @@
+Sat Aug 27 23:32:43 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* symfile.c (symbol_file_add):  Move reinit_frame_cache call to
+	the callers of symbol_file_add. Gets rid of heuristic fence-post
+	warnings on mips and alpha targets when the PC resides in a shared
+	library which is not yet read in.
+	* coff-solib.c (coff_solib_add), cxux-nat.c (add_shared_symbol_files),
+	irix5-nat.c (solib_add), osfsolib.c (solib_add),
+	remote-vx.c (vx_open), solib.c (solib_add):
+	Add call to reinit_frame_cache after all shared libraries are read in.
+	* remote-udi.c (udi_load), remote-vx.c (vx_load_command),
+	symfile.c (symbol_file_command, add_symbol_file_command):
+	Add call to reinit_frame_cache after symbol_file_add.
+
 Wed Aug 24 17:45:14 1994  J.T. Conklin  (jtc@cygnus.com)
 
 	* config/xm-nbsd.h: New file, support for all NetBSD ports.
@@ -109,7 +123,7 @@ Fri Aug 19 14:55:45 1994  Stan Shebs  (shebs@andros.cygnus.com)
 Fri Aug 19 13:35:01 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* c-typeprint.c (c_print_type):  Assume demangled arguments
-	if a '(' is found in varstring, Looking for ')' at the end of
+	if a '(' is found in varstring, looking for ')' at the end of
 	varstring did fail with demangled const member functions, which
 	have a trailing `const'.
 	* remote.c (get_offsets, putpkt):  Change to `char' buffers,

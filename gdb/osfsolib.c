@@ -473,6 +473,7 @@ solib_add (arg_string, from_tty, target)
   char *re_err;
   int count;
   int old;
+  int symbols_added = 0;
   
   if ((re_err = re_comp (arg_string ? arg_string : ".")) != NULL)
     {
@@ -481,9 +482,7 @@ solib_add (arg_string, from_tty, target)
   
   
   /* Add the shared library sections to the section table of the
-     specified target, if any. We have to do this before reading the
-     symbol files as symbol_file_add calls reinit_frame_cache and
-     creating a new frame might access memory in the shared library.  */
+     specified target, if any.  */
   if (target)
     {
       /* Count how many new section_table entries there are.  */
@@ -551,9 +550,15 @@ solib_add (arg_string, from_tty, target)
 	    {
 	      so_last = so;
 	      so -> symbols_loaded = 1;
+	      symbols_added = 1;
 	    }
 	}
     }
+
+  /* Getting new symbols may change our opinion about what is
+     frameless.  */
+  if (symbols_added)
+    reinit_frame_cache ();
 }
 
 /*
@@ -752,7 +757,7 @@ solib_create_inferior_hook()
     }
   while (stop_signal != TARGET_SIGNAL_TRAP);
 
-  /*  solib_add will call reinit_frame_cache via symbol_file_add.
+  /*  solib_add will call reinit_frame_cache.
       But we are stopped in the runtime loader and we do not have symbols
       for the runtime loader. So heuristic_proc_start will be called
       and will put out an annoying warning.
