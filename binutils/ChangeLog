@@ -1,3 +1,13 @@
+2002-10-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* objdump.c: #include "bfdver.h".
+	* version.c: Likewise.
+	* Makefile.in: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2002-10-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* readelf.c (display_debug_info): Ignore empty .rela.debug_info
