@@ -438,18 +438,6 @@ d10v_frame_saved_pc (struct frame_info *frame)
   return ((frame)->extra_info->return_pc);
 }
 
-CORE_ADDR
-d10v_frame_args_address (struct frame_info *fi)
-{
-  return (fi)->frame;
-}
-
-CORE_ADDR
-d10v_frame_locals_address (struct frame_info *fi)
-{
-  return (fi)->frame;
-}
-
 /* Immediately after a function call, return the saved pc.  We can't
    use frame->return_pc beause that is determined by reading R13 off
    the stack and that may not be written yet. */
@@ -1592,8 +1580,8 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_chain (gdbarch, d10v_frame_chain);
   set_gdbarch_frame_chain_valid (gdbarch, d10v_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, d10v_frame_saved_pc);
-  set_gdbarch_frame_args_address (gdbarch, d10v_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, d10v_frame_locals_address);
+  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
+  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
   set_gdbarch_saved_pc_after_call (gdbarch, d10v_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_stack_align (gdbarch, d10v_stack_align);

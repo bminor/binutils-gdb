@@ -101,4 +101,9 @@ extern CORE_ADDR default_convert_from_func_ptr_addr (CORE_ADDR addr);
 
 extern int no_op_reg_to_regnum (int reg);
 
+/* Default frame_args_address and frame_locals_address.  */
+
+extern CORE_ADDR default_frame_address (struct frame_info *);
+
+
 #endif

@@ -2810,14 +2810,6 @@ sparc_frame_init_saved_regs (struct frame_info *fi_ignored)
 {	/* no-op */
 }
 
-/* The frame address: stored in the 'frame' field of the frame_info.  */
-
-static CORE_ADDR
-sparc_frame_address (struct frame_info *fi)
-{
-  return fi->frame;
-}
-
 /* gdbarch fix call dummy:
    All this function does is rearrange the arguments before calling
    sparc_fix_call_dummy (which does the real work).  */
@@ -2957,10 +2949,10 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_fp_regnum (gdbarch, SPARC_FP_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, SPARC_FP0_REGNUM);
-  set_gdbarch_frame_args_address (gdbarch, sparc_frame_address);
+  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
   set_gdbarch_frame_chain (gdbarch, sparc_frame_chain);
   set_gdbarch_frame_init_saved_regs (gdbarch, sparc_frame_init_saved_regs);
-  set_gdbarch_frame_locals_address (gdbarch, sparc_frame_address);
+  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frame_saved_pc (gdbarch, sparc_frame_saved_pc);
   set_gdbarch_frameless_function_invocation (gdbarch, 
