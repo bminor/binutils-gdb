@@ -3258,6 +3258,7 @@ fixup_sigtramp ()
     e->pdr.fregmask = -1;
     e->pdr.fregoffset = -(7 * sizeof (int));
     e->pdr.isym = (long) s;
+    e->pdr.adr = sigtramp_address;
 
     current_objfile = st->objfile;	/* Keep new_symbol happy */
     s = new_symbol (MIPS_EFI_SYMBOL_NAME);
