@@ -1,3 +1,10 @@
+2005-02-10  Jakub Jelinek  <jakub@redhat.com>
+
+	* emultempl/hppaelf.em (hppaelf_create_output_section_statements):
+	Set BFD_LINKER_CREATED on the stubs bfd.
+	* emultempl/ppc64elf.em (ppc_create_output_section_statements):
+	Likewise.
+
 2005-02-08  Mark Mitchell  <mark@codesourcery.com>
 
 	* scripttempl/armbpabi.sc (VERSION): Make special section symbols

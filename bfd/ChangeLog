@@ -1,3 +1,11 @@
+2005-02-10  Jakub Jelinek  <jakub@redhat.com>
+
+	* bfd-in.h (BFD_LINKER_CREATED): Define.
+	* bfd-in2.h: Rebuilt.
+	* elflink.c (bfd_elf_size_dynamic_sections): Disregard
+	BFD_LINKER_CREATED bfds when determining input bfds without
+	.note.GNU-stack section.
+
 2005-02-10  Maciej W. Rozycki  <macro@mips.com>
 
 	* elf64-mips.c (mips16_gprel_reloc): Update a comment.

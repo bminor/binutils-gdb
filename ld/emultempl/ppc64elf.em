@@ -92,6 +92,7 @@ ppc_create_output_section_statements (void)
       return;
     }
 
+  stub_file->the_bfd->flags |= BFD_LINKER_CREATED;
   ldlang_add_file (stub_file);
   ppc64_elf_init_stub_bfd (stub_file->the_bfd, &link_info);
 }
