@@ -1946,7 +1946,7 @@ case ${host64}-${target64}-${want64} in
   *true*)
     wordsize=64
     all_backends='$(BFD64_BACKENDS) $(BFD32_BACKENDS)'
-    if test -z "$GCC" && test "$HOST_64BIT_LONG" = "0"; then
+    if test -z "$GCC" && test "$BFD_HOST_64BIT_LONG" = "0" && test "$BFD_HOST_64_BIT_DEFINED" = "0"; then
       echo "configure: warning: You have requested a 64 bit BFD configuration, but" 1>&2
       echo "configure: warning: your compiler may not have a 64 bit integral type" 1>&2
     fi

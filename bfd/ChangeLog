@@ -1,3 +1,8 @@
+Fri Jul 19 18:15:51 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Fix test for whether a compiler has a 64 bit
+	type.  From Jim Wilson <wilson@cygnus.com>.
+
 Thu Jul 18 15:39:10 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.host (mips-sgi-irix6*): New host.
