@@ -1,5 +1,8 @@
 Fri Mar 11 08:08:50 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* main.c (main): When printing warning about bad baud rate, don't
+	use warning(); it relies on current_target which isn't set up yet.
+
 	* breakpoint.c (_initialize_breakpoint): Update docstring for
 	tbreak to match what the code actually does.  Don't mention tbreak
 	in docstrings for "enable once" or "enable breakpoints once".

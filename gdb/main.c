@@ -690,7 +690,13 @@ main (argc, argv)
 
 	      i = strtol (optarg, &p, 0);
 	      if (i == 0 && p == optarg)
-		warning ("Could not set baud rate to `%s'.\n", optarg);
+
+		/* Don't use *_filtered or warning() (which relies on
+                   current_target) until after initialize_all_files(). */
+
+		fprintf_unfiltered
+		  (gdb_stderr,
+		   "warning: could not set baud rate to `%s'.\n", optarg);
 	      else
 		baud_rate = i;
 	    }
