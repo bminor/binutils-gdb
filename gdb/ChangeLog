@@ -1,3 +1,8 @@
+Sun Dec  1 00:41:47 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* vax-tdep.c (vax_print_insn, print_insn_arg):  Use info functions
+	for printing. From Valeriy Ushakov <uwe@ptc.spbu.ru>.
+
 Sun Dec  1 00:18:59 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	Add support for Irix 6.2 native O32 and N32 ABI.
