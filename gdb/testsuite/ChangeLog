@@ -1,3 +1,7 @@
+2002-06-06  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/long_long.exp: Add check for sizeof (long double).
+
 2002-06-06  Michal Ludvig  <mludvig@suse.cz>
 
 	* gdb.asm/asm-source.exp: Add x86-64 target.
