@@ -1,5 +1,32 @@
 1999-06-27  Mark Mitchell  <mark@codesourcery.com>
 
+	* elf32-mips.c (MIPS_ELF_SRDATA_SECTION_NAME): New macro.
+	(MIPS_ELF_OPTIONS_SECTION_NAME): Likewise.
+	(MIPS_ELF_STUB_SECTION_NAME): Likewise.
+	(_bfd_mips_elf_section_from_shdr): Use them.
+	(_bfd_mips_elf_fake_sections): Likewise.  Add .srdata to the list
+	of GP-relative sections.
+	(_bfd_mips_elf_set_section_contents): Use them.
+	(_bfd_mips_elf_section_processing): Share code between .sdata and
+	.lit4/.lit8 sections.  Set appropriate flags for .srdata.
+	(mips_elf_additional_program_headers): Add handling for
+	PT_MIPS_OPTIONS segment on IRIX6.
+	(mips_elf_modify_segment_map): Likeiwse.
+	(mips_elf_final_link): Set EF_MIPS_CPIC when required by the ABI.
+	Include the options sections on IRIX6.  Don't look for GP-relative
+	sections by name; use SHF_MIPS_GPREL instead.
+	(ELF_DYNAMIC_INTERPRETER): Adjust to use /usr/lib32/libc.so.1 for
+	the N32 ABI.
+	(mips_elf_create_dynamic_sections): Don't muck about with section
+	alignments and such on IRIX6.
+	(mips_elf_adjust_dynamic_symbol): Use MIPS_ELF_STUB_SECTION_NAME.
+	(mips_elf_size_dynamic_sections): Likewise. Adjust to handle the
+	fact that ELF_DYNAMIC_INTERPRETER is no longer a constant.  Use
+	bfd_zalloc rather than bfd_alloc and memset.
+	(mips_elf_finish_dynamic_symbol): Use MIPS_ELF_STUB_SECTION_NAME.
+	Don't assert the existence of .rld_map on IRIX6.
+	(mips_elf_finish_dynamic_sections): Use MIPS_ELF_STUB_SECTION_NAME.
+		
 	* elf32-mips.c (mips_elf_adjust_dynindx): Remove.
 	(mips_elf_size_dynamic_sections): Use _bfd_elf_link_adjust_dynindx
 	instead.

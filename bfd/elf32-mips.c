@@ -170,6 +170,17 @@ struct mips_got_info
 /* The name of the msym section.  */
 #define MIPS_ELF_MSYM_SECTION_NAME(abfd) ".msym"
 
+/* The name of the srdata section.  */
+#define MIPS_ELF_SRDATA_SECTION_NAME(abfd) ".srdata"
+
+/* The name of the options section.  */
+#define MIPS_ELF_OPTIONS_SECTION_NAME(abfd) \
+  (IRIX_COMPAT (abfd) == ict_irix6 ? ".MIPS.options" : ".options")
+
+/* The name of the stub section.  */
+#define MIPS_ELF_STUB_SECTION_NAME(abfd) \
+  (IRIX_COMPAT (abfd) == ict_irix6 ? ".MIPS.stubs" : ".stub")
+
 /* The number of local .got entries we reserve.  */
 #define MIPS_RESERVED_GOTNO (2)
 
@@ -2449,8 +2460,7 @@ _bfd_mips_elf_section_from_shdr (abfd, hdr, name)
 	return false;
       break;
     case SHT_MIPS_OPTIONS:
-      if (strcmp (name, ".options") != 0
-	  && strcmp (name, ".MIPS.options") != 0)
+      if (strcmp (name, MIPS_ELF_OPTIONS_SECTION_NAME (abfd)) != 0)
 	return false;
       break;
     case SHT_MIPS_DWARF:
@@ -2627,6 +2637,7 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
 #endif
     }
   else if (strcmp (name, ".got") == 0
+	   || strcmp (name, MIPS_ELF_SRDATA_SECTION_NAME (abfd)) == 0
 	   || strcmp (name, ".sdata") == 0
 	   || strcmp (name, ".sbss") == 0
 	   || strcmp (name, ".lit4") == 0
@@ -2643,8 +2654,7 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
       hdr->sh_flags |= SHF_MIPS_NOSTRIP;
       /* The sh_info field is set in final_write_processing.  */
     }
-  else if (strcmp (name, ".options") == 0
-	   || strcmp (name, ".MIPS.options") == 0)
+  else if (strcmp (name, MIPS_ELF_OPTIONS_SECTION_NAME (abfd)) == 0)
     {
       hdr->sh_type = SHT_MIPS_OPTIONS;
       hdr->sh_entsize = 1;
@@ -2714,8 +2724,7 @@ _bfd_mips_elf_set_section_contents (abfd, section, location, offset, count)
      file_ptr offset;
      bfd_size_type count;
 {
-  if (strcmp (section->name, ".options") == 0
-      || strcmp (section->name, ".MIPS.options") == 0)
+  if (strcmp (section->name, MIPS_ELF_OPTIONS_SECTION_NAME (abfd)) == 0)
     {
       bfd_byte *c;
 
@@ -2762,7 +2771,9 @@ _bfd_mips_elf_section_processing (abfd, hdr)
     {
       const char *name = bfd_get_section_name (abfd, hdr->bfd_section);
 
-      if (strcmp (name, ".sdata") == 0)
+      if (strcmp (name, ".sdata") == 0
+	  || strcmp (name, ".lit8") == 0
+	  || strcmp (name, ".lit4") == 0)
 	{
 	  hdr->sh_flags |= SHF_ALLOC | SHF_WRITE | SHF_MIPS_GPREL;
 	  hdr->sh_type = SHT_PROGBITS;
@@ -2772,10 +2783,9 @@ _bfd_mips_elf_section_processing (abfd, hdr)
 	  hdr->sh_flags |= SHF_ALLOC | SHF_WRITE | SHF_MIPS_GPREL;
 	  hdr->sh_type = SHT_NOBITS;
 	}
-      else if (strcmp (name, ".lit8") == 0
-	       || strcmp (name, ".lit4") == 0)
+      else if (strcmp (name, MIPS_ELF_SRDATA_SECTION_NAME (abfd)) == 0)
 	{
-	  hdr->sh_flags |= SHF_ALLOC | SHF_WRITE | SHF_MIPS_GPREL;
+	  hdr->sh_flags |= SHF_ALLOC | SHF_MIPS_GPREL;
 	  hdr->sh_type = SHT_PROGBITS;
 	}
       else if (strcmp (name, ".compact_rel") == 0)
@@ -2981,26 +2991,27 @@ mips_elf_additional_program_headers (abfd)
      bfd *abfd;
 {
   asection *s;
-  int ret;
+  int ret = 0;
 
-  ret = 0;
+  if (!SGI_COMPAT (abfd))
+    return 0;
 
-  if (! SGI_COMPAT (abfd))
-    return ret;
-
+  /* See if we need a PT_MIPS_REGINFO segment.  */
   s = bfd_get_section_by_name (abfd, ".reginfo");
-  if (s != NULL && (s->flags & SEC_LOAD) != 0)
-    {
-      /* We need a PT_MIPS_REGINFO segment.  */
-      ++ret;
-    }
+  if (s && (s->flags & SEC_LOAD))
+    ++ret;
 
-  if (bfd_get_section_by_name (abfd, ".dynamic") != NULL
-      && bfd_get_section_by_name (abfd, ".mdebug") != NULL)
-    {
-      /* We need a PT_MIPS_RTPROC segment.  */
-      ++ret;
-    }
+  /* See if we need a PT_MIPS_OPTIONS segment.  */
+  if (IRIX_COMPAT (abfd) == ict_irix6
+      && bfd_get_section_by_name (abfd, 
+				  MIPS_ELF_OPTIONS_SECTION_NAME (abfd)))
+    ++ret;
+
+  /* See if we need a PT_MIPS_RTPROC segment.  */
+  if (IRIX_COMPAT (abfd) == ict_irix5
+      && bfd_get_section_by_name (abfd, ".dynamic")
+      && bfd_get_section_by_name (abfd, ".mdebug"))
+    ++ret;
 
   return ret;
 }
@@ -3047,114 +3058,154 @@ mips_elf_modify_segment_map (abfd)
 	}
     }
 
-  /* If there are .dynamic and .mdebug sections, we make a room for
-     the RTPROC header.  FIXME: Rewrite without section names.  */
-  if (bfd_get_section_by_name (abfd, ".interp") == NULL
-      && bfd_get_section_by_name (abfd, ".dynamic") != NULL
-      && bfd_get_section_by_name (abfd, ".mdebug") != NULL)
+  /* For IRIX 6, we don't have .mdebug sections, nor does anything but
+     .dynamic end up in PT_DYNAMIC.  However, we do have to insert a
+     PT_OPTIONS segement immediately following the program header
+     table.  */
+  if (IRIX_COMPAT (abfd) == ict_irix6)
     {
-      for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
-	if (m->p_type == PT_MIPS_RTPROC)
+      asection *s;
+
+      for (s = abfd->sections; s; s = s->next)
+	if (elf_section_data (s)->this_hdr.sh_type == SHT_MIPS_OPTIONS)
 	  break;
-      if (m == NULL)
+
+      if (s)
 	{
-	  m = (struct elf_segment_map *) bfd_zalloc (abfd, sizeof *m);
+	  struct elf_segment_map *options_segment;
+
+	  for (m = elf_tdata (abfd)->segment_map; m; m = m->next)
+	    if (m->p_type == PT_PHDR)
+	      break;
+
+	  /* There should always be a program header table.  */
 	  if (m == NULL)
 	    return false;
 
-	  m->p_type = PT_MIPS_RTPROC;
-
-	  s = bfd_get_section_by_name (abfd, ".rtproc");
-	  if (s == NULL)
-	    {
-	      m->count = 0;
-	      m->p_flags = 0;
-	      m->p_flags_valid = 1;
-	    }
-	  else
-	    {
-	      m->count = 1;
-	      m->sections[0] = s;
-	    }
-
-	  /* We want to put it after the DYNAMIC segment.  */
-	  pm = &elf_tdata (abfd)->segment_map;
-	  while (*pm != NULL && (*pm)->p_type != PT_DYNAMIC)
-	    pm = &(*pm)->next;
-	  if (*pm != NULL)
-	    pm = &(*pm)->next;
-
-	  m->next = *pm;
-	  *pm = m;
+	  options_segment = bfd_zalloc (abfd, 
+					sizeof (struct elf_segment_map));
+	  options_segment->next = m->next;
+	  options_segment->p_type = PT_MIPS_OPTIONS;
+	  options_segment->p_flags = PF_R;
+	  options_segment->p_flags_valid = true;
+	  options_segment->count = 1;
+	  options_segment->sections[0] = s;
+	  m->next = options_segment;
 	}
     }
-
-  /* On Irix 5, the PT_DYNAMIC segment includes the .dynamic, .dynstr,
-     .dynsym, and .hash sections, and everything in between.  */
-  for (pm = &elf_tdata (abfd)->segment_map; *pm != NULL; pm = &(*pm)->next)
-    if ((*pm)->p_type == PT_DYNAMIC)
-      break;
-  m = *pm;
-  if (m != NULL
-      && m->count == 1
-      && strcmp (m->sections[0]->name, ".dynamic") == 0)
+  else
     {
-      static const char *sec_names[] =
-	{ ".dynamic", ".dynstr", ".dynsym", ".hash" };
-      bfd_vma low, high;
-      unsigned int i, c;
-      struct elf_segment_map *n;
-
-      low = 0xffffffff;
-      high = 0;
-      for (i = 0; i < sizeof sec_names / sizeof sec_names[0]; i++)
+      /* If there are .dynamic and .mdebug sections, we make a room
+	 for the RTPROC header.  FIXME: Rewrite without section names.  */
+      if (bfd_get_section_by_name (abfd, ".interp") == NULL
+	  && bfd_get_section_by_name (abfd, ".dynamic") != NULL
+	  && bfd_get_section_by_name (abfd, ".mdebug") != NULL)
 	{
-	  s = bfd_get_section_by_name (abfd, sec_names[i]);
-	  if (s != NULL && (s->flags & SEC_LOAD) != 0)
+	  for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+	    if (m->p_type == PT_MIPS_RTPROC)
+	      break;
+	  if (m == NULL)
 	    {
-	      bfd_size_type sz;
+	      m = (struct elf_segment_map *) bfd_zalloc (abfd, sizeof *m);
+	      if (m == NULL)
+		return false;
 
-	      if (low > s->vma)
-		low = s->vma;
-	      sz = s->_cooked_size;
-	      if (sz == 0)
-		sz = s->_raw_size;
-	      if (high < s->vma + sz)
-		high = s->vma + sz;
+	      m->p_type = PT_MIPS_RTPROC;
+
+	      s = bfd_get_section_by_name (abfd, ".rtproc");
+	      if (s == NULL)
+		{
+		  m->count = 0;
+		  m->p_flags = 0;
+		  m->p_flags_valid = 1;
+		}
+	      else
+		{
+		  m->count = 1;
+		  m->sections[0] = s;
+		}
+
+	      /* We want to put it after the DYNAMIC segment.  */
+	      pm = &elf_tdata (abfd)->segment_map;
+	      while (*pm != NULL && (*pm)->p_type != PT_DYNAMIC)
+		pm = &(*pm)->next;
+	      if (*pm != NULL)
+		pm = &(*pm)->next;
+
+	      m->next = *pm;
+	      *pm = m;
 	    }
 	}
 
-      c = 0;
-      for (s = abfd->sections; s != NULL; s = s->next)
-	if ((s->flags & SEC_LOAD) != 0
-	    && s->vma >= low
-	    && ((s->vma
-		 + (s->_cooked_size != 0 ? s->_cooked_size : s->_raw_size))
-		<= high))
-	  ++c;
-
-      n = ((struct elf_segment_map *)
-	   bfd_zalloc (abfd, sizeof *n + (c - 1) * sizeof (asection *)));
-      if (n == NULL)
-	return false;
-      *n = *m;
-      n->count = c;
-
-      i = 0;
-      for (s = abfd->sections; s != NULL; s = s->next)
+      /* On Irix 5, the PT_DYNAMIC segment includes the .dynamic,
+	 .dynstr, .dynsym, and .hash sections, and everything in
+	 between.  */
+      for (pm = &elf_tdata (abfd)->segment_map; *pm != NULL; pm = &(*pm)->next)
+	if ((*pm)->p_type == PT_DYNAMIC)
+	  break;
+      m = *pm;
+      if (m != NULL
+	  && m->count == 1
+	  && strcmp (m->sections[0]->name, ".dynamic") == 0)
 	{
-	  if ((s->flags & SEC_LOAD) != 0
-	      && s->vma >= low
-	      && ((s->vma
-		   + (s->_cooked_size != 0 ? s->_cooked_size : s->_raw_size))
-		  <= high))
-	    {
-	      n->sections[i] = s;
-	      ++i;
-	    }
-	}
+	  static const char *sec_names[] =
+	  { ".dynamic", ".dynstr", ".dynsym", ".hash" };
+	  bfd_vma low, high;
+	  unsigned int i, c;
+	  struct elf_segment_map *n;
 
-      *pm = n;
+	  low = 0xffffffff;
+	  high = 0;
+	  for (i = 0; i < sizeof sec_names / sizeof sec_names[0]; i++)
+	    {
+	      s = bfd_get_section_by_name (abfd, sec_names[i]);
+	      if (s != NULL && (s->flags & SEC_LOAD) != 0)
+		{
+		  bfd_size_type sz;
+
+		  if (low > s->vma)
+		    low = s->vma;
+		  sz = s->_cooked_size;
+		  if (sz == 0)
+		    sz = s->_raw_size;
+		  if (high < s->vma + sz)
+		    high = s->vma + sz;
+		}
+	    }
+
+	  c = 0;
+	  for (s = abfd->sections; s != NULL; s = s->next)
+	    if ((s->flags & SEC_LOAD) != 0
+		&& s->vma >= low
+		&& ((s->vma
+		     + (s->_cooked_size != 0 ? s->_cooked_size : s->_raw_size))
+		    <= high))
+	      ++c;
+
+	  n = ((struct elf_segment_map *)
+	       bfd_zalloc (abfd, sizeof *n + (c - 1) * sizeof (asection *)));
+	  if (n == NULL)
+	    return false;
+	  *n = *m;
+	  n->count = c;
+
+	  i = 0;
+	  for (s = abfd->sections; s != NULL; s = s->next)
+	    {
+	      if ((s->flags & SEC_LOAD) != 0
+		  && s->vma >= low
+		  && ((s->vma
+		       + (s->_cooked_size != 0 ?
+			  s->_cooked_size : s->_raw_size))
+		      <= high))
+		{
+		  n->sections[i] = s;
+		  ++i;
+		}
+	    }
+
+	  *pm = n;
+	}
     }
 
   return true;
@@ -4121,21 +4172,35 @@ mips_elf_final_link (abfd, info)
   HDRR *symhdr = &debug.symbolic_header;
   PTR mdebug_handle = NULL;
 
-  /* Drop the .options section, since it has special semantics which I
-     haven't bothered to figure out.  */
-  for (secpp = &abfd->sections; *secpp != NULL; secpp = &(*secpp)->next)
+  /* If all the things we linked together were PIC, but we're
+     producing an executable (rather than a shared object), then the
+     resulting file is CPIC (i.e., it calls PIC code.)  */
+  if (!info->shared && elf_elfheader (abfd)->e_flags & EF_MIPS_PIC)
     {
-      if (strcmp ((*secpp)->name, ".options") == 0)
-	{
-	  for (p = (*secpp)->link_order_head; p != NULL; p = p->next)
-	    if (p->type == bfd_indirect_link_order)
-	      p->u.indirect.section->flags &=~ SEC_HAS_CONTENTS;
-	  (*secpp)->link_order_head = NULL;
-	  *secpp = (*secpp)->next;
-	  --abfd->section_count;
-	  break;
-	}
+      elf_elfheader (abfd)->e_flags &= ~EF_MIPS_PIC;
+      elf_elfheader (abfd)->e_flags |= EF_MIPS_CPIC;
+      
     }
+
+  /* On IRIX5, we omit the .options section.  On IRIX6, however, we
+     include it, even though we don't process it quite right.  (Some
+     entries are supposed to be merged.)  Empirically, we seem to be
+     better off including it then not.  */
+  if (IRIX_COMPAT (abfd) == ict_irix5)
+    for (secpp = &abfd->sections; *secpp != NULL; secpp = &(*secpp)->next)
+      {
+	if (strcmp ((*secpp)->name, MIPS_ELF_OPTIONS_SECTION_NAME (abfd)) == 0)
+	  {
+	    for (p = (*secpp)->link_order_head; p != NULL; p = p->next)
+	      if (p->type == bfd_indirect_link_order)
+		p->u.indirect.section->flags &=~ SEC_HAS_CONTENTS;
+	    (*secpp)->link_order_head = NULL;
+	    *secpp = (*secpp)->next;
+	    --abfd->section_count;
+	    
+	    break;
+	  }
+      }
 
   /* Get a value for the GP register.  */
   if (elf_gp (abfd) == 0)
@@ -4152,17 +4217,14 @@ mips_elf_final_link (abfd, info)
 	{
 	  bfd_vma lo;
 
-	  /* Make up a value.  */
+	  /* Find the GP-relative section with the lowest offset.  */
 	  lo = (bfd_vma) -1;
 	  for (o = abfd->sections; o != (asection *) NULL; o = o->next)
-	    {
-	      if (o->vma < lo
-		  && (strcmp (o->name, ".sbss") == 0
-		      || strcmp (o->name, ".sdata") == 0
-		      || strcmp (o->name, ".lit4") == 0
-		      || strcmp (o->name, ".lit8") == 0))
-		lo = o->vma;
-	    }
+	    if (o->vma < lo 
+		&& (elf_section_data (o)->this_hdr.sh_flags & SHF_MIPS_GPREL))
+	      lo = o->vma;
+
+	  /* And calculate GP relative to that.  */
 	  elf_gp (abfd) = lo + ELF_MIPS_GP_OFFSET (abfd);
 	}
       else
@@ -5815,7 +5877,8 @@ mips_elf_link_output_symbol_hook (abfd, info, name, sym, input_sec)
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
 
-#define ELF_DYNAMIC_INTERPRETER "/usr/lib/libc.so.1"
+#define ELF_DYNAMIC_INTERPRETER(abfd) \
+   (ABI_N32_P (abfd) ? "/usr/lib32/libc.so.1" : "/usr/lib/libc.so.1")
 
 /* Create dynamic sections when linking against a dynamic object.  */
 
@@ -5872,7 +5935,11 @@ mips_elf_create_dynamic_sections (abfd, info)
 	return false;
     }
 
-  if (SGI_COMPAT (abfd))
+  /* On IRIX5, we adjust add some additional symbols and change the
+     alignments of several sections.  There is no ABI documentation
+     indicating that this is necessary on IRIX6, nor any evidence that
+     the linker takes such action.  */
+  if (IRIX_COMPAT (abfd) == ict_irix5)
     {
       for (namep = mips_elf_dynsym_rtproc_names; *namep != NULL; namep++)
 	{
@@ -6679,7 +6746,8 @@ mips_elf_adjust_dynamic_symbol (info, h)
       if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
 	  /* We need .stub section.  */
-	  s = bfd_get_section_by_name (dynobj, ".stub");
+	  s = bfd_get_section_by_name (dynobj, 
+				       MIPS_ELF_STUB_SECTION_NAME (dynobj));
 	  BFD_ASSERT (s != NULL);
 
 	  h->root.u.def.section = s;
@@ -6819,8 +6887,10 @@ mips_elf_size_dynamic_sections (output_bfd, info)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
-	  s->_raw_size = sizeof ELF_DYNAMIC_INTERPRETER;
-	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
+	  s->_raw_size 
+	    = strlen (ELF_DYNAMIC_INTERPRETER (output_bfd)) + 1;
+	  s->contents 
+	    = (unsigned char *) ELF_DYNAMIC_INTERPRETER (output_bfd);
 	}
     }
 
@@ -6929,7 +6999,7 @@ mips_elf_size_dynamic_sections (output_bfd, info)
 	  i = elf_hash_table (info)->dynsymcount - g->global_gotsym;
 	  s->_raw_size += i * 4;
 	}
-      else if (strncmp (name, ".stub", 5) == 0)
+      else if (strcmp (name, MIPS_ELF_STUB_SECTION_NAME (output_bfd)) == 0)
 	{
 	  /* Irix rld assumes that the function stub isn't at the end
 	     of .text section. So put a dummy. XXX  */
@@ -6964,13 +7034,12 @@ mips_elf_size_dynamic_sections (output_bfd, info)
 	}
 
       /* Allocate memory for the section contents.  */
-      s->contents = (bfd_byte *) bfd_alloc (dynobj, s->_raw_size);
+      s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->_raw_size);
       if (s->contents == NULL && s->_raw_size != 0)
 	{
 	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
-      memset (s->contents, 0, s->_raw_size);
     }
 
   if (elf_hash_table (info)->dynamic_sections_created)
@@ -7203,7 +7272,8 @@ mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       BFD_ASSERT (h->dynindx != -1);
 
-      s = bfd_get_section_by_name (dynobj, ".stub");
+      s = bfd_get_section_by_name (dynobj, 
+				   MIPS_ELF_STUB_SECTION_NAME (dynobj));
       BFD_ASSERT (s != NULL);
 
       /* Fill the stub.  */
@@ -7333,8 +7403,10 @@ mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       else if (mips_elf_hash_table (info)->use_rld_obj_head
 	       && strcmp (name, "__rld_obj_head") == 0)
 	{
-	  asection *s = bfd_get_section_by_name (dynobj, ".rld_map");
-	  BFD_ASSERT (s != NULL);
+	  /* IRIX6 does not use a .rld_map section.  */
+	  if (IRIX_COMPAT (output_bfd) == ict_irix5)
+	    BFD_ASSERT (bfd_get_section_by_name (dynobj, ".rld_map") 
+			!= NULL);
 	  mips_elf_hash_table (info)->rld_value = sym->st_value;
 	}
     }
@@ -7673,7 +7745,8 @@ mips_elf_finish_dynamic_sections (output_bfd, info)
 					     s->contents));
 
 	    /* Clean up a dummy stub function entry in .text.  */
-	    s = bfd_get_section_by_name (dynobj, ".stub");
+	    s = bfd_get_section_by_name (dynobj, 
+					 MIPS_ELF_STUB_SECTION_NAME (dynobj));
 	    if (s != NULL)
 	      {
 		file_ptr dummy_offset;
