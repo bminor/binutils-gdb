@@ -1,3 +1,16 @@
+2004-10-02  Paul N. Hilfinger  <Hilfinger@gnat.com>
+
+        Turn on initial Ada support (mainly expression evaluation).
+	
+        * Makefile.in (SFILES): Remove ada-tasks.c.
+	(HFILES_NO_SRCDIR): Add ada-lang.h.
+	(COMMON_OBS): Add ada-lang.o, ada-typeprint.o, ada-valprint.o.
+	(YYOBJ): Add ada-exp.o.
+	(rule .l.c): Generalize to not mention ada.
+	* symtab.c: Include ada-lang.h.
+	(symbol_natural_name, symbol_demangled_name)
+	(symbol_search_name): Add Ada case.
+
 2004-10-01  Andrew Cagney  <cagney@gnu.org>
 
 	* Makefile.in (COMMON_OBS): Add inf-child.o.

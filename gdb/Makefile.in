@@ -510,7 +510,7 @@ TARGET_FLAGS_TO_PASS = \
 # Links made at configuration time should not be specified here, since
 # SFILES is used in building the distribution archive.
 
-SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
+SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	ax-general.c ax-gdb.c \
 	bcache.c \
 	bfd-target.c \
@@ -848,7 +848,7 @@ HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	symfile.h symfile-mem.h stabsread.h target.h terminal.h typeprint.h \
 	xcoffsolib.h \
 	macrotab.h macroexp.h macroscope.h \
-	c-lang.h f-lang.h \
+	ada-lang.h c-lang.h f-lang.h \
 	jv-lang.h \
 	m2-lang.h  p-lang.h \
 	complaints.h valprint.h \
@@ -910,7 +910,7 @@ COMMON_OBS = $(DEPFILES) $(YYOBJ) \
 	dbxread.o coffread.o coff-pe-read.o elfread.o \
 	dwarfread.o dwarf2read.o mipsread.o stabsread.o corefile.o \
 	dwarf2expr.o dwarf2loc.o dwarf2-frame.o \
-	c-lang.o f-lang.o objc-lang.o \
+	ada-lang.o c-lang.o f-lang.o objc-lang.o \
 	ui-out.o cli-out.o \
 	varobj.o wrapper.o \
 	jv-lang.o jv-valprint.o jv-typeprint.o \
@@ -918,8 +918,8 @@ COMMON_OBS = $(DEPFILES) $(YYOBJ) \
 	scm-exp.o scm-lang.o scm-valprint.o \
 	sentinel-frame.o \
 	complaints.o typeprint.o \
-	c-typeprint.o f-typeprint.o m2-typeprint.o \
-	c-valprint.o cp-valprint.o f-valprint.o m2-valprint.o \
+	ada-typeprint.o c-typeprint.o f-typeprint.o m2-typeprint.o \
+	ada-valprint.o c-valprint.o cp-valprint.o f-valprint.o m2-valprint.o \
 	nlmread.o serial.o mdebugread.o top.o utils.o \
 	ui-file.o \
 	user-regs.o \
@@ -943,6 +943,7 @@ YYFILES = c-exp.c \
 	f-exp.c m2-exp.c p-exp.c
 YYOBJ = c-exp.o \
 	objc-exp.o \
+	ada-exp.o \
 	jv-exp.o \
 	f-exp.o m2-exp.o p-exp.o
 
@@ -1585,7 +1586,7 @@ po/$(PACKAGE).pot: force
 	    echo $(FLEX) -Isit $< ">" $@; \
 	    $(FLEX) -Isit $< > $@; \
 	elif [ ! -f $@ -a ! -f $< ]; then \
-	    echo "ada-lex.c missing and flex not available."; \
+	    echo "$< missing and flex not available."; \
 	    false; \
 	elif [ ! -f $@ ]; then \
 	    echo "Warning: $*.c older than $*.l and flex not available."; \

@@ -41,6 +41,7 @@
 #include "source.h"
 #include "filenames.h"		/* for FILENAME_CMP */
 #include "objc-lang.h"
+#include "ada-lang.h"
 
 #include "hashtab.h"
 
@@ -634,17 +635,24 @@ symbol_init_demangled_name (struct general_symbol_info *gsymbol,
 char *
 symbol_natural_name (const struct general_symbol_info *gsymbol)
 {
-  if ((gsymbol->language == language_cplus
-       || gsymbol->language == language_java
-       || gsymbol->language == language_objc)
-      && (gsymbol->language_specific.cplus_specific.demangled_name != NULL))
+  switch (gsymbol->language) 
     {
-      return gsymbol->language_specific.cplus_specific.demangled_name;
+    case language_cplus:
+    case language_java:
+    case language_objc:
+      if (gsymbol->language_specific.cplus_specific.demangled_name != NULL)
+	return gsymbol->language_specific.cplus_specific.demangled_name;
+      break;
+    case language_ada:
+      if (gsymbol->language_specific.cplus_specific.demangled_name != NULL)
+	return gsymbol->language_specific.cplus_specific.demangled_name;
+      else
+	return ada_decode_symbol (gsymbol);
+      break;
+    default:
+      break;
     }
-  else
-    {
-      return gsymbol->name;
-    }
+  return gsymbol->name;
 }
 
 /* Return the demangled name for a symbol based on the language for
@@ -652,13 +660,24 @@ symbol_natural_name (const struct general_symbol_info *gsymbol)
 char *
 symbol_demangled_name (struct general_symbol_info *gsymbol)
 {
-  if (gsymbol->language == language_cplus
-      || gsymbol->language == language_java
-      || gsymbol->language == language_objc)
-    return gsymbol->language_specific.cplus_specific.demangled_name;
-
-  else 
-    return NULL;
+  switch (gsymbol->language) 
+    {
+    case language_cplus:
+    case language_java:
+    case language_objc:
+      if (gsymbol->language_specific.cplus_specific.demangled_name != NULL)
+	return gsymbol->language_specific.cplus_specific.demangled_name;
+      break;
+    case language_ada:
+      if (gsymbol->language_specific.cplus_specific.demangled_name != NULL)
+	return gsymbol->language_specific.cplus_specific.demangled_name;
+      else
+	return ada_decode_symbol (gsymbol);
+      break;
+    default:
+      break;
+    }
+  return NULL;
 }
 
 /* Return the search name of a symbol---generally the demangled or
@@ -666,7 +685,10 @@ symbol_demangled_name (struct general_symbol_info *gsymbol)
    If there is no distinct demangled name, then returns the same value 
    (same pointer) as SYMBOL_LINKAGE_NAME. */
 char *symbol_search_name (const struct general_symbol_info *gsymbol) {
-  return symbol_natural_name (gsymbol);
+  if (gsymbol->language == language_ada)
+    return gsymbol->name;
+  else
+    return symbol_natural_name (gsymbol);
 }
 
 /* Initialize the structure fields to zero values.  */
