@@ -1,3 +1,9 @@
+2001-08-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* genscripts.sh: Source the emulparams script before each output
+	script is generated so that variables like `RELOCATING' may affect
+	variables defined in the emulparams script.
+
 2001-08-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/aix.em: ldexp.h,ldlang.h,ldfile.h,ldemul.h go in this
