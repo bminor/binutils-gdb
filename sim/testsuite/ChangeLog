@@ -1,3 +1,8 @@
+2004-11-16  Hans-Peter Nilsson  <hp@axis.com>
+
+	* lib/sim-defs.exp (run_sim_test): Make multiple "output"
+	specifications concatenate, not override.
+
 2004-10-26  Nick Clifton  <nickc@redhat.com>
 
 	* lib/sim-defs.exp (sim_run): Add support for the "rawsid"

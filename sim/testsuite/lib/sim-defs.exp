@@ -229,6 +229,10 @@ proc run_sim_test { name requested_machs } {
 	    unresolved $subdir/$name
 	    return
 	}
+	# Multiple "output" specifications concatenate, they don't override.
+	if { $opt_name == "output" } {
+	    set opt_val "$opts(output)$opt_val"
+	}
 	foreach m $opt_machs {
 	    set opts($opt_name,$m) $opt_val
 	}
