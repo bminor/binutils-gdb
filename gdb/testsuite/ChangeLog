@@ -1,3 +1,9 @@
+2001-08-29  Frank Ch. Eigler  <fche@redhat.com>
+
+	* config/sid.exp (sid_start): Never set sid verbosity; disable
+	expect_background {} that consumed its stdout; tolerate </dev/null.
+	Attempt to set endianness override in "sid" protocol mode.  Cleanup.
+
 2001-08-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* lib/mi-support.exp (mi_gdb_start): If a remote target, use the

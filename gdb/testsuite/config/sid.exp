@@ -35,8 +35,11 @@ proc sid_start {} {
 	    }
 	}
     }
-    # set verbosity conditionally
-    if {$verbose > 0} then { set sidverbose "--verbose" } else { set sidverbose "" }
+    case $sidendian in {
+	{ -EB } { set sidendian2 {-e "set cpu endian big"} }
+	{ -EL } { set sidendian2 {-e "set cpu endian little"} }
+	default { set sidendian2 {} }
+    }
 
     # test to see whether to use use sid in build or install tree
     set use_build_tree [file exists ../../sid]
@@ -46,30 +49,26 @@ proc sid_start {} {
 	    global env
 	    set env(SID_LIBRARY_PATH) [join [glob "../../sid/component/*"] ":"]
 	    set env(SID) "../../sid/main/dynamic/sid"
-	    set env(MKSID) "../../sid/main/static/mksid"
 	    if {! [file exists $env(SID)]} then { error "Cannot find sid in build tree" }
 	}
 	if { [board_info target sim,protocol] == "sid" } {
-	    set spawncmd "[target_info sim] [target_info sim,options] -e \"set cpu-gdb-socket sockaddr-local 0.0.0.0:$port\""
+	    set spawncmd "[target_info sim] [target_info sim,options] $sidendian2 -e \"set cpu-gdb-socket sockaddr-local 0.0.0.0:$port\""
 	} else {
-	    set spawncmd "../../sid/bsp/[target_info sim] $sidverbose $sidendian --gdb=$port [target_info sim,options]"
+	    set spawncmd "../../sid/bsp/[target_info sim] $sidendian --gdb=$port [target_info sim,options]"
 	}
 	set post_spawn {
 	    global env
 	    unset env(SID_LIBRARY_PATH)
-	    unset env(MKSID)
 	    unset env(SID)
 	}
     } else {
-	global find_rawsid;
-
 	set pre_spawn {}
 	if { [board_info target sim,protocol] == "sid" } {
 	    # FIXME: sim,options may be from the build tree, should find
 	    # it in the install tree.
-	    set spawncmd "sid [target_info sim,options] -e \"set cpu-gdb-socket sockaddr-local 0.0.0.0:$port\""
+	    set spawncmd "sid [target_info sim,options] $sidendian2 -e \"set cpu-gdb-socket sockaddr-local 0.0.0.0:$port\""
 	} else {
-	    set spawncmd "[target_info sim] $sidverbose $sidendian --gdb=$port [target_info sim,options]"
+	    set spawncmd "[target_info sim] $sidendian --gdb=$port [target_info sim,options]"
 	}
 	set post_spawn {}
     }
@@ -81,12 +80,13 @@ proc sid_start {} {
     }
     eval $post_spawn
 
-    expect_background {
-	-re \[^\n\]*\n { 
-	    regsub "\n" $expect_out(buffer) {} msg
-	    verbose "SID: $msg" 2
-	}
-    }
+    # Don't do the following any more; it breaks with "runtest ... < /dev/null"
+#    expect_background {
+#	-re \[^\n\]*\n { 
+#	    regsub "\n" $expect_out(buffer) {} msg
+#	    verbose "SID: $msg" 2
+#	}
+#    }
 
     # There should be no need to sleep to give SID time to start;
     # GDB would wait for a fair while for the stub to respond.
