@@ -1,3 +1,8 @@
+2003-11-11  Nick Clifton  <nickc@redhat.com>
+
+	* gdb.base/shreloc.exp: Do not run for targets which do not
+	support shared objects.
+
 2003-11-10  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/fileio.exp: Drop tests for nointerrupts and noinferiorio.
