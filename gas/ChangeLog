@@ -1,3 +1,8 @@
+2002-04-15  Tom Rix  <trix@redhat.com>
+
+	* config/tc-d10v.c (d10v_fix_adjustable): Prevent adjustments to 
+	symbols in merge sections.
+
 2002-04-11  Richard Sandiford  <rsandifo@redhat.com>
 
 	* doc/invoke.texi (TC_LARGEST_EXPONENT_IS_NORMAL): Document.

@@ -1924,10 +1924,11 @@ d10v_fix_adjustable (fixP)
   if (fixP->fx_addsy == NULL)
     return 1;
 
-  /* Prevent all adjustments to global symbols.  */
-  if (S_IS_EXTERN (fixP->fx_addsy))
-    return 0;
-  if (S_IS_WEAK (fixP->fx_addsy))
+  /* Prevent all adjustments to global and weak symbols or symbols in
+     merge sections.  */
+  if ((S_IS_EXTERN (fixP->fx_addsy)
+       || (S_IS_WEAK (fixP->fx_addsy))
+       || (S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE) != 0))
     return 0;
 
   /* We need the symbol name for the VTABLE entries.  */
