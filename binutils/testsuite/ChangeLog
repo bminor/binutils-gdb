@@ -1,3 +1,9 @@
+2002-08-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* binutils-all/objdump.exp (cpus_expected): Add fr500, ip2022,
+	tic80, tms320c30.
+	* binutils-all/objcopy.exp (simple copy): Revise xfails.
+
 2002-05-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* binutils-all/objcopy.exp (strip_test_with_saving_a_symbol):

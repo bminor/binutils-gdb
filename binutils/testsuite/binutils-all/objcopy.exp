@@ -70,20 +70,20 @@ if ![string match "" $got] then {
     # in the first place, and may order things a little differently.
     # Those systems should use setup_xfail here.
 
-    setup_xfail "sh-*-coff" "sh-*-hms" 
-    setup_xfail "m68*-*-hpux*" "m68*-*-sunos*" "m68*-*-coff" "m68*-*-vxworks*"
-    setup_xfail "m68*-ericsson-ose" "m68k*-motorola-sysv*"
-    setup_xfail "i*86-*-aout*"
-    setup_xfail "i*86-*-sysv3" "i*86-*-isc*" "i*86-*-sco*" "i*86-*-coff"
-    setup_xfail "i*86-*-aix*" "i*86-*-go32*" "i*86-*-msdos*"
-    setup_xfail "a29k-*-udi" "a29k-*-coff" "a29k-*-vxworks*"
-    setup_xfail "i960-*-coff"
-    setup_xfail "h8300-*-hms" "h8300-*-coff"
-    setup_xfail "h8500-*-hms" "h8500-*-coff"
+    setup_xfail "a29k-*"
+    setup_xfail "h8300-*-rtems*" "h8300-*-coff"
+    setup_xfail "h8500-*-rtems*" "h8500-*-coff"
     setup_xfail "hppa*-*-*"
-    clear_xfail "hppa*64*-*-hpux*" "hppa*-*-*elf*" "hppa*-*-linux*"
-    setup_xfail "m88*-*-coff" "m88*-motorola-sysv*"
-    setup_xfail "z8*-*-coff"
+    setup_xfail "i960-*"
+    setup_xfail "m68*-*-*coff" "m68*-*-hpux*" "m68*-*-lynxos*"
+    setup_xfail "m68*-*-sysv*" "m68*-apple-aux*"
+    setup_xfail "m8*-*"
+    setup_xfail "or32-*-rtems*" "or32-*-coff"
+    setup_xfail "sh-*-coff*" "sh-*-rtems*" 
+    setup_xfail "tic80-*-*" "w65-*" "z8*-*"
+
+    clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
+    clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "*-*-*elf*" "m68*-*-sysv4*"
 
     if [string match "" $exec_output] then {
 	pass "objcopy (simple copy)"
