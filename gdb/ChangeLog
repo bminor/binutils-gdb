@@ -19,6 +19,12 @@
 	get_saved_register.
 
 2002-11-05  Elena Zannoni  <ezannoni@redhat.com>
+	
+        From Jim Ingham  <jingham@apple.com>:
+	* event-top.c (gdb_disable_readline): New function.
+	(_initialize_event_loop): Move comment.
+
+2002-11-05  Elena Zannoni  <ezannoni@redhat.com>
 
 	* event-loop.c (start_event_loop): Add comment.
 	Update copyright.
