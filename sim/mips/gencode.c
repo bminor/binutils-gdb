@@ -3359,11 +3359,13 @@ build_instruction (doisa, features, mips16, insn)
        char* maximum;
        char* minimum;
        char* signedness;
+       char* signletter;
 
        if ( insn->flags & UNSIGNED )
          {
            tmptype = type_for_data_len( insn );
            signedness = "unsigned";
+	   signletter = "U";
            maximum = umax_for_data_len( insn );
            minimum = 0;
          }
@@ -3371,29 +3373,31 @@ build_instruction (doisa, features, mips16, insn)
          {
            tmptype = type_for_data_len( insn );
            signedness = "";
-           maximum = 0;
-           minimum = 0;
+	   signletter = "S";
+           maximum = max_for_data_len( insn );
+           minimum = min_for_data_len( insn );
          }
        else
          {
            tmptype = type_for_data_len( insn );
            signedness = "";
-           maximum = max_for_data_len( insn );
-           minimum = min_for_data_len( insn );
+	   signletter = "S";
+           maximum = 0;
+           minimum = 0;
          }
 
        printf("int i;\n");
        printf("for(i=0;i<%sS_IN_MMI_REGS;i++)\n", name );
        printf("     {\n");
-       printf("     %s %s r = RS_S%s(i) %s RT_S%s(i);\n", signedness, tmptype, letter, op, letter );
+       printf("     %s %s r = RS_%s%s(i) %s RT_%s%s(i);\n", signedness, tmptype, signletter, letter, op, signletter, letter );
        if ( maximum )
          {
-           printf("     if (r > %s)      GPR_S%s(destreg,i) = %s;\n", maximum, letter, maximum );
+           printf("     if (r > %s)      GPR_%s%s(destreg,i) = %s;\n", maximum, signletter, letter, maximum );
            if ( minimum )
-             printf("     else if (r < %s) GPR_S%s(destreg,i) = %s;\n", minimum, letter, minimum );
+             printf("     else if (r < %s) GPR_%s%s(destreg,i) = %s;\n", minimum, signletter, letter, minimum );
            printf("     else             ");
          }
-       printf("GPR_S%s(destreg,i) = r;\n", letter );
+       printf("GPR_%s%s(destreg,i) = r;\n", signletter, letter );
        printf("     }\n");
        break;
      }
