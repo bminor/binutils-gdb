@@ -1,5 +1,9 @@
 2000-09-28  Alan Modra  <alan@linuxcare.com.au>
 
+	* gas/hppa/parse/parse.exp: Replace "hppa*w-*-*" with "hppa*64*-*-*"
+	* gas/hppa/reloc/reloc.exp: Likewise.
+	* gas/hppa/unsorted/unsorted.exp: Likewise.
+
 	* gas/hppa/reloc/reduce.s: Modify .PARAM so we need an arg reloc.
 
 2000-09-22  Jim Wilson  <wilson@cygnus.com>
