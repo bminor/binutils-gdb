@@ -73,6 +73,10 @@ struct ui_file *gdb_stdout;
 struct ui_file *gdb_stderr;
 struct ui_file *gdb_stdlog;
 struct ui_file *gdb_stdtarg;
+struct ui_file *gdb_stdin;
+/* target IO streams */
+struct ui_file *gdb_stdtargin;
+struct ui_file *gdb_stdtargerr;
 
 /* Whether to enable writing into executable and core files */
 extern int write_files;
@@ -193,6 +197,9 @@ captured_main (void *data)
   gdb_stderr = stdio_fileopen (stderr);
   gdb_stdlog = gdb_stderr;	/* for moment */
   gdb_stdtarg = gdb_stderr;	/* for moment */
+  gdb_stdin = stdio_fileopen (stdin);
+  gdb_stdtargerr = gdb_stderr;	/* for moment */
+  gdb_stdtargin = gdb_stdin;	/* for moment */
 
   /* initialize error() */
   error_init ();

@@ -1,3 +1,34 @@
+2003-06-10  Corinna Vinschen  <vinschen@redhat.com>
+
+	* Makefile.in: Add dependencies for remote-fileio.o.
+	* remote-fileio.c: New file implementing the remote File-I/O protocol.
+	* remote-fileio.h: New header file defining remote File-I/O interface.
+	* remote.c (remote_write_bytes, remote_read_bytes): Remove  
+	static storage class.
+	(remote_wait, remote_async_wait): Call remote_fileio_request() on
+	'F' packet.
+	(_initialize_remote): Call initialize_remote_fileio().
+	* remote.h: Declare remote_write_bytes() and remote_read_bytes().
+
+2003-06-10  Martin M. Hunt  <hunt@redhat.com>
+
+	* Makefile.in (REMOTE_OBS): Add remote-fileio.o
+	(SFILES): Add remote-fileio.c.
+	Add dependencies for building remote-fileio.o.  Add remote-fileio.h to
+	dependencies for building remote.o.
+	* defs.h: Declare gdb_stdin, gdb_stdtargerr and gdb_stdtargin.
+	* main.c: New ui_file gdb_stdin, gdb_stdtargerr and gdb_stdtargin.
+	(captured_main): Initialize new ui_files.
+	* ui-file.c: Add read and fgets input functions.
+	(ui_file_new): set ui_file_fputs and ui_file_read to null functions.
+	(null_file_read): New function.
+	(ui_file_read): New function.
+	(set_ui_file_read): New function.
+	(stdio_file_read): New function.
+	* ui-file.h: New type ui_file_read_ftype.
+	(set_ui_file_read): Declare.
+	(ui_file_read): Declare.
+
 2003-06-09  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.h (deprecated_unwind_get_saved_register): Rename

@@ -400,7 +400,7 @@ SER_HARDWIRE = @SER_HARDWIRE@
 
 # The `remote' debugging target is supported for most architectures,
 # but not all (e.g. 960)
-REMOTE_OBS = remote.o dcache.o remote-utils.o tracepoint.o ax-general.o ax-gdb.o
+REMOTE_OBS = remote.o dcache.o remote-utils.o tracepoint.o ax-general.o ax-gdb.o remote-fileio.o
 
 # This is remote-sim.o if a simulator is to be linked in.
 SIM_OBS =
@@ -535,7 +535,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	objc-exp.y objc-lang.c \
 	objfiles.c osabi.c observer.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c printcmd.c \
-	regcache.c reggroups.c remote.c \
+	regcache.c reggroups.c remote.c remote-fileio.c \
 	scm-exp.c scm-lang.c scm-valprint.c \
 	sentinel-frame.c \
 	serial.c ser-unix.c source.c \
@@ -710,6 +710,7 @@ regcache_h = regcache.h
 reggroups_h = reggroups.h
 remote_utils_h = remote-utils.h $(target_h)
 remote_h = remote.h
+remote_fileio_h = remote_fileio.h
 scm_lang_h = scm-lang.h $(scm_tags_h)
 scm_tags_h = scm-tags.h
 sentinel_frame_h = sentinel-frame.h
@@ -2153,7 +2154,8 @@ remote.o: remote.c $(defs_h) $(gdb_string_h) $(inferior_h) $(bfd_h) \
 	$(symfile_h) $(target_h) $(gdbcmd_h) $(objfiles_h) $(gdb_stabs_h) \
 	$(gdbthread_h) $(remote_h) $(regcache_h) $(value_h) $(gdb_assert_h) \
 	$(event_loop_h) $(event_top_h) $(inf_loop_h) $(serial_h) \
-	$(gdbcore_h) $(solib_h)
+	$(gdbcore_h) $(solib_h) $(remote-fileio_h)
+remote-fileio.o: remote-fileio.c $(defs_h) $(gdb_string_h) $(gdbcmd_h) $(remote_h)
 rom68k-rom.o: rom68k-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h) $(value_h) $(m68k_tdep_h)
 rs6000-nat.o: rs6000-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
