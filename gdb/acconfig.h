@@ -49,6 +49,9 @@
 /* Define if <sys/procfs.h> has pr_siginfo64_t */
 #undef HAVE_PR_SIGINFO64_T
 
+/* Define if the pread64 function is available.  */
+#undef HAVE_PREAD64
+
 /* Define if <link.h> exists and defines struct link_map which has
    members with an ``l_'' prefix.  (For Solaris, SVR4, and
    SVR4-like systems.) */
