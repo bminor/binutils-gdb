@@ -29,7 +29,6 @@ Things-to-keep:
 ChangeLog
 Makefile.dos
 Makefile.in
-PORTING
 README
 a29k.sc-sh
 a29k.sh
@@ -76,6 +75,7 @@ ldfile.h
 ldgram.y
 ldindr.c
 ldindr.h
+ldint.texinfo
 ldlang.c
 ldlang.h
 ldlex.h
@@ -122,7 +122,11 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.38  1992/08/05 04:15:24  bothner
+# Revision 1.39  1992/08/07 01:37:34  bothner
+# 	* ldint.texinfo:  New internals manual (beginnings thereof).
+# 	* PORTING:  Removed, merged into ldint.texinfo.
+#
+# Revision 1.38  1992/08/05  04:15:24  bothner
 # 	* cdtest-main.cc, cdtest-func.cc, cdtest-foo.h, cdtest-foo.cc,
 # 	cdtest.exp:  A test program (copied from libg++/test-install)
 # 	that tests that constructor and destructors are handled

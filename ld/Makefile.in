@@ -274,10 +274,17 @@ ld.dvi: $(srcdir)/ld.texinfo
 	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex $(srcdir)/ld.texinfo
 	texindex ld.??
 	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex $(srcdir)/ld.texinfo
+ldint.dvi: $(srcdir)/ldint.texinfo
+	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex $(srcdir)/ldint.texinfo
+	texindex ldint.??
+	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex $(srcdir)/ldint.texinfo
 
 # info file for online browsing
 ld.info: $(srcdir)/ld.texinfo
 	$(MAKEINFO) -o ld.info $(srcdir)/ld.texinfo
+
+ldint.info: $(srcdir)/ldint.texinfo
+	$(MAKEINFO) -o ldint.info $(srcdir)/ldint.texinfo
 
 #separate targets for "ms", "me", and "mm" forms of roff doc
 # Try to use a recent texi2roff.  v2 was put on prep in jan91.
