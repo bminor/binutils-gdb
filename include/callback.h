@@ -1,3 +1,22 @@
+/* Remote target system call callback support.
+   Copyright 1997 Free Software Foundation, Inc.
+
+This file is part of GDB.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
 #ifndef CALLBACK_H
 #define CALLBACK_H
 
@@ -32,13 +51,16 @@ struct host_callback_struct
   /* depreciated, use vprintf_filtered - Talk to the user on a console.  */
   void (*printf_filtered) PARAMS ((host_callback *, const char *, ...));
 
-  /* Talk to the user on a console.  */
+  /* Talk to the user on a console.
+     The `void *' is actually `va_list *'.  */
   void (*vprintf_filtered) PARAMS ((host_callback *, const char *, void *));
+
+  /* Same as vprintf_filtered but to stderr.  */
+  void (*evprintf_filtered) PARAMS ((host_callback *, const char *, void *));
 
   /* Print an error message and "exit".
      In the case of gdb "exiting" means doing a longjmp back to the main
      command loop.  */
-  void (*evprintf_filtered) PARAMS ((host_callback *, const char *, void *));
   void (*error) PARAMS ((host_callback *, const char *, ...));
 
   int last_errno;		/* host format */
