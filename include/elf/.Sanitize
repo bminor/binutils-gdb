@@ -41,6 +41,7 @@ hppa.h
 internal.h
 mips.h
 ppc.h
+sparc.h
 
 Things-to-lose:
 

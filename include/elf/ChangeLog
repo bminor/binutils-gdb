@@ -1,3 +1,7 @@
+Wed Jan 17 09:09:16 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc.h: New file.
+
 Thu Jan 11 16:27:34 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* ppc.h (SHF_EXCLUDE, SHT_ORDERED): New fields from the abi.
@@ -13,7 +17,7 @@ Tue Nov 28 16:58:10 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 Tue Oct 31 15:19:36 1995  Fred Fish  <fnf@cygnus.com>
 
-	* arc.h, common.h, dwarf.h, external.h, hppa.h, internal.h,
+	* common.h, dwarf.h, external.h, hppa.h, internal.h,
 	mips.h, ppc.h:  Protect against multiple inclusions.
 
 Thu Sep 21 13:51:58 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
