@@ -30,7 +30,8 @@ static void obj_som_weak PARAMS ((int));
 
 const pseudo_typeS obj_pseudo_table[] =
 {
-  {"weak", obj_som_weak, 0}
+  {"weak", obj_som_weak, 0},
+  {NULL, NULL, 0}
 };
 
 static int version_seen = 0;
