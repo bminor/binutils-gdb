@@ -1,3 +1,8 @@
+2002-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.mi/mi-console.exp: Add KFAIL for "Hello message (known bug)".
+	* gdb.mi/mi1-console.exp: Likewise.
+
 2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.c++/overload.exp: Remove some fixed XFAILs.

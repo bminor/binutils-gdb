@@ -77,7 +77,7 @@ gdb_expect {
 	# multiple event sources to channel the output back through the
 	# MI.
 
-	fail "Hello message (known bug)"
+	kfail "gdb/623" "Hello message (known bug)"
     }
     timeout {
 	fail "Hello message (timeout)"
