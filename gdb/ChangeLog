@@ -1,3 +1,7 @@
+Tue Jul 14 23:05:14 1992  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (VERSION):  Bump to 4.6.1 (post-release versions).
+
 Tue Jul 14 19:26:54 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in, demangle.c:  Change default demangling style to

@@ -52,7 +52,7 @@ diff -c -r1.162 Makefile.in
   ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ! ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES}
   
-  VERSION = 4.6
+  VERSION = 4.6.1
   DIST=gdb
 --- 160,172 ----
   # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
@@ -66,7 +66,7 @@ diff -c -r1.162 Makefile.in
 ! ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} \
 ! 	   ${ENERGIZE_LIB}
   
-  VERSION = 4.6
+  VERSION = 4.6.1
   DIST=gdb
 ***************
 *** 175,181 ****

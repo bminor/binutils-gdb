@@ -123,6 +123,11 @@ READLINE_DIR = ${srcdir}/../readline
 READLINE_DEP = $$(READLINE_DIR)
 RL_LIB = ./../readline${subdir}/libreadline.a
 
+# Energize libraries
+ENERGIZE_DIR = ${srcdir}/energize
+ENERGIZE_INCLUDES = -I${ENERGIZE_DIR}
+ENERGIZE_LIB = ${ENERGIZE_DIR}/libconn.a
+
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
 # -I${srcdir} possibly for regex.h also.
@@ -155,14 +160,15 @@ LIBIBERTY = ./../libiberty${subdir}/libiberty.a
 # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
 # TERMCAP comes after readline, since readline depends on it.
 CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${MMALLOC_LIB} ${LIBIBERTY} \
-	${XM_CLIBS} ${TM_CLIBS}
+	${XM_CLIBS} ${TM_CLIBS} ${ENERGIZE_LIB}
 CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${MMALLOC_LIB} ${LIBIBERTY} \
 	${RL_LIB} ${MMALLOC_LIB}
 
 ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
-ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES}
+ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} \
+	   ${ENERGIZE_LIB}
 
-VERSION = 4.5.9
+VERSION = 4.6.1
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -175,7 +181,7 @@ LINTFLAGS= -I${BFD_DIR}
 # selection of the style unless you do an explicit "set demangle auto".
 # To select one of these as the default, set DEMANGLING_STYLE in the
 # appropriate target dependent makefile fragment.
-DEMANGLING_STYLE = "auto"
+DEMANGLING_STYLE = "lucid"
 
 # Select demangler to use.
 DEMANGLER = cplus-dem
@@ -199,7 +205,7 @@ SFILES_MAINDIR = \
 	 ${DEMANGLER}.c mem-break.c target.c inftarg.c \
 	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
 	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
-	 minsyms.c mipsread.c maint.c
+	 minsyms.c mipsread.c maint.c energize.c
 
 # Source files in subdirectories (which will be handled separately by
 #  'make gdb.tar.Z').
@@ -285,7 +291,7 @@ OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     command.o utils.o expprint.o environ.o version.o gdbtypes.o \
     copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
     inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
-    buildsym.o objfiles.o minsyms.o maint.o demangle.o \
+    buildsym.o objfiles.o minsyms.o maint.o demangle.o energize.o \
     dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o
 
 RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
@@ -298,7 +304,7 @@ TSSTART = /lib/crt0.o
 
 NTSSTART = kdb-start.o
 
-SUBDIRS = doc
+SUBDIRS = doc ${ENERGIZE_DIR}
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.tab.c m2-exp.tab.c
@@ -352,6 +358,20 @@ saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
 	echo "Load .c corresponding to:" $(DEPFILES)
 
+${ENERGIZE_LIB} :
+	@(cd ${ENERGIZE_DIR}; \
+		$(MAKE) \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"CFLAGS=$(CFLAGS)" \
+			"RANLIB=$(RANLIB)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			"INSTALL=$(INSTALL)" \
+			"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
+			"INSTALL_DATA=$(INSTALL_DATA)" \
+			"BISON=$(BISON)")
 
 # This is useful when debugging GDB, because some Unix's don't let you run GDB
 # on itself without copying the executable.  So "make gdb1" will make
@@ -700,6 +720,9 @@ ttybreak.o: ${srcdir}/nindy-share/ttybreak.c
 
 ttyflush.o: ${srcdir}/nindy-share/ttyflush.c
 	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/nindy-share/ttyflush.c
+
+energize.o: ${srcdir}/energize.c
+	${CC} -c ${INTERNAL_CFLAGS} ${ENERGIZE_INCLUDES} ${srcdir}/energize.c
 
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
