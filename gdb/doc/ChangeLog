@@ -1,3 +1,8 @@
+Tue Mar 15 08:43:02 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdbint.texinfo (Host Conditionals, Target Conditionals): Remove
+	references to ieee-float.c.
+
 Fri Mar 11 08:09:40 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.texinfo (Set Breaks): Update documentation for tbreak to
