@@ -15,7 +15,6 @@
 @ifclear GENERIC
 @settitle Debugging with @value{GDBN} (@value{TARGET})
 @end ifclear
-@clear RENAMED
 @setchapternewpage odd
 @c %**end of header
 
@@ -30,26 +29,13 @@
 @c readline appendices use @vindex
 @syncodeindex vr cp
 
-@ifclear HPPA
 @c !!set GDB manual's edition---not the same as GDB version!
-@set EDITION Sixth
+@set EDITION Seventh
 
 @c !!set GDB manual's revision date
-@set DATE January 1999
-@end ifclear
+@set DATE February 1999
 
 @c THIS MANUAL REQUIRES TEXINFO-2 macros and info-makers to format properly.
-
-@ifset HPPA
-@c !!set GDB manual's edition---not the same as GDB version!
-@set EDITION Sixth-HP
-
-@c !!set GDB manual's revision date
-@set DATE November 1997
-
-@c !!set HP version
-@set HPVER HP WDB Version 0.75
-@end ifset
 
 @ifinfo
 @c This is a dir.info fragment to support semi-automated addition of
@@ -165,7 +151,7 @@ This file describes @value{GDBN}, the @sc{gnu} symbolic debugger.
 This is the @value{EDITION} Edition, @value{DATE}, for @value{GDBN} Version 
 @value{GDBVN}.
 
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1997
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1997, 1998, 1999
 Free Software Foundation, Inc.
 @menu
 * Summary::                     Summary of @value{GDBN}
@@ -198,17 +184,7 @@ Free Software Foundation, Inc.
 * Emacs::                       Using @value{GDBN} under @sc{gnu} Emacs
 @end ifclear
 
-@ifset LUCID
-* Energize::                    
-@end ifset
-
 * GDB Bugs::                    Reporting bugs in @value{GDBN}
-@ifset NOVEL
-@ifset RENAMED
-* Renamed Commands::            @c  @end ifset
-@end ifset
-
-@end ifset
 
 @ifclear PRECONFIGURED
 @ifclear HPPA
@@ -1224,9 +1200,9 @@ batch mode or quiet mode.
 @item -nx
 @itemx -n
 Do not execute commands from any initialization files (normally called
-@file{@value{GDBINIT}}).  Normally, the commands in these files are
-executed after all the command options and arguments have been
-processed.  @xref{Command Files,,Command files}.
+@file{.gdbinit}, or @file{gdb.ini} on PCs).  Normally, the commands in
+these files are executed after all the command options and arguments
+have been processed.  @xref{Command Files,,Command files}.
 
 @item -quiet
 @itemx -q
@@ -1255,16 +1231,6 @@ terminates) is not issued when running in batch mode.
 @item -cd @var{directory}
 Run @value{GDBN} using @var{directory} as its working directory,
 instead of the current directory.
-
-@ifset LUCID
-@item -context @var{authentication}
-When the Energize programming system starts up @value{GDBN}, it uses this
-option to trigger an alternate mode of interaction.
-@var{authentication} is a pair of numeric codes that identify @value{GDBN}
-as a client in the Energize environment.  Avoid this option when you run
-@value{GDBN} directly from the command line.  See @ref{Energize,,Using
-@value{GDBN} with Energize} for more discussion of using @value{GDBN} with Energize.
-@end ifset
 
 @ifclear DOSHOST
 @item -fullname
@@ -1656,7 +1622,7 @@ You can get a complete list of the @code{info} sub-commands with
 
 @kindex set
 @item set
-You can assign the result of an expresson to an environment variable with 
+You can assign the result of an expression to an environment variable with 
 @code{set}.  For example, you can set the @value{GDBN} prompt to a $-sign with
 @code{set prompt $}.
 
@@ -2199,17 +2165,13 @@ Show all the above information about the process.
 @cindex threads of execution
 @cindex multiple threads
 @cindex switching threads
-In some operating systems,
-@ifset HPPA
-including HP-UX,
-@end ifset
-a single program may have more than one
-@dfn{thread} of execution.  The precise semantics of threads differ from
-one operating system to another, but in general the threads of a single
-program are akin to multiple processes---except that they share one
-address space (that is, they can all examine and modify the same
-variables).  On the other hand, each thread has its own registers and
-execution stack, and perhaps private memory.
+In some operating systems, such as HP-UX and Solaris, a single program
+may have more than one @dfn{thread} of execution.  The precise semantics
+of threads differ from one operating system to another, but in general
+the threads of a single program are akin to multiple processes---except
+that they share one address space (that is, they can all examine and
+modify the same variables).  On the other hand, each thread has its own
+registers and execution stack, and perhaps private memory.
 
 @value{GDBN} provides these facilities for debugging multi-thread
 programs:
@@ -2557,26 +2519,19 @@ and why it stopped.
 
 @cindex breakpoints
 A @dfn{breakpoint} makes your program stop whenever a certain point in
-the program is reached.  For each breakpoint, you can add
-conditions to control in finer detail whether your program stops.
-You can set breakpoints with the @code{break} command and its variants
-(@pxref{Set Breaks, ,Setting breakpoints}), to specify the place where
-your program should stop by line number, function name or exact address
-in the program.  
-@ifclear CONLY
-@ifclear HPPA
-In languages with exception handling (such as @sc{gnu} C++), you can
-also set catchpoints where an exception is raised (@pxref{Set
-Catchpoints, , Setting catchpoints}).
-@end ifclear
-@end ifclear
+the program is reached.  For each breakpoint, you can add conditions to
+control in finer detail whether your program stops.  You can set
+breakpoints with the @code{break} command and its variants (@pxref{Set
+Breaks, ,Setting breakpoints}), to specify the place where your program
+should stop by line number, function name or exact address in the
+program.
 
 In HP-UX, SunOS 4.x, SVR4, and Alpha OSF/1 configurations, you can set
-breakpoints in shared libraries before the executable is run.
-There is a minor limitation on HP-UX systems: you must wait until the
-executable is run in order to set breakpoints in shared library routines
-that are not called directly by the program (for example, routines that
-are arguments in a @code{pthread_create} call).
+breakpoints in shared libraries before the executable is run.  There is
+a minor limitation on HP-UX systems: you must wait until the executable
+is run in order to set breakpoints in shared library routines that are
+not called directly by the program (for example, routines that are
+arguments in a @code{pthread_create} call).
 
 @cindex watchpoints
 @cindex memory tracing
@@ -2730,7 +2685,7 @@ provided by SPARClite DSU.  DSU will generate traps when a program accesses
 some data or instruction address that is assigned to the debug registers.  
 However the hardware breakpoint registers can only take two data breakpoints,
 and @value{GDBN} will reject this command if more than two are used.  
-Delete or disable usused hardware breakpoints before setting
+Delete or disable unused hardware breakpoints before setting
 new ones.  @xref{Conditions, ,Break conditions}.
 
 @kindex thbreak
@@ -2864,40 +2819,28 @@ Shared library events.
 @subsection Setting watchpoints
 
 @cindex setting watchpoints
+@cindex software watchpoints
+@cindex hardware watchpoints
 You can use a watchpoint to stop execution whenever the value of an
 expression changes, without having to predict a particular place where
 this may happen.
 
-@ifclear HPPA
-Watchpoints currently execute two orders of magnitude more slowly than
-other breakpoints, but this can be well worth it to catch errors where
-you have no clue what part of your program is the culprit.
-@end ifclear
+Depending on your system, watchpoints may be implemented in software or
+hardware.  GDB does software watchpointing by single-stepping your
+program and testing the variable's value each time, which is hundreds of
+times slower than normal execution.  (But this may still be worth it, to
+catch errors where you have no clue what part of your program is the
+culprit.)
 
-@c FIXME - did Stan mean to @ignore this out?
-@ignore
-Some processors provide special hardware to support watchpoint
-evaluation; @value{GDBN} will use such hardware if it is available,
-and if the support code has been added for that configuration.
-@end ignore
+On some systems, such as HP-UX and Linux, GDB includes support for
+hardware watchpoints, which do not slow down the running of your
+program.
 
 @table @code
 @kindex watch
 @item watch @var{expr}
 Set a watchpoint for an expression.  @value{GDBN} will break when @var{expr}
 is written into by the program and its value changes.
-@ifclear HPPA
-This can be used with the new trap-generation provided by 
-SPARClite DSU.  DSU will generate traps when a program accesses
-some data or instruction address that is assigned to the debug registers.  
-For the data addresses, DSU facilitates the @code{watch} command.
-However the hardware breakpoint registers can only take two data watchpoints,
-and both watchpoints must be the same kind.  For example, you can set two
-watchpoints with @code{watch} commands, two with @code{rwatch}
-commands, @strong{or} two with @code{awatch} commands, but you cannot set one
-watchpoint with one command and the other with a different command. 
-@value{GDBN} will reject the command if you try to mix watchpoints.
-Delete or disable unused watchpoint commands before setting new ones.
 
 @kindex rwatch
 @item rwatch @var{expr}
@@ -2910,7 +2853,6 @@ command.
 Set a watchpoint that will break when @var{args} is read and written into
 by the program.  If you use both watchpoints, both must be set with the
 @code{awatch} command.
-@end ifclear
 
 @kindex info watchpoints
 @item info watchpoints
@@ -2918,7 +2860,6 @@ This command prints a list of watchpoints, breakpoints, and catchpoints;
 it is the same as @code{info break}.
 @end table
 
-@ifset HPPA
 @value{GDBN} sets a @dfn{hardware watchpoint} if possible.  Hardware
 watchpoints execute very quickly, and the debugger reports a change in
 value at the exact instruction where the change occurs.  If @value{GDBN}
@@ -2934,7 +2875,17 @@ Hardware watchpoint @var{num}: @var{expr}
 
 @noindent
 if it was able to set a hardware watchpoint.
-@end ifset
+
+The SPARClite DSU will generate traps when a program accesses
+some data or instruction address that is assigned to the debug registers.  
+For the data addresses, DSU facilitates the @code{watch} command.
+However the hardware breakpoint registers can only take two data watchpoints,
+and both watchpoints must be the same kind.  For example, you can set two
+watchpoints with @code{watch} commands, two with @code{rwatch}
+commands, @strong{or} two with @code{awatch} commands, but you cannot set one
+watchpoint with one command and the other with a different command. 
+@value{GDBN} will reject the command if you try to mix watchpoints.
+Delete or disable unused watchpoint commands before setting new ones.
 
 If you call a function interactively using @code{print} or @code{call},
 any watchpoints you have set will be inactive until GDB reaches another
@@ -2993,27 +2944,27 @@ The catching of a C++ exception.
 
 @item exec
 @kindex catch exec
-A call to @code{exec}.
+A call to @code{exec}.  This is currently only available for HP-UX.
 
 @item fork
 @kindex catch fork
-A call to @code{fork}.
+A call to @code{fork}.  This is currently only available for HP-UX.
 
 @item vfork
 @kindex catch vfork
-A call to @code{vfork}.
+A call to @code{vfork}.  This is currently only available for HP-UX.
 
 @item load
 @itemx load @var{libname}
 @kindex catch load
 The dynamic loading of any shared library, or the loading of the library
-@var{libname}.
+@var{libname}.  This is currently only available for HP-UX.
 
 @item unload
 @itemx unload @var{libname}
 @kindex catch unload
 The unloading of any dynamically loaded shared library, or the unloading
-of the library @var{libname}.
+of the library @var{libname}.  This is currently only available for HP-UX.
 @end table
 
 @item tcatch @var{event}
@@ -3832,7 +3783,30 @@ You might even find your program stopped in another thread after
 continuing or even single-stepping.  This happens whenever some other
 thread runs into a breakpoint, a signal, or an exception before the
 first thread completes whatever you requested.
+
+On some OSes, you can lock the OS scheduler and thus allow only a single
+thread to run.
+
+@table @code
+@item set scheduler-locking @var{mode}
+Set the scheduler locking mode.  If it is @code{off}, then there is no
+locking and any thread may run at any time.  If @code{on}, then only the
+current thread may run when the inferior is resumed.  The @code{step}
+mode optimizes for single-stepping.  It stops other threads from
+``seizing the prompt'' by preempting the current thread while you are
+stepping.  Other threads will only rarely (or never) get a chance to run
+when you step.  They are more likely to run when you ``next'' over a
+function call, and they are completely free to run when you use commands
+like ``continue'', ``until'', or ``finish''.  However, unless another
+thread hits a breakpoint during its timeslice, they will never steal the
+GDB prompt away from the thread that you are debugging.
+
+@item show scheduler-locking
+Display the current scheduler locking mode.
+@end table
+
 @end ifclear
+
 
 @node Stack, Source, Stopping, Top
 @chapter Examining the Stack
@@ -4562,6 +4536,9 @@ to 0x808c:
 @end smallexample
 @end ifset
 
+Some architectures have more than one commonly-used set of instruction
+mnemonics or other syntax.
+
 @table @code
 @kindex set assembly-language
 @cindex assembly instructions
@@ -4569,12 +4546,12 @@ to 0x808c:
 @cindex machine instructions
 @cindex listing machine instructions
 @item set assembly-language @var{instruction-set}
-This command selects the instruction set to use when disassembling the program via the
-@code{disassemble} or @code{x/i} commands.  It is useful for architectures that
-have more than one native instruction set.
+Select the instruction set to use when disassembling the
+program via the @code{disassemble} or @code{x/i} commands.
 
-Currently it is only defined for the Intel x86 family.  You can set @var{instruction-set}
-to either @code{i386} or @code{i8086}.  The default is @code{i386}.
+Currently this command is only defined for the Intel x86 family.  You
+can set @var{instruction-set} to either @code{i386} or @code{i8086}.
+The default is @code{i386}.
 @end table
 
 
@@ -4791,6 +4768,10 @@ values until the stack frame is completely built.  On exit, it usually
 also takes more than one machine instruction to destroy a stack frame;
 after you begin stepping through that group of instructions, local
 variable definitions may be gone.
+
+This may also happen when the compiler does significant optimizations.
+To be sure of always seeing accurate values, turn off all optimization
+when compiling.
 
 @node Arrays, Output Formats, Variables, Data
 @section Artificial arrays
@@ -5446,9 +5427,8 @@ Decode using the algorithm in the @cite{C++ Annotated Reference Manual}.
 debugging @code{cfront}-generated executables.  @value{GDBN} would
 require further enhancement to permit that.
 
-@item foo
-Show the list of formats.
 @end table
+If you omit @var{style}, you will see a list of possible formats.
 
 @kindex show demangle-style
 @item show demangle-style
@@ -5874,21 +5854,21 @@ If a source file name ends in one of the following extensions, then
 @value{GDBN} infers that its language is the one indicated.
 
 @table @file
-@ifset MOD2
-@item .mod
-Modula-2 source file
-@end ifset
 
 @item .c
 C source file
 
 @item .C
 @itemx .cc
-@itemx .cxx
-@itemx .cpp
 @itemx .cp
+@itemx .cpp
+@itemx .cxx
 @itemx .c++
 C++ source file
+
+@item .f
+@itemx .F
+Fortran source file
 
 @ifclear HPPA
 @item .ch
@@ -5897,10 +5877,27 @@ C++ source file
 CHILL source file.
 @end ifclear
 
+@ifset MOD2
+@item .mod
+Modula-2 source file
+@end ifset
+
 @item .s
 @itemx .S
 Assembler source file.  This actually behaves almost like C, but
 @value{GDBN} does not skip over function prologues when stepping.
+@end table
+
+In addition, you may set the language associated with a filename
+extension.
+
+@kindex set extensions
+@kindex show extensions
+@table @code
+@item set extension-language @var{.ext} @var{language}
+
+@item info extensions
+
 @end table
 
 @node Manually, Automatically, Filenames, Setting
@@ -5999,6 +5996,21 @@ information listed here.
 Display the source language of this source file.
 @xref{Symbols, ,Examining the Symbol Table}, to identify the other 
 information listed here.
+@end table
+
+In unusual circumstances, you may have source files with extensions
+not in the standard list.  You can then set the extension associated
+with a language explicitly:
+
+@kindex set extension-language
+@kindex info extensions
+@table @code
+@item set extension-language @var{ext} @var{language}
+Set source files with extension @var{ext} to be assumed to be in
+the source language @var{language}.
+
+@item info extensions
+List all the filename extensions and the associated languages.
 @end table
 
 @ifset MOD2
@@ -6176,10 +6188,10 @@ being set automatically by @value{GDBN}.
 @end ifclear
 
 @ifset MOD2
-@value{GDBN} 4 supports C, C++, and Modula-2.
+@value{GDBN} supports C, C++, Fortran, Chill, assembly, and Modula-2.
 @end ifset
 @ifclear MOD2
-@value{GDBN} 4 supports C and C++.
+@value{GDBN} supports C, C++, Fortran, Chill, and assembly.
 @end ifclear
 Some @value{GDBN} features may be used in expressions regardless of the
 language you use: the @value{GDBN} @code{@@} and @code{::} operators,
@@ -6220,16 +6232,17 @@ together.
 @cindex C++
 @kindex g++
 @cindex @sc{gnu} C++
-The C++ debugging facilities are jointly implemented by the @sc{gnu} C++
+The C++ debugging facilities are jointly implemented by the C++
 compiler and @value{GDBN}.  Therefore, to debug your C++ code
-effectively, you must compile your C++ programs with the @sc{gnu} C++
-compiler, @code{g++}.
+effectively, you must compile your C++ programs with a supported
+C++ compiler, such as @sc{gnu} @code{g++}, or the HP ANSI C++
+compiler (@code{aCC}).
 
-For best results when debugging C++ programs, use the stabs debugging
+For best results when using @sc{gnu} C++, use the stabs debugging
 format.  You can select that format explicitly with the @code{g++}
 command-line options @samp{-gstabs} or @samp{-gstabs+}.  See
-@ref{Debugging Options,,Options for Debugging Your Program or @sc{gnu} CC,
-gcc.info, Using @sc{gnu} CC}, for more information.
+@ref{Debugging Options,,Options for Debugging Your Program or @sc{gnu}
+CC, gcc.info, Using @sc{gnu} CC}, for more information.
 @end ifclear
 @ifset HPPA
 @cindex C++
@@ -6256,7 +6269,7 @@ information.
 @cindex expressions in C
 
 Information specific to the C language is built into @value{GDBN} so that you
-can use C expressions while degugging.  This also permits @value{GDBN} to
+can use C expressions while debugging.  This also permits @value{GDBN} to
 output values in a manner consistent with C conventions.
 
 @menu
@@ -6568,13 +6581,12 @@ and @samp{@{&"hi", &"there", &"fred"@}} is a three-element array of pointers.
 @c FIXME!! GDB may eventually be able to debug C++ using DWARF; check
 @c periodically whether this has happened...
 @quotation
-@emph{Warning:} @value{GDBN} can only debug C++ code if you compile with
-the @sc{gnu} C++ compiler.  Moreover, C++ debugging depends on the use of
+@emph{Warning:} @value{GDBN} can only debug C++ code if you use the
+proper compiler.  Typically, C++ debugging depends on the use of
 additional debugging information in the symbol table, and thus requires
-special support.  @value{GDBN} has this support @emph{only} with the
-stabs debug format.  In particular, if your compiler generates a.out,
-MIPS @sc{ecoff}, RS/6000 @sc{xcoff}, or @sc{elf} with stabs extensions
-to the symbol table, these facilities are all available.  (With @sc{gnu} CC,
+special support.  In particular, if your compiler generates a.out, MIPS
+@sc{ecoff}, RS/6000 @sc{xcoff}, or @sc{elf} with stabs extensions to the
+symbol table, these facilities are all available.  (With @sc{gnu} CC,
 you can use the @samp{-gstabs} option to request stabs debugging
 extensions explicitly.)  Where the object code format is standard
 @sc{coff} or @sc{dwarf} in @sc{elf}, on the other hand, most of the C++
@@ -6687,12 +6699,12 @@ C or C++.  This happens regardless of whether you or @value{GDBN}
 selects the working language.
 @end ifclear
 
-If you allow @value{GDBN} to set the language automatically, it recognizes
-source files whose names end with @file{.c}, @file{.C}, or @file{.cc}, and
-when @value{GDBN} enters code compiled from one of these files, 
-it sets the working language to C or C++.
-@xref{Automatically, ,Having @value{GDBN} infer the source language}, for
-further details.
+If you allow @value{GDBN} to set the language automatically, it
+recognizes source files whose names end with @file{.c}, @file{.C}, or
+@file{.cc}, etc, and when @value{GDBN} enters code compiled from one of
+these files, it sets the working language to C or C++.
+@xref{Automatically, ,Having @value{GDBN} infer the source language},
+for further details.
 
 @ifset MOD2
 @c Type checking is (a) primarily motivated by Modula-2, and (b)
@@ -7809,11 +7821,11 @@ with @code{void} returned values.  If the result is not void, it
 is printed and saved in the value history. 
 
 @ifclear HPPA
-A new user-controlled variable, @var{call_scratch_address}, specifies
-the location of a scratch area to be used when @value{GDBN} calls a
-function in the target.  This is necessary because the usual method
-of putting the scratch area on the stack does not work in systems that
-have separate instruction and data spaces.
+For the A29K, a user-controlled variable @code{call_scratch_address},
+specifies the location of a scratch area to be used when @value{GDBN}
+calls a function in the target.  This is necessary because the usual
+method of putting the scratch area on the stack does not work in systems
+that have separate instruction and data spaces.
 @end ifclear
 
 @node Patching,  , Calling, Altering
@@ -7966,28 +7978,25 @@ using @code{@value{GCC}} you can generate debugging information for
 optimized code.
 @end ifclear
 
-@ifclear HPPA
-On some kinds of object files, the @code{symbol-file} command does not
-@end ifclear
-@ifset HPPA
-The @code{symbol-file} command does not
-@end ifset
-normally read the symbol table in full right away.  Instead, it scans
-the symbol table quickly to find which source files and which symbols
-are present.  The details are read later, one source file at a time,
-as they are needed.
+For most kinds of object files, with the exception of old SVR3 systems
+using COFF, the @code{symbol-file} command does not normally read the
+symbol table in full right away.  Instead, it scans the symbol table
+quickly to find which source files and which symbols are present.  The
+details are read later, one source file at a time, as they are needed.
 
-The purpose of this two-stage reading strategy is to make @value{GDBN} start up
-faster.  For the most part, it is invisible except for occasional
-pauses while the symbol table details for a particular source file are
-being read.  (The @code{set verbose} command can turn these pauses
-into messages if desired.  @xref{Messages/Warnings, ,Optional warnings
-and messages}.) 
+The purpose of this two-stage reading strategy is to make @value{GDBN}
+start up faster.  For the most part, it is invisible except for
+occasional pauses while the symbol table details for a particular source
+file are being read.  (The @code{set verbose} command can turn these
+pauses into messages if desired.  @xref{Messages/Warnings, ,Optional
+warnings and messages}.)
 
 @ifclear HPPA
 We have not implemented the two-stage strategy for COFF yet.  When the
 symbol table is stored in COFF format, @code{symbol-file} reads the
-symbol table data in full right away.
+symbol table data in full right away.  Note that ``stabs-in-COFF''
+still does the two-stage strategy, since the debug info is actually
+in stabs format.
 
 @kindex readnow
 @cindex reading symbols immediately
@@ -8052,55 +8061,6 @@ under @value{GDBN}.  So, if you have been running your program and you wish to
 debug a core file instead, you must kill the subprocess in which the
 program is running.  To do this, use the @code{kill} command
 (@pxref{Kill Process, ,Killing the child process}).
-@end ifclear
-
-@ifclear HPPA
-@kindex load @var{filename}
-@item load @var{filename}
-@ifset GENERIC
-Depending on what remote debugging facilities are configured into
-@value{GDBN}, the @code{load} command may be available.  Where it exists, it
-is meant to make @var{filename} (an executable) available for debugging
-on the remote system---by downloading, or dynamic linking, for example.
-@code{load} also records the @var{filename} symbol table in @value{GDBN}, like
-the @code{add-symbol-file} command.
-
-If your @value{GDBN} does not have a @code{load} command, attempting to
-execute it gets the error message ``@code{You can't do that when your
-target is @dots{}}''
-@end ifset
-
-The file is loaded at whatever address is specified in the executable.
-For some object file formats, you can specify the load address when you
-link the program; for other formats, like a.out, the object file format
-specifies a fixed address.
-@c FIXME! This would be a good place for an xref to the GNU linker doc.
-
-@ifset VXWORKS
-On VxWorks, @code{load} links @var{filename} dynamically on the
-current target system as well as adding its symbols in @value{GDBN}.
-@end ifset
-
-@ifset I960
-@cindex download to Nindy-960
-With the Nindy interface to an Intel 960 board, @code{load}
-downloads @var{filename} to the 960 as well as adding its symbols in
-@value{GDBN}.
-@end ifset
-
-@ifset H8
-@cindex download to H8/300 or H8/500
-@cindex H8/300 or H8/500 download
-@cindex download to Hitachi SH
-@cindex Hitachi SH download
-When you select remote debugging to a Hitachi SH, H8/300, or H8/500 board
-(@pxref{Hitachi Remote,,@value{GDBN} and Hitachi Microprocessors}),
-the @code{load} command downloads your program to the Hitachi board and also
-opens it as the current executable target for @value{GDBN} on your host
-(like the @code{file} command).
-@end ifset
-
-@code{load} does not repeat if you press @key{RET} again after using it.
 @end ifclear
 
 @ifclear BARETARGET
@@ -8515,7 +8475,6 @@ A core dump file.  @samp{target core @var{filename}} is the same as
 @samp{core-file @var{filename}}.
 @end ifclear
 
-@ifset REMOTESTUB
 @kindex target remote
 @item target remote @var{dev}
 Remote serial target in GDB-specific protocol.  The argument @var{dev}
@@ -8524,20 +8483,27 @@ specifies what serial device to use for the connection (e.g.
 now supports the @code{load} command.  This is only useful if you have
 some other way of getting the stub to the target system, and you can put
 it somewhere in memory where it won't get clobbered by the download.
-@end ifset
 
-@ifset SIMS
+@ifclear HPPA
 @kindex target sim
 @item target sim
 CPU simulator.  @xref{Simulator,,Simulated CPU Target}.
-@end ifset
+@end ifclear
+@end table
 
-@ifset AMD29K
-@kindex target udi
-@item target udi @var{keyword}
-Remote AMD29K target, using the AMD UDI protocol.  The @var{keyword}
-argument specifies which 29K board or simulator to use.  @xref{UDI29K
-Remote,,The UDI protocol for AMD29K}.
+The following targets are all CPU-specific, and only available for
+specific configurations.
+@c should organize by CPU
+
+@table @code
+
+@kindex target abug
+@item target abug @var{dev}
+ABug ROM monitor for M68K.
+
+@kindex target adapt
+@item target adapt @var{dev}
+Adapt monitor for A29K.
 
 @kindex target amd-eb
 @item target amd-eb @var{dev} @var{speed} @var{PROG}
@@ -8548,72 +8514,113 @@ Remote PC-resident AMD EB29K board, attached over serial lines.
 name of the program to be debugged, as it appears to DOS on the PC.
 @xref{EB29K Remote, ,The EBMON protocol for AMD29K}.
 
-@end ifset
-@ifset H8
+@kindex target array
+@item target array @var{dev}
+Array Tech LSI33K RAID controller board.
+
+@kindex target bug
+@item target bug @var{dev}
+BUG monitor, running on a MVME187 (m88k) board.
+
+@kindex target cpu32bug
+@item target cpu32bug @var{dev}
+CPU32BUG monitor, running on a CPU32 (M68K) board.
+
+@kindex target dbug
+@item target dbug @var{dev}
+dBUG ROM monitor for Motorola ColdFire.
+
+@kindex target ddb
+@item target ddb @var{dev}
+NEC's DDB monitor for Mips Vr4300.
+
+@kindex target dink32
+@item target dink32 @var{dev}
+DINK32 ROM monitor for PowerPC.
+
+@kindex target e7000
+@item target e7000 @var{dev}
+E7000 emulator for Hitachi H8 and SH.
+
+@kindex target es1800
+@item target es1800 @var{dev}
+ES-1800 emulator for M68K.
+
+@kindex target est
+@item target est @var{dev}
+EST-300 ICE monitor, running on a CPU32 (M68K) board.
+
 @kindex target hms
 @item target hms @var{dev}
 A Hitachi SH, H8/300, or H8/500 board, attached via serial line to your host.
 @ifclear H8EXCLUSIVE
 Use special commands @code{device} and @code{speed} to control the serial
 line and the communications speed used.
-@end ifclear
 @xref{Hitachi Remote,,@value{GDBN} and Hitachi Microprocessors}.
 
-@end ifset
-@ifset I960
+@kindex target lsi
+@item target lsi @var{dev}
+LSI ROM monitor for Mips.
+
+@kindex target m32r
+@item target m32r @var{dev}
+Mitsubishi M32R/D ROM monitor.
+
+@kindex target mips
+@item target mips @var{dev}
+IDT/SIM ROM monitor for Mips.
+
+@kindex target mon960
+@item target mon960 @var{dev}
+MON960 monitor for Intel i960.
+
 @kindex target nindy
 @item target nindy @var{devicename}
 An Intel 960 board controlled by a Nindy Monitor.  @var{devicename} is
 the name of the serial device to use for the connection, e.g.
 @file{/dev/ttya}.  @xref{i960-Nindy Remote, ,@value{GDBN} with a remote i960 (Nindy)}.
 
-@end ifset
-@ifset ST2000
-@kindex target st2000
-@item target st2000 @var{dev} @var{speed}
-A Tandem ST2000 phone switch, running Tandem's STDBUG protocol.  @var{dev}
-is the name of the device attached to the ST2000 serial line;
-@var{speed} is the communication line speed.  The arguments are not used
-if @value{GDBN} is configured to connect to the ST2000 using TCP or Telnet.
-@xref{ST2000 Remote,,@value{GDBN} with a Tandem ST2000}.
-@end ifset
-
-@ifset VXWORKS
-@kindex target vxworks
-@item target vxworks @var{machinename}
-A VxWorks system, attached via TCP/IP.  The argument @var{machinename}
-is the target system's machine name or IP address.
-@xref{VxWorks Remote, ,@value{GDBN} and VxWorks}.
-@end ifset
-
-@kindex target bug
-@item target bug @var{dev}
-BUG monitor, running on a MVME187 (m88k) board.
-
-@ifclear HPPA
-@kindex target cpu32bug
-@item target cpu32bug @var{dev}
-CPU32BUG monitor, running on a CPU32 (M68K) board.
+@kindex target nrom
+@item target nrom @var{dev}
+NetROM ROM emulator.  This target only supports downloading.
 
 @kindex target op50n
 @item target op50n @var{dev}
 OP50N monitor, running on an OKI HPPA board.
 
-@kindex target w89k
-@item target w89k @var{dev}
-W89K monitor, running on a Winbond HPPA board.
+@kindex target pmon
+@item target pmon @var{dev}
+PMON ROM monitor for Mips.
 
-@kindex target est
-@item target est @var{dev}
-EST-300 ICE monitor, running on a CPU32 (M68K) board.
+@kindex target ppcbug
+@item target ppcbug @var{dev}
+@kindex target ppcbug1
+@item target ppcbug1 @var{dev}
+PPCBUG ROM monitor for PowerPC.
+
+@kindex target r3900
+@item target r3900 @var{dev}
+Densan DVE-R3900 ROM monitor for Toshiba R3900 Mips.
+
+@kindex target rdi
+@item target rdi @var{dev}
+ARM Angel monitor, via RDI library interface.
+ 
+@kindex target rdp
+@item target rdp @var{dev}
+ARM Demon monitor.
 
 @kindex target rom68k
 @item target rom68k @var{dev}
-ROM 68K monitor, running on an IDP board.
+ROM 68K monitor, running on an M68K IDP board.
 
-@kindex target array
-@item target array @var{dev}
-Array Tech LSI33K RAID controller board.
+@kindex target rombug
+@item target rombug @var{dev}
+ROMBUG ROM monitor for OS/9000.
+
+@kindex target sds
+@item target sds @var{dev}
+SDS monitor, running on a PowerPC board (such as Motorola's ADS).
 
 @kindex target sparclite
 @item target sparclite @var{dev}
@@ -8621,7 +8628,91 @@ Fujitsu sparclite boards, used only for the purpose of loading.
 You must use an additional command to debug the program. 
 For example: target remote @var{dev} using @value{GDBN} standard 
 remote protocol.
+
+@kindex target sh3
+@kindex target sh3e
+@item target sh3 @var{dev}
+@item target sh3e @var{dev}
+Hitachi SH-3 and SH-3E target systems.
+
+@kindex target st2000
+@item target st2000 @var{dev} @var{speed}
+A Tandem ST2000 phone switch, running Tandem's STDBUG protocol.  @var{dev}
+is the name of the device attached to the ST2000 serial line;
+@var{speed} is the communication line speed.  The arguments are not used
+if @value{GDBN} is configured to connect to the ST2000 using TCP or Telnet.
+@xref{ST2000 Remote,,@value{GDBN} with a Tandem ST2000}.
+
+@kindex target udi
+@item target udi @var{keyword}
+Remote AMD29K target, using the AMD UDI protocol.  The @var{keyword}
+argument specifies which 29K board or simulator to use.  @xref{UDI29K
+Remote,,The UDI protocol for AMD29K}.
+
+@kindex target vxworks
+@item target vxworks @var{machinename}
+A VxWorks system, attached via TCP/IP.  The argument @var{machinename}
+is the target system's machine name or IP address.
+@xref{VxWorks Remote, ,@value{GDBN} and VxWorks}.
+
+@kindex target w89k
+@item target w89k @var{dev}
+W89K monitor, running on a Winbond HPPA board.
+
 @end ifclear
+@end table
+
+Many remote targets require you to download the executable's code
+once you've successfully established a connection.
+
+@table @code
+
+@kindex load @var{filename}
+@item load @var{filename}
+@ifset GENERIC
+Depending on what remote debugging facilities are configured into
+@value{GDBN}, the @code{load} command may be available.  Where it exists, it
+is meant to make @var{filename} (an executable) available for debugging
+on the remote system---by downloading, or dynamic linking, for example.
+@code{load} also records the @var{filename} symbol table in @value{GDBN}, like
+the @code{add-symbol-file} command.
+
+If your @value{GDBN} does not have a @code{load} command, attempting to
+execute it gets the error message ``@code{You can't do that when your
+target is @dots{}}''
+@end ifset
+
+The file is loaded at whatever address is specified in the executable.
+For some object file formats, you can specify the load address when you
+link the program; for other formats, like a.out, the object file format
+specifies a fixed address.
+@c FIXME! This would be a good place for an xref to the GNU linker doc.
+
+@ifset VXWORKS
+On VxWorks, @code{load} links @var{filename} dynamically on the
+current target system as well as adding its symbols in @value{GDBN}.
+@end ifset
+
+@ifset I960
+@cindex download to Nindy-960
+With the Nindy interface to an Intel 960 board, @code{load}
+downloads @var{filename} to the 960 as well as adding its symbols in
+@value{GDBN}.
+@end ifset
+
+@ifset H8
+@cindex download to H8/300 or H8/500
+@cindex H8/300 or H8/500 download
+@cindex download to Hitachi SH
+@cindex Hitachi SH download
+When you select remote debugging to a Hitachi SH, H8/300, or H8/500 board
+(@pxref{Hitachi Remote,,@value{GDBN} and Hitachi Microprocessors}),
+the @code{load} command downloads your program to the Hitachi board and also
+opens it as the current executable target for @value{GDBN} on your host
+(like the @code{file} command).
+@end ifset
+
+@code{load} does not repeat if you press @key{RET} again after using it.
 @end table
 
 @ifset GENERIC
@@ -8639,15 +8730,33 @@ your configuration may have more or fewer targets.
 @kindex set endian auto
 @kindex show endian
 
-You can now choose which byte order to use with a target system.
-Use the @code{set endian big} and @code{set endian little} commands.  
-Use the @code{set endian auto} command to instruct
-@value{GDBN} to use the byte order associated with the executable.
-You can see the current setting for byte order with the @code{show endian}
-command.
- 
-@emph{Warning:} Currently, only embedded MIPS configurations support 
-dynamic selection of target byte order.
+Some types of processors, such as the MIPS, PowerPC, and Hitachi SH,
+offer the ability to run either big-endian or little-endian byte
+orders.  Usually the executable or symbol will include a bit to
+designate the endian-ness, and you will not need to worry about
+which to use.  However, you may still find it useful to adjust
+GDB's idea of processor endian-ness manually.
+
+@table @code
+@kindex set endian big
+@item set endian big
+
+@kindex set endian little
+@item set endian little
+
+@kindex set endian auto
+@item set endian auto
+Instruct @value{GDBN} to use the byte order associated with the
+executable.
+
+@item show endian
+Display @value{GDBN}'s current idea of the target byte order.
+
+@end table
+
+Note that these commands merely adjust interpretation of symbolic
+data on the host, and that they have absolutely no effect on the
+target system.
 
 @node Remote,  , Byte Order, Targets
 @section Remote debugging
@@ -9194,25 +9303,24 @@ An empty line in a command file does nothing; it does not mean to repeat
 the last command, as it would from the terminal.
 
 @cindex init file
-@cindex @file{@value{GDBINIT}}
+@cindex @file{.gdbinit}
 When you start @value{GDBN}, it automatically executes commands from its
-@dfn{init files}.  These are files named @file{@value{GDBINIT}}.
-@value{GDBN} reads the init file (if any) in your home directory, then
-processes command line options and operands, and then reads the init
-file (if any) in the current working directory.  This is so the init
-file in your home directory can set options (such as @code{set
-complaints}) which affect the processing of the command line options and
-operands.  The init files are not executed if you use the @samp{-nx}
-option; @pxref{Mode Options, ,Choosing modes}.
+@dfn{init files}.  These are files named @file{.gdbinit} on Unix, or
+@file{gdb.ini} on DOS/Windows.  @value{GDBN} reads the init file (if
+any) in your home directory, then processes command line options and
+operands, and then reads the init file (if any) in the current working
+directory.  This is so the init file in your home directory can set
+options (such as @code{set complaints}) which affect the processing of
+the command line options and operands.  The init files are not executed
+if you use the @samp{-nx} option; @pxref{Mode Options, ,Choosing modes}.
 
 @ifset GENERIC
 @cindex init file name
 On some configurations of @value{GDBN}, the init file is known by a
 different name (these are typically environments where a specialized
-form of @value{GDBN} may need to coexist with other forms, 
-hence a different name
-for the specialized version's init file).  These are the environments
-with special init file names:
+form of @value{GDBN} may need to coexist with other forms, hence a
+different name for the specialized version's init file).  These are the
+environments with special init file names:
 
 @kindex .vxgdbinit
 @itemize @bullet
@@ -9501,35 +9609,6 @@ each value is printed in its own window.
 @end ignore
 @end ifclear
 
-@ifset LUCID
-@node Energize, GDB Bugs, Emacs, Top
-@chapter Using @value{GDBN} with Energize
-
-@cindex Energize
-The Energize Programming System is an integrated development environment
-that includes a point-and-click interface to many programming tools.
-When you use @value{GDBN} in this environment, you can use the standard
-Energize graphical interface to drive @value{GDBN}; you can also, if you
-choose, type @value{GDBN} commands as usual in a debugging window.  Even if
-you use the graphical interface, the debugging window (which uses Emacs,
-and resembles the standard @sc{gnu} Emacs interface to 
-@value{GDBN}) displays the
-equivalent commands, so that the history of your debugging session is
-properly reflected.
-
-When Energize starts up a @value{GDBN} session, it uses one of the
-command-line options @samp{-energize} or @samp{-cadillac} (``cadillac''
-is the name of the communications protocol used by the Energize system).
-This option makes @value{GDBN} run as one of the tools in the Energize Tool
-Set: it sends all output to the Energize kernel, and accept input from
-it as well.
-
-See the user manual for the Energize Programming System for 
-information on how to use the Energize graphical interface and the other
-development tools that Energize integrates with @value{GDBN}.
-
-@end ifset
-
 @node GDB Bugs
 @c links whacked to pacify makeinfo
 @c , Command Line Editing, Emacs, Top
@@ -9568,7 +9647,9 @@ If the debugger gets a fatal signal, for any input whatever, that is a
 
 @cindex error on valid input
 @item
-If @value{GDBN} produces an error message for valid input, that is a bug.
+If @value{GDBN} produces an error message for valid input, that is a
+bug.  (Note that if you're cross debugging, the problem may also be
+somewhere in the connection to the target.)
 
 @cindex invalid input
 @item
@@ -9595,18 +9676,19 @@ contact that organization first.
 You can find contact information for many support companies and
 individuals in the file @file{etc/SERVICE} in the @sc{gnu} Emacs
 distribution.
+@c should add a web page ref...
 
-In any event, we also recommend that you send bug reports for @value{GDBN} to one
-of these addresses:
+In any event, we also recommend that you send bug reports for
+@value{GDBN} to this addresses:
 
 @example
 bug-gdb@@prep.ai.mit.edu
-@{ucbvax|mit-eddie|uunet@}!prep.ai.mit.edu!bug-gdb
 @end example
 
 @strong{Do not send bug reports to @samp{info-gdb}, or to
-@samp{help-gdb}, or to any newsgroups.} Most users of @value{GDBN} do not want to
-receive bug reports.  Those that do have arranged to receive @samp{bug-gdb}.
+@samp{help-gdb}, or to any newsgroups.} Most users of @value{GDBN} do
+not want to receive bug reports.  Those that do have arranged to receive
+@samp{bug-gdb}.
 
 The mailing list @samp{bug-gdb} has a newsgroup @samp{gnu.gdb.bug} which
 serves as a repeater.  The mailing list and the newsgroup carry exactly
@@ -9650,16 +9732,10 @@ of that location would fool the debugger into doing the right thing despite
 the bug.  Play it safe and give a specific, complete example.  That is the
 easiest thing for you to do, and the most helpful.
 
-Keep in mind that the purpose of a bug report is to enable us to fix
-the bug if it is new to us.  
-@c
-@c  FIX ME!!--What the heck does the following sentence mean, 
-@c  in the context of the one above?
-@c
-@c  It is not as important as what happens if the bug is already known.
-@c  
-Therefore, always write your bug reports on
-the assumption that the bug has not been reported previously.
+Keep in mind that the purpose of a bug report is to enable us to fix the
+bug.  It may be that the bug has been reported previously, but neither
+you nor we can know that unless your bug report is complete and
+self-contained.
 
 Sometimes people give a few sketchy facts and ask, ``Does this ring a
 bell?''  Those bug reports are useless, and we urge everyone to
@@ -9670,8 +9746,9 @@ To enable us to fix the bug, you should include all these things:
 
 @itemize @bullet
 @item
-The version of @value{GDBN}.  @value{GDBN} announces it if you start with no
-arguments; you can also print it at any time using @code{show version}.
+The version of @value{GDBN}.  @value{GDBN} announces it if you start
+with no arguments; you can also print it at any time using @code{show
+version}.
 
 Without this, we will not know whether there is any point in looking for
 the bug in the current version of @value{GDBN}.
@@ -9683,19 +9760,15 @@ version number.
 @ifclear HPPA
 @item
 What compiler (and its version) was used to compile @value{GDBN}---e.g.
-``@value{GCC}--2.0''.
+``@value{GCC}--2.8.1''.
 @end ifclear
 
 @item
-What compiler (and its version) was used to compile the program you
-@ifclear HPPA
-are debugging---e.g.  ``@value{GCC}--2.0''.
-@end ifclear
-@ifset HPPA
-are debugging---e.g. ``HP92453-01 A.10.32.03 HP C Compiler''.  Use the
-@code{what} command with the pathname of the compile command
-(@file{what /opt/ansic/bin/cc}, for example) to obtain this information.
-@end ifset
+What compiler (and its version) was used to compile the program you are
+debugging---e.g.  ``@value{GCC}--2.8.1'', or ``HP92453-01 A.10.32.03 HP
+C Compiler''.  For GCC, you can say @code{gcc --version} to get this
+information; for other compilers, see the documentation for those
+compilers.
 
 @item
 The command arguments you gave the compiler to compile your example and
@@ -9714,19 +9787,19 @@ reproduce the bug.
 A description of what behavior you observe that you believe is
 incorrect.  For example, ``It gets a fatal signal.''
 
-Of course, if the bug is that @value{GDBN} gets a fatal signal, then we will
-certainly notice it.  But if the bug is incorrect output, we might not
-notice unless it is glaringly wrong.  You might as well not give us a 
-chance to make a mistake.
+Of course, if the bug is that @value{GDBN} gets a fatal signal, then we
+will certainly notice it.  But if the bug is incorrect output, we might
+not notice unless it is glaringly wrong.  You might as well not give us
+a chance to make a mistake.
 
 Even if the problem you experience is a fatal signal, you should still
-say so explicitly.  Suppose something strange is going on, such as,
-your copy of @value{GDBN} is out of synch, or you have encountered a
-bug in the C library on your system.  (This has happened!)  Your copy
-might crash and ours would not.  If you told us to expect a crash,
-then when ours fails to crash, we would know that the bug was not
-happening for us.  If you had not told us to expect a crash, then we
-would not be able to draw any conclusion from our observations.
+say so explicitly.  Suppose something strange is going on, such as, your
+copy of @value{GDBN} is out of synch, or you have encountered a bug in
+the C library on your system.  (This has happened!)  Your copy might
+crash and ours would not.  If you told us to expect a crash, then when
+ours fails to crash, we would know that the bug was not happening for
+us.  If you had not told us to expect a crash, then we would not be able
+to draw any conclusion from our observations.
 
 @ifclear HPPA
 @item
@@ -9795,126 +9868,6 @@ things without first using the debugger to find the facts.
 @include rluser.texinfo
 @include inc-hist.texi
 
-@ifset NOVEL
-@ifset RENAMED
-@node Renamed Commands, Formatting Documentation, GDB Bugs, Top
-@appendix Renamed Commands
-
-The following commands were renamed in @value{GDBN} 4, in order to make the
-command set as a whole more consistent and easier to use and remember:
-
-@kindex add-syms
-@kindex delete environment
-@kindex info copying
-@kindex info convenience
-@kindex info directories
-@kindex info editing
-@kindex info history
-@kindex info targets
-@kindex info values
-@kindex info version
-@kindex info warranty
-@kindex set addressprint
-@kindex set arrayprint
-@kindex set prettyprint
-@kindex set screen-height
-@kindex set screen-width
-@kindex set unionprint
-@kindex set vtblprint
-@kindex set demangle
-@kindex set asm-demangle
-@kindex set sevenbit-strings
-@kindex set array-max
-@kindex set caution
-@kindex set history write
-@kindex show addressprint
-@kindex show arrayprint
-@kindex show prettyprint
-@kindex show screen-height
-@kindex show screen-width
-@kindex show unionprint
-@kindex show vtblprint
-@kindex show demangle
-@kindex show asm-demangle
-@kindex show sevenbit-strings
-@kindex show array-max
-@kindex show caution
-@kindex show history write
-@kindex unset
-
-@c TEXI2ROFF-KILL
-@ifinfo
-@c END TEXI2ROFF-KILL
-@example
-OLD COMMAND               NEW COMMAND
-@c TEXI2ROFF-KILL
----------------           -------------------------------
-@c END TEXI2ROFF-KILL
-add-syms                  add-symbol-file
-delete environment        unset environment
-info convenience          show convenience
-info copying              show copying
-info directories          show directories
-info editing              show commands
-info history              show values
-info targets              help target
-info values               show values
-info version              show version
-info warranty             show warranty
-set/show addressprint     set/show print address
-set/show array-max        set/show print elements
-set/show arrayprint       set/show print array
-set/show asm-demangle     set/show print asm-demangle
-set/show caution          set/show confirm
-set/show demangle         set/show print demangle
-set/show history write    set/show history save
-set/show prettyprint      set/show print pretty
-set/show screen-height    set/show height
-set/show screen-width     set/show width
-set/show sevenbit-strings set/show print sevenbit-strings
-set/show unionprint       set/show print union
-set/show vtblprint        set/show print vtbl
-
-unset                     [No longer an alias for delete]
-@end example
-@c TEXI2ROFF-KILL
-@end ifinfo
-
-@tex
-\vskip \parskip\vskip \baselineskip
-\halign{\tt #\hfil &\qquad#&\tt #\hfil\cr
-{\bf Old Command}         &&{\bf New Command}\cr
-add-syms                  &&add-symbol-file\cr
-delete environment        &&unset environment\cr
-info convenience          &&show convenience\cr
-info copying              &&show copying\cr
-info directories          &&show directories     \cr
-info editing              &&show commands\cr
-info history              &&show values\cr
-info targets              &&help target\cr
-info values               &&show values\cr
-info version              &&show version\cr
-info warranty             &&show warranty\cr
-set{\rm / }show addressprint     &&set{\rm / }show print address\cr
-set{\rm / }show array-max        &&set{\rm / }show print elements\cr
-set{\rm / }show arrayprint       &&set{\rm / }show print array\cr
-set{\rm / }show asm-demangle     &&set{\rm / }show print asm-demangle\cr
-set{\rm / }show caution          &&set{\rm / }show confirm\cr
-set{\rm / }show demangle         &&set{\rm / }show print demangle\cr
-set{\rm / }show history write    &&set{\rm / }show history save\cr
-set{\rm / }show prettyprint      &&set{\rm / }show print pretty\cr
-set{\rm / }show screen-height    &&set{\rm / }show height\cr
-set{\rm / }show screen-width     &&set{\rm / }show width\cr
-set{\rm / }show sevenbit-strings &&set{\rm / }show print sevenbit-strings\cr
-set{\rm / }show unionprint       &&set{\rm / }show print union\cr
-set{\rm / }show vtblprint        &&set{\rm / }show print vtbl\cr
-\cr
-unset                     &&\rm(No longer an alias for delete)\cr
-}
-@end tex
-@c END TEXI2ROFF-KILL
-@end ifset
-@end ifset
 
 @ifclear PRECONFIGURED
 @ifclear HPPA
@@ -10240,18 +10193,18 @@ script, if you wish, or you can use it to test your guesses on
 abbreviations---for example:
 
 @smallexample
+% sh config.sub i386-linux
+i386-pc-linux-gnu
+% sh config.sub alpha-linux
+alpha-unknown-linux-gnu
+% sh config.sub hp9k700
+hppa1.1-hp-hpux
 % sh config.sub sun4
 sparc-sun-sunos4.1.1
 % sh config.sub sun3
 m68k-sun-sunos4.1.1
-% sh config.sub decstation
-mips-dec-ultrix4.2
-% sh config.sub hp300bsd
-m68k-hp-bsd
-% sh config.sub i386v
-i386-unknown-sysv
-% sh config.sub i786v
-Invalid configuration `i786v': machine `i786v' not recognized
+% sh config.sub i986v
+Invalid configuration `i986v': machine `i986v' not recognized
 @end smallexample
 
 @noindent
@@ -10269,9 +10222,11 @@ Does,,configure.info}, for a full explanation of @code{configure}.
 @example
 configure @r{[}--help@r{]}
           @r{[}--prefix=@var{dir}@r{]}
+          @r{[}--exec-prefix=@var{dir}@r{]}
           @r{[}--srcdir=@var{dirname}@r{]}
           @r{[}--norecursion@r{]} @r{[}--rm@r{]}
-          @r{[}--target=@var{target}@r{]} @var{host}
+          @r{[}--target=@var{target}@r{]}
+          @var{host}
 @end example
 
 @noindent
@@ -10283,8 +10238,12 @@ You may introduce options with a single @samp{-} rather than
 @item --help
 Display a quick summary of how to invoke @code{configure}.
 
-@item -prefix=@var{dir}
+@item --prefix=@var{dir}
 Configure the source to install programs and files under directory
+@file{@var{dir}}.
+
+@item --exec-prefix=@var{dir}
+Configure the source to install programs under directory
 @file{@var{dir}}.
 
 @c avoid splitting the warning from the explanation:
@@ -10305,16 +10264,6 @@ the working directory in parallel to the source directories below
 Configure only the directory level where @code{configure} is executed; do not
 propagate configuration to subdirectories.
 
-@item --rm
-@emph{Remove} files otherwise built during configuration.
-
-@c This does not work (yet if ever).  FIXME.
-@c @item --parse=@var{lang} @dots{}
-@c Configure the @value{GDBN} expression parser to parse the listed languages.
-@c @samp{all} configures @value{GDBN} for all supported languages.  To get a
-@c list of all supported languages, omit the argument.  Without this
-@c option, @value{GDBN} is configured to parse all supported languages.
-
 @item --target=@var{target}
 Configure @value{GDBN} for cross-debugging programs running on the specified
 @var{target}.  Without this option, @value{GDBN} is configured to debug
@@ -10328,10 +10277,8 @@ Configure @value{GDBN} to run on the specified @var{host}.
 There is no convenient way to generate a list of all available hosts.
 @end table
 
-@noindent
-@code{configure} accepts other options, for compatibility with
-configuring other @sc{gnu} tools recursively; but these are the only
-options that affect @value{GDBN} or its supporting libraries.
+There are many other options available as well, but they are generally
+needed for special purposes only.
 @end ifclear
 
  

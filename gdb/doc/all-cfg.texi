@@ -45,18 +45,12 @@
 @c Zilog 8000 target:
 @set Z8K
 @c
-@c Lucid "Energize" environment:
-@clear LUCID
-@c
 @c Wind River Systems VxWorks environment:
 @set VXWORKS
 @c
 @c ----------------------------------------------------------------------
 @c DOC FEATURE FLAGS:
 @c 
-@c Include change-from-old?
-@set NOVEL
-@c
 @c Bare-board target?
 @clear BARETARGET
 @c
@@ -75,9 +69,6 @@
 @c
 @c Talk about CPU simulator targets?
 @set SIMS
-@c
-@c Is manual stand-alone, or part of an agglomeration, with overall GPL?
-@clear AGGLOMERATION
 @c
 @c Remote serial line settings of interest?
 @set SERIAL
@@ -109,9 +100,6 @@
 @c Name of GDB product.  Used in running text.
 @set GDBN GDB
 @c
-@c Name of GDB initialization file.
-@set GDBINIT .gdbinit
-@c 
 @c Name of host.  Should not be used in generic configs, but generic
 @c value may catch some flubs.
 @set HOST machine specific
