@@ -3589,8 +3589,7 @@ do_bx (str, flags)
       return;
     }
 
-  if (reg == REG_PC)
-    inst.error = BAD_PC;
+  /* Note - it is not illegal to do a "bx pc".  Useless, but not illegal.  */
 
   end_of_line (str);
 }
