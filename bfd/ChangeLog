@@ -1,3 +1,11 @@
+2002-05-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Revert last change.
+	(ppc64_elf_check_relocs): Don't set up function descriptor symbol
+	strings to point inside function code sym string.
+	(func_desc_adjust): Likewise.
+	(ppc64_elf_hide_symbol): Rewrite code to look up function code sym.
+
 2002-05-24  Michal Ludvig  <mludvig@suse.cz>
 
 	* elf64-x86-64.c (elf64_x86_64_grok_prstatus): Added.

@@ -2583,11 +2583,8 @@ ppc64_elf_copy_indirect_symbol (dir, ind)
       eind->dyn_relocs = NULL;
     }
 
-  /* We don't need to copy is_func and is_func_descriptor;  They're
-     never set when copy_indirect_symbol is called for indirect
-     symbols at the add_symbols stage of linking, and they're not
-     relevant when copy_indirect_symbol is called for weakdefs.
-     weakdefs are only held for non-function syms.  */
+  edir->is_func |= eind->is_func;
+  edir->is_func_descriptor |= eind->is_func_descriptor;
 
   _bfd_elf_link_hash_copy_indirect (dir, ind);
 }
@@ -2772,11 +2769,6 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 					  false, false, false);
 	      if (fdh != NULL)
 		{
-		  /* Ensure the function descriptor symbol string is
-		     part of the code symbol string.  We aren't
-		     changing the name here, just allowing some tricks
-		     in ppc64_elf_hide_symbol.  */
-		  fdh->root.root.string = h->root.root.string + 1;
 		  ((struct ppc_link_hash_entry *) fdh)->is_func_descriptor = 1;
 		  ((struct ppc_link_hash_entry *) fdh)->oh = h;
 		  ((struct ppc_link_hash_entry *) h)->is_func = 1;
@@ -3228,7 +3220,6 @@ func_desc_adjust (h, inf)
 	    }
 	  ((struct ppc_link_hash_entry *) fdh)->is_func_descriptor = 1;
 	  ((struct ppc_link_hash_entry *) fdh)->oh = h;
-	  fdh->root.root.string = h->root.root.string + 1;
 	  ((struct ppc_link_hash_entry *) h)->oh = fdh;
 	}
 
@@ -3511,14 +3502,48 @@ ppc64_elf_hide_symbol (info, h, force_local)
 
   if (((struct ppc_link_hash_entry *) h)->is_func_descriptor)
     {
-      const char *name;
       struct elf_link_hash_entry *fh = ((struct ppc_link_hash_entry *) h)->oh;
-      struct ppc_link_hash_table *htab;
 
-      name = h->root.root.string - 1;
-      htab = ppc_hash_table (info);
       if (fh == NULL)
-	fh = elf_link_hash_lookup (&htab->elf, name, false, false, false);
+	{
+	  const char *p, *q;
+	  struct ppc_link_hash_table *htab;
+	  char save;
+
+	  /* We aren't supposed to use alloca in BFD because on
+	     systems which do not have alloca the version in libiberty
+	     calls xmalloc, which might cause the program to crash
+	     when it runs out of memory.  This function doesn't have a
+	     return status, so there's no way to gracefully return an
+	     error.  So cheat.  We know that string[-1] can be safely
+	     dereferenced;  It's either a string in an ELF string
+	     table, or allocated in an objalloc structure.  */
+
+	  p = h->root.root.string - 1;
+	  save = *p;
+	  *(char *) p = '.';
+	  htab = ppc_hash_table (info);
+	  fh = elf_link_hash_lookup (&htab->elf, p, false, false, false);
+	  *(char *) p = save;
+
+	  /* Unfortunately, if it so happens that the string we were
+	     looking for was allocated immediately before this string,
+	     then we overwrote the string terminator.  That's the only
+	     reason the lookup should fail.  */
+	  if (fh == NULL)
+	    {
+	      q = h->root.root.string + strlen (h->root.root.string);
+	      while (q >= h->root.root.string && *q == *p)
+		--q, --p;
+	      if (q < h->root.root.string && *p == '.')
+		fh = elf_link_hash_lookup (&htab->elf, p, false, false, false);
+	    }
+	  if (fh != NULL)
+	    {
+	      ((struct ppc_link_hash_entry *) h)->oh = fh;
+	      ((struct ppc_link_hash_entry *) fh)->oh = h;
+	    }
+	}
       if (fh != NULL)
 	_bfd_elf_link_hash_hide_symbol (info, fh, force_local);
     }
