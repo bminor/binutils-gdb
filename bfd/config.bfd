@@ -581,6 +581,7 @@ case "${targ}" in
   i[3-7]86-*-mingw32* | i[3-7]86-*-cygwin* | i[3-7]86-*-winnt | i[3-7]86-*-pe)
     targ_defvec=i386pe_vec
     targ_selvecs="i386pe_vec i386pei_vec bfd_elf32_i386_vec"
+    targ_underscore=yes
     ;;
   i[3-7]86-none-*)
     targ_defvec=i386coff_vec
