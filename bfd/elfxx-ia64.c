@@ -789,6 +789,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
       bfd_size_type amt;
       bfd_boolean is_branch;
       struct elfNN_ia64_dyn_sym_info *dyn_i;
+      char symtype;
 
       switch (r_type)
 	{
@@ -864,6 +865,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 
 	  toff = isym->st_value;
 	  dyn_i = get_dyn_sym_info (ia64_info, NULL, abfd, irel, FALSE);
+	  symtype = ELF_ST_TYPE (isym->st_info);
 	}
       else
 	{
@@ -908,12 +910,38 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	      tsec = h->root.u.def.section;
 	      toff = h->root.u.def.value;
 	    }
+
+	  symtype = h->type;
 	}
 
       if (tsec->sec_info_type == ELF_INFO_TYPE_MERGE)
-	toff = _bfd_merged_section_offset (abfd, &tsec,
-					   elf_section_data (tsec)->sec_info,
-					   toff + irel->r_addend);
+	{
+	  /* At this stage in linking, no SEC_MERGE symbol has been
+	     adjusted, so all references to such symbols need to be
+	     passed through _bfd_merged_section_offset.  (Later, in
+	     relocate_section, all SEC_MERGE symbols *except* for
+	     section symbols have been adjusted.)
+
+	     gas may reduce relocations against symbols in SEC_MERGE
+	     sections to a relocation against the section symbol when
+	     the original addend was zero.  When the reloc is against
+	     a section symbol we should include the addend in the
+	     offset passed to _bfd_merged_section_offset, since the
+	     location of interest is the original symbol.  On the
+	     other hand, an access to "sym+addend" where "sym" is not
+	     a section symbol should not include the addend;  Such an
+	     access is presumed to be an offset from "sym";  The
+	     location of interest is just "sym".  */
+	   if (symtype == STT_SECTION)
+	     toff += irel->r_addend;
+	   
+	   toff = _bfd_merged_section_offset (abfd, &tsec,
+					      elf_section_data (tsec)->sec_info,
+					      toff);
+
+	   if (symtype != STT_SECTION)
+	     toff += irel->r_addend;
+	}
       else
 	toff += irel->r_addend;
 

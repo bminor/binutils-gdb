@@ -1,3 +1,8 @@
+2004-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Add addend when
+	calling _bfd_merged_section_offset only for section symbols.
+
 2004-06-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_relax_section): Implement reference code
