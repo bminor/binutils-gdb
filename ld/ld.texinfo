@@ -1750,7 +1750,7 @@ about 40% more memory for symbol storage.
 
 Another affect of the switch is to set the default hash table size to
 1021, which again saves memory at the cost of lengthening the linker's
-run time.  This is not done however if the *option{--hash-size} switch
+run time.  This is not done however if the @option{--hash-size} switch
 has been used.
 
 The @option{--reduce-memory-overheads} switch may be also be used to

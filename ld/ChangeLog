@@ -1,3 +1,7 @@
+2004-05-23  Andreas Schwab  <schwab@suse.de>
+
+	* ld.texinfo (Options): Fix typo in last change.
+
 2004-05-21  Andy Chittenden  <achittenden@bluearc.com>
 
 	* ld.h (ld_config_type): Add new field: hash_table_size.
