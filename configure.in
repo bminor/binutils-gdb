@@ -3,7 +3,7 @@
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-configdirs="libiberty bfd binutils gcc ld gas readline gnulib ${clib} prms"
+configdirs="libiberty bfd binutils gcc readline gdb ld gas gnulib ${clib} prms"
 srctrigger=README.configure
 srcname="gnu development package"
 
