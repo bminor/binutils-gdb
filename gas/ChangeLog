@@ -1,5 +1,7 @@
 Sun Sep 19 10:43:31 1999  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-hppa.c (pa_ip): Handle 'd', '#' and 'cq'.
+
 	* config/tc-hppa.c (struct pa_it): New field "trunc".
 	(pa_ip): Hadnle 'h', 'm', '=', '{', and '_' operands.
 	(pa_parse_ftest_gfx_completer): New function

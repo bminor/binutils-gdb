@@ -1785,6 +1785,7 @@ pa_ip (str)
 
 		/* Handle a short load/store completer.  */
 		case 'm':
+		case 'q':
 		  {
 		    int a = 0;
 		    int m = 0;
@@ -1809,8 +1810,18 @@ pa_ip (str)
 			s += 2;
 		      }
 
-		    opcode |= m << 5;
-		    INSERT_FIELD_AND_CONTINUE (opcode, a, 13);
+		   /* 'm' and 'q' are the same, except for where they encode
+		       the before/after field.  */
+		   if (*args == 'm')
+		      {
+			opcode |= m << 5;
+			INSERT_FIELD_AND_CONTINUE (opcode, a, 13);
+		      }
+		    else if (*args == 'q')
+		      {
+			opcode |= m << 3;
+			INSERT_FIELD_AND_CONTINUE (opcode, a, 2);
+		      }
 		  }
 
 		/* Handle a stbys completer.  */
@@ -2789,6 +2800,64 @@ pa_ip (str)
 		  continue;
 		}
 
+	    /* Handle 14 bit immediated, shifted left three times.  */
+	    case '#':
+	      the_insn.field_selector = pa_chk_field_selector (&s);
+	      get_expression (s);
+	      s = expr_end;
+	      if (the_insn.exp.X_op == O_constant)
+		{
+		  num = evaluate_absolute (&the_insn);
+		  if (num & 0x7)
+		    break;
+		  CHECK_FIELD (num, 8191, -8192, 0);
+		  if (num < 0)
+		    opcode |= 1;
+		  num &= 0x1fff;
+		  num >>= 3;
+		  INSERT_FIELD_AND_CONTINUE (opcode, num, 4);
+		}
+	      else
+		{
+		  if (is_DP_relative (the_insn.exp))
+		    the_insn.reloc = R_HPPA_GOTOFF;
+		  else if (is_PC_relative (the_insn.exp))
+		    the_insn.reloc = R_HPPA_PCREL_CALL;
+		  else
+		    the_insn.reloc = R_HPPA;
+		  the_insn.format = 14;
+		  continue;
+		}
+	      break;
+
+	    /* Handle 14 bit immediate, shifted left twice.  */
+	    case 'd':
+	      the_insn.field_selector = pa_chk_field_selector (&s);
+	      get_expression (s);
+	      s = expr_end;
+	      if (the_insn.exp.X_op == O_constant)
+		{
+		  num = evaluate_absolute (&the_insn);
+		  if (num & 0x3)
+		    break;
+		  CHECK_FIELD (num, 8191, -8192, 0);
+		  if (num < 0)
+		    opcode |= 1;
+		  num &= 0x1fff;
+		  num >>= 2;
+		  INSERT_FIELD_AND_CONTINUE (opcode, num, 3);
+		}
+	      else
+		{
+		  if (is_DP_relative (the_insn.exp))
+		    the_insn.reloc = R_HPPA_GOTOFF;
+		  else if (is_PC_relative (the_insn.exp))
+		    the_insn.reloc = R_HPPA_PCREL_CALL;
+		  else
+		    the_insn.reloc = R_HPPA;
+		  the_insn.format = 14;
+		  continue;
+		}
 
 	    /* Handle a 14 bit immediate at 31.  */
 	    case 'j':
