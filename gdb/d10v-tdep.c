@@ -949,29 +949,11 @@ d10v_read_sp (void)
   return (d10v_make_daddr (read_register (SP_REGNUM)));
 }
 
-static void
-d10v_write_sp (CORE_ADDR val)
-{
-  write_register (SP_REGNUM, d10v_convert_daddr_to_raw (val));
-}
-
 static CORE_ADDR
 d10v_read_fp (void)
 {
   return (d10v_make_daddr (read_register (FP_REGNUM)));
 }
-
-/* Function: push_return_address (pc)
-   Set up the return address for the inferior function call.
-   Needed for targets where we don't actually execute a JSR/BSR instruction */
-
-static CORE_ADDR
-d10v_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
-{
-  write_register (LR_REGNUM, d10v_convert_iaddr_to_raw (CALL_DUMMY_ADDRESS ()));
-  return sp;
-}
-
 
 /* When arguments must be pushed onto the stack, they go on in reverse
    order.  The below implements a FILO (stack) to do this. */
@@ -1010,20 +992,26 @@ pop_stack_item (struct stack_item *si)
 
 
 static CORE_ADDR
-d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-		     int struct_return, CORE_ADDR struct_addr)
+d10v_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
+		      CORE_ADDR dummy_addr, int nargs, struct value **args,
+		      CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
 {
   int i;
   int regnum = ARG1_REGNUM;
   struct stack_item *si = NULL;
   long val;
 
+  /* Set the return address.  For the d10v, the return breakpoint is
+     always at DUMMY_ADDR.  */
+  regcache_cooked_write_unsigned (regcache, LR_REGNUM,
+				  d10v_convert_iaddr_to_raw (dummy_addr));
+
   /* If STRUCT_RETURN is true, then the struct return address (in
      STRUCT_ADDR) will consume the first argument-passing register.
      Both adjust the register count and store that value.  */
   if (struct_return)
     {
-      write_register (regnum, struct_addr);
+      regcache_cooked_write_unsigned (regcache, regnum, struct_addr);
       regnum++;
     }
 
@@ -1041,7 +1029,7 @@ d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	/* fits in a single register, do not align */
 	{
 	  val = extract_unsigned_integer (contents, len);
-	  write_register (regnum++, val);
+	  regcache_cooked_write_unsigned (regcache, regnum++, val);
 	}
       else if (len <= (ARGN_REGNUM - aligned_regnum + 1) * 2)
 	/* value fits in remaining registers, store keeping left
@@ -1052,12 +1040,12 @@ d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	  for (b = 0; b < (len & ~1); b += 2)
 	    {
 	      val = extract_unsigned_integer (&contents[b], 2);
-	      write_register (regnum++, val);
+	      regcache_cooked_write_unsigned (regcache, regnum++, val);
 	    }
 	  if (b < len)
 	    {
 	      val = extract_unsigned_integer (&contents[b], 1);
-	      write_register (regnum++, (val << 8));
+	      regcache_cooked_write_unsigned (regcache, regnum++, (val << 8));
 	    }
 	}
       else
@@ -1074,6 +1062,10 @@ d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       write_memory (sp, si->data, si->len);
       si = pop_stack_item (si);
     }
+
+  /* Finally, update the SP register.  */
+  regcache_cooked_write_unsigned (regcache, SP_REGNUM,
+				  d10v_convert_daddr_to_raw (sp));
 
   return sp;
 }
@@ -1636,7 +1628,6 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_pc (gdbarch, d10v_write_pc);
   set_gdbarch_read_fp (gdbarch, d10v_read_fp);
   set_gdbarch_read_sp (gdbarch, d10v_read_sp);
-  set_gdbarch_write_sp (gdbarch, d10v_write_sp);
 
   set_gdbarch_num_regs (gdbarch, d10v_num_regs);
   set_gdbarch_sp_regnum (gdbarch, 15);
@@ -1692,9 +1683,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
   set_gdbarch_extract_return_value (gdbarch, d10v_extract_return_value);
-  set_gdbarch_deprecated_push_arguments (gdbarch, d10v_push_arguments);
-  set_gdbarch_push_return_address (gdbarch, d10v_push_return_address);
-
+  set_gdbarch_push_dummy_call (gdbarch, d10v_push_dummy_call);
   set_gdbarch_store_return_value (gdbarch, d10v_store_return_value);
   set_gdbarch_extract_struct_value_address (gdbarch, d10v_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, d10v_use_struct_convention);

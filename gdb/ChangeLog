@@ -1,3 +1,11 @@
+2003-03-27  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v-tdep.c (d10v_gdbarch_init): Set push_dummy_call instead of
+	push_arguments.  Don't set push_return_address or write_sp.
+	(d10v_push_dummy_call): Replace d10v_push_arguments.
+	(d10v_push_return_address, d10v_write_sp): Delete function,
+	handled by push_dummy_call.
+
 2003-03-26  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_PUSH_ARGUMENTS): Rename PUSH_ARGUMENTS.
