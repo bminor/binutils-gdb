@@ -1,3 +1,11 @@
+Mon Jul 24 20:06:17 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* subsegs.h (struct seg_info_trash): Make bitfield types valid.
+
+	* config/obj-coff.c (fixup_segment): Local add_number should not
+	be declared register since its address is taken for
+	MD_APPLY_FIX3.
+
 Mon Jul 24 14:10:24 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-sh.c (md_pseudo_table): Add "uses".
