@@ -117,6 +117,25 @@ proc default_ld_compile { cc source object } {
 
     catch "exec $cc -I$srcdir$subdir -c $CFLAGS $source -o $object" exec_output
     if [string match "" $exec_output] then {
+	if {![file exists $object]} then {
+	    regexp ".*/(\[^/\]*)$" $source all dobj
+	    regsub "\\.c" $dobj ".o" realobj
+	    verbose "looking for $realobj"
+	    if {[file exists $realobj]} then {
+		send_log "mv $realobj $object\n"
+		verbose "mv $realobj $object"
+		catch "exec mv $realobj $object" exec_output
+		if {![string match "" $exec_output]} then {
+		    send_log "$exec_output\n"
+		    verbose "$exec_output"
+		    perror "could not move $realobj to $object"
+		    return 0
+		}
+	    } else {
+		perror "$object not found after compilation"
+		return 0
+	    }
+	}
 	return 1
     } else {
 	send_log "$exec_output\n"
