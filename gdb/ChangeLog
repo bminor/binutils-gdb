@@ -1,3 +1,11 @@
+Wed Dec 16 11:47:00 1998  Andrew Cagney  <cagney@chook>
+
+	* gdbarch.c (show_architecture): Use TARGET_ARCHITECTURE.
+	* gdbarch.h, gdbarch.c: Fix typo's. Use struct's in preference to
+ 	types.
+	* gdbarch.h, gdbarch.c (gdbarch_debug): Add ``set archdebug'' to
+ 	command set.
+
 Tue Dec 15 23:46:40 1998  Andrew Cagney  <cagney@chook>
 
 	* config/mips/tm-*.h: (TARGET_BYTE_ORDER_DEFAULT,

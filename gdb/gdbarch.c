@@ -22,6 +22,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcmd.h"
 
 
+/* Non-zero if we want to trace architecture code.  */
+
+#ifndef GDBARCH_DEBUG
+#define GDBARCH_DEBUG 1
+#endif
+int gdbarch_debug = GDBARCH_DEBUG;
+
+
 /* Functions to manipulate the endianness of the target.  */
 
 #ifdef TARGET_BYTE_ORDER_SELECTABLE
@@ -163,14 +171,14 @@ set_endian_from_file (abfd)
 /* Functions to manipulate the architecture of the target */
 
 int target_architecture_auto = 1;
-extern const bfd_arch_info_type bfd_default_arch_struct;
-const bfd_arch_info_type *target_architecture = &bfd_default_arch_struct;
-int (*target_architecture_hook) PARAMS ((const bfd_arch_info_type *ap));
+extern const struct bfd_arch_info bfd_default_arch_struct;
+const struct bfd_arch_info *target_architecture = &bfd_default_arch_struct;
+int (*target_architecture_hook) PARAMS ((const struct bfd_arch_info *ap));
 
 /* Do the real work of changing the current architecture */
 static void
 set_arch (arch)
-     const bfd_arch_info_type *arch;
+     const struct bfd_arch_info *arch;
 {
   /* FIXME: Is it compatible with gdb? */
   /* Check with the target on the setting */
@@ -193,7 +201,7 @@ show_architecture (args, from_tty)
      int from_tty;
 {
   const char *arch;
-  arch = target_architecture->printable_name;
+  arch = TARGET_ARCHITECTURE->printable_name;
   if (target_architecture_auto)
     printf_filtered ("The target architecture is set automatically (currently %s)\n", arch);
   else
@@ -218,7 +226,7 @@ set_architecture (args, from_tty)
     }
   else
     {
-      const bfd_arch_info_type *arch = bfd_scan_arch (args);
+      const struct bfd_arch_info *arch = bfd_scan_arch (args);
       if (arch != NULL)
 	set_arch (arch);
       else
@@ -237,7 +245,7 @@ info_architecture (args, from_tty)
   printf_filtered ("Available architectures are:\n");
   for (a = bfd_arch_obscure + 1; a < bfd_arch_last; a++)
     {
-      const bfd_arch_info_type *ap = bfd_lookup_arch (a, 0);
+      const struct bfd_arch_info *ap = bfd_lookup_arch (a, 0);
       if (ap != NULL)
 	{
 	  do
@@ -257,7 +265,7 @@ set_architecture_from_arch_mach (arch, mach)
      enum bfd_architecture arch;
      unsigned long mach;
 {
-  const bfd_arch_info_type *wanted = bfd_lookup_arch (arch, mach);
+  const struct bfd_arch_info *wanted = bfd_lookup_arch (arch, mach);
   if (wanted != NULL)
     set_arch (wanted);
   else
@@ -270,7 +278,7 @@ static void
 set_architecture_from_file (abfd)
      bfd *abfd;
 {
-  const bfd_arch_info_type *wanted = bfd_get_arch_info (abfd);
+  const struct bfd_arch_info *wanted = bfd_get_arch_info (abfd);
   if (target_architecture_auto)
     {
       if (target_architecture_hook != NULL
@@ -338,4 +346,14 @@ _initialize_gdbarch ()
   tm_print_insn_info.read_memory_func = dis_asm_read_memory;
   tm_print_insn_info.memory_error_func = dis_asm_memory_error;
   tm_print_insn_info.print_address_func = dis_asm_print_address;
+
+#ifdef MAINTENANCE_CMDS
+  add_show_from_set (add_set_cmd ("archdebug",
+				  class_maintenance,
+				  var_zinteger,
+				  (char *)&gdbarch_debug,
+				  "Set architecture debugging.\n\
+When non-zero, architecture debugging is enabled.", &setlist),
+		     &showlist);
+#endif
 }

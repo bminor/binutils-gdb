@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define GDBARCH_H
 
 
-/* The target-system-dependant byte order is dynmaic */
+/* The target-system-dependant byte order is dynamic */
 
 /* TARGET_BYTE_ORDER_SELECTABLE_P determines if the target endianness
    is selectable at runtime.  The user can use the `set endian'
@@ -59,16 +59,20 @@ extern int target_byte_order_auto;
 /* The target-system-dependant BFD architecture is dynamic */
 
 extern int target_architecture_auto;
+#ifndef TARGET_ARCHITECTURE_AUTO
 #define TARGET_ARCHITECTURE_AUTO (target_architecture_auto + 0)
+#endif
 
-extern const bfd_arch_info_type *target_architecture;
+extern const struct bfd_arch_info *target_architecture;
+#ifndef TARGET_ARCHITECTURE
 #define TARGET_ARCHITECTURE (target_architecture + 0)
+#endif
 
 /* Notify the target dependant backend of a change to the selected
    architecture. A zero return status indicates that the target did
    not like the change. */
 
-extern int (*target_architecture_hook) PARAMS ((const bfd_arch_info_type *)); 
+extern int (*target_architecture_hook) PARAMS ((const struct bfd_arch_info *)); 
 
 
 
@@ -101,9 +105,14 @@ extern disassemble_info tm_print_insn_info;
 
 extern void set_gdbarch_from_file PARAMS ((bfd *));
 
+
 /* Explicitly set the dynamic target-system-dependant parameters based
    on bfd_architecture and machine. */
 
 extern void set_architecture_from_arch_mach PARAMS ((enum bfd_architecture, unsigned long));
+
+
+/* gdbarch trace variable */
+extern int gdbarch_debug;
 
 #endif
