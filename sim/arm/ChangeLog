@@ -1,3 +1,46 @@
+2002-05-20  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* Makefile.in (SWI_TARGET_SWITCHES): Define.
+	* armos.c (swi_mask): Define.  Initialise to supporting all
+	SWI emulations.
+	(ARMul_OSInit): For XScale targets, only support the ANGEL
+	SWI interface.  (This is at the request if Intel).
+	(ARMul_OSHandleSWI): Examine swi_mask to see if a particular
+        SWI call should be emulated.
+	Do not fall through from AngelSWI_Reason_WriteC.
+	Propagate exit code from RedBoot Exit SWI.
+	* rdi-dgb.h (swi_mask): Prototype.
+	(SWI_MASK_DEMON, SWI_MASK_ANGEL, SWI_MASK_REDBOOT): Define.
+	* wrapper.c: Include run-sim.h.
+	(sim_target_parse_command_line): New function.  Look for and
+	handle --swi-support switch.
+	(sim_target_parse_arg_array): New function.  Process an argv
+	array for parsing by sim_target_parse_command_line.
+	(sim_target_display_usage): New function.  Describe syntax of
+	--swi-suppoort switch.
+	(sim_open): Add call to sim_target_parse_arg_array).
+
+2002-05-17  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* Makefile.in (SWI_TARGET_SWITCHES): Define.
+	* armos.c (swi_mask): Define.  Initialise to supporting all
+	SWI emulations.
+	(ARMul_OSInit): For XScale targets, only support the ANGEL
+	SWI interface.  (This is at the request if Intel).
+	(ARMul_OSHandleSWI): Examine swi_mask to see if a particular
+        SWI call should be emulated.
+	Do not fall through from AngelSWI_Reason_WriteC.
+	Propagate exit code from RedBoot Exit SWI.
+	* rdi-dgb.h (swi_mask): Prototype.
+	(SWI_MASK_DEMON, SWI_MASK_ANGEL, SWI_MASK_REDBOOT): Define.
+	* wrapper.c (sim_target_parse_command_line): New function.
+	Look for and handle --swi-support switch.
+	(sim_target_parse_arg_array): New function.  Process an argv
+	array for parsing by sim_target_parse_command_line.
+	(sim_target_display_usage): New function.  Describe syntax of
+	--swi-suppoort switch.
+	(sim_open): Add call to sim_target_parse_arg_array).
+
 2002-05-09  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* armos.c (ARMul_OSHandleSWI): Support the RedBoot SWI in ARM

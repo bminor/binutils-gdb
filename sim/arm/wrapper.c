@@ -35,6 +35,7 @@
 #include "dbg_rdi.h"
 #include "ansidecl.h"
 #include "sim-utils.h"
+#include "run-sim.h"
 
 host_callback *sim_callback;
 
@@ -426,6 +427,119 @@ sim_fetch_register (sd, rn, memory, length)
   return -1;
 }
 
+#ifdef SIM_TARGET_SWITCHES
+
+static void sim_target_parse_arg_array PARAMS ((char **));
+
+typedef struct
+{
+  char * 	swi_option;
+  unsigned int	swi_mask;
+} swi_options;
+
+#define SWI_SWITCH	"--swi-support"
+
+static swi_options options[] =
+  {
+    { "none",    0 },
+    { "demon",   SWI_MASK_DEMON },
+    { "angel",   SWI_MASK_ANGEL },
+    { "redboot", SWI_MASK_REDBOOT },
+    { "all",     -1 },
+    { "NONE",    0 },
+    { "DEMON",   SWI_MASK_DEMON },
+    { "ANGEL",   SWI_MASK_ANGEL },
+    { "REDBOOT", SWI_MASK_REDBOOT },
+    { "ALL",     -1 }
+  };
+
+
+int
+sim_target_parse_command_line (argc, argv)
+     int argc;
+     char ** argv;
+{
+  int i;
+
+  for (i = 1; i < argc; i++)
+    {
+      char * ptr = argv[i];
+      int arg;
+
+      if ((ptr == NULL) || (* ptr != '-'))
+	break;
+
+      if (strncmp (ptr, SWI_SWITCH, sizeof SWI_SWITCH - 1) != 0)
+	continue;
+
+      if (ptr[sizeof SWI_SWITCH - 1] == 0)
+	{
+	  /* Remove this option from the argv array.  */
+	  for (arg = i; arg < argc; arg ++)
+	    argv[arg] = argv[arg + 1];
+	  argc --;
+	  
+	  ptr = argv[i];
+	}
+      else
+	ptr += sizeof SWI_SWITCH;
+
+      swi_mask = 0;
+      
+      while (* ptr)
+	{
+	  int i;
+
+	  for (i = sizeof options / sizeof options[0]; i--;)
+	    if (strncmp (ptr, options[i].swi_option,
+			 strlen (options[i].swi_option)) == 0)
+	      {
+		swi_mask |= options[i].swi_mask;
+		ptr += strlen (options[i].swi_option);
+
+		if (* ptr == ',')
+		  ++ ptr;
+
+		break;
+	      }
+
+	  if (i < 0)
+	    break;
+	}
+
+      if (* ptr != 0)
+	fprintf (stderr, "Ignoring swi options: %s\n", ptr);
+      
+      /* Remove this option from the argv array.  */
+      for (arg = i; arg < argc; arg ++)
+	argv[arg] = argv[arg + 1];
+      argc --;
+      i --;
+    }
+  return argc;
+}
+
+static void
+sim_target_parse_arg_array (argv)
+     char ** argv;
+{
+  int i;
+
+  for (i = 0; argv[i]; i++)
+    ;
+
+  return (void) sim_target_parse_command_line (i, argv);
+}
+
+void
+sim_target_display_usage ()
+{
+  fprintf (stderr, "%s=<list>  Comma seperated list of SWI protocols to supoport.\n\
+                This list can contain: NONE, DEMON, ANGEL, REDBOOT and/or ALL.\n",
+	   SWI_SWITCH);
+}
+#endif
+
 SIM_DESC
 sim_open (kind, ptr, abfd, argv)
      SIM_OPEN_KIND kind;
@@ -438,6 +552,10 @@ sim_open (kind, ptr, abfd, argv)
   myname = (char *) xstrdup (argv[0]);
   sim_callback = ptr;
 
+#ifdef SIM_TARGET_SWITCHES
+  sim_target_parse_arg_array (argv);
+#endif
+  
   /* Decide upon the endian-ness of the processor.
      If we can, get the information from the bfd itself.
      Otherwise look to see if we have been given a command

@@ -1,5 +1,5 @@
 /* run front end support for all the simulators.
-   Copyright (C) 1992, 93-96, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1992, 93-96, 1997, 2002 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "callback.h"
 #include "remote-sim.h"
 #include "ansidecl.h"
+#include "run-sim.h"
 
 static void usage PARAMS ((void));
 extern int optind;
@@ -110,6 +111,10 @@ main (ac, av)
      this. */
   default_callback.init (&default_callback);
   sim_set_callbacks (&default_callback);
+
+#ifdef SIM_TARGET_SWITCHES
+  ac = sim_target_parse_command_line (ac, av);
+#endif
 
   /* FIXME: This is currently being rewritten to have each simulator
      do all argv processing.  */
@@ -338,5 +343,9 @@ usage ()
   fprintf (stderr, "\n");
   fprintf (stderr, "program args    Arguments to pass to simulated program.\n");
   fprintf (stderr, "                Note: Very few simulators support this.\n");
+#ifdef SIM_TARGET_SWITCHES
+  fprintf (stderr, "\nTarget specific options:\n");
+  sim_target_display_usage ();
+#endif
   exit (1);
 }

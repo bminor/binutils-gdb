@@ -1,3 +1,13 @@
+2002-05-20  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* run-sim.h: New header.  Provide prototypes for functions used
+	between run() and libsim.a which are not used by GDB.
+	* run.c: Include run-sim.h.
+        (main): If SIM_TARGET_SWITCHES is defined call
+        sim_target_parse_command_line.
+        (usage): If SIM_TARGET_SWITCHES is defined call
+        sim_target_display_usage.
+
 2002-05-17  Andrey Volkov  <avolkov@transas.com>
 
 	* run.c: Made h8300s as new target, not h8300h alias.
