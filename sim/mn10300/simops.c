@@ -1238,7 +1238,7 @@ void OP_F100 ()
 
   z = (value == 0);
   n = (value & 0x80000000);
-  c = (reg1 < reg2);
+  c = (reg1 > reg2);
   v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
        && (reg2 & 0x80000000) != (value & 0x80000000));
 
@@ -1260,7 +1260,7 @@ void OP_F120 ()
 
   z = (value == 0);
   n = (value & 0x80000000);
-  c = (reg1 < reg2);
+  c = (reg1 > reg2);
   v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
        && (reg2 & 0x80000000) != (value & 0x80000000));
 
@@ -1282,7 +1282,7 @@ void OP_F110 ()
 
   z = (value == 0);
   n = (value & 0x80000000);
-  c = (reg1 < reg2);
+  c = (reg1 > reg2);
   v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
        && (reg2 & 0x80000000) != (value & 0x80000000));
 
@@ -1304,7 +1304,7 @@ void OP_F130 ()
 
   z = (value == 0);
   n = (value & 0x80000000);
-  c = (reg1 < reg2);
+  c = (reg1 > reg2);
   v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
        && (reg2 & 0x80000000) != (value & 0x80000000));
 
@@ -1370,7 +1370,7 @@ void OP_F180 ()
 
   z = (value == 0);
   n = (value & 0x80000000);
-  c = (reg1 < reg2);
+  c = (reg1 > reg2);
   v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
        && (reg2 & 0x80000000) != (value & 0x80000000));
 
@@ -1505,7 +1505,7 @@ void OP_A0 ()
 
   z = (value == 0);
   n = (value & 0x80000000);
-  c = (reg1 < reg2);
+  c = (reg1 > reg2);
   v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
        && (reg2 & 0x80000000) != (value & 0x80000000));
 
@@ -1526,7 +1526,7 @@ void OP_F1A0 ()
 
   z = (value == 0);
   n = (value & 0x80000000);
-  c = (reg1 < reg2);
+  c = (reg1 > reg2);
   v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
        && (reg2 & 0x80000000) != (value & 0x80000000));
 
@@ -1547,7 +1547,7 @@ void OP_F190 ()
 
   z = (value == 0);
   n = (value & 0x80000000);
-  c = (reg1 < reg2);
+  c = (reg1 > reg2);
   v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
        && (reg2 & 0x80000000) != (value & 0x80000000));
 
@@ -1589,7 +1589,7 @@ void OP_B0 ()
 
   z = (value == 0);
   n = (value & 0x80000000);
-  c = (reg1 < reg2);
+  c = (reg1 > reg2);
   v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
        && (reg2 & 0x80000000) != (value & 0x80000000));
 
