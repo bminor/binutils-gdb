@@ -71,14 +71,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    (single sub-space version)
    :		addil LR'lt_ptr+ltoff,%dp	; get procedure entry point
    :		ldw RR'lt_ptr+ltoff(%r1),%r21
-   :            bv %r0(%r21)
+   :		bv %r0(%r21)
    :		ldw RR'lt_ptr+ltoff+4(%r1),%r19	; get new dlt value.
 
    Import stub to call shared library routine from shared library
    (single sub-space version)
    :		addil LR'ltoff,%r19		; get procedure entry point
    :		ldw RR'ltoff(%r1),%r21
-   :            bv %r0(%r21)
+   :		bv %r0(%r21)
    :		ldw RR'ltoff+4(%r1),%r19	; get new dlt value.
 
    Import stub to call shared library routine from normal object file
@@ -203,9 +203,6 @@ struct elf32_hppa_link_hash_entry {
 #endif
   } *dyn_relocs;
 
-  /* Set during a static link if we detect a function is PIC.  */
-  unsigned int maybe_pic_call:1;
-
   /* Set if the only reason we need a .plt entry is for a non-PIC to
      PIC function call.  */
   unsigned int pic_call:1;
@@ -255,10 +252,11 @@ struct elf32_hppa_link_hash_table {
   /* Whether we support multiple sub-spaces for shared libs.  */
   unsigned int multi_subspace:1;
 
-  /* Flags set when PCREL12F and PCREL17F branches detected.  Used to
+  /* Flags set when various size branches are detected.  Used to
      select suitable defaults for the stub group size.  */
   unsigned int has_12bit_branch:1;
   unsigned int has_17bit_branch:1;
+  unsigned int has_22bit_branch:1;
 
   /* Set if we need a .plt stub to support lazy dynamic linking.  */
   unsigned int need_plt_stub:1;
@@ -373,9 +371,6 @@ static boolean elf32_hppa_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *,
 	   bfd_byte *, Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 
-static int hppa_unwind_entry_compare
-  PARAMS ((const PTR, const PTR));
-
 static boolean elf32_hppa_finish_dynamic_symbol
   PARAMS ((bfd *, struct bfd_link_info *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
@@ -460,7 +455,6 @@ hppa_link_hash_newfunc (entry, table, string)
       eh = (struct elf32_hppa_link_hash_entry *) entry;
       eh->stub_cache = NULL;
       eh->dyn_relocs = NULL;
-      eh->maybe_pic_call = 0;
       eh->pic_call = 0;
       eh->plabel = 0;
     }
@@ -508,6 +502,7 @@ elf32_hppa_link_hash_table_create (abfd)
   ret->multi_subspace = 0;
   ret->has_12bit_branch = 0;
   ret->has_17bit_branch = 0;
+  ret->has_22bit_branch = 0;
   ret->need_plt_stub = 0;
   ret->sym_sec.abfd = NULL;
 
@@ -670,21 +665,12 @@ hppa_type_of_stub (input_sec, rel, hash, destination)
   unsigned int r_type;
 
   if (hash != NULL
-      && (((hash->elf.root.type == bfd_link_hash_defined
-	    || hash->elf.root.type == bfd_link_hash_defweak)
-	   && hash->elf.root.u.def.section->output_section == NULL)
-	  || (hash->elf.root.type == bfd_link_hash_defweak
-	      && hash->elf.dynindx != -1
-	      && hash->elf.plt.offset != (bfd_vma) -1)
-	  || hash->elf.root.type == bfd_link_hash_undefweak
-	  || hash->elf.root.type == bfd_link_hash_undefined
-	  || (hash->maybe_pic_call && !(input_sec->flags & SEC_HAS_GOT_REF))))
+      && hash->elf.plt.offset != (bfd_vma) -1
+      && (hash->elf.dynindx != -1 || hash->pic_call)
+      && !hash->plabel)
     {
-      /* If output_section is NULL, then it's a symbol defined in a
-	 shared library.  We will need an import stub.  Decide between
-	 hppa_stub_import and hppa_stub_import_shared later.  For
-	 shared links we need stubs for undefined or weak syms too;
-	 They will presumably be resolved by the dynamic linker.  */
+      /* We need an import stub.  Decide between hppa_stub_import
+	 and hppa_stub_import_shared later.  */
       return hppa_stub_import;
     }
 
@@ -742,6 +728,7 @@ hppa_type_of_stub (input_sec, rel, hash, destination)
 #define BE_SR0_R21	0xe2a00000	/* be    0(%sr0,%r21)		*/
 #define STW_RP		0x6bc23fd1	/* stw   %rp,-24(%sr0,%sp)	*/
 
+#define BL22_RP		0xe800a002	/* b,l,n XXX,%rp		*/
 #define BL_RP		0xe8400002	/* b,l,n XXX,%rp		*/
 #define NOP		0x08000240	/* nop				*/
 #define LDW_RP		0x4bc23fd1	/* ldw   -24(%sr0,%sp),%rp	*/
@@ -931,7 +918,9 @@ hppa_build_one_stub (gen_entry, in_arg)
 		    + stub_sec->output_offset
 		    + stub_sec->output_section->vma);
 
-      if (sym_value - 8 + 0x40000 >= 0x80000)
+      if (sym_value - 8 + (1 << (17 + 1)) >= (1 << (17 + 2))
+	  && (!htab->has_22bit_branch
+	      || sym_value - 8 + (1 << (22 + 1)) >= (1 << (22 + 2))))
 	{
 	  (*_bfd_error_handler)
 	    (_("%s(%s+0x%lx): cannot reach %s, recompile with -ffunction-sections"),
@@ -944,7 +933,10 @@ hppa_build_one_stub (gen_entry, in_arg)
 	}
 
       val = hppa_field_adjust (sym_value, (bfd_signed_vma) -8, e_fsel) >> 2;
-      insn = hppa_rebuild_insn ((int) BL_RP, val, 17);
+      if (!htab->has_22bit_branch)
+	insn = hppa_rebuild_insn ((int) BL_RP, val, 17);
+      else
+	insn = hppa_rebuild_insn ((int) BL22_RP, val, 22);
       bfd_put_32 (stub_bfd, insn, loc);
 
       bfd_put_32 (stub_bfd, (bfd_vma) NOP,         loc + 4);
@@ -1263,12 +1255,16 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 
 	case R_PARISC_PCREL12F:
 	  htab->has_12bit_branch = 1;
-	  /* Fall thru.  */
+	  goto branch_common;
+
 	case R_PARISC_PCREL17C:
 	case R_PARISC_PCREL17F:
 	  htab->has_17bit_branch = 1;
-	  /* Fall thru.  */
+	  goto branch_common;
+
 	case R_PARISC_PCREL22F:
+	  htab->has_22bit_branch = 1;
+	branch_common:
 	  /* Function calls might need to go through the .plt, and
 	     might require long branch stubs.  */
 	  if (h == NULL)
@@ -1322,7 +1318,7 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 	case R_PARISC_DIR14F: /* Used for load/store from absolute locn.  */
 	case R_PARISC_DIR14R:
 	case R_PARISC_DIR21L: /* As above, and for ext branches too.  */
-#if 1
+#if 0
 	  /* Help debug shared library creation.  Any of the above
 	     relocs can be used in shared libs, but they may cause
 	     pages to become unshared.  */
@@ -1838,19 +1834,10 @@ elf32_hppa_adjust_dynamic_symbol (info, h)
   unsigned int power_of_two;
 
   /* If this is a function, put it in the procedure linkage table.  We
-     will fill in the contents of the procedure linkage table later,
-     when we know the address of the .got section.  */
+     will fill in the contents of the procedure linkage table later.  */
   if (h->type == STT_FUNC
       || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
-      if (!info->shared
-	  && h->plt.refcount > 0
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
-	  && (h->root.u.def.section->flags & SEC_HAS_GOT_REF) != 0)
-	{
-	  ((struct elf32_hppa_link_hash_entry *) h)->maybe_pic_call = 1;
-	}
-
       if (h->plt.refcount <= 0
 	  || ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
 	      && h->root.type != bfd_link_hash_defweak
@@ -1867,7 +1854,10 @@ elf32_hppa_adjust_dynamic_symbol (info, h)
 
 	  /* As a special sop to the hppa ABI, we keep a .plt entry
 	     for functions in sections containing PIC code.  */
-	  if (((struct elf32_hppa_link_hash_entry *) h)->maybe_pic_call)
+	  if (!info->shared
+	      && h->plt.refcount > 0
+	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
+	      && (h->root.u.def.section->flags & SEC_HAS_GOT_REF) != 0)
 	    ((struct elf32_hppa_link_hash_entry *) h)->pic_call = 1;
 	  else
 	    {
@@ -1918,7 +1908,7 @@ elf32_hppa_adjust_dynamic_symbol (info, h)
     }
 
   /* If we didn't find any dynamic relocs in read-only sections, then
-     we'll be keeping the dynamic relocs and avoiding the copy reloc.  */ 
+     we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
   if (p == NULL)
     {
       h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
@@ -1996,7 +1986,6 @@ mark_PIC_calls (h, inf)
     }
 
   h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
-  ((struct elf32_hppa_link_hash_entry *) h)->maybe_pic_call = 1;
   ((struct elf32_hppa_link_hash_entry *) h)->pic_call = 1;
 
   return true;
@@ -2026,6 +2015,7 @@ allocate_plt_static (h, inf)
     {
       /* Make an entry in the .plt section for non-pic code that is
 	 calling pic code.  */
+      ((struct elf32_hppa_link_hash_entry *) h)->plabel = 0;
       s = htab->splt;
       h->plt.offset = s->_raw_size;
       s->_raw_size += PLT_ENTRY_SIZE;
@@ -2045,7 +2035,11 @@ allocate_plt_static (h, inf)
 
       if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
 	{
-	  /* Allocate these later.  */
+	  /* Allocate these later.  From this point on, h->plabel
+	     means that the plt entry is only used by a plabel.
+	     We'll be using a normal plt entry for this symbol, so
+	     clear the plabel indicator.  */
+	  ((struct elf32_hppa_link_hash_entry *) h)->plabel = 0;
 	}
       else if (((struct elf32_hppa_link_hash_entry *) h)->plabel)
 	{
@@ -2096,7 +2090,7 @@ allocate_dynrelocs (h, inf)
   if (htab->elf.dynamic_sections_created
       && h->plt.offset != (bfd_vma) -1
       && !((struct elf32_hppa_link_hash_entry *) h)->pic_call
-      && WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
+      && !((struct elf32_hppa_link_hash_entry *) h)->plabel)
     {
       /* Make an entry in the .plt section.  */
       s = htab->splt;
@@ -3267,37 +3261,13 @@ elf32_hppa_final_link (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
-  asection *s;
-
   /* Invoke the regular ELF linker to do all the work.  */
   if (!bfd_elf32_bfd_final_link (abfd, info))
     return false;
 
   /* If we're producing a final executable, sort the contents of the
-     unwind section.  Magic section names, but this is much safer than
-     having elf32_hppa_relocate_section remember where SEGREL32 relocs
-     occurred.  Consider what happens if someone inept creates a
-     linker script that puts unwind information in .text.  */
-  s = bfd_get_section_by_name (abfd, ".PARISC.unwind");
-  if (s != NULL)
-    {
-      bfd_size_type size;
-      char *contents;
-
-      size = s->_raw_size;
-      contents = bfd_malloc (size);
-      if (contents == NULL)
-	return false;
-
-      if (! bfd_get_section_contents (abfd, s, contents, (file_ptr) 0, size))
-	return false;
-
-      qsort (contents, (size_t) (size / 16), 16, hppa_unwind_entry_compare);
-
-      if (! bfd_set_section_contents (abfd, s, contents, (file_ptr) 0, size))
-	return false;
-    }
-  return true;
+     unwind section.  */
+  return elf_hppa_sort_unwind (abfd);
 }
 
 /* Record the lowest address for the data and text segments.  */
@@ -3370,19 +3340,14 @@ final_link_relocate (input_section, contents, rel, value, htab, sym_sec, h)
     case R_PARISC_PCREL12F:
     case R_PARISC_PCREL17F:
     case R_PARISC_PCREL22F:
-      /* If this is a call to a function defined in another dynamic
-	 library, or if it is a call to a PIC function in the same
-	 object, or if this is a shared link and it is a call to a
-	 weak symbol which may or may not be in the same object, then
-	 find the import stub in the stub hash.  */
+      /* If this call should go via the plt, find the import stub in
+	 the stub hash.  */
       if (sym_sec == NULL
 	  || sym_sec->output_section == NULL
 	  || (h != NULL
-	      && ((h->maybe_pic_call
-		   && !(input_section->flags & SEC_HAS_GOT_REF))
-		  || (h->elf.root.type == bfd_link_hash_defweak
-		      && h->elf.dynindx != -1
-		      && h->elf.plt.offset != (bfd_vma) -1))))
+	      && h->elf.plt.offset != (bfd_vma) -1
+	      && (h->elf.dynindx != -1 || h->pic_call)
+	      && !h->plabel))
 	{
 	  stub_entry = hppa_get_stub_entry (input_section, sym_sec,
 					    h, rel, htab);
@@ -3437,7 +3402,7 @@ final_link_relocate (input_section, contents, rel, value, htab, sym_sec, h)
 	      == (((int) OP_ADDIL << 26) | (27 << 21)))
 	    {
 	      insn &= ~ (0x1f << 21);
-#if 1 /* debug them.  */
+#if 0 /* debug them.  */
 	      (*_bfd_error_handler)
 		(_("%s(%s+0x%lx): fixing %s"),
 		 bfd_archive_filename (input_bfd),
@@ -4106,32 +4071,6 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
     }
 
   return true;
-}
-
-/* Comparison function for qsort to sort unwind section during a
-   final link.  */
-
-static int
-hppa_unwind_entry_compare (a, b)
-     const PTR a;
-     const PTR b;
-{
-  const bfd_byte *ap, *bp;
-  unsigned long av, bv;
-
-  ap = (const bfd_byte *) a;
-  av = (unsigned long) ap[0] << 24;
-  av |= (unsigned long) ap[1] << 16;
-  av |= (unsigned long) ap[2] << 8;
-  av |= (unsigned long) ap[3];
-
-  bp = (const bfd_byte *) b;
-  bv = (unsigned long) bp[0] << 24;
-  bv |= (unsigned long) bp[1] << 16;
-  bv |= (unsigned long) bp[2] << 8;
-  bv |= (unsigned long) bp[3];
-
-  return av < bv ? -1 : av > bv ? 1 : 0;
 }
 
 /* Finish up dynamic symbol handling.  We set the contents of various

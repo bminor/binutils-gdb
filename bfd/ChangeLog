@@ -1,3 +1,57 @@
+2002-04-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* reloc.c: Move sh relocs to where they belong.
+	* libbfd.h, bfd-in2.h: Regenerate.
+
+	Merge from mainline
+	2002-04-26  Alan Modra  <amodra@bigpond.net.au>
+	* opncls.c (bfd_make_readable): Call bfd_section_list_clear.
+	* xcofflink.c (xcoff_link_add_dynamic_symbols): Likewise.
+	* elflink.h (elf_bfd_final_link): Ensure input bfd class is the
+	same as the output before calling elf_link_input_bfd.
+	* coffcode.h (coff_compute_section_file_positions): Set
+	section_tail after shuffling section list.
+
+	2002-04-23  Alan Modra  <amodra@bigpond.net.au>
+	* elf32-hppa.c (hppa_type_of_stub): Correct and simplify condition
+	under which a plt call stub is used.
+	(final_link_relocate): Similarly.
+	(allocate_plt_static): Clear h-plabel except when plt entry is
+	exclusively used for a plabel.
+	(allocate_dynrelocs): Use the above to simplify plt sizing.
+	(struct elf32_hppa_link_hash_table): Add has_22bit_branch.
+	(elf32_hppa_link_hash_table_create): Init.
+	(BL22_RP): Define.
+	(hppa_build_one_stub): Use BL22_RP if has_22bit_branch.
+	(elf32_hppa_check_relocs): Set has_22bit_branch.
+	* elf32-hppa.c (elf32_hppa_check_relocs): Remove debug message.
+	(final_link_relocate): Likewise.
+
+	2002-04-20  Alan Modra  <amodra@bigpond.net.au>
+	* archures.c (bfd_arch_info): Add comment on list order.
+	(bfd_default_set_arch_mach): Use bfd_lookup_arch.
+	* cpu-powerpc.c (bfd_powerpc_archs): Re-order so that the default
+	is always at head of list.
+	* bfd-in2.h: Regenerate.
+
+	2002-04-16  Alan Modra  <amodra@bigpond.net.au>
+	* elf32-m32r.c (m32r_elf_add_symbol_hook): Check the hash table
+	type rather than just assuming entries are ELF.
+	* elf32-sh64.c (sh64_elf_add_symbol_hook): Likewise.
+	* elf64-sh64.c (sh64_elf64_add_symbol_hook): Likewise.
+	* elf64-sparc.c (sparc64_elf_add_symbol_hook): Likewise.
+	* elf64-mmix.c (mmix_elf_add_symbol_hook): Use bfd_link_hash_entry
+	rather than elf_link_hash_entry.
+
+	2002-04-15  Alan Modra  <amodra@bigpond.net.au>
+	* elf32-ppc.c (ppc_elf_add_symbol_hook): Check the hash table type.
+
+	2002-04-08  Randolph Chung  <tausq@debian.org>
+	* elf32-hppa.c (hppa_unwind_entry_compare): Move to elf-hppa.h.
+	(elf32_hppa_final_link): Split out sorting logic to..
+	* elf-hppa.h (elf_hppa_sort_unwind): ..here.
+	(elf_hppa_final_link): Call elf_hppa_sort_unwind.
+
 2002-04-26  Richard Smith  <richard@ex-parrot.com>
 	    Jakub Jelinek  <jakub@redhat.com>
 

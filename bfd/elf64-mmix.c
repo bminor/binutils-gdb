@@ -1953,16 +1953,16 @@ mmix_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 		       strlen (MMIX_LOC_SECTION_START_SYMBOL_PREFIX)) == 0)
     {
       /* See if we have another one.  */
-      struct elf_link_hash_entry *h
-	= (struct elf_link_hash_entry *) bfd_link_hash_lookup (info->hash,
-							       *namep,
-							       false,
-							       false, false);
+      struct bfd_link_hash_entry *h = bfd_link_hash_lookup (info->hash,
+							    *namep,
+							    false,
+							    false,
+							    false);
 
-      if (h != NULL && h->root.type != bfd_link_hash_undefined)
+      if (h != NULL && h->type != bfd_link_hash_undefined)
 	{
 	  /* How do we get the asymbol (or really: the filename) from h?
-	     h->root.u.def.section->owner is NULL.  */
+	     h->u.def.section->owner is NULL.  */
 	  ((*_bfd_error_handler)
 	   (_("%s: Error: multiple definition of `%s'; start of %s is set in a earlier linked file\n"),
 	    bfd_get_filename (abfd), *namep,
