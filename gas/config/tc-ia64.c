@@ -3254,6 +3254,10 @@ generate_unwind_image (text_name)
   int size, pad;
   unw_rec_list *list;
 
+  /* Mark the end of the unwind info, so that we can compute the size of the
+     last unwind region.  */
+  add_unwind_entry (output_endp ());
+
   /* Force out pending instructions, to make sure all unwind records have
      a valid slot_number field.  */
   ia64_flush_insns ();
@@ -4045,8 +4049,6 @@ dot_endp (dummy)
     text_name = "";
 
   insn_group_break (1, 0, 0);
-
-  add_unwind_entry (output_endp ());
 
   /* If there wasn't a .handlerdata, we haven't generated an image yet.  */
   if (!unwind.info)
