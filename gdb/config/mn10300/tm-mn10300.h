@@ -1,6 +1,5 @@
 /* Parameters for execution on a Matsushita mn10300 processor.
-   Copyright 1996
-   Free Software Foundation, Inc. 
+   Copyright 1996, 1997 Free Software Foundation, Inc. 
 
    Contributed by Geoffrey Noer <noer@cygnus.com>
 
@@ -41,10 +40,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define LAR_REGNUM 13
 
 #define FP_REGNUM 7 /* needs to be virtual register ??? */
-#define V0_REGNUM 15 /* needs to be virtual register ??? */
-#define RP_REGNUM 16 /* needs to be virtual register ??? */
-#define ARG0_REGNUM 17 /* needs to be virtual register ??? */
-#define ARGLAST_REGNUM 18 /* needs to be virtual register ??? */
 
 #define REGISTER_VIRTUAL_TYPE(REG) builtin_type_int
 
@@ -62,7 +57,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define INNER_THAN <
 
-#define SAVED_PC_AFTER_CALL(fi) read_register (RP_REGNUM)
+#define SAVED_PC_AFTER_CALL(frame) \
+  read_memory_integer (read_register (SP_REGNUM), 4)
 
 #ifdef __STDC__
 struct frame_info;
@@ -88,15 +84,19 @@ extern CORE_ADDR mn10300_find_callers_reg PARAMS ((struct frame_info *fi, int re
 extern CORE_ADDR mn10300_frame_saved_pc   PARAMS ((struct frame_info *));
 #define FRAME_SAVED_PC(FI) (mn10300_frame_saved_pc (FI))
 
+/* Extract from an array REGBUF containing the (raw) register state
+   a function return value of type TYPE, and copy that, in virtual format,
+   into VALBUF. */
+
 #define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
-  memcpy (VALBUF, REGBUF + REGISTER_BYTE (V0_REGNUM), TYPE_LENGTH (TYPE))
+  memcpy (VALBUF, REGBUF + REGISTER_BYTE (0), TYPE_LENGTH (TYPE))
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
-  extract_address (REGBUF + REGISTER_BYTE (V0_REGNUM), \
-		   REGISTER_RAW_SIZE (V0_REGNUM))
+  extract_address (REGBUF + REGISTER_BYTE (0), \
+		   REGISTER_RAW_SIZE (0))
 
 #define STORE_RETURN_VALUE(TYPE, VALBUF) \
-  write_register_bytes(REGISTER_BYTE (V0_REGNUM), VALBUF, TYPE_LENGTH (TYPE));
+  write_register_bytes(REGISTER_BYTE (0), VALBUF, TYPE_LENGTH (TYPE));
 
 extern CORE_ADDR mn10300_skip_prologue PARAMS ((CORE_ADDR pc));
 #define SKIP_PROLOGUE(pc) pc = mn10300_skip_prologue (pc)
@@ -118,6 +118,7 @@ extern void mn10300_pop_frame PARAMS ((struct frame_info *frame));
 #define CALL_DUMMY_LOCATION          AT_ENTRY_POINT
 #define FIX_CALL_DUMMY(DUMMY, START, FUNADDR, NARGS, ARGS, TYPE, GCCP)
 #define CALL_DUMMY_ADDRESS()         entry_point_address ()
+
 extern CORE_ADDR mn10300_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
 #define PUSH_RETURN_ADDRESS(PC, SP)  mn10300_push_return_address (PC, SP)
 
