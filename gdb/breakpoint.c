@@ -738,7 +738,19 @@ insert_breakpoints (void)
     if (b->enable_state == bp_permanent)
       /* Permanent breakpoints cannot be inserted or removed.  */
       continue;
-    else if (b->type != bp_watchpoint
+    if ((b->type == bp_watchpoint
+	 || b->type == bp_hardware_watchpoint
+	 || b->type == bp_read_watchpoint
+	 || b->type == bp_access_watchpoint) && (!b->val))
+      {
+	struct value *val;
+	val = evaluate_expression (b->exp);
+	release_value (val);
+	if (VALUE_LAZY (val))
+	  value_fetch_lazy (val);
+	b->val = val;
+      } 
+    if (b->type != bp_watchpoint
 	&& b->type != bp_hardware_watchpoint
 	&& b->type != bp_read_watchpoint
 	&& b->type != bp_access_watchpoint
@@ -1566,6 +1578,14 @@ breakpoint_init_inferior (enum inf_context context)
 	/* Likewise for watchpoints on local expressions.  */
 	if (b->exp_valid_block != NULL)
 	  delete_breakpoint (b);
+	if (context == inf_starting) 
+	  {
+	    /* Reset val field to force reread of starting value
+	       in insert_breakpoints.  */
+	    if (b->val)
+	      value_free (b->val);
+	    b->val = NULL;
+	  }
 	break;
       default:
 	/* Likewise for exception catchpoints in dynamic-linked
