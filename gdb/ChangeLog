@@ -1,3 +1,20 @@
+2001-04-02  Kevin Buettner  <kevinb@redhat.com>
+
+	* m88k-tdep.c (examine_prologue): Change type of ``insn'' from
+	unsigned int to unsigned long.  Also, fix format string.
+	(pop_frame):  Fix PC_IN_CALL_DUMMY() call so that it doesn't
+	use an undeclared variable.  Also, delete declaration and
+	initialization of ``fp'' because it is otherwise unused.
+	* remote-bug.c (sleep): Delete declaration.
+	(bug_store_register, bug_write_memory, bug_read_memory)
+	(bug_insert_breakpoint, bug_remove_breakpoint): Fix sprintf()
+	format statements and cast certain sprintf() arguments to
+	eliminate warnings.
+	(bug_load): Likewise for call to printf_filtered().
+	* config/m88k/tm-m88k.h (FIX_CALL_DUMMY): Eliminate
+	assignment to ``pc''.  The necessary assignment is done in
+	hand_function_call() after the invocation of FIX_CALL_DUMMY().
+
 2001-03-20  Daniel Berlin  <dberlin@redhat.com>
 	
 	* symtab.c (completion_list_add_name): Remove duplicate string checks,

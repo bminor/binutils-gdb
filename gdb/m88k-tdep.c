@@ -246,7 +246,7 @@ examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
 {
   register CORE_ADDR next_ip;
   register int src;
-  unsigned int insn;
+  unsigned long insn;
   int size, offset;
   char must_adjust[32];		/* If set, must adjust offsets in fsr */
   int sp_offset = -1;		/* -1 means not set (valid must be mult of 8) */
@@ -389,7 +389,7 @@ end_of_prologue_found:
   /* (we hope...) */
   if (fsr->regs[SP_REGNUM] != 0
       && fsr->regs[SP_REGNUM] != frame_sp - sp_offset)
-    fprintf_unfiltered (gdb_stderr, "Bad saved SP value %x != %x, offset %x!\n",
+    fprintf_unfiltered (gdb_stderr, "Bad saved SP value %lx != %lx, offset %x!\n",
 			fsr->regs[SP_REGNUM],
 			frame_sp - sp_offset, sp_offset);
 
@@ -568,14 +568,12 @@ void
 pop_frame (void)
 {
   register struct frame_info *frame = get_current_frame ();
-  register CORE_ADDR fp;
   register int regnum;
   struct frame_saved_regs fsr;
 
-  fp = FRAME_FP (frame);
   get_frame_saved_regs (frame, &fsr);
 
-  if (PC_IN_CALL_DUMMY (read_pc (), read_register (SP_REGNUM), FRAME_FP (fi)))
+  if (PC_IN_CALL_DUMMY (read_pc (), read_register (SP_REGNUM), frame->frame))
     {
       /* FIXME: I think get_frame_saved_regs should be handling this so
          that we can deal with the saved registers properly (e.g. frame

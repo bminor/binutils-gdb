@@ -37,9 +37,6 @@
 
 #include "remote-utils.h"
 
-
-extern int sleep ();
-
 /* External data declarations */
 extern int stop_soon_quietly;	/* for wait_for_inferior */
 
@@ -142,7 +139,7 @@ bug_load (char *args, int fromtty)
 
 	  char *buffer = xmalloc (srec_frame);
 
-	  printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma, s->vma + s->_raw_size);
+	  printf_filtered ("%s\t: 0x%4lx .. 0x%4lx  ", s->name, s->vma, s->vma + s->_raw_size);
 	  gdb_flush (gdb_stdout);
 	  for (i = 0; i < s->_raw_size; i += srec_frame)
 	    {
@@ -514,9 +511,9 @@ bug_store_register (int regno)
       if (target_is_m88110 && regno == SFIP_REGNUM)
 	return;
       else if (regno < XFP_REGNUM)
-	sprintf (buffer, "rs %s %08x",
+	sprintf (buffer, "rs %s %08lx",
 		 regname,
-		 read_register (regno));
+		 (long) read_register (regno));
       else
 	{
 	  unsigned char *fpreg_buf =
@@ -650,7 +647,7 @@ bug_write_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 	    thisgo = srec_bytes;
 
 	  address = memaddr + done;
-	  sprintf (buf, "S3%02X%08X", thisgo + 4 + 1, address);
+	  sprintf (buf, "S3%02X%08lX", thisgo + 4 + 1, (long) address);
 	  buf += 12;
 
 	  checksum += (thisgo + 4 + 1
@@ -740,7 +737,7 @@ bug_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
   unsigned int inaddr;
   unsigned int checksum;
 
-  sprintf (request, "du 0 %x:&%d", memaddr, len);
+  sprintf (request, "du 0 %lx:&%d", (long) memaddr, len);
   sr_write_cr (request);
 
   p = buffer = alloca (len);
@@ -842,7 +839,7 @@ bug_insert_breakpoint (CORE_ADDR addr, char *save)
       char buffer[100];
 
       num_brkpts++;
-      sprintf (buffer, "br %x", addr);
+      sprintf (buffer, "br %lx", (long) addr);
       sr_write_cr (buffer);
       gr_expect_prompt ();
       return (0);
@@ -868,7 +865,7 @@ bug_remove_breakpoint (CORE_ADDR addr, char *save)
       char buffer[100];
 
       num_brkpts--;
-      sprintf (buffer, "nobr %x", addr);
+      sprintf (buffer, "nobr %lx", (long) addr);
       sr_write_cr (buffer);
       gr_expect_prompt ();
 

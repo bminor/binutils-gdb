@@ -585,7 +585,6 @@ extern void m88k_push_dummy_frame ();
 	(((unsigned long) (fun)) >> 16);				\
   *(unsigned long *)((char *) (dummy) + 0xa4) |=			\
 	(((unsigned long) (fun)) & 0xffff);				\
-  pc = text_end;							\
 }
 
 /* Stack must be aligned on 64-bit boundaries when synthesizing
