@@ -31,11 +31,10 @@ COPYING
 ChangeLog
 Makefile.in
 TODO
-aout.c
+VERSION
 aout32.c
 aout64.c
 aoutf1.h
-aoutx.c
 aoutx.h
 archive.c
 archures.c
@@ -57,6 +56,7 @@ demo64.c
 ecoff.c
 filemode.c
 host-aout.c
+i386coff.c
 icoff.c
 ieee.c
 liba.out.h
@@ -84,7 +84,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.1  1991/05/23 21:14:00  rich
+# Revision 1.2  1991/05/29 02:40:08  gnu
+# Fix up .Sanitize file, remove files that are not referenced.
+#
+# Revision 1.1  1991/05/23  21:14:00  rich
 # Initial revision
 #
 #
