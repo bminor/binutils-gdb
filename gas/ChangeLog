@@ -1,3 +1,12 @@
+2005-03-25  Hans-Peter Nilsson  <hp@axis.com>
+
+	* config/tc-cris.h: Convert to ISO C90.
+	* config/tc-cris.c: Ditto.
+	(md_estimate_size_before_relax): Remove obsolete comment for
+	parameter "segment_type".
+	(md_begin): Document reason for cast of hash_insert argument.
+	(md_atof): Correct type of parameter "type".
+
 2005-03-24  Nick Clifton  <nickc@redhat.com>
 
 	* write.h (bit_fix_new): Remove redundant prototype.

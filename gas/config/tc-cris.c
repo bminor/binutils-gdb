@@ -120,52 +120,46 @@ enum cris_archs
   arch_cris_any_v0_v10, arch_crisv32, arch_cris_common_v10_v32
 };
 
-static enum cris_archs cris_arch_from_string PARAMS ((char **));
-static int cris_insn_ver_valid_for_arch PARAMS ((enum cris_insn_version_usage,
-						 enum cris_archs));
+static enum cris_archs cris_arch_from_string (char **);
+static int cris_insn_ver_valid_for_arch (enum cris_insn_version_usage,
+					 enum cris_archs);
 
-static void cris_process_instruction PARAMS ((char *,
-					      struct cris_instruction *,
-					      struct cris_prefix *));
-static int get_bwd_size_modifier PARAMS ((char **, int *));
-static int get_bw_size_modifier PARAMS ((char **, int *));
-static int get_gen_reg PARAMS ((char **, int *));
-static int get_spec_reg PARAMS ((char **,
-				 const struct cris_spec_reg **));
-static int get_sup_reg PARAMS ((char **, int *));
-static int get_autoinc_prefix_or_indir_op PARAMS ((char **,
-						   struct cris_prefix *,
-						   int *, int *, int *,
-						   expressionS *));
-static int get_3op_or_dip_prefix_op PARAMS ((char **,
-					     struct cris_prefix *));
-static int cris_get_expression PARAMS ((char **, expressionS *));
-static int get_flags PARAMS ((char **, int *));
-static void gen_bdap PARAMS ((int, expressionS *));
-static int branch_disp PARAMS ((int));
-static void gen_cond_branch_32 PARAMS ((char *, char *, fragS *,
-					symbolS *, symbolS *, long int));
-static void cris_number_to_imm PARAMS ((char *, long, int, fixS *, segT));
-static void cris_create_short_jump PARAMS ((char *, addressT, addressT,
-					    fragS *, symbolS *));
-static void s_syntax PARAMS ((int));
-static void s_cris_file PARAMS ((int));
-static void s_cris_loc PARAMS ((int));
-static void s_cris_arch PARAMS ((int));
+static void cris_process_instruction (char *, struct cris_instruction *,
+				      struct cris_prefix *);
+static int get_bwd_size_modifier (char **, int *);
+static int get_bw_size_modifier (char **, int *);
+static int get_gen_reg (char **, int *);
+static int get_spec_reg (char **, const struct cris_spec_reg **);
+static int get_sup_reg (char **, int *);
+static int get_autoinc_prefix_or_indir_op (char **, struct cris_prefix *,
+					   int *, int *, int *,
+					   expressionS *);
+static int get_3op_or_dip_prefix_op (char **, struct cris_prefix *);
+static int cris_get_expression (char **, expressionS *);
+static int get_flags (char **, int *);
+static void gen_bdap (int, expressionS *);
+static int branch_disp (int);
+static void gen_cond_branch_32 (char *, char *, fragS *, symbolS *, symbolS *,
+				long int);
+static void cris_number_to_imm (char *, long, int, fixS *, segT);
+static void cris_create_short_jump (char *, addressT, addressT, fragS *,
+				    symbolS *);
+static void s_syntax (int);
+static void s_cris_file (int);
+static void s_cris_loc (int);
+static void s_cris_arch (int);
 
 /* Get ":GOT", ":GOTOFF", ":PLT" etc. suffixes.  */
-static void cris_get_pic_suffix PARAMS ((char **,
-					 bfd_reloc_code_real_type *,
-					 expressionS *));
-static unsigned int cris_get_pic_reloc_size
-  PARAMS ((bfd_reloc_code_real_type));
+static void cris_get_pic_suffix (char **, bfd_reloc_code_real_type *,
+				 expressionS *);
+static unsigned int cris_get_pic_reloc_size (bfd_reloc_code_real_type);
 
 /* All the .syntax functions.  */
-static void cris_force_reg_prefix PARAMS ((void));
-static void cris_relax_reg_prefix PARAMS ((void));
-static void cris_sym_leading_underscore PARAMS ((void));
-static void cris_sym_no_leading_underscore PARAMS ((void));
-static char *cris_insn_first_word_frag PARAMS ((void));
+static void cris_force_reg_prefix (void);
+static void cris_relax_reg_prefix (void);
+static void cris_sym_leading_underscore (void);
+static void cris_sym_no_leading_underscore (void);
+static char *cris_insn_first_word_frag (void);
 
 /* Handle to the opcode hash table.  */
 static struct hash_control *op_hash = NULL;
@@ -449,7 +443,7 @@ int md_long_jump_size = XCONCAT2 (DEFAULT_CRIS_ARCH,_long_jump_size);
    that, the output format must remain fixed.  */
 
 const char *
-cris_target_format ()
+cris_target_format (void)
 {
   switch (OUTPUT_FLAVOR)
     {
@@ -471,7 +465,7 @@ cris_target_format ()
    cris_arch.  */
 
 unsigned int
-cris_mach ()
+cris_mach (void)
 {
   unsigned int retval = 0;
 
@@ -505,10 +499,8 @@ cris_mach ()
    The offset can be 8, 16 or 32 bits long.  */
 
 long
-cris_relax_frag (seg, fragP, stretch)
-     segT seg ATTRIBUTE_UNUSED;
-     fragS *fragP;
-     long stretch ATTRIBUTE_UNUSED;
+cris_relax_frag (segT seg ATTRIBUTE_UNUSED, fragS *fragP,
+		 long stretch ATTRIBUTE_UNUSED)
 {
   long growth;
   offsetT aim = 0;
@@ -612,10 +604,7 @@ cris_relax_frag (seg, fragP, stretch)
    fr_var starts with a value.  */
 
 int
-md_estimate_size_before_relax (fragP, segment_type)
-     fragS *fragP;
-     /* The segment is either N_DATA or N_TEXT.  */
-     segT segment_type;
+md_estimate_size_before_relax (fragS *fragP, segT segment_type)
 {
   int old_fr_fix;
   symbolS *symbolP = fragP->fr_symbol;
@@ -792,10 +781,8 @@ md_estimate_size_before_relax (fragP, segment_type)
    The caller will turn the frag into a ".space 0".  */
 
 void
-md_convert_frag (abfd, sec, fragP)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     segT sec ATTRIBUTE_UNUSED;
-     fragS *fragP;
+md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec ATTRIBUTE_UNUSED,
+		 fragS *fragP)
 {
   /* Pointer to first byte in variable-sized part of the frag.  */
   char *var_partp;
@@ -1008,12 +995,9 @@ md_convert_frag (abfd, sec, fragP)
    jumps are the same for pre-v32.  */
 
 static void
-cris_create_short_jump (storep, from_addr, to_addr, fragP, to_symbol)
-     char *storep;
-     addressT from_addr;
-     addressT to_addr;
-     fragS *fragP ATTRIBUTE_UNUSED;
-     symbolS *to_symbol ATTRIBUTE_UNUSED;
+cris_create_short_jump (char *storep, addressT from_addr, addressT to_addr,
+			fragS *fragP ATTRIBUTE_UNUSED,
+			symbolS *to_symbol ATTRIBUTE_UNUSED)
 {
   long int distance;
 
@@ -1078,12 +1062,8 @@ cris_create_short_jump (storep, from_addr, to_addr, fragP, to_symbol)
    to_symbol  Destination symbol.  */
 
 void
-md_create_long_jump (storep, from_addr, to_addr, fragP, to_symbol)
-     char *storep;
-     addressT from_addr;
-     addressT to_addr;
-     fragS *fragP;
-     symbolS *to_symbol;
+md_create_long_jump (char *storep, addressT from_addr, addressT to_addr,
+		     fragS *fragP, symbolS *to_symbol)
 {
   long int distance;
 
@@ -1138,7 +1118,7 @@ md_create_long_jump (storep, from_addr, to_addr, fragP, to_symbol)
    start of the insn for debug-format use.  */
 
 static char *
-cris_insn_first_word_frag ()
+cris_insn_first_word_frag (void)
 {
   char *insnp = frag_more (2);
 
@@ -1157,7 +1137,7 @@ cris_insn_first_word_frag ()
 /* Port-specific assembler initialization.  */
 
 void
-md_begin ()
+md_begin (void)
 {
   const char *hashret = NULL;
   int i = 0;
@@ -1195,7 +1175,8 @@ md_begin ()
 	  continue;
 	}
 
-      hashret = hash_insert (op_hash, name, (PTR) &cris_opcodes[i]);
+      /* Need to cast to get rid of "const".  FIXME: Fix hash_insert instead.  */
+      hashret = hash_insert (op_hash, name, (void *) &cris_opcodes[i]);
 
       if (hashret != NULL && *hashret != '\0')
 	as_fatal (_("Can't hash `%s': %s\n"), cris_opcodes[i].name,
@@ -1216,8 +1197,7 @@ md_begin ()
 /* Assemble a source line.  */
 
 void
-md_assemble (str)
-     char *str;
+md_assemble (char *str)
 {
   struct cris_instruction output_instruction;
   struct cris_prefix prefix;
@@ -1465,10 +1445,8 @@ md_assemble (str)
 /* Low level text-to-bits assembly.  */
 
 static void
-cris_process_instruction (insn_text, out_insnp, prefixp)
-     char *insn_text;
-     struct cris_instruction *out_insnp;
-     struct cris_prefix *prefixp;
+cris_process_instruction (char *insn_text, struct cris_instruction *out_insnp,
+			  struct cris_prefix *prefixp)
 {
   char *s;
   char modified_char = 0;
@@ -2210,9 +2188,7 @@ cris_process_instruction (insn_text, out_insnp, prefixp)
    Return 1 iff a correct size modifier is found, else 0.  */
 
 static int
-get_bwd_size_modifier (cPP, size_bitsp)
-     char **cPP;
-     int *size_bitsp;
+get_bwd_size_modifier (char **cPP, int *size_bitsp)
 {
   if (**cPP != '.')
     return 0;
@@ -2262,9 +2238,7 @@ get_bwd_size_modifier (cPP, size_bitsp)
    Return 1 iff a correct size modifier is found, else 0.  */
 
 static int
-get_bw_size_modifier (cPP, size_bitsp)
-     char **cPP;
-     int *size_bitsp;
+get_bw_size_modifier (char **cPP, int *size_bitsp)
 {
   if (**cPP != '.')
     return 0;
@@ -2309,9 +2283,7 @@ get_bw_size_modifier (cPP, size_bitsp)
 	    else 0.  */
 
 static int
-get_gen_reg (cPP, regnop)
-     char **cPP;
-     int *regnop;
+get_gen_reg (char **cPP, int *regnop)
 {
   char *oldp;
   oldp = *cPP;
@@ -2434,9 +2406,7 @@ get_gen_reg (cPP, regnop)
    Return 1 iff a correct special register name is found.  */
 
 static int
-get_spec_reg (cPP, sregpp)
-     char **cPP;
-     const struct cris_spec_reg **sregpp;
+get_spec_reg (char **cPP, const struct cris_spec_reg **sregpp)
 {
   char *s1;
   const char *s2;
@@ -2494,9 +2464,7 @@ get_spec_reg (cPP, sregpp)
    Return 1 iff a correct support-register name is found.  */
 
 static int
-get_sup_reg (cPP, regnop)
-     char **cPP;
-     int *regnop;
+get_sup_reg (char **cPP, int *regnop)
 {
   char *s1;
   const char *s2;
@@ -2565,14 +2533,9 @@ get_sup_reg (cPP, regnop)
    Return 1 iff a correct indirect operand is found.  */
 
 static int
-get_autoinc_prefix_or_indir_op (cPP, prefixp, is_autoincp, src_regnop,
-				imm_foundp, imm_exprP)
-     char **cPP;
-     struct cris_prefix *prefixp;
-     int *is_autoincp;
-     int *src_regnop;
-     int *imm_foundp;
-     expressionS *imm_exprP;
+get_autoinc_prefix_or_indir_op (char **cPP, struct cris_prefix *prefixp,
+				int *is_autoincp, int *src_regnop,
+				int *imm_foundp, expressionS *imm_exprP)
 {
   /* Assume there was no immediate mode expression.  */
   *imm_foundp = 0;
@@ -2827,9 +2790,7 @@ get_autoinc_prefix_or_indir_op (cPP, prefixp, is_autoincp, src_regnop,
    Returns 1 iff a correct indirect operand is found.  */
 
 static int
-get_3op_or_dip_prefix_op (cPP, prefixp)
-     char **cPP;
-     struct cris_prefix *prefixp;
+get_3op_or_dip_prefix_op (char **cPP, struct cris_prefix *prefixp)
 {
   int reg_number;
 
@@ -3065,9 +3026,7 @@ get_3op_or_dip_prefix_op (cPP, prefixp)
    Return 1 iff a correct expression is found.  */
 
 static int
-cris_get_expression (cPP, exprP)
-     char **cPP;
-     expressionS *exprP;
+cris_get_expression (char **cPP, expressionS *exprP)
 {
   char *saved_input_line_pointer;
   segT exp;
@@ -3114,9 +3073,7 @@ cris_get_expression (cPP, exprP)
    Return 1 iff a correct flags expression is found.  */
 
 static int
-get_flags (cPP, flagsp)
-     char **cPP;
-     int *flagsp;
+get_flags (char **cPP, int *flagsp)
 {
   for (;;)
     {
@@ -3225,9 +3182,7 @@ get_flags (cPP, flagsp)
    exprP	Pointer to structure containing the offset expression.  */
 
 static void
-gen_bdap (base_regno, exprP)
-     int base_regno;
-     expressionS *exprP;
+gen_bdap (int base_regno, expressionS *exprP)
 {
   unsigned int opcode;
   char *opcodep;
@@ -3292,8 +3247,7 @@ gen_bdap (base_regno, exprP)
    offset  The displacement value in bytes.  */
 
 static int
-branch_disp (offset)
-     int offset;
+branch_disp (int offset)
 {
   int disp;
 
@@ -3325,13 +3279,8 @@ branch_disp (offset)
    add_num.  */
 
 static void
-gen_cond_branch_32 (opcodep, writep, fragP, add_symP, sub_symP, add_num)
-     char *opcodep;
-     char *writep;
-     fragS *fragP;
-     symbolS *add_symP;
-     symbolS *sub_symP;
-     long int add_num;
+gen_cond_branch_32 (char *opcodep, char *writep, fragS *fragP,
+		    symbolS *add_symP, symbolS *sub_symP, long int add_num)
 {
   int nop_opcode;
   int opc_offset;
@@ -3434,8 +3383,7 @@ gen_cond_branch_32 (opcodep, writep, fragP, add_symP, sub_symP, add_num)
    relocs.  */
 
 static unsigned int
-cris_get_pic_reloc_size (reloc)
-     bfd_reloc_code_real_type reloc;
+cris_get_pic_reloc_size (bfd_reloc_code_real_type reloc)
 {
   return reloc == BFD_RELOC_CRIS_16_GOTPLT || reloc == BFD_RELOC_CRIS_16_GOT
     ? 2 : 4;
@@ -3445,10 +3393,8 @@ cris_get_pic_reloc_size (reloc)
    Adjust *EXPRP with any addend found after the PIC suffix.  */
 
 static void
-cris_get_pic_suffix (cPP, relocp, exprP)
-     char **cPP;
-     bfd_reloc_code_real_type *relocp;
-     expressionS *exprP;
+cris_get_pic_suffix (char **cPP, bfd_reloc_code_real_type *relocp,
+		     expressionS *exprP)
 {
   char *s = *cPP;
   unsigned int i;
@@ -3536,10 +3482,8 @@ cris_get_pic_suffix (cPP, relocp, exprP)
    find out the correct bit patterns and use them.  */
 
 char *
-md_atof (type, litp, sizep)
-     char type ATTRIBUTE_UNUSED;
-     char *litp ATTRIBUTE_UNUSED;
-     int *sizep ATTRIBUTE_UNUSED;
+md_atof (int type ATTRIBUTE_UNUSED, char *litp ATTRIBUTE_UNUSED,
+	 int *sizep ATTRIBUTE_UNUSED)
 {
   /* FIXME:  Is this function mentioned in the internals.texi manual?  If
      not, add it.  */
@@ -3562,12 +3506,7 @@ md_atof (type, litp, sizep)
    seg	      The segment containing this number.  */
 
 static void
-cris_number_to_imm (bufp, val, n, fixP, seg)
-     char *bufp;
-     long val;
-     int n;
-     fixS *fixP;
-     segT seg;
+cris_number_to_imm (char *bufp, long val, int n, fixS *fixP, segT seg)
 {
   segT sym_seg;
 
@@ -3747,9 +3686,7 @@ cris_number_to_imm (bufp, val, n, fixP, seg)
    GAS does not understand.  */
 
 int
-md_parse_option (arg, argp)
-     int arg;
-     char *argp ATTRIBUTE_UNUSED;
+md_parse_option (int arg, char *argp ATTRIBUTE_UNUSED)
 {
   switch (arg)
     {
@@ -3818,9 +3755,7 @@ md_parse_option (arg, argp)
 
 /* Round up a section size to the appropriate boundary.  */
 valueT
-md_section_align (segment, size)
-     segT segment;
-     valueT size;
+md_section_align (segT segment, valueT size)
 {
   /* Round all sects to multiple of 4, except the bss section, which
      we'll round to word-size.
@@ -3848,9 +3783,7 @@ md_section_align (segment, size)
 
 /* Generate a machine-dependent relocation.  */
 arelent *
-tc_gen_reloc (section, fixP)
-     asection *section ATTRIBUTE_UNUSED;
-     fixS *fixP;
+tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 {
   arelent *relP;
   bfd_reloc_code_real_type code;
@@ -3944,8 +3877,7 @@ tc_gen_reloc (section, fixP)
 /* Machine-dependent usage-output.  */
 
 void
-md_show_usage (stream)
-     FILE *stream;
+md_show_usage (FILE *stream)
 {
   /* The messages are formatted to line up with the generic options.  */
   fprintf (stream, _("CRIS-specific options:\n"));
@@ -3972,10 +3904,7 @@ md_show_usage (stream)
    enough info to complete immediately) to the data in a frag.  */
 
 void
-md_apply_fix3 (fixP, valP, seg)
-     fixS *fixP;
-     valueT *valP;
-     segT seg;
+md_apply_fix3 (fixS *fixP, valueT *valP, segT seg)
 {
   /* This assignment truncates upper bits if valueT is 64 bits (as with
      --enable-64-bit-bfd), which is fine here, though we cast to avoid
@@ -4009,8 +3938,7 @@ md_apply_fix3 (fixP, valP, seg)
    the address of the fixup plus its size.  */
 
 long
-md_pcrel_from (fixP)
-     fixS *fixP;
+md_pcrel_from (fixS *fixP)
 {
   valueT addr = fixP->fx_where + fixP->fx_frag->fr_address;
 
@@ -4032,8 +3960,7 @@ md_pcrel_from (fixP)
 
 /* We have no need to give defaults for symbol-values.  */
 symbolS *
-md_undefined_symbol (name)
-     char *name ATTRIBUTE_UNUSED;
+md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
   return 0;
 }
@@ -4043,8 +3970,7 @@ md_undefined_symbol (name)
    against section symbols, and guarantees that a relocation will be
    emitted even when the value can be resolved locally.  */
 int
-md_cris_force_relocation (fixp)
-     struct fix *fixp;
+md_cris_force_relocation (struct fix *fixp)
 {
   switch (fixp->fx_r_type)
     {
@@ -4068,9 +3994,7 @@ md_cris_force_relocation (fixp)
    knows about how to handle broken words.  */
 
 void
-tc_cris_check_adjusted_broken_word (new_offset, brokwP)
-     offsetT new_offset;
-     struct broken_word *brokwP;
+tc_cris_check_adjusted_broken_word (offsetT new_offset, struct broken_word *brokwP)
 {
   if (new_offset > 32767 || new_offset < -32768)
     /* We really want a genuine error, not a warning, so make it one.  */
@@ -4081,21 +4005,24 @@ tc_cris_check_adjusted_broken_word (new_offset, brokwP)
 
 /* Make a leading REGISTER_PREFIX_CHAR mandatory for all registers.  */
 
-static void cris_force_reg_prefix ()
+static void
+cris_force_reg_prefix (void)
 {
   demand_register_prefix = TRUE;
 }
 
 /* Do not demand a leading REGISTER_PREFIX_CHAR for all registers.  */
 
-static void cris_relax_reg_prefix ()
+static void
+cris_relax_reg_prefix (void)
 {
   demand_register_prefix = FALSE;
 }
 
 /* Adjust for having a leading '_' on all user symbols.  */
 
-static void cris_sym_leading_underscore ()
+static void
+cris_sym_leading_underscore (void)
 {
   /* We can't really do anything more than assert that what the program
      thinks symbol starts with agrees with the command-line options, since
@@ -4108,7 +4035,7 @@ static void cris_sym_leading_underscore ()
 
 /* Adjust for not having any particular prefix on user symbols.  */
 
-static void cris_sym_no_leading_underscore ()
+static void cris_sym_no_leading_underscore (void)
 {
   if (symbols_have_leading_underscore)
     as_bad (_(".syntax %s requires command-line option `--no-underscore'"),
@@ -4119,13 +4046,12 @@ static void cris_sym_no_leading_underscore ()
    syntax the assembly code has.  */
 
 static void
-s_syntax (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_syntax (int ignore ATTRIBUTE_UNUSED)
 {
   static const struct syntaxes
   {
     const char *const operand;
-    void (*fn) PARAMS ((void));
+    void (*fn) (void);
   } syntax_table[] =
     {{SYNTAX_ENFORCE_REG_PREFIX, cris_force_reg_prefix},
      {SYNTAX_RELAX_REG_PREFIX, cris_relax_reg_prefix},
@@ -4156,8 +4082,7 @@ s_syntax (ignore)
    not emitting ELF.  */
 
 static void
-s_cris_file (dummy)
-     int dummy;
+s_cris_file (int dummy)
 {
   if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
     as_bad (_("Pseudodirective .file is only valid when generating ELF"));
@@ -4169,8 +4094,7 @@ s_cris_file (dummy)
    emitting ELF.  */
 
 static void
-s_cris_loc (dummy)
-     int dummy;
+s_cris_loc (int dummy)
 {
   if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
     as_bad (_("Pseudodirective .loc is only valid when generating ELF"));
@@ -4184,8 +4108,7 @@ s_cris_loc (dummy)
    arch_cris_unknown is returned.  */
 
 static enum cris_archs
-cris_arch_from_string (str)
-     char **str;
+cris_arch_from_string (char **str)
 {
   static const struct cris_arch_struct
   {
@@ -4222,9 +4145,8 @@ cris_arch_from_string (str)
    IVER.  */
 
 static int
-cris_insn_ver_valid_for_arch (iver, arch)
-     enum cris_insn_version_usage iver;
-     enum cris_archs arch;
+cris_insn_ver_valid_for_arch (enum cris_insn_version_usage iver,
+			      enum cris_archs arch)
 {
   switch (arch)
     {
@@ -4306,8 +4228,7 @@ cris_insn_ver_valid_for_arch (iver, arch)
    default --march=<ARCHCHOICE2> option.  */
 
 static void
-s_cris_arch (dummy)
-     int dummy ATTRIBUTE_UNUSED;
+s_cris_arch (int dummy ATTRIBUTE_UNUSED)
 {
   /* Right now we take the easy route and check for sameness.  It's not
      obvious that allowing e.g. --march=v32 and .arch common_v0_v32
