@@ -697,9 +697,11 @@ _GDBN__ reads commands from the terminal until you tell it to exit.
 You can also run @code{_GDBP__} with a variety of arguments and options,
 to specify more of your debugging environment at the outset.
 
+_if__(_GENERIC__)
 The command-line options described here are designed
 to cover a variety of situations; in some environments, some of these
 options may effectively be unavailable.  
+_fi__(_GENERIC__)
 
 The most usual way to start _GDBN__ is with one argument,
 specifying an executable program:

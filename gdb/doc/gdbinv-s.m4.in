@@ -495,8 +495,7 @@ degugger, you give it just the numeric part of the serial port's name;
 for example, @samp{asyncstr 2} below runs @code{asyncstr} on
 @code{COM2}.
 
-@cartouche
-@example
+@smallexample
 (eg-C:\H8300\TEST) mode com2:9600,n,8,1,p
 
 Resident portion of MODE loaded
@@ -504,8 +503,7 @@ Resident portion of MODE loaded
 COM2: 9600, n, 8, 1, p
 
 (eg-C:\H8300\TEST) asynctsr 2
-@end example
-@end cartouche
+@end smallexample
 
 @quotation
 @emph{Warning:} We have noticed a bug in PC-NFS that conflicts with
@@ -527,8 +525,7 @@ without downloading, use the _GDBN__ commands @code{file} or
 @code{symbol-file}.  These commands, and @code{load} itself, are
 described in @ref{Files,,Commands to Specify Files}.)
 
-@cartouche
-@example
+@smallexample
 (eg-C:\H8300\TEST) _GDBP__ t.x
 GDB is free software and you are welcome to distribute copies
  of it under certain conditions; type "show copying" to see 
@@ -542,8 +539,7 @@ Connected to remote H8/300 HMS system.
 .text   : 0x8000 .. 0xabde ***********
 .data   : 0xabde .. 0xad30 *
 .stack  : 0xf000 .. 0xf014 *
-@end example
-@end cartouche
+@end smallexample
 
 At this point, you're ready to run or debug your program.  From here on,
 you can use all the usual _GDBN__ commands.  The @code{break} command

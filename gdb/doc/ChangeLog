@@ -1,3 +1,10 @@
+Tue Aug 18 15:59:13 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdbinv-s.m4.in: refrain from using @cartouche for just a few
+	examples (not consistent w others).  
+	gdb.texinfo: issue disclaimer paragraph on cmdline options only
+	for generic vn of doc
+
 Tue Aug 18 14:53:27 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in: always create installation directories.
