@@ -167,10 +167,6 @@ extern void mips_elf_final_processing (void);
 extern void md_mips_end (void);
 #define md_end()	md_mips_end()
 
-#define USE_GLOBAL_POINTER_OPT	(OUTPUT_FLAVOR == bfd_target_ecoff_flavour \
-				 || OUTPUT_FLAVOR == bfd_target_coff_flavour \
-				 || OUTPUT_FLAVOR == bfd_target_elf_flavour)
-
 extern void mips_pop_insert (void);
 #define md_pop_insert()		mips_pop_insert()
 

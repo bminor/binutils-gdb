@@ -111,9 +111,7 @@ static char *mips_regmask_frag;
 extern int target_big_endian;
 
 /* The name of the readonly data section.  */
-#define RDATA_SECTION_NAME (OUTPUT_FLAVOR == bfd_target_aout_flavour \
-			    ? ".data" \
-			    : OUTPUT_FLAVOR == bfd_target_ecoff_flavour \
+#define RDATA_SECTION_NAME (OUTPUT_FLAVOR == bfd_target_ecoff_flavour \
 			    ? ".rdata" \
 			    : OUTPUT_FLAVOR == bfd_target_coff_flavour \
 			    ? ".rdata" \
@@ -1083,8 +1081,6 @@ mips_target_format (void)
 {
   switch (OUTPUT_FLAVOR)
     {
-    case bfd_target_aout_flavour:
-      return target_big_endian ? "a.out-mips-big" : "a.out-mips-little";
     case bfd_target_ecoff_flavour:
       return target_big_endian ? "ecoff-bigmips" : ECOFF_LITTLE_FORMAT;
     case bfd_target_coff_flavour:
@@ -1241,8 +1237,7 @@ md_begin (void)
   /* set the default alignment for the text section (2**2) */
   record_alignment (text_section, 2);
 
-  if (USE_GLOBAL_POINTER_OPT)
-    bfd_set_gp_size (stdoutput, g_switch_value);
+  bfd_set_gp_size (stdoutput, g_switch_value);
 
   if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
     {
@@ -8894,8 +8889,7 @@ do_msbd:
 
 		if (*args == 'f'
 		    || (*args == 'l'
-			&& (! USE_GLOBAL_POINTER_OPT
-			    || mips_pic == EMBEDDED_PIC
+			&& (mips_pic == EMBEDDED_PIC
 			    || g_switch_value < 4
 			    || (temp[0] == 0 && temp[1] == 0)
 			    || (temp[2] == 0 && temp[3] == 0))))
@@ -8983,7 +8977,7 @@ do_msbd:
 		      default: /* unused default case avoids warnings.  */
 		      case 'L':
 			newname = RDATA_SECTION_NAME;
-			if ((USE_GLOBAL_POINTER_OPT && g_switch_value >= 8)
+			if ((g_switch_value >= 8)
 			    || mips_pic == EMBEDDED_PIC)
 			  newname = ".lit8";
 			break;
@@ -8994,8 +8988,7 @@ do_msbd:
 			  newname = RDATA_SECTION_NAME;
 			break;
 		      case 'l':
-			assert (!USE_GLOBAL_POINTER_OPT
-				|| g_switch_value >= 4);
+			assert (g_switch_value >= 4);
 			newname = ".lit4";
 			break;
 		      }
@@ -10491,7 +10484,7 @@ md_parse_option (int c, char *arg)
 
     case OPTION_MEMBEDDED_PIC:
       mips_pic = EMBEDDED_PIC;
-      if (USE_GLOBAL_POINTER_OPT && g_switch_seen)
+      if (g_switch_seen)
 	{
 	  as_bad (_("-G may not be used with embedded PIC code"));
 	  return 0;
@@ -10554,12 +10547,7 @@ md_parse_option (int c, char *arg)
 #endif /* OBJ_ELF */
 
     case 'G':
-      if (! USE_GLOBAL_POINTER_OPT)
-	{
-	  as_bad (_("-G is not supported for this configuration"));
-	  return 0;
-	}
-      else if (mips_pic == SVR4_PIC || mips_pic == EMBEDDED_PIC)
+      if (mips_pic == SVR4_PIC || mips_pic == EMBEDDED_PIC)
 	{
 	  as_bad (_("-G may not be used with SVR4 or embedded PIC code"));
 	  return 0;
@@ -11540,52 +11528,30 @@ s_change_sec (int sec)
       break;
 
     case 'r':
-      if (USE_GLOBAL_POINTER_OPT)
+      seg = subseg_new (RDATA_SECTION_NAME,
+			(subsegT) get_absolute_expression ());
+      if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
 	{
-	  seg = subseg_new (RDATA_SECTION_NAME,
-			    (subsegT) get_absolute_expression ());
-	  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
-	    {
-	      bfd_set_section_flags (stdoutput, seg,
-				     (SEC_ALLOC
-				      | SEC_LOAD
-				      | SEC_READONLY
-				      | SEC_RELOC
-				      | SEC_DATA));
-	      if (strcmp (TARGET_OS, "elf") != 0)
-		record_alignment (seg, 4);
-	    }
-	  demand_empty_rest_of_line ();
+	  bfd_set_section_flags (stdoutput, seg, (SEC_ALLOC | SEC_LOAD
+						  | SEC_READONLY | SEC_RELOC
+						  | SEC_DATA));
+	  if (strcmp (TARGET_OS, "elf") != 0)
+	    record_alignment (seg, 4);
 	}
-      else
-	{
-	  as_bad (_("No read only data section in this object file format"));
-	  demand_empty_rest_of_line ();
-	  return;
-	}
+      demand_empty_rest_of_line ();
       break;
 
     case 's':
-      if (USE_GLOBAL_POINTER_OPT)
+      seg = subseg_new (".sdata", (subsegT) get_absolute_expression ());
+      if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
 	{
-	  seg = subseg_new (".sdata", (subsegT) get_absolute_expression ());
-	  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
-	    {
-	      bfd_set_section_flags (stdoutput, seg,
-				     SEC_ALLOC | SEC_LOAD | SEC_RELOC
-				     | SEC_DATA);
-	      if (strcmp (TARGET_OS, "elf") != 0)
-		record_alignment (seg, 4);
-	    }
-	  demand_empty_rest_of_line ();
-	  break;
+	  bfd_set_section_flags (stdoutput, seg,
+				 SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA);
+	  if (strcmp (TARGET_OS, "elf") != 0)
+	    record_alignment (seg, 4);
 	}
-      else
-	{
-	  as_bad (_("Global pointers not supported; recompile -G 0"));
-	  demand_empty_rest_of_line ();
-	  return;
-	}
+      demand_empty_rest_of_line ();
+      break;
     }
 
   auto_align = 1;
@@ -11781,7 +11747,7 @@ s_option (int x ATTRIBUTE_UNUSED)
       else
 	as_bad (_(".option pic%d not supported"), i);
 
-      if (USE_GLOBAL_POINTER_OPT && mips_pic == SVR4_PIC)
+      if (mips_pic == SVR4_PIC)
 	{
 	  if (g_switch_seen && g_switch_value != 0)
 	    as_warn (_("-G may not be used with SVR4 PIC code"));
@@ -12022,12 +11988,11 @@ s_abicalls (int ignore ATTRIBUTE_UNUSED)
 {
   mips_pic = SVR4_PIC;
   mips_abicalls = TRUE;
-  if (USE_GLOBAL_POINTER_OPT)
-    {
-      if (g_switch_seen && g_switch_value != 0)
-	as_warn (_("-G may not be used with SVR4 PIC code"));
-      g_switch_value = 0;
-    }
+
+  if (g_switch_seen && g_switch_value != 0)
+    as_warn (_("-G may not be used with SVR4 PIC code"));
+  g_switch_value = 0;
+
   bfd_set_gp_size (stdoutput, 0);
   demand_empty_rest_of_line ();
 }
@@ -12584,7 +12549,7 @@ nopic_need_relax (symbolS *sym, int before_relaxing)
   if (sym == 0)
     return 0;
 
-  if (USE_GLOBAL_POINTER_OPT && g_switch_value > 0)
+  if (g_switch_value > 0)
     {
       const char *symname;
       int change;
@@ -13090,12 +13055,9 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	}
       else
 	{
-	  if (OUTPUT_FLAVOR != bfd_target_aout_flavour)
-	    /* A gruesome hack which is a result of the gruesome gas reloc
-	       handling.  */
-	    reloc->addend = pcrel_address;
-	  else
-	    reloc->addend = -pcrel_address;
+	  /* A gruesome hack which is a result of the gruesome gas reloc
+	     handling.  */
+	  reloc->addend = pcrel_address;
 	}
     }
   else

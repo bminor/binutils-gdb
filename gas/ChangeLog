@@ -1,3 +1,12 @@
+2004-04-23  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.h (USE_GLOBAL_POINTER_OPT): Remove.
+	* config/tc-mips.c (RDATA_SECTION_NAME, mips_target_format): Remove
+	a.out support.
+	(md_begin, mips_ip, md_parse_option, s_change_sec, s_option,
+	s_abicalls, nopic_need_relax, tc_gen_reloc): Remove uses of
+	USE_GLOBAL_POINTER_OPT.
+
 2004-04-22  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (macro): One more use of load_delay_nop.
