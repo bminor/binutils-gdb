@@ -2199,9 +2199,9 @@ process_event_stop_test:
      test for stepping.  But, if not stepping,
      do not stop.  */
 
-  /* Are we stepping to get the inferior out of the dynamic
-     linker's hook (and possibly the dld itself) after catching
-     a shlib event? */
+  /* Are we stepping to get the inferior out of the dynamic linker's
+     hook (and possibly the dld itself) after catching a shlib
+     event?  */
   if (ecs->stepping_through_solib_after_catch)
     {
 #if defined(SOLIB_ADD)
@@ -3817,12 +3817,13 @@ Pass and Stop may be combined.", NULL));
 
   if (!dbx_commands)
     stop_command =
-      add_cmd ("stop", class_obscure, not_just_help_class_command, "There is no `stop' command, but you can set a hook on `stop'.\n\
+      add_cmd ("stop", class_obscure, not_just_help_class_command, 
+	       "There is no `stop' command, but you can set a hook on `stop'.\n\
 This allows you to set a list of commands to be run each time execution\n\
 of the program stops.", &cmdlist);
 
   add_set_cmd ("infrun", class_maintenance, var_zinteger,
-		  &debug_infrun, "Set inferior debugging.\n\
+	       &debug_infrun, "Set inferior debugging.\n\
 When non-zero, inferior specific debugging is enabled.", &setdebuglist);
 
   numsigs = (int) TARGET_SIGNAL_LAST;
@@ -3879,7 +3880,9 @@ When non-zero, inferior specific debugging is enabled.", &setdebuglist);
 		  "Set stopping for shared library events.\n\
 If nonzero, gdb will give control to the user when the dynamic linker\n\
 notifies gdb of shared library events.  The most common event of interest\n\
-to the user would be loading/unloading of a new library.\n", &setlist), &showlist);
+to the user would be loading/unloading of a new library.\n", 
+		  &setlist), 
+     &showlist);
 #endif
 
   c = add_set_enum_cmd ("follow-fork-mode",
@@ -3894,14 +3897,16 @@ The unfollowed process will continue to run.\n\
 By default, the debugger will follow the parent process.", &setlist);
   deprecated_add_show_from_set (c, &showlist);
 
-  c = add_set_enum_cmd ("scheduler-locking", class_run, scheduler_enums,	/* array of string names */
+  c = add_set_enum_cmd ("scheduler-locking", class_run, 
+			scheduler_enums,	/* array of string names */
 			&scheduler_mode,	/* current mode  */
 			"Set mode for locking scheduler during execution.\n\
 off  == no locking (threads may preempt at any time)\n\
 on   == full locking (no thread except the current thread may run)\n\
 step == scheduler locked during every single-step operation.\n\
 	In this mode, no other thread may run during a step command.\n\
-	Other threads may run while stepping over a function call ('next').", &setlist);
+	Other threads may run while stepping over a function call ('next').", 
+			&setlist);
 
   set_cmd_sfunc (c, set_schedlock_func);	/* traps on target vector */
   deprecated_add_show_from_set (c, &showlist);
