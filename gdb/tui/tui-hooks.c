@@ -309,10 +309,10 @@ tui_selected_frame_level_changed_hook (int level)
          would be 0 here, and select_source_symtab would abort the
          command by calling the 'error' function */
       if (s)
-	{
-          select_source_symtab (s);
-          tuiShowFrameInfo (fi);
-	}
+        select_source_symtab (s);
+
+      /* Display the frame position (even if there is no symbols).  */
+      tuiShowFrameInfo (fi);
 
       /* Refresh the register window if it's visible.  */
       if (tui_is_window_visible (DATA_WIN))
