@@ -1,3 +1,21 @@
+Sun Oct  8 04:23:14 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/return.exp:  Change xfail from "sparc-*-solaris2.*" to
+	"sparc-*-solaris2*".
+
+Sat Sep 23 01:22:23 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/coremaker.c:  Produce a full core dump for AIX targets.
+	Add global and local variables and initialize them.
+	* gdb.base/corefile.exp:  Test correct mapping of corefile sections
+	by printing variables. Remove rs6000 and powerpc xfails, BFD now
+	extracts the file name and terminating signal from the core file.
+	* TODO:  Remove note about tests for correct mapping of corefile.
+	* gdb.base/ptype.c (main):  Use boolean2 to inhibit AIX 4.1 xlc
+	from optimizing it away.
+	* gdb.stabs/weird.exp:  Remove rs6000 xfail, xcoffread.c now
+	handles common blocks.
+
 start-sanitize-sh3e
 Thu Sep 21 01:28:10 1995  Jeff Law  (law@snake.cs.utah.edu)
 
