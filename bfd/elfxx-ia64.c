@@ -3951,6 +3951,24 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      BFD_ASSERT (srel != NULL);
 
+	      switch (r_type)
+		{
+		case R_IA64_IMM14:
+		case R_IA64_IMM22:
+		case R_IA64_IMM64:
+		  /* ??? People shouldn't be doing non-pic code in
+		     shared libraries nor dynamic executables.  */
+		  (*_bfd_error_handler)
+		    (_("%s: non-pic code with imm relocation against dynamic symbol `%s'"),
+		     bfd_archive_filename (input_bfd),
+		     h->root.root.string);
+		  ret_val = FALSE;
+		  continue;
+
+		default:
+		  break;
+		}
+
 	      /* If we don't need dynamic symbol lookup, find a
 		 matching RELATIVE relocation.  */
 	      dyn_r_type = r_type;
@@ -3978,17 +3996,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 		      break;
 
 		    default:
-		      /* We can't represent this without a dynamic symbol.
-			 Adjust the relocation to be against an output
-			 section symbol, which are always present in the
-			 dynamic symbol table.  */
-		      /* ??? People shouldn't be doing non-pic code in
-			 shared libraries.  Hork.  */
-		      (*_bfd_error_handler)
-			(_("%s: linking non-pic code in a shared library"),
-			 bfd_archive_filename (input_bfd));
-		      ret_val = FALSE;
-		      continue;
+		      break;
 		    }
 		  dynindx = 0;
 		  addend = value;

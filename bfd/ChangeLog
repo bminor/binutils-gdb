@@ -1,3 +1,8 @@
+2004-01-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Disallow imm
+	relocations against dynamic symbols.
+
 2004-01-23  Daniel Jacobowitz  <drow@mvista.com>
 
 	* elf32-arm.h (elf32_arm_check_relocs): Revert part of 2004-01-13
