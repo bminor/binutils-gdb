@@ -1142,6 +1142,10 @@ extern long bfd_elf32_slurp_symbol_table
 extern boolean bfd_elf32_write_shdrs_and_ehdr PARAMS ((bfd *));
 extern int bfd_elf32_write_out_phdrs
   PARAMS ((bfd *, const Elf_Internal_Phdr *, int));
+extern void bfd_elf32_write_relocs
+  PARAMS ((bfd *, asection *, PTR));
+extern boolean bfd_elf32_slurp_reloc_table
+  PARAMS ((bfd *, asection *, asymbol **, boolean));
 extern boolean bfd_elf32_add_dynamic_entry
   PARAMS ((struct bfd_link_info *, bfd_vma, bfd_vma));
 extern boolean bfd_elf32_link_create_dynamic_sections
@@ -1185,6 +1189,10 @@ extern long bfd_elf64_slurp_symbol_table
 extern boolean bfd_elf64_write_shdrs_and_ehdr PARAMS ((bfd *));
 extern int bfd_elf64_write_out_phdrs
   PARAMS ((bfd *, const Elf_Internal_Phdr *, int));
+extern void bfd_elf64_write_relocs
+  PARAMS ((bfd *, asection *, PTR));
+extern boolean bfd_elf64_slurp_reloc_table
+  PARAMS ((bfd *, asection *, asymbol **, boolean));
 extern boolean bfd_elf64_add_dynamic_entry
   PARAMS ((struct bfd_link_info *, bfd_vma, bfd_vma));
 extern boolean bfd_elf64_link_create_dynamic_sections

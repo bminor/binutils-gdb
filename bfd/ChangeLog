@@ -1,5 +1,15 @@
 Mon Apr 24 01:49:03 2000  Ulrich Drepper  <drepper@cygnus.com>
 
+	* elf-bfd.h: Add prototypes for bfd_elf32_write_relocs,
+	bfd_elf32_slurp_reloc_table, bfd_elf64_write_relocs, and
+	bfd_elf64_slurp_reloc_table.
+
+	* elfcode.h (elf_write_relocs, elf_slurp_reloc_table): New
+	definitions to get external names.
+	(elf_write_relocs): Renamed from write_relocs and make global.
+	(elf_slurp_reloc_table): Make global.
+	(_bfd_elf,size_info): Use elf_write_relocs instead of write_relocs.
+
 	* archive.c (hpux_uid_gid_encode): New function.
 	(bfd_ar_hdr_from_filesystem): Use it if HPUX_LARGE_AR_IDS is
 	defined and the ID is greater than 99999.
