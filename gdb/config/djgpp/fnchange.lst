@@ -28,6 +28,8 @@
 @V@/bfd/elf32-sh-nbsd.c @V@/bfd/e32shn.c
 @V@/bfd/elf32-sh64.c @V@/bfd/e32sh64.c
 @V@/bfd/elf32-sh64-nbsd.c @V@/bfd/e32sh64n.c
+@V@/bfd/elf64-alpha.c @V@/bfd/e64alphf.c
+@V@/bfd/elf64-alpha-fbsd.c @V@/bfd/e64alph.c
 @V@/bfd/elf64-sh64.c @V@/bfd/e64sh64.c
 @V@/bfd/elf64-sh64-nbsd.c @V@/bfd/e64sh64n.c
 @V@/dejagnu/baseboards/mn10200-cygmon.exp @V@/dejagnu/baseboards/mn10200cygmon.exp

@@ -1,5 +1,10 @@
 2002-09-29  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/djgpp/fnchange.lst: Rename bfd/elf64-alpha.c and
+	bfd/elf64-alpha-fbsd.c.
+
+2002-09-29  Andrew Cagney  <ac131313@redhat.com>
+
 	* config/djgpp/fnchange.lst: Rename i386gnu-nat.c and
 	i386gnu-tdep.c.
 
