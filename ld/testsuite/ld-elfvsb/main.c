@@ -1,10 +1,9 @@
 #ifdef PROTECTED_CHECK
 #include <features.h>
+#include <stdio.h>
 
 int
-main (argc, argv)
-  int argc;
-  char *argv[];
+main (void)
 {
 #if defined (__GLIBC__) && (__GLIBC__ > 2 \
 			    || (__GLIBC__ == 2 \
