@@ -1,5 +1,10 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-openrisc.c (ignore_pseudo): Prototype.
+	(md_atof): Remove declaration of atof_ieee.
+	* config/tc-or32.c (parse_operand): Prototype non-BFD too.
+	(md_apply_fix3): Fix bogus >>='s.
+	(md_undefined_symbol): Delete unused var.
 	* config/tc-pj.c (little, big, parse_exp_save_ilp): Prototype.
 	(c_to_r, ipush_code, fake_opcode, alias): Likewise.
 	(fake_opcode): Adjust for pj_opc_int_t change.

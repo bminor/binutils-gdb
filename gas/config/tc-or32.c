@@ -117,9 +117,7 @@ static unsigned long jalr_r9_opcode;
 
 static int check_invalid_opcode PARAMS ((unsigned long));
 static void encode PARAMS ((const struct machine_opcode *, unsigned long *, signed long, char));
-#ifdef BFD_ASSEMBLER
-static char * parse_operand PARAMS ((char *, expressionS *, int));
-#endif
+static char *parse_operand PARAMS ((char *, expressionS *, int));
 
 /* Set bits in machine opcode according to insn->encoding
    description and passed operand.  */
@@ -352,7 +350,7 @@ parse_operand (s, operandp, opt)
 }
 #else
 
-char *
+static char *
 parse_operand (s, operandp, opt)
      char *s;
      expressionS *operandp;
@@ -1087,7 +1085,7 @@ md_apply_fix3 (fixP, valP, seg)
       break;
 
     case RELOC_WDISP30:
-      val = (val >>= 2) + 1;
+      val = (val >> 2) + 1;
       buf[0] |= (val >> 24) & 0x3f;
       buf[1] = (val >> 16);
       buf[2] = val >> 8;
@@ -1111,7 +1109,7 @@ md_apply_fix3 (fixP, valP, seg)
       break;
 
     case RELOC_WDISP22:
-      val = (val >>= 2) + 1;
+      val = (val >> 2) + 1;
       /* FALLTHROUGH */
     case RELOC_BASE22:
       buf[1] |= (val >> 16) & 0x3f;
@@ -1427,8 +1425,6 @@ md_undefined_symbol (name)
   /* Register name.  */
   if (name[0] == 'r' || name[0] == 'R' || name[0] == 'a' || name[0] == 'b')
     {
-      long maxreg;
-
       /* Parse the number, make sure it has no extra zeroes or
          trailing chars.  */
       regnum = atol (& name[1]);

@@ -83,6 +83,8 @@ md_show_usage (stream)
 {
 }
 
+static void ignore_pseudo PARAMS ((int));
+
 static void
 ignore_pseudo (val)
      int val ATTRIBUTE_UNUSED;
@@ -443,7 +445,6 @@ md_atof (type, litP, sizeP)
   int              prec;
   LITTLENUM_TYPE   words [MAX_LITTLENUMS];
   char *           t;
-  char *           atof_ieee ();
 
   switch (type)
     {
