@@ -826,6 +826,12 @@ operand (expressionP)
       break;
 #endif
 
+#ifdef LITERAL_PREFIXPERCENT_BIN
+    case '%':
+      integer_constant (2, expressionP);
+      break;
+#endif
+
     case '0':
       /* non-decimal radix */
 
