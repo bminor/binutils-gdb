@@ -47,7 +47,7 @@ write_template ()
 
   for (opcode = (struct mn10300_opcode *)mn10300_opcodes; opcode->name; opcode++)
     {
-      printf("/* %s */\nvoid\nOP_%X ()\n     unsigned long insn, extension;\n{\n", opcode->name, opcode->opcode);
+      printf("/* %s */\nvoid\nOP_%X (insn, extension)\n     unsigned long insn, extension;\n{\n", opcode->name, opcode->opcode);
 	  
       /* count operands */
       j = 0;
