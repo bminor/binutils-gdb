@@ -1,3 +1,9 @@
+start-sanitize-d10v
+Fri Aug  9 17:48:28 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c: Fix problem with relocs. 
+
+end-sanitize-d10v	
 Fri Aug  9 14:16:14 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-sh.c (sh_do_align): If not BFD_ASSEMBLER, always align
