@@ -1,3 +1,10 @@
+2003-06-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.c (struct comp_unit): Add member `dbase'.
+	(read_encoded_value): Handle DW_EH_PE_datarel encoding.
+	(dwarf2_build_frame_info): Set base for DW_EH_PE_datarel encodings
+	when handling .eh_frame sections.
+
 2003-06-04  J. Brobecker  <brobecker@gnat.com>
 
 	* config/pa/nm-hppah.h (PREPARE_TO_PROCEED): Use the generic

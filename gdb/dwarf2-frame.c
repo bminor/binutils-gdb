@@ -747,6 +747,9 @@ struct comp_unit
 
   /* Pointer to the .debug_frame section.  */
   asection *dwarf_frame_section;
+
+  /* Base for DW_EH_PE_datarel encodings.  */
+  bfd_vma dbase;
 };
 
 static unsigned int
@@ -915,6 +918,9 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
     case DW_EH_PE_pcrel:
       base = bfd_get_section_vma (unit->bfd, unit->dwarf_frame_section);
       base += (buf - unit->dwarf_frame_buffer);
+      break;
+    case DW_EH_PE_datarel:
+      base = unit->dbase;
       break;
     default:
       internal_error (__FILE__, __LINE__, "Invalid or unsupported encoding");
@@ -1251,11 +1257,14 @@ dwarf2_build_frame_info (struct objfile *objfile)
   unit.abfd = objfile->obfd;
   unit.objfile = objfile;
   unit.addr_size = objfile->obfd->arch_info->bits_per_address / 8;
+  unit.dbase = 0;
 
   /* First add the information from the .eh_frame section.  That way,
      the FDEs from that section are searched last.  */
   if (dwarf_eh_frame_offset)
     {
+      asection *got;
+
       unit.cie = NULL;
       unit.dwarf_frame_buffer = dwarf2_read_section (objfile,
 						     dwarf_eh_frame_offset,
@@ -1264,6 +1273,14 @@ dwarf2_build_frame_info (struct objfile *objfile)
 
       unit.dwarf_frame_size = dwarf_eh_frame_size;
       unit.dwarf_frame_section = dwarf_eh_frame_section;
+
+      /* FIXME: kettenis/20030602: This is the DW_EH_PE_datarel base
+         that for the i386/amd64 target, which currently is the only
+         target in GCC that supports/uses the DW_EH_PE_datarel
+         encoding.  */
+      got = bfd_get_section_by_name (unit.abfd, ".got");
+      if (got)
+	unit.dbase = got->vma;
 
       frame_ptr = unit.dwarf_frame_buffer;
       while (frame_ptr < unit.dwarf_frame_buffer + unit.dwarf_frame_size)
