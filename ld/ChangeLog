@@ -1,3 +1,8 @@
+2004-05-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (gc_section_callback): Move SEC_EXCLUDE twiddles..
+	(lang_gc_sections): .. to a LANG_FOR_EACH_INPUT_STATEMENT loop here.
+
 2004-05-28  Andrew Stubbs <andrew.stubbs@superh.com>
 
 	* testsuite/ld-sh/arch/arch.exp: New test script.

@@ -4272,12 +4272,6 @@ gc_section_callback (lang_wild_statement_type *ptr,
 		     lang_input_statement_type *file ATTRIBUTE_UNUSED,
 		     void *data ATTRIBUTE_UNUSED)
 {
-  /* SEC_EXCLUDE is ignored when doing a relocatable link, except in
-     the special case of debug info.  (See bfd/stabs.c)
-     Twiddle the flag here, to simplify later linker code.  */
-  if (link_info.relocatable && (section->flags & SEC_DEBUGGING) == 0)
-    section->flags &= ~SEC_EXCLUDE;
-
   /* If the wild pattern was marked KEEP, the member sections
      should be as well.  */
   if (ptr->keep_sections)
@@ -4335,6 +4329,20 @@ lang_gc_sections (void)
 	  && ! bfd_is_abs_section (h->u.def.section))
 	{
 	  h->u.def.section->flags |= SEC_KEEP;
+	}
+    }
+
+  /* SEC_EXCLUDE is ignored when doing a relocatable link, except in
+     the special case of debug info.  (See bfd/stabs.c)
+     Twiddle the flag here, to simplify later linker code.  */
+  if (link_info.relocatable)
+    {
+      LANG_FOR_EACH_INPUT_STATEMENT (f)
+	{
+	  asection *sec;
+	  for (sec = f->the_bfd->sections; sec != NULL; sec = sec->next)
+	    if ((sec->flags & SEC_DEBUGGING) == 0)
+	      sec->flags &= ~SEC_EXCLUDE;
 	}
     }
 
