@@ -8,12 +8,12 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
@@ -78,7 +78,7 @@ VPATH = @srcdir@
 
 YACC=@YACC@
 
-# This is used to rebuild ada-lex.c from ada-lex.l.  If the program is 
+# This is used to rebuild ada-lex.c from ada-lex.l.  If the program is
 # not defined, but ada-lex.c is present, compilation will continue,
 # possibly with a warning.
 FLEX = flex
@@ -431,8 +431,8 @@ ANNOTATE_OBS = annotate.o
 @target_makefile_frag@
 # End of host and target-dependent makefile fragments
 
-# Possibly ignore the simulator.  If the simulator is being ignored, 
-# these expand into SIM= and SIM_OBJ=, overriding the entries from 
+# Possibly ignore the simulator.  If the simulator is being ignored,
+# these expand into SIM= and SIM_OBJ=, overriding the entries from
 # target_makefile_frag
 #
 @IGNORE_SIM@
@@ -582,7 +582,7 @@ LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
 # "system" headers.  Using these in dependencies is a rather personal
 # choice. (-rich, summer 1993)
-# (Why would we not want to depend on them?  If one of these changes in a 
+# (Why would we not want to depend on them?  If one of these changes in a
 # non-binary-compatible way, it is a real pain to remake the right stuff
 # without these dependencies -kingdon, 13 Mar 1994)
 aout_aout64_h =	$(INCLUDE_DIR)/aout/aout64.h
@@ -652,6 +652,7 @@ amd64_nat_h = amd64-nat.h
 annotate_h = annotate.h $(symtab_h) $(gdbtypes_h)
 arch_utils_h = arch-utils.h
 arm_tdep_h = arm-tdep.h
+auxv_h = auxv.h
 ax_gdb_h = ax-gdb.h
 ax_h = ax.h $(doublest_h)
 bcache_h = bcache.h
@@ -891,6 +892,7 @@ TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
 COMMON_OBS = version.o \
+	auxv.o \
 	bfd-target.o \
 	blockframe.o breakpoint.o findvar.o regcache.o \
 	charset.o disasm.o dummy-frame.o \
@@ -977,12 +979,12 @@ info dvi install-info clean-info html install-html: force
 	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 gdb.z:gdb.1
-	nroff -man $(srcdir)/gdb.1 | col -b > gdb.t 
+	nroff -man $(srcdir)/gdb.1 | col -b > gdb.t
 	pack gdb.t ; rm -f gdb.t
 	mv gdb.t.z gdb.z
 
 # Traditionally "install" depends on "all".  But it may be useful
-# not to; for example, if the user has made some trivial change to a 
+# not to; for example, if the user has made some trivial change to a
 # source file and doesn't care about rebuilding or just wants to save the
 # time it takes for make to check that all is up to date.
 # install-only is intended to address that need.
@@ -1002,7 +1004,7 @@ install-only: $(CONFIG_INSTALL)
 			$(DESTDIR)$(man1dir) ; \
 		$(INSTALL_DATA) $(srcdir)/gdb.1 \
 			$(DESTDIR)$(man1dir)/$$transformed_name.1
-	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
+	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do
 
 uninstall: force $(CONFIG_UNINSTALL)
 	transformed_name=`t='$(program_transform_name)'; \
@@ -1014,7 +1016,7 @@ uninstall: force $(CONFIG_UNINSTALL)
 		fi ; \
 		rm -f $(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) \
 		      $(DESTDIR)$(man1dir)/$$transformed_name.1
-	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
+	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do
 
 # We do this by grepping through sources.  If that turns out to be too slow,
 # maybe we could just require every .o file to have an initialization routine
@@ -1028,8 +1030,8 @@ uninstall: force $(CONFIG_UNINSTALL)
 # object files that will be linked into gdb.
 #
 # FIXME: There are 2 problems with this approach. First, if the INIT_FILES
-# list includes a file twice (because of some mistake somewhere else) 
-# the _initialize_* function will be included twice in init.c. Second, 
+# list includes a file twice (because of some mistake somewhere else)
+# the _initialize_* function will be included twice in init.c. Second,
 # init.c may force unnecessary files to be linked in.
 
 # FIXME: cagney/2002-06-09: gdb/564: gdb/563: Force the order so that
@@ -1155,7 +1157,7 @@ TAGS: $(TAGFILES_NO_SRCDIR) $(TAGFILES_WITH_SRCDIR)
 tags: TAGS
 
 clean mostlyclean: $(CONFIG_CLEAN)
-	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do 
+	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do
 	rm -f *.o *.a $(ADD_FILES) *~ init.c-tmp init.l-tmp version.c-tmp
 	rm -f init.c version.c
 	rm -f gdb$(EXEEXT) core make.log
@@ -1168,7 +1170,7 @@ clean mostlyclean: $(CONFIG_CLEAN)
 # NB: While GDBSERVER might be configured on native systems, it isn't
 # always included in SUBDIRS.  Remove the gdbserver files explictly.
 distclean: clean
-	@$(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(SUBDIRS)" subdir_do 
+	@$(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(SUBDIRS)" subdir_do
 	rm -f gdbserver/config.status gdbserver/config.log
 	rm -f gdbserver/tm.h gdbserver/xm.h gdbserver/nm.h
 	rm -f gdbserver/Makefile gdbserver/config.cache
@@ -1410,7 +1412,7 @@ ada-exp.tab.o: ada-exp.tab.c $(defs_h) $(expression_h) $(value_h) \
 	$(objfiles_h) $(frame_h) $(block_h) $(ada_lex_c)
 ada-exp.tab.c: ada-exp.y
 	$(SHELL) $(YLWRAP) "$(YACC)" \
-	    $(srcdir)/ada-exp.y  y.tab.c ada-exp.tmp -- $(YFLAGS) 
+	    $(srcdir)/ada-exp.y  y.tab.c ada-exp.tmp -- $(YFLAGS)
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
@@ -1439,7 +1441,7 @@ c-exp.tab.o: c-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
 	$(symfile_h) $(objfiles_h) $(charset_h) $(block_h) $(cp_support_h)
 c-exp.tab.c: c-exp.y
 	$(SHELL) $(YLWRAP) "$(YACC)" \
-	    $(srcdir)/c-exp.y  y.tab.c c-exp.tmp -- $(YFLAGS) 
+	    $(srcdir)/c-exp.y  y.tab.c c-exp.tmp -- $(YFLAGS)
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
@@ -1456,7 +1458,7 @@ f-exp.tab.o: f-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
 	$(symfile_h) $(objfiles_h) $(block_h)
 f-exp.tab.c: f-exp.y
 	$(SHELL) $(YLWRAP) "$(YACC)" \
-	    $(srcdir)/f-exp.y  y.tab.c f-exp.tmp -- $(YFLAGS) 
+	    $(srcdir)/f-exp.y  y.tab.c f-exp.tmp -- $(YFLAGS)
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
@@ -1473,7 +1475,7 @@ jv-exp.tab.o: jv-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
 	$(symfile_h) $(objfiles_h) $(block_h)
 jv-exp.tab.c: jv-exp.y
 	$(SHELL) $(YLWRAP) "$(YACC)" \
-	    $(srcdir)/jv-exp.y  y.tab.c jv-exp.tmp -- $(YFLAGS) 
+	    $(srcdir)/jv-exp.y  y.tab.c jv-exp.tmp -- $(YFLAGS)
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
@@ -1490,7 +1492,7 @@ m2-exp.tab.o: m2-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
 	$(symfile_h) $(objfiles_h) $(block_h)
 m2-exp.tab.c: m2-exp.y
 	$(SHELL) $(YLWRAP) "$(YACC)" \
-	    $(srcdir)/m2-exp.y  y.tab.c m2-exp.tmp -- $(YFLAGS) 
+	    $(srcdir)/m2-exp.y  y.tab.c m2-exp.tmp -- $(YFLAGS)
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
@@ -1508,7 +1510,7 @@ objc-exp.tab.o: objc-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
 	$(block_h)
 objc-exp.tab.c: objc-exp.y
 	$(SHELL) $(YLWRAP) "$(YACC)" \
-	    $(srcdir)/objc-exp.y  y.tab.c objc-exp.tmp -- $(YFLAGS) 
+	    $(srcdir)/objc-exp.y  y.tab.c objc-exp.tmp -- $(YFLAGS)
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
@@ -1525,7 +1527,7 @@ p-exp.tab.o: p-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
 	$(symfile_h) $(objfiles_h) $(block_h)
 p-exp.tab.c: p-exp.y
 	$(SHELL) $(YLWRAP) "$(YACC)" \
-	    $(srcdir)/p-exp.y  y.tab.c p-exp.tmp -- $(YFLAGS) 
+	    $(srcdir)/p-exp.y  y.tab.c p-exp.tmp -- $(YFLAGS)
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
@@ -1621,6 +1623,8 @@ arm-tdep.o: arm-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcmd_h) \
 	$(frame_unwind_h) $(frame_base_h) $(trad_frame_h) $(arm_tdep_h) \
 	$(gdb_sim_arm_h) $(elf_bfd_h) $(coff_internal_h) $(elf_arm_h) \
 	$(gdb_assert_h) $(bfd_in2_h) $(libcoff_h)
+auxv.o: $(defs_h) $(target_h) $(gdbtypes_h) $(command_h) $(gdb_assert_h) \
+	$(auxv_h) $(elf_common_h) $(valprint_h) $(inferior_h)
 avr-tdep.o: avr-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(frame_base_h) $(trad_frame_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(symfile_h) $(arch_utils_h) $(regcache_h) \
@@ -2180,7 +2184,7 @@ proc-flags.o: proc-flags.c $(defs_h)
 procfs.o: procfs.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 	$(elf_bfd_h) $(gdbcmd_h) $(gdbthread_h) $(gdb_wait_h) \
 	$(gdb_assert_h) $(inflow_h) $(gdb_dirent_h) $(X_OK) $(gdb_stat_h) \
-	$(proc_utils_h) $(gregset_h) $(gdb_string_h)
+	$(proc_utils_h) $(gregset_h) $(gdb_string_h) $(auxv_h)
 proc-service.o: proc-service.c $(defs_h) $(gdb_proc_service_h) $(inferior_h) \
 	$(symtab_h) $(target_h) $(gregset_h)
 proc-why.o: proc-why.c $(defs_h) $(proc_utils_h)
@@ -2637,7 +2641,7 @@ gdbtk.o: $(srcdir)/gdbtk/generic/gdbtk.c \
 	$(srcdir)/gdbtk/generic/gdbtk.h $(defs_h) \
 	$(symtab_h) $(inferior_h) $(command_h) \
 	$(bfd_h) $(symfile_h) $(objfiles_h) $(target_h) $(gdb_string_h) \
-	$(tracepoint_h) $(top_h) 
+	$(tracepoint_h) $(top_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
         $(ITK_CFLAGS)  \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
