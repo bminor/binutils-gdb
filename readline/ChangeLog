@@ -1,3 +1,7 @@
+Thu Mar  3 17:40:03 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* configure.in: For ISC, use mh-sysv, not mh-isc.
+
 Thu Feb 24 04:13:53 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* Merge in changes from bash-1.13.5. Merge changes from glob/tilde.c
