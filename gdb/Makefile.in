@@ -1560,7 +1560,7 @@ builtin-regs.o: builtin-regs.c $(defs_h) $(builtin_regs_h) $(gdbtypes_h) \
 	$(gdb_string_h) $(gdb_assert_h)
 c-lang.o: c-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(parser_defs_h) $(language_h) $(c_lang_h) $(valprint_h) \
-	$(macroscope_h) $(gdb_assert_h)
+	$(macroscope_h) $(gdb_assert_h) $(charset_h) $(gdb_string_h)
 c-typeprint.o: c-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) $(target_h) \
 	$(language_h) $(demangle_h) $(c_lang_h) $(typeprint_h) $(cp_abi_h) \
@@ -1572,6 +1572,7 @@ c-valprint.o: c-valprint.c $(defs_h) $(gdb_string_h) $(symtab_h) \
 # OBSOLETE ch-lang.o: ch-lang.c
 # OBSOLETE ch-typeprint.o: ch-typeprint.c
 # OBSOLETE ch-valprint.o: ch-valprint.c
+charset.o: charset.c $(defs_h) $(charset_h) $(gdbcmd_h) gdb_assert.h
 cli-out.o: cli-out.c $(defs_h) $(ui_out_h) $(cli_out_h) $(gdb_string_h) \
 	$(gdb_assert_h)
 coff-solib.o: coff-solib.c $(defs_h) $(frame_h) $(bfd_h) $(gdbcore_h) \
@@ -2242,7 +2243,7 @@ ui-out.o: ui-out.c $(defs_h) $(gdb_string_h) $(expression_h) $(language_h) \
 utils.o: utils.c $(config_h) $(defs_h) $(gdb_assert_h) $(gdb_string_h) \
 	$(event_top_h) $(gdbcmd_h) $(serial_h) $(bfd_h) $(target_h) \
 	$(demangle_h) $(expression_h) $(language_h) $(annotate_h) \
-	$(filenames_h) $(inferior_h) $(mmalloc_h)
+	$(filenames_h) $(inferior_h) $(mmalloc_h) $(charset_h)
 uw-thread.o: uw-thread.c $(defs_h) $(gdbthread_h) $(target_h) $(inferior_h) \
 	$(regcache_h) $(gregset_h)
 v850-tdep.o: v850-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
@@ -2588,8 +2589,4 @@ xdr_rdb.o: vx-share/xdr_rdb.c $(defs_h) vx-share/vxTypes.h \
 	vx-share/vxWorks.h vx-share/xdr_rdb.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/vx-share/xdr_rdb.c
 
-charset.o: charset.c $(defs_h) $(charset_h) $(gdbcmd_h) gdb_assert.h
-
-c-lang.o: $(charset_h)
-utils.o: $(charset_h)
 ### end of the gdb Makefile.in.

@@ -1,5 +1,8 @@
 2002-09-20  David Carlton  <carlton@math.stanford.edu>
 
+	* Makefile.in (c-lang.o): Correct dependencies.
+	(utils.o): Gather dependencies.
+	(charset.o): Move.
 	* c-lang.c: #include "gdb_string.h"
 
 2002-09-20  Fernando Nasser  <fnasser@redhat.com>
