@@ -1,3 +1,10 @@
+1999-01-26  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* breakpoint.h (ep_is_exception_catchpoint): Add prototype.
+	* frame.h (select_and_print_frame): Add prototype.
+	* stack.c (func_command): Call select_and_print_frame with correct
+	number of arguments.  Reformat whitespace.
+
 Tue Jan 26 16:53:54 1999  Fernando Nasser  <fnasser@cygnus.com>
 
 	* remote.c (remote_query): fix maximum packet size to account for
