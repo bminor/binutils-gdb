@@ -1,5 +1,9 @@
 Tue Sep 27 14:56:20 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* ldexp.c (fold_name): For DEFINED case, don't try to look up the
+	name in the hash table during the first phase--the hash table does
+	not even exist at that point, much less have the right value.
+
 	* Makefile.in (CC): Define.
 	(CXX): Move definition, change from g++ to gcc.
 	(EXPECT, RUNTEST): Copy definitions from top level Makefile.in.
