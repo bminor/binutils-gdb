@@ -7811,7 +7811,7 @@ elf_reloc_symbol_deleted_p (offset, cookie)
       else if (rcookie->locsyms)
 	{
 	  /* It's not a relocation against a global symbol,
-	     but it could be a relocation against a section
+	     but it could be a relocation against a local
 	     symbol for a discarded section.  */
 	  asection *isec;
 
@@ -7820,7 +7820,6 @@ elf_reloc_symbol_deleted_p (offset, cookie)
 	    {
 	      isec = section_from_elf_index (rcookie->abfd, isym.st_shndx);
 	      if (isec != NULL
-		  && ELF_ST_TYPE (isym.st_info) == STT_SECTION
 		  && ! bfd_is_abs_section (isec)
 		  && bfd_is_abs_section (isec->output_section))
 		return true;
