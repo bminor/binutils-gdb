@@ -1,3 +1,9 @@
+2002-03-10  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (defs_h): Add $(INCLUDE_DIR)/gdb/signals.h.
+	* defs.h: Include "gdb/signals.h".
+	(enum target_signal): Move to $(INCLUDE_DIR)/gdb/signals.h.
+
 2002-03-10  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-tdep.h (sys/reg.h, x86_64_regmap): Moved to x86-64-linux-nat.c

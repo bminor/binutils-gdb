@@ -603,7 +603,7 @@ completer_h =	completer.h
 cp_abi_h =	cp-abi.h
 dcache_h =	dcache.h
 defs_h =	defs.h $(xm_h) $(tm_h) $(nm_h) config.status config.h \
-		gdbarch.h ui-file.h
+		gdbarch.h ui-file.h $(INCLUDE_DIR)/gdb/signals.h
 doublest_h =	doublest.h $(floatformat_h)
 dwarf2cfi_h =	dwarf2cfi.h
 event_loop_h =  event-loop.h
