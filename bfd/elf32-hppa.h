@@ -334,7 +334,7 @@ enum elf32_hppa_symextn_types
 /* FIXME.  Are these external?  (For example used by GAS?).  If so the
    names need to change to avoid namespace pollution, if not they should
    be moved into elf32-hppa.c.  */
-typedef Elf32_Word symext_entryS;
+typedef unsigned long symext_entryS;
 struct symext_chain
   {
     symext_entryS entry;

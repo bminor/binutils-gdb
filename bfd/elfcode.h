@@ -466,6 +466,7 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
       return true;
 
     case SHT_PROGBITS:
+    case SHT_DYNAMIC:
       /* Bits that get saved. This one is real. */
       if (!hdr->rawdata)
 	{
@@ -662,7 +663,6 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
       break;
 
     case SHT_HASH:
-    case SHT_DYNAMIC:
     case SHT_DYNSYM:		/* could treat this like symtab... */
 #if 0
       fprintf (stderr, "Dynamic Linking sections not yet supported.\n");
@@ -1523,7 +1523,7 @@ DEFUN (elf_write_phdrs, (abfd, i_ehdrp, i_phdrp, phdr_cnt),
        bfd * abfd AND
        Elf_Internal_Ehdr * i_ehdrp AND
        Elf_Internal_Phdr * i_phdrp AND
-       Elf32_Half phdr_cnt)
+       unsigned short phdr_cnt)
 {
   /* first program header entry goes after the file header */
   int outbase = i_ehdrp->e_phoff;
@@ -2898,8 +2898,8 @@ DEFUN (elf_slurp_reloc_table, (abfd, asect, symbols),
   arelent *reloc_cache;
   arelent *cache_ptr;
   Elf_Internal_Shdr *data_hdr;
-  ElfNAME (Off) data_off;
-  ElfNAME (Word) data_max;
+  bfd_vma data_off;
+  unsigned long data_max;
   char buf[4];			/* FIXME -- might be elf64 */
 
   unsigned int idx;

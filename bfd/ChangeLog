@@ -1,3 +1,9 @@
+Sat Mar  5 14:08:54 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* elf32-hppa.h, elfcode.h:  Replace uses of Elf*_Half, Elf*_Word,
+	Elf*_Off typedefs by their expansion, the typedefs have been
+	removed from include/elf/internal.h.
+
 Thu Mar  3 20:03:39 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.h (_PA_RISC_ID): Treat HOST_HPPAOSF just like HOST_HPPABSD.
