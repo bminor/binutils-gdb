@@ -31,10 +31,10 @@
 @syncodeindex vr cp
 
 @c !!set GDB manual's edition---not the same as GDB version!
-@set EDITION 4.12
+@set EDITION Fifth
 
 @c !!set GDB manual's revision date
-@set DATE January 1994
+@set DATE April 1998
 
 @c THIS MANUAL REQUIRES TEXINFO-2 macros and info-makers to format properly.
 
@@ -53,11 +53,11 @@ END-INFO-DIR-ENTRY
 This file documents the @sc{gnu} debugger @value{GDBN}.
 
 
-This is Edition @value{EDITION}, @value{DATE}, 
+This is the @value{EDITION} Edition, @value{DATE}, 
 of @cite{Debugging with @value{GDBN}: the @sc{gnu} Source-Level Debugger}
 for @value{GDBN} Version @value{GDBVN}.
 
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998
 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
@@ -87,7 +87,7 @@ into another language, under the above conditions for modified versions.
 @subtitle (@value{TARGET})
 @end ifclear
 @sp 1
-@subtitle Edition @value{EDITION}, for @value{GDBN} version @value{GDBVN}
+@subtitle @value{EDITION} Edition, for @value{GDBN} version @value{GDBVN}
 @subtitle @value{DATE}
 @author Richard M. Stallman and Roland H. Pesch
 @page
@@ -101,7 +101,7 @@ into another language, under the above conditions for modified versions.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
+Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998
 Free Software Foundation, Inc. 
 @sp 2
 Published by the Free Software Foundation @*
@@ -130,7 +130,7 @@ into another language, under the above conditions for modified versions.
 
 This file describes @value{GDBN}, the @sc{gnu} symbolic debugger.
 
-This is Edition @value{EDITION}, @value{DATE}, for @value{GDBN} Version 
+This is the @value{EDITION} Edition, @value{DATE}, for @value{GDBN} Version 
 @value{GDBVN}.
 
 @menu

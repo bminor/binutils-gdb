@@ -1,3 +1,8 @@
+Tue Apr 21 18:09:56 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.texinfo (EDITION, DATE): Update and change to use ordinals
+	for the edition instead of confusing GDB-version-like numbers.
+
 Mon Apr 13 14:05:00 1998  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.texinfo (hbreak, watch): Fix typo, "date" -> "data".
