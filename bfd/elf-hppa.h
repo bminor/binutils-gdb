@@ -1065,6 +1065,7 @@ elf_hppa_final_link_relocate (howto, input_bfd, output_bfd,
 
     case R_PARISC_PCREL22F:
     case R_PARISC_PCREL17F:
+    case R_PARISC_14F:
       {
 	bfd_vma location;
 	r_field = e_fsel;
@@ -1254,6 +1255,7 @@ elf_hppa_relocate_insn (abfd, input_sect, insn, address, sym_value,
       }
    
     case R_PARISC_DLTREL14R:
+    case R_PARISC_DLTREL14F:
       {
         int w;
 
