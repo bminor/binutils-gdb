@@ -1,5 +1,5 @@
 /* Native-dependent code for Linux/x86.
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -452,7 +452,7 @@ static void store_fpregs (int tid, int regno) {}
 /* Fill GDB's register array with the floating-point and SSE register
    values in *FPXREGSETP.  */
 
-static void
+void
 supply_fpxregset (elf_fpxregset_t *fpxregsetp)
 {
   i387_supply_fxsave ((char *) fpxregsetp);
@@ -462,7 +462,7 @@ supply_fpxregset (elf_fpxregset_t *fpxregsetp)
    *FPXREGSETP with the value in GDB's register array.  If REGNO is
    -1, do this for all registers.  */
 
-static void
+void
 fill_fpxregset (elf_fpxregset_t *fpxregsetp, int regno)
 {
   i387_fill_fxsave ((char *) fpxregsetp, regno);

@@ -1,5 +1,8 @@
 2002-01-09  Michael Snyder  <msnyder@redhat.com>
 
+	* i386-linux-nat.c (fill_fpxregset): Make global.
+	(store_fpxregset): Ditto.
+
 	* gregset.h (gdb_fpxregset_t): Define.
 	(supply_fpxregset): Prototype.
 	(fill_fpxregset): Prototype.
