@@ -150,6 +150,9 @@ static void lang_check_section_addresses PARAMS ((void));
 static void os_region_check
   PARAMS ((lang_output_section_statement_type *,
 	   struct memory_region_struct *, etree_type *, bfd_vma));
+static bfd_vma lang_size_sections_1
+  PARAMS ((lang_statement_union_type *, lang_output_section_statement_type *,
+	   lang_statement_union_type **, fill_type, bfd_vma, boolean *));
 
 typedef void (*callback_t) PARAMS ((lang_wild_statement_type *,
 				    struct wildcard_list *,
@@ -2823,8 +2826,8 @@ os_region_check (os, region, tree, base)
 
 /* Set the sizes for all the output sections.  */
 
-bfd_vma
-lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
+static bfd_vma
+lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
      lang_statement_union_type *s;
      lang_output_section_statement_type *output_section_statement;
      lang_statement_union_type **prev;
@@ -2949,8 +2952,8 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 		os->bfd_section->output_offset = 0;
 	      }
 
-	    lang_size_sections (os->children.head, os, &os->children.head,
-				os->fill, dot, relax);
+	    lang_size_sections_1 (os->children.head, os, &os->children.head,
+				  os->fill, dot, relax);
 
 	    /* Put the section within the requested block size, or
 	       align at the block boundary.  */
@@ -3018,10 +3021,10 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	  break;
 
 	case lang_constructors_statement_enum:
-	  dot = lang_size_sections (constructor_list.head,
-				    output_section_statement,
-				    &s->wild_statement.children.head,
-				    fill, dot, relax);
+	  dot = lang_size_sections_1 (constructor_list.head,
+				      output_section_statement,
+				      &s->wild_statement.children.head,
+				      fill, dot, relax);
 	  break;
 
 	case lang_data_statement_enum:
@@ -3082,10 +3085,10 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 
 	case lang_wild_statement_enum:
 
-	  dot = lang_size_sections (s->wild_statement.children.head,
-				    output_section_statement,
-				    &s->wild_statement.children.head,
-				    fill, dot, relax);
+	  dot = lang_size_sections_1 (s->wild_statement.children.head,
+				      output_section_statement,
+				      &s->wild_statement.children.head,
+				      fill, dot, relax);
 
 	  break;
 
@@ -3180,10 +3183,10 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	  break;
 
 	case lang_group_statement_enum:
-	  dot = lang_size_sections (s->group_statement.children.head,
-				    output_section_statement,
-				    &s->group_statement.children.head,
-				    fill, dot, relax);
+	  dot = lang_size_sections_1 (s->group_statement.children.head,
+				      output_section_statement,
+				      &s->group_statement.children.head,
+				      fill, dot, relax);
 	  break;
 
 	default:
@@ -3197,6 +3200,42 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
       prev = &s->header.next;
     }
   return dot;
+}
+
+bfd_vma
+lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
+     lang_statement_union_type *s;
+     lang_output_section_statement_type *output_section_statement;
+     lang_statement_union_type **prev;
+     fill_type fill;
+     bfd_vma dot;
+     boolean *relax;
+{
+  bfd_vma result;
+
+  exp_data_seg.phase = exp_dataseg_none;
+  result = lang_size_sections_1 (s, output_section_statement, prev, fill,
+				 dot, relax);
+  if (exp_data_seg.phase == exp_dataseg_end_seen)
+    {
+      /* If DATA_SEGMENT_ALIGN DATA_SEGMENT_END pair was seen, check whether
+	 a page could be saved in the data segment.  */
+      bfd_vma first, last;
+
+      first = -exp_data_seg.base & (exp_data_seg.pagesize - 1);
+      last = exp_data_seg.end & (exp_data_seg.pagesize - 1);
+      if (first && last
+	  && ((exp_data_seg.base & ~(exp_data_seg.pagesize - 1))
+	      != (exp_data_seg.end & ~(exp_data_seg.pagesize - 1)))
+	  && first + last <= exp_data_seg.pagesize)
+	{
+	  exp_data_seg.phase = exp_dataseg_adjust;
+	  result = lang_size_sections_1 (s, output_section_statement, prev,
+					 fill, dot, relax);
+	}
+    }
+
+  return result;
 }
 
 bfd_vma

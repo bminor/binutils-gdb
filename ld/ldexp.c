@@ -64,6 +64,8 @@ static etree_value_type exp_fold_tree_no_dot
 	   lang_output_section_statement_type *current_section,
 	   lang_phase_type allocation_done));
 
+struct exp_data_seg exp_data_seg;
+
 static void
 exp_print_token (code)
      token_code_type code;
@@ -114,6 +116,8 @@ exp_print_token (code)
     { LOADADDR, "LOADADDR" },
     { MAX_K, "MAX_K" },
     { REL, "relocateable" },
+    { DATA_SEGMENT_ALIGN, "DATA_SEGMENT_ALIGN" },
+    { DATA_SEGMENT_END, "DATA_SEGMENT_END" }
   };
   unsigned int idx;
 
@@ -312,6 +316,33 @@ fold_binary (tree, current_section, allocation_done, dot, dotp)
 	    case MIN_K:
 	      if (result.value > other.value)
 		result = other;
+	      break;
+
+	    case DATA_SEGMENT_ALIGN:
+	      if (allocation_done != lang_first_phase_enum
+		  && current_section == abs_output_section
+		  && (exp_data_seg.phase == exp_dataseg_none
+		      || exp_data_seg.phase == exp_dataseg_adjust
+		      || allocation_done != lang_allocating_phase_enum))
+		{
+		  bfd_vma maxpage = result.value;
+
+		  result.value = ALIGN_N (dot, maxpage);
+		  if (exp_data_seg.phase != exp_dataseg_adjust)
+		    {
+		      result.value += dot & (maxpage - 1);
+		      if (allocation_done == lang_allocating_phase_enum)
+			{
+			  exp_data_seg.phase = exp_dataseg_align_seen;
+			  exp_data_seg.base = result.value;
+			  exp_data_seg.pagesize = other.value;
+			}
+		    }
+		  else if (other.value < maxpage)
+		    result.value += dot & (maxpage - other.value);
+		}
+	      else
+		result.valid_p = false;
 	      break;
 
 	    default:
@@ -578,6 +609,23 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 		result.valid_p = false;
 	      break;
 
+	    case DATA_SEGMENT_END:
+	      if (allocation_done != lang_first_phase_enum
+		  && current_section == abs_output_section
+		  && (exp_data_seg.phase == exp_dataseg_align_seen
+		      || exp_data_seg.phase == exp_dataseg_adjust
+		      || allocation_done != lang_allocating_phase_enum))
+		{
+		  if (exp_data_seg.phase == exp_dataseg_align_seen)
+		    {
+		      exp_data_seg.phase = exp_dataseg_end_seen;
+		      exp_data_seg.end = result.value;
+		    }
+		}
+	      else
+		result.valid_p = false;
+	      break;
+
 	    default:
 	      FAIL ();
 	      break;
@@ -615,7 +663,7 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 	    {
 	      result = exp_fold_tree (tree->assign.src,
 				      current_section,
-				      lang_allocating_phase_enum, dot,
+				      allocation_done, dot,
 				      dotp);
 	      if (! result.valid_p)
 		einfo (_("%F%S invalid assignment to location counter\n"));

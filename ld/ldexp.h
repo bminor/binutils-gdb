@@ -88,6 +88,16 @@ typedef union etree_union {
   } assert_s;
 } etree_type;
 
+extern struct exp_data_seg {
+  enum {
+    exp_dataseg_none,
+    exp_dataseg_align_seen,
+    exp_dataseg_end_seen,
+    exp_dataseg_adjust
+  } phase;
+  bfd_vma base, end, pagesize;
+} exp_data_seg;
+
 etree_type *exp_intop PARAMS ((bfd_vma));
 etree_type *exp_relop PARAMS ((asection *, bfd_vma));
 etree_value_type invalid PARAMS ((void));

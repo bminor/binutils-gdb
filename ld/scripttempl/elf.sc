@@ -70,6 +70,10 @@ if [ -z "$MACHINE" ]; then OUTPUT_ARCH=${ARCH}; else OUTPUT_ARCH=${ARCH}:${MACHI
 test -z "${ELFSIZE}" && ELFSIZE=32
 test -z "${ALIGNMENT}" && ALIGNMENT="${ELFSIZE} / 8"
 test "$LD_FLAG" = "N" && DATA_ADDR=.
+DATA_SEGMENT_ALIGN="ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))"
+if [ -n "${COMMONPAGESIZE}" ]; then
+  DATA_SEGMENT_ALIGN="DATA_SEGMENT_ALIGN(${MAXPAGESIZE}, ${COMMONPAGESIZE})"
+fi
 INTERP=".interp       ${RELOCATING-0} : { *(.interp) }"
 PLT=".plt          ${RELOCATING-0} : { *(.plt) }"
 DYNAMIC=".dynamic      ${RELOCATING-0} : { *(.dynamic) }"
@@ -269,8 +273,8 @@ cat <<EOF
 
   /* Adjust the address for the data segment.  We want to adjust up to
      the same address within the page on the next page up.  */
-  ${CREATE_SHLIB-${RELOCATING+. = ${DATA_ADDR-ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))};}}
-  ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_DATA_ADDR-ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))};}}
+  ${CREATE_SHLIB-${RELOCATING+. = ${DATA_ADDR-${DATA_SEGMENT_ALIGN}};}}
+  ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_DATA_ADDR-${DATA_SEGMENT_ALIGN}};}}
 
   .data         ${RELOCATING-0} :
   {
@@ -316,6 +320,7 @@ cat <<EOF
   ${RELOCATING+_end = .;}
   ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
   ${RELOCATING+PROVIDE (end = .);}
+  ${COMMONPAGESIZE+${RELOCATING+. = DATA_SEGMENT_END (.);}}
 
   /* Stabs debugging sections.  */
   .stab          0 : { *(.stab) }

@@ -1,3 +1,27 @@
+2002-02-12  Jakub Jelinek  <jakub@redhat.com>
+
+	* ldlex.l (DATA_SEGMENT_ALIGN, DATA_SEGMENT_END): New tokens.
+	* ldgram.y (DATA_SEGMENT_ALIGN, DATA_SEGMENT_END): New tokens.
+	(exp): Add DATA_SEGMENT_ALIGN (exp, exp) and DATA_SEGMENT_END (exp).
+	* ldexp.c (exp_data_seg): New variable.
+	(exp_print_token): Handle DATA_SEGMENT_ALIGN and DATA_SEGMENT_END.
+	(fold_binary): Handle DATA_SEGMENT_ALIGN.
+	(exp_fold_tree): Handle DATA_SEGMENT_END.
+	Pass allocation_done when recursing instead of hardcoding
+	lang_allocating_phase_enum.
+	* ldexp.h (exp_data_seg): New.
+	* ldlang.c (lang_size_sections_1): Renamed from lang_size_sections.
+	(lang_size_sections): New.
+	* ld.texinfo (DATA_SEGMENT_ALIGN, DATA_SEGMENT_END): Document.
+	* scripttempl/elf.sc: Use DATA_SEGMENT_ALIGN and DATA_SEGMENT_END
+	if COMMONPAGESIZE is defined.
+	* emulparams/elf_i386.sh (COMMONPAGESIZE): Set to 4K.
+	* emulparams/elf32_sparc.sh (COMMONPAGESIZE): Set to 8K.
+	* emulparams/elf64_sparc.sh (COMMONPAGESIZE): Set to 8K.
+	* emulparams/elf64alpha.sh (COMMONPAGESIZE): Set to 8K.
+	* emulparams/elf64_ia64.sh (COMMONPAGESIZE): Set to 16K for shared
+	libraries only.
+
 2002-02-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.

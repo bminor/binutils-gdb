@@ -4159,6 +4159,45 @@ This is a synonym for @code{ALIGN}, for compatibility with older linker
 scripts.  It is most often seen when setting the address of an output
 section.
 
+@item DATA_SEGMENT_ALIGN(@var{maxpagesize}, @var{commonpagesize})
+@kindex DATA_SEGMENT_ALIGN(@var{maxpagesize}, @var{commonpagesize})
+This is equivalent to either
+@smallexample
+(ALIGN(@var{maxpagesize}) + (. & (@var{maxpagesize} - 1)))
+@end smallexample
+or
+@smallexample
+(ALIGN(@var{maxpagesize}) + (. & (@var{maxpagesize} - @var{commonpagesize})))
+@end smallexample
+@noindent
+depending on whether the latter uses fewer @var{commonpagesize} sized pages
+for the data segment (area between the result of this expression and
+@code{DATA_SEGMENT_END}) than the former or not.
+If the latter form is used, it means @var{commonpagesize} bytes of runtime
+memory will be saved at the expense of up to @var{commonpagesize} wasted
+bytes in the on-disk file.
+
+This expression can only be used directly in @code{SECTIONS} commands, not in
+any output section descriptions and only once in the linker script.
+@var{commonpagesize} should be less or equal to @var{maxpagesize} and should
+be the system page size the object wants to be optimized for (while still
+working on system page sizes up to @var{maxpagesize}).
+
+@noindent
+Example:
+@smallexample
+  . = DATA_SEGMENT_ALIGN(0x10000, 0x2000);
+@end smallexample
+
+@item DATA_SEGMENT_END(@var{exp})
+@kindex DATA_SEGMENT_END(@var{exp})
+This defines the end of data segment for @code{DATA_SEGMENT_ALIGN}
+evaluation purposes.
+
+@smallexample
+  . = DATA_SEGMENT_END(.);
+@end smallexample
+
 @item DEFINED(@var{symbol})
 @kindex DEFINED(@var{symbol})
 @cindex symbol defaults
