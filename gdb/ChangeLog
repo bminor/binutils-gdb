@@ -1,3 +1,8 @@
+2004-01-08  David Mosberger  <davidm@hpl.hp.com>
+
+	* ia64-linux-tdep.c: Update GATE_AREA_END value to reflect
+	reality.
+
 2004-01-07  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (mips_gdbarch_init): Set elf_flags to the previous
