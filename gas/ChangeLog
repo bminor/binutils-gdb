@@ -1,5 +1,9 @@
 1999-08-08  Ian Lance Taylor  <ian@zembu.com>
 
+	* Makefile.am: Change all uses of itbl-test-ops to itbl-tops to
+	avoid problems on DOS filesystems.
+	* Makefile.in: Rebuild.
+
 	* doc/as.texinfo (Section): Document 's' flag for COFF version.
 
 1999-08-08  Mumit Khan  <khan@xraylith.wisc.edu>

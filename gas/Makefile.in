@@ -553,7 +553,7 @@ EXTRA_as_new_SOURCES = config/m68k-parse.y
 
 EXTRA_PROGRAMS = itbl-test
 itbl_test_SOURCES = itbl-parse.y itbl-lex.l
-itbl_test_LDADD = itbl-test-ops.o itbl-test.o $(GASLIBS) @LEXLIB@
+itbl_test_LDADD = itbl-tops.o itbl-test.o $(GASLIBS) @LEXLIB@
 
 # CGEN interface.
 
@@ -1610,7 +1610,7 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 itbl_test_OBJECTS =  itbl-parse.o itbl-lex.o
-itbl_test_DEPENDENCIES =  itbl-test-ops.o itbl-test.o \
+itbl_test_DEPENDENCIES =  itbl-tops.o itbl-test.o \
 ../libiberty/libiberty.a
 itbl_test_LDFLAGS = 
 as_new_OBJECTS =  app.o as.o atof-generic.o bignum-copy.o cond.o \
@@ -2152,8 +2152,8 @@ itbl-ops.o: $(srcdir)/itbl-ops.c $(srcdir)/itbl-ops.h itbl-parse.h
 itbl-parse.c itbl-parse.h: $(srcdir)/itbl-parse.y
 	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/itbl-parse.y y.tab.c itbl-parse.c y.tab.h itbl-parse.h -- -d
 
-itbl-test-ops.o: $(srcdir)/itbl-ops.c $(srcdir)/itbl-ops.h itbl-parse.h
-	$(COMPILE) -o itbl-test-ops.o -DSTAND_ALONE -c $(srcdir)/itbl-ops.c
+itbl-tops.o: $(srcdir)/itbl-ops.c $(srcdir)/itbl-ops.h itbl-parse.h
+	$(COMPILE) -o itbl-tops.o -DSTAND_ALONE -c $(srcdir)/itbl-ops.c
 
 itbl-test.o: $(srcdir)/testsuite/gas/all/itbl-test.c $(srcdir)/itbl-ops.h
 	$(COMPILE) -c -DSTAND_ALONE $(srcdir)/testsuite/gas/all/itbl-test.c
