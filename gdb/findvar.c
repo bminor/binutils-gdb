@@ -288,6 +288,7 @@ value_of_register (int regnum, struct frame_info *frame)
   VALUE_ADDRESS (reg_val) = addr;
   VALUE_REGNUM (reg_val) = regnum;
   VALUE_OPTIMIZED_OUT (reg_val) = optim;
+  VALUE_FRAME_ID (reg_val) = get_frame_id (frame);
   return reg_val;
 }
 

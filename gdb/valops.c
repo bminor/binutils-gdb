@@ -602,16 +602,8 @@ value_assign (struct value *toval, struct value *fromval)
 	int value_reg;
 
 	/* Figure out which frame this is in currently.  */
-	if (VALUE_LVAL (toval) == lval_register)
-	  {
-	    frame = get_current_frame ();
-	    value_reg = VALUE_REGNUM (toval);
-	  }
-	else
-	  {
-	    frame = frame_find_by_id (VALUE_FRAME_ID (toval));
-	    value_reg = VALUE_REGNUM (toval);
-	  }
+	frame = frame_find_by_id (VALUE_FRAME_ID (toval));
+	value_reg = VALUE_REGNUM (toval);
 
 	if (!frame)
 	  error ("Value being assigned to is no longer active.");

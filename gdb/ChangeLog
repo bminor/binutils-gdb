@@ -1,3 +1,10 @@
+2004-11-15  Andrew Cagney  <cagney@gnu.org>
+
+	* findvar.c (value_of_register): Set the frame ID.
+	* value.c (value_primitive_field): Copy the frame ID.
+	* valops.c (value_assign): Simplify lval_register case, there's
+	always a frame.
+
 2004-11-14  Daniel Jacobowitz  <dan@debian.org>
 
 	* Makefile.in (mips-linux-tdep.o): Update dependencies.
