@@ -35,6 +35,7 @@
 #include "objfiles.h"
 #include "gdbcmd.h"
 #include "gdb_assert.h"
+#include "dis-asm.h"
 
 /* Extra info which is saved in each frame_info. */
 struct frame_extra_info

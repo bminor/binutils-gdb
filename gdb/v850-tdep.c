@@ -31,6 +31,7 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "symtab.h"
+#include "dis-asm.h"
 
 struct gdbarch_tdep
 {

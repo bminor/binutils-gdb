@@ -39,7 +39,7 @@
 #include "regcache.h"
 #include "value.h"
 #include "gdb_assert.h"
-
+#include "dis-asm.h"
 
 
 

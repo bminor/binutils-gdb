@@ -35,8 +35,6 @@
 #ifndef GDBARCH_H
 #define GDBARCH_H
 
-#include "dis-asm.h" /* Get defs for disassemble_info, which unfortunately is a typedef. */
-
 struct floatformat;
 struct ui_file;
 struct frame_info;
@@ -45,6 +43,7 @@ struct objfile;
 struct minimal_symbol;
 struct regcache;
 struct reggroup;
+struct disassemble_info;
 
 extern struct gdbarch *current_gdbarch;
 
@@ -2082,8 +2081,8 @@ extern void set_gdbarch_software_single_step (struct gdbarch *gdbarch, gdbarch_s
 /* FIXME: cagney/2003-08-28: Need to find a better way of selecting the
    disassembler.  Perhaphs objdump can handle it? */
 
-typedef int (gdbarch_print_insn_ftype) (bfd_vma vma, disassemble_info *info);
-extern int gdbarch_print_insn (struct gdbarch *gdbarch, bfd_vma vma, disassemble_info *info);
+typedef int (gdbarch_print_insn_ftype) (bfd_vma vma, struct disassemble_info *info);
+extern int gdbarch_print_insn (struct gdbarch *gdbarch, bfd_vma vma, struct disassemble_info *info);
 extern void set_gdbarch_print_insn (struct gdbarch *gdbarch, gdbarch_print_insn_ftype *print_insn);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (TARGET_PRINT_INSN)
 #error "Non multi-arch definition of TARGET_PRINT_INSN"

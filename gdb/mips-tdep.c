@@ -48,6 +48,7 @@
 #include "elf-bfd.h"
 #include "symcat.h"
 #include "sim-regno.h"
+#include "dis-asm.h"
 
 static void set_reg_offset (CORE_ADDR *saved_regs, int regnum, CORE_ADDR off);
 static struct type *mips_register_type (struct gdbarch *gdbarch, int regnum);
@@ -373,8 +374,6 @@ mips_stack_argsize (void)
 #define MIPS_DEFAULT_MASK_ADDRESS_P (gdbarch_tdep (current_gdbarch)->default_mask_address_p)
 
 #define VM_MIN_ADDRESS (CORE_ADDR)0x400000
-
-int gdb_print_insn_mips (bfd_vma, disassemble_info *);
 
 static mips_extra_func_info_t heuristic_proc_desc (CORE_ADDR, CORE_ADDR,
 						   struct frame_info *, int);
@@ -5255,8 +5254,8 @@ reinit_frame_cache_sfunc (char *args, int from_tty,
   reinit_frame_cache ();
 }
 
-int
-gdb_print_insn_mips (bfd_vma memaddr, disassemble_info *info)
+static int
+gdb_print_insn_mips (bfd_vma memaddr, struct disassemble_info *info)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   mips_extra_func_info_t proc_desc;

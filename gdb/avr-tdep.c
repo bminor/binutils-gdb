@@ -36,6 +36,7 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "gdb_string.h"
+#include "dis-asm.h"
 
 /* AVR Background:
 

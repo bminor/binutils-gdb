@@ -41,6 +41,7 @@
 #include "symtab.h"
 #include "target.h"
 #include "value.h"
+#include "dis-asm.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -1566,7 +1567,7 @@ i386_pc_in_sigtramp (CORE_ADDR pc, char *name)
    deals with switching between those.  */
 
 static int
-i386_print_insn (bfd_vma pc, disassemble_info *info)
+i386_print_insn (bfd_vma pc, struct disassemble_info *info)
 {
   gdb_assert (disassembly_flavor == att_flavor
 	      || disassembly_flavor == intel_flavor);

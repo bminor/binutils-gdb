@@ -28,6 +28,7 @@
 #include "target.h"
 #include "arch-utils.h"
 #include "osabi.h"
+#include "dis-asm.h"
 
 #include "ns32k-tdep.h"
 #include "gdb_string.h"

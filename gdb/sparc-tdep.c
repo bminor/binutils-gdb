@@ -33,6 +33,7 @@
 #include "gdb_string.h"
 #include "regcache.h"
 #include "osabi.h"
+#include "dis-asm.h"
 
 #include "sparc-tdep.h"
 

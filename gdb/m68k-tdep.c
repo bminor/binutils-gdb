@@ -33,6 +33,7 @@
 #include "regcache.h"
 #include "arch-utils.h"
 #include "osabi.h"
+#include "dis-asm.h"
 
 #include "m68k-tdep.h"
 

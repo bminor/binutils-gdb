@@ -27,6 +27,7 @@
 #include "regcache.h"
 #include "gdbcore.h"
 #include "objfiles.h"
+#include "dis-asm.h"
 
 struct gdbarch_tdep
 {
@@ -1128,7 +1129,5 @@ extern initialize_file_ftype _initialize_xstormy16_tdep; /* -Wmissing-prototypes
 void
 _initialize_xstormy16_tdep (void)
 {
-  extern int print_insn_xstormy16 ();
-
   register_gdbarch_init (bfd_arch_xstormy16, xstormy16_gdbarch_init);
 }

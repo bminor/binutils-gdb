@@ -48,6 +48,7 @@
 #include "ppc-tdep.h"
 
 #include "gdb_assert.h"
+#include "dis-asm.h"
 
 /* If the kernel has to deliver a signal, it pushes a sigcontext
    structure on the stack and then calls the signal handler, passing

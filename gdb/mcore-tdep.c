@@ -29,6 +29,7 @@
 #include "arch-utils.h"
 #include "gdb_string.h"
 #include "disasm.h"
+#include "dis-asm.h"
 
 static CORE_ADDR mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc,
 					 int skip_prologue);

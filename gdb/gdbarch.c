@@ -5086,7 +5086,7 @@ set_gdbarch_software_single_step (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_print_insn (struct gdbarch *gdbarch, bfd_vma vma, disassemble_info *info)
+gdbarch_print_insn (struct gdbarch *gdbarch, bfd_vma vma, struct disassemble_info *info)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->print_insn != NULL);

@@ -1,3 +1,46 @@
+2003-09-04  Andrew Cagney  <cagney@redhat.com>
+
+	* avr-tdep.c: Include "dis-asm.h".
+	* cris-tdep.c: Include "dis-asm.h".
+	(cris_delayed_get_disassembler): Use "struct disassemble_info"
+	instead of corresponding typedef.
+	* h8300-tdep.c: Include "dis-asm.h".
+	* ia64-tdep.c: Include "dis-asm.h".
+	* i386-tdep.c: Include "dis-asm.h".
+	(i386_print_insn): Use "struct disassemble_info" instead of
+	corresponding typedef.
+	* m68k-tdep.c: Include "dis-asm.h".
+	* mcore-tdep.c: Include "dis-asm.h".
+	* mips-tdep.c: Include "dis-asm.h".
+	(gdb_print_insn_mips): Make static, use "struct disassemble_info"
+	instead of corresponding typedef.
+	* ns32k-tdep.c: Include "dis-asm.h".
+	* s390-tdep.c: Include "dis-asm.h".
+	* sparc-tdep.c: Include "dis-asm.h".
+	* vax-tdep.c: Include "dis-asm.h".
+	* v850-tdep.c: Include "dis-asm.h".
+	* mn10300-tdep.c: Include "dis-asm.h".
+	* rs6000-tdep.c: Include "dis-asm.h".
+	* xstormy16-tdep.c: Include "dis-asm.h".
+	(_initialize_xstormy16_tdep): Delete "extern" declaration of
+	print_insn_xstormy16.
+	* Makefile.in (v850-tdep.o): Update dependencies.
+	(vax-tdep.o, sparc-tdep.o, s390-tdep.o): Ditto.
+	(ns32k-tdep.o, mips-tdep.o, mcore-tdep.o): Ditto.
+	(m68k-tdep.o, ia64-tdep.o, i386-tdep.o): Ditto.
+	(h8300-tdep.o, cris-tdep.o, avr-tdep.o): Ditto.
+	(mn10300-tdep.o, xstormy16-tdep.o, disasm.o): Ditto.
+	(gdbarch_h): Remove $(dis_asm_h).
+	* disasm.c: Include "dis-asm.h".
+	(dis_asm_read_memory): Use "struct disassemble_info" instead of
+	corresponding typedef.
+	(dis_asm_memory_error, dump_insns, do_assembly_only): Ditto.
+	(gdb_disassemble_info, gdb_disassembly, gdb_print_insn): Ditto.
+	* gdbarch.sh: Do not include "dis-asm.h".
+	(struct disassemble_info): Declare opaque.
+	(TARGET_PRINT_INSN): Update declaration.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 2003-09-08  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_CALL_DUMMY_ADDRESS): Rename

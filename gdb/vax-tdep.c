@@ -30,6 +30,7 @@
 #include "arch-utils.h"
 #include "gdb_string.h"
 #include "osabi.h"
+#include "dis-asm.h"
 
 #include "vax-tdep.h"
 

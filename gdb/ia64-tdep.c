@@ -36,6 +36,7 @@
 #include "objfiles.h"
 #include "elf/common.h"		/* for DT_PLTGOT value */
 #include "elf-bfd.h"
+#include "dis-asm.h"
 
 /* Hook for determining the global pointer when calling functions in
    the inferior under AIX.  The initialization code in ia64-aix-nat.c

@@ -32,6 +32,7 @@
 #include "regcache.h"
 #include "arch-utils.h"
 #include "gdb_assert.h"
+#include "dis-asm.h"
 
 #define D0_REGNUM 0
 #define D2_REGNUM 2

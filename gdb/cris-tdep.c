@@ -39,6 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "solib.h"              /* Support for shared libraries. */
 #include "solib-svr4.h"         /* For struct link_map_offsets.  */
 #include "gdb_string.h"
+#include "dis-asm.h"
 
 
 enum cris_num_regs
@@ -373,8 +374,6 @@ static CORE_ADDR cris_skip_prologue_main (CORE_ADDR pc, int frameless_p);
 
 static struct gdbarch *cris_gdbarch_init (struct gdbarch_info,
                                           struct gdbarch_list *);
-
-static int cris_delayed_get_disassembler (bfd_vma, disassemble_info *);
 
 static void cris_dump_tdep (struct gdbarch *, struct ui_file *);
 
@@ -3539,9 +3538,9 @@ cris_gdb_func (enum cris_op_type op_type, unsigned short inst,
    exec_bfd has been set.  */
 
 static int
-cris_delayed_get_disassembler (bfd_vma addr, disassemble_info *info)
+cris_delayed_get_disassembler (bfd_vma addr, struct disassemble_info *info)
 {
-  int (*print_insn) (bfd_vma addr, disassemble_info *info);
+  int (*print_insn) (bfd_vma addr, struct disassemble_info *info);
   /* FIXME: cagney/2003-08-27: It should be possible to select a CRIS
      disassembler, even when there is no BFD.  Does something like
      "gdb; target remote; disassmeble *0x123" work?  */

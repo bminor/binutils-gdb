@@ -674,7 +674,7 @@ f:2:SMASH_TEXT_ADDRESS:CORE_ADDR:smash_text_address:CORE_ADDR addr:addr:::core_a
 F:2:SOFTWARE_SINGLE_STEP:void:software_single_step:enum target_signal sig, int insert_breakpoints_p:sig, insert_breakpoints_p
 # FIXME: cagney/2003-08-28: Need to find a better way of selecting the
 # disassembler.  Perhaphs objdump can handle it?
-f::TARGET_PRINT_INSN:int:print_insn:bfd_vma vma, disassemble_info *info:vma, info:::0:
+f::TARGET_PRINT_INSN:int:print_insn:bfd_vma vma, struct disassemble_info *info:vma, info:::0:
 f:2:SKIP_TRAMPOLINE_CODE:CORE_ADDR:skip_trampoline_code:CORE_ADDR pc:pc:::generic_skip_trampoline_code::0
 
 
@@ -836,8 +836,6 @@ cat <<EOF
 #ifndef GDBARCH_H
 #define GDBARCH_H
 
-#include "dis-asm.h" /* Get defs for disassemble_info, which unfortunately is a typedef. */
-
 struct floatformat;
 struct ui_file;
 struct frame_info;
@@ -846,6 +844,7 @@ struct objfile;
 struct minimal_symbol;
 struct regcache;
 struct reggroup;
+struct disassemble_info;
 
 extern struct gdbarch *current_gdbarch;
 
