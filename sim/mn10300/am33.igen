@@ -19,6 +19,25 @@
     return REG_E0 + rreg;
 }
 
+:function:::int:translate_xreg:int xreg
+{
+  switch (xreg)
+    {
+    case 0:
+      return REG_SP;
+    case 1:
+      return REG_MDRQ;
+    case 2:
+      return REG_MCRH;
+    case 3:
+      return REG_MCRL;
+    case 4:
+      return REG_MCVF;
+    default:
+      abort ();
+    }
+}
+
 // 1111 0000 0010 00An; mov USP,An
 8.0xf0+4.0x2,00,2.AN0:D0m:::mov
 "mov"
@@ -589,17 +608,13 @@
 "mov"
 *am33
 {
-  int dstreg;
+  int dstreg, srcreg;
 
   PC = cia;
   dstreg = translate_rreg (SD_, RN0);
+  srcreg = translate_xreg (SD_, XRM2);
 
-  if (XRM2 == 0)
-    {
-      State.regs[dstreg] = State.regs[REG_SP];
-    }
-  else
-    abort ();
+  State.regs[dstreg] = State.regs[srcreg];
 }
 
 // 1111 1001 1111 1000 Rm XRn; mov Rm,XRn
@@ -607,17 +622,13 @@
 "mov"
 *am33
 {
-  int srcreg;
+  int srcreg, dstreg;
 
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_xreg (SD_, XRN0);
 
-  if (XRN0 == 0)
-    {
-      State.regs[REG_SP] = State.regs[srcreg];
-    }
-  else
-    abort ();
+  State.regs[dstreg] = State.regs[srcreg];
 }
 
 // 1111 1001 0000 1001 Rm Rn; and Rm,Rn
@@ -1713,11 +1724,9 @@
   int dstreg;
 
   PC = cia;
+  dstreg = translate_xreg (SD_, XRN0);
 
-  if (XRN0 == 0)
-    State.regs[REG_SP] = IMM8;
-  else
-    abort ();
+  State.regs[dstreg] = IMM8;
 }
 
 // 1111 1011 0000 1001 Rn Rn IMM8; and IMM8,Rn
@@ -3274,14 +3283,12 @@
 "mov"
 *am33
 {
-  PC = cia;
+  int dstreg;
 
-  if (XRN0 == 0)
-    {
-      State.regs[REG_SP] = FETCH24 (IMM24A, IMM24B, IMM24C) & 0xffffff;
-    }
-  else
-    abort ();
+  PC = cia;
+  dstreg = translate_xreg (SD_, XRN0);
+
+  State.regs[dstreg] = FETCH24 (IMM24A, IMM24B, IMM24C) & 0xffffff;
 }
 
 // 1111 1101 0000 1001 Rn Rn IMM24; and imm24,Rn
@@ -4037,12 +4044,12 @@
 "mov"
 *am33
 {
-  PC = cia;
+  int dstreg;
 
-  if (XRN0 == 0)
-    State.regs[REG_SP] = FETCH32(IMM32A, IMM32B, IMM32C, IMM32D);
-  else
-    abort ();
+  PC = cia;
+  dstreg = translate_xreg (SD_, XRN0);
+
+  State.regs[dstreg] = FETCH32(IMM32A, IMM32B, IMM32C, IMM32D);
 }
 
 // 1111 1110 0000 1001 Rn Rn IMM32; and imm32,Rn

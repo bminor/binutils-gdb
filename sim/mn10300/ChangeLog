@@ -1,4 +1,8 @@
 start-sanitize-am33
+Fri Jul 24 12:49:28 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* am33.igen (translate_xreg): New function.  Use it as needed.
+
 Thu Jul 23 10:05:28 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* am33.igen: Add some missing instructions.
