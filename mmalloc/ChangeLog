@@ -1,3 +1,8 @@
+Mon Apr  6 16:33:37 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* detach.c (mmalloc_detach):  Arg should be PTR, not void *.
+	Fixes complaints from non __STDC__ systems.
+
 Wed Apr  1 11:47:02 1992  Fred Fish  (fnf@cygnus.com)
 
 	* mcalloc.c, mfree.c, mmalloc.c, mrealloc.c:  Minor comment
