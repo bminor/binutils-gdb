@@ -1,5 +1,9 @@
 2004-05-21  Jim Blandy  <jimb@redhat.com>
 
+	* ppc-linux-nat.c (fetch_register): Move code back to be next
+	to the comment that describes it.  (Moved code, instead of
+	comment, for symmetry with store_register.)
+
 	Allocate regset structures in the gdbarch's obstack, not using
 	xmalloc.
 	* regset.c (regset_alloc): Renamed from regset_xmalloc.

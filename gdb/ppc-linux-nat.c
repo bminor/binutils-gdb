@@ -208,11 +208,11 @@ fetch_register (int tid, int regno)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
+  CORE_ADDR regaddr = ppc_register_u_addr (regno);
   char mess[128];              /* For messages */
   int i;
   unsigned int offset;         /* Offset of registers within the u area. */
   char buf[MAX_REGISTER_SIZE];
-  CORE_ADDR regaddr = ppc_register_u_addr (regno);
 
   if (altivec_register_p (regno))
     {
