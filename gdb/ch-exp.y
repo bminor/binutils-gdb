@@ -90,6 +90,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yy_yyv	chill_yyv
 #define	yyval	chill_val
 #define	yylloc	chill_lloc
+#define yyrule	chill_rule		/* With YYDEBUG defined, byacc */
+#define yyname  chill_name		/* With YYDEBUG defined, byacc */
 #define yyreds	chill_reds		/* With YYDEBUG defined */
 #define yytoks	chill_toks		/* With YYDEBUG defined */
 #define yyss	chill_yyss		/* byacc */

@@ -1,5 +1,11 @@
 Wed Dec 30 19:47:13 1992  Fred Fish  (fnf@cygnus.com)
 
+	* c-exp.y, m2-exp.y (yyrule, yyname):  Remap like other yy* names
+	for byacc.
+	**** start-sanitize-chill ****
+	* ch-exp.y (yyrule, yyname):  Remap like other yy* names for byacc.
+	**** end-sanitize-chill ****
+
 	* c-exp.y, m2-exp.y (yyreds, yytoks):  Remap like other yy* names.
 	* c-exp.y, m2-exp.y (YYDEBUG):  Define if MAINTENANCE_CMDS is defined
 	and YYDEBUG is not already defined.
