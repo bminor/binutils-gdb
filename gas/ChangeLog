@@ -1,5 +1,7 @@
 Thu Feb 22 16:39:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* gdbinit.in: Set a breakpoint on as_warn_where.
+
 	* config/tc-mips.c (macro): Add missing arguments to macro_build
 	omitted in last change.  From Jim Wilson <wilson@cygnus.com>.
 
