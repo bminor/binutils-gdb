@@ -3922,27 +3922,40 @@ The display for frame zero does not begin with a program counter
 value, indicating that your program has stopped at the beginning of the
 code for line @code{993} of @code{builtin.c}.
 
-@kindex set backtrace-below-main
-@kindex show backtrace-below-main
+@kindex set backtrace past-main
+@kindex show backtrace past-main
+@kindex set backtrace limit
+@kindex show backtrace limit
 
-Most programs have a standard entry point---a place where system libraries
-and startup code transition into user code.  For C this is @code{main}.
-When @value{GDBN} finds the entry function in a backtrace it will terminate
-the backtrace, to avoid tracing into highly system-specific (and generally
-uninteresting) code.  If you need to examine the startup code, then you can
-change this behavior.
+Most programs have a standard user entry point---a place where system
+libraries and startup code transition into user code.  For C this is
+@code{main}.  When @value{GDBN} finds the entry function in a backtrace
+it will terminate the backtrace, to avoid tracing into highly
+system-specific (and generally uninteresting) code.
+
+If you need to examine the startup code, or limit the number of levels
+in a backtrace, you can change this behavior:
 
 @table @code
-@item set backtrace-below-main off
+@item set backtrace past-main
+@itemx set backtrace past-main on
+Backtraces will continue past the user entry point.
+
+@item set backtrace past-main off
 Backtraces will stop when they encounter the user entry point.  This is the
 default.
 
-@item set backtrace-below-main
-@itemx set backtrace-below-main on
-Backtraces will continue past the user entry point to the top of the stack.
+@item show backtrace past-main
+Display the current user entry point backtrace policy.
 
-@item show backtrace-below-main
-Display the current backtrace policy.
+@item set backtrace limit @var{n}
+@itemx set backtrace limit 0
+@cindex backtrace limit
+Limit the backtrace to @var{n} levels.  A value of zero means
+unlimited.
+
+@item show backtrace limit
+Display the current limit on backtrace levels.
 @end table
 
 @node Selection

@@ -1,3 +1,9 @@
+2003-08-09  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (Backtrace): Replace "set/show backtrace-below-main"
+	with "set/show backtrace past-main" and "set/show backtrace
+	limit".
+
 2003-08-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.in (install-info): Support DESTDIR.
