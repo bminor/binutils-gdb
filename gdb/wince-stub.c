@@ -484,7 +484,6 @@ WinMain (HINSTANCE hi, HINSTANCE hp, LPWSTR cmd, int show)
   char host[80];
 
   whost = wcschr (cmd, L' ');	/* Look for argument. */
-  whost = cmd;
 
   /* If no host is specified, just use default */
   if (whost)
