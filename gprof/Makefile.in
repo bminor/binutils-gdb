@@ -112,7 +112,7 @@ mostlyclean:
 clean: mostlyclean
 	-rm -f gprof
 distclean: clean
-	-rm -f config.status Makefile
+	-rm -f config.cache config.log config.status Makefile
 realclean: distclean
 	-rm -f $(DISTSTUFF)
 
