@@ -1,5 +1,7 @@
 Tue Mar 10 21:49:18 1992  K. Richard Pixley  (rich@mars.cygnus.com)
 
+	* Makefile.in: drop flex.  make stamp files work.
+
 	* configure: use relative paths for configure and srcdir whenever
 	  possible.
 

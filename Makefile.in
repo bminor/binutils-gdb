@@ -111,16 +111,16 @@ install-dir.info:
 
 # clib send_pr
 #	all-libgcc
-all.normal: all-texinfo all-bison all-byacc all-flex all-ld \
-	all-gas all-gcc all-binutils \
-	all-libg++ all-gdb all-make all-cvs all-patch all-emacs \
-	all-ispell all-fileutils \
-	all-newlib 
-all.cross: all-bison all-ld all-libgcc all-gdb
+all.normal: .stmp-texinfo .stmp-bison .stmp-byacc .stmp-ld \
+	.stmp-gas .stmp-gcc .stmp-binutils \
+	.stmp-libg++ .stmp-gdb .stmp-make .stmp-cvs .stmp-patch .stmp-emacs \
+	.stmp-ispell .stmp-fileutils \
+	.stmp-newlib 
+all.cross: .stmp-bison .stmp-ld .stmp-libgcc .stmp-gdb
 #	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
 clean: clean-stamps clean-libiberty clean-texinfo clean-bfd clean-newlib clean-binutils \
-	clean-bison clean-byacc clean-flex clean-ld clean-gas \
+	clean-bison clean-byacc clean-ld clean-gas \
 	clean-gcc clean-libgcc clean-readline clean-glob clean-gdb \
 	clean-make clean-diff clean-grep clean-rcs clean-gdbm \
 	clean-cvs clean-patch clean-emacs clean-ispell clean-fileutils \
@@ -128,14 +128,14 @@ clean: clean-stamps clean-libiberty clean-texinfo clean-bfd clean-newlib clean-b
 	-rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 
 clean-stamps:
-	-rm -f stmp-*
+	-rm -f .stmp-*
 
 install: $(INSTALL_TARGET) $(srcdir)/configure.man
 	$(INSTALL_DATA) $(srcdir)/configure.man $(man1dir)/configure.1
 
 install.all: install-dirs install-libiberty install-texinfo \
 	install-bfd install-binutils install-bison install-byacc \
-	install-flex install-ld install-gas install-gcc \
+	install-ld install-gas install-gcc \
 	install-libgcc install-readline install-glob install-gdb \
 	install-make install-cvs install-patch install-emacs \
 	install-ispell install-fileutils install-libg++ install-newlib
@@ -145,9 +145,8 @@ install.cross: install-dirs install-libiberty install-binutils install-bison \
 	install-readline install-glob install-gdb
 
 ### libiberty
-.PHONY: all-libiberty stmp-libiberty
-all-libiberty: stmp-libiberty
-stmp-libiberty:
+all-libiberty: .stmp-libiberty
+.stmp-libiberty:
 	if [ -d ./libiberty ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libiberty; \
@@ -165,7 +164,7 @@ stmp-libiberty:
 	else \
 		true ; \
 	fi
-	touch stmp-libiberty
+	touch .stmp-libiberty
 
 clean-libiberty: force
 	if [ -d ./libiberty ] ; then \
@@ -206,9 +205,8 @@ install-libiberty: force
 	fi
 
 ### texinfo
-.PHONY: all-texinfo stmp-texinfo
-all-texinfo: stmp-libiberty stmp-texinfo
-stmp-texinfo:
+all-texinfo: .stmp-libiberty .stmp-texinfo
+.stmp-texinfo:
 	if [ -d ./texinfo ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		rootme=`pwd` ; export rootme ; \
@@ -227,7 +225,7 @@ stmp-texinfo:
 	else \
 		true ; \
 	fi
-	touch stmp-texinfo
+	touch .stmp-texinfo
 
 clean-texinfo: force
 	if [ -d ./texinfo ] ; then \
@@ -268,9 +266,8 @@ install-texinfo: force
 	fi
 
 ### bfd
-.PHONY: all-bfd stmp-bfd
-all-bfd: stmp-bfd
-stmp-bfd:
+all-bfd: .stmp-bfd
+.stmp-bfd:
 	if [ -d ./bfd ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./bfd; \
@@ -288,7 +285,7 @@ stmp-bfd:
 	else \
 		true ; \
 	fi
-	touch stmp-bfd
+	touch .stmp-bfd
 
 clean-bfd: force
 	if [ -d ./bfd ] ; then \
@@ -329,9 +326,8 @@ install-bfd: force
 	fi
 
 ### binutils
-.PHONY: all-binutils stmp-binutils
-all-binutils: stmp-libiberty stmp-bfd stmp-binutils
-stmp-binutils:
+all-binutils: .stmp-libiberty .stmp-bfd .stmp-binutils
+.stmp-binutils:
 	if [ -d ./binutils ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./binutils; \
@@ -349,7 +345,7 @@ stmp-binutils:
 	else \
 		true ; \
 	fi
-	touch stmp-binutils
+	touch .stmp-binutils
 
 clean-binutils: force
 	if [ -d ./binutils ] ; then \
@@ -390,9 +386,8 @@ install-binutils: force
 	fi
 
 ### newlib
-.PHONY: all-newlib stmp-newlib
-all-newlib: stmp-newlib
-stmp-newlib:
+all-newlib: .stmp-newlib
+.stmp-newlib:
 	if [ -d ./newlib ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./newlib; \
@@ -410,7 +405,7 @@ stmp-newlib:
 	else \
 		true ; \
 	fi
-	touch stmp-newlib
+	touch .stmp-newlib
 
 clean-newlib: force
 	if [ -d ./newlib ] ; then \
@@ -451,9 +446,8 @@ install-newlib: force
 	fi
 
 ### byacc
-.PHONY: all-byacc stmp-byacc
-all-byacc: stmp-byacc
-stmp-byacc:
+all-byacc: .stmp-byacc
+.stmp-byacc:
 	if [ -d ./byacc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./byacc; \
@@ -471,7 +465,7 @@ stmp-byacc:
 	else \
 		true ; \
 	fi
-	touch stmp-byacc
+	touch .stmp-byacc
 
 clean-byacc: force
 	if [ -d ./byacc ] ; then \
@@ -512,9 +506,8 @@ install-byacc: force
 	fi
 
 ### bison
-.PHONY: all-bison stmp-bison
-all-bison: stmp-libiberty stmp-bison
-stmp-bison:
+all-bison: .stmp-libiberty .stmp-bison
+.stmp-bison:
 	if [ -d ./bison ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./bison; \
@@ -533,7 +526,7 @@ stmp-bison:
 	else \
 		true ; \
 	fi
-	touch stmp-bison
+	touch .stmp-bison
 
 clean-bison: force
 	if [ -d ./bison ] ; then \
@@ -576,9 +569,8 @@ install-bison: force
 	fi
 
 ### gcc
-.PHONY: all-gcc stmp-gcc
-all-gcc: stmp-libiberty stmp-bison stmp-gas
-stmp-gcc:
+all-gcc: .stmp-libiberty .stmp-bison .stmp-gas
+.stmp-gcc:
 	if [ -d ./gcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gcc; \
@@ -596,7 +588,7 @@ stmp-gcc:
 	else \
 		true ; \
 	fi
-	touch stmp-gcc
+	touch .stmp-gcc
 
 clean-gcc: force
 	if [ -d ./gcc ] ; then \
@@ -637,9 +629,8 @@ install-gcc:
 	fi
 
 ### readline
-.PHONY: all-readline stmp-readline
-all-readline: stmp-readline
-stmp-readline:
+all-readline: .stmp-readline
+.stmp-readline:
 	if [ -d ./readline ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./readline; \
@@ -657,7 +648,7 @@ stmp-readline:
 	else \
 		true ; \
 	fi
-	touch stmp-readline
+	touch .stmp-readline
 
 clean-readline: force
 	if [ -d ./readline ] ; then \
@@ -698,9 +689,8 @@ install-readline: force
 	fi
 
 ### glob
-.PHONY: all-glob stmp-glob
-all-glob: stmp-glob
-stmp-glob:
+all-glob: .stmp-glob
+.stmp-glob:
 	if [ -d ./glob ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./glob; \
@@ -718,7 +708,7 @@ stmp-glob:
 	else \
 		true ; \
 	fi
-	touch stmp-glob
+	touch .stmp-glob
 
 clean-glob: force
 	if [ -d ./glob ] ; then \
@@ -759,9 +749,8 @@ install-glob: force
 	fi
 
 ### gas
-.PHONY: all-gas stmp-gas
-all-gas: stmp-libiberty stmp-bfd stmp-gas
-stmp-gas:
+all-gas: .stmp-libiberty .stmp-bfd .stmp-gas
+.stmp-gas:
 	if [ -d ./gas ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gas; \
@@ -779,7 +768,7 @@ stmp-gas:
 	else \
 		true ; \
 	fi
-	touch stmp-gas
+	touch .stmp-gas
 
 clean-gas: force
 	if [ -d ./gas ] ; then \
@@ -820,9 +809,8 @@ install-gas: force
 	fi
 
 ### ld
-.PHONY: all-ld stmp-ld
-all-ld: stmp-libiberty stmp-bfd stmp-bison stmp-ld
-stmp-ld: 
+all-ld: .stmp-libiberty .stmp-bfd .stmp-bison .stmp-ld
+.stmp-ld: 
 	if [ -d ./ld ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ld; \
@@ -840,7 +828,7 @@ stmp-ld:
 	else \
 		true ; \
 	fi
-	touch stmp-ld
+	touch .stmp-ld
 
 clean-ld: force
 	if [ -d ./ld ] ; then \
@@ -881,9 +869,8 @@ install-ld: force
 	fi
 
 ### libgcc (and libgcc1)
-.PHONY: all-libgcc stmp-libgcc1 stmp-libgcc
-all-libgcc1: all-gas all-binutils stmp-libgcc1
-stmp-libgcc1:
+all-libgcc1: all-gas all-binutils .stmp-libgcc1
+.stmp-libgcc1:
 	if [ -d ./libgcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libgcc; \
@@ -901,7 +888,7 @@ stmp-libgcc1:
 	else \
 		true ; \
 	fi
-	touch stmp-libgcc1
+	touch .stmp-libgcc1
 
 clean-libgcc1: force
 	if [ -d ./libgcc ] ; then \
@@ -925,8 +912,8 @@ clean-libgcc1: force
 install-libgcc1: force
 	echo libgcc1 is a component, not an installable target
 
-all-libgcc: all-gas all-gcc all-binutils stmp-libgcc
-stmp-libgcc:
+all-libgcc: all-gas all-gcc all-binutils .stmp-libgcc
+.stmp-libgcc:
 	true
 	if [ -d ./libgcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
@@ -945,7 +932,7 @@ stmp-libgcc:
 	else \
 		true ; \
 	fi
-	touch stmp-libgcc
+	touch .stmp-libgcc
 
 clean-libgcc: force
 	if [ -d ./libgcc ] ; then \
@@ -986,9 +973,8 @@ install-libgcc: force
 	fi
 
 ### gdb
-.PHONY: all-gdb stmp-gdb
-all-gdb: stmp-bfd stmp-libiberty stmp-readline stmp-glob stmp-bison stmp-gdb
-stmp-gdb: 
+all-gdb: .stmp-bfd .stmp-libiberty .stmp-readline .stmp-glob .stmp-bison .stmp-gdb
+.stmp-gdb: 
 	if [ -d ./gdb ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gdb; \
@@ -1006,7 +992,7 @@ stmp-gdb:
 	else \
 		true ; \
 	fi
-	touch stmp-gdb
+	touch .stmp-gdb
 
 clean-gdb: force
 	if [ -d ./gdb ] ; then \
@@ -1047,9 +1033,8 @@ install-gdb: force
 	fi
 
 ### make
-.PHONY: all-make stmp-make
-all-make: all-libiberty stmp-make
-stmp-make:
+all-make: all-libiberty .stmp-make
+.stmp-make:
 	if [ -d ./make ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./make; \
@@ -1067,7 +1052,7 @@ stmp-make:
 	else \
 		true ; \
 	fi
-	touch stmp-make
+	touch .stmp-make
 
 clean-make: force
 	if [ -d ./make ] ; then \
@@ -1108,9 +1093,8 @@ install-make: force
 	fi
 
 ### diff
-.PHONY: all-diff stmp-diff
-all-diff: stmp-diff
-stmp-diff:
+all-diff: .stmp-diff
+.stmp-diff:
 	if [ -d ./diff ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./diff; \
@@ -1128,7 +1112,7 @@ stmp-diff:
 	else \
 		true ; \
 	fi
-	touch stmp-diff
+	touch .stmp-diff
 
 clean-diff: force
 	if [ -d ./diff ] ; then \
@@ -1169,9 +1153,8 @@ install-diff: force
 	fi
 
 ### grep
-.PHONY: all-grep stmp-grep
-all-grep: stmp-grep
-stmp-grep:
+all-grep: .stmp-grep
+.stmp-grep:
 	if [ -d ./grep ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./grep; \
@@ -1189,7 +1172,7 @@ stmp-grep:
 	else \
 		true ; \
 	fi
-	touch stmp-grep
+	touch .stmp-grep
 
 clean-grep: force
 	if [ -d ./grep ] ; then \
@@ -1230,9 +1213,8 @@ install-grep: force
 	fi
 
 ### rcs
-.PHONY: all-rcs stmp-rcs
-all-rcs: stmp-diff stmp-grep stmp-rcs
-stmp-rcs:
+all-rcs: .stmp-diff .stmp-grep .stmp-rcs
+.stmp-rcs:
 	if [ -d ./rcs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./rcs; \
@@ -1250,7 +1232,7 @@ stmp-rcs:
 	else \
 		true ; \
 	fi
-	touch stmp-rcs
+	touch .stmp-rcs
 
 clean-rcs: force
 	if [ -d ./rcs ] ; then \
@@ -1291,9 +1273,8 @@ install-rcs: install-grep install-diff force
 	fi
 
 ### gdbm
-.PHONY: all-gdbm stmp-gdbm
-all-gdbm: stmp-gdbm
-stmp-gdbm: force
+all-gdbm: .stmp-gdbm
+.stmp-gdbm:
 	if [ -d ./gdbm ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gdbm; \
@@ -1311,7 +1292,7 @@ stmp-gdbm: force
 	else \
 		true ; \
 	fi
-	touch stmp-gdbm
+	touch .stmp-gdbm
 
 clean-gdbm: force
 	if [ -d ./gdbm ] ; then \
@@ -1352,9 +1333,9 @@ install-gdbm: force
 	fi
 
 ### cvs
-.PHONY: all-cvs stmp-cvs
-all-cvs: stmp-cvs stmp-rcs stmp-grep stmp-diff
-stmp-cvs: stmp-gdbm force
+
+all-cvs: .stmp-cvs .stmp-rcs .stmp-grep .stmp-diff
+.stmp-cvs: .stmp-gdbm force
 	if [ -d ./cvs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./cvs; \
@@ -1372,7 +1353,7 @@ stmp-cvs: stmp-gdbm force
 	else \
 		true ; \
 	fi
-	touch stmp-cvs
+	touch .stmp-cvs
 
 clean-cvs: clean-gdbm force
 	if [ -d ./cvs ] ; then \
@@ -1413,9 +1394,8 @@ install-cvs: install-rcs install-gdbm force
 	fi
 
 ### patch
-.PHONY: all-patch stmp-patch
-all-patch: stmp-patch
-stmp-patch: force
+all-patch: .stmp-patch
+.stmp-patch: force
 	if [ -d ./patch ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./patch; \
@@ -1433,7 +1413,7 @@ stmp-patch: force
 	else \
 		true ; \
 	fi
-	touch stmp-patch
+	touch .stmp-patch
 
 clean-patch: force
 	if [ -d ./patch ] ; then \
@@ -1475,9 +1455,8 @@ install-patch: force
 	fi
 
 ### emacs
-.PHONY: all-emacs stmp-emacs
-all-emacs: stmp-emacs
-stmp-emacs: force
+all-emacs: .stmp-emacs
+.stmp-emacs: force
 	if [ -d ./emacs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./emacs; \
@@ -1495,7 +1474,7 @@ stmp-emacs: force
 	else \
 		true ; \
 	fi
-	touch stmp-emacs
+	touch .stmp-emacs
 
 clean-emacs: force
 	if [ -d ./emacs ] ; then \
@@ -1536,9 +1515,8 @@ install-emacs: install-rcs install-gdbm force
 	fi
 
 ### ispell
-.PHONY: all-ispell stmp-ispell
-all-ispell: stmp-ispell
-stmp-ispell: all-emacs force
+all-ispell: .stmp-ispell
+.stmp-ispell: all-emacs force
 	if [ -d ./ispell ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ispell; \
@@ -1556,7 +1534,7 @@ stmp-ispell: all-emacs force
 	else \
 		true ; \
 	fi
-	touch stmp-ispell
+	touch .stmp-ispell
 
 clean-ispell: force
 	if [ -d ./ispell ] ; then \
@@ -1596,71 +1574,9 @@ install-ispell: install-rcs install-gdbm force
 		true ; \
 	fi
 
-### flex
-.PHONY: all-flex stmp-flex
-all-flex: stmp-flex
-stmp-flex: force
-	if [ -d ./flex ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		(cd ./flex; \
-		$(MAKE) \
-			"against=$(against)" \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
-	else \
-		true ; \
-	fi
-	touch stmp-flex
-
-clean-flex: force
-	if [ -d ./flex ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		(cd ./flex; \
-		$(MAKE) \
-			"against=$(against)" \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
-	else \
-		true ; \
-	fi
-
-install-flex: force
-	if [ -d ./flex ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		(cd ./flex; \
-		$(MAKE) \
-			"against=$(against)" \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			install) ; \
-	else \
-		true ; \
-	fi
-
 ### fileutils
-.PHONY: all-fileutils stmp-fileutils
-all-fileutils: stmp-fileutils
-stmp-fileutils: force
+all-fileutils: .stmp-fileutils
+.stmp-fileutils: force
 	if [ -d ./fileutils ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./fileutils; \
@@ -1681,7 +1597,7 @@ stmp-fileutils: force
 	else \
 		true ; \
 	fi
-	touch stmp-fileutils
+	touch .stmp-fileutils
 
 clean-fileutils: force
 	if [ -d ./fileutils ] ; then \
@@ -1728,9 +1644,16 @@ install-fileutils: force
 	fi
 
 ### libg++
-.PHONY: all-libg++ stmp-libg++
-all-libg++: stmp-gas stmp-ld stmp-gcc stmp-libg++
-stmp-libg++: stmp-gcc force
+GXX = `if [ -d $${rootme}/gcc ] ; \
+	then echo $${rootme}/gcc/gcc -B$${rootme}/gcc/ ; \
+	else echo gcc ; fi`
+
+XTRAFLAGS = `if [ -d $${rootme}/gcc ] ; \
+	then echo -I$${rootme}/gcc/include ; \
+	else echo ; fi`
+
+all-libg++: .stmp-gas .stmp-ld .stmp-gcc .stmp-libg++
+.stmp-libg++: .stmp-gcc
 	if [ -d ./libg++ ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libg++; \
@@ -1741,7 +1664,8 @@ stmp-libg++: stmp-gcc force
 			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$${rootme}/gcc/gcc -B$${rootme}/gcc/" \
+			"CC=${GXX}" \
+			"XTRAFLAGS=${XTRAFLAGS}" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1751,7 +1675,7 @@ stmp-libg++: stmp-gcc force
 	else \
 		true ; \
 	fi
-	touch stmp-libgxx
+	touch .stmp-libg++
 
 clean-libg++: force
 	if [ -d ./libg++ ] ; then \
