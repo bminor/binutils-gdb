@@ -1,3 +1,12 @@
+2004-09-30  Andrew Cagney  <cagney@gnu.org>
+
+	* target.c (target_xfer_partial): New function.
+	(target_read_memory_partial, target_write_memory_partial) 
+	(default_xfer_partial, target_read_partial, target_write_partial) 
+	(xfer_using_stratum): Use.
+	(debug_to_xfer_partial): Delete function.
+	(setup_target_debug): Do not override to_xfer_partial.
+
 2004-09-30  Mark Kettenis  <kettenis@chello.nl>
 
 	* fork-child.c: Update copyright year.  Fix coding style.
