@@ -471,11 +471,4 @@ void tc_aout_fix_to_chars ();
  */
 #define DBG_S_C_FUNCTION_PARAMETER	0xc9
 #define DBG_S_C_LOCAL_SYM			0xd9
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
-
 /* end of obj-vms.h */
