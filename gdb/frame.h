@@ -250,6 +250,8 @@ extern struct symbol *get_frame_function (struct frame_info *);
 
 extern CORE_ADDR get_frame_pc (struct frame_info *);
 
+extern CORE_ADDR frame_address_in_block (struct frame_info *);
+
 extern CORE_ADDR get_pc_function_start (CORE_ADDR);
 
 extern struct block *block_for_pc (CORE_ADDR);

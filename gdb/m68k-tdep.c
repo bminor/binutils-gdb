@@ -42,16 +42,82 @@
 #define P_FMOVM		0xf237
 #define P_TRAP		0x4e40
 
+
+/* Register numbers of various important registers.
+   Note that some of these values are "real" register numbers,
+   and correspond to the general registers of the machine,
+   and some are "phony" register numbers which are too large
+   to be actual register numbers as far as the user is concerned
+   but do serve to get the desired values when passed to read_register.  */
+
+/* Note: Since they are used in files other than this (monitor files), 
+   D0_REGNUM and A0_REGNUM are currently defined in tm-m68k.h.  */
+
 enum
 {
+  E_A1_REGNUM = 9,
   E_FP_REGNUM = 14,		/* Contains address of executing stack frame */
   E_SP_REGNUM = 15,		/* Contains address of top of stack */
   E_PS_REGNUM = 16,		/* Contains processor status */
   E_PC_REGNUM = 17,		/* Contains program counter */
-  E_FP0_REGNUM = 18		/* Floating point register 0 */
+  E_FP0_REGNUM = 18,		/* Floating point register 0 */
+  E_FPC_REGNUM = 26,		/* 68881 control register */
+  E_FPS_REGNUM = 27,		/* 68881 status register */
+  E_FPI_REGNUM = 28
 };
 
+#define REGISTER_BYTES_FP (16*4 + 8 + 8*12 + 3*4)
+#define REGISTER_BYTES_NOFP (16*4 + 8)
+
+#define NUM_FREGS (NUM_REGS-24)
+
+/* Offset from SP to first arg on stack at first instruction of a function */
+
+#define SP_ARG0 (1 * 4)
+
+/* This was determined by experimentation on hp300 BSD 4.3.  Perhaps
+   it corresponds to some offset in /usr/include/sys/user.h or
+   something like that.  Using some system include file would
+   have the advantage of probably being more robust in the face
+   of OS upgrades, but the disadvantage of being wrong for
+   cross-debugging.  */
+
+#define SIG_PC_FP_OFFSET 530
+
+#define TARGET_M68K
+
+
+#if !defined (BPT_VECTOR)
+#define BPT_VECTOR 0xf
+#endif
+
+#if !defined (REMOTE_BPT_VECTOR)
+#define REMOTE_BPT_VECTOR 1
+#endif
+
+
 void m68k_frame_init_saved_regs (struct frame_info *frame_info);
+
+
+/* gdbarch_breakpoint_from_pc is set to m68k_local_breakpoint_from_pc
+   so m68k_remote_breakpoint_from_pc is currently not used.  */
+
+const static unsigned char *
+m68k_remote_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+{
+  static unsigned char break_insn[] = {0x4e, (0x40 | REMOTE_BPT_VECTOR)};
+  *lenptr = sizeof (break_insn);
+  return break_insn;
+}
+
+const static unsigned char *
+m68k_local_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+{
+  static unsigned char break_insn[] = {0x4e, (0x40 | BPT_VECTOR)};
+  *lenptr = sizeof (break_insn);
+  return break_insn;
+}
+
 
 static int
 m68k_register_bytes_ok (numbytes)
@@ -92,7 +158,7 @@ m68k_register_virtual_size (int regnum)
 static struct type *
 m68k_register_virtual_type (int regnum)
 {
-  if ((unsigned) regnum >= FPC_REGNUM)
+  if ((unsigned) regnum >= E_FPC_REGNUM)
     return lookup_pointer_type (builtin_type_void);
   else if ((unsigned) regnum >= FP0_REGNUM)
     return builtin_type_long_double;
@@ -138,8 +204,8 @@ m68k_stack_align (CORE_ADDR addr)
 static int
 m68k_register_byte (int regnum)
 {
-  if (regnum >= FPC_REGNUM)
-    return (((regnum - FPC_REGNUM) * 4) + 168);
+  if (regnum >= E_FPC_REGNUM)
+    return (((regnum - E_FPC_REGNUM) * 4) + 168);
   else if (regnum >= FP0_REGNUM)
     return (((regnum - FP0_REGNUM) * 12) + 72);
   else
@@ -152,7 +218,7 @@ m68k_register_byte (int regnum)
 static void
 m68k_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
-  write_register (A1_REGNUM, addr);
+  write_register (E_A1_REGNUM, addr);
 }
 
 /* Extract from an array regbuf containing the (raw) register state
@@ -795,14 +861,14 @@ supply_fpregset (fpregset_t *fpregsetp)
   register int regi;
   char *from;
 
-  for (regi = FP0_REGNUM; regi < FPC_REGNUM; regi++)
+  for (regi = FP0_REGNUM; regi < E_FPC_REGNUM; regi++)
     {
       from = (char *) &(fpregsetp->f_fpregs[regi - FP0_REGNUM][0]);
       supply_register (regi, from);
     }
-  supply_register (FPC_REGNUM, (char *) &(fpregsetp->f_pcr));
-  supply_register (FPS_REGNUM, (char *) &(fpregsetp->f_psr));
-  supply_register (FPI_REGNUM, (char *) &(fpregsetp->f_fpiaddr));
+  supply_register (E_FPC_REGNUM, (char *) &(fpregsetp->f_pcr));
+  supply_register (E_FPS_REGNUM, (char *) &(fpregsetp->f_psr));
+  supply_register (E_FPI_REGNUM, (char *) &(fpregsetp->f_fpiaddr));
 }
 
 /*  Given a pointer to a floating point register set in /proc format
@@ -817,7 +883,7 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
   char *to;
   char *from;
 
-  for (regi = FP0_REGNUM; regi < FPC_REGNUM; regi++)
+  for (regi = FP0_REGNUM; regi < E_FPC_REGNUM; regi++)
     {
       if ((regno == -1) || (regno == regi))
 	{
@@ -826,17 +892,17 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
 	}
     }
-  if ((regno == -1) || (regno == FPC_REGNUM))
+  if ((regno == -1) || (regno == E_FPC_REGNUM))
     {
-      fpregsetp->f_pcr = *(int *) &registers[REGISTER_BYTE (FPC_REGNUM)];
+      fpregsetp->f_pcr = *(int *) &registers[REGISTER_BYTE (E_FPC_REGNUM)];
     }
-  if ((regno == -1) || (regno == FPS_REGNUM))
+  if ((regno == -1) || (regno == E_FPS_REGNUM))
     {
-      fpregsetp->f_psr = *(int *) &registers[REGISTER_BYTE (FPS_REGNUM)];
+      fpregsetp->f_psr = *(int *) &registers[REGISTER_BYTE (E_FPS_REGNUM)];
     }
-  if ((regno == -1) || (regno == FPI_REGNUM))
+  if ((regno == -1) || (regno == E_FPI_REGNUM))
     {
-      fpregsetp->f_fpiaddr = *(int *) &registers[REGISTER_BYTE (FPI_REGNUM)];
+      fpregsetp->f_fpiaddr = *(int *) &registers[REGISTER_BYTE (E_FPI_REGNUM)];
     }
 }
 
@@ -936,6 +1002,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_prologue (gdbarch, m68k_skip_prologue);
   set_gdbarch_saved_pc_after_call (gdbarch, m68k_saved_pc_after_call);
+  set_gdbarch_breakpoint_from_pc (gdbarch, m68k_local_breakpoint_from_pc);
 
   /* Stack grows down. */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

@@ -86,8 +86,8 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
 }
 
 static void
-fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size, int which,
-                         CORE_ADDR ignore)
+fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size,
+			 int which, CORE_ADDR ignore)
 {
   switch (which)
     {

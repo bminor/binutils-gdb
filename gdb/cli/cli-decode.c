@@ -1505,3 +1505,23 @@ complete_on_enum (const char *enumlist[],
   return matchlist;
 }
 
+
+/* check function pointer */
+int
+cmd_func_p (struct cmd_list_element *cmd)
+{
+  return (cmd->func != NULL);
+}
+
+
+/* call the command function */
+void
+cmd_func (struct cmd_list_element *cmd, char *args, int from_tty)
+{
+  if (cmd_func_p (cmd))
+    (*cmd->func) (cmd, args, from_tty);
+  else
+    error ("Invalid command");
+}
+
+

@@ -280,4 +280,10 @@ extern void dont_repeat (void);
 
 extern void not_just_help_class_command (char *, int);
 
+/* check function pointer */
+extern int cmd_func_p (struct cmd_list_element *cmd);
+
+/* call the command function */
+extern void cmd_func (struct cmd_list_element *cmd, char *args, int from_tty);
+
 #endif /* !defined (COMMAND_H) */

@@ -94,12 +94,12 @@ i[3456]86-*-aix*)	gdb_target=i386aix ;;
 i[3456]86-*-bsd*)	gdb_target=i386bsd ;;
 i[3456]86-*-freebsd*)	gdb_target=fbsd ;;
 i[3456]86-*-netbsdelf*)	gdb_target=nbsdelf ;;
-i[3456]86-*-netbsd*)	gdb_target=nbsdaout ;;
+i[3456]86-*-netbsd* | i[3456]86-*-openbsd*)
+			gdb_target=nbsdaout ;;
 i[3456]86-*-os9k)	gdb_target=i386os9k ;;
 i[3456]86-*-go32*)	gdb_target=i386aout ;;
 i[3456]86-*-msdosdjgpp*) gdb_target=go32 ;;
 i[3456]86-*-lynxos*)	gdb_target=i386lynx ;;
-i[3456]86-*-openbsd*)	gdb_target=obsd ;;
 i[3456]86-*-solaris*)	gdb_target=i386sol2 ;;
 i[3456]86-*-sysv4.2*)	gdb_target=i386v42mp ;;
 i[3456]86-*-sysv4*)	gdb_target=i386v4 ;;

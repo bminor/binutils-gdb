@@ -359,7 +359,14 @@ static int
 open_map (struct read_map_ctxt *ctxt)
 {
 #ifdef USE_LDR_ROUTINES
-  ctxt->proc = ldr_my_process ();
+  /* Note: As originally written, ldr_my_process() was used to obtain
+     the value for ctxt->proc.  This is incorrect, however, since
+     ldr_my_process() retrieves the "unique identifier" associated
+     with the current process (i.e. GDB) and not the one being
+     debugged.  Presumably, the pid of the process being debugged is
+     compatible with the "unique identifier" used by the ldr_
+     routines, so we use that.  */
+  ctxt->proc = ptid_get_pid (inferior_ptid);
   if (ldr_xattach (ctxt->proc) != 0)
     return 0;
   ctxt->next = LDR_NULL_MODULE;

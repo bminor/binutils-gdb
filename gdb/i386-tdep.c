@@ -452,6 +452,38 @@ i386_get_frame_setup (CORE_ADDR pc)
   return (-1);
 }
 
+/* Signal trampolines don't have a meaningful frame.  The frame
+   pointer value we use is actually the frame pointer of the calling
+   frame -- that is, the frame which was in progress when the signal
+   trampoline was entered.  GDB mostly treats this frame pointer value
+   as a magic cookie.  We detect the case of a signal trampoline by
+   looking at the SIGNAL_HANDLER_CALLER field, which is set based on
+   PC_IN_SIGTRAMP.
+
+   When a signal trampoline is invoked from a frameless function, we
+   essentially have two frameless functions in a row.  In this case,
+   we use the same magic cookie for three frames in a row.  We detect
+   this case by seeing whether the next frame has
+   SIGNAL_HANDLER_CALLER set, and, if it does, checking whether the
+   current frame is actually frameless.  In this case, we need to get
+   the PC by looking at the SP register value stored in the signal
+   context.
+
+   This should work in most cases except in horrible situations where
+   a signal occurs just as we enter a function but before the frame
+   has been set up.  */
+
+/* Return non-zero if we're dealing with a frameless signal, that is,
+   a signal trampoline invoked from a frameless function.  */
+
+static int
+i386_frameless_signal_p (struct frame_info *frame)
+{
+  return (frame->next
+	  && frame->next->signal_handler_caller
+	  && frameless_look_for_prologue (frame));
+}
+
 /* Return the chain-pointer for FRAME.  In the case of the i386, the
    frame's nominal address is the address of a 4-byte word containing
    the calling frame's address.  */
@@ -459,7 +491,8 @@ i386_get_frame_setup (CORE_ADDR pc)
 static CORE_ADDR
 i386_frame_chain (struct frame_info *frame)
 {
-  if (frame->signal_handler_caller)
+  if (frame->signal_handler_caller
+      || i386_frameless_signal_p (frame))
     return frame->frame;
 
   if (! inside_entry_file (frame->pc))
@@ -472,7 +505,7 @@ i386_frame_chain (struct frame_info *frame)
    not have a from on the stack associated with it.  If it does not,
    return non-zero, otherwise return zero.  */
 
-int
+static int
 i386_frameless_function_invocation (struct frame_info *frame)
 {
   if (frame->signal_handler_caller)
@@ -481,18 +514,44 @@ i386_frameless_function_invocation (struct frame_info *frame)
   return frameless_look_for_prologue (frame);
 }
 
+/* Assuming FRAME is for a sigtramp routine, return the saved program
+   counter.  */
+
+static CORE_ADDR
+i386_sigtramp_saved_pc (struct frame_info *frame)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  CORE_ADDR addr;
+
+  addr = tdep->sigcontext_addr (frame);
+  return read_memory_unsigned_integer (addr + tdep->sc_pc_offset, 4);
+}
+
+/* Assuming FRAME is for a sigtramp routine, return the saved stack
+   pointer.  */
+
+static CORE_ADDR
+i386_sigtramp_saved_sp (struct frame_info *frame)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  CORE_ADDR addr;
+
+  addr = tdep->sigcontext_addr (frame);
+  return read_memory_unsigned_integer (addr + tdep->sc_sp_offset, 4);
+}
+
 /* Return the saved program counter for FRAME.  */
 
 static CORE_ADDR
 i386_frame_saved_pc (struct frame_info *frame)
 {
   if (frame->signal_handler_caller)
-    {
-      CORE_ADDR (*sigtramp_saved_pc) (struct frame_info *);
-      sigtramp_saved_pc = gdbarch_tdep (current_gdbarch)->sigtramp_saved_pc;
+    return i386_sigtramp_saved_pc (frame);
 
-      gdb_assert (sigtramp_saved_pc != NULL);
-      return sigtramp_saved_pc (frame);
+  if (i386_frameless_signal_p (frame))
+    {
+      CORE_ADDR sp = i386_sigtramp_saved_sp (frame->next);
+      return read_memory_unsigned_integer (sp, 4);
     }
 
   return read_memory_unsigned_integer (frame->frame + 4, 4);
@@ -503,13 +562,16 @@ i386_frame_saved_pc (struct frame_info *frame)
 static CORE_ADDR
 i386_saved_pc_after_call (struct frame_info *frame)
 {
+  if (frame->signal_handler_caller)
+    return i386_sigtramp_saved_pc (frame);
+
   return read_memory_unsigned_integer (read_register (SP_REGNUM), 4);
 }
 
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-int
+static int
 i386_frame_num_args (struct frame_info *fi)
 {
 #if 1
@@ -606,7 +668,7 @@ i386_frame_num_args (struct frame_info *fi)
    If the setup sequence is at the end of the function, then the next
    instruction will be a branch back to the start.  */
 
-void
+static void
 i386_frame_init_saved_regs (struct frame_info *fip)
 {
   long locals = -1;
@@ -666,7 +728,7 @@ i386_frame_init_saved_regs (struct frame_info *fip)
 
 /* Return PC of first real instruction.  */
 
-CORE_ADDR
+static CORE_ADDR
 i386_skip_prologue (CORE_ADDR pc)
 {
   unsigned char op;
@@ -767,7 +829,7 @@ i386_breakpoint_from_pc (CORE_ADDR *pc, int *len)
   return break_insn;
 }
 
-void
+static void
 i386_push_dummy_frame (void)
 {
   CORE_ADDR sp = read_register (SP_REGNUM);
@@ -803,7 +865,7 @@ static LONGEST i386_call_dummy_words[] =
 /* Insert the (relative) function address into the call sequence
    stored at DYMMY.  */
 
-void
+static void
 i386_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 		     struct value **args, struct type *type, int gcc_p)
 {
@@ -820,7 +882,7 @@ i386_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
   *((char *)(dummy) + 4) = ((delta >> 24) & 0xff);
 }
 
-void
+static void
 i386_pop_frame (void)
 {
   struct frame_info *frame = get_current_frame ();
@@ -880,7 +942,7 @@ i386_get_longjmp_target (CORE_ADDR *pc)
 }
 
 
-CORE_ADDR
+static CORE_ADDR
 i386_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
 {
@@ -898,7 +960,7 @@ i386_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   return sp;
 }
 
-void
+static void
 i386_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   /* Do nothing.  Everything was already done by i386_push_arguments.  */
@@ -914,7 +976,7 @@ i386_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
    function return value of TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
-void
+static void
 i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   int len = TYPE_LENGTH (type);
@@ -965,7 +1027,7 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 /* Write into the appropriate registers a function return value stored
    in VALBUF of type TYPE, given in virtual format.  */
 
-void
+static void
 i386_store_return_value (struct type *type, char *valbuf)
 {
   int len = TYPE_LENGTH (type);
@@ -1037,7 +1099,7 @@ i386_store_return_value (struct type *type, char *valbuf)
    the address in which a function should return its structure value,
    as a CORE_ADDR.  */
 
-CORE_ADDR
+static CORE_ADDR
 i386_extract_struct_value_address (char *regbuf)
 {
   return extract_address (&regbuf[REGISTER_BYTE (LOW_RETURN_REGNUM)],
@@ -1080,7 +1142,7 @@ i386_use_struct_convention (int gcc_p, struct type *type)
    register REGNUM.  Perhaps %esi and %edi should go here, but
    potentially they could be used for things other than address.  */
 
-struct type *
+static struct type *
 i386_register_virtual_type (int regnum)
 {
   if (regnum == PC_REGNUM || regnum == FP_REGNUM || regnum == SP_REGNUM)
@@ -1101,7 +1163,7 @@ i386_register_virtual_type (int regnum)
    registers need conversion.  Even if we can't find a counterexample,
    this is still sloppy.  */
 
-int
+static int
 i386_register_convertible (int regnum)
 {
   return IS_FP_REGNUM (regnum);
@@ -1110,7 +1172,7 @@ i386_register_convertible (int regnum)
 /* Convert data from raw format for register REGNUM in buffer FROM to
    virtual format with type TYPE in buffer TO.  */
 
-void
+static void
 i386_register_convert_to_virtual (int regnum, struct type *type,
 				  char *from, char *to)
 {
@@ -1133,7 +1195,7 @@ i386_register_convert_to_virtual (int regnum, struct type *type,
 /* Convert data from virtual format with type TYPE in buffer FROM to
    raw format for register REGNUM in buffer TO.  */
 
-void
+static void
 i386_register_convert_to_raw (struct type *type, int regnum,
 			      char *from, char *to)
 {
@@ -1244,29 +1306,31 @@ i386_svr4_pc_in_sigtramp (CORE_ADDR pc, char *name)
 		   || strcmp ("sigvechandler", name) == 0));
 }
 
-/* Get saved user PC for sigtramp from the pushed ucontext on the
-   stack for all three variants of SVR4 sigtramps.  */
+/* Get address of the pushed ucontext (sigcontext) on the stack for
+   all three variants of SVR4 sigtramps.  */
 
-CORE_ADDR
-i386_svr4_sigtramp_saved_pc (struct frame_info *frame)
+static CORE_ADDR
+i386_svr4_sigcontext_addr (struct frame_info *frame)
 {
-  CORE_ADDR saved_pc_offset = 4;
+  int sigcontext_offset = -1;
   char *name = NULL;
 
   find_pc_partial_function (frame->pc, &name, NULL, NULL);
   if (name)
     {
       if (strcmp (name, "_sigreturn") == 0)
-	saved_pc_offset = 132 + 14 * 4;
+	sigcontext_offset = 132;
       else if (strcmp (name, "_sigacthandler") == 0)
-	saved_pc_offset = 80 + 14 * 4;
+	sigcontext_offset = 80;
       else if (strcmp (name, "sigvechandler") == 0)
-	saved_pc_offset = 120 + 14 * 4;
+	sigcontext_offset = 120;
     }
 
+  gdb_assert (sigcontext_offset != -1);
+
   if (frame->next)
-    return read_memory_integer (frame->next->frame + saved_pc_offset, 4);
-  return read_memory_integer (read_register (SP_REGNUM) + saved_pc_offset, 4);
+    return frame->next->frame + sigcontext_offset;
+  return read_register (SP_REGNUM) + sigcontext_offset;
 }
 
 
@@ -1303,14 +1367,16 @@ i386_svr4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
 
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_svr4_pc_in_sigtramp);
-  tdep->sigtramp_saved_pc = i386_svr4_sigtramp_saved_pc;
+  tdep->sigcontext_addr = i386_svr4_sigcontext_addr;
+  tdep->sc_pc_offset = 14 * 4;
+  tdep->sc_sp_offset = 7 * 4;
 
   tdep->jb_pc_offset = 20;
 }
 
 /* DJGPP.  */
 
-void
+static void
 i386_go32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -1322,7 +1388,7 @@ i386_go32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
 /* NetWare.  */
 
-void
+static void
 i386_nw_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -1334,7 +1400,7 @@ i386_nw_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 
-struct gdbarch *
+static struct gdbarch *
 i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
@@ -1369,17 +1435,18 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   tdep->jb_pc_offset = -1;
   tdep->struct_return = pcc_struct_return;
-  tdep->sigtramp_saved_pc = NULL;
   tdep->sigtramp_start = 0;
   tdep->sigtramp_end = 0;
+  tdep->sigcontext_addr = NULL;
   tdep->sc_pc_offset = -1;
+  tdep->sc_sp_offset = -1;
 
   /* The format used for `long double' on almost all i386 targets is
      the i387 extended floating-point format.  In fact, of all targets
      in the GCC 2.95 tree, only OSF/1 does it different, and insists
      on having a `long double' that's not `long' at all.  */
   set_gdbarch_long_double_format (gdbarch, &floatformat_i387_ext);
-  
+
   /* Although the i386 extended floating-point has only 80 significant
      bits, a `long double' actually takes up 96, probably to enforce
      alignment.  */
@@ -1388,7 +1455,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* NOTE: tm-i386aix.h, tm-i386bsd.h, tm-i386os9k.h, tm-ptx.h,
      tm-symmetry.h currently override this.  Sigh.  */
   set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS);
-  
+
   set_gdbarch_sp_regnum (gdbarch, 4);
   set_gdbarch_fp_regnum (gdbarch, 5);
   set_gdbarch_pc_regnum (gdbarch, 8);

@@ -22,8 +22,8 @@
 #ifndef MACROTAB_H
 #define MACROTAB_H
 
-#include "obstack.h"
-#include "bcache.h"
+struct obstack;
+struct bcache;
 
 /* How do we represent a source location?  I mean, how should we
    represent them within GDB; the user wants to use all sorts of
