@@ -7628,13 +7628,12 @@ display_debug_loc (section, start, file)
 
       while (1)
 	{
-	  /* Normally, the lists in  the debug_loc section are related to a
-	     given compilation unit, and thus, we would use the
-	     pointer size of that compilation unit.  However, since we are
-	     displaying it seperately here, we either have to store
-	     pointer sizes of all compilation units, or assume they don't
-	     change.   We assume, like the debug_line display, that
-	     it doesn't change.  */
+	  /* Normally, the lists in the debug_loc section are related to a
+	     given compilation unit, and thus, we would use the pointer size
+	     of that compilation unit.  However, since we are displaying it
+	     seperately here, we either have to store pointer sizes of all
+	     compilation units, or assume they don't change.   We assume,
+	     like the debug_line display, that it doesn't change.  */
 	  begin = byte_get (start, debug_line_pointer_size);
 	  start += debug_line_pointer_size;
 	  end = byte_get (start, debug_line_pointer_size);
@@ -7642,6 +7641,10 @@ display_debug_loc (section, start, file)
 
 	  if (begin == 0 && end == 0)
 	    break;
+
+	  /* For now, skip any base address specifiers.  */
+	  if (begin == 0xffffffff)
+	    continue;
 
 	  begin += addr;
 	  end += addr;
