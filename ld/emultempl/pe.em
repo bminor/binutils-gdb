@@ -1668,7 +1668,7 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 
       stat_ptr = old;
 
-      if (place != NULL)
+      if (place != NULL && os->bfd_section != NULL)
 	{
 	  asection *snew, **pps;
 
