@@ -1,3 +1,7 @@
+Thu Feb 24 07:10:31 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/ho-hppaosf.h: Fix braino in test for ANSI-C.
+
 Wed Feb 23 16:51:43 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* write.c (write_contents): Give the user a reasonable error

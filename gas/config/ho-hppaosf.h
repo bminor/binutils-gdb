@@ -22,7 +22,7 @@
 
 #define M_HPPAOSF 1
 
-#ifdef __STDC__ != 1
+#if __STDC__ != 1
 #define NO_STDARG
 #endif /* not ansi */
 
