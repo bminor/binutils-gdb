@@ -1,3 +1,9 @@
+Thu Jan  2 18:14:32 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.tgt (mips*el-*-linux*, mips*-*-linux*): New targets.
+	* scripttempl/elfmips.sc: Use __start as the entry address for
+	mips*-*-linux*.
+
 Tue Dec 31 14:48:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (ALL_CFLAGS): Add -D_GNU_SOURCE.

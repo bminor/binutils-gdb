@@ -27,6 +27,7 @@
 if [ -z "$ENTRY" ]; then
   case "${target}" in
   mips*-*-irix5*) ENTRY=__start ;;
+  mips*-*-linux*) ENTRY=__start ;;
   *) ENTRY=_start ;;
   esac
 fi
