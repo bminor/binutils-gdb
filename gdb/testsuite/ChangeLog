@@ -1,3 +1,8 @@
+2003-03-29  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/sizeof.c (main): Print the value of '\377'.
+	* gdb.base/sizeof.exp: Check the sign of '\377'.
+
 2003-03-27  Michael Chastain  <mec@shout.net>
 
 	* gdb.base/gdb1090.exp: New file.
