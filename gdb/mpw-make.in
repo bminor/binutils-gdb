@@ -723,7 +723,7 @@ uninstall \Option-f  force
 	Delete -i -y "{o}"init.c init.c-tmp
 	Echo '/* Do not modify this file.  */' >init.c-tmp
 	Echo '/* It is created automatically by the Makefile.  */'>>init.c-tmp
-	Echo 'void initialize_all_files () ' `mpw-open-brace` >>init.c-tmp
+	Echo 'void initialize_all_files () ' `open-brace` >>init.c-tmp
 	For i in {OBS} {TSOBS}
 	  set filename "`Echo {i} | sed \Option-d
 	    -e '/^Onindy.c.o/d' \Option-d
