@@ -9203,7 +9203,7 @@ fi
 # gdb/doc/gdbint.texinfo.
 build_warnings="-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs \
 -Wformat -Wparentheses -Wpointer-arith -Wuninitialized -Wformat-nonliteral \
--Wunused-label"
+-Wunused-label -Wunused-function"
 # Up for debate: -Wswitch -Wcomment -trigraphs -Wtrigraphs
 # -Wunused-function -Wunused-variable -Wunused-value
 # -Wchar-subscripts -Wtraditional -Wshadow -Wcast-qual

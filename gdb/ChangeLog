@@ -1,5 +1,8 @@
 2004-02-15  Andrew Cagney  <cagney@redhat.com>
 
+	* configure.in (build_warnings): Add -Wunused-function.
+	* configure: Re-generate.
+
 	* config/tm-lynx.h (START_INFERIOR_TRAPS_EXPECTED): Delete macro.
 	* config/rs6000/tm-rs6000.h (START_INFERIOR_TRAPS_EXPECTED): Ditto.
 
