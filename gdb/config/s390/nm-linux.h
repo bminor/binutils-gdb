@@ -75,16 +75,6 @@ extern int s390_remove_watchpoint (int pid, CORE_ADDR addr, int len);
 	 ((type) == bp_read_watchpoint) || \
          ((type) == bp_access_watchpoint))
 
-#undef PREPARE_TO_PROCEED
-
-extern void lin_lwp_attach_lwp (ptid_t ptid, int verbose);
-#define ATTACH_LWP(ptid, verbose) lin_lwp_attach_lwp ((ptid), (verbose))
-
-
-#include <signal.h>
-
-extern void lin_thread_get_thread_signals (sigset_t * mask);
-#define GET_THREAD_SIGNALS(mask) lin_thread_get_thread_signals (mask)
 
 /* Needed for s390x */
 #define PTRACE_ARG3_TYPE long

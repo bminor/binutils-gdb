@@ -1,5 +1,9 @@
 2001-10-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/s390/nm-linux.h: Don't include <signal.h>.
+	(lin_lwp_attach_lwp, ATTACH_LWP, lin_thread_get_thread_signals,
+	GET_THREAD_SIGNAL): Remove.
+
 	* config/nm-linux.h (struct objfile): Remove forward declaration.
 	(linuxthreads_new_objfile): Remove prototype.
 	(linuxthreads_pid_to_str): Remove prototype.
