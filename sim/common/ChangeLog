@@ -1,3 +1,12 @@
+Tue Feb 22 16:45:09 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* run.c (main): When SIM_HAVE_ENVIRONMENT enable tracing with
+ 	sim_set_trace and run simulator using sim_resume.
+	(main): Add option ``-o'' - operating environment.  Only continue
+ 	after a signal when operating environment.
+	(main): Always set REASON and SIGRC using sim_stop_reason.
+	(sim_trace): Delete extern declaration.
+
 2000-02-08  Nick Clifton  <nickc@cygnus.com>
 
 	* callback.c: Fix compile time warning messages.

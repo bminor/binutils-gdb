@@ -1072,20 +1072,12 @@ sim_resume (sd, step, siggnal)
     State.exception = SIGTRAP;
 }
 
-int
-sim_trace (sd)
-     SIM_DESC sd;
+void
+sim_set_trace (void)
 {
-  enum sim_stop reason;
-  static int sigrc = 0;
 #ifdef DEBUG
   d10v_debug = DEBUG;
 #endif
-  /* NOTE: SIGRC starts with zero and is then, always the value
-     returned by the last sim_stop_reason() call. */
-  sim_resume (sd, 0, sigrc);
-  sim_stop_reason (sd, &reason, &sigrc);
-  return (reason != sim_stopped || sigrc != SIGINT);
 }
 
 void

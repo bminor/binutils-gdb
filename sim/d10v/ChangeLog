@@ -1,3 +1,8 @@
+Tue Feb 22 18:24:56 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (SIM_EXTRA_CFLAGS): Define SIM_HAVE_ENVIRONMENT.
+	* interp.c (sim_set_trace): Replace sim_trace.  Enable tracing.
+
 Mon Jan  3 02:06:07 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (lookup_hash): Stop the update of the PC when there was

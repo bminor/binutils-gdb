@@ -106,6 +106,9 @@ RUN_FOR_TARGET = `\
     echo $(target_alias)-run ; \
   fi`
 
+# Force d10v into operating mode.
+RUNFLAGS_FOR_TARGET=-o
+
 
 check: sanity $(TESTS)
 sanity:
