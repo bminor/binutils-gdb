@@ -65,7 +65,7 @@ MAKEINFO = `if [ -f $${rootme}/texinfo/C/makeinfo ] ; \
 	then echo $${rootme}/texinfo/C/makeinfo ; \
 	else echo makeinfo ; fi`
 
-SUBDIRS = libiberty mmalloc glob readline opcodes bfd gdb binutils opcodes ld gas tgas gcc libg++ newlib libm # clib -- newlib replaces
+SUBDIRS = libiberty mmalloc glob readline opcodes bfd gdb  binutils ld gas tgas gcc libg++ newlib libm # clib -- newlib replaces
 OTHERS = 
 
 ALL = all.normal
@@ -386,7 +386,7 @@ install-bfd: force
 all-opcodes: force
 	@if [ -f ./opcodes/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
-		(cd ./bfd; \
+		(cd ./opcodes; \
 		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
@@ -395,7 +395,7 @@ all-opcodes: force
 clean-opcodes: force
 	@if [ -f ./opcodes/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
-		(cd ./bfd; \
+		(cd ./opcodes; \
 		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
@@ -404,7 +404,7 @@ clean-opcodes: force
 install-opcodes: force
 	@if [ -f ./opcodes/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
-		(cd ./bfd; \
+		(cd ./opcodes; \
 		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
@@ -628,7 +628,7 @@ install-glob: force
 	fi
 
 ### gas
-all-gas: all-libiberty all-bfd
+all-gas: all-libiberty all-opcodes all-bfd
 	@if [ -f ./gas/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gas; \
@@ -695,7 +695,7 @@ install-ld: force
 	fi
 
 ### gdb
-all-gdb: all-bfd all-libiberty all-mmalloc all-readline all-glob all-byacc
+all-gdb: all-bfd all-opcodes all-libiberty all-mmalloc all-readline all-glob all-byacc
 	@if [ -f ./gdb/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gdb; \

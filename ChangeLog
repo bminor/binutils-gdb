@@ -1,6 +1,15 @@
+Tue Sep  8 17:28:30 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* Makefile.in (all-gas, all-gdb): Require all-opcodes to be built
+	first.
+
+Wed Sep  2 02:50:05 1992  John Gilmore  (gnu@cygnus.com)
+
+	* config.sub:  Accept `elf' as an environment.
+
 Tue Sep  1 15:48:30 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
-	* Makefile.in: all-opcodes, cd into the right directory
+	* Makefile.in (all-opcodes):  cd into the right directory
 
 Sun Aug 30 21:12:11 1992  Ian Lance Taylor  (ian@cygnus.com)
 
