@@ -138,9 +138,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitze-vr5400
+// start-sanitize-vr5400
 *vr5400:
-// end-sanitze-vr5400
+// end-sanitize-vr5400
 // start-sanitize-vrXXXX
 {
   SET_MulAcc (SD_, 0 + SignedMultiply (SD_, GPR[RS], GPR[RT]));
@@ -157,9 +157,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitze-vr5400
+// start-sanitize-vr5400
 *vr5400:
-// end-sanitze-vr5400
+// end-sanitize-vr5400
 // start-sanitize-vrXXXX
 {
   SET_MulAcc (SD_, 0 + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
@@ -176,9 +176,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitze-vr5400
+// start-sanitize-vr5400
 *vr5400:
-// end-sanitze-vr5400
+// end-sanitize-vr5400
 // start-sanitize-vrXXXX
 {
   SET_MulAcc (SD_, 0 + SignedMultiply (SD_, GPR[RS], GPR[RT]));
@@ -195,9 +195,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitze-vr5400
+// start-sanitize-vr5400
 *vr5400:
-// end-sanitze-vr5400
+// end-sanitize-vr5400
 // start-sanitize-vrXXXX
 {
   SET_MulAcc (SD_, 0 + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
@@ -206,63 +206,63 @@
 
 
 // end-sanitize-vrXXXX
-// start-sanitze-vr5400
+// start-sanitize-vr5400
 // Multiply, Negate and Move LO.
 000000,5.RS,5.RT,5.RD,00011,011000::::MULS
 "muls r<RD>, r<RS>, r<RT>"
-// end-sanitze-vr5400
-// start-sanitze-vr5400
+// end-sanitize-vr5400
+// start-sanitize-vr5400
 *vr5400:
-// end-sanitze-vr5400
-// start-sanitze-vr5400
+// end-sanitize-vr5400
+// start-sanitize-vr5400
 {
   SET_MulAcc (SD_, 0 - SignedMultiply   (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
 }
 
 
-// end-sanitze-vr5400
-// start-sanitze-vr5400
+// end-sanitize-vr5400
+// start-sanitize-vr5400
 // Unsigned Multiply, Negate and Move LO.
 000000,5.RS,5.RT,5.RD,00011,011001::::MULSU
 "mulsu r<RD>, r<RS>, r<RT>"
-// end-sanitze-vr5400
-// start-sanitze-vr5400
+// end-sanitize-vr5400
+// start-sanitize-vr5400
 *vr5400:
-// end-sanitze-vr5400
-// start-sanitze-vr5400
+// end-sanitize-vr5400
+// start-sanitize-vr5400
 {
   SET_MulAcc (SD_, 0 - UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
 }
 
 
-// end-sanitze-vr5400
-// start-sanitze-vr5400
+// end-sanitize-vr5400
+// start-sanitize-vr5400
 // Multiply, Negate and Move HI.
 000000,5.RS,5.RT,5.RD,01011,011000::::MULSHI
 "mulshi r<RD>, r<RS>, r<RT>"
-// end-sanitze-vr5400
-// start-sanitze-vr5400
+// end-sanitize-vr5400
+// start-sanitize-vr5400
 *vr5400:
-// end-sanitze-vr5400
-// start-sanitze-vr5400
+// end-sanitize-vr5400
+// start-sanitize-vr5400
 {
   SET_MulAcc (SD_, 0 - SignedMultiply   (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = High32Bits (SD_, MulAcc (SD_));
 }
 
 
-// end-sanitze-vr5400
-// start-sanitze-vr5400
+// end-sanitize-vr5400
+// start-sanitize-vr5400
 // Unsigned Multiply, Negate and Move HI.
 000000,5.RS,5.RT,5.RD,01011,011001::::MULSHIU
 "mulshiu r<RD>, r<RS>, r<RT>"
-// end-sanitze-vr5400
-// start-sanitze-vr5400
+// end-sanitize-vr5400
+// start-sanitize-vr5400
 *vr5400:
-// end-sanitze-vr5400
-// start-sanitze-vr5400
+// end-sanitize-vr5400
+// start-sanitize-vr5400
 {
   SET_MulAcc (SD_, 0 - UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = High32Bits (SD_, MulAcc (SD_));
@@ -272,16 +272,16 @@
 
 
 
-// end-sanitze-vr5400
+// end-sanitize-vr5400
 // Multiply, Accumulate and Move LO.
 000000,5.RS,5.RT,5.RD,00010,101000::::MACC
 "macc r<RD>, r<RS>, r<RT>"
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitze-vr5400
+// start-sanitize-vr5400
 *vr5400:
-// end-sanitze-vr5400
+// end-sanitize-vr5400
 {
   SET_MulAcc (SD_, MulAcc (SD_) + SignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
@@ -297,9 +297,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitze-vr5400
+// start-sanitize-vr5400
 *vr5400:
-// end-sanitze-vr5400
+// end-sanitize-vr5400
 // start-sanitize-vrXXXX
 {
   SET_MulAcc (SD_, MulAcc (SD_) + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
@@ -316,9 +316,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitze-vr5400
+// start-sanitize-vr5400
 *vr5400:
-// end-sanitze-vr5400
+// end-sanitize-vr5400
 // start-sanitize-vrXXXX
 {
   SET_MulAcc (SD_, MulAcc (SD_) + SignedMultiply (SD_, GPR[RS], GPR[RT]));
@@ -334,9 +334,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitze-vr5400
+// start-sanitize-vr5400
 *vr5400:
-// end-sanitze-vr5400
+// end-sanitize-vr5400
 // start-sanitize-vrXXXX
 {
   SET_MulAcc (SD_, MulAcc (SD_) + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
