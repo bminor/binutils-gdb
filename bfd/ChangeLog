@@ -1,5 +1,10 @@
 2003-06-02  Daniel Jacobowitz  <drow@mvista.com>
 
+	* config.bfd: Move obsolete entries out of the range of the
+	targmatch sed script.
+
+2003-06-02  Daniel Jacobowitz  <drow@mvista.com>
+
 	* config.bfd (mips*-dec-bsd*, mips*-*-pe*): Mark as obsolete.
 
 2003-05-31  Jakub Jelinek  <jakub@redhat.com>
