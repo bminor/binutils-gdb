@@ -3953,8 +3953,10 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 	  fp = &som_fixup_formats[op];
 	}
 
-      /* If we are not just counting, set some reasonable defaults.  */
-      if (! just_count)
+      /* If this fixup will be passed to BFD, set some reasonable defaults.  */
+      if (! just_count
+	  && som_hppa_howto_table[op].type != R_NO_RELOCATION
+	  && som_hppa_howto_table[op].type != R_DATA_OVERRIDE)
 	{
 	  rptr->address = offset;
 	  rptr->howto = &som_hppa_howto_table[op];

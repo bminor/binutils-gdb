@@ -1,3 +1,8 @@
+Fri May 20 13:38:23 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_set_reloc_info): Do not set any relocation info
+	for SOM fixups which are never passed to BFD.
+
 Fri May 20 11:57:05 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elf32-i386.c (elf_i386_size_dynamic_sections): Add DT_DEBUG to
