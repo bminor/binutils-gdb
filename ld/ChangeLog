@@ -1,5 +1,10 @@
 Mon Nov  6 10:59:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Add test for whether free must be declared.
+	* sysdep.h: Declare free if necessary.  Include "ansidecl.h".
+	* acconfig.h: Explain NEED_DECLARATION_FREE.
+	* configure, config.in: Rebuild.
+
 	* lexsup.c (parse_args): Take B:: out of shortopts.
 
 Sun Nov  5 03:08:28 1995  Ken Raeburn  <raeburn@cygnus.com>
