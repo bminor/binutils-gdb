@@ -2767,8 +2767,17 @@ md_apply_fix (fixP, val)
   /* The function adjust_reloc_syms won't convert a reloc against a weak
      symbol into a reloc against a section, but bfd_install_relocation
      will screw up if the symbol is defined, so we have to adjust val here
-     to avoid the screw up later.  */
-  if (fixP->fx_addsy != NULL
+     to avoid the screw up later.
+
+     For ordinary relocs, this does not happen for ELF, since for ELF,
+     bfd_install_relocation uses the "special function" field of the
+     howto, and does not execute the code that needs to be undone, as long
+     as the special function does not return bfd_reloc_continue.
+     It can happen for GOT- and PLT-type relocs the way they are
+     described in elf32-sh.c as they use bfd_elf_generic_reloc, but it
+     doesn't matter here since those relocs don't use VAL; see below.  */
+  if (OUTPUT_FLAVOR != bfd_target_elf_flavour
+      && fixP->fx_addsy != NULL
       && S_IS_WEAK (fixP->fx_addsy))
     val -= S_GET_VALUE  (fixP->fx_addsy);
 #endif

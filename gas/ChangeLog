@@ -4,6 +4,9 @@
 	* as.c (parse_args) <std_longopts>: Add comment about the need to
 	check OPTION_MD_BASE in as.h.
 
+	* config/tc-sh.c (md_apply_fix): For ELF, do not "adjust back" VAL
+	for weak symbols.
+
 2000-10-27  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (emulations): Add m68hc12.
