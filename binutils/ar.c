@@ -692,8 +692,11 @@ write_archive()
 
 	if (!bfd_close(obfd))
 	    bfd_fatal(inarch->filename);
-	if (unlink(inarch->filename) != 0)
-	    bfd_fatal(inarch->filename);
+
+	/* We don't care if this fails, we might be creating the
+	   archive */
+	(void) unlink(inarch->filename);
+
 	if (rename(new_name, inarch->filename) != 0)
 	    bfd_fatal(inarch->filename);
 #if 0
