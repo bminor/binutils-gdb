@@ -1,3 +1,9 @@
+2003-03-25  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (_bfd_mips_relax_section): New function.
+	* elfxx-mips.h (_bfd_mips_relax_section): Declare.
+	* elfn32-mips.c, elf64-mips.c: Use it.
+
 2003-03-25  Stan Cox   <scox@redhat.com>
 	    Nick Clifton  <nickc@redhat.com>
 	    
