@@ -655,7 +655,7 @@ SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES) $(CONFIG_SRCS)
 # Don't include YYFILES (*.tab.c) because we already include *.y in SFILES,
 # and it's more useful to see it in the .y file.
 TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
-	$(POSSLIBS)
+	$(POSSLIBS) $(SUBDIR_CLI_SRCS)
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
 COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
@@ -1130,9 +1130,8 @@ unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	29k-share/udi/udi2go32.c \
 	a29k-tdep.c a68v-nat.c alpha-nat.c alpha-tdep.c \
-	altos-xdep.c arm-convert.s \
-	arm-linux-nat.c arm-linux-tdep.c arm-tdep.c arm-xdep.c \
-	coff-solib.c convex-tdep.c convex-xdep.c \
+	arm-linux-nat.c arm-linux-tdep.c arm-tdep.c \
+	coff-solib.c \
 	core-sol2.c core-regset.c core-aout.c corelow.c \
 	dcache.c delta68-nat.c dpx2-nat.c dstread.c exec.c fork-child.c \
 	go32-nat.c h8300-tdep.c h8500-tdep.c \
@@ -1156,7 +1155,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	ns32k-tdep.c ns32km3-nat.c osfsolib.c \
 	somread.c somsolib.c $(HPREAD_SOURCE) \
 	ppc-linux-nat.c ppc-linux-tdep.c \
-	procfs.c pyr-tdep.c pyr-xdep.c \
+	procfs.c \
 	remote-adapt.c remote-array.c remote-bug.c remote-e7000.c remote-eb.c \
 	remote-es.c remote-hms.c remote-mips.c \
 	remote-mm.c remote-nindy.c remote-os9k.c remote-rdp.c remote-sim.c \
@@ -1167,7 +1166,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	sh-tdep.c solib.c sparc-nat.c \
 	sparc-tdep.c sparcl-tdep.c sun3-nat.c sun386-nat.c \
 	symm-tdep.c symm-nat.c \
-	tahoe-tdep.c ultra3-nat.c ultra3-xdep.c umax-xdep.c \
+	ultra3-nat.c ultra3-xdep.c umax-xdep.c \
 	vax-tdep.c \
 	vx-share/xdr_ld.c vx-share/xdr_ptrace.c vx-share/xdr_rdb.c \
 	win32-nat.c \
