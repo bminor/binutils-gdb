@@ -1,3 +1,8 @@
+2000-05-03  Rodney Brown  <RodneyBrown@pmsc.com>
+
+	config/tc-mcore.c (md_apply_fix3): BFD_RELOC_MCORE_PCREL_IMM11BY2
+	Fix little-endian case.
+
 2000-05-03  David O'Brien  <obrien@NUXI.com>
 
 	* as.c (parse_args): Update copyright.
@@ -455,7 +460,7 @@ Mon Apr  3 13:56:03 2000  Hans-Peter Nilsson  <hp@axis.com>
 
 2000-03-19  Nick Clifton  <nickc@cygnus.com>
 
-	* config/tc-arm.c (md_apply_fix3): Fix bug detectng overflow of pc
+	* config/tc-arm.c (md_apply_fix3): Fix bug detecting overflow of pc
 	relative branches.
 
 2000-03-17 Thomas de Lellis <tdel@windriver.com>
@@ -550,8 +555,6 @@ Sat Mar 11 00:01:39 2000  Hans-Peter Nilsson  <hp@axis.se>
 	* doc/Makefile.am (CPU_DOCS): Add c-m32r.texi.
 	* doc/Makefile.in: Regenerate.
 	* doc/c-m32r.texi (M32R-Opts): Document new command line switch.
-
-
 
 2000-03-02  Michael Meissner  <meissner@redhat.com>
 
@@ -920,6 +923,7 @@ Fri Feb 11 14:21:51 2000  Jeffrey A Law  (law@cygnus.com)
 	filename is encoded incorrectly.
 
 2000-01-31  Nick Clifton  <nickc@cygnus.com>
+
 	* config/tc-arm.c (reg_table): Add support for ATPCS register
 	naming conventions.
 
@@ -1197,7 +1201,7 @@ Wed Nov 24 20:27:58 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (pa_ip): Handle PA2.0 unit completers.  Handle
 	'B' operand for PA2.0 bb instruction.
-	
+
 1999-11-18  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-mcore.h (TC_FORCE_RELOCATION): Define for Mcore-pe
@@ -1374,7 +1378,7 @@ Sun Oct 10 01:47:23 1999  Jerry Quinn <jerry.quinn.adv91@alum.dartmouth.org>
 	completers.
 
 	* config/tc-hppa.c (pa_ip):  Remove unused args.  Add code to '?W'
-	arg. 
+	arg.
 	(pa_parse_addb_64_cmpltr):  New function.
 
 	* config/tc-hppa.c (pa_ip):  Change error message.
@@ -1452,7 +1456,7 @@ Mon Sep 20 04:01:41 1999  Jeffrey A Law  (law@cygnus.com)
 
 Sun Sep 19 10:43:31 1999  Jeffrey A Law  (law@cygnus.com)
 
-	* config/tc-hppa.c (pa_ip): Handle 'J', 'K' and 'cc' 
+	* config/tc-hppa.c (pa_ip): Handle 'J', 'K' and 'cc'
 	operands.
 
 	* config/tc-hppa.c (pa_ip); Handle "fe", and 'cJ'.
@@ -1474,11 +1478,6 @@ Sun Sep 19 10:43:31 1999  Jeffrey A Law  (law@cygnus.com)
 	* config/tc-hppa.c (pa_ip): Handle 'l' operand.
 
 	* config/tc-hppa.c (pa_ip): Handle 'g' operand.
-
-at Sep 18 12:13:28 1999  Jeffrey A Law  (law@cygnus.com)
-
-	* config/tc-hppa.c (md_assemble): Fix dwarf2 line handling.
-	(pa_ip): Handle 'fX'.
 
 Sat Sep 18 12:13:28 1999  Jeffrey A Law  (law@cygnus.com)
 
@@ -1629,7 +1628,7 @@ Mon Sep  6 04:26:56 1999  Jeffrey A Law  (law@cygnus.com)
 	constants when in strict mode.
 	(pa_get_absolute_expression): Require a constant when in strict
 	mode.
-	
+
 1999-09-06  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (md_longopts): Fix value for -Wnuh.
@@ -1965,7 +1964,7 @@ Wed Aug  4 13:12:17 1999  Jeffrey A Law  (law@cygnus.com)
 
 1999-07-30  Catherine Moore  <clm@cygnus.com>
 
-	* config/tc-arm.c (tc_gen_reloc):  Record the vtable entry in
+	* config/tc-arm.c (tc_gen_reloc): Record the vtable entry in
 	the relocation's section offset.
 
 1999-07-29  Alan Modra  <alan@spri.levels.unisa.edu.au>

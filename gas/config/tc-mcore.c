@@ -74,14 +74,14 @@ const char line_comment_chars[] = "#/";
 
 const int md_reloc_size = 8;
 
-static int do_jsri2bsr = 0;	/* change here from 1 by Cruess 19 August 97 */
+static int do_jsri2bsr = 0;	/* Change here from 1 by Cruess 19 August 97.  */
 static int sifilter_mode = 0;
 
 const char EXP_CHARS[] = "eE";
 
-/* Chars that mean this number is a floating point constant */
-/* As in 0f12.456 */
-/* or    0d1.2345e12 */
+/* Chars that mean this number is a floating point constant
+    As in 0f12.456
+    or    0d1.2345e12  */
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 #define C(what,length) (((what) << 2) + (length))
@@ -113,7 +113,7 @@ cpu_type;
 
 cpu_type cpu = M340;
 
-/* Initialize the relax table */
+/* Initialize the relax table.  */
 const relax_typeS md_relax_table[] =
 {
 {    1,     1,	     0, 0 },			/* 0: unused */  
@@ -131,7 +131,7 @@ const relax_typeS md_relax_table[] =
 {    0,     0,	     0, 0 }			/*12: unused */  
 };
 
-/* LITERAL POOL DATA STRUCTURES */
+/* Literal pool data structures.  */
 struct literal
 {
   unsigned short  refcnt;
@@ -158,18 +158,18 @@ static unsigned long poolspan;
    -- so we have to be smaller than 1018 and since we deal with 2-byte
    instructions, the next good choice is 1016.
    -- Note we have a test case that fails when we've got 1018 here.  */
-#define SPANPANIC	(1016)		/* 1024 - 1 entry - 2 byte rounding */
+#define SPANPANIC	(1016)		/* 1024 - 1 entry - 2 byte rounding.  */
 #define SPANCLOSE	(900)
 #define SPANEXIT	(600)
-static symbolS * poolsym;		/* label for current pool */
+static symbolS * poolsym;		/* label for current pool.  */
 static char poolname[8];
-static struct hash_control * opcode_hash_control;	/* Opcode mnemonics */
+static struct hash_control * opcode_hash_control;	/* Opcode mnemonics.  */
 
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
      Pseudo-op name without dot
      Function to call to execute this pseudo-op
-     Integer arg to pass to the function   */
+     Integer arg to pass to the function.   */
 const pseudo_typeS md_pseudo_table[] =
 {
   { "export",   s_globl,          0 },
@@ -2146,8 +2146,8 @@ md_apply_fix3 (fixP, valp, segment)
 	}
       else
 	{
-	  buf[0] |= ((val >> 8) & 0x7);
-	  buf[1] |= (val & 0xff);
+	  buf[1] |= ((val >> 8) & 0x7);
+	  buf[0] |= (val & 0xff);
 	}
       break;
 
