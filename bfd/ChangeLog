@@ -1,3 +1,8 @@
+1999-07-16  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* elf64-sparc.c (sparc64_elf_size_dynamic_sections): Remove
+	DT_SPARC_PLTFMT.
+
 1999-07-16  Ian Lance Taylor  <ian@zembu.com>
 
 	* elf32-mips.c (mips_elf_local_relocation_p): New static

@@ -1125,9 +1125,7 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
 	  if (! bfd_elf64_add_dynamic_entry (info, DT_PLTGOT, 0)
 	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTRELSZ, 0)
 	      || ! bfd_elf64_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_JMPREL, 0)
-	      || ! bfd_elf64_add_dynamic_entry (info, DT_SPARC_PLTFMT,
-						(info->shared != 0) + 1))
+	      || ! bfd_elf64_add_dynamic_entry (info, DT_JMPREL, 0))
 	    return false;
 	}
 
