@@ -1,3 +1,7 @@
+Tue Mar  2 09:01:30 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* configure.in: For vms target, skip bfd, ld, binutils.
+
 Tue Mar  2 08:35:24 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure (makesrcdir): If ${srcdir} is relative and not ".",

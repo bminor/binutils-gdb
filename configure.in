@@ -159,6 +159,9 @@ case "${target}" in
   *-*-solaris2)
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/gas//'`
     ;;
+  *-*-vms)
+    configdirs=`echo ${configdirs} | sed -e 's/bfd//;s/ld//;s/binutils//'`
+    ;;
 esac
 
 
