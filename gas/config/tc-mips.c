@@ -3551,7 +3551,7 @@ load_address (counter, reg, ep, dbl, used_at)
 	   lui		$reg,<sym>		(BFD_RELOC_HI16_S)
 	   addiu	$reg,$reg,<sym>		(BFD_RELOC_LO16)
 	 If we have an addend, we always use the latter form.
-	 
+
 	 With 64bit address space and a usable $at we want
 	   lui		$reg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
 	   lui		$at,<sym>		(BFD_RELOC_HI16_S)
@@ -3559,7 +3559,7 @@ load_address (counter, reg, ep, dbl, used_at)
 	   daddiu	$at,<sym>		(BFD_RELOC_LO16)
 	   dsll32	$reg,0
 	   dadd		$reg,$reg,$at
-       
+
 	 If $at is already in use, we use an path which is suboptimal
 	 on superscalar processors.
 	   lui		$reg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
@@ -4521,7 +4521,7 @@ macro (ip)
 	       addiu	$tempreg,$tempreg,<sym>	(BFD_RELOC_LO16)
 	     If we have a constant, we need two instructions anyhow,
 	     so we may as well always use the latter form.
-	 
+
 	    With 64bit address space and a usable $at we want
 	      lui	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
 	      lui	$at,<sym>		(BFD_RELOC_HI16_S)
@@ -4529,7 +4529,7 @@ macro (ip)
 	      daddiu	$at,<sym>		(BFD_RELOC_LO16)
 	      dsll32	$tempreg,0
 	      dadd	$tempreg,$tempreg,$at
-       
+
 	    If $at is already in use, we use an path which is suboptimal
 	    on superscalar processors.
 	      lui	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
@@ -5310,7 +5310,7 @@ macro (ip)
          symbol, relative to a base register, e.g.:
 		<op>	$treg, <sym>-<localsym>($breg)
 	 This is used by the compiler for switch statements.  */
-      if (mips_pic == EMBEDDED_PIC 
+      if (mips_pic == EMBEDDED_PIC
           && offset_expr.X_op == O_subtract
           && (symbol_constant_p (offset_expr.X_op_symbol)
               ? S_GET_SEGMENT (offset_expr.X_op_symbol) == now_seg
@@ -5375,7 +5375,7 @@ macro (ip)
 	       addu	$tempreg,$tempreg,$breg
 	       <op>	$treg,<sym>($tempreg)	(BFD_RELOC_LO16)
 	     With a constant we always use the latter case.
-	   
+
 	     With 64bit address space and no base register and $at usable,
 	     we want
 	       lui	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
@@ -5457,7 +5457,7 @@ macro (ip)
 
 	      return;
 	    }
-		  
+
 	  if (breg == 0)
 	    {
 	      if ((valueT) offset_expr.X_add_number > MAX_GPREL_OFFSET
@@ -9217,9 +9217,9 @@ my_getSmallParser (str, len, nestlevel)
 	  *str = b;
 	  goto percent_op;
 	}
-      else
-        /* Some other expression in the braces.  */
-        *len = strcspn (*str, ")") + 1;
+
+      /* Some other expression in the braces.  */
+      *len = strcspn (*str, ")") + 1;
     }
   /* Check for percent_op.  */
   else if (*str[0] == '%')
@@ -9273,7 +9273,7 @@ my_getSmallExpression (ep, str)
   /* Don't update oldstr if the last call had nested percent_op's.  */
   if (! oldstr)
     oldstr = str;
-	
+
   do
     {
       oldc = c;
@@ -10181,7 +10181,7 @@ md_apply_fix (fixP, valueP)
 	  || fixP->fx_r_type == BFD_RELOC_HI16_S
 	  || fixP->fx_r_type == BFD_RELOC_LO16
 	  || fixP->fx_r_type == BFD_RELOC_GPREL16
-	  || fixP->fx_r_type == BFD_RELOC_MIPS_LITERAL 
+	  || fixP->fx_r_type == BFD_RELOC_MIPS_LITERAL
 	  || fixP->fx_r_type == BFD_RELOC_GPREL32
 	  || fixP->fx_r_type == BFD_RELOC_64
 	  || fixP->fx_r_type == BFD_RELOC_CTOR
@@ -11337,7 +11337,7 @@ s_cprestore (ignore)
 /* Handle the .cpreturn pseudo-op defined for NewABI PIC code. If an offset
    was given in the preceeding .gpsetup, it results in:
      ld		$gp, offset($sp)
-   
+
    If a register $reg2 was given there, it results in:
      daddiu	$gp, $gp, $reg2
  */

@@ -1,3 +1,7 @@
+2001-11-06  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (my_getSmallParser): Fix small parser bug.
+
 2001-11-05  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* config/tc-s390.c (tc_s390_force_relocation): Force all relocations
@@ -29,7 +33,7 @@
 	(do_fp_{ctrl,ldst,ldstm,dyadic,monadic,cmp,from_reg,to_reg}): Rename
 	to do_fpa_*.  All callers changed.
 
-	* tc-arm.c (insns): Add two temporary instructions to handle 
+	* tc-arm.c (insns): Add two temporary instructions to handle
 	ldrd/strd.
 
 2001-11-01  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
@@ -373,7 +377,7 @@
 
 2001-10-08  Tom Rix <trix@redhat.com>
 
-	* config/tc-ppc (ppc_bf, ppc_biei) : Set first .bi lineno value to 
+	* config/tc-ppc (ppc_bf, ppc_biei) : Set first .bi lineno value to
 	location of next .bf
 	* config/obj-coff.c (coff_frob_symbol) : XCOFF does not use endndx.
 
