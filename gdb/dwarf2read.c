@@ -1021,9 +1021,13 @@ dwarf2_locate_sections (bfd *ignore_abfd, asection *sectp, void *ignore_ptr)
     }
   else if (STREQ (sectp->name, EH_FRAME_SECTION))
     {
-      dwarf_eh_frame_offset = sectp->filepos;
-      dwarf_eh_frame_size = bfd_get_section_size_before_reloc (sectp);
-      dwarf_eh_frame_section = sectp;
+      flagword aflag = bfd_get_section_flags (ignore_abfd, sectp);
+      if (aflag & SEC_HAS_CONTENTS)
+        {
+          dwarf_eh_frame_offset = sectp->filepos;
+          dwarf_eh_frame_size = bfd_get_section_size_before_reloc (sectp);
+          dwarf_eh_frame_section = sectp;
+        }
     }
   else if (STREQ (sectp->name, RANGES_SECTION))
     {
