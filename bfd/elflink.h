@@ -1322,7 +1322,7 @@ elf_link_add_object_symbols (abfd, info)
       /* Save the SONAME, if there is one, because sometimes the
          linker emulation code will need to know it.  */
       if (*name == '\0')
-	name = bfd_get_filename (abfd);
+	name = basename (bfd_get_filename (abfd));
       elf_dt_name (abfd) = name;
     }
 
@@ -3317,7 +3317,8 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 					     true, false);
 		else
 		  indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
-					     t->vn_bfd->filename, true, false);
+					     basename (t->vn_bfd->filename),
+					     true, false);
 		if (indx == (bfd_size_type) -1)
 		  return false;
 		t->vn_file = indx;

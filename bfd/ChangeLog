@@ -1,3 +1,12 @@
+2001-05-03  H.J. Lu  <hjl@gnu.org>
+
+	* elfcode.h: Include "libiberty.h".
+
+	* elflink.h (elf_link_add_object_symbols): Set
+	elf_dt_name (abfd) to basename of the bfd filename.
+	(NAME(bfd_elf,size_dynamic_sections)): Set vn_file to basename
+	of the bfd filename.
+
 2001-05-03  Andreas Jaeger  <aj@suse.de>
 
 	* elf64-gen.c (elf_generic_info_to_howto): Add unused attribute.
