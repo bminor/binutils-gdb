@@ -260,7 +260,7 @@ enum mmo_sym_type { mmo_reg_sym, mmo_undef_sym, mmo_data_sym, mmo_abs_sym};
 struct mmo_symbol
   {
     struct mmo_symbol *next;
-    CONST char *name;
+    const char *name;
     bfd_vma value;
     enum mmo_sym_type sym_type;
     unsigned int serno;
@@ -357,7 +357,7 @@ static void mmo_write_section_unless_reg_contents
  PARAMS ((bfd *, asection *, PTR));
 static void mmo_find_sec_w_addr PARAMS ((bfd *, asection *, PTR));
 static void mmo_find_sec_w_addr_grow PARAMS ((bfd *, asection *, PTR));
-static asection *mmo_make_section PARAMS ((bfd *, CONST char *));
+static asection *mmo_make_section PARAMS ((bfd *, const char *));
 static void mmo_get_symbol_info PARAMS ((bfd *, asymbol *, symbol_info *));
 static void mmo_print_symbol
  PARAMS ((bfd *, PTR, asymbol *, bfd_print_symbol_type));
@@ -371,10 +371,10 @@ static INLINE bfd_byte *mmo_get_loc PARAMS ((asection *, bfd_vma, int));
 static void mmo_xore_64 PARAMS ((asection *, bfd_vma vma, bfd_vma value));
 static void mmo_xore_32 PARAMS ((asection *, bfd_vma vma, unsigned int));
 static void mmo_xore_16 PARAMS ((asection *, bfd_vma vma, unsigned int));
-static CONST bfd_target *mmo_object_p PARAMS ((bfd *));
+static const bfd_target *mmo_object_p PARAMS ((bfd *));
 static void mmo_map_set_sizes PARAMS ((bfd *, asection *, PTR));
 static boolean mmo_get_symbols PARAMS ((bfd *));
-static boolean mmo_create_symbol PARAMS ((bfd *, CONST char *, bfd_vma,
+static boolean mmo_create_symbol PARAMS ((bfd *, const char *, bfd_vma,
 					  enum mmo_sym_type, unsigned int));
 static boolean mmo_get_section_contents
   PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
@@ -391,7 +391,7 @@ static long mmo_get_reloc_upper_bound PARAMS ((bfd *, asection *));
 static boolean mmo_internal_write_header PARAMS ((bfd *));
 static boolean mmo_internal_write_post PARAMS ((bfd *, int, asection *));
 static boolean mmo_internal_add_3_sym
- PARAMS ((bfd *, struct mmo_symbol_trie *, CONST struct mmo_symbol *));
+ PARAMS ((bfd *, struct mmo_symbol_trie *, const struct mmo_symbol *));
 static unsigned int mmo_internal_3_length
  PARAMS ((bfd *, struct mmo_symbol_trie *));
 static void mmo_internal_3_dump
@@ -404,10 +404,10 @@ static void mmo_write_tetra_raw PARAMS ((bfd *, unsigned int));
 static void mmo_write_octa PARAMS ((bfd *, bfd_vma));
 static void mmo_write_octa_raw PARAMS ((bfd *, bfd_vma));
 static boolean mmo_write_chunk
-  PARAMS ((bfd *, CONST bfd_byte *, unsigned int));
+  PARAMS ((bfd *, const bfd_byte *, unsigned int));
 static boolean mmo_flush_chunk PARAMS ((bfd *));
 static boolean mmo_write_loc_chunk
-  PARAMS ((bfd *, bfd_vma, CONST bfd_byte *, unsigned int, bfd_vma *));
+  PARAMS ((bfd *, bfd_vma, const bfd_byte *, unsigned int, bfd_vma *));
 static boolean mmo_write_chunk_list PARAMS ((bfd *, mmo_data_list_type *));
 static boolean mmo_write_loc_chunk_list
   PARAMS ((bfd *, mmo_data_list_type *));
@@ -417,7 +417,7 @@ static flagword bfd_sec_flags_from_mmo_flags PARAMS ((flagword));
 static bfd_byte mmo_get_byte PARAMS ((bfd *));
 static void mmo_write_byte PARAMS ((bfd *, bfd_byte));
 static boolean mmo_new_section_hook PARAMS ((bfd *, asection *));
-static int mmo_sort_mmo_symbols PARAMS ((CONST PTR, CONST PTR));
+static int mmo_sort_mmo_symbols PARAMS ((const PTR, const PTR));
 static boolean mmo_write_object_contents PARAMS ((bfd *));
 static long mmo_canonicalize_reloc
   PARAMS ((bfd *, sec_ptr, arelent **, asymbol **));
@@ -446,7 +446,7 @@ char valid_mmo_symbol_character_set[/* A-Z a-z (we assume consecutive
 static asection *
 mmo_make_section (abfd, secname)
      bfd *abfd;
-     CONST char *secname;
+     const char *secname;
 {
   asection *sec = bfd_get_section_by_name (abfd, secname);
 
@@ -495,7 +495,7 @@ mmo_init ()
 
 /* Check whether an existing file is an mmo file.  */
 
-static CONST bfd_target *
+static const bfd_target *
 mmo_object_p (abfd)
      bfd *abfd;
 {
@@ -819,7 +819,7 @@ mmo_write_octa_raw (abfd, value)
 static INLINE boolean
 mmo_write_chunk (abfd, loc, len)
      bfd *abfd;
-     CONST bfd_byte *loc;
+     const bfd_byte *loc;
      unsigned int len;
 {
   boolean retval = true;
@@ -907,7 +907,7 @@ static boolean
 mmo_write_loc_chunk (abfd, vma, loc, len, last_vmap)
      bfd *abfd;
      bfd_vma vma;
-     CONST bfd_byte *loc;
+     const bfd_byte *loc;
      unsigned int len;
      bfd_vma *last_vmap;
 {
@@ -1199,7 +1199,7 @@ mmo_write_byte (abfd, value)
 static boolean
 mmo_create_symbol (abfd, symname, addr, sym_type, serno)
      bfd *abfd;
-     CONST char *symname;
+     const char *symname;
      bfd_vma addr;
      enum mmo_sym_type sym_type;
      unsigned int serno;
@@ -2135,11 +2135,11 @@ mmo_get_symtab_upper_bound (abfd)
 
 static int
 mmo_sort_mmo_symbols (arg1, arg2)
-     CONST PTR arg1;
-     CONST PTR arg2;
+     const PTR arg1;
+     const PTR arg2;
 {
-  CONST struct mmo_symbol *sym1 = *(CONST struct mmo_symbol **) arg1;
-  CONST struct mmo_symbol *sym2 = *(CONST struct mmo_symbol **) arg2;
+  const struct mmo_symbol *sym1 = *(const struct mmo_symbol **) arg1;
+  const struct mmo_symbol *sym2 = *(const struct mmo_symbol **) arg2;
 
   /* Sort by serial number first.  */
   if (sym1->serno < sym2->serno)
@@ -2148,7 +2148,7 @@ mmo_sort_mmo_symbols (arg1, arg2)
     return 1;
 
   /* Then sort by address of the table entries.  */
-  return ((CONST char *) arg1 - (CONST char *) arg2);
+  return ((const char *) arg1 - (const char *) arg2);
 }
 
 /* Translate the symbol table.  */
@@ -2295,7 +2295,7 @@ static boolean
 mmo_internal_write_header (abfd)
      bfd *abfd;
 {
-  CONST char lop_pre_bfd[] = { LOP, LOP_PRE, 1, 1};
+  const char lop_pre_bfd[] = { LOP, LOP_PRE, 1, 1};
 
   if (bfd_bwrite (lop_pre_bfd, 4, abfd) != 4)
     return false;
@@ -2619,9 +2619,9 @@ static boolean
 mmo_internal_add_3_sym (abfd, rootp, symp)
      bfd *abfd;
      struct mmo_symbol_trie *rootp;
-     CONST struct mmo_symbol *symp;
+     const struct mmo_symbol *symp;
 {
-  CONST char *name = symp->name;
+  const char *name = symp->name;
   struct mmo_symbol_trie *trie = rootp;
   struct mmo_symbol_trie **triep = NULL;
 
@@ -3278,7 +3278,7 @@ mmo_canonicalize_reloc (abfd, section, relptr, symbols)
 #define mmo_bfd_set_private_flags _bfd_generic_bfd_set_private_flags
 #define mmo_bfd_print_private_bfd_data _bfd_generic_bfd_print_private_bfd_data
 
-CONST bfd_target bfd_mmo_vec =
+const bfd_target bfd_mmo_vec =
 {
   "mmo",			/* name */
   bfd_target_mmo_flavour,

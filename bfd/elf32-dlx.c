@@ -500,7 +500,7 @@ struct elf_reloc_map
   enum elf_dlx_reloc_type elf_reloc_val;
 };
 
-static CONST struct elf_reloc_map dlx_reloc_map[] =
+static const struct elf_reloc_map dlx_reloc_map[] =
   {
     { BFD_RELOC_NONE,           R_DLX_NONE },
     { BFD_RELOC_16,             R_DLX_RELOC_16 },

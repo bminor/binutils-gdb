@@ -1,5 +1,12 @@
 2002-06-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* armnetbsd.c: Replace CONST with const.
+	* corefile.c: Likewise.
+	* elf32-dlx.c: Likewise.
+	* elf64-mips.c: Likewise.
+	* mmo.c: Likewise.
+	* ns32knetbsd.c: Likewise.
+
 	* elf64-sparc.c (sparc64_elf_add_symbol_hook): Check the hash
 	table is elf64-sparc.
 

@@ -1548,7 +1548,7 @@ mips_elf64_assign_gp (output_bfd, pgp)
     {
       for (i = 0; i < count; i++, sym++)
 	{
-	  register CONST char *name;
+	  register const char *name;
 
 	  name = bfd_asymbol_name (*sym);
 	  if (*name == '_' && strcmp (name, "_gp") == 0)
