@@ -4509,7 +4509,7 @@ add_line (struct linetable *lt, int lineno, CORE_ADDR adr, int last)
 static int
 compare_blocks (const void *arg1, const void *arg2)
 {
-  int addr_diff;
+  LONGEST addr_diff;
   struct block **b1 = (struct block **) arg1;
   struct block **b2 = (struct block **) arg2;
 

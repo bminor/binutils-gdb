@@ -1,3 +1,9 @@
+2004-01-17  Andrew Cagney  <cagney@redhat.com>
+
+	* mdebugread.c (compare_blocks): Make addr_diff a LONGEST.
+	* block.h: Make GLOBAL_BLOCK, STATIC_BLOCK, FIRST_LOCAL_BLOOCK
+	enums.
+
 2004-01-17  Daniel Jacobowitz  <drow@mvista.com>
 
 	* remote.c: Update copyright years.

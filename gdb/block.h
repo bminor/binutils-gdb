@@ -139,9 +139,7 @@ struct blockvector
 
 /* Special block numbers */
 
-#define GLOBAL_BLOCK		0
-#define	STATIC_BLOCK		1
-#define	FIRST_LOCAL_BLOCK	2
+enum { GLOBAL_BLOCK = 0, STATIC_BLOCK = 1, FIRST_LOCAL_BLOCK = 2 };
 
 extern struct symbol *block_function (const struct block *);
 
