@@ -1,5 +1,8 @@
 Fri Apr  2 08:23:14 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* rs6000-tdep.c (frameless_function_invocation): Don't even think
+	about framlessness except on the innermost frame.
+
 	* xcoffexec.c: Call fatal() not abort().
 
 	* stabsread.c (patch_block_stabs): If stab & no symbol, make

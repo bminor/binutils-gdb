@@ -956,6 +956,10 @@ int pcsaved;
   CORE_ADDR func_start;
   struct aix_framedata fdata;
 
+  if (fi->next != NULL)
+    /* Don't even think about framelessness except on the innermost frame.  */
+    return 0;
+  
   func_start = get_pc_function_start (fi->pc) + FUNCTION_START_OFFSET;
 
   /* If we failed to find the start of the function, it is a mistake
