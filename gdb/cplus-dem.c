@@ -233,6 +233,9 @@ static int
 get_count PARAMS ((const char **, int *));
 
 static int
+consume_count PARAMS ((const char **));
+
+static int
 demangle_args PARAMS ((string *, const char **, struct work_stuff *));
 
 static int
@@ -253,6 +256,23 @@ static void
 string_prepends PARAMS ((string *, string *));
 #endif
 
+/*  Translate count to integer, consuming tokens in the process.
+    Conversion terminates on the first non-digit character. */
+
+static int
+consume_count (type)
+    const char **type;
+{
+    int count = 0;
+
+    do
+      {
+	count *= 10;
+	count += **type - '0';
+	(*type)++;
+      } while (isdigit (**type));
+    return (count);
+}
 
 /* Takes operator name as e.g. "++" and returns mangled
    operator name (e.g. "postincrement_expr"), or NULL if not found.
@@ -806,14 +826,7 @@ demangle_class (declp, mangled, work)
   int n;
   int success = 0;
 
-  n = 0;
-  do
-    {
-      n *= 10;
-      n += **mangled - '0';
-      (*mangled)++;
-    }
-  while (isdigit (**mangled));
+  n = consume_count (mangled);
   if (strlen (*mangled) >= n)
     {
       if (work -> constructor || work -> destructor)
@@ -925,6 +938,29 @@ demangle_prefix (declp, mangled, work)
   return (success);
 }
 
+/*
+
+LOCAL FUNCTION
+
+	gnu_special -- special handling of gnu mangled strings
+
+SYNOPSIS
+
+	static int
+	gnu_special (string *declp, const char **mangled,
+		     struct work_stuff *work)
+
+
+DESCRIPTION
+
+	Process some special GNU style mangling forms that don't fit
+	the normal pattern.  For example:
+
+		_$_3foo		(destructor for class foo)
+		_vt$foo		(virtual table)
+		_3foo$varname	(static data member)
+ */
+
 static int
 gnu_special (declp, mangled, work)
      string *declp;
@@ -943,17 +979,6 @@ gnu_special (declp, mangled, work)
       (*mangled) += 3;
       work -> destructor = 1;
     }
-  else if (**mangled != '_' && (p = strchr (*mangled, CPLUS_MARKER)) != NULL)
-    {
-#if 0
-      /* static data member */
-      n = strlen (*mangled) + 2;
-      tem = (char *) xmalloc (n);
-      memcpy (tem, *mangled, p - *mangled);
-      strcpy (tem + (p - *mangled), "::");
-      strcpy (tem + (p - *mangled) + 2, p + 1);
-#endif
-    }
   else if ((*mangled)[0] == '_'
 	   && (*mangled)[1] == 'v'
 	   && (*mangled)[2] == 't'
@@ -968,6 +993,20 @@ gnu_special (declp, mangled, work)
       string_appendn (declp, *mangled, n);
       string_append (declp, " virtual table");
       (*mangled) += n;
+    }
+  else if ((*mangled)[0] == '_'
+	   && isdigit ((*mangled)[1])
+	   && (p = strchr (*mangled, CPLUS_MARKER)) != NULL)
+    {
+      /* static data member, "_3foo$varname" for example */
+      (*mangled)++;
+      p++;
+      n = consume_count (mangled);
+      string_appendn (declp, *mangled, n);
+      string_append (declp, "::");
+      n = strlen (p);
+      string_appendn (declp, p, n);
+      (*mangled) = p + n;
     }
   else
     {
@@ -1021,6 +1060,22 @@ demangle_qualified (declp, mangled, work)
   return (success);
 }
 
+/*
+
+LOCAL FUNCTION
+
+	get_count -- convert an ascii count to integer, consuming tokens
+
+SYNOPSIS
+
+	static int
+	get_count (const char **type, int *count)
+
+DESCRIPTION
+
+	Return 0 if no conversion is performed, 1 if a string is converted.
+*/
+
 static int
 get_count (type, count)
      const char **type;
@@ -1033,24 +1088,26 @@ get_count (type, count)
     {
       return (0);
     }
-  *count = **type - '0';
-  (*type)++;
-  /* see flush_repeats in cplus-method.c */
-  if (isdigit (**type))
+  else
     {
-      p = *type;
-      n = *count;
-      do 
+      *count = **type - '0';
+      (*type)++;
+      if (isdigit (**type))
 	{
-	  n *= 10;
-	  n += *p - '0';
-	  p++;
-	} 
-      while (isdigit (*p));
-      if (*p == '_')
-	{
-	  *type = p + 1;
-	  *count = n;
+	  p = *type;
+	  n = *count;
+	  do 
+	    {
+	      n *= 10;
+	      n += *p - '0';
+	      p++;
+	    } 
+	  while (isdigit (*p));
+	  if (*p == '_')
+	    {
+	      *type = p + 1;
+	      *count = n;
+	    }
 	}
     }
   return (1);
@@ -1162,14 +1219,7 @@ do_type (type, result, work)
 		success = 0;
 		break;
 	      }
-	    n = 0;
-	    do
-	      {
-		n *= 10;
-		n += **type - '0';
-		(*type)++;
-	      } 
-	    while (isdigit (**type));
+	    n = consume_count (type);
 	    if (strlen (*type) < n)
 	      {
 		success = 0;
@@ -1394,14 +1444,7 @@ demangle_fund_type (type, result, work)
       case '7':
       case '8':
       case '9':
-	n = 0;
-	do
-	  {
-	    n *= 10;
-	    n += **type - '0';
-	    (*type)++;
-	  }
-	while (isdigit (**type));
+	n = consume_count (type);
 	if (strlen (*type) < n)
 	  {
 	    success = 0;

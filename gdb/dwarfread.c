@@ -380,7 +380,7 @@ static struct type *
 decode_mod_u_d_type PARAMS ((char *));
 
 static struct type *
-decode_modified_type PARAMS ((unsigned char *, unsigned int, int));
+decode_modified_type PARAMS ((char *, unsigned int, int));
 
 static struct type *
 decode_fund_type PARAMS ((unsigned int));
@@ -2711,7 +2711,7 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	static struct type *decode_modified_type (unsigned char *modifiers,
+	static struct type *decode_modified_type (char *modifiers,
 	    unsigned short modcount, int mtype)
 
 DESCRIPTION
@@ -2745,14 +2745,14 @@ BUGS
 
 static struct type *
 decode_modified_type (modifiers, modcount, mtype)
-     unsigned char *modifiers;
+     char *modifiers;
      unsigned int modcount;
      int mtype;
 {
   struct type *typep = NULL;
   unsigned short fundtype;
   DIE_REF die_ref;
-  unsigned char modifier;
+  char modifier;
   int nbytes;
   
   if (modcount == 0)
@@ -2799,9 +2799,11 @@ decode_modified_type (modifiers, modcount, mtype)
 	    SQUAWK (("type modifier 'volatile' ignored"));	/* FIXME */
 	    break;
 	  default:
-	    if (!(MOD_lo_user <= modifier && modifier <= MOD_hi_user))
+	    if (!(MOD_lo_user <= (unsigned char) modifier
+		  && (unsigned char) modifier <= MOD_hi_user))
 	      {
-		SQUAWK (("unknown type modifier %u", modifier));
+		SQUAWK (("unknown type modifier %u",
+			 (unsigned char) modifier));
 	      }
 	    break;
 	}

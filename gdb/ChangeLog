@@ -1,3 +1,26 @@
+Mon Jun 15 07:21:00 1992  Fred Fish  (fnf@cygnus.com)
+
+	* dwarfread.c (decode_modified_type):  Change type of first arg.
+	Change 'modifier' to char from unsigned char.  Cast single use
+	that needs to be unsigned char.
+	* symtab.h (SYMBOL_BASEREG_VALID):  Explain disabling.
+	* utils.c (strdup_demangled):  Add function.
+	* defs.h (strdup_demangled):  Add prototype.
+	* stack.c (return_command):  Demangle C++ function names for query.
+	* infcmd.c (jump_command):  Demangle C++ function names for query.
+	* cplus-dem.c (consume_count):  New function and prototype.
+	* cplus-dem.c (demangle_class, gnu_special, demangle_func_type,
+	do_type):  Replace conversion code with consume_count().
+	* cplus-dem.c (gnu_special):  Fix demangled of static members.
+	* source.c (list_command):  Print demangled function names
+	when appropriate.  Fix supplied by Peter Schauer.
+
+Mon Jun 15 01:45:48 1992  John Gilmore  (gnu at cygnus.com)
+
+	* buildsym.c (define_symbol):  Nameless types are now on several
+	platforms; generalize them and un-ifdef them to make Solaris 2
+	work.
+
 Sun Jun 14 10:55:51 1992  John Gilmore  (gnu at cygnus.com)
 
 	* infcmd.c:  Fix typo (reported by Rob Savoye).
