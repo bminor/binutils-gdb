@@ -1,3 +1,24 @@
+Fri Jul 15 19:09:25 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* lib/gas-defs.exp (run_dump_test): New routine for running the
+	assembler, running objdump or nm (not fully supported) on the
+	resulting object file, and comparing the results against a file of
+	regular expressions in the test suite, all in one command.
+	(fail_phase, slurp_options): New auxiliary routines.
+	(regexp_diff): Always return a value.  Fix bugs in actually doing
+	the regexp test.
+
+Thu Jul  7 11:55:33 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/relocreduce2.s: More relocation reduction tests.
+	* gas/hppa/reloc/reloc.exp: Run them.
+
+Thu Jun 30 18:49:25 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/default.exp: Look for "as.new" in "$base_dir/..", where
+	it got compiled, not in "$base_dir".
+	* config/unknown.exp: Deleted.
+
 Sun Jun 26 13:23:54 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gas/lib/gas-defs.exp (gas_finish): Call "close" and "wait"

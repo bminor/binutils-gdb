@@ -66,8 +66,8 @@ proc gas_start { prog as_opts } {
 proc gas_finish { } {
     global spawn_id
 
-    close
-    # Might also need a wait here one day.
+    catch "close"
+    catch "wait"
 }
 
 proc want_no_output { testname } {
@@ -172,6 +172,117 @@ proc gas_init {} {
     return
 }
 
+# For easier reading.
+proc fail_phase { name phase opts } {
+    set opts [string trim $opts]
+    if { $opts == "" } {
+	fail "$name ($phase)"
+    } else {
+	fail "$name ($phase: $opts)"
+    }
+}
+
+# This proc requires two input files -- the .s file containing the
+# assembly source, and a .d file containing the expected output from
+# objdump or nm or whatever, and leading comments indicating any options
+# to be passed to the assembler or dump program.
+proc run_dump_test { name } {
+    global subdir srcdir
+    global OBJDUMP NM AS
+    global OBJDUMPFLAGS NMFLAGS ASFLAGS
+
+    set file "$srcdir/$subdir/$name"
+    set opt_array [slurp_options "${file}.d"]
+    set opts(as) {}
+    set opts(objdump) {}
+    set opts(nm) {}
+    set opts(name) {}
+    set opts(PROG) {}
+
+    foreach i $opt_array {
+	set opt_name [lindex $i 0]
+	set opt_val [lindex $i 1]
+	if ![info exists opts($opt_name)] {
+	    perror "unknown option $opt_name in file $file.d"
+	    return
+	}
+	if [string length $opts($opt_name)] {
+	    perror "option $opt_name multiply set in $file.d"
+	    return
+	}
+	set opts($opt_name) $opt_val
+    }
+
+    if {$opts(PROG) != ""} {
+	switch -- $opts(PROG) {
+	    objdump
+		{ set program objdump }
+	    nm
+		{ set program nm }
+	    default
+		{ perror "unrecognized program option $opts(PROG) in $file.d"
+		  return }
+	}
+    } elseif {$opts(objdump) == "" && $opts(nm) != ""} {
+	set program nm
+    } elseif {$opts(objdump) != "" && $opts(nm) == ""} {
+	set program objdump
+    } else {
+	perror "dump program unspecified in $file.d"
+	return
+    }
+    set progopts1 $opts($program)
+    eval set progopts \$[string toupper $program]FLAGS
+    eval set program \$[string toupper $program]
+    if { $opts(name) == "" } { set testname "$subdir/$name" } else { set testname $opts(name) }
+
+    catch "exec $srcdir/lib/run $AS $ASFLAGS $opts(as) ${file}.s" comp_output
+
+    if ![string match "" $comp_output] then {
+	send_log "$comp_output\n"
+	verbose "$comp_output" 3
+	fail_phase $testname assembly "$ASFLAGS $opts(as)"
+	return
+    }
+
+    if [catch "exec $program -r > dump.out" comp_output] {
+	fail_phase $testname {running objdump} {-r}
+	return
+    }
+
+    if { [regexp_diff "dump.out" "${file}.d"] } then {
+	fail_phase $testname {checking output} "$ASFLAGS $opts(as)"
+	return
+    }
+
+    pass $testname
+}
+
+proc slurp_options { file } {
+    if [catch { set f [open $file r] } x] {
+	perror "couldn't open `$file': $x"
+    }
+    set opt_array {}
+    # whitespace expression
+    set ws  {[ 	]*}
+    set nws {[^ 	]*}
+    # whitespace is ignored anywhere except within the options list;
+    # option names are alphabetic only
+    set pat "^#${ws}(\[a-zA-Z\]*)$ws:${ws}($nws)$ws\$"
+    while { [gets $f line] != -1 } {
+	set line [string trim $line]
+	# Whitespace here is space-tab.
+	if [regexp $pat $line xxx opt_name opt_val] {
+	    # match!
+	    lappend opt_array [list $opt_name $opt_val]
+	} else {
+	    break
+	}
+    }
+    close $f
+    return $opt_array
+}
+
 proc objdump { opts } {
     global OBJDUMP
     global comp_output
@@ -197,8 +308,8 @@ proc objdump_start_no_subdir { prog opts } {
 proc objdump_finish { } {
     global spawn_id
 
-    close
-    # Might also need a wait here one day.
+    catch "close"
+    catch "wait"
 }
 
 expect_after {
@@ -219,24 +330,24 @@ proc regexp_diff { file_1 file_2 } {
     set eof -1
     set end 0
     set differences 0
-    
+
     if [file exists $file_1] then {
 	set file_a [open $file_1 r]
     } else {
 	warning "$file_1 doesn't exist"
-	return
+	return 1
     }
-    
+
     if [file exists $file_2] then {
 	set file_b [open $file_2 r]
     } else {
 	fail "$file_2 doesn't exist"
 	close $file_a
-	return
+	return 1
     }
-    
+
     verbose " Regexp-diff'ing: $file_1 $file_2" 2
-    
+
     while { $differences == 0 && $end == 0 } {
 	set line_a ""
 	set line_b ""
@@ -254,7 +365,7 @@ proc regexp_diff { file_1 file_2 } {
 	}
 	if { $end } { break }
 	verbose "regexp \"^$line_b$\"\nline   \"$line_a\"" 3
-	if [regexp "^$line_b$" "$line_a\n"] {
+	if ![regexp "^$line_b$" "$line_a"] {
 		verbose "no match" 3
 		set differences 1
 	}
