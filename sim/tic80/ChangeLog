@@ -3,6 +3,7 @@ Thu May  8 11:57:47 1997  Michael Meissner  <meissner@cygnus.com>
 	* insns (jsr,bsr): For non-allulled calls, set r31 so that the
 	return address does not reexecute the instruction in the delay
 	slot.
+	(bbo,bbz): Reverse bit number.
 
 	* misc.c (tic80_trace_*): Change format slightly to accomidate
 	real large decimal values.
