@@ -706,6 +706,65 @@ _bfd_abort (file, line, fn)
 
 /*
 FUNCTION
+	bfd_get_arch_size
+
+SYNOPSIS
+ 	int bfd_get_arch_size (bfd *abfd);
+
+DESCRIPTION
+	Returns the architecture address size, in bits, as determined
+	by the object file's format.  For ELF, this information is
+	included in the header.
+
+RETURNS
+	Returns the arch size in bits if known, <<-1>> otherwise.
+*/
+
+int
+bfd_get_arch_size (abfd)
+     bfd *abfd;
+{
+  if (abfd->xvec->flavour == bfd_target_elf_flavour)
+    return (get_elf_backend_data (abfd))->s->arch_size;
+
+  bfd_set_error (bfd_error_wrong_format);
+  return -1;
+}
+
+/*
+FUNCTION
+	bfd_get_sign_extend_vma
+
+SYNOPSIS
+ 	int bfd_get_sign_extend_vma (bfd *abfd);
+
+DESCRIPTION
+	Indicates if the target architecture "naturally" sign extends
+	an address.  Some architectures implicitly sign extend address
+	values when they are converted to types larger than the size
+	of an address.  For instance, bfd_get_start_address() will
+	return an address sign extended to fill a bfd_vma when this is
+	the case.
+
+RETURNS
+	Returns <<1>> if the target architecture is known to sign
+	extend addresses, <<0>> if the target architecture is known to
+	not sign extend addresses, and <<-1>> otherwise.
+*/
+
+int
+bfd_get_sign_extend_vma (abfd)
+     bfd *abfd;
+{
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+    return (get_elf_backend_data (abfd)->sign_extend_vma);
+
+  bfd_set_error (bfd_error_wrong_format);  
+  return -1;
+}
+
+/*
+FUNCTION
 	bfd_set_start_address
 
 SYNOPSIS

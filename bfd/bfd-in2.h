@@ -644,10 +644,10 @@ extern long bfd_get_elf_phdr_upper_bound PARAMS ((bfd *abfd));
 extern int bfd_get_elf_phdrs PARAMS ((bfd *abfd, void *phdrs));
 
 /* Return the arch_size field of an elf bfd, or -1 if not elf.  */
-extern int bfd_elf_get_arch_size PARAMS ((bfd *));
+extern int bfd_get_arch_size PARAMS ((bfd *));
 
 /* Return true if address "naturally" sign extends, or -1 if not elf. */
-extern int bfd_elf_get_sign_extend_vma PARAMS ((bfd *));
+extern int bfd_get_sign_extend_vma PARAMS ((bfd *));
 
 /* SunOS shared library support routines for the linker.  */
 
@@ -2955,6 +2955,12 @@ bfd_set_reloc
 
 boolean 
 bfd_set_file_flags PARAMS ((bfd *abfd, flagword flags));
+
+int 
+bfd_get_arch_size  PARAMS ((bfd *abfd));
+
+int 
+bfd_get_sign_extend_vma  PARAMS ((bfd *abfd));
 
 boolean 
 bfd_set_start_address PARAMS ((bfd *abfd, bfd_vma vma));

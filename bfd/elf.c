@@ -1761,36 +1761,6 @@ elf_fake_sections (abfd, asect, failedptrarg)
     *failedptr = true;
 }
 
-/* Get elf arch size (32 / 64).
-   Returns -1 if not elf.  */
-
-int
-bfd_elf_get_arch_size (abfd)
-     bfd *abfd;
-{
-  if (abfd->xvec->flavour != bfd_target_elf_flavour)
-    {
-      bfd_set_error (bfd_error_wrong_format);
-      return -1;
-    }
-
-  return (get_elf_backend_data (abfd))->s->arch_size;
-}
-
-/* True if addresses "naturally" sign extend.  Return 0/1 if known.
-   -1 if unknown. */
-int
-bfd_elf_get_sign_extend_vma (abfd)
-     bfd *abfd;
-{
-  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
-    {
-      bfd_set_error (bfd_error_wrong_format);
-      return -1;
-    }
-  return (get_elf_backend_data (abfd)->sign_extend_vma);
-}
-
 /* Assign all ELF section numbers.  The dummy first section is handled here
    too.  The link/info pointers for the standard section types are filled
    in here too, while we're at it.  */
@@ -1937,7 +1907,7 @@ assign_section_numbers (abfd)
 
 		  /* This is a .stab section.  */
 		  elf_section_data (s)->this_hdr.sh_entsize =
-		    4 + 2 * bfd_elf_get_arch_size (abfd) / 8;
+		    4 + 2 * bfd_get_arch_size (abfd) / 8;
 		}
 	    }
 	  break;
@@ -3267,7 +3237,7 @@ prep_headers (abfd)
       i_ehdrp->e_machine = EM_NONE;
       break;
     case bfd_arch_sparc:
-      if (bfd_elf_get_arch_size (abfd) == 64)
+      if (bfd_get_arch_size (abfd) == 64)
 	i_ehdrp->e_machine = EM_SPARCV9;
       else
 	i_ehdrp->e_machine = EM_SPARC;
