@@ -9449,6 +9449,32 @@ md_estimate_size_before_relax (fragp, segtype)
     return RELAX_NEW (fragp->fr_subtype) - RELAX_OLD (fragp->fr_subtype);
 }
 
+/* This is called to see whether a reloc against a defined symbol
+   should be converted into a reloc against a section.  Don't adjust
+   MIPS16 jump relocations, so we don't have to worry about the format
+   of the offset in the .o file.  Don't adjust relocations against
+   externally visible mips16 symbols, so that the linker can find them
+   if it needs to set up a stub.  */
+
+int
+mips_fix_adjustable (fixp)
+     fixS *fixp;
+{
+  if (fixp->fx_r_type == BFD_RELOC_MIPS16_JMP)
+    return 0;
+  if (fixp->fx_addsy == NULL)
+    return 1;
+  if (! S_IS_EXTERNAL (fixp->fx_addsy)
+      && ! S_IS_WEAK (fixp->fx_addsy))
+    return 1;
+#ifdef S_GET_OTHER
+  if (OUTPUT_FLAVOR == bfd_target_elf_flavour
+      && S_GET_OTHER (fixp->fx_addsy) == STO_MIPS16)
+    return 0;
+#endif
+  return 1;
+}
+
 /* Translate internal representation of relocation info to BFD target
    format.  */
 

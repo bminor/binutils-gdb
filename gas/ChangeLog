@@ -12,6 +12,10 @@ Thu Jan 30 12:28:18 1997  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 Thu Jan 30 12:08:40 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (mips_fix_adjustable): New function.
+	* config/tc-mips.h (tc_fix_adjustable): Call mips_fix_adjustable.
+	(mips_fix_adjustable): Declare.
+
 	Ideas from Srinivas Addagarla <srinivas@cdotd.ernet.in>:
 	* read.c (read_a_source_file): After doing an mri_pending_align,
 	adjust the line_label if there is one.

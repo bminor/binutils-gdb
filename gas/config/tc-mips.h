@@ -1,5 +1,5 @@
 /* tc-mips.h -- header file for tc-mips.c.
-   Copyright (C) 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF support by Ian Lance Taylor of Cygnus Support.
@@ -57,9 +57,6 @@ extern int mips_relax_frag PARAMS ((struct frag *, long));
    embedded PIC code.  */
 #define DIFF_EXPR_OK
 
-#define LITTLE_ENDIAN   1234
-#define BIG_ENDIAN      4321
-
 /* Default to big endian.  */
 #ifndef TARGET_BYTES_LITTLE_ENDIAN
 #undef  TARGET_BYTES_BIG_ENDIAN
@@ -91,7 +88,7 @@ extern void mips_define_label PARAMS ((struct symbol *));
 #define tc_frob_file() mips_frob_file ()
 extern void mips_frob_file PARAMS ((void));
 
-#ifdef OBJ_ELF
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 #define tc_frob_file_after_relocs mips_frob_file_after_relocs
 extern void mips_frob_file_after_relocs PARAMS ((void));
 #endif
@@ -99,9 +96,8 @@ extern void mips_frob_file_after_relocs PARAMS ((void));
 #define TC_CONS_FIX_NEW cons_fix_new_mips
 extern void cons_fix_new_mips ();
 
-/* Don't adjust MIPS16 jump relocations to section addresses, so we
-   don't have to worry about the format of the offset in the .o file.  */
-#define tc_fix_adjustable(fixp) ((fixp)->fx_r_type != BFD_RELOC_MIPS16_JMP)
+#define tc_fix_adjustable(fixp) mips_fix_adjustable (fixp)
+extern int mips_fix_adjustable PARAMS ((struct fix *));
 
 /* When generating embedded PIC code we must keep PC relative
    relocations.  */
@@ -116,7 +112,7 @@ extern int mips_force_relocation ();
 extern unsigned long mips_gprmask;
 extern unsigned long mips_cprmask[4];
 
-#ifdef OBJ_ELF
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 
 #define elf_tc_final_processing mips_elf_final_processing
 extern void mips_elf_final_processing PARAMS ((void));
@@ -147,8 +143,5 @@ extern void mips_flush_pending_output PARAMS ((void));
 
 extern void mips_enable_auto_align PARAMS ((void));
 #define md_elf_section_change_hook()	mips_enable_auto_align()
-
-extern void mips_init_after_args PARAMS ((void));
-#define tc_init_after_args mips_init_after_args
 
 #endif /* TC_MIPS */
