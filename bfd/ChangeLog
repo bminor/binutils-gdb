@@ -1,3 +1,9 @@
+Tue Feb  8 00:32:28 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* elf32-hppa.c (CURRENT_STUB_OFFSET, hppa_elf_build_arg_reloc_stub,
+	hppa_elf_build_long_branch_stub):  Cast to char * instead of int
+	before performing pointer arithmetic.
+
 Mon Feb  7 20:56:27 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config.bfd (hppa*-*-osf*): Use bfd_name hppaosf for this
