@@ -1,3 +1,10 @@
+2002-12-16  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* lib/mi-support.exp (mi_reinitialize_dir): Check mi level
+	to see whether we are using the new -environment-directory
+	command which resets via -r or the old version of the command
+	which may prompt the user.  Part of fix for gdb/741.
+
 2002-12-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.fortran/types.exp: Update obsolete comment.
