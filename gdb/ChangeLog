@@ -1,3 +1,8 @@
+2003-09-18  J. Brobecker  <brobecker@gnat.com>
+
+	* hppa-hpux-tdep.c (_initialize_hppa_hpux_tdep): Remove a
+	hard-coded constant. Use the proper machine name instead.
+
 2003-09-17  Andrew Cagney  <cagney@redhat.com>
 
 	* sparc-tdep.c (legacy_register_name): Delete function.

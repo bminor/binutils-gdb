@@ -171,9 +171,6 @@ _initialize_hppa_hpux_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_hppa, 0, GDB_OSABI_HPUX_SOM,
                           hppa_hpux_som_init_abi);
-  /* FIXME brobecker 2003-08-13: The machine number 25 corresponds to
-     the hppa2.0w bfd arch_info. A #define should probably be defined
-     in bfd, instead of using this hard-coded number.  */
-  gdbarch_register_osabi (bfd_arch_hppa, 25, GDB_OSABI_HPUX_ELF,
+  gdbarch_register_osabi (bfd_arch_hppa, bfd_mach_hppa20w, GDB_OSABI_HPUX_ELF,
                           hppa_hpux_elf_init_abi);
 }
