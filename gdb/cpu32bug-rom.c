@@ -1,9 +1,7 @@
-/* Remote debugging interface for EST-300 ICE, for GDB
+/* Remote debugging interface for CPU32Bug Rom monitor for GDB, the GNU debugger.
    Copyright 1995 Free Software Foundation, Inc.
-   Contributed by Cygnus Support.
 
-   Written by Steve Chamberlain for Cygnus Support.
-   Re-written by Stu Grossman of Cygnus Support
+   Written by Stu Grossman of Cygnus Support
 
 This file is part of GDB.
 
@@ -27,10 +25,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "monitor.h"
 #include "serial.h"
 
-static void est_open PARAMS ((char *args, int from_tty));
+static void cpu32bug_open PARAMS ((char *args, int from_tty));
 
 static void
-est_supply_register (regname, regnamelen, val, vallen)
+cpu32bug_supply_register (regname, regnamelen, val, vallen)
      char *regname;
      int regnamelen;
      char *val;
@@ -74,10 +72,10 @@ est_supply_register (regname, regnamelen, val, vallen)
  * This array of registers needs to match the indexes used by GDB. The
  * whole reason this exists is because the various ROM monitors use
  * different names than GDB does, and don't support all the
- * registers either. So, typing "info reg sp" becomes a "r30".
+ * registers either. So, typing "info reg sp" becomes an "A7".
  */
 
-static char *est_regnames[NUM_REGS] =
+static char *cpu32bug_regnames[NUM_REGS] =
 {
   "D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7",
   "A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7",
@@ -90,91 +88,90 @@ static char *est_regnames[NUM_REGS] =
  * strings. We also need a CR or LF on the end.
  */
 
-static struct target_ops est_ops;
+static struct target_ops cpu32bug_ops;
 
-static char *est_loadtypes[] = {"srec", NULL};
-static char *est_loadprotos[] = {"none", NULL};
+static char *cpu32bug_loadtypes[] = {"srec", NULL};
+static char *cpu32bug_loadprotos[] = {"none", NULL};
 
-static char *est_inits[] = {"he\r", /* Resets the prompt, and clears repeated cmds */
-			      NULL};
+static char *cpu32bug_inits[] = {"\r", NULL};
 
-static struct monitor_ops est_cmds =
+static struct monitor_ops cpu32bug_cmds =
 {
-  MO_CLR_BREAK_USES_ADDR | MO_FILL_USES_ADDR | MO_NEED_REGDUMP_AFTER_CONT,
-  est_inits,			/* Init strings */
-  "go\r",			/* continue command */
-  "sidr\r",			/* single step */
-  "\003",			/* ^C interrupts the program */
-  "sb %x\r",			/* set a breakpoint */
-  "rb %x\r",			/* clear a breakpoint */
-  "rb\r",			/* clear all breakpoints */
-  "bfb %x %x %x\r",		/* fill (start end val) */
+  MO_CLR_BREAK_USES_ADDR,
+  cpu32bug_inits,		/* Init strings */
+  "g\r",			/* continue command */
+  "t\r",			/* single step */
+  NULL,				/* interrupt command */
+  "br %x\r",			/* set a breakpoint */
+  "nobr %x\r",			/* clear a breakpoint */
+  "nobr\r",			/* clear all breakpoints */
+  "bf %x:%x %x;b\r",		/* fill (start count val) */
   {
-    "smb %x %x\r",		/* setmem.cmdb (addr, value) */
-    "smw %x %x\r",		/* setmem.cmdw (addr, value) */
-    "sml %x %x\r",		/* setmem.cmdl (addr, value) */
+    "ms %x %02x\r",		/* setmem.cmdb (addr, value) */
+    "ms %x %04x\r",		/* setmem.cmdw (addr, value) */
+    "ms %x %08x\r",		/* setmem.cmdl (addr, value) */
     NULL,			/* setmem.cmdll (addr, value) */
     NULL,			/* setreg.resp_delim */
     NULL,			/* setreg.term */
     NULL,			/* setreg.term_cmd */
   },
   {
-    "dmb %x %x\r",		/* getmem.cmdb (addr, len) */
-    "dmw %x %x\r",		/* getmem.cmdw (addr, len) */
-    "dml %x %x\r",		/* getmem.cmdl (addr, len) */
+    "md %x:%x;b\r",		/* getmem.cmdb (addr, len) */
+    "md %x:%x;b\r",		/* getmem.cmdw (addr, len) */
+    "md %x:%x;b\r",		/* getmem.cmdl (addr, len) */
     NULL,			/* getmem.cmdll (addr, len) */
-    ": ",			/* getmem.resp_delim */
+    " ",			/* getmem.resp_delim */
     NULL,			/* getmem.term */
     NULL,			/* getmem.term_cmd */
   },
   {
-    "sr %s %x\r",		/* setreg.cmd (name, value) */
+    "rs %s %x\r",		/* setreg.cmd (name, value) */
     NULL,			/* setreg.resp_delim */
     NULL,			/* setreg.term */
     NULL			/* setreg.term_cmd */
   },
   {
-    "dr %s\r",			/* getreg.cmd (name) */
-    " = ",			/* getreg.resp_delim */
+    "rs %s\r",			/* getreg.cmd (name) */
+    "=",			/* getreg.resp_delim */
     NULL,			/* getreg.term */
     NULL			/* getreg.term_cmd */
   },
-  "dr\r",			/* dump_registers */
-  "\\(\\w+\\) = \\([0-9a-fA-F]+\\)", /* register_pattern */
-  est_supply_register,		/* supply_register */
+  "rd\r",			/* dump_registers */
+  "\\(\\w+\\) +=\\([0-9a-fA-F]+\\b\\)", /* register_pattern */
+  cpu32bug_supply_register,	/* supply_register */
   NULL,				/* load_routine (defaults to SRECs) */
-  "dl\r",			/* download command */
-  "+",				/* load response */
-  ">BKM>",			/* monitor command prompt */
+  "lo\r",			/* download command */
+  "lo\r\n",			/* load response */
+  "CPU32Bug>",			/* monitor command prompt */
   NULL,				/* end-of-command delimitor */
   NULL,				/* optional command terminator */
-  &est_ops,			/* target operations */
-  est_loadtypes,		/* loadtypes */
-  est_loadprotos,		/* loadprotos */
+  &cpu32bug_ops,		/* target operations */
+  cpu32bug_loadtypes,		/* loadtypes */
+  cpu32bug_loadprotos,		/* loadprotos */
   "9600",			/* supported baud rates */
   SERIAL_1_STOPBITS,		/* number of stop bits */
-  est_regnames,			/* registers names */
+  cpu32bug_regnames,		/* registers names */
   MONITOR_OPS_MAGIC		/* magic */
   };
 
 void
-est_open(args, from_tty)
+cpu32bug_open(args, from_tty)
      char *args;
      int from_tty;
 {
-  monitor_open (args, &est_cmds, from_tty);
+  monitor_open (args, &cpu32bug_cmds, from_tty);
 }
 
 void
-_initialize_est ()
+_initialize_cpu32bug_rom ()
 {
-  init_monitor_ops (&est_ops);
+  init_monitor_ops (&cpu32bug_ops);
 
-  est_ops.to_shortname = "est";
-  est_ops.to_longname = "EST background debug monitor";
-  est_ops.to_doc = "Debug via the EST BDM.\n\
+  cpu32bug_ops.to_shortname = "cpu32bug";
+  cpu32bug_ops.to_longname = "CPU32Bug monitor";
+  cpu32bug_ops.to_doc = "Debug via the CPU32Bug monitor.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).";
-  est_ops.to_open = est_open;
+  cpu32bug_ops.to_open = cpu32bug_open;
 
-  add_target (&est_ops);
+  add_target (&cpu32bug_ops);
 }

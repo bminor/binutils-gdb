@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "monitor.h"
 #include "serial.h"
 
-static void rom68k_open PARAMS ((char *, int));
+static void rom68k_open PARAMS ((char *args, int from_tty));
 
 static void
 rom68k_supply_register (regname, regnamelen, val, vallen)
@@ -39,40 +39,36 @@ rom68k_supply_register (regname, regnamelen, val, vallen)
   regno = -1;
 
   if (regnamelen == 2)
-    {
-      switch (regname[0])
-	{
-	case 'S':
-	  if (regname[1] == 'R')
-	    regno = PS_REGNUM;
+    switch (regname[0])
+      {
+      case 'S':
+	if (regname[1] == 'R')
+	  regno = PS_REGNUM;
+	break;
+      case 'P':
+	if (regname[1] == 'C')
+	  regno = PC_REGNUM;
+	break;
+      case 'D':
+	if (regname[1] != 'R')
 	  break;
-	case 'P':
-	  if (regname[1] == 'C')
-	    regno = PC_REGNUM;
+	regno = D0_REGNUM;
+	numregs = 8;
+	break;
+      case 'A':
+	if (regname[1] != 'R')
 	  break;
-	case 'D':
-	  if (regname[1] != 'R')
-	    break;
-	  regno = D0_REGNUM;
-	  numregs = 8;
-	  break;
-	case 'A':
-	  if (regname[1] != 'R')
-	    break;
-	  regno = A0_REGNUM;
-	  numregs = 7;
-	  break;
-	}
-    }
+	regno = A0_REGNUM;
+	numregs = 7;
+	break;
+      }
   else if (regnamelen == 3)
-    {
-      switch (regname[0])
-	{
-	case 'I':
-	  if (regname[1] == 'S' && regname[2] == 'P')
-	    regno = SP_REGNUM;
-	}
-    }
+    switch (regname[0])
+      {
+      case 'I':
+	if (regname[1] == 'S' && regname[2] == 'P')
+	  regno = SP_REGNUM;
+      }
 
   if (regno >= 0)
     while (numregs-- > 0)
@@ -145,6 +141,7 @@ static struct monitor_ops rom68k_cmds =
 				/* register_pattern */
   "\\(\\w+\\)=\\([0-9a-fA-F]+\\( +[0-9a-fA-F]+\\b\\)*\\)",
   rom68k_supply_register,	/* supply_register */
+  NULL,				/* load_routine (defaults to SRECs) */
   "dc\r",			/* download command */
   "Waiting for S-records from host... ", /* Load response */
   "ROM68K :->",			/* monitor command prompt */

@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "monitor.h"
 #include "serial.h"
+#include "xmodem.h"
 
 static void w89k_open PARAMS ((char *args, int from_tty));
 
@@ -154,6 +155,82 @@ w89k_supply_register (regname, regnamelen, val, vallen)
       val = monitor_supply_register (regno++, val);
 }
 
+static int hashmark = 1;	/* flag set by "set hash" */
+
+extern struct monitor_ops w89k_cmds; /* fwd decl */
+
+static void
+w89k_load (desc, file, hashmark)
+     serial_t desc;
+     char *file;
+     int hashmark;
+{
+  bfd *abfd;
+  asection *s;
+  char *buffer;
+  int i;
+
+  buffer = alloca (XMODEM_PACKETSIZE);
+
+  abfd = bfd_openr (file, 0);
+  if (!abfd)
+    {
+      printf_filtered ("Unable to open file %s\n", file);
+      return;
+    }
+
+  if (bfd_check_format (abfd, bfd_object) == 0)
+    {
+      printf_filtered ("File is not an object file\n");
+      return;
+    }
+  
+  for (s = abfd->sections; s; s = s->next)
+    if (s->flags & SEC_LOAD)
+      {
+	bfd_size_type section_size;
+
+	printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma,
+			 s->vma + s->_raw_size);
+	gdb_flush (gdb_stdout);
+
+	monitor_printf (w89k_cmds.load, s->vma);
+	if (w89k_cmds.loadresp)
+	  monitor_expect (w89k_cmds.loadresp, NULL, 0);
+
+	xmodem_init_xfer (desc);
+
+	section_size = bfd_section_size (abfd, s);
+
+	for (i = 0; i < section_size; i += XMODEM_DATASIZE)
+	  {
+	    int numbytes;
+
+	    numbytes = min (XMODEM_DATASIZE, section_size - i);
+
+	    bfd_get_section_contents (abfd, s, buffer + XMODEM_DATAOFFSET, i,
+				      numbytes);
+
+	    xmodem_send_packet (desc, buffer, numbytes, hashmark);
+
+	    if (hashmark)
+	      {
+		putchar_unfiltered ('#');
+		gdb_flush (gdb_stdout);
+	      }
+	  }			/* Per-packet (or S-record) loop */
+
+	xmodem_finish_xfer (desc);
+
+	monitor_expect_prompt (NULL, 0);
+
+	putchar_unfiltered ('\n');
+      }				/* Loadable sections */
+  
+  if (hashmark) 
+    putchar_unfiltered ('\n');
+}
+
 /*
  * Define the monitor command strings. Since these are passed directly
  * through to a printf style function, we need can include formatting
@@ -162,7 +239,7 @@ w89k_supply_register (regname, regnamelen, val, vallen)
 
 static struct target_ops w89k_ops;
 
-static char *w89k_loadtypes[] = {"srec", NULL};
+static char *w89k_loadtypes[] = {"binary", NULL};
 static char *w89k_loadprotos[] = {"xmodem", NULL};
 
 static char *w89k_inits[] = {"\r", NULL};
@@ -211,8 +288,9 @@ static struct monitor_ops w89k_cmds =
   "r\r",			/* dump_registers */
   "\\(\\w+\\)\\( +[0-9a-fA-F]+\\b\\)+",
   w89k_supply_register,		/* supply_register */
-  "u\r",			/* download command */
-  "u\n\r",			/* load response */
+  w89k_load,			/* load routine */
+  "u %x\r",			/* download command */
+  "\r",				/* load response */
   "ROM>",			/* monitor command prompt */
   NULL,				/* end-of-command delimitor */
   NULL,				/* optional command terminator */

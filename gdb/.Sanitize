@@ -112,6 +112,7 @@ core.c
 coredep.c
 corelow.c
 cp-valprint.c
+cpu32bug-rom.c
 cxux-nat.c
 dbxread.c
 dcache.c
@@ -326,6 +327,8 @@ w89k-rom.c
 xcoffread.c
 xcoffsolib.c
 xcoffsolib.h
+xmodem.c
+xmodem.h
 z8k-tdep.c
 
 
