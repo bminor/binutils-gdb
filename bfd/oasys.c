@@ -1,6 +1,6 @@
-/* bfd backend for oasys objects.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
-   Written by Steve Chamberlain of Cygnus Support <steve@cygnus.com>.
+/* BFD back-end for oasys objects.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Written by Steve Chamberlain of Cygnus Support, <sac@cygnus.com>.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -837,7 +837,7 @@ DEFUN(oasys_write_syms, (abfd),
     char *dst = symbol.name;
     unsigned int l = 0;
 
-    if (g->section == & bfd_com_section) {
+    if (bfd_is_com_section (g->section)) {
       symbol.relb = RELOCATION_TYPE_COM;
       bfd_h_put_16(abfd, index, (uint8e_type *)(&symbol.refno[0]));
       index++;
@@ -1152,7 +1152,7 @@ DEFUN(oasys_write_data, (abfd),
 }
 static boolean
 DEFUN(oasys_write_object_contents, (abfd),
-      bfd * CONST abfd)
+      bfd *abfd)
 {
   oasys_write_header(abfd);
   oasys_write_syms(abfd);
@@ -1310,6 +1310,8 @@ return 0;
 #define oasys_bfd_debug_info_accumulate  (FOO(void, (*), (bfd *, asection *)))bfd_void
 #define oasys_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
 #define oasys_bfd_relax_section bfd_generic_relax_section
+#define oasys_bfd_seclet_link bfd_generic_seclet_link
+
 /*SUPPRESS 460 */
 bfd_target oasys_vec =
 {

@@ -1,3 +1,8 @@
+Mon Feb 15 20:43:51 1993  John Gilmore  (gnu@cygnus.com)
+
+	* oasys.c (oasys_write_object_contents):  Lint.
+	* srec.c:  Whitespace cleanup.
+
 Fri Feb 12 14:23:07 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coffgen.c (coff_print_symbol): Print correct tagndx value;
