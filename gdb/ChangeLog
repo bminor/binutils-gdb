@@ -1,5 +1,7 @@
 Tue Nov  9 12:20:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* utils.c (quit): Also call gdb_flush on standard output and error.
+
 	* .gdbinit: Remove "source /.gdbinit".  It causes a spurious error
 	if /.gdbinit doesn't exist (and I know of no convention of putting
 	something in /.gdbinit).
