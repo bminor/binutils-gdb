@@ -1,6 +1,8 @@
 /* MIPS-specific support for 64-bit ELF
    Copyright 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
    Ian Lance Taylor, Cygnus Support
+   Linker support added by Mark Mitchell, CodeSourcery, LLC.
+   <mark@codesourcery.com>
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -74,10 +76,6 @@ static boolean mips_elf64_slurp_one_reloc_table
 static boolean mips_elf64_slurp_reloc_table
   PARAMS ((bfd *, asection *, asymbol **, boolean));
 static void mips_elf64_write_relocs PARAMS ((bfd *, asection *, PTR));
-static boolean mips_elf64_section_from_shdr
-  PARAMS ((bfd *, Elf_Internal_Shdr *, char *));
-static boolean mips_elf64_section_processing
-  PARAMS ((bfd *, Elf_Internal_Shdr *));
 static boolean mips_elf64_slurp_armap PARAMS ((bfd *));
 static boolean mips_elf64_write_armap
   PARAMS ((bfd *, unsigned int, struct orl *, unsigned int, int));
@@ -85,6 +83,9 @@ static boolean mips_elf64_write_armap
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value
    from smaller values.  Start with zero, widen, *then* decrement.  */
 #define MINUS_ONE	(((bfd_vma)0) - 1)
+
+/* The number of local .got entries we reserve.  */
+#define MIPS_RESERVED_GOTNO (2)
 
 /* The relocation table used for SHT_REL sections.  */
 
@@ -1814,115 +1815,6 @@ mips_elf64_write_relocs (abfd, sec, data)
 	      == count);
 }
 
-/* Handle a 64-bit MIPS ELF specific section.  */
-
-static boolean
-mips_elf64_section_from_shdr (abfd, hdr, name)
-     bfd *abfd;
-     Elf_Internal_Shdr *hdr;
-     char *name;
-{
-  if (! _bfd_mips_elf_section_from_shdr (abfd, hdr, name))
-    return false;
-
-  /* For a SHT_MIPS_OPTIONS section, look for a ODK_REGINFO entry, and
-     set the gp value based on what we find.  We may see both
-     SHT_MIPS_REGINFO and SHT_MIPS_OPTIONS/ODK_REGINFO; in that case,
-     they should agree.  */
-  if (hdr->sh_type == SHT_MIPS_OPTIONS)
-    {
-      bfd_byte *contents, *l, *lend;
-
-      contents = (bfd_byte *) bfd_malloc (hdr->sh_size);
-      if (contents == NULL)
-	return false;
-      if (! bfd_get_section_contents (abfd, hdr->bfd_section, contents,
-				      (file_ptr) 0, hdr->sh_size))
-	{
-	  free (contents);
-	  return false;
-	}
-      l = contents;
-      lend = contents + hdr->sh_size;
-      while (l + sizeof (Elf_External_Options) <= lend)
-	{
-	  Elf_Internal_Options intopt;
-
-	  bfd_mips_elf_swap_options_in (abfd, (Elf_External_Options *) l,
-					&intopt);
-	  if (intopt.kind == ODK_REGINFO)
-	    {
-	      Elf64_Internal_RegInfo intreg;
-
-	      bfd_mips_elf64_swap_reginfo_in
-		(abfd,
-		 ((Elf64_External_RegInfo *)
-		  (l + sizeof (Elf_External_Options))),
-		 &intreg);
-	      elf_gp (abfd) = intreg.ri_gp_value;
-	    }
-	  l += intopt.size;
-	}
-      free (contents);
-    }
-
-  return true;
-}
-
-/* Work over a section just before writing it out.  We update the GP
-   value in the SHT_MIPS_OPTIONS section based on the value we are
-   using.  */
-
-static boolean
-mips_elf64_section_processing (abfd, hdr)
-     bfd *abfd;
-     Elf_Internal_Shdr *hdr;
-{
-  if (hdr->sh_type == SHT_MIPS_OPTIONS
-      && hdr->bfd_section != NULL
-      && elf_section_data (hdr->bfd_section) != NULL
-      && elf_section_data (hdr->bfd_section)->tdata != NULL)
-    {
-      bfd_byte *contents, *l, *lend;
-
-      /* We stored the section contents in the elf_section_data tdata
-	 field in the set_section_contents routine.  We save the
-	 section contents so that we don't have to read them again.
-	 At this point we know that elf_gp is set, so we can look
-	 through the section contents to see if there is an
-	 ODK_REGINFO structure.  */
-
-      contents = (bfd_byte *) elf_section_data (hdr->bfd_section)->tdata;
-      l = contents;
-      lend = contents + hdr->sh_size;
-      while (l + sizeof (Elf_External_Options) <= lend)
-	{
-	  Elf_Internal_Options intopt;
-
-	  bfd_mips_elf_swap_options_in (abfd, (Elf_External_Options *) l,
-					&intopt);
-	  if (intopt.kind == ODK_REGINFO)
-	    {
-	      bfd_byte buf[8];
-
-	      if (bfd_seek (abfd,
-			    (hdr->sh_offset
-			     + (l - contents)
-			     + sizeof (Elf_External_Options)
-			     + (sizeof (Elf64_External_RegInfo) - 8)),
-			     SEEK_SET) == -1)
-		return false;
-	      bfd_h_put_64 (abfd, elf_gp (abfd), buf);
-	      if (bfd_write (buf, 1, 8, abfd) != 8)
-		return false;
-	    }
-	  l += intopt.size;
-	}
-    }
-
-  return _bfd_mips_elf_section_processing (abfd, hdr);
-}
-
 /* Irix 6 defines a brand new archive map format, so that they can
    have archives more than 4 GB in size.  */
 
@@ -2215,29 +2107,66 @@ const struct elf_size_info mips_elf64_size_info =
 #define TARGET_BIG_NAME			"elf64-bigmips"
 #define ELF_ARCH			bfd_arch_mips
 #define ELF_MACHINE_CODE		EM_MIPS
+
 #define ELF_MAXPAGESIZE			0x1000
+
+#define elf_backend_collect		true
+#define elf_backend_type_change_ok	true
+#define elf_backend_can_gc_sections	true
 #define elf_backend_size_info		mips_elf64_size_info
 #define elf_backend_object_p		_bfd_mips_elf_object_p
-#define elf_backend_section_from_shdr	mips_elf64_section_from_shdr
+#define elf_backend_section_from_shdr	_bfd_mips_elf_section_from_shdr
 #define elf_backend_fake_sections	_bfd_mips_elf_fake_sections
 #define elf_backend_section_from_bfd_section \
 					_bfd_mips_elf_section_from_bfd_section
-#define elf_backend_section_processing	mips_elf64_section_processing
+#define elf_backend_section_processing	_bfd_mips_elf_section_processing
 #define elf_backend_symbol_processing	_bfd_mips_elf_symbol_processing
+#define elf_backend_additional_program_headers \
+					_bfd_mips_elf_additional_program_headers
+#define elf_backend_modify_segment_map	_bfd_mips_elf_modify_segment_map
 #define elf_backend_final_write_processing \
 					_bfd_mips_elf_final_write_processing
 #define elf_backend_ecoff_debug_swap	&mips_elf64_ecoff_debug_swap
+#define elf_backend_add_symbol_hook	_bfd_mips_elf_add_symbol_hook
+#define elf_backend_create_dynamic_sections \
+					_bfd_mips_elf_create_dynamic_sections
+#define elf_backend_check_relocs	_bfd_mips_elf_check_relocs
+#define elf_backend_adjust_dynamic_symbol \
+					_bfd_mips_elf_adjust_dynamic_symbol
+#define elf_backend_always_size_sections \
+					_bfd_mips_elf_always_size_sections
+#define elf_backend_size_dynamic_sections \
+					_bfd_mips_elf_size_dynamic_sections
+#define elf_backend_relocate_section    _bfd_mips_elf_relocate_section
+#define elf_backend_link_output_symbol_hook \
+					_bfd_mips_elf_link_output_symbol_hook
+#define elf_backend_finish_dynamic_symbol \
+					_bfd_mips_elf_finish_dynamic_symbol
+#define elf_backend_finish_dynamic_sections \
+					_bfd_mips_elf_finish_dynamic_sections
+#define elf_backend_gc_mark_hook	_bfd_mips_elf_gc_mark_hook
+#define elf_backend_gc_sweep_hook	_bfd_mips_elf_gc_sweep_hook
+#define elf_backend_got_header_size	(4*MIPS_RESERVED_GOTNO)
+#define elf_backend_plt_header_size	0
 
+/* We don't set bfd_elf64_bfd_is_local_label_name because the 32-bit 
+   MIPS-specific function only applies to IRIX5, which had no 64-bit
+   ABI.  */
 #define bfd_elf64_find_nearest_line	_bfd_mips_elf_find_nearest_line
-#define bfd_elf64_get_reloc_upper_bound mips_elf64_get_reloc_upper_bound
-#define bfd_elf64_bfd_reloc_type_lookup	mips_elf64_reloc_type_lookup
 #define bfd_elf64_set_section_contents	_bfd_mips_elf_set_section_contents
+#define bfd_elf64_bfd_link_hash_table_create \
+					_bfd_mips_elf_link_hash_table_create
+#define bfd_elf64_bfd_final_link	_bfd_mips_elf_final_link
 #define bfd_elf64_bfd_copy_private_bfd_data \
 					_bfd_mips_elf_copy_private_bfd_data
 #define bfd_elf64_bfd_merge_private_bfd_data \
 					_bfd_mips_elf_merge_private_bfd_data
 #define bfd_elf64_bfd_set_private_flags	_bfd_mips_elf_set_private_flags
+#define bfd_elf64_bfd_print_private_bfd_data \
+					_bfd_mips_elf_print_private_bfd_data
 
+#define bfd_elf64_get_reloc_upper_bound mips_elf64_get_reloc_upper_bound
+#define bfd_elf64_bfd_reloc_type_lookup	mips_elf64_reloc_type_lookup
 #define bfd_elf64_archive_functions
 #define bfd_elf64_archive_slurp_armap	mips_elf64_slurp_armap
 #define bfd_elf64_archive_slurp_extended_name_table \

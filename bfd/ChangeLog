@@ -1,5 +1,101 @@
 1999-07-07  Mark Mitchell  <mark@codesourcery.com>
 
+	* elf-bfd.h (_bfd_mips_elf_section_from_shdr): Constify.
+	(_bfd_mips_elf_create_dynamic_sections): New function.
+	(_bfd_mips_elf_add_symbol_hook): Likewise.
+	(_bfd_mips_elf_adjust_dynamic_symbol): Likewise.
+	(_bfd_mips_elf_finish_dynamic_symbol): Likewise.	
+	(_bfd_mips_elf_finish_dynamic_sections): Likewise.
+	(_bfd_mips_elf_gc_mark_hook): Likewise.
+	(_bfd_mips_elf_gc_sweep_hook): Likewise.
+	(_bfd_mips_elf_always_size_sections): Likewise.
+	(_bfd_mips_elf_size_dynamic_sections): Likewise.
+	(_bfd_mips_elf_check_relocs): Likewise.
+	(_bfd_mips_elf_link_hash_table_create): Likewise.
+	(_bfd_mips_elf_print_private_data): Likewise.
+	(_bfd_mips_elf_link_output_symbol_hook): Likewise.
+	(_bfd_mips_elf_final_link): Likewise.
+	(_bfd_mips_elf_additional_program_headers): Likewise.
+	(_bfd_mips_elf_modify_segment_map): Likewise.
+	(_bfd_mips_elf_relocate_section): Likewise.
+	* elf32-mips.c (mips_elf32_object_p): Move contents into
+	_bfd_mips_elf_object_p.
+	(mips_elf_additional_program_headers): Rename to
+	_bfd_mips_elf_additional_program_headers.
+	(mips_elf_modify_segment_map): Rename to
+	_bfd_mips_elf_modify_segment_map.
+	(elf_mips_abi_name): Change prototype.
+	(mips_elf32_section_from_shdr): Merge into
+	_bfd_mips_elf_section_from_shdr.
+	(mips_elf32_section_processing): Merge into
+	_bfd_mips_elf_section_processing.
+	(mips_elf_final_link): Rename to _bfd_mips_elf_final_link.  Invoke
+	the right back-end ELF linker.
+	(mips_elf_relocate_section): Rename to
+	_bfd_mips_elf_relocate_section.  Clean up.  Adjust for 64-bit code.
+	(mips_elf_link_output_symbol_hook): Rename to
+	_bfd_mips_elf_link_output_symbol_hook.
+	(mips_elf_create_dynamic_section): Rename to
+	_bfd_mips_elf_create_dynamic_section.
+	(mips_elf_check_relocs): Rename to _bfd_mips_elf_check_relocs.
+	Adjust for 64-bit code.  Use mips_elf_got_section.
+	(mips_elf_adjust_dynamic_symbol): Rename to
+	_bfd_mips_elf_adjust_dynamic_symbol.  Use
+	mips_elf_allocate_dynamic_relocations.
+	(mips_elf_finish_dynamic_symbol): Rename to
+	_bfd_mips_elf_finish_dynamic_symbol.  Use mips_elf_got_section.
+	Adjust for 64-bit code.
+	(mips_elf_finish_dynamic_sections): Rename to
+	_bfd_mips_elf_finish_dynamic_sections.  Adjust for 64-bit code.
+	(mips_elf_always_size_sections): Rename to
+	_bfd_mips_elf_always_size_sections.
+	(mips_elf_add_symbol_hook): Rename to
+	_bfd_mips_elf_add_symbol_hook.
+	(mips_elf_next_lo16_addend): Constify.
+	(mips_elf_calculate_relocation): Likewise.
+	(mips_elf_obtain_contents): Likewise.
+	(mips_elf_perform_relocation): Likewise.
+	(mips_elf_create_dynamic_relocation): Likewise.
+	(mips_elf_allocate_dynamic_relocations): New function.
+	(MIPS_ELF_REL_DYN_SECTION_NAME): New macro.
+	(MIPS_ELF_REL_SIZE): Likewise.
+	(MIPS_ELF_DYN_SIZE): Likewise.
+	(MIPS_ELF_GOT_SIZE): Likewise.
+	(MIPS_ELF_SYM_SIZE): Likewise.
+	(MIPS_ELF_LOG_FILE_ALIGN): Likewise.
+	(MIPS_ELF_GET_WORD): Likewise.
+	(MIPS_ELF_PUT_WORD): Likewise.
+	(MIPS_ELF_ADD_DYNAMIC_ENTRY): Likewise.
+	(STUB_LW): Conditionalize for 64-bit value.
+	(elf_mips_howto_table): Add R_MIPS_HIGHER and R_MIPS_HIGHEST
+	entries.
+	(_bfd_mips_elf_merge_private_bfd_data): Merge e_ident[EI_CLASS].
+	Check it for inconsistency.
+	(_bfd_mips_elf_print_private_bfd_data): Print ABI=64 for 64-bit
+	ABI.
+	(_bfd_mips_elf_fake_sections): Remove duplicate handling of
+	.msym. 
+	(mips_elf_global_got_index): Use MIPS_ELF_GOT_SIZE.
+	(mips_elf_got_offset_from_index): Use misp_elf_got_section.
+	(mips_elf_create_local_got_entry): Use MIPS_ELF_GOT_SIZE.
+	(mips_elf_local_got_index): Likewise.
+	(mips_elf_got_page): Likewise.
+	(mips_elf_got_info): Likewise.
+	(mips_elf_create_dynamic_relocation): Handle 32-bit/64-bit split.
+	(ELF_DYNAMIC_INTERPRETER): Handle 64-bit code.
+	(mips_elf_create_dynamic_sections): Use MIPS_ELF_LOG_FILE_ALIGN,
+	instead of constant `2'.
+	(mips_elf_create_got_section): Tidy.  Use MIPS_ELF_GOT_SIZE.
+	(mips_elf_create_msym_section): Use MIPS_ELF_LOG_FILE_ALIGN.
+	(mips_elf_size_dynamic_sections): Use
+	MIPS_ELF_REL_DYN_SECTION_NAME, MIPS_ELF_GOT_SIZE,
+	MIPS_ELF_ADD_DYNAMIC_ENTRY.  Remove #if 0'd code.
+	Adjust all releveant entries in elf backend table.
+	* elf64-mips.c (mips_elf64_section_from_shdr): Remove.
+	(mips_elf64_section_processing): Likewise.
+	Adjust elf backend entries to use _bfd_mips_elf variants now
+	publicly available.
+	
 	* elflink.h (elf_link_create_dynamic_sections): Handle non-standard
 	hash-entry sizes.
 	(size_dynamic_sections): Likewise.

@@ -1147,7 +1147,7 @@ boolean _bfd_elf64_gc_record_vtentry
 
 extern boolean _bfd_mips_elf_object_p PARAMS ((bfd *));
 extern boolean _bfd_mips_elf_section_from_shdr
-  PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
+  PARAMS ((bfd *, Elf_Internal_Shdr *, char *));
 extern boolean _bfd_mips_elf_fake_sections
   PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
 extern boolean _bfd_mips_elf_section_from_bfd_section
@@ -1176,5 +1176,44 @@ extern boolean _bfd_mips_elf_find_nearest_line
 	   const char **, unsigned int *));
 extern boolean _bfd_mips_elf_set_section_contents
   PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
+extern boolean _bfd_mips_elf_create_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean _bfd_mips_elf_add_symbol_hook
+  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+	   const char **, flagword *, asection **, bfd_vma *));
+extern boolean _bfd_mips_elf_adjust_dynamic_symbol
+  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+extern boolean _bfd_mips_elf_finish_dynamic_symbol
+  PARAMS ((bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
+	   Elf_Internal_Sym *));
+extern boolean _bfd_mips_elf_finish_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
+extern asection * _bfd_mips_elf_gc_mark_hook 
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
+extern boolean _bfd_mips_elf_gc_sweep_hook 
+  PARAMS ((bfd *, struct bfd_link_info *, asection *, 
+	   const Elf_Internal_Rela *));
+extern boolean _bfd_mips_elf_always_size_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean _bfd_mips_elf_size_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean _bfd_mips_elf_check_relocs
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
+extern struct bfd_link_hash_table *_bfd_mips_elf_link_hash_table_create
+  PARAMS ((bfd *));
+extern boolean _bfd_mips_elf_print_private_bfd_data 
+  PARAMS ((bfd *, PTR));
+extern boolean _bfd_mips_elf_link_output_symbol_hook
+  PARAMS ((bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
+	   asection *));
+extern boolean _bfd_mips_elf_final_link
+  PARAMS ((bfd *, struct bfd_link_info *));
+extern int _bfd_mips_elf_additional_program_headers PARAMS ((bfd *));
+extern boolean _bfd_mips_elf_modify_segment_map PARAMS ((bfd *));
+extern boolean _bfd_mips_elf_relocate_section
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 
 #endif /* _LIBELF_H_ */
