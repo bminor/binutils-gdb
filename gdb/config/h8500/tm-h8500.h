@@ -304,13 +304,13 @@ CORE_ADDR target_read_fp();
 void target_write_fp PARAMS ((CORE_ADDR ));
 
 CORE_ADDR target_read_pc();
-void target_write_pc PARAMS ((CORE_ADDR ));
+void target_write_pc PARAMS ((CORE_ADDR, INT ));
 
 
 #define TARGET_READ_SP() target_read_sp()
 #define TARGET_WRITE_SP(x) target_write_sp(x)
 #define TARGET_READ_PC() target_read_pc()
-#define TARGET_WRITE_PC(x) target_write_pc(x)
+#define TARGET_WRITE_PC(x,y) target_write_pc(x,y)
 
 #define TARGET_READ_FP() target_read_fp()
 #define TARGET_WRITE_FP(x) target_write_fp(x)
