@@ -43,7 +43,7 @@ pretex.m4
 rc-cm.tex
 rc-ps.tex
 rc-pslong.tex
-rdl-apps.texinfo
+rdl-apps.texi
 refcard.tex
 sparc.m4
 threecol.tex
@@ -56,8 +56,13 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 2.5  1991/08/22 07:59:45  gnu
-# Keep rdl-apps.texinfo for users who don't read the doc on how to build the doc.
+# Revision 2.6  1991/08/23 22:35:41  pesch
+# 	* rdl-apps.texi: renamed from rdl-apps.texinfo
+#
+# 	* Makefile, .Sanitize, gdb.texinfo: reflect above name change
+#
+# Revision 2.5  1991/08/22  07:59:45  gnu
+# Keep rdl-apps.texi for users who don't read the doc on how to build the doc.
 #
 # Revision 2.4  1991/08/07  00:15:02  pesch
 # Makefile: GDB documentation nos has its own Makefile

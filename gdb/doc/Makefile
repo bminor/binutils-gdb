@@ -41,7 +41,7 @@ SFILES_DOCDIR = \
 all: gdb.info gdb.dvi refcard.dvi gdb-internals gdbint.dvi
 
 clean:
-	rm -f gdb.dvi rdl-apps.texinfo gdb-all* gdb.info* 
+	rm -f gdb.dvi rdl-apps.texi gdb-all* gdb.info* 
 	rm -f gdb-internals gdbint.?? gdbint.???
 	rm -f refcard.ps refcard.dvi rcfonts.tex refcard.log *~
 
@@ -57,11 +57,11 @@ refcard.ps : refcard.tex
 	dvips -t landscape refcard -o; rm -f refcard.dvi refcard.log
 
 # Cover file for "Readline" appendices
-rdl-apps.texinfo: ${READLINE_DIR}/inc-readline.texinfo \
+rdl-apps.texi: ${READLINE_DIR}/inc-readline.texinfo \
 			${READLINE_DIR}/inc-history.texinfo
-	rm -f rdl-apps.texinfo
-	echo "@include ${READLINE_DIR}/inc-readline.texinfo" >rdl-apps.texinfo
-	echo "@include ${READLINE_DIR}/inc-history.texinfo" >>rdl-apps.texinfo
+	rm -f rdl-apps.texi
+	echo "@include ${READLINE_DIR}/inc-readline.texinfo" >rdl-apps.texi
+	echo "@include ${READLINE_DIR}/inc-history.texinfo" >>rdl-apps.texi
 
 # GDB MANUAL: texinfo source, created by preprocessing w/m4
 # Be sure to not create a bad gdb-all.texinfo if ${M4} is missing or aborts...
@@ -72,7 +72,7 @@ gdb-all.texinfo: ${SFILES_DOCDIR}
 	mv foobus.texinfo gdb-all.texinfo
 
 # GDB MANUAL: TeX dvi file
-gdb.dvi : gdb-all.texinfo rdl-apps.texinfo
+gdb.dvi : gdb-all.texinfo rdl-apps.texi
 	TEXINPUTS=${TEXIDIR}:$$TEXINPUTS tex gdb-all.texinfo
 	texindex gdb-all.??
 	TEXINPUTS=${TEXIDIR}:$$TEXINPUTS tex gdb-all.texinfo
