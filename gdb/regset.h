@@ -37,13 +37,16 @@ struct regset
 {
   /* Data pointer for private use by the methods below, presumably
      providing some sort of description of the register set.  */
-  struct gdbarch *arch;
+  const void *descr;
 
   /* Function supplying values in a register set to a register cache.  */
   supply_regset_ftype *supply_regset;
 
   /* Function collecting values in a register set from a register cache.  */
   collect_regset_ftype *collect_regset;
+
+  /* Architecture associated with the register set.  */
+  struct gdbarch *arch;
 };
 
 /* Allocate a fresh 'struct regset' whose supply_regset function is
