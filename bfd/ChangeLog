@@ -1,3 +1,7 @@
+Thu Nov 12 17:01:41 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: pass down prefix and exec_prefix in FLAGS_TO_PASS
+
 Thu Nov 12 09:46:47 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* coff-z8k.c: checkpoint, more addressing modes handled
