@@ -20,9 +20,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "serial.h"
 
-/* Open up a device or a network socket, depending upon the syntax of NAME. */
+/* Linked list of serial I/O handlers */
 
 static struct serial_ops *serial_ops_list = NULL;
+
+/* This is the last serial stream opened.  Used by connect command. */
+
+static serial_t last_serial_opened = NULL;
 
 static struct serial_ops *
 serial_interface_lookup (name)
@@ -45,6 +49,8 @@ serial_add_interface(optable)
   serial_ops_list = optable;
 }
 
+/* Open up a device or a network socket, depending upon the syntax of NAME. */
+
 serial_t
 serial_open(name)
      const char *name;
@@ -52,7 +58,10 @@ serial_open(name)
   serial_t scb;
   struct serial_ops *ops;
 
-  ops = serial_interface_lookup ("hardwire");
+  if (strchr (name, ':'))
+    ops = serial_interface_lookup ("tcp");
+  else
+    ops = serial_interface_lookup ("hardwire");
 
   if (!ops)
     return NULL;
@@ -70,6 +79,34 @@ serial_open(name)
       return NULL;
     }
 
+  last_serial_opened = scb;
+
+  return scb;
+}
+
+serial_t
+serial_fdopen(fd)
+     const int fd;
+{
+  serial_t scb;
+  struct serial_ops *ops;
+
+  ops = serial_interface_lookup ("hardwire");
+
+  if (!ops)
+    return NULL;
+
+  scb = (serial_t)xmalloc (sizeof (struct _serial_t));
+
+  scb->ops = ops;
+
+  scb->bufcnt = 0;
+  scb->bufp = scb->buf;
+
+  scb->fd = fd;
+
+  last_serial_opened = scb;
+
   return scb;
 }
 
@@ -77,21 +114,28 @@ void
 serial_close(scb)
      serial_t scb;
 {
+  last_serial_opened = NULL;
+
   scb->ops->close(scb);
 
   free(scb);
 }
 
 #if 0
+
 /* Connect the user directly to the remote system.  This command acts just like
    the 'cu' or 'tip' command.  Use <CR>~. or <CR>~^D to break out.  */
 
+static serial_t tty_desc;		/* Controlling terminal */
+
 static void
 cleanup_tty(ttystate)
-     struct ttystate ttystate;
+     serial_ttystate ttystate;
 {
-  printf("\r\n[Exiting connect mode]\r\n");
-  serial_restore(0, &ttystate);
+  printf ("\r\n[Exiting connect mode]\r\n");
+  SERIAL_SET_TTY_STATE (tty_desc, ttystate);
+  free (ttystate);
+  SERIAL_CLOSE (tty_desc);
 }
 
 static void
@@ -99,87 +143,94 @@ connect_command (args, fromtty)
      char	*args;
      int	fromtty;
 {
-  fd_set readfds;
-  int numfds;
   int c;
   char cur_esc = 0;
-  static struct ttystate ttystate;
+  serial_ttystate ttystate;
+  serial_t port_desc;		/* TTY port */
 
   dont_repeat();
 
-  if (desc < 0)
-    error("target not open.");
-  
   if (args)
-    fprintf("This command takes no args.  They have been ignored.\n");
+    fprintf(stderr, "This command takes no args.  They have been ignored.\n");
 	
   printf("[Entering connect mode.  Use ~. or ~^D to escape]\n");
 
-  serial_raw(0, &ttystate);
+  tty_desc = SERIAL_FDOPEN (0);
+  port_desc = last_serial_opened;
 
-  make_cleanup(cleanup_tty, &ttystate);
+  ttystate = SERIAL_GET_TTY_STATE (tty_desc);
 
-  FD_ZERO(&readfds);
+  SERIAL_RAW (tty_desc);
+  SERIAL_RAW (port_desc);
+
+  make_cleanup (cleanup_tty, ttystate);
 
   while (1)
     {
-      do
-	{
-	  FD_SET(0, &readfds);
-	  FD_SET(desc, &readfds);
-	  numfds = select(sizeof(readfds)*8, &readfds, 0, 0, 0);
-	}
-      while (numfds == 0);
+      int mask;
 
-      if (numfds < 0)
-	perror_with_name("select");
+      mask = SERIAL_WAIT_2 (tty_desc, port_desc, -1);
 
-      if (FD_ISSET(0, &readfds))
-	{			/* tty input, send to stdebug */
+      if (mask & 2)
+	{			/* tty input */
 	  char cx;
 
-	  c = serial_readchar(-1);
-	  if (c < 0)
-	    perror_with_name("connect");
-
-	  cx = c;
-	  serial_write(&cx, 1);
-	  switch (cur_esc)
+	  while (1)
 	    {
-	    case 0:
-	      if (c == '\r')
-		cur_esc = c;
-	      break;
-	    case '\r':
-	      if (c == '~')
-		cur_esc = c;
-	      else
-		cur_esc = 0;
-	      break;
-	    case '~':
-	      if (c == '.' || c == '\004')
-		return;
-	      else
-		cur_esc = 0;
+	      c = SERIAL_READCHAR(tty_desc, 0);
+
+	      if (c == SERIAL_TIMEOUT)
+		  break;
+
+	      if (c < 0)
+		perror_with_name("connect");
+
+	      cx = c;
+	      SERIAL_WRITE(port_desc, &cx, 1);
+
+	      switch (cur_esc)
+		{
+		case 0:
+		  if (c == '\r')
+		    cur_esc = c;
+		  break;
+		case '\r':
+		  if (c == '~')
+		    cur_esc = c;
+		  else
+		    cur_esc = 0;
+		  break;
+		case '~':
+		  if (c == '.' || c == '\004')
+		    return;
+		  else
+		    cur_esc = 0;
+		}
 	    }
 	}
 
-      if (FD_ISSET(desc, &readfds))
-	{
+      if (mask & 1)
+	{			/* Port input */
+	  char cx;
+
 	  while (1)
 	    {
-	      c = serial_readchar(-1);
+	      c = SERIAL_READCHAR(port_desc, 0);
+
+	      if (c == SERIAL_TIMEOUT)
+		  break;
+
 	      if (c < 0)
-		break;
-	      putchar(c);
+		perror_with_name("connect");
+
+	      cx = c;
+
+	      SERIAL_WRITE(tty_desc, &cx, 1);
 	    }
-	  fflush(stdout);
 	}
     }
 }
-#endif
 
-#if 0
 void
 _initialize_serial ()
 {
@@ -187,4 +238,4 @@ _initialize_serial ()
 	   "Connect the terminal directly up to the command monitor.\n\
 Use <CR>~. or <CR>~^D to break out.");
 }
-#endif
+#endif /* 0 */

@@ -25,10 +25,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <a.out.h>
 #include <sys/file.h>
 #include <sgtty.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/tcp.h>
+#include <sys/time.h>
 
 extern int remote_desc;
 extern int remote_debugging;
-extern int kiodebug;
 
 void remote_open ();
 void remote_send ();
@@ -53,13 +58,56 @@ remote_open (name, from_tty)
 
   remote_debugging = 0;
 
-  remote_desc = open (name, O_RDWR);
-  if (remote_desc < 0)
-    perror_with_name ("Could not open remote device");
+  if (!strchr (name, ':'))
+    {
+      remote_desc = open (name, O_RDWR);
+      if (remote_desc < 0)
+	perror_with_name ("Could not open remote device");
 
-  ioctl (remote_desc, TIOCGETP, &sg);
-  sg.sg_flags = RAW;
-  ioctl (remote_desc, TIOCSETP, &sg);
+      ioctl (remote_desc, TIOCGETP, &sg);
+      sg.sg_flags = RAW;
+      ioctl (remote_desc, TIOCSETP, &sg);
+    }
+  else
+    {
+      char *port_str;
+      int port;
+      struct sockaddr_in sockaddr;
+      int tmp;
+
+      port_str = strchr (name, ':');
+
+      port = atoi (port_str + 1);
+
+      remote_desc = socket (PF_INET, SOCK_STREAM, 0);
+      if (remote_desc < 0)
+	perror_with_name ("Can't open socket");
+
+      /* Allow rapid reuse of this port. */
+      tmp = 1;
+      setsockopt (remote_desc, SOL_SOCKET, SO_REUSEADDR, (char *)&tmp,
+		  sizeof(tmp));
+
+      /* Enable TCP keep alive process. */
+      tmp = 1;
+      setsockopt (remote_desc, SOL_SOCKET, SO_KEEPALIVE, (char *)&tmp, sizeof(tmp));
+
+      sockaddr.sin_family = PF_INET;
+      sockaddr.sin_port = htons(port);
+      sockaddr.sin_addr.s_addr = INADDR_ANY;
+
+      if (bind (remote_desc, &sockaddr, sizeof (sockaddr))
+	  || listen (remote_desc, 1))
+	perror_with_name ("Can't bind address");
+
+      tmp = sizeof (sockaddr);
+      remote_desc = accept (remote_desc, &sockaddr, &tmp);
+      if (remote_desc == -1)
+	perror_with_name ("Accept failed");
+
+      tmp = 1;
+      setsockopt (remote_desc, 6, TCP_NODELAY, (char *)&tmp, sizeof(tmp));
+    }
 
   fprintf (stderr, "Remote debugging using %s\n", name);
   remote_debugging = 1;
@@ -148,9 +196,24 @@ putpkt (buf)
 static int
 readchar ()
 {
-  char buf[1];
-  while (read (remote_desc, buf, 1) != 1);
-  return buf[0] & 0x7f;
+  static char buf[BUFSIZ];
+  static int bufcnt = 0;
+  static char *bufp;
+
+  if (bufcnt-- > 0)
+    return *bufp++ & 0x7f;
+
+  bufcnt = read (remote_desc, buf, sizeof (buf));
+
+  if (bufcnt <= 0)
+    {
+      perror ("readchar");
+      fatal ("read error, quitting");
+    }
+
+  bufp = buf;
+  bufcnt--;
+  return *bufp++ & 0x7f;
 }
 
 /* Read a packet from the remote machine, with error checking,
@@ -161,12 +224,13 @@ getpkt (buf)
      char *buf;
 {
   char *bp;
-  unsigned char csum, c, c1, c2;
-  extern kiodebug;
+  unsigned char csum, c1, c2;
+  int c;
 
   while (1)
     {
       csum = 0;
+
       while ((c = readchar ()) != '$');
 
       bp = buf;

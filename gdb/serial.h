@@ -19,13 +19,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Terminal state pointer.  This is specific to each type of interface. */
 
-typedef PTR ttystate;
+typedef PTR serial_ttystate;
 
 struct _serial_t
 {
   int fd;			/* File descriptor */
   struct serial_ops *ops;	/* Function vector */
-  ttystate ttystate;		/* Not used (yet) */
+  serial_ttystate ttystate;	/* Not used (yet) */
   int bufcnt;			/* Amount of data in receive buffer */
   unsigned char *bufp;		/* Current byte */
   unsigned char buf[BUFSIZ];	/* Da buffer itself */
@@ -42,7 +42,8 @@ struct serial_ops {
   int (*readchar) PARAMS ((serial_t, int timeout));
   int (*write) PARAMS ((serial_t, const char *str, int len));
   void (*go_raw) PARAMS ((serial_t));
-  void (*restore) PARAMS ((serial_t));
+  serial_ttystate (*get_tty_state) PARAMS ((serial_t));
+  int (*set_tty_state) PARAMS ((serial_t, serial_ttystate));
   int (*setbaudrate) PARAMS ((serial_t, int rate));
 };
 
@@ -52,6 +53,8 @@ void serial_add_interface PARAMS ((struct serial_ops *optable));
 
 serial_t serial_open PARAMS ((const char *name));
 
+serial_t serial_fdopen PARAMS ((int fd));
+
 /* For most routines, if a failure is indicated, then errno should be
    examined.  */
 
@@ -60,9 +63,17 @@ serial_t serial_open PARAMS ((const char *name));
 
 #define SERIAL_OPEN(NAME) serial_open(NAME)
 
+/* Open a new serial stream using a file handle.  */
+
+#define SERIAL_FDOPEN(FD) serial_fdopen(FD)
+
 /* Turn the port into raw mode. */
 
 #define SERIAL_RAW(SERIAL_T) (SERIAL_T)->ops->go_raw((SERIAL_T))
+
+#define SERIAL_GET_TTY_STATE(SERIAL_T) (SERIAL_T)->ops->get_tty_state((SERIAL_T))
+
+#define SERIAL_SET_TTY_STATE(SERIAL_T, TTYSTATE) (SERIAL_T)->ops->set_tty_state((SERIAL_T), (TTYSTATE))
 
 /* Read one char from the serial device with TIMEOUT seconds timeout.
    Returns char if ok, else one of the following codes.  Note that all
@@ -90,7 +101,3 @@ void serial_close PARAMS ((serial_t));
 
 #define SERIAL_CLOSE(SERIAL_T) serial_close(SERIAL_T)
 
-/* Restore the serial port to the state saved in oldstate.  XXX - currently
-   unused! */
-
-#define SERIAL_RESTORE(SERIAL_T) (SERIAL_T)->ops->restore((SERIAL_T))

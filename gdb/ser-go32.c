@@ -21,6 +21,33 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "serial.h"
 #include <sys/dos.h>
 
+/* This is unused for now.  We just return a placeholder. */
+struct go32_ttystate
+{
+  int bogus;
+};
+
+static int go32_open PARAMS ((serial_t scb, const char *name));
+static void go32_raw PARAMS ((serial_t scb));
+static int wait_for PARAMS ((serial_t scb, int timeout));
+static int go32_readchar PARAMS ((serial_t scb, int timeout));
+static int rate_to_code PARAMS ((int rate));
+static int go32_setbaudrate PARAMS ((serial_t scb, int rate));
+static int go32_write PARAMS ((serial_t scb, const char *str, int len));
+static void go32_restore PARAMS ((serial_t scb));
+static void go32_close PARAMS ((serial_t scb));
+serial_ttystate go32_get_tty_state PARAMS ((serial_t scb));
+static int go32_set_tty_state PARAMS ((serial_t scb, serial_ttystate state));
+static int strncasecmp PARAMS ((char *str1, char *str2, int len));
+static char *aptr PARAMS ((short p));
+static ASYNC_STRUCT *getivec PARAMS ((int which));
+static int dos_async_init PARAMS ((int port));
+static void dos_async_tx PARAMS ((const char c));
+static int dos_async_ready PARAMS (());
+static int dos_async_rx PARAMS (());
+static int dosasync_read PARAMS ((int fd, char *buf, int len, int timeout));
+static int dosasync_write PARAMS ((int fd, const char *buf, int len, int timeout));
+
 #define SIGNATURE 0x4154
 #define VERSION 1
 #define OFFSET 0x104
@@ -260,6 +287,30 @@ go32_readchar (scb, timeout)
     return SERIAL_TIMEOUT;
 }
 
+/* go32_{get set}_tty_state() are both dummys to fill out the function
+   vector.  Someday, they may do something real... */
+
+static serial_ttystate
+go32_get_tty_state(scb)
+     serial_t scb;
+{
+  struct go32_ttystate *state;
+
+  state = (struct go32_ttystate *)xmalloc(sizeof *state);
+
+  return (serial_ttystate)state;
+}
+
+static int
+go32_set_tty_state(scb, ttystate)
+     serial_t scb;
+     serial_ttystate ttystate;
+{
+  struct go32_ttystate *state;
+
+  return 0;
+}
+
 static int
 go32_setbaudrate (scb, rate)
      serial_t scb;
@@ -284,12 +335,6 @@ go32_close ()
 {
 }
 
-static void
-go32_restore (scb)
-     serial_t scb;
-{
-}
-
 static struct serial_ops go32_ops =
 {
   "hardwire",
@@ -299,7 +344,8 @@ static struct serial_ops go32_ops =
   go32_readchar,
   go32_write,
   go32_raw,
-  go32_restore,
+  go32_get_tty_state,
+  go32_set_tty_state,
   go32_setbaudrate
 };
 

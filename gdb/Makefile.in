@@ -185,7 +185,7 @@ RUNTESTFLAGS=
 # part of libiberty) a POSIX interface.  But at least for now the
 # host-dependent makefile fragment might need to use something else
 # besides ser-unix.o
-SER_HARDWIRE=ser-unix.o
+SER_HARDWIRE=ser-unix.o ser-tcp.o
 
 # Host and target-dependent makefile fragments come in here.
 ####
@@ -304,7 +304,7 @@ SFILES = ${srcdir}/blockframe.c ${srcdir}/breakpoint.c ${srcdir}/buildsym.c \
   ${srcdir}/target.c ${srcdir}/typeprint.c ${srcdir}/utils.c \
   ${srcdir}/valarith.c \
   ${srcdir}/valops.c ${srcdir}/valprint.c ${srcdir}/values.c \
-  ${srcdir}/serial.c ${srcdir}/ser-unix.c
+  ${srcdir}/serial.c ${srcdir}/ser-unix.c ${srcdir}/ser-tcp.c
 
 # Files that are not source code, but need to go into gdb-$(VERSION).tar.Z.
 NONSRC = ${srcdir}/Makefile.in ${srcdir}/depend ${srcdir}/alldeps.mak \

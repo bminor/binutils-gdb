@@ -30,12 +30,29 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef HAVE_TERMIOS
 #include <termios.h>
 #include <unistd.h>
+
+struct hardwire_ttystate
+{
+  struct termios termios;
+};
 #endif
+
 #ifdef HAVE_TERMIO
 #include <termio.h>
+
+struct hardwire_ttystate
+{
+  struct termio termio;
+};
 #endif
+
 #ifdef HAVE_SGTTY
 #include <sgtty.h>
+
+struct hardwire_ttystate
+{
+  struct sgttyb sgttyb;
+};
 #endif
 
 static int hardwire_open PARAMS ((serial_t scb, const char *name));
@@ -47,6 +64,10 @@ static int hardwire_setbaudrate PARAMS ((serial_t scb, int rate));
 static int hardwire_write PARAMS ((serial_t scb, const char *str, int len));
 static void hardwire_restore PARAMS ((serial_t scb));
 static void hardwire_close PARAMS ((serial_t scb));
+static int get_tty_state PARAMS ((serial_t scb, struct hardwire_ttystate *state));
+static int set_tty_state PARAMS ((serial_t scb, struct hardwire_ttystate *state));
+static serial_ttystate hardwire_get_tty_state PARAMS ((serial_t scb));
+static int hardwire_set_tty_state PARAMS ((serial_t scb, serial_ttystate state));
 
 /* Open up a real live device for serial I/O */
 
@@ -62,68 +83,108 @@ hardwire_open(scb, name)
   return 0;
 }
 
+static int
+get_tty_state(scb, state)
+     serial_t scb;
+     struct hardwire_ttystate *state;
+{
+#ifdef HAVE_TERMIOS
+  return tcgetattr(scb->fd, &state->termios);
+#endif
+
+#ifdef HAVE_TERMIO
+  return ioctl (scb->fd, TCGETA, &state->termio);
+#endif
+
+#ifdef HAVE_SGTTY
+  return ioctl (scb->fd, TIOCGETP, &state->sgttyb);
+#endif
+}
+
+static int
+set_tty_state(scb, state)
+     serial_t scb;
+     struct hardwire_ttystate *state;
+{
+  int err;
+
+#ifdef HAVE_TERMIOS
+  return tcsetattr(scb->fd, TCSANOW, &state->termios);
+#endif
+
+#ifdef HAVE_TERMIO
+  return ioctl (scb->fd, TCSETA, &state->termio);
+#endif
+
+#ifdef HAVE_SGTTY
+  return ioctl (scb->fd, TIOCSETP, &state->sgttyb);
+#endif
+}
+
+static serial_ttystate
+hardwire_get_tty_state(scb)
+     serial_t scb;
+{
+  struct hardwire_ttystate *state;
+
+  state = (struct hardwire_ttystate *)xmalloc(sizeof *state);
+
+  if (get_tty_state(scb, state))
+    return NULL;
+
+  return (serial_ttystate)state;
+}
+
+static int
+hardwire_set_tty_state(scb, ttystate)
+     serial_t scb;
+     serial_ttystate ttystate;
+{
+  struct hardwire_ttystate *state;
+
+  state = (struct hardwire_ttystate *)ttystate;
+
+  return set_tty_state(scb, state);
+}
+
 static void
 hardwire_raw(scb)
      serial_t scb;
 {
+  struct hardwire_ttystate state;
+
+  if (get_tty_state(scb, &state))
+    fprintf(stderr, "get_tty_state failed: %s\n", safe_strerror(errno));
+
 #ifdef HAVE_TERMIOS
-  struct termios termios;
-
-  if (tcgetattr(scb->fd, &termios))
-    {
-      fprintf(stderr, "tcgetattr failed: %s\n", safe_strerror(errno));
-    }
-
-  termios.c_iflag = 0;
-  termios.c_oflag = 0;
-  termios.c_lflag = 0;
-  termios.c_cflag &= ~(CSIZE|PARENB);
-  termios.c_cflag |= CS8;
-  termios.c_cc[VMIN] = 0;
-  termios.c_cc[VTIME] = 0;
-
-  if (tcsetattr(scb->fd, TCSANOW, &termios))
-    {
-      fprintf(stderr, "tcsetattr failed: %s\n", safe_strerror(errno));
-    }
+  state.termios.c_iflag = 0;
+  state.termios.c_oflag = 0;
+  state.termios.c_lflag = 0;
+  state.termios.c_cflag &= ~(CSIZE|PARENB);
+  state.termios.c_cflag |= CS8;
+  state.termios.c_cc[VMIN] = 0;
+  state.termios.c_cc[VTIME] = 0;
 #endif
 
 #ifdef HAVE_TERMIO
-  struct termio termio;
-
-  if (ioctl (scb->fd, TCGETA, &termio))
-    {
-      fprintf(stderr, "TCGETA failed: %s\n", safe_strerror(errno));
-    }
-
-  termio.c_iflag = 0;
-  termio.c_oflag = 0;
-  termio.c_lflag = 0;
-  termio.c_cflag &= ~(CSIZE|PARENB);
-  termio.c_cflag |= CS8;
-  termio.c_cc[VMIN] = 0;
-  termio.c_cc[VTIME] = 0;
-
-  if (ioctl (scb->fd, TCSETA, &termio))
-    {
-      fprintf(stderr, "TCSETA failed: %s\n", safe_strerror(errno));
-    }
+  state.termio.c_iflag = 0;
+  state.termio.c_oflag = 0;
+  state.termio.c_lflag = 0;
+  state.termio.c_cflag &= ~(CSIZE|PARENB);
+  state.termio.c_cflag |= CS8;
+  state.termio.c_cc[VMIN] = 0;
+  state.termio.c_cc[VTIME] = 0;
 #endif
 
 #ifdef HAVE_SGTTY
-  struct sgttyb sgttyb;
-
-  if (ioctl (scb->fd, TIOCGETP, &sgttyb))
-    fprintf(stderr, "TIOCGETP failed: %s\n", safe_strerror(errno));
-
-  sgttyb.sg_flags |= RAW | ANYP;
-  sgttyb.sg_flags &= ~(CBREAK | ECHO);
-
-  if (ioctl (scb->fd, TIOCSETP, &sgttyb))
-    fprintf(stderr, "TIOCSETP failed: %s\n", safe_strerror(errno));
+  state.sgttyb.sg_flags |= RAW | ANYP;
+  state.sgttyb.sg_flags &= ~(CBREAK | ECHO);
 #endif
 
   scb->current_timeout = 0;
+
+  if (set_tty_state (scb, &state))
+    fprintf(stderr, "set_tty_state failed: %s\n", safe_strerror(errno));
 }
 
 /* Wait for input on scb, with timeout seconds.  Returns 0 on success,
@@ -171,31 +232,24 @@ wait_for(scb, timeout)
     return 0;
 
   {
+    struct hardwire_ttystate state;
+
+    if (get_tty_state(scb, &state))
+      fprintf(stderr, "get_tty_state failed: %s\n", safe_strerror(errno));
+
 #ifdef HAVE_TERMIOS
-    struct termios termios;
-
-    if (tcgetattr(scb->fd, &termios))
-      fprintf(stderr, "wait_for() tcgetattr failed: %s\n", safe_strerror(errno));
-
-  termios.c_cc[VTIME] = timeout * 10;
-
-  if (tcsetattr(scb->fd, TCSANOW, &termios))
-    fprintf(stderr, "wait_for() tcsetattr failed: %s\n", safe_strerror(errno));
-#endif	/* HAVE_TERMIOS */
+    state.termios.c_cc[VTIME] = timeout * 10;
+#endif
 
 #ifdef HAVE_TERMIO
-  struct termio termio;
-
-  if (ioctl (scb->fd, TCGETA, &termio))
-    fprintf(stderr, "wait_for() TCGETA failed: %s\n", safe_strerror(errno));
-
-  termio.c_cc[VTIME] = timeout * 10;
-
-  if (ioctl (scb->fd, TCSETA, &termio))
-      fprintf(stderr, "TCSETA failed: %s\n", safe_strerror(errno));
-#endif	/* HAVE_TERMIO */
+    state.termio.c_cc[VTIME] = timeout * 10;
+#endif
 
     scb->current_timeout = timeout;
+
+    if (set_tty_state (scb, &state))
+      fprintf(stderr, "set_tty_state failed: %s\n", safe_strerror(errno));
+
     return 0;
   }
 #endif	/* HAVE_TERMIO || HAVE_TERMIOS */
@@ -290,49 +344,31 @@ hardwire_setbaudrate(scb, rate)
      serial_t scb;
      int rate;
 {
+  struct hardwire_ttystate state;
+
+  if (get_tty_state(scb, &state))
+    return -1;
+
 #ifdef HAVE_TERMIOS
-  struct termios termios;
-
-  if (tcgetattr (scb->fd, &termios))
-    return -1;
-
-  cfsetospeed (&termios, rate_to_code (rate));
-  cfsetispeed (&termios, rate_to_code (rate));
-
-  if (tcsetattr (scb->fd, TCSANOW, &termios))
-    return -1;
+  cfsetospeed (&state.termios, rate_to_code (rate));
+  cfsetispeed (&state.termios, rate_to_code (rate));
 #endif
 
 #ifdef HAVE_TERMIO
-  struct termio termio;
-
-  if (ioctl (scb->fd, TCGETA, &termio))
-    return -1;
-
 #ifndef CIBAUD
 #define CIBAUD CBAUD
 #endif
 
-  termio.c_cflag &= ~(CBAUD | CIBAUD);
-  termio.c_cflag |= rate_to_code (rate);
-
-  if (ioctl (scb->fd, TCSETA, &termio))
-    return -1;
+  state.termio.c_cflag &= ~(CBAUD | CIBAUD);
+  state.termio.c_cflag |= rate_to_code (rate);
 #endif
 
 #ifdef HAVE_SGTTY
-  struct sgttyb sgttyb;
-
-  if (ioctl (scb->fd, TIOCGETP, &sgttyb))
-    return -1;
-
-  sgttyb.sg_ispeed = rate_to_code (rate);
-  sgttyb.sg_ospeed = rate_to_code (rate);
-
-  if (ioctl (scb->fd, TIOCSETP, &sgttyb))
-    return -1;
+  state.sgttyb.sg_ispeed = rate_to_code (rate);
+  state.sgttyb.sg_ospeed = rate_to_code (rate);
 #endif
-  return 0;
+
+  return set_tty_state (scb, &state);
 }
 
 static int
@@ -356,12 +392,6 @@ hardwire_write(scb, str, len)
 }
 
 static void
-hardwire_restore(scb)
-     serial_t scb;
-{
-}
-
-static void
 hardwire_close(scb)
      serial_t scb;
 {
@@ -381,8 +411,9 @@ static struct serial_ops hardwire_ops =
   hardwire_readchar,
   hardwire_write,
   hardwire_raw,
-  hardwire_restore,
-  hardwire_setbaudrate
+  hardwire_get_tty_state,
+  hardwire_set_tty_state,
+  hardwire_setbaudrate,
 };
 
 void

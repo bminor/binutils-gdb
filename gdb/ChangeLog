@@ -1,3 +1,27 @@
+Fri May 28 17:18:05 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* Makefile.in:  Add new file ser-tcp.c.
+	* defs.h (memcmp):  Add decl for memcmp to #ifndef MEM_FNS_DECLARED.
+	* findvar.c (write_register):  See if we are writing back the same
+	value that's already in the register.  If so, don't bother.
+	* remote.c (putpkt, getpkt):  Improve handling of communication
+	problems.
+	* ser-go32.c:  Prototype it to death.  Update serial_ops and add
+	dummy routines where appropriate.
+	* ser-tcp.c:  New module to implement serial I/O via TCP
+	connections.
+	* ser-unix.c:  Clean up getting/setting of tty state.  Get rid of
+	SERIAL_RESTORE, add SERIAL_{GET|SET}_TTY_STATE interfaces.
+	* serial.c:  Add start of support for connect command.
+	(serial_open):  Distinguish between tcp and local devices.
+	* serial.h (struct serial_ops):  Get rid of restore, add
+	get_tty_state and set_tty_state.  Define protoypes and macros for
+	this mess.
+	* gdbserver/remote-utils.c:  Add tcp support.  (readchar):  Do
+	some real buffering.  Handle error conditions gracefully.
+	* gdbserver/remote-inflow-sparc.c:  Update to remote-inflow.c
+	(Lynx), remove lots of cruft.
+
 Fri May 28 17:24:51 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* printcmd.c (print_address_symbolic): turn this into an assigment

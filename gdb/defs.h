@@ -434,20 +434,23 @@ enum val_prettyprint
 /* Defaults for system-wide constants (if not defined by xm.h, we fake it).  */
 
 #if !defined (UINT_MAX)
-#define UINT_MAX 0xffffffff
-#endif
-
-#if !defined (LONG_MAX)
-#define LONG_MAX 0x7fffffff
+#define	UINT_MAX ((unsigned int)(~0))		/* 0xFFFFFFFF for 32-bits */
 #endif
 
 #if !defined (INT_MAX)
-#define INT_MAX 0x7fffffff
+#define	INT_MAX (UINT_MAX >> 1)			/* 0x7FFFFFFF for 32-bits */
 #endif
 
 #if !defined (INT_MIN)
-/* Two's complement, 32 bit.  */
-#define INT_MIN -0x80000000
+#define INT_MIN (-INT_MAX - 1)			/* 0x80000000 for 32-bits */
+#endif
+
+#if !defined (ULONG_MAX)
+#define	ULONG_MAX ((unsigned long)(~0L))	/* 0xFFFFFFFF for 32-bits */
+#endif
+
+#if !defined (LONG_MAX)
+#define	LONG_MAX ((long)(ULONG_MAX >> 1))	/* 0x7FFFFFFF for 32-bits */
 #endif
 
 /* Number of bits in a char or unsigned char for the target machine.
@@ -722,10 +725,10 @@ qsort PARAMS ((void *base, size_t nmemb,		/* 4.10.5.2 */
 #ifndef	MEM_FNS_DECLARED	/* Some non-ANSI use void *, not char *.  */
 extern PTR
 memcpy PARAMS ((void *, const void *, size_t));		/* 4.11.2.1 */
-#endif
 
 extern int
 memcmp PARAMS ((const void *, const void *, size_t));	/* 4.11.4.1 */
+#endif
 
 extern char *
 strchr PARAMS ((const char *, int));			/* 4.11.5.2 */

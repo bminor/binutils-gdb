@@ -1,9 +1,24 @@
-/* Low level interface to ptrace, for GDB when running under Unix.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
-*/
+/* Low level interface to ptrace, for the remote server for GDB.
+   Copyright (C) 1986, 1987, 1993 Free Software Foundation, Inc.
+
+This file is part of GDB.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
-#include "wait.h"
+#include "/usr/include/sys/wait.h"
 #include "frame.h"
 #include "inferior.h"
 /***************************
@@ -38,12 +53,6 @@ extern int errno;
 extern int inferior_pid;
 void error (), quit (), perror_with_name ();
 int query ();
-void supply_register (), write_register ();
-CORE_ADDR read_register ();
-
-/* Nonzero if we are debugging an attached outside process
-   rather than an inferior.  */
-
 
 /* Start an inferior process and returns its pid.
    ALLARGS is a vector of program-name and args.
@@ -101,52 +110,52 @@ kill_inferior ()
   /*************inferior_died ();****VK**************/
 }
 
-/* Resume execution of the inferior process.
-   If STEP is nonzero, single-step it.
-   If SIGNAL is nonzero, give it that signal.  */
+/* Wait for process, returns status */
 
 unsigned char
-myresume (step, signal, status)
-     int step;
-     int signal;
+mywait (status)
      char *status;
 {
   int pid;
-  WAITTYPE w;
+  union wait w;
 
-  errno = 0;
-  ptrace (step ? 9 : 7, inferior_pid, 1, signal);
-  if (errno)
-    perror_with_name ("ptrace");
   pid = wait (&w);
   if (pid != inferior_pid)
     perror_with_name ("wait");
 
-  fetch_inferior_registers (0);
-
   if (WIFEXITED (w))
     {
-      printf ("\nChild exited with retcode = %x \n", WEXITSTATUS (w));
+      fprintf (stderr, "\nChild exited with retcode = %x \n", WEXITSTATUS (w));
       *status = 'E';
       return ((unsigned char) WEXITSTATUS (w));
     }
   else if (!WIFSTOPPED (w))
     {
-      printf ("\nChild terminated with signal = %x \n", WTERMSIG (w));
+      fprintf (stderr, "\nChild terminated with signal = %x \n", WTERMSIG (w));
       *status = 'T';
       return ((unsigned char) WTERMSIG (w));
     }
-  else
-    {
-      printf ("\nChild stopped with signal = %x \n", WSTOPSIG (w));
-      *status = 'S';
-      return ((unsigned char) WSTOPSIG (w));
-    }
+
+  fetch_inferior_registers (0);
+
+  *status = 'S';
+  return ((unsigned char) WSTOPSIG (w));
 }
 
-#define	INT_REGS	1
-#define	STACK_REGS	2
-#define	FP_REGS		4
+/* Resume execution of the inferior process.
+   If STEP is nonzero, single-step it.
+   If SIGNAL is nonzero, give it that signal.  */
+
+void
+myresume (step, signal)
+     int step;
+     int signal;
+{
+  errno = 0;
+  ptrace (step ? PTRACE_SINGLESTEP : PTRACE_CONT, inferior_pid, 1, signal);
+  if (errno)
+    perror_with_name ("ptrace");
+}
 
 /* Fetch one or more registers from the inferior.  REGNO == -1 to get
    them all.  We actually fetch more than requested, when convenient,
@@ -234,63 +243,6 @@ store_inferior_registers (ignored)
     perror("ptrace_setfpregs");
 }
 
-#if 0
-void
-fetch_inferior_registers ()
-{
-  struct regs inferior_registers;
-  struct fp_status inferior_fp_registers;
-  extern char registers[];
-
-  ptrace (PTRACE_GETREGS, inferior_pid, &inferior_registers);
-  if (errno)
-    perror_with_name ("ptrace");
-  /**********debugging begin **********/
-  print_some_registers (&inferior_registers);
-  /**********debugging end **********/
-  ptrace (PTRACE_GETFPREGS, inferior_pid, &inferior_fp_registers);
-  if (errno)
-    perror_with_name ("ptrace");
-
-  bcopy (&inferior_registers, registers, 16 * 4);
-  bcopy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
-	 sizeof inferior_fp_registers.fpu_regs);
-  *(int *) &registers[REGISTER_BYTE (PS_REGNUM)] = inferior_registers.r_ps;
-  *(int *) &registers[REGISTER_BYTE (PC_REGNUM)] = inferior_registers.r_pc;
-  bcopy (&inferior_fp_registers.fpu_flags,
-	 &registers[REGISTER_BYTE (FPC_REGNUM)],
-      sizeof inferior_fp_registers - sizeof inferior_fp_registers.fpu_regs);
-}
-
-/* Store our register values back into the inferior.
-   If REGNO is -1, do this for all registers.
-   Otherwise, REGNO specifies which register (so we can save time).  */
-
-store_inferior_registers (regno)
-     int regno;
-{
-  struct regs inferior_registers;
-  struct fp_status inferior_fp_registers;
-  extern char registers[];
-
-  bcopy (registers, &inferior_registers, 16 * 4);
-  bcopy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
-	 sizeof inferior_fp_registers.fps_regs);
-  inferior_registers.r_ps = *(int *) &registers[REGISTER_BYTE (PS_REGNUM)];
-  inferior_registers.r_pc = *(int *) &registers[REGISTER_BYTE (PC_REGNUM)];
-  bcopy (&registers[REGISTER_BYTE (FPC_REGNUM)],
-	 &inferior_fp_registers.fps_control,
-      sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
-
-  ptrace (PTRACE_SETREGS, inferior_pid, &inferior_registers);
-  if (errno)
-    perror_with_name ("ptrace");
-  ptrace (PTRACE_SETFPREGS, inferior_pid, &inferior_fp_registers);
-  if (errno)
-    perror_with_name ("ptrace");
-}
-#endif /* 0 */
-
 /* NOTE! I tried using PTRACE_READDATA, etc., to read and write memory
    in the NEW_SUN_PTRACE case.
    It ought to be straightforward.  But it appears that writing did
@@ -374,78 +326,13 @@ write_inferior_memory (memaddr, myaddr, len)
 }
 
 void
-try_writing_regs_command ()
-{
-  register int i;
-  register int val;
-
-  if (inferior_pid == 0)
-    error ("There is no inferior process now.");
-
-  fetch_inferior_registers (0);
-  for (i = 0; i < 18; i++)
-    {
-      QUIT;
-      errno = 0;
-      val = read_register (i);
-      write_register (i, val);
-      if (errno == 0)
-	{
-	  printf (" Succeeded with register %d; value 0x%x (%d).\n",
-		  i, val, val);
-	}
-      else
-	printf (" Failed with register %d.\n", i);
-    }
-}
-
-void
 initialize ()
 {
-
   inferior_pid = 0;
-
-
 }
-
-
-/* Return the contents of register REGNO,
-   regarding it as an integer.  */
-
-CORE_ADDR
-read_register (regno)
-     int regno;
-{
-  /* This loses when REGISTER_RAW_SIZE (regno) != sizeof (int) */
-  return *(int *) &registers[REGISTER_BYTE (regno)];
-}
-
-/* Store VALUE in the register number REGNO, regarded as an integer.  */
-
-void
-write_register (regno, val)
-     int regno, val;
-{
-  /* This loses when REGISTER_RAW_SIZE (regno) != sizeof (int) */
-  *(int *) &registers[REGISTER_BYTE (regno)] = val;
-
-  if (have_inferior_p ())
-    store_inferior_registers (regno);
-}
-
 
 int
 have_inferior_p ()
 {
   return inferior_pid != 0;
-}
-
-print_some_registers (regs)
-     int regs[];
-{
-  register int i;
-  for (i = 0; i < 18; i++)
-    {
-      printf ("reg[%d] = %x\n", i, regs[i]);
-    }
 }
