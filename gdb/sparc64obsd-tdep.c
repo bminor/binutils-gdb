@@ -189,7 +189,6 @@ sparc64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset->supply_regset = sparc64obsd_supply_gregset;
   tdep->sizeof_gregset = 832;
 
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, sparc64obsd_pc_in_sigtramp);
   frame_unwind_append_sniffer (gdbarch, sparc64obsd_sigtramp_frame_sniffer);
 
   sparc64_init_abi (info, gdbarch);

@@ -283,7 +283,6 @@ sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->fpregset->supply_regset = sparc32nbsd_supply_fpregset;
   tdep->sizeof_fpregset = 33 * 4;
 
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, sparc32nbsd_pc_in_sigtramp);
   frame_unwind_append_sniffer (gdbarch, sparc32nbsd_sigtramp_frame_sniffer);
 }
 

@@ -1,5 +1,15 @@
 2004-04-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-linux-tdep.c (sparc32_linux_init_abi): Don't set
+	deprecated_pc_in_sigtramp.
+	* sparc-sol2-tdep.c (sparc32_sol2_init_abi): Likewise.
+	* sparc64-sol2-tdep.c (sparc64_sol2_init_abi): Likewise.
+	* sparc64fbsd-tdep.c (sparc64fbsd_init_abi): Likewise.
+	* sparc64nbsd-tdep.c (sparc64nbsd_init_abi): Likewise.
+	* sparc64obsd-tdep.c (sparc64obsd_init_abi): Likewise.
+	* sparcnbsd-tdep.c (sparc32nbsd_init_abi): Likewise.
+	* sparcobsd-tdep.c (sparc32obsd_init_abi): Likewise.
+
 	* amd64-linux-tdep.c, amd64nbsd-tdep.c, amd64obsd-tdep.c,
 	i386-linux-tdep.c, i386-tdep.c, i386nbsd-tdep.c, i386obsd-tdep.c:
 	Fix typo.
