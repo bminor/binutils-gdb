@@ -1,3 +1,12 @@
+2005-02-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Allow relax
+	backward branch in the same section.
+	(elfNN_ia64_relocate_section): Inform users that the input
+	section is too big to relax br instruction when overflow
+	happens to R_IA64_PCREL21B, R_IA64_PCREL21BI, R_IA64_PCREL21M
+	and R_IA64_PCREL21F.
+
 2005-02-14 Orjan Friberg <orjanf@axis.com>
 
 	* elfcore.h (elf_core_file_p): Move the call to

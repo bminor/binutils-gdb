@@ -984,9 +984,10 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	    }
 
 	  /* If the branch and target are in the same section, you've
-	     got one honking big section and we can't help you.  You'll
-	     get an error message later.  */
-	  if (tsec == sec)
+	     got one honking big section and we can't help you unless
+	     you are branching backwards.  You'll get an error message
+	     later.  */
+	  if (tsec == sec && toff > roff)
 	    continue;
 
 	  /* Look for an existing fixup to this address.  */
@@ -4504,13 +4505,37 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 		if (*name == '\0')
 		  name = bfd_section_name (input_bfd, sym_sec);
 	      }
-	    if (!(*info->callbacks->reloc_overflow) (info, &h->root,
-						     name, howto->name,
-						     (bfd_vma) 0,
-						     input_bfd,
-						     input_section,
-						     rel->r_offset))
-	      return FALSE;
+
+	    switch (r_type)
+	      {
+	      case R_IA64_PCREL21B:
+	      case R_IA64_PCREL21BI:
+	      case R_IA64_PCREL21M:
+	      case R_IA64_PCREL21F:
+		if (is_elf_hash_table (info->hash))
+		  {
+		    /* Relaxtion is always performed for ELF output.
+		       Overflow failures for those relocations mean
+		       that the section is too big to relax.  */
+		    (*_bfd_error_handler)
+		      (_("%B: Can't relax br (%s) to `%s' at 0x%lx in section `%A' with size 0x%lx (> 0x1000000)."),
+		       input_bfd, input_section, howto->name, name,
+		       rel->r_offset, input_section->size);
+		    break;
+		  }
+	      default:
+		if (!(*info->callbacks->reloc_overflow) (info,
+							 &h->root,
+							 name,
+							 howto->name,
+							 (bfd_vma) 0,
+							 input_bfd,
+							 input_section,
+							 rel->r_offset))
+		  return FALSE;
+		break;
+	      }
+
 	    ret_val = FALSE;
 	  }
 	  break;
