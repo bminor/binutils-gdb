@@ -1,3 +1,19 @@
+Tue Jul  9 12:21:54 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Kazumoto Kojima <kkojima@kk.info.kanagawa-u.ac.jp>:
+	* elf32-mips.c (struct mips_elf_link_hash_table): Add new fields
+	use_rld_obj_head and rld_value.
+	(mips_elf_link_hash_table_create): Initialize new fields.
+	(mips_elf_add_symbol_hook): Mark __rld_obj_head symbol as
+	dynamic.
+	(mips_elf_create_dynamic_sections): Create .rld_map section.  If
+	__rld_obj_head symbol not seen, create an __rld_map symbol.
+	(mips_elf_size_dynamic_sections): Make space in .rld_map section.
+	Create a DT_MIPS_RLD_MAP entry rather than a DT_DEBUG entry.
+	(mips_elf_finish_dynamic_symbol): Save value of __rld_map or
+	__rld_obj_head symbol.
+	(mips_elf_finish_dynamic_sections): Handle DT_MIPS_RLD_MAP.
+
 Mon Jul  8 16:18:03 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-mips.c (mips_reloc_map): Remove BFD_RELOC_32_PCREL entry.

@@ -2697,6 +2697,11 @@ struct mips_elf_link_hash_table
   bfd_size_type procedure_count;
   /* The size of the .compact_rel section (if SGI_COMPAT).  */
   bfd_size_type compact_rel_size;
+  /* This flag indicates that the value of DT_MIPS_RLD_MAP dynamic
+     entry is set to the address of __rld_obj_head as in Irix 5. */
+  boolean use_rld_obj_head;
+  /* This is the value of the __rld_map or __rld_obj_head symbol.  */
+  bfd_vma rld_value;
 };
 
 /* Look up an entry in a MIPS ELF linker hash table.  */
@@ -2784,6 +2789,8 @@ mips_elf_link_hash_table_create (abfd)
     ret->dynsym_sec_strindex[i] = (bfd_size_type) -1;
   ret->procedure_count = 0;
   ret->compact_rel_size = 0;
+  ret->use_rld_obj_head = false;
+  ret->rld_value = 0;
 
   return &ret->root.root;
 }
@@ -2876,6 +2883,31 @@ mips_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
     case SHN_MIPS_SUNDEFINED:
       *secp = bfd_und_section_ptr;
       break;
+    }
+
+  if (SGI_COMPAT (abfd)
+      && ! info->shared
+      && info->hash->creator == abfd->xvec
+      && strcmp (*namep, "__rld_obj_head") == 0)
+    {
+      struct elf_link_hash_entry *h;
+
+      /* Mark __rld_obj_head as dynamic.  */
+      h = NULL;
+      if (! (_bfd_generic_link_add_one_symbol
+	     (info, abfd, *namep, BSF_GLOBAL, *secp,
+	      (bfd_vma) *valp, (const char *) NULL, false,
+	      get_elf_backend_data (abfd)->collect,
+	      (struct bfd_link_hash_entry **) &h)))
+	return false;
+      h->elf_link_hash_flags &=~ ELF_LINK_NON_ELF;
+      h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+      h->type = STT_OBJECT;
+
+      if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	return false;
+
+      mips_elf_hash_table (info)->use_rld_obj_head = true;
     }
 
   return true;
@@ -4651,6 +4683,17 @@ mips_elf_create_dynamic_sections (abfd, info)
 	return false;
     }
 
+  if (SGI_COMPAT (abfd)
+      && !info->shared
+      && bfd_get_section_by_name (abfd, ".rld_map") == NULL)
+    {
+      s = bfd_make_section (abfd, ".rld_map");
+      if (s == NULL
+	  || ! bfd_set_section_flags (abfd, s, flags & ~SEC_READONLY)
+	  || ! bfd_set_section_alignment (abfd, s, 2))
+	return false;
+    }
+
   if (SGI_COMPAT (abfd))
     {
       for (namep = mips_elf_dynsym_rtproc_names; *namep != NULL; namep++)
@@ -4707,6 +4750,30 @@ mips_elf_create_dynamic_sections (abfd, info)
 
       if (! bfd_elf32_link_record_dynamic_symbol (info, h))
 	return false;
+
+      if (! mips_elf_hash_table (info)->use_rld_obj_head)
+	{
+	  /* __rld_map is a four byte word located in the .data section
+	     and is filled in by the rtld to contain a pointer to
+	     the _r_debug structure. Its symbol value will be set in
+	     mips_elf_finish_dynamic_symbol.  */
+	  s = bfd_get_section_by_name (abfd, ".rld_map");
+	  BFD_ASSERT (s != NULL);
+
+	  h = NULL;
+	  if (! (_bfd_generic_link_add_one_symbol
+		 (info, abfd, "__rld_map", BSF_GLOBAL, s,
+		  (bfd_vma) 0, (const char *) NULL, false,
+		  get_elf_backend_data (abfd)->collect,
+		  (struct bfd_link_hash_entry **) &h)))
+	    return false;
+	  h->elf_link_hash_flags &=~ ELF_LINK_NON_ELF;
+	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+	  h->type = STT_OBJECT;
+
+	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	    return false;
+	}
     }
 
   return true;
@@ -5238,6 +5305,14 @@ mips_elf_size_dynamic_sections (output_bfd, info)
 	     of .text section. So put a dummy. XXX  */
 	  s->_raw_size += MIPS_FUNCTION_STUB_SIZE;
 	}
+      else if (! info->shared
+	       && ! mips_elf_hash_table (info)->use_rld_obj_head
+	       && strncmp (name, ".rld_map", 8) == 0)
+	{
+	  /* We add a room for __rld_map. It will be filled in by the
+	     rtld to contain a pointer to the _r_debug structure.  */
+	  s->_raw_size += 4;
+	}
       else if (SGI_COMPAT (output_bfd)
 	       && strncmp (name, ".compact_rel", 12) == 0)
 	s->_raw_size += mips_elf_hash_table (info)->compact_rel_size;
@@ -5280,8 +5355,16 @@ mips_elf_size_dynamic_sections (output_bfd, info)
 	 dynamic linker and used by the debugger.  */
       if (! info->shared)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_DEBUG, 0))
-	    return false;
+	  if (SGI_COMPAT (output_bfd))
+	    {
+	      /* SGI object has the equivalence of DT_DEBUG in the
+		 DT_MIPS_RLD_MAP entry.  */
+	      if (! bfd_elf32_add_dynamic_entry (info, DT_MIPS_RLD_MAP, 0))
+		return false;
+	    }
+	  else
+	    if (! bfd_elf32_add_dynamic_entry (info, DT_DEBUG, 0))
+	      return false;
 	}
 
       if (reltext)
@@ -5591,6 +5674,28 @@ mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	}
     }
 
+  if (SGI_COMPAT (output_bfd)
+      && ! info->shared)
+    {
+      if (! mips_elf_hash_table (info)->use_rld_obj_head
+	  && strcmp (name, "__rld_map") == 0)
+	{
+	  asection *s = bfd_get_section_by_name (dynobj, ".rld_map");
+	  BFD_ASSERT (s != NULL);
+	  sym->st_value = s->output_section->vma + s->output_offset;
+	  bfd_put_32 (output_bfd, (bfd_vma) 0, s->contents);
+	  if (mips_elf_hash_table (info)->rld_value == 0)
+	    mips_elf_hash_table (info)->rld_value = sym->st_value;
+	}
+      else if (mips_elf_hash_table (info)->use_rld_obj_head
+	       && strcmp (name, "__rld_obj_head") == 0)
+	{
+	  asection *s = bfd_get_section_by_name (dynobj, ".rld_map");
+	  BFD_ASSERT (s != NULL);
+	  mips_elf_hash_table (info)->rld_value = sym->st_value;
+	}
+    }
+
   return true;
 }
 
@@ -5752,6 +5857,11 @@ mips_elf_finish_dynamic_sections (output_bfd, info)
 
 	    case DT_MIPS_HIPAGENO:
 	      dyn.d_un.d_val = g->local_gotno - MIPS_RESERVED_GOTNO;
+	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
+	      break;
+
+	    case DT_MIPS_RLD_MAP:
+	      dyn.d_un.d_ptr = mips_elf_hash_table (info)->rld_value;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
