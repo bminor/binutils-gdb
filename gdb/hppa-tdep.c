@@ -68,8 +68,8 @@ static int inst_saves_gr PARAMS ((unsigned long));
 static int inst_saves_fr PARAMS ((unsigned long));
 static int pc_in_interrupt_handler PARAMS ((CORE_ADDR));
 static int pc_in_linker_stub PARAMS ((CORE_ADDR));
-static int compare_unwind_entries PARAMS ((struct unwind_table_entry *,   
-					   struct unwind_table_entry *));
+static int compare_unwind_entries PARAMS ((const struct unwind_table_entry *,   
+					   const struct unwind_table_entry *));
 static void read_unwind_info PARAMS ((struct objfile *));
 static void internalize_unwinds PARAMS ((struct objfile *,
 					 struct unwind_table_entry *,
@@ -262,8 +262,8 @@ extract_17 (word)
 
 static int
 compare_unwind_entries (a, b)
-     struct unwind_table_entry *a;
-     struct unwind_table_entry *b;
+     const struct unwind_table_entry *a;
+     const struct unwind_table_entry *b;
 {
   if (a->region_start > b->region_start)
     return 1;

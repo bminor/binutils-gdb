@@ -1,5 +1,8 @@
 Mon Aug  1 01:36:13 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* hppa-tdep.c (compare_unwind_entries): Add "const" to both
+	argument types to shut up GCC.
+
 	* hppa-tdep.c (saved_pc_after_call): If the saved PC is in a
 	linker stub, then return the address the stub will return to.
 	(frame_saved_pc): Correctly restart the search for the saved
