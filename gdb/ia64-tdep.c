@@ -1891,7 +1891,7 @@ ia64_sigtramp_frame_init_saved_regs (struct ia64_frame_cache *cache)
       for (regno = IA64_BR0_REGNUM; regno <= IA64_BR7_REGNUM; regno++)
 	cache->saved_regs[regno] =
 	  SIGCONTEXT_REGISTER_ADDRESS (cache->base, regno);
-      for (regno = IA64_FR2_REGNUM; regno <= IA64_BR7_REGNUM; regno++)
+      for (regno = IA64_FR2_REGNUM; regno <= IA64_FR31_REGNUM; regno++)
 	cache->saved_regs[regno] =
 	  SIGCONTEXT_REGISTER_ADDRESS (cache->base, regno);
     }

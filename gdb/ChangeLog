@@ -1,3 +1,8 @@
+2003-09-09  Jeff Johnston  <jjohnstn@redhat.com>
+
+        * ia64-tdep.c (ia64_sigtramp_frame_init_saved_regs):
+        Fix typo for high range of floating registers.
+
 2003-09-08  Adam Fedor  <fedor@gnu.org>
 
 	* linespec.c (is_objc_method_format): New function
