@@ -50,7 +50,17 @@ static etree_value_type new_rel
   PARAMS ((bfd_vma, char *, lang_output_section_statement_type *section));
 static etree_value_type new_rel_from_section
   PARAMS ((bfd_vma value, lang_output_section_statement_type *section));
+static etree_value_type fold_unary
+  PARAMS ((etree_type *tree,
+	   lang_output_section_statement_type *current_section,
+	   lang_phase_type allocation_done,
+	   bfd_vma dot, bfd_vma *dotp));
 static etree_value_type fold_binary
+  PARAMS ((etree_type *tree,
+	   lang_output_section_statement_type *current_section,
+	   lang_phase_type allocation_done,
+	   bfd_vma dot, bfd_vma *dotp));
+static etree_value_type fold_trinary
   PARAMS ((etree_type *tree,
 	   lang_output_section_statement_type *current_section,
 	   lang_phase_type allocation_done,
@@ -247,6 +257,93 @@ new_rel_from_section (value, section)
 }
 
 static etree_value_type
+fold_unary (tree, current_section, allocation_done, dot, dotp)
+     etree_type *tree;
+     lang_output_section_statement_type *current_section;
+     lang_phase_type allocation_done;
+     bfd_vma dot;
+     bfd_vma *dotp;
+{
+  etree_value_type result;
+
+  result = exp_fold_tree (tree->unary.child,
+			  current_section,
+			  allocation_done, dot, dotp);
+  if (result.valid_p)
+    {
+      switch (tree->type.node_code)
+	{
+	case ALIGN_K:
+	  if (allocation_done != lang_first_phase_enum)
+	    result = new_rel_from_section (align_n (dot, result.value),
+					   current_section);
+	  else
+	    result.valid_p = false;
+	  break;
+
+	case ABSOLUTE:
+	  if (allocation_done != lang_first_phase_enum)
+	    {
+	      result.value += result.section->bfd_section->vma;
+	      result.section = abs_output_section;
+	    }
+	  else
+	    result.valid_p = false;
+	  break;
+
+	case '~':
+	  make_abs (&result);
+	  result.value = ~result.value;
+	  break;
+
+	case '!':
+	  make_abs (&result);
+	  result.value = !result.value;
+	  break;
+
+	case '-':
+	  make_abs (&result);
+	  result.value = -result.value;
+	  break;
+
+	case NEXT:
+	  /* Return next place aligned to value.  */
+	  if (allocation_done == lang_allocating_phase_enum)
+	    {
+	      make_abs (&result);
+	      result.value = align_n (dot, result.value);
+	    }
+	  else
+	    result.valid_p = false;
+	  break;
+
+	case DATA_SEGMENT_END:
+	  if (allocation_done != lang_first_phase_enum
+	      && current_section == abs_output_section
+	      && (exp_data_seg.phase == exp_dataseg_align_seen
+		  || exp_data_seg.phase == exp_dataseg_adjust
+		  || allocation_done != lang_allocating_phase_enum))
+	    {
+	      if (exp_data_seg.phase == exp_dataseg_align_seen)
+		{
+		  exp_data_seg.phase = exp_dataseg_end_seen;
+		  exp_data_seg.end = result.value;
+		}
+	    }
+	  else
+	    result.valid_p = false;
+	  break;
+
+	default:
+	  FAIL ();
+	  break;
+	}
+    }
+
+  return result;
+}
+
+static etree_value_type
 fold_binary (tree, current_section, allocation_done, dot, dotp)
      etree_type *tree;
      lang_output_section_statement_type *current_section;
@@ -279,15 +376,14 @@ fold_binary (tree, current_section, allocation_done, dot, dotp)
 	      && (tree->type.node_code == '+'
 		  || tree->type.node_code == '-'))
 	    {
-	      etree_value_type hold;
-
-	      /* If there is only one absolute term, make sure it is the
-		 second one.  */
 	      if (other.section != abs_output_section)
 		{
-		  hold = result;
-		  result = other;
-		  other = hold;
+		  /* Keep the section of the other term.  */
+		  if (tree->type.node_code == '+')
+		    other.value = result.value + other.value;
+		  else
+		    other.value = result.value - other.value;
+		  return other;
 		}
 	    }
 	  else if (result.section != other.section
@@ -378,6 +474,28 @@ fold_binary (tree, current_section, allocation_done, dot, dotp)
 	  result.valid_p = false;
 	}
     }
+
+  return result;
+}
+
+static etree_value_type
+fold_trinary (tree, current_section, allocation_done, dot, dotp)
+     etree_type *tree;
+     lang_output_section_statement_type *current_section;
+     lang_phase_type allocation_done;
+     bfd_vma dot;
+     bfd_vma *dotp;
+{
+  etree_value_type result;
+
+  result = exp_fold_tree (tree->trinary.cond, current_section,
+			  allocation_done, dot, dotp);
+  if (result.valid_p)
+    result = exp_fold_tree ((result.value
+			     ? tree->trinary.lhs
+			     : tree->trinary.rhs),
+			    current_section,
+			    allocation_done, dot, dotp);
 
   return result;
 }
@@ -584,95 +702,18 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
       break;
 
     case etree_unary:
-      result = exp_fold_tree (tree->unary.child,
-			      current_section,
-			      allocation_done, dot, dotp);
-      if (result.valid_p)
-	{
-	  switch (tree->type.node_code)
-	    {
-	    case ALIGN_K:
-	      if (allocation_done != lang_first_phase_enum)
-		result = new_rel_from_section (align_n (dot, result.value),
-					       current_section);
-	      else
-		result.valid_p = false;
-	      break;
-
-	    case ABSOLUTE:
-	      if (allocation_done != lang_first_phase_enum)
-		{
-		  result.value += result.section->bfd_section->vma;
-		  result.section = abs_output_section;
-		}
-	      else
-		result.valid_p = false;
-	      break;
-
-	    case '~':
-	      make_abs (&result);
-	      result.value = ~result.value;
-	      break;
-
-	    case '!':
-	      make_abs (&result);
-	      result.value = !result.value;
-	      break;
-
-	    case '-':
-	      make_abs (&result);
-	      result.value = -result.value;
-	      break;
-
-	    case NEXT:
-	      /* Return next place aligned to value.  */
-	      if (allocation_done == lang_allocating_phase_enum)
-		{
-		  make_abs (&result);
-		  result.value = align_n (dot, result.value);
-		}
-	      else
-		result.valid_p = false;
-	      break;
-
-	    case DATA_SEGMENT_END:
-	      if (allocation_done != lang_first_phase_enum
-		  && current_section == abs_output_section
-		  && (exp_data_seg.phase == exp_dataseg_align_seen
-		      || exp_data_seg.phase == exp_dataseg_adjust
-		      || allocation_done != lang_allocating_phase_enum))
-		{
-		  if (exp_data_seg.phase == exp_dataseg_align_seen)
-		    {
-		      exp_data_seg.phase = exp_dataseg_end_seen;
-		      exp_data_seg.end = result.value;
-		    }
-		}
-	      else
-		result.valid_p = false;
-	      break;
-
-	    default:
-	      FAIL ();
-	      break;
-	    }
-	}
-      break;
-
-    case etree_trinary:
-      result = exp_fold_tree (tree->trinary.cond, current_section,
-			      allocation_done, dot, dotp);
-      if (result.valid_p)
-	result = exp_fold_tree ((result.value
-				 ? tree->trinary.lhs
-				 : tree->trinary.rhs),
-				current_section,
-				allocation_done, dot, dotp);
+      result = fold_unary (tree, current_section, allocation_done,
+			   dot, dotp);
       break;
 
     case etree_binary:
       result = fold_binary (tree, current_section, allocation_done,
 			    dot, dotp);
+      break;
+
+    case etree_trinary:
+      result = fold_trinary (tree, current_section, allocation_done,
+			     dot, dotp);
       break;
 
     case etree_assign:
