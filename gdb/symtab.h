@@ -743,9 +743,6 @@ struct section_offsets
   (sizeof (struct section_offsets) \
    + sizeof (((struct section_offsets *) 0)->offsets) * ((n)-1))
 
-/* The maximum possible size of a section_offsets table.  */
-#define SIZEOF_SECTION_OFFSETS (SIZEOF_N_SECTION_OFFSETS (SECT_OFF_MAX))
-
 /* Each source file or header is represented by a struct symtab. 
    These objects are chained through the `next' field.  */
 

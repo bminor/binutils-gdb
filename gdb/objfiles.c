@@ -613,7 +613,8 @@ void
 objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 {
   struct section_offsets *delta =
-    (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
+    ((struct section_offsets *) 
+     alloca (SIZEOF_N_SECTION_OFFSETS (objfile->num_sections)));
 
   {
     int i;

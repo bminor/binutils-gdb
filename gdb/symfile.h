@@ -67,16 +67,18 @@ struct psymbol_allocation_list
    solib.c to communicate the section addresses in shared objects to
    symbol_file_add (). */
  
-#define MAX_SECTIONS 64
 struct section_addr_info 
 {
+  /* The number of sections for which address information is
+     available.  */
+  size_t num_sections;
   /* Sections whose names are file format dependent. */
   struct other_sections
   {
     CORE_ADDR addr;
     char *name;
     int sectindex;
-  } other[MAX_SECTIONS];
+  } other[1];
 };
 
 /* Structure to keep track of symbol reading functions for various
@@ -184,6 +186,11 @@ extern void new_symfile_objfile (struct objfile *, int, int);
 
 extern struct objfile *symbol_file_add (char *, int,
 					struct section_addr_info *, int, int);
+
+/* Create a new section_addr_info, with room for NUM_SECTIONS.  */
+
+extern struct section_addr_info *
+alloc_section_addr_info (size_t num_sections);
 
 /* Build (allocate and populate) a section_addr_info struct from
    an existing section table. */

@@ -372,34 +372,47 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 		    }
 		  else if (sym->flags & BSF_LOCAL)
 		    {
+		      int special_local_sym_p = 0;
 		      /* Named Local variable in a Data section.  Check its
 		         name for stabs-in-elf.  The STREQ macro checks the
 		         first character inline, so we only actually do a
 		         strcmp function call on names that start with 'B'
 		         or 'D' */
-		      index = SECT_OFF_MAX;
 		      if (STREQ ("Bbss.bss", sym->name))
 			{
 			  index = SECT_OFF_BSS (objfile);
+			  special_local_sym_p = 1;
 			}
 		      else if (STREQ ("Ddata.data", sym->name))
 			{
 			  index = SECT_OFF_DATA (objfile);
+			  special_local_sym_p = 1;
 			}
 		      else if (STREQ ("Drodata.rodata", sym->name))
 			{
 			  index = SECT_OFF_RODATA (objfile);
+			  special_local_sym_p = 1;
 			}
-		      if (index != SECT_OFF_MAX)
+		      if (special_local_sym_p)
 			{
 			  /* Found a special local symbol.  Allocate a
 			     sectinfo, if needed, and fill it in.  */
 			  if (sectinfo == NULL)
 			    {
+			      int max_index;
+			      size_t size;
+
+			      max_index 
+				= max (SECT_OFF_BSS (objfile),
+				       max (SECT_OFF_DATA (objfile),
+					    SECT_OFF_RODATA (objfile)));
+			      size = (sizeof (struct stab_section_info) 
+				      + (sizeof (CORE_ADDR)
+					 * (max_index - 1)));
 			      sectinfo = (struct stab_section_info *)
-				xmmalloc (objfile->md, sizeof (*sectinfo));
-			      memset (sectinfo, 0,
-				      sizeof (*sectinfo));
+				xmmalloc (objfile->md, size);
+			      memset (sectinfo, 0, size);
+			      sectinfo->num_sections = max_index;
 			      if (filesym == NULL)
 				{
 				  complaint (&symfile_complaints,
@@ -740,8 +753,9 @@ elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
       /* Found it!  Allocate a new psymtab struct, and fill it in.  */
       maybe->found++;
       pst->section_offsets = (struct section_offsets *)
-	obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
-      for (i = 0; i < SECT_OFF_MAX; i++)
+	obstack_alloc (&objfile->psymbol_obstack, 
+		       SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
+      for (i = 0; i < maybe->num_sections; i++)
 	(pst->section_offsets)->offsets[i] = maybe->sections[i];
       return;
     }

@@ -401,6 +401,22 @@ find_lowest_section (bfd *abfd, asection *sect, void *obj)
     *lowest = sect;
 }
 
+/* Create a new section_addr_info, with room for NUM_SECTIONS.  */
+
+struct section_addr_info *
+alloc_section_addr_info (size_t num_sections)
+{
+  struct section_addr_info *sap;
+  size_t size;
+
+  size = (sizeof (struct section_addr_info)
+	  +  sizeof (struct other_sections) * (num_sections - 1));
+  sap = (struct section_addr_info *) xmalloc (size);
+  memset (sap, 0, size);
+  sap->num_sections = num_sections;
+
+  return sap;
+}
 
 /* Build (allocate and populate) a section_addr_info struct from
    an existing section table. */
@@ -413,14 +429,13 @@ build_section_addr_info_from_section_table (const struct section_table *start,
   const struct section_table *stp;
   int oidx;
 
-  sap = xmalloc (sizeof (struct section_addr_info));
-  memset (sap, 0, sizeof (struct section_addr_info));
+  sap = alloc_section_addr_info (end - start);
 
   for (stp = start, oidx = 0; stp != end; stp++)
     {
       if (bfd_get_section_flags (stp->bfd, 
 				 stp->the_bfd_section) & (SEC_ALLOC | SEC_LOAD)
-	  && oidx < MAX_SECTIONS)
+	  && oidx < end - start)
 	{
 	  sap->other[oidx].addr = stp->addr;
 	  sap->other[oidx].name 
@@ -441,7 +456,7 @@ free_section_addr_info (struct section_addr_info *sap)
 {
   int idx;
 
-  for (idx = 0; idx < MAX_SECTIONS; idx++)
+  for (idx = 0; idx < sap->num_sections; idx++)
     if (sap->other[idx].name)
       xfree (sap->other[idx].name);
   xfree (sap);
@@ -514,14 +529,16 @@ default_symfile_offsets (struct objfile *objfile,
 {
   int i;
 
-  objfile->num_sections = SECT_OFF_MAX;
+  objfile->num_sections = bfd_count_sections (objfile->obfd);
   objfile->section_offsets = (struct section_offsets *)
-    obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
-  memset (objfile->section_offsets, 0, SIZEOF_SECTION_OFFSETS);
+    obstack_alloc (&objfile->psymbol_obstack, 
+		   SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
+  memset (objfile->section_offsets, 0, 
+	  SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
 
   /* Now calculate offsets for section that were specified by the
      caller. */
-  for (i = 0; i < MAX_SECTIONS && addrs->other[i].name; i++)
+  for (i = 0; i < addrs->num_sections && addrs->other[i].name; i++)
     {
       struct other_sections *osp ;
 
@@ -584,22 +601,11 @@ syms_from_objfile (struct objfile *objfile,
   asection *lower_sect;
   asection *sect;
   CORE_ADDR lower_offset;
-  struct section_addr_info local_addr;
+  struct section_addr_info *local_addr = NULL;
   struct cleanup *old_chain;
   int i;
 
   gdb_assert (! (addrs && offsets));
-
-  /* If ADDRS and OFFSETS are both NULL, put together a dummy address
-     list.  We now establish the convention that an addr of zero means
-     no load address was specified. */
-  if (! addrs && ! offsets)
-    {
-      memset (&local_addr, 0, sizeof (local_addr));
-      addrs = &local_addr;
-    }
-
-  /* Now either addrs or offsets is non-zero.  */
 
   init_entry_point_info (objfile);
   find_sym_fns (objfile);
@@ -610,6 +616,19 @@ syms_from_objfile (struct objfile *objfile,
   /* Make sure that partially constructed symbol tables will be cleaned up
      if an error occurs during symbol reading.  */
   old_chain = make_cleanup_free_objfile (objfile);
+
+  /* If ADDRS and OFFSETS are both NULL, put together a dummy address
+     list.  We now establish the convention that an addr of zero means
+     no load address was specified. */
+  if (! addrs && ! offsets)
+    {
+      local_addr 
+	= alloc_section_addr_info (bfd_count_sections (objfile->obfd));
+      make_cleanup (xfree, local_addr);
+      addrs = local_addr;
+    }
+
+  /* Now either addrs or offsets is non-zero.  */
 
   if (mainline)
     {
@@ -674,7 +693,7 @@ syms_from_objfile (struct objfile *objfile,
 
       /* Calculate offsets for sections. */
       if (addrs)
-        for (i=0 ; i < MAX_SECTIONS && addrs->other[i].name; i++)
+        for (i=0 ; i < addrs->num_sections && addrs->other[i].name; i++)
           {
             if (addrs->other[i].addr != 0)
               {
@@ -758,7 +777,7 @@ syms_from_objfile (struct objfile *objfile,
 	  int i;
 
  	    for (i = 0; 
-	         !s_addr && i < MAX_SECTIONS && addrs->other[i].name;
+	         !s_addr && i < addrs->num_sections && addrs->other[i].name;
 		 i++)
  	      if (strcmp (bfd_section_name (s->objfile->obfd, 
 					    s->the_bfd_section), 
@@ -849,10 +868,8 @@ symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
   struct partial_symtab *psymtab;
   char *debugfile;
   bfd *abfd;
-  struct section_addr_info orig_addrs;
-  
-  if (addrs)
-    orig_addrs = *addrs;
+  struct section_addr_info *orig_addrs;
+  struct cleanup *my_cleanups;
 
   /* Open a bfd for the file, and give user a chance to burp if we'd be
      interactively wiping out any existing symbols.  */
@@ -866,6 +883,11 @@ symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
     error ("Not confirmed.");
 
   objfile = allocate_objfile (abfd, flags);
+
+  orig_addrs = alloc_section_addr_info (bfd_count_sections (abfd));
+  my_cleanups = make_cleanup (xfree, orig_addrs);
+  if (addrs)
+    *orig_addrs = *addrs;
 
   /* If the objfile uses a mapped symbol file, and we have a psymtab for
      it, then skip reading any symbols at this time. */
@@ -933,7 +955,7 @@ symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
       if (addrs != NULL)
 	{
 	  objfile->separate_debug_objfile
-            = symbol_file_add (debugfile, from_tty, &orig_addrs, 0, flags);
+            = symbol_file_add (debugfile, from_tty, orig_addrs, 0, flags);
 	}
       else
 	{
@@ -971,6 +993,8 @@ symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
      info_verbose' is true, so make sure they go out at the right
      time.  */
   gdb_flush (gdb_stdout);
+
+  do_cleanups (my_cleanups);
 
   if (objfile->sf == NULL)
     return objfile;	/* No symbols. */
@@ -1689,14 +1713,20 @@ add_symbol_file_command (char *args, int from_tty)
   int expecting_sec_name = 0;
   int expecting_sec_addr = 0;
 
-  struct
+  struct sect_opt
   {
     char *name;
     char *value;
-  } sect_opts[SECT_OFF_MAX];
+  };
 
-  struct section_addr_info section_addrs;
+  struct section_addr_info *section_addrs;
+  struct sect_opt *sect_opts = NULL;
+  size_t num_sect_opts = 0;
   struct cleanup *my_cleanups = make_cleanup (null_cleanup, NULL);
+
+  num_sect_opts = 16;
+  sect_opts = (struct sect_opt *) xmalloc (num_sect_opts 
+					   * sizeof (struct sect_opt));
 
   dont_repeat ();
 
@@ -1705,9 +1735,6 @@ add_symbol_file_command (char *args, int from_tty)
 
   /* Make a copy of the string that we can safely write into. */
   args = xstrdup (args);
-
-  /* Ensure section_addrs is initialized */
-  memset (&section_addrs, 0, sizeof (section_addrs));
 
   while (*args != '\000')
     {
@@ -1741,7 +1768,14 @@ add_symbol_file_command (char *args, int from_tty)
                to load the program. */
 	    sect_opts[section_index].name = ".text";
 	    sect_opts[section_index].value = arg;
-	    section_index++;		  
+	    if (++section_index > num_sect_opts) 
+	      {
+		num_sect_opts *= 2;
+		sect_opts = ((struct sect_opt *) 
+			     xrealloc (sect_opts,
+				       num_sect_opts 
+				       * sizeof (struct sect_opt)));
+	      }
 	  }
 	else
 	  {
@@ -1758,8 +1792,6 @@ add_symbol_file_command (char *args, int from_tty)
 		  else 
 		    if (strcmp (arg, "-s") == 0)
 		      {
-			if (section_index >= SECT_OFF_MAX)
-			  error ("Too many sections specified.");
 			expecting_sec_name = 1;
 			expecting_sec_addr = 1;
 		      }
@@ -1776,7 +1808,14 @@ add_symbol_file_command (char *args, int from_tty)
 		    {
 		      sect_opts[section_index].value = arg;
 		      expecting_sec_addr = 0;
-		      section_index++;		  
+		      if (++section_index > num_sect_opts) 
+			{
+			  num_sect_opts *= 2;
+			  sect_opts = ((struct sect_opt *) 
+				       xrealloc (sect_opts,
+						 num_sect_opts 
+						 * sizeof (struct sect_opt)));
+			}
 		    }
 		  else
 		    error ("USAGE: add-symbol-file <filename> <textaddress> [-mapped] [-readnow] [-s <secname> <addr>]*");
@@ -1792,6 +1831,8 @@ add_symbol_file_command (char *args, int from_tty)
      string. */
  
   printf_filtered ("add symbol table from file \"%s\" at\n", filename);
+  section_addrs = alloc_section_addr_info (section_index);
+  make_cleanup (xfree, section_addrs);
   for (i = 0; i < section_index; i++)
     {
       CORE_ADDR addr;
@@ -1806,8 +1847,8 @@ add_symbol_file_command (char *args, int from_tty)
 
       /* Here we store the section offsets in the order they were
          entered on the command line. */
-      section_addrs.other[sec_num].name = sec;
-      section_addrs.other[sec_num].addr = addr;
+      section_addrs->other[sec_num].name = sec;
+      section_addrs->other[sec_num].addr = addr;
       printf_filtered ("\t%s_addr = %s\n",
 		       sec, 
 		       local_hex_string ((unsigned long)addr));
@@ -1823,7 +1864,7 @@ add_symbol_file_command (char *args, int from_tty)
   if (from_tty && (!query ("%s", "")))
     error ("Not confirmed.");
 
-  symbol_file_add (filename, from_tty, &section_addrs, 0, flags);
+  symbol_file_add (filename, from_tty, section_addrs, 0, flags);
 
   /* Getting new symbols may change our opinion about what is
      frameless.  */
@@ -1920,8 +1961,10 @@ reread_symbols (void)
 	      /* Save the offsets, we will nuke them with the rest of the
 	         psymbol_obstack.  */
 	      num_offsets = objfile->num_sections;
-	      offsets = (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
-	      memcpy (offsets, objfile->section_offsets, SIZEOF_SECTION_OFFSETS);
+	      offsets = ((struct section_offsets *) 
+			 alloca (SIZEOF_N_SECTION_OFFSETS (num_offsets)));
+	      memcpy (offsets, objfile->section_offsets, 
+		      SIZEOF_N_SECTION_OFFSETS (num_offsets));
 
 	      /* Nuke all the state that we will re-read.  Much of the following
 	         code which sets things to NULL really is necessary to tell
@@ -1989,8 +2032,10 @@ reread_symbols (void)
 	      /* We use the same section offsets as from last time.  I'm not
 	         sure whether that is always correct for shared libraries.  */
 	      objfile->section_offsets = (struct section_offsets *)
-		obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
-	      memcpy (objfile->section_offsets, offsets, SIZEOF_SECTION_OFFSETS);
+		obstack_alloc (&objfile->psymbol_obstack, 
+			       SIZEOF_N_SECTION_OFFSETS (num_offsets));
+	      memcpy (objfile->section_offsets, offsets, 
+		      SIZEOF_N_SECTION_OFFSETS (num_offsets));
 	      objfile->num_sections = num_offsets;
 
 	      /* What the hell is sym_new_init for, anyway?  The concept of

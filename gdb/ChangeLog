@@ -1,3 +1,30 @@
+2003-06-06  Mark Mitchell  <mark@codesourcery.com>
+
+	* elfread.c (elf_symtab_read): Avoid use of SECT_OFF_MAX.
+	(elfstab_offset_sections): Likewise.
+	* gdb-stabs.h (stab_section_info): Likewise.
+	* i386-interix-tdep.c (pei_adjust_objfile_offsets): Likewise.
+	* objfiles.c (objfile_relocate): Likewise.
+	* pa64solib.c (pa64_solib_add_solib_objfile): Likewise.
+	* remote.c (get_offsets): Likewise.
+	(remote_cisco_objfile_relocate): Likewise.
+	* somread.c (som_symfile_offsets): Likewise.
+	* symfile.c (alloc_section_addr_info): New function.
+	(build_section_addr_info_from_section_tab): Use it.
+	(free_section_addr_info): Adjust.
+	(default_symfile_offsets): Avoid use of SECT_OFF_MAX.
+	(syms_from_objfile): Allocate local_addr dynamically.
+	(symbol_file_add_with_addrs_or_offsets): Allocate orig_addrs
+	dynamically.
+	(add_symbol_file_command): Allocate sect_opts dynamically.
+	(reread_symbols): Avoid use of SECT_OFF_MAX.
+	* symfile.h (section_addr_info): Do not use MAX_SECTIONS.
+	(alloc_section_addr_info): Declare it.
+	* symtab.h (SIZEOF_SECTION_OFFSETS): Remove.
+	* win32-nat.c (solib_symbols_add): Allocate section_addrs
+	dynamically.
+	* xcoffread.c (xcoff_symfile_offsets): Avoid use of SECT_OFF_MAX.
+	
 2003-06-06  Andrew Cagney  <cagney@redhat.com>
 
 	* d10v-tdep.c (struct d10v_unwind_cache): Delete "return_pc".

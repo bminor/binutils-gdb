@@ -1989,8 +1989,10 @@ get_offsets (void)
   if (symfile_objfile == NULL)
     return;
 
-  offs = (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
-  memcpy (offs, symfile_objfile->section_offsets, SIZEOF_SECTION_OFFSETS);
+  offs = ((struct section_offsets *) 
+	  alloca (SIZEOF_N_SECTION_OFFSETS (symfile_objfile->num_sections)));
+  memcpy (offs, symfile_objfile->section_offsets, 
+	  SIZEOF_N_SECTION_OFFSETS (symfile_objfile->num_sections));
 
   offs->offsets[SECT_OFF_TEXT (symfile_objfile)] = text_addr;
 
@@ -2101,8 +2103,10 @@ remote_cisco_objfile_relocate (bfd_signed_vma text_off, bfd_signed_vma data_off,
          broken for xcoff, dwarf, sdb-coff, etc.  But there is no
          simple canonical representation for this stuff.  */
 
-      offs = (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
-      memcpy (offs, symfile_objfile->section_offsets, SIZEOF_SECTION_OFFSETS);
+      offs = (struct section_offsets *) 
+	alloca (SIZEOF_N_SECTION_OFFSETS (symfile_objfile->num_sections));
+      memcpy (offs, symfile_objfile->section_offsets, 
+	      SIZEOF_N_SECTION_OFFSETS (symfile_objfile->num_sections));
 
       offs->offsets[SECT_OFF_TEXT (symfile_objfile)] = text_off;
       offs->offsets[SECT_OFF_DATA (symfile_objfile)] = data_off;

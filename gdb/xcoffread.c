@@ -2981,9 +2981,10 @@ xcoff_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
   asection *sect = NULL;
   int i;
 
-  objfile->num_sections = SECT_OFF_MAX;
+  objfile->num_sections = bfd_count_sections (objfile->obfd);
   objfile->section_offsets = (struct section_offsets *)
-    obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
+    obstack_alloc (&objfile->psymbol_obstack, 
+		   SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
 
   /* Initialize the section indexes for future use. */
   sect = bfd_get_section_by_name (objfile->obfd, ".text");
