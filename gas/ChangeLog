@@ -1,3 +1,7 @@
+2004-04-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-xtensa.c (xg_assembler_literal): Fix a typo.
+
 2004-04-19  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* read.c (do_align): Call md_flush_pending_output, if defined.

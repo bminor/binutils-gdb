@@ -3721,7 +3721,7 @@ xg_assemble_literal (insn)
   set_expr_symbol_offset (&saved_loc, frag_now->fr_symbol, frag_now_fix ());
 
   assert (insn->insn_type == ITYPE_LITERAL);
-  assert (insn->ntok = 1);	/* must be only one token here */
+  assert (insn->ntok == 1);	/* must be only one token here */
 
   xtensa_switch_to_literal_fragment (&state);
 
