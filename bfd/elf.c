@@ -1746,7 +1746,8 @@ map_sections_to_segments (abfd)
       phdr_size = elf_tdata (abfd)->program_header_size;
       if (phdr_size == 0)
 	phdr_size = get_elf_backend_data (abfd)->s->sizeof_phdr;
-      if (sections[0]->lma % maxpagesize < phdr_size % maxpagesize)
+      if ((abfd->flags & D_PAGED) == 0
+	  || sections[0]->lma % maxpagesize < phdr_size % maxpagesize)
 	phdr_in_section = false;
     }
 
@@ -1765,6 +1766,7 @@ map_sections_to_segments (abfd)
          program segment; anybody can use PHDRS in their linker script
          to control what happens anyhow).  */
       if (last_hdr == NULL
+	  || (abfd->flags & D_PAGED) == 0
 	  || ((BFD_ALIGN (last_hdr->lma + last_hdr->_raw_size, maxpagesize)
 	       >= hdr->lma)
 	      && ((last_hdr->flags & SEC_LOAD) != 0
@@ -1775,7 +1777,6 @@ map_sections_to_segments (abfd)
 		  || (BFD_ALIGN (last_hdr->lma + last_hdr->_raw_size,
 				 maxpagesize)
 		      > hdr->lma))))
-		      
 	{
 	  if ((hdr->flags & SEC_READONLY) == 0)
 	    writable = true;
@@ -1856,6 +1857,13 @@ elf_sort_sections (arg1, arg2)
   if (sec1->vma < sec2->vma)
     return -1;
   else if (sec1->vma > sec2->vma)
+    return 1;
+
+  /* Sort by LMA.  Normally the LMA and the VMA will be the same, and
+     this will do nothing.  */
+  if (sec1->lma < sec2->lma)
+    return -1;
+  else if (sec1->lma > sec2->lma)
     return 1;
 
   /* Put !SEC_LOAD sections after SEC_LOAD ones.  */
@@ -1976,7 +1984,13 @@ assign_file_positions_for_segments (abfd)
       if (p->p_type == PT_LOAD
 	  && m->count > 0
 	  && (m->sections[0]->flags & SEC_LOAD) != 0)
-	off += (m->sections[0]->vma - off) % bed->maxpagesize;
+	{
+	  if ((abfd->flags & D_PAGED) != 0)
+	    off += (m->sections[0]->vma - off) % bed->maxpagesize;
+	  else
+	    off += ((m->sections[0]->vma - off)
+		    % (1 << bfd_get_section_alignment (abfd, m->sections[0])));
+	}
 
       if (m->count == 0)
 	p->p_vaddr = 0;
@@ -1990,7 +2004,8 @@ assign_file_positions_for_segments (abfd)
       else
 	p->p_paddr = m->sections[0]->lma;
 
-      if (p->p_type == PT_LOAD)
+      if (p->p_type == PT_LOAD
+	  && (abfd->flags & D_PAGED) != 0)
 	p->p_align = bed->maxpagesize;
       else if (m->count == 0)
 	p->p_align = bed->s->file_align;
@@ -2077,6 +2092,7 @@ assign_file_positions_for_segments (abfd)
 
 	  sec = *secpp;
 	  flags = sec->flags;
+	  align = 1 << bfd_get_section_alignment (abfd, sec);
 
 	  if (p->p_type == PT_LOAD)
 	    {
@@ -2086,7 +2102,10 @@ assign_file_positions_for_segments (abfd)
                  the page size.  */
 	      if ((flags & SEC_ALLOC) != 0)
 		{
-		  adjust = (sec->vma - voff) % bed->maxpagesize;
+		  if ((abfd->flags & D_PAGED) != 0)
+		    adjust = (sec->vma - voff) % bed->maxpagesize;
+		  else
+		    adjust = (sec->vma - voff) % align;
 		  if (adjust != 0)
 		    {
 		      if (i == 0)
@@ -2112,7 +2131,6 @@ assign_file_positions_for_segments (abfd)
 	  if ((flags & SEC_LOAD) != 0)
 	    p->p_filesz += sec->_raw_size;
 
-	  align = 1 << bfd_get_section_alignment (abfd, sec);
 	  if (align > p->p_align)
 	    p->p_align = align;
 
@@ -2324,7 +2342,10 @@ assign_file_positions_except_relocs (abfd)
 		(hdr->bfd_section == NULL
 		 ? "*unknown*"
 		 : hdr->bfd_section->name)));
-	      off += (hdr->sh_addr - off) % bed->maxpagesize;
+	      if ((abfd->flags & D_PAGED) != 0)
+		off += (hdr->sh_addr - off) % bed->maxpagesize;
+	      else
+		off += (hdr->sh_addr - off) % hdr->sh_addralign;
 	      off = _bfd_elf_assign_file_position_for_section (hdr, off,
 							       false);
 	    }

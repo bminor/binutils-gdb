@@ -1,3 +1,15 @@
+Wed Jul 31 15:50:55 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Make ld -N more reasonable for ELF:
+	* elf.c (map_sections_to_segments): If D_PAGED is not set, set
+	phdr_in_section to false, and always use a single load segment.
+	(elf_sort_sections): Sort sections by LMA after VMA.
+	(assign_file_positions_for_segments): If D_PAGED is not set, don't
+	align to maxpagesize.
+	(assign_file_positions_except_relocs): Likewise.
+	* elfcode.h (elf_object_p): If a section is loaded but not page
+	aligned, clear D_PAGED.
+
 Wed Jul 31 15:00:12 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* reloc.c: (BFD_RELOC_ARM_OFFSETIMM8, BFD_RELOC_ARM_HWLITERAL):
