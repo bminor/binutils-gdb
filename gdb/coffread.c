@@ -33,6 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <string.h>
 
 #include <time.h> /* For time_t in libbfd.h.  */
+#include <sys/types.h> /* For time_t, if not in time.h.  */
 #include "libbfd.h"		/* FIXME secret internal data from BFD */
 #include "coff/internal.h"	/* Internal format of COFF symbols in BFD */
 #include "libcoff.h"		/* FIXME secret internal data from BFD */
@@ -776,7 +777,11 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
 	     * or symnum of first global after last .file.
 	     */
 	    next_file_symnum = cs->c_value;
-	    filestring = getfilename (&main_aux);
+	    if (cs->c_naux > 0)
+	      filestring = getfilename (&main_aux);
+	    else
+	      filestring = "";
+
 	    /*
 	     * Complete symbol table for last object file
 	     * containing debugging information.

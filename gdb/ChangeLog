@@ -1,3 +1,8 @@
+Mon Sep 27 18:10:08 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* coffread.c (read_coff_symtab):  Don't call getfilename if there
+	are no auxents.
+
 Mon Sep 27 10:22:37 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* symtab.c (find_pc_line): Fix comments.
