@@ -1,0 +1,4 @@
+Mon Jul 19 22:12:40 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* (common.h, external.h, internal.h):  New files for NLM/NetWare
+	support.
