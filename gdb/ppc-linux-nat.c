@@ -20,6 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "gdb_string.h"
 #include "frame.h"
 #include "inferior.h"
 #include "gdbcore.h"
