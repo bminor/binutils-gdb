@@ -1,5 +1,7 @@
 2004-10-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* budemang.c (demangle): Fix thinko.
+
 	* budemang.c (demangle): Handle "@plt" suffix.
 
 2004-10-14  Nick Clifton  <nickc@redhat.com>

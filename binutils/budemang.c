@@ -52,7 +52,7 @@ demangle (bfd *abfd, const char *name)
   pre = name;
   while (*name == '.')
     ++name;
-  pre_len = pre - name;
+  pre_len = name - pre;
 
   alloc = NULL;
   suf = strchr (name, '@');
