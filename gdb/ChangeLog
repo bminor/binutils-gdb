@@ -1,3 +1,15 @@
+Thu Oct  9 12:37:57 1997  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* printcmd.c (print_address_symbolic, address_info): Mask
+ 	target-specific flag bits from PC, for more aesthetic disassembly.
+  	* config/mips/tm-mips.h: Added PC masking for MIPS family
+ 	(especially the MIPS16).
+
+Sat Oct  4 18:45:44 1997  Mark Alexander  <marka@cygnus.com>
+
+	* remote-mips.c (mips-initialize): Work around flakiness in
+	some versions of PMON after loading a program.
+
 Fri Oct  3 15:49:18 1997  Per Bothner  <bothner@cygnus.com>
 
 	* c-lang.h, cp-valprint.c (static_field_print):  Make non-static.

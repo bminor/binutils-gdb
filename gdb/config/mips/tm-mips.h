@@ -50,6 +50,14 @@ struct value;
 #define TARGET_MONITOR_PROMPT "<IDT>"
 #endif
 
+/* PC should be masked to remove possible MIPS16 flag */
+#if !defined (GDB_TARGET_MASK_DISAS_PC)
+#define GDB_TARGET_MASK_DISAS_PC(addr) UNMAKE_MIPS16_ADDR(addr)
+#endif
+#if !defined (GDB_TARGET_UNMASK_DISAS_PC)
+#define GDB_TARGET_UNMASK_DISAS_PC(addr) MAKE_MIPS16_ADDR(addr)
+#endif
+
 /* Floating point is IEEE compliant */
 #define IEEE_FLOAT
 
