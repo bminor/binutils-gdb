@@ -1,3 +1,11 @@
+Wed May 20 00:10:40 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	Zero bottom two bits of pc in jmp,jl insns.
+	* sem.c,sem-switch.c: Regenerate.
+start-sanitize-m32rx
+	* semx.c: Regenerate.
+end-sanitize-m32rx
+
 Tue May 19 16:45:33 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim-if.c (do_trap): Treat traps 2-15 as hardware does.

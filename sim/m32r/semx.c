@@ -1502,7 +1502,7 @@ SEM_FN_NAME (m32rx,jl) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec
 do {
   SI temp1;SI temp0;
   temp0 = ADDSI (ANDSI (OPRND (pc), -4), 4);
-  temp1 = OPRND (sr);
+  temp1 = ANDSI (OPRND (sr), -4);
   CPU (h_gr[14]) = temp0;
   TRACE_RESULT (current_cpu, "gr-14", 'x', CPU (h_gr[14]));
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, temp1));
@@ -1538,7 +1538,7 @@ SEM_FN_NAME (m32rx,jmp) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
   EXTRACT_FMT_JMP_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_JMP_CODE
 
-  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, OPRND (sr)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, ANDSI (OPRND (sr), -4)));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 
