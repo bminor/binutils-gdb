@@ -41,7 +41,7 @@ strip.1
 is-ranlib.c
 not-ranlib.c
 maybe-ranlib.c
-binutils.texinfo
+binutils.texi
 bucomm.c
 configure.in
 copy.c
@@ -68,7 +68,11 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.9  1991/11/06 09:06:02  sac
+# Revision 1.10  1991/11/15 23:34:33  pesch
+# .Sanitize: reflect someone's apocopation of binutils.texi[nfo] name
+# Makefile.in: improve texi2roff workarounds
+#
+# Revision 1.9  1991/11/06  09:06:02  sac
 # Added nm.1, objdump.1, ranlib.1, size.1 and strip.1
 #
 # Revision 1.8  1991/11/05  20:53:19  sac
