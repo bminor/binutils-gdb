@@ -80,12 +80,16 @@ CORE_ADDR skip_prologue ();
 
 /* Sequence of bytes for breakpoint instruction.  */
 /* ASNEQ 0x50, gr1, gr1
-   The trap number 0x50 is chosen arbitrarily.  */
+   The trap number 0x50 is chosen arbitrarily.
+   We let the command line (or previously included files) override this
+   setting.  */
+#ifndef BREAKPOINT
 #if TARGET_BYTE_ORDER == BIG_ENDIAN
 #define BREAKPOINT {0x72, 0x50, 0x01, 0x01}
 #else /* Target is little-endian.  */
 #define BREAKPOINT {0x01, 0x01, 0x50, 0x72}
 #endif /* Target is little-endian.  */
+#endif /* BREAKPOINT */
 
 /* Amount PC must be decremented by after a breakpoint.
    This is often the number of bytes in BREAKPOINT
