@@ -1,3 +1,24 @@
+2003-12-02  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (dwarf_info_offset, dwarf_abbrev_offset)
+	(dwarf_line_offset, dwarf_pubnames_offset, dwarf_aranges_offset)
+	(dwarf_loc_offset, dwarf_macinfo_offset, dwarf_str_offset)
+	(dwarf_ranges_offset, dwarf_frame_offset, dwarf_eh_frame_offset):
+	Delete.
+	(dwarf2_read_section): Remove offset and size arguments.  Use
+	bfd_get_section_size_before_reloc and sectp->filepos.
+	(dwarf2_has_info): Clear section variables instead of offsets.
+	(dwarf2_locate_sections): Don't initialize the deleted variables.
+	(dwarf2_build_psymtabs): Update calls to dwarf2_read_section.
+	(dwarf2_build_psymtabs_easy): Likewise.
+	* dwarf2-frame.c (dwarf_frame_offset, dwarf_frame_size)
+	(dwarf_eh_frame_offset, dwarf_eh_frame_size): Remove extern
+	declarations.
+	(dwarf2_read_section): Update prototype.
+	(dwarf2_build_frame_info): Update calls to dwarf2_read_section.
+	Use bfd_get_section_size_before_reloc instead of global size
+	variables.
+
 2003-12-01  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* dwarfread.c: Update documentation on the state of dwarf-1.

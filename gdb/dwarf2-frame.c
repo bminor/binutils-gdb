@@ -1507,16 +1507,11 @@ decode_frame_entry (struct comp_unit *unit, char *start, int eh_frame_p)
    dwarf2read.c in a better way.  */
 
 /* Imported from dwarf2read.c.  */
-extern file_ptr dwarf_frame_offset;
-extern unsigned int dwarf_frame_size;
 extern asection *dwarf_frame_section;
-extern file_ptr dwarf_eh_frame_offset;
-extern unsigned int dwarf_eh_frame_size;
 extern asection *dwarf_eh_frame_section;
 
 /* Imported from dwarf2read.c.  */
-extern char *dwarf2_read_section (struct objfile *objfile, file_ptr offset,
-				  unsigned int size, asection *sectp);
+extern char *dwarf2_read_section (struct objfile *objfile, asection *sectp);
 
 void
 dwarf2_build_frame_info (struct objfile *objfile)
@@ -1533,17 +1528,16 @@ dwarf2_build_frame_info (struct objfile *objfile)
 
   /* First add the information from the .eh_frame section.  That way,
      the FDEs from that section are searched last.  */
-  if (dwarf_eh_frame_offset)
+  if (dwarf_eh_frame_section)
     {
       asection *got, *txt;
 
       unit.cie = NULL;
       unit.dwarf_frame_buffer = dwarf2_read_section (objfile,
-						     dwarf_eh_frame_offset,
-						     dwarf_eh_frame_size,
 						     dwarf_eh_frame_section);
 
-      unit.dwarf_frame_size = dwarf_eh_frame_size;
+      unit.dwarf_frame_size
+	= bfd_get_section_size_before_reloc (dwarf_eh_frame_section);
       unit.dwarf_frame_section = dwarf_eh_frame_section;
 
       /* FIXME: kettenis/20030602: This is the DW_EH_PE_datarel base
@@ -1565,14 +1559,13 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	frame_ptr = decode_frame_entry (&unit, frame_ptr, 1);
     }
 
-  if (dwarf_frame_offset)
+  if (dwarf_frame_section)
     {
       unit.cie = NULL;
       unit.dwarf_frame_buffer = dwarf2_read_section (objfile,
-						     dwarf_frame_offset,
-						     dwarf_frame_size,
 						     dwarf_frame_section);
-      unit.dwarf_frame_size = dwarf_frame_size;
+      unit.dwarf_frame_size
+	= bfd_get_section_size_before_reloc (dwarf_frame_section);
       unit.dwarf_frame_section = dwarf_frame_section;
 
       frame_ptr = unit.dwarf_frame_buffer;

@@ -128,18 +128,6 @@ _STATEMENT_PROLOGUE;
 
 /* offsets and sizes of debugging sections */
 
-static file_ptr dwarf_info_offset;
-static file_ptr dwarf_abbrev_offset;
-static file_ptr dwarf_line_offset;
-static file_ptr dwarf_pubnames_offset;
-static file_ptr dwarf_aranges_offset;
-static file_ptr dwarf_loc_offset;
-static file_ptr dwarf_macinfo_offset;
-static file_ptr dwarf_str_offset;
-static file_ptr dwarf_ranges_offset;
-file_ptr dwarf_frame_offset;
-file_ptr dwarf_eh_frame_offset;
-
 static unsigned int dwarf_info_size;
 static unsigned int dwarf_abbrev_size;
 static unsigned int dwarf_line_size;
@@ -697,8 +685,7 @@ static void dwarf2_psymtab_to_symtab (struct partial_symtab *);
 
 static void psymtab_to_symtab_1 (struct partial_symtab *);
 
-char *dwarf2_read_section (struct objfile *, file_ptr, unsigned int,
-			   asection *);
+char *dwarf2_read_section (struct objfile *, asection *);
 
 static void dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu);
 
@@ -931,25 +918,18 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 int
 dwarf2_has_info (bfd *abfd)
 {
-  dwarf_info_offset = 0;
-  dwarf_abbrev_offset = 0;
-  dwarf_line_offset = 0;
-  dwarf_str_offset = 0;
-  dwarf_macinfo_offset = 0;
-  dwarf_frame_offset = 0;
-  dwarf_eh_frame_offset = 0;
-  dwarf_ranges_offset = 0;
-  dwarf_loc_offset = 0;
+  dwarf_info_section = 0;
+  dwarf_abbrev_section = 0;
+  dwarf_line_section = 0;
+  dwarf_str_section = 0;
+  dwarf_macinfo_section = 0;
+  dwarf_frame_section = 0;
+  dwarf_eh_frame_section = 0;
+  dwarf_ranges_section = 0;
+  dwarf_loc_section = 0;
   
   bfd_map_over_sections (abfd, dwarf2_locate_sections, NULL);
-  if (dwarf_info_offset && dwarf_abbrev_offset)
-    {
-      return 1;
-    }
-  else
-    {
-      return 0;
-    }
+  return (dwarf_info_section != NULL && dwarf_abbrev_section != NULL);
 }
 
 /* This function is mapped across the sections and remembers the
@@ -961,55 +941,46 @@ dwarf2_locate_sections (bfd *ignore_abfd, asection *sectp, void *ignore_ptr)
 {
   if (strcmp (sectp->name, INFO_SECTION) == 0)
     {
-      dwarf_info_offset = sectp->filepos;
       dwarf_info_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_info_section = sectp;
     }
   else if (strcmp (sectp->name, ABBREV_SECTION) == 0)
     {
-      dwarf_abbrev_offset = sectp->filepos;
       dwarf_abbrev_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_abbrev_section = sectp;
     }
   else if (strcmp (sectp->name, LINE_SECTION) == 0)
     {
-      dwarf_line_offset = sectp->filepos;
       dwarf_line_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_line_section = sectp;
     }
   else if (strcmp (sectp->name, PUBNAMES_SECTION) == 0)
     {
-      dwarf_pubnames_offset = sectp->filepos;
       dwarf_pubnames_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_pubnames_section = sectp;
     }
   else if (strcmp (sectp->name, ARANGES_SECTION) == 0)
     {
-      dwarf_aranges_offset = sectp->filepos;
       dwarf_aranges_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_aranges_section = sectp;
     }
   else if (strcmp (sectp->name, LOC_SECTION) == 0)
     {
-      dwarf_loc_offset = sectp->filepos;
       dwarf_loc_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_loc_section = sectp;
     }
   else if (strcmp (sectp->name, MACINFO_SECTION) == 0)
     {
-      dwarf_macinfo_offset = sectp->filepos;
       dwarf_macinfo_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_macinfo_section = sectp;
     }
   else if (strcmp (sectp->name, STR_SECTION) == 0)
     {
-      dwarf_str_offset = sectp->filepos;
       dwarf_str_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_str_section = sectp;
     }
   else if (strcmp (sectp->name, FRAME_SECTION) == 0)
     {
-      dwarf_frame_offset = sectp->filepos;
       dwarf_frame_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_frame_section = sectp;
     }
@@ -1018,14 +989,12 @@ dwarf2_locate_sections (bfd *ignore_abfd, asection *sectp, void *ignore_ptr)
       flagword aflag = bfd_get_section_flags (ignore_abfd, sectp);
       if (aflag & SEC_HAS_CONTENTS)
         {
-          dwarf_eh_frame_offset = sectp->filepos;
           dwarf_eh_frame_size = bfd_get_section_size_before_reloc (sectp);
           dwarf_eh_frame_section = sectp;
         }
     }
   else if (strcmp (sectp->name, RANGES_SECTION) == 0)
     {
-      dwarf_ranges_offset = sectp->filepos;
       dwarf_ranges_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_ranges_section = sectp;
     }
@@ -1039,52 +1008,32 @@ dwarf2_build_psymtabs (struct objfile *objfile, int mainline)
 
   /* We definitely need the .debug_info and .debug_abbrev sections */
 
-  dwarf_info_buffer = dwarf2_read_section (objfile,
-					   dwarf_info_offset,
-					   dwarf_info_size,
-					   dwarf_info_section);
-  dwarf_abbrev_buffer = dwarf2_read_section (objfile,
-					     dwarf_abbrev_offset,
-					     dwarf_abbrev_size,
-					     dwarf_abbrev_section);
+  dwarf_info_buffer = dwarf2_read_section (objfile, dwarf_info_section);
+  dwarf_abbrev_buffer = dwarf2_read_section (objfile, dwarf_abbrev_section);
 
-  if (dwarf_line_offset)
-    dwarf_line_buffer = dwarf2_read_section (objfile,
-					     dwarf_line_offset,
-					     dwarf_line_size,
-					     dwarf_line_section);
+  if (dwarf_line_section)
+    dwarf_line_buffer = dwarf2_read_section (objfile, dwarf_line_section);
   else
     dwarf_line_buffer = NULL;
 
-  if (dwarf_str_offset)
-    dwarf_str_buffer = dwarf2_read_section (objfile,
-					    dwarf_str_offset,
-					    dwarf_str_size,
-					    dwarf_str_section);
+  if (dwarf_str_section)
+    dwarf_str_buffer = dwarf2_read_section (objfile, dwarf_str_section);
   else
     dwarf_str_buffer = NULL;
 
-  if (dwarf_macinfo_offset)
+  if (dwarf_macinfo_section)
     dwarf_macinfo_buffer = dwarf2_read_section (objfile,
-                                                dwarf_macinfo_offset,
-                                                dwarf_macinfo_size,
 						dwarf_macinfo_section);
   else
     dwarf_macinfo_buffer = NULL;
 
-  if (dwarf_ranges_offset)
-    dwarf_ranges_buffer = dwarf2_read_section (objfile,
-					       dwarf_ranges_offset,
-					       dwarf_ranges_size,
-					       dwarf_ranges_section);
+  if (dwarf_ranges_section)
+    dwarf_ranges_buffer = dwarf2_read_section (objfile, dwarf_ranges_section);
   else
     dwarf_ranges_buffer = NULL;
 
-  if (dwarf_loc_offset)
-    dwarf_loc_buffer = dwarf2_read_section (objfile,
-					    dwarf_loc_offset,
-					    dwarf_loc_size,
-					    dwarf_loc_section);
+  if (dwarf_loc_section)
+    dwarf_loc_buffer = dwarf2_read_section (objfile, dwarf_loc_section);
   else
     dwarf_loc_buffer = NULL;
 
@@ -1125,8 +1074,6 @@ dwarf2_build_psymtabs_easy (struct objfile *objfile, int mainline)
   unsigned int entry_length, version, info_offset, info_size;
 
   pubnames_buffer = dwarf2_read_section (objfile,
-					 dwarf_pubnames_offset,
-					 dwarf_pubnames_size,
 					 dwarf_pubnames_section);
   pubnames_ptr = pubnames_buffer;
   while ((pubnames_ptr - pubnames_buffer) < dwarf_pubnames_size)
@@ -1146,8 +1093,6 @@ dwarf2_build_psymtabs_easy (struct objfile *objfile, int mainline)
     }
 
   aranges_buffer = dwarf2_read_section (objfile,
-					dwarf_aranges_offset,
-					dwarf_aranges_size,
 					dwarf_aranges_section);
 
 }
@@ -3857,11 +3802,11 @@ make_cleanup_free_die_list (struct die_info *dies)
    object file specified by OBJFILE into the psymbol_obstack and return it.  */
 
 char *
-dwarf2_read_section (struct objfile *objfile, file_ptr offset,
-		     unsigned int size, asection *sectp)
+dwarf2_read_section (struct objfile *objfile, asection *sectp)
 {
   bfd *abfd = objfile->obfd;
   char *buf, *retbuf;
+  bfd_size_type size = bfd_get_section_size_before_reloc (sectp);
 
   if (size == 0)
     return NULL;
@@ -3872,13 +3817,11 @@ dwarf2_read_section (struct objfile *objfile, file_ptr offset,
   if (retbuf != NULL)
     return retbuf;
 
-  if ((bfd_seek (abfd, offset, SEEK_SET) != 0) ||
-      (bfd_bread (buf, size, abfd) != size))
-    {
-      buf = NULL;
-      error ("Dwarf Error: Can't read DWARF data from '%s'",
-	     bfd_get_filename (abfd));
-    }
+  if (bfd_seek (abfd, sectp->filepos, SEEK_SET) != 0
+      || bfd_bread (buf, size, abfd) != size)
+    error ("Dwarf Error: Can't read DWARF data from '%s'",
+	   bfd_get_filename (abfd));
+
   return buf;
 }
 
