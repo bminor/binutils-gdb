@@ -52,9 +52,9 @@ into another language, under the above conditions for modified versions.
 @titlepage
 @finalout
 @title The GNU Binary Utilities
-@subtitle Version 1.97
+@subtitle Version 2.01
 @sp 1
-@subtitle October 1991
+@subtitle April 1993
 @author Roland H. Pesch
 @author Cygnus Support
 @page
@@ -133,8 +133,8 @@ Discard symbols
 @cindex archives
 @cindex collections of files
 @smallexample
-  ar [-]@var{p}@var{mod} [ @var{membername} ] @var{archive} @var{file}@dots{}
-  ar -M [ <mri-script ]
+ar [-]@var{p}@var{mod} [ @var{membername} ] @var{archive} @var{file}@dots{}
+ar -M [ <mri-script ]
 @end smallexample
 
 The GNU @code{ar} program creates, modifies, and extracts from
@@ -191,7 +191,7 @@ program.
 @section Controlling @code{ar} on the command line
 
 @smallexample
-  ar [-]@var{p}@var{mod} [ @var{membername} ] @var{archive} @var{file}@dots{}
+ar [-]@var{p}@var{mod} [ @var{membername} ] @var{archive} @var{file}@dots{}
 @end smallexample
 
 @cindex Unix compatibility, @code{ar}
@@ -372,6 +372,9 @@ advantage from the operation @samp{q}.
 This modifier requests the @emph{verbose} version of an operation.  Many
 operations display additional information, such as filenames processed,
 when the modifier @samp{v} is appended.
+
+@item V
+This modifier shows the version number of @code{ar}.
 @end table
 
 @node ar-scripts,  , ar-cmdline, ar
@@ -605,7 +608,7 @@ Do not copy compiler-generated local symbols.
 
 @item -V
 @itemx --version
-Show version number.
+Show the version number of @code{copy}.
 
 @item -v
 @itemx --verbose
@@ -628,12 +631,12 @@ The GNU linker @code{ld} is now described in a separate manual.
 @kindex nm
 
 @smallexample
-  nm [ -a | --debug-syms ]  [ -g | --extern-only ]
-      [ -s | --print-armap ]  [ -o | --print-file-name ]  
-      [ -n | --numeric-sort ]  [ -p | --no-sort ]
-      [ -r | --reverse-sort ]  [ -u | --undefined-only ]  
-      [ --target=@var{bfdname} ]
-      [ @var{objfile}@dots{} ]
+nm [ -a | --debug-syms ]  [ -g | --extern-only ]
+   [ -s | --print-armap ]  [ -o | --print-file-name ]  
+   [ -n | --numeric-sort ]  [ -p | --no-sort ]
+   [ -r | --reverse-sort ]  [ -u | --undefined-only ]  
+   [ --target=@var{bfdname} ]
+   [ @var{objfile}@dots{} ]
 @end smallexample
 
 GNU @code{nm} lists the symbols from object files @var{objfile}@dots{}.
@@ -711,11 +714,11 @@ Display only undefined symbols (those external to each object file).
 @kindex objdump
 
 @smallexample
-  objdump [ -a ]  [ -b @var{bfdname} ]  [ -d ]  [ -f ]
-          [ -h | --header ]  [ -i ]  [ -j @var{section} ]  [ -l ]
-          [ -m @var{machine} ]  [ -r | --reloc ]  [ -s ]
-          [ --stabs ]  [ -t | --syms ]  [ -x ]
-          @var{objfile}@dots{}
+objdump [ -a ]  [ -b @var{bfdname} ]  [ -d ]  [ -f ]
+        [ -h | --header ]  [ -i ]  [ -j @var{section} ]  [ -l ]
+        [ -m @var{machine} ]  [ -r | --reloc ]  [ -s ]
+        [ --stabs ]  [ -t | --syms ]  [ -x ]
+        @var{objfile}@dots{}
 @end smallexample
 
 @code{objdump} displays information about one or more object files.
@@ -844,7 +847,7 @@ relocation entries.  Using @samp{-x} is equivalent to specifying all of
 @cindex symbol index
 
 @smallexample
-  ranlib @var{archive}
+ranlib [-vV] @var{archive}
 @end smallexample
 
 @code{ranlib} generates an index to the contents of an archive and
@@ -861,6 +864,12 @@ The GNU @code{ranlib} program is another form of GNU @code{ar}; running
 @code{ranlib} is completely equivalent to executing @samp{ar -s}.
 @xref{ar}.
 
+@table @code
+@item -v
+@itemx -V
+Show the version number of @code{ranlib}.
+@end @table
+
 @node size, strip, ranlib, Top
 @chapter size
 
@@ -868,10 +877,10 @@ The GNU @code{ranlib} program is another form of GNU @code{ar}; running
 @cindex section sizes
 
 @smallexample
-  size [ -A | -B | --format=@var{compatibility} ]
-       [ --help ]  [ -d | -o | -x | --radix=@var{number} ]
-       [ --target=@var{bfdname} ]  [ -V | --version ]  
-       @var{objfile}@dots{}
+size [ -A | -B | --format=@var{compatibility} ]
+     [ --help ]  [ -d | -o | -x | --radix=@var{number} ]
+     [ --target=@var{bfdname} ]  [ -V | --version ]  
+     @var{objfile}@dots{}
 @end smallexample
 
 The GNU @code{size} utility lists the section sizes---and the total
@@ -900,7 +909,7 @@ Berkeley's.
 Here is an example of the Berkeley (default) format of output from
 @code{size}: 
 @smallexample
- eg$  size --format Berkeley ranlib size
+size --format Berkeley ranlib size
 text    data    bss     dec     hex     filename
 294880  81920   11592   388392  5ed28   ranlib
 294880  81920   11888   388688  5ee50   size
@@ -910,7 +919,7 @@ text    data    bss     dec     hex     filename
 This is the same data, but displayed closer to System V conventions:
 
 @smallexample
- eg$  size --format SysV ranlib size
+size --format SysV ranlib size
 ranlib  :
 section         size         addr
 .text         294880         8192       
@@ -953,8 +962,7 @@ on listing available formats.
 
 @item -V
 @itemx --version
-Display version number information for @code{size} itself.
-
+Display the version number of @code{size}.
 @end table
 
 @node strip, Index, size, Top
