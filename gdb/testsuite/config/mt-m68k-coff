@@ -9,7 +9,7 @@ AS = m68k-coff-as
 ASFLAGS = 
 FC =
 FCFLAGS = 
-LD = ld
+LD = m68k-coff-ld
 LDFLAGS =
 LIBS = 
 
