@@ -1,3 +1,7 @@
+Mon Sep  7 13:24:03 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* rs6000-core.c (_LONG_LONG):  Define for AIX 4.x only.
+
 Sat Sep  5 20:40:18 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libbfd-in.h (_bfd_nolink_bfd_gc_sections): Correct definition to
