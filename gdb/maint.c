@@ -259,35 +259,54 @@ print_bfd_flags (flagword flags)
 }
 
 static void
-print_section_table (bfd *abfd, asection *asect, void *arg)
+print_section_info (const char *name, flagword flags, 
+		    CORE_ADDR addr, CORE_ADDR endaddr, 
+		    unsigned long filepos)
 {
-  flagword flags;
-  char *string = arg;
+  /* FIXME-32x64: Need print_address_numeric with field width.  */
+  printf_filtered ("    0x%s", paddr (addr));
+  printf_filtered ("->0x%s", paddr (endaddr));
+  printf_filtered (" at 0x%s",
+		   local_hex_string_custom ((unsigned long) filepos, "08l"));
+  printf_filtered (": %s", name);
+  print_bfd_flags (flags);
+  printf_filtered ("\n");
+}
 
-  flags = bfd_get_section_flags (abfd, asect);
+static void
+print_bfd_section_info (bfd *abfd, 
+			asection *asect, 
+			void *arg)
+{
+  flagword flags = bfd_get_section_flags (abfd, asect);
+  const char *name = bfd_section_name (abfd, asect);
+
+  if (arg == NULL || *((char *) arg) == '\0' ||
+      strstr ((char *) arg, name) ||
+      match_bfd_flags ((char *) arg, flags))
+    {
+      CORE_ADDR addr, endaddr;
+
+      addr = bfd_section_vma (abfd, asect);
+      endaddr = addr + bfd_section_size (abfd, asect);
+      print_section_info (name, flags, addr, endaddr, asect->filepos);
+    }
+}
+
+static void
+print_objfile_section_info (bfd *abfd, 
+			    struct obj_section *asect, 
+			    char *string)
+{
+  flagword flags = bfd_get_section_flags (abfd, asect->the_bfd_section);
+  const char *name = bfd_section_name (abfd, asect->the_bfd_section);
 
   if (string == NULL || *string == '\0' ||
-      strstr (string, bfd_get_section_name (abfd, asect)) ||
+      strstr (string, name) ||
       match_bfd_flags (string, flags))
     {
-      /* FIXME-32x64: Need print_address_numeric with field width.  */
-      printf_filtered ("    %s",
-		       local_hex_string_custom
-		       ((unsigned long) bfd_section_vma (abfd, asect), 
-			"08l"));
-      printf_filtered ("->%s",
-		       local_hex_string_custom
-		       ((unsigned long) (bfd_section_vma (abfd, asect)
-					 + bfd_section_size (abfd, asect)),
-			"08l"));
-      printf_filtered (" at %s",
-		       local_hex_string_custom
-		       ((unsigned long) asect->filepos, "08l"));
-      printf_filtered (": %s", bfd_section_name (abfd, asect));
-
-      print_bfd_flags (flags);
-
-      printf_filtered ("\n");
+      print_section_info (name, flags, asect->addr, asect->endaddr, 
+			  asect->the_bfd_section->filepos);
     }
 }
 
@@ -301,7 +320,30 @@ maintenance_info_sections (char *arg, int from_tty)
       printf_filtered ("    `%s', ", bfd_get_filename (exec_bfd));
       wrap_here ("        ");
       printf_filtered ("file type %s.\n", bfd_get_target (exec_bfd));
-      bfd_map_over_sections (exec_bfd, print_section_table, arg);
+      if (arg && *arg && strstr (arg, "ALLOBJ"))
+	{
+	  struct objfile *ofile;
+	  struct obj_section *osect;
+
+	  /* Only this function cares about the 'ALLOBJ' argument; 
+	     if 'ALLOBJ' is the only argument, discard it rather than
+	     passing it down to print_objfile_section_info (which 
+	     wouldn't know how to handle it).  */
+	  if (strcmp (arg, "ALLOBJ") == 0)
+	    arg = NULL;
+
+	  ALL_OBJFILES (ofile)
+	    {
+	      printf_filtered ("  Object file: %s\n", 
+			       bfd_get_filename (ofile->obfd));
+	      ALL_OBJFILE_OSECTIONS (ofile, osect)
+		{
+		  print_objfile_section_info (ofile->obfd, osect, arg);
+		}
+	    }
+	}
+      else 
+	bfd_map_over_sections (exec_bfd, print_bfd_section_info, arg);
     }
 
   if (core_bfd)
@@ -310,7 +352,7 @@ maintenance_info_sections (char *arg, int from_tty)
       printf_filtered ("    `%s', ", bfd_get_filename (core_bfd));
       wrap_here ("        ");
       printf_filtered ("file type %s.\n", bfd_get_target (core_bfd));
-      bfd_map_over_sections (core_bfd, print_section_table, arg);
+      bfd_map_over_sections (core_bfd, print_bfd_section_info, arg);
     }
 }
 
@@ -580,7 +622,15 @@ to test internal functions such as the C++ demangler, etc.",
   add_alias_cmd ("i", "info", class_maintenance, 1, &maintenancelist);
 
   add_cmd ("sections", class_maintenance, maintenance_info_sections,
-	   "List the BFD sections of the exec and core files.",
+	   "List the BFD sections of the exec and core files. \n
+Arguments may be any combination of:\n\
+	[one or more section names]\n\
+	ALLOC LOAD RELOC READONLY CODE DATA ROM CONSTRUCTOR\n\
+	HAS_CONTENTS NEVER_LOAD COFF_SHARED_LIBRARY IS_COMMON\n\
+Sections matching any argument will be listed (no argument\n\
+implies all sections).  In addition, the special argument\n\
+	ALLOBJ\n\
+lists all sections from all object files, including shared libraries.",
 	   &maintenanceinfolist);
 
   add_prefix_cmd ("print", class_maintenance, maintenance_print_command,

@@ -1,3 +1,13 @@
+2001-12-20  Michael Snyder  <msnyder@redhat.com>
+
+	* maint.c (maintenance_info_sections): Accept new argument
+	'ALLOBJ', iterate over all object files.
+	(print_section_table): Delete.  Replaced by:
+	(print_section_info): New function.
+	(print_bfd_section_info): New function.
+	(print_objfile_section_info): New function.
+	(_initialize_maint_commands): Add help for new features.
+
 2001-12-20  Kevin Buettner  <kevinb@redhat.com>
 
 	* arm-tdep.c (arm_init_extra_frame_info): Add special case for
