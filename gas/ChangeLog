@@ -1,3 +1,7 @@
+2003-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* as.h: Include fopen-bin.h not fopen-same.h for mingw32 hosts.
+
 2003-01-21  Fabio Alemagna  <falemagn@aros.org>
 
 	* configure.in: Handle *-*-aros*.

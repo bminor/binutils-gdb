@@ -188,7 +188,7 @@ extern char **environ;
 #endif /* __FILE__ */
 
 #ifndef FOPEN_WB
-#ifdef GO32
+#if defined GO32 || defined __MINGW32__
 #include "fopen-bin.h"
 #else
 #include "fopen-same.h"
