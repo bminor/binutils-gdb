@@ -27,6 +27,10 @@
 #include "opcode/txvu.h"
 #include "elf/txvu.h"
 
+static TXVU_INSN txvu_insert_operand
+     PARAMS ((TXVU_INSN, const struct txvu_operand *, int, offsetT,
+	      char *, unsigned int));
+
 const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
 const char line_separator_chars[] = "!";
@@ -103,12 +107,17 @@ struct txvu_fixup
 
 #define MAX_FIXUPS 5
 
-static char * assemble_insn PARAMS ((char *, int));
+static char * assemble_insn PARAMS ((char *, int, char *));
 
 void
 md_assemble (str)
      char *str;
 {
+  /* The lower instruction has the lower address.
+     Handle this by grabbing 8 bytes now, and then filling each word
+     as appropriate.  */
+  char *f = frag_more (8);
+
 #ifdef VERTICAL_BAR_SEPARATOR
   char *p = strchr (str, '|');
 
@@ -119,27 +128,29 @@ md_assemble (str)
     }
 
   *p = 0;
-  assemble_insn (str, 0);
+  assemble_insn (str, 0, f + 4);
   *p = '|';
-  assemble_insn (p + 1, 1);
+  assemble_insn (p + 1, 1, f);
 #else
-  str = assemble_insn (str, 0);
+  str = assemble_insn (str, 0, f + 4);
   /* Don't assemble next one if we couldn't assemble the first.  */
   if (str)
-    assemble_insn (str, 1);
+    assemble_insn (str, 1, f);
 #endif
 }
 
 /* Assemble one instruction.
    LOWER_P is non-zero if assembling in the lower insn slot.
-   The result is a pointer to beyond the end of the scanned insn.
+   The result is a pointer to beyond the end of the scanned insn
+   or NULL if an error occured.
    If this is the upper insn, the caller can pass back to result to us
    parse the lower insn.  */
 
 static char *
-assemble_insn (str, lower_p)
+assemble_insn (str, lower_p, buf)
      char *str;
      int lower_p;
+     char *buf;
 {
   const struct txvu_opcode *opcode;
   char *start;
@@ -368,7 +379,6 @@ assemble_insn (str, lower_p)
       if (*syn == '\0')
 	{
 	  int i;
-	  char *f;
 
 	  /* For the moment we assume a valid `str' can only contain blanks
 	     now.  IE: We needn't try again with a longer version of the
@@ -386,11 +396,10 @@ assemble_insn (str, lower_p)
 	    as_bad ("junk at end of line: `%s'", str);
 
 	  /* Write out the instruction.
-	     It is important to fetch enough space in one call to `frag_more'.
-	     We use (f - frag_now->fr_literal) to compute where we are and we
-	     don't want frag_now to change between calls.  */
-	  f = frag_more (4);
-	  md_number_to_chars (f, insn, 4);
+	     Reminder: it is important to fetch enough space in one call to
+	     `frag_more'.  We use (f - frag_now->fr_literal) to compute where
+	     we are and we don't want frag_now to change between calls.  */
+	  md_number_to_chars (buf, insn, 4);
 
 	  /* Create any fixups.  */
 	  for (i = 0; i < fc; ++i)
@@ -408,9 +417,7 @@ assemble_insn (str, lower_p)
 	      op_type = fixups[i].opindex;
 	      reloc_type = op_type + (int) BFD_RELOC_UNUSED;
 	      operand = &txvu_operands[op_type];
-	      fix_new_exp (frag_now,
-			   ((f - frag_now->fr_literal)
-			    + (operand->flags & TXVU_OPERAND_LIMM ? 4 : 0)), 4,
+	      fix_new_exp (frag_now, buf - frag_now->fr_literal, 4,
 			   &fixups[i].exp,
 			   (operand->flags & TXVU_OPERAND_RELATIVE_BRANCH) != 0,
 			   (bfd_reloc_code_real_type) reloc_type);
@@ -469,7 +476,7 @@ md_pcrel_from_section (fixP, sec)
     }
 
   /* FIXME: `& -16L'? */
-  return (fixP->fx_frag->fr_address + fixP->fx_where) & -4L;
+  return (fixP->fx_frag->fr_address + fixP->fx_where) & -8L;
 }
 
 /* Apply a fixup to the object code.  This is called for all the
@@ -487,19 +494,137 @@ md_apply_fix3 (fixP, valueP, seg)
   char *where = fixP->fx_frag->fr_literal + fixP->fx_where;
   valueT value;
 
-  as_fatal ("txvu md_apply_fix3\n");
+  /* FIXME FIXME FIXME: The value we are passed in *valueP includes
+     the symbol values.  Since we are using BFD_ASSEMBLER, if we are
+     doing this relocation the code in write.c is going to call
+     bfd_perform_relocation, which is also going to use the symbol
+     value.  That means that if the reloc is fully resolved we want to
+     use *valueP since bfd_perform_relocation is not being used.
+     However, if the reloc is not fully resolved we do not want to use
+     *valueP, and must use fx_offset instead.  However, if the reloc
+     is PC relative, we do want to use *valueP since it includes the
+     result of md_pcrel_from.  This is confusing.  */
+
+  if (fixP->fx_addsy == (symbolS *) NULL)
+    {
+      value = *valueP;
+      fixP->fx_done = 1;
+    }
+  else if (fixP->fx_pcrel)
+    {
+      value = *valueP;
+    }
+  else
+    {
+      value = fixP->fx_offset;
+      if (fixP->fx_subsy != (symbolS *) NULL)
+	{
+	  if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
+	    value -= S_GET_VALUE (fixP->fx_subsy);
+	  else
+	    {
+	      /* We can't actually support subtracting a symbol.  */
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
+			    "expression too complex");
+	    }
+	}
+    }
+
+  /* Check for txvu_operand's.  These are indicated with a reloc value
+     >= BFD_RELOC_UNUSED.  */
+
+  if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
+    {
+      int opindex;
+      const struct txvu_operand *operand;
+      TXVU_INSN insn;
+
+      opindex = (int) fixP->fx_r_type - (int) BFD_RELOC_UNUSED;
+
+      operand = &txvu_operands[opindex];
+
+      /* Fetch the instruction, insert the fully resolved operand
+	 value, and stuff the instruction back again.  */
+      insn = bfd_getl32 ((unsigned char *) where);
+      insn = txvu_insert_operand (insn, operand, -1, (offsetT) value,
+				  fixP->fx_file, fixP->fx_line);
+      bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);
+
+      if (fixP->fx_done)
+	{
+	  /* Nothing else to do here.  */
+	  return 1;
+	}
+
+      /* Determine a BFD reloc value based on the operand information.
+	 We are only prepared to turn a few of the operands into relocs.  */
+      /* FIXME: This test is a hack.  */
+      if ((operand->flags & TXVU_OPERAND_RELATIVE_BRANCH) != 0)
+	{
+	  assert ((operand->flags & TXVU_OPERAND_RELATIVE_BRANCH) != 0
+		  && operand->bits == 11
+		  && operand->shift == 0);
+	  fixP->fx_r_type = BFD_RELOC_TXVU_11_PCREL;
+	}
+      else
+	{
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			"unresolved expression that must be resolved");
+	  fixP->fx_done = 1;
+	  return 1;
+	}
+    }
+  else
+    {
+      switch (fixP->fx_r_type)
+	{
+	case BFD_RELOC_8:
+	  md_number_to_chars (where, value, 1);
+	  break;
+	case BFD_RELOC_16:
+	  md_number_to_chars (where, value, 2);
+	  break;
+	case BFD_RELOC_32:
+	  md_number_to_chars (where, value, 4);
+	  break;
+	default:
+	  abort ();
+	}
+    }
+
+  fixP->fx_addnumber = value;
+
+  return 1;
 }
 
 /* Translate internal representation of relocation info to BFD target
    format.  */
 
 arelent *
-tc_gen_reloc (section, fixp)
+tc_gen_reloc (section, fixP)
      asection *section;
-     fixS *fixp;
+     fixS *fixP;
 {
-  /* relocs not handled yet */
-  as_fatal ("txvu tc_gen_reloc\n");
+  arelent *reloc;
+
+  reloc = (arelent *) xmalloc (sizeof (arelent));
+
+  reloc->sym_ptr_ptr = &fixP->fx_addsy->bsym;
+  reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
+  reloc->howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
+  if (reloc->howto == (reloc_howto_type *) NULL)
+    {
+      as_bad_where (fixP->fx_file, fixP->fx_line,
+		    "internal error: can't export reloc type %d (`%s')",
+		    fixP->fx_r_type, bfd_get_reloc_code_name (fixP->fx_r_type));
+      return NULL;
+    }
+
+  assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
+
+  reloc->addend = fixP->fx_addnumber;
+
+  return reloc;
 }
 
 /* Write a value out to the object file, using the appropriate endianness.  */
@@ -582,4 +707,81 @@ md_atof (type, litP, sizeP)
     }
      
   return 0;
+}
+
+/* Insert an operand value into an instruction.  */
+
+static TXVU_INSN
+txvu_insert_operand (insn, operand, mods, val, file, line)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     offsetT val;
+     char *file;
+     unsigned int line;
+{
+  if (operand->bits != 32)
+    {
+      long min, max;
+      offsetT test;
+
+      if ((operand->flags & TXVU_OPERAND_RELATIVE_BRANCH) != 0)
+	{
+	  if ((val & 7) != 0)
+	    {
+	      if (file == (char *) NULL)
+		as_warn ("branch to misaligned address");
+	      else
+		as_warn_where (file, line, "branch to misaligned address");
+	    }
+	  val >>= 3;
+	}
+
+      if ((operand->flags & TXVU_OPERAND_SIGNED) != 0)
+	{
+	  if ((operand->flags & TXVU_OPERAND_SIGNOPT) != 0)
+	    max = (1 << operand->bits) - 1;
+	  else
+	    max = (1 << (operand->bits - 1)) - 1;
+	  min = - (1 << (operand->bits - 1));
+	}
+      else
+	{
+	  max = (1 << operand->bits) - 1;
+	  min = 0;
+	}
+
+      if ((operand->flags & TXVU_OPERAND_NEGATIVE) != 0)
+	test = - val;
+      else
+	test = val;
+
+      if (test < (offsetT) min || test > (offsetT) max)
+	{
+	  const char *err =
+	    "operand out of range (%s not between %ld and %ld)";
+	  char buf[100];
+
+	  sprint_value (buf, test);
+	  if (file == (char *) NULL)
+	    as_warn (err, buf, min, max);
+	  else
+	    as_warn_where (file, line, err, buf, min, max);
+	}
+    }
+
+  if (operand->insert)
+    {
+      const char *errmsg;
+
+      errmsg = NULL;
+      insn = (*operand->insert) (insn, operand, mods, (long) val, &errmsg);
+      if (errmsg != (const char *) NULL)
+	as_warn (errmsg);
+    }
+  else
+    insn |= (((long) val & ((1 << operand->bits) - 1))
+	     << operand->shift);
+
+  return insn;
 }

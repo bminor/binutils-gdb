@@ -50,7 +50,5 @@
 			(as_fatal("estimate_size_before_relax called"),1)
 
 #define MD_APPLY_FIX3
-extern int txvu_md_apply_fix3 ();
-#define md_apply_fix3 txvu_md_apply_fix3
 
 #define TC_HANDLES_FX_DONE
