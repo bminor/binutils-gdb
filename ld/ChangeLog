@@ -1,3 +1,7 @@
+2002-04-04  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* emulparams/elf64btsmip.sh: n64 replaces .reginfo with .MIPS.options.
+
 2002-04-03  Jakub Jelinek  <jakub@redhat.com>
 
 	* ldexp.c (fold_binary) [DATA_SEGMENT_ALIGN]: If common page size

@@ -17,7 +17,7 @@ unset EXECUTABLE_SYMBOLS
 unset WRITABLE_RODATA
 
 # Magic sections.
-INITIAL_READONLY_SECTIONS='.reginfo : { *(.reginfo) }'
+INITIAL_READONLY_SECTIONS='.MIPS.options : { *(.MIPS.options) }'
 OTHER_TEXT_SECTIONS='*(.mips16.fn.*) *(.mips16.call.*)'
 OTHER_SECTIONS='
   .gptab.sdata : { *(.gptab.data) *(.gptab.sdata) }
