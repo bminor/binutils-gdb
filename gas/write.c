@@ -476,7 +476,7 @@ adjust_reloc_syms (abfd, sec, xxx)
 }
 
 static void
-write_contents (abfd, sec, xxx)
+write_relocs (abfd, sec, xxx)
      bfd *abfd;
      asection *sec;
      char *xxx;
@@ -503,7 +503,7 @@ write_contents (abfd, sec, xxx)
   /* Set up reloc information as well.  */
   relocs = (arelent **) bfd_alloc_by_size_t (stdoutput,
 					     n * sizeof (arelent *));
-  bzero ((char*)relocs, n * sizeof (arelent*));
+  memset ((char*)relocs, 0, n * sizeof (arelent*));
 
   i = 0;
   for (fixp = seginfo->fix_root; fixp != (fixS *) NULL; fixp = fixp->fx_next)
@@ -527,6 +527,7 @@ write_contents (abfd, sec, xxx)
 	  continue;
 	}
       data = fixp->fx_frag->fr_literal + fixp->fx_where;
+      /* @@ Assumes max size of reloc is 4. */
       if (fixp->fx_where + 4
 	  > fixp->fx_frag->fr_fix + fixp->fx_frag->fr_offset)
 	abort ();
@@ -613,13 +614,29 @@ write_contents (abfd, sec, xxx)
       }
   }
 #endif
+}
 
-  /* Force calculations (size, vma) to get done.  */
-  bfd_set_section_contents (stdoutput, sec, "", 0, (addressT) 0);
+static void
+write_contents (abfd, sec, xxx)
+     bfd *abfd;
+     asection *sec;
+     char *xxx;
+{
+  segment_info_type *seginfo = seg_info (sec);
+  unsigned long offset = 0;
+  fragS *frags;
+  int i, n;
+  arelent **relocs;
+  fixS *fixp;
 
   /* Write out the frags.  */
   if (! (bfd_get_section_flags (abfd, sec) & SEC_HAS_CONTENTS))
     return;
+
+#if 0 /* Who cares?  Let the first call, below, do it.  */
+  /* Force calculations (size, vma) to get done.  */
+  bfd_set_section_contents (stdoutput, sec, "", 0, (addressT) 0);
+#endif
 
   for (frags = seginfo->frchainP->frch_root;
        frags;
@@ -1281,6 +1298,8 @@ write_object_file ()
 
   /* Now that all the sizes are known, and contents correct, we can
      start writing the file.  */
+  bfd_map_over_sections (stdoutput, write_relocs, (char *) 0);
+
   bfd_map_over_sections (stdoutput, write_contents, (char *) 0);
 
   output_file_close (out_file_name);
