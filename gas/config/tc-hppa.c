@@ -4047,14 +4047,6 @@ tc_gen_reloc (section, fixp)
 
       code = *codes[0];
 
-      reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
-      *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
-      reloc->howto = bfd_reloc_type_lookup (stdoutput,
-					    (bfd_reloc_code_real_type) code);
-      reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
-
-      assert (reloc->howto && (unsigned int) code == reloc->howto->type);
-
       /* Now, do any processing that is dependent on the relocation type.  */
       switch (code)
 	{
@@ -4088,10 +4080,24 @@ tc_gen_reloc (section, fixp)
 	  break;
 #endif
 
+	case R_PARISC_DIR32:
+	  /* Facilitate hand-crafted unwind info.  */
+	  if (strcmp (section->name, UNWIND_SECTION_NAME) == 0)
+	    code = R_PARISC_SEGREL32;
+	  /* Fall thru */
+
 	default:
 	  reloc->addend = fixp->fx_offset;
 	  break;
 	}
+
+      reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+      *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
+      reloc->howto = bfd_reloc_type_lookup (stdoutput,
+					    (bfd_reloc_code_real_type) code);
+      reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+
+      assert (reloc->howto && (unsigned int) code == reloc->howto->type);
       break;
     }
 #else /* OBJ_SOM */

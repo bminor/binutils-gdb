@@ -1,5 +1,8 @@
 2001-01-16  Alan Modra  <alan@linuxcare.com.au>
 
+	* config/tc-hppa.c (tc_gen_reloc): Use SEGREL32 instead of DIR32
+	relocs for .PARISC.unwind section.
+
 	* config/tc-hppa.c (pa_build_unwind_subspace): Build unwind
 	depending on section flags, not just for .text.
 
