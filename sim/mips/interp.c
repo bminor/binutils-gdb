@@ -44,6 +44,7 @@ code on the hardware.
 #include "sky-vpe.h"
 #include "sky-libvpe.h"
 #include "sky-pke.h"
+#include "idecode.h"
 #endif
 /* end-sanitize-sky */
 
@@ -671,31 +672,31 @@ sim_store_register (sd,rn,memory,length)
       if( rn < NUM_VU_REGS )
 	{
 	  if (rn < NUM_VU_INTEGER_REGS)
-	    return write_vu_int_reg (&(vu0_device.state->regs), rn, memory);
+	    return write_vu_int_reg (&(vu0_device.regs), rn, memory);
 	  else if (rn >= FIRST_VEC_REG)
 	    {
 	      rn -= FIRST_VEC_REG;
-	      return write_vu_vec_reg (&(vu0_device.state->regs), rn>>2, rn&3,
+	      return write_vu_vec_reg (&(vu0_device.regs), rn>>2, rn&3,
 				       memory);
 	    }
 	  else switch (rn - NUM_VU_INTEGER_REGS)
 	    {
 	    case 0:
-	      return write_vu_special_reg (vu0_device.state, VU_REG_CIA, 
+	      return write_vu_special_reg (&vu0_device, VU_REG_CIA, 
 					   memory);
 	    case 1:
-	      return write_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MR,
+	      return write_vu_misc_reg (&(vu0_device.regs), VU_REG_MR,
 					memory);
 	    case 2: /* VU0 has no P register */
 	      return 4;
 	    case 3:
-	      return write_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MI,
+	      return write_vu_misc_reg (&(vu0_device.regs), VU_REG_MI,
 					memory);
 	    case 4:
-	      return write_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MQ,
+	      return write_vu_misc_reg (&(vu0_device.regs), VU_REG_MQ,
 					memory);
 	    default:
-	      return write_vu_acc_reg (&(vu0_device.state->regs), 
+	      return write_vu_acc_reg (&(vu0_device.regs), 
 				      rn - (NUM_VU_INTEGER_REGS + 5),
 				      memory);
 	    }
@@ -706,32 +707,32 @@ sim_store_register (sd,rn,memory,length)
       if (rn < NUM_VU_REGS)
 	{
 	  if (rn < NUM_VU_INTEGER_REGS) 
-	    return write_vu_int_reg (&(vu1_device.state->regs), rn, memory);
+	    return write_vu_int_reg (&(vu1_device.regs), rn, memory);
 	  else if (rn >= FIRST_VEC_REG)
 	    {
 	      rn -= FIRST_VEC_REG;
-	      return write_vu_vec_reg (&(vu1_device.state->regs), 
+	      return write_vu_vec_reg (&(vu1_device.regs), 
 				       rn >> 2, rn & 3, memory);
 	    }
 	  else switch (rn - NUM_VU_INTEGER_REGS)
 	    {
 	    case 0:
-	      return write_vu_special_reg (vu1_device.state, VU_REG_CIA,
+	      return write_vu_special_reg (&vu1_device, VU_REG_CIA,
 					   memory);
 	    case 1:
-	      return write_vu_misc_reg (&(vu1_device.state->regs), VU_REG_MR,
+	      return write_vu_misc_reg (&(vu1_device.regs), VU_REG_MR,
 					memory);
 	    case 2: 
-	      return write_vu_misc_reg (&(vu1_device.state->regs), VU_REG_MP,
+	      return write_vu_misc_reg (&(vu1_device.regs), VU_REG_MP,
 					memory);
 	    case 3:
-	      return write_vu_misc_reg (&(vu1_device.state->regs), VU_REG_MI,
+	      return write_vu_misc_reg (&(vu1_device.regs), VU_REG_MI,
 					memory);
 	    case 4:
-	      return write_vu_misc_reg (&(vu1_device.state->regs), VU_REG_MQ,
+	      return write_vu_misc_reg (&(vu1_device.regs), VU_REG_MQ,
 					memory);
 	    default:
-	      return write_vu_acc_reg (&(vu1_device.state->regs), 
+	      return write_vu_acc_reg (&(vu1_device.regs), 
 				       rn - (NUM_VU_INTEGER_REGS + 5),
 				       memory);
 	    }
@@ -846,31 +847,31 @@ sim_fetch_register (sd,rn,memory,length)
       if (rn < NUM_VU_REGS)
 	{
 	  if (rn < NUM_VU_INTEGER_REGS)
-	    return read_vu_int_reg (&(vu0_device.state->regs), rn, memory);
+	    return read_vu_int_reg (&(vu0_device.regs), rn, memory);
 	  else if (rn >= FIRST_VEC_REG)
 	    {
 	      rn -= FIRST_VEC_REG;
-	      return read_vu_vec_reg (&(vu0_device.state->regs), rn>>2, rn & 3,
+	      return read_vu_vec_reg (&(vu0_device.regs), rn>>2, rn & 3,
 				      memory);
 	    }
 	  else switch (rn - NUM_VU_INTEGER_REGS)
 	    {
 	    case 0:
-	      return read_vu_special_reg(vu0_device.state, VU_REG_CIA, memory);
+	      return read_vu_special_reg(&vu0_device, VU_REG_CIA, memory);
 	    case 1:
-	      return read_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MR,
+	      return read_vu_misc_reg (&(vu0_device.regs), VU_REG_MR,
 				      memory);
 	    case 2: /* VU0 has no P register */
 	      *((int *) memory) = 0;
 	      return 4;
 	    case 3:
-	      return read_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MI,
+	      return read_vu_misc_reg (&(vu0_device.regs), VU_REG_MI,
 				      memory);
 	    case 4:
-	      return read_vu_misc_reg (&(vu0_device.state->regs), VU_REG_MQ,
+	      return read_vu_misc_reg (&(vu0_device.regs), VU_REG_MQ,
 				      memory);
 	    default:
-	      return read_vu_acc_reg (&(vu0_device.state->regs), 
+	      return read_vu_acc_reg (&(vu0_device.regs), 
 				      rn - (NUM_VU_INTEGER_REGS + 5),
 				      memory);
 	    }
@@ -881,31 +882,31 @@ sim_fetch_register (sd,rn,memory,length)
       if (rn < NUM_VU_REGS)
 	{
 	  if (rn < NUM_VU_INTEGER_REGS) 
-	    return read_vu_int_reg (&(vu1_device.state->regs), rn, memory);
+	    return read_vu_int_reg (&(vu1_device.regs), rn, memory);
 	  else if (rn >= FIRST_VEC_REG)
 	    {
 	      rn -= FIRST_VEC_REG;
-	      return read_vu_vec_reg (&(vu1_device.state->regs), 
+	      return read_vu_vec_reg (&(vu1_device.regs), 
 				      rn >> 2, rn & 3, memory);
 	    }
 	  else switch (rn - NUM_VU_INTEGER_REGS)
 	    {
 	    case 0:
-	      return read_vu_special_reg(vu1_device.state, VU_REG_CIA, memory);
+	      return read_vu_special_reg(&vu1_device, VU_REG_CIA, memory);
 	    case 1:
-	      return read_vu_misc_reg (&(vu1_device.state->regs), 
+	      return read_vu_misc_reg (&(vu1_device.regs), 
 				       VU_REG_MR, memory);
 	    case 2:
-	      return read_vu_misc_reg (&(vu1_device.state->regs), 
+	      return read_vu_misc_reg (&(vu1_device.regs), 
 				       VU_REG_MP, memory);
 	    case 3:
-	      return read_vu_misc_reg (&(vu1_device.state->regs), 
+	      return read_vu_misc_reg (&(vu1_device.regs), 
 				       VU_REG_MI, memory);
 	    case 4:
-	      return read_vu_misc_reg (&(vu1_device.state->regs), 
+	      return read_vu_misc_reg (&(vu1_device.regs), 
 				       VU_REG_MQ, memory);
 	    default:
-	      return read_vu_acc_reg (&(vu1_device.state->regs), 
+	      return read_vu_acc_reg (&(vu1_device.regs), 
 				      rn - (NUM_VU_INTEGER_REGS + 5),
 				      memory);
 	    }
@@ -3213,7 +3214,7 @@ decode_coproc (SIM_DESC sd,
       }
     break;
     
-    case 2: /* undefined co-processor */
+    case 2: /* co-processor 2 */
       {
 	int handle = 0;
 
@@ -3223,12 +3224,14 @@ decode_coproc (SIM_DESC sd,
 
 	int i_25_21 = (instruction >> 21) & 0x1f;
 	int i_20_16 = (instruction >> 16) & 0x1f;
+	int i_20_6 = (instruction >> 6) & 0x7fff;
 	int i_15_11 = (instruction >> 11) & 0x1f;
 	int i_15_0 = instruction & 0xffff;
 	int i_10_1 = (instruction >> 1) & 0x3ff;
+	int i_10_0 = instruction & 0x7ff;
+	int i_10_6 = (instruction >> 6) & 0x1f;
 	int i_5_0 = instruction & 0x03f;
 	int interlock = instruction & 0x01;
-	int co = (instruction >> 25) & 0x01;
 	/* setup for semantic.c-like actions below */
 	typedef unsigned_4 instruction_word;
 	int CIA = cia;
@@ -3272,101 +3275,134 @@ decode_coproc (SIM_DESC sd,
 	  {
 	    int rt = i_20_16;
 	    int id = i_15_11;
-	    address_word vu_cr_addr; /* VU control register address */
-	    unsigned_4 data;
 
 	    /* interlock checking */
-	    if(vu0_busy_in_macro_mode()) /* busy in macro mode */
-	      {
-		/* interlock bit invalid here */
-		if(interlock) 
-		  ; /* XXX: warning */
+	    /* POLICY: never busy in macro mode */
+	    while(vu0_busy() && interlock)
+	      vu0_issue(sd);
 
-		/* always check data hazard */
-		while(vu0_macro_hazard_check(id))
-		  vu0_issue(sd);
-	      }
-	    else if(vu0_busy_in_micro_mode() && interlock)
-	      {
-		while(vu0_busy_in_micro_mode())
-		  vu0_issue(sd);
-	      }
-
-	    /* compute VU register address */
+	    /* perform VU register address */
 	    if(i_25_21 == 0x01) /* QMFC2 */
-	      vu_cr_addr = VU0_REGISTER_WINDOW_START + (id * 16);
+	      {
+		unsigned_16 xyzw;
+		/* one word at a time, argh! */
+		read_vu_vec_reg(&(vu0_device.regs), id, 0, A4_16(& xyzw, 3));
+		read_vu_vec_reg(&(vu0_device.regs), id, 1, A4_16(& xyzw, 2));
+		read_vu_vec_reg(&(vu0_device.regs), id, 2, A4_16(& xyzw, 1));
+		read_vu_vec_reg(&(vu0_device.regs), id, 3, A4_16(& xyzw, 0));
+		xyzw = T2H_16(xyzw);
+		memcpy(& GPR[rt], & xyzw, sizeof(xyzw));
+	      }
 	    else /* CFC2 */
-	      vu_cr_addr = VU0_MST + (id * 16);
-
-	    /* read or write word */
-	    data = sim_core_read_aligned_4(cpu, cia, read_map, vu_cr_addr);
-	    GPR[rt] = EXTEND64(data);
+	      {
+		unsigned_4 data;
+		/* enum + int calculation, argh! */
+		id = VU_REG_MST + 16 * id;
+		read_vu_misc_reg(&(vu0_device.regs), id, & data);
+		GPR[rt] = EXTEND32(T2H_4(data));
+	      }
 	  }
 	else if((i_25_21 == 0x06 && i_10_1 == 0x000) || /* CTC2 */
 		(i_25_21 == 0x05)) /* QMTC2 */
 	  {
 	    int rt = i_20_16;
 	    int id = i_15_11;
-	    address_word vu_cr_addr; /* VU control register address */
-	    unsigned_4 data;
 
 	    /* interlock checking */
-	    if(vu0_busy_in_macro_mode()) /* busy in macro mode */
+	    /* POLICY: never busy in macro mode */
+	    if(vu0_busy() && interlock)
 	      {
-		/* interlock bit invalid here */
-		if(interlock) 
-		  ; /* XXX: warning */
-
-		/* always check data hazard */
-		while(vu0_macro_hazard_check(id))
+		while(! vu0_micro_interlock_released())
 		  vu0_issue(sd);
 	      }
-	    else if(vu0_busy_in_micro_mode())
-	      {
-		if(interlock)
-		  {
-		    while(! vu0_micro_interlock_released())
-		      vu0_issue(sd);
-		  }
-	      }
-
-	    /* compute VU register address */
+	    
+	    /* perform VU register address */
 	    if(i_25_21 == 0x05) /* QMTC2 */
-	      vu_cr_addr = VU0_REGISTER_WINDOW_START + (id * 16);
+	      {
+		unsigned_16 xyzw;
+		memcpy(& xyzw, & GPR[rt], sizeof(xyzw));
+		xyzw = H2T_16(xyzw);
+		/* one word at a time, argh! */
+		write_vu_vec_reg(&(vu0_device.regs), id, 0, A4_16(& xyzw, 3));
+		write_vu_vec_reg(&(vu0_device.regs), id, 1, A4_16(& xyzw, 2));
+		write_vu_vec_reg(&(vu0_device.regs), id, 2, A4_16(& xyzw, 1));
+		write_vu_vec_reg(&(vu0_device.regs), id, 3, A4_16(& xyzw, 0));
+	      }
 	    else /* CTC2 */
-	      vu_cr_addr = VU0_MST + (id * 16);
-
-	    data = GPR[rt];
-	    sim_core_write_aligned_4(cpu, cia, write_map, vu_cr_addr, data);
+	      {
+		unsigned_4 data = H2T_4(GPR[rt]);
+		/* enum + int calculation, argh! */
+		id = VU_REG_MST + 16 * id;
+		write_vu_misc_reg(&(vu0_device.regs), id, & data);
+	      }
 	  }
-	else if( 0 /* XXX: ... upper ... */)
+	else if(i_10_0 == 0x3bf) /* VWAITQ */
+	  {
+	    while(vu0_q_busy())
+	      vu0_issue(sd);
+	  }
+	else if(i_5_0 == 0x38) /* VCALLMS */
+	  {
+	    unsigned_4 data = H2T_2(i_20_6);
+
+	    while(vu0_busy())
+	      vu0_issue(sd);
+
+	    /* write to reserved CIA register to get VU0 moving */
+	    write_vu_misc_reg(&(vu0_device.regs), VU_REG_CIA, & data);
+	  }
+	else if(i_5_0 == 0x39) /* VCALLMSR */
+	  {
+	    unsigned_4 data;
+
+	    while(vu0_busy())
+	      vu0_issue(sd);
+
+	    read_vu_misc_reg(&(vu0_device.regs), VU_REG_CMSAR0, & data);
+	    /* write to reserved CIA register to get VU0 moving */
+	    write_vu_misc_reg(&(vu0_device.regs), VU_REG_CIA, & data);
+	  }
+	/* handle all remaining UPPER VU instructions in one block */
+	else if((i_5_0 <  0x30) || /* VADDx .. VMINI */
+		(i_5_0 >= 0x3c && i_10_6 < 0x0c)) /* VADDAx .. VNOP */
 	  {
 	    unsigned_4 vu_upper, vu_lower;
 	    vu_upper =
-	      0x00000000 | /* bits 31 .. 25 */
-	      instruction & 0x01ffffff; /* bits 24 .. 0 */
+	      0x40000000 | /* bits 31 .. 25 */
+	      (instruction & 0x01ffffff); /* bits 24 .. 0 */
 	    vu_lower = 0x8000033c; /* NOP */
 
-	    while(vu0_busy_in_micro_mode())
+	    /* POLICY: never busy in macro mode */
+	    while(vu0_busy())
 	      vu0_issue(sd);
 
 	    vu0_macro_issue(vu_upper, vu_lower);
+
+	    /* POLICY: wait for completion of macro-instruction */
+	    while(vu0_busy())
+	      vu0_issue(sd);
 	  }
-	else if( 0 /* XXX: ... lower ... */)
-	  {
+	/* handle all remaining LOWER VU instructions in one block */
+	else if((i_5_0 >= 0x30 && i_5_0 <= 0x35) || /* VIADD .. VIOR */
+		(i_5_0 >= 0x3c && i_10_6 >= 0x0c)) /* VMOVE .. VRXOR */
+	  {                            /* N.B.: VWAITQ already covered by prior case */
 	    unsigned_4 vu_upper, vu_lower;
-	    vu_upper = 0x000002ff; /* NOP */
+	    vu_upper = 0x400002ff; /* END/NOP */
 	    vu_lower =
 	      0x10000000 | /* bits 31 .. 25 */
-	      instruction & 0x01ffffff; /* bits 24 .. 0 */
+	      (instruction & 0x01ffffff); /* bits 24 .. 0 */
 
-	    while(vu0_busy_in_micro_mode())
+	    /* POLICY: never busy in macro mode */
+	    while(vu0_busy())
 	      vu0_issue(sd);
 
 	    vu0_macro_issue(vu_upper, vu_lower);
+
+	    /* POLICY: wait for completion of macro-instruction */
+	    while(vu0_busy())
+	      vu0_issue(sd);
 	  }
-	/* XXX */
-	/* ... other COP2 instructions ... */
+	/* ... no other COP2 instructions ... */
 	else
 	  {
 	    SignalException(ReservedInstruction, instruction); 
@@ -3381,7 +3417,7 @@ decode_coproc (SIM_DESC sd,
 
 	if(! handle)
 	  {
-	    sim_io_eprintf(sd,"COP2 instruction 0x%08X at PC = 0x%s : No handler present\n",
+	    sim_io_eprintf(sd, "COP2 instruction 0x%08X at PC = 0x%s : No handler present\n",
 			   instruction,pr_addr(cia));
 	  }
       }

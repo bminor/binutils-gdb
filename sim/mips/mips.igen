@@ -127,7 +127,7 @@
 
 
 001001,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ADDIU
-"add r<RT>, r<RS>, <IMMEDIATE>"
+"addu r<RT>, r<RS>, <IMMEDIATE>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
 // start-sanitize-vr4320
@@ -150,6 +150,7 @@
 
 
 000000,5.RS,5.RT,5.RD,00000,100001:SPECIAL:32::ADDU
+"addu r<RD>, r<RS>, r<RT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
 // start-sanitize-vr4320
@@ -1389,24 +1390,27 @@
 }
 
 
-:function:::void:do_load_byte:address_word gpr_base, int rt, signed16 offset
+:function:::unsigned_word:do_load:unsigned access, address_word base, address_word offset
 {
-  address_word vaddr = offset + gpr_base;
+  address_word mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
+  address_word reverseendian = (ReverseEndian ? (mask ^ access) : 0);
+  address_word bigendiancpu = (BigEndianCPU ? (mask ^ access) : 0);
+  unsigned int byte;
   address_word paddr;
   int uncached;
-  if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-    {
-      unsigned64 memval = 0;
-      address_word mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
-      unsigned int reverse = (ReverseEndian ? mask : 0);
-      unsigned int bigend = (BigEndianCPU ? mask : 0);
-      unsigned int byte;
-      paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
-      LoadMemory (&memval, NULL, uncached, AccessLength_BYTE, paddr, vaddr, isDATA, isREAL);
-      byte = ((vaddr & mask) ^ bigend);
-      GPR[rt] = EXTEND8 ((memval >> (8 * byte)));
-    }
+  unsigned64 memval;
+  address_word vaddr;
+
+  vaddr = base + offset;
+  if ((vaddr & access) != 0)
+    SignalExceptionAddressLoad ();
+  AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &uncached, isTARGET, isREAL);
+  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverseendian));
+  LoadMemory (&memval, NULL, uncached, access, paddr, vaddr, isDATA, isREAL);
+  byte = ((vaddr & mask) ^ bigendiancpu);
+  return (memval >> (8 * byte));
 }
+
 
 100000,5.BASE,5.RT,16.OFFSET:NORMAL:32::LB
 "lb r<RT>, <OFFSET>(r<BASE>)"
@@ -1426,34 +1430,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  do_load_byte (SD_, GPR[BASE], RT, OFFSET);
-#if 0
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((uword64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    {
-      if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-	{
-	  uword64 memval = 0;
-	  uword64 memval1 = 0;
-	  uword64 mask = 0x7;
-	  unsigned int shift = 0;
-	  unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
-	  unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
-	  unsigned int byte;
-	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
-	  LoadMemory(&memval,&memval1,uncached,AccessLength_BYTE,paddr,vaddr,isDATA,isREAL);
-	  byte = ((vaddr & mask) ^ (bigend << shift));
-	  GPR[destreg] = (SIGNEXTEND(((memval >> (8 * byte)) & 0x000000FF),8));
-	}
-    }
-  }
-#endif
+  GPR[RT] = EXTEND8 (do_load (SD_, AccessLength_BYTE, GPR[BASE], EXTEND16 (OFFSET)));
 }
 
 
@@ -1475,31 +1452,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    {
-      if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-	{
-	  unsigned64 memval = 0;
-	  unsigned64 memval1 = 0;
-	  unsigned64 mask = 0x7;
-	  unsigned int shift = 0;
-	  unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
-	  unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
-	  unsigned int byte;
-	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
-	  LoadMemory(&memval,&memval1,uncached,AccessLength_BYTE,paddr,vaddr,isDATA,isREAL);
-	  byte = ((vaddr & mask) ^ (bigend << shift));
-	  GPR[destreg] = (((memval >> (8 * byte)) & 0x000000FF));
-	}
-    }
-  }
+  GPR[RT] = do_load (SD_, AccessLength_BYTE, GPR[BASE], EXTEND16 (OFFSET));
 }
 
 
@@ -1521,27 +1474,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 7) != 0)
-      SignalExceptionAddressLoad();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    unsigned64 memval = 0;
-	    unsigned64 memval1 = 0;
-	    LoadMemory(&memval,&memval1,uncached,AccessLength_DOUBLEWORD,paddr,vaddr,isDATA,isREAL);
-	    GPR[destreg] = memval;
-	  }
-      }
-  }
+  GPR[RT] = EXTEND64 (do_load (SD_, AccessLength_DOUBLEWORD, GPR[BASE], EXTEND16 (OFFSET)));
 }
 
 
@@ -1562,62 +1495,10 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 7) != 0)
-      SignalExceptionAddressLoad();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    unsigned64 memval = 0;
-	    unsigned64 memval1 = 0;
-	    LoadMemory(&memval,&memval1,uncached,AccessLength_DOUBLEWORD,paddr,vaddr,isDATA,isREAL);
-	    COP_LD(((instruction >> 26) & 0x3),destreg,memval);;
-	  }
-      }
-  }
+  COP_LD (ZZ, RT, do_load (SD_, AccessLength_DOUBLEWORD, GPR[BASE], EXTEND16 (OFFSET)));
 }
 
 
-// start-sanitize-sky
-110110,5.BASE,5.RT,16.OFFSET:NORMAL:64::LQC2
-"lqc2 r<RT>, <OFFSET>(r<BASE>)"
-*r5900:
-{
-#ifdef TARGET_SKY
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 0x0f) != 0)
-      SignalExceptionAddressLoad();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    unsigned64 memval = 0;
-	    unsigned64 memval1 = 0;
-	    unsigned128 qw = U16_8(memval, memval1); /* XXX: check order */
-	    /* XXX: block on VU0 pipeline if necessary */
-	    LoadMemory(&memval,&memval1,uncached,AccessLength_QUADWORD,paddr,vaddr,isDATA,isREAL);
-	    COP_LQ(((instruction >> 26) & 0x3),destreg,qw);;
-	  }
-      }
-  }
-#endif /* TARGET_SKY */
-}
-// end-sanitize-sky
 
 
 011010,5.BASE,5.RT,16.OFFSET:NORMAL:64::LDL
@@ -1638,32 +1519,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    {
-      if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-	{
-	  unsigned64 memval = 0;
-	  unsigned64 memval1 = 0;
-	  unsigned64 mask = 7;
-	  unsigned int reverse = (ReverseEndian ? mask : 0);
-	  unsigned int bigend = (BigEndianCPU ? mask : 0);
-	  int byte;
-	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
-	  byte = ((vaddr & mask) ^ bigend);
-	  if (!BigEndianMem)
-	    paddr &= ~mask;
-	  LoadMemory(&memval,&memval1,uncached,byte,paddr,vaddr,isDATA,isREAL);
-	  GPR[destreg] = ((memval << ((7 - byte) * 8)) | (GPR[destreg] & (((unsigned64)1 << ((7 - byte) * 8)) - 1)));
-	}
-    }
-  }
+  GPR[RT] = do_load_left (SD_, AccessLength_DOUBLEWORD, GPR[BASE], EXTEND16 (OFFSET), GPR[RT]);
 }
 
 
@@ -1685,39 +1541,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    {
-      if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-	{
-	  unsigned64 memval = 0;
-	  unsigned64 memval1 = 0;
-	  unsigned64 mask = 7;
-	  unsigned int reverse = (ReverseEndian ? mask : 0);
-	  unsigned int bigend = (BigEndianCPU ? mask : 0);
-	  int byte;
-	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
-	  byte = ((vaddr & mask) ^ bigend);
-	  if (BigEndianMem)
-	    paddr &= ~mask;
-	  LoadMemory(&memval,&memval1,uncached,(7 - byte),paddr,vaddr,isDATA,isREAL);
-	  {
-	    unsigned64 srcmask;
-	    if (byte == 0)
-	      srcmask = 0;
-	    else
-	      srcmask = ((unsigned64)-1 << (8 * (8 - byte)));
-	    GPR[destreg] = ((GPR[destreg] & srcmask) | (memval >> (8 * byte)));
-	  }
-	}
-    }
-  }
+  GPR[RT] = do_load_right (SD_, AccessLength_DOUBLEWORD, GPR[BASE], EXTEND16 (OFFSET), GPR[RT]);
 }
 
 
@@ -1739,34 +1563,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 1) != 0)
-      SignalExceptionAddressLoad();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    unsigned64 memval = 0;
-	    unsigned64 memval1 = 0;
-	    unsigned64 mask = 0x7;
-	    unsigned int shift = 1;
-	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte;
-	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
-	    LoadMemory(&memval,&memval1,uncached,AccessLength_HALFWORD,paddr,vaddr,isDATA,isREAL);
-	    byte = ((vaddr & mask) ^ (bigend << shift));
-	    GPR[destreg] = (SIGNEXTEND(((memval >> (8 * byte)) & 0x0000FFFF),16));
-	  }
-      }
-  }
+  GPR[RT] = EXTEND16 (do_load (SD_, AccessLength_HALFWORD, GPR[BASE], EXTEND16 (OFFSET)));
 }
 
 
@@ -1788,34 +1585,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 1) != 0)
-      SignalExceptionAddressLoad();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    unsigned64 memval = 0;
-	    unsigned64 memval1 = 0;
-	    unsigned64 mask = 0x7;
-	    unsigned int shift = 1;
-	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte;
-	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
-	    LoadMemory(&memval,&memval1,uncached,AccessLength_HALFWORD,paddr,vaddr,isDATA,isREAL);
-	    byte = ((vaddr & mask) ^ (bigend << shift));
-	    GPR[destreg] = (((memval >> (8 * byte)) & 0x0000FFFF));
-	  }
-      }
-  }
+  GPR[RT] = do_load (SD_, AccessLength_HALFWORD, GPR[BASE], EXTEND16 (OFFSET));
 }
 
 
@@ -1953,34 +1723,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 3) != 0)
-      SignalExceptionAddressLoad();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    unsigned64 memval = 0;
-	    unsigned64 memval1 = 0;
-	    unsigned64 mask = 0x7;
-	    unsigned int shift = 2;
-	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte;
-	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
-	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
-	    byte = ((vaddr & mask) ^ (bigend << shift));
-	    GPR[destreg] = (SIGNEXTEND(((memval >> (8 * byte)) & 0xFFFFFFFF),32));
-	  }
-      }
-  }
+  GPR[RT] = EXTEND32 (do_load (SD_, AccessLength_WORD, GPR[BASE], EXTEND16 (OFFSET)));
 }
 
 
@@ -2002,34 +1745,44 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 3) != 0)
-      SignalExceptionAddressLoad();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    unsigned64 memval = 0;
-	    unsigned64 memval1 = 0;
-	    unsigned64 mask = 0x7;
-	    unsigned int shift = 2;
-	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte;
-	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
-	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
-	    byte = ((vaddr & mask) ^ (bigend << shift));
-	    COP_LW(((instruction >> 26) & 0x3),destreg,(unsigned int)((memval >> (8 * byte)) & 0xFFFFFFFF));
-	  }
-      }
-  }
+  COP_LW (ZZ, RT, do_load (SD_, AccessLength_WORD, GPR[BASE], EXTEND16 (OFFSET)));
+}
+
+
+:function:::unsigned_word:do_load_left:unsigned access, address_word base, address_word offset, unsigned_word rt
+{
+  address_word mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
+  address_word reverseendian = (ReverseEndian ? -1 : 0);
+  address_word bigendiancpu = (BigEndianCPU ? -1 : 0);
+  unsigned int byte;
+  address_word paddr;
+  int uncached;
+  unsigned64 memval;
+  address_word vaddr;
+
+  vaddr = base + offset;
+  AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &uncached, isTARGET, isREAL);
+  paddr = (paddr ^ (reverseendian & mask));
+  if (BigEndianMem == 0)
+    paddr = paddr & ~access;
+  byte = ((vaddr & mask) ^ (bigendiancpu & mask));
+  LoadMemory (&memval, NULL, uncached, byte & access, paddr, vaddr, isDATA, isREAL);
+  /* printf ("ll: 0x%08lx %d@0x%08lx 0x%08lx\n",
+     (long) vaddr, byte, (long) paddr, (long) memval); */
+  if ((byte & ~access) == 0)
+    {
+      int bits = 8 * (access - byte);
+      unsigned_word screen = LSMASK (bits - 1, 0);
+      rt &= screen;
+      rt |= ((memval << bits) & ~screen);
+    }
+  else
+    {
+      unsigned_word screen = LSMASK (8 * (access - (byte & access)) - 1, 0);
+      rt &= screen;
+      rt |= ((memval >> (8 * (mask - byte))) & ~screen);
+    }
+  return rt;
 }
 
 
@@ -2051,36 +1804,38 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  GPR[RT] = EXTEND32 (do_load_left (SD_, AccessLength_WORD, GPR[BASE], EXTEND32 (OFFSET), GPR[RT]));
+}
+
+
+:function:::unsigned_word:do_load_right:unsigned access, address_word base, address_word offset, unsigned_word rt
+{
+  address_word mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
+  address_word reverseendian = (ReverseEndian ? -1 : 0);
+  address_word bigendiancpu = (BigEndianCPU ? -1 : 0);
+  unsigned int byte;
+  address_word paddr;
+  int uncached;
+  unsigned64 memval;
+  address_word vaddr;
+
+  vaddr = base + offset;
+  AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &uncached, isTARGET, isREAL);
+  /* NOTE: SPEC is wrong, has `BigEndianMem == 0' not `BigEndianMem != 0' */
+  paddr = (paddr ^ (reverseendian & mask));
+  if (BigEndianMem != 0)
+    paddr = paddr & ~access;
+  byte = ((vaddr & mask) ^ (bigendiancpu & mask));
+  /* NOTE: SPEC is wrong, had `byte' not `access - byte'.  See SW. */
+  LoadMemory (&memval, NULL, uncached, access - (access & byte), paddr, vaddr, isDATA, isREAL);
+  /* printf ("lr: 0x%08lx %d@0x%08lx 0x%08lx\n",
+     (long) paddr, byte, (long) paddr, (long) memval); */
   {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    {
-      if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-	{
-	  unsigned64 memval = 0;
-	  unsigned64 memval1 = 0;
-	  unsigned64 mask = 3;
-	  unsigned int reverse = (ReverseEndian ? mask : 0);
-	  unsigned int bigend = (BigEndianCPU ? mask : 0);
-	  int byte;
-	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
-	  byte = ((vaddr & mask) ^ bigend);
-	  if (!BigEndianMem)
-	    paddr &= ~mask;
-	  LoadMemory(&memval,&memval1,uncached,byte,paddr,vaddr,isDATA,isREAL);
-	  if ((vaddr & (1 << 2)) ^ (BigEndianCPU << 2)) {
-	    memval >>= 32;
-	  }
-	  GPR[destreg] = ((memval << ((3 - byte) * 8)) | (GPR[destreg] & (((unsigned64)1 << ((3 - byte) * 8)) - 1)));
-	  GPR[destreg] = SIGNEXTEND(GPR[destreg],32);
-	}
-    }
+    unsigned_word screen = LSMASK (8 * (access - (byte & access) + 1) - 1, 0);
+    rt &= ~screen;
+    rt |= (memval >> (8 * byte)) & screen;
   }
+  return rt;
 }
 
 
@@ -2102,43 +1857,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    {
-      if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-	{
-	  unsigned64 memval = 0;
-	  unsigned64 memval1 = 0;
-	  unsigned64 mask = 3;
-	  unsigned int reverse = (ReverseEndian ? mask : 0);
-	  unsigned int bigend = (BigEndianCPU ? mask : 0);
-	  int byte;
-	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
-	  byte = ((vaddr & mask) ^ bigend);
-	  if (BigEndianMem)
-	    paddr &= ~mask;
-	  LoadMemory(&memval,&memval1,uncached,(3 - byte),paddr,vaddr,isDATA,isREAL);
-	  if ((vaddr & (1 << 2)) ^ (BigEndianCPU << 2)) {
-	    memval >>= 32;
-	  }
-	  {
-	    unsigned64 srcmask;
-	    if (byte == 0)
-	      srcmask = 0;
-	    else
-	      srcmask = ((unsigned64)-1 << (8 * (4 - byte)));
-	    GPR[destreg] = ((GPR[destreg] & srcmask) | (memval >> (8 * byte)));
-	  }
-	  GPR[destreg] = SIGNEXTEND(GPR[destreg],32);
-	}
-    }
-  }
+  GPR[RT] = EXTEND32 (do_load_right (SD_, AccessLength_WORD, GPR[BASE], EXTEND16 (OFFSET), GPR[RT]));
 }
 
 
@@ -2160,34 +1879,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 3) != 0)
-      SignalExceptionAddressLoad();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    unsigned64 memval = 0;
-	    unsigned64 memval1 = 0;
-	    unsigned64 mask = 0x7;
-	    unsigned int shift = 2;
-	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte;
-	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
-	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
-	    byte = ((vaddr & mask) ^ (bigend << shift));
-	    GPR[destreg] = (((memval >> (8 * byte)) & 0xFFFFFFFF));
-	  }
-      }
-  }
+  GPR[RT] = do_load (SD_, AccessLength_WORD, GPR[BASE], EXTEND16 (OFFSET));
 }
 
 
@@ -2511,6 +2203,28 @@
   }
 }
 
+:function:::void:do_store:unsigned access, address_word base, address_word offset, unsigned_word word
+{
+  address_word mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
+  address_word reverseendian = (ReverseEndian ? (mask ^ access) : 0);
+  address_word bigendiancpu = (BigEndianCPU ? (mask ^ access) : 0);
+  unsigned int byte;
+  address_word paddr;
+  int uncached;
+  unsigned64 memval;
+  address_word vaddr;
+
+  vaddr = base + offset;
+  if ((vaddr & access) != 0)
+    SignalExceptionAddressStore ();
+  AddressTranslation (vaddr, isDATA, isSTORE, &paddr, &uncached, isTARGET, isREAL);
+  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverseendian));
+  byte = ((vaddr & mask) ^ bigendiancpu);
+  memval = (word << (8 * byte));
+  StoreMemory (uncached, access, memval, 0, paddr, vaddr, isREAL);
+}
+
+
 101000,5.BASE,5.RT,16.OFFSET:NORMAL:32::SB
 "sb r<RT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -2529,33 +2243,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    {
-      if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
-	{
-	  unsigned64 memval = 0;
-	  unsigned64 memval1 = 0;
-	  unsigned64 mask = 0x7;
-	  unsigned int shift = 0;
-	  unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
-	  unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
-	  unsigned int byte;
-	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
-	  byte = ((vaddr & mask) ^ (bigend << shift));
-	  memval = ((unsigned64) op2 << (8 * byte));
-	  {
-	    StoreMemory(uncached,AccessLength_BYTE,memval,memval1,paddr,vaddr,isREAL);
-	  }
-	}
-    }
-  }
+  do_store (SD_, AccessLength_BYTE, GPR[BASE], EXTEND16 (OFFSET), GPR[RT]);
 }
 
 
@@ -2674,29 +2362,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 7) != 0)
-      SignalExceptionAddressStore();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    unsigned64 memval = 0;
-	    unsigned64 memval1 = 0;
-	    memval = op2;
-	    {
-	      StoreMemory(uncached,AccessLength_DOUBLEWORD,memval,memval1,paddr,vaddr,isREAL);
-	    }
-	  }
-      }
-  }
+  do_store (SD_, AccessLength_DOUBLEWORD, GPR[BASE], EXTEND16 (OFFSET), GPR[RT]);
 }
 
 
@@ -2719,68 +2385,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 7) != 0)
-      SignalExceptionAddressStore();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    unsigned64 memval = 0;
-	    unsigned64 memval1 = 0;
-	    memval = (unsigned64)COP_SD(((instruction >> 26) & 0x3),destreg);
-	    {
-	      StoreMemory(uncached,AccessLength_DOUBLEWORD,memval,memval1,paddr,vaddr,isREAL);
-	    }
-	  }
-      }
-  }
+  do_store (SD_, AccessLength_DOUBLEWORD, GPR[BASE], EXTEND16 (OFFSET), COP_SD (ZZ, RT));
 }
-
-
-// start-sanitize-sky
-111010,5.BASE,5.RT,16.OFFSET:NORMAL:64::SQC2
-"sqc2 r<RT>, <OFFSET>(r<BASE>)"
-*r5900:
-{
-#ifdef TARGET_SKY
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 0x0f) != 0)
-      SignalExceptionAddressStore();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    unsigned128 qw;
-	    unsigned64 memval0 = 0;
-	    unsigned64 memval1 = 0;
-	    qw = COP_SQ(((instruction >> 26) & 0x3),destreg);
-	    memval0 = *A8_16(& qw, 0);
-	    memval1 = *A8_16(& qw, 1);
-	    {
-	      StoreMemory(uncached,AccessLength_WORD,memval0,memval1,paddr,vaddr,isREAL);
-	    }
-	  }
-      }
-  }
-#endif /* TARGET_SKY */
-}
-// end-sanitize-sky
-
 
 
 101100,5.BASE,5.RT,16.OFFSET:NORMAL:64::SDL
@@ -2801,32 +2407,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    {
-      if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
-	{
-	  unsigned64 memval = 0;
-	  unsigned64 memval1 = 0;
-	  unsigned64 mask = 7;
-	  unsigned int reverse = (ReverseEndian ? mask : 0);
-	  unsigned int bigend = (BigEndianCPU ? mask : 0);
-	  int byte;
-	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
-	  byte = ((vaddr & mask) ^ bigend);
-	  if (!BigEndianMem)
-	    paddr &= ~mask;
-	  memval = (op2 >> (8 * (7 - byte)));
-	  StoreMemory(uncached,byte,memval,memval1,paddr,vaddr,isREAL);
-	}
-    }
-  }
+  do_store_left (SD_, AccessLength_DOUBLEWORD, GPR[BASE], EXTEND16 (OFFSET), GPR[RT]);
 }
 
 
@@ -2848,21 +2429,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  address_word paddr;
-  int uncached;
-  unsigned64 memval;
-  unsigned64 mask = 7;
-  unsigned int reverse = (ReverseEndian ? mask : 0);
-  unsigned int bigend = (BigEndianCPU ? mask : 0);
-  int byte;
-  address_word vaddr = (GPR[BASE] + EXTEND16 (OFFSET));
-  AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL);
-  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
-  if (BigEndianMem)
-    paddr &= ~mask;
-  byte = ((vaddr & mask) ^ bigend);
-  memval = (GPR[RT] << (byte * 8));
-  StoreMemory(uncached,(AccessLength_DOUBLEWORD - byte),memval,0,paddr,vaddr,isREAL);
+  do_store_right (SD_, AccessLength_DOUBLEWORD, GPR[BASE], EXTEND16 (OFFSET), GPR[RT]);
 }
 
 
@@ -2884,36 +2451,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 1) != 0)
-      SignalExceptionAddressStore();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    unsigned64 memval = 0;
-	    unsigned64 memval1 = 0;
-	    unsigned64 mask = 0x7;
-	    unsigned int shift = 1;
-	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte;
-	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
-	    byte = ((vaddr & mask) ^ (bigend << shift));
-	    memval = ((unsigned64) op2 << (8 * byte));
-	    {
-	      StoreMemory(uncached,AccessLength_HALFWORD,memval,memval1,paddr,vaddr,isREAL);
-	    }
-	  }
-      }
-  }
+  do_store (SD_, AccessLength_HALFWORD, GPR[BASE], EXTEND16 (OFFSET), GPR[RT]);
 }
 
 
@@ -3197,48 +2735,22 @@
 101011,5.BASE,5.RT,16.OFFSET:NORMAL:32::SW
 "sw r<RT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
-*vr5000:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+*r3900:
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
-// start-sanitize-tx19
-*tx19:
-// end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 3) != 0)
-      SignalExceptionAddressStore();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    unsigned64 memval = 0;
-	    unsigned64 memval1 = 0;
-	    unsigned64 mask = 0x7;
-	    unsigned int byte;
-	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2)));
-	    byte = ((vaddr & mask) ^ (BigEndianCPU << 2));
-	    memval = ((unsigned64) op2 << (8 * byte));
-	    {
-	      StoreMemory(uncached,AccessLength_WORD,memval,memval1,paddr,vaddr,isREAL);
-	    }
-	  }
-      }
-  }
+  do_store (SD_, AccessLength_WORD, GPR[BASE], EXTEND16 (OFFSET), GPR[RT]);
 }
 
 
@@ -3257,33 +2769,33 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  int destreg = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 3) != 0)
-      SignalExceptionAddressStore();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    unsigned64 memval = 0;
-	    unsigned64 memval1 = 0;
-	    unsigned64 mask = 0x7;
-	    unsigned int byte;
-	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2)));
-	    byte = ((vaddr & mask) ^ (BigEndianCPU << 2));
-	    memval = (((unsigned64)COP_SW(((instruction >> 26) & 0x3),destreg)) << (8 * byte));
-	    {
-	      StoreMemory(uncached,AccessLength_WORD,memval,memval1,paddr,vaddr,isREAL);
-	    }
-	  }
-      }
-  }
+  do_store (SD_, AccessLength_WORD, GPR[BASE], EXTEND16 (OFFSET), COP_SW (ZZ, RT));
+}
+
+
+
+:function:::void:do_store_left:unsigned access, address_word base, address_word offset, unsigned_word rt
+{
+  address_word mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
+  address_word reverseendian = (ReverseEndian ? -1 : 0);
+  address_word bigendiancpu = (BigEndianCPU ? -1 : 0);
+  unsigned int byte;
+  address_word paddr;
+  int uncached;
+  unsigned64 memval;
+  address_word vaddr;
+
+  vaddr = base + offset;
+  AddressTranslation (vaddr, isDATA, isSTORE, &paddr, &uncached, isTARGET, isREAL);
+  paddr = (paddr ^ (reverseendian & mask));
+  if (BigEndianMem == 0)
+    paddr = paddr & ~access;
+  byte = ((vaddr & mask) ^ (bigendiancpu & mask));
+  if ((byte & ~access) == 0)
+    memval = (rt >> (8 * (access - byte)));
+  else
+    memval = (rt << (8 * (mask - byte)));
+  StoreMemory (uncached, byte & access, memval, NULL, paddr, vaddr, isREAL);
 }
 
 
@@ -3305,37 +2817,30 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    {
-      if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
-	{
-	  unsigned64 memval = 0;
-	  unsigned64 memval1 = 0;
-	  unsigned64 mask = 3;
-	  unsigned int reverse = (ReverseEndian ? mask : 0);
-	  unsigned int bigend = (BigEndianCPU ? mask : 0);
-	  int byte;
-	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
-	  byte = ((vaddr & mask) ^ bigend);
-	  if (!BigEndianMem)
-	    paddr &= ~mask;
-	  memval = (op2 >> (8 * (3 - byte)));
-	  if ((vaddr & (1 << 2)) ^ (BigEndianCPU << 2)) {
-	    memval <<= 32;
-	  }
-	  StoreMemory(uncached,byte,memval,memval1,paddr,vaddr,isREAL);
-	}
-    }
-  }
+  do_store_left (SD_, AccessLength_WORD, GPR[BASE], EXTEND16 (OFFSET), GPR[RT]);
 }
 
+
+:function:::void:do_store_right:unsigned access, address_word base, address_word offset, unsigned_word rt
+{
+  address_word mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
+  address_word reverseendian = (ReverseEndian ? -1 : 0);
+  address_word bigendiancpu = (BigEndianCPU ? -1 : 0);
+  unsigned int byte;
+  address_word paddr;
+  int uncached;
+  unsigned64 memval;
+  address_word vaddr;
+
+  vaddr = base + offset;
+  AddressTranslation (vaddr, isDATA, isSTORE, &paddr, &uncached, isTARGET, isREAL);
+  paddr = (paddr ^ (reverseendian & mask));
+  if (BigEndianMem != 0)
+    paddr &= ~access;
+  byte = ((vaddr & mask) ^ (bigendiancpu & mask));
+  memval = (rt << (byte * 8));
+  StoreMemory (uncached, access - (access & byte), memval, 0, paddr, vaddr, isREAL);
+}
 
 101110,5.BASE,5.RT,16.OFFSET:NORMAL:32::SWR
 "swr r<RT>, <OFFSET>(r<BASE>)"
@@ -3355,23 +2860,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned64 memval = 0;
-  unsigned64 mask = 3;
-  unsigned int reverse = (ReverseEndian ? mask : 0);
-  unsigned int bigend = (BigEndianCPU ? mask : 0);
-  int byte;
-  address_word paddr;
-  int uncached;
-  address_word vaddr = (GPR[BASE] + EXTEND16 (OFFSET));
-  AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL);
-  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
-  if (BigEndianMem)
-    paddr &= ~mask;
-  byte = ((vaddr & mask) ^ bigend);
-  memval = (GPR[RT] << (byte * 8));
-  if ((vaddr & (1 << 2)) ^ (BigEndianCPU << 2))
-    memval <<= 32;
-  StoreMemory(uncached,(AccessLength_WORD - byte),memval,0,paddr,vaddr,isREAL);
+  do_store_right (SD_, AccessLength_WORD, GPR[BASE], EXTEND16 (OFFSET), GPR[RT]);
 }
 
 
@@ -4448,18 +3937,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  address_word vaddr = GPR[BASE] + EXTEND16 (OFFSET);
-  address_word paddr;
-  int uncached;
-  if ((vaddr & 7) != 0)
-    SignalExceptionAddressLoad();
-  else
-    {
-      unsigned64 memval;
-      AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL);
-      LoadMemory(&memval,0,uncached,AccessLength_DOUBLEWORD,paddr,vaddr,isDATA,isREAL);
-      COP_LD(((instruction_0 >> 26) & 0x3),FT,memval);;
-    }
+  COP_LD (1, FT, do_load (SD_, AccessLength_DOUBLEWORD, GPR[BASE], EXTEND16 (OFFSET)));
 }
 
 
@@ -4474,27 +3952,7 @@
 *vr5400:
 // end-sanitize-vr5400
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + op2);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 7) != 0)
-      SignalExceptionAddressLoad();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    unsigned64 memval = 0;
-	    unsigned64 memval1 = 0;
-	    LoadMemory(&memval,&memval1,uncached,AccessLength_DOUBLEWORD,paddr,vaddr,isDATA,isREAL);
-	    COP_LD(1,destreg,memval);;
-	  }
-      }
-  }
+  COP_LD (1, FD, do_load (SD_, AccessLength_DOUBLEWORD, GPR[BASE], GPR[INDEX]));
 }
 
 
@@ -4517,34 +3975,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = EXTEND16 (OFFSET);
-  int destreg UNUSED = ((instruction >> 16) & 0x0000001F);
-  signed_word op1 UNUSED = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((uword64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 3) != 0)
-      SignalExceptionAddressLoad();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    uword64 memval = 0;
-	    uword64 memval1 = 0;
-	    uword64 mask = 0x7;
-	    unsigned int shift = 2;
-	    unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);
-	    unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);
-	    unsigned int byte UNUSED;
-	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
-	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
-	    byte = ((vaddr & mask) ^ (bigend << shift));
-	    COP_LW(((instruction >> 26) & 0x3),destreg,(unsigned int)((memval >> (8 * byte)) & 0xFFFFFFFF));
-	  }
-      }
-  }
+  COP_LW (1, FT, do_load (SD_, AccessLength_WORD, GPR[BASE], EXTEND16 (OFFSET)));
 }
 
 
@@ -4559,34 +3990,7 @@
 *vr5400:
 // end-sanitize-vr5400
 {
-  unsigned32 instruction = instruction_0;
-  int destreg = ((instruction >> 6) & 0x0000001F);
-  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-   address_word vaddr = ((unsigned64)op1 + op2);
-   address_word paddr;
-   int uncached;
-   if ((vaddr & 3) != 0)
-    SignalExceptionAddressLoad();
-   else
-   {
-    if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
-    {
-     unsigned64 memval = 0;
-     unsigned64 memval1 = 0;
-     unsigned64 mask = 0x7;
-     unsigned int shift = 2;
-     unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
-     unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
-     unsigned int byte;
-     paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
-     LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
-     byte = ((vaddr & mask) ^ (bigend << shift));
-     COP_LW(1,destreg,(unsigned int)((memval >> (8 * byte)) & 0xFFFFFFFF));
-    }
-   }
-  }
+  COP_LW (1, FD, do_load (SD_, AccessLength_WORD, GPR[BASE], GPR[INDEX]));
 }
 
 
@@ -5162,22 +4566,12 @@
 *tx19:
 // end-sanitize-tx19
 {
-  address_word vaddr = GPR[BASE] + EXTEND16 (OFFSET);
-  int uncached;
-  if ((vaddr & 7) != 0)
-    SignalExceptionAddressStore();
-  else
-    {
-      address_word paddr;
-      unsigned64 memval;
-      AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL);
-      memval = (unsigned64) COP_SD(((instruction_0 >> 26) & 0x3),FT);
-      StoreMemory(uncached,AccessLength_DOUBLEWORD,memval,0,paddr,vaddr,isREAL);
-    }
+  do_store (SD_, AccessLength_DOUBLEWORD, GPR[BASE], EXTEND16 (OFFSET), COP_SD (1, FT));
 }
 
 
-010011,5.RS,5.RT,vvvvv,00000001001:COP1X:64::SDXC1
+010011,5.BASE,5.INDEX,5.FS,00000001001:COP1X:64::SDXC1
+"ldxc1 f<FS>, r<INDEX>(r<BASE>)"
 *mipsIV:
 *vr5000:
 // start-sanitize-vr4320
@@ -5187,29 +4581,7 @@
 *vr5400:
 // end-sanitize-vr5400
 {
-  unsigned32 instruction = instruction_0;
-  int fs = ((instruction >> 11) & 0x0000001F);
-  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + op2);
-    address_word paddr;
-    int uncached;
-    if ((vaddr & 7) != 0)
-      SignalExceptionAddressStore();
-    else
-      {
-	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
-	  {
-	    unsigned64 memval = 0;
-	    unsigned64 memval1 = 0;
-	    memval = (unsigned64)COP_SD(1,fs);
-	    {
-	      StoreMemory(uncached,AccessLength_DOUBLEWORD,memval,memval1,paddr,vaddr,isREAL);
-	    }
-	  }
-      }
-  }
+  do_store (SD_, AccessLength_DOUBLEWORD, GPR[BASE], GPR[INDEX], COP_SD (1, FS));
 }
 
 
@@ -5586,10 +4958,11 @@
 010000,00100,5.RT,5.RD,00000,6.REGX:COP0:32::MTC0
 "mtc0 r<RT>, r<RD> # <REGX>"
 *mipsI,mipsII,mipsIII,mipsIV:
-*vr5000:
+*r3900:
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5672,6 +5045,7 @@
 // start-sanitize-r5900
 :include::r5900:r5900.igen
 // end-sanitize-r5900
+:include:::tx.igen
 
 // start-sanitize-cygnus-never
 

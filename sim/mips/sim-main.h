@@ -779,12 +779,16 @@ cop_sw (SD, CPU, cia, coproc_num, coproc_reg)
 cop_sd (SD, CPU, cia, coproc_num, coproc_reg)
 
 /* start-sanitize-sky */
-void cop_lq  PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg, unsigned128 memword));
-unsigned128 cop_sq PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg));
+#ifdef TARGET_SKY
+void cop_lq  PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia,
+		      int coproc_num, int coproc_reg, unsigned128 memword));
+unsigned128 cop_sq PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia,
+			    int coproc_num, int coproc_reg));
 #define COP_LQ(coproc_num,coproc_reg,memword) \
 cop_lq (SD, CPU, cia, coproc_num, coproc_reg, memword)
 #define COP_SQ(coproc_num,coproc_reg) \
 cop_sq (SD, CPU, cia, coproc_num, coproc_reg)
+#endif /* TARGET_SKY */
 /* end-sanitize-sky */
 
 void decode_coproc PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, unsigned int instruction));

@@ -1089,16 +1089,19 @@ pke_check_stall(struct pke_device* me, enum pke_check_target what)
     }
   else if(what == chk_path1) /* VU -> GPUIF */
     {
+      ASSERT(me->pke_number == 1);
       if(BIT_MASK_GET(gpuif_stat, GPUIF_REG_STAT_APATH_B, GPUIF_REG_STAT_APATH_E) == 1)
 	any_stall = 1;
     }
   else if(what == chk_path2) /* PKE -> GPUIF */
     {
+      ASSERT(me->pke_number == 1);
       if(BIT_MASK_GET(gpuif_stat, GPUIF_REG_STAT_APATH_B, GPUIF_REG_STAT_APATH_E) == 2)
 	any_stall = 1;
     }
   else if(what == chk_path3) /* DMA -> GPUIF */
     {
+      ASSERT(me->pke_number == 1);
       if(BIT_MASK_GET(gpuif_stat, GPUIF_REG_STAT_APATH_B, GPUIF_REG_STAT_APATH_E) == 3)
 	any_stall = 1;
     }
@@ -1243,12 +1246,12 @@ pke_code_mskpath3(struct pke_device* me, unsigned_4 pkecode)
 
   /* set appropriate bit */
   if(BIT_MASK_GET(imm, PKE_REG_MSKPATH3_B, PKE_REG_MSKPATH3_E) != 0)
-    gif_mode = GIF_REG_MODE_M3R_MASK;
+    gif_mode = GIF_REG_STAT_M3P;
   else
     gif_mode = 0;
 
-  /* write register; patrickm code will look at M3R bit only */
-  PKE_MEM_WRITE(me, GIF_REG_MODE, & gif_mode, 4);
+  /* write register to "read-only" register; gpuif code will look at M3P bit only */
+  PKE_MEM_WRITE(me, GIF_REG_VIF_M3P, & gif_mode, 4);
 
   /* done */
   pke_pc_advance(me, 1);
