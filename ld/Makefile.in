@@ -52,11 +52,9 @@ scriptdir = $(tooldir)/lib
 
 SHELL = /bin/sh
 
-INSTALL = `cd $(srcdir); pwd`/../install.sh -c
+INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
-INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
-INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1
 
 AR = ar
 AR_FLAGS = qv
@@ -274,6 +272,7 @@ ALL_EMULATIONS = \
 	eshlelf.o \
 	eshl.o \
 	esparcaout.o \
+	esparclinux.o \
 	esparclynx.o \
 	esparcnbsd.o \
 	est2000.o \
@@ -399,11 +398,9 @@ edelta68.c: $(srcdir)/emulparams/delta68.sh \
 eebmon29k.c: $(srcdir)/emulparams/ebmon29k.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/ebmon29k.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} ebmon29k "$(tdir_ebmon29k)"
-# start-sanitize-m32r
 em32relf.c: $(srcdir)/emulparams/m32relf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m32relf "$(tdir_m32r)"
-# end-sanitize-m32r
 eelf32_sparc.c: $(srcdir)/emulparams/elf32_sparc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_sparc "$(tdir_elf32_sparc)"
@@ -614,6 +611,9 @@ eshl.c: $(srcdir)/emulparams/shl.sh \
 esparcaout.c: $(srcdir)/emulparams/sparcaout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} sparcaout "$(tdir_sparcaout)"
+esparclinux.c: $(srcdir)/emulparams/sparclinux.sh \
+  $(srcdir)/emultempl/linux.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} sparclinux "$(tdir_sparclinux)"
 esparclynx.c: $(srcdir)/emulparams/sparclynx.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sparclynx.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} sparclynx "$(tdir_sparclynx)"
@@ -789,7 +789,8 @@ configdoc.texi:	${DOCVER}-doc.texi
 # TeX output
 dvi: ld.dvi
 ld.dvi: $(srcdir)/ld.texinfo configdoc.texi $(BFDDIR)/doc/bfdsumm.texi
-	TEXINPUTS=$(BFDDIR)/doc:$$TEXINPUTS $(TEXI2DVI) $(srcdir)/ld.texinfo
+	TEXINPUTS=$(BFDDIR)/doc:$$TEXINPUTS MAKEINFO='$(MAKEINFO) -I$(BFDDIR)/doc -I$(srcdir)' \
+	$(TEXI2DVI) $(srcdir)/ld.texinfo
 
 ldint.dvi: $(srcdir)/ldint.texinfo
 	$(TEXI2DVI) $(srcdir)/ldint.texinfo
@@ -954,20 +955,22 @@ TAGS:
 	etags -t $(srcdir)/*.[chly] *.[chly]
 
 
-install: 
-	$(INSTALL_XFORM) ld.new $(bindir)/ld
-	$(INSTALL_XFORM1) $(srcdir)/ld.1 $(man1dir)/ld.1
+install: ld.new installdirs
+	n=`echo ld | sed '$(program_transform_name)'`; \
+	$(INSTALL_PROGRAM) ld.new $(bindir)/$$n; \
+	$(INSTALL_DATA) $(srcdir)/ld.1 $(man1dir)/$$n.1; \
+	rm -f $(tooldir)/bin/ld; \
+	ln $(bindir)/$$n $(tooldir)/bin/ld >/dev/null 2>/dev/null \
+	 || $(INSTALL_PROGRAM) ld.new $(tooldir)/bin/ld
 	for f in ldscripts/*; do \
 	  $(INSTALL_DATA) $$f $(scriptdir)/$$f ; \
 	done
-	test -d $(tooldir) || mkdir $(tooldir)
-	test -d $(tooldir)/bin || mkdir $(tooldir)/bin
-	-n=`echo ld | sed '$(program_transform_name)'`; \
-	  rm -f $(tooldir)/bin/ld; \
-	  ln $(bindir)/$$n $(tooldir)/bin/ld >/dev/null 2>/dev/null \
-	   || $(INSTALL_PROGRAM) ld.new $(tooldir)/bin/ld
+
+installdirs:
+	$(SHELL) $(srcdir)/../mkinstalldirs $(bindir) $(man1dir) $(scriptdir)/ldscripts $(tooldir)/bin
 
 install-info: ld.info
+	$(SHELL) $(srcdir)/../mkinstalldirs $(infodir)
 	if [ -r ld.info ]; then \
 	  dir=. ; \
 	else \
@@ -980,7 +983,7 @@ install-info: ld.info
 clean-info:
 	-rm -rf *.info*
 
-.PHONY: install install-info clean-info
+.PHONY: install installdirs install-info clean-info
 
 # Targets to rebuild dependencies in this Makefile.
 # Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
@@ -1035,60 +1038,57 @@ config.status: configure configure.host configure.tgt
 # DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
 
 ldctor.o: ldctor.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/bfdlink.h ld.h ldexp.h ldlang.h ldmisc.h \
-  ldgram.h ldmain.h ldctor.h
+  sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
+  ld.h ldexp.h ldlang.h ldmisc.h ldgram.h ldmain.h ldctor.h
 ldemul.o: ldemul.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  ld.h ldemul.h ldmisc.h ldexp.h ldlang.h ldfile.h ldmain.h \
-  ldemul-list.h
+  sysdep.h config.h $(INCDIR)/fopen-same.h ld.h ldemul.h \
+  ldmisc.h ldexp.h ldlang.h ldfile.h ldmain.h ldemul-list.h
 ldexp.o: ldexp.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/bfdlink.h ld.h ldmain.h ldmisc.h ldexp.h \
-  ldgram.h ldlang.h
+  sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
+  ld.h ldmain.h ldmisc.h ldexp.h ldgram.h ldlang.h
 ldfile.o: ldfile.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/bfdlink.h ld.h ldmisc.h ldexp.h ldlang.h \
-  ldfile.h ldmain.h ldgram.h ldlex.h ldemul.h
+  sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
+  ld.h ldmisc.h ldexp.h ldlang.h ldfile.h ldmain.h ldgram.h \
+  ldlex.h ldemul.h
 ldlang.o: ldlang.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h $(INCDIR)/bfdlink.h ld.h ldmain.h \
+  sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/obstack.h $(INCDIR)/bfdlink.h ld.h ldmain.h \
   ldgram.h ldexp.h ldlang.h ldemul.h ldlex.h ldmisc.h \
   ldctor.h ldfile.h $(INCDIR)/fnmatch.h
 ldmain.o: ldmain.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h $(INCDIR)/progress.h $(INCDIR)/bfdlink.h \
-  ld.h ldmain.h ldmisc.h ldwrite.h ldgram.h ldexp.h ldlang.h \
-  ldemul.h ldlex.h ldfile.h ldctor.h
+  sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/progress.h $(INCDIR)/bfdlink.h ld.h ldmain.h \
+  ldmisc.h ldwrite.h ldgram.h ldexp.h ldlang.h ldemul.h \
+  ldlex.h ldfile.h ldctor.h
 ldmisc.o: ldmisc.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h $(INCDIR)/demangle.h ld.h ldmisc.h \
-  ldexp.h ldlang.h ldgram.h ldlex.h ldmain.h ldfile.h
+  sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/demangle.h ld.h ldmisc.h ldexp.h ldlang.h \
+  ldgram.h ldlex.h ldmain.h ldfile.h
 ldver.o: ldver.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  ld.h ldver.h ldemul.h ldmain.h
+  sysdep.h config.h $(INCDIR)/fopen-same.h ld.h ldver.h \
+  ldemul.h ldmain.h
 ldwrite.o: ldwrite.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h ld.h ldexp.h \
-  ldlang.h ldwrite.h ldmisc.h ldgram.h ldmain.h
+  sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/libiberty.h ld.h ldexp.h ldlang.h ldwrite.h \
+  ldmisc.h ldgram.h ldmain.h
 lexsup.o: lexsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h $(INCDIR)/getopt.h $(INCDIR)/bfdlink.h \
-  ld.h ldmain.h ldmisc.h ldexp.h ldlang.h ldgram.h ldlex.h \
-  ldfile.h ldver.h ldemul.h
-mri.o: mri.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/obstack.h \
-  sysdep.h config.h $(INCDIR)/fopen-same.h ld.h ldexp.h \
-  ldlang.h ldmisc.h mri.h ldgram.h
+  sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/getopt.h $(INCDIR)/bfdlink.h ld.h ldmain.h \
+  ldmisc.h ldexp.h ldlang.h ldgram.h ldlex.h ldfile.h \
+  ldver.h ldemul.h
+mri.o: mri.c ../bfd/bfd.h $(INCDIR)/ansidecl.h sysdep.h \
+  config.h $(INCDIR)/fopen-same.h ld.h ldexp.h ldlang.h \
+  ldmisc.h mri.h ldgram.h $(INCDIR)/libiberty.h
 ldcref.o: ldcref.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h ld.h ldmain.h \
-  ldmisc.h ldexp.h ldlang.h
+  sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/libiberty.h ld.h ldmain.h ldmisc.h ldexp.h \
+  ldlang.h
 ldgram.o: ldgram.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/bfdlink.h ld.h ldexp.h ldver.h ldlang.h ldemul.h \
-  ldfile.h ldmisc.h ldmain.h mri.h ldlex.h
-ldlex.o: ldlex.c ../bfd/bfd.h $(INCDIR)/obstack.h sysdep.h \
-  config.h $(INCDIR)/fopen-same.h ld.h ldgram.h ldmisc.h \
-  ldexp.h ldlang.h ldfile.h ldlex.h ldmain.h
+  sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/bfdlink.h \
+  ld.h ldexp.h ldver.h ldlang.h ldemul.h ldfile.h ldmisc.h \
+  ldmain.h mri.h ldlex.h
+ldlex.o: ldlex.c ../bfd/bfd.h sysdep.h config.h $(INCDIR)/fopen-same.h \
+  ld.h ldgram.h ldmisc.h ldexp.h ldlang.h ldfile.h ldlex.h \
+  ldmain.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY

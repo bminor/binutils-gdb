@@ -1,4 +1,16 @@
+Tue Apr 15 13:19:26 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (INSTALL): Set to @INSTALL@.
+	(INSTALL_XFORM, INSTALL_XFORM1): Remove.
+	(install): Depend upon ld.new and installdirs.  Use
+	$(program_transform_name) directly, rather than using
+	$(INSTALL_XFORM) and $(INSTALL_XFORM1).
+	(installdirs): New target.
+	(install-info): Run mkinstalldirs.
+
 Mon Apr 14 12:06:15 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (INSTALL): Change install.sh to install-sh.
 
 	From Thomas Graichen <graichen@rzpd.de>:
 	* configure.in: Use ${CONFIG_SHELL} when running $ac_config_sub.
