@@ -1,3 +1,9 @@
+start-sanitize-ide
+Thu May  8 17:09:12 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (all-libide): Depend upon all-ilu.
+
+end-sanitize-ide
 Tue May  6 15:49:52 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Default CXX to c++, not gcc.
