@@ -1,5 +1,5 @@
 /* Simulator tracing/debugging support.
-   Copyright (C) 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1998, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -76,7 +76,8 @@ enum {
   OPTION_TRACE_RANGE,
   OPTION_TRACE_FUNCTION,
   OPTION_TRACE_DEBUG,
-  OPTION_TRACE_FILE
+  OPTION_TRACE_FILE,
+  OPTION_TRACE_VPU
 };
 
 static const OPTION trace_options[] =
@@ -105,6 +106,9 @@ static const OPTION trace_options[] =
       trace_option_handler },
   { {"trace-fpu", optional_argument, NULL, OPTION_TRACE_FPU},
       '\0', "on|off", "Trace FPU operations",
+      trace_option_handler },
+  { {"trace-vpu", optional_argument, NULL, OPTION_TRACE_VPU},
+      '\0', "on|off", "Trace VPU operations",
       trace_option_handler },
   { {"trace-branch", optional_argument, NULL, OPTION_TRACE_BRANCH},
       '\0', "on|off", "Trace branching",
@@ -322,6 +326,13 @@ trace_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	sim_io_eprintf (sd, "FPU tracing not compiled in, `--trace-fpu' ignored\n");
       break;
 
+    case OPTION_TRACE_VPU :
+      if (WITH_TRACE_VPU_P)
+	return set_trace_option (sd, "-vpu", TRACE_VPU_IDX, arg);
+      else
+	sim_io_eprintf (sd, "VPU tracing not compiled in, `--trace-vpu' ignored\n");
+      break;
+
     case OPTION_TRACE_BRANCH :
       if (WITH_TRACE_BRANCH_P)
 	return set_trace_option (sd, "-branch", TRACE_BRANCH_IDX, arg);
@@ -337,6 +348,7 @@ trace_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	{
 	  if (set_trace_option (sd, "-semantics", TRACE_ALU_IDX, arg) != SIM_RC_OK
 	      || set_trace_option (sd, "-semantics", TRACE_FPU_IDX, arg) != SIM_RC_OK
+	      || set_trace_option (sd, "-semantics", TRACE_VPU_IDX, arg) != SIM_RC_OK
 	      || set_trace_option (sd, "-semantics", TRACE_MEMORY_IDX, arg) != SIM_RC_OK
 	      || set_trace_option (sd, "-semantics", TRACE_BRANCH_IDX, arg) != SIM_RC_OK)
 	    return SIM_RC_FAIL;
@@ -617,6 +629,7 @@ trace_idx_to_str (int trace_idx)
     case TRACE_EVENTS_IDX:  return "events:  ";
     case TRACE_FPU_IDX:     return "fpu:     ";
     case TRACE_BRANCH_IDX:  return "branch:  ";
+    case TRACE_VPU_IDX:     return "vpu:     ";
     default:
       sprintf (num, "?%d?", trace_idx);
       return num;

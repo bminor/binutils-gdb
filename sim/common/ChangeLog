@@ -1,3 +1,15 @@
+2001-02-22  Ben Elliston  <bje@redhat.com>
+
+	* sim-trace.h (TRACE_VPU_IDX): Add.
+	(TRACE_vpu): Define.
+	(WITH_TRACE_VPU_P): Likewise.
+	(TRACE_VPU_P): Likewise.
+	* sim-trace.c (OPTION_TRACE_VPU): Define.
+	(trace_options): Add --trace-vpu.
+	(trace_option_handler): Handle OPTION_TRACE_VPU.
+	(trace_option_handler): Include VPU tracing in --trace-semantics.
+	(trace_idx_to_str): Handle TRACE_VPU_IDX.
+
 2001-02-21  Ben Elliston  <bje@redhat.com>
 
 	* sim-trace.h (TRACE_BRANCH_INPUT1): New macro.
