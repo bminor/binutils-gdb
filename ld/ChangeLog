@@ -1,3 +1,18 @@
+Tue Nov 21 16:14:32 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldmain.c (constructor_callback): Don't warn about BFD_RELOC_CTOR
+	being unsupported if this is not a relocaeable link and the input
+	BFD supports it, since ldctor_build_sets can cope with that case.
+
+Fri Nov 17 16:23:15 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* configure.tgt (powerpc-*-macos*): New target.
+	* emulparams/ppcmacos.sh: New file, PowerMac emulation.
+	* Makefile.in (ALL_EMULATIONS): Add eppcmacos.o.
+	(eppcmacos.c): New target.
+	* mpw-eppcmacos.c: Update.
+	* mpw-make.sed: Edit out attempts to use {GENSCRIPTS}.
+
 Fri Nov 17 10:37:27 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (CC_FOR_TARGET): Use @host@ and @target@, not
