@@ -125,6 +125,155 @@ handle_query (char *own_buf)
   own_buf[0] = 0;
 }
 
+/* Parse vCont packets.  */
+void
+handle_v_cont (char *own_buf, char *status, unsigned char *signal)
+{
+  char *p, *q;
+  int n = 0, i = 0;
+  struct thread_resume *resume_info, default_action;
+
+  /* Count the number of semicolons in the packet.  There should be one
+     for every action.  */
+  p = &own_buf[5];
+  while (p)
+    {
+      n++;
+      p++;
+      p = strchr (p, ';');
+    }
+  /* Allocate room for one extra action, for the default remain-stopped
+     behavior; if no default action is in the list, we'll need the extra
+     slot.  */
+  resume_info = malloc ((n + 1) * sizeof (resume_info[0]));
+
+  default_action.thread = -1;
+  default_action.leave_stopped = 1;
+  default_action.step = 0;
+  default_action.sig = 0;
+
+  p = &own_buf[5];
+  i = 0;
+  while (*p)
+    {
+      p++;
+
+      resume_info[i].leave_stopped = 0;
+
+      if (p[0] == 's' || p[0] == 'S')
+	resume_info[i].step = 1;
+      else if (p[0] == 'c' || p[0] == 'C')
+	resume_info[i].step = 0;
+      else
+	goto err;
+
+      if (p[0] == 'S' || p[0] == 'C')
+	{
+	  int sig;
+	  sig = strtol (p + 1, &q, 16);
+	  if (p == q)
+	    goto err;
+	  p = q;
+
+	  if (!target_signal_to_host_p (sig))
+	    goto err;
+	  resume_info[i].sig = target_signal_to_host (sig);
+	}
+      else
+	{
+	  resume_info[i].sig = 0;
+	  p = p + 1;
+	}
+
+      if (p[0] == 0)
+	{
+	  resume_info[i].thread = -1;
+	  default_action = resume_info[i];
+
+	  /* Note: we don't increment i here, we'll overwrite this entry
+	     the next time through.  */
+	}
+      else if (p[0] == ':')
+	{
+	  resume_info[i].thread = strtol (p + 1, &q, 16);
+	  if (p == q)
+	    goto err;
+	  p = q;
+	  if (p[0] != ';' && p[0] != 0)
+	    goto err;
+
+	  i++;
+	}
+    }
+
+  resume_info[i] = default_action;
+
+  /* Still used in occasional places in the backend.  */
+  if (n == 1 && resume_info[0].thread != -1)
+    cont_thread = resume_info[0].thread;
+  else
+    cont_thread = -1;
+
+  (*the_target->resume) (resume_info);
+
+  free (resume_info);
+
+  *signal = mywait (status, 1);
+  prepare_resume_reply (own_buf, *status, *signal);
+  return;
+
+err:
+  /* No other way to report an error... */
+  strcpy (own_buf, "");
+  free (resume_info);
+  return;
+}
+
+/* Handle all of the extended 'v' packets.  */
+void
+handle_v_requests (char *own_buf, char *status, unsigned char *signal)
+{
+  if (strncmp (own_buf, "vCont;", 6) == 0)
+    {
+      handle_v_cont (own_buf, status, signal);
+      return;
+    }
+
+  if (strncmp (own_buf, "vCont?", 6) == 0)
+    {
+      strcpy (own_buf, "vCont;c;C;s;S");
+      return;
+    }
+
+  /* Otherwise we didn't know what packet it was.  Say we didn't
+     understand it.  */
+  own_buf[0] = 0;
+  return;
+}
+
+void
+myresume (int step, int sig)
+{
+  struct thread_resume resume_info[2];
+  int n = 0;
+
+  if (step || sig || cont_thread > 0)
+    {
+      resume_info[0].thread
+	= ((struct inferior_list_entry *) current_inferior)->id;
+      resume_info[0].step = step;
+      resume_info[0].sig = sig;
+      resume_info[0].leave_stopped = 0;
+      n++;
+    }
+  resume_info[n].thread = -1;
+  resume_info[n].step = 0;
+  resume_info[n].sig = 0;
+  resume_info[n].leave_stopped = (cont_thread > 0);
+
+  (*the_target->resume) (resume_info);
+}
+
 static int attached;
 
 static void
@@ -383,6 +532,10 @@ main (int argc, char *argv[])
 		  own_buf[0] = '\0';
 		  break;
 		}
+	    case 'v':
+	      /* Extended (long) request.  */
+	      handle_v_requests (own_buf, &status, &signal);
+	      break;
 	    default:
 	      /* It is a request we don't understand.  Respond with an
 	         empty packet so that gdb knows that we don't support this

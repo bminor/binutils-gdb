@@ -52,7 +52,7 @@ int using_threads;
 
 static void linux_resume_one_process (struct inferior_list_entry *entry,
 				      int step, int signal);
-static void linux_resume (int step, int signal);
+static void linux_resume (struct thread_resume *resume_info);
 static void stop_all_processes (void);
 static int linux_wait_for_event (struct thread_info *child);
 
@@ -652,7 +652,12 @@ retry:
 
       /* No stepping, no signal - unless one is pending already, of course.  */
       if (child == NULL)
-	linux_resume (0, 0);
+	{
+	  struct thread_resume resume_info;
+	  resume_info.thread = -1;
+	  resume_info.step = resume_info.sig = resume_info.leave_stopped = 0;
+	  linux_resume (&resume_info);
+	}
     }
 
   enable_async_io ();
@@ -868,33 +873,48 @@ linux_resume_one_process (struct inferior_list_entry *entry,
     perror_with_name ("ptrace");
 }
 
-/* This function is called once per process other than the first
-   one.  The first process we are told the signal to continue
-   with, and whether to step or continue; for all others, any
-   existing signals will be marked in status_pending_p to be
-   reported momentarily, and we preserve the stepping flag.  */
+static struct thread_resume *resume_ptr;
+
+/* This function is called once per thread.  We look up the thread
+   in RESUME_PTR, which will tell us whether to resume, step, or leave
+   the thread stopped; and what signal, if any, it should be sent.
+   For threads which we aren't explicitly told otherwise, we preserve
+   the stepping flag; this is used for stepping over gdbserver-placed
+   breakpoints.  If the thread has a status pending, it may not actually
+   be resumed.  */
 static void
-linux_continue_one_process (struct inferior_list_entry *entry)
+linux_continue_one_thread (struct inferior_list_entry *entry)
 {
   struct process_info *process;
+  struct thread_info *thread;
+  int ndx, step;
 
-  process = (struct process_info *) entry;
-  linux_resume_one_process (entry, process->stepping, 0);
+  thread = (struct thread_info *) entry;
+  process = get_thread_process (thread);
+
+  ndx = 0;
+  while (resume_ptr[ndx].thread != -1 && resume_ptr[ndx].thread != entry->id)
+    ndx++;
+
+  if (resume_ptr[ndx].leave_stopped)
+    return;
+
+  if (resume_ptr[ndx].thread == -1)
+    step = process->stepping || resume_ptr[ndx].step;
+  else
+    step = resume_ptr[ndx].step;
+
+  linux_resume_one_process (&process->head, step, resume_ptr[ndx].sig);
 }
 
 static void
-linux_resume (int step, int signal)
+linux_resume (struct thread_resume *resume_info)
 {
-  struct process_info *process;
+  /* Yes, this is quadratic.  If it ever becomes a problem then it's
+     fairly easy to fix.  Yes, the use of a global here is rather ugly.  */
 
-  process = get_thread_process (current_inferior);
-
-  /* If the current process has a status pending, this signal will
-     be enqueued and sent later.  */
-  linux_resume_one_process (&process->head, step, signal);
-
-  if (cont_thread == 0 || cont_thread == -1)
-    for_each_inferior (&all_processes, linux_continue_one_process);
+  resume_ptr = resume_info;
+  for_each_inferior (&all_threads, linux_continue_one_thread);
 }
 
 #ifdef HAVE_LINUX_USRREGS

@@ -1,3 +1,20 @@
+2003-10-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c (linux_resume): Take a struct thread_resume *
+	argument.
+	(linux_wait): Update call.
+	(resume_ptr): New static variable.
+	(linux_continue_one_thread): Renamed from
+	linux_continue_one_process.  Use resume_ptr.
+	(linux_resume): Use linux_continue_one_thread.
+	* server.c (handle_v_cont, handle_v_requests): New functions.
+	(myresume): New function.
+	(main): Handle 'v' case.
+	* target.h (struct thread_resume): New type.
+	(struct target_ops): Change argument of "resume" to struct
+	thread_resume *.
+	(myresume): Delete macro.
+
 2003-08-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.in (install-only): Create dest dir. Support DESTDIR.

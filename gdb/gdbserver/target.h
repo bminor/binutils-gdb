@@ -24,6 +24,25 @@
 #ifndef TARGET_H
 #define TARGET_H
 
+/* This structure describes how to resume a particular thread (or
+   all threads) based on the client's request.  If thread is -1, then
+   this entry applies to all threads.  These are generally passed around
+   as an array, and terminated by a thread == -1 entry.  */
+
+struct thread_resume
+{
+  int thread;
+
+  /* If non-zero, leave this thread stopped.  */
+  int leave_stopped;
+
+  /* If non-zero, we want to single-step.  */
+  int step;
+
+  /* If non-zero, send this signal when we resume.  */
+  int sig;
+};
+
 struct target_ops
 {
   /* Start a new process.
@@ -56,14 +75,9 @@ struct target_ops
 
   int (*thread_alive) (int pid);
 
-  /* Resume the inferior process.
+  /* Resume the inferior process.  */
 
-     If STEP is non-zero, we want to single-step.
-
-     If SIGNAL is nonzero, send the process that signal as we resume it.
-   */
-
-  void (*resume) (int step, int signo);
+  void (*resume) (struct thread_resume *resume_info);
 
   /* Wait for the inferior process to change state.
 
@@ -131,9 +145,6 @@ void set_target_ops (struct target_ops *);
 
 #define mythread_alive(pid) \
   (*the_target->thread_alive) (pid)
-
-#define myresume(step,signo) \
-  (*the_target->resume) (step, signo)
 
 #define fetch_inferior_registers(regno) \
   (*the_target->fetch_registers) (regno)
