@@ -1,5 +1,9 @@
 Mon Jul 19 11:48:57 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* printcmd.c, config/pa/xm-pa.h, config/alpha/xm-alpha.h: Make it so
+	arg_bytes field of makeva_list is always aligned.
+	* config/pa/xm-pa.h: Make arglist_address a char *.
+
 	* ser-unix.c: Don't try to use job control with termio.
 
 Sun Jul 18 23:11:28 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
