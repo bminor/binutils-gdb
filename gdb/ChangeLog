@@ -1,3 +1,7 @@
+Mon Nov 17 15:35:06 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Makefile.in (remote-sim.o): Depend on $(INCLUDE_DIR)/callback.h.
+
 Fri Nov 14 13:04:34 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* jv-exp.y (copy_exp, insert_exp): Avoid ANSI prototypes.

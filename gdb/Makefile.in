@@ -976,73 +976,6 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	win32-nat.c \
 	xcoffread.c xcoffsolib.c z8k-tdep.c
 
-ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt config/a29k/vx29k.mt\
-	config/a29k/a29k.mt config/a29k/ultra3.mh config/a29k/ultra3.mt \
-	config/alpha/alpha-osf1.mh config/alpha/alpha-osf2.mh \
-	config/alpha/alpha-osf1.mt config/alpha/alpha-nw.mt \
-	config/arm/arm.mh config/arm/arm.mt config/convex/convex.mh \
-	config/convex/convex.mt config/gould/np1.mh config/gould/np1.mt \
-	config/gould/pn.mh config/gould/pn.mt config/h8300/h8300hms.mt \
-	config/h8500/h8500hms.mt config/i386/go32.mh config/i386/i386aix.mh \
-	config/i386/i386aix.mt config/i386/i386aout.mt config/i386/i386bsd.mh \
-	config/i386/i386bsd.mt config/i386/i386lynx.mh \
-	config/i386/i386lynx.mt config/i386/i386m3.mh config/i386/i386m3.mt \
-	config/i386/i386mach.mh config/i386/i386mk.mh config/i386/i386mk.mt \
-	config/i386/i386nw.mt config/i386/i386sco.mh \
-	config/i386/i386sco4.mh \
-	config/i386/i386sol2.mh config/i386/i386sol2.mt config/i386/i386v.mh \
-	config/i386/i386v.mt config/i386/i386v32.mh config/i386/i386v4.mh \
-	config/i386/i386v4.mt config/i386/linux.mh config/i386/linux.mt \
-	config/i386/ncr3000.mh config/i386/ncr3000.mt config/i386/ptx.mh \
-	config/i386/sun386.mh \
-	config/i386/sun386.mt config/i386/symmetry.mh config/i386/symmetry.mt \
-	config/i386/win32.mh config/i386/win32.mt \
-	config/i960/mon960.mt \
-	config/i960/nindy960.mt config/i960/vxworks960.mt config/m68k/3b1.mh \
-	config/m68k/3b1.mt config/m68k/altos.mh config/m68k/altos.mt \
-	config/m68k/amix.mh config/m68k/amix.mt config/m68k/apollo68b.mh \
-	config/m68k/apollo68b.mt \
-	config/m68k/apollo68v.mh \
-	config/m68k/cisco.mt config/m68k/delta68.mh \
-	config/m68k/delta68.mt config/m68k/dpx2.mh config/m68k/dpx2.mt \
-	config/m68k/es1800.mt config/m68k/hp300bsd.mh \
-	config/m68k/hp300bsd.mt config/m68k/hp300hpux.mh \
-	config/m68k/hp300hpux.mt config/m68k/isi.mh config/m68k/isi.mt \
-	config/m68k/m68klynx.mh config/m68k/m68klynx.mt \
-	config/m68k/monitor.mt \
-	config/m68k/news.mh config/m68k/news.mt config/m68k/news1000.mh \
-	config/m68k/os68k.mt config/m68k/st2000.mt config/m68k/sun2os3.mh \
-	config/m68k/sun2os3.mt config/m68k/sun2os4.mh config/m68k/sun2os4.mt \
-	config/m68k/sun3os3.mh config/m68k/sun3os3.mt config/m68k/sun3os4.mh \
-	config/m68k/sun3os4.mt config/m68k/vxworks68.mt config/m88k/delta88.mh \
-	config/m88k/delta88.mt config/m88k/delta88v4.mh \
-	config/m88k/delta88v4.mt config/m88k/m88k.mh config/m88k/m88k.mt \
-	config/mips/bigmips.mt config/mips/bigmips64.mt \
-	config/mips/decstation.mh \
-	config/mips/decstation.mt config/mips/idt.mt config/mips/idtl.mt \
-	config/mips/idt64.mt config/mips/idtl64.mt \
-	config/mips/irix3.mh config/mips/irix3.mt config/mips/irix4.mh \
-	config/mips/irix5.mh config/mips/irix5.mt \
-	config/mips/littlemips.mh config/mips/littlemips.mt \
-	config/mips/mipsel64.mt \
-	config/mips/mipsm3.mh config/mips/mipsm3.mt \
-	config/mips/mipsv4.mh config/mips/mipsv4.mt \
-	config/mips/news-mips.mh config/mips/riscos.mh \
-	config/none/none.mh config/none/none.mt config/ns32k/merlin.mh \
-	config/ns32k/merlin.mt config/ns32k/ns32km3.mh config/ns32k/ns32km3.mt \
-	config/ns32k/umax.mh config/ns32k/umax.mt \
-	config/pa/hppabsd.mh config/pa/hppabsd.mt config/pa/hppahpux.mh \
-	config/pa/hppahpux.mt config/pyr/pyramid.mh config/pyr/pyramid.mt \
-	config/romp/rtbsd.mh config/rs6000/rs6000.mh config/rs6000/rs6000.mt \
-	config/sh/sh.mt config/sparc/sparc-em.mt config/sparc/sparclite.mt \
-	config/sparc/sparclynx.mh config/sparc/sparclynx.mt \
-	config/sparc/sun4os4.mh config/sparc/sun4os4.mt \
-	config/sparc/sun4sol2.mh config/sparc/sun4sol2.mt \
-	config/sparc/vxsparc.mt config/tahoe/tahoe.mh config/tahoe/tahoe.mt \
-	config/vax/vax.mt config/vax/vaxbsd.mh config/vax/vaxult.mh \
-	config/vax/vaxult2.mh config/z8k/z8ksim.mt
-
-
 udip2soc.o: $(srcdir)/29k-share/udi/udip2soc.c $(udiheaders)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/29k-share/udi/udip2soc.c
 
@@ -1461,7 +1394,8 @@ remote-sds.o: remote-sds.c $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(remote_utils_h) symfile.h terminal.h gdb_string.h
 
 remote-sim.o: remote-sim.c $(wait_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) target.h terminal.h gdb_string.h
+	$(inferior_h) target.h terminal.h gdb_string.h \
+	$(INCLUDE_DIR)/callback.h
 
 remote-st.o: remote-st.c $(wait_h) $(defs_h) $(gdbcore_h) serial.h \
 	target.h gdb_string.h
