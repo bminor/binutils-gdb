@@ -1,3 +1,18 @@
+Wed Jan 27 17:19:09 1999  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim-profile.h: Make like sim-trace.h.
+	(PROFILE_USEFUL_MASK): New macro.
+	* sim-profile.c (profile_options): Make like trace_options, allow
+	optional on|off arg where applicable.
+	(set_profile_option_mask): New function.
+	(sim_profile_set_option): New function.
+	(profile_option_handler): Simplify.
+	Have -p only enable selected things, not everything.
+	Add missing break to OPTION_PROFILE_PC_RANGE.
+	* cgen-scache.c (scache_options): Allow optional on|off arg to
+	--profile-scache.
+	(scache_option_handler): Use sim_profile_set_option.
+
 1999-01-26  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* sim-memopt.c (memory_options): Add MEMORY_FILL option.
