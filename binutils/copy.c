@@ -104,13 +104,12 @@ static
 void            
 copy_usage()
 {
-    fprintf(stderr, "copy %s\n\
+    fprintf(stderr, "\
 Usage: %s [-vVSgxX] [-I format] [-O format] [-F format]\n\
        [--format=format] [--target=format] [--input-format=format]\n\
        [--output-format=format] [--strip-all] [--strip-debug]\n\
        [--discard-all] [--discard-locals] [--verbose] [--version]\n\
-       in-file [out-file]\n",
-	    program_version, program_name);
+       in-file [out-file]\n", program_name);
     exit(1);
 }
 
