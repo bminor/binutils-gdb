@@ -929,7 +929,8 @@ static void do_vfp_sp_dyadic	PARAMS ((char *));
 static void do_vfp_dp_dyadic	PARAMS ((char *));
 static void do_vfp_reg_from_sp  PARAMS ((char *));
 static void do_vfp_sp_from_reg  PARAMS ((char *));
-static void do_vfp_sp_reg2	PARAMS ((char *));
+static void do_vfp_reg2_from_sp2 PARAMS ((char *));
+static void do_vfp_sp2_from_reg2 PARAMS ((char *));
 static void do_vfp_reg_from_dp  PARAMS ((char *));
 static void do_vfp_reg2_from_dp PARAMS ((char *));
 static void do_vfp_dp_from_reg  PARAMS ((char *));
@@ -1976,8 +1977,8 @@ static const struct asm_opcode insns[] =
   {"fcmpezd", 0xeeb50bc0, 7, FPU_VFP_EXT_V1,   do_vfp_dp_compare_z},
 
   /* VFP V2.  */
-  {"fmsrr",   0xec400a10, 5, FPU_VFP_EXT_V2,   do_vfp_sp_reg2},
-  {"fmrrs",   0xec500a10, 5, FPU_VFP_EXT_V2,   do_vfp_sp_reg2},
+  {"fmsrr",   0xec400a10, 5, FPU_VFP_EXT_V2,   do_vfp_sp2_from_reg2},
+  {"fmrrs",   0xec500a10, 5, FPU_VFP_EXT_V2,   do_vfp_reg2_from_sp2},
   {"fmdrr",   0xec400b10, 5, FPU_VFP_EXT_V2,   do_vfp_dp_from_reg2},
   {"fmrrd",   0xec500b10, 5, FPU_VFP_EXT_V2,   do_vfp_reg2_from_dp},
 
@@ -8954,15 +8955,13 @@ do_vfp_reg_from_sp (str)
 }
 
 static void
-do_vfp_sp_reg2 (str)
+do_vfp_reg2_from_sp2 (str)
      char *str;
 {
   skip_whitespace (str);
 
-  if (reg_required_here (&str, 12) == FAIL)
-    return;
-
-  if (skip_past_comma (&str) == FAIL
+  if (reg_required_here (&str, 12) == FAIL
+      || skip_past_comma (&str) == FAIL
       || reg_required_here (&str, 16) == FAIL
       || skip_past_comma (&str) == FAIL)
     {
@@ -8992,6 +8991,32 @@ do_vfp_sp_from_reg (str)
 
   if (skip_past_comma (&str) == FAIL
       || reg_required_here (&str, 12) == FAIL)
+    {
+      if (! inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+}
+
+static void
+do_vfp_sp2_from_reg2 (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  /* We require exactly two consecutive SP registers.  */
+  if (vfp_sp_reg_list (&str, VFP_REG_Sm) != 2)
+    {
+      if (! inst.error)
+	inst.error = _("only two consecutive VFP SP registers allowed here");
+    }
+
+  if (skip_past_comma (&str) == FAIL
+      || reg_required_here (&str, 12) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || reg_required_here (&str, 16) == FAIL)
     {
       if (! inst.error)
 	inst.error = BAD_ARGS;
@@ -9075,7 +9100,7 @@ do_vfp_dp_from_reg2 (str)
   if (skip_past_comma (&str) == FAIL
       || reg_required_here (&str, 12) == FAIL
       || skip_past_comma (&str) == FAIL
-      || reg_required_here (&str, 16))
+      || reg_required_here (&str, 16) == FAIL)
     {
       if (! inst.error)
 	inst.error = BAD_ARGS;

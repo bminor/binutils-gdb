@@ -61,6 +61,8 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
 
     run_dump_test "vfp1"
 
+    run_dump_test "vfp2"
+
     run_errors_test "vfp-bad" "-mfpu=vfp" "VFP errors"
 
     run_dump_test "xscale"

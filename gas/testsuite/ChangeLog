@@ -1,3 +1,8 @@
+2004-01-09  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/vfp2.s, gas/arm/vfp2.d: New test.
+	* gas/arm/arm.exp: Add them.
+
 2004-01-08  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* gas/mips/ldstla-n64.d: Pass -64 to assembler, not -n64.
