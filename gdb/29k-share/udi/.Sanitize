@@ -28,7 +28,7 @@ Things-to-keep:
 udiids.h
 udip2soc.c
 udiphcfg.h
-udiphsun.h
+udiphunix.h
 udiproc.h
 udipt29k.h
 udiptcfg.h
