@@ -2956,31 +2956,18 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 	      {
 		if (0 == find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol)))
 		  {
-		    if (kind == FUNCTIONS_NAMESPACE)
-		      {
-			found_misc = 1;
-		      }
-		    else
-		      {
-			struct symbol *sym;
-
-			if (SYMBOL_DEMANGLED_NAME (msymbol) != NULL)
-			  sym
-			    = lookup_symbol_aux_minsyms (SYMBOL_DEMANGLED_NAME
-							 (msymbol),
-							 SYMBOL_NAME (msymbol),
-							 VAR_NAMESPACE,
-							 NULL, NULL);
-			else
-			  sym
-			    = lookup_symbol_aux_minsyms (SYMBOL_NAME (msymbol),
-							 NULL,
-							 VAR_NAMESPACE,
-							 NULL, NULL);
-
-			if (sym == NULL)
-			  found_misc = 1;
-		      }
+		    /* FIXME: carlton/2003-02-04: Given that the
+		       semantics of lookup_symbol keeps on changing
+		       slightly, it would be a nice idea if we had a
+		       function lookup_symbol_minsym that found the
+		       symbol associated to a given minimal symbol (if
+		       any).  */
+		    if (kind == FUNCTIONS_NAMESPACE
+			|| lookup_symbol (SYMBOL_NAME (msymbol),
+					  (struct block *) NULL,
+					  VAR_NAMESPACE,
+					0, (struct symtab **) NULL) == NULL)
+		      found_misc = 1;
 		  }
 	      }
 	  }

@@ -1,3 +1,8 @@
+2003-02-20  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (search_symbols): Revert the search_symbols part of my
+	2002-12-23 patch.  Add comment.
+
 2002-02-20  Daniel Jacobowitz  <drow@mvista.com>
 
 	* coffread.c (coff_symfile_read): Clean up minimal symbols earlier.
