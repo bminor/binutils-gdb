@@ -1,3 +1,9 @@
+2002-11-06  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf64-mips.c (mips_elf64_slurp_one_reloc_table): Generate
+	exactly three internal relocs per external reloc.  Set reloc_count
+	to the external reloc count.
+
 2002-11-06  Klee Dienes  <kdienes@apple.com>
 
          * coff-stgo32.c (stub_bytes): Mark as const.
