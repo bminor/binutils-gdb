@@ -336,6 +336,19 @@ DEFUN (lang_add_input_file, (name, file_type, target),
   return new_afile (name, file_type, target);
 }
 
+void
+DEFUN (lang_add_keepsyms_file, (filename),
+       CONST char *filename)
+{
+  extern strip_symbols_type strip_symbols;
+  if (keepsyms_file != 0)
+    info ("%X%P error: duplicated keep-symbols-file value\n");
+  keepsyms_file = filename;
+  if (strip_symbols != STRIP_NONE)
+    info ("%P `-keep-only-symbols-file' overrides `-s' and `-S'\n");
+  strip_symbols = STRIP_SOME;
+}
+
 /* Build enough state so that the parser can build its tree */
 void
 DEFUN_VOID (lang_init)
@@ -1846,7 +1859,7 @@ static void
 DEFUN_VOID (lang_finish)
 {
   ldsym_type *lgs;
-  int warn = 1;
+  int warn = config.relocateable_output != true;
   if (entry_symbol == (char *) NULL)
   {
     /* No entry has been specified, look for start, but don't warn */

@@ -1,3 +1,8 @@
+Tue Oct  6 13:08:54 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ldlang.c (lang_finish): don't warn if -e start symbol does not
+	exist when linking with -r.
+
 Mon Oct  5 14:07:37 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* aout.sc-sh, m68kcoff.sc-sh: set __bss_start to the start of the
