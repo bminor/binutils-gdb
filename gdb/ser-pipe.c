@@ -1,5 +1,5 @@
 /* Serial interface for a pipe to a separate program
-   Copyright 1999 Free Software Foundation, Inc.
+   Copyright 1999, 2001 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions.
 
@@ -31,7 +31,7 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <fcntl.h>
-#include <string.h>
+#include "gdb_string.h"
 
 #include "signals.h"
 

@@ -1,5 +1,5 @@
 /* MI Console code.
-   Copyright (C) 2000, Free Software Foundation, Inc.
+   Copyright (C) 2000, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -21,7 +21,7 @@
 
 #include "defs.h"
 #include "mi-console.h"
-#include <string.h>
+#include "gdb_string.h"
 
 /* Convenience macro for allocting typesafe memory. */
 

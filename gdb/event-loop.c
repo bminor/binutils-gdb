@@ -1,5 +1,5 @@
 /* Event loop machinery for GDB, the GNU debugger.
-   Copyright 1999 Free Software Foundation, Inc.
+   Copyright 1999, 2001 Free Software Foundation, Inc.
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
    This file is part of GDB.
@@ -33,7 +33,7 @@
 #endif
 
 #include <sys/types.h>
-#include <string.h>
+#include "gdb_string.h"
 #include <errno.h>
 #include <setjmp.h>
 #include <sys/time.h>

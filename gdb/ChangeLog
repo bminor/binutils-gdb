@@ -1,5 +1,15 @@
 2001-01-31  David Smith  <dsmith@redhat.com>
 
+	* event-loop.c: Change inclusion of string.h to gdb_string.h and
+	updated the copyright notice.
+	* ser-pipe.c: Ditto.
+	* mi/mi-cmds.c: Ditto.
+	* mi/mi-console.c: Ditto.
+	* mi/mi-getopt.c: Ditto.
+	* mi/mi-parse.c: Ditto.
+
+2001-01-31  David Smith  <dsmith@redhat.com>
+
 	* MAINTAINERS: Add David Smith to Write After Approval list.
 
 Tue Jan 30 15:43:08 2001  Andrew Cagney  <cagney@cygnus.com>
