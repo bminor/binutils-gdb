@@ -557,9 +557,14 @@ static int mips_optimize = 2;
    equivalent to seeing no -g option at all.  */
 static int mips_debug = 0;
 
-/* The maximum number of NOPs needed to satisfy a hardware hazard
-   or processor errata.  */
-#define MAX_NOPS 2
+/* The maximum number of NOPs needed to avoid the VR4130 mflo/mfhi errata.  */
+#define MAX_VR4130_NOPS 4
+
+/* The maximum number of NOPs needed to fill delay slots.  */
+#define MAX_DELAY_NOPS 2
+
+/* The maximum number of NOPs needed for any purpose.  */
+#define MAX_NOPS 4
 
 /* A list of previous instructions, with index 0 being the most recent.
    We need to look back MAX_NOPS instructions when filling delay slots
@@ -658,6 +663,9 @@ static unsigned int vr4120_conflicts[NUM_FIX_VR4120_CLASSES];
 
 /* True if -mfix-vr4120 is in force.  */
 static int mips_fix_vr4120;
+
+/* ...likewise -mfix-vr4130.  */
+static int mips_fix_vr4130;
 
 /* We don't relax branches by default, since this causes us to expand
    `la .l2 - .l1' if there's a branch between .l1 and .l2, because we
@@ -2011,6 +2019,48 @@ insns_between (const struct mips_cl_insn *insn1,
   return 0;
 }
 
+/* Return the number of nops that would be needed to work around the
+   VR4130 mflo/mfhi errata if instruction INSN immediately followed
+   the MAX_VR4130_NOPS instructions described by HISTORY.  */
+
+static int
+nops_for_vr4130 (const struct mips_cl_insn *history,
+		 const struct mips_cl_insn *insn)
+{
+  int i, j, reg;
+
+  /* Check if the instruction writes to HI or LO.  MTHI and MTLO
+     are not affected by the errata.  */
+  if (insn != 0
+      && ((insn->insn_mo->pinfo & (INSN_WRITE_HI | INSN_WRITE_LO)) == 0
+	  || strcmp (insn->insn_mo->name, "mtlo") == 0
+	  || strcmp (insn->insn_mo->name, "mthi") == 0))
+    return 0;
+
+  /* Search for the first MFLO or MFHI.  */
+  for (i = 0; i < MAX_VR4130_NOPS; i++)
+    if (!history[i].noreorder_p && MF_HILO_INSN (history[i].insn_mo->pinfo))
+      {
+	/* Extract the destination register.  */
+	if (mips_opts.mips16)
+	  reg = mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RX, history[i])];
+	else
+	  reg = EXTRACT_OPERAND (RD, history[i]);
+
+	/* No nops are needed if INSN reads that register.  */
+	if (insn != NULL && insn_uses_reg (insn, reg, MIPS_GR_REG))
+	  return 0;
+
+	/* ...or if any of the intervening instructions do.  */
+	for (j = 0; j < i; j++)
+	  if (insn_uses_reg (&history[j], reg, MIPS_GR_REG))
+	    return 0;
+
+	return MAX_VR4130_NOPS - i;
+      }
+  return 0;
+}
+
 /* Return the number of nops that would be needed if instruction INSN
    immediately followed the MAX_NOPS instructions given by HISTORY,
    where HISTORY[0] is the most recent instruction.  If INSN is null,
@@ -2023,13 +2073,21 @@ nops_for_insn (const struct mips_cl_insn *history,
   int i, nops, tmp_nops;
 
   nops = 0;
-  for (i = 0; i < MAX_NOPS; i++)
+  for (i = 0; i < MAX_DELAY_NOPS; i++)
     if (!history[i].noreorder_p)
       {
 	tmp_nops = insns_between (history + i, insn) - i;
 	if (tmp_nops > nops)
 	  nops = tmp_nops;
       }
+
+  if (mips_fix_vr4130)
+    {
+      tmp_nops = nops_for_vr4130 (history, insn);
+      if (tmp_nops > nops)
+	nops = tmp_nops;
+    }
+
   return nops;
 }
 
@@ -9966,9 +10024,13 @@ struct option md_longopts[] =
 #define OPTION_NO_FIX_VR4120 (OPTION_FIX_BASE + 3)
   {"mfix-vr4120",    no_argument, NULL, OPTION_FIX_VR4120},
   {"mno-fix-vr4120", no_argument, NULL, OPTION_NO_FIX_VR4120},
+#define OPTION_FIX_VR4130 (OPTION_FIX_BASE + 4)
+#define OPTION_NO_FIX_VR4130 (OPTION_FIX_BASE + 5)
+  {"mfix-vr4130",    no_argument, NULL, OPTION_FIX_VR4130},
+  {"mno-fix-vr4130", no_argument, NULL, OPTION_NO_FIX_VR4130},
 
   /* Miscellaneous options.  */
-#define OPTION_MISC_BASE (OPTION_FIX_BASE + 4)
+#define OPTION_MISC_BASE (OPTION_FIX_BASE + 6)
 #define OPTION_TRAP (OPTION_MISC_BASE + 0)
   {"trap", no_argument, NULL, OPTION_TRAP},
   {"no-break", no_argument, NULL, OPTION_TRAP},
@@ -10209,6 +10271,14 @@ md_parse_option (int c, char *arg)
 
     case OPTION_NO_FIX_VR4120:
       mips_fix_vr4120 = 0;
+      break;
+
+    case OPTION_FIX_VR4130:
+      mips_fix_vr4130 = 1;
+      break;
+
+    case OPTION_NO_FIX_VR4130:
+      mips_fix_vr4130 = 0;
       break;
 
     case OPTION_RELAX_BRANCH:
@@ -13886,6 +13956,7 @@ MIPS options:\n\
 -no-mips16		do not generate mips16 instructions\n"));
   fprintf (stream, _("\
 -mfix-vr4120		work around certain VR4120 errata\n\
+-mfix-vr4130		work around VR4130 mflo/mfhi errata\n\
 -mgp32			use 32-bit GPRs, regardless of the chosen ISA\n\
 -mfp32			use 32-bit FPRs, regardless of the chosen ISA\n\
 -mno-shared		optimize output for executables\n\
