@@ -1,5 +1,9 @@
 2003-02-26  Michael Chastain  <mec@shout.net>
 
+	* configure: Regenerate with autoconf 000227.
+
+2003-02-26  Michael Chastain  <mec@shout.net>
+
 	Close PR build/660.
 	* PROBLEMS (i[3456]86-*-linux*): Note explicit error message
 	for old libc5/glibc.
