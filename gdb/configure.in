@@ -135,26 +135,6 @@ if test x"$enable_gdbmi" = xyes; then
   fi
 fi
 
-# FIXME: kettenis/20030102: We seem to prefer HP curses (Hcurses) over
-# Xcurses on HP-UX; see the `-D__HP_CURSES' in the relevant host
-# Makefile fragments.  That's why we need to have `Hcurses' before
-# `curses'.  I don't see why we should use HP curses if a more
-# standard curses is available, except that according to HP's
-# documentation one needs to compile `-D_XOPEN_SOURCE_EXTENDED' on
-# HP-UX 10.10 and 10.20.
-
-AC_SEARCH_LIBS(initscr, [ncurses Hcurses curses pdcurses], [],
-    [AC_MSG_WARN([no curses library found])])
-
-# Check whether the wborder function is provided by the curses
-# library detected above.  In certain implementations such as
-# the HP/UX Hcurses for instance, this function is provided by an
-# additional library.  So if we did not find this function inside
-# the curses library, try some alternate libraries we know might
-# provide it.
-AC_SEARCH_LIBS(wborder, [cur_colr], [],
-    [AC_MSG_WARN([wborder function not found, tui will be disabled])])
-
 # Enable TUI.
 AC_ARG_ENABLE(tui,
 [  --enable-tui            enable full-screen terminal user interface (TUI)],
@@ -330,6 +310,36 @@ AC_SEARCH_LIBS(tgetent, [termcap tinfo ncurses Hcurses curses])
 if test "$ac_cv_search_tgetent" = no; then
   AC_MSG_ERROR([no termcap library found])
 fi
+
+# FIXME: kettenis/20030102: We seem to prefer HP curses (Hcurses) over
+# Xcurses on HP-UX; see the `-D__HP_CURSES' in the relevant host
+# Makefile fragments.  That's why we need to have `Hcurses' before
+# `curses'.  I don't see why we should use HP curses if a more
+# standard curses is available, except that according to HP's
+# documentation one needs to compile `-D_XOPEN_SOURCE_EXTENDED' on
+# HP-UX 10.10 and 10.20.
+
+case $host_os in
+  osf5.*)
+    # ncurses does not work on native alphaev68-dec-osf5.1
+    # -- chastain 2004-04-24
+    AC_SEARCH_LIBS(initscr, [curses], [],
+      [AC_MSG_WARN([no curses library found])])
+    ;;
+  *)
+    AC_SEARCH_LIBS(initscr, [ncurses Hcurses curses pdcurses], [],
+      [AC_MSG_WARN([no curses library found])])
+    ;;
+esac
+
+# Check whether the wborder function is provided by the curses
+# library detected above.  In certain implementations such as
+# the HP/UX Hcurses for instance, this function is provided by an
+# additional library.  So if we did not find this function inside
+# the curses library, try some alternate libraries we know might
+# provide it.
+AC_SEARCH_LIBS(wborder, [cur_colr], [],
+    [AC_MSG_WARN([wborder function not found, tui will be disabled])])
 
 # ------------------------- #
 # Checks for header files.  #

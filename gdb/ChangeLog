@@ -1,3 +1,10 @@
+2004-04-25  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Fix PR gdb/1626.
+	* configure.in: Check for curses after termcap.
+	On osf5.*, do not check for ncurses.
+	* configure: Regenerate.
+
 2004-04-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* ppcobsd-nat.c: Include "ppc-tdep.h".
