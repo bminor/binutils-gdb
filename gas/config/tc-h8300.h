@@ -1,5 +1,5 @@
 /* This file is tc-h8300.h
-   Copyright (C) 1987-1992, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1987-1992, 93, 94, 95, 96, 97, 98, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -18,7 +18,6 @@
    along with GAS; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
-
 
 #define TC_H8300
 
@@ -54,5 +53,3 @@ extern int Hmode;
 extern int Smode;
 
 #define md_operand(x)
-
-/* end of tc-h8300.h */

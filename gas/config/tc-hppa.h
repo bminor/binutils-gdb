@@ -19,7 +19,6 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-
 /* HP PA-RISC support was contributed by the Center for Software Science
    at the University of Utah.  */
 
@@ -28,7 +27,7 @@
    (please PARAMize them!) not exporting structures and data items which
    are used solely within tc-hppa.c, etc.
 
-   Also refrain from adding any more object file dependent code, there is 
+   Also refrain from adding any more object file dependent code, there is
    already far too much object file format dependent code in this file.
    In theory this file should contain only exported functions, structures
    and data declarations common to all PA assemblers.  */
@@ -136,7 +135,7 @@ int hppa_fix_adjustable PARAMS((struct fix *));
 
 /* We need to be able to make relocations involving the difference of
    two symbols.  This includes the difference of two symbols when
-   one of them is undefined (this comes up in PIC code generation). 
+   one of them is undefined (this comes up in PIC code generation).
 
    We don't define DIFF_EXPR_OK because it does the wrong thing if
    the add symbol is undefined and the sub symbol is a symbol in

@@ -29,13 +29,11 @@
 #include "opcode/i860.h"
 #include "elf/i860.h"
 
-
 /* Defined by default since this is primarily a SVR4/860 assembler.
    However, I'm trying to leave the door open for Intel syntax. Of course,
    if full support for anything other than SVR4 is done, then we should
    select this based on a command-line flag.  */
 #define SYNTAX_SVR4
-
 
 /* The opcode hash table.  */
 static struct hash_control *op_hash = NULL;
@@ -56,14 +54,12 @@ const char EXP_CHARS[] = "eE";
    As in 0f12.456 or 0d1.2345e12.  */
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
-
 /* Register prefix.  */
 #ifdef SYNTAX_SVR4
 static const char reg_prefix = '%';
 #else
 static const char reg_prefix = 0;
 #endif
-
 
 struct i860_it
 {
@@ -84,7 +80,6 @@ static char last_expand;
 /* If true, then warn if any pseudo operations were expanded.  */
 static int target_warn_expand = 0;
 
-
 /* Prototypes.  */
 static void i860_process_insn	PARAMS ((char *));
 static void s_dual		PARAMS ((int));
@@ -97,7 +92,6 @@ static bfd_reloc_code_real_type obtain_reloc_for_imm16
 static void print_insn		PARAMS ((struct i860_it *));
 #endif
 
-
 const pseudo_typeS md_pseudo_table[] =
 {
 #ifdef OBJ_ELF
@@ -109,14 +103,12 @@ const pseudo_typeS md_pseudo_table[] =
   {NULL,      0,             0},
 };
 
-
 /* Dual-instruction mode handling.  */
 enum dual
 {
   DUAL_OFF = 0, DUAL_ON, DUAL_DDOT, DUAL_ONDDOT,
 };
 static enum dual dual_mode = DUAL_OFF;
-
 
 /* Handle ".dual" directive.  */
 static void
@@ -126,7 +118,6 @@ s_dual (ignore)
   dual_mode = DUAL_ON;
 }
 
-
 /* Handle ".enddual" directive.  */
 static void
 s_enddual (ignore)
@@ -134,7 +125,6 @@ s_enddual (ignore)
 {
   dual_mode = DUAL_OFF;
 }
-
 
 /* Temporary register used when expanding assembler pseudo operations.  */
 static int atmp = 31;
@@ -169,7 +159,6 @@ s_atmp (ignore)
     }
   demand_empty_rest_of_line ();
 }
-
 
 /* This function is called once, at assembler startup time.  It should
    set up all the tables and data structures that the MD part of the
@@ -211,7 +200,6 @@ md_begin ()
   if (lose)
     as_fatal (_("Defective assembler.  No assembly attempted."));
 }
-
 
 /* This is the core of the machine-dependent assembler.  STR points to a
    machine dependent instruction.  This function emits the frags/bytes
@@ -390,7 +378,7 @@ md_assemble (str)
 			     the_insn.reloc);
 
 	  /* Despite the odd name, this is a scratch field.  We use
-	     it to encode operand type information.  */ 
+	     it to encode operand type information.  */
 	  fix->fx_addnumber = the_insn.fup;
 	}
       the_insn = pseudo[++i];
@@ -398,7 +386,6 @@ md_assemble (str)
   while (--num_opcodes > 0);
 
 }
-
 
 /* Assemble the instruction pointed to by STR.  */
 static void
@@ -869,7 +856,6 @@ i860_process_insn (str)
   the_insn.opcode = opcode;
 }
 
-
 static int
 i860_get_expression (str)
      char *str;
@@ -893,7 +879,6 @@ i860_get_expression (str)
   input_line_pointer = save_in;
   return 0;
 }
-
 
 /* Turn a string in input_line_pointer into a floating point constant of
    type TYPE, and store the appropriate bytes in *LITP.  The number of
@@ -957,7 +942,6 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
-
 /* Write out in current endian mode.  */
 void
 md_number_to_chars (buf, val, n)
@@ -971,7 +955,6 @@ md_number_to_chars (buf, val, n)
     number_to_chars_littleendian (buf, val, n);
 }
 
-
 /* This should never be called for i860.  */
 void
 md_number_to_disp (buf, val, n)
@@ -981,7 +964,6 @@ md_number_to_disp (buf, val, n)
 {
   as_fatal (_("md_number_to_disp\n"));
 }
-
 
 /* This should never be called for i860.  */
 void
@@ -993,7 +975,6 @@ md_number_to_field (buf, val, fix)
   as_fatal (_("i860_number_to_field\n"));
 }
 
-
 /* This should never be called for i860.  */
 int
 md_estimate_size_before_relax (fragP, segtype)
@@ -1002,7 +983,6 @@ md_estimate_size_before_relax (fragP, segtype)
 {
   as_fatal (_("i860_estimate_size_before_relax\n"));
 }
-
 
 #ifdef DEBUG_I860
 static void
@@ -1031,14 +1011,12 @@ print_insn (insn)
 }
 #endif /* DEBUG_I860 */
 
-
 
 #ifdef OBJ_ELF
 CONST char *md_shortopts = "VQ:";
 #else
 CONST char *md_shortopts = "";
 #endif
-
 
 #define OPTION_EB		(OPTION_MD_BASE + 0)
 #define OPTION_EL		(OPTION_MD_BASE + 1)
@@ -1051,7 +1029,6 @@ struct option md_longopts[] = {
   { NULL,	    no_argument, NULL, 0 }
 };
 size_t md_longopts_size = sizeof (md_longopts);
-
 
 int
 md_parse_option (c, arg)
@@ -1091,7 +1068,6 @@ md_parse_option (c, arg)
   return 1;
 }
 
-
 void
 md_show_usage (stream)
      FILE *stream;
@@ -1117,7 +1093,6 @@ md_undefined_symbol (name)
   return 0;
 }
 
-
 /* The i860 denotes auto-increment with '++'.  */
 void
 md_operand (exp)
@@ -1136,7 +1111,6 @@ md_operand (exp)
     }
 }
 
-
 /* Round up a section size to the appropriate boundary.  */
 valueT
 md_section_align (segment, size)
@@ -1147,7 +1121,6 @@ md_section_align (segment, size)
   return size;
 }
 
-
 /* On the i860, a PC-relative offset is relative to the address of the
    of the offset plus its size.  */
 long
@@ -1156,7 +1129,6 @@ md_pcrel_from (fixP)
 {
   return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
 }
-
 
 /* Determine the relocation needed for non PC-relative 16-bit immediates.
    Also adjust the given immediate as necessary.  Finally, check that
@@ -1167,7 +1139,7 @@ obtain_reloc_for_imm16 (fix, val)
      long *val;
 {
   valueT fup = fix->fx_addnumber;
-  bfd_reloc_code_real_type reloc;  
+  bfd_reloc_code_real_type reloc;
 
   if (fix->fx_pcrel)
     abort ();
@@ -1253,7 +1225,6 @@ obtain_reloc_for_imm16 (fix, val)
   return reloc;
 }
 
-
 /* Attempt to simplify or eliminate a fixup. To indicate that a fixup
    has been eliminated, set fix->fx_done. If fix->fx_addsy is non-NULL,
    we will have to generate a reloc entry.  */
@@ -1327,7 +1298,7 @@ md_apply_fix3 (fix, valuep, seg)
 	  fix->fx_r_type = BFD_RELOC_NONE;
 	  fix->fx_done = 1;
 	}
-    } 
+    }
   else if (fup & OP_IMM_BR16)
     {
       if (val & 0x3)
@@ -1375,7 +1346,7 @@ md_apply_fix3 (fix, valuep, seg)
     }
   else if (fup != OP_NONE)
     {
-      as_bad_where (fix->fx_file, fix->fx_line, 
+      as_bad_where (fix->fx_file, fix->fx_line,
 		    _("Unrecognized fix-up (0x%08x)"), fup);
       abort ();
     }
@@ -1401,7 +1372,6 @@ md_apply_fix3 (fix, valuep, seg)
   return 0;
 }
 
-
 /* Generate a machine dependent reloc from a fixup.  */
 arelent*
 tc_gen_reloc (section, fixp)
@@ -1425,4 +1395,3 @@ tc_gen_reloc (section, fixp)
     }
   return reloc;
 }
-

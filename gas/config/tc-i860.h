@@ -4,7 +4,7 @@
 
    Brought back from the dead and completely reworked
    by Jason Eckhardt <jle@cygnus.com>.
-   
+
    This file is part of GAS, the GNU Assembler.
 
    GAS is free software; you can redistribute it and/or modify
@@ -24,13 +24,11 @@
 #ifndef TC_I860
 #define TC_I860 1
 
-
 #ifndef BFD_ASSEMBLER
 #error i860 support requires BFD_ASSEMBLER
 #endif
 
-
-enum i860_fix_info 
+enum i860_fix_info
 {
   OP_NONE	 = 0x00000,
   OP_IMM_U5	 = 0x00001,
@@ -53,7 +51,6 @@ enum i860_fix_info
   OP_ALIGN8	 = 0x20000,
   OP_ALIGN16	 = 0x40000
 };
-
 
 /* Set the endianness we are using.  Default to little endian.  */
 #ifndef TARGET_BYTES_BIG_ENDIAN
@@ -85,4 +82,3 @@ extern int target_big_endian;
 #define md_convert_frag(b,s,f)  as_fatal (_("i860_convert_frag\n"));
 
 #endif /* TC_I860 */
-

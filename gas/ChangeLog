@@ -1,3 +1,17 @@
+2000-09-15  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-h8300.h: Fix formatting.
+	* config/tc-h8500.c: Likewise.
+	* config/tc-h8500.h: Likewise.
+	* config/tc-hppa.h: Likewise.
+	* config/tc-i370.h: Likewise.
+	* config/tc-i386.h: Likewise.
+	* config/tc-i860.c: Likewise.
+	* config/tc-i860.h: Likewise.
+	* config/tc-i960.h: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-ia64.h: Likewise.
+
 2000-09-14  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-a29k.c: Fix formatting.

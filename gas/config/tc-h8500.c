@@ -18,10 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*
-  Written By Steve Chamberlain
-  sac@cygnus.com
-  */
+/* Written By Steve Chamberlain <sac@cygnus.com>.  */
 
 #include <stdio.h>
 #include "as.h"
@@ -304,7 +301,6 @@ typedef enum
   {
     exp_signed, exp_unsigned, exp_sandu
   } sign_type;
-
 
 static char *
 skip_colonthing (sign, ptr, exp, def, size8, size16, size24)
@@ -1300,7 +1296,7 @@ wordify_scb (buffer, disp_size, inst_size)
   *buffer++ = 0x04;		/* cmp #0xff:8, rn */
   *buffer++ = 0xff;
   *buffer++ = 0x70 | rn;
-  *buffer++ = 0x36;		/* bne ... */
+  *buffer++ = 0x36;		/* bne ...  */
   *buffer++ = 0;
   *buffer++ = 0;
 }

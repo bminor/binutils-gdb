@@ -7019,7 +7019,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 		  && p1 != 0 && p1 != 63)
 		{
 		  specs[count] = tmpl;
-		  specs[count].cmp_type = 
+		  specs[count].cmp_type =
 		    (or_andcm ? CMP_OR : (and_orcm ? CMP_AND : CMP_NONE));
 		  specs[count++].index = p1;
 		}
@@ -7028,7 +7028,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 		  && p2 != 0 && p2 != 63)
 		{
 		  specs[count] = tmpl;
-		  specs[count].cmp_type = 
+		  specs[count].cmp_type =
 		    (or_andcm ? CMP_AND : (and_orcm ? CMP_OR : CMP_NONE));
 		  specs[count++].index = p2;
 		}
@@ -7477,12 +7477,12 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 	      int or_andcm = strstr(idesc->name, "or.andcm") != NULL;
 	      int and_orcm = strstr(idesc->name, "and.orcm") != NULL;
 
-	      if (p1 == 63 
+	      if (p1 == 63
 		  && (idesc->operands[0] == IA64_OPND_P1
 		      || idesc->operands[0] == IA64_OPND_P2))
 		{
                   specs[count] = tmpl;
-		  specs[count++].cmp_type = 
+		  specs[count++].cmp_type =
 		    (or_andcm ? CMP_OR : (and_orcm ? CMP_AND : CMP_NONE));
 		}
 	      if (p2 == 63
@@ -7490,7 +7490,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 		      || idesc->operands[1] == IA64_OPND_P2))
 		{
                   specs[count] = tmpl;
-		  specs[count++].cmp_type = 
+		  specs[count++].cmp_type =
 		    (or_andcm ? CMP_AND : (and_orcm ? CMP_OR : CMP_NONE));
 		}
 	    }
@@ -7976,7 +7976,7 @@ resources_match (rs, idesc, note, qp_regno, path)
 	}
 
       /* Skip apparent PR write conflicts where both writes are an AND or both
-	 writes are an OR. */
+	 writes are an OR.  */
       if (rs->dependency->specifier == IA64_RS_PR
 	  || rs->dependency->specifier == IA64_RS_PR63)
 	{
@@ -7991,14 +7991,14 @@ resources_match (rs, idesc, note, qp_regno, path)
 	      continue;
 	    }
 	  if (md.debug_dv)
-	    fprintf (stderr, 
+	    fprintf (stderr,
 		     "  %s on parallel compare conflict %s vs %s on PR%d\n",
 		     dv_mode[rs->dependency->mode],
-		     dv_cmp_type[rs->cmp_type], 
+		     dv_cmp_type[rs->cmp_type],
 		     dv_cmp_type[specs[count].cmp_type],
 		     rs->dependency->specifier == IA64_RS_PR ?
 		     specs[count].index : 63);
-		     
+
 	}
 
       /* If either resource is not specific, conservatively assume a conflict

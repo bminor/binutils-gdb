@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA. */
+   Boston, MA 02111-1307, USA.  */
 
 #include <opcode/ia64.h>
 #include <elf/ia64.h>
@@ -110,12 +110,12 @@ extern int ia64_md_do_align PARAMS ((int, const char *, int, int));
 #define DWARF2_LINE_MIN_INSN_LENGTH 1	/* so slot-multipliers can be 1 */
 
 /* This is the information required for unwind records in an ia64
-   object file. This is required by GAS and the compiler runtime. */
+   object file. This is required by GAS and the compiler runtime.  */
 
 /* These are the starting point masks for the various types of
    unwind records. To create a record of type R3 for instance, one
-   starts by using the value UNW_R3 and or-ing in any other required values. 
-   These values are also unique (in context), so they can be used to identify 
+   starts by using the value UNW_R3 and or-ing in any other required values.
+   These values are also unique (in context), so they can be used to identify
    the various record types as well. UNW_Bx and some UNW_Px do have the
    same value, but Px can only occur in a prologue context, and Bx in
    a body context.  */
@@ -151,8 +151,8 @@ typedef enum
   pfs_sprel, preds_when, preds_gr, preds_psprel, preds_sprel,
   fr_mem, frgr_mem, gr_gr, gr_mem, br_mem, br_gr, spill_base, spill_mask,
   unat_when, unat_gr, unat_psprel, unat_sprel, lc_when, lc_gr, lc_psprel,
-  lc_sprel, fpsr_when, fpsr_gr, fpsr_psprel, fpsr_sprel, 
-  priunat_when_gr, priunat_when_mem, priunat_gr, priunat_psprel, 
+  lc_sprel, fpsr_when, fpsr_gr, fpsr_psprel, fpsr_sprel,
+  priunat_when_gr, priunat_when_mem, priunat_gr, priunat_psprel,
   priunat_sprel, bsp_when, bsp_gr, bsp_psprel, bsp_sprel, bspstore_when,
   bspstore_gr, bspstore_psprel, bspstore_sprel, rnat_when, rnat_gr,
   rnat_psprel, rnat_sprel, epilogue, label_state, copy_state,
@@ -160,8 +160,7 @@ typedef enum
   spill_reg_p, unwabi
 } unw_record_type;
 
-
-/* These structures declare the fields that can be used in each of the 
+/* These structures declare the fields that can be used in each of the
    4 record formats, R, P, B and X.  */
 
 typedef struct unw_r_record
@@ -217,7 +216,7 @@ typedef struct unw_x_record
   unsigned short xy;	/* Value of the XY field..  */
 } unw_x_record;
 
-/* This structure is used to determine the specific record type and 
+/* This structure is used to determine the specific record type and
    its fields.  */
 typedef struct unwind_record
 {
