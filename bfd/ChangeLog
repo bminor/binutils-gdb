@@ -1,3 +1,9 @@
+2002-02-02  David O'Brien  <obrien@FreeBSD>
+
+	* configure.in: Tweak the FreeBSD 4.x recognition more.  Only treat
+	version 4.5 and later the same as 5-CURRENT.
+	* configure: Re-generate.
+
 2002-02-02  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* config.bfd (hppa*-*-netbsd*): New target.
