@@ -1,3 +1,9 @@
+Mon Oct 20 10:55:01 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* peicode.h (coff_swap_scnhdr_out): Don't clobber other flag
+	settings when setting IMAGE_SCN_MEM_READ.  From Jim Wilson
+	<wilson@cygnus.com>.
+
 Sun Oct 19 21:04:56 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* som.c (som_bfd_ar_write_symbol_stuff): Account for trailing
