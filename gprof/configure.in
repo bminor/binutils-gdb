@@ -33,15 +33,27 @@ AC_SUBST(MY_TARGET)
 BFDLIB='-L../bfd -lbfd'
 
 # We need to handle some special cases if BFD was built shared.
-if test "${shared}" = "true"; then
-  case "${host}" in
+case "${host}" in
   *-*-sunos*)
   # On SunOS, we must link against the name we are going to install,
   # not -lbfd, since SunOS does not support SONAME.
-  BFDLIB='-L../bfd -l`echo bfd | sed '"'"'$(program_transform_name)'"'"'`'
+  if test "${shared}" = "true"; then
+    BFDLIB='-L../bfd -l`echo bfd | sed '"'"'$(program_transform_name)'"'"'`'
+  fi
   ;;
-  esac
-fi
+alpha*-*-osf*)
+  # On Alpha OSF/1, the native linker searches all the -L
+  # directories for any LIB.so files, and only then searches for any
+  # LIB.a files.  That means that if there is an installed
+  # libbfd.so, but this build is not done with --enable-shared, the
+  # link will wind up being against the install libbfd.so rather
+  # than the newly built libbfd.  To avoid this, we must explicitly
+  # link against libbfd.a when --enable-shared is not used.
+  if test "${shared}" != "true"; then
+    BFDLIB='../bfd/libbfd.a'
+  fi
+  ;;
+esac
 AC_SUBST(BFDLIB)
 
 HLDFLAGS=

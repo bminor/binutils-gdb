@@ -1,3 +1,14 @@
+Mon Jun 24 11:59:13 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: On alpha*-*-osf*, link against libbfd.a if not
+	using shared libraries.
+	* configure: Rebuild with autoconf 2.10.
+
+Sun Jun 23 14:47:36 1996  Kim Knuttila  <krk@cygnus.com>
+
+	* dlltool.c (secdata): Changed .rdata to .reldata so .reloc will work.
+	(make_one_lib_file): Removed cruft. (#if 1)
+
 Wed Jun 19 14:46:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objdump.c (stabs): Change from struct internal_nlist * to
