@@ -915,7 +915,6 @@ init_gdbsim_ops (void)
   gdbsim_ops.to_thread_alive = 0;
   gdbsim_ops.to_stop = gdbsim_stop;
   gdbsim_ops.to_pid_to_exec_file = NULL;
-  gdbsim_ops.to_core_file_to_sym_file = NULL;
   gdbsim_ops.to_stratum = process_stratum;
   gdbsim_ops.DONT_USE = NULL;
   gdbsim_ops.to_has_all_memory = 1;

@@ -69,35 +69,13 @@ core_file_command (char *filename, int from_tty)
   dont_repeat ();		/* Either way, seems bogus. */
 
   t = find_core_target ();
-  if (t != NULL)
-    if (!filename)
-      (t->to_detach) (filename, from_tty);
-    else
-      {
-	/* Yes, we were given the path of a core file.  Do we already
-	   have a symbol file?  If not, can we determine it from the
-	   core file?  If we can, do so.
-	 */
-#ifdef HPUXHPPA
-	if (symfile_objfile == NULL)
-	  {
-	    char *symfile;
-	    symfile = t->to_core_file_to_sym_file (filename);
-	    if (symfile)
-	      {
-		char *symfile_copy = xstrdup (symfile);
-
-		make_cleanup (xfree, symfile_copy);
-		symbol_file_add_main (symfile_copy, from_tty);
-	      }
-	    else
-	      warning ("Unknown symbols for '%s'; use the 'symbol-file' command.", filename);
-	  }
-#endif
-	(t->to_open) (filename, from_tty);
-      }
-  else
+  if (t == NULL)
     error ("GDB can't read core files on this machine.");
+
+  if (!filename)
+    (t->to_detach) (filename, from_tty);
+  else
+    (t->to_open) (filename, from_tty);
 }
 
 

@@ -1169,7 +1169,6 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   rombug_ops.to_thread_alive = 0;
   rombug_ops.to_stop = 0;	/* to_stop */
   rombug_ops.to_pid_to_exec_file = NULL;
-  rombug_ops.to_core_file_to_sym_file = NULL;
   rombug_ops.to_stratum = process_stratum;
   rombug_ops.DONT_USE = 0;	/* next */
   rombug_ops.to_has_all_memory = 1;

@@ -364,7 +364,6 @@ a wiggler, specify wiggler and then the port it is connected to\n\
   bdm_ppc_ops.to_thread_alive = ocd_thread_alive;
   bdm_ppc_ops.to_stop = ocd_stop;
   bdm_ppc_ops.to_pid_to_exec_file = NULL;
-  bdm_ppc_ops.to_core_file_to_sym_file = NULL;
   bdm_ppc_ops.to_stratum = process_stratum;
   bdm_ppc_ops.DONT_USE = NULL;
   bdm_ppc_ops.to_has_all_memory = 1;

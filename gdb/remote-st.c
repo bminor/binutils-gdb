@@ -807,7 +807,6 @@ the speed to connect at in bits per second.";
   st2000_ops.to_thread_alive = 0;	/* thread alive */
   st2000_ops.to_stop = 0;	/* to_stop */
   st2000_ops.to_pid_to_exec_file = NULL;
-  st2000_run_ops.to_core_file_to_sym_file = NULL;
   st2000_ops.to_stratum = process_stratum;
   st2000_ops.DONT_USE = 0;	/* next */
   st2000_ops.to_has_all_memory = 1;

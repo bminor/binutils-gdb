@@ -931,7 +931,6 @@ init_850ice_ops (void)
   v850ice_ops.to_thread_alive = NULL;
   v850ice_ops.to_stop = v850ice_stop;
   v850ice_ops.to_pid_to_exec_file = NULL;
-  v850ice_ops.to_core_file_to_sym_file = NULL;
   v850ice_ops.to_stratum = process_stratum;
   v850ice_ops.DONT_USE = NULL;
   v850ice_ops.to_has_all_memory = 1;

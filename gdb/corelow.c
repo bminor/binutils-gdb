@@ -77,8 +77,6 @@ static void add_to_thread_list (bfd *, asection *, PTR);
 
 static int ignore (CORE_ADDR, char *);
 
-static char *core_file_to_sym_file (char *);
-
 static int core_file_thread_alive (int tid);
 
 static void init_core_ops (void);
@@ -464,68 +462,6 @@ get_core_registers (int regno)
   registers_fetched ();
 }
 
-static char *
-core_file_to_sym_file (char *core)
-{
-  CONST char *failing_command;
-  char *p;
-  char *temp;
-  bfd *temp_bfd;
-  int scratch_chan;
-
-  if (!core)
-    error ("No core file specified.");
-
-  core = tilde_expand (core);
-  if (core[0] != '/')
-    {
-      temp = concat (current_directory, "/", core, NULL);
-      core = temp;
-    }
-
-  scratch_chan = open (core, write_files ? O_RDWR : O_RDONLY, 0);
-  if (scratch_chan < 0)
-    perror_with_name (core);
-
-  temp_bfd = bfd_fdopenr (core, gnutarget, scratch_chan);
-  if (temp_bfd == NULL)
-    perror_with_name (core);
-
-  if (!bfd_check_format (temp_bfd, bfd_core))
-    {
-      /* Do it after the err msg */
-      /* FIXME: should be checking for errors from bfd_close (for one thing,
-         on error it does not free all the storage associated with the
-         bfd).  */
-      make_cleanup_bfd_close (temp_bfd);
-      error ("\"%s\" is not a core dump: %s",
-	     core, bfd_errmsg (bfd_get_error ()));
-    }
-
-  /* Find the data section */
-  if (build_section_table (temp_bfd, &core_ops.to_sections,
-			   &core_ops.to_sections_end))
-    error ("\"%s\": Can't find sections: %s",
-	   bfd_get_filename (temp_bfd), bfd_errmsg (bfd_get_error ()));
-
-  failing_command = bfd_core_file_failing_command (temp_bfd);
-
-  bfd_close (temp_bfd);
-
-  /* If we found a filename, remember that it is probably saved
-     relative to the executable that created it.  If working directory
-     isn't there now, we may not be able to find the executable.  Rather
-     than trying to be sauve about finding it, just check if the file
-     exists where we are now.  If not, then punt and tell our client
-     we couldn't find the sym file.
-   */
-  p = (char *) failing_command;
-  if ((p != NULL) && (access (p, F_OK) != 0))
-    p = NULL;
-
-  return p;
-}
-
 static void
 core_files_info (struct target_ops *t)
 {
@@ -577,7 +513,6 @@ init_core_ops (void)
   core_ops.to_create_inferior = find_default_create_inferior;
   core_ops.to_clone_and_follow_inferior = find_default_clone_and_follow_inferior;
   core_ops.to_thread_alive = core_file_thread_alive;
-  core_ops.to_core_file_to_sym_file = core_file_to_sym_file;
   core_ops.to_stratum = core_stratum;
   core_ops.to_has_memory = 1;
   core_ops.to_has_stack = 1;

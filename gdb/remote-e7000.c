@@ -2199,7 +2199,6 @@ target e7000 foobar";
   e7000_ops.to_thread_alive = 0;
   e7000_ops.to_stop = e7000_stop;
   e7000_ops.to_pid_to_exec_file = NULL;
-  e7000_ops.to_core_file_to_sym_file = NULL;
   e7000_ops.to_stratum = process_stratum;
   e7000_ops.DONT_USE = 0;
   e7000_ops.to_has_all_memory = 1;

@@ -1433,7 +1433,6 @@ init_remote_rdp_ops (void)
   remote_rdp_ops.to_thread_alive = 0;
   remote_rdp_ops.to_stop = 0;
   remote_rdp_ops.to_pid_to_exec_file = NULL;
-  remote_rdp_ops.to_core_file_to_sym_file = NULL;
   remote_rdp_ops.to_stratum = process_stratum;
   remote_rdp_ops.DONT_USE = NULL;
   remote_rdp_ops.to_has_all_memory = 1;

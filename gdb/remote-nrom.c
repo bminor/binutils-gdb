@@ -317,7 +317,6 @@ init_nrom_ops (void)
   nrom_ops.to_thread_alive = 0;
   nrom_ops.to_stop = 0;
   nrom_ops.to_pid_to_exec_file = NULL;
-  nrom_ops.to_core_file_to_sym_file = NULL;
   nrom_ops.to_stratum = download_stratum;
   nrom_ops.DONT_USE = NULL;
   nrom_ops.to_has_all_memory = 1;

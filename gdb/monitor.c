@@ -2309,7 +2309,6 @@ init_base_monitor_ops (void)
   monitor_ops.to_stop = monitor_stop;
   monitor_ops.to_rcmd = monitor_rcmd;
   monitor_ops.to_pid_to_exec_file = NULL;
-  monitor_ops.to_core_file_to_sym_file = NULL;
   monitor_ops.to_stratum = process_stratum;
   monitor_ops.DONT_USE = 0;
   monitor_ops.to_has_all_memory = 1;

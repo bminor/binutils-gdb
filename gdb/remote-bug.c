@@ -946,7 +946,6 @@ init_bug_ops (void)
   bug_ops.to_thread_alive = 0;
   bug_ops.to_stop = 0;
   bug_ops.to_pid_to_exec_file = NULL;
-  bug_ops.to_core_file_to_sym_file = NULL;
   bug_ops.to_stratum = process_stratum;
   bug_ops.DONT_USE = 0;
   bug_ops.to_has_all_memory = 1;

@@ -738,7 +738,6 @@ specified when you started GDB.";
   nindy_ops.to_thread_alive = 0;	/* to_thread_alive */
   nindy_ops.to_stop = 0;	/* to_stop */
   nindy_ops.to_pid_to_exec_file = NULL;
-  nindy_ops.to_core_file_to_sym_file = NULL;
   nindy_ops.to_stratum = process_stratum;
   nindy_ops.DONT_USE = 0;	/* next */
   nindy_ops.to_has_all_memory = 1;

@@ -381,7 +381,6 @@ init_child_ops (void)
   child_ops.to_thread_alive = 0;
   child_ops.to_stop = child_stop;
   child_ops.to_pid_to_exec_file = NULL;		/* to_pid_to_exec_file */
-  child_ops.to_core_file_to_sym_file = NULL;
   child_ops.to_stratum = process_stratum;
   child_ops.DONT_USE = 0;
   child_ops.to_has_all_memory = 1;

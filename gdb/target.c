@@ -503,9 +503,6 @@ cleanup_target (struct target_ops *t)
   de_fault (to_pid_to_exec_file, 
 	    (char *(*) (int)) 
 	    return_zero);
-  de_fault (to_core_file_to_sym_file, 
-	    (char *(*) (char *)) 
-	    return_zero);
   de_fault (to_can_async_p, 
 	    (int (*) (void)) 
 	    return_zero);
@@ -599,7 +596,6 @@ update_current_target (void)
       INHERIT (to_enable_exception_callback, t);
       INHERIT (to_get_current_exception_event, t);
       INHERIT (to_pid_to_exec_file, t);
-      INHERIT (to_core_file_to_sym_file, t);
       INHERIT (to_stratum, t);
       INHERIT (DONT_USE, t);
       INHERIT (to_has_all_memory, t);
@@ -2873,19 +2869,6 @@ debug_to_pid_to_exec_file (int pid)
   return exec_file;
 }
 
-static char *
-debug_to_core_file_to_sym_file (char *core)
-{
-  char *sym_file;
-
-  sym_file = debug_target.to_core_file_to_sym_file (core);
-
-  fprintf_unfiltered (gdb_stdlog, "target_core_file_to_sym_file (%s) = %s\n",
-		      core, sym_file);
-
-  return sym_file;
-}
-
 static void
 setup_target_debug (void)
 {
@@ -2946,7 +2929,6 @@ setup_target_debug (void)
   current_target.to_enable_exception_callback = debug_to_enable_exception_callback;
   current_target.to_get_current_exception_event = debug_to_get_current_exception_event;
   current_target.to_pid_to_exec_file = debug_to_pid_to_exec_file;
-  current_target.to_core_file_to_sym_file = debug_to_core_file_to_sym_file;
 
 }
 

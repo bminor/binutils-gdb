@@ -294,7 +294,6 @@ struct target_ops
 							     int);
     struct exception_event_record *(*to_get_current_exception_event) (void);
     char *(*to_pid_to_exec_file) (int pid);
-    char *(*to_core_file_to_sym_file) (char *);
     enum strata to_stratum;
     struct target_ops
      *DONT_USE;			/* formerly to_next */

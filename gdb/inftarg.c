@@ -797,7 +797,6 @@ init_child_ops (void)
   child_ops.to_enable_exception_callback = child_enable_exception_callback;
   child_ops.to_get_current_exception_event = child_get_current_exception_event;
   child_ops.to_pid_to_exec_file = child_pid_to_exec_file;
-  child_ops.to_core_file_to_sym_file = child_core_file_to_sym_file;
   child_ops.to_stratum = process_stratum;
   child_ops.to_has_all_memory = 1;
   child_ops.to_has_memory = 1;

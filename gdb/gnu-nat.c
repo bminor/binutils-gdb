@@ -2561,7 +2561,6 @@ init_gnu_ops (void)
   gnu_ops.to_pid_to_str = gnu_pid_to_str;   /* to_pid_to_str */
   gnu_ops.to_stop = gnu_stop;	/* to_stop */
   gnu_ops.to_pid_to_exec_file = gnu_pid_to_exec_file; /* to_pid_to_exec_file */
-  gnu_ops.to_core_file_to_sym_file = NULL;
   gnu_ops.to_stratum = process_stratum;		/* to_stratum */
   gnu_ops.DONT_USE = 0;			/* to_next */
   gnu_ops.to_has_all_memory = 1;	/* to_has_all_memory */

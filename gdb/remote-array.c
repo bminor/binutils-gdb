@@ -178,7 +178,6 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   array_ops.to_thread_alive = 0;
   array_ops.to_stop = 0;
   array_ops.to_pid_to_exec_file = NULL;
-  array_ops.to_core_file_to_sym_file = NULL;
   array_ops.to_stratum = process_stratum;
   array_ops.DONT_USE = 0;
   array_ops.to_has_all_memory = 1;

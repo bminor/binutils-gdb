@@ -1,3 +1,34 @@
+2001-04-14  J.T. Conklin  <jtc@redback.com>
+	
+	* target.h (target_ops): Removed to_core_file_to_sym_file vector
+ 	function.
+	* corelow.c (core_ops): Updated for above change.
+	* gnu-nat.c (core_ops): Likewise.
+	* inftarg.c (child_ops): Likewise.
+	* monitor.c (monitor_ops): Likewise.
+	* ppc-bdm.c (bdm_ppc_ops): Likewise.
+	* remote-adapt.c (adapt_ops): Likewise.
+	* remote-bug.c (bug_ops): Likewise.
+	* remote-e7000.c (e7000_ops): Likewise.
+	* remote-eb.c (eb_ops): Likewise.
+	* remote-es.c (es1800_ops, es1800_child_ops): Likewise.
+	* remote-mm.c (mm_ops): Likewise.
+	* remote-nindy.c (nindy_ops): Likewise.
+	* remote-nrom.c (nrom_ops): Likewise.
+	* remote-os9k.c (rombug_ops): Likewise.
+	* remote-rdp.c (remote_rdp_ops): Likewise.
+	* remote-sim.c (gdbsim_ops): Likewise.
+	* remote-st.c (st2000_ops): Likewise.
+	* v850ice.c (v850ice_ops): Likewise.
+	* target.c (cleanup_target): Likewise
+	(update_current_target): Likewise.
+	(setup_target_debug): Likewise
+	(debug_to_core_file_to_sym_file): Removed.
+
+	* corefile.c (core_file_command) [HPUXHPPA]: Removed code that
+ 	sets symbol file from information obtained from the core file.
+	* corelow.c (core_file_to_sym_file): Removed.
+	
 2001-04-13  Fernando Nasser  <fnasser@redhat.com>
 
 	From  Adam Mirowski  <Adam.Mirowski@Sun.COM>
