@@ -1512,7 +1512,7 @@ void OP_40 (insn, extension)
 
   z = (value == 0);
   n = (value & 0x80000000);
-  c = (reg1 < imm);
+  c = (value < imm);
   v = ((reg1 & 0x80000000) == (imm & 0x80000000)
        && (reg1 & 0x80000000) != (value & 0x80000000));
 
