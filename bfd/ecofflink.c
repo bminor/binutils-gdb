@@ -27,7 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/ecoff.h"
 
 static boolean ecoff_add_bytes PARAMS ((char **buf, char **bufend,
-					bfd_size_type need));
+					size_t need));
 static bfd_size_type ecoff_add_string PARAMS ((struct ecoff_debug_info *,
 					       FDR *fdr, const char *string));
 static void ecoff_align_debug PARAMS ((bfd *abfd,
@@ -43,10 +43,10 @@ static boolean
 ecoff_add_bytes (buf, bufend, need)
      char **buf;
      char **bufend;
-     bfd_size_type need;
+     size_t need;
 {
-  bfd_size_type have;
-  bfd_size_type want;
+  size_t have;
+  size_t want;
   char *newbuf;
 
   have = *bufend - *buf;
@@ -78,6 +78,7 @@ ecoff_add_bytes (buf, bufend, need)
    pointed to by the OUTPUT_DEBUG argument.  OUTPUT_SWAP and
    INPUT_SWAP point to the swapping information needed.  */
 
+/*ARGSUSED*/
 boolean
 bfd_ecoff_debug_accumulate (output_bfd, output_debug, output_swap,
 			    input_bfd, input_debug, input_swap,
@@ -223,13 +224,13 @@ bfd_ecoff_debug_accumulate (output_bfd, output_debug, output_swap,
   /* Copy the information that does not need swapping.  */
   memcpy (output_debug->line + output_symhdr->cbLine,
 	  input_debug->line,
-	  input_symhdr->cbLine * sizeof (unsigned char));
+	  (size_t) (input_symhdr->cbLine * sizeof (unsigned char)));
   memcpy (output_debug->external_aux + output_symhdr->iauxMax,
 	  input_debug->external_aux,
-	  input_symhdr->iauxMax * sizeof (union aux_ext));
+	  (size_t) (input_symhdr->iauxMax * sizeof (union aux_ext)));
   memcpy (output_debug->ss + output_symhdr->issMax,
 	  input_debug->ss,
-	  input_symhdr->issMax * sizeof (char));
+	  (size_t) (input_symhdr->issMax * sizeof (char)));
 
   /* Some of the information may need to be swapped.  */
   if (output_bfd->xvec->header_byteorder_big_p
@@ -245,7 +246,8 @@ bfd_ecoff_debug_accumulate (output_bfd, output_debug, output_swap,
 	memcpy (((char *) output_debug->external_dnr
 		 + output_symhdr->idnMax * output_swap->external_dnr_size),
 		input_debug->external_dnr,
-		input_symhdr->idnMax * output_swap->external_dnr_size);
+		((size_t)
+		 (input_symhdr->idnMax * output_swap->external_dnr_size)));
 #endif
       BFD_ASSERT (output_swap->external_pdr_size
 		  == input_swap->external_pdr_size);
@@ -253,14 +255,16 @@ bfd_ecoff_debug_accumulate (output_bfd, output_debug, output_swap,
 	memcpy (((char *) output_debug->external_pdr
 		 + output_symhdr->ipdMax * output_swap->external_pdr_size),
 		input_debug->external_pdr,
-		input_symhdr->ipdMax * output_swap->external_pdr_size);
+		((size_t)
+		 (input_symhdr->ipdMax * output_swap->external_pdr_size)));
       BFD_ASSERT (output_swap->external_opt_size
 		  == input_swap->external_opt_size);
       if (input_symhdr->ioptMax > 0)
 	memcpy (((char *) output_debug->external_opt
 		 + output_symhdr->ioptMax * output_swap->external_opt_size),
 		input_debug->external_opt,
-		input_symhdr->ioptMax * output_swap->external_opt_size);
+		((size_t)
+		 (input_symhdr->ioptMax * output_swap->external_opt_size)));
     }
   else
     {
@@ -462,7 +466,7 @@ ecoff_add_string (output, fdr, string)
     {
       if (ecoff_add_bytes (&output->ss, &output->ss_end,
 			   symhdr->issMax + len + 1) == false)
-	return -1;
+	return (bfd_size_type) -1;
     }
   memcpy (output->ss + symhdr->issMax, string, len + 1);
   ret = fdr->cbSs;
@@ -504,6 +508,8 @@ bfd_ecoff_debug_link_other (output_bfd, output_debug, output_swap, input_bfd)
   fdr.cbSs = 0;
   fdr.rss = ecoff_add_string (output_debug, &fdr,
 			      bfd_get_filename (input_bfd));
+  if (fdr.rss == -1)
+    return false;
   fdr.isymBase = output_symhdr->isymMax;
 
   /* Get the local symbols from the input BFD.  */
@@ -529,6 +535,8 @@ bfd_ecoff_debug_link_other (output_bfd, output_debug, output_swap, input_bfd)
       internal_sym.iss = ecoff_add_string (output_debug, &fdr,
 					   (*sym_ptr)->name);
 
+      if (internal_sym.iss == -1)
+	return false;
       if (bfd_is_com_section ((*sym_ptr)->section)
 	  || (*sym_ptr)->section == &bfd_und_section)
 	internal_sym.value = (*sym_ptr)->value;
@@ -596,9 +604,6 @@ bfd_ecoff_debug_externals (abfd, debug, swap, relocateable, get_extr,
      boolean (*get_extr) PARAMS ((asymbol *, EXTR *));
      void (*set_index) PARAMS ((asymbol *, bfd_size_type));
 {
-  const bfd_size_type external_ext_size = swap->external_ext_size;
-  void (* const swap_ext_out) PARAMS ((bfd *, const EXTR *, PTR))
-    = swap->swap_ext_out;
   HDRR * const symhdr = &debug->symbolic_header;
   asymbol **sym_ptr_ptr;
   size_t c;
@@ -628,26 +633,6 @@ bfd_ecoff_debug_externals (abfd, debug, swap, relocateable, get_extr,
 	    esym.asym.sc = scSBss;
 	}
 
-      if (debug->ssext_end - debug->ssext
-	  < symhdr->issExtMax + strlen (sym_ptr->name) + 1)
-	{
-	  if (ecoff_add_bytes ((char **) &debug->ssext,
-			       (char **) &debug->ssext_end,
-			       symhdr->issExtMax + strlen (sym_ptr->name) + 1)
-	      == false)
-	    return false;
-	}
-      if ((char *) debug->external_ext_end - (char *) debug->external_ext
-	  < (symhdr->iextMax + 1) * external_ext_size)
-	{
-	  if (ecoff_add_bytes ((char **) &debug->external_ext,
-			       (char **) &debug->external_ext_end,
-			       (symhdr->iextMax + 1) * external_ext_size)
-	      == false)
-	    return false;
-	}
-
-      esym.asym.iss = symhdr->issExtMax;
 
       if (bfd_is_com_section (sym_ptr->section)
 	  || sym_ptr->section == &bfd_und_section)
@@ -657,24 +642,71 @@ bfd_ecoff_debug_externals (abfd, debug, swap, relocateable, get_extr,
 			   + sym_ptr->section->output_offset
 			   + sym_ptr->section->output_section->vma);
 
-      (*swap_ext_out) (abfd, &esym,
-		       ((char *) debug->external_ext
-			+ symhdr->iextMax * swap->external_ext_size));
-
       if (set_index)
-	(*set_index) (sym_ptr, symhdr->iextMax);
+	(*set_index) (sym_ptr, (bfd_size_type) symhdr->iextMax);
 
-      ++symhdr->iextMax;
-
-      strcpy (debug->ssext + symhdr->issExtMax, sym_ptr->name);
-      symhdr->issExtMax += strlen (sym_ptr->name) + 1;
+      if (! bfd_ecoff_debug_one_external (abfd, debug, swap,
+					  sym_ptr->name, &esym))
+	return false;
     }
+
+  return true;
+}
+
+/* Add a single external symbol to the debugging information.  */
+
+boolean
+bfd_ecoff_debug_one_external (abfd, debug, swap, name, esym)
+     bfd *abfd;
+     struct ecoff_debug_info *debug;
+     const struct ecoff_debug_swap *swap;
+     const char *name;
+     EXTR *esym;
+{
+  const bfd_size_type external_ext_size = swap->external_ext_size;
+  void (* const swap_ext_out) PARAMS ((bfd *, const EXTR *, PTR))
+    = swap->swap_ext_out;
+  HDRR * const symhdr = &debug->symbolic_header;
+  size_t namelen;
+
+  namelen = strlen (name);
+
+  if (debug->ssext_end - debug->ssext
+      < symhdr->issExtMax + namelen + 1)
+    {
+      if (ecoff_add_bytes ((char **) &debug->ssext,
+			   (char **) &debug->ssext_end,
+			   symhdr->issExtMax + namelen + 1)
+	  == false)
+	return false;
+    }
+  if ((char *) debug->external_ext_end - (char *) debug->external_ext
+      < (symhdr->iextMax + 1) * external_ext_size)
+    {
+      if (ecoff_add_bytes ((char **) &debug->external_ext,
+			   (char **) &debug->external_ext_end,
+			   (symhdr->iextMax + 1) * external_ext_size)
+	  == false)
+	return false;
+    }
+
+  esym->asym.iss = symhdr->issExtMax;
+
+  (*swap_ext_out) (abfd, esym,
+		   ((char *) debug->external_ext
+		    + symhdr->iextMax * swap->external_ext_size));
+
+  ++symhdr->iextMax;
+
+  strcpy (debug->ssext + symhdr->issExtMax, name);
+  symhdr->issExtMax += namelen + 1;
 
   return true;
 }
 
 /* Align the ECOFF debugging information.  */
 
+/*ARGSUSED*/
 static void
 ecoff_align_debug (abfd, debug, swap)
      bfd *abfd;
@@ -682,7 +714,8 @@ ecoff_align_debug (abfd, debug, swap)
      const struct ecoff_debug_swap *swap;
 {
   HDRR * const symhdr = &debug->symbolic_header;
-  bfd_size_type debug_align, aux_align, add;
+  bfd_size_type debug_align, aux_align;
+  size_t add;
 
   /* Adjust the counts so that structures are aligned.  The alignment
      of ALLOC_SIZE ensures that we do not have to worry about running
@@ -808,7 +841,7 @@ bfd_ecoff_write_debug (abfd, debug, swap, where)
 
 #define WRITE(ptr, count, size, offset) \
   BFD_ASSERT (symhdr->offset == 0 || bfd_tell (abfd) == symhdr->offset); \
-  if (bfd_write (debug->ptr, size, symhdr->count, abfd) \
+  if (bfd_write ((PTR) debug->ptr, size, symhdr->count, abfd) \
       != size * symhdr->count) \
     return false;
 

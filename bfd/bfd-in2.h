@@ -407,7 +407,8 @@ extern struct bfd_hash_entry *bfd_hash_newfunc
 	   const char *));
 
 /* Grab some space for a hash table entry.  */
-extern PTR bfd_hash_allocate PARAMS ((struct bfd_hash_table *, size_t));
+extern PTR bfd_hash_allocate PARAMS ((struct bfd_hash_table *,
+				      unsigned int));
 
 /* Traverse a hash table in a random order, calling a function on each
    element.  If the function returns false, the traversal stops.  The
@@ -558,6 +559,10 @@ extern boolean bfd_ecoff_debug_externals
 				struct ecoff_extr *),
 	   void (*set_index) (struct symbol_cache_entry *,
 			      bfd_size_type)));
+extern boolean bfd_ecoff_debug_one_external
+  PARAMS ((bfd *abfd, struct ecoff_debug_info *debug,
+	   const struct ecoff_debug_swap *swap,
+	   const char *name, struct ecoff_extr *esym));
 extern bfd_size_type bfd_ecoff_debug_size
   PARAMS ((bfd *abfd, struct ecoff_debug_info *debug,
 	   const struct ecoff_debug_swap *swap));
