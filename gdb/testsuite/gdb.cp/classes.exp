@@ -42,8 +42,10 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 #
 # There are lots of variations in the output:
 #
-# . gcc -stabs+ emits debug info for implicit member functions:
-#   operator=, copy ctor, ctor.  gcc -gdwarf-2 does not.
+# . older gcc -gstabs+ emits debug info for implicit member functions:
+#   operator=, copy ctor, ctor.  newer gcc -gstabs+ sometimes emits
+#   this debug info.  gcc -gdwarf-2 also emits this debug info,
+#   but gdb does not print implicit members in ptype output.
 #
 # . gcc with abi version 1 puts the implicit member functions
 #   at the beginning of the member function list; with abi version 2,
@@ -55,8 +57,11 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 # . gcc v2 shows data members for virtual base pointers.
 #   gcc v3 does not.
 #
-# . gdb always prints "class" for both "class" and "struct".
-#   In the future, I should accept "struct" in case gdb improves.
+# . ptype can print either "class ... { public:" or "struct ... {".
+#   this depends on the debug info format; on whether the struct/class
+#   has any c++ features such as non-public data members, base classes,
+#   or member functions; and on other factors.  I accept any form that
+#   is semantically the same as the original.
 
 proc test_ptype_class_objects {} {
     global gdb_prompt
@@ -65,85 +70,105 @@ proc test_ptype_class_objects {} {
 
     # Simple type.
 
+    set re_class "((struct|class) default_public_struct \{${ws}public:|struct default_public_struct \{)"
+
     gdb_test_multiple "ptype struct default_public_struct" "ptype struct default_public_struct" {
-	-re "type = class default_public_struct \{${ws}public:${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype struct default_public_struct"
 	}
-	-re "type = class default_public_struct \{${ws}public:${ws}int a;${ws}int b;${ws}default_public_struct ?& ?operator ?=\\(default_public_struct const ?&\\);${ws}default_public_struct\\(default_public_struct const ?&\\);${ws}default_public_struct\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;${ws}default_public_struct ?& ?operator ?=\\(default_public_struct const ?&\\);${ws}default_public_struct\\(default_public_struct const ?&\\);${ws}default_public_struct\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	    # gcc 3.4.1 -gstabs+
 	    pass "ptype struct default_public_struct"
 	}
     }
 
     # Same test, slightly different type.
+
+    set re_class "((struct|class) explicit_public_struct \{${ws}public:|struct explicit_public_struct \{)"
 
     gdb_test_multiple "ptype struct explicit_public_struct" "ptype struct explicit_public_struct" {
-	-re "type = class explicit_public_struct \{${ws}public:${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype struct explicit_public_struct"
 	}
-	-re "type = class explicit_public_struct \{${ws}public:${ws}int a;${ws}int b;${ws}explicit_public_struct ?& ?operator ?=\\(explicit_public_struct const ?&\\);${ws}explicit_public_struct\\(explicit_public_struct const ?&\\);${ws}explicit_public_struct\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;${ws}explicit_public_struct ?& ?operator ?=\\(explicit_public_struct const ?&\\);${ws}explicit_public_struct\\(explicit_public_struct const ?&\\);${ws}explicit_public_struct\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	    # gcc 3.4.1 -gstabs+
 	    pass "ptype struct explicit_public_struct"
 	}
     }
 
     # Same test, slightly different type.
+
+    set re_class "((struct|class) protected_struct \{${ws}protected:)"
 
     gdb_test_multiple "ptype struct protected_struct" "ptype struct protected_struct" {
-	-re "type = class protected_struct \{${ws}protected:${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype struct protected_struct"
 	}
-	-re "type = class protected_struct \{${ws}protected:${ws}int a;${ws}int b;${ws}public:${ws}protected_struct ?& ?operator ?=\\(protected_struct const ?&\\);${ws}protected_struct\\(protected_struct const ?&\\);${ws}protected_struct\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;${ws}public:${ws}protected_struct ?& ?operator ?=\\(protected_struct const ?&\\);${ws}protected_struct\\(protected_struct const ?&\\);${ws}protected_struct\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	    # gcc 3.4.1 -gstabs+
 	    pass "ptype struct protected_struct"
 	}
     }
 
     # Same test, slightly different type.
 
+    set re_class "((struct|class) private_struct \{${ws}private:|class private_struct \{)"
+
     gdb_test_multiple "ptype struct private_struct" "ptype struct private_struct" {
-	-re "type = class private_struct \{${ws}private:${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype struct private_struct"
 	}
-	-re "type = class private_struct \{${ws}private:${ws}int a;${ws}int b;${ws}public:${ws}private_struct ?& ?operator ?=\\(private_struct const ?&\\);${ws}private_struct\\(private_struct const ?&\\);${ws}private_struct\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;${ws}public:${ws}private_struct ?& ?operator ?=\\(private_struct const ?&\\);${ws}private_struct\\(private_struct const ?&\\);${ws}private_struct\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	    # gcc 3.4.1 -gstabs+
 	    pass "ptype struct private_struct"
 	}
     }
 
     # Similar test, bigger type.
 
+    set re_class "((struct|class) mixed_protection_struct \{${ws}public:|struct mixed_protection_struct \{)"
+
     gdb_test_multiple "ptype struct mixed_protection_struct" "ptype struct mixed_protection_struct" {
-	-re "type = class mixed_protection_struct \{${ws}public:${ws}int a;${ws}int b;${ws}private:${ws}int c;${ws}int d;${ws}protected:${ws}int e;${ws}int f;${ws}public:${ws}int g;${ws}private:${ws}int h;${ws}protected:${ws}int i;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;${ws}private:${ws}int c;${ws}int d;${ws}protected:${ws}int e;${ws}int f;${ws}public:${ws}int g;${ws}private:${ws}int h;${ws}protected:${ws}int i;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype struct mixed_protection_struct"
 	}
-	-re "type = class mixed_protection_struct \{${ws}public:${ws}int a;${ws}int b;${ws}private:${ws}int c;${ws}int d;${ws}protected:${ws}int e;${ws}int f;${ws}public:${ws}int g;${ws}private:${ws}int h;${ws}protected:${ws}int i;${ws}public:${ws}mixed_protection_struct ?& ?operator ?=\\(mixed_protection_struct const ?&\\);${ws}mixed_protection_struct\\(mixed_protection_struct const ?&\\);${ws}mixed_protection_struct\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;${ws}private:${ws}int c;${ws}int d;${ws}protected:${ws}int e;${ws}int f;${ws}public:${ws}int g;${ws}private:${ws}int h;${ws}protected:${ws}int i;${ws}public:${ws}mixed_protection_struct ?& ?operator ?=\\(mixed_protection_struct const ?&\\);${ws}mixed_protection_struct\\(mixed_protection_struct const ?&\\);${ws}mixed_protection_struct\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	    # gcc 3.4.1 -gstabs+
 	    pass "ptype struct mixed_protection_struct"
 	}
     }
@@ -151,86 +176,105 @@ proc test_ptype_class_objects {} {
     # All that again with "class" instead of "struct".
     # gdb does not care about the difference anyways.
 
+    set re_class "((struct|class) public_class \{${ws}public:|struct public_class \{)"
+
     gdb_test_multiple "ptype class public_class" "ptype class public_class" {
-	-re "type = class public_class \{${ws}public:${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype class public_class"
 	}
-	-re "type = class public_class \{${ws}public:${ws}int a;${ws}int b;${ws}public_class ?& ?operator ?=\\(public_class const ?&\\);${ws}public_class\\(public_class const ?&\\);${ws}public_class\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;${ws}public_class ?& ?operator ?=\\(public_class const ?&\\);${ws}public_class\\(public_class const ?&\\);${ws}public_class\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	    # gcc 3.4.1 -gstabs+
 	    pass "ptype class public_class"
 	}
     }
 
     # Same test, slightly different type.
+
+    set re_class "((struct|class) protected_class \{${ws}protected:)"
 
     gdb_test_multiple "ptype class protected_class" "ptype class protected_class" {
-	-re "type = class protected_class \{${ws}protected:${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype class protected_class"
 	}
-	-re "type = class protected_class \{${ws}protected:${ws}int a;${ws}int b;${ws}public:${ws}protected_class ?& ?operator ?=\\(protected_class const ?&\\);${ws}protected_class\\(protected_class const ?&\\);${ws}protected_class\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;${ws}public:${ws}protected_class ?& ?operator ?=\\(protected_class const ?&\\);${ws}protected_class\\(protected_class const ?&\\);${ws}protected_class\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	    # gcc 3.4.1 -gstabs+
 	    pass "ptype class protected_class"
 	}
     }
 
     # Same test, slightly different type.
-    # The 'private' is optional but gdb always prints it.
+
+    set re_class "((struct|class) default_private_class \{${ws}private:|class default_private_class \{)"
 
     gdb_test_multiple "ptype class default_private_class" "ptype class default_private_class" {
-	-re "type = class default_private_class \{${ws}(private:${ws}|)int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype class default_private_class"
 	}
-	-re "type = class default_private_class \{${ws}(private:${ws}|)int a;${ws}int b;${ws}public:${ws}default_private_class ?& ?operator ?=\\(default_private_class const ?&\\);${ws}default_private_class\\(default_private_class const ?&\\);${ws}default_private_class\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;${ws}public:${ws}default_private_class ?& ?operator ?=\\(default_private_class const ?&\\);${ws}default_private_class\\(default_private_class const ?&\\);${ws}default_private_class\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	    # gcc 3.4.1 -gstabs+
 	    pass "ptype class default_private_class"
 	}
     }
 
     # Same test, slightly different type.
 
+    set re_class "((struct|class) explicit_private_class \{${ws}private:|class explicit_private_class \{)"
+
     gdb_test_multiple "ptype class explicit_private_class" "ptype class explicit_private_class" {
-	-re "type = class explicit_private_class \{${ws}(private:${ws}|)int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype class explicit_private_class"
 	}
-	-re "type = class explicit_private_class \{${ws}(private:${ws}|)int a;${ws}int b;${ws}public:${ws}explicit_private_class ?& ?operator ?=\\(explicit_private_class const ?&\\);${ws}explicit_private_class\\(explicit_private_class const ?&\\);${ws}explicit_private_class\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;${ws}public:${ws}explicit_private_class ?& ?operator ?=\\(explicit_private_class const ?&\\);${ws}explicit_private_class\\(explicit_private_class const ?&\\);${ws}explicit_private_class\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	    # gcc 3.4.1 -gstabs+
 	    pass "ptype class explicit_private_class"
 	}
     }
 
     # Similar test, bigger type.
 
+    set re_class "((struct|class) mixed_protection_class \{${ws}public:|struct mixed_protection_class \{)"
+
     gdb_test_multiple "ptype class mixed_protection_class" "ptype struct mixed_protection_class" {
-	-re "type = class mixed_protection_class \{${ws}public:${ws}int a;${ws}int b;${ws}private:${ws}int c;${ws}int d;${ws}protected:${ws}int e;${ws}int f;${ws}public:${ws}int g;${ws}private:${ws}int h;${ws}protected:${ws}int i;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;${ws}private:${ws}int c;${ws}int d;${ws}protected:${ws}int e;${ws}int f;${ws}public:${ws}int g;${ws}private:${ws}int h;${ws}protected:${ws}int i;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype class mixed_protection_class"
 	}
-	-re "type = class mixed_protection_class \{${ws}public:${ws}int a;${ws}int b;${ws}private:${ws}int c;${ws}int d;${ws}protected:${ws}int e;${ws}int f;${ws}public:${ws}int g;${ws}private:${ws}int h;${ws}protected:${ws}int i;${ws}public:${ws}mixed_protection_class ?& ?operator ?=\\(mixed_protection_class const ?&\\);${ws}mixed_protection_class\\(mixed_protection_class const ?&\\);${ws}mixed_protection_class\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int b;${ws}private:${ws}int c;${ws}int d;${ws}protected:${ws}int e;${ws}int f;${ws}public:${ws}int g;${ws}private:${ws}int h;${ws}protected:${ws}int i;${ws}public:${ws}mixed_protection_class ?& ?operator ?=\\(mixed_protection_class const ?&\\);${ws}mixed_protection_class\\(mixed_protection_class const ?&\\);${ws}mixed_protection_class\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	    # gcc 3.4.1 -gstabs+
 	    pass "ptype class mixed_protection_class"
 	}
     }
@@ -239,85 +283,105 @@ proc test_ptype_class_objects {} {
 
     # Base class.
 
+    set re_class "((struct|class) A \{${ws}public:|struct A \{)"
+
     gdb_test_multiple "ptype class A" "ptype class A" {
-	-re "type = class A \{${ws}public:${ws}int a;${ws}int x;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int x;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype class A"
 	}
-	-re "type = class A \{${ws}public:${ws}int a;${ws}int x;${ws}A ?& ?operator ?=\\(A const ?&\\);${ws}A\\(A const ?&\\);${ws}A\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int a;${ws}int x;${ws}A ?& ?operator ?=\\(A const ?&\\);${ws}A\\(A const ?&\\);${ws}A\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	    # gcc 3.4.1 -gstabs+
 	    pass "ptype class A"
 	}
     }
 
     # Derived class.
+
+    set re_class "((struct|class) B : public A \{${ws}public:|struct B : public A \{)"
 
     gdb_test_multiple "ptype class B" "ptype class B" {
-	-re "type = class B : public A \{${ws}public:${ws}int b;${ws}int x;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int b;${ws}int x;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype class B"
 	}
-	-re "type = class B : public A \{${ws}public:${ws}int b;${ws}int x;${ws}B ?& ?operator ?=\\(B const ?&\\);${ws}B\\(B const ?&\\);${ws}B\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int b;${ws}int x;${ws}B ?& ?operator ?=\\(B const ?&\\);${ws}B\\(B const ?&\\);${ws}B\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	    # gcc 3.4.1 -gstabs+
 	    pass "ptype class B"
 	}
     }
 
     # Derived class.
 
+    set re_class "((struct|class) C : public A \{${ws}public:|struct C : public A \{)"
+
     gdb_test_multiple "ptype class C" "ptype class C" {
-	-re "type = class C : public A \{${ws}public:${ws}int c;${ws}int x;$nl\}$nl$gdb_prompt $" {
+	-re "${re_class}${ws}int c;${ws}int x;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype class C"
 	}
-	-re "type = class C : public A \{${ws}public:${ws}int c;${ws}int x;${ws}C ?& ?operator ?=\\(C const ?&\\);${ws}C\\(C const ?&\\);${ws}C\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "${re_class}${ws}int c;${ws}int x;${ws}C ?& ?operator ?=\\(C const ?&\\);${ws}C\\(C const ?&\\);${ws}C\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	    # gcc 3.4.1 -gstabs+
 	    pass "ptype class C"
 	}
     }
 
     # Derived class, multiple inheritance.
 
+    set re_class "((struct|class) D : public B, public C \{${ws}public:|struct D : public B, public C \{)"
+
     gdb_test_multiple "ptype class D" "ptype class D" {
-	-re "type = class D : public B, public C \{${ws}public:${ws}int d;${ws}int x;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int d;${ws}int x;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype class D"
 	}
-	-re "type = class D : public B, public C \{${ws}public:${ws}int d;${ws}int x;${ws}D ?& ?operator ?=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int d;${ws}int x;${ws}D ?& ?operator ?=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	    # gcc 3.4.1 -gstabs+
 	    pass "ptype class D"
 	}
     }
 
     # Derived class.
 
+    set re_class "((struct|class) E : public D \{${ws}public:|struct E : public D \{)"
+
     gdb_test_multiple "ptype class E" "ptype class E" {
-	-re "type = class E : public D \{${ws}public:${ws}int e;${ws}int x;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int e;${ws}int x;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype class E"
 	}
-	-re "type = class E : public D \{${ws}public:${ws}int e;${ws}int x;${ws}E ?& ?operator ?=\\(E const ?&\\);${ws}E\\(E const ?&\\);${ws}E\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int e;${ws}int x;${ws}E ?& ?operator ?=\\(E const ?&\\);${ws}E\\(E const ?&\\);${ws}E\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	    # gcc 3.4.1 -gstabs+
 	    pass "ptype class E"
 	}
     }
@@ -327,37 +391,45 @@ proc test_ptype_class_objects {} {
     # gcc 2.X with stabs (stabs or stabs+?) used to have a problem with
     # static methods whose name is the same as their argument mangling.
  
+    set re_class "((struct|class) Static \{${ws}public:|struct Static \{)"
+
     gdb_test_multiple "ptype class Static" "ptype class Static" {
-	-re "type = class Static \{${ws}public:${ws}static void ii\\(int, int\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}static void ii\\(int, int\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	      # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
+	      # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype class Static"
 	}
-	-re "type = class Static \{${ws}public:${ws}Static ?& ?operator ?=\\(Static const ?&\\);${ws}Static\\(Static const ?&\\);${ws}Static\\((void|)\\);${ws}static void ii\\(int, int\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}Static ?& ?operator ?=\\(Static const ?&\\);${ws}Static\\(Static const ?&\\);${ws}Static\\((void|)\\);${ws}static void ii\\(int, int\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # gcc 3.3.2 -gstabs+
 	    pass "ptype class Static"
 	}
-	-re "type = class Static \{${ws}public:${ws}static void ii\\(int, int\\);${ws}Static ?& ?operator ?=\\(Static const ?&\\);${ws}Static\\(Static const ?&\\);${ws}Static\\((void|)\\);$nl\}$nl$gdb_prompt $" {
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	-re "type = ${re_class}${ws}static void ii\\(int, int\\);${ws}Static ?& ?operator ?=\\(Static const ?&\\);${ws}Static\\(Static const ?&\\);${ws}Static\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	    # gcc 3.4.1 -gstabs+
 	    pass "ptype class Static"
 	}
     }
 
     # Here are some virtual inheritance tests.
 
+    set re_class "((struct|class) vA \{${ws}public:|struct vA \{)"
+
     gdb_test_multiple "ptype class vA" "ptype class vA" {
-	-re "type = class vA \{${ws}public:${ws}int va;${ws}int vx;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int va;${ws}int vx;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype class vA"
 	}
-	-re "type = class vA \{${ws}public:${ws}int va;${ws}int vx;${ws}vA ?& ?operator ?=\\(vA const ?&\\);${ws}vA\\(vA const ?&\\);${ws}vA\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}int va;${ws}int vx;${ws}vA ?& ?operator ?=\\(vA const ?&\\);${ws}vA\\(vA const ?&\\);${ws}vA\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	    # gcc 3.4.1 -gstabs+
 	    pass "ptype class vA"
 	}
     }
@@ -366,108 +438,140 @@ proc test_ptype_class_objects {} {
     # With gcc 3, gdb does not print the virtual base pointer.
     # drow considers it a gdb bug if gdb prints the vbptr.
 
+    set re_class_private "((struct|class) vB : public virtual vA \{${ws}private:|class vB : public virtual vA \{)"
+    set re_class_public "((struct|class) vB : public virtual vA \{${ws}public:|struct vB : public virtual vA \{)"
+
     gdb_test_multiple "ptype class vB" "ptype class vB" {
-	-re "type = class vB : public virtual vA \{${ws}private:${ws}vA ?\\* ?_vb.2vA;${ws}public:${ws}int vb;${ws}int vx;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class_private}${ws}private:${ws}vA ?\\* ?_vb.2vA;${ws}public:${ws}int vb;${ws}int vx;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # TODO: kfail this
 	    fail "ptype class vB"
 	}
-	-re "type = class vB : public virtual vA \{${ws}public:${ws}int vb;${ws}int vx;$nl\}$nl$gdb_prompt $" {
-	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	-re "type = ${re_class_public}${ws}int vb;${ws}int vx;$nl\}$nl$gdb_prompt $" {
+	    # gcc 3.3.4 -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
 	    pass "ptype class vB"
 	}
-	-re "type = class vB : public virtual vA \{${ws}private:${ws}vA ?\\* ?_vb.vA;${ws}public:${ws}int vb;${ws}int vx;${ws}vB ?& ?operator ?=\\(vB const ?&\\);${ws}vB\\(int, ?vB const ?&\\);${ws}vB\\(int\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class_private}${ws}vA ?\\* ?_vb.vA;${ws}public:${ws}int vb;${ws}int vx;${ws}vB ?& ?operator ?=\\(vB const ?&\\);${ws}vB\\(int, ?vB const ?&\\);${ws}vB\\(int\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # See the hidden "in-charge" ctor parameter!
 	    # TODO: kfail this
 	    setup_xfail "*-*-*"
 	    fail "ptype class vB (FIXME: non-portable virtual table constructs)"
 	}
-	-re "type = class vB : public virtual vA \{${ws}public:${ws}int vb;${ws}int vx;${ws}vB ?& ?operator ?=\\(vB const ?&\\);${ws}vB\\(vB const ?&\\);${ws}vB\\((void|)\\);$nl\}$nl$gdb_prompt $" {
-	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	-re "type = ${re_class_public}${ws}int vb;${ws}int vx;${ws}vB ?& ?operator ?=\\(vB const ?&\\);${ws}vB\\(vB const ?&\\);${ws}vB\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	    # gcc 3.3.4 -gstabs+
+	    # gcc 3.4.1 -gstabs+
+	    pass "ptype class vB"
+	}
+	-re "type = ${re_class_public}${ws}int vb;${ws}int vx;${ws}vB\\(vB const ?&\\);${ws}vB\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype class vB"
 	}
     }
 
     # Another class with a virtual base.
 
+    set re_class_private "((struct|class) vC : public virtual vA \{${ws}private:|class vC : public virtual vA \{)"
+    set re_class_public "((struct|class) vC : public virtual vA \{${ws}public:|struct vC : public virtual vA \{)"
+
     gdb_test_multiple "ptype class vC" "ptype class vC" {
-	-re "type = class vC : public virtual vA \{${ws}private:${ws}vA ?\\* ?_vb.2vA;${ws}public:${ws}int vc;${ws}int vx;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class_private}${ws}private:${ws}vA ?\\* ?_vb.2vA;${ws}public:${ws}int vc;${ws}int vx;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
-	    # TODO: kfail
+	    # TODO: kfail this
 	    fail "ptype class vC"
 	}
-	-re "type = class vC : public virtual vA \{${ws}public:${ws}int vc;${ws}int vx;$nl\}$nl$gdb_prompt $" {
-	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	-re "type = ${re_class_public}${ws}int vc;${ws}int vx;$nl\}$nl$gdb_prompt $" {
+	    # gcc 3.3.4 -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
 	    pass "ptype class vC"
 	}
-	-re "type = class vC : public virtual vA \{${ws}private:${ws}vA ?\\* ?_vb.vA;${ws}public:${ws}int vc;${ws}int vx;${ws}vC ?& ?operator ?=\\(vC const ?&\\);${ws}vC\\(int, ?vC const ?&\\);${ws}vC\\(int\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class_private}${ws}vA ?\\* ?_vb.vA;${ws}public:${ws}int vc;${ws}int vx;${ws}vC ?& ?operator ?=\\(vC const ?&\\);${ws}vC\\(int, ?vC const ?&\\);${ws}vC\\(int\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # See the hidden "in-charge" ctor parameter!
-	    # TODO: kfail
+	    # TODO: kfail this
 	    setup_xfail "*-*-*"
 	    fail "ptype class vC (FIXME: non-portable virtual table constructs)"
 	}
-	-re "type = class vC : public virtual vA \{${ws}public:${ws}int vc;${ws}int vx;${ws}vC ?& ?operator ?=\\(vC const ?&\\);${ws}vC\\(vC const ?&\\);${ws}vC\\((void|)\\);$nl\}$nl$gdb_prompt $" {
-	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	-re "type = ${re_class_public}${ws}int vc;${ws}int vx;${ws}vC ?& ?operator ?=\\(vC const ?&\\);${ws}vC\\(vC const ?&\\);${ws}vC\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	    # gcc 3.3.4 -gstabs+
+	    # gcc 3.4.1 -gstabs+
+	    pass "ptype class vC"
+	}
+	-re "type = ${re_class_public}${ws}int vc;${ws}int vx;${ws}vC\\(vC const ?&\\);${ws}vC\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype class vC"
 	}
     }
 
     # The classic diamond inheritance.
 
+    set re_class_private "((struct|class) vD : public virtual vB, public virtual vC \{${ws}private:|class vD : public virtual vB, public virtual vC \{)"
+    set re_class_public "((struct|class) vD : public virtual vB, public virtual vC \{${ws}public:|struct vD : public virtual vB, public virtual vC \{)"
+
     gdb_test_multiple "ptype class vD" "ptype class vD" {
-	-re "type = class vD : public virtual vB, public virtual vC \{${ws}private:${ws}vC ?\\* ?_vb.2vC;${ws}vB ?\\* ?_vb.2vB;${ws}public:${ws}int vd;${ws}int vx;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class_private}${ws}vC ?\\* ?_vb.2vC;${ws}vB ?\\* ?_vb.2vB;${ws}public:${ws}int vd;${ws}int vx;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # TODO: kfail
 	    fail "ptype class vD"
 	}
-	-re "type = class vD : public virtual vB, public virtual vC \{${ws}public:${ws}int vd;${ws}int vx;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class_public}${ws}int vd;${ws}int vx;$nl\}$nl$gdb_prompt $" {
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
 	    pass "ptype class vD"
 	}
-	-re "type = class vD : public virtual vB, public virtual vC \{${ws}private:${ws}vC ?\\* ?_vb.vC;${ws}vB ?\\* ?_vb.vB;${ws}public:${ws}int vd;${ws}int vx;${ws}vD ?& ?operator ?=\\(vD const ?&\\);${ws}vD\\(int, ?vD const ?&\\);${ws}vD\\(int\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class_private}${ws}vC ?\\* ?_vb.vC;${ws}vB ?\\* ?_vb.vB;${ws}public:${ws}int vd;${ws}int vx;${ws}vD ?& ?operator ?=\\(vD const ?&\\);${ws}vD\\(int, ?vD const ?&\\);${ws}vD\\(int\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # See the hidden "in-charge" ctor parameter!
 	    # TODO: kfail
 	    setup_xfail "*-*-*"
 	    fail "ptype class vD (FIXME: non-portable virtual table constructs)"
 	}
-	-re "type = class vD : public virtual vB, public virtual vC \{${ws}public:${ws}int vd;${ws}int vx;${ws}vD ?& ?operator ?=\\(vD const ?&\\);${ws}vD\\(vD const ?&\\);${ws}vD\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class_public}${ws}int vd;${ws}int vx;${ws}vD ?& ?operator ?=\\(vD const ?&\\);${ws}vD\\(vD const ?&\\);${ws}vD\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	    # gcc 3.4.1 -gstabs+
+	    pass "ptype class vD"
+	}
+	-re "type = ${re_class_public}${ws}int vd;${ws}int vx;${ws}vD\\(vD const ?&\\);${ws}vD\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
 	    pass "ptype class vD"
 	}
     }
 
     # One more case of virtual derivation.
 
+    set re_class_private "((struct|class) vE : public virtual vD \{${ws}private:|class vE : public virtual vD \{)"
+    set re_class_public "((struct|class) vE : public virtual vD \{${ws}public:|struct vE : public virtual vD \{)"
+
     gdb_test_multiple "ptype class vE" "ptype class vE" {
-	-re "type = class vE : public virtual vD \{${ws}private:${ws}vD ?\\* ?_vb.2vD;${ws}public:${ws}int ve;${ws}int vx;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class_private}${ws}vD ?\\* ?_vb.2vD;${ws}public:${ws}int ve;${ws}int vx;$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # TODO: kfail
 	    fail "ptype class vE"
 	}
-	-re "type = class vE : public virtual vD \{${ws}public:${ws}int ve;${ws}int vx;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class_public}${ws}int ve;${ws}int vx;$nl\}$nl$gdb_prompt $" {
 	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gdwarf-2
 	    pass "ptype class vE"
 	}
-	-re "type = class vE : public virtual vD \{${ws}private:${ws}vD ?\\* ?_vb.vD;${ws}public:${ws}int ve;${ws}int vx;${ws}vE ?& ?operator ?=\\(vE const ?&\\);${ws}vE\\(int, ?vE const ?&\\);${ws}vE\\(int\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class_private}${ws}vD ?\\* ?_vb.vD;${ws}public:${ws}int ve;${ws}int vx;${ws}vE ?& ?operator ?=\\(vE const ?&\\);${ws}vE\\(int, ?vE const ?&\\);${ws}vE\\(int\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # See the hidden "in-charge" ctor parameter!
 	    # TODO: kfail
 	    setup_xfail "*-*-*"
 	    fail "ptype class vE (FIXME: non-portable virtual table constructs)"
 	}
-	-re "type = class vE : public virtual vD \{${ws}public:${ws}int ve;${ws}int vx;${ws}vE ?& ?operator ?=\\(vE const ?&\\);${ws}vE\\(vE const ?&\\);${ws}vE\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class_public}${ws}int ve;${ws}int vx;${ws}vE ?& ?operator ?=\\(vE const ?&\\);${ws}vE\\(vE const ?&\\);${ws}vE\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
+	    # gcc 3.4.1 -gstabs+
+	    pass "ptype class vE"
+	}
+	-re "type = ${re_class_public}${ws}int ve;${ws}int vx;${ws}vE\\(vE const ?&\\);${ws}vE\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	    # gcc HEAD 2004-07-31 00:45:52 UTC -gstabs+
 	    pass "ptype class vE"
 	}
     }
@@ -670,11 +774,14 @@ proc test_enums {} {
     }
 
     # ptype on the object
+
+    set re_class "((struct|class) ClassWithEnum \{${ws}public:|struct ClassWithEnum \{)"
+
     gdb_test_multiple "ptype obj_with_enum" "ptype obj_with_enum" {
-	-re "type = class ClassWithEnum \{${ws}public:${ws}(enum |)ClassWithEnum::PrivEnum priv_enum;${ws}int x;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}(enum |)ClassWithEnum::PrivEnum priv_enum;${ws}int x;$nl\}$nl$gdb_prompt $" {
 	    pass "ptype obj_with_enum"
 	}
-	-re "type = class ClassWithEnum \{${ws}public:${ws}(enum |)PrivEnum priv_enum;${ws}int x;$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}(enum |)PrivEnum priv_enum;${ws}int x;$nl\}$nl$gdb_prompt $" {
 	    # NOTE: carlton/2003-02-28: One could certainly argue that
 	    # this output is acceptable: PrivEnum is a member of
 	    # ClassWithEnum, so there's no need to explicitly qualify
@@ -688,11 +795,11 @@ proc test_enums {} {
 	    # gcc 3.3.2 -gdwarf-2
 	    kfail "gdb/57" "ptype obj_with_enum"
 	}
-	-re "type = class ClassWithEnum \{${ws}public:${ws}(enum |)PrivEnum priv_enum;${ws}int x;${ws}ClassWithEnum ?& ?operator ?=\\(ClassWithEnum const ?&\\);${ws}ClassWithEnum\\(ClassWithEnum const ?&\\);${ws}ClassWithEnum\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}(enum |)PrivEnum priv_enum;${ws}int x;${ws}ClassWithEnum ?& ?operator ?=\\(ClassWithEnum const ?&\\);${ws}ClassWithEnum\\(ClassWithEnum const ?&\\);${ws}ClassWithEnum\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    kfail "gdb/57" "ptype obj_with_enum"
 	}
-	-re "type = class ClassWithEnum \{${ws}public:${ws}(enum |)ClassWithEnum::PrivEnum priv_enum;${ws}int x;${ws}ClassWithEnum ?& ?operator ?=\\(ClassWithEnum const ?&\\);${ws}ClassWithEnum\\(ClassWithEnum const ?&\\);${ws}ClassWithEnum\\((void|)\\);$nl\}$nl$gdb_prompt $" {
+	-re "type = ${re_class}${ws}(enum |)ClassWithEnum::PrivEnum priv_enum;${ws}int x;${ws}ClassWithEnum ?& ?operator ?=\\(ClassWithEnum const ?&\\);${ws}ClassWithEnum\\(ClassWithEnum const ?&\\);${ws}ClassWithEnum\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # I think this is a PASS, but only carlton knows for sure.
 	    # -- chastain 2003-12-30
 	    #

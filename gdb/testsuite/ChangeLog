@@ -1,5 +1,9 @@
 2004-07-30  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/classes.exp: Accept more varieties of ptype output.
+
+2004-07-30  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.base/asm-source.exp: Properly convert target board
 	debug flags from gcc format to binutils format.
 
