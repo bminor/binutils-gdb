@@ -195,7 +195,7 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The CT field in an X form instruction.  */
 #define CT CR + 1
-  { 5, 21, 0, 0, 0 },
+  { 5, 21, 0, 0, PPC_OPERAND_OPTIONAL },
 
   /* The D field in a D form instruction.  This is a displacement off
      a register, and implies that the next operand is a register in
