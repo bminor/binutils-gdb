@@ -1,5 +1,10 @@
 2003-07-07  Joel Brobecker  <brobecker@gnat.com>
 
+        * xcoffread.c (xcoff_psymtab_to_symtab_1): Remove call to
+        sort_symtab_syms, no longer necessary.
+
+2003-07-07  Joel Brobecker  <brobecker@gnat.com>
+
 	* config/mips/tm-irix6.h (MIPS_REGISTER_TYPE): Add comment.
 
 2003-07-07  Joel Brobecker  <brobecker@gnat.com>
