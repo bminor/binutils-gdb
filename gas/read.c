@@ -3683,7 +3683,7 @@ emit_expr (exp, nbytes)
 	    }
 
 	  nums = generic_bignum + size / CHARS_PER_LITTLENUM;
-	  while (size > 0)
+	  while (size >= CHARS_PER_LITTLENUM)
 	    {
 	      --nums;
 	      md_number_to_chars (p, (valueT) *nums, CHARS_PER_LITTLENUM);
@@ -3694,7 +3694,7 @@ emit_expr (exp, nbytes)
       else
 	{
 	  nums = generic_bignum;
-	  while (size > 0)
+	  while (size >= CHARS_PER_LITTLENUM)
 	    {
 	      md_number_to_chars (p, (valueT) *nums, CHARS_PER_LITTLENUM);
 	      ++nums;
@@ -3703,7 +3703,7 @@ emit_expr (exp, nbytes)
 	      nbytes -= CHARS_PER_LITTLENUM;
 	    }
 
-	  while (nbytes > 0)
+	  while (nbytes >= CHARS_PER_LITTLENUM)
 	    {
 	      md_number_to_chars (p, extra_digit, CHARS_PER_LITTLENUM);
 	      nbytes -= CHARS_PER_LITTLENUM;
