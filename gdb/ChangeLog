@@ -1,3 +1,8 @@
+2004-05-10  Jim Blandy  <jimb@redhat.com>
+
+	* rs6000-tdep.c (ppc_collect_gregset): Correct off-by-one error in
+	loop collecting gprs.
+
 2004-05-09  Andrew Cagney  <cagney@redhat.com>
 
 	* remote-vx.c (net_step): Delete step-range code.

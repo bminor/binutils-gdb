@@ -257,7 +257,7 @@ ppc_collect_gregset (const struct regset *regset,
   int i;
 
   offset = offsets->r0_offset;
-  for (i = 0; i <= 32; i++, offset += 4)
+  for (i = 0; i < 32; i++, offset += 4)
     {
       if (regnum == -1 || regnum == i)
 	ppc_collect_reg (regcache, regnum, gregs, offset);
