@@ -2292,6 +2292,96 @@ proc do_shift {} {
     if [expr $x==16] then { pass $testname } else { fail $testname }
 }
 
+proc do_shift2 {} {
+    set testname "shift2.s: shift tests"
+    set x 0
+
+    gas_start "shift2.s" "-al"
+
+    # Check the assembled instruction against a table built by the HP assembler
+    # Any differences should be checked by hand -- with the number of problems
+    # I've seen in the HP assembler I don't completely trust it.
+    #
+    # Instead of having a variable for each match string just increment the
+    # total number of matches seen.  That's simpler when testing large numbers
+    # of instructions (as these tests to).
+    while 1 {
+	expect {
+	    -re "^ +\[0-9\]+ 0000 D0A40006\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0004 D0A42006\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0008 D0A44006\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000c D0A46006\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0010 D0A48006\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0014 D0A4A006\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0018 D0A4C006\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001c D0A4E006\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0020 D0A40B46\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0024 D0A42B46\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0028 D0A44B46\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 002c D0A46B46\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0030 D0A48B46\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0034 D0A4AB46\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0038 D0A4CB46\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 003c D0A4EB46\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "\[^\n\]*\n"				{ }
+	    timeout				{ perror "timeout\n"; break }
+	    eof					{ break }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    gas_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==16] then { pass $testname } else { fail $testname }
+}
+
+proc do_shift3 {} {
+    set testname "shift3.s: shift3 tests"
+    set x 0
+
+    gas_start "shift3.s" "-al"
+
+    # Check the assembled instruction against a table built by the HP assembler
+    # Any differences should be checked by hand -- with the number of problems
+    # I've seen in the HP assembler I don't completely trust it.
+    #
+    # Instead of having a variable for each match string just increment the
+    # total number of matches seen.  That's simpler when testing large numbers
+    # of instructions (as these tests to).
+    while 1 {
+	expect {
+	    -re "^ +\[0-9\]+ 0000 D0A40206\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0004 D0A42206\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0008 D0A44206\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000c D0A46206\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0010 D0A48206\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0014 D0A4A206\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0018 D0A4C206\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001c D0A4E206\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0020 D0A40F46\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0024 D0A42F46\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0028 D0A44F46\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 002c D0A46F46\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0030 D0A48F46\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0034 D0A4AF46\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0038 D0A4CF46\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 003c D0A4EF46\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "\[^\n\]*\n"				{ }
+	    timeout				{ perror "timeout\n"; break }
+	    eof					{ break }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    gas_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==16] then { pass $testname } else { fail $testname }
+}
+
 proc do_extract {} {
     set testname "extract.s: extract tests"
     set x 0
@@ -2339,6 +2429,128 @@ proc do_extract {} {
 	    -re "^ +\[0-9\]+ 0074 D086B41B\[^\n]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0078 D086D41B\[^\n]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 007c D086F41B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "\[^\n\]*\n"				{ }
+	    timeout				{ perror "timeout\n"; break }
+	    eof					{ break }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    gas_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==32] then { pass $testname } else { fail $testname }
+}
+
+proc do_extract2 {} {
+    set testname "extract2.s: extract2 tests"
+    set x 0
+
+    gas_start "extract2.s" "-al"
+
+    # Check the assembled instruction against a table built by the HP assembler
+    # Any differences should be checked by hand -- with the number of problems
+    # I've seen in the HP assembler I don't completely trust it.
+    #
+    # Instead of having a variable for each match string just increment the
+    # total number of matches seen.  That's simpler when testing large numbers
+    # of instructions (as these tests to).
+    while 1 {
+	expect {
+	    -re "^ +\[0-9\]+ 0000 D08618B6\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0004 D08638B6\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0008 D08658B6\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000c D08678B6\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0010 D08698B6\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0014 D086B8B6\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0018 D086D8B6\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001c D086F8B6\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0020 D0861CB6\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0024 D0863CB6\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0028 D0865CB6\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 002c D0867CB6\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0030 D0869CB6\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0034 D086BCB6\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0038 D086DCB6\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 003c D086FCB6\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0040 D086101B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0044 D086301B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0048 D086501B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 004c D086701B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0050 D086901B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0054 D086B01B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0058 D086D01B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 005c D086F01B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0060 D086141B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0064 D086341B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0068 D086541B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 006c D086741B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0070 D086941B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0074 D086B41B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0078 D086D41B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 007c D086F41B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "\[^\n\]*\n"				{ }
+	    timeout				{ perror "timeout\n"; break }
+	    eof					{ break }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    gas_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==32] then { pass $testname } else { fail $testname }
+}
+
+proc do_extract3 {} {
+    set testname "extract3.s: extract3 tests"
+    set x 0
+
+    gas_start "extract3.s" "-al"
+
+    # Check the assembled instruction against a table built by the HP assembler
+    # Any differences should be checked by hand -- with the number of problems
+    # I've seen in the HP assembler I don't completely trust it.
+    #
+    # Instead of having a variable for each match string just increment the
+    # total number of matches seen.  That's simpler when testing large numbers
+    # of instructions (as these tests to).
+    while 1 {
+	expect {
+	    -re "^ +\[0-9\]+ 0000 D886015B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0004 D886215B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0008 D886415B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000c D886615B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0010 D886815B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0014 D886A15B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0018 D886C15B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001c D886E15B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0020 D886055B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0024 D886255B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0028 D886455B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 002c D886655B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0030 D886855B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0034 D886A55B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0038 D886C55B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 003c D886E55B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0040 D086121B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0044 D086321B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0048 D086521B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 004c D086721B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0050 D086921B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0054 D086B21B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0058 D086D21B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 005c D086F21B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0060 D086161B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0064 D086361B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0068 D086561B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 006c D086761B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0070 D086961B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0074 D086B61B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0078 D086D61B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 007c D086F61B\[^\n]*\n"	{ set x [expr $x+1] }
 	    -re "\[^\n\]*\n"				{ }
 	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
@@ -2432,6 +2644,192 @@ proc do_deposit {} {
 	    -re "^ +\[0-9\]+ 00f4 D4DFBB76\[^\n]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 00f8 D4DFDB76\[^\n]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 00fc D4DFFB76\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "\[^\n\]*\n"				{ }
+	    timeout				{ perror "timeout\n"; break }
+	    eof					{ break }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    gas_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==64] then { pass $testname } else { fail $testname }
+}
+
+proc do_deposit2 {} {
+    set testname "deposit2.s: deposit2 tests"
+    set x 0
+
+    gas_start "deposit2.s" "-al"
+
+    # Check the assembled instruction against a table built by the HP assembler
+    # Any differences should be checked by hand -- with the number of problems
+    # I've seen in the HP assembler I don't completely trust it.
+    #
+    # Instead of having a variable for each match string just increment the
+    # total number of matches seen.  That's simpler when testing large numbers
+    # of instructions (as these tests to).
+    while 1 {
+	expect {
+	    -re "^ +\[0-9\]+ 0000 D4C40B56\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0004 D4C42B56\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0008 D4C44B56\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000c D4C46B56\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0010 D4C48B56\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0014 D4C4AB56\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0018 D4C4CB56\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001c D4C4EB56\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0020 D4C40F56\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0024 D4C42F56\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0028 D4C44F56\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 002c D4C46F56\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0030 D4C48F56\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0034 D4C4AF56\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0038 D4C4CF56\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 003c D4C4EF56\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0040 D4C4001B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0044 D4C4201B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0048 D4C4401B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 004c D4C4601B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0050 D4C4801B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0054 D4C4A01B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0058 D4C4C01B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 005c D4C4E01B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0060 D4C4041B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0064 D4C4241B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0068 D4C4441B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 006c D4C4641B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0070 D4C4841B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0074 D4C4A41B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0078 D4C4C41B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 007c D4C4E41B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0080 D4DF141B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0084 D4DF341B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0088 D4DF541B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 008c D4DF741B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0090 D4DF941B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0094 D4DFB41B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0098 D4DFD41B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 009c D4DFF41B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a0 D4DF101B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a4 D4DF301B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a8 D4DF501B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00ac D4DF701B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00b0 D4DF901B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00b4 D4DFB01B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00b8 D4DFD01B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00bc D4DFF01B\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00c0 D4DF1F76\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00c4 D4DF3F76\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00c8 D4DF5F76\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00cc D4DF7F76\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d0 D4DF9F76\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d4 D4DFBF76\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d8 D4DFDF76\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00dc D4DFFF76\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00e0 D4DF1B76\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00e4 D4DF3B76\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00e8 D4DF5B76\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00ec D4DF7B76\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00f0 D4DF9B76\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00f4 D4DFBB76\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00f8 D4DFDB76\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00fc D4DFFB76\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "\[^\n\]*\n"				{ }
+	    timeout				{ perror "timeout\n"; break }
+	    eof					{ break }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    gas_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==64] then { pass $testname } else { fail $testname }
+}
+
+proc do_deposit3 {} {
+    set testname "deposit3.s: deposit3 tests"
+    set x 0
+
+    gas_start "deposit3.s" "-al"
+
+    # Check the assembled instruction against a table built by the HP assembler
+    # Any differences should be checked by hand -- with the number of problems
+    # I've seen in the HP assembler I don't completely trust it.
+    #
+    # Instead of having a variable for each match string just increment the
+    # total number of matches seen.  That's simpler when testing large numbers
+    # of instructions (as these tests to).
+    while 1 {
+	expect {
+	    -re "^ +\[0-9\]+ 0000 F0C40ABB\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0004 F0C42ABB\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0008 F0C44ABB\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000c F0C46ABB\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0010 F0C48ABB\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0014 F0C4AABB\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0018 F0C4CABB\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001c F0C4EABB\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0020 F0C40EBB\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0024 F0C42EBB\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0028 F0C44EBB\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 002c F0C46EBB\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0030 F0C48EBB\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0034 F0C4AEBB\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0038 F0C4CEBB\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 003c F0C4EEBB\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0040 D4C4021B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0044 D4C4221B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0048 D4C4421B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 004c D4C4621B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0050 D4C4821B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0054 D4C4A21B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0058 D4C4C21B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 005c D4C4E21B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0060 D4C4061B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0064 D4C4261B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0068 D4C4461B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 006c D4C4661B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0070 D4C4861B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0074 D4C4A61B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0078 D4C4C61B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 007c D4C4E61B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0080 D4DF161B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0084 D4DF361B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0088 D4DF561B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 008c D4DF761B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0090 D4DF961B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0094 D4DFB61B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0098 D4DFD61B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 009c D4DFF61B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a0 D4DF121B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a4 D4DF321B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a8 D4DF521B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00ac D4DF721B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00b0 D4DF921B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00b4 D4DFB21B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00b8 D4DFD21B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00bc D4DFF21B\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00c0 F4DF0EBC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00c4 F4DF2EBC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00c8 F4DF4EBC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00cc F4DF6EBC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d0 F4DF8EBC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d4 F4DFAEBC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d8 F4DFCEBC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00dc F4DFEEBC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00e0 F4DF0ABC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00e4 F4DF2ABC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00e8 F4DF4ABC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00ec F4DF6ABC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00f0 F4DF8ABC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00f4 F4DFAABC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00f8 F4DFCABC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00fc F4DFEABC\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "\[^\n\]*\n"				{ }
 	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
@@ -3428,8 +3826,14 @@ if [istarget hppa*-*-*] then {
     do_addi
     do_subi
     do_shift
+    do_shift2
+    do_shift3
     do_extract
+    do_extract2
+    do_extract3
     do_deposit
+    do_deposit2
+    do_deposit3
     do_system
     do_system2
     do_purge

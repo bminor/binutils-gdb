@@ -1,5 +1,10 @@
 Sat Aug 28 00:16:12 1999  Jerry Quinn <jquinn@nortelnetworks.com>
 
+	* gas/hppa/basic/basic.exp:  Add new tests shift2.s,
+	shift3.s, extract2.s, extract3.s, deposit2.s, and deposit3.s.
+	* gas/hppa/basic/shift2.s, shift3.s, extract2.s,
+	extract3.s, deposit2.s, deposit3.s:  New.
+
 	* gas/hppa/basic/add.s,addi.s,dcor.s,shladd.s,sub.s,subi.s,unit.s:
 	Add new syntax versions of instructions to tests. 
 	* gas/hppa/basic/add2.s,dcor2.s,perf.s,purge2.s,shladd2.s,sub2.s,
