@@ -1,3 +1,8 @@
+2001-01-30  Curtis L. Janssen  <cljanss@ca.sandia.gov>
+
+	* elf64-alpha.c (elf64_alpha_find_nearest_line): Query dwarf2
+	before mdebug.
+
 2001-01-26  Richard Henderson  <rth@redhat.com>
 
 	* elfxx-ia64.c (elfNN_ia64_dynamic_symbol_p): Return false
