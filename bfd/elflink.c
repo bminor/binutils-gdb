@@ -430,6 +430,13 @@ bfd_elf_record_link_assignment (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (h == NULL)
     return FALSE;
 
+  /* Since we're defining the symbol, don't let it seem to have not
+     been defined.  record_dynamic_symbol and size_dynamic_sections
+     may depend on this.  */
+  if (h->root.type == bfd_link_hash_undefweak
+      || h->root.type == bfd_link_hash_undefined)
+    h->root.type = bfd_link_hash_new;
+
   if (h->root.type == bfd_link_hash_new)
     h->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
 
