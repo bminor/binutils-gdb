@@ -1665,7 +1665,7 @@ proc gdb_continue_to_end {mssg} {
     # Don't bother to check the output of the program, that may be
     # extremely tough for some remote systems.
     gdb_test "continue"\
-      "Continuing.\[\r\n0-9\]+(... EXIT code 0\[\r\n\]+|)Program exited normally\\..*"\
+      "Continuing.\[\r\n0-9\]+(... EXIT code 0\[\r\n\]+|Program exited normally\\.).*"\
       "continue until exit at $mssg"
   }
 }
