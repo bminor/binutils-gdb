@@ -76,8 +76,8 @@ extern unsigned long i386_linux_dr_get_status (void);
    general-purpose registers in that way.  */
 extern int cannot_fetch_register (int regno);
 extern int cannot_store_register (int regno);
-#define CANNOT_FETCH_REGISTER(regno) cannot_store_register (regno)
-#define CANNOT_STORE_REGISTER(regno) cannot_fetch_register (regno)
+#define CANNOT_FETCH_REGISTER(regno) cannot_fetch_register (regno)
+#define CANNOT_STORE_REGISTER(regno) cannot_store_register (regno)
 
 /* Override child_resume in `infptrace.c'.  */
 #define CHILD_RESUME
