@@ -1,3 +1,19 @@
+2004-01-09  David Carlton  <carlton@kealia.com>
+
+	Checked in by Elena Zannoni  <ezannoni@redhat.com>.
+	* dwarf2read.c (read_namespace): Pull out name-generating code
+	into namespace_name. Rename previous_namespace to previous_prefix
+	and processing_current_namespace to processing_current_prefix..
+        (namespace_name): New function.
+	(add_partial_symbol): Substitute uses of pdi->name with
+	actual_name.
+	* cp-support.h: Rename processing_current_namespace to
+	processing_current_prefix.
+        Update copyright year.
+	* cp-namespace.c: Rename processing_current_namespace to
+	processing_current_prefix.
+        Update copyright year.
+	
 2004-01-09  Andrew Cagney  <cagney@redhat.com>
 
 	* jv-valprint.c, ser-unix.c: Add missing copyright years.
@@ -13,7 +29,7 @@
 	* dwarf2read.c (read_array_type): Discard FORTRAN_HACK macro and
 	ifdeffed code.
         Update copyright year.
-	
+
 2004-01-08  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* config/pa/tm-hppa.h: Update extern declarations for

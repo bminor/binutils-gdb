@@ -1,5 +1,5 @@
 /* Helper routines for C++ support in GDB.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
    Namespace support contributed by David Carlton.
@@ -69,7 +69,7 @@ extern struct type *cp_lookup_rtti_type (const char *name,
 
 extern unsigned char processing_has_namespace_info;
 
-extern const char *processing_current_namespace;
+extern const char *processing_current_prefix;
 
 extern int cp_is_anonymous (const char *namespace);
 

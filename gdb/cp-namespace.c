@@ -1,5 +1,5 @@
 /* Helper routines for C++ support in GDB.
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by David Carlton and by Kealia, Inc.
 
@@ -38,14 +38,22 @@
 
 unsigned char processing_has_namespace_info;
 
-/* If processing_has_namespace_info is nonzero, this string should
-   contain the name of the current namespace.  The string is
-   temporary; copy it if you need it.  */
+/* This contains our best guess as to the name of the current
+   enclosing namespace(s)/class(es), if any.  For example, if we're
+   within the method foo() in the following code:
 
-/* FIXME: carlton/2003-06-12: This isn't entirely reliable: currently,
-   we get mislead by DW_AT_specification.  */
+    namespace N {
+      class C {
+	void foo () {
+	}
+      };
+    }
 
-const char *processing_current_namespace;
+   then processing_current_prefix should be set to "N::C".  If
+   processing_has_namespace_info is false, then this variable might
+   not be reliable.  */
+
+const char *processing_current_prefix;
 
 /* List of using directives that are active in the current file.  */
 
@@ -223,8 +231,8 @@ cp_set_block_scope (const struct symbol *symbol,
       if (processing_has_namespace_info)
 	{
 	  block_set_scope
-	    (block, obsavestring (processing_current_namespace,
-				  strlen (processing_current_namespace),
+	    (block, obsavestring (processing_current_prefix,
+				  strlen (processing_current_prefix),
 				  obstack),
 	     obstack);
 	}
