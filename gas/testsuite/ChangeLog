@@ -1,6 +1,7 @@
 Mon Apr 22 16:45:12 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gas/sparc/splet.[ds]: New tests for sparclet extensions.
+	* gas/sparc/sparc.exp: Run them.
 
 Mon Apr 15 17:25:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
