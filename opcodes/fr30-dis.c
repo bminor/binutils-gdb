@@ -85,7 +85,7 @@ print_register_list (dis_info, value, offset)
 }
 
 static void
-print_reglist_hi (od, dis_info, value, attrs, pc, length)
+print_hi_register_list (od, dis_info, value, attrs, pc, length)
      CGEN_OPCODE_DESC od;
      PTR dis_info;
      long value;
@@ -97,7 +97,7 @@ print_reglist_hi (od, dis_info, value, attrs, pc, length)
 }
 
 static void
-print_reglist_low (od, dis_info, value, attrs, pc, length)
+print_low_register_list (od, dis_info, value, attrs, pc, length)
      CGEN_OPCODE_DESC od;
      PTR dis_info;
      long value;
@@ -262,14 +262,14 @@ fr30_cgen_extract_operand (od, opindex, ex_info, insn_value, fields, pc)
       {
         long value;
         length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), pc, & value);
-        value = ((((value) << (1))) + (((pc) & (-2))));
+        value = ((((value) << (1))) + (((pc) + (2))));
         fields->f_rel9 = value;
       }
       break;
     case FR30_OPERAND_LABEL12 :
       {
         long value;
-        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 5, 11, CGEN_FIELDS_BITSIZE (fields), pc, & value);
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 5, 11, CGEN_FIELDS_BITSIZE (fields), pc, & value);
         value = ((((value) << (1))) + (((pc) & (-2))));
         fields->f_rel12 = value;
       }
@@ -408,13 +408,13 @@ fr30_cgen_print_operand (od, opindex, info, fields, attrs, pc, length)
       print_normal (od, info, fields->f_rel9, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
     case FR30_OPERAND_LABEL12 :
-      print_normal (od, info, fields->f_rel12, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      print_normal (od, info, fields->f_rel12, 0|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
     case FR30_OPERAND_REGLIST_LOW :
-      print_reglist_low (od, info, fields->f_reglist_low, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      print_low_register_list (od, info, fields->f_reglist_low, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
     case FR30_OPERAND_REGLIST_HI :
-      print_reglist_hi (od, info, fields->f_reglist_hi, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      print_hi_register_list (od, info, fields->f_reglist_hi, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
     case FR30_OPERAND_CC :
       print_normal (od, info, fields->f_cc, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);

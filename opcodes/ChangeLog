@@ -1,4 +1,12 @@
 start-sanitize-fr30
+Thu Nov 26 11:26:32 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* fr30-asm.c,fr30-dis.c,fr30-opc.c: Regenerated.
+
+Tue Nov 24 11:20:54 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* fr30-asm.c,fr30-dis.c: Regenerated.
+
 Mon Nov 23 18:28:48 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* fr30-asm.c,fr30-dis.c,fr30-opc.c,fr30-opc.h: Regenerated.

@@ -57,7 +57,7 @@ static const char * insert_insn_normal
 /* Handle register lists for LDMx and STMx  */
 
 static const char *
-parse_reglist_low (od, strp, opindex, valuep)
+parse_low_register_list (od, strp, opindex, valuep)
      CGEN_OPCODE_DESC od;
      const char **strp;
      int opindex;
@@ -76,13 +76,13 @@ parse_reglist_low (od, strp, opindex, valuep)
 }
 
 static const char *
-parse_reglist_hi (od, strp, opindex, valuep)
+parse_hi_register_list (od, strp, opindex, valuep)
      CGEN_OPCODE_DESC od;
      const char **strp;
      int opindex;
      unsigned long *valuep;
 {
-  return parse_reglist_low (od, strp, opindex, valuep);
+  return parse_low_register_list (od, strp, opindex, valuep);
 }
 
 /* -- */
@@ -194,16 +194,16 @@ fr30_cgen_parse_operand (od, opindex, strp, fields)
       errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_DIR10, &fields->f_dir10);
       break;
     case FR30_OPERAND_LABEL9 :
-      errmsg = cgen_parse_signed_integer (od, strp, FR30_OPERAND_LABEL9, &fields->f_rel9);
+      errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_LABEL9, &fields->f_rel9);
       break;
     case FR30_OPERAND_LABEL12 :
       errmsg = cgen_parse_signed_integer (od, strp, FR30_OPERAND_LABEL12, &fields->f_rel12);
       break;
     case FR30_OPERAND_REGLIST_LOW :
-      errmsg = parse_reglist_low (od, strp, FR30_OPERAND_REGLIST_LOW, &fields->f_reglist_low);
+      errmsg = parse_low_register_list (od, strp, FR30_OPERAND_REGLIST_LOW, &fields->f_reglist_low);
       break;
     case FR30_OPERAND_REGLIST_HI :
-      errmsg = parse_reglist_hi (od, strp, FR30_OPERAND_REGLIST_HI, &fields->f_reglist_hi);
+      errmsg = parse_hi_register_list (od, strp, FR30_OPERAND_REGLIST_HI, &fields->f_reglist_hi);
       break;
     case FR30_OPERAND_CC :
       errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_CC, &fields->f_cc);
@@ -364,7 +364,7 @@ fr30_cgen_insert_operand (od, opindex, fields, buffer, pc)
     case FR30_OPERAND_LABEL9 :
       {
         long value = fields->f_rel9;
-        value = ((int) (((value) - (((pc) & (-2))))) >> (1));
+        value = ((int) (((value) - (((pc) + (2))))) >> (1));
         errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
       }
       break;
@@ -372,7 +372,7 @@ fr30_cgen_insert_operand (od, opindex, fields, buffer, pc)
       {
         long value = fields->f_rel12;
         value = ((int) (((value) - (((pc) & (-2))))) >> (1));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 5, 11, CGEN_FIELDS_BITSIZE (fields), buffer);
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 5, 11, CGEN_FIELDS_BITSIZE (fields), buffer);
       }
       break;
     case FR30_OPERAND_REGLIST_LOW :
