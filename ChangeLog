@@ -1,3 +1,8 @@
+Tue Apr 22 17:17:28 1997  Geoffrey Noer  <noer@pizza.cygnus.com>
+
+	* configure.in: if target is cygwin32 but host isn't cygwin32,
+	don't configure gdb tcl tk expect, not just gdb.
+
 Mon Apr 21 13:33:39 1997  Tom Tromey  <tromey@cygnus.com>
 
 	* configure.in: Added gnuserv everywhere sn appears.

@@ -463,8 +463,8 @@ case "${target}" in
 
     # Can't build gdb for cygwin32 if not native.
     case "${host}" in
-      *-*-cygwin32) ;; # keep gdb
-      *) noconfigdirs="$noconfigdirs gdb"
+      *-*-cygwin32) ;; # keep gdb tcl tk expect
+      *) noconfigdirs="$noconfigdirs gdb tcl tk expect"
     esac
     ;;    
   i[3456]86-*-pe)
