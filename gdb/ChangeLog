@@ -1,5 +1,13 @@
 2002-05-09  Jim Blandy  <jimb@redhat.com>
 
+	Properly track the size of the current objfile's .debug_line section.
+	* dwarf2read.c (struct dwarf2_pinfo): New member: dwarf_line_size.
+	(DWARF_LINE_SIZE): New macro.
+	(dwarf2_build_psymtabs_hard): Record the line section's size in
+	the partial symbol table.
+	(psymtab_to_symtab_1): Restore dwarf_line_size from the partial
+	symbol table.
+
 	Teach the Dwarf 2 reader to read macro information.
 	* dwarf2read.c: #include "macrotab.h".
 	(dwarf_macinfo_buffer): New variable.
