@@ -7706,6 +7706,13 @@ note_register_values (idesc)
       clear_qp_implies (~qp_safe_across_calls, ~qp_safe_across_calls);
       clear_qp_branch_flag (~qp_safe_across_calls);
     }
+  else if (is_interruption_or_rfi (idesc)
+           || is_taken_branch (idesc))
+    {
+      clear_register_values ();
+      clear_qp_mutex (~(valueT)0);
+      clear_qp_implies (~(valueT)0, ~(valueT)0);
+    }
   /* Look for mutex and implies relations */
   else if ((idesc->operands[0] == IA64_OPND_P1 
             || idesc->operands[0] == IA64_OPND_P2)
@@ -8324,9 +8331,6 @@ update_dependencies (idesc)
          which require a srlz.[id], we don't follow the branch; the next
          instruction is assumed to start with a clean slate */
       regdepslen = 0;
-      clear_register_values ();
-      clear_qp_mutex (~(valueT)0);
-      clear_qp_implies (~(valueT)0, ~(valueT)0);
       md.path = 0;
     }
   else if (is_conditional_branch (idesc)
