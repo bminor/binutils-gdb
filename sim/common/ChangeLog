@@ -1,3 +1,7 @@
+2000-03-13  Jeff Johnston <jjohnstn@cygnus.com>
+
+	* cgen-ops.h: Added TRUNCSISI.
+
 2000-03-08  Dave Brolley  <brolley@redhat.com>
 
 	* cgen-par.h (cgen_write_queue_kind): Add CGEN_FN_SF_WRITE.
