@@ -180,6 +180,12 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 	$(srcdir)/../../move-if-change tmp-irun.c irun.c
 	touch tmp-igen
 
+semantics.o: sim-main.h $(SIM_EXTRA_DEPS)
+engine.o: sim-main.h $(SIM_EXTRA_DEPS)
+support.o: sim-main.h $(SIM_EXTRA_DEPS)
+idecode.o: sim-main.h $(SIM_EXTRA_DEPS)
+itable.o: sim-main.h $(SIM_EXTRA_DEPS)
+
 
 
 SIM_M16_ALL = tmp-igen $(SIM_M16_ALL) 

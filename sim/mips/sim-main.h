@@ -22,8 +22,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SIM_MAIN_H
 
 /* This simulator doesn't cache the Current Instruction Address */
-#define SIM_ENGINE_HALT_HOOK(SD, LAST_CPU, CIA)
-#define SIM_ENGINE_RESUME_HOOK(SD, LAST_CPU, CIA)
+/* #define SIM_ENGINE_HALT_HOOK(SD, LAST_CPU, CIA) */
+/* #define SIM_ENGINE_RESUME_HOOK(SD, LAST_CPU, CIA) */
 
 #define SIM_HAVE_BIENDIAN
 
@@ -99,11 +99,11 @@ typedef enum {
  fmt_uninterpreted = 0x20000000,
 } FP_formats;
 
-unsigned64 value_fpr PARAMS ((SIM_DESC sd, int fpr, FP_formats));
-#define ValueFPR(FPR,FMT) value_fpr (sd, (FPR), (FMT))
+unsigned64 value_fpr PARAMS ((SIM_DESC sd, address_word cia, int fpr, FP_formats));
+#define ValueFPR(FPR,FMT) value_fpr (sd, cia, (FPR), (FMT))
 
-void store_fpr PARAMS ((SIM_DESC sd, int fpr, FP_formats fmt, unsigned64 value));
-#define StoreFPR(FPR,FMT,VALUE) store_fpr (sd, (FPR), (FMT), (VALUE))
+void store_fpr PARAMS ((SIM_DESC sd, address_word cia, int fpr, FP_formats fmt, unsigned64 value));
+#define StoreFPR(FPR,FMT,VALUE) store_fpr (sd, cia, (FPR), (FMT), (VALUE))
 
 int NaN PARAMS ((unsigned64 op, FP_formats fmt));
 int Infinity PARAMS ((unsigned64 op, FP_formats fmt));
@@ -117,8 +117,8 @@ unsigned64 Multiply PARAMS ((unsigned64 op1, unsigned64 op2, FP_formats fmt));
 unsigned64 Divide PARAMS ((unsigned64 op1, unsigned64 op2, FP_formats fmt));
 unsigned64 Recip PARAMS ((unsigned64 op, FP_formats fmt));
 unsigned64 SquareRoot PARAMS ((unsigned64 op, FP_formats fmt));
-unsigned64 convert PARAMS ((SIM_DESC sd, int rm, unsigned64 op, FP_formats from, FP_formats to));
-#define Convert(rm,op,from,to) convert(sd,rm,op,from,to)
+unsigned64 convert PARAMS ((SIM_DESC sd, address_word cia, int rm, unsigned64 op, FP_formats from, FP_formats to));
+#define Convert(rm,op,from,to) convert(sd,cia,rm,op,from,to)
 
 /* Macro to update FPSR condition-code field. This is complicated by
    the fact that there is a hole in the index range of the bits within
@@ -295,7 +295,6 @@ struct _sim_cpu {
 
 
   /* The following are internal simulator state variables: */
-  sim_cia cia;
 #define CPU_CIA(CPU) (PC)
   address_word ipc; /* internal Instruction PC */
   address_word dspc;  /* delay-slot PC */
@@ -309,17 +308,17 @@ struct _sim_cpu {
     address_word target = (TARGET); \
     instruction_word delay_insn; \
     sim_events_slip (sd, 1); \
-    PC = CIA + 4; \
+    CIA = CIA + 4; \
     STATE |= simDELAYSLOT; \
-    delay_insn = IMEM (PC); \
-    idecode_issue (sd, delay_insn, (PC)); \
-    STATE &= !simDELAYSLOT; \
-    PC = target; \
+    delay_insn = IMEM (CIA); \
+    idecode_issue (sd, delay_insn, (CIA)); \
+    STATE &= ~simDELAYSLOT; \
+    NIA = target; \
   } while (0)
 #define NULLIFY_NEXT_INSTRUCTION() \
   do { \
     sim_events_slip (sd, 1); \
-    NIA = CIA + 4; \
+    NIA = CIA + 8; \
   } while (0)
 
 
@@ -629,32 +628,32 @@ struct sim_state {
    run-time errors in the simulator. */
 #define SimulatorFault      (0xFFFFFFFF)
 
-void signal_exception (SIM_DESC sd, int exception, ...);
-#define SignalException(exc,instruction) signal_exception (sd, (exc), (instruction))
-#define SignalExceptionInterrupt() signal_exception (sd, Interrupt)
-#define SignalExceptionInstructionFetch() signal_exception (sd, InstructionFetch)
-#define SignalExceptionAddressStore() signal_exception (sd, AddressStore)
-#define SignalExceptionAddressLoad() signal_exception (sd, AddressLoad)
-#define SignalExceptionSimulatorFault(buf) signal_exception (sd, SimulatorFault, buf)
-#define SignalExceptionFPE() signal_exception (sd, FPE)
-#define SignalExceptionIntegerOverflow() signal_exception (sd, IntegerOverflow)
-#define SignalExceptionCoProcessorUnusable() signal_exception (sd, CoProcessorUnusable)
+void signal_exception (SIM_DESC sd, address_word cia, int exception, ...);
+#define SignalException(exc,instruction)     signal_exception (sd, cia, (exc), (instruction))
+#define SignalExceptionInterrupt()           signal_exception (sd, NULL_CIA, Interrupt)
+#define SignalExceptionInstructionFetch()    signal_exception (sd, cia, InstructionFetch)
+#define SignalExceptionAddressStore()        signal_exception (sd, cia, AddressStore)
+#define SignalExceptionAddressLoad()         signal_exception (sd, cia, AddressLoad)
+#define SignalExceptionSimulatorFault(buf)   signal_exception (sd, cia, SimulatorFault, buf)
+#define SignalExceptionFPE()                 signal_exception (sd, cia, FPE)
+#define SignalExceptionIntegerOverflow()     signal_exception (sd, cia, IntegerOverflow)
+#define SignalExceptionCoProcessorUnusable() signal_exception (sd, cia, CoProcessorUnusable)
 
 
 /* Co-processor accesses */
 
-void cop_lw  PARAMS ((SIM_DESC sd, int coproc_num, int coproc_reg, unsigned int memword));
-void cop_ld  PARAMS ((SIM_DESC sd, int coproc_num, int coproc_reg, uword64 memword));
-unsigned int cop_sw PARAMS ((SIM_DESC sd, int coproc_num, int coproc_reg));
-uword64 cop_sd PARAMS ((SIM_DESC sd, int coproc_num, int coproc_reg));
+void cop_lw  PARAMS ((SIM_DESC sd, address_word cia, int coproc_num, int coproc_reg, unsigned int memword));
+void cop_ld  PARAMS ((SIM_DESC sd, address_word cia, int coproc_num, int coproc_reg, uword64 memword));
+unsigned int cop_sw PARAMS ((SIM_DESC sd, address_word cia, int coproc_num, int coproc_reg));
+uword64 cop_sd PARAMS ((SIM_DESC sd, address_word cia, int coproc_num, int coproc_reg));
 
-#define COP_LW(coproc_num,coproc_reg,memword) cop_lw(sd,coproc_num,coproc_reg,memword)
-#define COP_LD(coproc_num,coproc_reg,memword) cop_ld(sd,coproc_num,coproc_reg,memword)
-#define COP_SW(coproc_num,coproc_reg) cop_sw(sd,coproc_num,coproc_reg)
-#define COP_SD(coproc_num,coproc_reg) cop_sd(sd,coproc_num,coproc_reg)
+#define COP_LW(coproc_num,coproc_reg,memword) cop_lw(sd,cia,coproc_num,coproc_reg,memword)
+#define COP_LD(coproc_num,coproc_reg,memword) cop_ld(sd,cia,coproc_num,coproc_reg,memword)
+#define COP_SW(coproc_num,coproc_reg) cop_sw(sd,cia,coproc_num,coproc_reg)
+#define COP_SD(coproc_num,coproc_reg) cop_sd(sd,cia,coproc_num,coproc_reg)
 
-void decode_coproc PARAMS ((SIM_DESC sd,unsigned int instruction));
-#define DecodeCoproc(instruction) decode_coproc(sd, (instruction))
+void decode_coproc PARAMS ((SIM_DESC sd, address_word cia, unsigned int instruction));
+#define DecodeCoproc(instruction) decode_coproc(sd, cia, (instruction))
 
 
 
@@ -691,29 +690,29 @@ void decode_coproc PARAMS ((SIM_DESC sd,unsigned int instruction));
 #define AccessLength_DOUBLEWORD (7)
 #define AccessLength_QUADWORD   (15)
 
-int address_translation PARAMS ((SIM_DESC sd, address_word vAddr, int IorD, int LorS, address_word *pAddr, int *CCA, int raw));
+int address_translation PARAMS ((SIM_DESC sd, address_word cia, address_word vAddr, int IorD, int LorS, address_word *pAddr, int *CCA, int raw));
 #define AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw) \
-address_translation(sd, vAddr,IorD,LorS,pAddr,CCA,raw)
+address_translation(sd,cia,vAddr,IorD,LorS,pAddr,CCA,raw)
 
-void load_memory PARAMS ((SIM_DESC sd, uword64* memvalp, uword64* memval1p, int CCA, int AccessLength, address_word pAddr, address_word vAddr, int IorD));
+void load_memory PARAMS ((SIM_DESC sd, address_word cia, uword64* memvalp, uword64* memval1p, int CCA, int AccessLength, address_word pAddr, address_word vAddr, int IorD));
 #define LoadMemory(memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw) \
-load_memory(sd,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD)
+load_memory(sd,cia,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD)
 
-void store_memory PARAMS ((SIM_DESC sd, int CCA, int AccessLength, uword64 MemElem, uword64 MemElem1, address_word pAddr, address_word vAddr));
+void store_memory PARAMS ((SIM_DESC sd, address_word cia, int CCA, int AccessLength, uword64 MemElem, uword64 MemElem1, address_word pAddr, address_word vAddr));
 #define StoreMemory(CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw) \
-store_memory(sd,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr)
+store_memory(sd,cia,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr)
 
-void cache_op PARAMS ((SIM_DESC sd, int op, address_word pAddr, address_word vAddr, unsigned int instruction));
-#define CacheOp(op,pAddr,vAddr,instruction) cache_op(sd,op,pAddr,vAddr,instruction)
+void cache_op PARAMS ((SIM_DESC sd, address_word cia, int op, address_word pAddr, address_word vAddr, unsigned int instruction));
+#define CacheOp(op,pAddr,vAddr,instruction) cache_op(sd,cia,op,pAddr,vAddr,instruction)
 
-void sync_operation PARAMS ((SIM_DESC sd, int stype));
-#define SyncOperation(stype) sync_operation (sd, (stype))
+void sync_operation PARAMS ((SIM_DESC sd, address_word cia, int stype));
+#define SyncOperation(stype) sync_operation (sd, cia, (stype))
 
-void prefetch PARAMS ((SIM_DESC sd, int CCA, address_word pAddr, address_word vAddr, int DATA, int hint));
-#define Prefetch(CCA,pAddr,vAddr,DATA,hint) prefetch(sd,CCA,pAddr,vAddr,DATA,hint)
+void prefetch PARAMS ((SIM_DESC sd, address_word cia, int CCA, address_word pAddr, address_word vAddr, int DATA, int hint));
+#define Prefetch(CCA,pAddr,vAddr,DATA,hint) prefetch(sd,cia,CCA,pAddr,vAddr,DATA,hint)
 
-unsigned32 ifetch32 PARAMS ((SIM_DESC sd, address_word cia));
-#define IMEM(CIA) ifetch32 (SD, (CIA))
+unsigned32 ifetch32 PARAMS ((SIM_DESC sd, address_word cia, address_word vaddr));
+#define IMEM(CIA) ifetch32 (SD, (CIA), (CIA))
 
 
 #endif

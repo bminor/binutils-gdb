@@ -1,3 +1,36 @@
+Thu Nov  6 16:36:35 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (signal_exception, store_word, load_word,
+ 	address_translation, load_memory, store_memory, cache_op,
+ 	prefetch, sync_operation, ifetch, value_fpr, store_fpr, convert,
+ 	cop_lw, cop_ld, cop_sw, cop_sd, decode_coproc): Add current
+ 	instruction address - cia - argument.
+	(sim_read, sim_write): Call address_translation directly.
+	(sim_engine_run): Rename variable vaddr to cia.
+
+	* sim-main.h (SignalException, LoadWord, StoreWord, CacheOp,
+ 	Prefetch, SyncOperation, ValueFPR, StoreFPR, Convert, COP_LW,
+ 	COP_LD, COP_SW, COP_SD, DecodeCoproc): Update.
+
+	* sim-main.h (SignalExceptionSimulatorFault): Delete definition.
+  	* interp.c (sim_open): Replace SignalExceptionSimulatorFault with
+ 	SIM_ASSERT.
+	
+	* interp.c (signal_exception): Pass restart address to
+ 	sim_engine_restart.
+
+	* Makefile.in (semantics.o, engine.o, support.o, itable.o,
+ 	idecode.o): Add dependency.
+
+	* sim-main.h (SIM_ENGINE_HALT_HOOK, SIM_ENGINE_RESUME_HOOK):
+ 	Delete definitions
+	(DELAY_SLOT): Update NIA not PC with branch address.
+	(NULLIFY_NEXT_INSTRUCTION): Set NIA to instruction after next.
+
+	* mips.igen: Use CIA not PC in branch calculations.
+	(illegal): Call SignalException.
+ 	(BEQ, ADDIU): Fix assembler.
+
 Wed Nov  5 12:19:56 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* m16.igen (JALX): Was missing.

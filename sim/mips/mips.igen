@@ -50,16 +50,15 @@
 // Pseudo instructions known by IGEN
 :internal::::illegal:
 {
-  sim_io_eprintf (SD, "Illegal instruction at address 0x%lx\n",
-		  (unsigned long) CIA);
-  sim_engine_halt (SD, CPU, NULL, cia, sim_signalled, SIGILL);
+  /* FIXME: This ifetch causes a double count of a fetch at CIA */
+  SignalException (ReservedInstruction, IMEM (CIA));
 }
 
 
 
 
 //
-// MIPS Architecture:
+// Mips Architecture:
 //
 //        CPU Instruction Set (mipsI - mipsIV)
 //
@@ -112,7 +111,7 @@
 
 
 001001,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ADDIU
-"add r<RT>, r<RS>, IMMEDIATE"
+"add r<RT>, r<RS>, <IMMEDIATE>"
 *mipsI:
 *mipsII:
 *mipsIII:
@@ -196,7 +195,7 @@
 
 
 000100,5.RS,5.RT,16.OFFSET:NORMAL:32::BEQ
-"beq r<RS>, r<RT>, OFFSET"
+"beq r<RS>, r<RT>, <OFFSET>"
 *mipsI:
 *mipsII:
 *mipsIII:
@@ -214,7 +213,7 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   if (GPR[RS] == GPR[RT])
-    DELAY_SLOT (PC + offset);
+    DELAY_SLOT (CIA + offset);
 }
 
 
@@ -236,7 +235,7 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   if (GPR[RS] == GPR[RT])
-    DELAY_SLOT (PC + offset);
+    DELAY_SLOT (CIA + offset);
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -261,7 +260,7 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   if (GPR[RS] >= 0)
-    DELAY_SLOT (PC + offset);
+    DELAY_SLOT (CIA + offset);
 }
 
 
@@ -285,7 +284,7 @@
   address_word offset = EXTEND16 (OFFSET) << 2;
   RA = (CIA + 8);
   if (GPR[RS] >= 0)
-    DELAY_SLOT (PC + offset);
+    DELAY_SLOT (CIA + offset);
 }
 
 
@@ -310,7 +309,7 @@
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
   if (GPR[RS] >= 0)
-    DELAY_SLOT (PC + offset);
+    DELAY_SLOT (CIA + offset);
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -334,7 +333,7 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   if (GPR[RS] >= 0)
-    DELAY_SLOT (PC + offset);
+    DELAY_SLOT (CIA + offset);
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -359,7 +358,7 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   if (GPR[RS] > 0)
-    DELAY_SLOT (PC + offset);
+    DELAY_SLOT (CIA + offset);
 }
 
 
@@ -383,7 +382,7 @@
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
   if (GPR[RS] > 0)
-    DELAY_SLOT (PC + offset);
+    DELAY_SLOT (CIA + offset);
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -410,7 +409,7 @@
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
   if (GPR[RS] <= 0)
-    DELAY_SLOT (PC + offset);
+    DELAY_SLOT (CIA + offset);
 }
 
 
@@ -432,7 +431,7 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   if (GPR[RS] <= 0)
-    DELAY_SLOT (PC + offset);
+    DELAY_SLOT (CIA + offset);
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -457,7 +456,7 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   if (GPR[RS] < 0)
-    DELAY_SLOT (PC + offset);
+    DELAY_SLOT (CIA + offset);
 }
 
 
@@ -483,7 +482,7 @@
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
   if (GPR[RS] < 0)
-    DELAY_SLOT (PC + offset);
+    DELAY_SLOT (CIA + offset);
 }
 
 
@@ -506,7 +505,7 @@
   address_word offset = EXTEND16 (OFFSET) << 2;
   RA = (CIA + 8);
   if (GPR[RS] < 0)
-    DELAY_SLOT (PC + offset);
+    DELAY_SLOT (CIA + offset);
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -532,7 +531,7 @@
   /* NOTE: The branch occurs AFTER the next instruction has been
      executed */
   if (GPR[RS] < 0)
-    DELAY_SLOT (PC + offset);
+    DELAY_SLOT (CIA + offset);
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -557,7 +556,7 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   if (GPR[RS] != GPR[RT])
-    DELAY_SLOT (PC + offset);
+    DELAY_SLOT (CIA + offset);
 }
 
 
@@ -579,7 +578,7 @@
 {
   address_word offset = EXTEND16 (OFFSET) << 2;
   if (GPR[RS] != GPR[RT])
-    DELAY_SLOT (PC + offset);
+    DELAY_SLOT (CIA + offset);
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
@@ -3554,7 +3553,7 @@
       int condition = (PREVCOC1() == boolean);
       /* NOTE: The branch occurs AFTER the next instruction has been executed */
       if (condition) {
-	DELAY_SLOT (PC + offset);
+	DELAY_SLOT (CIA + offset);
       }
       else if (likely) {
 	NULLIFY_NEXT_INSTRUCTION ();

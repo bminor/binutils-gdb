@@ -319,10 +319,8 @@ sim_open (kind, cb, abfd, argv)
 
   /* verify assumptions the simulator made about the host type system.
      This macro does not return if there is a problem */
-  if (sizeof(int) != (4 * sizeof(char)))
-    SignalExceptionSimulatorFault ("sizeof(int) != 4");
-  if (sizeof(word64) != (8 * sizeof(char)))
-    SignalExceptionSimulatorFault ("sizeof(word64) != 8");
+  SIM_ASSERT (sizeof(int) == (4 * sizeof(char)));
+  SIM_ASSERT (sizeof(word64) == (8 * sizeof(char)));
 
 #if defined(HASFPU)
   /* Check that the host FPU conforms to IEEE 754-1985 for the SINGLE
@@ -507,7 +505,7 @@ sim_write (sd,addr,buffer,size)
       address_word vaddr = (address_word)addr + index;
       address_word paddr;
       int cca;
-      if (!AddressTranslation (vaddr, isDATA, isSTORE, &paddr, &cca, isTARGET, isRAW))
+      if (!address_translation (sd, NULL_CIA, vaddr, isDATA, isSTORE, &paddr, &cca, isRAW))
 	break;
       if (sim_core_write_buffer (sd, NULL, sim_core_read_map, buffer + index, paddr, 1) != 1)
 	break;
@@ -535,7 +533,7 @@ sim_read (sd,addr,buffer,size)
       address_word vaddr = (address_word)addr + index;
       address_word paddr;
       int cca;
-      if (!AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &cca, isTARGET, isRAW))
+      if (!address_translation (sd, NULL_CIA, vaddr, isDATA, isLOAD, &paddr, &cca, isRAW))
 	break;
       if (sim_core_read_buffer (sd, NULL, sim_core_read_map, buffer + index, paddr, 1) != 1)
 	break;
@@ -937,8 +935,9 @@ sim_monitor(sd,reason)
 /* Store a word into memory.  */
 
 static void
-store_word (sd, vaddr, val)
+store_word (sd, cia, vaddr, val)
      SIM_DESC sd;
+     address_word cia;
      uword64 vaddr;
      t_reg val;
 {
@@ -968,8 +967,9 @@ store_word (sd, vaddr, val)
 /* Load a word from memory.  */
 
 static t_reg
-load_word (sd, vaddr)
+load_word (sd, cia, vaddr)
      SIM_DESC sd;
+     address_word cia;
      uword64 vaddr;
 {
   if ((vaddr & 3) != 0)
@@ -1219,8 +1219,9 @@ ColdReset (sd)
    function raises an exception and does not return. */
 
 int
-address_translation(sd,vAddr,IorD,LorS,pAddr,CCA,raw)
+address_translation(sd,cia,vAddr,IorD,LorS,pAddr,CCA,raw)
      SIM_DESC sd;
+     address_word cia;
      address_word vAddr;
      int IorD;
      int LorS;
@@ -1254,8 +1255,9 @@ address_translation(sd,vAddr,IorD,LorS,pAddr,CCA,raw)
    program, or alter architecturally-visible state. */
 
 void 
-prefetch(sd,CCA,pAddr,vAddr,DATA,hint)
+prefetch(sd,cia,CCA,pAddr,vAddr,DATA,hint)
      SIM_DESC sd;
+     address_word cia;
      int CCA;
      address_word pAddr;
      address_word vAddr;
@@ -1287,8 +1289,9 @@ prefetch(sd,CCA,pAddr,vAddr,DATA,hint)
    satisfy a load reference. At a minimum, the block is the entire
    memory element. */
 void
-load_memory(sd,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD)
+load_memory(sd,cia,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD)
      SIM_DESC sd;
+     address_word cia;
      uword64* memvalp;
      uword64* memval1p;
      int CCA;
@@ -1417,8 +1420,9 @@ load_memory(sd,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD)
    will be changed. */
 
 void
-store_memory(sd,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr)
+store_memory(sd,cia,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr)
      SIM_DESC sd;
+     address_word cia;
      int CCA;
      int AccessLength;
      uword64 MemElem;
@@ -1513,7 +1517,9 @@ store_memory(sd,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr)
 
 
 unsigned32
-ifetch32 (SIM_DESC sd, address_word vaddr)
+ifetch32 (SIM_DESC sd,
+	  address_word cia,
+	  address_word vaddr)
 {
   /* Copy the action of the LW instruction */
   address_word reverse = (ReverseEndian ? (LOADDRMASK >> 2) : 0);
@@ -1538,8 +1544,9 @@ ifetch32 (SIM_DESC sd, address_word vaddr)
    loads and stores indicated by stype occur in the same order for all
    processors. */
 void
-sync_operation(sd,stype)
+sync_operation(sd,cia,stype)
      SIM_DESC sd;
+     address_word cia;
      int stype;
 {
 #ifdef DEBUG
@@ -1554,7 +1561,9 @@ sync_operation(sd,stype)
    will never see a return from this function call. */
 
 void
-signal_exception (SIM_DESC sd, int exception,...)
+signal_exception (SIM_DESC sd,
+		  address_word cia,
+		  int exception,...)
 {
   int vector;
 
@@ -1630,22 +1639,24 @@ signal_exception (SIM_DESC sd, int exception,...)
           space with suitable instruction values. For systems were
           actual trap instructions are used, we would not need to
           perform this magic. */
-       if ((instruction & RSVD_INSTRUCTION_MASK) == RSVD_INSTRUCTION) {
-         sim_monitor(sd, ((instruction >> RSVD_INSTRUCTION_ARG_SHIFT) & RSVD_INSTRUCTION_ARG_MASK) );
-         PC = RA; /* simulate the return from the vector entry */
-         /* NOTE: This assumes that a branch-and-link style
-            instruction was used to enter the vector (which is the
-            case with the current IDT monitor). */
-	 sim_engine_restart (sd, STATE_CPU (sd, 0), NULL, NULL_CIA);
-       }
+       if ((instruction & RSVD_INSTRUCTION_MASK) == RSVD_INSTRUCTION)
+	 {
+	   sim_monitor(sd, ((instruction >> RSVD_INSTRUCTION_ARG_SHIFT) & RSVD_INSTRUCTION_ARG_MASK) );
+	   /* NOTE: This assumes that a branch-and-link style
+	      instruction was used to enter the vector (which is the
+	      case with the current IDT monitor). */
+	   sim_engine_restart (sd, STATE_CPU (sd, 0), NULL, RA);
+	 }
        /* Look for the mips16 entry and exit instructions, and
           simulate a handler for them.  */
        else if ((IPC & 1) != 0
 		&& (instruction & 0xf81f) == 0xe809
-		&& (instruction & 0x0c0) != 0x0c0) {
-	 mips16_entry (instruction);
-	 sim_engine_restart (sd, STATE_CPU (sd, 0), NULL, NULL_CIA);
-       } /* else fall through to normal exception processing */
+		&& (instruction & 0x0c0) != 0x0c0)
+	 {
+	   mips16_entry (instruction);
+	   sim_engine_restart (sd, NULL, NULL, NULL_CIA);
+	 }
+       /* else fall through to normal exception processing */
        sim_io_eprintf(sd,"ReservedInstruction 0x%08X at IPC = 0x%s\n",instruction,pr_addr(IPC));
      }
 
@@ -1663,7 +1674,7 @@ signal_exception (SIM_DESC sd, int exception,...)
 	va_end(ap);
 	/* Check for our special terminating BREAK: */
 	if ((instruction & 0x03FFFFC0) == 0x03ff0000) {
-	  sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
+	  sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, cia,
 			   sim_exited, (unsigned int)(A0 & 0xFFFFFFFF));
 	}
       }
@@ -1795,8 +1806,9 @@ UndefinedResult()
 #endif /* WARN_RESULT */
 
 void
-cache_op(sd,op,pAddr,vAddr,instruction)
+cache_op(sd,cia,op,pAddr,vAddr,instruction)
      SIM_DESC sd;
+     address_word cia;
      int op;
      address_word pAddr;
      address_word vAddr;
@@ -1930,8 +1942,9 @@ cache_op(sd,op,pAddr,vAddr,instruction)
 #endif /* DEBUG */
 
 uword64
-value_fpr(sd,fpr,fmt)
+value_fpr(sd,cia,fpr,fmt)
      SIM_DESC sd;
+     address_word cia;
      int fpr;
      FP_formats fmt;
 {
@@ -2034,8 +2047,9 @@ value_fpr(sd,fpr,fmt)
 }
 
 void
-store_fpr(sd,fpr,fmt,value)
+store_fpr(sd,cia,fpr,fmt,value)
      SIM_DESC sd;
+     address_word cia;
      int fpr;
      FP_formats fmt;
      uword64 value;
@@ -2586,8 +2600,9 @@ SquareRoot(op,fmt)
 }
 
 uword64
-convert(sd,rm,op,from,to)
+convert(sd,cia,rm,op,from,to)
      SIM_DESC sd;
+     address_word cia;
      int rm;
      uword64 op;
      FP_formats from; 
@@ -2803,8 +2818,9 @@ CoProcPresent(coproc_number)
 }
 
 void
-cop_lw(sd,coproc_num,coproc_reg,memword)
+cop_lw(sd,cia,coproc_num,coproc_reg,memword)
      SIM_DESC sd;
+     address_word cia;
      int coproc_num, coproc_reg;
      unsigned int memword;
 {
@@ -2830,8 +2846,9 @@ cop_lw(sd,coproc_num,coproc_reg,memword)
 }
 
 void
-cop_ld(sd,coproc_num,coproc_reg,memword)
+cop_ld(sd,cia,coproc_num,coproc_reg,memword)
      SIM_DESC sd;
+     address_word cia;
      int coproc_num, coproc_reg;
      uword64 memword;
 {
@@ -2853,8 +2870,9 @@ cop_ld(sd,coproc_num,coproc_reg,memword)
 }
 
 unsigned int
-cop_sw(sd,coproc_num,coproc_reg)
+cop_sw(sd,cia,coproc_num,coproc_reg)
      SIM_DESC sd;
+     address_word cia;
      int coproc_num, coproc_reg;
 {
   unsigned int value = 0;
@@ -2894,8 +2912,9 @@ cop_sw(sd,coproc_num,coproc_reg)
 }
 
 uword64
-cop_sd(sd,coproc_num,coproc_reg)
+cop_sd(sd,cia,coproc_num,coproc_reg)
      SIM_DESC sd;
+     address_word cia;
      int coproc_num, coproc_reg;
 {
   uword64 value = 0;
@@ -2928,8 +2947,9 @@ cop_sd(sd,coproc_num,coproc_reg)
 }
 
 void
-decode_coproc(sd,instruction)
+decode_coproc(sd,cia,instruction)
      SIM_DESC sd;
+     address_word cia;
      unsigned int instruction;
 {
   int coprocnum = ((instruction >> 26) & 3);
@@ -3113,8 +3133,10 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
 
   /* main controlling loop */
   while (1) {
-    /* Fetch the next instruction from the simulator memory: */
-    address_word vaddr = (uword64)PC;
+    /* vaddr is slowly being replaced with cia - current instruction
+       address */
+    address_word cia = (uword64)PC;
+    address_word vaddr = cia;
     address_word paddr;
     int cca;
     unsigned int instruction;	/* uword64? what's this used for?  FIXME! */
@@ -3134,7 +3156,8 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
      sim_io_printf(sd,"DBG: DSPC = 0x%s\n",pr_addr(DSPC));
 #endif /* DEBUG */
 
-    if (AddressTranslation(PC,isINSTRUCTION,isLOAD,&paddr,&cca,isTARGET,isREAL)) {
+    /* Fetch the next instruction from the simulator memory: */
+    if (AddressTranslation(cia,isINSTRUCTION,isLOAD,&paddr,&cca,isTARGET,isREAL)) {
       if ((vaddr & 1) == 0) {
 	/* Copy the action of the LW instruction */
 	unsigned int reverse = (ReverseEndian ? (LOADDRMASK >> 2) : 0);
