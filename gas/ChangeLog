@@ -3,6 +3,8 @@ Fri Mar  6 11:36:37 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/tc-dvp.c (s_endgif): Fix nloop calc and test.  Warn if
 	insufficient data present.  Fix insertion of computed nloop value.
+	(install_vif_length): Second pass at unpack len calcs.
+	(s_endunpack): Round data up to word boundary.
 
 end-sanitize-sky
 start-sanitize-vr4320

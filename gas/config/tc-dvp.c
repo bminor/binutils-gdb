@@ -1692,6 +1692,8 @@ cur_vif_insn_length ()
   int byte_len;
   fragS *f;
 
+  /* FIXME: A better and less fragile way would be to use eval_expr.  */
+
   if (cur_varlen_frag == frag_now)
     byte_len = frag_more (0) - cur_varlen_insn - 4; /* -4 for mpg itself */
   else
@@ -1740,11 +1742,19 @@ install_vif_length (buf, len)
   else if ((cmd & 0x60) == 0x60)
     {
       /* unpack */
-      /* FIXME: revisit */
-      /* ??? Worry about data /= 16 cuts off?  */
-      len /= 16;
+      /* Round up to a word boundary.  */
+      len = (len + 3) & ~3;
+      /* Compute value to insert.  */
+      len = vif_unpack_len_value (cmd & 15, len);
+      /* -1 is returned if wl,cl are unknown and thus we can't compute
+	 a useful value */
+      if (len == -1)
+	{
+	  as_bad ("missing `stcycle', can't compute length of `unpack' insn");
+	  len = 1;
+	}
       if (len > 256)
-	as_bad ("`direct' data length must be between 1 and 256");
+	as_bad ("`unpack' data length must be between 1 and 256");
       len = len == 256 ? 0 : len;
       buf[2] = len;
     }
@@ -2088,10 +2098,15 @@ s_endunpack (ignore)
     }
 
   byte_len = cur_vif_insn_length ();
+  /* Round up to next word boundary.  */
+  if (byte_len % 4)
+    frag_align (2, 0, 0);
+
 #if 0 /* unpack doesn't support prespecifying a length */
   if (cur_varlen_value * 16 != bytelen)
     as_warn ("length in `direct' instruction does not match length of data");
 #endif
+
   if (output_vif)
     install_vif_length (cur_varlen_insn, byte_len);
 
