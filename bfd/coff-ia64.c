@@ -52,6 +52,8 @@ static reloc_howto_type howto_table[] =
 /* Return true if this relocation should
    appear in the output .reloc section.  */
 
+static boolean in_reloc_p PARAMS ((bfd *, reloc_howto_type *));
+
 static boolean
 in_reloc_p(abfd, howto)
      bfd * abfd ATTRIBUTE_UNUSED;
@@ -62,6 +64,8 @@ in_reloc_p(abfd, howto)
 #endif
 
 #include "coffcode.h"
+
+static const bfd_target *ia64coff_object_p PARAMS ((bfd *));
 
 static const bfd_target *
 ia64coff_object_p (abfd)

@@ -161,6 +161,8 @@ static boolean is_unwind_section_name
   PARAMS ((const char *));
 static boolean elfNN_ia64_section_from_shdr
   PARAMS ((bfd *, ElfNN_Internal_Shdr *, char *));
+static boolean elfNN_ia64_section_flags
+  PARAMS ((flagword *, ElfNN_Internal_Shdr *));
 static boolean elfNN_ia64_fake_sections
   PARAMS ((bfd *abfd, ElfNN_Internal_Shdr *hdr, asection *sec));
 static void elfNN_ia64_final_write_processing
@@ -179,6 +181,8 @@ static boolean elfNN_ia64_aix_link_add_symbols
   PARAMS ((bfd *abfd, struct bfd_link_info *info));
 static int elfNN_ia64_additional_program_headers
   PARAMS ((bfd *abfd));
+static boolean elfNN_ia64_modify_segment_map
+  PARAMS ((bfd *));
 static boolean elfNN_ia64_is_local_label_name
   PARAMS ((bfd *abfd, const char *name));
 static boolean elfNN_ia64_dynamic_symbol_p
@@ -192,11 +196,19 @@ static struct bfd_hash_entry *elfNN_ia64_new_loc_hash_entry
 static struct bfd_hash_entry *elfNN_ia64_new_elf_hash_entry
   PARAMS ((struct bfd_hash_entry *entry, struct bfd_hash_table *table,
 	   const char *string));
+static void elfNN_ia64_hash_copy_indirect
+  PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
+static void elfNN_ia64_hash_hide_symbol
+  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static struct bfd_link_hash_table *elfNN_ia64_hash_table_create
   PARAMS ((bfd *abfd));
 static struct elfNN_ia64_local_hash_entry *elfNN_ia64_local_hash_lookup
   PARAMS ((struct elfNN_ia64_local_hash_table *table, const char *string,
 	   boolean create, boolean copy));
+static boolean elfNN_ia64_global_dyn_sym_thunk
+  PARAMS ((struct bfd_hash_entry *, PTR));
+static boolean elfNN_ia64_local_dyn_sym_thunk
+  PARAMS ((struct bfd_hash_entry *, PTR));
 static void elfNN_ia64_dyn_sym_traverse
   PARAMS ((struct elfNN_ia64_link_hash_table *ia64_info,
 	   boolean (*func) (struct elfNN_ia64_dyn_sym_info *, PTR),
@@ -265,6 +277,8 @@ static bfd_vma set_pltoff_entry
   PARAMS ((bfd *abfd, struct bfd_link_info *info,
 	   struct elfNN_ia64_dyn_sym_info *dyn_i,
 	   bfd_vma value, boolean));
+static int elfNN_ia64_unwind_entry_compare
+  PARAMS ((const PTR, const PTR));
 static boolean elfNN_ia64_final_link
   PARAMS ((bfd *abfd, struct bfd_link_info *info));
 static boolean elfNN_ia64_relocate_section
@@ -1723,7 +1737,8 @@ get_dyn_sym_info (ia64_info, h, abfd, rel, create)
       len += 10;	/* %p slop */
 
       addr_name = alloca (len);
-      sprintf (addr_name, "%p:%lx", (void *) abfd, ELFNN_R_SYM (rel->r_info));
+      sprintf (addr_name, "%p:%lx",
+	       (void *) abfd, (unsigned long) ELFNN_R_SYM (rel->r_info));
 
       /* Collect the canonical entry data for this address.  */
       loc_h = elfNN_ia64_local_hash_lookup (&ia64_info->loc_hash_table,
@@ -3188,8 +3203,8 @@ static bfd *elfNN_ia64_unwind_entry_compare_bfd;
 
 static int
 elfNN_ia64_unwind_entry_compare (a, b)
-     PTR a;
-     PTR b;
+     const PTR a;
+     const PTR b;
 {
   bfd_vma av, bv;
 

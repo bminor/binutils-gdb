@@ -1,5 +1,27 @@
 2001-08-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* coffcode.h (coff_write_object_contents): Add ATTRIBUTE_UNUSED to
+	silence warning.
+	* coffgen.c (coff_print_symbol): Fix warnings.
+	(coff_find_nearest_line): Likewise.
+	* cofflink.c (_bfd_coff_link_input_bfd): Likewise.
+	* coff-alpha.c (alpha_convert_external_reloc): Likewise.
+	* format.c (bfd_check_format_matches): Likewise.
+	(bfd_set_format): Likewise.
+	* coff-ia64.c: Add missing prototypes.
+	* elf64-alpha.c (struct alpha_elf_link_hash_entry): Make addend
+	signed to silence warnings.
+	(elf64_alpha_relocate_section): Likewise.
+	(elf64_alpha_find_reloc_at_ofs): Fix warnings.
+	(elf64_alpha_add_symbol_hook): Likewise.
+	(elf64_alpha_final_link): Likewise.
+	(elf64_alpha_relax_section): Remove redundant assign to info.gotent.
+	(elf64_alpha_merge_gots): Add ATTRIBUTE_UNUSED to unused args.
+	(elf64_alpha_size_got_sections): Likewise.
+	* elfxx-ia64.c: Add missing prototypes.
+	(elfNN_ia64_relocate_section): Fix warning.
+	(elfNN_ia64_unwind_entry_compare): Make params const.
+
 	* config.bfd (targ64_selvecs): New.
 	<powerpc-*-aix* entry>: Use it here instead of ineffectual #ifdef.
 

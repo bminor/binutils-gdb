@@ -2106,16 +2106,18 @@ coff_print_symbol (abfd, filep, symbol, how)
 		case C_EXT:
 		  if (ISFCN (combined->u.syment.n_type))
 		    {
+		      long next, llnos;
+
+		      if (auxp->fix_end)
+			next = (auxp->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p
+			       - root);
+		      else
+			next = auxp->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l;
+		      llnos = auxp->u.auxent.x_sym.x_fcnary.x_fcn.x_lnnoptr;
 		      fprintf (file,
 			       _("AUX tagndx %ld ttlsiz 0x%lx lnnos %ld next %ld"),
-			       tagndx,
-			       auxp->u.auxent.x_sym.x_misc.x_fsize,
-			       auxp->u.auxent.x_sym.x_fcnary.x_fcn.x_lnnoptr,
-			       (auxp->fix_end
-				? ((long)
-				   (auxp->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p
-				    - root))
-				: auxp->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l));
+			       tagndx, auxp->u.auxent.x_sym.x_misc.x_fsize,
+			       llnos, next);
 		      break;
 		    }
 		  /* else fall through */
@@ -2280,7 +2282,7 @@ coff_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 
 	  /* Avoid endless loops on erroneous files by ensuring that
 	     we always move forward in the file.  */
-	  if (p - cof->raw_syments >= p->u.syment.n_value)
+	  if (p >= cof->raw_syments + p->u.syment.n_value)
 	    break;
 
 	  p = cof->raw_syments + p->u.syment.n_value;

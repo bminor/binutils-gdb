@@ -1334,7 +1334,7 @@ alpha_convert_external_reloc (output_bfd, info, input_bfd, ext_rel, h)
 	  break;
 	}
 
-      if (r_symndx == -1)
+      if (r_symndx == (unsigned long) -1)
 	abort ();
 
       /* Add the section VMA and the symbol value.  */
@@ -1347,7 +1347,7 @@ alpha_convert_external_reloc (output_bfd, info, input_bfd, ext_rel, h)
       /* Change the symndx value to the right one for
 	 the output BFD.  */
       r_symndx = h->indx;
-      if (r_symndx == -1)
+      if (r_symndx == (unsigned long) -1)
 	{
 	  /* Caller must give an error.  */
 	  r_symndx = 0;

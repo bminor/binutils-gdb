@@ -125,8 +125,7 @@ bfd_check_format_matches (abfd, format, matching)
   int ar_match_index;
 
   if (!bfd_read_p (abfd)
-      || abfd->format < bfd_unknown
-      || abfd->format >= bfd_type_end)
+      || (unsigned int) abfd->format >= (unsigned int) bfd_type_end)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return false;
@@ -348,8 +347,7 @@ bfd_set_format (abfd, format)
      bfd_format format;
 {
   if (bfd_read_p (abfd)
-      || abfd->format < bfd_unknown
-      || abfd->format >= bfd_type_end)
+      || (unsigned int) abfd->format >= (unsigned int) bfd_type_end)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return false;

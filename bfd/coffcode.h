@@ -326,7 +326,7 @@ static boolean coff_set_flags
 static boolean coff_set_arch_mach
   PARAMS ((bfd *, enum bfd_architecture, unsigned long));
 static boolean coff_compute_section_file_positions PARAMS ((bfd *));
-static boolean coff_write_object_contents PARAMS ((bfd *));
+static boolean coff_write_object_contents PARAMS ((bfd *)) ATTRIBUTE_UNUSED;
 static boolean coff_set_section_contents
   PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
 static PTR buy_and_read PARAMS ((bfd *, file_ptr, int, size_t));

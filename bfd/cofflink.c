@@ -1829,7 +1829,7 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 		 have to write the symbol out twice.  */
 
 	      if (finfo->last_file_index != -1
-		  && finfo->last_file.n_value != (long) output_index)
+		  && finfo->last_file.n_value != (bfd_vma) output_index)
 		{
 		  /* We must correct the value of the last C_FILE
                      entry.  */
