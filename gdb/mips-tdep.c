@@ -185,6 +185,8 @@ mips_xfer_register (struct regcache *regcache, int reg_num, int length,
 {
   bfd_byte *reg = alloca (MAX_REGISTER_RAW_SIZE);
   int reg_offset = 0;
+  /* Need to transfer the left or right part of the register, based on
+     the targets byte order.  */
   switch (endian)
     {
     case BFD_ENDIAN_BIG:
@@ -200,14 +202,15 @@ mips_xfer_register (struct regcache *regcache, int reg_num, int length,
       internal_error (__FILE__, __LINE__, "bad switch");
     }
   if (mips_debug)
-    fprintf_unfiltered (gdb_stderr, "xfer $%d[%d..%d] ",
-			reg_num, reg_offset, reg_offset + length);
+    fprintf_unfiltered (gdb_stderr,
+			"xfer $%d, reg offset %d, buf offset %d, length %d, ",
+			reg_num, reg_offset, buf_offset, length);
   if (mips_debug && out != NULL)
     {
       int i;
-      fprintf_unfiltered (gdb_stdlog, "out: ");
+      fprintf_unfiltered (gdb_stdlog, "out ");
       for (i = 0; i < length; i++)
-	fprintf_unfiltered (gdb_stdlog, "%02x", out[i]);
+	fprintf_unfiltered (gdb_stdlog, "%02x", out[buf_offset + i]);
     }
   if (in != NULL)
     regcache_raw_read_part (regcache, reg_num, reg_offset, length, in + buf_offset);
@@ -216,9 +219,9 @@ mips_xfer_register (struct regcache *regcache, int reg_num, int length,
   if (mips_debug && in != NULL)
     {
       int i;
-      fprintf_unfiltered (gdb_stdlog, "in: ");
+      fprintf_unfiltered (gdb_stdlog, "in ");
       for (i = 0; i < length; i++)
-	fprintf_unfiltered (gdb_stdlog, "%02x", in[i]);
+	fprintf_unfiltered (gdb_stdlog, "%02x", in[buf_offset + i]);
     }
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog, "\n");
@@ -4542,25 +4545,6 @@ mips_eabi_extract_return_value (struct type *valtype,
 }
 
 static void
-mips_o32_extract_return_value (struct type *valtype,
-				char regbuf[REGISTER_BYTES],
-				char *valbuf)
-{
-  struct return_value_word lo;
-  struct return_value_word hi;
-  return_value_location (valtype, &hi, &lo);
-
-  memcpy (valbuf + lo.buf_offset,
-	  regbuf + REGISTER_BYTE (lo.reg) + lo.reg_offset,
-	  lo.len);
-
-  if (hi.len > 0)
-    memcpy (valbuf + hi.buf_offset,
-	    regbuf + REGISTER_BYTE (hi.reg) + hi.reg_offset,
-	    hi.len);
-}
-
-static void
 mips_o64_extract_return_value (struct type *valtype,
 			       char regbuf[REGISTER_BYTES],
 			       char *valbuf)
@@ -4607,30 +4591,6 @@ mips_eabi_store_return_value (struct type *valtype, char *valbuf)
 }
 
 static void
-mips_o32_store_return_value (struct type *valtype, char *valbuf)
-{
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
-  struct return_value_word lo;
-  struct return_value_word hi;
-  return_value_location (valtype, &hi, &lo);
-
-  memset (raw_buffer, 0, sizeof (raw_buffer));
-  memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
-  write_register_bytes (REGISTER_BYTE (lo.reg),
-			raw_buffer,
-			REGISTER_RAW_SIZE (lo.reg));
-
-  if (hi.len > 0)
-    {
-      memset (raw_buffer, 0, sizeof (raw_buffer));
-      memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
-      write_register_bytes (REGISTER_BYTE (hi.reg),
-			    raw_buffer,
-			    REGISTER_RAW_SIZE (hi.reg));
-    }
-}
-
-static void
 mips_o64_store_return_value (struct type *valtype, char *valbuf)
 {
   char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
@@ -4653,6 +4613,149 @@ mips_o64_store_return_value (struct type *valtype, char *valbuf)
 			    REGISTER_RAW_SIZE (hi.reg));
     }
 }
+
+/* O32 ABI stuff.  */
+
+static void
+mips_o32_xfer_return_value (struct type *type,
+			    struct regcache *regcache,
+			    bfd_byte *in, const bfd_byte *out)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  if (TYPE_CODE (type) == TYPE_CODE_FLT
+      && TYPE_LENGTH (type) == 4
+      && tdep->mips_fpu_type != MIPS_FPU_NONE)
+    {
+      /* A single-precision floating-point value.  It fits in the
+         least significant part of FP0.  */
+      if (mips_debug)
+	fprintf_unfiltered (gdb_stderr, "Return float in $fp0\n");
+      mips_xfer_register (regcache, FP0_REGNUM, TYPE_LENGTH (type),
+			  TARGET_BYTE_ORDER, in, out, 0);
+    }
+  else if (TYPE_CODE (type) == TYPE_CODE_FLT
+	   && TYPE_LENGTH (type) == 8
+	   && tdep->mips_fpu_type != MIPS_FPU_NONE)
+    {
+      /* A double-precision floating-point value.  It fits in the
+         least significant part of FP0/FP1 but with byte ordering
+         based on the target (???).  */
+      if (mips_debug)
+	fprintf_unfiltered (gdb_stderr, "Return float in $fp0/$fp1\n");
+      switch (TARGET_BYTE_ORDER)
+	{
+	case BFD_ENDIAN_LITTLE:
+	  mips_xfer_register (regcache, FP0_REGNUM + 0, 4,
+			      TARGET_BYTE_ORDER, in, out, 0);
+	  mips_xfer_register (regcache, FP0_REGNUM + 1, 4,
+			      TARGET_BYTE_ORDER, in, out, 4);
+	  break;
+	case BFD_ENDIAN_BIG:
+	  mips_xfer_register (regcache, FP0_REGNUM + 1, 4,
+			      TARGET_BYTE_ORDER, in, out, 0);
+	  mips_xfer_register (regcache, FP0_REGNUM + 0, 4,
+			      TARGET_BYTE_ORDER, in, out, 4);
+	  break;
+	default:
+	  internal_error (__FILE__, __LINE__, "bad switch");
+	}
+    }
+#if 0
+  else if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	   && TYPE_NFIELDS (type) <= 2
+	   && TYPE_NFIELDS (type) >= 1
+	   && ((TYPE_NFIELDS (type) == 1
+		&& (TYPE_CODE (TYPE_FIELD_TYPE (type, 0))
+		    == TYPE_CODE_FLT))
+	       || (TYPE_NFIELDS (type) == 2
+		   && (TYPE_CODE (TYPE_FIELD_TYPE (type, 0))
+		       == TYPE_CODE_FLT)
+		   && (TYPE_CODE (TYPE_FIELD_TYPE (type, 1))
+		       == TYPE_CODE_FLT)))
+	   && tdep->mips_fpu_type != MIPS_FPU_NONE)
+    {
+      /* A struct that contains one or two floats.  Each value is part
+         in the least significant part of their floating point
+         register..  */
+      bfd_byte *reg = alloca (MAX_REGISTER_RAW_SIZE);
+      int regnum;
+      int field;
+      for (field = 0, regnum = FP0_REGNUM;
+	   field < TYPE_NFIELDS (type);
+	   field++, regnum += 2)
+	{
+	  int offset = (FIELD_BITPOS (TYPE_FIELDS (type)[field])
+			/ TARGET_CHAR_BIT);
+	  if (mips_debug)
+	    fprintf_unfiltered (gdb_stderr, "Return float struct+%d\n", offset);
+	  mips_xfer_register (regcache, regnum, TYPE_LENGTH (TYPE_FIELD_TYPE (type, field)),
+			      TARGET_BYTE_ORDER, in, out, offset);
+	}
+    }
+#endif
+#if 0
+  else if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	   || TYPE_CODE (type) == TYPE_CODE_UNION)
+    {
+      /* A structure or union.  Extract the left justified value,
+         regardless of the byte order.  I.e. DO NOT USE
+         mips_xfer_lower.  */
+      int offset;
+      int regnum;
+      for (offset = 0, regnum = V0_REGNUM;
+	   offset < TYPE_LENGTH (type);
+	   offset += REGISTER_RAW_SIZE (regnum), regnum++)
+	{
+	  int xfer = REGISTER_RAW_SIZE (regnum);
+	  if (offset + xfer > TYPE_LENGTH (type))
+	    xfer = TYPE_LENGTH (type) - offset;
+	  if (mips_debug)
+	    fprintf_unfiltered (gdb_stderr, "Return struct+%d:%d in $%d\n",
+				offset, xfer, regnum);
+	  mips_xfer_register (regcache, regnum, xfer, BFD_ENDIAN_UNKNOWN,
+			      in, out, offset);
+	}
+    }
+#endif
+  else
+    {
+      /* A scalar extract each part but least-significant-byte
+         justified.  o32 thinks registers are 4 byte, regardless of
+         the ISA.  mips_stack_argsize controls this.  */
+      int offset;
+      int regnum;
+      for (offset = 0, regnum = V0_REGNUM;
+	   offset < TYPE_LENGTH (type);
+	   offset += mips_stack_argsize (), regnum++)
+	{
+	  int xfer = mips_stack_argsize ();
+	  int pos = 0;
+	  if (offset + xfer > TYPE_LENGTH (type))
+	    xfer = TYPE_LENGTH (type) - offset;
+	  if (mips_debug)
+	    fprintf_unfiltered (gdb_stderr, "Return scalar+%d:%d in $%d\n",
+				offset, xfer, regnum);
+	  mips_xfer_register (regcache, regnum, xfer, TARGET_BYTE_ORDER,
+			      in, out, offset);
+	}
+    }
+}
+
+static void
+mips_o32_extract_return_value (struct type *type,
+			       struct regcache *regcache,
+			       char *valbuf)
+{
+  mips_o32_xfer_return_value (type, regcache, valbuf, NULL); 
+}
+
+static void
+mips_o32_store_return_value (struct type *type, char *valbuf)
+{
+  mips_o32_xfer_return_value (type, current_regcache, NULL, valbuf); 
+}
+
+/* N32/N44 ABI stuff.  */
 
 static void
 mips_n32n64_xfer_return_value (struct type *type,
@@ -5570,7 +5673,7 @@ mips_gdbarch_init (struct gdbarch_info info,
     case MIPS_ABI_O32:
       set_gdbarch_push_arguments (gdbarch, mips_o32_push_arguments);
       set_gdbarch_store_return_value (gdbarch, mips_o32_store_return_value);
-      set_gdbarch_deprecated_extract_return_value (gdbarch, mips_o32_extract_return_value);
+      set_gdbarch_extract_return_value (gdbarch, mips_o32_extract_return_value);
       tdep->mips_default_saved_regsize = 4;
       tdep->mips_default_stack_argsize = 4;
       tdep->mips_fp_register_double = 0;
