@@ -1,3 +1,10 @@
+2000-06-25  Alexander Aganichev <AAganichev@hypercom.com>
+
+	* ar.c (normalize): Advance past both characters in a DOS based
+	<letter>: filepath prefix.
+	(main): Likewise.
+	* bucomm.c (make_tempname): Likewise.
+
 2000-06-24  Nick Clifton  <nickc@cygnus.com>
 
 	* objdump.c (usage): Fix description of --stabs switch.
