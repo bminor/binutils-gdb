@@ -1,3 +1,8 @@
+Mon Feb 27 11:56:32 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* monitor.c: General gcc -Wall lint cleanup and reformat.
+	(monitor_command): If no args, send an empty command.
+
 Thu Feb 23 21:07:25 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* monitor.c (monitor_load_ascii_srec):  Add a one second sleep
