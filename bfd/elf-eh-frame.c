@@ -919,14 +919,23 @@ _bfd_elf_write_section_eh_frame (abfd, sec, ehdrsec, contents)
 	{
 	  if (sec_info->entry[i].cie)
 	    {
-	      cie_offset = sec_info->entry[i].new_offset;
-	      cie_offset += (sec_info->entry[i].sec->output_section->vma
-			     + sec_info->entry[i].sec->output_offset
-			     - sec->output_section->vma
-			     - sec->output_offset);
+	      /* If CIE is removed due to no remaining FDEs referencing it
+		 and there were no CIEs kept before it, sec_info->entry[i].sec
+		 will be zero.  */
+	      if (sec_info->entry[i].sec == NULL)
+		cie_offset = 0;
+	      else
+		{
+		  cie_offset = sec_info->entry[i].new_offset;
+		  cie_offset += (sec_info->entry[i].sec->output_section->vma
+				 + sec_info->entry[i].sec->output_offset
+				 - sec->output_section->vma
+				 - sec->output_offset);
+		}
 	    }
 	  continue;
 	}
+
       if (sec_info->entry[i].cie)
 	{
 	  /* CIE */

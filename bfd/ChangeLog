@@ -1,3 +1,8 @@
+2002-01-04  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame): Don't crash if
+	CIE at .eh_frame start is removed due to no FDEs referencing it.
+
 2002-01-04  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* config.bfd (x86_64-*-netbsd*): New target.
