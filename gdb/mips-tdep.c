@@ -1442,6 +1442,7 @@ mips32_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
   CORE_ADDR cur_pc;
   CORE_ADDR frame_addr = 0; /* Value of $r30. Used by gcc for frame-pointer */
 restart:
+  memset (&temp_saved_regs, '\0', sizeof(struct frame_saved_regs));
   PROC_FRAME_OFFSET(&temp_proc_desc) = 0;
   PROC_FRAME_ADJUST (&temp_proc_desc) = 0;	/* offset of FP from SP */
   for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS_INSTLEN)
@@ -1990,13 +1991,15 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 		     It does not seem to be necessary to do the
 		     same for integral types.
 
-		     Also don't do this adjustment on EABI targets.  */
+		     Also don't do this adjustment on EABI and O64
+		     binaries. */
 
-		  if (!MIPS_EABI &&
-		      TARGET_BYTE_ORDER == BIG_ENDIAN &&
-		      partial_len < MIPS_REGSIZE &&
-		      (typecode == TYPE_CODE_STRUCT ||
-		       typecode == TYPE_CODE_UNION))
+		  if (!MIPS_EABI
+		      && (MIPS_REGSIZE < 8)
+		      && TARGET_BYTE_ORDER == BIG_ENDIAN
+		      && (partial_len < MIPS_REGSIZE)
+		      && (typecode == TYPE_CODE_STRUCT ||
+			  typecode == TYPE_CODE_UNION))
 		    regval <<= ((MIPS_REGSIZE - partial_len) * 
 				TARGET_CHAR_BIT);
 

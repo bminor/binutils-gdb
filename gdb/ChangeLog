@@ -1,4 +1,13 @@
+Sat Dec 19 09:55:09 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
+
+	* mips-tdep.c (mips32_heuristic_proc_desc):  Clear temp_saved_regs
+	on restart.  Fixes problem with backtracing through functions that
+	use virtual frame pointers.
+
 Fri Dec 18 14:23:34 1998  Andrew Cagney  <cagney@chook>
+
+	* mips-tdep.c (mips_push_arguments): Don't left-shift small
+ 	structs being passed in a register when an O64 target.
 
 	* config/mips/tm-mips.h (enum mips_fpu_type, mips_fpu): Move to
  	mips-tdep.c.
