@@ -1,3 +1,7 @@
+Fri Jun 17 11:16:50 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* elf32-hppa.h (elf_hppa_final_processing): Delete decl.
+
 Thu Jun 16 23:36:23 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* elfcode.h (elf_link_input_bfd): Don't try to read local symbols
