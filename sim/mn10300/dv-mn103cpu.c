@@ -255,13 +255,19 @@ deliver_mn103cpu_interrupt (struct hw *me,
 		 (long) CIA_GET (cpu), (unsigned) PSW, (long) SP));
     }
 
-  /* As long as there is the potential need to deliver an interrupt we
-     keep rescheduling this routine. */
   if (controller->pending_level < 7) /* FIXME */
     {
+      /* As long as there is the potential need to deliver an
+	 interrupt we keep rescheduling this routine. */
       if (controller->pending_handler != NULL)
 	controller->pending_handler =
 	  hw_event_queue_schedule (me, 1, deliver_mn103cpu_interrupt, NULL);
+    }
+  else
+    {
+      /* Don't bother re-scheduling the interrupt handler as there is
+         nothing to deliver */
+      controller->pending_handler = NULL;
     }
 
 }

@@ -1,3 +1,9 @@
+Fri Mar 27 00:56:40 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* dv-mn103cpu.c (deliver_mn103cpu_interrupt): Stop loss of
+ 	succeeding interrupts, clear pending_handler when the handler
+ 	isn't re-scheduled.
+
 Thu Mar 26 10:11:01 1998  Stu Grossman  <grossman@bhuna.cygnus.co.uk>
 
 	* Makefile.in (tmp-igen):  Prefix all usage of move-if-change
