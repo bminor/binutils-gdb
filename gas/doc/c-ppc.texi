@@ -15,6 +15,7 @@
 @cindex PowerPC support
 @menu
 * PowerPC-Opts::                Options
+* PowerPC-Pseudo::              PowerPC Assembler Directives
 @end menu
 
 @node PowerPC-Opts
@@ -104,4 +105,22 @@ Generate code for Solaris.
 
 @item -mno-solaris
 Do not generate code for Solaris.
+@end table
+
+
+@node PowerPC-Pseudo
+@section PowerPC Assembler Directives
+
+@cindex directives for PowerPC
+@cindex PowerPC directives
+A number of assembler directives are available for PowerPC.  The
+following table is far from complete.
+
+@table @code
+@item .machine "string"
+This directive allows you to change the machine for which code is
+generated.  @code{"string"} may be any of the -m cpu selection options
+(without the -m) enclosed in double quotes, @code{"push"}, or
+@code{"pop"}.  @code{.machine "push"} saves the currently selected
+cpu, which may be restored with @code{.machine "pop"}.
 @end table

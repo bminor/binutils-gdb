@@ -1,5 +1,7 @@
 2003-11-22  Alan Modra  <amodra@bigpond.net.au>
 
+	* doc/c-ppc.texi (PowerPC-Pseudo): Add section.
+
 	* app.c (do_scrub_chars): Revert 2003-04-23 and 2003-04-22.
 
 2003-11-21  Kazu Hirata  <kazu@cs.umass.edu>
