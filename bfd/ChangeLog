@@ -1,8 +1,3 @@
-Fri Jun  4 13:16:15 1993  Stu Grossman  (grossman@cygnus.com)
-
-	* Sony News config stuff from Jyrki Kuoppala <jkp@cs.hut.fi>.
-	* hosts/news.h, config/news.mh:  New configs for Sony News hosts.
-
 Fri Jun  4 07:49:01 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure.in (mips-*-ecoffl*): New target; use decstation.
