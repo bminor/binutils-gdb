@@ -471,9 +471,9 @@ gld${EMULATION_NAME}_add_sysroot (path)
   while (path[i])
     if (path[i] == ':')
       {
+        *p++ = path[i++];
 	strcpy (p, ld_sysroot);
 	p = p + strlen (p);
-	i++;
       }
     else
       *p++ = path[i++];
