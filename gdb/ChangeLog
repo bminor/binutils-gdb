@@ -1,3 +1,8 @@
+2001-12-18  Jim Blandy  <jimb@redhat.com>
+
+	* Makefile.in (c-exp.tab.o): Delete duplicate build rule.  Fix
+ 	dependency list on remaining build rule.
+
 2001-12-18  Martin M. Hunt  <hunt@redhat.com>
 
 	* ser-tcp.c (tcp_open): Disable Nagle algorithm which

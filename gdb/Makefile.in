@@ -1055,10 +1055,6 @@ version.c: Makefile version.in
 	mv version.c-tmp version.c
 version.o: version.c $(version_h)
 
-c-exp.tab.o: c-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
-	$(value_h) $(parser_defs_h) $(language_h) c-lang.h $(bfd_h) \
-	$(symfile_h) $(objfiles_h)
-
 # c-exp.tab.c is generated in objdir from c-exp.y if it doesn't exist
 # in srcdir, then compiled in objdir to c-exp.tab.o.
 
@@ -2176,9 +2172,9 @@ z8k-tdep.o: z8k-tdep.c $(bfd_h) $(dis_asm_h) $(defs_h) $(frame_h) \
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
 		$(srcdir)/z8k-tdep.c
 
-c-exp.tab.o: c-exp.tab.c $(c_lang_h) $(defs_h) $(expression_h) \
-	$(gdbtypes_h) $(language_h) $(parser_defs_h) $(symtab_h) $(value_h) \
-	$(bfd_h) $(objfiles_h) $(symfile_h)
+c-exp.tab.o: c-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
+	$(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) $(bfd_h) \
+	$(symfile_h) $(objfiles_h)
 
 jv-exp.tab.o: jv-exp.tab.c jv-lang.h $(defs_h) $(expression_h) \
 	$(gdbtypes_h) $(language_h) $(parser_defs_h) $(symtab_h) $(value_h) \
