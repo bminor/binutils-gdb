@@ -1,3 +1,10 @@
+2004-05-08  Andrew Cagney  <cagney@redhat.com>
+
+	* ns32k-tdep.c (ns32k_gdbarch_init): Do not set deprecated
+	pc_in_call_dummy.
+	* inferior.h (deprecated_pc_in_call_dummy_on_stack): Delete.
+	* blockframe.c (deprecated_pc_in_call_dummy_on_stack): Delete.
+
 2004-05-08  Mark Kettenis  <kettenis@gnu.org>
 
 	* alphanbsd-tdep.c: Include "gdb_string.h".

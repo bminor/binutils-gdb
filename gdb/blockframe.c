@@ -519,33 +519,6 @@ block_innermost_frame (struct block *block)
    below is for infrun.c, which may give the macro a pc without that
    subtracted out.  */
 
-/* Is the PC in a call dummy?  SP and FRAME_ADDRESS are the bottom and
-   top of the stack frame which we are checking, where "bottom" and
-   "top" refer to some section of memory which contains the code for
-   the call dummy.  Calls to this macro assume that the contents of
-   SP_REGNUM and DEPRECATED_FP_REGNUM (or the saved values thereof),
-   respectively, are the things to pass.
-
-   This won't work on the 29k, where SP_REGNUM and
-   DEPRECATED_FP_REGNUM don't have that meaning, but the 29k doesn't
-   use ON_STACK.  This could be fixed by generalizing this scheme,
-   perhaps by passing in a frame and adding a few fields, at least on
-   machines which need them for DEPRECATED_PC_IN_CALL_DUMMY.
-
-   Something simpler, like checking for the stack segment, doesn't work,
-   since various programs (threads implementations, gcc nested function
-   stubs, etc) may either allocate stack frames in another segment, or
-   allocate other kinds of code on the stack.  */
-
-int
-deprecated_pc_in_call_dummy_on_stack (CORE_ADDR pc, CORE_ADDR sp,
-				      CORE_ADDR frame_address)
-{
-  return (INNER_THAN ((sp), (pc))
-	  && (frame_address != 0)
-	  && INNER_THAN ((pc), (frame_address)));
-}
-
 /* Returns true for a user frame or a call_function_by_hand dummy
    frame, and false for the CRT0 start-up frame.  Purpose is to
    terminate backtrace.  */
