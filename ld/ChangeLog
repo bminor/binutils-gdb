@@ -1,3 +1,8 @@
+Thu Feb  9 18:29:43 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (distclean): Do recursive deletion, since ldscripts
+	is a directory.
+
 Thu Feb  9 11:38:22 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldmain.c (main): If trace_file_tries is true, and we are using
