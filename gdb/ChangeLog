@@ -1,3 +1,7 @@
+2002-04-28  Michal Ludvig  <mludvig@suse.cz>
+
+	* x86-64-tdep.c (x86_64_skip_prologue): Reformulated message.
+
 2002-04-26  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-tdep.c (x86_64_skip_prologue): Print note when debugging
