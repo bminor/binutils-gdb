@@ -1,5 +1,11 @@
 2004-06-21  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbarch.sh (read): Delete "print_p" and "description", add
+	"garbage_at_eol".  Check for non-empty garbage at end-of-line.
+	Delete references to print_p.
+	(TARGET_ARCHITECTURE): Delete print predicate.
+	* gdbarch.c: Re-generate.
+	
 	* gdbarch.sh: Check that multi-arch methods do not provide a
 	macro.
 	(register_type, unwind_dummy_id, push_dummy_call, push_dummy_code)

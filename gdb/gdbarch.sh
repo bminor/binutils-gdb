@@ -44,7 +44,7 @@ compare_new ()
 
 
 # Format of the input table
-read="class macro returntype function formal actual attrib staticdefault predefault postdefault invalid_p fmt print print_p description"
+read="class macro returntype function formal actual attrib staticdefault predefault postdefault invalid_p fmt print garbage_at_eol"
 
 do_read ()
 {
@@ -74,6 +74,13 @@ ${line}"
 ${line}
 EOF
 	    IFS="${OFS}"
+
+	    if test -n "${garbage_at_eol}"
+	    then
+		echo "Garbage at end-of-line in ${line}" 1>&2
+		kill $$
+		exit 1
+	    fi
 
 	    # .... and then going back through each field and strip out those
 	    # that ended up with just that space character.
@@ -360,20 +367,9 @@ do
 
 	# If PRINT is empty, ``(long)'' is used.
 
-    print_p ) : ;;
+    garbage_at_eol ) : ;;
 
-	# An optional indicator for any predicte to wrap around the
-	# print member code.
-
-	#   () -> Call a custom function to do the dump.
-	#   exp -> Wrap print up in ``if (${print_p}) ...
-	#   ``'' -> No predicate
-
-	# If PRINT_P is empty, ``1'' is always used.
-
-    description ) : ;;
-
-	# Currently unused.
+	# Catches stray fields.
 
     *)
 	echo "Bad field ${field}"
@@ -386,7 +382,7 @@ function_list ()
 {
   # See below (DOCO) for description of each field
   cat <<EOF
-i:TARGET_ARCHITECTURE:const struct bfd_arch_info *:bfd_arch_info::::&bfd_default_arch_struct::::%s:TARGET_ARCHITECTURE->printable_name:TARGET_ARCHITECTURE != NULL
+i:TARGET_ARCHITECTURE:const struct bfd_arch_info *:bfd_arch_info::::&bfd_default_arch_struct::::%s:TARGET_ARCHITECTURE->printable_name
 #
 i:TARGET_BYTE_ORDER:int:byte_order::::BFD_ENDIAN_BIG
 #
@@ -1592,19 +1588,7 @@ do
 	printf "                      \"gdbarch_dump: ${macro} # %%s\\\\n\",\n"
 	printf "                      XSTRING (${macro}));\n"
     fi
-    if [ "x${print_p}" = "x()" ]
-    then
-        printf "  gdbarch_dump_${function} (current_gdbarch);\n"
-    elif [ "x${print_p}" = "x0" ]
-    then
-        printf "  /* skip print of ${macro}, print_p == 0. */\n"
-    elif [ -n "${print_p}" ]
-    then
-        printf "  if (${print_p})\n"
-	printf "    fprintf_unfiltered (file,\n"
-	printf "                        \"gdbarch_dump: ${macro} = %s\\\\n\",\n" "${fmt}"
-	printf "                        ${print});\n"
-    elif class_is_function_p
+    if class_is_function_p
     then
 	printf "  fprintf_unfiltered (file,\n"
 	printf "                      \"gdbarch_dump: ${macro} = <0x%%08lx>\\\\n\",\n"

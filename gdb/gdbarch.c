@@ -770,10 +770,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_ARCHITECTURE # %s\n",
                       XSTRING (TARGET_ARCHITECTURE));
-  if (TARGET_ARCHITECTURE != NULL)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: TARGET_ARCHITECTURE = %s\n",
-                        TARGET_ARCHITECTURE->printable_name);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_ARCHITECTURE = %s\n",
+                      TARGET_ARCHITECTURE->printable_name);
 #endif
 #ifdef TARGET_BFD_VMA_BIT
   fprintf_unfiltered (file,
