@@ -1777,9 +1777,6 @@ get_machine_flags (e_flags, e_machine)
 	    case E_V850E_ARCH:
 	      strcat (buf, ", v850e");
 	      break;
-	    case E_V850EA_ARCH:
-	      strcat (buf, ", v850ea");
-	      break;
 	    case E_V850_ARCH:
 	      strcat (buf, ", v850");
 	      break;
