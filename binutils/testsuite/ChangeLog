@@ -1,4 +1,14 @@
+Thu Aug 28 09:57:27 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* binutils-all/objdump.exp (cpus_expected): Add arc.
+
+Tue Aug  5 00:03:20 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/default.exp: Look for nm-new and strip-new.
+
 Tue Jun  3 17:12:54 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/default.exp: Remove expect_before statement.
 
 	* binutils-all/objcopy.exp: Don't use global exec_output variable;
  	the output is returned from remote_load instead.
