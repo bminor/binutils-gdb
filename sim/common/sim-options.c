@@ -803,7 +803,8 @@ find_match (SIM_DESC sd, sim_cpu *cpu, char *argv[], int *pargi)
 	const char *name = opt->opt.name;
 	if (name == NULL)
 	  continue;
-	while (strncmp (name, argv [argi], strlen (argv [argi])) == 0)
+	while (argv [argi] != NULL
+	       && strncmp (name, argv [argi], strlen (argv [argi])) == 0)
 	  {
 	    name = &name [strlen (argv[argi])];
 	    if (name [0] == '-')
