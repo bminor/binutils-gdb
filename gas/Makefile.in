@@ -59,7 +59,7 @@ CCLIBFLAGS = -O
 # Version of ar to use when compiling gnulib. 
 OLDAR = ar
 
-version=`awk '{print substr ($$4, 2, length ($$4) - 3); }' $(unsubdir)/../gcc/version.c`
+version=`$(srcdir)/../gcc$(subdir)/gcc -dumpversion`
 
 # Directory where sources are, from where we are.
 srcdir = .
@@ -71,7 +71,7 @@ bindir = $(ddestdir)/bin
 # Directory in which to put the directories used by the compiler.
 libdir = $(ddestdir)/lib
 # Directory in which the compiler finds executables, libraries, etc.
-libsubdir = $(libdir)/gcc/$(target)/$(version)
+libsubdir = $(libdir)/gcc/$(target_alias)/$(version)
 # Number to put in man-page filename.
 manext = 1
 # Directory in which to put man pages.
@@ -449,9 +449,9 @@ realclean: cleanconfig
 
 # Copy the files into directories where they will be run.
 install: $(ALL)
-#	$(INSTALL_PROGRAM) $(ALL) $(libsubdir)/as
-	cp $(ALL) $(bindir)/as.new
-	mv -f $(bindir)/as.new $(bindir)/as
+	$(INSTALL_PROGRAM) $(ALL) $(libsubdir)/as
+#	cp $(ALL) $(bindir)/as.new
+#	mv -f $(bindir)/as.new $(bindir)/as
 
 # Create the installation directory.
 install-dir:
