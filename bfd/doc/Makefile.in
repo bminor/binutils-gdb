@@ -14,7 +14,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #
 
 VPATH = @srcdir@
@@ -23,11 +23,11 @@ srcdir = @srcdir@
 prefix = @prefix@
 
 exec_prefix = @exec_prefix@
-bindir = $(exec_prefix)/bin
-libdir = $(exec_prefix)/lib
+bindir = @bindir@
+libdir = @libdir@
 
-datadir = $(prefix)/lib
-mandir = $(prefix)/man
+datadir = @datadir@
+mandir = @mandir@
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
 man3dir = $(mandir)/man3
@@ -37,16 +37,15 @@ man6dir = $(mandir)/man6
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
-infodir = $(prefix)/info
-includedir = $(prefix)/include
-docdir = $(datadir)/doc
+infodir = @infodir@
+includedir = @includedir@
 
 MKDOC=./chew
 SHELL = /bin/sh
 
-INSTALL = `cd $(srcdir)/../..;pwd`/install.sh -c
-INSTALL_PROGRAM = $(INSTALL)
-INSTALL_DATA = $(INSTALL)
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
 
 MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
@@ -80,7 +79,7 @@ IPROTOS = cache.ip libbfd.ip reloc.ip init.ip archures.ip coffcode.ip
 SRCDOC = $(srcdir)/../aoutx.h  $(srcdir)/../archive.c \
 	$(srcdir)/../archures.c $(srcdir)/../bfd.c \
 	$(srcdir)/../cache.c $(srcdir)/../coffcode.h \
-	$(srcdir)/../core.c $(srcdir)/../elf.c \
+	$(srcdir)/../corefile.c $(srcdir)/../elf.c \
 	$(srcdir)/../elfcode.h  $(srcdir)/../format.c \
 	$(srcdir)/../libbfd.c $(srcdir)/../opncls.c \
 	$(srcdir)/../reloc.c  $(srcdir)/../section.c \
@@ -88,7 +87,7 @@ SRCDOC = $(srcdir)/../aoutx.h  $(srcdir)/../archive.c \
 	$(srcdir)/../hash.c $(srcdir)/../linker.c
 
 SRCPROT = $(srcdir)/../archive.c $(srcdir)/../archures.c \
-	$(srcdir)/../bfd.c $(srcdir)/../coffcode.h $(srcdir)/../core.c \
+	$(srcdir)/../bfd.c $(srcdir)/../coffcode.h $(srcdir)/../corefile.c \
 	$(srcdir)/../format.c $(srcdir)/../libbfd.c \
 	$(srcdir)/../opncls.c $(srcdir)/../reloc.c \
 	$(srcdir)/../section.c $(srcdir)/../syms.c \
@@ -146,8 +145,8 @@ cache.texi: $(MKDOC) $(srcdir)/../cache.c $(srcdir)/doc.str
 coffcode.texi:	$(MKDOC) $(srcdir)/../coffcode.h $(srcdir)/doc.str
 	$(MKDOC) -f $(srcdir)/doc.str <$(srcdir)/../coffcode.h >coffcode.texi
 
-core.texi: $(MKDOC) $(srcdir)/../core.c $(srcdir)/doc.str
-	$(MKDOC) -f $(srcdir)/doc.str <$(srcdir)/../core.c >core.texi
+core.texi: $(MKDOC) $(srcdir)/../corefile.c $(srcdir)/doc.str
+	$(MKDOC) -f $(srcdir)/doc.str <$(srcdir)/../corefile.c >core.texi
 
 elf.texi: $(MKDOC) $(srcdir)/../elf.c $(srcdir)/doc.str
 	$(MKDOC) -f $(srcdir)/doc.str <$(srcdir)/../elf.c >elf.texi
@@ -194,6 +193,7 @@ libbfd.h: $(srcdir)/../libbfd-in.h	\
 	$(srcdir)/../cpu-i960.c		\
 	$(srcdir)/../archures.c		\
 	$(srcdir)/../elfcode.h		\
+	$(srcdir)/proto.str		\
 	$(MKDOC)
 	cat $(srcdir)/../libbfd-in.h >libbfd.h 
 	$(MKDOC) -i -f $(srcdir)/proto.str  < $(srcdir)/../init.c >>libbfd.h
@@ -207,7 +207,8 @@ libbfd.h: $(srcdir)/../libbfd-in.h	\
 	$(MKDOC) -i -f $(srcdir)/proto.str  < $(srcdir)/../elfcode.h >>libbfd.h
 
 libcoff.h: $(srcdir)/../libcoff-in.h	\
-	$(srcdir)/../coffcode.h \
+	$(srcdir)/../coffcode.h		\
+	$(srcdir)/proto.str		\
 	$(MKDOC)
 	cat $(srcdir)/../libcoff-in.h >libcoff.h
 	$(MKDOC) -i -f $(srcdir)/proto.str  < $(srcdir)/../coffcode.h >>libcoff.h
@@ -222,9 +223,10 @@ bfd.h: $(srcdir)/../bfd-in.h 		\
 	$(srcdir)/../syms.c		\
 	$(srcdir)/../bfd.c		\
 	$(srcdir)/../archive.c		\
-	$(srcdir)/../core.c		\
+	$(srcdir)/../corefile.c		\
 	$(srcdir)/../targets.c		\
 	$(srcdir)/../format.c		\
+	$(srcdir)/proto.str		\
 	$(MKDOC)
 	cat $(srcdir)/../bfd-in.h >bfd.h
 	$(MKDOC) -f $(srcdir)/proto.str<$(srcdir)/../init.c >>bfd.h
@@ -236,9 +238,12 @@ bfd.h: $(srcdir)/../bfd-in.h 		\
 	$(MKDOC) -f $(srcdir)/proto.str<$(srcdir)/../syms.c >>bfd.h
 	$(MKDOC) -f $(srcdir)/proto.str<$(srcdir)/../bfd.c >>bfd.h
 	$(MKDOC) -f $(srcdir)/proto.str<$(srcdir)/../archive.c >>bfd.h
-	$(MKDOC) -f $(srcdir)/proto.str<$(srcdir)/../core.c >>bfd.h
+	$(MKDOC) -f $(srcdir)/proto.str<$(srcdir)/../corefile.c >>bfd.h
 	$(MKDOC) -f $(srcdir)/proto.str<$(srcdir)/../targets.c >>bfd.h
 	$(MKDOC) -f $(srcdir)/proto.str<$(srcdir)/../format.c >>bfd.h	
+	echo "#ifdef __cplusplus" >>bfd.h
+	echo "}" >>bfd.h
+	echo "#endif" >>bfd.h
 	echo "#endif" >>bfd.h
 
 
@@ -251,10 +256,12 @@ clean: mostlyclean
 	rm -rf $(STAGESTUFF)
 	rm -f *.p *.ip  bfd.?? bfd.??? bfd.h libbfd.h libcoff.h texput.log 
 
-distclean: clean
+distclean:
+	rm -f $(DOCFILES)
+	rm -f *.p *.ip  bfd.?? bfd.??? bfd.h libbfd.h libcoff.h texput.log 
 	rm -f Makefile config.status
 
-realclean: clean
+maintainer-clean realclean: clean
 	rm -f Makefile config.status
 
 bfd.info: $(DOCFILES) bfdsumm.texi bfd.texinfo
@@ -301,5 +308,5 @@ de-stage3: force
 force:
 
 Makefile: $(srcdir)/Makefile.in
-	cd .. && $(SHELL) ./config.status
+	cd .. && CONFIG_FILES=doc/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 

@@ -1,3 +1,27 @@
+Mon Apr  7 15:23:26 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (distclean): Don't remove *.info files.
+
+Thu Feb 13 20:50:02 1997  Klaus Kaempf  (kkaempf@progis.de)
+
+	* makefile.vms: New file.
+
+Tue Jun 18 18:32:28 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* chew.c (kill_bogus_lines): Reset sl when not at the start of a
+	line.  From Uwe Ohse <uwe@tirka.gun.de>.
+
+Tue Jan 30 14:10:46 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Ronald F. Guilmette <rfg@monkeys.com>:
+	* Makefile.in (libbfd.h): Depend upon proto.str.
+	(libcoff.h, bfd.h): Likewise.
+
+Fri Nov  3 14:46:48 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (SRCDOC, SRCPROT, core.texi, bfd.h):  Use corefile.c, 
+	renamed from core.c.
+
 Wed Nov  1 14:28:23 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
 
 	* chew.c: Include <ctype.h>.
