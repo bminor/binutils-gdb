@@ -1,3 +1,8 @@
+Tue Aug  8 19:14:58 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
+
+	* emultempl/sunos.em (gld${EMULATION_NAME}_find_so): Use xmalloc
+	instead of alloca.
+
 Tue Aug  8 15:24:05 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* Makefile.in (CC_FOR_TARGET, CXX_FOR_TARGET): Don't use
