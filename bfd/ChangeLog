@@ -1,3 +1,13 @@
+Wed Aug 21 14:33:06 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
+
+	* Makefile.in, awkscan-ip, awkscan-p, intobfd,
+	libbfd.h, libcoff.h, tolibcoff; new bfd-in.h, libbfd-in.h,
+	libcoff-in.h: (a) use separate files for invariant parts of bfd.h,
+	libbfd.h, and libcoff.h; (b) in generated parts of same, use less
+	obtrusive marks indicating .c origins.
+
+	* bfd.texinfo: generalize most references to linker
+
 Tue Aug 20 15:18:02 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 	* Makefile.in: include core.p in PROTOS (building better bfd.h)

@@ -226,19 +226,19 @@ representation internally.  This means that the BFD back ends
 cannot maintain all possible data richness through the transformation
 between external to internal and back to external formats.
 
-This limitation is only a problem when using the linker to read one
- format and write another. Each BFD back end is responsible for
+This limitation is only a problem when an application reads one
+format and writes another.  Each BFD back end is responsible for
 maintaining as much data as possible, and the internal BFD
 canonical form has structures which are opaque to the BFD core,
 and exported only to the back ends. When a file is read in one format,
-the canonical form is generated for BFD and the linker. At the
+the canonical form is generated for BFD and the application. At the
 same time, the back end saves away any information which may otherwise
 be lost. If the data is then written back in the same format, the back
 end routine will be able to use the canonical form provided by the
 BFD core as well as the information it prepared earlier.  Since
 there is a great deal of commonality between back ends, this mechanism
 is very useful. There is no information lost for this reason when
-linking big endian COFF to little endian COFF, or from @code{a.out} to
+linking or copying big endian COFF to little endian COFF, or @code{a.out} to
 @code{b.out}.  When a mixture of formats is linked, the information is
 only lost from the files whose format differs from the destination.
 
@@ -259,11 +259,11 @@ Information on target machine architecture, particular implementation
 and format type are stored on a per-file basis. Other information
 includes a demand pageable bit and a write protected bit.  Note that
 information like Unix magic numbers is not stored here---only the magic
-numbers' meaning, so a @code{ZMAGIC} file would have both the demand pageable
-bit and the write protected text bit set.
-
-The byte order of the target is stored on a per-file basis, so that big-
-and little-endian object files may be linked with one another.
+numbers' meaning, so a @code{ZMAGIC} file would have both the demand
+pageable bit and the write protected text bit set.  The byte order of
+the target is stored on a per-file basis, so that big- and little-endian
+object files may be linked with one another.
+@c FIXME: generalize above from "link"?
 
 @item sections
 Each section in the input file contains the name of the section, the
@@ -286,13 +286,9 @@ Normal global and simple local symbols are maintained on output, so an
 output file (no matter its format) will retain symbols pointing to
 functions and to global, static, and common variables.  Some symbol
 information is not worth retaining; in @code{a.out} type information is
-stored in the symbol table as long symbol names. 
-@c FIXME: is the enclosed text linker-specific?
-This information would
-be useless to most COFF debuggers and may be thrown away with
-appropriate command line switches. (The GNU debugger @code{gdb} does
-support @code{a.out} style debugging information in COFF).
-@c end linker-query FIXME
+stored in the symbol table as long symbol names.  This information would
+be useless to most COFF debuggers; the linker has command line switches
+to allow users to throw it away.
 
 There is one word of type information within the symbol, so if the
 format supports symbol type information within symbols (for example COFF,

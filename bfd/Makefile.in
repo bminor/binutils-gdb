@@ -242,13 +242,13 @@ IPROTOS = libbfd.ip cache.ip
 headers : $(PROTOS) $(IPROTOS)
 	# Rebuild prototypes in bfd.h
 	mv $(BFD_H) $(BFD_H).old
-	sed -f $(srcdir)/intobfd $(BFD_H).old > $(BFD_H)
+	sed -f $(srcdir)/intobfd $(srcdir)/bfd-in.h > $(BFD_H)
 	# and libbfd.h
 	mv $(srcdir)/libbfd.h libbfd.h.old
-	sed -f $(srcdir)/tolibbfd libbfd.h.old >$(srcdir)/libbfd.h
+	sed -f $(srcdir)/tolibbfd $(srcdir)/libbfd-in.h >$(srcdir)/libbfd.h
 	# and libcoff.h
 	mv $(srcdir)/libcoff.h libcoff.h.old
-	sed -f $(srcdir)/tolibcoff libcoff.h.old >$(srcdir)/libcoff.h
+	sed -f $(srcdir)/tolibcoff $(srcdir)/libcoff-in.h >$(srcdir)/libcoff.h
 
 
 texinfo:

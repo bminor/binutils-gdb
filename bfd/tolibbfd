@@ -1,4 +1,4 @@
 /---------------START FROM/,/---------------END FROM/d
-/\/\* FROM libbfd.c\*\//r libbfd.ip
-/\/\* FROM cache.c\*\//r cache.ip
-/\/\* FROM reloc.c\*\//r reloc.ip
+/\/\*:libbfd.c\*\//r libbfd.ip
+/\/\*:cache.c\*\//r cache.ip
+/\/\*:reloc.c\*\//r reloc.ip

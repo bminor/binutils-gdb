@@ -1,12 +1,11 @@
-/---------------START FROM/,/---------------END FROM/d
-/\/\* FROM archive.c\*\//r archive.p
-/\/\* FROM archures.c\*\//r archures.p
-/\/\* FROM bfd.c\*\//r bfd.p
-/\/\* FROM core.c\*\//r core.p
-/\/\* FROM format.c\*\//r format.p
-/\/\* FROM libbfd.c\*\//r libbfd.p
-/\/\* FROM opncls.c\*\//r opncls.p
-/\/\* FROM reloc.c\*\//r reloc.p
-/\/\* FROM section.c\*\//r section.p
-/\/\* FROM syms.c\*\//r syms.p
-/\/\* FROM targets.c\*\//r targets.p
+/\/\*:archive.c\*\//r archive.p
+/\/\*:archures.c\*\//r archures.p
+/\/\*:bfd.c\*\//r bfd.p
+/\/\*:core.c\*\//r core.p
+/\/\*:format.c\*\//r format.p
+/\/\*:libbfd.c\*\//r libbfd.p
+/\/\*:opncls.c\*\//r opncls.p
+/\/\*:reloc.c\*\//r reloc.p
+/\/\*:section.c\*\//r section.p
+/\/\*:syms.c\*\//r syms.p
+/\/\*:targets.c\*\//r targets.p
