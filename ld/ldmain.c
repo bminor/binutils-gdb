@@ -348,129 +348,139 @@ DEFUN (Q_enter_global_ref, (nlist_p, name),
   flagword this_symbol_flags = sym->flags;
 
   sp = ldsym_get (name);
+  /* If this symbol already has udata, it means that something strange 
+     has happened.
+     
+     The strange thing is that we've had an undefined symbol resolved by
+     an alias, but the thing the alias defined wasn't in the file. So
+     the symbol got a udata entry, but the file wasn't loaded.  Then
+     later on the file was loaded, but we don't need to do this
+     processing again */
 
-  ASSERT (sym->udata == 0);
+
+  if (sym->udata)
+   return;
 
 
   if (flag_is_constructor (this_symbol_flags))
+  {
+    /* Add this constructor to the list we keep */
+    ldlang_add_constructor (sp);
+    /* Turn any commons into refs */
+    if (sp->scoms_chain != (asymbol **) NULL)
     {
-      /* Add this constructor to the list we keep */
-      ldlang_add_constructor (sp);
-      /* Turn any commons into refs */
-      if (sp->scoms_chain != (asymbol **) NULL)
-	{
-	  refize (sp, sp->scoms_chain);
-	  sp->scoms_chain = 0;
-	}
-
-
+      refize (sp, sp->scoms_chain);
+      sp->scoms_chain = 0;
     }
+
+
+  }
   else
+  {
+    if (sym->section == &bfd_com_section)
     {
-      if (sym->section == &bfd_com_section)
+      /* If we have a definition of this symbol already then
+	 this common turns into a reference. Also we only
+	 ever point to the largest common, so if we
+	 have a common, but it's bigger that the new symbol
+	 the turn this into a reference too. */
+      if (sp->sdefs_chain)
+      {
+	/* This is a common symbol, but we already have a definition
+	   for it, so just link it into the ref chain as if
+	   it were a reference  */
+	refize (sp, nlist_p);
+      }
+      else if (sp->scoms_chain)
+      {
+	/* If we have a previous common, keep only the biggest */
+	if ((*(sp->scoms_chain))->value > sym->value)
 	{
-	  /* If we have a definition of this symbol already then
-             this common turns into a reference. Also we only
-             ever point to the largest common, so if we
-             have a common, but it's bigger that the new symbol
-             the turn this into a reference too. */
-	  if (sp->sdefs_chain)
-	    {
-	      /* This is a common symbol, but we already have a definition
-	         for it, so just link it into the ref chain as if
-	         it were a reference  */
-	      refize (sp, nlist_p);
-	    }
-	  else if (sp->scoms_chain)
-	    {
-	      /* If we have a previous common, keep only the biggest */
-	      if ((*(sp->scoms_chain))->value > sym->value)
-		{
-		  /* other common is bigger, throw this one away */
-		  refize (sp, nlist_p);
-		}
-	      else if (sp->scoms_chain != nlist_p)
-		{
-		  /* other common is smaller, throw that away */
-		  refize (sp, sp->scoms_chain);
-		  sp->scoms_chain = nlist_p;
-		}
-	    }
-	  else
-	    {
-	      /* This is the first time we've seen a common, so remember it
-	         - if it was undefined before, we know it's defined now. If
-	         the symbol has been marked as really being a constructor,
-	         then treat this as a ref
-	         */
-	      if (sp->flags & SYM_CONSTRUCTOR)
-		{
-		  /* Turn this into a ref */
-		  refize (sp, nlist_p);
-		}
-	      else
-		{
-		  /* treat like a common */
-		  if (sp->srefs_chain)
-		    undefined_global_sym_count--;
-
-		  commons_pending++;
-		  sp->scoms_chain = nlist_p;
-		}
-	    }
-	}
-
-      else if (sym->section != &bfd_und_section)
-	{
-	  /* This is the definition of a symbol, add to def chain */
-	  if (sp->sdefs_chain && (*(sp->sdefs_chain))->section != sym->section)
-	    {
-	      /* Multiple definition */
-	      asymbol *sy = *(sp->sdefs_chain);
-	      lang_input_statement_type *stat = (lang_input_statement_type *) sy->the_bfd->usrdata;
-	      lang_input_statement_type *stat1 = (lang_input_statement_type *) sym->the_bfd->usrdata;
-	      asymbol **stat1_symbols = stat1 ? stat1->asymbols : 0;
-	      asymbol **stat_symbols = stat ? stat->asymbols : 0;
-
-	      multiple_def_count++;
-	      einfo ("%X%C: multiple definition of `%T'\n",
-		sym->the_bfd, sym->section, stat1_symbols, sym->value, sym);
-
-	      einfo ("%X%C: first seen here\n",
-		     sy->the_bfd, sy->section, stat_symbols, sy->value);
-	    }
-	  else
-	    {
-	      sym->udata = (PTR) (sp->sdefs_chain);
-	      sp->sdefs_chain = nlist_p;
-	    }
-	  /* A definition overrides a common symbol */
-	  if (sp->scoms_chain)
-	    {
-	      refize (sp, sp->scoms_chain);
-	      sp->scoms_chain = 0;
-	      commons_pending--;
-	    }
-	  else if (sp->srefs_chain && relaxing == false)
-	    {
-	      /* If previously was undefined, then remember as defined */
-	      undefined_global_sym_count--;
-	    }
-	}
-      else
-	{
-	  if (sp->scoms_chain == (asymbol **) NULL
-	      && sp->srefs_chain == (asymbol **) NULL
-	      && sp->sdefs_chain == (asymbol **) NULL)
-	    {
-	      /* And it's the first time we've seen it */
-	      undefined_global_sym_count++;
-
-	    }
-
+	  /* other common is bigger, throw this one away */
 	  refize (sp, nlist_p);
 	}
+	else if (sp->scoms_chain != nlist_p)
+	{
+	  /* other common is smaller, throw that away */
+	  refize (sp, sp->scoms_chain);
+	  sp->scoms_chain = nlist_p;
+	}
+      }
+      else
+      {
+	/* This is the first time we've seen a common, so remember it
+	   - if it was undefined before, we know it's defined now. If
+	   the symbol has been marked as really being a constructor,
+	   then treat this as a ref
+	   */
+	if (sp->flags & SYM_CONSTRUCTOR)
+	{
+	  /* Turn this into a ref */
+	  refize (sp, nlist_p);
+	}
+	else
+	{
+	  /* treat like a common */
+	  if (sp->srefs_chain)
+	   undefined_global_sym_count--;
+
+	  commons_pending++;
+	  sp->scoms_chain = nlist_p;
+	}
+      }
     }
+
+    else if (sym->section != &bfd_und_section)
+    {
+      /* This is the definition of a symbol, add to def chain */
+      if (sp->sdefs_chain && (*(sp->sdefs_chain))->section != sym->section)
+      {
+	/* Multiple definition */
+	asymbol *sy = *(sp->sdefs_chain);
+	lang_input_statement_type *stat = (lang_input_statement_type *) sy->the_bfd->usrdata;
+	lang_input_statement_type *stat1 = (lang_input_statement_type *) sym->the_bfd->usrdata;
+	asymbol **stat1_symbols = stat1 ? stat1->asymbols : 0;
+	asymbol **stat_symbols = stat ? stat->asymbols : 0;
+
+	multiple_def_count++;
+	einfo ("%X%C: multiple definition of `%T'\n",
+	       sym->the_bfd, sym->section, stat1_symbols, sym->value, sym);
+
+	einfo ("%X%C: first seen here\n",
+	       sy->the_bfd, sy->section, stat_symbols, sy->value);
+      }
+      else
+      {
+	sym->udata = (PTR) (sp->sdefs_chain);
+	sp->sdefs_chain = nlist_p;
+      }
+      /* A definition overrides a common symbol */
+      if (sp->scoms_chain)
+      {
+	refize (sp, sp->scoms_chain);
+	sp->scoms_chain = 0;
+	commons_pending--;
+      }
+      else if (sp->srefs_chain && relaxing == false)
+      {
+	/* If previously was undefined, then remember as defined */
+	undefined_global_sym_count--;
+      }
+    }
+    else
+    {
+      if (sp->scoms_chain == (asymbol **) NULL
+	  && sp->srefs_chain == (asymbol **) NULL
+	  && sp->sdefs_chain == (asymbol **) NULL)
+      {
+	/* And it's the first time we've seen it */
+	undefined_global_sym_count++;
+
+      }
+
+      refize (sp, nlist_p);
+    }
+  }
 
   ASSERT (sp->sdefs_chain == 0 || sp->scoms_chain == 0);
   ASSERT (sp->scoms_chain == 0 || (*(sp->scoms_chain))->udata == 0);

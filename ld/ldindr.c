@@ -93,6 +93,8 @@ asymbol **ptr)
   {
     refize(new, new->scoms_chain);
   }    
+lgs->sdefs_chain = (asymbol **)new;
+
 }
 
 
