@@ -10,7 +10,7 @@ Sat Aug  9 00:42:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* configure.host: Don't set HLDFLAGS, HLDENV, or RPATH_ENVVAR.
 	* acconfig.h: Mention PACKAGE and VERSION.
 	* stamp-h.in: New file.
-	* ldver.c (ld_program_vresion): Set ld_program_version from
+	* ldver.c (ld_program_version): Set ld_program_version from
 	VERSION.
 	* ldgram.y, ldlex.l: Replace VERSION with VERSIONK.
 	* Makefile.in: Now built with automake.
