@@ -1,3 +1,8 @@
+2002-09-29  H.J. Lu <hjl@gnu.org>
+
+	* ld/emulparams/elf32ppc.sh (OTHER_GOT_RELOC_SECTIONS): New.
+	* ld/emulparams/elf32ppclinux.sh (OTHER_GOT_RELOC_SECTIONS): New.
+
 2002-09-25  Daniel Jacobowitz  <drow@mvista.com>
 
 	From "Anita Kulkarni" <AnitaK@kpit.com>
