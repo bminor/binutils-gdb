@@ -34,7 +34,7 @@
 /* Register number for the "orig_eax" pseudo-register.  If this
    pseudo-register contains a value >= 0 it is interpreted as the
    system call number that the kernel is supposed to restart.  */
-#define I386_LINUX_ORIG_EAX_REGNUM 41
+#define I386_LINUX_ORIG_EAX_REGNUM (NUM_GREGS + NUM_FREGS + NUM_SSE_REGS)
 
 /* Adjust a few macros to deal with this extra register.  */
 
