@@ -6624,15 +6624,9 @@ download @var{filename} to the 960 as well as adding its symbols in
 @ifset H8
 @cindex download to H8/300 or H8/500
 @cindex H8/300 or H8/500 download
-@c start-sanitize-Hitachi-SH
 @cindex download to Hitachi SH
 @cindex Hitachi SH download
-@c end-sanitize-Hitachi-SH
-When you select remote debugging to a Hitachi
-@c start-sanitize-Hitachi-SH
-SH,
-@c end-sanitize-Hitachi-SH
-H8/300, or H8/500 board
+When you select remote debugging to a Hitachi SH, H8/300, or H8/500 board
 (@pxref{Hitachi Remote,,@value{GDBN} and Hitachi Microprocessors}),
 the @code{load} command downloads your program to the Hitachi board and also
 opens it as the current executable target for @value{GDBN} on your host
@@ -6971,11 +6965,7 @@ name of the program to be debugged, as it appears to DOS on the PC.
 @ifset H8
 @item target hms
 @kindex target hms
-A Hitachi
-@c start-sanitize-Hitachi-SH
-SH,
-@c end-sanitize-Hitachi-SH
-H8/300, or H8/500 board, attached via serial line to your host.
+A Hitachi SH, H8/300, or H8/500 board, attached via serial line to your host.
 @ifclear H8EXCLUSIVE
 @c Unix only, not currently of interest for H8-only manual
 Use special commands @code{device} and @code{speed} to control the serial
