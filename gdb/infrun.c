@@ -3790,45 +3790,47 @@ _initialize_infrun (void)
   DEPRECATED_REGISTER_GDBARCH_SWAP (stop_registers);
   deprecated_register_gdbarch_swap (NULL, 0, build_infrun);
 
-  add_info ("signals", signals_info,
-	    "What debugger does when program gets various signals.\n\
-Specify a signal as argument to print info on that signal only.");
+  add_info ("signals", signals_info, _("\
+What debugger does when program gets various signals.\n\
+Specify a signal as argument to print info on that signal only."));
   add_info_alias ("handle", "signals", 0);
 
-  add_com ("handle", class_run, handle_command,
-	   concat ("Specify how to handle a signal.\n\
+  add_com ("handle", class_run, handle_command, _("\
+Specify how to handle a signal.\n\
 Args are signals and actions to apply to those signals.\n\
 Symbolic signals (e.g. SIGSEGV) are recommended but numeric signals\n\
 from 1-15 are allowed for compatibility with old versions of GDB.\n\
 Numeric ranges may be specified with the form LOW-HIGH (e.g. 1-5).\n\
 The special arg \"all\" is recognized to mean all signals except those\n\
-used by the debugger, typically SIGTRAP and SIGINT.\n", "Recognized actions include \"stop\", \"nostop\", \"print\", \"noprint\",\n\
+used by the debugger, typically SIGTRAP and SIGINT.\n\
+Recognized actions include \"stop\", \"nostop\", \"print\", \"noprint\",\n\
 \"pass\", \"nopass\", \"ignore\", or \"noignore\".\n\
 Stop means reenter debugger if this signal happens (implies print).\n\
 Print means print a message if this signal happens.\n\
 Pass means let program see this signal; otherwise program doesn't know.\n\
 Ignore is a synonym for nopass and noignore is a synonym for pass.\n\
-Pass and Stop may be combined.", NULL));
+Pass and Stop may be combined."));
   if (xdb_commands)
     {
-      add_com ("lz", class_info, signals_info,
-	       "What debugger does when program gets various signals.\n\
-Specify a signal as argument to print info on that signal only.");
-      add_com ("z", class_run, xdb_handle_command,
-	       concat ("Specify how to handle a signal.\n\
+      add_com ("lz", class_info, signals_info, _("\
+What debugger does when program gets various signals.\n\
+Specify a signal as argument to print info on that signal only."));
+      add_com ("z", class_run, xdb_handle_command, _("\
+Specify how to handle a signal.\n\
 Args are signals and actions to apply to those signals.\n\
 Symbolic signals (e.g. SIGSEGV) are recommended but numeric signals\n\
 from 1-15 are allowed for compatibility with old versions of GDB.\n\
 Numeric ranges may be specified with the form LOW-HIGH (e.g. 1-5).\n\
 The special arg \"all\" is recognized to mean all signals except those\n\
-used by the debugger, typically SIGTRAP and SIGINT.\n", "Recognized actions include \"s\" (toggles between stop and nostop), \n\
+used by the debugger, typically SIGTRAP and SIGINT.\n\
+Recognized actions include \"s\" (toggles between stop and nostop), \n\
 \"r\" (toggles between print and noprint), \"i\" (toggles between pass and \
 nopass), \"Q\" (noprint)\n\
 Stop means reenter debugger if this signal happens (implies print).\n\
 Print means print a message if this signal happens.\n\
 Pass means let program see this signal; otherwise program doesn't know.\n\
 Ignore is a synonym for nopass and noignore is a synonym for pass.\n\
-Pass and Stop may be combined.", NULL));
+Pass and Stop may be combined."));
     }
 
   if (!dbx_commands)

@@ -1989,32 +1989,32 @@ _initialize_printcmd (void)
   current_display_number = -1;
 
   add_info ("address", address_info,
-	    "Describe where symbol SYM is stored.");
+	    _("Describe where symbol SYM is stored."));
 
-  add_info ("symbol", sym_info,
-	    "Describe what symbol is at location ADDR.\n\
-Only for symbols with fixed locations (global or static scope).");
+  add_info ("symbol", sym_info, _("\
+Describe what symbol is at location ADDR.\n\
+Only for symbols with fixed locations (global or static scope)."));
 
-  add_com ("x", class_vars, x_command,
-	   concat ("Examine memory: x/FMT ADDRESS.\n\
+  add_com ("x", class_vars, x_command, _("\
+Examine memory: x/FMT ADDRESS.\n\
 ADDRESS is an expression for the memory address to examine.\n\
 FMT is a repeat count followed by a format letter and a size letter.\n\
 Format letters are o(octal), x(hex), d(decimal), u(unsigned decimal),\n\
-  t(binary), f(float), a(address), i(instruction), c(char) and s(string).\n",
-		   "Size letters are b(byte), h(halfword), w(word), g(giant, 8 bytes).\n\
+  t(binary), f(float), a(address), i(instruction), c(char) and s(string).\n\
+Size letters are b(byte), h(halfword), w(word), g(giant, 8 bytes).\n\
 The specified number of objects of the specified size are printed\n\
 according to the format.\n\n\
 Defaults for format and size letters are those previously used.\n\
 Default count is 1.  Default address is following last thing printed\n\
-with this command or \"print\".", NULL));
+with this command or \"print\"."));
 
 #if 0
   add_com ("whereis", class_vars, whereis_command,
-	   "Print line number and file of definition of variable.");
+	   _("Print line number and file of definition of variable."));
 #endif
 
-  add_info ("display", display_info,
-	    "Expressions to display when program stops, with code numbers.");
+  add_info ("display", display_info, _("\
+Expressions to display when program stops, with code numbers."));
 
   add_cmd ("undisplay", class_vars, undisplay_command, _("\
 Cancel some expressions to be displayed when program stops.\n\
@@ -2024,15 +2024,14 @@ No argument means cancel all automatic-display expressions.\n\
 Do \"info display\" to see current list of code numbers."),
 	   &cmdlist);
 
-  add_com ("display", class_vars, display_command,
-	   "Print value of expression EXP each time the program stops.\n\
+  add_com ("display", class_vars, display_command, _("\
+Print value of expression EXP each time the program stops.\n\
 /FMT may be used before EXP as in the \"print\" command.\n\
 /FMT \"i\" or \"s\" or including a size-letter is allowed,\n\
 as in the \"x\" command, and then EXP is used to get the address to examine\n\
 and examining is done as in the \"x\" command.\n\n\
 With no argument, display all currently requested auto-display expressions.\n\
-Use \"undisplay\" to cancel display requests previously made."
-    );
+Use \"undisplay\" to cancel display requests previously made."));
 
   add_cmd ("display", class_vars, enable_display, _("\
 Enable some expressions to be displayed when program stops.\n\
@@ -2052,41 +2051,42 @@ Arguments are the code numbers of the expressions to stop displaying.\n\
 No argument means cancel all automatic-display expressions.\n\
 Do \"info display\" to see current list of code numbers."), &deletelist);
 
-  add_com ("printf", class_vars, printf_command,
-	   "printf \"printf format string\", arg1, arg2, arg3, ..., argn\n\
-This is useful for formatted output in user-defined commands.");
+  add_com ("printf", class_vars, printf_command, _("\
+printf \"printf format string\", arg1, arg2, arg3, ..., argn\n\
+This is useful for formatted output in user-defined commands."));
 
-  add_com ("output", class_vars, output_command,
-	   "Like \"print\" but don't put in value history and don't print newline.\n\
-This is useful in user-defined commands.");
+  add_com ("output", class_vars, output_command, _("\
+Like \"print\" but don't put in value history and don't print newline.\n\
+This is useful in user-defined commands."));
 
-  add_prefix_cmd ("set", class_vars, set_command,
-		  concat ("Evaluate expression EXP and assign result to variable VAR, using assignment\n\
+  add_prefix_cmd ("set", class_vars, set_command, _("\
+Evaluate expression EXP and assign result to variable VAR, using assignment\n\
 syntax appropriate for the current language (VAR = EXP or VAR := EXP for\n\
 example).  VAR may be a debugger \"convenience\" variable (names starting\n\
 with $), a register (a few standard names starting with $), or an actual\n\
-variable in the program being debugged.  EXP is any valid expression.\n",
-			  "Use \"set variable\" for variables with names identical to set subcommands.\n\
-\nWith a subcommand, this command modifies parts of the gdb environment.\n\
-You can see these environment settings with the \"show\" command.", NULL),
+variable in the program being debugged.  EXP is any valid expression.\n\
+Use \"set variable\" for variables with names identical to set subcommands.\n\
+\n\
+With a subcommand, this command modifies parts of the gdb environment.\n\
+You can see these environment settings with the \"show\" command."),
 		  &setlist, "set ", 1, &cmdlist);
   if (dbx_commands)
-    add_com ("assign", class_vars, set_command, concat ("Evaluate expression \
-EXP and assign result to variable VAR, using assignment\n\
+    add_com ("assign", class_vars, set_command, _("\
+Evaluate expression EXP and assign result to variable VAR, using assignment\n\
 syntax appropriate for the current language (VAR = EXP or VAR := EXP for\n\
 example).  VAR may be a debugger \"convenience\" variable (names starting\n\
 with $), a register (a few standard names starting with $), or an actual\n\
-variable in the program being debugged.  EXP is any valid expression.\n",
-							"Use \"set variable\" for variables with names identical to set subcommands.\n\
+variable in the program being debugged.  EXP is any valid expression.\n\
+Use \"set variable\" for variables with names identical to set subcommands.\n\
 \nWith a subcommand, this command modifies parts of the gdb environment.\n\
-You can see these environment settings with the \"show\" command.", NULL));
+You can see these environment settings with the \"show\" command."));
 
   /* "call" is the same as "set", but handy for dbx users to call fns. */
-  c = add_com ("call", class_vars, call_command,
-	       "Call a function in the program.\n\
+  c = add_com ("call", class_vars, call_command, _("\
+Call a function in the program.\n\
 The argument is the function name and arguments, in the notation of the\n\
 current working language.  The result is printed and saved in the value\n\
-history, if it is not void.");
+history, if it is not void."));
   set_cmd_completer (c, location_completer);
 
   add_cmd ("variable", class_vars, set_command, _("\
@@ -2098,34 +2098,34 @@ variable in the program being debugged.  EXP is any valid expression.\n\
 This may usually be abbreviated to simply \"set\"."),
 	   &setlist);
 
-  c = add_com ("print", class_vars, print_command,
-	   concat ("Print value of expression EXP.\n\
+  c = add_com ("print", class_vars, print_command, _("\
+Print value of expression EXP.\n\
 Variables accessible are those of the lexical environment of the selected\n\
 stack frame, plus all those whose scope is global or an entire file.\n\
 \n\
 $NUM gets previous value number NUM.  $ and $$ are the last two values.\n\
 $$NUM refers to NUM'th value back from the last one.\n\
-Names starting with $ refer to registers (with the values they would have\n",
-		   "if the program were to return to the stack frame now selected, restoring\n\
+Names starting with $ refer to registers (with the values they would have\n\
+if the program were to return to the stack frame now selected, restoring\n\
 all registers saved by frames farther in) or else to debugger\n\
 \"convenience\" variables (any such name not a known register).\n\
-Use assignment expressions to give values to convenience variables.\n",
-		   "\n\
+Use assignment expressions to give values to convenience variables.\n\
+\n\
 {TYPE}ADREXP refers to a datum of data type TYPE, located at address ADREXP.\n\
 @ is a binary operator for treating consecutive data objects\n\
 anywhere in memory as an array.  FOO@NUM gives an array whose first\n\
 element is FOO, whose second element is stored in the space following\n\
 where FOO is stored, etc.  FOO must be an expression whose value\n\
-resides in memory.\n",
-		   "\n\
+resides in memory.\n\
+\n\
 EXP may be preceded with /FMT, where FMT is a format letter\n\
-but no count or size letter (see \"x\" command).", NULL));
+but no count or size letter (see \"x\" command)."));
   set_cmd_completer (c, location_completer);
   add_com_alias ("p", "print", class_vars, 1);
 
-  c = add_com ("inspect", class_vars, inspect_command,
-	   "Same as \"print\" command, except that if you are running in the epoch\n\
-environment, the value is printed in its own window.");
+  c = add_com ("inspect", class_vars, inspect_command, _("\
+Same as \"print\" command, except that if you are running in the epoch\n\
+environment, the value is printed in its own window."));
   set_cmd_completer (c, location_completer);
 
   deprecated_add_show_from_set

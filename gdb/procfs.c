@@ -5968,18 +5968,18 @@ _initialize_procfs (void)
 {
   init_procfs_ops ();
   add_target (&procfs_ops);
-  add_info ("proc", info_proc_cmd,
-	    "Show /proc process information about any running process.\n\
+  add_info ("proc", info_proc_cmd, _("\
+Show /proc process information about any running process.\n\
 Specify process id, or use the program being debugged by default.\n\
-Specify keyword 'mappings' for detailed info on memory mappings.");
+Specify keyword 'mappings' for detailed info on memory mappings."));
   add_com ("proc-trace-entry", no_class, proc_trace_sysentry_cmd,
-	   "Give a trace of entries into the syscall.");
+	   _("Give a trace of entries into the syscall."));
   add_com ("proc-trace-exit", no_class, proc_trace_sysexit_cmd,
-	   "Give a trace of exits from the syscall.");
+	   _("Give a trace of exits from the syscall."));
   add_com ("proc-untrace-entry", no_class, proc_untrace_sysentry_cmd,
-	   "Cancel a trace of entries into the syscall.");
+	   _("Cancel a trace of entries into the syscall."));
   add_com ("proc-untrace-exit", no_class, proc_untrace_sysexit_cmd,
-	   "Cancel a trace of exits from the syscall.");
+	   _("Cancel a trace of exits from the syscall."));
 }
 
 /* =================== END, GDB  "MODULE" =================== */

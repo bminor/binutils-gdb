@@ -1081,32 +1081,32 @@ The commands below can be used to select other frames by number or address."),
 
   /* Define general commands. */
 
-  add_com ("pwd", class_files, pwd_command,
-	"Print working directory.  This is used for your program as well.");
+  add_com ("pwd", class_files, pwd_command, _("\
+Print working directory.  This is used for your program as well."));
   c = add_cmd ("cd", class_files, cd_command, _("\
 Set working directory to DIR for debugger and program being debugged.\n\
 The change does not take effect for the program being debugged\n\
 until the next time it is started."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
-  add_com ("echo", class_support, echo_command,
-	   "Print a constant string.  Give string as argument.\n\
+  add_com ("echo", class_support, echo_command, _("\
+Print a constant string.  Give string as argument.\n\
 C escape sequences may be used in the argument.\n\
 No newline is added at the end of the argument;\n\
 use \"\\n\" if you want a newline to be printed.\n\
 Since leading and trailing whitespace are ignored in command arguments,\n\
 if you want to print some you must use \"\\\" before leading whitespace\n\
-to be printed or after trailing whitespace.");
-  add_com ("document", class_support, document_command,
-	   "Document a user-defined command.\n\
+to be printed or after trailing whitespace."));
+  add_com ("document", class_support, document_command, _("\
+Document a user-defined command.\n\
 Give command name as argument.  Give documentation on following lines.\n\
-End with a line of just \"end\".");
-  add_com ("define", class_support, define_command,
-	   "Define a new command name.  Command name is argument.\n\
+End with a line of just \"end\"."));
+  add_com ("define", class_support, define_command, _("\
+Define a new command name.  Command name is argument.\n\
 Definition appears on following lines, one command per line.\n\
 End with a line of just \"end\".\n\
 Use the \"document\" command to give documentation for the new command.\n\
-Commands defined in this way may have up to ten arguments.");
+Commands defined in this way may have up to ten arguments."));
 
   c = add_cmd ("source", class_support, source_command, _("\
 Read commands from a file named FILE.\n\
@@ -1114,8 +1114,9 @@ Note that the file \"" GDBINIT_FILENAME "\" is read automatically in this way\n\
 when gdb is started."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
-  add_com ("quit", class_support, quit_command, "Exit gdb.");
-  c = add_com ("help", class_support, help_command, "Print list of commands.");
+  add_com ("quit", class_support, quit_command, _("Exit gdb."));
+  c = add_com ("help", class_support, help_command,
+	       _("Print list of commands."));
   set_cmd_completer (c, command_completer);
   add_com_alias ("q", "quit", class_support, 1);
   add_com_alias ("h", "help", class_support, 1);
@@ -1128,10 +1129,10 @@ when gdb is started."), &cmdlist);
   set_verbose (NULL, 0, c);
 
   add_prefix_cmd ("history", class_support, set_history,
-		  "Generic command for setting command history parameters.",
+		  _("Generic command for setting command history parameters."),
 		  &sethistlist, "set history ", 0, &setlist);
   add_prefix_cmd ("history", class_support, show_history,
-		  "Generic command for showing command history parameters.",
+		  _("Generic command for showing command history parameters."),
 		  &showhistlist, "show history ", 0, &showlist);
 
   deprecated_add_show_from_set
@@ -1140,19 +1141,19 @@ when gdb is started."), &cmdlist);
 Without an argument, history expansion is enabled.", &sethistlist),
      &showhistlist);
 
-  add_prefix_cmd ("info", class_info, info_command,
-     "Generic command for showing things about the program being debugged.",
+  add_prefix_cmd ("info", class_info, info_command, _("\
+Generic command for showing things about the program being debugged."),
 		  &infolist, "info ", 0, &cmdlist);
   add_com_alias ("i", "info", class_info, 1);
 
   add_com ("complete", class_obscure, complete_command,
-	   "List the completions for the rest of the line as a command.");
+	   _("List the completions for the rest of the line as a command."));
 
   add_prefix_cmd ("show", class_info, show_command,
-		  "Generic command for showing things about the debugger.",
+		  _("Generic command for showing things about the debugger."),
 		  &showlist, "show ", 0, &cmdlist);
   /* Another way to get at the same thing.  */
-  add_info ("set", show_command, "Show all GDB settings.");
+  add_info ("set", show_command, _("Show all GDB settings."));
 
   add_cmd ("commands", no_class, show_commands, _("\
 Show the history of commands you typed.\n\
@@ -1163,18 +1164,18 @@ the previous command number shown."),
   add_cmd ("version", no_class, show_version,
 	   _("Show what version of GDB this is."), &showlist);
 
-  add_com ("while", class_support, while_command,
-	   "Execute nested commands WHILE the conditional expression is non zero.\n\
+  add_com ("while", class_support, while_command, _("\
+Execute nested commands WHILE the conditional expression is non zero.\n\
 The conditional expression must follow the word `while' and must in turn be\n\
 followed by a new line.  The nested commands must be entered one per line,\n\
-and should be terminated by the word `end'.");
+and should be terminated by the word `end'."));
 
-  add_com ("if", class_support, if_command,
-	   "Execute nested commands once IF the conditional expression is non zero.\n\
+  add_com ("if", class_support, if_command, _("\
+Execute nested commands once IF the conditional expression is non zero.\n\
 The conditional expression must follow the word `if' and must in turn be\n\
 followed by a new line.  The nested commands must be entered one per line,\n\
 and should be terminated by the word 'else' or `end'.  If an else clause\n\
-is used, the same rules apply to its nested commands as to the first ones.");
+is used, the same rules apply to its nested commands as to the first ones."));
 
   /* If target is open when baud changes, it doesn't take effect until the
      next open (I think, not sure).  */
@@ -1202,45 +1203,43 @@ from the target.", &setlist),
      &showlist);
 
   add_prefix_cmd ("debug", no_class, set_debug,
-		  "Generic command for setting gdb debugging flags",
+		  _("Generic command for setting gdb debugging flags"),
 		  &setdebuglist, "set debug ", 0, &setlist);
 
   add_prefix_cmd ("debug", no_class, show_debug,
-		  "Generic command for showing gdb debugging flags",
+		  _("Generic command for showing gdb debugging flags"),
 		  &showdebuglist, "show debug ", 0, &showlist);
 
-  c = add_com ("shell", class_support, shell_escape,
-	       "Execute the rest of the line as a shell command.\n\
-With no arguments, run an inferior shell.");
+  c = add_com ("shell", class_support, shell_escape, _("\
+Execute the rest of the line as a shell command.\n\
+With no arguments, run an inferior shell."));
   set_cmd_completer (c, filename_completer);
 
-  c = add_com ("edit", class_files, edit_command,
-           concat ("Edit specified file or function.\n\
+  c = add_com ("edit", class_files, edit_command, _("\
+Edit specified file or function.\n\
 With no argument, edits file containing most recent line listed.\n\
-", "\
 Editing targets can be specified in these ways:\n\
   FILE:LINENUM, to edit at that line in that file,\n\
   FUNCTION, to edit at the beginning of that function,\n\
   FILE:FUNCTION, to distinguish among like-named static functions.\n\
   *ADDRESS, to edit at the line containing that address.\n\
-Uses EDITOR environment variable contents as editor (or ex as default).",NULL));
+Uses EDITOR environment variable contents as editor (or ex as default)."));
 
   c->completer = location_completer;
 
-  add_com ("list", class_files, list_command,
-	   concat ("List specified function or line.\n\
+  add_com ("list", class_files, list_command, _("\
+List specified function or line.\n\
 With no argument, lists ten more lines after or around previous listing.\n\
 \"list -\" lists the ten lines before a previous ten-line listing.\n\
 One argument specifies a line, and ten lines are listed around that line.\n\
 Two arguments with comma between specify starting and ending lines to list.\n\
-", "\
 Lines can be specified in these ways:\n\
   LINENUM, to list around that line in current file,\n\
   FILE:LINENUM, to list around that line in that file,\n\
   FUNCTION, to list around beginning of that function,\n\
   FILE:FUNCTION, to distinguish among like-named static functions.\n\
   *ADDRESS, to list around the line containing that address.\n\
-With two args if one is empty it stands for ten lines away from the other arg.", NULL));
+With two args if one is empty it stands for ten lines away from the other arg."));
 
   if (!xdb_commands)
     add_com_alias ("l", "list", class_files, 1);
@@ -1250,11 +1249,11 @@ With two args if one is empty it stands for ten lines away from the other arg.",
   if (dbx_commands)
     add_com_alias ("file", "list", class_files, 1);
 
-  c = add_com ("disassemble", class_vars, disassemble_command,
-	       "Disassemble a specified section of memory.\n\
+  c = add_com ("disassemble", class_vars, disassemble_command, _("\
+Disassemble a specified section of memory.\n\
 Default is the function surrounding the pc of the selected frame.\n\
 With a single argument, the function surrounding that address is dumped.\n\
-Two arguments are taken as a range of memory to dump.");
+Two arguments are taken as a range of memory to dump."));
   set_cmd_completer (c, location_completer);
   if (xdb_commands)
     add_com_alias ("va", "disassemble", class_xdb, 0);
@@ -1268,14 +1267,15 @@ Two arguments are taken as a range of memory to dump.");
   if (xdb_commands)
     add_com_alias ("!", "shell", class_support, 0);
 
-  c = add_com ("make", class_support, make_command,
-          "Run the ``make'' program using the rest of the line as arguments.");
+  c = add_com ("make", class_support, make_command, _("\
+Run the ``make'' program using the rest of the line as arguments."));
   set_cmd_completer (c, filename_completer);
   add_cmd ("user", no_class, show_user, _("\
 Show definitions of user defined commands.\n\
 Argument is the name of the user defined command.\n\
 With no argument, show definitions of all user defined commands."), &showlist);
-  add_com ("apropos", class_support, apropos_command, "Search for commands matching a REGEXP");
+  add_com ("apropos", class_support, apropos_command,
+	   _("Search for commands matching a REGEXP"));
 
   deprecated_add_show_from_set
     (add_set_cmd ("max-user-call-depth", no_class, var_integer, 

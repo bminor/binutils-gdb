@@ -509,6 +509,6 @@ _initialize_infptrace (void)
 {
 #if !defined (CHILD_XFER_MEMORY)
   add_info ("udot", udot_info,
-	    "Print contents of kernel ``struct user'' for current child.");
+	    _("Print contents of kernel ``struct user'' for current child."));
 #endif
 }

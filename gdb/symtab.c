@@ -4105,14 +4105,14 @@ main_name (void)
 void
 _initialize_symtab (void)
 {
-  add_info ("variables", variables_info,
-	 "All global and static variable names, or those matching REGEXP.");
+  add_info ("variables", variables_info, _("\
+All global and static variable names, or those matching REGEXP."));
   if (dbx_commands)
-    add_com ("whereis", class_info, variables_info,
-	 "All global and static variable names, or those matching REGEXP.");
+    add_com ("whereis", class_info, variables_info, _("\
+All global and static variable names, or those matching REGEXP."));
 
   add_info ("functions", functions_info,
-	    "All function names, or those matching REGEXP.");
+	    _("All function names, or those matching REGEXP."));
 
   
   /* FIXME:  This command has at least the following problems:
@@ -4124,19 +4124,20 @@ _initialize_symtab (void)
      I also think "ptype" or "whatis" is more likely to be useful (but if
      there is much disagreement "info types" can be fixed).  */
   add_info ("types", types_info,
-	    "All type names, or those matching REGEXP.");
+	    _("All type names, or those matching REGEXP."));
 
   add_info ("sources", sources_info,
-	    "Source files in the program.");
+	    _("Source files in the program."));
 
   add_com ("rbreak", class_breakpoint, rbreak_command,
-	   "Set a breakpoint for all functions matching REGEXP.");
+	   _("Set a breakpoint for all functions matching REGEXP."));
 
   if (xdb_commands)
     {
-      add_com ("lf", class_info, sources_info, "Source files in the program");
-      add_com ("lg", class_info, variables_info,
-	 "All global and static variable names, or those matching REGEXP.");
+      add_com ("lf", class_info, sources_info,
+	       _("Source files in the program"));
+      add_com ("lg", class_info, variables_info, _("\
+All global and static variable names, or those matching REGEXP."));
     }
 
   /* Initialize the one built-in type that isn't language dependent... */

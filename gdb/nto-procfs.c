@@ -1343,8 +1343,8 @@ _initialize_procfs (void)
   nto_cpuinfo_flags = SYSPAGE_ENTRY (cpuinfo)->flags;
   nto_cpuinfo_valid = 1;
 
-  add_info ("pidlist", procfs_pidlist, "pidlist");
-  add_info ("meminfo", procfs_meminfo, "memory information");
+  add_info ("pidlist", procfs_pidlist, _("pidlist"));
+  add_info ("meminfo", procfs_meminfo, _("memory information"));
 
   nto_is_nto_target = procfs_is_nto_target;
 }

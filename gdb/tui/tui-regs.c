@@ -595,7 +595,7 @@ _initialize_tui_regs (void)
   tuicmd = tui_get_cmd_list ();
 
   add_prefix_cmd ("reg", class_tui, tui_reg_command,
-                  "TUI commands to control the register window.",
+                  _("TUI commands to control the register window."),
                   &tuireglist, "tui reg ", 0,
                   tuicmd);
 
@@ -615,15 +615,15 @@ _initialize_tui_regs (void)
   if (xdb_commands)
     {
       add_com ("fr", class_tui, tui_reg_float_command,
-	       "Display only floating point registers\n");
+	       _("Display only floating point registers\n"));
       add_com ("gr", class_tui, tui_reg_general_command,
-	       "Display only general registers\n");
+	       _("Display only general registers\n"));
       add_com ("sr", class_tui, tui_reg_system_command,
-	       "Display only special registers\n");
+	       _("Display only special registers\n"));
       add_com ("+r", class_tui, tui_scroll_regs_forward_command,
-	       "Scroll the registers window forward\n");
+	       _("Scroll the registers window forward\n"));
       add_com ("-r", class_tui, tui_scroll_regs_backward_command,
-	       "Scroll the register window backward\n");
+	       _("Scroll the register window backward\n"));
     }
 }
 

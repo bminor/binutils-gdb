@@ -735,12 +735,12 @@ is searched for a command of that name.\n\
 No arg means have no executable file."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
-  add_com ("section", class_files, set_section_command,
-	   "Change the base address of section SECTION of the exec file to ADDR.\n\
+  add_com ("section", class_files, set_section_command, _("\
+Change the base address of section SECTION of the exec file to ADDR.\n\
 This can be used if the exec file does not contain section addresses,\n\
 (such as in the a.out format), or when the addresses specified in the\n\
 file itself are wrong.  Each section must be changed separately.  The\n\
-``info files'' command lists all the sections and their addresses.");
+``info files'' command lists all the sections and their addresses."));
 
   deprecated_add_show_from_set
     (add_set_cmd ("write", class_support, var_boolean, (char *) &write_files,

@@ -695,18 +695,18 @@ _initialize_maint_cmds (void)
 {
   struct cmd_list_element *tmpcmd;
 
-  add_prefix_cmd ("maintenance", class_maintenance, maintenance_command,
-		  "Commands for use by GDB maintainers.\n\
+  add_prefix_cmd ("maintenance", class_maintenance, maintenance_command, _("\
+Commands for use by GDB maintainers.\n\
 Includes commands to dump specific internal GDB structures in\n\
 a human readable form, to cause GDB to deliberately dump core,\n\
-to test internal functions such as the C++/ObjC demangler, etc.",
+to test internal functions such as the C++/ObjC demangler, etc."),
 		  &maintenancelist, "maintenance ", 0,
 		  &cmdlist);
 
   add_com_alias ("mt", "maintenance", class_maintenance, 1);
 
-  add_prefix_cmd ("info", class_maintenance, maintenance_info_command,
-     "Commands for showing internal info about the program being debugged.",
+  add_prefix_cmd ("info", class_maintenance, maintenance_info_command, _("\
+Commands for showing internal info about the program being debugged."),
 		  &maintenanceinfolist, "maintenance info ", 0,
 		  &maintenancelist);
   add_alias_cmd ("i", "info", class_maintenance, 1, &maintenancelist);
@@ -724,20 +724,20 @@ lists all sections from all object files, including shared libraries."),
 	   &maintenanceinfolist);
 
   add_prefix_cmd ("print", class_maintenance, maintenance_print_command,
-		  "Maintenance command for printing GDB internal state.",
+		  _("Maintenance command for printing GDB internal state."),
 		  &maintenanceprintlist, "maintenance print ", 0,
 		  &maintenancelist);
 
-  add_prefix_cmd ("set", class_maintenance, maintenance_set_cmd, "\
+  add_prefix_cmd ("set", class_maintenance, maintenance_set_cmd, _("\
 Set GDB internal variables used by the GDB maintainer.\n\
-Configure variables internal to GDB that aid in GDB's maintenance",
+Configure variables internal to GDB that aid in GDB's maintenance"),
 		  &maintenance_set_cmdlist, "maintenance set ",
 		  0/*allow-unknown*/,
 		  &maintenancelist);
 
-  add_prefix_cmd ("show", class_maintenance, maintenance_show_cmd, "\
+  add_prefix_cmd ("show", class_maintenance, maintenance_show_cmd, _("\
 Show GDB internal variables used by the GDB maintainer.\n\
-Configure variables internal to GDB that aid in GDB's maintenance",
+Configure variables internal to GDB that aid in GDB's maintenance"),
 		  &maintenance_show_cmdlist, "maintenance show ",
 		  0/*allow-unknown*/,
 		  &maintenancelist);

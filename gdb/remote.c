@@ -5267,16 +5267,16 @@ threadlist_update_test_cmd (char *cmd, int tty)
 static void
 init_remote_threadtests (void)
 {
-  add_com ("tlist", class_obscure, threadlist_test_cmd,
-     "Fetch and print the remote list of thread identifiers, one pkt only");
+  add_com ("tlist", class_obscure, threadlist_test_cmd, _("\
+Fetch and print the remote list of thread identifiers, one pkt only"));
   add_com ("tinfo", class_obscure, threadinfo_test_cmd,
-	   "Fetch and display info about one thread");
+	   _("Fetch and display info about one thread"));
   add_com ("tset", class_obscure, threadset_test_cmd,
-	   "Test setting to a different thread");
+	   _("Test setting to a different thread"));
   add_com ("tupd", class_obscure, threadlist_update_test_cmd,
-	   "Iterate through updating all remote thread info");
+	   _("Iterate through updating all remote thread info"));
   add_com ("talive", class_obscure, threadalive_test,
-	   " Remote thread alive test ");
+	   _(" Remote thread alive test "));
 }
 
 #endif /* 0 */
@@ -5570,16 +5570,16 @@ _initialize_remote (void)
 
   /* set/show remote ...  */
 
-  add_prefix_cmd ("remote", class_maintenance, set_remote_cmd, "\
+  add_prefix_cmd ("remote", class_maintenance, set_remote_cmd, _("\
 Remote protocol specific variables\n\
 Configure various remote-protocol specific variables such as\n\
-the packets being used",
+the packets being used"),
 		  &remote_set_cmdlist, "set remote ",
 		  0 /* allow-unknown */, &setlist);
-  add_prefix_cmd ("remote", class_maintenance, show_remote_cmd, "\
+  add_prefix_cmd ("remote", class_maintenance, show_remote_cmd, _("\
 Remote protocol specific variables\n\
 Configure various remote-protocol specific variables such as\n\
-the packets being used",
+the packets being used"),
 		  &remote_show_cmdlist, "show remote ",
 		  0 /* allow-unknown */, &showlist);
 

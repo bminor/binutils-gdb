@@ -1538,14 +1538,14 @@ _initialize_frame (void)
 
   observer_attach_target_changed (frame_observer_target_changed);
 
-  add_prefix_cmd ("backtrace", class_maintenance, set_backtrace_cmd, "\
+  add_prefix_cmd ("backtrace", class_maintenance, set_backtrace_cmd, _("\
 Set backtrace specific variables.\n\
-Configure backtrace variables such as the backtrace limit",
+Configure backtrace variables such as the backtrace limit"),
 		  &set_backtrace_cmdlist, "set backtrace ",
 		  0/*allow-unknown*/, &setlist);
-  add_prefix_cmd ("backtrace", class_maintenance, show_backtrace_cmd, "\
+  add_prefix_cmd ("backtrace", class_maintenance, show_backtrace_cmd, _("\
 Show backtrace specific variables\n\
-Show backtrace variables such as the backtrace limit",
+Show backtrace variables such as the backtrace limit"),
 		  &show_backtrace_cmdlist, "show backtrace ",
 		  0/*allow-unknown*/, &showlist);
 

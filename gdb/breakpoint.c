@@ -7622,67 +7622,67 @@ _initialize_breakpoint (void)
      before a breakpoint is set.  */
   breakpoint_count = 0;
 
-  add_com ("ignore", class_breakpoint, ignore_command,
-	   "Set ignore-count of breakpoint number N to COUNT.\n\
-Usage is `ignore N COUNT'.");
+  add_com ("ignore", class_breakpoint, ignore_command, _("\
+Set ignore-count of breakpoint number N to COUNT.\n\
+Usage is `ignore N COUNT'."));
   if (xdb_commands)
     add_com_alias ("bc", "ignore", class_breakpoint, 1);
 
-  add_com ("commands", class_breakpoint, commands_command,
-	   "Set commands to be executed when a breakpoint is hit.\n\
+  add_com ("commands", class_breakpoint, commands_command, _("\
+Set commands to be executed when a breakpoint is hit.\n\
 Give breakpoint number as argument after \"commands\".\n\
 With no argument, the targeted breakpoint is the last one set.\n\
 The commands themselves follow starting on the next line.\n\
 Type a line containing \"end\" to indicate the end of them.\n\
 Give \"silent\" as the first line to make the breakpoint silent;\n\
-then no output is printed when it is hit, except what the commands print.");
+then no output is printed when it is hit, except what the commands print."));
 
-  add_com ("condition", class_breakpoint, condition_command,
-	   "Specify breakpoint number N to break only if COND is true.\n\
+  add_com ("condition", class_breakpoint, condition_command, _("\
+Specify breakpoint number N to break only if COND is true.\n\
 Usage is `condition N COND', where N is an integer and COND is an\n\
-expression to be evaluated whenever breakpoint N is reached.");
+expression to be evaluated whenever breakpoint N is reached."));
 
-  c = add_com ("tbreak", class_breakpoint, tbreak_command,
-	       "Set a temporary breakpoint.  Args like \"break\" command.\n\
+  c = add_com ("tbreak", class_breakpoint, tbreak_command, _("\
+Set a temporary breakpoint.  Args like \"break\" command.\n\
 Like \"break\" except the breakpoint is only temporary,\n\
 so it will be deleted when hit.  Equivalent to \"break\" followed\n\
-by using \"enable delete\" on the breakpoint number.");
+by using \"enable delete\" on the breakpoint number."));
   set_cmd_completer (c, location_completer);
 
-  c = add_com ("hbreak", class_breakpoint, hbreak_command,
-	       "Set a hardware assisted  breakpoint. Args like \"break\" command.\n\
+  c = add_com ("hbreak", class_breakpoint, hbreak_command, _("\
+Set a hardware assisted  breakpoint. Args like \"break\" command.\n\
 Like \"break\" except the breakpoint requires hardware support,\n\
-some target hardware may not have this support.");
+some target hardware may not have this support."));
   set_cmd_completer (c, location_completer);
 
-  c = add_com ("thbreak", class_breakpoint, thbreak_command,
-	       "Set a temporary hardware assisted breakpoint. Args like \"break\" command.\n\
+  c = add_com ("thbreak", class_breakpoint, thbreak_command, _("\
+Set a temporary hardware assisted breakpoint. Args like \"break\" command.\n\
 Like \"hbreak\" except the breakpoint is only temporary,\n\
-so it will be deleted when hit.");
+so it will be deleted when hit."));
   set_cmd_completer (c, location_completer);
 
-  add_prefix_cmd ("enable", class_breakpoint, enable_command,
-		  "Enable some breakpoints.\n\
+  add_prefix_cmd ("enable", class_breakpoint, enable_command, _("\
+Enable some breakpoints.\n\
 Give breakpoint numbers (separated by spaces) as arguments.\n\
 With no subcommand, breakpoints are enabled until you command otherwise.\n\
 This is used to cancel the effect of the \"disable\" command.\n\
-With a subcommand you can enable temporarily.",
+With a subcommand you can enable temporarily."),
 		  &enablelist, "enable ", 1, &cmdlist);
   if (xdb_commands)
-    add_com ("ab", class_breakpoint, enable_command,
-	     "Enable some breakpoints.\n\
+    add_com ("ab", class_breakpoint, enable_command, _("\
+Enable some breakpoints.\n\
 Give breakpoint numbers (separated by spaces) as arguments.\n\
 With no subcommand, breakpoints are enabled until you command otherwise.\n\
 This is used to cancel the effect of the \"disable\" command.\n\
-With a subcommand you can enable temporarily.");
+With a subcommand you can enable temporarily."));
 
   add_com_alias ("en", "enable", class_breakpoint, 1);
 
-  add_abbrev_prefix_cmd ("breakpoints", class_breakpoint, enable_command,
-			 "Enable some breakpoints.\n\
+  add_abbrev_prefix_cmd ("breakpoints", class_breakpoint, enable_command, _("\
+Enable some breakpoints.\n\
 Give breakpoint numbers (separated by spaces) as arguments.\n\
 This is used to cancel the effect of the \"disable\" command.\n\
-May be abbreviated to simply \"enable\".\n",
+May be abbreviated to simply \"enable\".\n"),
 		   &enablebreaklist, "enable breakpoints ", 1, &enablelist);
 
   add_cmd ("once", no_class, enable_once_command, _("\
@@ -7705,20 +7705,20 @@ Enable breakpoints for one hit.  Give breakpoint numbers.\n\
 If a breakpoint is hit while enabled in this fashion, it becomes disabled."),
 	   &enablelist);
 
-  add_prefix_cmd ("disable", class_breakpoint, disable_command,
-		  "Disable some breakpoints.\n\
+  add_prefix_cmd ("disable", class_breakpoint, disable_command, _("\
+Disable some breakpoints.\n\
 Arguments are breakpoint numbers with spaces in between.\n\
 To disable all breakpoints, give no argument.\n\
-A disabled breakpoint is not forgotten, but has no effect until reenabled.",
+A disabled breakpoint is not forgotten, but has no effect until reenabled."),
 		  &disablelist, "disable ", 1, &cmdlist);
   add_com_alias ("dis", "disable", class_breakpoint, 1);
   add_com_alias ("disa", "disable", class_breakpoint, 1);
   if (xdb_commands)
-    add_com ("sb", class_breakpoint, disable_command,
-	     "Disable some breakpoints.\n\
+    add_com ("sb", class_breakpoint, disable_command, _("\
+Disable some breakpoints.\n\
 Arguments are breakpoint numbers with spaces in between.\n\
 To disable all breakpoints, give no argument.\n\
-A disabled breakpoint is not forgotten, but has no effect until reenabled.");
+A disabled breakpoint is not forgotten, but has no effect until reenabled."));
 
   add_cmd ("breakpoints", class_alias, disable_command, _("\
 Disable some breakpoints.\n\
@@ -7728,20 +7728,20 @@ A disabled breakpoint is not forgotten, but has no effect until reenabled.\n\
 This command may be abbreviated \"disable\"."),
 	   &disablelist);
 
-  add_prefix_cmd ("delete", class_breakpoint, delete_command,
-		  "Delete some breakpoints or auto-display expressions.\n\
+  add_prefix_cmd ("delete", class_breakpoint, delete_command, _("\
+Delete some breakpoints or auto-display expressions.\n\
 Arguments are breakpoint numbers with spaces in between.\n\
 To delete all breakpoints, give no argument.\n\
 \n\
 Also a prefix command for deletion of other GDB objects.\n\
-The \"unset\" command is also an alias for \"delete\".",
+The \"unset\" command is also an alias for \"delete\"."),
 		  &deletelist, "delete ", 1, &cmdlist);
   add_com_alias ("d", "delete", class_breakpoint, 1);
   if (xdb_commands)
-    add_com ("db", class_breakpoint, delete_command,
-	     "Delete some breakpoints.\n\
+    add_com ("db", class_breakpoint, delete_command, _("\
+Delete some breakpoints.\n\
 Arguments are breakpoint numbers with spaces in between.\n\
-To delete all breakpoints, give no argument.\n");
+To delete all breakpoints, give no argument.\n"));
 
   add_cmd ("breakpoints", class_alias, delete_command, _("\
 Delete some breakpoints or auto-display expressions.\n\
@@ -7750,29 +7750,30 @@ To delete all breakpoints, give no argument.\n\
 This command may be abbreviated \"delete\"."),
 	   &deletelist);
 
-  add_com ("clear", class_breakpoint, clear_command,
-	   concat ("Clear breakpoint at specified line or function.\n\
+  add_com ("clear", class_breakpoint, clear_command, _("\
+Clear breakpoint at specified line or function.\n\
 Argument may be line number, function name, or \"*\" and an address.\n\
 If line number is specified, all breakpoints in that line are cleared.\n\
 If function is specified, breakpoints at beginning of function are cleared.\n\
-If an address is specified, breakpoints at that address are cleared.\n\n",
-		   "With no argument, clears all breakpoints in the line that the selected frame\n\
+If an address is specified, breakpoints at that address are cleared.\n\
+\n\
+With no argument, clears all breakpoints in the line that the selected frame\n\
 is executing in.\n\
 \n\
-See also the \"delete\" command which clears breakpoints by number.", NULL));
+See also the \"delete\" command which clears breakpoints by number."));
 
-  c = add_com ("break", class_breakpoint, break_command,
-	       concat ("Set breakpoint at specified line or function.\n\
+  c = add_com ("break", class_breakpoint, break_command, _("\
+Set breakpoint at specified line or function.\n\
 Argument may be line number, function name, or \"*\" and an address.\n\
 If line number is specified, break at start of code for that line.\n\
 If function is specified, break at start of code for that function.\n\
-If an address is specified, break at that exact address.\n",
-		   "With no arg, uses current execution address of selected stack frame.\n\
+If an address is specified, break at that exact address.\n\
+With no arg, uses current execution address of selected stack frame.\n\
 This is useful for breaking on return to a stack frame.\n\
 \n\
 Multiple breakpoints at one place are permitted, and useful if conditional.\n\
 \n\
-Do \"help breakpoints\" for info on other commands dealing with breakpoints.", NULL));
+Do \"help breakpoints\" for info on other commands dealing with breakpoints."));
   set_cmd_completer (c, location_completer);
 
   add_com_alias ("b", "break", class_run, 1);
@@ -7788,56 +7789,59 @@ Do \"help breakpoints\" for info on other commands dealing with breakpoints.", N
 
   if (dbx_commands)
     {
-      add_abbrev_prefix_cmd ("stop", class_breakpoint, stop_command,
-	"Break in function/address or break at a line in the current file.",
+      add_abbrev_prefix_cmd ("stop", class_breakpoint, stop_command, _("\
+Break in function/address or break at a line in the current file."),
 			     &stoplist, "stop ", 1, &cmdlist);
       add_cmd ("in", class_breakpoint, stopin_command,
 	       _("Break in function or address."), &stoplist);
       add_cmd ("at", class_breakpoint, stopat_command,
 	       _("Break at a line in the current file."), &stoplist);
-      add_com ("status", class_info, breakpoints_info,
-	       concat ("Status of user-settable breakpoints, or breakpoint number NUMBER.\n\
+      add_com ("status", class_info, breakpoints_info, _("\
+Status of user-settable breakpoints, or breakpoint number NUMBER.\n\
 The \"Type\" column indicates one of:\n\
 \tbreakpoint     - normal breakpoint\n\
 \twatchpoint     - watchpoint\n\
 The \"Disp\" column contains one of \"keep\", \"del\", or \"dis\" to indicate\n\
 the disposition of the breakpoint after it gets hit.  \"dis\" means that the\n\
 breakpoint will be disabled.  The \"Address\" and \"What\" columns indicate the\n\
-address and file/line number respectively.\n\n",
-		       "Convenience variable \"$_\" and default examine address for \"x\"\n\
+address and file/line number respectively.\n\
+\n\
+Convenience variable \"$_\" and default examine address for \"x\"\n\
 are set to the address of the last breakpoint listed.\n\n\
 Convenience variable \"$bpnum\" contains the number of the last\n\
-breakpoint set.", NULL));
+breakpoint set."));
     }
 
-  add_info ("breakpoints", breakpoints_info,
-	    concat ("Status of user-settable breakpoints, or breakpoint number NUMBER.\n\
+  add_info ("breakpoints", breakpoints_info, _("\
+Status of user-settable breakpoints, or breakpoint number NUMBER.\n\
 The \"Type\" column indicates one of:\n\
 \tbreakpoint     - normal breakpoint\n\
 \twatchpoint     - watchpoint\n\
 The \"Disp\" column contains one of \"keep\", \"del\", or \"dis\" to indicate\n\
 the disposition of the breakpoint after it gets hit.  \"dis\" means that the\n\
 breakpoint will be disabled.  The \"Address\" and \"What\" columns indicate the\n\
-address and file/line number respectively.\n\n",
-		    "Convenience variable \"$_\" and default examine address for \"x\"\n\
+address and file/line number respectively.\n\
+\n\
+Convenience variable \"$_\" and default examine address for \"x\"\n\
 are set to the address of the last breakpoint listed.\n\n\
 Convenience variable \"$bpnum\" contains the number of the last\n\
-breakpoint set.", NULL));
+breakpoint set."));
 
   if (xdb_commands)
-    add_com ("lb", class_breakpoint, breakpoints_info,
-	     concat ("Status of user-settable breakpoints, or breakpoint number NUMBER.\n\
+    add_com ("lb", class_breakpoint, breakpoints_info, _("\
+Status of user-settable breakpoints, or breakpoint number NUMBER.\n\
 The \"Type\" column indicates one of:\n\
 \tbreakpoint     - normal breakpoint\n\
 \twatchpoint     - watchpoint\n\
 The \"Disp\" column contains one of \"keep\", \"del\", or \"dis\" to indicate\n\
 the disposition of the breakpoint after it gets hit.  \"dis\" means that the\n\
 breakpoint will be disabled.  The \"Address\" and \"What\" columns indicate the\n\
-address and file/line number respectively.\n\n",
-		     "Convenience variable \"$_\" and default examine address for \"x\"\n\
+address and file/line number respectively.\n\
+\n\
+Convenience variable \"$_\" and default examine address for \"x\"\n\
 are set to the address of the last breakpoint listed.\n\n\
 Convenience variable \"$bpnum\" contains the number of the last\n\
-breakpoint set.", NULL));
+breakpoint set."));
 
   add_cmd ("breakpoints", class_maintenance, maintenance_info_breakpoints, _("\
 Status of all breakpoints, or breakpoint number NUMBER.\n\
@@ -7860,8 +7864,8 @@ Convenience variable \"$bpnum\" contains the number of the last\n\
 breakpoint set."),
 	   &maintenanceinfolist);
 
-  add_com ("catch", class_breakpoint, catch_command,
-	   "Set catchpoints to catch events.\n\
+  add_com ("catch", class_breakpoint, catch_command, _("\
+Set catchpoints to catch events.\n\
 Raised signals may be caught:\n\
 \tcatch signal              - all signals\n\
 \tcatch signal <signame>    - a particular signal\n\
@@ -7893,35 +7897,35 @@ C++ exceptions may be caught:\n\
 \n\
 Do \"help set follow-fork-mode\" for info on debugging your program\n\
 after a fork or vfork is caught.\n\n\
-Do \"help breakpoints\" for info on other commands dealing with breakpoints.");
+Do \"help breakpoints\" for info on other commands dealing with breakpoints."));
 
-  add_com ("tcatch", class_breakpoint, tcatch_command,
-	   "Set temporary catchpoints to catch events.\n\
+  add_com ("tcatch", class_breakpoint, tcatch_command, _("\
+Set temporary catchpoints to catch events.\n\
 Args like \"catch\" command.\n\
 Like \"catch\" except the catchpoint is only temporary,\n\
 so it will be deleted when hit.  Equivalent to \"catch\" followed\n\
-by using \"enable delete\" on the catchpoint number.");
+by using \"enable delete\" on the catchpoint number."));
 
-  c = add_com ("watch", class_breakpoint, watch_command,
-	       "Set a watchpoint for an expression.\n\
+  c = add_com ("watch", class_breakpoint, watch_command, _("\
+Set a watchpoint for an expression.\n\
 A watchpoint stops execution of your program whenever the value of\n\
-an expression changes.");
+an expression changes."));
   set_cmd_completer (c, location_completer);
 
-  c = add_com ("rwatch", class_breakpoint, rwatch_command,
-	       "Set a read watchpoint for an expression.\n\
+  c = add_com ("rwatch", class_breakpoint, rwatch_command, _("\
+Set a read watchpoint for an expression.\n\
 A watchpoint stops execution of your program whenever the value of\n\
-an expression is read.");
+an expression is read."));
   set_cmd_completer (c, location_completer);
 
-  c = add_com ("awatch", class_breakpoint, awatch_command,
-	       "Set a watchpoint for an expression.\n\
+  c = add_com ("awatch", class_breakpoint, awatch_command, _("\
+Set a watchpoint for an expression.\n\
 A watchpoint stops execution of your program whenever the value of\n\
-an expression is either read or written.");
+an expression is either read or written."));
   set_cmd_completer (c, location_completer);
 
   add_info ("watchpoints", breakpoints_info,
-	    "Synonym for ``info breakpoints''.");
+	    _("Synonym for ``info breakpoints''."));
 
 
   c = add_set_cmd ("can-use-hw-watchpoints", class_support, var_zinteger,
@@ -7936,16 +7940,16 @@ hardware.)",
 
   can_use_hw_watchpoints = 1;
 
-  add_prefix_cmd ("breakpoint", class_maintenance, set_breakpoint_cmd, "\
+  add_prefix_cmd ("breakpoint", class_maintenance, set_breakpoint_cmd, _("\
 Breakpoint specific settings\n\
 Configure various breakpoint-specific variables such as\n\
-pending breakpoint behavior",
+pending breakpoint behavior"),
 		  &breakpoint_set_cmdlist, "set breakpoint ",
 		  0/*allow-unknown*/, &setlist);
-  add_prefix_cmd ("breakpoint", class_maintenance, show_breakpoint_cmd, "\
+  add_prefix_cmd ("breakpoint", class_maintenance, show_breakpoint_cmd, _("\
 Breakpoint specific settings\n\
 Configure various breakpoint-specific variables such as\n\
-pending breakpoint behavior",
+pending breakpoint behavior"),
 		  &breakpoint_show_cmdlist, "show breakpoint ",
 		  0/*allow-unknown*/, &showlist);
 

@@ -1415,7 +1415,7 @@ _initialize_regcache (void)
   observer_attach_target_changed (regcache_observer_target_changed);
 
   add_com ("flushregs", class_maintenance, reg_flush_command,
-	   "Force gdb to flush its register cache (maintainer command)");
+	   _("Force gdb to flush its register cache (maintainer command)"));
 
    /* Initialize the thread/process associated with the current set of
       registers.  For now, -1 is special, and means `no current process'.  */

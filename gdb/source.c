@@ -1604,29 +1604,28 @@ $cdir in the path means the compilation directory of the source file."),
     }
 
   add_info ("source", source_info,
-	    "Information about the current source file.");
+	    _("Information about the current source file."));
 
-  add_info ("line", line_info,
-	    concat ("Core addresses of the code for a source line.\n\
+  add_info ("line", line_info, _("\
+Core addresses of the code for a source line.\n\
 Line can be specified as\n\
   LINENUM, to list around that line in current file,\n\
   FILE:LINENUM, to list around that line in that file,\n\
   FUNCTION, to list around beginning of that function,\n\
   FILE:FUNCTION, to distinguish among like-named static functions.\n\
-", "\
 Default is to describe the last source line that was listed.\n\n\
 This sets the default address for \"x\" to the line's first instruction\n\
 so that \"x/i\" suffices to start examining the machine code.\n\
-The address is also stored as the value of \"$_\".", NULL));
+The address is also stored as the value of \"$_\"."));
 
-  add_com ("forward-search", class_files, forward_search_command,
-	   "Search for regular expression (see regex(3)) from last line listed.\n\
-The matching line number is also stored as the value of \"$_\".");
+  add_com ("forward-search", class_files, forward_search_command, _("\
+Search for regular expression (see regex(3)) from last line listed.\n\
+The matching line number is also stored as the value of \"$_\"."));
   add_com_alias ("search", "forward-search", class_files, 0);
 
-  add_com ("reverse-search", class_files, reverse_search_command,
-	   "Search backward for regular expression (see regex(3)) from last line listed.\n\
-The matching line number is also stored as the value of \"$_\".");
+  add_com ("reverse-search", class_files, reverse_search_command, _("\
+Search backward for regular expression (see regex(3)) from last line listed.\n\
+The matching line number is also stored as the value of \"$_\"."));
 
   if (xdb_commands)
     {

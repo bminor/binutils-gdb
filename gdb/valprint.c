@@ -1193,14 +1193,14 @@ _initialize_valprint (void)
   struct cmd_list_element *c;
 
   add_prefix_cmd ("print", no_class, set_print,
-		  "Generic command for setting how things print.",
+		  _("Generic command for setting how things print."),
 		  &setprintlist, "set print ", 0, &setlist);
   add_alias_cmd ("p", "print", no_class, 1, &setlist);
   /* prefer set print to set prompt */
   add_alias_cmd ("pr", "print", no_class, 1, &setlist);
 
   add_prefix_cmd ("print", no_class, show_print,
-		  "Generic command for showing print settings.",
+		  _("Generic command for showing print settings."),
 		  &showprintlist, "show print ", 0, &showlist);
   add_alias_cmd ("p", "print", no_class, 1, &showlist);
   add_alias_cmd ("pr", "print", no_class, 1, &showlist);

@@ -2710,30 +2710,30 @@ _initialize_tracepoint (void)
     }
 
   add_info ("scope", scope_info,
-	    "List the variables local to a scope");
+	    _("List the variables local to a scope"));
 
   add_cmd ("tracepoints", class_trace, NULL,
 	   _("Tracing of program execution without stopping the program."),
 	   &cmdlist);
 
-  add_info ("tracepoints", tracepoints_info,
-	    "Status of tracepoints, or tracepoint number NUMBER.\n\
+  add_info ("tracepoints", tracepoints_info, _("\
+Status of tracepoints, or tracepoint number NUMBER.\n\
 Convenience variable \"$tpnum\" contains the number of the\n\
-last tracepoint set.");
+last tracepoint set."));
 
   add_info_alias ("tp", "tracepoints", 1);
 
-  c = add_com ("save-tracepoints", class_trace, tracepoint_save_command,
-	       "Save current tracepoint definitions as a script.\n\
-Use the 'source' command in another debug session to restore them.");
+  c = add_com ("save-tracepoints", class_trace, tracepoint_save_command, _("\
+Save current tracepoint definitions as a script.\n\
+Use the 'source' command in another debug session to restore them."));
   set_cmd_completer (c, filename_completer);
 
   add_com ("tdump", class_trace, trace_dump_command,
-	   "Print everything collected at the current tracepoint.");
+	   _("Print everything collected at the current tracepoint."));
 
-  add_prefix_cmd ("tfind", class_trace, trace_find_command,
-		  "Select a trace frame;\n\
-No argument means forward by one frame; '-' means backward by one frame.",
+  add_prefix_cmd ("tfind", class_trace, trace_find_command, _("\
+Select a trace frame;\n\
+No argument means forward by one frame; '-' means backward by one frame."),
 		  &tfindlist, "tfind ", 1, &cmdlist);
 
   add_cmd ("outside", class_trace, trace_find_outside_command, _("\
@@ -2777,53 +2777,53 @@ De-select any trace frame and resume 'live' debugging."),
 	   &tfindlist);
 
   add_com ("tstatus", class_trace, trace_status_command,
-	   "Display the status of the current trace data collection.");
+	   _("Display the status of the current trace data collection."));
 
   add_com ("tstop", class_trace, trace_stop_command,
-	   "Stop trace data collection.");
+	   _("Stop trace data collection."));
 
   add_com ("tstart", class_trace, trace_start_command,
-	   "Start trace data collection.");
+	   _("Start trace data collection."));
 
-  add_com ("passcount", class_trace, trace_pass_command,
-	   "Set the passcount for a tracepoint.\n\
+  add_com ("passcount", class_trace, trace_pass_command, _("\
+Set the passcount for a tracepoint.\n\
 The trace will end when the tracepoint has been passed 'count' times.\n\
 Usage: passcount COUNT TPNUM, where TPNUM may also be \"all\";\n\
-if TPNUM is omitted, passcount refers to the last tracepoint defined.");
+if TPNUM is omitted, passcount refers to the last tracepoint defined."));
 
-  add_com ("end", class_trace, end_actions_pseudocommand,
-	   "Ends a list of commands or actions.\n\
+  add_com ("end", class_trace, end_actions_pseudocommand, _("\
+Ends a list of commands or actions.\n\
 Several GDB commands allow you to enter a list of commands or actions.\n\
 Entering \"end\" on a line by itself is the normal way to terminate\n\
 such a list.\n\n\
-Note: the \"end\" command cannot be used at the gdb prompt.");
+Note: the \"end\" command cannot be used at the gdb prompt."));
 
-  add_com ("while-stepping", class_trace, while_stepping_pseudocommand,
-	   "Specify single-stepping behavior at a tracepoint.\n\
+  add_com ("while-stepping", class_trace, while_stepping_pseudocommand, _("\
+Specify single-stepping behavior at a tracepoint.\n\
 Argument is number of instructions to trace in single-step mode\n\
 following the tracepoint.  This command is normally followed by\n\
 one or more \"collect\" commands, to specify what to collect\n\
 while single-stepping.\n\n\
-Note: this command can only be used in a tracepoint \"actions\" list.");
+Note: this command can only be used in a tracepoint \"actions\" list."));
 
   add_com_alias ("ws", "while-stepping", class_alias, 0);
   add_com_alias ("stepping", "while-stepping", class_alias, 0);
 
-  add_com ("collect", class_trace, collect_pseudocommand,
-	   "Specify one or more data items to be collected at a tracepoint.\n\
+  add_com ("collect", class_trace, collect_pseudocommand, _("\
+Specify one or more data items to be collected at a tracepoint.\n\
 Accepts a comma-separated list of (one or more) expressions.  GDB will\n\
 collect all data (variables, registers) referenced by that expression.\n\
 Also accepts the following special arguments:\n\
     $regs   -- all registers.\n\
     $args   -- all function arguments.\n\
     $locals -- all variables local to the block/function scope.\n\
-Note: this command can only be used in a tracepoint \"actions\" list.");
+Note: this command can only be used in a tracepoint \"actions\" list."));
 
-  add_com ("actions", class_trace, trace_actions_command,
-	   "Specify the actions to be taken at a tracepoint.\n\
+  add_com ("actions", class_trace, trace_actions_command, _("\
+Specify the actions to be taken at a tracepoint.\n\
 Tracepoint actions may include collecting of specified data, \n\
 single-stepping, or enabling/disabling other tracepoints, \n\
-depending on target's capabilities.");
+depending on target's capabilities."));
 
   add_cmd ("tracepoints", class_trace, delete_trace_command, _("\
 Delete specified tracepoints.\n\
@@ -2843,12 +2843,12 @@ Arguments are tracepoint numbers, separated by spaces.\n\
 No argument means enable all tracepoints."),
 	   &enablelist);
 
-  c = add_com ("trace", class_trace, trace_command,
-	       "Set a tracepoint at a specified line or function or address.\n\
+  c = add_com ("trace", class_trace, trace_command, _("\
+Set a tracepoint at a specified line or function or address.\n\
 Argument may be a line number, function name, or '*' plus an address.\n\
 For a line number or function, trace at the start of its code.\n\
 If an address is specified, trace at that exact address.\n\n\
-Do \"help tracepoints\" for info on other tracepoint commands.");
+Do \"help tracepoints\" for info on other tracepoint commands."));
   set_cmd_completer (c, location_completer);
 
   add_com_alias ("tp", "trace", class_alias, 0);

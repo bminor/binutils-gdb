@@ -580,8 +580,8 @@ Determine the IP address for download server (GDB's host computer)."),
 			  NULL, /* FIXME: i18n: IP address for download server (GDB's host computer) is %s.  */
 			  NULL, NULL, &setlist, &showlist);
 
-  add_com ("upload", class_obscure, m32r_upload_command,
-	   "Upload the srec file via the monitor's Ethernet upload capability.");
+  add_com ("upload", class_obscure, m32r_upload_command, _("\
+Upload the srec file via the monitor's Ethernet upload capability."));
 
-  add_com ("tload", class_obscure, m32r_load, "test upload command.");
+  add_com ("tload", class_obscure, m32r_load, _("test upload command."));
 }

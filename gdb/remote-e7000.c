@@ -2178,16 +2178,16 @@ _initialize_remote_e7000 (void)
   add_target (&e7000_ops);
 
   add_com ("e7000", class_obscure, e7000_command,
-	   "Send a command to the e7000 monitor.");
+	   _("Send a command to the e7000 monitor."));
 
   add_com ("ftplogin", class_obscure, e7000_login_command,
-	   "Login to machine and change to directory.");
+	   _("Login to machine and change to directory."));
 
   add_com ("ftpload", class_obscure, e7000_ftp_command,
-	   "Fetch and load a file from previously described place.");
+	   _("Fetch and load a file from previously described place."));
 
   add_com ("drain", class_obscure, e7000_drain_command,
-	   "Drain pending e7000 text buffers.");
+	   _("Drain pending e7000 text buffers."));
 
   deprecated_add_show_from_set
     (add_set_cmd ("usehardbreakpoints", no_class,

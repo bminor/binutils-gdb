@@ -1,3 +1,22 @@
+2005-02-15  Andrew Cagney  <cagney@gnu.org>
+
+	Mark up add_com, add_info and add_prefix_cmd.
+	* breakpoint.c, cp-support.c, dcache.c, dwarf2read.c: Update.
+	* exec.c, f-valprint.c, frame.c, gcore.c, gnu-nat.c: Update.
+	* go32-nat.c, infcmd.c, inflow.c, infptrace.c, infrun.c: Update.
+	* kod.c, language.c, linux-nat.c, m32r-rom.c, macrocmd.c: Update.
+	* maint.c, memattr.c, mips-tdep.c, nto-procfs.c, objc-lang.c: Update.
+	* ocd.c, pa64solib.c, printcmd.c, procfs.c, regcache.c: Update.
+	* remote-e7000.c, remote-m32r-sdi.c, remote-mips.c: Update.
+	* remote-sds.c, remote-sim.c, remote-st.c, remote-utils.c: Update.
+	* remote.c, rs6000-tdep.c, ser-go32.c, serial.c: Update.
+	* sh-tdep.c, solib.c, somsolib.c, source.c, stack.c: Update.
+	* symfile.c, symtab.c, target.c, thread.c, top.c: Update.
+	* tracepoint.c, typeprint.c, utils.c, valprint.c: Update.
+	* win32-nat.c, xcoffsolib.c, cli/cli-cmds.c, cli/cli-dump.c: Update.
+	* cli/cli-logging.c, tui/tui-layout.c, tui/tui-regs.c: Update.
+	* tui/tui-stack.c, tui/tui-win.c: Update.
+
 2005-02-14  Andrew Cagney  <cagney@gnu.org>
 
 	* config/h8300/h8300.mt (DEPRECATED_TM_FILE): Delete.

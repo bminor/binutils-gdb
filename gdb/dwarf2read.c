@@ -9630,15 +9630,15 @@ _initialize_dwarf2_read (void)
 {
   dwarf2_objfile_data_key = register_objfile_data ();
 
-  add_prefix_cmd ("dwarf2", class_maintenance, set_dwarf2_cmd,
-		  "Set DWARF 2 specific variables.\n"
-		  "Configure DWARF 2 variables such as the cache size",
+  add_prefix_cmd ("dwarf2", class_maintenance, set_dwarf2_cmd, _("\
+Set DWARF 2 specific variables.\n\
+Configure DWARF 2 variables such as the cache size"),
                   &set_dwarf2_cmdlist, "maintenance set dwarf2 ",
                   0/*allow-unknown*/, &maintenance_set_cmdlist);
 
-  add_prefix_cmd ("dwarf2", class_maintenance, show_dwarf2_cmd,
-		  "Show DWARF 2 specific variables\n"
-		  "Show DWARF 2 variables such as the cache size",
+  add_prefix_cmd ("dwarf2", class_maintenance, show_dwarf2_cmd, _("\
+Show DWARF 2 specific variables\n\
+Show DWARF 2 variables such as the cache size"),
                   &show_dwarf2_cmdlist, "maintenance show dwarf2 ",
                   0/*allow-unknown*/, &maintenance_show_cmdlist);
 

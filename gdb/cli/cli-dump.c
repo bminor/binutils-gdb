@@ -675,13 +675,13 @@ void
 _initialize_cli_dump (void)
 {
   struct cmd_list_element *c;
-  add_prefix_cmd ("dump", class_vars, dump_command, "\
-Dump target code/data to a local file.",
+  add_prefix_cmd ("dump", class_vars, dump_command, _("\
+Dump target code/data to a local file."),
 		  &dump_cmdlist, "dump ",
 		  0/*allow-unknown*/,
 		  &cmdlist);
-  add_prefix_cmd ("append", class_vars, append_command, "\
-Append target code/data to a local file.",
+  add_prefix_cmd ("append", class_vars, append_command, _("\
+Append target code/data to a local file."),
 		  &append_cmdlist, "append ",
 		  0/*allow-unknown*/,
 		  &cmdlist);
@@ -696,32 +696,32 @@ Write the value of an expression to a raw binary file.\n\
 Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION to\n\
 the specified FILE in raw target ordered bytes.");
 
-  add_prefix_cmd ("srec", all_commands, srec_dump_command, "\
-Write target code/data to an srec file.",
+  add_prefix_cmd ("srec", all_commands, srec_dump_command, _("\
+Write target code/data to an srec file."),
 		  &srec_cmdlist, "dump srec ", 
 		  0 /*allow-unknown*/, 
 		  &dump_cmdlist);
 
-  add_prefix_cmd ("ihex", all_commands, ihex_dump_command, "\
-Write target code/data to an intel hex file.",
+  add_prefix_cmd ("ihex", all_commands, ihex_dump_command, _("\
+Write target code/data to an intel hex file."),
 		  &ihex_cmdlist, "dump ihex ", 
 		  0 /*allow-unknown*/, 
 		  &dump_cmdlist);
 
-  add_prefix_cmd ("tekhex", all_commands, tekhex_dump_command, "\
-Write target code/data to a tekhex file.",
+  add_prefix_cmd ("tekhex", all_commands, tekhex_dump_command, _("\
+Write target code/data to a tekhex file."),
 		  &tekhex_cmdlist, "dump tekhex ", 
 		  0 /*allow-unknown*/, 
 		  &dump_cmdlist);
 
-  add_prefix_cmd ("binary", all_commands, binary_dump_command, "\
-Write target code/data to a raw binary file.",
+  add_prefix_cmd ("binary", all_commands, binary_dump_command, _("\
+Write target code/data to a raw binary file."),
 		  &binary_dump_cmdlist, "dump binary ", 
 		  0 /*allow-unknown*/, 
 		  &dump_cmdlist);
 
-  add_prefix_cmd ("binary", all_commands, binary_append_command, "\
-Append target code/data to a raw binary file.",
+  add_prefix_cmd ("binary", all_commands, binary_append_command, _("\
+Append target code/data to a raw binary file."),
 		  &binary_append_cmdlist, "append binary ", 
 		  0 /*allow-unknown*/, 
 		  &append_cmdlist);
@@ -786,12 +786,12 @@ Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION\n\
 to the specified FILE in raw target ordered bytes."),
 	   &binary_append_cmdlist);
 
-  c = add_com ("restore", class_vars, restore_command, 
-	       "Restore the contents of FILE to target memory.\n\
+  c = add_com ("restore", class_vars, restore_command, _("\
+Restore the contents of FILE to target memory.\n\
 Arguments are FILE OFFSET START END where all except FILE are optional.\n\
 OFFSET will be added to the base address of the file (default zero).\n\
 If START and END are given, only the file contents within that range\n\
-(file relative) will be restored to target memory.");
+(file relative) will be restored to target memory."));
   c->completer = filename_completer;
   /* FIXME: completers for other commands. */
 }

@@ -2018,91 +2018,92 @@ _initialize_stack (void)
   backtrace_limit = 30;
 #endif
 
-  add_com ("return", class_stack, return_command,
-	   "Make selected stack frame return to its caller.\n\
+  add_com ("return", class_stack, return_command, _("\
+Make selected stack frame return to its caller.\n\
 Control remains in the debugger, but when you continue\n\
 execution will resume in the frame above the one now selected.\n\
-If an argument is given, it is an expression for the value to return.");
+If an argument is given, it is an expression for the value to return."));
 
-  add_com ("up", class_stack, up_command,
-	   "Select and print stack frame that called this one.\n\
-An argument says how many frames up to go.");
-  add_com ("up-silently", class_support, up_silently_command,
-	   "Same as the `up' command, but does not print anything.\n\
-This is useful in command scripts.");
+  add_com ("up", class_stack, up_command, _("\
+Select and print stack frame that called this one.\n\
+An argument says how many frames up to go."));
+  add_com ("up-silently", class_support, up_silently_command, _("\
+Same as the `up' command, but does not print anything.\n\
+This is useful in command scripts."));
 
-  add_com ("down", class_stack, down_command,
-	   "Select and print stack frame called by this one.\n\
-An argument says how many frames down to go.");
+  add_com ("down", class_stack, down_command, _("\
+Select and print stack frame called by this one.\n\
+An argument says how many frames down to go."));
   add_com_alias ("do", "down", class_stack, 1);
   add_com_alias ("dow", "down", class_stack, 1);
-  add_com ("down-silently", class_support, down_silently_command,
-	   "Same as the `down' command, but does not print anything.\n\
-This is useful in command scripts.");
+  add_com ("down-silently", class_support, down_silently_command, _("\
+Same as the `down' command, but does not print anything.\n\
+This is useful in command scripts."));
 
-  add_com ("frame", class_stack, frame_command,
-	   "Select and print a stack frame.\n\
+  add_com ("frame", class_stack, frame_command, _("\
+Select and print a stack frame.\n\
 With no argument, print the selected stack frame.  (See also \"info frame\").\n\
 An argument specifies the frame to select.\n\
 It can be a stack frame number or the address of the frame.\n\
 With argument, nothing is printed if input is coming from\n\
-a command file or a user-defined command.");
+a command file or a user-defined command."));
 
   add_com_alias ("f", "frame", class_stack, 1);
 
   if (xdb_commands)
     {
       add_com ("L", class_stack, current_frame_command,
-	       "Print the current stack frame.\n");
+	       _("Print the current stack frame.\n"));
       add_com_alias ("V", "frame", class_stack, 1);
     }
-  add_com ("select-frame", class_stack, select_frame_command,
-	   "Select a stack frame without printing anything.\n\
+  add_com ("select-frame", class_stack, select_frame_command, _("\
+Select a stack frame without printing anything.\n\
 An argument specifies the frame to select.\n\
-It can be a stack frame number or the address of the frame.\n");
+It can be a stack frame number or the address of the frame.\n"));
 
-  add_com ("backtrace", class_stack, backtrace_command,
-	   "Print backtrace of all stack frames, or innermost COUNT frames.\n\
+  add_com ("backtrace", class_stack, backtrace_command, _("\
+Print backtrace of all stack frames, or innermost COUNT frames.\n\
 With a negative argument, print outermost -COUNT frames.\n\
-Use of the 'full' qualifier also prints the values of the local variables.\n");
+Use of the 'full' qualifier also prints the values of the local variables.\n"));
   add_com_alias ("bt", "backtrace", class_stack, 0);
   if (xdb_commands)
     {
       add_com_alias ("t", "backtrace", class_stack, 0);
-      add_com ("T", class_stack, backtrace_full_command,
-	       "Print backtrace of all stack frames, or innermost COUNT frames \n\
+      add_com ("T", class_stack, backtrace_full_command, _("\
+Print backtrace of all stack frames, or innermost COUNT frames \n\
 and the values of the local variables.\n\
 With a negative argument, print outermost -COUNT frames.\n\
-Usage: T <count>\n");
+Usage: T <count>\n"));
     }
 
   add_com_alias ("where", "backtrace", class_alias, 0);
   add_info ("stack", backtrace_command,
-	    "Backtrace of the stack, or innermost COUNT frames.");
+	    _("Backtrace of the stack, or innermost COUNT frames."));
   add_info_alias ("s", "stack", 1);
   add_info ("frame", frame_info,
-	    "All about selected stack frame, or frame at ADDR.");
+	    _("All about selected stack frame, or frame at ADDR."));
   add_info_alias ("f", "frame", 1);
   add_info ("locals", locals_info,
-	    "Local variables of current stack frame.");
+	    _("Local variables of current stack frame."));
   add_info ("args", args_info,
-	    "Argument variables of current stack frame.");
+	    _("Argument variables of current stack frame."));
   if (xdb_commands)
     add_com ("l", class_info, args_plus_locals_info,
-	     "Argument and local variables of current stack frame.");
+	     _("Argument and local variables of current stack frame."));
 
   if (dbx_commands)
-    add_com ("func", class_stack, func_command,
-      "Select the stack frame that contains <func>.\nUsage: func <name>\n");
+    add_com ("func", class_stack, func_command, _("\
+Select the stack frame that contains <func>.\n\
+Usage: func <name>\n"));
 
   add_info ("catch", catch_info,
-	    "Exceptions that can be caught in the current stack frame.");
+	    _("Exceptions that can be caught in the current stack frame."));
 
 #if 0
   add_cmd ("backtrace-limit", class_stack, set_backtrace_limit_command, _(\
 "Specify maximum number of frames for \"backtrace\" to print by default."),
 	   &setlist);
-  add_info ("backtrace-limit", backtrace_limit_info,
-     "The maximum number of frames for \"backtrace\" to print by default.");
+  add_info ("backtrace-limit", backtrace_limit_info, _("\
+The maximum number of frames for \"backtrace\" to print by default."));
 #endif
 }

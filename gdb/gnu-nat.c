@@ -3133,10 +3133,10 @@ Show whether exceptions in the inferior process will be trapped."),
 	   &showlist);
 
   add_prefix_cmd ("task", no_class, set_task_cmd,
-		  "Command prefix for setting task attributes.",
+		  _("Command prefix for setting task attributes."),
 		  &set_task_cmd_list, "set task ", 0, &setlist);
   add_prefix_cmd ("task", no_class, show_task_cmd,
-		  "Command prefix for showing task attributes.",
+		  _("Command prefix for showing task attributes."),
 		  &show_task_cmd_list, "show task ", 0, &showlist);
 
   add_cmd ("pause", class_run, set_task_pause_cmd, _("\
@@ -3300,17 +3300,17 @@ static void
 add_thread_commands (void)
 {
   add_prefix_cmd ("thread", no_class, set_thread_cmd,
-		  "Command prefix for setting thread properties.",
+		  _("Command prefix for setting thread properties."),
 		  &set_thread_cmd_list, "set thread ", 0, &setlist);
   add_prefix_cmd ("default", no_class, show_thread_cmd,
-		  "Command prefix for setting default thread properties.",
+		  _("Command prefix for setting default thread properties."),
 		  &set_thread_default_cmd_list, "set thread default ", 0,
 		  &set_thread_cmd_list);
   add_prefix_cmd ("thread", no_class, set_thread_default_cmd,
-		  "Command prefix for showing thread properties.",
+		  _("Command prefix for showing thread properties."),
 		  &show_thread_cmd_list, "show thread ", 0, &showlist);
   add_prefix_cmd ("default", no_class, show_thread_default_cmd,
-		  "Command prefix for showing default thread properties.",
+		  _("Command prefix for showing default thread properties."),
 		  &show_thread_default_cmd_list, "show thread default ", 0,
 		  &show_thread_cmd_list);
 

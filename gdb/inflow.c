@@ -734,10 +734,10 @@ void
 _initialize_inflow (void)
 {
   add_info ("terminal", term_info,
-	    "Print inferior's saved terminal status.");
+	    _("Print inferior's saved terminal status."));
 
   add_com ("kill", class_run, kill_command,
-	   "Kill execution of program being debugged.");
+	   _("Kill execution of program being debugged."));
 
   inferior_ptid = null_ptid;
 

@@ -170,10 +170,10 @@ _initialize_cli_logging (void)
 
   
   add_prefix_cmd ("logging", class_support, set_logging_command,
-		  "Set logging options", &set_logging_cmdlist,
+		  _("Set logging options"), &set_logging_cmdlist,
 		  "set logging ", 0, &setlist);
   add_prefix_cmd ("logging", class_support, show_logging_command,
-		  "Show logging options", &show_logging_cmdlist,
+		  _("Show logging options"), &show_logging_cmdlist,
 		  "show logging ", 0, &showlist);
   add_setshow_boolean_cmd ("overwrite", class_support, &logging_overwrite, _("\
 Set whether logging overwrites or appends to the log file."), _("\

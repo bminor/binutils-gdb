@@ -893,11 +893,11 @@ _initialize_solib (void)
   struct cmd_list_element *c;
 
   add_com ("sharedlibrary", class_files, sharedlibrary_command,
-	   "Load shared object library symbols for files matching REGEXP.");
+	   _("Load shared object library symbols for files matching REGEXP."));
   add_info ("sharedlibrary", info_sharedlibrary_command,
-	    "Status of loaded shared object libraries.");
+	    _("Status of loaded shared object libraries."));
   add_com ("nosharedlibrary", class_files, no_shared_libraries,
-	   "Unload all shared object library symbols.");
+	   _("Unload all shared object library symbols."));
 
   deprecated_add_show_from_set
     (add_set_cmd ("auto-solib-add", class_support, var_boolean,

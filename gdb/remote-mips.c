@@ -3413,7 +3413,7 @@ ignored.)",
      &showlist);
 
   add_com ("pmon <command>", class_obscure, pmon_command,
-	   "Send a packet to PMON (must be in debug mode).");
+	   _("Send a packet to PMON (must be in debug mode)."));
 
   deprecated_add_show_from_set
     (add_set_cmd ("mask-address", no_class,

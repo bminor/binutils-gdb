@@ -605,6 +605,6 @@ targets.", &setlist),
      &showlist);
 
   add_com ("remote <command>", class_obscure, sr_com,
-	   "Send a command to the remote monitor.");
+	   _("Send a command to the remote monitor."));
 
 }

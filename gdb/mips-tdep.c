@@ -5170,11 +5170,11 @@ _initialize_mips_tdep (void)
 
   /* Add root prefix command for all "set mips"/"show mips" commands */
   add_prefix_cmd ("mips", no_class, set_mips_command,
-		  "Various MIPS specific commands.",
+		  _("Various MIPS specific commands."),
 		  &setmipscmdlist, "set mips ", 0, &setlist);
 
   add_prefix_cmd ("mips", no_class, show_mips_command,
-		  "Various MIPS specific commands.",
+		  _("Various MIPS specific commands."),
 		  &showmipscmdlist, "show mips ", 0, &showlist);
 
   /* Allow the user to override the saved register size. */
@@ -5220,7 +5220,7 @@ This option can be set to one of:\n\
      heuristic_proc_start.  */
 
   add_prefix_cmd ("mipsfpu", class_support, set_mipsfpu_command,
-		  "Set use of MIPS floating-point coprocessor.",
+		  _("Set use of MIPS floating-point coprocessor."),
 		  &mipsfpulist, "set mipsfpu ", 0, &setlist);
   add_cmd ("single", class_support, set_mipsfpu_single_command,
 	   _("Select single-precision MIPS floating-point coprocessor."),

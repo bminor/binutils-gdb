@@ -746,7 +746,7 @@ void
 _initialize_cp_support (void)
 {
   add_prefix_cmd ("cplus", class_maintenance, maint_cplus_command,
-		  "C++ maintenance commands.", &maint_cplus_cmd_list,
+		  _("C++ maintenance commands."), &maint_cplus_cmd_list,
 		  "maintenance cplus ", 0, &maintenancelist);
   add_alias_cmd ("cp", "cplus", class_maintenance, 1, &maintenancelist);
 

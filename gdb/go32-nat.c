@@ -1906,8 +1906,8 @@ _initialize_go32_nat (void)
   init_go32_ops ();
   add_target (&go32_ops);
 
-  add_prefix_cmd ("dos", class_info, go32_info_dos_command,
-		  "Print information specific to DJGPP (aka MS-DOS) debugging.",
+  add_prefix_cmd ("dos", class_info, go32_info_dos_command, _("\
+Print information specific to DJGPP (aka MS-DOS) debugging."),
 		  &info_dos_cmdlist, "info dos ", 0, &infolist);
 
   add_cmd ("sysinfo", class_info, go32_sysinfo, _("\

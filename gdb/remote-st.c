@@ -797,8 +797,8 @@ _initialize_remote_st2000 (void)
   init_st2000_ops ();
   add_target (&st2000_ops);
   add_com ("st2000 <command>", class_obscure, st2000_command,
-	   "Send a command to the STDBUG monitor.");
-  add_com ("connect", class_obscure, connect_command,
-	   "Connect the terminal directly up to the STDBUG command monitor.\n\
-Use <CR>~. or <CR>~^D to break out.");
+	   _("Send a command to the STDBUG monitor."));
+  add_com ("connect", class_obscure, connect_command, _("\
+Connect the terminal directly up to the STDBUG command monitor.\n\
+Use <CR>~. or <CR>~^D to break out."));
 }

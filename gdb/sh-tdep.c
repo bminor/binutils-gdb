@@ -2735,5 +2735,5 @@ _initialize_sh_tdep (void)
 
   gdbarch_register (bfd_arch_sh, sh_gdbarch_init, NULL);
 
-  add_com ("regs", class_vars, sh_show_regs_command, "Print all registers");
+  add_com ("regs", class_vars, sh_show_regs_command, _("Print all registers"));
 }

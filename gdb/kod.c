@@ -179,7 +179,7 @@ kod_set_os (char *arg, int from_tty, struct cmd_list_element *command)
 
       /* Add kod related info commands to gdb.  */
       add_info (operating_system, info_kod_command,
-		"Displays information about Kernel Objects.");
+		_("Displays information about Kernel Objects."));
 
       p = strrchr (kodlib, '-');
       if (p != NULL)

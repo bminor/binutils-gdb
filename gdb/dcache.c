@@ -599,6 +599,6 @@ volatile registers are in use.  By default, this option is off.",
      &showlist);
 
   add_info ("dcache", dcache_info,
-	    "Print information on the dcache performance.");
+	    _("Print information on the dcache performance."));
 
 }

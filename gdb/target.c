@@ -242,12 +242,12 @@ add_target (struct target_ops *t)
   target_structs[target_struct_size++] = t;
 
   if (targetlist == NULL)
-    add_prefix_cmd ("target", class_run, target_command,
-		    "Connect to a target machine or process.\n\
+    add_prefix_cmd ("target", class_run, target_command, _("\
+Connect to a target machine or process.\n\
 The first argument is the type or protocol of the target machine.\n\
 Remaining arguments are interpreted by the target protocol.  For more\n\
 information on the arguments for a particular protocol, type\n\
-`help target ' followed by the protocol name.",
+`help target ' followed by the protocol name."),
 		    &targetlist, "target ", 0, &cmdlist);
   add_cmd (t->to_shortname, no_class, t->to_open, t->to_doc, &targetlist);
 }
@@ -2573,7 +2573,7 @@ result in significant performance improvement for remote targets."),
 			   &setlist, &showlist);
 
   add_com ("monitor", class_obscure, do_monitor_command,
-	   "Send a command to the remote monitor (remote targets only).");
+	   _("Send a command to the remote monitor (remote targets only)."));
 
   target_dcache = dcache_init ();
 }

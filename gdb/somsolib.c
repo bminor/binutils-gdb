@@ -1553,9 +1553,9 @@ void
 _initialize_som_solib (void)
 {
   add_com ("sharedlibrary", class_files, som_solib_sharedlibrary_command,
-	   "Load shared object library symbols for files matching REGEXP.");
+	   _("Load shared object library symbols for files matching REGEXP."));
   add_info ("sharedlibrary", som_sharedlibrary_info_command,
-	    "Status of loaded shared object libraries.");
+	    _("Status of loaded shared object libraries."));
 
   deprecated_add_show_from_set
     (add_set_cmd ("auto-solib-add", class_support, var_boolean,

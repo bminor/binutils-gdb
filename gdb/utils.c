@@ -2473,9 +2473,9 @@ initialize_utils (void)
   if (xdb_commands)
     {
       add_com ("am", class_support, pagination_on_command,
-	       "Enable pagination");
+	       _("Enable pagination"));
       add_com ("sm", class_support, pagination_off_command,
-	       "Disable pagination");
+	       _("Disable pagination"));
     }
 
   deprecated_add_show_from_set

@@ -1720,11 +1720,11 @@ _initialize_objc_language (void)
 {
   add_language (&objc_language_defn);
   add_info ("selectors", selectors_info,    /* INFO SELECTORS command.  */
-	    "All Objective-C selectors, or those matching REGEXP.");
+	    _("All Objective-C selectors, or those matching REGEXP."));
   add_info ("classes", classes_info, 	    /* INFO CLASSES   command.  */
-	    "All Objective-C classes, or those matching REGEXP.");
+	    _("All Objective-C classes, or those matching REGEXP."));
   add_com ("print-object", class_vars, print_object_command, 
-	   "Ask an Objective-C object to print itself.");
+	   _("Ask an Objective-C object to print itself."));
   add_com_alias ("po", "print-object", class_vars, 1);
 }
 

@@ -179,9 +179,9 @@ void
 _initialize_xcoffsolib (void)
 {
   add_com ("sharedlibrary", class_files, sharedlibrary_command,
-	   "Load shared object library symbols for files matching REGEXP.");
+	   _("Load shared object library symbols for files matching REGEXP."));
   add_info ("sharedlibrary", solib_info,
-	    "Status of loaded shared object libraries");
+	    _("Status of loaded shared object libraries"));
 
   deprecated_add_show_from_set
     (add_set_cmd ("auto-solib-add", class_support, var_boolean,

@@ -3570,7 +3570,7 @@ for access from GDB."), &cmdlist);
      &showlist);
 
   add_prefix_cmd ("overlay", class_support, overlay_command,
-		  "Commands for debugging overlays.", &overlaylist,
+		  _("Commands for debugging overlays."), &overlaylist,
 		  "overlay ", 0, &cmdlist);
 
   add_com_alias ("ovly", "overlay", class_alias, 1);
@@ -3604,7 +3604,7 @@ Usage: set extension-language .foo bar",
   set_cmd_cfunc (c, set_ext_lang_command);
 
   add_info ("extensions", info_ext_lang_command,
-	    "All filename extensions associated with a source language.");
+	    _("All filename extensions associated with a source language."));
 
   deprecated_add_show_from_set
     (add_set_cmd ("download-write-size", class_obscure,

@@ -682,14 +682,15 @@ _initialize_thread (void)
   static struct cmd_list_element *thread_apply_list = NULL;
 
   add_info ("threads", info_threads_command,
-	    "IDs of currently known threads.");
+	    _("IDs of currently known threads."));
 
-  add_prefix_cmd ("thread", class_run, thread_command,
-		  "Use this command to switch between threads.\n\
-The new thread ID must be currently known.", &thread_cmd_list, "thread ", 1, &cmdlist);
+  add_prefix_cmd ("thread", class_run, thread_command, _("\
+Use this command to switch between threads.\n\
+The new thread ID must be currently known."),
+		  &thread_cmd_list, "thread ", 1, &cmdlist);
 
   add_prefix_cmd ("apply", class_run, thread_apply_command,
-		  "Apply a command to a list of threads.",
+		  _("Apply a command to a list of threads."),
 		  &thread_apply_list, "apply ", 1, &thread_cmd_list);
 
   add_cmd ("all", class_run, thread_apply_all_command,

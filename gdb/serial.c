@@ -669,19 +669,19 @@ void
 _initialize_serial (void)
 {
 #if 0
-  add_com ("connect", class_obscure, connect_command,
-	   "Connect the terminal directly up to the command monitor.\n\
-Use <CR>~. or <CR>~^D to break out.");
+  add_com ("connect", class_obscure, connect_command, _("\
+Connect the terminal directly up to the command monitor.\n\
+Use <CR>~. or <CR>~^D to break out."));
 #endif /* 0 */
 
-  add_prefix_cmd ("serial", class_maintenance, serial_set_cmd, "\
-Set default serial/parallel port configuration.",
+  add_prefix_cmd ("serial", class_maintenance, serial_set_cmd, _("\
+Set default serial/parallel port configuration."),
 		  &serial_set_cmdlist, "set serial ",
 		  0/*allow-unknown*/,
 		  &setlist);
 
-  add_prefix_cmd ("serial", class_maintenance, serial_show_cmd, "\
-Show default serial/parallel port configuration.",
+  add_prefix_cmd ("serial", class_maintenance, serial_show_cmd, _("\
+Show default serial/parallel port configuration."),
 		  &serial_show_cmdlist, "show serial ",
 		  0/*allow-unknown*/,
 		  &showlist);

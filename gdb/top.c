@@ -1380,9 +1380,10 @@ init_main (void)
   deprecated_add_show_from_set (c, &showlist);
   set_cmd_sfunc (c, set_async_prompt);
 
-  add_com ("dont-repeat", class_support, dont_repeat_command, "Don't repeat this command.\n\
+  add_com ("dont-repeat", class_support, dont_repeat_command, _("\
+Don't repeat this command.\n\
 Primarily used inside of user-defined commands that should not be repeated when\n\
-hitting return.");
+hitting return."));
 
   c = add_set_cmd ("editing", class_support, var_boolean, (char *) &async_command_editing_p,
 		   "Set editing of command lines as they are typed.\n\

@@ -960,5 +960,5 @@ _initialize_ser_dos (void)
      &showlist);
 
   add_info ("serial", dos_info,
-	    "Print DOS serial port status.");
+	    _("Print DOS serial port status."));
 }

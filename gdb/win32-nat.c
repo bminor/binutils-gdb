@@ -2118,7 +2118,7 @@ _initialize_win32_nat (void)
   init_child_ops ();
 
   c = add_com ("dll-symbols", class_files, dll_symbol_command,
-	       "Load dll library symbols from FILE.");
+	       _("Load dll library symbols from FILE."));
   set_cmd_completer (c, filename_completer);
 
   add_com_alias ("sharedlibrary", "dll-symbols", class_alias, 1);
@@ -2172,11 +2172,11 @@ _initialize_win32_nat (void)
 		  &setlist),
      &showlist);
 
-  add_info ("dll", info_dll_command, "Status of loaded DLLs.");
+  add_info ("dll", info_dll_command, _("Status of loaded DLLs."));
   add_info_alias ("sharedlibrary", "dll", 1);
 
   add_prefix_cmd ("w32", class_info, info_w32_command,
-		  "Print information specific to Win32 debugging.",
+		  _("Print information specific to Win32 debugging."),
 		  &info_w32_cmdlist, "info w32 ", 0, &infolist);
 
   add_cmd ("selector", class_info, display_selectors,

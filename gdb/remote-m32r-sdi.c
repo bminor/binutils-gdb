@@ -1619,21 +1619,21 @@ _initialize_remote_m32r (void)
   add_target (&m32r_ops);
 
   add_com ("sdireset", class_obscure, sdireset_command,
-	   "Reset SDI connection.");
+	   _("Reset SDI connection."));
 
   add_com ("sdistatus", class_obscure, sdistatus_command,
-	   "Show status of SDI connection.");
+	   _("Show status of SDI connection."));
 
   add_com ("debug_chaos", class_obscure, debug_chaos_command,
-	   "Debug M32R/Chaos.");
+	   _("Debug M32R/Chaos."));
 
   add_com ("use_debug_dma", class_obscure, use_debug_dma_command,
-	   "Use debug DMA mem access.");
+	   _("Use debug DMA mem access."));
   add_com ("use_mon_code", class_obscure, use_mon_code_command,
-	   "Use mon code mem access.");
+	   _("Use mon code mem access."));
 
   add_com ("use_ib_break", class_obscure, use_ib_breakpoints_command,
-	   "Set breakpoints by IB break.");
+	   _("Set breakpoints by IB break."));
   add_com ("use_dbt_break", class_obscure, use_dbt_breakpoints_command,
-	   "Set breakpoints by dbt.");
+	   _("Set breakpoints by dbt."));
 }

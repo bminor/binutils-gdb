@@ -1162,8 +1162,9 @@ _initialize_remote_ocd (void)
 		  "Set timeout value for remote read.\n", &setlist),
      &showlist);
 
-  add_prefix_cmd ("ocd", class_obscure, bdm_command, "", &ocd_cmd_list, "ocd ",
-		  0, &cmdlist);
+  /* FIXME: i18n: What documentation?  */
+  add_prefix_cmd ("ocd", class_obscure, bdm_command, (""), &ocd_cmd_list,
+		  "ocd ", 0, &cmdlist);
 
   /* FIXME: i18n: what documentation? */
   add_cmd ("reset", class_obscure, bdm_reset_command, (""), &ocd_cmd_list);

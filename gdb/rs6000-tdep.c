@@ -3419,6 +3419,6 @@ _initialize_rs6000_tdep (void)
 
   /* Add root prefix command for "info powerpc" commands */
   add_prefix_cmd ("powerpc", class_info, rs6000_info_powerpc_command,
-		  "Various POWERPC info specific commands.",
+		  _("Various POWERPC info specific commands."),
 		  &info_powerpc_cmdlist, "info powerpc ", 0, &infolist);
 }

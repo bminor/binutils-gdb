@@ -3057,14 +3057,14 @@ _initialize_linux_nat (void)
   deprecated_child_ops.to_find_memory_regions = linux_nat_find_memory_regions;
   deprecated_child_ops.to_make_corefile_notes = linux_nat_make_corefile_notes;
 
-  add_info ("proc", linux_nat_info_proc_cmd,
-	    "Show /proc process information about any running process.\n\
+  add_info ("proc", linux_nat_info_proc_cmd, _("\
+Show /proc process information about any running process.\n\
 Specify any process id, or use the program being debugged by default.\n\
 Specify any of the following keywords for detailed info:\n\
   mappings -- list of mapped memory regions.\n\
   stat     -- list a bunch of random process info.\n\
   status   -- list a different bunch of random process info.\n\
-  all      -- list all available /proc info.");
+  all      -- list all available /proc info."));
 
   init_linux_nat_ops ();
   add_target (&linux_nat_ops);

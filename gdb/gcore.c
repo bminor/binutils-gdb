@@ -491,10 +491,9 @@ gcore_memory_sections (bfd *obfd)
 void
 _initialize_gcore (void)
 {
-  add_com ("generate-core-file", class_files, gcore_command,
-	   "\
+  add_com ("generate-core-file", class_files, gcore_command, _("\
 Save a core file with the current state of the debugged process.\n\
-Argument is optional filename.  Default filename is 'core.<process_id>'.");
+Argument is optional filename.  Default filename is 'core.<process_id>'."));
 
   add_com_alias ("gcore", "generate-core-file", class_files, 1);
   exec_set_find_memory_regions (objfile_find_memory_regions);

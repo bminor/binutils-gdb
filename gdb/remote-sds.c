@@ -1123,5 +1123,5 @@ _initialize_remote_sds (void)
      &showlist);
 
   add_com ("sds", class_obscure, sds_command,
-	   "Send a command to the SDS monitor.");
+	   _("Send a command to the SDS monitor."));
 }
