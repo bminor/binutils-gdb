@@ -1,3 +1,16 @@
+2002-11-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.c (set_unwind_by_pc): Use dummy_frame_register_unwind.
+	* dummy-frame.c (find_dummy_frame): Rename
+	generic_find_dummy_frame, make static.  Return the dummy frame
+	instead of the regcache.
+	(generic_find_dummy_frame): Re-implement using find_dummy_frame,
+	(cached_find_dummy_frame): New function.  Use find_dummy_frame.
+	(dummy_frame_register_unwind): Rename
+	generic_call_dummy_register_unwind.  Use cached_find_dummy_frame.
+	* dummy-frame.h (dummy_frame_register_unwind): Rename
+	generic_call_dummy_register_unwind.
+
 2002-11-08  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/tm-i386v42mp.h: Remove file.  Move its contents,

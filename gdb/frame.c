@@ -636,7 +636,7 @@ set_unwind_by_pc (CORE_ADDR pc, CORE_ADDR fp,
        return vaguely correct values..  */
     *unwind = frame_saved_regs_register_unwind;
   else if (PC_IN_CALL_DUMMY (pc, fp, fp))
-    *unwind = generic_call_dummy_register_unwind;
+    *unwind = dummy_frame_register_unwind;
   else
     *unwind = frame_saved_regs_register_unwind;
 }

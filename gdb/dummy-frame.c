@@ -58,8 +58,8 @@ static struct dummy_frame *dummy_frame_stack = NULL;
    adjust for DECR_PC_AFTER_BREAK.  This is because it is only legal
    to call this function after the PC has been adjusted.  */
 
-struct regcache *
-generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
+static struct dummy_frame *
+find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 {
   struct dummy_frame *dummyframe;
 
@@ -94,10 +94,28 @@ generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 	    continue;
 	}
       /* The FP matches this dummy frame.  */
-      return dummyframe->regcache;
+      return dummyframe;
     }
 
-  return 0;
+  return NULL;
+}
+
+struct dummy_frame *
+cached_find_dummy_frame (struct frame_info *frame, void **cache)
+{
+  if ((*cache) == NULL)
+    (*cache) = find_dummy_frame (frame->pc, frame->frame);
+  return (*cache);
+}
+
+struct regcache *
+generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
+{
+  struct dummy_frame *dummy = find_dummy_frame (pc, fp);
+  if (dummy != NULL)
+    return dummy->regcache;
+  else
+    return NULL;
 }
 
 char *
@@ -264,13 +282,13 @@ generic_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
    register value is taken from the local copy of the register buffer.  */
 
 void
-generic_call_dummy_register_unwind (struct frame_info *frame, void **cache,
-				    int regnum, int *optimized,
-				    enum lval_type *lvalp, CORE_ADDR *addrp,
-				    int *realnum, void *bufferp)
+dummy_frame_register_unwind (struct frame_info *frame, void **cache,
+			     int regnum, int *optimized,
+			     enum lval_type *lvalp, CORE_ADDR *addrp,
+			     int *realnum, void *bufferp)
 {
-  gdb_assert (frame != NULL);
-  gdb_assert (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame));
+  struct dummy_frame *dummy = cached_find_dummy_frame (frame, cache);
+  gdb_assert (dummy != NULL);
 
   /* Describe the register's location.  Generic dummy frames always
      have the register value in an ``expression''.  */
@@ -282,27 +300,11 @@ generic_call_dummy_register_unwind (struct frame_info *frame, void **cache,
   /* If needed, find and return the value of the register.  */
   if (bufferp != NULL)
     {
-      struct regcache *registers;
-#if 1
-      /* Get the address of the register buffer that contains all the
-	 saved registers for this dummy frame.  Cache that address.  */
-      registers = (*cache);
-      if (registers == NULL)
-	{
-	  registers = generic_find_dummy_frame (frame->pc, frame->frame);
-	  (*cache) = registers;
-	}
-#else
-      /* Get the address of the register buffer that contains the
-         saved registers and then extract the value from that.  */
-      registers = generic_find_dummy_frame (frame->pc, frame->frame);
-#endif
-      gdb_assert (registers != NULL);
       /* Return the actual value.  */
       /* Use the regcache_cooked_read() method so that it, on the fly,
          constructs either a raw or pseudo register from the raw
          register cache.  */
-      regcache_cooked_read (registers, regnum, bufferp);
+      regcache_cooked_read (dummy->regcache, regnum, bufferp);
     }
 }
 

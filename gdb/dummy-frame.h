@@ -45,14 +45,14 @@ struct regcache;
 /* Assuming that FRAME is a dummy, return a register value for the
    previous frame.  */
 
-extern void generic_call_dummy_register_unwind (struct frame_info *frame,
-						void **unwind_cache,
-						int regnum,
-						int *optimized,
-						enum lval_type *lvalp,
-						CORE_ADDR *addrp,
-						int *realnump,
-						void *valuep);
+extern void dummy_frame_register_unwind (struct frame_info *frame,
+					 void **unwind_cache,
+					 int regnum,
+					 int *optimized,
+					 enum lval_type *lvalp,
+					 CORE_ADDR *addrp,
+					 int *realnump,
+					 void *valuep);
 
 /* Return the regcache that belongs to the dummy-frame identifed by PC
    and FP, or NULL if no such frame exists.  */
@@ -62,5 +62,4 @@ extern void generic_call_dummy_register_unwind (struct frame_info *frame,
 
 extern struct regcache *generic_find_dummy_frame (CORE_ADDR pc,
 						  CORE_ADDR fp);
-
 #endif /* !defined (DUMMY_FRAME_H)  */
