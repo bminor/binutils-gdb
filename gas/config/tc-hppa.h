@@ -176,6 +176,13 @@ void pa_end_of_source PARAMS ((void));
 
 #define md_operand(x)
 
+/* Allow register expressions to be treated as absolute expressions.
+   A silly fudge required for backwards compatibility.  */
+#define md_optimize_expr hppa_force_reg_syms_absolute
+
+int hppa_force_reg_syms_absolute
+  PARAMS ((expressionS *, operatorT, expressionS *));
+
 #define TC_FIX_TYPE PTR
 #define TC_INIT_FIX_DATA(FIXP) ((FIXP)->tc_fix_data = NULL)
 

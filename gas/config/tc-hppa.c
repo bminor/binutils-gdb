@@ -249,23 +249,7 @@ struct pa_it
    |  14 or 30L   |  30 or 30R   |
    +--------------+--------------+
    |  15 or 31L   |  31 or 31R   |
-   +--------------+--------------+
-
-
-   The following is a version of pa_parse_number that
-   handles the L/R notation and returns the correct
-   value to put into the instruction register field.
-   The correct value to put into the instruction is
-   encoded in the structure 'pa_11_fp_reg_struct'.  */
-
-struct pa_11_fp_reg_struct
-  {
-    /* The register number.  */
-    char number_part;
-
-    /* L/R selector.  */
-    char l_r_select;
-  };
+   +--------------+--------------+  */
 
 /* Additional information needed to build argument relocation stubs.  */
 struct call_desc
@@ -526,9 +510,8 @@ static void pa_proc PARAMS ((int));
 static void pa_procend PARAMS ((int));
 static void pa_param PARAMS ((int));
 static void pa_undefine_label PARAMS ((void));
-static int need_pa11_opcode PARAMS ((struct pa_it *,
-				     struct pa_11_fp_reg_struct *));
-static int pa_parse_number PARAMS ((char **, struct pa_11_fp_reg_struct *));
+static int need_pa11_opcode PARAMS ((void));
+static int pa_parse_number PARAMS ((char **, int));
 static label_symbol_struct *pa_get_label PARAMS ((void));
 #ifdef OBJ_SOM
 static int log2 PARAMS ((int));
@@ -763,6 +746,15 @@ static int hppa_field_selector;
    strict syntax checking should be enabled for that instruction.  */
 static int strict = 0;
 
+/* pa_parse_number returns values in `pa_number'.  Mostly
+   pa_parse_number is used to return a register number, with floating
+   point registers being numbered from FP_REG_BASE upwards.
+   The bit specified with FP_REG_RSEL is set if the floating point
+   register has a `r' suffix.  */
+#define FP_REG_BASE 64
+#define FP_REG_RSEL 128
+static int pa_number;
+
 #ifdef OBJ_SOM
 /* A dummy bfd symbol so that all relocations have symbols of some kind.  */
 static symbolS *dummy_symbol;
@@ -799,202 +791,202 @@ static int print_errors = 1;
 
 static const struct pd_reg pre_defined_registers[] =
 {
-  {"%arg0", 26},
-  {"%arg1", 25},
-  {"%arg2", 24},
-  {"%arg3", 23},
-  {"%cr0", 0},
-  {"%cr10", 10},
-  {"%cr11", 11},
-  {"%cr12", 12},
-  {"%cr13", 13},
-  {"%cr14", 14},
-  {"%cr15", 15},
-  {"%cr16", 16},
-  {"%cr17", 17},
-  {"%cr18", 18},
-  {"%cr19", 19},
-  {"%cr20", 20},
-  {"%cr21", 21},
-  {"%cr22", 22},
-  {"%cr23", 23},
-  {"%cr24", 24},
-  {"%cr25", 25},
-  {"%cr26", 26},
-  {"%cr27", 27},
-  {"%cr28", 28},
-  {"%cr29", 29},
-  {"%cr30", 30},
-  {"%cr31", 31},
-  {"%cr8", 8},
-  {"%cr9", 9},
-  {"%dp", 27},
-  {"%eiem", 15},
-  {"%eirr", 23},
-  {"%fr0", 0},
-  {"%fr0l", 0},
-  {"%fr0r", 0},
-  {"%fr1", 1},
-  {"%fr10", 10},
-  {"%fr10l", 10},
-  {"%fr10r", 10},
-  {"%fr11", 11},
-  {"%fr11l", 11},
-  {"%fr11r", 11},
-  {"%fr12", 12},
-  {"%fr12l", 12},
-  {"%fr12r", 12},
-  {"%fr13", 13},
-  {"%fr13l", 13},
-  {"%fr13r", 13},
-  {"%fr14", 14},
-  {"%fr14l", 14},
-  {"%fr14r", 14},
-  {"%fr15", 15},
-  {"%fr15l", 15},
-  {"%fr15r", 15},
-  {"%fr16", 16},
-  {"%fr16l", 16},
-  {"%fr16r", 16},
-  {"%fr17", 17},
-  {"%fr17l", 17},
-  {"%fr17r", 17},
-  {"%fr18", 18},
-  {"%fr18l", 18},
-  {"%fr18r", 18},
-  {"%fr19", 19},
-  {"%fr19l", 19},
-  {"%fr19r", 19},
-  {"%fr1l", 1},
-  {"%fr1r", 1},
-  {"%fr2", 2},
-  {"%fr20", 20},
-  {"%fr20l", 20},
-  {"%fr20r", 20},
-  {"%fr21", 21},
-  {"%fr21l", 21},
-  {"%fr21r", 21},
-  {"%fr22", 22},
-  {"%fr22l", 22},
-  {"%fr22r", 22},
-  {"%fr23", 23},
-  {"%fr23l", 23},
-  {"%fr23r", 23},
-  {"%fr24", 24},
-  {"%fr24l", 24},
-  {"%fr24r", 24},
-  {"%fr25", 25},
-  {"%fr25l", 25},
-  {"%fr25r", 25},
-  {"%fr26", 26},
-  {"%fr26l", 26},
-  {"%fr26r", 26},
-  {"%fr27", 27},
-  {"%fr27l", 27},
-  {"%fr27r", 27},
-  {"%fr28", 28},
-  {"%fr28l", 28},
-  {"%fr28r", 28},
-  {"%fr29", 29},
-  {"%fr29l", 29},
-  {"%fr29r", 29},
-  {"%fr2l", 2},
-  {"%fr2r", 2},
-  {"%fr3", 3},
-  {"%fr30", 30},
-  {"%fr30l", 30},
-  {"%fr30r", 30},
-  {"%fr31", 31},
-  {"%fr31l", 31},
-  {"%fr31r", 31},
-  {"%fr3l", 3},
-  {"%fr3r", 3},
-  {"%fr4", 4},
-  {"%fr4l", 4},
-  {"%fr4r", 4},
-  {"%fr5", 5},
-  {"%fr5l", 5},
-  {"%fr5r", 5},
-  {"%fr6", 6},
-  {"%fr6l", 6},
-  {"%fr6r", 6},
-  {"%fr7", 7},
-  {"%fr7l", 7},
-  {"%fr7r", 7},
-  {"%fr8", 8},
-  {"%fr8l", 8},
-  {"%fr8r", 8},
-  {"%fr9", 9},
-  {"%fr9l", 9},
-  {"%fr9r", 9},
-  {"%hta", 25},
-  {"%iir", 19},
-  {"%ior", 21},
-  {"%ipsw", 22},
-  {"%isr", 20},
-  {"%itmr", 16},
-  {"%iva", 14},
-  {"%pcoq", 18},
-  {"%pcsq", 17},
-  {"%pidr1", 8},
-  {"%pidr2", 9},
+  {"%arg0",  26},
+  {"%arg1",  25},
+  {"%arg2",  24},
+  {"%arg3",  23},
+  {"%cr0",    0},
+  {"%cr10",  10},
+  {"%cr11",  11},
+  {"%cr12",  12},
+  {"%cr13",  13},
+  {"%cr14",  14},
+  {"%cr15",  15},
+  {"%cr16",  16},
+  {"%cr17",  17},
+  {"%cr18",  18},
+  {"%cr19",  19},
+  {"%cr20",  20},
+  {"%cr21",  21},
+  {"%cr22",  22},
+  {"%cr23",  23},
+  {"%cr24",  24},
+  {"%cr25",  25},
+  {"%cr26",  26},
+  {"%cr27",  27},
+  {"%cr28",  28},
+  {"%cr29",  29},
+  {"%cr30",  30},
+  {"%cr31",  31},
+  {"%cr8",    8},
+  {"%cr9",    9},
+  {"%dp",    27},
+  {"%eiem",  15},
+  {"%eirr",  23},
+  {"%fr0",    0 + FP_REG_BASE},
+  {"%fr0l",   0 + FP_REG_BASE},
+  {"%fr0r",   0 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr1",    1 + FP_REG_BASE},
+  {"%fr10",  10 + FP_REG_BASE},
+  {"%fr10l", 10 + FP_REG_BASE},
+  {"%fr10r", 10 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr11",  11 + FP_REG_BASE},
+  {"%fr11l", 11 + FP_REG_BASE},
+  {"%fr11r", 11 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr12",  12 + FP_REG_BASE},
+  {"%fr12l", 12 + FP_REG_BASE},
+  {"%fr12r", 12 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr13",  13 + FP_REG_BASE},
+  {"%fr13l", 13 + FP_REG_BASE},
+  {"%fr13r", 13 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr14",  14 + FP_REG_BASE},
+  {"%fr14l", 14 + FP_REG_BASE},
+  {"%fr14r", 14 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr15",  15 + FP_REG_BASE},
+  {"%fr15l", 15 + FP_REG_BASE},
+  {"%fr15r", 15 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr16",  16 + FP_REG_BASE},
+  {"%fr16l", 16 + FP_REG_BASE},
+  {"%fr16r", 16 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr17",  17 + FP_REG_BASE},
+  {"%fr17l", 17 + FP_REG_BASE},
+  {"%fr17r", 17 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr18",  18 + FP_REG_BASE},
+  {"%fr18l", 18 + FP_REG_BASE},
+  {"%fr18r", 18 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr19",  19 + FP_REG_BASE},
+  {"%fr19l", 19 + FP_REG_BASE},
+  {"%fr19r", 19 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr1l",   1 + FP_REG_BASE},
+  {"%fr1r",   1 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr2",    2 + FP_REG_BASE},
+  {"%fr20",  20 + FP_REG_BASE},
+  {"%fr20l", 20 + FP_REG_BASE},
+  {"%fr20r", 20 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr21",  21 + FP_REG_BASE},
+  {"%fr21l", 21 + FP_REG_BASE},
+  {"%fr21r", 21 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr22",  22 + FP_REG_BASE},
+  {"%fr22l", 22 + FP_REG_BASE},
+  {"%fr22r", 22 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr23",  23 + FP_REG_BASE},
+  {"%fr23l", 23 + FP_REG_BASE},
+  {"%fr23r", 23 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr24",  24 + FP_REG_BASE},
+  {"%fr24l", 24 + FP_REG_BASE},
+  {"%fr24r", 24 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr25",  25 + FP_REG_BASE},
+  {"%fr25l", 25 + FP_REG_BASE},
+  {"%fr25r", 25 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr26",  26 + FP_REG_BASE},
+  {"%fr26l", 26 + FP_REG_BASE},
+  {"%fr26r", 26 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr27",  27 + FP_REG_BASE},
+  {"%fr27l", 27 + FP_REG_BASE},
+  {"%fr27r", 27 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr28",  28 + FP_REG_BASE},
+  {"%fr28l", 28 + FP_REG_BASE},
+  {"%fr28r", 28 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr29",  29 + FP_REG_BASE},
+  {"%fr29l", 29 + FP_REG_BASE},
+  {"%fr29r", 29 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr2l",   2 + FP_REG_BASE},
+  {"%fr2r",   2 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr3",    3 + FP_REG_BASE},
+  {"%fr30",  30 + FP_REG_BASE},
+  {"%fr30l", 30 + FP_REG_BASE},
+  {"%fr30r", 30 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr31",  31 + FP_REG_BASE},
+  {"%fr31l", 31 + FP_REG_BASE},
+  {"%fr31r", 31 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr3l",   3 + FP_REG_BASE},
+  {"%fr3r",   3 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr4",    4 + FP_REG_BASE},
+  {"%fr4l",   4 + FP_REG_BASE},
+  {"%fr4r",   4 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr5",    5 + FP_REG_BASE},
+  {"%fr5l",   5 + FP_REG_BASE},
+  {"%fr5r",   5 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr6",    6 + FP_REG_BASE},
+  {"%fr6l",   6 + FP_REG_BASE},
+  {"%fr6r",   6 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr7",    7 + FP_REG_BASE},
+  {"%fr7l",   7 + FP_REG_BASE},
+  {"%fr7r",   7 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr8",    8 + FP_REG_BASE},
+  {"%fr8l",   8 + FP_REG_BASE},
+  {"%fr8r",   8 + FP_REG_BASE + FP_REG_RSEL},
+  {"%fr9",    9 + FP_REG_BASE},
+  {"%fr9l",   9 + FP_REG_BASE},
+  {"%fr9r",   9 + FP_REG_BASE + FP_REG_RSEL},
+  {"%hta",   25},
+  {"%iir",   19},
+  {"%ior",   21},
+  {"%ipsw",  22},
+  {"%isr",   20},
+  {"%itmr",  16},
+  {"%iva",   14},
+  {"%pcoq",  18},
+  {"%pcsq",  17},
+  {"%pidr1",  8},
+  {"%pidr2",  9},
   {"%pidr3", 12},
   {"%pidr4", 13},
-  {"%ppda", 24},
-  {"%r0", 0},
-  {"%r1", 1},
-  {"%r10", 10},
-  {"%r11", 11},
-  {"%r12", 12},
-  {"%r13", 13},
-  {"%r14", 14},
-  {"%r15", 15},
-  {"%r16", 16},
-  {"%r17", 17},
-  {"%r18", 18},
-  {"%r19", 19},
-  {"%r2", 2},
-  {"%r20", 20},
-  {"%r21", 21},
-  {"%r22", 22},
-  {"%r23", 23},
-  {"%r24", 24},
-  {"%r25", 25},
-  {"%r26", 26},
-  {"%r27", 27},
-  {"%r28", 28},
-  {"%r29", 29},
-  {"%r3", 3},
-  {"%r30", 30},
-  {"%r31", 31},
-  {"%r4", 4},
-  {"%r5", 5},
-  {"%r6", 6},
-  {"%r7", 7},
-  {"%r8", 8},
-  {"%r9", 9},
-  {"%rctr", 0},
-  {"%ret0", 28},
-  {"%ret1", 29},
-  {"%rp", 2},
-  {"%sar", 11},
-  {"%sp", 30},
-  {"%sr0", 0},
-  {"%sr1", 1},
-  {"%sr2", 2},
-  {"%sr3", 3},
-  {"%sr4", 4},
-  {"%sr5", 5},
-  {"%sr6", 6},
-  {"%sr7", 7},
-  {"%tr0", 24},
-  {"%tr1", 25},
-  {"%tr2", 26},
-  {"%tr3", 27},
-  {"%tr4", 28},
-  {"%tr5", 29},
-  {"%tr6", 30},
-  {"%tr7", 31}
+  {"%ppda",  24},
+  {"%r0",     0},
+  {"%r1",     1},
+  {"%r10",   10},
+  {"%r11",   11},
+  {"%r12",   12},
+  {"%r13",   13},
+  {"%r14",   14},
+  {"%r15",   15},
+  {"%r16",   16},
+  {"%r17",   17},
+  {"%r18",   18},
+  {"%r19",   19},
+  {"%r2",     2},
+  {"%r20",   20},
+  {"%r21",   21},
+  {"%r22",   22},
+  {"%r23",   23},
+  {"%r24",   24},
+  {"%r25",   25},
+  {"%r26",   26},
+  {"%r27",   27},
+  {"%r28",   28},
+  {"%r29",   29},
+  {"%r3",     3},
+  {"%r30",   30},
+  {"%r31",   31},
+  {"%r4",     4},
+  {"%r5",     5},
+  {"%r6",     6},
+  {"%r7",     7},
+  {"%r8",     8},
+  {"%r9",     9},
+  {"%rctr",   0},
+  {"%ret0",  28},
+  {"%ret1",  29},
+  {"%rp",     2},
+  {"%sar",   11},
+  {"%sp",    30},
+  {"%sr0",    0},
+  {"%sr1",    1},
+  {"%sr2",    2},
+  {"%sr3",    3},
+  {"%sr4",    4},
+  {"%sr5",    5},
+  {"%sr6",    6},
+  {"%sr7",    7},
+  {"%tr0",   24},
+  {"%tr1",   25},
+  {"%tr2",   26},
+  {"%tr3",   27},
+  {"%tr4",   28},
+  {"%tr5",   29},
+  {"%tr6",   30},
+  {"%tr7",   31}
 };
 
 /* This table is sorted by order of the length of the string. This is
@@ -1651,10 +1643,9 @@ pa_ip (str)
 	    /* Handle a 5 bit register or control register field at 10.  */
 	    case 'b':
 	    case '^':
-	      /* This should be more strict.  Small steps.  */
-	      if (strict && *s != '%')
+	      if (!pa_parse_number (&s, 0))
 		break;
-	      num = pa_parse_number (&s, 0);
+	      num = pa_number;
 	      CHECK_FIELD (num, 31, 0, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 21);
 
@@ -1679,28 +1670,25 @@ pa_ip (str)
 
 	    /* Handle a 5 bit register field at 15.  */
 	    case 'x':
-	      /* This should be more strict.  Small steps.  */
-	      if (strict && *s != '%')
+	      if (!pa_parse_number (&s, 0))
 		break;
-	      num = pa_parse_number (&s, 0);
+	      num = pa_number;
 	      CHECK_FIELD (num, 31, 0, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 16);
 
 	    /* Handle a 5 bit register field at 31.  */
 	    case 't':
-	      /* This should be more strict.  Small steps.  */
-	      if (strict && *s != '%')
+	      if (!pa_parse_number (&s, 0))
 		break;
-	      num = pa_parse_number (&s, 0);
+	      num = pa_number;
 	      CHECK_FIELD (num, 31, 0, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
 	    /* Handle a 5 bit register field at 10 and 15.  */
 	    case 'a':
-	      /* This should be more strict.  Small steps.  */
-	      if (strict && *s != '%')
+	      if (!pa_parse_number (&s, 0))
 		break;
-	      num = pa_parse_number (&s, 0);
+	      num = pa_number;
 	      CHECK_FIELD (num, 31, 0, 0);
 	      opcode |= num << 16;
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 21);
@@ -1767,19 +1755,17 @@ pa_ip (str)
 
 	    /* Handle a 2 bit space identifier at 17.  */
 	    case 's':
-	      /* This should be more strict.  Small steps.  */
-	      if (strict && *s != '%')
+	      if (!pa_parse_number (&s, 0))
 		break;
-	      num = pa_parse_number (&s, 0);
+	      num = pa_number;
 	      CHECK_FIELD (num, 3, 0, 1);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 14);
 
 	    /* Handle a 3 bit space identifier at 18.  */
 	    case 'S':
-	      /* This should be more strict.  Small steps.  */
-	      if (strict && *s != '%')
+	      if (!pa_parse_number (&s, 0))
 		break;
-	      num = pa_parse_number (&s, 0);
+	      num = pa_number;
 	      CHECK_FIELD (num, 7, 0, 1);
 	      opcode |= re_assemble_3 (num);
 	      continue;
@@ -3444,8 +3430,6 @@ pa_ip (str)
 	      num = pa_get_absolute_expression (&the_insn, &s);
 	      if (strict && the_insn.exp.X_op != O_constant)
 		break;
-	      if (the_insn.exp.X_op != O_constant)
-		break;
 	      s = expr_end;
 	      CHECK_FIELD (num, 31, 0, strict);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 21);
@@ -3669,49 +3653,43 @@ pa_ip (str)
 	        {
 		/* Float target register.  */
 		case 't':
-		  /* This should be more strict.  Small steps.  */
-		  if (strict && *s != '%')
+		  if (!pa_parse_number (&s, 3))
 		    break;
-		  num = pa_parse_number (&s, 0);
+		  num = (pa_number & ~FP_REG_RSEL) - FP_REG_BASE;
 		  CHECK_FIELD (num, 31, 0, 0);
 		  INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
 		/* Float target register with L/R selection.  */
 		case 'T':
 		  {
-		    struct pa_11_fp_reg_struct result;
-
-		    /* This should be more strict.  Small steps.  */
-		    if (strict && *s != '%')
+		    if (!pa_parse_number (&s, 1))
 		      break;
-		    pa_parse_number (&s, &result);
-		    CHECK_FIELD (result.number_part, 31, 0, 0);
-		    opcode |= result.number_part;
+		    num = (pa_number & ~FP_REG_RSEL) - FP_REG_BASE;
+		    CHECK_FIELD (num, 31, 0, 0);
+		    opcode |= num;
 
 		    /* 0x30 opcodes are FP arithmetic operation opcodes
 		       and need to be turned into 0x38 opcodes.  This
 		       is not necessary for loads/stores.  */
-		    if (need_pa11_opcode (&the_insn, &result)
+		    if (need_pa11_opcode ()
 			&& ((opcode & 0xfc000000) == 0x30000000))
 		      opcode |= 1 << 27;
 
-		    INSERT_FIELD_AND_CONTINUE (opcode, result.l_r_select & 1, 6);
+		    opcode |= (pa_number & FP_REG_RSEL ? 1 << 6 : 0);
+		    continue;
 		  }
 
 		/* Float operand 1.  */
 		case 'a':
 		  {
-		    struct pa_11_fp_reg_struct result;
-
-		    /* This should be more strict.  Small steps.  */
-		    if (strict && *s != '%')
+		    if (!pa_parse_number (&s, 1))
 		      break;
-		    pa_parse_number (&s, &result);
-		    CHECK_FIELD (result.number_part, 31, 0, 0);
-		    opcode |= result.number_part << 21;
-		    if (need_pa11_opcode (&the_insn, &result))
+		    num = (pa_number & ~FP_REG_RSEL) - FP_REG_BASE;
+		    CHECK_FIELD (num, 31, 0, 0);
+		    opcode |= num << 21;
+		    if (need_pa11_opcode ())
 		      {
-			opcode |= (result.l_r_select & 1) << 7;
+			opcode |= (pa_number & FP_REG_RSEL ? 1 << 7 : 0);
 			opcode |= 1 << 27;
 		      }
 		    continue;
@@ -3721,32 +3699,26 @@ pa_ip (str)
 		case 'X':
 		case 'A':
 		  {
-		    struct pa_11_fp_reg_struct result;
-
-		    /* This should be more strict.  Small steps.  */
-		    if (strict && *s != '%')
+		    if (!pa_parse_number (&s, 1))
 		      break;
-		    pa_parse_number (&s, &result);
-		    CHECK_FIELD (result.number_part, 31, 0, 0);
-		    opcode |= result.number_part << 21;
-		    opcode |= (result.l_r_select & 1) << 7;
+		    num = (pa_number & ~FP_REG_RSEL) - FP_REG_BASE;
+		    CHECK_FIELD (num, 31, 0, 0);
+		    opcode |= num << 21;
+		    opcode |= (pa_number & FP_REG_RSEL ? 1 << 7 : 0);
 		    continue;
 		  }
 
 		/* Float operand 2.  */
 		case 'b':
 		  {
-		    struct pa_11_fp_reg_struct result;
-
-		    /* This should be more strict.  Small steps.  */
-		    if (strict && *s != '%')
+		    if (!pa_parse_number (&s, 1))
 		      break;
-		    pa_parse_number (&s, &result);
-		    CHECK_FIELD (result.number_part, 31, 0, 0);
-		    opcode |= (result.number_part & 0x1f) << 16;
-		    if (need_pa11_opcode (&the_insn, &result))
+		    num = (pa_number & ~FP_REG_RSEL) - FP_REG_BASE;
+		    CHECK_FIELD (num, 31, 0, 0);
+		    opcode |= num << 16;
+		    if (need_pa11_opcode ())
 		      {
-			opcode |= (result.l_r_select & 1) << 12;
+			opcode |= (pa_number & FP_REG_RSEL ? 1 << 12 : 0);
 			opcode |= 1 << 27;
 		      }
 		    continue;
@@ -3755,174 +3727,149 @@ pa_ip (str)
 		/* Float operand 2 with L/R selection.  */
 		case 'B':
 		  {
-		    struct pa_11_fp_reg_struct result;
-
-		    /* This should be more strict.  Small steps.  */
-		    if (strict && *s != '%')
+		    if (!pa_parse_number (&s, 1))
 		      break;
-		    pa_parse_number (&s, &result);
-		    CHECK_FIELD (result.number_part, 31, 0, 0);
-		    opcode |= (result.number_part & 0x1f) << 16;
-		    opcode |= (result.l_r_select & 1) << 12;
+		    num = (pa_number & ~FP_REG_RSEL) - FP_REG_BASE;
+		    CHECK_FIELD (num, 31, 0, 0);
+		    opcode |= num << 16;
+		    opcode |= (pa_number & FP_REG_RSEL ? 1 << 12 : 0);
 		    continue;
 		  }
 
 		/* Float operand 3 for fmpyfadd, fmpynfadd.  */
 		case 'C':
 		  {
-		    struct pa_11_fp_reg_struct result;
-
-		    /* This should be more strict.  Small steps.  */
-		    if (strict && *s != '%')
+		    if (!pa_parse_number (&s, 1))
 		      break;
-		    pa_parse_number (&s, &result);
-		    CHECK_FIELD (result.number_part, 31, 0, 0);
-		    opcode |= (result.number_part & 0x1c) << 11;
-		    opcode |= (result.number_part & 0x3) << 9;
-		    opcode |= (result.l_r_select & 1) << 8;
+		    num = (pa_number & ~FP_REG_RSEL) - FP_REG_BASE;
+		    CHECK_FIELD (num, 31, 0, 0);
+		    opcode |= (num & 0x1c) << 11;
+		    opcode |= (num & 0x03) << 9;
+		    opcode |= (pa_number & FP_REG_RSEL ? 1 << 8 : 0);
 		    continue;
 		  }
 
 		/* Float mult operand 1 for fmpyadd, fmpysub */
 		case 'i':
 		  {
-		    struct pa_11_fp_reg_struct result;
-
-		    /* This should be more strict.  Small steps.  */
-		    if (strict && *s != '%')
+		    if (!pa_parse_number (&s, 1))
 		      break;
-		    pa_parse_number (&s, &result);
-		    CHECK_FIELD (result.number_part, 31, 0, 0);
+		    num = (pa_number & ~FP_REG_RSEL) - FP_REG_BASE;
+		    CHECK_FIELD (num, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
-			if (result.number_part < 16)
+			if (num < 16)
 			  {
 			    as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
 			    break;
 			  }
-
-			result.number_part &= 0xF;
-			result.number_part |= (result.l_r_select & 1) << 4;
+			num &= 0xF;
+			num |= (pa_number & FP_REG_RSEL ? 1 << 4 : 0);
 		      }
-		    INSERT_FIELD_AND_CONTINUE (opcode, result.number_part, 21);
+		    INSERT_FIELD_AND_CONTINUE (opcode, num, 21);
 		  }
 
 		/* Float mult operand 2 for fmpyadd, fmpysub */
 		case 'j':
 		  {
-		    struct pa_11_fp_reg_struct result;
-
-		    /* This should be more strict.  Small steps.  */
-		    if (strict && *s != '%')
+		    if (!pa_parse_number (&s, 1))
 		      break;
-		    pa_parse_number (&s, &result);
-		    CHECK_FIELD (result.number_part, 31, 0, 0);
+		    num = (pa_number & ~FP_REG_RSEL) - FP_REG_BASE;
+		    CHECK_FIELD (num, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
-		        if (result.number_part < 16)
+		        if (num < 16)
 		          {
-		    	as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
-		    	break;
+			    as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
+			    break;
 		          }
-		        result.number_part &= 0xF;
-		        result.number_part |= (result.l_r_select & 1) << 4;
+		        num &= 0xF;
+		        num |= (pa_number & FP_REG_RSEL ? 1 << 4 : 0);
 		      }
-		    INSERT_FIELD_AND_CONTINUE (opcode, result.number_part, 16);
+		    INSERT_FIELD_AND_CONTINUE (opcode, num, 16);
 		  }
 
 		/* Float mult target for fmpyadd, fmpysub */
 		case 'k':
 		  {
-		    struct pa_11_fp_reg_struct result;
-
-		    /* This should be more strict.  Small steps.  */
-		    if (strict && *s != '%')
+		    if (!pa_parse_number (&s, 1))
 		      break;
-		    pa_parse_number (&s, &result);
-		    CHECK_FIELD (result.number_part, 31, 0, 0);
+		    num = (pa_number & ~FP_REG_RSEL) - FP_REG_BASE;
+		    CHECK_FIELD (num, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
-		        if (result.number_part < 16)
+		        if (num < 16)
 		          {
-		    	as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
-		    	break;
+			    as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
+			    break;
 		          }
-		        result.number_part &= 0xF;
-		        result.number_part |= (result.l_r_select & 1) << 4;
+		        num &= 0xF;
+		        num |= (pa_number & FP_REG_RSEL ? 1 << 4 : 0);
 		      }
-		    INSERT_FIELD_AND_CONTINUE (opcode, result.number_part, 0);
+		    INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 		  }
 
 		/* Float add operand 1 for fmpyadd, fmpysub */
 		case 'l':
 		  {
-		    struct pa_11_fp_reg_struct result;
-
-		    /* This should be more strict.  Small steps.  */
-		    if (strict && *s != '%')
+		    if (!pa_parse_number (&s, 1))
 		      break;
-		    pa_parse_number (&s, &result);
-		    CHECK_FIELD (result.number_part, 31, 0, 0);
+		    num = (pa_number & ~FP_REG_RSEL) - FP_REG_BASE;
+		    CHECK_FIELD (num, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
-		        if (result.number_part < 16)
+		        if (num < 16)
 		          {
-		    	as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
-		    	break;
+			    as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
+			    break;
 		          }
-		        result.number_part &= 0xF;
-		        result.number_part |= (result.l_r_select & 1) << 4;
+		        num &= 0xF;
+		        num |= (pa_number & FP_REG_RSEL ? 1 << 4 : 0);
 		      }
-		    INSERT_FIELD_AND_CONTINUE (opcode, result.number_part, 6);
+		    INSERT_FIELD_AND_CONTINUE (opcode, num, 6);
 		  }
 
 		/* Float add target for fmpyadd, fmpysub */
 		case 'm':
 		  {
-		    struct pa_11_fp_reg_struct result;
-
-		    /* This should be more strict.  Small steps.  */
-		    if (strict && *s != '%')
+		    if (!pa_parse_number (&s, 1))
 		      break;
-		    pa_parse_number (&s, &result);
-		    CHECK_FIELD (result.number_part, 31, 0, 0);
+		    num = (pa_number & ~FP_REG_RSEL) - FP_REG_BASE;
+		    CHECK_FIELD (num, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
-		        if (result.number_part < 16)
+		        if (num < 16)
 		          {
-		    	as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
-		    	break;
+			    as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
+			    break;
 		          }
-		        result.number_part &= 0xF;
-		        result.number_part |= (result.l_r_select & 1) << 4;
+		        num &= 0xF;
+		        num |= (pa_number & FP_REG_RSEL ? 1 << 4 : 0);
 		      }
-		    INSERT_FIELD_AND_CONTINUE (opcode, result.number_part, 11);
+		    INSERT_FIELD_AND_CONTINUE (opcode, num, 11);
 		  }
 
 		/* Handle L/R register halves like 'x'.  */
 		case 'E':
 		case 'e':
 		  {
-		    struct pa_11_fp_reg_struct result;
-
-		    if (strict && *s != '%')
+		    if (!pa_parse_number (&s, 1))
 		      break;
-		    pa_parse_number (&s, &result);
-		    CHECK_FIELD (result.number_part, 31, 0, 0);
-		    opcode |= (result.number_part & 0x1f) << 16;
-		    if (need_pa11_opcode (&the_insn, &result))
+		    num = (pa_number & ~FP_REG_RSEL) - FP_REG_BASE;
+		    CHECK_FIELD (num, 31, 0, 0);
+		    opcode |= num << 16;
+		    if (need_pa11_opcode ())
 		      {
-			opcode |= (result.l_r_select & 1) << 1;
+			opcode |= (pa_number & FP_REG_RSEL ? 1 << 1 : 0);
 		      }
 		    continue;
 		  }
 
 		/* Float target register (PA 2.0 wide).  */
 		case 'x':
-		  /* This should be more strict.  Small steps.  */
-		  if (strict && *s != '%')
+		  if (!pa_parse_number (&s, 3))
 		    break;
-		  num = pa_parse_number (&s, 0);
+		  num = (pa_number & ~FP_REG_RSEL) - FP_REG_BASE;
 		  CHECK_FIELD (num, 31, 0, 0);
 		  INSERT_FIELD_AND_CONTINUE (opcode, num, 16);
 
@@ -4622,19 +4569,21 @@ is_end_of_statement ()
    the most common will be a hex or decimal constant, but it could be
    a pre-defined register (Yuk!), or an absolute symbol.
 
-   Return a number or -1 for failure.
+   Return 1 on success or 0 on failure.  If STRICT, then a missing
+   register prefix will cause a failure.  The number itself is
+   returned in `pa_number'.
 
-   When parsing PA-89 FP register numbers RESULT will be
-   the address of a structure to return information about
-   L/R half of FP registers, store results there as appropriate.
+   IS_FLOAT indicates that a PA-89 FP register number should be
+   parsed;  A `l' or `r' suffix is checked for if but 2 of IS_FLOAT is
+   not set.
 
    pa_parse_number can not handle negative constants and will fail
    horribly if it is passed such a constant.  */
 
 static int
-pa_parse_number (s, result)
+pa_parse_number (s, is_float)
      char **s;
-     struct pa_11_fp_reg_struct *result;
+     int is_float;
 {
   int num;
   char *name;
@@ -4642,23 +4591,18 @@ pa_parse_number (s, result)
   symbolS *sym;
   int status;
   char *p = *s;
+  boolean have_prefix;
 
   /* Skip whitespace before the number.  */
   while (*p == ' ' || *p == '\t')
     p = p + 1;
 
-  /* Store info in RESULT if requested by caller.  */
-  if (result)
-    {
-      result->number_part = -1;
-      result->l_r_select = -1;
-    }
-  num = -1;
-
-  if (isdigit (*p))
+  pa_number = -1;
+  have_prefix = 0;
+  num = 0;
+  if (!strict && isdigit (*p))
     {
       /* Looks like a number.  */
-      num = 0;
 
       if (*p == '0' && (*(p + 1) == 'x' || *(p + 1) == 'X'))
 	{
@@ -4686,29 +4630,30 @@ pa_parse_number (s, result)
 	    }
 	}
 
-      /* Store info in RESULT if requested by the caller.  */
-      if (result)
-	{
-	  result->number_part = num;
+      pa_number = num;
 
-	  if (IS_R_SELECT (p))
+      /* Check for a `l' or `r' suffix.  */
+      if (is_float)
+	{
+	  pa_number += FP_REG_BASE;
+	  if (! (is_float & 2))
 	    {
-	      result->l_r_select = 1;
-	      ++p;
+	      if (IS_R_SELECT (p))
+		{
+		  pa_number += FP_REG_RSEL;
+		  ++p;
+		}
+	      else if (IS_L_SELECT (p))
+		{
+		  ++p;
+		}
 	    }
-	  else if (IS_L_SELECT (p))
-	    {
-	      result->l_r_select = 0;
-	      ++p;
-	    }
-	  else
-	    result->l_r_select = 0;
 	}
     }
   else if (*p == '%')
     {
       /* The number might be a predefined register.  */
-      num = 0;
+      have_prefix = 1;
       name = p;
       p++;
       c = *p;
@@ -4764,23 +4709,12 @@ pa_parse_number (s, result)
 	  *p = c;
 	}
 
-      /* Store info in RESULT if requested by caller.  */
-      if (result)
-	{
-	  result->number_part = num;
-	  if (IS_R_SELECT (p - 1))
-	    result->l_r_select = 1;
-	  else if (IS_L_SELECT (p - 1))
-	    result->l_r_select = 0;
-	  else
-	    result->l_r_select = 0;
-	}
+      pa_number = num;
     }
   else
     {
       /* And finally, it could be a symbol in the absolute section which
-         is effectively a constant.  */
-      num = 0;
+         is effectively a constant, or a register alias symbol.  */
       name = p;
       c = *p;
       while (is_part_of_name (c))
@@ -4791,16 +4725,23 @@ pa_parse_number (s, result)
       *p = 0;
       if ((sym = symbol_find (name)) != NULL)
 	{
-	  if (S_GET_SEGMENT (sym) == &bfd_abs_section)
+	  if (S_GET_SEGMENT (sym) == reg_section)
+	    {
+	      num = S_GET_VALUE (sym);
+	      /* Well, we don't really have one, but we do have a
+		 register, so...  */
+	      have_prefix = true;
+	    }
+	  else if (S_GET_SEGMENT (sym) == &bfd_abs_section)
 	    num = S_GET_VALUE (sym);
-	  else
+	  else if (!strict)
 	    {
 	      if (print_errors)
 		as_bad (_("Non-absolute symbol: '%s'."), name);
 	      num = -1;
 	    }
 	}
-      else
+      else if (!strict)
 	{
 	  /* There is where we'd come for an undefined symbol
 	     or for an empty string.  For an empty string we
@@ -4817,21 +4758,15 @@ pa_parse_number (s, result)
 	}
       *p = c;
 
-      /* Store info in RESULT if requested by caller.  */
-      if (result)
-	{
-	  result->number_part = num;
-	  if (IS_R_SELECT (p - 1))
-	    result->l_r_select = 1;
-	  else if (IS_L_SELECT (p - 1))
-	    result->l_r_select = 0;
-	  else
-	    result->l_r_select = 0;
-	}
+      pa_number = num;
     }
 
-  *s = p;
-  return num;
+  if (!strict || have_prefix)
+    {
+      *s = p;
+      return 1;
+    }
+  return 0;
 }
 
 #define REG_NAME_CNT	(sizeof(pre_defined_registers) / sizeof(struct pd_reg))
@@ -4870,11 +4805,10 @@ reg_name_search (name)
    a new PA-1.1 opcode.  */
 
 static int
-need_pa11_opcode (insn, result)
-     struct pa_it *insn;
-     struct pa_11_fp_reg_struct *result;
+need_pa11_opcode ()
 {
-  if (result->l_r_select == 1 && !(insn->fpof1 == DBL && insn->fpof2 == DBL))
+  if ((pa_number & FP_REG_RSEL) != 0
+      && !(the_insn.fpof1 == DBL && the_insn.fpof2 == DBL))
     {
       /* If this instruction is specific to a particular architecture,
 	 then set a new architecture.  */
@@ -5186,7 +5120,7 @@ pa_get_absolute_expression (insn, strp)
 
      The PA assembly syntax is ambigious in a variety of ways.  Consider
      this string "4 %r5"  Is that the number 4 followed by the register
-     r5, or is that 4 MOD 5?
+     r5, or is that 4 MOD r5?
 
      If we get a modulo expresion When looking for an absolute, we try
      again cutting off the input string at the first whitespace character.  */
@@ -6465,6 +6399,27 @@ pa_entry (unused)
 #endif
 }
 
+/* Silly nonsense for pa_equ.  The only half-sensible use for this is
+   being able to subtract two register symbols that specify a range of
+   registers, to get the size of the range.  */
+static int fudge_reg_expressions;
+
+int
+hppa_force_reg_syms_absolute (resultP, op, rightP)
+     expressionS *resultP;
+     operatorT op ATTRIBUTE_UNUSED;
+     expressionS *rightP;
+{
+  if (fudge_reg_expressions
+      && rightP->X_op == O_register
+      && resultP->X_op == O_register)
+    {
+      rightP->X_op = O_constant;
+      resultP->X_op = O_constant;
+    }
+  return 0;  /* Continue normal expr handling.  */
+}
+
 /* Handle a .EQU pseudo-op.  */
 
 static void
@@ -6478,10 +6433,32 @@ pa_equ (reg)
     {
       symbol = label_symbol->lss_label;
       if (reg)
-	S_SET_VALUE (symbol, pa_parse_number (&input_line_pointer, 0));
+	{
+	  strict = 1;
+	  if (!pa_parse_number (&input_line_pointer, 0))
+	    as_bad (_(".REG expression must be a register"));
+	  S_SET_VALUE (symbol, pa_number);
+	  S_SET_SEGMENT (symbol, reg_section);
+	}
       else
-	S_SET_VALUE (symbol, (unsigned int) get_absolute_expression ());
-      S_SET_SEGMENT (symbol, bfd_abs_section_ptr);
+	{
+	  expressionS exp;
+	  segT seg;
+
+	  fudge_reg_expressions = 1;
+	  seg = expression (&exp);
+	  fudge_reg_expressions = 0;
+	  if (exp.X_op != O_constant
+	      && exp.X_op != O_register)
+	    {
+	      if (exp.X_op != O_absent)
+		as_bad (_("bad or irreducible absolute expression; zero assumed"));
+	      exp.X_add_number = 0;
+	      seg = absolute_section;
+	    }
+	  S_SET_VALUE (symbol, (unsigned int) exp.X_add_number);
+	  S_SET_SEGMENT (symbol, seg);
+	}
     }
   else
     {
@@ -7135,7 +7112,7 @@ pa_parse_space_stmt (space_name, create_flag)
 {
   char *name, *ptemp, c;
   char loadable, defined, private, sort;
-  int spnum, temp;
+  int spnum;
   asection *seg = NULL;
   sd_chain_struct *space;
 
@@ -7169,10 +7146,11 @@ pa_parse_space_stmt (space_name, create_flag)
       /* First see if the space was specified as a number rather than
          as a name.  According to the PA assembly manual the rest of
          the line should be ignored.  */
-      temp = pa_parse_number (&ptemp, 0);
-      if (temp >= 0)
+      strict = 0;
+      pa_parse_number (&ptemp, 0);
+      if (pa_number >= 0)
 	{
-	  spnum = temp;
+	  spnum = pa_number;
 	  input_line_pointer = ptemp;
 	}
       else
@@ -7254,7 +7232,6 @@ pa_space (unused)
      int unused ATTRIBUTE_UNUSED;
 {
   char *name, c, *space_name, *save_s;
-  int temp;
   sd_chain_struct *sd_chain;
 
   if (within_procedure)
@@ -7332,9 +7309,11 @@ pa_space (unused)
       /* It could be a space specified by number.  */
       print_errors = 0;
       save_s = input_line_pointer;
-      if ((temp = pa_parse_number (&input_line_pointer, 0)) >= 0)
+      strict = 0;
+      pa_parse_number (&input_line_pointer, 0);
+      if (pa_number >= 0)
 	{
-	  if ((sd_chain = pa_find_space_by_number (temp)))
+	  if ((sd_chain = pa_find_space_by_number (pa_number)))
 	    {
 	      current_space = sd_chain;
 

@@ -1,5 +1,29 @@
 2000-09-05  Alan Modra  <alan@linuxcare.com.au>
 
+	* config/tc-hppa.c (fudge_reg_expressions): New
+	(hppa_force_reg_syms_absolute): New.
+	(pa_equ): Allow reg_section expressions.
+	* config/tc-hppa.c (md_optimize_expr): Define.
+	(hppa_force_reg_syms_absolute): Prototype.
+
+	* config/tc-hppa.c (pa_11_fp_reg_struct): Delete.
+	(pa_parse_number): Pass in arg to select fp reg parsing.
+	Return 1 to indicate format checks pass.  If strict, then only
+	accept a register or register symbol.  Return value in...
+	(pa_number): New static for pa_parse_number.
+	(FP_REG_BASE): Define.
+	(FP_REG_RSEL): Define.
+	(pre_defined_registers): Apply FP_REG_BASE and FP_REG_RSEL as
+	appropriate.  White space changes.
+	(need_pa11_opcode): Don't bother passing any params, get them from
+	globals instead.
+	(pa_ip): Modify all calls to pa_parse_number and need_pa11_opcode.
+	Remove extraneous check in case 'Q'.
+	(pa_equ): Modify call to pa_parse_number to do strict parsing. If
+	reg, set section of resulting symbol to reg_section.
+	(pa_parse_space_stmt): Modify call to pa_parse_number.
+	(pa_space): Likewise.
+
 	* config/tc-hppa.c: (md_apply_fix): Handle vtable relocs.
 	(hppa_force_relocation): Handle vtable relocs.
 	(pa_vtable_entry): New.
