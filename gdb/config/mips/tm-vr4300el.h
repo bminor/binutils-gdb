@@ -17,6 +17,4 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define TARGET_BYTE_ORDER_SELECTABLE_P 1
-
 #include "mips/tm-mips64.h"

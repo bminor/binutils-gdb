@@ -1,3 +1,15 @@
+Tue Jun  6 16:46:37 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/mips/tm-vr5000el.h, config/mips/tm-vr5000.h,
+ 	config/mips/tm-vr4xxxel.h, config/mips/tm-vr4xxx.h,
+ 	config/mips/tm-vr4300el.h, config/mips/tm-vr4100.h,
+ 	config/mips/tm-vr4300.h, config/mips/tm-tx39l.h,
+ 	config/mips/tm-tx39.h, config/mips/tm-embedl64.h,
+ 	config/mips/tm-embedl.h, config/mips/tm-embed64.h,
+ 	config/mips/tm-embed.h: Delete TARGET_BYTE_ORDER_SELECTABLE_P.
+
+	* tm-mips.h (TARGET_BYTE_ORDER_SELECTABLE_P): Define as 1.
+	
 Tue Jun  6 16:21:14 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbarch.sh (generic_register_convertible_not,

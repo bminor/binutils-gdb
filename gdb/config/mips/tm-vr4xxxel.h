@@ -19,6 +19,5 @@
 
 #define GDB_MULTI_ARCH 1
 #define MIPS_DEFAULT_FPU_TYPE MIPS_FPU_DOUBLE
-#define TARGET_BYTE_ORDER_SELECTABLE_P 1
 
 #include "mips/tm-mips64.h"
