@@ -1,3 +1,12 @@
+1999-08-03  Etienne Lorrain  <etienne.lorrain@ibm.net>
+
+	* config/tc-i386.c (f16_3): New. Fixes 16 bit 3 byte nop.
+
+1999-08-03  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (i386_operand): Add INFER_ADDR_PREFIX code, but
+	don't enable it by default.  White space changes.
+
 1999-07-30  Jakub Jelinek  <jj@ultra.linux.cz>
 
 	* config/tc-sparc.c (md_longopts): Add --no-undeclared-regs option.
