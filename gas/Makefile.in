@@ -354,7 +354,7 @@ e-mipsecoff.o : $(srcdir)/config/e-mipsecoff.c
 m68k-parse.c: $(srcdir)/config/m68k-parse.y
 	$(BISON) $(BISONFLAGS) $(srcdir)/config/m68k-parse.y
 	mv -f y.tab.c m68k-parse.c
-m68k-parse.o: m68k-parse.c $(srcdir)/config/m68k-parse.y
+m68k-parse.o: m68k-parse.c $(srcdir)/config/m68k-parse.h
 
 # Remake the info files.
 

@@ -768,11 +768,13 @@ m68k_ip (instring)
 		    losing++;
 		  else if (s[1] == 'b'
 			   && ! isvar (&opP->disp)
-			   && ! expr8 (&opP->disp))
+			   && (opP->disp.exp.X_op != O_constant
+			       || ! isbyte (opP->disp.exp.X_add_number)))
 		    losing++;
 		  else if (s[1] == 'w'
 			   && ! isvar (&opP->disp)
-			   && ! expr16 (&opP->disp))
+			   && (opP->disp.exp.X_op != O_constant
+			       || ! isword (opP->disp.exp.X_add_number)))
 		    losing++;
 		  break;
 
@@ -1076,7 +1078,8 @@ m68k_ip (instring)
 		case 'M':
 		  if (opP->mode != IMMED)
 		    losing++;
-		  else if (! expr8 (&opP->disp))
+		  else if (opP->disp.exp.X_op != O_constant
+			   || ! issbyte (opP->disp.exp.X_add_number))
 		    losing++;
 		  else if (! m68k_quick
 			   && instring[3] != 'q'
@@ -1092,7 +1095,7 @@ m68k_ip (instring)
 		case 'Q':
 		  if (opP->mode != IMMED)
 		    losing++;
-		  else if (! expr8 (&opP->disp)
+		  else if (opP->disp.exp.X_op != O_constant
 			   || opP->disp.exp.X_add_number < 1
 			   || opP->disp.exp.X_add_number > 8)
 		    losing++;
@@ -1139,7 +1142,7 @@ m68k_ip (instring)
 		case 't':
 		  if (opP->mode != IMMED)
 		    losing++;
-		  else if (! expr8 (&opP->disp)
+		  else if (opP->disp.exp.X_op != O_constant
 			   || opP->disp.exp.X_add_number < 0
 			   || opP->disp.exp.X_add_number > 7)
 		    losing++;

@@ -1,5 +1,13 @@
 Thu Aug 10 00:38:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m68k.c (m68k_ip): When recognizing '#', use isbyte and
+	iword rather than expr8 and expr16.  When recognizing 'M', use
+	issbyte rather than expr8.  When recognizing 'Q' and 't', just
+	check for O_constant rather than using expr8.
+	* config/m68k-parse.h (expr8, expr16): Don't define.
+	* Makefile.in (m68k-parse.o): Depend upon m68k-parse.h, not
+	m68k-parse.y.
+
 	* read.c (potable): Add spc, ttl, xcom, xref.
 	(s_mri_sect): New function.
 	* read.h (s_mri_sect): Declare.
