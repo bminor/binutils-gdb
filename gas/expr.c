@@ -1,5 +1,5 @@
 /* expr.c -operands, expressions-
-   Copyright (C) 1987, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -49,6 +49,10 @@ make_expr_symbol (expressionP)
   const char *fake;
   symbolS *symbolP;
 
+  if (expressionP->X_op == O_symbol
+      && expressionP->X_add_number == 0)
+    return expressionP->X_add_symbol;
+
   /* FIXME: This should be something which decode_local_label_name
      will handle.  */
   fake = FAKE_LABEL_NAME;
@@ -63,6 +67,10 @@ make_expr_symbol (expressionP)
 			 : expr_section),
 			0, &zero_address_frag);
   symbolP->sy_value = *expressionP;
+
+  if (expressionP->X_op == O_constant)
+    resolve_symbol_value (symbolP);
+
   return symbolP;
 }
 
@@ -267,14 +275,12 @@ integer_constant (radix, expressionP)
 	    symbolP = symbol_find (name);
 	    if ((symbolP != NULL) && (S_IS_DEFINED (symbolP)))
 	      {
-
 		/* local labels are never absolute. don't waste time
 		   checking absoluteness. */
 		know (SEG_NORMAL (S_GET_SEGMENT (symbolP)));
 
 		expressionP->X_op = O_symbol;
 		expressionP->X_add_symbol = symbolP;
-
 	      }
 	    else
 	      {
@@ -460,17 +466,38 @@ operand (expressionP)
 
 	case 'b':
 #ifdef LOCAL_LABELS_FB
-	  if (!input_line_pointer[1]
-	      /* Strictly speaking, we should only need to check for
-		 "+-01", since that's all you'd normally have in a
-		 binary constant.  But some of our code does permit
-		 digits greater than the base we're expecting.  */
-	      || !strchr ("+-0123456789", input_line_pointer[1]))
+	  switch (input_line_pointer[1])
 	    {
-	      input_line_pointer--;
-	      integer_constant (10, expressionP);
-	      break;
+	    case '+':
+	    case '-':
+	      /* If unambiguously a difference expression, treat it as
+		 one by indicating a label; otherwise, it's always a
+		 binary number.  */
+	      {
+		char *cp = input_line_pointer + 1;
+		while (strchr ("0123456789", *++cp))
+		  ;
+		if (*cp == 'b' || *cp == 'f')
+		  goto is_0b_label;
+	      }
+	      goto is_0b_binary;
+	    case '0':    case '1':
+	      /* Some of our code elsewhere does permit digits greater
+		 than the expected base; for consistency, do the same
+		 here.  */
+	    case '2':    case '3':    case '4':    case '5':
+	    case '6':    case '7':    case '8':    case '9':
+	      goto is_0b_binary;
+	    case 0:
+	      goto is_0b_label;
+	    default:
+	      goto is_0b_label;
 	    }
+	is_0b_label:
+	  input_line_pointer--;
+	  integer_constant (10, expressionP);
+	  break;
+	is_0b_binary:
 #endif
 	case 'B':
 	  input_line_pointer++;
@@ -490,18 +517,41 @@ operand (expressionP)
 
 	case 'f':
 #ifdef LOCAL_LABELS_FB
-	  /* if it says '0f' and the line ends or it doesn't look like
-	     a floating point #, its a local label ref.  dtrt */
-	  /* likewise for the b's.  xoxorich. */
-	  if (c == 'f'
-	      && (!input_line_pointer[1]
-		  || (!strchr ("+-.0123456789", input_line_pointer[1])
-		      && !strchr (EXP_CHARS, input_line_pointer[1]))))
-	    {
-	      input_line_pointer -= 1;
-	      integer_constant (10, expressionP);
-	      break;
-	    }
+	  /* If it says "0f" and it could possibly be a floating point
+	     number, make it one.  Otherwise, make it a local label,
+	     and try to deal with parsing the rest later.  */
+	  if (!input_line_pointer[1]
+	      || (is_end_of_line[0xff & input_line_pointer[1]]))
+	    goto is_0f_label;
+	  {
+	    char *cp = input_line_pointer + 1;
+	    int r = atof_generic (&cp, ".", EXP_CHARS,
+				  &generic_floating_point_number);
+	    switch (r)
+	      {
+	      case 0:
+	      case ERROR_EXPONENT_OVERFLOW:
+		if (*cp == 'f' || *cp == 'b')
+		  /* looks like a difference expression */
+		  goto is_0f_label;
+		else
+		  goto is_0f_float;
+	      default:
+		as_fatal ("expr.c(operand): bad atof_generic return val %d",
+			  r);
+	      }
+	  }
+
+	  /* Okay, now we've sorted it out.  We resume at one of these
+	     two labels, depending on what we've decided we're probably
+	     looking at.  */
+	is_0f_label:
+	  input_line_pointer--;
+	  integer_constant (10, expressionP);
+	  break;
+
+	is_0f_float:
+	  /* fall through */
 #endif
 
 	case 'd':
@@ -512,7 +562,6 @@ operand (expressionP)
 	case 'E':
 	case 'g':
 	case 'G':
-
 	  input_line_pointer++;
 	  floating_constant (expressionP);
 	  expressionP->X_add_number = -(isupper (c) ? tolower (c) : c);
@@ -528,10 +577,12 @@ operand (expressionP)
       break;
 
     case '(':
+    case '[':
       /* didn't begin with digit & not a name */
       segment = expression (expressionP);
       /* Expression() will pass trailing whitespace */
-      if (*input_line_pointer++ != ')')
+      if (c == '(' && *input_line_pointer++ != ')' ||
+	  c == '[' && *input_line_pointer++ != ']') 
 	{
 	  as_bad ("Missing ')' assumed");
 	  input_line_pointer--;
@@ -585,6 +636,9 @@ operand (expressionP)
       break;
 
     case '.':
+#ifdef DOLLAR_DOT
+    case '$':
+#endif
       if (!is_part_of_name (*input_line_pointer))
 	{
 	  const char *fake;
@@ -722,9 +776,13 @@ clean_up_expression (expressionP)
 	      && (S_GET_VALUE (expressionP->X_op_symbol)
 		  == S_GET_VALUE (expressionP->X_add_symbol))))
 	{
+	  bfd_vma diff = (S_GET_VALUE (expressionP->X_add_symbol)
+			  - S_GET_VALUE (expressionP->X_op_symbol));
+
 	  expressionP->X_op = O_constant;
 	  expressionP->X_add_symbol = NULL;
 	  expressionP->X_op_symbol = NULL;
+	  expressionP->X_add_number += diff;
 	}
       break;
     default:
@@ -908,10 +966,38 @@ expr (rank, resultP)
 	}
 
       /* Optimize common cases.  */
-      if (op_left == O_add && right.X_op == O_constant)
+#if 0
+      if (op_left == O_add && resultP->X_got_symbol)
+	{
+	  /* XXX - kludge here to accomodate "_GLOBAL_OFFSET_TABLE + (x - y)"
+	   * expressions: this only works for this special case, the
+	   * _GLOBAL_OFFSET_TABLE thing *must* be the left operand, the whole
+	   * expression is given the segment of right expression (always a DIFFERENCE,
+	   * which should get resolved by fixup_segment())
+	   */
+	  resultP->X_op = right.X_op;
+	  resultP->X_add_symbol = right.X_add_symbol;
+	  resultP->X_op_symbol = right.X_op_symbol;
+	}
+      else
+#endif
+	if (op_left == O_add && right.X_op == O_constant)
 	{
 	  /* X + constant.  */
 	  resultP->X_add_number += right.X_add_number;
+	}
+      /* This case comes up in PIC code.  */
+      else if (op_left == O_subtract
+	       && right.X_op == O_symbol
+	       && resultP->X_op == O_symbol
+	       && (right.X_add_symbol->sy_frag
+		   == resultP->X_add_symbol->sy_frag))
+	{
+	  resultP->X_add_number += right.X_add_number;
+	  resultP->X_add_number += (S_GET_VALUE (resultP->X_add_symbol)
+				    - S_GET_VALUE (right.X_add_symbol));
+	  resultP->X_op = O_constant;
+	  resultP->X_add_symbol = 0;
 	}
       else if (op_left == O_subtract && right.X_op == O_constant)
 	{
