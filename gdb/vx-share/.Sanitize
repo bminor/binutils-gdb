@@ -27,7 +27,6 @@ Things-to-keep:
 README
 dbgRpcLib.h
 ptrace.h
-reg.h
 vxTypes.h
 vxWorks.h
 wait.h
@@ -37,8 +36,6 @@ xdr_ptrace.c
 xdr_ptrace.h
 xdr_rdb.c
 xdr_rdb.h
-xdr_regs.c
-xdr_regs.h
 
 Do-last:
 
