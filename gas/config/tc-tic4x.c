@@ -3163,10 +3163,6 @@ tic4x_start_line ()
 	  /* So line counters get bumped.  */
 	  input_line_pointer[-1] = '\n';
 	}
-      else
-        {
-          as_bad ("Parallel opcode cannot contain more than two instructions");
-        }
     }
   else
     {
