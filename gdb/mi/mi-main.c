@@ -101,7 +101,7 @@ void
 mi_error_last_message (void)
 {
   char *s = error_last_message ();
-  xasprintf (&mi_error_message, s);
+  xasprintf (&mi_error_message, "%s", s);
   xfree (s);
 }
 

@@ -1201,9 +1201,9 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
 
       if (annotation_level > 1 && instream == stdin)
 	{
-	  printf_unfiltered ("\n\032\032pre-");
-	  printf_unfiltered (annotation_suffix);
-	  printf_unfiltered ("\n");
+	  puts_unfiltered ("\n\032\032pre-");
+	  puts_unfiltered (annotation_suffix);
+	  puts_unfiltered ("\n");
 	}
 
       /* Don't use fancy stuff if not talking to stdin.  */
@@ -1222,9 +1222,9 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
 
       if (annotation_level > 1 && instream == stdin)
 	{
-	  printf_unfiltered ("\n\032\032post-");
-	  printf_unfiltered (annotation_suffix);
-	  printf_unfiltered ("\n");
+	  puts_unfiltered ("\n\032\032post-");
+	  puts_unfiltered (annotation_suffix);
+	  puts_unfiltered ("\n");
 	}
 
       if (!rl || rl == (char *) EOF)
@@ -1686,7 +1686,7 @@ quit_confirm (void)
       else
 	s = "The program is running.  Exit anyway? ";
 
-      if (!query (s))
+      if (!query ("%s", s))
 	return 0;
     }
 

@@ -1,3 +1,26 @@
+2003-08-04  David Carlton  <carlton@kealia.com>
+
+	* charset.c (cached_iconv_convert): Add __FILE__ and __LINE__ args
+	to internal_error call.
+	* source.c (forward_search_command): Add "%s" format argument.
+	(reverse_search_command): Ditto.
+	* top.c (quit_confirm): Ditto.
+	* cli/cli-setshow.c (do_setshow_command): Ditto.
+	* cp-valprint.c (cp_print_class_method): Replace
+	{f,}printf_{un,}filtered by {f,}puts_{un,}filtered.
+	(cp_print_class_member): Ditto.
+	* event-top.c (command_line_handler): Ditto.
+	* linux-proc.c (linux_info_proc_cmd): Ditto.
+	* p-typeprint.c (pascal_type_print_base): Ditto.
+	* p-valprint.c (pascal_object_print_class_method): Ditto.
+	(pascal_object_print_class_member): Ditto.
+	* printcmd.c (print_scalar_formatted,printf_command): Ditto.
+	* remote.c (remote_cisco_section_offsets): Ditto.
+	* top.c (command_line_input): Ditto.
+	* utils.c (vwarning,error_stream,quit): Ditto.
+	* valprint.c (print_floating,print_binary_chars)
+	(print_octal_chars,print_decimal_chars,print_hex_chars): Ditto.
+
 2003-08-04  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (frame_func_unwind): Use frame_unwind_address_in_block.

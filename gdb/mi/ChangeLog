@@ -1,3 +1,8 @@
+2003-08-04  David Carlton  <carlton@kealia.com>
+
+	* mi-main.c (mi_error_last_message): Add "%s" second argument to
+	xasprintf call.
+
 2003-06-28  Daniel Jacobowitz  <drow@mvista.com>
 
 	* mi-out.c (mi_ui_out_impl): Add NULL for redirect member.

@@ -2071,7 +2071,7 @@ remote_cisco_section_offsets (bfd_vma text_addr,
       sprintf_vma (tmp + strlen (tmp), data_addr);
       sprintf (tmp + strlen (tmp), " bss = 0x");
       sprintf_vma (tmp + strlen (tmp), bss_addr);
-      fprintf_filtered (gdb_stdlog, tmp);
+      fputs_filtered (tmp, gdb_stdlog);
       fprintf_filtered (gdb_stdlog,
 			"Reloc offset: text = 0x%s data = 0x%s bss = 0x%s\n",
 			paddr_nz (*text_offs),
