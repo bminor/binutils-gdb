@@ -1,3 +1,8 @@
+2002-02-04  Andreas Schwab  <schwab@suse.de>
+
+	* config/ia64/linux.mh: Don't set NAT_CLIBS and REGEX.
+	* config/ia64/linux.mt: Don't set GDBSERVER_LIBS.
+
 2002-02-04  Richard Earnshaw  <rearnsha@arm.com>
 
 	* gdbarch.sh (copyright): Update years in generated header.
