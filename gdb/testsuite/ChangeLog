@@ -1,3 +1,11 @@
+2004-06-09  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/structs.exp (test_struct_returns): Replace
+	"return_value_unknown" and "finish_value_unknown" by
+	"return_value_known" and "finish_value_known".  Instead of
+	"return_value_unknown" iff "finish_value_unknown", check
+	"return_value_known" implies "finish_value_known".
+
 2004-06-08  Martin Hunt  <hunt@redhat.com>
 
 	* gdb.base/float.exp: Add pattern for mips targets.
