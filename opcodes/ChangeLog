@@ -1,3 +1,9 @@
+Mon Oct 31 18:48:10 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* hppa-dis.c (print_insn_hppa): Read the instruction using
+	bfd_getb32, so that it works on a little endian or 64 bit host.
+	Remove unused local variable op.
+
 Tue Oct 25 17:07:57 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* mips-opc.c: Use or instead of addu for pseudo-op move, since
