@@ -20,20 +20,34 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "sim-main.h"
 #include "sim-assert.h"
+
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+
 #ifdef HAVE_TIME_H
 #include <time.h>
 #endif
+
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h> /* needed by sys/resource.h */
 #endif
+
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
 #endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
+
 #include "libiberty.h"
 #include "bfd.h"
+#include "sim-utils.h"
 
 /* Global pointer to all state data.
    Set by sim_resume.  */
@@ -105,29 +119,33 @@ char **
 sim_copy_argv (argv)
      char **argv;
 {
-  int i,argc,len;
-  char **copy,*p;
+  int i;
+  int argc;
+  int len;
+  char **copy;
 
-  argc = len = 0;
-  if (argv)
-    {
-      for ( ; argv[argc]; ++argc)
-	len += strlen (argv[argc]) + 1;
-    }
+  if (argv == NULL)
+    return NULL;
 
-  copy = (char **) malloc ((argc + 1) * sizeof (char *) + len);
+  /* the vector */
+  for (argc = 0; argv[argc] != NULL; argc++);
+  copy = (char **) malloc ((argc + 1) * sizeof (char *));
   if (copy == NULL)
     return NULL;
 
-  p = (char *) copy + (argc + 1) * sizeof (char *);
-  for (i = 0; i < argc; ++i)
+  /* the strings */
+  for (argc = 0; argv[argc] != NULL; argc++)
     {
-      copy[i] = p;
-      strcpy (p, argv[i]);
-      p += strlen (argv[i]) + 1;
+      int len = strlen (argv[argc]);
+      copy[argc] = malloc (sizeof (char *) * (len + 1));
+      if (copy[argc] == NULL)
+	{
+	  freeargv (copy);
+	  return NULL;
+	}
+      strcpy (copy[argc], argv[argc]);
     }
-  copy[argc] = 0;
-
+  copy[argc] = NULL;
   return copy;
 }
 
@@ -140,6 +158,7 @@ sim_analyze_program (sd, prog_bfd)
 {
   asection *s;
 
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   STATE_PROG_BFD (sd) = prog_bfd;
   STATE_START_ADDR (sd) = bfd_get_start_address (prog_bfd);
 

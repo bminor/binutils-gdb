@@ -375,7 +375,7 @@ sim_parse_args (sd, argv)
       if (optc == -1)
 	{
 	  if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
-	    STATE_PROG_ARGV (sd) = argv + optind;
+	    STATE_PROG_ARGV (sd) = sim_copy_argv (argv + optind);
 	  break;
 	}
       if (optc == '?')
@@ -405,7 +405,11 @@ sim_print_help (sd, is_command)
   /* Initialize duplicate argument checker.  */
   (void) dup_arg_p (NULL);
 
-  sim_io_printf (sd, "Options:\n");
+  if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
+    sim_io_printf (sd, "Options:\n");
+  else
+    sim_io_printf (sd, "Commands:\n");
+
   for (ol = STATE_OPTIONS (sd); ol != NULL; ol = ol->next)
     for (opt = ol->options; opt->opt.name != NULL; ++opt)
       {
@@ -502,6 +506,11 @@ sim_print_help (sd, is_command)
 
 	sim_io_printf (sd, "%s\n", opt->doc);
       }
+
+  sim_io_printf (sd, "\n");
+  sim_io_printf (sd, "Note: Depending on the simulator configuration some %ss\n",
+		 STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE ? "option" : "command");
+  sim_io_printf (sd, "      may not be applicable\n");
 
   if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
     {

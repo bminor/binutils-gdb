@@ -1,3 +1,11 @@
+Wed Aug 27 09:51:42 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-utils.c (sim_copy_argv): Rewrite to match malloc strategy
+ 	used by copyargv and freeargv.
+
+	* sim-options.c (sim_parse_args): Save a copy of PROG-ARGS in
+ 	STATE_PROG_ARGV, not just a pointer.
+
 Mon Aug 25 17:50:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
