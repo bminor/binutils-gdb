@@ -40,6 +40,13 @@ extern char *operator_chars (char *, char **);
 
 /* Prototypes for local functions */
 
+static void initialize_defaults (struct symtab **default_symtab,
+				 int *default_line);
+
+static void set_flags (char *arg, int *is_quoted, char **paren_pointer);
+
+static struct symtabs_and_lines decode_indirect (char **argptr);
+
 static NORETURN void cplusplus_error (const char *name, const char *fmt, ...) ATTR_NORETURN ATTR_FORMAT (printf, 2, 3);
 
 static int total_number_of_methods (struct type *type);
@@ -53,14 +60,6 @@ static char *find_toplevel_char (char *s, char c);
 
 static struct symtabs_and_lines decode_line_2 (struct symbol *[],
 					       int, int, char ***);
-
-static void dl1_initialize_defaults (struct symtab **default_symtab,
-				     int *default_line);
-
-static struct symtabs_and_lines dl1_indirect (char **argptr);
-
-static void dl1_set_flags (char *arg, int *is_quoted,
-			   char **paren_pointer);
 
 static char *dl1_locate_first_half (char **argptr, int *is_quote_enclosed);
 
@@ -129,6 +128,250 @@ symtabs_and_lines dl1_symbol_found (int funfirstline,
 static struct
 symtabs_and_lines dl1_minsym_found (int funfirstline,
 				    struct minimal_symbol *msymbol);
+
+/* The parser of linespec itself. */
+
+/* Parse a string that specifies a line number.
+   Pass the address of a char * variable; that variable will be
+   advanced over the characters actually parsed.
+
+   The string can be:
+
+   LINENUM -- that line number in current file.  PC returned is 0.
+   FILE:LINENUM -- that line in that file.  PC returned is 0.
+   FUNCTION -- line number of openbrace of that function.
+   PC returned is the start of the function.
+   VARIABLE -- line number of definition of that variable.
+   PC returned is 0.
+   FILE:FUNCTION -- likewise, but prefer functions in that file.
+   *EXPR -- line in which address EXPR appears.
+
+   This may all be followed by an "if EXPR", which we ignore.
+
+   FUNCTION may be an undebuggable function found in minimal symbol table.
+
+   If the argument FUNFIRSTLINE is nonzero, we want the first line
+   of real code inside a function when a function is specified, and it is
+   not OK to specify a variable or type to get its line number.
+
+   DEFAULT_SYMTAB specifies the file to use if none is specified.
+   It defaults to current_source_symtab.
+   DEFAULT_LINE specifies the line number to use for relative
+   line numbers (that start with signs).  Defaults to current_source_line.
+   If CANONICAL is non-NULL, store an array of strings containing the canonical
+   line specs there if necessary. Currently overloaded member functions and
+   line numbers or static functions without a filename yield a canonical
+   line spec. The array and the line spec strings are allocated on the heap,
+   it is the callers responsibility to free them.
+
+   Note that it is possible to return zero for the symtab
+   if no file is validly specified.  Callers must check that.
+   Also, the line number returned may be invalid.  */
+
+/* We allow single quotes in various places.  This is a hideous
+   kludge, which exists because the completer can't yet deal with the
+   lack of single quotes.  FIXME: write a linespec_completer which we
+   can use as appropriate instead of make_symbol_completion_list.  */
+
+/* Everything else in this file is a helper function for
+   decode_line_1.  */
+
+/* FIXME: carlton/2002-11-04: It would be nice for ARGPTR to be a
+   const char **.  But, alas, that can't easily be fixed right now:
+   for one thing, some functions actually do temporarily modify some
+   of the chars in question (e.g. is_quoted), and, for another thing,
+   GCC would seem not to be to thrilled about implicit conversions
+   from char ** to const char **.  */
+
+struct symtabs_and_lines
+decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
+	       int default_line, char ***canonical)
+{
+  /* This is NULL if there are no parens in *ARGPTR, or a pointer to
+     the closing parenthesis if there are parens.  */
+  char *paren_pointer;
+  /* This says whether or not something in *ARGPTR is quoted with
+     completer_quotes (i.e. with single quotes).  */
+  int is_quoted;
+  /* If a file name is specified, this is its symtab.  */
+  struct symtab *file_symtab = NULL;
+  /* This function advances *ARGPTR, but, for error messages, we want
+     to remember what it pointed to initially.  */
+  char *saved_arg = *argptr;
+
+  /* Defaults have defaults.  */
+
+  initialize_defaults (&default_symtab, &default_line);
+  
+  /* Set various flags.
+   * 'paren_pointer' is important for overload checking, where
+   * we allow things like: 
+   *     (gdb) break c::f(int)
+   */
+
+  set_flags (*argptr, &is_quoted, &paren_pointer);
+
+  /* See if arg is *PC */
+
+  if (**argptr == '*')
+    return decode_indirect (argptr);
+
+  /* Check to see if it's a multipart linespec (with colons or periods).  */
+  {
+    char *p;
+    int is_quote_enclosed;
+    
+    /* Locate the first half of the linespec, ending in a colon, period,
+       or whitespace.  (More or less.)  */
+
+    p = dl1_locate_first_half (argptr, &is_quote_enclosed);
+
+    /* Does it look like there actually were two parts?  */
+
+    if ((p[0] == ':' || p[0] == '.') && paren_pointer == NULL)
+      {
+	if (is_quoted)
+	  *argptr = *argptr + 1;
+      
+	/* Is it a C++ or Java compound data structure?  */
+      
+	if (p[0] == '.' || p[1] == ':')
+	  return dl1_compound (argptr, funfirstline, canonical,
+			       saved_arg, p);
+
+	/* No, the first part is a filename; set file_symtab
+	   accordingly.  Also, move argptr past the filename.  */
+      
+	file_symtab = dl1_handle_filename (argptr, p, is_quote_enclosed);
+      }
+  }
+
+  /* Check whether arg is all digits (and sign) */
+
+  if (dl1_is_all_digits (*argptr))
+    return dl1_all_digits (argptr, default_symtab, default_line,
+			   canonical, file_symtab);
+
+  /* Arg token is not digits => try it as a variable name
+     Find the next token (everything up to end or next whitespace).  */
+
+  /* If it starts with $: may be a legitimate variable or routine name
+     (e.g. HP-UX millicode routines such as $$dyncall), or it may
+     be history value, or it may be a convenience variable */
+  
+  if (**argptr == '$')
+    return dl1_dollar (argptr, funfirstline, default_symtab, canonical,
+		       file_symtab);
+  
+  /* Look up that token as a variable.
+     If file specified, use that file's per-file block to start with.  */
+
+  return dl1_variable (argptr, funfirstline, canonical, is_quoted,
+		       paren_pointer, file_symtab);
+}
+
+
+
+/* Now, the helper functions.  */
+
+/* NOTE: carlton/2002-11-04: Some of these have non-obvious side
+   effects.  In particular, if a function is passed ARGPTR as an
+   argument, it probably modifies what ARGPTR points to.  */
+
+/* First, some functions to initialize stuff at the beggining of the
+   function.  */
+
+static void
+initialize_defaults (struct symtab **default_symtab, int *default_line)
+{
+  if (*default_symtab == NULL)
+    {
+      /* Use whatever we have for the default source line.  We don't use
+         get_current_or_default_symtab_and_line as it can recurse and call
+	 us back! */
+      struct symtab_and_line cursal
+	= get_current_source_symtab_and_line ();
+      
+      *default_symtab = cursal.symtab;
+      *default_line = cursal.line;
+    }
+}
+
+static void
+set_flags (char *arg, int *is_quoted, char **paren_pointer)
+{
+  char *if_index;
+  char *paren_start;
+  int has_if = 0;
+  
+  /* 'has_if' is for the syntax:
+   *     (gdb) break foo if (a==b)
+   */
+  if ((if_index = strstr (arg, " if ")) != NULL ||
+      (if_index = strstr (arg, "\tif ")) != NULL ||
+      (if_index = strstr (arg, " if\t")) != NULL ||
+      (if_index = strstr (arg, "\tif\t")) != NULL ||
+      (if_index = strstr (arg, " if(")) != NULL ||
+      (if_index = strstr (arg, "\tif( ")) != NULL)
+    has_if = 1;
+  /* Temporarily zap out "if (condition)" to not
+   * confuse the parenthesis-checking code below.
+   * This is undone below. Do not change if_index!!
+   */
+  if (has_if)
+    {
+      *if_index = '\0';
+    }
+
+  /* Set various flags.
+   * 'paren_pointer' is important for overload checking, where
+   * we allow things like: 
+   *     (gdb) break c::f(int)
+   */
+
+  /* Maybe arg is FILE : LINENUM or FILE : FUNCTION */
+
+  *is_quoted = (*arg && (strchr (get_gdb_completer_quote_characters (),
+				 *arg)
+			 != NULL));
+
+  paren_start = strchr (arg, '(');
+
+  if (paren_start != NULL)
+    *paren_pointer = strrchr (paren_start, ')');
+  else
+    *paren_pointer = NULL;
+
+  /* Now that we're safely past the has_parens check,
+   * put back " if (condition)" so outer layers can see it 
+   */
+  if (has_if)
+    *if_index = ' ';
+}
+
+
+
+/* Decode arg of the form *PC.  */
+
+static struct symtabs_and_lines
+decode_indirect (char **argptr)
+{
+  struct symtabs_and_lines values;
+  CORE_ADDR pc;
+
+  (*argptr)++;				/* Skip the initial asterisk.  */
+  pc = parse_and_eval_address_1 (argptr);
+
+  values.sals = xmalloc (sizeof (struct symtab_and_line));
+
+  values.nelts = 1;
+  values.sals[0] = find_pc_line (pc, 0);
+  values.sals[0].pc = pc;
+  values.sals[0].section = find_pc_overlay (pc);
+
+  return values;
+}
+
 
 /* Helper functions. */
 
@@ -535,226 +778,6 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
   return_values.nelts = i;
   discard_cleanups (old_chain);
   return return_values;
-}
-
-/* The parser of linespec itself. */
-
-/* Parse a string that specifies a line number.
-   Pass the address of a char * variable; that variable will be
-   advanced over the characters actually parsed.
-
-   The string can be:
-
-   LINENUM -- that line number in current file.  PC returned is 0.
-   FILE:LINENUM -- that line in that file.  PC returned is 0.
-   FUNCTION -- line number of openbrace of that function.
-   PC returned is the start of the function.
-   VARIABLE -- line number of definition of that variable.
-   PC returned is 0.
-   FILE:FUNCTION -- likewise, but prefer functions in that file.
-   *EXPR -- line in which address EXPR appears.
-
-   This may all be followed by an "if EXPR", which we ignore.
-
-   FUNCTION may be an undebuggable function found in minimal symbol table.
-
-   If the argument FUNFIRSTLINE is nonzero, we want the first line
-   of real code inside a function when a function is specified, and it is
-   not OK to specify a variable or type to get its line number.
-
-   DEFAULT_SYMTAB specifies the file to use if none is specified.
-   It defaults to current_source_symtab.
-   DEFAULT_LINE specifies the line number to use for relative
-   line numbers (that start with signs).  Defaults to current_source_line.
-   If CANONICAL is non-NULL, store an array of strings containing the canonical
-   line specs there if necessary. Currently overloaded member functions and
-   line numbers or static functions without a filename yield a canonical
-   line spec. The array and the line spec strings are allocated on the heap,
-   it is the callers responsibility to free them.
-
-   Note that it is possible to return zero for the symtab
-   if no file is validly specified.  Callers must check that.
-   Also, the line number returned may be invalid.  */
-
-/* We allow single quotes in various places.  This is a hideous
-   kludge, which exists because the completer can't yet deal with the
-   lack of single quotes.  FIXME: write a linespec_completer which we
-   can use as appropriate instead of make_symbol_completion_list.  */
-
-struct symtabs_and_lines
-decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
-	       int default_line, char ***canonical)
-{
-  /* This is NULL if there are no parens in argptr, or a pointer to
-     the closing parenthesis if there are parens.  */
-  char *paren_pointer;
-  /* If a file name is specified, this is its symtab.  */
-  struct symtab *file_symtab = NULL;
-  int is_quoted;
-  char *saved_arg = *argptr;
-
-  /* Defaults have defaults.  */
-
-  dl1_initialize_defaults (&default_symtab, &default_line);
-  
-  /* See if arg is *PC */
-
-  if (**argptr == '*')
-    return dl1_indirect (argptr);
-
-  /* Set various flags.
-   * 'paren_pointer' is important for overload checking, where
-   * we allow things like: 
-   *     (gdb) break c::f(int)
-   */
-
-  dl1_set_flags (*argptr, &is_quoted, &paren_pointer);
-
-  /* Check to see if it's a multipart linespec (with colons or periods).  */
-  {
-    char *p;
-    int is_quote_enclosed;
-    
-    /* Locate the first half of the linespec, ending in a colon, period,
-       or whitespace.  (More or less.)  */
-
-    p = dl1_locate_first_half (argptr, &is_quote_enclosed);
-
-    /* Does it look like there actually were two parts?  */
-
-    if ((p[0] == ':' || p[0] == '.') && paren_pointer == NULL)
-      {
-	if (is_quoted)
-	  *argptr = *argptr + 1;
-      
-	/* Is it a C++ or Java compound data structure?  */
-      
-	if (p[0] == '.' || p[1] == ':')
-	  return dl1_compound (argptr, funfirstline, canonical,
-			       saved_arg, p);
-
-	/* No, the first part is a filename; set file_symtab
-	   accordingly.  Also, move argptr past the filename.  */
-      
-	file_symtab = dl1_handle_filename (argptr, p, is_quote_enclosed);
-      }
-  }
-
-  /* Check whether arg is all digits (and sign) */
-
-  if (dl1_is_all_digits (*argptr))
-    return dl1_all_digits (argptr, default_symtab, default_line,
-			   canonical, file_symtab);
-
-  /* Arg token is not digits => try it as a variable name
-     Find the next token (everything up to end or next whitespace).  */
-
-  /* If it starts with $: may be a legitimate variable or routine name
-     (e.g. HP-UX millicode routines such as $$dyncall), or it may
-     be history value, or it may be a convenience variable */
-  
-  if (**argptr == '$')
-    return dl1_dollar (argptr, funfirstline, default_symtab, canonical,
-		       file_symtab);
-  
-  /* Look up that token as a variable.
-     If file specified, use that file's per-file block to start with.  */
-
-  return dl1_variable (argptr, funfirstline, canonical, is_quoted,
-		       paren_pointer, file_symtab);
-}
-
-/* Now come a bunch of helper functions for decode_line_1.  Warning:
-   most of them have the side effect of advancing argptr, and I'm not
-   mentioning that in the comments.  */
-
-/* Defaults have defaults.  */
-
-static void
-dl1_initialize_defaults (struct symtab **default_symtab, int *default_line)
-{
-  if (*default_symtab == NULL)
-    {
-      /* Use whatever we have for the default source line.  We don't use
-         get_current_or_default_symtab_and_line as it can recurse and call
-	 us back! */
-      struct symtab_and_line cursal
-	= get_current_source_symtab_and_line ();
-      
-      *default_symtab = cursal.symtab;
-      *default_line = cursal.line;
-    }
-}
-
-/* See if arg is *PC */
-
-static struct symtabs_and_lines
-dl1_indirect (char **argptr)
-{
-  struct symtabs_and_lines values;
-  CORE_ADDR pc;
-
-  (*argptr)++;
-  pc = parse_and_eval_address_1 (argptr);
-
-  values.sals = (struct symtab_and_line *)
-    xmalloc (sizeof (struct symtab_and_line));
-
-  values.nelts = 1;
-  values.sals[0] = find_pc_line (pc, 0);
-  values.sals[0].pc = pc;
-  values.sals[0].section = find_pc_overlay (pc);
-
-  return values;
-}
-
-static void
-dl1_set_flags (char *arg, int *is_quoted, char **paren_pointer)
-{
-  char *ii;
-  int has_if = 0;
-  
-  /* 'has_if' is for the syntax:
-   *     (gdb) break foo if (a==b)
-   */
-  if ((ii = strstr (arg, " if ")) != NULL ||
-      (ii = strstr (arg, "\tif ")) != NULL ||
-      (ii = strstr (arg, " if\t")) != NULL ||
-      (ii = strstr (arg, "\tif\t")) != NULL ||
-      (ii = strstr (arg, " if(")) != NULL ||
-      (ii = strstr (arg, "\tif( ")) != NULL)
-    has_if = 1;
-  /* Temporarily zap out "if (condition)" to not
-   * confuse the parenthesis-checking code below.
-   * This is undone below. Do not change ii!!
-   */
-  if (has_if)
-    {
-      *ii = '\0';
-    }
-
-  /* Set various flags.
-   * 'paren_pointer' is important for overload checking, where
-   * we allow things like: 
-   *     (gdb) break c::f(int)
-   */
-
-  /* Maybe arg is FILE : LINENUM or FILE : FUNCTION */
-
-  *is_quoted = (*arg
-		&& strchr (get_gdb_completer_quote_characters (),
-			   *arg) != NULL);
-
-  *paren_pointer = strchr (arg, '(');
-
-  if (*paren_pointer != NULL)
-    *paren_pointer = strrchr (*paren_pointer, ')');
-
-  /* Now that we're safely past the has_parens check,
-   * put back " if (condition)" so outer layers can see it 
-   */
-  if (has_if)
-    *ii = ' ';
 }
 
 static char *
