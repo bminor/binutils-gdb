@@ -1,3 +1,8 @@
+2001-01-23  Jim Blandy  <jimb@redhat.com>
+
+	* dwarf2read.c (read_tag_const_type, read_tag_volatile_type):
+	Implement these correctly, using make_cv_type.
+
 2001-01-23  J.T. Conklin  <jtc@redback.com>
 
 	* exec.c (xfer_memory): Add attrib argument.

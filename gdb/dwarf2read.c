@@ -2653,26 +2653,30 @@ static void
 read_tag_const_type (struct die_info *die, struct objfile *objfile,
 		     const struct comp_unit_head *cu_header)
 {
+  struct type *base_type;
+
   if (die->type)
     {
       return;
     }
 
-  complain (&dwarf2_const_ignored);
-  die->type = die_type (die, objfile, cu_header);
+  base_type = die_type (die, objfile, cu_header);
+  die->type = make_cv_type (1, TYPE_VOLATILE (base_type), base_type, 0);
 }
 
 static void
 read_tag_volatile_type (struct die_info *die, struct objfile *objfile,
 			const struct comp_unit_head *cu_header)
 {
+  struct type *base_type;
+
   if (die->type)
     {
       return;
     }
 
-  complain (&dwarf2_volatile_ignored);
-  die->type = die_type (die, objfile, cu_header);
+  base_type = die_type (die, objfile, cu_header);
+  die->type = make_cv_type (TYPE_CONST (base_type), 1, base_type, 0);
 }
 
 /* Extract all information from a DW_TAG_string_type DIE and add to
