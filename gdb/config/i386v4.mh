@@ -1,0 +1,7 @@
+# Host: Intel 386 running SVR4.
+XDEPFILES= procfs.o i386-xdep.o
+XM_FILE= xm-i386v4.h
+XM_CLIBS=
+SYSV_DEFINE=-DSYSV
+REGEX=regex.o
+REGEX1=regex.o
