@@ -212,9 +212,9 @@
 @V@/gdb/testsuite/gdb.c++/derivation.exp @V@/gdb/testsuite/gdb.cxx/derivation.exp
 @V@/gdb/testsuite/gdb.c++/hang.H @V@/gdb/testsuite/gdb.cxx/hang.h
 @V@/gdb/testsuite/gdb.c++/hang.exp @V@/gdb/testsuite/gdb.cxx/hang.exp
-@V@/gdb/testsuite/gdb.c++/hang1.c @V@/gdb/testsuite/gdb.cxx/hang1.c
-@V@/gdb/testsuite/gdb.c++/hang2.c @V@/gdb/testsuite/gdb.cxx/hang2.c
-@V@/gdb/testsuite/gdb.c++/hang3.c @V@/gdb/testsuite/gdb.cxx/hang3.c
+@V@/gdb/testsuite/gdb.c++/hang1.C @V@/gdb/testsuite/gdb.cxx/hang1.c
+@V@/gdb/testsuite/gdb.c++/hang2.C @V@/gdb/testsuite/gdb.cxx/hang2.c
+@V@/gdb/testsuite/gdb.c++/hang3.C @V@/gdb/testsuite/gdb.cxx/hang3.c
 @V@/gdb/testsuite/gdb.c++/inherit.exp @V@/gdb/testsuite/gdb.cxx/inherit.exp
 @V@/gdb/testsuite/gdb.c++/local.cc @V@/gdb/testsuite/gdb.cxx/local.cc
 @V@/gdb/testsuite/gdb.c++/local.exp @V@/gdb/testsuite/gdb.cxx/local.exp
