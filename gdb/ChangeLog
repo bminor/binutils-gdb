@@ -1,3 +1,10 @@
+Sat Jun 12 14:40:54 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* mips-tdep.c: Remove isa_NAN; it assumed sizeof(host int) == 4 and
+	probably contained byte-order sins too.
+	config/mips/tm-mips.h (INVALID_FLOAT): Define to 0 like most machines.
+	The IEEE_FLOAT code in print_floating takes care of it.
+
 Sat Jun 12 14:47:04 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (VERSION):  Bump to 4.9.2.
