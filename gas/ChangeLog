@@ -1,3 +1,8 @@
+Mon Feb 11 11:23:38 2002  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-sparc.c (U0x80000000, U0xffffffff): New constants.
+	Use all over.
+
 Mon Feb 11 12:59:29 CET 2002  Jan Hubicka  <jh@suse.cz>
 
 	* i386.c (md_assemble): Support 32bit address prefix.
