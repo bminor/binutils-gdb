@@ -1,3 +1,10 @@
+2001-02-12  Michael Chastain  <chastain@redhat.com>
+
+	* gdb/somsolib.c (som_solib_add_solib_objfile): Do not use
+	section relocation feature of syms_from_objfile.  Do my own
+	section relocation, offsetting each section of the som by
+	either text_addr - text_link_addr or data_start.
+
 2001-02-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* TODO (5.1): Move ``Hardware watchpint problems'' out of 5.1.

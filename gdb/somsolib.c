@@ -1,5 +1,5 @@
 /* Handle HP SOM shared libraries for GDB, the GNU Debugger.
-   Copyright 1993, 1996, 1999 Free Software Foundation, Inc.
+   Copyright 1993, 1996, 1999, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -283,14 +283,30 @@ som_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
 			     CORE_ADDR text_addr)
 {
   obj_private_data_t *obj_private;
-  struct section_addr_info section_addrs;
+  struct obj_section *s;
 
-  memset (&section_addrs, 0, sizeof (section_addrs));
-  section_addrs.other[0].name = ".text";
-  section_addrs.other[0].addr = text_addr;
-  so->objfile = symbol_file_add (name, from_tty, &section_addrs, 0, OBJF_SHARED);
+  so->objfile = symbol_file_add (name, from_tty, NULL, 0, OBJF_SHARED);
   so->abfd = so->objfile->obfd;
 
+  /* syms_from_objfile has bizarre section offset code,
+     so I do my own right here.  */
+  for (s = so->objfile->sections; s < so->objfile->sections_end; s++)
+    {
+      flagword aflag = bfd_get_section_flags(so->abfd, s->the_bfd_section);
+      if (aflag & SEC_CODE)
+	{
+	  s->addr    += so->som_solib.text_addr - so->som_solib.text_link_addr;
+	  s->endaddr += so->som_solib.text_addr - so->som_solib.text_link_addr;
+	}
+      else if (aflag & SEC_DATA)
+	{
+	  s->addr    += so->som_solib.data_start;
+	  s->endaddr += so->som_solib.data_start;
+	}
+      else
+	;
+    }
+   
   /* Mark this as a shared library and save private data.
    */
   so->objfile->flags |= OBJF_SHARED;
