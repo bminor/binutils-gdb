@@ -1,3 +1,9 @@
+2004-11-21  Daniel Jacobowitz  <dan@debian.org>
+
+	* valarith.c (value_subscript): Copy VALUE_FRAME_ID.
+	(value_subscripted_rvalue): Likewise.
+	* valops.c (search_struct_field, value_slice): Likewise.
+
 2004-11-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* inf-ptrace.c: Don't include "regcache.h" and "gdbcmd.h".
