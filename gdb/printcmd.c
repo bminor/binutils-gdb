@@ -621,10 +621,30 @@ print_command_1 (exp, inspect, voidprint)
 
   if (exp && *exp)
     {
+      extern int objectprint;
+      struct type *type;
       expr = parse_c_expression (exp);
       old_chain = make_cleanup (free_current_contents, &expr);
       cleanup = 1;
       val = evaluate_expression (expr);
+
+      /* C++: figure out what type we actually want to print it as.  */
+      type = VALUE_TYPE (val);
+
+      if (objectprint
+	  && (TYPE_CODE (type) == TYPE_CODE_PTR
+	      || TYPE_CODE (type) == TYPE_CODE_REF)
+	  && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT)
+	{
+	  value v;
+
+	  v = value_from_vtable_info (val, TYPE_TARGET_TYPE (type));
+	  if (v != 0)
+	    {
+	      val = v;
+	      type = VALUE_TYPE (val);
+	    }
+	}
     }
   else
     val = access_value_history (0);
@@ -853,6 +873,8 @@ x_command (exp, from_tty)
 	*exp = 0;
       old_chain = make_cleanup (free_current_contents, &expr);
       val = evaluate_expression (expr);
+      if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_REF)
+	val = value_ind (val);
       /* In rvalue contexts, such as this, functions are coerced into
 	 pointers to functions.  This makes "x/i main" work.  */
       if (/* last_format == 'i'
@@ -958,7 +980,9 @@ ptype_command (typename, from_tty)
 			     (struct symtab **)NULL);
 	  if (sym == 0)
 	    {
-	      whatis_exp (typename, 1 /* FIXME: right? */);
+	      /* It's not the name of a type, either VAR_NAMESPACE
+		 or STRUCT_NAMESPACE, so it must be an expression.  */
+	      whatis_exp (typename, 1);
 	      return;
 	    }
 	  printf_filtered ("No type named %s, but there is a ",
