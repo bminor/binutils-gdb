@@ -1,3 +1,7 @@
+Fri Apr 10 15:48:10 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+        * gdbtk.c (gdb_listfiles): Allocate space for 'files' dynamically.
+
 Thu Apr  9 14:20:59 1998  Martin M. Hunt  <hunt@cygnus.com>
 
 	* gdbtk.c (gdbtk_init): Remove redundant variable "IDE".
