@@ -45,6 +45,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "vx-share/xdr_ld.h"
 #include "vx-share/xdr_rdb.h"
 #include "vx-share/dbgRpcLib.h"
+#include "vx-share/reg.h"
 
 #include <symtab.h>
 
@@ -85,7 +86,7 @@ static char *find_white_space ();
  
 /* Tell the VxWorks target system to download a file.
    The load addresses of the text, data, and bss segments are
-   stored in pTextAddr, pDataAddr, and *pBssAddr (respectively).
+   stored in *pTextAddr, *pDataAddr, and *pBssAddr (respectively).
    Returns 0 for success, -1 for failure.  */
 
 static int
@@ -106,7 +107,7 @@ net_load (filename, pTextAddr, pDataAddr, pBssAddr)
        The load on the target side can take quite a while, easily
        more than 10 seconds.  The user can kill this call by typing
        CTRL-C if there really is a problem with the load.  
-       
+
        Do not change the tv_sec value without checking -- select() imposes
        a limit of 10**8 on it for no good reason that I can see...  */
 
@@ -118,7 +119,7 @@ net_load (filename, pTextAddr, pDataAddr, pBssAddr)
 
     if (status == RPC_SUCCESS)
       {
-        if (*ldstruct.name == NULL)	/* load failed on VxWorks side */
+        if (*ldstruct.name == 0)	/* load failed on VxWorks side */
           return -1;
 	*pTextAddr = ldstruct.txt_addr;
 	*pDataAddr = ldstruct.data_addr;
@@ -384,7 +385,11 @@ vx_read_register (regno)
   
   ptrace_in.pid = inferior_pid;
   ptrace_out.info.more_data = (caddr_t) &out_data;
+#ifndef I80960
   out_data.len   = 18 * REGISTER_RAW_SIZE (0);		/* FIXME 68k hack */
+#else
+  out_data.len = (16 + 16 + 3) * REGISTER_RAW_SIZE (0);
+#endif
   out_data.bytes = (caddr_t) registers;
   
   status = net_ptrace_clnt_call (PTRACE_GETREGS, &ptrace_in, &ptrace_out);
@@ -398,49 +403,40 @@ vx_read_register (regno)
   
 #ifdef I80960
 
-      bcopy ((char *) inferior_registers.r_lreg,
-	     &registers[REGISTER_BYTE (R0_REGNUM)], 16 * sizeof (int));
-      bcopy ((char *) inferior_registers.r_greg,
-	     &registers[REGISTER_BYTE (G0_REGNUM)], 16 * sizeof (int));
+  {
+    /* If the target has floating point registers, fetch them.
+       Otherwise, zero the floating point register values in
+       registers[] for good measure, even though we might not
+       need to.  */
+    /* @@ Can't use this -- the rdb library for the 960 target
+       doesn't support setting or retrieving FP regs.  KR  */
+#if 0
+    struct fp_status inferior_fp_registers;
 
-      /* Don't assume that a location in registers[] is properly aligned.  */
+    if (target_has_fp)
+      {
+	ptrace_in.pid = inferior_pid;
+	ptrace_out.info.more_data = (caddr_t) &inferior_fp_registers;
+	status = net_ptrace_clnt_call (PTRACE_GETFPREGS,
+				       &ptrace_in, &ptrace_out);
+	if (status)
+	  error (rpcerr);
+	if (ptrace_out.status == -1)
+	  {
+	    errno = ptrace_out.errno;
+	    perror_with_name ("net_ptrace_clnt_call(PTRACE_GETFPREGS)");
+	  }
 
-      bcopy ((char *) &inferior_registers.r_pcw,
-	     &registers[REGISTER_BYTE (PCW_REGNUM)], sizeof (int));
-      bcopy ((char *) &inferior_registers.r_acw,
-	     &registers[REGISTER_BYTE (ACW_REGNUM)], sizeof (int));
-      bcopy ((char *) &inferior_registers.r_lreg[2],	/* r2 (RIP) -> IP */
-	     &registers[REGISTER_BYTE (IP_REGNUM)], sizeof (int));
-      bcopy ((char *) &inferior_registers.r_tcw,
-	     &registers[REGISTER_BYTE (TCW_REGNUM)], sizeof (int));
-
-      /* If the target has floating point registers, fetch them.
-	 Otherwise, zero the floating point register values in
-	 registers[] for good measure, even though we might not
-	 need to.  */
-
-      if (target_has_fp)
-	{
-	  ptrace_in.pid = inferior_pid;
-	  ptrace_out.info.more_data = (caddr_t) &inferior_fp_registers;
-	  status = net_ptrace_clnt_call (PTRACE_GETFPREGS, &ptrace_in, &ptrace_out);
-	  if (status)
-	    error (rpcerr);
-	  if (ptrace_out.status == -1)
-	    {
-	      errno = ptrace_out.errno;
-	      perror_with_name ("net_ptrace_clnt_call(PTRACE_GETFPREGS)");
-	    }
-	  
-	  bcopy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
-		 REGISTER_RAW_SIZE (FP0_REGNUM) * 4);
-	}
-      else
-	{
-	  bzero ((char *) &registers[REGISTER_BYTE (FP0_REGNUM)],
-		 REGISTER_RAW_SIZE (FP0_REGNUM) * 4);
-	}
-
+	bcopy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
+	       REGISTER_RAW_SIZE (FP0_REGNUM) * 4);
+      }
+    else
+      {
+	bzero ((char *) &registers[REGISTER_BYTE (FP0_REGNUM)],
+	       REGISTER_RAW_SIZE (FP0_REGNUM) * 4);
+      }
+#endif
+  }
 #else  /* not 960, thus must be 68000:  FIXME!  */
 
   if (target_has_fp)
@@ -507,20 +503,7 @@ vx_write_register (regno)
 
 #ifdef I80960
 
-  /* FIXME */
-  bcopy (&registers[REGISTER_BYTE (R0_REGNUM)],
-	 (char *) inferior_registers.r_lreg, 16 * sizeof (int));
-  bcopy (&registers[REGISTER_BYTE (G0_REGNUM)],
-	 (char *) inferior_registers.r_greg, 16 * sizeof (int));
-
-  /* Don't assume that a location in registers[] is properly aligned.  */
-
-  bcopy (&registers[REGISTER_BYTE (PCW_REGNUM)],
-	 (char *) &inferior_registers.r_pcw, sizeof (int));
-  bcopy (&registers[REGISTER_BYTE (ACW_REGNUM)],
-	 (char *) &inferior_registers.r_acw, sizeof (int));
-  bcopy (&registers[REGISTER_BYTE (TCW_REGNUM)],
-	 (char *) &inferior_registers.r_tcw, sizeof (int));
+  in_data.len = (16 + 16 + 3) * sizeof (REGISTER_TYPE);
 
 #else  /* not 960 -- assume 68k -- FIXME */
 
@@ -548,10 +531,10 @@ vx_write_register (regno)
 
 
 #ifdef I80960
-
-      bcopy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
-	     sizeof inferior_fp_registers.fps_regs);
-
+#if 0 /* @@ Not supported by target.  */
+      in_data.bytes = &registers[REGISTER_BYTE (FP0_REGNUM)];
+      in_data.len = 4 * REGISTER_RAW_SIZE (FP0_REGNUM);
+#endif
 #else  /* not 960 -- assume 68k -- FIXME */
 
       in_data.bytes = &registers[REGISTER_BYTE (FP0_REGNUM)];
@@ -1252,19 +1235,13 @@ vx_detach (args, from_tty)
 /* vx_kill -- takes a running task and wipes it out.  */
 
 static void
-vx_kill (args, from_tty)
-     char *args;
-     int from_tty;
+vx_kill ()
 {
   Rptrace ptrace_in;
   Ptrace_return ptrace_out;
   int status;
 
-  if (args)
-    error ("Argument given to VxWorks \"kill\".");
-
-  if (from_tty)
-      printf ("Killing pid %s.\n", local_hex_string(inferior_pid));
+  printf ("Killing pid %s.\n", local_hex_string(inferior_pid));
 
   bzero ((char *)&ptrace_in,  sizeof (ptrace_in));
   bzero ((char *)&ptrace_out, sizeof (ptrace_out));
