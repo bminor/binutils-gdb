@@ -1229,7 +1229,11 @@ extern char **make_symbol_completion_list (char *, char *);
 
 extern char **make_file_symbol_completion_list (char *, char *, char *);
 
-extern struct symbol **make_symbol_overload_list (struct symbol *);
+extern char *remove_params (const char *demangled_name);
+
+extern struct symbol **make_symbol_overload_list (const char *,
+						  const char *, int,
+						  const struct block *);
 
 extern char **make_source_files_completion_list (char *, char *);
 

@@ -164,7 +164,8 @@ static void print_msymbol_info (struct minimal_symbol *);
 
 static void symtab_symbol_info (char *, namespace_enum, int);
 
-static void overload_list_add_symbol (struct symbol *sym, char *oload_name);
+static void overload_list_add_symbol (struct symbol *sym,
+				      const char *oload_name);
 
 void _initialize_symtab (void);
 
@@ -3857,7 +3858,7 @@ in_prologue (CORE_ADDR pc, CORE_ADDR func_start)
 
 /* Begin overload resolution functions */
 
-static char *
+char *
 remove_params (const char *demangled_name)
 {
   const char *argp;
@@ -3910,7 +3911,7 @@ static struct symbol **sym_return_val;
    characters.  If so, add it to the current completion list. */
 
 static void
-overload_list_add_symbol (struct symbol *sym, char *oload_name)
+overload_list_add_symbol (struct symbol *sym, const char *oload_name)
 {
   int newsize;
   int i;
@@ -3952,13 +3953,16 @@ overload_list_add_symbol (struct symbol *sym, char *oload_name)
 }
 
 /* Return a null-terminated list of pointers to function symbols that
- * match name of the supplied symbol FSYM.
- * This is used in finding all overloaded instances of a function name.
- * This has been modified from make_symbol_completion_list.  */
-
+   match name of the supplied symbol FSYM and that occur within the
+   namespace given by the initial substring of NAMESPACE_NAME of
+   length NAMESPACE_LEN.  Apply using directives from BLOCK.  This is
+   used in finding all overloaded instances of a function name.  This
+   has been modified from make_symbol_completion_list.  */
 
 struct symbol **
-make_symbol_overload_list (struct symbol *fsym)
+make_symbol_overload_list (const char *func_name,
+			   const char *namespace_name,
+			   int namespace_len, const struct block *block)
 {
   register struct symbol *sym;
   register struct symtab *s;
@@ -3967,24 +3971,7 @@ make_symbol_overload_list (struct symbol *fsym)
   register struct block *b, *surrounding_static_block = 0;
   struct dict_iterator iter;
   /* The name we are completing on. */
-  char *oload_name = NULL;
-  /* Length of name.  */
-  int oload_name_len = 0;
-
-  /* Look for the symbol we are supposed to complete on.  */
-
-  oload_name = remove_params (SYMBOL_DEMANGLED_NAME (fsym));
-  if (!oload_name)
-    {
-      sym_return_val_size = 1;
-      sym_return_val =
-	(struct symbol **) xmalloc (2 * sizeof (struct symbol *));
-      sym_return_val[0] = fsym;
-      sym_return_val[1] = NULL;
-
-      return sym_return_val;
-    }
-  oload_name_len = strlen (oload_name);
+  const char *oload_name = func_name;
 
   sym_return_val_size = 100;
   sym_return_val_index = 0;
@@ -4069,8 +4056,6 @@ make_symbol_overload_list (struct symbol *fsym)
       overload_list_add_symbol (sym, oload_name);
     }
   }
-
-  xfree (oload_name);
 
   return (sym_return_val);
 }

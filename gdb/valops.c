@@ -2818,7 +2818,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   int boffset;
   register int ix;
   int static_offset;
-  struct cleanup *cleanups = NULL;
+  struct cleanup *old_cleanups = NULL;
 
   const char *obj_type_name = NULL;
   char *func_name = NULL;
@@ -2850,26 +2850,27 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   else
     {
       int i = -1;
-      func_name = cplus_demangle (SYMBOL_NAME (fsym), DMGL_NO_OPTS);
+      func_name	= remove_params (SYMBOL_CPLUS_DEMANGLED_NAME (fsym));
 
       /* If the name is NULL this must be a C-style function.
          Just return the same symbol. */
-      if (!func_name)
+      if (func_name == NULL)
         {
 	  *symp = fsym;
           return 0;
         }
 
-      oload_syms = make_symbol_overload_list (fsym);
-      cleanups = make_cleanup (xfree, oload_syms);
+      old_cleanups = make_cleanup (xfree, func_name);
+      oload_syms = make_symbol_overload_list (func_name, "", 0, current_block);
+      make_cleanup (xfree, oload_syms);
       while (oload_syms[++i])
 	num_fns++;
       if (!num_fns)
 	error ("Couldn't find function %s", func_name);
     }
 
-  oload_champ = find_oload_champ(arg_types, nargs, method, num_fns, fns_ptr,
-				 oload_syms, &oload_champ_bv);
+  oload_champ = find_oload_champ (arg_types, nargs, method, num_fns, fns_ptr,
+				  oload_syms, &oload_champ_bv);
 
   /* NOTE: dan/2000-03-10: Seems to be a better idea to just pick one
      if they have the exact same goodness. This is because there is no
@@ -2931,7 +2932,6 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   else
     {
       *symp = oload_syms[oload_champ];
-      xfree (func_name);
     }
 
   if (objp)
@@ -2943,8 +2943,8 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 	}
       *objp = temp;
     }
-  if (cleanups != NULL)
-    do_cleanups (cleanups);
+  if (old_cleanups != NULL)
+    do_cleanups (old_cleanups);
 
   switch (match_quality)
     {

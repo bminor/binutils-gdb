@@ -1,3 +1,18 @@
+2003-01-28  David Carlton  <carlton@math.stanford.edu>
+
+	* valops.c (find_overload_match): Calculate func_name via
+	SYMBOL_CPLUS_DEMANGLED_NAME + remove_params.
+	* symtab.c (remove_params): Make extern.
+	* symtab.h: Add declaration for remove_params.
+	* symtab.c (overload_list_add_symbol): Change second arg to const
+	char *.
+	* valops.c (find_overload_match) Update call to
+	make_symbol_overload_list.
+	* symtab.h: Update declaration for make_symbol_overload_list.
+	* symtab.c (make_symbol_overload_list): Change arguments.
+	* valops.c (find_overload_match): Rename cleanups to old_cleanups;
+	handle freeing func_name via cleanups.
+
 2003-01-27  David Carlton  <carlton@math.stanford.edu>
 
 	* objfiles.h: Add comments about objfile->msymbols being NULL.
