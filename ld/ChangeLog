@@ -1,5 +1,10 @@
 Thu Feb 15 13:58:06 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Remove explicit substitution of CFLAGS; autoconf
+	does it anyhow.
+	* configure: Rebuild.
+	* Makefile.in (LDFLAGS): Set to @LDFLAGS@.
+
 	* configure.in: Call AC_PROG_CC before configure.host.
 	* configure: Rebuild.
 	* configure.host: Remove go32 host, since it should no longer be
