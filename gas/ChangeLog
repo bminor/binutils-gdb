@@ -1,3 +1,8 @@
+2001-06-13  Philip Blundell  <philb@gnu.org>
+
+	* config/tc-arm.c (thumb_shift): Improve wording of error message.
+	(do_t_arit): Likewise.
+
 2001-06-13  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-sh.c (md_pseudo_table): Only intercept the .file and
