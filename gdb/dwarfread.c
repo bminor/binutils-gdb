@@ -2972,7 +2972,7 @@ new_symbol (dip, objfile)
 	case TAG_global_variable:
 	  if (dip -> at_location != NULL)
 	    {
-	      SYMBOL_VALUE (sym) = locval (dip -> at_location);
+	      SYMBOL_VALUE_ADDRESS (sym) = locval (dip -> at_location);
 	      add_symbol_to_list (sym, &global_symbols);
 	      SYMBOL_CLASS (sym) = LOC_STATIC;
 	      SYMBOL_VALUE (sym) += baseaddr;
@@ -2981,8 +2981,6 @@ new_symbol (dip, objfile)
 	case TAG_local_variable:
 	  if (dip -> at_location != NULL)
 	    {
-	      SYMBOL_VALUE (sym) = locval (dip -> at_location);
-	      add_symbol_to_list (sym, list_in_scope);
 	      if (optimized_out)
 		{
 		  SYMBOL_CLASS (sym) = LOC_OPTIMIZED_OUT;
@@ -3001,6 +2999,17 @@ new_symbol (dip, objfile)
 		  SYMBOL_CLASS (sym) = LOC_STATIC;
 		  SYMBOL_VALUE (sym) += baseaddr;
 		}
+	      if (SYMBOL_CLASS (sym) == LOC_STATIC)
+		{
+		  /* LOC_STATIC address class MUST use SYMBOL_VALUE_ADDRESS,
+		     which may store to a bigger location than SYMBOL_VALUE. */
+		  SYMBOL_VALUE_ADDRESS (sym) = locval (dip -> at_location);
+		}
+	      else
+		{
+		  SYMBOL_VALUE (sym) = locval (dip -> at_location);
+		}
+	      add_symbol_to_list (sym, list_in_scope);
 	    }
 	  break;
 	case TAG_formal_parameter:
