@@ -1,3 +1,12 @@
+Wed Feb  7 14:03:17 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Don't set CC.  Look for --enable-shared.  Set
+	BFDLIB and HLDFLAGS and substitute them.
+	* configure: Rebuild.
+	* Makefile.in (LIBS): Use @BFDLIB@.
+	(HLDFLAGS): New variable.
+	(gprof): Use $(HLDFLAGS).
+
 Mon Feb  5 16:34:44 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	Support for building bfd and opcodes as shared libraries, based on
