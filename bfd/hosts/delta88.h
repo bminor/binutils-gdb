@@ -40,7 +40,7 @@ extern PROTO(void, bzero,(char *, int));
 extern char * strchr();
 extern PROTO(void, perror,(CONST char *));
 extern char *getenv();
-extern char *memchr();
+extern PROTO(PTR, memchr,(const void *, int, unsigned ));
 extern char *strrchr();
 extern int chmod();
 extern int fread();
