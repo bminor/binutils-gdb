@@ -1095,7 +1095,7 @@ elf_link_add_object_symbols (abfd, info)
 	 elf_dt_name, we don't make a DT_NEEDED entry at all, even if
 	 there is a DT_SONAME entry.  */
       add_needed = true;
-      name = bfd_get_filename (abfd);
+      name = basename (bfd_get_filename (abfd));
       if (elf_dt_name (abfd) != NULL)
 	{
 	  name = elf_dt_name (abfd);
