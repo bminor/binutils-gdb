@@ -2567,13 +2567,17 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	      outrel.r_offset = (htab->sgot->output_section->vma
 				 + htab->sgot->output_offset + off);
 
-	      bfd_put_32 (output_bfd, 0,
-			  htab->sgot->contents + off);
 	      indx = h && h->dynindx != -1 ? h->dynindx : 0;
 	      if (r_type == R_386_TLS_GD)
 		dr_type = R_386_TLS_DTPMOD32;
 	      else
 		dr_type = R_386_TLS_TPOFF32;
+	      if (dr_type == R_386_TLS_TPOFF32 && indx == 0)
+		bfd_put_32 (output_bfd, relocation - dtpoff_base (info),
+			    htab->sgot->contents + off);
+	      else
+		bfd_put_32 (output_bfd, 0,
+			    htab->sgot->contents + off);
 	      outrel.r_info = ELF32_R_INFO (indx, dr_type);
 	      loc = (Elf32_External_Rel *) htab->srelgot->contents;
 	      loc += htab->srelgot->reloc_count++;
