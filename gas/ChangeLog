@@ -1,3 +1,7 @@
+Mon Nov 27 13:18:25 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Rebuild with autoconf 2.7.
+
 Tue Nov 21 18:39:01 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aclocal.m4 (AC_PROG_CC): Remove local definition.
