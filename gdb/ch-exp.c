@@ -488,7 +488,9 @@ parse_call ()
 static void
 parse_named_record_element ()
 {
-  struct stoken label = PEEK_LVAL ().sval;
+  struct stoken label;
+
+  label = PEEK_LVAL ().sval;
   expect (FIELD_NAME, "expected a field name here `%s'", lexptr);
   if (check_token (','))
     parse_named_record_element ();

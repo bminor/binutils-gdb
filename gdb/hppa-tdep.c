@@ -1733,7 +1733,7 @@ hppa_alignof (type)
      struct type *type;
 {
   int max_align, align, i;
-  CHECK_TYPEDEf (type);
+  CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_PTR:

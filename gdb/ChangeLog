@@ -1,3 +1,10 @@
+Sun Dec  3 11:59:21 1995  Jeffrey A. Law  <law@cygnus.com>
+
+	* ch-exp.c (parse_named_record_element): Avoid aggregrate
+	initializations for automatic variables.
+
+	* hppa-tdep.c (hppa_alignof): Fix typo in last change.
+
 Sat Dec  2 19:32:57 1995  Fred Fish  <fnf@cygnus.com>
 
 	* symfile.c (global_psymbols, static_psymbols):  Remove, unused.
