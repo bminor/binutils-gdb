@@ -1,3 +1,17 @@
+Wed Sep  7 19:10:09 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	Update for autoconf beta 1.112:
+	* aclocal.m4 (GAS_CHECK_DECL_NEEDED, GAS_WORKING_ASSERT): New
+	macros.
+	* configure.in: Use them.  Use AC_ARG_PROGRAM (now provided by
+	autoconf) instead of my hacked-up AC_PROGRAM_TRANSFORM_NAME.  Move
+	test for CROSS_COMPILE just before AC_FUNC_ALLOCA, and emit a
+	message to try to ease confusion about autoconf's
+	"cross-compiling" message.
+	* acconfig.h (NEED_DECLARATION_MALLOC, NEED_DECLARATION_FREE,
+	NEED_DECLARATION_ERRNO): Renamed from NEED_*_DECLARATION.
+	* configure, conf.in: Regenerated.
+
 Wed Sep  7 12:49:55 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* configure.in: Check ${host} and ${target} rather than

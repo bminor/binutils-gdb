@@ -29,13 +29,13 @@
 #undef WANT_FOPEN_BIN
 
 /* Sometimes the system header files don't declare malloc and realloc.  */
-#undef NEED_MALLOC_DECLARATION
+#undef NEED_DECLARATION_MALLOC
 
 /* Sometimes the system header files don't declare free.  */
-#undef NEED_FREE_DECLARATION
+#undef NEED_DECLARATION_FREE
 
 /* Sometimes errno.h doesn't declare errno itself.  */
-#undef NEED_ERRNO_DECLARATION
+#undef NEED_DECLARATION_ERRNO
 
 #undef MANY_SEGMENTS
 

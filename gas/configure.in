@@ -24,7 +24,7 @@ AC_CONFIG_HEADER(conf)
 dnl For recursion to work right, this must be an absolute pathname.
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
 AC_CANONICAL_SYSTEM
-AC_PROGRAM_TRANSFORM_NAME
+AC_ARG_PROGRAM
 
 emulation=generic
 
@@ -276,11 +276,6 @@ esac
 AC_SUBST(BFDLIB)
 AC_SUBST(ALL_OBJ_DEPS)
 
-case "x${host}" in
-  x${target})				;;
-  *)		AC_DEFINE(CROSS_COMPILE);;
-esac
-
 AC_DEFINE_UNQUOTED(TARGET_ALIAS,	"${target_alias}")
 AC_DEFINE_UNQUOTED(TARGET_CANONICAL,	"${target}")
 AC_DEFINE_UNQUOTED(TARGET_CPU,		"${target_cpu}")
@@ -302,6 +297,17 @@ AC_PROG_INSTALL
 
 AC_CHECK_HEADERS(string.h stdlib.h memory.h strings.h unistd.h stdarg.h varargs.h errno.h sys/types.h)
 
+# Put this here so that autoconf's "cross-compiling" message doesn't confuse
+# people who are not cross-compiling but are compiling cross-assemblers.
+AC_MSG_CHECKING(whether compiling a cross-assembler)
+if test "${host}" = "${target}"; then
+  cross_gas=yes
+  AC_DEFINE(CROSS_COMPILE)
+else
+  cross_gas=no
+fi
+AC_MSG_RESULT($cross_gas)
+
 dnl ansidecl.h will deal with const
 dnl AC_CONST
 AC_FUNC_ALLOCA
@@ -310,27 +316,12 @@ AC_C_INLINE
 # Some non-ANSI preprocessors botch requoting inside strings.  That's bad
 # enough, but on some of those systems, the assert macro relies on requoting
 # working properly!
-AC_MSG_CHECKING([for working assert macro])
-AC_CACHE_VAL(gas_cv_assert_ok,
-AC_TRY_LINK([#include <assert.h>
-#include <stdio.h>], [
-/* check for requoting problems */
-static int a, b, c, d;
-static char *s;
-assert (!strcmp(s, "foo bar baz quux"));
-/* check for newline handling */
-assert (a == b
-        || c == d);
-], gas_cv_assert_ok=yes, gas_cv_assert_ok=no))dnl
-AC_MSG_RESULT($gas_cv_assert_ok)
-test $gas_cv_assert_ok = yes || AC_DEFINE(BROKEN_ASSERT)
+GAS_WORKING_ASSERT
 
 # On some systems, the system header files may not declare malloc, realloc,
 # and free.  There are places where gas needs these functions to have been
 # declared -- such as when taking their addresses.
-AC_MSG_CHECKING([whether a malloc declaration is required])
-AC_CACHE_VAL(gas_cv_malloc_decl_needed,
-AC_TRY_LINK([
+gas_test_headers="
 #ifdef HAVE_MEMORY_H
 #include <memory.h>
 #endif
@@ -343,49 +334,17 @@ AC_TRY_LINK([
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-], [
-char *(*f) ();
-f = (char *(*)()) malloc;
-], gas_cv_malloc_decl_needed=no, gas_cv_malloc_decl_needed=yes))dnl
-AC_MSG_RESULT($gas_cv_malloc_decl_needed)
-test $gas_cv_malloc_decl_needed = no || AC_DEFINE(NEED_MALLOC_DECLARATION)
-
-AC_MSG_CHECKING([whether a free declaration is required])
-AC_CACHE_VAL(gas_cv_free_decl_needed,
-AC_TRY_LINK([
-#ifdef HAVE_MEMORY_H
-#include <memory.h>
-#endif
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-], [
-int (*f) ();
-f = (int (*)()) free;
-], gas_cv_free_decl_needed=no, gas_cv_free_decl_needed=yes))
-AC_MSG_RESULT($gas_cv_free_decl_needed)
-test $gas_cv_free_decl_needed = no || AC_DEFINE(NEED_FREE_DECLARATION)
+"
+GAS_CHECK_DECL_NEEDED(malloc, f, char *(*f)(), $gas_test_headers)
+GAS_CHECK_DECL_NEEDED(free, f, int f, $gas_test_headers)
 
 # Does errno.h declare errno, or do we have to add a separate declaration
 # for it?
-AC_MSG_CHECKING([whether an errno declaration is required])
-AC_CACHE_VAL(gas_cv_errno_decl_needed,
-AC_TRY_LINK([
+GAS_CHECK_DECL_NEEDED(errno, f, int f, [
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
 #endif
-], [
-int x;
-x = errno;
-], gas_cv_errno_decl_needed=no, gas_cv_errno_decl_needed=yes))
-AC_MSG_RESULT($gas_cv_errno_decl_needed)
-test $gas_cv_errno_decl_needed = no || AC_DEFINE(NEED_ERRNO_DECLARATION)
+])
 
 AC_CONFIG_SUBDIRS(testsuite)
 

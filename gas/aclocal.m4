@@ -7,9 +7,8 @@ dnl
 dnl It knows where it is in the tree; don't try using it elsewhere.
 dnl
 undefine([AC_PROG_CC])dnl
-define(AC_PROG_CC,
+AC_DEFUN(AC_PROG_CC,
 [AC_BEFORE([$0], [AC_PROG_CPP])dnl
-AC_PROVIDE([$0])dnl
 dnl
 dnl The ugly bit...
 dnl
@@ -34,4 +33,44 @@ else
   GCC=
 fi
 rm -f conftest*
+])dnl
+dnl
+dnl GAS_CHECK_DECL_NEEDED(name, typedefname, typedef, headers)
+AC_DEFUN(GAS_CHECK_DECL_NEEDED,[
+AC_MSG_CHECKING(whether declaration is required for $1)
+AC_CACHE_VAL(gas_cv_decl_needed_$1,
+AC_TRY_LINK([$4],
+[
+typedef $3;
+$2 x;
+x = ($2) $1;
+], gas_cv_decl_needed_$1=no, gas_cv_decl_needed_$1=yes))dnl
+AC_MSG_RESULT($gas_cv_decl_needed_$1)
+test $gas_cv_decl_needed_$1 = no || {
+ ifelse(index($1,[$]),-1,
+    [AC_DEFINE([NEED_DECLARATION_]translit($1, [a-z], [A-Z]))],
+    [gas_decl_name_upcase=`echo $1 | tr '[a-z]' '[A-Z]'`
+     AC_DEFINE_UNQUOTED(NEED_DECLARATION_$gas_decl_name_upcase)])
+}
+])dnl
+dnl
+dnl Some non-ANSI preprocessors botch requoting inside strings.  That's bad
+dnl enough, but on some of those systems, the assert macro relies on requoting
+dnl working properly!
+dnl GAS_WORKING_ASSERT
+AC_DEFUN(GAS_WORKING_ASSERT,
+[AC_MSG_CHECKING([for working assert macro])
+AC_CACHE_VAL(gas_cv_assert_ok,
+AC_TRY_LINK([#include <assert.h>
+#include <stdio.h>], [
+/* check for requoting problems */
+static int a, b, c, d;
+static char *s;
+assert (!strcmp(s, "foo bar baz quux"));
+/* check for newline handling */
+assert (a == b
+        || c == d);
+], gas_cv_assert_ok=yes, gas_cv_assert_ok=no))dnl
+AC_MSG_RESULT($gas_cv_assert_ok)
+test $gas_cv_assert_ok = yes || AC_DEFINE(BROKEN_ASSERT)
 ])dnl
