@@ -1,3 +1,10 @@
+2000-07-16  Charles Wilson  <cwilson@ece.gatech.edu>
+
+	* src/ld/emultempl/pe.em (gld_*_open_dynamic_archive): New search
+	order for dynamic library '-lfoo' on pei386: libfoo.dll.a,
+	foo.dll.a, libfoo.a, libfoo.dll, foo.dll. This fixes compatibility
+	errors introduced by the old dynamic lib search order.
+
 2000-07-17  DJ Delorie  <dj@cygnus.com>
 
 	* pe-dll.c (process_def_file): auto-export data items also

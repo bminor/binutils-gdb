@@ -1387,16 +1387,33 @@ gld_${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
       sprintf (string, "%s/%s.dll.a", search->name, filename);
       if (! ldfile_try_open_bfd (string, entry))
         {
-          /* Try "libfoo.dll" (preferred dll name) */
-          sprintf (string, "%s/lib%s.dll", search->name, filename);
+/*
+   Try libfoo.a next. Normally, this would be interpreted as a static
+   library, but it *could* be an import library. For backwards compatibility,
+   libfoo.a needs to ==precede== libfoo.dll and foo.dll in the search,
+   or sometimes errors occur when building legacy packages.
+
+   Putting libfoo.a here means that in a failure case (i.e. the library
+   -lfoo is not found) we will search for libfoo.a twice before
+   giving up -- once here, and once when searching for a "static" lib.
+   for a "static" lib.
+*/
+          /* Try "libfoo.a" (import lib, or static lib, but must
+             take precedence over dll's) */
+          sprintf (string, "%s/lib%s.a", search->name, filename);
           if (! ldfile_try_open_bfd (string, entry))
-            {
-              /* Finally, try "foo.dll" (alternate dll name) */
-              sprintf (string, "%s/%s.dll", search->name, filename);
+	    {
+              /* Try "libfoo.dll" (preferred dll name) */
+              sprintf (string, "%s/lib%s.dll", search->name, filename);
               if (! ldfile_try_open_bfd (string, entry))
                 {
-                  free (string);
-                  return false;
+                  /* Finally, try "foo.dll" (alternate dll name) */
+                  sprintf (string, "%s/%s.dll", search->name, filename);
+                  if (! ldfile_try_open_bfd (string, entry))
+                    {
+                      free (string);
+                      return false;
+                    }
                 }
             }
         }
