@@ -1,4 +1,9 @@
 2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdbmi.texinfo: Fix examples that show frames to remove
+	extraneous blank in level field.  Part of fix for PR gdb/192.
+        
+2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
         
 	* mi-cmd-var.c (mi_cmd_var_update): Fix for PR gdb/672.  For m2, 
 	output list begin and end for "changelist" rather than tuple begin/end.
