@@ -1,3 +1,14 @@
+Sat Nov 21 03:15:27 1992  John Gilmore  (gnu@cygnus.com)
+
+	* ldctor.h, lderror.h, ldexp.h, ldfile.h, ldindr.h, ldlang.c,
+	ldlang.h, ldlex.h, ldmain.h, ldmisc.h, ldsym.h, ldver.h, ldwarn.h,
+	ldwrite.h, relax.h:  Replace all uses of EXFUN and PROTO ansi-glue
+	macros with PARAMS.  Recreational cleanup.  Update copyrights.
+
+Tue Nov 10 00:23:37 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: pass down the bfd source directory for includes
+
 Thu Nov  5 15:41:55 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* ldlang.c (lang_size_sections): don't change size and address for

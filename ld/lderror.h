@@ -1,4 +1,1 @@
-
-
-void EXFUN(init_bfd_error_vector,(void));
-
+void init_bfd_error_vector PARAMS ((void));

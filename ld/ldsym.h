@@ -62,15 +62,15 @@ typedef struct user_symbol_struct
 extern CONST char *keepsyms_file;
 extern int kept_syms;
 
-PROTO(ldsym_type *, ldsym_get, (CONST char *));
-PROTO(ldsym_type *, ldsym_get_soft, (CONST char *));
-PROTO(void, ldsym_print_symbol_table,(void));
-PROTO(void, ldsym_write, (void));
-PROTO(boolean, ldsym_undefined, (CONST char *));
+ldsym_type *ldsym_get PARAMS ((CONST char *));
+ldsym_type *ldsym_get_soft PARAMS ((CONST char *));
+void ldsym_print_symbol_table PARAMS ((void));
+void ldsym_write PARAMS ((void));
+boolean ldsym_undefined PARAMS ((CONST char *));
+
 #define FOR_EACH_LDSYM(x)						\
 	extern ldsym_type *symbol_head;					\
 	ldsym_type *x;							\
 	for (x = symbol_head; x != (ldsym_type *)NULL; x = x->next) 	
 
-
-void EXFUN(ldsym_init,(void));
+void ldsym_init PARAMS ((void));

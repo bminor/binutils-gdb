@@ -1,4 +1,5 @@
-/* Copyright (C) 1991 Free Software Foundation, Inc.
+/* Linker command language support.
+   Copyright 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -32,8 +33,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldindr.h"
 #include "ldctor.h"
 /* FORWARDS */
-PROTO (static void, print_statements, (void));
-PROTO (static void, print_statement, (lang_statement_union_type *,
+static void print_statements PARAMS ((void));
+static void print_statement PARAMS ((lang_statement_union_type *,
 				      lang_output_section_statement_type *));
 
 /* LOCALS */
@@ -107,7 +108,7 @@ extern boolean write_map;
 
 #define outside_symbol_address(q) ((q)->value +   outside_section_address(q->section))
 
-void EXFUN (lang_add_data, (int type, union etree_union * exp));
+void lang_add_data PARAMS ((int type, union etree_union * exp));
 
 PTR
 DEFUN (stat_alloc, (size),
@@ -621,6 +622,11 @@ DEFUN (wild_doit, (ptr, section, output, file),
     {
       output->bfd_section->alignment_power = section->alignment_power;
     }
+    /* If supplied an aligmnet, then force it */
+    if (output->section_alignment != -1)
+    {
+      output->bfd_section->alignment_power = output->section_alignment;
+    }
   }
 }
 
@@ -1033,39 +1039,55 @@ DEFUN (print_output_section_statement, (output_section_statement),
   print_nl ();
   print_section (output_section_statement->name);
 
-  if (section)
-    {
-      print_dot = section->vma;
-      print_space ();
-      print_section ("");
-      print_space ();
-      print_address (section->vma);
-      print_space ();
-      print_size (section->_raw_size);
-      print_space();
-      print_size(section->_cooked_size);
-      print_space ();
-      print_alignment (section->alignment_power);
-      print_space ();
-#if 0
-      fprintf (config.map_file, "%s flags", output_section_statement->region->name);
-      print_flags (stdout, &output_section_statement->flags);
-#endif
-      if (section->flags & SEC_LOAD)
-	fprintf (config.map_file, "load ");
-      if (section->flags & SEC_ALLOC)
-	fprintf (config.map_file, "alloc ");
-      if (section->flags & SEC_RELOC)
-	fprintf (config.map_file, "reloc ");
-      if (section->flags & SEC_HAS_CONTENTS)
-	fprintf (config.map_file, "contents ");
 
-    }
+  if (section)
+  {
+    print_dot = section->vma;
+    print_space ();
+    print_section ("");
+    print_space ();
+    print_address (section->vma);
+    print_space ();
+    print_size (section->_raw_size);
+    print_space();
+    print_size(section->_cooked_size);
+    print_space ();
+    print_alignment (section->alignment_power);
+    print_space ();
+#if 0
+    fprintf (config.map_file, "%s flags", output_section_statement->region->name);
+    print_flags (stdout, &output_section_statement->flags);
+#endif
+    if (section->flags & SEC_LOAD)
+     fprintf (config.map_file, "load ");
+    if (section->flags & SEC_ALLOC)
+     fprintf (config.map_file, "alloc ");
+    if (section->flags & SEC_RELOC)
+     fprintf (config.map_file, "reloc ");
+    if (section->flags & SEC_HAS_CONTENTS)
+     fprintf (config.map_file, "contents ");
+
+  }
   else
-    {
-      fprintf (config.map_file, "No attached output section");
-    }
+  {
+    fprintf (config.map_file, "No attached output section");
+  }
   print_nl ();
+  if (output_section_statement->section_alignment >= 0
+      || output_section_statement->section_alignment >= 0) 
+  {
+    printf("\t\t\t\t\tforced alignment ");
+    if ( output_section_statement->section_alignment >= 0) 
+    {
+      printf("section 2**%d ",output_section_statement->section_alignment );
+    }
+    if ( output_section_statement->subsection_alignment >= 0) 
+    {
+      printf("subsection 2**%d ",output_section_statement->subsection_alignment );
+    }
+  
+    print_nl ();
+  }
   print_statement (output_section_statement->children.head,
 		   output_section_statement);
 
@@ -1348,7 +1370,7 @@ DEFUN (print_statement, (s, os),
 	case lang_output_statement_enum:
 	  fprintf (config.map_file, "OUTPUT(%s %s)\n",
 		   s->output_statement.name,
-		   output_target);
+		   output_target ? output_target : "");
 	  break;
 	case lang_input_statement_enum:
 	  print_input_statement (&s->input_statement);
@@ -1431,6 +1453,10 @@ DEFUN (size_input_section, (this_ptr, output_section_statement, fill,
 
   if (is->ifile->just_syms_flag == false)
     {
+      if (output_section_statement->subsection_alignment != -1)
+       i->alignment_power =
+	output_section_statement->subsection_alignment;
+
       dot = insert_pad (this_ptr, fill, i->alignment_power,
 			output_section_statement->bfd_section, dot);
 
@@ -1495,9 +1521,9 @@ DEFUN (lang_size_sections, (s, output_section_statement, prev, fill,
        bfd_vma after;
        lang_output_section_statement_type *os = &s->output_section_statement;
 
-       /* If this section is never loaded, don't change the size and
-	  address.  */
-       if (os->bfd_section->flags & SEC_NEVER_LOAD)
+       /* If this is a shared library section, don't change the size
+	  and address.  */
+       if (os->bfd_section->flags & SEC_SHARED_LIBRARY)
 	 break;
 
        if (os->bfd_section == &bfd_abs_section)
@@ -2177,7 +2203,7 @@ DEFUN (lang_set_flags, (ptr, flags),
 
 void
 DEFUN (lang_for_each_file, (func),
-       PROTO (void, (*func), (lang_input_statement_type *)))
+       void (*func) PARAMS ((lang_input_statement_type *)))
 {
   lang_input_statement_type *f;
 
@@ -2192,7 +2218,7 @@ DEFUN (lang_for_each_file, (func),
 
 void
 DEFUN (lang_for_each_input_section, (func),
-       PROTO (void, (*func), (bfd * ab, asection * as)))
+       void (*func) PARAMS ((bfd * ab, asection * as)))
 {
   lang_input_statement_type *f;
 
@@ -2237,21 +2263,36 @@ DEFUN (lang_add_output, (name),
 
 static lang_output_section_statement_type *current_section;
 
+static int topower(x)
+ int x;
+{
+  unsigned  int i = 1;
+  int l;
+  if (x < 0) return -1;
+  for (l = 0; l < 32; l++) 
+  {
+    if (i >= x) return l;
+    i<<=1;
+  }
+}
 void
 DEFUN (lang_enter_output_section_statement,
        (output_section_statement_name,
 	address_exp,
 	flags,
-	block_value),
+	block_value, 
+	align, subalign),
        char *output_section_statement_name AND
        etree_type * address_exp AND
        int flags AND
-       bfd_vma block_value)
+       bfd_vma block_value AND
+       etree_type *align AND
+       etree_type *subalign)
 {
   lang_output_section_statement_type *os;
 
   current_section =
-    os =
+   os =
     lang_output_section_statement_lookup (output_section_statement_name);
 
 
@@ -2263,10 +2304,10 @@ DEFUN (lang_enter_output_section_statement,
 
   if (os->addr_tree ==
       (etree_type *) NULL)
-    {
-      os->addr_tree =
-	address_exp;
-    }
+  {
+    os->addr_tree =
+     address_exp;
+  }
   os->flags = flags;
   if (flags & SEC_NEVER_LOAD)
    os->loadable = 0;
@@ -2275,6 +2316,13 @@ DEFUN (lang_enter_output_section_statement,
   os->block_value = block_value;
   stat_ptr = &os->children;
 
+  os->subsection_alignment = topower(
+   exp_get_value_int(subalign, -1,
+		     "subsection alignment",
+		     0));
+  os->section_alignment = topower(
+   exp_get_value_int(align, -1,
+		     "section alignment", 0));
 }
 
 void

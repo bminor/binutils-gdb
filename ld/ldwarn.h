@@ -1,5 +1,5 @@
-/*
-   Copyright (C) 1991 Free Software Foundation, Inc.
+/* Warning support for the GNU Linker.
+   Copyright 1991, 1992 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
 This file is part of GLD, the GNU linker.
@@ -18,7 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-
-void EXFUN(add_warning,(asymbol *));
-CONST char * EXFUN(fetch_warning,(asymbol *));
-void EXFUN(produce_warnings,(ldsym_type *, asymbol *));
+void add_warning PARAMS ((asymbol *));
+CONST char *fetch_warning PARAMS ((asymbol *));
+void produce_warnings PARAMS ((ldsym_type *, asymbol *));
