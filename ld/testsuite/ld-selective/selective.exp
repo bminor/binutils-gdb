@@ -19,6 +19,11 @@
 # Make sure that constructors are handled correctly.
 
 
+# AOUT based ports do not support selective linking
+if {[istarget "vax-*-ultrix*"]} {
+    return
+}
+
 # COFF based ports do not support selective linking
 if {[istarget "*-*-coff"]} {
     return
@@ -38,12 +43,12 @@ if {[istarget "*-*-pe"]} {
 #
 # FIXME: Instead of table, read settings from each source-file.
 set seltests {
-  {selective1 C 1.c {} {} {dropme1 dropme2} {alpha*-*}}
-  {selective2 C 2.c {} {} {foo} {alpha*-* mips*-*}}
-  {selective3 C 2.c {-u foo} {foo} {{foo 0}} {mips*-*}}
-  {selective4 C++ 3.cc {} {start a A::foo() B::foo()} {A::bar()} {alpha*-*  mips*-*}}
-  {selective5 C++ 4.cc {} {start a A::bar()} {A::foo() B::foo()} {alpha*-*  mips*-*}}
-  {selective6 C++ 5.cc {} {start a A::bar()}
+  {selective1 C   1.c  {}       {}    {dropme1 dropme2} {alpha*-*}}
+  {selective2 C   2.c  {}       {}    {foo} {alpha*-* mips*-*}}
+  {selective3 C   2.c  {-u foo} {foo} {{foo 0}} {mips*-*}}
+  {selective4 C++ 3.cc {}       {start a A::foo() B::foo()} {A::bar()} {alpha*-*  mips*-*}}
+  {selective5 C++ 4.cc {}       {start a A::bar()} {A::foo() B::foo()} {alpha*-*  mips*-*}}
+  {selective6 C++ 5.cc {}       {start a A::bar()}
     {A::foo() B::foo() dropme1() dropme2()} {*-*-*}}
 }
 
@@ -88,7 +93,7 @@ foreach testitem $seltests {
     # leave as is.
     if { ![ld_compile "$CC $testflags" $srcdir/$subdir/$testfile $objfile] } {
 	unresolved $testname
-	return
+	continue
     }
 
     # V850 targets need libgcc.a

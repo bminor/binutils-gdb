@@ -1,3 +1,8 @@
+2001-08-21  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* ld-selective/selective.exp: Return if target is `vax-*-ultrix*'.
+	Continue with other tests when there is a compilation error.
+
 2001-08-01  Loren J. Rittle  <ljrittle@acm.org>
 
 	* ld-cdtest/cdtest-nrv.dat: New file.
