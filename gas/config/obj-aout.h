@@ -109,7 +109,7 @@ extern void obj_aout_frob_file PARAMS ((void));
         || (S_LOCAL_NAME(s) && !flag_keep_locals)))	\
    || (flag_strip_local_absolute			\
        && ! S_IS_EXTERNAL(s)				\
-       && S_GET_SEGMENT == absolute_section))
+       && S_GET_SEGMENT (s) == absolute_section))
 /* True if a symbol is not defined in this file */
 #define S_IS_EXTERN(s)		((s)->sy_symbol.n_type & N_EXT)
 /* True if the symbol has been generated because of a .stabd directive */

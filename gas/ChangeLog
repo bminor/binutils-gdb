@@ -1,3 +1,8 @@
+Wed Jan 28 14:51:18 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-aout.h (S_IS_LOCAL): Correct typo--pass argument to
+	S_GET_SEGMENT.
+
 Wed Jan 28 13:54:50 1998  Pat Rankin  <rankin@eql.caltech.edu>
 
 	as.h (unlink): Reverse 13-Feb-97 change; use of unlink vs remove
