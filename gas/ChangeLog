@@ -1,9 +1,15 @@
+2000-03-28  Alan Modra  <alan@linuxcare.com.au>
+
+	* listing.c (LISTING_LHS_WIDTH): Default depends on
+	LISTING_WORD_SIZE.
+	(LISTING_LHS_WIDTH_SECOND): Default to LISTING_LHS_WIDTH.
+
 2000-03-27  Ian Lance Taylor  <ian@zembu.com>
 
 	* config/tc-sh.c (md_show_usage): Use backslash before newline in
 	string literal.
 
-2000-03-27  Alan Modra  <alan@linuxcare.com>
+2000-03-27  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-avr.h (TC_HANDLES_FX_DONE): Define.
 
@@ -46,7 +52,7 @@
 	* internals.texi: Document new macro hooks.
 	* as.h: New prototypes added.
 	
-2000-03-26  Alan Modra  <alan@linuxcare.com>
+2000-03-26  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-i386.c: Don't start any as_bad or as_warn message with
 	an initial capital letter.

@@ -7,10 +7,9 @@ proc dotest {} {
     gas_start "x930509a.s" "-al"
     while 1 {
 	expect {
-	    -re " 00008000\[ 	\]+.single" { pass $testname; set x 1 }
-	    -re " 00800000\[ 	\]+.single" { pass $testname; set x 1 }
-	    -re " 0080 0000\[ 	\]+.single" { pass $testname; set x 1 }
-	    -re " ........ +.single" { fail $testname; set x 1 }
+	    -re " 00 ?00 ?80 ?00\[ 	\]+.single" { pass $testname; set x 1 }
+	    -re " 00 ?80 ?00 ?00\[ 	\]+.single" { pass $testname; set x 1 }
+	    -re ".single" { fail $testname; set x 1 }
 	    -re "\[^\n\]*\n" { }
 	    timeout { perror "timeout\n"; break }
 	    eof { break }

@@ -65,9 +65,9 @@ proc do_930509a {} {
 # If ".long" means an 8-byte value on some target someday, this test will have
 # to be fixed.
 	expect {
-	    -re "^ +1 .... 0000 *0000" { fail $testname; set x 1 }
-	    -re "^ +1 .... 0400 *0000" { pass $testname; set x 1 }
-	    -re "^ +1 .... 0000 *0004" { pass $testname; set x 1 }
+	    -re "^ +1 .... 00 ?00 ?00 ?00" { fail $testname; set x 1 }
+	    -re "^ +1 .... 04 ?00 ?00 ?00" { pass $testname; set x 1 }
+	    -re "^ +1 .... 00 ?00 ?00 ?04" { pass $testname; set x 1 }
 	    -re "\[^\n\]*\n" { }
 	    timeout { perror "timeout\n"; break }
 	    eof { break }
@@ -124,7 +124,7 @@ proc test_cond {} {
     global subdir
 
     set testname "conditional listings"
-    gas_run cond.s -alc ">dump.out"
+    gas_run cond.s "-alc" ">dump.out"
     if ![string match "" $comp_output] {
 	send_log "$comp_output\n"
 	fail $testname
