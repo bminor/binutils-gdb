@@ -1,5 +1,9 @@
 2004-11-20  Mark Kettenis  <kettenis@gnu.org>
 
+	* gdb_ptrace.h [PTRACE_TYPE_ARG5] (ptrace): New macro.
+	* infptrace.c (call_ptrace): Simply call ptrace with four
+	arguments.
+
 	* dbxread.c (process_one_symbol): Fix a few coding standard
 	issues.  Improve code formatting.
 

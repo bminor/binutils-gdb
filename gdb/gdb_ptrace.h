@@ -107,8 +107,18 @@
 /* Some systems, in particular DEC OSF/1, Digital Unix, Compaq Tru64
    or whatever it's called these days, don't provide a prototype for
    ptrace.  Provide one to silence compiler warnings.  */
+
 #ifndef HAVE_DECL_PTRACE
 extern PTRACE_TYPE_RET ptrace();
+#endif
+
+/* Some systems, at least AIX and HP-UX have a ptrace with five
+   arguments.  Since we never use the fifth argument, define a ptrace
+   macro that calls the real ptrace with the last argument set to
+   zero.  */
+
+#ifdef PTRACE_TYPE_ARG5
+# define ptrace(request, pid, addr, data) ptrace (request, pid, addr, data, 0)
 #endif
 
 #endif /* gdb_ptrace.h */

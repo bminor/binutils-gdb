@@ -54,86 +54,11 @@ static void udot_info (char *, int);
 void _initialize_infptrace (void);
 
 
-/* This function simply calls ptrace with the given arguments.  
-   It exists so that all calls to ptrace are isolated in this 
-   machine-dependent file. */
 int
 call_ptrace (int request, int pid, PTRACE_ARG3_TYPE addr, int data)
 {
-  int pt_status = 0;
-
-#if 0
-  int saved_errno;
-
-  printf ("call_ptrace(request=%d, pid=%d, addr=0x%x, data=0x%x)",
-	  request, pid, addr, data);
-#endif
-#if defined(PT_SETTRC)
-  /* If the parent can be told to attach to us, try to do it.  */
-  if (request == PT_SETTRC)
-    {
-      errno = 0;
-#ifndef PTRACE_TYPE_ARG5
-      pt_status = ptrace (PT_SETTRC, pid, addr, data);
-#else
-      /* Deal with HPUX 8.0 braindamage.  We never use the
-         calls which require the fifth argument.  */
-      pt_status = ptrace (PT_SETTRC, pid, addr, data, 0);
-#endif
-      if (errno)
-	perror_with_name ("ptrace");
-#if 0
-      printf (" = %d\n", pt_status);
-#endif
-      if (pt_status < 0)
-	return pt_status;
-      else
-	return parent_attach_all (pid, addr, data);
-    }
-#endif
-
-#if defined(PT_CONTIN1)
-  /* On HPUX, PT_CONTIN1 is a form of continue that preserves pending
-     signals.  If it's available, use it.  */
-  if (request == PT_CONTINUE)
-    request = PT_CONTIN1;
-#endif
-
-#if defined(PT_SINGLE1)
-  /* On HPUX, PT_SINGLE1 is a form of step that preserves pending
-     signals.  If it's available, use it.  */
-  if (request == PT_STEP)
-    request = PT_SINGLE1;
-#endif
-
-#if 0
-  saved_errno = errno;
-  errno = 0;
-#endif
-#ifndef PTRACE_TYPE_ARG5
-  pt_status = ptrace (request, pid, addr, data);
-#else
-  /* Deal with HPUX 8.0 braindamage.  We never use the
-     calls which require the fifth argument.  */
-  pt_status = ptrace (request, pid, addr, data, 0);
-#endif
-
-#if 0
-  if (errno)
-    printf (" [errno = %d]", errno);
-
-  errno = saved_errno;
-  printf (" = 0x%x\n", pt_status);
-#endif
-  return pt_status;
+  return ptrace (request, pid, addr, data);
 }
-
-
-#if defined (DEBUG_PTRACE) || defined (PTRACE_TYPE_ARG5)
-/* For the rest of the file, use an extra level of indirection */
-/* This lets us breakpoint usefully on call_ptrace. */
-#define ptrace call_ptrace
-#endif
 
 /* Wait for a process to finish, possibly running a target-specific
    hook before returning.  */
