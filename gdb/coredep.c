@@ -32,7 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/user.h>
-#ifdef USG
+#ifndef USG
 #include <sys/ptrace.h>
 #endif
 
