@@ -146,8 +146,13 @@ DISTCLEANFILES       = config.texi
 MOSTLYCLEANFILES     = $(DEMANGLER_NAME).1
 
 $(DEMANGLER_NAME).1: cxxfilt.man Makefile
+	if test -f cxxfilt.man; then \
+	  man=cxxfilt.man; \
+	else \
+	  man=$(srcdir)/cxxfilt.man; \
+	fi; \
 	sed -e 's/@PROGRAM@/$(DEMANGLER_NAME)/' \
-	    -e 's/cxxfilt/$(DEMANGLER_NAME)/' < cxxfilt.man \
+	    -e 's/cxxfilt/$(DEMANGLER_NAME)/' < $$man \
 		> $(DEMANGLER_NAME).1
 
 # Maintenance
