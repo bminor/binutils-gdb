@@ -126,6 +126,9 @@ som_solib_add (arg_string, from_tty, target)
      We also need to examine __dld_flags to determine if the shared library
      list is valid and to determine if the libraries have been privately
      mapped.  */
+  if (symfile_objfile == NULL)
+    return;
+
   /* First see if the objfile was dynamically linked.  */
   shlib_info = bfd_get_section_by_name (symfile_objfile->obfd, "$SHLIB_INFO$");
   if (!shlib_info)
@@ -453,6 +456,9 @@ som_solib_create_inferior_hook()
   asection *shlib_info;
   char shadow_contents[BREAKPOINT_MAX], buf[4];
   CORE_ADDR anaddr;
+
+  if (symfile_objfile == NULL)
+    return; 
 
   /* First see if the objfile was dynamically linked.  */
   shlib_info = bfd_get_section_by_name (symfile_objfile->obfd, "$SHLIB_INFO$");
