@@ -1,3 +1,74 @@
+Mon Jun 16 18:56:27 1997  Geoff Keating  <geoffk@ozemail.com.au>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Don't emit R_PPC_REL*
+ 	relocs in shared libraries which refer to local symbols.  Cope
+ 	with addend when processing a GOT relocation.
+
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Only create symbols
+	for sections that the linker didn't create.
+	(ppc_elf_finish_dynamic_sections): Only try to write out a section
+ 	symbol if it was created in ppc_elf_size_dynamic_sections.
+	(ppc_elf_relocate_section): Complain if we have to generate a reloc
+	relative to a section for which we didn't output a symbol.
+
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Clean up.  PLT
+ 	relocs are 'rela' relocs, like everything else.  .rela.plt is not
+ 	a read-only section, so we don't have to special-case it.
+
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Entries in the
+	.rela.bss section are (of course) 'rela' relocs not 'rel' relocs.
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Initialise srelgot.
+	(ppc_elf_relocate_section): @got offsets are 4 from start of the
+	actual .got section.
+	* elflink.c (_bfd_elf_create_got_section): The three reserved
+	words start from the symbol '_GLOBAL_OFFSET_TABLE_'.
+
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): '.rela' is 5
+	characters, not 4.
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Use
+	_bfd_elf_create_got_section to create the GOT rather than
+	ppc_elf_create_linker_section. Create the '.rela.got' section
+	ourselves.
+	(ppc_elf_finish_dynamic_symbol): Set up GOT relocations when a
+	symbol has a GOT entry.
+	(ppc_elf_relocate_section): Record when a symbol is used through
+	the GOT, and allocate space in the GOT for each such symbol.
+	(ppc_elf_adjust_dynamic_symbol): Delete unused .got.plt stuff.
+	(ppc_elf_create_linker_section): Delete unused LINKER_SECTION_GOT
+	stuff.
+
+	* elf32-ppc.c (ppc_elf_howto_raw): GOT16_HA relocs should be
+	treated in a similar way to ADDR16_HA relocs.
+	(ppc_elf_relocate_section): PLTREL24 relocs do not get copied into
+	shared objects; the linker must deal with them.
+	(ppc_elf_create_linker_section): Stop setting
+	_GLOBAL_OFFSET_TABLE_ to the wrong value; delete unused
+	LINKER_SECTION_PLT stuff.
+	(ppc_elf_check_relocs): Delete unused LINKER_SECTION_PLT stuff.
+	(ppc_elf_finish_dynamic_sections): Use BFD calls to get GOT
+	section, not ELF-specific calls.
+	(elf_backend_plt_not_loaded): Set to 1.
+	(elf_backend_got_symbol_offset): Set to 4.
+	* elf-bfd.h (elf_backend_data): Add 'plt_not_loaded' member
+	for when ld.so fills in the PLT; and 'got_symbol_offset' member.
+	* elflink.c (_bfd_elf_create_dynamic_sections): Apply
+	plt_not_loaded member.
+	(_bfd_elf_create_got_section): Apply got_symbol_offset.
+	* elfxx-target.h (elf_backend_plt_not_loaded): Set default to
+	'loaded'.
+	(elf_backend_G_O_T_offset): Set default to 0.
+	(elfNN_bed): Set added fields.
+
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Was setting
+	DT_RELENT in shared objects; should be DT_RELAENT.
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Propagate
+	R_PPC_ADDR16_HA relocs to shared objects. Cope with case where
+	such a reloc (in a non-shared object) refers to a symbol that's
+	not defined.
+
 Mon Jun 16 14:42:14 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 	* elfcode.h (put_signed_word): Define.
