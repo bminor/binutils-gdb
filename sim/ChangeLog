@@ -152,14 +152,12 @@ Thu Oct 17 12:50:08 1996  Doug Evans  <dje@canuck.cygnus.com>
 	(--enable-sim): Add.
 	* configure: Regenerated.
 
-start-sanitize-v850
 Fri Oct 11 21:13:43 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* configure.in: Only build the V850 simulator if
 	we are using gcc.
 	* configure: Rebuild.
 
-end-sanitize-v850
 Sun Sep  8 17:22:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Do build erc32 for DOS and Windows hosts.
@@ -177,12 +175,10 @@ Wed Sep  4 15:49:16 1996  Ian Lance Taylor  <ian@cygnus.com>
 	gcc.
 	* configure: Rebuild.
 
-start-sanitize-v850
 Wed Aug 28 19:05:23 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* configure.in (v850-*-*): Added V850 simulator.
 
-end-sanitize-v850
 Thu Aug  1 17:08:41 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* configure.in (d10v-*-*): Added D10V simulator.

@@ -32,6 +32,7 @@ v850_sim.h
 gencode.c
 interp.c
 simops.c
+sim-main.h
 
 Things-to-lose:
 
