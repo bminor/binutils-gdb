@@ -1,3 +1,9 @@
+2003-10-17  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* gas/arm/iwmmxt-bad.s: New file.
+	* gas/arm/iwmmxt-bad.l: New file.
+	* gas/arm/arm.exp: Run new test.
+
 2003-10-16  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* gas/arm/iwmmxt.d: Add -miwmmxt to #objdump line, to get the
