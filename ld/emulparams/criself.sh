@@ -36,7 +36,7 @@ OTHER_READONLY_SECTIONS='PROVIDE (__Etext = .);'
 DATA_START_SYMBOLS='PROVIDE (__Sdata = .);'
 
 # Smuggle an "OTHER_DATA_END_SYMBOLS" here.
-OTHER_GOT_SECTIONS='PROVIDE (__Edata = .);'
+OTHER_SDATA_SECTIONS='PROVIDE (__Edata = .);'
 
 # If .bss does not immediately follow .data but has its own start
 # address, we can't get to it with OTHER_BSS_SYMBOLS, neither can we

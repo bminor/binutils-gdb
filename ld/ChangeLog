@@ -1,3 +1,27 @@
+2001-08-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* scripttempl/elf.sc: Move non-text .dynamic section before
+	.plt/.got/.sdata* group.
+	(OTHER_GOT_SECTIONS): Move to immediately after .got.
+	(OTHER_SDATA_SECTIONS): Add.
+	* emulparams/criself.sh: Use OTHER_SDATA_SECTIONS rather than
+	OTHER_GOT_SECTIONS.
+	* emulparams/crislinux.sh: Likewise.
+	* emulparams/elf32b4300.sh: Likewise.
+	* emulparams/elf32bmip.sh: Likewise.
+	* emulparams/elf32bmipn32.sh: Likewise.
+	* emulparams/elf32bsmip.sh: Likewise.
+	* emulparams/elf32btsmip.sh: Likewise.
+	* emulparams/elf32ebmip.sh: Likewise.
+	* emulparams/elf32elmip.sh: Likewise.
+	* emulparams/elf32l4300.sh: Likewise.
+	* emulparams/elf32lmip.sh: Likewise.
+	* emulparams/elf32lsmip.sh: Likewise.
+	* emulparams/elf32ltsmip.sh: Likewise.
+	* emulparams/elf64bmip.sh: Likewise.
+	* emulparams/elf64btsmip.sh: Likewise.
+	* emulparams/elf64ltsmip.sh: Likewise.
+
 2001-08-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* genscripts.sh: Source the emulparams script before each output

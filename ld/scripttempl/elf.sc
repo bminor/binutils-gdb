@@ -17,7 +17,8 @@
 #	DATA_START_SYMBOLS - symbols that appear at the start of the
 #		.data section.
 #	OTHER_GOT_SYMBOLS - symbols defined just before .got.
-#	OTHER_GOT_SECTIONS - sections just after .got and .sdata.
+#	OTHER_GOT_SECTIONS - sections just after .got.
+#	OTHER_SDATA_SECTIONS - sections just after .sdata.
 #	OTHER_BSS_SYMBOLS - symbols that appear at the start of the
 #		.bss section besides __bss_start.
 #	DATA_PLT - .plt should be in data segment, not text segment.
@@ -308,14 +309,15 @@ SECTIONS
   .gcc_except_table : { *(.gcc_except_table) }
   ${WRITABLE_RODATA+${RODATA}}
   ${RELOCATING+${OTHER_READWRITE_SECTIONS}}
+  ${TEXT_DYNAMIC-${DYNAMIC}}
   ${RELOCATING+${CTOR}}
   ${RELOCATING+${DTOR}}
   ${DATA_PLT+${PLT}}
   ${RELOCATING+${OTHER_GOT_SYMBOLS}}
   .got		${RELOCATING-0} : { *(.got.plt) *(.got) }
+  ${RELOCATING+${OTHER_GOT_SECTIONS}}
   ${CREATE_SHLIB+${SDATA2}}
   ${CREATE_SHLIB+${SBSS2}}
-  ${TEXT_DYNAMIC-${DYNAMIC}}
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
@@ -326,7 +328,7 @@ SECTIONS
     ${RELOCATING+*(.sdata.*)}
     ${RELOCATING+*(.gnu.linkonce.s.*)}
   }
-  ${RELOCATING+${OTHER_GOT_SECTIONS}}
+  ${RELOCATING+${OTHER_SDATA_SECTIONS}}
   ${RELOCATING+_edata = .;}
   ${RELOCATING+PROVIDE (edata = .);}
   ${RELOCATING+__bss_start = .;}

@@ -20,7 +20,7 @@ ENTRY=__start
 OTHER_GOT_SYMBOLS='
   _gp = ALIGN(16) + 0x7ff0;
 '
-OTHER_GOT_SECTIONS='
+OTHER_SDATA_SECTIONS='
   .lit8 : { *(.lit8) }
   .lit4 : { *(.lit4) }
   .srdata : { *(.srdata) }
