@@ -82,6 +82,7 @@ boolean lang_has_input_file = false;
 lang_output_section_statement_type *create_object_symbols = 0;
 boolean had_output_filename = false;
 boolean lang_float_flag = false;
+boolean delete_output_file_on_failure = false;
 
 /* IMPORTS */
 extern char *default_target;
@@ -324,12 +325,6 @@ lang_add_input_file (name, file_type, target)
 {
   /* Look it up or build a new one */
   lang_has_input_file = true;
-
-  if (name) {
-    if ((*(name+strlen(name)-1) == '.') && (*(name+strlen(name)) == 'a')) {
-      file_type=lang_input_file_is_l_enum;
-    }
-  }
 
 #if 0
   lang_input_statement_type *p;
@@ -782,6 +777,7 @@ wild (s, section, file, target, output)
 /*
   read in all the files
   */
+
 static bfd *
 open_output (name)
      CONST char *CONST name;
@@ -810,6 +806,8 @@ open_output (name)
 	}
       einfo ("%P%F: cannot open output file %s: %E\n", name);
     }
+
+  delete_output_file_on_failure = 1;
 
   /*  output->flags |= D_PAGED;*/
 
@@ -1631,11 +1629,10 @@ DEFUN (lang_size_sections, (s, output_section_statement, prev, fill, dot, relax)
        /* Ignore the size of the input sections, use the vma and size to */
        /* align against */
 
-
        after = ALIGN_N (os->bfd_section->vma +
-		      os->bfd_section->_raw_size,
-		      os->block_value);
-
+			os->bfd_section->_raw_size,
+			/* The coercion here is important, see ld.h.  */
+			(bfd_vma) os->block_value);
 
        os->bfd_section->_raw_size = after - os->bfd_section->vma;
        dot = os->bfd_section->vma + os->bfd_section->_raw_size;
@@ -2143,7 +2140,9 @@ lang_common ()
 		      /*  Fix the size of the common section */
 
 		      com->section->_raw_size =
-			ALIGN_N (com->section->_raw_size, align);
+			ALIGN_N (com->section->_raw_size,
+				 /* The coercion here is important, see ld.h.  */
+				 (bfd_vma) align);
 
 		      /* Remember if this is the biggest alignment ever seen */
 		      if (power_of_two > com->section->alignment_power)
@@ -2466,6 +2465,8 @@ lang_process ()
      file */
   lang_create_output_section_statements ();
 
+  ldemul_create_output_section_statements ();
+
   /* Create a dummy bfd for the script */
   lang_init_script_file ();
 
@@ -2514,50 +2515,41 @@ lang_process ()
   /* Now run around and relax if we can */
   if (command_line.relax)
     {
-      /* First time round is a trial run to get the 'worst case' addresses of the
-         objects if there was no relaxing */
+      /* First time round is a trial run to get the 'worst case'
+	 addresses of the objects if there was no relaxing.  */
       lang_size_sections (statement_list.head,
 			  (lang_output_section_statement_type *) NULL,
 			  &(statement_list.head), 0, (bfd_vma) 0, false);
 
+      /* Move the global symbols around so the second pass of relaxing
+	 can see them.  */
+      lang_relocate_globals ();
 
+      reset_memory_regions ();
 
-  /* Move the global symbols around so the second pass of relaxing can
-     see them */
-  lang_relocate_globals ();
+      /* Do all the assignments, now that we know the final resting
+	 places of all the symbols.  */
 
-  reset_memory_regions ();
-
-  /* Do all the assignments, now that we know the final restingplaces
-     of all the symbols */
-
-  lang_do_assignments (statement_list.head,
-		       abs_output_section,
-		       0, (bfd_vma) 0);
-
+      lang_do_assignments (statement_list.head,
+			   abs_output_section,
+			   0, (bfd_vma) 0);
 
       /* Perform another relax pass - this time we know where the
-	 globals are, so can make better guess */
+	 globals are, so can make better guess.  */
       lang_size_sections (statement_list.head,
 			  (lang_output_section_statement_type *) NULL,
 			  &(statement_list.head), 0, (bfd_vma) 0, true);
-
-
-
     }
-
   else
     {
-      /* Size up the sections */
+      /* Size up the sections.  */
       lang_size_sections (statement_list.head,
 			  abs_output_section,
 			  &(statement_list.head), 0, (bfd_vma) 0, false);
-
     }
 
-
   /* See if anything special should be done now we know how big
-     everything is */
+     everything is.  */
   ldemul_after_allocation ();
 
   /* Do all the assignments, now that we know the final restingplaces
@@ -2576,6 +2568,12 @@ lang_process ()
   lang_check ();
 
   /* Final stuffs */
+
+  ldemul_finish ();
+  /* Size up the sections.  */
+  lang_size_sections (statement_list.head,
+		      abs_output_section,
+		      &(statement_list.head), 0, (bfd_vma) 0, false);
   lang_finish ();
 }
 

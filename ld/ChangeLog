@@ -1,3 +1,17 @@
+Tue Nov  2 15:45:51 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* ldlang.c (lang_process): Re-enable last call lang_size_sections.
+	Pass abs_output_section rather than NULL to avoid invalidating
+	absolute symbols.
+
+Thu Oct 28 21:16:42 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* Makefile.in (ALL_EMULATIONS): Add em_i386mach.o.
+	(em_i386mach.c): New rule.
+	* configure.in (i[34]86-*-mach*): New case.
+	* config/i386-mach.mt: New file.
+	* emulparams/i386mach.sh: New file.
+
 Fri Oct 29 14:55:05 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ld.h (flag_is_*): Removed macros.
