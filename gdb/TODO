@@ -28,34 +28,6 @@ release of GDB.
 
 --
 
-Watch point related patches (Eli Zaretskii, Michael Snyder, ???)
-
-Eli writes: This doesn't include the watchpoint-related patches I sent
-beginning with August or September, and mentioned them again three
-weeks ago.  Here again are the pointers to the relevant messages:
-
-Hardware breakpoints and watchpoints: patches
-http://sourceware.cygnus.com/ml/gdb-patches/1999-q3/msg00173.html
-
-Re: Hardware breakpoints and watchpoints: patches
-http://sourceware.cygnus.com/ml/gdb-patches/1999-q3/msg00204.html
-
-Re: Hardware breakpoints and watchpoints: patches
-http://sourceware.cygnus.com/ml/gdb-patches/1999-q4/msg00200.html
-
-Hardware watchpoints for bitfields
-http://sourceware.cygnus.com/ml/gdb-patches/1999-q4/msg00201.html
-
---
-
-Tom's speedups to GDB (Tom Tromey, Jim Blandy)
-
-I believe that there was a late breaking fix that stopped a coredump.
-
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00869.html
-
---
-
 Solaris/x86 - which? (Nick Duffek, Peter Schauer, Michael Snyder?)
 
 Nick D's working through patches from Michael Snyder and Peter S.
@@ -224,8 +196,33 @@ you're introducing discrepancies between the manual and the documentation,
 and everybody is confused - witness the lack of doc for the tracing
 commands still, some two years after they were added...
 
-[PATCH] GDB command-line switches and annotations docs
+Discussion on MI can be found on the thread: [PATCH] GDB command-line
+switches and annotations docs
 http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00639.html
+
+--
+
+Revised UDP support (was: Re: [Fwd: [patch] UDP transport support])
+http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00000.html
+
+--
+
+problems loading shared libraries - with attached test case
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00820.html
+
+Hi, I'm having problems loading shared libraries.  This is with a
+build of gdb out of cvs that I pulled and built on March 27th and has
+been there for at least a week.  I haven't gone back further than
+that.  This is with the gcc that is shipping with Red Hat 6.2:
+
+Reading specs from
+/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/specs gcc version
+egcs-2.91.66 19990314/Linux (egcs-1.1.2 release)
+
+I'm using "set auto-solib-add 0" after main has been called.  If I use
+"shar" to load a shared library manually once I can't use it again to
+load another shared library later.  Please see the attached log for an
+example of how to reproduce the problem.
 
 --
 
@@ -287,6 +284,19 @@ Needs further debate.
 
 Re: [PATCH] Add change-log variables to more MI files
 http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00811.html
+
+--
+
+Re: gdb-cvs fails on freebsd-elf
+http://sourceware.cygnus.com/ml/gdb/2000-04/msg00004.html
+
+FreeBSD haven't contributed their local GDB changes back to the master
+sources (they would at least need an FSF assignment by all
+individuales that contributed to the work).  Given the strong
+likelhood that this will never happen, I'd suggest that a better
+strategy would be for someone (with an FSF/GDD assignment) to do a new
+(clean-room) implementation.  That can then be accepted in time for
+GDB 5.1.
 
 --
 
