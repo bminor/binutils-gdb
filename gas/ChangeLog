@@ -1,3 +1,7 @@
+Tue Jul 12 21:27:05 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/ho-sysv.h (realloc): Declare.
+
 Tue Jul 12 12:06:42 1994  Kung Hsu  (kung@x1.cygnus.com)
 
 	* config/obj-ecoff.h: change calling interface of

@@ -19,6 +19,6 @@
 
 #include <string.h>
 extern int free ();
-extern char *malloc ();
+extern char *malloc (), *realloc ();
 
 /* end of ho-sysv.h */
