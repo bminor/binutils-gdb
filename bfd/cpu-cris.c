@@ -45,7 +45,9 @@ get_compatible (a,b)
   if (b->mach == bfd_mach_cris_v10_v32)
     return a;
 
-  /* See ldlang.c:lang_check.  Quite illogically, incompatible arches
+#if 0
+  /* The code below is disabled but kept as a warning.
+     See ldlang.c:lang_check.  Quite illogically, incompatible arches
      (as signalled by this function) are only *warned* about, while with
      this function signalling compatible ones, we can have the
      cris_elf_merge_private_bfd_data function return an error.  This is
@@ -56,12 +58,9 @@ get_compatible (a,b)
      pretending matching machs here.  */
 
   /* Except for the compatible mach, machs must match.  */
-
-  /*
-    This code is disabled but kept as a warning:
-    if (a->mach != b->mach)
-      return NULL;
-  */
+  if (a->mach != b->mach)
+    return NULL;
+#endif
 
   return a;
 }

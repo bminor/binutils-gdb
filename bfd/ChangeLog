@@ -1,3 +1,8 @@
+2005-02-01  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cpu-cris.c (get_compatible): Rearrange disabled code and comment
+	for clarity.
+
 2005-02-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_check_directives): Move undefs list fixup..
