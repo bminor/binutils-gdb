@@ -1764,8 +1764,8 @@ sh_flush_pending_output ()
 }
 
 symbolS *
-DEFUN (md_undefined_symbol, (name),
-       char *name)
+md_undefined_symbol (name)
+     char *name;
 {
   return 0;
 }
@@ -1774,15 +1774,15 @@ DEFUN (md_undefined_symbol, (name),
 #ifndef BFD_ASSEMBLER
 
 void
-DEFUN (tc_crawl_symbol_chain, (headers),
-       object_headers * headers)
+tc_crawl_symbol_chain (headers)
+     object_headers *headers;
 {
   printf (_("call to tc_crawl_symbol_chain \n"));
 }
 
 void
-DEFUN (tc_headers_hook, (headers),
-       object_headers * headers)
+tc_headers_hook (headers)
+     object_headers *headers;
 {
   printf (_("call to tc_headers_hook \n"));
 }
@@ -2355,9 +2355,9 @@ md_convert_frag (headers, seg, fragP)
 }
 
 valueT
-DEFUN (md_section_align, (seg, size),
-       segT seg AND
-       valueT size)
+md_section_align (seg, size)
+     segT seg;
+     valueT size;
 {
 #ifdef BFD_ASSEMBLER
 #ifdef OBJ_ELF

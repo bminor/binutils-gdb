@@ -1,5 +1,6 @@
 /* tc-z8k.c -- Assemble code for the Zilog Z800n
-   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 1999 Free Software Foundation.
+   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 99, 2000
+   Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -220,9 +221,9 @@ int the_flags;
 int the_interrupt;
 
 char *
-DEFUN (whatreg, (reg, src),
-       int *reg AND
-       char *src)
+whatreg (reg, src)
+     int *reg;
+     char *src;
 {
   if (isdigit (src[1]))
     {
@@ -254,10 +255,10 @@ DEFUN (whatreg, (reg, src),
 
 /* try and parse a reg name, returns number of chars consumed */
 char *
-DEFUN (parse_reg, (src, mode, reg),
-       char *src AND
-       int *mode AND
-       unsigned int *reg)
+parse_reg (src, mode, reg)
+     char *src;
+     int *mode;
+     unsigned int *reg;
 {
   char *res = 0;
   char regno;
@@ -325,9 +326,9 @@ DEFUN (parse_reg, (src, mode, reg),
 }
 
 char *
-DEFUN (parse_exp, (s, op),
-       char *s AND
-       expressionS * op)
+parse_exp (s, op)
+     char *s;
+     expressionS *op;
 {
   char *save = input_line_pointer;
   char *new;
@@ -360,9 +361,9 @@ DEFUN (parse_exp, (s, op),
 
 static
 char *
-DEFUN (checkfor, (ptr, what),
-       char *ptr AND
-       char what)
+checkfor (ptr, what)
+     char *ptr;
+     char what;
 {
   if (*ptr == what)
     ptr++;
@@ -375,9 +376,9 @@ DEFUN (checkfor, (ptr, what),
 
 /* Make sure the mode supplied is the size of a word */
 static void
-DEFUN (regword, (mode, string),
-       int mode AND
-       char *string)
+regword (mode, string)
+     int mode;
+     char *string;
 {
   int ok;
 
@@ -390,9 +391,9 @@ DEFUN (regword, (mode, string),
 
 /* Make sure the mode supplied is the size of an address */
 static void
-DEFUN (regaddr, (mode, string),
-       int mode AND
-       char *string)
+regaddr (mode, string)
+     int mode;
+     char *string;
 {
   int ok;
 
@@ -423,10 +424,10 @@ struct ctrl_names ctrl_table[] =
 };
    
 static void
-DEFUN (get_ctrl_operand, (ptr, mode, dst),
-       char **ptr AND
-       struct z8k_op *mode AND
-       unsigned int dst)
+get_ctrl_operand (ptr, mode, dst)
+     char **ptr;
+     struct z8k_op *mode;
+     unsigned int dst;
 {
   char *src = *ptr;
   int r;
@@ -473,10 +474,10 @@ struct flag_names flag_table[] =
 };
 
 static void
-DEFUN (get_flags_operand, (ptr, mode, dst),
-       char **ptr AND
-       struct z8k_op *mode AND
-       unsigned int dst)
+get_flags_operand (ptr, mode, dst)
+     char **ptr;
+     struct z8k_op *mode;
+     unsigned int dst;
 {
   char *src = *ptr;
   int r;
@@ -527,10 +528,10 @@ struct interrupt_names intr_table[] =
 };
 
 static void
-DEFUN (get_interrupt_operand, (ptr, mode, dst),
-       char **ptr AND
-       struct z8k_op *mode AND
-       unsigned int dst)
+get_interrupt_operand (ptr, mode, dst)
+     char **ptr;
+     struct z8k_op *mode;
+     unsigned int dst;
 {
   char *src = *ptr;
   int r;
@@ -593,10 +594,10 @@ struct cc_names table[] =
 };
 
 static void
-DEFUN (get_cc_operand, (ptr, mode, dst),
-       char **ptr AND
-       struct z8k_op *mode AND
-       unsigned int dst)
+get_cc_operand (ptr, mode, dst)
+     char **ptr;
+     struct z8k_op *mode;
+     unsigned int dst;
 {
   char *src = *ptr;
   int r;
@@ -843,9 +844,9 @@ char *savptr;
 
 static
 opcode_entry_type *
-DEFUN (get_specific, (opcode, operands),
-       opcode_entry_type * opcode AND
-       op_type * operands)
+get_specific (opcode, operands)
+     opcode_entry_type *opcode;
+     op_type *operands;
 
 {
   opcode_entry_type *this_try = opcode;
@@ -926,10 +927,10 @@ DEFUN (get_specific, (opcode, operands),
 }
 
 static void
-DEFUN (check_operand, (operand, width, string),
-       struct z8k_op *operand AND
-       unsigned int width AND
-       char *string)
+check_operand (operand, width, string)
+     struct z8k_op *operand;
+     unsigned int width;
+     char *string;
 {
   if (operand->exp.X_add_symbol == 0
       && operand->exp.X_op_symbol == 0)
@@ -950,10 +951,10 @@ DEFUN (check_operand, (operand, width, string),
 static char buffer[20];
 
 static void
-DEFUN (newfix, (ptr, type, operand),
-       int ptr AND
-       int type AND
-       expressionS * operand)
+newfix (ptr, type, operand)
+     int ptr;
+     int type;
+     expressionS *operand;
 {
   if (operand->X_add_symbol
       || operand->X_op_symbol
@@ -969,11 +970,11 @@ DEFUN (newfix, (ptr, type, operand),
 }
 
 static char *
-DEFUN (apply_fix, (ptr, type, operand, size),
-       char *ptr AND
-       int type AND
-       expressionS * operand AND
-       int size)
+apply_fix (ptr, type, operand, size)
+     char *ptr;
+     int type;
+     expressionS *operand;
+     int size;
 {
   int n = operand->X_add_number;
 
@@ -1189,8 +1190,8 @@ top:;
    */
 
 void
-DEFUN (md_assemble, (str),
-       char *str)
+md_assemble (str)
+     char *str;
 {
   char *op_start;
   char *op_end;
@@ -1281,22 +1282,22 @@ DEFUN (md_assemble, (str),
 }
 
 void
-DEFUN (tc_crawl_symbol_chain, (headers),
-       object_headers * headers)
+tc_crawl_symbol_chain (headers)
+     object_headers *headers;
 {
   printf (_("call to tc_crawl_symbol_chain \n"));
 }
 
 symbolS *
-DEFUN (md_undefined_symbol, (name),
-       char *name)
+md_undefined_symbol (name)
+     char *name;
 {
   return 0;
 }
 
 void
-DEFUN (tc_headers_hook, (headers),
-       object_headers * headers)
+tc_headers_hook (headers)
+     object_headers *headers;
 {
   printf (_("call to tc_headers_hook \n"));
 }
@@ -1424,9 +1425,9 @@ md_convert_frag (headers, seg, fragP)
 }
 
 valueT
-DEFUN (md_section_align, (seg, size),
-       segT seg AND
-       valueT size)
+md_section_align (seg, size)
+     segT seg;
+     valueT size;
 {
   return ((size + (1 << section_alignment[(int) seg]) - 1) & (-1 << section_alignment[(int) seg]));
 
@@ -1501,10 +1502,10 @@ md_estimate_size_before_relax (fragP, segment_type)
 /* Put number into target byte order */
 
 void
-DEFUN (md_number_to_chars, (ptr, use, nbytes),
-       char *ptr AND
-       valueT use AND
-       int nbytes)
+md_number_to_chars (ptr, use, nbytes)
+     char *ptr;
+     valueT use;
+     int nbytes;
 {
   number_to_chars_bigendian (ptr, use, nbytes);
 }

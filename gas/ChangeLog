@@ -1,5 +1,10 @@
 2000-06-24  Kazu Hirata  <kazu@hxi.com>
 
+	* config/tc-h8500.c: Remove all uses of DEFUN.
+	* config/tc-sh.c: Likewise.
+	* config/tc-w65.c: Likewise.
+	* config/tc-z8k.c: Likewise.
+
 	* config/tc-h8500.c: Fix typos in comments.
 
 2000-06-23  Frank Ch. Eigler  <fche@redhat.com>

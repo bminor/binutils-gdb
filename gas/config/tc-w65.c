@@ -1,5 +1,5 @@
 /* tc-w65.c -- Assemble code for the W65816
-   Copyright (C) 1995, 1998 Free Software Foundation.
+   Copyright (C) 1995, 1998, 2000 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -785,22 +785,22 @@ md_assemble (str)
 
 
 void
-DEFUN (tc_crawl_symbol_chain, (headers),
-       object_headers * headers)
+tc_crawl_symbol_chain (headers)
+     object_headers *headers;
 {
   printf (_("call to tc_crawl_symbol_chain \n"));
 }
 
 symbolS *
-DEFUN (md_undefined_symbol, (name),
-       char *name)
+md_undefined_symbol (name)
+     char *name;
 {
   return 0;
 }
 
 void
-DEFUN (tc_headers_hook, (headers),
-       object_headers * headers)
+tc_headers_hook (headers)
+     object_headers *headers;
 {
   printf (_("call to tc_headers_hook \n"));
 }
@@ -996,9 +996,9 @@ md_convert_frag (headers, seg, fragP)
 
 
 valueT
-DEFUN (md_section_align, (seg, size),
-       segT seg AND
-       valueT size)
+md_section_align (seg, size)
+     segT seg;
+     valueT size;
 {
   return ((size + (1 << section_alignment[(int) seg]) - 1)
 	  & (-1 << section_alignment[(int) seg]));

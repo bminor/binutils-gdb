@@ -1086,8 +1086,8 @@ build_bytes (opcode, operand)
    */
 
 void
-DEFUN (md_assemble, (str),
-       char *str)
+md_assemble (str)
+     char *str;
 {
   char *op_start;
   char *op_end;
@@ -1150,22 +1150,22 @@ DEFUN (md_assemble, (str),
 }
 
 void
-DEFUN (tc_crawl_symbol_chain, (headers),
-       object_headers * headers)
+tc_crawl_symbol_chain (headers)
+     object_headers *headers;
 {
   printf (_("call to tc_crawl_symbol_chain \n"));
 }
 
 symbolS *
-DEFUN (md_undefined_symbol, (name),
-       char *name)
+md_undefined_symbol (name)
+     char *name;
 {
   return 0;
 }
 
 void
-DEFUN (tc_headers_hook, (headers),
-       object_headers * headers)
+tc_headers_hook (headers)
+     object_headers *headers;
 {
   printf (_("call to tc_headers_hook \n"));
 }
