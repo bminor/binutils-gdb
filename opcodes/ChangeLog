@@ -1,3 +1,23 @@
+Thu Dec  8 18:23:31 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* alpha-dis.c (print_insn_alpha): Handle call_pal instruction, and
+	print something for reserved opcode values, even if it won't
+	assemble again.
+
+	* mips-dis.c (_print_insn_mips): When initializing, shift right
+	and mask, to avoid sign extension problems on the Alpha.
+
+	* m68k-dis.c (print_insn_arg, case 'J'): Handle buscr and pcr
+	control registers.
+
+start-sanitize-arc
+Tue Nov 29 18:02:43 1994  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure.in: Add ARC support.
+	* disassemble.c: Likewise.
+	* arc-dis.c, arc-opc.c: New files.
+end-sanitize-arc
+
 Wed Nov 23 22:34:51 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* sh-opc.h (mov.l gbr): Get direction right.
