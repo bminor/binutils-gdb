@@ -253,7 +253,6 @@ value_cast (struct type *type, struct value *arg2)
     arg2 = value_coerce_function (arg2);
 
   type2 = check_typedef (VALUE_TYPE (arg2));
-  COERCE_VARYING_ARRAY (arg2, type2);
   code2 = TYPE_CODE (type2);
 
   if (code1 == TYPE_CODE_COMPLEX)
@@ -2731,7 +2730,6 @@ value_slice (struct value *array, int lowbound, int length)
   struct value *slice;
   struct type *array_type;
   array_type = check_typedef (VALUE_TYPE (array));
-  COERCE_VARYING_ARRAY (array, array_type);
   if (TYPE_CODE (array_type) != TYPE_CODE_ARRAY
       && TYPE_CODE (array_type) != TYPE_CODE_STRING
       && TYPE_CODE (array_type) != TYPE_CODE_BITSTRING)

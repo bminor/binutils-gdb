@@ -185,7 +185,6 @@ value_subscript (struct value *array, struct value *idx)
 
   COERCE_REF (array);
   tarray = check_typedef (VALUE_TYPE (array));
-  COERCE_VARYING_ARRAY (array, tarray);
 
   if (TYPE_CODE (tarray) == TYPE_CODE_ARRAY
       || TYPE_CODE (tarray) == TYPE_CODE_STRING)
@@ -623,9 +622,6 @@ value_concat (struct value *arg1, struct value *arg2)
   char inchar;
   struct type *type1 = check_typedef (VALUE_TYPE (arg1));
   struct type *type2 = check_typedef (VALUE_TYPE (arg2));
-
-  COERCE_VARYING_ARRAY (arg1, type1);
-  COERCE_VARYING_ARRAY (arg2, type2);
 
   /* First figure out if we are dealing with two values to be concatenated
      or a repeat count and a value to be repeated.  INVAL1 is set to the

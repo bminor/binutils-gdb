@@ -1,3 +1,9 @@
+2004-11-02  Andrew Cagney  <cagney@gnu.org>
+
+	* value.h (COERCE_VARYING_ARRAY): Delete.
+	* valops.c (value_cast, value_slice): Delete use.
+	* valarith.c (value_subscript, value_concat): Delete use.
+
 2004-11-02  Paul Hilfinger  <hilfingr@nile.gnat.com>
 
 	* NEWS: GDB understands GNAT Ada.

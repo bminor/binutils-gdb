@@ -259,10 +259,6 @@ extern int value_fetch_lazy (struct value *val);
 #define COERCE_NUMBER(arg) \
   do { COERCE_ARRAY(arg); COERCE_ENUM(arg); } while (0)
 
-/* NOTE: cagney/2002-12-17: This macro was handling a chill language
-   problem but that language has gone away.  */
-#define COERCE_VARYING_ARRAY(arg, real_arg_type)
-
 /* If ARG is an enum, convert it to an integer.  */
 
 #define COERCE_ENUM(arg) \
