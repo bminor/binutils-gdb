@@ -1,3 +1,22 @@
+2003-06-03  Richard Henderson  <rth@redhat.com>
+
+	* alpha-tdep.c (alpha_dwarf2_init_abi): New.
+	* alpha-tdep.h (alpha_dwarf2_init_abi): Declare it.
+	* alpha-linux-tdep.c (alpha_linux_init_abi): Use it.
+	* alphafbsd-tdep.c (alphafbsd_init_abi): Register dwarf2 and mdebug
+	unwind routines.
+	* alphanbsd-tdep.c (alphanbsd_init_abi): Likewise.
+	* config/alpha/fbsd.mt (TDEPFILES): Add alpha-mdebug-tdep.o.
+	* config/alpha/nbsd.mt (TDEPFILES): Likewise.
+
+	* alpha-linux-tdep.c: Remove unnecessary includes.
+	* Makefile.in (alpha-linux-tdep.o): Update.
+
+2003-06-03  Richard Henderson  <rth@redhat.com>
+
+	* alphabsd-tdep.c (alphabsd_supply_fpreg): Fix typo last change.
+	(alphabsd_fill_fpreg): Likewise.
+
 2003-06-03  J. Brobecker  <brobecker@gnat.com>
 
 	* alphanbsd-tdep.c (alphanbsd_sigcontext_addr):  Replace

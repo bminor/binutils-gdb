@@ -24,6 +24,7 @@
 #include "frame.h"
 #include "frame-unwind.h"
 #include "frame-base.h"
+#include "dwarf2-frame.h"
 #include "inferior.h"
 #include "symtab.h"
 #include "value.h"
@@ -1579,6 +1580,14 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_base_set_default (gdbarch, &alpha_heuristic_frame_base);
 
   return gdbarch;
+}
+
+void
+alpha_dwarf2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  frame_unwind_append_predicate (gdbarch, dwarf2_frame_p);
+  frame_base_append_predicate (gdbarch, dwarf2_frame_base_p);
+  set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
 }
 
 void

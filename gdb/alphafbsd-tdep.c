@@ -68,6 +68,12 @@ alphafbsd_init_abi (struct gdbarch_info info,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
+  /* Hook into the DWARF CFI frame unwinder.  */
+  alpha_dwarf2_init_abi (info, gdbarch);
+
+  /* Hook into the MDEBUG frame unwinder.  */
+  alpha_mdebug_init_abi (info, gdbarch);
+
   set_gdbarch_pc_in_sigtramp (gdbarch, alphafbsd_pc_in_sigtramp);
 
   set_gdbarch_use_struct_convention (gdbarch, alphafbsd_use_struct_convention);

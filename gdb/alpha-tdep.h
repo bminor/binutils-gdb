@@ -93,6 +93,7 @@ extern void alpha_software_single_step (enum target_signal, int);
 extern CORE_ADDR alpha_after_prologue (CORE_ADDR pc);
 
 extern void alpha_mdebug_init_abi (struct gdbarch_info, struct gdbarch *);
+extern void alpha_dwarf2_init_abi (struct gdbarch_info, struct gdbarch *);
 
 extern void alpha_supply_int_regs (int, const void *, const void *,
 				   const void *);

@@ -1509,9 +1509,8 @@ ada-valprint.o: ada-valprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) \
 aix-thread.o: aix-thread.c $(defs_h) $(gdb_assert_h) $(gdbthread_h) \
 	$(target_h) $(inferior_h) $(regcache_h) $(gdbcmd_h) $(language_h) \
 	$(ppc_tdep_h)
-alpha-linux-tdep.o: alpha-linux-tdep.c $(defs_h) $(frame_h) $(frame_base_h) \
-	$(frame_unwind_h) $(dwarf2_frame_h) $(gdbcore_h) $(gdb_assert_h) \
-	$(osabi_h) $(symtab_h) $(symfile_h) $(value_h) $(alpha_tdep_h) 
+alpha-linux-tdep.o: alpha-linux-tdep.c $(defs_h) $(frame_h) $(gdb_assert_h) \
+	$(osabi_h) $(alpha_tdep_h) 
 alpha-nat.o: alpha-nat.c $(defs_h) $(gdb_string_h) $(inferior_h) $(gdbcore_h) \
 	$(target_h) $(regcache_h) $(alpha_tdep_h) $(gregset_h) 
 alpha-osf1-tdep.o: alpha-osf1-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
@@ -1521,7 +1520,7 @@ alpha-tdep.o: alpha-tdep.c $(defs_h) $(doublest_h) $(frame_h) \
 	$(value_h) $(gdbcmd_h) $(gdbcore_h) $(dis_asm_h) $(symfile_h) \
 	$(objfiles_h) $(gdb_string_h) $(linespec_h) $(regcache_h) \
 	$(reggroups_h) $(arch_utils_h) $(osabi_h) $(block_h) $(gdb_assert_h) \
-	$(elf_bfd_h) $(alpha_tdep_h)
+	$(elf_bfd_h) $(alpha_tdep_h) $(dwarf2_frame_h)
 alpha-mdebug-tdep.o: alpha-mdebug-tdep.c $(defs_h) $(frame_h) \
 	$(frame_unwind_h) $(frame_base_h) $(symtab_h) $(gdbcore_h) \
 	$(block_h) $(gdb_assert_h) $(alpha_tdep_h)
