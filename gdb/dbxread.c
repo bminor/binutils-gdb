@@ -3,19 +3,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Symbol read-in occurs in two phases:
    1.  A scan (read_dbx_symtab()) of the entire executable, whose sole
@@ -27,16 +27,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    2.  Full read-in of symbols.  (dbx_psymtab_to_symtab()).  This happens
        when a symbol in a file for which symbols have not yet been
        read in is referenced.  */
-
-/* There used to be some PROFILE_TYPES code in this file which counted
-   the number of occurances of various symbols.  I'd suggest instead:
-     nm -ap foo | awk 'print $5' | sort | uniq -c
-   to print how many of each n_type, or something like
-     nm -ap foo | awk '$5 == "LSYM" {print $6 $7 $8 $9 $10 $11}' | \
-     awk 'BEGIN {FS=":"}
-     {print substr($2,1,1)}' | sort | uniq -c
-   to print the number of each kind of symbol descriptor (i.e. the letter
-   after ':').  */
 
 #include <stdio.h>
 #include <string.h>
@@ -1325,10 +1315,6 @@ dbx_symfile_read (sf, addr, mainline)
   free (info);
   sf->sym_private = 0;		/* Zap pointer to our (now gone) info struct */
 
-  /* Call to select_source_symtab used to be here; it was using too
-     much time.  I'll make sure that list_sources can handle the lack
-     of current_source_symtab */
-
   if (!partial_symtab_list)
     printf_filtered ("\n(no debugging symbols found)...");
 }
@@ -2200,8 +2186,10 @@ read_dbx_symtab (symfile_name, addr,
 	      continue;
 	    case 'G':
 	      bufp->n_value += addr;		/* Relocate */
+	      /* The addresses in these entries are reported to be
+		 wrong.  See the code that reads 'G's for symtabs. */
 	      ADD_PSYMBOL_ADDR_TO_LIST (namestring, p - namestring,
-				   VAR_NAMESPACE, LOC_EXTERNAL,
+				   VAR_NAMESPACE, LOC_STATIC,
 				   global_psymbols, bufp->n_value);
 	      continue;
 

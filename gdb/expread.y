@@ -667,7 +667,6 @@ variable:	name_not_typename
 				case LOC_TYPEDEF:
 				case LOC_LABEL:
 				case LOC_BLOCK:
-				case LOC_EXTERNAL:
 				case LOC_CONST_BYTES:
 
 				  /* In this case the expression can

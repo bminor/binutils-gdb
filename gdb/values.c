@@ -1352,7 +1352,8 @@ unpack_field_as_long (type, valaddr, fieldno)
   val = val >> (bitpos % 8);
 #endif
 
-  val &= (1 << bitsize) - 1;
+  if (bitsize < 8 * sizeof (val))
+    val &= (((unsigned long)1) << bitsize) - 1;
   return val;
 }
 
@@ -1369,9 +1370,10 @@ modify_field (addr, fieldval, bitpos, bitsize)
 {
   long oword;
 
-  /* Reject values too big to fit in the field in question.
-     Otherwise adjoining fields may be corrupted.  */
-  if (fieldval & ~((1<<bitsize)-1))
+  /* Reject values too big to fit in the field in question,
+     otherwise adjoining fields may be corrupted.  */
+  if ((0 != fieldval & ~((1<<bitsize)-1))
+   && bitsize < 8 * sizeof (fieldval))
     error ("Value %d does not fit in %d bits.", fieldval, bitsize);
   
   bcopy (addr, &oword, sizeof oword);
@@ -1382,7 +1384,11 @@ modify_field (addr, fieldval, bitpos, bitsize)
   bitpos = sizeof (oword) * 8 - bitpos - bitsize;
 #endif
 
-  oword &= ~(((1 << bitsize) - 1) << bitpos);
+  /* Mask out old value, while avoiding shifts >= longword size */
+  if (bitsize < 8 * sizeof (oword))
+    oword &= ~(((((unsigned long)1) << bitsize) - 1) << bitpos);
+  else
+    oword &= ~((-1) << bitpos);
   oword |= fieldval << bitpos;
 
   SWAP_TARGET_AND_HOST (&oword, sizeof oword);		/* To target format */

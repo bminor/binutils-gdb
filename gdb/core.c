@@ -78,7 +78,7 @@ core_open (filename, from_tty)
      char *filename;
      int from_tty;
 {
-  char *p;
+  const char *p;
   int siggy;
   struct cleanup *old_chain;
   char *temp;
