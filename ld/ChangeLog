@@ -1,3 +1,7 @@
+Wed Nov 18 18:18:43 1998  Geoffrey Noer  <noer@cygnus.com>
+
+	* configure.tgt: change refs from cygwin32* to cygwin*.
+
 Mon Nov 16 22:14:07 1998  DJ Delorie  <dj@cygnus.com>
 
 	* emultempl/pe.em (gld_i386_finish): generate import library
