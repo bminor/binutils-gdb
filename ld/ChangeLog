@@ -1,3 +1,8 @@
+1999-08-03  Ian Lance Taylor  <ian@zembu.com>
+
+	* emulparams/elf32ppc.sh (MAXPAGESIZE): Change to 0x10000.
+	* emulparams/elf32ppclinux.sh (MAXPAGESIZE): Likewise.
+
 1999-08-03  H.J. Lu  <hjl@gnu.org>
 
 	* Makefile.am (ALL_EMULATIONS): Remove ego32.o.
