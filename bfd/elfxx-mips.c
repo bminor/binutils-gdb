@@ -188,10 +188,6 @@ struct mips_elf_link_hash_entry
      a readonly section.  */
   bfd_boolean readonly_reloc;
 
-  /* The index of the first dynamic relocation (in the .rel.dyn
-     section) against this symbol.  */
-  unsigned int min_dyn_reloc_index;
-
   /* We must not create a stub for a symbol that has relocations
      related to taking the function's address, i.e. any but
      R_MIPS_CALL*16 ones -- see "MIPS ABI Supplement, 3rd Edition",
@@ -390,12 +386,6 @@ static void bfd_elf32_swap_compact_rel_out
   PARAMS ((bfd *, const Elf32_compact_rel *, Elf32_External_compact_rel *));
 static void bfd_elf32_swap_crinfo_out
   PARAMS ((bfd *, const Elf32_crinfo *, Elf32_External_crinfo *));
-#if 0
-static void bfd_mips_elf_swap_msym_in
-  PARAMS ((bfd *, const Elf32_External_Msym *, Elf32_Internal_Msym *));
-#endif
-static void bfd_mips_elf_swap_msym_out
-  PARAMS ((bfd *, const Elf32_Internal_Msym *, Elf32_External_Msym *));
 static int sort_dynamic_relocs
   PARAMS ((const void *, const void *));
 static int sort_dynamic_relocs_64
@@ -442,8 +432,6 @@ static bfd_boolean mips_elf_create_compact_rel_section
   PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean mips_elf_create_got_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd_boolean));
-static asection *mips_elf_create_msym_section
-  PARAMS ((bfd *));
 static bfd_reloc_status_type mips_elf_calculate_relocation
   PARAMS ((bfd *, bfd *, asection *, struct bfd_link_info *,
 	   const Elf_Internal_Rela *, bfd_vma, reloc_howto_type *,
@@ -730,7 +718,6 @@ mips_elf_link_hash_newfunc (entry, table, string)
       ret->esym.ifd = -2;
       ret->possibly_dynamic_relocs = 0;
       ret->readonly_reloc = FALSE;
-      ret->min_dyn_reloc_index = 0;
       ret->no_fn_stub = FALSE;
       ret->fn_stub = NULL;
       ret->need_fn_stub = FALSE;
@@ -1191,31 +1178,6 @@ bfd_elf32_swap_crinfo_out (abfd, in, ex)
   H_PUT_32 (abfd, l, ex->info);
   H_PUT_32 (abfd, in->konst, ex->konst);
   H_PUT_32 (abfd, in->vaddr, ex->vaddr);
-}
-
-#if 0
-/* Swap in an MSYM entry.  */
-
-static void
-bfd_mips_elf_swap_msym_in (abfd, ex, in)
-     bfd *abfd;
-     const Elf32_External_Msym *ex;
-     Elf32_Internal_Msym *in;
-{
-  in->ms_hash_value = H_GET_32 (abfd, ex->ms_hash_value);
-  in->ms_info = H_GET_32 (abfd, ex->ms_info);
-}
-#endif
-/* Swap out an MSYM entry.  */
-
-static void
-bfd_mips_elf_swap_msym_out (abfd, in, ex)
-     bfd *abfd;
-     const Elf32_Internal_Msym *in;
-     Elf32_External_Msym *ex;
-{
-  H_PUT_32 (abfd, in->ms_hash_value, ex->ms_hash_value);
-  H_PUT_32 (abfd, in->ms_info, ex->ms_info);
 }
 
 /* A .reginfo section holds a single Elf32_RegInfo structure.  These
@@ -2917,34 +2879,6 @@ mips_elf_create_got_section (abfd, info, maybe_exclude)
 
   return TRUE;
 }
-
-/* Returns the .msym section for ABFD, creating it if it does not
-   already exist.  Returns NULL to indicate error.  */
-
-static asection *
-mips_elf_create_msym_section (abfd)
-     bfd *abfd;
-{
-  asection *s;
-
-  s = bfd_get_section_by_name (abfd, ".msym");
-  if (!s)
-    {
-      s = bfd_make_section (abfd, ".msym");
-      if (!s
-	  || !bfd_set_section_flags (abfd, s,
-				     SEC_ALLOC
-				     | SEC_LOAD
-				     | SEC_HAS_CONTENTS
-				     | SEC_LINKER_CREATED
-				     | SEC_READONLY)
-	  || !bfd_set_section_alignment (abfd, s,
-					 MIPS_ELF_LOG_FILE_ALIGN (abfd)))
-	return NULL;
-    }
-
-  return s;
-}
 
 /* Calculate the value produced by the RELOCATION (which comes from
    the INPUT_BFD).  The ADDEND is the addend to use for this
@@ -4008,13 +3942,6 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
       (output_bfd, &outrel[0],
        (sreloc->contents + sreloc->reloc_count * sizeof (Elf32_External_Rel)));
 
-  /* Record the index of the first relocation referencing H.  This
-     information is later emitted in the .msym section.  */
-  if (h != NULL
-      && (h->min_dyn_reloc_index == 0
-	  || sreloc->reloc_count < h->min_dyn_reloc_index))
-    h->min_dyn_reloc_index = sreloc->reloc_count;
-
   /* We've now added another relocation.  */
   ++sreloc->reloc_count;
 
@@ -4913,13 +4840,6 @@ _bfd_mips_elf_create_dynamic_sections (abfd, info)
     return FALSE;
 
   if (! mips_elf_rel_dyn_section (elf_hash_table (info)->dynobj, TRUE))
-    return FALSE;
-
-  /* Create the .msym section on IRIX6.  It is used by the dynamic
-     linker to speed up dynamic relocations, and to avoid computing
-     the ELF hash for symbols.  */
-  if (IRIX_COMPAT (abfd) == ict_irix6
-      && !mips_elf_create_msym_section (abfd))
     return FALSE;
 
   /* Create .stub section.  */
@@ -6084,10 +6004,6 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
       else if (SGI_COMPAT (output_bfd)
 	       && strncmp (name, ".compact_rel", 12) == 0)
 	s->_raw_size += mips_elf_hash_table (info)->compact_rel_size;
-      else if (strcmp (name, ".msym") == 0)
-	s->_raw_size = (sizeof (Elf32_External_Msym)
-			* (elf_hash_table (info)->dynsymcount
-			   + bfd_count_sections (output_bfd)));
       else if (strncmp (name, ".init", 5) != 0)
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
@@ -6231,10 +6147,6 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
 	  && (bfd_get_section_by_name
 	      (dynobj, MIPS_ELF_OPTIONS_SECTION_NAME (dynobj)))
 	  && !MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_OPTIONS, 0))
-	return FALSE;
-
-      if (bfd_get_section_by_name (dynobj, ".msym")
-	  && !MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_MSYM, 0))
 	return FALSE;
     }
 
@@ -6693,14 +6605,11 @@ _bfd_mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
   bfd *dynobj;
   bfd_vma gval;
   asection *sgot;
-  asection *smsym;
   struct mips_got_info *g, *gg;
   const char *name;
-  struct mips_elf_link_hash_entry *mh;
 
   dynobj = elf_hash_table (info)->dynobj;
   gval = sym->st_value;
-  mh = (struct mips_elf_link_hash_entry *) h;
 
   if (h->plt.offset != (bfd_vma) -1)
     {
@@ -6812,21 +6721,6 @@ _bfd_mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	      BFD_ASSERT (addend == 0);
 	    }
 	}
-    }
-
-  /* Create a .msym entry, if appropriate.  */
-  smsym = bfd_get_section_by_name (dynobj, ".msym");
-  if (smsym)
-    {
-      Elf32_Internal_Msym msym;
-
-      msym.ms_hash_value = bfd_elf_hash (h->root.root.string);
-      /* It is undocumented what the `1' indicates, but IRIX6 uses
-	 this value.  */
-      msym.ms_info = ELF32_MS_INFO (mh->min_dyn_reloc_index, 1);
-      bfd_mips_elf_swap_msym_out
-	(dynobj, &msym,
-	 ((Elf32_External_Msym *) smsym->contents) + h->dynindx);
     }
 
   /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  */
@@ -7151,32 +7045,8 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
     }
 
   {
-    asection *smsym;
     asection *s;
     Elf32_compact_rel cpt;
-
-    /* ??? The section symbols for the output sections were set up in
-       _bfd_elf_final_link.  SGI sets the STT_NOTYPE attribute for these
-       symbols.  Should we do so?  */
-
-    smsym = bfd_get_section_by_name (dynobj, ".msym");
-    if (smsym != NULL)
-      {
-	Elf32_Internal_Msym msym;
-
-	msym.ms_hash_value = 0;
-	msym.ms_info = ELF32_MS_INFO (0, 1);
-
-	for (s = output_bfd->sections; s != NULL; s = s->next)
-	  {
-	    long dynindx = elf_section_data (s)->dynindx;
-
-	    bfd_mips_elf_swap_msym_out
-	      (output_bfd, &msym,
-	       (((Elf32_External_Msym *) smsym->contents)
-		+ dynindx));
-	  }
-      }
 
     if (SGI_COMPAT (output_bfd))
       {
@@ -7770,10 +7640,6 @@ _bfd_mips_elf_copy_indirect_symbol (bed, dir, ind)
   dirmips->possibly_dynamic_relocs += indmips->possibly_dynamic_relocs;
   if (indmips->readonly_reloc)
     dirmips->readonly_reloc = TRUE;
-  if (dirmips->min_dyn_reloc_index == 0
-      || (indmips->min_dyn_reloc_index != 0
-	  && indmips->min_dyn_reloc_index < dirmips->min_dyn_reloc_index))
-    dirmips->min_dyn_reloc_index = indmips->min_dyn_reloc_index;
   if (indmips->no_fn_stub)
     dirmips->no_fn_stub = TRUE;
 }

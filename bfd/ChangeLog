@@ -1,5 +1,18 @@
 2003-07-09  Richard Sandiford  <rsandifo@redhat.com>
 
+	* elfxx-mips.c (mips_elf_link_hash_entry): Remove min_dyn_reloc_index.
+	(bfd_mips_elf_swap_msym_in, bfd_mips_elf_swap_msym_out): Delete.
+	(mips_elf_create_msym_section): Delete.
+	(mips_elf_create_dynamic_relocation): Don't set min_dyn_reloc_index.
+	(_bfd_mips_elf_copy_indirect_symbol): Likewise.
+	(_bfd_mips_elf_create_dynamic_sections): Don't create .msym.
+	(_bfd_mips_elf_size_dynamic_sections): Don't calculate its size.
+	(_bfd_mips_elf_size_dynamic_sections): Don't add DT_MIPS_MSYM.
+	(_bfd_mips_elf_finish_dynamic_symbol): Don't add symbols to .msym.
+	(_bfd_mips_elf_finish_dynamic_sections): Likewise.
+
+2003-07-09  Richard Sandiford  <rsandifo@redhat.com>
+
 	* elfxx-mips.c (mips_elf_irix6_finish_dynamic_symbol): Make the
 	symbols protected.
 
