@@ -201,7 +201,7 @@ proc test_with_self {} {
     set description "step over ttyarg initialization"
     send "step\n"
     expect {
-	-re "init_malloc.* NULL.*$prompt $" {
+	-re ".*time_at_startup = get_run_time .*$prompt $" {
 	    pass "$description"
 	}
 	-re ".*No such file or directory.\r\n$prompt $" {
@@ -220,17 +220,22 @@ proc test_with_self {} {
 
     # now jump over a few functions
 
-    set description "next over init_malloc and everything it calls"
+    set description "next over get_run_time and everything it calls"
     send "next\n"
     expect {
-	-re "if.*SET_TOP_LEVEL.*$prompt $" {
+	-re ".*init_malloc.*$prompt $" {
 	    pass "$description"
-	}
-	-re "i = .*count.*$prompt $" {
-	    pass "$description"
-	    set description "next over ALIGN_STACK_ON_STARTUP code"
-	    send "next\n"
+	    set description "next over init_malloc and everything it calls"
+   	    send "next\n"
 	    expect {
+	    -re "if.*SET_TOP_LEVEL.*$prompt $" {
+	        pass "$description"
+	    }
+	    -re "i = .*count.*$prompt $" {
+	      pass "$description"
+	      set description "next over ALIGN_STACK_ON_STARTUP code"
+	      send "next\n"
+	      expect {
 		-re "if.*i != 0.*$prompt $" {
 		    pass "$description"
 		    send "next\n"
@@ -248,8 +253,10 @@ proc test_with_self {} {
 			}
 		    }
 		}
-	    }
+	      }
+	   }
 	}
+       }
 	-re ".*No such file or directory.\r\n$prompt $" {
 	    pass "$description (no source available)"
 	}
@@ -264,7 +271,6 @@ proc test_with_self {} {
 	}
     }
     #    -re "if \(setmp \(to_top_level\)\).*$prompt $" { pass "first next" }
-    
     
     # This one fails on Solaris (for some versions of gdb) because you
     # can't next over library functions
