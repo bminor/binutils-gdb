@@ -493,9 +493,11 @@ of control statements, there may be more than one line number entry for
 the same source line.  In this case there is a line number entry at the
 start of each code range, each with the same line number.
 
-XCOFF uses COFF line numbers, which are outside the scope of this
-document, ammeliorated by adequate marking of include files
-(@pxref{Include Files}).
+XCOFF does not use stabs for line numbers.  Instead, it uses COFF line
+numbers (which are outside the scope of this document).  Standard COFF
+line numbers cannot deal with include files, but in XCOFF this is fixed
+with the C_BINCL method of marking include files (@pxref{Include
+files}).
 
 @node Procedures
 @section Procedures
