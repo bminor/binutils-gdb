@@ -1,3 +1,8 @@
+Mon Jan 24 12:38:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* aoutx.h (translate_symbol_table): The string index 0 has a
+	special meaning for normal symbols, but not for dynamic symbols.
+
 Sat Jan 22 12:26:01 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* sparclynx.c:  Setup appropriate macros to enable core file

@@ -1410,7 +1410,15 @@ translate_symbol_table (abfd, in, ext, count, str, strsize, dynamic)
 
       x = GET_WORD (abfd, ext->e_strx);
       in->symbol.the_bfd = abfd;
-      if (x < strsize)
+
+      /* For the normal symbols, the zero index points at the number
+	 of bytes in the string table but is to be interpreted as the
+	 null string.  For the dynamic symbols, the number of bytes in
+	 the string table is stored in the __DYNAMIC structure and the
+	 zero index points at an actual string.  */
+      if (x == 0 && ! dynamic)
+	in->symbol.name = "";
+      else if (x < strsize)
 	in->symbol.name = str + x;
       else
 	return false;
