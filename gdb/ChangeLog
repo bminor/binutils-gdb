@@ -1,3 +1,7 @@
+2004-07-30  Andrew Cagney  <cagney@gnu.org>
+
+	* GDB 6.2 released from gdb_6_2-branch.
+
 2004-07-30  Baurjan Ismagulov  <ibr@ata.cs.hun.edu.tr>
 
 	* defs.h (OPF_TRY_CWD_FIRST, OPF_SEARCH_IN_PATH): New macros.
