@@ -1,3 +1,10 @@
+2001-09-17  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/display.c (do_loops): Add float variable `f'.
+	Increment f in loop.
+	* gdb.base/display.exp: Increment timeout by 60 seconds.
+	Change float display test to use variable `f'.
+
 2001-09-17  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/restore.exp: Use temporary breakpoints, to avoid

@@ -38,6 +38,11 @@ if [target_info exists gdb_stub] {
     gdb_step_for_stub;
 }
 
+# Preserve the old timeout, and set a new one that should be
+# sufficient to avoid timing out during this test.
+set oldtimeout $timeout
+set timeout [expr "$timeout + 60"]
+verbose "Timeout is now $timeout seconds" 2
 
 # use this to debug:
 #log_user 1
@@ -90,13 +95,13 @@ gdb_test "info disp" ".*There are no auto-display expressions now..*" "inf disp"
 gdb_test "disp i" ".*1: i = 0.*" "display i"
 gdb_test "disp/x j" ".*2: /x j = 0x0.*" "display j"
 gdb_test "disp/i &k" ".*3: x/i &k  $hex:.*" "display &k"
-gdb_test "disp/f sum" ".*4: /f sum = 0.*" "display/f sum"
+gdb_test "disp/f f" ".*4: /f f = 3.1415*" "display/f f"
 gdb_test "disp/s &sum" ".*5: x/s &sum  $hex.*sum.:.*" "display/s &sum"
 
 # Hit the displays
 #
-gdb_test "cont" ".*\[Ww\]atchpoint 3: sum.*\[1-9\]*: x/s &sum.*\[1-9\]*: /f sum = 1.40129846e.45\r\n\[1-9\]*: x/i &k.*\r\n\[1-9\]*: /x j = 0x0\r\n\[1-9\]*: i = 0.*" "first disp"
-gdb_test "cont" ".*\[Ww\]atchpoint 3: sum.*\[1-9\]*: x/s &sum.*\[1-9\]*: /f sum = 2.80259693e.45\r\n\[1-9\]*: x/i &k.*\r\n\[1-9\]*: /x j = 0x0.*\[1-9\]*: i = 0.*" "second disp"
+gdb_test "cont" ".*\[Ww\]atchpoint 3: sum.*\[1-9\]*: x/s &sum.*\[1-9\]*: /f f = 3.1415\r\n\[1-9\]*: x/i &k.*\r\n\[1-9\]*: /x j = 0x0\r\n\[1-9\]*: i = 0.*" "first disp"
+gdb_test "cont" ".*\[Ww\]atchpoint 3: sum.*\[1-9\]*: x/s &sum.*\[1-9\]*: /f f = 4.1415\r\n\[1-9\]*: x/i &k.*\r\n\[1-9\]*: /x j = 0x0.*\[1-9\]*: i = 0.*" "second disp"
 
 gdb_test "enab  disp 6" ".*No display number 6..*" "catch err"
 gdb_test "disab disp 1" ".*" "disab disp 1"
@@ -104,9 +109,9 @@ gdb_test "disab disp 2" ".*" "disab disp 2"
 gdb_test "enab disp 1"  ".*" "re-enab"
 gdb_test "enab disp 1"  ".*" "re-enab of enab"
 gdb_test "undisp 5"     ".*" "undisp"
-gdb_test "info disp"    ".*Auto-display expressions now in effect.*y  /f sum.*y  /1bi &k.*n  /x j.*y  i.*" "info disp"
+gdb_test "info disp"    ".*Auto-display expressions now in effect.*y  /f f.*y  /1bi &k.*n  /x j.*y  i.*" "info disp"
 
-gdb_test "cont" ".*\[Ww\]atch.*4.20389539e-45.*.*i = 0.*" "next hit"
+gdb_test "cont" ".*\[Ww\]atch.*5.1415.*.*i = 0.*" "next hit"
 
 send_gdb "undisp\n"
 gdb_expect {
@@ -202,4 +207,9 @@ gdb_test "print/a &&j" ".*A .* error in expression.*"
 # Done!
 #
 gdb_exit
+
+# Restore the preserved old timeout value.
+set timeout $oldtimeout
+verbose "Timeout is now $timeout seconds" 2
+
 return 0
