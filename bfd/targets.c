@@ -373,6 +373,9 @@ extern bfd_target shcoff_vec;
 extern bfd_target hp300hpux_vec;
 extern bfd_target hp300bsd_vec;
 extern bfd_target hppa_vec;
+/* start-sanitize-v9 */
+extern bfd_target bfd_elf64_sparc_vec;
+/* end-sanitize-v9 */
 
 bfd_target *target_vector[] = {
 
@@ -405,8 +408,6 @@ bfd_target *target_vector[] = {
 	&h8300coff_vec,
 	&z8kcoff_vec,
 	&m88kbcs_vec,
-	&srec_vec,
-	&symbolsrec_vec,
 #if 0
 	&tekhex_vec,
 #endif
@@ -445,6 +446,10 @@ bfd_target *target_vector[] = {
 	&we32kcoff_vec,
 
 #endif /* not SELECT_VECS */
+
+/* Always support S-records, for convenience.  */
+	&srec_vec,
+	&symbolsrec_vec,
 
 /* Add any required traditional-core-file-handler.  */
 

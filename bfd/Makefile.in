@@ -74,9 +74,17 @@ BFD_H = bfd.h
 # hacks to work, they're also included here for now.
 #	gdb: ecoff.o
 #	objdump: elf.o
+#
+# Also, Jim Kingdon notes:
+# Writing S-records should be included in all (or at least most)
+# *-*-coff, *-*-aout, etc., configurations, because people will want to
+# be able to use objcopy to create S-records.  (S-records are not useful
+# for the debugger, so if you are downloading things as S-records you
+# need two copies of the executable, one to download and one for the
+# debugger).
 BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 	archures.o core.o section.o format.o syms.o reloc.o init.o \
-	ctor.o seclet.o coffgen.o ecoff.o reloc16.o elf.o
+	ctor.o seclet.o coffgen.o ecoff.o reloc16.o elf.o srec.o
 
 ALL_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
 	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o cpu-hppa.o \
@@ -236,10 +244,10 @@ clean: do_clean
 	$(MAKE) subdir_do DO=clean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 distclean:
 	$(MAKE) subdir_do DO=distclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
-	make do_distclean
+	$(MAKE) do_distclean
 clobber realclean:
 	$(MAKE) subdir_do DO=realclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
-	make do_realclean
+	$(MAKE) do_realclean
 
 # Mark everything as depending on config.status, since the timestamp on
 # sysdep.h might actually move backwards if we reconfig and relink it

@@ -31,119 +31,40 @@ fi
 
 # per-target:
 
-# WHEN ADDING ENTRIES TO THIS MATRIX:
-#  Make sure that the left side always has two dashes.  Otherwise you
-#  can get spurious matches.  Even for unambiguous cases, do this as a
-#  convention, else the table becomes a real mess to understand and maintain.
-
-case "${target}" in
-  alpha-*-*)		bfd_target=alphaosf ;;
-  a29k-*-ebmon)		bfd_target=a29k-coff ;;
-  a29k-*-udi)		bfd_target=a29k-coff ;;
-  a29k-*-aout)		bfd_target=a29k-aout ;;
-  a29k-*-coff)		bfd_target=a29k-coff ;;
-  a29k-*-sym1)		bfd_target=a29k-coff ;;
-  h8300*-*-*)		bfd_target=h8300-coff ;;
-  h8500-*-*)		bfd_target=h8500-coff ;;
-  sh-*-*)		bfd_target=sh-coff ;;
-  hppa*-*-bsd*)		bfd_target=hppabsd ;;
-  hppa*-*-hpux*)	bfd_target=hppahpux ;;
-  hppa*-*-osf)		bfd_target=hppa-elf ;;
-  i[34]86-*-sysv4*)	bfd_target=i386-elf ;;
-  i[34]86-*-sysv*)	bfd_target=i386-coff ;;
-  i[34]86-*-isc*)	bfd_target=i386-sco ;; # gets core dump reading right
-  i[34]86-*-sco*)	bfd_target=i386-sco ;;
-  i[34]86-*-bsd*)	bfd_target=i386-bsd ;;
-  i[34]86-*-lynxos*)	bfd_target=i386-lynx ;;
-  i[34]86-*-coff)	bfd_target=i386-coff ;;
-  i[34]86-*-aix*)	bfd_target=i386-coff ;;
-  i[34]86-*-elf)	bfd_target=i386-elf ;;
-  i[34]86-*-netware*)	bfd_target=i386-nlm ;;
-  i[34]86-*-linux*)	bfd_target=i386-linux ;;
-  i[34]86-*-lynx*)	bfd_target=i386-lynx ;;
-  i[34]86-none-*)	bfd_target=i386-coff ;;
-  i960-*-vxworks)	bfd_target=i960-bout ;;
-  i960-*-aout)		bfd_target=i960-bout ;;
-  i960-*-bout)		bfd_target=i960-bout ;;
-  m68*-bull-sysv*)	bfd_target=u68k-coff ;;
-  m68*-hp-bsd*)		bfd_target=hp300bsd ;;
-  m68*-*-aout)		bfd_target=m68k-aout ;;
-  m68*-*-coff)		bfd_target=m68k-coff ;;
-  m68*-*-hpux*)		bfd_target=hp300hpux ;;
-  m68*-*-os68k)		bfd_target=m68k-aout ;;
-  m68*-*-sunos*)	bfd_target=m68k-aout ;;
-  m68*-*-sysv*)		bfd_target=m68k-coff ;;
-  m68*-*-vxworks*)	bfd_target=m68k-aout ;;
-  m68*-ericsson-*)	bfd_target=m68k-aout ;;
-  m68*-netx-*)		bfd_target=m68k-aout ;;
-  m88k-*-*)		bfd_target=m88k-coff ;;
-  mips-big-*)		bfd_target=bigmips ;;
-  mips-dec-bsd*)        bfd_target=mipsdecbsd ;;
-  mips-dec-*)		bfd_target=decstation ;;
-  mips-*-ecoffl*)	bfd_target=decstation ;;
-  mips-*-ecoff*)	bfd_target=bigmips ;;
-  mips-sgi-*)		bfd_target=bigmips ;;
-  mips-*-sysv*)		bfd_target=riscos ;;
-  mips-*-riscos*)	bfd_target=riscos ;;
-  mips-*-bsd*)		bfd_target=noop ;;
-  rs6000-*-*)		bfd_target=rs6000 ;;
-  sparc-*-solaris2*)	bfd_target=sparc-elf ;;
-  sparc-*-sysv4*)	bfd_target=sparc-elf ;;
-#	start-sanitize-v9
-# Don't set target64=true for sparc64-*-aout*.  Keep it using the 32bit stuff
-# so we continue to have something that works (until the 64 bit support is
-# rock solid).
-  sparc64-*-aout*)	bfd_target=sparc-aout ;;
-  sparc64-*-elf*)	bfd_target=sparc64-elf  ; target64=true ;;
-#	end-sanitize-v9
-  sparc*-*-*)		bfd_target=sparc-aout ;;
-  tahoe-*-*)		bfd_target=tahoe ;;
-  vax-*-vms)		bfd_target=vax-vms ;;
-  vax-*-*)		bfd_target=vax ;;
-  we32k-*-*)		bfd_target=we32k ;;
-  z8k*-*-*)		bfd_target=z8k-coff ;;
-
-  *-*-aout)		bfd_target=${target_cpu}-aout ;;
-  *-*-bsd*)		bfd_target=${target_cpu}-aout ;;
-  *-*-netware*)		bfd_target=${target_cpu}-nlm ;;
-  *-*-sysv4*)		bfd_target=${target_cpu}-elf ;;
-  *-*-solaris2*)	bfd_target=${target_cpu}-elf ;;
-  *-*-go32)		bfd_target=${target_cpu}-aout ;;
-  *-*-sysv*)		bfd_target=${target_cpu}-coff ;;
-
-  *-*-aout64)		bfd_target=${target_cpu}-aout64 ; target64=true ;;
-  *-*-elf64)		bfd_target=${target_cpu}-elf64 ; target64=true ;;
-
-  *-adobe-*)		bfd_target=adobe ;;
-  *-sony-*)		bfd_target=news ;;
-  *-intel-*)		bfd_target=${target_cpu}-coff ;;
-  *-stratus-*)		bfd_target=${target_cpu}-elf ;;
-  *-cbm-*)		bfd_target=${target_cpu}-elf ;;
-  *-ncr-*)		bfd_target=${target_cpu}-elf ;;
-  *-tandem-*)		bfd_target=st2000 ;;
-esac
-
-[ -z "$bfd_target" ] && bfd_target="$target" # For error message.
+# Canonicalize the secondary target names.
+if [ -n "$with_targets" ]; then
+    for targ in `echo $with_targets | sed 's/,/ /g'`
+    do
+	result=`$configsub $targ 2>/dev/null`
+	if [ -n "$result" ]; then
+	    canon_targets="$canon_targets $result"
+	else
+	    # Allow targets that config.sub doesn't recognize, like "all".
+	    canon_targets="$canon_targets $targ"
+	fi
+    done
+fi
 
 all_targets=false
-for targ in $bfd_target `echo $with_bfd_targets | sed 's/,/ /g'`
+
+for targ in $target $canon_targets
 do
-    if [ "x$targ" = "xall" ]; then
+    bfd_target=`$srcdir/config.bfd $targ $target_cpu`
+
+    if [ "x$bfd_target" = "xall" ]; then
         all_targets=true
     else
-	if [ ! -f ${srcdir}/config/${targ}.mt ] ; then
-	    if [ -n "${targ}" ] ; then
-		echo '***' No file ${srcdir}/config/${targ}.mt 1>&2
-	    fi
-	    echo '***' BFD does not support target ${targ} 1>&2
+	if [ ! -f ${srcdir}/config/${bfd_target}.mt ] ; then
+	    echo '***' No file ${srcdir}/config/${bfd_target}.mt 1>&2
+	    echo '***' BFD does not support target ${bfd_target} 1>&2
 	    echo '***' Look in bfd/configure.in for supported targets 1>&2
 	    exit 1
 	fi
 
-	if [ "x$bfd_target" = "x$targ" ]; then
-	    target_makefile_frag=${srcdir}/config/${targ}.mt
+	if [ "x$targ" = "x$target" ]; then
+	    target_makefile_frag=${srcdir}/config/${bfd_target}.mt
 	else
-	    target_extra_frags="$target_extra_frags ${srcdir}/config/${targ}.mt"
+	    target_extra_frags="$target_extra_frags ${srcdir}/config/${bfd_target}.mt"
 	fi
     fi
 done
