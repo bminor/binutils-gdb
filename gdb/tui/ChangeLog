@@ -1,3 +1,9 @@
+2002-10-26  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tuiIO.c (tui_prep_terminal): Save the prompt registered in readline.
+	(tui_redisplay_readline): Use the last saved prompt.
+	(tui_rl_saved_prompt): New.
+
 2002-10-25  Stephane Carrez  <stcarrez@nerim.fr>
 
 	Fix PR gdb/787
