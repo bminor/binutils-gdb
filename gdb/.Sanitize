@@ -60,7 +60,7 @@ else
 	fi
 fi
 
-gm_files="magic.c magic.h"
+gm_files="gmagic.c gmagic.h"
 
 if ( echo $* | grep keep\-gm > /dev/null ) ; then
 	keep_these_too="${gm_files} ${keep_these_too}"

@@ -30,9 +30,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "language.h"	/* For CAST_IS_CONVERSION */
 #include "f-lang.h"	/* for array bound stuff */
 /* start-sanitize-gm */
-#ifdef GENERAL_MAGIC_HACKS
-#include "magic.h"
-#endif /* GENERAL_MAGIC_HACKS */
+#ifdef GENERAL_MAGIC
+#include "gmagic.h"
+#endif /* GENERAL_MAGIC */
 /* end-sanitize-gm */
 
 /* Prototypes for local functions. */
@@ -845,7 +845,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	}
 
 /* start-sanitize-gm */
-#ifdef GENERAL_MAGIC_HACKS
+#ifdef GENERAL_MAGIC
     case STRUCTOP_FIELD:
       tem = longest_to_int (exp->elts[pc + 1].longconst);
       (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
@@ -871,7 +871,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 				     NULL, "structure pointer");
 	  }
       }
-#endif /* GENERAL_MAGIC_HACKS */
+#endif /* GENERAL_MAGIC */
 /* end-sanitize-gm */
 
     case STRUCTOP_MEMBER:

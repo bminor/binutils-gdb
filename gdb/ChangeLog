@@ -1,3 +1,10 @@
+Tue Nov 28 11:17:47 1995  Fred Fish  <fnf@cygnus.com>
+
+	* magic.h:  Renamed to gmagic.h to avoid <magic.h> conflict.
+	* magic.c:  Renamed to gmagic.c in sympathy.
+	* eval.c, gmagic.c, config/tm-magic.h:
+ 	Include "gmagic.h" rather than "magic.h".
+
 Sat Nov 25 02:56:38 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mdebugread.c (handle_psymbol_enumerators, parse_symbol):
