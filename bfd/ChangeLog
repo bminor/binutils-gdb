@@ -1,5 +1,8 @@
 Mon Apr  4 15:30:49 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* aoutx.h (NAME(aout,bfd_free_cached_info)): Don't free anything
+	if we don't have a bfd_object.
+
 	Made sure that every call to bfd_read, bfd_write, and bfd_seek
 	checks the return value and handled bfd_error correctly.  These
 	changes are not itemised.  Also:

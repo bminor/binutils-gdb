@@ -2880,6 +2880,9 @@ NAME(aout,bfd_free_cached_info) (abfd)
 {
   asection *o;
 
+  if (bfd_get_format (abfd) != bfd_object)
+    return true;
+
 #define FREE(x) if (x != NULL) { free (x); x = NULL; }
   FREE (obj_aout_symbols (abfd));
   FREE (obj_aout_external_syms (abfd));
