@@ -1,3 +1,10 @@
+Fri Jul 23 15:34:37 1993  Brendan Kehoe  (brendan@lisa.cygnus.com)
+
+	* ch-exp.y (yycheck, yydefred, yydgoto, yygindex, yylen, yylhs,
+	yyrindex, yysccsid, yysindex, yyss, yyssp, yytable, yyvs, yyvss):
+	Also define these to chill_{name}, for 386BSD's yacc.
+	* m2-exp.y: Likewise.
+
 Fri Jul 23 09:57:25 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* exec.c, corelow.c (target_ops struct): Don't allow

@@ -58,7 +58,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yyerror	m2_error
 #define	yylval	m2_lval
 #define	yychar	m2_char
+#define	yycheck m2_yycheck
 #define	yydebug	m2_debug
+#define	yydefred m2_yydefred
+#define	yydgoto	m2_yydgoto
+#define	yygindex m2_yygindex
+#define	yylen	m2_yylen
+#define	yylhs	m2_yylhs
+#define	yyrindex m2_yyrindex
+#define	yysccsid m2_yysccsid
+#define	yysindex m2_yysindex
 #define	yypact	m2_pact
 #define	yyr1	m2_r1
 #define	yyr2	m2_r2
@@ -67,20 +76,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yypgo	m2_pgo
 #define	yyact	m2_act
 #define	yyexca	m2_exca
-#define yyerrflag m2_errflag
-#define yynerrs	m2_nerrs
+#define	yyerrflag m2_errflag
+#define	yynerrs	m2_nerrs
 #define	yyps	m2_ps
 #define	yypv	m2_pv
 #define	yys	m2_s
+#define	yyss	m2_yyss
+#define	yyssp	m2_yyssp
 #define	yy_yys	m2_yys
 #define	yystate	m2_state
+#define	yytable	m2_yytable
 #define	yytmp	m2_tmp
 #define	yyv	m2_v
+#define	yyvs	m2_vs
+#define	yyvss	m2_vss
 #define	yy_yyv	m2_yyv
 #define	yyval	m2_val
 #define	yylloc	m2_lloc
-#define yyreds	m2_reds		/* With YYDEBUG defined */
-#define yytoks	m2_toks		/* With YYDEBUG defined */
+#define	yyreds	m2_reds		/* With YYDEBUG defined */
+#define	yytoks	m2_toks		/* With YYDEBUG defined */
 
 #ifndef YYDEBUG
 #define	YYDEBUG	0		/* Default to no yydebug support */

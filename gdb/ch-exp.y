@@ -74,7 +74,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yyerror	chill_error
 #define	yylval	chill_lval
 #define	yychar	chill_char
+#define	yycheck chill_yycheck
 #define	yydebug	chill_debug
+#define	yydefred chill_yydefred
+#define	yydgoto	chill_yydgoto
+#define	yygindex chill_yygindex
+#define	yylen	chill_yylen
+#define	yylhs	chill_yylhs
+#define	yyrindex chill_yyrindex
+#define	yysccsid chill_yysccsid
+#define	yysindex chill_yysindex
 #define	yypact	chill_pact
 #define	yyr1	chill_r1
 #define	yyr2	chill_r2
@@ -83,20 +92,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yypgo	chill_pgo
 #define	yyact	chill_act
 #define	yyexca	chill_exca
-#define yyerrflag chill_errflag
-#define yynerrs	chill_nerrs
+#define	yyerrflag chill_errflag
+#define	yynerrs	chill_nerrs
 #define	yyps	chill_ps
 #define	yypv	chill_pv
 #define	yys	chill_s
+#define	yyss	chill_yyss
+#define	yyssp	chill_yyssp
 #define	yy_yys	chill_yys
 #define	yystate	chill_state
+#define	yytable	chill_yytable
 #define	yytmp	chill_tmp
 #define	yyv	chill_v
+#define	yyvs	chill_vs
+#define	yyvss	chill_vss
 #define	yy_yyv	chill_yyv
 #define	yyval	chill_val
 #define	yylloc	chill_lloc
-#define yyreds	chill_reds		/* With YYDEBUG defined */
-#define yytoks	chill_toks		/* With YYDEBUG defined */
+#define	yyreds	chill_reds		/* With YYDEBUG defined */
+#define	yytoks	chill_toks		/* With YYDEBUG defined */
 
 #ifndef YYDEBUG
 #define	YYDEBUG	0		/* Default to no yydebug support */
