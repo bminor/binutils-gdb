@@ -152,6 +152,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     {"bso", no_argument, NULL, OPTION_AUTOIMP},
     {"bstrcmpct", no_argument, NULL, OPTION_STRCMPCT},
     {"btextro", no_argument, &textro, 1},
+    {"static", no_argument, NULL, OPTION_NOAUTOIMP},
     {NULL, no_argument, NULL, 0}
   };
 

@@ -1,5 +1,8 @@
 Thu Oct 26 14:11:26 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/aix.em (gld${EMULATION_NAME}_parse_args): Treat
+	-static as a synonym for -bnso.
+
 	* scripttempl/aix.sc: Move special symbols inside sections.
 	Always start .data at 0.
 
