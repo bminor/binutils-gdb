@@ -830,9 +830,6 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
 
 	  insn  = bfd_get_32 (abfd, (bfd_byte *) data + reloc->address);
 	  
-if (reloc->howto->type == R_V850_SDA_16_16_SPLIT_OFFSET)
-  fprintf (stderr, "relocation %x, insn = %x\n", relocation, insn );
-
 	  insn &= 0x0001ffdf;
 	  insn |= (relocation & 1) << 5;
 	  insn |= (relocation & ~1) << 16;
@@ -1463,40 +1460,161 @@ fprintf (stderr, "local: sec: %s, sym: %s (%d), value: %x + %x + %x addend %x re
 }
 
 /* Set the right machine number.  */
-
 static boolean
 v850_elf_object_p (abfd)
      bfd *abfd;
 {
-  switch (get_elf_backend_data (abfd) -> elf_machine_code)
+  switch (elf_elfheader (abfd)->e_flags & EF_V850_ARCH)
     {
     default:
-    case EM_CYGNUS_V850:   (void) bfd_default_set_arch_mach (abfd, bfd_arch_v850, 0); break;
+    case E_V850_ARCH:   (void) bfd_default_set_arch_mach (abfd, bfd_arch_v850, 0); break;
 /* start-sanitize-v850e */
-    case EM_CYGNUS_V850E:  (void) bfd_default_set_arch_mach (abfd, bfd_arch_v850, bfd_mach_v850e); break;
+    case E_V850E_ARCH:  (void) bfd_default_set_arch_mach (abfd, bfd_arch_v850, bfd_mach_v850e); break;
 /* end-sanitize-v850e */
 /* start-sanitize-v850eq */
-    case EM_CYGNUS_V850EQ: (void) bfd_default_set_arch_mach (abfd, bfd_arch_v850, bfd_mach_v850eq); break;
+    case E_V850EQ_ARCH: (void) bfd_default_set_arch_mach (abfd, bfd_arch_v850, bfd_mach_v850eq); break;
 /* start-sanitize-v850eq */
     }
 }
 
+/* Store the machine number in the flags field.  */
+void
+v850_elf_final_write_processing (abfd, linker)
+     bfd *   abfd;
+     boolean linker;
+{
+  unsigned long val;
+
+  switch (bfd_get_mach (abfd))
+    {
+    default:
+    case 0: val = E_V850_ARCH; break;
+/* start-sanitize-v850e */
+    case bfd_mach_v850e: val = E_V850E_ARCH; break;
+/* end-sanitize-v850e */
+/* start-sanitize-v850eq */
+    case bfd_mach_v850eq: val = E_V850EQ_ARCH;  break;
+/* end-sanitize-v850eq */
+    }
+
+  elf_elfheader (abfd)->e_flags &=~ EF_V850_ARCH;
+  elf_elfheader (abfd)->e_flags |= val;
+}
+
+/* Function to keep V850 specific file flags. */
+boolean
+v850_elf_set_private_flags (abfd, flags)
+     bfd *    abfd;
+     flagword flags;
+{
+  BFD_ASSERT (!elf_flags_init (abfd)
+	      || elf_elfheader (abfd)->e_flags == flags);
+
+  elf_elfheader (abfd)->e_flags = flags;
+  elf_flags_init (abfd) = true;
+  return true;
+}
+
+/* Copy backend specific data from one object module to another */
+boolean
+v850_elf_copy_private_bfd_data (ibfd, obfd)
+     bfd * ibfd;
+     bfd * obfd;
+{
+  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  BFD_ASSERT (!elf_flags_init (obfd)
+	      || (elf_elfheader (obfd)->e_flags
+		  == elf_elfheader (ibfd)->e_flags));
+
+  elf_gp (obfd) = elf_gp (ibfd);
+  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
+  elf_flags_init (obfd) = true;
+  return true;
+}
+
+/* Merge backend specific data from an object file to the output
+   object file when linking.  */
+boolean
+v850_elf_merge_private_bfd_data (ibfd, obfd)
+     bfd * ibfd;
+     bfd * obfd;
+{
+  flagword old_flags;
+  flagword new_flags;
+
+  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  new_flags = elf_elfheader (ibfd)->e_flags;
+  old_flags = elf_elfheader (obfd)->e_flags;
+
+  if (! elf_flags_init (obfd))
+    {
+      elf_flags_init (obfd) = true;
+      elf_elfheader (obfd)->e_flags = new_flags;
+
+      if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
+	  && bfd_get_arch_info (obfd)->the_default)
+	{
+	  return bfd_set_arch_mach (obfd, bfd_get_arch (ibfd), bfd_get_mach (ibfd));
+	}
+
+      return true;
+    }
+
+  /* Check flag compatibility.  */
+
+  if (new_flags == old_flags)
+    return true;
+
+  if ((new_flags & EF_V850_ARCH) != (old_flags & EF_V850_ARCH))
+    {
+      _bfd_error_handler ("%s: Architecture mismatch with previous modules",
+	     bfd_get_filename (ibfd));
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
+
+  return true;
+}
+/* Display the flags field */
+
+static boolean
+v850_elf_print_private_bfd_data (abfd, ptr)
+     bfd *   abfd;
+     PTR     ptr;
+{
+  FILE * file = (FILE *) ptr;
+  
+  BFD_ASSERT (abfd != NULL && ptr != NULL)
+  
+  fprintf (file, "private flags = %x", elf_elfheader (abfd)->e_flags);
+  
+  switch (elf_elfheader (abfd)->e_flags & EF_V850_ARCH)
+    {
+    default:
+    case E_V850_ARCH: fprintf (file, ": v850 architecture");
+/* start-sanitize-v850e */
+    case E_V850E_ARCH: fprintf (file, ": v850e architecture");
+/* end-sanitize-v850e */
+/* start-sanitize-v850eq */
+    case E_V850EQ_ARCH: fprintf (file, ": v850eq architecture");
+/* end-sanitize-v850eq */
+    }
+  
+  fputc ('\n', file);
+  
+  return true;
+}
 
 #define TARGET_LITTLE_SYM			bfd_elf32_v850_vec
 #define TARGET_LITTLE_NAME			"elf32-v850"
 #define ELF_ARCH				bfd_arch_v850
 #define ELF_MACHINE_CODE			EM_CYGNUS_V850
-/* start-sanitize-v850e */
-#undef  ELF_MACHINE_CODE
-#define ELF_MACHINE_CODE			EM_CYGNUS_V850E
-#define ELF_MACHINE_ALT1			EM_CYGNUS_V850
-/* end-sanitize-v850e */
-/* start-sanitize-v850eq */
-#undef  ELF_MACHINE_CODE
-#define ELF_MACHINE_CODE			EM_CYGNUS_V850EQ
-#define ELF_MACHINE_ALT2			EM_CYGNUS_V850E
-/* end-sanitize-v850eq */
-
 #define ELF_MAXPAGESIZE				0x1000
 	
 #define elf_info_to_howto			0
@@ -1504,8 +1622,13 @@ v850_elf_object_p (abfd)
 #define elf_backend_check_relocs		v850_elf_check_relocs
 #define elf_backend_relocate_section    	v850_elf_relocate_section
 #define elf_backend_object_p			v850_elf_object_p
+#define elf_backend_final_write_processing 	v850_elf_final_write_processing
 #define bfd_elf32_bfd_is_local_label_name	v850_elf_is_local_label_name
 #define bfd_elf32_bfd_reloc_type_lookup		v850_elf_reloc_type_lookup
+#define bfd_elf32_bfd_copy_private_bfd_data 	v850_elf_copy_private_bfd_data
+#define bfd_elf32_bfd_merge_private_bfd_data 	v850_elf_merge_private_bfd_data
+#define bfd_elf32_bfd_set_private_flags		v850_elf_set_private_flags
+#define bfd_elf32_bfd_print_private_bfd_data	v850_elf_print_private_bfd_data
 
 #define elf_symbol_leading_char			'_'
 

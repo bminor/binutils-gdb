@@ -1,3 +1,20 @@
+Tue Sep  2 17:45:22 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-v850.c (v850_elf_object_p): Set machine number based on
+	bits in e_flags field rather than magic numbers.
+	(v850_elf_final_write_processing, v850_elf_set_private_flags,
+	v850_elf_copy_private_bfd_data, v850_elf_merge_private_bfd_data,
+	v850_elf_print_private_bfd_data): New functions.
+
+start-sanitize-v850e
+Tue Sep  2 17:43:49 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* elf.c (prep_headers): Remove V850E magic number.
+start-sanitize-v850eq
+	* elf.c (prep_headers): Remove V850EQ magic number.
+end-sanitize-v850eq
+end-sanitize-v850e
+
 Tue Sep  2 17:35:05 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* cpu-arc.c (arc_get_mach): Properly scan defined mach entries.
