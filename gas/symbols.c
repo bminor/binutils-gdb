@@ -949,6 +949,7 @@ resolve_symbol_value (symp)
 		}
 	      final_val = 0;
 	      resolved = symbol_resolved_p (add_symbol);
+	      symp->sy_resolving = 0;
 	      goto exit_dont_set_value;
 	    }
 	  else

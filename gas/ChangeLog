@@ -1,5 +1,8 @@
 2001-05-25  Alan Modra  <amodra@one.net.au>
 
+	* symbols.c (resolve_symbol_value): Clear sy_resolving before
+	taking exit_dont_set_value.
+
 	* write.c (relax_segment): Don't zap fr_symbol when relaxing.
 
 2000-05-24  Tom Rix <trix@redhat.com>
