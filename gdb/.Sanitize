@@ -102,7 +102,6 @@ gdbcmd.h
 gdbcore.h
 gdbtypes.c
 gdbtypes.h
-go32-nat.c
 go32-xdep.c
 gould-pinsn.c
 gould-xdep.c
@@ -162,7 +161,6 @@ nindy-share
 nindy-tdep.c
 nm-apollo68b.h
 nm-apollo68v.h
-nm-delta88.h
 nm-hp300bsd.h
 nm-hp300hpux.h
 nm-hppab.h
