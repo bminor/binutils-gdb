@@ -2645,18 +2645,19 @@ sym_exists_at (asymbol **syms, long lo, long hi, int id, bfd_vma value)
    entry syms.  */
 
 static long
-ppc64_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
-				long dynsymcount, asymbol **dynsyms,
+ppc64_elf_get_synthetic_symtab (bfd *abfd,
+				long static_count, asymbol **static_syms,
+				long dyn_count, asymbol **dyn_syms,
 				asymbol **ret)
 {
   asymbol *s;
   long i;
   long count;
   char *names;
-  long codesecsym, codesecsymend, secsymend, opdsymend;
+  long symcount, codesecsym, codesecsymend, secsymend, opdsymend;
   asection *opd;
   bfd_boolean relocatable = (abfd->flags & (EXEC_P | DYNAMIC)) == 0;
-  asymbol **sy = NULL;
+  asymbol **syms;
 
   *ret = NULL;
 
@@ -2664,28 +2665,26 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
   if (opd == NULL)
     return 0;
 
+  symcount = static_count;
   if (!relocatable)
-    {
-      if (symcount != 0 && dynsymcount != 0)
-	{
-	  /* Use both symbol tables.  */
-	  sy = bfd_malloc ((symcount + dynsymcount + 1) * sizeof (*syms));
-	  if (sy == NULL)
-	    return 0;
-	  memcpy (sy, syms, symcount * sizeof (*syms));
-	  memcpy (sy + symcount, dynsyms, (dynsymcount + 1) * sizeof (*syms));
-	  syms = sy;
-	  symcount = symcount + dynsymcount;
-	}
-      else if (symcount == 0)
-	{
-	  syms = dynsyms;
-	  symcount = dynsymcount;
-	}
-    }
-
+    symcount += dyn_count;
   if (symcount == 0)
     return 0;
+
+  syms = bfd_malloc ((symcount + 1) * sizeof (*syms));
+  if (syms == NULL)
+    return 0;
+
+  if (!relocatable && static_count != 0 && dyn_count != 0)
+    {
+      /* Use both symbol tables.  */
+      memcpy (syms, static_syms, static_count * sizeof (*syms));
+      memcpy (syms + static_count, dyn_syms, (dyn_count + 1) * sizeof (*syms));
+    }
+  else if (!relocatable && static_count == 0)
+    memcpy (syms, dyn_syms, (symcount + 1) * sizeof (*syms));
+  else
+    memcpy (syms, static_syms, (symcount + 1) * sizeof (*syms));
 
   synthetic_opd = opd;
   synthetic_relocatable = relocatable;
@@ -2916,8 +2915,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
     }
 
  done:
-  if (sy != NULL)
-    free (sy);
+  free (syms);
   return count;
 }
 

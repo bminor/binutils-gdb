@@ -1,5 +1,10 @@
 2004-08-28  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Copy input
+	symbol pointer arrays before modifying.
+
+2004-08-28  Alan Modra  <amodra@bigpond.net.au>
+
 	* bfd.c (bfd_get_synthetic_symtab): Pass counts and both symbol tables.
 	* elf-bfd.h (_bfd_elf_get_synthetic_symtab): Adjust.
 	* elf.c (_bfd_elf_get_synthetic_symtab): Adjust.
