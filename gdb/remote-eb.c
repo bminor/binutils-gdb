@@ -202,10 +202,6 @@ get_hex_regs (int n, int regno)
 /* Called when SIGALRM signal sent due to alarm() timeout.  */
 #ifndef HAVE_TERMIO
 
-#ifndef __STDC__
-#define volatile
-/**/
-#endif
 volatile int n_alarms;
 
 void

@@ -4524,11 +4524,7 @@ unwind_command (char *exp, int from_tty)
   printf_unfiltered ("\n\tregion_end = ");
   print_address (u->region_end, gdb_stdout);
 
-#ifdef __STDC__
 #define pif(FLD) if (u->FLD) printf_unfiltered (" "#FLD);
-#else
-#define pif(FLD) if (u->FLD) printf_unfiltered (" FLD");
-#endif
 
   printf_unfiltered ("\n\tflags =");
   pif (Cannot_unwind);
@@ -4553,11 +4549,7 @@ unwind_command (char *exp, int from_tty)
 
   putchar_unfiltered ('\n');
 
-#ifdef __STDC__
 #define pin(FLD) printf_unfiltered ("\t"#FLD" = 0x%x\n", u->FLD);
-#else
-#define pin(FLD) printf_unfiltered ("\tFLD = 0x%x\n", u->FLD);
-#endif
 
   pin (Region_description);
   pin (Entry_FR);

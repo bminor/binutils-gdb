@@ -2077,11 +2077,7 @@ printf_command (char *arg, int from_tty)
 	      *f++ = '\\';
 	      break;
 	    case 'a':
-#ifdef __STDC__
 	      *f++ = '\a';
-#else
-	      *f++ = '\007';	/* Bell */
-#endif
 	      break;
 	    case 'b':
 	      *f++ = '\b';

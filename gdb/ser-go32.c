@@ -355,11 +355,7 @@ dos_comisr (int irq)
     }
 }
 
-#ifdef __STDC__
 #define ISRNAME(x) dos_comisr##x
-#else
-#define ISRNAME(x) dos_comisr/**/x
-#endif
 #define ISR(x) static void ISRNAME(x)() {dos_comisr(x);}
 
 ISR (0) ISR (1) ISR (2) ISR (3)

@@ -375,11 +375,5 @@ extern int scm_tc16_key_vector;
 
 #endif /* 0 */
 
-#ifdef __STDC__
-
-#else /* STDC */
-
-#endif /* STDC */
-
 
 #endif /* TAGSH */

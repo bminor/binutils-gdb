@@ -25,10 +25,8 @@
 
 /* The ui_out structure */
 
-#if __STDC__
 struct ui_out;
 struct ui_out_data;
-#endif
 
 
 /* the current ui_out */

@@ -1,3 +1,19 @@
+2001-03-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* ui-out.h: Remove #if __STDC__, assume an ISO-C compiler.
+	* m3-nat.c: Ditto.
+	* p-lang.h: Ditto.
+	* printcmd.c (printf_command): Ditto.
+	* ch-exp.c (match_integer_literal): Ditto.
+	* scm-tags.h: Ditto.
+	* ser-go32.c: Ditto.
+	* hppa-tdep.c (unwind_command): Ditto.
+	* defs.h (volatile): Delete macro definition.  Assume __STDC__.
+	* remote-adapt.c (volatile): Ditto.
+	* remote-eb.c (volatile): Ditto.
+	* remote-mm.c (volatile): Ditto.
+	* defs.h (alloca): Assume __STDC__, declare returning void *.
+
 2001-03-08  Andrew Cagney  <ac131313@redhat.com>
 
 	* inferior.h (ARCH_NUM_REGS): Delete definition.

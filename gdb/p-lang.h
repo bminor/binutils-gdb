@@ -19,9 +19,7 @@
 
 /* This file is derived from c-lang.h */
 
-#ifdef __STDC__			/* Forward decls for prototypes */
 struct value;
-#endif
 
 extern int pascal_parse (void);	/* Defined in p-exp.y */
 

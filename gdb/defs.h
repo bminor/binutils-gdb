@@ -764,23 +764,6 @@ enum val_prettyprint
 #define CONST_PTR const
 #endif
 
-/*
- * Allow things in gdb to be declared "volatile".  If compiling ANSI, it
- * just works.  If compiling with gcc but non-ansi, redefine to __volatile__.
- * If non-ansi, non-gcc, then eliminate "volatile" entirely, making those
- * objects be read-write rather than read-only.
- */
-
-#ifndef volatile
-#ifndef __STDC__
-#ifdef __GNUC__
-#define volatile __volatile__
-#else
-#define volatile		/* nothing */
-#endif /* GNUC */
-#endif /* STDC */
-#endif /* volatile */
-
 /* Defaults for system-wide constants (if not defined by xm.h, we fake it).
    FIXME: Assumes 2's complement arithmetic */
 
@@ -993,11 +976,7 @@ extern void free ();
 /* We need to be careful not to declare this in a way which conflicts with
    bison.  Bison never declares it as char *, but under various circumstances
    (like __hpux) we need to use void *.  */
-#if defined (__STDC__) || defined (__hpux)
 extern void *alloca ();
-#else /* Don't use void *.  */
-extern char *alloca ();
-#endif /* Don't use void *.  */
 #endif /* Not _AIX */
 #endif /* Not HAVE_ALLOCA_H */
 #endif /* Not GNU C */

@@ -1788,7 +1788,7 @@ match_integer_literal (void)
   else
     {
       yylval.typed_val.val = ival;
-#if defined(CC_HAS_LONG_LONG) && defined(__STDC__)
+#if defined(CC_HAS_LONG_LONG)
       if (ival > (LONGEST) 2147483647U || ival < -(LONGEST) 2147483648U)
 	yylval.typed_val.type = builtin_type_long_long;
       else

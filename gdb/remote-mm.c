@@ -118,12 +118,6 @@ FILE *mm_stream;
 /* Called when SIGALRM signal sent due to alarm() timeout.  */
 #ifndef HAVE_TERMIO
 
-#ifndef __STDC__
-#ifndef volatile
-#define volatile
-/**/
-# endif
-#endif
 volatile int n_alarms;
 
 static void

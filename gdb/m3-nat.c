@@ -1832,13 +1832,8 @@ mach3_read_inferior (CORE_ADDR addr, char *myaddr, int length)
   return length;
 }
 
-#ifdef __STDC__
 #define CHK_GOTO_OUT(str,ret) \
   do if (ret != KERN_SUCCESS) { errstr = #str; goto out; } while(0)
-#else
-#define CHK_GOTO_OUT(str,ret) \
-  do if (ret != KERN_SUCCESS) { errstr = str; goto out; } while(0)
-#endif
 
 struct vm_region_list
 {
@@ -4225,11 +4220,7 @@ m3_open (char *arg, int from_tty)
 }
 
 #ifdef DUMP_SYSCALL
-#ifdef __STDC__
 #define STR(x) #x
-#else
-#define STR(x) "x"
-#endif
 
 char *bsd1_names[] =
 {
