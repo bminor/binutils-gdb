@@ -1,3 +1,8 @@
+Mon Nov 27 15:15:09 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils-all/objcopy.exp: Correct fail calls to always use the
+	same string as the pass call.
+
 Wed Nov 22 13:18:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* lib/utils-lib.exp (prune_system_crud): Discard -g -O warnings
