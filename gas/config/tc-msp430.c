@@ -186,6 +186,8 @@ md_show_usage (stream)
 	     "                  msp430x1101 msp430x1111\n"
 	     "                  msp430x1121 msp430x1122 msp430x1132\n"
 	     "                  msp430x122  msp430x123\n"
+             "                  msp430x1222 msp430x1232\n"
+             "                  msp430x133  msp430x135\n"
 	     "                  msp430x1331 msp430x1351\n"
 	     "                  msp430x147  msp430x148  msp430x149\n"
 	     "                  msp430x155  msp430x156  msp430x157\n"
