@@ -1,3 +1,8 @@
+Thu Aug 17 14:46:34 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* scripttempl/h8500s.sc (.rdata): All data must go in data segment.
+	(.strings,.ctors,.dtors): Likewise.
+
 Wed Aug 16 11:38:59 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* scripttempl/armpe.sc: Always start code at 0x401000, even
