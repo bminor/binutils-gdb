@@ -1,5 +1,10 @@
 Thu Jun  2 00:12:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* configure: If config.guess result is a prefix of the user
+	specified target, assume a native build and use the user specified
+	target as the host alias.  Remove SunOS patch suffix removal hack.
+	* configure.in: Remove SunOS patch suffix removal hack.
+
 	* Makefile.in (CROSS_CHECK_MODULES): Remove check-flex, since it's
 	in NATIVE_CHECK_MODULES.
 

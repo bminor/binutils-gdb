@@ -328,6 +328,30 @@ case "${fatal}" in
 			guesssys=`echo ${progname} | sed 's/configure$/config.guess/'`
 			if host_alias=`${guesssys}`
 			then
+				# If the string we are going to use for
+				# the target is a prefix of the string
+				# we just guessed for the host, then
+				# assume we are running native, and force
+				# the same string for both target and host.
+				case $target_alias in
+				NOTARGET)
+					case $undefs in
+					NOUNDEFS) ;;
+					*)
+					    if expr $host_alias : $undefs >/dev/null
+					    then
+						host_alias=$undefs
+					    fi
+					    ;;
+					esac
+					;;
+				*)
+					if expr $host_alias : $target_alias >/dev/null
+					then
+						host_alias=$target_alias
+					fi
+					;;
+				esac
 				echo "Configuring for a ${host_alias} host." 1>&2
 				arguments="--host=$host_alias $arguments"
 			else
@@ -755,11 +779,6 @@ EOF
 
             # real copy now in ${subdir}/Makefile.tem
 
-            # Remove patch suffixes from host name.
-            # See similar code in configure.in.
-            # Example: 'sparc-sun-sunos4.1.3_U1'
-            host_osnop=`echo ${host_os} | sed '/sunos/s/_U1//'`
-
             # prepend warning about editting, and a bunch of variables.
             rm -f ${Makefile}
             cat > ${Makefile} <<EOF
@@ -770,7 +789,7 @@ host_alias = ${host_alias}
 host_cpu = ${host_cpu}
 host_vendor = ${host_vendor}
 host_os = ${host_os}
-host_canonical = ${host_cpu}-${host_vendor}-${host_osnop}
+host_canonical = ${host_cpu}-${host_vendor}-${host_os}
 target_alias = ${target_alias}
 target_cpu = ${target_cpu}
 target_vendor = ${target_vendor}
@@ -779,13 +798,12 @@ target_canonical = ${target_cpu}-${target_vendor}-${target_os}
 EOF
 	    case "${build}" in
 	      "") ;;
-	      *) build_osnop=`echo ${build_os} | sed '/sunos/s/_U1//'` 
-                 cat >> ${Makefile} << EOF
+	      *)  cat >> ${Makefile} << EOF
 build_alias = ${build_alias}
 build_cpu = ${build_cpu}
 build_vendor = ${build_vendor}
 build_os = ${build_os}
-build_canonical = ${build_cpu}-${build_vendor}-${build_osnop}
+build_canonical = ${build_cpu}-${build_vendor}-${build_os}
 EOF
 	    esac
 
