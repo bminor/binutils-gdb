@@ -86,8 +86,8 @@ case "${host}" in
   m88k-motorola-m88kbcs)  host_makefile_frag=config/mh-delta88;;
   m88k-dg-dgux*)	  host_makefile_frag=config/mh-dgux ;;
   mips-dec-ultrix*)       host_makefile_frag=config/mh-decstation ;;
-  mips-sgi-irix4)         host_makefile_frag=config/mh-irix4 ;;
-  mips-sgi-irix3)         host_makefile_frag=config/mh-sysv ;;
+  mips-sgi-irix4*)        host_makefile_frag=config/mh-irix4 ;;
+  mips-sgi-irix3*)        host_makefile_frag=config/mh-sysv ;;
   i[34]86-ncr-sysv4*)     host_makefile_frag=config/mh-ncr3000 ;;
   i[34]86-*-sco*)         host_makefile_frag=config/mh-sco ;;
   i[34]86-*-isc*)	  host_makefile_frag=config/mh-sysv ;;
@@ -97,8 +97,8 @@ case "${host}" in
   *-sun-solaris*)         host_makefile_frag=config/mh-solaris ;;
   *-sun-*)		  host_makefile_frag=config/mh-sun ;;
   *-hp-hpux)              host_makefile_frag=config/mh-hpux ;;
-  *-*-sysv4*)              host_makefile_frag=config/mh-sysv4 ;;
-  *-*-sysv*)               host_makefile_frag=config/mh-sysv ;;
+  *-*-sysv4*)             host_makefile_frag=config/mh-sysv4 ;;
+  *-*-sysv*)              host_makefile_frag=config/mh-sysv ;;
 esac
 
 # per-target:
