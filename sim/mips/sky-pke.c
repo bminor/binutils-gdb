@@ -701,12 +701,16 @@ pke_fifo_fit(struct pke_fifo* fifo)
       new_qw = zalloc(new_length * sizeof(struct fifo_quadword*));
       ASSERT(new_qw != NULL);
 
-      /* copy over old pointers to beginning of new block */
-      memcpy(new_qw, fifo->quadwords,
-	     fifo->length * sizeof(struct fifo_quadword*));
-
-      /* free old block */
-      zfree(fifo->quadwords);
+      /* copy over old contents, if any */
+      if(fifo->quadwords != NULL)
+	{
+	  /* copy over old pointers to beginning of new block */
+	  memcpy(new_qw, fifo->quadwords,
+		 fifo->length * sizeof(struct fifo_quadword*));
+	  
+	  /* free old block */
+	  zfree(fifo->quadwords);
+	}
 
       /* replace pointers & counts */
       fifo->quadwords = new_qw;
@@ -1699,7 +1703,7 @@ pke_code_direct(struct pke_device* me, unsigned_4 pkecode)
 	  
 	  /* collect word into quadword */
 	  *A4_16(&fifo_data, 3 - (i % 4)) = *operand;
-	  
+
 	  /* write to GPUIF FIFO only with full quadword */
 	  if(i % 4 == 3)
 	    {
@@ -1708,7 +1712,6 @@ pke_code_direct(struct pke_device* me, unsigned_4 pkecode)
 			    & fifo_data,
 			    16);
 	    } /* write collected quadword */
-	  
 	} /* GPUIF xfer loop */
       
       /* done */
