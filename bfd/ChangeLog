@@ -1,3 +1,8 @@
+2001-03-07  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Fix handling of
+	some relocation values.
+
 2001-02-28  Andreas Jaeger  <aj@suse.de>
 
 	* elf64-x86-64.c (elf64_x86_64_relocate_section): Add relocation
