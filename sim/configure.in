@@ -52,7 +52,7 @@ case "${target}" in
   d30v-*-*)
 	sim_target=d30v
 	only_if_gcc=yes
-	extra_subdirs="${extra_subdirs} igen"
+	extra_subdirs="${extra_subdirs} igen testsuite"
 	;;
 # end-sanitize-d30v
   h8300*-*-*)		sim_target=h8300 ;;
