@@ -1,5 +1,5 @@
 # Makefile fragment for common parts of all simulators.
-# Copyright (C) 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+# Copyright 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 # Contributed by Cygnus Support.
 
 # This program is free software; you can redistribute it and/or modify
@@ -659,13 +659,13 @@ stamp-h: config.in config.status
 CGENDIR = @cgendir@
 CGEN = `if [ -f ../../guile/libguile/guile ]; then echo ../../guile/libguile/guile; else echo guile ; fi`
 CGENFLAGS = -v
-srccgen = $(CGENDIR)
+CGEN_CPU_DIR = $(CGENDIR)/cpu
 
-CGEN_READ_SCM = ../../cgen/stamp-cgen $(srccgen)/sim.scm
-CGEN_ARCH_SCM = $(srccgen)/sim-arch.scm
-CGEN_CPU_SCM = $(srccgen)/sim-cpu.scm $(srccgen)/sim-model.scm
-CGEN_DECODE_SCM = $(srccgen)/sim-decode.scm
-CGEN_DESC_SCM = $(srccgen)/desc.scm $(srccgen)/desc-cpu.scm
+CGEN_READ_SCM = ../../cgen/stamp-cgen $(CGENDIR)/sim.scm
+CGEN_ARCH_SCM = $(CGENDIR)/sim-arch.scm
+CGEN_CPU_SCM = $(CGENDIR)/sim-cpu.scm $(CGENDIR)/sim-model.scm
+CGEN_DECODE_SCM = $(CGENDIR)/sim-decode.scm
+CGEN_DESC_SCM = $(CGENDIR)/desc.scm $(CGENDIR)/desc-cpu.scm
 
 # Various choices for which cpu specific files to generate.
 CGEN_CPU_EXTR = -E tmp-ext.c1

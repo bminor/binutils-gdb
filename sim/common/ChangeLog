@@ -1,3 +1,13 @@
+2001-07-05  Ben Elliston  <bje@redhat.com>
+
+	* Make-common.in (srccgen): Remove.
+	(CGEN_CPU_DIR): Define.
+	(CGEN_READ_SCM): Redefine without $(srccgen).
+	(CGEN_ARCH_SCM): Ditto.
+	(CGEN_CPU_SCM): Ditto.
+	(CGEN_DECODE_SCM): Ditto.
+	(CGEN_DESC_SCM): Ditto.
+
 2001-04-25  Frank Ch. Eigler  <fche@redhat.com>
 
 	* sim-load.c (sim_load_file): Put it back: external now.

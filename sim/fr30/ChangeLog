@@ -1,3 +1,8 @@
+2001-07-05  Ben Elliston  <bje@redhat.com>
+
+	* Makefile.in (stamp-arch): Use $(CGEN_CPU_DIR).
+	(stamp-cpu): Likewise.
+
 2001-03-05  Dave Brolley  <brolley@redhat.com>
 
 	* arch.c: Regenerate.
