@@ -1,3 +1,35 @@
+Mon Jul 24 14:10:24 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-sh.c (md_pseudo_table): Add "uses".
+	(s_uses): New static function.
+	(sh_coff_frob_file): New function.
+	(md_convert_frag): Call subseg_change before calling fix_new.
+	(sh_handle_align): New function.
+	(SWITCH_TABLE): Define.
+	(sh_force_relocation): New function.
+	(md_apply_fix): Handle R_SH_USES, R_SH_COUNT and R_SH_ALIGN.
+	(sh_coff_reloc_mangle): Likewise.  Also handle switch table
+	entries.
+	* config/tc-sh.h (HANDLE_ALIGN): Define.
+	(sh_handle_align): Declare.
+	(TC_FORCE_RELOCATION): Define.
+	(sh_force_relocation): Declare.
+	(TC_COUNT_RELOC): Simplify; rely on TC_FORCE_RELOCATION instead.
+	(tc_frob_file): Define.
+	(sh_coff_frob_file): Declare.
+	* config/obj-coff.c (write_object_file): Call tc_frob_file if it
+	is defined.
+	(fixup_mdeps): Call HANDLE_ALIGN if it is defined.
+	(TC_FORCE_RELOCATION): Define if not defined.
+	(fixup_segment): Use TC_FORCE_RELOCATION to decide whether to
+	clear the symbol fields of fixP.
+
+Fri Jul 21 22:38:00 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* config/tc-ppc.c (ppc_elf_suffix): Add support for R_PPC_SDAREL
+	relocation.
+	(md_apply_fix3): Ditto.
+
 Thu Jul 20 13:00:56 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* config/tc-m68k.c (md_convert_frag): Rename argument seg to sec,

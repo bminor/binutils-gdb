@@ -1030,6 +1030,10 @@ coff_frob_symbol (symp, punt)
 	S_SET_STORAGE_CLASS (symp, C_EXT);
       else if (SF_GET_LOCAL (symp))
 	*punt = 1;
+
+      if (SF_GET_FUNCTION (symp))
+	symp->bsym->flags |= BSF_FUNCTION;
+
       /* more ... */
     }
 
@@ -1607,7 +1611,8 @@ do_relocs_for (abfd, h, file_cursor)
 		  if (TC_COUNT_RELOC (fix_ptr))
 		    {
 #ifdef TC_RELOC_MANGLE
-		      TC_RELOC_MANGLE (fix_ptr, &intr, base);
+		      TC_RELOC_MANGLE (&segment_info[idx], fix_ptr, &intr,
+				       base);
 
 #else
 		      symbolS *dot;
@@ -2451,6 +2456,10 @@ obj_read_begin_hook ()
 /* This function runs through the symbol table and puts all the
    externals onto another chain */
 
+/* The chain of globals.  */
+symbolS *symbol_globalP;
+symbolS *symbol_global_lastP;
+
 /* The chain of externals */
 symbolS *symbol_externP;
 symbolS *symbol_extern_lastP;
@@ -2640,6 +2649,23 @@ yank_symbols ()
 	  symbol_append (symbolP, symbol_extern_lastP, &symbol_externP, &symbol_extern_lastP);
 	  symbolP = hold;
 	}
+      else if (! S_IS_DEBUG (symbolP)
+	       && ! SF_GET_STATICS (symbolP)
+	       && ! SF_GET_FUNCTION (symbolP)
+	       && S_GET_STORAGE_CLASS (symbolP) == C_EXT)
+	{
+	  symbolS *hold = symbol_previous (symbolP);
+
+	  /* The O'Reilly COFF book says that defined global symbols
+             come at the end of the symbol table, just before
+             undefined global symbols.  */
+
+	  symbol_remove (symbolP, &symbol_rootP, &symbol_lastP);
+	  symbol_clear_list_pointers (symbolP);
+	  symbol_append (symbolP, symbol_global_lastP, &symbol_globalP,
+			 &symbol_global_lastP);
+	  symbolP = hold;
+	}
       else
 	{
 	  if (SF_GET_STRING (symbolP))
@@ -2662,16 +2688,19 @@ yank_symbols ()
 
 
 static unsigned int
-glue_symbols ()
+glue_symbols (head, tail)
+     symbolS **head;
+     symbolS **tail;
 {
   unsigned int symbol_number = 0;
   symbolS *symbolP;
-  for (symbolP = symbol_externP; symbol_externP;)
+
+  for (symbolP = *head; *head != NULL;)
     {
-      symbolS *tmp = symbol_externP;
+      symbolS *tmp = *head;
 
       /* append */
-      symbol_remove (tmp, &symbol_externP, &symbol_extern_lastP);
+      symbol_remove (tmp, head, tail);
       symbol_append (tmp, symbol_lastP, &symbol_rootP, &symbol_lastP);
 
       /* and process */
@@ -2688,8 +2717,8 @@ glue_symbols ()
       tmp->sy_number = symbol_number;
       symbol_number += 1 + S_GET_NUMBER_AUXILIARY (tmp);
     }				/* append the entire extern chain */
-  return symbol_number;
 
+  return symbol_number;
 }
 
 static unsigned int
@@ -2768,9 +2797,16 @@ crawl_symbols (h, abfd)
   /* Take all the externals out and put them into another chain */
   H_SET_SYMBOL_TABLE_SIZE (h, yank_symbols ());
   /* Take the externals and glue them onto the end.*/
-  H_SET_SYMBOL_TABLE_SIZE (h, H_GET_SYMBOL_COUNT (h) + glue_symbols ());
+  H_SET_SYMBOL_TABLE_SIZE (h,
+			   (H_GET_SYMBOL_COUNT (h)
+			    + glue_symbols (&symbol_globalP,
+					    &symbol_global_lastP)
+			    + glue_symbols (&symbol_externP,
+					    &symbol_extern_lastP)));
 
   H_SET_SYMBOL_TABLE_SIZE (h, tie_tags ());
+  know (symbol_globalP == NULL);
+  know (symbol_global_lastP == NULL);
   know (symbol_externP == NULL);
   know (symbol_extern_lastP == NULL);
 }
@@ -2990,6 +3026,10 @@ write_object_file ()
     string_byte_count = 0;
 
   H_SET_STRING_SIZE (&headers, string_byte_count);
+
+#ifdef tc_frob_file
+  tc_frob_file ();
+#endif
 
   for (i = SEG_E0; i < SEG_UNKNOWN; i++)
     {
@@ -3521,12 +3561,15 @@ fixup_mdeps (frags, h, this_segment)
 	{
 	case rs_align:
 	case rs_org:
+#ifdef HANDLE_ALIGN
+	  HANDLE_ALIGN (frags);
+#endif
 	  frags->fr_type = rs_fill;
 	  frags->fr_offset =
 	    (frags->fr_next->fr_address - frags->fr_address - frags->fr_fix);
 	  break;
 	case rs_machine_dependent:
-	  md_convert_frag (h, frags);
+	  md_convert_frag (h, this_segment, frags);
 	  frag_wane (frags);
 	  break;
 	default:
@@ -3537,6 +3580,11 @@ fixup_mdeps (frags, h, this_segment)
 }
 
 #if 1
+
+#ifndef TC_FORCE_RELOCATION
+#define TC_FORCE_RELOCATION(fix) 0
+#endif
+
 static void
 fixup_segment (segP, this_segment_type)
      segment_info_type * segP;
@@ -3625,11 +3673,14 @@ fixup_segment (segP, this_segment_type)
 #endif /* TC_I960 */
 	      add_number += S_GET_VALUE (add_symbolP) -
 		S_GET_VALUE (sub_symbolP);
-
 	      add_symbolP = NULL;
-	      fixP->fx_addsy = NULL;
-	      fixP->fx_subsy = NULL;
-	      fixP->fx_done = 1;
+
+	      if (!TC_FORCE_RELOCATION (fixP))
+		{
+		  fixP->fx_addsy = NULL;
+		  fixP->fx_subsy = NULL;
+		  fixP->fx_done = 1;
+		}
 	    }
 	  else
 	    {
@@ -3693,8 +3744,11 @@ fixup_segment (segP, this_segment_type)
 	      add_number -= segP->scnhdr.s_vaddr;
 #endif
 	      pcrel = 0;	/* Lie. Don't want further pcrel processing. */
-	      fixP->fx_addsy = NULL;
-	      fixP->fx_done = 1;
+	      if (!TC_FORCE_RELOCATION (fixP))
+		{
+		  fixP->fx_addsy = NULL;
+		  fixP->fx_done = 1;
+		}
 	    }
 	  else
 	    {
@@ -3705,9 +3759,13 @@ fixup_segment (segP, this_segment_type)
 		  reloc_callj (fixP);	/* See comment about reloc_callj() above*/
 #endif /* TC_I960 */
 		  add_number += S_GET_VALUE (add_symbolP);
-		  fixP->fx_addsy = NULL;
-		  fixP->fx_done = 1;
 		  add_symbolP = NULL;
+
+		  if (!TC_FORCE_RELOCATION (fixP))
+		    {
+		      fixP->fx_addsy = NULL;
+		      fixP->fx_done = 1;
+		    }
 		  break;
 		default:
 
@@ -3805,7 +3863,11 @@ fixup_segment (segP, this_segment_type)
 	}			/* not a bit fix */
       /* Once this fix has been applied, we don't have to output
 	 anything nothing more need be done.  */
+#ifdef MD_APPLY_FIX3
+      md_apply_fix3 (fixP, &add_number, this_segment_type);
+#else
       md_apply_fix (fixP, add_number);
+#endif
     }				/* For each fixS in this segment. */
 }				/* fixup_segment() */
 
