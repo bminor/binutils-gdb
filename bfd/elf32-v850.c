@@ -586,29 +586,31 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
 	      if ((h->other & V850_OTHER_MASK) != (other & V850_OTHER_MASK)
 		  && (h->other & V850_OTHER_ERROR) == 0)
 		{
-		  const char *msg;
-
+		  const char * msg;
+		  static char  buff[100]; /* XXX */
+		  
 		  switch (h->other & V850_OTHER_MASK)
 		    {
 		    default:
-		      msg = "Variable cannot occupy in multiple small data regions";
+		      msg = "cannot occupy in multiple small data regions";
 		      break;
 		    case V850_OTHER_SDA | V850_OTHER_ZDA | V850_OTHER_TDA:
-		      msg = "Variable can only be in one of the small, zero, and tiny data regions";
+		      msg = "can only be in one of the small, zero, and tiny data regions";
 		      break;
 		    case V850_OTHER_SDA | V850_OTHER_ZDA:
-		      msg = "Variable cannot be in both small and zero data regions simultaneously";
+		      msg = "cannot be in both small and zero data regions simultaneously";
 		      break;
 		    case V850_OTHER_SDA | V850_OTHER_TDA:
-		      msg = "Variable cannot be in both small and tiny data regions simultaneously";
+		      msg = "cannot be in both small and tiny data regions simultaneously";
 		      break;
 		    case V850_OTHER_ZDA | V850_OTHER_TDA:
-		      msg = "Variable cannot be in both zero and tiny data regions simultaneously";
+		      msg = "cannot be in both zero and tiny data regions simultaneously";
 		      break;
 		    }
 
-		  (*info->callbacks->warning) (info, msg, h->root.root.string,
-					       abfd, h->root.u.def.section, 0);
+		  sprintf (buff, "Variable '%s' %s", h->root.root.string, msg );
+		  info->callbacks->warning (info, buff, h->root.root.string,
+					    abfd, h->root.u.def.section, 0);
 
 		  bfd_set_error (bfd_error_bad_value);
 		  h->other |= V850_OTHER_ERROR;
