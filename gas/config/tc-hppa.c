@@ -4779,12 +4779,19 @@ pa_export_args (symbolP)
   if (strncasecmp (input_line_pointer, "absolute", 8) == 0)
     {
       input_line_pointer += 8;
+      symbolP->bsym->flags &= ~BSF_FUNCTION;
       S_SET_SEGMENT (symbolP, &bfd_abs_section);
     }
   else if (strncasecmp (input_line_pointer, "code", 4) == 0)
-    input_line_pointer += 4;
+    {
+      input_line_pointer += 4;
+      symbolP->bsym->flags &= ~BSF_FUNCTION;
+    }
   else if (strncasecmp (input_line_pointer, "data", 4) == 0)
-    input_line_pointer += 4;
+    {
+      input_line_pointer += 4;
+      symbolP->bsym->flags &= ~BSF_FUNCTION;
+    }
   else if ((strncasecmp (input_line_pointer, "entry", 5) == 0))
     {
       input_line_pointer += 5;
@@ -4793,18 +4800,22 @@ pa_export_args (symbolP)
   else if (strncasecmp (input_line_pointer, "millicode", 9) == 0)
     {
       input_line_pointer += 9;
+      symbolP->bsym->flags |= BSF_FUNCTION;
     }
   else if (strncasecmp (input_line_pointer, "plabel", 6) == 0)
     {
       input_line_pointer += 6;
+      symbolP->bsym->flags &= ~BSF_FUNCTION;
     }
   else if (strncasecmp (input_line_pointer, "pri_prog", 8) == 0)
     {
       input_line_pointer += 8;
+      symbolP->bsym->flags |= BSF_FUNCTION;
     }
   else if (strncasecmp (input_line_pointer, "sec_prog", 8) == 0)
     {
       input_line_pointer += 8;
+      symbolP->bsym->flags |= BSF_FUNCTION;
     }
 
   /* Now that the type of the exported symbol has been handled,

@@ -1,5 +1,8 @@
 Sat Oct 30 14:26:20 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/tc-hppa.c (pa_export_args): Always set BSF_FUNCTION
+	as appropriate for the given type.
+
 	* config/tc-hppa.c (tc_gen_reloc): Preliminary stab at handling
 	SOM relocations.
 
