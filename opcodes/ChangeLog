@@ -1,4 +1,9 @@
 start-sanitize-v850
+Fri Aug 23 00:27:01 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* v850-opc.c (v850_opcodes): Correct short store half (sst.h) and
+	short store word (sst.w).
+
 Thu Aug 22 16:57:27 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* v850-opc.c (v850_operands): Added insert and extract fields,

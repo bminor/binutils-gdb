@@ -117,8 +117,8 @@ const struct v850_opcode v850_opcodes[] = {
 { "sld.h",	OP(0x00),		OP_MASK,	IF4A },
 { "sld.w",	OP(0x00),		OP_MASK,	IF4A },
 { "sst.b",	OP(0x00),		OP_MASK,	IF4B },
+{ "sst.h",	OP(0x00),		OP_MASK,	IF4B },
 { "sst.w",	OP(0x00),		OP_MASK,	IF4B },
-{ "sst.l",	OP(0x00),		OP_MASK,	IF4B },
 
 { "ld.b",	OP(0x00),		OP_MASK,	IF7A },
 { "ld.h",	OP(0x00),		OP_MASK,	IF7A },
