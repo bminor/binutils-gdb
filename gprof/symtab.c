@@ -132,7 +132,8 @@ DEFUN (symtab_finalize, (tab), Sym_Table * tab)
 	  /* retain sym only if it has a non-empty address range: */
 	  if (!src->end_addr || src->addr <= src->end_addr)
 	    {
-	      *dst++ = *src;
+	      *dst = *src;
+	      dst++;
 	      prev_addr = src->addr;
 	    }
 	}

@@ -1,3 +1,8 @@
+2000-03-31  Alan Modra  <alan@linuxcare.com.au>
+
+	* symtab.c (symtab_finalize): Don't use post-increment on
+	structure copy to work around a ppc gcc bug.
+
 1999-09-29  Mark Kettenis  <kettenis@gnu.org>
 
         * hertz.h [MACH] (hertz): Remove macro.  The
