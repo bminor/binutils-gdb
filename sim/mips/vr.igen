@@ -288,7 +288,6 @@
 }
 
 
-// end-sanitize-vr4320
 // start-sanitize-vrXXXX
 // Unsigned Multiply, Accumulate and Move LO.
 000000,5.RS,5.RT,5.RD,00011,101000::::MACCU
@@ -331,6 +330,7 @@
 // Unsigned Multiply, Accumulate and Move HI.
 000000,5.RS,5.RT,5.RD,01011,101000::::MACCHIU
 "macchiu r<RD>, r<RS>, r<RT>"
+// end-sanitize-vrXXXX
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
