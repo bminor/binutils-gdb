@@ -1,5 +1,5 @@
 /* BFD library -- caching of file descriptors.
-   Copyright 1990, 91, 92, 93, 94, 95, 1996, 2000
+   Copyright 1990, 91, 92, 93, 94, 95, 1996, 2000, 2001
    Free Software Foundation, Inc.
    Hacked by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
@@ -311,7 +311,7 @@ bfd_open_file (abfd)
 	  if (stat (abfd->filename, &s) == 0 && s.st_size != 0)
 	    unlink (abfd->filename);
 #endif
-	  abfd->iostream = (PTR) fopen (abfd->filename, FOPEN_WB);
+	  abfd->iostream = (PTR) fopen (abfd->filename, FOPEN_WUB);
 	  abfd->opened_once = true;
 	}
       break;

@@ -1,5 +1,5 @@
 /* tc-hppa.c -- Assemble for the PA
-   Copyright (C) 1989, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
+   Copyright 1989, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -6056,11 +6056,7 @@ pa_build_unwind_subspace (call_info)
   if (now_seg != text_section)
     return;
 
-  if (bfd_get_arch_info (stdoutput)->bits_per_address == 32)
-    reloc = R_PARISC_DIR32;
-  else
-    reloc = R_PARISC_SEGREL32;
-
+  reloc = R_PARISC_SEGREL32;
   save_seg = now_seg;
   save_subseg = now_subseg;
   /* Get into the right seg/subseg.  This may involve creating

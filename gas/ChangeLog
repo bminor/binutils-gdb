@@ -1,5 +1,8 @@
 2001-01-14  Alan Modra  <alan@linuxcare.com.au>
 
+	* config/tc-hppa.c (pa_build_unwind_subspace): Use SEGREL32 for
+	both 32 and 64 bit ELF.
+
 	* config/tc-hppa.c (pa_ip): Store `a' flag in bit zero of operand
 	and don't bother storing `m' for "ce" completer.  Tidy handling of
 	'J' and 'K' operands to suit.  Handle '<' and '>' operands.

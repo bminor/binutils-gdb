@@ -1,5 +1,5 @@
 /* BFD back-end for HP PA-RISC ELF files.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
    Free Software Foundation, Inc.
 
    Original code by
@@ -272,6 +272,11 @@ struct elf32_hppa_link_hash_table {
   asection *sdynbss;
   asection *srelbss;
 
+  /* Used during a final link to store the base of the text and data
+     segments so that we can perform SEGREL relocations.  */
+  bfd_vma text_segment_base;
+  bfd_vma data_segment_base;
+
   /* Whether we support multiple sub-spaces for shared libs.  */
   unsigned int multi_subspace:1;
 
@@ -369,6 +374,12 @@ static boolean clobber_millicode_symbols
 static boolean elf32_hppa_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
+static boolean elf32_hppa_final_link
+  PARAMS ((bfd *, struct bfd_link_info *));
+
+static void hppa_record_segment_addr
+  PARAMS ((bfd *, asection *, PTR));
+
 static bfd_reloc_status_type final_link_relocate
   PARAMS ((asection *, bfd_byte *, const Elf_Internal_Rela *,
 	   bfd_vma, struct elf32_hppa_link_hash_table *, asection *,
@@ -377,6 +388,9 @@ static bfd_reloc_status_type final_link_relocate
 static boolean elf32_hppa_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *,
 	   bfd_byte *, Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+
+static int hppa_unwind_entry_compare
+  PARAMS ((const PTR, const PTR));
 
 static boolean elf32_hppa_finish_dynamic_symbol
   PARAMS ((bfd *, struct bfd_link_info *,
@@ -515,6 +529,8 @@ elf32_hppa_link_hash_table_create (abfd)
   ret->srelplt = NULL;
   ret->sdynbss = NULL;
   ret->srelbss = NULL;
+  ret->text_segment_base = (bfd_vma) -1;
+  ret->data_segment_base = (bfd_vma) -1;
   ret->multi_subspace = 0;
   ret->has_12bit_branch = 0;
   ret->has_17bit_branch = 0;
@@ -1305,7 +1321,7 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 	  break;
 
 	case R_PARISC_SEGBASE: /* Used to set segment base.  */
-	case R_PARISC_SEGREL32: /* Relative reloc.  */
+	case R_PARISC_SEGREL32: /* Relative reloc, used for unwind.  */
 	case R_PARISC_PCREL14F: /* PC relative load/store.  */
 	case R_PARISC_PCREL14R:
 	case R_PARISC_PCREL17R: /* External branches.  */
@@ -1347,7 +1363,7 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 	  /* Fall through.  */
 #endif
 
-	case R_PARISC_DIR32: /* .word, PARISC.unwind relocs.  */
+	case R_PARISC_DIR32: /* .word relocs.  */
 	  /* We may want to output a dynamic relocation later.  */
 	  need_entry = NEED_DYNREL;
 	  break;
@@ -3095,6 +3111,76 @@ elf32_hppa_build_stubs (info)
   return true;
 }
 
+/* Perform a final link.  */
+
+static boolean
+elf32_hppa_final_link (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  asection *s;
+
+  /* Invoke the regular ELF garbage collecting linker to do all the
+     work.  */
+  if (!_bfd_elf32_gc_common_final_link (abfd, info))
+    return false;
+
+  /* If we're producing a final executable, sort the contents of the
+     unwind section.  Magic section names, but this is much safer than
+     having elf32_hppa_relocate_section remember where SEGREL32 relocs
+     occurred.  Consider what happens if someone inept creates a
+     linker script that puts unwind information in .text.  */
+  s = bfd_get_section_by_name (abfd, ".PARISC.unwind");
+  if (s != NULL)
+    {
+      bfd_size_type size;
+      char *contents;
+
+      size = s->_raw_size;
+      contents = bfd_malloc (size);
+      if (contents == NULL)
+	return false;
+
+      if (! bfd_get_section_contents (abfd, s, contents, (file_ptr) 0, size))
+	return false;
+
+      qsort (contents, size / 16, 16, hppa_unwind_entry_compare);
+
+      if (! bfd_set_section_contents (abfd, s, contents, (file_ptr) 0, size))
+	return false;
+    }
+  return true;
+}
+
+/* Record the lowest address for the data and text segments.  */
+
+static void
+hppa_record_segment_addr (abfd, section, data)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *section;
+     PTR data;
+{
+  struct elf32_hppa_link_hash_table *hplink;
+
+  hplink = (struct elf32_hppa_link_hash_table *) data;
+
+  if ((section->flags & (SEC_ALLOC | SEC_LOAD)) == (SEC_ALLOC | SEC_LOAD))
+    {
+      bfd_vma value = section->vma - section->filepos;
+
+      if ((section->flags & SEC_READONLY) != 0)
+	{
+	  if (value < hplink->text_segment_base)
+	    hplink->text_segment_base = value;
+	}
+      else
+	{
+	  if (value < hplink->data_segment_base)
+	    hplink->data_segment_base = value;
+	}
+    }
+}
+
 /* Perform a relocation as part of a final link.  */
 
 static bfd_reloc_status_type
@@ -3218,6 +3304,13 @@ final_link_relocate (input_section, contents, rel, value, hplink, sym_sec, h)
     case R_PARISC_DLTIND14R:
     case R_PARISC_DLTIND14F:
       value -= elf_gp (input_section->output_section->owner);
+      break;
+
+    case R_PARISC_SEGREL32:
+      if ((sym_sec->flags & SEC_CODE) != 0)
+	value -= hplink->text_segment_base;
+      else
+	value -= hplink->data_segment_base;
       break;
 
     default:
@@ -3579,6 +3672,15 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 			 + hplink->sgot->output_section->vma);
 	  break;
 
+	case R_PARISC_SEGREL32:
+	  /* If this is the first SEGREL relocation, then initialize
+	     the segment base values.  */
+	  if (hplink->text_segment_base == (bfd_vma) -1)
+	    bfd_map_over_sections (output_bfd,
+				   hppa_record_segment_addr,
+				   hplink);
+	  break;
+
 	case R_PARISC_PLABEL14R:
 	case R_PARISC_PLABEL21L:
 	case R_PARISC_PLABEL32:
@@ -3821,6 +3923,32 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
     }
 
   return true;
+}
+
+/* Comparison function for qsort to sort unwind section during a
+   final link.  */
+
+static int
+hppa_unwind_entry_compare (a, b)
+     const PTR a;
+     const PTR b;
+{
+  const bfd_byte *ap, *bp;
+  unsigned long av, bv;
+
+  ap = (const bfd_byte *) a;
+  av = (unsigned long) ap[0] << 24;
+  av |= (unsigned long) ap[1] << 16;
+  av |= (unsigned long) ap[2] << 8;
+  av |= (unsigned long) ap[3];
+
+  bp = (const bfd_byte *) b;
+  bv = (unsigned long) bp[0] << 24;
+  bv |= (unsigned long) bp[1] << 16;
+  bv |= (unsigned long) bp[2] << 8;
+  bv |= (unsigned long) bp[3];
+
+  return av < bv ? -1 : av > bv ? 1 : 0;
 }
 
 /* Finish up dynamic symbol handling.  We set the contents of various
@@ -4125,7 +4253,7 @@ elf32_hppa_elf_get_symbol_type (elf_sym, type)
 #define elf_info_to_howto_rel		     elf_hppa_info_to_howto_rel
 
 /* Stuff for the BFD linker.  */
-#define bfd_elf32_bfd_final_link	     _bfd_elf32_gc_common_final_link
+#define bfd_elf32_bfd_final_link	     elf32_hppa_final_link
 #define bfd_elf32_bfd_link_hash_table_create elf32_hppa_link_hash_table_create
 #define elf_backend_add_symbol_hook	     elf32_hppa_add_symbol_hook
 #define elf_backend_adjust_dynamic_symbol    elf32_hppa_adjust_dynamic_symbol
