@@ -1,3 +1,10 @@
+start-sanitize-r5900
+Mon May 18 12:37:38 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* config/tc-mips.c (macro): For R5900, use "B" operand format for
+ 	"break" instructions generated in macro (div etc.) instructions.
+
+end-sanitize-r5900
 Mon May 18 09:31:43 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* write.c (fixup_segment): Improve error message for sym1-sym2

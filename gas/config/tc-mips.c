@@ -3941,7 +3941,12 @@ macro (ip)
 	  if (mips_trap)
 	    macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", 0, 0);
 	  else
-	    macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
+	    /* start-sanitize-r5900 */
+	    if (mips_5900)
+	      macro_build ((char *) NULL, &icnt, NULL, "break", "B", 7);
+	    else
+	    /* end-sanitize-r5900 */
+	      macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
 	  return;
 	}
 
@@ -3962,7 +3967,12 @@ macro (ip)
 	  macro_build ((char *) NULL, &icnt, NULL,
 		       dbl ? "ddiv" : "div",
 		       "z,s,t", sreg, treg);
-	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
+	  /* start-sanitize-r5900 */
+	  if (mips_5900)
+	    macro_build ((char *) NULL, &icnt, NULL, "break", "B", 7);
+	  else
+	    /* end-sanitize-r5900 */
+	    macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
 	}
       expr1.X_add_number = -1;
       macro_build ((char *) NULL, &icnt, &expr1,
@@ -3991,7 +4001,13 @@ macro (ip)
 	  expr1.X_add_number = 8;
 	  macro_build ((char *) NULL, &icnt, &expr1, "bne", "s,t,p", sreg, AT);
 	  macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
-	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 6);
+
+	  /* start-sanitize-r5900 */
+	  if (mips_5900)
+	    macro_build ((char *) NULL, &icnt, NULL, "break", "B", 6);
+	  else
+	    /* end-sanitize-r5900 */
+	    macro_build ((char *) NULL, &icnt, NULL, "break", "c", 6);
 	}
       --mips_opts.noreorder;
       macro_build ((char *) NULL, &icnt, NULL, s, "d", dreg);
@@ -4039,7 +4055,12 @@ macro (ip)
 	  if (mips_trap)
 	    macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", 0, 0);
 	  else
-	    macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
+	    /* start-sanitize-r5900 */
+	    if (mips_5900)
+	      macro_build ((char *) NULL, &icnt, NULL, "break", "B", 7);
+	    else
+	      /* end-sanitize-r5900 */
+	      macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
 	  return;
 	}
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
@@ -4103,7 +4124,12 @@ macro (ip)
 	  expr1.X_add_number = 8;
 	  macro_build ((char *) NULL, &icnt, &expr1, "bne", "s,t,p", treg, 0);
 	  macro_build ((char *) NULL, &icnt, NULL, s, "z,s,t", sreg, treg);
-	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
+	  /* start-sanitize-r5900 */
+	  if (mips_5900)
+	    macro_build ((char *) NULL, &icnt, NULL, "break", "B", 7);
+	  else
+	    /* end-sanitize-r5900 */
+	    macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
 	}
       --mips_opts.noreorder;
       macro_build ((char *) NULL, &icnt, NULL, s2, "d", dreg);
@@ -5989,7 +6015,12 @@ macro2 (ip)
 	  expr1.X_add_number = 8;
 	  macro_build ((char *) NULL, &icnt, &expr1, "beq", "s,t,p", dreg, AT);
 	  macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
-	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 6);
+	  /* start-sanitize-r5900 */
+	  if (mips_5900)
+	    macro_build ((char *) NULL, &icnt, NULL, "break", "B", 6);
+	  else
+	    /* end-sanitize-r5900 */
+	    macro_build ((char *) NULL, &icnt, NULL, "break", "c", 6);
 	}
       --mips_opts.noreorder;
       macro_build ((char *) NULL, &icnt, NULL, "mflo", "d", dreg);
@@ -6022,7 +6053,12 @@ macro2 (ip)
 	  expr1.X_add_number = 8;
 	  macro_build ((char *) NULL, &icnt, &expr1, "beq", "s,t,p", AT, 0);
 	  macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
-	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 6);
+	  /* start-sanitize-r5900 */
+	  if (mips_5900)
+	    macro_build ((char *) NULL, &icnt, NULL, "break", "B", 6);
+	  else
+	    /* end-sanitize-r5900 */
+	    macro_build ((char *) NULL, &icnt, NULL, "break", "c", 6);
 	}
       --mips_opts.noreorder;
       break;
@@ -6675,7 +6711,13 @@ mips16_macro (ip)
 		   "0,x,y", xreg, yreg);
       expr1.X_add_number = 2;
       macro_build ((char *) NULL, &icnt, &expr1, "bnez", "x,p", yreg);
-      macro_build ((char *) NULL, &icnt, NULL, "break", "6", 7);
+      /* start-sanitize-r5900 */
+      if (mips_5900)
+	macro_build ((char *) NULL, &icnt, NULL, "break", "B", 7);
+      else
+	/* end-sanitize-r5900 */
+	macro_build ((char *) NULL, &icnt, NULL, "break", "6", 7);
+      
       /* FIXME: The normal code checks for of -1 / -0x80000000 here,
          since that causes an overflow.  We should do that as well,
          but I don't see how to do the comparisons without a temporary
@@ -6706,7 +6748,12 @@ mips16_macro (ip)
       macro_build ((char *) NULL, &icnt, NULL, s, "0,x,y", xreg, yreg);
       expr1.X_add_number = 2;
       macro_build ((char *) NULL, &icnt, &expr1, "bnez", "x,p", yreg);
-      macro_build ((char *) NULL, &icnt, NULL, "break", "6", 7);
+      /* start-sanitize-r5900 */
+      if (mips_5900)
+	macro_build ((char *) NULL, &icnt, NULL, "break", "B", 7);
+      else
+	/* end-sanitize-r5900 */
+	macro_build ((char *) NULL, &icnt, NULL, "break", "6", 7);
       --mips_opts.noreorder;
       macro_build ((char *) NULL, &icnt, NULL, s2, "x", zreg);
       break;
@@ -6979,23 +7026,6 @@ validate_mips_insn (opc)
 	return 0;
       }
 #undef USE_BITS
-  /* Some of the trapping instructions (break, t*, sdbbp) have "code"
-     fields that cannot currently be set by assembly code.  Ignore them
-     for now.  */
-  if (opc->pinfo & INSN_TRAP)
-    {
-      static const char *const trap_insns[] = {
-	"break", "sdbbp",
-	"teq", "tge", "tgeu", "tlt", "tltu", "tne",
-      };
-      int i;
-      for (i = sizeof(trap_insns)/sizeof(trap_insns[0]) - 1; i >= 0; i--)
-	if (!strcmp (trap_insns[i], opc->name))
-	  {
-	    used_bits |= 0xffc0;
-	    break;
-	  }
-    }
   if (used_bits != 0xffffffff)
     {
       as_bad (_("internal: bad mips opcode (bits 0x%lx undefined): %s %s"),
