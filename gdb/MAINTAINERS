@@ -152,6 +152,7 @@ generic arch support	Andrew Cagney		cagney@cygnus.com
 target vector		Andrew Cagney		cagney@cygnus.com
 main (main.c, top.c)	Elena Zannoni		ezannoni@cygnus.com
 event loop		Elena Zannoni           ezannoni@cygnus.com
+
 generic symtabs		Jim Blandy		jimb@cygnus.com
 			Elena Zannoni		ezannoni@cygnus.com
   dwarf readers		Jim Blandy		jimb@cygnus.com
@@ -161,6 +162,10 @@ generic symtabs		Jim Blandy		jimb@cygnus.com
   stabs reader		Jim Blandy		jimb@cygnus.com
 			Elena Zannoni		ezannoni@cygnus.com
   coff reader		Philippe De Muyter	phdm@macqel.be
+  linespec		Jim Blandy		jimb@cygnus.com
+			Elena Zannoni		ezannoni@cygnus.com
+			Fernando Nasser		fnasser@cygnus.com
+
 tracing bytecode stuff  Jim Blandy              jimb@cygnus.com
 tracing			Michael Snyder		msnyder@cygnus.com
 threads			Michael Snyder		msnyder@cygnus.com
