@@ -1,5 +1,9 @@
 2002-10-11  Adam Fedor  <fedor@gnu.org>
 
+	* language.h (CAST_IS_CONVERSION): Add language_objc.
+
+2002-10-11  Adam Fedor  <fedor@gnu.org>
+
 	* defs.h (enum language): Add language_objc.
 
 2002-10-11  Klee Dienes  <kdienes@apple.com>
