@@ -1,3 +1,8 @@
+Tue Mar 24 18:28:12 1998  Eric Mumpower  <nocturne@cygnus.com>
+
+	* Makefile.in (BASE_FLAGS_TO_PASS): Pass $(lispdir) down to
+	recursive makes
+
 Tue Mar 24 11:37:45 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (CC_FOR_TARGET): Use $(TARGET_SUBDIR) when passing -B

@@ -384,6 +384,7 @@ BASE_FLAGS_TO_PASS = \
 	"infodir=$(infodir)" \
 	"libdir=$(libdir)" \
 	"libexecdir=$(libexecdir)" \
+	"lispdir=$(lispdir)" \
 	"localstatedir=$(localstatedir)" \
 	"mandir=$(mandir)" \
 	"oldincludedir=$(oldincludedir)" \
