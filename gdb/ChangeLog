@@ -1,5 +1,13 @@
 2004-11-11  Randolph Chung  <tausq@debian.org>
 
+	* hppa-tdep.c (skip_prologue_hard_way): Make static, add
+	stop_after_branch parameter and use it to determine if we should look
+	at the delay slot of the first branch insn to find prologue insns.
+	(hppa_skip_prologue): Update comment and call to skip_prologue_hard_way.
+	(hppa_frame_cache): Likewise.
+
+2004-11-11  Randolph Chung  <tausq@debian.org>
+
 	* hppa-tdep.c (hppa_frame_cache): Properly handle the frame pointer
 	register so that it can be unwound from anywhere in the prologue.
 

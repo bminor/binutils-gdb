@@ -1247,14 +1247,15 @@ inst_saves_fr (unsigned long inst)
    be in the prologue.  */
 
 
-CORE_ADDR
-skip_prologue_hard_way (CORE_ADDR pc)
+static CORE_ADDR
+skip_prologue_hard_way (CORE_ADDR pc, int stop_before_branch)
 {
   char buf[4];
   CORE_ADDR orig_pc = pc;
   unsigned long inst, stack_remaining, save_gr, save_fr, save_rp, save_sp;
   unsigned long args_stored, status, i, restart_gr, restart_fr;
   struct unwind_table_entry *u;
+  int final_iteration;
 
   restart_gr = 0;
   restart_fr = 0;
@@ -1297,6 +1298,8 @@ restart:
   for (i = 12; i < u->Entry_FR + 12; i++)
     save_fr |= (1 << i);
   save_fr &= ~restart_fr;
+
+  final_iteration = 0;
 
   /* Loop until we find everything of interest or hit a branch.
 
@@ -1434,7 +1437,7 @@ restart:
 
       /* Quit if we hit any kind of branch.  This can happen if a prologue
          instruction is in the delay slot of the first call/branch.  */
-      if (is_branch (inst))
+      if (is_branch (inst) && stop_before_branch)
 	break;
 
       /* What a crock.  The HP compilers set args_stored even if no
@@ -1455,6 +1458,13 @@ restart:
 
       /* Bump the PC.  */
       pc += 4;
+
+      /* !stop_before_branch, so also look at the insn in the delay slot 
+         of the branch.  */
+      if (final_iteration)
+	break;
+      if (is_branch (inst))
+	final_iteration = 1;
     }
 
   /* We've got a tenative location for the end of the prologue.  However
@@ -1513,12 +1523,13 @@ after_prologue (CORE_ADDR pc)
 
 /* To skip prologues, I use this predicate.  Returns either PC itself
    if the code at PC does not look like a function prologue; otherwise
-   returns an address that (if we're lucky) follows the prologue.  If
-   LENIENT, then we must skip everything which is involved in setting
-   up the frame (it's OK to skip more, just so long as we don't skip
-   anything which might clobber the registers which are being saved.
-   Currently we must not skip more on the alpha, but we might the lenient
-   stuff some day.  */
+   returns an address that (if we're lucky) follows the prologue.  
+   
+   hppa_skip_prologue is called by gdb to place a breakpoint in a function.
+   It doesn't necessarily skips all the insns in the prologue. In fact
+   we might not want to skip all the insns because a prologue insn may
+   appear in the delay slot of the first branch, and we don't want to
+   skip over the branch in that case.  */
 
 static CORE_ADDR
 hppa_skip_prologue (CORE_ADDR pc)
@@ -1543,7 +1554,7 @@ hppa_skip_prologue (CORE_ADDR pc)
   if (post_prologue_pc != 0)
     return max (pc, post_prologue_pc);
   else
-    return (skip_prologue_hard_way (pc));
+    return (skip_prologue_hard_way (pc, 1));
 }
 
 struct hppa_frame_cache
@@ -1626,18 +1637,24 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
     int looking_for_rp = u->Save_RP;
     int fp_loc = -1;
 
-    /* We have to use hppa_skip_prologue instead of just 
+    /* We have to use skip_prologue_hard_way instead of just 
        skip_prologue_using_sal, in case we stepped into a function without
        symbol information.  hppa_skip_prologue also bounds the returned
        pc by the passed in pc, so it will not return a pc in the next
-       function.  */
+       function.  
+       
+       We used to call hppa_skip_prologue to find the end of the prologue,
+       but if some non-prologue instructions get scheduled into the prologue,
+       and the program is compiled with debug information, the "easy" way
+       in hppa_skip_prologue will return a prologue end that is too early
+       for us to notice any potential frame adjustments.  */
 
     /* We used to use frame_func_unwind () to locate the beginning of the
        function to pass to skip_prologue ().  However, when objects are 
        compiled without debug symbols, frame_func_unwind can return the wrong 
        function (or 0).  We can do better than that by using unwind records.  */
 
-    prologue_end = hppa_skip_prologue (u->region_start);
+    prologue_end = skip_prologue_hard_way (u->region_start, 0);
     end_pc = frame_pc_unwind (next_frame);
 
     if (prologue_end != 0 && end_pc > prologue_end)
