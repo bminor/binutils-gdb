@@ -1,3 +1,8 @@
+2003-12-20  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-ppc.c (md_apply_fix3): Handle the case where a
+	.byte directive generates a pc-relative relocation.
+
 2003-12-19  Nick Clifton  <nickc@redhat.com>
             Andreas Schwab  <schwab@suse.de>
 

@@ -5899,10 +5899,19 @@ md_apply_fix3 (fixP, valP, seg)
 
 	case BFD_RELOC_8:
 	  if (fixP->fx_pcrel)
-	    abort ();
-
-	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
-			      value, 1);
+	    {
+	      /* This can occur if there is a bug in the input assembler, eg:
+	         ".byte <undefined_symbol> - ."  */
+	      if (fixP->fx_addsy)
+		as_bad (_("Unable to handle reference to symbol %s"),
+			S_GET_NAME (fixP->fx_addsy));
+	      else
+		as_bad (_("Unable to resolve expression"));
+	      fixP->fx_done = 1;
+	    }
+	  else
+	    md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
+				value, 1);
 	  break;
 
 	case BFD_RELOC_24_PLT_PCREL:
