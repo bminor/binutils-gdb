@@ -1,3 +1,9 @@
+Mon Feb 11 12:59:29 CET 2002  Jan Hubicka  <jh@suse.cz>
+
+	* i386.c (md_assemble): Support 32bit address prefix.
+	(i386_displacement): Likewise.
+	(i386_index_check): Accept 32bit addressing in 64bit mode.
+
 2002-02-11  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-sh.c (dot): Removed unused function.
