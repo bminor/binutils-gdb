@@ -1,3 +1,8 @@
+Thu Mar 18 13:49:09 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* ieee-float.h:  Moved from ../gdb.
+	* dis-asm.h:  New file.  Interface to dis-assembler.
+
 Thu Mar 11 10:52:57 1993  Fred Fish  (fnf@cygnus.com)
 
 	* demangle.h (DMGL_NO_OPTS):  Add define (set to 0) to use
