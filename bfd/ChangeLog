@@ -1,3 +1,8 @@
+2002-11-03  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-v850.c (v850_elf_relax_delete_bytes): Correct parameters
+	for bfd_elf32_swap_symbol_out.
+
 2002-10-31  David O'Brien  <obrien@FreeBSD.org>
 
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Don't mix

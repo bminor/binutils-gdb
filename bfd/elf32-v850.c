@@ -2388,7 +2388,7 @@ v850_elf_relax_delete_bytes (abfd, sec, addr, toaddr, count)
 	  if (isym.st_value + isym.st_size >= toaddr)
 	    isym.st_size += count;	    
 	  
-	  bfd_elf32_swap_symbol_out (abfd, & isym, shndx, esym);
+	  bfd_elf32_swap_symbol_out (abfd, & isym, esym, shndx);
 	}
       else if (isym.st_shndx == sec_shndx
 	       && isym.st_value < addr + count)
@@ -2401,7 +2401,7 @@ v850_elf_relax_delete_bytes (abfd, sec, addr, toaddr, count)
 	      && isym.st_value <  addr + count)
 	    isym.st_value = addr;
 
-	  bfd_elf32_swap_symbol_out (abfd, & isym, shndx, esym);
+	  bfd_elf32_swap_symbol_out (abfd, & isym, esym, shndx);
 	}
     }
 
@@ -2426,7 +2426,7 @@ v850_elf_relax_delete_bytes (abfd, sec, addr, toaddr, count)
 	  if ((sym_hash)->root.u.def.value + isym.st_size >= toaddr)
 	    {
 	      isym.st_size += count;
-	      bfd_elf32_swap_symbol_out (abfd, & isym, shndx, esym);
+	      bfd_elf32_swap_symbol_out (abfd, & isym, esym, shndx);
 	    }
 
 	  (sym_hash)->root.u.def.value -= count;
@@ -2445,7 +2445,7 @@ v850_elf_relax_delete_bytes (abfd, sec, addr, toaddr, count)
 	      && (sym_hash)->root.u.def.value < addr + count)
 	    (sym_hash)->root.u.def.value = addr;
 
-	  bfd_elf32_swap_symbol_out (abfd, & isym, shndx, esym);
+	  bfd_elf32_swap_symbol_out (abfd, & isym, esym, shndx);
 	}
 
       if (shndx)
