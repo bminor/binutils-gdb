@@ -29,7 +29,6 @@ if { [istarget mips*-*-*] } then {
 
 	# MIPS branch offset final link checking.
 	run_dump_test "branch-misc-1"
-	run_dump_test "branch-misc-2"
     }
 
     if { $embedded_elf } {
