@@ -1,3 +1,7 @@
+Thu Jan  9 11:26:27 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* scripttempl/armcoff.sc: Correct mask used for .data address.
+
 Wed Jan  8 15:14:59 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	* emultempl/pe.em: make default executable a.exe instead of
