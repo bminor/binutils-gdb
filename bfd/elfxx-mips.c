@@ -3783,10 +3783,11 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
 				    bfd_vma *addendp, asection *input_section)
 {
   Elf_Internal_Rela outrel[3];
-  bfd_boolean skip;
   asection *sreloc;
   bfd *dynobj;
   int r_type;
+  long indx;
+  bfd_boolean defined_p;
 
   r_type = ELF_R_TYPE (output_bfd, rel->r_info);
   dynobj = elf_hash_table (info)->dynobj;
@@ -3796,7 +3797,6 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
   BFD_ASSERT (sreloc->reloc_count * MIPS_ELF_REL_SIZE (output_bfd)
 	      < sreloc->size);
 
-  skip = FALSE;
   outrel[0].r_offset =
     _bfd_elf_section_offset (output_bfd, info, input_section, rel[0].r_offset);
   outrel[1].r_offset =
@@ -3830,118 +3830,108 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
 
   if (outrel[0].r_offset == MINUS_ONE)
     /* The relocation field has been deleted.  */
-    skip = TRUE;
-  else if (outrel[0].r_offset == MINUS_TWO)
+    return TRUE;
+
+  if (outrel[0].r_offset == MINUS_TWO)
     {
       /* The relocation field has been converted into a relative value of
 	 some sort.  Functions like _bfd_elf_write_section_eh_frame expect
 	 the field to be fully relocated, so add in the symbol's value.  */
-      skip = TRUE;
       *addendp += symbol;
+      return TRUE;
     }
 
-  /* If we've decided to skip this relocation, just output an empty
-     record.  Note that R_MIPS_NONE == 0, so that this call to memset
-     is a way of setting R_TYPE to R_MIPS_NONE.  */
-  if (skip)
-    memset (outrel, 0, sizeof (Elf_Internal_Rela) * 3);
+  /* We must now calculate the dynamic symbol table index to use
+     in the relocation.  */
+  if (h != NULL
+      && (! info->symbolic || !h->root.def_regular)
+      /* h->root.dynindx may be -1 if this symbol was marked to
+	 become local.  */
+      && h->root.dynindx != -1)
+    {
+      indx = h->root.dynindx;
+      if (SGI_COMPAT (output_bfd))
+	defined_p = h->root.def_regular;
+      else
+	/* ??? glibc's ld.so just adds the final GOT entry to the
+	   relocation field.  It therefore treats relocs against
+	   defined symbols in the same way as relocs against
+	   undefined symbols.  */
+	defined_p = FALSE;
+    }
   else
     {
-      long indx;
-      bfd_boolean defined_p;
-
-      /* We must now calculate the dynamic symbol table index to use
-	 in the relocation.  */
-      if (h != NULL
-	  && (! info->symbolic || !h->root.def_regular)
-	  /* h->root.dynindx may be -1 if this symbol was marked to
-	     become local.  */
-	  && h->root.dynindx != -1)
+      if (sec != NULL && bfd_is_abs_section (sec))
+	indx = 0;
+      else if (sec == NULL || sec->owner == NULL)
 	{
-	  indx = h->root.dynindx;
-	  if (SGI_COMPAT (output_bfd))
-	    defined_p = h->root.def_regular;
-	  else
-	    /* ??? glibc's ld.so just adds the final GOT entry to the
-	       relocation field.  It therefore treats relocs against
-	       defined symbols in the same way as relocs against
-	       undefined symbols.  */
-	    defined_p = FALSE;
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
 	}
       else
 	{
-	  if (sec != NULL && bfd_is_abs_section (sec))
-	    indx = 0;
-	  else if (sec == NULL || sec->owner == NULL)
-	    {
-	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
-	    }
-	  else
-	    {
-	      indx = elf_section_data (sec->output_section)->dynindx;
-	      if (indx == 0)
-		abort ();
-	    }
-
-	  /* Instead of generating a relocation using the section
-	     symbol, we may as well make it a fully relative
-	     relocation.  We want to avoid generating relocations to
-	     local symbols because we used to generate them
-	     incorrectly, without adding the original symbol value,
-	     which is mandated by the ABI for section symbols.  In
-	     order to give dynamic loaders and applications time to
-	     phase out the incorrect use, we refrain from emitting
-	     section-relative relocations.  It's not like they're
-	     useful, after all.  This should be a bit more efficient
-	     as well.  */
-	  /* ??? Although this behavior is compatible with glibc's ld.so,
-	     the ABI says that relocations against STN_UNDEF should have
-	     a symbol value of 0.  Irix rld honors this, so relocations
-	     against STN_UNDEF have no effect.  */
-	  if (!SGI_COMPAT (output_bfd))
-	    indx = 0;
-	  defined_p = TRUE;
+	  indx = elf_section_data (sec->output_section)->dynindx;
+	  if (indx == 0)
+	    abort ();
 	}
 
-      /* If the relocation was previously an absolute relocation and
-	 this symbol will not be referred to by the relocation, we must
-	 adjust it by the value we give it in the dynamic symbol table.
-	 Otherwise leave the job up to the dynamic linker.  */
-      if (defined_p && r_type != R_MIPS_REL32)
-	*addendp += symbol;
-
-      /* The relocation is always an REL32 relocation because we don't
-	 know where the shared library will wind up at load-time.  */
-      outrel[0].r_info = ELF_R_INFO (output_bfd, (unsigned long) indx,
-				     R_MIPS_REL32);
-      /* For strict adherence to the ABI specification, we should
-	 generate a R_MIPS_64 relocation record by itself before the
-	 _REL32/_64 record as well, such that the addend is read in as
-	 a 64-bit value (REL32 is a 32-bit relocation, after all).
-	 However, since none of the existing ELF64 MIPS dynamic
-	 loaders seems to care, we don't waste space with these
-	 artificial relocations.  If this turns out to not be true,
-	 mips_elf_allocate_dynamic_relocation() should be tweaked so
-	 as to make room for a pair of dynamic relocations per
-	 invocation if ABI_64_P, and here we should generate an
-	 additional relocation record with R_MIPS_64 by itself for a
-	 NULL symbol before this relocation record.  */
-      outrel[1].r_info = ELF_R_INFO (output_bfd, 0,
-				     ABI_64_P (output_bfd)
-				     ? R_MIPS_64
-				     : R_MIPS_NONE);
-      outrel[2].r_info = ELF_R_INFO (output_bfd, 0, R_MIPS_NONE);
-
-      /* Adjust the output offset of the relocation to reference the
-	 correct location in the output file.  */
-      outrel[0].r_offset += (input_section->output_section->vma
-			     + input_section->output_offset);
-      outrel[1].r_offset += (input_section->output_section->vma
-			     + input_section->output_offset);
-      outrel[2].r_offset += (input_section->output_section->vma
-			     + input_section->output_offset);
+      /* Instead of generating a relocation using the section
+	 symbol, we may as well make it a fully relative
+	 relocation.  We want to avoid generating relocations to
+	 local symbols because we used to generate them
+	 incorrectly, without adding the original symbol value,
+	 which is mandated by the ABI for section symbols.  In
+	 order to give dynamic loaders and applications time to
+	 phase out the incorrect use, we refrain from emitting
+	 section-relative relocations.  It's not like they're
+	 useful, after all.  This should be a bit more efficient
+	 as well.  */
+      /* ??? Although this behavior is compatible with glibc's ld.so,
+	 the ABI says that relocations against STN_UNDEF should have
+	 a symbol value of 0.  Irix rld honors this, so relocations
+	 against STN_UNDEF have no effect.  */
+      if (!SGI_COMPAT (output_bfd))
+	indx = 0;
+      defined_p = TRUE;
     }
+
+  /* If the relocation was previously an absolute relocation and
+     this symbol will not be referred to by the relocation, we must
+     adjust it by the value we give it in the dynamic symbol table.
+     Otherwise leave the job up to the dynamic linker.  */
+  if (defined_p && r_type != R_MIPS_REL32)
+    *addendp += symbol;
+
+  /* The relocation is always an REL32 relocation because we don't
+     know where the shared library will wind up at load-time.  */
+  outrel[0].r_info = ELF_R_INFO (output_bfd, (unsigned long) indx,
+				 R_MIPS_REL32);
+  /* For strict adherence to the ABI specification, we should
+     generate a R_MIPS_64 relocation record by itself before the
+     _REL32/_64 record as well, such that the addend is read in as
+     a 64-bit value (REL32 is a 32-bit relocation, after all).
+     However, since none of the existing ELF64 MIPS dynamic
+     loaders seems to care, we don't waste space with these
+     artificial relocations.  If this turns out to not be true,
+     mips_elf_allocate_dynamic_relocation() should be tweaked so
+     as to make room for a pair of dynamic relocations per
+     invocation if ABI_64_P, and here we should generate an
+     additional relocation record with R_MIPS_64 by itself for a
+     NULL symbol before this relocation record.  */
+  outrel[1].r_info = ELF_R_INFO (output_bfd, 0,
+				 ABI_64_P (output_bfd)
+				 ? R_MIPS_64
+				 : R_MIPS_NONE);
+  outrel[2].r_info = ELF_R_INFO (output_bfd, 0, R_MIPS_NONE);
+
+  /* Adjust the output offset of the relocation to reference the
+     correct location in the output file.  */
+  outrel[0].r_offset += (input_section->output_section->vma
+			 + input_section->output_offset);
+  outrel[1].r_offset += (input_section->output_section->vma
+			 + input_section->output_offset);
+  outrel[2].r_offset += (input_section->output_section->vma
+			 + input_section->output_offset);
 
   /* Put the relocation back out.  We have to use the special
      relocation outputter in the 64-bit case since the 64-bit
@@ -3967,7 +3957,7 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
     |= SHF_WRITE;
 
   /* On IRIX5, make an entry of compact relocation info.  */
-  if (! skip && IRIX_COMPAT (output_bfd) == ict_irix5)
+  if (IRIX_COMPAT (output_bfd) == ict_irix5)
     {
       asection *scpt = bfd_get_section_by_name (dynobj, ".compact_rel");
       bfd_byte *cr;

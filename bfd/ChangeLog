@@ -1,3 +1,9 @@
+2004-11-16  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Return early
+	for discard relocations; don't add an R_MIPS_NONE to the main body
+	of .rel.dyn.
+
 2004-11-04  Paul Brook  <paul@codesourcery.com>
 
 	* elf-bfd.h (_bfd_elf_slurp_version_tables): Update prototype.
