@@ -920,7 +920,7 @@ unsigned char ebcasc[256] =
 /* ebcdic translation tables needed for 3270 support */
 static void
 i370_ebcdic (unused)
-     int unused;
+     int unused ATTRIBUTE_UNUSED;
 {
   char *p, *end;
   char delim = 0;
@@ -955,7 +955,7 @@ i370_ebcdic (unused)
 /* stub out a couple of routines */
 static void
 i370_rmode (unused)
-     int unused;
+     int unused ATTRIBUTE_UNUSED;
 {
   as_tsktsk ("rmode ignored");
 }
@@ -976,7 +976,7 @@ i370_dsect (sect)
 
 static void
 i370_csect (unused)
-     int unused;
+     int unused ATTRIBUTE_UNUSED;
 {
   as_tsktsk ("csect not supported");
 }
@@ -989,8 +989,8 @@ i370_csect (unused)
  * DC   F'1'             # in sysv4, .long   1
  */
 static void
-i370_dc(unused)
-     int unused;
+i370_dc (unused)
+     int unused ATTRIBUTE_UNUSED;
 {
   char * p, tmp[50];
   int nbytes=0;
@@ -1069,7 +1069,7 @@ i370_dc(unused)
 /* provide minimal support for DS Define Storage */
 static void
 i370_ds (unused)
-     int unused;
+     int unused ATTRIBUTE_UNUSED;
 {
   /* DS 0H or DS 0F or DS 0D */
   if ('0' == *input_line_pointer)
@@ -1118,7 +1118,7 @@ i370_elf_rdata (sect)
 /* Pseudo op to make file scope bss items */
 static void
 i370_elf_lcomm (unused)
-     int unused;
+     int unused ATTRIBUTE_UNUSED;
 {
   register char *name;
   register char c;
@@ -1416,6 +1416,9 @@ add_to_lit_pool (expressionS *exx, char *name, int sz)
 
 /* Can't use symbol_new here, so have to create a symbol and then at
    a later date assign it a value. Thats what these functions do */
+static void symbol_locate
+  PARAMS ((symbolS *, const char *, segT, valueT, fragS *));
+
 static void
 symbol_locate (symbolP, name, segment, valu, frag)
      symbolS *symbolP;
@@ -1706,7 +1709,7 @@ i370_addr_cons (expressionS *exp)
 
 static void
 i370_ltorg (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   int litsize;
   int lit_count = 0;
@@ -1830,7 +1833,7 @@ i370_ltorg (ignore)
  */
 static void
 i370_using (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   expressionS ex, baseaddr;
   int iregno;
@@ -1876,7 +1879,7 @@ i370_using (ignore)
 
 static void
 i370_drop (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   expressionS ex;
   int iregno;
@@ -2451,7 +2454,7 @@ i370_macro (str, macro)
   md_assemble (complete);
 }
 
-#ifdef OBJ_ELF
+#if 0
 /* For ELF, add support for SHF_EXCLUDE and SHT_ORDERED */
 
 int
@@ -2512,7 +2515,7 @@ i370_section_flags (flags, attr, type)
 
 static void
 i370_byte (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (*input_line_pointer != '\"')
     {
@@ -2556,7 +2559,7 @@ i370_byte (ignore)
 
 static void
 i370_tc (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
 
   /* Skip the TOC symbol name.  */
@@ -2660,8 +2663,8 @@ md_section_align (seg, addr)
 
 int
 md_estimate_size_before_relax (fragp, seg)
-     fragS *fragp;
-     asection *seg;
+     fragS *fragp ATTRIBUTE_UNUSED;
+     asection *seg ATTRIBUTE_UNUSED;
 {
   abort ();
   return 0;
@@ -2671,9 +2674,9 @@ md_estimate_size_before_relax (fragp, seg)
 
 void
 md_convert_frag (abfd, sec, fragp)
-     bfd *abfd;
-     asection *sec;
-     fragS *fragp;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
+     fragS *fragp ATTRIBUTE_UNUSED;
 {
   abort ();
 }
@@ -2682,7 +2685,7 @@ md_convert_frag (abfd, sec, fragp)
 
 symbolS *
 md_undefined_symbol (name)
-     char *name;
+     char *name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -2695,7 +2698,7 @@ md_undefined_symbol (name)
 long
 md_pcrel_from_section (fixp, sec)
      fixS *fixp;
-     segT sec;
+     segT sec ATTRIBUTE_UNUSED;
 {
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
@@ -2893,7 +2896,7 @@ md_apply_fix3 (fixP, valP, seg)
 
 arelent *
 tc_gen_reloc (seg, fixp)
-     asection *seg;
+     asection *seg ATTRIBUTE_UNUSED;
      fixS *fixp;
 {
   arelent *reloc;

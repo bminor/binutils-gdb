@@ -1,5 +1,24 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-i370.c (i370_ebcdic <unused>): Add ATTRIBUTE_UNUSED.
+	(i370_rmode <unused>): Likewise.
+	(i370_csect <unused>): Likewise.
+	(i370_dc <unused>): Likewise.
+	(i370_ds <unused>): Likewise.
+	(i370_elf_lcomm <unused>): Likewise.
+	(i370_ltorg <ignore>): Likewise.
+	(i370_using <ignore>): Likewise.
+	(i370_drop <ignore>): Likewise.
+	(i370_byte <ignore>): Likewise.
+	(i370_tc <ignore>): Likewise.
+	(md_estimate_size_before_relax <fragp, seg>): Likewise.
+	(md_convert_frag <all args>): Likewise.
+	(md_undefined_symbol <name>): Likewise.
+	(md_pcrel_from_section <sec>): Likewise.
+	(tc_gen_reloc <seg>): Likewise.
+	(i370_section_letter): #if 0 unused functions.
+	(i370_section_word, i370_section_type, i370_section_flags): Likewise.
+	(symbol_locate): Prototype.
 	* config/tc-i860.c (md_atof): Remove declaration of atof_ieee.
 	(md_number_to_disp, md_number_to_field): Remove.
 	(md_apply_fix3): Correct format string and cast "fup".
