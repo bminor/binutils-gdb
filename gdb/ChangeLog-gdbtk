@@ -1,3 +1,8 @@
+Tue May 12 13:29:20 1998  Jeff Holcomb  <jeffh@cygnus.com>
+
+	* Makefile.in (install-only): Add images/icons.txt and
+	images2/icons.txt to files that need to be installed.
+
 Tue May  5 09:30:25 1998  Christopher Faylor <cgf@cygnus.com>
 
 	* gdbtk.c (_initialize_gdbtk): Use correct device names in
