@@ -1550,9 +1550,10 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 	  if (isym.n_scnum > 0)
 	    {
 	      isym.n_scnum = (*secpp)->output_section->target_index;
-	      isym.n_value += ((*secpp)->output_section->vma
-			       + (*secpp)->output_offset
-			       - (*secpp)->vma);
+	      isym.n_value += (*secpp)->output_offset;
+	      if (! obj_pe (finfo->output_bfd))
+		isym.n_value += ((*secpp)->output_section->vma
+				 - (*secpp)->vma);
 	    }
 
 	  /* The value of a C_FILE symbol is the symbol index of the
@@ -2245,8 +2246,9 @@ _bfd_coff_write_global_sym (h, data)
 	else
 	  isym.n_scnum = sec->target_index;
 	isym.n_value = (h->root.u.def.value
-			+ sec->vma
 			+ h->root.u.def.section->output_offset);
+	if (! obj_pe (finfo->output_bfd))
+	  isym.n_value += sec->vma;
       }
       break;
 
@@ -2544,8 +2546,9 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 	      sec = sections[symndx];
               val = (sec->output_section->vma
 		     + sec->output_offset
-		     + sym->n_value
-		     - sec->vma);
+		     + sym->n_value);
+	      if (! obj_pe (output_bfd))
+		val -= sec->vma;
 	    }
 	}
       else

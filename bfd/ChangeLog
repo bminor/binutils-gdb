@@ -1,5 +1,15 @@
 Wed May 21 17:15:50 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffcode.h (coff_slurp_symbol_table): If COFF_WITH_PE or
+	COFF_IMAGE_WITH_PE, don't subtract the section VMA from the symbol
+	value.
+	* coffgen.c (fixup_symbol_value): Add abfd parameter.  Change all
+	callers.  If PE file, don't add section VMA.
+	(coff_write_alien_symbol): If PE file, don't add section VMA.
+	* cofflink.c (_bfd_coff_link_input_bfd): Likewise.
+	(_bfd_coff_write_global_sym): Likewise.
+	(_bfd_coff_generic_relocate_section): Likewise.
+
 	* peicode.h: Add & 0xffffffff when using ImageBase in case bfd_vma
 	is 64 bits.
 

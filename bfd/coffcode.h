@@ -3408,8 +3408,15 @@ coff_slurp_symbol_table (abfd)
 		     section */
 
 		  dst->symbol.flags = BSF_EXPORT | BSF_GLOBAL;
+
+#if defined (COFF_WITH_PE) || defined (COFF_IMAGE_WITH_PE)
+		  /* PE sets the symbol to a value relative to the
+                     start of the section.  */
+		  dst->symbol.value = src->u.syment.n_value;
+#else
 		  dst->symbol.value = (src->u.syment.n_value
 				       - dst->symbol.section->vma);
+#endif
 
 		  if (ISFCN ((src->u.syment.n_type)))
 		    {
@@ -3448,8 +3455,16 @@ coff_slurp_symbol_table (abfd)
 	      /* Base the value as an index from the base of the
 		 section, if there is one.  */
 	      if (dst->symbol.section)
-		dst->symbol.value = (src->u.syment.n_value
-				     - dst->symbol.section->vma);
+		{
+#if defined (COFF_WITH_PE) || defined (COFF_IMAGE_WITH_PE)
+		  /* PE sets the symbol to a value relative to the
+                     start of the section.  */
+		  dst->symbol.value = src->u.syment.n_value;
+#else
+		  dst->symbol.value = (src->u.syment.n_value
+				       - dst->symbol.section->vma);
+#endif
+		}
 	      else
 		dst->symbol.value = src->u.syment.n_value;
 	      break;
@@ -3545,10 +3560,16 @@ coff_slurp_symbol_table (abfd)
 	    case C_FCN:		/* ".bf" or ".ef"		 */
 	    case C_EFCN:	/* physical end of function	 */
 	      dst->symbol.flags = BSF_LOCAL;
+#if defined (COFF_WITH_PE) || defined (COFF_IMAGE_WITH_PE)
+	      /* PE sets the symbol to a value relative to the start
+		 of the section.  */
+	      dst->symbol.value = src->u.syment.n_value;
+#else
 	      /* Base the value as an index from the base of the
 		 section.  */
 	      dst->symbol.value = (src->u.syment.n_value
 				   - dst->symbol.section->vma);
+#endif
 	      break;
 
 	    case C_NULL:
