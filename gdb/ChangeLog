@@ -1,3 +1,20 @@
+2003-09-08  Corinna Vinschen  <vinschen@redhat.com>
+
+	* Makefile.in (ALLDEPFILES): Add sh64-tdep.c.
+	(sh64-tdep.o): Add dependencies.
+	* configure.tgt: Add FIXME to sh-*-linux*.
+	* sh-tdep.c: Move sh64 support to sh64-tdep.c.
+	(sh_gdbarch_init): Always set correct sh_show_regs function
+	pointer.  Call sh64_gdbarch_init() if machine type is sh5. 
+	* sh-tdep.h: Move sh64 support to sh64-tdep.c.
+	* sh64-tdep.c: New file, containing all sh64 related code from
+	sh-tdep.c.
+	* config/sh/embed.mt (TDEPFILES): Add sh64-tdep.o.
+	* config/sh/linux.mt (TDEPFILES): Ditto.
+	* config/sh/nbsd.mt (TDEPFILES): Ditto. 
+	* config/sh/tm-sh.h: Drop REGISTER_TYPE definition.
+	* config/sh/wince.mt (TDEPFILES): Ditto.
+
 2003-09-07  Daniel Jacobowitz  <drow@mvista.com>
 
 	* lin-lwp.c (detach_callback): Don't call stop_wait_callback.

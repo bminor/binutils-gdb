@@ -195,6 +195,7 @@ s390x-*-*)		gdb_target=s390x
 sh*-*-pe)		gdb_target=wince ;;
 sh-*-coff*)		gdb_target=embed ;;
 sh-*-elf*)		gdb_target=embed ;;
+# FIXME should that be sh*-*-linux*, perhaps?
 sh-*-linux*)		gdb_target=linux
 			build_gdbserver=yes
 			;;

@@ -1295,7 +1295,7 @@ ALLDEPFILES = \
 	rs6000-nat.c rs6000-tdep.c \
 	s390-tdep.c s390-nat.c \
 	ser-go32.c ser-pipe.c ser-tcp.c \
-	sh-tdep.c shnbsd-tdep.c shnbsd-nat.c \
+	sh-tdep.c sh64-tdep.c shnbsd-tdep.c shnbsd-nat.c \
 	solib.c solib-irix.c solib-svr4.c solib-sunos.c sparc-linux-nat.c \
 	sparc-nat.c \
 	sparc64nbsd-nat.c sparcnbsd-nat.c sparcnbsd-tdep.c \
@@ -2260,6 +2260,11 @@ sh-tdep.o: sh-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(symfile_h) \
 	$(gdbtypes_h) $(gdbcmd_h) $(gdbcore_h) $(value_h) $(dis_asm_h) \
 	$(inferior_h) $(gdb_string_h) $(arch_utils_h) $(floatformat_h) \
 	$(regcache_h) $(doublest_h) $(osabi_h) $(sh_tdep_h) $(elf_bfd_h) \
+	$(solib_svr4_h) $(elf_sh_h) $(gdb_sim_sh_h)
+sh64-tdep.o: sh64-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(symfile_h) \
+	$(gdbtypes_h) $(gdbcmd_h) $(gdbcore_h) $(value_h) $(dis_asm_h) \
+	$(inferior_h) $(gdb_string_h) $(arch_utils_h) $(floatformat_h) \
+	$(regcache_h) $(doublest_h) $(osabi_h) $(elf_bfd_h) \
 	$(solib_svr4_h) $(elf_sh_h) $(gdb_sim_sh_h)
 solib-aix5.o: solib-aix5.c $(defs_h) $(gdb_string_h) $(elf_external_h) \
 	$(symtab_h) $(bfd_h) $(symfile_h) $(objfiles_h) $(gdbcore_h) \
