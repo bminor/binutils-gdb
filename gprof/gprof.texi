@@ -477,6 +477,12 @@ are annotated.  If this option is specified, every line in
 a basic-block is annotated by repeating the annotation for the
 first line.  This behavior is similar to @code{tcov}'s @samp{-a}.
 
+@item --demangle
+@itemx --no-demangle
+These options control whether C++ symbol names should be demangled when
+printing output.  The default is to demangle symbols.  The
+@code{--no-demangle} option may be used to turn off demangling.
+
 @end table
 
 @node Analysis Options,Miscellaneous Options,Output Options,Invoking

@@ -112,6 +112,7 @@ extern int debug_level;		/* debug level */
 extern int output_style;
 extern int output_width;	/* controls column width in index */
 extern bool bsd_style_output;	/* as opposed to FSF style output */
+extern bool demangle;		/* demangle symbol names? */
 extern bool discard_underscores;	/* discard leading underscores? */
 extern bool ignore_direct_calls;	/* don't count direct calls */
 extern bool ignore_static_funcs;	/* suppress static functions */

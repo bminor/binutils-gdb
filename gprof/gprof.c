@@ -42,6 +42,7 @@ int debug_level = 0;
 int output_style = 0;
 int output_width = 80;
 bool bsd_style_output = FALSE;
+bool demangle = TRUE;
 bool discard_underscores = TRUE;
 bool ignore_direct_calls = FALSE;
 bool ignore_static_funcs = FALSE;
@@ -73,6 +74,12 @@ static char *default_excluded_list[] =
   0
 };
 
+/* Codes used for the long options with no short synonyms.  150 isn't
+   special; it's just an arbitrary non-ASCII char value.  */
+
+#define OPTION_DEMANGLE		(150)
+#define OPTION_NO_DEMANGLE	(OPTION_DEMANGLE + 1)
+
 static struct option long_options[] =
 {
   {"line", no_argument, 0, 'l'},
@@ -97,6 +104,8 @@ static struct option long_options[] =
     /* various options to affect output: */
 
   {"all-lines", no_argument, 0, 'x'},
+  {"demangle", no_argument, 0, OPTION_DEMANGLE},
+  {"no-demangle", no_argument, 0, OPTION_NO_DEMANGLE},
   {"directory-path", required_argument, 0, 'I'},
   {"display-unused-functions", no_argument, 0, 'z'},
   {"min-count", required_argument, 0, 'm'},
@@ -144,6 +153,7 @@ Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
 	[--no-static] [--print-path] [--separate-files]\n\
 	[--static-call-graph] [--sum] [--table-length=len] [--traditional]\n\
 	[--version] [--width=n] [--ignore-non-functions]\n\
+	[--demangle] [--no-demangle]\n\
 	[image-file] [profile-file...]\n",
 	   whoami);
   if (status == 0)
@@ -403,6 +413,12 @@ This program is free software.  This program has absolutely no warranty.\n");
 	      output_style &= ~STYLE_EXEC_COUNTS;
 	    }
 	  user_specified |= STYLE_ANNOTATED_SOURCE;
+	  break;
+	case OPTION_DEMANGLE:
+	  demangle = TRUE;
+	  break;
+	case OPTION_NO_DEMANGLE:
+	  demangle = FALSE;
 	  break;
 	default:
 	  usage (stderr, 1);
