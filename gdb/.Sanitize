@@ -351,7 +351,7 @@ vax-tdep.c
 vx-share
 w65-tdep.c
 w89k-rom.c
-win32.c
+win32-nat.c
 xcoffread.c
 xcoffsolib.c
 xcoffsolib.h

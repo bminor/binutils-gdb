@@ -1,5 +1,0 @@
-MH_CFLAGS=
-XM_FILE=xm-i386win32.h
-TERMCAP= 
-XDEPFILES=win32.o
-

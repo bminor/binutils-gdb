@@ -2039,7 +2039,7 @@ i[345]86-*-unixware)	gdb_host=i386v4 ;;
 i[345]86-*-sysv*)	gdb_host=i386v ;;
 i[345]86-*-isc*)	gdb_host=i386v32 ;;
 i[345]86-*-os9k)	gdb_host=i386os9k ;;
-i[345]86-*-win32*)	gdb_host=i386win32 ;;
+i[345]86-*-win32*)	gdb_host=win32 ;;
 m680[01]0-sun-sunos3*)	gdb_host=sun2os3 ;;
 m680[01]0-sun-sunos4*)	gdb_host=sun2os4 ;;
 m68030-sony-*)		gdb_host=news1000 ;;
@@ -2204,7 +2204,7 @@ i[345]86-*-mach*)	gdb_target=i386mach ;;
 i[345]86-*-netware*)	gdb_target=i386nw
 		configdirs="${configdirs} nlm" ;;
 i[345]86-*-osf1mk*)	gdb_target=i386mk ;;
-i[345]86-*-win32)	gdb_target=i386win32  ;;
+i[345]86-*-win32)	gdb_target=win32  ;;
 
 i960-*-bout*)		gdb_target=vxworks960 ;;
 i960-*-coff*)		gdb_target=nindy960 ;;

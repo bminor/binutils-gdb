@@ -12,6 +12,14 @@ about volatile variables, thus making it impossible to debug targets
 which use memory mapped I/O devices. `set remotecache off' turns the
 the data cache off.
 
+* New native configurations
+
+Microsoft NT and Microsoft Windows95		i[345]86-*-win32
+
+* New Targets
+
+ARM via RDP protocol				arm-*-*
+
 *** Changes in GDB-4.14:
 
 * New native configurations

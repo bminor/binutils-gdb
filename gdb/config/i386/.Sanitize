@@ -34,9 +34,9 @@ i386bsd.mh
 i386bsd.mt
 i386lynx.mh
 i386lynx.mt
-i386mach.mh
 i386m3.mh
 i386m3.mt
+i386mach.mh
 i386mk.mh
 i386mk.mt
 i386nw.mt
@@ -50,14 +50,13 @@ i386v.mt
 i386v32.mh
 i386v4.mh
 i386v4.mt
-i386win32.mh
-i386win32.mt
 linux.mh
 linux.mt
 nbsd.mh
 nbsd.mt
 ncr3000.mh
 ncr3000.mt
+nm-fbsd.h
 nm-i386aix.h
 nm-i386bsd.h
 nm-i386lynx.h
@@ -66,7 +65,6 @@ nm-i386sco.h
 nm-i386sco4.h
 nm-i386v.h
 nm-i386v4.h
-nm-fbsd.h
 nm-linux.h
 nm-m3.h
 nm-nbsd.h
@@ -90,13 +88,15 @@ tm-i386nw.h
 tm-i386os9k.h
 tm-i386v.h
 tm-i386v4.h
-tm-i386win32.h
 tm-linux.h
 tm-nbsd.h
 tm-ptx.h
 tm-ptx4.h
 tm-sun386.h
 tm-symmetry.h
+tm-win32.h
+win32.mh
+win32.mt
 xm-go32.h
 xm-i386aix.h
 xm-i386bsd.h
@@ -108,13 +108,13 @@ xm-i386sco.h
 xm-i386v.h
 xm-i386v32.h
 xm-i386v4.h
-xm-i386win32.h
 xm-linux.h
 xm-nbsd.h
 xm-ptx.h
 xm-ptx4.h
 xm-sun386.h
 xm-symmetry.h
+xm-win32.h
 
 Things-to-lose:
 
