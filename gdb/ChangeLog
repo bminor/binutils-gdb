@@ -1,3 +1,8 @@
+Wed Oct 20 14:34:38 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* config/i386/xm-go32.h: define some signals if they aren't
+	  already defined.
+
 Wed Oct 20 11:35:43 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (INTERNAL_LDFLAGS): New macro.  The new part is
