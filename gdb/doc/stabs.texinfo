@@ -218,21 +218,21 @@ descriptors}.
 The @samp{c} symbol descriptor is an exception in that it is not
 followed by type information.  @xref{Constants}.
 
-Type information is either a @var{type_number}, or a
+Type information is either a @var{type_number}, or
 @samp{@var{type_number}=}.  The @var{type_number} alone is a type
 reference, referring directly to a type that has already been defined.
 
-The @samp{@var{type_number}=} is a type definition, where the number
-represents a new type which is about to be defined.  The type definition
-may refer to other types by number, and those type numbers may be
-followed by @samp{=} and nested definitions.
+The @samp{@var{type_number}=} form is a type definition, where the
+number represents a new type which is about to be defined.  The type
+definition may refer to other types by number, and those type numbers
+may be followed by @samp{=} and nested definitions.
 
 In a type definition, if the character that follows the equals sign is
 non-numeric then it is a @var{type_descriptor}, and tells what kind of
 type is about to be defined.  Any other values following the
 @var{type_descriptor} vary, depending on the @var{type_descriptor}.  If
 a number follows the @samp{=} then the number is a @var{type_reference}.
-This is described more thoroughly in the section on types.  @xref{Type
+For a full description of types, @ref{Types}.  @xref{Type
 Descriptors,,Table D: Type Descriptors}, for a list of
 @var{type_descriptor} values.
 
@@ -840,7 +840,7 @@ nesting is reflected in the nested bracketing stabs (@code{N_LBRAC},
 @chapter Variables
 
 @menu
-* Automatic variables::		Variables allocated on the stack.
+* Stack Variables::		Variables allocated on the stack.
 * Global Variables::		Variables used by more than one source file.
 * Register variables::		Variables in registers.
 * Common Blocks::		Variables statically allocated together.
@@ -848,70 +848,54 @@ nesting is reflected in the nested bracketing stabs (@code{N_LBRAC},
 * Parameters::			Variables for arguments to functions.
 @end menu
 
-@node Automatic variables
-@section Locally scoped automatic variables
+@node Stack Variables
+@section Automatic Variables Allocated on the Stack
 
-@table @strong
-@item Directive:
-@code{.stabs}
-@item Type:
-@code{N_LSYM} 
-@item Symbol Descriptor:
-none
-@end table
+If a variable is declared whose scope is local to a function and whose
+lifetime is only as long as that function executes (C calls such
+variables automatic), they can be allocated in a register
+(@pxref{Register variables}) or on the stack.
 
-In addition to describing types, the @code{N_LSYM} stab type also
-describes locally scoped automatic variables.  Refer again to the body
-of @code{main} in @file{example2.c}.  It allocates two automatic
-variables: @samp{times} is scoped to the body of @code{main}, and
-@samp{inner} is scoped to the body of the @code{for} loop.
-@samp{s_flap} is locally scoped but not automatic, and will be discussed
-later.
+For variables allocated on the stack, each variable has a stab with the
+symbol descriptor omitted.  Since type information should being with a
+digit, @samp{-}, or @samp{(}, only digits, @samp{-}, and @samp{(} are
+precluded from being used for symbol descriptors by this fact.  However,
+the Acorn RISC machine (ARM) is said to get this wrong: it puts out a
+mere type definition here, without the preceding
+@code{@var{typenumber}=}.  This is a bad idea; there is no guarantee
+that type descriptors are distinct from symbol descriptors.
 
-@example
-20 @{
-21      static float s_flap;
-22      int times;
-23      for (times=0; times < s_g_repeat; times++)@{
-24        int inner;
-25        printf ("Hello world\n");
-26      @}
-27 @};
-@end example
+These stabs have the @code{N_LSYM} stab type.  The value of the stab is
+the offset of the variable within the local variables.  On most machines
+this is an offset from the frame pointer and is negative.
 
-The @code{N_LSYM} stab for an automatic variable is located just before the
-@code{N_LBRAC} stab describing the open brace of the block to which it is
-scoped. 
+The stab for an automatic variable is located just before the
+@code{N_LBRAC} stab describing the open brace of the block to which it
+is scoped, except for some compilers which put the automatic variables
+after the @code{N_LBRAC} (see @code{VARIABLES_INSIDE_BLOCK} in GDB).
+
+For example, the following C code
 
 @example
-@exdent @code{N_LSYM} (128): automatic variable, scoped locally to @code{main}
-
-.stabs "@var{name}:
-        @var{type information}",
-       N_LSYM, NIL, NIL,
-       @var{frame-pointer-offset}
-
-98  .stabs "times:1",128,0,0,-20
-99  .stabn 192,0,0,LBB2      ## begin `main' N_LBRAC
-
-@exdent @code{N_LSYM} (128): automatic variable, scoped locally to the @code{for} loop
-
-.stabs "@var{name}:
-        @var{type information}",
-        N_LSYM, NIL, NIL,
-       @var{frame-pointer-offset}
-
-100 .stabs "inner:1",128,0,0,-24
-101 .stabn 192,0,0,LBB3      ## begin `for' loop N_LBRAC
+int
+main ()
+@{
+  int x;
+@}
 @end example
 
-The symbol descriptor is omitted for automatic variables.  Since type
-information should being with a digit, @samp{-}, or @samp{(}, only
-digits, @samp{-}, and @samp{(} are precluded from being used for symbol
-descriptors by this fact.  However, the Acorn RISC machine (ARM) is said
-to get this wrong: it puts out a mere type definition here, without the
-preceding @code{@var{typenumber}=}.  This is a bad idea; there is no
-guarantee that type descriptors are distinct from symbol descriptors.
+produces the following stabs
+
+@example
+.stabs "main:F1",36,0,0,_main   # N_FUN
+.stabs "x:1",128,0,0,-12        # N_LSYM
+.stabn 192,0,0,LBB2             # N_LBRAC
+.stabn 224,0,0,LBE2             # N_RBRAC
+@end example
+
+@xref{Procedures} for more information on the @samp{F} symbol desciptor,
+and @ref{Block Structure} for more information on the @code{N_LBRAC} and
+@code{N_RBRAC} symbols.
 
 @node Global Variables
 @section Global Variables
@@ -1861,9 +1845,11 @@ element of.  So the definition of structure type 16 contains an type
 definition for an element which is a pointer to type 16. 
 
 @node Typedefs
-@section Giving a type a name
+@section Giving a Type a Name
 
-To give a type a name, use the @samp{t} symbol descriptor.  For example,
+To give a type a name, use the @samp{t} symbol descriptor.  The type
+specified by the type information (@pxref{Stabs Format}) for the stab.
+For example,
 
 @example
 .stabs "s_typedef:t16",128,0,0,0
@@ -1883,7 +1869,7 @@ means---is it always the same as the name of the type, or is this type
 descriptor used with a nameless stab (@pxref{Stabs Format})?  There
 optionally follows a comma followed by type information which defines
 the type of this type.  If omitted, a semicolon is used in place of the
-comma and the type information, and, the type is much like a generic
+comma and the type information, and the type is much like a generic
 pointer type---it has a known size but little else about it is
 specified.
 
@@ -1937,8 +1923,7 @@ After that is a list of union element descriptions.  Their format is
 name:type, bit offset into the union, and number of bytes for the
 element;.
 
-The stab for the union variable follows.  Notice that the frame
-pointer offset for local variables is negative.
+The stab for the union variable follows.
 
 @display
     <128> N_LSYM - local variable (with no symbol descriptor)
@@ -3106,7 +3091,7 @@ Last stab for module (Solaris2).
 Path and name of source file, @xref{Source Files}.
 
 @item 0x80 N_LSYM
-Stack variable or type definition, @xref{N_LSYM}, @xref{Typedefs}.
+Stack variable (@pxref{Stack Variables}) or type (@pxref{Typedefs}).
 
 @item 0x82     N_BINCL   
 Beginning of an include file (Sun only), @xref{Source Files}.
@@ -3181,7 +3166,7 @@ Gould non-base registers, @xref{Gould}.
 @item @var{digit}
 @itemx (
 @itemx -
-Local variable, @xref{Automatic variables}.
+Variable on the stack, @xref{Stack Variables}.
 
 @item a
 Parameter passed by reference in register, @xref{Parameters}.
@@ -3440,7 +3425,6 @@ Finally, any further information.
 * N_MOD2::			Modula2 information "for imc"
 * N_CATCH::			GNU C++ "catch" clause
 * N_SSYM::			Structure or union element
-* N_LSYM::			Automatic variable
 * N_ENTRY::			Alternate entry point
 * N_SCOPE::			Modula2 scope information (Sun only)
 * Gould::			non-base register symbols used on Gould systems
@@ -3588,38 +3572,6 @@ Structure or union element
 Value is offset in the structure. 
 
 <<?looking at structs and unions in C I didn't see these>>
-
-@node N_LSYM
-@section 128 - 0x80 - N_LSYM      
-Automatic var in the stack (also used for type descriptors.)
-
-@display
-.stabs "name" N_LSYM, NIL, NIL, value
-@end display
-
-@example
-@exdent @emph{For stack based local variables:}
-
-"name" -> name of the variable
-value  -> offset from frame pointer (negative)
-
-@exdent @emph{For type descriptors:}
-
-"name"   -> "name_of_the_type:#type"
-                              # -> t
-
-type     -> type_ref (or) type_def
-
-type_ref -> type_number
-type_def -> type_number=type_desc etc.
-@end example
-
-Type may be either a type reference or a type definition.  A type
-reference is a number that refers to a previously defined type.  A
-type definition is the number that will refer to this type, followed
-by an equals sign, a type descriptor and the additional data that
-defines the type.  See the Table D for type descriptors and the
-section on types for what data follows each type descriptor.
 
 @node N_ENTRY
 @section 164 - 0xa4 - N_ENTRY   

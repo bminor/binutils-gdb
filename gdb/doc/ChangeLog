@@ -1,3 +1,7 @@
+Tue Aug 17 15:57:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Stack Variables): Re-write.
+
 Mon Aug 16 21:20:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Stabs-in-elf): Talk about getting the start
