@@ -1,5 +1,5 @@
 /* Instruction printing code for the ARC.
-   Copyright (C) 1994 Free Software Foundation, Inc. 
+   Copyright (C) 1994, 1995 Free Software Foundation, Inc. 
    Contributed by Doug Evans (dje@cygnus.com).
 
 This program is free software; you can redistribute it and/or modify
@@ -18,14 +18,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "dis-asm.h"
 #include "opcode/arc.h"
+#include "libelf.h"
+#include "elf/arc.h"
+
+static int print_insn_arc_base PARAMS ((bfd_vma, disassemble_info *));
+static int print_insn_arc_host PARAMS ((bfd_vma, disassemble_info *));
+static int print_insn_arc_graphics PARAMS ((bfd_vma, disassemble_info *));
+static int print_insn_arc_audio PARAMS ((bfd_vma, disassemble_info *));
 
 /* Print one instruction from PC on INFO->STREAM.
    Return the size of the instruction (4 or 8 for the ARC). */
 
-int
-print_insn_arc (pc, info)
+static int
+print_insn (pc, info, cpu)
      bfd_vma pc;
-     struct disassemble_info *info;
+     disassemble_info *info;
+     int cpu;
 {
   const struct arc_opcode *opcode,*opcode_end;
   bfd_byte buffer[4];
@@ -36,12 +44,15 @@ print_insn_arc (pc, info)
   arc_insn insn[2];
   int got_limm_p = 0;
   static int initialized = 0;
+  static int current_cpu = 0;
+  /* Not used yet.  Here to record byte order dependencies.  */
+  int bigendian_p = 0;
 
-  if (!initialized)
+  if (!initialized || cpu != current_cpu)
     {
-      /* ??? Hmmm... what do we pass here?  */
-      arc_opcode_init_tables (ARC_HAVE_MULT_SHIFT);
+      arc_opcode_init_tables (cpu);
       initialized = 1;
+      current_cpu = cpu;
     }
 
   status = (*info->read_memory_func) (pc, buffer, 4, info);
@@ -50,7 +61,10 @@ print_insn_arc (pc, info)
       (*info->memory_error_func) (status, pc, info);
       return -1;
     }
-  insn[0] = bfd_getb32 (buffer);
+  if (bigendian_p)
+    insn[0] = bfd_getb32 (buffer);
+  else
+    insn[0] = bfd_getl32 (buffer);
 
   func (stream, "%08lx\t", insn[0]);
 
@@ -63,7 +77,12 @@ print_insn_arc (pc, info)
       const struct arc_operand *operand;
       const struct arc_operand_value *opval;
 
+      /* Basic bit mask must be correct.  */
       if ((insn[0] & opcode->mask) != opcode->value)
+	continue;
+
+      /* Supported by this cpu?  */
+      if (! arc_opcode_supported (opcode))
 	continue;
 
       /* Make two passes over the operands.  First see if any of them
@@ -78,7 +97,7 @@ print_insn_arc (pc, info)
       /* Instructions like "add.f r0,r1,1" are tricky because the ".f" gets
 	 printed first, but we don't know how to print it until we've processed
 	 the regs.  Since we're scanning all the args before printing the insn
-	 anyways, it's quite easy.  */
+	 anyways, it's actually quite easy.  */
 
       for (syn = opcode->syntax; *syn; ++syn)
 	{
@@ -111,7 +130,10 @@ print_insn_arc (pc, info)
 	      (*info->memory_error_func) (status, pc, info);
 	      return -1;
 	    }
-	  insn[1] = bfd_getb32 (buffer);
+	  if (bigendian_p)
+	    insn[1] = bfd_getb32 (buffer);
+	  else
+	    insn[1] = bfd_getl32 (buffer);
 	  got_limm_p = 1;
 	}
 
@@ -178,7 +200,7 @@ print_insn_arc (pc, info)
 		}
 	    }
 	  else if (operand->flags & ARC_OPERAND_RELATIVE)
-	    (*info->print_address_func) (pc + value, info);
+	    (*info->print_address_func) (pc + 4 + value, info);
 	  /* ??? Not all cases of this are currently caught.  */
 	  else if (operand->flags & ARC_OPERAND_ABSOLUTE)
 	    (*info->print_address_func) ((bfd_vma) value & 0xffffffff, info);
@@ -195,4 +217,66 @@ print_insn_arc (pc, info)
 
   func (stream, "*unknown*");
   return 4;
+}
+
+/* Given ABFD, return the print_insn function to use.
+   This does things a non-standard way (the "standard" way would be to copy
+   this code into disassemble.c).  Since there are more than a couple of
+   variants, hiding all this crud here seems cleaner.  */
+
+disassembler_ftype
+arc_disassembler (bfd *abfd)
+{
+  int mach = bfd_get_mach (abfd);
+
+  switch (mach)
+    {
+    case bfd_mach_arc_base:
+      return print_insn_arc_base;
+    case bfd_mach_arc_host:
+      return print_insn_arc_host;
+    case bfd_mach_arc_graphics:
+      return print_insn_arc_graphics;
+    case bfd_mach_arc_audio:
+      return print_insn_arc_audio;
+    }
+  return print_insn_arc_base;
+}
+
+static int
+print_insn_arc_base (pc, info)
+     bfd_vma pc;
+     disassemble_info *info;
+{
+  return print_insn (pc, info, ARC_MACH_BASE);
+}
+
+/* Host CPU.  */
+
+static int
+print_insn_arc_host (pc, info)
+     bfd_vma pc;
+     disassemble_info *info;
+{
+  return print_insn (pc, info, ARC_MACH_HOST);
+}
+
+/* Graphics CPU.  */
+
+static int
+print_insn_arc_graphics (pc, info)
+     bfd_vma pc;
+     disassemble_info *info;
+{
+  return print_insn (pc, info, ARC_MACH_GRAPHICS);
+}
+
+/* Audio CPU.  */
+
+static int
+print_insn_arc_audio (pc, info)
+     bfd_vma pc;
+     disassemble_info *info;
+{
+  return print_insn (pc, info, ARC_MACH_AUDIO);
 }
