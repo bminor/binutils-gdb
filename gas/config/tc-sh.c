@@ -3948,8 +3948,10 @@ tc_gen_reloc (section, fixp)
     rel->addend = 0;
 
   rel->howto = bfd_reloc_type_lookup (stdoutput, r_type);
+#ifdef OBJ_ELF
   if (rel->howto->type == R_SH_IND12W)
       rel->addend += fixp->fx_offset - 4;
+#endif
   if (rel->howto == NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,

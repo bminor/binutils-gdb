@@ -1,3 +1,7 @@
+2003-07-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-sh.c (tc_gen_reloc): Test for R_SH_IND12W only when ELF.
+
 2003-07-29  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/tc-ppc.c (md_apply_fix3): Fix check for lq insns.
