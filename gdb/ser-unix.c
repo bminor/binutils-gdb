@@ -910,9 +910,9 @@ do_unix_readchar (serial_t scb, int timeout)
      each time through the loop.
 
      Also, timeout = 0 means to poll, so we just set the delta to 0, so we
-     will only go through the loop once. timeout < 0 means to wait forever. */
+     will only go through the loop once. */
 
-  delta = (timeout <= 0 ? 0 : 1);
+  delta = (timeout == 0 ? 0 : 1);
   while (1)
     {
 
@@ -928,38 +928,51 @@ do_unix_readchar (serial_t scb, int timeout)
 	    return SERIAL_TIMEOUT;
 	}
 
-      status = ser_unix_wait_for (scb, timeout < 0 ? timeout : delta);
+      status = ser_unix_wait_for (scb, delta);
       timeout -= delta;
 
-      /* If we got an error back from wait_for, then we can return */
+      /* If we got a character or an error back from wait_for, then we can 
+         break from the loop before the timeout is completed. */
 
-      if (status == SERIAL_ERROR)
-        return status;
-
-      status = read (scb->fd, scb->buf, BUFSIZ);
-
-      if (status <= 0)
-        {
-          if (status == 0)
-            {
-              if (timeout != 0)
-                continue;
-              else
-                return SERIAL_TIMEOUT;	/* 0 chars means timeout [may need to
-					   distinguish between EOF & timeouts
-					   someday] */
-            }
-	  else if (errno == EINTR)
-            continue;
-          else
-	    return SERIAL_ERROR;	/* Got an error from read */
+      if (status != SERIAL_TIMEOUT)
+	{
+	  break;
 	}
 
-      scb->bufcnt = status;
-      scb->bufcnt--;
-      scb->bufp = scb->buf;
-      return *scb->bufp++;
+      /* If we have exhausted the original timeout, then generate
+         a SERIAL_TIMEOUT, and pass it out of the loop. */
+
+      else if (timeout == 0)
+	{
+	  status = SERIAL_TIMEOUT;
+	  break;
+	}
     }
+
+  if (status < 0)
+    return status;
+
+  while (1)
+    {
+      status = read (scb->fd, scb->buf, BUFSIZ);
+      if (status != -1 || errno != EINTR)
+	break;
+    }
+
+  if (status <= 0)
+    {
+      if (status == 0)
+	return SERIAL_TIMEOUT;	/* 0 chars means timeout [may need to
+				   distinguish between EOF & timeouts
+				   someday] */
+      else
+	return SERIAL_ERROR;	/* Got an error from read */
+    }
+
+  scb->bufcnt = status;
+  scb->bufcnt--;
+  scb->bufp = scb->buf;
+  return *scb->bufp++;
 }
 
 /* Perform operations common to both old and new readchar. */
