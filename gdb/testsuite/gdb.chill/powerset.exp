@@ -161,6 +161,9 @@ proc test_max {} {
     test_print_accept "print max(v_ps5)" "FALSE"
     test_print_accept "print max(v_ps6)" "50"
 
+    # test an IN
+    test_print_accept "print 0 in v_ps6" "TRUE"
+
     # a failure
     setup_xfail "*-*-*"
     test_print_accept "print max(v_ps51)" "MAX for empty powerset"
