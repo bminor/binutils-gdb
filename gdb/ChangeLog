@@ -1,3 +1,9 @@
+2004-11-03  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (hppa_frame_cache): Use frame_pc_unwind instead of
+    frame_func_unwind to locate the unwind entry.
+	(hppa_frame_this_id): Likewise.
+
 2004-11-03  Andrew Cagney  <cagney@gnu.org>
 
 	* gdb/NEWS: Mention internationalization, m32r-*-linux-gnu, 'p'

@@ -1580,7 +1580,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
   /* Yow! */
-  u = find_unwind_entry (frame_func_unwind (next_frame));
+  u = find_unwind_entry (frame_pc_unwind (next_frame));
   if (!u)
     {
       if (hppa_debug)
@@ -1630,7 +1630,13 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
        symbol information.  hppa_skip_prologue also bounds the returned
        pc by the passed in pc, so it will not return a pc in the next
        function.  */
-    prologue_end = hppa_skip_prologue (frame_func_unwind (next_frame));
+
+    /* We used to use frame_func_unwind () to locate the beginning of the
+       function to pass to skip_prologue ().  However, when objects are 
+       compiled without debug symbols, frame_func_unwind can return the wrong 
+       function (or 0).  We can do better than that by using unwind records.  */
+
+    prologue_end = hppa_skip_prologue (u->region_start);
     end_pc = frame_pc_unwind (next_frame);
 
     if (prologue_end != 0 && end_pc > prologue_end)
@@ -1638,7 +1644,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 
     frame_size = 0;
 
-    for (pc = frame_func_unwind (next_frame);
+    for (pc = u->region_start;
 	 ((saved_gr_mask || saved_fr_mask
 	   || looking_for_sp || looking_for_rp
 	   || frame_size < (u->Total_frame_size << 3))
@@ -1881,8 +1887,14 @@ static void
 hppa_frame_this_id (struct frame_info *next_frame, void **this_cache,
 			   struct frame_id *this_id)
 {
-  struct hppa_frame_cache *info = hppa_frame_cache (next_frame, this_cache);
-  (*this_id) = frame_id_build (info->base, frame_func_unwind (next_frame));
+  struct hppa_frame_cache *info;
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  struct unwind_table_entry *u;
+
+  info = hppa_frame_cache (next_frame, this_cache);
+  u = find_unwind_entry (pc);
+
+  (*this_id) = frame_id_build (info->base, u->region_start);
 }
 
 static void
@@ -1928,7 +1940,12 @@ hppa_fallback_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   struct hppa_frame_cache *cache;
   unsigned int frame_size;
+  int found_rp;
   CORE_ADDR pc, start_pc, end_pc, cur_pc;
+
+  if (hppa_debug)
+    fprintf_unfiltered (gdb_stdlog, "{ hppa_fallback_frame_cache (frame=%d)-> ",
+      frame_relative_level(next_frame));
 
   cache = FRAME_OBSTACK_ZALLOC (struct hppa_frame_cache);
   (*this_cache) = cache;
@@ -1937,6 +1954,7 @@ hppa_fallback_frame_cache (struct frame_info *next_frame, void **this_cache)
   pc = frame_func_unwind (next_frame);
   cur_pc = frame_pc_unwind (next_frame);
   frame_size = 0;
+  found_rp = 0;
 
   find_pc_partial_function (pc, NULL, &start_pc, &end_pc);
 
@@ -1961,10 +1979,20 @@ hppa_fallback_frame_cache (struct frame_info *next_frame, void **this_cache)
       /* There are limited ways to store the return pointer into the
 	 stack.  */
       if (insn == 0x6bc23fd9) /* stw rp,-0x14(sr0,sp) */
-	 cache->saved_regs[HPPA_RP_REGNUM].addr = -20;
+	 {
+	   cache->saved_regs[HPPA_RP_REGNUM].addr = -20;
+	   found_rp = 1;
+	 }
       else if (insn == 0x0fc212c1) /* std rp,-0x10(sr0,sp) */
-	 cache->saved_regs[HPPA_RP_REGNUM].addr = -16;
+	 {
+	   cache->saved_regs[HPPA_RP_REGNUM].addr = -16;
+	   found_rp = 1;
+	 }
     }
+
+  if (hppa_debug)
+    fprintf_unfiltered (gdb_stdlog, " frame_size = %d, found_rp = %d }\n",
+      frame_size, found_rp);
 
   cache->base = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM) - frame_size;
   trad_frame_set_value (cache->saved_regs, HPPA_SP_REGNUM, cache->base);
@@ -2154,9 +2182,11 @@ unwind_command (char *exp, int from_tty)
 
   printf_unfiltered ("\tregion_start = ");
   print_address (u->region_start, gdb_stdout);
+  gdb_flush (gdb_stdout);
 
   printf_unfiltered ("\n\tregion_end = ");
   print_address (u->region_end, gdb_stdout);
+  gdb_flush (gdb_stdout);
 
 #define pif(FLD) if (u->FLD) printf_unfiltered (" "#FLD);
 
