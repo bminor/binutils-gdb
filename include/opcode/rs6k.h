@@ -82,25 +82,29 @@ struct rs6000_insn rs6k_ops [] = {
 {"cal",		0,	D,	14,	-1,	{RT,DIS,RA,0}	},
 {"liu",		0,	D,	15,	-1,	{RT, UI,0}	}, /* same as `cau' */
 {"cau",		0,	D,	15,	-1,	{RT,RA,UI,0}	},
-{"bb",		"1tfl",	B,	16,	-1,	{LI,A2,0}	},
-/*		^^^^^
-  exception #1. Either fix this, or document what you are doing here. FIXMEmgo.
-*/
+
+/* "1" indicates an exception--"bb" is only usable for some values of
+   BO, so the disassembler first matches this instruction and then changes
+   it to "bc" if that is the case.  */
+{"bb",		"1tfla",	B,	16,	-1,	{LI,A2,0}	},
 {"bc",		"la",	B,	16,	-1,	{BO,BI,TA14,0}	},
+
 {"svc",		"la",	SC,	17,	-1,	{LEV,FL1,FL2,0}	},
 {"b",		"la",	I,	18,	-1,	{TA24,0}	},
 {"mcrf",	0,	XL,	19,	0,	{BF,BFA,0}	},
 {"bcr",		"l",	XL,	19,	16,	{BO,BI,0}	},
-{"cror",	0,	XL,	19,	33,	{BT,BA,BB,0}	},
+{"crnor",	0,	XL,	19,	33,	{BT,BA,BB,0}	},
+{"rfi",		0,	X,	19,	50,	{0}		},
+{"rfsvc",	0,	X,	19,	82,	{0}		},
 {"crandc",	0,	XL,	19,	129,	{BT,BA,BB,0}	},
-{"bcc",		"l",	XL,	19,	193,	{BO,BI,0}	},
-{"crnor",	0,	XL,	19,	225,	{BT,BA,BB,0}	},
+{"ics",		0,	X,	19,	150,	{0}		},
+{"crxor",	0,	XL,	19,	193,	{BT,BA,BB,0}	},
+{"crnand",	0,	XL,	19,	225,	{BT,BA,BB,0}	},
 {"crand",	0,	XL,	19,	257,	{BT,BA,BB,0}	},
 {"creqv",	0,	XL,	19,	289,	{BT,BA,BB,0}	},
-{"crnand",	0,	XL,	19,	289,	{BT,BA,BB,0}	},
-{"crxor",	0,	XL,	19,	417,	{BT,BA,BB,0}	},
-{"crorc",	0,	XL,	19,	449,	{BT,BA,BB,0}	},
-{"bcr",		"l",	XL,	19,	528,	{BO,BI,0}	},
+{"crorc",	0,	XL,	19,	417,	{BT,BA,BB,0}	},
+{"cror",	0,	XL,	19,	449,	{BT,BA,BB,0}	},
+{"bcc",		"l",	XL,	19,	528,	{BO,BI,0}	},
 {"rlimi",	".",	M,	20,	-1,	{RA,RS,SH,MB,ME,0} /*??*/},
 {"rlinm",	".",	M,	21,	-1,	{RA,RS,SH,MB,ME,0} /*??*/},
 {"rlmi",	".",	M,	22,	-1,	{RA,RS,RB,MB,ME,0} /*??*/},
