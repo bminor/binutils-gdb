@@ -144,6 +144,7 @@ nindy-tdep.c
 nm-irix4.h
 nm-mips.h
 nm-rs6000.h
+nm-sun2.h
 nm-sun3.h
 nm-sun4os4.h
 nm-trash.h

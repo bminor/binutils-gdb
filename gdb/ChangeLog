@@ -1,5 +1,14 @@
 Fri Oct  9 00:31:33 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	Sun2 native support (untested).
+
+	* xm-sun2.h (ATTACH_DETACH, FETCH_INFERIOR_REGISTERS,
+	  REGISTER_U_ADDR): removed to nm-sun2.h.
+	* nm-sun2.h: new file.
+	* config/sun2os[34].mh (XDEPFILES): infptrace.o inftarg.o
+	  fork-child.o sun3-xdep.o removed.
+	  (NAT_FILE, NATDEPFILES): new macros.
+
 	Mips native support.  Decstation and iris4 have been tested.
 	Iris3 has not.
 

@@ -28,20 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define NEW_SUN_CORE
 
-/* Do implement the attach and detach commands.  */
-
-#define ATTACH_DETACH
-
-/* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
-#define FETCH_INFERIOR_REGISTERS
-
-/* This is a piece of magic that is given a register number REGNO
-   and as BLOCKEND the address in the system of the end of the user structure
-   and stores in ADDR the address in the kernel or core dump
-   of that register.  */
-
-#define REGISTER_U_ADDR(addr, blockend, regno)		\
-{ addr = blockend + regno * 4; }
 
 /* Interface definitions for kernel debugger KDB.  */
 
