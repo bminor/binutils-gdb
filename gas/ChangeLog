@@ -1,3 +1,33 @@
+Thu Jun 20 15:57:41 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* config/tc-i386.c (md_number_to_chars): Deleted.
+	* config/tc-i386.h (md_number_to_chars): New macro.
+
+	* config/tc-alpha.c (build_operate_n, build_mem): Moved earlier in
+	the file.
+	(load_symbol_address, load_expression): Use build_mem.
+	(build_operate): New function.
+	(emit_addq_r): Use it.
+
+	Wed Mar 13 22:14:14 1996  Pat Rankin  <rankin@eql.caltech.edu>
+
+	* symbols.c (colon):  #if VMS, use S_SET_OTHER to store `const_flag'.
+
+	Tue Mar  5 14:31:45 1996  Pat Rankin  <rankin@eql.caltech.edu>
+
+	* config/tc-vax.h (NOP_OPCODE): Define.
+
+	Sun Feb  4 21:01:03 1996  Pat Rankin  <rankin@eql.caltech.edu>
+
+	* config/obj-vms.h (S_IS_COMMON): Define.
+	(S_IS_LOCAL): Check for \002 as well as \001.
+	(LONGWORD_ALIGNMENT): New macro.
+	(SUB_SEGMENT_ALIGN): Use it.
+
+	Fri Jan 26 17:44:09 1996  Pat Rankin  <rankin@eql.caltech.edu>
+
+	* config/vms-conf.h: Reconcile with conf.in.
+
 Wed Jun 19 11:31:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* write.c (is_dnrange): Only define if TC_GENERIC_RELAX_TABLE is

@@ -860,6 +860,34 @@ md_section_align (seg, size)
   return size;
 }
 
+static int
+build_mem (opc, ra, rb, disp)
+     int opc, ra, rb;
+     bfd_signed_vma disp;
+{
+  if ((disp >> 15) != 0
+      && (disp >> 15) + 1 != 0)
+    abort ();
+  return ((opc << 26) | (ra << SA) | (rb << SB) | (disp & 0xffff));
+}
+
+static int
+build_operate_n (opc, fn, ra, lit, rc)
+     int opc, fn, ra, rc;
+     int lit;
+{
+  if (lit & ~0xff)
+    abort ();
+  return ((opc << 26) | (fn << 5) | (ra << SA) | (lit << SN) | (1 << 12) | (rc << SC));
+}
+
+static int
+build_operate (opc, fn, ra, rb, rc)
+     int opc, fn, ra, rb, rc;
+{
+  return ((opc << 26) | (fn << 5) | (ra << SA) | (rb << SB) | (rc << SC));
+}
+
 /* Add this thing to the .lita section and produce a LITERAL reloc referring
    to it.  */
 
@@ -898,16 +926,8 @@ load_symbol_address (reg, insn)
     /* Overflow? */
     as_fatal ("overflow in literal (.lita) table");
   x = retval;
-  if (addr32)
-    insn->opcode = (0xa0000000	/* ldl */
-		    | (reg << SA)
-		    | (base_register << SB)
-		    | (x & 0xffff));
-  else
-    insn->opcode = (0xa4000000	/* ldq */
-		    | (reg << SA)
-		    | (base_register << SB)
-		    | (x & 0xffff));
+  insn->opcode = build_mem (addr32 ? 0x28 : 0x29, /* ldl or ldq */
+			    reg, base_register, x & 0xffff);
   note_gpreg (base_register);
 }
 
@@ -958,20 +978,15 @@ load_expression (reg, insn)
 	 an LDAH instruction.  */
       if (addendlo)
 	{
-	  insn[1].opcode = (0x20000000	/* lda */
-			    | (reg << SA)
-			    | (reg << SB)
-			    | (addendlo & 0xffff));
+	  insn[1].opcode = build_mem (0x08, reg, reg, addendlo & 0xffff);
 	  insn[1].reloc[0].code = BFD_RELOC_ALPHA_LITUSE;
 	  insn[1].reloc[0].exp = lituse_basereg;
 	  num_insns++;
 	}
       if (addendhi)
 	{
-	  insn[num_insns].opcode = (0x24000000
-				    | (reg << SA)
-				    | (reg << SB)
-				    | (addendhi & 0xffff));
+	  insn[num_insns].opcode = build_mem (0x09, reg, reg,
+					      addendhi & 0xffff);
 	  num_insns++;
 	}
       if (num_insns == 1)
@@ -1118,27 +1133,6 @@ emit_bis_r (in1, in2, out)
   md_assemble (buf);
 }
 
-static int
-build_mem (opc, ra, rb, disp)
-     int opc, ra, rb;
-     bfd_signed_vma disp;
-{
-  if ((disp >> 15) != 0
-      && (disp >> 15) + 1 != 0)
-    abort ();
-  return ((opc << 26) | (ra << SA) | (rb << SB) | (disp & 0xffff));
-}
-
-static int
-build_operate_n (opc, fn, ra, lit, rc)
-     int opc, fn, ra, rc;
-     int lit;
-{
-  if (lit & ~0xff)
-    abort ();
-  return ((opc << 26) | (fn << 5) | (ra << SA) | (lit << SN) | (1 << 12) | (rc << SC));
-}
-
 static void
 emit_sll_n (dest, disp, src)
      int dest, disp, src;
@@ -1163,7 +1157,7 @@ emit_addq_r (in1, in2, out)
      int in1, in2, out;
 {
   struct alpha_it insn = clear_insn;
-  insn.opcode = 0x40000400 | (in1 << SA) | (in2 << SB) | (out << SC);
+  insn.opcode = build_operate (0x10, 0x20, in1, in2, out);
   emit_insn (&insn);
 }
 

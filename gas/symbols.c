@@ -229,7 +229,7 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
 	    {
 	      symbolP->sy_frag = frag_now;
 #ifdef OBJ_VMS
-	      S_GET_OTHER(symbolP) = const_flag;
+	      S_SET_OTHER(symbolP, const_flag);
 #endif
 	      S_SET_VALUE (symbolP, (valueT) frag_now_fix ());
 	      S_SET_SEGMENT (symbolP, now_seg);
@@ -281,8 +281,8 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
 			 data.  */
 		      symbolP->sy_frag = frag_now;
 #ifdef OBJ_VMS
-		      S_GET_OTHER(symbolP) = const_flag;
-#endif /* OBJ_VMS */
+		      S_SET_OTHER(symbolP, const_flag);
+#endif
 		      S_SET_VALUE (symbolP, (valueT) frag_now_fix ());
 		      S_SET_SEGMENT (symbolP, now_seg);	/* keep N_EXT bit */
 		    }
