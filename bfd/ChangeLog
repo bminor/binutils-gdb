@@ -1,3 +1,8 @@
+Mon May  6 18:24:09 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* reloc16.c (bfd_coff_reloc16_get_value): Handle common
+	symbols correctly.
+
 Sat May  4 05:08:45 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* elfcode.h (elf_object_p):  Reject generic ELF target if
