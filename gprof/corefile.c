@@ -1,6 +1,6 @@
 /* corefile.c
 
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -216,17 +216,17 @@ core_init (const char *aout_name)
 void
 core_get_text_space (bfd *cbfd)
 {
-  core_text_space = (PTR) malloc ((unsigned int) core_text_sect->_raw_size);
+  core_text_space = malloc (bfd_get_section_size (core_text_sect));
 
   if (!core_text_space)
     {
       fprintf (stderr, _("%s: ran out room for %lu bytes of text space\n"),
-	       whoami, (unsigned long) core_text_sect->_raw_size);
+	       whoami, (unsigned long) bfd_get_section_size (core_text_sect));
       done (1);
     }
 
   if (!bfd_get_section_contents (cbfd, core_text_sect, core_text_space,
-				 (bfd_vma) 0, core_text_sect->_raw_size))
+				 0, bfd_get_section_size (core_text_sect)))
     {
       bfd_perror ("bfd_get_section_contents");
       free (core_text_space);
@@ -613,7 +613,7 @@ core_create_line_syms ()
   ltab.len = 0;
   prev_line_num = 0;
 
-  vma_high = core_text_sect->vma + core_text_sect->_raw_size;
+  vma_high = core_text_sect->vma + bfd_get_section_size (core_text_sect);
   for (vma = core_text_sect->vma; vma < vma_high; vma += min_insn_size)
     {
       unsigned int len;
