@@ -1786,7 +1786,7 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
 
       int reg;
       struct sparc64_elf_app_reg * app_regs;
-      struct bfd_strtab_hash *dynstr;
+      struct elf_strtab_hash *dynstr;
       struct elf_link_hash_table *eht = elf_hash_table (info);
 
       if (!info->shared)

@@ -8929,7 +8929,7 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
 	    case DT_STRSZ:
 	      /* Rewrite DT_STRSZ.  */
 	      dyn.d_un.d_val =
-		_bfd_stringtab_size (elf_hash_table (info)->dynstr);
+		_bfd_elf_strtab_size (elf_hash_table (info)->dynstr);
 	      break;
 
 	    case DT_PLTGOT:

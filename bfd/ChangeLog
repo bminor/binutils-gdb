@@ -1,3 +1,11 @@
+2001-11-11  H.J. Lu <hjl@gnu.org>
+
+	* elf32-mips.c (_bfd_mips_elf_finish_dynamic_sections): Call
+	_bfd_elf_strtab_size instead of _bfd_stringtab_size.
+
+	* elf64-sparc.c (sparc64_elf_size_dynamic_sections): Change
+	dynstr type to `struct elf_strtab_hash *'.
+
 2001-11-11  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* elf-strtab.c (_bfd_elf_strtab_finalize): Make first variable i
