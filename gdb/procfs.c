@@ -3531,9 +3531,7 @@ procfs_fetch_registers (regno)
 #if defined (FP0_REGNUM)	/* need floating point? */
   if ((regno >= 0 && regno < FP0_REGNUM) ||
       regno == PC_REGNUM  ||
-#ifdef NPC_REGNUM
-      regno == NPC_REGNUM ||
-#endif
+      (NPC_REGNUM >= 0 && regno == NPC_REGNUM) ||
       regno == FP_REGNUM  ||
       regno == SP_REGNUM)
     return;			/* not a floating point register */
@@ -3607,9 +3605,7 @@ procfs_store_registers (regno)
 #if defined (FP0_REGNUM)	/* need floating point? */
   if ((regno >= 0 && regno < FP0_REGNUM) ||
       regno == PC_REGNUM  ||
-#ifdef NPC_REGNUM
-      regno == NPC_REGNUM ||
-#endif
+      (NPC_REGNUM >= 0 && regno == NPC_REGNUM) ||
       regno == FP_REGNUM  ||
       regno == SP_REGNUM)
     return;			/* not a floating point register */

@@ -1,3 +1,16 @@
+Tue May  2 19:07:20 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh (NPC_REGNUM, NNPC_REGNUM): Add.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+	* gdbserver/remote-utils.c (prepare_resume_reply): Change #ifdef
+ 	NPC_REGNUM to run-time test.
+	* findvar.c (generic_target_write_pc): Change #ifdef NPC_REGNUM
+ 	and NNPC_REGNUM to run-time test.
+	* procfs.c (procfs_fetch_registers): Change #ifdef NPC_REGNUM to
+ 	run-time test.
+	(procfs_store_registers): Ditto.
+
 Tue May  2 18:48:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbarch.sh: Provide non- multi-arch defaults by direct

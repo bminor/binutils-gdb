@@ -241,6 +241,8 @@ v:2:NUM_REGS:int:num_regs::::0:-1
 v:2:SP_REGNUM:int:sp_regnum::::0:-1
 v:2:FP_REGNUM:int:fp_regnum::::0:-1
 v:2:PC_REGNUM:int:pc_regnum::::0:-1
+v:2:NPC_REGNUM:int:npc_regnum::::0:-1:0
+v:2:NNPC_REGNUM:int:nnpc_regnum::::0:-1:0
 f:2:REGISTER_NAME:char *:register_name:int regnr:regnr:::legacy_register_name:0
 v:2:REGISTER_SIZE:int:register_size::::0:-1
 v:2:REGISTER_BYTES:int:register_bytes::::0:-1

@@ -1082,14 +1082,10 @@ generic_target_write_pc (pc, pid)
 #ifdef PC_REGNUM
   if (PC_REGNUM >= 0)
     write_register_pid (PC_REGNUM, pc, pid);
-#ifdef NPC_REGNUM
   if (NPC_REGNUM >= 0)
     write_register_pid (NPC_REGNUM, pc + 4, pid);
-#ifdef NNPC_REGNUM
   if (NNPC_REGNUM >= 0)
     write_register_pid (NNPC_REGNUM, pc + 8, pid);
-#endif
-#endif
 #else
   internal_error ("generic_target_write_pc");
 #endif

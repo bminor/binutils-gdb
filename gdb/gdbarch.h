@@ -263,6 +263,32 @@ extern void set_gdbarch_pc_regnum (struct gdbarch *gdbarch, int pc_regnum);
 #endif
 #endif
 
+/* Default (value) for non- multi-arch platforms. */
+#if (GDB_MULTI_ARCH == 0) && !defined (NPC_REGNUM)
+#define NPC_REGNUM (-1)
+#endif
+
+extern int gdbarch_npc_regnum (struct gdbarch *gdbarch);
+extern void set_gdbarch_npc_regnum (struct gdbarch *gdbarch, int npc_regnum);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > 1) || !defined (NPC_REGNUM)
+#define NPC_REGNUM (gdbarch_npc_regnum (current_gdbarch))
+#endif
+#endif
+
+/* Default (value) for non- multi-arch platforms. */
+#if (GDB_MULTI_ARCH == 0) && !defined (NNPC_REGNUM)
+#define NNPC_REGNUM (-1)
+#endif
+
+extern int gdbarch_nnpc_regnum (struct gdbarch *gdbarch);
+extern void set_gdbarch_nnpc_regnum (struct gdbarch *gdbarch, int nnpc_regnum);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > 1) || !defined (NNPC_REGNUM)
+#define NNPC_REGNUM (gdbarch_nnpc_regnum (current_gdbarch))
+#endif
+#endif
+
 /* Default (function) for non- multi-arch platforms. */
 #if (GDB_MULTI_ARCH == 0) && !defined (REGISTER_NAME)
 #define REGISTER_NAME(regnr) (legacy_register_name (regnr))
