@@ -141,6 +141,7 @@ fetch_inferior_registers ()
 }
 
 /* ARGSUSED */
+void
 store_inferior_registers (regno)
      int regno;
 {

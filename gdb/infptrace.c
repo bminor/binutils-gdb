@@ -31,7 +31,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <signal.h>
 #include <sys/ioctl.h>
 #ifndef USG
+#ifdef PTRACE_IN_WRONG_PLACE
+#include <ptrace.h>
+#else
 #include <sys/ptrace.h>
+#endif
 #endif
 
 #if !defined (PT_KILL)
@@ -395,8 +399,7 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 
       /* Copy data to be written over corresponding part of buffer */
 
-      (void) memcpy ((char *) buffer + (memaddr & (sizeof (int) - 1)), myaddr,
-		     len);
+      memcpy ((char *) buffer + (memaddr & (sizeof (int) - 1)), myaddr, len);
 
       /* Write the entire buffer.  */
 
@@ -431,8 +434,7 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 	}
 
       /* Copy appropriate bytes out of the buffer.  */
-      (void) memcpy (myaddr, (char *) buffer + (memaddr & (sizeof (int) - 1)),
-		     len);
+      memcpy (myaddr, (char *) buffer + (memaddr & (sizeof (int) - 1)), len);
     }
   return len;
 }

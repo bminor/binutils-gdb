@@ -42,16 +42,37 @@ int serial_timedreadchar PARAMS ((int to, int *ok));
 /* Set the baudrate to the decimal value supplied, and return 1, or fail and
    return 0.  */
 
-int serial_setbaudrate PARAMS ((int to));
+int serial_setbaudrate PARAMS ((int rate));
 
 /* Return the next rate in the sequence, or return 0 for failure.  */
 
-int serial_nextbaudrate PARAMS ((int rate));
+/* Write some chars to the device, returns 0 for failure.  See errno for
+   details. */
 
-/* Write some chars to the device, return 1 if ok, 0 if not.  */
+int serial_write PARAMS ((const char *str , int len));
 
-int serial_write PARAMS ((const char *str, int len));
+/* Close the serial port */
 
-/* Close the serial port.  */
+void serial_close PARAMS ((void));
 
-int serial_close PARAMS ((void));
+#ifdef HAVE_TERMIO
+
+#include <termios.h>
+#include <unistd.h>
+
+struct ttystate
+{
+  int flags;			/* Flags from fcntl F_GETFL */
+  struct termios termios;	/* old tty driver settings */
+};
+
+#else /* not HAVE_TERMIO */
+
+#include <sgtty.h>
+
+struct ttystate {
+  int flags;			/* Flags from fcntl F_GETFL */
+  struct sgttyb sgttyb;		/* old tty driver settings */
+};
+
+#endif /* not HAVE_TERMIO */

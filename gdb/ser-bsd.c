@@ -1,4 +1,4 @@
-/* Remote serial interface for OS's with termios, for GDB.
+/* Remote serial interface for OS's with sgttyb
    Copyright 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -18,8 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
-#include <fcntl.h>
+#include <sys/types.h>
 #include <sys/time.h>
+#include <fcntl.h>
 #include "serial.h"
 
 static int desc = -1;
@@ -29,28 +30,24 @@ serial_raw(fd, oldstate)
      int fd;
      struct ttystate *oldstate;
 {
-  struct termios termios;
+  struct sgttyb sgttyb;
 
   oldstate->flags = fcntl(fd, F_GETFL, 0);
 
   fcntl(fd, F_SETFL, oldstate->flags|FNDELAY);
 
-  if (tcgetattr(fd, &termios))
+  if (ioctl(fd, TIOCGETP, &sgttyb))
     {
-      fprintf(stderr, "tcgetattr failed: %s\n", safe_strerror(errno));
+      fprintf(stderr, "TIOCGETP failed: %s\n", safe_strerror(errno));
     }
 
-  oldstate->termios = termios;
+  oldstate->sgttyb = sgttyb;
 
-  termios.c_iflag = 0;
-  termios.c_oflag = 0;
-  termios.c_lflag = 0;
-  termios.c_cc[VMIN] = 0;
-  termios.c_cc[VTIME] = 0;
+  sgttyb.sg_flags = RAW;
 
-  if (tcsetattr(fd, TCSANOW, &termios))
+  if (ioctl(fd, TIOCSETP, &sgttyb))
     {
-      fprintf(stderr, "tcsetattr failed: %s\n", safe_strerror(errno));
+      fprintf(stderr, "TIOCSETP failed: %s\n", safe_strerror(errno));
     }
 }
 
@@ -61,7 +58,7 @@ serial_restore(fd, oldstate)
 {
   fcntl(fd, F_SETFL, oldstate->flags);
 
-  tcsetattr(fd, TCSANOW, &oldstate->termios);
+  ioctl(fd, TIOCSETP, &oldstate->sgttyb);
 }
 
 static struct ttystate oldstate;
@@ -72,7 +69,7 @@ int
 serial_open(name)
      char *name;
 {
-  struct termios termios;
+  struct sgttyb sgttyb;
 
   desc = open (name, O_RDWR);
   if (desc < 0)
@@ -134,6 +131,14 @@ serial_readchar(timeout)
   return *bufp++;
 }
 
+#ifndef B19200
+#define B19200 EXTA
+#endif
+
+#ifndef B38400
+#define B38400 EXTB
+#endif
+
 /* Translate baud rates from integers to damn B_codes.  Unix should
    have outgrown this crap years ago, but even POSIX wouldn't buck it.  */
 
@@ -177,16 +182,16 @@ int
 serial_setbaudrate(rate)
      int rate;
 {
-  struct termios termios;
+  struct sgttyb sgttyb;
 
-  if (tcgetattr(desc, &termios))
-    error("tcgetattr failed: %s\n", safe_strerror(errno));
+  if (ioctl(desc, TIOCGETP, &sgttyb))
+    error("TIOCGETP failed: %s\n", safe_strerror(errno));
 
-  cfsetospeed(&termios, rate_to_code(rate));
-  cfsetispeed(&termios, rate_to_code(rate));
+  sgttyb.sg_ospeed = rate_to_code(rate);
+  sgttyb.sg_ispeed = rate_to_code(rate);
 
-  if (tcsetattr(desc, TCSANOW, &termios))
-    error("tcsetattr failed: %s\n", safe_strerror(errno));
+  if (ioctl(desc, TIOCSETP, &sgttyb))
+    error("TIOCSETP failed: %s\n", safe_strerror(errno));
 
   return 1;
 }
