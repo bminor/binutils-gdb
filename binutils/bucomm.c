@@ -1,5 +1,6 @@
 /* bucomm.c -- Bin Utils COMmon code.
-   Copyright (C) 1991, 92, 93, 94, 95, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94, 95, 97, 98, 2000
+   Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -33,12 +34,6 @@
 typedef long time_t;
 #endif
 #endif
-
-#ifdef ANSI_PROTOTYPES
-#include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 
 /* Error reporting */
 
@@ -64,7 +59,7 @@ bfd_fatal (string)
   xexit (1);
 }
 
-static void
+void
 report (format, args)
      const char * format;
      va_list args;

@@ -1,3 +1,99 @@
+2000-04-06  Alan Modra  <alan@linuxcare.com.au>
+
+	* addr2line.c: Update copyright.
+	* objcopy.1: Likewise, and title.
+	* strings.1: Likewise.
+
+	* version.c (print_version): Add 2000.
+
+	* rddbg.c (read_section_stabs_debugging_info): Don't use
+	bfd_size_type for strx to avoid printf problems if BFD64.
+
+	* bucomm.c: (report): Remove `static'.
+	Move inclusion of stdarg.h/vararg.h from here.
+	* bucomm.h: To here.
+	(CONST): Change all occurences to const.
+	(report): Declare it.
+	(bfd_fatal): Add ATTRIBUTE_NORETURN.
+	(fatal): Add ATTRIBUTE_PRINTF_1 ATTRIBUTE_NORETURN.
+	(non_fatal): Add ATTRIBUTE_PRINTF_1.
+
+	* ar.c (main): Use fatal or non_fatal instead of fprintf.
+	Correct a typo in an error message.
+	(do_quick_append): Use non_fatal instead of fprintf.
+	(move_members): Use fatal instead of fprintf, exit.
+	* coffdump.c (main): Same here.
+
+	* dlltool.c (display): Delete.
+	(warn): Delete.
+	(inform): Use `report' instead of `display'.
+	(rvaafter): Remove trailing \n from fatal error msg.
+	(rvabefore): Ditto.
+	(asm_prefix): Ditto.
+	(yyerror): Replace `warn' with `non_fatal', and remove \n.
+	(def_name): Likewise.
+	(run): Likewise.
+	(scan_all_symbols): Likewise.
+	(gen_lib_file): Likewise.
+	(def_library): Likewise.  Remove extra program_name too.
+	(run): Remove \n from inform strings.
+	(scan_drectve_symbols): Likewise.
+	(add_excludes): Likewise.
+	(scan_open_obj_file): Likewise.
+	(gen_exp_file): Likewise.
+	(gen_lib_file): Likewise.
+	(process_duplicates): Likewise.
+
+	* Makefile.am (dllwrap_SOURCES): Add version.c.
+	* dllwrap.c (program_version): Delete.
+	(print_version): Delete.
+	(display): Always print trailing \n.
+	(warn): New.
+	(delete_temp_files): Use warn instead of fprintf.  Use gettext.
+	(run): Here too.
+	(main): And here.
+	(usage): gettext'ify.
+	(long_options): Add missing initialisers.
+
+	* nlmconv.c (main): Use fatal/non_fatal instead of fprintf.
+	(select_output_format): Likewise.
+	(powerpc_mangle_relocs): Likewise.
+	(link_inputs): Likewise.
+
+	* nm.c (set_print_radix): Use fatal instead of fprintf, exit.
+	(set_output_format): Likewise.
+	(main): Use non_fatal instead of fprintf.
+	(display_rel_file): Likewise.
+
+	* objdump.c (slurp_symtab): Use non_fatal instead of fprintf.
+	(slurp_dynamic_symtab): Same here.
+	(disassemble_data): And here.
+	(read_section_stabs): And here.
+	(read_section_stabs): And here.
+	(dump_bfd): And here.
+	(main): And here.
+	(objdump_sprintf): Use fatal instead of fprintf, exit.
+	(disassemble_data): Same here.
+
+	* rdcoff.c (parse_coff_type): Use non_fatal instead of fprintf.
+	(parse_coff_struct_type): Same here.
+	(parse_coff_enum_type): And here.
+	(parse_coff): And here.
+	* rddbg.c (read_debugging_info): And here.
+	* size.c (main): And here.
+	* windres.c (format_from_name): And here.
+	* wrstabs.c (stab_write_symbol): Here too.
+	(write_stabs_in_sections_debugging_info): And here.
+	(stab_int_type): And here.
+	(stab_struct_field): And here.
+	(stab_typdef): And here.
+
+	* rescoff.c (read_coff_rsrc): Use fatal instead of fprintf, exit.
+	* srconv.c (main): Same here.
+	* strings.c (main): And here.
+	(integer_arg): And here.
+	* sysdump.c (main): And here.
+
 2000-04-05  Alan Modra  <alan@linuxcare.com.au>
 
 	* binutils.texi: Remove optional `=' from long options that have
@@ -7356,7 +7452,8 @@ Mon Sep 30 12:30:39 1991  Per Bothner  (bothner at cygnus.com)
 
 Mon May 20 16:14:07 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
-        *objdump.c *nm.c *copy.c :hanged some types to work with 64 bit object files
+        *objdump.c *nm.c *copy.c: Changed some types to work with 64 bit
+	object files.
 
 Thu May 16 16:06:55 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
      from bother

@@ -142,9 +142,7 @@ read_coff_rsrc (filename, target)
   sec = bfd_get_section_by_name (abfd, ".rsrc");
   if (sec == NULL)
     {
-      fprintf (stderr, _("%s: %s: no resource section\n"), program_name,
-	       filename);
-      xexit (1);
+      fatal (_("%s: no resource section"), filename);
     }
 
   size = bfd_section_size (abfd, sec);

@@ -1,5 +1,5 @@
 /* size.c -- report size of various sections of an executable file.
-   Copyright 1991, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
@@ -136,7 +136,7 @@ main (argc, argv)
 	    berkeley_format = 0;
 	    break;
 	  default:
-	    fprintf (stderr, _("invalid argument to --format: %s\n"), optarg);
+	    non_fatal (_("invalid argument to --format: %s"), optarg);
 	    usage (stderr, 1);
 	  }
 	break;
@@ -163,7 +163,7 @@ main (argc, argv)
 	    radix = hex;
 	    break;
 	  default:
-	    printf (_("Invalid radix: %s\n"), optarg);
+	    non_fatal (_("Invalid radix: %s\n"), optarg);
 	    usage (stderr, 1);
 	  }
 	break;

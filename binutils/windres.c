@@ -1,5 +1,5 @@
 /* windres.c -- a program to manipulate Windows resources
-   Copyright 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1997, 98, 99, 2000 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GNU Binutils.
@@ -599,7 +599,7 @@ format_from_name (name)
 
   if (m->name == NULL)
     {
-      fprintf (stderr, _("%s: unknown format type `%s'\n"), program_name, name);
+      non_fatal (_("unknown format type `%s'"), name);
       fprintf (stderr, _("%s: supported formats:"), program_name);
       for (m = format_names; m->name != NULL; m++)
 	fprintf (stderr, " %s", m->name);

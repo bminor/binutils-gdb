@@ -1,5 +1,6 @@
 /* strings -- print the strings of printable characters in files
-   Copyright (C) 1993, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 98, 99, 2000
+   Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -156,9 +157,7 @@ main (argc, argv)
 	  string_min = integer_arg (optarg);
 	  if (string_min < 1)
 	    {
-	      fprintf (stderr, _("%s: invalid number %s\n"),
-		       program_name, optarg);
-	      exit (1);
+	      fatal (_("invalid number %s"), optarg);
 	    }
 	  break;
 
@@ -491,8 +490,7 @@ integer_arg (s)
 
   if (*p)
     {
-      fprintf (stderr, _("%s: invalid integer argument %s\n"), program_name, s);
-      exit (1);
+      fatal (_("invalid integer argument %s"), s);
     }
   return value;
 }

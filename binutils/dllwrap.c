@@ -78,7 +78,6 @@
 #endif /* defined (_WIN32) && ! defined (__CYGWIN32__) */
 #endif /* ! HAVE_SYS_WAIT_H */
 
-static char *program_version = "0.2.4";
 static char *driver_name = NULL;
 static char *cygwin_driver_flags = 
   "-Wl,--dll -nostartfiles";
@@ -120,6 +119,7 @@ static int run PARAMS ((const char *, char *));
 static void usage PARAMS ((FILE *, int));
 static void display PARAMS ((const char *, va_list));
 static void inform PARAMS ((const char *, ...));
+static void warn PARAMS ((const char *format, ...));
 static char *look_for_prog PARAMS ((const char *, const char *, int));
 static char *deduce_name PARAMS ((const char *));
 static void delete_temp_files PARAMS ((void));
@@ -144,36 +144,62 @@ display (message, args)
     fprintf (stderr, "%s: ", program_name);
 
   vfprintf (stderr, message, args);
-
-  if (message [strlen (message) - 1] != '\n')
-    fputc ('\n', stderr);
-}  
+  fputc ('\n', stderr);
+}
 
 
-static void
 #ifdef __STDC__
+static void
 inform (const char * message, ...)
-#else
-inform (message, va_alist)
-     const char * message;
-     va_dcl
-#endif
 {
   va_list args;
-  
+
   if (!verbose)
     return;
 
-#ifdef __STDC__
   va_start (args, message);
-#else
-  va_start (args);
-#endif
-
   display (message, args);
-  
   va_end (args);
 }
+
+static void
+warn (const char *format, ...)
+{
+  va_list args;
+
+  va_start (args, format);
+  display (format, args);
+  va_end (args);
+}
+#else
+
+static void
+inform (message, va_alist)
+     const char * message;
+     va_dcl
+{
+  va_list args;
+
+  if (!verbose)
+    return;
+
+  va_start (args);
+  display (message, args);
+  va_end (args);
+}
+
+static void
+warn (format, va_alist)
+     const char *format;
+     va_dcl
+{
+  va_list args;
+
+  va_start (args);
+  display (format, args);
+  va_end (args);
+}
+#endif
 
 /* Look for the program formed by concatenating PROG_NAME and the
    string running from PREFIX to END_PREFIX.  If the concatenated
@@ -304,9 +330,12 @@ delete_temp_files ()
   if (delete_base_file && base_file_name)
     {
       if (verbose)
-	fprintf (stderr, "%s temporary base file %s\n",
-		 dontdeltemps ? "Keeping" : "Deleting",
-	         base_file_name);
+	{
+	  if (dontdeltemps)
+	    warn (_("Keeping temporary base file %s"), base_file_name);
+	  else
+	    warn (_("Deleting temporary base file %s"), base_file_name);
+	}
       if (! dontdeltemps)
         {
           unlink (base_file_name);
@@ -317,9 +346,12 @@ delete_temp_files ()
   if (delete_exp_file && exp_file_name)
     {
       if (verbose)
-	fprintf (stderr, "%s temporary exp file %s\n",
-		 dontdeltemps ? "Keeping" : "Deleting",
-	         exp_file_name);
+	{
+	  if (dontdeltemps)
+	    warn (_("Keeping temporary exp file %s"), exp_file_name);
+	  else
+	    warn (_("Deleting temporary exp file %s"), exp_file_name);
+	}
       if (! dontdeltemps)
         {
           unlink (exp_file_name);
@@ -329,9 +361,12 @@ delete_temp_files ()
   if (delete_def_file && def_file_name)
     {
       if (verbose)
-	fprintf (stderr, "%s temporary def file %s\n",
-		 dontdeltemps ? "Keeping" : "Deleting",
-	         def_file_name);
+	{
+	  if (dontdeltemps)
+	    warn (_("Keeping temporary def file %s"), def_file_name);
+	  else
+	    warn (_("Deleting temporary def file %s"), def_file_name);
+	}
       if (! dontdeltemps)
         {
           unlink (def_file_name);
@@ -413,21 +448,19 @@ run (what, args)
   pid = pwait (pid, &wait_status, 0);
   if (pid == -1)
     {
-      fprintf (stderr, "%s: wait: %s\n", program_name, strerror (errno));
+      warn ("wait: %s", strerror (errno));
       retcode = 1;
     }
   else if (WIFSIGNALED (wait_status))
     {
-      fprintf (stderr, "%s: subprocess got fatal signal %d\n",
-	       program_name, WTERMSIG (wait_status));
+      warn (_("subprocess got fatal signal %d"), WTERMSIG (wait_status));
       retcode = 1;
     }
   else if (WIFEXITED (wait_status))
     {
       if (WEXITSTATUS (wait_status) != 0)
 	{
-	  fprintf (stderr, "%s: %s exited with status %d\n",
-	  	   program_name, what, WEXITSTATUS (wait_status));
+	  warn (_("%s exited with status %d"), what, WEXITSTATUS (wait_status));
 	  retcode = 1;
 	}
     }
@@ -479,61 +512,47 @@ strhash (const char *str)
 
 /**********************************************************************/
 
-void
-print_version (name)
-     const char *name;
-{
-  /* This output is intended to follow the GNU standards document.  */
-  /* xgettext:c-format */
-  printf ("GNU %s %s\n", name, program_version);
-  printf ("Copyright 1998 Free Software Foundation, Inc.\n");
-  printf ("\
-This program is free software; you may redistribute it under the terms of\n\
-the GNU General Public License.  This program has absolutely no warranty.\n");
-  exit (0);
-}
-
 static void
 usage (file, status)
      FILE *file;
      int status;
 {
-  fprintf (file, "Usage %s <options> <object-files>\n", program_name);
-  fprintf (file, "  Generic options:\n");
-  fprintf (file, "   --quiet, -q            Work quietly\n");
-  fprintf (file, "   --verbose, -v          Verbose\n");
-  fprintf (file, "   --version              Print dllwrap version\n");
-  fprintf (file, "   --implib <outname>     Synonym for --output-lib\n");
-  fprintf (file, "  Options for %s:\n", program_name);
-  fprintf (file, "   --driver-name <driver> Defaults to \"gcc\"\n");
-  fprintf (file, "   --driver-flags <flags> Override default ld flags\n");
-  fprintf (file, "   --dlltool-name <dlltool> Defaults to \"dlltool\"\n");
-  fprintf (file, "   --entry <entry>        Specify alternate DLL entry point\n");
-  fprintf (file, "   --image-base <base>    Specify image base address\n");
-  fprintf (file, "   --target <machine>     i386-cygwin32 or i386-mingw32\n");
-  fprintf (file, "   --dry-run              Show what needs to be run\n");
-  fprintf (file, "   --mno-cygwin           Create Mingw DLL\n");
-  fprintf (file, "  Options passed to DLLTOOL:\n");
-  fprintf (file, "   --machine <machine>\n");
-  fprintf (file, "   --output-exp <outname> Generate export file.\n");
-  fprintf (file, "   --output-lib <outname> Generate input library.\n");
-  fprintf (file, "   --add-indirect         Add dll indirects to export file.\n");
-  fprintf (file, "   --dllname <name>       Name of input dll to put into output lib.\n");
-  fprintf (file, "   --def <deffile>        Name input .def file\n");
-  fprintf (file, "   --output-def <deffile> Name output .def file\n");
-  fprintf (file, "   --export-all-symbols     Export all symbols to .def\n");
-  fprintf (file, "   --no-export-all-symbols  Only export .drectve symbols\n");
-  fprintf (file, "   --exclude-symbols <list> Exclude <list> from .def\n");
-  fprintf (file, "   --no-default-excludes    Zap default exclude symbols\n");
-  fprintf (file, "   --base-file <basefile> Read linker generated base file\n");
-  fprintf (file, "   --no-idata4           Don't generate idata$4 section\n");
-  fprintf (file, "   --no-idata5           Don't generate idata$5 section\n");
-  fprintf (file, "   -U                     Add underscores to .lib\n");
-  fprintf (file, "   -k                     Kill @<n> from exported names\n");
-  fprintf (file, "   --add-stdcall-alias    Add aliases without @<n>\n");
-  fprintf (file, "   --as <name>            Use <name> for assembler\n");
-  fprintf (file, "   --nodelete             Keep temp files.\n");
-  fprintf (file, "  Rest are passed unmodified to the language driver\n");
+  fprintf (file, _("Usage %s <options> <object-files>\n"), program_name);
+  fprintf (file, _("  Generic options:\n"));
+  fprintf (file, _("   --quiet, -q            Work quietly\n"));
+  fprintf (file, _("   --verbose, -v          Verbose\n"));
+  fprintf (file, _("   --version              Print dllwrap version\n"));
+  fprintf (file, _("   --implib <outname>     Synonym for --output-lib\n"));
+  fprintf (file, _("  Options for %s:\n"), program_name);
+  fprintf (file, _("   --driver-name <driver> Defaults to \"gcc\"\n"));
+  fprintf (file, _("   --driver-flags <flags> Override default ld flags\n"));
+  fprintf (file, _("   --dlltool-name <dlltool> Defaults to \"dlltool\"\n"));
+  fprintf (file, _("   --entry <entry>        Specify alternate DLL entry point\n"));
+  fprintf (file, _("   --image-base <base>    Specify image base address\n"));
+  fprintf (file, _("   --target <machine>     i386-cygwin32 or i386-mingw32\n"));
+  fprintf (file, _("   --dry-run              Show what needs to be run\n"));
+  fprintf (file, _("   --mno-cygwin           Create Mingw DLL\n"));
+  fprintf (file, _("  Options passed to DLLTOOL:\n"));
+  fprintf (file, _("   --machine <machine>\n"));
+  fprintf (file, _("   --output-exp <outname> Generate export file.\n"));
+  fprintf (file, _("   --output-lib <outname> Generate input library.\n"));
+  fprintf (file, _("   --add-indirect         Add dll indirects to export file.\n"));
+  fprintf (file, _("   --dllname <name>       Name of input dll to put into output lib.\n"));
+  fprintf (file, _("   --def <deffile>        Name input .def file\n"));
+  fprintf (file, _("   --output-def <deffile> Name output .def file\n"));
+  fprintf (file, _("   --export-all-symbols     Export all symbols to .def\n"));
+  fprintf (file, _("   --no-export-all-symbols  Only export .drectve symbols\n"));
+  fprintf (file, _("   --exclude-symbols <list> Exclude <list> from .def\n"));
+  fprintf (file, _("   --no-default-excludes    Zap default exclude symbols\n"));
+  fprintf (file, _("   --base-file <basefile> Read linker generated base file\n"));
+  fprintf (file, _("   --no-idata4           Don't generate idata$4 section\n"));
+  fprintf (file, _("   --no-idata5           Don't generate idata$5 section\n"));
+  fprintf (file, _("   -U                     Add underscores to .lib\n"));
+  fprintf (file, _("   -k                     Kill @<n> from exported names\n"));
+  fprintf (file, _("   --add-stdcall-alias    Add aliases without @<n>\n"));
+  fprintf (file, _("   --as <name>            Use <name> for assembler\n"));
+  fprintf (file, _("   --nodelete             Keep temp files.\n"));
+  fprintf (file, _("  Rest are passed unmodified to the language driver\n"));
   fprintf (file, "\n\n");
   exit (status);
 }
@@ -614,7 +633,7 @@ static const struct option long_options[] =
   {"add-indirect", no_argument, NULL, OPTION_ADD_INDIRECT},
   {"base-file", required_argument, NULL, OPTION_BASE_FILE},
   {"as", required_argument, NULL, OPTION_AS},
-  {0}
+  {0, 0, 0, 0}
 };
 
 int
@@ -794,9 +813,7 @@ main (argc, argv)
   /* sanity checks. */
   if (! dll_name && ! dll_file_name)
     {
-      fprintf (stderr,
-               "%s: Must provide at least one of -o or --dllname options\n",
-               program_name);
+      warn (_("Must provide at least one of -o or --dllname options"));
       exit (1);
     }
   else if (! dll_name)
@@ -824,9 +841,8 @@ main (argc, argv)
       delete_def_file = 1;
       free (fileprefix);
       delete_def_file = 1;
-      fprintf (stderr, "Warning: no export definition file provided\n");
-      fprintf (stderr, 
-               "dllwrap will create one, but may not be what you want\n");
+      warn (_("no export definition file provided"));
+      warn (_("creating one, but that may not be what you want"));
     }
   
   /* set the target platform. */
@@ -987,10 +1003,10 @@ main (argc, argv)
 
   if (verbose)
     {
-      fprintf (stderr, "DLLTOOL name    : %s\n", dlltool_name);
-      fprintf (stderr, "DLLTOOL options : %s\n", dlltool_cmdline->s);
-      fprintf (stderr, "DRIVER name     : %s\n", driver_name);
-      fprintf (stderr, "DRIVER options  : %s\n", driver_cmdline->s);
+      fprintf (stderr, _("DLLTOOL name    : %s\n"), dlltool_name);
+      fprintf (stderr, _("DLLTOOL options : %s\n"), dlltool_cmdline->s);
+      fprintf (stderr, _("DRIVER name     : %s\n"), driver_name);
+      fprintf (stderr, _("DRIVER options  : %s\n"), driver_cmdline->s);
     }
  
   /*

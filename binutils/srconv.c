@@ -1,5 +1,5 @@
 /* srconv.c -- Sysroff conversion program
-   Copyright (C) 1994, 95, 96, 98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1994, 95, 96, 98, 99, 2000 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -1962,10 +1962,7 @@ main (ac, av)
 	    show_usage (stderr, 1);
 	  if (strcmp (input_file, output_file) == 0)
 	    {
-	      fprintf (stderr,
-		       _("%s: input and output files must be different\n"),
-		       program_name);
-	      exit (1);
+	      fatal (_("input and output files must be different"));
 	    }
 	}
     }
@@ -1974,9 +1971,7 @@ main (ac, av)
 
   if (!input_file)
     {
-      fprintf (stderr, _("%s: no input file specified\n"),
-	       program_name);
-      exit (1);
+      fatal (_("no input file specified"));
     }
 
   if (!output_file)
@@ -2021,9 +2016,7 @@ main (ac, av)
 
   if (!file)
     {
-      fprintf (stderr, _("%s: unable to open output file %s\n"),
-	       program_name, output_file);
-      exit (1);
+      fatal (_("unable to open output file %s"), output_file);
     }
 
   if (debug)

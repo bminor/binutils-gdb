@@ -1,5 +1,5 @@
 /* bucomm.h -- binutils common include file.
-   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
@@ -27,6 +27,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "config.h"
 #include "bin-bugs.h"
+
+#ifdef ANSI_PROTOTYPES
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
 
 #ifdef USE_BINARY_FOPEN
 #include "fopen-bin.h"
@@ -143,13 +149,15 @@ void *alloca ();
 #endif
 
 /* bucomm.c */
-void bfd_nonfatal PARAMS ((CONST char *));
+void bfd_nonfatal PARAMS ((const char *));
 
-void bfd_fatal PARAMS ((CONST char *));
+void bfd_fatal PARAMS ((const char *)) ATTRIBUTE_NORETURN;
 
-void fatal PARAMS ((CONST char *, ...));
+void report PARAMS ((const char *, va_list));
 
-void non_fatal PARAMS ((CONST char *, ...));
+void fatal PARAMS ((const char *, ...)) ATTRIBUTE_PRINTF_1 ATTRIBUTE_NORETURN;
+
+void non_fatal PARAMS ((const char *, ...)) ATTRIBUTE_PRINTF_1;
 
 void set_default_bfd_target PARAMS ((void));
 

@@ -280,7 +280,7 @@ windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l \
 
 windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 
-dllwrap_SOURCES = dllwrap.c dyn-string.c 
+dllwrap_SOURCES = dllwrap.c dyn-string.c version.c
 dllwrap_LDADD = $(LIBIBERTY) $(INTLLIBS)
 
 DISTSTUFF = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
@@ -338,7 +338,7 @@ windres_OBJECTS =  windres.o resrc.o rescoff.o resbin.o rcparse.o \
 rclex.o winduni.o resres.o bucomm.o version.o filemode.o
 windres_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 windres_LDFLAGS = 
-dllwrap_OBJECTS =  dllwrap.o dyn-string.o
+dllwrap_OBJECTS =  dllwrap.o dyn-string.o version.o
 dllwrap_DEPENDENCIES =  ../libiberty/libiberty.a
 dllwrap_LDFLAGS = 
 size_OBJECTS =  size.o bucomm.o version.o filemode.o

@@ -267,7 +267,7 @@ windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l \
 	winduni.c resres.c $(BULIBS)
 windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 
-dllwrap_SOURCES = dllwrap.c dyn-string.c 
+dllwrap_SOURCES = dllwrap.c dyn-string.c version.c
 dllwrap_LDADD = $(LIBIBERTY) $(INTLLIBS)
 
 
