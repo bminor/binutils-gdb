@@ -1,5 +1,5 @@
 /* tc-hppa.c -- Assemble for the PA
-   Copyright (C) 1989, 93, 94, 95, 96, 97, 98, 99, 2000
+   Copyright (C) 1989, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1855,10 +1855,10 @@ pa_ip (str)
 		      }
 		    else if (*args == 'e')
 		      {
-			/* Gross!  Hide these values in the immediate field
-			   of the instruction, then pull them out later.  */
-			opcode |= m << 8;
-			opcode |= a << 9;
+			/* Stash the ma/mb flag temporarily in the
+			   instruction.  We will use (and remove it)
+			   later when handling 'J', 'K', '<' & '>'.  */
+			opcode |= a;
 			continue;
 		      }
 		  }
@@ -2922,26 +2922,22 @@ pa_ip (str)
 	      s = expr_end;
 	      if (the_insn.exp.X_op == O_constant)
 		{
-		  int a, m;
+		  int mb;
 
-		  /* XXX the completer stored away tibits of information
+		  /* XXX the completer stored away tidbits of information
 		     for us to extract.  We need a cleaner way to do this.
 		     Now that we have lots of letters again, it would be
 		     good to rethink this.  */
-		  m = (opcode & (1 << 8)) != 0;
-		  a = (opcode & (1 << 9)) != 0;
-		  opcode &= ~ (3 << 8);
+		  mb = opcode & 1;
+		  opcode -= mb;
 		  num = evaluate_absolute (&the_insn);
-		  if ((a == 1 && num >= 0) || (a == 0 && num < 0))
+		  if (mb != (num < 0))
 		    break;
 		  CHECK_FIELD (num, 8191, -8192, 0);
 		  num = low_sign_unext (num, 14);
 		  INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 		}
-	      else
-		{
-		  break;
-		}
+	      break;
 
 	    /* Handle a 14 bit immediate at 31.  */
 	    case 'K':
@@ -2950,31 +2946,62 @@ pa_ip (str)
 	      s = expr_end;
 	      if (the_insn.exp.X_op == O_constant)
 		{
-		  int a, m;
+		  int mb;
 
-		  /* XXX the completer stored away tibits of information
-		     for us to extract.  We need a cleaner way to do this.
-		     Now that we have lots of letters again, it would be
-		     good to rethink this.  */
-		  m = (opcode & (1 << 8)) != 0;
-		  a = (opcode & (1 << 9)) != 0;
-		  opcode &= ~ (3 << 8);
+		  mb = opcode & 1;
+		  opcode -= mb;
 		  num = evaluate_absolute (&the_insn);
-		  if ((a == 1 && num < 0) || (a == 0 && num > 0))
+		  if (mb == (num < 0))
 		    break;
 		  if (num % 4)
 		    break;
 		  CHECK_FIELD (num, 8191, -8192, 0);
-		  if (num < 0)
-		    opcode |= 1;
-                  num &= 0x1fff;
-                  num >>= 2;
-                  INSERT_FIELD_AND_CONTINUE (opcode, num, 3);
+		  num = low_sign_unext (num, 14);
+		  INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 		}
-	      else
+	      break;
+
+	    /* Handle a 16 bit immediate at 31.  */
+	    case '<':
+	      the_insn.field_selector = pa_chk_field_selector (&s);
+	      get_expression (s);
+	      s = expr_end;
+	      if (the_insn.exp.X_op == O_constant)
 		{
-		  break;
+		  int mb;
+
+		  mb = opcode & 1;
+		  opcode -= mb;
+		  num = evaluate_absolute (&the_insn);
+		  if (mb != (num < 0))
+		    break;
+		  CHECK_FIELD (num, 32767, -32768, 0);
+		  num = re_assemble_16 (num);
+		  INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 		}
+	      break;
+
+	    /* Handle a 16 bit immediate at 31.  */
+	    case '>':
+	      the_insn.field_selector = pa_chk_field_selector (&s);
+	      get_expression (s);
+	      s = expr_end;
+	      if (the_insn.exp.X_op == O_constant)
+		{
+		  int mb;
+
+		  mb = opcode & 1;
+		  opcode -= mb;
+		  num = evaluate_absolute (&the_insn);
+		  if (mb == (num < 0))
+		    break;
+		  if (num % 4)
+		    break;
+		  CHECK_FIELD (num, 32767, -32768, 0);
+		  num = re_assemble_16 (num);
+		  INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
+		}
+	      break;
 
 	    /* Handle 14 bit immediate, shifted left three times.  */
 	    case '#':

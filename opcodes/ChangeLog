@@ -1,3 +1,7 @@
+2001-01-14  Alan Modra  <alan@linuxcare.com.au>
+
+	* hppa-dis.c (print_insn_hppa): Handle '>' and '<' arg types.
+
 2001-01-13  Nick Clifton  <nickc@redhat.com>
 
 	* disassemble.c: Remove spurious white space.

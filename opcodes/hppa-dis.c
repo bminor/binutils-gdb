@@ -1,5 +1,5 @@
 /* Disassembler for the PA-RISC. Somewhat derived from sparc-pinsn.c.
-   Copyright 1989, 90, 92, 93, 94, 95, 98, 99, 2000
+   Copyright 1989, 90, 92, 93, 94, 95, 98, 99, 2000, 2001
    Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
@@ -889,6 +889,7 @@ print_insn_hppa (memaddr, info)
 		case 'k':
 		  fput_const (extract_21 (insn), info);
 		  break;
+		case '<':
 		case 'l':
 		  /* 16-bit long disp., PA2.0 wide only.  */
 		  fput_const (extract_16 (insn), info);
@@ -1099,6 +1100,7 @@ print_insn_hppa (memaddr, info)
 		    break;
 		  }
 
+		case '>':
 		case 'y':
 		  {
 		    /* 16-bit long disp., PA2.0 wide only.  */
