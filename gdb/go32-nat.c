@@ -90,16 +90,16 @@ static void load_npx (void);	/* Restore the FPU of the debugged program */
 static void
 save_npx (void)
 {
-  asm ("inb    $0xa0, %%al
-       testb $0x20, %%al
-       jz 1f
-       xorb %% al, %%al
-       outb %% al, $0xf0
-       movb $0x20, %%al
-       outb %% al, $0xa0
-       outb %% al, $0x20
-1:
-       fnsave % 0
+  asm ("inb    $0xa0, %%al  \n\
+       testb $0x20, %%al    \n\
+       jz 1f 	    	    \n\
+       xorb %% al, %%al	    \n\
+       outb %% al, $0xf0    \n\
+       movb $0x20, %%al	    \n\
+       outb %% al, $0xa0    \n\
+       outb %% al, $0x20    \n\
+1:     	       	   	    \n\
+       fnsave % 0	    \n\
        fwait "
 :     "=m" (npx)
 :				/* No input */
@@ -493,8 +493,7 @@ static void
 store_register (int regno)
 {
   void *rp;
-  void *v = alloca (MAX_REGISTER_RAW_SIZE);
-  regcache_collect (regno, v);
+  void *v = (void *) register_buffer (regno);
 
   if (regno < FP0_REGNUM)
     memcpy ((char *) &a_tss + regno_mapping[regno].tss_ofs,
@@ -1701,7 +1700,7 @@ get_cr3 (void)
   cr3 = _farnspeekl (taskbase + 0x1c) & ~0xfff;
   if (cr3 > 0xfffff)
     {
-#if 0  /* not fully supported yet */
+#if 0  /* not fullly supported yet */
       /* The Page Directory is in UMBs.  In that case, CWSDPMI puts
 	 the first Page Table right below the Page Directory.  Thus,
 	 the first Page Table's entry for its own address and the Page
