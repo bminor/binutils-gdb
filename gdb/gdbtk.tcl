@@ -700,14 +700,15 @@ proc do_nothing {} {}
 #
 
 proc not_implemented_yet {message} {
-	tk_dialog .unimpl "gdb : unimpl" "$message: not implemented yet" \
+	tk_dialog .unimpl "gdb : unimpl" \
+		"$message: not implemented in the interface yet" \
 		{} 1 "OK"
 }
 
 ##
 # Local procedure:
 #
-#	create_expr_win - Creat expression display window
+#	create_expr_win - Create expression display window
 #
 # Description:
 #
@@ -1579,7 +1580,7 @@ proc build_framework {win {title GDBtk} {label {}}} {
 		  update_ptr
 	      }
 	${win}.menubar.file.menu add command -label Target... \
-		-command { gdb_cmd not_implemented_yet "target" }
+		-command { not_implemented_yet "target" }
 	${win}.menubar.file.menu add command -label Edit \
 		-command {exec $editor +[expr ($screen_top + $screen_bot)/2] $cfile &}
 	${win}.menubar.file.menu add separator
@@ -1610,27 +1611,61 @@ proc build_framework {win {title GDBtk} {label {}}} {
 	${win}.menubar.file.menu add command -label Quit \
 		-command { catch { gdb_cmd quit } }
 
+	menubutton ${win}.menubar.commands -padx 12 -text Commands \
+		-menu ${win}.menubar.commands.menu -underline 0
+
+	menu ${win}.menubar.commands.menu
+	${win}.menubar.commands.menu add command -label Run \
+		-command { catch  {gdb_cmd run } ; update_ptr }
+	${win}.menubar.commands.menu add command -label Step \
+		-command { catch { gdb_cmd step } ; update_ptr }
+	${win}.menubar.commands.menu add command -label Next \
+		-command { catch { gdb_cmd next } ; update_ptr }
+	${win}.menubar.commands.menu add command -label Continue \
+		-command { catch { gdb_cmd continue } ; update_ptr }
+	${win}.menubar.commands.menu add separator
+	${win}.menubar.commands.menu add command -label Stepi \
+		-command { catch { gdb_cmd stepi } ; update_ptr }
+	${win}.menubar.commands.menu add command -label Nexti \
+		-command { catch { gdb_cmd nexti } ; update_ptr }
+
 	menubutton ${win}.menubar.view -padx 12 -text View \
 		-menu ${win}.menubar.view.menu -underline 0
 
 	menu ${win}.menubar.view.menu
-	${win}.menubar.view.menu add command -label Hex -command {echo Hex}
+	${win}.menubar.view.menu add command -label Hex \
+		-command {echo Hex}
 	${win}.menubar.view.menu add command -label Decimal \
 		-command {echo Decimal}
-	${win}.menubar.view.menu add command -label Octal -command {echo Octal}
+	${win}.menubar.view.menu add command -label Octal \
+		-command {echo Octal}
 
 	menubutton ${win}.menubar.window -padx 12 -text Window \
 		-menu ${win}.menubar.window.menu -underline 0
 
 	menu ${win}.menubar.window.menu
-	${win}.menubar.window.menu add command -label Source \
-		-command {echo Source}
 	${win}.menubar.window.menu add command -label Command \
 		-command {echo Command}
+	${win}.menubar.window.menu add separator
+	${win}.menubar.window.menu add command -label Source \
+		-command {echo Source}
 	${win}.menubar.window.menu add command -label Assembly \
 		-command {create_asm_window ; update_ptr}
-	${win}.menubar.window.menu add command -label Register \
+	${win}.menubar.window.menu add separator
+	${win}.menubar.window.menu add command -label Registers \
 		-command {create_registers_window ; update_ptr}
+	${win}.menubar.window.menu add command -label Stack \
+		-command { not_implemented_yet "stack window" }
+	${win}.menubar.window.menu add separator
+	${win}.menubar.window.menu add command -label Files \
+		-command { not_implemented_yet "files window" }
+	${win}.menubar.window.menu add separator
+	${win}.menubar.window.menu add command -label Breakpoints \
+		-command { not_implemented_yet "breakpoints window" }
+	${win}.menubar.window.menu add command -label Signals \
+		-command { not_implemented_yet "signals window" }
+	${win}.menubar.window.menu add command -label Variables \
+		-command { not_implemented_yet "variables window" }
 
 	menubutton ${win}.menubar.help -padx 12 -text Help \
 		-menu ${win}.menubar.help.menu -underline 0
@@ -1643,11 +1678,17 @@ proc build_framework {win {title GDBtk} {label {}}} {
 	${win}.menubar.help.menu add command -label "Report bug" \
 		-command {exec send-pr}
 
-	tk_menuBar ${win}.menubar ${win}.menubar.file ${win}.menubar.view \
-		${win}.menubar.window ${win}.menubar.help
-	pack ${win}.menubar.file ${win}.menubar.view ${win}.menubar.window \
-		-side left
-	pack ${win}.menubar.help -side right
+	tk_menuBar ${win}.menubar \
+		${win}.menubar.file \
+		${win}.menubar.commands \
+		${win}.menubar.view \
+		${win}.menubar.window \
+		${win}.menubar.help
+	pack	${win}.menubar.file \
+		${win}.menubar.commands \
+		${win}.menubar.view \
+		${win}.menubar.window -side left
+	pack	${win}.menubar.help -side right
 
 	frame ${win}.info
 	text ${win}.text -height 25 -width 80 -relief raised -borderwidth 2 \
