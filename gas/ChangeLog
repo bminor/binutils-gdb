@@ -7,6 +7,10 @@ end-sanitize-d10v
 start-sanitize-v850
 Fri Aug 23 10:41:32 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-v850.c (CC_NAME_CNT): Define.
+	(cc_name): New function.
+	(md_assemble): Handle V850_OPERAND_CC correctly.
+
 	* config/tc-v850.c (md_assemble): Don't forget to initialize
 	"insn"!
 

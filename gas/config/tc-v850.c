@@ -59,6 +59,7 @@ static unsigned long v850_insert_operand
 static int reg_name_search PARAMS ((char *name, const struct reg_name *, int));
 static boolean register_name PARAMS ((expressionS *expressionP));
 static boolean system_register_name PARAMS ((expressionS *expressionP));
+static boolean cc_name PARAMS ((expressionS *expressionP));
 static int postfix PARAMS ((char *p));
 static bfd_reloc_code_real_type get_reloc PARAMS ((struct v850_operand *op));
 static unsigned long build_insn PARAMS ((struct v850_opcode *opcode, expressionS *opers));
@@ -178,6 +179,7 @@ static const struct reg_name cc_names[] =
   { "v", 0x0 },
   { "z", 0x2 },
 };
+#define CC_NAME_CNT	(sizeof(cc_names) / sizeof(struct reg_name))
 
 /* reg_name_search does a binary search of the given register table
    to see if "name" is a valid regiter name.  Returns the register
@@ -284,6 +286,52 @@ system_register_name (expressionP)
   if (reg_number >= 0) 
     {
       expressionP->X_op = O_register;
+      expressionP->X_add_number = reg_number;
+
+      /* make the rest nice */
+      expressionP->X_add_symbol = NULL;
+      expressionP->X_op_symbol = NULL;
+      *input_line_pointer = c;	/* put back the delimiting char */
+      return true;
+    }
+  else
+    {
+      /* reset the line as if we had not done anything */
+      *input_line_pointer = c;   /* put back the delimiting char */
+      input_line_pointer = start; /* reset input_line pointer */
+      return false;
+    }
+}
+
+/* Summary of cc_name().
+ *
+ * in: Input_line_pointer points to 1st char of operand.
+ *
+ * out: A expressionS.
+ *	The operand may have been a register: in this case, X_op == O_register,
+ *	X_add_number is set to the register number, and truth is returned.
+ *	Input_line_pointer->(next non-blank) char after operand, or is in
+ *	its original state.
+ */
+static boolean
+cc_name (expressionP)
+     expressionS *expressionP;
+{
+  int reg_number;
+  char *name;
+  char *start;
+  char c;
+
+  /* Find the spelling of the operand */
+  start = name = input_line_pointer;
+
+  c = get_symbol_end ();
+  reg_number = reg_name_search (name, cc_names, CC_NAME_CNT - 1);
+
+  /* look to see if it's in the register table */
+  if (reg_number >= 0) 
+    {
+      expressionP->X_op = O_constant;
       expressionP->X_add_number = reg_number;
 
       /* make the rest nice */
@@ -509,6 +557,14 @@ md_assemble (str)
 		  goto error;
 		}
 	    }
+	  else if ((operand->flags & V850_OPERAND_CC) != 0) 
+	    {
+	      if (!cc_name(&ex))
+		{
+		  errmsg = "invalid condition code name";
+		  goto error;
+		}
+	    }
 	  else if (strncmp(input_line_pointer, "lo(", 3) == 0) 
 	    {
 	      input_line_pointer += 3;
@@ -567,6 +623,12 @@ md_assemble (str)
 		   && (operand->flags & V850_OPERAND_SRG) == 0)
 	    {
 	      errmsg = "syntax error: system register not expected";
+	      goto error;
+	    }
+	  else if (cc_name (&ex)
+		   && (operand->flags & V850_OPERAND_CC) == 0)
+	    {
+	      errmsg = "syntax error: condition code not expected";
 	      goto error;
 	    }
 	  else
