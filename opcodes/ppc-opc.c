@@ -1944,7 +1944,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
   /* Double-precision opcodes.  */
   /* Some of these conflict with AltiVec, so move them before, since
      PPCVEC includes the PPC_OPCODE_PPC set.  */
-{ "efscfd",   VX(4, 719), VX_MASK,	PPCEFS,		{ RS, RA } },
+{ "efscfd",   VX(4, 719), VX_MASK,	PPCEFS,		{ RS, RB } },
 { "efdabs",   VX(4, 740), VX_MASK,	PPCEFS,		{ RS, RA } },
 { "efdnabs",  VX(4, 741), VX_MASK,	PPCEFS,		{ RS, RA } },
 { "efdneg",   VX(4, 742), VX_MASK,	PPCEFS,		{ RS, RA } },
