@@ -2690,9 +2690,11 @@ macro (ip)
 			       treg, (int) BFD_RELOC_MIPS_GPREL, GP);
 		  p = frag_var (rs_machine_dependent, 8, 0,
 				RELAX_ENCODE (4, 8, 0, 4, 0,
-					      mips_warn_about_macros),
+					      (mips_warn_about_macros
+					       || (used_at && mips_noat))),
 				offset_expr.X_add_symbol, (long) 0,
 				(char *) NULL);
+		  used_at = 0;
 		}
 	      macro_build_lui (p, &icnt, &offset_expr, tempreg);
 	      if (p != NULL)
@@ -3012,7 +3014,7 @@ macro (ip)
 			   (int) BFD_RELOC_MIPS_GPREL, tempreg);
 	      p = frag_var (rs_machine_dependent, 12 + off, 0,
 			    RELAX_ENCODE (8 + off, 12 + off, 0, 4 + off, 1,
-					  ! used_at && mips_noat),
+					  used_at && mips_noat),
 			    offset_expr.X_add_symbol, (long) 0,
 			    (char *) NULL);
 

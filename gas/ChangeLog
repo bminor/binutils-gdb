@@ -1,5 +1,8 @@
 Tue Jan 11 13:01:20 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/tc-mips.c (macro): Corrected $at warnings in a couple of
+	spots.
+
 	* listing.c (listing_prev_line): New function.
 	* listing.c: Include subsegs.h.
 	(listing_prev_line): New function.
