@@ -1,3 +1,21 @@
+2004-03-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/ppc/altivec.d: Update.
+	* gas/ppc/altivec_xcoff.d: Update.
+	* gas/ppc/altivec_xcoff64.d: Update.
+	* gas/ppc/astest.d: Update.
+	* gas/ppc/astest2.d: Update.
+	* gas/ppc/astest2_64.d: Update.
+	* gas/ppc/astest64.d: Update.
+	* gas/ppc/booke.d: Update.
+	* gas/ppc/booke_xcoff.d: Update.
+	* gas/ppc/booke_xcoff64.d: Update.
+	* gas/ppc/e500.d: Update.
+	* gas/ppc/power4.d: Update.
+	* gas/ppc/test1elf32.d: Update.
+	* gas/ppc/test1elf64.d: Update.
+	* gas/ppc/test1xcoff32.d: Update.
+
 2004-03-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/i386/padlock.s: Pad with .p2align.

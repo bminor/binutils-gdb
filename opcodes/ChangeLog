@@ -1,3 +1,13 @@
+2004-03-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-dis.c (print_insn_powerpc): Don't print tabs.  Handle
+	PPC_OPERANDS_GPR_0.
+	* ppc-opc.c (RA0): Define.
+	(RAQ, RAL, RAM, RAS, RSQ, RTQ, RSO): Use PPC_OPERAND_GPR_0.
+	(RAOPT): Rename from RAO.  Update all uses.
+	(powerpc_opcodes): Use RA0 as appropriate.  Add "lsdx", "lsdi",
+	"stsdx", "stsdi", "lmd" and "stmd" insns.
+
 2004-03-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* sparc-dis.c (print_insn_sparc): Update getword prototype.

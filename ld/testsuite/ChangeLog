@@ -1,3 +1,15 @@
+2004-03-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tls.d: Update.
+	* ld-powerpc/tls32.d: Update.
+	* ld-powerpc/tlsexe.d: Update.
+	* ld-powerpc/tlsexe32.d: Update.
+	* ld-powerpc/tlsexetoc.d: Update.
+	* ld-powerpc/tlsso.d: Update.
+	* ld-powerpc/tlsso32.d: Update.
+	* ld-powerpc/tlstoc.d: Update.
+	* ld-powerpc/tlstocso.d: Update.
+
 2004-03-05  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-scripts/size.exp: New.
@@ -29,7 +41,7 @@
 	relocations.
 
 2004-02-09  Anil Paranjpe  <anilp1@KPITCummins.com>
-	
+
 	* ld-h8300/relax-5.s: New file: Source for relax-5 test.
 	* ld-h8300/relax-5.d: New file: Expected output and commands for
 	assembling and linking the relax-5 test.
@@ -54,7 +66,7 @@
 	ld-arm/arm-static-app.r: New files.
 
 2004-01-12  Anil Paranjpe  <anilp1@KPITCummins.com>
-	
+
 	* ld-h8300/h8300-exp:  Run the relax-4 test.
 	* ld-h8300/relax-4.s: New file: Source for relax-4 test.
 	* ld-h8300/relax-4.d: New file: Expected output and commands for
