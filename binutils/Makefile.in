@@ -17,13 +17,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-#$Id$
-
 srcdir = .
 
 prefix = /usr/local
 
 program_prefix =
+program_suffix =
 exec_prefix = $(prefix)
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
@@ -312,14 +311,23 @@ realclean: clean
 	-rm -f $(STAGESTUFF) TAGS
 
 install: all
+	-parent=`echo $(bindir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+	-if [ -d $(bindir) ] ; then true ; else mkdir $(bindir) ; fi
 	for i in $(PROGS) ; do \
-		$(INSTALL_PROGRAM) $$i $(bindir)/$(program_prefix)$$i ; \
+		$(INSTALL_PROGRAM) $$i $(bindir)/$(program_prefix)$${i}$(program_suffix) ; \
 	done
+	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
 	for i in $(MANPAGES) ; do \
-		$(INSTALL_DATA) $(srcdir)/$$i $(man1dir)/$(program_prefix)$$i ; \
+		$(INSTALL_DATA) $(srcdir)/$$i $(man1dir)/$(program_prefix)$${i}$(program_suffix) ; \
 	done
 
 install-info: info
+	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+	-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
 	for i in *.info* ; do \
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done

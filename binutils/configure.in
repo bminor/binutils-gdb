@@ -13,6 +13,16 @@ case "${host_cpu}" in
 rs6000)	my_host=rs6000
 	;;
 
+hppa*)
+	case "${host_vendor}" in
+	hp)
+		case "${host_os}" in
+		hpux)	my_host=hppahpux ;;
+		bsd)	my_host=hppabsd ;;
+		esac
+		;;
+	esac
+	;;
 mips)
 	case "${host_vendor}" in
 	dec)	my_host=decstation ;;
@@ -32,7 +42,7 @@ m88k)
 	esac
 	;;
 
-m68k)
+m68*)
 	case "${host_vendor}" in
 	cbm)
 		case ${host_os} in
@@ -103,9 +113,9 @@ links="sysdep.h"
 
 if [ ! -f ${srcdir}/${files} ] ; then
 	if [ -n "${my_host}" ] ; then
-		echo '***' No file ${srcdir}/${files}
+		echo '***' No file ${srcdir}/${files} 1>&2
 	fi
-	echo '***' ${srcname} does not support host ${host}
+	echo '***' ${srcname} does not support host ${host} 1>&2
 	exit 1
 fi
 

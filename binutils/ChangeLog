@@ -1,3 +1,9 @@
+Tue Aug 18 13:28:44 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/mh-apollo68v: removed -g from CC definition.
+
+	* Makefile.in: always create installation directories.
+
 Mon Aug 17 18:33:41 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* m68k-pinsn.c:  Minor fix in style of output (don't use
