@@ -38,11 +38,11 @@
    beginning of the current instruction.  */
 typedef struct sym_link
 {
-  struct sym_link *next;
-  symbolS	  *symbol;
+  struct sym_link * next;
+  symbolS *         symbol;
 } sym_linkS;
 
-static sym_linkS *debug_sym_link = (sym_linkS *)0;
+static sym_linkS *  debug_sym_link = (sym_linkS *) NULL;
   
 /* Structure to hold all of the different components describing
    an individual instruction.  */
@@ -63,7 +63,7 @@ typedef struct
   int                   num_fixups;
   fixS *                fixups [GAS_CGEN_MAX_FIXUPS];
   int                   indices [MAX_OPERAND_INSTANCES];
-  sym_linkS		*debug_sym_link;
+  sym_linkS *           debug_sym_link;
 }
 fr30_insn;
 
@@ -1017,149 +1017,11 @@ md_cgen_lookup_reloc (insn, operand, fixP)
   return BFD_RELOC_NONE;
 }
 
-/* Record a HI16 reloc for later matching with its LO16 cousin.  */
-
-static void
-fr30_record_hi16 (reloc_type, fixP, seg)
-     int    reloc_type;
-     fixS * fixP;
-     segT   seg;
-{
-  struct fr30_hi_fixup * hi_fixup;
-
-  assert (reloc_type == BFD_RELOC_FR30_HI16_SLO
-	  || reloc_type == BFD_RELOC_FR30_HI16_ULO);
-
-  hi_fixup = ((struct fr30_hi_fixup *)
-	      xmalloc (sizeof (struct fr30_hi_fixup)));
-  hi_fixup->fixp = fixP;
-  hi_fixup->seg  = now_seg;
-  hi_fixup->next = fr30_hi_fixup_list;
-  
-  fr30_hi_fixup_list = hi_fixup;
-}
-
-/* Called while parsing an instruction to create a fixup.
-   We need to check for HI16 relocs and queue them up for later sorting.  */
-
-fixS *
-fr30_cgen_record_fixup_exp (frag, where, insn, length, operand, opinfo, exp)
-     fragS *              frag;
-     int                  where;
-     const CGEN_INSN *    insn;
-     int                  length;
-     const CGEN_OPERAND * operand;
-     int                  opinfo;
-     expressionS *        exp;
-{
-#if 0
-  fixS * fixP = gas_cgen_record_fixup_exp (frag, where, insn, length,
-					   operand, opinfo, exp);
-
-  switch (CGEN_OPERAND_TYPE (operand))
-    {
-    case FR30_OPERAND_HI16 :
-      /* If low/high/shigh/sda was used, it is recorded in `opinfo'.  */
-      if (fixP->tc_fix_data.opinfo == BFD_RELOC_FR30_HI16_SLO
-	  || fixP->tc_fix_data.opinfo == BFD_RELOC_FR30_HI16_ULO)
-	fr30_record_hi16 (fixP->tc_fix_data.opinfo, fixP, now_seg);
-      break;
-    default : /* avoid -Wall warning */
-      break;
-    }
-
-  return fixP;
-#else
-  return 0;
-#endif
-}
 
 /* Return BFD reloc type from opinfo field in a fixS.
    It's tricky using fx_r_type in fr30_frob_file because the values
    are BFD_RELOC_UNUSED + operand number.  */
 #define FX_OPINFO_R_TYPE(f) ((f)->tc_fix_data.opinfo)
-
-/* Sort any unmatched HI16 relocs so that they immediately precede
-   the corresponding LO16 reloc.  This is called before md_apply_fix and
-   tc_gen_reloc.  */
-
-void
-fr30_frob_file ()
-{
-  struct fr30_hi_fixup * l;
-
-  for (l = fr30_hi_fixup_list; l != NULL; l = l->next)
-    {
-      segment_info_type * seginfo;
-      int                 pass;
-
-      assert (FX_OPINFO_R_TYPE (l->fixp) == BFD_RELOC_FR30_HI16_SLO
-	      || FX_OPINFO_R_TYPE (l->fixp) == BFD_RELOC_FR30_HI16_ULO);
-
-      /* Check quickly whether the next fixup happens to be a matching low.  */
-      if (l->fixp->fx_next != NULL
-	  && FX_OPINFO_R_TYPE (l->fixp->fx_next) == BFD_RELOC_FR30_LO16
-	  && l->fixp->fx_addsy == l->fixp->fx_next->fx_addsy
-	  && l->fixp->fx_offset == l->fixp->fx_next->fx_offset)
-	continue;
-
-      /* Look through the fixups for this segment for a matching `low'.
-         When we find one, move the high/shigh just in front of it.  We do
-         this in two passes.  In the first pass, we try to find a
-         unique `low'.  In the second pass, we permit multiple high's
-         relocs for a single `low'.  */
-      seginfo = seg_info (l->seg);
-      for (pass = 0; pass < 2; pass++)
-	{
-	  fixS * f;
-	  fixS * prev;
-
-	  prev = NULL;
-	  for (f = seginfo->fix_root; f != NULL; f = f->fx_next)
-	    {
-	      /* Check whether this is a `low' fixup which matches l->fixp.  */
-	      if (FX_OPINFO_R_TYPE (f) == BFD_RELOC_FR30_LO16
-		  && f->fx_addsy == l->fixp->fx_addsy
-		  && f->fx_offset == l->fixp->fx_offset
-		  && (pass == 1
-		      || prev == NULL
-		      || (FX_OPINFO_R_TYPE (prev) != BFD_RELOC_FR30_HI16_SLO
-			  && FX_OPINFO_R_TYPE (prev) != BFD_RELOC_FR30_HI16_ULO)
-		      || prev->fx_addsy != f->fx_addsy
-		      || prev->fx_offset !=  f->fx_offset))
-		{
-		  fixS ** pf;
-
-		  /* Move l->fixp before f.  */
-		  for (pf = &seginfo->fix_root;
-		       * pf != l->fixp;
-		       pf = & (* pf)->fx_next)
-		    assert (* pf != NULL);
-
-		  * pf = l->fixp->fx_next;
-
-		  l->fixp->fx_next = f;
-		  if (prev == NULL)
-		    seginfo->fix_root = l->fixp;
-		  else
-		    prev->fx_next = l->fixp;
-
-		  break;
-		}
-
-	      prev = f;
-	    }
-
-	  if (f != NULL)
-	    break;
-
-	  if (pass == 1
-	      && warn_unmatched_high)
-	    as_warn_where (l->fixp->fx_file, l->fixp->fx_line,
-			   _("Unmatched high/shigh reloc"));
-	}
-    }
-}
 
 /* See whether we need to force a relocation into the output file.
    This is used to force out switch and PC relative relocations when
@@ -1264,35 +1126,3 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
-void
-fr30_elf_section_change_hook ()
-{
-  /* If we have reached the end of a section and we have just emitted a
-     16 bit insn, then emit a nop to make sure that the section ends on
-     a 32 bit boundary.  */
-  
-  if (prev_insn.insn || seen_relaxable_p)
-    (void) fr30_fill_insn (0);
-}
-
-boolean
-fr30_fix_adjustable (fixP)
-   fixS *fixP;
-{
-
-  if (fixP->fx_addsy == NULL)
-    return 1;
-  
-  /* Prevent all adjustments to global symbols. */
-  if (S_IS_EXTERN (fixP->fx_addsy))
-    return 0;
-  if (S_IS_WEAK (fixP->fx_addsy))
-    return 0;
-  
-  /* We need the symbol name for the VTABLE entries */
-  if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
-    return 0;
-
-  return 1;
-}
