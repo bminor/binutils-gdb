@@ -1,3 +1,7 @@
+Thu Dec 16 13:06:32 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* hosts/hp300bsd.h: Correctly identify 4.3BSD vs 4.4BSD.
+
 Wed Dec 15 08:04:16 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* hosts/std-host.h: (time): Don't declare; conflicts on Mach3.
