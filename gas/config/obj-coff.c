@@ -3641,7 +3641,8 @@ fixup_segment (segP, this_segment_type)
       add_number = fixP->fx_offset;
       pcrel = fixP->fx_pcrel;
 
-      if (add_symbolP->sy_mri_common)
+      if (add_symbolP != NULL
+	  && add_symbolP->sy_mri_common)
 	{
 	  know (add_symbolP->sy_value.X_op == O_symbol);
 	  add_number += S_GET_VALUE (add_symbolP);

@@ -630,7 +630,7 @@ adjust_reloc_syms (abfd, sec, xxx)
 	sym = fixp->fx_addsy;
 	symsec = sym->bsym->section;
 
-	if (sym->sy_mri_common)
+	if (sym != NULL && sym->sy_mri_common)
 	  {
 	    /* These symbols are handled specially in fixup_segment.  */
 	    goto done;
@@ -2169,7 +2169,8 @@ fixup_segment (fixP, this_segment_type)
       pcrel = fixP->fx_pcrel;
       plt = fixP->fx_plt;
 
-      if (add_symbolP->sy_mri_common)
+      if (add_symbolP != NULL
+	  && add_symbolP->sy_mri_common)
 	{
 	  know (add_symbolP->sy_value.X_op == O_symbol);
 	  add_number += S_GET_VALUE (add_symbolP);
