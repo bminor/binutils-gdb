@@ -73,6 +73,11 @@ Generate code for the MIPS 16 processor.  This is equivalent to putting
 @samp{.set mips16} at the start of the assembly file.  @samp{-no-mips16}
 turns off this option.
 
+@item -mfix7000
+@itemx -no-mfix7000
+Cause nops to be inserted if the read of the destination register
+of an mfhi or mflo instruction occurs in the following two instructions.
+
 @item -m4010
 @itemx -no-m4010
 Generate code for the LSI @sc{r4010} chip.  This tells the assembler to

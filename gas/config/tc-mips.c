@@ -265,6 +265,10 @@ static int mips_32bitmode = 0;
 #define cop_interlocks (mips_cpu == 4300                            \
 			)
 
+/* Is this a mfhi or mflo instruction?  */
+#define MF_HILO_INSN(PINFO) \
+          ((PINFO & INSN_READ_HI) || (PINFO & INSN_READ_LO))
+
 /* MIPS PIC level.  */
 
 enum mips_pic_level
@@ -299,6 +303,10 @@ static int mips_trap;
 /* Non-zero if any .set noreorder directives were used.  */
 
 static int mips_any_noreorder;
+
+/* Non-zero if nops should be inserted when the register referenced in
+   an mfhi/mflo instruction is read in the next two instructions.  */
+static int mips_7000_hilo_fix;
 
 /* The size of the small data section.  */
 static int g_switch_value = 8;
@@ -1551,6 +1559,37 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	      || (pinfo & INSN_READ_COND_CODE))
 	    ++nops;
 	}
+
+      /* If we're fixing up mfhi/mflo for the r7000 and the
+	 previous insn was an mfhi/mflo and the current insn
+	 reads the register that the mfhi/mflo wrote to, then
+	 insert two nops.  */
+
+      else if (mips_7000_hilo_fix
+	       && MF_HILO_INSN (prev_pinfo)
+	       && insn_uses_reg (ip, ((prev_insn.insn_opcode >> OP_SH_RD)
+                                       & OP_MASK_RD),
+                                    MIPS_GR_REG))
+
+	{
+	  nops += 2;
+	}
+
+      /* If we're fixing up mfhi/mflo for the r7000 and the
+	 2nd previous insn was an mfhi/mflo and the current insn
+	 reads the register that the mfhi/mflo wrote to, then
+	 insert one nop.  */
+
+      else if (mips_7000_hilo_fix
+	       && MF_HILO_INSN (prev_prev_insn.insn_opcode)
+	       && insn_uses_reg (ip, ((prev_prev_insn.insn_opcode >> OP_SH_RD)
+                                       & OP_MASK_RD),
+                                    MIPS_GR_REG))
+     
+	{
+	  nops += 1;
+	}
+ 
       else if (prev_pinfo & INSN_READ_LO)
 	{
 	  /* The previous instruction reads the LO register; if the
@@ -8802,6 +8841,11 @@ struct option md_longopts[] = {
 #define OPTION_MABI (OPTION_MD_BASE + 38)
   {"mabi", required_argument, NULL, OPTION_MABI},
 
+#define OPTION_M7000_HILO_FIX (OPTION_MD_BASE + 39)
+  {"mfix7000", no_argument, NULL, OPTION_M7000_HILO_FIX},
+#define OPTION_NO_M7000_HILO_FIX (OPTION_MD_BASE + 40)
+  {"no-fix-7000", no_argument, NULL, OPTION_NO_M7000_HILO_FIX},
+
 #define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
 #define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
 #define OPTION_XGOT (OPTION_MD_BASE + 19)
@@ -9124,6 +9168,14 @@ md_parse_option (c, arg)
 	  || strcmp (arg,"o64") == 0
 	  || strcmp (arg,"eabi") == 0)
 	mips_abi_string = arg;
+      break;
+
+    case OPTION_M7000_HILO_FIX:
+      mips_7000_hilo_fix = true;
+      break;
+
+    case OPTION_NO_M7000_HILO_FIX:
+      mips_7000_hilo_fix = false;
       break;
 
     default:
