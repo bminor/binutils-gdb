@@ -47,9 +47,9 @@ endif
 
 NATIVE  = native
 
-GCC	 = gcc -O 
+GCC	 = gcc -O2 
 CFLAGS	 = -g
-CXXFLAGS = -g -O -fexternal-templates
+CXXFLAGS = -g -O2 -fexternal-templates
 MAKEINFOFLAGS =
 
 log	= 1>$(canonhost)-build-log 2>&1
@@ -122,14 +122,14 @@ TARGETS = $(NATIVE) \
 	sparc-aout	sparc-lynx	sparc-vxworks	\
 	sparclite-aout  sparclite-vxworks \
 	sparclite-coff  z8k-coff
-GCC = gcc -O -pipe
+GCC = gcc -O2 -pipe
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),m68k-sun-sunos4.1.1)
 TARGETS = $(NATIVE) \
 	m68k-coff 
-GCC = gcc -O -msoft-float
+GCC = gcc -O2 -msoft-float
 CC = cc -J
 all: all-cygnus
 endif
@@ -142,7 +142,7 @@ TARGETS = $(NATIVE) \
 	m88k-coff     \
 	mipsel-idt-ecoff sparc-lynx 
 CC = cc -Xs
-GCC = gcc -O -pipe
+GCC = gcc -O2 -pipe
 all: all-cygnus
 endif
 
@@ -202,9 +202,9 @@ TARGETS = \
 	sh-hms 		\
 	sparclite-aout
 CC = i386-go32-gcc
-GCC = i386-go32-gcc -O
+GCC = i386-go32-gcc -O2
 CFLAGS =
-CXXFLAGS = -O
+CXXFLAGS = -O2
 MAKEINFOFLAGS = --no-split
 all: all-dos
 endif
