@@ -1,3 +1,8 @@
+2004-02-24  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.java/jmisc.exp: Use the fully quallified name of "main" when
+	setting a breakpoint.  Work around PR java/1565.
+
 2004-02-23  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* lib/gdb.exp (gdb_breakpoint): Update query string to match
