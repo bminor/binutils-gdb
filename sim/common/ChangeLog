@@ -1,5 +1,26 @@
 Mon May 19 12:07:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* sim-events.c (sim_events_zalloc): Signal save memory allocator -
+ 	stop tk interrupting malloc calls.
+	(sim_events_zalloc): Converse.
+
+	* Make-common.in (sim_main_headers): Add sim-events.h.
+
+	* sim-events.c (sim_events_schedule_after_signal): Change return
+ 	type to void - signal events are strictly internal.
+	(sim_events_init): Allocate a finite buffer for signal events.
+	(sim_events_schedule_after_signal): Enter signal events into the
+ 	signal buffer.
+
+	* sim-engine.c (sim_engine_halt): Check SIM_DESC magic.
+	(sim_engine_restart): Ditto.
+	(sim_engine_abort): Ditto.
+	* sim-stop.c (sim_stop): Ditto.
+	(control_c_simulation): Ditto.
+	* sim-resume.c (sim_resume): Ditto.
+	(has_stepped): Ditto.
+	* sim-abort.c (sim_engine_abort): Ditto.
+
 	* sim-basics.h (transfer_type): New type.
 
 	* sim-core.c (sim_core_signal): New function. Print core signal

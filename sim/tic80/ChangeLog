@@ -1,3 +1,7 @@
+Mon May 19 14:58:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_open): Set the simulator base magic number.
+
 Fri May 16 14:35:30 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* insns (illegal, fp_unavailable): Halt instead of abort the

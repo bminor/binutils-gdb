@@ -53,6 +53,7 @@ SIM_DESC
 sim_open (SIM_OPEN_KIND kind, char **argv)
 {
   STATE_OPEN_KIND (&simulation) = kind;
+  STATE_MAGIC (&simulation) = SIM_MAGIC_NUMBER;
 
   /* establish the simulator configuration */
   sim_config (&simulation,
