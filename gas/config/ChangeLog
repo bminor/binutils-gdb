@@ -3,6 +3,8 @@ Tue Nov 10 09:50:25 1992  Ian Lance Taylor  (ian@cygnus.com)
 	* tc-m68k.c (m68k_reg_parse): If REGISTER_PREFIX isn't defined,
 	still accept (but don't require) OPTIONAL_REGISTER_PREFIX before
 	the register name.
+	(insert_reg): put REGISTER_PREFIX before register names before
+	putting them in the symbol table.
 	* tc-m68k.h (OPTIONAL_REGISTER_PREFIX): Define to be "%", if not
 	M68KCOFF.
 
