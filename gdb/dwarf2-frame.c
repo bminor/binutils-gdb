@@ -432,6 +432,9 @@ execute_cfa_program (unsigned char *insn_ptr, unsigned char *insn_end,
 	      /* cfa_how deliberately not set.  */
 	      break;
 
+	    case DW_CFA_nop:
+	      break;
+
 	    case DW_CFA_def_cfa_expression:
 	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &fs->cfa_exp_len);
 	      fs->cfa_exp = insn_ptr;
@@ -449,7 +452,26 @@ execute_cfa_program (unsigned char *insn_ptr, unsigned char *insn_end,
 	      insn_ptr += utmp;
 	      break;
 
-	    case DW_CFA_nop:
+	    case DW_CFA_offset_extended_sf:
+	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &reg);
+	      insn_ptr = read_sleb128 (insn_ptr, insn_end, &offset);
+	      offset += fs->data_align;
+	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      fs->regs.reg[reg].how = REG_SAVED_OFFSET;
+	      fs->regs.reg[reg].loc.offset = offset;
+	      break;
+
+	    case DW_CFA_def_cfa_sf:
+	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &fs->cfa_reg);
+	      insn_ptr = read_sleb128 (insn_ptr, insn_end, &offset);
+	      fs->cfa_offset = offset * fs->data_align;
+	      fs->cfa_how = CFA_REG_OFFSET;
+	      break;
+
+	    case DW_CFA_def_cfa_offset_sf:
+	      insn_ptr = read_sleb128 (insn_ptr, insn_end, &offset);
+	      fs->cfa_offset = offset * fs->data_align;
+	      /* cfa_how deliberately not set.  */
 	      break;
 
 	    case DW_CFA_GNU_args_size:

@@ -1,3 +1,10 @@
+2004-01-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.c (execute_cfa_program): Move DWA_CFA_nop before
+	DW_CFA_def_cfa_exporession.  Add support for
+	DW_CFA_offset_extendend_sf, DW_CFA_def_cfa_sf and
+	DW_CFA_def_cfa_offset_sf.  This should fix PR backtrace/1391.
+
 2004-01-18  Andrew Cagney  <cagney@redhat.com>
 
 	* ocd.c: Update copyright.
