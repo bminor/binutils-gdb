@@ -1,3 +1,27 @@
+Fri Mar 22 15:49:08 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* stabs.c (struct stab_handle): Add field abfd.
+	(start_stab): Add abfd parameter.
+	(parse_stab_string): Skip the symbol leading char when searching
+	for the value of a global symbol.
+	* budbg.h (start_stab): Update declaration.
+	* rddbg.c (read_section_stabs_debugging_info): Pass abfd to
+	start_stab.
+	(read_symbol_stabs_debugging_info): Likewise.
+
+Thu Mar 21 12:40:48 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* wrstabs.c (stab_function_type): Output an empty typedef for an
+	unused argument, rather than making up a meaningless name.
+	(stab_variable): Use N_RSYM for a DEBUG_REGISTER variable.
+
+	* ieee.c (struct ieee_info): Add global_vars field.
+	(parse_ieee_be): When ending the global typedef block, copy the
+	variables into info->global_vars.
+	(parse_ieee_atn): Don't require an NN record for a pmisc ATN.
+	(ieee_read_reference): Search the global variables after the local
+	variables.
+
 Wed Mar 20 18:08:19 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* objdump.c (disassemble_data): Make sure sym_name is always set.

@@ -1,5 +1,5 @@
 /* rddbg.c -- Read debugging information into a generic form.
-   Copyright (C) 1995 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -30,14 +30,22 @@
 #include "budbg.h"
 
 static boolean read_section_stabs_debugging_info
-  PARAMS ((bfd *, PTR, boolean *));
+  PARAMS ((bfd *, asymbol **, long, PTR, boolean *));
+static boolean read_symbol_stabs_debugging_info
+  PARAMS ((bfd *, asymbol **, long, PTR, boolean *));
+static boolean read_ieee_debugging_info PARAMS ((bfd *, PTR, boolean *));
+static void save_stab PARAMS ((int, int, bfd_vma, const char *));
+static void stab_context PARAMS ((void));
+static void free_saved_stabs PARAMS ((void));
 
 /* Read debugging information from a BFD.  Returns a generic debugging
    pointer.  */
 
 PTR
-read_debugging_info (abfd)
+read_debugging_info (abfd, syms, symcount)
      bfd *abfd;
+     asymbol **syms;
+     long symcount;
 {
   PTR dhandle;
   boolean found;
@@ -46,10 +54,24 @@ read_debugging_info (abfd)
   if (dhandle == NULL)
     return NULL;
 
-  /* All we know about right now is stabs in sections.  */
+  /* All we know about right now is stabs.  */
 
-  if (! read_section_stabs_debugging_info (abfd, dhandle, &found))
+  if (! read_section_stabs_debugging_info (abfd, syms, symcount, dhandle,
+					   &found))
     return NULL;
+
+  if (bfd_get_flavour (abfd) == bfd_target_aout_flavour)
+    {
+      if (! read_symbol_stabs_debugging_info (abfd, syms, symcount, dhandle,
+					      &found))
+	return NULL;
+    }
+
+  if (bfd_get_flavour (abfd) == bfd_target_ieee_flavour)
+    {
+      if (! read_ieee_debugging_info (abfd, dhandle, &found))
+	return NULL;
+    }
 
   if (! found)
     {
@@ -64,8 +86,10 @@ read_debugging_info (abfd)
 /* Read stabs in sections debugging information from a BFD.  */
 
 static boolean
-read_section_stabs_debugging_info (abfd, dhandle, pfound)
+read_section_stabs_debugging_info (abfd, syms, symcount, dhandle, pfound)
      bfd *abfd;
+     asymbol **syms;
+     long symcount;
      PTR dhandle;
      boolean *pfound;
 {
@@ -115,7 +139,7 @@ read_section_stabs_debugging_info (abfd, dhandle, pfound)
 
 	  if (shandle == NULL)
 	    {
-	      shandle = start_stab (dhandle);
+	      shandle = start_stab (dhandle, abfd, true, syms, symcount);
 	      if (shandle == NULL)
 		return false;
 	    }
@@ -168,8 +192,14 @@ read_section_stabs_debugging_info (abfd, dhandle, pfound)
 		      f = s;
 		    }
 
+		  save_stab (type, desc, value, s);
+
 		  if (! parse_stab (dhandle, shandle, type, desc, value, s))
-		    return false;
+		    {
+		      stab_context ();
+		      free_saved_stabs ();
+		      return false;
+		    }
 
 		  /* Don't free f, since I think the stabs code
                      expects strings to hang around.  This should be
@@ -177,6 +207,7 @@ read_section_stabs_debugging_info (abfd, dhandle, pfound)
 		}
 	    }
 
+	  free_saved_stabs ();
 	  free (stabs);
 
 	  /* Don't free strings, since I think the stabs code expects
@@ -192,4 +223,201 @@ read_section_stabs_debugging_info (abfd, dhandle, pfound)
     }
 
   return true;
+}
+
+/* Read stabs in the symbol table.  */
+
+static boolean
+read_symbol_stabs_debugging_info (abfd, syms, symcount, dhandle, pfound)
+     bfd *abfd;
+     asymbol **syms;
+     long symcount;
+     PTR dhandle;
+     boolean *pfound;
+{
+  PTR shandle;
+  asymbol **ps, **symend;
+
+  shandle = NULL;
+  symend = syms + symcount;
+  for (ps = syms; ps < symend; ps++)
+    {
+      symbol_info i;
+
+      bfd_get_symbol_info (abfd, *ps, &i);
+
+      if (i.type == '-')
+	{
+	  const char *s;
+	  char *f;
+
+	  if (shandle == NULL)
+	    {
+	      shandle = start_stab (dhandle, abfd, false, syms, symcount);
+	      if (shandle == NULL)
+		return false;
+	    }
+
+	  *pfound = true;
+
+	  s = i.name;
+	  while (s[strlen (s) - 1] == '\\'
+		 && ps + 1 < symend)
+	    {
+	      char *sc, *n;
+
+	      ++ps;
+	      sc = xstrdup (s);
+	      sc[strlen (sc) - 1] = '\0';
+	      n = concat (sc, bfd_asymbol_name (*ps), (const char *) NULL);
+	      free (sc);
+	      if (f != NULL)
+		free (f);
+	      f = n;
+	      s = n;
+	    }
+
+	  save_stab (i.stab_type, i.stab_desc, i.value, s);
+
+	  if (! parse_stab (dhandle, shandle, i.stab_type, i.stab_desc,
+			    i.value, s))
+	    {
+	      stab_context ();
+	      free_saved_stabs ();
+	      return false;
+	    }
+
+	  free_saved_stabs ();
+
+	  /* Don't free f, since I think the stabs code expects
+	     strings to hang around.  This should be straightened out.
+	     FIXME.  */
+	}
+    }
+
+  if (shandle != NULL)
+    {
+      if (! finish_stab (dhandle, shandle))
+	return false;
+    }
+
+  return true;
+}
+
+/* Read IEEE debugging information.  */
+
+static boolean
+read_ieee_debugging_info (abfd, dhandle, pfound)
+     bfd *abfd;
+     PTR dhandle;
+     boolean *pfound;
+{
+  asection *dsec;
+  bfd_size_type size;
+  bfd_byte *contents;
+
+  /* The BFD backend puts the debugging information into a section
+     named .debug.  */
+
+  dsec = bfd_get_section_by_name (abfd, ".debug");
+  if (dsec == NULL)
+    return true;
+
+  size = bfd_section_size (abfd, dsec);
+  contents = (bfd_byte *) xmalloc (size);
+  if (! bfd_get_section_contents (abfd, dsec, contents, 0, size))
+    return false;
+
+  if (! parse_ieee (dhandle, abfd, contents, size))
+    return false;
+
+  free (contents);
+
+  *pfound = true;
+
+  return true;
+}
+
+/* Record stabs strings, so that we can give some context for errors.  */
+
+#define SAVE_STABS_COUNT (16)
+
+struct saved_stab
+{
+  int type;
+  int desc;
+  bfd_vma value;
+  char *string;
+};
+
+static struct saved_stab saved_stabs[SAVE_STABS_COUNT];
+static int saved_stabs_index;
+
+/* Save a stabs string.  */
+
+static void
+save_stab (type, desc, value, string)
+     int type;
+     int desc;
+     bfd_vma value;
+     const char *string;
+{
+  if (saved_stabs[saved_stabs_index].string != NULL)
+    free (saved_stabs[saved_stabs_index].string);
+  saved_stabs[saved_stabs_index].type = type;
+  saved_stabs[saved_stabs_index].desc = desc;
+  saved_stabs[saved_stabs_index].value = value;
+  saved_stabs[saved_stabs_index].string = xstrdup (string);
+  saved_stabs_index = (saved_stabs_index + 1) % SAVE_STABS_COUNT;
+}
+
+/* Provide context for an error.  */
+
+static void
+stab_context ()
+{
+  int i;
+
+  fprintf (stderr, "Last stabs entries before error:\n");
+  fprintf (stderr, "n_type n_desc n_value  string\n");
+
+  i = saved_stabs_index;
+  do
+    {
+      struct saved_stab *stabp;
+
+      stabp = saved_stabs + i;
+      if (stabp->string != NULL)
+	{
+	  const char *s;
+
+	  s = bfd_get_stab_name (stabp->type);
+	  if (s != NULL)
+	    fprintf (stderr, "%-6s", s);
+	  else if (stabp->type == 0)
+	    fprintf (stderr, "HdrSym");
+	  else
+	    fprintf (stderr, "%-6d", stabp->type);
+	  fprintf (stderr, " %-6d ", stabp->desc);
+	  fprintf_vma (stderr, stabp->value);
+	  if (stabp->type != 0)
+	    fprintf (stderr, " %s", stabp->string);
+	  fprintf (stderr, "\n");
+	}
+      i = (i + 1) % SAVE_STABS_COUNT;
+    }
+  while (i != saved_stabs_index);
+}
+
+/* Free the saved stab strings.  */
+
+static void
+free_saved_stabs ()
+{
+  int i;
+
+  for (i = 0; i < SAVE_STABS_COUNT; i++)
+    if (saved_stabs[i].string != NULL)
+      free (saved_stabs[i].string);
+  saved_stabs_index = 0;
 }

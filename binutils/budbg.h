@@ -32,17 +32,23 @@ extern PTR read_debugging_info PARAMS ((bfd *, asymbol **, long));
 
 extern boolean print_debugging_info PARAMS ((FILE *, PTR));
 
-/* Routines used to read stabs information.  */
+/* Routines used to read and write stabs information.  */
 
-extern PTR start_stab PARAMS ((PTR, boolean));
+extern PTR start_stab PARAMS ((PTR, bfd *, boolean, asymbol **, long));
 
 extern boolean finish_stab PARAMS ((PTR, PTR));
 
 extern boolean parse_stab PARAMS ((PTR, PTR, int, int, bfd_vma, const char *));
 
-/* Routine used to read IEEE information.  */
+extern boolean write_stabs_in_sections_debugging_info
+  PARAMS ((bfd *, PTR, bfd_byte **, bfd_size_type *, bfd_byte **,
+	   bfd_size_type *));
+
+/* Routines used to read and write IEEE debugging information.  */
 
 extern boolean parse_ieee
   PARAMS ((PTR, bfd *, const bfd_byte *, bfd_size_type));
+
+extern boolean write_ieee_debugging_info PARAMS ((bfd *, PTR));
 
 #endif
