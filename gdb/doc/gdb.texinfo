@@ -30,7 +30,7 @@ _fi__(0)
 @c
 @syncodeindex ky cp
 @c FOR UPDATES LEADING TO THIS DRAFT, GDB CHANGELOG CONSULTED BETWEEN:
-@c Sun May 19 05:36:59 1991  John Gilmore  (gnu at cygint.cygnus.com)
+@c Wed Jul 31 12:06:29 1991  John Gilmore  (gnu at cygint.cygnus.com)
 @c Sat Dec 22 02:51:40 1990  John Gilmore  (gnu at cygint)
 @ifinfo
 This file documents the GNU debugger _GDBN__.
@@ -181,7 +181,7 @@ Running Programs Under _GDBN__
 Stopping and Continuing
 
 * Breakpoints::			Breakpoints, Watchpoints, and Exceptions
-* Stepping and Continuing::	Resuming Execution
+* Continuing and Stepping::	Resuming Execution
 * Signals::			Signals
 
 Breakpoints, Watchpoints, and Exceptions
@@ -424,18 +424,19 @@ changes, without having to predict a particular place in your program
 where this may happen.
 
 @item Object Code Formats
-_GDBN__ uses a new scheme called Binary File Descriptors (BFD) to permit
-it to switch dynamically, without reconfiguration or recompilation,
-between different object-file formats.  Formats currently supported are
-COFF, a.out, and the Intel 960 b.out; files may be read as .o's, archive
-libraries, or core dumps.  BFD is available as a subroutine library so
-that other programs may take advantage of it, and the other GNU binary
-utilities are being converted to use it.
+_GDBN__ uses a new scheme called the Binary File Descriptor (BFD)
+Library to permit it to switch dynamically, without reconfiguration or
+recompilation, between different object-file formats.  Formats currently
+supported are COFF, a.out, and the Intel 960 b.out; files may be read as
+.o's, archive libraries, or core dumps.  BFD is available as a
+subroutine library so that other programs may take advantage of it, and
+the other GNU binary utilities are being converted to use it.
 
 @item Configuration
 Compile-time configuration (to select a particular architecture and
 operating system) is much easier.  The script @code{configure} now
-handles specification of separate host and target configurations.
+allows you to configure _GDBN__ as either a native debugger or a
+cross-debugger. 
 
 @item Interaction
 The user interface to _GDBN__'s control variables has been simplified
@@ -803,7 +804,7 @@ Use file @var{file} as the executable file to execute when
 appropriate, and for examining pure data in conjunction with a core
 dump.
 
-@item -se @var{file}
+@item -se=@var{file}
 Read symbol table from file @var{file} and use it as the executable
 file.
 
@@ -858,7 +859,7 @@ Program exited normally.
 (which is ordinarily issued whenever a program running under _GDBN__ control
 terminates) is not issued when running in batch mode.
 
-@item -cd @var{directory}
+@item -cd=@var{directory}
 Run _GDBN__ using @var{directory} as its working directory,
 instead of the current directory.
 
@@ -877,7 +878,7 @@ a signal to display the source code for the frame.
 Set the line speed (baud rate or bits per second) of any serial
 interface used by _GDBN__ for remote debugging.
 
-@item -tty @var{device}
+@item -tty=@var{device}
 Run using @var{device} for your program's standard input and output.
 @c FIXME: kingdon thinks there's more to -tty.  Investigate.
 @end table
@@ -1078,6 +1079,7 @@ exceptional in lacking corresponding @code{set} commands:
 
 @table @code
 @kindex show version
+@cindex version number
 @item show version
 Show what version of _GDBN__ is running.  You should include this
 information in _GDBN__ bug-reports.  If multiple versions of _GDBN__ are
@@ -1212,6 +1214,12 @@ standard output as _GDBN__ is using.  You can redirect input and output
 in the @code{run} command line, or you can use the @code{tty} command to
 set a different device for your program.
 @xref{Input/Output}.
+
+@cindex pipes
+@emph{Warning:} While input and output redirection work, you can't use
+pipes to pass the output of the program you're debugging to another
+program; if you attempt this, _GDBN__ is likely to wind up debugging the
+wrong program.
 @end table
 
 When you issue the @code{run} command, your program begins to execute
@@ -1504,11 +1512,11 @@ running or not, what process it is, and why it stopped.
 
 @menu
 * Breakpoints::			Breakpoints, Watchpoints, and Exceptions
-* Stepping and Continuing::	Resuming Execution
+* Continuing and Stepping::	Resuming Execution
 * Signals::			Signals
 @end menu
 
-@node Breakpoints, Stepping and Continuing, Stopping, Stopping
+@node Breakpoints, Continuing and Stepping, Stopping, Stopping
 @section Breakpoints, Watchpoints, and Exceptions
 
 @cindex breakpoints
@@ -1608,9 +1616,10 @@ existed when the program stopped.
 @item break @dots{} if @var{cond}
 Set a breakpoint with condition @var{cond}; evaluate the expression
 @var{cond} each time the breakpoint is reached, and stop only if the
-value is nonzero.  @samp{@dots{}} stands for one of the possible
-arguments described above (or no argument) specifying where to break.
-@xref{Conditions}, for more information on breakpoint conditions.
+value is nonzero---that is, if @var{cond} evaluates as true.
+@samp{@dots{}} stands for one of the possible arguments described above
+(or no argument) specifying where to break.  @xref{Conditions}, for more
+information on breakpoint conditions.
 
 @item tbreak @var{args}
 @kindex tbreak
@@ -1852,7 +1861,7 @@ breakpoints that you set are initially enabled; subsequently, they become
 disabled or enabled only when you use one of the commands above.  (The
 command @code{until} can set and delete a breakpoint of its own, but it
 will not change the state of your other breakpoints;
-@pxref{Stepping and Continuing}.)
+@pxref{Continuing and Stepping}.)
 
 @node Conditions, Break Commands, Disabling, Breakpoints
 @subsection Break Conditions
@@ -1864,7 +1873,13 @@ specified place.  You can also specify a @dfn{condition} for a
 breakpoint.  A condition is just a Boolean expression in your
 programming language.  (@xref{Expressions}).  A breakpoint with a
 condition evaluates the expression each time the program reaches it, and
-the program stops only if the condition is true.
+the program stops only if the condition is @emph{true}.
+
+This is the converse of using assertions for program validation; in that
+situation, you want to stop when the assertion is violated---that is,
+when the condition is false.  In C, if you want to test an assertion expressed
+by the condition @var{assert}, you should set the condition 
+@samp{! @var{assert}} on the appropriate breakpoint.
 
 Conditions are also accepted for watchpoints; you may not need them,
 since a watchpoint is inspecting the value of an expression anyhow---but
@@ -2127,18 +2142,34 @@ linker option @samp{-N}.  The operating system limitation may not apply
 to nonsharable executables.
 @end enumerate
 
-@node Stepping and Continuing, Signals, Breakpoints, Stopping
-@section Stepping and Continuing
+@node Continuing and Stepping, Signals, Breakpoints, Stopping
+@section Continuing and Stepping
 
 @cindex stepping
 @cindex continuing
 @cindex resuming execution
-@dfn{Stepping} means resuming program execution for a very limited time:
-one line of source code, or one machine instruction.  @dfn{Continuing}
-means resuming program execution until the program completes normally.
-In either case, the program may stop even sooner, due to a breakpoint or
-to a signal.  (If due to a signal, you may want to use @code{handle}, or
-use @samp{signal 0} to resume execution; @pxref{Signals}.)
+@dfn{Continuing} means resuming program execution until your program
+completes normally.  In contrast, @dfn{stepping} means resuming program
+execution for a very limited time: one line of source code, or one
+machine instruction.  Either when continuing or when stepping, the
+program may stop even sooner, due to a breakpoint or to a signal.  (If
+due to a signal, you may want to use @code{handle}, or use @samp{signal
+0} to resume execution; @pxref{Signals}.)
+
+@table @code
+@item continue @r{[}@var{ignore-count}@r{]}
+@kindex continue
+Resume program execution, at the address where the program last stopped;
+any breakpoints set at that address are bypassed.  The optional argument
+@var{ignore-count} allows you to specify a further number of times to
+ignore a breakpoint at this location; its effect is like that of
+@code{ignore} (@pxref{Conditions}).
+
+To resume execution at a different place, you can use @code{return}
+(@pxref{Returning}) to go back to the calling function; or @code{jump}
+(@pxref{Jumping}) to go to an arbitrary location in your program.
+
+@end table
 
 A typical technique for using stepping is to set a breakpoint
 (@pxref{Breakpoints}) at the beginning of the function or the section of
@@ -2155,10 +2186,11 @@ Continue running the program until control reaches a different source
 line, then stop it and return control to _GDBN__.  This command is
 abbreviated @code{s}.
 
-You may use the @code{step} command even when control is within a function
-compiled without debugging information.  In that case, execution
-will proceed until control reaches a different function, or is about to
-return from this function.
+@quotation
+@emph{Warning:} If you use the @code{step} command while control is
+within a function that was compiled without debugging information,
+execution will proceed until control reaches another function.
+@end quotation
 
 @item step @var{count}
 Continue running as in @code{step}, but do so @var{count} times.  If a
@@ -2262,23 +2294,10 @@ Execute one machine instruction, but if it is a function call,
 proceed until the function returns.
 
 An argument is a repeat count, as in @code{next}.
-
-@item continue @r{[}@var{ignore-count}@r{]}
-@kindex continue
-Resume program execution, at the address where the program last stopped;
-any breakpoints set at that address are bypassed.  The optional argument
-@var{ignore-count} allows you to specify a further number of times to
-ignore a breakpoint at this location; its effect is like that of
-@code{ignore} (@pxref{Conditions}).
-
-To resume execution at a different place, you can use @code{return}
-(@pxref{Returning}) to go back to the calling function; or @code{jump}
-(@pxref{Jumping}) to go to an arbitrary location in your program.
-
 @end table
 
 
-@node Signals,  , Stepping and Continuing, Stopping
+@node Signals,  , Continuing and Stepping, Stopping
 @section Signals
 @cindex signals
 
@@ -3062,6 +3081,22 @@ This use of @samp{::} is very rarely in conflict with the very similar
 use of the same notation in C++.  _GDBN__ also supports use of the C++
 name resolution operator in _GDBN__ expressions.
 
+@cindex wrong values
+@cindex variable values, wrong
+@quotation
+@emph{Warning:} Occasionally, a local variable may appear to have the
+wrong value at certain points in a function---just after entry to the
+function, and just before exit.  You may see this problem when you're
+stepping by machine instructions.  This is because on most machines, it
+takes more than one instruction to set up a stack frame (including local
+variable definitions); if you're stepping by machine instructions,
+variables may appear to have the wrong values until the stack frame is
+completely built.  On function exit, it usually also takes more than one
+machine instruction to destroy a stack frame; after you begin stepping
+through that group of instructions, local variable definitions may be
+gone.
+@end quotation
+
 @node Arrays, Output formats, Variables, Data
 @section Artificial Arrays
 
@@ -3097,6 +3132,24 @@ with @samp{@@} in this way behave just like other arrays in terms of
 subscripting, and are coerced to pointers when used in expressions.
 Artificial arrays most often appear in expressions via the value history
 (@pxref{Value History}), after printing one out.)
+
+Sometimes the artificial array mechanism isn't quite enough; in
+moderately complex data structures, the elements of interest may not
+actually be adjacent---for example, if you're interested in the values
+of pointers in an array.  One useful work-around in this situation is to
+use a convenience variable (@pxref{Convenience Vars}) as a counter in an
+expression that prints the first interesting value, and then repeat that
+expression via @key{RET}.  For instance, suppose you have an array
+@code{dtab} of pointers to structures, and you're interested in the
+values of a field @code{fv} in each structure.  Here's an example of
+what you might type:
+@example
+set $i = 0
+p dtab[$i++]->fv
+@key{RET}
+@key{RET}
+@dots{}
+@end example
 
 @node Output formats, Memory, Arrays, Data
 @section Output formats
@@ -4115,7 +4168,7 @@ set $pc = 0x485
 @noindent
 causes the next @code{continue} command or stepping command to execute at
 address 0x485, rather than at the address where the program stopped.
-@xref{Stepping and Continuing}.
+@xref{Continuing and Stepping}.
 
 The most common occasion to use the @code{jump} command is to back up,
 perhaps with more breakpoints set, over a portion of a program that has
@@ -4168,9 +4221,9 @@ the registers used for returning values of functions.
 
 The @code{return} command does not resume execution; it leaves the
 program stopped in the state that would exist if the function had just
-returned.  In contrast, the @code{finish} command (@pxref{Stepping and
-Continuing}) resumes execution until the selected stack frame returns
-naturally.
+returned.  In contrast, the @code{finish} command (@pxref{Continuing and
+Stepping}) resumes execution until the selected stack frame returns
+naturally.@refill
 
 @node     Calling,  , Returning, Altering
 @section Calling your Program's Functions
@@ -4480,7 +4533,7 @@ information that the compiler should have output for it.
 
 @item C++ type mismatch between compiler and debugger
 
-The debugger could not parse a type specification output by the compiler
+_GDBN__ could not parse a type specification output by the compiler
 for some C++ object.
 
 @end table
@@ -5182,7 +5235,10 @@ This is useful because it means that you can copy the text of previous
 commands and input them again; you can even use parts of the output
 in this way.
 
-All the facilities of Emacs' Shell mode are available for this purpose.
+All the facilities of Emacs' Shell mode are available for interacting
+with your program.  In particular, you can send signals the usual
+way---for example, @kbd{C-c C-c} for an interrupt, @kbd{C-c C-z} for a
+stop.
 
 @itemize @bullet
 @item
@@ -5369,7 +5425,7 @@ for improvement of _GDBN__ are welcome in any case.
 @node Bug Reporting,  , Bug Criteria, _GDBN__ Bugs
 @section How to Report Bugs
 @cindex Bug Reports
-@cindex Compiler Bugs, Reporting
+@cindex _GDBN__ Bugs, Reporting
 
 A number of companies and individuals offer support for GNU products.
 If you obtained _GDBN__ from a support organization, we recommend you
@@ -5390,19 +5446,20 @@ bug-gdb@@prep.ai.mit.edu
 @samp{help-gdb}, or to any newsgroups.} Most users of _GDBN__ do not want to
 receive bug reports.  Those that do, have arranged to receive @samp{bug-gdb}.
 
-The mailing list @samp{bug-gdb} has a newsgroup which serves as a
-repeater.  The mailing list and the newsgroup carry exactly the same
-messages.  Often people think of posting bug reports to the newsgroup
-instead of mailing them.  This appears to work, but it has one problem
-which can be crucial: a newsgroup posting often lacks a mail path
-back to the sender.  Thus, if we need to ask for more information, we
-may be unable to reach you.  For this reason, it is better to send bug
-reports to the mailing list.
+The mailing list @samp{bug-gdb} has a newsgroup @samp{gnu.gdb.bug} which
+serves as a repeater.  The mailing list and the newsgroup carry exactly
+the same messages.  Often people think of posting bug reports to the
+newsgroup instead of mailing them.  This appears to work, but it has one
+problem which can be crucial: a newsgroup posting often lacks a mail
+path back to the sender.  Thus, if we need to ask for more information,
+we may be unable to reach you.  For this reason, it is better to send
+bug reports to the mailing list.
 
 As a last resort, send bug reports on paper to:
 
 @example
 GNU Debugger Bugs
+Free Software Foundation
 545 Tech Square
 Cambridge, MA 02139
 @end example
@@ -5654,56 +5711,147 @@ unset                     &&\rm(No longer an alias for delete)\cr
 @cindex configuring _GDBN__
 @cindex installation
 
-_GDBN__ is distributed with a script @code{configure} that automates the
+_GDBN__ is distributed with a @code{configure} script that automates the
 process of preparing _GDBN__ for installation; you can then use
-@code{make} to actually build it.  
+@code{make} to build the @code{_GDBP__} program.
 
-You can find the @code{configure} script that's specific to _GDBN__ in
-the main _GDBN__ source directory.  However, @code{configure} is
-designed to be called recursively, so it is most convenient to run the
-version of @code{configure} for the @emph{parent} of that directory,
-which should include not only @code{_GDBP__} but also other @sc{gnu}
-tools and libraries.  Building _GDBN__ requires some of these associated
-directories; at a minimum, you need a source directory that includes the
-directories
-@example
-bfd gdb include libiberty readline
-@end example
+The @code{configure} script that's specific to _GDBN__ is distributed in
+the main _GDBN__ source directory.  However, building _GDBN__ also
+requires several other directories of source common to multiple @sc{gnu}
+programs.  These directories (@sc{gnu} libraries and includes) are
+distributed separately, but their @code{configure} scripts and
+@code{Makefile}s are designed to work together.  To ensure that
+_GDBN__'s @code{Makefile} can find all the pieces, you should make a
+single overall directory to hold the directories of source for @sc{gnu}
+libraries and includes, and you should install the _GDBN__ source
+directory there too.  In this Appendix, we refer to the directory of
+@sc{gnu} source directories as @var{gnusrc}.
+
+At a minimum, to build _GDBN__ you need the directories
+@table @code
+@item @var{gnusrc}/gdb
+the source specific to _GDBN__ itself
+
+@item @var{gnusrc}/bfd
+source for the Binary File Descriptor Library
+
+@item @var{gnusrc}/include
+@sc{gnu} include files
+
+@item @var{gnusrc}/libiberty
+source for the @samp{-liberty} free software library
+
+@item @var{gnusrc}/readline
+source for the @sc{gnu} command-line interface
+@end table
 @noindent
-to build _GDBN__.  It should also include @file{texinfo} if you want to
-format and print copies of this manual. 
+Each of these directories has its own @code{configure} script.
+@var{gnusrc} has an overall @code{configure} script, which is
+distributed with the @sc{gnu} libraries and includes.
 
+@code{configure} is designed to be called recursively, so it is most
+convenient to run @code{configure} from the @var{gnusrc} directory. 
 The simplest way to configure and build _GDBN__ is the following:
 @example
 cd @var{gnusrc}
-./configure @var{machine}
+./configure @var{host}
 make
 @end example
 @noindent
-where @var{gnusrc} is the directory containing both _GDBN__ source and
-source for supporting libraries, in subdirectories; and @var{machine} is
-something like @samp{sun4} or @samp{vax}, that identifies the platform
-where _GDBN__ will run.
+where @var{host} is something like @samp{sun4} or @samp{vax}, that
+identifies the platform where _GDBN__ will run.  This builds the three
+libraries @file{bfd}, @file{readline}, and @file{libiberty}, then
+@code{gdb} itself.  The configured source files, and the binaries, are
+left in the corresponding source directories.
 
-The best way to build _GDBN__ is to use subdirectories that record the
-configuration options used; this gives you a clean way of building
-_GDBN__ binaries with several different configuration options.
-@code{configure} only requires this when you simultaneously create
-several configurations; but it's a good habit even for a single
+You can install @code{_GDBP__} anywhere; it has no hardwired paths.  However,
+you should make sure that the shell on your path (named by the
+@samp{SHELL} environment variable) is publicly readable; some systems
+refuse to let _GDBN__ debug child processes whose programs are not
+readable, and _GDBN__ uses the shell to start your program.
+
+@menu
+* Subdirectories::		Configuration subdirectories
+* configure Options::		Summary of options for configure
+* Formatting Manual::		How to format and print this manual
+@end menu
+
+
+@node Subdirectories, configure Options, Installing _GDBN__, Installing _GDBN__
+@section Configuration Subdirectories
+If you build _GDBN__ for several host or target machines, and if
+your @code{make} program handles the @samp{VPATH} feature
+(@sc{gnu} @code{make} does), it is most convenient instead to build
+the different _GDBN__ configurations in subdirectories (separate from
+the source).  @code{configure} does this for you when you simultaneously
+specify several configurations; but it's a good habit even for a single
 configuration.  You can specify the use of subdirectories using the
-@samp{+forcesubdirs} option (abbreviated @samp{+f}).  For example,
-assuming the @sc{gnu} source directory that includes _GDBN__ source and
-the supporting libraries is in a directory called @file{gnusrc}:
+@samp{+forcesubdirs} option (abbreviated @samp{+f}).  For example, you
+can build _GDBN__ on a Sun 4 as follows:
 
 @example
-cd gnusrc
+@group
+cd @var{gnusrc}
 ./configure +f sun4
 cd Host-sun4/Target-sun4
 make
+@end group
 @end example
 
+When @code{configure} uses subdirectories to build programs or
+libraries, it creates nested directories
+@file{Host-@var{host}/Target-@var{machine}}.  This is because _GDBN__
+can be configured for cross-compiling: _GDBN__ can run on one machine
+(the host) while debugging programs that run on another machine (the
+target).  You specify cross-debugging targets by giving the
+@samp{+target=@var{machine}} option to @code{configure}.  Specifying
+only hosts still gives you two levels of subdirectory for each host,
+with the same machine-name suffix on both.  On the other hand, whenever
+you specify both hosts and targets on the same command line,
+@code{configure} creates all combinations of the hosts and targets you
+list.@refill
+
+When you run @code{make} to build a program or library, you must run it
+in a configured directory.  If you made a single configuration,
+without subdirectories, run @code{make} in the source directory.
+If you have @file{Host-@var{host}/Target-@var{machine}} subdirectories,
+run @code{make} in those subdirectories.  
+
+Each @code{configure} and @code{Makefile} under each source directory
+runs recursively, so that typing @code{make} in @var{gnusrc} (or in a
+@file{@var{gnusrc}/Host-@var{host}/Target-@var{machine}} subdirectory)
+builds all the required libraries, then _GDBN__.@refill
+
+If you run @code{configure} from a directory (such as @var{gnusrc}) that
+contains source directories for multiple libraries or programs,
+@code{configure} creates the @file{Host-@var{host}/Target-@var{machine}}
+subdirectories in each library or program's source directory.  For
+example, typing:
+@example
+cd @var{gnusrc}
+configure sun4 +target=vx960
+@end example
 @noindent
-will build _GDBN__ on a Sun 4.
+creates the following directories:
+@example
+@var{gnusrc}/Host-sun4/Target-vx960
+@var{gnusrc}/bfd/Host-sun4/Target-vx960
+@var{gnusrc}/gdb/Host-sun4/Target-vx960
+@var{gnusrc}/gdb/libiberty/Host-sun4/Target-vx960
+@var{gnusrc}/readline/Host-sun4/Target-vx960
+@end example
+@noindent
+The @code{Makefile} in @file{@var{gnusrc}/Host-sun4/Target-vx960}
+will @code{cd} to the appropriate lower-level directories
+(such as @file{@var{gnusrc}/bfd/Host-sun4/Target-vx960}), building each
+in turn.
+
+When you have multiple hosts or targets configured, you can run
+@code{make} on them in parallel (for example, if they are NFS-mounted on
+each of the hosts); they will not interfere with each other.
+
+@node configure Options, Formatting Manual, Subdirectories, Installing _GDBN__
+@section @code{configure} Options
 
 Here is a summary of all the @code{configure} options and arguments that
 you might use for building _GDBN__:
@@ -5712,23 +5860,25 @@ you might use for building _GDBN__:
 configure @r{[}+destdir=@var{dir}@r{]} @r{[}+forcesubdirs@r{]} @r{[}+norecur@r{]} @r{[}+rm@r{]}
           @r{[}+target=@var{machine}@dots{}@r{]} @var{host}@dots{}
 @end example
-
+@noindent
 You may introduce options with the character @samp{-} rather than
 @samp{+} if you prefer; but options introduced with @samp{+} may be truncated.
-@code{configure} accepts other options, for compatibility with
-configuring other @sc{gnu} tools recursively; but these are the only
-options that affect _GDBN__ or its supporting libraries.
 
 @table @code
 @item +destdir=@var{dir}
-@var{dir} is an installation directory for use by @code{make install}.
+@var{dir} is an installation directory @emph{path prefix}.  After you
+configure with this option, @code{make install} will install _GDBN__ as
+@file{@var{dir}/bin/_GDBP__}, and the libraries in @file{@var{dir}/lib}.
+If you specify @samp{+destdir=/usr/local}, for example, @code{make
+install} creates @file{/usr/local/bin/gdb}.@refill
 
 @item +forcesubdirs
-Build binaries in subdirectories of the form
+Write configuration specific files in subdirectories of the form
 @example
 Host-@var{machine}/Target-@var{machine}
 @end example
 @noindent
+(and configure the @code{Makefile} to write binaries there too).
 Without this option, if you specify only one configuration for _GDBN__,
 @code{configure} will use the same directory for source, configured
 files, and binaries.  This option is used automatically if you specify
@@ -5743,18 +5893,62 @@ propagate configuration to subdirectories.
 Remove the configuration specified by other arguments.
 
 @item +target=@var{machine} @dots{}
-Configure _GDBN__ for cross-debugging programs running on specified
-@var{machine}s.  You may specify as many @samp{+target} options as you
+Configure _GDBN__ for cross-debugging programs running on each specified
+@var{machine}.  You may specify as many @samp{+target} options as you
 wish.  To see a list of available targets, execute @samp{ls tconfig} in
 the _GDBN__ source directory.  Without this option, _GDBN__ is
 configured to debug programs that run on the same machine (@var{host})
 as _GDBN__ itself.
 
 @item @var{host} @dots{}
-Configure _GDBN__ to run on specified @var{host}s.  You may specify as
+Configure _GDBN__ to run on each specified @var{host}.  You may specify as
 many host names as you wish.  To see a list of available hosts, execute
 @samp{ls xconfig} in the _GDBN__ source directory.
 @end table
+
+@noindent
+@code{configure} accepts other options, for compatibility with
+configuring other @sc{gnu} tools recursively; but these are the only
+options that affect _GDBN__ or its supporting libraries.
+
+@node Formatting Manual,  , configure Options, Installing _GDBN__
+@section Formatting this Manual
+
+To format the _GDBN__ manual as an Info file, you need the @sc{gnu}
+@code{makeinfo} program.  Once you have it, you can type
+@example
+cd @var{gnusrc}/gdb
+make gdb.info
+@end example
+@noindent
+to make the Info file.
+
+If you want to format and print copies of this manual, you need several
+things: 
+@itemize @bullet
+@item 
+@TeX{}, the public domain typesetting program written by Donald Knuth,
+must be installed on your system and available through your execution
+path.
+@item 
+@file{@var{gnusrc}/texinfo}: @TeX{} macros defining the @sc{gnu}
+Documentation Format.
+@item
+@emph{A @sc{dvi} output program.}  @TeX{} doesn't actually make marks on
+paper; it produces output files called @sc{dvi} files.  If your system
+has @TeX{} installed, chances are it has a program for printing out
+these files; one popular example is @code{dvips}, which can print
+@sc{dvi} files on PostScript printers.
+@end itemize
+@noindent
+Once you have these things, you can type
+@example
+cd @var{gnusrc}/gdb
+make gdb.dvi
+@end example
+@noindent
+to format the text of this manual, and print it with the usual output
+method for @TeX{} @sc{dvi} files at your site.
 
 @node Copying, Index, Installing _GDBN__, Top
 @unnumbered GNU GENERAL PUBLIC LICENSE
