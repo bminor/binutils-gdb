@@ -1,3 +1,10 @@
+start-sanitize-tx3904
+1998-12-10  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* dv-tx3904sio.c (tx3904sio_io_read_buffer): Endianness fixes.
+	(tx3904sio_tickle): fflush after a stdout character output.
+	
+end-sanitize-tx3904
 1998-12-03  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* interp.c (sim_close): Uninstall modules.
