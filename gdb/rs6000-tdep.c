@@ -425,6 +425,10 @@ static int max_skip_non_prologue_insns = 10;
    the line data in the symbol table.  If successful, a better guess
    on where the prologue ends is returned, otherwise the previous
    value of lim_pc is returned.  */
+
+/* FIXME: cagney/2004-02-14: This function and logic have largely been
+   superseded by skip_prologue_using_sal.  */
+
 static CORE_ADDR
 refine_prologue_limit (CORE_ADDR pc, CORE_ADDR lim_pc)
 {

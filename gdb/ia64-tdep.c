@@ -930,6 +930,9 @@ static int max_skip_non_prologue_insns = 40;
    used with no further scanning in the event that the function is
    frameless.  */
 
+/* FIXME: cagney/2004-02-14: This function and logic have largely been
+   superseded by skip_prologue_using_sal.  */
+
 static CORE_ADDR
 refine_prologue_limit (CORE_ADDR pc, CORE_ADDR lim_pc, int *trust_limit)
 {

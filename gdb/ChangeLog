@@ -1,4 +1,16 @@
-2004-02-09  Andrew Cagney  <cagney@redhat.com>
+2004-02-17  Andrew Cagney  <cagney@redhat.com>
+
+	* symtab.c (skip_prologue_using_sal): New function.
+	* symtab.h (skip_prologue_using_sal): Declare.
+	* frv-tdep.c: Include "symtab.h".
+	(skip_prologue_using_sal): Delete function.
+	* mips-tdep.c (skip_prologue_using_sal): Delete function.
+	* rs6000-tdep.c (refine_prologue_limit): Mention
+	skip_prologue_using_sal.
+	* ia64-tdep.c (refine_prologue_limit): Ditto.
+	* Makefile.in: Update dependencies.
+
+2004-02-16  Andrew Cagney  <cagney@redhat.com>
 
 	* config/alpha/tm-nbsd.h: Update copyright, delete #undef
 	START_INFERIOR_TRAPS_EXPECTED.

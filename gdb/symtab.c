@@ -3860,6 +3860,60 @@ in_prologue (CORE_ADDR pc, CORE_ADDR func_start)
   return func_addr <= pc && pc < sal.end;
 }
 
+/* Given PC at the function's start address, attempt to find the
+   prologue end using SAL information.  Return zero if the skip fails.
+
+   A non-optimized prologue traditionally has one SAL for the function
+   and a second for the function body.  A single line function has
+   them both pointing at the same line.
+
+   An optimized prologue is similar but the prologue may contain
+   instructions (SALs) from the instruction body.  Need to skip those
+   while not getting into the function body.
+
+   The functions end point and an increasing SAL line are used as
+   indicators of the prologue's endpoint.
+
+   This code is based on the function refine_prologue_limit (versions
+   found in both ia64 and ppc).  */
+
+CORE_ADDR
+skip_prologue_using_sal (CORE_ADDR func_addr)
+{
+  struct symtab_and_line prologue_sal;
+  CORE_ADDR start_pc;
+  CORE_ADDR end_pc;
+
+  /* Get an initial range for the function.  */
+  find_pc_partial_function (func_addr, NULL, &start_pc, &end_pc);
+  start_pc += FUNCTION_START_OFFSET;
+
+  prologue_sal = find_pc_line (start_pc, 0);
+  if (prologue_sal.line != 0)
+    {
+      while (prologue_sal.end < end_pc)
+	{
+	  struct symtab_and_line sal;
+
+	  sal = find_pc_line (prologue_sal.end, 0);
+	  if (sal.line == 0)
+	    break;
+	  /* Assume that a consecutive SAL for the same (or larger)
+	     line mark the prologue -> body transition.  */
+	  if (sal.line >= prologue_sal.line)
+	    break;
+	  /* The case in which compiler's optimizer/scheduler has
+	     moved instructions into the prologue.  We look ahead in
+	     the function looking for address ranges whose
+	     corresponding line number is less the first one that we
+	     found for the function.  This is more conservative then
+	     refine_prologue_limit which scans a large number of SALs
+	     looking for any in the prologue */
+	  prologue_sal = sal;
+	}
+    }
+  return prologue_sal.end;
+}
 
 struct symtabs_and_lines
 decode_line_spec (char *string, int funfirstline)
