@@ -47,6 +47,16 @@ amdahl)
 	vendor=amdahl
 	os=uts
 	;;
+amigados)
+	cpu=m68k
+	vendor=cbm
+	os=amigados # Native AmigaDOS
+	;;
+amigaunix | amix)
+	cpu=m68k
+	vendor=cbm
+	os=svr4 # System V Release 4 (svr4 is an industry recognized acronym)
+	;;
 apollo68)
 	cpu=m68k
 	vendor=apollo
@@ -374,11 +384,11 @@ esac
 # verify that the vendor is known.
 
 case "${vendor}" in
-none | convex | mips | dec | little | sony | ncr | convergent \
-	| altos | apollo | isi | hp | next | sco | ibm | sun \
-	| unicom | sequent | encore | motorola | att | sgi | utek \
-	| gould | wrs | intel | aout | bout | coff | bcs | amdahl \
-	| cray) ;; 
+	altos | amdahl | aout | apollo | att | bcs | bout |\
+	cbm | convergent | convex | coff | cray | dec | encore |\
+	gould | intel | isi | hp | ibm | little | mips | motorola |\
+	ncr | next | none | nyu | sco | sequent | sgi | sony | sun |\
+	unicom | utek | wrs ) ;; 
 
 # start-sanitize-v9
 hal) ;;
@@ -396,7 +406,7 @@ case "${os}" in
 aix* | aout | bout | bsd* | coff | ctix* | dynix* | esix* | hpux* | irix* \
 	| isc* | mach* | newsos* | nindy* | none | osf* | osf* | sco* \
 	| sunos* | sysv* | ultrix* | unos* | v88r* | vms* | vxworks* \
-	| unicos* | uts)
+	| sym[1-9]* | unicos* | uts | svr4 | amigados)
 	;;
 
 # start-sanitize-v9
