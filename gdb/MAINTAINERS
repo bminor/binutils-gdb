@@ -270,6 +270,7 @@ threads			Michael Snyder		msnyder@redhat.com
 breakpoints		Michael Snyder		msnyder@redhat.com
 			Jim Blandy		jimb@redhat.com
 language support	(Blanket Write Privs Maintainers)
+  C++			Daniel Jacobowitz	dan@debian.org
   Java support (devolved)
 			Per Bothner		per@bothner.com
 			Anthony Green 		green@redhat.com

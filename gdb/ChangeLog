@@ -1,3 +1,8 @@
+2002-01-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS (language support): Daniel Jacobwitz is C++
+	maintainer.
+
 2002-01-15  Daniel Jacobowitz  <drow@mvista.com>
 
 	* c-typeprint.c (is_type_conversion_operator): Add additional
