@@ -958,27 +958,50 @@ _bfd_pei_swap_scnhdr_out (abfd, in, out)
     bfd_h_put_32(abfd, flags, (bfd_byte *) scnhdr_ext->s_flags);
   }
 
-  if (scnhdr_int->s_nlnno <= 0xffff)
-    bfd_h_put_16(abfd, scnhdr_int->s_nlnno, (bfd_byte *) scnhdr_ext->s_nlnno);
-  else
+  if (coff_data (abfd)->link_info
+      && ! coff_data (abfd)->link_info->relocateable
+      && ! coff_data (abfd)->link_info->shared
+      && strcmp (scnhdr_int->s_name, ".text") == 0)
     {
-      (*_bfd_error_handler) (_("%s: line number overflow: 0x%lx > 0xffff"),
-			     bfd_get_filename (abfd),
-			     scnhdr_int->s_nlnno);
-      bfd_set_error (bfd_error_file_truncated);
-      bfd_h_put_16 (abfd, 0xffff, (bfd_byte *) scnhdr_ext->s_nlnno);
-      ret = 0;
+      /* By inference from looking at MS output, the 32 bit field
+	 which is the combintion of the number_of_relocs and
+	 number_of_linenos is used for the line number count in
+	 executables.  A 16-bit field won't do for cc1.  The MS
+	 document says that the number of relocs is zero for
+	 executables, but the 17-th bit has been observed to be there.
+	 Overflow is not an issue: a 4G-line program will overflow a
+	 bunch of other fields long before this!  */
+      bfd_h_put_16 (abfd, scnhdr_int->s_nlnno & 0xffff,
+		    (bfd_byte *) scnhdr_ext->s_nlnno);
+      bfd_h_put_16 (abfd, scnhdr_int->s_nlnno >> 16,
+		    (bfd_byte *) scnhdr_ext->s_nreloc);
     }
-  if (scnhdr_int->s_nreloc <= 0xffff)
-    bfd_h_put_16(abfd, scnhdr_int->s_nreloc, (bfd_byte *) scnhdr_ext->s_nreloc);
   else
     {
-      (*_bfd_error_handler) (_("%s: reloc overflow: 0x%lx > 0xffff"),
-			     bfd_get_filename (abfd),
-			     scnhdr_int->s_nreloc);
-      bfd_set_error (bfd_error_file_truncated);
-      bfd_h_put_16 (abfd, 0xffff, (bfd_byte *) scnhdr_ext->s_nreloc);
-      ret = 0;
+      if (scnhdr_int->s_nlnno <= 0xffff)
+	bfd_h_put_16 (abfd, scnhdr_int->s_nlnno,
+		      (bfd_byte *) scnhdr_ext->s_nlnno);
+      else
+	{
+	  (*_bfd_error_handler) (_("%s: line number overflow: 0x%lx > 0xffff"),
+				 bfd_get_filename (abfd),
+				 scnhdr_int->s_nlnno);
+	  bfd_set_error (bfd_error_file_truncated);
+	  bfd_h_put_16 (abfd, 0xffff, (bfd_byte *) scnhdr_ext->s_nlnno);
+	  ret = 0;
+	}
+      if (scnhdr_int->s_nreloc <= 0xffff)
+	bfd_h_put_16 (abfd, scnhdr_int->s_nreloc,
+		      (bfd_byte *) scnhdr_ext->s_nreloc);
+      else
+	{
+	  (*_bfd_error_handler) (_("%s: reloc overflow: 0x%lx > 0xffff"),
+				 bfd_get_filename (abfd),
+				 scnhdr_int->s_nreloc);
+	  bfd_set_error (bfd_error_file_truncated);
+	  bfd_h_put_16 (abfd, 0xffff, (bfd_byte *) scnhdr_ext->s_nreloc);
+	  ret = 0;
+	}
     }
   return ret;
 }

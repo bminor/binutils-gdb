@@ -7,6 +7,12 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* peicode.h (coff_swap_scnhdr_in): If COFF_IMAGE_WITH_PE, the
+	get the overflow of the s_nlnno field from the s_nreloc field.
+	* peigen.c (_bfd_pei_swap_scnhdr_out): If doing a final link, swap
+	the s_nlnno overflow of the .text section into the s_nreloc
+	field.
+
 	* peigen.c (add_data_entry): Declare.
 	(pei_swap_aouthdr_out): Get image size right.  Set linker version
 	more intuitively.

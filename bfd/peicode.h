@@ -215,8 +215,20 @@ coff_swap_scnhdr_in (abfd, ext, in)
     GET_SCNHDR_LNNOPTR (abfd, (bfd_byte *) scnhdr_ext->s_lnnoptr);
   scnhdr_int->s_flags = bfd_h_get_32(abfd, (bfd_byte *) scnhdr_ext->s_flags);
 
-  scnhdr_int->s_nreloc = bfd_h_get_16(abfd, (bfd_byte *) scnhdr_ext->s_nreloc);
-  scnhdr_int->s_nlnno = bfd_h_get_16(abfd, (bfd_byte *) scnhdr_ext->s_nlnno);
+  /* MS handles overflow of line numbers by carrying into the reloc
+     field (it appears).  Since it's supposed to be zero for PE
+     *IMAGE* format, that's safe.  This is still a bit iffy.  */
+#ifdef COFF_IMAGE_WITH_PE
+  scnhdr_int->s_nlnno =
+    (bfd_h_get_16 (abfd, (bfd_byte *) scnhdr_ext->s_nlnno)
+     + (bfd_h_get_16 (abfd, (bfd_byte *) scnhdr_ext->s_nreloc) << 16));
+  scnhdr_int->s_nreloc = 0;
+#else
+  scnhdr_int->s_nreloc = bfd_h_get_16 (abfd,
+				       (bfd_byte *) scnhdr_ext->s_nreloc);
+  scnhdr_int->s_nlnno = bfd_h_get_16 (abfd,
+				      (bfd_byte *) scnhdr_ext->s_nlnno);
+#endif
 
   if (scnhdr_int->s_vaddr != 0) 
     {
