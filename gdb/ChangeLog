@@ -1,3 +1,8 @@
+2001-11-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* Makefile.in (ALLDEPFILES): Add i387-nat.c.
+	(i387-nat.o): Add dependencies.
+
 2001-11-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* README: Mention problem with alpha-dec-osf5.1.
