@@ -1,5 +1,9 @@
 Mon Oct 25 11:17:58 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
+	* config/tc-sh.c (build_Mbytes): Write the relocs to the correct
+	address. (md_assemble): Make error handling a bit more graceful.
+	(md_apply_fix):  Don't warn on non aligned displacement.
+	
 	* config/tc-z8k.c (get_specific, built_bytes):  Understand all the
 	aspects of lda.
 
