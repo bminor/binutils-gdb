@@ -1,5 +1,5 @@
 /* Core dump and executable file functions below target vector, for GDB.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -37,6 +37,10 @@ static void core_files_info PARAMS ((struct target_ops *));
 #ifdef SOLIB_ADD
 static int solib_add_stub PARAMS ((char *));
 #endif
+
+static void core_open PARAMS ((char *, int));
+
+static void core_detach PARAMS ((char *, int));
 
 static void core_close PARAMS ((int));
 
@@ -114,7 +118,7 @@ add_to_thread_list (abfd, asect, reg_sect_arg)
 
 /* This routine opens and sets up the core file bfd.  */
 
-void
+static void
 core_open (filename, from_tty)
      char *filename;
      int from_tty;
@@ -228,7 +232,7 @@ your %s; do ``info files''", target_longname);
     }
 }
 
-void
+static void
 core_detach (args, from_tty)
      char *args;
      int from_tty;

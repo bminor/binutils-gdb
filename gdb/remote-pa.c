@@ -867,7 +867,7 @@ remote_fetch_word (addr)
       if (addr >= text_start && addr < text_end)
 	{
 	  int buffer;
-	  xfer_core_file (addr, &buffer, sizeof (int));
+	  target_read_memory (addr, &buffer, sizeof (int));
 	  return buffer;
 	}
     }

@@ -130,6 +130,7 @@ exec_file_command (filename, from_tty)
     (*exec_file_display_hook) (filename);
 }
 
+#if 0
 /* Read data from SOFF exec or core file.
    Return 0 on success, EIO if address out of bounds. */
 
@@ -233,7 +234,7 @@ xfer_core_file (memaddr, myaddr, len)
     }
   return returnval;
 }
-
+#endif
 
 /* Here from info files command to print an address map.  */
 

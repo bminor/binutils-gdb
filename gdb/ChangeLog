@@ -1,5 +1,13 @@
 Fri Jan 27 17:08:06 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
+	* convex-tdep.c (xfer_core_file): Comment out.
+	* config/convex/tm-convex.h (XFER_CORE_FILE): Remove.
+	* remote.c, remote-pa.c (remote_fetch_word): Change xfer_core_file
+        references to target_read_memory.
+	* gdbcore.h (xfer_core_file, core_open, core_detach): Remove
+	declarations.
+	* corelow.c (core_open, core_detach): Make static.
+
 	* arm-tdep.c: Make it compile.
 	(exec_file_command, xfer_core_file): Comment out.
 	(arm_print_insn): Remove, now in libopcodes.

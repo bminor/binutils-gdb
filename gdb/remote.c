@@ -756,7 +756,7 @@ Packet: '%s'\n",
 	      last_sent_signal = TARGET_SIGNAL_0;
 	      target_terminal_inferior ();
 
-	      strcpy (buf, last_sent_step ? 's' : 'c');
+	      strcpy (buf, last_sent_step ? "s" : "c");
 	      putpkt (buf);
 	      continue;
 	    }
@@ -944,7 +944,7 @@ remote_fetch_word (addr)
       if (addr >= text_start && addr < text_end)
 	{
 	  int buffer;
-	  xfer_core_file (addr, &buffer, sizeof (int));
+	  target_read_memory (addr, &buffer, sizeof (int));
 	  return buffer;
 	}
     }
