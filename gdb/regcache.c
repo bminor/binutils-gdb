@@ -723,7 +723,7 @@ read_register_gen (int regnum, char *buf)
 }
 
 void
-regcache_cooked_read (struct regcache *regcache, int rawnum, void *buf)
+regcache_cooked_read (struct regcache *regcache, int regnum, void *buf)
 {
   gdb_assert (regnum >= 0);
   gdb_assert (regnum < regcache->descr->nr_cooked_registers);
@@ -843,8 +843,7 @@ write_register_gen (int regnum, char *buf)
 }
 
 void
-regcache_cooked_write (struct regcache *regcache, int rawnum,
-		       const void *buf)
+regcache_cooked_write (struct regcache *regcache, int regnum, const void *buf)
 {
   gdb_assert (regnum >= 0);
   gdb_assert (regnum < regcache->descr->nr_cooked_registers);
