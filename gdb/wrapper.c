@@ -41,6 +41,16 @@ struct gdb_wrapper_arguments
       } args[10];
   };
 
+struct captured_value_struct_elt_args
+{
+  struct value **argp;
+  struct value **args;
+  char *name;
+  int *static_memfuncp;
+  char *err;
+  struct value **result_ptr;
+};
+
 static int wrap_parse_exp_1 (char *);
 
 static int wrap_evaluate_expression (char *);
@@ -54,6 +64,8 @@ static int wrap_value_assign (char *);
 static int wrap_value_subscript (char *);
 
 static int wrap_value_ind (char *opaque_arg);
+
+static int do_captured_value_struct_elt (struct ui_out *uiout, void *data);
 
 static int wrap_parse_and_eval_type (char *);
 
@@ -293,3 +305,29 @@ wrap_parse_and_eval_type (char *a)
 
   return 1;
 }
+
+enum gdb_rc
+gdb_value_struct_elt (struct ui_out *uiout, struct value **result, struct value **argp,
+		      struct value **args, char *name, int *static_memfuncp,
+		      char *err)
+{
+  struct captured_value_struct_elt_args cargs;
+  cargs.argp = argp;
+  cargs.args = args;
+  cargs.name = name;
+  cargs.static_memfuncp = static_memfuncp;
+  cargs.err = err;
+  cargs.result_ptr = result;
+  return catch_exceptions (uiout, do_captured_value_struct_elt, &cargs,
+			   NULL, RETURN_MASK_ALL);
+}
+
+static int
+do_captured_value_struct_elt (struct ui_out *uiout, void *data)
+{
+  struct captured_value_struct_elt_args *cargs = data;
+  *cargs->result_ptr = value_struct_elt (cargs->argp, cargs->args, cargs->name,
+			     cargs->static_memfuncp, cargs->err);
+  return GDB_RC_OK;
+}
+

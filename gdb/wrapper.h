@@ -18,6 +18,7 @@
 
 #ifndef WRAPPER_H
 #define WRAPPER_H 1
+#include "gdb.h"
 
 struct value;
 
@@ -36,6 +37,10 @@ extern int gdb_value_equal (struct value *, struct value *, int *);
 extern int gdb_value_assign (struct value *, struct value *, struct value **);
 
 extern int gdb_value_subscript (struct value *, struct value *, struct value **);
+
+extern enum gdb_rc gdb_value_struct_elt (struct ui_out *uiout, struct value **result_ptr,
+					 struct value **argp, struct value **args,
+					 char *name, int *static_memfuncp, char *err);
 
 extern int gdb_value_ind (struct value *val, struct value ** rval);
 
