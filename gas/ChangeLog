@@ -1,3 +1,8 @@
+2003-08-24  Jason Eckhardt  <jle@rice.edu>
+
+	* config/tc-i860.c (md_assemble): Use isrc2 from the original
+	instruction when expanding E_ADDR.
+
 2003-08-21  Nick Clifton  <nickc@redhat.com>
 
 	* po/tr.po: Updated Turkish translation.

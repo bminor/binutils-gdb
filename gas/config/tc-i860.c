@@ -312,8 +312,9 @@ md_assemble (char *str)
 		  && the_insn.fi[0].exp.X_add_number >= -(1 << 15)))
 	    break;
 
-	  /* Emit "orh ha%addr_expr,r0,r31".  */
-	  pseudo[0].opcode = 0xec000000 | (atmp << 16);
+	  /* Emit "orh ha%addr_expr,ireg_src2,r31".  */
+	  pseudo[0].opcode = 0xec000000 | (the_insn.opcode & 0x03e00000)
+			     | (atmp << 16);
 	  pseudo[0].fi[0].fup = (OP_IMM_S16 | OP_SEL_HA);
 
 	  /* Emit "l%addr_expr(r31),ireg_dest".  We pick up the fixup
