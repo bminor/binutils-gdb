@@ -1,3 +1,8 @@
+Fri Jun  4 07:51:18 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/obj-ecoff.c (ecoff_build_procs): Force the adr of the
+	first FDR in a file to be zero.
+
 Thu Jun  3 14:09:59 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* Makefile.in (VERSION): Jump to 2.1.4.
