@@ -1,5 +1,7 @@
 Sat May 29 17:57:01 1993  Fred Fish  (fnf@cygnus.com)
 
+	* gdb.stabs/wierd.exp:  Rewrite to properly handling a missing
+	wierd.o, make more modular.
 	* gdb.stabs/wierd.def (bad_neg0type, bad_neg0const):  Remove
 	spurious newlines that caused problems.
 

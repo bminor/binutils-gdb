@@ -3,44 +3,163 @@
 # a file that's more minimal than what a compiler normally puts out.
 if $tracelevel then {
 	strace $tracelevel
-	}
+}
+
 set prms_id 0
 set bug_id 0
 
-gdb_reinitialize_dir $srcdir/$subdir
+proc do_tests {} {
+	global binfile
+	global prompt
 
-# Don't use gdb_load; it doesn't bitch if the loading produced some
-# error messages during symbol reading.
-set binfile $objdir/$subdir/wierd.o
+	# Do this first because the bug only exhibits itself before partial
+	# symbols have been expanded.
+	setup_xfail "*-*-*"
+	# xcoffread.c doesn't (yet) use partial symbol tables.
+	clear_xfail "rs*-*-aix*"
+	gdb_test "ptype red" "type = enum \{red, green, blue\}" "ptype unnamed enum"
 
-if ![file exists $binfile] then {
-	error "$binfile does not exist."
-	alldone
-	}
+	print_wierd_var var0
+	print_wierd_var var1
+	print_wierd_var var2
+	print_wierd_var var3
 
-# xcoffread.c wrongly bitches about the lack of a text section.
-setup_xfail "rs*-*-aix*"
-send "file $binfile\n"
-expect {
-	-re "^file $binfile\r*\nReading symbols from $binfile\.\.\.done\.\r*\n$prompt $" {
-		pass "wierd.o read without error"
-	}
-	-re ".*$prompt $" {
-		fail "Errors reading wierd.o"
-	}
-	timeout {
-		error "couldn't load $binfile into $GDB (timed out)."
-		return -1
-	}
-	eof { fail "(eof) cannot read wierd.o" }
+	print_wierd_var attr32
+	print_wierd_var attr33
+	print_wierd_var attr35
+	print_wierd_var attr36
+	print_wierd_var attr37
+	print_wierd_var attr38
+	print_wierd_var attr39
+	print_wierd_var attr41
+	print_wierd_var attr42
+	print_wierd_var attr43
+	print_wierd_var attr44
+	print_wierd_var attr46
+	print_wierd_var attr47
+	print_wierd_var attr58
+	print_wierd_var attr59
+	print_wierd_var attr60
+	print_wierd_var attr61
+	print_wierd_var attr62
+	print_wierd_var attr63
+	print_wierd_var attr64
+	print_wierd_var attr65
+	print_wierd_var attr66
+	print_wierd_var attr67
+	print_wierd_var attr68
+	print_wierd_var attr69
+	print_wierd_var attr70
+	print_wierd_var attr71
+	print_wierd_var attr72
+	print_wierd_var attr73
+	print_wierd_var attr74
+	print_wierd_var attr75
+	print_wierd_var attr76
+	print_wierd_var attr77
+	print_wierd_var attr78
+	print_wierd_var attr79
+	print_wierd_var attr80
+	print_wierd_var attr81
+	print_wierd_var attr82
+	print_wierd_var attr83
+	print_wierd_var attr84
+	print_wierd_var attr85
+	print_wierd_var attr86
+	print_wierd_var attr87
+	print_wierd_var attr88
+	print_wierd_var attr89
+	print_wierd_var attr90
+	print_wierd_var attr91
+	print_wierd_var attr92
+	print_wierd_var attr93
+	print_wierd_var attr94
+	print_wierd_var attr95
+	print_wierd_var attr96
+	print_wierd_var attr97
+	print_wierd_var attr98
+	print_wierd_var attr99
+	print_wierd_var attr100
+	print_wierd_var attr101
+	print_wierd_var attr102
+	print_wierd_var attr103
+	print_wierd_var attr104
+	print_wierd_var attr105
+	print_wierd_var attr106
+	print_wierd_var attr107
+	print_wierd_var attr108
+	print_wierd_var attr109
+	print_wierd_var attr110
+	print_wierd_var attr111
+	print_wierd_var attr112
+	print_wierd_var attr113
+	print_wierd_var attr114
+	print_wierd_var attr115
+	print_wierd_var attr116
+	print_wierd_var attr117
+	print_wierd_var attr118
+	print_wierd_var attr119
+	print_wierd_var attr120
+	print_wierd_var attr121
+	print_wierd_var attr122
+	print_wierd_var attr123
+	print_wierd_var attr124
+	print_wierd_var attr125
+	print_wierd_var attr126
+
+	gdb_test "p const69" " = 69" "'e' constant on non-enum type"
+	gdb_test "whatis const69" "type = (unsigned int|inttype)" "whatis const69"
+
+	# Haven't investigated
+	setup_xfail "*-*-*"
+	gdb_test "p sizeof (const70)" " = 2" "'e' constant with embedded type"
+
+	# field3 is printing out a bogus value; haven't investigated
+	setup_xfail "*-*-*"
+	gdb_test "p bad_neg0" " = \{field0 = 42, field2 =.*field3 = 45\}" "p bad_neg0"
+	# test that it at least gets field0 right
+	gdb_test "p bad_neg0" " = \{field0 = 42, field2 =" "p bad_neg0, test 2"
+
+	gdb_test "ptype inttype" "type = (unsigned int|inttype)" "ptype on inttype"
+	gdb_test "p sizeof (float72type)" " = 9" "unrecognized floating point type"
+
+	# Haven't investigated
+	setup_xfail "*-*-*"
+	gdb_test "p/x int256var" " = 0x0000002a0000002b0000002c0000002d\
+	0000002d0000002c0000002b0000002a" "print very big integer"
+
+	gdb_test "whatis consth" "type = inttype" "whatis consth"
+	gdb_test "whatis consth2" "type = inttype" "whatis consth2"
+
+	# GDB does not yet understand S constants
+	setup_xfail "*-*-*"
+	gdb_test "p/x bad_neg0const" " = \{field0 = 0x11222211, field2 =.*\
+	field3 = 0x77888877\}" "print struct constant"
+
+	gdb_test "ptype bad_type0" "type = " "print bad_type0"
+	gdb_test "ptype bad_type1" "type = " "print bad_type1"
+
+	# GDB does not yet support arrays indexed by anything at all unusual
+	setup_xfail "*-*-*"
+	gdb_test "p array0" " = \{42, 43, 44, 45, 46, 47\}" "array0 with strange index"
+	setup_xfail "*-*-*"
+	gdb_test "p array1" " = \{42, 43, 44\}" "array1 with strange index"
+
+	# GDB does not yet support this feature
+	setup_xfail "*-*-*"
+	gdb_test "whatis one_var" "type = inttype_one" "whatis one_var"
+	# But do make sure that it prints as something reasonable
+	gdb_test "whatis one_var" "type = inttype(|_one)" "whatis one_var test 2"
+
+	setup_xfail "*-*-*"
+	gdb_test "whatis two_var" "type = inttype_two" "whatis two_var"
+	gdb_test "whatis two_var" "type = inttype(|_two)" "whatis two_var test 2"
+
+	setup_xfail "*-*-*"
+	gdb_test "whatis pointer_to_int_var" "type = int \*" "whatis p t i v"
+	setup_xfail "*-*-*"
+	gdb_test "whatis intp_var" "type = intp" "whatis intp_var"
 }
-
-# Do this first because the bug only exhibits itself before partial
-# symbols have been expanded.
-setup_xfail "*-*-*"
-# xcoffread.c doesn't (yet) use partial symbol tables.
-clear_xfail "rs*-*-aix*"
-gdb_test "ptype red" "type = enum \{red, green, blue\}" "ptype unnamed enum"
 
 proc print_wierd_var { var } {
 	global prompt
@@ -71,151 +190,39 @@ proc print_wierd_var { var } {
 	# If somehow the stabs got skipped, then the above test can
 	# pass because GDB assumes int for variables without a stab.
 
-  gdb_test "whatis $var\n" "type = (unsigned int|inttype)" "whatis on $var"
+	gdb_test "whatis $var\n" "type = (unsigned int|inttype)" "whatis on $var"
 }
 
-print_wierd_var var0
-print_wierd_var var1
-print_wierd_var var2
-print_wierd_var var3
+# Start with a fresh gdb
 
-print_wierd_var attr32
-print_wierd_var attr33
-print_wierd_var attr35
-print_wierd_var attr36
-print_wierd_var attr37
-print_wierd_var attr38
-print_wierd_var attr39
-print_wierd_var attr41
-print_wierd_var attr42
-print_wierd_var attr43
-print_wierd_var attr44
-print_wierd_var attr46
-print_wierd_var attr47
-print_wierd_var attr58
-print_wierd_var attr59
-print_wierd_var attr60
-print_wierd_var attr61
-print_wierd_var attr62
-print_wierd_var attr63
-print_wierd_var attr64
-print_wierd_var attr65
-print_wierd_var attr66
-print_wierd_var attr67
-print_wierd_var attr68
-print_wierd_var attr69
-print_wierd_var attr70
-print_wierd_var attr71
-print_wierd_var attr72
-print_wierd_var attr73
-print_wierd_var attr74
-print_wierd_var attr75
-print_wierd_var attr76
-print_wierd_var attr77
-print_wierd_var attr78
-print_wierd_var attr79
-print_wierd_var attr80
-print_wierd_var attr81
-print_wierd_var attr82
-print_wierd_var attr83
-print_wierd_var attr84
-print_wierd_var attr85
-print_wierd_var attr86
-print_wierd_var attr87
-print_wierd_var attr88
-print_wierd_var attr89
-print_wierd_var attr90
-print_wierd_var attr91
-print_wierd_var attr92
-print_wierd_var attr93
-print_wierd_var attr94
-print_wierd_var attr95
-print_wierd_var attr96
-print_wierd_var attr97
-print_wierd_var attr98
-print_wierd_var attr99
-print_wierd_var attr100
-print_wierd_var attr101
-print_wierd_var attr102
-print_wierd_var attr103
-print_wierd_var attr104
-print_wierd_var attr105
-print_wierd_var attr106
-print_wierd_var attr107
-print_wierd_var attr108
-print_wierd_var attr109
-print_wierd_var attr110
-print_wierd_var attr111
-print_wierd_var attr112
-print_wierd_var attr113
-print_wierd_var attr114
-print_wierd_var attr115
-print_wierd_var attr116
-print_wierd_var attr117
-print_wierd_var attr118
-print_wierd_var attr119
-print_wierd_var attr120
-print_wierd_var attr121
-print_wierd_var attr122
-print_wierd_var attr123
-print_wierd_var attr124
-print_wierd_var attr125
-print_wierd_var attr126
-
-gdb_test "p const69" " = 69" "'e' constant on non-enum type"
-gdb_test "whatis const69" "type = (unsigned int|inttype)" "whatis const69"
-
-# Haven't investigated
-setup_xfail "*-*-*"
-gdb_test "p sizeof (const70)" " = 2" "'e' constant with embedded type"
-
-# field3 is printing out a bogus value; haven't investigated
-setup_xfail "*-*-*"
-gdb_test "p bad_neg0" " = \{field0 = 42, field2 =.*field3 = 45\}" "p bad_neg0"
-# test that it at least gets field0 right
-gdb_test "p bad_neg0" " = \{field0 = 42, field2 =" "p bad_neg0, test 2"
-
-gdb_test "ptype inttype" "type = (unsigned int|inttype)" "ptype on inttype"
-gdb_test "p sizeof (float72type)" " = 9" "unrecognized floating point type"
-
-# Haven't investigated
-setup_xfail "*-*-*"
-gdb_test "p/x int256var" " = 0x0000002a0000002b0000002c0000002d\
-0000002d0000002c0000002b0000002a" "print very big integer"
-
-gdb_test "whatis consth" "type = inttype" "whatis consth"
-gdb_test "whatis consth2" "type = inttype" "whatis consth2"
-
-# GDB does not yet understand S constants
-setup_xfail "*-*-*"
-gdb_test "p/x bad_neg0const" " = \{field0 = 0x11222211, field2 =.*\
-field3 = 0x77888877\}" "print struct constant"
-
-gdb_test "ptype bad_type0" "type = " "print bad_type0"
-gdb_test "ptype bad_type1" "type = " "print bad_type1"
-
-# GDB does not yet support arrays indexed by anything at all unusual
-setup_xfail "*-*-*"
-gdb_test "p array0" " = \{42, 43, 44, 45, 46, 47\}" "array0 with strange index"
-setup_xfail "*-*-*"
-gdb_test "p array1" " = \{42, 43, 44\}" "array1 with strange index"
-
-# GDB does not yet support this feature
-setup_xfail "*-*-*"
-gdb_test "whatis one_var" "type = inttype_one" "whatis one_var"
-# But do make sure that it prints as something reasonable
-gdb_test "whatis one_var" "type = inttype(|_one)" "whatis one_var test 2"
-
-setup_xfail "*-*-*"
-gdb_test "whatis two_var" "type = inttype_two" "whatis two_var"
-gdb_test "whatis two_var" "type = inttype(|_two)" "whatis two_var test 2"
-
-setup_xfail "*-*-*"
-gdb_test "whatis pointer_to_int_var" "type = int \*" "whatis p t i v"
-setup_xfail "*-*-*"
-gdb_test "whatis intp_var" "type = intp" "whatis intp_var"
-
-#Prevent some failures in default.exp, which are probably GDB bugs
-# (but trivial ones).
 gdb_exit
 gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+
+# Don't use gdb_load; it doesn't bitch if the loading produced some
+# error messages during symbol reading.
+set binfile $objdir/$subdir/wierd.o
+
+if ![file exists $binfile] then {
+	warning "$binfile does not exist; tests suppressed"
+} else {
+	# xcoffread.c wrongly bitches about the lack of a text section.
+	setup_xfail "rs*-*-aix*"
+	send "file $binfile\n"
+	expect {
+		-re "^file $binfile\r*\nReading symbols from $binfile\.\.\.done\.\r*\n$prompt $" {
+			pass "wierd.o read without error"
+		}
+		-re ".*$prompt $" {
+			fail "Errors reading wierd.o"
+		}
+		timeout {
+			error "couldn't load $binfile into $GDB (timed out)."
+			return -1
+		}
+		eof { fail "(eof) cannot read wierd.o" }
+	}
+	do_tests
+}
+
+return 0
