@@ -1103,7 +1103,7 @@ insert_mbe (unsigned long insn,
   /* me: location of last 1->0 transition */
   /* count: # transitions */
 
-  for (mx = 0, mask = 1 << 31; mx < 32; ++mx, mask >>= 1)
+  for (mx = 0, mask = 1L << 31; mx < 32; ++mx, mask >>= 1)
     {
       if ((uval & mask) && !last)
 	{
@@ -1144,7 +1144,7 @@ extract_mbe (unsigned long insn,
     {
       ret = 0;
       for (i = mb; i <= me; i++)
-	ret |= 1 << (31 - i);
+	ret |= 1L << (31 - i);
     }
   else if (mb == me + 1)
     ret = ~0;
@@ -1152,7 +1152,7 @@ extract_mbe (unsigned long insn,
     {
       ret = ~0;
       for (i = me + 1; i < mb; i++)
-	ret &= ~(1 << (31 - i));
+	ret &= ~(1L << (31 - i));
     }
   return ret;
 }
