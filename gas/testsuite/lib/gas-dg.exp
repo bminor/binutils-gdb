@@ -17,6 +17,10 @@ proc gas-dg-test { prog do_what tool_flags default_tool_flags libs } {
 	}
 	"run" {
 	}
+	default {
+	    perror "$do_what: not a valid dg-do keyword"
+	    return
+	}
     }
 
     # gas_start prepends $srcdir/$subdir so we must remove it from PROG
