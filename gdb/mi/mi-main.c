@@ -327,7 +327,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
      case, some entries of REGISTER_NAME will change depending upon
      the particular processor being debugged.  */
 
-  numregs = NUM_REGS;
+  numregs = NUM_REGS + NUM_PSEUDO_REGS;
 
   cleanup = make_cleanup_ui_out_list_begin_end (uiout, "changed-registers");
 
@@ -423,7 +423,7 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
      case, some entries of REGISTER_NAME will change depending upon
      the particular processor being debugged.  */
 
-  numregs = NUM_REGS;
+  numregs = NUM_REGS + NUM_PSEUDO_REGS;
 
   if (argc == 0)
     {
@@ -563,7 +563,7 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
      case, some entries of REGISTER_NAME will change depending upon
      the particular processor being debugged.  */
 
-  numregs = NUM_REGS;
+  numregs = NUM_REGS + NUM_PSEUDO_REGS;
 
   if (argc == 0)
     {

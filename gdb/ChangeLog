@@ -1,3 +1,11 @@
+2004-09-12  Salvador E. Tropea  <set@users.sf.net>
+	    Andrew Cagney  <cagney@gnu.org>
+
+	* mi/mi-main.c (mi_cmd_data_list_changed_registers)
+	(mi_cmd_data_list_register_values)
+	(mi_cmd_data_write_register_values): Include the PSEUDO_REGS in
+	the register number computation.
+
 2004-09-12  Andrew Cagney  <cagney@gnu.org>
 
 	* ppcnbsd-nat.c: Include "inf-ptrace.h".
