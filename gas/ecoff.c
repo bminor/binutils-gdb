@@ -3616,7 +3616,7 @@ ecoff_frob_symbol (sym)
 {
   if (S_IS_COMMON (sym)
       && S_GET_VALUE (sym) > 0
-      && S_GET_VALUE (sym) <= (unsigned) bfd_get_gp_size (stdoutput))
+      && S_GET_VALUE (sym) <= bfd_get_gp_size (stdoutput))
     {
       static asection scom_section;
       static asymbol scom_symbol;
@@ -4081,7 +4081,7 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 
 			      s = symbol_get_obj (as_sym)->ecoff_extern_size;
 			      if (s == 0
-				  || s > (unsigned) bfd_get_gp_size (stdoutput))
+				  || s > bfd_get_gp_size (stdoutput))
 				sc = sc_Undefined;
 			      else
 				{
@@ -4096,7 +4096,7 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 			    {
 			      if (S_GET_VALUE (as_sym) > 0
 				  && (S_GET_VALUE (as_sym)
-				      <= (unsigned) bfd_get_gp_size (stdoutput)))
+				      <= bfd_get_gp_size (stdoutput)))
 				sc = sc_SCommon;
 			      else
 				sc = sc_Common;

@@ -1988,7 +1988,7 @@ s_lcomm_internal (needs_align, bytes_p)
       || OUTPUT_FLAVOR == bfd_target_elf_flavour)
     {
       /* For MIPS and Alpha ECOFF or ELF, small objects are put in .sbss.  */
-      if (temp <= bfd_get_gp_size (stdoutput))
+      if ((unsigned) temp <= bfd_get_gp_size (stdoutput))
 	{
 	  bss_seg = subseg_new (".sbss", 1);
 	  seg_info (bss_seg)->bss = 1;

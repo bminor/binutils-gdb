@@ -1,3 +1,9 @@
+2001-08-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* ecoff.c (ecoff_frob_symbol): Remove casts from bfd_get_gp_size.
+	(ecoff_build_symbols): Likewise.
+	* read.c (s_lcomm_internal): Fix signed/unsigned warning.
+
 2001-08-16  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (mips_elf_final_processing): Set elf	header flags
@@ -1538,7 +1544,7 @@
 	* dwarf2dbg.c (dwarf2_directive_file): Call s_app_file (0) if
 	BFD_ASSEMBLER is not defined.
 
-2001-02-23   Richard Sandiford <rsandifo@redhat.com>
+2001-02-23  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mn10300.c (md_apply_fix3): Don't mark a fixup as
 	done if it's against a symbol.
@@ -1742,7 +1748,7 @@ Mon Feb 12 17:45:50 CET 2001  Jan Hubicka  <jh@suse.cz>
 	* config/tc-sh.c (md_pseudo_table): Add uaquad.  Use s_uacons for
 	2byte, 4byte and 8byte.
 
-2001-02-08  Alan Modra   <alan@linuxcare.com.au>
+2001-02-08  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-hppa.c (pa_build_unwind_subspace): Don't call
 	md_number_to_chars with size > sizeof (valueT).
@@ -2445,7 +2451,7 @@ Mon Dec 11 14:35:42 MET 2000  Jan hubicka  <jh@suse.cz>
 	* doc/as.texinfo: Correct description of MIPS -mcpu
 	option, by copying some of the text from doc/c-mips.texi.
 
-2000-12-01      Joel Sherrill <joel@OARcorp.com>
+2000-12-01  Joel Sherrill  <joel@OARcorp.com>
 
 	* configure.in (arm-*-rtems*, a29k-*rtems*, h8300-*-rtems*):
 	New targets.
@@ -5956,7 +5962,7 @@ Fri Feb 11 14:21:51 2000  Jeffrey A Law  (law@cygnus.com)
 	* config/tc-ppc.c (ppc_fix_adjustable): Don't look at the frag
 	of a symbol when we really care about its value.
 
-2000-01-19  Chandra Chavva   <cchavva@cygnus.com>
+2000-01-19  Chandra Chavva  <cchavva@cygnus.com>
 
 	* config/tc-mcore.c (md_assemble): Give warning message if
 	operands passes to instruction are more than the spec.
@@ -5965,7 +5971,7 @@ Fri Feb 11 14:21:51 2000  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-arm.c (armadjust_symtab): If the assembler is in
 	Thumb mode but the label seen was not declared as '.thumb_func'
-	then set the ST_INFO type to STT_ARM_16BIT mode.   This allows
+	then set the ST_INFO type to STT_ARM_16BIT mode.  This allows
 	correct disassembly of Thumb code bounded by non function labels.
 
 2000-01-27  Alan Modra  <alan@spri.levels.unisa.edu.au>
