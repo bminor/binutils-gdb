@@ -1,3 +1,8 @@
+Fri Nov  5 16:27:27 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdb.texinfo: updates re threads.
+	* remote.texinfo: avoid index entries starting with digits.
+
 Tue Nov  2 09:08:37 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Enumerations): Talk about large, negative and
