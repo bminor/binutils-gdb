@@ -1,23 +1,22 @@
 /* GDB symbol table format definitions.
-   Copyright (C) 1986 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1989 Free Software Foundation, Inc.
    Hacked by Michael Tiemann (tiemann@mcc.com)
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Format of GDB symbol table data.
    There is one symbol segment for each source file or
@@ -121,17 +120,31 @@ enum type_code
 
   /* C++ */
   TYPE_CODE_MEMBER,		/* Member type */
+  TYPE_CODE_METHOD,		/* Method type */
   TYPE_CODE_REF,		/* C++ Reference types */
 };
 
 /* This appears in a type's flags word for an unsigned integer type.  */
 #define TYPE_FLAG_UNSIGNED 1
-
-/* Other flag bits are used with GDB.  */
-
+/* This appears in a type's flags word
+   if it is a (pointer to a|function returning a)* built in scalar type.
+   These types are never freed.  */
+#define TYPE_FLAG_PERM 4
+/* This appears in a type's flags word if it is a stub type (eg. if
+   someone referenced a type that wasn't definined in a source file
+   via (struct sir_not_appearing_in_this_film *)).  */
+#define TYPE_FLAG_STUB 8
+/* Set when a class has a constructor defined */
 #define	TYPE_FLAG_HAS_CONSTRUCTOR	256
+/* Set when a class has a destructor defined */
 #define	TYPE_FLAG_HAS_DESTRUCTOR	512
+/* Indicates that this type is a public baseclass of another class,
+   i.e. that all its public methods are available in the derived
+   class. */
 #define	TYPE_FLAG_VIA_PUBLIC		1024
+/* Indicates that this type is a virtual baseclass of another class,
+   i.e. that if this class is inherited more than once by another
+   class, only one set of member variables will be included. */ 
 #define	TYPE_FLAG_VIA_VIRTUAL		2048
 
 struct type
@@ -146,7 +159,7 @@ struct type
   int length;
   /* For a pointer type, describes the type of object pointed to.
      For an array type, describes the type of the elements.
-     For a function type, describes the type of the value.
+     For a function or method type, describes the type of the value.
      For a range type, describes the type of the full range.
      Unused otherwise.  */
   struct type *target_type;
@@ -157,6 +170,8 @@ struct type
   struct type *pointer_type;
   /* C++: also need a reference type.  */
   struct type *reference_type;
+  struct type **arg_types;
+  
   /* Type that is a function returning this type.
      Zero if no such function type is known here.
      The debugger may add the address of such a type
@@ -182,8 +197,6 @@ struct type
      For range types, there are two "fields",
      the minimum and maximum values (both inclusive).
      For enum types, each possible value is described by one "field".
-     For range types, there are two "fields", that record constant values
-     (inclusive) for the minimum and maximum.
 
      Using a pointer to a separate array of fields
      allows all types to have the same size, which is useful
@@ -225,7 +238,7 @@ struct type
   /* For classes, structures, and unions, a description of each field,
      which consists of an overloaded name, followed by the types of
      arguments that the method expects, and then the name after it
-     has been renamed to make it distinct. */
+     has been renamed to make it distinct.  */
   struct fn_fieldlist
     {
       /* The overloaded name.  */
@@ -239,7 +252,7 @@ struct type
 	  /* The overloaded name */
 	  char *name;
 #endif
-	  /* The type of the argument */
+	  /* The return value of the method */
 	  struct type *type;
 	  /* The argument list */
 	  struct type **args;
@@ -383,6 +396,8 @@ enum address_class
   LOC_STATIC,		/* Value is at fixed address */
   LOC_REGISTER,		/* Value is in register */
   LOC_ARG,		/* Value is at spec'd position in arglist */
+  LOC_REF_ARG,		/* Value address is at spec'd position in */
+			/* arglist.  */
   LOC_REGPARM,		/* Value is at spec'd position in  register window */
   LOC_LOCAL,		/* Value is at spec'd pos in stack frame */
   LOC_TYPEDEF,		/* Value not used; definition in SYMBOL_TYPE
@@ -428,13 +443,23 @@ struct partial_symbol
   enum namespace namespace;
   /* Address class (for info_symbols) */
   enum address_class class;
+  /* Value (only used for static functions currently).  Done this
+     way so that we can use the struct symbol macros.  */
+  union
+    {
+      long value;
+    }
+  value;
 };
 
 /* 
  * Vectors of all partial symbols read in from file; actually declared
  * and used in dbxread.c.
  */
-extern struct partial_symbol *global_psymbols, *static_psymbols;
+extern struct psymbol_allocation_list {
+  struct partial_symbol *list, *next;
+  int size;
+} global_psymbols, static_psymbols;
 
 
 /* Source-file information.

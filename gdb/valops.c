@@ -1,22 +1,22 @@
 /* Perform non-arithmetic operations on values, for GDB.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
 #include "stdio.h"
 #include "defs.h"
 #include "param.h"
@@ -64,6 +64,21 @@ value_cast (type, arg2)
     }
   else
     error ("Invalid cast.");
+}
+
+/* Create a value of type TYPE that is zero, and return it.  */
+
+value
+value_zero (type, lv)
+     struct type *type;
+     enum lval_type lv;
+{
+  register value val = allocate_value (type);
+
+  bzero (VALUE_CONTENTS (val), TYPE_LENGTH (type));
+  VALUE_LVAL (val) = lv;
+
+  return val;
 }
 
 /* Return the value with a specified type located at specified address.  */
@@ -255,12 +270,20 @@ value_assign (toval, fromval)
       error ("Left side of = operation is not an lvalue.");
     }
 
-  /* Return a value just like TOVAL except with the contents of FROMVAL.  */
+  /* Return a value just like TOVAL except with the contents of FROMVAL
+     (except in the case of the type if TOVAL is an internalvar).  */
+
+  if (VALUE_LVAL (toval) == lval_internalvar
+      || VALUE_LVAL (toval) == lval_internalvar_component)
+    {
+      type = VALUE_TYPE (fromval);
+    }
 
   val = allocate_value (type);
   bcopy (toval, val, VALUE_CONTENTS (val) - (char *) val);
   bcopy (VALUE_CONTENTS (fromval), VALUE_CONTENTS (val), TYPE_LENGTH (type));
-
+  VALUE_TYPE (val) = type;
+  
   return val;
 }
 
@@ -293,7 +316,7 @@ value
 value_of_variable (var)
      struct symbol *var;
 {
-  return read_var_value (var, (CORE_ADDR) 0);
+  return read_var_value (var, (FRAME) 0);
 }
 
 /* Given a value which is an array, return a value which is
@@ -371,7 +394,7 @@ value_ind (arg1)
 
   /* Allow * on an integer so we can cast it to whatever we want.  */
   if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_INT)
-    return value_at (builtin_type_long,
+    return value_at (BUILTIN_TYPE_LONGEST,
 		     (CORE_ADDR) value_as_long (arg1));
   else if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_PTR)
     return value_at (TYPE_TARGET_TYPE (VALUE_TYPE (arg1)),
@@ -502,6 +525,9 @@ call_function (function, nargs, args)
   struct inferior_status inf_status;
   struct cleanup *old_chain;
 
+  if (!have_inferior_p ())
+    error ("Cannot invoke functions if the inferior is not running.");
+
   save_inferior_status (&inf_status, 1);
   old_chain = make_cleanup (restore_inferior_status, &inf_status);
 
@@ -524,14 +550,9 @@ call_function (function, nargs, args)
 
     /* If it's a member function, just look at the function
        part of it.  */
-    if (code == TYPE_CODE_MEMBER)
-      {
-	ftype = TYPE_TARGET_TYPE (ftype);
-	code = TYPE_CODE (ftype);
-      }
 
     /* Determine address to call.  */
-    if (code == TYPE_CODE_FUNC)
+    if (code == TYPE_CODE_FUNC || code == TYPE_CODE_METHOD)
       {
 	funaddr = VALUE_ADDRESS (function);
 	value_type = TYPE_TARGET_TYPE (ftype);
@@ -539,8 +560,8 @@ call_function (function, nargs, args)
     else if (code == TYPE_CODE_PTR)
       {
 	funaddr = value_as_long (function);
-	if (TYPE_CODE (TYPE_TARGET_TYPE (ftype))
-	    == TYPE_CODE_FUNC)
+	if (TYPE_CODE (TYPE_TARGET_TYPE (ftype)) == TYPE_CODE_FUNC
+	    || TYPE_CODE (TYPE_TARGET_TYPE (ftype)) == TYPE_CODE_METHOD)
 	  value_type = TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (ftype));
 	else
 	  value_type = builtin_type_int;
@@ -571,9 +592,10 @@ call_function (function, nargs, args)
     FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, value_type);
   }
 
+#ifndef CANNOT_EXECUTE_STACK
   write_memory (start_sp, dummy1, sizeof dummy);
 
-#ifdef convex
+#else
   /* Convex Unix prohibits executing in the stack segment. */
   /* Hope there is empty room at the top of the text segment. */
   {
@@ -584,10 +606,11 @@ call_function (function, nargs, args)
 	if (read_memory_integer (start_sp, 1) != 0)
 	  error ("text segment full -- no place to put call");
     checked = 1;
+    sp = old_sp;
     start_sp = text_end - sizeof dummy;
     write_memory (start_sp, dummy1, sizeof dummy);
   }
-#else /* !convex */
+#endif /* CANNOT_EXECUTE_STACK */
 #ifdef STACK_ALIGN
   /* If stack grows down, we must leave a hole at the top. */
   {
@@ -600,7 +623,7 @@ call_function (function, nargs, args)
       len += TYPE_LENGTH (value_type);
     
     for (i = nargs - 1; i >= 0; i--)
-      len += TYPE_LENGTH (VALUE_TYPE (args[i]));
+      len += TYPE_LENGTH (VALUE_TYPE (value_arg_coerce (args[i])));
 #ifdef CALL_DUMMY_STACK_ADJUST
     len += CALL_DUMMY_STACK_ADJUST;
 #endif
@@ -636,7 +659,6 @@ call_function (function, nargs, args)
   sp += CALL_DUMMY_STACK_ADJUST;
 #endif
 #endif /* CALL_DUMMY_STACK_ADJUST */
-#endif /* !convex */
 
   /* Store the address at which the structure is supposed to be
      written.  Note that this (and the code which reserved the space
@@ -748,12 +770,17 @@ value_string (ptr, len)
    C++: ARGS is a list of argument types to aid in the selection of
    an appropriate method. Also, handle derived types.
 
+   STATIC_MEMFUNCP, if non-NULL, points to a caller-supplied location
+   where the truthvalue of whether the function that was resolved was
+   a static member function or not.
+
    ERR is an error message to be printed in case the field is not found.  */
 
 value
-value_struct_elt (arg1, args, name, err)
+value_struct_elt (arg1, args, name, static_memfuncp, err)
      register value arg1, *args;
      char *name;
+     int *static_memfuncp;
      char *err;
 {
   register struct type *t;
@@ -784,17 +811,22 @@ value_struct_elt (arg1, args, name, err)
 
   baseclass = t;
 
+  /* Assume it's not, unless we see that it is.  */
+  if (static_memfuncp)
+    *static_memfuncp =0;
+
   if (!args)
     {
-      /*  if there are no arguments ...do this...  */
+      /* if there are no arguments ...do this...  */
 
-      /*  Try as a variable first, because if we succeed, there
-	  is less work to be done.  */
+      /* Try as a variable first, because if we succeed, there
+	 is less work to be done.  */
       while (t)
 	{
 	  for (i = TYPE_NFIELDS (t) - 1; i >= 0; i--)
 	    {
-	      if (!strcmp (TYPE_FIELD_NAME (t, i), name))
+	      char *t_field_name = TYPE_FIELD_NAME (t, i);
+	      if (t_field_name && !strcmp (t_field_name, name))
 		{
 		  found = 1;
 		  break;
@@ -837,7 +869,7 @@ value_struct_elt (arg1, args, name, err)
 	}
 
       if (found == 0)
-	error("there is no field named %s", name);
+	error ("there is no field named %s", name);
       return 0;
     }
 
@@ -871,15 +903,15 @@ value_struct_elt (arg1, args, name, err)
 
 	      found = 1;
 	      for (j = TYPE_FN_FIELDLIST_LENGTH (t, i) - 1; j >= 0; --j)
-		{
-		  if (!typecmp (TYPE_FN_FIELD_ARGS (f, j), args))
-		    {
-		      if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
-			return (value)value_virtual_fn_field (arg1, f, j, t);
-		      else
-			return (value)value_fn_field (arg1, i, j);
-		    }
-		}
+		if (!typecmp (TYPE_FN_FIELD_STATIC_P (f, j),
+			      TYPE_FN_FIELD_ARGS (f, j), args))
+		  {
+		    if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
+		      return (value)value_virtual_fn_field (arg1, f, j, t);
+		    if (TYPE_FN_FIELD_STATIC_P (f, j) && static_memfuncp)
+		      *static_memfuncp = 1;
+		    return (value)value_fn_field (arg1, i, j);
+		  }
 	    }
 	}
 
@@ -903,7 +935,8 @@ value_struct_elt (arg1, args, name, err)
 	{
 	  for (i = TYPE_NFIELDS (t) - 1; i >= 0; i--)
 	    {
-	      if (!strcmp (TYPE_FIELD_NAME (t, i), name))
+	      char *t_field_name = TYPE_FIELD_NAME (t, i);
+	      if (t_field_name && !strcmp (t_field_name, name))
 		{
 		  found = 1;
 		  break;
@@ -991,7 +1024,8 @@ check_field (arg1, name)
     {
       for (i = TYPE_NFIELDS (t) - 1; i >= 0; i--)
 	{
-	  if (!strcmp (TYPE_FIELD_NAME (t, i), name))
+	  char *t_field_name = TYPE_FIELD_NAME (t, i);
+	  if (t_field_name && !strcmp (t_field_name, name))
 	    {
 	      return 1;
 	    }
@@ -1056,7 +1090,8 @@ value_struct_elt_for_address (domain, intype, name)
     {
       for (i = TYPE_NFIELDS (t) - 1; i >= 0; i--)
 	{
-	  if (!strcmp (TYPE_FIELD_NAME (t, i), name))
+	  char *t_field_name = TYPE_FIELD_NAME (t, i);
+	  if (t_field_name && !strcmp (t_field_name, name))
 	    {
 	      if (TYPE_FIELD_PACKED (t, i))
 		error ("pointers to bitfield members not allowed");
@@ -1136,27 +1171,37 @@ value_struct_elt_for_address (domain, intype, name)
 }
 
 /* Compare two argument lists and return the position in which they differ,
-   or zero if equal. Note that we ignore the first argument, which is
-   the type of the instance variable. This is because we want to handle
-   derived classes. This is not entirely correct: we should actually
-   check to make sure that a requested operation is type secure,
-   shouldn't we? */
-int typecmp(t1, t2)
+   or zero if equal.
+
+   STATICP is nonzero if the T1 argument list came from a
+   static member function.
+
+   For non-static member functions, we ignore the first argument,
+   which is the type of the instance variable.  This is because we want
+   to handle calls with objects from derived classes.  This is not
+   entirely correct: we should actually check to make sure that a
+   requested operation is type secure, shouldn't we?  */
+
+int
+typecmp (staticp, t1, t2)
+     int staticp;
      struct type *t1[];
      value t2[];
 {
   int i;
 
+  if (staticp && t1 == 0)
+    return t2[1] != 0;
+  if (t1 == 0)
+    return 1;
   if (t1[0]->code == TYPE_CODE_VOID) return 0;
-  if (!t1[1]) return 0;
-  for (i = 1; t1[i] && t1[i]->code != TYPE_CODE_VOID; i++)
+  if (t1[!staticp] == 0) return 0;
+  for (i = !staticp; t1[i] && t1[i]->code != TYPE_CODE_VOID; i++)
     {
       if (! t2[i]
 	  || t1[i]->code != t2[i]->type->code
 	  || t1[i]->target_type != t2[i]->type->target_type)
-	{
-	  return i+1;
-	}
+	return i+1;
     }
   if (!t1[i]) return 0;
   return t2[i] ? i+1 : 0;

@@ -58,6 +58,10 @@ enum machine_type {
  (N_MAGIC(x) != OMAGIC && N_MAGIC(x) != NMAGIC		\
   && N_MAGIC(x) != ZMAGIC)
 
+#define _N_BADMAG(x)					\
+ (N_MAGIC(x) != OMAGIC && N_MAGIC(x) != NMAGIC		\
+  && N_MAGIC(x) != ZMAGIC)
+
 #define _N_HDROFF(x) (1024 - sizeof (struct exec))
 
 #define N_TXTOFF(x) \
@@ -82,8 +86,15 @@ enum machine_type {
 #ifdef vax
 #define SEGMENT_SIZE page_size
 #endif
+#ifdef	sony
+#define	SEGMENT_SIZE	0x2000
+#endif	/* Sony.  */
 #ifdef is68k
 #define SEGMENT_SIZE 0x20000
+#endif
+#if defined(m68k) && defined(PORTAR)
+#define PAGE_SIZE 0x400
+#define SEGMENT_SIZE PAGE_SIZE
 #endif
 
 #ifndef N_DATADDR
@@ -101,10 +112,10 @@ struct nlist {
     struct nlist *n_next;
     long n_strx;
   } n_un;
-  char n_type;
+  unsigned char n_type;
   char n_other;
   short n_desc;
-  unsigned n_value;
+  unsigned long n_value;
 };
 
 #define N_UNDF 0

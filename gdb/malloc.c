@@ -142,8 +142,9 @@ what you give them.   Help stamp out software-hoarding!  */
  */
 
 #ifdef emacs
+/* config.h specifies which kind of system this is.  */
 #include "config.h"
-#endif /* emacs */
+#else
 
 /* Determine which kind of system this is.  */
 #include <signal.h>
@@ -155,21 +156,27 @@ what you give them.   Help stamp out software-hoarding!  */
 #endif /* not VMS */
 #else /* SIGTSTP */
 #ifdef SIGIO
-#define BSD42
+#define BSD4_2
 #endif /* SIGIO */
 #endif /* SIGTSTP */
+
+#if defined(hpux)
+#define USG
+#endif
+
+#endif /* not emacs */
 
 /* Define getpagesize () if the system does not.  */
 #include "getpagesize.h"
 
-#ifndef BSD42
+#ifndef BSD4_2
 #ifndef USG
 #include <sys/vlimit.h>		/* warn the user when near the end */
 #endif /* not USG */
-#else /* if BSD42 */
+#else /* if BSD4_2 */
 #include <sys/time.h>
 #include <sys/resource.h>
-#endif /* BSD42 */
+#endif /* BSD4_2 */
 
 extern char *start_of_data ();
 
@@ -318,6 +325,7 @@ morecore (nu)			/* ask system for more memory */
 
 #ifdef BSD
 #ifndef BSD4_1
+  /* ?? There was a suggestion not to block SIGILL, somehow for GDB's sake.  */
   oldmask = sigsetmask (-1);
 #endif
 #endif
@@ -344,8 +352,6 @@ morecore (nu)			/* ask system for more memory */
    */
   cp = sbrk (0);
   siz = cp - data_space_start;
-  malloc_sbrk_used = siz;
-  malloc_sbrk_unused = lim_data - siz;
 
   if (warnfunction)
     switch (warnlevel)
@@ -384,7 +390,17 @@ morecore (nu)			/* ask system for more memory */
     nblks = 1 << ((siz = 8) - nu);
 
   if ((cp = sbrk (1 << (siz + 3))) == (char *) -1)
-    return;			/* no more room! */
+    {
+#ifdef BSD
+#ifndef BSD4_1
+      sigsetmask (oldmask);
+#endif
+#endif
+      return;			/* no more room! */
+    }
+  malloc_sbrk_used = siz;
+  malloc_sbrk_unused = lim_data - siz;
+
 #ifndef VMS
   if ((int) cp & 7)
     {		/* shouldn't happen, but just in case */
@@ -461,8 +477,10 @@ malloc (n)		/* get a block */
   register int nunits = 0;
 
   /* Figure out how many bytes are required, rounding up to the nearest
-     multiple of 4, then figure out which nextf[] area to use */
-  nbytes = (n + sizeof *p + EXTRA + 3) & ~3;
+     multiple of 8, then figure out which nestf[] area to use.
+     Both the beginning of the header and the beginning of the
+     block should be on an eight byte boundary.  */
+  nbytes = (n + ((sizeof *p + 7) & ~7) + EXTRA + 7) & ~7;
   {
     register unsigned int   shiftr = (nbytes - 1) >> 2;
 
@@ -507,7 +525,8 @@ malloc (n)		/* get a block */
   p -> mh_nbytes = n;
   p -> mh_magic4 = MAGIC4;
   {
-    register char  *m = (char *) (p + 1) + n;
+    /* Get the location n after the beginning of the user's space.  */
+    register char *m = (char *) p + ((sizeof *p + 7) & ~7) + n;
 
     *m++ = MAGIC1, *m++ = MAGIC1, *m++ = MAGIC1, *m = MAGIC1;
   }
@@ -518,7 +537,7 @@ malloc (n)		/* get a block */
   nmalloc[nunits]++;
   nmal++;
 #endif /* MSTATS */
-  return (char *) (p + 1);
+  return (char *) p + ((sizeof *p + 7) & ~7);
 }
 
 free (mem)
@@ -531,18 +550,18 @@ free (mem)
     if (ap == 0)
       return;
 
-    p = (struct mhead *) ap - 1;
+    p = (struct mhead *) (ap - ((sizeof *p + 7) & ~7));
     if (p -> mh_alloc == ISMEMALIGN)
       {
 	ap -= p->mh_size;
-	p = (struct mhead *) ap - 1;
+	p = (struct mhead *) (ap - ((sizeof *p + 7) & ~7));
       }
 
 #ifndef rcheck
     if (p -> mh_alloc != ISALLOC)
       abort ();
 
-#else rcheck
+#else /* rcheck */
     if (p -> mh_alloc != ISALLOC)
       {
 	if (p -> mh_alloc == ISFREE)
@@ -587,9 +606,9 @@ realloc (mem, n)
   register unsigned int nbytes;
   register int nunits;
 
-  if ((p = (struct mhead *) mem) == 0)
+  if (mem == 0)
     return malloc (n);
-  p--;
+  p = (struct mhead *) (mem - ((sizeof *p + 7) & ~7));
   nunits = p -> mh_index;
   ASSERT (p -> mh_alloc == ISALLOC);
 #ifdef rcheck
@@ -601,13 +620,13 @@ realloc (mem, n)
   }
 #else /* not rcheck */
   if (p -> mh_index >= 13)
-    tocopy = (1 << (p -> mh_index + 3)) - sizeof *p;
+    tocopy = (1 << (p -> mh_index + 3)) - ((sizeof *p + 7) & ~7);
   else
     tocopy = p -> mh_size;
 #endif /* not rcheck */
 
   /* See if desired size rounds to same power of 2 as actual size. */
-  nbytes = (n + sizeof *p + EXTRA + 7) & ~7;
+  nbytes = (n + ((sizeof *p + 7) & ~7) + EXTRA + 7) & ~7;
 
   /* If ok, use the same block, just marking its size as changed.  */
   if (nbytes > (4 << nunits) && nbytes <= (8 << nunits))
@@ -663,7 +682,7 @@ memalign (alignment, size)
   return aligned;
 }
 
-#ifndef HPUX
+#ifndef hpux
 /* This runs into trouble with getpagesize on HPUX.
    Patching out seems cleaner than the ugly fix needed.  */
 char *
@@ -671,7 +690,7 @@ valloc (size)
 {
   return memalign (getpagesize (), size);
 }
-#endif /* not HPUX */
+#endif /* not hpux */
 #endif /* not VMS */
 
 #ifdef MSTATS
@@ -772,14 +791,14 @@ get_lim_data ()
 }
 
 #else /* not USG */
-#ifndef BSD42
+#ifndef BSD4_2
 
 get_lim_data ()
 {
   lim_data = vlimit (LIM_DATA, -1);
 }
 
-#else /* BSD42 */
+#else /* BSD4_2 */
 
 get_lim_data ()
 {
@@ -793,7 +812,7 @@ get_lim_data ()
 #endif
 }
 
-#endif /* BSD42 */
+#endif /* BSD4_2 */
 #endif /* not USG */
 
 #ifdef VMS

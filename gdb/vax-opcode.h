@@ -1,4 +1,21 @@
-/* vax.opcode.h */
+/* Vax opcde list.
+   Copyright (C) 1989, Free Software Foundation, Inc.
+
+This file is part of GDB and GAS.
+
+GDB and GAS are free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
+
+GDB and GAS are distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB or GAS; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #ifndef vax_opcodeT
 #define vax_opcodeT int
@@ -154,8 +171,8 @@ votstrs[] =
 {    "emul",	{"rlrlrlwq",		0x7a	} },
 {    "ediv",	{"rlrqwlwl",		0x7b	} },
 {    "clrd",	{"wd",			0x7c	} },
-{    "clrq",	{"wd",			0x7c	} },
 {    "clrg",	{"wg",			0x7c	} },
+{    "clrq",	{"wd",			0x7c	} },
 {    "movq",	{"rqwq",		0x7d	} },
 {    "movaq",	{"aqwl",		0x7e	} },
 {    "movad",	{"adwl",		0x7e	} },
@@ -220,7 +237,7 @@ votstrs[] =
 {    "bispsw",	{"rw",			0xb8	} },
 {    "bicpsw",	{"rw",			0xb9	} },
 {    "popr",	{"rw",			0xba	} },
-{    "pushr<",	{"rw",			0xbb	} },
+{    "pushr",	{"rw",			0xbb	} },
 {    "chmk",	{"rw",			0xbc	} },
 {    "chme",	{"rw",			0xbd	} },
 {    "chms",	{"rw",			0xbe	} },

@@ -1,22 +1,21 @@
 /* Memory-access and commands for inferior process, for GDB.
-   Copyright (C) 1986, 1987, 1988 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1988, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "param.h"
@@ -126,8 +125,9 @@ set_args_command (args)
 }
 
 void
-tty_command (file)
+tty_command (file, from_tty)
      char *file;
+     int from_tty;
 {
   if (file == 0)
     error_no_arg ("terminal name for running target process");
@@ -160,13 +160,13 @@ Start it from the beginning? "))
       kill_inferior ();
     }
 
+  exec_file = (char *) get_exec_file (1);
+
   if (remote_debugging)
     {
-      free (allargs);
       if (from_tty)
 	{
-	  printf ("Starting program: %s%s\n",
-		  exec_file, inferior_args);
+	  printf ("Starting program: %s\n", exec_file);
 	  fflush (stdout);
 	}
     }
@@ -175,7 +175,6 @@ Start it from the beginning? "))
       if (args)
 	set_args_command (args);
 
-      exec_file = (char *) get_exec_file (1);
       if (from_tty)
 	{
 	  printf ("Starting program: %s%s\n",
@@ -566,7 +565,7 @@ finish_command (arg, from_tty)
 						       value_type));
 
       printf ("Value returned is $%d = ", record_latest_value (val));
-      value_print (val, stdout, 0);
+      value_print (val, stdout, 0, Val_no_prettyprint);
       putchar ('\n');
     }
 }
@@ -674,11 +673,18 @@ set_environment_command (arg)
 }
 
 static void
-unset_environment_command (var)
+unset_environment_command (var, from_tty)
      char *var;
+     int from_tty;
 {
   if (var == 0)
-    error_no_arg ("environment variable");
+    /* If there is no argument, delete all environment variables.
+       Ask for confirmation if reading from the terminal.  */
+    if (!from_tty || query ("Delete all environment variables? "))
+      {
+	free_environ (inferior_environ);
+	inferior_environ = make_environ ();
+      }
 
   unset_in_environ (inferior_environ, var);
 }
@@ -694,25 +700,48 @@ read_memory_integer (memaddr, len)
   short sbuf;
   int ibuf;
   long lbuf;
+  int result_err;
+  extern int sys_nerr;
+  extern char *sys_errlist[];
 
   if (len == sizeof (char))
     {
-      read_memory (memaddr, &cbuf, len);
+      result_err = read_memory (memaddr, &cbuf, len);
+      if (result_err)
+	error ("Error reading memory address 0x%x: %s (%d).",
+	       memaddr, (result_err < sys_nerr ?
+			 sys_errlist[result_err] :
+			 "uknown error"), result_err);
       return cbuf;
     }
   if (len == sizeof (short))
     {
-      read_memory (memaddr, &sbuf, len);
+      result_err = read_memory (memaddr, &sbuf, len);
+      if (result_err)
+	error ("Error reading memory address 0x%x: %s (%d).",
+	       memaddr, (result_err < sys_nerr ?
+			 sys_errlist[result_err] :
+			 "uknown error"), result_err);
       return sbuf;
     }
   if (len == sizeof (int))
     {
-      read_memory (memaddr, &ibuf, len);
+      result_err = read_memory (memaddr, &ibuf, len);
+      if (result_err)
+	error ("Error reading memory address 0x%x: %s (%d).",
+	       memaddr, (result_err < sys_nerr ?
+			 sys_errlist[result_err] :
+			 "uknown error"), result_err);
       return ibuf;
     }
   if (len == sizeof (lbuf))
     {
-      read_memory (memaddr, &lbuf, len);
+      result_err = read_memory (memaddr, &lbuf, len);
+      if (result_err)
+	error ("Error reading memory address 0x%x: %s (%d).",
+	       memaddr, (result_err < sys_nerr ?
+			 sys_errlist[result_err] :
+			 "uknown error"), result_err);
       return lbuf;
     }
   error ("Cannot handle integers of %d bytes.", len);
@@ -763,7 +792,8 @@ registers_info (addr_exp)
 	}
     }
   else
-    printf ("Reg\tContents\n\n");
+    printf_filtered (
+      "Register       Contents (relative to selected stack frame)\n\n");
 
   for (i = 0; i < NUM_REGS; i++)
     {
@@ -774,34 +804,26 @@ registers_info (addr_exp)
       if (addr_exp != 0 && i != regnum)
 	continue;
 
-      /* On machines with lots of registers, pause every 16 lines
-	 so user can read the output.  */
-      if (addr_exp == 0 && i > 0 && i % 16 == 0)
-	{
-	  printf ("--Type Return to print more--");
-	  fflush (stdout);
-	  gdb_read_line (0, 0);
-	}
-
       /* Get the data in raw format, then convert also to virtual format.  */
       read_relative_register_raw_bytes (i, raw_buffer);
       REGISTER_CONVERT_TO_VIRTUAL (i, raw_buffer, virtual_buffer);
 
-      printf ("%s\t", reg_names[i]);
+      fputs_filtered (reg_names[i], stdout);
+      print_spaces_filtered (15 - strlen (reg_names[i]), stdout);
 
       /* If virtual format is floating, print it that way.  */
       if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT
 	  && ! INVALID_FLOAT (virtual_buffer, REGISTER_VIRTUAL_SIZE (i)))
 	val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0,
-		   stdout, 0, 1);
+		   stdout, 0, 1, 0, Val_pretty_default);
       /* Else if virtual format is too long for printf,
 	 print in hex a byte at a time.  */
       else if (REGISTER_VIRTUAL_SIZE (i) > sizeof (long))
 	{
 	  register int j;
-	  printf ("0x");
+	  printf_filtered ("0x");
 	  for (j = 0; j < REGISTER_VIRTUAL_SIZE (i); j++)
-	    printf ("%02x", virtual_buffer[j]);
+	    printf_filtered ("%02x", virtual_buffer[j]);
 	}
       /* Else print as integer in hex and in decimal.  */
       else
@@ -810,9 +832,9 @@ registers_info (addr_exp)
 
 	  bcopy (virtual_buffer, &val, sizeof (long));
 	  if (val == 0)
-	    printf ("0");
+	    printf_filtered ("0");
 	  else
-	    printf ("0x%08x  %d", val, val);
+	    printf_filtered ("0x%08x  %d", val, val);
 	}
 
       /* If register has different raw and virtual formats,
@@ -822,18 +844,20 @@ registers_info (addr_exp)
 	{
 	  register int j;
 
-	  printf ("  (raw 0x");
+	  printf_filtered ("  (raw 0x");
 	  for (j = 0; j < REGISTER_RAW_SIZE (i); j++)
-	    printf ("%02x", raw_buffer[j]);
-	  printf (")");
+	    printf_filtered ("%02x", raw_buffer[j]);
+	  printf_filtered (")");
 	}
-      printf ("\n");
+      printf_filtered ("\n");
     }
-
-  printf ("Contents are relative to selected stack frame.\n");
 }
 
 #ifdef ATTACH_DETACH
+#define PROCESS_ATTACH_ALLOWED 1
+#else
+#define PROCESS_ATTACH_ALLOWED 0
+#endif
 /*
  * TODO:
  * Should save/restore the tty state since it might be that the
@@ -841,6 +865,7 @@ registers_info (addr_exp)
  * the tty in some state other than what we want.  If it's running
  * on another terminal or without a terminal, then saving and
  * restoring the tty state is a harmless no-op.
+ * This only needs to be done if we are attaching to a process.
  */
 
 /*
@@ -862,14 +887,18 @@ attach_command (args, from_tty)
   dont_repeat();
 
   if (!args)
-    error_no_arg ("process-id to attach");
+    error_no_arg ("process-id or device file to attach");
 
   while (*args == ' ' || *args == '\t') args++;
 
   if (args[0] == '/')
     remote = 1;
   else
+#ifndef ATTACH_DETACH
+    error ("Can't attach to a process on this machine.");
+#else
     pid = atoi (args);
+#endif
 
   if (inferior_pid)
     {
@@ -891,13 +920,17 @@ attach_command (args, from_tty)
       fflush (stdout);
     }
 
+#ifdef ATTACH_DETACH
   if (remote)
     {
+#endif
       remote_open (args, from_tty);
       start_remote ();
+#ifdef ATTACH_DETACH
     }
   else
     attach_program (pid);
+#endif
 }
 
 /*
@@ -918,24 +951,36 @@ detach_command (args, from_tty)
 {
   int signal = 0;
 
-  if (!inferior_pid)
-    error ("Not currently tracing a program\n");
-  if (from_tty)
+#ifdef ATTACH_DETACH
+  if (inferior_pid)
     {
-      char *exec_file = (char *)get_exec_file (0);
-      if (exec_file == 0)
-	exec_file = "";
-      printf ("Detaching program: %s pid %d\n",
-	      exec_file, inferior_pid);
-      fflush (stdout);
+      if (from_tty)
+	{
+	  char *exec_file = (char *)get_exec_file (0);
+	  if (exec_file == 0)
+	    exec_file = "";
+	  printf ("Detaching program: %s pid %d\n",
+		  exec_file, inferior_pid);
+	  fflush (stdout);
+	}
+      if (args)
+	signal = atoi (args);
+      
+      detach (signal);
+      inferior_pid = 0;
     }
-  if (args)
-    signal = atoi (args);
+  else
+#endif
+    {
+      if (!remote_debugging)
+	error ("Not currently attached to subsidiary or remote process.");
 
-  detach (signal);
-  inferior_pid = 0;
+      if (args)
+	error ("Argument given to \"detach\" when remotely debugging.");
+      
+      remote_close (from_tty);
+    }
 }
-#endif /* ATTACH_DETACH */
 
 /* ARGUSUED */
 static void
@@ -983,15 +1028,25 @@ This does not affect the program until the next \"run\" command.",
 #ifdef ATTACH_DETACH
  add_com ("attach", class_run, attach_command,
  	   "Attach to a process that was started up outside of GDB.\n\
-To do this, you must have permission to send the process a signal.\n\
-And it must have the same effective uid as the debugger.\n\n\
+This command may take as argument a process id or a device file.\n\
+For a process id, you must have permission to send the process a signal,\n\
+and it must have the same effective uid as the debugger.\n\
+For a device file, the file must be a connection to a remote debug server.\n\n\
 Before using \"attach\", you must use the \"exec-file\" command\n\
 to specify the program running in the process,\n\
 and the \"symbol-file\" command to load its symbol table.");
+#else
+ add_com ("attach", class_run, attach_command,
+ 	   "Attach to a process that was started up outside of GDB.\n\
+This commands takes as an argument the name of a device file.\n\
+This file must be a connection to a remote debug server.\n\n\
+Before using \"attach\", you must use the \"exec-file\" command\n\
+to specify the program running in the process,\n\
+and the \"symbol-file\" command to load its symbol table.");
+#endif
   add_com ("detach", class_run, detach_command,
 	   "Detach the process previously attached.\n\
 The process is no longer traced and continues its execution.");
-#endif /* ATTACH_DETACH */
 
   add_com ("signal", class_run, signal_command,
 	   "Continue program giving it signal number SIGNUMBER.");
@@ -1043,9 +1098,9 @@ then the same breakpoint won't break until the Nth time it is reached.");
 	   "Start debugged program.  You may specify arguments to give it.\n\
 Args may include \"*\", or \"[...]\"; they are expanded using \"sh\".\n\
 Input and output redirection with \">\", \"<\", or \">>\" are also allowed.\n\n\
-With no arguments, uses arguments last specified (with \"run\" or \"set-args\".\n\
+With no arguments, uses arguments last specified (with \"run\" or \"set args\".\n\
 To cancel previous arguments and run with no arguments,\n\
-use \"set-args\" without arguments.");
+use \"set args\" without arguments.");
   add_com_alias ("r", "run", class_run, 1);
 
   add_info ("registers", registers_info,

@@ -1,22 +1,21 @@
 /* Symbol table definitions for GDB.
-   Copyright (C) 1986 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <obstack.h>
 
@@ -41,15 +40,20 @@ extern void free ();
 
 /* In addition, gdb can record any number of miscellaneous undebuggable
    functions' addresses.  In a system that appends _ to function names,
-   the _'s are removed from the names stored in this table.  The type is
-   used when sorting so that find_pc_misc_function will pick a global name
-   over a local name for the same address. */
+   the _'s are removed from the names stored in this table.  */
+
+/* Actually, the misc function list is used to store *all* of the
+   global symbols (text, data, bss, and abs).  It is sometimes used
+   to figure out what symtabs to read in.  The "type" field appears
+   never to be used.  */
+
+enum misc_function_type {mf_unknown = 0, mf_text, mf_data, mf_bss, mf_abs};
 
 struct misc_function
 {
   char *name;
   CORE_ADDR address;
-  unsigned char type; 
+  unsigned char type;		/* Really enum misc_function_type.  */
 };
 
 /* Address and length of the vector recording all misc function names/addresses.  */
@@ -200,11 +204,6 @@ int current_source_line;
 #define SYMBOL_BLOCK_VALUE(symbol) (symbol)->value.block
 #define SYMBOL_TYPE(symbol) (symbol)->type
 
-/* This appears in a type's flags word
-   if it is a (pointer to a|function returning a)* built in scalar type.
-   These types are never freed.  */
-#define TYPE_FLAG_PERM 4
-
 /* Some macros for bitfields.  */
 #define B_SET(a,x) (a[x>>5] |= (1 << (x&31)))
 #define B_CLR(a,x) (a[x>>5] &= ~(1 << (x&31)))
@@ -231,6 +230,7 @@ int current_source_line;
 #define TYPE_NFN_FIELDS(thistype) (thistype)->nfn_fields
 #define TYPE_NFN_FIELDS_TOTAL(thistype) (thistype)->nfn_fields_total
 #define TYPE_BASECLASSES(thistype) (thistype)->baseclasses
+#define TYPE_ARG_TYPES(thistype) (thistype)->arg_types
 #define TYPE_BASECLASS(thistype,index) (thistype)->baseclasses[index]
 #define TYPE_N_BASECLASSES(thistype) (thistype)->n_baseclasses
 #define TYPE_VIA_PUBLIC(thistype) ((thistype)->flags & TYPE_FLAG_VIA_PUBLIC)
@@ -263,12 +263,13 @@ int current_source_line;
 #define TYPE_FN_FIELDLIST_NAME(thistype, n) (thistype)->fn_fieldlists[n].name
 #define TYPE_FN_FIELDLIST_LENGTH(thistype, n) (thistype)->fn_fieldlists[n].length
 
-#define TYPE_FN_FIELD(thistype) (thistype)[n]
+#define TYPE_FN_FIELD(thistype, n) (thistype)[n]
 #define TYPE_FN_FIELD_NAME(thistype, n) (thistype)[n].name
 #define TYPE_FN_FIELD_TYPE(thistype, n) (thistype)[n].type
 #define TYPE_FN_FIELD_ARGS(thistype, n) (thistype)[n].args
 #define TYPE_FN_FIELD_PHYSNAME(thistype, n) (thistype)[n].physname
-#define TYPE_FN_FIELD_VIRTUAL_P(thistype, n) (thistype)[n].voffset
+#define TYPE_FN_FIELD_VIRTUAL_P(thistype, n) ((thistype)[n].voffset < 0)
+#define TYPE_FN_FIELD_STATIC_P(thistype, n) ((thistype)[n].voffset > 0)
 #define TYPE_FN_FIELD_VOFFSET(thistype, n) ((thistype)[n].voffset-1)
 
 #define TYPE_FN_PRIVATE_BITS(thistype) (thistype).private_fn_field_bits
@@ -287,11 +288,17 @@ extern struct type *lookup_unsigned_typename ();
 extern struct type *lookup_struct ();
 extern struct type *lookup_union ();
 extern struct type *lookup_enum ();
+extern struct type *lookup_struct_elt_type ();
 extern struct type *lookup_pointer_type ();
 extern struct type *lookup_function_type ();
 extern struct type *lookup_basetype_type ();
+extern struct type *create_array_type ();
 extern struct symbol *block_function ();
 extern struct symbol *find_pc_function ();
+extern int find_pc_partial_function ();
+extern struct partial_symtab *find_pc_psymtab ();
+extern struct symtab *find_pc_symtab ();
+extern struct partial_symbol *find_pc_psymbol ();
 extern int find_pc_misc_function ();
 
 /* C++ stuff.  */
@@ -311,9 +318,29 @@ extern struct type *builtin_type_unsigned_int;
 extern struct type *builtin_type_unsigned_long;
 extern struct type *builtin_type_float;
 extern struct type *builtin_type_double;
+
 #ifdef LONG_LONG
 extern struct type *builtin_type_long_long;
 extern struct type *builtin_type_unsigned_long_long;
+
+#ifndef BUILTIN_TYPE_LONGEST
+#define BUILTIN_TYPE_LONGEST builtin_type_long_long
+#endif
+
+#ifndef BUILTIN_TYPE_UNSIGNED_LONGEST
+#define BUILTIN_TYPE_UNSIGNED_LONGEST builtin_type_unsigned_long_long
+#endif
+
+#else /* LONG_LONG */
+
+#ifndef BUILTIN_TYPE_LONGEST
+#define BUILTIN_TYPE_LONGEST builtin_type_long
+#endif
+
+#ifndef BUILTIN_TYPE_UNSIGNED_LONGEST
+#define BUILTIN_TYPE_UNSIGNED_LONGEST builtin_type_unsigned_long
+#endif
+
 #endif
 
 struct symtab_and_line

@@ -1,26 +1,51 @@
 /* Definitions to make GDB run on a vax under 4.2bsd.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+/* There is one known bug with VAX support that I don't know how to
+   fix:  if you do a backtrace from a signal handler, you get something
+   like:
+#0  0xbc in kill (592, 3)
+#1  0x7f in hand (...) (...)
+#2  0x7fffec7e in ?? (2, 0, 2147478112, 94)
+                  ^^ GDB doesn't know about sigtramp
+#3  0x7fffec70 in ?? (592, 2)
+    ^^^^^^^^^^ wrong address
+#4  0xae in main (...) (...)
+
+when the correct backtrace (as given by adb) is:
+_kill(250,3) from _hand+21
+_hand(2,0,7fffea60,5e) from 7fffec7e
+sigtramp(2,0,7fffea60,5e) from _kill+4
+_kill(250,2) from _main+2e
+_main(1,7fffeac4,7fffeacc) from start+3d
+
+If anyone knows enough about VAX BSD to fix this, please send the
+fix to bug-gdb@prep.ai.mit.edu.  */
 
 #ifndef vax
 #define vax
 #endif
+
+/* Define the bit, byte, and word ordering of the machine.  */
+/* #define BITS_BIG_ENDIAN */
+/* #define BYTES_BIG_ENDIAN */
+/* #define WORDS_BIG_ENDIAN */
 
 /* Get rid of any system-imposed stack limit if possible.  */
 
@@ -218,7 +243,9 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)(REGBUF))
 
 /* Compensate for lack of `vprintf' function.  */
+#ifndef HAVE_VPRINTF
 #define vprintf(format, ap) _doprnt (format, ap, stdout)
+#endif /* not HAVE_VPRINTF */
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
@@ -236,14 +263,25 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 /* In the case of the Vax, the frame's nominal address is the FP value,
    and 12 bytes later comes the saved previous FP value as a 4-byte word.  */
 
-#define FRAME_CHAIN(thisframe)  (read_memory_integer ((thisframe)->frame + 12, 4))
+#define FRAME_CHAIN(thisframe)  \
+  (outside_startup_file ((thisframe)->pc) ? \
+   read_memory_integer ((thisframe)->frame + 12, 4) :\
+   0)
 
 #define FRAME_CHAIN_VALID(chain, thisframe) \
-  (chain != 0 && (FRAME_SAVED_PC (thisframe) >= first_object_file_end))
+  (chain != 0 && (outside_startup_file (FRAME_SAVED_PC (thisframe))))
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
 /* Define other aspects of the stack frame.  */
+
+/* A macro that tells us whether the function invocation represented
+   by FI does not have a frame on the stack associated with it.  If it
+   does not, FRAMELESS is set to 1, else 0.  */
+/* On the vax, all functions have frames.  */
+#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS)  {(FRAMELESS) = 0;}
+
+/* Saved Pc.  */
 
 #define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame + 16, 4))
 

@@ -1,22 +1,21 @@
 /* Start and stop the inferior process, for GDB.
-   Copyright (C) 1986, 1987, 1988 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1988, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Notes on the algorithm used in wait_for_inferior to determine if we
    just did a subroutine call when stepping.  We have the following
@@ -134,12 +133,8 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include <sys/file.h>
 #endif
 
-/* The idiots at Apple only define X_OK if POSIX is defined.  Fuck 'em. */
-#ifndef X_OK
-#define	X_OK	1	/* Execute permission for access() */
-#endif
-
 #ifdef UMAX_PTRACE
+#include <aouthdr.h>
 #include <sys/param.h>
 #include <sys/ptrace.h>
 #endif /* UMAX_PTRACE */
@@ -436,6 +431,7 @@ attach_program (pid)
   clear_proceed_status ();
   stop_after_attach = 1;
   /*proceed (-1, 0, -2);*/
+  terminal_inferior ();
   wait_for_inferior ();
   normal_stop ();
 }
@@ -458,23 +454,26 @@ wait_for_inferior ()
   int random_signal;
   CORE_ADDR stop_sp, prev_sp;
   CORE_ADDR prev_func_start, stop_func_start;
+  char *prev_func_name, *stop_func_name;
   CORE_ADDR prologue_pc;
   int stop_step_resume_break;
   CORE_ADDR step_resume_break_sp;
   int newmisc;
   int newfun_pc;
-  struct symbol *newfun;
   struct symtab_and_line sal;
   int prev_pc;
   extern CORE_ADDR text_end;
+  int remove_breakpoints_on_following_step = 0;
 
   prev_pc = read_pc ();
-  prev_func_start = get_pc_function_start (prev_pc) + FUNCTION_START_OFFSET;
+  (void) find_pc_partial_function (prev_pc, &prev_func_name,
+				   &prev_func_start);
+  prev_func_start += FUNCTION_START_OFFSET;
   prev_sp = read_register (SP_REGNUM);
 
   while (1)
     {
-      /* Clean up saved state that will become invalid */
+      /* Clean up saved state that will become invalid.  */
       pc_changed = 0;
       flush_cached_frames ();
 
@@ -487,7 +486,7 @@ wait_for_inferior ()
 	    continue;
 	}
 
-      /* See if the process still exists; clean up if it doesn't. */
+      /* See if the process still exists; clean up if it doesn't.  */
       if (WIFEXITED (w))
 	{
 	  terminal_ours_for_output ();
@@ -498,8 +497,8 @@ wait_for_inferior ()
 	  fflush (stdout);
 	  inferior_died ();
 #ifdef NO_SINGLE_STEP
-	  one_stepped = 0;	/* Clear single_step state since proc gone */
-#endif /* NO_SINGLE_STEP */
+	  one_stepped = 0;
+#endif
 	  stop_print_frame = 0;
 	  break;
 	}
@@ -517,42 +516,29 @@ wait_for_inferior ()
 	  printf ("The inferior process no longer exists.\n");
 	  fflush (stdout);
 #ifdef NO_SINGLE_STEP
-	  one_stepped = 0;	/* Clear single_step state since proc gone */
-#endif /* NO_SINGLE_STEP */
+	  one_stepped = 0;
+#endif
 	  break;
 	}
-
+      
 #ifdef NO_SINGLE_STEP
       if (one_stepped)
 	single_step (0);	/* This actually cleans up the ss */
 #endif /* NO_SINGLE_STEP */
-
+      
       fetch_inferior_registers ();
       stop_pc = read_pc ();
       set_current_frame ( create_new_frame (read_register (FP_REGNUM),
 					    read_pc ()));
-#ifdef CONVEX_PTRACE
-      /* pop frame stored by user-mode trap, if present */
-      if (stop_pc == BREAK_TRAP_ADDR)
-	{
-	  POP_FRAME;
-	  stop_pc = read_pc () - 2;
-	  write_register (PC_REGNUM, stop_pc);
-#ifdef NPC_REGNUM
-	  write_register (NPC_REGNUM, stop_pc + 4);
-#endif
-	  pc_changed = 0;
-	}
-      else if (stop_pc > STACK_END_ADDR)
-	{
-	  POP_FRAME;
-	  stop_pc = read_pc ();
-	}
-#endif /* CONVEX_PTRACE */
+      
       stop_frame_address = FRAME_FP (get_current_frame ());
       stop_sp = read_register (SP_REGNUM);
-      stop_func_start =
-	get_pc_function_start (stop_pc) + FUNCTION_START_OFFSET;
+      stop_func_start = 0;
+      /* Don't care about return value; stop_func_start will be 0
+	 if it doesn't work.  */
+      (void) find_pc_partial_function (stop_pc, &stop_func_name,
+				       &stop_func_start);
+      stop_func_start += FUNCTION_START_OFFSET;
       another_trap = 0;
       stop_breakpoint = 0;
       stop_step = 0;
@@ -562,30 +548,28 @@ wait_for_inferior ()
       random_signal = 0;
       stopped_by_random_signal = 0;
       breakpoints_failed = 0;
-
+      
       /* Look at the cause of the stop, and decide what to do.
 	 The alternatives are:
 	 1) break; to really stop and return to the debugger,
 	 2) drop through to start up again
-	   (set another_trap to 1 to single step once)
+	 (set another_trap to 1 to single step once)
 	 3) set random_signal to 1, and the decision between 1 and 2
-	   will be made according to the signal handling tables.  */
-
+	 will be made according to the signal handling tables.  */
+      
       stop_signal = WSTOPSIG (w);
-
+      
       /* First, distinguish signals caused by the debugger from signals
 	 that have to do with the program's own actions.
 	 Note that breakpoint insns may cause SIGTRAP or SIGILL
 	 or SIGEMT, depending on the operating system version.
 	 Here we detect when a SIGILL or SIGEMT is really a breakpoint
 	 and change it to SIGTRAP.  */
-
+      
       if (stop_signal == SIGTRAP
-#ifndef CONVEX_PTRACE
 	  || (breakpoints_inserted &&
 	      (stop_signal == SIGILL
 	       || stop_signal == SIGEMT))
-#endif /* not CONVEX_PTRACE */
 	  || stop_after_attach)
 	{
 	  if (stop_signal == SIGTRAP && stop_after_trap)
@@ -614,43 +598,44 @@ wait_for_inferior ()
 		    && step_range_end && !step_resume_break_address))
 #endif /* DECR_PC_AFTER_BREAK not zero */
 		{
-		  /* For condition exprs. */
-		  select_frame (get_current_frame (), 0);
-		  stop_breakpoint =
-		    breakpoint_stop_status (stop_pc, stop_frame_address);
-		  /* Following in case break condition called a
-		     function.  */
-		  stop_print_frame = 1;
-		  if (stop_breakpoint && DECR_PC_AFTER_BREAK)
+		  /* See if we stopped at the special breakpoint for
+		     stepping over a subroutine call.  */
+		  if (stop_pc - DECR_PC_AFTER_BREAK
+		      == step_resume_break_address)
 		    {
-		      stop_pc -= DECR_PC_AFTER_BREAK;
-		      write_register (PC_REGNUM, stop_pc);
-#ifdef NPC_REGNUM
-		      write_register (NPC_REGNUM, stop_pc + 4);
-#endif
-		      pc_changed = 0;
+		      stop_step_resume_break = 1;
+		      if (DECR_PC_AFTER_BREAK)
+			{
+			  stop_pc -= DECR_PC_AFTER_BREAK;
+			  write_register (PC_REGNUM, stop_pc);
+			  pc_changed = 0;
+			}
 		    }
-		}
-	      /* See if we stopped at the special breakpoint for
-		 stepping over a subroutine call.  */
-	      if (stop_pc - DECR_PC_AFTER_BREAK
-		  == step_resume_break_address)
-		{
-		  stop_step_resume_break = 1;
-		  if (DECR_PC_AFTER_BREAK)
+		  else
 		    {
-		      stop_pc -= DECR_PC_AFTER_BREAK;
-		      write_register (PC_REGNUM, stop_pc);
-		      pc_changed = 0;
+		      stop_breakpoint =
+			breakpoint_stop_status (stop_pc, stop_frame_address);
+		      /* Following in case break condition called a
+			 function.  */
+		      stop_print_frame = 1;
+		      if (stop_breakpoint && DECR_PC_AFTER_BREAK)
+			{
+			  stop_pc -= DECR_PC_AFTER_BREAK;
+			  write_register (PC_REGNUM, stop_pc);
+#ifdef NPC_REGNUM
+			  write_register (NPC_REGNUM, stop_pc + 4);
+#endif
+			  pc_changed = 0;
+			}
 		    }
 		}
 	    }
-
+	  
 	  if (stop_signal == SIGTRAP)
 	    random_signal
 	      = !(stop_breakpoint || trap_expected
 		  || stop_step_resume_break
-#ifndef CONVEX_PTRACE
+#ifndef CANNOT_EXECUTE_STACK
 		  || (stop_sp INNER_THAN stop_pc
 		      && stop_pc INNER_THAN stop_frame_address)
 #else
@@ -662,11 +647,11 @@ wait_for_inferior ()
 	      random_signal
 		= !(stop_breakpoint
 		    || stop_step_resume_break
-#ifdef news800
+#ifdef sony_news
 		    || (stop_sp INNER_THAN stop_pc
 			&& stop_pc INNER_THAN stop_frame_address)
 #endif
-
+		    
 		    );
 	      if (!random_signal)
 		stop_signal = SIGTRAP;
@@ -674,18 +659,18 @@ wait_for_inferior ()
 	}
       else
 	random_signal = 1;
-
+      
       /* For the program's own signals, act according to
 	 the signal handling tables.  */
-
+      
       if (random_signal
 	  && !(running_in_shell && stop_signal == SIGSEGV))
 	{
 	  /* Signal not for debugging purposes.  */
 	  int printed = 0;
-
+	  
 	  stopped_by_random_signal = 1;
-
+	  
 	  if (stop_signal >= NSIG
 	      || signal_print[stop_signal])
 	    {
@@ -694,8 +679,8 @@ wait_for_inferior ()
 	      printf ("\nProgram received signal %d, %s\n",
 		      stop_signal,
 		      stop_signal < NSIG
-		       ? sys_siglist[stop_signal]
-		       : "(undocumented)");
+		      ? sys_siglist[stop_signal]
+		      : "(undocumented)");
 	      fflush (stdout);
 	    }
 	  if (stop_signal >= NSIG
@@ -706,9 +691,9 @@ wait_for_inferior ()
 	  else if (printed)
 	    terminal_inferior ();
 	}
-
+      
       /* Handle cases caused by hitting a breakpoint.  */
-
+      
       if (!random_signal
 	  && (stop_breakpoint || stop_step_resume_break))
 	{
@@ -743,20 +728,14 @@ wait_for_inferior ()
 	     the stack pointer doesn't have to change if it
 	     the bp was set in a routine without a frame (pc can
 	     be stored in some other window).
-
+	     
 	     The removal of the sp test is to allow calls to
 	     alloca.  Nasty things were happening.  Oh, well,
 	     gdb can only handle one level deep of lack of
 	     frame pointer. */
 	  if (stop_step_resume_break
 	      && (step_frame_address == 0
-		  || (stop_frame_address == step_frame_address
-#if 0
-#ifndef HAVE_REGISTER_WINDOWS
-		      && step_resume_break_sp INNER_THAN stop_sp
-#endif
-#endif
-		      )))
+		  || (stop_frame_address == step_frame_address)))
 	    {
 	      remove_step_breakpoint ();
 	      step_resume_break_address = 0;
@@ -770,32 +749,31 @@ wait_for_inferior ()
 	      breakpoints_inserted = 0;
 	      another_trap = 1;
 	    }
-
+	  
 	  /* We come here if we hit a breakpoint but should not
 	     stop for it.  Possibly we also were stepping
 	     and should stop for that.  So fall through and
 	     test for stepping.  But, if not stepping,
 	     do not stop.  */
 	}
-
+      
       /* If this is the breakpoint at the end of a stack dummy,
 	 just stop silently.  */
-#ifndef CONVEX_PTRACE
+#ifndef CANNOT_EXECUTE_STACK
       if (stop_sp INNER_THAN stop_pc
 	  && stop_pc INNER_THAN stop_frame_address)
 #else
-	  /* "stack" dummy must be in text segment for Convex Unix */
-      if (stop_pc == text_end - 2)
+	if (stop_pc == text_end - 2)
 #endif
-	{
-	  stop_print_frame = 0;
-	  stop_stack_dummy = 1;
-#ifdef HP9K320
-	  trap_expected_after_continue = 1;
+	  {
+	    stop_print_frame = 0;
+	    stop_stack_dummy = 1;
+#ifdef HP_OS_BUG
+	    trap_expected_after_continue = 1;
 #endif
-	  break;
-	}
-
+	    break;
+	  }
+      
       if (step_resume_break_address)
 	/* Having a step-resume breakpoint overrides anything
 	   else having to do with stepping commands until
@@ -812,7 +790,7 @@ wait_for_inferior ()
 		  just changed, we've stepped outside */
 	       && !(stop_pc == step_range_start
 		    && stop_frame_address
-		    && (stop_sp != prev_sp
+		    && (stop_sp INNER_THAN prev_sp
 			|| stop_frame_address != step_frame_address)))
 	{
 	  /* Don't step through the return from a function
@@ -823,7 +801,7 @@ wait_for_inferior ()
 	      break;
 	    }
 	}
-
+      
       /* We stepped out of the stepping range.  See if that was due
 	 to a subroutine call that we should proceed to the end of.  */
       else if (!random_signal && step_range_end)
@@ -834,16 +812,35 @@ wait_for_inferior ()
 	      SKIP_PROLOGUE (prologue_pc);
 	    }
 
-	  /* ==> See comments at top of file on this algorithm.  <==*/
+	  /* Did we just take a signal?  */
+	  if (stop_func_name && !strcmp ("_sigtramp", stop_func_name)
+	      && (!prev_func_name || strcmp ("_sigtramp", prev_func_name)))
+	    {
+	      /* We've just taken a signal; go until we are back to
+		 the point where we took it and one more.  */
+	      step_resume_break_address = prev_pc;
+	      step_resume_break_duplicate =
+		breakpoint_here_p (step_resume_break_address);
+	      step_resume_break_sp = stop_sp;
+	      if (breakpoints_inserted)
+		insert_step_breakpoint ();
+	      /* Make sure that the stepping range gets us past
+		 that instruction.  */
+	      if (step_range_end == 1)
+		step_range_end = (step_range_start = prev_pc) + 1;
+	      remove_breakpoints_on_following_step = 1;
+	    }
 
-	  if (stop_pc == stop_func_start
+	  /* ==> See comments at top of file on this algorithm.  <==*/
+	  
+	  else if (stop_pc == stop_func_start
 	      && (stop_func_start != prev_func_start
 		  || prologue_pc != stop_func_start
 		  || stop_sp != prev_sp))
 	    {
-	      newfun = find_pc_function (stop_pc);
 	      /* It's a subroutine call */
-	      if (step_over_calls > 0 || (step_over_calls && newfun == 0))
+	      if (step_over_calls > 0 
+		  || (step_over_calls &&  find_pc_function (stop_pc) == 0))
 		{
 		  /* A subroutine call has happened.  */
 		  /* Set a special breakpoint after the return */
@@ -867,7 +864,7 @@ wait_for_inferior ()
 		  /* If the prologue ends in the middle of a source line,
 		     continue to the end of that source line.
 		     Otherwise, just go to end of prologue.  */
-#ifdef convex
+#ifdef PROLOGUE_FIRSTLINE_OVERLAP
 		  /* no, don't either.  It skips any code that's
 		     legitimately on the first line.  */
 #else
@@ -925,6 +922,7 @@ wait_for_inferior ()
 					  original pc would not have
 					  been at the start of a
 					  function. */
+      prev_func_name = stop_func_name;
       prev_sp = stop_sp;
 
       /* If we did not do break;, it means we should keep
@@ -947,6 +945,15 @@ wait_for_inferior ()
 	{
 	  resume (0, SIGSEGV);
 	}
+      else if (trap_expected && stop_signal != SIGTRAP)
+	{
+	  /* We took a signal which we are supposed to pass through to
+	     the inferior and we haven't yet gotten our trap.  Simply
+	     continue.  */
+	  resume ((step_range_end && !step_resume_break_address)
+		  || trap_expected,
+		  stop_signal);
+	}
       else
 	{
 	  /* Here, we are not awaiting another exec to get
@@ -954,7 +961,16 @@ wait_for_inferior ()
 	     Insert breakpoints now, unless we are trying
 	     to one-proceed past a breakpoint.  */
 	  running_in_shell = 0;
-	  if (!breakpoints_inserted && !another_trap)
+	  /* If we've just finished a special step resume and we don't
+	     want to hit a breakpoint, pull em out.  */
+	  if (!step_resume_break_address &&
+	      remove_breakpoints_on_following_step)
+	    {
+	      remove_breakpoints_on_following_step = 0;
+	      remove_breakpoints ();
+	      breakpoints_inserted = 0;
+	    }
+	  else if (!breakpoints_inserted && !another_trap)
 	    {
 	      insert_step_breakpoint ();
 	      breakpoints_failed = insert_breakpoints ();
@@ -984,10 +1000,6 @@ wait_for_inferior ()
    (pc, function, args, file, line number and line text).
    BREAKPOINTS_FAILED nonzero means stop was due to error
    attempting to insert breakpoints.  */
-
-/* FIXME, normal_stop is ALWAYS called immediately after wait_for_inferior.
-   They should probably be merged into a single function, since that
-   would avoid numerous tests (e.g. of inferior_pid).  */
 
 static void
 normal_stop ()
@@ -1029,7 +1041,7 @@ Further execution is probably impossible.\n");
      delete that auto-display to avoid an infinite recursion.  */
 
   if (stopped_by_random_signal)
-    delete_current_display ();
+    disable_current_display ();
 
   if (step_multi && stop_step)
     return;
@@ -1052,10 +1064,10 @@ This is so that \"sh\" will process wildcards and I/O redirection.\n\
 This time, \"sh\" crashed.\n\
 \n\
 One known bug in \"sh\" bites when the environment takes up a lot of space.\n\
-Try \"info env\" to see the environment; then use \"unset-env\" to kill\n\
+Try \"info env\" to see the environment; then use \"delete env\" to kill\n\
 some variables whose values are large; then do \"run\" again.\n\
 \n\
-If that works, you might want to put those \"unset-env\" commands\n\
+If that works, you might want to put those \"delete env\" commands\n\
 into a \".gdbinit\" file in this directory so they will happen every time.\n");
 	}
       /* Don't confuse user with his program's symbols on sh's data.  */
@@ -1211,37 +1223,34 @@ signals_info (signum_exp)
      char *signum_exp;
 {
   register int i;
-  printf ("Number\tStop\tPrint\tPass to program\tDescription\n");
+  printf_filtered ("Number\tStop\tPrint\tPass to program\tDescription\n");
 
   if (signum_exp)
     {
       i = parse_and_eval_address (signum_exp);
-      printf ("%d\t", i);
-      printf ("%s\t", signal_stop[i] ? "Yes" : "No");
-      printf ("%s\t", signal_print[i] ? "Yes" : "No");
-      printf ("%s\t\t", signal_program[i] ? "Yes" : "No");
-      printf ("%s\n", sys_siglist[i]);
+      if (i >= NSIG || i < 0)
+	error ("Signal number out of bounds.");
+      printf_filtered ("%d\t", i);
+      printf_filtered ("%s\t", signal_stop[i] ? "Yes" : "No");
+      printf_filtered ("%s\t", signal_print[i] ? "Yes" : "No");
+      printf_filtered ("%s\t\t", signal_program[i] ? "Yes" : "No");
+      printf_filtered ("%s\n", sys_siglist[i]);
       return;
     }
 
-  printf ("\n");
+  printf_filtered ("\n");
   for (i = 0; i < NSIG; i++)
     {
       QUIT;
-      if (i > 0 && i % 16 == 0)
-	{
-	  printf ("[Type Return to see more]");
-	  fflush (stdout);
-	  gdb_read_line (0, 0);
-	}
-      printf ("%d\t", i);
-      printf ("%s\t", signal_stop[i] ? "Yes" : "No");
-      printf ("%s\t", signal_print[i] ? "Yes" : "No");
-      printf ("%s\t\t", signal_program[i] ? "Yes" : "No");
-      printf ("%s\n", sys_siglist[i]);
+
+      printf_filtered ("%d\t", i);
+      printf_filtered ("%s\t", signal_stop[i] ? "Yes" : "No");
+      printf_filtered ("%s\t", signal_print[i] ? "Yes" : "No");
+      printf_filtered ("%s\t\t", signal_program[i] ? "Yes" : "No");
+      printf_filtered ("%s\n", sys_siglist[i]);
     }
 
-  printf ("\nUse the \"handle\" command to change these tables.\n");
+  printf_filtered ("\nUse the \"handle\" command to change these tables.\n");
 }
 
 /* Save all of the information associated with the inferior<==>gdb

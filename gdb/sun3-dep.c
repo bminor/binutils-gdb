@@ -1,23 +1,22 @@
 /* Machine-dependent code which would otherwise be in inflow.c and core.c,
    for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "param.h"
@@ -131,9 +130,9 @@ void
 fetch_inferior_registers ()
 {
   struct regs inferior_registers;
-#ifndef sun2
+#ifdef FP0_REGNUM
   struct fp_status inferior_fp_registers;
-#endif sun2
+#endif
   extern char registers[];
 
   if (remote_debugging)
@@ -141,22 +140,22 @@ fetch_inferior_registers ()
   else
     {
       ptrace (PTRACE_GETREGS, inferior_pid, &inferior_registers);
-#ifndef sun2
+#ifdef FP0_REGNUM
       ptrace (PTRACE_GETFPREGS, inferior_pid, &inferior_fp_registers);
-#endif sun2
+#endif 
 
       bcopy (&inferior_registers, registers, 16 * 4);
-#ifndef sun2
+#ifdef FP0_REGNUM
       bcopy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
 	     sizeof inferior_fp_registers.fps_regs);
-#endif sun2
+#endif 
       *(int *)&registers[REGISTER_BYTE (PS_REGNUM)] = inferior_registers.r_ps;
       *(int *)&registers[REGISTER_BYTE (PC_REGNUM)] = inferior_registers.r_pc;
-#ifndef sun2
+#ifdef FP0_REGNUM
       bcopy (&inferior_fp_registers.fps_control,
 	     &registers[REGISTER_BYTE (FPC_REGNUM)],
 	     sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
-#endif sun2
+#endif 
     }
 }
 
@@ -296,11 +295,6 @@ write_inferior_memory (memaddr, myaddr, len)
 /* Machine-dependent code which would otherwise be in core.c */
 /* Work with core dump and executable files, for GDB. */
 
-/* Recognize COFF format systems because a.out.h defines AOUTHDR.  */
-#ifdef AOUTHDR
-#define COFF_FORMAT
-#endif
- 
 #ifndef N_TXTADDR
 #define N_TXTADDR(hdr) 0
 #endif /* no N_TXTADDR */
@@ -309,6 +303,15 @@ write_inferior_memory (memaddr, myaddr, len)
 #define N_DATADDR(hdr) hdr.a_text
 #endif /* no N_DATADDR */
 
+/* Non-zero if this is an object (.o) file, rather than an executable.
+   Distinguishing between the two is rarely necessary (and seems like
+   a hack, but there is no other way to get the text and data
+   addresses--N_TXTADDR should probably take care of
+   this, but it doesn't).  */
+/* This definition will not work
+   if someone decides to make ld preserve relocation info.  */
+#define IS_OBJECT_FILE(hdr) (hdr.a_trsize != 0)
+  
 /* Make COFF and non-COFF names for things a little more compatible
    to reduce conditionals later.  */
 
@@ -317,7 +320,9 @@ write_inferior_memory (memaddr, myaddr, len)
 #endif
 
 #ifndef COFF_FORMAT
+#ifndef AOUTHDR
 #define AOUTHDR struct exec
+#endif
 #endif
 
 extern char *sys_siglist[];
@@ -421,6 +426,9 @@ core_file_command (filename, from_tty)
 
   if (filename)
     {
+      filename = tilde_expand (filename);
+      make_cleanup (free, filename);
+      
       if (have_inferior_p ())
 	error ("To look at a core file, you must kill the inferior with \"kill\".");
       corechan = open (filename, O_RDONLY, 0);
@@ -449,6 +457,7 @@ core_file_command (filename, from_tty)
 	bcopy (&corestr.c_regs, registers, 16 * 4);
 	*(int *)&registers[REGISTER_BYTE (PS_REGNUM)] = corestr.c_regs.r_ps;
 	*(int *)&registers[REGISTER_BYTE (PC_REGNUM)] = corestr.c_regs.r_pc;
+#ifdef FP0_REGNUM
 #ifdef FPU
      bcopy (corestr.c_fpu.f_fpstatus.fps_regs,
             &registers[REGISTER_BYTE (FP0_REGNUM)],
@@ -463,6 +472,7 @@ core_file_command (filename, from_tty)
 	bcopy (&corestr.c_fpstatus.fps_control,
 	       &registers[REGISTER_BYTE (FPC_REGNUM)],
 	       sizeof corestr.c_fpstatus - sizeof corestr.c_fpstatus.fps_regs);
+#endif
 #endif
 	bcopy (&corestr.c_aouthdr, &core_aouthdr, sizeof (struct exec));
 
@@ -516,6 +526,9 @@ exec_file_command (filename, from_tty)
 
   if (filename)
     {
+      filename = tilde_expand (filename);
+      make_cleanup (free, filename);
+      
       execchan = openp (getenv ("PATH"), 1, filename, O_RDONLY, 0,
 			&execfile);
       if (execchan < 0)
@@ -559,8 +572,10 @@ exec_file_command (filename, from_tty)
 	if (val < 0)
 	  perror_with_name (filename);
 
-        text_start = N_TXTADDR (exec_aouthdr);
-        exec_data_start = N_DATADDR (exec_aouthdr);
+	text_start =
+	  IS_OBJECT_FILE (exec_aouthdr) ? 0 : N_TXTADDR (exec_aouthdr);
+        exec_data_start = IS_OBJECT_FILE (exec_aouthdr)
+	  ? exec_aouthdr.a_text : N_DATADDR (exec_aouthdr);
 	text_offset = N_TXTOFF (exec_aouthdr);
 	exec_data_offset = N_TXTOFF (exec_aouthdr) + exec_aouthdr.a_text;
 

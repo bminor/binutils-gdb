@@ -1,22 +1,22 @@
 /* Top level for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1988 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1988, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
 #include "defs.h"
 #include "command.h"
 #include "param.h"
@@ -31,13 +31,23 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include <setjmp.h>
 #include <signal.h>
 #include <sys/param.h>
+#include <sys/stat.h>
 
 #ifdef SET_STACK_LIMIT_HUGE
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <ctype.h>
 
 int original_stack_limit;
 #endif
+
+/* If this definition isn't overridden by the header files, assume
+   that isatty and fileno exist on this system.  */
+#ifndef ISATTY
+#define ISATTY(FP)	(isatty (fileno (FP)))
+#endif
+
+extern void free ();
 
 /* Version number of GDB, as a string.  */
 
@@ -75,6 +85,14 @@ struct cmd_list_element *enablebreaklist;
 
 struct cmd_list_element *setlist;
 
+/* Chain containing all defined \"set history\".  */
+
+struct cmd_list_element *sethistlist;
+
+/* Chain containing all defined \"unset history\".  */
+
+struct cmd_list_element *unsethistlist;
+
 /* stdio stream that command input is being read from.  */
 
 FILE *instream;
@@ -85,6 +103,10 @@ char *current_directory;
 
 /* The directory name is actually stored here (usually).  */
 static char dirbuf[MAXPATHLEN];
+
+/* The number of lines on a page, and the number of spaces
+   in a line.  */
+int linesize, pagesize;
 
 /* Nonzero if we should refrain from using an X window.  */
 
@@ -97,14 +119,20 @@ int inhibit_windows = 0;
 void (*window_hook) ();
 
 extern int frame_file_full_name;
+int xgdb_verbose;
 
 void free_command_lines ();
-char *gdb_read_line ();
-static void init_main ();
-static void init_cmd_lists ();
+char *gdb_readline ();
+char *command_line_input ();
+static void initialize_main ();
+static void initialize_cmd_lists ();
 void command_loop ();
 static void source_command ();
 static void print_gdb_version ();
+static void float_handler ();
+static void cd_command ();
+
+char *getenv ();
 
 /* gdb prints this when reading a command interactively */
 static char *prompt;
@@ -114,6 +142,15 @@ static char *prompt;
 
 char *line;
 int linesize;
+
+
+/* Signal to catch ^Z typed while reading a command: SIGTSTP or SIGCONT.  */
+
+#ifndef STOP_SIGNAL
+#ifdef SIGTSTP
+#define STOP_SIGNAL SIGTSTP
+#endif
+#endif
 
 /* This is how `error' returns to command level.  */
 
@@ -126,7 +163,7 @@ return_to_top_level ()
   immediate_quit = 0;
   clear_breakpoint_commands ();
   clear_momentary_breakpoints ();
-  delete_current_display ();
+  disable_current_display ();
   do_cleanups (0);
   longjmp (to_top_level, 1);
 }
@@ -196,7 +233,6 @@ main (argc, argv, envp)
      char **argv;
      char **envp;
 {
-  extern void request_quit ();
   int count;
   int inhibit_gdbinit = 0;
   int quiet = 0;
@@ -238,20 +274,18 @@ main (argc, argv, envp)
 	batch = 1, quiet = 1;
       else if (!strcmp (argv[i], "-fullname"))
 	frame_file_full_name = 1;
+      else if (!strcmp (argv[i], "-xgdb_verbose"))
+	xgdb_verbose = 1;
       else if (argv[i][0] == '-')
 	i++;
     }
 
   /* Run the init function of each source file */
 
-  init_cmd_lists ();	/* This needs to be done first */
-  init_all_files ();
-  init_main ();		/* But that omits this file!  Do it now */
-
-  signal (SIGINT, request_quit);
-  signal (SIGQUIT, SIG_IGN);
-  if (signal (SIGHUP, SIG_IGN) != SIG_IGN)
-    signal (SIGHUP, disconnect);
+  initialize_cmd_lists ();	/* This needs to be done first */
+  initialize_all_files ();
+  initialize_main ();		/* But that omits this file!  Do it now */
+  initialize_signals ();
 
   if (!quiet)
     print_gdb_version ();
@@ -272,7 +306,8 @@ main (argc, argv, envp)
 
 	  if (!strcmp (arg, "-q") || !strcmp (arg, "-nx")
 	      || !strcmp (arg, "-quiet") || !strcmp (arg, "-batch")
-	      || !strcmp (arg, "-fullname"))
+	      || !strcmp (arg, "-fullname") || !strcmp (arg, "-nw")
+	      || !strcmp (arg, "-xgdb_verbose"))
 	    /* Already processed above */
 	    continue;
 
@@ -306,11 +341,7 @@ main (argc, argv, envp)
 		 GDB remembers the precise string FOO as the dirname.  */
 	      else if (!strcmp (arg, "-cd"))
 		{
-		  int len = strlen (argv[i]);
-		  current_directory = argv[i];
-		  if (len > 1 && current_directory[len - 1] == '/')
-		    current_directory = savestring (current_directory, len-1);
-		  chdir (current_directory);
+		  cd_command (argv[i], 0);
 		  init_source_path ();
 		}
 	      /* -t /def/ttyp1: use /dev/ttyp1 for inferior I/O.  */
@@ -345,25 +376,54 @@ main (argc, argv, envp)
 	}
     }
 
-  /* Read init file, if it exists in home directory  */
-  if (getenv ("HOME"))
-    {
-      char *s;
-      s = (char *) xmalloc (strlen (getenv ("HOME")) + 10);
-      strcpy (s, getenv ("HOME"));
-      strcat (s, "/.gdbinit");
-      if (!inhibit_gdbinit && access (s, R_OK) == 0)
-	if (!setjmp (to_top_level))
-	  source_command (s);
-    }
+  {
+    struct stat homebuf, cwdbuf;
+    char *homedir, *homeinit;
 
-  /* Read init file, if it exists in current directory.  */
-  if (!inhibit_gdbinit && access (".gdbinit", R_OK) == 0)
-    if (!setjmp (to_top_level))
-      source_command (".gdbinit");
+    /* Read init file, if it exists in home directory  */
+    homedir = getenv ("HOME");
+    if (homedir)
+      {
+	homeinit = (char *) alloca (strlen (getenv ("HOME")) + 10);
+	strcpy (homeinit, getenv ("HOME"));
+	strcat (homeinit, "/.gdbinit");
+	if (!inhibit_gdbinit && access (homeinit, R_OK) == 0)
+	  if (!setjmp (to_top_level))
+	    source_command (homeinit);
+
+	/* Do stats; no need to do them elsewhere since we'll only
+	   need them if homedir is set.  Make sure that they are
+	   zero in case one of them fails (guarantees that they
+	   won't match if either exits).  */
+	
+	bzero (&homebuf, sizeof (struct stat));
+	bzero (&cwdbuf, sizeof (struct stat));
+	
+	stat (homeinit, &homebuf);
+	stat ("./.gdbinit", &cwdbuf); /* We'll only need this if
+					 homedir was set.  */
+      }
+    
+    /* Read the input file in the current directory, *if* it isn't
+       the same file (it should exist, also).  */
+
+    if (!homedir
+	|| bcmp ((char *) &homebuf,
+		 (char *) &cwdbuf,
+		 sizeof (struct stat)))
+      if (!inhibit_gdbinit && access (".gdbinit", R_OK) == 0)
+	if (!setjmp (to_top_level))
+	  source_command (".gdbinit");
+  }
 
   if (batch)
-    fatal ("Attempt to read commands from stdin in batch mode.");
+    {
+#if 0
+      fatal ("Attempt to read commands from stdin in batch mode.");
+#endif
+      /* We have hit the end of the batch file.  */
+      exit (0);
+    }
 
   if (!quiet)
     printf ("Type \"help\" for a list of commands.\n");
@@ -393,7 +453,7 @@ execute_command (p, from_tty)
   while (*p == ' ' || *p == '\t') p++;
   if (*p)
     {
-      c = lookup_cmd (&p, cmdlist, "", 0);
+      c = lookup_cmd (&p, cmdlist, "", 0, 1);
       if (c->function == 0)
 	error ("That is not a command, just a help topic.");
       else if (c->class == (int) class_user)
@@ -441,8 +501,10 @@ command_loop ()
 	(*window_hook) (instream, prompt);
 
       quit_flag = 0;
+      if (instream == stdin && ISATTY (stdin))
+	reinitialize_more_filter ();
       old_chain = make_cleanup (do_nothing, 0);
-      execute_command (gdb_read_line (instream == stdin ? prompt : 0,
+      execute_command (command_line_input (instream == stdin ? prompt : 0,
 				      instream == stdin),
 		       instream == stdin);
       /* Do any commands attached to breakpoint we stopped at.  */
@@ -451,51 +513,34 @@ command_loop ()
     }
 }
 
-#ifdef SIGTSTP
-static void
-stop_sig ()
-{
-  signal (SIGTSTP, SIG_DFL);
-  sigsetmask (0);
-  kill (getpid (), SIGTSTP);
-  signal (SIGTSTP, stop_sig);
-  printf ("%s", prompt);
-  fflush (stdout);
-
-  /* Forget about any previous command -- null line now will do nothing.  */
-  *line = 0;
-}
-#endif /* SIGTSTP */
-
 /* Commands call this if they do not want to be repeated by null lines.  */
 
 void
 dont_repeat ()
 {
-  *line = 0;
+  /* If we aren't reading from standard input, we are saving the last
+     thing read from stdin in line and don't want to delete it.  Null lines
+     won't repeat here in any case.  */
+  if (instream == stdin)
+    *line = 0;
 }
+
+/* Read a line from the stream "instream" without command line editing.
 
-/* Read one line from the command input stream `instream'
-   into the buffer `line' (whose current length is `linesize').
-   The buffer is made bigger as necessary.
-   Returns the address of the start of the line.  */
+   It prints PROMPT once at the start.
 
+   If RETURN_RESULT is set it allocates
+   space for whatever the user types and returns the result.
+   If not, it just discards what the user types.  */
 char *
-gdb_read_line (prompt, repeat)
+gdb_readline (prompt, return_result)
      char *prompt;
-     int repeat;
+     int return_result;
 {
-  register char *p = line;
-  register char *p1;
-  register int c;
-  char *nline;
-
-  /* Control-C quits instantly if typed while in this loop
-     since it should not wait until the user types a newline.  */
-  immediate_quit++;
-#ifdef SIGTSTP
-  signal (SIGTSTP, stop_sig);
-#endif
+  int c;
+  char *result;
+  int input_index = 0;
+  int result_size = 80;
 
   if (prompt)
     {
@@ -503,50 +548,413 @@ gdb_read_line (prompt, repeat)
       fflush (stdout);
     }
   
+  if (return_result)
+    result = (char *) xmalloc (result_size);
+
   while (1)
     {
       c = fgetc (instream);
       if (c == -1 || c == '\n')
 	break;
-      /* Ignore backslash-newline; keep adding to the same line.  */
-      else if (c == '\\')
+      if (return_result)
 	{
-	  int c1 = fgetc (instream);
-	  if (c1 == '\n')
-	    continue;
-	  else
-	    ungetc (c1, instream);
+	  result[input_index++] = c;
+	  while (input_index >= result_size)
+	    {
+	      result_size *= 2;
+	      result = (char *) xrealloc (result, result_size);
+	    }
 	}
+    }
+  if (return_result)
+    {
+      result[input_index++] = '\0';
+      return result;
+    }
+  else
+    return (char *) 0;
+}
 
-      if (p - line == linesize - 1)
+/* Declaration for fancy readline with command line editing.  */
+char *readline ();
+
+/* Variables which control command line editing and history
+   substitution.  These variables are given default values at the end
+   of this file.  */
+static int command_editing_p;
+static int history_expansion_p;
+static int write_history_p;
+static int history_size;
+static char *history_filename;
+
+/* Variables which are necessary for fancy command line editing.  */
+char *gdb_completer_word_break_characters =
+  " \t\n!@#$%^&*()-+=|~`}{[]\"';:?/>.<,";
+
+/* Functions that are used as part of the fancy command line editing.  */
+
+/* Generate symbol names one by one for the completer.  If STATE is
+   zero, then we need to initialize, otherwise the initialization has
+   already taken place.  TEXT is what we expect the symbol to start
+   with.  RL_LINE_BUFFER is available to be looked at; it contains the
+   entire text of the line.  RL_POINT is the offset in that line of
+   the cursor.  You should pretend that the line ends at RL_POINT.  */
+char *
+symbol_completion_function (text, state)
+     char *text;
+     int state;
+{
+  char **make_symbol_completion_list ();
+  static char **list = (char **)NULL;
+  static int index;
+  char *output;
+  extern char *rl_line_buffer;
+  extern int rl_point;
+  char *tmp_command, *p;
+  struct cmd_list_element *c, *result_list;
+
+  if (!state)
+    {
+      /* Free the storage used by LIST, but not by the strings inside.  This is
+	 because rl_complete_internal () frees the strings. */
+      if (list)
+	free (list);
+      list = 0;
+      index = 0;
+
+      /* Decide whether to complete on a list of gdb commands or on
+	 symbols.  */
+      tmp_command = (char *) alloca (rl_point + 1);
+      p = tmp_command;
+      
+      strncpy (tmp_command, rl_line_buffer, rl_point);
+      tmp_command[rl_point] = '\0';
+
+      if (rl_point == 0)
 	{
-	  linesize *= 2;
-	  nline = (char *) xrealloc (line, linesize);
-	  p += nline - line;
-	  line = nline;
+	  /* An empty line we want to consider ambiguous; that is,
+	     it could be any command.  */
+	  c = (struct cmd_list_element *) -1;
+	  result_list = 0;
 	}
-      *p++ = c;
+      else
+	c = lookup_cmd_1 (&p, cmdlist, &result_list, 1);
+
+      /* Move p up to the next interesting thing.  */
+      while (*p == ' ' || *p == '\t')
+	p++;
+
+      if (!c)
+	/* He's typed something unrecognizable.  Sigh.  */
+	list = (char **) 0;
+      else if (c == (struct cmd_list_element *) -1)
+	{
+	  if (p + strlen(text) != tmp_command + rl_point)
+	    error ("Unrecognized command.");
+	  
+	  /* He's typed something ambiguous.  This is easier.  */
+	  if (result_list)
+	    list = complete_on_cmdlist (*result_list->prefixlist, text);
+	  else
+	    list = complete_on_cmdlist (cmdlist, text);
+	}
+      else
+	{
+	  /* If we've gotten this far, gdb has recognized a full
+	     command.  There are several possibilities:
+
+	     1) We need to complete on the command.
+	     2) We need to complete on the possibilities coming after
+	     the command.
+	     2) We need to complete the text of what comes after the
+	     command.   */
+
+	  if (!*p && *text)
+	    /* Always (might be longer versions of thie command).  */
+	    list = complete_on_cmdlist (result_list, text);
+	  else if (!*p && !*text)
+	    {
+	      if (c->prefixlist)
+		list = complete_on_cmdlist (*c->prefixlist, "");
+	      else
+		list = make_symbol_completion_list ("");
+	    }
+	  else
+	    {
+	      if (c->prefixlist && !c->allow_unknown)
+		{
+		  *p = '\0';
+		  error ("\"%s\" command requires a subcommand.",
+			 tmp_command);
+		}
+	      else
+		list = make_symbol_completion_list (text);
+	    }
+	}
     }
 
-#ifdef SIGTSTP
+  /* If the debugged program wasn't compiled with symbols, or if we're
+     clearly completing on a command and no command matches, return
+     NULL.  */
+  if (!list)
+    return ((char *)NULL);
+
+  output = list[index];
+  if (output)
+    index++;
+
+  return (output);
+}
+
+#ifdef STOP_SIGNAL
+static void
+stop_sig ()
+{
+#if STOP_SIGNAL == SIGTSTP
+  signal (SIGTSTP, SIG_DFL);
+  sigsetmask (0);
+  kill (getpid (), SIGTSTP);
+  signal (SIGTSTP, stop_sig);
+#else
+  signal (STOP_SIGNAL, stop_sig);
+#endif
+  printf ("%s", prompt);
+  fflush (stdout);
+
+  /* Forget about any previous command -- null line now will do nothing.  */
+  dont_repeat ();
+}
+#endif /* STOP_SIGNAL */
+
+#if 0
+Writing the history file upon a terminating signal is not useful,
+  because the info is rarely relevant and is in the core dump anyway.
+  It is an annoyance to have the file cluttering up the place.
+/* The list of signals that would terminate us if not caught.
+   We catch them, but just so that we can write the history file,
+   and so forth. */
+int terminating_signals[] = {
+  SIGHUP, SIGINT, SIGILL, SIGTRAP, SIGIOT,
+  SIGEMT, SIGFPE, SIGKILL, SIGBUS, SIGSEGV, SIGSYS,
+  SIGPIPE, SIGALRM, SIGTERM,
+#ifdef SIGXCPU
+  SIGXCPU,
+#endif
+#ifdef SIGXFSZ
+  SIGXFSZ,
+#endif
+#ifdef SIGVTALRM
+  SIGVTALRM,
+#endif
+#ifdef SIGPROF
+  SIGPROF,
+#endif
+#ifdef SIGLOST
+  SIGLOST,
+#endif
+#ifdef SIGUSR1
+  SIGUSR1, SIGUSR2
+#endif
+    };
+
+#define TERMSIGS_LENGTH (sizeof (terminating_signals) / sizeof (int))
+
+static void
+catch_termination (sig)
+     int sig;
+{
+  /* We are probably here because GDB has a bug.  Write out the history
+     so that we might have a better chance of reproducing it.  */
+  /* Tell the user what we are doing so he can delete the file if
+     it is unwanted.  */
+  write_history (history_filename);
+  printf ("\n%s written.\n", history_filename);
+  signal (sig, SIG_DFL);
+  kill (getpid (), sig);
+}
+#endif
+
+/* Initialize signal handlers. */
+initialize_signals ()
+{
+  extern void request_quit ();
+#if 0
+  register int i;
+
+  for (i = 0; i < TERMSIGS_LENGTH; i++)
+    signal (terminating_signals[i], catch_termination);
+#endif
+
+  signal (SIGINT, request_quit);
+
+  /* If we initialize SIGQUIT to SIG_IGN, then the SIG_IGN will get
+     passed to the inferior, which we don't want.  It would be
+     possible to do a "signal (SIGQUIT, SIG_DFL)" after we fork, but
+     on BSD4.3 systems using vfork, that will (apparently) affect the
+     GDB process as well as the inferior (the signal handling tables
+     being shared between the two, apparently).  Since we establish
+     a handler for SIGQUIT, when we call exec it will set the signal
+     to SIG_DFL for us.  */
+  signal (SIGQUIT, do_nothing);
+  if (signal (SIGHUP, do_nothing) != SIG_IGN)
+    signal (SIGHUP, disconnect);
+  signal (SIGFPE, float_handler);
+}
+
+/* Read one line from the command input stream `instream'
+   into the local static buffer `linebuffer' (whose current length
+   is `linelength').
+   The buffer is made bigger as necessary.
+   Returns the address of the start of the line.
+
+   *If* the instream == stdin & stdin is a terminal, the line read
+   is copied into the file line saver (global var char *line,
+   length linesize) so that it can be duplicated.
+
+   This routine either uses fancy command line editing or
+   simple input as the user has requested.  */
+
+char *
+command_line_input (prompt, repeat)
+     char *prompt;
+     int repeat;
+{
+  static char *linebuffer = 0;
+  static int linelength = 0;
+  register char *p;
+  register char *p1, *rl;
+  char *local_prompt = prompt;
+  register int c;
+  char *nline;
+
+  if (linebuffer == 0)
+    {
+      linelength = 80;
+      linebuffer = (char *) xmalloc (linelength);
+    }
+
+  p = linebuffer;
+
+  /* Control-C quits instantly if typed while in this loop
+     since it should not wait until the user types a newline.  */
+  immediate_quit++;
+#ifdef STOP_SIGNAL
+  signal (STOP_SIGNAL, stop_sig);
+#endif
+
+  while (1)
+    {
+      /* Don't use fancy stuff if not talking to stdin.  */
+      if (command_editing_p && instream == stdin
+	  && ISATTY (instream))
+	rl = readline (local_prompt);
+      else
+	rl = gdb_readline (local_prompt, 1);
+
+      if (!rl || rl == (char *) EOF) break;
+      if (strlen(rl) + 1 + (p - linebuffer) > linelength)
+	{
+	  linelength = strlen(rl) + 1 + (p - linebuffer);
+	  nline = (char *) xrealloc (linebuffer, linelength);
+	  p += nline - linebuffer;
+	  linebuffer = nline;
+	}
+      p1 = rl;
+      /* Copy line.  Don't copy null at end.  (Leaves line alone
+         if this was just a newline)  */
+      while (*p1)
+	*p++ = *p1++;
+
+      free (rl);			/* Allocated in readline.  */
+
+      if (p == linebuffer || *(p - 1) != '\\')
+	break;
+
+      p--;			/* Put on top of '\'.  */
+      local_prompt = (char *) 0;
+  }
+
+#ifdef STOP_SIGNAL
   signal (SIGTSTP, SIG_DFL);
 #endif
   immediate_quit--;
 
-  /* If we just got an empty line, and that is supposed
-     to repeat the previous command, leave the last input unchanged.  */
-  if (p == line && repeat)
-    return line;
+  /* Do history expansion if that is wished.  */
+  if (history_expansion_p && instream == stdin
+      && ISATTY (instream))
+    {
+      char *history_value;
+      int expanded;
 
-  /* If line is a comment, clear it out.  */
-  p1 = line;
-  while ((c = *p1) == ' ' || c == '\t') p1++;
-  if (c == '#')
-    p = line;
+      *p = '\0';		/* Insert null now.  */
+      expanded = history_expand (linebuffer, &history_value);
+      if (expanded)
+	{
+	  /* Print the changes.  */
+	  printf ("%s\n", history_value);
+
+	  /* If there was an error, call this function again.  */
+	  if (expanded < 0)
+	    {
+	      free (history_value);
+	      return command_line_input (prompt, repeat);
+	    }
+	  if (strlen (history_value) > linelength)
+	    {
+	      linelength = strlen (history_value) + 1;
+	      linebuffer = (char *) xrealloc (linebuffer, linelength);
+	    }
+	  strcpy (linebuffer, history_value);
+	  p = linebuffer + strlen(linebuffer);
+	  free (history_value);
+	}
+    }
+
+  /* If we just got an empty line, and that is supposed
+     to repeat the previous command, return the value in the
+     global buffer.  */
+  if (repeat)
+    {
+      if (p == linebuffer)
+	return line;
+      p1 = linebuffer;
+      while (*p1 == ' ' || *p1 == '\t')
+	p1++;
+      if (!*p1)
+	return line;
+    }
 
   *p = 0;
 
-  return line;
+  /* Add line to history if appropriate.  */
+  if (instream == stdin
+      && ISATTY (stdin) && *linebuffer)
+    add_history (linebuffer);
+
+  /* If line is a comment, clear it out.  */
+  /* Note:  comments are added to the command history.
+     This is useful when you type a command, and then realize
+     you don't want to execute it quite yet.  You can comment out the
+     command and then later fetch it from the value history and
+     remove the '#'.  */
+  p1 = linebuffer;
+  while ((c = *p1) == ' ' || c == '\t') p1++;
+  if (c == '#')
+    *linebuffer = 0;
+
+  /* Save into global buffer if appropriate.  */
+  if (repeat)
+    {
+      if (linelength > linesize)
+	{
+	  line = xrealloc (line, linelength);
+	  linesize = linelength;
+	}
+      strcpy (line, linebuffer);
+      return line;
+    }
+
+  return linebuffer;
 }
 
 /* Read lines from the input stream
@@ -564,7 +972,7 @@ read_command_lines ()
   while (1)
     {
       dont_repeat ();
-      p = gdb_read_line (0, 1);
+      p = command_line_input (0, instream == stdin);
       /* Remove leading and trailing blanks.  */
       while (*p == ' ' || *p == '\t') p++;
       p1 = p + strlen (p);
@@ -723,7 +1131,7 @@ define_command (comname, from_tty)
 
   validate_comname (comname);
 
-  c = lookup_cmd (&tem, cmdlist, "", -1);
+  c = lookup_cmd (&tem, cmdlist, "", -1, 1);
   if (c)
     {
       if (c->class == (int) class_user || c->class == (int) class_alias)
@@ -763,7 +1171,7 @@ document_command (comname, from_tty)
 
   validate_comname (comname);
 
-  c = lookup_cmd (&tem, cmdlist, "", 0);
+  c = lookup_cmd (&tem, cmdlist, "", 0, 1);
 
   if (c->class != (int) class_user)
     error ("Command \"%s\" is built-in.", comname);
@@ -798,192 +1206,9 @@ End with a line saying just \"end\".\n", comname);
 }
 
 static void
-copying_info ()
-{
-  immediate_quit++;
-  printf ("		    GDB GENERAL PUBLIC LICENSE\n\
-		    (Clarified 11 Feb 1988)\n\
-\n\
- Copyright (C) 1988 Richard M. Stallman\n\
- Everyone is permitted to copy and distribute verbatim copies\n\
- of this license, but changing it is not allowed.\n\
- You can also use this wording to make the terms for other programs.\n\
-\n\
-  The license agreements of most software companies keep you at the\n\
-mercy of those companies.  By contrast, our general public license is\n\
-intended to give everyone the right to share GDB.  To make sure that\n\
-you get the rights we want you to have, we need to make restrictions\n\
-that forbid anyone to deny you these rights or to ask you to surrender\n\
-the rights.  Hence this license agreement.\n\
-\n\
-  Specifically, we want to make sure that you have the right to give\n\
-away copies of GDB, that you receive source code or else can get it\n\
-if you want it, that you can change GDB or use pieces of it in new\n\
-free programs, and that you know you can do these things.\n\
---Type Return to print more--");
-  fflush (stdout);
-  gdb_read_line (0, 0);
-
-  printf ("\
-  To make sure that everyone has such rights, we have to forbid you to\n\
-deprive anyone else of these rights.  For example, if you distribute\n\
-copies of GDB, you must give the recipients all the rights that you\n\
-have.  You must make sure that they, too, receive or can get the\n\
-source code.  And you must tell them their rights.\n\
-\n\
-  Also, for our own protection, we must make certain that everyone\n\
-finds out that there is no warranty for GDB.  If GDB is modified by\n\
-someone else and passed on, we want its recipients to know that what\n\
-they have is not what we distributed, so that any problems introduced\n\
-by others will not reflect on our reputation.\n\
-\n\
-  Therefore we (Richard Stallman and the Free Software Foundation,\n\
-Inc.) make the following terms which say what you must do to be\n\
-allowed to distribute or change GDB.\n\
---Type Return to print more--");
-  fflush (stdout);
-  gdb_read_line (0, 0);
-
-  printf ("\
-			COPYING POLICIES\n\
-\n\
-  1. You may copy and distribute verbatim copies of GDB source code as\n\
-you receive it, in any medium, provided that you conspicuously and\n\
-appropriately publish on each copy a valid copyright notice \"Copyright\n\
-\(C) 1988 Free Software Foundation, Inc.\" (or with whatever year is\n\
-appropriate); keep intact the notices on all files that refer\n\
-to this License Agreement and to the absence of any warranty; and give\n\
-any other recipients of the GDB program a copy of this License\n\
-Agreement along with the program.  You may charge a distribution fee\n\
-for the physical act of transferring a copy.\n\
-\n\
-  2. You may modify your copy or copies of GDB or any portion of it,\n\
-and copy and distribute such modifications under the terms of\n\
-Paragraph 1 above, provided that you also do the following:\n\
-\n\
-    a) cause the modified files to carry prominent notices stating\n\
-    that you changed the files and the date of any change; and\n\
---Type Return to print more--");
-  fflush (stdout);
-  gdb_read_line (0, 0);
-
-  printf ("\
-    b) cause the whole of any work that you distribute or publish,\n\
-    that in whole or in part contains or is a derivative of GDB\n\
-    or any part thereof, to be licensed to all third parties on terms\n\
-    identical to those contained in this License Agreement (except that\n\
-    you may choose to grant more extensive warranty protection to some\n\
-    or all third parties, at your option).\n\
-\n");
-  printf ("\
-    c) if the modified program serves as a debugger, cause it\n\
-    when started running in the simplest and usual way, to print\n\
-    an announcement including a valid copyright notice\n\
-    \"Copyright (C) 1988 Free Software Foundation, Inc.\" (or with\n\
-    the year that is appropriate), saying that there is no warranty\n\
-    (or else, saying that you provide a warranty) and that users may\n\
-    redistribute the program under these conditions, and telling the user\n\
-    how to view a copy of this License Agreement.\n\
-\n\
-    d) You may charge a distribution fee for the physical act of\n\
-    transferring a copy, and you may at your option offer warranty\n\
-    protection in exchange for a fee.\n\
-\n\
-Mere aggregation of another unrelated program with this program (or its\n\
-derivative) on a volume of a storage or distribution medium does not bring\n\
-the other program under the scope of these terms.\n\
---Type Return to print more--");
-  fflush (stdout);
-  gdb_read_line (0, 0);
-
-  printf ("\
-  3. You may copy and distribute GDB (or a portion or derivative of it,\n\
-under Paragraph 2) in object code or executable form under the terms of\n\
-Paragraphs 1 and 2 above provided that you also do one of the following:\n\
-\n\
-    a) accompany it with the complete corresponding machine-readable\n\
-    source code, which must be distributed under the terms of\n\
-    Paragraphs 1 and 2 above; or,\n\
-\n\
-    b) accompany it with a written offer, valid for at least three\n\
-    years, to give any third party free (except for a nominal\n\
-    shipping charge) a complete machine-readable copy of the\n\
-    corresponding source code, to be distributed under the terms of\n\
-    Paragraphs 1 and 2 above; or,\n\n");
-
-  printf ("\
-    c) accompany it with the information you received as to where the\n\
-    corresponding source code may be obtained.  (This alternative is\n\
-    allowed only for noncommercial distribution and only if you\n\
-    received the program in object code or executable form alone.)\n\
-\n\
-For an executable file, complete source code means all the source code for\n\
-all modules it contains; but, as a special exception, it need not include\n\
-source code for modules which are standard libraries that accompany the\n\
-operating system on which the executable file runs.\n\
---Type Return to print more--");
-  fflush (stdout);
-  gdb_read_line (0, 0);
-
-  printf ("\
-  4. You may not copy, sublicense, distribute or transfer GDB\n\
-except as expressly provided under this License Agreement.  Any attempt\n\
-otherwise to copy, sublicense, distribute or transfer GDB is void and\n\
-your rights to use the program under this License agreement shall be\n\
-automatically terminated.  However, parties who have received computer\n\
-software programs from you with this License Agreement will not have\n\
-their licenses terminated so long as such parties remain in full compliance.\n\
-\n\
-");
-  printf ("\
-  5. If you wish to incorporate parts of GDB into other free\n\
-programs whose distribution conditions are different, write to the Free\n\
-Software Foundation at 675 Mass Ave, Cambridge, MA 02139.  We have not yet\n\
-worked out a simple rule that can be stated here, but we will often permit\n\
-this.  We will be guided by the two goals of preserving the free status of\n\
-all derivatives of our free software and of promoting the sharing and reuse\n\
-of software.\n\
-\n\
-In other words, go ahead and share GDB, but don't try to stop\n\
-anyone else from sharing it farther.  Help stamp out software hoarding!\n\
-");
-  immediate_quit--;
-}
-
-static void
-warranty_info ()
-{
-  immediate_quit++;
-  printf ("			 NO WARRANTY\n\
-\n\
-  BECAUSE GDB IS LICENSED FREE OF CHARGE, WE PROVIDE ABSOLUTELY NO\n\
-WARRANTY, TO THE EXTENT PERMITTED BY APPLICABLE STATE LAW.  EXCEPT\n\
-WHEN OTHERWISE STATED IN WRITING, FREE SOFTWARE FOUNDATION, INC,\n\
-RICHARD M. STALLMAN AND/OR OTHER PARTIES PROVIDE GDB \"AS IS\" WITHOUT\n\
-WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT\n\
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\n\
-A PARTICULAR PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND\n\
-PERFORMANCE OF GDB IS WITH YOU.  SHOULD GDB PROVE DEFECTIVE, YOU\n\
-ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.\n\n");
-
-  printf ("\
- IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW WILL RICHARD M.\n\
-STALLMAN, THE FREE SOFTWARE FOUNDATION, INC., AND/OR ANY OTHER PARTY\n\
-WHO MAY MODIFY AND REDISTRIBUTE GDB, BE LIABLE TO\n\
-YOU FOR DAMAGES, INCLUDING ANY LOST PROFITS, LOST MONIES, OR OTHER\n\
-SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR\n\
-INABILITY TO USE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA\n\
-BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY THIRD PARTIES OR A\n\
-FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS) GDB, EVEN\n\
-IF YOU HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES, OR FOR\n\
-ANY CLAIM BY ANY OTHER PARTY.\n");
-  immediate_quit--;
-}
-
-static void
 print_gdb_version ()
 {
-  printf ("GDB %s, Copyright (C) 1988 Free Software Foundation, Inc.\n\
+  printf ("GDB %s, Copyright (C) 1989 Free Software Foundation, Inc.\n\
 There is ABSOLUTELY NO WARRANTY for GDB; type \"info warranty\" for details.\n\
 GDB is free software and you are welcome to distribute copies of it\n\
  under certain conditions; type \"info copying\" to see the conditions.\n",
@@ -1062,6 +1287,9 @@ quit_command ()
       else
 	error ("Not confirmed.");
     }
+  /* Save the history information if it is appropriate to do so.  */
+  if (write_history_p && history_filename)
+    write_history (history_filename);
   exit (0);
 }
 
@@ -1096,6 +1324,9 @@ cd_command (dir, from_tty)
 
   if (dir == 0)
     error_no_arg ("new working directory");
+
+  dir = tilde_expand (dir);
+  make_cleanup (free, dir);
 
   len = strlen (dir);
   dir = savestring (dir, len - (len > 1 && dir[len-1] == '/'));
@@ -1144,14 +1375,20 @@ cd_command (dir, from_tty)
 }
 
 static void
-source_command (file)
-     char *file;
+source_command (arg, from_tty)
+     char *arg;
+     int from_tty;
 {
   FILE *stream;
   struct cleanup *cleanups;
+  char *file = arg;
 
   if (file == 0)
-    error_no_arg ("file to read commands from");
+    /* Let source without arguments read .gdbinit.  */
+    file = ".gdbinit";
+
+  file = tilde_expand (file);
+  make_cleanup (free, file);
 
   stream = fopen (file, "r");
   if (stream == 0)
@@ -1202,8 +1439,237 @@ dump_me_command ()
     }
 }
 
+int
+parse_binary_operation (caller, arg)
+     char *caller, *arg;
+{
+  int length;
+
+  if (!arg || !*arg)
+    return 1;
+
+  length = strlen (arg);
+
+  while (arg[length - 1] == ' ' || arg[length - 1] == '\t')
+    length--;
+
+  if (!strncmp (arg, "on", length)
+      || !strncmp (arg, "1", length)
+      || !strncmp (arg, "yes", length))
+    return 1;
+  else
+    if (!strncmp (arg, "off", length)
+	|| !strncmp (arg, "0", length)
+	|| !strncmp (arg, "no", length))
+      return 0;
+    else
+      error ("\"%s\" not given a binary valued argument.", caller);
+}
+
+/* Functions to manipulate command line editing control variables.  */
+
 static void
-init_cmd_lists ()
+set_editing (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  command_editing_p = parse_binary_operation ("set command-editing", arg);
+}
+
+/* Number of commands to print in each call to editing_info.  */
+#define Hist_print 10
+static void
+editing_info (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  /* Index for history commands.  Relative to history_base.  */
+  int offset;
+
+  /* Number of the history entry which we are planning to display next.
+     Relative to history_base.  */
+  static int num = 0;
+
+  /* The first command in the history which doesn't exist (i.e. one more
+     than the number of the last command).  Relative to history_base.  */
+  int hist_len;
+
+  struct _hist_entry {
+    char *line;
+    char *data;
+  } *history_get();
+  extern int history_base;
+
+  printf_filtered ("Interactive command editing is %s.\n",
+	  command_editing_p ? "on" : "off");
+
+  printf_filtered ("History expansion of command input is %s.\n",
+	  history_expansion_p ? "on" : "off");
+  printf_filtered ("Writing of a history record upon exit is %s.\n",
+	  write_history_p ? "enabled" : "disabled");
+  printf_filtered ("The size of the history list (number of stored commands) is %d.\n",
+	  history_size);
+  printf_filtered ("The name of the history record is \"%s\".\n\n",
+	  history_filename ? history_filename : "");
+
+  /* Print out some of the commands from the command history.  */
+  /* First determine the length of the history list.  */
+  hist_len = history_size;
+  for (offset = 0; offset < history_size; offset++)
+    {
+      if (!history_get (history_base + offset))
+	{
+	  hist_len = offset;
+	  break;
+	}
+    }
+
+  if (arg)
+    {
+      if (arg[0] == '+' && arg[1] == '\0')
+	/* "info editing +" should print from the stored position.  */
+	;
+      else
+	/* "info editing <exp>" should print around command number <exp>.  */
+	num = (parse_and_eval_address (arg) - history_base) - Hist_print / 2;
+    }
+  /* "info editing" means print the last Hist_print commands.  */
+  else
+    {
+      num = hist_len - Hist_print;
+    }
+
+  if (num < 0)
+    num = 0;
+
+  /* If there are at least Hist_print commands, we want to display the last
+     Hist_print rather than, say, the last 6.  */
+  if (hist_len - num < Hist_print)
+    {
+      num = hist_len - Hist_print;
+      if (num < 0)
+	num = 0;
+    }
+
+  if (num == hist_len - Hist_print)
+    printf_filtered ("The list of the last %d commands is:\n\n", Hist_print);
+  else
+    printf_filtered ("Some of the stored commands are:\n\n");
+
+  for (offset = num; offset < num + Hist_print && offset < hist_len; offset++)
+    {
+      printf_filtered ("%5d  %s\n", history_base + offset,
+	      (history_get (history_base + offset))->line);
+    }
+
+  /* The next command we want to display is the next one that we haven't
+     displayed yet.  */
+  num += Hist_print;
+  
+  /* If the user repeats this command with return, it should do what
+     "info editing +" does.  This is unnecessary if arg is null,
+     because "info editing +" is not useful after "info editing".  */
+  if (from_tty && arg)
+    {
+      arg[0] = '+';
+      arg[1] = '\0';
+    }
+}
+
+static void
+set_history_expansion (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  history_expansion_p = parse_binary_operation ("set history expansion", arg);
+}
+
+static void
+set_history_write (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  write_history_p = parse_binary_operation ("set history write", arg);
+}
+
+static void
+set_history (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  printf ("\"set history\" must be followed by the name of a history subcommand.\n");
+  help_list (sethistlist, "set history ", -1, stdout);
+}
+
+static void
+set_history_size (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  if (!*arg)
+    error_no_arg ("set history size");
+
+  history_size = atoi (arg);
+}
+
+static void
+set_history_filename (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  int i;
+
+  if (!arg)
+    error_no_arg ("history file name");
+  
+  arg = tilde_expand (arg);
+  make_cleanup (free, arg);
+
+  i = strlen (arg) - 1;
+  
+  free (history_filename);
+  
+  while (i > 0 && (arg[i] == ' ' || arg[i] == '\t'))
+    i--;
+
+  if (!*arg)
+    history_filename = (char *) 0;
+  else
+    history_filename = savestring (arg, i + 1);
+  history_filename[i] = '\0';
+}
+
+int info_verbose;
+
+static void
+set_verbose_command (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  info_verbose = parse_binary_operation ("set verbose", arg);
+}
+
+static void
+verbose_info (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  if (arg)
+    error ("\"info verbose\" does not take any arguments.\n");
+  
+  printf ("Verbose printing of information is %s.\n",
+	  info_verbose ? "on" : "off");
+}
+
+static void
+float_handler ()
+{
+  error ("Invalid floating value encountered or computed.");
+}
+
+
+static void
+initialize_cmd_lists ()
 {
   cmdlist = (struct cmd_list_element *) 0;
   infolist = (struct cmd_list_element *) 0;
@@ -1212,12 +1678,48 @@ init_cmd_lists ()
   deletelist = (struct cmd_list_element *) 0;
   enablebreaklist = (struct cmd_list_element *) 0;
   setlist = (struct cmd_list_element *) 0;
+  sethistlist = (struct cmd_list_element *) 0;
+  unsethistlist = (struct cmd_list_element *) 0;
 }
 
 static void
-init_main ()
+initialize_main ()
 {
+  char *tmpenv;
+  /* Command line editing externals.  */
+  extern int (*rl_completion_entry_function)();
+  extern char *rl_completer_word_break_characters;
+  
+  /* Set default verbose mode on.  */
+  info_verbose = 1;
+
   prompt = savestring ("(gdb) ", 6);
+
+  /* Set the important stuff up for command editing.  */
+  command_editing_p = 1;
+  history_expansion_p = 0;
+  write_history_p = 0;
+  
+  if (tmpenv = getenv ("HISTSIZE"))
+    history_size = atoi (tmpenv);
+  else
+    history_size = 256;
+
+  stifle_history (history_size);
+
+  if (tmpenv = getenv ("GDBHISTFILE"))
+    history_filename = savestring (tmpenv, strlen(tmpenv));
+  else
+    /* We include the current directory so that if the user changes
+       directories the file written will be the same as the one
+       that was read.  */
+    history_filename = concat (current_directory, "/.gdb_history", "");
+
+  read_history (history_filename);
+
+  /* Setup important stuff for command line editing.  */
+  rl_completion_entry_function = (int (*)()) symbol_completion_function;
+  rl_completer_word_break_characters = gdb_completer_word_break_characters;
 
   /* Define the classes of commands.
      They will appear in the help list in the reverse of this order.  */
@@ -1280,15 +1782,47 @@ when gdb is started.");
   add_com_alias ("q", "quit", class_support, 1);
   add_com_alias ("h", "help", class_support, 1);
 
+  add_cmd ("verbose", class_support, set_verbose_command,
+	   "Change the number of informational messages gdb prints.",
+	   &setlist);
+  add_info ("verbose", verbose_info,
+	    "Status of gdb's verbose printing option.\n");
+
   add_com ("dump-me", class_obscure, dump_me_command,
 	   "Get fatal error; make debugger dump its core.");
+
+  add_cmd ("editing", class_support, set_editing,
+	   "Enable or disable command line editing.\n\
+Use \"on\" to enable to enable the editing, and \"off\" to disable it.\n\
+Without an argument, command line editing is enabled.", &setlist);
+
+  add_prefix_cmd ("history", class_support, set_history,
+		  "Generic command for setting command history parameters.",
+		  &sethistlist, "set history ", 0, &setlist);
+
+  add_cmd ("expansion", no_class, set_history_expansion,
+	   "Enable or disable history expansion on command input.\n\
+Without an argument, history expansion is enabled.", &sethistlist);
+
+  add_cmd ("write", no_class, set_history_write,
+	   "Enable or disable saving of the history record on exit.\n\
+Use \"on\" to enable to enable the saving, and \"off\" to disable it.\n\
+Without an argument, saving is enabled.", &sethistlist);
+
+  add_cmd ("size", no_class, set_history_size,
+	   "Set the size of the command history, \n\
+ie. the number of previous commands to keep a record of.", &sethistlist);
+
+  add_cmd ("filename", no_class, set_history_filename,
+	   "Set the filename in which to record the command history\n\
+ (the list of previous commands of which a record is kept).", &sethistlist);
 
   add_prefix_cmd ("info", class_info, info_command,
 		  "Generic command for printing status.",
 		  &infolist, "info ", 0, &cmdlist);
   add_com_alias ("i", "info", class_info, 1);
 
-  add_info ("copying", copying_info, "Conditions for redistributing copies of GDB.");
-  add_info ("warranty", warranty_info, "Various kinds of warranty you do not have.");
+  add_info ("editing", editing_info, "Status of command editor.");
+
   add_info ("version", version_info, "Report what version of GDB this is.");
 }

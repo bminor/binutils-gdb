@@ -1,23 +1,21 @@
-
 /* Low level packing and unpacking of values for GDB.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
@@ -196,7 +194,8 @@ record_latest_value (val)
   if (i == 0)
     {
       register struct value_history_chunk *new
-	= (struct value_history_chunk *) xmalloc (sizeof (struct value_history_chunk));
+	= (struct value_history_chunk *)
+	  xmalloc (sizeof (struct value_history_chunk));
       bzero (new->values, sizeof new->values);
       new->next = value_history_chain;
       value_history_chain = new;
@@ -272,17 +271,28 @@ clear_value_history ()
 }
 
 static void
-history_info (num_exp)
+value_history_info (num_exp, from_tty)
      char *num_exp;
+     int from_tty;
 {
   register int i;
   register value val;
-  register int num;
+  static int num = 1;
 
   if (num_exp)
-    num = parse_and_eval_address (num_exp) - 5;
+    {
+      if (num_exp[0] == '+' && num_exp[1] == '\0')
+	/* "info history +" should print from the stored position.  */
+	;
+      else
+	/* "info history <exp>" should print around value number <exp>.  */
+	num = parse_and_eval_address (num_exp) - 5;
+    }
   else
-    num = value_history_count - 9;
+    {
+      /* "info history" means print the last 10 values.  */
+      num = value_history_count - 9;
+    }
 
   if (num <= 0)
     num = 1;
@@ -290,9 +300,21 @@ history_info (num_exp)
   for (i = num; i < num + 10 && i <= value_history_count; i++)
     {
       val = access_value_history (i);
-      printf ("$%d = ", i);
-      value_print (val, stdout, 0);
-      printf ("\n");
+      printf_filtered ("$%d = ", i);
+      value_print (val, stdout, 0, Val_pretty_default);
+      printf_filtered ("\n");
+    }
+
+  /* The next "info history +" should start after what we just printed.  */
+  num += 10;
+
+  /* Hitting just return after this command should do the same thing as
+     "info history +".  If num_exp is null, this is unnecessary, since
+     "info history +" is not useful after "info history".  */
+  if (from_tty && num_exp)
+    {
+      num_exp[0] = '+';
+      num_exp[1] = '\0';
     }
 }
 
@@ -332,7 +354,14 @@ value
 value_of_internalvar (var)
      struct internalvar *var;
 {
-  register value val = value_copy (var->value);
+  register value val;
+
+#ifdef IS_TRAPPED_INTERNALVAR
+  if (IS_TRAPPED_INTERNALVAR (var->name))
+    return VALUE_OF_TRAPPED_INTERNALVAR (var);
+#endif 
+
+  val = value_copy (var->value);
   VALUE_LVAL (val) = lval_internalvar;
   VALUE_INTERNALVAR (val) = var;
   return val;
@@ -345,6 +374,12 @@ set_internalvar_component (var, offset, bitpos, bitsize, newval)
      value newval;
 {
   register char *addr = VALUE_CONTENTS (var->value) + offset;
+
+#ifdef IS_TRAPPED_INTERNALVAR
+  if (IS_TRAPPED_INTERNALVAR (var->name))
+    SET_TRAPPED_INTERNALVAR (var, newval, bitpos, bitsize, offset);
+#endif
+
   if (bitsize)
     modify_field (addr, (int) value_as_long (newval),
 		  bitpos, bitsize);
@@ -358,6 +393,11 @@ set_internalvar (var, val)
      struct internalvar *var;
      value val;
 {
+#ifdef IS_TRAPPED_INTERNALVAR
+  if (IS_TRAPPED_INTERNALVAR (var->name))
+    SET_TRAPPED_INTERNALVAR (var, val, 0, 0, 0);
+#endif
+
   free (var->value);
   var->value = value_copy (val);
   release_value (var->value);
@@ -392,20 +432,27 @@ static void
 convenience_info ()
 {
   register struct internalvar *var;
-
-  if (internalvars)
-    printf ("Debugger convenience variables:\n\n");
-  else
-    printf ("No debugger convenience variables now defined.\n\
-Convenience variables have names starting with \"$\";\n\
-use \"set\" as in \"set $foo = 5\" to define them.\n");
+  int varseen = 0;
 
   for (var = internalvars; var; var = var->next)
     {
+#ifdef IS_TRAPPED_INTERNALVAR
+      if (IS_TRAPPED_INTERNALVAR (var->name))
+	continue;
+#endif
+      if (!varseen)
+	{
+	  printf ("Debugger convenience variables:\n\n");
+	  varseen = 1;
+	}
       printf ("$%s: ", var->name);
-      value_print (var->value, stdout, 0);
+      value_print (var->value, stdout, 0, Val_pretty_default);
       printf ("\n");
     }
+  if (!varseen)
+    printf ("No debugger convenience variables now defined.\n\
+Convenience variables have names starting with \"$\";\n\
+use \"set\" as in \"set $foo = 5\" to define them.\n");
 }
 
 /* Extract a value as a C number (either long or double).
@@ -426,10 +473,10 @@ value_as_double (val)
 {
   double foo;
   int inv;
-
+  
   foo = unpack_double (VALUE_TYPE (val), VALUE_CONTENTS (val), &inv);
   if (inv)
-	error ("Invalid floating value found in program.");
+    error ("Invalid floating value found in program.");
   return foo;
 }
 
@@ -475,6 +522,10 @@ unpack_long (type, valaddr)
 
       if (len == sizeof (long))
 	return * (unsigned long *) valaddr;
+#ifdef LONG_LONG
+      if (len == sizeof (long long))
+	return * (unsigned long long *) valaddr;
+#endif
     }
   else if (code == TYPE_CODE_INT)
     {
@@ -508,9 +559,9 @@ unpack_long (type, valaddr)
 }
 
 /* Return a double value from the specified type and address.
- * INVP points to an int which is set to 0 for valid value,
- * 1 for invalid value (bad float format).  In either case,
- * the returned double is OK to use.  */
+   INVP points to an int which is set to 0 for valid value,
+   1 for invalid value (bad float format).  In either case,
+   the returned double is OK to use.  */
 
 double
 unpack_double (type, valaddr, invp)
@@ -522,13 +573,14 @@ unpack_double (type, valaddr, invp)
   register int len = TYPE_LENGTH (type);
   register int nosign = TYPE_UNSIGNED (type);
 
-  *invp = 0;		/* Assume valid */
+  *invp = 0;			/* Assume valid.   */
   if (code == TYPE_CODE_FLT)
     {
-      if (INVALID_FLOAT (valaddr, len)) {
-	*invp = 1;
-	return 1.234567891011121314;
-      }
+      if (INVALID_FLOAT (valaddr, len))
+	{
+	  *invp = 1;
+	  return 1.234567891011121314;
+	}
 
       if (len == sizeof (float))
 	return * (float *) valaddr;
@@ -582,6 +634,8 @@ unpack_double (type, valaddr, invp)
     }
 
   error ("Value not floating number.");
+  /* NOTREACHED */
+  return (double) 0;		/* To silence compiler warning.  */
 }
 
 /* Given a value ARG1 of a struct or union type,
@@ -605,7 +659,7 @@ value_field (arg1, fieldno)
   if (TYPE_FIELD_BITSIZE (VALUE_TYPE (arg1), fieldno))
     {
       v = value_from_long (type,
-			   (LONGEST) unpack_field_as_long (VALUE_TYPE (arg1),
+			   unpack_field_as_long (VALUE_TYPE (arg1),
 						 VALUE_CONTENTS (arg1),
 						 fieldno));
       VALUE_BITPOS (v) = TYPE_FIELD_BITPOS (VALUE_TYPE (arg1), fieldno) % 8;
@@ -677,13 +731,15 @@ value_virtual_fn_field (arg1, f, j, type)
     TYPE_VPTR_FIELDNO (type)
       = fill_in_vptr_fieldno (type);
 
-  /* Pretend that this array is just an array of pointers to integers.
-     This will have to change for multiple inheritance.  */
-  vtbl = value_copy (value_field (arg1, TYPE_VPTR_FIELDNO (type)));
-  VALUE_TYPE (vtbl) = lookup_pointer_type (builtin_type_int);
+  /* The virtual function table is now an array of structures
+     which have the form { int16 offset, delta; void *pfn; }.  */
+  vtbl = value_ind (value_field (arg1, TYPE_VPTR_FIELDNO (type)));
 
-  /* Index into the virtual function table.  */
-  vfn = value_subscript (vtbl, vi);
+  /* Index into the virtual function table.  This is hard-coded because
+     looking up a field is not cheap, and it may be important to save
+     time, e.g. if the user has set a conditional breakpoint calling
+     a virtual function.  */
+  vfn = value_field (value_subscript (vtbl, vi), 2);
 
   /* Reinstantiate the function pointer with the correct type.  */
   VALUE_TYPE (vfn) = lookup_pointer_type (TYPE_FN_FIELD_TYPE (f, j));
@@ -771,7 +827,7 @@ unpack_field_as_long (type, valaddr, fieldno)
 
   bcopy (valaddr + bitpos / 8, &val, sizeof val);
 
-  /* Extracting bits depends on endianness of the target machine.  */
+  /* Extracting bits depends on endianness of the machine.  */
 #ifdef BITS_BIG_ENDIAN
   val = val >> (sizeof val * 8 - bitpos % 8 - bitsize);
 #else
@@ -790,11 +846,16 @@ modify_field (addr, fieldval, bitpos, bitsize)
 {
   long oword;
 
+  /* Reject values too big to fit in the field in question.
+     Otherwise adjoining fields may be corrupted.  */
+  if (fieldval & ~((1<<bitsize)-1))
+    error ("Value %d does not fit in %d bits.", fieldval, bitsize);
+  
   bcopy (addr, &oword, sizeof oword);
 
-  /* Shifting for bit field depends on endianness of the target machine.  */
+  /* Shifting for bit field depends on endianness of the machine.  */
 #ifdef BITS_BIG_ENDIAN
-  bitpos = sizeof oword * 8 - bitpos - bitsize;
+  bitpos = sizeof (oword) * 8 - bitpos - bitsize;
 #endif
 
   oword &= ~(((1 << bitsize) - 1) << bitpos);
@@ -908,7 +969,7 @@ using_struct_return (function, funcaddr, value_type)
   register enum type_code code = TYPE_CODE (value_type);
 
   if (code == TYPE_CODE_STRUCT ||
-      code == TYPE_CODE_ENUM ||
+      code == TYPE_CODE_UNION ||
       code == TYPE_CODE_ARRAY)
     {
       struct block *b = block_for_pc (funcaddr);
@@ -961,7 +1022,7 @@ A few convenience variables are given values automatically GDB:\n\
 \"$_\"holds the last address examined with \"x\" or \"info lines\",\n\
 \"$__\" holds the contents of the last address examined with \"x\".");
 
-  add_info ("history", history_info,
+  add_info ("values", value_history_info,
 	    "Elements of value history (around item number IDX, or last ten).");
+  add_info_alias ("history", value_history_info, 0);
 }
-

@@ -1,24 +1,26 @@
 /* Print m68k instructions for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
+
+#include <setjmp.h>
+#include <signal.h>
 
 #include "defs.h"
 #include "param.h"
@@ -118,11 +120,11 @@ print_insn (memaddr, stream)
   /* Handle undefined instructions.  */
   if (best < 0)
     {
-      fprintf (stream, "0%o", (buffer[0] << 8) + buffer[1]);
+      fprintf_filtered (stream, "0%o", (buffer[0] << 8) + buffer[1]);
       return 2;
     }
 
-  fprintf (stream, "%s", m68k_opcodes[best].name);
+  fprintf_filtered (stream, "%s", m68k_opcodes[best].name);
 
   /* Point at first word of argument data,
      and at descriptor for first argument.  */
@@ -142,19 +144,21 @@ print_insn (memaddr, stream)
 	p = buffer + 4;
       if (d[1] >= '4' && d[1] <= '6' && p - buffer < 6)
 	p = buffer + 6;
+      if ((d[0] == 'L' || d[0] == 'l') && d[1] == 'w' && p - buffer < 4)
+	p = buffer + 4;
     }
 
   d = m68k_opcodes[best].args;
 
   if (*d)
-    fputc (' ', stream);
+    fputs_filtered (" ", stream);
 
   while (*d)
     {
       p = print_insn_arg (d, buffer, p, memaddr + p - buffer, stream);
       d += 2;
       if (*d && *(d - 2) != 'I' && *d != 'k')
-	fprintf (stream, ",");
+	fputs_filtered (",", stream);
     }
   return p - buffer;
 }
@@ -178,15 +182,15 @@ print_insn_arg (d, buffer, p, addr, stream)
   switch (*d)
     {
     case 'C':
-      fprintf (stream, "ccr");
+      fprintf_filtered (stream, "ccr");
       break;
 
     case 'S':
-      fprintf (stream, "sr");
+      fprintf_filtered (stream, "sr");
       break;
 
     case 'U':
-      fprintf (stream, "usp");
+      fprintf_filtered (stream, "usp");
       break;
 
     case 'J':
@@ -200,73 +204,76 @@ print_insn_arg (d, buffer, p, addr, stream)
 	for (regno = sizeof names / sizeof names[0] - 1; regno >= 0; regno--)
 	  if (names[regno].value == val)
 	    {
-	      fprintf (stream, names[regno].name);
+	      fprintf_filtered (stream, names[regno].name);
 	      break;
 	    }
 	if (regno < 0)
-	  fprintf (stream, "%d", val);
+	  fprintf_filtered (stream, "%d", val);
       }
       break;
 
     case 'Q':
       val = fetch_arg (buffer, place, 3);
       if (val == 0) val = 8;
-      fprintf (stream, "#%d", val);
+      fprintf_filtered (stream, "#%d", val);
       break;
 
     case 'M':
       val = fetch_arg (buffer, place, 8);
       if (val & 0x80)
 	val = val - 0x100;
-      fprintf (stream, "#%d", val);
+      fprintf_filtered (stream, "#%d", val);
       break;
 
     case 'T':
       val = fetch_arg (buffer, place, 4);
-      fprintf (stream, "#%d", val);
+      fprintf_filtered (stream, "#%d", val);
       break;
 
     case 'D':
-      fprintf (stream, "%s", reg_names[fetch_arg (buffer, place, 3)]);
+      fprintf_filtered (stream, "%s", reg_names[fetch_arg (buffer, place, 3)]);
       break;
 
     case 'A':
-      fprintf (stream, "%s", reg_names[fetch_arg (buffer, place, 3) + 010]);
+      fprintf_filtered (stream, "%s",
+			reg_names[fetch_arg (buffer, place, 3) + 010]);
       break;
 
     case 'R':
-      fprintf (stream, "%s", reg_names[fetch_arg (buffer, place, 4)]);
+      fprintf_filtered (stream, "%s", reg_names[fetch_arg (buffer, place, 4)]);
       break;
 
     case 'F':
-      fprintf (stream, "fp%d", fetch_arg (buffer, place, 3));
+      fprintf_filtered (stream, "fp%d", fetch_arg (buffer, place, 3));
       break;
 
     case 'O':
       val = fetch_arg (buffer, place, 6);
       if (val & 0x20)
-	fprintf (stream, "%s", reg_names [val & 7]);
+	fprintf_filtered (stream, "%s", reg_names [val & 7]);
       else
-	fprintf (stream, "%d", val);
+	fprintf_filtered (stream, "%d", val);
       break;
 
     case '+':
-      fprintf (stream, "(%s)+", reg_names[fetch_arg (buffer, place, 3) + 8]);
+      fprintf_filtered (stream, "%s@+",
+			reg_names[fetch_arg (buffer, place, 3) + 8]);
       break;
 
     case '-':
-      fprintf (stream, "-(%s)", reg_names[fetch_arg (buffer, place, 3) + 8]);
+      fprintf_filtered (stream, "%s@-",
+	       reg_names[fetch_arg (buffer, place, 3) + 8]);
       break;
 
     case 'k':
       if (place == 'k')
-	fprintf (stream, "{%s}", reg_names[fetch_arg (buffer, place, 3)]);
+	fprintf_filtered (stream, "{%s}", reg_names[fetch_arg (buffer, place, 3)]);
       else if (place == 'C')
 	{
 	  val = fetch_arg (buffer, place, 7);
 	  if ( val > 63 )		/* This is a signed constant. */
 	    val -= 128;
-	  fprintf (stream, "{#%d}", val);
+	  fprintf_filtered (stream, "{#%d}", val);
 	}
       else
 	error ("Invalid arg format in opcode table: \"%c%c\".",
@@ -274,7 +281,8 @@ print_insn_arg (d, buffer, p, addr, stream)
       break;
 
     case '#':
-      p1 = buffer + 2;
+    case '^':
+      p1 = buffer + (*d == '#' ? 2 : 4);
       if (place == 's')
 	val = fetch_arg (buffer, place, 4);
       else if (place == 'C')
@@ -292,26 +300,7 @@ print_insn_arg (d, buffer, p, addr, stream)
       else
 	error ("Invalid arg format in opcode table: \"%c%c\".",
 	       *d, place);
-      fprintf (stream, "#%d", val);
-      break;
-
-    case '^':
-      if (place == 's')
-	val = fetch_arg (buffer, place, 4);
-      else if (place == 'C')
-	val = fetch_arg (buffer, place, 7);
-      else if (place == '8')
-	val = fetch_arg (buffer, place, 3);
-      else if (place == 'b')
-	val = NEXTBYTE (p);
-      else if (place == 'w')
-	val = NEXTWORD (p);
-      else if (place == 'l')
-	val = NEXTLONG (p);
-      else
-	error ("Invalid arg format in opcode table: \"%c%c\".",
-	       *d, place);
-      fprintf (stream, "#%d", val);
+      fprintf_filtered (stream, "#%d", val);
       break;
 
     case 'B':
@@ -345,17 +334,19 @@ print_insn_arg (d, buffer, p, addr, stream)
 
     case 'd':
       val = NEXTWORD (p);
-      fprintf (stream, "%d(%s)", val, reg_names[fetch_arg (buffer, place, 3)]);
+      fprintf_filtered (stream, "%s@(%d)",
+			reg_names[fetch_arg (buffer, place, 3)], val);
       break;
 
     case 's':
-      fprintf (stream, "%s", fpcr_names[fetch_arg (buffer, place, 3)]);
+      fprintf_filtered (stream, "%s",
+			fpcr_names[fetch_arg (buffer, place, 3)]);
       break;
 
     case 'I':
       val = fetch_arg (buffer, 'd', 3);		  /* Get coprocessor ID... */
       if (val != 1)				/* Unusual coprocessor ID? */
-	fprintf (stream, "(cpid=%d) ", val);
+	fprintf_filtered (stream, "(cpid=%d) ", val);
       if (place == 'i')
 	p += 2;			     /* Skip coprocessor extended operands */
       break;
@@ -385,28 +376,28 @@ print_insn_arg (d, buffer, p, addr, stream)
       switch (val >> 3)
 	{
 	case 0:
-	  fprintf (stream, "%s", reg_names[val]);
+	  fprintf_filtered (stream, "%s", reg_names[val]);
 	  break;
 
 	case 1:
-	  fprintf (stream, "%s", regname);
+	  fprintf_filtered (stream, "%s", regname);
 	  break;
 
 	case 2:
-	  fprintf (stream, "(%s)", regname);
+	  fprintf_filtered (stream, "%s@", regname);
 	  break;
 
 	case 3:
-	  fprintf (stream, "(%s)+", regname);
+	  fprintf_filtered (stream, "%s@+", regname);
 	  break;
 
 	case 4:
-	  fprintf (stream, "-(%s)", regname);
+	  fprintf_filtered (stream, "%s@-", regname);
 	  break;
 
 	case 5:
 	  val = NEXTWORD (p);
-	  fprintf (stream, "%d(%s)", val, regname);
+	  fprintf_filtered (stream, "%s@(%d)", regname, val);
 	  break;
 
 	case 6:
@@ -418,13 +409,13 @@ print_insn_arg (d, buffer, p, addr, stream)
 	    {
 	    case 0:
 	      val = NEXTWORD (p);
-	      fprintf (stream, "@#");
+	      fprintf_filtered (stream, "@#");
 	      print_address (val, stream);
 	      break;
 
 	    case 1:
 	      val = NEXTLONG (p);
-	      fprintf (stream, "@#");
+	      fprintf_filtered (stream, "@#");
 	      print_address (val, stream);
 	      break;
 
@@ -477,15 +468,94 @@ print_insn_arg (d, buffer, p, addr, stream)
 		       *d, place);
 	      }
 	      if ( flt_p )	/* Print a float? */
-		fprintf (stream, "#%g", flval);
+		fprintf_filtered (stream, "#%g", flval);
 	      else
-		fprintf (stream, "#%d", val);
+		fprintf_filtered (stream, "#%d", val);
 	      break;
 
 	    default:
-	      fprintf (stream, "<invalid address mode 0%o>", val);
+	      fprintf_filtered (stream, "<invalid address mode 0%o>", val);
 	    }
 	}
+      break;
+
+    case 'L':
+    case 'l':
+	if (place == 'w')
+	  {
+	    char doneany;
+	    p1 = buffer + 2;
+	    val = NEXTWORD (p1);
+	    /* Move the pointer ahead if this point is farther ahead
+	       than the last.  */
+	    p = p1 > p ? p1 : p;
+	    if (val == 0)
+	      {
+		fputs_filtered ("#0", stream);
+		break;
+	      }
+	    if (*d == 'l')
+	      {
+		register int newval = 0;
+		for (regno = 0; regno < 16; ++regno)
+		  if (val & (0x8000 >> regno))
+		    newval |= 1 << regno;
+		val = newval;
+	      }
+	    val &= 0xffff;
+	    doneany = 0;
+	    for (regno = 0; regno < 16; ++regno)
+	      if (val & (1 << regno))
+		{
+		  int first_regno;
+		  if (doneany)
+		    fputs_filtered ("/", stream);
+		  doneany = 1;
+		  fprintf_filtered (stream, "%s", reg_names[regno]);
+		  first_regno = regno;
+		  while (val & (1 << (regno + 1)))
+		    ++regno;
+		  if (regno > first_regno)
+		    fprintf_filtered (stream, "-%s", reg_names[regno]);
+		}
+	  }
+	else if (place == '3')
+	  {
+	    /* `fmovem' insn.  */
+	    char doneany;
+	    val = fetch_arg (buffer, place, 8);
+	    if (val == 0)
+	      {
+		fputs_filtered ("#0", stream);
+		break;
+	      }
+	    if (*d == 'l')
+	      {
+		register int newval = 0;
+		for (regno = 0; regno < 8; ++regno)
+		  if (val & (0x80 >> regno))
+		    newval |= 1 << regno;
+		val = newval;
+	      }
+	    val &= 0xff;
+	    doneany = 0;
+	    for (regno = 0; regno < 8; ++regno)
+	      if (val & (1 << regno))
+		{
+		  int first_regno;
+		  if (doneany)
+		    fputs_filtered ("/", stream);
+		  doneany = 1;
+		  fprintf_filtered (stream, "fp%d", regno);
+		  first_regno = regno;
+		  while (val & (1 << (regno + 1)))
+		    ++regno;
+		  if (regno > first_regno)
+		    fprintf_filtered (stream, "-fp%d", regno);
+		}
+	  }
+	else
+	  abort ();
       break;
 
     default:
@@ -629,7 +699,7 @@ print_indexed (basereg, p, addr, stream)
 		  ((word & 0x80) ? word | 0xff00 : word & 0xff)
 		  + ((basereg == -1) ? addr : 0),
 		  stream);
-      fprintf (stream, "%s", buf);
+      fputs_filtered (buf, stream);
       return p;
     }
 
@@ -657,7 +727,7 @@ print_indexed (basereg, p, addr, stream)
   if ((word & 7) == 0)
     {
       print_base (basereg, base_disp, stream);
-      fprintf (stream, "%s", buf);
+      fputs_filtered (buf, stream);
       return p;
     }
 
@@ -673,15 +743,15 @@ print_indexed (basereg, p, addr, stream)
       outer_disp = NEXTLONG (p);
     }
 
-  fprintf (stream, "%d(", outer_disp);
+  fprintf_filtered (stream, "%d(", outer_disp);
   print_base (basereg, base_disp, stream);
 
   /* If postindexed, print the closeparen before the index.  */
   if (word & 4)
-    fprintf (stream, ")%s", buf);
+    fprintf_filtered (stream, ")%s", buf);
   /* If preindexed, print the closeparen after the index.  */
   else
-    fprintf (stream, "%s)", buf);
+    fprintf_filtered (stream, "%s)", buf);
 
   return p;
 }
@@ -696,13 +766,15 @@ print_base (regno, disp, stream)
      FILE *stream;
 {
   if (regno == -2)
-    fprintf (stream, "%d", disp);
+    fprintf_filtered (stream, "%d", disp);
   else if (regno == -1)
-    fprintf (stream, "0x%x", disp);
+    fprintf_filtered (stream, "0x%x", disp);
   else
-    fprintf (stream, "%d(%s)", disp, reg_names[regno]);
+    fprintf_filtered (stream, "%d(%s)", disp, reg_names[regno]);
 }
 
+static int have_fpu = 1;
+
 /* This is not part of insn printing, but it is machine-specific,
    so this is a convenient place to put it.
 
@@ -714,12 +786,17 @@ convert_from_68881 (from, to)
      char *from;
      double *to;
 {
-#ifdef USG_SGS_ASM
+  if (!have_fpu)
+    {
+      *to = 0.0;
+      return;
+    }
+#ifdef HPUX_ASM
   asm ("mov.l 8(%a6),%a0");
   asm ("mov.l 12(%a6),%a1");
   asm ("fmove.x (%a0),%fp0");
   asm ("fmove.d %fp0,(%a1)");
-#else /* not USG_SGS_ASM */
+#else /* not HPUX_ASM */
 #if 0
   asm ("movl a6@(8),a0");
   asm ("movl a6@(12),a1");
@@ -735,7 +812,7 @@ convert_from_68881 (from, to)
   asm (".long 0xf2104800");
   asm (".long 0xf2117400");
 #endif
-#endif /* not USG_SGS_ASM */
+#endif /* not HPUX_ASM */
 }
 
 /* The converse: convert the double *FROM to an extended float
@@ -745,12 +822,14 @@ convert_to_68881 (from, to)
      double *from;
      char *to;
 {
-#ifdef USG_SGS_ASM
+  if (!have_fpu)
+      return;
+#ifdef HPUX_ASM
   asm ("mov.l 8(%a6),%a0");
   asm ("mov.l 12(%a6),%a1");
   asm ("fmove.d (%a0),%fp0");
   asm ("fmove.x %fp0,(%a1)");
-#else /* not USG_SGS_ASM */
+#else /* not HPUX_ASM */
 #if 0
   asm ("movl a6@(8),a0");
   asm ("movl a6@(12),a1");
@@ -765,5 +844,37 @@ convert_to_68881 (from, to)
   asm (".long 0xf2105400");
   asm (".long 0xf2116800");
 #endif
-#endif /* not USG_SGS_ASM */
+#endif /* not HPUX_ASM */
+}
+
+static jmp_buf	fpu_check;
+
+void
+sigemt()
+{
+    have_fpu = 0;
+    longjmp (fpu_check, 1);
+}
+
+void
+_initialize_pinsn()
+{
+  /* Want to figure out if we've got a coprocessor. The idea is to catch the
+     signal that gets delivered if no coprocessor is around (SIGEMT) then
+     execute a coprocessor instruction and see what happens. have_fpu is set
+     to zero if the EMT signal arrives. Else it is left at 1.  */
+  /* If this turns out not to be portable to all 68k machines, we'll
+     have to move it to the dep files.  */
+  void (*emthandler) ();
+
+  emthandler = (void (*) ()) signal (SIGEMT, sigemt);
+  if (!setjmp (fpu_check))
+    {
+#if defined(HPUX_ASM)
+      asm (" long       0xf2000600");   /* fmovel fp0, d0 */
+#else
+      asm(".long	0xf2000600");	/* fmovel fp0, d0 */
+#endif
+    }
+  signal(SIGEMT, emthandler);
 }

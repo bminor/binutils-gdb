@@ -19,6 +19,25 @@ struct not			/* ns32k opcode text */
   struct not_wot    detail;	/* rest of opcode table          [datum] */
 };
 
+/* Instructions look like this:
+    
+   basic instruction--1, 2, or 3 bytes
+   index byte for operand A, if operand A is indexed--1 byte
+   index byte for operand B, if operand B is indexed--1 byte
+   addressing extension for operand A
+   addressing extension for operand B
+   implied operands
+
+   Operand A is the operand listed first in the following opcode table.
+   Operand B is the operand listed second in the following opcode table.
+   All instructions have at most 2 general operands, so this is enough.
+   The implied operands are associated with operands other than A and B.
+
+   Each operand has a digit and a letter.
+   
+   The digit gives the position in the assembly language.  The letter,
+   one of the following, tells us what kind of operand it is.  */
+
 /* F : 32 bit float
  * L : 64 bit float
  * B : byte
@@ -229,7 +248,7 @@ notstrs[] =
   { "notd",	14,24,	0x274e, "1D2D" },
   { "orb",	 6,16,	0x18,	"1B1B" },
   { "orw",	 6,16,	0x19,	"1W1W" },
-  { "ord",	 6,16,	0x1b,	"1D1D" },
+  { "ord",	 6,16,	0x1b,	"1D2D" },
   { "quob",	14,24,	0x30ce,	"1B2B" },
   { "quow",	14,24,	0x31ce,	"1W2W" },
   { "quod",	14,24,	0x33ce,	"1D2D" },

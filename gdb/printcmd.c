@@ -1,22 +1,21 @@
 /* Print values for GNU debugger GDB.
-   Copyright (C) 1986, 1987, 1988 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1988, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
@@ -70,6 +69,9 @@ void print_scalar_formatted ();
 /* Decode a format specification.  *STRING_PTR should point to it.
    OFORMAT and OSIZE are used as defaults for the format and size
    if none are given in the format specification.
+   If OSIZE is zero, then the size field of the returned value
+   should be set only if a size is explicitly specified by the
+   user.
    The structure returned describes all the data
    found in the specification.  In addition, *STRING_PTR is advanced
    past the specification and past all whitespace following it.  */
@@ -83,8 +85,8 @@ decode_format (string_ptr, oformat, osize)
   struct format_data val;
   register char *p = *string_ptr;
 
-  val.format = oformat;
-  val.size = osize;
+  val.format = '?';
+  val.size = '?';
   val.count = 1;
 
   if (*p >= '0' && *p <= '9')
@@ -120,6 +122,46 @@ decode_format (string_ptr, oformat, osize)
   while (*p == ' ' || *p == '\t') p++;
   *string_ptr = p;
 
+  /* Set defaults for format and size if not specified.  */
+  if (val.format == '?')
+    {
+      if (val.size == '?')
+	{
+	  /* Neither has been specified.  */
+	  val.format = oformat;
+	  val.size = osize;
+	}
+      else
+	/* If a size is specified, any format makes a reasonable
+	   default except 'i'.  */
+	val.format = oformat == 'i' ? 'x' : oformat;
+    }
+  else if (val.size == '?')
+    switch (val.format)
+      {
+      case 'a':
+      case 's':
+	/* Addresses must be words.  */
+	val.size = osize ? 'w' : osize;
+	break;
+      case 'f':
+	/* Floating point has to be word or giantword.  */
+	if (osize == 'w' || osize == 'g')
+	  val.size = osize;
+	else
+	  /* Default it to giantword if the last used size is not
+	     appropriate.  */
+	  val.size = osize ? 'g' : osize;
+	break;
+      case 'c':
+	/* Characters default to one byte.  */
+	val.size = osize ? 'b' : osize;
+	break;
+      default:
+	/* The default is the size most recently specified.  */
+	val.size = osize;
+      }
+
   return val;
 }
 
@@ -144,7 +186,7 @@ print_formatted (val, format, size)
     {
     case 's':
       next_address = VALUE_ADDRESS (val)
-	+ value_print (value_addr (val), stdout, 0);
+	+ value_print (value_addr (val), stdout, 0, Val_pretty_default);
       break;
 
     case 'i':
@@ -158,7 +200,7 @@ print_formatted (val, format, size)
 	  || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_STRUCT
 	  || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_UNION
 	  || VALUE_REPEATED (val))
-	value_print (val, stdout, format);
+	value_print (val, stdout, format, Val_pretty_default);
       else
 	print_scalar_formatted (VALUE_CONTENTS (val), VALUE_TYPE (val),
 				format, size, stdout);
@@ -200,11 +242,11 @@ print_scalar_formatted (valaddr, type, format, size, stream)
       v1 = v2;
       v2 = tmp;
 #endif
-
+  
       switch (format)
 	{
 	case 'x':
-	  fprintf (stream, "0x%08x%08x", v1, v2);
+	  fprintf_filtered (stream, "0x%08x%08x", v1, v2);
 	  break;
 	default:
 	  error ("Output size \"g\" unimplemented for format \"%c\".",
@@ -235,17 +277,17 @@ print_scalar_formatted (valaddr, type, format, size, stream)
       switch (size)
 	{
 	case 'b':
-	  fprintf (stream, "0x%02llx", val_long);
+	  fprintf_filtered (stream, "0x%02llx", val_long);
 	  break;
 	case 'h':
-	  fprintf (stream, "0x%04llx", val_long);
+	  fprintf_filtered (stream, "0x%04llx", val_long);
 	  break;
 	case 0:		/* no size specified, like in print */
 	case 'w':
-	  fprintf (stream, "0x%08llx", val_long);
+	  fprintf_filtered (stream, "0x%08llx", val_long);
 	  break;
 	case 'g':
-	  fprintf (stream, "0x%16llx", val_long);
+	  fprintf_filtered (stream, "0x%016llx", val_long);
 	  break;
 	default:
 	  error ("Undefined output size \"%c\".", size);
@@ -254,17 +296,17 @@ print_scalar_formatted (valaddr, type, format, size, stream)
       switch (size)
 	{
 	case 'b':
-	  fprintf (stream, "0x%02x", val_long);
+	  fprintf_filtered (stream, "0x%02x", val_long);
 	  break;
 	case 'h':
-	  fprintf (stream, "0x%04x", val_long);
+	  fprintf_filtered (stream, "0x%04x", val_long);
 	  break;
 	case 0:		/* no size specified, like in print */
 	case 'w':
-	  fprintf (stream, "0x%08x", val_long);
+	  fprintf_filtered (stream, "0x%08x", val_long);
 	  break;
 	case 'g':
-	  fprintf (stream, "0x%16x", val_long);
+	  fprintf_filtered (stream, "0x%o16x", val_long);
 	  break;
 	default:
 	  error ("Undefined output size \"%c\".", size);
@@ -274,29 +316,29 @@ print_scalar_formatted (valaddr, type, format, size, stream)
 
     case 'd':
 #ifdef LONG_LONG
-      fprintf (stream, "%lld", val_long);
+      fprintf_filtered (stream, "%lld", val_long);
 #else
-      fprintf (stream, "%d", val_long);
+      fprintf_filtered (stream, "%d", val_long);
 #endif
       break;
 
     case 'u':
 #ifdef LONG_LONG
-      fprintf (stream, "%llu", val_long);
+      fprintf_filtered (stream, "%llu", val_long);
 #else
-      fprintf (stream, "%u", val_long);
+      fprintf_filtered (stream, "%u", val_long);
 #endif
       break;
 
     case 'o':
       if (val_long)
 #ifdef LONG_LONG
-	fprintf (stream, "0%llo", val_long);
+	fprintf_filtered (stream, "0%llo", val_long);
 #else
-	fprintf (stream, "0%o", val_long);
+	fprintf_filtered (stream, "0%o", val_long);
 #endif
       else
-	fprintf (stream, "0");
+	fprintf_filtered (stream, "0");
       break;
 
     case 'a':
@@ -304,7 +346,8 @@ print_scalar_formatted (valaddr, type, format, size, stream)
       break;
 
     case 'c':
-      value_print (value_from_long (builtin_type_char, val_long), stream, 0);
+      value_print (value_from_long (builtin_type_char, val_long), stream, 0,
+		   Val_pretty_default);
       break;
 
     case 'f':
@@ -312,24 +355,22 @@ print_scalar_formatted (valaddr, type, format, size, stream)
 	type = builtin_type_float;
       else if (len == sizeof (double))
 	type = builtin_type_double;
-      else abort();
-
 #ifdef IEEE_FLOAT
-      if (is_nan (valaddr, len))
+      if (is_nan (type, valaddr))
 	{
-	  fprintf (stream, "NaN");
+	  fprintf_filtered (stream, "Nan");
 	  break;
 	}
 #endif
       {
 	double doub;
 	int inv;
-
+	
 	doub = unpack_double (type, valaddr, &inv);
 	if (inv)
-	  fprintf (stream, "Invalid float value");
-	else 
-	  fprintf (stream, len > 4? "%.16g": "%.6g", doub);
+	  fprintf_filtered (stream, "Invalid float value");
+	else
+	  fprintf_filtered (stream, len > 4 ? "%.16g" : "%.6g", doub);
       }
       break;
 
@@ -364,37 +405,24 @@ print_address (addr, stream)
      CORE_ADDR addr;
      FILE *stream;
 {
-  register int i;
-  struct symbol *fs;
+  register int i = 0;
+  register char *format;
+  register struct symbol *fs;
   char *name;
   int name_location;
 
-  fprintf (stream, "0x%x", addr);
+  i = find_pc_partial_function (addr, &name, &name_location);
 
-  fs = find_pc_function (addr);
-
-  if (!fs)
-    {
-      i = find_pc_misc_function (addr);
-
-      if (i < 0) return;	/* If nothing comes through, don't
-				   print anything symbolic */
-
-      name = misc_function_vector[i].name;
-      name_location = misc_function_vector[i].address;
-    }
+  /* If nothing comes out, don't print anything symbolic.  */
+  
+  if (i == 0)
+    format = "0x%x";
+  else if (addr - name_location)
+    format = "0x%x <%s+%d>";
   else
-    {
-      name = fs->name;
-      name_location = BLOCK_START (SYMBOL_BLOCK_VALUE (fs));
-    }
+    format = "0x%x <%s>";
 
-  if (addr - name_location)
-    fprintf (stream, " <%s+%d>",
-	     name,
-	     addr - name_location);
-  else
-    fprintf (stream, " <%s>", name);
+  fprintf_filtered (stream, format, addr, name, addr - name_location);
 }
 
 /* Examine data at address ADDR in format FMT.
@@ -449,19 +477,19 @@ do_examine (fmt, addr)
   while (count > 0)
     {
       print_address (next_address, stdout);
-      fputc (':', stdout);
+      printf_filtered (":");
       for (i = maxelts;
 	   i > 0 && count > 0;
 	   i--, count--)
 	{
-	  fputc ('\t', stdout);
+	  printf_filtered ("\t");
 	  /* Note that print_formatted sets next_address for the next
 	     object.  */
 	  last_examine_address = next_address;
 	  last_examine_value = value_at (val_type, next_address);
 	  print_formatted (last_examine_value, format, size);
 	}
-      fputc ('\n', stdout);
+      printf_filtered ("\n");
       fflush (stdout);
     }
 }
@@ -512,10 +540,10 @@ print_command (exp)
     val = access_value_history (0);
 
   histindex = record_latest_value (val);
-  if (histindex >= 0) printf ("$%d = ", histindex);
+  if (histindex >= 0) printf_filtered ("$%d = ", histindex);
 
   print_formatted (val, format, fmt.size);
-  printf ("\n");
+  printf_filtered ("\n");
 
   if (cleanup)
     do_cleanups (old_chain);
@@ -580,7 +608,7 @@ address_info (exp)
 
       if (is_a_field_of_this)
 	{
-	  printf("Symbol \"%s\" is a field of the local class variable `this'\n", exp);
+	  printf ("Symbol \"%s\" is a field of the local class variable `this'\n", exp);
 	  return;
 	}
 
@@ -630,6 +658,10 @@ address_info (exp)
       printf ("a local variable at frame offset %d", val);
       break;
 
+    case LOC_REF_ARG:
+      printf ("a reference argument at offset %d", val);
+      break;
+
     case LOC_TYPEDEF:
       printf ("a typedef");
       break;
@@ -650,6 +682,7 @@ x_command (exp, from_tty)
   struct expression *expr;
   struct format_data fmt;
   struct cleanup *old_chain;
+  struct value *val;
 
   fmt.format = last_format;
   fmt.size = last_size;
@@ -674,7 +707,13 @@ x_command (exp, from_tty)
       if (from_tty)
 	*exp = 0;
       old_chain = make_cleanup (free_current_contents, &expr);
-      next_address = (CORE_ADDR) value_as_long (evaluate_expression (expr));
+      val = evaluate_expression (expr);
+      if (last_format == 'i'
+	  && TYPE_CODE (VALUE_TYPE (val)) != TYPE_CODE_PTR
+	  && VALUE_LVAL (val) == lval_memory)
+	next_address = VALUE_ADDRESS (val);
+      else
+	next_address = (CORE_ADDR) value_as_long (val);
       do_cleanups (old_chain);
     }
 
@@ -712,9 +751,12 @@ whatis_command (exp)
   else
     val = access_value_history (0);
 
-  printf ("type = ");
-  type_print (VALUE_TYPE (val), "", stdout, 1);
-  printf ("\n");
+  printf_filtered ("type = ");
+  /* Most of the time users do not want to see all the fields
+     in a structure.  If they do they can use the "ptype" command.
+     Hence the "-1" below.  */
+  type_print (VALUE_TYPE (val), "", stdout, -1);
+  printf_filtered ("\n");
 
   if (exp)
     do_cleanups (old_chain);
@@ -753,28 +795,28 @@ ptype_command (typename)
 	    = lookup_symbol (typename, b, STRUCT_NAMESPACE, 0);
 	  if (sym == 0)
 	    error ("No type named %s.", typename);
-	  printf ("No type named %s, but there is a ",
+	  printf_filtered ("No type named %s, but there is a ",
 		  typename);
 	  switch (TYPE_CODE (SYMBOL_TYPE (sym)))
 	    {
 	    case TYPE_CODE_STRUCT:
-	      printf ("struct");
+	      printf_filtered ("struct");
 	      break;
 
 	    case TYPE_CODE_UNION:
-	      printf ("union");
+	      printf_filtered ("union");
 	      break;
 
 	    case TYPE_CODE_ENUM:
-	      printf ("enum");
+	      printf_filtered ("enum");
 	    }
-	  printf (" %s.  Type \"help ptype\".\n", typename);
+	  printf_filtered (" %s.  Type \"help ptype\".\n", typename);
 	  type = SYMBOL_TYPE (sym);
 	}
     }
 
   type_print (type, "", stdout, 1);
-  printf ("\n");
+  printf_filtered ("\n");
 }
 
 enum display_status {disabled, enabled};
@@ -972,21 +1014,21 @@ do_one_display (d)
 
   current_display_number = d->number;
 
-  printf ("%d: ", d->number);
+  printf_filtered ("%d: ", d->number);
   if (d->format.size)
     {
-      printf ("x/");
+      printf_filtered ("x/");
       if (d->format.count != 1)
-	printf ("%d", d->format.count);
-      printf ("%c", d->format.format);
+	printf_filtered ("%d", d->format.count);
+      printf_filtered ("%c", d->format.format);
       if (d->format.format != 'i' && d->format.format != 's')
-	printf ("%c", d->format.size);
-      printf (" ");
+	printf_filtered ("%c", d->format.size);
+      printf_filtered (" ");
       print_expression (d->exp, stdout);
       if (d->format.count != 1)
-	printf ("\n");
+	printf_filtered ("\n");
       else
-	printf ("  ");
+	printf_filtered ("  ");
       do_examine (d->format,
 		  (CORE_ADDR) value_as_long (evaluate_expression (d->exp)));
 
@@ -994,12 +1036,12 @@ do_one_display (d)
   else
     {
       if (d->format.format)
-	printf ("/%c ", d->format.format);
+	printf_filtered ("/%c ", d->format.format);
       print_expression (d->exp, stdout);
-      printf (" = ");
+      printf_filtered (" = ");
       print_formatted (evaluate_expression (d->exp),
 		       d->format.format, d->format.size);
-      printf ("\n");
+      printf_filtered ("\n");
     }
 
   fflush (stdout);
@@ -1022,12 +1064,27 @@ do_displays ()
    This is done when there is an error or a signal.  */
 
 void
-delete_current_display ()
+disable_display (num)
+     int num;
+{
+  register struct display *d;
+
+  for (d = display_chain; d; d = d->next)
+    if (d->number == num)
+      {
+	d->status = disabled;
+	return;
+      }
+  printf ("No display number %d.\n", num);
+}
+  
+void
+disable_current_display ()
 {
   if (current_display_number >= 0)
     {
-      delete_display (current_display_number);
-      fprintf (stderr, "Deleting display %d to avoid infinite recursion.\n",
+      disable_display (current_display_number);
+      fprintf (stderr, "Disabling display %d to avoid infinite recursion.\n",
 	       current_display_number);
     }
   current_display_number = -1;
@@ -1041,21 +1098,21 @@ display_info ()
   if (!display_chain)
     printf ("There are no auto-display expressions now.\n");
   else
-      printf ("Auto-display expressions now in effect:\n\
+      printf_filtered ("Auto-display expressions now in effect:\n\
 Num Enb Expression\n");
 
   for (d = display_chain; d; d = d->next)
     {
-      printf ("%d:   %c  ", d->number, "ny"[(int)d->status]);
+      printf_filtered ("%d:   %c  ", d->number, "ny"[(int)d->status]);
       if (d->format.size)
-	printf ("/%d%c%c ", d->format.count, d->format.size,
+	printf_filtered ("/%d%c%c ", d->format.count, d->format.size,
 		d->format.format);
       else if (d->format.format)
-	printf ("/%c ", d->format.format);
+	printf_filtered ("/%c ", d->format.format);
       print_expression (d->exp, stdout);
       if (d->block && !contained_in (get_selected_block (), d->block))
-	printf (" (cannot be evaluated in the current context)");
-      printf ("\n");
+	printf_filtered (" (cannot be evaluated in the current context)");
+      printf_filtered ("\n");
       fflush (stdout);
     }
 }
@@ -1071,7 +1128,7 @@ enable_display (args)
 
   if (p == 0)
     {
-      for (d = display_chain; d; d->next)
+      for (d = display_chain; d; d = d->next)
 	d->status = enabled;
     }
   else
@@ -1100,8 +1157,9 @@ enable_display (args)
 }
 
 void
-disable_display (args)
+disable_display_command (args, from_tty)
      char *args;
+     int from_tty;
 {
   register char *p = args;
   register char *p1;
@@ -1110,7 +1168,7 @@ disable_display (args)
 
   if (p == 0)
     {
-      for (d = display_chain; d; d->next)
+      for (d = display_chain; d; d = d->next)
 	d->status = disabled;
     }
   else
@@ -1124,14 +1182,8 @@ disable_display (args)
 	
 	num = atoi (p);
 	
-	for (d = display_chain; d; d = d->next)
-	  if (d->number == num)
-	    {
-	      d->status = disabled;
-	      goto win;
-	    }
-	printf ("No display number %d.\n", num);
-      win:
+	disable_display (atoi (p));
+
 	p = p1;
 	while (*p == ' ' || *p == '\t')
 	  p++;
@@ -1149,7 +1201,14 @@ print_variable_value (var, frame, stream)
      FILE *stream;
 {
   value val = read_var_value (var, frame);
-  value_print (val, stream, 0);
+  value_print (val, stream, 0, Val_pretty_default);
+}
+
+static int
+compare_ints (i, j)
+     int *i, *j;
+{
+  return *i - *j;
 }
 
 /* Print the arguments of a stack frame, given the function FUNC
@@ -1169,10 +1228,10 @@ print_frame_args (func, fi, num, stream)
   int nsyms = 0;
   int first = 1;
   register int i;
-  register int last_offset = FRAME_ARGS_SKIP;
   register int last_regparm = 0;
   register struct symbol *lastsym, *sym, *nextsym;
   register value val;
+  CORE_ADDR highest_offset = 0;
   register CORE_ADDR addr = FRAME_ARGS_ADDRESS (fi);
 
   if (func)
@@ -1181,72 +1240,66 @@ print_frame_args (func, fi, num, stream)
       nsyms = BLOCK_NSYMS (b);
     }
 
-  lastsym = 0;
-  while (1)
+  for (i = 0; i < nsyms; i++)
     {
-      /* Find first arg that is not before LAST_OFFSET.  */
-      nextsym = 0;
-      for (i = 0; i < nsyms; i++)
-	{
-	  QUIT;
-	  sym = BLOCK_SYM (b, i);
-	  if (SYMBOL_CLASS (sym) == LOC_ARG)
-	    {
-	      if (SYMBOL_VALUE (sym) >= last_offset
-		  && (nextsym == 0
-		      || SYMBOL_VALUE (sym) < SYMBOL_VALUE (nextsym)))
-		nextsym = sym;
-	    }
-	  else if (SYMBOL_CLASS (sym) == LOC_REGPARM)
-	    {
-	      /* This shouldn't be sorted by number.  Since we can't
-		 find nameless args with register parameters, print
-		 this out in order by .stabs.  */
-	      if (sym > lastsym && nextsym == 0)
-		nextsym = sym;
-	    }
-	}
-      if (nextsym == 0)
-	break;
-      sym = nextsym;
-      /* Print any nameless args between the last arg printed
-	 and the next arg.  */
-      if (SYMBOL_CLASS (sym) == LOC_ARG
-	  && last_offset != (SYMBOL_VALUE (sym) / sizeof (int)) * sizeof (int))
-	{
-	  print_frame_nameless_args (addr, last_offset, SYMBOL_VALUE (sym),
-				     stream);
-	  first = 0;
-	}
+      QUIT;
+      sym = BLOCK_SYM (b, i);
+
+      if (SYMBOL_CLASS (sym) != LOC_REGPARM
+	  && SYMBOL_CLASS (sym) != LOC_ARG
+	  && SYMBOL_CLASS (sym) != LOC_REF_ARG)
+	continue;
+
       /* Print the next arg.  */
       if (SYMBOL_CLASS (sym) == LOC_REGPARM)
 	val = value_from_register (SYMBOL_TYPE (sym),
 				   SYMBOL_VALUE (sym),
 				   FRAME_INFO_ID (fi));
       else
-	val = value_at (SYMBOL_TYPE (sym), addr + SYMBOL_VALUE (sym));
+	{
+	  int current_offset = SYMBOL_VALUE (sym);
+	  int arg_size = TYPE_LENGTH (SYMBOL_TYPE (sym));
+	  
+	  if (SYMBOL_CLASS (sym) == LOC_REF_ARG)
+	    val = value_at (SYMBOL_TYPE (sym),
+			    read_memory_integer (addr + current_offset,
+						 sizeof (CORE_ADDR)));
+	  else
+	    val = value_at (SYMBOL_TYPE (sym), addr + current_offset);
+
+	  /* Round up address of next arg to multiple of size of int.  */
+	  current_offset
+	    = (((current_offset + sizeof (int) - 1) / sizeof (int))
+	       * sizeof (int));
+	  
+	  if ((current_offset
+	      + (arg_size - sizeof (int) + 3) / (sizeof (int)))
+	      > highest_offset)
+	    highest_offset = current_offset;
+	}
 
       if (! first)
-	fprintf (stream, ", ");
-      fprintf (stream, "%s=", SYMBOL_NAME (sym));
-      value_print (val, stream, 0);
+	fprintf_filtered (stream, ", ");
+      fputs_filtered (SYMBOL_NAME (sym), stream);
+      fputs_filtered ("=", stream);
+      value_print (val, stream, 0, Val_no_prettyprint);
       first = 0;
-      if (SYMBOL_CLASS (sym) == LOC_ARG)
-	last_offset = SYMBOL_VALUE (sym) + TYPE_LENGTH (SYMBOL_TYPE (sym));
-      else
-	{
-	  last_regparm = SYMBOL_VALUE (sym) + 1;
-	  last_offset += TYPE_LENGTH (SYMBOL_TYPE (sym));
-	}
-      
-      /* Round up address of next arg to multiple of size of int.  */
-      last_offset
-	= ((last_offset + sizeof (int) - 1) / sizeof (int)) * sizeof (int);
-      lastsym = sym;
     }
-  if (num >= 0 && num * sizeof (int) + FRAME_ARGS_SKIP > last_offset)
-    print_frame_nameless_args (addr, last_offset,
-			       num * sizeof (int) + FRAME_ARGS_SKIP, stream);
+
+  /* Don't print nameless args in situations where we don't know
+     enough about the stack to find them.  */
+  if (num != -1)
+    {
+      if (i && num * sizeof (int) + FRAME_ARGS_SKIP > highest_offset)
+	print_frame_nameless_args (addr,
+				   highest_offset + sizeof (int),
+				   num * sizeof (int) + FRAME_ARGS_SKIP,
+				   stream);
+      else 
+	print_frame_nameless_args (addr, FRAME_ARGS_SKIP,
+				   num * sizeof (int) + FRAME_ARGS_SKIP,
+				   stream);
+    }
 }
 
 static void
@@ -1260,9 +1313,16 @@ print_frame_nameless_args (argsaddr, start, end, stream)
     {
       QUIT;
       if (start != FRAME_ARGS_SKIP)
-	fprintf (stream, ", ");
-      fprintf (stream, "%d",
+	fprintf_filtered (stream, ", ");
+#ifndef PRINT_TYPELESS_INTEGER
+      fprintf_filtered (stream, "%d",
 	       read_memory_integer (argsaddr + start, sizeof (int)));
+#else
+      PRINT_TYPELESS_INTEGER (stream, builtin_type_int,
+			      (LONGEST)
+			      read_memory_integer (argsaddr + start,
+						   sizeof (int)));
+#endif
       start += sizeof (int);
     }
 }
@@ -1278,10 +1338,6 @@ printf_command (arg)
   int nargs = 0;
   int allocated_args = 20;
   char *arg_bytes;
-  char *argclass;
-  int i;
-  int argindex;
-  int nargs_wanted;
 
   val_args = (value *) xmalloc (allocated_args * sizeof (value));
 
@@ -1348,113 +1404,217 @@ printf_command (arg)
   if (*s == ',') s++;
   while (*s == ' ' || *s == '\t') s++;
 
-  /* Now scan the string for %-specs and see what kinds of args they want.
-     argclass[I] is set to 1 if the Ith arg should be a string. 
-     It's set to 2 if the Ith arg should be floating point. */
-
-  argclass = (char *) alloca (strlen (s));
-  nargs_wanted = 0;
-  f = string;
-  while (*f)
-    if (*f++ == '%')
-      {
-	while (index ("0123456789.hlL-+ #", *f)) f++;
-	if (*f == 's')
-	  argclass[nargs_wanted++] = 1;
-	else if (*f == 'e' || *f == 'f' || *f == 'g')
-	  argclass[nargs_wanted++] = 2;
-	else if (*f != '%')
-	  argclass[nargs_wanted++] = 0;
-	f++;
-      }
-
-  /* Now, parse all arguments and evaluate them.
-     Store the VALUEs in VAL_ARGS.  */
-
-  while (*s != '\0')
-    {
-      char *s1;
-      if (nargs == allocated_args)
-	val_args = (value *) xrealloc (val_args,
-				       (allocated_args *= 2)
-				       * sizeof (value));
-      s1 = s;
-      val_args[nargs] = parse_to_comma_and_eval (&s1);
-
-      /* If format string wants a float, unchecked-convert the value to
-	 floating point of the same size */
-
-      if (argclass[nargs] == 2)
+  {
+    /* Now scan the string for %-specs and see what kinds of args they want.
+       argclass[I] classifies the %-specs so we can give vprintf something
+       of the right size.  */
+ 
+    enum argclass {int_arg, string_arg, double_arg, long_long_arg};
+    enum argclass *argclass;
+    int nargs_wanted;
+    int argindex;
+    int lcount;
+    int i;
+ 
+    argclass = (enum argclass *) alloca (strlen (s) * sizeof *argclass);
+    nargs_wanted = 0;
+    f = string;
+    while (*f)
+      if (*f++ == '%')
 	{
-	  argclass[nargs] = 0;
-	  if (TYPE_LENGTH (VALUE_TYPE (val_args[nargs])) == sizeof (float))
-	    VALUE_TYPE (val_args[nargs]) = builtin_type_float;
-	  if (TYPE_LENGTH (VALUE_TYPE (val_args[nargs])) == sizeof (double))
-	    VALUE_TYPE (val_args[nargs]) = builtin_type_double;
-	}
-      nargs++;
-      s = s1;
-      if (*s == ',')
-	s++;
-    }
-
-  if (nargs != nargs_wanted)
-    error ("Wrong number of arguments for specified format-string");
-
-  /* Now lay out an argument-list containing the arguments
-     as doubles, integers and C pointers.  */
-
-  arg_bytes = (char *) alloca (sizeof (double) * nargs);
-  argindex = 0;
-  for (i = 0; i < nargs; i++)
-    {
-      if (argclass[i])
-	{
-	  char *str;
-	  int tem, j;
-	  tem = value_as_long (val_args[i]);
-
-	  /* This is a %s argument.  Find the length of the string.  */
-	  for (j = 0; ; j++)
+	  lcount = 0;
+	  while (index ("0123456789.hlL-+ #", *f)) 
 	    {
-	      char c;
-	      QUIT;
-	      read_memory (tem + j, &c, 1);
-	      if (c == 0)
-		break;
+	      if (*f == 'l' || *f == 'L')
+		lcount++;
+	      f++;
 	    }
-
-	  /* Copy the string contents into a string inside GDB.  */
-	  str = (char *) alloca (j + 1);
-	  read_memory (tem, str, j);
-	  str[j] = 0;
-
-	  /* Pass address of internal copy as the arg to vprintf.  */
-	  *((int *) &arg_bytes[argindex]) = (int) str;
-	  argindex += sizeof (int);
+	  if (*f == 's')
+	    argclass[nargs_wanted++] = string_arg;
+	  else if (*f == 'e' || *f == 'f' || *f == 'g')
+	    argclass[nargs_wanted++] = double_arg;
+	  else if (lcount > 1)
+	    argclass[nargs_wanted++] = long_long_arg;
+	  else if (*f != '%')
+	    argclass[nargs_wanted++] = int_arg;
+	  f++;
 	}
-      else if (VALUE_TYPE (val_args[i])->code == TYPE_CODE_FLT)
-	{
-	  *((double *) &arg_bytes[argindex]) = value_as_double (val_args[i]);
-	  argindex += sizeof (double);
-	}
-      else
-#ifdef LONG_LONG
-	if (TYPE_LENGTH (VALUE_TYPE (val_args[i])) == sizeof (long long))
+ 
+    /* Now, parse all arguments and evaluate them.
+       Store the VALUEs in VAL_ARGS.  */
+ 
+    while (*s != '\0')
+      {
+	char *s1;
+	if (nargs == allocated_args)
+	  val_args = (value *) xrealloc (val_args,
+					 (allocated_args *= 2)
+					 * sizeof (value));
+	s1 = s;
+	val_args[nargs] = parse_to_comma_and_eval (&s1);
+ 
+	/* If format string wants a float, unchecked-convert the value to
+	   floating point of the same size */
+ 
+	if (argclass[nargs] == double_arg)
 	  {
-	    *(long long *) &arg_bytes[argindex] = value_as_long (val_args[i]);
-	    argindex += sizeof (long long);
+	    if (TYPE_LENGTH (VALUE_TYPE (val_args[nargs])) == sizeof (float))
+	      VALUE_TYPE (val_args[nargs]) = builtin_type_float;
+	    if (TYPE_LENGTH (VALUE_TYPE (val_args[nargs])) == sizeof (double))
+	      VALUE_TYPE (val_args[nargs]) = builtin_type_double;
+	  }
+	nargs++;
+	s = s1;
+	if (*s == ',')
+	  s++;
+      }
+ 
+    if (nargs != nargs_wanted)
+      error ("Wrong number of arguments for specified format-string");
+ 
+    /* Now lay out an argument-list containing the arguments
+       as doubles, integers and C pointers.  */
+ 
+    arg_bytes = (char *) alloca (sizeof (double) * nargs);
+    argindex = 0;
+    for (i = 0; i < nargs; i++)
+      {
+	if (argclass[i] == string_arg)
+	  {
+	    char *str;
+	    int tem, j;
+	    tem = value_as_long (val_args[i]);
+ 
+	    /* This is a %s argument.  Find the length of the string.  */
+	    for (j = 0; ; j++)
+	      {
+		char c;
+		QUIT;
+		read_memory (tem + j, &c, 1);
+		if (c == 0)
+		  break;
+	      }
+ 
+	    /* Copy the string contents into a string inside GDB.  */
+	    str = (char *) alloca (j + 1);
+	    read_memory (tem, str, j);
+	    str[j] = 0;
+ 
+	    /* Pass address of internal copy as the arg to vprintf.  */
+	    *((int *) &arg_bytes[argindex]) = (int) str;
+	    argindex += sizeof (int);
+	  }
+	else if (VALUE_TYPE (val_args[i])->code == TYPE_CODE_FLT)
+	  {
+	    *((double *) &arg_bytes[argindex]) = value_as_double (val_args[i]);
+	    argindex += sizeof (double);
 	  }
 	else
+#ifdef LONG_LONG
+	  if (argclass[i] == long_long_arg)
+	    {
+	      *(long long *) &arg_bytes[argindex] = value_as_long (val_args[i]);
+	      argindex += sizeof (long long);
+	    }
+	  else
 #endif
-	{
-	  *((int *) &arg_bytes[argindex]) = value_as_long (val_args[i]);
-	  argindex += sizeof (int);
-	}
-    }
-
+	    {
+	      *((int *) &arg_bytes[argindex]) = value_as_long (val_args[i]);
+	      argindex += sizeof (int);
+	    }
+      }
+  }
   vprintf (string, arg_bytes);
 }
+
+/* Helper function for asdump_command.  Finds the bounds of a function
+   for a specified section of text.  PC is an address within the
+   function which you want bounds for; *LOW and *HIGH are set to the
+   beginning (inclusive) and end (exclusive) of the function.  This
+   function returns 1 on success and 0 on failure.  */
+
+static int
+containing_function_bounds (pc, low, high)
+     CORE_ADDR pc, *low, *high;
+{
+  int scan;
+
+  if (!find_pc_partial_function (pc, 0, low))
+    return 0;
+
+  scan = *low;
+  do {
+    scan++;
+    if (!find_pc_partial_function (scan, 0, high))
+      return 0;
+  } while (*low == *high);
+
+  return 1;
+}
+
+/* Dump a specified section of assembly code.  With no command line
+   arguments, this command will dump the assembly code for the
+   function surrounding the pc value in the selected frame.  With one
+   argument, it will dump the assembly code surrounding that pc value.
+   Two arguments are interpeted as bounds within which to dump
+   assembly.  */
+
+static void
+disassemble_command (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  CORE_ADDR low, high;
+  CORE_ADDR pc;
+  char *space_index;
+
+  if (!arg)
+    {
+      if (!selected_frame)
+	error ("No frame selected.\n");
+
+      pc = get_frame_pc (selected_frame);
+      if (!containing_function_bounds (pc, &low, &high))
+	error ("No function contains pc specified by selected frame.\n");
+    }
+  else if (!(space_index = (char *) index (arg, ' ')))
+    {
+      /* One argument.  */
+      pc = parse_and_eval_address (arg);
+      if (!containing_function_bounds (pc, &low, &high))
+	error ("No function contains specified pc.\n");
+    }
+  else
+    {
+      /* Two arguments.  */
+      *space_index = '\0';
+      low = parse_and_eval_address (arg);
+      high = parse_and_eval_address (space_index + 1);
+    }
+
+  printf_filtered ("Dump of assembler code ");
+  if (!space_index)
+    {
+      char *name;
+      find_pc_partial_function (pc, &name, 0);
+      printf_filtered ("for function %s:\n", name);
+    }
+  else
+    printf_filtered ("from 0x%x to 0x%x:\n", low, high);
+
+  /* Dump the specified range.  */
+  for (pc = low; pc < high; )
+    {
+      QUIT;
+      print_address (pc, stdout);
+      printf_filtered (":\t");
+      pc += print_insn (pc, stdout);
+      printf_filtered ("\n");
+    }
+  printf_filtered ("End of assembler dump.\n");
+  fflush (stdout);
+}
+
 
 extern struct cmd_list_element *enablelist, *disablelist, *deletelist;
 extern struct cmd_list_element *cmdlist, *setlist;
@@ -1481,6 +1641,12 @@ Defaults for format and size letters are those previously used.\n\
 Default count is 1.  Default address is following last thing printed\n\
 with this command or \"print\".");
 
+  add_com ("disassemble", class_vars, disassemble_command,
+	   "Disassemble a specified section of memory.\n\
+Default is the function surrounding the pc of the selected frame.\n\
+With a single argument, the function surrounding that address is dumped.\n\
+Two arguments are taken as a range of memory to dump.");
+
   add_com ("ptype", class_vars, ptype_command,
 	   "Print definition of type TYPE.\n\
 Argument may be a type name defined by typedef, or \"struct STRUCTNAME\"\n\
@@ -1493,7 +1659,7 @@ The selected stack frame's lexical context is used to look up the name.");
   add_info ("display", display_info,
 	    "Expressions to display when program stops, with code numbers.");
 
-  add_abbrev_cmd ("undisplay", class_vars, undisplay_command,
+  add_cmd ("undisplay", class_vars, undisplay_command,
 	   "Cancel some expressions to be displayed when program stops.\n\
 Arguments are the code numbers of the expressions to stop displaying.\n\
 No argument means cancel all automatic-display expressions.\n\
@@ -1516,7 +1682,7 @@ Arguments are the code numbers of the expressions to resume displaying.\n\
 No argument means enable all automatic-display expressions.\n\
 Do \"info display\" to see current list of code numbers.", &enablelist);
 
-  add_cmd ("display", class_vars, disable_display, 
+  add_cmd ("display", class_vars, disable_display_command, 
 	   "Disable some expressions to be displayed when program stops.\n\
 Arguments are the code numbers of the expressions to stop displaying.\n\
 No argument means disable all automatic-display expressions.\n\
@@ -1576,4 +1742,3 @@ EXP may be preceded with /FMT, where FMT is a format letter\n\
 but no count or size letter (see \"x\" command)."));
   add_com_alias ("p", "print", class_vars, 1);
 }
-

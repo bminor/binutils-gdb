@@ -1,22 +1,21 @@
 /* Basic definitions for GDB, the GNU debugger.
-   Copyright (C) 1986 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define CORE_ADDR unsigned int
 
@@ -26,15 +25,28 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 extern char *savestring ();
 extern char *concat ();
 extern char *xmalloc (), *xrealloc ();
-extern char *alloca ();
 extern int parse_escape ();
 extern char *reg_names[];
+
+/* Various possibilities for alloca.  */
+#ifdef __GNUC__
+#define alloca __builtin_alloca
+#else
+#ifdef sparc
+#include <alloca.h>
+#else
+extern char *alloca ();
+#endif
+#endif
 
 extern int quit_flag;
 
 extern int immediate_quit;
 
 #define QUIT { if (quit_flag) quit (); }
+
+/* Notes on classes: class_alias is for alias commands which are not
+   abbreviations of the original command.  */
 
 enum command_class
 {
@@ -66,6 +78,12 @@ extern struct cleanup *make_cleanup ();
 extern struct cleanup *save_cleanups ();
 extern void restore_cleanups ();
 extern void free_current_contents ();
+extern void reinitialize_more_filter ();
+extern void fputs_filtered ();
+extern void fprintf_filtered ();
+extern void printf_filtered ();
+extern void print_spaces_filtered ();
+extern char *tilde_expand ();
 
 /* Structure for saved commands lines
    (for breakpoints, defined commands, etc).  */
@@ -81,8 +99,4 @@ struct command_line *read_command_lines ();
 /* String containing the current directory (what getwd would return).  */
 
 char *current_directory;
-
-#ifdef sparc
-#include <alloca.h>
-#endif
 

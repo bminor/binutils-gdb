@@ -1,22 +1,21 @@
 /* Find a variable's value in memory, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "param.h"
@@ -44,7 +43,7 @@ find_saved_register (frame, regnum)
 
 #ifdef HAVE_REGISTER_WINDOWS
   /* We assume that a register in a register window will only be saved
-     in one place (since the name changes and dissapears as you go
+     in one place (since the name changes and disappears as you go
      towards inner frames), so we only call get_frame_saved_regs on
      the current frame.  This is directly in contradiction to the
      usage below, which assumes that registers used in a frame must be
@@ -53,9 +52,25 @@ find_saved_register (frame, regnum)
      always returns the registers saved within a frame, within the
      context (register namespace) of that frame. */
 
+  /* However, note that we don't want this to return anything if
+     nothing is saved (if there's a frame inside of this one).  Also,
+     callers to this routine asking for the stack pointer want the
+     stack pointer saved for *this* frame; this is returned from the
+     next frame.  */
+     
+
   if (REGISTER_IN_WINDOW_P(regnum))
     {
-      fi = get_frame_info (frame);
+      frame1 = get_next_frame (frame);
+      if (!frame1) return 0;	/* Registers of this frame are
+				   active.  */
+      
+      /* Get the SP from the next frame in; it will be this
+	 current frame.  */
+      if (regnum != SP_REGNUM)
+	frame1 = frame;	
+	  
+      fi = get_frame_info (frame1);
       get_frame_saved_regs (fi, &saved_regs);
       return (saved_regs.regs[regnum] ?
 	      saved_regs.regs[regnum] : 0);
@@ -228,7 +243,7 @@ supply_register (regno, val)
 }
 
 /* Given a struct symbol for a variable,
-   and a stack frame address, read the value of the variable
+   and a stack frame id, read the value of the variable
    and return a (pointer to a) struct value containing the value.  */
 
 value
@@ -272,7 +287,13 @@ read_var_value (var, frame)
       fi = get_frame_info (frame);
       addr = val + FRAME_ARGS_ADDRESS (fi);
       break;
-
+    
+    case LOC_REF_ARG:
+      fi = get_frame_info (frame);
+      addr = val + FRAME_ARGS_ADDRESS (fi);
+      addr = read_memory_integer (addr, sizeof (CORE_ADDR));
+      break;
+      
     case LOC_LOCAL:
       fi = get_frame_info (frame);
       addr = val + FRAME_LOCALS_ADDRESS (fi);
@@ -444,15 +465,15 @@ value_from_register (type, regnum, frame)
   else
     {
       /* Raw and virtual formats are the same for this register.  */
-      
+
 #ifdef BYTES_BIG_ENDIAN
       if (len < REGISTER_RAW_SIZE (regnum))
 	{
-	  /* Big-endian, and we want less than full size.  */
+  	  /* Big-endian, and we want less than full size.  */
 	  VALUE_OFFSET (v) = REGISTER_RAW_SIZE (regnum) - len;
 	}
 #endif
- 
+
       bcopy (virtual_buffer + VALUE_OFFSET (v),
 	     VALUE_CONTENTS (v), len);
     }
@@ -461,7 +482,7 @@ value_from_register (type, regnum, frame)
 }
 
 /* Given a struct symbol for a variable,
-   and a stack frame address,
+   and a stack frame id, 
    return a (pointer to a) struct value containing the variable's address.  */
 
 value
@@ -473,6 +494,7 @@ locate_var_value (var, frame)
   int val = SYMBOL_VALUE (var);
   struct frame_info *fi;
   struct type *type = SYMBOL_TYPE (var);
+  struct type *result_type;
 
   if (frame == 0) frame = selected_frame;
 
@@ -509,6 +531,12 @@ locate_var_value (var, frame)
       addr = val + FRAME_ARGS_ADDRESS (fi);
       break;
 
+    case LOC_REF_ARG:
+      fi = get_frame_info (frame);
+      addr = val + FRAME_ARGS_ADDRESS (fi);
+      addr = read_memory_integer (addr, sizeof (CORE_ADDR));
+      break;
+
     case LOC_LOCAL:
       fi = get_frame_info (frame);
       addr = val + FRAME_LOCALS_ADDRESS (fi);
@@ -523,7 +551,12 @@ locate_var_value (var, frame)
       break;
     }
 
-  return value_cast (lookup_pointer_type (type),
+  /* Address of an array is of the type of address of it's elements.  */
+  result_type =
+    lookup_pointer_type (TYPE_CODE (type) == TYPE_CODE_ARRAY ?
+			 TYPE_TARGET_TYPE (type) : type);
+
+  return value_cast (result_type,
 		     value_from_long (builtin_type_long, (LONGEST) addr));
 }
 

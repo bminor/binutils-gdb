@@ -1,24 +1,33 @@
 /* Parameters for execution on a Gould PN, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding! */
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+/* Define the bit, byte, and word ordering of the machine.  */
+#define BITS_BIG_ENDIAN
+#define BYTES_BIG_ENDIAN
+#define WORDS_BIG_ENDIAN
 
 /* This code appears in libraries on Gould machines.  Ignore it. */
 #define IGNORE_SYMBOL(type) (type == N_ENTRY)
+
+/* We don't want the extra gnu symbols on the machine;
+   they will interfere with the shared segment symbols.  */
+#define NO_GNU_STABS
 
 /* Macro for text-offset and data info (in PN a.out format).  */
 #define	TEXTINFO						\
@@ -67,7 +76,9 @@ anyone else from sharing it farther.  Help stamp out software hoarding! */
 /* Define COFF and other symbolic names needed on NP1 */
 #define	NS32GMAGIC	GDPMAGIC
 #define	NS32SMAGIC	PN_MAGIC
+#ifndef HAVE_VPRINTF
 #define vprintf		printf
+#endif /* not HAVE_VPRINTF */
 
 /* Get rid of any system-imposed stack limit if possible.  */
 #define SET_STACK_LIMIT_HUGE

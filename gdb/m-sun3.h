@@ -1,26 +1,30 @@
 /* Parameters for execution on a Sun, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #ifndef sun3
 #define sun3
 #endif
+
+/* Define the bit, byte, and word ordering of the machine.  */
+#define BITS_BIG_ENDIAN
+#define BYTES_BIG_ENDIAN
+#define WORDS_BIG_ENDIAN
 
 /* Get rid of any system-imposed stack limit if possible.  */
 
@@ -45,9 +49,9 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 #define SKIP_PROLOGUE(pc)   \
 { register int op = read_memory_integer (pc, 2);	\
-  if (op == 0047126)				\
+  if (op == 0047126)					\
     pc += 4;   /* Skip link #word */			\
-  else if (op == 0044016)			\
+  else if (op == 0044016)				\
     pc += 6;   /* Skip link #long */			\
 }
 
@@ -78,8 +82,10 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 #define DECR_PC_AFTER_BREAK 2
 
 /* Nonzero if instruction at PC is a return instruction.  */
+/* Allow any of the return instructions, including a trapv and a return
+   from interupt.  */
 
-#define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 2) == 0x4e75)
+#define ABOUT_TO_RETURN(pc) ((read_memory_integer (pc, 2) & ~0x3) == 0x4e74)
 
 /* Return 1 if P points to an invalid floating point value.  */
 
@@ -223,10 +229,6 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 
 #define ATTACH_DETACH
 
-/* It is safe to look for symsegs on a Sun, because Sun's ld
-   does not screw up with random garbage at end of file.  */
-
-#define READ_GDB_SYMSEGS
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
@@ -244,14 +246,23 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 /* In the case of the Sun, the frame's nominal address
    is the address of a 4-byte word containing the calling frame's address.  */
 
-#define FRAME_CHAIN(thisframe)  (read_memory_integer ((thisframe)->frame, 4))
+#define FRAME_CHAIN(thisframe)  \
+  (outside_startup_file ((thisframe)->pc) ?	\
+   read_memory_integer ((thisframe)->frame, 4) :\
+   0)
 
 #define FRAME_CHAIN_VALID(chain, thisframe) \
-  (chain != 0 && (FRAME_SAVED_PC (thisframe) >= first_object_file_end))
+  (chain != 0 && (outside_startup_file (FRAME_SAVED_PC (thisframe))))
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
 /* Define other aspects of the stack frame.  */
+
+/* A macro that tells us whether the function invocation represented
+   by FI does not have a frame on the stack associated with it.  If it
+   does not, FRAMELESS is set to 1, else 0.  */
+#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
+  FRAMELESS_LOOK_FOR_PROLOGUE(FI, FRAMELESS)
 
 #define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame + 4, 4))
 
@@ -382,29 +393,29 @@ read_memory_integer (read_register (SP_REGNUM), 4)
    restoring all saved registers.  */
 
 #define POP_FRAME  \
-{ register FRAME frame = get_current_frame ();			 \
-  register CORE_ADDR fp;					 \
-  register int regnum;						 \
-  struct frame_saved_regs fsr;					 \
-  struct frame_info *fi;						 \
-  char raw_buffer[12];						 \
-  fi = get_frame_info (frame);					 \
-  fp = fi->frame;						 \
-  get_frame_saved_regs (fi, &fsr);				 \
-  for (regnum = FP0_REGNUM + 7; regnum >= FP0_REGNUM; regnum--)	 \
-    if (fsr.regs[regnum])					 \
-      { read_memory (fsr.regs[regnum], raw_buffer, 12);		 \
+{ register FRAME frame = get_current_frame ();				\
+  register CORE_ADDR fp;						\
+  register int regnum;							\
+  struct frame_saved_regs fsr;						\
+  struct frame_info *fi;						\
+  char raw_buffer[12];							\
+  fi = get_frame_info (frame);						\
+  fp = fi->frame;							\
+  get_frame_saved_regs (fi, &fsr);					\
+  for (regnum = FP0_REGNUM + 7; regnum >= FP0_REGNUM; regnum--)		\
+    if (fsr.regs[regnum])						\
+      { read_memory (fsr.regs[regnum], raw_buffer, 12);			\
         write_register_bytes (REGISTER_BYTE (regnum), raw_buffer, 12); }\
-  for (regnum = FP_REGNUM - 1; regnum >= 0; regnum--)		 \
-    if (fsr.regs[regnum])					 \
+  for (regnum = FP_REGNUM - 1; regnum >= 0; regnum--)			\
+    if (fsr.regs[regnum])						\
       write_register (regnum, read_memory_integer (fsr.regs[regnum], 4)); \
-  if (fsr.regs[PS_REGNUM])					 \
+  if (fsr.regs[PS_REGNUM])						\
     write_register (PS_REGNUM, read_memory_integer (fsr.regs[PS_REGNUM], 4)); \
-  write_register (FP_REGNUM, read_memory_integer (fp, 4));	 \
-  write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));   \
-  write_register (SP_REGNUM, fp + 8);				 \
-  flush_cached_frames ();					 \
-  set_current_frame (create_new_frame (read_register (FP_REGNUM),\
+  write_register (FP_REGNUM, read_memory_integer (fp, 4));		\
+  write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));  	\
+  write_register (SP_REGNUM, fp + 8);					\
+  flush_cached_frames ();						\
+  set_current_frame (create_new_frame (read_register (FP_REGNUM),	\
 					read_pc ())); }
 
 /* This sequence of words is the instructions

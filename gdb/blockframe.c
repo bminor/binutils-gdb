@@ -1,35 +1,48 @@
 /* Get info from stack frames;
    convert between frames, blocks, functions and pc values.
-   Copyright (C) 1986, 1987, 1988 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1988, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "param.h"
 #include "symtab.h"
 #include "frame.h"
 
-/* Address of end of first object file.
+#include <obstack.h>
+
+/* Start and end of object file containing the entry point.
+   STARTUP_FILE_END is the first address of the next file.
    This file is assumed to be a startup file
    and frames with pc's inside it
-   are treated as nonexistent.  */
+   are treated as nonexistent.
 
-CORE_ADDR first_object_file_end;
+   Setting these variables is necessary so that backtraces do not fly off
+   the bottom of the stack.  */
+CORE_ADDR startup_file_start;
+CORE_ADDR startup_file_end;
+
+/* Is ADDR outside the startup file?  */
+int
+outside_startup_file (addr)
+     CORE_ADDR addr;
+{
+  return !(addr >= startup_file_start && addr < startup_file_end);
+}
 
 /* Address of innermost stack frame (contents of FP register) */
 
@@ -100,6 +113,18 @@ get_prev_frame (frame)
   return get_prev_frame_info (frame);
 }
 
+/* Return the frame that FRAME calls (0 if FRAME is the innermost
+   frame).  */
+
+FRAME
+get_next_frame (frame)
+     FRAME frame;
+{
+  /* We're allowed to know that FRAME and "struct frame_info *" are
+     the same */
+  return frame->next;
+}
+
 /*
  * Flush the entire frame cache.
  */
@@ -109,7 +134,7 @@ flush_cached_frames ()
   /* Since we can't really be sure what the first object allocated was */
   obstack_free (&frame_cache_obstack, 0);
   obstack_init (&frame_cache_obstack);
-  
+
   current_frame = (struct frame_info *) 0; /* Invalidate cache */
 }
 
@@ -127,6 +152,33 @@ get_frame_info (frame)
   return frame;
 }
 
+/* If a machine allows frameless functions, it should define a macro
+   FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) in param.h.  FI is the struct
+   frame_info for the frame, and FRAMELESS should be set to nonzero
+   if it represents a frameless function invocation.  */
+
+/* Many machines which allow frameless functions can detect them using
+   this macro.  Such machines should define FRAMELESS_FUNCTION_INVOCATION
+   to just call this macro.  */
+#define FRAMELESS_LOOK_FOR_PROLOGUE(FI, FRAMELESS) \
+{      	       	       	       	       	       	       	       	       	 \
+  CORE_ADDR func_start, after_prologue;			                 \
+  func_start = (get_pc_function_start ((FI)->pc) +	                 \
+		FUNCTION_START_OFFSET);			                 \
+  if (func_start)                                                        \
+    {									 \
+      after_prologue = func_start;					 \
+      SKIP_PROLOGUE (after_prologue);					 \
+      (FRAMELESS) = (after_prologue == func_start);			 \
+    }									 \
+  else									 \
+    /* If we can't find the start of the function, we don't really */    \
+    /* know whether the function is frameless, but we should be	   */    \
+    /* able to get a reasonable (i.e. best we can do under the	   */    \
+    /* circumstances) backtrace by saying that it isn't.  */	         \
+    (FRAMELESS) = 0;							 \
+}
+
 /* Return a structure containing various interesting information
    about the frame that called NEXT_FRAME.  */
 
@@ -138,16 +190,6 @@ get_prev_frame_info (next_frame)
   struct frame_info *prev;
   int fromleaf = 0;
 
-  /* If we are within "start" right now, don't go any higher.  */
-  /* This truncates stack traces of things at sigtramp() though,
-     because sigtramp() doesn't have a normal return PC, it has
-     garbage or a small value (seen: 3) in the return PC slot. 
-     It's VITAL to see where the signal occurred, so punt this. */
-#if 0
-  if (next_frame && next_frame->pc < first_object_file_end)
-    return 0;
-#endif
-
   /* If the requested entry is in the cache, return it.
      Otherwise, figure out what the address should be for the entry
      we're about to add to the cache. */
@@ -155,61 +197,58 @@ get_prev_frame_info (next_frame)
   if (!next_frame)
     {
       if (!current_frame)
-	error ("No frame is currently selected.");
+	{
+	  if (!have_inferior_p () && !have_core_file_p ())
+	    fatal ("get_prev_frame_info: Called before cache primed.  \"Shouldn't happen.\"");
+	  else
+	    error ("No inferior or core file.");
+	}
 
       return current_frame;
     }
-  else
+
+  /* If we have the prev one, return it */
+  if (next_frame->prev)
+    return next_frame->prev;
+
+  /* On some machines it is possible to call a function without
+     setting up a stack frame for it.  On these machines, we
+     define this macro to take two args; a frameinfo pointer
+     identifying a frame and a variable to set or clear if it is
+     or isn't leafless.  */
+#ifdef FRAMELESS_FUNCTION_INVOCATION
+  /* Still don't want to worry about this except on the innermost
+     frame.  This macro will set FROMLEAF if NEXT_FRAME is a
+     frameless function invocation.  */
+  if (!(next_frame->next))
     {
-      /* If we have the prev one, return it */
-      if (next_frame->prev)
-	return next_frame->prev;
-
-      /* There is a questionable, but probably always correct
-	 assumption being made here.  The assumption is that if
-	 functions on a specific machine has a FUNCTION_START_OFFSET,
-	 then this is used by the function call instruction for some
-	 purpose.  If the function call instruction has this much hair
-	 in it, it probably also sets up the frame pointer
-	 automatically (ie.  we'll never have what I am calling a
-	 "leaf node", one which shares a frame pointer with it's
-	 calling function).  This is true on a vax.  The only other
-	 way to find this out would be to setup a seperate macro
-	 "FUNCTION_HAS_FRAME_POINTER", which would often be equivalent
-	 to SKIP_PROLOGUE modifying a pc value.  */
-
-#if FUNCTION_START_OFFSET == 0
-      if (!(next_frame->next))
-	{
-	  /* Innermost */
-	  CORE_ADDR func_start, after_prologue;
-
-	  func_start = (get_pc_function_start (next_frame->pc) +
-			FUNCTION_START_OFFSET);
-	  after_prologue = func_start;
-	  SKIP_PROLOGUE (after_prologue);
-	  if (after_prologue == func_start)
-	    {
-	      fromleaf = 1;
-	      address = next_frame->frame;
-	    }
-	}
+      FRAMELESS_FUNCTION_INVOCATION (next_frame, fromleaf);
+      if (fromleaf)
+	address = next_frame->frame;
+    }
 #endif
 
-      if (!fromleaf)
-	{
-	  /* Two macros defined in param.h specify the machine-dependent
-	     actions to be performed here.  */
-	  /* First, get the frame's chain-pointer.
-	     If that is zero, the frame is the outermost frame.  */
-	  address = FRAME_CHAIN (next_frame);
-	  if (!FRAME_CHAIN_VALID (address, next_frame))
-	    return 0;
+  if (!fromleaf)
+    {
+      /* Two macros defined in param.h specify the machine-dependent
+	 actions to be performed here.
+	 First, get the frame's chain-pointer.
+	 If that is zero, the frame is the outermost frame or a leaf
+	 called by the outermost frame.  This means that if start
+	 calls main without a frame, we'll return 0 (which is fine
+	 anyway).
 
-	  /* If frame has a caller, combine the chain pointer and
-	     the frame's own address to get the address of the caller.  */
-	  address = FRAME_CHAIN_COMBINE (address, next_frame);
-	}
+	 Nope; there's a problem.  This also returns when the current
+	 routine is a leaf of main.  This is unacceptable.  We move
+	 this to after the ffi test; I'd rather have backtraces from
+	 start go curfluy than have an abort called from main not show
+	 main.  */
+      address = FRAME_CHAIN (next_frame);
+      if (!FRAME_CHAIN_VALID (address, next_frame))
+	return 0;
+      /* If this frame is a leaf, this will be superceeded by the
+	 code below.  */
+      address = FRAME_CHAIN_COMBINE (address, next_frame);
     }
 
   prev = (struct frame_info *)
@@ -252,102 +291,7 @@ get_frame_saved_regs (frame_info_addr, saved_regs_addr)
      struct frame_info *frame_info_addr;
      struct frame_saved_regs *saved_regs_addr;
 {
-#if 1
   FRAME_FIND_SAVED_REGS (frame_info_addr, *saved_regs_addr);
-#else
-  {
-    register int regnum;							
-    register int regmask;							
-    register CORE_ADDR next_addr;						
-    register CORE_ADDR pc;						
-    int nextinsn;								
-    bzero (&*saved_regs_addr, sizeof *saved_regs_addr);			
-    if ((frame_info_addr)->pc >= ((frame_info_addr)->frame
-			     - CALL_DUMMY_LENGTH - FP_REGNUM*4 - 8*12 - 4)
-	&& (frame_info_addr)->pc <= (frame_info_addr)->frame)				
-      {
-	next_addr = (frame_info_addr)->frame;					
-	pc = (frame_info_addr)->frame - CALL_DUMMY_LENGTH - FP_REGNUM * 4 - 8*12 - 4;
-      }
-    else   								
-      {
-	pc = get_pc_function_start ((frame_info_addr)->pc); 			
-	/* Verify we have a link a6 instruction next;			
-	   if not we lose.  If we win, find the address above the saved   
-	   regs using the amount of storage from the link instruction.  */
-	if (044016 == read_memory_integer (pc, 2))			
-	  {
-	    next_addr = (frame_info_addr)->frame + read_memory_integer (pc += 2, 4);
-	    pc += 4;
-	  }
-	else if (047126 == read_memory_integer (pc, 2))
-	  {
-	    next_addr = (frame_info_addr)->frame + read_memory_integer (pc += 2, 2);
-	    pc+=2;
-	  }
-	else goto lose;							
-	
-	/* If have an addal #-n, sp next, adjust next_addr.  */		
-	if ((0177777 & read_memory_integer (pc, 2)) == 0157774)
-	  {
-	    next_addr += read_memory_integer (pc += 2, 4);
-	    pc += 4;
-	  }
-      }									
-    /* next should be a moveml to (sp) or -(sp) or a movl r,-(sp) */	
-    regmask = read_memory_integer (pc + 2, 2);				
-    
-    /* But before that can come an fmovem.  Check for it.  */		
-    nextinsn = 0xffff & read_memory_integer (pc, 2);			
-    if (0xf227 == nextinsn						
-	&& (regmask & 0xff00) == 0xe000)					
-      {
-	pc += 4; /* Regmask's low bit is for register fp7, the first pushed */ 
-	for (regnum = FP0_REGNUM + 7;
-	     regnum >= FP0_REGNUM;
-	     regnum--, regmask >>= 1)		
-	  if (regmask & 1)						
-	    (*saved_regs_addr).regs[regnum] = (next_addr -= 12);		
-	regmask = read_memory_integer (pc + 2, 2);
-      }			
-    if (0044327 == read_memory_integer (pc, 2))				
-      {
-	pc += 4; /* Regmask's low bit is for register 0, the first written */ 
-	for (regnum = 0; regnum < 16; regnum++, regmask >>= 1)		
-	  if (regmask & 1)						
-	    (*saved_regs_addr).regs[regnum] = (next_addr += 4) - 4;
-      }	
-    else if (0044347 == read_memory_integer (pc, 2))			
-      { pc += 4; /* Regmask's low bit is for register 15, the first pushed */ 
-	for (regnum = 15; regnum >= 0; regnum--, regmask >>= 1)		
-	  if (regmask & 1)						
-	    (*saved_regs_addr).regs[regnum] = (next_addr -= 4); }		
-    else if (0x2f00 == (0xfff0 & read_memory_integer (pc, 2)))		
-      { regnum = 0xf & read_memory_integer (pc, 2); pc += 2;		
-	(*saved_regs_addr).regs[regnum] = (next_addr -= 4); }		
-    /* fmovemx to index of sp may follow.  */				
-    regmask = read_memory_integer (pc + 2, 2);				
-    nextinsn = 0xffff & read_memory_integer (pc, 2);			
-    if (0xf236 == nextinsn						
-	&& (regmask & 0xff00) == 0xf000)					
-      {
-	pc += 10; /* Regmask's low bit is for register fp0, the first written */ 
-	for (regnum = FP0_REGNUM + 7;
-	     regnum >= FP0_REGNUM;
-	     regnum--, regmask >>= 1)		
-	  if (regmask & 1)						
-	    (*saved_regs_addr).regs[regnum] = (next_addr += 12) - 12;	
-	regmask = read_memory_integer (pc + 2, 2);
-      }			
-    /* clrw -(sp); movw ccr,-(sp) may follow.  */				
-    if (0x426742e7 == read_memory_integer (pc, 4))			
-      (*saved_regs_addr).regs[PS_REGNUM] = (next_addr -= 4);		
-  lose: ;								
-    (*saved_regs_addr).regs[SP_REGNUM] = (frame_info_addr)->frame + 8;		
-    (*saved_regs_addr).regs[FP_REGNUM] = (frame_info_addr)->frame;		
-    (*saved_regs_addr).regs[PC_REGNUM] = (frame_info_addr)->frame + 4;		
-  }
-#endif
 }
 
 /* Return the innermost lexical block in execution
@@ -430,6 +374,8 @@ block_for_pc (pc)
 	if (ps->textlow <= pc
 	    && ps->texthigh > pc)
 	  {
+	    if (ps->readin)
+	      fatal ("Internal error: pc found in readin psymtab and not in any symtab.");
 	    s = psymtab_to_symtab (ps);
 	    bl = BLOCKVECTOR (s);
 	    b = BLOCKVECTOR_BLOCK (bl, 0);
@@ -482,6 +428,91 @@ find_pc_function (pc)
   return block_function (b);
 }
 
+/* Finds the "function" (text symbol) that is smaller than PC
+   but greatest of all of the potential text symbols.  Sets
+   *NAME and/or *ADDRESS conditionally if that pointer is non-zero.
+   Returns 0 if it couldn't find anything, 1 if it did.  */
+
+int
+find_pc_partial_function (pc, name, address)
+     CORE_ADDR pc;
+     char **name;
+     CORE_ADDR *address;
+{
+  struct partial_symtab *pst = find_pc_psymtab (pc);
+  struct symbol *f;
+  int miscfunc;
+  struct partial_symbol *psb;
+
+  if (pst)
+    {
+      if (pst->readin)
+	{
+	  /* The information we want has already been read in.
+	     We can go to the already readin symbols and we'll get
+	     the best possible answer.  */
+	  f = find_pc_function (pc);
+	  if (!f)
+	    {
+	      /* No availible symbol.  */
+	      if (name != 0)
+		*name = 0;
+	      if (address != 0)
+		*address = 0;
+	      return 0;
+	    }
+
+	  if (name)
+	    *name = SYMBOL_NAME (f);
+	  if (address)
+	    *address = SYMBOL_VALUE (f);
+	}
+
+      /* Get the information from a combination of the pst
+	 (static symbols), and the misc function vector (extern
+	 symbols).  */
+      miscfunc = find_pc_misc_function (pc);
+      psb = find_pc_psymbol (pst, pc);
+
+      if (!psb && miscfunc == -1)
+	{
+	  if (address != 0)
+	    *address = 0;
+	  if (name != 0)
+	    *name = 0;
+	  return 0;
+	}
+      if (!psb
+	  || (miscfunc != -1
+	      && SYMBOL_VALUE(psb) < misc_function_vector[miscfunc].address))
+	{
+	  if (address)
+	    *address = misc_function_vector[miscfunc].address;
+	  if (name)
+	    *name = misc_function_vector[miscfunc].name;
+	}
+      else
+	{
+	  if (address)
+	    *address = SYMBOL_VALUE (psb);
+	  if (name)
+	    *name = SYMBOL_NAME (psb);
+	}
+    }
+  else
+    /* Must be in the misc function stuff.  */
+    {
+      miscfunc = find_pc_misc_function (pc);
+      if (miscfunc == -1)
+	return 0;
+      if (address)
+	*address = misc_function_vector[miscfunc].address;
+      if (name)
+	*name = misc_function_vector[miscfunc].name;
+    }
+  return 1;
+}
+
 /* Find the misc function whose address is the largest
    while being less than PC.  Return its index in misc_function_vector.
    Returns -1 if PC is not in suitable range.  */
@@ -496,6 +527,8 @@ find_pc_misc_function (pc)
   register int distance;
 
   /* Note that the last thing in the vector is always _etext.  */
+  /* Actually, "end", now that non-functions
+     go on the misc_function_vector.  */
 
   /* Above statement is not *always* true - fix for case where there are */
   /* no misc functions at all (ie no symbol table has been read). */
@@ -506,6 +539,11 @@ find_pc_misc_function (pc)
       pc > misc_function_vector[hi].address)
     return -1;
 
+  /* Note that the following search will not return hi if
+     pc == misc_function_vector[hi].address.  If "end" points to the
+     first unused location, this is correct and the above test
+     simply needs to be changed to
+     "pc >= misc_function_vector[hi].address".  */
   do {
     new = (lo + hi) >> 1;
     distance = misc_function_vector[new].address - pc;

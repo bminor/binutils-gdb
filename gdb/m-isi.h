@@ -1,65 +1,34 @@
-/*
-Date: Thu, 2 Apr 87 00:02:42 EST
-From: crl@maxwell.physics.purdue.edu (Charles R. LaBrec)
-Message-Id: <8704020502.AA01744@maxwell.physics.purdue.edu>
-To: bug-gdb@prep.ai.mit.edu
-Subject: gdb for ISI Optimum V
+/* Definitions to make GDB run on an ISI Optimum V (3.05) under 4.3bsd.
+   Copyright (C) 1987, 1989 Free Software Foundation, Inc.
 
-Here is an m-isi-ov.h file for gdb version 2.1.  It supports the 68881
-registers, and tracks down the function prologue (since the ISI cc
-puts it at the end of the function and branches to it if not
-optimizing).  Also included are diffs to core.c, findvar.c, and
-inflow.c, since the original code assumed that registers are an int in
-the user struct, which isn't the case for 68020's with 68881's (and
-not using the NEW_SUN_PTRACE).  I have not fixed the bugs associated
-with the other direction (writing registers back to the user struct).
-I have also included a diff that turns m68k-pinsn.c into isi-pinsn.c,
-which is needed since the 3.05 release of as does not understand
-floating point ops, and it compiles incorrectly under "cc -20"
+This file is part of GDB.
 
-I have used gdb for a while now, and it seems to work relatively well,
-but I do not guarantee that it is perfect.  The more that use it, the
-faster the bugs will get shaken out.  One bug I know of is not in gdb,
-but in the assembler.  It seems to screw up the .stabs of variables.
-For externs, this is not important since gdb uses the global symbol
-value, but for statics, this makes gdb unable to find them.  I am
-currently trying to track it down.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-As an aside, I notice that only global functions are used as symbols
-to print as relative addresses, i.e. "<function + offset>", and not
-static functions, which end up printing as large offsets from the last
-global one.  Would there be a problem if static functions were also
-recorded as misc functions in read_dbx_symtab?
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-Charles LaBrec
-crl @ maxwell.physics.purdue.edu
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-  Definitions to make GDB run on a ISI Optimum V (3.05) under 4.2bsd.
-
-   Copyright (C) 1987 Free Software Foundation, Inc.
-
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
-
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
-
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
-
+/* This has not been tested on ISI's running BSD 4.2, but it will probably
+   work.  */
 
 /* Identify this machine */
 #ifndef ISI68K
 #define ISI68K
 #endif
+
+/* Define the bit, byte, and word ordering of the machine.  */
+#define BITS_BIG_ENDIAN
+#define BYTES_BIG_ENDIAN
+#define WORDS_BIG_ENDIAN
 
 /* Define this if the C compiler puts an underscore at the front
    of external names before giving them to the linker.  */
@@ -104,11 +73,13 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 /* This is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */
 
-#define KERNEL_U_ADDR 0x10800000
+/*#define KERNEL_U_ADDR 0x10800000*/
+#define KERNEL_U_ADDR 0
 
 /* Address of end of stack space.  */
 
-#define STACK_END_ADDR 0x10000000
+/*#define STACK_END_ADDR 0x10000000*/
+#define STACK_END_ADDR 0xfffe000
 
 /* Stack grows downward.  */
 
@@ -130,7 +101,7 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 
 /* Amount PC must be decremented by after a breakpoint.
    This is often the number of bytes in BREAKPOINT
-   but not always.  
+   but not always.
    On the ISI, the kernel resets the pc to the trap instr */
 
 #define DECR_PC_AFTER_BREAK 0
@@ -154,7 +125,6 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 #define REGISTER_TYPE long
 
 /* Number of machine registers */
-
 #define NUM_REGS 29
 
 /* Initializer for an array of names of registers.
@@ -181,23 +151,15 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 #define FP0_REGNUM 18		/* Floating point register 0 */
 #define FPC_REGNUM 26		/* 68881 control register */
 
-#ifdef BSD43_ISI40D
-#define BLOCKFUDGE	0x400000
-#else
-#define BLOCKFUDGE	0
-#endif
-#define REGISTER_U_ADDR(addr, blockend, regno)			\
-{	blockend -= BLOCKFUDGE;					\
-	if (regno < 2) addr = blockend - 0x18 + regno * 4;	\
-	else if (regno < 8) addr = blockend - 0x54 + regno * 4;	\
-	else if (regno < 10) addr = blockend - 0x30 + regno * 4;\
-	else if (regno < 15) addr = blockend - 0x5c + regno * 4;\
-	else if (regno < 16) addr = blockend - 0x1c;		\
-	else if (regno < 18) addr = blockend - 0x44 + regno * 4;\
-	else if (regno < 26) addr = (int) ((struct user *)0)->u_68881_regs \
-	    + (regno - 18) * 12;				\
-	else if (regno < 29) addr = (int) ((struct user *)0)->u_68881_regs \
-	    + 8 * 12 + (regno - 26) * 4;			\
+/* expects blockend to be u.u_ar0 */
+extern int rloc[];  	/* Defined in isi-dep.c */
+#define REGISTER_U_ADDR(addr, blockend, regno)                  \
+{       blockend &= UPAGES*NBPG - 1;                            \
+	if (regno < 18) addr = (int)blockend + rloc[regno]*4;  	\
+        else if (regno < 26) addr = (int) &((struct user *)0)->u_68881_regs \
+            + (regno - 18) * 12;                                \
+        else if (regno < 29) addr = (int) &((struct user *)0)->u_68881_regs \
+            + 8 * 12 + (regno - 26) * 4;                        \
 }
 
 /* Total amount of space needed to store our copies of the machine's
@@ -302,14 +264,23 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 /* In the case of the ISI, the frame's nominal address
    is the address of a 4-byte word containing the calling frame's address.  */
 
-#define FRAME_CHAIN(thisframe)  (read_memory_integer ((thisframe)->frame, 4))
+#define FRAME_CHAIN(thisframe)  \
+  (outside_startup_file ((thisframe)->pc) ? \
+   read_memory_integer ((thisframe)->frame, 4) :\
+   0)
 
 #define FRAME_CHAIN_VALID(chain, thisframe) \
-  (chain != 0 && (FRAME_SAVED_PC (thisframe) >= first_object_file_end))
+  (chain != 0 && outside_startup_file (FRAME_SAVED_PC (thisframe)))
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
 /* Define other aspects of the stack frame.  */
+
+/* A macro that tells us whether the function invocation represented
+   by FI does not have a frame on the stack associated with it.  If it
+   does not, FRAMELESS is set to 1, else 0.  */
+#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
+  FRAMELESS_LOOK_FOR_PROLOGUE(FI, FRAMELESS)
 
 #define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame + 4, 4))
 
@@ -411,8 +382,10 @@ retry:									\
   (frame_saved_regs).regs[PC_REGNUM] = (frame_info)->frame + 4;		\
 }
 
-/* Compensate for lack of `vprintf' function.  */ 
-#define vprintf(format, ap) _doprnt (format, ap, stdout) 
+/* Compensate for lack of `vprintf' function.  */
+#ifndef HAVE_VPRINTF
+#define vprintf(format, ap) _doprnt (format, ap, stdout)
+#endif
 
 /* Things needed for making the inferior call functions.  */
 
@@ -468,7 +441,7 @@ retry:									\
      movew ccr,-(sp)
      /..* The arguments are pushed at this point by GDB;
 	no code is needed in the dummy for this.
-	The CALL_DUMMY_START_OFFSET gives the position of 
+	The CALL_DUMMY_START_OFFSET gives the position of
 	the following jsr instruction.  *../
      jsr @#32323232
      addl #69696969,sp

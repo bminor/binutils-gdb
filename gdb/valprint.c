@@ -1,22 +1,21 @@
 /* Print values for GNU debugger gdb.
-   Copyright (C) 1986, 1988 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1988, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
@@ -38,6 +37,91 @@ static void type_print_method_args ();
 char **unsigned_type_table;
 char **signed_type_table;
 char **float_type_table;
+
+
+/* Print repeat counts if there are more than this
+   many repetitions of an element in an array.  */
+#define	REPEAT_COUNT_THRESHOLD	10
+
+/* Print the character string STRING, printing at most LENGTH characters.
+   Printing stops early if the number hits print_max; repeat counts
+   are printed as appropriate.  */
+
+void
+print_string (stream, string, length)
+     FILE *stream;
+     char *string;
+     unsigned int length;
+{
+  register unsigned int i;
+  unsigned int things_printed = 0;
+  int in_quotes = 0;
+  int need_comma = 0;
+
+  if (length == 0)
+    {
+      fputs_filtered ("\"\"", stdout);
+      return;
+    }
+
+  for (i = 0; i < length && things_printed < print_max; ++i)
+    {
+      /* Position of the character we are examining
+	 to see whether it is repeated.  */
+      unsigned int rep1;
+      /* Number of repititions we have detected so far.  */
+      unsigned int reps;
+
+      QUIT;
+
+      if (need_comma)
+	{
+	  fputs_filtered (", ", stream);
+	  need_comma = 0;
+	}
+
+      rep1 = i + 1;
+      reps = 1;
+      while (rep1 < length && string[rep1] == string[i])
+	{
+	  ++rep1;
+	  ++reps;
+	}
+
+      if (reps > REPEAT_COUNT_THRESHOLD)
+	{
+	  if (in_quotes)
+	    {
+	      fputs_filtered ("\", ", stream);
+	      in_quotes = 0;
+	    }
+	  fputs_filtered ("'", stream);
+	  printchar (string[i], stream, '\'');
+	  fprintf_filtered (stream, "' <repeats %u times>", reps);
+	  i = rep1 - 1;
+	  things_printed += REPEAT_COUNT_THRESHOLD;
+	  need_comma = 1;
+	}
+      else
+	{
+	  if (!in_quotes)
+	    {
+	      fputs_filtered ("\"", stream);
+	      in_quotes = 1;
+	    }
+	  printchar (string[i], stream, '"');
+	  ++things_printed;
+	}
+    }
+
+  /* Terminate the quotes if necessary.  */
+  if (in_quotes)
+    fputs_filtered ("\"", stream);
+
+  /* Print ellipses if we stopped before printing LENGTH characters.  */
+  if (i < length)
+    fputs_filtered ("...", stream);
+}
 
 /* Print the value VAL in C-ish syntax on stream STREAM.
    FORMAT is a format-letter, or 0 for print in natural format of data type.
@@ -45,12 +129,13 @@ char **float_type_table;
    the number of string bytes printed.  */
 
 int
-value_print (val, stream, format)
+value_print (val, stream, format, pretty)
      value val;
      FILE *stream;
      char format;
+     enum val_prettyprint pretty;
 {
-  register int i, n, typelen;
+  register unsigned int i, n, typelen;
 
   /* A "repeated" value really contains several values in a row.
      They are made by the @ operator.
@@ -60,35 +145,59 @@ value_print (val, stream, format)
     {
       n = VALUE_REPETITIONS (val);
       typelen = TYPE_LENGTH (VALUE_TYPE (val));
-      fputc ('{', stream);
+      fprintf_filtered (stream, "{");
       /* Print arrays of characters using string syntax.  */
       if (typelen == 1 && TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_INT
 	  && format == 0)
-	{
-	  fputc ('"', stream);
-	  for (i = 0; i < n && i < print_max; i++)
-	    {
-	      QUIT;
-	      printchar (VALUE_CONTENTS (val)[i], stream, '"');
-	    }
-	  if (i < n)
-	    fprintf (stream, "...");
-	  fputc ('"', stream);
-	}
+	print_string (stream, VALUE_CONTENTS (val), n);
       else
 	{
-	  for (i = 0; i < n && i < print_max; i++)
+	  unsigned int things_printed = 0;
+	  
+	  for (i = 0; i < n && things_printed < print_max; i++)
 	    {
-	      if (i)
-		fprintf (stream, ", ");
-	      val_print (VALUE_TYPE (val), VALUE_CONTENTS (val) + typelen * i,
-			 VALUE_ADDRESS (val) + typelen * i,
-			 stream, format, 1);
+	      /* Position of the array element we are examining to see
+		 whether it is repeated.  */
+	      unsigned int rep1;
+	      /* Number of repititions we have detected so far.  */
+	      unsigned int reps;
+
+	      if (i != 0)
+		fprintf_filtered (stream, ", ");
+
+	      rep1 = i + 1;
+	      reps = 1;
+	      while (rep1 < n
+		     && !bcmp (VALUE_CONTENTS (val) + typelen * i,
+			       VALUE_CONTENTS (val) + typelen * rep1, typelen))
+		{
+		  ++reps;
+		  ++rep1;
+		}
+
+	      if (reps > REPEAT_COUNT_THRESHOLD)
+		{
+		  val_print (VALUE_TYPE (val),
+			     VALUE_CONTENTS (val) + typelen * i,
+			     VALUE_ADDRESS (val) + typelen * i,
+			     stream, format, 1, 0, pretty);
+		  fprintf (stream, " <repeats %u times>", reps);
+		  i = rep1 - 1;
+		  things_printed += REPEAT_COUNT_THRESHOLD;
+		}
+	      else
+		{
+		  val_print (VALUE_TYPE (val),
+			     VALUE_CONTENTS (val) + typelen * i,
+			     VALUE_ADDRESS (val) + typelen * i,
+			     stream, format, 1, 0, pretty);
+		  things_printed++;
+		}
 	    }
 	  if (i < n)
-	    fprintf (stream, "...");
+	    fprintf_filtered (stream, "...");
 	}
-      fputc ('}', stream);
+      fprintf_filtered (stream, "}");
       return n * typelen;
     }
   else
@@ -102,15 +211,28 @@ value_print (val, stream, format)
       if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_PTR
 	  || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_REF)
 	{
-	  fprintf (stream, "(");
+	  fprintf_filtered (stream, "(");
 	  type_print (VALUE_TYPE (val), "", stream, -1);
-	  fprintf (stream, ") ");
+	  fprintf_filtered (stream, ") ");
+
+	  /* If this is a function pointer, try to print what
+	     function it is pointing to by name.  */
+	  if (TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (val)))
+	      == TYPE_CODE_FUNC)
+	    {
+	      print_address (((int *) VALUE_CONTENTS (val))[0], stream);
+	      /* Return value is irrelevant except for string pointers.  */
+	      return 0;
+	    }
 	}
       return val_print (VALUE_TYPE (val), VALUE_CONTENTS (val),
-			VALUE_ADDRESS (val), stream, format, 1);
+			VALUE_ADDRESS (val), stream, format, 1, 0, pretty);
     }
 }
 
+static int prettyprint;	/* Controls prettyprinting of structures.  */
+int unionprint;		/* Controls printing of nested unions.  */
+
 /* Print data of type TYPE located at VALADDR (within GDB),
    which came from the inferior at address ADDRESS,
    onto stdio stream STREAM according to FORMAT
@@ -120,64 +242,107 @@ value_print (val, stream, format)
    sting characters printed.
 
    if DEREF_REF is nonzero, then dereference references,
-   otherwise just print them like pointers. */
+   otherwise just print them like pointers.
+
+   The PRETTY parameter controls prettyprinting.  */
 
 int
-val_print (type, valaddr, address, stream, format, deref_ref)
+val_print (type, valaddr, address, stream, format,
+	   deref_ref, recurse, pretty)
      struct type *type;
      char *valaddr;
      CORE_ADDR address;
      FILE *stream;
      char format;
      int deref_ref;
+     int recurse;
+     enum val_prettyprint pretty;
 {
-  register int i;
+  register unsigned int i;
   int len, n_baseclasses;
   struct type *elttype;
   int eltlen;
   LONGEST val;
   unsigned char c;
 
+  if (pretty == Val_pretty_default)
+    {
+      pretty = prettyprint ? Val_prettyprint : Val_no_prettyprint;
+    }
+  
   QUIT;
 
+  if (TYPE_FLAGS (type) & TYPE_FLAG_STUB)
+    {
+      fprintf_filtered (stream, "<Type not defined in this context>");
+      fflush (stream);
+      return 0;
+    }
+  
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
-      if (TYPE_LENGTH (type) >= 0)
+      if (TYPE_LENGTH (type) >= 0
+	  && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
 	{
 	  elttype = TYPE_TARGET_TYPE (type);
 	  eltlen = TYPE_LENGTH (elttype);
 	  len = TYPE_LENGTH (type) / eltlen;
-	  fprintf (stream, "{");
+	  fprintf_filtered (stream, "{");
 	  /* For an array of chars, print with string syntax.  */
 	  if (eltlen == 1 && TYPE_CODE (elttype) == TYPE_CODE_INT
 	      && format == 0)
-	    {
-	      fputc ('"', stream);
-	      for (i = 0; i < len && i < print_max; i++)
-		{
-		  QUIT;
-		  printchar (valaddr[i], stream, '"');
-		}
-	      if (i < len)
-		fprintf (stream, "...");
-	      fputc ('"', stream);
-	    }
+	    print_string (stream, valaddr, len);
 	  else
 	    {
-	      for (i = 0; i < len && i < print_max; i++)
+	      unsigned int things_printed = 0;
+	      
+	      for (i = 0; i < len && things_printed < print_max; i++)
 		{
-		  if (i) fprintf (stream, ", ");
-		  val_print (elttype, valaddr + i * eltlen,
-			     0, stream, format, deref_ref);
+		  /* Position of the array element we are examining to see
+		     whether it is repeated.  */
+		  unsigned int rep1;
+		  /* Number of repititions we have detected so far.  */
+		  unsigned int reps;
+		  
+		  if (i > 0)
+		    fprintf_filtered (stream, ", ");
+		  
+		  rep1 = i + 1;
+		  reps = 1;
+		  while (rep1 < len
+			 && !bcmp (valaddr + i * eltlen,
+				   valaddr + rep1 * eltlen, eltlen))
+		    {
+		      ++reps;
+		      ++rep1;
+		    }
+
+		  if (reps > REPEAT_COUNT_THRESHOLD)
+		    {
+		      val_print (elttype, valaddr + i * eltlen,
+				 0, stream, format, deref_ref,
+				 recurse + 1, pretty);
+		      fprintf_filtered (stream, " <repeats %u times>", reps);
+		      i = rep1 - 1;
+		      things_printed += REPEAT_COUNT_THRESHOLD;
+		    }
+		  else
+		    {
+		      val_print (elttype, valaddr + i * eltlen,
+				 0, stream, format, deref_ref,
+				 recurse + 1, pretty);
+		      things_printed++;
+		    }
 		}
 	      if (i < len)
-		fprintf (stream, "...");
+		fprintf_filtered (stream, "...");
 	    }
-	  fprintf (stream, "}");
+	  fprintf_filtered (stream, "}");
 	  break;
 	}
-      /* Array of unspecified length: treat like pointer.  */
+      /* Array of unspecified length: treat like pointer to first elt.  */
+      valaddr = (char *) &address;
 
     case TYPE_CODE_PTR:
       if (format)
@@ -185,7 +350,7 @@ val_print (type, valaddr, address, stream, format, deref_ref)
 	  print_scalar_formatted (valaddr, type, format, 0, stream);
 	  break;
 	}
-      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_MEMBER)
+      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD)
 	{
 	  struct type *domain = TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (type));
 	  struct type *target = TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (type));
@@ -194,112 +359,115 @@ val_print (type, valaddr, address, stream, format, deref_ref)
 	  char *kind = "";
 
 	  val = unpack_long (builtin_type_int, valaddr);
-	  if (TYPE_CODE (target) == TYPE_CODE_FUNC)
+	  if (val < 128)
 	    {
-	      if (val < 128)
+	      len = TYPE_NFN_FIELDS (domain);
+	      for (i = 0; i < len; i++)
 		{
-		  len = TYPE_NFN_FIELDS (domain);
-		  for (i = 0; i < len; i++)
-		    {
-		      f = TYPE_FN_FIELDLIST1 (domain, i);
-		      len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
+		  f = TYPE_FN_FIELDLIST1 (domain, i);
+		  len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
 
-		      for (j = 0; j < len2; j++)
+		  for (j = 0; j < len2; j++)
+		    {
+		      QUIT;
+		      if (TYPE_FN_FIELD_VOFFSET (f, j) == val)
 			{
-			  QUIT;
-			  if (TYPE_FN_FIELD_VOFFSET (f, j) == val)
-			    {
-			      kind = "virtual";
-			      goto common;
-			    }
+			  kind = "virtual";
+			  goto common;
 			}
 		    }
-		}
-	      else
-		{
-		  struct symbol *sym = find_pc_function ((CORE_ADDR) val);
-		  if (sym == 0)
-		    error ("invalid pointer to member function");
-		  len = TYPE_NFN_FIELDS (domain);
-		  for (i = 0; i < len; i++)
-		    {
-		      f = TYPE_FN_FIELDLIST1 (domain, i);
-		      len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
-
-		      for (j = 0; j < len2; j++)
-			{
-			  QUIT;
-			  if (!strcmp (SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j)))
-			    goto common;
-			}
-		    }
-		}
-	    common:
-	      if (i < len)
-		{
-		  fputc ('&', stream);
-		  type_print_varspec_prefix (TYPE_FN_FIELD_TYPE (f, j), stream, 0, 0);
-		  fprintf (stream, kind);
-		  if (TYPE_FN_FIELD_PHYSNAME (f, j)[0] == '_'
-		      && TYPE_FN_FIELD_PHYSNAME (f, j)[1] == '$')
-		    type_print_method_args
-		      (TYPE_FN_FIELD_ARGS (f, j) + 1, "~",
-		       TYPE_FN_FIELDLIST_NAME (domain, i), stream);
-		  else
-		    type_print_method_args
-		      (TYPE_FN_FIELD_ARGS (f, j), "",
-		       TYPE_FN_FIELDLIST_NAME (domain, i), stream);
-		  break;
 		}
 	    }
 	  else
 	    {
-	      /* VAL is a byte offset into the structure type DOMAIN.
-		 Find the name of the field for that offset and
-		 print it.  */
-	      int extra = 0;
-	      int bits = 0;
-	      len = TYPE_NFIELDS (domain);
-	      val <<= 3;	/* @@ Make VAL into bit offset */
+	      struct symbol *sym = find_pc_function ((CORE_ADDR) val);
+	      if (sym == 0)
+		error ("invalid pointer to member function");
+	      len = TYPE_NFN_FIELDS (domain);
 	      for (i = 0; i < len; i++)
 		{
-		  int bitpos = TYPE_FIELD_BITPOS (domain, i);
-		  QUIT;
-		  if (val == bitpos)
-		    break;
-		  if (val < bitpos && i > 0)
+		  f = TYPE_FN_FIELDLIST1 (domain, i);
+		  len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
+
+		  for (j = 0; j < len2; j++)
 		    {
-		      int ptrsize = (TYPE_LENGTH (builtin_type_char) * TYPE_LENGTH (target));
-		      /* Somehow pointing into a field.  */
-		      i -= 1;
-		      extra = (val - TYPE_FIELD_BITPOS (domain, i));
-		      if (extra & 0x3)
-			bits = 1;
-		      else
-			extra >>= 3;
-		      break;
+		      QUIT;
+		      if (!strcmp (SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j)))
+			goto common;
 		    }
 		}
-	      if (i < len)
+	    }
+	common:
+	  if (i < len)
+	    {
+	      fprintf_filtered (stream, "&");
+	      type_print_varspec_prefix (TYPE_FN_FIELD_TYPE (f, j), stream, 0, 0);
+	      fprintf (stream, kind);
+	      if (TYPE_FN_FIELD_PHYSNAME (f, j)[0] == '_'
+		  && TYPE_FN_FIELD_PHYSNAME (f, j)[1] == '$')
+		type_print_method_args
+		  (TYPE_FN_FIELD_ARGS (f, j) + 1, "~",
+		   TYPE_FN_FIELDLIST_NAME (domain, i), 0, stream);
+	      else
+		type_print_method_args
+		  (TYPE_FN_FIELD_ARGS (f, j), "",
+		   TYPE_FN_FIELDLIST_NAME (domain, i), 0, stream);
+	      break;
+	    }
+	  fprintf_filtered (stream, "(");
+  	  type_print (type, "", stream, -1);
+	  fprintf_filtered (stream, ") %d", (int) val >> 3);
+	}
+      else if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_MEMBER)
+	{
+	  struct type *domain = TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (type));
+	  struct type *target = TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (type));
+	  char *kind = "";
+
+	  /* VAL is a byte offset into the structure type DOMAIN.
+	     Find the name of the field for that offset and
+	     print it.  */
+	  int extra = 0;
+	  int bits = 0;
+	  len = TYPE_NFIELDS (domain);
+	  /* @@ Make VAL into bit offset */
+	  val = unpack_long (builtin_type_int, valaddr) << 3;
+	  for (i = 0; i < len; i++)
+	    {
+	      int bitpos = TYPE_FIELD_BITPOS (domain, i);
+	      QUIT;
+	      if (val == bitpos)
+		break;
+	      if (val < bitpos && i > 0)
 		{
-		  fputc ('&', stream);
-		  type_print_base (domain, stream, 0, 0);
-		  fprintf (stream, "::");
-		  fprintf (stream, "%s", TYPE_FIELD_NAME (domain, i));
-		  if (extra)
-		    fprintf (stream, " + %d bytes", extra);
-		  if (bits)
-		    fprintf (stream, " (offset in bits)");
+		  int ptrsize = (TYPE_LENGTH (builtin_type_char) * TYPE_LENGTH (target));
+		  /* Somehow pointing into a field.  */
+		  i -= 1;
+		  extra = (val - TYPE_FIELD_BITPOS (domain, i));
+		  if (extra & 0x3)
+		    bits = 1;
+		  else
+		    extra >>= 3;
 		  break;
 		}
 	    }
-	  fputc ('(', stream);
-	  type_print (type, "", stream, -1);
-	  fprintf (stream, ") %d", val >> 3);
+	  if (i < len)
+	    {
+	      fprintf_filtered (stream, "&");
+	      type_print_base (domain, stream, 0, 0);
+	      fprintf_filtered (stream, "::");
+	      fputs_filtered (TYPE_FIELD_NAME (domain, i), stream);
+	      if (extra)
+		fprintf_filtered (stream, " + %d bytes", extra);
+	      if (bits)
+		fprintf_filtered (stream, " (offset in bits)");
+	      break;
+	    }
+	  fprintf_filtered (stream, "%d", val >> 3);
 	}
       else
 	{
-	  fprintf (stream, "0x%x", * (int *) valaddr);
+	  fprintf_filtered (stream, "0x%x", * (int *) valaddr);
 	  /* For a pointer to char or unsigned char,
 	     also print the string pointed to, unless pointer is null.  */
 	  
@@ -309,18 +477,17 @@ val_print (type, valaddr, address, stream, format, deref_ref)
 	  if (TYPE_LENGTH (elttype) == 1 
 	      && TYPE_CODE (elttype) == TYPE_CODE_INT
 	      && format == 0
-	      /* Convex needs this typecast to a long */
-	      && (long) unpack_long (type, valaddr) != 0
+	      && unpack_long (type, valaddr) != 0
 	      && print_max)
 	    {
-	      fputc (' ', stream);
+	      fprintf_filtered (stream, " ");
 
 	      /* Get first character.  */
 	      if (read_memory ( (CORE_ADDR) unpack_long (type, valaddr),
 			       &c, 1))
 		{
 		  /* First address out of bounds.  */
-		  fprintf (stream, "<Address 0x%x out of bounds>",
+		  fprintf_filtered (stream, "<Address 0x%x out of bounds>",
 			   (* (int *) valaddr));
 		  break;
 		}
@@ -328,32 +495,31 @@ val_print (type, valaddr, address, stream, format, deref_ref)
 		{
 		  /* A real string.  */
 		  int out_of_bounds = 0;
-		  
-		  fputc ('"', stream);
-		  while (c)
+		  char *string = (char *) alloca (print_max);
+
+		  while (i < print_max)
 		    {
 		      QUIT;
-		      printchar (c, stream, '"');
-		      if (++i >= print_max)
-			break;
 		      if (read_memory ((CORE_ADDR) unpack_long (type, valaddr)
 				       + i, &c, 1))
 			{
-			  /* This address was out of bounds.  */
-			  fprintf (stream,
-				   "\"*** <Address 0x%x out of bounds>",
-				   (* (int *) valaddr) + i);
 			  out_of_bounds = 1;
 			  break;
 			}
+		      else if (c == '\0')
+			break;
+		      else
+			string[i++] = c;
 		    }
-		  if (!out_of_bounds)
-		    {
-		      fputc ('"', stream);
-		      if (i == print_max)
-			fprintf (stream, "...");
-		    }
+
+		  if (i != 0)
+		    print_string (stream, string, i);
+		  if (out_of_bounds)
+		    fprintf_filtered (stream,
+				      "*** <Address 0x%x out of bounds>",
+				      (*(int *) valaddr) + i);
 		}
+
 	      fflush (stream);
 	    }
 	  /* Return number of characters printed, plus one for the
@@ -367,7 +533,7 @@ val_print (type, valaddr, address, stream, format, deref_ref)
       break;
 
     case TYPE_CODE_REF:
-      fprintf (stream, "(0x%x &) = ", * (int *) valaddr);
+      fprintf_filtered (stream, "(0x%x &) = ", * (int *) valaddr);
       /* De-reference the reference.  */
       if (deref_ref)
 	{
@@ -375,53 +541,94 @@ val_print (type, valaddr, address, stream, format, deref_ref)
 	    {
 	      value val = value_at (TYPE_TARGET_TYPE (type), * (int *) valaddr);
 	      val_print (VALUE_TYPE (val), VALUE_CONTENTS (val),
-			 VALUE_ADDRESS (val), stream, format, deref_ref);
+			 VALUE_ADDRESS (val), stream, format,
+			 deref_ref, recurse + 1, pretty);
 	    }
 	  else
-	    fprintf (stream, "???");
+	    fprintf_filtered (stream, "???");
 	}
       break;
 
-    case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
-      fprintf (stream, "{");
+      if (recurse && !unionprint)
+	{
+	  fprintf_filtered (stream, "{...}");
+	  break;
+	}
+      /* Fall through.  */
+    case TYPE_CODE_STRUCT:
+      fprintf_filtered (stream, "{");
       len = TYPE_NFIELDS (type);
       n_baseclasses = TYPE_N_BASECLASSES (type);
       for (i = 1; i <= n_baseclasses; i++)
 	{
-	  fprintf (stream, "\n<%s> = ", TYPE_NAME (TYPE_BASECLASS (type, i)));
+	  fprintf_filtered (stream, "\n");
+	  if (pretty)
+	    print_spaces_filtered (2 + 2 * recurse, stream);
+	  fputs_filtered ("<", stream);
+	  fputs_filtered (TYPE_NAME (TYPE_BASECLASS (type, i)), stream);
+	  fputs_filtered ("> = ", stream);
 	  val_print (TYPE_FIELD_TYPE (type, 0),
 		     valaddr + TYPE_FIELD_BITPOS (type, i-1) / 8,
-		     0, stream, 0, 0);
+		     0, stream, 0, 0, recurse + 1, pretty);
 	}
-      if (i > 1) fprintf (stream, "\nmembers of %s: ", TYPE_NAME (type));
-      for (i -= 1; i < len; i++)
+      if (i > 1) {
+	fprintf_filtered (stream, "\n");
+	print_spaces_filtered (2 + 2 * recurse, stream);
+	fputs_filtered ("members of ", stream);
+        fputs_filtered (TYPE_NAME (type), stream);
+        fputs_filtered (": ", stream);
+      }
+      if (!len && i == 1)
+	fprintf_filtered (stream, "<No data fields>");
+      else
 	{
-	  if (i > n_baseclasses) fprintf (stream, ", ");
-	  fprintf (stream, "%s = ", TYPE_FIELD_NAME (type, i));
-	  /* check if static field */
-	  if (TYPE_FIELD_STATIC (type, i))
+	  for (i -= 1; i < len; i++)
 	    {
-	      value v;
-
-	      v = value_static_field (type, TYPE_FIELD_NAME (type, i), i);
-	      val_print (TYPE_FIELD_TYPE (type, i),
-			 VALUE_CONTENTS (v), 0, stream, format, deref_ref);
+	      if (i > n_baseclasses) fprintf_filtered (stream, ", ");
+	      if (pretty)
+		{
+		  fprintf_filtered (stream, "\n");
+		  print_spaces_filtered (2 + 2 * recurse, stream);
+		}
+	      fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	      fputs_filtered (" = ", stream);
+	      /* check if static field */
+	      if (TYPE_FIELD_STATIC (type, i))
+		{
+		  value v;
+		  
+		  v = value_static_field (type, TYPE_FIELD_NAME (type, i), i);
+		  val_print (TYPE_FIELD_TYPE (type, i),
+			     VALUE_CONTENTS (v), 0, stream, format,
+			     deref_ref, recurse + 1, pretty);
+		}
+	      else if (TYPE_FIELD_PACKED (type, i))
+		{
+		  char *valp = (char *) & val;
+		  union {int i; char c;} test;
+		  test.i = 1;
+		  if (test.c != 1)
+		    valp += sizeof val - TYPE_LENGTH (TYPE_FIELD_TYPE (type, i));
+		  val = unpack_field_as_long (type, valaddr, i);
+		  val_print (TYPE_FIELD_TYPE (type, i), valp, 0,
+			     stream, format, deref_ref, recurse + 1, pretty);
+		}
+	      else
+		{
+		  val_print (TYPE_FIELD_TYPE (type, i), 
+			     valaddr + TYPE_FIELD_BITPOS (type, i) / 8,
+			     0, stream, format, deref_ref,
+			     recurse + 1, pretty);
+		}
 	    }
-	  else if (TYPE_FIELD_PACKED (type, i))
+	  if (pretty)
 	    {
-	      val = unpack_field_as_long (type, valaddr, i);
-	      val_print (TYPE_FIELD_TYPE (type, i), &val, 0,
-			 stream, format, deref_ref);
-	    }
-	  else
-	    {
-	      val_print (TYPE_FIELD_TYPE (type, i), 
-			 valaddr + TYPE_FIELD_BITPOS (type, i) / 8,
-			 0, stream, format, deref_ref);
+	      fprintf_filtered (stream, "\n");
+	      print_spaces_filtered (2 * recurse, stream);
 	    }
 	}
-      fprintf (stream, "}");
+      fprintf_filtered (stream, "}");
       break;
 
     case TYPE_CODE_ENUM:
@@ -431,7 +638,7 @@ val_print (type, valaddr, address, stream, format, deref_ref)
 	  break;
 	}
       len = TYPE_NFIELDS (type);
-      val = (long) unpack_long (builtin_type_int, valaddr);
+      val = unpack_long (builtin_type_int, valaddr);
       for (i = 0; i < len; i++)
 	{
 	  QUIT;
@@ -439,9 +646,9 @@ val_print (type, valaddr, address, stream, format, deref_ref)
 	    break;
 	}
       if (i < len)
-	fprintf (stream, "%s", TYPE_FIELD_NAME (type, i));
+	fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
       else
-	fprintf (stream, "%d", val);
+	fprintf_filtered (stream, "%d", (int) val);
       break;
 
     case TYPE_CODE_FUNC:
@@ -450,10 +657,10 @@ val_print (type, valaddr, address, stream, format, deref_ref)
 	  print_scalar_formatted (valaddr, type, format, 0, stream);
 	  break;
 	}
-      fprintf (stream, "{");
+      fprintf_filtered (stream, "{");
       type_print (type, "", stream, -1);
-      fprintf (stream, "} ");
-      fprintf (stream, "0x%x", address);
+      fprintf_filtered (stream, "} ");
+      fprintf_filtered (stream, "0x%x", address);
       break;
 
     case TYPE_CODE_INT:
@@ -462,15 +669,26 @@ val_print (type, valaddr, address, stream, format, deref_ref)
 	  print_scalar_formatted (valaddr, type, format, 0, stream);
 	  break;
 	}
-      fprintf (stream,
-	       TYPE_UNSIGNED (type) ? "%u" : "%d",
-	       unpack_long (type, valaddr));
+#ifdef PRINT_TYPELESS_INTEGER
+      PRINT_TYPELESS_INTEGER (stream, type, unpack_long (type, valaddr));
+#else
+#ifndef LONG_LONG
+      fprintf_filtered (stream,
+			TYPE_UNSIGNED (type) ? "%u" : "%d",
+			unpack_long (type, valaddr));
+#else
+      fprintf_filtered (stream,
+			TYPE_UNSIGNED (type) ? "%llu" : "%lld",
+			unpack_long (type, valaddr));
+#endif
+#endif
+			
       if (TYPE_LENGTH (type) == 1)
 	{
-	  fprintf (stream, " '");
+	  fprintf_filtered (stream, " '");
 	  printchar ((unsigned char) unpack_long (type, valaddr), 
 		     stream, '\'');
-	  fputc ('\'', stream);
+	  fprintf_filtered (stream, "'");
 	}
       break;
 
@@ -480,12 +698,10 @@ val_print (type, valaddr, address, stream, format, deref_ref)
 	  print_scalar_formatted (valaddr, type, format, 0, stream);
 	  break;
 	}
-      /* FIXME:  When printing NaNs or invalid floats, print them
-	 in raw hex in addition to the message. */
 #ifdef IEEE_FLOAT
-      if (is_nan ((void *)valaddr, TYPE_LENGTH(type)))
+      if (is_nan ((void *) valaddr, TYPE_LENGTH (type)))
 	{
-	  fprintf (stream, "NaN");
+	  fprintf_filtered (stream, "NaN");
 	  break;
 	}
 #endif
@@ -495,20 +711,22 @@ val_print (type, valaddr, address, stream, format, deref_ref)
 
 	doub = unpack_double (type, valaddr, &inv);
 	if (inv)
-	  fprintf (stream, "Invalid float value");
+	  fprintf_filtered (stream, "Invalid float value");
 	else
-	  fprintf (stream, TYPE_LENGTH (type) <= 4? "%.6g": "%.16g", doub);
+	  fprintf_filtered (stream,
+			    TYPE_LENGTH (type) <= 4? "%.6g": "%.16g", doub);
       }
       break;
 
     case TYPE_CODE_VOID:
-      fprintf (stream, "void");
+      fprintf_filtered (stream, "void");
       break;
 
     default:
       error ("Invalid type code in symbol table.");
     }
   fflush (stream);
+  return 0;
 }
 
 #ifdef IEEE_FLOAT
@@ -517,27 +735,29 @@ val_print (type, valaddr, address, stream, format, deref_ref)
 
 int
 is_nan (fp, len)
-  void *fp;
-  int len;
+     void *fp;
+     int len;
 {
   int lowhalf, highhalf;
-  union ieee {
-    long i[2];		/* ASSUMED 32 BITS */
-    float f;		/* ASSUMED 32 BITS */
-    double d;		/* ASSUMED 64 BITS */
-  } *arg;
+  union ieee
+    {
+      long i[2];		/* ASSUMED 32 BITS */
+      float f;		/* ASSUMED 32 BITS */
+      double d;		/* ASSUMED 64 BITS */
+    } *arg;
 
   arg = (union ieee *)fp;
 
   /*
    * Single precision float.
    */
-  if (len == sizeof(long)) {
-	highhalf = arg->i[0];
-	return ((((highhalf >> 23) & 0xFF) == 0xFF) 
-		&& 0 != (highhalf & 0x7FFFFF));
-  }
-
+  if (len == sizeof(long))
+    {
+      highhalf = arg->i[0];
+      return ((((highhalf >> 23) & 0xFF) == 0xFF) 
+	      && 0 != (highhalf & 0x7FFFFF));
+    }
+  
   /* Separate the high and low words of the double.
      Distinguish big and little-endian machines.  */
 #ifdef WORDS_BIG_ENDIAN
@@ -545,11 +765,10 @@ is_nan (fp, len)
 #else
     lowhalf = arg->i[0], highhalf = arg->i[1];
 #endif
-
+  
   /* Nan: exponent is the maximum possible, and fraction is nonzero.  */
   return (((highhalf>>20) & 0x7ff) == 0x7ff
-	  &&
-	  ! ((highhalf & 0xfffff == 0) && (lowhalf == 0)));
+	  && ! ((highhalf & 0xfffff == 0) && (lowhalf == 0)));
 }
 #endif
 
@@ -590,44 +809,49 @@ type_print_1 (type, varstring, stream, show, level)
       ((show > 0 || TYPE_NAME (type) == 0)
        &&
        (code == TYPE_CODE_PTR || code == TYPE_CODE_FUNC
+	|| code == TYPE_CODE_METHOD
 	|| code == TYPE_CODE_ARRAY
 	|| code == TYPE_CODE_MEMBER
 	|| code == TYPE_CODE_REF)))
-    fprintf (stream, " ");
+    fprintf_filtered (stream, " ");
   type_print_varspec_prefix (type, stream, show, 0);
-  fprintf (stream, "%s", varstring);
+  fputs_filtered (varstring, stream);
   type_print_varspec_suffix (type, stream, show, 0);
 }
 
 /* Print the method arguments ARGS to the file STREAM.  */
 static void
-type_print_method_args (args, prefix, varstring, stream)
+type_print_method_args (args, prefix, varstring, staticp, stream)
      struct type **args;
      char *prefix, *varstring;
+     int staticp;
      FILE *stream;
 {
   int i;
 
-  fprintf (stream, " %s%s (", prefix, varstring);
-  if (args[1] && args[1]->code != TYPE_CODE_VOID)
+  fputs_filtered (" ", stream);
+  fputs_filtered (prefix, stream);
+  fputs_filtered (varstring, stream);
+  fputs_filtered (" (", stream);
+  if (args && args[!staticp] && args[!staticp]->code != TYPE_CODE_VOID)
     {
-      i = 1;			/* skip the class variable */
+      i = !staticp;		/* skip the class variable */
       while (1)
 	{
 	  type_print (args[i++], "", stream, 0);
 	  if (!args[i]) 
 	    {
-	      fprintf (stream, " ...");
+	      fprintf_filtered (stream, " ...");
 	      break;
 	    }
 	  else if (args[i]->code != TYPE_CODE_VOID)
 	    {
-	      fprintf (stream, ", ");
+	      fprintf_filtered (stream, ", ");
 	    }
 	  else break;
 	}
     }
-  fprintf (stream, ")");
+  fprintf_filtered (stream, ")");
 }
   
 /* If TYPE is a derived type, then print out derivation
@@ -649,10 +873,11 @@ type_print_derivation_info (stream, type)
       if (TYPE_NAME (basetype) && (name = TYPE_NAME (basetype)))
 	{
 	  while (*name != ' ') name++;
-	  fprintf (stream, ": %s%s %s ",
+	  fprintf_filtered (stream, ": %s%s ",
 		   TYPE_VIA_PUBLIC (basetype) ? "public" : "private",
-		   TYPE_VIA_VIRTUAL (basetype) ? " virtual" : "",
-		   name + 1);
+		   TYPE_VIA_VIRTUAL (basetype) ? " virtual" : "");
+	  fputs_filtered (name + 1, stream);
+	  fputs_filtered (" ", stream);
 	}
       n_baseclasses = TYPE_N_BASECLASSES (basetype);
       type = basetype;
@@ -661,22 +886,22 @@ type_print_derivation_info (stream, type)
   if (type)
     {
       if (n_baseclasses != 0)
-	fprintf (stream, ": ");
+	fprintf_filtered (stream, ": ");
       for (i = 1; i <= n_baseclasses; i++)
 	{
 	  basetype = TYPE_BASECLASS (type, i);
 	  if (TYPE_NAME (basetype) && (name = TYPE_NAME (basetype)))
 	    {
 	      while (*name != ' ') name++;
-	      fprintf (stream, "%s%s %s",
+	      fprintf_filtered (stream, "%s%s ",
 		       TYPE_VIA_PUBLIC (basetype) ? "public" : "private",
-		       TYPE_VIA_VIRTUAL (basetype) ? " virtual" : "",
-		       name + 1);
+		       TYPE_VIA_VIRTUAL (basetype) ? " virtual" : "");
+	      fputs_filtered (name + 1, stream);
 	    }
 	  if (i < n_baseclasses)
-	    fprintf (stream, ", ");
+	    fprintf_filtered (stream, ", ");
 	}
-      putc (' ', stream);
+      fprintf_filtered (stream, " ");
     }
 }
 
@@ -707,33 +932,48 @@ type_print_varspec_prefix (type, stream, show, passed_a_ptr)
     {
     case TYPE_CODE_PTR:
       type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
-      fputc ('*', stream);
+      fprintf_filtered (stream, "*");
       break;
 
     case TYPE_CODE_MEMBER:
+      if (passed_a_ptr)
+	fprintf_filtered (stream, "(");
       type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0,
-				 passed_a_ptr);
-      fputc (' ', stream);
+				 0);
+      fprintf_filtered (stream, " ");
       type_print_base (TYPE_DOMAIN_TYPE (type), stream, 0,
 		       passed_a_ptr);
-      fprintf (stream, "::");
+      fprintf_filtered (stream, "::");
+      break;
+
+    case TYPE_CODE_METHOD:
+      if (passed_a_ptr)
+	fprintf (stream, "(");
+      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0,
+				 0);
+      fprintf_filtered (stream, " ");
+      type_print_base (TYPE_DOMAIN_TYPE (type), stream, 0,
+		       passed_a_ptr);
+      fprintf_filtered (stream, "::");
       break;
 
     case TYPE_CODE_REF:
       type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
-      fputc ('&', stream);
+      fprintf_filtered (stream, "&");
       break;
 
     case TYPE_CODE_FUNC:
       type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0,
-				 passed_a_ptr);
+				 0);
       if (passed_a_ptr)
-	fputc ('(', stream);
+	fprintf_filtered (stream, "(");
       break;
 
     case TYPE_CODE_ARRAY:
       type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0,
-				 passed_a_ptr);
+				 0);
+      if (passed_a_ptr)
+	fprintf_filtered (stream, "(");
     }
 }
 
@@ -759,20 +999,49 @@ type_print_varspec_suffix (type, stream, show, passed_a_ptr)
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
-      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
-				 passed_a_ptr);
-      fprintf (stream, "[");
+      if (passed_a_ptr)
+	fprintf_filtered (stream, ")");
+      
+      fprintf_filtered (stream, "[");
       if (TYPE_LENGTH (type) >= 0
 	  && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
-	fprintf (stream, "%d",
-		 TYPE_LENGTH (type) / TYPE_LENGTH (TYPE_TARGET_TYPE (type)));
-      fprintf (stream, "]");
+	fprintf_filtered (stream, "%d",
+			  (TYPE_LENGTH (type)
+			   / TYPE_LENGTH (TYPE_TARGET_TYPE (type))));
+      fprintf_filtered (stream, "]");
+      
+      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
+				 0);
       break;
 
     case TYPE_CODE_MEMBER:
       if (passed_a_ptr)
-	fputc (')', stream);
+	fprintf_filtered (stream, ")");
       type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      break;
+
+    case TYPE_CODE_METHOD:
+      if (passed_a_ptr)
+	fprintf_filtered (stream, ")");
+      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      if (passed_a_ptr)
+	{
+	  int i;
+	  struct type **args = TYPE_ARG_TYPES (type);
+
+	  fprintf_filtered (stream, "(");
+	  if (args[1] == 0)
+	    fprintf_filtered (stream, "...");
+	  else for (i = 1; args[i] != 0 && args[i]->code != TYPE_CODE_VOID; i++)
+	    {
+	      type_print_1 (args[i], "", stream, -1, 0);
+	      if (args[i+1] == 0)
+		fprintf_filtered (stream, "...");
+	      else if (args[i+1]->code != TYPE_CODE_VOID)
+		fprintf_filtered (stream, ",");
+	    }
+	  fprintf_filtered (stream, ")");
+	}
       break;
 
     case TYPE_CODE_PTR:
@@ -784,8 +1053,8 @@ type_print_varspec_suffix (type, stream, show, passed_a_ptr)
       type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
 				 passed_a_ptr);
       if (passed_a_ptr)
-	fprintf (stream, ")");
-      fprintf (stream, "()");
+	fprintf_filtered (stream, ")");
+      fprintf_filtered (stream, "()");
       break;
     }
 }
@@ -819,13 +1088,13 @@ type_print_base (type, stream, show, level)
 
   if (type == 0)
     {
-      fprintf (stream, "type unknown");
+      fprintf_filtered (stream, "type unknown");
       return;
     }
 
   if (TYPE_NAME (type) && show <= 0)
     {
-      fprintf (stream, TYPE_NAME (type));
+      fputs_filtered (TYPE_NAME (type), stream);
       return;
     }
 
@@ -836,33 +1105,42 @@ type_print_base (type, stream, show, level)
     case TYPE_CODE_MEMBER:
     case TYPE_CODE_REF:
     case TYPE_CODE_FUNC:
+    case TYPE_CODE_METHOD:
       type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
       break;
 
     case TYPE_CODE_STRUCT:
-      fprintf (stream, "struct ");
+      fprintf_filtered (stream, "struct ");
       goto struct_union;
 
     case TYPE_CODE_UNION:
-      fprintf (stream, "union ");
+      fprintf_filtered (stream, "union ");
     struct_union:
       if (TYPE_NAME (type) && (name = TYPE_NAME (type)))
 	{
 	  while (*name != ' ') name++;
-	  fprintf (stream, "%s ", name + 1);
+	  fputs_filtered (name + 1, stream);
+	  fputs_filtered (" ", stream);
 	}
       if (show < 0)
-	fprintf (stream, "{...}");
+	fprintf_filtered (stream, "{...}");
       else
 	{
 	  int i;
 
 	  type_print_derivation_info (stream, type);
 	  
-	  fprintf (stream, "{");
+	  fprintf_filtered (stream, "{");
 	  len = TYPE_NFIELDS (type);
-	  if (len) fprintf (stream, "\n");
-	  else fprintf (stream, "<no data fields>\n");
+	  if (len)
+	    fprintf_filtered (stream, "\n");
+	  else
+	    {
+	      if (TYPE_FLAGS (type) & TYPE_FLAG_STUB)
+		fprintf_filtered (stream, "<incomplete type>\n");
+	      else
+		fprintf_filtered (stream, "<no data fields>\n");
+	    }
 
 	  /* If there is a base class for this type,
 	     do not print the field that it occupies.  */
@@ -874,10 +1152,10 @@ type_print_base (type, stream, show, level)
 			   "_vptr$", 6))
 		continue;
 
-	      print_spaces (level + 4, stream);
+	      print_spaces_filtered (level + 4, stream);
 	      if (TYPE_FIELD_STATIC (type, i))
 		{
-		  fprintf (stream, "static ");
+		  fprintf_filtered (stream, "static ");
 		}
 	      type_print_1 (TYPE_FIELD_TYPE (type, i),
 			    TYPE_FIELD_NAME (type, i),
@@ -885,14 +1163,20 @@ type_print_base (type, stream, show, level)
 	      if (!TYPE_FIELD_STATIC (type, i)
 		  && TYPE_FIELD_PACKED (type, i))
 		{
-		  /* ??? don't know what to put here ??? */;
+		  /* It is a bitfield.  This code does not attempt
+		     to look at the bitpos and reconstruct filler,
+		     unnamed fields.  This would lead to misleading
+		     results if the compiler does not put out fields
+		     for such things (I don't know what it does).  */
+		  fprintf_filtered (stream, " : %d",
+				    TYPE_FIELD_BITSIZE (type, i));
 		}
-	      fprintf (stream, ";\n");
+	      fprintf_filtered (stream, ";\n");
 	    }
 
 	  /* C++: print out the methods */
 	  len = TYPE_NFN_FIELDS (type);
-	  if (len) fprintf (stream, "\n");
+	  if (len) fprintf_filtered (stream, "\n");
 	  for (i = 0; i < len; i++)
 	    {
 	      struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
@@ -901,58 +1185,62 @@ type_print_base (type, stream, show, level)
 	      for (j = 0; j < len2; j++)
 		{
 		  QUIT;
-		  print_spaces (level + 4, stream);
+		  print_spaces_filtered (level + 4, stream);
 		  if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
-		    fprintf (stream, "virtual ");
-		  type_print (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j))), "", stream, 0);
+		    fprintf_filtered (stream, "virtual ");
+		  else if (TYPE_FN_FIELD_STATIC_P (f, j))
+		    fprintf_filtered (stream, "static ");
+		  type_print (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)), "", stream, 0);
 		  if (TYPE_FN_FIELD_PHYSNAME (f, j)[0] == '_'
 		      && TYPE_FN_FIELD_PHYSNAME (f, j)[1] == '$')
 		    type_print_method_args
 		      (TYPE_FN_FIELD_ARGS (f, j) + 1, "~",
-		       TYPE_FN_FIELDLIST_NAME (type, i), stream);
+		       TYPE_FN_FIELDLIST_NAME (type, i), 0, stream);
 		  else
 		    type_print_method_args
 		      (TYPE_FN_FIELD_ARGS (f, j), "",
-		       TYPE_FN_FIELDLIST_NAME (type, i), stream);
+		       TYPE_FN_FIELDLIST_NAME (type, i),
+		       TYPE_FN_FIELD_STATIC_P (f, j), stream);
 
-		  fprintf (stream, ";\n");
+		  fprintf_filtered (stream, ";\n");
 		}
-	      if (len2) fprintf (stream, "\n");
+	      if (len2) fprintf_filtered (stream, "\n");
 	    }
 
-	  print_spaces (level, stream);
-	  fputc ('}', stream);
+	  print_spaces_filtered (level, stream);
+	  fprintf_filtered (stream, "}");
 	}
       break;
 
     case TYPE_CODE_ENUM:
-      fprintf (stream, "enum ");
+      fprintf_filtered (stream, "enum ");
       if (TYPE_NAME (type))
 	{
 	  name = TYPE_NAME (type);
 	  while (*name != ' ') name++;
-	  fprintf (stream, "%s ", name + 1);
+	  fputs_filtered (name + 1, stream);
+	  fputs_filtered (" ", stream);
 	}
       if (show < 0)
-	fprintf (stream, "{...}");
+	fprintf_filtered (stream, "{...}");
       else
 	{
-	  fprintf (stream, "{");
+	  fprintf_filtered (stream, "{");
 	  len = TYPE_NFIELDS (type);
 	  lastval = 0;
 	  for (i = 0; i < len; i++)
 	    {
 	      QUIT;
-	      if (i) fprintf (stream, ", ");
-	      fprintf (stream, "%s", TYPE_FIELD_NAME (type, i));
+	      if (i) fprintf_filtered (stream, ", ");
+	      fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
 	      if (lastval != TYPE_FIELD_BITPOS (type, i))
 		{
-		  fprintf (stream, " : %d", TYPE_FIELD_BITPOS (type, i));
+		  fprintf_filtered (stream, " : %d", TYPE_FIELD_BITPOS (type, i));
 		  lastval = TYPE_FIELD_BITPOS (type, i);
 		}
 	      lastval++;
 	    }
-	  fprintf (stream, "}");
+	  fprintf_filtered (stream, "}");
 	}
       break;
 
@@ -961,20 +1249,20 @@ type_print_base (type, stream, show, level)
 	name = unsigned_type_table[TYPE_LENGTH (type)];
       else
 	name = signed_type_table[TYPE_LENGTH (type)];
-      fprintf (stream, "%s", name);
+      fputs_filtered (name, stream);
       break;
 
     case TYPE_CODE_FLT:
       name = float_type_table[TYPE_LENGTH (type)];
-      fprintf (stream, "%s", name);
+      fputs_filtered (name, stream);
       break;
 
     case TYPE_CODE_VOID:
-      fprintf (stream, "void");
+      fprintf_filtered (stream, "void");
       break;
 
     case 0:
-      fprintf (stream, "struct unknown");
+      fprintf_filtered (stream, "struct unknown");
       break;
 
     default:
@@ -987,7 +1275,37 @@ set_maximum_command (arg)
      char *arg;
 {
   if (!arg) error_no_arg ("value for maximum elements to print");
-  print_max = atoi (arg);
+  print_max = parse_and_eval_address (arg);
+}
+
+static void
+set_prettyprint_command (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  prettyprint = parse_binary_operation ("set prettyprint", arg);
+}
+
+static void
+set_unionprint_command (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  unionprint = parse_binary_operation ("set unionprint", arg);
+}
+
+format_info (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  if (arg)
+    error ("\"info format\" does not take any arguments.");
+  printf ("Prettyprinting of structures is %s.\n",
+	  prettyprint ? "on" : "off");
+  printf ("Printing of unions interior to structures is %s.\n",
+	  unionprint ? "on" : "off");
+  printf ("The maximum number of array elements printed is %d.\n",
+	  print_max);
 }
 
 extern struct cmd_list_element *setlist;
@@ -998,6 +1316,22 @@ _initialize_valprint ()
   add_cmd ("array-max", class_vars, set_maximum_command,
 	   "Set NUMBER as limit on string chars or array elements to print.",
 	   &setlist);
+
+  add_cmd ("prettyprint", class_support, set_prettyprint_command,
+	   "Turn prettyprinting of structures on and off.",
+	   &setlist);
+  add_alias_cmd ("pp", "prettyprint", class_support, 1, &setlist);
+
+  add_cmd ("unionprint", class_support, set_unionprint_command,
+	   "Turn printing of unions interior to structures on and off.",
+	   &setlist);
+
+  add_info ("format", format_info,
+	    "Show current settings of data formatting options.");
+
+  /* Give people the defaults which they are used to.  */
+  prettyprint = 0;
+  unionprint = 1;
 
   print_max = 200;
 

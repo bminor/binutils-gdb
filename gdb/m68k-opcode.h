@@ -1,4 +1,22 @@
-/* Opcode table for m68000/m68020 and m68881.  */
+/* Opcode table for m68000/m68020 and m68881.
+   Copyright (C) 1989, Free Software Foundation.
+
+This file is part of GDB, the GNU Debugger and GAS, the GNU Assembler.
+
+Both GDB and GAS are free software; you can redistribute and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
+
+GDB and GAS are distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB or GAS; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   
 
 struct m68k_opcode
 {
@@ -57,6 +75,7 @@ struct m68k_opcode
       coprocessor opcode can be skipped using the 'i' place, if needed.
 
    s  System Control register for the floating point coprocessor.
+   S  List of system control registers for floating point coprocessor.
 
    J  Misc register for movec instruction, stored in 'j' format.
 	Possible values:
@@ -69,7 +88,14 @@ struct m68k_opcode
 	803	MSP	Master Stack Pointer
 	804	ISP	Interrupt Stack Pointer
 
- These specify various classes of addressing modes.
+    L  Register list of the type d0-d7/a0-a7 etc.
+       (New!  Improved!  Can also hold fp0-fp7, as well!)
+       The assembler tries to see if the registers match the insn by
+       looking at where the insn wants them stored.
+
+    l  Register list like L, but with all the bits reversed.
+       Used for going the other way. . .
+
  They are all stored as 6 bits using an address mode and a register number;
  they differ in which addressing modes they match.
 
@@ -77,12 +103,49 @@ struct m68k_opcode
    ~  alterable memory				(modes 2-6,7.0,7.1)(not 0,1,7.~)
    %  alterable					(modes 0-6,7.0,7.1)(not 7.~)
    ;  data					(modes 0,2-6,7.*)(not 1)
-   @  data, but not immediate			(modes 0,2-6,7.???)(not 1,7.?)  This may really be ;, the 68020 book says it is
+   @  data, but not immediate			(modes 0,2-6,7.? ? ?)(not 1,7.?)  This may really be ;, the 68020 book says it is
    !  control					(modes 2,5,6,7.*-)(not 0,1,3,4,7.4)
-   &  alterable control				(modes 2,5,6,7.0,7.1)(not 0,1,7.???)
+   &  alterable control				(modes 2,5,6,7.0,7.1)(not 0,1,7.? ? ?)
    $  alterable data				(modes 0,2-6,7.0,7.1)(not 1,7.~)
    ?  alterable control, or data register	(modes 0,2,5,6,7.0,7.1)(not 1,3,4,7.~)
    /  control, or data register			(modes 0,2,5,6,7.0,7.1,7.2,7.3)(not 1,3,4,7.4)
+*/
+
+/* JF: for the 68851 */
+/*
+   I didn't use much imagination in choosing the 
+   following codes, so many of them aren't very
+   mnemonic. -rab
+
+   P  pmmu register
+	Possible values:
+	000	TC	Translation Control reg
+	100	CAL	Current Access Level
+	101	VAL	Validate Access Level
+	110	SCC	Stack Change Control
+	111	AC	Access Control
+
+   W  wide pmmu registers
+	Possible values:
+	001	DRP	Dma Root Pointer
+	010	SRP	Supervisor Root Pointer
+	011	CRP	Cpu Root Pointer
+
+   f	function code register
+	0	SFC
+	1	DFC
+
+   V	VAL register only
+
+   X	BADx, BACx
+	100	BAD	Breakpoint Acknowledge Data
+	101	BAC	Breakpoint Acknowledge Control
+
+   Y	PSR
+   Z	PCSR
+
+   |	memory 		(modes 2-6, 7.*)
+
 */
 
 /* Places to put an operand, for non-general operands:
@@ -130,10 +193,11 @@ struct m68k_opcode
 #define one(x) ((x) << 16)
 #define two(x, y) (((x) << 16) + y)
 
-/* The assembler requires that this array be sorted as follows:
-   all instances of the same mnemonic must be consecutive.
-   All instances of the same mnemonic with the same number of operands
-   must be consecutive.
+/*
+	*** DANGER WILL ROBINSON ***
+
+   The assembler requires that all instances of the same mnemonic must be
+   consecutive.  If they aren't, the assembler will bomb at runtime
  */
 struct m68k_opcode m68k_opcodes[] =
 {
@@ -150,20 +214,20 @@ struct m68k_opcode m68k_opcodes[] =
 {"addql",	one(0050200),		one(0170700),		"Qd%l"},
 {"addqw",	one(0050100),		one(0170700),		"Qd%w"},
 
-{"addb",	one(0003000),		one(0177700),		"#b$b"},	/* addi written as add */
 {"addb",	one(0050000),		one(0170700),		"Qd$b"},	/* addq written as add */
+{"addb",	one(0003000),		one(0177700),		"#b$b"},	/* addi written as add */
 {"addb",	one(0150000),		one(0170700),		";bDd"},	/* addb <ea>,	Dd */
 {"addb",	one(0150400),		one(0170700),		"Dd~b"},	/* addb Dd,	<ea> */
 
+{"addw",	one(0050100),		one(0170700),		"Qd%w"},	/* addq written as add */
 {"addw",	one(0003100),		one(0177700),		"#w$w"},	/* addi written as add */
 {"addw",	one(0150300),		one(0170700),		"*wAd"},	/* adda written as add */
-{"addw",	one(0050100),		one(0170700),		"Qd%w"},	/* addq written as add */
 {"addw",	one(0150100),		one(0170700),		"*wDd"},	/* addw <ea>,	Dd */
 {"addw",	one(0150500),		one(0170700),		"Dd~w"},	/* addw Dd,	<ea> */
 
+{"addl",	one(0050200),		one(0170700),		"Qd%l"},	/* addq written as add */
 {"addl",	one(0003200),		one(0177700),		"#l$l"},	/* addi written as add */
 {"addl",	one(0150700),		one(0170700),		"*lAd"},	/* adda written as add */
-{"addl",	one(0050200),		one(0170700),		"Qd%l"},	/* addq written as add */
 {"addl",	one(0150200),		one(0170700),		"*lDd"},	/* addl <ea>,	Dd */
 {"addl",	one(0150600),		one(0170700),		"Dd~l"},	/* addl Dd,	<ea> */
 
@@ -241,7 +305,10 @@ struct m68k_opcode m68k_opcodes[] =
 
 {"bkpt",	one(0044110),		one(0177770),		"Qs"},
 {"bra",		one(0060000),		one(0177400),		"Bg"},
+{"bras",	one(0060000),		one(0177400),		"Bg"},
 {"bsr",		one(0060400),		one(0177400),		"Bg"},
+{"bsrs",	one(0060400),		one(0177400),		"Bg"},
+
 {"callm",	one(0003300),		one(0177700),		"#b!s"},
 {"cas2l",	two(0007374, 0),	two(0177777, 0107070),	"D3D6D2D5R1R4"}, /* JF FOO this is really a 3 word ins */
 {"cas2w",	two(0006374, 0),	two(0177777, 0107070),	"D3D6D2D5R1R4"}, /* JF ditto */
@@ -359,22 +426,33 @@ struct m68k_opcode m68k_opcodes[] =
 {"moveal",	one(0020100),		one(0170700),		"*lAd"},
 {"moveaw",	one(0030100),		one(0170700),		"*wAd"},
 {"moveb",	one(0010000),		one(0170000),		";b$d"},	/* move */
+{"movel",	one(0070000),		one(0170400),		"MsDd"},	/* moveq written as move */
+{"movel",	one(0020000),		one(0170000),		"*l$d"},
+{"movel",	one(0020100),		one(0170700),		"*lAd"},
+{"movel",	one(0047140),		one(0177770),		"AsUd"},	/* move to USP */
+{"movel",	one(0047150),		one(0177770),		"UdAs"},	/* move from USP */
 
 {"movec",	one(0047173),		one(0177777),		"R1Jj"},
 {"movec",	one(0047173),		one(0177777),		"R1#j"},
 {"movec",	one(0047172),		one(0177777),		"JjR1"},
 {"movec",	one(0047172),		one(0177777),		"#jR1"},
 
-{"movel",	one(0020000),		one(0170000),		"*l$d"},
-{"movel",	one(0020100),		one(0170700),		"*lAd"},
-{"movel",	one(0047140),		one(0177770),		"AsUd"},	/* move to USP */
-{"movel",	one(0047150),		one(0177770),		"UdAs"},	/* move from USP */
-{"movel",	one(0070000),		one(0170400),		"MsDd"},	/* moveq written as move */
+/* JF added these next four for the assembler */
+{"moveml",	one(0044300),		one(0177700),		"Lw&s"},	/* movem reg to mem. */
+{"moveml",	one(0044340),		one(0177770),		"lw-s"},	/* movem reg to autodecrement. */
+{"moveml",	one(0046300),		one(0177700),		"!sLw"},	/* movem mem to reg. */
+{"moveml",	one(0046330),		one(0177770),		"+sLw"},	/* movem autoinc to reg. */
 
 {"moveml",	one(0044300),		one(0177700),		"#w&s"},	/* movem reg to mem. */
 {"moveml",	one(0044340),		one(0177770),		"#w-s"},	/* movem reg to autodecrement. */
 {"moveml",	one(0046300),		one(0177700),		"!s#w"},	/* movem mem to reg. */
 {"moveml",	one(0046330),		one(0177770),		"+s#w"},	/* movem autoinc to reg. */
+
+/* JF added these next four for the assembler */
+{"movemw",	one(0044200),		one(0177700),		"Lw&s"},	/* movem reg to mem. */
+{"movemw",	one(0044240),		one(0177770),		"lw-s"},	/* movem reg to autodecrement. */
+{"movemw",	one(0046200),		one(0177700),		"!sLw"},	/* movem mem to reg. */
+{"movemw",	one(0046230),		one(0177770),		"+sLw"},	/* movem autoinc to reg. */
 
 {"movemw",	one(0044200),		one(0177700),		"#w&s"},	/* movem reg to mem. */
 {"movemw",	one(0044240),		one(0177770),		"#w-s"},	/* movem reg to autodecrement. */
@@ -501,27 +579,26 @@ struct m68k_opcode m68k_opcodes[] =
 
 {"subal",	one(0110700),		one(0170700),		"*lAd"},
 {"subaw",	one(0110300),		one(0170700),		"*wAd"},
-{"subb",	one(0002000),		one(0177700),		"#b$s"},	/* subi written as sub */
 {"subb",	one(0050400),		one(0170700),		"Qd%s"},	/* subq written as sub */
-{"subb",	one(0110000),		one(0170700),		";bDd"},	/* subb ??,	Dd */
-{"subb",	one(0110400),		one(0170700),		"Dd~s"},	/* subb Dd,	?? */
+{"subb",	one(0002000),		one(0177700),		"#b$s"},	/* subi written as sub */
+{"subb",	one(0110000),		one(0170700),		";bDd"},	/* subb ? ?,	Dd */
+{"subb",	one(0110400),		one(0170700),		"Dd~s"},	/* subb Dd,	? ? */
 {"subib",	one(0002000),		one(0177700),		"#b$s"},
 {"subil",	one(0002200),		one(0177700),		"#l$s"},
 {"subiw",	one(0002100),		one(0177700),		"#w$s"},
-{"subl",	one(0002200),		one(0177700),		"#l$s"},
 {"subl",	one(0050600),		one(0170700),		"Qd%s"},
+{"subl",	one(0002200),		one(0177700),		"#l$s"},
+{"subl",	one(0110700),		one(0170700),		"*lAd"},
 {"subl",	one(0110200),		one(0170700),		"*lDd"},
 {"subl",	one(0110600),		one(0170700),		"Dd~s"},
-{"subl",	one(0110700),		one(0170700),		"*lAd"},
 {"subqb",	one(0050400),		one(0170700),		"Qd%s"},
 {"subql",	one(0050600),		one(0170700),		"Qd%s"},
 {"subqw",	one(0050500),		one(0170700),		"Qd%s"},
-{"subw",	one(0002100),		one(0177700),		"#w$s"},
 {"subw",	one(0050500),		one(0170700),		"Qd%s"},
+{"subw",	one(0002100),		one(0177700),		"#w$s"},
 {"subw",	one(0110100),		one(0170700),		"*wDd"},
 {"subw",	one(0110300),		one(0170700),		"*wAd"},	/* suba written as sub */
 {"subw",	one(0110500),		one(0170700),		"Dd~s"},
-
 {"subxb",	one(0110400),		one(0170770),		"DsDd"},	/* subxb Ds,	Dd */
 {"subxb",	one(0110410),		one(0170770),		"-s-d"},	/* subxb -(As),	-(Ad) */
 {"subxl",	one(0110600),		one(0170770),		"DsDd"},
@@ -624,6 +701,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"faddw",	two(0xF000, 0x5022),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
 {"faddx",	two(0xF000, 0x0022),	two(0xF1C0, 0xE07F),	"IiF8F7"},
 {"faddx",	two(0xF000, 0x4822),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
+/* {"faddx",	two(0xF000, 0x0022),	two(0xF1C0, 0xE07F),	"IiFt"}, JF removed */
 
 {"fasinb",	two(0xF000, 0x580C),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
 {"fasind",	two(0xF000, 0x540C),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
@@ -696,6 +774,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"fcmpw",	two(0xF000, 0x5038),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
 {"fcmpx",	two(0xF000, 0x0038),	two(0xF1C0, 0xE07F),	"IiF8F7"},
 {"fcmpx",	two(0xF000, 0x4838),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
+/* {"fcmpx",	two(0xF000, 0x0038),	two(0xF1C0, 0xE07F),	"IiFt"}, JF removed */
 
 {"fcosb",	two(0xF000, 0x581D),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
 {"fcosd",	two(0xF000, 0x541D),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
@@ -758,6 +837,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"fdivw",	two(0xF000, 0x5020),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
 {"fdivx",	two(0xF000, 0x0020),	two(0xF1C0, 0xE07F),	"IiF8F7"},
 {"fdivx",	two(0xF000, 0x4820),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
+/* {"fdivx",	two(0xF000, 0x0020),	two(0xF1C0, 0xE07F),	"IiFt"}, JF */
 
 {"fetoxb",	two(0xF000, 0x5810),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
 {"fetoxd",	two(0xF000, 0x5410),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
@@ -867,6 +947,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"fmodw",	two(0xF000, 0x5021),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
 {"fmodx",	two(0xF000, 0x0021),	two(0xF1C0, 0xE07F),	"IiF8F7"},
 {"fmodx",	two(0xF000, 0x4821),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
+/* {"fmodx",	two(0xF000, 0x0021),	two(0xF1C0, 0xE07F),	"IiFt"}, JF */
 
 {"fmoveb",	two(0xF000, 0x5800),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},		/* fmove from <ea> to fp<n> */
 {"fmoveb",	two(0xF000, 0x7800),	two(0xF1C0, 0xFC7F),	"IiF7@b"},		/* fmove from fp<n> to <ea> */
@@ -874,12 +955,19 @@ struct m68k_opcode m68k_opcodes[] =
 {"fmoved",	two(0xF000, 0x7400),	two(0xF1C0, 0xFC7F),	"IiF7@F"},		/* fmove from fp<n> to <ea> */
 {"fmovel",	two(0xF000, 0x4000),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},		/* fmove from <ea> to fp<n> */
 {"fmovel",	two(0xF000, 0x6000),	two(0xF1C0, 0xFC7F),	"IiF7@l"},		/* fmove from fp<n> to <ea> */
-	/* JF for the assembler */
-{"fmovel",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Iis8%l"},
+/* Warning:  The addressing modes on these are probably not right:
+   esp, Areg direct is only allowed for FPI */
+		/* fmove.l from/to system control registers: */
+{"fmovel",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Iis8@s"},
 {"fmovel",	two(0xF000, 0x8000),	two(0xF1C0, 0xE3FF),	"Ii*ls8"},
-/* JF {"fmovep",	two(0xF000, 0x4C00),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},		/* fmove from <ea> to fp<n> */
+
+/* {"fmovel",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Iis8@s"},
+{"fmovel",	two(0xF000, 0x8000),	two(0xF2C0, 0xE3FF),	"Ii*ss8"}, */
+
+{"fmovep",	two(0xF000, 0x4C00),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},		/* fmove from <ea> to fp<n> */
 {"fmovep",	two(0xF000, 0x6C00),	two(0xF1C0, 0xFC00),	"IiF7@pkC"},		/* fmove.p with k-factors: */
 {"fmovep",	two(0xF000, 0x7C00),	two(0xF1C0, 0xFC0F),	"IiF7@pDk"},		/* fmove.p with k-factors: */
+
 {"fmoves",	two(0xF000, 0x4400),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},		/* fmove from <ea> to fp<n> */
 {"fmoves",	two(0xF000, 0x6400),	two(0xF1C0, 0xFC7F),	"IiF7@f"},		/* fmove from fp<n> to <ea> */
 {"fmovew",	two(0xF000, 0x5000),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},		/* fmove from <ea> to fp<n> */
@@ -887,35 +975,62 @@ struct m68k_opcode m68k_opcodes[] =
 {"fmovex",	two(0xF000, 0x0000),	two(0xF1C0, 0xE07F),	"IiF8F7"},		/* fmove from <ea> to fp<n> */
 {"fmovex",	two(0xF000, 0x4800),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},		/* fmove from <ea> to fp<n> */
 {"fmovex",	two(0xF000, 0x6800),	two(0xF1C0, 0xFC7F),	"IiF7@x"},		/* fmove from fp<n> to <ea> */
-
-		/* fmove.l from/to system control registers: */
-
-/* fmove.l and fmovem.l are the same instruction.   fmovem.l makes sense in
-   more cases,	so I've dumped fmove.l pro tem,	but this is the wrong
-   way to solve the problem in the long run.   Hmmm. */
-/*  {"fmovel",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Iis8@s"},	*/
-/*  {"fmovel",	two(0xF000, 0x8000),	two(0xF1C0, 0xE3FF),	"Ii@ss8"},	*/
+/* JF removed {"fmovex",	two(0xF000, 0x0000),	two(0xF1C0, 0xE07F),	"IiFt"},		/ * fmove from <ea> to fp<n> */
 
 {"fmovecrx",	two(0xF000, 0x5C00),	two(0xF1FF, 0xFC00),	"Ii#CF7"},		/* fmovecr.x #ccc,	FPn */
 {"fmovecr",	two(0xF000, 0x5C00),	two(0xF1FF, 0xFC00),	"Ii#CF7"},
 
+/* Other fmovemx.  */
+{"fmovemx",	two(0xF020, 0xE000),	two(0xF1F8, 0xFF00),	"IdL3-s"},		/* fmovem.x to autodecrement,	static and dynamic */
 {"fmovemx",	two(0xF020, 0xE000),	two(0xF1F8, 0xFF00),	"Id#3-s"},		/* fmovem.x to autodecrement,	static and dynamic */
+
 {"fmovemx",	two(0xF020, 0xE800),	two(0xF1F8, 0xFF8F),	"IiDk-s"},		/* fmovem.x to autodecrement,	static and dynamic */
 
 {"fmovemx",	two(0xF000, 0xF000),	two(0xF1C0, 0xFF00),	"Id#3&s"},		/* fmovem.x to control,	static and dynamic: */
 {"fmovemx",	two(0xF000, 0xF800),	two(0xF1C0, 0xFF8F),	"IiDk&s"},		/* fmovem.x to control,	static and dynamic: */
-
-{"fmovemx",	two(0xF018, 0xD000),	two(0xF1F8, 0xFF00),	"Id+s#3"},		/* fmovem.x from autoincrement,	static and dynamic: */
-{"fmovemx",	two(0xF018, 0xD800),	two(0xF1F8, 0xFF8F),	"Ii+sDk"},		/* fmovem.x from autoincrement,	static and dynamic: */
-  
 {"fmovemx",	two(0xF000, 0xD000),	two(0xF1C0, 0xFF00),	"Id&s#3"},		/* fmovem.x from control,	static and dynamic: */
 {"fmovemx",	two(0xF000, 0xD800),	two(0xF1C0, 0xFF8F),	"Ii&sDk"},		/* fmovem.x from control,	static and dynamic: */
+{"fmovemx",	two(0xF000, 0xF000),	two(0xF1C0, 0xFF00),	"Idl3&s"},		/* fmovem.x to control,	static and dynamic: */
+{"fmovemx",	two(0xF000, 0xD000),	two(0xF1C0, 0xFF00),	"Id&sl3"},		/* fmovem.x from control,	static and dynamic: */
 
-/* fmoveml and fmovel are the same instruction.   This may cause some
-   confusion in the assembler. */
+{"fmovemx",	two(0xF018, 0xD000),	two(0xF1F8, 0xFF00),	"Id+sl3"},		/* fmovem.x from autoincrement,	static and dynamic: */
+{"fmovemx",	two(0xF018, 0xD000),	two(0xF1F8, 0xFF00),	"Id+s#3"},		/* fmovem.x from autoincrement,	static and dynamic: */
+{"fmovemx",	two(0xF018, 0xD800),	two(0xF1F8, 0xFF8F),	"Ii+sDk"},		/* fmovem.x from autoincrement,	static and dynamic: */
 
-{"fmoveml",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Ii#8%s"},		/* fmovem.l to/from system control register(s): */
-{"fmoveml",	two(0xF000, 0x8000),	two(0xF1C0, 0xE3FF),	"Ii%s#8"},		/* fmovem.l to/from system control register(s): */
+{"fmoveml",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"IiL8@s"},
+{"fmoveml",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Ii#8@s"},
+{"fmoveml",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Iis8@s"},
+
+{"fmoveml",	two(0xF000, 0x8000),	two(0xF2C0, 0xE3FF),	"Ii*sL8"},
+{"fmoveml",	two(0xF000, 0x8000),	two(0xF1C0, 0xE3FF),	"Ii*s#8"},
+{"fmoveml",	two(0xF000, 0x8000),	two(0xF1C0, 0xE3FF),	"Ii*ss8"},
+
+/* fmovemx with register lists */
+{"fmovem",	two(0xF020, 0xE000),	two(0xF1F8, 0xFF00),	"IdL3-s"},		/* fmovem.x to autodecrement,	static and dynamic */
+{"fmovem",	two(0xF000, 0xF000),	two(0xF1C0, 0xFF00),	"Idl3&s"},		/* fmovem.x to control,	static and dynamic: */
+{"fmovem",	two(0xF018, 0xD000),	two(0xF1F8, 0xFF00),	"Id+sl3"},		/* fmovem.x from autoincrement,	static and dynamic: */
+{"fmovem",	two(0xF000, 0xD000),	two(0xF1C0, 0xFF00),	"Id&sl3"},		/* fmovem.x from control,	static and dynamic: */
+
+	/* Alternate mnemonics for GNU as and GNU CC */
+{"fmovem",	two(0xF020, 0xE000),	two(0xF1F8, 0xFF00),	"Id#3-s"},		/* fmovem.x to autodecrement,	static and dynamic */
+{"fmovem",	two(0xF020, 0xE800),	two(0xF1F8, 0xFF8F),	"IiDk-s"},		/* fmovem.x to autodecrement,	static and dynamic */
+
+{"fmovem",	two(0xF000, 0xF000),	two(0xF1C0, 0xFF00),	"Id#3&s"},		/* fmovem.x to control,	static and dynamic: */
+{"fmovem",	two(0xF000, 0xF800),	two(0xF1C0, 0xFF8F),	"IiDk&s"},		/* fmovem.x to control,	static and dynamic: */
+
+{"fmovem",	two(0xF018, 0xD000),	two(0xF1F8, 0xFF00),	"Id+s#3"},		/* fmovem.x from autoincrement,	static and dynamic: */
+{"fmovem",	two(0xF018, 0xD800),	two(0xF1F8, 0xFF8F),	"Ii+sDk"},		/* fmovem.x from autoincrement,	static and dynamic: */
+  
+{"fmovem",	two(0xF000, 0xD000),	two(0xF1C0, 0xFF00),	"Id&s#3"},		/* fmovem.x from control,	static and dynamic: */
+{"fmovem",	two(0xF000, 0xD800),	two(0xF1C0, 0xFF8F),	"Ii&sDk"},		/* fmovem.x from control,	static and dynamic: */
+
+/* fmoveml a FP-control register */
+{"fmovem",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Iis8@s"},
+{"fmovem",	two(0xF000, 0x8000),	two(0xF1C0, 0xE3FF),	"Ii*ss8"},
+
+/* fmoveml a FP-control reglist */
+{"fmovem",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"IiL8@s"},
+{"fmovem",	two(0xF000, 0x8000),	two(0xF2C0, 0xE3FF),	"Ii*sL8"},
 
 {"fmulb",	two(0xF000, 0x5823),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
 {"fmuld",	two(0xF000, 0x5423),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
@@ -925,6 +1040,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"fmulw",	two(0xF000, 0x5023),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
 {"fmulx",	two(0xF000, 0x0023),	two(0xF1C0, 0xE07F),	"IiF8F7"},
 {"fmulx",	two(0xF000, 0x4823),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
+/* {"fmulx",	two(0xF000, 0x0023),	two(0xF1C0, 0xE07F),	"IiFt"}, JF */
 
 {"fnegb",	two(0xF000, 0x581A),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
 {"fnegd",	two(0xF000, 0x541A),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
@@ -946,6 +1062,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"fremw",	two(0xF000, 0x5025),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
 {"fremx",	two(0xF000, 0x0025),	two(0xF1C0, 0xE07F),	"IiF8F7"},
 {"fremx",	two(0xF000, 0x4825),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
+/* {"fremx",	two(0xF000, 0x0025),	two(0xF1C0, 0xE07F),	"IiFt"}, JF */
 
 {"frestore",	one(0xF140),		one(0xF1C0),		"Id&s"},
 {"frestore",	one(0xF158),		one(0xF1F8),		"Id+s"},
@@ -969,6 +1086,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"fscalew",	two(0xF000, 0x5026),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
 {"fscalex",	two(0xF000, 0x0026),	two(0xF1C0, 0xE07F),	"IiF8F7"},
 {"fscalex",	two(0xF000, 0x4826),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
+/* {"fscalex",	two(0xF000, 0x0026),	two(0xF1C0, 0xE07F),	"IiFt"}, JF */
 
 {"fseq",	two(0xF040, 0x0001),	two(0xF1C0, 0xFFFF),	"Ii@s"},
 {"fsf",		two(0xF040, 0x0000),	two(0xF1C0, 0xFFFF),	"Ii@s"},
@@ -1011,6 +1129,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"fsgldivw",	two(0xF000, 0x5024),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
 {"fsgldivx",	two(0xF000, 0x0024),	two(0xF1C0, 0xE07F),	"IiF8F7"},
 {"fsgldivx",	two(0xF000, 0x4824),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
+{"fsgldivx",	two(0xF000, 0x0024),	two(0xF1C0, 0xE07F),	"IiFt"},
 
 {"fsglmulb",	two(0xF000, 0x5827),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
 {"fsglmuld",	two(0xF000, 0x5427),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
@@ -1020,6 +1139,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"fsglmulw",	two(0xF000, 0x5027),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
 {"fsglmulx",	two(0xF000, 0x0027),	two(0xF1C0, 0xE07F),	"IiF8F7"},
 {"fsglmulx",	two(0xF000, 0x4827),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
+{"fsglmulx",	two(0xF000, 0x0027),	two(0xF1C0, 0xE07F),	"IiFt"},
 
 {"fsinb",	two(0xF000, 0x580E),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
 {"fsind",	two(0xF000, 0x540E),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
@@ -1059,6 +1179,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"fsubw",	two(0xF000, 0x5028),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
 {"fsubx",	two(0xF000, 0x0028),	two(0xF1C0, 0xE07F),	"IiF8F7"},
 {"fsubx",	two(0xF000, 0x4828),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
+{"fsubx",	two(0xF000, 0x0028),	two(0xF1C0, 0xE07F),	"IiFt"},
 
 {"ftanb",	two(0xF000, 0x580F),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
 {"ftand",	two(0xF000, 0x540F),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
@@ -1208,6 +1329,57 @@ struct m68k_opcode m68k_opcodes[] =
 {"ftwotoxx",	two(0xF000, 0x4811),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
 {"ftwotoxx",	two(0xF000, 0x0011),	two(0xF1C0, 0xE07F),	"IiFt"},
 
+
+{"fjeq",	one(0xF081),		one(0xF1FF),		"IdBc"},
+{"fjf",		one(0xF080),		one(0xF1FF),		"IdBc"},
+{"fjge",	one(0xF093),		one(0xF1FF),		"IdBc"},
+{"fjgl",	one(0xF096),		one(0xF1FF),		"IdBc"},
+{"fjgle",	one(0xF097),		one(0xF1FF),		"IdBc"},
+{"fjgt",	one(0xF092),		one(0xF1FF),		"IdBc"},
+{"fjle",	one(0xF095),		one(0xF1FF),		"IdBc"},
+{"fjlt",	one(0xF094),		one(0xF1FF),		"IdBc"},
+{"fjne",	one(0xF08E),		one(0xF1FF),		"IdBc"},
+{"fjnge",	one(0xF09C),		one(0xF1FF),		"IdBc"},
+{"fjngl",	one(0xF099),		one(0xF1FF),		"IdBc"},
+{"fjngle",	one(0xF098),		one(0xF1FF),		"IdBc"},
+{"fjngt",	one(0xF09D),		one(0xF1FF),		"IdBc"},
+{"fjnle",	one(0xF09A),		one(0xF1FF),		"IdBc"},
+{"fjnlt",	one(0xF09B),		one(0xF1FF),		"IdBc"},
+{"fjoge",	one(0xF083),		one(0xF1FF),		"IdBc"},
+{"fjogl",	one(0xF086),		one(0xF1FF),		"IdBc"},
+{"fjogt",	one(0xF082),		one(0xF1FF),		"IdBc"},
+{"fjole",	one(0xF085),		one(0xF1FF),		"IdBc"},
+{"fjolt",	one(0xF084),		one(0xF1FF),		"IdBc"},
+{"fjor",	one(0xF087),		one(0xF1FF),		"IdBc"},
+{"fjseq",	one(0xF091),		one(0xF1FF),		"IdBc"},
+{"fjsf",	one(0xF090),		one(0xF1FF),		"IdBc"},
+{"fjsne",	one(0xF09E),		one(0xF1FF),		"IdBc"},
+{"fjst",	one(0xF09F),		one(0xF1FF),		"IdBc"},
+{"fjt",		one(0xF08F),		one(0xF1FF),		"IdBc"},
+{"fjueq",	one(0xF089),		one(0xF1FF),		"IdBc"},
+{"fjuge",	one(0xF08B),		one(0xF1FF),		"IdBc"},
+{"fjugt",	one(0xF08A),		one(0xF1FF),		"IdBc"},
+{"fjule",	one(0xF08D),		one(0xF1FF),		"IdBc"},
+{"fjult",	one(0xF08C),		one(0xF1FF),		"IdBc"},
+{"fjun",	one(0xF088),		one(0xF1FF),		"IdBc"},
+
+/* The assembler will ignore attempts to force a short offset */
+
+{"bhis",	one(0061000),		one(0177400),		"Bg"},
+{"blss",	one(0061400),		one(0177400),		"Bg"},
+{"bccs",	one(0062000),		one(0177400),		"Bg"},
+{"bcss",	one(0062400),		one(0177400),		"Bg"},
+{"bnes",	one(0063000),		one(0177400),		"Bg"},
+{"beqs",	one(0063400),		one(0177400),		"Bg"},
+{"bvcs",	one(0064000),		one(0177400),		"Bg"},
+{"bvss",	one(0064400),		one(0177400),		"Bg"},
+{"bpls",	one(0065000),		one(0177400),		"Bg"},
+{"bmis",	one(0065400),		one(0177400),		"Bg"},
+{"bges",	one(0066000),		one(0177400),		"Bg"},
+{"blts",	one(0066400),		one(0177400),		"Bg"},
+{"bgts",	one(0067000),		one(0177400),		"Bg"},
+{"bles",	one(0067400),		one(0177400),		"Bg"},
+
 /* Alternate mnemonics for SUN */
 
 {"jbsr",	one(0060400),		one(0177400),		"Bg"},
@@ -1230,24 +1402,55 @@ struct m68k_opcode m68k_opcodes[] =
 {"jgt",		one(0067000),		one(0177400),		"Bg"},
 {"jle",		one(0067400),		one(0177400),		"Bg"},
 
+/* Short offsets are ignored */
+
+{"jbsrs",	one(0060400),		one(0177400),		"Bg"},
+{"jras",	one(0060000),		one(0177400),		"Bg"},
+{"jhis",	one(0061000),		one(0177400),		"Bg"},
+{"jlss",	one(0061400),		one(0177400),		"Bg"},
+{"jccs",	one(0062000),		one(0177400),		"Bg"},
+{"jcss",	one(0062400),		one(0177400),		"Bg"},
+{"jnes",	one(0063000),		one(0177400),		"Bg"},
+{"jeqs",	one(0063400),		one(0177400),		"Bg"},
+{"jvcs",	one(0064000),		one(0177400),		"Bg"},
+{"jvss",	one(0064400),		one(0177400),		"Bg"},
+{"jpls",	one(0065000),		one(0177400),		"Bg"},
+{"jmis",	one(0065400),		one(0177400),		"Bg"},
+{"jges",	one(0066000),		one(0177400),		"Bg"},
+{"jlts",	one(0066400),		one(0177400),		"Bg"},
+{"jgts",	one(0067000),		one(0177400),		"Bg"},
+{"jles",	one(0067400),		one(0177400),		"Bg"},
+
 {"movql",	one(0070000),		one(0170400),		"MsDd"},
 {"moveql",	one(0070000),		one(0170400),		"MsDd"},
 {"moval",	one(0020100),		one(0170700),		"*lAd"},
 {"movaw",	one(0030100),		one(0170700),		"*wAd"},
 {"movb",	one(0010000),		one(0170000),		";b$d"},	/* mov */
+{"movl",	one(0070000),		one(0170400),		"MsDd"},	/* movq written as mov */
 {"movl",	one(0020000),		one(0170000),		"*l$d"},
 {"movl",	one(0020100),		one(0170700),		"*lAd"},
 {"movl",	one(0047140),		one(0177770),		"AsUd"},	/* mov to USP */
 {"movl",	one(0047150),		one(0177770),		"UdAs"},	/* mov from USP */
-{"movl",	one(0070000),		one(0170400),		"MsDd"},	/* movq written as mov */
+{"movc",	one(0047173),		one(0177777),		"R1Jj"},
+{"movc",	one(0047173),		one(0177777),		"R1#j"},
+{"movc",	one(0047172),		one(0177777),		"JjR1"},
+{"movc",	one(0047172),		one(0177777),		"#jR1"},
 {"movml",	one(0044300),		one(0177700),		"#w&s"},	/* movm reg to mem. */
 {"movml",	one(0044340),		one(0177770),		"#w-s"},	/* movm reg to autodecrement. */
 {"movml",	one(0046300),		one(0177700),		"!s#w"},	/* movm mem to reg. */
 {"movml",	one(0046330),		one(0177770),		"+s#w"},	/* movm autoinc to reg. */
+{"movml",	one(0044300),		one(0177700),		"Lw&s"},	/* movm reg to mem. */
+{"movml",	one(0044340),		one(0177770),		"lw-s"},	/* movm reg to autodecrement. */
+{"movml",	one(0046300),		one(0177700),		"!sLw"},	/* movm mem to reg. */
+{"movml",	one(0046330),		one(0177770),		"+sLw"},	/* movm autoinc to reg. */
 {"movmw",	one(0044200),		one(0177700),		"#w&s"},	/* movm reg to mem. */
 {"movmw",	one(0044240),		one(0177770),		"#w-s"},	/* movm reg to autodecrement. */
 {"movmw",	one(0046200),		one(0177700),		"!s#w"},	/* movm mem to reg. */
 {"movmw",	one(0046230),		one(0177770),		"+s#w"},	/* movm autoinc to reg. */
+{"movmw",	one(0044200),		one(0177700),		"Lw&s"},	/* movm reg to mem. */
+{"movmw",	one(0044240),		one(0177770),		"lw-s"},	/* movm reg to autodecrement. */
+{"movmw",	one(0046200),		one(0177700),		"!sLw"},	/* movm mem to reg. */
+{"movmw",	one(0046230),		one(0177770),		"+sLw"},	/* movm autoinc to reg. */
 {"movpl",	one(0000510),		one(0170770),		"dsDd"},	/* memory to register */
 {"movpl",	one(0000710),		one(0170770),		"Ddds"},	/* register to memory */
 {"movpw",	one(0000410),		one(0170770),		"dsDd"},	/* memory to register */
@@ -1259,7 +1462,6 @@ struct m68k_opcode m68k_opcodes[] =
 {"movw",	one(0041300),		one(0177700),		"Cs$s"},	/* Move from ccr */
 {"movw",	one(0042300),		one(0177700),		";wCd"},	/* mov to ccr */
 {"movw",	one(0043300),		one(0177700),		";wSd"},	/* mov to sr */
-/* movc not done*/
 
 {"movsb",	two(0007000, 0),	two(0177700, 07777),	"~sR1"},
 {"movsb",	two(0007000, 04000),	two(0177700, 07777),	"R1~s"},
@@ -1267,8 +1469,209 @@ struct m68k_opcode m68k_opcodes[] =
 {"movsl",	two(0007200, 04000),	two(0177700, 07777),	"R1~s"},
 {"movsw",	two(0007100, 0),	two(0177700, 07777),	"~sR1"},
 {"movsw",	two(0007100, 04000),	two(0177700, 07777),	"R1~s"},
+
+#ifdef m68851
+ /* name */	/* opcode */		/* match */		/* args */
+
+{"pbac",	one(0xf0c7),		one(0xffbf),		"Bc"},
+{"pbacw",	one(0xf087),		one(0xffbf),		"Bc"},
+{"pbas",	one(0xf0c6),		one(0xffbf),		"Bc"},
+{"pbasw",	one(0xf086),		one(0xffbf),		"Bc"},
+{"pbbc",	one(0xf0c1),		one(0xffbf),		"Bc"},
+{"pbbcw",	one(0xf081),		one(0xffbf),		"Bc"},
+{"pbbs",	one(0xf0c0),		one(0xffbf),		"Bc"},
+{"pbbsw",	one(0xf080),		one(0xffbf),		"Bc"},
+{"pbcc",	one(0xf0cf),		one(0xffbf),		"Bc"},
+{"pbccw",	one(0xf08f),		one(0xffbf),		"Bc"},
+{"pbcs",	one(0xf0ce),		one(0xffbf),		"Bc"},
+{"pbcsw",	one(0xf08e),		one(0xffbf),		"Bc"},
+{"pbgc",	one(0xf0cd),		one(0xffbf),		"Bc"},
+{"pbgcw",	one(0xf08d),		one(0xffbf),		"Bc"},
+{"pbgs",	one(0xf0cc),		one(0xffbf),		"Bc"},
+{"pbgsw",	one(0xf08c),		one(0xffbf),		"Bc"},
+{"pbic",	one(0xf0cb),		one(0xffbf),		"Bc"},
+{"pbicw",	one(0xf08b),		one(0xffbf),		"Bc"},
+{"pbis",	one(0xf0ca),		one(0xffbf),		"Bc"},
+{"pbisw",	one(0xf08a),		one(0xffbf),		"Bc"},
+{"pblc",	one(0xf0c3),		one(0xffbf),		"Bc"},
+{"pblcw",	one(0xf083),		one(0xffbf),		"Bc"},
+{"pbls",	one(0xf0c2),		one(0xffbf),		"Bc"},
+{"pblsw",	one(0xf082),		one(0xffbf),		"Bc"},
+{"pbsc",	one(0xf0c5),		one(0xffbf),		"Bc"},
+{"pbscw",	one(0xf085),		one(0xffbf),		"Bc"},
+{"pbss",	one(0xf0c4),		one(0xffbf),		"Bc"},
+{"pbssw",	one(0xf084),		one(0xffbf),		"Bc"},
+{"pbwc",	one(0xf0c9),		one(0xffbf),		"Bc"},
+{"pbwcw",	one(0xf089),		one(0xffbf),		"Bc"},
+{"pbws",	one(0xf0c8),		one(0xffbf),		"Bc"},
+{"pbwsw",	one(0xf088),		one(0xffbf),		"Bc"},
+
+
+{"pdbac",	two(0xf048, 0x0007),	two(0xfff8, 0xffff),	"DsBw"},
+{"pdbas",	two(0xf048, 0x0006),	two(0xfff8, 0xffff),	"DsBw"},
+{"pdbbc",	two(0xf048, 0x0001),	two(0xfff8, 0xffff),	"DsBw"},
+{"pdbbs",	two(0xf048, 0x0000),	two(0xfff8, 0xffff),	"DsBw"},
+{"pdbcc",	two(0xf048, 0x000f),	two(0xfff8, 0xffff),	"DsBw"},
+{"pdbcs",	two(0xf048, 0x000e),	two(0xfff8, 0xffff),	"DsBw"},
+{"pdbgc",	two(0xf048, 0x000d),	two(0xfff8, 0xffff),	"DsBw"},
+{"pdbgs",	two(0xf048, 0x000c),	two(0xfff8, 0xffff),	"DsBw"},
+{"pdbic",	two(0xf048, 0x000b),	two(0xfff8, 0xffff),	"DsBw"},
+{"pdbis",	two(0xf048, 0x000a),	two(0xfff8, 0xffff),	"DsBw"},
+{"pdblc",	two(0xf048, 0x0003),	two(0xfff8, 0xffff),	"DsBw"},
+{"pdbls",	two(0xf048, 0x0002),	two(0xfff8, 0xffff),	"DsBw"},
+{"pdbsc",	two(0xf048, 0x0005),	two(0xfff8, 0xffff),	"DsBw"},
+{"pdbss",	two(0xf048, 0x0004),	two(0xfff8, 0xffff),	"DsBw"},
+{"pdbwc",	two(0xf048, 0x0009),	two(0xfff8, 0xffff),	"DsBw"},
+{"pdbws",	two(0xf048, 0x0008),	two(0xfff8, 0xffff),	"DsBw"},
+
+{"pflusha",	two(0xf000, 0x2400),	two(0xffff, 0xffff),	"" },
+
+{"pflush",	two(0xf000, 0x3010),	two(0xffc0, 0xfe10),	"T3T9" },
+{"pflush",	two(0xf000, 0x3810),	two(0xffc0, 0xfe10),	"T3T9&s" },
+{"pflush",	two(0xf000, 0x3008),	two(0xffc0, 0xfe18),	"D3T9" },
+{"pflush",	two(0xf000, 0x3808),	two(0xffc0, 0xfe18),	"D3T9&s" },
+{"pflush",	two(0xf000, 0x3000),	two(0xffc0, 0xfe1e),	"f3T9" },
+{"pflush",	two(0xf000, 0x3800),	two(0xffc0, 0xfe1e),	"f3T9&s" },
+
+{"pflushs",	two(0xf000, 0x3410),	two(0xfff8, 0xfe10),	"T3T9" },
+{"pflushs",	two(0xf000, 0x3c00),	two(0xfff8, 0xfe00),	"T3T9&s" },
+{"pflushs",	two(0xf000, 0x3408),	two(0xfff8, 0xfe18),	"D3T9" },
+{"pflushs",	two(0xf000, 0x3c08),	two(0xfff8, 0xfe18),	"D3T9&s" },
+{"pflushs",	two(0xf000, 0x3400),	two(0xfff8, 0xfe1e),	"f3T9" },
+{"pflushs",	two(0xf000, 0x3c00),	two(0xfff8, 0xfe1e),	"f3T9&s"},
+
+{"pflushr",	two(0xf000, 0xa000),	two(0xffc0, 0xffff),	"|s" },
+
+{"ploadr",	two(0xf000, 0x2210),	two(0xffc0, 0xfff0),	"T3&s" },
+{"ploadr",	two(0xf000, 0x2208),	two(0xffc0, 0xfff8),	"D3&s" },
+{"ploadr",	two(0xf000, 0x2200),	two(0xffc0, 0xfffe),	"f3&s" },
+{"ploadw",	two(0xf000, 0x2010),	two(0xffc0, 0xfff0),	"T3&s" },
+{"ploadw",	two(0xf000, 0x2008),	two(0xffc0, 0xfff8),	"D3&s" },
+{"ploadw",	two(0xf000, 0x2000),	two(0xffc0, 0xfffe),	"f3&s" },
+
+/* TC, CRP, DRP, SRP, CAL, VAL, SCC, AC */
+{"pmove",	two(0xf000, 0x4000),	two(0xffc0, 0xe3ff),	"*sP8" },
+{"pmove",	two(0xf000, 0x4200),	two(0xffc0, 0xe3ff),	"P8%s" },
+{"pmove",	two(0xf000, 0x4000),	two(0xffc0, 0xe3ff),	"|sW8" },
+{"pmove",	two(0xf000, 0x4200),	two(0xffc0, 0xe3ff),	"W8~s" },
+
+/* BADx, BACx */
+{"pmove",	two(0xf000, 0x6200),	two(0xffc0, 0xe3e3),	"*sX3" },
+{"pmove",	two(0xf000, 0x6000),	two(0xffc0, 0xe3e3),	"X3%s" },
+
+/* PSR, PCSR */
+/* {"pmove",	two(0xf000, 0x6100),	two(oxffc0, oxffff),	"*sZ8" }, */
+{"pmove",	two(0xf000, 0x6000),	two(0xffc0, 0xffff),	"*sY8" },
+{"pmove",	two(0xf000, 0x6200),	two(0xffc0, 0xffff),	"Y8%s" },
+{"pmove",	two(0xf000, 0x6600),	two(0xffc0, 0xffff),	"Z8%s" },
+
+{"prestore",	one(0xf140),		one(0xffc0),		"&s"},
+{"prestore",	one(0xf158),		one(0xfff8),		"+s"},
+{"psave",	one(0xf100),		one(0xffc0),		"&s"},
+{"psave",	one(0xf100),		one(0xffc0),		"+s"},
+
+{"psac",	two(0xf040, 0x0007),	two(0xffc0, 0xffff),	"@s"},
+{"psas",	two(0xf040, 0x0006),	two(0xffc0, 0xffff),	"@s"},
+{"psbc",	two(0xf040, 0x0001),	two(0xffc0, 0xffff),	"@s"},
+{"psbs",	two(0xf040, 0x0000),	two(0xffc0, 0xffff),	"@s"},
+{"pscc",	two(0xf040, 0x000f),	two(0xffc0, 0xffff),	"@s"},
+{"pscs",	two(0xf040, 0x000e),	two(0xffc0, 0xffff),	"@s"},
+{"psgc",	two(0xf040, 0x000d),	two(0xffc0, 0xffff),	"@s"},
+{"psgs",	two(0xf040, 0x000c),	two(0xffc0, 0xffff),	"@s"},
+{"psic",	two(0xf040, 0x000b),	two(0xffc0, 0xffff),	"@s"},
+{"psis",	two(0xf040, 0x000a),	two(0xffc0, 0xffff),	"@s"},
+{"pslc",	two(0xf040, 0x0003),	two(0xffc0, 0xffff),	"@s"},
+{"psls",	two(0xf040, 0x0002),	two(0xffc0, 0xffff),	"@s"},
+{"pssc",	two(0xf040, 0x0005),	two(0xffc0, 0xffff),	"@s"},
+{"psss",	two(0xf040, 0x0004),	two(0xffc0, 0xffff),	"@s"},
+{"pswc",	two(0xf040, 0x0009),	two(0xffc0, 0xffff),	"@s"},
+{"psws",	two(0xf040, 0x0008),	two(0xffc0, 0xffff),	"@s"},
+
+{"ptestr",	two(0xf000, 0x8210),	two(0xffc0, 0xe3f0),	"T3&sQ8" },
+{"ptestr",	two(0xf000, 0x8310),	two(0xffc0, 0xe310),	"T3&sQ8A9" },
+{"ptestr",	two(0xf000, 0x8208),	two(0xffc0, 0xe3f8),	"D3&sQ8" },
+{"ptestr",	two(0xf000, 0x8308),	two(0xffc0, 0xe318),	"D3&sQ8A9" },
+{"ptestr",	two(0xf000, 0x8200),	two(0xffc0, 0xe3fe),	"f3&sQ8" },
+{"ptestr",	two(0xf000, 0x8300),	two(0xffc0, 0xe31e),	"f3&sQ8A9" },
+
+{"ptestw",	two(0xf000, 0x8010),	two(0xffc0, 0xe3f0),	"T3&sQ8" },
+{"ptestw",	two(0xf000, 0x8110),	two(0xffc0, 0xe310),	"T3&sQ8A9" },
+{"ptestw",	two(0xf000, 0x8008),	two(0xffc0, 0xe3f8),	"D3&sQ8" },
+{"ptestw",	two(0xf000, 0x8108),	two(0xffc0, 0xe318),	"D3&sQ8A9" },
+{"ptestw",	two(0xf000, 0x8000),	two(0xffc0, 0xe3fe),	"f3&sQ8" },
+{"ptestw",	two(0xf000, 0x8100),	two(0xffc0, 0xe31e),	"f3&sQ8A9" },
+
+{"ptrapacw",	two(0xf07a, 0x0007),	two(0xffff, 0xffff),	"#w"},
+{"ptrapacl",	two(0xf07b, 0x0007),	two(0xffff, 0xffff),	"#l"},
+{"ptrapac",	two(0xf07c, 0x0007),	two(0xffff, 0xffff),	""},
+
+{"ptrapasw",	two(0xf07a, 0x0006),	two(0xffff, 0xffff),	"#w"},
+{"ptrapasl",	two(0xf07b, 0x0006),	two(0xffff, 0xffff),	"#l"},
+{"ptrapas",	two(0xf07c, 0x0006),	two(0xffff, 0xffff),	""},
+
+{"ptrapbcw",	two(0xf07a, 0x0001),	two(0xffff, 0xffff),	"#w"},
+{"ptrapbcl",	two(0xf07b, 0x0001),	two(0xffff, 0xffff),	"#l"},
+{"ptrapbc",	two(0xf07c, 0x0001),	two(0xffff, 0xffff),	""},
+
+{"ptrapbsw",	two(0xf07a, 0x0000),	two(0xffff, 0xffff),	"#w"},
+{"ptrapbsl",	two(0xf07b, 0x0000),	two(0xffff, 0xffff),	"#l"},
+{"ptrapbs",	two(0xf07c, 0x0000),	two(0xffff, 0xffff),	""},
+
+{"ptrapccw",	two(0xf07a, 0x000f),	two(0xffff, 0xffff),	"#w"},
+{"ptrapccl",	two(0xf07b, 0x000f),	two(0xffff, 0xffff),	"#l"},
+{"ptrapcc",	two(0xf07c, 0x000f),	two(0xffff, 0xffff),	""},
+
+{"ptrapcsw",	two(0xf07a, 0x000e),	two(0xffff, 0xffff),	"#w"},
+{"ptrapcsl",	two(0xf07b, 0x000e),	two(0xffff, 0xffff),	"#l"},
+{"ptrapcs",	two(0xf07c, 0x000e),	two(0xffff, 0xffff),	""},
+
+{"ptrapgcw",	two(0xf07a, 0x000d),	two(0xffff, 0xffff),	"#w"},
+{"ptrapgcl",	two(0xf07b, 0x000d),	two(0xffff, 0xffff),	"#l"},
+{"ptrapgc",	two(0xf07c, 0x000d),	two(0xffff, 0xffff),	""},
+
+{"ptrapgsw",	two(0xf07a, 0x000c),	two(0xffff, 0xffff),	"#w"},
+{"ptrapgsl",	two(0xf07b, 0x000c),	two(0xffff, 0xffff),	"#l"},
+{"ptrapgs",	two(0xf07c, 0x000c),	two(0xffff, 0xffff),	""},
+
+{"ptrapicw",	two(0xf07a, 0x000b),	two(0xffff, 0xffff),	"#w"},
+{"ptrapicl",	two(0xf07b, 0x000b),	two(0xffff, 0xffff),	"#l"},
+{"ptrapic",	two(0xf07c, 0x000b),	two(0xffff, 0xffff),	""},
+
+{"ptrapisw",	two(0xf07a, 0x000a),	two(0xffff, 0xffff),	"#w"},
+{"ptrapisl",	two(0xf07b, 0x000a),	two(0xffff, 0xffff),	"#l"},
+{"ptrapis",	two(0xf07c, 0x000a),	two(0xffff, 0xffff),	""},
+
+{"ptraplcw",	two(0xf07a, 0x0003),	two(0xffff, 0xffff),	"#w"},
+{"ptraplcl",	two(0xf07b, 0x0003),	two(0xffff, 0xffff),	"#l"},
+{"ptraplc",	two(0xf07c, 0x0003),	two(0xffff, 0xffff),	""},
+
+{"ptraplsw",	two(0xf07a, 0x0002),	two(0xffff, 0xffff),	"#w"},
+{"ptraplsl",	two(0xf07b, 0x0002),	two(0xffff, 0xffff),	"#l"},
+{"ptrapls",	two(0xf07c, 0x0002),	two(0xffff, 0xffff),	""},
+
+{"ptrapscw",	two(0xf07a, 0x0005),	two(0xffff, 0xffff),	"#w"},
+{"ptrapscl",	two(0xf07b, 0x0005),	two(0xffff, 0xffff),	"#l"},
+{"ptrapsc",	two(0xf07c, 0x0005),	two(0xffff, 0xffff),	""},
+
+{"ptrapssw",	two(0xf07a, 0x0004),	two(0xffff, 0xffff),	"#w"},
+{"ptrapssl",	two(0xf07b, 0x0004),	two(0xffff, 0xffff),	"#l"},
+{"ptrapss",	two(0xf07c, 0x0004),	two(0xffff, 0xffff),	""},
+
+{"ptrapwcw",	two(0xf07a, 0x0009),	two(0xffff, 0xffff),	"#w"},
+{"ptrapwcl",	two(0xf07b, 0x0009),	two(0xffff, 0xffff),	"#l"},
+{"ptrapwc",	two(0xf07c, 0x0009),	two(0xffff, 0xffff),	""},
+
+{"ptrapwsw",	two(0xf07a, 0x0008),	two(0xffff, 0xffff),	"#w"},
+{"ptrapwsl",	two(0xf07b, 0x0008),	two(0xffff, 0xffff),	"#l"},
+{"ptrapws",	two(0xf07c, 0x0008),	two(0xffff, 0xffff),	""},
+
+{"pvalid",	two(0xf000, 0x2800),	two(0xffc0, 0xffff),	"Vs&s"},
+{"pvalid",	two(0xf000, 0x2c00),	two(0xffc0, 0xfff8),	"A3&s" },
+
+#endif /* m68851 */
+
 };
 
 int numopcodes=sizeof(m68k_opcodes)/sizeof(m68k_opcodes[0]);
 
-struct m68k_opcode *endop = m68k_opcodes+sizeof(m68k_opcodes)/sizeof(m68k_opcodes[0]);;
+struct m68k_opcode *endop = m68k_opcodes+sizeof(m68k_opcodes)/sizeof(m68k_opcodes[0]);

@@ -1,27 +1,33 @@
 /* Parameters for execution on a Sun 4, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
    Contributed by Michael Tiemann (tiemann@mcc.com)
+This file is part of GDB.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #ifndef sun4
 #define sun4
 #endif
+
+/* Define the bit, byte, and word ordering of the machine.  */
+#define BITS_BIG_ENDIAN
+#define BYTES_BIG_ENDIAN
+#define WORDS_BIG_ENDIAN
+
+/* Floating point is IEEE compatible.  */
+#define IEEE_FLOAT
 
 /* Get rid of any system-imposed stack limit if possible.  */
 
@@ -36,16 +42,16 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 #define READ_DBX_FORMAT
 
-/* Big or Little-Endian target machine
-   BITS: defined if bit #0 is the high-order bit of a byte.
-   BYTES:defined if byte#0 is the high-order byte of an int.
-   WORDS:defined if word#0 is the high-order word of a double. */
-#define BITS_BIG_ENDIAN
-#define	BYTES_BIG_ENDIAN
-#define WORDS_BIG_ENDIAN
+/* If Pcc says that a parameter is a short, it's a short.  This is
+   because the parameter does get passed in in a register as an int,
+   but pcc puts it onto the stack frame as a short (not nailing
+   whatever else might be there.  I'm not sure that I consider this
+   swift.  Sigh.)
 
-/* Floating point is IEEE compatible. */
-#define	IEEE_FLOAT
+   No, don't do this.  The problem here is that pcc says that the
+   argument is in the upper half of the word reserved on the stack,
+   but puts it in the lower half.  */
+/* #define BELIEVE_PCC_PROMOTION 1 */
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
@@ -73,10 +79,9 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #define SAVED_PC_AFTER_CALL(frame) PC_ADJUST (read_register (RP_REGNUM))
 
 /* Address of end of stack space.  */
-
-#define STACK_END_ADDR 0xf8000000
-
-/* Stack grows downward.  */
+#include <sys/types.h>
+#include <machine/vmparam.h>
+#define STACK_END_ADDR USRSTACK
 
 #define INNER_THAN <
 
@@ -261,11 +266,6 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 #define ATTACH_DETACH
 
-/* It is safe to look for symsegs on a Sun, because Sun's ld
-   does not screw up with random garbage at end of file.  */
-
-#define READ_GDB_SYMSEGS
-
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
@@ -315,19 +315,18 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #define FRAME_CHAIN(thisframe) \
    GET_RWINDOW_REG ((thisframe)->frame, rw_in[6])
 
-/* Avoid checking FRAME_SAVED_PC since that screws us due to
-   improperly set up saved PC on a signal trampoline call */
-#if 0
 #define FRAME_CHAIN_VALID(chain, thisframe) \
-  (chain != 0 && (FRAME_SAVED_PC (thisframe) >= first_object_file_end))
-#else
-#define FRAME_CHAIN_VALID(chain, thisframe) \
-  (chain != 0)
-#endif
+  (chain != 0 && (outside_startup_file (FRAME_SAVED_PC (thisframe))))
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
 /* Define other aspects of the stack frame.  */
+
+/* A macro that tells us whether the function invocation represented
+   by FI does not have a frame on the stack associated with it.  If it
+   does not, FRAMELESS is set to 1, else 0.  */
+#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
+  FRAMELESS_LOOK_FOR_PROLOGUE(FI, FRAMELESS)
 
 /* Where is the PC for a specific frame */
 
@@ -375,8 +374,12 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
   FRAME fid = FRAME_INFO_ID (fi);					\
   if (!fid) fatal ("Bad frame info struct in FRAME_FIND_SAVED_REGS");	\
   bzero (&(frame_saved_regs), sizeof (frame_saved_regs));		\
+  /* Old test.								\
   if ((fi)->pc >= frame - CALL_DUMMY_LENGTH - 0x140			\
-      && (fi)->pc <= frame)						\
+      && (fi)->pc <= frame) */						\
+  if ((fi)->pc >= ((fi)->bottom ? (fi)->bottom :			\
+		   read_register (SP_REGNUM))				\
+      && (fi)->pc <= FRAME_FP(fi))					\
     {									\
       for (regnum = 1; regnum < 8; regnum++)				\
 	(frame_saved_regs).regs[regnum] =				\
@@ -415,7 +418,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
   /* is accurate */							\
   for (regnum = 30; regnum < 32; regnum++)				\
     (frame_saved_regs).regs[regnum] = frame + (regnum-16) * 4;		\
-  (frame_saved_regs).regs[SP_REGNUM] = frame;				\
+  (frame_saved_regs).regs[SP_REGNUM] = FRAME_FP (fi);			\
   (frame_saved_regs).regs[PC_REGNUM] = frame + 15*4;			\
 }
 

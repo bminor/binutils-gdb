@@ -1,22 +1,21 @@
 /* Everything about breakpoints, for GDB.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "param.h"
@@ -107,6 +106,9 @@ struct command_line *breakpoint_commands;
 static void delete_breakpoint ();
 void clear_momentary_breakpoints ();
 void breakpoint_auto_delete ();
+
+/* Flag indicating extra verbosity for xgdb.  */
+extern int xgdb_verbose;
 
 /* condition N EXP -- set break condition of breakpoint N to EXP.  */
 
@@ -125,6 +127,9 @@ condition_command (arg, from_tty)
 
   p = arg;
   while (*p >= '0' && *p <= '9') p++;
+  if (p == arg)
+    /* There is no number here.  (e.g. "cond a == b").  */
+    error_no_arg ("breakpoint number");
   bnum = atoi (arg);
 
   ALL_BREAKPOINTS (b)
@@ -376,6 +381,9 @@ breakpoint_stop_status (pc, frame_address)
 	    int value_zero;
 	    if (b->cond)
 	      {
+		/* Need to select the frame, with all that implies
+		   so that the conditions will have the right context.  */
+		select_frame (get_current_frame (), 0);
 		value_zero
 		  = catch_errors (breakpoint_cond_eval, b->cond,
 				  "Error occurred in testing breakpoint condition.");
@@ -420,12 +428,12 @@ breakpoint_1 (bnum)
   register struct breakpoint *b;
   register struct command_line *l;
   register struct symbol *sym;
-  CORE_ADDR last_addr = -1;
+  CORE_ADDR last_addr = (CORE_ADDR)-1;
 
   ALL_BREAKPOINTS (b)
     if (bnum == -1 || bnum == b->number)
       {
-	printf ("#%-3d %c  0x%08x ", b->number,
+	printf_filtered ("#%-3d %c  0x%08x ", b->number,
 		"nyod"[(int) b->enable],
 		b->address);
 	last_addr = b->address;
@@ -433,32 +441,48 @@ breakpoint_1 (bnum)
 	  {
 	    sym = find_pc_function (b->address);
 	    if (sym)
-	      printf (" in %s (%s line %d)", SYMBOL_NAME (sym),
-		      b->symtab->filename, b->line_number);
+	      printf_filtered (" in %s (%s line %d)", SYMBOL_NAME (sym),
+			       b->symtab->filename, b->line_number);
 	    else
-	      printf ("%s line %d", b->symtab->filename, b->line_number);
+	      printf_filtered ("%s line %d", b->symtab->filename, b->line_number);
 	  }
-	printf ("\n");
+	else
+	  {
+	    char *name;
+	    int addr;
+
+	    if (find_pc_partial_function (b->address, &name, &addr))
+	      {
+		if (b->address - addr)
+		  printf_filtered ("<%s+%d>", name, b->address - addr);
+		else
+		  printf_filtered ("<%s>", name);
+	      }
+	  }
+	      
+	printf_filtered ("\n");
 
 	if (b->ignore_count)
-	  printf ("\tignore next %d hits\n", b->ignore_count);
+	  printf_filtered ("\tignore next %d hits\n", b->ignore_count);
 	if (b->frame)
-	  printf ("\tstop only in stack frame at 0x%x\n", b->frame);
+	  printf_filtered ("\tstop only in stack frame at 0x%x\n", b->frame);
 	if (b->cond)
 	  {
-	    printf ("\tbreak only if ");
+	    printf_filtered ("\tbreak only if ");
 	    print_expression (b->cond, stdout);
-	    printf ("\n");
+	    printf_filtered ("\n");
 	  }
 	if (l = b->commands)
 	  while (l)
 	    {
-	      printf ("\t%s\n", l->line);
+	      printf_filtered ("\t%s\n", l->line);
 	      l = l->next;
 	    }
       }
 
-  if (last_addr != -1)
+  /* Compare against (CORE_ADDR)-1 in case some compiler decides
+     that a comparison of an unsigned with -1 is always false.  */
+  if (last_addr != (CORE_ADDR)-1)
     set_next_address (last_addr);
 }
 
@@ -471,9 +495,9 @@ breakpoints_info (bnum_exp)
   if (bnum_exp)
     bnum = parse_and_eval_address (bnum_exp);
   else if (breakpoint_chain == 0)
-    printf ("No breakpoints.\n");
+    printf_filtered ("No breakpoints.\n");
   else
-    printf ("Breakpoints:\n\
+    printf_filtered ("Breakpoints:\n\
 Num Enb   Address    Where\n");
 
   breakpoint_1 (bnum);
@@ -686,7 +710,13 @@ break_command_1 (arg, tempflag, from_tty)
 	error ("No default breakpoint address now.");
     }
   else
-    if (default_breakpoint_valid)
+    /* Force almost all breakpoints to be in terms of the
+       current_source_symtab (which is decode_line_1's default).  This
+       should produce the results we want almost all of the time while
+       leaving default_breakpoint_* alone.  */
+    if (default_breakpoint_valid
+	&& (!current_source_symtab
+	    || (arg && (*arg == '+' || *arg == '-'))))
       sals = decode_line_1 (&arg, 1, default_breakpoint_symtab,
 			    default_breakpoint_line);
     else
@@ -770,14 +800,15 @@ tbreak_command (arg, from_tty)
  * because it uses the mechanisms of breakpoints.
  */
 void
-until_break_command(arg, from_tty)
+until_break_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
-  FRAME frame = get_current_frame ();
-  FRAME prev_frame = get_prev_frame (frame);
+  FRAME prev_frame = get_prev_frame (selected_frame);
+
+  clear_proceed_status ();
 
   /* Set a breakpoint where the user wants it and at return from
      this function */
@@ -803,7 +834,7 @@ until_break_command(arg, from_tty)
   if (sal.pc == 0)
     error ("No line %d in file \"%s\".", sal.line, sal.symtab->filename);
   
-  set_momentary_breakpoint (sal, 0);
+  set_momentary_breakpoint (sal, selected_frame);
   
   /* Keep within the current frame */
   
@@ -940,6 +971,10 @@ delete_breakpoint (bpt)
   free_command_lines (&bpt->commands);
   if (bpt->cond)
     free (bpt->cond);
+
+  if (xgdb_verbose && bpt->number >=0)
+    printf ("breakpoint #%d deleted\n", bpt->number);
+
   free (bpt);
 }
 
@@ -954,7 +989,9 @@ delete_command (arg, from_tty)
 
   if (arg == 0)
     {
-      if (!from_tty || query ("Delete all breakpoints? "))
+      /* Ask user only if there are some breakpoints to delete.  */
+      if (!from_tty
+	  || breakpoint_chain && query ("Delete all breakpoints? "))
 	{
 	  /* No arg; clear all breakpoints.  */
 	  while (breakpoint_chain)
@@ -1077,6 +1114,9 @@ enable_breakpoint (bpt)
 {
   bpt->enable = enabled;
 
+  if (xgdb_verbose && bpt->number >= 0)
+    printf ("breakpoint #%d enabled\n", bpt->number);
+
   check_duplicates (bpt->address);
 }
 
@@ -1084,7 +1124,12 @@ static void
 enable_command (args)
      char *args;
 {
-  map_breakpoint_numbers (args, enable_breakpoint);
+  struct breakpoint *bpt;
+  if (args == 0)
+    ALL_BREAKPOINTS (bpt)
+      enable_breakpoint (bpt);
+  else
+    map_breakpoint_numbers (args, enable_breakpoint);
 }
 
 static void
@@ -1092,6 +1137,9 @@ disable_breakpoint (bpt)
      struct breakpoint *bpt;
 {
   bpt->enable = disabled;
+
+  if (xgdb_verbose && bpt->number >= 0)
+    printf ("breakpoint #%d disabled\n", bpt->number);
 
   check_duplicates (bpt->address);
 }
@@ -1263,12 +1311,13 @@ This command may be abbreviated \"disable\".",
 Arguments are breakpoint numbers with spaces in between.\n\
 To delete all breakpoints, give no argument.\n\
 \n\
-The \"display\" subcommand applies to auto-displays instead of breakpoints.",
+Also a prefix command for deletion of other GDB objects.\n\
+The \"unset\" command is also an alias for \"delete\".",
 		  &deletelist, "delete ", 1, &cmdlist);
   add_com_alias ("d", "delete", class_breakpoint, 1);
-  add_com_alias ("unset", "delete", class_breakpoint, 1);
+  add_com_alias ("unset", "delete", class_alias, 1);
 
-  add_abbrev_cmd ("breakpoints", class_breakpoint, delete_command,
+  add_cmd ("breakpoints", class_alias, delete_command,
 	   "Delete some breakpoints or auto-display expressions.\n\
 Arguments are breakpoint numbers with spaces in between.\n\
 To delete all breakpoints, give no argument.\n\

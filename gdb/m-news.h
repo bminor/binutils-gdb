@@ -1,41 +1,62 @@
 /* Parameters for execution on a Sony/NEWS, for GDB, the GNU debugger.
-   Probably ths parameters is match as news800, news700 and news900.
+   Copyright (C) 1987, 1989 Free Software Foundation, Inc.
+
+This file is part of GDB.
+
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
+
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+/* See following cpu type determination macro to get the machine type.
+  
+Here is an m-news.h file for gdb.  It supports the 68881 registers.
+                                           by hikichi@srava.sra.junet
+  
+* Support Sun assembly format instead of Motorola one.
+* Ptrace for handling floating register has a bug(before NEWS OS version 2.2),
+* After NEWS OS version 3.2, some of ptrace's bug is fixed.
+  But we cannot change the floating register(see adb(1) in OS 3.2) yet.
 
 Here is an m-news800.h file for gdb version 2.6.  It supports the 68881
 registers.
 
-(hikichi@srava.sra.junet or hikichi%srava.sra.junet%kddlabs@uunet.uu.net
- and now hikichi@wheaties.ai.mit.edu)
-* Now(9/2 '87) NEWS's printf has a bug. 
-* And support Sun assembly format instead of Motorola one.
-* Probably not well support floating registers from core file rarely that
-I do not know detail.
-* Ptrace for handling floating register has a bug(7/3 '87), but not fixed
-yet. We cannot write floating register.
-
-   Copyright (C) 1987 Free Software Foundation, Inc.
-
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
-
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
-
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
-
 /* Identify this machine */
-#ifndef news800
-#define news800
+#ifndef sony_news
+#define sony_news
 #endif
+
+/* determine the cpu type from machine type.  */
+#if defined(news1500)||defined(news1700)||defined(news1800)||defined(news1900)
+#  ifndef mc68020
+#    define mc68020
+#  endif /* not def mc68020 */
+#  ifndef mc68030
+#    define mc68030
+#  endif /* not def mc68030 */
+#else /* 1000 Series */
+#  if defined(news700)||defined(news800)||defined(news900)
+#    ifndef mc68020
+#    define mc68020
+#    endif 
+#  else /* 800 Series */
+/* unkown model ? */
+#  endif /* 800 Series */
+#endif /* 1000 Series */
+
+/* Define the bit, byte, and word ordering of the machine.  */
+#define BITS_BIG_ENDIAN
+#define BYTES_BIG_ENDIAN
+#define WORDS_BIG_ENDIAN
 
 /* Use GNU assembler instead of standard assembler */
 #define USE_GAS
@@ -45,6 +66,15 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #define MOTOROLA
 #endif
 
+/* Doesn't have siginterrupt.  */
+#define NO_SIGINTERRUPT
+
+#define HAVE_WAIT_STRUCT
+
+/* Get rid of any system-imposed stack limit if possible.  */
+
+#define SET_STACK_LIMIT_HUGE
+
 /* Define this if the C compiler puts an underscore at the front
    of external names before giving them to the linker.  */
 
@@ -52,6 +82,10 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 /* Symbols on this machine are in DBX format. */
 #define READ_DBX_FORMAT
+
+/* We can't use "isatty" or "fileno" on this machine.  This isn't good,
+   but it will have to do.  */
+#define ISATTY(FP)	((FP) == stdin || (FP) == stdout)
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
@@ -85,7 +119,7 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 
 /* Address of end of stack space.  */
 
-#define STACK_END_ADDR	(0x80000000 - ctob(UPAGES + 1))
+#define STACK_END_ADDR  (0x80000000 - (UPAGES+CLSIZE)*NBPG)
 
 /* Stack grows downward.  */
 
@@ -147,6 +181,8 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 #define FP0_REGNUM 18		/* Floating point register 0 */
 #define FPC_REGNUM 26		/* 68881 control register */
 
+/* before NEWSOS version 2.2 or more.  If you have a new OS,
+   redefine this macro in 'see m-newsos3.h'. */
 #define REGISTER_U_ADDR(addr, blockend, regno)		\
 {	if (regno <= FP_REGNUM) \
 	  addr = blockend + 4 + regno * 4; \
@@ -155,7 +191,7 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 	else if (regno <= PS_REGNUM) \
 	  addr = blockend + (regno - PS_REGNUM) * 4; \
 	else if (regno < FPC_REGNUM) \
-	  addr = blockend + 4 + 4 * 14 + 4 * 5 + (regno - FP0_REGNUM) * 12; \
+	  addr = blockend + 4 + 4 * 14 + 4 * 4 + (regno - FP0_REGNUM) * 12; \
 	else \
 	  addr = blockend + 4 + 4 * 16 + (regno - FPC_REGNUM) * 4; \
 }
@@ -231,14 +267,30 @@ read_memory_integer (read_register (SP_REGNUM), 4)
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
+/* when it return the floating value, use the FP0 in NEWS.  */
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  bcopy (REGBUF, VALBUF, TYPE_LENGTH (TYPE))
+  { if (TYPE_CODE (TYPE) == TYPE_CODE_FLT) \
+      { \
+	REGISTER_CONVERT_TO_VIRTUAL (FP0_REGNUM, \
+			       &REGBUF[REGISTER_BYTE (FP0_REGNUM)], VALBUF); \
+      } \
+    else \
+      bcopy (REGBUF, VALBUF, TYPE_LENGTH (TYPE)); }
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
 
+/* when it return the floating value, use the FP0 in NEWS.  */
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE))
+  { if (TYPE_CODE (TYPE) == TYPE_CODE_FLT) \
+      { \
+	char raw_buf[REGISTER_RAW_SIZE (FP0_REGNUM)]; \
+	REGISTER_CONVERT_TO_RAW (FP0_REGNUM, VALBUF, raw_buf); \
+	write_register_bytes (FP0_REGNUM, \
+			      raw_buf, REGISTER_RAW_SIZE (FP0_REGNUM)); \
+      } \
+    else \
+      write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE)); }
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
@@ -246,8 +298,10 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)(REGBUF))
 
-/* Compensate for lack of `vprintf' function.  */ 
-#define vprintf(format, ap) _doprnt (format, ap, stdout) 
+/* Compensate for lack of `vprintf' function.  */
+#ifndef HAVE_VPRINTF
+#define vprintf(format, ap) _doprnt (format, ap, stdout)
+#endif /* not HAVE_VPRINTF */
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
@@ -265,14 +319,23 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 /* In the case of the NEWS, the frame's nominal address
    is the address of a 4-byte word containing the calling frame's address.  */
 
-#define FRAME_CHAIN(thisframe)  (read_memory_integer ((thisframe)->frame, 4))
+#define FRAME_CHAIN(thisframe)  \
+  (outside_startup_file ((thisframe)->pc) ? \
+   read_memory_integer ((thisframe)->frame, 4) :\
+   0)
 
 #define FRAME_CHAIN_VALID(chain, thisframe) \
-  (chain != 0 && (FRAME_SAVED_PC (thisframe) >= first_object_file_end))
+  (chain != 0 && (outside_startup_file (FRAME_SAVED_PC (thisframe))))
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
 /* Define other aspects of the stack frame.  */
+
+/* A macro that tells us whether the function invocation represented
+   by FI does not have a frame on the stack associated with it.  If it
+   does not, FRAMELESS is set to 1, else 0.  */
+#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
+  FRAMELESS_LOOK_FOR_PROLOGUE(FI, FRAMELESS)
 
 #define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame + 4, 4))
 
@@ -311,8 +374,7 @@ read_memory_integer (read_register (SP_REGNUM), 4)
   register int regmask;							\
   register CORE_ADDR next_addr;						\
   register CORE_ADDR pc;						\
-  register int insn;							\
-  register int offset;							\
+  int nextinsn;								\
   bzero (&frame_saved_regs, sizeof frame_saved_regs);			\
   if ((frame_info)->pc >= (frame_info)->frame - CALL_DUMMY_LENGTH - FP_REGNUM*4 - 8*12 - 4 \
       && (frame_info)->pc <= (frame_info)->frame)				\
@@ -320,53 +382,54 @@ read_memory_integer (read_register (SP_REGNUM), 4)
       pc = (frame_info)->frame - CALL_DUMMY_LENGTH - FP_REGNUM * 4 - 8*12 - 4; }\
   else   								\
     { pc = get_pc_function_start ((frame_info)->pc); 			\
-      /* Verify we have a link a6 instruction next,			\
-	 or a branch followed by a link a6 instruction;			\
+      /* Verify we have a link a6 instruction next;			\
 	 if not we lose.  If we win, find the address above the saved   \
 	 regs using the amount of storage from the link instruction.  */\
-retry:									\
-      insn = read_memory_integer (pc, 2);				\
-      if (insn == 044016)						\
-	next_addr = (frame_info)->frame - read_memory_integer (pc += 2, 4), pc+=4; \
-      else if (insn == 047126)						\
-	next_addr = (frame_info)->frame - read_memory_integer (pc += 2, 2), pc+=2; \
-      else if ((insn & 0177400) == 060000)	/* bra insn */		\
-	{ offset = insn & 0377;						\
-          pc += 2;				/* advance past bra */	\
-	  if (offset == 0)			/* bra #word */		\
-	    offset = read_memory_integer (pc, 2), pc += 2;		\
-	  else if (offset == 0377)		/* bra #long */		\
-	    offset = read_memory_integer (pc, 4), pc += 4;		\
-	  pc += offset;							\
-	  goto retry;							\
-      } else goto lose;							\
+      if (044016 == read_memory_integer (pc, 2))			\
+	next_addr = (frame_info)->frame + read_memory_integer (pc += 2, 4), pc+=4; \
+      else if (047126 == read_memory_integer (pc, 2))			\
+	next_addr = (frame_info)->frame + read_memory_integer (pc += 2, 2), pc+=2; \
+      else goto lose;							\
       /* If have an addal #-n, sp next, adjust next_addr.  */		\
       if ((0177777 & read_memory_integer (pc, 2)) == 0157774)		\
 	next_addr += read_memory_integer (pc += 2, 4), pc += 4;		\
     }									\
   /* next should be a moveml to (sp) or -(sp) or a movl r,-(sp) */	\
-  insn = read_memory_integer (pc, 2), pc += 2;				\
-  regmask = read_memory_integer (pc, 2);				\
-  if ((insn & 0177760) == 022700)	/* movl rn, (sp) */		\
-    (frame_saved_regs).regs[(insn&7) + ((insn&010)?8:0)] = next_addr;	\
-  else if ((insn & 0177760) == 024700)	/* movl rn, -(sp) */		\
-    (frame_saved_regs).regs[(insn&7) + ((insn&010)?8:0)] = next_addr-=4; \
-  else if (insn == 0044327)		/* moveml mask, (sp) */		\
-    { pc += 2;								\
-      /* Regmask's low bit is for register 0, the first written */	\
-      next_addr -= 4;							\
+  regmask = read_memory_integer (pc + 2, 2);				\
+  /* But before that can come an fmovem.  Check for it.  */		\
+  nextinsn = 0xffff & read_memory_integer (pc, 2);			\
+  if (0xf227 == nextinsn						\
+      && (regmask & 0xff00) == 0xe000)					\
+    { pc += 4; /* Regmask's low bit is for register fp7, the first pushed */ \
+      for (regnum = FP0_REGNUM + 7; regnum >= FP0_REGNUM; regnum--, regmask >>= 1)		\
+	if (regmask & 1)						\
+          (frame_saved_regs).regs[regnum] = (next_addr -= 12);		\
+      regmask = read_memory_integer (pc + 2, 2); }			\
+  if (0044327 == read_memory_integer (pc, 2))				\
+    { pc += 4; /* Regmask's low bit is for register 0, the first written */ \
       for (regnum = 0; regnum < 16; regnum++, regmask >>= 1)		\
 	if (regmask & 1)						\
-          (frame_saved_regs).regs[regnum] = (next_addr += 4);		\
-  } else if (insn == 0044347)		/* moveml mask, -(sp) */	\
-    { pc += 2;								\
-      /* Regmask's low bit is for register 15, the first pushed */	\
+          (frame_saved_regs).regs[regnum] = (next_addr += 4) - 4; }	\
+  else if (0044347 == read_memory_integer (pc, 2))			\
+    { pc += 4; /* Regmask's low bit is for register 15, the first pushed */ \
       for (regnum = 15; regnum >= 0; regnum--, regmask >>= 1)		\
 	if (regmask & 1)						\
           (frame_saved_regs).regs[regnum] = (next_addr -= 4); }		\
+  else if (0x2f00 == (0xfff0 & read_memory_integer (pc, 2)))		\
+    { regnum = 0xf & read_memory_integer (pc, 2); pc += 2;		\
+      (frame_saved_regs).regs[regnum] = (next_addr -= 4); }		\
+  /* fmovemx to index of sp may follow.  */				\
+  regmask = read_memory_integer (pc + 2, 2);				\
+  nextinsn = 0xffff & read_memory_integer (pc, 2);			\
+  if (0xf236 == nextinsn						\
+      && (regmask & 0xff00) == 0xf000)					\
+    { pc += 10; /* Regmask's low bit is for register fp0, the first written */ \
+      for (regnum = FP0_REGNUM + 7; regnum >= FP0_REGNUM; regnum--, regmask >>= 1)		\
+	if (regmask & 1)						\
+          (frame_saved_regs).regs[regnum] = (next_addr += 12) - 12;	\
+      regmask = read_memory_integer (pc + 2, 2); }			\
   /* clrw -(sp); movw ccr,-(sp) may follow.  */				\
-  if (read_memory_integer (pc, 2) == 041147 				\
-      && read_memory_integer (pc+2, 2) == 042347)			\
+  if (0x426742e7 == read_memory_integer (pc, 4))			\
     (frame_saved_regs).regs[PS_REGNUM] = (next_addr -= 4);		\
   lose: ;								\
   (frame_saved_regs).regs[SP_REGNUM] = (frame_info)->frame + 8;		\
@@ -375,52 +438,11 @@ retry:									\
 }
 
 /* Things needed for making the inferior call functions.  */
+/* On NEWS os 2.x ptrace cannot modify fp and floating registers.  */
+#define PTRACE_BUG
 
 /* Push an empty stack frame, to record the current PC, etc.  */
-#if 0 /* now these define is not used */
-#define PUSH_DUMMY_FRAME \
-{ register CORE_ADDR sp = read_register (SP_REGNUM);			\
-  register int regnum;							\
-  char raw_buffer[12];							\
-  sp = push_word (sp, read_register (PC_REGNUM));			\
-  sp = push_word (sp, read_register (FP_REGNUM));			\
-  write_register (FP_REGNUM, sp);					\
-  for (regnum = FP0_REGNUM + 7; regnum >= FP0_REGNUM; regnum--)		\
-    { read_register_bytes (REGISTER_BYTE (regnum), raw_buffer, 12);	\
-      sp = push_bytes (sp, raw_buffer, 12); }				\
-  for (regnum = FP_REGNUM - 1; regnum >= 0; regnum--)			\
-    sp = push_word (sp, read_register (regnum));			\
-  sp = push_word (sp, read_register (PS_REGNUM));			\
-  write_register (SP_REGNUM, sp);  }
-
-/* Discard from the stack the innermost frame, restoring all registers.  */
-
-#define POP_FRAME  \
-{ register FRAME frame = get_current_frame ();			 	\
-  register CORE_ADDR fp;					 	\
-  register int regnum;							\
-  struct frame_saved_regs fsr;						\
-  struct frame_info *fi;						\
-  char raw_buffer[12];							\
-  fi = get_frame_info (frame);					 	\
-  fp = fi->frame;						 	\
-  get_frame_saved_regs (fi, &fsr);					\
-  for (regnum = FP0_REGNUM + 7; regnum >= FP0_REGNUM; regnum--)		\
-    if (fsr.regs[regnum])						\
-      { read_memory (fsr.regs[regnum], raw_buffer, 12);			\
-        write_register_bytes (REGISTER_BYTE (regnum), raw_buffer, 12); }\
-  for (regnum = FP_REGNUM - 1; regnum >= 0; regnum--)			\
-    if (fsr.regs[regnum])						\
-      write_register (regnum, read_memory_integer (fsr.regs[regnum], 4)); \
-  if (fsr.regs[PS_REGNUM])						\
-    write_register (PS_REGNUM, read_memory_integer (fsr.regs[PS_REGNUM], 4)); \
-  write_register (FP_REGNUM, read_memory_integer (fp, 4));		\
-  write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));  	\
-  write_register (SP_REGNUM, fp + 8);					\
-  flush_cached_frames ();					 	\
-  set_current_frame (create_new_frame (read_register (FP_REGNUM),	\
-				       read_pc ())); }
-#else /* now ptrace has a bug to write floating register */
+/* now ptrace has a bug to write floating register in old OS */
 #define PUSH_DUMMY_FRAME \
 { register CORE_ADDR sp = read_register (SP_REGNUM);			\
   register int regnum;							\
@@ -454,10 +476,10 @@ retry:									\
   flush_cached_frames ();					 	\
   set_current_frame (create_new_frame (read_register (FP_REGNUM),	\
 				       read_pc ())); }
-#endif
+
 /* This sequence of words is the instructions
      fmove.m #<f0-f7>,-(sp)
-     movem.l 0xfffc,-(sp)
+     movem.l 0xfffc,-(sp)     ;; no save a6(fp) and a7(sp)
      clr.w -(sp)
      move.w ccr,-(sp)
      /..* The arguments are pushed at this point by GDB;

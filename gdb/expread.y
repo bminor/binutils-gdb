@@ -1,22 +1,21 @@
 /* Parse C expressions for GDB.
-   Copyright (C) 1986 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Parse a C expression from text in a string,
    and return the result as a  struct expression  pointer.
@@ -35,6 +34,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include "expression.h"
 
 #include <stdio.h>
+#include <a.out.h>
 
 static struct expression *expout;
 static int expout_size;
@@ -43,6 +43,12 @@ static int expout_ptr;
 static int yylex ();
 static void yyerror ();
 static void write_exp_elt ();
+static void write_exp_elt_opcode ();
+static void write_exp_elt_sym ();
+static void write_exp_elt_longcst ();
+static void write_exp_elt_dblcst ();
+static void write_exp_elt_type ();
+static void write_exp_elt_intern ();
 static void write_exp_string ();
 static void start_arglist ();
 static int end_arglist ();
@@ -83,6 +89,19 @@ struct stoken
     char *ptr;
     int length;
   };
+
+/* For parsing of complicated types.
+   An array should be preceded in the list by the size of the array.  */
+enum type_pieces
+  {tp_end = -1, tp_pointer, tp_reference, tp_array, tp_function};
+static enum type_pieces *type_stack;
+static int type_stack_depth, type_stack_size;
+
+static void push_type ();
+static enum type_pieces pop_type ();
+
+/* Allow debugging of parsing.  */
+#define YYDEBUG 1
 %}
 
 /* Although the yacc "value" of an expression is not used,
@@ -91,7 +110,8 @@ struct stoken
 
 %union
   {
-    long lval;
+    LONGEST lval;
+    unsigned LONGEST ulval;
     double dval;
     struct symbol *sym;
     struct type *tval;
@@ -110,7 +130,13 @@ struct stoken
 %type <tvec> nonempty_typelist
 %type <bval> block
 
+/* Fancy type parsing.  */
+%type <voidval> func_mod direct_abs_decl abs_decl
+%type <tval> ptype
+%type <lval> array_mod
+
 %token <lval> INT CHAR
+%token <ulval> UINT
 %token <dval> FLOAT
 
 /* Both NAME and TYPENAME tokens represent symbols in the input,
@@ -122,10 +148,14 @@ struct stoken
    Contexts where this distinction is not important can use the
    nonterminal "name", which matches either NAME or TYPENAME.  */
 
-%token <sval> NAME TYPENAME STRING
-%type <sval> name
+%token <sval> NAME TYPENAME BLOCKNAME STRING
+%type <sval> name name_not_typename typename
 
 %token STRUCT UNION ENUM SIZEOF UNSIGNED COLONCOLON
+
+/* Special type cases, put in to allow the parser to distinguish different
+   legal basetypes.  */
+%token SIGNED LONG SHORT INT_KEYWORD
 
 %token <lval> LAST REGNAME
 
@@ -139,6 +169,7 @@ struct stoken
 %left ','
 %left ABOVE_COMMA
 %right '=' ASSIGN_MODIFY
+%right '?'
 %left OR
 %left AND
 %left '|'
@@ -147,11 +178,11 @@ struct stoken
 %left EQUAL NOTEQUAL
 %left '<' '>' LEQ GEQ
 %left LSH RSH
+%left '@'
 %left '+' '-'
 %left '*' '/' '%'
-%left '@'
 %right UNARY INCREMENT DECREMENT
-%right ARROW '.' '['
+%right ARROW '.' '[' '('
 %left COLONCOLON
 
 %%
@@ -232,9 +263,9 @@ exp	:	exp '('
 			/* This is to save the value of arglist_len
 			   being accumulated by an outer function call.  */
 			{ start_arglist (); }
-		arglist ')'
+		arglist ')'	%prec ARROW
 			{ write_exp_elt_opcode (OP_FUNCALL);
-			  write_exp_elt_longcst (end_arglist ());
+			  write_exp_elt_longcst ((LONGEST) end_arglist ());
 			  write_exp_elt_opcode (OP_FUNCALL); }
 	;
 
@@ -343,7 +374,7 @@ exp	:	exp OR exp
 			{ write_exp_elt_opcode (BINOP_OR); }
 	;
 
-exp	:	exp '?' exp ':' exp
+exp	:	exp '?' exp ':' exp	%prec '?'
 			{ write_exp_elt_opcode (TERNOP_COND); }
 	;
 			  
@@ -359,15 +390,30 @@ exp	:	exp ASSIGN_MODIFY exp
 
 exp	:	INT
 			{ write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type (builtin_type_long);
-			  write_exp_elt_longcst ($1);
+			  if ($1 == (int) $1 || $1 == (unsigned int) $1)
+			    write_exp_elt_type (builtin_type_int);
+			  else
+			    write_exp_elt_type (BUILTIN_TYPE_LONGEST);
+			  write_exp_elt_longcst ((LONGEST) $1);
 			  write_exp_elt_opcode (OP_LONG); }
+	;
+
+exp	:	UINT
+			{
+			  write_exp_elt_opcode (OP_LONG);
+			  if ($1 == (unsigned int) $1)
+			    write_exp_elt_type (builtin_type_unsigned_int);
+			  else
+			    write_exp_elt_type (BUILTIN_TYPE_UNSIGNED_LONGEST);
+			  write_exp_elt_longcst ((LONGEST) $1);
+			  write_exp_elt_opcode (OP_LONG);
+			}
 	;
 
 exp	:	CHAR
 			{ write_exp_elt_opcode (OP_LONG);
 			  write_exp_elt_type (builtin_type_char);
-			  write_exp_elt_longcst ($1);
+			  write_exp_elt_longcst ((LONGEST) $1);
 			  write_exp_elt_opcode (OP_LONG); }
 	;
 
@@ -383,13 +429,13 @@ exp	:	variable
 
 exp	:	LAST
 			{ write_exp_elt_opcode (OP_LAST);
-			  write_exp_elt_longcst ($1);
+			  write_exp_elt_longcst ((LONGEST) $1);
 			  write_exp_elt_opcode (OP_LAST); }
 	;
 
 exp	:	REGNAME
 			{ write_exp_elt_opcode (OP_REGISTER);
-			  write_exp_elt_longcst ($1);
+			  write_exp_elt_longcst ((LONGEST) $1);
 			  write_exp_elt_opcode (OP_REGISTER); }
 	;
 
@@ -399,10 +445,10 @@ exp	:	VARIABLE
 			  write_exp_elt_opcode (OP_INTERNALVAR); }
 	;
 
-exp	:	SIZEOF '(' type ')'
+exp	:	SIZEOF '(' type ')'	%prec UNARY
 			{ write_exp_elt_opcode (OP_LONG);
 			  write_exp_elt_type (builtin_type_int);
-			  write_exp_elt_longcst ((long) TYPE_LENGTH ($3));
+			  write_exp_elt_longcst ((LONGEST) TYPE_LENGTH ($3));
 			  write_exp_elt_opcode (OP_LONG); }
 	;
 
@@ -420,7 +466,7 @@ exp	:	THIS
 
 /* end of C++.  */
 
-block	:	name
+block	:	BLOCKNAME
 			{
 			  struct symtab *tem = lookup_symtab (copy_name ($1));
 			  struct symbol *sym;
@@ -494,12 +540,21 @@ variable:	typebase COLONCOLON name
 
 			  if (i < misc_function_count)
 			    {
+			      enum misc_function_type mft =
+				(enum misc_function_type)
+				  misc_function_vector[i].type;
+			      
 			      write_exp_elt_opcode (OP_LONG);
 			      write_exp_elt_type (builtin_type_int);
-			      write_exp_elt_longcst (misc_function_vector[i].address);
+			      write_exp_elt_longcst ((LONGEST) misc_function_vector[i].address);
 			      write_exp_elt_opcode (OP_LONG);
 			      write_exp_elt_opcode (UNOP_MEMVAL);
-			      write_exp_elt_type (builtin_type_char);
+			      if (mft == mf_data || mft == mf_bss)
+				write_exp_elt_type (builtin_type_int);
+			      else if (mft == mf_text)
+				write_exp_elt_type (lookup_function_type (builtin_type_int));
+			      else
+				write_exp_elt_type (builtin_type_char);
 			      write_exp_elt_opcode (UNOP_MEMVAL);
 			    }
 			  else
@@ -511,7 +566,7 @@ variable:	typebase COLONCOLON name
 			}
 	;
 
-variable:	NAME
+variable:	name_not_typename
 			{ struct symbol *sym;
 			  int is_a_field_of_this;
 
@@ -560,12 +615,21 @@ variable:	NAME
 
 			      if (i < misc_function_count)
 				{
+				  enum misc_function_type mft =
+				    (enum misc_function_type)
+				      misc_function_vector[i].type;
+				  
 				  write_exp_elt_opcode (OP_LONG);
 				  write_exp_elt_type (builtin_type_int);
-				  write_exp_elt_longcst (misc_function_vector[i].address);
+				  write_exp_elt_longcst ((LONGEST) misc_function_vector[i].address);
 				  write_exp_elt_opcode (OP_LONG);
 				  write_exp_elt_opcode (UNOP_MEMVAL);
-				  write_exp_elt_type (builtin_type_char);
+				  if (mft == mf_data || mft == mf_bss)
+				    write_exp_elt_type (builtin_type_int);
+				  else if (mft == mf_text)
+				    write_exp_elt_type (lookup_function_type (builtin_type_int));
+				  else
+				    write_exp_elt_type (builtin_type_char);
 				  write_exp_elt_opcode (UNOP_MEMVAL);
 				}
 			      else if (symtab_list == 0
@@ -578,19 +642,90 @@ variable:	NAME
 			}
 	;
 
-type	:	typebase
-	|	type '*'
-			{ $$ = lookup_pointer_type ($1); }
-	|	type '&'
-			{ $$ = lookup_reference_type ($1); }
+
+ptype	:	typebase
+	|	typebase abs_decl
+		{
+		  /* This is where the interesting stuff happens.  */
+		  int done = 0;
+		  int array_size;
+		  struct type *follow_type = $1;
+		  
+		  while (!done)
+		    switch (pop_type ())
+		      {
+		      case tp_end:
+			done = 1;
+			break;
+		      case tp_pointer:
+			follow_type = lookup_pointer_type (follow_type);
+			break;
+		      case tp_reference:
+			follow_type = lookup_reference_type (follow_type);
+			break;
+		      case tp_array:
+			array_size = (int) pop_type ();
+			if (array_size != -1)
+			  follow_type = create_array_type (follow_type,
+							   array_size);
+			else
+			  follow_type = lookup_pointer_type (follow_type);
+			break;
+		      case tp_function:
+			follow_type = lookup_function_type (follow_type);
+			break;
+		      }
+		  $$ = follow_type;
+		}
+	;
+
+abs_decl:	'*'
+			{ push_type (tp_pointer); $$ = 0; }
+	|	'*' abs_decl
+			{ push_type (tp_pointer); $$ = $2; }
+	|	direct_abs_decl
+	;
+
+direct_abs_decl: '(' abs_decl ')'
+			{ $$ = $2; }
+	|	direct_abs_decl array_mod
+			{
+			  push_type ((enum type_pieces) $2);
+			  push_type (tp_array);
+			}
+	|	array_mod
+			{
+			  push_type ((enum type_pieces) $1);
+			  push_type (tp_array);
+			  $$ = 0;
+			}
+	| 	direct_abs_decl func_mod
+			{ push_type (tp_function); }
+	|	func_mod
+			{ push_type (tp_function); }
+	;
+
+array_mod:	'[' ']'
+			{ $$ = -1; }
+	|	'[' INT ']'
+			{ $$ = $2; }
+	;
+
+func_mod:	'(' ')'
+			{ $$ = 0; }
+	;
+
+type	:	ptype
 	|	typebase COLONCOLON '*'
 			{ $$ = lookup_member_type (builtin_type_int, $1); }
 	|	type '(' typebase COLONCOLON '*' ')'
 			{ $$ = lookup_member_type ($1, $3); }
 	|	type '(' typebase COLONCOLON '*' ')' '(' ')'
-			{ $$ = lookup_member_type (lookup_function_type ($1)); }
+			{ $$ = lookup_member_type
+			    (lookup_function_type ($1), $3); }
 	|	type '(' typebase COLONCOLON '*' ')' '(' nonempty_typelist ')'
-			{ $$ = lookup_member_type (lookup_function_type ($1));
+			{ $$ = lookup_member_type
+			    (lookup_function_type ($1), $3);
 			  free ($8); }
 	;
 
@@ -598,6 +733,20 @@ typebase
 	:	TYPENAME
 			{ $$ = lookup_typename (copy_name ($1),
 						expression_context_block, 0); }
+	|	INT_KEYWORD
+			{ $$ = builtin_type_int; }
+	|	LONG
+			{ $$ = builtin_type_long; }
+	|	SHORT
+			{ $$ = builtin_type_short; }
+	|	LONG INT_KEYWORD
+			{ $$ = builtin_type_long; }
+	|	UNSIGNED LONG INT_KEYWORD
+			{ $$ = builtin_type_unsigned_long; }
+	|	SHORT INT_KEYWORD
+			{ $$ = builtin_type_short; }
+	|	UNSIGNED SHORT INT_KEYWORD
+			{ $$ = builtin_type_unsigned_short; }
 	|	STRUCT name
 			{ $$ = lookup_struct (copy_name ($2),
 					      expression_context_block); }
@@ -607,8 +756,33 @@ typebase
 	|	ENUM name
 			{ $$ = lookup_enum (copy_name ($2),
 					    expression_context_block); }
-	|	UNSIGNED name
+	|	UNSIGNED typename
 			{ $$ = lookup_unsigned_typename (copy_name ($2)); }
+	|	UNSIGNED
+			{ $$ = builtin_type_unsigned_int; }
+	|	SIGNED typename
+			{ $$ = lookup_typename (copy_name ($2),
+						expression_context_block, 0); }
+	|	SIGNED
+			{ $$ = builtin_type_int; }
+	;
+
+typename:	TYPENAME
+	|	INT_KEYWORD
+		{
+		  $$.ptr = "int";
+		  $$.length = 3;
+		}
+	|	LONG
+		{
+		  $$.ptr = "long";
+		  $$.length = 4;
+		}
+	|	SHORT
+		{
+		  $$.ptr = "short";
+		  $$.length = 5;
+		}
 	;
 
 nonempty_typelist
@@ -625,8 +799,14 @@ nonempty_typelist
 	;
 
 name	:	NAME
+	|	BLOCKNAME
 	|	TYPENAME
 	;
+
+name_not_typename :	NAME
+	|	BLOCKNAME
+	;
+
 %%
 
 /* Begin counting arguments for a function call,
@@ -782,7 +962,7 @@ write_exp_string (str)
     }
   bcopy (str.ptr, (char *) &expout->elts[expout_ptr - lenelt], len);
   ((char *) &expout->elts[expout_ptr - lenelt])[len] = 0;
-  write_exp_elt_longcst (len);
+  write_exp_elt_longcst ((LONGEST) len);
 }
 
 /* During parsing of a C expression, the pointer to the next character
@@ -820,11 +1000,12 @@ parse_number (olen)
      int olen;
 {
   register char *p = lexptr;
-  register long n = 0;
+  register LONGEST n = 0;
   register int c;
   register int base = 10;
   register int len = olen;
   char *err_copy;
+  int unsigned_p = 0;
 
   extern double atof ();
 
@@ -850,7 +1031,7 @@ parse_number (olen)
     {
       c = *p++;
       if (c >= 'A' && c <= 'Z') c += 'a' - 'A';
-      if (c != 'l')
+      if (c != 'l' && c != 'u')
 	n *= base;
       if (c >= '0' && c <= '9')
 	n += c - '0';
@@ -860,6 +1041,16 @@ parse_number (olen)
 	    n += c - 'a' + 10;
 	  else if (len == 0 && c == 'l')
 	    ;
+	  else if (len == 0 && c == 'u')
+	    unsigned_p = 1;
+	  else if (base == 10 && len != 0 && (c == 'e' || c == 'E'))
+	    {
+	      /* Scientific notation, where we are unlucky enough not
+		 to have a '.' in the string.  */
+	      yylval.dval = atof (lexptr);
+	      lexptr += olen;
+	      return FLOAT;
+	    }
 	  else
 	    {
 	      err_copy = (char *) alloca (olen + 1);
@@ -871,8 +1062,16 @@ parse_number (olen)
     }
 
   lexptr = p;
-  yylval.lval = n;
-  return INT;
+  if (unsigned_p)
+    {
+      yylval.ulval = n;
+      return UINT;
+    }
+  else
+    {
+      yylval.lval = n;
+      return INT;
+    }
 }
 
 struct token
@@ -1006,6 +1205,11 @@ yylex ()
       lexptr++;
       return c;
 
+    case '.':
+      /* Might be a floating point number.  */
+      if (lexptr[1] >= '0' && lexptr[1] <= '9')
+	break;			/* Falls into number code.  */
+
     case '+':
     case '-':
     case '*':
@@ -1021,7 +1225,6 @@ yylex ()
     case '>':
     case '[':
     case ']':
-    case '.':
     case '?':
     case ':':
     case '=':
@@ -1047,29 +1250,47 @@ yylex ()
       lexptr += namelen + 1;
       return STRING;
     }
-  if (c >= '0' && c <= '9')
+
+  /* Is it a number?  */
+  /* Note:  We have already dealt with the case of the token '.'.
+     See case '.' above.  */
+  if ((c >= '0' && c <= '9') || c == '.')
     {
-      /* It's a number */
-      for (namelen = 0;
-	   c = tokstart[namelen],
-	   (c == '_' || c == '$' || c == '.' || (c >= '0' && c <= '9')
-	    || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));
-	   namelen++)
-	;
-      return parse_number (namelen);
+      /* It's a number.  */
+      int got_dot = 0, got_e = 0;
+      register char *p = tokstart;
+      int hex = c == '0' && (p[1] == 'x' || p[1] == 'X');
+      if (hex)
+	p += 2;
+      for (;; ++p)
+	{
+	  if (!hex && !got_e && (*p == 'e' || *p == 'E'))
+	    got_dot = got_e = 1;
+	  else if (!hex && !got_dot && *p == '.')
+	    got_dot = 1;
+	  else if (got_e && (p[-1] == 'e' || p[-1] == 'E')
+		   && (*p == '-' || *p == '+'))
+	    /* This is the sign of the exponent, not the end of the
+	       number.  */
+	    continue;
+	  else if (*p < '0' || *p > '9'
+		   && (!hex || ((*p < 'a' || *p > 'f')
+				&& (*p < 'A' || *p > 'F'))))
+	    break;
+	}
+      return parse_number (p - tokstart);
     }
 
   if (!(c == '_' || c == '$'
 	|| (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
     error ("Invalid token in expression.");
 
-  /* It is a name.  See how long it is.  */
-
-  for (namelen = 0;
-       c = tokstart[namelen],
+  /* It's a name.  See how long it is.  */
+  namelen = 0;
+  for (c = tokstart[namelen];
        (c == '_' || c == '$' || (c >= '0' && c <= '9')
 	|| (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));
-       namelen++)
+       c = tokstart[++namelen])
     ;
 
   /* The token "if" terminates the expression and is NOT 
@@ -1134,36 +1355,45 @@ yylex ()
 	 return REGNAME;
        }
   }
-  if (namelen == 6 && !strncmp (tokstart, "struct", 6))
+  /* Catch specific keywords.  Should be done with a data structure.  */
+  switch (namelen)
     {
-      return STRUCT;
-    }
-  if (namelen == 5)
-    {
+    case 8:
+      if (!strncmp (tokstart, "unsigned", 8))
+	return UNSIGNED;
+      break;
+    case 6:
+      if (!strncmp (tokstart, "struct", 6))
+	return STRUCT;
+      if (!strncmp (tokstart, "signed", 6))
+	return SIGNED;
+      if (!strncmp (tokstart, "sizeof", 6))      
+	return SIZEOF;
+      break;
+    case 5:
       if (!strncmp (tokstart, "union", 5))
-	{
-	  return UNION;
-	}
-    }
-  if (namelen == 4)
-    {
+	return UNION;
+      if (!strncmp (tokstart, "short", 5))
+	return SHORT;
+      break;
+    case 4:
       if (!strncmp (tokstart, "enum", 4))
-	{
-	  return ENUM;
-	}
+	return ENUM;
+      if (!strncmp (tokstart, "long", 4))
+	return LONG;
       if (!strncmp (tokstart, "this", 4)
 	  && lookup_symbol ("$this", expression_context_block,
 			    VAR_NAMESPACE, 0))
 	return THIS;
+      break;
+    case 3:
+      if (!strncmp (tokstart, "int", 3))
+	return INT_KEYWORD;
+      break;
+    default:
+      break;
     }
-  if (namelen == 6 && !strncmp (tokstart, "sizeof", 6))
-    {
-      return SIZEOF;
-    }
-  if (namelen == 8 && !strncmp (tokstart, "unsigned", 6))
-    {
-      return UNSIGNED;
-    }
+
   yylval.sval.ptr = tokstart;
   yylval.sval.length = namelen;
 
@@ -1175,12 +1405,25 @@ yylex ()
       return VARIABLE;
     }
 
-  /* Use token-type TYPENAME for symbols that happen to be defined
+  /* Use token-type BLOCKNAME for symbols that happen to be defined as
+     functions or symtabs.  If this is not so, then ...
+     Use token-type TYPENAME for symbols that happen to be defined
      currently as names of types; NAME for other symbols.
      The caller is not constrained to care about the distinction.  */
-  if (lookup_typename (copy_name (yylval.sval), expression_context_block, 1))
-    return TYPENAME;
-  return NAME;
+  {
+    char *tmp = copy_name (yylval.sval);
+    struct symbol *sym;
+
+    if (lookup_partial_symtab (tmp))
+      return BLOCKNAME;
+    sym = lookup_symbol (tmp, expression_context_block,
+			 VAR_NAMESPACE, 0);
+    if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
+      return BLOCKNAME;
+    if (lookup_typename (copy_name (yylval.sval), expression_context_block, 1))
+      return TYPENAME;
+    return NAME;
+  }
 }
 
 static void
@@ -1443,6 +1686,7 @@ parse_c_1 (stringptr, block, comma)
   lexptr = *stringptr;
 
   paren_depth = 0;
+  type_stack_depth = 0;
 
   comma_terminates = comma;
 
@@ -1486,4 +1730,34 @@ parse_c_expression (string)
   if (*string)
     error ("Junk after end of expression.");
   return exp;
+}
+
+static void 
+push_type (tp)
+     enum type_pieces tp;
+{
+  if (type_stack_depth == type_stack_size)
+    {
+      type_stack_size *= 2;
+      type_stack = (enum type_pieces *)
+	xrealloc (type_stack, type_stack_size * sizeof (enum type_pieces));
+    }
+  type_stack[type_stack_depth++] = tp;
+}
+
+static enum type_pieces 
+pop_type ()
+{
+  if (type_stack_depth)
+    return type_stack[--type_stack_depth];
+  return tp_end;
+}
+
+void
+_initialize_expread ()
+{
+  type_stack_size = 80;
+  type_stack_depth = 0;
+  type_stack = (enum type_pieces *)
+    xmalloc (type_stack_size * sizeof (enum type_pieces));
 }

@@ -1,22 +1,21 @@
 /* Interface from GDB to X windows.
-   Copyright (C) 1987 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Original version was contributed by Derek Beatty, 30 June 87.  */
 
@@ -214,6 +213,7 @@ print_prompt ()
 {
   if (prompt_string)
     printf ("%s", prompt_string);
+  fflush (stdout);
 }
 
 /* Handlers for buttons.  */
@@ -333,9 +333,12 @@ Widget	w;
 char	*command;
 caddr_t	call_data;
 {
-  execute_command (command, 0);
+  char *copy = (char *) xmalloc (strlen (command) + 1);
+  strcpy (copy, command);
+  execute_command (copy, 0);
   xgdb_display_source ();
   print_prompt ();
+  free (copy);
 }
 
 static void
@@ -422,6 +425,10 @@ create_text_widget (parent, filename)
   static Arg fileArgs[3];
   XtTextSource src;
   XtTextSink   sink;
+  Widget text_widget;
+
+  text_widget = XtCreateManagedWidget ("disk", textWidgetClass,
+				       parent, NULL, 0);
 
   XtSetArg (fileArgs[0], XtNfile, filename);
   src = XtDiskSourceCreate(parent, fileArgs, 1);
@@ -430,7 +437,8 @@ create_text_widget (parent, filename)
   XtSetArg (fileArgs[0], XtNtextOptions, scrollVertical);
   XtSetArg (fileArgs[1], XtNtextSource, src);
   XtSetArg (fileArgs[2], XtNtextSink, sink);
-  return XtCreateManagedWidget("disk", textWidgetClass, parent, fileArgs, XtNumber (fileArgs));
+  XtSetValues (text_widget, fileArgs, XtNumber (fileArgs));
+  return text_widget;
 }
 
 /* Entry point to create the widgets representing our display.  */
@@ -592,10 +600,12 @@ _initialize_xgdb ()
   extern int inhibit_windows;
 
   if (getenv ("DISPLAY") && ! inhibit_windows)
-    if (xgdb_create_window ())
-      window_hook = xgdb_window_hook;
+    {
+      if (xgdb_create_window ())
+	window_hook = xgdb_window_hook;
 
-  specify_exec_file_hook (xgdb_display_exec_file);
+      specify_exec_file_hook (xgdb_display_exec_file);
+    }
 }
 
 

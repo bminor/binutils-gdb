@@ -1,26 +1,26 @@
 /* Work with core dump and executable files, for GDB.
    Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "param.h"
-#include "gdbcore.h"
+#include "frame.h"  /* required by inferior.h */
+#include "inferior.h"
 
 #ifdef USG
 #include <sys/types.h>
@@ -32,7 +32,6 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #else
 #include <a.out.h>
 #endif
-
 #ifndef N_MAGIC
 #ifdef COFF_FORMAT
 #define N_MAGIC(exec) ((exec).magic)
@@ -40,23 +39,12 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #define N_MAGIC(exec) ((exec).a_magic)
 #endif
 #endif
-
 #include <stdio.h>
 #include <signal.h>
 #include <sys/param.h>
 #include <sys/dir.h>
 #include <sys/file.h>
 #include <sys/stat.h>
-
-#ifdef UNISOFT_ASSHOLES
-#define	PMMU
-#define	NEW_PMMU
-#include <sys/seg.h>		/* Required for user.ps */
-#include <sys/time.h>		/* '' */
-#include <sys/mmu.h>		/* '' */
-#include <sys/reg.h>
-#define mc68881			/* Required to get float in user.ps */
-#endif
 
 #ifdef UMAX_CORE
 #include <sys/ptrace.h>
@@ -73,7 +61,9 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #endif /* no N_DATADDR */
 
 #ifndef COFF_FORMAT
+#ifndef AOUTHDR
 #define AOUTHDR		struct exec
+#endif
 #endif
 
 extern char *sys_siglist[];
@@ -238,18 +228,22 @@ files_info ()
     printf ("Executable file \"%s\".\n", execfile);
   else
     printf ("No executable file\n");
-
-  if (corefile)
-    printf ("Core dump file  \"%s\".\n", corefile);
-  else
+  if (corefile == 0)
     printf ("No core dump file\n");
+  else
+    printf ("Core dump file \"%s\".\n", corefile);
 
   if (have_inferior_p ())
     printf ("Using the running image of the program, rather than these files.\n");
 
   symfile = get_sym_file ();
   if (symfile != 0)
-    printf ("Symbols from    \"%s\".\n", symfile);
+    printf ("Symbols from \"%s\".\n", symfile);
+
+#ifdef FILES_INFO_HOOK
+  if (FILES_INFO_HOOK ())
+    return;
+#endif
 
   if (! have_inferior_p ())
     {
@@ -260,11 +254,11 @@ files_info ()
 	  printf ("Data segment in executable from 0x%x to 0x%x.\n",
 		  exec_data_start, exec_data_end);
 	  if (corefile)
-	    printf("(But since we have a core file, we're using...)\n");
+	    printf ("(But since we have a core file, we're using...)\n");
 	}
       if (corefile)
 	{
-	  printf ("Data segment in core file  from 0x%x to 0x%x.\n",
+	  printf ("Data segment in core file from 0x%x to 0x%x.\n",
 		  data_start, data_end);
 	  printf ("Stack segment in core file from 0x%x to 0x%x.\n",
 		  stack_start, stack_end);
@@ -282,8 +276,16 @@ read_memory (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
+  if (len == 0)
+    return 0;
+
   if (have_inferior_p ())
-      return read_inferior_memory (memaddr, myaddr, len);
+    {
+      if (remote_debugging)
+	return remote_read_inferior_memory (memaddr, myaddr, len);
+      else
+	return read_inferior_memory (memaddr, myaddr, len);
+    }
   else
       return xfer_core_file (memaddr, myaddr, len);
 }
@@ -299,11 +301,17 @@ write_memory (memaddr, myaddr, len)
      int len;
 {
   if (have_inferior_p ())
-    return write_inferior_memory (memaddr, myaddr, len);
+    {
+      if (remote_debugging)
+	return remote_write_inferior_memory (memaddr, myaddr, len);
+      else
+	return write_inferior_memory (memaddr, myaddr, len);
+    }
   else
     error ("Can write memory only when program being debugged is running.");
 }
 
+#ifndef XFER_CORE_FILE
 /* Read from the program's memory (except for inferior processes).
    This function is misnamed, since it only reads, never writes; and
    since it will use the core file and/or executable file as necessary.
@@ -384,21 +392,29 @@ xfer_core_file (memaddr, myaddr, len)
 	{
 	  i = min (len, data_start - memaddr);
 	}
-      else if (memaddr >= (corechan >= 0 ? data_end : exec_data_end)
-	       && memaddr < stack_start)
+      else if (corechan >= 0
+	       && memaddr >= data_end && memaddr < stack_start)
 	{
 	  i = min (len, stack_start - memaddr);
 	}
+      else if (corechan < 0 && memaddr >= exec_data_end)
+	{
+	  /* Since there is nothing at higher addresses than data
+	     (without a core file or an inferior, there is no
+	     stack, set i to do the rest of the operation now.  */
+	  i = len;
+	}
       else if (memaddr >= stack_end && stack_end != 0)
 	{
-	  i = min (len, - memaddr);
+	  /* Since there is nothing at higher addresses than
+	     the stack, set i to do the rest of the operation now.  */
+	  i = len;
 	}
       else
 	{
 	  /* Address did not classify into one of the known ranges.
-	     This could be because data_start != exec_data_start
-	     or data_end similarly. */
-	  abort();
+	     This shouldn't happen; we catch the endpoints.  */
+	  fatal ("Internal: Bad case logic in xfer_core_file.");
 	}
 
       /* Now we know which file to use.
@@ -419,7 +435,7 @@ xfer_core_file (memaddr, myaddr, len)
 	}
       /* If this address is for nonexistent memory,
 	 read zeros if reading, or do nothing if writing.
-	 (FIXME we never write.) */
+	 Actually, we never right.  */
       else
 	{
 	  bzero (myaddr, i);
@@ -432,6 +448,7 @@ xfer_core_file (memaddr, myaddr, len)
     }
   return returnval;
 }
+#endif /* XFER_CORE_FILE */
 
 /* My replacement for the read system call.
    Used like `read' but keeps going if `read' returns too soon.  */

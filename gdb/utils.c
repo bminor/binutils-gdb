@@ -1,31 +1,37 @@
 /* General utility routines for GDB, the GNU debugger.
-   Copyright (C) 1986 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <sys/param.h>
+#include <pwd.h>
 #include "defs.h"
 #include "param.h"
 #ifdef HAVE_TERMIO
 #include <termio.h>
+#endif
+
+/* If this definition isn't overridden by the header files, assume
+   that isatty and fileno exist on this system.  */
+#ifndef ISATTY
+#define ISATTY(FP)	(isatty (fileno (FP)))
 #endif
 
 void error ();
@@ -214,13 +220,11 @@ print_sys_errmsg (string, errcode)
 void
 quit ()
 {
-  fflush (stdout);
 #ifdef HAVE_TERMIO
   ioctl (fileno (stdout), TCFLSH, 1);
 #else /* not HAVE_TERMIO */
   ioctl (fileno (stdout), TIOCFLUSH, 0);
 #endif /* not HAVE_TERMIO */
-
 #ifdef TIOCGPGRP
   error ("Quit");
 #else
@@ -236,8 +240,8 @@ request_quit ()
   quit_flag = 1;
 
 #ifdef USG
-  /* Restore the signal handler */
-  signal(SIGINT, request_quit);
+  /* Restore the signal handler.  */
+  signal (SIGINT, request_quit);
 #endif
 
   if (immediate_quit)
@@ -253,6 +257,7 @@ error (string, arg1, arg2, arg3)
      char *string;
      int arg1, arg2, arg3;
 {
+  terminal_ours ();		/* Should be ok even if no inf.  */
   fflush (stdout);
   fprintf (stderr, string, arg1, arg2, arg3);
   fprintf (stderr, "\n");
@@ -271,6 +276,23 @@ fatal (string, arg)
   fprintf (stderr, "gdb: ");
   fprintf (stderr, string, arg);
   fprintf (stderr, "\n");
+  exit (1);
+}
+
+/* Print an error message and exit, dumping core.
+   STRING is a printf-style control string, and ARG is a corresponding
+   argument.  */
+void
+fatal_dump_core (string, arg)
+     char *string;
+     int arg;
+{
+  fprintf (stderr, "gdb: ");
+  fprintf (stderr, string, arg);
+  fprintf (stderr, "\n");
+  signal (SIGQUIT, SIG_DFL);
+  kill (getpid (), SIGQUIT);
+  /* We should never get here, but just in case...  */
   exit (1);
 }
 
@@ -436,30 +458,273 @@ printchar (ch, stream, quoter)
 {
   register int c = ch;
   if (c < 040 || c >= 0177)
-    {
-      if (c == '\n')
-	fprintf (stream, "\\n");
-      else if (c == '\b')
-	fprintf (stream, "\\b");
-      else if (c == '\t')
-	fprintf (stream, "\\t");
-      else if (c == '\f')
-	fprintf (stream, "\\f");
-      else if (c == '\r')
-	fprintf (stream, "\\r");
-      else if (c == 033)
-	fprintf (stream, "\\e");
-      else if (c == '\a')
-	fprintf (stream, "\\a");
-      else
-	fprintf (stream, "\\%03o", c);
-    }
+    switch (c)
+      {
+      case '\n':
+	fputs_filtered ("\\n", stream);
+	break;
+      case '\b':
+	fputs_filtered ("\\b", stream);
+	break;
+      case '\t':
+	fputs_filtered ("\\t", stream);
+	break;
+      case '\f':
+	fputs_filtered ("\\f", stream);
+	break;
+      case '\r':
+	fputs_filtered ("\\r", stream);
+	break;
+      case '\033':
+	fputs_filtered ("\\e", stream);
+	break;
+      case '\007':
+	fputs_filtered ("\\a", stream);
+	break;
+      default:
+	fprintf_filtered (stream, "\\%.3o", (unsigned int) c);
+	break;
+      }
   else
     {
       if (c == '\\' || c == quoter)
-	fputc ('\\', stream);
-      fputc (c, stream);
+	fputs_filtered ("\\", stream);
+      fprintf_filtered (stream, "%c", c);
     }
+}
+
+static int lines_per_page, lines_printed, chars_per_line, chars_printed;
+
+/* Set values of page and line size.  */
+static void
+set_screensize_command (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  char *p = arg;
+  char *p1;
+  int tolinesize = lines_per_page;
+  int tocharsize = chars_per_line;
+
+  if (p == 0)
+    error_no_arg ("set screensize");
+
+  while (*p >= '0' && *p <= '9')
+    p++;
+
+  if (*p && *p != ' ' && *p != '\t')
+    error ("Non-integral argument given to \"set screensize\".");
+
+  tolinesize = atoi (arg);
+
+  while (*p == ' ' || *p == '\t')
+    p++;
+
+  if (*p)
+    {
+      p1 = p;
+      while (*p1 >= '0' && *p1 <= '9')
+	p1++;
+
+      if (*p1)
+	error ("Non-integral second argument given to \"set screensize\".");
+
+      tocharsize = atoi (p);
+    }
+
+  lines_per_page = tolinesize;
+  chars_per_line = tocharsize;
+}
+
+static void
+prompt_for_continue ()
+{
+  immediate_quit++;
+  gdb_readline ("---Type <return> to continue---", 0);
+  chars_printed = lines_printed = 0;
+  immediate_quit--;
+}
+
+/* Reinitialize filter; ie. tell it to reset to original values.  */
+
+void
+reinitialize_more_filter ()
+{
+  lines_printed = 0;
+  chars_printed = 0;
+}
+
+static void
+screensize_info (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  if (arg)
+    error ("\"info screensize\" does not take any arguments.");
+  
+  if (!lines_per_page)
+    printf ("Output more filtering is disabled.\n");
+  else
+    {
+      printf ("Output more filtering is enabled with\n");
+      printf ("%d lines per page and %d characters per line.\n",
+	      lines_per_page, chars_per_line);
+    }
+}
+
+/* Like fputs but pause after every screenful.
+   Unlike fputs, fputs_filtered does not return a value.
+   It is OK for LINEBUFFER to be NULL, in which case just don't print
+   anything.
+
+   Note that a longjmp to top level may occur in this routine
+   (since prompt_for_continue may do so) so this routine should not be
+   called when cleanups are not in place.  */
+
+void
+fputs_filtered (linebuffer, stream)
+     char *linebuffer;
+     FILE *stream;
+{
+  char *lineptr;
+
+  if (linebuffer == 0)
+    return;
+  
+  /* Don't do any filtering if it is disabled.  */
+  if (stream != stdout || !ISATTY(stdout) || lines_per_page == 0)
+    {
+      fputs (linebuffer, stream);
+      return;
+    }
+
+  /* Go through and output each character.  Show line extension
+     when this is necessary; prompt user for new page when this is
+     necessary.  */
+  
+  lineptr = linebuffer;
+  while (*lineptr)
+    {
+      /* Possible new page.  */
+      if (lines_printed >= lines_per_page - 1)
+	prompt_for_continue ();
+
+      while (*lineptr && *lineptr != '\n')
+	{
+	  /* Print a single line.  */
+	  if (*lineptr == '\t')
+	    {
+	      putc ('\t', stream);
+	      /* Shifting right by 3 produces the number of tab stops
+	         we have already passed, and then adding one and
+		 shifting left 3 advances to the next tab stop.  */
+	      chars_printed = ((chars_printed >> 3) + 1) << 3;
+	      lineptr++;
+	    }
+	  else
+	    {
+	      putc (*lineptr, stream);
+	      chars_printed++;
+	      lineptr++;
+	    }
+      
+	  if (chars_printed >= chars_per_line)
+	    {
+	      chars_printed = 0;
+	      lines_printed++;
+	      /* Possible new page.  */
+	      if (lines_printed >= lines_per_page - 1)
+		prompt_for_continue ();
+	    }
+	}
+
+      if (*lineptr == '\n')
+	{
+	  lines_printed++;
+	  putc ('\n', stream);
+	  lineptr++;
+	  chars_printed = 0;
+	}
+    }
+}
+
+/* Print ARG1, ARG2, and ARG3 on stdout using format FORMAT.  If this
+   information is going to put the amount written since the last call
+   to INIIALIZE_MORE_FILTER or the last page break over the page size,
+   print out a pause message and do a gdb_readline to get the users
+   permision to continue.
+
+   Unlike fprintf, this function does not return a value.
+
+   Note that this routine has a restriction that the length of the
+   final output line must be less than 255 characters *or* it must be
+   less than twice the size of the format string.  This is a very
+   arbitrary restriction, but it is an internal restriction, so I'll
+   put it in.  This means that the %s format specifier is almost
+   useless; unless the caller can GUARANTEE that the string is short
+   enough, fputs_filtered should be used instead.
+
+   Note also that a longjmp to top level may occur in this routine
+   (since prompt_for_continue may do so) so this routine should not be
+   called when cleanups are not in place.  */
+
+void
+fprintf_filtered (stream, format, arg1, arg2, arg3, arg4, arg5, arg6)
+     FILE *stream;
+     char *format;
+     int arg1, arg2, arg3, arg4, arg5, arg6;
+{
+  static char *linebuffer = (char *) 0;
+  static int line_size;
+  int format_length = strlen (format);
+  int numchars;
+
+  /* Allocated linebuffer for the first time.  */
+  if (!linebuffer)
+    {
+      linebuffer = (char *) xmalloc (255);
+      line_size = 255;
+    }
+
+  /* Reallocate buffer to a larger size if this is necessary.  */
+  if (format_length * 2 > line_size)
+    {
+      line_size = format_length * 2;
+
+      /* You don't have to copy.  */
+      free (linebuffer);
+      linebuffer = (char *) xmalloc (line_size);
+    }
+
+  /* This won't blow up if the restrictions described above are
+     followed.   */
+  (void) sprintf (linebuffer, format, arg1, arg2, arg3);
+
+  fputs_filtered (linebuffer, stream);
+}
+
+void
+printf_filtered (format, arg1, arg2, arg3, arg4, arg5, arg6)
+     char *format;
+     int arg1, arg2, arg3, arg4, arg5, arg6;
+{
+  fprintf_filtered (stdout, format, arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+/* Print N spaces.  */
+void
+print_spaces_filtered (n, stream)
+     int n;
+     FILE *stream;
+{
+  register char *s = (char *) alloca (n + 1);
+  register char *t = s;
+
+  while (n--)
+    *t++ = ' ';
+  *t = '\0';
+
+  fputs_filtered (s, stream);
 }
 
 
@@ -504,6 +769,34 @@ rindex (s, c)
   return strrchr (s, c);
 }
 
+#ifndef USG
+char *sys_siglist[32] = {
+	"SIG0",
+	"SIGHUP",
+	"SIGINT",
+	"SIGQUIT",
+	"SIGILL",
+	"SIGTRAP",
+	"SIGIOT",
+	"SIGEMT",
+	"SIGFPE",
+	"SIGKILL",
+	"SIGBUS",
+	"SIGSEGV",
+	"SIGSYS",
+	"SIGPIPE",
+	"SIGALRM",
+	"SIGTERM",
+	"SIGUSR1",
+	"SIGUSR2",
+	"SIGCLD",
+	"SIGPWR",
+	"SIGWIND",
+	"SIGPHONE",
+	"SIGPOLL",
+};
+#endif
+
 /* Queue routines */
 
 struct queue {
@@ -528,21 +821,71 @@ struct queue *item;
 	item->forw->back = item->back;
 	item->back->forw = item->forw;
 }
-
-
-/*
- * There is too much variation in Sys V signal numbers and names, so
- * we must initialize them at runtime.  If C provided a way to initialize
- * an array based on subscript and value, this would not be necessary.
- */
+#endif /* USG */
+
+#ifdef USG
+/* There is too much variation in Sys V signal numbers and names, so
+   we must initialize them at runtime.  */
 static char undoc[] = "(undocumented)";
 
 char *sys_siglist[NSIG];
+#endif /* USG */
 
-_initialize_utils()
+extern struct cmd_list_element *setlist;
+
+void
+_initialize_utils ()
 {
-	int i;
-	
+  int i;
+  add_cmd ("screensize", class_support, set_screensize_command,
+	   "Change gdb's notion of the size of the output screen.\n\
+The first argument is the number of lines on a page.\n\
+The second argument (optional) is the number of characters on a line.",
+	   &setlist);
+  add_info ("screensize", screensize_info,
+	    "Show gdb's current notion of the size of the output screen.");
+
+  /* These defaults will be used if we are unable to get the correct
+     values from termcap.  */
+  lines_per_page = 24;
+  chars_per_line = 80;
+  /* Initialize the screen height and width from termcap.  */
+  {
+    int termtype = getenv ("TERM");
+
+    /* Positive means success, nonpositive means failure.  */
+    int status;
+
+    /* 2048 is large enough for all known terminals, according to the
+       GNU termcap manual.  */
+    char term_buffer[2048];
+
+    if (termtype)
+      {
+	status = tgetent (term_buffer, termtype);
+	if (status > 0)
+	  {
+	    int val;
+	    
+	    val = tgetnum ("li");
+	    if (val >= 0)
+	      lines_per_page = val;
+	    else
+	      /* The number of lines per page is not mentioned
+		 in the terminal description.  This probably means
+		 that paging is not useful (e.g. emacs shell window),
+		 so disable paging.  */
+	      lines_per_page = 0;
+	    
+	    val = tgetnum ("co");
+	    if (val >= 0)
+	      chars_per_line = val;
+	  }
+      }
+  }
+
+#ifdef USG
+  /* Initialize signal names.  */
 	for (i = 0; i < NSIG; i++)
 		sys_siglist[i] = undoc;
 
@@ -651,6 +994,5 @@ _initialize_utils()
 #ifdef SIGPOLL
 	sys_siglist[SIGPOLL	] = "SIGPOLL";
 #endif
-}
 #endif /* USG */
-
+}

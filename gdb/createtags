@@ -5,14 +5,13 @@
 # we setup the TAGS entries to point to the actual source directory.
 #
 filelist=""
-if test -h main.c ; then
+if test "`find main.c -type l -print `" != "" ; then
 	prefix=`ls -l main.c | awk '{print $11}' | sed 's;main.c$;;'`
-	echo path 1
 else
 	prefix=""
 fi
 for i in $@ ; do
-	filelist="$prefix$i $filelist"
+	filelist="$filelist $prefix$i"
 done
 #
 # Here we simply make sure that the actual machine dependent files being used

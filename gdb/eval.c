@@ -1,22 +1,21 @@
 /* Evaluate expressions for GDB.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "param.h"
@@ -106,8 +105,14 @@ enum noside
 { EVAL_NORMAL,
   EVAL_SKIP,			/* Only effect is to increment pos.  */
   EVAL_AVOID_SIDE_EFFECTS,	/* Don't modify any variables or
-				   call any functions.  Correct type
-				   is returned.  */
+				   call any functions.  The value
+				   returned will have the correct
+				   type, and will have an
+				   approximately correct lvalue
+				   type (inaccuracy: anything that is
+				   listed as being in a register in
+				   the function in which it was
+				   declared will be lval_register).  */
 };
 
 value
@@ -150,7 +155,8 @@ evaluate_subexp (expect_type, exp, pos, noside)
     {
     case OP_SCOPE:
       tem = strlen (&exp->elts[pc + 2].string);
-      (*pos) += 3 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
+      (*pos) += 3 + ((tem + sizeof (union exp_element))
+		     / sizeof (union exp_element));
       return value_static_field (exp->elts[pc + 1].type,
 				 &exp->elts[pc + 2].string, -1);
 
@@ -168,7 +174,28 @@ evaluate_subexp (expect_type, exp, pos, noside)
       (*pos) += 2;
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      return value_of_variable (exp->elts[pc + 1].symbol);
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	{
+	  struct symbol * sym = exp->elts[pc + 1].symbol;
+	  enum lval_type lv;
+
+	  switch (SYMBOL_CLASS (sym))
+	    {
+	    case LOC_CONST:
+	    case LOC_LABEL:
+	    case LOC_CONST_BYTES:
+	      lv = not_lval;
+	    case LOC_REGISTER:
+	    case LOC_REGPARM:
+	      lv = lval_register;
+	    default:
+	      lv = lval_memory;
+	    }
+
+	  return value_zero (SYMBOL_TYPE (sym), lv);
+	}
+      else
+	return value_of_variable (exp->elts[pc + 1].symbol);
 
     case OP_LAST:
       (*pos) += 2;
@@ -184,7 +211,8 @@ evaluate_subexp (expect_type, exp, pos, noside)
 
     case OP_STRING:
       tem = strlen (&exp->elts[pc + 1].string);
-      (*pos) += 2 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
+      (*pos) += 2 + ((tem + sizeof (union exp_element))
+		     / sizeof (union exp_element));
       if (noside == EVAL_SKIP)
 	goto nosideret;
       return value_string (&exp->elts[pc + 1].string, tem);
@@ -319,11 +347,20 @@ evaluate_subexp (expect_type, exp, pos, noside)
 
       if (op == STRUCTOP_STRUCT || op == STRUCTOP_PTR)
 	{
+	  int static_memfuncp;
+
 	  argvec[1] = arg2;
 	  argvec[0] =
 	    value_struct_elt (arg2, argvec+1, &exp->elts[pc2 + 1].string,
+			      &static_memfuncp,
 			      op == STRUCTOP_STRUCT
 			      ? "structure" : "structure pointer");
+	  if (static_memfuncp)
+	    {
+	      argvec[1] = argvec[0];
+	      nargs--;
+	      argvec++;
+	    }
 	}
       else if (op == STRUCTOP_MEMBER || op == STRUCTOP_MPTR)
 	{
@@ -354,12 +391,18 @@ evaluate_subexp (expect_type, exp, pos, noside)
 
     case STRUCTOP_STRUCT:
       tem = strlen (&exp->elts[pc + 1].string);
-      (*pos) += 2 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
+      (*pos) += 2 + ((tem + sizeof (union exp_element))
+		     / sizeof (union exp_element));
       arg1 = evaluate_subexp (0, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      return value_struct_elt (arg1, 0, &exp->elts[pc + 1].string,
-			       "structure");
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	return value_zero (lookup_struct_elt_type (VALUE_TYPE (arg1),
+						   &exp->elts[pc + 1].string),
+			   lval_memory);
+      else
+	return value_struct_elt (arg1, 0, &exp->elts[pc + 1].string, 0,
+				 "structure");
 
     case STRUCTOP_PTR:
       tem = strlen (&exp->elts[pc + 1].string);
@@ -367,8 +410,14 @@ evaluate_subexp (expect_type, exp, pos, noside)
       arg1 = evaluate_subexp (0, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      return value_struct_elt (arg1, 0, &exp->elts[pc + 1].string,
-			       "structure pointer");
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	return value_zero (lookup_struct_elt_type (TYPE_TARGET_TYPE
+						   (VALUE_TYPE (arg1)),
+						   &exp->elts[pc + 1].string),
+			   lval_memory);
+      else
+	return value_struct_elt (arg1, 0, &exp->elts[pc + 1].string, 0,
+				 "structure pointer");
 
     case STRUCTOP_MEMBER:
       arg1 = evaluate_subexp_for_address (exp, pos, noside);
@@ -376,9 +425,16 @@ evaluate_subexp (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP)
 	goto nosideret;
       /* Now, convert these values to an address.  */
+      if (TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_PTR
+	  || ((TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg2)))
+	       != TYPE_CODE_MEMBER)
+	      && (TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg2)))
+		  != TYPE_CODE_METHOD)))
+	error ("non-pointer-to-member value used in pointer-to-member construct");
       arg3 = value_from_long (builtin_type_long,
 			      value_as_long (arg1) + value_as_long (arg2));
-      VALUE_TYPE (arg3) = lookup_pointer_type (TYPE_TARGET_TYPE (VALUE_TYPE (arg2)));
+      VALUE_TYPE (arg3) =
+	lookup_pointer_type (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (VALUE_TYPE (arg2))));
       return value_ind (arg3);
 
     case STRUCTOP_MPTR:
@@ -387,9 +443,14 @@ evaluate_subexp (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP)
 	goto nosideret;
       /* Now, convert these values to an address.  */
+      if (TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_PTR
+	  || (TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg2))) != TYPE_CODE_MEMBER
+	      && TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg2))) != TYPE_CODE_METHOD))
+	error ("non-pointer-to-member value used in pointer-to-member construct");
       arg3 = value_from_long (builtin_type_long,
 			      value_as_long (arg1) + value_as_long (arg2));
-      VALUE_TYPE (arg3) = lookup_pointer_type (TYPE_TARGET_TYPE (VALUE_TYPE (arg2)));
+      VALUE_TYPE (arg3) =
+	lookup_pointer_type (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (VALUE_TYPE (arg2))));
       return value_ind (arg3);
 
     case BINOP_ASSIGN:
@@ -454,6 +515,10 @@ evaluate_subexp (expect_type, exp, pos, noside)
       if (binop_user_defined_p (op, arg1, arg2))
 	return value_x_binop (arg1, arg2, op, 0);
       else
+	if (noside == EVAL_AVOID_SIDE_EFFECTS
+	    && op == BINOP_DIV)
+	  return value_zero (VALUE_TYPE (arg1), not_lval);
+      else
 	return value_binop (arg1, arg2, op);
 
     case BINOP_SUBSCRIPT:
@@ -461,10 +526,14 @@ evaluate_subexp (expect_type, exp, pos, noside)
       arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	return value_zero (TYPE_TARGET_TYPE (VALUE_TYPE (arg1)),
+			   VALUE_LVAL (arg1));
+			   
       if (binop_user_defined_p (op, arg1, arg2))
 	return value_x_binop (arg1, arg2, op, 0);
       else
-	return value_subscript (arg1, arg2, op);
+	return value_subscript (arg1, arg2);
       
     case BINOP_AND:
       arg1 = evaluate_subexp (0, exp, pos, noside);
@@ -613,7 +682,13 @@ evaluate_subexp (expect_type, exp, pos, noside)
       arg2 = evaluate_subexp (0, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      return value_repeat (arg1, (int) value_as_long (arg2));
+      if (TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_INT)
+	error ("Non-integral right operand for \"@\" operator.");
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	return allocate_repeat_value (VALUE_TYPE (arg1),
+				       (int) value_as_long (arg2));
+      else
+	return value_repeat (arg1, (int) value_as_long (arg2));
 
     case BINOP_COMMA:
       evaluate_subexp (0, exp, pos, noside);
@@ -624,7 +699,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (unop_user_defined_p (op, arg1))
-	return value_x_unop (arg1, op, 0);
+	return value_x_unop (arg1, op);
       else
 	return value_neg (arg1);
 
@@ -633,7 +708,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (unop_user_defined_p (op, arg1))
-	return value_x_unop (arg1, op, 0);
+	return value_x_unop (arg1, op);
       else
 	return value_lognot (arg1);
 
@@ -642,7 +717,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (unop_user_defined_p (op, arg1))
-	return value_x_unop (arg1, op, 0);
+	return value_x_unop (arg1, op);
       else
 	return value_from_long (builtin_type_int,
 				(LONGEST) value_zerop (arg1));
@@ -653,6 +728,21 @@ evaluate_subexp (expect_type, exp, pos, noside)
       arg1 = evaluate_subexp (expect_type, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	{
+	  if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_PTR
+	      || TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_REF
+	      /* In C you can dereference an array to get the 1st elt.  */
+	      || TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_ARRAY
+	      )
+	    return value_zero (TYPE_TARGET_TYPE (VALUE_TYPE (arg1)),
+			       lval_memory);
+	  else if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_INT)
+	    /* GDB allows dereferencing an int.  */
+	    return value_zero (BUILTIN_TYPE_LONGEST, lval_memory);
+	  else
+	    error ("Attempt to take contents of a non-pointer value.");
+	}
       return value_ind (arg1);
 
     case UNOP_ADDR:
@@ -707,8 +797,11 @@ evaluate_subexp (expect_type, exp, pos, noside)
       arg1 = evaluate_subexp (expect_type, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      return value_at (exp->elts[pc + 1].type,
-		       (CORE_ADDR) value_as_long (arg1));
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	return value_zero (exp->elts[pc + 1].type, lval_memory);
+      else
+	return value_at (exp->elts[pc + 1].type,
+			 (CORE_ADDR) value_as_long (arg1));
 
     case UNOP_PREINCREMENT:
       arg1 = evaluate_subexp (expect_type, exp, pos, noside);
@@ -716,7 +809,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	return arg1;
       else if (unop_user_defined_p (op, arg1))
 	{
-	  return value_x_unop (arg1, op, 0);
+	  return value_x_unop (arg1, op);
 	}
       else
 	{
@@ -731,7 +824,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	return arg1;
       else if (unop_user_defined_p (op, arg1))
 	{
-	  return value_x_unop (arg1, op, 0);
+	  return value_x_unop (arg1, op);
 	}
       else
 	{
@@ -746,7 +839,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	return arg1;
       else if (unop_user_defined_p (op, arg1))
 	{
-	  return value_x_unop (arg1, op, 0);
+	  return value_x_unop (arg1, op);
 	}
       else
 	{
@@ -762,7 +855,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	return arg1;
       else if (unop_user_defined_p (op, arg1))
 	{
-	  return value_x_unop (arg1, op, 0);
+	  return value_x_unop (arg1, op);
 	}
       else
 	{
@@ -816,9 +909,35 @@ evaluate_subexp_for_address (exp, pos, noside)
 
     case OP_VAR_VALUE:
       (*pos) += 3;
-      return locate_var_value (exp->elts[pc + 1].symbol, (CORE_ADDR) 0);
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	{
+	  struct type *type =
+	    lookup_pointer_type (SYMBOL_TYPE (exp->elts[pc + 1].symbol));
+	  enum address_class sym_class =
+	    SYMBOL_CLASS (exp->elts[pc + 1].symbol);
+
+	  if (sym_class == LOC_CONST
+	      || sym_class == LOC_CONST_BYTES
+	      || sym_class == LOC_REGISTER
+	      || sym_class == LOC_REGPARM)
+	    error ("Attempt to take address of register or constant.");
+
+	return
+	  value_zero (type, not_lval);
+	}
+      else
+	return locate_var_value (exp->elts[pc + 1].symbol, (CORE_ADDR) 0);
 
     default:
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	{
+	  value x = evaluate_subexp (0, exp, pos, noside);
+	  if (VALUE_LVAL (x) == lval_memory)
+	    return value_zero (TYPE_POINTER_TYPE (VALUE_TYPE (x)),
+			       not_lval);
+	  else
+	    error ("Attempt to take address of non-lval");
+	}
       return value_addr (evaluate_subexp (0, exp, pos, noside));
     }
 }

@@ -1,22 +1,22 @@
 /* Low level interface to ptrace, for GDB when running under Unix.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
 #include "defs.h"
 #include "param.h"
 #include "frame.h"
@@ -70,7 +70,7 @@ static TERMINAL sg_ours;
 static int tflags_inferior;
 static int tflags_ours;
 
-#ifdef TIOCGETC
+#if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
 static struct tchars tc_inferior;
 static struct tchars tc_ours;
 #endif
@@ -78,7 +78,7 @@ static struct tchars tc_ours;
 #ifdef TIOCGLTC
 static struct ltchars ltc_inferior;
 static struct ltchars ltc_ours;
-#endif /* TIOCGLTC */
+#endif
 
 #ifdef TIOCLGET
 static int lmode_inferior;
@@ -114,7 +114,7 @@ terminal_init_inferior ()
   sg_inferior = sg_ours;
   tflags_inferior = tflags_ours;
 
-#ifdef TIOCGETC
+#if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
   tc_inferior = tc_ours;
 #endif
 
@@ -147,7 +147,8 @@ terminal_inferior ()
       fcntl (0, F_SETFL, tflags_inferior);
       fcntl (0, F_SETFL, tflags_inferior);
       ioctl (0, TIOCSETN, &sg_inferior);
-#ifdef TIOCGETC
+
+#if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
       ioctl (0, TIOCSETC, &tc_inferior);
 #endif
 #ifdef TIOCGLTC
@@ -211,7 +212,7 @@ terminal_ours_1 (output_only)
       terminal_is_ours = 1;
 
 #ifdef TIOCGPGRP
-      osigttou = signal (SIGTTOU, SIG_IGN);
+      osigttou = (int (*) ()) signal (SIGTTOU, SIG_IGN);
 
       ioctl (0, TIOCGPGRP, &pgrp_inferior);
       ioctl (0, TIOCSPGRP, &pgrp_ours);
@@ -225,7 +226,7 @@ terminal_ours_1 (output_only)
       tflags_inferior = fcntl (0, F_GETFL, 0);
       ioctl (0, TIOCGETP, &sg_inferior);
 
-#ifdef TIOCGETC
+#if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
       ioctl (0, TIOCGETC, &tc_inferior);
 #endif
 #ifdef TIOCGLTC
@@ -250,7 +251,7 @@ terminal_ours_1 (output_only)
   fcntl (0, F_SETFL, tflags_ours);
   ioctl (0, TIOCSETN, &sg_ours);
 
-#ifdef TIOCGETC
+#if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
   ioctl (0, TIOCSETC, &tc_ours);
 #endif
 #ifdef TIOCGLTC
@@ -259,7 +260,6 @@ terminal_ours_1 (output_only)
 #ifdef TIOCLGET
   ioctl (0, TIOCLSET, &lmode_ours);
 #endif
-
 
 #ifdef HAVE_TERMIO
   sg_ours.c_lflag |= ICANON;
@@ -275,47 +275,47 @@ term_status_command ()
 
   if (remote_debugging)
     {
-      printf ("No terminal status when remote debugging.\n");
+      printf_filtered ("No terminal status when remote debugging.\n");
       return;
     }
 
-  printf ("Inferior's terminal status (currently saved by GDB):\n");
+  printf_filtered ("Inferior's terminal status (currently saved by GDB):\n");
 
 #ifdef HAVE_TERMIO
 
-  printf ("fcntl flags = 0x%x, c_iflag = 0x%x, c_oflag = 0x%x,\n",
+  printf_filtered ("fcntl flags = 0x%x, c_iflag = 0x%x, c_oflag = 0x%x,\n",
 	  tflags_inferior, sg_inferior.c_iflag, sg_inferior.c_oflag);
-  printf ("c_cflag = 0x%x, c_lflag = 0x%x, c_line = 0x%x.\n",
+  printf_filtered ("c_cflag = 0x%x, c_lflag = 0x%x, c_line = 0x%x.\n",
 	  sg_inferior.c_cflag, sg_inferior.c_lflag, sg_inferior.c_line);
-  printf ("c_cc: ");
+  printf_filtered ("c_cc: ");
   for (i = 0; (i < NCC); i += 1)
-    printf ("0x%x ", sg_inferior.c_cc[i]);
-  printf ("\n");
+    printf_filtered ("0x%x ", sg_inferior.c_cc[i]);
+  printf_filtered ("\n");
 
 #else /* not HAVE_TERMIO */
 
-  printf ("fcntl flags = 0x%x, sgttyb.sg_flags = 0x%x, owner pid = %d.\n",
+  printf_filtered ("fcntl flags = 0x%x, sgttyb.sg_flags = 0x%x, owner pid = %d.\n",
 	  tflags_inferior, sg_inferior.sg_flags, pgrp_inferior);
 
 #endif /* not HAVE_TERMIO */
 
-#ifdef TIOCGETC
-  printf ("tchars: ");
+#if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
+  printf_filtered ("tchars: ");
   for (i = 0; i < sizeof (struct tchars); i++)
-    printf ("0x%x ", ((char *)&tc_inferior)[i]);
-  printf ("\n");
+    printf_filtered ("0x%x ", ((char *)&tc_inferior)[i]);
+  printf_filtered ("\n");
 #endif
 
 #ifdef TIOCGLTC
-  printf ("ltchars: ");
+  printf_filtered ("ltchars: ");
   for (i = 0; i < sizeof (struct ltchars); i++)
-    printf ("0x%x ", ((char *)&ltc_inferior)[i]);
-  printf ("\n");
+    printf_filtered ("0x%x ", ((char *)&ltc_inferior)[i]);
+  printf_filtered ("\n");
   ioctl (0, TIOCSLTC, &ltc_ours);
 #endif
-
+  
 #ifdef TIOCLGET
-  printf ("lmode:  %x\n", lmode_inferior);
+  printf_filtered ("lmode:  %x\n", lmode_inferior);
 #endif
 }
 
@@ -342,10 +342,15 @@ new_tty (ttyname)
   if (tty == -1)
     _exit(1);
 
-  dup2(tty, 0);
-  dup2(tty, 1);
-  dup2(tty, 2);
-  close(tty);
+  /* Avoid use of dup2; doesn't exist on all systems.  */
+  if (tty != 0)
+    { close (0); dup (tty); }
+  if (tty != 1)
+    { close (1); dup (tty); }
+  if (tty != 2)
+    { close (2); dup (tty); }
+  if (tty > 2)
+    close(tty);
 }
 
 /* Start an inferior process and returns its pid.
@@ -380,9 +385,14 @@ create_inferior (allargs, env)
   /* exec is said to fail if the executable is open.  */
   close_exec_file ();
 
+#if defined(USG) && !defined(HAVE_VFORK)
   pid = fork ();
+#else
+  pid = vfork ();
+#endif
+
   if (pid < 0)
-    perror_with_name ("fork");
+    perror_with_name ("vfork");
 
   if (pid == 0)
     {
@@ -407,6 +417,10 @@ create_inferior (allargs, env)
       if (inferior_io_terminal != 0)
 	new_tty (inferior_io_terminal);
 
+/* It seems that changing the signal handlers for the inferior after
+   a vfork also changes them for the superior.  See comments in
+   initialize_signals for how we get the right signal handlers
+   for the inferior.  */
 /* Not needed on Sun, at least, and loses there
    because it clobbers the superior.  */
 /*???      signal (SIGQUIT, SIG_DFL);
@@ -420,6 +434,10 @@ create_inferior (allargs, env)
       fflush (stderr);
       _exit (0177);
     }
+
+#ifdef CREATE_INFERIOR_HOOK
+  CREATE_INFERIOR_HOOK (pid);
+#endif  
   return pid;
 }
 
@@ -443,11 +461,13 @@ inferior_died ()
   inferior_pid = 0;
   attach_flag = 0;
   mark_breakpoints_out ();
-  select_frame ( (FRAME) 0, -1);
+  select_frame ((FRAME) 0, -1);
   reopen_exec_file ();
   if (have_core_file_p ())
     set_current_frame ( create_new_frame (read_register (FP_REGNUM),
 					  read_pc ()));
+  else
+    set_current_frame (0);
 }
 
 static void
@@ -494,7 +514,7 @@ Report which ones can be written.");
   ioctl (0, TIOCGETP, &sg_ours);
   fcntl (0, F_GETFL, tflags_ours);
 
-#ifdef TIOCGETC
+#if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
   ioctl (0, TIOCGETC, &tc_ours);
 #endif
 #ifdef TIOCGLTC

@@ -1,22 +1,21 @@
 /* Print and select stack frames for GDB, the GNU debugger.
    Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 
@@ -24,8 +23,6 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include "param.h"
 #include "symtab.h"
 #include "frame.h"
-#include "inferior.h"
-#include "gdbcore.h"
 
 
 /* Thie "selected" stack frame is used by default for local and arg access.
@@ -39,9 +36,6 @@ FRAME selected_frame;
 
 int selected_frame_level;
 
-/* Error message when selected_frame is zero when it's needed */
-char no_sel_frame[] = "There is no current stack frame.";
-
 /* Nonzero means print the full filename and linenumber
    when a frame is printed, and do so in a format programs can parse.  */
 
@@ -51,7 +45,7 @@ static void select_calling_frame ();
 
 void print_frame_info ();
 
-/* Print a stack frame briefly.  FRAME should be the frame address
+/* Print a stack frame briefly.  FRAME should be the frame id
    and LEVEL should be its level in the stack (or -1 for level not defined).
    This prints the level, the function executing, the arguments,
    and the file name and line number.
@@ -61,10 +55,6 @@ void print_frame_info ();
    If SOURCE is 1, print the source line as well.
    If SOURCE is -1, print ONLY the source line.  */
 
-/* FIXME, the argument "frame" is always "selected_frame".  This is why
-   we can say "No selected frame" if it == 0.  Probably shouldn't be an
-   argument anymore...  */
-
 static void
 print_stack_frame (frame, level, source)
      FRAME frame;
@@ -73,12 +63,14 @@ print_stack_frame (frame, level, source)
 {
   struct frame_info *fi;
 
-  if (frame == 0)
-    error (no_sel_frame);
   fi = get_frame_info (frame);
 
   print_frame_info (fi, level, source, 1);
 }
+
+/* Flag which will indicate when the frame has been changed
+   by and "up" or "down" command.  */
+static int frame_changed;
 
 void
 print_frame_info (fi, level, source, args)
@@ -91,11 +83,60 @@ print_frame_info (fi, level, source, args)
   struct symbol *func;
   register char *funname = 0;
   int numargs;
+  struct partial_symtab *pst;
+
+  /* Don't give very much information if we haven't readin the
+     symbol table yet.  */
+  pst = find_pc_psymtab (fi->pc);
+  if (pst && !pst->readin)
+    {
+      /* Abbreviated information.  */
+      char *fname;
+
+      if (!find_pc_partial_function (fi->pc, &fname, 0))
+	fname = "??";
+	
+      printf_filtered ("#%-2d ", level);
+      printf_filtered ("0x%x in ", fi->pc);
+
+      printf_filtered ("%s (...) (...)\n", fname);
+      
+      return;
+    }
 
   sal = find_pc_line (fi->pc, fi->next_frame);
   func = find_pc_function (fi->pc);
   if (func)
-    funname = SYMBOL_NAME (func);
+    {
+      /* In certain pathological cases, the symtabs give the wrong
+	 function (when we are in the first function in a file which
+	 is compiled without debugging symbols, the previous function
+	 is compiled with debugging symbols, and the "foo.o" symbol
+	 that is supposed to tell us where the file with debugging symbols
+	 ends has been truncated by ar because it is longer than 15
+	 characters).
+
+	 So look in the misc_function_vector as well, and if it comes
+	 up with a larger address for the function use that instead.
+	 I don't think this can ever cause any problems;
+	 there shouldn't be any
+	 misc_function_vector symbols in the middle of a function.  */
+      int misc_index = find_pc_misc_function (fi->pc);
+      if (misc_index >= 0
+	  && (misc_function_vector[misc_index].address
+	      > BLOCK_START (SYMBOL_BLOCK_VALUE (func))))
+	{
+	  /* In this case we have no way of knowing the source file
+	     and line number, so don't print them.  */
+	  sal.symtab = 0;
+	  /* We also don't know anything about the function besides
+	     its address and name.  */
+	  func = 0;
+	  funname = misc_function_vector[misc_index].name;
+	}
+      else
+	funname = SYMBOL_NAME (func);
+    }
   else
     {
       register int misc_index = find_pc_misc_function (fi->pc);
@@ -103,25 +144,27 @@ print_frame_info (fi, level, source, args)
 	funname = misc_function_vector[misc_index].name;
     }
 
-  if (source >= 0 || !sal.symtab)
+  if (frame_changed || source >= 0 || !sal.symtab)
     {
       if (level >= 0)
-	printf ("#%-2d ", level);
+	printf_filtered ("#%-2d ", level);
+      else if (frame_changed)
+	printf ("#%-2d ", 0);
       if (fi->pc != sal.pc || !sal.symtab)
-	printf ("0x%x in ", fi->pc);
-      printf ("%s (", funname ? funname : "??");
+	printf_filtered ("0x%x in ", fi->pc);
+      printf_filtered ("%s (", funname ? funname : "??");
       if (args)
 	{
 	  FRAME_NUM_ARGS (numargs, fi);
 	  print_frame_args (func, fi, numargs, stdout);
 	}
-      printf (")");
+      printf_filtered (")");
       if (sal.symtab)
-	printf (" (%s line %d)", sal.symtab->filename, sal.line);
-      printf ("\n");
+	printf_filtered (" (%s line %d)", sal.symtab->filename, sal.line);
+      printf_filtered ("\n");
     }
 
-  if (source != 0 && sal.symtab)
+  if ((frame_changed || source != 0) && sal.symtab)
     {
       int done = 0;
       int mid_statement = source < 0 && fi->pc != sal.pc;
@@ -130,11 +173,12 @@ print_frame_info (fi, level, source, args)
       if (!done)
 	{
 	  if (mid_statement)
-	    printf ("0x%x\t", fi->pc);
+	    printf_filtered ("0x%x\t", fi->pc);
 	  print_source_lines (sal.symtab, sal.line, sal.line + 1, 1);
 	}
       current_source_line = max (sal.line - 5, 1);
     }
+  frame_changed = 0;
   if (source != 0)
     set_default_breakpoint (1, fi->pc, sal.symtab, sal.line);
 
@@ -159,7 +203,7 @@ print_selected_frame ()
   print_stack_frame (selected_frame, selected_frame_level, 0);
 }
 
-void flush_cached_frames ();	/* FIXME, never called! */
+void flush_cached_frames ();
 
 #ifdef FRAME_SPECIFICATION_DYADIC
 extern FRAME setup_arbitrary_frame ();
@@ -209,8 +253,6 @@ parse_frame_specification (frame_exp)
   switch (numargs)
     {
     case 0:
-      if (selected_frame == 0)
-	error (no_sel_frame);
       return selected_frame;
       /* NOTREACHED */
     case 1:
@@ -276,7 +318,12 @@ frame_info (addr_exp)
   char *funname = 0;
   int numargs;
 
+  if (!(have_inferior_p () || have_core_file_p ()))
+    error ("No inferior or core file.");
+
   frame = parse_frame_specification (addr_exp);
+  if (!frame)
+    error ("Invalid frame specified.");
 
   fi = get_frame_info (frame);
   get_frame_saved_regs (fi, &fsr);
@@ -326,9 +373,12 @@ frame_info (addr_exp)
   FRAME_NUM_ARGS (numargs, fi);
   print_frame_args (func, fi, numargs, stdout);
   printf ("\n");
+  /* The sp is special; what's returned isn't the save address, but
+     actually the value of the previous frame's sp.  */
+  printf (" Previous frame's sp is 0x%x\n", fsr.regs[SP_REGNUM]);
   count = 0;
   for (i = 0; i < NUM_REGS; i++)
-    if (fsr.regs[i])
+    if (fsr.regs[i] && i != SP_REGNUM)
       {
 	if (count % 4 != 0)
 	  printf (", ");
@@ -389,9 +439,6 @@ backtrace_command (count_exp)
   register FRAME trailing;
   register int trailing_level;
 
-  if (have_inferior_p () == 0 && corefile == 0)
-    error ("There is no running program or core file.");
-
   /* The following code must do two things.  First, it must
      set the variable TRAILING to the frame from which we should start
      printing.  Second, it must set the variable count to the number
@@ -424,11 +471,7 @@ backtrace_command (count_exp)
 	}
     }
   else
-#if 0    
-    count = backtrace_limit;
-#else
     count = -1;
-#endif  
 
   for (i = 0, frame = trailing;
        frame && count--;
@@ -441,12 +484,13 @@ backtrace_command (count_exp)
 
   /* If we've stopped before the end, mention that.  */
   if (frame)
-    printf ("(More stack frames follow...)\n");
+    printf_filtered ("(More stack frames follow...)\n");
 }
 
-/* Print the local variables of a block B active in FRAME.  */
+/* Print the local variables of a block B active in FRAME.
+   Return 1 if any variables were printed; 0 otherwise.  */
 
-static void
+static int
 print_block_frame_locals (b, frame, stream)
      struct block *b;
      register FRAME frame;
@@ -455,6 +499,7 @@ print_block_frame_locals (b, frame, stream)
   int nsyms;
   register int i;
   register struct symbol *sym;
+  register int values_printed = 0;
 
   nsyms = BLOCK_NSYMS (b);
 
@@ -465,12 +510,15 @@ print_block_frame_locals (b, frame, stream)
 	  || SYMBOL_CLASS (sym) == LOC_REGISTER
 	  || SYMBOL_CLASS (sym) == LOC_STATIC)
 	{
-	  fprintf (stream, "%s = ", SYMBOL_NAME (sym));
+	  values_printed = 1;
+	  fputs_filtered (SYMBOL_NAME (sym), stream);
+	  fputs_filtered (" = ", stream);
 	  print_variable_value (sym, frame, stream);
-	  fprintf (stream, "\n");
+	  fprintf_filtered (stream, "\n");
 	  fflush (stream);
 	}
     }
+  return values_printed;
 }
 
 /* Print on STREAM all the local variables in frame FRAME,
@@ -486,14 +534,20 @@ print_frame_local_vars (frame, stream)
      register FRAME frame;
      register FILE *stream;
 {
-  register struct block *block;
+  register struct block *block = get_frame_block (frame);
+  register int values_printed = 0;
 
-  block = get_frame_block (frame);
   if (block == 0)
-    return 0;
+    {
+      fprintf_filtered (stream, "No symbol table info available.\n");
+      fflush (stream);
+      return 0;
+    }
+  
   while (block != 0)
     {
-      print_block_frame_locals (block, frame, stream);
+      if (print_block_frame_locals (block, frame, stream))
+	values_printed = 1;
       /* After handling the function's top-level block, stop.
 	 Don't continue to its superblock, the block of
 	 per-file symbols.  */
@@ -501,14 +555,22 @@ print_frame_local_vars (frame, stream)
 	break;
       block = BLOCK_SUPERBLOCK (block);
     }
+
+  if (!values_printed)
+    {
+      fprintf_filtered (stream, "No locals.\n");
+      fflush (stream);
+    }
+  
   return 1;
 }
 
 static void
 locals_info ()
 {
-  if (selected_frame == 0)
-    error(no_sel_frame);
+  if (!have_inferior_p () && !have_core_file_p ())
+    error ("No inferior or core file.");
+
   print_frame_local_vars (selected_frame, stdout);
 }
 
@@ -517,15 +579,19 @@ print_frame_arg_vars (frame, stream)
      register FRAME frame;
      register FILE *stream;
 {
-  struct symbol *func;
+  struct symbol *func = get_frame_function (frame);
   register struct block *b;
   int nsyms;
   register int i;
   register struct symbol *sym;
+  register int values_printed = 0;
 
-  func = get_frame_function (frame);
   if (func == 0)
-    return 0;
+    {
+      fprintf_filtered (stream, "No symbol table info available.\n");
+      fflush (stream);
+      return 0;
+    }
 
   b = SYMBOL_BLOCK_VALUE (func);
   nsyms = BLOCK_NSYMS (b);
@@ -533,13 +599,23 @@ print_frame_arg_vars (frame, stream)
   for (i = 0; i < nsyms; i++)
     {
       sym = BLOCK_SYM (b, i);
-      if (SYMBOL_CLASS (sym) == LOC_ARG || SYMBOL_CLASS (sym) == LOC_REGPARM)
+      if (SYMBOL_CLASS (sym) == LOC_ARG
+	  || SYMBOL_CLASS (sym) == LOC_REF_ARG
+	  || SYMBOL_CLASS (sym) == LOC_REGPARM)
 	{
-	  fprintf (stream, "%s = ", SYMBOL_NAME (sym));
+	  values_printed = 1;
+	  fputs_filtered (SYMBOL_NAME (sym), stream);
+	  fputs_filtered (" = ", stream);
 	  print_variable_value (sym, frame, stream);
-	  fprintf (stream, "\n");
+	  fprintf_filtered (stream, "\n");
 	  fflush (stream);
 	}
+    }
+
+  if (!values_printed)
+    {
+      fprintf_filtered (stream, "No arguments.\n");
+      fflush (stream);
     }
 
   return 1;
@@ -548,8 +624,8 @@ print_frame_arg_vars (frame, stream)
 static void
 args_info ()
 {
-  if (selected_frame == 0)
-    error(no_sel_frame);
+  if (!have_inferior_p () && !have_core_file_p ())
+    error ("No inferior or core file.");
   print_frame_arg_vars (selected_frame, stdout);
 }
 
@@ -563,6 +639,9 @@ select_frame (frame, level)
 {
   selected_frame = frame;
   selected_frame_level = level;
+  /* Ensure that symbols for this frame are readin.  */
+  if (frame)
+    find_pc_symtab (get_frame_info (frame)->pc);
 }
 
 /* Store the selected frame and its level into *FRAMEP and *LEVELP.  */
@@ -607,8 +686,6 @@ find_relative_frame (frame, level_offset_ptr)
   register FRAME prev;
   register FRAME frame1, frame2;
 
-  if (frame == 0)
-    error (no_sel_frame);
   /* Going up is simple: just do get_prev_frame enough times
      or until initial frame is reached.  */
   while (*level_offset_ptr > 0)
@@ -661,6 +738,9 @@ frame_command (level_exp, from_tty)
   register FRAME frame, frame1;
   unsigned int level = 0;
 
+  if (!have_inferior_p () && ! have_core_file_p ())
+    error ("No inferior or core file.");
+
   frame = parse_frame_specification (level_exp);
 
   for (frame1 = get_prev_frame (0);
@@ -671,6 +751,7 @@ frame_command (level_exp, from_tty)
   if (!frame1)
     level = 0;
 
+  frame_changed = level;
   select_frame (frame, level);
 
   if (!from_tty)
@@ -692,12 +773,16 @@ up_command (count_exp)
     count = parse_and_eval_address (count_exp);
   count1 = count;
   
+  if (!have_inferior_p () && !have_core_file_p ())
+    error ("No inferior or core file.");
+
   frame = find_relative_frame (selected_frame, &count1);
   if (count1 != 0 && count_exp == 0)
     error ("Initial frame selected; you cannot go up.");
   select_frame (frame, selected_frame_level + count - count1);
 
   print_stack_frame (selected_frame, selected_frame_level, 1);
+  frame_changed++;
 }
 
 /* Select the frame down one or COUNT stack levels
@@ -719,6 +804,7 @@ down_command (count_exp)
   select_frame (frame, selected_frame_level + count - count1);
 
   print_stack_frame (selected_frame, selected_frame_level, 1);
+  frame_changed--;
 }
 
 static void
@@ -727,6 +813,7 @@ return_command (retval_exp, from_tty)
      int from_tty;
 {
   struct symbol *thisfun = get_frame_function (selected_frame);
+  FRAME_ADDR selected_frame_addr = FRAME_FP (selected_frame);
 
   /* If interactive, require confirmation.  */
 
@@ -742,9 +829,12 @@ return_command (retval_exp, from_tty)
 	  error ("Not confirmed.");
     }
 
-  /* Do the real work.  Pop until the specified frame is current.  */
+  /* Do the real work.  Pop until the specified frame is current.  We
+     use this method because the selected_frame is not valid after
+     a POP_FRAME.  Note that this will not work if the selected frame
+     shares it's fp with another frame.  */
 
-  while (selected_frame != get_current_frame ())
+  while (selected_frame_addr != FRAME_FP (get_current_frame()))
     POP_FRAME;
 
   /* Then pop that frame.  */

@@ -4,22 +4,21 @@
    Revised 11/27/87 ddj@cs.brown.edu
    Copyright (C) 1987, 1988, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "param.h"
@@ -36,9 +35,6 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include <obstack.h>
 #include <sys/param.h>
 #include <sys/file.h>
-
-/* Avoid problems with A/UX predefine */
-#undef aux
 
 static void add_symbol_to_list ();
 static void read_coff_symtab ();
@@ -58,6 +54,7 @@ static char *getsymname ();
 static int init_lineno ();
 static void enter_linenos ();
 
+extern int fclose ();
 extern void free_all_symtabs ();
 extern void free_all_psymtabs ();
 
@@ -73,6 +70,9 @@ static char *last_source_file;
 static CORE_ADDR cur_src_start_addr;
 static CORE_ADDR cur_src_end_addr;
 
+/* Core address of the end of the first object file.  */
+static CORE_ADDR first_object_file_end;
+
 /* End of the text segment of the executable file,
    as found in the symbol _etext.  */
 
@@ -84,10 +84,11 @@ static CORE_ADDR end_of_text_addr;
 static FILE *nlist_stream_global;
 static int nlist_nsyms_global;
 
-/* The file and text section headers of the symbol file */
+/* The file, a.out  and text section headers of the symbol file */
 
 static FILHDR file_hdr;
 static SCNHDR text_hdr;
+static AOUTHDR aout_hdr;
 
 /* The index in the symbol table of the last coff symbol that was processed.  */
 
@@ -172,7 +173,8 @@ struct pending_block
 
 struct pending_block *pending_blocks;
 
-extern CORE_ADDR first_object_file_end;	/* From blockframe.c */
+extern CORE_ADDR startup_file_start;	/* From blockframe.c */
+extern CORE_ADDR startup_file_end;	/* From blockframe.c */
 
 /* File name symbols were loaded from.  */
 
@@ -423,6 +425,13 @@ complete_symtab (name, start_addr, size)
   last_source_file = savestring (name, strlen (name));
   cur_src_start_addr = start_addr;
   cur_src_end_addr = start_addr + size;
+
+  if (aout_hdr.entry < cur_src_end_addr
+      && aout_hdr.entry >= cur_src_start_addr)
+    {
+      startup_file_start = cur_src_start_addr;
+      startup_file_end = cur_src_end_addr;
+    }
 }
 
 /* Finish the symbol definitions for one main source file,
@@ -541,6 +550,7 @@ record_misc_function (name, address)
     }
   misc_bunch->contents[misc_bunch_index].name = savestring (name, strlen (name));
   misc_bunch->contents[misc_bunch_index].address = address;
+  misc_bunch->contents[misc_bunch_index].type = mf_unknown;
   misc_bunch_index++;
   misc_count++;
 }
@@ -691,6 +701,9 @@ symbol_file_command (name)
       return;
     }
 
+  name = tilde_expand (name);
+  make_cleanup (free, name);
+
   if (symtab_list && !query ("Load new symbol table from \"%s\"? ", name))
     error ("Not confirmed.");
 
@@ -713,6 +726,23 @@ symbol_file_command (name)
 
   if ((num_symbols = read_file_hdr (desc, &file_hdr)) < 0)
     error ("File \"%s\" not in executable format.", name);
+
+  /* If an a.out header is present, read it in.  If not (e.g. a .o file)
+     deal with its absence.  */
+  if (file_hdr.f_opthdr == 0
+      || read_aout_hdr (desc, &aout_hdr, file_hdr.f_opthdr) < 0)
+    {
+      /* We will not actually be able to run code, since backtraces would
+	 fly off the bottom of the stack (there is no way to reliably
+	 detect bottom of stack), but that's fine since the kernel won't
+	 run something without an a.out header anyway.  Passive examination
+	 of .o files is one place this might make sense.  */
+      /* ~0 will not be in any file.  */
+      aout_hdr.entry = ~0;
+      /* set the startup file to be an empty range.  */
+      startup_file_start = 0;
+      startup_file_end = 0;
+    }
 
   if (num_symbols == 0)
     {
@@ -844,7 +874,7 @@ read_coff_symtab (desc, nsyms)
   int fcn_start_addr;
   long fcn_line_ptr;
   struct cleanup *old_chain;
-  int fclose();
+
 
   newfd = dup (desc);
   if (newfd == -1)
@@ -973,7 +1003,11 @@ read_coff_symtab (desc, nsyms)
 	  case C_FCN:
 	    if (strcmp (cs->c_name, ".bf") == 0)
 	      {
+#if 0
+		/* Don't do this; we want all functions to be on the
+		   mfl now.  */
 		unrecord_misc_function ();
+#endif
 
 		within_function = 1;
 
@@ -1079,6 +1113,9 @@ read_file_hdr (chan, file_hdr)
 
   switch (file_hdr->f_magic)
     {
+#ifdef MC68MAGIC
+    case MC68MAGIC:
+#endif
 #ifdef NS32GMAGIC
       case NS32GMAGIC:
       case NS32SMAGIC:
@@ -1086,15 +1123,17 @@ read_file_hdr (chan, file_hdr)
 #ifdef I386MAGIC
     case I386MAGIC:
 #endif
+#ifdef CLIPPERMAGIC
+    case CLIPPERMAGIC:
+#endif      
 	return file_hdr->f_nsyms;
-
 
       default:
 #ifdef BADMAG
 	if (BADMAG(file_hdr))
-	    return -1;
+	  return -1;
 	else
-	    return file_hdr->f_nsyms;
+	  return file_hdr->f_nsyms;
 #else
 	return -1;
 #endif
@@ -1289,18 +1328,20 @@ enter_linenos (file_offset, first_line, last_line)
     register int last_line;
 {
   register char *rawptr = &linetab[file_offset - linetab_offset];
-  register struct lineno *lptr;
+  struct lineno lptr;
 
   /* skip first line entry for each function */
   rawptr += LINESZ;
   /* line numbers start at one for the first line of the function */
   first_line--;
 
-  for (lptr = (struct lineno *)rawptr;
-	lptr->l_lnno && lptr->l_lnno <= last_line;
-	rawptr += LINESZ, lptr = (struct lineno *)rawptr)
+  /* Bcopy since occaisionally rawptr isn't pointing at long
+     boundaries.  */
+  for (bcopy (rawptr, &lptr, LINESZ);
+       lptr.l_lnno && lptr.l_lnno <= last_line;
+       rawptr += LINESZ, bcopy (rawptr, &lptr, LINESZ))
     {
-      record_line (first_line + lptr->l_lnno, lptr->l_addr.l_paddr);
+      record_line (first_line + lptr.l_lnno, lptr.l_addr.l_paddr);
     }
 }
 
@@ -1478,7 +1519,6 @@ process_coff_symbol (cs, aux)
 	    break;
 
 	  case C_REG:
-	  case C_REGPARM:
 	    SYMBOL_CLASS (sym) = LOC_REGISTER;
 	    add_symbol_to_list (sym, &local_symbols);
 	    break;
@@ -1489,6 +1529,7 @@ process_coff_symbol (cs, aux)
 	  case C_ARG:
 	    SYMBOL_CLASS (sym) = LOC_ARG;
 	    add_symbol_to_list (sym, &local_symbols);
+#ifndef clipper	   
 	    /* If PCC says a parameter is a short or a char,
 	       it is really an int.  */
 	    if (SYMBOL_TYPE (sym) == builtin_type_char
@@ -1497,8 +1538,24 @@ process_coff_symbol (cs, aux)
 	    else if (SYMBOL_TYPE (sym) == builtin_type_unsigned_char
 		     || SYMBOL_TYPE (sym) == builtin_type_unsigned_short)
 	      SYMBOL_TYPE (sym) = builtin_type_unsigned_int;
+#endif
 	    break;
 
+	  case C_REGPARM:
+	    SYMBOL_CLASS (sym) = LOC_REGPARM;
+	    add_symbol_to_list (sym, &local_symbols);
+#ifndef clipper
+	    /* If PCC says a parameter is a short or a char,
+	       it is really an int.  */
+	    if (SYMBOL_TYPE (sym) == builtin_type_char
+		|| SYMBOL_TYPE (sym) == builtin_type_short)
+	      SYMBOL_TYPE (sym) = builtin_type_int;
+	    else if (SYMBOL_TYPE (sym) == builtin_type_unsigned_char
+		     || SYMBOL_TYPE (sym) == builtin_type_unsigned_short)
+	      SYMBOL_TYPE (sym) = builtin_type_unsigned_int;
+#endif
+	    break;
+	    
 	  case C_TPDEF:
 	    SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	    SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -1935,13 +1992,14 @@ psymtab_to_symtab ()
 }
 
 /* These will stay zero all the time */
-struct partial_symbol *global_psymbols, *static_psymbols;
+struct psymbol_allocation_list global_psymbols, static_psymbols;
 
 _initialize_coff ()
 {
   symfile = 0;
 
-  static_psymbols = global_psymbols = (struct partial_symbol *) 0;
+  bzero (&global_psymbols, sizeof (global_psymbols));
+  bzero (&static_psymbols, sizeof (static_psymbols));
 
   add_com ("symbol-file", class_files, symbol_file_command,
 	   "Load symbol table (in coff format) from executable file FILE.");

@@ -1,23 +1,21 @@
-/* Print sparc instructions for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
-   Contributed by Michael Tiemann (tiemann@mcc.com)
+/* Disassembler for the sparc.
+   Copyright (C) 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB, the GNU disassembler.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 
@@ -26,618 +24,425 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include "symtab.h"
 #include "sparc-opcode.h"
 
-/* sparc instructions are never longer than this many bytes.  */
-#define MAXLEN 4
-
-/* Print the sparc instruction at address MEMADDR in debugged memory,
-   on STREAM.  Returns length of the instruction, in bytes, which
-   is always 4.  */
+extern char *reg_names[];
+#define	freg_names	(&reg_names[4 * 8])
 
-static char *icc_name[] =
-{ "~", "eq", "le", "lt", "leu", "ltu", "neg", "vs",
-  "", "ne", "gt", "ge", "gtu", "geu", "pos", "vc"};
+union sparc_insn
+  {
+    unsigned long int code;
+    struct
+      {
+	unsigned int OP:2;
+#define	op	ldst.OP
+	unsigned int RD:5;
+#define	rd	ldst.RD
+	unsigned int op3:6;
+	unsigned int RS1:5;
+#define	rs1	ldst.RS1
+	unsigned int i:1;
+	unsigned int ASI:8;
+#define	asi	ldst.ASI
+	unsigned int RS2:5;
+#define	rs2	ldst.RS2
+#define	shcnt	rs2
+      } ldst;
+    struct
+      {
+	unsigned int OP:2, RD:5, op3:6, RS1:5, i:1;
+	unsigned int IMM13:13;
+#define	imm13	IMM13.IMM13
+      } IMM13;
+    struct
+      {
+	unsigned int OP:2;
+	unsigned int a:1;
+	unsigned int cond:4;
+	unsigned int op2:3;
+	unsigned int DISP22:22;
+#define	disp22	branch.DISP22
+      } branch;
+#define	imm22	disp22
+    struct
+      {
+	unsigned int OP:2;
+	unsigned int DISP30:30;
+#define	disp30	call.DISP30
+      } call;
+  };
 
-static char *fcc_name[] =
-{ "~fb", "fbne", "fblg", "fbul", "fbl", "fbug", "fbg", "fbu",
-  "fb", "fbe", "fbue", "fbge", "fbuge", "fble", "fbule", "fbo"};
+/* Nonzero if INSN is the opcode for a delayed branch.  */
+static int
+is_delayed_branch (insn)
+     union sparc_insn insn;
+{
+  unsigned int i;
 
-static char *ccc_name[] =
-{ "~cb", "cb123", "cb12", "cb13", "cb1", "cb23", "cb2", "cb3",
-  "cb", "cb0", "cb03", "cb02", "cb023", "cb01", "cb013", "cb012"};
+  for (i = 0; i < NUMOPCODES; ++i)
+    {
+      const struct sparc_opcode *opcode = &sparc_opcodes[i];
+      if ((opcode->match & insn.code) == opcode->match
+	  && (opcode->lose & insn.code) == 0
+	  && (opcode->delayed))
+	return 1;
+    }
+  return 0;
+}
 
-static char *arith_name[] =
-{ "add", "and", "or", "xor", "sub", "andn", "orn", "xnor",
-  "addx", 0, 0, 0, "subx", 0, 0, 0};
+static int opcodes_sorted = 0;
 
-static char *xarith_name[] =
-{ "taddcc", "tsubcc", "taddcctv", "tsubcctv", "mulscc", "sll", "srl", "sra"};
-
-static char *state_reg_name[] =
-{ "%y", "%psr", "%wim", "%tbr", 0, 0, 0, 0};
-
-static char *ldst_i_name[] =
-{ "ld", "ldub", "lduh", "ldd", "st", "stb", "sth", "std",
-  0, "ldsb", "ldsh", 0, 0, "ldstub", 0, "swap",
-  "lda", "lduba", "lduha", "ldda", "sta", "stba", "stha", "stda",
-  0, "ldsba", "ldsha", 0, 0, "ldstuba", 0, "swapa"};
-
-static char *ldst_f_name[] =
-{ "ldf", "ldfsr", 0, "lddf", "stf", "stfsr", "stdfq", "stdf"};
-
-static char *ldst_c_name[] =
-{ "ldc", "ldcsr", 0, "lddc", "stc", "stcsr", "stdcq", "stdc"};
-
-static int this_sethi_target = -1;
-static int last_sethi_target = -1;
-static int sethi_value = 0;
-
-static void fprint_addr1 ();
-static void fprint_ldst ();
-static void fprint_f_ldst ();
-static void fprint_c_ldst ();
-static void fprint_fpop ();
-
+/* Print one instruction from MEMADDR on STREAM.  */
 int
 print_insn (memaddr, stream)
      CORE_ADDR memaddr;
      FILE *stream;
 {
-  union insn_fmt insn;
-  int disp22;
+  union sparc_insn insn;
 
-  read_memory (memaddr, &insn, MAXLEN);
+  register unsigned int i;
 
-  this_sethi_target = -1;
-  switch (insn.op1.op1)
+  if (!opcodes_sorted)
     {
-    case 1:
-      /* CALL format.  */
-      fprintf (stream, "call ");
-      print_address (memaddr + (insn.call.disp << 2), stream);
-      break;
-    case 0:
-      /* Bicc, FBfcc, CBccc, SETHI format.  */
-      switch (insn.op2.op2)
+      static int compare_opcodes ();
+      qsort ((char *) sparc_opcodes, NUMOPCODES,
+	     sizeof (sparc_opcodes[0]), compare_opcodes);
+      opcodes_sorted = 1;
+    }
+
+  read_memory (memaddr, &insn, sizeof (insn));
+
+  for (i = 0; i < NUMOPCODES; ++i)
+    {
+      const struct sparc_opcode *opcode = &sparc_opcodes[i];
+      if ((opcode->match & insn.code) == opcode->match
+	  && (opcode->lose & insn.code) == 0)
 	{
-	case 0:
-	  fprintf (stream, "unimp");
-	  break;
-	case 2:
-	  /* Bicc.  */
-	  fprintf (stream, "b%s", icc_name[insn.branch.cond]);
-	  if (insn.branch.a) fprintf (stream, ",a ");
-	  else fprintf (stream, " ");
-	  disp22 = insn.branch.disp;
-	  disp22 = ((disp22 << 10) >> 10);
-	  print_address (memaddr + (disp22 << 2), stream);
-	  break;
-	case 4:
-	  /* SETHI.  */
-	  fprintf (stream, "sethi %%hi(0x%x),%s",
-		   insn.sethi.imm << 10, reg_names[insn.sethi.rd]);
-	  this_sethi_target = insn.sethi.rd;
-	  sethi_value = insn.sethi.imm << 12;
-	  break;
-	case 6:
-	  /* FBdfcc.  */
-	  fprintf (stream, "fb%s", fcc_name[insn.branch.cond]);
-	  if (insn.branch.a) fprintf (stream, ",a ");
-	  else fprintf (stream, " ");
-	  disp22 = insn.branch.disp;
-	  disp22 = ((disp22 << 10) >> 10);
-	  print_address (memaddr + (disp22 << 2), stream);
-	  break;
-	case 7:
-	  /* CBccc.  */
-	  fprintf (stream, "cb%s", ccc_name[insn.branch.cond]);
-	  if (insn.branch.a) fprintf (stream, ",a ");
-	  else fprintf (stream, " ");
-	  disp22 = insn.branch.disp;
-	  disp22 = ((disp22 << 10) >> 10);
-	  print_address (memaddr + (disp22 << 2), stream);
-	  break;
-	default:
-	  fprintf (stream, "0x%x (illegal op2 format)", insn.intval);
-	  break;
-	}
-      break;
-    case 2:
-      {
-	/* vaguely arithmetic insns.  */
-	char *rd = reg_names[insn.arith.rd];
-	char *rs1 = reg_names[insn.arith.rs1];
+	  /* Nonzero means that we have found an instruction which has
+	     the effect of adding or or'ing the imm13 field to rs1.  */
+	  int imm_added_to_rs1 = 0;
 
-	if (insn.op3.op3 <= 28)
+	  /* Nonzero means that we have found a plus sign in the args
+	     field of the opcode table.  */
+	  int found_plus = 0;
+	  
+	  /* Do we have an 'or' instruction where rs1 is the same
+	     as rsd, and which has the i bit set?  */
+	  if (opcode->match == 0x80102000
+	      && insn.rs1 == insn.rd)
+	    imm_added_to_rs1 = 1;
+
+	  if (index (opcode->args, 'S') != 0)
+	    /* Reject the special case for `set'.
+	       The real `sethi' will match.  */
+	    continue;
+	  if (insn.rs1 != insn.rd
+	      && index (opcode->args, 'r') != 0)
+	      /* Can't do simple format if source and dest are different.  */
+	      continue;
+
+	  fputs_filtered (opcode->name, stream);
+
 	  {
-	    /* Arithmetic insns, with a few unimplemented.  */
-	    register int affect_cc = insn.op3.op3 & 16;
-	    char *name = arith_name[insn.op3.op3 ^ affect_cc];
-	    char *tmp = affect_cc ? "cc" : "";
+	    register const char *s;
 
-	    if (name == 0)
+	    if (opcode->args[0] != ',')
+	      fputs_filtered (" ", stream);
+	    for (s = opcode->args; *s != '\0'; ++s)
 	      {
-		fprintf (stream, "0x%08x (unimplemented arithmetic insn)",
-			 insn.intval);
-	      }
-	    else if (insn.arith.i)
-	      {
-		/* With explicit sign extension.  */
-		fprintf (stream, "%s%s %s,0x%x,%s",
-			 name, tmp, rs1,
-			 (int) (insn.arith_imm.simm << 19) >> 19,
-			 rd);
-		if (last_sethi_target == insn.arith.rd)
+		if (*s == ',')
 		  {
-		    fprintf (stream, "\t! ");
-		    print_address (sethi_value +
-				   (int) (insn.arith_imm.simm << 19) >> 19);
+		    fputs_filtered (",", stream);
+		    ++s;
+		    if (*s == 'a')
+		      {
+			fputs_filtered ("a", stream);
+			++s;
+		      }
+		    fputs_filtered (" ", stream);
+		  }
+
+		switch (*s)
+		  {
+		  case '+':
+		    found_plus = 1;
+
+		    /* note fall-through */
+		  default:
+		    fprintf_filtered (stream, "%c", *s);
+		    break;
+
+		  case '#':
+		    fputs_filtered ("0", stream);
+		    break;
+
+#define	reg(n)	fprintf_filtered (stream, "%%%s", reg_names[n])
+		  case '1':
+		  case 'r':
+		    reg (insn.rs1);
+		    break;
+
+		  case '2':
+		    reg (insn.rs2);
+		    break;
+
+		  case 'd':
+		    reg (insn.rd);
+		    break;
+#undef	reg
+
+#define	freg(n)	fprintf_filtered (stream, "%%%s", freg_names[n])
+		  case 'e':
+		    freg (insn.rs1);
+		    break;
+
+		  case 'f':
+		    freg (insn.rs2);
+		    break;
+
+		  case 'g':
+		    freg (insn.rd);
+		    break;
+#undef	freg
+
+#define	creg(n)	fprintf_filtered (stream, "%%c%u", (unsigned int) (n))
+		  case 'b':
+		    creg (insn.rs1);
+		    break;
+
+		  case 'c':
+		    creg (insn.rs2);
+		    break;
+
+		  case 'D':
+		    creg (insn.rd);
+		    break;
+#undef	creg
+
+		  case 'h':
+		    fprintf_filtered (stream, "%%hi(%#x)",
+				      (int) insn.imm22 << 10);
+		    break;
+
+		  case 'i':
+		    {
+		      /* We cannot trust the compiler to sign-extend
+			 when extracting the bitfield, hence the shifts.  */
+		      int imm = ((int) insn.imm13 << 19) >> 19;
+
+		      /* Check to see whether we have a 1+i, and take
+			 note of that fact.
+
+			 Note: because of the way we sort the table,
+			 we will be matching 1+i rather than i+1,
+			 so it is OK to assume that i is after +,
+			 not before it.  */
+		      if (found_plus)
+			imm_added_to_rs1 = 1;
+		      
+		      if (imm <= 9)
+			fprintf_filtered (stream, "%d", imm);
+		      else
+			fprintf_filtered (stream, "%#x", imm);
+		    }
+		    break;
+
+		  case 'L':
+		    print_address ((CORE_ADDR) memaddr + insn.disp30 * 4,
+				   stream);
+		    break;
+
+		  case 'l':
+		    if ((insn.code >> 22) == 0)
+		      /* Special case for `unimp'.  Don't try to turn
+			 it's operand into a function offset.  */
+		      fprintf_filtered (stream, "%#x",
+					(int) (((int) insn.disp22 << 10) >> 10));
+		    else
+		      /* We cannot trust the compiler to sign-extend
+			 when extracting the bitfield, hence the shifts.  */
+		      print_address ((CORE_ADDR)
+				     (memaddr
+				      + (((int) insn.disp22 << 10) >> 10) * 4),
+				     stream);
+		    break;
+
+		  case 'A':
+		    fprintf_filtered (stream, "(%d)", (int) insn.asi);
+		    break;
+
+		  case 'C':
+		    fputs_filtered ("%csr", stream);
+		    break;
+
+		  case 'F':
+		    fputs_filtered ("%fsr", stream);
+		    break;
+
+		  case 'p':
+		    fputs_filtered ("%psr", stream);
+		    break;
+
+		  case 'q':
+		    fputs_filtered ("%fq", stream);
+		    break;
+
+		  case 'Q':
+		    fputs_filtered ("%cq", stream);
+		    break;
+
+		  case 't':
+		    fputs_filtered ("%tbr", stream);
+		    break;
+
+		  case 'w':
+		    fputs_filtered ("%wim", stream);
+		    break;
+
+		  case 'y':
+		    fputs_filtered ("%y", stream);
+		    break;
 		  }
 	      }
-	    else
-	      {
-		fprintf (stream, "%s%s %s,%s,%s",
-			 name, tmp, rs1, reg_names[insn.arith.rs2], rd);
-	      }
-	    break;
 	  }
-	if (insn.op3.op3 < 32)
-	  {
-	    fprintf (stream, "0x%08x (unimplemented arithmetic insn)",
-		     insn.intval);
-	    break;
-	  }
-	else
-	  {
-	    int op = insn.op3.op3 ^ 32;
 
-	    if (op < 8)
-	      {
-		char *name = xarith_name[op];
-		/* tagged add/sub insns and shift insns.  */
-		if (insn.arith.i)
-		  {
-		    int i = (int) (insn.arith_imm.simm << 19) >> 19;
-		    if (op > 4)
-		      /* Its a shift insn.  */
-		      i &= 31;
+	  /* If we are adding or or'ing something to rs1, then
+	     check to see whether the previous instruction was
+	     a sethi to the same register as in the sethi.
+	     If so, attempt to print the result of the add or
+	     or (in this context add and or do the same thing)
+	     and its symbolic value.  */
+	  if (imm_added_to_rs1)
+	    {
+	      union sparc_insn prev_insn;
+	      int errcode;
 
-		    fprintf (stream, "%s %s,0x%x,%s",
-			     name, rs1, i, rd);
-		  }
-		else
-		  {
-		    fprintf (stream, "%s %s,%s,%s",
-			     name, rs1, reg_names[insn.arith.rs2], rd);
-		  }
-		break;
-	      }
-	    if (op < 20)
-	      {
-		/* read/write state registers.  */
-		char *sr = state_reg_name[op & 7];
-		if (sr == 0)
-		  fprintf (stream, "0x%08x (unimplemented state register insn",
-			   insn.intval);
-		else
-		  fprintf (stream, "%s %s,%s", op & 16 ? "wr" : "rd", sr, rd);
-		break;
-	      }
-	    if (op < 22)
-	      {
-		/* floating point insns.  */
-		int opcode = insn.arith.opf;
+	      errcode = read_memory (memaddr - 4,
+				     &prev_insn, sizeof (prev_insn));
 
-		fprint_fpop (stream, insn, op & 3, opcode);
-		break;
-	      }
-	    if (op < 24)
-	      {
-		/* coprocessor insns.  */
-		char *rs2 = reg_names[insn.arith.rs2];
-		int opcode = insn.arith.opf;
-
-		fprintf (stream, "cpop%d rs1=%s,rs2=%s,op=0x%x,rd=%s",
-			 op & 1, rs1, rs2, opcode, rd);
-		break;
-	      }
-
-	    switch (op)
-	      {
-		char *rndop_ptr;
-
-	      case 24:
-		fprint_addr1 (stream, "jumpl", insn);
-		break;
-	      case 25:
-		fprint_addr1 (stream, "rett", insn);
-		break;
-	      case 26:
+	      if (errcode == 0)
 		{
-		  char rndop_buf[32];
-		  sprintf (rndop_buf, "t%s", icc_name[insn.branch.cond]);
-		  fprint_addr1 (stream, rndop_buf, insn);
+		  /* If it is a delayed branch, we need to look at the
+		     instruction before the delayed branch.  This handles
+		     sequences such as
+
+		     sethi %o1, %hi(_foo), %o1
+		     call _printf
+		     or %o1, %lo(_foo), %o1
+		     */
+
+		  if (is_delayed_branch (prev_insn))
+		    errcode = read_memory (memaddr - 8,
+					   &prev_insn, sizeof (prev_insn));
 		}
-		break;
-	      case 27:
-		fprint_addr1 (stream, "iflush", insn);
-		break;
 
-	      case 28:
-		rndop_ptr = "save";
-	      case 29:
-		if (op == 29)
-		  rndop_ptr = "restore";
+	      /* If there was a problem reading memory, then assume
+		 the previous instruction was not sethi.  */
+	      if (errcode == 0)
+		{
+		  /* Is it sethi to the same register?  */
+		  if ((prev_insn.code & 0xc1c00000) == 0x01000000
+		      && prev_insn.rd == insn.rs1)
+		    {
+		      fprintf_filtered (stream, "\t! ");
+		      /* We cannot trust the compiler to sign-extend
+			 when extracting the bitfield, hence the shifts.  */
+		      print_address (((int) prev_insn.imm22 << 10)
+				     | (insn.imm13 << 19) >> 19, stream);
+		    }
+		}
+	    }
 
-		if (insn.arith.i)
-		  {
-		    fprintf (stream, "%s %s,0x%x,%s",
-			     rndop_ptr, rs1,
-			     ((int) (insn.arith_imm.simm << 19) >> 19), rd);
-		  }
-		else
-		  {
-		    fprintf (stream, "%s %s,%s,%s",
-			     rndop_ptr, rs1, reg_names[insn.arith.rs2], rd);
-		  }
-		break;
-	      case 30:
-	      case 31:
-		fprintf (stream, "0x%08x (unimplemented op3 insn)",
-			 insn.intval);
-		break;
-	      }
-	    break;
-	  }
-      }
-    case 3:
-      /* load and store insns.  */
+	  return sizeof (insn);
+	}
+    }
+
+  fprintf_filtered ("%#8x", insn.code);
+  return sizeof (insn);
+}
+
+
+/* Compare opcodes A and B.  */
+
+static int
+compare_opcodes (a, b)
+     char *a, *b;
+{
+  struct sparc_opcode *op0 = (struct sparc_opcode *) a;
+  struct sparc_opcode *op1 = (struct sparc_opcode *) b;
+  unsigned long int match0 = op0->match, match1 = op1->match;
+  unsigned long int lose0 = op0->lose, lose1 = op1->lose;
+  register unsigned int i;
+
+  /* If a bit is set in both match and lose, there is something
+     wrong with the opcode table.  */
+  if (match0 & lose0)
+    {
+      fprintf (stderr, "Internal error:  bad sparc-opcode.h: \"%s\", %#.8x, %#.8x\n",
+	       op0->name, match0, lose0);
+      op0->lose &= ~op0->match;
+      lose0 = op0->lose;
+    }
+
+  if (match1 & lose1)
+    {
+      fprintf (stderr, "Internal error: bad sparc-opcode.h: \"%s\", %#.8x, %#.8x\n",
+	       op1->name, match1, lose1);
+      op1->lose &= ~op1->match;
+      lose1 = op1->lose;
+    }
+
+  /* Because the bits that are variable in one opcode are constant in
+     another, it is important to order the opcodes in the right order.  */
+  for (i = 0; i < 32; ++i)
+    {
+      unsigned long int x = 1 << i;
+      int x0 = (match0 & x) != 0;
+      int x1 = (match1 & x) != 0;
+
+      if (x0 != x1)
+	return x1 - x0;
+    }
+
+  for (i = 0; i < 32; ++i)
+    {
+      unsigned long int x = 1 << i;
+      int x0 = (lose0 & x) != 0;
+      int x1 = (lose1 & x) != 0;
+
+      if (x0 != x1)
+	return x1 - x0;
+    }
+
+  /* They are functionally equal.  So as long as the opcode table is
+     valid, we can put whichever one first we want, on aesthetic grounds.  */
+  {
+    int length_diff = strlen (op0->args) - strlen (op1->args);
+    if (length_diff != 0)
+      /* Put the one with fewer arguments first.  */
+      return length_diff;
+  }
+
+  /* Put 1+i before i+1.  */
+  {
+    char *p0 = (char *) index(op0->args, '+');
+    char *p1 = (char *) index(op1->args, '+');
+
+    if (p0 && p1)
       {
-	char *rd = reg_names[insn.arith.rd];
-	char *rs1 = reg_names[insn.arith.rs1];
-	int op = insn.arith.op3;
-
-	if ((op & 32) == 0)
-	  {
-	    /* Integer ops.  */
-	    fprint_ldst (stream, insn, op);
-	    break;
-	  }
-	if ((op & 16) == 0)
-	  {
-	    /* Float ops.  */
-	    op ^= 32;
-	    if (op <= 7)
-	      {
-		fprint_f_ldst (stream, insn, op);
-	      }
-	    else
-	      fprintf (stream, "0x%08x (unimplemented float load/store insn)",
-		       insn.intval);
-	  }
-	else
-	  {
-	    /* Coprocessor ops.  */
-	    op ^= (32+16);
-	    if (op <= 7)
-	      {
-		fprint_c_ldst (stream, insn, op);
-	      }
-	    else
-	      fprintf (stream, "0x%08x (unimplemented coprocessor load/store insn)",
-		       insn.intval);
-	  }
-	break;
+	/* There is a plus in both operands.  Note that a plus
+	   sign cannot be the first character in args,
+	   so the following [-1]'s are valid.  */
+	if (p0[-1] == 'i' && p1[1] == 'i')
+	  /* op0 is i+1 and op1 is 1+i, so op1 goes first.  */
+	  return 1;
+	if (p0[1] == 'i' && p1[-1] == 'i')
+	  /* op0 is 1+i and op1 is i+1, so op0 goes first.  */
+	  return -1;
       }
-    }
-  return 4;
+  }
+
+  /* They are, as far as we can tell, identical.
+     Since qsort may have rearranged the table partially, there is
+     no way to tell which one was first in the opcode table as
+     written, so just say there are equal.  */
+  return 0;
 }
-
-/* It would be nice if this routine could print out a symbolic address
-   when appropriate.  */
-static void
-fprint_addr1 (stream, name, insn)
-     FILE *stream;
-     char *name;
-     union insn_fmt insn;
-{
-  char *rs1 = reg_names[insn.arith.rs1];
-  char *rd = reg_names[insn.arith.rd];
-
-  if (insn.arith.i)
-    {
-      fprintf (stream, "%s %s,0x%x,%s",
-	       name, rs1,
-	       (int) (insn.arith_imm.simm << 19) >> 19,
-	       rd);
-    }
-  else
-    {
-      fprintf (stream, "%s %s,%s,%s",
-	       name, rs1, reg_names[insn.arith.rs2], rd);
-    }
-}
-
-static void
-fprint_mem (stream, insn)
-     FILE *stream;
-     union insn_fmt insn;
-{
-  char *reg_name = reg_names[insn.arith.rs1];
-  if (insn.arith.i)
-    {
-      if (insn.arith_imm.simm == 0)
-	fprintf (stream, "[%s]", reg_name);
-      else if (insn.arith_imm.simm & 0x1000)
-	fprintf (stream, "[%s-0x%x]", reg_name,
-		 - (insn.arith_imm.simm | 0xffffe000));
-      else
-	fprintf (stream, "[%s+0x%x]", reg_name, insn.arith_imm.simm);
-    }
-  else
-    {
-      if (insn.arith.rs2 == 0)
-	fprintf (stream, "[%s]", reg_name);
-      else
-	fprintf (stream, "[%s,%s]", reg_names[insn.arith.rs2], reg_name);
-    }
-}
-
-static void
-fprint_ldst (stream, insn, op)
-     FILE *stream;
-     union insn_fmt insn;
-     int op;
-{
-  char *name = ldst_i_name[op];
-  char *rd = reg_names[insn.arith.rd];
-
-  if (name)
-    {
-      if (name[0] == 's')
-	{
-	  fprintf (stream, "%s %s,", name, rd);
-	  fprint_mem (stream, insn);
-	}
-      else
-	{
-	  fprintf (stream, "%s ", name);
-	  fprint_mem (stream, insn);
-	  fprintf (stream, ",%s", rd);
-	}
-    }
-  else
-    fprintf (stream, "0x%08x (unimplemented load/store insn)", insn.intval);
-}
-
-static void
-fprint_f_ldst (stream, insn, op)
-     FILE *stream;
-     union insn_fmt insn;
-     int op;
-{
-  char *name = ldst_f_name[op];
-  if (name)
-    {
-      char *rd = reg_names[insn.arith.rd + 32];
-
-      if (name[0] == 's')
-	{
-	  fprintf (stream, "%s %s,", name, rd);
-	  fprint_mem (stream, insn);
-	}
-      else
-	{
-	  fprintf (stream, "%s ", name);
-	  fprint_mem (stream, insn);
-	  fprintf (stream, ",%s", rd);
-	}
-    }
-  else
-    fprintf (stream, "0x%08x (unimplemented float load/store insn)", insn.intval);
-}
-
-static void
-fprint_c_ldst (stream, insn, op)
-     FILE *stream;
-     union insn_fmt insn;
-     int op;
-{
-  char *name = ldst_c_name[op];
-  if (name)
-    {
-      if (name[0] == 's')
-	{
-	  fprintf (stream, "%s %%cpreg(%d),", name, insn.arith.rs1);
-	  fprint_mem (stream, insn);
-	}
-      else
-	{
-	  fprintf (stream, "%s ");
-	  fprint_mem (stream, insn);
-	  fprintf (stream, ",%%cpreg(%d)", insn.arith.rd);
-	}
-    }
-  else
-    fprintf (stream, "0x%08x (unimplemented coprocessor load/store insn)",
-	     insn.intval);
-}
-
-static void
-fprint_fpop (stream, insn, op, opcode)
-     FILE *stream;
-     union insn_fmt insn;
-     int op, opcode;
-{
-  char *name;
-  char *rs1, *rs2, *rd;
-
-  switch (op)
-    {
-    case 0:
-      rs2 = reg_names[insn.arith.rs2 + 32];
-      rd = reg_names[insn.arith.rd + 32];
-      if ((opcode ^ 0x2f) <= 0x2f)
-	{
-	  switch (opcode)
-	    {
-	    case 0x1:
-	      name = "fmovs";
-	      break;
-	    case 0x5:
-	      name = "fnegs";
-	      break;
-	    case 0x9:
-	      name = "fabss";
-	      break;
-	    case 0x29:
-	      name = "fsqrts";
-	      break;
-	    case 0x2a:
-	      name = "fsqrtd";
-	      break;
-	    case 0x2b:
-	      name = "fsqrtx";
-	      break;
-	    }
-	  fprintf (stream, "%s %s,%s", name, rs2, rd);
-	  return;
-	}
-      if ((opcode ^ 0x5f) <= 0x5f)
-	{
-	  rs1 = reg_names[insn.arith.rs1 + 32];
-	  switch (opcode)
-	    {
-	    case 0x41:
-	      name = "fadds";
-	      break;
-	    case 0x42:
-	      name = "faddd";
-	      break;
-	    case 0x43:
-	      name = "faddx";
-	      break;
-	    case 0x45:
-	      name = "fsubs";
-	      break;
-	    case 0x46:
-	      name = "fsubd";
-	      break;
-	    case 0x47:
-	      name = "fsubx";
-	      break;
-	    case 0x49:
-	      name = "fmuls";
-	      break;
-	    case 0x4a:
-	      name = "fmuld";
-	      break;
-	    case 0x4b:
-	      name = "fmulx";
-	      break;
-	    case 0x4d:
-	      name = "fdivs";
-	      break;
-	    case 0x4e:
-	      name = "fdivd";
-	      break;
-	    case 0x4f:
-	      name = "fdivx";
-	      break;
-	    default:
-	      goto unimplemented;
-	    }
-	  if ((opcode & 0x10) == 0)
-	    fprintf (stream, "%s %s,%s,%s", name, rs1, rs2, rd);
-	  else
-	    fprintf (stream, "%s %s,%s", name, rs1, rs2);
-	  return;
-	}
-      if ((opcode ^ 0xdf) <= 0xdf)
-	{
-	  switch (opcode)
-	    {
-	    case 0xc4:
-	      name = "fitos";
-	      break;
-	    case 0xc8:
-	      name = "fitod";
-	      break;
-	    case 0xcc:
-	      name = "fitox";
-	      break;
-	    case 0xd1:
-	      name = "fstoi";
-	      break;
-	    case 0xd2:
-	      name = "fdtoi";
-	      break;
-	    case 0xd3:
-	      name = "fxtoi";
-	      break;
-	    case 0xc9:
-	      name = "fstod";
-	      break;
-	    case 0xcd:
-	      name = "fstox";
-	      break;
-	    case 0xc6:
-	      name = "fdtos";
-	      break;
-	    case 0xce:
-	      name = "fdtox";
-	      break;
-	    case 0xc7:
-	      name = "fxtos";
-	      break;
-	    case 0xcb:
-	      name = "fxtod";
-	      break;
-	    default:
-	      goto unimplemented;
-	    }
-	  fprintf (stream, "%s %s,%s", name, rs2, rd);
-	  return;
-	}
-      goto unimplemented;
-
-    case 1:
-      rs1 = reg_names[insn.arith.rs1 + 32];
-      rs2 = reg_names[insn.arith.rs2 + 32];
-      if ((opcode ^ 0x57) <= 0x57)
-	{
-	  switch (opcode)
-	    {
-	    case 0x51:
-	      name = "fcmps";
-	      break;
-	    case 0x52:
-	      name = "fcmpd";
-	      break;
-	    case 0x53:
-	      name = "fcmpx";
-	      break;
-	    case 0x55:
-	      name = "fcmpes";
-	      break;
-	    case 0x56:
-	      name = "fcmped";
-	      break;
-	    case 0x57:
-	      name = "fcmpex";
-	      break;
-	    default:
-	      goto unimplemented;
-	    }
-	  fprintf (stream, "%s %s,%s", name, rs1, rs2);
-	  return;
-	}
-      else goto unimplemented;
-
-    case 2:
-    case 3:
-      goto unimplemented;
-    }
- unimplemented:
-  fprintf (stream, "0x%08x (unimplemented fpop insn)", insn.intval);
-}
-

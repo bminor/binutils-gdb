@@ -1,115 +1,24 @@
 /* Library for reading command lines and decoding commands.
-   Copyright (C) 1986 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1989 Free Software Foundation, Inc.
 
-		       NO WARRANTY
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 1, or (at your option)
+   any later version.
 
-  BECAUSE THIS PROGRAM IS LICENSED FREE OF CHARGE, WE PROVIDE ABSOLUTELY
-NO WARRANTY, TO THE EXTENT PERMITTED BY APPLICABLE STATE LAW.  EXCEPT
-WHEN OTHERWISE STATED IN WRITING, FREE SOFTWARE FOUNDATION, INC,
-RICHARD M. STALLMAN AND/OR OTHER PARTIES PROVIDE THIS PROGRAM "AS IS"
-WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING,
-BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY
-AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE PROGRAM PROVE
-DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR
-CORRECTION.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
- IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW WILL RICHARD M.
-STALLMAN, THE FREE SOFTWARE FOUNDATION, INC., AND/OR ANY OTHER PARTY
-WHO MAY MODIFY AND REDISTRIBUTE THIS PROGRAM AS PERMITTED BELOW, BE
-LIABLE TO YOU FOR DAMAGES, INCLUDING ANY LOST PROFITS, LOST MONIES, OR
-OTHER SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
-USE OR INABILITY TO USE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR
-DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY THIRD PARTIES OR
-A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS) THIS
-PROGRAM, EVEN IF YOU HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH
-DAMAGES, OR FOR ANY CLAIM BY ANY OTHER PARTY.
-
-		GENERAL PUBLIC LICENSE TO COPY
-
-  1. You may copy and distribute verbatim copies of this source file
-as you receive it, in any medium, provided that you conspicuously and
-appropriately publish on each copy a valid copyright notice "Copyright
-(C) 1986 Free Software Foundation, Inc."; and include following the
-copyright notice a verbatim copy of the above disclaimer of warranty
-and of this License.  You may charge a distribution fee for the
-physical act of transferring a copy.
-
-  2. You may modify your copy or copies of this source file or
-any portion of it, and copy and distribute such modifications under
-the terms of Paragraph 1 above, provided that you also do the following:
-
-    a) cause the modified files to carry prominent notices stating
-    that you changed the files and the date of any change; and
-
-    b) cause the whole of any work that you distribute or publish,
-    that in whole or in part contains or is a derivative of this
-    program or any part thereof, to be licensed at no charge to all
-    third parties on terms identical to those contained in this
-    License Agreement (except that you may choose to grant more extensive
-    warranty protection to some or all third parties, at your option).
-
-    c) You may charge a distribution fee for the physical act of
-    transferring a copy, and you may at your option offer warranty
-    protection in exchange for a fee.
-
-Mere aggregation of another unrelated program with this program (or its
-derivative) on a volume of a storage or distribution medium does not bring
-the other program under the scope of these terms.
-
-  3. You may copy and distribute this program (or a portion or derivative
-of it, under Paragraph 2) in object code or executable form under the terms
-of Paragraphs 1 and 2 above provided that you also do one of the following:
-
-    a) accompany it with the complete corresponding machine-readable
-    source code, which must be distributed under the terms of
-    Paragraphs 1 and 2 above; or,
-
-    b) accompany it with a written offer, valid for at least three
-    years, to give any third party free (except for a nominal
-    shipping charge) a complete machine-readable copy of the
-    corresponding source code, to be distributed under the terms of
-    Paragraphs 1 and 2 above; or,
-
-    c) accompany it with the information you received as to where the
-    corresponding source code may be obtained.  (This alternative is
-    allowed only for noncommercial distribution and only if you
-    received the program in object code or executable form alone.)
-
-For an executable file, complete source code means all the source code for
-all modules it contains; but, as a special exception, it need not include
-source code for modules which are standard libraries that accompany the
-operating system on which the executable file runs.
-
-  4. You may not copy, sublicense, distribute or transfer this program
-except as expressly provided under this License Agreement.  Any attempt
-otherwise to copy, sublicense, distribute or transfer this program is void and
-your rights to use the program under this License agreement shall be
-automatically terminated.  However, parties who have received computer
-software programs from you with this License Agreement will not have
-their licenses terminated so long as such parties remain in full compliance.
-
-  5. If you wish to incorporate parts of this program into other free
-programs whose distribution conditions are different, write to the Free
-Software Foundation at 675 Mass Ave, Cambridge, MA 02139.  We have not yet
-worked out a simple rule that can be stated here, but we will often permit
-this.  We will be guided by the two goals of preserving the free status of
-all derivatives of our free software and of promoting the sharing and reuse of
-software.
-
-
-In other words, you are welcome to use, share and improve this program.
-You are forbidden to forbid anyone else to use, share and improve
-what you give them.   Help stamp out software-hoarding!  */
-
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "command.h"
 #include "defs.h"
 #include <stdio.h>
-
-#ifdef sparc
-#include <alloca.h>
-#endif
+#include <ctype.h>
 
 extern char *xmalloc ();
 
@@ -189,7 +98,7 @@ add_alias_cmd (name, oldname, class, abbrev_flag, list)
   register struct cmd_list_element *c;
   copied_name = (char *) alloca (strlen (oldname) + 1);
   strcpy (copied_name, oldname);
-  old  = lookup_cmd (&copied_name, *list, 0, 1);
+  old  = lookup_cmd (&copied_name, *list, 0, 1, 1);
 
   if (old == 0)
     {
@@ -303,7 +212,7 @@ help_cmd (command, stream)
       return;
     }
 
-  c = lookup_cmd (&command, cmdlist, "", 0);
+  c = lookup_cmd (&command, cmdlist, "", 0, 0);
 
   if (c == 0)
     return;
@@ -320,10 +229,12 @@ help_cmd (command, stream)
      and then set class to he number of this class
      so that the commands in the class will be listed.  */
 
-  fprintf (stream, "%s\n", c->doc);
+  fputs_filtered (c->doc, stream);
+  fputs_filtered ("\n", stream);
+
   if (c->prefixlist == 0 && c->function != 0)
     return;
-  fputc ('\n', stream);
+  fprintf_filtered (stream, "\n");
 
   /* If this is a prefix command, print it's subcommands */
   if (c->prefixlist)
@@ -372,18 +283,18 @@ help_list (list, cmdtype, class, stream)
     }
 
   if (class == -2)
-    fprintf (stream, "List of classes of %scommands:\n\n", cmdtype2);
+    fprintf_filtered (stream, "List of classes of %scommands:\n\n", cmdtype2);
   else
-    fprintf (stream, "List of %scommands:\n\n", cmdtype2);
+    fprintf_filtered (stream, "List of %scommands:\n\n", cmdtype2);
 
   help_cmd_list (list, class, cmdtype, (class >= 0), stream);
 
   if (class == -2)
-    fprintf (stream, "\n\
+    fprintf_filtered (stream, "\n\
 Type \"help%s\" followed by a class name for a list of commands in that class.",
 	     cmdtype1);
 
-  fprintf (stream, "\n\
+  fprintf_filtered (stream, "\n\
 Type \"help%s\" followed by %scommand name for full documentation.\n\
 Command name abbreviations are allowed if unambiguous.\n",
 	   cmdtype1, cmdtype2);
@@ -416,6 +327,14 @@ help_cmd_list (list, class, prefix, recurse, stream)
 {
   register struct cmd_list_element *c;
   register char *p;
+  static char *line_buffer = 0;
+  static int line_size;
+
+  if (!line_buffer)
+    {
+      line_size = 80;
+      line_buffer = (char *) xmalloc (line_size);
+    }
 
   for (c = list; c; c = c->next)
     {
@@ -424,12 +343,20 @@ help_cmd_list (list, class, prefix, recurse, stream)
 	  || (class == -2 && c->function == 0)
 	  || (class == c->class && c->function != 0)))
 	{
-	  fprintf (stream, "%s%s -- ", prefix, c->name);
+	  fprintf_filtered (stream, "%s%s -- ", prefix, c->name);
 	  /* Print just the first line */
 	  p = c->doc;
 	  while (*p && *p != '\n') p++;
-	  fwrite (c->doc, 1, p - c->doc, stream);
-	  fputc('\n', stream);
+	  if (p - c->doc > line_size - 1)
+	    {
+	      line_size = p - c->doc + 1;
+	      free (line_buffer);
+	      line_buffer = (char *) xmalloc (line_size);
+	    }
+	  strncpy (line_buffer, c->doc, p - c->doc);
+	  line_buffer[p - c->doc] = '\0';
+	  fputs_filtered (line_buffer, stream);
+	  fputs_filtered ("\n", stream);
 	}
       if (recurse
 	  && c->prefixlist != 0
@@ -438,6 +365,260 @@ help_cmd_list (list, class, prefix, recurse, stream)
     }
 }
 
+/* This routine takes a line of TEXT and a CLIST in which to
+   start the lookup.  When it returns it will have incremented the text
+   pointer past the section of text it matched, set *RESULT_LIST to
+   the list in which the last word was matched, and will return the
+   cmd list element which the text matches.  It will return 0 if no
+   match at all was possible.  It will return -1 if ambigous matches are
+   possible; in this case *RESULT_LIST will be set to the list in which
+   there are ambiguous choices (and text will be set to the ambiguous
+   text string).
+
+   It does no error reporting whatsoever; control will always return
+   to the superior routine.
+
+   In the case of an ambiguous return (-1), *RESULT_LIST will be set to
+   point at the prefix_command (ie. the best match) *or* (special
+   case) will be 0 if no prefix command was ever found.  For example,
+   in the case of "info a", "info" matches without ambiguity, but "a"
+   could be "args" or "address", so *RESULT_LIST is set to
+   the cmd_list_element for "info".  So in this case
+   result list should not be interpeted as a pointer to the beginning
+   of a list; it simply points to a specific command.
+
+   This routine does *not* modify the text pointed to by TEXT.
+   
+   If INGNORE_HELP_CLASSES is nonzero, ignore any command list
+   elements which are actually help classes rather than commands (i.e.
+   the function field of the struct cmd_list_element is 0).  */
+
+struct cmd_list_element *
+lookup_cmd_1 (text, clist, result_list, ignore_help_classes)
+     char **text;
+     struct cmd_list_element *clist, **result_list;
+     int ignore_help_classes;
+{
+  char *p, *command;
+  int len, tmp, nfound;
+  struct cmd_list_element *found, *c;
+
+  while (**text == ' ' || **text == '\t')
+    (*text)++;
+
+  /* Treating underscores as part of command words is important
+     so that "set args_foo()" doesn't get interpreted as
+     "set args _foo()".  */
+  for (p = *text;
+       *p && (isalnum(*p) || *p == '-' || *p == '_');
+       p++)
+    ;
+
+  /* If nothing but whitespace, return 0.  */
+  if (p == *text)
+    return 0;
+  
+  len = p - *text;
+
+  /* *text and p now bracket the first command word to lookup (and
+     it's length is len).  We copy this into a local temporary,
+     converting to lower case as we go.  */
+
+  command = (char *) alloca (len + 1);
+  for (tmp = 0; tmp < len; tmp++)
+    {
+      char x = (*text)[tmp];
+      command[tmp] = (x >= 'A' && x <= 'Z') ? x - 'A' + 'a' : x;
+    }
+  command[len] = '\0';
+
+  /* Look it up.  */
+  found = 0;
+  nfound = 0;
+  for (c = clist; c; c = c->next)
+    if (!strncmp (command, c->name, len)
+	&& (!ignore_help_classes || c->function))
+      {
+	found = c;
+	nfound++;
+	if (c->name[len] == '\0')
+	  {
+	    nfound = 1;
+	    break;
+	  }
+      }
+
+  /* If nothing matches, we have a simple failure.  */
+  if (nfound == 0)
+    return 0;
+
+  if (nfound > 1)
+    {
+      *result_list = 0;		/* Will be modified in calling routine
+				   if we know what the prefix command is.
+				   */
+      return (struct cmd_list_element *) -1; /* Ambiguous.  */
+    }
+
+  /* We've matched something on this list.  Move text pointer forward. */
+
+  *text = p;
+  if (found->prefixlist)
+    {
+      c = lookup_cmd_1 (text, *found->prefixlist, result_list,
+			ignore_help_classes);
+      if (!c)
+	{
+	  /* Didn't find anything; this is as far as we got.  */
+	  *result_list = clist;
+	  return found;
+	}
+      else if (c == (struct cmd_list_element *) -1)
+	{
+	  /* We've gotten this far properley, but the next step
+	     is ambiguous.  We need to set the result list to the best
+	     we've found (if an inferior hasn't already set it).  */
+	  if (!*result_list)
+	    /* This used to say *result_list = *found->prefixlist
+	       If that was correct, need to modify the documentation
+	       at the top of this function to clarify what is supposed
+	       to be going on.  */
+	    *result_list = found;
+	  return c;
+	}
+      else
+	{
+	  /* We matched!  */
+	  return c;
+	}
+    }
+  else
+    {
+      *result_list = clist;
+      return found;
+    }
+}
+
+/* Look up the contents of *LINE as a command in the command list LIST.
+   LIST is a chain of struct cmd_list_element's.
+   If it is found, return the struct cmd_list_element for that command
+   and update *LINE to point after the command name, at the first argument.
+   If not found, call error if ALLOW_UNKNOWN is zero
+   otherwise (or if error returns) return zero.
+   Call error if specified command is ambiguous,
+   unless ALLOW_UNKNOWN is negative.
+   CMDTYPE precedes the word "command" in the error message.
+
+   If INGNORE_HELP_CLASSES is nonzero, ignore any command list
+   elements which are actually help classes rather than commands (i.e.
+   the function field of the struct cmd_list_element is 0).  */
+
+struct cmd_list_element *
+lookup_cmd (line, list, cmdtype, allow_unknown, ignore_help_classes)
+     char **line;
+     struct cmd_list_element *list;
+     char *cmdtype;
+     int allow_unknown;
+     int ignore_help_classes;
+{
+  struct cmd_list_element *last_list = 0;
+  struct cmd_list_element *c =
+    lookup_cmd_1 (line, list, &last_list, ignore_help_classes);
+  char *ptr = (*line) + strlen (*line) - 1;
+
+  /* Clear off trailing whitespace.  */
+  while (ptr >= *line && (*ptr == ' ' || *ptr == '\t'))
+    ptr--;
+  *(ptr + 1) = '\0';
+  
+  if (!c)
+    {
+      if (!allow_unknown)
+	{
+	  if (!*line)
+	    error ("Lack of needed %scommand", cmdtype);
+	  else
+	    {
+	      char *p = *line, *q;
+
+	      while (isalnum(*p) || *p == '-')
+		p++;
+
+	      q = (char *) alloca (p - *line + 1);
+	      strncpy (q, *line, p - *line);
+	      q[p-*line] = '\0';
+	      
+	      error ("Undefined %scommand: \"%s\".", cmdtype, q);
+	    }
+	}
+      else
+	return 0;
+    }
+  else if (c == (struct cmd_list_element *) -1)
+    {
+      /* Ambigous.  Local values should be off prefixlist or called
+	 values.  */
+      int local_allow_unknown = (last_list ? last_list->allow_unknown :
+				 allow_unknown);
+      char *local_cmdtype = last_list ? last_list->prefixname : cmdtype;
+      struct cmd_list_element *local_list =
+	(last_list ? *(last_list->prefixlist) : list);
+      
+      if (local_allow_unknown < 0)
+	{
+	  if (last_list)
+	    return last_list;	/* Found something.  */
+	  else
+	    return 0;		/* Found nothing.  */
+	}
+      else
+	{
+	  /* Report as error.  */
+	  int amb_len;
+	  char ambbuf[100];
+
+	  for (amb_len = 0;
+	       ((*line)[amb_len] && (*line)[amb_len] != ' '
+		&& (*line)[amb_len] != '\t');
+	       amb_len++)
+	    ;
+	  
+	  ambbuf[0] = 0;
+	  for (c = local_list; c; c = c->next)
+	    if (!strncmp (*line, c->name, amb_len))
+	      {
+		if (strlen (ambbuf) + strlen (c->name) + 6 < sizeof ambbuf)
+		  {
+		    if (strlen (ambbuf))
+		      strcat (ambbuf, ", ");
+		    strcat (ambbuf, c->name);
+		  }
+		else
+		  {
+		    strcat (ambbuf, "..");
+		    break;
+		  }
+	      }
+	  error ("Ambiguous %scommand \"%s\": %s.", local_cmdtype,
+		 *line, ambbuf);
+	}
+    }
+  else
+    {
+      /* We've got something.  It may still not be what the caller
+         wants (if this command *needs* a subcommand).  */
+      while (**line == ' ' || **line == '\t')
+	(*line)++;
+
+      if (c->prefixlist && **line && !c->allow_unknown)
+	error ("Undefined %scommand: \"%s\".", c->prefixname, *line);
+
+      /* Seems to be what he wants.  Return it.  */
+      return c;
+    }
+}
+	
+#if 0
 /* Look up the contents of *LINE as a command in the command list LIST.
    LIST is a chain of struct cmd_list_element's.
    If it is found, return the struct cmd_list_element for that command
@@ -477,12 +658,10 @@ lookup_cmd (line, list, cmdtype, allow_unknown)
   /* Find end of command name.  */
 
   p = *line;
-  if (*p == '!')
-    p++;
-  else while (*p == '-'
-	      || (*p >= 'a' && *p <= 'z')
-	      || (*p >= 'A' && *p <= 'Z')
-	      || (*p >= '0' && *p <= '9'))
+  while (*p == '-'
+	 || (*p >= 'a' && *p <= 'z')
+	 || (*p >= 'A' && *p <= 'Z')
+	 || (*p >= '0' && *p <= '9'))
     p++;
 
   /* Look up the command name.
@@ -576,6 +755,61 @@ lookup_cmd (line, list, cmdtype, allow_unknown)
 
   return found;
 }
+#endif
+
+/* Helper function for SYMBOL_COMPLETION_FUNCTION.  */
+
+/* Return a vector of char pointers which point to the different
+   possible completions in LIST of TEXT.  */
+
+char **
+complete_on_cmdlist (list, text)
+     struct cmd_list_element *list;
+     char *text;
+{
+  struct cmd_list_element *ptr;
+  char **matchlist;
+  int sizeof_matchlist;
+  int matches;
+  int textlen = strlen (text);
+
+  sizeof_matchlist = 10;
+  matchlist = (char **) xmalloc (sizeof_matchlist * sizeof (char *));
+  matches = 0;
+
+  for (ptr = list; ptr; ptr = ptr->next)
+    if (!strncmp (ptr->name, text, textlen)
+	&& !ptr->abbrev_flag
+	&& (ptr->function
+	    || ptr->prefixlist))
+      {
+	if (matches == sizeof_matchlist)
+	  {
+	    sizeof_matchlist *= 2;
+	    matchlist = (char **) xrealloc (matchlist,
+					    (sizeof_matchlist
+					     * sizeof (char *)));
+	  }
+
+	matchlist[matches] = (char *) 
+	  xmalloc (strlen (ptr->name) + 1);
+	strcpy (matchlist[matches++], ptr->name);
+      }
+
+  if (matches == 0)
+    {
+      free (matchlist);
+      matchlist = 0;
+    }
+  else
+    {
+      matchlist = (char **) xrealloc (matchlist, ((matches + 1)
+						* sizeof (char *)));
+      matchlist[matches] = (char *) 0;
+    }
+
+  return matchlist;
+}
 
 static void
 shell_escape (arg, from_tty)
@@ -619,6 +853,4 @@ _initialize_command ()
   add_com ("shell", class_support, shell_escape,
 	   "Execute the rest of the line as a shell command.  \n\
 With no arguments, run an inferior shell.");
-
-  add_com_alias ("!", "shell", class_support, 1);
 }

@@ -116,6 +116,24 @@ flip_bytes (ptr, count)
       count -= 2;
     }
 }
+
+/* Given a character C, does it represent a general addressing mode?  */
+#define Is_gen(c) \
+  ((c) == 'F' || (c) == 'L' || (c) == 'B' \
+   || (c) == 'W' || (c) == 'D' || (c) == 'A')
+
+/* Adressing modes.  */
+#define Adrmod_index_byte 0x1c
+#define Adrmod_index_word 0x1d
+#define Adrmod_index_doubleword 0x1e
+#define Adrmod_index_quadword 0x1f
+
+/* Is MODE an indexed addressing mode?  */
+#define Adrmod_is_index(mode) \
+  (mode == Adrmod_index_byte \
+   || mode == Adrmod_index_word \
+   || mode == Adrmod_index_doubleword \
+   || mode == Adrmod_index_quadword)
 
 
 /* Print the 32000 instruction at address MEMADDR in debugged memory,
@@ -123,8 +141,8 @@ flip_bytes (ptr, count)
 
 int
 print_insn (memaddr, stream)
-CORE_ADDR memaddr;
-FILE *stream;
+     CORE_ADDR memaddr;
+     FILE *stream;
 {
   unsigned char buffer[MAXLEN];
   register int i;
@@ -161,9 +179,44 @@ FILE *stream;
 
   if (*d)
     {
+      /* Offset in bits of the first thing beyond each index byte.
+	 Element 0 is for operand A and element 1 is for operand B.
+	 The rest are irrelevant, but we put them here so we don't
+	 index outside the array.  */
+      int index_offset[MAX_ARGS];
+
+      /* 0 for operand A, 1 for operand B, greater for other args.  */
+      int whicharg = 0;
+      
       fputc ('\t', stream);
 
       maxarg = 0;
+
+      /* First we have to find and keep track of the index bytes,
+	 if we are using scaled indexed addressing mode, since the index
+	 bytes occur right after the basic instruction, not as part
+	 of the addressing extension.  */
+      if (Is_gen(d[1]))
+	{
+	  int addr_mode = bit_extract (buffer, ioffset - 5, 5);
+
+	  if (Adrmod_is_index (addr_mode))
+	    {
+	      aoffset += 8;
+	      index_offset[0] = aoffset;
+	    }
+	}
+      if (d[2] && Is_gen(d[3]))
+	{
+	  int addr_mode = bit_extract (buffer, ioffset - 10, 5);
+
+	  if (Adrmod_is_index (addr_mode))
+	    {
+	      aoffset += 8;
+	      index_offset[1] = aoffset;
+	    }
+	}
+
       while (*d)
 	{
 	  argnum = *d - '1';
@@ -171,8 +224,10 @@ FILE *stream;
 	  if (argnum > maxarg && argnum < MAX_ARGS)
 	    maxarg = argnum;
 	  ioffset = print_insn_arg (*d, ioffset, &aoffset, buffer,
-				    memaddr, arg_bufs[argnum]);
+				    memaddr, arg_bufs[argnum],
+				    index_offset[whicharg]);
 	  d++;
+	  whicharg++;
 	}
       for (argnum = 0; argnum <= maxarg; argnum++)
 	{
@@ -200,12 +255,23 @@ FILE *stream;
   return aoffset / 8;
 }
 
-print_insn_arg (d, ioffset, aoffsetp, buffer, addr, result)
+/* Print an instruction operand of category given by d.  IOFFSET is
+   the bit position below which small (<1 byte) parts of the operand can
+   be found (usually in the basic instruction, but for indexed
+   addressing it can be in the index byte).  AOFFSETP is a pointer to the
+   bit position of the addressing extension.  BUFFER contains the
+   instruction.  ADDR is where BUFFER was read from.  Put the disassembled
+   version of the operand in RESULT.  INDEX_OFFSET is the bit position
+   of the index byte (it contains garbage if this operand is not a
+   general operand using scaled indexed addressing mode).  */
+
+print_insn_arg (d, ioffset, aoffsetp, buffer, addr, result, index_offset)
      char d;
      int ioffset, *aoffsetp;
      char *buffer;
      CORE_ADDR addr;
      char *result;
+     int index_offset;
 {
   int addr_mode;
   float Fvalue;
@@ -328,16 +394,15 @@ print_insn_arg (d, ioffset, aoffsetp, buffer, addr, result)
 	case 0x1d:
 	case 0x1e:
 	case 0x1f:
-	  index = bit_extract (buffer, *aoffsetp, 8);
-	  *aoffsetp += 8;
-	  print_insn_arg (d, *aoffsetp, aoffsetp, buffer, addr,
-			  result);
+	  index = bit_extract (buffer, index_offset - 8, 3);
+	  print_insn_arg (d, index_offset, aoffsetp, buffer, addr,
+			  result, 0);
 	  {
 	    static char	*ind[] = {"b", "w", "d", "q"};
 	    char *off;
 
 	    off = result + strlen (result);
-	    sprintf (off, "[r%d:%s]", index & 7,
+	    sprintf (off, "[r%d:%s]", index,
 		     ind[addr_mode & 3]);
 	  }
 	  break;

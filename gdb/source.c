@@ -1,22 +1,21 @@
 /* List lines of source files for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1988 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1988, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
@@ -57,8 +56,13 @@ static int first_line_listed;
 
 struct symtab *psymtab_to_symtab ();
 
-/* Set the source file default for the "list" command,
-   specifying a symtab.  */
+/* Set the source file default for the "list" command, specifying a
+   symtab.  Sigh.  Behaivior specification: If it is called with a
+   non-zero argument, that is the symtab to select.  If it is not,
+   first lookup "main"; if it exists, use the symtab and line it
+   defines.  If not, take the last symtab in the symtab_list (if it
+   exists) or the last symtab in the psytab_list (if *it* exists).  If
+   none of this works, report an error.   */
 
 void
 select_source_symtab (s)
@@ -68,6 +72,13 @@ select_source_symtab (s)
   struct symtab_and_line sal;
   struct partial_symtab *ps, *cs_pst;
   
+  if (s)
+    {
+      current_source_symtab = s;
+      current_source_line = 1;
+      return;
+    }
+
   /* Make the default place to list be the function `main'
      if one exists.  */
   if (lookup_symbol ("main", 0, VAR_NAMESPACE, 0))
@@ -76,14 +87,13 @@ select_source_symtab (s)
       sal = sals.sals[0];
       free (sals.sals);
       current_source_symtab = sal.symtab;
-      current_source_line = sal.line - 9;
+      current_source_line = max (sal.line - 9, 1);
       return;
     }
   
-  /* If there is no `main', use the last symtab in the list,
-     which is actually the first found in the file's symbol table.
-     But ignore .h files.  */
-  if (s)
+  /* All right; find the last file in the symtab list (ignoring .h's).  */
+
+  if (s = symtab_list)
     {
       do
 	{
@@ -96,7 +106,7 @@ select_source_symtab (s)
       while (s);
       current_source_line = 1;
     }
-  else
+  else if (partial_symtab_list)
     {
       ps = partial_symtab_list;
       while (ps)
@@ -108,7 +118,10 @@ select_source_symtab (s)
 	  ps = ps->next;
 	}
       if (cs_pst)
-	current_source_symtab = psymtab_to_symtab (cs_pst);
+	if (cs_pst->readin)
+	  fatal ("Internal: select_source_symtab: readin pst found and no symtabs.");
+	else
+	  current_source_symtab = psymtab_to_symtab (cs_pst);
       else
 	current_source_symtab = 0;
       current_source_line = 1;
@@ -146,6 +159,8 @@ directory_command (dirname, from_tty)
 {
   char *old = source_path;
 
+  dont_repeat ();
+
   if (dirname == 0)
     {
       if (query ("Reinitialize source path to %s? ", current_directory))
@@ -156,76 +171,109 @@ directory_command (dirname, from_tty)
     }
   else
     {
-      struct stat st;
-      register int len = strlen (dirname);
-      register char *tem;
-      extern char *index ();
-
-      if (index (dirname, ':'))
-	error ("Please add one directory at a time to the source path.");
-      if (dirname[len - 1] == '/')
-	  /* Sigh. "foo/" => "foo" */
-	  dirname[--len] == '\0';
-
-      while (dirname[len - 1] == '.')
-	{
-	  if (len == 1)
-	    {
-	      /* "." => getwd () */
-	      dirname = current_directory;
-	      goto append;
-	    }
-	  else if (dirname[len - 2] == '/')
-	    {
-	      if (len == 2)
-		{
-		  /* "/." => "/" */
-		  dirname[--len] = '\0';
-		  goto append;
-		}
-	      else
-		{
-		  /* "...foo/." => "...foo" */
-		  dirname[len -= 2] = '\0';
-		  continue;
-		}
-	    }
-	  break;
-	}
-
-      if (dirname[0] != '/')
-	dirname = concat (current_directory, "/", dirname);
-      else
-	dirname = savestring (dirname, len);
+      dirname = tilde_expand (dirname);
       make_cleanup (free, dirname);
 
-      if (stat (dirname, &st) < 0)
-	perror_with_name (dirname);
-      if ((st.st_mode & S_IFMT) != S_IFDIR)
-	error ("%s is not a directory.", dirname);
-
-    append:
-      len = strlen (dirname);
-      tem = source_path;
-      while (1)
+      do
 	{
-	  if (!strncmp (tem, dirname, len)
-	      && (tem[len] == '\0' || tem[len] == ':'))
+	  extern char *index ();
+	  char *name = dirname;
+	  register char *p;
+	  struct stat st;
+
+	  {
+	    char *colon = index (name, ':');
+	    char *space = index (name, ' ');
+	    char *tab = index (name, '\t');
+	    if (colon == 0 && space == 0 && tab ==  0)
+	      p = dirname = name + strlen (name);
+	    else
+	      {
+		p = 0;
+		if (colon != 0 && (p == 0 || colon < p))
+		  p = colon;
+		if (space != 0 && (p == 0 || space < p))
+		  p = space;
+		if (tab != 0 && (p == 0 || tab < p))
+		  p = tab;
+		dirname = p + 1;
+		while (*dirname == ':' || *dirname == ' ' || *dirname == '\t')
+		  ++dirname;
+	      }
+	  }
+
+	  if (p[-1] == '/')
+	    /* Sigh. "foo/" => "foo" */
+	    --p;
+	  *p = '\0';
+
+	  while (p[-1] == '.')
 	    {
-	      printf ("\"%s\" is already in the source path.\n",
-		      dirname);
-	      break;
+	      if (p - name == 1)
+		{
+		  /* "." => getwd ().  */
+		  name = current_directory;
+		  goto append;
+		}
+	      else if (p[-2] == '/')
+		{
+		  if (p - name == 2)
+		    {
+		      /* "/." => "/".  */
+		      *--p = '\0';
+		      goto append;
+		    }
+		  else
+		    {
+		      /* "...foo/." => "...foo".  */
+		      p -= 2;
+		      *p = '\0';
+		      continue;
+		    }
+		}
+	      else
+		break;
 	    }
-	  tem = index (tem, ':');
-	  if (tem)
-	    tem++;
+
+	  if (*name != '/')
+	    name = concat (current_directory, "/", name);
 	  else
-	    {
-	      source_path = concat (old, ":", dirname);
-	      free (old);
-	      break;
-	    }
-	}
+	    name = savestring (name, p - name);
+	  make_cleanup (free, name);
+
+	  if (stat (name, &st) < 0)
+	    perror_with_name (name);
+	  if ((st.st_mode & S_IFMT) != S_IFDIR)
+	    error ("%s is not a directory.", name);
+
+	append:
+	  {
+	    register unsigned int len = strlen (name);
+
+	    p = source_path;
+	    while (1)
+	      {
+		if (!strncmp (p, name, len)
+		    && (p[len] == '\0' || p[len] == ':'))
+		  {
+		    if (from_tty)
+		      printf ("\"%s\" is already in the source path.\n", name);
+		    break;
+		  }
+		p = index (p, ':');
+		if (p != 0)
+		  ++p;
+		else
+		  break;
+	      }
+	    if (p == 0)
+	      {
+		source_path = concat (old, ":", name);
+		free (old);
+		old = source_path;
+	      }
+	  }
+	} while (*dirname != '\0');
       if (from_tty)
 	directories_info ();
     }
@@ -256,6 +304,9 @@ openp (path, try_cwd_first, string, mode, prot, filename_opened)
   register char *filename;
   register char *p, *p1;
   register int len;
+
+  if (!path)
+    path = ".";
 
   /* ./foo => foo */
   while (string[0] == '.' && string[1] == '/')
@@ -433,9 +484,10 @@ identify_source_line (s, line, mid_statement)
     get_filename_and_charpos (s, line, 0);
   if (s->fullname == 0)
     return 0;
-  printf ("\032\032%s:%d:%d:%s\n", s->fullname,
+  printf ("\032\032%s:%d:%d:%s:0x%x\n", s->fullname,
 	  line, s->line_charpos[line - 1],
-	  mid_statement ? "middle" : "beg");
+	  mid_statement ? "middle" : "beg",
+	  get_frame_pc (get_current_frame()));
   current_source_line = line;
   first_line_listed = line;
   last_line_listed = line;
@@ -495,18 +547,15 @@ print_source_lines (s, line, stopline, noerror)
       c = fgetc (stream);
       if (c == EOF) break;
       last_line_listed = current_source_line;
-      printf ("%d\t", current_source_line++);
+      printf_filtered ("%d\t", current_source_line++);
       do
 	{
 	  if (c < 040 && c != '\t' && c != '\n')
-	    {
-	      fputc ('^', stdout);
-	      fputc (c + 0100, stdout);
-	    }
+	      printf_filtered ("^%c", c + 0100);
 	  else if (c == 0177)
-	    printf ("^?");
+	    printf_filtered ("^?");
 	  else
-	    fputc (c, stdout);
+	    printf_filtered ("%c", c);
 	} while (c != '\n' && (c = fgetc (stream)) >= 0);
     }
 
@@ -550,12 +599,12 @@ list_command (arg, from_tty)
   char *p;
 
   if (symtab_list == 0 && partial_symtab_list == 0)
-    error ("Listing source lines requires symbols.");
+    error ("No symbol table is loaded.  Use the \"symbol-file\" command.");
 
   /* Pull in a current source symtab if necessary */
   if (current_source_symtab == 0 &&
       (arg == 0 || arg[0] == '+' || arg[0] == '-'))
-    select_source_symtab (symtab_list);
+    select_source_symtab (0);
 
   /* "l" or "l +" lists next ten lines.  */
 
@@ -768,8 +817,8 @@ forward_search_command (regex, from_tty)
   if (msg)
     error (msg);
 
-  if (current_source_symtab == 0) 
-    error ("No default source file yet.  Do \"help list\".");
+  if (current_source_symtab == 0)
+    select_source_symtab (0);
 
   /* Search from last_line_listed+1 in current_source_symtab */
 
@@ -838,8 +887,8 @@ reverse_search_command (regex, from_tty)
   if (msg)
     error (msg);
 
-  if (current_source_symtab == 0) 
-    error ("No default source file yet.  Do \"help list\".");
+  if (current_source_symtab == 0)
+    select_source_symtab (0);
 
   /* Search from last_line_listed-1 in current_source_symtab */
 

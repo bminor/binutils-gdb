@@ -1,22 +1,21 @@
 /* Low level interface to ptrace, for GDB when running under Unix.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "param.h"
@@ -101,8 +100,12 @@ fetch_inferior_registers ()
   register int i;
 
   struct user u;
+#ifdef USE_PCB
+  unsigned int offset = (char *) &u.u_pcb.pcb_d0 - (char *) &u;
+#else
   unsigned int offset = (char *) &u.u_ar0 - (char *) &u;
   offset = ptrace (3, inferior_pid, offset, 0) - KERNEL_U_ADDR;
+#endif
 
   for (regno = 0; regno < NUM_REGS; regno++)
     {
@@ -125,34 +128,71 @@ store_inferior_registers (regno)
 {
   register unsigned int regaddr;
   char buf[80];
+  extern char registers[];
 
   struct user u;
+#ifdef USE_PCB
+  unsigned int offset = (char *) &u.u_pcb.pcb_d0 - (char *) &u;
+#else
   unsigned int offset = (char *) &u.u_ar0 - (char *) &u;
   offset = ptrace (3, inferior_pid, offset, 0) - KERNEL_U_ADDR;
+#endif
 
+#ifdef PTRACE_BUG
+  if (regno >= FP0_REGNUM)
+      printf ("warning: floating register num %d not written due to OS bug.\n",
+	      regno);
+  else
+#endif
   if (regno >= 0)
     {
+      int i;
+      int *p = (int *) &registers[REGISTER_BYTE (regno)];
+
+#ifdef PTRACE_BUG
+      if (regno == FP_REGNUM)
+	  printf ("warning: ptrace bug for writing register number fp(a6).\n");
+#endif
+
       regaddr = register_addr (regno, offset);
-      errno = 0;
-      ptrace (6, inferior_pid, regaddr, read_register (regno));
-      if (errno != 0)
+      for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
 	{
-	  sprintf (buf, "writing register number %d", regno);
-	  perror_with_name (buf);
+	  errno = 0;
+	  ptrace (6, inferior_pid, regaddr, *p++);
+	  if (errno != 0)
+	    {
+	      sprintf (buf, "writing register number %d[%d]", regno, i);
+	      perror_with_name (buf);
+	    }
+	  regaddr += sizeof (int);
 	}
     }
-  /* Ptrace News OS cannot write floating register now(7/2/88), so
-     avoid the writing them. */
-  else for (regno = 0; regno < FP0_REGNUM; regno++)
+  else
     {
-      regaddr = register_addr (regno, offset);
-      errno = 0;
-      ptrace (6, inferior_pid, regaddr, read_register (regno));
-      if (errno != 0)
+#ifdef PTRACE_BUG
+      for (regno = 0; regno < FP0_REGNUM; regno++)
+#else
+      for (regno = 0; regno < NUM_REGS; regno++)
+#endif
 	{
-	  sprintf (buf, "writing register number %d", regno);
-	  perror_with_name (buf);
+	  int i;
+	  int *p = (int *) &registers[REGISTER_BYTE (regno)];
+	  regaddr = register_addr (regno, offset);
+	  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
+	    {
+	      errno = 0;
+	      ptrace (6, inferior_pid, regaddr, *p++);
+	      if (errno != 0)
+		{
+		  sprintf (buf, "writing register number %d[%d]", regno, i);
+		  perror_with_name (buf);
+		}
+	      regaddr += sizeof (int);
+	    }
 	}
+#ifdef PTRACE_BUG
+      printf ("warning: ptrace bug for writing floating registers(no write).\n");
+#endif
     }
 }
 
@@ -262,11 +302,6 @@ write_inferior_memory (memaddr, myaddr, len)
 /* Work with core dump and executable files, for GDB. 
    This code would be in core.c if it weren't machine-dependent. */
 
-/* Recognize COFF format systems because a.out.h defines AOUTHDR.  */
-#ifdef AOUTHDR
-#define COFF_FORMAT
-#endif
-
 #ifndef N_TXTADDR
 #define N_TXTADDR(hdr) 0
 #endif /* no N_TXTADDR */
@@ -283,7 +318,9 @@ write_inferior_memory (memaddr, myaddr, len)
 #endif
 
 #ifndef COFF_FORMAT
+#ifndef AOUTHDR
 #define AOUTHDR struct exec
+#endif
 #endif
 
 extern char *sys_siglist[];
@@ -388,6 +425,9 @@ core_file_command (filename, from_tty)
 
   if (filename)
     {
+      filename = tilde_expand (filename);
+      make_cleanup (free, filename);
+      
       if (have_inferior_p ())
 	error ("To look at a core file, you must kill the inferior with \"kill\".");
       corechan = open (filename, O_RDONLY, 0);
@@ -476,6 +516,9 @@ exec_file_command (filename, from_tty)
 
   if (filename)
     {
+      filename = tilde_expand (filename);
+      make_cleanup (free, filename);
+      
       execchan = openp (getenv ("PATH"), 1, filename, O_RDONLY, 0,
 			&execfile);
       if (execchan < 0)
@@ -545,3 +588,50 @@ exec_file_command (filename, from_tty)
   if (exec_file_display_hook)
     (*exec_file_display_hook) (filename);
 }
+
+#ifdef __GNUC__
+/* Bad implement execle(3). It's depend for "/bin/cc".
+
+   main()
+   {
+     printf("execle:\n");
+     execle(FILE, ARGS, envp);
+     exit(1);
+   }
+
+   GCC:
+   link a6,#0
+   pea LC5	; call printf
+   jbsr _printf
+   ;		; (not popd stack)
+   pea _envp	; call execle
+   clrl sp@-
+   pea LC4
+   pea LC4
+   pea LC4
+   pea LC3
+   pea LC6
+   jbsr _execle
+   addw #32,sp	; delayed pop !!
+
+   /bin/cc:
+   link.l	fp,#L23
+   movem.l	#L24,(sp)
+   pea	L26		; call printf
+   jbsr	_printf
+   addq.l	#4,sp	; <--- popd stack !!
+   pea	_envp		; call execle
+   clr.l	-(sp)
+   pea	L32
+   
+   */
+
+execle(name, args)
+     char *name, *args;
+{
+  register char	**env = &args;
+  while (*env++)
+    ;
+  execve(name, (char **)&args, (char **)*env);
+}
+#endif

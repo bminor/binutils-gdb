@@ -1,3 +1,5 @@
+echo Setting up the environment for debugging gdb.\n
+
 b fatal
 
 b info_command

@@ -1,32 +1,29 @@
 /* Machine-dependent code which would otherwise be in inflow.c and core.c,
    for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
    This code is for the sparc cpu.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "param.h"
 #include "frame.h"
 #include "inferior.h"
 #include "obstack.h"
-#include "sparc-opcode.h"
-#include "gdbcore.h"
 
 #include <stdio.h>
 #include <sys/param.h>
@@ -46,6 +43,11 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 extern int errno;
 extern int attach_flag;
+
+typedef enum
+{
+  Error, not_branch, bicc, bicca, ba, baa, ticc, ta,
+} branch_type;
 
 /* This function simply calls ptrace with the given arguments.  
    It exists so that all calls to ptrace are isolated in this 
@@ -130,15 +132,16 @@ single_step (signal)
       if (br == bicca)
 	{
 	  /* Conditional annulled branch will either end up at
-	     npc (if taken) or at npc+4 (if not taken).  Trap npc+4.  */
+	     npc (if taken) or at npc+4 (if not taken).
+	     Trap npc+4.  */
 	  brknpc4 = 1;
 	  read_memory (npc4, break_mem[1], sizeof break_insn);
 	  write_memory (npc4, break_insn, sizeof break_insn);
 	}
       else if (br == baa && target != next_pc)
-	{ 
+	{
 	  /* Unconditional annulled branch will always end up at
-	     the target. */
+	     the target.  */
 	  brktrg = 1;
 	  read_memory (target, break_mem[2], sizeof break_insn);
 	  write_memory (target, break_insn, sizeof break_insn);
@@ -426,11 +429,6 @@ write_inferior_memory (memaddr, myaddr, len)
 /* Machine-dependent code which would otherwise be in core.c */
 /* Work with core dump and executable files, for GDB. */
 
-/* Recognize COFF format systems because a.out.h defines AOUTHDR.  */
-#ifdef AOUTHDR
-#define COFF_FORMAT
-#endif
- 
 #ifndef N_TXTADDR
 #define N_TXTADDR(hdr) 0
 #endif /* no N_TXTADDR */
@@ -438,6 +436,15 @@ write_inferior_memory (memaddr, myaddr, len)
 #ifndef N_DATADDR
 #define N_DATADDR(hdr) hdr.a_text
 #endif /* no N_DATADDR */
+
+/* Non-zero if this is an object (.o) file, rather than an executable.
+   Distinguishing between the two is rarely necessary (and seems like
+   a hack, but there is no other way to get the text and data
+   addresses--N_TXTADDR should probably take care of
+   this, but it doesn't).  */
+/* This definition will not work
+   if someone decides to make ld preserve relocation info.  */
+#define IS_OBJECT_FILE(hdr) (hdr.a_trsize != 0)
 
 /* Make COFF and non-COFF names for things a little more compatible
    to reduce conditionals later.  */
@@ -447,7 +454,9 @@ write_inferior_memory (memaddr, myaddr, len)
 #endif
 
 #ifndef COFF_FORMAT
+#ifndef AOUTHDR
 #define AOUTHDR struct exec
+#endif
 #endif
 
 extern char *sys_siglist[];
@@ -456,6 +465,55 @@ extern char *sys_siglist[];
 
 extern void (*exec_file_display_hook) ();
    
+/* File names of core file and executable file.  */
+
+extern char *corefile;
+extern char *execfile;
+
+/* Descriptors on which core file and executable file are open.
+   Note that the execchan is closed when an inferior is created
+   and reopened if the inferior dies or is killed.  */
+
+extern int corechan;
+extern int execchan;
+
+/* Last modification time of executable file.
+   Also used in source.c to compare against mtime of a source file.  */
+
+extern int exec_mtime;
+
+/* Virtual addresses of bounds of the two areas of memory in the core file.  */
+
+extern CORE_ADDR data_start;
+extern CORE_ADDR data_end;
+extern CORE_ADDR stack_start;
+extern CORE_ADDR stack_end;
+
+/* Virtual addresses of bounds of two areas of memory in the exec file.
+   Note that the data area in the exec file is used only when there is no core file.  */
+
+extern CORE_ADDR text_start;
+extern CORE_ADDR text_end;
+
+extern CORE_ADDR exec_data_start;
+extern CORE_ADDR exec_data_end;
+
+/* Address in executable file of start of text area data.  */
+
+extern int text_offset;
+
+/* Address in executable file of start of data area data.  */
+
+extern int exec_data_offset;
+
+/* Address in core file of start of data area data.  */
+
+extern int data_offset;
+
+/* Address in core file of start of stack area data.  */
+
+extern int stack_offset;
+  
 #ifdef COFF_FORMAT
 /* various coff data structures */
 
@@ -503,6 +561,9 @@ core_file_command (filename, from_tty)
 
   if (filename)
     {
+      filename = tilde_expand (filename);
+      make_cleanup (free, filename);
+      
       if (have_inferior_p ())
 	error ("To look at a core file, you must kill the inferior with \"kill\".");
       corechan = open (filename, O_RDONLY, 0);
@@ -522,8 +583,7 @@ core_file_command (filename, from_tty)
 	  error ("\"%s\" has an invalid struct core length (%d, expected %d)",
 		 filename, corestr.c_len, (int) sizeof (struct core));
 
-	/* Note that data_start and data_end don't depend on the exec file */
-        data_start = N_DATADDR (corestr.c_aouthdr);
+	data_start = exec_data_start;
 	data_end = data_start + corestr.c_dsize;
 	stack_start = stack_end - corestr.c_ssize;
 	data_offset = sizeof corestr;
@@ -604,6 +664,8 @@ exec_file_command (filename, from_tty)
   if (execfile)
     free (execfile);
   execfile = 0;
+  data_start = 0;
+  data_end -= exec_data_start;
   text_start = 0;
   text_end = 0;
   exec_data_start = 0;
@@ -616,6 +678,9 @@ exec_file_command (filename, from_tty)
 
   if (filename)
     {
+      filename = tilde_expand (filename);
+      make_cleanup (free, filename);
+      
       execchan = openp (getenv ("PATH"), 1, filename, O_RDONLY, 0,
 			&execfile);
       if (execchan < 0)
@@ -647,6 +712,8 @@ exec_file_command (filename, from_tty)
 	exec_data_start = exec_aouthdr.data_start;
 	exec_data_end = exec_data_start + exec_aouthdr.dsize;
 	exec_data_offset = data_hdr.s_scnptr;
+	data_start = exec_data_start;
+	data_end += exec_data_start;
 	exec_mtime = file_hdr.f_timdat;
       }
 #else /* not COFF_FORMAT */
@@ -657,13 +724,17 @@ exec_file_command (filename, from_tty)
 	if (val < 0)
 	  perror_with_name (filename);
 
-        text_start = N_TXTADDR (exec_aouthdr);
-        exec_data_start = N_DATADDR (exec_aouthdr);
+	text_start =
+	  IS_OBJECT_FILE (exec_aouthdr) ? 0 : N_TXTADDR (exec_aouthdr);
+        exec_data_start = IS_OBJECT_FILE (exec_aouthdr)
+	  ? exec_aouthdr.a_text : N_DATADDR (exec_aouthdr);
 	text_offset = N_TXTOFF (exec_aouthdr);
 	exec_data_offset = N_TXTOFF (exec_aouthdr) + exec_aouthdr.a_text;
 
 	text_end = text_start + exec_aouthdr.a_text;
         exec_data_end = exec_data_start + exec_aouthdr.a_data;
+	data_start = exec_data_start;
+	data_end += exec_data_start;
 
 	fstat (execchan, &st_exec);
 	exec_mtime = st_exec.st_mtime;
@@ -837,29 +908,41 @@ skip_prologue (pc)
 {
   union
     {
-      union insn_fmt insn;
+      unsigned long int code;
+      struct
+	{
+	  unsigned int op:2;
+	  unsigned int rd:5;
+	  unsigned int op2:3;
+	  unsigned int imm22:22;
+	} sethi;
+      struct
+	{
+	  unsigned int op:2;
+	  unsigned int rd:5;
+	  unsigned int op3:6;
+	  unsigned int rs1:5;
+	  unsigned int i:1;
+	  unsigned int simm13:13;
+	} add;
       int i;
     } x;
   int dest = -1;
 
   x.i = read_memory_integer (pc, 4);
 
-  /* Recognize sethi insn.  Record destination.  */
-  if (x.insn.sethi.op == 0
-      && x.insn.sethi.op2 == 4)
+  /* Recognize the `sethi' insn and record its destination.  */
+  if (x.sethi.op == 0 && x.sethi.op2 == 4)
     {
-      dest = x.insn.sethi.rd;
+      dest = x.sethi.rd;
       pc += 4;
       x.i = read_memory_integer (pc, 4);
     }
 
-  /* Recognizes an add immediate value to register to either %g1 or
+  /* Recognize an add immediate value to register to either %g1 or
      the destination register recorded above.  Actually, this might
-     well recognize several different arithmetic operations.*/
-  if (x.insn.arith_imm.op == 2
-      && x.insn.arith_imm.i == 1
-      && (x.insn.arith_imm.rd == 1
-	  || x.insn.arith_imm.rd == dest))
+     well recognize several different arithmetic operations.  */
+  if (x.add.op == 2 && x.add.i && (x.add.rd == 1 || x.add.rd == dest))
     {
       pc += 4;
       x.i = read_memory_integer (pc, 4);
@@ -868,8 +951,7 @@ skip_prologue (pc)
   /* This recognizes any SAVE insn.  But why do the XOR and then
      the compare?  That's identical to comparing against 60 (as long
      as there isn't any sign extension).  */
-  if (x.insn.arith.op == 2
-      && (x.insn.arith.op3 ^ 32) == 28)
+  if (x.add.op == 2 && (x.add.op3 ^ 32) == 28)
     {
       pc += 4;
       x.i = read_memory_integer (pc, 4);
@@ -877,14 +959,15 @@ skip_prologue (pc)
 
   /* Now we need to recognize stores into the frame from the input
      registers.  This recognizes all non alternate stores of input
-     register, into a location offset from the frame pointer. */
-  while (x.insn.arith_imm.op == 3
-	 && (x.insn.arith_imm.op3 & 0x3c) == 4 	   /* Store, non-alt */
-	 && (x.insn.arith_imm.rd & 0x18) == 0x18   /* Input register */
-	 && x.insn.arith_imm.i == 1 		   /* Immediate mode */
-	 && x.insn.arith_imm.rs1 == 30 		   /* Off of frame pointer */
-	 && x.insn.arith_imm.simm >= 0x44	   /* Into reserved */
-	 && x.insn.arith_imm.simm < 0x5b)	   /* stack space. */
+     register, into a location offset from the frame pointer.  */
+  while (x.add.op == 3
+	 && (x.add.op3 & 0x3c) == 4 /* Store, non-alternate.  */
+	 && (x.add.rd & 0x18) == 0x18 /* Input register.  */
+	 && x.add.i		/* Immediate mode.  */
+	 && x.add.rs1 == 30	/* Off of frame pointer.  */
+	 /* Into reserved stack space.  */
+	 && x.add.simm13 >= 0x44
+	 && x.add.simm13 < 0x5b)
     {
       pc += 4;
       x.i = read_memory_integer (pc, 4);
@@ -892,41 +975,43 @@ skip_prologue (pc)
   return pc;
 }
 
-/*
- * Check instruction at "addr" to see if it is an annulled branch.
- * All other instructions will go to NPC or will trap.
- *
- * Set *target if we find a candidate branch; set to zero if not.
- */
-
+/* Check instruction at ADDR to see if it is an annulled branch.
+   All other instructions will go to NPC or will trap.
+   Set *TARGET if we find a canidate branch; set to zero if not. */
+   
 branch_type
 isannulled (addr,  target)
      CORE_ADDR addr, *target;
 {
-  union insn_fmt instr;
   branch_type val = not_branch;
-  long offset; /* Must be signed for sign-extend */
+  long int offset;		/* Must be signed for sign-extend.  */
+  union
+    {
+      unsigned long int code;
+      struct
+	{
+	  unsigned int op:2;
+	  unsigned int a:1;
+	  unsigned int cond:4;
+	  unsigned int op2:3;
+	  unsigned int disp22:22;
+	} b;
+    } insn;
 
   *target = 0;
-  instr.intval = read_memory_integer (addr, 4);
-  /* printf("intval = %x\n",instr.intval); */
-  switch (instr.op1.op1)
+  insn.code = read_memory_integer (addr, 4);
+
+  if (insn.b.op == 0
+      && (insn.b.op2 == 2 || insn.b.op2 == 6 || insn.b.op2 == 7))
     {
-    case 0:			/* Format 2 */
-      switch(instr.op2.op2)
-	{
-	case 2: case 6: case 7:		/* Bcc, FBcc, CBcc */
-	  if (instr.branch.cond == 8)
-	    val = instr.branch.a ? baa : ba;
-	  else
-	    val = instr.branch.a ? bicca : bicc;
-	  /* 22 bits, sign extended */
-	  offset = 4 * ((int) (instr.branch.disp << 10) >> 10);
-	  *target = addr + offset;
-	  break;
-	}
-      break;
+      if (insn.b.cond == 8)
+	val = insn.b.a ? baa : ba;
+      else
+	val = insn.b.a ? bicca : bicc;
+      offset = 4 * ((int) (insn.b.disp22 << 10) >> 10);
+      *target = addr + offset;
     }
-  /*printf("isannulled ret: %d\n",val); */
+
   return val;
 }
+

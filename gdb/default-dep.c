@@ -1,22 +1,21 @@
 /* Low level interface to ptrace, for GDB when running under Unix.
-   Copyright (C) 1988 Free Software Foundation, Inc.
+   Copyright (C) 1988, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "param.h"
@@ -27,25 +26,12 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include <sys/types.h>
 #endif
 
-#ifdef UNISOFT_ASSHOLES
-#define	PMMU
-#define	NEW_PMMU
-#define	mc68881		/* Needed to get float in user.h!!! */
-#include <sys/seg.h>		/* For user.h */
-#include <sys/mmu.h>
-#include <sys/time.h>
-/* Things Unisoft defined differently from every other Unix system */
-#define	NBPG	PAGESIZE
-#define	UPAGES	USIZE
-#define	KERNEL_U_ADDR	UDOT
-#endif
-
 #include <stdio.h>
 #include <sys/param.h>
 #include <sys/dir.h>
 #include <signal.h>
 #include <sys/ioctl.h>
-#include <fcntl.h>
+/* #include <fcntl.h>  Can we live without this?  */
 
 #ifdef COFF_ENCAPSULATE
 #include "a.out.encap.h"
@@ -56,7 +42,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #define N_SET_MAGIC(exec, val) ((exec).a_magic = (val))
 #endif
 
-#include <sys/user.h>	/* After a.out.h */
+#include <sys/user.h>		/* After a.out.h  */
 #include <sys/file.h>
 #include <sys/stat.h>
 
@@ -64,28 +50,12 @@ extern int errno;
 
 /* This function simply calls ptrace with the given arguments.  
    It exists so that all calls to ptrace are isolated in this 
-   machine-dependent file. 
-
-   If you are having trouble debugging ptrace calls, turn on DEBUG
-   and every call to ptrace, in this module or elsewhere, will be
-   logged to stderr. */
+   machine-dependent file. */
 int
 call_ptrace (request, pid, arg3, arg4)
      int request, pid, arg3, arg4;
 {
-#ifdef DEBUG
-  int result;
-
-  fprintf(stderr, "ptrace(%x,,%x, %x) = ", request, arg3, arg4);
-  result=ptrace (request, pid, arg3, arg4);
-  fprintf(stderr, "%x\n", result);
-  return result;
-
-#define	ptrace	call_ptrace
-
-#else
   return ptrace (request, pid, arg3, arg4);
-#endif
 }
 
 kill_inferior ()
@@ -173,13 +143,7 @@ store_inferior_registers (regno)
     {
       regaddr = register_addr (regno, offset);
       errno = 0;
-#ifdef UNISOFT_ASSHOLES
-      /* You can't write the PC with ptrace 6, only with ptrace 11! */
-      if (regno == PC_REGNUM)
-	ptrace(11, inferior_pid, 16, read_register(regno));
-      else
-#endif
-        ptrace (6, inferior_pid, regaddr, read_register (regno));
+      ptrace (6, inferior_pid, regaddr, read_register (regno));
       if (errno != 0)
 	{
 	  sprintf (buf, "writing register number %d", regno);
@@ -190,12 +154,7 @@ store_inferior_registers (regno)
     {
       regaddr = register_addr (regno, offset);
       errno = 0;
-#ifdef UNISOFT_ASSHOLES
-      if (regno == PC_REGNUM)
-	ptrace(11, inferior_pid, 16, read_register(regno));
-      else
-#endif
-        ptrace (6, inferior_pid, regaddr, read_register (regno));
+      ptrace (6, inferior_pid, regaddr, read_register (regno));
       if (errno != 0)
 	{
 	  sprintf (buf, "writing all regs, number %d", regno);
@@ -229,8 +188,16 @@ read_inferior_memory (memaddr, myaddr, len)
   for (i = 0; i < count; i++, addr += sizeof (int))
     {
       errno = 0;
+#if 0
+This is now done by read_memory, because when this function did it,
+  reading a byte or short int hardware port read whole longs, causing
+  serious side effects
+  such as bus errors and unexpected hardware operation.  This would
+  also be a problem with ptrace if the inferior process could read
+  or write hardware registers, but that's not usually the case.
       if (remote_debugging)
 	buffer[i] = remote_fetch_word (addr);
+#endif
       else
 	buffer[i] = ptrace (1, inferior_pid, addr, 0);
       if (errno)
@@ -304,11 +271,6 @@ write_inferior_memory (memaddr, myaddr, len)
 /* Work with core dump and executable files, for GDB. 
    This code would be in core.c if it weren't machine-dependent. */
 
-/* Recognize COFF format systems because a.out.h defines AOUTHDR.  */
-#ifdef AOUTHDR
-#define COFF_FORMAT
-#endif
-
 #ifndef N_TXTADDR
 #define N_TXTADDR(hdr) 0
 #endif /* no N_TXTADDR */
@@ -325,7 +287,9 @@ write_inferior_memory (memaddr, myaddr, len)
 #endif
 
 #ifndef COFF_FORMAT
+#ifndef AOUTHDR
 #define AOUTHDR struct exec
+#endif
 #endif
 
 extern char *sys_siglist[];
@@ -430,6 +394,9 @@ core_file_command (filename, from_tty)
 
   if (filename)
     {
+      filename = tilde_expand (filename);
+      make_cleanup (free, filename);
+      
       if (have_inferior_p ())
 	error ("To look at a core file, you must kill the inferior with \"kill\".");
       corechan = open (filename, O_RDONLY, 0);
@@ -439,12 +406,12 @@ core_file_command (filename, from_tty)
       {
 	struct user u;
 
-	int reg_offset;
+	unsigned int reg_offset;
 
 	val = myread (corechan, &u, sizeof u);
 	if (val < 0)
 	  perror_with_name ("Not a core file: reading upage");
- 	if (val != sizeof u)
+	if (val != sizeof u)
 	  error ("Not a core file: could only read %d bytes", val);
 	data_start = exec_data_start;
 
@@ -453,8 +420,8 @@ core_file_command (filename, from_tty)
 	data_offset = NBPG * UPAGES;
 	stack_offset = NBPG * (UPAGES + u.u_dsize);
 
-	/* Some machines put an absolute address in here; Unisoft
-	   seems to put the offset in the upage of the regs.  Sigh. */
+	/* Some machines put an absolute address in here and some put
+	   the offset in the upage of the regs.  */
 	reg_offset = (int) u.u_ar0;
 	if (reg_offset > NBPG * UPAGES)
 	  reg_offset -= KERNEL_U_ADDR;
@@ -474,12 +441,17 @@ core_file_command (filename, from_tty)
 	      char buf[MAX_REGISTER_RAW_SIZE];
 
 	      val = lseek (corechan, register_addr (regno, reg_offset), 0);
-	      if (val < 0)
-		perror_with_name (reg_names[regno]);
+	      if (val < 0
+		  || (val = myread (corechan, buf, sizeof buf)) < 0)
+		{
+		  char * buffer = (char *) alloca (strlen (reg_names[regno])
+						   + 30);
+		  strcpy (buffer, "Reading register ");
+		  strcat (buffer, reg_names[regno]);
+						   
+		  perror_with_name (buffer);
+		}
 
- 	      val = myread (corechan, buf, sizeof buf);
-	      if (val < 0)
-		perror_with_name (reg_names[regno]);
 	      supply_register (regno, buf);
 	    }
 	}
@@ -526,6 +498,9 @@ exec_file_command (filename, from_tty)
 
   if (filename)
     {
+      filename = tilde_expand (filename);
+      make_cleanup (free, filename);
+      
       execchan = openp (getenv ("PATH"), 1, filename, O_RDONLY, 0,
 			&execfile);
       if (execchan < 0)

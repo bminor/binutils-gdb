@@ -1,7 +1,22 @@
+/* Another try at encapsulating bsd object files in coff.
+   Copyright (C) 1988, 1989, Free Software Foundation, Inc.
+   Written by Pace Willisson 12/9/88
+
+   This file is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 1, or (at your option)
+   any later version.
+
+   This file is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this file; if not, write to the Free Software
+   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   
 /*
- * another try at encapsulating bsd object files in coff
- * by Pace Willisson 12/9/88
- *
  * This time, we will only use the coff headers to tell the kernel
  * how to exec the file.  Therefore, the only fields that need to 
  * be filled in are the scnptr and vaddr for the text and data
@@ -65,8 +80,11 @@ struct coffheader
 #ifdef i386
 #define COFF_MAGIC 0514 /* I386MAGIC */
 #endif
+#ifdef m68k
+#define COFF_MAGIC 0520 /* MC68MAGIC */
+#endif
 
-#if defined(i386)
+#ifdef COFF_MAGIC
 short __header_offset_temp;
 #define HEADER_OFFSET(f) \
 	(__header_offset_temp = 0, \
@@ -104,8 +122,8 @@ short __header_offset_temp;
 #define N_TXTADDR(x) \
 	((N_FLAGS(x) & N_FLAGS_COFF_ENCAPSULATE) ? \
 	 sizeof (struct coffheader) + sizeof (struct exec) : 0)
-
 #define SEGMENT_SIZE 0x400000
+
 #define N_DATADDR(x) \
 	((N_FLAGS(x) & N_FLAGS_COFF_ENCAPSULATE) ? \
 	 (SEGMENT_SIZE + ((N_TXTADDR(x)+(x).a_text-1) & ~(SEGMENT_SIZE-1))) : \

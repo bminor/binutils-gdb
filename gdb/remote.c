@@ -1,22 +1,21 @@
 /* Memory-access and commands for inferior process, for GDB.
-   Copyright (C)  1988 Free Software Foundation, Inc.
+   Copyright (C)  1988, 1989 Free Software Foundation, Inc.
 
-GDB is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY.  No author or distributor accepts responsibility to anyone
-for the consequences of using it or for whether it serves any
-particular purpose or works at all, unless he says so in writing.
-Refer to the GDB General Public License for full details.
+This file is part of GDB.
 
-Everyone is granted permission to copy, modify and redistribute GDB,
-but only under the conditions described in the GDB General Public
-License.  A copy of this license is supposed to have been given to you
-along with GDB so you can know your rights and responsibilities.  It
-should be in a file named COPYING.  Among other things, the copyright
-notice and this notice must be preserved on all copies.
+GDB is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-In other words, go ahead and share GDB, but don't try to stop
-anyone else from sharing it farther.  Help stamp out software hoarding!
-*/
+GDB is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GDB; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Remote communication protocol.
    All values are encoded in ascii hex digits.
@@ -54,6 +53,11 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 	step		sAA..AA		AA..AA is address to resume
 					If AA..AA is omitted,
 					resume at same address.
+
+	last signal     ?               Reply the current reason for stopping.
+                                        This is the same reply as is generated
+					for step or cont : SAA where AA is the
+					signal number.
 
 	There is no immediate reply to step or cont.
 	The reply comes when the machine stops.
@@ -93,21 +97,44 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #define TERMINAL struct sgttyb
 #endif
 
-int kiodebug;
+static int kiodebug;
+static int timeout = 5;
 
+#if 0
 int icache;
+#endif
 
-/* Descriptor for I/O to remote machine.  */
-int remote_desc;
+/* Descriptor for I/O to remote machine.  Initialize it to -1 so that
+   remote_open knows that we don't have a file open when the program
+   starts.  */
+int remote_desc = -1;
 
 #define	PBUFSIZ	400
+
+/* Maximum number of bytes to read/write at once.  The value here
+   is chosen to fill up a packet (the headers account for the 32).  */
+#define MAXBUFBYTES ((PBUFSIZ-32)/2)
 
 static void remote_send ();
 static void putpkt ();
 static void getpkt ();
+#if 0
 static void dcache_flush ();
+#endif
 
 
+/* Called when SIGALRM signal sent due to alarm() timeout.  */
+#ifndef HAVE_TERMIO
+void
+remote_timer ()
+{
+  if (kiodebug)
+    printf ("remote_timer called\n");
+
+  alarm (timeout);
+}
+#endif
+
 /* Open a connection to a remote debugger.
    NAME is the filename used for communication.  */
 
@@ -118,8 +145,13 @@ remote_open (name, from_tty)
 {
   TERMINAL sg;
 
+  if (remote_desc >= 0)
+    close (remote_desc);
+
   remote_debugging = 0;
+#if 0
   dcache_init ();
+#endif
 
   remote_desc = open (name, O_RDWR);
   if (remote_desc < 0)
@@ -127,7 +159,9 @@ remote_open (name, from_tty)
 
   ioctl (remote_desc, TIOCGETP, &sg);
 #ifdef HAVE_TERMIO
-  sg.c_lflag &= ~ICANON;
+  sg.c_cc[VMIN] = 0;		/* read with timeout.  */
+  sg.c_cc[VTIME] = timeout * 10;
+  sg.c_lflag &= ~(ICANON | ECHO);
 #else
   sg.sg_flags = RAW;
 #endif
@@ -136,8 +170,45 @@ remote_open (name, from_tty)
   if (from_tty)
     printf ("Remote debugging using %s\n", name);
   remote_debugging = 1;
+
+#ifndef HAVE_TERMIO
+#ifndef NO_SIGINTERRUPT
+  /* Cause SIGALRM's to make reads fail.  */
+  if (siginterrupt (SIGALRM, 1) != 0)
+    perror ("remote_open: error in siginterrupt");
+#endif
+
+  /* Set up read timeout timer.  */
+  if ((void (*)) signal (SIGALRM, remote_timer) == (void (*)) -1)
+    perror ("remote_open: error in signal");
+#endif
+
+  putpkt ("?");			/* initiate a query from remote machine */
 }
 
+/* Close the open connection to the remote debugger.
+   Use this when you want to detach and do something else
+   with your gdb.  */
+void
+remote_close (from_tty)
+     int from_tty;
+{
+  if (!remote_debugging)
+    error ("Can't close remote connection: not debugging remotely.");
+  
+  close (remote_desc);		/* This should never be called if
+				   there isn't something valid in
+				   remote_desc.  */
+
+  /* Do not try to close remote_desc again, later in the program.  */
+  remote_desc = -1;
+
+  if (from_tty)
+    printf ("Ending remote debugging\n");
+
+  remote_debugging = 0;
+}
+ 
 /* Convert hex digit A to a number.  */
 
 static int
@@ -172,7 +243,9 @@ remote_resume (step, signal)
 {
   char buf[PBUFSIZ];
 
+#if 0
   dcache_flush ();
+#endif
 
   strcpy (buf, step ? "s": "c");
 
@@ -186,7 +259,7 @@ int
 remote_wait (status)
      WAITTYPE *status;
 {
-  char buf[PBUFSIZ];
+  unsigned char buf[PBUFSIZ];
 
   WSETEXIT ((*status), 0);
   getpkt (buf);
@@ -244,10 +317,12 @@ remote_store_registers (regs)
       *p++ = tohex ((regs[i] >> 4) & 0xf);
       *p++ = tohex (regs[i] & 0xf);
     }
+  *p = '\0';
 
   remote_send (buf);
 }
 
+#if 0
 /* Read a word from remote address ADDR and return it.
    This goes through the data cache.  */
 
@@ -279,6 +354,18 @@ remote_store_word (addr, word)
 {
   dcache_poke (addr, word);
 }
+#else /* not 0 */
+void remote_fetch_word (addr)
+     CORE_ADDR addr;
+{
+  error ("Internal error: remote_fetch_word is obsolete.\n");
+}
+void remote_store_word (addr)
+     CORE_ADDR addr;
+{
+  error ("Internal error: remote_store_word is obsolete.\n");
+}
+#endif /* not 0 */
 
 /* Write memory data directly to the remote machine.
    This does not inform the data cache; the data cache uses this.
@@ -310,6 +397,7 @@ remote_write_bytes (memaddr, myaddr, len)
       *p++ = tohex ((myaddr[i] >> 4) & 0xf);
       *p++ = tohex (myaddr[i] & 0xf);
     }
+  *p = '\0';
 
   remote_send (buf);
 }
@@ -349,6 +437,55 @@ remote_read_bytes (memaddr, myaddr, len)
     }
 }
 
+/* Read LEN bytes from inferior memory at MEMADDR.  Put the result
+   at debugger address MYADDR.  Returns errno value.  */
+int
+remote_read_inferior_memory(memaddr, myaddr, len)
+     CORE_ADDR memaddr;
+     char *myaddr;
+     int len;
+{
+  int xfersize;
+  while (len > 0)
+    {
+      if (len > MAXBUFBYTES)
+	xfersize = MAXBUFBYTES;
+      else
+	xfersize = len;
+
+      remote_read_bytes (memaddr, myaddr, xfersize);
+      memaddr += xfersize;
+      myaddr  += xfersize;
+      len     -= xfersize;
+    }
+  return 0; /* no error */
+}
+
+/* Copy LEN bytes of data from debugger memory at MYADDR
+   to inferior's memory at MEMADDR.  Returns errno value.  */
+int
+remote_write_inferior_memory (memaddr, myaddr, len)
+     CORE_ADDR memaddr;
+     char *myaddr;
+     int len;
+{
+  int xfersize;
+  while (len > 0)
+    {
+      if (len > MAXBUFBYTES)
+	xfersize = MAXBUFBYTES;
+      else
+	xfersize = len;
+      
+      remote_write_bytes(memaddr, myaddr, xfersize);
+      
+      memaddr += xfersize;
+      myaddr  += xfersize;
+      len     -= xfersize;
+    }
+  return 0; /* no error */
+}
+
 /*
 
 A debug packet whose contents are <data>
@@ -369,6 +506,24 @@ Receiver responds with:
 	-	- if CSUM is incorrect
 
 */
+
+static int
+readchar ()
+{
+  char buf;
+
+  buf = '\0';
+#ifdef HAVE_TERMIO
+  /* termio does the timeout for us.  */
+  read (remote_desc, &buf, 1);
+#else
+  alarm (timeout);
+  read (remote_desc, &buf, 1);
+  alarm (0);
+#endif
+
+  return buf & 0x7f;
+}
 
 /* Send the command in BUF to the remote machine,
    and read the reply into BUF.
@@ -394,14 +549,12 @@ putpkt (buf)
      char *buf;
 {
   int i;
-  char csum = 0;
+  unsigned char csum = 0;
   char buf2[500];
   char buf3[1];
   int cnt = strlen (buf);
+  char ch;
   char *p;
-
-  if (kiodebug)
-    fprintf (stderr, "Sending packet: %s\n", buf);
 
   /* Copy the packet into buffer BUF2, encapsulating it
      and giving it a checksum.  */
@@ -421,17 +574,18 @@ putpkt (buf)
   /* Send it over and over until we get a positive ack.  */
 
   do {
+    if (kiodebug)
+      {
+	*p = '\0';
+	printf ("Sending packet: %s (%s)\n", buf2, buf);
+      }
     write (remote_desc, buf2, p - buf2);
-    read (remote_desc, buf3, 1);
-  } while (buf3[0] != '+');
-}
 
-static int
-readchar ()
-{
-  char buf[1];
-  while (read (remote_desc, buf, 1) != 1) ;
-  return buf[0] & 0x7f;
+    /* read until either a timeout occurs (\0) or '+' is read */
+    do {
+      ch = readchar ();
+    } while ((ch != '+') && (ch != '\0'));
+  } while (ch != '+');
 }
 
 /* Read a packet from the remote machine, with error checking,
@@ -443,8 +597,12 @@ getpkt (buf)
 {
   char *bp;
   unsigned char csum;
-  unsigned int c, c1, c2;
+  int c;
+  unsigned char c1, c2;
   extern kiodebug;
+
+  /* allow immediate quit while reading from device, it could be hung */
+  immediate_quit++;
 
   while (1)
     {
@@ -466,12 +624,14 @@ getpkt (buf)
 
       c1 = fromhex (readchar ());
       c2 = fromhex (readchar ());
-      if (csum == (c1 << 4) + c2)
+      if ((csum & 0xff) == (c1 << 4) + c2)
 	break;
       printf ("Bad checksum, sentsum=0x%x, csum=0x%x, buf=%s\n",
-	      (c1 << 4) + c2, csum, buf);
+	      (c1 << 4) + c2, csum & 0xff, buf);
       write (remote_desc, "-", 1);
     }
+
+  immediate_quit--;
 
   write (remote_desc, "+", 1);
 
@@ -479,6 +639,16 @@ getpkt (buf)
     fprintf (stderr,"Packet received :%s\n", buf);
 }
 
+/* The data cache leads to incorrect results because it doesn't know about
+   volatile variables, thus making it impossible to debug functions which
+   use hardware registers.  Therefore it is #if 0'd out.  Effect on
+   performance is some, for backtraces of functions with a few
+   arguments each.  For functions with many arguments, the stack
+   frames don't fit in the cache blocks, which makes the cache less
+   helpful.  Disabling the cache is a big performance win for fetching
+   large structures, because the cache code fetched data in 16-byte
+   chunks.  */
+#if 0
 /* The data cache records all the data read from the remote machine
    since the last time it stopped.
 
@@ -620,4 +790,4 @@ dcache_init ()
   for (i=0;i<DCACHE_SIZE;i++,db++)
     insque (db, &dcache_free);
 }
-
+#endif /* 0 */
