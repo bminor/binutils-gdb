@@ -280,6 +280,7 @@ sunos.c
 syms.c
 sysdep.h
 targets.c
+targmatch.sed
 tekhex.c
 trad-core.c
 versados.c

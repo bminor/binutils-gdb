@@ -1,3 +1,32 @@
+Thu Oct  3 16:57:51 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Add havevecs, and put it in tdefaults.
+	* mpw-config.in: Likewise.
+	* configure: Rebuild.
+	* targmatch.sed: New file; a sed script to build targmatch.h from
+	config.bfd.
+	* config.bfd: Add #if, #endif, and comments for targmatch.h.
+	* targets.c: Include "fnmatch.h".
+	(struct targmatch): Define.
+	(bfd_target_match): Define by including targmatch.h.
+	(bfd_find_target): If the target is not found by name, search for
+	it as a configuration triplet.
+	* Makefile.in: Rebuild dependencies.
+ 	(BFD32_BACKENDS): Add aout-arm.o, aout-sparcle.o, hp300bsd.o,
+	i386dynix.o, m68k4knetbsd.o, and riscix.o.
+	(BFD32_BACKENDS_CFILES): Add aout-arm.c, aout-sparcle.c,
+	hp300bsd.c, i386dynix.c, m68k4knetbsd.c, and riscix.c.
+	(HFILES): Add targmatch.h.  Also, alphabetize and reindent.
+	(CFILES): Remove i386dynix.c and hp300bsd.c.
+	(targmatch.h): New target.
+	(do_clean): Remove targmatch.h.
+
+	* configure.in: Add BFD_NEED_DECLARATION(getenv).
+	* acconfig.h: Add NEED_DECLARATION_GETENV.
+	* configure, config.in: Rebuild.
+	* sysdep.h: If NEED_DECLARATION_GETENV, declare getenv.
+	* aout-adobe.c (aout_adobe_object_p): Don't declare getenv.
+
 Thu Oct  3 09:29:09 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* cpu-mn10x00.c, elf32-mn10x00: Removed.

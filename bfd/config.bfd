@@ -9,6 +9,10 @@
 #  targ_cflags		$(CFLAGS) for this target (FIXME: pretty bogus)
 #  targ_undercore	Whether underscores are used: yes or no
 
+# Part of this file is processed by targmatch.sed to generate the
+# targmatch.h file.  The #ifdef and #endif lines that appear below are
+# copied directly into targmatch.h.
+
 # The binutils c++filt program wants to know whether underscores are
 # stripped or not.  That is why we set targ_underscore.  c++filt uses
 # this information to choose a default.  This information is
@@ -43,6 +47,8 @@ esac
 #  convention, else the table becomes a real mess to understand and maintain.
 
 case "${targ}" in
+# START OF targmatch.h
+#ifdef BFD64
   alpha-*-netware*)
     targ_defvec=ecoffalpha_little_vec
     targ_selvecs=nlm32_alpha_vec
@@ -61,6 +67,7 @@ case "${targ}" in
   alpha-*-*)
     targ_defvec=ecoffalpha_little_vec
     ;;
+#endif /* BFD64 */
 
 # start-sanitize-arc
   arc-*-elf*)
@@ -120,6 +127,7 @@ case "${targ}" in
   hppa*-*-*elf* | hppa*-*-lites* | hppa*-*-sysv4*)
     targ_defvec=bfd_elf32_hppa_vec
     ;;
+#if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD) || defined (HOST_HPPAOSF)
   hppa*-*-bsd*)
     targ_defvec=som_vec
     targ_selvecs=bfd_elf32_hppa_vec
@@ -131,6 +139,7 @@ case "${targ}" in
     targ_defvec=som_vec
     targ_selvecs=bfd_elf32_hppa_vec
     ;;
+#endif /* defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD) || defined (HOST_HPPAOSF) */
 
   i[3456]86-*-sysv4* | i[3456]86-*-unixware | i[3456]86-*-solaris2* | \
   i[3456]86-*-elf | i[3456]86-*-sco*elf* | i[3456]86-*-freebsdelf* | \
@@ -475,10 +484,12 @@ case "${targ}" in
     targ_defvec=sunos_big_vec
     targ_underscore=yes
     ;;
+#ifdef BFD64
   sparc64-*-elf*)
     targ_defvec=bfd_elf64_sparc_vec
     targ_selvecs=bfd_elf32_sparc_vec
     ;;    
+#endif /* BFD64 */
   sparc-*-netware*)
     targ_defvec=bfd_elf32_sparc_vec
     targ_selvecs="nlm32_sparc_vec sunos_big_vec"
@@ -491,10 +502,12 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
+#if 0
   tahoe-*-*)
     targ_defvec=host_aout_vec
     targ_underscore=yes
     ;;
+#endif
 
 # start-sanitize-v850
   v850-*-*)
@@ -502,15 +515,12 @@ case "${targ}" in
     ;;
 
 # end-sanitize-v850
-  vax-*-vms*)
-    echo 1>&2 "*** BFD does not support target ${targ}."
-    echo 1>&2 "*** Look in bfd/config.bfd for supported targets."
-    exit 1
-    ;;
-  vax-*-*)
+#if 0
+  vax-*-bsd* | vax-*-ultrix*)
     targ_defvec=host_aout_vec
     targ_underscore=yes
     ;;
+#endif
 
   we32k-*-*)
     targ_defvec=we32kcoff_vec
@@ -530,7 +540,7 @@ case "${targ}" in
     ;;
 
   *-adobe-*)
-    targ_defvec=a_aout_adobe_vec
+    targ_defvec=a_out_adobe_vec
     targ_underscore=yes
     ;;
 
@@ -543,7 +553,7 @@ case "${targ}" in
     targ_defvec=m68kcoff_vec
     targ_selvecs=ieee_vec
     ;;
-
+# END OF targmatch.h
   *)
     echo 1>&2 "*** BFD does not support target ${targ}."
     echo 1>&2 "*** Look in bfd/config.bfd for supported targets."
