@@ -1,3 +1,7 @@
+Mon Apr 25 16:14:32 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Makefile.in (distclean): Remove $(PROGS) and underscore.c.
+
 Fri Apr 22 11:14:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* nlmconv.c (setup_sections): Remove special handling of .reginfo
