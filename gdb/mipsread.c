@@ -954,6 +954,10 @@ parse_symbol (sh, ax, ext_sh, bigend)
 		  max_value = tsym.value;
 		break;
 
+#if 0
+		/* This does not fix the bug which it intended to fix,
+		   and makes GDB hang when reading its own symbol table on
+		   the SGI, when compiled with the SGI compiler.  */
 	      case stTypedef:
 	      case stConstant:
 	      case stStaticProc:
@@ -962,6 +966,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
 		   Apparently processing them like the following prevents
 		   core dumps.  */
 		/* FALLTHROUGH */
+#endif
 
 	      case stBlock:
 	      case stUnion:

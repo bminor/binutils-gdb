@@ -97,20 +97,58 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun)
 #endif
   strcat (shell_command, "exec ");
 
-  /* Now add exec_file, quoting as necessary.  Quoting in this style is
-     said to work with all shells.  */
+  /* Now add exec_file, quoting as necessary.  */
   {
     char *p;
+    int need_to_quote;
 
-    strcat (shell_command, "'");
-    for (p = exec_file; *p != '\0'; ++p)
+    /* Quoting in this style is said to work with all shells.  But csh
+       on IRIX 4.0.1 can't deal with it.  So we only quote it if we need
+       to.  */
+    p = exec_file;
+    while (1)
       {
-	if (*p == '\'')
-	  strcat (shell_command, "'\\''");
-	else
-	  strncat (shell_command, p, 1);
+	switch (*p)
+	  {
+	  case '\'':
+	  case '"':
+	  case '(':
+	  case ')':
+	  case '$':
+	  case '&':
+	  case ';':
+	  case '<':
+	  case '>':
+	  case ' ':
+	  case '\n':
+	  case '\t':
+	    need_to_quote = 1;
+	    goto end_scan;
+
+	  case '\0':
+	    need_to_quote = 0;
+	    goto end_scan;
+
+	  default:
+	    break;
+	  }
+	++p;
       }
-    strcat (shell_command, "'");
+  end_scan:
+    if (need_to_quote)
+      {
+	strcat (shell_command, "'");
+	for (p = exec_file; *p != '\0'; ++p)
+	  {
+	    if (*p == '\'')
+	      strcat (shell_command, "'\\''");
+	    else
+	      strncat (shell_command, p, 1);
+	  }
+	strcat (shell_command, "'");
+      }
+    else
+      strcat (shell_command, exec_file);
   }
 
   strcat (shell_command, " ");
