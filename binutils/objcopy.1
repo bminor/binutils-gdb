@@ -38,15 +38,16 @@ objcopy \- copy and translate object files
 .RB "[\|" \-\-set\-start=\fIval\fR "\|]"
 .RB "[\|" \-\-change\-start=\fIincr\fR "\|]"
 .RB "[\|" \-\-change\-addresses=\fIincr\fR "\|]"
-.RB "[\|" \-\-change\-section\-address=\fIsection{=,+,-}val\fR "\|]"
-.RB "[\|" \-\-change\-section\-lma=\fIsection{=,+,-}val\fR "\|]"
-.RB "[\|" \-\-change\-section\-vma=\fIsection{=,+,-}val\fR "\|]"
+.RB "[\|" \-\-change\-section\-address\ \fIsection{=,+,-}val\fR "\|]"
+.RB "[\|" \-\-change\-section\-lma\ \fIsection{=,+,-}val\fR "\|]"
+.RB "[\|" \-\-change\-section\-vma\ \fIsection{=,+,-}val\fR "\|]"
 .RB "[\|" \-\-change\-warnings\fR "\|]"
 .RB "[\|" \-\-no\-change\-warnings\fR "\|]"
-.RB "[\|" \-\-set\-section\-flags=\fIsection=flags\fR "\|]"
-.RB "[\|" \-\-add\-section=\fIsectionname=filename\fR "\|]"
+.RB "[\|" \-\-set\-section\-flags\ \fIsection=flags\fR "\|]"
+.RB "[\|" \-\-add\-section\ \fIsectionname=filename\fR "\|]"
 .RB "[\|" \-\-change\-leading\-char\fR "\|]"
 .RB "[\|" \-\-remove\-leading\-char\fR "\|]"
+.RB "[\|" \-\-redefine\-sym\ \fIold=new\fR "\|]"
 .RB "[\|" \-\-weaken\fR "\|]"
 .RB "[\|" \-v\ |\ \-\-verbose\fR "\|]" 
 .RB "[\|" \-V\ |\ \-\-version\fR "\|]" 
@@ -159,7 +160,7 @@ visible externally.  This option may be given more than once.
 .B \-W \fIsymbolname\fR, \fB\-\-weaken\-symbol=\fIsymbolname
 Make symbol \fIsymbolname\fP weak. This option may be given more than once.
 .TP
-.B \-x\fR, \fB \-\-discard\-all
+.B \-x\fR, \fB\-\-discard\-all
 Do not copy non-global symbols from the source file.
 .TP
 .B \-X\fR, \fB\-\-discard\-locals
@@ -214,7 +215,7 @@ the sections; if the program expects sections to be loaded at a
 certain address, and this option is used to change the sections such
 that they are loaded at a different address, the program may fail.
 .TP
-.B \fB\-\-change\-section\-address=\fIsection{=,+,-}val\fR, \fB\-\-adjust\-section\-vma=\fIsection{=,+,-}val
+.B \fB\-\-change\-section\-address\ \fIsection{=,+,-}val\fR, \fB\-\-adjust\-section\-vma\ \fIsection{=,+,-}val
 Set or changes the VMA and LMA addresses of the named \fIsection\fP.
 If \fI=\fP is used, the section address is set to \fIval\fP.
 Otherwise, \fIval\fP is added to or subtracted from the section
@@ -222,7 +223,7 @@ address.  See the comments under \fB\-\-change\-addresses\fP, above.  If
 \fIsection\fP does not exist in the input file, a warning will be
 issued, unless \fB\-\-no\-change\-warnings\fP is used.
 .TP
-.B \fB\-\-change\-section\-lma=\fIsection{=,+,-}val
+.B \fB\-\-change\-section\-lma\ \fIsection{=,+,-}val
 Set or change the LMA address of the named \fIsection\fP.  If \fI=\fP is
 used, the section address is set to \fIval\fP.  Otherwise, \fIval\fP
 is added to or subtracted from the section address.  See the comments
@@ -230,7 +231,7 @@ under \fB\-\-change\-addresses\fP, above.  If \fIsection\fP does not exist
 in the input file, a warning will be issued, unless
 \fB\-\-no\-change\-warnings\fP is used.
 .TP
-.B \fB\-\-change\-section\-vma=\fIsection{=,+,-}val
+.B \fB\-\-change\-section\-vma\ \fIsection{=,+,-}val
 Set or change the VMA address of the named \fIsection\fP.  If \fI=\fP is
 used, the section address is set to \fIval\fP.  Otherwise, \fIval\fP
 is added to or subtracted from the section address.  See the comments
@@ -246,14 +247,14 @@ not exist, issue a warning.  This is the default.
 Do not issue a warning if \fB\-\-change\-section\-XXX\fP is used, even
 if the named section does not exist.
 .TP
-.B \fB\-\-set\-section\-flags=\fIsection=flags
+.B \fB\-\-set\-section\-flags\ \fIsection=flags
 Set the flags for the named section.  The \fIflags\fP argument is a
 comma separated string of flag names.  The recognized names are
 \fIalloc\fP, \fIcontents\fP, \fIload\fP, \fInoload\fP, \fIreadonly\fP,
 \fIcode\fP, \fIdata\fP, \fIrom\fP, \fIshare\fP, and \fIdebug\fP.  Not
 all flags are meaningful for all object file formats.
 .TP
-.B \fB\-\-add\-section=\fIsectionname=filename
+.B \fB\-\-add\-section\ \fIsectionname=filename
 Add a new section named \fIsectionname\fR while copying the file.  The
 contents of the new section are taken from the file \fIfilename\fR.
 The size of the section will be the size of the file.  This option
@@ -280,6 +281,11 @@ useful if you want to link together objects of different file formats
 with different conventions for symbol names.  This is different from
 \fB\-\-change\-leading\-char\fP because it always changes the symbol name
 when appropriate, regardless of the object file format of the output
+.TP
+.B \-\-redefine\-sym\ \fIold=new
+Change the name of symbol \fIold\fR to \fInew\fR.  This can be useful
+when one is trying link two things together for which you have no
+source, and there are name collisions.
 .TP
 .B \-\-weaken
 Change all global symbols in the file to be weak.

@@ -22,13 +22,15 @@ Changes in binutils 2.10:
   equivalent to --change-section-address.  The other --adjust-* options are now
   renamed to --change-*, although --adjust-* continues to work.
 
+* objcopy has a --redefine-sym option that lets you rename symbols.
+
+* objcopy now takes a -j/--only-section option to copy only the specified
+  sections.
+
 * dlltool now supports the IMPORTS command.
 
 * dlltool now takes --export-all-symbols, --no-export-all-symbols,
   --exclude-symbols, and --no-default-excludes options.
-
-* objcopy now takes a -j/--only-section option to copy only the specified
-  sections.
 
 Changes in binutils 2.9:
 

@@ -1,3 +1,32 @@
+2000-04-05  Alan Modra  <alan@linuxcare.com.au>
+
+	* binutils.texi: Remove optional `=' from long options that have
+	an `=' in the argument.
+	* objcopy.1: Here too.  Remove extra space on discard-all.
+
+	* binutils.texi (objcopy): Mention --redefine-sym.
+	* objcopy.1: Here too.
+	* NEWS: And here.
+
+	* objcopy.c (parse_flags): Split off flag names from error message
+	gettext as they are not translated.
+	(copy_main): Similarly split off option name for --add-section,
+	--set-section-flags, --change-section-vma, --change-section-lma
+	error messages.
+	Some white space changes.
+
+	from Matthew Benjamin <matt@linuxbox.nu>
+	* objcopy.c (struct redefine_node): New.
+	(redefine_sym_list): New.
+	(redefine_list_append): New.
+	(lookup_sym_redefinition): New.
+	(OPTION_REDEFINE_SYM): New.
+	(copy_options): Add --redefine-sym option.
+	(copy_usage): Mention it.
+	(filter_symbols): Rename symbols on redefine_sym_list.
+	(copy_object): Call filter_symbols if redefine_sym_list != NULL.
+	(copy_main): Handle OPTION_REDEFINE_SYM.
+
 2000-04-04  H.J. Lu  <hjl@gnu.org>
 
 	* readelf.c (process_symbol_table): Correctly read in symbol
