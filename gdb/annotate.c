@@ -1,5 +1,5 @@
 /* Annotation routines for GDB.
-   Copyright 1986, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1990, 1991, 1992, 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -369,7 +369,7 @@ annotate_source (filename, line, character, mid, pc)
   else
     printf_filtered ("\032\032");
 
-  printf_filtered ("%s:%d:%d:%s:", filename,
+  printf_filtered ("%s:%d:%d:%s:0x", filename,
 		   line, character,
 		   mid ? "middle" : "beg");
   print_address_numeric (pc, 0, gdb_stdout);
@@ -383,7 +383,7 @@ annotate_frame_begin (level, pc)
 {
   if (annotation_level > 1)
     {
-      printf_filtered ("\n\032\032frame-begin %d ", level);
+      printf_filtered ("\n\032\032frame-begin %d 0x", level);
       print_address_numeric (pc, 0, gdb_stdout);
       printf_filtered ("\n");
     }

@@ -199,6 +199,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 #include "gnu-regex.h"
 #include "inferior.h"
 #include "language.h"
+#include "gdbcmd.h"
 
 /* The symbol which starts off the list of shared libraries.  */
 #define DEBUG_BASE "__rld_obj_head"
@@ -1002,7 +1003,8 @@ solib_create_inferior_hook()
       and will put out an annoying warning.
       Delaying the resetting of stop_soon_quietly until after symbol loading
       suppresses the warning.  */
-  solib_add ((char *) 0, 0, (struct target_ops *) 0);
+  if (auto_solib_add_at_startup)
+    solib_add ((char *) 0, 0, (struct target_ops *) 0);
   stop_soon_quietly = 0;
 }
 
@@ -1032,9 +1034,18 @@ int from_tty;
 void
 _initialize_solib()
 {
-  
   add_com ("sharedlibrary", class_files, sharedlibrary_command,
 	   "Load shared object library symbols for files matching REGEXP.");
   add_info ("sharedlibrary", info_sharedlibrary_command, 
 	    "Status of loaded shared object libraries.");
+
+  add_show_from_set
+    (add_set_cmd ("auto-solib-add", class_support, var_zinteger,
+		  (char *) &auto_solib_add_at_startup,
+		  "Set autoloading of shared library symbols at startup.\n\
+If nonzero, symbols from all shared object libraries will be loaded\n\
+automatically when the inferior begins execution.  Otherwise, symbols\n\
+must be loaded manually, using `sharedlibrary'.",
+		  &setlist),
+     &showlist);
 }
