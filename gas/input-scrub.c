@@ -134,7 +134,9 @@ char *saved_position;
 	saved->next_saved_file		= next_saved_file;
 	saved->input_file_save		= input_file_push();
 	
-	input_scrub_begin();		/* Reinitialize! */
+	input_file_begin();		/* Reinitialize! */
+	logical_input_line = 0;
+	logical_input_file = (char *)NULL;
 	
 	return((char *) saved);
 } /* input_scrub_push() */

@@ -123,7 +123,7 @@ char *filename;
 
 	as_where();
 	fprintf(stderr, gripe, filename);
-	fprintf(stderr, "%s.\n", strerror(errno));
+	fprintf(stderr, ": %s\n", strerror(errno));
 	errno = 0; /* After reporting, clear it. */
 } /* as_perror() */
 
