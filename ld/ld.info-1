@@ -1,0 +1,1255 @@
+This is Info file ld.info, produced by Makeinfo-1.55 from the input
+file ./ld.texinfo.
+
+START-INFO-DIR-ENTRY
+* Ld::                          The GNU linker.
+END-INFO-DIR-ENTRY
+
+   This file documents the GNU linker LD.
+
+   Copyright (C) 1991, 1992, 1993 Free Software Foundation, Inc.
+
+   Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+   Permission is granted to copy and distribute modified versions of
+this manual under the conditions for verbatim copying, provided also
+that the entire resulting derived work is distributed under the terms
+of a permission notice identical to this one.
+
+   Permission is granted to copy and distribute translations of this
+manual into another language, under the above conditions for modified
+versions.
+
+
+File: ld.info,  Node: Top,  Next: Overview,  Prev: (DIR),  Up: (DIR)
+
+Using ld
+********
+
+   This file documents the GNU linker ld.
+
+* Menu:
+
+* Overview::                    Overview
+* Invocation::                  Invocation
+* Commands::                    Command Language
+
+* Machine Dependent::           Machine Dependent Features
+
+* BFD::                         BFD
+
+* MRI::                         MRI Compatible Script Files
+* Index::                       Index
+
+
+File: ld.info,  Node: Overview,  Next: Invocation,  Prev: Top,  Up: Top
+
+Overview
+********
+
+   `ld' combines a number of object and archive files, relocates their
+data and ties up symbol references. Usually the last step in compiling
+a program is to run `ld'.
+
+   `ld' accepts Linker Command Language files written in a superset of
+AT&T's Link Editor Command Language syntax, to provide explicit and
+total control over the linking process.
+
+   This version of `ld' uses the general purpose BFD libraries to
+operate on object files. This allows `ld' to read, combine, and write
+object files in many different formats--for example, COFF or `a.out'.
+Different formats may be linked together to produce any available kind
+of object file.  *Note BFD:: for a list of formats supported on various
+architectures.
+
+   Aside from its flexibility, the GNU linker is more helpful than other
+linkers in providing diagnostic information.  Many linkers abandon
+execution immediately upon encountering an error; whenever possible,
+`ld' continues executing, allowing you to identify other errors (or, in
+some cases, to get an output file in spite of the error).
+
+
+File: ld.info,  Node: Invocation,  Next: Commands,  Prev: Overview,  Up: Top
+
+Invocation
+**********
+
+   The GNU linker `ld' is meant to cover a broad range of situations,
+and to be as compatible as possible with other linkers.  As a result,
+you have many choices to control its behavior.
+
+* Menu:
+
+* Options::                     Command Line Options
+* Environment::                 Environment Variables
+
+
+File: ld.info,  Node: Options,  Next: Environment,  Up: Invocation
+
+Command Line Options
+====================
+
+   Here is a summary of the options you can use on the `ld' command
+line:
+
+     ld [ -o OUTPUT ]  OBJFILE...
+       [ -AARCHITECTURE ]  [ -b INPUT-FORMAT ]  [ -Bstatic ]
+       [ -c MRI-COMMANDFILE ]  [ -d | -dc | -dp ]
+       [ -defsym SYMBOL=EXPRESSION ]
+       [ -e ENTRY ]  [ -F ]  [ -F FORMAT ]
+       [ -format INPUT-FORMAT ]  [ -g ]  [ -G SIZE ]  [ --help ]  [ -i ]
+       [ -lARCHIVE ]  [ -LSEARCHDIR ]  [ -M ]  [ -Map MAPFILE ]
+       [ -m EMULATION ]  [ -N | -n ]  [ -noinhibit-exec ]
+       [ -oformat OUTPUT-FORMAT ]  [ -R FILENAME ]  [ -relax ]
+       [ -r | -Ur ]  [ -S ]  [ -s ]  [ -sort-common ]  [ -T COMMANDFILE ]
+       [ -Ttext ORG ]  [ -Tdata ORG ]
+       [ -Tbss ORG ]  [ -t ]  [ -u SYMBOL]  [-V]  [-v]  [ --version ]
+       [ -warn-common ]  [ -ySYMBOL ]  [ -X ]  [-x ]
+
+   This plethora of command-line options may seem intimidating, but in
+actual practice few of them are used in any particular context.  For
+instance, a frequent use of `ld' is to link standard Unix object files
+on a standard, supported Unix system.  On such a system, to link a file
+`hello.o':
+
+     ld -o OUTPUT /lib/crt0.o hello.o -lc
+
+   This tells `ld' to produce a file called OUTPUT as the result of
+linking the file `/lib/crt0.o' with `hello.o' and the library `libc.a',
+which will come from the standard search directories.  (See the
+discussion of the `-l' option below.)
+
+   The command-line options to `ld' may be specified in any order, and
+may be repeated at will.  Repeating most options with a different
+argument will either have no further effect, or override prior
+occurrences (those further to the left on the command line) of that
+option.
+
+   The exceptions--which may meaningfully be used more than once--are
+`-A', `-b' (or its synonym `-format'), `-defsym', `-L', `-l', `-R', and
+`-u'.
+
+   The list of object files to be linked together, shown as OBJFILE...,
+may follow, precede, or be mixed in with command-line options, except
+that an OBJFILE argument may not be placed between an option and its
+argument.
+
+   Usually the linker is invoked with at least one object file, but you
+can specify other forms of binary input files using `-l', `-R', and the
+script command language.  If *no* binary input files at all are
+specified, the linker does not produce any output, and issues the
+message `No input files'.
+
+   Option arguments must either follow the option letter without
+intervening whitespace, or be given as separate arguments immediately
+following the option that requires them.
+
+`-AARCHITECTURE'
+     In the current release of `ld', this option is useful only for the
+     Intel 960 family of architectures.  In that `ld' configuration, the
+     ARCHITECTURE argument identifies the particular architecture in
+     the 960 family, enabling some safeguards and modifying the
+     archive-library search path.  *Note `ld' and the Intel 960 family:
+     i960, for details.
+
+     Future releases of `ld' may support similar functionality for
+     other architecture families.
+
+`-b INPUT-FORMAT'
+     Specify the binary format for input object files that follow this
+     option on the command line.  You don't usually need to specify
+     this, as `ld' is configured to expect as a default input format
+     the most usual format on each machine.  INPUT-FORMAT is a text
+     string, the name of a particular format supported by the BFD
+     libraries.  (You can list the available binary formats with
+     `objdump -i'.) `-format INPUT-FORMAT' has the same effect, as does
+     the script command `TARGET'.  *Note BFD::.
+
+     You may want to use this option if you are linking files with an
+     unusual binary format.  You can also use `-b' to switch formats
+     explicitly (when linking object files of different formats), by
+     including `-b INPUT-FORMAT' before each group of object files in a
+     particular format.
+
+     The default format is taken from the environment variable
+     `GNUTARGET'.  *Note Environment::.  You can also define the input
+     format from a script, using the command `TARGET'; see *Note Option
+     Commands::.
+
+`-Bstatic'
+     Ignored.  This option is accepted for command-line compatibility
+     with the SunOS linker.
+
+`-c MRI-COMMANDFILE'
+     For compatibility with linkers produced by MRI, `ld' accepts script
+     files written in an alternate, restricted command language,
+     described in *Note MRI Compatible Script Files: MRI.  Introduce
+     MRI script files with the option `-c'; use the `-T' option to run
+     linker scripts written in the general-purpose `ld' scripting
+     language.  If MRI-CMDFILE does not exist, `ld' looks for it in the
+     directories specified by any `-L' options.
+
+`-d'
+`-dc'
+`-dp'
+     These three options are equivalent; multiple forms are supported
+     for compatibility with other linkers.  They assign space to common
+     symbols even if a relocatable output file is specified (with
+     `-r').  The script command `FORCE_COMMON_ALLOCATION' has the same
+     effect.  *Note Option Commands::.
+
+`-defsym SYMBOL=EXPRESSION'
+     Create a global symbol in the output file, containing the absolute
+     address given by EXPRESSION.  You may use this option as many
+     times as necessary to define multiple symbols in the command line.
+     A limited form of arithmetic is supported for the EXPRESSION in
+     this context: you may give a hexadecimal constant or the name of
+     an existing symbol, or use `+' and `-' to add or subtract
+     hexadecimal constants or symbols.  If you need more elaborate
+     expressions, consider using the linker command language from a
+     script (*note Assignment: Symbol Definitions: Assignment.).
+     *Note:*  there should be no white space between SYMBOL, the equals
+     sign ("="), and EXPRESSION.
+
+`-e ENTRY'
+     Use ENTRY as the explicit symbol for beginning execution of your
+     program, rather than the default entry point. *Note Entry Point::,
+     for a discussion of defaults and other ways of specifying the
+     entry point.
+
+`-F'
+`-FFORMAT'
+     Ignored.  Some older linkers used this option throughout a
+     compilation toolchain for specifying object-file format for both
+     input and output object files.  The mechanisms `ld' uses for this
+     purpose (the `-b' or `-format' options for input files, `-oformat'
+     option or the `TARGET' command in linker scripts for output files,
+     the `GNUTARGET' environment variable) are more flexible, but `ld'
+     accepts the `-F' option for compatibility with scripts written to
+     call the old linker.
+
+`-format INPUT-FORMAT'
+     Synonym for `-b INPUT-FORMAT'.
+
+`-g'
+     Ignored.  Provided for compatibility with other tools.
+
+`-GVALUE'
+`-G VALUE'
+     Set the maximum size of objects to be optimized using the GP
+     register to SIZE under MIPS ECOFF.  Ignored for other object file
+     formats.
+
+`--help'
+     Print a summary of the command-line options on the standard output
+     and exit.  This option and `--version' begin with two dashes
+     instead of one for compatibility with other GNU programs.  The
+     other options start with only one dash for compatibility with
+     other linkers.
+
+`-i'
+     Perform an incremental link (same as option `-r').
+
+`-lAR'
+     Add archive file ARCHIVE to the list of files to link.  This
+     option may be used any number of times.  `ld' will search its
+     path-list for occurrences of `libAR.a' for every ARCHIVE specified.
+
+`-LSEARCHDIR'
+`-L SEARCHDIR'
+     Add path SEARCHDIR to the list of paths that `ld' will search for
+     archive libraries and `ld' control scripts.  You may use this
+     option any number of times.
+
+     The default set of paths searched (without being specified with
+     `-L') depends on which emulation mode `ld' is using, and in some
+     cases also on how it was configured.  *Note Environment::.
+
+     The paths can also be specified in a link script with the
+     `SEARCH_DIR' command.
+
+`-M'
+     Print (to the standard output) a link map--diagnostic information
+     about where symbols are mapped by `ld', and information on global
+     common storage allocation.
+
+`-Map MAPFILE'
+     Print to the file MAPFILE a link map--diagnostic information about
+     where symbols are mapped by `ld', and information on global common
+     storage allocation.
+
+`-mEMULATION'
+`-m EMULATION'
+     Emulate the EMULATION linker.  You can list the available
+     emulations with the `-V' option.  The default is the system for
+     which you configured `ld'.
+
+`-N'
+     Set the text and data sections to be readable and writable.  Also,
+     do not page-align the data segment.  If the output format supports
+     Unix style magic numbers, mark the output as `OMAGIC'.
+
+`-n'
+     Set the text segment to be read only, and mark the output as
+     `NMAGIC' if possible.
+
+`-noinhibit-exec'
+     Retain the executable output file whenever it is still usable.
+     Normally, the linker will not produce an output file if it
+     encounters errors during the link process; it exits without
+     writing an output file when it issues any error whatsoever.
+
+`-o OUTPUT'
+     Use OUTPUT as the name for the program produced by `ld'; if this
+     option is not specified, the name `a.out' is used by default.  The
+     script command `OUTPUT' can also specify the output file name.
+
+`-oformat OUTPUT-FORMAT'
+     Specify the binary format for the output object file.  You don't
+     usually need to specify this, as `ld' is configured to produce as
+     a default output format the most usual format on each machine.
+     oUTPUT-FORMAT is a text string, the name of a particular format
+     supported by the BFD libraries.  (You can list the available binary
+     formats with `objdump -i'.)  The script command `OUTPUT_FORMAT'
+     can also specify the output format, but this option overrides it.
+     *Note BFD::.
+
+`-R FILENAME'
+     Read symbol names and their addresses from FILENAME, but do not
+     relocate it or include it in the output.  This allows your output
+     file to refer symbolically to absolute locations of memory defined
+     in other programs.
+
+`-relax'
+     An option with machine dependent effects.  Currently this option
+     is only supported on the H8/300.  *Note `ld' and the H8/300:
+     H8/300.
+
+     On some platforms, use option performs global optimizations that
+     become possible when the linker resolves addressing in the
+     program, such as relaxing address modes and synthesizing new
+     instructions in the output object file.
+
+     On platforms where this is not supported, `-relax' is accepted, but
+     ignored.
+
+`-r'
+     Generate relocatable output--i.e., generate an output file that
+     can in turn serve as input to `ld'.  This is often called "partial
+     linking".  As a side effect, in environments that support standard
+     Unix magic numbers, this option also sets the output file's magic
+     number to `OMAGIC'.  If this option is not specified, an absolute
+     file is produced.  When linking C++ programs, this option *will
+     not* resolve references to constructors; to do that, use `-Ur'.
+
+     This option does the same thing as `-i'.
+
+`-S'
+     Omit debugger symbol information (but not all symbols) from the
+     output file.
+
+`-s'
+     Omit all symbol information from the output file.
+
+`-sort-common'
+     Normally, when `ld' places the global common symbols in the
+     appropriate output sections, it sorts them by size.  First come
+     all the one byte symbols, then all the two bytes, then all the
+     four bytes, and then everything else.  This is to prevent gaps
+     between symbols due to alignment constraints.  This option
+     disables that sorting.
+
+`-Tbss ORG'
+`-Tdata ORG'
+`-Ttext ORG'
+     Use ORG as the starting address for--respectively--the `bss',
+     `data', or the `text' segment of the output file.  ORG must be a
+     single hexadecimal integer; for compatibility with other linkers,
+     you may omit the leading `0x' usually associated with hexadecimal
+     values.
+
+`-T COMMANDFILE'
+`-TCOMMANDFILE'
+     Read link commands from the file COMMANDFILE.  These commands
+     completely override `ld''s default link format (rather than adding
+     to it); COMMANDFILE must specify everything necessary to describe
+     the target format.  *Note Commands::.  If COMMANDFILE does not
+     exist, `ld' looks for it in the directories specified by any
+     preceding `-L' options.  Multiple `-T' options accumulate.
+
+`-t'
+     Print the names of the input files as `ld' processes them.
+
+`-u SYMBOL'
+     Force SYMBOL to be entered in the output file as an undefined
+     symbol.  Doing this may, for example, trigger linking of
+     additional modules from standard libraries.  `-u' may be repeated
+     with different option arguments to enter additional undefined
+     symbols.
+
+`-Ur'
+     For anything other than C++ programs, this option is equivalent to
+     `-r': it generates relocatable output--i.e., an output file that
+     can in turn serve as input to `ld'.  When linking C++ programs,
+     `-Ur' *will* resolve references to constructors, unlike `-r'.  It
+     does not work to use `-Ur' on files that were themselves linked
+     with `-Ur'; once the constructor table has been built, it can not
+     be added to.  Use `-Ur' only for the last partial link, and `-r'
+     for the others.
+
+`-V'
+     Display the version number for `ld' and list the supported
+     emulations.  Display which input files can and can not be opened.
+
+`-v'
+     Display the version number for `ld'.
+
+`--version'
+     Display the version number for `ld' and exit.
+
+`-warn-common'
+     Warn when a common symbol is combined with another common symbol
+     or with a symbol definition.  Unix linkers allow this somewhat
+     sloppy practice, but linkers on some other operating systems do
+     not.  This option allows you to find potential problems from
+     combining global symbols.  Unfortunately, some C libraries use
+     this practice, so you may get some warnings about symbols in the
+     libraries as well as in your programs.
+
+     There are three kinds of global symbols, illustrated here by C
+     examples:
+
+    `int i = 1;'
+          A definition, which goes in the initialized data section of
+          the output file.
+
+    `extern int i;'
+          An undefined reference, which does not allocate space.  There
+          must be either a definition or a common symbol for the
+          variable somewhere.
+
+    `int i;'
+          A common symbol.  If there are only (one or more) common
+          symbols for a variable, it goes in the uninitialized data
+          area of the output file.  The linker merges multiple common
+          symbols for the same variable into a single symbol.  If they
+          are of different sizes, it picks the largest size.  The
+          linker turns a common symbol into a declaration, if there is
+          a definition of the same variable.
+
+     The `-warn-common' option can produce five kinds of warnings.  Each
+     warning consists of a pair of lines: the first describes the
+     symbol just encountered, and the second describes the previous
+     symbol encountered with the same name.  One or both of the two
+     symbols will be a common symbol.
+
+       1. Turning a common symbol into a reference, because there is
+          already a definition for the symbol.
+               FILE(SECTION): warning: common of `SYMBOL'
+                  overridden by definition
+               FILE(SECTION): warning: defined here
+
+       2. Turning a common symbol into a reference, because a later
+          definition for the symbol is encountered.  This is the same
+          as the previous case, except that the symbols are encountered
+          in a different order.
+               FILE(SECTION): warning: definition of `SYMBOL'
+                  overriding common
+               FILE(SECTION): warning: common is here
+
+       3. Merging a common symbol with a previous same-sized common
+          symbol.
+               FILE(SECTION): warning: multiple common
+                  of `SYMBOL'
+               FILE(SECTION): warning: previous common is here
+
+       4. Merging a common symbol with a previous larger common symbol.
+               FILE(SECTION): warning: common of `SYMBOL'
+                  overridden by larger common
+               FILE(SECTION): warning: larger common is here
+
+       5. Merging a common symbol with a previous smaller common
+          symbol.  This is the same as the previous case, except that
+          the symbols are encountered in a different order.
+               FILE(SECTION): warning: common of `SYMBOL'
+                  overriding smaller common
+               FILE(SECTION): warning: smaller common is here
+
+`-X'
+     If `-s' or `-S' is also specified, delete only local symbols
+     beginning with `L'.
+
+`-x'
+     If `-s' or `-S' is also specified, delete all local symbols, not
+     just those beginning with `L'.
+
+`-ySYMBOL'
+     Print the name of each linked file in which SYMBOL appears.  This
+     option may be given any number of times.  On many systems it is
+     necessary to prepend an underscore.
+
+     This option is useful when you have an undefined symbol in your
+     link but don't know where the reference is coming from.
+
+
+File: ld.info,  Node: Environment,  Prev: Options,  Up: Invocation
+
+Environment Variables
+=====================
+
+   You can change the behavior of `ld' with the environment variable
+`GNUTARGET'.
+
+   `GNUTARGET' determines the input-file object format if you don't use
+`-b' (or its synonym `-format').  Its value should be one of the BFD
+names for an input format (*note BFD::.).  If there is no `GNUTARGET'
+in the environment, `ld' uses the natural format of the target. If
+`GNUTARGET' is set to `default' then BFD attempts to discover the input
+format by examining binary input files; this method often succeeds, but
+there are potential ambiguities, since there is no method of ensuring
+that the magic number used to specify object-file formats is unique.
+However, the configuration procedure for BFD on each system places the
+conventional format for that system first in the search-list, so
+ambiguities are resolved in favor of convention.
+
+
+File: ld.info,  Node: Commands,  Next: Machine Dependent,  Prev: Invocation,  Up: Top
+
+Command Language
+****************
+
+   The command language provides explicit control over the link process,
+allowing complete specification of the mapping between the linker's
+input files and its output.  It controls:
+   * input files
+
+   * file formats
+
+   * output file layout
+
+   * addresses of sections
+
+   * placement of common blocks
+
+   You may supply a command file (also known as a link script) to the
+linker either explicitly through the `-T' option, or implicitly as an
+ordinary file. If the linker opens a file which it cannot recognize as
+a supported object or archive format, it reports an error.
+
+* Menu:
+
+* Scripts::                     Linker Scripts
+* Expressions::                 Expressions
+* MEMORY::                      MEMORY Command
+* SECTIONS::                    SECTIONS Command
+* Entry Point::                 The Entry Point
+* Option Commands::             Option Commands
+
+
+File: ld.info,  Node: Scripts,  Next: Expressions,  Up: Commands
+
+Linker Scripts
+==============
+
+   The `ld' command language is a collection of statements; some are
+simple keywords setting a particular option, some are used to select and
+group input files or name output files; and two statement types have a
+fundamental and pervasive impact on the linking process.
+
+   The most fundamental command of the `ld' command language is the
+`SECTIONS' command (*note SECTIONS::.).  Every meaningful command
+script must have a `SECTIONS' command: it specifies a "picture" of the
+output file's layout, in varying degrees of detail.  No other command
+is required in all cases.
+
+   The `MEMORY' command complements `SECTIONS' by describing the
+available memory in the target architecture.  This command is optional;
+if you don't use a `MEMORY' command, `ld' assumes sufficient memory is
+available in a contiguous block for all output.  *Note MEMORY::.
+
+   You may include comments in linker scripts just as in C: delimited
+by `/*' and `*/'.  As in C, comments are syntactically equivalent to
+whitespace.
+
+
+File: ld.info,  Node: Expressions,  Next: MEMORY,  Prev: Scripts,  Up: Commands
+
+Expressions
+===========
+
+   Many useful commands involve arithmetic expressions.  The syntax for
+expressions in the command language is identical to that of C
+expressions, with the following features:
+   * All expressions evaluated as integers and are of "long" or
+     "unsigned long" type.
+
+   * All constants are integers.
+
+   * All of the C arithmetic operators are provided.
+
+   * You may reference, define, and create global variables.
+
+   * You may call special purpose built-in functions.
+
+* Menu:
+
+* Integers::                    Integers
+* Symbols::                     Symbol Names
+* Location Counter::            The Location Counter
+* Operators::                   Operators
+* Evaluation::                  Evaluation
+* Assignment::                  Assignment: Defining Symbols
+* Arithmetic Functions::        Built-In Functions
+
+
+File: ld.info,  Node: Integers,  Next: Symbols,  Up: Expressions
+
+Integers
+--------
+
+   An octal integer is `0' followed by zero or more of the octal digits
+(`01234567').
+     _as_octal = 0157255;
+
+   A decimal integer starts with a non-zero digit followed by zero or
+more digits (`0123456789').
+     _as_decimal = 57005;
+
+   A hexadecimal integer is `0x' or `0X' followed by one or more
+hexadecimal digits chosen from `0123456789abcdefABCDEF'.
+     _as_hex = 0xdead;
+
+   To write a negative integer, use the prefix operator `-'; *note
+Operators::..
+     _as_neg = -57005;
+
+   Additionally the suffixes `K' and `M' may be used to scale a
+constant by `1024' or `1024*1024' respectively. For example, the
+following all refer to the same quantity:
+
+             _fourk_1 = 4K;
+             _fourk_2 = 4096;
+             _fourk_3 = 0x1000;
+
+
+File: ld.info,  Node: Symbols,  Next: Location Counter,  Prev: Integers,  Up: Expressions
+
+Symbol Names
+------------
+
+   Unless quoted, symbol names start with a letter, underscore, point or
+hyphen and may include any letters, underscores, digits, points, and
+minus signs.  Unquoted symbol names must not conflict with any
+keywords.  You can specify a symbol which contains odd characters or has
+the same name as a keyword, by surrounding the symbol name in double
+quotes:
+             "SECTION" = 9;
+             "with a space" = "also with a space" + 10;
+
+
+File: ld.info,  Node: Location Counter,  Next: Operators,  Prev: Symbols,  Up: Expressions
+
+The Location Counter
+--------------------
+
+   The special linker variable "dot" `.' always contains the current
+output location counter. Since the `.' always refers to a location in
+an output section, it must always appear in an expression within a
+`SECTIONS' command. The `.' symbol may appear anywhere that an ordinary
+symbol is allowed in an expression, but its assignments have a side
+effect. Assigning a value to the `.' symbol will cause the location
+counter to be moved.  This may be used to create holes in the output
+section.  The location counter may never be moved backwards.
+     SECTIONS
+     {
+             output :
+             {
+             file1(.text)
+             . = . + 1000;
+             file2(.text)
+             . += 1000;
+             file3(.text)
+             } = 0x1234;
+     }
+
+In the previous example, `file1' is located at the beginning of the
+output section, then there is a 1000 byte gap.  Then `file2' appears,
+also with a 1000 byte gap following before `file3' is loaded.  The
+notation `= 0x1234' specifies what data to write in the gaps (*note
+Section Options::.).
+
+
+File: ld.info,  Node: Operators,  Next: Evaluation,  Prev: Location Counter,  Up: Expressions
+
+Operators
+---------
+
+   The linker recognizes  the standard C set of arithmetic operators,
+with the standard bindings and precedence levels:
+     precedence      associativity   Operators                Notes
+     (highest)
+     1               left            !  -  ~                  (1)
+     2               left            *  /  %
+     3               left            +  -
+     4               left            >>  <<
+     5               left            ==  !=  >  <  <=  >=
+     6               left            &
+     7               left            |
+     8               left            &&
+     9               left            ||
+     10              right           ? :
+     11              right           &=  +=  -=  *=  /=       (2)
+     (lowest)
+   Notes: (1) Prefix operators (2) *Note Assignment::
+
+
+File: ld.info,  Node: Evaluation,  Next: Assignment,  Prev: Operators,  Up: Expressions
+
+Evaluation
+----------
+
+   The linker uses "lazy evaluation" for expressions; it only calculates
+an expression when absolutely necessary.  The linker needs the value of
+the start address, and the lengths of memory regions, in order to do any
+linking at all; these values are computed as soon as possible when the
+linker reads in the command file.  However, other values (such as symbol
+values) are not known or needed until after storage allocation.  Such
+values are evaluated later, when other information (such as the sizes of
+output sections) is available for use in the symbol assignment
+expression.
+
+
+File: ld.info,  Node: Assignment,  Next: Arithmetic Functions,  Prev: Evaluation,  Up: Expressions
+
+Assignment: Defining Symbols
+----------------------------
+
+   You may create global symbols, and assign values (addresses) to
+global symbols, using any of the C assignment operators:
+
+`SYMBOL  = EXPRESSION ;'
+`SYMBOL &= EXPRESSION ;'
+`SYMBOL += EXPRESSION ;'
+`SYMBOL -= EXPRESSION ;'
+`SYMBOL *= EXPRESSION ;'
+`SYMBOL /= EXPRESSION ;'
+   Two things distinguish assignment from other operators in `ld'
+expressions.
+   * Assignment may only be used at the root of an expression; `a=b+3;'
+     is allowed, but `a+b=3;' is an error.
+
+   * You must place a trailing semicolon (";") at the end of an
+     assignment statement.
+
+   Assignment statements may appear:
+   * as commands in their own right in an `ld' script; or
+
+   * as independent statements within a `SECTIONS' command; or
+
+   * as part of the contents of a section definition in a `SECTIONS'
+     command.
+
+   The first two cases are equivalent in effect--both define a symbol
+with an absolute address.  The last case defines a symbol whose address
+is relative to a particular section (*note SECTIONS::.).
+
+   When a linker expression is evaluated and assigned to a variable, it
+is given either an absolute or a relocatable type. An absolute
+expression type is one in which the symbol contains the value that it
+will have in the output file; a relocatable expression type is one in
+which the value is expressed as a fixed offset from the base of a
+section.
+
+   The type of the expression is controlled by its position in the
+script file.  A symbol assigned within a section definition is created
+relative to the base of the section; a symbol assigned in any other
+place is created as an absolute symbol. Since a symbol created within a
+section definition is relative to the base of the section, it will
+remain relocatable if relocatable output is requested.  A symbol may be
+created with an absolute value even when assigned to within a section
+definition by using the absolute assignment function `ABSOLUTE'.  For
+example, to create an absolute symbol whose address is the last byte of
+an output section named `.data':
+     SECTIONS{ ...
+     .data :
+             {
+                     *(.data)
+                     _edata = ABSOLUTE(.) ;
+             }
+     ... }
+
+   The linker tries to put off the evaluation of an assignment until all
+the terms in the source expression are known (*note Evaluation::.).  For
+instance, the sizes of sections cannot be known until after allocation,
+so assignments dependent upon these are not performed until after
+allocation. Some expressions, such as those depending upon the location
+counter "dot", `.' must be evaluated during allocation. If the result
+of an expression is required, but the value is not available, then an
+error results.  For example, a script like the following
+     SECTIONS { ...
+           text 9+this_isnt_constant :
+                     { ...
+                     }
+     ... }
+
+will cause the error message "`Non constant expression for initial
+address'".
+
+
+File: ld.info,  Node: Arithmetic Functions,  Prev: Assignment,  Up: Expressions
+
+Arithmetic Functions
+--------------------
+
+   The command language includes a number of built-in functions for use
+in link script expressions.
+`ABSOLUTE(EXP)'
+     Return the absolute (non-relocatable, as opposed to non-negative)
+     value of the expression EXP.  Primarily useful to assign an
+     absolute value to a symbol within a section definition, where
+     symbol values are normally section-relative.
+
+`ADDR(SECTION)'
+     Return the absolute address of the named SECTION.  Your script must
+     previously have defined the location of that section. In the
+     following example, `symbol_1' and `symbol_2' are assigned identical
+     values:
+          SECTIONS{ ...
+                  .output1 :
+                          {
+                          start_of_output_1 = ABSOLUTE(.);
+                          ...
+                          }
+                  .output :
+                          {
+                          symbol_1 = ADDR(.output1);
+                          symbol_2 = start_of_output_1;
+                          }
+          ... }
+
+`ALIGN(EXP)'
+     Return the result of the current location counter (`.') aligned to
+     the next EXP boundary.  EXP must be an expression whose value is a
+     power of two.  This is equivalent to
+          (. + EXP - 1) & ~(EXP - 1)
+
+     `ALIGN' doesn't change the value of the location counter--it just
+     does arithmetic on it.  As an example, to align the output `.data'
+     section to the next `0x2000' byte boundary after the preceding
+     section and to set a variable within the section to the next
+     `0x8000' boundary after the input sections:
+          SECTIONS{ ...
+                  .data ALIGN(0x2000): {
+                          *(.data)
+                          variable = ALIGN(0x8000);
+                  }
+          ... }
+
+     The first use of `ALIGN' in this example specifies the location of
+     a section because it is used as the optional START attribute of a
+     section definition (*note Section Options::.).  The second use
+     simply defines the value of a variable.
+
+     The built-in `NEXT' is closely related to `ALIGN'.
+
+`DEFINED(SYMBOL)'
+     Return 1 if SYMBOL is in the linker global symbol table and is
+     defined, otherwise return 0.  You can use this function to provide
+     default values for symbols.  For example, the following
+     command-file fragment shows how to set a global symbol `begin' to
+     the first location in the `.text' section--but if a symbol called
+     `begin' already existed, its value is preserved:
+          SECTIONS{ ...
+                  .text : {
+                          begin = DEFINED(begin) ? begin : . ;
+                          ...
+                  }
+          ... }
+
+`NEXT(EXP)'
+     Return the next unallocated address that is a multiple of EXP.
+     This function is closely related to `ALIGN(EXP)'; unless you use
+     the `MEMORY' command to define discontinuous memory for the output
+     file, the two functions are equivalent.
+
+`SIZEOF(SECTION)'
+     Return the size in bytes of the named SECTION, if that section has
+     been allocated.  In the following example, `symbol_1' and
+     `symbol_2' are assigned identical values:
+          SECTIONS{ ...
+                  .output {
+                          .start = . ;
+                          ...
+                          .end = . ;
+                          }
+                  symbol_1 = .end - .start ;
+                  symbol_2 = SIZEOF(.output);
+          ... }
+
+`SIZEOF_HEADERS'
+`sizeof_headers'
+     Return the size in bytes of the output file's headers.  You can
+     use this number as the start address of the first section, if you
+     choose, to facilitate paging.
+
+
+File: ld.info,  Node: MEMORY,  Next: SECTIONS,  Prev: Expressions,  Up: Commands
+
+Memory Layout
+=============
+
+   The linker's default configuration permits allocation of all
+available memory.  You can override this configuration by using the
+`MEMORY' command.  The `MEMORY' command describes the location and size
+of blocks of memory in the target.  By using it carefully, you can
+describe which memory regions may be used by the linker, and which
+memory regions it must avoid.  The linker does not shuffle sections to
+fit into the available regions, but does move the requested sections
+into the correct regions and issue errors when the regions become too
+full.
+
+   A command file may contain at most one use of the `MEMORY' command;
+however, you can define as many blocks of memory within it as you wish.
+The syntax is:
+
+     MEMORY
+           {
+            NAME (ATTR) : ORIGIN = ORIGIN, LENGTH = LEN
+            ...
+           }
+
+`NAME'
+     is a name used internally by the linker to refer to the region. Any
+     symbol name may be used.  The region names are stored in a separate
+     name space, and will not conflict with symbols, file names or
+     section names.  Use distinct names to specify multiple regions.
+
+`(ATTR)'
+     is an optional list of attributes, permitted for compatibility
+     with the AT&T linker but not used by `ld' beyond checking that the
+     attribute list is valid.  Valid attribute lists must be made up of
+     the characters "`LIRWX'".  If you omit the attribute list, you may
+     omit the parentheses around it as well.
+
+`ORIGIN'
+     is the start address of the region in physical memory.  It is an
+     expression that must evaluate to a constant before memory
+     allocation is performed. The keyword `ORIGIN' may be abbreviated
+     to `org' or `o' (but not, for example, `ORG').
+
+`LEN'
+     is the size in bytes of the region (an expression).  The keyword
+     `LENGTH' may be abbreviated to `len' or `l'.
+
+   For example, to specify that memory has two regions available for
+allocation--one starting at 0 for 256 kilobytes, and the other starting
+at `0x40000000' for four megabytes:
+
+     MEMORY
+             {
+             rom : ORIGIN = 0, LENGTH = 256K
+             ram : org = 0x40000000, l = 4M
+             }
+
+   Once you have defined a region of memory named MEM, you can direct
+specific output sections there by using a command ending in `>MEM'
+within the `SECTIONS' command (*note Section Options::.).  If the
+combined output sections directed to a region are too big for the
+region, the linker will issue an error message.
+
+
+File: ld.info,  Node: SECTIONS,  Next: Entry Point,  Prev: MEMORY,  Up: Commands
+
+Specifying Output Sections
+==========================
+
+   The `SECTIONS' command controls exactly where input sections are
+placed into output sections, their order in the output file, and to
+which output sections they are allocated.
+
+   You may use at most one `SECTIONS' command in a script file, but you
+can have as many statements within it as you wish.  Statements within
+the `SECTIONS' command can do one of three things:
+   * define the entry point;
+
+   * assign a value to a symbol;
+
+   * describe the placement of a named output section, and which input
+     sections go into it.
+
+   You can also use the first two operations--defining the entry point
+and defining symbols--outside the `SECTIONS' command: *note Entry
+Point::., and *note Assignment::..  They are permitted here as well for
+your convenience in reading the script, so that symbols and the entry
+point can be defined at meaningful points in your output-file layout.
+
+   When no `SECTIONS' command is given, the linker places each input
+section into an identically named output section in the order that the
+sections are first encountered in the input files.  If all input
+sections are present in the first file, for example, the order of
+sections in the output file will match the order in the first input
+file.
+
+* Menu:
+
+* Section Definition::          Section Definitions
+* Section Placement::           Section Placement
+* Section Data Expressions::    Section Data Expressions
+* Section Options::             Optional Section Attributes
+
+
+File: ld.info,  Node: Section Definition,  Next: Section Placement,  Up: SECTIONS
+
+Section Definitions
+-------------------
+
+   The most frequently used statement in the `SECTIONS' command is the
+"section definition", which specifies the properties of an output
+section: its location, alignment, contents, fill pattern, and target
+memory region.  Most of these specifications are optional; the simplest
+form of a section definition is
+     SECTIONS { ...
+     SECNAME : {
+                      CONTENTS
+                     }
+     ... }
+
+SECNAME is the name of the output section, and CONTENTS a specification
+of what goes there--for example, a list of input files or sections of
+input files (*note Section Placement::.).  As you might assume, the
+whitespace shown is optional.  You do need the colon `:' and the braces
+`{}', however.
+
+   SECNAME must meet the constraints of your output format.  In formats
+which only support a limited number of sections, such as `a.out', the
+name must be one of the names supported by the format (`a.out', for
+example, allows only `.text', `.data' or `.bss'). If the output format
+supports any number of sections, but with numbers and not names (as is
+the case for Oasys), the name should be supplied as a quoted numeric
+string.  A section name may consist of any sequence of characters, but
+any name which does not conform to the standard `ld' symbol name syntax
+must be quoted.  *Note Symbol Names: Symbols.
+
+
+File: ld.info,  Node: Section Placement,  Next: Section Data Expressions,  Prev: Section Definition,  Up: SECTIONS
+
+Section Placement
+-----------------
+
+   In a section definition, you can specify the contents of an output
+section by listing particular input files, by listing particular
+input-file sections, or by a combination of the two.  You can also
+place arbitrary data in the section, and define symbols relative to the
+beginning of the section.
+
+   The CONTENTS of a section definition may include any of the
+following kinds of statement.  You can include as many of these as you
+like in a single section definition, separated from one another by
+whitespace.
+
+`FILENAME'
+     You may simply name a particular input file to be placed in the
+     current output section; *all* sections from that file are placed
+     in the current section definition.  If the file name has already
+     been mentioned in another section definition, with an explicit
+     section name list, then only those sections which have not yet
+     been allocated are used.
+
+     To specify a list of particular files by name:
+          .data : { afile.o bfile.o cfile.o }
+
+     The example also illustrates that multiple statements can be
+     included in the contents of a section definition, since each file
+     name is a separate statement.
+
+`FILENAME( SECTION )'
+`FILENAME( SECTION, SECTION, ... )'
+`FILENAME( SECTION SECTION ... )'
+     You can name one or more sections from your input files, for
+     insertion in the current output section.  If you wish to specify a
+     list of input-file sections inside the parentheses, you may
+     separate the section names by either commas or whitespace.
+
+`* (SECTION)'
+`* (SECTION, SECTION, ...)'
+`* (SECTION SECTION ...)'
+     Instead of explicitly naming particular input files in a link
+     control script, you can refer to *all* files from the `ld' command
+     line: use `*' instead of a particular file name before the
+     parenthesized input-file section list.
+
+     If you have already explicitly included some files by name, `*'
+     refers to all *remaining* files--those whose places in the output
+     file have not yet been defined.
+
+     For example, to copy sections `1' through `4' from an Oasys file
+     into the `.text' section of an `a.out' file, and sections `13' and
+     `14' into the `.data' section:
+          SECTIONS {
+                  .text :{
+                          *("1" "2" "3" "4")
+                  }
+          
+                  .data :{
+                          *("13" "14")
+                  }
+          }
+
+     `[ SECTION ... ]' used to be accepted as an alternate way to
+     specify named sections from all unallocated input files.  Because
+     some operating systems (VMS) allow brackets in file names, that
+     notation is no longer supported.
+
+`FILENAME`( COMMON )''
+`*( COMMON )'
+     Specify where in your output file to place uninitialized data with
+     this notation.  `*(COMMON)' by itself refers to all uninitialized
+     data from all input files (so far as it is not yet allocated);
+     FILENAME`(COMMON)' refers to uninitialized data from a particular
+     file.  Both are special cases of the general mechanisms for
+     specifying where to place input-file sections: `ld' permits you to
+     refer to uninitialized data as if it were in an input-file section
+     named `COMMON', regardless of the input file's format.
+
+   For example, the following command script arranges the output file
+into three consecutive sections, named `.text', `.data', and `.bss',
+taking the input for each from the correspondingly named sections of
+all the input files:
+     SECTIONS {
+       .text : { *(.text) }
+       .data : { *(.data) }
+       .bss :  { *(.bss)  *(COMMON) }
+     }
+
+   The following example reads all of the sections from file `all.o'
+and places them at the start of output section `outputa' which starts
+at location `0x10000'. All of section `.input1' from file `foo.o'
+follows immediately, in the same output section.  All of section
+`.input2' from `foo.o' goes into output section `outputb', followed by
+section `.input1' from `foo1.o'.  All of the remaining `.input1' and
+`.input2' sections from any files are written to output section
+`outputc'.
+
+     SECTIONS {
+             outputa 0x10000 :
+                     {
+                     all.o
+                     foo.o (.input1)
+                     }
+             outputb :
+                     {
+                     foo.o (.input2)
+                     foo1.o (.input1)
+                     }
+             outputc :
+                     {
+                     *(.input1)
+                     *(.input2)
+                     }
+     }
+
+
+File: ld.info,  Node: Section Data Expressions,  Next: Section Options,  Prev: Section Placement,  Up: SECTIONS
+
+Section Data Expressions
+------------------------
+
+   The foregoing statements arrange, in your output file, data
+originating from your input files.  You can also place data directly in
+an output section from the link command script.  Most of these
+additional statements involve expressions; *note Expressions::..
+Although these statements are shown separately here for ease of
+presentation, no such segregation is needed within a section definition
+in the `SECTIONS' command; you can intermix them freely with any of the
+statements we've just described.
+
+`CREATE_OBJECT_SYMBOLS'
+     Create a symbol for each input file in the current section, set to
+     the address of the first byte of data written from that input
+     file.  For instance, with `a.out' files it is conventional to have
+     a symbol for each input file.  You can accomplish this by defining
+     the output `.text' section as follows:
+          SECTIONS {
+                  .text 0x2020 :
+                           {
+                          CREATE_OBJECT_SYMBOLS
+                          *(.text)
+                          _etext = ALIGN(0x2000);
+                          }
+                  ...
+          }
+
+     If `sample.ld' is a file containing this script, and `a.o', `b.o',
+     `c.o', and `d.o' are four input files with contents like the
+     following--
+          /* a.c */
+          
+          afunction() { }
+          int adata=1;
+          int abss;
+
+     `ld -M -T sample.ld a.o b.o c.o d.o' would create a map like this,
+     containing symbols matching the object file names:
+          00000000 A __DYNAMIC
+          00004020 B _abss
+          00004000 D _adata
+          00002020 T _afunction
+          00004024 B _bbss
+          00004008 D _bdata
+          00002038 T _bfunction
+          00004028 B _cbss
+          00004010 D _cdata
+          00002050 T _cfunction
+          0000402c B _dbss
+          00004018 D _ddata
+          00002068 T _dfunction
+          00004020 D _edata
+          00004030 B _end
+          00004000 T _etext
+          00002020 t a.o
+          00002038 t b.o
+          00002050 t c.o
+          00002068 t d.o
+
+`SYMBOL = EXPRESSION ;'
+`SYMBOL F= EXPRESSION ;'
+     SYMBOL is any symbol name (*note Symbols::.).  "F=" refers to any
+     of the operators `&= += -= *= /=' which combine arithmetic and
+     assignment.
+
+     When you assign a value to a symbol within a particular section
+     definition, the value is relative to the beginning of the section
+     (*note Assignment::.).  If you write
+          SECTIONS {
+            abs = 14 ;
+            ...
+            .data : { ... rel = 14 ; ... }
+            abs2 = 14 + ADDR(.data);
+            ...
+          }
+
+     `abs' and `rel' do not have the same value; `rel' has the same
+     value as `abs2'.
+
+`BYTE(EXPRESSION)'
+`SHORT(EXPRESSION)'
+`LONG(EXPRESSION)'
+     By including one of these three statements in a section
+     definition, you can explicitly place one, two, or four bytes
+     (respectively) at the current address of that section.
+
+     Multiple-byte quantities are represented in whatever byte order is
+     appropriate for the output file format (*note BFD::.).
+
+`FILL(EXPRESSION)'
+     Specify the "fill pattern" for the current section.  Any otherwise
+     unspecified regions of memory within the section (for example,
+     regions you skip over by assigning a new value to the location
+     counter `.') are filled with the two least significant bytes from
+     the EXPRESSION argument.  A `FILL' statement covers memory
+     locations *after* the point it occurs in the section definition; by
+     including more than one `FILL' statement, you can have different
+     fill patterns in different parts of an output section.
+

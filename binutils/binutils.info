@@ -1,0 +1,1127 @@
+This is Info file binutils.info, produced by Makeinfo-1.55 from the
+input file ./binutils.texi.
+
+START-INFO-DIR-ENTRY
+* Binutils::                    The GNU binary utilities "ar", "ld", "objcopy",
+				"objdump", "nm", "size", "strings", "strip", and "ranlib".
+END-INFO-DIR-ENTRY
+
+   Copyright (C) 1991, 1992, 1993 Free Software Foundation, Inc.
+
+   Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+   Permission is granted to copy and distribute modified versions of
+this manual under the conditions for verbatim copying, provided also
+that the entire resulting derived work is distributed under the terms
+of a permission notice identical to this one.
+
+   Permission is granted to copy and distribute translations of this
+manual into another language, under the above conditions for modified
+versions.
+
+
+File: binutils.info,  Node: Top,  Next: ar,  Prev: (dir),  Up: (dir)
+
+Introduction
+************
+
+   This brief manual contains preliminary documentation for the GNU
+binary utilities (collectively version 2.2):
+
+* Menu:
+
+* ar::                          Create, modify, and extract from archives
+* ld:(ld)Overview.              Combine object and archive files
+* nm::                          List symbols from object files
+* objcopy::			Copy and translate object files
+* objdump::                     Display information from object files
+* ranlib::                      Generate index to archive contents
+* size::                        List section sizes and total size
+* strings::                     List printable strings from files
+* strip::                       Discard symbols
+* c++filt::			Filter to demangle encoded C++ symbols
+* Index::
+
+
+File: binutils.info,  Node: ar,  Next: nm,  Prev: Top,  Up: Top
+
+ar
+**
+
+     ar [-]P[MOD [RELPOS]] ARCHIVE [MEMBER...]
+     ar -M [ <mri-script ]
+
+   The GNU `ar' program creates, modifies, and extracts from archives.
+An "archive" is a single file holding a collection of other files in a
+structure that makes it possible to retrieve the original individual
+files (called "members" of the archive).
+
+   The original files' contents, mode (permissions), timestamp, owner,
+and group are preserved in the archive, and can be restored on
+extraction.
+
+   GNU `ar' can maintain archives whose members have names of any
+length; however, depending on how `ar' is configured on your system, a
+limit on member-name length may be imposed for compatibility with
+archive formats maintained with other tools.  If it exists, the limit
+is often 15 characters (typical of formats related to a.out) or 16
+characters (typical of formats related to coff).
+
+   `ar' is considered a binary utility because archives of this sort
+are most often used as "libraries" holding commonly needed subroutines.
+
+   `ar' creates an index to the symbols defined in relocatable object
+modules in the archive when you specify the modifier `s'.  Once
+created, this index is updated in the archive whenever `ar' makes a
+change to its contents (save for the `q' update operation).  An archive
+with such an index speeds up linking to the library, and allows
+routines in the library to call each other without regard to their
+placement in the archive.
+
+   You may use `nm -s' or `nm --print-armap' to list this index table.
+If an archive lacks the table, another form of `ar' called `ranlib' can
+be used to add just the table.
+
+   GNU `ar' is designed to be compatible with two different facilities.
+You can control its activity using command-line options, like the
+different varieties of `ar' on Unix systems; or, if you specify the
+single command-line option `-M', you can control it with a script
+supplied via standard input, like the MRI "librarian" program.
+
+* Menu:
+
+* ar-cmdline::                  Controlling `ar' on the command line
+* ar-scripts::                  Controlling `ar' with a script
+
+
+File: binutils.info,  Node: ar-cmdline,  Next: ar-scripts,  Prev: ar,  Up: ar
+
+Controlling `ar' on the command line
+====================================
+
+     ar [-]P[MOD [RELPOS]] ARCHIVE [MEMBER...]
+
+   When you use `ar' in the Unix style, `ar' insists on at least two
+arguments to execute: one keyletter specifying the *operation*
+(optionally accompanied by other keyletters specifying *modifiers*),
+and the archive name to act on.
+
+   Most operations can also accept further MEMBER arguments, specifying
+particular files to operate on.
+
+   GNU `ar' allows you to mix the operation code P and modifier flags
+MOD in any order, within the first command-line argument.
+
+   If you wish, you may begin the first command-line argument with a
+dash.
+
+   The P keyletter specifies what operation to execute; it may be any
+of the following, but you must specify only one of them:
+
+`d'
+     *Delete* modules from the archive.  Specify the names of modules to
+     be deleted as MEMBER...; the archive is untouched if you specify
+     no files to delete.
+
+     If you specify the `v' modifier, `ar' lists each module as it is
+     deleted.
+
+`m'
+     Use this operation to *move* members in an archive.
+
+     The ordering of members in an archive can make a difference in how
+     programs are linked using the library, if a symbol is defined in
+     more than one member.
+
+     If no modifiers are used with `m', any members you name in the
+     MEMBER arguments are moved to the *end* of the archive; you can
+     use the `a', `b', or `i' modifiers to move them to a specified
+     place instead.
+
+`p'
+     *Print* the specified members of the archive, to the standard
+     output file.  If the `v' modifier is specified, show the member
+     name before copying its contents to standard output.
+
+     If you specify no MEMBER arguments, all the files in the archive
+     are printed.
+
+`q'
+     *Quick append*; add the files MEMBER... to the end of ARCHIVE,
+     without checking for replacement.
+
+     The modifiers `a', `b', and `i' do *not* affect this operation;
+     new members are always placed at the end of the archive.
+
+     The modifier `v' makes `ar' list each file as it is appended.
+
+     Since the point of this operation is speed, the archive's symbol
+     table index is not updated, even if it already existed; you can
+     use `ar s' or `ranlib' explicitly to update the symbol table index.
+
+`r'
+     Insert the files MEMBER... into ARCHIVE (with *replacement*). This
+     operation differs from `q' in that any previously existing members
+     are deleted if their names match those being added.
+
+     If one of the files named in MEMBER... does not exist, `ar'
+     displays an error message, and leaves undisturbed any existing
+     members of the archive matching that name.
+
+     By default, new members are added at the end of the file; but you
+     may use one of the modifiers `a', `b', or `i' to request placement
+     relative to some existing member.
+
+     The modifier `v' used with this operation elicits a line of output
+     for each file inserted, along with one of the letters `a' or `r'
+     to indicate whether the file was appended (no old member deleted)
+     or replaced.
+
+`t'
+     Display a *table* listing the contents of ARCHIVE, or those of the
+     files listed in MEMBER... that are present in the archive.
+     Normally only the member name is shown; if you also want to see
+     the modes (permissions), timestamp, owner, group, and size, you can
+     request that by also specifying the `v' modifier.
+
+     If you do not specify a MEMBER, all files in the archive are
+     listed.
+
+     If there is more than one file with the same name (say, `fie') in
+     an archive (say `b.a'), `ar t b.a fie' lists only the first
+     instance; to see them all, you must ask for a complete listing--in
+     our example, `ar t b.a'.
+
+`x'
+     *Extract* members (named MEMBER) from the archive.  You can use
+     the `v' modifier with this operation, to request that `ar' list
+     each name as it extracts it.
+
+     If you do not specify a MEMBER, all files in the archive are
+     extracted.
+
+   A number of modifiers (MOD) may immediately follow the P keyletter,
+to specify variations on an operation's behavior:
+
+`a'
+     Add new files *after* an existing member of the archive.  If you
+     use the modifier `a', the name of an existing archive member must
+     be present as the RELPOS argument, before the ARCHIVE
+     specification.
+
+`b'
+     Add new files *before* an existing member of the archive.  If you
+     use the modifier `b', the name of an existing archive member must
+     be present as the RELPOS argument, before the ARCHIVE
+     specification.  (same as `i').
+
+`c'
+     *Create* the archive.  The specified ARCHIVE is always created if
+     it did not exist, when you request an update.  But a warning is
+     issued unless you specify in advance that you expect to create it,
+     by using this modifier.
+
+`i'
+     Insert new files *before* an existing member of the archive.  If
+     you use the modifier `i', the name of an existing archive member
+     must be present as the RELPOS argument, before the ARCHIVE
+     specification.  (same as `b').
+
+`l'
+     This modifier is accepted but not used.
+
+`o'
+     Preserve the *original* dates of members when extracting them.  If
+     you do not specify this modifier, files extracted from the archive
+     are stamped with the time of extraction.
+
+`s'
+     Write an object-file index into the archive, or update an existing
+     one, even if no other change is made to the archive.  You may use
+     this modifier flag either with any operation, or alone.  Running
+     `ar s' on an archive is equivalent to running `ranlib' on it.
+
+`u'
+     Normally, `ar r'... inserts all files listed into the archive.  If
+     you would like to insert *only* those of the files you list that
+     are newer than existing members of the same names, use this
+     modifier.  The `u' modifier is allowed only for the operation `r'
+     (replace).  In particular, the combination `qu' is not allowed,
+     since checking the timestamps would lose any speed advantage from
+     the operation `q'.
+
+`v'
+     This modifier requests the *verbose* version of an operation.  Many
+     operations display additional information, such as filenames
+     processed, when the modifier `v' is appended.
+
+`V'
+     This modifier shows the version number of `ar'.
+
+
+File: binutils.info,  Node: ar-scripts,  Prev: ar-cmdline,  Up: ar
+
+Controlling `ar' with a script
+==============================
+
+     ar -M [ <SCRIPT ]
+
+   If you use the single command-line option `-M' with `ar', you can
+control its operation with a rudimentary command language.  This form
+of `ar' operates interactively if standard input is coming directly
+from a terminal.  During interactive use, `ar' prompts for input (the
+prompt is `AR >'), and continues executing even after errors.  If you
+redirect standard input to a script file, no prompts are issued, and
+`ar' abandons execution (with a nonzero exit code) on any error.
+
+   The `ar' command language is *not* designed to be equivalent to the
+command-line options; in fact, it provides somewhat less control over
+archives.  The only purpose of the command language is to ease the
+transition to GNU `ar' for developers who already have scripts written
+for the MRI "librarian" program.
+
+   The syntax for the `ar' command language is straightforward:
+   * commands are recognized in upper or lower case; for example, `LIST'
+     is the same as `list'.  In the following descriptions, commands are
+     shown in upper case for clarity.
+
+   * a single command may appear on each line; it is the first word on
+     the line.
+
+   * empty lines are allowed, and have no effect.
+
+   * comments are allowed; text after either of the characters `*' or
+     `;' is ignored.
+
+   * Whenever you use a list of names as part of the argument to an `ar'
+     command, you can separate the individual names with either commas
+     or blanks.  Commas are shown in the explanations below, for
+     clarity.
+
+   * `+' is used as a line continuation character; if `+' appears at
+     the end of a line, the text on the following line is considered
+     part of the current command.
+
+   Here are the commands you can use in `ar' scripts, or when using
+`ar' interactively.  Three of them have special significance:
+
+   `OPEN' or `CREATE' specify a "current archive", which is a temporary
+file required for most of the other commands.
+
+   `SAVE' commits the changes so far specified by the script.  Prior to
+`SAVE', commands affect only the temporary copy of the current archive.
+
+`ADDLIB ARCHIVE'
+`ADDLIB ARCHIVE (MODULE, MODULE, ... MODULE)'
+     Add all the contents of ARCHIVE (or, if specified, each named
+     MODULE from ARCHIVE) to the current archive.
+
+     Requires prior use of `OPEN' or `CREATE'.
+
+`ADDMOD MEMBER, MEMBER, ... MEMBER'
+     Add each named MEMBER as a module in the current archive.
+
+     Requires prior use of `OPEN' or `CREATE'.
+
+`CLEAR'
+     Discard the contents of the current archive, cancelling the effect
+     of any operations since the last `SAVE'.  May be executed (with no
+     effect) even if  no current archive is specified.
+
+`CREATE ARCHIVE'
+     Creates an archive, and makes it the current archive (required for
+     many other commands).  The new archive is created with a temporary
+     name; it is not actually saved as ARCHIVE until you use `SAVE'.
+     You can overwrite existing archives; similarly, the contents of any
+     existing file named ARCHIVE will not be destroyed until `SAVE'.
+
+`DELETE MODULE, MODULE, ... MODULE'
+     Delete each listed MODULE from the current archive; equivalent to
+     `ar -d ARCHIVE MODULE ... MODULE'.
+
+     Requires prior use of `OPEN' or `CREATE'.
+
+`DIRECTORY ARCHIVE (MODULE, ... MODULE)'
+`DIRECTORY ARCHIVE (MODULE, ... MODULE) OUTPUTFILE'
+     List each named MODULE present in ARCHIVE.  The separate command
+     `VERBOSE' specifies the form of the output: when verbose output is
+     off, output is like that of `ar -t ARCHIVE MODULE...'.  When
+     verbose output is on, the listing is like `ar -tv ARCHIVE
+     MODULE...'.
+
+     Output normally goes to the standard output stream; however, if you
+     specify OUTPUTFILE as a final argument, `ar' directs the output to
+     that file.
+
+`END'
+     Exit from `ar', with a `0' exit code to indicate successful
+     completion.  This command does not save the output file; if you
+     have changed the current archive since the last `SAVE' command,
+     those changes are lost.
+
+`EXTRACT MODULE, MODULE, ... MODULE'
+     Extract each named MODULE from the current archive, writing them
+     into the current directory as separate files.  Equivalent to `ar -x
+     ARCHIVE MODULE...'.
+
+     Requires prior use of `OPEN' or `CREATE'.
+
+`LIST'
+     Display full contents of the current archive, in "verbose" style
+     regardless of the state of `VERBOSE'.  The effect is like `ar tv
+     ARCHIVE').  (This single command is a GNU `ld' enhancement, rather
+     than present for MRI compatibility.)
+
+     Requires prior use of `OPEN' or `CREATE'.
+
+`OPEN ARCHIVE'
+     Opens an existing archive for use as the current archive (required
+     for many other commands).  Any changes as the result of subsequent
+     commands will not actually affect ARCHIVE until you next use
+     `SAVE'.
+
+`REPLACE MODULE, MODULE, ... MODULE'
+     In the current archive, replace each existing MODULE (named in the
+     `REPLACE' arguments) from files in the current working directory.
+     To execute this command without errors, both the file, and the
+     module in the current archive, must exist.
+
+     Requires prior use of `OPEN' or `CREATE'.
+
+`VERBOSE'
+     Toggle an internal flag governing the output from `DIRECTORY'.
+     When the flag is on, `DIRECTORY' output matches output from `ar
+     -tv '....
+
+`SAVE'
+     Commit your changes to the current archive, and actually save it
+     as a file with the name specified in the last `CREATE' or `OPEN'
+     command.
+
+     Requires prior use of `OPEN' or `CREATE'.
+
+
+File: binutils.info,  Node: nm,  Next: objcopy,  Prev: ar,  Up: Top
+
+nm
+**
+
+     nm [ -a | --debug-syms ]  [ -g | --extern-only ]
+        [ -B ]  [ -C | --demangle ]
+        [ -s | --print-armap ]  [ -A | -o | --print-file-name ]
+        [ -n | -v | --numeric-sort ]  [ -p | --no-sort ]
+        [ -r | --reverse-sort ]  [ -u | --undefined-only ]
+        [ -t RADIX | --radix=RADIX ] [ -P | --portability ]
+        [ --target=BFDNAME ] [ -f FORMAT | --format=FORMAT ]
+        [ -V | --version ]  [ --help ]  [ OBJFILE... ]
+
+   GNU `nm' lists the symbols from object files OBJFILE....  If no
+object files are listed as arguments, `nm' assumes `a.out'.
+
+   For each symbol, `nm' shows:
+
+   * The symbol value, in the radix selected by options (see below), or
+     hexadecimal by default.
+
+   * The symbol type.  At least the following types are used; others
+     are, as well, depending on the object file format.  If lowercase,
+     the symbol is local; if uppercase, the symbol is global (external).
+
+    `A'
+          Absolute.
+
+    `B'
+          BSS (uninitialized data).
+
+    `C'
+          Common.
+
+    `D'
+          Initialized data.
+
+    `I'
+          Indirect reference.
+
+    `T'
+          Text (program code).
+
+    `U'
+          Undefined.
+
+   * The symbol name.
+
+   The long and short forms of options, shown here as alternatives, are
+equivalent.
+
+`-A'
+`-o'
+`--print-file-name'
+     Precede each symbol by the name of the input file (or archive
+     element) in which it was found, rather than identifying the input
+     file once only, before all of its symbols.
+
+`-a'
+`--debug-syms'
+     Display all symbols, even debugger-only symbols; normally these
+     are not listed.
+
+`-B'
+     The same as `--format=bsd' (for compatibility with the MIPS `nm').
+
+`-C'
+`--demangle'
+     Decode ("demangle") low-level symbol names into user-level names.
+     Besides removing any initial underscore prepended by the system,
+     this makes C++ function names readable.  *Note c++filt::, for more
+     information on demangling.
+
+`-f FORMAT'
+`--format=FORMAT'
+     Use the output format FORMAT, which can be `bsd', `sysv', or
+     `posix'.  The default is `bsd'.  Only the first character of
+     FORMAT is significant; it can be either upper or lower case.
+
+`-g'
+`--extern-only'
+     Display only external symbols.
+
+`-n'
+`-v'
+`--numeric-sort'
+     Sort symbols numerically by their addresses, rather than
+     alphabetically by their names.
+
+`-p'
+`--no-sort'
+     Do not bother to sort the symbols in any order; print them in the
+     order encountered.
+
+`-P'
+`--portability'
+     Use the POSIX.2 standard output format instead of the default
+     format.  Equivalent to `-f posix'.
+
+`-s'
+`--print-armap'
+     When listing symbols from archive members, include the index: a
+     mapping (stored in the archive by `ar' or `ranlib') of which
+     modules contain definitions for which names.
+
+`-r'
+`--reverse-sort'
+     Reverse the order of the sort (whether numeric or alphabetic); let
+     the last come first.
+
+`-t RADIX'
+`--radix=RADIX'
+     Use RADIX as the radix for printing the symbol values.  It must be
+     `d' for decimal, `o' for octal, or `x' for hexadecimal.
+
+`--target=BFDNAME'
+     Specify an object code format other than your system's default
+     format.  *Note objdump::, for information on listing available
+     formats.
+
+`-u'
+`--undefined-only'
+     Display only undefined symbols (those external to each object
+     file).
+
+`-V'
+`--version'
+     Show the version number of `nm' and exit.
+
+`--help'
+     Show a summary of the options to `nm' and exit.
+
+
+File: binutils.info,  Node: objcopy,  Next: objdump,  Prev: nm,  Up: Top
+
+objcopy
+*******
+
+     objcopy [ -F FORMAT | --format=FORMAT ]
+             [ -I FORMAT | --input-format=FORMAT ]
+             [ -O FORMAT | --output-format=FORMAT ]
+             [ -S | --strip-all ]  [ -g | --strip-debug ]
+             [ -x | --discard-all ]  [ -X | --discard-locals ]
+             [ -v | --verbose ]  [ -V | --version ]  [ --help ]
+             INFILE [OUTFILE]
+
+   The GNU `objcopy' utility copies the contents of an object file to
+another.  `objcopy' uses the GNU BFD Library to read and write the
+object files.  It can write the destination object file in a format
+different from that of the source object file.  The exact behavior of
+`objcopy' is controlled by command-line options.
+
+   `objcopy' creates temporary files to do its translations and deletes
+them afterward.  `objcopy' uses BFD to do all its translation work; it
+knows about all the formats BFD knows about, and thus is able to
+recognize most formats without being told explicitly.  *Note BFD:
+(ld.info)BFD the GNU linker.
+
+`INFILE'
+`OUTFILE'
+     The source and output files respectively.  If you do not specify
+     OUTFILE, `objcopy' creates a temporary file and destructively
+     renames the result with the name of the input file.
+
+`-I FORMAT'
+`--input-format=FORMAT'
+     Consider the source file's object format to be FORMAT, rather than
+     attempting to deduce it.
+
+`-O FORMAT'
+`--output-format=FORMAT'
+     Write the output file using the object format FORMAT.
+
+`-F FORMAT'
+`--format=FORMAT'
+     Use FORMAT as the object format for both the input and the output
+     file; i.e. simply transfer data from source to destination with no
+     translation.
+
+`-S'
+`--strip-all'
+     Do not copy relocation and symbol information from the source file.
+
+`-g'
+`--strip-debug'
+     Do not copy debugging symbols from the source file.
+
+`-x'
+`--discard-all'
+     Do not copy non-global symbols from the source file.
+
+`-X'
+`--discard-locals'
+     Do not copy compiler-generated local symbols.  (These usually
+     start with `L' or `.'.)
+
+`-V'
+`--version'
+     Show the version number of `objcopy'.
+
+`-v'
+`--verbose'
+     Verbose output: list all object files modified.  In the case of
+     archives, `objcopy -V' lists all members of the archive.
+
+`--help'
+     Show a summary of the options to `objcopy'.
+
+
+File: binutils.info,  Node: objdump,  Next: ranlib,  Prev: objcopy,  Up: Top
+
+objdump
+*******
+
+     objdump [ -a ]  [ -b BFDNAME ]  [ -d ]  [ -f ]
+             [ -h | --header ]  [ -i ]  [ -j SECTION ]  [ -l ]
+             [ -m MACHINE ]  [ -r | --reloc ]  [ -s ]  [ --stabs ]
+             [ -t | --syms ]  [ -x ]  [ --version ]  [ --help ]
+             OBJFILE...
+
+   `objdump' displays information about one or more object files.  The
+options control what particular information to display.  This
+information is mostly useful to programmers who are working on the
+compilation tools, as opposed to programmers who just want their
+program to compile and work.
+
+   OBJFILE... are the object files to be examined.  When you specify
+archives, `objdump' shows information on each of the member object
+files.
+
+   The long and short forms of options, shown here as alternatives, are
+equivalent.  At least one option besides `-l' must be given.
+
+`-a'
+     If any of the OBJFILE files are archives, display the archive
+     header information (in a format similar to `ls -l').  Besides the
+     information you could list with `ar tv', `objdump -a' shows the
+     object file format of each archive member.
+
+`-b BFDNAME'
+     Specify that the object-code format for the object files is
+     BFDNAME.  This option may not be necessary; OBJDUMP can
+     automatically recognize many formats.
+
+     For example,
+          objdump -b oasys -m vax -h fu.o
+
+     displays summary information from the section headers (`-h') of
+     `fu.o', which is explicitly identified (`-m') as a VAX object file
+     in the format produced by Oasys compilers.  You can list the
+     formats available with the `-i' option.
+
+`-d'
+     Disassemble.  Display the assembler mnemonics for the machine
+     instructions from OBJFILE.
+
+`-f'
+     File header.  Display summary information from the overall header
+     of each of the OBJFILE files.
+
+`-h'
+`--header'
+     Header.  Display summary information from the section headers of
+     the object file.
+
+`--help'
+     Print a summary of the options to `objdump' and exit.
+
+`-i'
+     Display a list showing all architectures and object formats
+     available for specification with `-b' or `-m'.
+
+`-j NAME'
+     Display information only for section NAME.
+
+`-l'
+     Label the display (using debugging information) with the source
+     filename and line numbers corresponding to the object code shown.
+
+`-m MACHINE'
+     Specify that the object files OBJFILE are for architecture
+     MACHINE.  You can list available architectures using the `-i'
+     option.
+
+`-r'
+`--reloc'
+     Relocation.  Print the relocation entries of the file.
+
+`-s'
+     Display the full contents of any sections requested.
+
+`--stabs'
+     Display the full contents of any sections requested.  Display the
+     contents of the .stab and .stab.index and .stab.excl sections from
+     an ELF file.  This is only useful on systems (such as Solaris 2.0)
+     in which `.stab' debugging symbol-table entries are carried in an
+     ELF section.  In most other file formats, debugging symbol-table
+     entries are interleaved with linkage symbols, and are visible in
+     the `--syms' output.
+
+`-t'
+`--syms'
+     Symbol Table.  Print the symbol table entries of the file.  This
+     is similar to the information provided by the `nm' program.
+
+`--version'
+     Print the version number of `objdump' and exit.
+
+`-x'
+     Display all available header information, including the symbol
+     table and relocation entries.  Using `-x' is equivalent to
+     specifying all of `-a -f -h -r -t'.
+
+
+File: binutils.info,  Node: ranlib,  Next: size,  Prev: objdump,  Up: Top
+
+ranlib
+******
+
+     ranlib [-vV] ARCHIVE
+
+   `ranlib' generates an index to the contents of an archive and stores
+it in the archive.  The index lists each symbol defined by a member of
+an archive that is a relocatable object file.
+
+   You may use `nm -s' or `nm --print-armap' to list this index.
+
+   An archive with such an index speeds up linking to the library and
+allows routines in the library to call each other without regard to
+their placement in the archive.
+
+   The GNU `ranlib' program is another form of GNU `ar'; running
+`ranlib' is completely equivalent to executing `ar -s'.  *Note ar::.
+
+`-v'
+`-V'
+     Show the version number of `ranlib'.
+
+
+File: binutils.info,  Node: size,  Next: strings,  Prev: ranlib,  Up: Top
+
+size
+****
+
+     size [ -A | -B | --format=COMPATIBILITY ]
+          [ --help ]  [ -d | -o | -x | --radix=NUMBER ]
+          [ --target=BFDNAME ]  [ -V | --version ]
+          OBJFILE...
+
+   The GNU `size' utility lists the section sizes--and the total
+size--for each of the object or archive files OBJFILE in its argument
+list.  By default, one line of output is generated for each object file
+or each module in an archive.
+
+   OBJFILE... are the object files to be examined.
+
+   The command line options have the following meanings:
+
+`-A'
+`-B'
+`--format=COMPATIBILITY'
+     Using one of these options, you can choose whether the output from
+     GNU `size' resembles output from System V `size' (using `-A', or
+     `--format=sysv'), or Berkeley `size' (using `-B', or
+     `--format=berkeley').  The default is the one-line format similar
+     to Berkeley's.
+
+     Here is an example of the Berkeley (default) format of output from
+     `size':
+          size --format Berkeley ranlib size
+          text    data    bss     dec     hex     filename
+          294880  81920   11592   388392  5ed28   ranlib
+          294880  81920   11888   388688  5ee50   size
+
+     This is the same data, but displayed closer to System V
+     conventions:
+
+          size --format SysV ranlib size
+          ranlib  :
+          section         size         addr
+          .text         294880         8192
+          .data          81920       303104
+          .bss           11592       385024
+          Total         388392
+          
+          
+          size  :
+          section         size         addr
+          .text         294880         8192
+          .data          81920       303104
+          .bss           11888       385024
+          Total         388688
+
+`--help'
+     Show a summary of acceptable arguments and options.
+
+`-d'
+`-o'
+`-x'
+`--radix=NUMBER'
+     Using one of these options, you can control whether the size of
+     each section is given in decimal (`-d', or `--radix=10'); octal
+     (`-o', or `--radix=8'); or hexadecimal (`-x', or `--radix=16').
+     In `--radix=NUMBER', only the three values (8, 10, 16) are
+     supported.  The total size is always given in two radices; decimal
+     and hexadecimal for `-d' or `-x' output, or octal and hexadecimal
+     if you're using `-o'.
+
+`--target=BFDNAME'
+     Specify that the object-code format for OBJFILE is BFDNAME.  This
+     option may not be necessary; `size' can automatically recognize
+     many formats.  *Note objdump::, for information on listing
+     available formats.
+
+`-V'
+`--version'
+     Display the version number of `size'.
+
+
+File: binutils.info,  Node: strings,  Next: strip,  Prev: size,  Up: Top
+
+strings
+*******
+
+     strings [-afov] [-MIN-LEN] [-n MIN-LEN] [-t RADIX] [-]
+             [--all] [--print-file-name] [--bytes=MIN-LEN]
+             [--radix=RADIX] [--help] [--version] FILE...
+
+   For each FILE given, GNU `strings' prints the printable character
+sequences that are at least 4 characters long (or the number given with
+the options below) and are followed by a NUL or newline character.  By
+default, it only prints the strings from the initialized data sections
+of object files; for other types of files, it prints the strings from
+the whole file.
+
+   `strings' is mainly useful for determining the contents of non-text
+files.
+
+`-a'
+`--all'
+`-'
+     Do not scan only the initialized data section of object files; scan
+     the whole files.
+
+`-f'
+`--print-file-name'
+     Print the name of the file before each string.
+
+`--help'
+     Print a summary of the program usage on the standard output and
+     exit.
+
+`-MIN-LEN'
+`-n MIN-LEN'
+`--bytes=MIN-LEN'
+     Print sequences of characters that are at least MIN-LEN characters
+     long, instead of the default 4.
+
+`-o'
+     Like `-t o'.  Some other versions of `strings' have `-o' act like
+     `-t d' instead.  Since we can not be compatible with both ways, we
+     simply chose one.
+
+`-t RADIX'
+`--radix=RADIX'
+     Print the offset within the file before each string.  The single
+     character argument specifies the radix of the offset--`o' for
+     octal, `x' for hexadecimal, or `d' for decimal.
+
+`-v'
+`--version'
+     Print the program version number on the standard output and exit.
+
+
+File: binutils.info,  Node: strip,  Next: c++filt,  Prev: strings,  Up: Top
+
+strip
+*****
+
+     strip [ -F FORMAT | --format=FORMAT | --target=FORMAT ]
+           [ -I FORMAT | --input-format=FORMAT ]
+           [ -O FORMAT | --output-format=FORMAT ]
+           [ -s | --strip-all ] [ -S | -g | --strip-debug ]
+           [ -x | --discard-all ] [ -X | --discard-locals ]
+           [ -v | --verbose ]  [ -V | --version ]  [ --help ]
+           OBJFILE...
+
+   GNU `strip' discards all symbols from object files OBJFILE.  The
+list of object files may include archives.  At least one object file
+must be given.
+
+   `strip' modifies the files named in its argument, rather than
+writing modified copies under different names.
+
+`-F FORMAT'
+`--format=FORMAT'
+`--target=FORMAT'
+     Treat the original OBJFILE as a file with the object code format
+     FORMAT, and rewrite it in the same format.
+
+`--help'
+     Show a summary of the options to `strip' and exit.
+
+`-I FORMAT'
+`--input-format=FORMAT'
+     Treat the original OBJFILE as a file with the object code format
+     FORMAT.
+
+`-O FORMAT'
+`--output-format=FORMAT'
+     Replace OBJFILE with a file in the output format FORMAT.
+
+`-s'
+`--strip-all'
+     Remove all symbols.
+
+`-g'
+`-S'
+`--strip-debug'
+     Remove debugging symbols only.
+
+`-x'
+`--discard-all'
+     Remove non-global symbols.
+
+`-X'
+`--discard-locals'
+     Remove compiler-generated local symbols.  (These usually start
+     with `L' or `.'.)
+
+`-V'
+`--version'
+     Show the version number for `strip'.
+
+`-v'
+`--verbose'
+     Verbose output: list all object files modified.  In the case of
+     archives, `strip -v' lists all members of the archive.
+
+
+File: binutils.info,  Node: c++filt,  Next: Index,  Prev: strip,  Up: Top
+
+c++filt
+*******
+
+     c++filt [ -_ | --strip-underscores ]
+             [ -s FORMAT | --format=FORMAT ]
+             [ --help ]  [ --version ]  [ SYMBOL... ]
+
+   The C++ language provides function overloading, which means that you
+can write many functions with the same name (providing each takes
+parameters of different types).  All C++ function names are encoded
+into a low-level assembly label (this process is known as "mangling").
+The `c++filt' program does the inverse mapping: it decodes
+("demangles") low-level names into user-level names so that the linker
+can keep these overloaded functions from clashing.
+
+   Every alphanumeric word (consisting of letters, digits, underscores,
+dollars, or periods) seen in the input is a potential label.  If the
+label decodes into a C++ name, the C++ name replaces the low-level name
+in the output.
+
+   You can use `c++filt' to decipher individual symbols:
+
+     c++filt SYMBOL
+
+   If no SYMBOL arguments are given, `c++filt' reads symbol names from
+the standard input and writes the demangled names to the standard
+output.  All results are printed on the standard output.
+
+`-_'
+`--strip-underscores'
+     On some systems, both the C and C++ compilers put an underscore in
+     front of every name.  For example, the C name `foo' gets the
+     low-level name `_foo'.  This option removes the initial underscore.
+
+`-s FORMAT'
+`--format=FORMAT'
+     GNU `nm' can decode three different methods of mangling, used by
+     different C++ compilers.  The argument to this option selects which
+     method it uses:
+
+    `gnu'
+          the one used by the GNU compiler (the default method)
+
+    `lucid'
+          the one used by the Lucid compiler
+
+    `arm'
+          the one specified by the C++ Annotated Reference Manual
+
+`--help'
+     Print a summary of the options to `c++filt' and exit.
+
+`--version'
+     Print the version number of `c++filt' and exit.
+
+     *Warning:* `c++filt' is a new utility, and the details of its user
+     interface are subject to change in future releases.  In particular,
+     a command-line option may be required in the the future to decode
+     a name passed as an argument on the command line; in other words,
+
+          c++filt SYMBOL
+
+     may in a future release become
+
+          c++filt OPTION SYMBOL
+
+
+File: binutils.info,  Node: Index,  Prev: c++filt,  Up: Top
+
+Index
+*****
+
+* Menu:
+
+* .stab:                                objdump.
+* ar compatibility:                     ar.
+* nm compatibility:                     nm.
+* nm compatibility:                     nm.
+* nm format:                            nm.
+* nm format:                            nm.
+* size display format:                  size.
+* size number format:                   size.
+* all header information, object file:  objdump.
+* ar:                                   ar.
+* architecture:                         objdump.
+* architectures available:              objdump.
+* archive contents:                     ranlib.
+* archive headers:                      objdump.
+* archives:                             ar.
+* c++filt:                              c++filt.
+* collections of files:                 ar.
+* compatibility, ar:                    ar.
+* contents of archive:                  ar-cmdline.
+* creating archives:                    ar-cmdline.
+* dates in archive:                     ar-cmdline.
+* debug symbols:                        objdump.
+* debugging symbols:                    nm.
+* deleting from archive:                ar-cmdline.
+* demangling C++ symbols:               c++filt.
+* demangling C++ symbols:               nm.
+* disassembling object code:            objdump.
+* discarding symbols:                   strip.
+* ELF object file format:               objdump.
+* external symbols:                     nm.
+* external symbols:                     nm.
+* extract from archive:                 ar-cmdline.
+* file name:                            nm.
+* header information, all:              objdump.
+* input file name:                      nm.
+* libraries:                            ar.
+* listings strings:                     strings.
+* machine instructions:                 objdump.
+* moving in archive:                    ar-cmdline.
+* MRI compatibility, ar:                ar-scripts.
+* name duplication in archive:          ar-cmdline.
+* name length:                          ar.
+* nm:                                   nm.
+* objdump:                              objdump.
+* object code format:                   nm.
+* object code format:                   objdump.
+* object code format:                   size.
+* object file header:                   objdump.
+* object file information:              objdump.
+* object file sections:                 objdump.
+* object formats available:             objdump.
+* operations on archive:                ar-cmdline.
+* printing from archive:                ar-cmdline.
+* printing strings:                     strings.
+* quick append to archive:              ar-cmdline.
+* radix for section sizes:              size.
+* ranlib:                               ranlib.
+* relative placement in archive:        ar-cmdline.
+* relocation entries, in object file:   objdump.
+* removing symbols:                     strip.
+* repeated names in archive:            ar-cmdline.
+* replacement in archive:               ar-cmdline.
+* scripts, ar:                          ar-scripts.
+* section headers:                      objdump.
+* section information:                  objdump.
+* section sizes:                        size.
+* sections, full contents:              objdump.
+* size:                                 size.
+* sorting symbols:                      nm.
+* source file name:                     nm.
+* source filenames for object files:    objdump.
+* stab:                                 objdump.
+* strings:                              strings.
+* strings, printing:                    strings.
+* strip:                                strip.
+* symbol index:                         ranlib.
+* symbol index:                         ar.
+* symbol index, listing:                nm.
+* symbol table entries, printing:       objdump.
+* symbols:                              nm.
+* symbols, discarding:                  strip.
+* undefined symbols:                    nm.
+* Unix compatibility, ar:               ar-cmdline.
+* updating an archive:                  ar-cmdline.
+* version:                              Top.
+* writing archive index:                ar-cmdline.
+
+
+
+Tag Table:
+Node: Top918
+Node: ar1769
+Node: ar-cmdline3935
+Node: ar-scripts10370
+Node: nm16051
+Node: objcopy19624
+Node: objdump21994
+Node: ranlib25572
+Node: size26306
+Node: strings28993
+Node: strip30625
+Node: c++filt32286
+Node: Index34647
+
+End Tag Table
