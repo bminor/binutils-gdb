@@ -1855,6 +1855,7 @@ elf32_hppa_adjust_dynamic_symbol (info, h)
 	abort ();
       h->root.u.def.section = h->weakdef->root.u.def.section;
       h->root.u.def.value = h->weakdef->root.u.def.value;
+      return true;
     }
 
   /* This is a reference to a symbol defined by a dynamic object which

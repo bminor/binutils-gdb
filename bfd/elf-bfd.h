@@ -648,8 +648,11 @@ struct elf_backend_data
     PARAMS ((bfd *, struct bfd_link_info *, PTR,
 	    boolean (*) (PTR, const char *, Elf_Internal_Sym *, asection *)));
 
-  /* Copy any information related to dynamic linking from a pre-existing
-     symbol IND to a newly created symbol DIR.  */
+  /* Copy any information related to dynamic linking from a pre-existing 
+     symbol to a newly created symbol.  Also called to copy flags and
+     other back-end info to a weakdef, in which case the symbol is not
+     newly created and plt/got refcounts and dynamic indices should not
+     be copied.  */
   void (*elf_backend_copy_indirect_symbol)
     PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
 

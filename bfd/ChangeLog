@@ -1,3 +1,20 @@
+2001-10-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_fix_symbol_flags): Copy flags to weakdef using
+	elf_backend_copy_indirect_symbol so that backend has a chance to
+	copy other necessary fields.
+	* elf-bfd.h (struct elf_backend_data): Update description of
+	elf_backend_copy_indirect_symbol.
+	* elf.c (_bfd_elf_link_hash_copy_indirect): Bail out after
+	copying flags if this is a weakdef.
+	* elfxx-ia64.c (elfNN_ia64_hash_copy_indirect): Likewise.
+	(elfNN_ia64_aix_add_symbol_hook): Use elf_link_hash_lookup rather
+	than bfd_link_hash_lookup.
+	* elf32-i386 (elf_i386_adjust_dynamic_symbol): Don't do copy
+	reloc processing for weakdefs.
+	* elf32-hppa.c (elf32_hppa_adjust_dynamic_symbol): Likewise.
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Likewise.
+
 2001-10-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_check_relocs): Use a local var and cast

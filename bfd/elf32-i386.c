@@ -1109,6 +1109,7 @@ elf_i386_adjust_dynamic_symbol (info, h)
 		  || h->weakdef->root.type == bfd_link_hash_defweak);
       h->root.u.def.section = h->weakdef->root.u.def.section;
       h->root.u.def.value = h->weakdef->root.u.def.value;
+      return true;
     }
 
   /* This is a reference to a symbol defined by a dynamic object which

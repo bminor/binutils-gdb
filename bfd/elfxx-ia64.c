@@ -1190,7 +1190,8 @@ elfNN_ia64_aix_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	 no one else should use it b/c it is undocumented.  */
       struct elf_link_hash_entry *h;
 
-      h = (struct elf_link_hash_entry *) bfd_link_hash_lookup (info->hash, *namep, false, false, false);
+      h = elf_link_hash_lookup (elf_hash_table (info), *namep,
+				false, false, false);
       if (h == NULL)
 	{
 	  struct elf_backend_data *bed;
@@ -1522,6 +1523,9 @@ elfNN_ia64_hash_copy_indirect (xdir, xind)
      & (ELF_LINK_HASH_REF_DYNAMIC
         | ELF_LINK_HASH_REF_REGULAR
         | ELF_LINK_HASH_REF_REGULAR_NONWEAK));
+
+  if (dir == ind->weakdef)
+    return;
 
   /* Copy over the got and plt data.  This would have been done
      by check_relocs.  */

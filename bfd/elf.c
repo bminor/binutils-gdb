@@ -986,7 +986,7 @@ _bfd_elf_link_hash_newfunc (entry, table, string)
 }
 
 /* Copy data from an indirect symbol to its direct symbol, hiding the
-   old indirect symbol.  */
+   old indirect symbol.  Also used for copying flags to a weakdef.  */
 
 void
 _bfd_elf_link_hash_copy_indirect (dir, ind)
@@ -1003,6 +1003,9 @@ _bfd_elf_link_hash_copy_indirect (dir, ind)
 	| ELF_LINK_HASH_REF_REGULAR
 	| ELF_LINK_HASH_REF_REGULAR_NONWEAK
 	| ELF_LINK_NON_GOT_REF));
+
+  if (dir == ind->weakdef)
+    return;
 
   /* Copy over the global and procedure linkage table refcount entries.
      These may have been already set up by a check_relocs routine.  */

@@ -3615,11 +3615,12 @@ elf_fix_symbol_flags (h, eif)
       if ((weakdef->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
 	h->weakdef = NULL;
       else
-	weakdef->elf_link_hash_flags |=
-	  (h->elf_link_hash_flags
-	   & (ELF_LINK_HASH_REF_REGULAR
-	      | ELF_LINK_HASH_REF_REGULAR_NONWEAK
-	      | ELF_LINK_NON_GOT_REF));
+	{
+	  struct elf_backend_data *bed;
+
+	  bed = get_elf_backend_data (elf_hash_table (eif->info)->dynobj);
+	  (*bed->elf_backend_copy_indirect_symbol) (weakdef, h);
+	}
     }
 
   return true;
