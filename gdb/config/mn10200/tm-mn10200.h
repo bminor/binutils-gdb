@@ -89,7 +89,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define INNER_THAN <
 
 #define SAVED_PC_AFTER_CALL(frame) \
-  (read_memory_integer (read_register (SP_REGNUM), REGISTER_SIZE) & 0xffff)
+  (read_memory_integer (read_register (SP_REGNUM), REGISTER_SIZE) & 0xffffff)
 
 #ifdef __STDC__
 struct frame_info;
