@@ -37,11 +37,11 @@ typedef unsigned long	Nlm32_Word;	/* Unsigned large integer */
 typedef unsigned short	Nlm32_Half;	/* Unsigned medium integer */
 typedef unsigned char	Nlm32_Char;	/* Unsigned tiny integer */
 
-#ifdef HOST_64_BIT
-typedef unsigned HOST_64_BIT	Nlm64_Addr;
-typedef unsigned HOST_64_BIT	Nlm64_Off;
-typedef          HOST_64_BIT	Nlm64_Sxword;
-typedef unsigned HOST_64_BIT	Nlm64_Xword;
+#ifdef BFD_HOST_64_BIT
+typedef unsigned BFD_HOST_64_BIT	Nlm64_Addr;
+typedef unsigned BFD_HOST_64_BIT	Nlm64_Off;
+typedef          BFD_HOST_64_BIT	Nlm64_Sxword;
+typedef unsigned BFD_HOST_64_BIT	Nlm64_Xword;
 #endif
 typedef          long		Nlm64_Sword;
 typedef unsigned long		Nlm64_Word;
@@ -252,6 +252,8 @@ typedef struct nlm_internal_extended_header
   long sharedExternalReferenceCount;
   file_ptr sharedPublicsOffset;
   long sharedPublicsCount;
+  file_ptr sharedDebugRecordOffset;
+  long sharedDebugRecordCount;
   bfd_vma SharedInitializationOffset;
   bfd_vma SharedExitProcedureOffset;
   long productID;
@@ -273,8 +275,7 @@ typedef struct nlm_internal_custom_header
   /* The header is recognized by "CuStHeAd" in the stamp field. */
   char stamp[8];
   bfd_size_type dataLength;
-  file_ptr debugRecOffset;
-  bfd_size_type debugRecLength;
+  PTR data;
 } Nlm_Internal_Custom_Header;
 
 #define nlm32_internal_custom_header nlm_internal_custom_header
