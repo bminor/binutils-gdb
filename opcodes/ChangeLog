@@ -1,5 +1,12 @@
 Tue Apr 28 14:12:12 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* cgen-asm.c: Internationalised.
+	* cgen-asm.in: Internationalised.
+	* cgen-opc.in: Internationalised.
+	* m32r-asm.c: Internationalised.
+	* m32r-dis.c: Internationalised.
+	* m32r-opc.c: Internationalised.
+
 	* aclocal.m4: Regenerated.
 	* configure: Regenerated.
 	* Makefile.am (POTFILES): Remove inclusion of BFD_H.

@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h"
 #include "symcat.h"
 #include "@arch@-opc.h"
+#include "opintl.h"
 
 /* Look up instruction INSN_VALUE and extract its fields.
    INSN, if non-null, is the insn table entry.
