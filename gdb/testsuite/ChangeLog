@@ -1,3 +1,9 @@
+2001-06-06  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/return2.exp (main): Use values to test float and double
+	returns that are not NaN's, to avoid being confused by IEEE
+	comparison rules.
+
 2001-06-04  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.threads/pthreads.exp (check_control_c): Return 0 for success,
