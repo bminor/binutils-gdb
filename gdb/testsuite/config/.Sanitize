@@ -30,7 +30,6 @@ hppro.exp
 mips-gdb.exp
 monitor.exp
 mt-a29k-udi
-mt-hpux
 mt-i386-aout
 mt-i960-nindy
 mt-lynx

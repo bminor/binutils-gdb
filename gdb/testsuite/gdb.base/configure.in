@@ -16,7 +16,6 @@ target_makefile_frag=../config/mt-unix
 
 	# this section is for all targets
 case "${target}" in
-	hppa*-*-hpux*)	target_makefile_frag=../config/mt-hpux ;;
 	i[345]86-*-aout)	target_makefile_frag=../config/mt-i386-aout ;;
 	*-*-lynx)	target_makefile_frag=../config/mt-lynx ;;
 	*-*-netware*)	target_makefile_frag=../config/mt-netware ;;
