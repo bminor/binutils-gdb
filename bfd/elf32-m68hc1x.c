@@ -1375,8 +1375,8 @@ _bfd_m68hc11_elf_merge_private_bfd_data (ibfd, obfd)
 
   elf_elfheader (obfd)->e_flags = new_flags;
 
-  new_flags &= ~EF_M68HC11_ABI;
-  old_flags &= ~EF_M68HC11_ABI;
+  new_flags &= ~(EF_M68HC11_ABI | EF_M68HC11_MACH_MASK);
+  old_flags &= ~(EF_M68HC11_ABI | EF_M68HC11_MACH_MASK);
 
   /* Warn about any other mismatches */
   if (new_flags != old_flags)
