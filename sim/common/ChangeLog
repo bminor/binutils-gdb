@@ -1,3 +1,7 @@
+Wed May  6 10:08:16 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim-io.c: #include <errno.h>.
+
 Wed May  6 12:39:15 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 start-sanitize-am30
 
