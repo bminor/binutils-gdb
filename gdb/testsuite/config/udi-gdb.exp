@@ -154,10 +154,6 @@ proc gdb_start { } {
     # force the width to "unlimited", so no wraparound occurs
     send "set width 0\n"
     expect -re ".*$prompt $" {}
-    # set the default arguments to "main", so that "run" with no
-    # arguments will work correctly.
-    send "set args main\n"
-    expect -re ".*$prompt $" {}
 
     verbose "Setting up target, Please wait..."
 

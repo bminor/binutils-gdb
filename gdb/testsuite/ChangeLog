@@ -1,3 +1,9 @@
+Sun Feb  6 15:36:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/udi-gdb.exp (gdb_start): Don't send "set args main" to
+	GDB.  GDB doesn't work that way (not anymore at least) on UDI.
+	* gdb.t01/run.exp: Don't pass extra first argument for UDI.
+
 Fri Feb  4 12:19:32 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* gdb.t17/interrupt.c: If we get EINTR, don't print an error message.
