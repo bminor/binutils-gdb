@@ -1,10 +1,12 @@
-/* Copyright (C) 1991 Free Software Foundation, Inc.
+/* intel coff loader emulation specific stuff
+   Copyright (C) 1991 Free Software Foundation, Inc.
+   Written by Steve Chamberlain steve@cygnus.com
 
 This file is part of GLD, the Gnu Linker.
 
 GLD is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 GLD is distributed in the hope that it will be useful,
@@ -19,13 +21,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /*
    $Id$ 
 */
-
-/* 
-
-   Written by Steve Chamberlain steve@cygnus.com
-
- * intel coff loader emulation specific stuff
- */
 
 #include "bfd.h"
 #include "sysdep.h"

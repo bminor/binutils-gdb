@@ -6,7 +6,7 @@
 
    GLD is free software; you can redistribute it and/or modify
    it under the terms of the GNU Genexral Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
+   the Free Software Foundation; either version 2, or (at your option)
    any later version.
 
    GLD is distributed in the hope that it will be useful,

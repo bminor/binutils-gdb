@@ -1,3 +1,17 @@
+Wed Oct 16 12:27:08 1991  Per Bothner  (bothner at cygnus.com)
+
+	* Makefile.in, config.h, ld.h, ldemul.c, ldexp.c, ldexp.h,
+	ldgram.y, ldlex.l, ldlnk960.c, ldmain.c, ldmisc.c, ldmisc.h,
+	ldsym.c, ldsym.h, ldtemplate, ldvanilla.c, ldver.c, ldver.h,
+	ldwarn.c, ldwarn.h, ldwrite.c, ldwrite.h:
+	Add or update copyright notices.	
+
+Mon Oct 14 23:55:27 1991  Per Bothner  (bothner at cygnus.com)
+
+	* README: New file.
+	* Makefile.in:  Changed installation directory name scheme
+	to be consistent with gcc.  Also changed 'install'.
+
 Mon Oct 14 17:30:02 1991  Roland H. Pesch  (pesch at cygnus.com)
 
 	* Makefile.in: new targets ld.mm, ld.me
