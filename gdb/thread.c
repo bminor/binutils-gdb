@@ -347,6 +347,10 @@ info_threads_command (arg, from_tty)
   if (!target_has_stack) error ("No stack.");
 
   prune_threads ();
+#if defined(FIND_NEW_THREADS)
+  FIND_NEW_THREADS ();
+#endif
+
   for (tp = thread_list; tp; tp = tp->next)
     {
       if (tp->pid == current_pid)

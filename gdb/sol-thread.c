@@ -1239,6 +1239,43 @@ solaris_pid_to_str (pid)
 }
 
 
+/* Worker bee for find_new_threads
+   Callback function that gets called once per USER thread (i.e., not
+   kernel) thread. */
+
+static int
+sol_find_new_threads_callback(th, ignored)
+     const td_thrhandle_t *th;
+     void *ignored;
+{
+  td_err_e retval;
+  td_thrinfo_t ti;
+  int pid;
+
+  if ((retval = p_td_thr_get_info(th, &ti)) != TD_OK)
+    {
+      return -1;
+    }
+  pid = BUILD_THREAD(ti.ti_tid, PIDGET(inferior_pid));
+  if (!in_thread_list(pid))
+    add_thread(pid);
+
+  return 0;
+}
+
+void
+sol_find_new_threads()
+{
+  if (inferior_pid == -1)
+    {
+      printf_filtered("No process.\n");
+      return;
+    }
+  p_td_ta_thr_iter (main_ta, sol_find_new_threads_callback, (void *)0,
+		    TD_THR_ANY_STATE, TD_THR_LOWEST_PRIORITY,
+		    TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);
+}
+
 #ifdef MAINTENANCE_CMDS
 /* Worker bee for info sol-thread command.  This is a callback function that
    gets called once for each Solaris thread (ie. not kernel thread) in the 

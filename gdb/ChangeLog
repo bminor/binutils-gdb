@@ -1,3 +1,12 @@
+Fri Oct 24 16:48:21 1997  David Taylor  <taylor@texas.cygnus.com>
+
+	* sol-thread.c (sol_find_new_threads_callback,
+	sol_find_new_threads): New functions.
+	* config/sparc/nm-sun4sol2.h (FIND_NEW_THREADS): New macro, invoke
+	sol_find_new_threads.
+	* thread.c (info_threads_command): invoke FIND_NEW_THREADS if it
+	is defined.
+
 Thu Oct 23 16:16:04 1997  Jeff Law  (law@fast.cs.utah.edu)
 
 	* dbxread.c (process_one_symbol): Put back initialization
