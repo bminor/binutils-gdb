@@ -1,3 +1,9 @@
+2003-04-11  Alexandre Oliva  <aoliva@redhat.com>
+
+	* Makefile.in (libbfd_h): Added missing setting.
+	* mips-tdep.c (mips_gdbarch_init): Set disassembler_options
+	according to the selected ABI.
+
 2003-04-11  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb_indent.sh: Recognize pid_t and sigset_t as types.

@@ -574,6 +574,7 @@ elf_sh_h =	$(INCLUDE_DIR)/elf/sh.h
 elf_arm_h =	$(INCLUDE_DIR)/elf/arm.h $(elf_reloc_macros_h)
 elf_bfd_h =	$(BFD_SRC)/elf-bfd.h
 libaout_h =	$(BFD_SRC)/libaout.h
+libbfd_h =	$(BFD_SRC)/libbfd.h
 remote_sim_h =	$(INCLUDE_DIR)/gdb/remote-sim.h
 demangle_h =    $(INCLUDE_DIR)/demangle.h
 obstack_h =     $(INCLUDE_DIR)/obstack.h
