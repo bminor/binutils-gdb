@@ -454,16 +454,20 @@ static const unsigned char thumb_jtab[] =
 
 static const unsigned char mcore_be_jtab[] =
 {
-  0x70, 0x01,            /* jmpi 1     */
-  0x12, 0x11,            /* nop */
-  0x00, 0x00, 0x00, 0x00 /* <address>  */  
+  0x71, 0x02,            /* lrw r1,2       */
+  0x81, 0x01,            /* ld.w r1,(r1,0) */  
+  0x00, 0xC1,            /* jmp r1         */
+  0x12, 0x00,            /* nop            */
+  0x00, 0x00, 0x00, 0x00 /* <address>      */  
 };
 
 static const unsigned char mcore_le_jtab[] =
 {
-  0x01, 0x70,            /* jmpi 1     */
-  0x11, 0x12,            /* nop */
-  0x00, 0x00, 0x00, 0x00 /* <address>  */  
+  0x02, 0x71,            /* lrw r1,2       */
+  0x01, 0x81,            /* ld.w r1,(r1,0) */  
+  0xC1, 0x00,            /* jmp r1         */
+  0x00, 0x12,            /* nop            */
+  0x00, 0x00, 0x00, 0x00 /* <address>      */  
 };
 
 /* This is the glue sequence for PowerPC PE. There is a  */
@@ -558,37 +562,37 @@ mtable[] =
   {
 #define MMCORE_BE 5
     "mcore-be", ".byte", ".short", ".long", ".asciz", "//",
-    "jmpi\t1\n\tnop\n\t.long",
+    "lrw r1,[1f]\n\tld.w r1,(r1,0)\n\tjmp r1\n\tnop\n1:.long",
     ".global", ".space", ".align\t2",".align\t4", "",
     "pe-mcore-big", bfd_arch_mcore,
-    mcore_be_jtab, sizeof (mcore_be_jtab), 4
+    mcore_be_jtab, sizeof (mcore_be_jtab), 8
   }
   ,
   {
 #define MMCORE_LE 6
     "mcore-le", ".byte", ".short", ".long", ".asciz", "//",
-    "jmpi\t1\n\tnop\n\t.long",
+    "lrw r1,[1f]\n\tld.w r1,(r1,0)\n\tjmp r1\n\tnop\n1:.long",
     ".global", ".space", ".align\t2",".align\t4", "-EL",
     "pe-mcore-little", bfd_arch_mcore,
-    mcore_le_jtab, sizeof (mcore_le_jtab), 4
+    mcore_le_jtab, sizeof (mcore_le_jtab), 8
   }
   ,
   {
 #define MMCORE_ELF 7
     "mcore-elf-be", ".byte", ".short", ".long", ".asciz", "//",
-    "jmpi\t1\n\tnop\n\t.long",
+    "lrw r1,[1f]\n\tld.w r1,(r1,0)\n\tjmp r1\n\tnop\n1:.long",
     ".global", ".space", ".align\t2",".align\t4", "",
     "elf32-mcore-big", bfd_arch_mcore,
-    mcore_be_jtab, sizeof (mcore_be_jtab), 4
+    mcore_be_jtab, sizeof (mcore_be_jtab), 8
   }
   ,
   {
 #define MMCORE_ELF_LE 8
     "mcore-elf-le", ".byte", ".short", ".long", ".asciz", "//",
-    "jmpi\t1\n\tnop\n\t.long",
+    "lrw r1,[1f]\n\tld.w r1,(r1,0)\n\tjmp r1\n\tnop\n1:.long",
     ".global", ".space", ".align\t2",".align\t4", "-EL",
     "elf32-mcore-little", bfd_arch_mcore,
-    mcore_le_jtab, sizeof (mcore_le_jtab), 4
+    mcore_le_jtab, sizeof (mcore_le_jtab), 8
   }
   ,
   {
