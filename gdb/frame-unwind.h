@@ -82,12 +82,27 @@ typedef void (frame_unwind_id_ftype) (struct frame_info * frame,
 				      void **unwind_cache,
 				      struct frame_id * id);
 
+/* Discard the frame by restoring the registers (in regcache) back to
+   that of the caller.  */
+/* NOTE: cagney/2003-01-19: While at present the callers all pop each
+   frame in turn, the implementor should try to code things so that
+   any frame can be popped directly.  */
+/* FIXME: cagney/2003-01-19: Since both FRAME and REGCACHE refer to a
+   common register cache, care must be taken when restoring the
+   registers.  The `correct fix' is to first first save the registers
+   in a scratch cache, and second write that scratch cache back to to
+   the real register cache.  */
+
+typedef void (frame_unwind_pop_ftype) (struct frame_info *frame,
+				       void **unwind_cache,
+				       struct regcache *regcache);
 
 struct frame_unwind
 {
   /* Should the frame's type go here? */
   /* Should an attribute indicating the frame's address-in-block go
      here?  */
+  frame_unwind_pop_ftype *pop;
   frame_unwind_pc_ftype *pc;
   frame_unwind_id_ftype *id;
   frame_unwind_reg_ftype *reg;

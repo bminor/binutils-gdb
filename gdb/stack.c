@@ -1625,6 +1625,10 @@ return_command (char *retval_exp, int from_tty)
 	error ("Not confirmed.");
     }
 
+  /* FIXME: cagney/2003-01-18: Rather than pop each frame in turn,
+     this code should just go straight to the relevant frame and pop
+     that.  */
+
   /* Do the real work.  Pop until the specified frame is current.  We
      use this method because the deprecated_selected_frame is not valid after
      a POP_FRAME.  The pc comparison makes this work even if the
@@ -1632,11 +1636,11 @@ return_command (char *retval_exp, int from_tty)
 
   while (selected_frame_addr != get_frame_base (frame = get_current_frame ())
 	 || selected_frame_pc != get_frame_pc (frame))
-    POP_FRAME;
+    frame_pop (get_current_frame ());
 
   /* Then pop that frame.  */
 
-  POP_FRAME;
+  frame_pop (get_current_frame ());
 
   /* Compute the return value (if any) and store in the place
      for return values.  */
@@ -1646,9 +1650,14 @@ return_command (char *retval_exp, int from_tty)
 
   /* If we are at the end of a call dummy now, pop the dummy frame too.  */
 
+  /* FIXME: cagney/2003-01-18: This is silly.  Instead of popping all
+     the frames except the dummy, and then, as an afterthought,
+     popping the dummy frame, this code should just pop through to the
+     dummy frame.  */
+  
   if (CALL_DUMMY_HAS_COMPLETED (read_pc(), read_sp (),
 				get_frame_base (get_current_frame ())))
-    POP_FRAME;
+    frame_pop (get_current_frame ());
 
   /* If interactive, print the frame that is now current.  */
 

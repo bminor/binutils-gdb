@@ -145,6 +145,18 @@ frame_id_unwind (struct frame_info *frame)
   return frame->id_unwind_cache;
 }
 
+void
+frame_pop (struct frame_info *frame)
+{
+  /* FIXME: cagney/2003-01-18: There is probably a chicken-egg problem
+     with passing in current_regcache.  The pop function needs to be
+     written carefully so as to not overwrite registers whose [old]
+     values are needed to restore other registers.  Instead, this code
+     should pass in a scratch cache and, as a second step, restore the
+     registers using that.  */
+  frame->unwind->pop (frame, &frame->unwind_cache, current_regcache);
+  flush_cached_frames ();
+}
 
 void
 frame_register_unwind (struct frame_info *frame, int regnum,
@@ -715,7 +727,15 @@ frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache,
   id->base = base;
 }
 	
+static void
+frame_saved_regs_pop (struct frame_info *fi, void **cache,
+		      struct regcache *regcache)
+{
+  POP_FRAME;
+}
+
 const struct frame_unwind trad_frame_unwinder = {
+  frame_saved_regs_pop,
   frame_saved_regs_pc_unwind,
   frame_saved_regs_id_unwind,
   frame_saved_regs_register_unwind

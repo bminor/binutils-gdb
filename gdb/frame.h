@@ -306,6 +306,10 @@ extern CORE_ADDR frame_pc_unwind (struct frame_info *frame);
    caller's frame.  */
 extern struct frame_id frame_id_unwind (struct frame_info *frame);
 
+/* Discard the specified frame.  Restoring the registers to the state
+   of the caller.  */
+extern void frame_pop (struct frame_info *frame);
+
 /* Describe the saved registers of a frame.  */
 
 #if defined (EXTRA_FRAME_INFO) || defined (FRAME_FIND_SAVED_REGS)

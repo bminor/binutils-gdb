@@ -1711,8 +1711,9 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	  {
 	    /* The user wants the context restored. */
 
-            /* We must get back to the frame we were before the dummy call. */
-            POP_FRAME;
+            /* We must get back to the frame we were before the dummy
+               call. */
+	    frame_pop (get_current_frame ());
 
 	    /* FIXME: Insert a bunch of wrap_here; name can be very long if it's
 	       a C++ name with arguments and stuff.  */

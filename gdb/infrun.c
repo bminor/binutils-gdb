@@ -3109,10 +3109,10 @@ normal_stop (void)
 
   if (stop_stack_dummy)
     {
-      /* Pop the empty frame that contains the stack dummy.
-         POP_FRAME ends with a setting of the current frame, so we
-         can use that next. */
-      POP_FRAME;
+      /* Pop the empty frame that contains the stack dummy.  POP_FRAME
+         ends with a setting of the current frame, so we can use that
+         next. */
+      frame_pop (get_current_frame ());
       /* Set stop_pc to what it was before we called the function.
          Can't rely on restore_inferior_status because that only gets
          called if we don't stop in the called function.  */

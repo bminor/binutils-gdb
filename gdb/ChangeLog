@@ -1,3 +1,19 @@
+2003-01-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame-unwind.h (frame_unwind_pop_ftype): Declare.
+	(struct frame_unwind): Add field pop.
+	* frame.h (frame_pop): Declare.
+	* frame.c (frame_saved_regs_pop): New function.
+	(trad_frame_unwinder): Add frame_saved_regs_pop.
+	(frame_pop): New function.
+	* dummy-frame.c (dummy_frame_pop): New function.
+	(discard_innermost_dummy): New function.
+	(generic_pop_dummy_frame): Use discard_innermost_dummy.
+	(dummy_frame_unwind): Add dummy_frame_pop.
+	* infrun.c (normal_stop): Call frame_pop instead of POP_FRAME.
+	* valops.c (hand_function_call): Ditto.
+	* stack.c (return_command): Ditto.
+
 2003-01-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* cris-tdep.c: Fix function declaration indentation.
