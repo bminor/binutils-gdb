@@ -1,4 +1,4 @@
-OUTPUT_FORMAT("a.out-generic-big")
+OUTPUT_FORMAT("a.out-sunos-big")
 OUTPUT_ARCH(m68k)
 
 SEARCH_DIR(/lib) 			

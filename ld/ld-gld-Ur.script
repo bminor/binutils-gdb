@@ -1,4 +1,4 @@
-SCRIPT 
+
 SEARCH_DIR(/lib) 			
 SEARCH_DIR(/usr/lib) 			
 SEARCH_DIR(/usr/local/lib) 		
@@ -28,4 +28,4 @@ SECTIONS
    [COMMON]				
     } 					
 } 					
-ENDSCRIPT 
+

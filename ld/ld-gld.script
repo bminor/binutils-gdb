@@ -1,5 +1,5 @@
 OUTPUT_ARCH(sparc)
-OUTPUT_FORMAT("a.out-generic-big")
+OUTPUT_FORMAT("a.out-sunos-big")
 SEARCH_DIR(/lib) 			
 SEARCH_DIR(/usr/lib) 			
 SEARCH_DIR(/usr/local/lib) 		

@@ -5,7 +5,7 @@
    This file is part of GLD, the Gnu Linker.
 
    GLD is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
+   it under the terms of the GNU Genexral Public License as published by
    the Free Software Foundation; either version 1, or (at your option)
    any later version.
 
@@ -39,11 +39,11 @@
 /* Look in this variable for a target format */
 #define TARGET_ENVIRON "GNUTARGET"
 /* If not there then choose this */
-#define GLD_TARGET "a.out-generic-big"
-#define GLD68K_TARGET "a.out-generic-big"
+#define GLD_TARGET "a.out-sunos-big"
+#define GLD68K_TARGET "a.out-sunos-big"
 #define LNK960_TARGET "coff-Intel-big"
 #define GLD960_TARGET "b.out.big"
-#define VANILLA_TARGET "a.out-generic-big"
+#define VANILLA_TARGET "a.out-sunos-big"
 #define GLDM88KBCS_TARGET "m88kbcs"
 
 
