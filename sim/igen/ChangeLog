@@ -1,3 +1,50 @@
+Wed Jan 21 18:00:22 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen-semantics.c (print_semantic_body): Use GPR_SET to zero
+ 	hardwired register.
+
+Wed Dec 17 14:49:03 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* gen-semantics.c (print_semantic_body): Fix handling of
+	hardwired zero register.
+
+Tue Dec  9 12:45:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* igen.h (struct _igen_gen_options): Add member default_model.
+
+	* igen.c (gen_run_c): Default to the first machine in the
+ 	multi-sim list.
+	(main): Add MODEL parameter to gen-multi-sim option.
+
+	* gen.h (function_decl_type): Declare enum.
+
+	* gen-engine.c (print_engine_run_function_header), gen-engine.h:
+ 	Make global, pass function_decl_type as argument.
+	(gen_engine_h, gen_engine_c): Update call.
+
+	* gen-idecode.c (print_idecode_issue_function_header),
+ 	gen-idecode.h: Pass function_decl_type as argument.
+
+	* igen.c (gen_idecode_h): For multi-sim, delcare global variable
+ 	idecode_issue.
+
+	* igen.c (gen_run_c): For multi-sim, initialize globals
+ 	idecode_issue and engine_run.
+
+Fri Nov 14 10:51:44 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ld-insn.c (parse_insn_model_record): Allow multiple model names
+ 	to be specified in a single instruction model record.
+	(dump_insn_model_entry): Update.
+
+	* ld-insn.h (struct _insn_model_entry): Replace member name with
+ 	the filter names.  Document syntax change.
+
+Wed Nov 12 15:45:40 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen-engine.c (print_run_body): Add hooks for adding code before
+ 	and after an instruction has been issued.
+
 1997-11-04  Brendan Kehoe  <brendan@lisa.cygnus.com>
 
 	* gen-idecode.c (print_jump_until_stop_body): Use `#if 0' instead of

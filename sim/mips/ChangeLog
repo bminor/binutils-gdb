@@ -1,3 +1,12 @@
+Wed Jan 21 16:16:27 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (GPR_SET): Define, used by igen when zeroing a
+ 	regiser.
+
+	* configure.in (default_endian): Configure a big-endian simulator
+ 	by default.
+	* configure: Re-generate.
+	
 Mon Jan 19 22:26:29 1998  Doug Evans  <devans@seba>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

@@ -42,19 +42,21 @@ AC_SUBST(SIM_SUBTARGET)
 #
 # Select the byte order of the target
 #
+mips_endian=
+default_endian=
 case "${target}" in
 # start-sanitize-tx19
-  mipstx19*-*-*)        mips_endian=0 ;;
+  mipstx19*-*-*)        default_endian=BIG_ENDIAN ;;
 # end-sanitize-tx19
 # start-sanitize-r5900
   mips64r59*-*-*)	mips_endian=LITTLE_ENDIAN ;;
 # end-sanitize-r5900
-  mips64*-*-*)          mips_endian=0 ;;
-  mips16*-*-*)          mips_endian=0 ;;
-  mips*-*-*)            mips_endian=0 ;;
-  *)                    mips_endian=0 ;;
+  mips64*-*-*)          default_endian=BIG_ENDIAN ;;
+  mips16*-*-*)          default_endian=BIG_ENDIAN ;;
+  mips*-*-*)            default_endian=BIG_ENDIAN ;;
+  *)                    default_endian=BIG_ENDIAN ;;
 esac
-SIM_AC_OPTION_ENDIAN($mips_endian)
+SIM_AC_OPTION_ENDIAN($mips_endian,$default_endian)
 
 
 #

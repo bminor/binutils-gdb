@@ -76,6 +76,8 @@ typedef unsigned64 uword64;
 
 /* Floating-point operations: */
 
+#include "sim-fpu.h"
+
 /* FPU registers must be one of the following types. All other values
    are reserved (and undefined). */
 typedef enum {
@@ -371,6 +373,7 @@ struct _sim_cpu {
 #define REGISTERS       ((STATE_CPU (sd,0))->registers)
 
 #define GPR     (&REGISTERS[0])
+#define GPR_SET(N,VAL) (REGISTERS[(N)] = (VAL))
 #define FGRIDX  (38)
 #define FGR     (&REGISTERS[FGRIDX])
 #define LO      (REGISTERS[33])
@@ -517,9 +520,9 @@ struct _sim_cpu {
   /* end-sanitize-r5900 */
   /* start-sanitize-vr5400 */
 
+  /* The MDMX ISA has a very very large accumulator */
+  unsigned8 acc[3 * 8];
   /* end-sanitize-vr5400 */
-
-
 
   sim_cpu_base base;
 };
