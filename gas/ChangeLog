@@ -1,3 +1,7 @@
+2001-12-17  Richard Henderson  <rth@redhat.com>
+
+	* config/tc-alpha.c (alpha_handle_align): Encode unop with RB as $sp.
+
 2001-12-17  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* cgen.c: Add prototype for queue_fixup.
