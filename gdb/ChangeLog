@@ -1,5 +1,9 @@
 Fri Sep 11 01:34:25 1992  John Gilmore  (gnu@sphagnum.cygnus.com)
 
+	* mipsread.c:  Clean up some white space.
+	(parse_symbol):  Handle stEnd of stFile.
+	(parse_partial_symbols):  Remove old #if 0'd code.  Handle stLocal.
+
 	* mips-xdep.c (REGISTER_PTRACE_ADDR, fetch_inferior_registers,
 	store_inferior_registers):  Replace unexplained numbers
 	with manifest constants from a DECstation header file.
