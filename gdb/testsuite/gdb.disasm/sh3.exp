@@ -117,9 +117,5 @@ if ![file exists $objdir/$subdir/$binfile] then {
 
     all_fp_move_and_load_tests
     all_fp_arithmetic_tests
-
-    # SH3E V1.6 manual doesn't have the right bit patterns for some of
-    # the new insns, so we don't know how to assemble them correctly.
-    setup_xfail "sh*-*-*"
     all_fp_misc_tests
 }

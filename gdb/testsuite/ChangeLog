@@ -1,3 +1,10 @@
+start-sanitize-sh3e
+Fri Aug 11 13:36:20 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gdb.disasm/sh3.exp (all_fp_misc_tests): No longer expect a
+	failure (opcode table has been fixed to match reality).
+
+end-sanitize-sh3e
 Wed Aug  9 08:04:12 1995  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.base/a1-selftest.exp: Change "i*86-*-sysv4" xfail for
