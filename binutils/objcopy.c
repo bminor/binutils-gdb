@@ -1,6 +1,6 @@
 /* objcopy.c -- copy object file from input to output, optionally massaging it.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002
+   2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -798,7 +798,8 @@ filter_symbols (abfd, obfd, osyms, isyms, symcount)
 
 	  old_name = (char *) bfd_asymbol_name (sym);
 	  new_name = (char *) lookup_sym_redefinition (old_name);
-	  name = (char *) bfd_asymbol_name (sym) = new_name;
+	  bfd_asymbol_name (sym) = new_name;
+	  name = new_name;
 	}
 
       /* Check if we will remove the current leading character.  */
@@ -828,7 +829,7 @@ filter_symbols (abfd, obfd, osyms, isyms, symcount)
 
       /* Remove leading char.  */
       if (rem_leading_char)
-	name = (char *) bfd_asymbol_name (sym) = name + 1;
+	bfd_asymbol_name (sym) = ++name;
 
       /* Add new leading char and/or prefix.  */
       if (add_leading_char || prefix_symbols_string)
@@ -846,7 +847,8 @@ filter_symbols (abfd, obfd, osyms, isyms, symcount)
            }
 
           strcpy (ptr, name);
-          name = (char *) bfd_asymbol_name (sym) = n;
+          bfd_asymbol_name (sym) = n;
+          name = n;
 	}
 
       if (strip_symbols == STRIP_ALL)
@@ -996,6 +998,8 @@ copy_object (ibfd, obfd)
   bfd_size_type max_gap = 0;
   long symsize;
   PTR dhandle;
+  enum bfd_architecture iarch;
+  unsigned int imach;
 
   if (ibfd->xvec->byteorder != obfd->xvec->byteorder
       && ibfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN
@@ -1031,8 +1035,9 @@ copy_object (ibfd, obfd)
     }
 
   /* Copy architecture of input file to output file.  */
-  if (!bfd_set_arch_mach (obfd, bfd_get_arch (ibfd),
-			  bfd_get_mach (ibfd))
+  iarch = bfd_get_arch (ibfd);
+  imach = bfd_get_mach (ibfd);
+  if (!bfd_set_arch_mach (obfd, iarch, imach)
       && (ibfd->target_defaulted
 	  || bfd_get_arch (ibfd) != bfd_get_arch (obfd)))
     non_fatal (_("Warning: Output file cannot represent architecture %s"),
@@ -1673,7 +1678,7 @@ setup_section (ibfd, isection, obfdarg)
       strcat (n, name);
       name = n;
     }
-    
+
   osection = bfd_make_section_anyway (obfd, name);
 
   if (osection == NULL)

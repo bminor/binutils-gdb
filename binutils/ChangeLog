@@ -1,3 +1,8 @@
+2003-02-21  Roger Sayle  <roger@eyesopen.com>
+
+	* objcopy.c (filter_symbols): Fix compilation problems with
+	HP-UX's C compiler.
+
 2003-02-19  Christopher Faylor  <cgf@redhat.com>
 
 	* rclex.l (handle_quotes): Fix minor formatting problems introduced in
