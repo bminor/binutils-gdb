@@ -1,3 +1,13 @@
+Tue Apr 16 13:50:22 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* rdcoff.c: New file.
+	* rddbg.c (read_debugging_info): Read COFF symbols if COFF flavour
+	and no stabs were found.
+	* budbg.h (parse_coff): Declare.
+	* Makefile.in: Rebuild dependencies.
+	(CFILES): Add rdcoff.c.
+	(DEBUG_OBJS): Add rdcoff.o.
+
 Mon Apr 15 15:55:01 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* nlmconv.c (choose_temp_base{,_try}): Delete, in libiberty now.

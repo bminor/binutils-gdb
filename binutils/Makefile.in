@@ -136,8 +136,8 @@ GENERATED_HFILES = arparse.h sysroff.h sysinfo.h defparse.h
 CFILES = ar.c arsup.c bucomm.c coffdump.c coffgrok.c debug.c dlltool.c \
 	filemode.c ieee.c is-ranlib.c is-strip.c maybe-ranlib.c \
 	maybe-strip.c nlmconv.c nm.c not-ranlib.c not-strip.c \
-	objcopy.c objdump.c prdbg.c rddbg.c size.c srconv.c stabs.c \
-	strings.c sysdump.c version.c
+	objcopy.c objdump.c prdbg.c rdcoff.c rddbg.c size.c srconv.c \
+	stabs.c strings.c sysdump.c version.c wrstabs.c
 
 GENERATED_CFILES = \
 	underscore.c arparse.c arlex.c sysroff.c sysinfo.c syslex.c \
@@ -146,7 +146,8 @@ GENERATED_CFILES = \
 .c.o:
 	$(CC) -c $(ALL_CFLAGS) $<
 
-DEBUG_OBJS = rddbg.o debug.o stabs.o ieee.o
+DEBUG_OBJS = rddbg.o debug.o stabs.o ieee.o rdcoff.o
+WRITE_DEBUG_OBJS = $(DEBUG_OBJS) wrstabs.o
 
 LIBIBERTY = ../libiberty/libiberty.a
 
@@ -248,20 +249,23 @@ dvi: binutils.dvi
 $(SIZE_PROG): $(ADDL_DEPS) size.o
 	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(SIZE_PROG) size.o $(ADDL_LIBS) $(EXTRALIBS)
 
-$(OBJCOPY_PROG): $(ADDL_DEPS) objcopy.o not-strip.o $(DEBUG_OBJS)
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o not-strip.o $(DEBUG_OBJS) $(ADDL_LIBS) $(EXTRALIBS)
+$(OBJCOPY_PROG): $(ADDL_DEPS) objcopy.o not-strip.o $(WRITE_DEBUG_OBJS)
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o not-strip.o $(WRITE_DEBUG_OBJS) $(ADDL_LIBS) $(EXTRALIBS)
 
 $(STRINGS_PROG): $(ADDL_DEPS) strings.o
 	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(STRINGS_PROG) strings.o $(ADDL_LIBS) $(EXTRALIBS)
 
-$(STRIP_PROG): $(ADDL_DEPS) objcopy.o is-strip.o $(DEBUG_OBJS)
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(STRIP_PROG) objcopy.o is-strip.o $(DEBUG_OBJS) $(ADDL_LIBS) $(EXTRALIBS)
+$(STRIP_PROG): $(ADDL_DEPS) objcopy.o is-strip.o $(WRITE_DEBUG_OBJS)
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(STRIP_PROG) objcopy.o is-strip.o $(WRITE_DEBUG_OBJS) $(ADDL_LIBS) $(EXTRALIBS)
 
 $(NM_PROG): $(ADDL_DEPS) nm.o
 	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(NM_PROG) nm.o $(ADDL_LIBS) $(EXTRALIBS)
 
+#libbfd is searched twice here ($(BFDLIB) and $(ADDL_LIBS)) because when a
+#shared libbfd is built with --enable-commonbfdlib, all of libopcodes is
+#available in libbfd.so and we don't want to link anything from libopcodes.a
 $(OBJDUMP_PROG): $(ADDL_DEPS) objdump.o prdbg.o $(DEBUG_OBJS) $(OPCODES_DEP)
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(OBJDUMP_PROG) objdump.o prdbg.o $(DEBUG_OBJS) $(OPCODES) $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(OBJDUMP_PROG) objdump.o prdbg.o $(DEBUG_OBJS) $(BFDLIB) $(OPCODES) $(ADDL_LIBS) $(EXTRALIBS)
 
 underscore.c: stamp-under ; @true
 
@@ -694,11 +698,15 @@ objcopy.o: objcopy.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 objdump.o: objdump.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h $(INCDIR)/getopt.h $(INCDIR)/progress.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/dis-asm.h \
-  $(INCDIR)/libiberty.h debug.h budbg.h $(INCDIR)/aout/aout64.h \
-  $(INCDIR)/aout/stab.def
+  $(INCDIR)/libiberty.h debug.h budbg.h $(INCDIR)/aout/aout64.h
 prdbg.o: prdbg.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h debug.h budbg.h
+rdcoff.o: rdcoff.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h $(INCDIR)/coff/internal.h bucomm.h \
+  config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/demangle.h debug.h budbg.h ../bfd/libcoff.h \
+  $(INCDIR)/bfdlink.h
 rddbg.o: rddbg.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h debug.h budbg.h
@@ -710,8 +718,9 @@ srconv.o: srconv.c bucomm.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h sysroff.c
 stabs.o: stabs.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h debug.h budbg.h $(INCDIR)/aout/aout64.h \
-  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
+  $(INCDIR)/libiberty.h $(INCDIR)/demangle.h debug.h \
+  budbg.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/aout/stab.def
 strings.o: strings.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h
@@ -719,6 +728,10 @@ sysdump.o: sysdump.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
   sysroff.h sysroff.c
 version.o: version.c
+wrstabs.o: wrstabs.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/libiberty.h debug.h budbg.h $(INCDIR)/aout/aout64.h \
+  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
 underscore.o: underscore.c
 arparse.o: arparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h bucomm.h config.h $(INCDIR)/fopen-same.h \

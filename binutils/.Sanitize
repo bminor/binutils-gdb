@@ -78,6 +78,7 @@ objdump.c
 prdbg.c
 ranlib.1
 ranlib.sh
+rdcoff.c
 rddbg.c
 sanity.sh
 size.1

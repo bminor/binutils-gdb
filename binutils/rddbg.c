@@ -54,8 +54,6 @@ read_debugging_info (abfd, syms, symcount)
   if (dhandle == NULL)
     return NULL;
 
-  /* All we know about right now is stabs.  */
-
   if (! read_section_stabs_debugging_info (abfd, syms, symcount, dhandle,
 					   &found))
     return NULL;
@@ -71,6 +69,17 @@ read_debugging_info (abfd, syms, symcount)
     {
       if (! read_ieee_debugging_info (abfd, dhandle, &found))
 	return NULL;
+    }
+
+  /* Try reading the COFF symbols if we didn't find any stabs in COFF
+     sections.  */
+  if (! found
+      && bfd_get_flavour (abfd) == bfd_target_coff_flavour
+      && symcount > 0)
+    {
+      if (! parse_coff (abfd, syms, symcount, dhandle))
+	return NULL;
+      found = true;
     }
 
   if (! found)
