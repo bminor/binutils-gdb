@@ -1,3 +1,8 @@
+2001-06-13  Elena Zannoni  <ezannoni@redhat.com>
+
+	* MAINTAINERS: Add Andrew Cagney as co-maintainer of
+        testsuite/gdb.mi.
+
 2001-06-11  Andrew Cagney  <ac131313@redhat.com>
 
 	* symtab.c (lookup_symtab_1): Replace basename with lbasename.

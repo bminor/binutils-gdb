@@ -267,6 +267,7 @@ testsuite		Fernando Nasser		fnasser@cygnus.com
   lib                   Mark Salter             msalter@redhat.com
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
   mi tests (gdb.mi)     Elena Zannoni           ezannoni@redhat.com
+                        Andrew Cagney           cagney@redhat.com
   stabs (gdb.satbs)     Elena Zannoni           ezannoni@redhat.com
   threads (gdb.threads) Michael Snyder          msnyder@redhat.com
   trace (gdb.trace)     Michael Snyder          msnyder@redhat.com
