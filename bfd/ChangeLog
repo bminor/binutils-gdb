@@ -1,3 +1,12 @@
+Tue Oct 31 15:30:07 1995  David Mosberger-Tang  <davidm@azstarnet.com>
+
+	* configure.in (alpha*-*-linux*): Set COREFILE to trad-core.o and
+	define TRAD_HEADER as hosts/alphalinux.h.
+	* configure: Rebuild.
+	* hosts/alphalinux.h: New file.
+	* trad-core.c (trad_unix_core_file_p): Cast u.u_ar0 to bfd_vma,
+	not int.
+
 Tue Oct 31 12:34:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffcode.h (coff_slurp_symbol_table): Accept C_BCOMM and

@@ -980,7 +980,14 @@ COREFILE=
 COREFLAG=
 if test "${target}" = "${host}"; then
   case "${host}" in
-  alpha-*-*)		COREFILE=osf-core.o ;;
+  alpha*-*-linux*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/alphalinux.h"
+EOF
+
+	;;
+  alpha*-*-*)		COREFILE=osf-core.o ;;
   arm-*-riscix)		COREFILE=trad-core.o ;;
   hppa*-*-hpux*)	COREFILE=hpux-core.o ;;
   hppa*-*-hiux*)	COREFILE=hpux-core.o ;;
@@ -1212,7 +1219,7 @@ EOF
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1216 "configure"
+#line 1223 "configure"
 #include "confdefs.h"
 #include <sys/procfs.h>
 int main() { return 0; }
