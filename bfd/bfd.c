@@ -114,8 +114,14 @@ CODE_FRAGMENT
 .       from happening. *}
 .    boolean output_has_begun;
 .
-.    {* Pointer to linked list of sections*}
-.    struct sec  *sections;
+.    {* A hash table for section names. *}
+.    struct bfd_hash_table section_htab;
+.
+.    {* Pointer to linked list of sections. *}
+.    struct sec *sections;
+.
+.    {* The place where we add to the section list. *}
+.    struct sec **section_tail;
 .
 .    {* The number of sections *}
 .    unsigned int section_count;

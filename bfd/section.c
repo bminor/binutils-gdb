@@ -629,6 +629,92 @@ STD_SECTION (bfd_abs_section, 0, bfd_abs_symbol, BFD_ABS_SECTION_NAME, 2);
 STD_SECTION (bfd_ind_section, 0, bfd_ind_symbol, BFD_IND_SECTION_NAME, 3);
 #undef STD_SECTION
 
+struct section_hash_entry
+{
+  struct bfd_hash_entry root;
+  asection section;
+};
+
+/* Initialize an entry in the section hash table.  */
+
+struct bfd_hash_entry *
+bfd_section_hash_newfunc (entry, table, string)
+     struct bfd_hash_entry *entry;
+     struct bfd_hash_table *table;
+     const char *string;
+{
+  /* Allocate the structure if it has not already been allocated by a
+     subclass.  */
+  if (entry == NULL)
+    {
+      entry = bfd_hash_allocate (table, sizeof (struct section_hash_entry));
+      if (entry == NULL)
+	return entry;
+    }
+
+  /* Call the allocation method of the superclass.  */
+  entry = bfd_hash_newfunc (entry, table, string);
+  if (entry != NULL)
+    {
+      memset ((PTR) &((struct section_hash_entry *) entry)->section,
+	      0, sizeof (asection));
+    }
+
+  return entry;
+}
+
+#define section_hash_lookup(table, string, create, copy) \
+  ((struct section_hash_entry *) \
+   bfd_hash_lookup ((table), (string), (create), (copy)))
+
+/* Initializes a new section.  NEWSECT->NAME is already set.  */
+
+static asection *bfd_section_init PARAMS ((bfd *, asection *));
+
+static asection *
+bfd_section_init (abfd, newsect)
+     bfd *abfd;
+     asection *newsect;
+{
+  static int section_id = 0x10;  /* id 0 to 3 used by STD_SECTION.  */
+
+  newsect->id = section_id;
+  newsect->index = abfd->section_count;
+  newsect->flags = SEC_NO_FLAGS;
+
+  newsect->userdata = NULL;
+  newsect->contents = NULL;
+  newsect->next = (asection *) NULL;
+  newsect->relocation = (arelent *) NULL;
+  newsect->reloc_count = 0;
+  newsect->line_filepos = 0;
+  newsect->owner = abfd;
+  newsect->comdat = NULL;
+
+  /* Create a symbol whose only job is to point to this section.  This
+     is useful for things like relocs which are relative to the base
+     of a section.  */
+  newsect->symbol = bfd_make_empty_symbol (abfd);
+  if (newsect->symbol == NULL)
+    return NULL;
+
+  newsect->symbol->name = newsect->name;
+  newsect->symbol->value = 0;
+  newsect->symbol->section = newsect;
+  newsect->symbol->flags = BSF_SECTION_SYM;
+
+  newsect->symbol_ptr_ptr = &newsect->symbol;
+
+  if (! BFD_SEND (abfd, _new_section_hook, (abfd, newsect)))
+    return NULL;
+
+  section_id++;
+  abfd->section_count++;
+  *abfd->section_tail = newsect;
+  abfd->section_tail = &newsect->next;
+  return newsect;
+}
+
 /*
 DOCDD
 INODE
@@ -662,11 +748,12 @@ bfd_get_section_by_name (abfd, name)
      bfd *abfd;
      const char *name;
 {
-  asection *sect;
+  struct section_hash_entry *sh;
 
-  for (sect = abfd->sections; sect != NULL; sect = sect->next)
-    if (!strcmp (sect->name, name))
-      return sect;
+  sh = section_hash_lookup (&abfd->section_htab, name, false, false);
+  if (sh != NULL)
+    return &sh->section;
+
   return NULL;
 }
 
@@ -713,7 +800,7 @@ bfd_get_unique_section_name (abfd, templat, count)
 	abort ();
       sprintf (sname + len, ".%d", num++);
     }
-  while (bfd_get_section_by_name (abfd, sname) != NULL);
+  while (section_hash_lookup (&abfd->section_htab, sname, false, false));
 
   if (count != NULL)
     *count = num;
@@ -750,12 +837,40 @@ bfd_make_section_old_way (abfd, name)
      bfd *abfd;
      const char *name;
 {
-  asection *sec = bfd_get_section_by_name (abfd, name);
-  if (sec == (asection *) NULL)
+  struct section_hash_entry *sh;
+  asection *newsect;
+
+  if (abfd->output_has_begun)
     {
-      sec = bfd_make_section (abfd, name);
+      bfd_set_error (bfd_error_invalid_operation);
+      return NULL;
     }
-  return sec;
+
+  if (strcmp (name, BFD_ABS_SECTION_NAME) == 0)
+    return bfd_abs_section_ptr;
+
+  if (strcmp (name, BFD_COM_SECTION_NAME) == 0)
+    return bfd_com_section_ptr;
+
+  if (strcmp (name, BFD_UND_SECTION_NAME) == 0)
+    return bfd_und_section_ptr;
+
+  if (strcmp (name, BFD_IND_SECTION_NAME) == 0)
+    return bfd_ind_section_ptr;
+
+  sh = section_hash_lookup (&abfd->section_htab, name, true, false);
+  if (sh == NULL)
+    return NULL;
+
+  newsect = &sh->section;
+  if (newsect->name != NULL)
+    {
+      /* Section already exists.  */
+      return newsect;
+    }
+
+  newsect->name = name;
+  return bfd_section_init (abfd, newsect);
 }
 
 /*
@@ -780,10 +895,8 @@ bfd_make_section_anyway (abfd, name)
      bfd *abfd;
      const char *name;
 {
-  static int section_id = 0x10;  /* id 0 to 3 used by STD_SECTION.  */
+  struct section_hash_entry *sh;
   asection *newsect;
-  asection **prev = &abfd->sections;
-  asection *sect = abfd->sections;
 
   if (abfd->output_has_begun)
     {
@@ -791,56 +904,24 @@ bfd_make_section_anyway (abfd, name)
       return NULL;
     }
 
-  while (sect)
-    {
-      prev = &sect->next;
-      sect = sect->next;
-    }
-
-  newsect = (asection *) bfd_zalloc (abfd, (bfd_size_type) sizeof (asection));
-  if (newsect == NULL)
+  sh = section_hash_lookup (&abfd->section_htab, name, true, false);
+  if (sh == NULL)
     return NULL;
 
+  newsect = &sh->section;
+  if (newsect->name != NULL)
+    {
+      /* We are making a section of the same name.  It can't go in
+	 section_htab without generating a unique section name and
+	 that would be pointless;  We don't need to traverse the
+	 hash table.  */
+      newsect = (asection *) bfd_zalloc (abfd, sizeof (asection));
+      if (newsect == NULL)
+	return NULL;
+    }
+
   newsect->name = name;
-  newsect->id = section_id;
-  newsect->index = abfd->section_count;
-  newsect->flags = SEC_NO_FLAGS;
-
-  newsect->userdata = NULL;
-  newsect->contents = NULL;
-  newsect->next = (asection *) NULL;
-  newsect->relocation = (arelent *) NULL;
-  newsect->reloc_count = 0;
-  newsect->line_filepos = 0;
-  newsect->owner = abfd;
-  newsect->comdat = NULL;
-
-  /* Create a symbol whos only job is to point to this section. This is
-     useful for things like relocs which are relative to the base of a
-     section.  */
-  newsect->symbol = bfd_make_empty_symbol (abfd);
-  if (newsect->symbol == NULL)
-    {
-      bfd_release (abfd, newsect);
-      return NULL;
-    }
-  newsect->symbol->name = name;
-  newsect->symbol->value = 0;
-  newsect->symbol->section = newsect;
-  newsect->symbol->flags = BSF_SECTION_SYM;
-
-  newsect->symbol_ptr_ptr = &newsect->symbol;
-
-  if (BFD_SEND (abfd, _new_section_hook, (abfd, newsect)) != true)
-    {
-      bfd_release (abfd, newsect);
-      return NULL;
-    }
-
-  section_id++;
-  abfd->section_count++;
-  *prev = newsect;
-  return newsect;
+  return bfd_section_init (abfd, newsect);
 }
 
 /*
@@ -862,35 +943,34 @@ bfd_make_section (abfd, name)
      bfd *abfd;
      const char *name;
 {
-  asection *sect = abfd->sections;
+  struct section_hash_entry *sh;
+  asection *newsect;
 
-  if (strcmp (name, BFD_ABS_SECTION_NAME) == 0)
+  if (abfd->output_has_begun)
     {
-      return bfd_abs_section_ptr;
-    }
-  if (strcmp (name, BFD_COM_SECTION_NAME) == 0)
-    {
-      return bfd_com_section_ptr;
-    }
-  if (strcmp (name, BFD_UND_SECTION_NAME) == 0)
-    {
-      return bfd_und_section_ptr;
+      bfd_set_error (bfd_error_invalid_operation);
+      return NULL;
     }
 
-  if (strcmp (name, BFD_IND_SECTION_NAME) == 0)
+  if (strcmp (name, BFD_ABS_SECTION_NAME) == 0
+      || strcmp (name, BFD_COM_SECTION_NAME) == 0
+      || strcmp (name, BFD_UND_SECTION_NAME) == 0
+      || strcmp (name, BFD_IND_SECTION_NAME) == 0)
+    return NULL;
+
+  sh = section_hash_lookup (&abfd->section_htab, name, true, false);
+  if (sh == NULL)
+    return NULL;
+
+  newsect = &sh->section;
+  if (newsect->name != NULL)
     {
-      return bfd_ind_section_ptr;
+      /* Section already exists.  */
+      return newsect;
     }
 
-  while (sect)
-    {
-      if (!strcmp (sect->name, name))
-	return NULL;
-      sect = sect->next;
-    }
-
-  /* The name is not already used; go ahead and make a new section.  */
-  return bfd_make_section_anyway (abfd, name);
+  newsect->name = name;
+  return bfd_section_init (abfd, newsect);
 }
 
 /*
@@ -1278,6 +1358,8 @@ _bfd_strip_section_from_output (info, s)
 	if (*spp == os)
 	  {
 	    *spp = os->next;
+	    if (os->next == NULL)
+	      os->owner->section_tail = spp;
 	    os->owner->section_count--;
 	    break;
 	  }

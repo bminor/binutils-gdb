@@ -57,6 +57,7 @@ _bfd_new_bfd ()
   if (nbfd->memory == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
+      free (nbfd);
       return NULL;
     }
 
@@ -65,7 +66,13 @@ _bfd_new_bfd ()
   nbfd->direction = no_direction;
   nbfd->iostream = NULL;
   nbfd->where = 0;
+  if (!bfd_hash_table_init (&nbfd->section_htab, bfd_section_hash_newfunc))
+    {
+      free (nbfd);
+      return NULL;
+    }
   nbfd->sections = (asection *) NULL;
+  nbfd->section_tail = &nbfd->sections;
   nbfd->format = bfd_unknown;
   nbfd->my_archive = (bfd *) NULL;
   nbfd->origin = 0;
@@ -94,6 +101,17 @@ _bfd_new_bfd_contained_in (obfd)
   nbfd->direction = read_direction;
   nbfd->target_defaulted = obfd->target_defaulted;
   return nbfd;
+}
+
+/* Delete a BFD.  */
+
+void
+_bfd_delete_bfd (abfd)
+     bfd *abfd;
+{
+  bfd_hash_table_free (&abfd->section_htab);
+  objalloc_free ((struct objalloc *) abfd->memory);
+  free (abfd);
 }
 
 /*
@@ -135,9 +153,8 @@ bfd_openr (filename, target)
   target_vec = bfd_find_target (target, nbfd);
   if (target_vec == NULL)
     {
-      objalloc_free ((struct objalloc *) nbfd->memory);
-      free (nbfd);
       bfd_set_error (bfd_error_invalid_target);
+      _bfd_delete_bfd (nbfd);
       return NULL;
     }
 
@@ -148,8 +165,7 @@ bfd_openr (filename, target)
     {
       /* File didn't exist, or some such */
       bfd_set_error (bfd_error_system_call);
-      objalloc_free ((struct objalloc *) nbfd->memory);
-      free (nbfd);
+      _bfd_delete_bfd (nbfd);
       return NULL;
     }
 
@@ -216,8 +232,7 @@ bfd_fdopenr (filename, target, fd)
   if (target_vec == NULL)
     {
       bfd_set_error (bfd_error_invalid_target);
-      objalloc_free ((struct objalloc *) nbfd->memory);
-      free (nbfd);
+      _bfd_delete_bfd (nbfd);
       return NULL;
     }
 
@@ -236,8 +251,7 @@ bfd_fdopenr (filename, target, fd)
 
   if (nbfd->iostream == NULL)
     {
-      objalloc_free ((struct objalloc *) nbfd->memory);
-      free (nbfd);
+      _bfd_delete_bfd (nbfd);
       return NULL;
     }
 
@@ -259,8 +273,7 @@ bfd_fdopenr (filename, target, fd)
 
   if (! bfd_cache_init (nbfd))
     {
-      objalloc_free ((struct objalloc *) nbfd->memory);
-      free (nbfd);
+      _bfd_delete_bfd (nbfd);
       return NULL;
     }
   nbfd->opened_once = true;
@@ -299,8 +312,7 @@ bfd_openstreamr (filename, target, streamarg)
   if (target_vec == NULL)
     {
       bfd_set_error (bfd_error_invalid_target);
-      objalloc_free ((struct objalloc *) nbfd->memory);
-      free (nbfd);
+      _bfd_delete_bfd (nbfd);
       return NULL;
     }
 
@@ -310,8 +322,7 @@ bfd_openstreamr (filename, target, streamarg)
 
   if (! bfd_cache_init (nbfd))
     {
-      objalloc_free ((struct objalloc *) nbfd->memory);
-      free (nbfd);
+      _bfd_delete_bfd (nbfd);
       return NULL;
     }
 
@@ -358,8 +369,7 @@ bfd_openw (filename, target)
   target_vec = bfd_find_target (target, nbfd);
   if (target_vec == NULL)
     {
-      objalloc_free ((struct objalloc *) nbfd->memory);
-      free (nbfd);
+      _bfd_delete_bfd (nbfd);
       return NULL;
     }
 
@@ -369,8 +379,7 @@ bfd_openw (filename, target)
   if (bfd_open_file (nbfd) == NULL)
     {
       bfd_set_error (bfd_error_system_call);	/* File not writeable, etc */
-      objalloc_free ((struct objalloc *) nbfd->memory);
-      free (nbfd);
+      _bfd_delete_bfd (nbfd);
       return NULL;
   }
 
@@ -437,8 +446,7 @@ bfd_close (abfd)
 	}
     }
 
-  objalloc_free ((struct objalloc *) abfd->memory);
-  free (abfd);
+  _bfd_delete_bfd (abfd);
 
   return ret;
 }
@@ -492,8 +500,7 @@ bfd_close_all_done (abfd)
 	}
     }
 
-  objalloc_free ((struct objalloc *) abfd->memory);
-  free (abfd);
+  _bfd_delete_bfd (abfd);
 
   return ret;
 }
@@ -680,7 +687,8 @@ bfd_zalloc (abfd, size)
   return res;
 }
 
-/* Free a block allocated for a BFD.  */
+/* Free a block allocated for a BFD.
+   Note:  Also frees all more recently allocated blocks!  */
 
 void
 bfd_release (abfd, block)

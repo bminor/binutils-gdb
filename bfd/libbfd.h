@@ -117,6 +117,7 @@ boolean _bfd_compute_and_write_armap PARAMS ((bfd *, unsigned int elength));
 bfd *_bfd_get_elt_at_filepos PARAMS ((bfd *archive, file_ptr filepos));
 extern bfd *_bfd_generic_get_elt_at_index PARAMS ((bfd *, symindex));
 bfd * _bfd_new_bfd PARAMS ((void));
+void _bfd_delete_bfd PARAMS ((bfd *));
 
 boolean	bfd_false PARAMS ((bfd *ignore));
 boolean	bfd_true PARAMS ((bfd *ignore));
@@ -372,6 +373,10 @@ extern boolean _bfd_dwarf2_find_nearest_line
   PARAMS ((bfd *, asection *, asymbol **, bfd_vma, const char **,
 	   const char **, unsigned int *, unsigned int,
 	   PTR *));
+
+/* Create a new section entry.  */
+extern struct bfd_hash_entry *bfd_section_hash_newfunc
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 
 /* A routine to create entries for a bfd_link_hash_table.  */
 extern struct bfd_hash_entry *_bfd_link_hash_newfunc

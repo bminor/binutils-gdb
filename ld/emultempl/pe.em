@@ -1691,10 +1691,14 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 		   pps = &(*pps)->next)
 		;
 	      *pps = snew->next;
+	      if (snew->next == NULL)
+		snew->owner->section_tail = pps;
 
 	      /* Now tack it on to the "place->os" section list.  */
 	      snew->next = *place->section;
 	      *place->section = snew;
+	      if (snew->next == NULL)
+		snew->owner->section_tail = &snew->next;
 	    }
 
 	  /* Save the end of this list.  Further ophans of this type will

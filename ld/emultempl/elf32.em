@@ -1274,10 +1274,14 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 	  for (pps = &output_bfd->sections; *pps != snew; pps = &(*pps)->next)
 	    ;
 	  *pps = snew->next;
+	  if (snew->next == NULL)
+	    snew->owner->section_tail = pps;
 
 	  /* Now tack it on to the "place->os" section list.  */
 	  snew->next = *place->section;
 	  *place->section = snew;
+	  if (snew->next == NULL)
+	    snew->owner->section_tail = &snew->next;
 	}
 
       /* Save the end of this list.  Further ophans of this type will
@@ -1598,8 +1602,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  -z nodlopen\t\tMark DSO not available to dlopen\n"));
   fprintf (file, _("  -z nodump\t\tMark DSO not available to dldump\n"));
   fprintf (file, _("  -z now\t\tMark object non-lazy runtime binding\n"));
-  fprintf (file, _("  -z origin\t\tMark object requiring immediate \$ORIGIN processing\n"));
-  fprintf (file, _("\t\t\t  at runtime\n"));
+  fprintf (file, _("  -z origin\t\tMark object requiring immediate \$ORIGIN processing\n\t\t\t  at runtime\n"));
   fprintf (file, _("  -z KEYWORD\t\tIgnored for Solaris compatibility\n"));
 EOF
 fi
