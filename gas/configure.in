@@ -114,6 +114,7 @@ changequote([,])dnl
     arch=
     endian=
     case ${cpu} in
+      am33_2.0)		cpu_type=mn10300 endian=little ;;
       alpha*)		cpu_type=alpha ;;
       arm*b|xscale*b|strongarm*b) cpu_type=arm endian=big ;;
       arm*|xscale*|strongarm*)    cpu_type=arm endian=little ;;
@@ -185,6 +186,9 @@ changequote([,])dnl
       alpha*-*-linux-gnu*)		fmt=elf em=linux ;;
       alpha*-*-netbsd*)			fmt=elf em=nbsd ;;
       alpha*-*-openbsd*)		fmt=elf em=obsd ;;
+
+      # cpu_type for am33_2.0 is set to mn10300
+      mn10300-*-linux*)			fmt=elf bfd_gas=yes em=linux ;;
 
       arc-*-elf*)			fmt=elf ;;
 

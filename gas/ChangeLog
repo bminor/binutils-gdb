@@ -1,3 +1,15 @@
+2003-07-10  Alexandre Oliva  <aoliva@redhat.com>
+
+	2002-12-12  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-mn10300.h (EXTERN_FORCE_RELOC): Don't define to zero.
+	2001-05-09  Alexandre Oliva  <aoliva@redhat.com>
+	* configure.in (am33_2.0, mn10300-*-linux*): Added.
+	* configure: Rebuilt.
+	* config/tc-mn10300.h (TARGET_FORMAT) [TE_LINUX]: Define to
+	elf32-am33lin.
+	* config/tc-mn10300.c (md_begin) [TE_LINUX]: Choose AM33/2.0
+	by default.
+
 2003-07-09  Alexandre Oliva  <aoliva@redhat.com>
 
 	2003-02-25  Alexandre Oliva  <aoliva@redhat.com>

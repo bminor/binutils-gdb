@@ -1213,10 +1213,17 @@ md_begin ()
     }
 
   /* Set the default machine type.  */
+#ifdef TE_LINUX
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_mn10300, AM33_2))
+    as_warn (_("could not set architecture and machine"));
+
+  current_machine = AM33_2;
+#else  
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_mn10300, MN103))
     as_warn (_("could not set architecture and machine"));
 
   current_machine = MN103;
+#endif
 }
 
 static symbolS *GOT_symbol;

@@ -55,11 +55,12 @@ void mn10300_cons_fix_new PARAMS ((fragS *, int, int, expressionS *));
 /* The target BFD architecture.  */
 #define TARGET_ARCH bfd_arch_mn10300
 
+#ifdef TE_LINUX
+#define TARGET_FORMAT "elf32-am33lin"
+#else
 #define TARGET_FORMAT "elf32-mn10300"
+#endif
 
-/* No shared lib support, so we don't need to ensure externally
-   visible symbols can be overridden.  */
-#define EXTERN_FORCE_RELOC 0
 
 /* Do not adjust relocations involving symbols in code sections,
    because it breaks linker relaxations.  This could be fixed in the
