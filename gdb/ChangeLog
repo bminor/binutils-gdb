@@ -1,3 +1,8 @@
+Thu Nov 30 23:54:17 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* gdbtypes.c (check_stub_type):  Removed;  no longes needed.
+	* ch-exp.c (expect, parse_call):  Tweak error messages.
+
 Wed Nov 29 13:35:18 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* scm-valprint.c (scm_isymnames):  Remove "#@" prefix.

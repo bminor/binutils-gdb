@@ -253,7 +253,7 @@ expect(token, message)
       if (message)
 	error (message);
       else if (token < 256)
-	error ("syntax error - expected a '%c' here '%s'", token, lexptr);
+	error ("syntax error - expected a '%c' here \"%s\"", token, lexptr);
       else
 	error ("syntax error");
       return 0;
@@ -478,7 +478,7 @@ parse_call ()
     }
   else
     arglist_len = 0;
-  expect (')', "expected ')' here");
+  expect (')', NULL);
   arg_count = end_arglist ();
   write_exp_elt_opcode (MULTI_SUBSCRIPT);
   write_exp_elt_longcst (arg_count);

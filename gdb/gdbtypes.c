@@ -864,13 +864,6 @@ fill_in_vptr_fieldno (type)
 struct complaint stub_noname_complaint =
   {"stub type has NULL name", 0, 0};
 
-void
-check_stub_type (type)
-     struct type *type;
-{
-  check_typedef (type);
-}
-
 struct type *
 check_typedef (type)
      register struct type *type;
