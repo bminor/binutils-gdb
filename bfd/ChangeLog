@@ -1,3 +1,9 @@
+2005-02-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/716
+	* peicode.h (pe_bfd_copy_private_bfd_data): Copy the large address
+	aware flag from the input bfd to the output bfd.
+
 2005-02-11  Maciej W. Rozycki  <macro@mips.com>
 
 	* elf32-mips.c (_bfd_mips_elf32_gprel16_reloc): Reject
