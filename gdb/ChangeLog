@@ -1,3 +1,8 @@
+Tue Dec 20 11:44:28 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* value.h: Remove obsolete comments about FRAME vs struct
+	frame_info *.
+
 Mon Dec 19 09:55:47 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* gdbtk.tcl (update_assembly):  Force update to make sure that pc

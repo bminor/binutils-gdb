@@ -81,6 +81,13 @@ struct value
        variables or put into the value history are taken off this
        list.  */
     struct value *next;
+
+    /* ??? When is this used?  */
+    union {
+      CORE_ADDR memaddr;
+      char *myaddr;
+    } substring_addr;
+
     /* If an lval is forced to repeat, a new value is created with
        these fields set.  The new value is not an lval.  */
     short repeated;
@@ -105,6 +112,7 @@ struct value
       long contents[1];
       double force_double_align;
       LONGEST force_longlong_align;
+      char *literal_data;
     } aligner;
 
   };
@@ -143,23 +151,24 @@ extern int value_fetch_lazy PARAMS ((value_ptr val));
 /* Overload the contents field to store literal data for 
    arrays.  */
 
-#define VALUE_LITERAL_DATA(val)  ((val)->aligner.contents[0])
+#define VALUE_LITERAL_DATA(val)  ((val)->aligner.literal_data)
 
-/* Overload the frame address field to contain a pointer to 
+/* Pointer to 
    the base substring, for F77 string substring operators.
    We use this ONLY when doing operations of the form 
    
    FOO= 'hello' 
    FOO(2:4) = 'foo'
 
-   In the above case VALUE_SUBSTRING_START would point to 
+   In the above case VALUE_SUBSTRING_* would point to 
    FOO(2) in the original FOO string. 
 
    Depending on whether the base object is allocated in the 
-   inferior or the superior process, VALUE_SUBSTRING_START 
-   contains a ptr. to memory in the relevant area.  */ 
+   inferior or the superior process, use VALUE_SUBSTRING_MYADDR or
+   VALUE_SUBSTRING_MEMADDR.  */
 
-#define VALUE_SUBSTRING_START(val) VALUE_FRAME(val)
+#define VALUE_SUBSTRING_MEMADDR(val) (val)->substring_addr.memaddr
+#define VALUE_SUBSTRING_MYADDR(val) (val)->substring_addr.myaddr
 
 /* Convert a REF to the object referenced. */
 
@@ -247,7 +256,6 @@ extern value_ptr value_at PARAMS ((struct type *type, CORE_ADDR addr));
 
 extern value_ptr value_at_lazy PARAMS ((struct type *type, CORE_ADDR addr));
 
-/* FIXME:  Assumes equivalence of "struct frame_info *" and "FRAME" */
 extern value_ptr value_from_register PARAMS ((struct type *type, int regnum,
 					  struct frame_info * frame));
 
@@ -258,11 +266,9 @@ extern value_ptr value_of_register PARAMS ((int regnum));
 
 extern int symbol_read_needs_frame PARAMS ((struct symbol *));
 
-/* FIXME:  Assumes equivalence of "struct frame_info *" and "FRAME" */
 extern value_ptr read_var_value PARAMS ((struct symbol *var,
 					 struct frame_info *frame));
 
-/* FIXME:  Assumes equivalence of "struct frame_info *" and "FRAME" */
 extern value_ptr locate_var_value PARAMS ((struct symbol *var,
 				       struct frame_info *frame));
 
@@ -428,7 +434,6 @@ write_register PARAMS ((int regno, LONGEST val));
 extern void
 supply_register PARAMS ((int regno, char *val));
 
-/* FIXME:  Assumes equivalence of "struct frame_info *" and "FRAME" */
 extern void
 get_saved_register PARAMS ((char *raw_buffer, int *optimized,
 			    CORE_ADDR *addrp, struct frame_info *frame,
@@ -470,7 +475,6 @@ val_print PARAMS ((struct type *type, char *valaddr, CORE_ADDR address,
 extern int
 val_print_string PARAMS ((CORE_ADDR addr, unsigned int len, GDB_FILE *stream));
 
-/* FIXME:  Assumes equivalence of "struct frame_info *" and "FRAME" */
 extern void
 print_variable_value PARAMS ((struct symbol *var, struct frame_info *frame,
 			      GDB_FILE *stream));
