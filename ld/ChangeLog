@@ -1,3 +1,8 @@
+Wed Mar 23 14:15:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* emultemp/gld960.em: Include libiberty.h
+	(gld960_before_parse): Pass NULL as final argument to concat.
+
 Tue Mar 22 13:08:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* scripttempl/aout.sc: Force _end and __end to be aligned to a
