@@ -1,3 +1,8 @@
+Sat Jan  1 04:35:23 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* infrun.c (wait_for_inferior):  Do not step or step resume past
+	the end of a one-line function we just stepped into.
+
 Fri Dec 31 14:33:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* nindy-share/nindy.c: Fix order of arguments to store_unsigned_integer
