@@ -6,8 +6,6 @@ This bug list is probably not up to date or accurate, but it reflects
 some known bugs in gdb, if you are into bug-hunting.
 
 
-Update the TODO list with all the lists of gdb bugs lying around on paper.
-
 It should be possible to use symbols from shared libraries before we know
 exactly where the libraries will be loaded.  E.g. "b perror" before running
 the program.  This could maybe be done as an extension of the "breakpoint
@@ -28,7 +26,7 @@ Speed up watchpoints by not single-stepping them, but do something
 faster like single-line execution.  Speed them up tremendously on
 machines that have watchpoint registers.
 
-Update gdb-int.texinfo to include doc on the directory structure and 
+Update gdbint.texinfo to include doc on the directory structure and 
 the various tricks of building gdb.
 
 Do a tutorial in gdb.texinfo on how to do simple things in gdb.
@@ -82,7 +80,7 @@ texinfo files.
 Remove the VTBL internal guts from printouts of C++ structs, unless
 vtblprint is set.
 
-Remove "at 0xnnnn" from the "b foo" response, if !addressprint and if
+Remove "at 0xnnnn" from the "b foo" response, if `print address off' and if
 it matches the source line indicated.
 
 The prompt at end of screen should accept space as well as CR.
@@ -203,8 +201,6 @@ thought we were stashing that info now!
 
 Make sure we can handle executables with no symbol info, e.g. /bin/csh.
 
-We should be able to write to executables that aren't running.
-
 We should be able to write to random files at hex offsets like adb.
 
 Make "target xxx" command interruptible.
@@ -274,7 +270,6 @@ Handling of "&" address-of operator needs some serious overhaul
 for ANSI C and consistency on arrays and functions.
   For "float point[15];":
 ptype &point[4]   ==> Attempt to take address of non-lvalue.
-p     &point[4]   ==> Dereferences point[4] rather than giving you point+4.
   For "char *malloc();":
 ptype malloc	  ==> "char *()";  should be same as
 ptype &malloc     ==> "char *(*)()"

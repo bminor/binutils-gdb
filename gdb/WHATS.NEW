@@ -1,6 +1,29 @@
 		What has changed since GDB-3.5?
 		(Organized release by release)
 
+*** Changes in GDB-4.2:
+
+ *  Improved configuration
+
+Only one copy of `configure' exists now, and it is not self-modifying.
+Porting BFD is simpler.  
+
+ *  Stepping improved
+
+The `step' and `next' commands now only stop at the first instruction
+of a source line.  This prevents the multiple stops that used to occur
+in switch statements, for-loops, etc.  `Step' continues to stop if a
+function that has debugging information is called within the line.
+
+ *  Bug fixing
+
+Lots of small bugs fixed.  More remain.
+
+ *  New host supported (not target)
+
+Intel 386 PC clone running Mach		i386-none-mach
+
+
 *** Changes in GDB-4.1:
 
  *  Multiple source language support
