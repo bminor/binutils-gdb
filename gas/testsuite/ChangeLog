@@ -1,5 +1,10 @@
 Wed Feb 12 12:33:08 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* gas/mips/lif-svr4pic.d: Pass -EB when running the assembler.
+	* gas/mips/lif-xgot.d: Likewise.
+	* gas/mips/ulh-svr4pic.d: Likewise.
+	* gas/mips/ulh-xgot.d: Likewise.
+
 	* gas/mips/mips16.d: Update for yet another change in disassembly
 	output (this one is spacing only).
 
