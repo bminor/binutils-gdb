@@ -6984,11 +6984,11 @@
        ((fr400 (unit u-media-1-quad
 		     (in  FRinti FRintieven)
 		     (in  FRintj FRintjeven)
-		     (out FRintk Frintkeven)))
+		     (out FRintk FRintkeven)))
 	(fr500 (unit u-media-quad-arith
 		     (in  FRinti FRintieven)
 		     (in  FRintj FRintjeven)
-		     (out FRintk Frintkeven))))
+		     (out FRintk FRintkeven))))
   )
 )
 
@@ -7010,11 +7010,11 @@
        ((fr400 (unit u-media-1-quad
 		     (in  FRinti FRintieven)
 		     (in  FRintj FRintjeven)
-		     (out FRintk Frintkeven)))
+		     (out FRintk FRintkeven)))
 	(fr500 (unit u-media-quad-arith
 		     (in  FRinti FRintieven)
 		     (in  FRintj FRintjeven)
-		     (out FRintk Frintkeven))))
+		     (out FRintk FRintkeven))))
   )
 )
 
