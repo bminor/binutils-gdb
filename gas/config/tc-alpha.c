@@ -937,7 +937,7 @@ md_assemble (str)
   size_t opnamelen;
 
   /* split off the opcode */
-  opnamelen = strspn (str, "abcdefghijklmnopqrstuvwxyz_/468");
+  opnamelen = strspn (str, "abcdefghijklmnopqrstuvwxyz_/46819");
   trunclen = (opnamelen < sizeof (opname) - 1
 	      ? opnamelen
 	      : sizeof (opname) - 1);
