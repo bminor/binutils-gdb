@@ -1,0 +1,106 @@
+#!/bin/sh
+
+# config.bfd
+# Convert a canonical host type into a BFD host type.
+# Call with canonical name as the argument.
+# Echos the result.
+
+canon="$1"
+cpu=`echo $canon | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
+
+# WHEN ADDING ENTRIES TO THIS MATRIX:
+#  Make sure that the left side always has two dashes.  Otherwise you
+#  can get spurious matches.  Even for unambiguous cases, do this as a
+#  convention, else the table becomes a real mess to understand and maintain.
+
+case "${canon}" in
+  alpha-*-*)		bfd_name=alphaosf ;;
+  a29k-*-ebmon)		bfd_name=a29k-coff ;;
+  a29k-*-udi)		bfd_name=a29k-coff ;;
+  a29k-*-aout)		bfd_name=a29k-aout ;;
+  a29k-*-coff)		bfd_name=a29k-coff ;;
+  a29k-*-sym1)		bfd_name=a29k-coff ;;
+  h8300*-*-*)		bfd_name=h8300-coff ;;
+  h8500-*-*)		bfd_name=h8500-coff ;;
+  sh-*-*)		bfd_name=sh-coff ;;
+  hppa*-*-bsd*)		bfd_name=hppabsd ;;
+  hppa*-*-hpux*)	bfd_name=hppahpux ;;
+  hppa*-*-osf)		bfd_name=hppa-elf ;;
+  i[34]86-*-sysv4*)	bfd_name=i386-elf ;;
+  i[34]86-*-sysv*)	bfd_name=i386-coff ;;
+  i[34]86-*-isc*)	bfd_name=i386-sco ;; # gets core dump reading right
+  i[34]86-*-sco*)	bfd_name=i386-sco ;;
+  i[34]86-*-bsd*)	bfd_name=i386-bsd ;;
+  i[34]86-*-lynxos*)	bfd_name=i386-lynx ;;
+  i[34]86-*-coff)	bfd_name=i386-coff ;;
+  i[34]86-*-aix*)	bfd_name=i386-coff ;;
+  i[34]86-*-elf)	bfd_name=i386-elf ;;
+  i[34]86-*-netware*)	bfd_name=i386-nlm ;;
+  i[34]86-*-linux*)	bfd_name=i386-linux ;;
+  i[34]86-*-lynx*)	bfd_name=i386-lynx ;;
+  i[34]86-none-*)	bfd_name=i386-coff ;;
+  i960-*-vxworks)	bfd_name=i960-bout ;;
+  i960-*-aout)		bfd_name=i960-bout ;;
+  i960-*-bout)		bfd_name=i960-bout ;;
+  m68*-bull-sysv*)	bfd_name=u68k-coff ;;
+  m68*-hp-bsd*)		bfd_name=hp300bsd ;;
+  m68*-*-aout)		bfd_name=m68k-aout ;;
+  m68*-*-coff)		bfd_name=m68k-coff ;;
+  m68*-*-hpux*)		bfd_name=hp300hpux ;;
+  m68*-*-os68k)		bfd_name=m68k-aout ;;
+  m68*-*-sunos*)	bfd_name=m68k-aout ;;
+  m68*-*-sysv*)		bfd_name=m68k-coff ;;
+  m68*-*-vxworks*)	bfd_name=m68k-aout ;;
+  m68*-ericsson-*)	bfd_name=m68k-aout ;;
+  m68*-netx-*)		bfd_name=m68k-aout ;;
+  m88k-*-*)		bfd_name=m88k-coff ;;
+  mips-big-*)		bfd_name=bigmips ;;
+  mips-dec-bsd*)        bfd_name=mipsdecbsd ;;
+  mips-dec-*)		bfd_name=decstation ;;
+  mips-*-ecoffl*)	bfd_name=decstation ;;
+  mips-*-ecoff*)	bfd_name=bigmips ;;
+  mips-sgi-*)		bfd_name=bigmips ;;
+  mips-*-sysv*)		bfd_name=riscos ;;
+  mips-*-riscos*)	bfd_name=riscos ;;
+  mips-*-bsd*)		bfd_name=noop ;;
+  rs6000-*-*)		bfd_name=rs6000 ;;
+  sparc-*-solaris2*)	bfd_name=sparc-elf ;;
+  sparc-*-sysv4*)	bfd_name=sparc-elf ;;
+#	start-sanitize-v9
+# Don't set target64=true for sparc64-*-aout*.  Keep it using the 32bit stuff
+# so we continue to have something that works (until the 64 bit support is
+# rock solid).
+  sparc64-*-aout*)	bfd_name=sparc-aout ;;
+  sparc64-*-elf*)	bfd_name=sparc64-elf  ; target64=true ;;
+#	end-sanitize-v9
+  sparc*-*-*)		bfd_name=sparc-aout ;;
+  tahoe-*-*)		bfd_name=tahoe ;;
+  vax-*-vms)		bfd_name=vax-vms ;;
+  vax-*-*)		bfd_name=vax ;;
+  we32k-*-*)		bfd_name=we32k ;;
+  z8k*-*-*)		bfd_name=z8k-coff ;;
+
+  *-*-aout)		bfd_name=${cpu}-aout ;;
+  *-*-bsd*)		bfd_name=${cpu}-aout ;;
+  *-*-netware*)		bfd_name=${cpu}-nlm ;;
+  *-*-sysv4*)		bfd_name=${cpu}-elf ;;
+  *-*-solaris2*)	bfd_name=${cpu}-elf ;;
+  *-*-go32)		bfd_name=${cpu}-aout ;;
+  *-*-sysv*)		bfd_name=${cpu}-coff ;;
+
+  *-*-aout64)		bfd_name=${cpu}-aout64 ; target64=true ;;
+  *-*-elf64)		bfd_name=${cpu}-elf64 ; target64=true ;;
+
+  *-adobe-*)		bfd_name=adobe ;;
+  *-sony-*)		bfd_name=news ;;
+  *-intel-*)		bfd_name=${cpu}-coff ;;
+  *-stratus-*)		bfd_name=${cpu}-elf ;;
+  *-cbm-*)		bfd_name=${cpu}-elf ;;
+  *-ncr-*)		bfd_name=${cpu}-elf ;;
+  *-tandem-*)		bfd_name=st2000 ;;
+
+  # Allow targets that config.sub doesn't recognize, like "all".
+  *)			bfd_name=$canon ;;
+esac
+
+echo $bfd_name

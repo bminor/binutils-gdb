@@ -1,4 +1,13 @@
+Tue Aug 17 09:42:16 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* config.bfd (cpu): Extract from canonical name with sed.
+	* configure.in: Don't pass it.
+
 Sun Aug 15 20:45:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* bfd-in.h: Remove {BYTE,WORD,LONG}_SIZE; they are pointless and
+	BYTE_SIZE conflicts with a Mach header.
+	* ecoff.c: Change LONG_SIZE to ECOFF_LONG_SIZE and define it.
 
 	* configure.host: Make sure all OS fields end in *.
 
