@@ -72,6 +72,11 @@
    
 #define SOM_TMP_BUFSIZE 8192
 
+/* Size of the hash table in archives.  */
+#define SOM_LST_HASH_SIZE 31
+
+/* Max number of SOMs to be found in an archive.  */
+#define SOM_LST_MODULE_LIMIT 1024
 
 /* SOM allows any one of the four previous relocations to be reused
    with a "R_PREV_FIXUP" relocation entry.  Since R_PREV_FIXUP
@@ -106,6 +111,17 @@ struct section_to_type
 {
   char *section;
   char type;
+};
+
+/* Assorted symbol information that needs to be derived from the BFD symbol
+   and/or the BFD backend private symbol data.  */
+struct som_misc_symbol_info
+{
+  unsigned int symbol_type;
+  unsigned int symbol_scope;
+  unsigned int arg_reloc;
+  unsigned int symbol_info;
+  unsigned int symbol_value;
 };
 
 /* Forward declarations */
@@ -199,7 +215,15 @@ static boolean som_bfd_fill_in_ar_symbols PARAMS ((bfd *, struct lst_header *,
 static boolean som_slurp_armap PARAMS ((bfd *));
 static boolean som_write_armap PARAMS ((bfd *));
 static boolean som_slurp_extended_name_table PARAMS ((bfd *));
-
+static void som_bfd_derive_misc_symbol_info PARAMS ((bfd *, asymbol *,
+					     struct som_misc_symbol_info *));
+static boolean som_bfd_prep_for_ar_write PARAMS ((bfd *, unsigned int *,
+						  unsigned int *));
+static unsigned int som_bfd_ar_symbol_hash PARAMS ((asymbol *));
+static boolean som_bfd_ar_write_symbol_stuff PARAMS ((bfd *, unsigned int,
+						      unsigned int,
+						      struct lst_header));
+	
 /* Map SOM section names to POSIX/BSD single-character symbol types.
 
    This table includes all the standard subspaces as defined in the 
@@ -1659,7 +1683,7 @@ setup_sections (abfd, file_hdr)
 
       /* Initialize save_subspace so we can reliably determine if this
 	 loop placed any useful values into it.  */
-      bzero (&save_subspace, sizeof (struct subspace_dictionary_record));
+      memset (&save_subspace, 0, sizeof (struct subspace_dictionary_record));
 
       /* Loop over the rest of the subspaces, building up more sections */
       for (subspace_index = 0; subspace_index < space.subspace_quantity;
@@ -1829,7 +1853,7 @@ som_object_p (abfd)
   /* If the aux_header_size field in the file header is zero, then this
      object is an incomplete executable (a .o file).  Do not try to read
      a non-existant auxiliary header.  */
-  bzero (&aux_hdr, sizeof (struct som_exec_auxhdr));
+  memset (&aux_hdr, 0, sizeof (struct som_exec_auxhdr));
   if (file_hdr.aux_header_size != 0)
     {
       if (bfd_read ((PTR) & aux_hdr, 1, AUX_HDR_SIZE, abfd) != AUX_HDR_SIZE)
@@ -2143,7 +2167,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
   /* Get a chunk of memory that we can use as buffer space, then throw
      away.  */
   tmp_space = alloca (SOM_TMP_BUFSIZE);
-  bzero (tmp_space, SOM_TMP_BUFSIZE);
+  memset (tmp_space, 0, SOM_TMP_BUFSIZE);
   p = tmp_space;
 
   /* All the fixups for a particular subspace are emitted in a single
@@ -2432,7 +2456,7 @@ som_write_space_strings (abfd, current_offset, string_sizep)
   /* Get a chunk of memory that we can use as buffer space, then throw
      away.  */
   tmp_space = alloca (SOM_TMP_BUFSIZE);
-  bzero (tmp_space, SOM_TMP_BUFSIZE);
+  memset (tmp_space, 0, SOM_TMP_BUFSIZE);
   p = tmp_space;
 
   /* Seek to the start of the space strings in preparation for writing
@@ -2527,7 +2551,7 @@ som_write_symbol_strings (abfd, current_offset, syms, num_syms, string_sizep)
   /* Get a chunk of memory that we can use as buffer space, then throw
      away.  */
   tmp_space = alloca (SOM_TMP_BUFSIZE);
-  bzero (tmp_space, SOM_TMP_BUFSIZE);
+  memset (tmp_space, 0, SOM_TMP_BUFSIZE);
   p = tmp_space;
 
   /* Seek to the start of the space strings in preparation for writing
@@ -3080,6 +3104,108 @@ som_compute_checksum (abfd)
   return checksum;
 }
 
+static void
+som_bfd_derive_misc_symbol_info (abfd, sym, info)
+     bfd *abfd;
+     asymbol *sym;
+     struct som_misc_symbol_info *info;
+{
+  /* Initialize.  */
+  memset (info, 0, sizeof (struct som_misc_symbol_info));
+
+  /* The HP SOM linker requires detailed type information about
+     all symbols (including undefined symbols!).  Unfortunately,
+     the type specified in an import/export statement does not
+     always match what the linker wants.  Severe braindamage.  */
+	 
+  /* Section symbols will not have a SOM symbol type assigned to
+     them yet.  Assign all section symbols type ST_DATA.  */
+  if (sym->flags & BSF_SECTION_SYM)
+    info->symbol_type = ST_DATA;
+  else
+    {
+      /* Common symbols must have scope SS_UNSAT and type
+	 ST_STORAGE or the linker will choke.  */
+      if (sym->section == &bfd_com_section)
+	{
+	  info->symbol_scope = SS_UNSAT;
+	  info->symbol_type = ST_STORAGE;
+	}
+
+      /* It is possible to have a symbol without an associated
+	 type.  This happens if the user imported the symbol
+	 without a type and the symbol was never defined
+	 locally.  If BSF_FUNCTION is set for this symbol, then
+	 assign it type ST_CODE (the HP linker requires undefined
+	 external functions to have type ST_CODE rather than ST_ENTRY).  */
+      else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_UNKNOWN
+	       && sym->section == &bfd_und_section
+	       && sym->flags & BSF_FUNCTION)
+	info->symbol_type = ST_CODE;
+
+      /* Handle function symbols which were defined in this file.
+	 They should have type ST_ENTRY.  Also retrieve the argument
+	 relocation bits from the SOM backend information.  */
+      else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_ENTRY
+	       || (som_symbol_data (sym)->som_type == SYMBOL_TYPE_CODE
+		   && (sym->flags & BSF_FUNCTION))
+	       || (som_symbol_data (sym)->som_type == SYMBOL_TYPE_UNKNOWN
+		   && (sym->flags & BSF_FUNCTION)))
+	{
+	  info->symbol_type = ST_ENTRY;
+	  info->arg_reloc = som_symbol_data (sym)->tc_data.hppa_arg_reloc;
+	}
+
+      /* If the type is unknown at this point, it should be
+	 ST_DATA (functions were handled as special cases above).  */
+      else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_UNKNOWN)
+	info->symbol_type = ST_DATA;
+
+      /* From now on it's a very simple mapping.  */
+      else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_ABSOLUTE)
+	info->symbol_type = ST_ABSOLUTE;
+      else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_CODE)
+	info->symbol_type = ST_CODE;
+      else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_DATA)
+	info->symbol_type = ST_DATA;
+      else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_MILLICODE)
+	info->symbol_type = ST_MILLICODE;
+      else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_PLABEL)
+	info->symbol_type = ST_PLABEL;
+      else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_PRI_PROG)
+	info->symbol_type = ST_PRI_PROG;
+      else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_SEC_PROG)
+	info->symbol_type = ST_SEC_PROG;
+    }
+	
+  /* Now handle the symbol's scope.  Exported data which is not
+     in the common section has scope SS_UNIVERSAL.  Note scope
+     of common symbols was handled earlier!  */
+  if (sym->flags & BSF_EXPORT && sym->section != &bfd_com_section)
+    info->symbol_scope = SS_UNIVERSAL;
+  /* Any undefined symbol at this point has a scope SS_UNSAT.  */
+  else if (sym->section == &bfd_und_section)
+    info->symbol_scope = SS_UNSAT;
+  /* Anything else which is not in the common section has scope
+     SS_LOCAL.  */
+  else if (sym->section != &bfd_com_section)
+    info->symbol_scope = SS_LOCAL;
+
+  /* Now set the symbol_info field.  It has no real meaning
+     for undefined or common symbols, but the HP linker will
+     choke if it's not set to some "reasonable" value.  We
+     use zero as a reasonable value.  */
+  if (sym->section == &bfd_com_section || sym->section == &bfd_und_section)
+    info->symbol_info = 0;
+  /* For all other symbols, the symbol_info field contains the 
+     subspace index of the space this symbol is contained in.  */
+  else
+    info->symbol_info = som_section_data (sym->section)->subspace_index;
+
+  /* Set the symbol's value.  */
+  info->symbol_value = sym->value + sym->section->vma;
+}
+
 /* Build and write, in one big chunk, the entire symbol table for
    this BFD.  */
 
@@ -3097,127 +3223,30 @@ som_build_and_write_symbol_table (abfd)
      to hold the symbol table as we build it.  */
   symtab_size = num_syms * sizeof (struct symbol_dictionary_record);
   som_symtab = (struct symbol_dictionary_record *) alloca (symtab_size);
-  bzero (som_symtab, symtab_size);
+  memset (som_symtab, 0, symtab_size);
 
   /* Walk over each symbol.  */
   for (i = 0; i < num_syms; i++)
     {
+      struct som_misc_symbol_info info;
+
       /* This is really an index into the symbol strings table.  
 	 By the time we get here, the index has already been 
 	 computed and stored into the name field in the BFD symbol.  */
       som_symtab[i].name.n_strx = (int) bfd_syms[i]->name;
 
-      /* The HP SOM linker requires detailed type information about
-	 all symbols (including undefined symbols!).  Unfortunately,
-	 the type specified in an import/export statement does not
-	 always match what the linker wants.  Severe braindamage.  */
-	 
-      /* Section symbols will not have a SOM symbol type assigned to
-	 them yet.  Assign all section symbols type ST_DATA.  */
-      if (bfd_syms[i]->flags & BSF_SECTION_SYM)
-	som_symtab[i].symbol_type = ST_DATA;
-      else
-	{
-	  /* Common symbols must have scope SS_UNSAT and type
-	     ST_STORAGE or the linker will choke.  */
-	  if (bfd_syms[i]->section == &bfd_com_section)
-	    {
-	      som_symtab[i].symbol_scope = SS_UNSAT;
-	      som_symtab[i].symbol_type = ST_STORAGE;
-	    }
+      /* Derive SOM information from the BFD symbol.  */
+      som_bfd_derive_misc_symbol_info (abfd, bfd_syms[i], &info);
 
-	  /* It is possible to have a symbol without an associated
-	     type.  This happens if the user imported the symbol
-	     without a type and the symbol was never defined
-	     locally.  If BSF_FUNCTION is set for this symbol, then
-	     assign it type ST_CODE (the HP linker requires undefined
-	     external functions to have type ST_CODE rather than ST_ENTRY.  */
-	  else if ((som_symbol_data (bfd_syms[i])->som_type
-		    == SYMBOL_TYPE_UNKNOWN)
-		   && (bfd_syms[i]->section == &bfd_und_section)
-		   && (bfd_syms[i]->flags & BSF_FUNCTION))
-	    som_symtab[i].symbol_type = ST_CODE;
-
-	  /* Handle function symbols which were defined in this file.
-	     They should have type ST_ENTRY.  Also retrieve the argument
-	     relocation bits from the SOM backend information.  */
-	  else if ((som_symbol_data (bfd_syms[i])->som_type
-		    == SYMBOL_TYPE_ENTRY)
-		   || ((som_symbol_data (bfd_syms[i])->som_type
-			== SYMBOL_TYPE_CODE)
-		       && (bfd_syms[i]->flags & BSF_FUNCTION))
-		   || ((som_symbol_data (bfd_syms[i])->som_type
-			== SYMBOL_TYPE_UNKNOWN)
-		       && (bfd_syms[i]->flags & BSF_FUNCTION)))
-	    {
-	      som_symtab[i].symbol_type = ST_ENTRY;
-	      som_symtab[i].arg_reloc
-		= som_symbol_data (bfd_syms[i])->tc_data.hppa_arg_reloc;
-	    }
-
-	  /* If the type is unknown at this point, it should be
-	     ST_DATA (functions were handled as special cases above).  */
-	  else if (som_symbol_data (bfd_syms[i])->som_type
-		   == SYMBOL_TYPE_UNKNOWN)
-	    som_symtab[i].symbol_type = ST_DATA;
-
-	  /* From now on it's a very simple mapping.  */
-	  else if (som_symbol_data (bfd_syms[i])->som_type
-		   == SYMBOL_TYPE_ABSOLUTE)
-	    som_symtab[i].symbol_type = ST_ABSOLUTE;
-	  else if (som_symbol_data (bfd_syms[i])->som_type
-		   == SYMBOL_TYPE_CODE)
-	    som_symtab[i].symbol_type = ST_CODE;
-	  else if (som_symbol_data (bfd_syms[i])->som_type
-		   == SYMBOL_TYPE_DATA)
-	    som_symtab[i].symbol_type = ST_DATA;
-	  else if (som_symbol_data (bfd_syms[i])->som_type
-		   == SYMBOL_TYPE_MILLICODE)
-	    som_symtab[i].symbol_type = ST_MILLICODE;
-	  else if (som_symbol_data (bfd_syms[i])->som_type
-		   == SYMBOL_TYPE_PLABEL)
-	    som_symtab[i].symbol_type = ST_PLABEL;
-	  else if (som_symbol_data (bfd_syms[i])->som_type
-		   == SYMBOL_TYPE_PRI_PROG)
-	    som_symtab[i].symbol_type = ST_PRI_PROG;
-	  else if (som_symbol_data (bfd_syms[i])->som_type
-		   == SYMBOL_TYPE_SEC_PROG)
-	    som_symtab[i].symbol_type = ST_SEC_PROG;
-	}
-	
-      /* Now handle the symbol's scope.  Exported data which is not
-	 in the common section has scope SS_UNIVERSAL.  Note scope
-	 of common symbols was handled earlier!  */
-      if (bfd_syms[i]->flags & BSF_EXPORT
-	  && bfd_syms[i]->section != &bfd_com_section)
-	som_symtab[i].symbol_scope = SS_UNIVERSAL;
-      /* Any undefined symbol at this point has a scope SS_UNSAT.  */
-      else if (bfd_syms[i]->section == &bfd_und_section)
-	som_symtab[i].symbol_scope = SS_UNSAT;
-      /* Anything else which is not in the common section has scope
-	 SS_LOCAL.  */
-      else if (bfd_syms[i]->section != &bfd_com_section)
-	som_symtab[i].symbol_scope = SS_LOCAL;
-
-      /* Now set the symbol_info field.  It has no real meaning
-	 for undefined or common symbols, but the HP linker will
-	 choke if it's not set to some "reasonable" value.  We
-	 use zero as a reasonable value.  */
-      if (bfd_syms[i]->section == &bfd_com_section
-	  || bfd_syms[i]->section == &bfd_und_section)
-	som_symtab[i].symbol_info = 0;
-      /* For all other symbols, the symbol_info field contains the 
-	 subspace index of the space this symbol is contained in.  */
-      else
-	som_symtab[i].symbol_info
-	  = som_section_data (bfd_syms[i]->section)->subspace_index;
-
-      /* Set the symbol's value.  */
-      som_symtab[i].symbol_value
-	= bfd_syms[i]->value + bfd_syms[i]->section->vma;
+      /* Now use it.  */
+      som_symtab[i].symbol_type = info.symbol_type;
+      som_symtab[i].symbol_scope = info.symbol_scope;
+      som_symtab[i].arg_reloc = info.arg_reloc;
+      som_symtab[i].symbol_info = info.symbol_info;
+      som_symtab[i].symbol_value = info.symbol_value;
     }
 
-  /* Egad.  Everything is ready, seek to the right location and
+  /* Everything is ready, seek to the right location and
      scribble out the symbol table.  */
   if (bfd_seek (abfd, symtab_location, SEEK_SET) != 0)
     {
@@ -3395,6 +3424,29 @@ som_slurp_symbol_table (abfd)
       if (bufp->symbol_type == ST_SYM_EXT
 	  || bufp->symbol_type == ST_ARG_EXT)
 	continue;
+
+      /* Set some private data we care about.  */
+      if (bufp->symbol_type == ST_NULL)
+	som_symbol_data (sym)->som_type = SYMBOL_TYPE_UNKNOWN;
+      else if (bufp->symbol_type == ST_ABSOLUTE)
+	som_symbol_data (sym)->som_type = SYMBOL_TYPE_ABSOLUTE;
+      else if (bufp->symbol_type == ST_DATA)
+	som_symbol_data (sym)->som_type = SYMBOL_TYPE_DATA;
+      else if (bufp->symbol_type == ST_CODE)
+	som_symbol_data (sym)->som_type = SYMBOL_TYPE_CODE;
+      else if (bufp->symbol_type == ST_PRI_PROG)
+	som_symbol_data (sym)->som_type = SYMBOL_TYPE_PRI_PROG;
+      else if (bufp->symbol_type == ST_SEC_PROG)
+	som_symbol_data (sym)->som_type = SYMBOL_TYPE_SEC_PROG;
+      else if (bufp->symbol_type == ST_ENTRY)
+	som_symbol_data (sym)->som_type = SYMBOL_TYPE_ENTRY;
+      else if (bufp->symbol_type == ST_MILLICODE)
+	som_symbol_data (sym)->som_type = SYMBOL_TYPE_MILLICODE;
+      else if (bufp->symbol_type == ST_PLABEL)
+	som_symbol_data (sym)->som_type = SYMBOL_TYPE_PLABEL;
+      else
+	som_symbol_data (sym)->som_type = SYMBOL_TYPE_UNKNOWN;
+      som_symbol_data (sym)->tc_data.hppa_arg_reloc = bufp->arg_reloc;
 
       /* Some reasonable defaults.  */
       sym->symbol.the_bfd = abfd;
@@ -3584,8 +3636,8 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 #define	emptystack()	(sp == stack)
 
   som_initialize_reloc_queue (reloc_queue);
-  bzero (variables, sizeof (variables));
-  bzero (stack, sizeof (stack));
+  memset (variables, 0, sizeof (variables));
+  memset (stack, 0, sizeof (stack));
   count = 0;
   prev_fixup = 0;
   sp = stack;
@@ -3767,8 +3819,8 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 	  count++;
 	  /* Now that we've handled a "full" relocation, reset
 	     some state.  */
-	  bzero (variables, sizeof (variables));
-	  bzero (stack, sizeof (stack));
+	  memset (variables, 0, sizeof (variables));
+	  memset (stack, 0, sizeof (stack));
 	}
     }
   return count;
@@ -4545,12 +4597,411 @@ som_slurp_armap (abfd)
   return true;
 }
 
-/* Write out the LST for the archive.  Not supported yet.  */
+/* Begin preparing to write a SOM library symbol table.
+
+   As part of the prep work we need to determine the number of symbols
+   and the size of the associated string section.  */
+
+static boolean
+som_bfd_prep_for_ar_write (abfd, num_syms, stringsize)
+     bfd *abfd;
+     unsigned int *num_syms, *stringsize;
+{
+  bfd *curr_bfd = abfd->archive_head;
+
+  /* Some initialization.  */
+  *num_syms = 0;
+  *stringsize = 0;
+
+  /* Iterate over each BFD within this archive.  */
+  while (curr_bfd != NULL)
+    {
+      unsigned int curr_count, i;
+      asymbol *sym;
+
+      /* Make sure the symbol table has been read, then snag a pointer
+	 to it.  It's a little slimey to grab the symbols via obj_som_symtab,
+	 but doing so avoids allocating lots of extra memory.  */
+      if (som_slurp_symbol_table (curr_bfd) == false)
+	return false;
+
+      sym = (asymbol *)obj_som_symtab (curr_bfd);
+      curr_count = bfd_get_symcount (curr_bfd);
+
+      /* Examine each symbol to determine if it belongs in the
+	 library symbol table.  */
+      for (i = 0; i < curr_count; i++, sym++)
+	{
+	  struct som_misc_symbol_info info;
+
+	  /* Derive SOM information from the BFD symbol.  */
+	  som_bfd_derive_misc_symbol_info (curr_bfd, sym, &info);
+
+	  /* Should we include this symbol?  */
+	  if (info.symbol_type == ST_NULL
+	      || info.symbol_type == ST_SYM_EXT
+	      || info.symbol_type == ST_ARG_EXT)
+	    continue;
+
+	  /* Only global symbols and unsatisfied commons.  */
+	  if (info.symbol_scope != SS_UNIVERSAL
+	      && info.symbol_type != ST_STORAGE)
+	    continue;
+
+	  /* Do no include undefined symbols.  */
+	  if (sym->section == &bfd_und_section)
+	    continue;
+
+	  /* Bump the various counters, being careful to honor
+	     alignment considerations in the string table.  */
+	  (*num_syms)++;
+	  *stringsize = *stringsize + strlen (sym->name) + 5;
+	  while (*stringsize % 4)
+	    (*stringsize)++;
+	}
+
+      curr_bfd = curr_bfd->next;
+    }
+  return true;
+}
+
+/* Hash a symbol name based on the hashing algorithm presented in the
+   SOM ABI.  */
+static unsigned int
+som_bfd_ar_symbol_hash (symbol)
+     asymbol *symbol;
+{
+  unsigned int len = strlen (symbol->name);
+
+  /* Names with length 1 are special.  */
+  if (len == 1)
+    return 0x1000100 | (symbol->name[0] << 16) | symbol->name[0];
+
+  return ((len & 0x7f) << 24) | (symbol->name[1] << 16)
+	  | (symbol->name[len-2] << 8) | symbol->name[len-1];
+}
+
+/* Do the bulk of the work required to write the SOM library
+   symbol table.  */
+   
+static boolean
+som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
+     bfd *abfd;
+     unsigned int nsyms, string_size;
+     struct lst_header lst;
+{
+  file_ptr lst_filepos;
+  char *strings, *p;
+  struct lst_symbol_record *lst_syms, *curr_lst_sym;
+  bfd *curr_bfd = abfd->archive_head;
+  unsigned int hash_table[lst.hash_size];
+  struct som_entry som_dict[lst.module_count];
+  struct lst_symbol_record *last_hash_entry[lst.hash_size];
+  unsigned int curr_som_offset, som_index;
+
+  /* Lots of fields are file positions relative to the start
+     of the lst record.  So save its location.  */
+  lst_filepos = bfd_tell (abfd) - sizeof (struct lst_header);
+
+  /* Some initialization.  */
+  memset (hash_table, 0, 4 * lst.hash_size);
+  memset (som_dict, 0, lst.module_count * sizeof (struct som_entry));
+  memset (last_hash_entry, 0, 	
+	  lst.hash_size * sizeof (struct lst_symbol_record *));
+
+  /* Symbols have som_index fields, so we have to keep track of the
+     index of each SOM in the archive.
+
+     The SOM dictionary has (among other things) the absolute file
+     position for the SOM which a particular dictionary entry
+     describes.  We have to compute that information as we iterate
+     through the SOMs/symbols.  */
+  som_index = 0;
+  curr_som_offset = 8 + 2 * sizeof (struct ar_hdr) + lst.file_end;
+
+  /* FIXME should be done with buffers just like everything else... */
+  lst_syms = alloca (nsyms * sizeof (struct lst_symbol_record));
+  strings = alloca (string_size);
+  p = strings;
+  curr_lst_sym = lst_syms;
+
+
+  while (curr_bfd != NULL)
+    {
+      unsigned int curr_count, i;
+      asymbol *sym;
+
+      /* Make sure the symbol table has been read, then snag a pointer
+	 to it.  It's a little slimey to grab the symbols via obj_som_symtab,
+	 but doing so avoids allocating lots of extra memory.  */
+      if (som_slurp_symbol_table (curr_bfd) == false)
+	return false;
+
+      sym = (asymbol *)obj_som_symtab (curr_bfd);
+      curr_count = bfd_get_symcount (curr_bfd);
+
+      for (i = 0; i < curr_count; i++, sym++)
+	{
+	  struct som_misc_symbol_info info;
+
+	  /* Derive SOM information from the BFD symbol.  */
+	  som_bfd_derive_misc_symbol_info (curr_bfd, sym, &info);
+
+	  /* Should we include this symbol?  */
+	  if (info.symbol_type == ST_NULL
+	      || info.symbol_type == ST_SYM_EXT
+	      || info.symbol_type == ST_ARG_EXT)
+	    continue;
+
+	  /* Only global symbols and unsatisfied commons.  */
+	  if (info.symbol_scope != SS_UNIVERSAL
+	      && info.symbol_type != ST_STORAGE)
+	    continue;
+
+	  /* Do no include undefined symbols.  */
+	  if (sym->section == &bfd_und_section)
+	    continue;
+
+	  /* If this is the first symbol from this SOM, then update
+	     the SOM dictionary too.  */
+	  if (som_dict[som_index].location == 0)
+	    {
+	      som_dict[som_index].location = curr_som_offset;
+	      som_dict[som_index].length = arelt_size (curr_bfd);
+	    }
+
+	  /* Fill in the lst symbol record.  */
+	  curr_lst_sym->hidden = 0;
+	  curr_lst_sym->secondary_def = 0;
+	  curr_lst_sym->symbol_type = info.symbol_type;
+	  curr_lst_sym->symbol_scope = info.symbol_scope;
+	  curr_lst_sym->check_level = 0;
+	  curr_lst_sym->must_qualify = 0;
+	  curr_lst_sym->initially_frozen = 0;
+	  curr_lst_sym->memory_resident = 0;
+	  curr_lst_sym->is_common = (sym->section == &bfd_com_section);
+	  curr_lst_sym->dup_common = 0;
+	  curr_lst_sym->xleast = 0;
+	  curr_lst_sym->arg_reloc = info.arg_reloc;
+	  curr_lst_sym->name.n_strx = p - strings + 4;
+	  curr_lst_sym->qualifier_name.n_strx = 0;
+	  curr_lst_sym->symbol_info = info.symbol_info;
+	  curr_lst_sym->symbol_value = info.symbol_value;
+	  curr_lst_sym->symbol_descriptor = 0;
+	  curr_lst_sym->reserved = 0;
+	  curr_lst_sym->som_index = som_index;
+	  curr_lst_sym->symbol_key = som_bfd_ar_symbol_hash (sym);
+	  curr_lst_sym->next_entry = 0;
+
+	  /* Insert into the hash table.  */
+	  if (hash_table[curr_lst_sym->symbol_key % lst.hash_size])
+	    {
+	      struct lst_symbol_record *tmp;
+
+	      /* There is already something at the head of this hash chain,
+		 so tack this symbol onto the end of the chain.  */
+	      tmp = last_hash_entry[curr_lst_sym->symbol_key % lst.hash_size];
+	      tmp->next_entry
+		= (curr_lst_sym - lst_syms) * sizeof (struct lst_symbol_record)
+		  + lst.hash_size * 4 
+		  + lst.module_count * sizeof (struct som_entry)
+		  + sizeof (struct lst_header);
+	    }
+	  else
+	    {
+	      /* First entry in this hash chain.  */
+	      hash_table[curr_lst_sym->symbol_key % lst.hash_size]
+		= (curr_lst_sym - lst_syms) * sizeof (struct lst_symbol_record)
+		  + lst.hash_size * 4 
+		  + lst.module_count * sizeof (struct som_entry)
+		  + sizeof (struct lst_header);
+	    }
+
+	  /* Keep track of the last symbol we added to this chain so we can
+	     easily update its next_entry pointer.  */
+	  last_hash_entry[curr_lst_sym->symbol_key % lst.hash_size]
+	    = curr_lst_sym;
+
+
+	  /* Update the string table.  */
+	  bfd_put_32 (abfd, strlen (sym->name), p);
+	  p += 4;
+	  strcpy (p, sym->name);
+	  p += strlen (sym->name) + 1;
+	  while ((int)p % 4)
+	    {
+	      bfd_put_8 (abfd, 0, p);
+	      p++;
+	    }
+
+	  /* Head to the next symbol.  */
+	  curr_lst_sym++;
+	}
+
+      /* Keep track of where each SOM will finally reside; then look
+	 at the next BFD.  */
+      curr_som_offset += arelt_size (curr_bfd) + sizeof (struct ar_hdr);
+      curr_bfd = curr_bfd->next;
+      som_index++;
+    }
+
+  /* Now scribble out the hash table.  */
+  if (bfd_write ((PTR) hash_table, lst.hash_size, 4, abfd)
+      != lst.hash_size * 4)
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  /* Then the SOM dictionary.  */
+  if (bfd_write ((PTR) som_dict, lst.module_count,
+		 sizeof (struct som_entry), abfd)
+      != lst.module_count * sizeof (struct som_entry))
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  /* The library symbols.  */
+  if (bfd_write ((PTR) lst_syms, nsyms, sizeof (struct lst_symbol_record), abfd)
+      != nsyms * sizeof (struct lst_symbol_record))
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  /* And finally the strings.  */
+  if (bfd_write ((PTR) strings, string_size, 1, abfd) != string_size)
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  return true;
+}
+
+/* Write out the LST for the archive.
+
+   You'll never believe this is really how armaps are handled in SOM...  */
+
 static boolean
 som_write_armap (abfd)
      bfd *abfd;
 {
-  return false;
+  bfd *curr_bfd;
+  struct stat statbuf;
+  unsigned int i, lst_size, nsyms, stringsize;
+  struct ar_hdr hdr;
+  struct lst_header lst;
+  int *p;
+ 
+  /* We'll use this for the archive's date and mode later.  */
+  if (stat (abfd->filename, &statbuf) != 0)
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+  /* Fudge factor.  */
+  bfd_ardata (abfd)->armap_timestamp = statbuf.st_mtime + 60;
+
+  /* Account for the lst header first.  */
+  lst_size = sizeof (struct lst_header);
+
+  /* Start building the LST header.  */
+  lst.system_id = HP9000S800_ID;
+  lst.a_magic = LIBMAGIC;
+  lst.version_id = VERSION_ID;
+  lst.file_time.secs = 0;
+  lst.file_time.nanosecs = 0;
+
+  lst.hash_loc = lst_size;
+  lst.hash_size = SOM_LST_HASH_SIZE;
+
+  /* Hash table is a SOM_LST_HASH_SIZE 32bit offsets.  */
+  lst_size += 4 * SOM_LST_HASH_SIZE;
+
+  /* We need to count the number of SOMs in this archive.  */
+  curr_bfd = abfd->archive_head;
+  lst.module_count = 0;
+  while (curr_bfd != NULL)
+    {
+      lst.module_count++;
+      curr_bfd = curr_bfd->next;
+    }
+  lst.module_limit = lst.module_count;
+  lst.dir_loc = lst_size;
+  lst_size += sizeof (struct som_entry) * lst.module_count;
+
+  /* We don't support import/export tables, auxiliary headers,
+     or free lists yet.  Make the linker work a little harder
+     to make our life easier.  */
+
+  lst.export_loc = 0;
+  lst.export_count = 0;
+  lst.import_loc = 0;
+  lst.aux_loc = 0;
+  lst.aux_size = 0;
+
+  /* Count how many symbols we will have on the hash chains and the
+     size of the associated string table.  */
+  if (som_bfd_prep_for_ar_write (abfd, &nsyms, &stringsize) == false)
+    return false;
+
+  lst_size += sizeof (struct lst_symbol_record) * nsyms;
+
+  /* For the string table.  One day we might actually use this info
+     to avoid small seeks/reads when reading archives.  */
+  lst.string_loc = lst_size;
+  lst.string_size = stringsize;
+  lst_size += stringsize;
+
+  /* SOM ABI says this must be zero.  */
+  lst.free_list = 0;
+
+  lst.file_end = lst_size;
+
+  /* Compute the checksum.  Must happen after the entire lst header
+     has filled in.  */
+  p = (int *)&lst;
+  for (i = 0; i < sizeof (struct lst_header)/sizeof (int) - 1; i++)
+    lst.checksum ^= *p++;
+
+  sprintf (hdr.ar_name, "/               ");
+  sprintf (hdr.ar_date, "%ld", bfd_ardata (abfd)->armap_timestamp);
+  sprintf (hdr.ar_uid, "%d", getuid ());
+  sprintf (hdr.ar_gid, "%d", getgid ());
+  sprintf (hdr.ar_mode, "%-8o", (unsigned int) statbuf.st_mode);
+  sprintf (hdr.ar_size, "%-10d", (int) lst_size);
+  hdr.ar_fmag[0] = '`';
+  hdr.ar_fmag[1] = '\012';
+
+  /* Turn any nulls into spaces.  */
+  for (i = 0; i < sizeof (struct ar_hdr); i++)
+    if (((char *) (&hdr))[i] == '\0')
+      (((char *) (&hdr))[i]) = ' ';
+
+  /* Scribble out the ar header.  */
+  if (bfd_write ((PTR) &hdr, 1, sizeof (struct ar_hdr), abfd)
+      != sizeof (struct ar_hdr))
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  /* Now scribble out the lst header.  */
+  if (bfd_write ((PTR) &lst, 1, sizeof (struct lst_header), abfd)
+      != sizeof (struct lst_header))
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  /* Build and write the armap.  */
+  if (som_bfd_ar_write_symbol_stuff (abfd, nsyms, stringsize, lst) == false)
+    return false;
+  
+  /* Done.  */
+  return true;
 }
 
 /* Apparently the extened names are never used, even though they appear
@@ -4606,7 +5057,7 @@ bfd_target som_vec =
 /* leading_symbol_char: is the first char of a user symbol
    predictable, and if so what is it */
   0,
-  ' ',				/* ar_pad_char */
+  '/',				/* ar_pad_char */
   16,				/* ar_max_namelen */
   3,				/* minimum alignment */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
