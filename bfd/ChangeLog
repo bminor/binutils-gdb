@@ -1,3 +1,9 @@
+Tue Jun 25 15:28:34 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elflink.h (elf_create_pointer_linker_section): Comment out code
+	dealing with making GOT pointers negative of the GOT symbol for
+	now.
+
 Tue Jun 25 11:41:24 1996  Richard Henderson  <rth@tamu.edu>
 
 	* elf64-alpha.c (elf64_alpha_adjust_dynamic_symbol): Don't

@@ -3361,9 +3361,10 @@ elf_create_pointer_linker_section (abfd, info, lsect, h, rel)
   linker_section_ptr->written_address_p = false;
   *ptr_linker_section_ptr = linker_section_ptr;
 
+#if 0
   if (lsect->hole_size && lsect->hole_offset < lsect->max_hole_offset)
     {
-      linker_section_ptr->offset = lsect->section->_raw_size - lsect->hole_size;
+      linker_section_ptr->offset = lsect->section->_raw_size - lsect->hole_size + (ARCH_SIZE / 8);
       lsect->hole_offset += ARCH_SIZE / 8;
       lsect->sym_offset  += ARCH_SIZE / 8;
       if (lsect->sym_hash)	/* Bump up symbol value if needed */
@@ -3378,6 +3379,7 @@ elf_create_pointer_linker_section (abfd, info, lsect, h, rel)
 	}
     }
   else
+#endif
     linker_section_ptr->offset = lsect->section->_raw_size;
 
   lsect->section->_raw_size += ARCH_SIZE / 8;
