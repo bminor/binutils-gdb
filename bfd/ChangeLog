@@ -1,5 +1,11 @@
 1999-08-01  Mark Mitchell  <mark@codesourcery.com>
 
+	* elf32-mips.c (_bfd_mips_elf_final_link): Handle the case where
+	there are no global symbols requiring GOT entries.
+	(_bfd_mips_elf_size_dynamic_sections): Likewise.
+	(_bfd_mips_elf_finish_dynamic_symbol): Likewise.
+	(_bfd_mips_elf_finish_dynamic_sections): Likewise.
+
 	* elf32-mips.c (mips_elf_calculate_relocation): Undefined weak
 	symbols are considered to have the value zero.
 	(_bfd_mips_elf_relocate_section): Don't try to perform a

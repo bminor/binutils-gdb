@@ -4363,9 +4363,10 @@ _bfd_mips_elf_final_link (abfd, info)
       got = bfd_get_section_by_name (dynobj, ".got");
       g = (struct mips_got_info *) elf_section_data (got)->tdata;
 
-      BFD_ASSERT ((elf_hash_table (info)->dynsymcount
-		   - g->global_gotsym->dynindx)
-		  <= g->global_gotno);
+      if (g->global_gotsym != NULL)
+	BFD_ASSERT ((elf_hash_table (info)->dynsymcount
+		     - g->global_gotsym->dynindx)
+		    <= g->global_gotno);
     }
 
   /* On IRIX5, we omit the .options section.  On IRIX6, however, we
@@ -7896,7 +7897,12 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
  	  if (!mips_elf_sort_hash_table (info, 1))
  	    return false;
 
- 	  i = elf_hash_table (info)->dynsymcount - g->global_gotsym->dynindx;
+	  if (g->global_gotsym != NULL)
+	    i = elf_hash_table (info)->dynsymcount - g->global_gotsym->dynindx;
+	  else
+	    /* If there are no global symbols, or none requiring
+	       relocations, then GLOBAL_GOTSYM will be NULL.  */
+	    i = 0;
 	  g->global_gotno = i;
 	  s->_raw_size += i * MIPS_ELF_GOT_SIZE (dynobj);
 	}
@@ -8186,7 +8192,8 @@ _bfd_mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 
   /* Run through the global symbol table, creating GOT entries for all
      the symbols that need them.  */
-  if (h->dynindx >= g->global_gotsym->dynindx)
+  if (g->global_gotsym != NULL
+      && h->dynindx >= g->global_gotsym->dynindx)
     {
       bfd_vma offset;
       bfd_vma value;
@@ -8452,7 +8459,10 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
 	      break;
 
 	    case DT_MIPS_GOTSYM:
-	      dyn.d_un.d_val = g->global_gotsym->dynindx;
+	      if (g->global_gotsym != NULL)
+		dyn.d_un.d_val = g->global_gotsym->dynindx;
+	      else
+		dyn.d_un.d_val = 0;
 	      break;
 
 	    case DT_MIPS_HIPAGENO:
