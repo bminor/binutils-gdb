@@ -1,3 +1,15 @@
+Thu Feb 17 12:27:52 1994  Torbjorn Granlund  (tege@mexican.cygnus.com)
+
+	* hppa.h: Fix typo in fstws arg string.
+
+Wed Feb  9 21:23:52 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ppc.h (struct powerpc_opcode): Make operands field unsigned.
+
+Mon Feb  7 19:14:58 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ppc.h (PPC_OPCODE_601): Define.
+
 Fri Feb  4 23:43:50 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* hppa.h (addb): Use '@' for addb and addib pseudo ops.
