@@ -27,13 +27,19 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "debug.h"
 #include "budbg.h"
 
+#ifdef ANSI_PROTOTYPES
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
+
 /* Internal headers for the ELF .stab-dump code - sorry.  */
 #define	BYTES_IN_WORD	32
 #include "aout/aout64.h"
 
 #ifdef NEED_DECLARATION_FPRINTF
 /* This is needed by INIT_DISASSEMBLE_INFO.  */
-extern int fprintf PARAMS ((FILE *, const char *));
+extern int fprintf PARAMS ((FILE *, const char *, ...));
 #endif
 
 char *default_target = NULL;	/* default at runtime */
@@ -115,7 +121,7 @@ static void
 display_bfd PARAMS ((bfd *abfd));
 
 static void
-objdump_print_value PARAMS ((bfd_vma, FILE *));
+objdump_print_value PARAMS ((bfd_vma, struct disassemble_info *));
 
 static void
 objdump_print_address PARAMS ((bfd_vma, struct disassemble_info *));
@@ -452,9 +458,9 @@ compare_relocs (ap, bp)
 /* Print VMA to STREAM with no leading zeroes.  */
 
 static void
-objdump_print_value (vma, stream)
+objdump_print_value (vma, info)
      bfd_vma vma;
-     FILE *stream;
+     struct disassemble_info *info;
 {
   char buf[30];
   char *p;
@@ -462,7 +468,7 @@ objdump_print_value (vma, stream)
   sprintf_vma (buf, vma);
   for (p = buf; *p == '0'; ++p)
     ;
-  fprintf (stream, "%s", p);
+  (*info->fprintf_func) (info->stream, "%s", p);
 }
 
 /* Print VMA symbolically to INFO if possible.  */
@@ -472,6 +478,8 @@ objdump_print_address (vma, info)
      bfd_vma vma;
      struct disassemble_info *info;
 {
+  char buf[30];
+
   /* @@ Would it speed things up to cache the last two symbols returned,
      and maybe their address ranges?  For many processors, only one memory
      operand can be present at a time, so the 2-entry cache wouldn't be
@@ -482,7 +490,8 @@ objdump_print_address (vma, info)
   long max = sorted_symcount;
   long thisplace;
 
-  fprintf_vma (info->stream, vma);
+  sprintf_vma (buf, vma);
+  (*info->fprintf_func) (info->stream, "%s", buf);
 
   if (sorted_symcount < 1)
     return;
@@ -579,39 +588,39 @@ objdump_print_address (vma, info)
 	  {
 	    bfd_vma secaddr;
 
-	    fprintf (info->stream, " <%s",
-		     bfd_get_section_name (aux->abfd, aux->sec));
+	    (*info->fprintf_func) (info->stream, " <%s",
+				   bfd_get_section_name (aux->abfd, aux->sec));
 	    secaddr = bfd_get_section_vma (aux->abfd, aux->sec);
 	    if (vma < secaddr)
 	      {
-		fprintf (info->stream, "-");
-		objdump_print_value (secaddr - vma, info->stream);
+		(*info->fprintf_func) (info->stream, "-");
+		objdump_print_value (secaddr - vma, info);
 	      }
 	    else if (vma > secaddr)
 	      {
-		fprintf (info->stream, "+");
-		objdump_print_value (vma - secaddr, info->stream);
+		(*info->fprintf_func) (info->stream, "+");
+		objdump_print_value (vma - secaddr, info);
 	      }
-	    fprintf (info->stream, ">");
+	    (*info->fprintf_func) (info->stream, ">");
 	    return;
 	  }
       }
   }
 
-  fprintf (info->stream, " <%s", sorted_syms[thisplace]->name);
+  (*info->fprintf_func) (info->stream, " <%s", sorted_syms[thisplace]->name);
   if (bfd_asymbol_value (sorted_syms[thisplace]) > vma)
     {
-      fprintf (info->stream, "-");
+      (*info->fprintf_func) (info->stream, "-");
       objdump_print_value (bfd_asymbol_value (sorted_syms[thisplace]) - vma,
-			   info->stream);
+			   info);
     }
   else if (vma > bfd_asymbol_value (sorted_syms[thisplace]))
     {
-      fprintf (info->stream, "+");
+      (*info->fprintf_func) (info->stream, "+");
       objdump_print_value (vma - bfd_asymbol_value (sorted_syms[thisplace]),
-			   info->stream);
+			   info);
     }
-  fprintf (info->stream, ">");
+  (*info->fprintf_func) (info->stream, ">");
 }
 
 /* Hold the last function name and the last line number we displayed
@@ -813,6 +822,47 @@ show_line (abfd, section, off)
     prev_line = line;
 }
 
+/* Pseudo FILE object for strings.  */
+typedef struct {
+  char *buffer;
+  char *current;
+} SFILE;
+
+/* sprintf to a "stream" */
+
+#ifdef ANSI_PROTOTYPES
+static int
+objdump_sprintf (SFILE *f, const char *format, ...)
+{
+  int n;
+  va_list args;
+
+  va_start (args, format);
+  vsprintf (f->current, format, args);
+  f->current += n = strlen (f->current);
+  va_end (args);
+  return n;
+}
+#else
+static int
+objdump_sprintf (va_alist)
+     va_dcl
+{
+  int n;
+  SFILE *f;
+  const char *format;
+  va_list args;
+
+  va_start (args);
+  f = va_arg (args, SFILE *);
+  format = va_arg (args, const char *);
+  vsprintf (f->current, format, args);
+  f->current += n = strlen (f->current);
+  va_end (args);
+  return n;
+}
+#endif
+
 void
 disassemble_data (abfd)
      bfd *abfd;
@@ -823,6 +873,8 @@ disassemble_data (abfd)
   struct objdump_disasm_info aux;
   asection *section;
   boolean done_dot = false;
+  char buf[200];
+  SFILE sfile;
 
   print_files = NULL;
   prev_functionname = NULL;
@@ -842,8 +894,6 @@ disassemble_data (abfd)
   disasm_info.application_data = (PTR) &aux;
   aux.abfd = abfd;
   disasm_info.print_address_func = objdump_print_address;
-  if (show_raw_insn)
-    disasm_info.flags |= DISASM_RAW_INSN_FLAG;
 
   if (machine != (char *) NULL)
     {
@@ -978,9 +1028,28 @@ disassemble_data (abfd)
 	      aux.require_sec = false;
 	      putchar (' ');
 
+	      sfile.buffer = sfile.current = buf;
+	      disasm_info.fprintf_func = (fprintf_ftype) objdump_sprintf;
+	      disasm_info.stream = (FILE *) &sfile;
 	      bytes = (*disassemble_fn) (section->vma + i, &disasm_info);
+	      disasm_info.fprintf_func = (fprintf_ftype) fprintf;
+	      disasm_info.stream = stdout;
 	      if (bytes < 0)
 		break;
+
+	      if (show_raw_insn)
+		{
+		  long j;
+		  for (j = i; j < i + bytes; ++j)
+		    {
+		      printf ("%02x", (unsigned) data[j]);
+		      putchar (' ');
+		    }
+		  /* Separate raw data from instruction by extra space.  */
+		  putchar (' ');
+		}
+
+	      printf ("%s", sfile.buffer);
 
 	      if (!wide_output)
 		putchar ('\n');
@@ -1053,20 +1122,6 @@ disassemble_data (abfd)
    could be a direct-mapped table, but instead we build one the first
    time we need it.  */
 
-char **stab_name;
-
-struct stab_print {
-  int value;
-  char *string;
-};
-
-struct stab_print stab_print[] = {
-#define __define_stab(NAME, CODE, STRING) {CODE, STRING},
-#include "aout/stab.def"
-#undef __define_stab
-  {0, ""}
-};
-
 void dump_section_stabs PARAMS ((bfd *abfd, char *stabsect_name,
 				 char *strsect_name));
 
@@ -1078,20 +1133,6 @@ void
 dump_stabs (abfd)
      bfd *abfd;
 {
-  /* Allocate and initialize stab name array if first time.  */
-  if (stab_name == NULL) 
-    {
-      int i;
-
-      stab_name = (char **) xmalloc (256 * sizeof(char *));
-      /* Clear the array. */
-      for (i = 0; i < 256; i++)
-	stab_name[i] = NULL;
-      /* Fill in the defined stabs. */
-      for (i = 0; *stab_print[i].string; i++)
-	stab_name[stab_print[i].value] = stab_print[i].string;
-    }
-
   dump_section_stabs (abfd, ".stab", ".stabstr");
   dump_section_stabs (abfd, ".stab.excl", ".stab.exclstr");
   dump_section_stabs (abfd, ".stab.index", ".stab.indexstr");
@@ -1196,12 +1237,15 @@ print_section_stabs (abfd, stabsect_name, strsect_name)
 
   for (i = -1; stabp < stabs_end; stabp++, i++)
     {
+      const char *name;
+
       SWAP_SYMBOL (stabp, abfd);
       printf ("\n%-6d ", i);
       /* Either print the stab name, or, if unnamed, print its number
 	 again (makes consistent formatting for tools like awk). */
-      if (stab_name[stabp->n_type])
-	printf ("%-6s", stab_name[stabp->n_type]);
+      name = bfd_get_stab_name (stabp->n_type);
+      if (name != NULL)
+	printf ("%-6s", name);
       else if (stabp->n_type == N_UNDF)
 	printf ("HdrSym");
       else
