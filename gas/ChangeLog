@@ -1,6 +1,14 @@
 Sat May 20 12:31:36 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 
-	* Added improved VMS support from Pat Rankin:
+	Added improved VMS support from Pat Rankin:
+
+	Fri 19 May 16:51:40 1995  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* config/obj-vms.h (AOUT_STABS): Define.
+
+	* config/obj-vms.c (fpush, rpush): New routines.
+	(push): Replaced by the above.
+	(find_symbol): Slight reorganization to expose tail recursion.
 
 	Fri Mar 17 18:40:36 1995  Pat Rankin  (rankin@eql.caltech.edu)
 

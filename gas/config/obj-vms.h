@@ -224,6 +224,12 @@ extern void vms_check_for_main PARAMS ((void));
 
 extern void vms_write_object_file PARAMS ((unsigned,unsigned,unsigned,
 					   struct frag *,struct frag *));
+
+/* VMS executables are nothing like a.out, but the VMS port of gcc uses
+   a.out format stabs which obj-vms.c then translates.  */
+
+#define AOUT_STABS
+
 
 /* The rest of this file contains definitions for constants used within the actual
    VMS object file.  We do not use a $ in the symbols (as per usual VMS

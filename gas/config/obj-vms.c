@@ -1609,6 +1609,7 @@ find_symbol (dbx_type)
      int dbx_type;
 {
   struct VMS_DBG_Symbol *spnt;
+
   spnt = VMS_Symbol_type_list[SYMTYP_HASH(dbx_type)];
   while (spnt != (struct VMS_DBG_Symbol *) NULL)
     {
@@ -1616,14 +1617,13 @@ find_symbol (dbx_type)
 	break;
       spnt = spnt->next;
     }
-  if (spnt == (struct VMS_DBG_Symbol *) NULL)
-    return 0;			/*Dunno what this is*/
-  if(spnt->advanced == ALIAS)
-    return find_symbol(spnt->type2);
-  return spnt;
+  if (!spnt || spnt->advanced != ALIAS)
+    return spnt;
+  return find_symbol(spnt->type2);
 }
 
 
+#if 0		/* obsolete */
 /* this routine puts info into either Local or Asuffix, depending on the sign
  * of size.  The reason is that it is easier to build the variable descriptor
  * backwards, while the array descriptor is best built forwards.  In the end
@@ -1657,6 +1657,46 @@ push (value, size1)
       Apoint += size1;
     }
 }
+#endif
+
+
+static void
+fpush (value, size)
+     int value, size;
+{
+  if (Apoint + size >= MAX_DEBUG_RECORD)
+    {
+      overflow = 1;
+      Apoint = MAX_DEBUG_RECORD - 1;
+      return;
+    }
+  if (size == 1)
+    Asuffix[Apoint++] = (char) value;
+  else
+    {
+      md_number_to_chars (&Asuffix[Apoint], value, size);
+      Apoint += size;
+    }
+}
+
+static void
+rpush (value, size)
+     int value, size;
+{
+  if (Lpnt < size)
+    {
+      overflow = 1;
+      Lpnt = 1;
+      return;
+    }
+  if (size == 1)
+      Local[Lpnt--] = (char) value;
+  else
+    {
+      Lpnt -= size;
+      md_number_to_chars (&Local[Lpnt + 1], value, size);
+    }
+}
 
 /* this routine generates the array descriptor for a given array */
 static void
@@ -1685,30 +1725,30 @@ array_suffix (spnt2)
       spnt1 = find_symbol (spnt1->type2);
     }
   total_size = total_size * spnt1->data_size;
-  push (spnt1->data_size, 2);	/* element size */
+  fpush (spnt1->data_size, 2);	/* element size */
   if (spnt1->VMS_type == DBG_S_C_ADVANCED_TYPE)
-    push (0, 1);
+    fpush (0, 1);
   else
-    push (spnt1->VMS_type, 1);	/* element type */
-  push (DSC_K_CLASS_A, 1);	/* descriptor class */
-  push (0, 4);			/* base address */
-  push (0, 1);			/* scale factor -- not applicable */
-  push (0, 1);			/* digit count -- not applicable */
-  push (0xc0, 1);		/* flags: multiplier block & bounds present */
-  push (rank, 1);		/* number of dimensions */
-  push (total_size, 4);
-  push (0, 4);			/* pointer to element [0][0]...[0] */
+    fpush (spnt1->VMS_type, 1);	/* element type */
+  fpush (DSC_K_CLASS_A, 1);	/* descriptor class */
+  fpush (0, 4);			/* base address */
+  fpush (0, 1);			/* scale factor -- not applicable */
+  fpush (0, 1);			/* digit count -- not applicable */
+  fpush (0xc0, 1);		/* flags: multiplier block & bounds present */
+  fpush (rank, 1);		/* number of dimensions */
+  fpush (total_size, 4);
+  fpush (0, 4);			/* pointer to element [0][0]...[0] */
   spnt1 = spnt;
   while (spnt1->advanced == ARRAY)
     {
-      push (spnt1->index_max - spnt1->index_min + 1, 4);
+      fpush (spnt1->index_max - spnt1->index_min + 1, 4);
       spnt1 = find_symbol (spnt1->type2);
     }
   spnt1 = spnt;
   while (spnt1->advanced == ARRAY)
     {
-      push (spnt1->index_min, 4);
-      push (spnt1->index_max, 4);
+      fpush (spnt1->index_min, 4);
+      fpush (spnt1->index_max, 4);
       spnt1 = find_symbol (spnt1->type2);
     }
 }
@@ -1729,9 +1769,9 @@ new_forward_ref (dbx_type)
   fpnt->dbx_type = dbx_type;
   fpnt->struc_numb = ++structure_count;
   fpnt->resolved = 'N';
-  push (DST_K_TS_IND, -1);	/* indirect type specification */
+  rpush (DST_K_TS_IND, 1);	/* indirect type specification */
   total_len = 5;
-  push (total_len, -2);
+  rpush (total_len, 2);
   struct_number = -fpnt->struc_numb;
 }
 
@@ -1752,23 +1792,23 @@ gen1 (spnt, array_suffix_len)
   switch (spnt->advanced)
     {
     case VOID:
-      push (DBG_S_C_VOID, -1);
+      rpush (DBG_S_C_VOID, 1);
       total_len += 1;
-      push (total_len, -2);
+      rpush (total_len, 2);
       return 0;
     case BASIC:
     case FUNCTION:
       if (array_suffix_len == 0)
 	{
-	  push (spnt->VMS_type, -1);
-	  push (DBG_S_C_BASIC, -1);
+	  rpush (spnt->VMS_type, 1);
+	  rpush (DBG_S_C_BASIC, 1);
 	  total_len = 2;
-	  push (total_len, -2);
+	  rpush (total_len, 2);
 	  return 1;
 	}
-      push (0, -4);
-      push (DST_K_VFLAGS_DSC, -1);
-      push (DST_K_TS_DSC, -1);	/* descriptor type specification */
+      rpush (0, 4);
+      rpush (DST_K_VFLAGS_DSC, 1);
+      rpush (DST_K_TS_DSC, 1);	/* descriptor type specification */
       total_len = -2;
       return 1;
     case STRUCT:
@@ -1780,9 +1820,9 @@ gen1 (spnt, array_suffix_len)
 	  new_forward_ref (spnt->dbx_type);
 	  return 1;
 	}
-      push (DBG_S_C_STRUCT, -1);
+      rpush (DBG_S_C_STRUCT, 1);
       total_len = 5;
-      push (total_len, -2);
+      rpush (total_len, 2);
       return 1;
     case POINTER:
       spnt1 = find_symbol (spnt->type2);
@@ -1793,9 +1833,9 @@ gen1 (spnt, array_suffix_len)
 	i = gen1 (spnt1, 0);
       if (i)
 	{			/* (*void) is a special case, do not put pointer suffix*/
-	  push (DBG_S_C_POINTER, -1);
+	  rpush (DBG_S_C_POINTER, 1);
 	  total_len += 3;
-	  push (total_len, -2);
+	  rpush (total_len, 2);
 	}
       return 1;
     case ARRAY:
@@ -1822,16 +1862,16 @@ gen1 (spnt, array_suffix_len)
 	case FUNCTION:
 	  break;
 	default:
-	  push (0, -2);
+	  rpush (0, 2);
 	  total_len += 2;
-	  push (total_len, -2);
-	  push (DST_K_VFLAGS_DSC, -1);
-	  push (1, -1);		/* flags: element value spec included */
-	  push (1, -1);		/* one dimension */
-	  push (DBG_S_C_COMPLEX_ARRAY, -1);
+	  rpush (total_len, 2);
+	  rpush (DST_K_VFLAGS_DSC, 1);
+	  rpush (1, 1);		/* flags: element value spec included */
+	  rpush (1, 1);		/* one dimension */
+	  rpush (DBG_S_C_COMPLEX_ARRAY, 1);
 	}
       total_len += array_suffix_len + 8;
-      push (total_len, -2);
+      rpush (total_len, 2);
       break;
     default:	/* lint suppression */
       break;
@@ -1872,10 +1912,10 @@ generate_suffix (spnt, dbx_type)
 	return;		/* no suffix needed */
       gen1 (spnt, 0);
     }
-  push (0, -1);		/* no name (len==0) */
-  push (DST_K_TYPSPEC, -1);
+  rpush (0, 1);		/* no name (len==0) */
+  rpush (DST_K_TYPSPEC, 1);
   total_len += 4;
-  push (total_len, -1);
+  rpush (total_len, 1);
 /* if the variable descriptor overflows the record, output a descriptor for
  * a pointer to void.
  */
@@ -2138,6 +2178,7 @@ VMS_stab_parse (sp, expected_type, type1, type2, Text_Psect)
   struct VMS_DBG_Symbol *spnt;
   struct VMS_Symbol *vsp;
   int dbx_type;
+
   dbx_type = 0;
   str = S_GET_NAME (sp);
   pnt = (char *) strchr (str, ':');
@@ -2689,19 +2730,19 @@ VMS_typedef_parse (str)
 				    || spnt1->VMS_type == DBG_S_C_UQUAD
 				    || spnt1->advanced == ENUM); /* (approximate) */
 		  Apoint = 0;
-		  push (19 + len, 1);
-		  push (unsigned_type ? DBG_S_C_UBITU : DBG_S_C_SBITU, 1);
-		  push (DST_K_VFLAGS_DSC, 1); /* specified by descriptor */
-		  push (1 + len, 4);	/* relative offset to descriptor */
-		  push (len, 1);		/* length byte (ascic prefix) */
+		  fpush (19 + len, 1);
+		  fpush (unsigned_type ? DBG_S_C_UBITU : DBG_S_C_SBITU, 1);
+		  fpush (DST_K_VFLAGS_DSC, 1);	/* specified by descriptor */
+		  fpush (1 + len, 4);	/* relative offset to descriptor */
+		  fpush (len, 1);		/* length byte (ascic prefix) */
 		  while (*pnt2 != '\0')	/* name bytes */
-		    push (*pnt2++, 1);
-		  push (i3, 2);		/* dsc length == size of bitfield */
+		    fpush (*pnt2++, 1);
+		  fpush (i3, 2);	/* dsc length == size of bitfield */
 					/* dsc type == un?signed bitfield */
-		  push (unsigned_type ? DBG_S_C_UBITU : DBG_S_C_SBITU, 1);
-		  push (DSC_K_CLASS_UBS, 1); /* dsc class == unaligned bitstring */
-		  push (0x00, 4);		/* dsc pointer == zeroes */
-		  push (i2, 4);		/* start position */
+		  fpush (unsigned_type ? DBG_S_C_UBITU : DBG_S_C_SBITU, 1);
+		  fpush (DSC_K_CLASS_UBS, 1);	/* dsc class == unaligned bitstring */
+		  fpush (0x00, 4);		/* dsc pointer == zeroes */
+		  fpush (i2, 4);	/* start position */
 		  VMS_Store_Immediate_Data (Asuffix, Apoint, OBJ_S_C_DBG);
 		  Apoint = 0;
 		}
@@ -4710,8 +4751,7 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  /*
 	   *	Make a VMS data symbol entry
 	   */
-	  vsp = (struct VMS_Symbol *)
-	    xmalloc (sizeof (*vsp));
+	  vsp = (struct VMS_Symbol *) xmalloc (sizeof (*vsp));
 	  vsp->Symbol = sp;
 	  vsp->Size = S_GET_VALUE (sp);
 	  vsp->Psect_Index = Psect_Number++;
@@ -4759,8 +4799,7 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  /*
 	   *	Make a VMS data symbol entry
 	   */
-	  vsp = (struct VMS_Symbol *)
-	    xmalloc (sizeof (*vsp));
+	  vsp = (struct VMS_Symbol *) xmalloc (sizeof (*vsp));
 	  vsp->Symbol = sp;
 	  vsp->Size = 0;
 	  vsp->Psect_Index = Bss_Psect;
@@ -4776,11 +4815,9 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  /*
 	   *	Make a VMS data symbol entry
 	   */
-	  vsp = (struct VMS_Symbol *)
-	    xmalloc (sizeof (*vsp));
+	  vsp = (struct VMS_Symbol *) xmalloc (sizeof (*vsp));
 	  vsp->Symbol = sp;
-	  vsp->Size = VMS_Initialized_Data_Size (sp,
-						 text_siz + data_siz);
+	  vsp->Size = VMS_Initialized_Data_Size (sp, text_siz + data_siz);
 	  vsp->Psect_Index = Psect_Number++;
 	  vsp->Psect_Offset = 0;
 	  vsp->Next = VMS_Symbols;
@@ -4825,8 +4862,7 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	  /*
 	   *	Make a VMS data symbol entry
 	   */
-	  vsp = (struct VMS_Symbol *)
-	    xmalloc (sizeof (*vsp));
+	  vsp = (struct VMS_Symbol *) xmalloc (sizeof (*vsp));
 	  vsp->Symbol = sp;
 	  vsp->Size = VMS_Initialized_Data_Size (sp, text_siz + data_siz);
 	  vsp->Psect_Index = Data_Psect;
@@ -4864,9 +4900,8 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	    if (fragP->fr_fix < 2)
 	      abort ();
 
-	    Entry_Mask = (fragP->fr_literal[0] & 0xff) +
-	      ((fragP->fr_literal[1] & 0xff)
-	       << 8);
+	    Entry_Mask = (fragP->fr_literal[0] & 0x00ff) |
+			 ((fragP->fr_literal[1] & 0x00ff) << 8);
 	    /*
 	     *	Define the Procedure entry pt.
 	     */
@@ -4885,8 +4920,7 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	   */
 	  if (Text_Psect != -1)
 	    {
-	      vsp = (struct VMS_Symbol *)
-		xmalloc (sizeof (*vsp));
+	      vsp = (struct VMS_Symbol *) xmalloc (sizeof (*vsp));
 	      vsp->Symbol = sp;
 	      vsp->Size = 0;
 	      vsp->Psect_Index = Text_Psect;
