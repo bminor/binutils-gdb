@@ -1,5 +1,8 @@
 2003-07-07  Andreas Schwab  <schwab@suse.de>
 
+	* gdb.asm/m68k.inc: New file.
+	* gdb.asm/asm-source.exp: Use it for m68k-*-*.
+
 	* gdb.objc/basicclass.exp ("Call an Objective-C method with no
 	arguments"): Also match negative number.
 
