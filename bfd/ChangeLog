@@ -1,3 +1,30 @@
+2002-02-01  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	Perform on-demand global register allocation from
+	R_MMIX_BASE_PLUS_OFFSET relocs.
+	* elf64-mmix.c (struct bpo_reloc_section_info, struct
+	bpo_reloc_request, struct bpo_greg_section_info): New.
+	(mmix_elf_check_common_relocs, mmix_elf_gc_sweep_hook,
+	bpo_reloc_request_sort_fn, mmix_elf_relax_section,
+	_bfd_mmix_check_all_relocs,
+	_bfd_mmix_prepare_linker_allocated_gregs,
+	_bfd_mmix_finalize_linker_allocated_gregs): New functions.
+	(elf_mmix_howto_table): Correct src_mask for most relocs.
+	(mmix_elf_perform_relocation) <case R_MMIX_BASE_PLUS_OFFSET>: New
+	case.
+	(mmix_final_link_relocate) <case R_MMIX_BASE_PLUS_OFFSET>: New
+	case.  Fix typo in comment.  New label do_mmix_reloc.
+	(mmix_elf_check_relocs): Abuse bfd_link_info member base_file to
+	store first object file with a base-plus-offset reloc.  Call
+	mmix_elf_check_common_relocs for the part common with mmo.
+	(mmix_elf_final_link): Write out linker-allocated register
+	contents section.
+	(elf_backend_gc_sweep_hook): Define.
+	(bfd_elf64_bfd_relax_section): Define.
+
+	* mmo.c: Don't include <ctype.h>
+	(mmo_init): Correct init-once logic.
+
 2002-02-01  Tom Rix  <trix@redhat.com>
 
 	* config.bfd: Conditionally support <aiaff> for pre AIX 4.3.

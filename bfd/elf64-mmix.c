@@ -21,8 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* No specific ABI or "processor-specific supplement" defined.  */
 
 /* TODO:
-   - Linker relaxation.
-   - On-demand register allocation (from R_MMIX_BASE_PLUS_OFFSET).  */
+   - Linker relaxation.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -41,6 +40,85 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define BAD_CASE(x)				\
  _bfd_abort (__FILE__, __LINE__,		\
 	     "bad case for " #x)
+
+/* For each section containing a base-plus-offset (BPO) reloc, we attach
+   this struct as elf_section_data (section)->tdata, which is otherwise
+   NULL.  */
+struct bpo_reloc_section_info
+  {
+    /* The base is 1; this is the first number in this section.  */
+    size_t first_base_plus_offset_reloc;
+
+    /* Number of BPO-relocs in this section.  */
+    size_t n_bpo_relocs_this_section;
+
+    /* Running index, used at relocation time.  */
+    size_t bpo_index;
+
+    /* We don't have access to the bfd_link_info struct in
+       mmix_final_link_relocate.  What we really want to get at is the
+       global single struct greg_relocation, so we stash it here.  */
+    asection *bpo_greg_section;
+  };
+
+/* Helper struct (in global context) for the one below.
+   There's one of these created for every BPO reloc.  */
+struct bpo_reloc_request
+  {
+    bfd_vma value;
+
+    /* Valid after relaxation.  The base is 0; the first register number
+       must be added.  The offset is in range 0..255.  */
+    size_t regindex;
+    size_t offset;
+
+    /* The order number for this BPO reloc, corresponding to the order in
+       which BPO relocs were found.  Used to create an index after reloc
+       requests are sorted.  */
+    size_t bpo_reloc_no;
+
+    /* Set when the value is computed.  Better than coding "guard values"
+       into the other members.  Is false only for BPO relocs in a GC:ed
+       section.  */
+    boolean valid;
+  };
+
+/* We attach this as elf_section_data (sec)->tdata in the linker-allocated
+   greg contents section (MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME),
+   which is linked into the register contents section
+   (MMIX_REG_CONTENTS_SECTION_NAME).  This section is created by the
+   linker; using the same hook as for usual with BPO relocs does not
+   collide.  */
+struct bpo_greg_section_info
+  {
+    /* After GC, this reflects the number of remaining, non-excluded
+       BPO-relocs.  */
+    size_t n_bpo_relocs;
+
+    /* This is the number of allocated bpo_reloc_requests; the size of
+       sorted_indexes.  Valid after the check.*relocs functions are called
+       for all incoming sections.  It includes the number of BPO relocs in
+       sections that were GC:ed.  */
+    size_t n_max_bpo_relocs;
+
+    /* A counter used to find out when to fold the BPO gregs, since we
+       don't have a single "after-relaxation" hook.  */
+    size_t n_remaining_bpo_relocs_this_relaxation_round;
+
+    /* The number of linker-allocated GREGs resulting from BPO relocs.
+       This is an approximation after _bfd_mmix_allocated_gregs_init and
+       supposedly accurate after mmix_elf_relax_section is called for all
+       incoming non-collected sections.  */
+    size_t n_allocated_bpo_gregs;
+
+    /* Index into reloc_request[], sorted on increasing "value", secondary
+       by increasing index for strict sorting order.  */
+    size_t *bpo_reloc_indexes;
+
+    /* An array of all relocations, with the "value" member filled in by
+       the relaxation function.  */
+    struct bpo_reloc_request *reloc_request;
+  };
 
 static boolean mmix_elf_link_output_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const char *,
@@ -61,6 +139,10 @@ static boolean mmix_elf_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
 
+static boolean mmix_elf_check_common_relocs
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
+
 static boolean mmix_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
@@ -68,6 +150,10 @@ static boolean mmix_elf_relocate_section
 static asection * mmix_elf_gc_mark_hook
   PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
+
+static boolean mmix_elf_gc_sweep_hook
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
 
 static bfd_reloc_status_type mmix_final_link_relocate
   PARAMS ((reloc_howto_type *, asection *, bfd_byte *,
@@ -85,6 +171,12 @@ static boolean mmix_elf_add_symbol_hook
 
 static boolean mmix_elf_is_local_label_name
   PARAMS ((bfd *, const char *));
+
+static int bpo_reloc_request_sort_fn PARAMS ((const PTR, const PTR));
+
+static boolean mmix_elf_relax_section
+  PARAMS ((bfd *abfd, asection *sec, struct bfd_link_info *link_info,
+	   boolean *again));
 
 extern boolean mmix_elf_final_link PARAMS ((bfd *, struct bfd_link_info *));
 
@@ -120,7 +212,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MMIX_8",		/* name */
 	 false,			/* partial_inplace */
-	 0xff,			/* src_mask */
+	 0,			/* src_mask */
 	 0xff,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -135,7 +227,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MMIX_16",		/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -150,7 +242,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MMIX_24",		/* name */
 	 false,			/* partial_inplace */
-	 0xffffff,		/* src_mask */
+	 ~0xffffff,		/* src_mask */
 	 0xffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -165,7 +257,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MMIX_32",		/* name */
 	 false,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -180,7 +272,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MMIX_64",		/* name */
 	 false,			/* partial_inplace */
-	 MINUS_ONE,		/* src_mask */
+	 0,			/* src_mask */
 	 MINUS_ONE,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -195,7 +287,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MMIX_PC_8",		/* name */
 	 false,			/* partial_inplace */
-	 0xff,			/* src_mask */
+	 0,			/* src_mask */
 	 0xff,			/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -210,7 +302,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MMIX_PC_16",	/* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -225,7 +317,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MMIX_PC_24",	/* name */
 	 false,			/* partial_inplace */
-	 0xffffff,		/* src_mask */
+	 ~0xffffff,		/* src_mask */
 	 0xffffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -240,7 +332,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MMIX_PC_32",	/* name */
 	 false,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -255,7 +347,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MMIX_PC_64",	/* name */
 	 false,			/* partial_inplace */
-	 MINUS_ONE,		/* src_mask */
+	 0,			/* src_mask */
 	 MINUS_ONE,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -303,7 +395,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_GETA",		/* name */
 	 false,			/* partial_inplace */
-	 0x0100ffff,		/* src_mask */
+	 ~0x0100ffff,		/* src_mask */
 	 0x0100ffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -317,7 +409,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_GETA_1",		/* name */
 	 false,			/* partial_inplace */
-	 0x0100ffff,		/* src_mask */
+	 ~0x0100ffff,		/* src_mask */
 	 0x0100ffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -331,7 +423,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_GETA_2",		/* name */
 	 false,			/* partial_inplace */
-	 0x0100ffff,		/* src_mask */
+	 ~0x0100ffff,		/* src_mask */
 	 0x0100ffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -345,7 +437,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_GETA_3",		/* name */
 	 false,			/* partial_inplace */
-	 0x0100ffff,		/* src_mask */
+	 ~0x0100ffff,		/* src_mask */
 	 0x0100ffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -363,7 +455,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_CBRANCH",	/* name */
 	 false,			/* partial_inplace */
-	 0x0100ffff,		/* src_mask */
+	 ~0x0100ffff,		/* src_mask */
 	 0x0100ffff,		/* dst_mask */
 	 true),		       	/* pcrel_offset */
 
@@ -377,7 +469,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_CBRANCH_J",	/* name */
 	 false,			/* partial_inplace */
-	 0x0100ffff,		/* src_mask */
+	 ~0x0100ffff,		/* src_mask */
 	 0x0100ffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -391,7 +483,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_CBRANCH_1",	/* name */
 	 false,			/* partial_inplace */
-	 0x0100ffff,		/* src_mask */
+	 ~0x0100ffff,		/* src_mask */
 	 0x0100ffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -405,7 +497,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_CBRANCH_2",	/* name */
 	 false,			/* partial_inplace */
-	 0x0100ffff,		/* src_mask */
+	 ~0x0100ffff,		/* src_mask */
 	 0x0100ffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -419,7 +511,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_CBRANCH_3",	/* name */
 	 false,			/* partial_inplace */
-	 0x0100ffff,		/* src_mask */
+	 ~0x0100ffff,		/* src_mask */
 	 0x0100ffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -438,7 +530,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_PUSHJ",	/* name */
 	 false,			/* partial_inplace */
-	 0x0100ffff,		/* src_mask */
+	 ~0x0100ffff,		/* src_mask */
 	 0x0100ffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -452,7 +544,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_PUSHJ_1",	/* name */
 	 false,			/* partial_inplace */
-	 0x0100ffff,		/* src_mask */
+	 ~0x0100ffff,		/* src_mask */
 	 0x0100ffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -466,7 +558,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_PUSHJ_2",	/* name */
 	 false,			/* partial_inplace */
-	 0x0100ffff,		/* src_mask */
+	 ~0x0100ffff,		/* src_mask */
 	 0x0100ffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -480,7 +572,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_PUSHJ_3",	/* name */
 	 false,			/* partial_inplace */
-	 0x0100ffff,		/* src_mask */
+	 ~0x0100ffff,		/* src_mask */
 	 0x0100ffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -498,7 +590,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_JMP",		/* name */
 	 false,			/* partial_inplace */
-	 0x1ffffff,		/* src_mask */
+	 ~0x1ffffff,		/* src_mask */
 	 0x1ffffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -512,7 +604,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_JMP_1",	/* name */
 	 false,			/* partial_inplace */
-	 0x1ffffff,		/* src_mask */
+	 ~0x1ffffff,		/* src_mask */
 	 0x1ffffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -526,7 +618,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_JMP_2",	/* name */
 	 false,			/* partial_inplace */
-	 0x1ffffff,		/* src_mask */
+	 ~0x1ffffff,		/* src_mask */
 	 0x1ffffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -540,7 +632,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_JMP_3",	/* name */
 	 false,			/* partial_inplace */
-	 0x1ffffff,		/* src_mask */
+	 ~0x1ffffff,		/* src_mask */
 	 0x1ffffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -557,7 +649,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_ADDR19",	/* name */
 	 false,			/* partial_inplace */
-	 0x0100ffff,		/* src_mask */
+	 ~0x0100ffff,		/* src_mask */
 	 0x0100ffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -572,7 +664,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_ADDR27",	/* name */
 	 false,			/* partial_inplace */
-	 0x1ffffff,		/* src_mask */
+	 ~0x1ffffff,		/* src_mask */
 	 0x1ffffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
@@ -588,7 +680,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_REG_OR_BYTE",	/* name */
 	 false,			/* partial_inplace */
-	 0xff,			/* src_mask */
+	 0,			/* src_mask */
 	 0xff,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -603,7 +695,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_REG",		/* name */
 	 false,			/* partial_inplace */
-	 0xff,			/* src_mask */
+	 0,			/* src_mask */
 	 0xff,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -620,7 +712,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
 	 mmix_elf_reloc,	/* special_function */
 	 "R_MMIX_BASE_PLUS_OFFSET", /* name */
 	 false,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -874,7 +966,7 @@ mmix_elf_perform_relocation (isec, howto, datap, addr, value)
 	  value >>= 2;
 
 	  bfd_put_32 (abfd,
-		      (in1 & ~howto->src_mask)
+		      (in1 & howto->src_mask)
 		      | highbit
 		      | (value & howto->dst_mask),
 		      (bfd_byte *) datap);
@@ -883,6 +975,48 @@ mmix_elf_perform_relocation (isec, howto, datap, addr, value)
 	}
       else
 	return bfd_reloc_overflow;
+
+    case R_MMIX_BASE_PLUS_OFFSET:
+      {
+	struct bpo_reloc_section_info *bpodata
+	  = (struct bpo_reloc_section_info *)
+	  elf_section_data (isec)->tdata;
+	asection *bpo_greg_section
+	  = bpodata->bpo_greg_section;
+	struct bpo_greg_section_info *gregdata
+	  = (struct bpo_greg_section_info *)
+	  elf_section_data (bpo_greg_section)->tdata;
+	size_t bpo_index
+	  = gregdata->bpo_reloc_indexes[bpodata->bpo_index++];
+
+	/* A consistency check: The value we now have in "relocation" must
+	   be the same as the value we stored for that relocation.  It
+	   doesn't cost much, so can be left in at all times.  */
+	if (value != gregdata->reloc_request[bpo_index].value)
+	  {
+	    (*_bfd_error_handler)
+	      (_("%s: Internal inconsistency error for value for\n\
+ linker-allocated global register: linked: 0x%lx%08lx != relaxed: 0x%lx%08lx\n"),
+	       bfd_get_filename (isec->owner),
+	       (unsigned long) (value >> 32), (unsigned long) value,
+	       (unsigned long) (gregdata->reloc_request[bpo_index].value
+				>> 32),
+	       (unsigned long) gregdata->reloc_request[bpo_index].value);
+	    bfd_set_error (bfd_error_bad_value);
+	    return bfd_reloc_overflow;
+	  }
+
+	/* Then store the register number and offset for that register
+	   into datap and datap + 1 respectively.  */
+	bfd_put_8 (abfd,
+		   gregdata->reloc_request[bpo_index].regindex
+		   + bpo_greg_section->output_section->vma / 8,
+		   datap);
+	bfd_put_8 (abfd,
+		   gregdata->reloc_request[bpo_index].offset,
+		   ((unsigned char *) datap) + 1);
+	return bfd_reloc_ok;
+      }
 
     case R_MMIX_REG_OR_BYTE:
     case R_MMIX_REG:
@@ -1231,6 +1365,32 @@ mmix_final_link_relocate (howto, input_section, contents,
 				       addr, srel);
       break;
 
+    case R_MMIX_BASE_PLUS_OFFSET:
+      if (symsec == NULL)
+	return bfd_reloc_undefined;
+
+      /* Check that we're not relocating against a register symbol.  */
+      if (strcmp (bfd_get_section_name (symsec->owner, symsec),
+		  MMIX_REG_CONTENTS_SECTION_NAME) == 0
+	  || strcmp (bfd_get_section_name (symsec->owner, symsec),
+		     MMIX_REG_SECTION_NAME) == 0)
+	{
+	  /* Note: This is separated out into two messages in order
+	     to ease the translation into other languages.  */
+	  if (symname == NULL || *symname == 0)
+	    (*_bfd_error_handler)
+	      (_("%s: base-plus-offset relocation against register symbol: (unknown) in %s"),
+	       bfd_get_filename (input_section->owner),
+	       bfd_get_section_name (symsec->owner, symsec));
+	  else
+	    (*_bfd_error_handler)
+	      (_("%s: base-plus-offset relocation against register symbol: %s in %s"),
+	       bfd_get_filename (input_section->owner), symname,
+	       bfd_get_section_name (symsec->owner, symsec));
+	  return bfd_reloc_overflow;
+	}
+      goto do_mmix_reloc;
+
     case R_MMIX_REG_OR_BYTE:
     case R_MMIX_REG:
       /* For now, we handle these alike.  They must refer to an register
@@ -1264,7 +1424,7 @@ mmix_final_link_relocate (howto, input_section, contents,
 	}
       else
 	{
-	  /* Note: This is seperated out into two messages in order
+	  /* Note: This is separated out into two messages in order
 	     to ease the translation into other languages.  */
 	  if (symname == NULL || *symname == 0)
 	    (*_bfd_error_handler)
@@ -1281,6 +1441,7 @@ mmix_final_link_relocate (howto, input_section, contents,
 	     better value, will not get us an error.  */
 	  return bfd_reloc_overflow;
 	}
+    do_mmix_reloc:
       contents += r_offset;
       r = mmix_elf_perform_relocation (input_section, howto, contents,
 				       addr, srel);
@@ -1396,6 +1557,37 @@ mmix_elf_gc_mark_hook (abfd, info, rel, h, sym)
 
   return NULL;
 }
+
+/* Update relocation info for a GC-excluded section.  We could supposedly
+   perform the allocation after GC, but there's no suitable hook between
+   GC (or section merge) and the point when all input sections must be
+   present.  Better to waste some memory and (perhaps) a little time.  */
+
+static boolean
+mmix_elf_gc_sweep_hook (abfd, info, sec, relocs)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
+     const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
+{
+  struct bpo_reloc_section_info *bpodata
+    = (struct bpo_reloc_section_info *)
+    elf_section_data (sec)->tdata;
+  asection *allocated_gregs_section;
+
+  /* If no bpodata here, we have nothing to do.  */
+  if (bpodata == NULL)
+    return true;
+
+  allocated_gregs_section = bpodata->bpo_greg_section;
+
+  ((struct bpo_greg_section_info *)
+   elf_section_data (allocated_gregs_section)->tdata)
+    ->n_bpo_relocs
+    -= bpodata->n_bpo_relocs_this_section;
+
+  return true;
+}
 
 /* Sort register relocs to come before expanding relocs.  */
 
@@ -1432,6 +1624,114 @@ mmix_elf_sort_relocs (p1, p2)
   return 0;
 }
 
+/* Subset of mmix_elf_check_relocs, common to ELF and mmo linking.  */
+
+static boolean
+mmix_elf_check_common_relocs  (abfd, info, sec, relocs)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     asection *sec;
+     const Elf_Internal_Rela *relocs;
+{
+  bfd *bpo_greg_owner = NULL;
+  asection *allocated_gregs_section = NULL;
+  struct bpo_greg_section_info *gregdata = NULL;
+  struct bpo_reloc_section_info *bpodata = NULL;
+  const Elf_Internal_Rela *rel;
+  const Elf_Internal_Rela *rel_end;
+
+  if (info->relocateable)
+    return true;
+
+  /* We currently have to abuse this COFF-specific member, since there's
+     no target-machine-dedicated member.  There's no alternative outside
+     the bfd_link_info struct; we can't specialize a hash-table since
+     they're different between ELF and mmo.  */
+  bpo_greg_owner = (bfd *) info->base_file;
+
+  rel_end = relocs + sec->reloc_count;
+  for (rel = relocs; rel < rel_end; rel++)
+    {
+      switch (ELF64_R_TYPE (rel->r_info))
+        {
+	  /* This relocation causes a GREG allocation.  We need to count
+	     them, and we need to create a section for them, so we need an
+	     object to fake as the owner of that section.  We can't use
+	     the ELF dynobj for this, since the ELF bits assume lots of
+	     DSO-related stuff if that member is non-NULL.  */
+	case R_MMIX_BASE_PLUS_OFFSET:
+	  if (bpo_greg_owner == NULL)
+	    {
+	      bpo_greg_owner = abfd;
+	      info->base_file = (PTR) bpo_greg_owner;
+	    }
+
+	  allocated_gregs_section
+	    = bfd_get_section_by_name (bpo_greg_owner,
+				       MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME);
+	  if (allocated_gregs_section == NULL)
+	    {
+	      allocated_gregs_section
+		= bfd_make_section (bpo_greg_owner,
+				    MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME);
+	      /* Setting both SEC_ALLOC and SEC_LOAD means the section is
+		 treated like any other section, and we'd get errors for
+		 address overlap with the text section.  Let's set none of
+		 those flags, as that is what currently happens for usual
+		 GREG allocations, and that works.  */
+	      if (allocated_gregs_section == NULL
+		  || !bfd_set_section_flags (bpo_greg_owner,
+					     allocated_gregs_section,
+					     (SEC_HAS_CONTENTS
+					      | SEC_IN_MEMORY
+					      | SEC_LINKER_CREATED))
+		  || !bfd_set_section_alignment (bpo_greg_owner,
+						 allocated_gregs_section,
+						 3))
+		return false;
+
+	      gregdata = (struct bpo_greg_section_info *)
+		bfd_zalloc (bpo_greg_owner, sizeof (struct bpo_greg_section_info));
+	      if (gregdata == NULL)
+		return false;
+	      elf_section_data (allocated_gregs_section)->tdata = gregdata;
+	    }
+	  else if (gregdata == NULL)
+	    gregdata = elf_section_data (allocated_gregs_section)->tdata;
+
+	  /* Get ourselves some auxiliary info for the BPO-relocs.  */
+	  if (bpodata == NULL)
+	    {
+	      /* No use doing a separate iteration pass to find the upper
+		 limit - just use the number of relocs.  */
+	      bpodata = (struct bpo_reloc_section_info *)
+		bfd_alloc (bpo_greg_owner,
+			   sizeof (struct bpo_reloc_section_info)
+			   * (sec->reloc_count + 1));
+	      if (bpodata == NULL)
+		return false;
+	      elf_section_data (sec)->tdata = bpodata;
+	      bpodata->first_base_plus_offset_reloc
+		= bpodata->bpo_index
+		= gregdata->n_max_bpo_relocs;
+	      bpodata->bpo_greg_section
+		= allocated_gregs_section;
+	    }
+
+	  bpodata->n_bpo_relocs_this_section++;
+	  gregdata->n_max_bpo_relocs++;
+
+	  /* We don't get another chance to set this before GC; we've not
+	     set up set up any hook that runs before GC.  */
+	  gregdata->n_bpo_relocs
+	    = gregdata->n_max_bpo_relocs;
+	  break;
+	}
+    }
+
+  return true;
+}
+
 /* Look through the relocs for a section during the first phase.  */
 
 static boolean
@@ -1460,6 +1760,10 @@ mmix_elf_check_relocs (abfd, info, sec, relocs)
   qsort ((PTR) relocs, sec->reloc_count, sizeof (Elf_Internal_Rela),
 	 mmix_elf_sort_relocs);
 
+  /* Do the common part.  */
+  if (!mmix_elf_check_common_relocs (abfd, info, sec, relocs))
+    return false;
+
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
     {
@@ -1473,7 +1777,7 @@ mmix_elf_check_relocs (abfd, info, sec, relocs)
         h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
       switch (ELF64_R_TYPE (rel->r_info))
-        {
+	{
         /* This relocation describes the C++ object vtable hierarchy.
            Reconstruct it for later use during GC.  */
         case R_MMIX_GNU_VTINHERIT:
@@ -1487,7 +1791,48 @@ mmix_elf_check_relocs (abfd, info, sec, relocs)
           if (!_bfd_elf64_gc_record_vtentry (abfd, sec, h, rel->r_addend))
             return false;
           break;
-        }
+	}
+    }
+
+  return true;
+}
+
+/* Wrapper for mmix_elf_check_common_relocs, called when linking to mmo.
+   Copied from elf_link_add_object_symbols.  */
+
+boolean
+_bfd_mmix_check_all_relocs (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  asection *o;
+
+  for (o = abfd->sections; o != NULL; o = o->next)
+    {
+      Elf_Internal_Rela *internal_relocs;
+      boolean ok;
+
+      if ((o->flags & SEC_RELOC) == 0
+	  || o->reloc_count == 0
+	  || ((info->strip == strip_all || info->strip == strip_debugger)
+	      && (o->flags & SEC_DEBUGGING) != 0)
+	  || bfd_is_abs_section (o->output_section))
+	continue;
+
+      internal_relocs
+	= _bfd_elf64_link_read_relocs (abfd, o, (PTR) NULL,
+				       (Elf_Internal_Rela *) NULL,
+				       info->keep_memory);
+      if (internal_relocs == NULL)
+	return false;
+
+      ok = mmix_elf_check_common_relocs (abfd, info, o, internal_relocs);
+
+      if (! info->keep_memory)
+	free (internal_relocs);
+
+      if (! ok)
+	return false;
     }
 
   return true;
@@ -1685,7 +2030,457 @@ mmix_elf_final_link (abfd, info)
   if (! bfd_elf64_bfd_final_link (abfd, info))
     return false;
 
+  /* Since this section is marked SEC_LINKER_CREATED, it isn't output by
+     the regular linker machinery.  We do it here, like other targets with
+     special sections.  */
+  if (info->base_file != NULL)
+    {
+      asection *greg_section
+	= bfd_get_section_by_name ((bfd *) info->base_file,
+				   MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME);
+      if (!bfd_set_section_contents (abfd,
+				     greg_section->output_section,
+				     greg_section->contents,
+				     (file_ptr) greg_section->output_offset,
+				     greg_section->_cooked_size))
+	return false;
+    }
   return true;
+}
+
+/* Initialize stuff for the linker-generated GREGs to match
+   R_MMIX_BASE_PLUS_OFFSET relocs seen by the linker.  */
+
+boolean
+_bfd_mmix_prepare_linker_allocated_gregs (abfd, info)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info;
+{
+  asection *bpo_gregs_section;
+  bfd *bpo_greg_owner;
+  struct bpo_greg_section_info *gregdata;
+  size_t n_gregs;
+  bfd_vma gregs_size;
+  size_t i;
+  size_t *bpo_reloc_indexes;
+
+  /* The bpo_greg_owner bfd is supposed to have been set by
+     mmix_elf_check_relocs when the first R_MMIX_BASE_PLUS_OFFSET is seen.
+     If there is no such object, there was no R_MMIX_BASE_PLUS_OFFSET.  */
+  bpo_greg_owner = (bfd *) info->base_file;
+  if (bpo_greg_owner == NULL)
+    return true;
+
+  bpo_gregs_section
+    = bfd_get_section_by_name (bpo_greg_owner,
+			       MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME);
+
+  /* This can't happen without DSO handling.  When DSOs are handled
+     without any R_MMIX_BASE_PLUS_OFFSET seen, there will be no such
+     section.  */
+  if (bpo_gregs_section == NULL)
+    return true;
+
+  /* We use the target-data handle in the ELF section data.  */
+  gregdata = (struct bpo_greg_section_info *)
+    elf_section_data (bpo_gregs_section)->tdata;
+  if (gregdata == NULL)
+    return false;
+
+  n_gregs = gregdata->n_bpo_relocs;
+  gregdata->n_allocated_bpo_gregs = n_gregs;
+
+  /* When this reaches zero during relaxation, all entries have been
+     filled in and the size of the linker gregs can be calculated.  */
+  gregdata->n_remaining_bpo_relocs_this_relaxation_round = n_gregs;
+
+  /* Set the zeroth-order estimate for the GREGs size.  */
+  gregs_size = n_gregs * 8;
+
+  if (!bfd_set_section_size (bpo_greg_owner, bpo_gregs_section, gregs_size))
+    return false;
+
+  /* Allocate and set up the GREG arrays.  They're filled in at relaxation
+     time.  Note that we must use the max number ever noted for the array,
+     since the index numbers were created before GC.  */
+  gregdata->reloc_request
+    = bfd_zalloc (bpo_greg_owner,
+		  sizeof (struct bpo_reloc_request)
+		  * gregdata->n_max_bpo_relocs);
+
+  gregdata->bpo_reloc_indexes
+    = bpo_reloc_indexes
+    = bfd_alloc (bpo_greg_owner,
+		 gregdata->n_max_bpo_relocs
+		 * sizeof (size_t));
+  if (bpo_reloc_indexes == NULL)
+    return false;
+
+  /* The default order is an identity mapping.  */
+  for (i = 0; i < gregdata->n_max_bpo_relocs; i++)
+    {
+      bpo_reloc_indexes[i] = i;
+      gregdata->reloc_request[i].bpo_reloc_no = i;
+    }
+
+  return true;
+}
+
+/* Fill in contents in the linker allocated gregs.  Everything is
+   calculated at this point; we just move the contents into place here.  */
+
+boolean
+_bfd_mmix_finalize_linker_allocated_gregs (abfd, link_info)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *link_info;
+{
+  asection *bpo_gregs_section;
+  bfd *bpo_greg_owner;
+  struct bpo_greg_section_info *gregdata;
+  size_t n_gregs;
+  size_t i, j;
+  size_t lastreg;
+  bfd_byte *contents;
+
+  /* The bpo_greg_owner bfd is supposed to have been set by mmix_elf_check_relocs
+     when the first R_MMIX_BASE_PLUS_OFFSET is seen.  If there is no such
+     object, there was no R_MMIX_BASE_PLUS_OFFSET.  */
+  bpo_greg_owner = (bfd *) link_info->base_file;
+  if (bpo_greg_owner == NULL)
+    return true;
+
+  bpo_gregs_section
+    = bfd_get_section_by_name (bpo_greg_owner,
+			       MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME);
+
+  /* This can't happen without DSO handling.  When DSOs are handled
+     without any R_MMIX_BASE_PLUS_OFFSET seen, there will be no such
+     section.  */
+  if (bpo_gregs_section == NULL)
+    return true;
+
+  /* We use the target-data handle in the ELF section data.  */
+
+  gregdata = (struct bpo_greg_section_info *)
+    elf_section_data (bpo_gregs_section)->tdata;
+  if (gregdata == NULL)
+    return false;
+
+  n_gregs = gregdata->n_allocated_bpo_gregs;
+
+  bpo_gregs_section->contents
+    = contents = bfd_alloc (bpo_greg_owner, bpo_gregs_section->_cooked_size);
+  if (contents == NULL)
+    return false;
+
+  for (lastreg = 255, i = 0, j = 0; j < n_gregs; i++)
+    if (gregdata->reloc_request[i].regindex != lastreg)
+      {
+	bfd_put_64 (bpo_greg_owner, gregdata->reloc_request[i].value,
+		    contents + j * 8);
+	lastreg = gregdata->reloc_request[i].regindex;
+	j++;
+      }
+
+  return true;
+}
+
+/* Sort valid relocs to come before non-valid relocs, then on increasing
+   value.  */
+
+static int
+bpo_reloc_request_sort_fn (p1, p2)
+     const PTR p1;
+     const PTR p2;
+{
+  const struct bpo_reloc_request *r1 = (const struct bpo_reloc_request *) p1;
+  const struct bpo_reloc_request *r2 = (const struct bpo_reloc_request *) p2;
+
+  /* Primary function is validity; non-valid relocs sorted after valid
+     ones.  */
+  if (r1->valid != r2->valid)
+    return r2->valid - r1->valid;
+
+  /* Then sort on value.  */
+  if (r1->value != r2->value)
+    return r1->value - r2->value;
+
+  /* As a last re-sort, use the address so we get a stable sort.  */
+  return r1 > r2 ? 1 : (r1 < r2 ? -1 : 0);
+}
+
+/* This links all R_MMIX_BASE_PLUS_OFFSET relocs into a special array, and
+   when the last such reloc is done, an index-array is sorted according to
+   the values and iterated over to produce register numbers (indexed by 0
+   from the first allocated register number) and offsets for use in real
+   relocation.
+
+   Symbol- and reloc-reading infrastructure copied from elf-m10200.c.  */
+
+static boolean
+mmix_elf_relax_section (abfd, sec, link_info, again)
+     bfd *abfd;
+     asection *sec;
+     struct bfd_link_info *link_info;
+     boolean *again;
+{
+
+  Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Shdr *shndx_hdr;
+  Elf_Internal_Rela *internal_relocs;
+  Elf_Internal_Rela *free_relocs = NULL;
+  Elf_Internal_Rela *irel, *irelend;
+  asection *bpo_gregs_section = NULL;
+  struct bpo_greg_section_info *gregdata;
+  struct bpo_reloc_section_info *bpodata
+    = (struct bpo_reloc_section_info *)
+    elf_section_data (sec)->tdata;
+  size_t bpono;
+  bfd *bpo_greg_owner;
+  Elf64_External_Sym *extsyms = NULL;
+  Elf64_External_Sym *free_extsyms = NULL;
+  Elf_External_Sym_Shndx *shndx_buf = NULL;
+
+  /* Assume nothing changes.  */
+  *again = false;
+
+  /* If this is the first time we have been called for this section,
+     initialize the cooked size.  */
+  if (sec->_cooked_size == 0)
+    sec->_cooked_size = sec->_raw_size;
+
+  /* We don't have to do anything for a relocateable link, if
+     this section does not have relocs, or if this is not a
+     code section.  */
+  if (link_info->relocateable
+      || (sec->flags & SEC_RELOC) == 0
+      || sec->reloc_count == 0
+      || (sec->flags & SEC_CODE) == 0
+      || (sec->flags & SEC_LINKER_CREATED) != 0
+      /* If no R_MMIX_BASE_PLUS_OFFSET relocs, then nothing to do.  */
+      || bpodata == NULL)
+    return true;
+
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
+
+  bpo_greg_owner = (bfd *) link_info->base_file;
+  bpo_gregs_section = bpodata->bpo_greg_section;
+  gregdata = (struct bpo_greg_section_info *)
+    elf_section_data (bpo_gregs_section)->tdata;
+
+  bpono = bpodata->first_base_plus_offset_reloc;
+
+  /* Get a copy of the native relocations.  */
+  internal_relocs
+    = _bfd_elf64_link_read_relocs (abfd, sec, (PTR) NULL,
+				   (Elf_Internal_Rela *) NULL,
+				   link_info->keep_memory);
+  if (internal_relocs == NULL)
+    goto error_return;
+  if (! link_info->keep_memory)
+    free_relocs = internal_relocs;
+
+  /* Walk through them looking for relaxing opportunities.  */
+  irelend = internal_relocs + sec->reloc_count;
+  for (irel = internal_relocs; irel < irelend; irel++)
+    {
+      bfd_vma symval;
+
+      if (ELF64_R_TYPE (irel->r_info) != (int) R_MMIX_BASE_PLUS_OFFSET)
+	continue;
+
+      /* Read this BFD's symbols if we haven't done so already.  */
+      if (extsyms == NULL)
+	{
+	  /* Get cached copy if it exists.  */
+	  if (symtab_hdr->contents != NULL)
+	    extsyms = (Elf64_External_Sym *) symtab_hdr->contents;
+	  else
+	    {
+	      /* Go get them off disk.  */
+	      bfd_size_type amt;
+
+	      amt = symtab_hdr->sh_info;
+	      amt *= sizeof (Elf64_External_Sym);
+	      extsyms = (Elf64_External_Sym *) bfd_malloc (amt);
+	      if (extsyms == NULL)
+		goto error_return;
+	      free_extsyms = extsyms;
+	      if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
+		  || bfd_bread ((PTR) extsyms, amt, abfd) != amt)
+		goto error_return;
+	      symtab_hdr->contents = (bfd_byte *) extsyms;
+	    }
+
+	  /* If >64k sections, this presumable happens.  No test-case.  */
+	  if (shndx_hdr->sh_size != 0)
+	    {
+	      bfd_size_type amt;
+
+	      amt = symtab_hdr->sh_info;
+	      amt *= sizeof (Elf_External_Sym_Shndx);
+	      shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
+	      if (shndx_buf == NULL)
+		goto error_return;
+	      if (bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0
+		  || bfd_bread ((PTR) shndx_buf, amt, abfd) != amt)
+		goto error_return;
+	      shndx_hdr->contents = (bfd_byte *) shndx_buf;
+	    }
+	}
+
+      /* Get the value of the symbol referred to by the reloc.  */
+      if (ELF64_R_SYM (irel->r_info) < symtab_hdr->sh_info)
+	{
+	  /* A local symbol.  */
+	  Elf64_External_Sym *esym;
+	  Elf_External_Sym_Shndx *shndx;
+	  Elf_Internal_Sym isym;
+	  asection *sym_sec;
+
+	  esym = extsyms + ELF64_R_SYM (irel->r_info);
+	  shndx = shndx_buf + (shndx_buf
+			       ? ELF64_R_SYM (irel->r_info) : 0);
+	  bfd_elf64_swap_symbol_in (abfd, esym, shndx, &isym);
+
+	  if (isym.st_shndx == SHN_UNDEF)
+	    sym_sec = bfd_und_section_ptr;
+	  else if (isym.st_shndx == SHN_ABS)
+	    sym_sec = bfd_abs_section_ptr;
+	  else if (isym.st_shndx == SHN_COMMON)
+	    sym_sec = bfd_com_section_ptr;
+	  else
+	    sym_sec = bfd_section_from_elf_index (abfd, isym.st_shndx);
+	  symval = (isym.st_value
+		    + sym_sec->output_section->vma
+		    + sym_sec->output_offset);
+	}
+      else
+	{
+	  unsigned long indx;
+	  struct elf_link_hash_entry *h;
+
+	  /* An external symbol.  */
+	  indx = ELF64_R_SYM (irel->r_info) - symtab_hdr->sh_info;
+	  h = elf_sym_hashes (abfd)[indx];
+	  BFD_ASSERT (h != NULL);
+	  if (h->root.type != bfd_link_hash_defined
+	      && h->root.type != bfd_link_hash_defweak)
+	    {
+	      /* This appears to be a reference to an undefined
+                 symbol.  Just ignore it--it will be caught by the
+                 regular reloc processing.  */
+	      continue;
+	    }
+
+	  symval = (h->root.u.def.value
+		    + h->root.u.def.section->output_section->vma
+		    + h->root.u.def.section->output_offset);
+	}
+
+      gregdata->reloc_request[gregdata->bpo_reloc_indexes[bpono]].value
+	= symval + irel->r_addend;
+      gregdata->reloc_request[gregdata->bpo_reloc_indexes[bpono++]].valid = true;
+      gregdata->n_remaining_bpo_relocs_this_relaxation_round--;
+    }
+
+  /* Check if that was the last BPO-reloc.  If so, sort the values and
+     calculate how many registers we need to cover them.  Set the size of
+     the linker gregs, and if the number of registers changed, indicate
+     that we need to relax some more because we have more work to do.  */
+  if (gregdata->n_remaining_bpo_relocs_this_relaxation_round == 0)
+    {
+      size_t i;
+      bfd_vma prev_base;
+      size_t regindex;
+
+      /* First, reset the remaining relocs for the next round.  */
+      gregdata->n_remaining_bpo_relocs_this_relaxation_round
+	= gregdata->n_bpo_relocs;
+
+      qsort ((PTR) gregdata->reloc_request,
+	     gregdata->n_max_bpo_relocs,
+	     sizeof (struct bpo_reloc_request),
+	     bpo_reloc_request_sort_fn);
+
+      /* Recalculate indexes.  When we find a change (however unlikely
+	 after the initial iteration), we know we need to relax again,
+	 since items in the GREG-array are sorted by increasing value and
+	 stored in the relaxation phase.  */
+      for (i = 0; i < gregdata->n_max_bpo_relocs; i++)
+	if (gregdata->bpo_reloc_indexes[gregdata->reloc_request[i].bpo_reloc_no]
+	    != i)
+	  {
+	    gregdata->bpo_reloc_indexes[gregdata->reloc_request[i].bpo_reloc_no]
+	      = i;
+	    *again = true;
+	  }
+
+      /* Allocate register numbers (indexing from 0).  Stop at the first
+	 non-valid reloc.  */
+      for (i = 0, regindex = 0, prev_base = gregdata->reloc_request[0].value;
+	   i < gregdata->n_bpo_relocs;
+	   i++)
+	{
+	  if (gregdata->reloc_request[i].value > prev_base + 255)
+	    {
+	      regindex++;
+	      prev_base = gregdata->reloc_request[i].value;
+	    }
+	  gregdata->reloc_request[i].regindex = regindex;
+	  gregdata->reloc_request[i].offset
+	    = gregdata->reloc_request[i].value - prev_base;
+	}
+
+      /* If it's not the same as the last time, we need to relax again,
+	 because the size of the section has changed.  I'm not sure we
+	 actually need to do any adjustments since the shrinking happens
+	 at the start of this section, but better safe than sorry.  */
+      if (gregdata->n_allocated_bpo_gregs != regindex + 1)
+	{
+	  gregdata->n_allocated_bpo_gregs = regindex + 1;
+	  *again = true;
+	}
+
+      bpo_gregs_section->_cooked_size = (regindex + 1) * 8;
+    }
+
+  if (free_relocs != NULL)
+    free (free_relocs);
+
+  if (shndx_buf != NULL)
+    {
+      shndx_hdr->contents = NULL;
+      free (shndx_buf);
+    }
+
+  if (free_extsyms != NULL)
+    {
+      if (! link_info->keep_memory)
+	{
+	  symtab_hdr->contents = NULL;
+	  free (free_extsyms);
+	}
+    }
+
+  return true;
+
+ error_return:
+  if (free_relocs != NULL)
+    free (free_relocs);
+  if (shndx_buf != NULL)
+    {
+      shndx_hdr->contents = NULL;
+      free (shndx_buf);
+    }
+  if (free_extsyms != NULL)
+    {
+      symtab_hdr->contents = NULL;
+      free (free_extsyms);
+    }
+
+  return false;
 }
 
 #define ELF_ARCH		bfd_arch_mmix
@@ -1712,6 +2507,8 @@ mmix_elf_final_link (abfd, info)
 #define elf_info_to_howto		mmix_info_to_howto_rela
 #define elf_backend_relocate_section	mmix_elf_relocate_section
 #define elf_backend_gc_mark_hook	mmix_elf_gc_mark_hook
+#define elf_backend_gc_sweep_hook	mmix_elf_gc_sweep_hook
+
 #define elf_backend_link_output_symbol_hook \
 	mmix_elf_link_output_symbol_hook
 #define elf_backend_add_symbol_hook	mmix_elf_add_symbol_hook
@@ -1731,5 +2528,6 @@ mmix_elf_final_link (abfd, info)
 	mmix_elf_section_from_bfd_section
 
 #define bfd_elf64_bfd_final_link	mmix_elf_final_link
+#define bfd_elf64_bfd_relax_section	mmix_elf_relax_section
 
 #include "elf64-target.h"

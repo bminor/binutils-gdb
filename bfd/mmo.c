@@ -201,7 +201,6 @@ EXAMPLE
 #include "libiberty.h"
 #include "elf/mmix.h"
 #include "opcode/mmix.h"
-#include <ctype.h>
 
 #define LOP 0x98
 #define LOP_QUOTE 0
@@ -481,10 +480,9 @@ mmo_init ()
   static const char letters[]
     = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:_";
 
-  if (inited == false)
-    {
-      inited = true;
-    }
+  if (inited == true)
+    return;
+  inited = true;
 
   /* Fill in the set of valid symbol characters.  */
   strcpy (valid_mmo_symbol_character_set, letters);
