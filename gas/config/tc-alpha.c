@@ -1159,9 +1159,10 @@ md_pcrel_from (fixP)
    GPDISP.  */
 
 int
-md_apply_fix (fixP, valueP)
+md_apply_fix3 (fixP, valueP, seg)
      fixS *fixP;
      valueT *valueP;
+     segT seg;
 {
   char * const fixpos = fixP->fx_frag->fr_literal + fixP->fx_where;
   valueT value = *valueP;
@@ -1196,7 +1197,7 @@ md_apply_fix (fixP, valueP)
 #endif
 
     do_reloc_gp:
-      fixP->fx_addsy = section_symbol (now_seg);
+      fixP->fx_addsy = section_symbol (seg);
       md_number_to_chars (fixpos, value, 2);
       break;
 

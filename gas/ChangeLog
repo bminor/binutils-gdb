@@ -1,3 +1,9 @@
+2001-08-20  Richard Henderson  <rth@redhat.com>
+
+	* config/tc-alpha.h (MD_APPLY_FIX3): Define.
+	* config/tc-alpha.c (md_apply_fix3): Rename from md_apply_fix;
+	use seg parameter instead of now_seg.
+
 2001-08-18  H.J. Lu  <hjl@gnu.org>
 
 	* config/tc-mips.c (show): Add the missing prototype.

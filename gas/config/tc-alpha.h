@@ -49,6 +49,7 @@ extern valueT alpha_gp_value;
 #define TC_FORCE_RELOCATION(FIXP)	alpha_force_relocation (FIXP)
 #define tc_fix_adjustable(FIXP)		alpha_fix_adjustable (FIXP)
 #define RELOC_REQUIRES_SYMBOL
+#define MD_APPLY_FIX3
 
 /* This expression evaluates to false if the relocation is for a local
    object for which we still want to do the relocation at runtime.
