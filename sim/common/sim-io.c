@@ -1,6 +1,7 @@
 /*  This file is part of the program psim.
 
     Copyright (C) 1994-1997, Andrew Cagney <cagney@highland.com.au>
+    Copyright (C) 1998, Cygnus Solutions.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,6 +23,11 @@
 #include "sim-main.h"
 #include "sim-io.h"
 #include "targ-vals.h"
+
+#if HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+
 
 /* See the file include/callbacks.h for a description */
 
@@ -299,156 +305,70 @@ sim_io_poll_quit(SIM_DESC sd)
 }
 
 
-static char *
-sim_io_getstring(SIM_DESC sd,
-		 sim_cpu *cpu,
-		 address_word cia,
-		 address_word target_string)
+/* Based on gdb-4.17/sim/ppc/main.c:sim_io_read_stdin().
+
+   FIXME: Should not be calling fcntl() or grubbing around inside of
+   ->fdmap and ->errno.
+
+   FIXME: Some completly new mechanism for handling the general
+   problem of asynchronous IO is needed.
+
+   FIXME: This function does not supress the echoing (ECHO) of input.
+   Consequently polled input is always displayed.
+
+   FIXME: This function does not perform uncooked reads.
+   Consequently, data will not be read until an EOLN character has
+   been entered. A cntrl-d may force the early termination of a line */
+
+
+int
+sim_io_poll_read (SIM_DESC sd,
+		  int sim_io_fd,
+		  char *buf,
+		  int sizeof_buf)
 {
-  int len = 0;
-  char *buf;
-
-  while (sim_core_read_1 (cpu, cia, sim_core_read_map, target_string+len) != 0)
-    len++;
-
-  buf = NZALLOC (char, len+1);
-  buf[len] = '\0';
-  sim_core_read_buffer (sd, cpu, sim_core_read_map, buf, target_string, len);
-  return buf;
-}
-
-void
-sim_io_syscalls(SIM_DESC sd,
-		int syscall,
-		address_word cia,
-		address_word parm1,
-		address_word parm2,
-		address_word parm3,
-		address_word parm4,
-		address_word *syscall_return,
-		address_word *errno_return)
-{
-  sim_cpu *cpu = STATE_CPU (sd, 0);
-  struct host_callback_struct *callback = STATE_CALLBACK (sd);
-  int len, len2, len3;
-  int ret;
-  char *buf;
-  int fd;
-
-  *errno_return = 0;
-  *syscall_return = 0;
-
-  switch (syscall)
+#if defined(O_NDELAY) && defined(F_GETFL) && defined(F_SETFL)
+  int fd = STATE_CALLBACK (sd)->fdmap[sim_io_fd];
+  int flags;
+  int status;
+  int nr_read;
+  int result;
+  STATE_CALLBACK (sd)->last_errno = 0;
+  /* get the old status */
+  flags = fcntl (fd, F_GETFL, 0);
+  if (flags == -1)
     {
-    case 1:			/* exit (status) */
-      sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, cia, sim_exited, parm1);
-      break;
-
-    case 2:			/* open (filename, flags, mode) */
-      buf = sim_io_getstring (sd, cpu, cia, parm1);
-      ret = *syscall_return = callback->open (callback, buf, parm2);
-      if (ret < 0)
-	*errno_return = callback->get_errno (callback);
-
-      zfree (buf);
-      break;
-
-    case 3:			/* close (filedes) */
-      ret = *syscall_return = callback->close (callback, parm1);
-      if (ret < 0)
-	*errno_return = callback->get_errno (callback);
-      break;
-
-    case 4:			/* read (filedes, buffer, len) */
-      fd = parm1;
-      len = parm3;
-      buf = NZALLOC (char, len);
-
-      if (fd == 0)
-	len2 = sim_io_read_stdin (sd, buf, len);
-      else
-	len2 = sim_io_read (sd, fd, buf, len);
-
-      if (len2 > 0)
-	{
-	  len3 = sim_core_write_buffer (sd, cpu, sim_core_write_map, buf, parm2,
-					len);
-
-	  if (len3 < len2)
-	    sim_engine_abort (sd, cpu, cia,
-			      "Could only write back %d bytes for read system call, wanted to write %d\n",
-			      len3, len2);
-
-	  *syscall_return = len2;
-	}
-      else
-	*errno_return = callback->get_errno (callback);
-
-      zfree (buf);
-      break;
-
-    case 5:			/* write (filedes, buffer, len) */
-      fd = parm1;
-      len = parm3;
-      buf = NZALLOC (char, len);
-
-      len = sim_core_read_buffer (sd, cpu, sim_core_read_map, buf, parm2, len);
-      if (fd == 1)
-	{
-	  len2 = sim_io_write_stdout (sd, buf, len);
-	  sim_io_flush_stdout (sd);
-	}
-      else if (fd == 2)
-	{
-	  len2 = sim_io_write_stderr (sd, buf, len);
-	  sim_io_flush_stderr (sd);
-	}
-      else
-	len2 = sim_io_write (sd, fd, buf, len);
-
-      if (len2 > 0)
-	*syscall_return = len2;
-      else
-	*errno_return = callback->get_errno (callback);
-
-      zfree (buf);
-      break;
-      
-    case 6:			/* lseek (filedes, offset, whence) */
-      *errno_return = TARGET_ENOSYS;
-      break;
-
-    case 7:			/* unlink (filename) */
-      buf = sim_io_getstring (sd, cpu, cia, parm1);
-      ret = *syscall_return = callback->unlink (callback, buf);
-      if (ret < 0)
-	*errno_return = callback->get_errno (callback);
-
-      zfree (buf);
-      break;
-
-    case 8:			/* getpid () */
-    case 9:			/* kill (signal, pid) */
-    case 10:			/* fstat (filedes, packet) */
-    case 11:			/* reserved for sbrk */
-    case 12:			/* argvlen () */
-    case 13:			/* argv () */
-    case 14:			/* chdir (dir) */
-    case 15:			/* stat (filename, packet) */
-    case 16:			/* chmod (filename, mode) */
-    case 17:			/* utime (filename, packet) */
-    case 18:			/* time (time_t *) */
-      *errno_return = TARGET_ENOSYS;
-      break;
-
-    default:
-      sim_engine_abort (sd, cpu, cia, "Unknown monitor call %d", syscall);
-      break;
+      perror ("sim_io_poll_read");
+      return 0;
     }
-
-  if (*errno_return)
-    *syscall_return = -1;
-
-  return;
+  /* temp, disable blocking IO */
+  status = fcntl (fd, F_SETFL, flags | O_NDELAY);
+  if (status == -1)
+    {
+      perror ("sim_io_read_stdin");
+      return 0;
+    }
+  /* try for input */
+  nr_read = read (fd, buf, sizeof_buf);
+  if (nr_read >= 0)
+    {
+      /* printf ("<nr-read=%d>\n", nr_read); */
+      result = nr_read;
+    }
+  else
+    { /* nr_read < 0 */
+      result = -1;
+      STATE_CALLBACK (sd)->last_errno = errno;
+    }
+  /* return to regular vewing */
+  status = fcntl (fd, F_SETFL, flags);
+  if (status == -1)
+    {
+      perror ("sim_io_read_stdin");
+      /* return 0; */
+    }
+  return result;
+#else
+  return sim_io_read (sd, sim_io_fd, buf, sizeof_buf);
+#endif
 }
-

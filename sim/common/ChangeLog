@@ -1,5 +1,21 @@
+Wed May  6 12:39:15 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+start-sanitize-am30
+
+	* dv-pal.c (struct hw_pal_device): Add reader.
+ 	(hw_pal_finish): Initialize reader.
+	(scan_hw_pal): Use reader.
+
+	* hw-base.h, sim-hw.c (do_hw_poll_read): New function.
+	(HW_IO_EOF, HW_IO_NOT_READY): Define.
+	* dv-pal.c: Use.
+
+end-sanitize-am30
+	* sim-io.h, sim-io.c (sim_io_poll_read): New function.  Copy from
+ 	../ppc/main.c sim_io_read_stdin.
+
 Fri May  1 12:11:02 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
+start-sanitize-am30
 	* hw-tree.h (hw_tree_print): Paramaterize with print and file
  	arguments.
 	* hw-tree.c: Update.
@@ -17,7 +33,6 @@ Fri May  1 12:11:02 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	(do_counter_event): Update.
 	* dv-glue.c (hw_glue_io_read_buffer): Update.
 	(hw_glue_port_event): Update.
-
 
 	* hw-device.h (SIM_DESC): Replace with struct sim_state.
 	* hw-base.h (hw_create): Ditto.
@@ -50,10 +65,11 @@ Fri May  1 12:11:02 1998  Andrew Cagney  <cagney@b1.cygnus.com>
  	sim_cpu_hw_io_read_buffer, sim_cpu_hw_io_write_buffer): New
  	functions.
 	(sim_hw_print): New function.
-	
+
+end-sanitize-am30
 	* sim-engine.h (sim_engine_vabort): Declare.
 	* sim-engine.c (sim_engine_vabort): New function.
-	
+
 Wed Apr 29 23:58:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-trace.c (print_data): For floating-point numbers trace raw
