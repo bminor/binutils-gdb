@@ -1,3 +1,18 @@
+Thu Sep 21 14:11:49 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* config/tc-ppc.c (ppc_flags): New variable to hold the flag bits
+	to set in the ELF header.
+	(md_parse_option): Add support for -mrelocatable-lib.  Make both
+	-mrelocatable and -mrelocatable-lib set ppc_flags.
+	(md_begin): Set ELF flags with ppc_flags.
+
+Wed Sep 20 13:01:52 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (maintainer-clean): New target, synonym for
+	realclean.  Add GNU standard maintainer-clean echos.
+	* doc/Makefile.in (maintainer-clean): New target, synonym for
+	realclean.
+
 Tue Sep 19 11:31:31 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-m68k.c (m68k_ip): Reject immediate operands for '%'.

@@ -31,8 +31,11 @@
 
 /* This is the assembler for the PowerPC or POWER (RS/6000) chips.  */
 
-/* FIXME: This should be handled in a different way.  */
+/* Tell the main code what the endianness is.  */
 extern int target_big_endian;
+
+/* Whether or not, we've set target_big_endian.  */
+static int set_target_endian = 0;
 
 static void ppc_set_cpu PARAMS ((void));
 static unsigned long ppc_insert_operand
@@ -148,6 +151,9 @@ static struct hash_control *ppc_macro_hash;
 /* Whether to warn about non PC relative relocations that aren't
    in the .got2 section. */
 static boolean mrelocatable = false;
+
+/* Flags to set in the elf header */
+static flagword ppc_flags = 0;
 #endif
 
 #ifdef OBJ_COFF
@@ -265,16 +271,35 @@ md_parse_option (c, arg)
 	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_POWER2 | PPC_OPCODE_PPC;
 
 #ifdef OBJ_ELF
-      /* -mrelocatable -- warn about initializations that require relocation */
+      /* -mrelocatable/-mrelocatable-lib -- warn about initializations that require relocation */
       else if (strcmp (arg, "relocatable") == 0)
-	mrelocatable = true;
+	{
+	  mrelocatable = true;
+	  ppc_flags |= EF_PPC_RELOCATABLE;
+	}
+
+      else if (strcmp (arg, "relocatable-lib") == 0)
+	{
+	  mrelocatable = true;
+	  ppc_flags |= EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB;
+	}
+
+      /* -memb, set embedded bit */
+      else if (strcmp (arg, "emb") == 0)
+	ppc_flags |= EF_PPC_EMB;
 
       /* -mlittle/-mbig set the endianess */
       else if (strcmp (arg, "little") == 0 || strcmp (arg, "little-endian") == 0)
-	target_big_endian = 0;
+	{
+	  target_big_endian = 0;
+	  set_target_endian = 1;
+	}
 
       else if (strcmp (arg, "big") == 0 || strcmp (arg, "big-endian") == 0)
-	target_big_endian = 1;
+	{
+	  target_big_endian = 1;
+	  set_target_endian = 1;
+	}
 #endif
       else
 	{
@@ -319,6 +344,8 @@ PowerPC options:\n\
 #ifdef OBJ_ELF
   fprintf(stream, "\
 -mrelocatable		support for GCC's -mrelocatble option\n\
+-mrelocatable-lib	support for GCC's -mrelocatble-lib option\n\
+-memb			set PPC_EMB bit in ELF flags\n\
 -mlittle, -mlittle-endian\n\
 			generate code for a little endian machine\n\
 -mbig, -mbig-endian	generate code for a big endian machine\n\
@@ -376,9 +403,9 @@ md_begin ()
   ppc_set_cpu ();
 
 #ifdef OBJ_ELF
-  /* Set  the -mrelocatable flag bit */
-  if (mrelocatable)
-    bfd_set_private_flags (stdoutput, EF_PPC_RELOCATABLE);
+  /* Set the ELF flags if desired. */
+  if (ppc_flags)
+    bfd_set_private_flags (stdoutput, ppc_flags);
 #endif
 
   /* Insert the opcodes into a hash table.  */
@@ -436,8 +463,12 @@ md_begin ()
 	}
     }
 
-  /* Tell the main code what the endianness is.  */
-  target_big_endian = PPC_BIG_ENDIAN;
+  /* Tell the main code what the endianness is if it is not overidden by the user.  */
+  if (!set_target_endian)
+    {
+      set_target_endian = 1;
+      target_big_endian = PPC_BIG_ENDIAN;
+    }
 
 #ifdef OBJ_COFF
   ppc_coff_debug_section = coff_section_from_bfd_index (stdoutput, N_DEBUG);
