@@ -1,5 +1,7 @@
 Mon Jan 31 12:12:34 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* remote-mips.c: Use unfiltered, not filtered, output most places.
+
 	* blockframe.c (get_prev_frame_info): Detect and stop an infinite
 	backtrace.  Revise comments.
 

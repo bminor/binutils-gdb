@@ -345,10 +345,12 @@ mips_readchar (timeout)
     mips_error ("Error reading from remote: %s", safe_strerror (errno));
   if (sr_get_debug () > 1)
     {
+      /* Don't use _filtered; we can't deal with a QUIT out of
+	 target_wait, and I think this might be called from there.  */
       if (ch != SERIAL_TIMEOUT)
-	printf_filtered ("Read '%c' %d 0x%x\n", ch, ch, ch);
+	printf_unfiltered ("Read '%c' %d 0x%x\n", ch, ch, ch);
       else
-	printf_filtered ("Timed out in read\n");
+	printf_unfiltered ("Timed out in read\n");
     }
 
   /* If we have seen <IDT> and we either time out, or we see a @
@@ -361,7 +363,9 @@ mips_readchar (timeout)
       && ! mips_initializing)
     {
       if (sr_get_debug () > 0)
-	printf_filtered ("Reinitializing MIPS debugging mode\n");
+	/* Don't use _filtered; we can't deal with a QUIT out of
+	   target_wait, and I think this might be called from there.  */
+	printf_unfiltered ("Reinitializing MIPS debugging mode\n");
       SERIAL_WRITE (mips_desc, "\rdb tty0\r", sizeof "\rdb tty0\r" - 1);
       sleep (1);
 
@@ -410,8 +414,8 @@ mips_receive_header (hdr, pgarbage, ch, timeout)
 	    {
 	      /* Printing the character here lets the user of gdb see
 		 what the program is outputting, if the debugging is
-		 being done on the console port.  FIXME: Perhaps this
-		 should be filtered?  */
+		 being done on the console port.  Don't use _filtered;
+		 we can't deal with a QUIT out of target_wait.  */
 	      if (! mips_initializing || sr_get_debug () > 0)
 		{
 		  putchar_unfiltered (ch);
@@ -549,8 +553,10 @@ mips_send_packet (s, get_ack)
 
       if (sr_get_debug () > 0)
 	{
+	  /* Don't use _filtered; we can't deal with a QUIT out of
+	     target_wait, and I think this might be called from there.  */
 	  packet[HDR_LENGTH + len + TRLR_LENGTH] = '\0';
-	  printf_filtered ("Writing \"%s\"\n", packet + 1);
+	  printf_unfiltered ("Writing \"%s\"\n", packet + 1);
 	}
 
       if (SERIAL_WRITE (mips_desc, packet,
@@ -607,7 +613,9 @@ mips_send_packet (s, get_ack)
 	    {
 	      hdr[HDR_LENGTH] = '\0';
 	      trlr[TRLR_LENGTH] = '\0';
-	      printf_filtered ("Got ack %d \"%s%s\"\n",
+	      /* Don't use _filtered; we can't deal with a QUIT out of
+		 target_wait, and I think this might be called from there.  */
+	      printf_unfiltered ("Got ack %d \"%s%s\"\n",
 			       HDR_GET_SEQ (hdr), hdr + 1, trlr);
 	    }
 
@@ -672,16 +680,20 @@ mips_receive_packet (buff, throw_error, timeout)
       /* An acknowledgement is probably a duplicate; ignore it.  */
       if (! HDR_IS_DATA (hdr))
 	{
+	  /* Don't use _filtered; we can't deal with a QUIT out of
+	     target_wait, and I think this might be called from there.  */
 	  if (sr_get_debug () > 0)
-	    printf_filtered ("Ignoring unexpected ACK\n");
+	    printf_unfiltered ("Ignoring unexpected ACK\n");
 	  continue;
 	}
 
       /* If this is the wrong sequence number, ignore it.  */
       if (HDR_GET_SEQ (hdr) != mips_receive_seq)
 	{
+	  /* Don't use _filtered; we can't deal with a QUIT out of
+	     target_wait, and I think this might be called from there.  */
 	  if (sr_get_debug () > 0)
-	    printf_filtered ("Ignoring sequence number %d (want %d)\n",
+	    printf_unfiltered ("Ignoring sequence number %d (want %d)\n",
 			     HDR_GET_SEQ (hdr), mips_receive_seq);
 	  continue;
 	}
@@ -710,8 +722,10 @@ mips_receive_packet (buff, throw_error, timeout)
 
       if (i < len)
 	{
+	  /* Don't use _filtered; we can't deal with a QUIT out of
+	     target_wait, and I think this might be called from there.  */
 	  if (sr_get_debug () > 0)
-	    printf_filtered ("Got new SYN after %d chars (wanted %d)\n",
+	    printf_unfiltered ("Got new SYN after %d chars (wanted %d)\n",
 			     i, len);
 	  continue;
 	}
@@ -726,8 +740,10 @@ mips_receive_packet (buff, throw_error, timeout)
 	}
       if (err == -2)
 	{
+	  /* Don't use _filtered; we can't deal with a QUIT out of
+	     target_wait, and I think this might be called from there.  */
 	  if (sr_get_debug () > 0)
-	    printf_filtered ("Got SYN when wanted trailer\n");
+	    printf_unfiltered ("Got SYN when wanted trailer\n");
 	  continue;
 	}
 
@@ -735,7 +751,9 @@ mips_receive_packet (buff, throw_error, timeout)
 	break;
 
       if (sr_get_debug () > 0)
-	printf_filtered ("Bad checksum; data %d, trailer %d\n",
+	/* Don't use _filtered; we can't deal with a QUIT out of
+	   target_wait, and I think this might be called from there.  */
+	printf_unfiltered ("Bad checksum; data %d, trailer %d\n",
 			 mips_cksum (hdr, buff, len),
 			 TRLR_GET_CKSUM (trlr));
 
@@ -755,7 +773,9 @@ mips_receive_packet (buff, throw_error, timeout)
       if (sr_get_debug () > 0)
 	{
 	  ack[HDR_LENGTH + TRLR_LENGTH] = '\0';
-	  printf_filtered ("Writing ack %d \"%s\"\n", mips_receive_seq,
+	  /* Don't use _filtered; we can't deal with a QUIT out of
+	     target_wait, and I think this might be called from there.  */
+	  printf_unfiltered ("Writing ack %d \"%s\"\n", mips_receive_seq,
 			   ack + 1);
 	}
 
@@ -771,7 +791,9 @@ mips_receive_packet (buff, throw_error, timeout)
   if (sr_get_debug () > 0)
     {
       buff[len] = '\0';
-      printf_filtered ("Got packet \"%s\"\n", buff);
+      /* Don't use _filtered; we can't deal with a QUIT out of
+	 target_wait, and I think this might be called from there.  */
+      printf_unfiltered ("Got packet \"%s\"\n", buff);
     }
 
   /* We got the packet.  Send an acknowledgement.  */
@@ -791,7 +813,9 @@ mips_receive_packet (buff, throw_error, timeout)
   if (sr_get_debug () > 0)
     {
       ack[HDR_LENGTH + TRLR_LENGTH] = '\0';
-      printf_filtered ("Writing ack %d \"%s\"\n", mips_receive_seq,
+      /* Don't use _filtered; we can't deal with a QUIT out of
+	 target_wait, and I think this might be called from there.  */
+      printf_unfiltered ("Writing ack %d \"%s\"\n", mips_receive_seq,
 		       ack + 1);
     }
 
