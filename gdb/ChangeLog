@@ -1,3 +1,12 @@
+2002-06-19  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* parse.c (parse_fprintf): New function used to avoid calls to
+	fprintf in bison parser generated debug code.
+	* parser-defs.h: Declaration of new parse_fprintf function.
+	* ada-exp.y, c-exp.y, f-exp.y, jv-exp.y, m2-exp.y, p-exp.y:
+	Set YYDEBUG to 1 by default.
+	Set YYFPRINTF as parse_fprintf.
+
 2002-06-21  Michal Ludvig  <mludvig@suse.cz>
 
 	* dwarf2cfi.c (read_encoded_pointer): Don't handle pointer 
