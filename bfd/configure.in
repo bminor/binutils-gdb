@@ -201,6 +201,7 @@ do
     shcoff_vec)			tb="$tb coff-sh.o reloc16.o" ;;
     sparclynx_aout_vec)		tb="$tb sparclynx.o lynx-core.o aout32.o stab-syms.o" ;;
     sparclynx_coff_vec)		tb="$tb cf-sparclynx.o lynx-core.o stab-syms.o" ;;
+    sparccoff_vec)		tb="$tb coff-sparc.o" ;;
     sunos_big_vec)		tb="$tb sunos.o aout32.o stab-syms.o" ;;
     tekhex_vec)			tb="$tb tekhex.o" ;;
     we32kcoff_vec)		tb="$tb coff-we32k.o" ;;
