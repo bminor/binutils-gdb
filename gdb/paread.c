@@ -394,8 +394,8 @@ read_unwind_info (objfile)
 						  (bfd_byte *) buf);
 	  buf += 2;
 	  ui->table[index].region_end
-	    = ui->table[index].region_start + 4 * bfd_get_16 (objfile->obfd,
-							      (bfd_byte *) buf);
+	    = ui->table[index].region_start + 4 * 
+	      (bfd_get_16 (objfile->obfd, (bfd_byte *) buf) - 1);
 	  buf += 2;
 	}
 

@@ -1,3 +1,7 @@
+Fri Mar 25 10:14:03 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* paread.c (read_unwind_info): Fix off-by-one error.
+
 Fri Mar 25 08:33:28 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* main.c (complete_command): Deal with it if arg is NULL.
