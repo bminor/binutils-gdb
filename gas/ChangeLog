@@ -1,6 +1,25 @@
-start-sanitize-sky
 Fri Jul 24 09:13:46 1998  Doug Evans  <devans@canuck.cygnus.com>
 
+	* cgen.c: Include libiberty.h.
+	(cgen_md_apply_fix3): Update call to md_cgen_lookup_reloc.
+	(cgen_tc_gen_reloc): Use xmalloc, not bfd_alloc.
+	* cgen.h (cgen_md_apply_fix3,cgen_tc_gen_reloc): Declare.
+	(md_cgen_lookup_reloc)): Declare.
+	(md_cgen_record_fixup_exp): Declare.
+	* config/tc-m32r.h (md_pcrel_from_section): Declare.
+	(m32r_relax_frag): Declare.
+	(cgen_md_apply_fix3): Decls moved to cgen.h.
+	(cgen_record_fixup_exp,cgen_tc_gen_reloc): Ditto.
+	(m32r_cgen_record_fixup_exp): Delete decl.
+	* config/tc-m32r.c (m32r_cpu_desc): #if 0 out.
+	(assemble_nop): Delete.
+	(expand_debug_syms): Delete unused `exp'.
+	(md_cgen_lookup_reloc): Renamed from CGEN_SYM (lookup_reloc).
+	Add default case for -Wall.
+	(m32r_cgen_record_fixup_exp): Add default case for -Wall.
+	(md_atof): Delete unused wordP.
+
+start-sanitize-sky
 	* config/tc-dvp.c (assemble_vif): Make label at start of overlay
 	a local label.
 	(create_vuoverlay_section): Put __start_ label at start of overlay
