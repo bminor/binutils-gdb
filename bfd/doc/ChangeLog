@@ -1,3 +1,9 @@
+2005-02-13  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* Makefile.am: Use CFLAGS_FOR_BUILD and LDFLAGS_FOR_BUILD for
+	building chew.
+	* Makefile.in: Regenerate.
+
 2004-12-20  Ian Lance Taylor  <ian@c2microsystems.com>
 
 	* Makefile.am: Use $(SHELL) whenever we run move-if-change.
