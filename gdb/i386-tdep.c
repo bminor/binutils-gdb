@@ -1695,7 +1695,7 @@ i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 
 
 /* Get the ith function argument for the current function.  */
-CORE_ADDR
+static CORE_ADDR
 i386_fetch_pointer_argument (struct frame_info *frame, int argi, 
 			     struct type *type)
 {

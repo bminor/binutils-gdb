@@ -1,5 +1,22 @@
 2003-06-14  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_register_to_value): Make static.
+	(mips_value_to_register): Make static.
+	* i386-tdep.c (i386_fetch_pointer_argument): Make static.
+	* ia64-tdep.c (ia64_register_raw_size): Make static.
+	(ia64_register_virtual_size): Make static.
+	(ia64_register_byte): Make static.
+	* i387-tdep.c: Include "i387-tdep.h".
+	(print_387_control_word): Delete function.
+	(print_387_status_word): Delete function.
+	(print_387_status_bits): Delete function.
+	(print_387_control_bits): Delete function.
+	* Makefile.in (i387-tdep.o): Update dependencies.
+	* rdi-share/host.h (Fail): Declare.
+	* remote-rdi.c (Fail): Update to match declaration.
+
+2003-06-14  Andrew Cagney  <cagney@redhat.com>
+
 	* config/mips/embedl64.mt (TDEPFILES): Delete "remote-array.o".
 	* config/mips/embedl.mt (TDEPFILES): Delete "remote-array.o".
 	* config/mips/embed64.mt (TDEPFILES): Delete "remote-array.o".

@@ -1065,8 +1065,8 @@ _initialize_remote_rdi (void)
 
 /* A little dummy to make linking with the library succeed. */
 
-int
-Fail (void)
+void
+Fail (const char *ignored)
 {
-  return 0;
+  
 }

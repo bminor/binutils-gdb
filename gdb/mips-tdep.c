@@ -644,7 +644,7 @@ mips_convert_register_p (int regnum, struct type *type)
 	  && TYPE_LENGTH(type) == 8);
 }
 
-void
+static void
 mips_register_to_value (struct frame_info *frame, int regnum,
 			struct type *type, void *to)
 {
@@ -652,7 +652,7 @@ mips_register_to_value (struct frame_info *frame, int regnum,
   frame_read_register (frame, regnum + 1, (char *) to + 0);
 }
 
-void
+static void
 mips_value_to_register (struct frame_info *frame, int regnum,
 			struct type *type, const void *from)
 {

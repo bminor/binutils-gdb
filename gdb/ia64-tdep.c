@@ -235,13 +235,13 @@ ia64_register_name (int reg)
   return ia64_register_names[reg];
 }
 
-int
+static int
 ia64_register_raw_size (int reg)
 {
   return (IA64_FR0_REGNUM <= reg && reg <= IA64_FR127_REGNUM) ? 16 : 8;
 }
 
-int
+static int
 ia64_register_virtual_size (int reg)
 {
   return (IA64_FR0_REGNUM <= reg && reg <= IA64_FR127_REGNUM) ? 16 : 8;
@@ -297,7 +297,7 @@ ia64_register_virtual_type (int reg)
     return builtin_type_long;
 }
 
-int
+static int
 ia64_register_byte (int reg)
 {
   return (8 * reg) +
