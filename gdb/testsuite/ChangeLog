@@ -1,3 +1,7 @@
+2003-07-22  Andreas Schwab  <schwab@suse.de>
+
+	* gdb.asm/powerpc.inc (gdbasm_startup): Force alignment.
+
 2003-07-20  Andreas Schwab  <schwab@suse.de>
 
 	* gdb.base/selftest.exp (do_steps_and_nexts): Add more patterns
