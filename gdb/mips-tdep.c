@@ -661,13 +661,6 @@ static unsigned int heuristic_fence_post = 0;
 #define PROC_DESC_IS_DUMMY(proc) ((proc)->pdr.isym == _PROC_MAGIC_)
 #define SET_PROC_DESC_IS_DUMMY(proc) ((proc)->pdr.isym = _PROC_MAGIC_)
 
-struct linked_proc_info
-{
-  struct mips_extra_func_info info;
-  struct linked_proc_info *next;
-}
- *linked_proc_desc_table = NULL;
-
 /* Number of bytes of storage in the actual machine representation for
    register N.  NOTE: This defines the pseudo register type so need to
    rebuild the architecture vector.  */
@@ -2080,8 +2073,18 @@ mips_insn32_frame_cache (struct frame_info *next_frame, void **this_cache)
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
-  /* Get the mdebug proc descriptor.  */
-  proc_desc = find_proc_desc (frame_pc_unwind (next_frame), next_frame, 1);
+  /* Synthesize a proc descriptor.  */
+  {
+    const CORE_ADDR pc = frame_pc_unwind (next_frame);
+    CORE_ADDR start_addr;
+
+    find_pc_partial_function (pc, NULL, &start_addr, NULL);
+    if (start_addr == 0)
+      start_addr = heuristic_proc_start (pc);
+
+    proc_desc = heuristic_proc_desc (start_addr, pc, next_frame, 1);
+  }
+  
   if (proc_desc == NULL)
     /* I'm not sure how/whether this can happen.  Normally when we
        can't find a proc_desc, we "synthesize" one using
@@ -3186,18 +3189,6 @@ find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame, int cur_frame)
     }
   else
     {
-      /* Is linked_proc_desc_table really necessary?  It only seems to be used
-         by procedure call dummys.  However, the procedures being called ought
-         to have their own proc_descs, and even if they don't,
-         heuristic_proc_desc knows how to create them! */
-
-      struct linked_proc_info *link;
-
-      for (link = linked_proc_desc_table; link; link = link->next)
-	if (PROC_LOW_ADDR (&link->info) <= pc
-	    && PROC_HIGH_ADDR (&link->info) > pc)
-	  return &link->info;
-
       if (startaddr == 0)
 	startaddr = heuristic_proc_start (pc);
 

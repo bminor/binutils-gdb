@@ -1,5 +1,11 @@
 2004-09-01  Joel Brobecker  <brobecker@gnat.com>
 
+	* mips-tdep.c (linked_proc_desc_table): Delete, not used.
+	(mips_insn32_frame_cache): Inline call to find_proc_desc.
+	(find_proc_desc): Remove dead code.
+
+2004-09-01  Joel Brobecker  <brobecker@gnat.com>
+
 	* mips-tdep.c (mips_mdebug_frame_cache): Minor reformatting.
 
 2004-09-01  Jeff Johnston  <jjohnstn@redhat.com>
