@@ -1,6 +1,6 @@
 /* SPARC-specific support for 32-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003 Free Software Foundation, Inc.
+   2003, 2004 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -1267,12 +1267,12 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 	  break;
 
 	case R_SPARC_GNU_VTINHERIT:
-	  if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
 	    return FALSE;
 	  break;
 
 	case R_SPARC_GNU_VTENTRY:
-	  if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+	  if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
 	    return FALSE;
 	  break;
 
@@ -1592,17 +1592,6 @@ elf32_sparc_adjust_dynamic_symbol (info, h)
   return TRUE;
 }
 
-/* This is the condition under which finish_dynamic_symbol will be called
-   from elflink.h.  If elflink.h doesn't call our finish_dynamic_symbol
-   routine, we'll need to do something about initializing any .plt and .got
-   entries in relocate_section.  */
-#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, INFO, H)			\
-  ((DYN)								\
-   && ((INFO)->shared							\
-       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
-   && ((H)->dynindx != -1						\
-       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
-
 /* Allocate space in .plt, .got and associated reloc sections for
    dynamic relocs.  */
 
@@ -1636,11 +1625,11 @@ allocate_dynrelocs (h, inf)
       if (h->dynindx == -1
 	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
 	{
-	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
 	}
 
-      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
+      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info->shared, h))
 	{
 	  asection *s = htab->splt;
 
@@ -1705,7 +1694,7 @@ allocate_dynrelocs (h, inf)
       if (h->dynindx == -1
 	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
 	{
-	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
 	}
 
@@ -1724,7 +1713,7 @@ allocate_dynrelocs (h, inf)
 	htab->srelgot->_raw_size += sizeof (Elf32_External_Rela);
       else if (tls_type == GOT_TLS_GD)
 	htab->srelgot->_raw_size += 2 * sizeof (Elf32_External_Rela);
-      else if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h))
+      else if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h))
 	htab->srelgot->_raw_size += sizeof (Elf32_External_Rela);
     }
   else
@@ -1777,7 +1766,7 @@ allocate_dynrelocs (h, inf)
 	  if (h->dynindx == -1
 	      && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
 	    {
-	      if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 		return FALSE;
 	    }
 
@@ -2027,7 +2016,7 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (info->executable)
 	{
@@ -2215,10 +2204,10 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  bfd_boolean warned ATTRIBUTE_UNUSED;
 
-	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx,
-				   symtab_hdr, relocation, sec,
-				   unresolved_reloc, info,
-				   warned);
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation,
+				   unresolved_reloc, warned);
 	}
 
       switch (r_type)
@@ -2239,7 +2228,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	      BFD_ASSERT (off != (bfd_vma) -1);
 	      dyn = elf_hash_table (info)->dynamic_sections_created;
 
-	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h)
+	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
 		  || (info->shared
 		      && (info->symbolic
 			  || h->dynindx == -1

@@ -1,3 +1,37 @@
+2004-04-08  Alan Modra  <amodra@bigpond.net.au>
+
+	Apply from mainline.
+	2004-03-27  Alan Modra  <amodra@bigpond.net.au>
+	* emultempl/elf32.em: Update new bfd_elf_discard_info name.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/sh64elf.em: Likewise.
+
+	2004-03-25  Alan Modra  <amodra@bigpond.net.au>
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation): Update
+	size_dynamic_sections call.
+
+	2004-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+	* lexsup.c (parse_args): Don't set unresolved_syms_in_objects
+	or unresolved_syms_in_shared_libs for -Bdynamic and -Bstatic.
+
+	2004-03-18  Alan Modra  <amodra@bigpond.net.au>
+	* ld.texinfo: Add --as-needed doco.
+	* ldmain.c (as_needed): New global var.
+	* ldmain.h (as_needed): Declare.
+	* lexsup.c (option_values): Add OPTION_AS_NEEDED and
+	OPTION_NO_AS_NEEDED.
+	(ld_options): Likewise.
+	(parse_args): Handle them.
+	* ldlang.h (lang_input_statement_type): Add as_needed field.
+	* ldlang.c (new_afile): Set p->as_needed.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_load_symbols): New function.
+	(gld${EMULATION_NAME}_try_needed): Use bfd_elf_set_dyn_lib_class.
+	(ld_${EMULATION_NAME}_emulation): Set LDEMUL_RECOGNIZED_FILE entry.
+	* ldlang.c (open_input_bfds): Remove useless cast.
+	(lang_do_assignments_1): Likewise.
+	(lang_for_each_input_section): Delete.
+
 2004-03-23  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 51.

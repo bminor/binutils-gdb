@@ -599,29 +599,30 @@ struct bfd_link_needed_list
   const char *name;
 };
 
+enum dynamic_lib_link_class {
+  DYN_NORMAL = 0,
+  DYN_AS_NEEDED = 1,
+  DYN_DT_NEEDED = 2
+};
+
 extern bfd_boolean bfd_elf_record_link_assignment
   (bfd *, struct bfd_link_info *, const char *, bfd_boolean);
 extern struct bfd_link_needed_list *bfd_elf_get_needed_list
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean bfd_elf_get_bfd_needed_list
   (bfd *, struct bfd_link_needed_list **);
-extern bfd_boolean bfd_elf32_size_dynamic_sections
-  (bfd *, const char *, const char *, const char *, const char * const *,
-   struct bfd_link_info *, struct bfd_section **, struct bfd_elf_version_tree *);
-extern bfd_boolean bfd_elf64_size_dynamic_sections
+extern bfd_boolean bfd_elf_size_dynamic_sections
   (bfd *, const char *, const char *, const char *, const char * const *,
    struct bfd_link_info *, struct bfd_section **, struct bfd_elf_version_tree *);
 extern void bfd_elf_set_dt_needed_name
   (bfd *, const char *);
-extern void bfd_elf_set_dt_needed_soname
-  (bfd *, const char *);
 extern const char *bfd_elf_get_dt_soname
   (bfd *);
+extern void bfd_elf_set_dyn_lib_class
+  (bfd *, int);
 extern struct bfd_link_needed_list *bfd_elf_get_runpath_list
   (bfd *, struct bfd_link_info *);
-extern bfd_boolean bfd_elf32_discard_info
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean bfd_elf64_discard_info
+extern bfd_boolean bfd_elf_discard_info
   (bfd *, struct bfd_link_info *);
 
 /* Return an upper bound on the number of bytes required to store a

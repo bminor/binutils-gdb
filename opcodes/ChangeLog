@@ -1,6 +1,25 @@
+2004-04-08  Alan Modra  <amodra@bigpond.net.au>
+
+	Apply from mainline.
+	2004-02-25  Aldy Hernandez  <aldyh@redhat.com>
+	* ppc-opc.c (powerpc_opcodes): Change mask for dcbt and dcbtst.
+
+	2004-02-20  Aldy Hernandez  <aldyh@redhat.com>
+	* ppc-opc.c (powerpc_opcodes): Move mfmcsrr0 before mfdc_dat.
+
+	2004-02-20  Aldy Hernandez  <aldyh@redhat.com>
+	* ppc-opc.c (powerpc_opcodes): Add m*ivor35.
+
+	2004-02-20  Aldy Hernandez  <aldyh@redhat.com>
+	* ppc-opc.c (powerpc_opcodes): Add mfivor32, mfivor33, mfivor34,
+	mtivor32, mtivor33, mtivor34.
+
+	2004-02-19  Aldy Hernandez  <aldyh@redhat.com>
+	* ppc-opc.c (powerpc_opcodes): Add mfmcar.
+
 2004-03-15  Aldy Hernandez  <aldyh@redhat.com>
  
-        * ppc-opc.c (powerpc_opcodes): Add BOOKE versions of mfsprg.
+	* ppc-opc.c (powerpc_opcodes): Add BOOKE versions of mfsprg.
 
 2004-03-16  Alan Modra  <amodra@bigpond.net.au>
 

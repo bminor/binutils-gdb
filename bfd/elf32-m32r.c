@@ -51,7 +51,7 @@ bfd_boolean _bfd_m32r_elf_section_from_bfd_section
 void _bfd_m32r_elf_symbol_processing
   PARAMS ((bfd *, asymbol *));
 static bfd_boolean m32r_elf_add_symbol_hook
-  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
 static bfd_boolean m32r_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
@@ -1391,7 +1391,7 @@ static bfd_boolean
 m32r_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;
      struct bfd_link_info *info;
-     const Elf_Internal_Sym *sym;
+     Elf_Internal_Sym *sym;
      const char **namep;
      flagword *flagsp ATTRIBUTE_UNUSED;
      asection **secp;
@@ -1742,7 +1742,7 @@ m32r_elf_create_dynamic_sections (abfd, info)
       h->type = STT_OBJECT;
 
       if (info->shared
-          && ! _bfd_elf_link_record_dynamic_symbol (info, h))
+          && ! bfd_elf_link_record_dynamic_symbol (info, h))
         return FALSE;
     }
 
@@ -2049,17 +2049,6 @@ printf("m32r_elf_adjust_dynamic_symbol()\n");
   return TRUE;
 }
 
-/* This is the condition under which finish_dynamic_symbol will be called
-   from elflink.h.  If elflink.h doesn't call our finish_dynamic_symbol
-   routine, we'll need to do something about initializing any .plt and .got
-   entries in relocate_section.  */
-#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, INFO, H)			\
-  ((DYN)								\
-   && ((INFO)->shared							\
-       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
-   && ((H)->dynindx != -1						\
-       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
-
 /* Allocate space in .plt, .got and associated reloc sections for
    dynamic relocs.  */
 
@@ -2105,11 +2094,11 @@ allocate_dynrelocs (h, inf)
       if (h->dynindx == -1
           && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
         {
-          if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+          if (! bfd_elf_link_record_dynamic_symbol (info, h))
             return FALSE;
         }
 
-      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
+      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info->shared, h))
         {
           asection *s = htab->splt;
 
@@ -2164,7 +2153,7 @@ allocate_dynrelocs (h, inf)
       if (h->dynindx == -1
           && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
         {
-          if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+          if (! bfd_elf_link_record_dynamic_symbol (info, h))
             return FALSE;
         }
 
@@ -2173,7 +2162,7 @@ allocate_dynrelocs (h, inf)
       h->got.offset = s->_raw_size;
       s->_raw_size += 4;
       dyn = htab->root.dynamic_sections_created;
-      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h))
+      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h))
         htab->srelgot->_raw_size += sizeof (Elf32_External_Rela);
     }
   else
@@ -2224,7 +2213,7 @@ allocate_dynrelocs (h, inf)
           if (h->dynindx == -1
               && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
             {
-              if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+              if (! bfd_elf_link_record_dynamic_symbol (info, h))
                 return FALSE;
             }
 
@@ -2442,7 +2431,7 @@ printf("m32r_elf_size_dynamic_sections()\n");
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (! info->shared)
 	{
@@ -2723,7 +2712,8 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
                            || r_type == R_M32R_GOT16_HI_ULO
                            || r_type == R_M32R_GOT16_HI_SLO
                            || r_type == R_M32R_GOT16_LO)
-                          && WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h)
+                          && WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn,
+							      info->shared, h)
                           && (! info->shared
                               || (! info->symbolic && h->dynindx != -1)
                               || (h->elf_link_hash_flags
@@ -2773,8 +2763,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		}
 	      else if (h->root.type == bfd_link_hash_undefweak)
 		relocation = 0;
-              else if (info->shared
-                       && (!info->symbolic)
+              else if (info->unresolved_syms_in_objects == RM_IGNORE
                        && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
                 relocation = 0;
 	      else
@@ -2782,7 +2771,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  if (! ((*info->callbacks->undefined_symbol)
 			 (info, h->root.root.string, input_bfd,
 			  input_section, offset,
-                          (!info->shared
+                          (info->unresolved_syms_in_objects == RM_GENERATE_ERROR
                            || ELF_ST_VISIBILITY (h->other)))))
 		    return FALSE;
 		  relocation = 0;
@@ -2846,7 +2835,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
                   BFD_ASSERT (off != (bfd_vma) -1);
 
                   dyn = htab->root.dynamic_sections_created;
-                  if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h)
+                  if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
                       || (info->shared
                           && (info->symbolic
                               || h->dynindx == -1
@@ -4657,18 +4646,18 @@ m32r_elf_check_relocs (abfd, info, sec, relocs)
            Reconstruct it for later use during GC.  */
         case R_M32R_RELA_GNU_VTINHERIT:
         case R_M32R_GNU_VTINHERIT:
-          if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+          if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
             return FALSE;
           break;
 
         /* This relocation describes which C++ vtable entries are actually
            used.  Record for later use during GC.  */
         case R_M32R_GNU_VTENTRY:
-          if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_offset))
+          if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_offset))
             return FALSE;
           break;
         case R_M32R_RELA_GNU_VTENTRY:
-          if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+          if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
             return FALSE;
           break;
         }

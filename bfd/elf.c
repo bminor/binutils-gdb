@@ -1479,8 +1479,7 @@ _bfd_elf_link_hash_table_create (bfd *abfd)
 
 /* This is a hook for the ELF emulation code in the generic linker to
    tell the backend linker what file name to use for the DT_NEEDED
-   entry for a dynamic object.  The generic linker passes name as an
-   empty string to indicate that no DT_NEEDED entry should be made.  */
+   entry for a dynamic object.  */
 
 void
 bfd_elf_set_dt_needed_name (bfd *abfd, const char *name)
@@ -1491,11 +1490,11 @@ bfd_elf_set_dt_needed_name (bfd *abfd, const char *name)
 }
 
 void
-bfd_elf_set_dt_needed_soname (bfd *abfd, const char *name)
+bfd_elf_set_dyn_lib_class (bfd *abfd, int lib_class)
 {
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
       && bfd_get_format (abfd) == bfd_object)
-    elf_dt_soname (abfd) = name;
+    elf_dyn_lib_class (abfd) = lib_class;
 }
 
 /* Get the list of DT_NEEDED entries for a link.  This is a hook for
@@ -3187,6 +3186,7 @@ map_sections_to_segments (bfd *abfd)
   struct elf_segment_map **pm;
   struct elf_segment_map *m;
   asection *last_hdr;
+  bfd_vma last_size;
   unsigned int phdr_index;
   bfd_vma maxpagesize;
   asection **hdrpp;
@@ -3266,6 +3266,7 @@ map_sections_to_segments (bfd *abfd)
      segment when the start of the second section can be placed within
      a few bytes of the end of the first section.  */
   last_hdr = NULL;
+  last_size = 0;
   phdr_index = 0;
   maxpagesize = get_elf_backend_data (abfd)->maxpagesize;
   writable = FALSE;
@@ -3314,18 +3315,19 @@ map_sections_to_segments (bfd *abfd)
              segment.  */
 	  new_segment = TRUE;
 	}
-      else if (BFD_ALIGN (last_hdr->lma + last_hdr->_raw_size, maxpagesize)
+      else if (BFD_ALIGN (last_hdr->lma + last_size, maxpagesize)
 	       < BFD_ALIGN (hdr->lma, maxpagesize))
 	{
 	  /* If putting this section in this segment would force us to
              skip a page in the segment, then we need a new segment.  */
 	  new_segment = TRUE;
 	}
-      else if ((last_hdr->flags & SEC_LOAD) == 0
-	       && (hdr->flags & SEC_LOAD) != 0)
+      else if ((last_hdr->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) == 0
+	       && (hdr->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) != 0)
 	{
 	  /* We don't want to put a loadable section after a
-             nonloadable section in the same segment.  */
+             nonloadable section in the same segment.
+             Consider .tbss sections as loadable for this purpose.  */
 	  new_segment = TRUE;
 	}
       else if ((abfd->flags & D_PAGED) == 0)
@@ -3337,7 +3339,7 @@ map_sections_to_segments (bfd *abfd)
 	}
       else if (! writable
 	       && (hdr->flags & SEC_READONLY) == 0
-	       && (((last_hdr->lma + last_hdr->_raw_size - 1)
+	       && (((last_hdr->lma + last_size - 1)
 		    & ~(maxpagesize - 1))
 		   != (hdr->lma & ~(maxpagesize - 1))))
 	{
@@ -3360,9 +3362,12 @@ map_sections_to_segments (bfd *abfd)
 	{
 	  if ((hdr->flags & SEC_READONLY) == 0)
 	    writable = TRUE;
-	  /* Ignore .tbss section for segment layout purposes.  */
+	  last_hdr = hdr;
+	  /* .tbss sections effectively have zero size.  */
 	  if ((hdr->flags & (SEC_THREAD_LOCAL | SEC_LOAD)) != SEC_THREAD_LOCAL)
-	    last_hdr = hdr;
+	    last_size = hdr->_raw_size;
+	  else
+	    last_size = 0;
 	  continue;
 	}
 
@@ -3382,6 +3387,11 @@ map_sections_to_segments (bfd *abfd)
 	writable = FALSE;
 
       last_hdr = hdr;
+      /* .tbss sections effectively have zero size.  */
+      if ((hdr->flags & (SEC_THREAD_LOCAL | SEC_LOAD)) != SEC_THREAD_LOCAL)
+	last_size = hdr->_raw_size;
+      else
+	last_size = 0;
       phdr_index = i;
       phdr_in_segment = FALSE;
     }
@@ -4255,9 +4265,7 @@ assign_file_positions_except_relocs (bfd *abfd,
 	      off = _bfd_elf_assign_file_position_for_section (hdr, off,
 							       FALSE);
 	    }
-	  else if (hdr->sh_type == SHT_REL
-		   || hdr->sh_type == SHT_RELA
-		   || hdr == i_shdrpp[tdata->symtab_section]
+	  else if (hdr == i_shdrpp[tdata->symtab_section]
 		   || hdr == i_shdrpp[tdata->symtab_shndx_section]
 		   || hdr == i_shdrpp[tdata->strtab_section])
 	    hdr->sh_offset = -1;

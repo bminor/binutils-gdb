@@ -17,6 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+if [istarget "rs6000-*-aix*"] {
+    # Target maps .text and .data to other sections.
+    return
+}
+
 set testname "ALIGN"
 
 if ![ld_assemble $as $srcdir/$subdir/align.s tmpdir/align.o] {

@@ -1,3 +1,317 @@
+2004-04-08  Alan Modra  <amodra@bigpond.net.au>
+
+	Apply from mainline.
+	2004-03-30  Jakub Jelinek  <jakub@redhat.com>
+	* elf.c (map_sections_to_segments): Fix handling of .tbss.
+
+	2004-03-27  Alan Modra  <amodra@bigpond.net.au>
+	* Makefile.am: Remove all mention of elflink.h.
+	* Makefile.in: Regenerate.
+	* bfd-in.h (bfd_elf_discard_info): Declare.
+	(bfd_elf32_discard_info, bfd_elf64_discard_info): Delete.
+	* bfd-in2.h: Regenerate.
+	* elf-bfd.h (bfd_elf32_print_symbol, bfd_elf64_print_symbol,
+	bfd_elf32_link_record_dynamic_symbol,
+	bfd_elf64_link_record_dynamic_symbol,
+	_bfd_elf_link_record_dynamic_symbol, bfd_elf32_bfd_final_link,
+	bfd_elf64_bfd_final_link, elf_link_record_local_dynamic_symbol,
+	_bfd_elf32_link_record_local_dynamic_symbol,
+	_bfd_elf64_link_record_local_dynamic_symbol,
+	_bfd_elf32_gc_sections, _bfd_elf32_gc_common_finalize_got_offsets,
+	_bfd_elf32_gc_common_final_link, _bfd_elf64_gc_common_final_link,
+	_bfd_elf32_gc_record_vtinherit, _bfd_elf32_gc_record_vtentry,
+	_bfd_elf64_gc_sections, _bfd_elf64_gc_common_finalize_got_offsets,
+	_bfd_elf64_gc_record_vtinherit, _bfd_elf64_gc_record_vtentry,
+	_bfd_elf32_reloc_symbol_deleted_p,
+	_bfd_elf64_reloc_symbol_deleted_p): Delete.
+	(bfd_elf_link_record_dynamic_symbol,
+	bfd_elf_link_record_local_dynamic_symbol,
+	bfd_elf_final_link, bfd_elf_gc_sections,
+	bfd_elf_gc_record_vtinherit, bfd_elf_gc_record_vtentry,
+	bfd_elf_gc_common_finalize_got_offsets, bfd_elf_gc_common_final_link,
+	bfd_elf_reloc_symbol_deleted_p): Declare.
+	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): Define.
+	* elf32-arm.h: Update for changed function names.  Remove local
+	WILL_CALL_FINISH_DYNAMIC_SECTION define.
+	* elf-hppa.h, elf-m10300.c, elf32-cris.c, elf32-d10v.c, elf32-dlx.c,
+	* elf32-fr30.c, elf32-frv.c, elf32-h8300.c, elf32-hppa.c, elf32-i386.c,
+	* elf32-iq2000.c, elf32-m32r.c, elf32-m68hc1x.c, elf32-m68k.c,
+	* elf32-mcore.c, elf32-openrisc.c, elf32-ppc.c, elf32-s390.c,
+	* elf32-sh.c, elf32-sparc.c, elf32-v850.c, elf32-vax.c,
+	* elf32-xstormy16.c, elf32-xtensa.c, elf64-alpha.c, elf64-hppa.c,
+	* elf64-mmix.c, elf64-ppc.c, elf64-s390.c, elf64-sh64.c, elf64-sparc.c,
+	* elf64-x86-64.c, elfxx-ia64.c, elfxx-mips.c, elfxx-target.h: Likewise.
+	* elfxx-target.h (bfd_elfNN_bfd_final_link): Define.
+	(bfd_elfNN_print_symbol): Define.
+	* elfcode.h: Don't include elflink.h.
+	(elf_bfd_discard_info, elf_reloc_symbol_deleted_p,
+	elf_link_record_dynamic_symbol, elf_bfd_final_link, elf_gc_sections,
+	elf_gc_common_finalize_got_offsets, elf_gc_common_final_link,
+	elf_gc_record_vtinherit, elf_gc_record_vtentry,
+	elf_link_record_local_dynamic_symbol): Don't define.
+	* elflink.c: Update for changed function names.  Move elflink.h
+	code here.
+	* elflink.h: Delete file.
+	* po/SRC-POTFILES.in: Regenerate.
+	* po/bfd.pot: Regenerate.
+
+	2004-03-27  Alan Modra  <amodra@bigpond.net.au>
+	* elf64-mmix.c (mmix_elf_relocate_section): Restore code setting
+	"name" for global syms accidentally removed in 2004-03-20 change.
+
+	2004-03-27  Alan Modra  <amodra@bigpond.net.au>
+	* elf-bfd.h (struct elf_reloc_cookie): Add r_sym_shift field.
+	* elflink.h: Replace all occurrences of sizeof (Elf_External_*)
+	where Elf_External_* is different for 64 and 32 bit, with
+	corresponding elf_size_info field.
+	(struct elf_final_link_info): Use "bfd_byte *" instead
+	of "Elf_External_Sym *" for external_syms and symbuf.
+	(elf_link_adjust_relocs): Set up r_type_mask and r_sym_shift local
+	vars and use instead of ELF_R_INFO and ELF_R_TYPE macros.
+	(struct elf_link_sort_rela): Add "sym_mask" alias for "offset".
+	(elf_link_sort_cmp1): Use sym_mask field instead of ELF_R_SYM.
+	(elf_link_sort_cmp2): Adjust.
+	(elf_link_sort_relocs): Set up r_sym_mask local var instead of
+	using ELF_R_SYM macro.  Set u.sym_mask.
+	(elf_bfd_final_link): Call _bfd_elf_stringtab_init instead of macro
+	version, elf_stringtab_init.  Ditto for bfd_section_from_elf_index
+	vs. section_from_elf_index.  Adjust Elf_External_Sym pointer
+	arithmetic.  Pass bed to elf_link_flush_output_syms.  Adjust
+	Elf_External_Dyn pointer arithmentic.  Use bed swap_dyn_in and
+	swap_syn_out functions.  Rearrange dyn swap in/out switch.
+	(elf_link_output_sym): Adjust Elf_External_Sym pointer arithmentic.
+	Pass bed to elf_link_flush_output_syms.  Use bed swap_symbol_out.
+	(elf_link_flush_output_syms): Add elf_backend_data arg.
+	(elf_link_check_versioned_symbol): Likewise.
+	(elf_link_output_extsym): Pass bed to elf_link_check_versioned_symbol.
+	Adjust Elf_External_Sym pointer arithmetic.  Use bed swap_symbol_out.
+	(elf_link_input_bfd): Use bfd_section_from_elf_index.  Set up
+	r_type_mask and r_sym_shift local vars and use instead of ELF_R_SYM,
+	ELF_R_TYPE and ELF_R_INFO macros.
+	(elf_reloc_link_order): Select ELF32_R_INFO or ELF64_R_INFO invocation
+	based on size rather than using ELF_R_INFO.
+	(elf_gc_mark): Set up r_sym_shift local var and use instead of
+	ELF_R_SYM macro.
+	(struct alloc_got_off_arg): New.
+	(elf_gc_common_finalize_got_offsets): Use elf_size_info instead of
+	ARCH_SIZE.  Pass get entry size down to elf_gc_allocate_got_offsets.
+	(elf_gc_allocate_got_offsets): Adjust.
+	(elf_reloc_symbol_deleted_p): Usee cookie.r_sym_shift instead of
+	ELF_R_SYM.  Use bfd_section_from_elf_index.
+	(elf_bfd_discard_info): Set cookie.r_sym_shift.
+	* elfcode.h (elf_stringtab_init, section_from_elf_index): Delete.
+	(elf_slurp_symbol_table): Use bfd_section_from_elf_index.
+
+	2004-03-26  Alan Modra  <amodra@bigpond.net.au>
+	* elf64-ppc.c (elf_backend_add_symbol_hook): Define.
+	(ppc64_elf_add_symbol_hook): New function.
+	* elf-bfd.h (struct elf_backend_data <elf_add_symbol_hook>): Remove
+	const from Elf_Internal_Sym param.
+	* elflink.c (elf_link_add_object_symbols): Adjust.
+	* elf-hppa.h (elf_hppa_add_symbol_hook): Adjust.
+	* elf32-frv.c (elf32_frv_add_symbol_hook): Adjust.
+	* elf32-i370.c (elf_backend_add_symbol_hook): Adjust.
+	* elf32-m32r.c (m32r_elf_add_symbol_hook): Adjust.
+	* elf32-m68hc1x.c (elf32_m68hc11_add_symbol_hook): Adjust.
+	* elf32-m68hc1x.h (elf32_m68hc11_add_symbol_hook): Adjust.
+	* elf32-ppc.c (ppc_elf_add_symbol_hook): Adjust.
+	* elf32-sh64.c (sh64_elf_add_symbol_hook): Adjust.
+	* elf32-v850.c (v850_elf_add_symbol_hook): Adjust.
+	* elf64-alpha.c (elf64_alpha_add_symbol_hook): Adjust.
+	* elf64-mmix.c (mmix_elf_add_symbol_hook): Adjust.
+	* elf64-sh64.c (sh64_elf64_add_symbol_hook): Adjust.
+	* elf64-sparc.c (sparc64_elf_add_symbol_hook): Adjust.
+	* elfxx-ia64.c (elfNN_ia64_add_symbol_hook): Adjust.
+	* elfxx-mips.c (_bfd_mips_elf_add_symbol_hook): Adjust.
+	* elfxx-mips.h (_bfd_mips_elf_add_symbol_hook): Adjust.
+
+	2004-03-26  Alan Modra  <amodra@bigpond.net.au>
+	* elfxx-target.h (bfd_elfNN_bfd_link_add_symbols): Define.
+	* elf-bfd.h (_bfd_elf_link_add_archive_symbols): Delete.
+	(_bfd_elf_sort_symbol, _bfd_elf_add_dt_needed_tag): Delete.
+	(_bfd_elf_finalize_dynstr, bfd_elf32_bfd_link_add_symbols): Delete.
+	(bfd_elf64_bfd_link_add_symbols): Delete.
+	(bfd_elf_link_add_symbols): Declare.
+	* elfcode.h (elf_bfd_link_add_symbols): Delete.
+	* elflink.c: Include safe-ctype.h.
+	(elf_add_dt_needed_tag): Rename from _bfd_elf_add_dt_needed_tag,
+	make static.
+	(elf_sort_symbol): Rename from _bfd_elf_sort_symbol, make static.
+	(elf_finalize_dynstr): Rename from _bfd_elf_finalize_dynstr, make
+	static.
+	(elf_link_add_archive_symbols): Rename from
+	_bfd_elf_link_add_archive_symbols, make static.
+	(elf_link_add_object_symbols): New function.  Corresponding
+	elflink.h function converted to use elf_size_info.
+	(bfd_elf_link_add_symbols): Likewise.
+	(bfd_elf_size_dynamic_sections): Adjust.
+	* elflink.h (elf_bfd_link_add_symbols): Delete.
+	(elf_link_add_object_symbols): Delete.
+	* elf32-gen.c (elf32_generic_link_add_symbols): Call
+	bfd_elf_link_add_symbols.
+	* elf64-gen.c (elf64_generic_link_add_symbols): Likewise.
+
+	2004-03-25  Alan Modra  <amodra@bigpond.net.au>
+	* elflink.h (elf_link_add_object_symbols): Add DT_NEEDED for as-needed
+	and chained shared libs only if dynsym.  Clear dynsym on forced-local.
+	* elf-bfd.h (_bfd_elf_add_dynamic_entry): Declare.
+	(bfd_elf32_add_dynamic_entry, bfd_elf64_add_dynamic_entry): Delete.
+	(_bfd_elf_add_dt_needed_tag): Declare.
+	(_bfd_elf_sort_symbol): Declare.
+	(_bfd_elf_finalize_dynstr): Declare.
+	(RELOC_FOR_GLOBAL_SYM): Formatting.
+	* elfcode.h (elf_add_dynamic_entry): Delete.
+	* elflink.c (_bfd_elf_add_dynamic_entry): New function.  Corresponding
+	elflink.h function converted to use elf_size_info.
+	(_bfd_elf_add_dt_needed_tag): Likewise.
+	(_bfd_elf_sort_symbol): Likewise.
+	(_bfd_elf_finalize_dynstr): Likewise.
+	(compute_bucket_count): Likewise.
+	(bfd_elf_size_dynamic_sections): Likewise.  Check result of
+	_bfd_elf_strtab_add before calling _bfd_elf_strtab_addref.
+	(elf_adjust_dynstr_offsets, elf_collect_hash_codes): Moved from..
+	* elflink.h: ..here.
+	(sort_symbol, add_dt_needed_tag): Delete.
+	(elf_add_dynamic_entry, elf_finalize_dynstr): Delete.
+	(compute_bucket_count, NAME(bfd_elf,size_dynamic_sections)): Delete.
+	Update all users.
+	* elf32-arm.h (add_dynamic_entry): Update.  Remove casts.
+	* elf32-cris.c (add_dynamic_entry): Likewise.
+	* elf32-hppa.c (add_dynamic_entry): Likewise.
+	* elf32-i370.c (add_dynamic_entry): Likewise.
+	* elf32-i386.c (add_dynamic_entry): Likewise.
+	* elf32-m32r.c (add_dynamic_entry): Likewise.
+	* elf32-m68k.c (add_dynamic_entry): Likewise.
+	* elf32-ppc.c (add_dynamic_entry): Likewise.
+	* elf32-s390.c (add_dynamic_entry): Likewise.
+	* elf32-sh.c (add_dynamic_entry): Likewise.
+	* elf32-sparc.c (add_dynamic_entry): Likewise.
+	* elf32-vax.c (add_dynamic_entry): Likewise.
+	* elf32-xtensa.c (add_dynamic_entry): Likewise.
+	* elf64-alpha.c (add_dynamic_entry): Likewise.
+	* elf64-hppa.c (add_dynamic_entry): Likewise.
+	* elf64-ppc.c (add_dynamic_entry): Likewise.
+	* elf64-s390.c (add_dynamic_entry): Likewise.
+	* elf64-sparc.c (add_dynamic_entry): Likewise.
+	* elf64-x86-64.c (add_dynamic_entry): Likewise.
+	* elfxx-ia64.c (add_dynamic_entry): Likewise.
+	* elfxx-mips.c (MIPS_ELF_ADD_DYNAMIC_ENTRY): Likewise.
+	* elf-m10300.c (_bfd_mn10300_elf_size_dynamic_sections): Likewise.
+	* elf32-frv.c (elf32_frv_size_dynamic_sections): Likewise.
+	* elf64-sh64.c (sh64_elf64_size_dynamic_sections): Likewise.
+
+	2004-03-22  Alan Modra  <amodra@bigpond.net.au>
+	* elf-bfd.h (RELOC_FOR_GLOBAL_SYMBOL): Add input_bfd, input_section
+	and rel args.  Group input and output args.  Wrap to 80 columns.
+	* elf-m10200.c, elf-m10300.c, elf32-arm.h, elf32-avr.c,
+	elf32-cris.c, elf32-d10v.c, elf32-fr30.c, elf32-h8300.c,
+	elf32-hppa.c, elf32-i386.c, elf32-i860.c, elf32-ip2k.c,
+	elf32-iq2000.c, elf32-m68hc1x.c, elf32-m68k.c, elf32-mcore.c,
+	elf32-msp430.c, elf32-openrisc.c, elf32-ppc.c, elf32-s390.c,
+	elf32-sparc.c, elf32-v850.c, elf32-vax.c, elf32-xstormy16.c,
+	elf32-xtensa.c, elf64-alpha.c, elf64-mmix.c, elf64-ppc.c,
+	elf64-s390.c, elf64-sparc.c, elf64-x86-64.c, elfxx-ia64.c: Update
+	RELOC_FOR_GLOBAL_SYMBOL invocation.
+
+	2004-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+	* elf-bfd.h (RELOC_FOR_GLOBAL_SYMBOL): Report error if
+	unresolved symbols in objects aren't allowed.
+	* elf-hppa.h (elf_hppa_relocate_section): Properly handle
+	unresolved symbols.
+	(elf_hppa_remark_useless_dynamic_symbols): Likewise.
+	(elf_hppa_unmark_useless_dynamic_symbols):
+	* elf32-frv.c (elf32_frv_relocate_section): Likewise.
+	* elf32-hppa.c (elf32_hppa_size_stubs): Likewise.
+	(elf32_hppa_relocate_section): Likewise.
+	* elf32-i370.c (i370_elf_relocate_section): Likewise.
+	* elf32-m32r.c (m32r_elf_relocate_section): Likewise.
+	* elf32-sh.c (sh_elf_relocate_section): Likewise.
+	* elf64-sh64.c (sh_elf64_relocate_section): Likewise.
+	* elfxx-mips.c (mips_elf_calculate_relocation): Likewise.
+	* elf-m10200.c (mn10200_elf_relocate_section): Use
+	RELOC_FOR_GLOBAL_SYMBOL.
+	* elf32-avr.c (elf32_avr_relocate_section): Likewise.
+	* elf32-d10v.c (elf32_d10v_relocate_section): Likewise.
+	* elf32-fr30.c (fr30_elf_relocate_section): Likewise.
+	* elf32-h8300.c (elf32_h8_relocate_section): Likewise.
+	* elf32-i860.c (elf32_i860_relocate_section): Likewise.
+	* elf32-m68hc1x.c (m68hc11_get_relocation_value): Likewise.
+	* elf32-mcore.c (mcore_elf_relocate_section): Likewise.
+	* elf32-msp430.c (elf32_msp430_relocate_section): Likewise.
+	* elf32-openrisc.c (openrisc_elf_relocate_section): Likewise.
+	* elf32-v850.c (v850_elf_relocate_section): Likewise.
+	* elf32-xstormy16.c (xstormy16_elf_relocate_section): Likewise.
+	* elf64-mmix.c (mmix_elf_relocate_section): Likewise.
+
+	2004-03-19  Alan Modra  <amodra@bigpond.net.au>
+		    H.J. Lu  <hongjiu.lu@intel.com>
+	* elflink.c (_bfd_elf_merge_symbol): Revert last change.  Move
+	type and size change code to where it was previously.  Remove
+	dt_needed param.  Treat old weak syms as strong if new sym is
+	from a shared lib, even when old sym is from another shared
+	lib.  Remove unnecessary tests of oldweak and newweak.  Correct
+	comments.
+	(_bfd_elf_add_default_symbol): Remove dt_needed param.  Update
+	_bfd_elf_merge_symbol calls.
+	* elflink.h (elf_link_add_object_symbols): Update calls.  Remove
+	dt_needed local var.  Update comments.
+	* elf-bfd.h (_bfd_elf_merge_symbol): Update prototype.
+	(_bfd_elf_add_default_symbol): Likewise.
+	* elflink.c (_bfd_elf_merge_symbol): Reinstate code to handle
+	strong syms in one shared object overriding weak syms in another.
+
+	2004-03-18  Alan Modra  <amodra@bigpond.net.au>
+	* elf-bfd.h (struct elf_obj_tdata): Delete dt_soname field.  Add
+	dyn_lib_class field.  Rearrange for better packing.
+	(elf_dt_soname): Delete.
+	(elf_dyn_lib_class): Define.
+	* elf.c (bfd_elf_set_dt_needed_name): Update comment.
+	(bfd_elf_set_dt_needed_soname): Delete.
+	(bfd_elf_set_dyn_lib_class): New function.
+	* elflink.h (add_dt_needed_tag): New function.  Split out from..
+	(elf_link_add_object_symbols): ..here.  Rename "name" to "soname".
+	Use elf_dyn_lib_class to set dt_needed and add_needed.  Move fallback
+	initialization of soname.
+	(elf_link_check_versioned_symbol): Test elf_dyn_lib_class instead of
+	elf_dt_soname.
+	* bfd-in.h (enum dynamic_lib_link_class): New.
+	(bfd_elf_set_dt_needed_soname): Delete.
+	(bfd_elf_set_dyn_lib_class): Declare.
+	* bfd-in2.h: Regenerate.
+	* elflink.c (_bfd_elf_merge_symbol): Rewrite weak symbol handling.
+	(_bfd_elf_add_default_symbol): Remove indirect BFD_ASSERTs.
+	* elflink.h (elf_link_add_object_symbols): Don't clear dt_needed in
+	symbol loop.  Instead use add_needed to flag tag as written.
+
+	2004-03-03  Alexandre Oliva  <aoliva@redhat.com>
+	* elflink.c (bfd_elf_record_link_assignment): Mark undefweak and
+	undefined symbols as hash_new.
+
+	2004-02-28  H.J. Lu  <hongjiu.lu@intel.com>
+	* elf-bfd.h (_bfd_elf_link_add_archive_symbols): New prototype.
+	* elflink.h (is_global_data_symbol_definition): Moved to
+	elflink.c.
+	(elf_link_is_defined_archive_symbol): Likewise.
+	(elf_link_add_archive_symbols): Likewise. Renamed to
+	_bfd_elf_link_add_archive_symbols.
+	* elflink.c (elf_link_is_defined_archive_symbol): Get the size
+	of ELF symbol table entry from backend.
+	(_bfd_elf_link_add_archive_symbols): Call bfd_link_add_symbols
+	instead of elf_link_add_object_symbols.
+
+	2004-02-27  H.J. Lu  <hongjiu.lu@intel.com>
+	* elflink.h (sort_symbol): New.
+	(elf_link_add_object_symbols): Use a sorted symbol array for
+	weakdef.
+
+	2004-02-23  Jakub Jelinek  <jakub@redhat.com>
+	* elflink.h (size_dynamic_sections): If not adding DT_FLAGS and
+	DF_BIND_NOW is set in info->flags, create DT_BIND_NOW dynamic entry.
+
+	2004-02-21  H.J. Lu  <hongjiu.lu@intel.com>
+	* elflink.c (_bfd_elf_merge_symbol): Properly handle undefined
+	symbols with non-default visibility.
+
 2004-03-22  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (elf_xtensa_check_relocs): Remove code to read

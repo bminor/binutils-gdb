@@ -439,28 +439,12 @@ elf32_h8_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	}
       else
 	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	  if (h->root.type == bfd_link_hash_defined
-	      || h->root.type == bfd_link_hash_defweak)
-	    {
-	      sec = h->root.u.def.section;
-	      relocation = (h->root.u.def.value
-			    + sec->output_section->vma
-			    + sec->output_offset);
-	    }
-	  else if (h->root.type == bfd_link_hash_undefweak)
-	    relocation = 0;
-	  else
-	    {
-	      if (! ((*info->callbacks->undefined_symbol)
-		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset, TRUE)))
-		return FALSE;
-	      relocation = 0;
-	    }
+	  bfd_boolean unresolved_reloc, warned;
+
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation,
+				   unresolved_reloc, warned);
 	}
 
       r = elf32_h8_final_link_relocate (r_type, input_bfd, output_bfd,
@@ -1574,7 +1558,7 @@ elf32_h8_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* ??? when elf_backend_relocate_section is not defined, elf32-target.h
    defaults to using _bfd_generic_link_hash_table_create, but
-   elflink.h:bfd_elf32_size_dynamic_sections uses
+   bfd_elf_size_dynamic_sections uses
    dynobj = elf_hash_table (info)->dynobj;
    and thus requires an elf hash table.  */
 #define bfd_elf32_bfd_link_hash_table_create _bfd_elf_link_hash_table_create

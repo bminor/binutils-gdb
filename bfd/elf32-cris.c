@@ -1,5 +1,5 @@
 /* CRIS-specific support for 32-bit ELF.
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hans-Peter Nilsson, based on elf32-fr30.c
    PIC and shlib bits based primarily on elf32-m68k.c and elf32-i386.c.
@@ -859,7 +859,10 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  bfd_boolean warned;
 	  bfd_boolean unresolved_reloc;
 
-	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx, symtab_hdr, relocation, sec, unresolved_reloc, info, warned);
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation,
+				   unresolved_reloc, warned);
 
 	  if (unresolved_reloc
 	      /* Perhaps we should detect the cases that
@@ -1439,7 +1442,7 @@ elf_cris_finish_dynamic_symbol (output_bfd, info, h, sym)
 	 to this function.  Note that we embed knowledge that "incoming"
 	 .got goes after .got.plt in the output without padding (pointer
 	 aligned).  However, that knowledge is present in several other
-	 places too, here and in elflink.h at least.  */
+	 places too.  */
       bfd_vma got_offset
 	= (has_gotplt
 	   ? gotplt_offset
@@ -2092,7 +2095,7 @@ elf_cris_adjust_dynamic_symbol (info, h)
       /* Make sure this symbol is output as a dynamic symbol.  */
       if (h->dynindx == -1)
 	{
-	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
 	}
 
@@ -2419,7 +2422,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 		  /* Make sure this symbol is output as a dynamic symbol.  */
 		  if (h->dynindx == -1)
 		    {
-		      if (!bfd_elf32_link_record_dynamic_symbol (info, h))
+		      if (!bfd_elf_link_record_dynamic_symbol (info, h))
 			return FALSE;
 		    }
 
@@ -2636,14 +2639,14 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
         /* This relocation describes the C++ object vtable hierarchy.
            Reconstruct it for later use during GC.  */
         case R_CRIS_GNU_VTINHERIT:
-          if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+          if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
             return FALSE;
           break;
 
         /* This relocation describes which C++ vtable entries are actually
            used.  Record for later use during GC.  */
         case R_CRIS_GNU_VTENTRY:
-          if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+          if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
             return FALSE;
           break;
 
@@ -2806,7 +2809,7 @@ elf_cris_size_dynamic_sections (output_bfd, info)
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (!info->shared)
 	{
@@ -3087,7 +3090,7 @@ elf_cris_reloc_type_class (rela)
 #define elf_backend_create_dynamic_sections \
 	_bfd_elf_create_dynamic_sections
 #define bfd_elf32_bfd_final_link \
-	_bfd_elf32_gc_common_final_link
+	bfd_elf_gc_common_final_link
 #define elf_backend_hide_symbol			elf_cris_hide_symbol
 #define elf_backend_reloc_type_class		elf_cris_reloc_type_class
 

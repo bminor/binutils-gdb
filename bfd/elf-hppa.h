@@ -1,5 +1,6 @@
 /* Common code for PA ELF implementations.
-   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -31,7 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_hppa_reloc_final_type elf64_hppa_reloc_final_type
 #define _bfd_elf_hppa_gen_reloc_type _bfd_elf64_hppa_gen_reloc_type
 #define elf_hppa_relocate_section elf64_hppa_relocate_section
-#define bfd_elf_bfd_final_link bfd_elf64_bfd_final_link
 #define elf_hppa_final_link elf64_hppa_final_link
 #endif
 #if ARCH_SIZE == 32
@@ -40,7 +40,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_hppa_reloc_final_type elf32_hppa_reloc_final_type
 #define _bfd_elf_hppa_gen_reloc_type _bfd_elf32_hppa_gen_reloc_type
 #define elf_hppa_relocate_section elf32_hppa_relocate_section
-#define bfd_elf_bfd_final_link bfd_elf32_bfd_final_link
 #define elf_hppa_final_link elf32_hppa_final_link
 #endif
 
@@ -1048,7 +1047,7 @@ static bfd_boolean elf_hppa_sort_unwind (bfd *abfd)
 static bfd_boolean
 elf_hppa_add_symbol_hook (bfd *abfd,
 			  struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			  const Elf_Internal_Sym *sym,
+			  Elf_Internal_Sym *sym,
 			  const char **namep ATTRIBUTE_UNUSED,
 			  flagword *flagsp ATTRIBUTE_UNUSED,
 			  asection **secp,
@@ -1096,8 +1095,7 @@ elf_hppa_unmark_useless_dynamic_symbols (struct elf_link_hash_entry *h,
      Ultimately we should have better controls over the generic ELF BFD
      linker code.  */
   if (! info->relocatable
-      && ! (info->shared
-	    && info->unresolved_syms_in_shared_libs == RM_IGNORE)
+      && info->unresolved_syms_in_shared_libs != RM_IGNORE
       && h->root.type == bfd_link_hash_undefined
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)
@@ -1131,8 +1129,7 @@ elf_hppa_remark_useless_dynamic_symbols (struct elf_link_hash_entry *h,
      Ultimately we should have better controls over the generic ELF BFD
      linker code.  */
   if (! info->relocatable
-      && ! (info->shared
-	    && info->unresolved_syms_in_shared_libs == RM_IGNORE)
+      && info->unresolved_syms_in_shared_libs != RM_IGNORE
       && h->root.type == bfd_link_hash_undefined
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0
@@ -1274,7 +1271,7 @@ elf_hppa_final_link (bfd *abfd, struct bfd_link_info *info)
 			  info);
 
   /* Invoke the regular ELF backend linker to do all the work.  */
-  retval = bfd_elf_bfd_final_link (abfd, info);
+  retval = bfd_elf_final_link (abfd, info);
 
   elf_link_hash_traverse (elf_hash_table (info),
 			  elf_hppa_remark_useless_dynamic_symbols,
@@ -1398,16 +1395,9 @@ elf_hppa_relocate_section (bfd *output_bfd,
 	      else
 		relocation = 0;
 	    }
-	  /* Allow undefined symbols in shared libraries.  */
-	  else if (info->shared
-		   && info->unresolved_syms_in_shared_libs == RM_IGNORE
+	  else if (info->unresolved_syms_in_objects == RM_IGNORE
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    {
-	      if (info->symbolic)
-		(*info->callbacks->undefined_symbol)
-		  (info, h->root.root.string, input_bfd,
-		   input_section, rel->r_offset, FALSE);
-
 	      /* If this symbol has an entry in the PA64 dynamic hash
 		 table, then get it.  */
 	      dyn_name = get_dyn_name (input_bfd, h, rel,
@@ -1449,7 +1439,9 @@ elf_hppa_relocate_section (bfd *output_bfd,
 		{
 		  if (!((*info->callbacks->undefined_symbol)
 			(info, h->root.root.string, input_bfd,
-			 input_section, rel->r_offset, TRUE)))
+			 input_section, rel->r_offset,
+			 (info->unresolved_syms_in_objects == RM_GENERATE_ERROR
+			  || ELF_ST_VISIBILITY (h->other)))))
 		    return FALSE;
 		  break;
 		}

@@ -1,5 +1,5 @@
 /* Xtensa-specific support for 32-bit ELF.
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -733,14 +733,14 @@ elf_xtensa_check_relocs (abfd, info, sec, relocs)
 	case R_XTENSA_GNU_VTINHERIT:
 	  /* This relocation describes the C++ object vtable hierarchy.
 	     Reconstruct it for later use during GC.  */
-	  if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
 	    return FALSE;
 	  break;
 
 	case R_XTENSA_GNU_VTENTRY:
 	  /* This relocation describes which C++ vtable entries are actually
 	     used.  Record for later use during GC.  */
-	  if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+	  if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
 	    return FALSE;
 	  break;
 
@@ -1334,7 +1334,7 @@ elf_xtensa_size_dynamic_sections (output_bfd, info)
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (! info->shared)
 	{
@@ -1965,10 +1965,10 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 	}
       else
 	{
-	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx,
-				   symtab_hdr, relocation, sec,
-				   unresolved_reloc, info,
-				   warned);
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation,
+				   unresolved_reloc, warned);
 
 	  if (relocation == 0
 	      && !unresolved_reloc
@@ -2720,7 +2720,7 @@ elf_xtensa_discard_info_for_section (abfd, cookie, info, sec)
       while (cookie->rel < cookie->relend
 	     && cookie->rel->r_offset == offset)
 	{
-	  if (_bfd_elf32_reloc_symbol_deleted_p (offset, cookie))
+	  if (bfd_elf_reloc_symbol_deleted_p (offset, cookie))
 	    {
 	      /* Remove the table entry.  (If the reloc type is NONE, then
 		 the entry has already been merged with another and deleted
@@ -5815,7 +5815,6 @@ static struct bfd_elf_special_section const elf_xtensa_special_sections[]=
 
 #define elf_info_to_howto		     elf_xtensa_info_to_howto_rela
 
-#define bfd_elf32_bfd_final_link	     bfd_elf32_bfd_final_link
 #define bfd_elf32_bfd_merge_private_bfd_data elf_xtensa_merge_private_bfd_data
 #define bfd_elf32_new_section_hook	     elf_xtensa_new_section_hook
 #define bfd_elf32_bfd_print_private_bfd_data elf_xtensa_print_private_bfd_data

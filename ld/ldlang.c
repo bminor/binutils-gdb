@@ -445,6 +445,7 @@ new_afile (const char *name,
   p->next = NULL;
   p->symbol_count = 0;
   p->dynamic = config.dynamic_link;
+  p->as_needed = as_needed;
   p->whole_archive = whole_archive;
   p->loaded = FALSE;
   lang_statement_append (&input_file_chain,
@@ -1842,7 +1843,7 @@ open_input_bfds (lang_statement_union_type *s, bfd_boolean force)
 	  /* Maybe we should load the file's symbols.  */
 	  if (s->wild_statement.filename
 	      && ! wildcardp (s->wild_statement.filename))
-	    (void) lookup_name (s->wild_statement.filename);
+	    lookup_name (s->wild_statement.filename);
 	  open_input_bfds (s->wild_statement.children.head, force);
 	  break;
 	case lang_group_statement_enum:
@@ -3348,8 +3349,7 @@ lang_do_assignments_1
 	    if (os->bfd_section != NULL)
 	      {
 		dot = os->bfd_section->vma;
-		(void) lang_do_assignments_1 (os->children.head, os,
-					      os->fill, dot);
+		lang_do_assignments_1 (os->children.head, os, os->fill, dot);
 		dot = (os->bfd_section->vma
 		       + TO_ADDR (os->bfd_section->_raw_size));
 
@@ -3937,24 +3937,6 @@ lang_for_each_file (void (*func) (lang_input_statement_type *))
       func (f);
     }
 }
-
-#if 0
-
-/* Not used.  */
-
-void
-lang_for_each_input_section (void (*func) (bfd *ab, asection *as))
-{
-  LANG_FOR_EACH_INPUT_STATEMENT (f)
-    {
-      asection *s;
-
-      for (s = f->the_bfd->sections; s != NULL; s = s->next)
-	func (f->the_bfd, s);
-    }
-}
-
-#endif
 
 void
 ldlang_add_file (lang_input_statement_type *entry)

@@ -1,6 +1,6 @@
 /* BFD back-end data structures for ELF files.
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003 Free Software Foundation, Inc.
+   2002, 2003, 2004 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -492,6 +492,7 @@ struct elf_reloc_cookie
   size_t locsymcount;
   size_t extsymoff;
   struct elf_link_hash_entry **sym_hashes;
+  int r_sym_shift;
   bfd_boolean bad_symtab;
 };
 
@@ -625,7 +626,7 @@ struct elf_backend_data
      indices, and must set at least *FLAGS and *SEC for each processor
      dependent case; failure to do so will cause a link error.  */
   bfd_boolean (*elf_add_symbol_hook)
-    (bfd *abfd, struct bfd_link_info *info, const Elf_Internal_Sym *,
+    (bfd *abfd, struct bfd_link_info *info, Elf_Internal_Sym *,
      const char **name, flagword *flags, asection **sec, bfd_vma *value);
 
   /* If this field is not NULL, it is called by the elf_link_output_sym
@@ -1114,19 +1115,12 @@ struct elf_obj_tdata
   bfd_vma gp;				/* The gp value */
   unsigned int gp_size;			/* The gp size */
 
-  Elf_Internal_Shdr **group_sect_ptr;
-  int num_group;
-
   /* Information grabbed from an elf core file.  */
   int core_signal;
   int core_pid;
   int core_lwpid;
   char* core_program;
   char* core_command;
-
-  /* This is set to TRUE if the object was created by the backend
-     linker.  */
-  bfd_boolean linker;
 
   /* A mapping from external symbols to entries in the linker hash
      table, used when linking.  This is indexed by the symbol index
@@ -1152,21 +1146,6 @@ struct elf_obj_tdata
      name actually used, which will be the DT_SONAME entry if there is
      one.  */
   const char *dt_name;
-
-  /* When a reference in a regular object is resolved by a shared
-     object is loaded into via the DT_NEEDED entries by the linker
-     ELF emulation code, we need to add the shared object to the
-     DT_NEEDED list of the resulting binary to indicate the dependency
-     as if the -l option is passed to the linker. This field holds the
-     name of the loaded shared object.  */
-  const char *dt_soname;
-
-  /* Irix 5 often screws up the symbol table, sorting local symbols
-     after global symbols.  This flag is set if the symbol table in
-     this BFD appears to be screwed up.  If it is, we ignore the
-     sh_info field in the symbol table header, and always read all the
-     symbols.  */
-  bfd_boolean bad_symtab;
 
   /* Records the result of `get_program_header_size'.  */
   bfd_size_type program_header_size;
@@ -1195,8 +1174,8 @@ struct elf_obj_tdata
      created.  */
   asection *eh_frame_hdr;
 
-  /* Used to determine if the e_flags field has been initialized */
-  bfd_boolean flags_init;
+  Elf_Internal_Shdr **group_sect_ptr;
+  int num_group;
 
   /* Number of symbol version definitions we are about to emit.  */
   unsigned int cverdefs;
@@ -1219,6 +1198,25 @@ struct elf_obj_tdata
   asymbol *elf_text_symbol;
   asection *elf_data_section;
   asection *elf_text_section;
+
+  /* Whether a dyanmic object was specified normally on the linker
+     command line, or was specified when --as-needed was in effect,
+     or was found via a DT_NEEDED entry.  */
+  enum dynamic_lib_link_class dyn_lib_class;
+
+  /* This is set to TRUE if the object was created by the backend
+     linker.  */
+  bfd_boolean linker;
+
+  /* Irix 5 often screws up the symbol table, sorting local symbols
+     after global symbols.  This flag is set if the symbol table in
+     this BFD appears to be screwed up.  If it is, we ignore the
+     sh_info field in the symbol table header, and always read all the
+     symbols.  */
+  bfd_boolean bad_symtab;
+
+  /* Used to determine if the e_flags field has been initialized */
+  bfd_boolean flags_init;
 };
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
@@ -1245,7 +1243,7 @@ struct elf_obj_tdata
 #define elf_local_got_offsets(bfd) (elf_tdata(bfd) -> local_got.offsets)
 #define elf_local_got_ents(bfd) (elf_tdata(bfd) -> local_got.ents)
 #define elf_dt_name(bfd)	(elf_tdata(bfd) -> dt_name)
-#define elf_dt_soname(bfd)	(elf_tdata(bfd) -> dt_soname)
+#define elf_dyn_lib_class(bfd)	(elf_tdata(bfd) -> dyn_lib_class)
 #define elf_bad_symtab(bfd)	(elf_tdata(bfd) -> bad_symtab)
 #define elf_flags_init(bfd)	(elf_tdata(bfd) -> flags_init)
 
@@ -1292,9 +1290,6 @@ extern void bfd_elf_print_symbol
 #define elf_string_from_elf_strtab(abfd, strindex) \
   bfd_elf_string_from_elf_section (abfd, elf_elfheader(abfd)->e_shstrndx, \
 				   strindex)
-
-#define bfd_elf32_print_symbol	bfd_elf_print_symbol
-#define bfd_elf64_print_symbol	bfd_elf_print_symbol
 
 extern void _bfd_elf_sprintf_vma
   (bfd *, char *, bfd_vma);
@@ -1455,12 +1450,12 @@ extern bfd_boolean _bfd_elf_maybe_strip_eh_frame_hdr
 extern bfd_boolean _bfd_elf_merge_symbol
   (bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
    asection **, bfd_vma *, struct elf_link_hash_entry **, bfd_boolean *,
-   bfd_boolean *, bfd_boolean *, bfd_boolean *, bfd_boolean);
+   bfd_boolean *, bfd_boolean *, bfd_boolean *);
 
 extern bfd_boolean _bfd_elf_add_default_symbol
   (bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
    const char *, Elf_Internal_Sym *, asection **, bfd_vma *,
-   bfd_boolean *, bfd_boolean, bfd_boolean);
+   bfd_boolean *, bfd_boolean);
 
 extern bfd_boolean _bfd_elf_export_symbol
   (struct elf_link_hash_entry *, void *);
@@ -1471,8 +1466,6 @@ extern bfd_boolean _bfd_elf_link_find_version_dependencies
 extern bfd_boolean _bfd_elf_link_assign_sym_version
   (struct elf_link_hash_entry *, void *);
 
-extern bfd_boolean _bfd_elf_link_record_dynamic_symbol
-  (struct bfd_link_info *, struct elf_link_hash_entry *);
 extern long _bfd_elf_link_lookup_local_dynindx
   (struct bfd_link_info *, bfd *, long);
 extern bfd_boolean _bfd_elf_compute_section_file_positions
@@ -1534,11 +1527,6 @@ extern int bfd_elf32_core_file_failing_signal
 extern bfd_boolean bfd_elf32_core_file_matches_executable_p
   (bfd *, bfd *);
 
-extern bfd_boolean bfd_elf32_bfd_link_add_symbols
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean bfd_elf32_bfd_final_link
-  (bfd *, struct bfd_link_info *);
-
 extern void bfd_elf32_swap_symbol_in
   (bfd *, const void *, const void *, Elf_Internal_Sym *);
 extern void bfd_elf32_swap_symbol_out
@@ -1569,8 +1557,6 @@ extern void bfd_elf32_write_relocs
   (bfd *, asection *, void *);
 extern bfd_boolean bfd_elf32_slurp_reloc_table
   (bfd *, asection *, asymbol **, bfd_boolean);
-extern bfd_boolean bfd_elf32_add_dynamic_entry
-  (struct bfd_link_info *, bfd_vma, bfd_vma);
 
 extern const bfd_target *bfd_elf64_object_p
   (bfd *);
@@ -1582,10 +1568,6 @@ extern int bfd_elf64_core_file_failing_signal
   (bfd *);
 extern bfd_boolean bfd_elf64_core_file_matches_executable_p
   (bfd *, bfd *);
-extern bfd_boolean bfd_elf64_bfd_link_add_symbols
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean bfd_elf64_bfd_final_link
-  (bfd *, struct bfd_link_info *);
 
 extern void bfd_elf64_swap_symbol_in
   (bfd *, const void *, const void *, Elf_Internal_Sym *);
@@ -1617,20 +1599,17 @@ extern void bfd_elf64_write_relocs
   (bfd *, asection *, void *);
 extern bfd_boolean bfd_elf64_slurp_reloc_table
   (bfd *, asection *, asymbol **, bfd_boolean);
-extern bfd_boolean bfd_elf64_add_dynamic_entry
+
+extern bfd_boolean bfd_elf_link_add_symbols
+  (bfd *, struct bfd_link_info *);
+extern bfd_boolean _bfd_elf_add_dynamic_entry
   (struct bfd_link_info *, bfd_vma, bfd_vma);
 
-#define bfd_elf32_link_record_dynamic_symbol \
-  _bfd_elf_link_record_dynamic_symbol
-#define bfd_elf64_link_record_dynamic_symbol \
-  _bfd_elf_link_record_dynamic_symbol
+extern bfd_boolean bfd_elf_link_record_dynamic_symbol
+  (struct bfd_link_info *, struct elf_link_hash_entry *);
 
-extern int elf_link_record_local_dynamic_symbol
+extern int bfd_elf_link_record_local_dynamic_symbol
   (struct bfd_link_info *, bfd *, long);
-#define _bfd_elf32_link_record_local_dynamic_symbol \
-  elf_link_record_local_dynamic_symbol
-#define _bfd_elf64_link_record_local_dynamic_symbol \
-  elf_link_record_local_dynamic_symbol
 
 extern bfd_boolean _bfd_elf_close_and_cleanup
   (bfd *);
@@ -1638,31 +1617,25 @@ extern bfd_reloc_status_type _bfd_elf_rel_vtable_reloc_fn
   (bfd *, arelent *, struct bfd_symbol *, void *,
    asection *, bfd *, char **);
 
-extern bfd_boolean _bfd_elf32_gc_sections
+extern bfd_boolean bfd_elf_final_link
   (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf32_gc_common_finalize_got_offsets
+
+extern bfd_boolean bfd_elf_gc_sections
   (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf32_gc_common_final_link
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf32_gc_record_vtinherit
-  (bfd *, asection *, struct elf_link_hash_entry *, bfd_vma);
-extern bfd_boolean _bfd_elf32_gc_record_vtentry
+
+extern bfd_boolean bfd_elf_gc_record_vtinherit
   (bfd *, asection *, struct elf_link_hash_entry *, bfd_vma);
 
-extern bfd_boolean _bfd_elf64_gc_sections
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf64_gc_common_finalize_got_offsets
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf64_gc_common_final_link
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf64_gc_record_vtinherit
-  (bfd *, asection *, struct elf_link_hash_entry *, bfd_vma);
-extern bfd_boolean _bfd_elf64_gc_record_vtentry
+extern bfd_boolean bfd_elf_gc_record_vtentry
   (bfd *, asection *, struct elf_link_hash_entry *, bfd_vma);
 
-extern bfd_boolean _bfd_elf32_reloc_symbol_deleted_p
-  (bfd_vma, void *);
-extern bfd_boolean _bfd_elf64_reloc_symbol_deleted_p
+extern bfd_boolean bfd_elf_gc_common_finalize_got_offsets
+  (bfd *, struct bfd_link_info *);
+
+extern bfd_boolean bfd_elf_gc_common_final_link
+  (bfd *, struct bfd_link_info *);
+
+extern bfd_boolean bfd_elf_reloc_symbol_deleted_p
   (bfd_vma, void *);
 
 /* Exported interface for writing elf corefile notes. */
@@ -1693,60 +1666,73 @@ extern bfd *_bfd_elf64_bfd_from_remote_memory
 extern bfd_boolean _sh_elf_set_mach_from_flags
   (bfd *);
 
+/* This is the condition under which finish_dynamic_symbol will be called.
+   If our finish_dynamic_symbol isn't called, we'll need to do something
+   about initializing any .plt and .got entries in relocate_section.  */
+#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, SHARED, H) \
+  ((DYN)								\
+   && ((SHARED)								\
+       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
+   && ((H)->dynindx != -1						\
+       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
+
 /* This macro is to avoid lots of duplicated code in the body
    of xxx_relocate_section() in the various elfxx-xxxx.c files.  */
-#define RELOC_FOR_GLOBAL_SYMBOL(h, sym_hashes, r_symndx, symtab_hdr, relocation, sec, unresolved_reloc, info, warned)	\
-  do															\
-    {															\
-      /* It seems this can happen with erroneous or unsupported								\
-	 input (mixing a.out and elf in an archive, for example.)  */							\
-      if (sym_hashes == NULL)												\
-	return FALSE;													\
-															\
-      h = sym_hashes[r_symndx - symtab_hdr->sh_info];									\
-															\
-      while (h->root.type == bfd_link_hash_indirect									\
-	     || h->root.type == bfd_link_hash_warning)									\
-	h = (struct elf_link_hash_entry *) h->root.u.i.link;								\
-															\
-      warned = FALSE;													\
-      unresolved_reloc = FALSE;												\
-      relocation = 0;													\
-      if (h->root.type == bfd_link_hash_defined										\
-	  || h->root.type == bfd_link_hash_defweak)									\
-	{														\
-	  sec = h->root.u.def.section;											\
-	  if (sec == NULL												\
-	      || sec->output_section == NULL)										\
-	    /* Set a flag that will be cleared later if we find a							\
-	       relocation value for this symbol.  output_section							\
-	       is typically NULL for symbols satisfied by a shared							\
-	       library.  */												\
-	    unresolved_reloc = TRUE;											\
-	  else														\
-	    relocation = (h->root.u.def.value										\
-			  + sec->output_section->vma									\
-			  + sec->output_offset);									\
-	}														\
-      else if (h->root.type == bfd_link_hash_undefweak)									\
-	;														\
-      else if (!info->executable											\
-	       && info->unresolved_syms_in_objects == RM_IGNORE								\
-	       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)								\
-	;														\
-      else														\
-	{														\
-	  if (! info->callbacks->undefined_symbol									\
-	      (info, h->root.root.string, input_bfd,									\
-	       input_section, rel->r_offset,										\
-	       ((info->shared && info->unresolved_syms_in_shared_libs == RM_GENERATE_ERROR)				\
-		|| (!info->shared && info->unresolved_syms_in_objects == RM_GENERATE_ERROR)				\
-		|| ELF_ST_VISIBILITY (h->other))									\
-	       ))													\
-	    return FALSE;												\
-	  warned = TRUE;												\
-	}														\
-    }															\
+#define RELOC_FOR_GLOBAL_SYMBOL(info, input_bfd, input_section, rel,	\
+				r_symndx, symtab_hdr, sym_hashes,	\
+				h, sec, relocation,			\
+				unresolved_reloc, warned)		\
+  do									\
+    {									\
+      /* It seems this can happen with erroneous or unsupported		\
+	 input (mixing a.out and elf in an archive, for example.)  */	\
+      if (sym_hashes == NULL)						\
+	return FALSE;							\
+									\
+      h = sym_hashes[r_symndx - symtab_hdr->sh_info];			\
+									\
+      while (h->root.type == bfd_link_hash_indirect			\
+	     || h->root.type == bfd_link_hash_warning)			\
+	h = (struct elf_link_hash_entry *) h->root.u.i.link;		\
+									\
+      warned = FALSE;							\
+      unresolved_reloc = FALSE;						\
+      relocation = 0;							\
+      if (h->root.type == bfd_link_hash_defined				\
+	  || h->root.type == bfd_link_hash_defweak)			\
+	{								\
+	  sec = h->root.u.def.section;					\
+	  if (sec == NULL						\
+	      || sec->output_section == NULL)				\
+	    /* Set a flag that will be cleared later if we find a	\
+	       relocation value for this symbol.  output_section	\
+	       is typically NULL for symbols satisfied by a shared	\
+	       library.  */						\
+	    unresolved_reloc = TRUE;					\
+	  else								\
+	    relocation = (h->root.u.def.value				\
+			  + sec->output_section->vma			\
+			  + sec->output_offset);			\
+	}								\
+      else if (h->root.type == bfd_link_hash_undefweak)			\
+	;								\
+      else if (info->unresolved_syms_in_objects == RM_IGNORE		\
+	       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)		\
+	;								\
+      else								\
+	{								\
+	  bfd_boolean err;						\
+	  err = (info->unresolved_syms_in_objects == RM_GENERATE_ERROR	\
+		 || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT);	\
+	  if (!info->callbacks->undefined_symbol (info,			\
+						  h->root.root.string,	\
+						  input_bfd,		\
+						  input_section,	\
+						  rel->r_offset, err))	\
+	    return FALSE;						\
+	  warned = TRUE;						\
+	}								\
+    }									\
   while (0)
 
 #endif /* _LIBELF_H_ */

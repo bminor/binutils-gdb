@@ -1,6 +1,6 @@
 /* BFD back-end for HP PA-RISC ELF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001,
-   2002, 2003 Free Software Foundation, Inc.
+   2002, 2003, 2004 Free Software Foundation, Inc.
 
    Original code by
 	Center for Software Science
@@ -1198,16 +1198,14 @@ elf32_hppa_check_relocs (bfd *abfd,
 	  /* This relocation describes the C++ object vtable hierarchy.
 	     Reconstruct it for later use during GC.  */
 	case R_PARISC_GNU_VTINHERIT:
-	  if (!_bfd_elf32_gc_record_vtinherit (abfd, sec,
-					       &h->elf, rel->r_offset))
+	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, &h->elf, rel->r_offset))
 	    return FALSE;
 	  continue;
 
 	  /* This relocation describes which C++ vtable entries are actually
 	     used.  Record for later use during GC.  */
 	case R_PARISC_GNU_VTENTRY:
-	  if (!_bfd_elf32_gc_record_vtentry (abfd, sec,
-					     &h->elf, rel->r_addend))
+	  if (!bfd_elf_gc_record_vtentry (abfd, sec, &h->elf, rel->r_addend))
 	    return FALSE;
 	  continue;
 
@@ -1620,17 +1618,6 @@ elf32_hppa_hide_symbol (struct bfd_link_info *info,
     }
 }
 
-/* This is the condition under which elf32_hppa_finish_dynamic_symbol
-   will be called from elflink.h.  If elflink.h doesn't call our
-   finish_dynamic_symbol routine, we'll need to do something about
-   initializing any .plt and .got entries in elf32_hppa_relocate_section.  */
-#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, INFO, H) \
-  ((DYN)								\
-   && ((INFO)->shared							\
-       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
-   && ((H)->dynindx != -1						\
-       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
-
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
@@ -1802,11 +1789,11 @@ allocate_plt_static (struct elf_link_hash_entry *h, void *inf)
 	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0
 	  && h->type != STT_PARISC_MILLI)
 	{
-	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
 	}
 
-      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
+      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info->shared, h))
 	{
 	  /* Allocate these later.  From this point on, h->plabel
 	     means that the plt entry is only used by a plabel.
@@ -1880,7 +1867,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0
 	  && h->type != STT_PARISC_MILLI)
 	{
-	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
 	}
 
@@ -1951,7 +1938,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	      && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0
 	      && h->type != STT_PARISC_MILLI)
 	    {
-	      if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 		return FALSE;
 	    }
 
@@ -2240,7 +2227,7 @@ elf32_hppa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 communicate the LTP value of a load module to the dynamic
 	 linker.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (!add_dynamic_entry (DT_PLTGOT, 0))
 	return FALSE;
@@ -2792,8 +2779,7 @@ elf32_hppa_size_stubs
 			}
 		      else if (hash->elf.root.type == bfd_link_hash_undefined)
 			{
-			  if (! (info->shared
-				 && info->unresolved_syms_in_objects == RM_IGNORE
+			  if (! (info->unresolved_syms_in_objects == RM_IGNORE
 				 && (ELF_ST_VISIBILITY (hash->elf.other)
 				     == STV_DEFAULT)
 				 && hash->elf.type != STT_PARISC_MILLI))
@@ -3005,7 +2991,7 @@ static bfd_boolean
 elf32_hppa_final_link (bfd *abfd, struct bfd_link_info *info)
 {
   /* Invoke the regular ELF linker to do all the work.  */
-  if (!bfd_elf32_bfd_final_link (abfd, info))
+  if (!bfd_elf_final_link (abfd, info))
     return FALSE;
 
   /* If we're producing a final executable, sort the contents of the
@@ -3430,26 +3416,25 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	{
 	  struct elf_link_hash_entry *hh;
 	  bfd_boolean unresolved_reloc;
+	  struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
 
-	  RELOC_FOR_GLOBAL_SYMBOL (hh, elf_sym_hashes (input_bfd), r_symndx, symtab_hdr,
-				   relocation, sym_sec, unresolved_reloc, info,
-				   warned_undef);
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   hh, sym_sec, relocation,
+				   unresolved_reloc, warned_undef);
 
 	  if (relocation == 0
 	      && hh->root.type != bfd_link_hash_defined
 	      && hh->root.type != bfd_link_hash_defweak
 	      && hh->root.type != bfd_link_hash_undefweak)
 	    {
-	      if (!info->executable
-		  && info->unresolved_syms_in_objects == RM_IGNORE
+	      if (info->unresolved_syms_in_objects == RM_IGNORE
 		  && ELF_ST_VISIBILITY (hh->other) == STV_DEFAULT
 		  && hh->type == STT_PARISC_MILLI)
 		{
 		  if (! info->callbacks->undefined_symbol
 		      (info, hh->root.root.string, input_bfd,
-		       input_section, rel->r_offset,
-		       ((info->shared && info->unresolved_syms_in_shared_libs == RM_GENERATE_ERROR)
-			|| (!info->shared && info->unresolved_syms_in_objects == RM_GENERATE_ERROR))))
+		       input_section, rel->r_offset, FALSE))
 		    return FALSE;
 		  warned_undef = TRUE;
 		}
@@ -3478,7 +3463,8 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 
 		off = h->elf.got.offset;
 		dyn = htab->elf.dynamic_sections_created;
-		if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, &h->elf))
+		if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared,
+						       &h->elf))
 		  {
 		    /* If we aren't going to call finish_dynamic_symbol,
 		       then we need to handle initialisation of the .got
@@ -3570,7 +3556,8 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	      if (h != NULL)
 		{
 		  off = h->elf.plt.offset;
-		  if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, &h->elf))
+		  if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info->shared,
+							 &h->elf))
 		    {
 		      /* In a non-shared link, adjust_dynamic_symbols
 			 isn't called for symbols forced local.  We

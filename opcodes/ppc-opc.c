@@ -3480,7 +3480,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "mtsrin",  X(31,242),	XRA_MASK,	PPC32,		{ RS, RB } },
 { "mtsri",   X(31,242),	XRA_MASK,	POWER32,	{ RS, RB } },
 
-{ "dcbtst",  X(31,246),	XRT_MASK,	PPC,		{ CT, RA, RB } },
+{ "dcbtst",  X(31,246),	X_MASK,	PPC,			{ CT, RA, RB } },
 
 { "stbux",   X(31,247),	X_MASK,		COM,		{ RS, RAS, RB } },
 
@@ -3514,7 +3514,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "lscbx",   XRC(31,277,0), X_MASK,	M601,		{ RT, RA, RB } },
 { "lscbx.",  XRC(31,277,1), X_MASK,	M601,		{ RT, RA, RB } },
 
-{ "dcbt",    X(31,278),	XRT_MASK,	PPC,		{ CT, RA, RB } },
+{ "dcbt",    X(31,278),	X_MASK,	PPC,			{ CT, RA, RB } },
 
 { "lhzx",    X(31,279),	X_MASK,		COM,		{ RT, RA0, RB } },
 
@@ -3691,6 +3691,10 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "mfspefscr",  XSPR(31,339,512),  XSPR_MASK, PPCSPE,	{ RT } },
 { "mfbbear",    XSPR(31,339,513),  XSPR_MASK, PPCBRLK,  { RT } },
 { "mfbbtar",    XSPR(31,339,514),  XSPR_MASK, PPCBRLK,  { RT } },
+{ "mfivor32",   XSPR(31,339,528),  XSPR_MASK, PPCSPE,	{ RT } },
+{ "mfivor33",   XSPR(31,339,529),  XSPR_MASK, PPCSPE,	{ RT } },
+{ "mfivor34",   XSPR(31,339,530),  XSPR_MASK, PPCSPE,	{ RT } },
+{ "mfivor35",   XSPR(31,339,531),  XSPR_MASK, PPCPMR,	{ RT } },
 { "mfibatu",    XSPR(31,339,528),  XSPRBAT_MASK, PPC,	{ RT, SPRBAT } },
 { "mfibatl",    XSPR(31,339,529),  XSPRBAT_MASK, PPC,	{ RT, SPRBAT } },
 { "mfdbatu",    XSPR(31,339,536),  XSPRBAT_MASK, PPC,	{ RT, SPRBAT } },
@@ -3700,10 +3704,11 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "mfic_dat",   XSPR(31,339,562),  XSPR_MASK, PPC860,	{ RT } },
 { "mfdc_cst",   XSPR(31,339,568),  XSPR_MASK, PPC860,	{ RT } },
 { "mfdc_adr",   XSPR(31,339,569),  XSPR_MASK, PPC860,	{ RT } },
-{ "mfdc_dat",   XSPR(31,339,570),  XSPR_MASK, PPC860,	{ RT } },
 { "mfmcsrr0",   XSPR(31,339,570),  XSPR_MASK, PPCRFMCI, { RT } },
+{ "mfdc_dat",   XSPR(31,339,570),  XSPR_MASK, PPC860,	{ RT } },
 { "mfmcsrr1",   XSPR(31,339,571),  XSPR_MASK, PPCRFMCI, { RT } },
 { "mfmcsr",     XSPR(31,339,572),  XSPR_MASK, PPCRFMCI, { RT } },
+{ "mfmcar",     XSPR(31,339,573),  XSPR_MASK, PPCRFMCI, { RT } },
 { "mfdpdr",     XSPR(31,339,630),  XSPR_MASK, PPC860,	{ RT } },
 { "mfdpir",     XSPR(31,339,631),  XSPR_MASK, PPC860,	{ RT } },
 { "mfimmr",     XSPR(31,339,638),  XSPR_MASK, PPC860,	{ RT } },
@@ -3997,6 +4002,10 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "mtspefscr",  XSPR(31,467,512),  XSPR_MASK, PPCSPE,   { RS } },
 { "mtbbear",   XSPR(31,467,513),  XSPR_MASK, PPCBRLK,   { RS } },
 { "mtbbtar",   XSPR(31,467,514),  XSPR_MASK, PPCBRLK,  { RS } },
+{ "mtivor32",  XSPR(31,467,528),  XSPR_MASK, PPCSPE,	{ RS } },
+{ "mtivor33",  XSPR(31,467,529),  XSPR_MASK, PPCSPE,	{ RS } },
+{ "mtivor34",  XSPR(31,467,530),  XSPR_MASK, PPCSPE,	{ RS } },
+{ "mtivor35",  XSPR(31,467,531),  XSPR_MASK, PPCPMR,	{ RS } },
 { "mtibatu",   XSPR(31,467,528),  XSPRBAT_MASK, PPC,	{ SPRBAT, RS } },
 { "mtibatl",   XSPR(31,467,529),  XSPRBAT_MASK, PPC,	{ SPRBAT, RS } },
 { "mtdbatu",   XSPR(31,467,536),  XSPRBAT_MASK, PPC,	{ SPRBAT, RS } },

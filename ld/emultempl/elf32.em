@@ -89,6 +89,28 @@ gld${EMULATION_NAME}_before_parse (void)
 EOF
 fi
 
+if test x"$LDEMUL_RECOGNIZED_FILE" != xgld"${EMULATION_NAME}"_load_symbols; then
+cat >>e${EMULATION_NAME}.c <<EOF
+/* Handle as_needed DT_NEEDED.  */
+
+static bfd_boolean
+gld${EMULATION_NAME}_load_symbols (lang_input_statement_type *entry)
+{
+  if (!entry->as_needed
+      || (bfd_get_file_flags (entry->the_bfd) & DYNAMIC) == 0)
+    return FALSE;
+
+  /* Tell the ELF linker that we don't want the output file to have a
+     DT_NEEDED entry for this file, unless it is used to resolve
+     references in a regular object.  */
+  bfd_elf_set_dyn_lib_class (entry->the_bfd, DYN_AS_NEEDED);
+
+  /* Continue on with normal load_symbols processing.  */
+  return FALSE;
+}
+EOF
+fi
+
 cat >>e${EMULATION_NAME}.c <<EOF
 
 /* These variables are required to pass information back and forth
@@ -336,14 +358,13 @@ cat >>e${EMULATION_NAME}.c <<EOF
       return TRUE;
     }
 
-  /* Tell the ELF backend that we don't want the output file to have a
-     DT_NEEDED entry for this file.  */
-  bfd_elf_set_dt_needed_name (abfd, "");
+  /* Specify the soname to use.  */
+  bfd_elf_set_dt_needed_name (abfd, soname);
 
-  /* Tell the ELF backend that the output file needs a DT_NEEDED
-     entry for this file if it is used to resolve the reference in
-     a regular object.  */
-  bfd_elf_set_dt_needed_soname (abfd, soname);
+  /* Tell the ELF linker that we don't want the output file to have a
+     DT_NEEDED entry for this file, unless it is used to resolve
+     references in a regular object.  */
+  bfd_elf_set_dyn_lib_class (abfd, DYN_DT_NEEDED);
 
   /* Add this file into the symbol table.  */
   if (! bfd_link_add_symbols (abfd, &link_info))
@@ -850,7 +871,7 @@ gld${EMULATION_NAME}_before_allocation (void)
   rpath = command_line.rpath;
   if (rpath == NULL)
     rpath = (const char *) getenv ("LD_RUN_PATH");
-  if (! (bfd_elf${ELFSIZE}_size_dynamic_sections
+  if (! (bfd_elf_size_dynamic_sections
 	 (output_bfd, command_line.soname, rpath,
 	  command_line.filter_shlib,
 	  (const char * const *) command_line.auxiliary_filters,
@@ -1386,7 +1407,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 static void
 gld${EMULATION_NAME}_finish (void)
 {
-  if (bfd_elf${ELFSIZE}_discard_info (output_bfd, &link_info))
+  if (bfd_elf_discard_info (output_bfd, &link_info))
     {
       lang_reset_memory_regions ();
 
@@ -1752,7 +1773,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld${EMULATION_NAME}_handle_option,
   ${LDEMUL_UNRECOGNIZED_FILE-NULL},
   ${LDEMUL_LIST_OPTIONS-gld${EMULATION_NAME}_list_options},
-  ${LDEMUL_RECOGNIZED_FILE-NULL},
+  ${LDEMUL_RECOGNIZED_FILE-gld${EMULATION_NAME}_load_symbols},
   ${LDEMUL_FIND_POTENTIAL_LIBRARIES-NULL},
   ${LDEMUL_NEW_VERS_PATTERN-NULL}
 };

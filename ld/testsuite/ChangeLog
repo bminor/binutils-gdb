@@ -1,3 +1,61 @@
+2004-04-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-scripts/align.exp: Don't run on aix.
+	* ld-scripts/assert.s: Remove comment.
+	* ld-scripts/data.s: Likewise.
+	* ld-scripts/data.t: Set start address to allow for aout headers.
+	Make first LONG pc-relative.
+	* ld-scripts/data.d: Update.
+	* ld-scripts/defined2.d: Allow other random syms.
+	* ld-scripts/defined3.d: Likewise.
+	* ld-scripts/provide-1.s: Pad section.
+	* ld-scripts/provide-1.t: Set .data address and align.
+	* ld-scripts/provide-1.d: Update.
+	* ld-scripts/provide-2.s: Pad section.
+	* ld-scripts/provide-2.d: Allow random trailing syms.
+	* ld-scripts/provide-3.s: Pad section.
+	* ld-scripts/provide-3.d: Fix typos.
+	* ld-scripts/provide.exp: Don't run on aix.
+	* ld-scripts/size-1.s: Simplify test.
+	* ld-scripts/size-1.t: Rewrite.
+	* ld-scripts/size-1.d: Update.
+	* ld-scripts/size-2.s: Simplify.
+	* ld-scripts/size-2.t: Set start address.  Set exe flag on image.
+	* ld-scripts/size-2.d: Update.
+	* ld-scripts/size.exp: Don't run on aix.  Run size-2 on all elf
+	targets except mips.
+
+	Apply from mainline.
+	2004-03-19  H.J. Lu  <hongjiu.lu@intel.com>
+	* ld-elfvers/vers.exp: Add new tests for versioned weak
+	definition. 
+	* ld-elfvers/vers28a.c: New file.
+	* ld-elfvers/vers28a.dsym: Likewise.
+	* ld-elfvers/vers28a.ver: Likewise.
+	* ld-elfvers/vers28b.c: Likewise.
+	* ld-elfvers/vers28b.dsym: Likewise.
+	* ld-elfvers/vers28b.map: Likewise.
+	* ld-elfvers/vers28b.ver: Likewise.
+	* ld-elfvers/vers28c.c: Likewise.
+	* ld-elfvers/vers28c.dsym: Likewise.
+	* ld-elfvers/vers28c.ver: Likewise.
+
+	2004-03-19  Alan Modra  <amodra@bigpond.net.au>
+	* ld-scripts/provide-2.d: Ignore random symbols.
+
+	2004-03-05  Nathan Sidwell  <nathan@codesourcery.com>
+	* ld-scripts/size-1.d: Add bigendian regexps.
+	* ld-scripts/size-2.d: Set --wide for readelf.
+
+	2004-02-23  Alan Modra  <amodra@bigpond.net.au>
+	* ld-scripts/data.t: Set ".other" address so location doesn't
+	depend on target alignment.
+	* ld-scripts/data.d: Update.
+
+	2004-03-26  Alan Modra  <amodra@bigpond.net.au>
+	* ld-powerpc/tlsexe.r: Update for changed sym type.
+	* ld-powerpc/tlsexetoc.r: Likewise.
+
 2004-03-22  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/dsofnf.s, ld-cris/dsofnf2.s, ld-cris/gotplt1.d,

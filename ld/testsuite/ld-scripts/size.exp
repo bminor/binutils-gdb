@@ -16,8 +16,20 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
+if [istarget "rs6000-*-aix*"] {
+    # Target maps .text and .data to other sections.
+    return
+}
+
 run_dump_test size-1
 
-if { [istarget "*-*-elf*"] } {
-    run_dump_test size-2
+if ![is_elf_format] {
+    return
 }
+
+if [istarget "mips*-*-*"] {
+    # MIPS inserts a REGINFO PHDR
+    return
+}
+
+run_dump_test size-2
