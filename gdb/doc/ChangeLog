@@ -1,3 +1,28 @@
+2000-07-08  Christopher Faylor <cgf@cygnus.com>
+
+	* Makefile.in (install-info): Find files to install in either the
+	build or source directories (adapted from Makefile.am).
+
+2000-07-07  Nicholas Duffek  <nsd@redhat.com>
+
+	* stabs.texinfo: Fix spelling errors.
+	(String Field): FILE-NUMBER starts from 0, not 1.
+
+2000-07-05  Eli Zaretskii <eliz@is.elta.co.il>
+
+	* refcard.tex: Remove \centerline from the blurb.  Patch from
+        Brian Youmans.
+
+2000-06-25  Eli Zaretskii <eliz@is.elta.co.il>
+
+	* Makefile.in (install-info): Support installation from outside of
+        the source directory.  Reported by Mark Harig
+        <markh@frazier.landmark.com>.
+
+2000-06-20  J.T. Conklin  <jtc@redback.com>
+
+	* gdb.texinfo: Fix typo, $bpnum is set to last breakpoint number.
+
 Fri May 26 15:55:33 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (pdf, gdbint.pdf, gdb.pdf, stabs.pdf): New targets.

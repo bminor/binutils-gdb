@@ -169,9 +169,7 @@ static struct type *fixup_method = NULL;
 /* Get the nesting depth for the source line identified by INDEX.  */
 
 static unsigned long
-hpread_get_scope_start (index, objfile)
-     sltpointer index;
-     struct objfile *objfile;
+hpread_get_scope_start (sltpointer index, struct objfile *objfile)
 {
   union sltentry *sl_bufp;
 
@@ -182,9 +180,7 @@ hpread_get_scope_start (index, objfile)
 /* Get the source line number the the line identified by INDEX.  */
 
 static unsigned long
-hpread_get_line (index, objfile)
-     sltpointer index;
-     struct objfile *objfile;
+hpread_get_line (sltpointer index, struct objfile *objfile)
 {
   union sltentry *sl_bufp;
 
@@ -195,9 +191,7 @@ hpread_get_line (index, objfile)
 /* Find the code address associated with a given sltpointer */
 
 static CORE_ADDR
-hpread_get_location (index, objfile)
-     sltpointer index;
-     struct objfile *objfile;
+hpread_get_location (sltpointer index, struct objfile *objfile)
 {
   union sltentry *sl_bufp;
   int i;
@@ -236,8 +230,7 @@ hpread_get_location (index, objfile)
  */
 
 int
-hpread_has_name (kind)
-     enum dntt_entry_type kind;
+hpread_has_name (enum dntt_entry_type kind)
 {
   switch (kind)
     {
@@ -311,8 +304,7 @@ hpread_has_name (kind)
    table.  */
 
 static void
-hpread_psymtab_to_symtab_1 (pst)
-     struct partial_symtab *pst;
+hpread_psymtab_to_symtab_1 (struct partial_symtab *pst)
 {
   struct cleanup *old_chain;
   int i;
@@ -370,8 +362,7 @@ hpread_psymtab_to_symtab_1 (pst)
    Be verbose about it if the user wants that.  */
 
 void
-hpread_psymtab_to_symtab (pst)
-     struct partial_symtab *pst;
+hpread_psymtab_to_symtab (struct partial_symtab *pst)
 {
   /* Get out quick if given junk.  */
   if (!pst)
@@ -427,15 +418,9 @@ hpread_psymtab_to_symtab (pst)
    SECTION_OFFSETS are the relocation offsets which get added to each symbol. */
 
 static struct symtab *
-hpread_expand_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
-		      section_offsets, filename)
-     struct objfile *objfile;
-     int sym_offset;
-     int sym_size;
-     CORE_ADDR text_offset;
-     int text_size;
-     struct section_offsets *section_offsets;
-     char *filename;
+hpread_expand_symtab (struct objfile *objfile, int sym_offset, int sym_size,
+		      CORE_ADDR text_offset, int text_size,
+		      struct section_offsets *section_offsets, char *filename)
 {
   char *namestring;
   union dnttentry *dn_bufp;
@@ -540,8 +525,7 @@ hpread_expand_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
 /* Convert basic types from HP debug format into GDB internal format.  */
 
 static int
-hpread_type_translate (typep)
-     dnttpointer typep;
+hpread_type_translate (dnttpointer typep)
 {
   if (!typep.dntti.immediate)
     {
@@ -632,9 +616,7 @@ hpread_type_translate (typep)
  */
 
 static struct type **
-hpread_lookup_type (hp_type, objfile)
-     dnttpointer hp_type;
-     struct objfile *objfile;
+hpread_lookup_type (dnttpointer hp_type, struct objfile *objfile)
 {
   unsigned old_len;
   int index = hp_type.dnttp.index;
@@ -720,9 +702,7 @@ hpread_lookup_type (hp_type, objfile)
    have it lying around.  */
 
 static struct type *
-hpread_alloc_type (hp_type, objfile)
-     dnttpointer hp_type;
-     struct objfile *objfile;
+hpread_alloc_type (dnttpointer hp_type, struct objfile *objfile)
 {
   struct type **type_addr;
 
@@ -744,10 +724,8 @@ hpread_alloc_type (hp_type, objfile)
 /* Read a native enumerated type and return it in GDB internal form.  */
 
 static struct type *
-hpread_read_enum_type (hp_type, dn_bufp, objfile)
-     dnttpointer hp_type;
-     union dnttentry *dn_bufp;
-     struct objfile *objfile;
+hpread_read_enum_type (dnttpointer hp_type, union dnttentry *dn_bufp,
+		       struct objfile *objfile)
 {
   struct type *type;
   struct pending **symlist, *osyms, *syms;
@@ -839,11 +817,8 @@ hpread_read_enum_type (hp_type, dn_bufp, objfile)
 /* Read and internalize a native function debug symbol.  */
 
 static struct type *
-hpread_read_function_type (hp_type, dn_bufp, objfile, newblock)
-     dnttpointer hp_type;
-     union dnttentry *dn_bufp;
-     struct objfile *objfile;
-     int newblock;
+hpread_read_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
+			   struct objfile *objfile, int newblock)
 {
   struct type *type, *type1;
   struct pending *syms;
@@ -1025,11 +1000,8 @@ finish:
  * volatile, please leave it this way.
  */
 static struct type *
-hpread_read_doc_function_type (hp_type, dn_bufp, objfile, newblock)
-     dnttpointer hp_type;
-     union dnttentry *dn_bufp;
-     struct objfile *objfile;
-     int newblock;
+hpread_read_doc_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
+			       struct objfile *objfile, int newblock)
 {
   struct type *type, *type1;
   struct pending *syms;
@@ -1218,10 +1190,8 @@ static struct type *current_template = NULL;
  */
 
 static struct type *
-hpread_read_struct_type (hp_type, dn_bufp, objfile)
-     dnttpointer hp_type;
-     union dnttentry *dn_bufp;
-     struct objfile *objfile;
+hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
+			 struct objfile *objfile)
 {
   /* The data members get linked together into a list of struct nextfield's */
   struct nextfield
@@ -2059,10 +2029,8 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
    Void return */
 
 static void
-fix_static_member_physnames (type, class_name, objfile)
-     struct type *type;
-     char *class_name;
-     struct objfile *objfile;
+fix_static_member_physnames (struct type *type, char *class_name,
+			     struct objfile *objfile)
 {
   int i;
 
@@ -2092,10 +2060,8 @@ fix_static_member_physnames (type, class_name, objfile)
  * Void return. */
 
 static void
-fixup_class_method_type (class, method, objfile)
-     struct type *class;
-     struct type *method;
-     struct objfile *objfile;
+fixup_class_method_type (struct type *class, struct type *method,
+			 struct objfile *objfile)
 {
   int i, j, k;
 
@@ -2156,9 +2122,7 @@ finish:
  * This is called from hpread_type_lookup().
  */
 static struct type *
-hpread_get_nth_template_arg (objfile, n)
-     struct objfile *objfile;
-     int n;
+hpread_get_nth_template_arg (struct objfile *objfile, int n)
 {
   if (current_template != NULL)
     return TYPE_TEMPLATE_ARG (current_template, n).type;
@@ -2169,11 +2133,8 @@ hpread_get_nth_template_arg (objfile, n)
 /* Read in and internalize a TEMPL_ARG (template arg) symbol.  */
 
 static struct type *
-hpread_read_templ_arg_type (hp_type, dn_bufp, objfile, name)
-     dnttpointer hp_type;
-     union dnttentry *dn_bufp;
-     struct objfile *objfile;
-     char *name;
+hpread_read_templ_arg_type (dnttpointer hp_type, union dnttentry *dn_bufp,
+			    struct objfile *objfile, char *name)
 {
   struct type *type;
 
@@ -2193,10 +2154,8 @@ hpread_read_templ_arg_type (hp_type, dn_bufp, objfile, name)
 /* Read in and internalize a set debug symbol.  */
 
 static struct type *
-hpread_read_set_type (hp_type, dn_bufp, objfile)
-     dnttpointer hp_type;
-     union dnttentry *dn_bufp;
-     struct objfile *objfile;
+hpread_read_set_type (dnttpointer hp_type, union dnttentry *dn_bufp,
+		      struct objfile *objfile)
 {
   struct type *type;
 
@@ -2217,10 +2176,8 @@ hpread_read_set_type (hp_type, dn_bufp, objfile)
 /* Read in and internalize an array debug symbol.  */
 
 static struct type *
-hpread_read_array_type (hp_type, dn_bufp, objfile)
-     dnttpointer hp_type;
-     union dnttentry *dn_bufp;
-     struct objfile *objfile;
+hpread_read_array_type (dnttpointer hp_type, union dnttentry *dn_bufp,
+			struct objfile *objfile)
 {
   struct type *type;
 
@@ -2277,10 +2234,8 @@ hpread_read_array_type (hp_type, dn_bufp, objfile)
 
 /* Read in and internalize a subrange debug symbol.  */
 static struct type *
-hpread_read_subrange_type (hp_type, dn_bufp, objfile)
-     dnttpointer hp_type;
-     union dnttentry *dn_bufp;
-     struct objfile *objfile;
+hpread_read_subrange_type (dnttpointer hp_type, union dnttentry *dn_bufp,
+			   struct objfile *objfile)
 {
   struct type *type;
 
@@ -2340,9 +2295,7 @@ hpread_read_subrange_type (hp_type, dn_bufp, objfile)
  *     a struct/class type, etc).
  */
 static struct type *
-hpread_type_lookup (hp_type, objfile)
-     dnttpointer hp_type;
-     struct objfile *objfile;
+hpread_type_lookup (dnttpointer hp_type, struct objfile *objfile)
 {
   union dnttentry *dn_bufp;
   struct type *tmp_type;
@@ -2701,11 +2654,9 @@ hpread_type_lookup (hp_type, objfile)
 }
 
 static sltpointer
-hpread_record_lines (subfile, s_idx, e_idx, objfile, offset)
-     struct subfile *subfile;
-     sltpointer s_idx, e_idx;
-     struct objfile *objfile;
-     CORE_ADDR offset;
+hpread_record_lines (struct subfile *subfile, sltpointer s_idx,
+		     sltpointer e_idx, struct objfile *objfile,
+		     CORE_ADDR offset)
 {
   union sltentry *sl_bufp;
 
@@ -2733,8 +2684,7 @@ hpread_record_lines (subfile, s_idx, e_idx, objfile, offset)
  * If "f" is not a member function, return NULL.
  */
 char *
-class_of (functype)
-     struct type *functype;
+class_of (struct type *functype)
 {
   struct type *first_param_type;
   char *first_param_name;
@@ -2794,19 +2744,11 @@ class_of (functype)
  */
 
 static void
-hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
-				 text_offset, text_size, filename,
-				 index, at_module_boundary_p
-)
-     union dnttentry *dn_bufp;
-     char *name;
-     struct section_offsets *section_offsets;
-     struct objfile *objfile;
-     CORE_ADDR text_offset;
-     int text_size;
-     char *filename;
-     int index;
-     int *at_module_boundary_p;
+hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
+				 struct section_offsets *section_offsets,
+				 struct objfile *objfile, CORE_ADDR text_offset,
+				 int text_size, char *filename, int index,
+				 int *at_module_boundary_p)
 {
   unsigned long desc;
   int type;
@@ -3916,10 +3858,8 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 
 
 static int
-hpread_get_scope_depth (dn_bufp, objfile, report_nested)
-     union dnttentry *dn_bufp;
-     struct objfile *objfile;
-     int report_nested;
+hpread_get_scope_depth (union dnttentry *dn_bufp, struct objfile *objfile,
+			int report_nested)
 {
   register int index;
   register union dnttentry *dn_tmp;
@@ -3964,9 +3904,7 @@ hpread_get_scope_depth (dn_bufp, objfile, report_nested)
    enclosing structure instead of relative to the union itself. */
 
 static void
-hpread_adjust_bitoffsets (type, bits)
-     struct type *type;
-     int bits;
+hpread_adjust_bitoffsets (struct type *type, int bits)
 {
   register int i;
 
@@ -4000,11 +3938,9 @@ hpread_adjust_bitoffsets (type, bits)
    is a dnttpointer for the new field after all the skipped ones */
 
 static dnttpointer
-hpread_get_next_skip_over_anon_unions (skip_fields, field, fieldp, objfile)
-     int skip_fields;
-     dnttpointer field;
-     union dnttentry **fieldp;
-     struct objfile *objfile;
+hpread_get_next_skip_over_anon_unions (int skip_fields, dnttpointer field,
+				       union dnttentry **fieldp,
+				       struct objfile *objfile)
 {
   struct type *anon_type;
   register int i;

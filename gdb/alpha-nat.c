@@ -55,8 +55,7 @@ static void fetch_elf_core_registers (char *, unsigned, int, CORE_ADDR);
    This routine returns true on success. */
 
 int
-get_longjmp_target (pc)
-     CORE_ADDR *pc;
+get_longjmp_target (CORE_ADDR *pc)
 {
   CORE_ADDR jb_addr;
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
@@ -85,11 +84,8 @@ get_longjmp_target (pc)
  */
 
 static void
-fetch_osf_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     CORE_ADDR reg_addr;
+fetch_osf_core_registers (char *core_reg_sect, unsigned core_reg_size,
+			  int which, CORE_ADDR reg_addr)
 {
   register int regno;
   register int addr;
@@ -138,11 +134,8 @@ fetch_osf_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 }
 
 static void
-fetch_elf_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     CORE_ADDR reg_addr;
+fetch_elf_core_registers (char *core_reg_sect, unsigned core_reg_size,
+			  int which, CORE_ADDR reg_addr)
 {
   if (core_reg_size < 32 * 8)
     {
@@ -181,15 +174,13 @@ fetch_elf_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 /* Return the ptrace ``address'' of register REGNO. */
 
 CORE_ADDR
-register_addr (regno, blockend)
-     int regno;
-     CORE_ADDR blockend;
+register_addr (int regno, CORE_ADDR blockend)
 {
   return REGISTER_PTRACE_ADDR (regno);
 }
 
 int
-kernel_u_size ()
+kernel_u_size (void)
 {
   return (sizeof (struct user));
 }
@@ -205,8 +196,7 @@ kernel_u_size ()
  */
 
 void
-supply_gregset (gregsetp)
-     gregset_t *gregsetp;
+supply_gregset (gregset_t *gregsetp)
 {
   register int regi;
   register long *regp = ALPHA_REGSET_BASE (gregsetp);
@@ -224,9 +214,7 @@ supply_gregset (gregsetp)
 }
 
 void
-fill_gregset (gregsetp, regno)
-     gregset_t *gregsetp;
-     int regno;
+fill_gregset (gregset_t *gregsetp, int regno)
 {
   int regi;
   register long *regp = ALPHA_REGSET_BASE (gregsetp);
@@ -245,8 +233,7 @@ fill_gregset (gregsetp, regno)
  */
 
 void
-supply_fpregset (fpregsetp)
-     fpregset_t *fpregsetp;
+supply_fpregset (fpregset_t *fpregsetp)
 {
   register int regi;
   register long *regp = ALPHA_REGSET_BASE (fpregsetp);
@@ -256,9 +243,7 @@ supply_fpregset (fpregsetp)
 }
 
 void
-fill_fpregset (fpregsetp, regno)
-     fpregset_t *fpregsetp;
-     int regno;
+fill_fpregset (fpregset_t *fpregsetp, int regno)
 {
   int regi;
   register long *regp = ALPHA_REGSET_BASE (fpregsetp);
@@ -298,7 +283,7 @@ static struct core_fns alpha_elf_core_fns =
 };
 
 void
-_initialize_core_alpha ()
+_initialize_core_alpha (void)
 {
   add_core_fns (&alpha_osf_core_fns);
   add_core_fns (&alpha_elf_core_fns);

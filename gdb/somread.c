@@ -80,10 +80,8 @@ extern void do_pxdb (bfd *);
  */
 
 static void
-som_symtab_read (abfd, objfile, section_offsets)
-     bfd *abfd;
-     struct objfile *objfile;
-     struct section_offsets *section_offsets;
+som_symtab_read (bfd *abfd, struct objfile *objfile,
+		 struct section_offsets *section_offsets)
 {
   unsigned int number_of_symbols;
   int val, dynamic;
@@ -347,9 +345,7 @@ som_symtab_read (abfd, objfile, section_offsets)
    capability even for files compiled without -g.  */
 
 static void
-som_symfile_read (objfile, mainline)
-     struct objfile *objfile;
-     int mainline;
+som_symfile_read (struct objfile *objfile, int mainline)
 {
   bfd *abfd = objfile->obfd;
   struct cleanup *back_to;
@@ -410,8 +406,7 @@ som_symfile_read (objfile, mainline)
    We reinitialize buildsym, since we may be reading stabs from a SOM file.  */
 
 static void
-som_new_init (ignore)
-     struct objfile *ignore;
+som_new_init (struct objfile *ignore)
 {
   stabsread_new_init ();
   buildsym_new_init ();
@@ -423,8 +418,7 @@ som_new_init (ignore)
    objfile struct from the global list of known objfiles. */
 
 static void
-som_symfile_finish (objfile)
-     struct objfile *objfile;
+som_symfile_finish (struct objfile *objfile)
 {
   if (objfile->sym_stab_info != NULL)
     {
@@ -436,8 +430,7 @@ som_symfile_finish (objfile)
 /* SOM specific initialization routine for reading symbols.  */
 
 static void
-som_symfile_init (objfile)
-     struct objfile *objfile;
+som_symfile_init (struct objfile *objfile)
 {
   /* SOM objects may be reordered, so set OBJF_REORDERED.  If we
      find this causes a significant slowdown in gdb then we could
@@ -451,9 +444,7 @@ som_symfile_init (objfile)
    Plain and simple for now.  */
 
 static void
-som_symfile_offsets (objfile, addrs)
-     struct objfile *objfile;
-     struct section_addr_info *addrs;
+som_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
 {
   int i;
   CORE_ADDR text_addr;
@@ -497,8 +488,7 @@ som_symfile_offsets (objfile, addrs)
    with as "loc_indirect" vars.)
    Return value = number of import symbols read in. */
 int
-init_import_symbols (objfile)
-     struct objfile *objfile;
+init_import_symbols (struct objfile *objfile)
 {
   unsigned int import_list;
   unsigned int import_list_size;
@@ -618,8 +608,7 @@ init_import_symbols (objfile)
    with as "loc_indirect" vars.)
    Return value = number of import symbols read in. */
 int
-init_export_symbols (objfile)
-     struct objfile *objfile;
+init_export_symbols (struct objfile *objfile)
 {
   unsigned int export_list;
   unsigned int export_list_size;
@@ -759,7 +748,7 @@ static struct sym_fns som_sym_fns =
 };
 
 void
-_initialize_somread ()
+_initialize_somread (void)
 {
   add_symtab_fns (&som_sym_fns);
 }

@@ -36,9 +36,7 @@ static void print_subexp (struct expression *, int *, struct ui_file *,
 			  enum precedence);
 
 void
-print_expression (exp, stream)
-     struct expression *exp;
-     struct ui_file *stream;
+print_expression (struct expression *exp, struct ui_file *stream)
 {
   int pc = 0;
   print_subexp (exp, &pc, stream, PREC_NULL);
@@ -50,11 +48,8 @@ print_expression (exp, stream)
    parentheses are needed here.  */
 
 static void
-print_subexp (exp, pos, stream, prec)
-     register struct expression *exp;
-     register int *pos;
-     struct ui_file *stream;
-     enum precedence prec;
+print_subexp (register struct expression *exp, register int *pos,
+	      struct ui_file *stream, enum precedence prec)
 {
   register unsigned tem;
   register const struct op_print *op_print_tab;
@@ -488,8 +483,7 @@ print_subexp (exp, pos, stream, prec)
    a string.   NULL indicates that the opcode was not found in the
    current language table.  */
 char *
-op_string (op)
-     enum exp_opcode op;
+op_string (enum exp_opcode op)
 {
   int tem;
   register const struct op_print *op_print_tab;
@@ -507,8 +501,7 @@ op_string (op)
 static char *op_name (int opcode);
 
 static char *
-op_name (opcode)
-     int opcode;
+op_name (int opcode)
 {
   switch (opcode)
     {
@@ -693,10 +686,8 @@ op_name (opcode)
 }
 
 void
-dump_prefix_expression (exp, stream, note)
-     struct expression *exp;
-     struct ui_file *stream;
-     char *note;
+dump_prefix_expression (struct expression *exp, struct ui_file *stream,
+			char *note)
 {
   int elt;
   char *opcode_name;
@@ -740,10 +731,7 @@ static int dump_subexp (struct expression *exp, struct ui_file *stream,
 			int elt);
 
 static int
-dump_subexp (exp, stream, elt)
-     struct expression *exp;
-     struct ui_file *stream;
-     int elt;
+dump_subexp (struct expression *exp, struct ui_file *stream, int elt)
 {
   static int indent = 0;
   int i;
@@ -973,10 +961,8 @@ dump_subexp (exp, stream, elt)
 }
 
 void
-dump_postfix_expression (exp, stream, note)
-     struct expression *exp;
-     struct ui_file *stream;
-     char *note;
+dump_postfix_expression (struct expression *exp, struct ui_file *stream,
+			 char *note)
 {
   int elt;
 

@@ -29,8 +29,7 @@
    Then return to command level.  */
 
 void
-perror_with_name (string)
-     char *string;
+perror_with_name (char *string)
 {
 #ifndef STDC_HEADERS
   extern int sys_nerr;

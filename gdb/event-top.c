@@ -487,7 +487,7 @@ command_handler (char *command)
   quit_flag = 0;
   if (instream == stdin && stdin_is_tty)
     reinitialize_more_filter ();
-  old_chain = make_cleanup (command_loop_marker, 0);
+  old_chain = make_cleanup (null_cleanup, 0);
 
 #if defined(TUI)
   insert_mode = 0;
@@ -1016,8 +1016,7 @@ async_do_nothing (gdb_client_data arg)
 /* Tell the event loop what to do if SIGHUP is received. 
    See event-signal.c. */
 static void
-handle_sighup (sig)
-     int sig;
+handle_sighup (int sig)
 {
   mark_async_signal_handler_wrapper (sighup_token);
   signal (sig, handle_sighup);

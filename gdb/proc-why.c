@@ -105,11 +105,8 @@ static struct trans pr_why_table[] =
 };
 
 void
-proc_prettyfprint_why (file, why, what, verbose)
-     FILE         *file;
-     unsigned long why; 
-     unsigned long what; 
-     int           verbose;
+proc_prettyfprint_why (FILE *file, unsigned long why, unsigned long what,
+		       int verbose)
 {
   int i;
 
@@ -172,10 +169,7 @@ proc_prettyfprint_why (file, why, what, verbose)
 }
 
 void
-proc_prettyprint_why (why, what, verbose)
-     unsigned long why; 
-     unsigned long what; 
-     int           verbose;
+proc_prettyprint_why (unsigned long why, unsigned long what, int verbose)
 {
   proc_prettyfprint_why (stdout, why, what, verbose);
 }

@@ -35,9 +35,8 @@
    an empty frame_saved_regs, so I guess that's better than total failure */
 
 void
-tic80_frame_find_saved_regs (fi, regaddr)
-     struct frame_info *fi;
-     struct frame_saved_regs *regaddr;
+tic80_frame_find_saved_regs (struct frame_info *fi,
+			     struct frame_saved_regs *regaddr)
 {
   memcpy (regaddr, &fi->fsr, sizeof (struct frame_saved_regs));
 }
@@ -46,8 +45,7 @@ tic80_frame_find_saved_regs (fi, regaddr)
    Find end of function prologue.  */
 
 CORE_ADDR
-tic80_skip_prologue (pc)
-     CORE_ADDR pc;
+tic80_skip_prologue (CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end;
   struct symtab_and_line sal;
@@ -80,8 +78,7 @@ tic80_skip_prologue (pc)
    This information is stored in the "extra" fields of the frame_info.  */
 
 static void
-tic80_scan_prologue (fi)
-     struct frame_info *fi;
+tic80_scan_prologue (struct frame_info *fi)
 {
   struct symtab_and_line sal;
   CORE_ADDR prologue_start, prologue_end, current_pc;
@@ -169,8 +166,7 @@ tic80_scan_prologue (fi)
    examine the prologue.  */
 
 void
-tic80_init_extra_frame_info (fi)
-     struct frame_info *fi;
+tic80_init_extra_frame_info (struct frame_info *fi)
 {
   int reg;
 
@@ -221,9 +217,7 @@ tic80_init_extra_frame_info (fi)
    caller-saves registers for an inner frame.  */
 
 CORE_ADDR
-tic80_find_callers_reg (fi, regnum)
-     struct frame_info *fi;
-     int regnum;
+tic80_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi; fi = fi->next)
     if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
@@ -241,8 +235,7 @@ tic80_find_callers_reg (fi, regnum)
    For c80, we save the frame size when we initialize the frame_info.  */
 
 CORE_ADDR
-tic80_frame_chain (fi)
-     struct frame_info *fi;
+tic80_frame_chain (struct frame_info *fi)
 {
   CORE_ADDR fn_start, callers_pc, fp;
 
@@ -271,8 +264,7 @@ tic80_frame_chain (fi)
    restoring all saved registers.  */
 
 struct frame_info *
-tic80_pop_frame (frame)
-     struct frame_info *frame;
+tic80_pop_frame (struct frame_info *frame)
 {
   int regnum;
 
@@ -303,8 +295,7 @@ tic80_pop_frame (frame)
    in the stack anywhere, otherwise we get it from the registers. */
 
 CORE_ADDR
-tic80_frame_saved_pc (fi)
-     struct frame_info *fi;
+tic80_frame_saved_pc (struct frame_info *fi)
 {
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return generic_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
@@ -318,9 +309,7 @@ tic80_frame_saved_pc (fi)
    (ie. when using an empty CALL_DUMMY) */
 
 CORE_ADDR
-tic80_push_return_address (pc, sp)
-     CORE_ADDR pc;
-     CORE_ADDR sp;
+tic80_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   write_register (LR_REGNUM, CALL_DUMMY_ADDRESS ());
   return sp;
@@ -365,12 +354,8 @@ tic80_push_return_address (pc, sp)
    passed as an implicit first argument, always in R0. */
 
 CORE_ADDR
-tic80_push_arguments (nargs, args, sp, struct_return, struct_addr)
-     int nargs;
-     value_ptr *args;
-     CORE_ADDR sp;
-     unsigned char struct_return;
-     CORE_ADDR struct_addr;
+tic80_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+		      unsigned char struct_return, CORE_ADDR struct_addr)
 {
   int stack_offset, stack_alloc;
   int argreg;
@@ -462,8 +447,7 @@ tic80_push_arguments (nargs, args, sp, struct_return, struct_addr)
    we must actually write one of those two as well, depending on PSW. */
 
 void
-tic80_write_sp (val)
-     CORE_ADDR val;
+tic80_write_sp (CORE_ADDR val)
 {
 #if 0
   unsigned long psw = read_register (PSW_REGNUM);
@@ -477,7 +461,7 @@ tic80_write_sp (val)
 }
 
 void
-_initialize_tic80_tdep ()
+_initialize_tic80_tdep (void)
 {
   tm_print_insn = print_insn_tic80;
 }

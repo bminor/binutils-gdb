@@ -28,11 +28,7 @@
 #include "serial.h"
 
 static void
-ppcbug_supply_register (regname, regnamelen, val, vallen)
-     char *regname;
-     int regnamelen;
-     char *val;
-     int vallen;
+ppcbug_supply_register (char *regname, int regnamelen, char *val, int vallen)
 {
   int regno = 0;
 
@@ -104,7 +100,7 @@ ppcbug_supply_register (regname, regnamelen, val, vallen)
  * registers either. So, typing "info reg sp" becomes an "A7".
  */
 
-static char *ppcbug_regnames[NUM_REGS] =
+static char *ppcbug_regnames[] =
 {
   "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
   "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -188,23 +184,19 @@ static struct monitor_ops ppcbug_cmds0;
 static struct monitor_ops ppcbug_cmds1;
 
 static void
-ppcbug_open0 (args, from_tty)
-     char *args;
-     int from_tty;
+ppcbug_open0 (char *args, int from_tty)
 {
   monitor_open (args, &ppcbug_cmds0, from_tty);
 }
 
 static void
-ppcbug_open1 (args, from_tty)
-     char *args;
-     int from_tty;
+ppcbug_open1 (char *args, int from_tty)
 {
   monitor_open (args, &ppcbug_cmds1, from_tty);
 }
 
 void
-_initialize_ppcbug_rom ()
+_initialize_ppcbug_rom (void)
 {
   init_ppc_cmds ("lo 0\r", &ppcbug_cmds0, &ppcbug_ops0);
   init_ppc_cmds ("lo 1\r", &ppcbug_cmds1, &ppcbug_ops1);

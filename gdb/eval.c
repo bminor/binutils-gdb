@@ -65,11 +65,8 @@ init_array_element (value_ptr, value_ptr, struct expression *,
 inline
 #endif
 static value_ptr
-evaluate_subexp (expect_type, exp, pos, noside)
-     struct type *expect_type;
-     register struct expression *exp;
-     register int *pos;
-     enum noside noside;
+evaluate_subexp (struct type *expect_type, register struct expression *exp,
+		 register int *pos, enum noside noside)
 {
   return (*exp->language_defn->evaluate_exp) (expect_type, exp, pos, noside);
 }
@@ -78,8 +75,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
    and return the result as a number.  */
 
 CORE_ADDR
-parse_and_eval_address (exp)
-     char *exp;
+parse_and_eval_address (char *exp)
 {
   struct expression *expr = parse_expression (exp);
   register CORE_ADDR addr;
@@ -95,8 +91,7 @@ parse_and_eval_address (exp)
    and advanced that variable across the characters parsed.  */
 
 CORE_ADDR
-parse_and_eval_address_1 (expptr)
-     char **expptr;
+parse_and_eval_address_1 (char **expptr)
 {
   struct expression *expr = parse_exp_1 (expptr, (struct block *) 0, 0);
   register CORE_ADDR addr;
@@ -109,8 +104,7 @@ parse_and_eval_address_1 (expptr)
 }
 
 value_ptr
-parse_and_eval (exp)
-     char *exp;
+parse_and_eval (char *exp)
 {
   struct expression *expr = parse_expression (exp);
   register value_ptr val;
@@ -127,8 +121,7 @@ parse_and_eval (exp)
    EXPP is advanced to point to the comma.  */
 
 value_ptr
-parse_to_comma_and_eval (expp)
-     char **expp;
+parse_to_comma_and_eval (char **expp)
 {
   struct expression *expr = parse_exp_1 (expp, (struct block *) 0, 1);
   register value_ptr val;
@@ -146,8 +139,7 @@ parse_to_comma_and_eval (expp)
    See expression.h for info on the format of an expression.  */
 
 value_ptr
-evaluate_expression (exp)
-     struct expression *exp;
+evaluate_expression (struct expression *exp)
 {
   int pc = 0;
   return evaluate_subexp (NULL_TYPE, exp, &pc, EVAL_NORMAL);
@@ -157,8 +149,7 @@ evaluate_expression (exp)
    and getting a value whose type alone is correct.  */
 
 value_ptr
-evaluate_type (exp)
-     struct expression *exp;
+evaluate_type (struct expression *exp)
 {
   int pc = 0;
   return evaluate_subexp (NULL_TYPE, exp, &pc, EVAL_AVOID_SIDE_EFFECTS);
@@ -168,9 +159,7 @@ evaluate_type (exp)
    returning the label.  Otherwise, does nothing and returns NULL. */
 
 static char *
-get_label (exp, pos)
-     register struct expression *exp;
-     int *pos;
+get_label (register struct expression *exp, int *pos)
 {
   if (exp->elts[*pos].opcode == OP_LABELED)
     {
@@ -188,12 +177,8 @@ get_label (exp, pos)
    (in C/C++) for structure types.  */
 
 static value_ptr
-evaluate_struct_tuple (struct_val, exp, pos, noside, nargs)
-     value_ptr struct_val;
-     register struct expression *exp;
-     register int *pos;
-     enum noside noside;
-     int nargs;
+evaluate_struct_tuple (value_ptr struct_val, register struct expression *exp,
+		       register int *pos, enum noside noside, int nargs)
 {
   struct type *struct_type = check_typedef (VALUE_TYPE (struct_val));
   struct type *substruct_type = struct_type;
@@ -335,12 +320,9 @@ evaluate_struct_tuple (struct_val, exp, pos, noside, nargs)
    Returns last index value.  */
 
 static LONGEST
-init_array_element (array, element, exp, pos, noside, low_bound, high_bound)
-     value_ptr array, element;
-     register struct expression *exp;
-     register int *pos;
-     enum noside noside;
-     LONGEST low_bound, high_bound;
+init_array_element (value_ptr array, value_ptr element,
+		    register struct expression *exp, register int *pos,
+		    enum noside noside, LONGEST low_bound, LONGEST high_bound)
 {
   LONGEST index;
   int element_size = TYPE_LENGTH (VALUE_TYPE (element));
@@ -379,11 +361,9 @@ init_array_element (array, element, exp, pos, noside, low_bound, high_bound)
 }
 
 value_ptr
-evaluate_subexp_standard (expect_type, exp, pos, noside)
-     struct type *expect_type;
-     register struct expression *exp;
-     register int *pos;
-     enum noside noside;
+evaluate_subexp_standard (struct type *expect_type,
+			  register struct expression *exp, register int *pos,
+			  enum noside noside)
 {
   enum exp_opcode op;
   int tem, tem2, tem3;
@@ -1781,10 +1761,8 @@ nosideret:
    then only the type of the result need be correct.  */
 
 static value_ptr
-evaluate_subexp_for_address (exp, pos, noside)
-     register struct expression *exp;
-     register int *pos;
-     enum noside noside;
+evaluate_subexp_for_address (register struct expression *exp, register int *pos,
+			     enum noside noside)
 {
   enum exp_opcode op;
   register int pc;
@@ -1863,10 +1841,8 @@ evaluate_subexp_for_address (exp, pos, noside)
  */
 
 value_ptr
-evaluate_subexp_with_coercion (exp, pos, noside)
-     register struct expression *exp;
-     register int *pos;
-     enum noside noside;
+evaluate_subexp_with_coercion (register struct expression *exp,
+			       register int *pos, enum noside noside)
 {
   register enum exp_opcode op;
   register int pc;
@@ -1902,9 +1878,7 @@ evaluate_subexp_with_coercion (exp, pos, noside)
    Advance *POS over the subexpression.  */
 
 static value_ptr
-evaluate_subexp_for_sizeof (exp, pos)
-     register struct expression *exp;
-     register int *pos;
+evaluate_subexp_for_sizeof (register struct expression *exp, register int *pos)
 {
   enum exp_opcode op;
   register int pc;
@@ -1954,9 +1928,7 @@ evaluate_subexp_for_sizeof (exp, pos)
 /* Parse a type expression in the string [P..P+LENGTH). */
 
 struct type *
-parse_and_eval_type (p, length)
-     char *p;
-     int length;
+parse_and_eval_type (char *p, int length)
 {
   char *tmp = (char *) alloca (length + 4);
   struct expression *expr;
@@ -1972,8 +1944,7 @@ parse_and_eval_type (p, length)
 }
 
 int
-calc_f77_array_dims (array_type)
-     struct type *array_type;
+calc_f77_array_dims (struct type *array_type)
 {
   int ndimen = 1;
   struct type *tmp_type;

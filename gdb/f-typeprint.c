@@ -59,12 +59,8 @@ void f_type_print_base (struct type *, struct ui_file *, int, int);
 /* LEVEL is the depth to indent lines by.  */
 
 void
-f_print_type (type, varstring, stream, show, level)
-     struct type *type;
-     char *varstring;
-     struct ui_file *stream;
-     int show;
-     int level;
+f_print_type (struct type *type, char *varstring, struct ui_file *stream,
+	      int show, int level)
 {
   register enum type_code code;
   int demangled_args;
@@ -103,11 +99,8 @@ f_print_type (type, varstring, stream, show, level)
    SHOW is always zero on recursive calls.  */
 
 void
-f_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
-     struct type *type;
-     struct ui_file *stream;
-     int show;
-     int passed_a_ptr;
+f_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
+			     int show, int passed_a_ptr)
 {
   if (type == 0)
     return;
@@ -161,9 +154,7 @@ f_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
 #if 0				/* Currently unused */
 
 static void
-f_type_print_args (type, stream)
-     struct type *type;
-     struct ui_file *stream;
+f_type_print_args (struct type *type, struct ui_file *stream)
 {
   int i;
   struct type **args;
@@ -201,12 +192,8 @@ f_type_print_args (type, stream)
    Args work like c_type_print_varspec_prefix.  */
 
 static void
-f_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
-     struct type *type;
-     struct ui_file *stream;
-     int show;
-     int passed_a_ptr;
-     int demangled_args;
+f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
+			     int show, int passed_a_ptr, int demangled_args)
 {
   int upper_bound, lower_bound;
   int lower_bound_was_default = 0;
@@ -312,9 +299,7 @@ f_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
 }
 
 static void
-print_equivalent_f77_float_type (type, stream)
-     struct type *type;
-     struct ui_file *stream;
+print_equivalent_f77_float_type (struct type *type, struct ui_file *stream)
 {
   /* Override type name "float" and make it the
      appropriate real. XLC stupidly outputs -12 as a type
@@ -337,11 +322,8 @@ print_equivalent_f77_float_type (type, stream)
    We increase it for some recursive calls.  */
 
 void
-f_type_print_base (type, stream, show, level)
-     struct type *type;
-     struct ui_file *stream;
-     int show;
-     int level;
+f_type_print_base (struct type *type, struct ui_file *stream, int show,
+		   int level)
 {
   int retcode;
   int upper_bound;

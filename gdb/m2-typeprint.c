@@ -37,12 +37,8 @@
 #include <errno.h>
 
 void
-m2_print_type (type, varstring, stream, show, level)
-     struct type *type;
-     char *varstring;
-     struct ui_file *stream;
-     int show;
-     int level;
+m2_print_type (struct type *type, char *varstring, struct ui_file *stream,
+	       int show, int level)
 {
   extern void c_print_type (struct type *, char *, struct ui_file *, int,
 			    int);

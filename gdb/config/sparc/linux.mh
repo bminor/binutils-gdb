@@ -1,5 +1,5 @@
 # Host: Sparcstation, running Linux
-XDEPFILES= ser-tcp.o
+XDEPFILES=
 XM_FILE= xm-linux.h
 NAT_FILE= nm-linux.h
 NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o sparc-nat.o \

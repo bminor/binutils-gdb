@@ -978,7 +978,7 @@ get_insn (CORE_ADDR pc)
 }
 
 void
-_initialize_mcore_tdep ()
+_initialize_mcore_tdep (void)
 {
   extern int print_insn_mcore (bfd_vma, disassemble_info *);
   tm_print_insn = print_insn_mcore;

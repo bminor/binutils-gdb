@@ -1412,7 +1412,7 @@ mi_load_progress (const char *section_name,
 }
 
 static void
-mi_command_loop ()
+mi_command_loop (void)
 {
   /* HACK: Force stdout/stderr to point at the console.  This avoids
      any potential side effects caused by legacy code that is still
@@ -1468,7 +1468,7 @@ mi_command_loop ()
 }
 
 static void
-setup_architecture_data ()
+setup_architecture_data (void)
 {
   /* don't trust REGISTER_BYTES to be zero. */
   old_regs = xmalloc (REGISTER_BYTES + 1);
@@ -1476,15 +1476,14 @@ setup_architecture_data ()
 }
 
 static void
-mi_init_ui (arg0)
-     char *arg0;
+mi_init_ui (char *arg0)
 {
   /* Eventually this will contain code that takes control of the
      console. */
 }
 
 void
-_initialize_mi_main ()
+_initialize_mi_main (void)
 {
   /* If we're _the_ interpreter, take control. */
   if (interpreter_p

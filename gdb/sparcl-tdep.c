@@ -91,10 +91,7 @@ static void sparclite_download (char *filename, int from_tty);
 #define DDV_MASK		0x1
 
 int
-sparclite_insert_watchpoint (addr, len, type)
-     CORE_ADDR addr;
-     int len;
-     int type;
+sparclite_insert_watchpoint (CORE_ADDR addr, int len, int type)
 {
   CORE_ADDR dcr;
 
@@ -157,10 +154,7 @@ sparclite_insert_watchpoint (addr, len, type)
 }
 
 int
-sparclite_remove_watchpoint (addr, len, type)
-     CORE_ADDR addr;
-     int len;
-     int type;
+sparclite_remove_watchpoint (CORE_ADDR addr, int len, int type)
 {
   CORE_ADDR dcr, dda1, dda2;
 
@@ -179,9 +173,7 @@ sparclite_remove_watchpoint (addr, len, type)
 }
 
 int
-sparclite_insert_hw_breakpoint (addr, len)
-     CORE_ADDR addr;
-     int len;
+sparclite_insert_hw_breakpoint (CORE_ADDR addr, int len)
 {
   CORE_ADDR dcr;
 
@@ -204,9 +196,7 @@ sparclite_insert_hw_breakpoint (addr, len)
 }
 
 int
-sparclite_remove_hw_breakpoint (addr, shadow)
-     CORE_ADDR addr;
-     int shadow;
+sparclite_remove_hw_breakpoint (CORE_ADDR addr, int shadow)
 {
   CORE_ADDR dcr, dia1, dia2;
 
@@ -225,10 +215,7 @@ sparclite_remove_hw_breakpoint (addr, shadow)
 }
 
 int
-sparclite_check_watch_resources (type, cnt, ot)
-     int type;
-     int cnt;
-     int ot;
+sparclite_check_watch_resources (int type, int cnt, int ot)
 {
   /* Watchpoints not supported on simulator.  */
   if (strcmp (target_shortname, "sim") == 0)
@@ -254,7 +241,7 @@ sparclite_check_watch_resources (type, cnt, ot)
 }
 
 CORE_ADDR
-sparclite_stopped_data_address ()
+sparclite_stopped_data_address (void)
 {
   CORE_ADDR dsr, dda1, dda2;
 
@@ -271,8 +258,7 @@ sparclite_stopped_data_address ()
 }
 
 static serial_t
-open_tty (name)
-     char *name;
+open_tty (char *name)
 {
   serial_t desc;
 
@@ -299,9 +285,7 @@ open_tty (name)
 /* Read a single character from the remote end, masking it down to 7 bits. */
 
 static int
-readchar (desc, timeout)
-     serial_t desc;
-     int timeout;
+readchar (serial_t desc, int timeout)
 {
   int ch;
   char s[10];
@@ -327,10 +311,7 @@ readchar (desc, timeout)
 }
 
 static void
-debug_serial_write (desc, buf, len)
-     serial_t desc;
-     char *buf;
-     int len;
+debug_serial_write (serial_t desc, char *buf, int len)
 {
   char s[10];
 
@@ -348,9 +329,7 @@ debug_serial_write (desc, buf, len)
 
 
 static int
-send_resp (desc, c)
-     serial_t desc;
-     char c;
+send_resp (serial_t desc, char c)
 {
   debug_serial_write (desc, &c, 1);
   return readchar (desc, remote_timeout);
@@ -369,10 +348,7 @@ close_tty (void *ignore)
 
 #ifdef HAVE_SOCKETS
 static int
-recv_udp_buf (fd, buf, len, timeout)
-     int fd, len;
-     unsigned char *buf;
-     int timeout;
+recv_udp_buf (int fd, unsigned char *buf, int len, int timeout)
 {
   int cc;
   fd_set readfds;
@@ -404,9 +380,7 @@ recv_udp_buf (fd, buf, len, timeout)
 }
 
 static int
-send_udp_buf (fd, buf, len)
-     int fd, len;
-     unsigned char *buf;
+send_udp_buf (int fd, unsigned char *buf, int len)
 {
   int cc;
 
@@ -423,9 +397,7 @@ send_udp_buf (fd, buf, len)
 #endif /* HAVE_SOCKETS */
 
 static void
-sparclite_open (name, from_tty)
-     char *name;
-     int from_tty;
+sparclite_open (char *name, int from_tty)
 {
   struct cleanup *old_chain;
   int c;
@@ -542,8 +514,7 @@ or: target sparclite udp host");
 }
 
 static void
-sparclite_close (quitting)
-     int quitting;
+sparclite_close (int quitting)
 {
   if (serial_flag)
     close_tty (0);
@@ -708,8 +679,7 @@ download (target_name, args, from_tty, write_routine, start_routine)
 }
 
 static void
-sparclite_serial_start (entry)
-     bfd_vma entry;
+sparclite_serial_start (bfd_vma entry)
 {
   char buffer[5];
   int i;
@@ -724,12 +694,8 @@ sparclite_serial_start (entry)
 }
 
 static void
-sparclite_serial_write (from_bfd, from_sec, from_addr, to_addr, len)
-     bfd *from_bfd;
-     asection *from_sec;
-     file_ptr from_addr;
-     bfd_vma to_addr;
-     int len;
+sparclite_serial_write (bfd *from_bfd, asection *from_sec, file_ptr from_addr,
+			bfd_vma to_addr, int len)
 {
   char buffer[4 + 4 + WRITESIZE];	/* addr + len + data */
   unsigned char checksum;
@@ -759,9 +725,7 @@ sparclite_serial_write (from_bfd, from_sec, from_addr, to_addr, len)
 #ifdef HAVE_SOCKETS
 
 static unsigned short
-calc_checksum (buffer, count)
-     unsigned char *buffer;
-     int count;
+calc_checksum (unsigned char *buffer, int count)
 {
   unsigned short checksum;
 
@@ -776,8 +740,7 @@ calc_checksum (buffer, count)
 }
 
 static void
-sparclite_udp_start (entry)
-     bfd_vma entry;
+sparclite_udp_start (bfd_vma entry)
 {
   unsigned char buffer[6];
   int i;
@@ -797,12 +760,8 @@ sparclite_udp_start (entry)
 }
 
 static void
-sparclite_udp_write (from_bfd, from_sec, from_addr, to_addr, len)
-     bfd *from_bfd;
-     asection *from_sec;
-     file_ptr from_addr;
-     bfd_vma to_addr;
-     int len;
+sparclite_udp_write (bfd *from_bfd, asection *from_sec, file_ptr from_addr,
+		     bfd_vma to_addr, int len)
 {
   unsigned char buffer[2000];
   unsigned short checksum;
@@ -873,9 +832,7 @@ sparclite_udp_write (from_bfd, from_sec, from_addr, to_addr, len)
 #endif /* HAVE_SOCKETS */
 
 static void
-sparclite_download (filename, from_tty)
-     char *filename;
-     int from_tty;
+sparclite_download (char *filename, int from_tty)
 {
   if (!serial_flag)
 #ifdef HAVE_SOCKETS
@@ -906,7 +863,7 @@ Specify the device it is connected to (e.g. /dev/ttya).";
 }
 
 void
-_initialize_sparcl_tdep ()
+_initialize_sparcl_tdep (void)
 {
   init_sparclite_ops ();
   add_target (&sparclite_ops);

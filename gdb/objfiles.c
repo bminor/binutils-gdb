@@ -76,10 +76,7 @@ int mapped_symbol_files;	/* Try to use mapped symbol files */
    the end of the table (objfile->sections_end). */
 
 static void
-add_to_objfile_sections (abfd, asect, objfile_p_char)
-     bfd *abfd;
-     sec_ptr asect;
-     PTR objfile_p_char;
+add_to_objfile_sections (bfd *abfd, sec_ptr asect, PTR objfile_p_char)
 {
   struct objfile *objfile = (struct objfile *) objfile_p_char;
   struct obj_section section;
@@ -119,8 +116,7 @@ add_to_objfile_sections (abfd, asect, objfile_p_char)
    we are building the table, we're pretty much hosed. */
 
 int
-build_objfile_section_table (objfile)
-     struct objfile *objfile;
+build_objfile_section_table (struct objfile *objfile)
 {
   /* objfile->sections can be already set when reading a mapped symbol
      file.  I believe that we do need to rebuild the section table in
@@ -148,9 +144,7 @@ build_objfile_section_table (objfile)
    member. */
 
 struct objfile *
-allocate_objfile (abfd, flags)
-     bfd *abfd;
-     int flags;
+allocate_objfile (bfd *abfd, int flags)
 {
   struct objfile *objfile = NULL;
   struct objfile *last_one = NULL;
@@ -331,8 +325,7 @@ allocate_objfile (abfd, flags)
 /* Put OBJFILE at the front of the list.  */
 
 void
-objfile_to_front (objfile)
-     struct objfile *objfile;
+objfile_to_front (struct objfile *objfile)
 {
   struct objfile **objp;
   for (objp = &object_files; *objp != NULL; objp = &((*objp)->next))
@@ -363,8 +356,7 @@ objfile_to_front (objfile)
    between the OBJFILE and the list. */
 
 void
-unlink_objfile (objfile)
-     struct objfile *objfile;
+unlink_objfile (struct objfile *objfile)
 {
   struct objfile **objpp;
 
@@ -399,8 +391,7 @@ unlink_objfile (objfile)
    we free objects in the reusable area. */
 
 void
-free_objfile (objfile)
-     struct objfile *objfile;
+free_objfile (struct objfile *objfile)
 {
   /* First do any symbol file specific actions required when we are
      finished with a particular symbol file.  Note that if the objfile
@@ -505,7 +496,7 @@ make_cleanup_free_objfile (struct objfile *obj)
 /* Free all the object files at once and clean up their users.  */
 
 void
-free_all_objfiles ()
+free_all_objfiles (void)
 {
   struct objfile *objfile, *temp;
 
@@ -519,9 +510,7 @@ free_all_objfiles ()
 /* Relocate OBJFILE to NEW_OFFSETS.  There should be OBJFILE->NUM_SECTIONS
    entries in new_offsets.  */
 void
-objfile_relocate (objfile, new_offsets)
-     struct objfile *objfile;
-     struct section_offsets *new_offsets;
+objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 {
   struct section_offsets *delta =
     (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
@@ -704,7 +693,7 @@ objfile_relocate (objfile, new_offsets)
    available, nonzero otherwise. */
 
 int
-have_partial_symbols ()
+have_partial_symbols (void)
 {
   struct objfile *ofp;
 
@@ -723,7 +712,7 @@ have_partial_symbols ()
    available, nonzero otherwise. */
 
 int
-have_full_symbols ()
+have_full_symbols (void)
 {
   struct objfile *ofp;
 
@@ -743,7 +732,7 @@ have_full_symbols ()
    command.
  */
 void
-objfile_purge_solibs ()
+objfile_purge_solibs (void)
 {
   struct objfile *objf;
   struct objfile *temp;
@@ -764,7 +753,7 @@ objfile_purge_solibs ()
    available, nonzero otherwise. */
 
 int
-have_minimal_symbols ()
+have_minimal_symbols (void)
 {
   struct objfile *ofp;
 
@@ -800,10 +789,7 @@ have_minimal_symbols ()
    Otherwise, returns the open file descriptor.  */
 
 static int
-open_existing_mapped_file (symsfilename, mtime, flags)
-     char *symsfilename;
-     long mtime;
-     int flags;
+open_existing_mapped_file (char *symsfilename, long mtime, int flags)
 {
   int fd = -1;
   struct stat sbuf;
@@ -855,10 +841,7 @@ open_existing_mapped_file (symsfilename, mtime, flags)
    /bin for example).  */
 
 static int
-open_mapped_file (filename, mtime, flags)
-     char *filename;
-     long mtime;
-     int flags;
+open_mapped_file (char *filename, long mtime, int flags)
 {
   int fd;
   char *symsfilename;
@@ -903,8 +886,7 @@ open_mapped_file (filename, mtime, flags)
 }
 
 static PTR
-map_to_file (fd)
-     int fd;
+map_to_file (int fd)
 {
   PTR md;
   CORE_ADDR mapto;
@@ -954,9 +936,7 @@ map_to_file (fd)
    contains a pointer to the bfd struct sec section.  */
 
 struct obj_section *
-find_pc_sect_section (pc, section)
-     CORE_ADDR pc;
-     struct sec *section;
+find_pc_sect_section (CORE_ADDR pc, struct sec *section)
 {
   struct obj_section *s;
   struct objfile *objfile;
@@ -973,8 +953,7 @@ find_pc_sect_section (pc, section)
    Backward compatibility, no section.  */
 
 struct obj_section *
-find_pc_section (pc)
-     CORE_ADDR pc;
+find_pc_section (CORE_ADDR pc)
 {
   return find_pc_sect_section (pc, find_pc_mapped_section (pc));
 }
@@ -985,9 +964,7 @@ find_pc_section (pc)
    a trampoline.  */
 
 int
-in_plt_section (pc, name)
-     CORE_ADDR pc;
-     char *name;
+in_plt_section (CORE_ADDR pc, char *name)
 {
   struct obj_section *s;
   int retval = 0;
@@ -1004,9 +981,7 @@ in_plt_section (pc, name)
    return zero.  */
 
 int
-is_in_import_list (name, objfile)
-     char *name;
-     struct objfile *objfile;
+is_in_import_list (char *name, struct objfile *objfile)
 {
   register int i;
 

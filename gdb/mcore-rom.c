@@ -83,7 +83,7 @@ ss0-ss4 bad0beef 00000000 00000000 00000000 00000000      vbr 30005c00
 
 
 int
-picobug_dumpregs ()
+picobug_dumpregs (void)
 {
   char buf[1024];
   int resp_len;
@@ -189,7 +189,7 @@ init_picobug_cmds (void)
 }
 
 void
-_initialize_picobug_rom ()
+_initialize_picobug_rom (void)
 {
   int i;
 

@@ -652,6 +652,7 @@ test "$host_alias" != "$target_alias" &&
 configdirs="gdb.asm \
             gdb.base \
             gdb.c++ \
+            gdb.java \
             gdb.disasm \
             gdb.chill \
             gdb.mi \

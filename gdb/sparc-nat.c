@@ -50,8 +50,7 @@ static void fetch_core_registers (char *, unsigned int, int, CORE_ADDR);
    marking them as valid so we won't fetch them again.  */
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   struct regs inferior_registers;
   struct fp_status inferior_fp_registers;
@@ -144,8 +143,7 @@ fetch_inferior_registers (regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   struct regs inferior_registers;
   struct fp_status inferior_fp_registers;
@@ -313,7 +311,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
 }
 
 int
-kernel_u_size ()
+kernel_u_size (void)
 {
   return (sizeof (struct user));
 }
@@ -332,7 +330,7 @@ static struct core_fns sparc_core_fns =
 };
 
 void
-_initialize_core_sparc ()
+_initialize_core_sparc (void)
 {
   add_core_fns (&sparc_core_fns);
 }

@@ -102,18 +102,14 @@ static void out_field_fmt (struct ui_out *uiout, int fldno, char *fldname,
 /* Mark beginning of a table */
 
 void
-cli_table_begin (uiout, nbrofcols, tblid)
-     struct ui_out *uiout;
-     int nbrofcols;
-     char *tblid;
+cli_table_begin (struct ui_out *uiout, int nbrofcols, char *tblid)
 {
 }
 
 /* Mark beginning of a table body */
 
 void
-cli_table_body (uiout)
-     struct ui_out *uiout;
+cli_table_body (struct ui_out *uiout)
 {
   /* first, close the table header line */
   cli_text (uiout, "\n");
@@ -122,19 +118,15 @@ cli_table_body (uiout)
 /* Mark end of a table */
 
 void
-cli_table_end (uiout)
-     struct ui_out *uiout;
+cli_table_end (struct ui_out *uiout)
 {
 }
 
 /* Specify table header */
 
 void
-cli_table_header (uiout, width, alignment, colhdr)
-     struct ui_out *uiout;
-     int width;
-     enum ui_align alignment;
-     char *colhdr;
+cli_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
+		  char *colhdr)
 {
   cli_field_string (uiout, 0, width, alignment, 0, colhdr);
 }
@@ -142,32 +134,22 @@ cli_table_header (uiout, width, alignment, colhdr)
 /* Mark beginning of a list */
 
 void
-cli_list_begin (uiout, list_flag, lstid)
-     struct ui_out *uiout;
-     int list_flag;
-     char *lstid;
+cli_list_begin (struct ui_out *uiout, int list_flag, char *lstid)
 {
 }
 
 /* Mark end of a list */
 
 void
-cli_list_end (uiout, list_flag)
-     struct ui_out *uiout;
-     int list_flag;
+cli_list_end (struct ui_out *uiout, int list_flag)
 {
 }
 
 /* output an int field */
 
 void
-cli_field_int (uiout, fldno, width, alignment, fldname, value)
-     struct ui_out *uiout;
-     int fldno;
-     int width;
-     enum ui_align alignment;
-     char *fldname;
-     int value;
+cli_field_int (struct ui_out *uiout, int fldno, int width,
+	       enum ui_align alignment, char *fldname, int value)
 {
   char buffer[20];		/* FIXME: how many chars long a %d can become? */
 
@@ -178,12 +160,8 @@ cli_field_int (uiout, fldno, width, alignment, fldname, value)
 /* used to ommit a field */
 
 void
-cli_field_skip (uiout, fldno, width, alignment, fldname)
-     struct ui_out *uiout;
-     int fldno;
-     int width;
-     enum ui_align alignment;
-     char *fldname;
+cli_field_skip (struct ui_out *uiout, int fldno, int width,
+		enum ui_align alignment, char *fldname)
 {
   cli_field_string (uiout, fldno, width, alignment, fldname, "");
 }
@@ -251,18 +229,14 @@ cli_field_fmt (struct ui_out *uiout, int fldno,
 }
 
 void
-cli_spaces (uiout, numspaces)
-     struct ui_out *uiout;
-     int numspaces;
+cli_spaces (struct ui_out *uiout, int numspaces)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   print_spaces_filtered (numspaces, data->stream);
 }
 
 void
-cli_text (uiout, string)
-     struct ui_out *uiout;
-     char *string;
+cli_text (struct ui_out *uiout, char *string)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   fputs_filtered (string, data->stream);
@@ -277,16 +251,13 @@ cli_message (struct ui_out *uiout, int verbosity, char *format, va_list args)
 }
 
 void
-cli_wrap_hint (uiout, identstring)
-     struct ui_out *uiout;
-     char *identstring;
+cli_wrap_hint (struct ui_out *uiout, char *identstring)
 {
   wrap_here (identstring);
 }
 
 void
-cli_flush (uiout)
-     struct ui_out *uiout;
+cli_flush (struct ui_out *uiout)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   gdb_flush (data->stream);
@@ -314,7 +285,7 @@ out_field_fmt (struct ui_out *uiout, int fldno, char *fldname,
 /* access to ui_out format private members */
 
 static void
-field_separator ()
+field_separator (void)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   fputc_filtered (' ', data->stream);
@@ -334,7 +305,7 @@ cli_out_new (struct ui_file *stream)
 
 /* standard gdb initialization hook */
 void
-_initialize_cli_out ()
+_initialize_cli_out (void)
 {
   /* nothing needs to be done */
 }

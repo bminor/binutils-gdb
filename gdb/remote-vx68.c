@@ -77,8 +77,7 @@ extern void net_write_registers ();
    it is ignored.  FIXME look at regno to improve efficiency.  */
 
 void
-vx_read_register (regno)
-     int regno;
+vx_read_register (int regno)
 {
   char mc68k_greg_packet[MC68K_GREG_PLEN];
   char mc68k_fpreg_packet[MC68K_FPREG_PLEN];
@@ -126,8 +125,7 @@ vx_read_register (regno)
    it is ignored.  FIXME look at regno to improve efficiency.  */
 
 void
-vx_write_register (regno)
-     int regno;
+vx_write_register (int regno)
 {
   char mc68k_greg_packet[MC68K_GREG_PLEN];
   char mc68k_fpreg_packet[MC68K_FPREG_PLEN];

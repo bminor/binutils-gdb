@@ -116,11 +116,7 @@ static ldr_process_t fake_ldr_process;
 static int ldr_read_memory (CORE_ADDR, char *, int, int);
 
 static int
-ldr_read_memory (memaddr, myaddr, len, readstring)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int readstring;
+ldr_read_memory (CORE_ADDR memaddr, char *myaddr, int len, int readstring)
 {
   int result;
   char *buffer;
@@ -221,8 +217,7 @@ static int solib_map_sections (char *);
  */
 
 static int
-solib_map_sections (arg)
-     char *arg;
+solib_map_sections (char *arg)
 {
   struct so_list *so = (struct so_list *) arg;	/* catch_errors bogon */
   char *filename;
@@ -308,7 +303,7 @@ solib_map_sections (arg)
  */
 
 static struct link_map *
-first_link_map_member ()
+first_link_map_member (void)
 {
   struct link_map *lm = NULL;
   static struct link_map first_lm;
@@ -351,8 +346,7 @@ first_link_map_member ()
 }
 
 static struct link_map *
-next_link_map_member (so_list_ptr)
-     struct so_list *so_list_ptr;
+next_link_map_member (struct so_list *so_list_ptr)
 {
   struct link_map *lm = NULL;
   static struct link_map next_lm;
@@ -393,9 +387,7 @@ next_link_map_member (so_list_ptr)
 }
 
 static void
-xfer_link_map_member (so_list_ptr, lm)
-     struct so_list *so_list_ptr;
-     struct link_map *lm;
+xfer_link_map_member (struct so_list *so_list_ptr, struct link_map *lm)
 {
   int i;
   so_list_ptr->lm = *lm;
@@ -564,8 +556,7 @@ find_solib (so_list_ptr)
 /* A small stub to get us past the arg-passing pinhole of catch_errors.  */
 
 static int
-symbol_add_stub (arg)
-     char *arg;
+symbol_add_stub (char *arg)
 {
   register struct so_list *so = (struct so_list *) arg;		/* catch_errs bogon */
   CORE_ADDR text_addr = 0;
@@ -612,10 +603,7 @@ symbol_add_stub (arg)
  */
 
 void
-solib_add (arg_string, from_tty, target)
-     char *arg_string;
-     int from_tty;
-     struct target_ops *target;
+solib_add (char *arg_string, int from_tty, struct target_ops *target)
 {
   register struct so_list *so = NULL;	/* link map state variable */
 
@@ -715,9 +703,7 @@ solib_add (arg_string, from_tty, target)
  */
 
 static void
-info_sharedlibrary_command (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+info_sharedlibrary_command (char *ignore, int from_tty)
 {
   register struct so_list *so = NULL;	/* link map state variable */
   int header_done = 0;
@@ -782,8 +768,7 @@ info_sharedlibrary_command (ignore, from_tty)
  */
 
 char *
-solib_address (address)
-     CORE_ADDR address;
+solib_address (CORE_ADDR address)
 {
   register struct so_list *so = 0;	/* link map state variable */
 
@@ -802,7 +787,7 @@ solib_address (address)
 /* Called by free_all_symtabs */
 
 void
-clear_solib ()
+clear_solib (void)
 {
   struct so_list *next;
   char *bfd_filename;
@@ -871,7 +856,7 @@ clear_solib ()
  */
 
 void
-solib_create_inferior_hook ()
+solib_create_inferior_hook (void)
 {
 
   /* Nothing to do for statically bound executables.  */
@@ -923,16 +908,14 @@ solib_create_inferior_hook ()
  */
 
 static void
-sharedlibrary_command (args, from_tty)
-     char *args;
-     int from_tty;
+sharedlibrary_command (char *args, int from_tty)
 {
   dont_repeat ();
   solib_add (args, from_tty, (struct target_ops *) 0);
 }
 
 void
-_initialize_solib ()
+_initialize_solib (void)
 {
   add_com ("sharedlibrary", class_files, sharedlibrary_command,
 	   "Load shared object library symbols for files matching REGEXP.");

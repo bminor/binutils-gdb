@@ -112,7 +112,7 @@ d30v_frame_chain_valid (chain, fi)
    registers.  */
 
 void
-d30v_pop_frame ()
+d30v_pop_frame (void)
 {
   struct frame_info *frame = get_current_frame ();
   CORE_ADDR fp;
@@ -159,8 +159,7 @@ d30v_pop_frame ()
 }
 
 static int
-check_prologue (op)
-     unsigned long op;
+check_prologue (unsigned long op)
 {
   /* add sp,sp,imm -- observed */
   if ((op & OP_MASK_ALL_BUT_IMM) == OP_ADD_SP_IMM)
@@ -234,8 +233,7 @@ check_prologue (op)
 }
 
 CORE_ADDR
-d30v_skip_prologue (pc)
-     CORE_ADDR pc;
+d30v_skip_prologue (CORE_ADDR pc)
 {
   unsigned long op[2];
   unsigned long opl, opr;	/* left / right sub operations */
@@ -320,8 +318,7 @@ static int end_of_stack;
  */
 
 CORE_ADDR
-d30v_frame_chain (frame)
-     struct frame_info *frame;
+d30v_frame_chain (struct frame_info *frame)
 {
   struct frame_saved_regs fsr;
 
@@ -351,10 +348,8 @@ static int next_addr, uses_frame;
 static int frame_size;
 
 static int
-prologue_find_regs (op, fsr, addr)
-     unsigned long op;
-     struct frame_saved_regs *fsr;
-     CORE_ADDR addr;
+prologue_find_regs (unsigned long op, struct frame_saved_regs *fsr,
+		    CORE_ADDR addr)
 {
   int n;
   int offset;
@@ -503,9 +498,7 @@ prologue_find_regs (op, fsr, addr)
    ways in the stack frame.  sp is even more special: the address we
    return for it IS the sp for the next frame. */
 void
-d30v_frame_find_saved_regs (fi, fsr)
-     struct frame_info *fi;
-     struct frame_saved_regs *fsr;
+d30v_frame_find_saved_regs (struct frame_info *fi, struct frame_saved_regs *fsr)
 {
   CORE_ADDR fp, pc;
   unsigned long opl, opr;
@@ -556,9 +549,8 @@ d30v_frame_find_saved_regs (fi, fsr)
 }
 
 void
-d30v_frame_find_saved_regs_offsets (fi, fsr)
-     struct frame_info *fi;
-     struct frame_saved_regs *fsr;
+d30v_frame_find_saved_regs_offsets (struct frame_info *fi,
+				    struct frame_saved_regs *fsr)
 {
   CORE_ADDR fp, pc;
   unsigned long opl, opr;
@@ -677,9 +669,7 @@ d30v_frame_find_saved_regs_offsets (fi, fsr)
 }
 
 void
-d30v_init_extra_frame_info (fromleaf, fi)
-     int fromleaf;
-     struct frame_info *fi;
+d30v_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   struct frame_saved_regs dummy;
 
@@ -709,9 +699,7 @@ d30v_init_extra_frame_info (fromleaf, fi)
 }
 
 void
-d30v_init_frame_pc (fromleaf, prev)
-     int fromleaf;
-     struct frame_info *prev;
+d30v_init_frame_pc (int fromleaf, struct frame_info *prev)
 {
   /* default value, put here so we can breakpoint on it and
      see if the default value is really the right thing to use */
@@ -722,9 +710,7 @@ d30v_init_frame_pc (fromleaf, prev)
 static void d30v_print_register (int regnum, int tabular);
 
 static void
-d30v_print_register (regnum, tabular)
-     int regnum;
-     int tabular;
+d30v_print_register (int regnum, int tabular)
 {
   if (regnum < A0_REGNUM)
     {
@@ -754,7 +740,7 @@ d30v_print_register (regnum, tabular)
 }
 
 static void
-d30v_print_flags ()
+d30v_print_flags (void)
 {
   long psw = read_register (PSW_REGNUM);
   printf_filtered ("flags #1");
@@ -778,17 +764,13 @@ d30v_print_flags ()
 }
 
 static void
-print_flags_command (args, from_tty)
-     char *args;
-     int from_tty;
+print_flags_command (char *args, int from_tty)
 {
   d30v_print_flags ();
 }
 
 void
-d30v_do_registers_info (regnum, fpregs)
-     int regnum;
-     int fpregs;
+d30v_do_registers_info (int regnum, int fpregs)
 {
   long long num1, num2;
   long psw;
@@ -886,14 +868,8 @@ d30v_do_registers_info (regnum, fpregs)
 }
 
 CORE_ADDR
-d30v_fix_call_dummy (dummyname, start_sp, fun, nargs, args, type, gcc_p)
-     char *dummyname;
-     CORE_ADDR start_sp;
-     CORE_ADDR fun;
-     int nargs;
-     value_ptr *args;
-     struct type *type;
-     int gcc_p;
+d30v_fix_call_dummy (char *dummyname, CORE_ADDR start_sp, CORE_ADDR fun,
+		     int nargs, value_ptr *args, struct type *type, int gcc_p)
 {
   int regnum;
   CORE_ADDR sp;
@@ -916,8 +892,7 @@ d30v_fix_call_dummy (dummyname, start_sp, fun, nargs, args, type, gcc_p)
 }
 
 static void
-d30v_pop_dummy_frame (fi)
-     struct frame_info *fi;
+d30v_pop_dummy_frame (struct frame_info *fi)
 {
   CORE_ADDR sp = fi->dummy;
   int regnum;
@@ -932,12 +907,8 @@ d30v_pop_dummy_frame (fi)
 
 
 CORE_ADDR
-d30v_push_arguments (nargs, args, sp, struct_return, struct_addr)
-     int nargs;
-     value_ptr *args;
-     CORE_ADDR sp;
-     int struct_return;
-     CORE_ADDR struct_addr;
+d30v_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+		     int struct_return, CORE_ADDR struct_addr)
 {
   int i, len, index = 0, regnum = 2;
   char buffer[4], *contents;
@@ -1035,7 +1006,7 @@ d30v_push_arguments (nargs, args, sp, struct_return, struct_addr)
 /* restored. */
 
 CORE_ADDR
-d30v_call_dummy_address ()
+d30v_call_dummy_address (void)
 {
   CORE_ADDR entry;
   struct minimal_symbol *sym;
@@ -1126,9 +1097,7 @@ struct trace_buffer
 trace_data;
 
 static void
-trace_command (args, from_tty)
-     char *args;
-     int from_tty;
+trace_command (char *args, int from_tty)
 {
   /* Clear the host-side trace buffer, allocating space if needed.  */
   trace_data.size = 0;
@@ -1143,9 +1112,7 @@ trace_command (args, from_tty)
 }
 
 static void
-untrace_command (args, from_tty)
-     char *args;
-     int from_tty;
+untrace_command (char *args, int from_tty)
 {
   tracing = 0;
 
@@ -1153,9 +1120,7 @@ untrace_command (args, from_tty)
 }
 
 static void
-trace_info (args, from_tty)
-     char *args;
-     int from_tty;
+trace_info (char *args, int from_tty)
 {
   int i;
 
@@ -1181,9 +1146,7 @@ trace_info (args, from_tty)
    on STREAM.  Returns length of the instruction, in bytes.  */
 
 static int
-print_insn (memaddr, stream)
-     CORE_ADDR memaddr;
-     struct ui_file *stream;
+print_insn (CORE_ADDR memaddr, struct ui_file *stream)
 {
   /* If there's no disassembler, something is very wrong.  */
   if (tm_print_insn == NULL)
@@ -1197,7 +1160,7 @@ print_insn (memaddr, stream)
 }
 
 void
-d30v_eva_prepare_to_trace ()
+d30v_eva_prepare_to_trace (void)
 {
   if (!tracing)
     return;
@@ -1209,7 +1172,7 @@ d30v_eva_prepare_to_trace ()
    more useful for display.  */
 
 void
-d30v_eva_get_trace_data ()
+d30v_eva_get_trace_data (void)
 {
   int count, i, j, oldsize;
   int trace_addr, trace_seg, trace_cnt, next_cnt;
@@ -1269,9 +1232,7 @@ d30v_eva_get_trace_data ()
 }
 
 static void
-tdisassemble_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+tdisassemble_command (char *arg, int from_tty)
 {
   int i, count;
   CORE_ADDR low, high;
@@ -1308,8 +1269,7 @@ tdisassemble_command (arg, from_tty)
 }
 
 static void
-display_trace (low, high)
-     int low, high;
+display_trace (int low, int high)
 {
   int i, count, trace_show_source, first, suppress;
   CORE_ADDR next_address;
@@ -1369,7 +1329,7 @@ extern void (*target_resume_hook) (void);
 extern void (*target_wait_loop_hook) (void);
 
 void
-_initialize_d30v_tdep ()
+_initialize_d30v_tdep (void)
 {
   tm_print_insn = print_insn_d30v;
 

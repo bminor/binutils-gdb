@@ -52,9 +52,7 @@ char *mac_input_buffer;
 char *mac_output_buffer;
 
 static int
-mac_open (scb, name)
-     serial_t scb;
-     const char *name;
+mac_open (serial_t scb, const char *name)
 {
   OSErr err;
 
@@ -131,15 +129,13 @@ mac_open (scb, name)
 }
 
 static int
-mac_noop (scb)
-     serial_t scb;
+mac_noop (serial_t scb)
 {
   return 0;
 }
 
 static void
-mac_raw (scb)
-     serial_t scb;
+mac_raw (serial_t scb)
 {
   /* Always effectively in raw mode. */
 }
@@ -150,9 +146,7 @@ mac_raw (scb)
    dead, or -3 for any other error (see errno in that case). */
 
 static int
-mac_readchar (scb, timeout)
-     serial_t scb;
-     int timeout;
+mac_readchar (serial_t scb, int timeout)
 {
   int status, n;
   /* time_t */ unsigned long start_time, now;
@@ -204,8 +198,7 @@ mac_readchar (scb, timeout)
    vector.  Someday, they may do something real... */
 
 static serial_ttystate
-mac_get_tty_state (scb)
-     serial_t scb;
+mac_get_tty_state (serial_t scb)
 {
   struct mac_ttystate *state;
 
@@ -215,18 +208,14 @@ mac_get_tty_state (scb)
 }
 
 static int
-mac_set_tty_state (scb, ttystate)
-     serial_t scb;
-     serial_ttystate ttystate;
+mac_set_tty_state (serial_t scb, serial_ttystate ttystate)
 {
   return 0;
 }
 
 static int
-mac_noflush_set_tty_state (scb, new_ttystate, old_ttystate)
-     serial_t scb;
-     serial_ttystate new_ttystate;
-     serial_ttystate old_ttystate;
+mac_noflush_set_tty_state (serial_t scb, serial_ttystate new_ttystate,
+			   serial_ttystate old_ttystate)
 {
   return 0;
 }
@@ -305,9 +294,7 @@ mac_baud_rate_table[] =
 };
 
 static int
-mac_set_baud_rate (scb, rate)
-     serial_t scb;
-     int rate;
+mac_set_baud_rate (serial_t scb, int rate)
 {
   int i, bits;
 
@@ -324,9 +311,7 @@ mac_set_baud_rate (scb, rate)
 }
 
 static int
-mac_set_stop_bits (scb, num)
-     serial_t scb;
-     int num;
+mac_set_stop_bits (serial_t scb, int num)
 {
   return 0;
 }
@@ -334,10 +319,7 @@ mac_set_stop_bits (scb, num)
 int first_mac_write = 0;
 
 static int
-mac_write (scb, str, len)
-     serial_t scb;
-     const char *str;
-     int len;
+mac_write (serial_t scb, const char *str, int len)
 {
   OSErr err;
   IOParam pb;
@@ -398,7 +380,7 @@ static struct serial_ops mac_ops =
 };
 
 void
-_initialize_ser_mac ()
+_initialize_ser_mac (void)
 {
   serial_add_interface (&mac_ops);
 }

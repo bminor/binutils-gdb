@@ -30,8 +30,7 @@
    system calls use a different calling sequence.  */
 
 CORE_ADDR
-i386lynx_saved_pc_after_call (frame)
-     struct frame_info *frame;
+i386lynx_saved_pc_after_call (struct frame_info *frame)
 {
   char opcode[7];
   static const unsigned char call_inst[] =

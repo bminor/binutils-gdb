@@ -60,7 +60,7 @@ static struct hpnlist nl[] =
 
 /* read the value of the u area from the hp-ux kernel */
 void
-_initialize_hp300ux_nat ()
+_initialize_hp300ux_nat (void)
 {
 #ifndef HPUX_VERSION_5
   nlist ("/hp-ux", nl);
@@ -77,9 +77,7 @@ _initialize_hp300ux_nat ()
    - kernel_u_addr)
 
 static void
-fetch_inferior_register (regno, regaddr)
-     register int regno;
-     register unsigned int regaddr;
+fetch_inferior_register (register int regno, register unsigned int regaddr)
 {
 #ifndef HPUX_VERSION_5
   if (regno == PS_REGNUM)
@@ -115,10 +113,7 @@ fetch_inferior_register (regno, regaddr)
 }
 
 static void
-store_inferior_register_1 (regno, regaddr, val)
-     int regno;
-     unsigned int regaddr;
-     int val;
+store_inferior_register_1 (int regno, unsigned int regaddr, int val)
 {
   errno = 0;
   ptrace (PT_WUAREA, inferior_pid, (PTRACE_ARG3_TYPE) regaddr, val, 0);
@@ -137,9 +132,7 @@ store_inferior_register_1 (regno, regaddr, val)
 }
 
 static void
-store_inferior_register (regno, regaddr)
-     register int regno;
-     register unsigned int regaddr;
+store_inferior_register (register int regno, register unsigned int regaddr)
 {
 #ifndef HPUX_VERSION_5
   if (regno == PS_REGNUM)
@@ -173,8 +166,7 @@ store_inferior_register (regno, regaddr)
 }
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   struct user u;
   register unsigned int ar0_offset;
@@ -199,8 +191,7 @@ fetch_inferior_registers (regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-store_inferior_registers (regno)
-     register int regno;
+store_inferior_registers (register int regno)
 {
   struct user u;
   register unsigned int ar0_offset;
@@ -226,7 +217,7 @@ store_inferior_registers (regno)
 }
 
 int
-getpagesize ()
+getpagesize (void)
 {
   return 4096;
 }

@@ -216,7 +216,7 @@ load_kod_library (char *lib)
 }
 
 void
-_initialize_kod ()
+_initialize_kod (void)
 {
   struct cmd_list_element *c;
 

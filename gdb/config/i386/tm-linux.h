@@ -136,5 +136,22 @@ extern CORE_ADDR i386_linux_skip_solib_resolver (CORE_ADDR pc);
 /* N_FUN symbols in shared libaries have 0 for their values and need
    to be relocated. */
 #define SOFUN_ADDRESS_MAYBE_MISSING
+
+
+/* Support for longjmp.  */
+
+/* Details about jmp_buf.  It's supposed to be an array of integers.  */
+
+#define JB_ELEMENT_SIZE 4	/* Size of elements in jmp_buf.  */
+#define JB_PC		5	/* Array index of saved PC.  */
+
+/* Figure out where the longjmp will land.  Slurp the args out of the
+   stack.  We expect the first arg to be a pointer to the jmp_buf
+   structure from which we extract the pc (JB_PC) that we will land
+   at.  The pc is copied into ADDR.  This routine returns true on
+   success.  */
+
+#define GET_LONGJMP_TARGET(addr) get_longjmp_target (addr)
+extern int get_longjmp_target (CORE_ADDR *addr);
 
 #endif /* #ifndef TM_LINUX_H */

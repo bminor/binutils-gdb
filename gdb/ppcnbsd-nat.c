@@ -34,8 +34,7 @@
         memcpy(&dst, &registers[REGISTER_BYTE(src)], sizeof(dst))
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   struct reg inferior_registers;
   struct fpreg inferior_fp_registers;
@@ -60,8 +59,7 @@ fetch_inferior_registers (regno)
 }
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   struct reg inferior_registers;
   struct fpreg inferior_fp_registers;
@@ -91,11 +89,8 @@ struct md_core
 };
 
 void
-fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     CORE_ADDR ignore;
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
+		      CORE_ADDR ignore)
 {
   struct md_core *core_reg = (struct md_core *) core_reg_sect;
   int i;
@@ -129,7 +124,7 @@ static struct core_fns ppcnbsd_core_fns =
 };
 
 void
-_initialize_ppcnbsd_nat ()
+_initialize_ppcnbsd_nat (void)
 {
   add_core_fns (&ppcnbsd_core_fns);
 }

@@ -36,9 +36,7 @@ static void java_type_print_base (struct type * type,
 				  int level);
 
 static void
-java_type_print_derivation_info (stream, type)
-     struct ui_file *stream;
-     struct type *type;
+java_type_print_derivation_info (struct ui_file *stream, struct type *type)
 {
   char *name;
   int i;
@@ -84,11 +82,8 @@ java_type_print_derivation_info (stream, type)
    We increase it for some recursive calls.  */
 
 static void
-java_type_print_base (type, stream, show, level)
-     struct type *type;
-     struct ui_file *stream;
-     int show;
-     int level;
+java_type_print_base (struct type *type, struct ui_file *stream, int show,
+		      int level)
 {
   register int i;
   register int len;
@@ -329,12 +324,8 @@ extern void c_type_print_varspec_suffix (struct type *, struct ui_file *,
 					 int, int, int);
 
 void
-java_print_type (type, varstring, stream, show, level)
-     struct type *type;
-     char *varstring;
-     struct ui_file *stream;
-     int show;
-     int level;
+java_print_type (struct type *type, char *varstring, struct ui_file *stream,
+		 int show, int level)
 {
   int demangled_args;
 

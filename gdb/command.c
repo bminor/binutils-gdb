@@ -145,9 +145,7 @@ add_cmd (name, class, fun, doc, list)
    Returns a pointer to the deprecated command.  */
 
 struct cmd_list_element *
-deprecate_cmd (cmd, replacement)
-     struct cmd_list_element *cmd;
-     char *replacement;
+deprecate_cmd (struct cmd_list_element *cmd, char *replacement)
 {
   cmd->flags |= (CMD_DEPRECATED | DEPRECATED_WARN_USER);
 
@@ -182,12 +180,8 @@ add_abbrev_cmd (name, class, fun, doc, list)
 #endif
 
 struct cmd_list_element *
-add_alias_cmd (name, oldname, class, abbrev_flag, list)
-     char *name;
-     char *oldname;
-     enum command_class class;
-     int abbrev_flag;
-     struct cmd_list_element **list;
+add_alias_cmd (char *name, char *oldname, enum command_class class,
+	       int abbrev_flag, struct cmd_list_element **list)
 {
   /* Must do this since lookup_cmd tries to side-effect its first arg */
   char *copied_name;
@@ -260,9 +254,7 @@ add_abbrev_prefix_cmd (name, class, fun, doc, prefixlist, prefixname,
 
 /* This is an empty "cfunc".  */
 void
-not_just_help_class_command (args, from_tty)
-     char *args;
-     int from_tty;
+not_just_help_class_command (char *args, int from_tty)
 {
 }
 
@@ -270,10 +262,7 @@ not_just_help_class_command (args, from_tty)
 static void empty_sfunc (char *, int, struct cmd_list_element *);
 
 static void
-empty_sfunc (args, from_tty, c)
-     char *args;
-     int from_tty;
-     struct cmd_list_element *c;
+empty_sfunc (char *args, int from_tty, struct cmd_list_element *c)
 {
 }
 
@@ -315,8 +304,8 @@ add_set_cmd (char *name,
 struct cmd_list_element *
 add_set_enum_cmd (char *name,
 		  enum command_class class,
-		  char *enumlist[],
-		  char **var,
+		  const char *enumlist[],
+		  const char **var,
 		  char *doc,
 		  struct cmd_list_element **list)
 {
@@ -327,13 +316,31 @@ add_set_enum_cmd (char *name,
   return c;
 }
 
+/* Add element named NAME to command list LIST (the list for set
+   or some sublist thereof).
+   CLASS is as in add_cmd.
+   VAR is address of the variable which will contain the value.
+   DOC is the documentation string.  */
+struct cmd_list_element *
+add_set_auto_boolean_cmd (char *name,
+			  enum command_class class,
+			  enum cmd_auto_boolean *var,
+			  char *doc,
+			  struct cmd_list_element **list)
+{
+  static const char *auto_boolean_enums[] = { "on", "off", "auto", NULL };
+  struct cmd_list_element *c;
+  c = add_set_cmd (name, class, var_auto_boolean, var, doc, list);
+  c->enums = auto_boolean_enums;
+  return c;
+}
+
 /* Where SETCMD has already been added, add the corresponding show
    command to LIST and return a pointer to the added command (not 
    necessarily the head of LIST).  */
 struct cmd_list_element *
-add_show_from_set (setcmd, list)
-     struct cmd_list_element *setcmd;
-     struct cmd_list_element **list;
+add_show_from_set (struct cmd_list_element *setcmd,
+		   struct cmd_list_element **list)
 {
   struct cmd_list_element *showcmd =
   (struct cmd_list_element *) xmalloc (sizeof (struct cmd_list_element));
@@ -372,9 +379,7 @@ add_show_from_set (setcmd, list)
 /* Remove the command named NAME from the command list.  */
 
 void
-delete_cmd (name, list)
-     char *name;
-     struct cmd_list_element **list;
+delete_cmd (char *name, struct cmd_list_element **list)
 {
   register struct cmd_list_element *c;
   struct cmd_list_element *p;
@@ -497,9 +502,7 @@ apropos_command (char *searchstr, int from_tty)
  */
 
 void
-help_cmd (command, stream)
-     char *command;
-     struct ui_file *stream;
+help_cmd (char *command, struct ui_file *stream)
 {
   struct cmd_list_element *c;
   extern struct cmd_list_element *cmdlist;
@@ -566,11 +569,8 @@ help_cmd (command, stream)
  * If you call this routine with a class >= 0, it recurses.
  */
 void
-help_list (list, cmdtype, class, stream)
-     struct cmd_list_element *list;
-     char *cmdtype;
-     enum command_class class;
-     struct ui_file *stream;
+help_list (struct cmd_list_element *list, char *cmdtype,
+	   enum command_class class, struct ui_file *stream)
 {
   int len;
   char *cmdtype1, *cmdtype2;
@@ -630,9 +630,7 @@ help_all (struct ui_file *stream)
 
 /* Print only the first line of STR on STREAM.  */
 static void
-print_doc_line (stream, str)
-     struct ui_file *stream;
-     char *str;
+print_doc_line (struct ui_file *stream, char *str)
 {
   static char *line_buffer = 0;
   static int line_size;
@@ -681,12 +679,8 @@ print_doc_line (stream, str)
  * is at the low level, not the high-level).
  */
 void
-help_cmd_list (list, class, prefix, recurse, stream)
-     struct cmd_list_element *list;
-     enum command_class class;
-     char *prefix;
-     int recurse;
-     struct ui_file *stream;
+help_cmd_list (struct cmd_list_element *list, enum command_class class,
+	       char *prefix, int recurse, struct ui_file *stream)
 {
   register struct cmd_list_element *c;
 
@@ -714,12 +708,8 @@ help_cmd_list (list, class, prefix, recurse, stream)
    found in nfound */
 
 static struct cmd_list_element *
-find_cmd (command, len, clist, ignore_help_classes, nfound)
-     char *command;
-     int len;
-     struct cmd_list_element *clist;
-     int ignore_help_classes;
-     int *nfound;
+find_cmd (char *command, int len, struct cmd_list_element *clist,
+	  int ignore_help_classes, int *nfound)
 {
   struct cmd_list_element *found, *c;
 
@@ -777,10 +767,8 @@ find_cmd (command, len, clist, ignore_help_classes, nfound)
    the struct cmd_list_element is NULL).  */
 
 struct cmd_list_element *
-lookup_cmd_1 (text, clist, result_list, ignore_help_classes)
-     char **text;
-     struct cmd_list_element *clist, **result_list;
-     int ignore_help_classes;
+lookup_cmd_1 (char **text, struct cmd_list_element *clist,
+	      struct cmd_list_element **result_list, int ignore_help_classes)
 {
   char *p, *command;
   int len, tmp, nfound;
@@ -912,8 +900,7 @@ lookup_cmd_1 (text, clist, result_list, ignore_help_classes)
 /* All this hair to move the space to the front of cmdtype */
 
 static void
-undef_cmd_error (cmdtype, q)
-     char *cmdtype, *q;
+undef_cmd_error (char *cmdtype, char *q)
 {
   error ("Undefined %scommand: \"%s\".  Try \"help%s%.*s\".",
 	 cmdtype,
@@ -938,12 +925,8 @@ undef_cmd_error (cmdtype, q)
    the function field of the struct cmd_list_element is 0).  */
 
 struct cmd_list_element *
-lookup_cmd (line, list, cmdtype, allow_unknown, ignore_help_classes)
-     char **line;
-     struct cmd_list_element *list;
-     char *cmdtype;
-     int allow_unknown;
-     int ignore_help_classes;
+lookup_cmd (char **line, struct cmd_list_element *list, char *cmdtype,
+	    int allow_unknown, int ignore_help_classes)
 {
   struct cmd_list_element *last_list = 0;
   struct cmd_list_element *c =
@@ -1260,11 +1243,8 @@ lookup_cmd_composition (char *text,
    CMDTYPE precedes the word "command" in the error message.  */
 
 struct cmd_list_element *
-lookup_cmd (line, list, cmdtype, allow_unknown)
-     char **line;
-     struct cmd_list_element *list;
-     char *cmdtype;
-     int allow_unknown;
+lookup_cmd (char **line, struct cmd_list_element *list, char *cmdtype,
+	    int allow_unknown)
 {
   register char *p;
   register struct cmd_list_element *c, *found;
@@ -1396,10 +1376,7 @@ lookup_cmd (line, list, cmdtype, allow_unknown)
    "oobar"; if WORD is "baz/foo", return "baz/foobar".  */
 
 char **
-complete_on_cmdlist (list, text, word)
-     struct cmd_list_element *list;
-     char *text;
-     char *word;
+complete_on_cmdlist (struct cmd_list_element *list, char *text, char *word)
 {
   struct cmd_list_element *ptr;
   char **matchlist;
@@ -1470,17 +1447,16 @@ complete_on_cmdlist (list, text, word)
    "oobar"; if WORD is "baz/foo", return "baz/foobar".  */
 
 char **
-complete_on_enum (enumlist, text, word)
-     char **enumlist;
-     char *text;
-     char *word;
+complete_on_enum (const char *enumlist[],
+		  char *text,
+		  char *word)
 {
   char **matchlist;
   int sizeof_matchlist;
   int matches;
   int textlen = strlen (text);
   int i;
-  char *name;
+  const char *name;
 
   sizeof_matchlist = 10;
   matchlist = (char **) xmalloc (sizeof_matchlist * sizeof (char *));
@@ -1531,9 +1507,34 @@ complete_on_enum (enumlist, text, word)
   return matchlist;
 }
 
+static enum cmd_auto_boolean
+parse_auto_binary_operation (const char *arg)
+{
+  if (arg != NULL && *arg != '\0')
+    {
+      int length = strlen (arg);
+      while (isspace (arg[length - 1]) && length > 0)
+	length--;
+      if (strncmp (arg, "on", length) == 0
+	  || strncmp (arg, "1", length) == 0
+	  || strncmp (arg, "yes", length) == 0
+	  || strncmp (arg, "enable", length) == 0)
+	return CMD_AUTO_BOOLEAN_TRUE;
+      else if (strncmp (arg, "off", length) == 0
+	       || strncmp (arg, "0", length) == 0
+	       || strncmp (arg, "no", length) == 0
+	       || strncmp (arg, "disable", length) == 0)
+	return CMD_AUTO_BOOLEAN_FALSE;
+      else if (strncmp (arg, "auto", length) == 0
+	       || (strncmp (arg, "-1", length) == 0 && length > 1))
+	return CMD_AUTO_BOOLEAN_AUTO;
+    }
+  error ("\"on\", \"off\" or \"auto\" expected.");
+  return CMD_AUTO_BOOLEAN_AUTO; /* pacify GCC */
+}
+
 static int
-parse_binary_operation (arg)
-     char *arg;
+parse_binary_operation (char *arg)
 {
   int length;
 
@@ -1545,13 +1546,15 @@ parse_binary_operation (arg)
   while (arg[length - 1] == ' ' || arg[length - 1] == '\t')
     length--;
 
-  if (!strncmp (arg, "on", length)
-      || !strncmp (arg, "1", length)
-      || !strncmp (arg, "yes", length))
+  if (strncmp (arg, "on", length) == 0
+      || strncmp (arg, "1", length) == 0
+      || strncmp (arg, "yes", length) == 0
+      || strncmp (arg, "enable", length) == 0)
     return 1;
-  else if (!strncmp (arg, "off", length)
-	   || !strncmp (arg, "0", length)
-	   || !strncmp (arg, "no", length))
+  else if (strncmp (arg, "off", length) == 0
+	   || strncmp (arg, "0", length) == 0
+	   || strncmp (arg, "no", length) == 0
+	   || strncmp (arg, "disable", length) == 0)
     return 0;
   else
     {
@@ -1565,10 +1568,7 @@ parse_binary_operation (arg)
    directly by the user (i.e. these are just like any other
    command).  C is the command list element for the command.  */
 void
-do_setshow_command (arg, from_tty, c)
-     char *arg;
-     int from_tty;
-     struct cmd_list_element *c;
+do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 {
   if (c->type == set_cmd)
     {
@@ -1636,6 +1636,9 @@ do_setshow_command (arg, from_tty, c)
 	case var_boolean:
 	  *(int *) c->var = parse_binary_operation (arg);
 	  break;
+	case var_auto_boolean:
+	  *(enum cmd_auto_boolean *) c->var = parse_auto_binary_operation (arg);
+	  break;
 	case var_uinteger:
 	  if (arg == NULL)
 	    error_no_arg ("integer to set it to.");
@@ -1667,7 +1670,7 @@ do_setshow_command (arg, from_tty, c)
 	    int i;
 	    int len;
 	    int nmatches;
-	    char *match = NULL;
+	    const char *match = NULL;
 	    char *p;
 
 	    /* if no argument was supplied, print an informative error message */
@@ -1696,8 +1699,17 @@ do_setshow_command (arg, from_tty, c)
 	    for (i = 0; c->enums[i]; i++)
 	      if (strncmp (arg, c->enums[i], len) == 0)
 		{
-		  match = c->enums[i];
-		  nmatches++;
+		  if (c->enums[i][len] == '\0')
+		    {
+		      match = c->enums[i];
+		      nmatches = 1;
+		      break; /* exact match. */
+		    }
+		  else
+		    {
+		      match = c->enums[i];
+		      nmatches++;
+		    }
 		}
 
 	    if (nmatches <= 0)
@@ -1706,7 +1718,7 @@ do_setshow_command (arg, from_tty, c)
 	    if (nmatches > 1)
 	      error ("Ambiguous item \"%s\".", arg);
 
-	    *(char **) c->var = match;
+	    *(const char **) c->var = match;
 	  }
 	  break;
 	default:
@@ -1751,6 +1763,23 @@ do_setshow_command (arg, from_tty, c)
 	  break;
 	case var_boolean:
 	  fputs_filtered (*(int *) c->var ? "on" : "off", stb->stream);
+	  break;
+	case var_auto_boolean:
+	  switch (*(enum cmd_auto_boolean*) c->var)
+	    {
+	    case CMD_AUTO_BOOLEAN_TRUE:
+	      fputs_filtered ("on", stb->stream);
+	      break;
+	    case CMD_AUTO_BOOLEAN_FALSE:
+	      fputs_filtered ("off", stb->stream);
+	      break;
+	    case CMD_AUTO_BOOLEAN_AUTO:
+	      fputs_filtered ("auto", stb->stream);
+	      break;
+	    default:
+	      internal_error ("do_setshow_command: invalid var_auto_boolean");
+	      break;
+	    }
 	  break;
 	case var_uinteger:
 	  if (*(unsigned int *) c->var == UINT_MAX)
@@ -1805,6 +1834,23 @@ do_setshow_command (arg, from_tty, c)
 	case var_boolean:
 	  fputs_filtered (*(int *) c->var ? "on" : "off", gdb_stdout);
 	  break;
+	case var_auto_boolean:
+	  switch (*(enum cmd_auto_boolean*) c->var)
+	    {
+	    case CMD_AUTO_BOOLEAN_TRUE:
+	      fputs_filtered ("on", gdb_stdout);
+	      break;
+	    case CMD_AUTO_BOOLEAN_FALSE:
+	      fputs_filtered ("off", gdb_stdout);
+	      break;
+	    case CMD_AUTO_BOOLEAN_AUTO:
+	      fputs_filtered ("auto", gdb_stdout);
+	      break;
+	    default:
+	      internal_error ("do_setshow_command: invalid var_auto_boolean");
+	      break;
+	    }
+	  break;
 	case var_uinteger:
 	  if (*(unsigned int *) c->var == UINT_MAX)
 	    {
@@ -1840,10 +1886,7 @@ do_setshow_command (arg, from_tty, c)
 /* Show all the settings in a list of show commands.  */
 
 void
-cmd_show_list (list, from_tty, prefix)
-     struct cmd_list_element *list;
-     int from_tty;
-     char *prefix;
+cmd_show_list (struct cmd_list_element *list, int from_tty, char *prefix)
 {
 #ifdef UI_OUT
   ui_out_list_begin (uiout, "showlist");
@@ -1888,9 +1931,7 @@ cmd_show_list (list, from_tty, prefix)
 
 /* ARGSUSED */
 static void
-shell_escape (arg, from_tty)
-     char *arg;
-     int from_tty;
+shell_escape (char *arg, int from_tty)
 {
 #ifdef CANT_FORK
   /* If ARG is NULL, they want an inferior shell, but `system' just
@@ -1951,9 +1992,7 @@ shell_escape (arg, from_tty)
 }
 
 static void
-make_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+make_command (char *arg, int from_tty)
 {
   char *p;
 
@@ -1970,9 +2009,7 @@ make_command (arg, from_tty)
 }
 
 static void
-show_user_1 (c, stream)
-     struct cmd_list_element *c;
-     struct ui_file *stream;
+show_user_1 (struct cmd_list_element *c, struct ui_file *stream)
 {
   register struct command_line *cmdlines;
 
@@ -1998,9 +2035,7 @@ show_user_1 (c, stream)
 
 /* ARGSUSED */
 static void
-show_user (args, from_tty)
-     char *args;
-     int from_tty;
+show_user (char *args, int from_tty)
 {
   struct cmd_list_element *c;
   extern struct cmd_list_element *cmdlist;
@@ -2023,7 +2058,7 @@ show_user (args, from_tty)
 }
 
 void
-_initialize_command ()
+_initialize_command (void)
 {
   add_com ("shell", class_support, shell_escape,
 	   "Execute the rest of the line as a shell command.  \n\

@@ -176,7 +176,7 @@ remote_rdp_xfer_inferior_memory (CORE_ADDR memaddr,
 /* Stuff for talking to the serial layer. */
 
 static unsigned char
-get_byte ()
+get_byte (void)
 {
   int c = SERIAL_READCHAR (io, timeout);
 
@@ -197,7 +197,7 @@ get_byte ()
 /* Note that the target always speaks little-endian to us,
    even if it's a big endian machine. */
 static unsigned int
-get_word ()
+get_word (void)
 {
   unsigned int val = 0;
   unsigned int c;
@@ -211,8 +211,7 @@ get_word ()
 }
 
 static void
-put_byte (val)
-     char val;
+put_byte (char val)
 {
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "(%02x)\n", val);
@@ -220,8 +219,7 @@ put_byte (val)
 }
 
 static void
-put_word (val)
-     int val;
+put_word (int val)
 {
   /* We always send in little endian */
   unsigned char b[4];
@@ -249,9 +247,7 @@ put_word (val)
 
  */
 static void
-rdp_init (cold, tty)
-     int cold;
-     int tty;
+rdp_init (int cold, int tty)
 {
   int sync = 0;
   int type = cold ? RDP_OPEN_TYPE_COLD : RDP_OPEN_TYPE_WARM;
@@ -487,10 +483,7 @@ send_rdp (char *template,...)
 
 
 static int
-rdp_write (memaddr, buf, len)
-     CORE_ADDR memaddr;
-     char *buf;
-     int len;
+rdp_write (CORE_ADDR memaddr, char *buf, int len)
 {
   int res;
   int val;
@@ -506,10 +499,7 @@ rdp_write (memaddr, buf, len)
 
 
 static int
-rdp_read (memaddr, buf, len)
-     CORE_ADDR memaddr;
-     char *buf;
-     int len;
+rdp_read (CORE_ADDR memaddr, char *buf, int len)
 {
   int res;
   int val;
@@ -525,9 +515,7 @@ rdp_read (memaddr, buf, len)
 }
 
 static void
-rdp_fetch_one_register (mask, buf)
-     int mask;
-     char *buf;
+rdp_fetch_one_register (int mask, char *buf)
 {
   int val;
   send_rdp ("bbw-SWZ", RDP_CPU_READ, RDP_CPU_READWRITE_MODE_CURRENT, mask, &val);
@@ -535,9 +523,7 @@ rdp_fetch_one_register (mask, buf)
 }
 
 static void
-rdp_fetch_one_fpu_register (mask, buf)
-     int mask;
-     char *buf;
+rdp_fetch_one_fpu_register (int mask, char *buf)
 {
 #if 0
   /* !!! Since the PIE board doesn't work as documented,
@@ -564,9 +550,7 @@ rdp_fetch_one_fpu_register (mask, buf)
 
 
 static void
-rdp_store_one_register (mask, buf)
-     int mask;
-     char *buf;
+rdp_store_one_register (int mask, char *buf)
 {
   int val = extract_unsigned_integer (buf, 4);
 
@@ -576,9 +560,7 @@ rdp_store_one_register (mask, buf)
 
 
 static void
-rdp_store_one_fpu_register (mask, buf)
-     int mask;
-     char *buf;
+rdp_store_one_fpu_register (int mask, char *buf)
 {
 #if 0
   /* See comment in fetch_one_fpu_register */
@@ -616,8 +598,7 @@ rdp_store_one_fpu_register (mask, buf)
 /* Convert between GDB requests and the RDP layer. */
 
 static void
-remote_rdp_fetch_register (regno)
-     int regno;
+remote_rdp_fetch_register (int regno)
 {
   if (regno == -1)
     {
@@ -647,8 +628,7 @@ remote_rdp_fetch_register (regno)
 
 
 static void
-remote_rdp_store_register (regno)
-     int regno;
+remote_rdp_store_register (int regno)
 {
   if (regno == -1)
     {
@@ -675,14 +655,14 @@ remote_rdp_store_register (regno)
 }
 
 static void
-remote_rdp_kill ()
+remote_rdp_kill (void)
 {
   callback->shutdown (callback);
 }
 
 
 static void
-rdp_info ()
+rdp_info (void)
 {
   send_rdp ("bw-S-W-Z", RDP_INFO, RDP_INFO_ABOUT_STEP,
 	    &ds.step_info);
@@ -699,7 +679,7 @@ rdp_info ()
 
 
 static void
-rdp_execute_start ()
+rdp_execute_start (void)
 {
   /* Start it off, but don't wait for it */
   send_rdp ("bb-", RDP_EXEC, RDP_EXEC_TYPE_SYNC);
@@ -707,9 +687,7 @@ rdp_execute_start ()
 
 
 static void
-rdp_set_command_line (command, args)
-     char *command;
-     char *args;
+rdp_set_command_line (char *command, char *args)
 {
   /*
      ** We could use RDP_INFO_SET_CMDLINE to send this, but EmbeddedICE systems
@@ -730,7 +708,7 @@ rdp_set_command_line (command, args)
 }
 
 static void
-rdp_catch_vectors ()
+rdp_catch_vectors (void)
 {
   /*
      ** We want the target monitor to intercept the abort vectors
@@ -817,9 +795,7 @@ static int translate_open_mode[] =
 };
 
 static int
-exec_swi (swi, args)
-     int swi;
-     argsin *args;
+exec_swi (int swi, argsin *args)
 {
   int i;
   char c;
@@ -942,7 +918,7 @@ exec_swi (swi, args)
 
 
 static void
-handle_swi ()
+handle_swi (void)
 {
   argsin args[3];
   char *buf;
@@ -1015,7 +991,7 @@ handle_swi ()
 }
 
 static void
-rdp_execute_finish ()
+rdp_execute_finish (void)
 {
   int running = 1;
 
@@ -1052,16 +1028,14 @@ rdp_execute_finish ()
 
 
 static void
-rdp_execute ()
+rdp_execute (void)
 {
   rdp_execute_start ();
   rdp_execute_finish ();
 }
 
 static int
-remote_rdp_insert_breakpoint (addr, save)
-     CORE_ADDR addr;
-     char *save;
+remote_rdp_insert_breakpoint (CORE_ADDR addr, char *save)
 {
   int res;
   if (ds.rdi_level > 0)
@@ -1085,9 +1059,7 @@ remote_rdp_insert_breakpoint (addr, save)
 }
 
 static int
-remote_rdp_remove_breakpoint (addr, save)
-     CORE_ADDR addr;
-     char *save;
+remote_rdp_remove_breakpoint (CORE_ADDR addr, char *save)
 {
   int res;
   if (ds.rdi_level > 0)
@@ -1108,7 +1080,7 @@ remote_rdp_remove_breakpoint (addr, save)
 }
 
 static void
-rdp_step ()
+rdp_step (void)
 {
   if (ds.can_step && 0)
     {
@@ -1131,9 +1103,7 @@ rdp_step ()
 }
 
 static void
-remote_rdp_open (args, from_tty)
-     char *args;
-     int from_tty;
+remote_rdp_open (char *args, int from_tty)
 {
   int not_icebreaker;
 
@@ -1203,8 +1173,7 @@ remote_rdp_open (args, from_tty)
 /* Close out all files and local state before this target loses control. */
 
 static void
-remote_rdp_close (quitting)
-     int quitting;
+remote_rdp_close (int quitting)
 {
   callback->shutdown (callback);
   if (io)
@@ -1218,9 +1187,7 @@ remote_rdp_close (quitting)
    to the target, or zero for no signal.  */
 
 static void
-remote_rdp_resume (pid, step, siggnal)
-     int pid, step;
-     enum target_signal siggnal;
+remote_rdp_resume (int pid, int step, enum target_signal siggnal)
 {
   if (step)
     rdp_step ();
@@ -1233,9 +1200,7 @@ remote_rdp_resume (pid, step, siggnal)
    just as `wait' would.  */
 
 static int
-remote_rdp_wait (pid, status)
-     int pid;
-     struct target_waitstatus *status;
+remote_rdp_wait (int pid, struct target_waitstatus *status)
 {
   switch (ds.rdi_stopped_status)
     {
@@ -1271,7 +1236,7 @@ remote_rdp_wait (pid, status)
    debugged.  */
 
 static void
-remote_rdp_prepare_to_store ()
+remote_rdp_prepare_to_store (void)
 {
   /* Do nothing, since we can store individual regs */
 }
@@ -1347,9 +1312,7 @@ static struct yn breakinfo[] =
 
 
 static void
-dump_bits (t, info)
-     struct yn *t;
-     int info;
+dump_bits (struct yn *t, int info)
 {
   while (t->name)
     {
@@ -1359,8 +1322,7 @@ dump_bits (t, info)
 }
 
 static void
-remote_rdp_files_info (target)
-     struct target_ops *target;
+remote_rdp_files_info (struct target_ops *target)
 {
   printf_filtered ("Target capabilities:\n");
   dump_bits (stepinfo, ds.step_info);
@@ -1370,10 +1332,7 @@ remote_rdp_files_info (target)
 
 
 static void
-remote_rdp_create_inferior (exec_file, allargs, env)
-     char *exec_file;
-     char *allargs;
-     char **env;
+remote_rdp_create_inferior (char *exec_file, char *allargs, char **env)
 {
   CORE_ADDR entry_point;
 
@@ -1403,16 +1362,14 @@ remote_rdp_create_inferior (exec_file, allargs, env)
 
 /* Accept any stray run/attach commands */
 static int
-remote_rdp_can_run ()
+remote_rdp_can_run (void)
 {
   return 1;
 }
 
 /* Attach doesn't need to do anything */
 static void
-remote_rdp_attach (args, from_tty)
-     char *args;
-     int from_tty;
+remote_rdp_attach (char *args, int from_tty)
 {
   return;
 }
@@ -1490,7 +1447,7 @@ init_remote_rdp_ops (void)
 }
 
 void
-_initialize_remote_rdp ()
+_initialize_remote_rdp (void)
 {
   init_remote_rdp_ops ();
   add_target (&remote_rdp_ops);

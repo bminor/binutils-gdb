@@ -133,7 +133,7 @@ static struct core_fns regset_core_fns =
 };
 
 void
-_initialize_core_regset ()
+_initialize_core_regset (void)
 {
   add_core_fns (&regset_core_fns);
 }

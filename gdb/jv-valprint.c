@@ -41,11 +41,8 @@ static void java_print_value_fields (struct type * type, char *valaddr,
 
 
 int
-java_value_print (val, stream, format, pretty)
-     value_ptr val;
-     struct ui_file *stream;
-     int format;
-     enum val_prettyprint pretty;
+java_value_print (value_ptr val, struct ui_file *stream, int format,
+		  enum val_prettyprint pretty)
 {
   struct type *type;
   CORE_ADDR address;
@@ -241,15 +238,9 @@ java_value_print (val, stream, format, pretty)
    should not print, or zero if called from top level.  */
 
 static void
-java_print_value_fields (type, valaddr, address, stream,
-			 format, recurse, pretty)
-     struct type *type;
-     char *valaddr;
-     CORE_ADDR address;
-     struct ui_file *stream;
-     int format;
-     int recurse;
-     enum val_prettyprint pretty;
+java_print_value_fields (struct type *type, char *valaddr, CORE_ADDR address,
+			 struct ui_file *stream, int format, int recurse,
+			 enum val_prettyprint pretty)
 {
   int i, len, n_baseclasses;
 
@@ -450,17 +441,9 @@ java_print_value_fields (type, valaddr, address, stream,
    The PRETTY parameter controls prettyprinting.  */
 
 int
-java_val_print (type, valaddr, embedded_offset, address, stream, format,
-		deref_ref, recurse, pretty)
-     struct type *type;
-     char *valaddr;
-     int embedded_offset;
-     CORE_ADDR address;
-     struct ui_file *stream;
-     int format;
-     int deref_ref;
-     int recurse;
-     enum val_prettyprint pretty;
+java_val_print (struct type *type, char *valaddr, int embedded_offset,
+		CORE_ADDR address, struct ui_file *stream, int format,
+		int deref_ref, int recurse, enum val_prettyprint pretty)
 {
   register unsigned int i = 0;	/* Number of characters printed */
   struct type *target_type;

@@ -2,7 +2,7 @@
 
 XM_FILE= xm-i386lynx.h
 XM_CLIBS= -lbsd
-XDEPFILES= ser-tcp.o
+XDEPFILES=
 
 NAT_FILE= nm-i386lynx.h
 NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o lynx-nat.o

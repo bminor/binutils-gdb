@@ -55,8 +55,7 @@
 
  */
 
-execle (name, args)
-     char *name, *args;
+execle (char *name, char *args)
 {
   register char **env = &args;
   while (*env++)

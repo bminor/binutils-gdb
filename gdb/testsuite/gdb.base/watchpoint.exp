@@ -376,6 +376,7 @@ proc test_stepping {} {
 	# This doesn't occur if the call dummy starts with a call,
 	# because we are out of the dummy by the first time the inferior
 	# stops.
+	clear_xfail "arm*-*-*"
 	clear_xfail "d10v*-*-*"
 	clear_xfail "m68*-*-*"
 	clear_xfail "i*86*-*-*"

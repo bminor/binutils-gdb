@@ -63,10 +63,7 @@ static void c_type_print_cv_qualifier (struct type *, struct ui_file *,
    NEW is the new name for a type TYPE. */
 
 void
-c_typedef_print (type, new, stream)
-     struct type *type;
-     struct symbol *new;
-     struct ui_file *stream;
+c_typedef_print (struct type *type, struct symbol *new, struct ui_file *stream)
 {
   CHECK_TYPEDEF (type);
   switch (current_language->la_language)
@@ -113,12 +110,8 @@ c_typedef_print (type, new, stream)
 /* LEVEL is the depth to indent lines by.  */
 
 void
-c_print_type (type, varstring, stream, show, level)
-     struct type *type;
-     char *varstring;
-     struct ui_file *stream;
-     int show;
-     int level;
+c_print_type (struct type *type, char *varstring, struct ui_file *stream,
+	      int show, int level)
 {
   register enum type_code code;
   int demangled_args;
@@ -182,9 +175,7 @@ c_print_type (type, varstring, stream, show, level)
    derivation via protected inheritance, so gdb can print it out */
 
 static void
-cp_type_print_derivation_info (stream, type)
-     struct ui_file *stream;
-     struct type *type;
+cp_type_print_derivation_info (struct ui_file *stream, struct type *type)
 {
   char *name;
   int i;
@@ -207,12 +198,8 @@ cp_type_print_derivation_info (stream, type)
 /* Print the C++ method arguments ARGS to the file STREAM.  */
 
 static void
-cp_type_print_method_args (args, prefix, varstring, staticp, stream)
-     struct type **args;
-     char *prefix;
-     char *varstring;
-     int staticp;
-     struct ui_file *stream;
+cp_type_print_method_args (struct type **args, char *prefix, char *varstring,
+			   int staticp, struct ui_file *stream)
 {
   int i;
 
@@ -256,11 +243,8 @@ cp_type_print_method_args (args, prefix, varstring, staticp, stream)
    SHOW is always zero on recursive calls.  */
 
 void
-c_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
-     struct type *type;
-     struct ui_file *stream;
-     int show;
-     int passed_a_ptr;
+c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
+			     int show, int passed_a_ptr)
 {
   char *name;
   if (type == 0)
@@ -354,11 +338,8 @@ c_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
    NEED_SPACE = 1 indicates an initial white space is needed */
 
 static void
-c_type_print_cv_qualifier (type, stream, need_pre_space, need_post_space)
-     struct type *type;
-     struct ui_file *stream;
-     int need_pre_space;
-     int need_post_space;
+c_type_print_cv_qualifier (struct type *type, struct ui_file *stream,
+			   int need_pre_space, int need_post_space)
 {
   int flag = 0;
 
@@ -386,9 +367,7 @@ c_type_print_cv_qualifier (type, stream, need_pre_space, need_post_space)
 
 
 static void
-c_type_print_args (type, stream)
-     struct type *type;
-     struct ui_file *stream;
+c_type_print_args (struct type *type, struct ui_file *stream)
 {
   int i;
   struct type **args;
@@ -567,12 +546,8 @@ remove_qualifiers (char *qid)
    Args work like c_type_print_varspec_prefix.  */
 
 void
-c_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
-     struct type *type;
-     struct ui_file *stream;
-     int show;
-     int passed_a_ptr;
-     int demangled_args;
+c_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
+			     int show, int passed_a_ptr, int demangled_args)
 {
   if (type == 0)
     return;
@@ -690,11 +665,8 @@ c_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
    We increase it for some recursive calls.  */
 
 void
-c_type_print_base (type, stream, show, level)
-     struct type *type;
-     struct ui_file *stream;
-     int show;
-     int level;
+c_type_print_base (struct type *type, struct ui_file *stream, int show,
+		   int level)
 {
   register int i;
   register int len;

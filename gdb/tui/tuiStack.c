@@ -475,7 +475,7 @@ tui_vShowFrameInfo (args)
    **      Function to initialize gdb commands, for tui window stack manipulation.
  */
 void
-_initialize_tuiStack ()
+_initialize_tuiStack (void)
 {
   if (tui_version)
     {

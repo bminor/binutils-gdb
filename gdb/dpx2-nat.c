@@ -47,9 +47,7 @@ static int regmap[] =
  */
 
 int
-dpx2_register_u_addr (blockend, regnum)
-     int blockend;
-     int regnum;
+dpx2_register_u_addr (int blockend, int regnum)
 {
   if (regnum < FP0_REGNUM)
     return (blockend + 4 * regmap[regnum]);
@@ -73,7 +71,7 @@ dpx2_register_u_addr (blockend, regnum)
 CORE_ADDR kernel_u_addr;
 
 void
-_initialize_dpx2_nat ()
+_initialize_dpx2_nat (void)
 {
   struct utsname uts;
 

@@ -72,8 +72,7 @@ static struct partial_symtab *hpread_end_psymtab
 
 /* check for the existance of a file, given its full pathname */
 int
-file_exists (filename)
-     char *filename;
+file_exists (char *filename)
 {
   if (filename)
     return (access (filename, F_OK) == 0);
@@ -84,8 +83,7 @@ file_exists (filename)
 /* Translate from the "hp_language" enumeration in hp-symtab.h
    used in the debug info to gdb's generic enumeration in defs.h. */
 static enum language
-trans_lang (in_lang)
-     enum hp_language in_lang;
+trans_lang (enum hp_language in_lang)
 {
   if (in_lang == HP_LANGUAGE_C)
     return language_c;
@@ -112,8 +110,7 @@ static char main_string[] = "main";
 
    Return value: 1 if ok, 0 if not */
 int
-hpread_call_pxdb (file_name)
-     char *file_name;
+hpread_call_pxdb (char *file_name)
 {
   char *p;
   int status;
@@ -146,8 +143,7 @@ hpread_call_pxdb (file_name)
    and the file therefore needs to be re-loaded.  Otherwise
    return 0. */
 int
-hpread_pxdb_needed (sym_bfd)
-     bfd *sym_bfd;
+hpread_pxdb_needed (bfd *sym_bfd)
 {
   asection *pinfo_section, *debug_section, *header_section;
   unsigned int do_pxdb;
@@ -277,8 +273,7 @@ hpread_pxdb_needed (sym_bfd)
    If so, call pxdb. */
 
 void
-do_pxdb (sym_bfd)
-     bfd *sym_bfd;
+do_pxdb (bfd *sym_bfd)
 {
   /* The following code is HP-specific.  The "right" way of
      doing this is unknown, but we bet would involve a target-
@@ -373,7 +368,7 @@ static boolean told_objfile = 0;
 
 /* Set up psymtab symbol index stuff */
 static void
-init_pst_syms ()
+init_pst_syms (void)
 {
   pst_syms_count = 0;
   pst_syms_size = 20;
@@ -382,7 +377,7 @@ init_pst_syms ()
 
 /* Clean up psymtab symbol index stuff */
 static void
-clear_pst_syms ()
+clear_pst_syms (void)
 {
   pst_syms_count = 0;
   pst_syms_size = 0;
@@ -392,9 +387,7 @@ clear_pst_syms ()
 
 /* Add information about latest psymtab to symbol index table */
 static void
-record_pst_syms (start_sym, end_sym)
-     int start_sym;
-     int end_sym;
+record_pst_syms (int start_sym, int end_sym)
 {
   if (++pst_syms_count > pst_syms_size)
     {
@@ -416,8 +409,7 @@ record_pst_syms (start_sym, end_sym)
 
    Return 0 => not found */
 static int
-find_next_pst_start (index)
-     int index;
+find_next_pst_start (int index)
 {
   int i;
 
@@ -442,11 +434,8 @@ find_next_pst_start (index)
 
    Return 0 => not found */
 static int
-find_next_file_isym (index, qFD, curr_fd, pxdb_header_p)
-     int index;
-     quick_file_entry *qFD;
-     int curr_fd;
-     PXDB_header_ptr pxdb_header_p;
+find_next_file_isym (int index, quick_file_entry *qFD, int curr_fd,
+		     PXDB_header_ptr pxdb_header_p)
 {
   while (VALID_CURR_FILE)
     {
@@ -464,11 +453,8 @@ find_next_file_isym (index, qFD, curr_fd, pxdb_header_p)
 
    Return 0 => not found */
 static int
-find_next_proc_isym (index, qPD, curr_pd, pxdb_header_p)
-     int index;
-     quick_procedure_entry *qPD;
-     int curr_pd;
-     PXDB_header_ptr pxdb_header_p;
+find_next_proc_isym (int index, quick_procedure_entry *qPD, int curr_pd,
+		     PXDB_header_ptr pxdb_header_p)
 {
   while (VALID_CURR_PROC)
     {
@@ -486,11 +472,8 @@ find_next_proc_isym (index, qPD, curr_pd, pxdb_header_p)
 
    Return 0 => not found */
 static int
-find_next_module_isym (index, qMD, curr_md, pxdb_header_p)
-     int index;
-     quick_module_entry *qMD;
-     int curr_md;
-     PXDB_header_ptr pxdb_header_p;
+find_next_module_isym (int index, quick_module_entry *qMD, int curr_md,
+		       PXDB_header_ptr pxdb_header_p)
 {
   while (VALID_CURR_MODULE)
     {
@@ -1348,9 +1331,7 @@ hpread_quick_traverse (objfile, gntt_bits, vt_bits, pxdb_header_p)
 /* Get appropriate header, based on pxdb type. 
    Return value: 1 if ok, 0 if not */
 int
-hpread_get_header (objfile, pxdb_header_p)
-     struct objfile *objfile;
-     PXDB_header_ptr pxdb_header_p;
+hpread_get_header (struct objfile *objfile, PXDB_header_ptr pxdb_header_p)
 {
   asection *pinfo_section, *debug_section, *header_section;
 
@@ -1468,8 +1449,7 @@ hpread_get_header (objfile, pxdb_header_p)
    FIXME, there should be a cleaner peephole into the BFD environment
    here. */
 void
-hpread_symfile_init (objfile)
-     struct objfile *objfile;
+hpread_symfile_init (struct objfile *objfile)
 {
   asection *vt_section, *slt_section, *lntt_section, *gntt_section;
 
@@ -1566,9 +1546,7 @@ hpread_symfile_init (objfile)
    opposed to a shared lib or dynamically loaded file). */
 
 void
-hpread_build_psymtabs (objfile, mainline)
-     struct objfile *objfile;
-     int mainline;
+hpread_build_psymtabs (struct objfile *objfile, int mainline)
 {
 
 #ifdef DUMPING
@@ -2091,8 +2069,7 @@ hpread_build_psymtabs (objfile, mainline)
    objfile struct from the global list of known objfiles. */
 
 void
-hpread_symfile_finish (objfile)
-     struct objfile *objfile;
+hpread_symfile_finish (struct objfile *objfile)
 {
   if (objfile->sym_private != NULL)
     {
@@ -2106,27 +2083,21 @@ hpread_symfile_finish (objfile)
 /* Various small functions to get entries in the debug symbol sections.  */
 
 union dnttentry *
-hpread_get_lntt (index, objfile)
-     int index;
-     struct objfile *objfile;
+hpread_get_lntt (int index, struct objfile *objfile)
 {
   return (union dnttentry *)
     &(LNTT (objfile)[(index * sizeof (struct dntt_type_block))]);
 }
 
 static union dnttentry *
-hpread_get_gntt (index, objfile)
-     int index;
-     struct objfile *objfile;
+hpread_get_gntt (int index, struct objfile *objfile)
 {
   return (union dnttentry *)
     &(GNTT (objfile)[(index * sizeof (struct dntt_type_block))]);
 }
 
 union sltentry *
-hpread_get_slt (index, objfile)
-     int index;
-     struct objfile *objfile;
+hpread_get_slt (int index, struct objfile *objfile)
 {
   return (union sltentry *) &(SLT (objfile)[index * sizeof (union sltentry)]);
 }
@@ -2137,11 +2108,8 @@ hpread_get_slt (index, objfile)
    the existance of DNTT_TYPE_FUNCTION symbols.  */
 
 static unsigned long
-hpread_get_textlow (global, index, objfile, symcount)
-     int global;
-     int index;
-     struct objfile *objfile;
-     int symcount;
+hpread_get_textlow (int global, int index, struct objfile *objfile,
+		    int symcount)
 {
   union dnttentry *dn_bufp;
   struct minimal_symbol *msymbol;
@@ -2193,14 +2161,10 @@ hpread_get_textlow (global, index, objfile, symcount)
    (normal). */
 
 static struct partial_symtab *
-hpread_start_psymtab (objfile,
-		      filename, textlow, ldsymoff, global_syms, static_syms)
-     struct objfile *objfile;
-     char *filename;
-     CORE_ADDR textlow;
-     int ldsymoff;
-     struct partial_symbol **global_syms;
-     struct partial_symbol **static_syms;
+hpread_start_psymtab (struct objfile *objfile, char *filename,
+		      CORE_ADDR textlow, int ldsymoff,
+		      struct partial_symbol **global_syms,
+		      struct partial_symbol **static_syms)
 {
   int offset = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
   extern void hpread_psymtab_to_symtab ();
@@ -2228,15 +2192,11 @@ hpread_start_psymtab (objfile,
    FIXME:  List variables and peculiarities of same.  */
 
 static struct partial_symtab *
-hpread_end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
-		    capping_text, dependency_list, number_dependencies)
-     struct partial_symtab *pst;
-     char **include_list;
-     int num_includes;
-     int capping_symbol_offset;
-     CORE_ADDR capping_text;
-     struct partial_symtab **dependency_list;
-     int number_dependencies;
+hpread_end_psymtab (struct partial_symtab *pst, char **include_list,
+		    int num_includes, int capping_symbol_offset,
+		    CORE_ADDR capping_text,
+		    struct partial_symtab **dependency_list,
+		    int number_dependencies)
 {
   int i;
   struct objfile *objfile = pst->objfile;

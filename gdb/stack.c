@@ -146,8 +146,7 @@ static int print_stack_frame_base_stub (char *);
    Pass the args the way catch_errors wants them.  */
 static int show_and_print_stack_frame_stub (void *args);
 static int
-show_and_print_stack_frame_stub (args)
-     void *args;
+show_and_print_stack_frame_stub (void *args)
 {
   struct print_stack_frame_args *p = (struct print_stack_frame_args *) args;
 
@@ -165,8 +164,7 @@ show_and_print_stack_frame_stub (args)
    Pass the args the way catch_errors wants them.  */
 static int print_stack_frame_stub (void *args);
 static int
-print_stack_frame_stub (args)
-     void *args;
+print_stack_frame_stub (void *args)
 {
   struct print_stack_frame_args *p = (struct print_stack_frame_args *) args;
 
@@ -183,8 +181,7 @@ print_stack_frame_stub (args)
 
 /* Pass the args the way catch_errors wants them.  */
 static int
-print_stack_frame_base_stub (args)
-     char *args;
+print_stack_frame_base_stub (char *args)
 {
   struct print_stack_frame_args *p = (struct print_stack_frame_args *) args;
 
@@ -196,8 +193,7 @@ print_stack_frame_base_stub (args)
    Pass the args the way catch_errors wants them.  */
 static int print_only_stack_frame_stub (void *);
 static int
-print_only_stack_frame_stub (args)
-     void *args;
+print_only_stack_frame_stub (void *args)
 {
   struct print_stack_frame_args *p = (struct print_stack_frame_args *) args;
 
@@ -216,10 +212,7 @@ print_only_stack_frame_stub (args)
    If SOURCE is -1, print ONLY the source line.  */
 
 static void
-print_stack_frame_base (fi, level, source)
-     struct frame_info *fi;
-     int level;
-     int source;
+print_stack_frame_base (struct frame_info *fi, int level, int source)
 {
   struct print_stack_frame_args args;
 
@@ -242,10 +235,7 @@ print_stack_frame_base (fi, level, source)
    If SOURCE is -1, print ONLY the source line.  */
 
 void
-show_and_print_stack_frame (fi, level, source)
-     struct frame_info *fi;
-     int level;
-     int source;
+show_and_print_stack_frame (struct frame_info *fi, int level, int source)
 {
   struct print_stack_frame_args args;
 
@@ -269,10 +259,7 @@ show_and_print_stack_frame (fi, level, source)
    If SOURCE is -1, print ONLY the source line.  */
 
 void
-print_stack_frame (fi, level, source)
-     struct frame_info *fi;
-     int level;
-     int source;
+print_stack_frame (struct frame_info *fi, int level, int source)
 {
   struct print_stack_frame_args args;
 
@@ -295,10 +282,7 @@ print_stack_frame (fi, level, source)
    If SOURCE is -1, print ONLY the source line.  */
 
 void
-print_only_stack_frame (fi, level, source)
-     struct frame_info *fi;
-     int level;
-     int source;
+print_only_stack_frame (struct frame_info *fi, int level, int source)
 {
   struct print_stack_frame_args args;
 
@@ -322,8 +306,7 @@ static int print_args_stub (PTR);
 /* Pass the args the way catch_errors wants them.  */
 
 static int
-print_args_stub (args)
-     PTR args;
+print_args_stub (PTR args)
 {
   int numargs;
   struct print_args_args *p = (struct print_args_args *) args;
@@ -344,11 +327,7 @@ print_args_stub (args)
    LOC_AND_SRC: Print location and source line.  */
 
 static void
-print_frame_info_base (fi, level, source, args)
-     struct frame_info *fi;
-     int level;
-     int source;
-     int args;
+print_frame_info_base (struct frame_info *fi, int level, int source, int args)
 {
   struct symtab_and_line sal;
   int source_print;
@@ -693,7 +672,7 @@ print_frame (struct frame_info *fi,
 
 #if 0
 void
-stack_publish_stopped_with_no_frame ()
+stack_publish_stopped_with_no_frame (void)
 {
   TUIDO (((TuiOpaqueFuncPtr) tuiUpdateOnEnd));
 
@@ -704,11 +683,8 @@ stack_publish_stopped_with_no_frame ()
 /* Show or print the frame info.  If this is the tui, it will be shown in 
    the source display */
 void
-print_frame_info (fi, level, source, args)
-     struct frame_info *fi;
-     register int level;
-     int source;
-     int args;
+print_frame_info (struct frame_info *fi, register int level, int source,
+		  int args)
 {
   if (!tui_version)
     print_frame_info_base (fi, level, source, args);
@@ -726,8 +702,7 @@ print_frame_info (fi, level, source, args)
 /* Show the frame info.  If this is the tui, it will be shown in 
    the source display otherwise, nothing is done */
 void
-show_stack_frame (fi)
-     struct frame_info *fi;
+show_stack_frame (struct frame_info *fi)
 {
   TUIDO (((TuiOpaqueFuncPtr) tui_vShowFrameInfo, fi));
 }
@@ -738,8 +713,7 @@ show_stack_frame (fi)
    this function never returns NULL).  */
 
 struct frame_info *
-parse_frame_specification (frame_exp)
-     char *frame_exp;
+parse_frame_specification (char *frame_exp)
 {
   int numargs = 0;
 #define	MAXARGS	4
@@ -855,9 +829,7 @@ parse_frame_specification (frame_exp)
    This means absolutely all information in the frame is printed.  */
 
 static void
-frame_info (addr_exp, from_tty)
-     char *addr_exp;
-     int from_tty;
+frame_info (char *addr_exp, int from_tty)
 {
   struct frame_info *fi;
   struct symtab_and_line sal;
@@ -1064,9 +1036,7 @@ frame_info (addr_exp, from_tty)
 static int backtrace_limit;
 
 static void
-set_backtrace_limit_command (count_exp, from_tty)
-     char *count_exp;
-     int from_tty;
+set_backtrace_limit_command (char *count_exp, int from_tty)
 {
   int count = parse_and_eval_address (count_exp);
 
@@ -1077,9 +1047,7 @@ set_backtrace_limit_command (count_exp, from_tty)
 }
 
 static void
-backtrace_limit_info (arg, from_tty)
-     char *arg;
-     int from_tty;
+backtrace_limit_info (char *arg, int from_tty)
 {
   if (arg)
     error ("\"Info backtrace-limit\" takes no arguments.");
@@ -1093,10 +1061,7 @@ backtrace_limit_info (arg, from_tty)
 static void backtrace_command_1 (char *count_exp, int show_locals,
 				 int from_tty);
 static void
-backtrace_command_1 (count_exp, show_locals, from_tty)
-     char *count_exp;
-     int show_locals;
-     int from_tty;
+backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
 {
   struct frame_info *fi;
   register int count;
@@ -1193,9 +1158,7 @@ backtrace_command_1 (count_exp, show_locals, from_tty)
 }
 
 static void
-backtrace_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+backtrace_command (char *arg, int from_tty)
 {
   struct cleanup *old_chain = (struct cleanup *) NULL;
   char **argv = (char **) NULL;
@@ -1261,9 +1224,7 @@ backtrace_command (arg, from_tty)
 
 static void backtrace_full_command (char *arg, int from_tty);
 static void
-backtrace_full_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+backtrace_full_command (char *arg, int from_tty)
 {
   backtrace_command_1 (arg, 1, from_tty);
 }
@@ -1273,11 +1234,8 @@ backtrace_full_command (arg, from_tty)
    Return 1 if any variables were printed; 0 otherwise.  */
 
 static int
-print_block_frame_locals (b, fi, num_tabs, stream)
-     struct block *b;
-     register struct frame_info *fi;
-     int num_tabs;
-     register struct ui_file *stream;
+print_block_frame_locals (struct block *b, register struct frame_info *fi,
+			  int num_tabs, register struct ui_file *stream)
 {
   int nsyms;
   register int i, j;
@@ -1315,10 +1273,8 @@ print_block_frame_locals (b, fi, num_tabs, stream)
 /* Same, but print labels.  */
 
 static int
-print_block_frame_labels (b, have_default, stream)
-     struct block *b;
-     int *have_default;
-     register struct ui_file *stream;
+print_block_frame_labels (struct block *b, int *have_default,
+			  register struct ui_file *stream)
 {
   int nsyms;
   register int i;
@@ -1363,10 +1319,8 @@ print_block_frame_labels (b, have_default, stream)
    on the function running in FRAME.  */
 
 static void
-print_frame_local_vars (fi, num_tabs, stream)
-     register struct frame_info *fi;
-     register int num_tabs;
-     register struct ui_file *stream;
+print_frame_local_vars (register struct frame_info *fi, register int num_tabs,
+			register struct ui_file *stream)
 {
   register struct block *block = get_frame_block (fi);
   register int values_printed = 0;
@@ -1398,10 +1352,8 @@ print_frame_local_vars (fi, num_tabs, stream)
 /* Same, but print labels.  */
 
 static void
-print_frame_label_vars (fi, this_level_only, stream)
-     register struct frame_info *fi;
-     int this_level_only;
-     register struct ui_file *stream;
+print_frame_label_vars (register struct frame_info *fi, int this_level_only,
+			register struct ui_file *stream)
 {
   register struct blockvector *bl;
   register struct block *block = get_frame_block (fi);
@@ -1469,9 +1421,7 @@ print_frame_label_vars (fi, this_level_only, stream)
 
 /* ARGSUSED */
 void
-locals_info (args, from_tty)
-     char *args;
-     int from_tty;
+locals_info (char *args, int from_tty)
 {
   if (!selected_frame)
     error ("No frame selected.");
@@ -1479,9 +1429,7 @@ locals_info (args, from_tty)
 }
 
 static void
-catch_info (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+catch_info (char *ignore, int from_tty)
 {
   struct symtab_and_line *sal;
 
@@ -1509,9 +1457,8 @@ catch_info (ignore, from_tty)
 }
 
 static void
-print_frame_arg_vars (fi, stream)
-     register struct frame_info *fi;
-     register struct ui_file *stream;
+print_frame_arg_vars (register struct frame_info *fi,
+		      register struct ui_file *stream)
 {
   struct symbol *func = get_frame_function (fi);
   register struct block *b;
@@ -1574,9 +1521,7 @@ print_frame_arg_vars (fi, stream)
 }
 
 void
-args_info (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+args_info (char *ignore, int from_tty)
 {
   if (!selected_frame)
     error ("No frame selected.");
@@ -1585,9 +1530,7 @@ args_info (ignore, from_tty)
 
 
 static void
-args_plus_locals_info (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+args_plus_locals_info (char *ignore, int from_tty)
 {
   args_info (ignore, from_tty);
   locals_info (ignore, from_tty);
@@ -1598,9 +1541,7 @@ args_plus_locals_info (ignore, from_tty)
    LEVEL may be -1 if an actual level number is not known.  */
 
 void
-select_frame (fi, level)
-     struct frame_info *fi;
-     int level;
+select_frame (struct frame_info *fi, int level)
 {
   register struct symtab *s;
 
@@ -1636,9 +1577,7 @@ select_frame (fi, level)
 /* Select frame FI, noting that its stack level is LEVEL.  Also print
    the stack frame and show the source if this is the tui version.  */
 void
-select_and_print_frame (fi, level)
-     struct frame_info *fi;
-     int level;
+select_and_print_frame (struct frame_info *fi, int level)
 {
   select_frame (fi, level);
   if (fi)
@@ -1653,9 +1592,7 @@ select_and_print_frame (fi, level)
    not the TUI */
 #if 0
 void
-select_and_maybe_print_frame (fi, level)
-     struct frame_info *fi;
-     int level;
+select_and_maybe_print_frame (struct frame_info *fi, int level)
 {
   if (!tui_version)
     select_frame (fi, level);
@@ -1669,9 +1606,7 @@ select_and_maybe_print_frame (fi, level)
    If there is no selected frame, *FRAMEP is set to NULL.  */
 
 void
-record_selected_frame (frameaddrp, levelp)
-     CORE_ADDR *frameaddrp;
-     int *levelp;
+record_selected_frame (CORE_ADDR *frameaddrp, int *levelp)
 {
   *frameaddrp = selected_frame ? selected_frame->frame : 0;
   *levelp = selected_frame_level;
@@ -1681,7 +1616,7 @@ record_selected_frame (frameaddrp, levelp)
    Can return zero under various legitimate circumstances.  */
 
 struct block *
-get_selected_block ()
+get_selected_block (void)
 {
   if (!target_has_stack)
     return 0;
@@ -1701,9 +1636,8 @@ get_selected_block ()
    how much farther the original request asked to go.  */
 
 struct frame_info *
-find_relative_frame (frame, level_offset_ptr)
-     register struct frame_info *frame;
-     register int *level_offset_ptr;
+find_relative_frame (register struct frame_info *frame,
+		     register int *level_offset_ptr)
 {
   register struct frame_info *prev;
   register struct frame_info *frame1;
@@ -1742,17 +1676,13 @@ find_relative_frame (frame, level_offset_ptr)
 /* ARGSUSED */
 #ifdef UI_OUT
 void
-select_frame_command_wrapper (level_exp, from_tty)
-     char *level_exp;
-     int from_tty;
+select_frame_command_wrapper (char *level_exp, int from_tty)
 {
   select_frame_command (level_exp, from_tty);
 }
 #endif
 static void
-select_frame_command (level_exp, from_tty)
-     char *level_exp;
-     int from_tty;
+select_frame_command (char *level_exp, int from_tty)
 {
   register struct frame_info *frame, *frame1;
   unsigned int level = 0;
@@ -1784,9 +1714,7 @@ select_frame_command (level_exp, from_tty)
    frame.  */
 
 void
-frame_command (level_exp, from_tty)
-     char *level_exp;
-     int from_tty;
+frame_command (char *level_exp, int from_tty)
 {
   select_frame_command (level_exp, from_tty);
   show_and_print_stack_frame (selected_frame, selected_frame_level, 1);
@@ -1795,9 +1723,7 @@ frame_command (level_exp, from_tty)
 /* The XDB Compatibility command to print the current frame. */
 
 static void
-current_frame_command (level_exp, from_tty)
-     char *level_exp;
-     int from_tty;
+current_frame_command (char *level_exp, int from_tty)
 {
   if (target_has_stack == 0 || selected_frame == 0)
     error ("No stack.");
@@ -1809,8 +1735,7 @@ current_frame_command (level_exp, from_tty)
 
 /* ARGSUSED */
 static void
-up_silently_base (count_exp)
-     char *count_exp;
+up_silently_base (char *count_exp)
 {
   register struct frame_info *fi;
   int count = 1, count1;
@@ -1828,9 +1753,7 @@ up_silently_base (count_exp)
 }
 
 static void
-up_silently_command (count_exp, from_tty)
-     char *count_exp;
-     int from_tty;
+up_silently_command (char *count_exp, int from_tty)
 {
   up_silently_base (count_exp);
   if (tui_version)
@@ -1838,9 +1761,7 @@ up_silently_command (count_exp, from_tty)
 }
 
 static void
-up_command (count_exp, from_tty)
-     char *count_exp;
-     int from_tty;
+up_command (char *count_exp, int from_tty)
 {
   up_silently_base (count_exp);
   show_and_print_stack_frame (selected_frame, selected_frame_level, 1);
@@ -1851,8 +1772,7 @@ up_command (count_exp, from_tty)
 
 /* ARGSUSED */
 static void
-down_silently_base (count_exp)
-     char *count_exp;
+down_silently_base (char *count_exp)
 {
   register struct frame_info *frame;
   int count = -1, count1;
@@ -1880,9 +1800,7 @@ down_silently_base (count_exp)
 
 /* ARGSUSED */
 static void
-down_silently_command (count_exp, from_tty)
-     char *count_exp;
-     int from_tty;
+down_silently_command (char *count_exp, int from_tty)
 {
   down_silently_base (count_exp);
   if (tui_version)
@@ -1890,9 +1808,7 @@ down_silently_command (count_exp, from_tty)
 }
 
 static void
-down_command (count_exp, from_tty)
-     char *count_exp;
-     int from_tty;
+down_command (char *count_exp, int from_tty)
 {
   down_silently_base (count_exp);
   show_and_print_stack_frame (selected_frame, selected_frame_level, 1);
@@ -1900,17 +1816,13 @@ down_command (count_exp, from_tty)
 
 #ifdef UI_OUT
 void
-return_command_wrapper (retval_exp, from_tty)
-     char *retval_exp;
-     int from_tty;
+return_command_wrapper (char *retval_exp, int from_tty)
 {
   return_command (retval_exp, from_tty);
 }
 #endif
 static void
-return_command (retval_exp, from_tty)
-     char *retval_exp;
-     int from_tty;
+return_command (char *retval_exp, int from_tty)
 {
   struct symbol *thisfun;
   CORE_ADDR selected_frame_addr;
@@ -1998,9 +1910,7 @@ struct function_bounds
 
 static void func_command (char *arg, int from_tty);
 static void
-func_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+func_command (char *arg, int from_tty)
 {
   struct frame_info *fp;
   int found = 0;
@@ -2054,7 +1964,7 @@ func_command (arg, from_tty)
 /* Gets the language of the current frame.  */
 
 enum language
-get_frame_language ()
+get_frame_language (void)
 {
   register struct symtab *s;
   enum language flang;		/* The language of the current frame */
@@ -2074,7 +1984,7 @@ get_frame_language ()
 }
 
 void
-_initialize_stack ()
+_initialize_stack (void)
 {
 #if 0
   backtrace_limit = 30;

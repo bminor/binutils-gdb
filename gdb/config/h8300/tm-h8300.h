@@ -1,5 +1,5 @@
 /* Parameters for execution on a H8/300 series machine.
-   Copyright 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,7 +25,12 @@ struct frame_saved_regs;
 struct value;
 struct type;
 
-/* 1 if debugging H8/300H application */
+/* 1 if debugging H8/300H application */ 
+
+/* NOTE: ezannoni 2000-07-18: these variables are part of sim, defined
+   in sim/h8300/compile.c.  They really should not be used this
+   way. Because of this we cannot get rid of the macro
+   GDB_TARGET_IS_H8300 in remote-e7000.c */
 extern int h8300hmode;
 extern int h8300smode;
 

@@ -120,9 +120,7 @@ static int program_loaded = 0;
 static SIM_DESC gdbsim_desc = 0;
 
 static void
-dump_mem (buf, len)
-     char *buf;
-     int len;
+dump_mem (char *buf, int len)
 {
   if (len <= 8)
     {
@@ -150,7 +148,7 @@ static int callbacks_initialized = 0;
 /* Initialize gdb_callback.  */
 
 static void
-init_callbacks ()
+init_callbacks (void)
 {
   if (!callbacks_initialized)
     {
@@ -173,7 +171,7 @@ init_callbacks ()
 /* Release callbacks (free resources used by them).  */
 
 static void
-end_callbacks ()
+end_callbacks (void)
 {
   if (callbacks_initialized)
     {
@@ -185,10 +183,7 @@ end_callbacks ()
 /* GDB version of os_write_stdout callback.  */
 
 static int
-gdb_os_write_stdout (p, buf, len)
-     host_callback *p;
-     const char *buf;
-     int len;
+gdb_os_write_stdout (host_callback *p, const char *buf, int len)
 {
   int i;
   char b[2];
@@ -200,8 +195,7 @@ gdb_os_write_stdout (p, buf, len)
 /* GDB version of os_flush_stdout callback.  */
 
 static void
-gdb_os_flush_stdout (p)
-     host_callback *p;
+gdb_os_flush_stdout (host_callback *p)
 {
   gdb_flush (gdb_stdtarg);
 }
@@ -209,10 +203,7 @@ gdb_os_flush_stdout (p)
 /* GDB version of os_write_stderr callback.  */
 
 static int
-gdb_os_write_stderr (p, buf, len)
-     host_callback *p;
-     const char *buf;
-     int len;
+gdb_os_write_stderr (host_callback *p, const char *buf, int len)
 {
   int i;
   char b[2];
@@ -229,8 +220,7 @@ gdb_os_write_stderr (p, buf, len)
 /* GDB version of os_flush_stderr callback.  */
 
 static void
-gdb_os_flush_stderr (p)
-     host_callback *p;
+gdb_os_flush_stderr (host_callback *p)
 {
   gdb_flush (gdb_stderr);
 }
@@ -285,8 +275,7 @@ gdb_os_error (host_callback * p, const char *format,...)
 #endif
 
 static void
-gdbsim_fetch_register (regno)
-     int regno;
+gdbsim_fetch_register (int regno)
 {
   static int warn_user = 1;
   if (regno == -1)
@@ -330,8 +319,7 @@ gdbsim_fetch_register (regno)
 
 
 static void
-gdbsim_store_register (regno)
-     int regno;
+gdbsim_store_register (int regno)
 {
   if (regno == -1)
     {
@@ -363,7 +351,7 @@ gdbsim_store_register (regno)
    and releasing other resources acquired by the simulated program.  */
 
 static void
-gdbsim_kill ()
+gdbsim_kill (void)
 {
   if (sr_get_debug ())
     printf_filtered ("gdbsim_kill\n");
@@ -378,9 +366,7 @@ gdbsim_kill ()
    GDB's symbol tables to match.  */
 
 static void
-gdbsim_load (prog, fromtty)
-     char *prog;
-     int fromtty;
+gdbsim_load (char *prog, int fromtty)
 {
   if (sr_get_debug ())
     printf_filtered ("gdbsim_load: prog \"%s\"\n", prog);
@@ -409,10 +395,7 @@ gdbsim_load (prog, fromtty)
    user types "run" after having attached.  */
 
 static void
-gdbsim_create_inferior (exec_file, args, env)
-     char *exec_file;
-     char *args;
-     char **env;
+gdbsim_create_inferior (char *exec_file, char *args, char **env)
 {
   int len;
   char *arg_buf, **argv;
@@ -461,9 +444,7 @@ gdbsim_create_inferior (exec_file, args, env)
 /* Called when selecting the simulator. EG: (gdb) target sim name.  */
 
 static void
-gdbsim_open (args, from_tty)
-     char *args;
-     int from_tty;
+gdbsim_open (char *args, int from_tty)
 {
   int len;
   char *arg_buf;
@@ -544,8 +525,7 @@ gdbsim_open (args, from_tty)
 /* Close out all files and local state before this target loses control. */
 
 static void
-gdbsim_close (quitting)
-     int quitting;
+gdbsim_close (int quitting)
 {
   if (sr_get_debug ())
     printf_filtered ("gdbsim_close: quitting %d\n", quitting);
@@ -572,9 +552,7 @@ gdbsim_close (quitting)
    Use this when you want to detach and do something else with your gdb.  */
 
 static void
-gdbsim_detach (args, from_tty)
-     char *args;
-     int from_tty;
+gdbsim_detach (char *args, int from_tty)
 {
   if (sr_get_debug ())
     printf_filtered ("gdbsim_detach: args \"%s\"\n", args);
@@ -592,9 +570,7 @@ static enum target_signal resume_siggnal;
 static int resume_step;
 
 static void
-gdbsim_resume (pid, step, siggnal)
-     int pid, step;
-     enum target_signal siggnal;
+gdbsim_resume (int pid, int step, enum target_signal siggnal)
 {
   if (inferior_pid != 42)
     error ("The program is not being run.");
@@ -616,7 +592,7 @@ gdbsim_resume (pid, step, siggnal)
    For simulators that do not support this operation, just abort */
 
 static void
-gdbsim_stop ()
+gdbsim_stop (void)
 {
   if (!sim_stop (gdbsim_desc))
     {
@@ -628,8 +604,7 @@ gdbsim_stop ()
    Taken from gdb/util.c - should be in a library */
 
 static int
-gdb_os_poll_quit (p)
-     host_callback *p;
+gdb_os_poll_quit (host_callback *p)
 {
   if (ui_loop_hook != NULL)
     ui_loop_hook (0);
@@ -652,16 +627,13 @@ gdb_os_poll_quit (p)
    just as `wait' would. */
 
 static void
-gdbsim_cntrl_c (signo)
-     int signo;
+gdbsim_cntrl_c (int signo)
 {
   gdbsim_stop ();
 }
 
 static int
-gdbsim_wait (pid, status)
-     int pid;
-     struct target_waitstatus *status;
+gdbsim_wait (int pid, struct target_waitstatus *status)
 {
   static RETSIGTYPE (*prev_sigint) ();
   int sigrc = 0;
@@ -733,7 +705,7 @@ gdbsim_wait (pid, status)
    debugged.  */
 
 static void
-gdbsim_prepare_to_store ()
+gdbsim_prepare_to_store (void)
 {
   /* Do nothing, since we can store individual regs */
 }
@@ -774,8 +746,7 @@ gdbsim_xfer_inferior_memory (memaddr, myaddr, len, write, target)
 }
 
 static void
-gdbsim_files_info (target)
-     struct target_ops *target;
+gdbsim_files_info (struct target_ops *target)
 {
   char *file = "nothing";
 
@@ -796,7 +767,7 @@ gdbsim_files_info (target)
 /* Clear the simulator's notion of what the break points are.  */
 
 static void
-gdbsim_mourn_inferior ()
+gdbsim_mourn_inferior (void)
 {
   if (sr_get_debug ())
     printf_filtered ("gdbsim_mourn_inferior:\n");
@@ -806,9 +777,7 @@ gdbsim_mourn_inferior ()
 }
 
 static int
-gdbsim_insert_breakpoint (addr, contents_cache)
-     CORE_ADDR addr;
-     char *contents_cache;
+gdbsim_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
 #ifdef SIM_HAS_BREAKPOINTS
   SIM_RC retcode;
@@ -830,9 +799,7 @@ gdbsim_insert_breakpoint (addr, contents_cache)
 }
 
 static int
-gdbsim_remove_breakpoint (addr, contents_cache)
-     CORE_ADDR addr;
-     char *contents_cache;
+gdbsim_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
 #ifdef SIM_HAS_BREAKPOINTS
   SIM_RC retcode;
@@ -858,9 +825,7 @@ gdbsim_remove_breakpoint (addr, contents_cache)
    simulator must do any command interpretation work.  */
 
 void
-simulator_command (args, from_tty)
-     char *args;
-     int from_tty;
+simulator_command (char *args, int from_tty)
 {
   if (gdbsim_desc == NULL)
     {
@@ -962,7 +927,7 @@ init_gdbsim_ops (void)
 }
 
 void
-_initialize_remote_sim ()
+_initialize_remote_sim (void)
 {
   init_gdbsim_ops ();
   add_target (&gdbsim_ops);

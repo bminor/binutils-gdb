@@ -62,10 +62,7 @@ static char *download_path;	/* user-settable path for SREC files     */
  */
 
 static void
-m32r_load_section (abfd, s, data_count)
-     bfd *abfd;
-     asection *s;
-     unsigned int *data_count;
+m32r_load_section (bfd *abfd, asection *s, unsigned int *data_count)
 {
   if (s->flags & SEC_LOAD)
     {
@@ -95,8 +92,7 @@ m32r_load_section (abfd, s, data_count)
 }
 
 static int
-m32r_load_1 (dummy)
-     void *dummy;
+m32r_load_1 (void *dummy)
 {
   int data_count = 0;
 
@@ -109,9 +105,7 @@ m32r_load_1 (dummy)
  */
 
 static void
-m32r_load (filename, from_tty)
-     char *filename;
-     int from_tty;
+m32r_load (char *filename, int from_tty)
 {
   extern int inferior_pid;
   bfd *abfd;
@@ -182,9 +176,7 @@ m32r_load (filename, from_tty)
 }
 
 static void
-m32r_load_gen (filename, from_tty)
-     char *filename;
-     int from_tty;
+m32r_load_gen (char *filename, int from_tty)
 {
   generic_load (filename, from_tty);
 }
@@ -204,11 +196,7 @@ static char *m32r_regnames[] =
 };
 
 static void
-m32r_supply_register (regname, regnamelen, val, vallen)
-     char *regname;
-     int regnamelen;
-     char *val;
-     int vallen;
+m32r_supply_register (char *regname, int regnamelen, char *val, int vallen)
 {
   int regno;
   int num_regs = sizeof (m32r_regnames) / sizeof (m32r_regnames[0]);
@@ -337,9 +325,7 @@ init_m32r_cmds (void)
 }				/* init_m32r_cmds */
 
 static void
-m32r_open (args, from_tty)
-     char *args;
-     int from_tty;
+m32r_open (char *args, int from_tty)
 {
   monitor_open (args, &m32r_cmds, from_tty);
 }
@@ -399,9 +385,7 @@ init_mon2000_cmds (void)
 }				/* init_mon2000_cmds */
 
 static void
-mon2000_open (args, from_tty)
-     char *args;
-     int from_tty;
+mon2000_open (char *args, int from_tty)
 {
   monitor_open (args, &mon2000_cmds, from_tty);
 }
@@ -412,9 +396,7 @@ mon2000_open (args, from_tty)
    Tell the BootOne monitor what it's ethernet IP address is. */
 
 static void
-m32r_set_board_address (args, from_tty)
-     char *args;
-     int from_tty;
+m32r_set_board_address (char *args, int from_tty)
 {
   int resp_len;
   char buf[1024];
@@ -433,9 +415,7 @@ m32r_set_board_address (args, from_tty)
    Tell the BootOne monitor what gdb's ethernet IP address is. */
 
 static void
-m32r_set_server_address (args, from_tty)
-     char *args;
-     int from_tty;
+m32r_set_server_address (char *args, int from_tty)
 {
   int resp_len;
   char buf[1024];
@@ -454,9 +434,7 @@ m32r_set_server_address (args, from_tty)
    Tell the BootOne monitor the default path for downloadable SREC files. */
 
 static void
-m32r_set_download_path (args, from_tty)
-     char *args;
-     int from_tty;
+m32r_set_download_path (char *args, int from_tty)
 {
   int resp_len;
   char buf[1024];
@@ -472,9 +450,7 @@ m32r_set_download_path (args, from_tty)
 }
 
 static void
-m32r_upload_command (args, from_tty)
-     char *args;
-     int from_tty;
+m32r_upload_command (char *args, int from_tty)
 {
   bfd *abfd;
   asection *s;
@@ -601,7 +577,7 @@ m32r_upload_command (args, from_tty)
 #endif /* ! _MSC_VER */
 
 void
-_initialize_m32r_rom ()
+_initialize_m32r_rom (void)
 {
   /* Initialize m32r RevC monitor target */
   init_m32r_cmds ();

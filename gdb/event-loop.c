@@ -23,9 +23,15 @@
 #include "top.h"
 #include "event-loop.h"
 #include "event-top.h"
+
 #ifdef HAVE_POLL
+#if defined (HAVE_POLL_H)
 #include <poll.h>
+#elif defined (HAVE_SYS_POLL_H)
+#include <sys/poll.h>
 #endif
+#endif
+
 #include <sys/types.h>
 #include <string.h>
 #include <errno.h>

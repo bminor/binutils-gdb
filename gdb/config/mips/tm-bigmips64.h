@@ -1,5 +1,5 @@
 /* Target machine parameters for MIPS r4000
-   Copyright 1994 Free Software Foundation, Inc.
+   Copyright 1994, 2000 Free Software Foundation, Inc.
    Contributed by Ian Lance Taylor (ian@cygnus.com)
 
    This file is part of GDB.
@@ -18,7 +18,5 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
-
-#define TARGET_BYTE_ORDER_DEFAULT BIG_ENDIAN
 
 #include "mips/tm-mips64.h"

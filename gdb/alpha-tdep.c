@@ -171,8 +171,7 @@ struct linked_proc_info
 long alpha_linux_sigtramp_offset (CORE_ADDR pc);
 #endif
 long
-alpha_linux_sigtramp_offset (pc)
-     CORE_ADDR pc;
+alpha_linux_sigtramp_offset (CORE_ADDR pc)
 {
   unsigned int i[3], w;
   long off;
@@ -215,9 +214,7 @@ alpha_linux_sigtramp_offset (pc)
 /* Under OSF/1, the __sigtramp routine is frameless and has a frame
    size of zero, but we are able to backtrace through it.  */
 CORE_ADDR
-alpha_osf_skip_sigtramp_frame (frame, pc)
-     struct frame_info *frame;
-     CORE_ADDR pc;
+alpha_osf_skip_sigtramp_frame (struct frame_info *frame, CORE_ADDR pc)
 {
   char *name;
   find_pc_partial_function (pc, &name, (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
@@ -233,8 +230,7 @@ alpha_osf_skip_sigtramp_frame (frame, pc)
    descriptor is added to the linked_proc_desc_table.  */
 
 static alpha_extra_func_info_t
-push_sigtramp_desc (low_addr)
-     CORE_ADDR low_addr;
+push_sigtramp_desc (CORE_ADDR low_addr)
 {
   struct linked_proc_info *link;
   alpha_extra_func_info_t proc_desc;
@@ -265,8 +261,7 @@ push_sigtramp_desc (low_addr)
    NULL).  */
 
 void
-alpha_find_saved_regs (frame)
-     struct frame_info *frame;
+alpha_find_saved_regs (struct frame_info *frame)
 {
   int ireg;
   CORE_ADDR reg_position;
@@ -354,9 +349,7 @@ alpha_find_saved_regs (frame)
 }
 
 static CORE_ADDR
-read_next_frame_reg (fi, regno)
-     struct frame_info *fi;
-     int regno;
+read_next_frame_reg (struct frame_info *fi, int regno)
 {
   for (; fi; fi = fi->next)
     {
@@ -376,8 +369,7 @@ read_next_frame_reg (fi, regno)
 }
 
 CORE_ADDR
-alpha_frame_saved_pc (frame)
-     struct frame_info *frame;
+alpha_frame_saved_pc (struct frame_info *frame)
 {
   alpha_extra_func_info_t proc_desc = frame->proc_desc;
   /* We have to get the saved pc from the sigcontext
@@ -391,8 +383,7 @@ alpha_frame_saved_pc (frame)
 }
 
 CORE_ADDR
-alpha_saved_pc_after_call (frame)
-     struct frame_info *frame;
+alpha_saved_pc_after_call (struct frame_info *frame)
 {
   CORE_ADDR pc = frame->pc;
   CORE_ADDR tmp;
@@ -421,8 +412,7 @@ static struct frame_saved_regs temp_saved_regs;
    $zero,($ra),1" on alpha. */
 
 static int
-alpha_about_to_return (pc)
-     CORE_ADDR pc;
+alpha_about_to_return (CORE_ADDR pc)
 {
   return read_memory_integer (pc, 4) == 0x6bfa8001;
 }
@@ -434,8 +424,7 @@ alpha_about_to_return (pc)
    lines.  */
 
 static CORE_ADDR
-heuristic_proc_start (pc)
-     CORE_ADDR pc;
+heuristic_proc_start (CORE_ADDR pc)
 {
   CORE_ADDR start_pc = pc;
   CORE_ADDR fence = start_pc - heuristic_fence_post;
@@ -488,9 +477,8 @@ Otherwise, you told GDB there was a function where there isn't one, or\n\
 }
 
 static alpha_extra_func_info_t
-heuristic_proc_desc (start_pc, limit_pc, next_frame)
-     CORE_ADDR start_pc, limit_pc;
-     struct frame_info *next_frame;
+heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
+		     struct frame_info *next_frame)
 {
   CORE_ADDR sp = read_next_frame_reg (next_frame, SP_REGNUM);
   CORE_ADDR cur_pc;
@@ -612,9 +600,7 @@ heuristic_proc_desc (start_pc, limit_pc, next_frame)
    find the prologue, then return 0.  */
 
 static CORE_ADDR
-after_prologue (pc, proc_desc)
-     CORE_ADDR pc;
-     alpha_extra_func_info_t proc_desc;
+after_prologue (CORE_ADDR pc, alpha_extra_func_info_t proc_desc)
 {
   struct symtab_and_line sal;
   CORE_ADDR func_addr, func_end;
@@ -652,9 +638,7 @@ after_prologue (pc, proc_desc)
    are definitively *not* in a function prologue.  */
 
 static int
-alpha_in_prologue (pc, proc_desc)
-     CORE_ADDR pc;
-     alpha_extra_func_info_t proc_desc;
+alpha_in_prologue (CORE_ADDR pc, alpha_extra_func_info_t proc_desc)
 {
   CORE_ADDR after_prologue_pc;
 
@@ -668,9 +652,7 @@ alpha_in_prologue (pc, proc_desc)
 }
 
 static alpha_extra_func_info_t
-find_proc_desc (pc, next_frame)
-     CORE_ADDR pc;
-     struct frame_info *next_frame;
+find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame)
 {
   alpha_extra_func_info_t proc_desc;
   struct block *b;
@@ -792,8 +774,7 @@ find_proc_desc (pc, next_frame)
 alpha_extra_func_info_t cached_proc_desc;
 
 CORE_ADDR
-alpha_frame_chain (frame)
-     struct frame_info *frame;
+alpha_frame_chain (struct frame_info *frame)
 {
   alpha_extra_func_info_t proc_desc;
   CORE_ADDR saved_pc = FRAME_SAVED_PC (frame);
@@ -827,8 +808,7 @@ alpha_frame_chain (frame)
 }
 
 void
-init_extra_frame_info (frame)
-     struct frame_info *frame;
+init_extra_frame_info (struct frame_info *frame)
 {
   /* Use proc_desc calculated in frame_chain */
   alpha_extra_func_info_t proc_desc =
@@ -900,9 +880,7 @@ init_extra_frame_info (frame)
    arguments without difficulty.  */
 
 struct frame_info *
-setup_arbitrary_frame (argc, argv)
-     int argc;
-     CORE_ADDR *argv;
+setup_arbitrary_frame (int argc, CORE_ADDR *argv)
 {
   if (argc != 2)
     error ("ALPHA frame specifications require two arguments: sp and pc");
@@ -921,12 +899,8 @@ setup_arbitrary_frame (argc, argv)
    structure to be returned is passed as a hidden first argument.  */
 
 CORE_ADDR
-alpha_push_arguments (nargs, args, sp, struct_return, struct_addr)
-     int nargs;
-     value_ptr *args;
-     CORE_ADDR sp;
-     int struct_return;
-     CORE_ADDR struct_addr;
+alpha_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+		      int struct_return, CORE_ADDR struct_addr)
 {
   int i;
   int accumulate_size = struct_return ? 8 : 0;
@@ -1007,7 +981,7 @@ alpha_push_arguments (nargs, args, sp, struct_return, struct_addr)
 }
 
 void
-alpha_push_dummy_frame ()
+alpha_push_dummy_frame (void)
 {
   int ireg;
   struct linked_proc_info *link;
@@ -1123,7 +1097,7 @@ alpha_push_dummy_frame ()
 }
 
 void
-alpha_pop_frame ()
+alpha_pop_frame (void)
 {
   register int regnum;
   struct frame_info *frame = get_current_frame ();
@@ -1193,9 +1167,7 @@ alpha_pop_frame ()
    stuff some day.  */
 
 CORE_ADDR
-alpha_skip_prologue (pc, lenient)
-     CORE_ADDR pc;
-     int lenient;
+alpha_skip_prologue (CORE_ADDR pc, int lenient)
 {
   unsigned long inst;
   int offset;
@@ -1272,9 +1244,7 @@ alpha_skip_prologue (pc, lenient)
    STARTADDR?  */
 
 static int
-alpha_in_lenient_prologue (startaddr, pc)
-     CORE_ADDR startaddr;
-     CORE_ADDR pc;
+alpha_in_lenient_prologue (CORE_ADDR startaddr, CORE_ADDR pc)
 {
   CORE_ADDR end_prologue = alpha_skip_prologue (startaddr, 1);
   return pc >= startaddr && pc < end_prologue;
@@ -1288,11 +1258,8 @@ alpha_in_lenient_prologue (startaddr, pc)
    memory format is an integer with 4 bytes or less, as the representation
    of integers in floating point registers is different. */
 void
-alpha_register_convert_to_virtual (regnum, valtype, raw_buffer, virtual_buffer)
-     int regnum;
-     struct type *valtype;
-     char *raw_buffer;
-     char *virtual_buffer;
+alpha_register_convert_to_virtual (int regnum, struct type *valtype,
+				   char *raw_buffer, char *virtual_buffer)
 {
   if (TYPE_LENGTH (valtype) >= REGISTER_RAW_SIZE (regnum))
     {
@@ -1317,11 +1284,8 @@ alpha_register_convert_to_virtual (regnum, valtype, raw_buffer, virtual_buffer)
 }
 
 void
-alpha_register_convert_to_raw (valtype, regnum, virtual_buffer, raw_buffer)
-     struct type *valtype;
-     int regnum;
-     char *virtual_buffer;
-     char *raw_buffer;
+alpha_register_convert_to_raw (struct type *valtype, int regnum,
+			       char *virtual_buffer, char *raw_buffer)
 {
   if (TYPE_LENGTH (valtype) >= REGISTER_RAW_SIZE (regnum))
     {
@@ -1369,9 +1333,7 @@ alpha_extract_return_value (valtype, regbuf, valbuf)
    write its value into the appropriate register.  */
 
 void
-alpha_store_return_value (valtype, valbuf)
-     struct type *valtype;
-     char *valbuf;
+alpha_store_return_value (struct type *valtype, char *valbuf)
 {
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
   int regnum = V0_REGNUM;
@@ -1393,10 +1355,7 @@ alpha_store_return_value (valtype, valbuf)
    callable as an sfunc.  */
 
 static void
-reinit_frame_cache_sfunc (args, from_tty, c)
-     char *args;
-     int from_tty;
-     struct cmd_list_element *c;
+reinit_frame_cache_sfunc (char *args, int from_tty, struct cmd_list_element *c)
 {
   reinit_frame_cache ();
 }
@@ -1407,7 +1366,7 @@ reinit_frame_cache_sfunc (args, from_tty, c)
  */
 
 CORE_ADDR
-alpha_call_dummy_address ()
+alpha_call_dummy_address (void)
 {
   CORE_ADDR entry;
   struct minimal_symbol *sym;
@@ -1426,7 +1385,7 @@ alpha_call_dummy_address ()
 }
 
 void
-_initialize_alpha_tdep ()
+_initialize_alpha_tdep (void)
 {
   struct cmd_list_element *c;
 

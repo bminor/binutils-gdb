@@ -43,8 +43,7 @@ static int read_memory_pointer (CORE_ADDR x);
    just use the register SRP_REGNUM itself.  */
 
 CORE_ADDR
-z8k_frame_saved_pc (frame)
-     struct frame_info *frame;
+z8k_frame_saved_pc (struct frame_info *frame)
 {
   return read_memory_pointer (frame->frame + (BIG ? 4 : 2));
 }
@@ -62,9 +61,7 @@ z8k_frame_saved_pc (frame)
    return the pc pointing to the first push */
 
 static CORE_ADDR
-skip_adjust (pc, size)
-     CORE_ADDR pc;
-     int *size;
+skip_adjust (CORE_ADDR pc, int *size)
 {
   *size = 0;
 
@@ -87,10 +84,7 @@ skip_adjust (pc, size)
 
 static CORE_ADDR examine_frame (CORE_ADDR, CORE_ADDR * regs, CORE_ADDR);
 static CORE_ADDR
-examine_frame (pc, regs, sp)
-     CORE_ADDR pc;
-     CORE_ADDR *regs;
-     CORE_ADDR sp;
+examine_frame (CORE_ADDR pc, CORE_ADDR *regs, CORE_ADDR sp)
 {
   int w = read_memory_short (pc);
   int offset = 0;
@@ -141,8 +135,7 @@ examine_frame (pc, regs, sp)
 }
 
 CORE_ADDR
-z8k_skip_prologue (start_pc)
-     CORE_ADDR start_pc;
+z8k_skip_prologue (CORE_ADDR start_pc)
 {
   CORE_ADDR dummy[NUM_REGS];
 
@@ -150,8 +143,7 @@ z8k_skip_prologue (start_pc)
 }
 
 CORE_ADDR
-z8k_addr_bits_remove (addr)
-     CORE_ADDR addr;
+z8k_addr_bits_remove (CORE_ADDR addr)
 {
   return (addr & PTR_MASK);
 }
@@ -163,8 +155,7 @@ read_memory_pointer (CORE_ADDR x)
 }
 
 CORE_ADDR
-z8k_frame_chain (thisframe)
-     struct frame_info *thisframe;
+z8k_frame_chain (struct frame_info *thisframe)
 {
   if (thisframe->prev == 0)
     {
@@ -178,7 +169,7 @@ z8k_frame_chain (thisframe)
 }
 
 void
-init_frame_pc ()
+init_frame_pc (void)
 {
   abort ();
 }
@@ -190,8 +181,7 @@ init_frame_pc ()
    the address we return for it IS the sp for the next frame.  */
 
 void
-z8k_frame_init_saved_regs (frame_info)
-     struct frame_info *frame_info;
+z8k_frame_init_saved_regs (struct frame_info *frame_info)
 {
   CORE_ADDR pc;
   int w;
@@ -205,15 +195,13 @@ z8k_frame_init_saved_regs (frame_info)
 }
 
 void
-z8k_push_dummy_frame ()
+z8k_push_dummy_frame (void)
 {
   abort ();
 }
 
 int
-gdb_print_insn_z8k (memaddr, info)
-     bfd_vma memaddr;
-     disassemble_info *info;
+gdb_print_insn_z8k (bfd_vma memaddr, disassemble_info *info)
 {
   if (BIG)
     return print_insn_z8001 (memaddr, info);
@@ -227,10 +215,7 @@ gdb_print_insn_z8k (memaddr, info)
    of the instruction. */
 
 CORE_ADDR
-NEXT_PROLOGUE_INSN (addr, lim, pword1)
-     CORE_ADDR addr;
-     CORE_ADDR lim;
-     short *pword1;
+NEXT_PROLOGUE_INSN (CORE_ADDR addr, CORE_ADDR lim, short *pword1)
 {
   char buf[2];
   if (addr < lim + 8)
@@ -254,9 +239,7 @@ NEXT_PROLOGUE_INSN (addr, lim, pword1)
    it is fairly expensive.  */
 
 void
-frame_find_saved_regs (fip, fsrp)
-     struct frame_info *fip;
-     struct frame_saved_regs *fsrp;
+frame_find_saved_regs (struct frame_info *fip, struct frame_saved_regs *fsrp)
 {
   int locals;
   CORE_ADDR pc;
@@ -306,10 +289,7 @@ z8k_saved_pc_after_call (struct frame_info *frame)
 
 
 void
-extract_return_value (type, regbuf, valbuf)
-     struct type *type;
-     char *regbuf;
-     char *valbuf;
+extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   int b;
   int len = TYPE_LENGTH (type);
@@ -325,9 +305,7 @@ extract_return_value (type, regbuf, valbuf)
 }
 
 void
-write_return_value (type, valbuf)
-     struct type *type;
-     char *valbuf;
+write_return_value (struct type *type, char *valbuf)
 {
   int reg;
   int len;
@@ -337,17 +315,14 @@ write_return_value (type, valbuf)
 }
 
 void
-store_struct_return (addr, sp)
-     CORE_ADDR addr;
-     CORE_ADDR sp;
+store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   write_register (2, addr);
 }
 
 
 void
-z8k_print_register_hook (regno)
-     int regno;
+z8k_print_register_hook (int regno)
 {
   if ((regno & 1) == 0 && regno < 16)
     {
@@ -389,15 +364,14 @@ z8k_print_register_hook (regno)
 }
 
 void
-z8k_pop_frame ()
+z8k_pop_frame (void)
 {
 }
 
 struct cmd_list_element *setmemorylist;
 
 void
-z8k_set_pointer_size (newsize)
-     int newsize;
+z8k_set_pointer_size (int newsize)
 {
   static int oldsize = 0;
 
@@ -423,32 +397,26 @@ z8k_set_pointer_size (newsize)
 }
 
 static void
-segmented_command (args, from_tty)
-     char *args;
-     int from_tty;
+segmented_command (char *args, int from_tty)
 {
   z8k_set_pointer_size (32);
 }
 
 static void
-unsegmented_command (args, from_tty)
-     char *args;
-     int from_tty;
+unsegmented_command (char *args, int from_tty)
 {
   z8k_set_pointer_size (16);
 }
 
 static void
-set_memory (args, from_tty)
-     char *args;
-     int from_tty;
+set_memory (char *args, int from_tty)
 {
   printf_unfiltered ("\"set memory\" must be followed by the name of a memory subcommand.\n");
   help_list (setmemorylist, "set memory ", -1, gdb_stdout);
 }
 
 void
-_initialize_z8ktdep ()
+_initialize_z8ktdep (void)
 {
   tm_print_insn = gdb_print_insn_z8k;
 

@@ -192,8 +192,7 @@ static td_err_e (*p_td_thr_setgregs)      (const td_thrhandle_t * th_p,
  */
 
 static char *
-td_err_string (errcode)
-     td_err_e errcode;
+td_err_string (td_err_e errcode)
 {
   static struct string_map
     td_err_table[] =
@@ -251,8 +250,7 @@ td_err_string (errcode)
  */
 
 static char *
-td_state_string (statecode)
-     td_thr_state_e statecode;
+td_state_string (td_thr_state_e statecode)
 {
   static struct string_map
     td_thr_state_table[] =
@@ -302,9 +300,7 @@ td_state_string (statecode)
  */
 
 static int
-thread_to_lwp (thread_id, default_lwp)
-     int thread_id;
-     int default_lwp;
+thread_to_lwp (int thread_id, int default_lwp)
 {
   td_thrinfo_t ti;
   td_thrhandle_t th;
@@ -360,8 +356,7 @@ thread_to_lwp (thread_id, default_lwp)
  */
 
 static int
-lwp_to_thread (lwp)
-     int lwp;
+lwp_to_thread (int lwp)
 {
   td_thrinfo_t ti;
   td_thrhandle_t th;
@@ -426,14 +421,13 @@ lwp_to_thread (lwp)
 
 
 static struct cleanup *
-save_inferior_pid ()
+save_inferior_pid (void)
 {
   return make_cleanup (restore_inferior_pid, (void *) inferior_pid);
 }
 
 static void
-restore_inferior_pid (pid)
-     void *pid;
+restore_inferior_pid (void *pid)
 {
   inferior_pid = (int) pid;
 }
@@ -445,9 +439,7 @@ restore_inferior_pid (pid)
 
 /* ARGSUSED */
 static void
-sol_thread_open (arg, from_tty)
-     char *arg;
-     int from_tty;
+sol_thread_open (char *arg, int from_tty)
 {
   procfs_ops.to_open (arg, from_tty);
 }
@@ -456,9 +448,7 @@ sol_thread_open (arg, from_tty)
    and wait for the trace-trap that results from attaching.  */
 
 static void
-sol_thread_attach (args, from_tty)
-     char *args;
-     int from_tty;
+sol_thread_attach (char *args, int from_tty)
 {
   procfs_ops.to_attach (args, from_tty);
   /* Must get symbols from solibs before libthread_db can run! */
@@ -486,9 +476,7 @@ sol_thread_attach (args, from_tty)
    started via the normal ptrace (PTRACE_TRACEME).  */
 
 static void
-sol_thread_detach (args, from_tty)
-     char *args;
-     int from_tty;
+sol_thread_detach (char *args, int from_tty)
 {
   inferior_pid = PIDGET (main_ph.pid);
   unpush_target (&sol_thread_ops);
@@ -501,10 +489,7 @@ sol_thread_detach (args, from_tty)
    for procfs.  */
 
 static void
-sol_thread_resume (pid, step, signo)
-     int pid;
-     int step;
-     enum target_signal signo;
+sol_thread_resume (int pid, int step, enum target_signal signo)
 {
   struct cleanup *old_chain;
 
@@ -535,9 +520,7 @@ sol_thread_resume (pid, step, signo)
    to a LWP id, and vice versa on the way out.  */
 
 static int
-sol_thread_wait (pid, ourstatus)
-     int pid;
-     struct target_waitstatus *ourstatus;
+sol_thread_wait (int pid, struct target_waitstatus *ourstatus)
 {
   int rtnval;
   int save_pid;
@@ -591,8 +574,7 @@ sol_thread_wait (pid, ourstatus)
 }
 
 static void
-sol_thread_fetch_registers (regno)
-     int regno;
+sol_thread_fetch_registers (int regno)
 {
   thread_t thread;
   td_thrhandle_t thandle;
@@ -670,8 +652,7 @@ sol_thread_fetch_registers (regno)
 }
 
 static void
-sol_thread_store_registers (regno)
-     int regno;
+sol_thread_store_registers (int regno)
 {
   thread_t thread;
   td_thrhandle_t thandle;
@@ -765,7 +746,7 @@ sol_thread_store_registers (regno)
    debugged.  */
 
 static void
-sol_thread_prepare_to_store ()
+sol_thread_prepare_to_store (void)
 {
   procfs_ops.to_prepare_to_store ();
 }
@@ -802,21 +783,19 @@ sol_thread_xfer_memory (memaddr, myaddr, len, dowrite, target)
 /* Print status information about what we're accessing.  */
 
 static void
-sol_thread_files_info (ignore)
-     struct target_ops *ignore;
+sol_thread_files_info (struct target_ops *ignore)
 {
   procfs_ops.to_files_info (ignore);
 }
 
 static void
-sol_thread_kill_inferior ()
+sol_thread_kill_inferior (void)
 {
   procfs_ops.to_kill ();
 }
 
 static void
-sol_thread_notice_signals (pid)
-     int pid;
+sol_thread_notice_signals (int pid)
 {
   procfs_ops.to_notice_signals (PIDGET (pid));
 }
@@ -824,10 +803,7 @@ sol_thread_notice_signals (pid)
 /* Fork an inferior process, and start debugging it with /proc.  */
 
 static void
-sol_thread_create_inferior (exec_file, allargs, env)
-     char *exec_file;
-     char *allargs;
-     char **env;
+sol_thread_create_inferior (char *exec_file, char *allargs, char **env)
 {
   procfs_ops.to_create_inferior (exec_file, allargs, env);
 
@@ -860,8 +836,7 @@ sol_thread_create_inferior (exec_file, allargs, env)
 static void (*target_new_objfile_chain) (struct objfile *);
 
 void
-sol_thread_new_objfile (objfile)
-     struct objfile *objfile;
+sol_thread_new_objfile (struct objfile *objfile)
 {
   td_err_e val;
 
@@ -905,7 +880,7 @@ quit:
 /* Clean up after the inferior dies.  */
 
 static void
-sol_thread_mourn_inferior ()
+sol_thread_mourn_inferior (void)
 {
   unpush_target (&sol_thread_ops);
   procfs_ops.to_mourn_inferior ();
@@ -914,7 +889,7 @@ sol_thread_mourn_inferior ()
 /* Mark our target-struct as eligible for stray "run" and "attach" commands.  */
 
 static int
-sol_thread_can_run ()
+sol_thread_can_run (void)
 {
   return procfs_suppress_run;
 }
@@ -936,8 +911,7 @@ sol_thread_can_run ()
  */
 
 static int
-sol_thread_alive (pid)
-     int pid;
+sol_thread_alive (int pid)
 {
   if (is_thread (pid))		/* non-kernel thread */
     {
@@ -962,7 +936,7 @@ sol_thread_alive (pid)
 }
 
 static void
-sol_thread_stop ()
+sol_thread_stop (void)
 {
   procfs_ops.to_stop ();
 }
@@ -1359,8 +1333,7 @@ ps_lgetLDT (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 /* Convert a pid to printable form. */
 
 char *
-solaris_pid_to_str (pid)
-     int pid;
+solaris_pid_to_str (int pid)
 {
   static char buf[100];
 
@@ -1395,9 +1368,7 @@ solaris_pid_to_str (pid)
    kernel) thread. */
 
 static int
-sol_find_new_threads_callback (th, ignored)
-     const td_thrhandle_t *th;
-     void *ignored;
+sol_find_new_threads_callback (const td_thrhandle_t *th, void *ignored)
 {
   td_err_e retval;
   td_thrinfo_t ti;
@@ -1415,7 +1386,7 @@ sol_find_new_threads_callback (th, ignored)
 }
 
 static void
-sol_find_new_threads ()
+sol_find_new_threads (void)
 {
   /* don't do anything if init failed to resolve the libthread_db library */
   if (!procfs_suppress_run)
@@ -1433,32 +1404,26 @@ sol_find_new_threads ()
 }
 
 static void
-sol_core_open (filename, from_tty)
-     char *filename;
-     int from_tty;
+sol_core_open (char *filename, int from_tty)
 {
   orig_core_ops.to_open (filename, from_tty);
 }
 
 static void
-sol_core_close (quitting)
-     int quitting;
+sol_core_close (int quitting)
 {
   orig_core_ops.to_close (quitting);
 }
 
 static void
-sol_core_detach (args, from_tty)
-     char *args;
-     int from_tty;
+sol_core_detach (char *args, int from_tty)
 {
   unpush_target (&core_ops);
   orig_core_ops.to_detach (args, from_tty);
 }
 
 static void
-sol_core_files_info (t)
-     struct target_ops *t;
+sol_core_files_info (struct target_ops *t)
 {
   orig_core_ops.to_files_info (t);
 }
@@ -1468,9 +1433,7 @@ sol_core_files_info (t)
    inferior.  Print anything interesting that we can think of.  */
 
 static int
-info_cb (th, s)
-     const td_thrhandle_t *th;
-     void *s;
+info_cb (const td_thrhandle_t *th, void *s)
 {
   td_err_e ret;
   td_thrinfo_t ti;
@@ -1540,9 +1503,7 @@ info_cb (th, s)
 /* List some state about each Solaris user thread in the inferior.  */
 
 static void
-info_solthreads (args, from_tty)
-     char *args;
-     int from_tty;
+info_solthreads (char *args, int from_tty)
 {
   p_td_ta_thr_iter (main_ta, info_cb, args,
 		    TD_THR_ANY_STATE, TD_THR_LOWEST_PRIORITY,
@@ -1550,16 +1511,14 @@ info_solthreads (args, from_tty)
 }
 
 static int
-ignore (addr, contents)
-     CORE_ADDR addr;
-     char *contents;
+ignore (CORE_ADDR addr, char *contents)
 {
   return 0;
 }
 
 
 static void
-init_sol_thread_ops ()
+init_sol_thread_ops (void)
 {
   sol_thread_ops.to_shortname = "solaris-threads";
   sol_thread_ops.to_longname = "Solaris threads and pthread.";
@@ -1607,7 +1566,7 @@ init_sol_thread_ops ()
 
 
 static void
-init_sol_core_ops ()
+init_sol_core_ops (void)
 {
   sol_core_ops.to_shortname = "solaris-core";
   sol_core_ops.to_longname = "Solaris core threads and pthread.";
@@ -1660,7 +1619,7 @@ init_sol_core_ops ()
 int coreops_suppress_target = 1;
 
 void
-_initialize_sol_thread ()
+_initialize_sol_thread (void)
 {
   void *dlhandle;
 

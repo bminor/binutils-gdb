@@ -449,7 +449,7 @@ static char remcomOutBuffer[BUFMAX];
 /* scan for the sequence $<data>#<checksum>     */
 
 unsigned char *
-getpacket ()
+getpacket (void)
 {
   unsigned char *buffer = &remcomInBuffer[0];
   unsigned char checksum;
@@ -562,7 +562,7 @@ static void (*volatile mem_fault_routine)() = NULL;
 static volatile int mem_err = 0;
 
 void
-set_mem_err ()
+set_mem_err (void)
 {
   mem_err = 1;
 }
@@ -572,16 +572,13 @@ set_mem_err ()
    to mem_fault, they won't get restored, so there better not be any
    saved).  */
 int
-get_char (addr)
-     char *addr;
+get_char (char *addr)
 {
   return *addr;
 }
 
 void
-set_char (addr, val)
-     char *addr;
-     int val;
+set_char (char *addr, int val)
 {
   *addr = val;
 }

@@ -317,8 +317,7 @@ debuglogs (int level, char *pattern,...)
  *    timeout stuff.
  */
 static int
-readchar (timeout)
-     int timeout;
+readchar (int timeout)
 {
   int c;
 
@@ -356,9 +355,7 @@ readchar (timeout)
  *      it out. Let the user break out immediately.
  */
 static void
-expect (string, discard)
-     char *string;
-     int discard;
+expect (char *string, int discard)
 {
   char *p = string;
   int c;
@@ -407,8 +404,7 @@ expect (string, discard)
    necessary to prevent getting into states from which we can't
    recover.  */
 static void
-expect_prompt (discard)
-     int discard;
+expect_prompt (int discard)
 {
   expect (ARRAY_PROMPT, discard);
 }
@@ -417,8 +413,7 @@ expect_prompt (discard)
  * junk -- ignore junk characters. Returns a 1 if junk, 0 otherwise
  */
 static int
-junk (ch)
-     char ch;
+junk (char ch)
 {
   switch (ch)
     {
@@ -443,8 +438,7 @@ junk (ch)
  *              If ignore is nonzero, ignore spaces, newline & tabs.
  */
 static int
-get_hex_digit (ignore)
-     int ignore;
+get_hex_digit (int ignore)
 {
   static int ch;
   while (1)
@@ -490,8 +484,7 @@ get_hex_digit (ignore)
  *    Accept any number leading spaces.
  */
 static void
-get_hex_byte (byt)
-     char *byt;
+get_hex_byte (char *byt)
 {
   int val;
 
@@ -510,7 +503,7 @@ get_hex_byte (byt)
  *      and put them in registers starting at REGNO.
  */
 static int
-get_hex_word ()
+get_hex_word (void)
 {
   long val, newval;
   int i;
@@ -540,10 +533,7 @@ get_hex_word ()
 /* This is called not only when we first attach, but also when the
    user types "run" after having attached.  */
 static void
-array_create_inferior (execfile, args, env)
-     char *execfile;
-     char *args;
-     char **env;
+array_create_inferior (char *execfile, char *args, char **env)
 {
   int entry_pt;
 
@@ -584,10 +574,7 @@ static int baudrate = 9600;
 static char dev_name[100];
 
 static void
-array_open (args, name, from_tty)
-     char *args;
-     char *name;
-     int from_tty;
+array_open (char *args, char *name, int from_tty)
 {
   char packet[PBUFSIZ];
 
@@ -659,8 +646,7 @@ array_open (args, name, from_tty)
  */
 
 static void
-array_close (quitting)
-     int quitting;
+array_close (int quitting)
 {
   SERIAL_CLOSE (array_desc);
   array_desc = NULL;
@@ -684,8 +670,7 @@ array_close (quitting)
  *      else with your gdb.
  */
 static void
-array_detach (from_tty)
-     int from_tty;
+array_detach (int from_tty)
 {
 
   debuglogs (1, "array_detach ()");
@@ -699,9 +684,7 @@ array_detach (from_tty)
  * array_attach -- attach GDB to the target.
  */
 static void
-array_attach (args, from_tty)
-     char *args;
-     int from_tty;
+array_attach (char *args, int from_tty)
 {
   if (from_tty)
     printf ("Starting remote %s debugging\n", target_shortname);
@@ -717,9 +700,7 @@ array_attach (args, from_tty)
  * array_resume -- Tell the remote machine to resume.
  */
 static void
-array_resume (pid, step, sig)
-     int pid, step;
-     enum target_signal sig;
+array_resume (int pid, int step, enum target_signal sig)
 {
   debuglogs (1, "array_resume (step=%d, sig=%d)", step, sig);
 
@@ -740,9 +721,7 @@ array_resume (pid, step, sig)
  *          storing status in status just as `wait' would.
  */
 static int
-array_wait (pid, status)
-     int pid;
-     struct target_waitstatus *status;
+array_wait (int pid, struct target_waitstatus *status)
 {
   int old_timeout = timeout;
   int result, i;
@@ -816,8 +795,7 @@ array_wait (pid, status)
  *      block regs.
  */
 static void
-array_fetch_registers (ignored)
-     int ignored;
+array_fetch_registers (int ignored)
 {
   int regno, i;
   char *p;
@@ -852,8 +830,7 @@ array_fetch_registers (ignored)
  * protocol based on GDB's remote protocol.
  */
 static void
-array_fetch_register (ignored)
-     int ignored;
+array_fetch_register (int ignored)
 {
   array_fetch_registers ();
 }
@@ -862,8 +839,7 @@ array_fetch_register (ignored)
  * Get all the registers from the targets. They come back in a large array.
  */
 static void
-array_store_registers (ignored)
-     int ignored;
+array_store_registers (int ignored)
 {
   int regno;
   unsigned long i;
@@ -902,8 +878,7 @@ array_store_registers (ignored)
  * protocol based on GDB's remote protocol.
  */
 static void
-array_store_register (ignored)
-     int ignored;
+array_store_register (int ignored)
 {
   array_store_registers ();
 }
@@ -915,13 +890,13 @@ array_store_register (ignored)
    debugged.  */
 
 static void
-array_prepare_to_store ()
+array_prepare_to_store (void)
 {
   /* Do nothing, since we can store individual regs */
 }
 
 static void
-array_files_info ()
+array_files_info (void)
 {
   printf ("\tAttached to %s at %d baud.\n",
 	  dev_name, baudrate);
@@ -932,10 +907,7 @@ array_files_info ()
  *      memory at MYADDR to inferior's memory at MEMADDR.  Returns length moved.
  */
 static int
-array_write_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     unsigned char *myaddr;
-     int len;
+array_write_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
   unsigned long i;
   int j;
@@ -980,10 +952,7 @@ array_write_inferior_memory (memaddr, myaddr, len)
  *      length moved.
  */
 static int
-array_read_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+array_read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   int j;
   char buf[20];
@@ -1067,9 +1036,7 @@ array_xfer_memory (memaddr, myaddr, len, write, target)
 }
 
 static void
-array_kill (args, from_tty)
-     char *args;
-     int from_tty;
+array_kill (char *args, int from_tty)
 {
   return;			/* ignore attempts to kill target system */
 }
@@ -1080,7 +1047,7 @@ array_kill (args, from_tty)
    instructions.  */
 
 static void
-array_mourn_inferior ()
+array_mourn_inferior (void)
 {
   remove_breakpoints ();
   generic_mourn_inferior ();	/* Do all the proper things now */
@@ -1095,9 +1062,7 @@ static CORE_ADDR breakaddr[MAX_ARRAY_BREAKPOINTS] =
  * array_insert_breakpoint -- add a breakpoint
  */
 static int
-array_insert_breakpoint (addr, shadow)
-     CORE_ADDR addr;
-     char *shadow;
+array_insert_breakpoint (CORE_ADDR addr, char *shadow)
 {
   int i;
   int bp_size = 0;
@@ -1128,9 +1093,7 @@ array_insert_breakpoint (addr, shadow)
  * _remove_breakpoint -- Tell the monitor to remove a breakpoint
  */
 static int
-array_remove_breakpoint (addr, shadow)
-     CORE_ADDR addr;
-     char *shadow;
+array_remove_breakpoint (CORE_ADDR addr, char *shadow)
 {
   int i;
 
@@ -1153,7 +1116,7 @@ array_remove_breakpoint (addr, shadow)
 }
 
 static void
-array_stop ()
+array_stop (void)
 {
   debuglogs (1, "array_stop()");
   printf_monitor ("\003");
@@ -1166,9 +1129,7 @@ array_stop ()
  *      expect_prompt is seen. FIXME
  */
 static void
-monitor_command (args, fromtty)
-     char *args;
-     int fromtty;
+monitor_command (char *args, int fromtty)
 {
   debuglogs (1, "monitor_command (args=%s)", args);
 
@@ -1199,8 +1160,7 @@ monitor_command (args, fromtty)
  *
  */
 static void
-make_gdb_packet (buf, data)
-     char *buf, *data;
+make_gdb_packet (char *buf, char *data)
 {
   int i;
   unsigned char csum = 0;
@@ -1239,8 +1199,7 @@ make_gdb_packet (buf, data)
  *              successful transmition, or a 0 for a failure.
  */
 static int
-array_send_packet (packet)
-     char *packet;
+array_send_packet (char *packet)
 {
   int c, retries, i;
   char junk[PBUFSIZ];
@@ -1338,8 +1297,7 @@ array_send_packet (packet)
  *              packet, or a 0 it the packet wasn't transmitted correctly.
  */
 static int
-array_get_packet (packet)
-     char *packet;
+array_get_packet (char *packet)
 {
   int c;
   int retries;
@@ -1433,8 +1391,7 @@ array_get_packet (packet)
  * ascii2hexword -- convert an ascii number represented by 8 digits to a hex value.
  */
 static unsigned long
-ascii2hexword (mem)
-     unsigned char *mem;
+ascii2hexword (unsigned char *mem)
 {
   unsigned long val;
   int i;
@@ -1462,9 +1419,7 @@ ascii2hexword (mem)
  *      digits.
  */
 static void
-hexword2ascii (mem, num)
-     unsigned char *mem;
-     unsigned long num;
+hexword2ascii (unsigned char *mem, unsigned long num)
 {
   int i;
   unsigned char ch;
@@ -1482,8 +1437,7 @@ hexword2ascii (mem, num)
 
 /* Convert hex digit A to a number.  */
 static int
-from_hex (a)
-     int a;
+from_hex (int a)
 {
   if (a == 0)
     return 0;
@@ -1503,8 +1457,7 @@ from_hex (a)
 
 /* Convert number NIB to a hex digit.  */
 static int
-tohex (nib)
-     int nib;
+tohex (int nib)
 {
   if (nib < 10)
     return '0' + nib;
@@ -1517,7 +1470,7 @@ tohex (nib)
  *              are usually only used by monitors.
  */
 void
-_initialize_remote_monitors ()
+_initialize_remote_monitors (void)
 {
   /* generic monitor command */
   add_com ("monitor", class_obscure, monitor_command,
@@ -1529,7 +1482,7 @@ _initialize_remote_monitors ()
  * _initialize_array -- do any special init stuff for the target.
  */
 void
-_initialize_array ()
+_initialize_array (void)
 {
   init_array_ops ();
   add_target (&array_ops);

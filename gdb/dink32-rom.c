@@ -30,11 +30,7 @@
 static void dink32_open (char *args, int from_tty);
 
 static void
-dink32_supply_register (regname, regnamelen, val, vallen)
-     char *regname;
-     int regnamelen;
-     char *val;
-     int vallen;
+dink32_supply_register (char *regname, int regnamelen, char *val, int vallen)
 {
   int regno = 0;
 
@@ -100,10 +96,7 @@ dink32_supply_register (regname, regnamelen, val, vallen)
 }
 
 static void
-dink32_load (monops, filename, from_tty)
-     struct monitor_ops *monops;
-     char *filename;
-     int from_tty;
+dink32_load (struct monitor_ops *monops, char *filename, int from_tty)
 {
   extern int inferior_pid;
 
@@ -145,15 +138,13 @@ static char *dink32_inits[] =
 static struct monitor_ops dink32_cmds;
 
 static void
-dink32_open (args, from_tty)
-     char *args;
-     int from_tty;
+dink32_open (char *args, int from_tty)
 {
   monitor_open (args, &dink32_cmds, from_tty);
 }
 
 void
-_initialize_dink32_rom ()
+_initialize_dink32_rom (void)
 {
   dink32_cmds.flags = MO_HEX_PREFIX | MO_GETMEM_NEEDS_RANGE | MO_FILL_USES_ADDR | MO_HANDLE_NL | MO_32_REGS_PAIRED | MO_SETREG_INTERACTIVE | MO_SETMEM_INTERACTIVE | MO_GETMEM_16_BOUNDARY | MO_CLR_BREAK_1_BASED | MO_SREC_ACK | MO_SREC_ACK_ROTATE;
   dink32_cmds.init = dink32_inits;

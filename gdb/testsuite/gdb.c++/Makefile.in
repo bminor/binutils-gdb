@@ -3,7 +3,7 @@ srcdir = @srcdir@
 
 EXECUTABLES = ambiguous annota2 anon-union cplusfuncs cttiadd \
 	derivation inherit local member-ptr method misc \
-        overload ovldbreak ref-typ ref-typ2 templates userdef virtfunc namespace
+        overload ovldbreak ref-typ ref-typ2 templates userdef virtfunc namespace ref-types
 
 all: 
 	@echo "Nothing to be done for all..."

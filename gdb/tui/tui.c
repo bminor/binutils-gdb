@@ -441,7 +441,7 @@ tui_vSelectSourceSymtab (args)
    **      Function to initialize gdb commands, for tui window manipulation.
  */
 void
-_initialize_tui ()
+_initialize_tui (void)
 {
 #if 0
   if (tui_version)

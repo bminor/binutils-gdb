@@ -1396,10 +1396,7 @@ init_syscall_table (void)
  */
 
 void
-proc_prettyfprint_syscall (file, num, verbose)
-     FILE *file;
-     int  num;
-     int  verbose;
+proc_prettyfprint_syscall (FILE *file, int num, int verbose)
 {
   if (syscall_table[num])
     fprintf (file, "SYS_%s ", syscall_table[num]);
@@ -1408,9 +1405,7 @@ proc_prettyfprint_syscall (file, num, verbose)
 }
 
 void
-proc_prettyprint_syscall (num, verbose)
-     int num;
-     int verbose;
+proc_prettyprint_syscall (int num, int verbose)
 {
   proc_prettyfprint_syscall (stdout, num, verbose);
 }
@@ -1420,10 +1415,7 @@ proc_prettyprint_syscall (num, verbose)
  */
 
 void
-proc_prettyfprint_syscalls (file, sysset, verbose)
-     FILE     *file;
-     sysset_t *sysset;
-     int      verbose;
+proc_prettyfprint_syscalls (FILE *file, sysset_t *sysset, int verbose)
 {
   int i;
 
@@ -1436,9 +1428,7 @@ proc_prettyfprint_syscalls (file, sysset, verbose)
 }
 
 void
-proc_prettyprint_syscalls (sysset, verbose)
-     sysset_t *sysset;
-     int      verbose;
+proc_prettyprint_syscalls (sysset_t *sysset, int verbose)
 {
   proc_prettyfprint_syscalls (stdout, sysset, verbose);
 }
@@ -1595,10 +1585,7 @@ static struct trans signal_table[] =
  */
 
 void
-proc_prettyfprint_signal (file, signo, verbose)
-     FILE *file;
-     int  signo;
-     int verbose;
+proc_prettyfprint_signal (FILE *file, int signo, int verbose)
 {
   int i;
 
@@ -1616,9 +1603,7 @@ proc_prettyfprint_signal (file, signo, verbose)
 }
 
 void
-proc_prettyprint_signal (signo, verbose)
-     int signo;
-     int verbose;
+proc_prettyprint_signal (int signo, int verbose)
 {
   proc_prettyfprint_signal (stdout, signo, verbose);
 }
@@ -1635,10 +1620,7 @@ proc_prettyprint_signal (signo, verbose)
  */
 
 void
-proc_prettyfprint_signalset (file, sigset, verbose)
-     FILE     *file;
-     sigset_t *sigset;
-     int      verbose;
+proc_prettyfprint_signalset (FILE *file, sigset_t *sigset, int verbose)
 {
   int i;
 
@@ -1651,9 +1633,7 @@ proc_prettyfprint_signalset (file, sigset, verbose)
 }
 
 void
-proc_prettyprint_signalset (sigset, verbose)
-     sigset_t *sigset;
-     int      verbose;
+proc_prettyprint_signalset (sigset_t *sigset, int verbose)
 {
   proc_prettyfprint_signalset (stdout, sigset, verbose);
 }
@@ -1714,10 +1694,7 @@ static struct trans fault_table[] =
  */
 
 static void
-prettyfprint_faulttable_entry (file, i, verbose)
-     FILE *file;
-     int   i;
-     int   verbose;
+prettyfprint_faulttable_entry (FILE *file, int i, int verbose)
 {
   fprintf (file, "%s", fault_table[i].name);
   if (verbose)
@@ -1731,10 +1708,7 @@ prettyfprint_faulttable_entry (file, i, verbose)
  */
 
 void
-proc_prettyfprint_fault (file, faultno, verbose)
-     FILE *file;
-     int  faultno;
-     int  verbose;
+proc_prettyfprint_fault (FILE *file, int faultno, int verbose)
 {
   int i;
 
@@ -1750,9 +1724,7 @@ proc_prettyfprint_fault (file, faultno, verbose)
 }
 
 void
-proc_prettyprint_fault (faultno, verbose)
-     int  faultno;
-     int  verbose;
+proc_prettyprint_fault (int faultno, int verbose)
 {
   proc_prettyfprint_fault (stdout, faultno, verbose);
 }
@@ -1767,10 +1739,7 @@ proc_prettyprint_fault (faultno, verbose)
  */
 
 void
-proc_prettyfprint_faultset (file, fltset, verbose)
-     FILE     *file;
-     fltset_t *fltset;
-     int      verbose;
+proc_prettyfprint_faultset (FILE *file, fltset_t *fltset, int verbose)
 {
   int i;
 
@@ -1783,9 +1752,7 @@ proc_prettyfprint_faultset (file, fltset, verbose)
 }
 
 void
-proc_prettyprint_faultset (fltset, verbose)
-     fltset_t *fltset;
-     int      verbose;
+proc_prettyprint_faultset (fltset_t *fltset, int verbose)
 {
   proc_prettyfprint_faultset (stdout, fltset, verbose);
 }
@@ -1800,7 +1767,7 @@ proc_prettyprint_actionset (struct sigaction *actions, int verbose)
 }
 
 void
-_initialize_proc_events ()
+_initialize_proc_events (void)
 {
   init_syscall_table ();
 }

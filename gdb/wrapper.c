@@ -57,11 +57,8 @@ static int wrap_value_ind (char *opaque_arg);
 static int wrap_parse_and_eval_type (char *);
 
 int
-gdb_parse_exp_1 (stringptr, block, comma, expression)
-     char **stringptr;
-     struct block *block;
-     int comma;
-     struct expression **expression;
+gdb_parse_exp_1 (char **stringptr, struct block *block, int comma,
+		 struct expression **expression)
 {
   struct gdb_wrapper_arguments args;
   args.args[0].pointer = stringptr;
@@ -81,8 +78,7 @@ gdb_parse_exp_1 (stringptr, block, comma, expression)
 }
 
 static int
-wrap_parse_exp_1 (argptr)
-     char *argptr;
+wrap_parse_exp_1 (char *argptr)
 {
   struct gdb_wrapper_arguments *args 
     = (struct gdb_wrapper_arguments *) argptr;
@@ -93,9 +89,7 @@ wrap_parse_exp_1 (argptr)
 }
 
 int
-gdb_evaluate_expression (exp, value)
-     struct expression *exp;
-     value_ptr *value;
+gdb_evaluate_expression (struct expression *exp, value_ptr *value)
 {
   struct gdb_wrapper_arguments args;
   args.args[0].pointer = exp;
@@ -112,8 +106,7 @@ gdb_evaluate_expression (exp, value)
 }
 
 static int
-wrap_evaluate_expression (a)
-     char *a;
+wrap_evaluate_expression (char *a)
 {
   struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) a;
 
@@ -123,8 +116,7 @@ wrap_evaluate_expression (a)
 }
 
 int
-gdb_value_fetch_lazy (value)
-     value_ptr value;
+gdb_value_fetch_lazy (value_ptr value)
 {
   struct gdb_wrapper_arguments args;
 
@@ -134,8 +126,7 @@ gdb_value_fetch_lazy (value)
 }
 
 static int
-wrap_value_fetch_lazy (a)
-     char *a;
+wrap_value_fetch_lazy (char *a)
 {
   struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) a;
 
@@ -144,10 +135,7 @@ wrap_value_fetch_lazy (a)
 }
 
 int
-gdb_value_equal (val1, val2, result)
-     value_ptr val1;
-     value_ptr val2;
-     int *result;
+gdb_value_equal (value_ptr val1, value_ptr val2, int *result)
 {
   struct gdb_wrapper_arguments args;
 
@@ -166,8 +154,7 @@ gdb_value_equal (val1, val2, result)
 }
 
 static int
-wrap_value_equal (a)
-     char *a;
+wrap_value_equal (char *a)
 {
   struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) a;
   value_ptr val1, val2;
@@ -180,10 +167,7 @@ wrap_value_equal (a)
 }
 
 int
-gdb_value_subscript (val1, val2, rval)
-     value_ptr val1;
-     value_ptr val2;
-     value_ptr * rval;
+gdb_value_subscript (value_ptr val1, value_ptr val2, value_ptr *rval)
 {
   struct gdb_wrapper_arguments args;
 
@@ -202,8 +186,7 @@ gdb_value_subscript (val1, val2, rval)
 }
 
 static int
-wrap_value_subscript (a)
-     char *a;
+wrap_value_subscript (char *a)
 {
   struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) a;
   value_ptr val1, val2;
@@ -216,9 +199,7 @@ wrap_value_subscript (a)
 }
 
 int
-gdb_value_ind (val, rval)
-     value_ptr val;
-     value_ptr *rval;
+gdb_value_ind (value_ptr val, value_ptr *rval)
 {
   struct gdb_wrapper_arguments args;
 
@@ -236,8 +217,7 @@ gdb_value_ind (val, rval)
 }
 
 static int
-wrap_value_ind (opaque_arg)
-     char *opaque_arg;
+wrap_value_ind (char *opaque_arg)
 {
   struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) opaque_arg;
   value_ptr val;

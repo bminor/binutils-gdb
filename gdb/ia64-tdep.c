@@ -564,9 +564,7 @@ ia64_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 /* We don't really want to use this, but remote.c needs to call it in order
    to figure out if Z-packets are supported or not.  Oh, well. */
 unsigned char *
-ia64_breakpoint_from_pc (pcptr, lenptr)
-     CORE_ADDR *pcptr;
-     int *lenptr;
+ia64_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char breakpoint[] =
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };

@@ -146,8 +146,7 @@ int have_ptrace_getxfpregs =
 /* Fetch one register.  */
 
 static void
-fetch_register (regno)
-     int regno;
+fetch_register (int regno)
 {
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr;
@@ -192,8 +191,7 @@ fetch_register (regno)
    Otherwise, REGNO specifies which register (so we can save time). */
 
 void
-old_fetch_inferior_registers (regno)
-     int regno;
+old_fetch_inferior_registers (int regno)
 {
   if (regno >= 0)
     {
@@ -216,8 +214,7 @@ old_fetch_inferior_registers (regno)
 /* Store one register. */
 
 static void
-store_register (regno)
-     int regno;
+store_register (int regno)
 {
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr;
@@ -258,8 +255,7 @@ store_register (regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-old_store_inferior_registers (regno)
-     int regno;
+old_store_inferior_registers (int regno)
 {
   if (regno >= 0)
     {
@@ -1151,7 +1147,7 @@ static struct core_fns linux_elf_core_fns =
 };
 
 void
-_initialize_i386_linux_nat ()
+_initialize_i386_linux_nat (void)
 {
   add_core_fns (&linux_elf_core_fns);
 }

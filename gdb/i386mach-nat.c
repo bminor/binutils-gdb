@@ -68,8 +68,7 @@ fetch_inferior_registers (regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   struct regs inferior_registers;
   struct fp_state inferior_fp_registers;
@@ -156,7 +155,7 @@ static struct core_fns i386mach_core_fns =
 };
 
 void
-_initialize_core_i386mach ()
+_initialize_core_i386mach (void)
 {
   add_core_fns (&i386mach_core_fns);
 }

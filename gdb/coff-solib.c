@@ -48,10 +48,7 @@
  */
 
 void
-coff_solib_add (arg_string, from_tty, target)
-     char *arg_string;
-     int from_tty;
-     struct target_ops *target;
+coff_solib_add (char *arg_string, int from_tty, struct target_ops *target)
 {
   asection *libsect;
 
@@ -126,7 +123,7 @@ coff_solib_add (arg_string, from_tty, target)
  */
 
 void
-coff_solib_create_inferior_hook ()
+coff_solib_create_inferior_hook (void)
 {
   coff_solib_add ((char *) 0, 0, (struct target_ops *) 0);
 }

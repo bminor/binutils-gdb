@@ -41,9 +41,7 @@
 #include <servers/netname_defs.h>
 
 void
-main (argc, argv)
-     int argc;
-     char **argv;
+main (int argc, char **argv)
 {
   kern_return_t kr;
   mach_msg_header_t msg;

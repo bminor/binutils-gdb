@@ -275,8 +275,7 @@ static struct type **os9k_type_vector[] =
 static void os9k_init_type_vector (struct type **);
 
 static void
-os9k_init_type_vector (tv)
-     struct type **tv;
+os9k_init_type_vector (struct type **tv)
 {
   unsigned int i;
   for (i = 0; i < sizeof (os9k_type_vector) / sizeof (struct type **); i++)
@@ -427,10 +426,8 @@ dbx_alloc_type (typenums, objfile)
    and fix their symbols in given symbol vector. */
 
 static void
-patch_block_stabs (symbols, stabs, objfile)
-     struct pending *symbols;
-     struct pending_stabs *stabs;
-     struct objfile *objfile;
+patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
+		   struct objfile *objfile)
 {
   int ii;
   char *name;
@@ -517,9 +514,7 @@ patch_block_stabs (symbols, stabs, objfile)
    Returns 0 for success, -1 for error.  */
 
 static int
-read_type_number (pp, typenums)
-     register char **pp;
-     register int *typenums;
+read_type_number (register char **pp, register int *typenums)
 {
   int nbits;
   if (**pp == '(')
@@ -557,9 +552,7 @@ read_type_number (pp, typenums)
    suibstring. */
 
 static char *
-get_substring (p, c)
-     char **p;
-     int c;
+get_substring (char **p, int c)
 {
   char *str;
   str = *p;
@@ -580,8 +573,7 @@ get_substring (p, c)
    eg: for sname="a" and fname="foo__1aFPFs_i" return "FPFs_i" */
 
 static char *
-get_cfront_method_physname (fname)
-     char *fname;
+get_cfront_method_physname (char *fname)
 {
   int len = 0;
   /* FIXME would like to make this generic for g++ too, but 
@@ -617,11 +609,8 @@ get_cfront_method_physname (fname)
  */
 
 static int
-read_cfront_baseclasses (fip, pp, type, objfile)
-     struct field_info *fip;
-     struct objfile *objfile;
-     char **pp;
-     struct type *type;
+read_cfront_baseclasses (struct field_info *fip, char **pp, struct type *type,
+			 struct objfile *objfile)
 {
   static struct complaint msg_unknown =
   {"\
@@ -770,11 +759,8 @@ read_cfront_baseclasses (fip, pp, type, objfile)
  */
 
 static int
-read_cfront_member_functions (fip, pp, type, objfile)
-     struct field_info *fip;
-     char **pp;
-     struct type *type;
-     struct objfile *objfile;
+read_cfront_member_functions (struct field_info *fip, char **pp,
+			      struct type *type, struct objfile *objfile)
 {
   /* This code extracted from read_member_functions 
      so as to do the similar thing for our funcs */
@@ -978,10 +964,8 @@ read_cfront_member_functions (fip, pp, type, objfile)
    to add information such as methods to classes.
    Examples of "p": "sA;;__ct__1AFv foo__1AFv ;;;" */
 int
-resolve_cfront_continuation (objfile, sym, p)
-     struct objfile *objfile;
-     struct symbol *sym;
-     char *p;
+resolve_cfront_continuation (struct objfile *objfile, struct symbol *sym,
+			     char *p)
 {
   struct symbol *ref_sym = 0;
   char *sname;
@@ -1050,10 +1034,7 @@ resolve_cfront_continuation (objfile, sym, p)
    symbol definition.  Returns 0 on failure, non-zero on success.  */
 
 static int
-resolve_symbol_reference (objfile, sym, p)
-     struct objfile *objfile;
-     struct symbol *sym;
-     char *p;
+resolve_symbol_reference (struct objfile *objfile, struct symbol *sym, char *p)
 {
   int refnum;
   struct symbol *ref_sym = 0;
@@ -1178,7 +1159,7 @@ static int ref_chunk = 0;
    table. If the symbol table changes, this cache must be cleared
    or we are left holding onto data in invalid obstacks. */
 void
-stabsread_clear_cache ()
+stabsread_clear_cache (void)
 {
   ref_count = 0;
   ref_chunk = 0;
@@ -1189,11 +1170,7 @@ stabsread_clear_cache ()
    find them, using their reference numbers as our index. 
    These will be used later when we resolve references. */
 void
-ref_add (refnum, sym, stabs, value)
-     int refnum;
-     struct symbol *sym;
-     char *stabs;
-     CORE_ADDR value;
+ref_add (int refnum, struct symbol *sym, char *stabs, CORE_ADDR value)
 {
   if (ref_count == 0)
     ref_chunk = 0;
@@ -1215,8 +1192,7 @@ ref_add (refnum, sym, stabs, value)
 
 /* Return defined sym for the reference REFNUM.  */
 struct symbol *
-ref_search (refnum)
-     int refnum;
+ref_search (int refnum)
 {
   if (refnum < 0 || refnum > ref_count)
     return 0;
@@ -1226,8 +1202,7 @@ ref_search (refnum)
 /* Return value for the reference REFNUM.  */
 
 static CORE_ADDR
-ref_search_value (refnum)
-     int refnum;
+ref_search_value (int refnum)
 {
   if (refnum < 0 || refnum > ref_count)
     return 0;
@@ -1238,8 +1213,7 @@ ref_search_value (refnum)
    reference number.  Move STRING beyond the reference id.  */
 
 static int
-process_reference (string)
-     char **string;
+process_reference (char **string)
 {
   char *p;
   int refnum = 0;
@@ -1264,8 +1238,7 @@ process_reference (string)
    definition for later use.  Return the reference number.  */
 
 int
-symbol_reference_defined (string)
-     char **string;
+symbol_reference_defined (char **string)
 {
   char *p = *string;
   int refnum = 0;
@@ -1290,12 +1263,8 @@ symbol_reference_defined (string)
 
 /* ARGSUSED */
 struct symbol *
-define_symbol (valu, string, desc, type, objfile)
-     CORE_ADDR valu;
-     char *string;
-     int desc;
-     int type;
-     struct objfile *objfile;
+define_symbol (CORE_ADDR valu, char *string, int desc, int type,
+	       struct objfile *objfile)
 {
   register struct symbol *sym;
   char *p = (char *) strchr (string, ':');
@@ -2189,10 +2158,7 @@ define_symbol (valu, string, desc, type, objfile)
    non-zero on success, zero otherwise.  */
 
 static int
-resolve_live_range (objfile, sym, p)
-     struct objfile *objfile;
-     struct symbol *sym;
-     char *p;
+resolve_live_range (struct objfile *objfile, struct symbol *sym, char *p)
 {
   int refnum;
   CORE_ADDR start, end;
@@ -2260,10 +2226,8 @@ resolve_live_range (objfile, sym, p)
    in objfile OBJFILE.  */
 
 static void
-add_live_range (objfile, sym, start, end)
-     struct objfile *objfile;
-     struct symbol *sym;
-     CORE_ADDR start, end;
+add_live_range (struct objfile *objfile, struct symbol *sym, CORE_ADDR start,
+		CORE_ADDR end)
 {
   struct range_list *r, *rs;
 
@@ -2324,9 +2288,7 @@ add_live_range (objfile, sym, start, end)
    debugger will be able to read the new symbol tables.  */
 
 static struct type *
-error_type (pp, objfile)
-     char **pp;
-     struct objfile *objfile;
+error_type (char **pp, struct objfile *objfile)
 {
   complain (&error_type_complaint);
   while (1)
@@ -2358,9 +2320,7 @@ error_type (pp, objfile)
    deciding whether to call read_type.  */
 
 struct type *
-read_type (pp, objfile)
-     register char **pp;
-     struct objfile *objfile;
+read_type (register char **pp, struct objfile *objfile)
 {
   register struct type *type = 0;
   struct type *type1;
@@ -2790,8 +2750,7 @@ again:
    Return the proper type node for a given builtin type number. */
 
 static struct type *
-rs6000_builtin_type (typenum)
-     int typenum;
+rs6000_builtin_type (int typenum)
 {
   /* We recognize types numbered from -NUMBER_RECOGNIZED to -1.  */
 #define NUMBER_RECOGNIZED 34
@@ -2966,11 +2925,8 @@ rs6000_builtin_type (typenum)
    Returns 1 for success, 0 for failure.  */
 
 static int
-read_member_functions (fip, pp, type, objfile)
-     struct field_info *fip;
-     char **pp;
-     struct type *type;
-     struct objfile *objfile;
+read_member_functions (struct field_info *fip, char **pp, struct type *type,
+		       struct objfile *objfile)
 {
   int nfn_fields = 0;
   int length = 0;
@@ -3260,11 +3216,8 @@ read_member_functions (fip, pp, type, objfile)
    keep parsing and it's time for error_type().  */
 
 static int
-read_cpp_abbrev (fip, pp, type, objfile)
-     struct field_info *fip;
-     char **pp;
-     struct type *type;
-     struct objfile *objfile;
+read_cpp_abbrev (struct field_info *fip, char **pp, struct type *type,
+		 struct objfile *objfile)
 {
   register char *p;
   char *name;
@@ -3349,12 +3302,8 @@ read_cpp_abbrev (fip, pp, type, objfile)
 }
 
 static void
-read_one_struct_field (fip, pp, p, type, objfile)
-     struct field_info *fip;
-     char **pp;
-     char *p;
-     struct type *type;
-     struct objfile *objfile;
+read_one_struct_field (struct field_info *fip, char **pp, char *p,
+		       struct type *type, struct objfile *objfile)
 {
   /* The following is code to work around cfront generated stabs.
      The stabs contains full mangled name for each field.
@@ -3520,11 +3469,8 @@ read_one_struct_field (fip, pp, p, type, objfile)
    Returns 1 for success, 0 for failure.  */
 
 static int
-read_struct_fields (fip, pp, type, objfile)
-     struct field_info *fip;
-     char **pp;
-     struct type *type;
-     struct objfile *objfile;
+read_struct_fields (struct field_info *fip, char **pp, struct type *type,
+		    struct objfile *objfile)
 {
   register char *p;
   struct nextfield *new;
@@ -3620,11 +3566,8 @@ read_struct_fields (fip, pp, type, objfile)
 
 
 static int
-read_baseclasses (fip, pp, type, objfile)
-     struct field_info *fip;
-     char **pp;
-     struct type *type;
-     struct objfile *objfile;
+read_baseclasses (struct field_info *fip, char **pp, struct type *type,
+		  struct objfile *objfile)
 {
   int i;
   struct nextfield *new;
@@ -3750,11 +3693,8 @@ read_baseclasses (fip, pp, type, objfile)
    so we can look for the vptr base class info.  */
 
 static int
-read_tilde_fields (fip, pp, type, objfile)
-     struct field_info *fip;
-     char **pp;
-     struct type *type;
-     struct objfile *objfile;
+read_tilde_fields (struct field_info *fip, char **pp, struct type *type,
+		   struct objfile *objfile)
 {
   register char *p;
 
@@ -3832,9 +3772,7 @@ read_tilde_fields (fip, pp, type, objfile)
 }
 
 static int
-attach_fn_fields_to_type (fip, type)
-     struct field_info *fip;
-     register struct type *type;
+attach_fn_fields_to_type (struct field_info *fip, register struct type *type)
 {
   register int n;
 
@@ -3858,11 +3796,8 @@ attach_fn_fields_to_type (fip, type)
  */
 
 static int
-read_cfront_static_fields (fip, pp, type, objfile)
-     struct field_info *fip;
-     char **pp;
-     struct type *type;
-     struct objfile *objfile;
+read_cfront_static_fields (struct field_info *fip, char **pp, struct type *type,
+			   struct objfile *objfile)
 {
   struct nextfield *new;
   struct type *stype;
@@ -3944,10 +3879,8 @@ read_cfront_static_fields (fip, pp, type, objfile)
    once we have collected all the class members. */
 
 static int
-copy_cfront_struct_fields (fip, type, objfile)
-     struct field_info *fip;
-     struct type *type;
-     struct objfile *objfile;
+copy_cfront_struct_fields (struct field_info *fip, struct type *type,
+			   struct objfile *objfile)
 {
   int nfields = TYPE_NFIELDS (type);
   int i;
@@ -3991,10 +3924,8 @@ copy_cfront_struct_fields (fip, type, objfile)
    for this class's virtual functions.  */
 
 static int
-attach_fields_to_type (fip, type, objfile)
-     struct field_info *fip;
-     register struct type *type;
-     struct objfile *objfile;
+attach_fields_to_type (struct field_info *fip, register struct type *type,
+		       struct objfile *objfile)
 {
   register int nfields = 0;
   register int non_public_fields = 0;
@@ -4094,10 +4025,7 @@ attach_fields_to_type (fip, type, objfile)
  */
 
 static struct type *
-read_struct_type (pp, type, objfile)
-     char **pp;
-     struct type *type;
-     struct objfile *objfile;
+read_struct_type (char **pp, struct type *type, struct objfile *objfile)
 {
   struct cleanup *back_to;
   struct field_info fi;
@@ -4144,10 +4072,8 @@ read_struct_type (pp, type, objfile)
    array.  */
 
 static struct type *
-read_array_type (pp, type, objfile)
-     register char **pp;
-     register struct type *type;
-     struct objfile *objfile;
+read_array_type (register char **pp, register struct type *type,
+		 struct objfile *objfile)
 {
   struct type *index_type, *element_type, *range_type;
   int lower, upper;
@@ -4211,10 +4137,8 @@ read_array_type (pp, type, objfile)
    Also defines the symbols that represent the values of the type.  */
 
 static struct type *
-read_enum_type (pp, type, objfile)
-     register char **pp;
-     register struct type *type;
-     struct objfile *objfile;
+read_enum_type (register char **pp, register struct type *type,
+		struct objfile *objfile)
 {
   register char *p;
   char *name;
@@ -4463,10 +4387,7 @@ read_sun_floating_type (pp, typenums, objfile)
    If encounter garbage, set *BITS to -1 and return 0.  */
 
 static long
-read_huge_number (pp, end, bits)
-     char **pp;
-     int end;
-     int *bits;
+read_huge_number (char **pp, int end, int *bits)
 {
   char *p = *pp;
   int sign = 1;
@@ -4770,10 +4691,7 @@ handle_true_range:
    **)-1 if there is an error.  */
 
 static struct type **
-read_args (pp, end, objfile)
-     char **pp;
-     int end;
-     struct objfile *objfile;
+read_args (char **pp, int end, struct objfile *objfile)
 {
   /* FIXME!  Remove this arbitrary limit!  */
   struct type *types[1024], **rval;	/* allow for fns of 1023 parameters */
@@ -4827,9 +4745,7 @@ static char *common_block_name;
    to remain after this function returns.  */
 
 void
-common_block_start (name, objfile)
-     char *name;
-     struct objfile *objfile;
+common_block_start (char *name, struct objfile *objfile)
 {
   if (common_block_name != NULL)
     {
@@ -4848,8 +4764,7 @@ common_block_start (name, objfile)
 /* Process a N_ECOMM symbol.  */
 
 void
-common_block_end (objfile)
-     struct objfile *objfile;
+common_block_end (struct objfile *objfile)
 {
   /* Symbols declared since the BCOMM are to have the common block
      start address added in when we know it.  common_block and
@@ -4912,9 +4827,7 @@ common_block_end (objfile)
    the common block name).  */
 
 static void
-fix_common_block (sym, valu)
-     struct symbol *sym;
-     int valu;
+fix_common_block (struct symbol *sym, int valu)
 {
   struct pending *next = (struct pending *) SYMBOL_TYPE (sym);
   for (; next; next = next->next)
@@ -4933,8 +4846,7 @@ fix_common_block (sym, valu)
    once this file has been read in.  */
 
 void
-add_undefined_type (type)
-     struct type *type;
+add_undefined_type (struct type *type)
 {
   if (undef_types_length == undef_types_allocated)
     {
@@ -4956,7 +4868,7 @@ add_undefined_type (type)
    yet defined at the time a pointer to it was made.
    Fix:  Do a full lookup on the struct/union tag.  */
 void
-cleanup_undefined_types ()
+cleanup_undefined_types (void)
 {
   struct type **type;
 
@@ -5027,8 +4939,7 @@ GDB internal error.  cleanup_undefined_types with bad type %d.", 0, 0};
    to.  Get these symbols from the minimal symbol table.  */
 
 void
-scan_file_globals (objfile)
-     struct objfile *objfile;
+scan_file_globals (struct objfile *objfile)
 {
   int hash;
   struct minimal_symbol *msymbol;
@@ -5186,7 +5097,7 @@ scan_file_globals (objfile)
    to a psymtab.  */
 
 void
-stabsread_init ()
+stabsread_init (void)
 {
 }
 
@@ -5195,7 +5106,7 @@ stabsread_init ()
    file, e.g. a shared library).  */
 
 void
-stabsread_new_init ()
+stabsread_new_init (void)
 {
   /* Empty the hash table of global syms looking for values.  */
   memset (global_sym_chain, 0, sizeof (global_sym_chain));
@@ -5205,7 +5116,7 @@ stabsread_new_init ()
    start_symtab() is called. */
 
 void
-start_stabs ()
+start_stabs (void)
 {
   global_stabs = NULL;		/* AIX COFF */
   /* Leave FILENUM of 0 free for builtin types and this file's types.  */
@@ -5222,7 +5133,7 @@ start_stabs ()
 /* Call after end_symtab() */
 
 void
-end_stabs ()
+end_stabs (void)
 {
   if (type_vector)
     {
@@ -5234,8 +5145,7 @@ end_stabs ()
 }
 
 void
-finish_global_stabs (objfile)
-     struct objfile *objfile;
+finish_global_stabs (struct objfile *objfile)
 {
   if (global_stabs)
     {
@@ -5248,7 +5158,7 @@ finish_global_stabs (objfile)
 /* Initializer for this module */
 
 void
-_initialize_stabsread ()
+_initialize_stabsread (void)
 {
   undef_types_allocated = 20;
   undef_types_length = 0;

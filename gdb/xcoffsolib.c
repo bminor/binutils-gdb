@@ -45,10 +45,7 @@ extern int current_source_line;
    the section list.  */
 
 void
-solib_add (arg_string, from_tty, target)
-     char *arg_string;
-     int from_tty;
-     struct target_ops *target;
+solib_add (char *arg_string, int from_tty, struct target_ops *target)
 {
   char *val;
   struct vmap *vp = vmap;
@@ -143,8 +140,7 @@ solib_add (arg_string, from_tty, target)
    is not persistent. */
 
 char *
-pc_load_segment_name (addr)
-     CORE_ADDR addr;
+pc_load_segment_name (CORE_ADDR addr)
 {
   static char buffer[BUFSIZ];
   struct vmap *vp = vmap;
@@ -168,9 +164,7 @@ pc_load_segment_name (addr)
 static void solib_info (char *, int);
 
 static void
-solib_info (args, from_tty)
-     char *args;
-     int from_tty;
+solib_info (char *args, int from_tty)
 {
   struct vmap *vp = vmap;
 
@@ -204,9 +198,7 @@ Text Range		Data Range		Syms	Shared Object Library\n");
 }
 
 void
-sharedlibrary_command (args, from_tty)
-     char *args;
-     int from_tty;
+sharedlibrary_command (char *args, int from_tty)
 {
   dont_repeat ();
 
@@ -220,7 +212,7 @@ sharedlibrary_command (args, from_tty)
 }
 
 void
-_initialize_solib ()
+_initialize_solib (void)
 {
   add_com ("sharedlibrary", class_files, sharedlibrary_command,
 	   "Load shared object library symbols for files matching REGEXP.");

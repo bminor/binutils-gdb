@@ -90,13 +90,13 @@ cisco_kod_open (kod_display_callback_ftype *display_func,
 
 /* Close the connection.  */
 void
-cisco_kod_close ()
+cisco_kod_close (void)
 {
 }
 
 /* Print a "bad packet" message.  */
 static void
-bad_packet ()
+bad_packet (void)
 {
   (*gdb_kod_display) ("Remote target returned malformed packet.\n");
 }

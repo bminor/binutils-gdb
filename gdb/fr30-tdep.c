@@ -32,8 +32,7 @@
 /* An expression that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  */
 int
-fr30_frameless_function_invocation (fi)
-     struct frame_info *fi;
+fr30_frameless_function_invocation (struct frame_info *fi)
 {
   int frameless;
   CORE_ADDR func_start, after_prologue;
@@ -50,7 +49,7 @@ fr30_frameless_function_invocation (fi)
    command, or the call dummy breakpoint gets hit.  */
 
 void
-fr30_pop_frame ()
+fr30_pop_frame (void)
 {
   struct frame_info *frame = get_current_frame ();
   int regnum;
@@ -159,12 +158,8 @@ fr30_skip_prologue (CORE_ADDR pc)
  */
 
 CORE_ADDR
-fr30_push_arguments (nargs, args, sp, struct_return, struct_addr)
-     int nargs;
-     value_ptr *args;
-     CORE_ADDR sp;
-     int struct_return;
-     CORE_ADDR struct_addr;
+fr30_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+		     int struct_return, CORE_ADDR struct_addr)
 {
   int argreg;
   int argnum;
@@ -245,7 +240,7 @@ fr30_push_arguments (nargs, args, sp, struct_return, struct_addr)
 void _initialize_fr30_tdep (void);
 
 void
-_initialize_fr30_tdep ()
+_initialize_fr30_tdep (void)
 {
   extern int print_insn_fr30 (bfd_vma, disassemble_info *);
   tm_print_insn = print_insn_fr30;
@@ -272,8 +267,7 @@ _initialize_fr30_tdep ()
 static struct frame_info prologue_cache;
 
 static int
-check_prologue_cache (fi)
-     struct frame_info *fi;
+check_prologue_cache (struct frame_info *fi)
 {
   int i;
 
@@ -296,8 +290,7 @@ check_prologue_cache (fi)
  */
 
 static void
-save_prologue_cache (fi)
-     struct frame_info *fi;
+save_prologue_cache (struct frame_info *fi)
 {
   int i;
 
@@ -323,8 +316,7 @@ save_prologue_cache (fi)
    be determined till after we have scanned the prologue.  */
 
 static void
-fr30_scan_prologue (fi)
-     struct frame_info *fi;
+fr30_scan_prologue (struct frame_info *fi)
 {
   int sp_offset, fp_offset;
   CORE_ADDR prologue_start, prologue_end, current_pc;
@@ -460,8 +452,7 @@ fr30_scan_prologue (fi)
    pointer just prior to calling the target function (see run_stack_dummy).  */
 
 void
-fr30_init_extra_frame_info (fi)
-     struct frame_info *fi;
+fr30_init_extra_frame_info (struct frame_info *fi)
 {
   int reg;
 
@@ -507,9 +498,7 @@ fr30_init_extra_frame_info (fi)
    frame.  */
 
 CORE_ADDR
-fr30_find_callers_reg (fi, regnum)
-     struct frame_info *fi;
-     int regnum;
+fr30_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi; fi = fi->next)
     if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
@@ -531,8 +520,7 @@ fr30_find_callers_reg (fi, regnum)
 
 
 CORE_ADDR
-fr30_frame_chain (fi)
-     struct frame_info *fi;
+fr30_frame_chain (struct frame_info *fi)
 {
   CORE_ADDR fn_start, callers_pc, fp;
   struct frame_info caller_fi;
@@ -580,8 +568,7 @@ fr30_frame_chain (fi)
    will be found.  */
 
 CORE_ADDR
-fr30_frame_saved_pc (fi)
-     struct frame_info *fi;
+fr30_frame_saved_pc (struct frame_info *fi)
 {
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return generic_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
@@ -597,14 +584,8 @@ fr30_frame_saved_pc (fi)
  */
 
 int
-fr30_fix_call_dummy (dummy, sp, fun, nargs, args, type, gcc_p)
-     char *dummy;
-     CORE_ADDR sp;
-     CORE_ADDR fun;
-     int nargs;
-     value_ptr *args;
-     struct type *type;
-     int gcc_p;
+fr30_fix_call_dummy (char *dummy, CORE_ADDR sp, CORE_ADDR fun, int nargs,
+		     value_ptr *args, struct type *type, int gcc_p)
 {
   long offset24;
 

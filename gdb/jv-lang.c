@@ -69,7 +69,7 @@ static struct objfile *dynamics_objfile = NULL;
 static struct type *java_link_class_type (struct type *, value_ptr);
 
 static struct objfile *
-get_dynamics_objfile ()
+get_dynamics_objfile (void)
 {
   if (dynamics_objfile == NULL)
     {
@@ -88,7 +88,7 @@ static struct symtab *class_symtab = NULL;
 static int class_symtab_space;
 
 static struct symtab *
-get_java_class_symtab ()
+get_java_class_symtab (void)
 {
   if (class_symtab == NULL)
     {
@@ -127,8 +127,7 @@ get_java_class_symtab ()
 }
 
 static void
-add_class_symtab_symbol (sym)
-     struct symbol *sym;
+add_class_symtab_symbol (struct symbol *sym)
 {
   struct symtab *symtab = get_java_class_symtab ();
   struct blockvector *bv = BLOCKVECTOR (symtab);
@@ -152,9 +151,7 @@ add_class_symtab_symbol (sym)
 static struct symbol *add_class_symbol (struct type *type, CORE_ADDR addr);
 
 static struct symbol *
-add_class_symbol (type, addr)
-     struct type *type;
-     CORE_ADDR addr;
+add_class_symbol (struct type *type, CORE_ADDR addr)
 {
   struct symbol *sym;
   sym = (struct symbol *)
@@ -172,8 +169,7 @@ add_class_symbol (type, addr)
 #endif
 
 struct type *
-java_lookup_class (name)
-     char *name;
+java_lookup_class (char *name)
 {
   struct symbol *sym;
   sym = lookup_symbol (name, expression_context_block, STRUCT_NAMESPACE,
@@ -210,9 +206,7 @@ java_lookup_class (name)
    a name given by NAME (which has type Utf8Const*). */
 
 char *
-get_java_utf8_name (obstack, name)
-     struct obstack *obstack;
-     value_ptr name;
+get_java_utf8_name (struct obstack *obstack, value_ptr name)
 {
   char *chrs;
   value_ptr temp = name;
@@ -229,8 +223,7 @@ get_java_utf8_name (obstack, name)
 }
 
 value_ptr
-java_class_from_object (obj_val)
-     value_ptr obj_val;
+java_class_from_object (value_ptr obj_val)
 {
   /* This is all rather inefficient, since the offsets of vtable and
      class are fixed.  FIXME */
@@ -247,8 +240,7 @@ java_class_from_object (obj_val)
 
 /* Check if CLASS_IS_PRIMITIVE(value of clas): */
 static int
-java_class_is_primitive (clas)
-     value_ptr clas;
+java_class_is_primitive (value_ptr clas)
 {
   value_ptr vtable = value_struct_elt (&clas, NULL, "vtable", NULL, "struct");
   CORE_ADDR i = value_as_pointer (vtable);
@@ -258,8 +250,7 @@ java_class_is_primitive (clas)
 /* Read a GCJ Class object, and generated a gdb (TYPE_CODE_STRUCT) type. */
 
 struct type *
-type_from_class (clas)
-     value_ptr clas;
+type_from_class (value_ptr clas)
 {
   struct type *type;
   char *name;
@@ -346,9 +337,7 @@ type_from_class (clas)
 /* Fill in class TYPE with data from the CLAS value. */
 
 struct type *
-java_link_class_type (type, clas)
-     struct type *type;
-     value_ptr clas;
+java_link_class_type (struct type *type, value_ptr clas)
 {
   value_ptr temp;
   char *unqualified_name;
@@ -583,7 +572,7 @@ java_link_class_type (type, clas)
 static struct type *java_object_type;
 
 struct type *
-get_java_object_type ()
+get_java_object_type (void)
 {
   if (java_object_type == NULL)
     {
@@ -598,7 +587,7 @@ get_java_object_type ()
 }
 
 int
-get_java_object_header_size ()
+get_java_object_header_size (void)
 {
   struct type *objtype = get_java_object_type ();
   if (objtype == NULL)
@@ -608,8 +597,7 @@ get_java_object_header_size ()
 }
 
 int
-is_object_type (type)
-     struct type *type;
+is_object_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
@@ -635,8 +623,7 @@ is_object_type (type)
 }
 
 struct type *
-java_primitive_type (signature)
-     int signature;
+java_primitive_type (int signature)
 {
   switch (signature)
     {
@@ -666,9 +653,7 @@ java_primitive_type (signature)
    return that type.  Otherwise, return NULL. */
 
 struct type *
-java_primitive_type_from_name (name, namelen)
-     char *name;
-     int namelen;
+java_primitive_type_from_name (char *name, int namelen)
 {
   switch (name[0])
     {
@@ -713,8 +698,7 @@ java_primitive_type_from_name (name, namelen)
    signature string SIGNATURE. */
 
 static int
-java_demangled_signature_length (signature)
-     char *signature;
+java_demangled_signature_length (char *signature)
 {
   int array = 0;
   for (; *signature == '['; signature++)
@@ -732,9 +716,7 @@ java_demangled_signature_length (signature)
 /* Demangle the Java type signature SIGNATURE, leaving the result in RESULT. */
 
 static void
-java_demangled_signature_copy (result, signature)
-     char *result;
-     char *signature;
+java_demangled_signature_copy (char *result, char *signature)
 {
   int array = 0;
   char *ptr;
@@ -776,8 +758,7 @@ java_demangled_signature_copy (result, signature)
    as a freshly allocated copy. */
 
 char *
-java_demangle_type_signature (signature)
-     char *signature;
+java_demangle_type_signature (char *signature)
 {
   int length = java_demangled_signature_length (signature);
   char *result = xmalloc (length + 1);
@@ -787,8 +768,7 @@ java_demangle_type_signature (signature)
 }
 
 struct type *
-java_lookup_type (signature)
-     char *signature;
+java_lookup_type (char *signature)
 {
   switch (signature[0])
     {
@@ -804,9 +784,7 @@ java_lookup_type (signature)
    If DIMS == 0, TYPE is returned. */
 
 struct type *
-java_array_type (type, dims)
-     struct type *type;
-     int dims;
+java_array_type (struct type *type, int dims)
 {
   struct type *range_type;
 
@@ -823,9 +801,7 @@ java_array_type (type, dims)
 /* Create a Java string in the inferior from a (Utf8) literal. */
 
 static value_ptr
-java_value_string (ptr, len)
-     char *ptr;
-     int len;
+java_value_string (char *ptr, int len)
 {
   error ("not implemented - java_value_string");	/* FIXME */
 }
@@ -835,10 +811,7 @@ java_value_string (ptr, len)
    characters and strings is language specific. */
 
 static void
-java_emit_char (c, stream, quoter)
-     int c;
-     struct ui_file *stream;
-     int quoter;
+java_emit_char (int c, struct ui_file *stream, int quoter)
 {
   switch (c)
     {
@@ -871,11 +844,8 @@ java_emit_char (c, stream, quoter)
 }
 
 static value_ptr
-evaluate_subexp_java (expect_type, exp, pos, noside)
-     struct type *expect_type;
-     register struct expression *exp;
-     register int *pos;
-     enum noside noside;
+evaluate_subexp_java (struct type *expect_type, register struct expression *exp,
+		      register int *pos, enum noside noside)
 {
   int pc = *pos;
   int i;
@@ -986,9 +956,7 @@ nosideret:
 }
 
 static struct type *
-java_create_fundamental_type (objfile, typeid)
-     struct objfile *objfile;
-     int typeid;
+java_create_fundamental_type (struct objfile *objfile, int typeid)
 {
   switch (typeid)
     {
@@ -1087,7 +1055,7 @@ const struct language_defn java_language_defn =
 };
 
 void
-_initialize_java_language ()
+_initialize_java_language (void)
 {
 
   java_int_type = init_type (TYPE_CODE_INT, 4, 0, "int", NULL);
@@ -1109,7 +1077,7 @@ _initialize_java_language ()
 
 extern void java_rerun_cleanup (void);
 void
-java_rerun_cleanup ()
+java_rerun_cleanup (void)
 {
   if (class_symtab != NULL)
     {

@@ -72,8 +72,7 @@ static void set_machine_hook (char *filename);
 void h8300_frame_find_saved_regs ();
 
 CORE_ADDR
-h8300_skip_prologue (start_pc)
-     CORE_ADDR start_pc;
+h8300_skip_prologue (CORE_ADDR start_pc)
 {
   short int w;
   int adjust = 0;
@@ -143,9 +142,7 @@ h8300_skip_prologue (start_pc)
 }
 
 int
-gdb_print_insn_h8300 (memaddr, info)
-     bfd_vma memaddr;
-     disassemble_info *info;
+gdb_print_insn_h8300 (bfd_vma memaddr, disassemble_info *info)
 {
   if (h8300smode)
     return print_insn_h8300s (memaddr, info);
@@ -163,8 +160,7 @@ gdb_print_insn_h8300 (memaddr, info)
    the function prologue to determine the caller's sp value, and return it.  */
 
 CORE_ADDR
-h8300_frame_chain (thisframe)
-     struct frame_info *thisframe;
+h8300_frame_chain (struct frame_info *thisframe)
 {
   if (PC_IN_CALL_DUMMY (thisframe->pc, thisframe->frame, thisframe->frame))
     {				/* initialize the from_pc now */
@@ -187,9 +183,8 @@ h8300_frame_chain (thisframe)
    fairly expensive.  */
 
 void
-h8300_frame_find_saved_regs (fi, fsr)
-     struct frame_info *fi;
-     struct frame_saved_regs *fsr;
+h8300_frame_find_saved_regs (struct frame_info *fi,
+			     struct frame_saved_regs *fsr)
 {
   register struct frame_saved_regs *cache_fsr;
   CORE_ADDR ip;
@@ -232,10 +227,7 @@ h8300_frame_find_saved_regs (fi, fsr)
    of the instruction. */
 
 CORE_ADDR
-NEXT_PROLOGUE_INSN (addr, lim, pword1)
-     CORE_ADDR addr;
-     CORE_ADDR lim;
-     INSN_WORD *pword1;
+NEXT_PROLOGUE_INSN (CORE_ADDR addr, CORE_ADDR lim, INSN_WORD *pword1)
 {
   char buf[2];
   if (addr < lim + 8)
@@ -258,12 +250,9 @@ NEXT_PROLOGUE_INSN (addr, lim, pword1)
    to reflect the offsets of the arg pointer and the locals pointer.  */
 
 static CORE_ADDR
-examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
-     register CORE_ADDR ip;
-     register CORE_ADDR limit;
-     CORE_ADDR after_prolog_fp;
-     struct frame_saved_regs *fsr;
-     struct frame_info *fi;
+examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
+		  CORE_ADDR after_prolog_fp, struct frame_saved_regs *fsr,
+		  struct frame_info *fi)
 {
   register CORE_ADDR next_ip;
   int r;
@@ -416,9 +405,7 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
 }
 
 void
-h8300_init_extra_frame_info (fromleaf, fi)
-     int fromleaf;
-     struct frame_info *fi;
+h8300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   fi->fsr = 0;			/* Not yet allocated */
   fi->args_pointer = 0;		/* Unknown */
@@ -436,8 +423,7 @@ h8300_init_extra_frame_info (fromleaf, fi)
    just use the register SRP_REGNUM itself.  */
 
 CORE_ADDR
-h8300_frame_saved_pc (frame)
-     struct frame_info *frame;
+h8300_frame_saved_pc (struct frame_info *frame)
 {
   if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return generic_read_register_dummy (frame->pc, frame->frame, PC_REGNUM);
@@ -446,8 +432,7 @@ h8300_frame_saved_pc (frame)
 }
 
 CORE_ADDR
-frame_locals_address (fi)
-     struct frame_info *fi;
+frame_locals_address (struct frame_info *fi)
 {
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return (CORE_ADDR) 0;	/* Not sure what else to do... */
@@ -465,8 +450,7 @@ frame_locals_address (fi)
    described by FI.  Returns 0 if the address is unknown.  */
 
 CORE_ADDR
-frame_args_address (fi)
-     struct frame_info *fi;
+frame_args_address (struct frame_info *fi)
 {
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return (CORE_ADDR) 0;	/* Not sure what else to do... */
@@ -519,12 +503,8 @@ frame_args_address (fi)
    the other arguments passed in via registers R0 to R2.  */
 
 CORE_ADDR
-h8300_push_arguments (nargs, args, sp, struct_return, struct_addr)
-     int nargs;
-     struct value **args;
-     CORE_ADDR sp;
-     unsigned char struct_return;
-     CORE_ADDR struct_addr;
+h8300_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
+		      unsigned char struct_return, CORE_ADDR struct_addr)
 {
   int stack_align, stack_alloc, stack_offset;
   int wordsize;
@@ -613,9 +593,7 @@ h8300_push_arguments (nargs, args, sp, struct_return, struct_addr)
    a JSR/BSR instruction.  */
 
 CORE_ADDR
-h8300_push_return_address (pc, sp)
-     CORE_ADDR pc;
-     CORE_ADDR sp;
+h8300_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   unsigned char buf[4];
   int wordsize;
@@ -637,7 +615,7 @@ h8300_push_return_address (pc, sp)
    call_function_by_hand after the dummy_frame is finished. */
 
 void
-h8300_pop_frame ()
+h8300_pop_frame (void)
 {
   unsigned regnum;
   struct frame_saved_regs fsr;
@@ -673,10 +651,7 @@ h8300_pop_frame ()
    Copy that into VALBUF.  Be sure to account for CPU type.   */
 
 void
-h8300_extract_return_value (type, regbuf, valbuf)
-     struct type *type;
-     char *regbuf;
-     char *valbuf;
+h8300_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   int wordsize, len;
 
@@ -716,9 +691,7 @@ h8300_extract_return_value (type, regbuf, valbuf)
    Primarily used by the RETURN command.  */
 
 void
-h8300_store_return_value (type, valbuf)
-     struct type *type;
-     char *valbuf;
+h8300_store_return_value (struct type *type, char *valbuf)
 {
   int wordsize, len, regval;
 
@@ -756,7 +729,7 @@ h8300_store_return_value (type, valbuf)
 struct cmd_list_element *setmemorylist;
 
 static void
-set_register_names ()
+set_register_names (void)
 {
   if (h8300hmode != 0)
     h8300_register_names = h8300h_register_names;
@@ -765,7 +738,7 @@ set_register_names ()
 }
 
 static void
-h8300_command (args, from_tty)
+h8300_command (int args, int from_tty)
 {
   extern int h8300hmode;
   h8300hmode = 0;
@@ -774,7 +747,7 @@ h8300_command (args, from_tty)
 }
 
 static void
-h8300h_command (args, from_tty)
+h8300h_command (int args, int from_tty)
 {
   extern int h8300hmode;
   h8300hmode = 1;
@@ -783,7 +756,7 @@ h8300h_command (args, from_tty)
 }
 
 static void
-h8300s_command (args, from_tty)
+h8300s_command (int args, int from_tty)
 {
   extern int h8300smode;
   extern int h8300hmode;
@@ -794,9 +767,7 @@ h8300s_command (args, from_tty)
 
 
 static void
-set_machine (args, from_tty)
-     char *args;
-     int from_tty;
+set_machine (char *args, int from_tty)
 {
   printf_unfiltered ("\"set machine\" must be followed by h8300, h8300h");
   printf_unfiltered ("or h8300s");
@@ -810,8 +781,7 @@ set_machine (args, from_tty)
    to be 16 or 32 bits as appropriate for the machine.  */
 
 static void
-set_machine_hook (filename)
-     char *filename;
+set_machine_hook (char *filename)
 {
   if (bfd_get_mach (exec_bfd) == bfd_mach_h8300s)
     {
@@ -832,7 +802,7 @@ set_machine_hook (filename)
 }
 
 void
-_initialize_h8300m ()
+_initialize_h8300m (void)
 {
   add_prefix_cmd ("machine", no_class, set_machine,
 		  "set the machine type",
@@ -856,7 +826,7 @@ _initialize_h8300m ()
 
 
 void
-print_register_hook (regno)
+print_register_hook (int regno)
 {
   if (regno == 8)
     {
@@ -901,7 +871,7 @@ print_register_hook (regno)
 }
 
 void
-_initialize_h8300_tdep ()
+_initialize_h8300_tdep (void)
 {
   tm_print_insn = gdb_print_insn_h8300;
 }

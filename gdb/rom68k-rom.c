@@ -27,11 +27,7 @@
 static void rom68k_open (char *args, int from_tty);
 
 static void
-rom68k_supply_register (regname, regnamelen, val, vallen)
-     char *regname;
-     int regnamelen;
-     char *val;
-     int vallen;
+rom68k_supply_register (char *regname, int regnamelen, char *val, int vallen)
 {
   int numregs;
   int regno;
@@ -149,15 +145,13 @@ init_rom68k_cmds (void)
 }				/* init_rom68k_cmds */
 
 static void
-rom68k_open (args, from_tty)
-     char *args;
-     int from_tty;
+rom68k_open (char *args, int from_tty)
 {
   monitor_open (args, &rom68k_cmds, from_tty);
 }
 
 void
-_initialize_rom68k ()
+_initialize_rom68k (void)
 {
   init_rom68k_cmds ();
   init_monitor_ops (&rom68k_ops);

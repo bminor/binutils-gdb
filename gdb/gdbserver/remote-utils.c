@@ -41,8 +41,7 @@ static int remote_desc;
    NAME is the filename used for communication.  */
 
 void
-remote_open (name)
-     char *name;
+remote_open (char *name)
 {
   int save_fcntl_flags;
 
@@ -162,7 +161,7 @@ remote_open (name)
 }
 
 void
-remote_close ()
+remote_close (void)
 {
   close (remote_desc);
 }
@@ -170,8 +169,7 @@ remote_close ()
 /* Convert hex digit A to a number.  */
 
 static int
-fromhex (a)
-     int a;
+fromhex (int a)
 {
   if (a >= '0' && a <= '9')
     return a - '0';
@@ -184,8 +182,7 @@ fromhex (a)
 /* Convert number NIB to a hex digit.  */
 
 static int
-tohex (nib)
-     int nib;
+tohex (int nib)
 {
   if (nib < 10)
     return '0' + nib;
@@ -197,8 +194,7 @@ tohex (nib)
    The data of the packet is in BUF.  Returns >= 0 on success, -1 otherwise. */
 
 int
-putpkt (buf)
-     char *buf;
+putpkt (char *buf)
 {
   int i;
   unsigned char csum = 0;
@@ -262,7 +258,7 @@ putpkt (buf)
    will cause us to send a SIGINT to the child.  */
 
 static void
-input_interrupt ()
+input_interrupt (void)
 {
   int cc;
   char c;
@@ -279,13 +275,13 @@ input_interrupt ()
 }
 
 void
-enable_async_io ()
+enable_async_io (void)
 {
   signal (SIGIO, input_interrupt);
 }
 
 void
-disable_async_io ()
+disable_async_io (void)
 {
   signal (SIGIO, SIG_IGN);
 }
@@ -293,7 +289,7 @@ disable_async_io ()
 /* Returns next char from remote GDB.  -1 if error.  */
 
 static int
-readchar ()
+readchar (void)
 {
   static char buf[BUFSIZ];
   static int bufcnt = 0;
@@ -323,8 +319,7 @@ readchar ()
    and store it in BUF.  Returns length of packet, or negative if error. */
 
 int
-getpkt (buf)
-     char *buf;
+getpkt (char *buf)
 {
   char *bp;
   unsigned char csum, c1, c2;
@@ -380,8 +375,7 @@ getpkt (buf)
 }
 
 void
-write_ok (buf)
-     char *buf;
+write_ok (char *buf)
 {
   buf[0] = 'O';
   buf[1] = 'K';
@@ -389,8 +383,7 @@ write_ok (buf)
 }
 
 void
-write_enn (buf)
-     char *buf;
+write_enn (char *buf)
 {
   buf[0] = 'E';
   buf[1] = 'N';
@@ -399,9 +392,7 @@ write_enn (buf)
 }
 
 void
-convert_int_to_ascii (from, to, n)
-     char *from, *to;
-     int n;
+convert_int_to_ascii (char *from, char *to, int n)
 {
   int nib;
   char ch;
@@ -418,9 +409,7 @@ convert_int_to_ascii (from, to, n)
 
 
 void
-convert_ascii_to_int (from, to, n)
-     char *from, *to;
-     int n;
+convert_ascii_to_int (char *from, char *to, int n)
 {
   int nib1, nib2;
   while (n--)
@@ -432,9 +421,7 @@ convert_ascii_to_int (from, to, n)
 }
 
 static char *
-outreg (regno, buf)
-     int regno;
-     char *buf;
+outreg (int regno, char *buf)
 {
   int regsize = REGISTER_RAW_SIZE (regno);
 
@@ -453,10 +440,7 @@ outreg (regno, buf)
 }
 
 void
-prepare_resume_reply (buf, status, signo)
-     char *buf;
-     char status;
-     unsigned char signo;
+prepare_resume_reply (char *buf, char status, unsigned char signo)
 {
   int nib;
 
@@ -512,10 +496,7 @@ prepare_resume_reply (buf, status, signo)
 }
 
 void
-decode_m_packet (from, mem_addr_ptr, len_ptr)
-     char *from;
-     CORE_ADDR *mem_addr_ptr;
-     unsigned int *len_ptr;
+decode_m_packet (char *from, CORE_ADDR *mem_addr_ptr, unsigned int *len_ptr)
 {
   int i = 0, j = 0;
   char ch;
@@ -537,10 +518,8 @@ decode_m_packet (from, mem_addr_ptr, len_ptr)
 }
 
 void
-decode_M_packet (from, mem_addr_ptr, len_ptr, to)
-     char *from, *to;
-     CORE_ADDR *mem_addr_ptr;
-     unsigned int *len_ptr;
+decode_M_packet (char *from, CORE_ADDR *mem_addr_ptr, unsigned int *len_ptr,
+		 char *to)
 {
   int i = 0;
   char ch;

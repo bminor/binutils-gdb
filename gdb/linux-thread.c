@@ -205,8 +205,7 @@ static CORE_ADDR linuxthreads_breakpoint_addr;
 #endif
 /* Check to see if the given thread is alive.  */
 static int
-linuxthreads_thread_alive (pid)
-     int pid;
+linuxthreads_thread_alive (int pid)
 {
   errno = 0;
   return ptrace (PT_READ_U, pid, (PTRACE_ARG3_TYPE)0, 0) >= 0 || errno == 0;
@@ -230,9 +229,7 @@ linuxthreads_thread_alive (pid)
    our efforts to debug it, accept them with wait, but don't pass them
    through to PID.  Do pass all other signals through.  */   
 static int
-linuxthreads_find_trap (pid, stop)
-    int pid;
-    int stop;
+linuxthreads_find_trap (int pid, int stop)
 {
   int i;
   int rpid;
@@ -397,8 +394,7 @@ save_inferior_pid (void)
 }
 
 static void
-sigchld_handler (signo)
-    int signo;
+sigchld_handler (int signo)
 {
   /* This handler is used to get an EINTR while doing waitpid()
      when an event is received */
@@ -407,8 +403,7 @@ sigchld_handler (signo)
 /* Have we already collected a wait status for PID in the
    linuxthreads_wait bag?  */
 static int
-linuxthreads_pending_status (pid)
-    int pid;
+linuxthreads_pending_status (int pid)
 {
   int i;
   for (i = linuxthreads_wait_last; i >= 0; i--)
@@ -425,9 +420,7 @@ linuxthreads_pending_status (pid)
    in OBJFILE, so we complain if it's required, but not there.
    Return true iff things are okay.  */
 static int
-find_signal_var (sig, objfile)
-     struct linuxthreads_signal *sig;
-     struct objfile *objfile;
+find_signal_var (struct linuxthreads_signal *sig, struct objfile *objfile)
 {
   struct minimal_symbol *ms = lookup_minimal_symbol (sig->var, NULL, objfile);
 
@@ -453,8 +446,7 @@ find_signal_var (sig, objfile)
 }
 
 static int
-find_all_signal_vars (objfile)
-     struct objfile *objfile;
+find_all_signal_vars (struct objfile *objfile)
 {
   return (   find_signal_var (&linuxthreads_sig_restart, objfile)
 	  && find_signal_var (&linuxthreads_sig_cancel,  objfile)
@@ -468,8 +460,7 @@ static int complained_cannot_determine_thread_signal_number = 0;
    been initialized yet.  If it has, tell GDB to pass that signal
    through to the inferior silently.  */
 static void
-check_signal_number (sig)
-     struct linuxthreads_signal *sig;
+check_signal_number (struct linuxthreads_signal *sig)
 {
   int num;
 
@@ -505,7 +496,7 @@ check_signal_number (sig)
 }
 
 void
-check_all_signal_numbers ()
+check_all_signal_numbers (void)
 {
   /* If this isn't a LinuxThreads program, quit early.  */
   if (! linuxthreads_max)
@@ -538,8 +529,7 @@ check_all_signal_numbers ()
    talking to an executable that uses LinuxThreads, so we clear the
    signal number and variable address too.  */
 static void
-restore_signal (sig)
-     struct linuxthreads_signal *sig;
+restore_signal (struct linuxthreads_signal *sig)
 {
   if (! sig->signal)
     return;
@@ -559,7 +549,7 @@ restore_signal (sig)
    talking to an executable that uses LinuxThreads, so we clear the
    signal number and variable address too.  */
 static void
-restore_all_signals ()
+restore_all_signals (void)
 {
   restore_signal (&linuxthreads_sig_restart);
   restore_signal (&linuxthreads_sig_cancel);
@@ -610,8 +600,7 @@ iterate_active_threads (func, all)
    This is the worker function for linuxthreads_insert_breakpoint,
    which passes it to iterate_active_threads.  */
 static void
-insert_breakpoint (pid)
-    int pid;
+insert_breakpoint (int pid)
 {
   int j;
 
@@ -637,8 +626,7 @@ insert_breakpoint (pid)
    breakpoint if the thread's PC is pointing at the breakpoint being
    removed.  */
 static void
-remove_breakpoint (pid)
-    int pid;
+remove_breakpoint (int pid)
 {
   int j;
 
@@ -663,8 +651,7 @@ remove_breakpoint (pid)
 
 /* Kill a thread */
 static void
-kill_thread (pid)
-    int pid;
+kill_thread (int pid)
 {
   if (in_thread_list (pid))
     {
@@ -678,8 +665,7 @@ kill_thread (pid)
 
 /* Resume a thread */
 static void
-resume_thread (pid)
-    int pid;
+resume_thread (int pid)
 {
   if (pid != inferior_pid
       && in_thread_list (pid)
@@ -698,8 +684,7 @@ resume_thread (pid)
 
 /* Detach a thread */
 static void
-detach_thread (pid)
-    int pid;
+detach_thread (int pid)
 {
   if (in_thread_list (pid) && linuxthreads_thread_alive (pid))
     {
@@ -714,8 +699,7 @@ detach_thread (pid)
 
 /* Attach a thread */
 void
-attach_thread (pid)
-     int pid;
+attach_thread (int pid)
 {
   if (ptrace (PT_ATTACH, pid, (PTRACE_ARG3_TYPE) 0, 0) != 0)
     perror_with_name ("attach_thread");
@@ -723,8 +707,7 @@ attach_thread (pid)
 
 /* Stop a thread */
 static void
-stop_thread (pid)
-    int pid;
+stop_thread (int pid)
 {
   if (pid != inferior_pid)
     {
@@ -752,8 +735,7 @@ stop_thread (pid)
 
 /* Wait for a thread */
 static void
-wait_thread (pid)
-    int pid;
+wait_thread (int pid)
 {
   int status;
   int rpid;
@@ -815,8 +797,7 @@ wait_thread (pid)
 /* Walk through the linuxthreads handles in order to detect all
    threads and stop them */
 static void
-update_stop_threads (test_pid)
-    int test_pid;
+update_stop_threads (int test_pid)
 {
   struct cleanup *old_chain = NULL;
 
@@ -905,8 +886,7 @@ update_stop_threads (test_pid)
 static void (*target_new_objfile_chain) (struct objfile *);
 
 void
-linuxthreads_new_objfile (objfile)
-    struct objfile *objfile;
+linuxthreads_new_objfile (struct objfile *objfile)
 {
   struct minimal_symbol *ms;
 
@@ -1076,8 +1056,7 @@ quit:
    return 1 otherwise 0.  */
 
 int
-linuxthreads_prepare_to_proceed (step)
-    int step;
+linuxthreads_prepare_to_proceed (int step)
 {
   if (!linuxthreads_max
       || !linuxthreads_manager_pid
@@ -1098,8 +1077,7 @@ linuxthreads_prepare_to_proceed (step)
 /* Convert a pid to printable form. */
 
 char *
-linuxthreads_pid_to_str (pid)
-    int pid;
+linuxthreads_pid_to_str (int pid)
 {
   static char buf[100];
 
@@ -1115,9 +1093,7 @@ linuxthreads_pid_to_str (pid)
    and wait for the trace-trap that results from attaching.  */
 
 static void
-linuxthreads_attach (args, from_tty)
-    char *args;
-    int from_tty;
+linuxthreads_attach (char *args, int from_tty)
 {
   if (!args)
     error_no_arg ("process-id to attach");
@@ -1143,9 +1119,7 @@ linuxthreads_attach (args, from_tty)
    started via the normal ptrace (PTRACE_TRACEME).  */
 
 static void
-linuxthreads_detach (args, from_tty)
-    char *args;
-    int from_tty;
+linuxthreads_detach (char *args, int from_tty)
 {
   if (linuxthreads_max)
     {
@@ -1209,10 +1183,7 @@ linuxthreads_detach (args, from_tty)
    signal activated.  */
 
 static void
-linuxthreads_resume (pid, step, signo)
-    int pid;
-    int step;
-    enum target_signal signo;
+linuxthreads_resume (int pid, int step, enum target_signal signo)
 {
   if (!linuxthreads_max || stop_soon_quietly || linuxthreads_manager_pid == 0)
     {
@@ -1288,10 +1259,7 @@ linuxthreads_resume (pid, step, signo)
 
 /* Abstract out the child_wait functionality.  */
 int
-linux_child_wait (pid, rpid, status)
-     int pid;
-     int *rpid;
-     int *status;
+linux_child_wait (int pid, int *rpid, int *status)
 {
   int save_errno;
 
@@ -1345,9 +1313,7 @@ linux_child_wait (pid, rpid, status)
    to a LWP id, and vice versa on the way out.  */
 
 static int
-linuxthreads_wait (pid, ourstatus)
-     int pid;
-     struct target_waitstatus *ourstatus;
+linuxthreads_wait (int pid, struct target_waitstatus *ourstatus)
 {
   int status;
   int rpid;
@@ -1582,10 +1548,7 @@ linuxthreads_wait (pid, ourstatus)
 /* Fork an inferior process, and start debugging it with ptrace.  */
 
 static void
-linuxthreads_create_inferior (exec_file, allargs, env)
-    char *exec_file;
-    char *allargs;
-    char **env;
+linuxthreads_create_inferior (char *exec_file, char *allargs, char **env)
 {
   if (!exec_file && !exec_bfd)
     {
@@ -1607,7 +1570,7 @@ Use the \"file\" or \"exec-file\" command.");
 }
 
 void
-linuxthreads_discard_global_state ()
+linuxthreads_discard_global_state (void)
 {
   linuxthreads_inferior_pid = 0;
   linuxthreads_breakpoint_pid = 0;
@@ -1622,7 +1585,7 @@ linuxthreads_discard_global_state ()
 /* Clean up after the inferior dies.  */
 
 static void
-linuxthreads_mourn_inferior ()
+linuxthreads_mourn_inferior (void)
 {
   if (linuxthreads_max)
     {
@@ -1641,7 +1604,7 @@ linuxthreads_mourn_inferior ()
 /* Kill the inferior process */
 
 static void
-linuxthreads_kill ()
+linuxthreads_kill (void)
 {
   int rpid;
   int status;
@@ -1702,9 +1665,7 @@ linuxthreads_kill ()
 /* Insert a breakpoint */
 
 static int
-linuxthreads_insert_breakpoint (addr, contents_cache)
-    CORE_ADDR addr;
-    char *contents_cache;
+linuxthreads_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   if (linuxthreads_max && linuxthreads_manager_pid != 0)
     {
@@ -1719,9 +1680,7 @@ linuxthreads_insert_breakpoint (addr, contents_cache)
 /* Remove a breakpoint */
 
 static int
-linuxthreads_remove_breakpoint (addr, contents_cache)
-    CORE_ADDR addr;
-    char *contents_cache;
+linuxthreads_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   if (linuxthreads_max && linuxthreads_manager_pid != 0)
     {
@@ -1736,14 +1695,14 @@ linuxthreads_remove_breakpoint (addr, contents_cache)
 /* Mark our target-struct as eligible for stray "run" and "attach" commands.  */
 
 static int
-linuxthreads_can_run ()
+linuxthreads_can_run (void)
 {
   return child_suppress_run;
 }
 
 
 static void
-init_linuxthreads_ops ()
+init_linuxthreads_ops (void)
 {
   linuxthreads_ops.to_shortname = "linuxthreads";
   linuxthreads_ops.to_longname  = "LINUX threads and pthread.";
@@ -1765,7 +1724,7 @@ init_linuxthreads_ops ()
 }
 
 void
-_initialize_linuxthreads ()
+_initialize_linuxthreads (void)
 {
   struct sigaction sact;
   sigset_t linuxthreads_wait_mask;	  /* sigset with SIGCHLD */

@@ -232,7 +232,7 @@ child_add_thread (DWORD id, HANDLE h)
 /* Clear out any old thread list and reintialize it to a
    pristine state. */
 static void
-child_init_thread_list ()
+child_init_thread_list (void)
 {
   thread_info *th = &thread_head;
 
@@ -422,6 +422,7 @@ struct safe_symbol_file_add_args
   struct section_addr_info *addrs;
   int mainline;
   int flags;
+  struct ui_file *err, *out;
   struct objfile *ret;
 };
 
@@ -438,11 +439,15 @@ safe_symbol_file_add_stub (void *argv)
 
 /* Restore gdb's stderr after calling symbol_file_add */
 static void
-safe_symbol_file_add_cleanup (void *gdb_stderrv)
+safe_symbol_file_add_cleanup (void *p)
 {
+#define sp ((struct safe_symbol_file_add_args *)p)
   gdb_flush (gdb_stderr);
+  gdb_flush (gdb_stdout);
   ui_file_delete (gdb_stderr);
-  gdb_stderr = (struct ui_file *)gdb_stderrv;
+  ui_file_delete (gdb_stdout);
+  gdb_stderr = sp->err;
+  gdb_stdout = sp->err;
 }
 
 /* symbol_file_add wrapper that prevents errors from being displayed. */
@@ -455,10 +460,14 @@ safe_symbol_file_add (char *name, int from_tty,
   struct safe_symbol_file_add_args p;
   struct cleanup *cleanup;
 
-  cleanup = make_cleanup (safe_symbol_file_add_cleanup, gdb_stderr);
+  cleanup = make_cleanup (safe_symbol_file_add_cleanup, &p);
 
+  p.err = gdb_stderr;
+  p.out = gdb_stdout;
   gdb_flush (gdb_stderr);
+  gdb_flush (gdb_stdout);
   gdb_stderr = ui_file_new ();
+  gdb_stdout = ui_file_new ();
   p.name = name;
   p.from_tty = from_tty;
   p.addrs = addrs;
@@ -652,7 +661,7 @@ info_dll_command (char *ignore, int from_tty)
 
   printf ("%*s  Load Address\n", -max_dll_name_len, "DLL Name");
   while ((so = so->next) != NULL)
-    printf_unfiltered ("%*s  %08lx\n", -max_dll_name_len, so->name, so->load_addr);
+    printf_filtered ("%*s  %08lx\n", -max_dll_name_len, so->name, so->load_addr);
 
   return;
 }
@@ -944,9 +953,7 @@ child_wait (int pid, struct target_waitstatus *ourstatus)
 /* Attach to process PID, then initialize for debugging it.  */
 
 static void
-child_attach (args, from_tty)
-     char *args;
-     int from_tty;
+child_attach (char *args, int from_tty)
 {
   BOOL ok;
 
@@ -1021,10 +1028,7 @@ child_open (char *arg ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
    ENV is the environment vector to pass.  Errors reported with error().  */
 
 static void
-child_create_inferior (exec_file, allargs, env)
-     char *exec_file;
-     char *allargs;
-     char **env;
+child_create_inferior (char *exec_file, char *allargs, char **env)
 {
   char real_path[MAXPATHLEN];
   char *winenv;
@@ -1180,7 +1184,7 @@ child_create_inferior (exec_file, allargs, env)
 }
 
 static void
-child_mourn_inferior ()
+child_mourn_inferior (void)
 {
   (void) child_continue (DBG_CONTINUE, -1);
   unpush_target (&child_ops);
@@ -1191,7 +1195,7 @@ child_mourn_inferior ()
    ^C on the controlling terminal. */
 
 static void
-child_stop ()
+child_stop (void)
 {
   DEBUG_EVENTS (("gdb: GenerateConsoleCtrlEvent (CTRLC_EVENT, 0)\n"));
   CHECK (GenerateConsoleCtrlEvent (CTRL_C_EVENT, current_event.dwProcessId));
@@ -1280,19 +1284,19 @@ child_resume (int pid, int step, enum target_signal sig)
 }
 
 static void
-child_prepare_to_store ()
+child_prepare_to_store (void)
 {
   /* Do nothing, since we can store individual regs */
 }
 
 static int
-child_can_run ()
+child_can_run (void)
 {
   return 1;
 }
 
 static void
-child_close ()
+child_close (void)
 {
   DEBUG_EVENTS (("gdb: child_close, inferior_pid=%d\n", inferior_pid));
 }
@@ -1346,7 +1350,7 @@ init_child_ops (void)
 }
 
 void
-_initialize_inftarg ()
+_initialize_inftarg (void)
 {
   init_child_ops ();
 

@@ -633,7 +633,7 @@ _proc_free (struct proc *proc)
 
 
 struct inf *
-make_inf ()
+make_inf (void)
 {
   struct inf *inf = malloc (sizeof (struct inf));
 
@@ -1994,7 +1994,7 @@ gnu_resume (int tid, int step, enum target_signal sig)
 
 
 static void
-gnu_kill_inferior ()
+gnu_kill_inferior (void)
 {
   struct proc *task = current_inferior->task;
   if (task)
@@ -2008,7 +2008,7 @@ gnu_kill_inferior ()
 
 /* Clean up after the inferior dies.  */
 static void
-gnu_mourn_inferior ()
+gnu_mourn_inferior (void)
 {
   inf_debug (current_inferior, "rip");
   inf_detach (current_inferior);
@@ -2021,7 +2021,7 @@ gnu_mourn_inferior ()
 
 /* Set INFERIOR_PID to the first thread available in the child, if any.  */
 static int
-inf_pick_first_thread ()
+inf_pick_first_thread (void)
 {
   if (current_inferior->task && current_inferior->threads)
     /* The first thread.  */
@@ -2032,7 +2032,7 @@ inf_pick_first_thread ()
 }
 
 static struct inf *
-cur_inf ()
+cur_inf (void)
 {
   if (!current_inferior)
     current_inferior = make_inf ();
@@ -2040,10 +2040,7 @@ cur_inf ()
 }
 
 static void
-gnu_create_inferior (exec_file, allargs, env)
-     char *exec_file;
-     char *allargs;
-     char **env;
+gnu_create_inferior (char *exec_file, char *allargs, char **env)
 {
   struct inf *inf = cur_inf ();
 
@@ -2099,7 +2096,7 @@ gnu_create_inferior (exec_file, allargs, env)
 /* Mark our target-struct as eligible for stray "run" and "attach"
    commands.  */
 static int
-gnu_can_run ()
+gnu_can_run (void)
 {
   return 1;
 }
@@ -2110,9 +2107,7 @@ gnu_can_run ()
 /* Attach to process PID, then initialize for debugging it
    and wait for the trace-trap that results from attaching.  */
 static void
-gnu_attach (args, from_tty)
-     char *args;
-     int from_tty;
+gnu_attach (char *args, int from_tty)
 {
   int pid;
   char *exec_file;
@@ -2174,9 +2169,7 @@ gnu_attach (args, from_tty)
    previously attached.  It *might* work if the program was
    started via fork.  */
 static void
-gnu_detach (args, from_tty)
-     char *args;
-     int from_tty;
+gnu_detach (char *args, int from_tty)
 {
   if (from_tty)
     {
@@ -2199,7 +2192,7 @@ gnu_detach (args, from_tty)
 
 
 static void
-gnu_terminal_init_inferior ()
+gnu_terminal_init_inferior (void)
 {
   assert (current_inferior);
   terminal_init_inferior_with_pgrp (current_inferior->pid);
@@ -2211,7 +2204,7 @@ gnu_terminal_init_inferior ()
    that registers contains all the registers from the program being
    debugged.  */
 static void
-gnu_prepare_to_store ()
+gnu_prepare_to_store (void)
 {
 #ifdef CHILD_PREPARE_TO_STORE
   CHILD_PREPARE_TO_STORE ();
@@ -2219,21 +2212,19 @@ gnu_prepare_to_store ()
 }
 
 static void
-gnu_open (arg, from_tty)
-     char *arg;
-     int from_tty;
+gnu_open (char *arg, int from_tty)
 {
   error ("Use the \"run\" command to start a Unix child process.");
 }
 
 static void
-gnu_stop ()
+gnu_stop (void)
 {
   error ("to_stop target function not implemented");
 }
 
 static char *
-gnu_pid_to_exec_file ()
+gnu_pid_to_exec_file (void)
 {
   error ("to_pid_to_exec_file target function not implemented");
   return NULL;
@@ -2252,11 +2243,7 @@ gnu_thread_alive (int tid)
    gdb's address space.  Return 0 on failure; number of bytes read
    otherwise.  */
 int
-gnu_read_inferior (task, addr, myaddr, length)
-     task_t task;
-     CORE_ADDR addr;
-     char *myaddr;
-     int length;
+gnu_read_inferior (task_t task, CORE_ADDR addr, char *myaddr, int length)
 {
   error_t err;
   vm_address_t low_address = (vm_address_t) trunc_page (addr);
@@ -2300,11 +2287,7 @@ struct obstack region_obstack;
 /* Write gdb's LEN bytes from MYADDR and copy it to ADDR in inferior
    task's address space.  */
 int
-gnu_write_inferior (task, addr, myaddr, length)
-     task_t task;
-     CORE_ADDR addr;
-     char *myaddr;
-     int length;
+gnu_write_inferior (task_t task, CORE_ADDR addr, char *myaddr, int length)
 {
   error_t err = 0;
   vm_address_t low_address = (vm_address_t) trunc_page (addr);
@@ -2672,7 +2655,7 @@ check_empty (char *args, char *cmd_prefix)
 
 /* Returns the alive thread named by INFERIOR_PID, or signals an error.  */
 static struct proc *
-cur_thread ()
+cur_thread (void)
 {
   struct inf *inf = cur_inf ();
   struct proc *thread = inf_tid_to_thread (inf, inferior_pid);
@@ -2683,7 +2666,7 @@ cur_thread ()
 
 /* Returns the current inferior, but signals an error if it has no task.  */
 static struct inf *
-active_inf ()
+active_inf (void)
 {
   struct inf *inf = cur_inf ();
   if (!inf->task)
@@ -3361,8 +3344,7 @@ _initialize_gnu_nat (void)
    end up looping in mysterious Bpt traps */
 
 void
-flush_inferior_icache (pc, amount)
-     CORE_ADDR pc;
+flush_inferior_icache (CORE_ADDR pc, int amount)
 {
   vm_machine_attribute_val_t flush = MATTR_VAL_ICACHE_FLUSH;
   error_t ret;

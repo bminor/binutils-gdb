@@ -173,8 +173,7 @@ DCACHE *last_cache;		/* Used by info dcache */
 /* Free all the data cache blocks, thus discarding all cached data.  */
 
 void
-dcache_flush (dcache)
-     DCACHE *dcache;
+dcache_flush (DCACHE *dcache)
 {
   int i;
   dcache->valid_head = 0;
@@ -204,9 +203,7 @@ dcache_flush (dcache)
    containing it. */
 
 static struct dcache_block *
-dcache_hit (dcache, addr)
-     DCACHE *dcache;
-     CORE_ADDR addr;
+dcache_hit (DCACHE *dcache, CORE_ADDR addr)
 {
   register struct dcache_block *db;
 
@@ -230,9 +227,7 @@ dcache_hit (dcache, addr)
    be written is. */
 
 static int
-dcache_write_line (dcache, db)
-     DCACHE *dcache;
-     register struct dcache_block *db;
+dcache_write_line (DCACHE *dcache, register struct dcache_block *db)
 {
   int s;
   int e;
@@ -280,8 +275,7 @@ dcache_write_line (dcache, db)
    list...).  */
 
 static struct dcache_block *
-dcache_alloc (dcache)
-     DCACHE *dcache;
+dcache_alloc (DCACHE *dcache)
 {
   register struct dcache_block *db;
 
@@ -320,10 +314,7 @@ dcache_alloc (dcache)
    Returns 0 on error. */
 
 static int
-dcache_peek_byte (dcache, addr, ptr)
-     DCACHE *dcache;
-     CORE_ADDR addr;
-     char *ptr;
+dcache_peek_byte (DCACHE *dcache, CORE_ADDR addr, char *ptr)
 {
   register struct dcache_block *db = dcache_hit (dcache, addr);
   int ok = 1;
@@ -361,8 +352,7 @@ dcache_peek_byte (dcache, addr, ptr)
 
 /* Writeback any dirty lines to the remote. */
 static int
-dcache_writeback (dcache)
-     DCACHE *dcache;
+dcache_writeback (DCACHE *dcache)
 {
   struct dcache_block *db;
 
@@ -378,31 +368,12 @@ dcache_writeback (dcache)
 }
 
 
-/* Using the data cache DCACHE return the contents of the word at
-   address ADDR in the remote machine.  */
-int
-dcache_fetch (dcache, addr)
-     DCACHE *dcache;
-     CORE_ADDR addr;
-{
-  int res;
-
-  if (dcache_xfer_memory (dcache, addr, (char *) &res, sizeof res, 0) != sizeof res)
-    memory_error (EIO, addr);
-
-  return res;
-}
-
-
 /* Write the byte at PTR into ADDR in the data cache.
    Return zero on write error.
  */
 
 static int
-dcache_poke_byte (dcache, addr, ptr)
-     DCACHE *dcache;
-     CORE_ADDR addr;
-     char *ptr;
+dcache_poke_byte (DCACHE *dcache, CORE_ADDR addr, char *ptr)
 {
   register struct dcache_block *db = dcache_hit (dcache, addr);
 
@@ -419,28 +390,9 @@ dcache_poke_byte (dcache, addr, ptr)
   return 1;
 }
 
-/* Write the word at ADDR both in the data cache and in the remote machine.  
-   Return zero on write error.
- */
-
-int
-dcache_poke (dcache, addr, data)
-     DCACHE *dcache;
-     CORE_ADDR addr;
-     int data;
-{
-  if (dcache_xfer_memory (dcache, addr, (char *) &data, sizeof data, 1) != sizeof data)
-    return 0;
-
-  return dcache_writeback (dcache);
-}
-
-
 /* Initialize the data cache.  */
 DCACHE *
-dcache_init (reading, writing)
-     memxferfunc reading;
-     memxferfunc writing;
+dcache_init (memxferfunc reading, memxferfunc writing)
 {
   int csize = sizeof (struct dcache_block) * DCACHE_SIZE;
   DCACHE *dcache;
@@ -467,12 +419,8 @@ dcache_init (reading, writing)
    This routine is indended to be called by remote_xfer_ functions. */
 
 int
-dcache_xfer_memory (dcache, memaddr, myaddr, len, should_write)
-     DCACHE *dcache;
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int should_write;
+dcache_xfer_memory (DCACHE *dcache, CORE_ADDR memaddr, char *myaddr, int len,
+		    int should_write)
 {
   int i;
 
@@ -503,9 +451,7 @@ dcache_xfer_memory (dcache, memaddr, myaddr, len, should_write)
 }
 
 static void
-dcache_info (exp, tty)
-     char *exp;
-     int tty;
+dcache_info (char *exp, int tty)
 {
   struct dcache_block *p;
 
@@ -543,7 +489,7 @@ set_dcache_state (int what)
 }
 
 void
-_initialize_dcache ()
+_initialize_dcache (void)
 {
   add_show_from_set
     (add_set_cmd ("remotecache", class_support, var_boolean,

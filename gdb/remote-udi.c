@@ -124,10 +124,7 @@ static char *prog_name = NULL;
    user types "run" after having attached.  */
 
 static void
-udi_create_inferior (execfile, args, env)
-     char *execfile;
-     char *args;
-     char **env;
+udi_create_inferior (char *execfile, char *args, char **env)
 {
   char *args1;
 
@@ -187,7 +184,7 @@ udi_create_inferior (execfile, args, env)
 }
 
 static void
-udi_mourn ()
+udi_mourn (void)
 {
 #if 0
   /* Requiring "target udi" each time you run is a major pain.  I suspect
@@ -212,9 +209,7 @@ udi_mourn ()
 /* XXX - need cleanups for udiconnect for various failures!!! */
 
 static void
-udi_open (name, from_tty)
-     char *name;
-     int from_tty;
+udi_open (char *name, int from_tty)
 {
   unsigned int prl;
   char *p;
@@ -304,8 +299,8 @@ udi_open (name, from_tty)
    Use this when you want to detach and do something else
    with your gdb.  */
 static void
-udi_close (quitting)		/*FIXME: how is quitting used */
-     int quitting;
+udi_close (			/*FIXME: how is quitting used */
+	    int quitting)
 {
   if (udi_session_id < 0)
     return;
@@ -333,9 +328,7 @@ udi_close (quitting)		/*FIXME: how is quitting used */
  * Upon exiting the process's execution is stopped.
  */
 static void
-udi_attach (args, from_tty)
-     char *args;
-     int from_tty;
+udi_attach (char *args, int from_tty)
 {
   UDIResource From;
   UDIInt32 PC_adds;
@@ -366,9 +359,7 @@ udi_attach (args, from_tty)
    Use this when you want to detach and do something else
    with your gdb.  Leave remote process running (with no breakpoints set). */
 static void
-udi_detach (args, from_tty)
-     char *args;
-     int from_tty;
+udi_detach (char *args, int from_tty)
 {
 
   remove_breakpoints ();	/* Just in case there were any left in */
@@ -392,9 +383,7 @@ udi_detach (args, from_tty)
 ** Tell the remote machine to resume.  */
 
 static void
-udi_resume (pid, step, sig)
-     int pid, step;
-     enum target_signal sig;
+udi_resume (int pid, int step, enum target_signal sig)
 {
   UDIError tip_error;
   UDIUInt32 Steps = 1;
@@ -420,9 +409,7 @@ udi_resume (pid, step, sig)
    storing status in STATUS just as `wait' would.  */
 
 static int
-udi_wait (pid, status)
-     int pid;
-     struct target_waitstatus *status;
+udi_wait (int pid, struct target_waitstatus *status)
 {
   UDIInt32 MaxTime;
   UDIPId PId;
@@ -602,7 +589,7 @@ udi_wait (pid, status)
 
 #if 0
 /* Handy for debugging */
-udi_pc ()
+udi_pc (void)
 {
   UDIResource From;
   UDIUInt32 *To;
@@ -654,8 +641,7 @@ udi_pc ()
  * If regno==-1 then read all the registers.
  */
 static void
-udi_fetch_registers (regno)
-     int regno;
+udi_fetch_registers (int regno)
 {
   UDIResource From;
   UDIUInt32 *To;
@@ -781,8 +767,7 @@ udi_fetch_registers (regno)
  */
 
 static void
-udi_store_registers (regno)
-     int regno;
+udi_store_registers (int regno)
 {
   UDIUInt32 *From;
   UDIResource To;
@@ -907,15 +892,14 @@ udi_store_registers (regno)
    debugged.  */
 
 static void
-udi_prepare_to_store ()
+udi_prepare_to_store (void)
 {
   /* Do nothing, since we can store individual regs */
 }
 
 /********************************************************** TRANSLATE_ADDR */
 static CORE_ADDR
-translate_addr (addr)
-     CORE_ADDR addr;
+translate_addr (CORE_ADDR addr)
 {
 #if defined(ULTRA3) && defined(KERNEL_DEBUGGING)
   /* Check for a virtual address in the kernel */
@@ -938,11 +922,7 @@ translate_addr (addr)
 /************************************************* UDI_XFER_INFERIOR_MEMORY */
 /* FIXME!  Merge these two.  */
 static int
-udi_xfer_inferior_memory (memaddr, myaddr, len, write)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
+udi_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
 {
 
   memaddr = translate_addr (memaddr);
@@ -955,7 +935,7 @@ udi_xfer_inferior_memory (memaddr, myaddr, len, write)
 
 /********************************************************** UDI_FILES_INFO */
 static void
-udi_files_info ()
+udi_files_info (void)
 {
   printf_unfiltered ("\tAttached to UDI socket to %s", udi_config_id);
   if (prog_name != NULL)
@@ -965,9 +945,7 @@ udi_files_info ()
 
 /**************************************************** UDI_INSERT_BREAKPOINT */
 static int
-udi_insert_breakpoint (addr, contents_cache)
-     CORE_ADDR addr;
-     char *contents_cache;
+udi_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   int cnt;
   UDIError err;
@@ -998,9 +976,7 @@ udi_insert_breakpoint (addr, contents_cache)
 
 /**************************************************** UDI_REMOVE_BREAKPOINT */
 static int
-udi_remove_breakpoint (addr, contents_cache)
-     CORE_ADDR addr;
-     char *contents_cache;
+udi_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   int cnt;
   UDIError err;
@@ -1022,9 +998,7 @@ udi_remove_breakpoint (addr, contents_cache)
 }
 
 static void
-udi_kill (arg, from_tty)
-     char *arg;
-     int from_tty;
+udi_kill (char *arg, int from_tty)
 {
 
 #if 0
@@ -1076,9 +1050,7 @@ udi_kill (arg, from_tty)
  */
 
 static void
-download (load_arg_string, from_tty)
-     char *load_arg_string;
-     int from_tty;
+download (char *load_arg_string, int from_tty)
 {
 #define DEFAULT_MEM_STACK_SIZE 		0x6000
 #define DEFAULT_REG_STACK_SIZE 		0x2000
@@ -1307,9 +1279,7 @@ download (load_arg_string, from_tty)
 /* Function to download an image into the remote target.  */
 
 static void
-udi_load (args, from_tty)
-     char *args;
-     int from_tty;
+udi_load (char *args, int from_tty)
 {
   download (args, from_tty);
 
@@ -1327,10 +1297,7 @@ udi_load (args, from_tty)
 ** Copy LEN bytes of data from debugger memory at MYADDR
    to inferior's memory at MEMADDR.  Returns number of bytes written.  */
 static int
-udi_write_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+udi_write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   int nwritten = 0;
   UDIUInt32 *From;
@@ -1367,10 +1334,7 @@ udi_write_inferior_memory (memaddr, myaddr, len)
 ** Read LEN bytes from inferior memory at MEMADDR.  Put the result
    at debugger address MYADDR.  Returns number of bytes read.  */
 static int
-udi_read_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+udi_read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   int nread = 0;
   UDIResource From;
@@ -1406,8 +1370,7 @@ udi_read_inferior_memory (memaddr, myaddr, len)
 
 /********************************************************************* WARNING
 */
-udi_warning (num)
-     int num;
+udi_warning (int num)
 {
   error ("ERROR while loading program into remote TIP: $d\n", num);
 }
@@ -1418,8 +1381,7 @@ udi_warning (num)
  * Returns 0/-1 on success/failure.  
  */
 static void
-fetch_register (regno)
-     int regno;
+fetch_register (int regno)
 {
   UDIResource From;
   UDIUInt32 To;
@@ -1483,8 +1445,7 @@ fetch_register (regno)
  * Returns 0/-1 on success/failure.  
  */
 static int
-store_register (regno)
-     int regno;
+store_register (int regno)
 {
   int result;
   UDIUInt32 From;
@@ -1566,8 +1527,7 @@ store_register (regno)
  * Convert a gdb special register number to a 29000 special register number.
  */
 static int
-regnum_to_srnum (regno)
-     int regno;
+regnum_to_srnum (int regno)
 {
   switch (regno)
     {
@@ -1636,8 +1596,7 @@ regnum_to_srnum (regno)
  * FIXME: Doesn't know anything about I_CACHE/D_CACHE.
  */
 static CPUSpace
-udi_memory_space (addr)
-     CORE_ADDR addr;
+udi_memory_space (CORE_ADDR addr)
 {
   UDIUInt32 tstart = IMemStart;
   UDIUInt32 tend = tstart + IMemSize;
@@ -1666,19 +1625,18 @@ udi_memory_space (addr)
 */
 
 void
-convert16 ()
+convert16 (void)
 {;
 }
 void
-convert32 ()
+convert32 (void)
 {;
 }
 struct ui_file *EchoFile = 0;	/* used for debugging */
 int QuietMode = 0;		/* used for debugging */
 
 #ifdef NO_HIF_SUPPORT
-service_HIF (msg)
-     union msg_t *msg;
+service_HIF (union msg_t *msg)
 {
   return (0);			/* Emulate a failure */
 }
@@ -1755,7 +1713,7 @@ To connect using a local connection to the \"tip.exe\" program which is\n\
 };
 
 void
-_initialize_remote_udi ()
+_initialize_remote_udi (void)
 {
   init_udi_ops ();
   add_target (&udi_ops);

@@ -53,10 +53,7 @@ static void chill_val_print_array_elements (struct type *, char *,
    decimal integer values. */
 
 static void
-chill_print_type_scalar (type, val, stream)
-     struct type *type;
-     LONGEST val;
-     struct ui_file *stream;
+chill_print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
 {
   switch (TYPE_CODE (type))
     {
@@ -99,16 +96,10 @@ chill_print_type_scalar (type, val, stream)
    element indexes (in Chill syntax). */
 
 static void
-chill_val_print_array_elements (type, valaddr, address, stream,
-				format, deref_ref, recurse, pretty)
-     struct type *type;
-     char *valaddr;
-     CORE_ADDR address;
-     struct ui_file *stream;
-     int format;
-     int deref_ref;
-     int recurse;
-     enum val_prettyprint pretty;
+chill_val_print_array_elements (struct type *type, char *valaddr,
+				CORE_ADDR address, struct ui_file *stream,
+				int format, int deref_ref, int recurse,
+				enum val_prettyprint pretty)
 {
   unsigned int i = 0;
   unsigned int things_printed = 0;
@@ -199,17 +190,9 @@ chill_val_print_array_elements (type, valaddr, address, stream,
    The PRETTY parameter controls prettyprinting.  */
 
 int
-chill_val_print (type, valaddr, embedded_offset, address,
-		 stream, format, deref_ref, recurse, pretty)
-     struct type *type;
-     char *valaddr;
-     int embedded_offset;
-     CORE_ADDR address;
-     struct ui_file *stream;
-     int format;
-     int deref_ref;
-     int recurse;
-     enum val_prettyprint pretty;
+chill_val_print (struct type *type, char *valaddr, int embedded_offset,
+		 CORE_ADDR address, struct ui_file *stream, int format,
+		 int deref_ref, int recurse, enum val_prettyprint pretty)
 {
   LONGEST val;
   unsigned int i = 0;		/* Number of characters printed.  */
@@ -514,15 +497,9 @@ chill_val_print (type, valaddr, embedded_offset, address,
    should not print, or zero if called from top level.  */
 
 static void
-chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
-			  dont_print)
-     struct type *type;
-     char *valaddr;
-     struct ui_file *stream;
-     int format;
-     int recurse;
-     enum val_prettyprint pretty;
-     struct type **dont_print;
+chill_print_value_fields (struct type *type, char *valaddr,
+			  struct ui_file *stream, int format, int recurse,
+			  enum val_prettyprint pretty, struct type **dont_print)
 {
   int i, len;
   int fields_seen = 0;
@@ -586,11 +563,8 @@ chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 }
 
 int
-chill_value_print (val, stream, format, pretty)
-     value_ptr val;
-     struct ui_file *stream;
-     int format;
-     enum val_prettyprint pretty;
+chill_value_print (value_ptr val, struct ui_file *stream, int format,
+		   enum val_prettyprint pretty)
 {
   struct type *type = VALUE_TYPE (val);
   struct type *real_type = check_typedef (type);

@@ -26,3 +26,7 @@
 	ldi r0, 0
 	trap 15
 	.endm
+
+	comment "crt0 startup"
+	.macro startup
+	.endm

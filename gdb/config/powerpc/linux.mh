@@ -1,7 +1,7 @@
 # Host: PowerPC, running Linux
 
 XM_FILE= xm-linux.h
-XDEPFILES= ser-tcp.o
+XDEPFILES=
 XM_CLIBS=
 
 NAT_FILE= nm-linux.h

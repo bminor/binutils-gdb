@@ -71,8 +71,25 @@ changequote(,)dnl
 
 . ${srcdir}/configure.tgt
 
+targ=${target} ; . ${srcdir}/../bfd/config.bfd
+
 dnl
 changequote([,])dnl
+
+dnl use BFD to determine the default architecture and byte order
+dnl (bfd_vec->byteorder provides the latter).
+targ=${target}
+. ${srcdir}/../bfd/config.bfd
+
+dnl We only want the first arch, if there is more than one.
+targ_archs=`echo ${targ_archs} | sed -e 's/ .*//;'`
+
+if test x"${targ_archs}" != x ; then
+    AC_DEFINE_UNQUOTED(DEFAULT_BFD_ARCH, ${targ_archs})
+fi
+if test x"${targ_defvec}" != x ; then
+    AC_DEFINE_UNQUOTED(DEFAULT_BFD_VEC, ${targ_defvec})
+fi
 
 AC_PROG_AWK
 AC_PROG_INSTALL
@@ -95,7 +112,7 @@ dnl Solaris 7 needs _MSE_INT_H defined to avoid a clash between <widec.h>
 dnl and <wchar.h> that causes AC_CHECK_HEADERS to think <curses.h> doesn't
 dnl exist.
 
-case $host_os in solaris2.7) case "$GCC" in yes)
+case $host_os in solaris2.7 | solaris2.8) case "$GCC" in yes)
     AC_DEFINE(_MSE_INT_H)
 esac; esac
 
@@ -106,7 +123,8 @@ AC_CHECK_HEADERS(ctype.h endian.h link.h thread_db.h proc_service.h \
 	wchar.h wctype.h asm/debugreg.h sys/debugreg.h sys/select.h \
 	time.h sys/ioctl.h sys/user.h \
 	dirent.h sys/ndir.h sys/dir.h ndir.h \
-	curses.h ncurses.h)
+	curses.h ncurses.h \
+	poll.h sys/poll.h)
 AC_HEADER_STAT
 
 AC_C_CONST
@@ -609,6 +627,16 @@ AC_CACHE_CHECK([for cygwin], gdb_cv_os_cygwin,
 lose
 #endif],[gdb_cv_os_cygwin=yes],[gdb_cv_os_cygwin=no])])
 
+
+dnl Figure out which of the many generic ser-*.c files the _host_ supports.
+SER_HARDWIRE="ser-unix.o ser-pipe.o ser-tcp.o"
+case ${host} in
+  *go32* ) SER_HARDWIRE=ser-go32.o ;;
+  *djgpp* ) SER_HARDWIRE=ser-go32.o ;;
+esac
+AC_SUBST(SER_HARDWIRE)
+
+
 dnl Figure out which term library to use.
 if test x$gdb_host = xgo32; then
   TERM_LIB=
@@ -809,7 +837,7 @@ if test "${enable_gdbtk}" = "yes"; then
 	   CONFIG_OBS="${CONFIG_OBS} gdbtk.o gdbtk-cmds.o gdbtk-hooks.o gdbtk-varobj.o gdbtk-wrapper.o"
 	   CONFIG_INITS="${CONFIG_INITS} gdbtk/generic/gdbtk.c gdbtk/generic/gdbtk-cmds.c gdbtk/generic/gdbtk-hooks.c gdbtk/generic/gdbtk-varobj.c gdbtk/generic/gdbtk-wrapper.c"
 	   CONFIG_ALL="${CONFIG_ALL} \$(SUBDIR_GDBTK_ALL)"
-	   CONFIG_CLEAN="${CONFIG_ALL} \$(SUBDIR_GDBTK_CLEAN)"
+	   CONFIG_CLEAN="${CONFIG_CLEAN} \$(SUBDIR_GDBTK_CLEAN)"
 	   CONFIG_INSTALL="${CONFIG_INSTALL} \$(SUBDIR_GDBTK_INSTALL)"
 	   CONFIG_UNINSTALL="${CONFIG_UNINSTALL} \$(SUBDIR_GDBTK_UNINSTALL)"
 
@@ -975,6 +1003,10 @@ targetfile=`sed -n '
 s/TM_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 ' ${target_makefile_frag}`
 
+GDB_MULTI_ARCH=`sed -n '
+s/GDB_MULTI_ARCH[ 	]*=[ 	]*\([^ 	]*\)[ 	]*/\1/p
+' ${target_makefile_frag}`
+
 # these really aren't orthogonal true/false values of the same condition,
 # but shells are slow enough that I like to reuse the test conditions
 # whenever possible
@@ -987,6 +1019,33 @@ s/NAT_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 # configdirs=`echo $configdirs | sed 's/gdbserver//'`
 fi
 changequote([,])
+
+# New targets should just set gdb_multi_arch=yes in configure.tgt.
+# Old targets being converted can either do that or set GDB_MULTI_ARCH
+# in the target specific makefile frag.  Eventually gdb_multi_arch=yes
+# will be the default.
+if test x"${GDB_MULTI_ARCH}" = x ; then
+    case "${gdb_multi_arch}" in
+    yes ) GDB_MULTI_ARCH=GDB_MULTI_ARCH_PURE ;;
+    no ) GDB_MULTI_ARCH=0 ;;
+    0|1|2 ) GDB_MULTI_ARCH=${gdb_multi_arch} ;;
+    esac
+fi
+if test x"${GDB_MULTI_ARCH}" != x ; then
+    AC_DEFINE_UNQUOTED(GDB_MULTI_ARCH, ${GDB_MULTI_ARCH})
+fi
+# Warn the user when they use an old pratice
+case "${GDB_MULTI_ARCH}" in
+    "" ) ;;
+    0 | GDB_MULTI_ARCH_PARTIAL | 1 | GDB_MULTI_ARCH_TM | 2 )
+	AC_MSG_WARN("GDB: Target is not pure multi-arch") ;;
+    GDB_MULTI_ARCH_PURE )
+	if test x"${targetfile}" != x ; then
+	    AC_MSG_WARN("GDB: Ingoring TM_FILE in ${target_makefile_frag}")
+	fi ;;
+    *)  AC_MSG_ERROR("GDB: Unknown GDB_MULTI_ARCH value ${GDB_MULTI_ARCH}");;
+esac
+
 
 SUBDIRS="doc testsuite nlm"
 if test "${enable_multi_ice}" = "yes"; then

@@ -84,8 +84,7 @@ struct target_ops core_ops;
    handle. */
 
 void
-add_core_fns (cf)
-     struct core_fns *cf;
+add_core_fns (struct core_fns *cf)
 {
   cf->next = core_file_fns;
   core_file_fns = cf;
@@ -96,9 +95,7 @@ add_core_fns (cf)
    reading the core file. */
 
 int
-default_core_sniffer (our_fns, abfd)
-     struct core_fns *our_fns;
-     bfd *abfd;
+default_core_sniffer (struct core_fns *our_fns, bfd *abfd)
 {
   int result;
 
@@ -112,8 +109,7 @@ default_core_sniffer (our_fns, abfd)
    selected. */
 
 static struct core_fns *
-sniff_core_bfd (abfd)
-     bfd *abfd;
+sniff_core_bfd (bfd *abfd)
 {
   struct core_fns *cf;
   struct core_fns *yummy = NULL;
@@ -149,8 +145,7 @@ sniff_core_bfd (abfd)
    core file handler that recognizes it. */
 
 int
-default_check_format (abfd)
-     bfd *abfd;
+default_check_format (bfd *abfd)
 {
   return (0);
 }
@@ -158,8 +153,7 @@ default_check_format (abfd)
 /* Attempt to recognize core file formats that BFD rejects. */
 
 static boolean 
-gdb_check_format (abfd)
-     bfd *abfd;
+gdb_check_format (bfd *abfd)
 {
   struct core_fns *cf;
 
@@ -178,8 +172,7 @@ gdb_check_format (abfd)
 
 /* ARGSUSED */
 static void
-core_close (quitting)
-     int quitting;
+core_close (int quitting)
 {
   char *name;
 
@@ -220,8 +213,7 @@ core_close_cleanup (void *ignore)
    is really an int * which points to from_tty.  */
 
 static int
-solib_add_stub (from_ttyp)
-     PTR from_ttyp;
+solib_add_stub (PTR from_ttyp)
 {
   SOLIB_ADD (NULL, *(int *) from_ttyp, &current_target);
   re_enable_breakpoints_in_shlibs ();
@@ -233,10 +225,7 @@ solib_add_stub (from_ttyp)
    list of threads in a core file.  */
 
 static void
-add_to_thread_list (abfd, asect, reg_sect_arg)
-     bfd *abfd;
-     asection *asect;
-     PTR reg_sect_arg;
+add_to_thread_list (bfd *abfd, asection *asect, PTR reg_sect_arg)
 {
   int thread_id;
   asection *reg_sect = (asection *) reg_sect_arg;
@@ -258,9 +247,7 @@ add_to_thread_list (abfd, asect, reg_sect_arg)
 /* This routine opens and sets up the core file bfd.  */
 
 static void
-core_open (filename, from_tty)
-     char *filename;
-     int from_tty;
+core_open (char *filename, int from_tty)
 {
   const char *p;
   int siggy;
@@ -375,9 +362,7 @@ your %s; do ``info files''", target_longname);
 }
 
 static void
-core_detach (args, from_tty)
-     char *args;
-     int from_tty;
+core_detach (char *args, int from_tty)
 {
   if (args)
     error ("Too many arguments");
@@ -451,8 +436,7 @@ get_core_register_section (char *name,
 
 /* ARGSUSED */
 static void
-get_core_registers (regno)
-     int regno;
+get_core_registers (int regno)
 {
   int status;
 
@@ -472,8 +456,7 @@ get_core_registers (regno)
 }
 
 static char *
-core_file_to_sym_file (core)
-     char *core;
+core_file_to_sym_file (char *core)
 {
   CONST char *failing_command;
   char *p;
@@ -535,8 +518,7 @@ core_file_to_sym_file (core)
 }
 
 static void
-core_files_info (t)
-     struct target_ops *t;
+core_files_info (struct target_ops *t)
 {
   print_section_info (t, core_bfd);
 }
@@ -545,9 +527,7 @@ core_files_info (t)
    `gdb internal error' (since generic_mourn calls breakpoint_init_inferior).  */
 
 static int
-ignore (addr, contents)
-     CORE_ADDR addr;
-     char *contents;
+ignore (CORE_ADDR addr, char *contents)
 {
   return 0;
 }
@@ -560,8 +540,7 @@ ignore (addr, contents)
    behaviour.
  */
 static int
-core_file_thread_alive (tid)
-     int tid;
+core_file_thread_alive (int tid)
 {
   return 1;
 }
@@ -569,7 +548,7 @@ core_file_thread_alive (tid)
 /* Fill in core_ops with its defined operations and properties.  */
 
 static void
-init_core_ops ()
+init_core_ops (void)
 {
   core_ops.to_shortname = "core";
   core_ops.to_longname = "Local core dump file";
@@ -606,7 +585,7 @@ init_core_ops ()
 int coreops_suppress_target;
 
 void
-_initialize_corelow ()
+_initialize_corelow (void)
 {
   init_core_ops ();
 

@@ -35,7 +35,8 @@ struct expression;
 #define	_LANG_c
 #define	_LANG_m2
 #define	_LANG_chill
-#define _LANG_fortran
+#define  _LANG_fortran
+#define  _LANG_pascal
 
 #define MAX_FORTRAN_DIMS  7	/* Maximum number of F77 array dims */
 

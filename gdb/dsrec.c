@@ -218,14 +218,8 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
  */
 
 static int
-make_srec (srec, targ_addr, abfd, sect, sectoff, maxrecsize, flags)
-     char *srec;
-     CORE_ADDR targ_addr;
-     bfd *abfd;
-     asection *sect;
-     int sectoff;
-     int *maxrecsize;
-     int flags;
+make_srec (char *srec, CORE_ADDR targ_addr, bfd *abfd, asection *sect,
+	   int sectoff, int *maxrecsize, int flags)
 {
   unsigned char checksum;
   int tmp;

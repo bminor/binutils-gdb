@@ -243,8 +243,7 @@ monitor_error (char *function, char *message,
 /* Convert hex digit A to a number.  */
 
 static int
-fromhex (a)
-     int a;
+fromhex (int a)
 {
   if (a >= '0' && a <= '9')
     return a - '0';
@@ -271,10 +270,7 @@ fromhex (a)
  */
 
 static void
-monitor_vsprintf (sndbuf, pattern, args)
-     char *sndbuf;
-     char *pattern;
-     va_list args;
+monitor_vsprintf (char *sndbuf, char *pattern, va_list args)
 {
   char format[10];
   char fmt;
@@ -391,9 +387,7 @@ monitor_printf (char *pattern,...)
 /* Write characters to the remote system.  */
 
 void
-monitor_write (buf, buflen)
-     char *buf;
-     int buflen;
+monitor_write (char *buf, int buflen)
 {
   if (SERIAL_WRITE (monitor_desc, buf, buflen))
     fprintf_unfiltered (gdb_stderr, "SERIAL_WRITE failed: %s\n",
@@ -406,7 +400,7 @@ monitor_write (buf, buflen)
    and without printing remote debug information.  */
 
 int
-monitor_readchar ()
+monitor_readchar (void)
 {
   int c;
   int looping;
@@ -435,8 +429,7 @@ monitor_readchar ()
    timeout stuff.  */
 
 static int
-readchar (timeout)
-     int timeout;
+readchar (int timeout)
 {
   int c;
   static enum
@@ -514,10 +507,7 @@ readchar (timeout)
    will be at the end of BUF.  */
 
 int
-monitor_expect (string, buf, buflen)
-     char *string;
-     char *buf;
-     int buflen;
+monitor_expect (char *string, char *buf, int buflen)
 {
   char *p = string;
   int obuflen = buflen;
@@ -622,10 +612,7 @@ monitor_expect (string, buf, buflen)
 /* Search for a regexp.  */
 
 static int
-monitor_expect_regexp (pat, buf, buflen)
-     struct re_pattern_buffer *pat;
-     char *buf;
-     int buflen;
+monitor_expect_regexp (struct re_pattern_buffer *pat, char *buf, int buflen)
 {
   char *mybuf;
   char *p;
@@ -676,9 +663,7 @@ monitor_expect_regexp (pat, buf, buflen)
    getting into states from which we can't recover.  */
 
 int
-monitor_expect_prompt (buf, buflen)
-     char *buf;
-     int buflen;
+monitor_expect_prompt (char *buf, int buflen)
 {
   monitor_debug ("MON Expecting prompt\n");
   return monitor_expect (current_monitor->prompt, buf, buflen);
@@ -689,7 +674,7 @@ monitor_expect_prompt (buf, buflen)
 
 #if 0
 static unsigned long
-get_hex_word ()
+get_hex_word (void)
 {
   unsigned long val;
   int i;
@@ -714,10 +699,8 @@ get_hex_word ()
 #endif
 
 static void
-compile_pattern (pattern, compiled_pattern, fastmap)
-     char *pattern;
-     struct re_pattern_buffer *compiled_pattern;
-     char *fastmap;
+compile_pattern (char *pattern, struct re_pattern_buffer *compiled_pattern,
+		 char *fastmap)
 {
   int tmp;
   const char *val;
@@ -741,10 +724,7 @@ compile_pattern (pattern, compiled_pattern, fastmap)
    for communication.  */
 
 void
-monitor_open (args, mon_ops, from_tty)
-     char *args;
-     struct monitor_ops *mon_ops;
-     int from_tty;
+monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
 {
   char *name;
   char **p;
@@ -869,8 +849,7 @@ monitor_open (args, mon_ops, from_tty)
    control.  */
 
 void
-monitor_close (quitting)
-     int quitting;
+monitor_close (int quitting)
 {
   if (monitor_desc)
     SERIAL_CLOSE (monitor_desc);
@@ -889,9 +868,7 @@ monitor_close (quitting)
    when you want to detach and do something else with your gdb.  */
 
 static void
-monitor_detach (args, from_tty)
-     char *args;
-     int from_tty;
+monitor_detach (char *args, int from_tty)
 {
   pop_target ();		/* calls monitor_close to do the real work */
   if (from_tty)
@@ -901,9 +878,7 @@ monitor_detach (args, from_tty)
 /* Convert VALSTR into the target byte-ordered value of REGNO and store it.  */
 
 char *
-monitor_supply_register (regno, valstr)
-     int regno;
-     char *valstr;
+monitor_supply_register (int regno, char *valstr)
 {
   ULONGEST val;
   unsigned char regbuf[MAX_REGISTER_RAW_SIZE];
@@ -950,15 +925,13 @@ monitor_supply_register (regno, valstr)
 /* Tell the remote machine to resume.  */
 
 void
-flush_monitor_dcache ()
+flush_monitor_dcache (void)
 {
   dcache_flush (remote_dcache);
 }
 
 static void
-monitor_resume (pid, step, sig)
-     int pid, step;
-     enum target_signal sig;
+monitor_resume (int pid, int step, enum target_signal sig)
 {
   /* Some monitors require a different command when starting a program */
   monitor_debug ("MON resume\n");
@@ -990,9 +963,7 @@ monitor_resume (pid, step, sig)
    string which are passed down to monitor specific code.  */
 
 static void
-parse_register_dump (buf, len)
-     char *buf;
-     int len;
+parse_register_dump (char *buf, int len)
 {
   monitor_debug ("MON Parsing  register dump\n");
   while (1)
@@ -1025,8 +996,7 @@ parse_register_dump (buf, len)
    packet.  */
 
 static void
-monitor_interrupt (signo)
-     int signo;
+monitor_interrupt (int signo)
 {
   /* If this doesn't work, try more severe steps.  */
   signal (signo, monitor_interrupt_twice);
@@ -1040,8 +1010,7 @@ monitor_interrupt (signo)
 /* The user typed ^C twice.  */
 
 static void
-monitor_interrupt_twice (signo)
-     int signo;
+monitor_interrupt_twice (int signo)
 {
   signal (signo, ofunc);
 
@@ -1053,7 +1022,7 @@ monitor_interrupt_twice (signo)
 /* Ask the user what to do when an interrupt is received.  */
 
 static void
-monitor_interrupt_query ()
+monitor_interrupt_query (void)
 {
   target_terminal_ours ();
 
@@ -1068,8 +1037,7 @@ Give up (and stop debugging it)? "))
 }
 
 static void
-monitor_wait_cleanup (old_timeout)
-     void *old_timeout;
+monitor_wait_cleanup (void *old_timeout)
 {
   timeout = *(int *) old_timeout;
   signal (SIGINT, ofunc);
@@ -1115,9 +1083,7 @@ monitor_wait_filter (char *buf,
    status just as `wait' would.  */
 
 static int
-monitor_wait (pid, status)
-     int pid;
-     struct target_waitstatus *status;
+monitor_wait (int pid, struct target_waitstatus *status)
 {
   int old_timeout = timeout;
   char buf[TARGET_BUF_SIZE];
@@ -1200,8 +1166,7 @@ monitor_wait (pid, status)
    errno value.  */
 
 static void
-monitor_fetch_register (regno)
-     int regno;
+monitor_fetch_register (int regno)
 {
   char *name;
   char *zerobuf;
@@ -1320,7 +1285,7 @@ monitor_dump_reg_block (char *block_cmd)
 /* Call the specific function if it has been provided */
 
 static void
-monitor_dump_regs ()
+monitor_dump_regs (void)
 {
   char buf[TARGET_BUF_SIZE];
   int resp_len;
@@ -1337,8 +1302,7 @@ monitor_dump_regs ()
 }
 
 static void
-monitor_fetch_registers (regno)
-     int regno;
+monitor_fetch_registers (int regno)
 {
   monitor_debug ("MON fetchregs\n");
   if (current_monitor->getreg.cmd)
@@ -1361,8 +1325,7 @@ monitor_fetch_registers (regno)
 /* Store register REGNO, or all if REGNO == 0.  Return errno value.  */
 
 static void
-monitor_store_register (regno)
-     int regno;
+monitor_store_register (int regno)
 {
   char *name;
   ULONGEST val;
@@ -1408,8 +1371,7 @@ monitor_store_register (regno)
 /* Store the remote registers.  */
 
 static void
-monitor_store_registers (regno)
-     int regno;
+monitor_store_registers (int regno)
 {
   if (regno >= 0)
     {
@@ -1428,23 +1390,19 @@ monitor_store_registers (regno)
    debugged.  */
 
 static void
-monitor_prepare_to_store ()
+monitor_prepare_to_store (void)
 {
   /* Do nothing, since we can store individual regs */
 }
 
 static void
-monitor_files_info (ops)
-     struct target_ops *ops;
+monitor_files_info (struct target_ops *ops)
 {
   printf_unfiltered ("\tAttached to %s at %d baud.\n", dev_name, baud_rate);
 }
 
 static int
-monitor_write_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+monitor_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   unsigned int val, hostval;
   char *cmd;
@@ -1540,10 +1498,7 @@ monitor_write_memory (memaddr, myaddr, len)
 
 
 static int
-monitor_write_even_block (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+monitor_write_even_block (CORE_ADDR memaddr, char *myaddr, int len)
 {
   unsigned int val;
   int written = 0;;
@@ -1570,10 +1525,7 @@ monitor_write_even_block (memaddr, myaddr, len)
 
 
 static int
-monitor_write_memory_bytes (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+monitor_write_memory_bytes (CORE_ADDR memaddr, char *myaddr, int len)
 {
   unsigned char val;
   int written = 0;
@@ -1665,10 +1617,7 @@ longlong_hexchars (unsigned long long value,
    Which possably entails endian conversions
  */
 static int
-monitor_write_memory_longlongs (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+monitor_write_memory_longlongs (CORE_ADDR memaddr, char *myaddr, int len)
 {
   static char hexstage[20];	/* At least 16 digits required, plus null */
   char *endstring;
@@ -1716,10 +1665,7 @@ monitor_write_memory_longlongs (memaddr, myaddr, len)
  */
 
 static int
-monitor_write_memory_block (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+monitor_write_memory_block (CORE_ADDR memaddr, char *myaddr, int len)
 {
   int written;
   written = 0;
@@ -1749,10 +1695,7 @@ monitor_write_memory_block (memaddr, myaddr, len)
    which can only read a single byte/word/etc. at a time.  */
 
 static int
-monitor_read_memory_single (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+monitor_read_memory_single (CORE_ADDR memaddr, char *myaddr, int len)
 {
   unsigned int val;
   char membuf[sizeof (int) * 2 + 1];
@@ -1879,10 +1822,7 @@ monitor_read_memory_single (memaddr, myaddr, len)
    than 16 bytes at a time.  */
 
 static int
-monitor_read_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+monitor_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   unsigned int val;
   char buf[512];
@@ -2067,7 +2007,7 @@ monitor_xfer_memory (memaddr, myaddr, len, write, target)
 }
 
 static void
-monitor_kill ()
+monitor_kill (void)
 {
   return;			/* ignore attempts to kill target system */
 }
@@ -2076,10 +2016,7 @@ monitor_kill ()
    the program at that point.  */
 
 static void
-monitor_create_inferior (exec_file, args, env)
-     char *exec_file;
-     char *args;
-     char **env;
+monitor_create_inferior (char *exec_file, char *args, char **env)
 {
   if (args && (*args != '\000'))
     error ("Args are not supported by the monitor.");
@@ -2095,7 +2032,7 @@ monitor_create_inferior (exec_file, args, env)
    instructions.  */
 
 static void
-monitor_mourn_inferior ()
+monitor_mourn_inferior (void)
 {
   unpush_target (targ_ops);
   generic_mourn_inferior ();	/* Do all the proper things now */
@@ -2104,9 +2041,7 @@ monitor_mourn_inferior ()
 /* Tell the monitor to add a breakpoint.  */
 
 static int
-monitor_insert_breakpoint (addr, shadow)
-     CORE_ADDR addr;
-     char *shadow;
+monitor_insert_breakpoint (CORE_ADDR addr, char *shadow)
 {
   int i;
   unsigned char *bp;
@@ -2140,9 +2075,7 @@ monitor_insert_breakpoint (addr, shadow)
 /* Tell the monitor to remove a breakpoint.  */
 
 static int
-monitor_remove_breakpoint (addr, shadow)
-     CORE_ADDR addr;
-     char *shadow;
+monitor_remove_breakpoint (CORE_ADDR addr, char *shadow)
 {
   int i;
 
@@ -2179,7 +2112,7 @@ monitor_remove_breakpoint (addr, shadow)
    an S-record.  Return non-zero if the ACK is received properly.  */
 
 static int
-monitor_wait_srec_ack ()
+monitor_wait_srec_ack (void)
 {
   int ch;
 
@@ -2205,9 +2138,7 @@ monitor_wait_srec_ack ()
 /* monitor_load -- download a file. */
 
 static void
-monitor_load (file, from_tty)
-     char *file;
-     int from_tty;
+monitor_load (char *file, int from_tty)
 {
   dcache_flush (remote_dcache);
   monitor_debug ("MON load\n");
@@ -2256,7 +2187,7 @@ monitor_load (file, from_tty)
 }
 
 static void
-monitor_stop ()
+monitor_stop (void)
 {
   monitor_debug ("MON stop\n");
   if ((current_monitor->flags & MO_SEND_BREAK_ON_STOP) != 0)
@@ -2296,8 +2227,7 @@ monitor_rcmd (char *command,
 
 #if 0
 static int
-from_hex (a)
-     int a;
+from_hex (int a)
 {
   if (a >= '0' && a <= '9')
     return a - '0';
@@ -2311,7 +2241,7 @@ from_hex (a)
 #endif
 
 char *
-monitor_get_dev_name ()
+monitor_get_dev_name (void)
 {
   return dev_name;
 }
@@ -2390,8 +2320,7 @@ init_base_monitor_ops (void)
 /* Init the target_ops structure pointed at by OPS */
 
 void
-init_monitor_ops (ops)
-     struct target_ops *ops;
+init_monitor_ops (struct target_ops *ops)
 {
   if (monitor_ops.to_magic != OPS_MAGIC)
     init_base_monitor_ops ();
@@ -2402,7 +2331,7 @@ init_monitor_ops (ops)
 /* Define additional commands that are usually only used by monitors.  */
 
 void
-_initialize_remote_monitors ()
+_initialize_remote_monitors (void)
 {
   init_base_monitor_ops ();
   add_show_from_set (add_set_cmd ("hash", no_class, var_boolean,

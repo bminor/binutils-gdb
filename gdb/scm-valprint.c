@@ -45,13 +45,8 @@ static int scm_inferior_print (LONGEST, struct ui_file *, int, int,
    print VALUE. */
 
 static int
-scm_inferior_print (value, stream, format, deref_ref, recurse, pretty)
-     LONGEST value;
-     struct ui_file *stream;
-     int format;
-     int deref_ref;
-     int recurse;
-     enum val_prettyprint pretty;
+scm_inferior_print (LONGEST value, struct ui_file *stream, int format,
+		    int deref_ref, int recurse, enum val_prettyprint pretty)
 {
   return -1;
 }
@@ -96,13 +91,8 @@ static char *scm_isymnames[] =
 };
 
 static void
-scm_scmlist_print (svalue, stream, format, deref_ref, recurse, pretty)
-     LONGEST svalue;
-     struct ui_file *stream;
-     int format;
-     int deref_ref;
-     int recurse;
-     enum val_prettyprint pretty;
+scm_scmlist_print (LONGEST svalue, struct ui_file *stream, int format,
+		   int deref_ref, int recurse, enum val_prettyprint pretty)
 {
   unsigned int more = print_max;
   if (recurse > 6)
@@ -135,10 +125,7 @@ scm_scmlist_print (svalue, stream, format, deref_ref, recurse, pretty)
 }
 
 static void
-scm_ipruk (hdr, ptr, stream)
-     char *hdr;
-     LONGEST ptr;
-     struct ui_file *stream;
+scm_ipruk (char *hdr, LONGEST ptr, struct ui_file *stream)
 {
   fprintf_filtered (stream, "#<unknown-%s", hdr);
 #define SCM_SIZE TYPE_LENGTH (builtin_type_scm)
@@ -149,13 +136,8 @@ scm_ipruk (hdr, ptr, stream)
 }
 
 void
-scm_scmval_print (svalue, stream, format, deref_ref, recurse, pretty)
-     LONGEST svalue;
-     struct ui_file *stream;
-     int format;
-     int deref_ref;
-     int recurse;
-     enum val_prettyprint pretty;
+scm_scmval_print (LONGEST svalue, struct ui_file *stream, int format,
+		  int deref_ref, int recurse, enum val_prettyprint pretty)
 {
 taloop:
   switch (7 & (int) svalue)
@@ -376,17 +358,9 @@ taloop:
 }
 
 int
-scm_val_print (type, valaddr, embedded_offset, address,
-	       stream, format, deref_ref, recurse, pretty)
-     struct type *type;
-     char *valaddr;
-     int embedded_offset;
-     CORE_ADDR address;
-     struct ui_file *stream;
-     int format;
-     int deref_ref;
-     int recurse;
-     enum val_prettyprint pretty;
+scm_val_print (struct type *type, char *valaddr, int embedded_offset,
+	       CORE_ADDR address, struct ui_file *stream, int format,
+	       int deref_ref, int recurse, enum val_prettyprint pretty)
 {
   if (is_scmvalue_type (type))
     {
@@ -412,11 +386,8 @@ scm_val_print (type, valaddr, embedded_offset, address,
 }
 
 int
-scm_value_print (val, stream, format, pretty)
-     value_ptr val;
-     struct ui_file *stream;
-     int format;
-     enum val_prettyprint pretty;
+scm_value_print (value_ptr val, struct ui_file *stream, int format,
+		 enum val_prettyprint pretty)
 {
   return (val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,
 		     VALUE_ADDRESS (val), stream, format, 1, 0, pretty));

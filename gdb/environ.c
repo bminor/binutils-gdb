@@ -28,7 +28,7 @@
 /* Return a new environment object.  */
 
 struct environ *
-make_environ ()
+make_environ (void)
 {
   register struct environ *e;
 
@@ -43,8 +43,7 @@ make_environ ()
 /* Free an environment and all the strings in it.  */
 
 void
-free_environ (e)
-     register struct environ *e;
+free_environ (register struct environ *e)
 {
   register char **vector = e->vector;
 
@@ -59,8 +58,7 @@ free_environ (e)
    that all strings in these environments are safe to free.  */
 
 void
-init_environ (e)
-     register struct environ *e;
+init_environ (register struct environ *e)
 {
   extern char **environ;
   register int i;
@@ -92,8 +90,7 @@ init_environ (e)
    This is used to get something to pass to execve.  */
 
 char **
-environ_vector (e)
-     struct environ *e;
+environ_vector (struct environ *e)
 {
   return e->vector;
 }
@@ -101,9 +98,7 @@ environ_vector (e)
 /* Return the value in environment E of variable VAR.  */
 
 char *
-get_in_environ (e, var)
-     const struct environ *e;
-     const char *var;
+get_in_environ (const struct environ *e, const char *var)
 {
   register int len = strlen (var);
   register char **vector = e->vector;
@@ -119,10 +114,7 @@ get_in_environ (e, var)
 /* Store the value in E of VAR as VALUE.  */
 
 void
-set_in_environ (e, var, value)
-     struct environ *e;
-     const char *var;
-     const char *value;
+set_in_environ (struct environ *e, const char *var, const char *value)
 {
   register int i;
   register int len = strlen (var);
@@ -169,9 +161,7 @@ set_in_environ (e, var, value)
 /* Remove the setting for variable VAR from environment E.  */
 
 void
-unset_in_environ (e, var)
-     struct environ *e;
-     char *var;
+unset_in_environ (struct environ *e, char *var)
 {
   register int len = strlen (var);
   register char **vector = e->vector;

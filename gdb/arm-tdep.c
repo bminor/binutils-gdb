@@ -52,10 +52,10 @@ static char * arm_register_name_strings[] =
 char **arm_register_names = arm_register_name_strings;
 
 /* Valid register name flavors.  */
-static char **valid_flavors;
+static const char **valid_flavors;
 
 /* Disassembly flavor to use. Default to "std" register names. */
-static char *disassembly_flavor;
+static const char *disassembly_flavor;
 static int current_option;	/* Index to that option in the opcodes table. */
 
 /* This is used to keep the bfd arch_info in sync with the disassembly
@@ -2037,7 +2037,9 @@ _initialize_arm_tdep (void)
   struct ui_file *stb;
   long length;
   struct cmd_list_element *new_cmd;
-  const char *setname, *setdesc, **regnames;
+  const char *setname;
+  const char *setdesc;
+  const char **regnames;
   int numregs, i, j;
   static char *helptext;
 
@@ -2059,13 +2061,13 @@ The valid values are:\n");
   for (i = 0; i < num_flavor_options; i++)
     {
       numregs = get_arm_regnames (i, &setname, &setdesc, &regnames);
-      valid_flavors[i] = (char *) setname;
+      valid_flavors[i] = setname;
       fprintf_unfiltered (stb, "%s - %s\n", setname,
 			  setdesc);
       /* Copy the default names (if found) and synchronize disassembler. */
       if (!strcmp (setname, "std"))
 	{
-          disassembly_flavor = (char *) setname;
+          disassembly_flavor = setname;
           current_option = i;
 	  for (j = 0; j < numregs; j++)
             arm_register_names[j] = (char *) regnames[j];

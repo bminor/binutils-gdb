@@ -33,9 +33,7 @@
    Return nonzero if call_function should allocate stack space for a
    struct return? */
 int
-m32r_use_struct_convention (gcc_p, type)
-     int gcc_p;
-     struct type *type;
+m32r_use_struct_convention (int gcc_p, struct type *type)
 {
   return (TYPE_LENGTH (type) > 8);
 }
@@ -46,9 +44,8 @@ m32r_use_struct_convention (gcc_p, type)
    an empty frame_saved_regs, so I guess that's better than total failure */
 
 void
-m32r_frame_find_saved_regs (fi, regaddr)
-     struct frame_info *fi;
-     struct frame_saved_regs *regaddr;
+m32r_frame_find_saved_regs (struct frame_info *fi,
+			    struct frame_saved_regs *regaddr)
 {
   memcpy (regaddr, &fi->fsr, sizeof (struct frame_saved_regs));
 }
@@ -109,15 +106,9 @@ dump_insn (char *commnt, CORE_ADDR pc, int insn)
  */
 
 static void
-decode_prologue (start_pc, scan_limit,
-		 pl_endptr, framelength,
-		 fi, fsr)
-     CORE_ADDR start_pc;
-     CORE_ADDR scan_limit;
-     CORE_ADDR *pl_endptr;	/* var parameter */
-     unsigned long *framelength;
-     struct frame_info *fi;
-     struct frame_saved_regs *fsr;
+decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit, CORE_ADDR *pl_endptr,	/* var parameter */
+		 unsigned long *framelength, struct frame_info *fi,
+		 struct frame_saved_regs *fsr)
 {
   unsigned long framesize;
   int insn;
@@ -309,8 +300,7 @@ decode_prologue (start_pc, scan_limit,
    Find end of function prologue */
 
 CORE_ADDR
-m32r_skip_prologue (pc)
-     CORE_ADDR pc;
+m32r_skip_prologue (CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end;
   struct symtab_and_line sal;
@@ -344,9 +334,7 @@ m32r_skip_prologue (pc)
 }
 
 static unsigned long
-m32r_scan_prologue (fi, fsr)
-     struct frame_info *fi;
-     struct frame_saved_regs *fsr;
+m32r_scan_prologue (struct frame_info *fi, struct frame_saved_regs *fsr)
 {
   struct symtab_and_line sal;
   CORE_ADDR prologue_start, prologue_end, current_pc;
@@ -389,8 +377,7 @@ m32r_scan_prologue (fi, fsr)
    examine the prologue.  */
 
 void
-m32r_init_extra_frame_info (fi)
-     struct frame_info *fi;
+m32r_init_extra_frame_info (struct frame_info *fi)
 {
   int reg;
 
@@ -436,10 +423,7 @@ m32r_init_extra_frame_info (fi)
    any frame pointer offsets.  */
 
 void
-m32r_virtual_frame_pointer (pc, reg, offset)
-     CORE_ADDR pc;
-     long *reg;
-     long *offset;
+m32r_virtual_frame_pointer (CORE_ADDR pc, long *reg, long *offset)
 {
   struct frame_info fi;
 
@@ -474,9 +458,7 @@ m32r_virtual_frame_pointer (pc, reg, offset)
    caller-saves registers for an inner frame.  */
 
 CORE_ADDR
-m32r_find_callers_reg (fi, regnum)
-     struct frame_info *fi;
-     int regnum;
+m32r_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi; fi = fi->next)
     if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
@@ -494,8 +476,7 @@ m32r_find_callers_reg (fi, regnum)
    For m32r, we save the frame size when we initialize the frame_info.  */
 
 CORE_ADDR
-m32r_frame_chain (fi)
-     struct frame_info *fi;
+m32r_frame_chain (struct frame_info *fi)
 {
   CORE_ADDR fn_start, callers_pc, fp;
 
@@ -529,9 +510,7 @@ m32r_frame_chain (fi)
    (ie. when using an empty CALL_DUMMY) */
 
 CORE_ADDR
-m32r_push_return_address (pc, sp)
-     CORE_ADDR pc;
-     CORE_ADDR sp;
+m32r_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   write_register (RP_REGNUM, CALL_DUMMY_ADDRESS ());
   return sp;
@@ -543,8 +522,7 @@ m32r_push_return_address (pc, sp)
    restoring all saved registers.  */
 
 struct frame_info *
-m32r_pop_frame (frame)
-     struct frame_info *frame;
+m32r_pop_frame (struct frame_info *frame)
 {
   int regnum;
 
@@ -573,8 +551,7 @@ m32r_pop_frame (frame)
    in the stack anywhere, otherwise we get it from the registers. */
 
 CORE_ADDR
-m32r_frame_saved_pc (fi)
-     struct frame_info *fi;
+m32r_frame_saved_pc (struct frame_info *fi)
 {
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return generic_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
@@ -614,12 +591,8 @@ m32r_frame_saved_pc (fi)
    passed as an implicit first argument, always in R0. */
 
 CORE_ADDR
-m32r_push_arguments (nargs, args, sp, struct_return, struct_addr)
-     int nargs;
-     value_ptr *args;
-     CORE_ADDR sp;
-     unsigned char struct_return;
-     CORE_ADDR struct_addr;
+m32r_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+		     unsigned char struct_return, CORE_ADDR struct_addr)
 {
   int stack_offset, stack_alloc;
   int argreg;
@@ -700,14 +673,8 @@ m32r_push_arguments (nargs, args, sp, struct_return, struct_addr)
    is the target of the target function call.  */
 
 void
-m32r_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
-     char *dummy;
-     CORE_ADDR pc;
-     CORE_ADDR fun;
-     int nargs;
-     value_ptr *args;
-     struct type *type;
-     int gcc_p;
+m32r_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
+		     value_ptr *args, struct type *type, int gcc_p)
 {
   /* ld24 r8, <(imm24) fun> */
   *(unsigned long *) (dummy) = (fun & 0x00ffffff) | 0xe8000000;
@@ -719,8 +686,7 @@ m32r_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
    we must actually write one of those two as well, depending on PSW. */
 
 void
-m32r_write_sp (val)
-     CORE_ADDR val;
+m32r_write_sp (CORE_ADDR val)
 {
   unsigned long psw = read_register (PSW_REGNUM);
 
@@ -732,7 +698,7 @@ m32r_write_sp (val)
 }
 
 void
-_initialize_m32r_tdep ()
+_initialize_m32r_tdep (void)
 {
   tm_print_insn = print_insn_m32r;
 }

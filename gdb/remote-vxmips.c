@@ -67,8 +67,7 @@ extern void net_write_registers ();
    it is ignored.  FIXME look at regno to improve efficiency.  */
 
 void
-vx_read_register (regno)
-     int regno;
+vx_read_register (int regno)
 {
   char mips_greg_packet[MIPS_GREG_PLEN];
   char mips_fpreg_packet[MIPS_FPREG_PLEN];
@@ -157,8 +156,7 @@ vx_read_register (regno)
    REGNO is the register to store, or -1 for all; currently,
    it is ignored.  FIXME look at regno to improve efficiency.  */
 
-vx_write_register (regno)
-     int regno;
+vx_write_register (int regno)
 {
   char mips_greg_packet[MIPS_GREG_PLEN];
   char mips_fpreg_packet[MIPS_FPREG_PLEN];

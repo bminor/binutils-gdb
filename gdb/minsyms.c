@@ -151,10 +151,8 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
    names (the dynamic linker deals with the duplication). */
 
 struct minimal_symbol *
-lookup_minimal_symbol (name, sfile, objf)
-     register const char *name;
-     const char *sfile;
-     struct objfile *objf;
+lookup_minimal_symbol (register const char *name, const char *sfile,
+		       struct objfile *objf)
 {
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
@@ -264,10 +262,8 @@ lookup_minimal_symbol (name, sfile, objf)
  */
 
 struct minimal_symbol *
-lookup_minimal_symbol_text (name, sfile, objf)
-     register const char *name;
-     const char *sfile;
-     struct objfile *objf;
+lookup_minimal_symbol_text (register const char *name, const char *sfile,
+			    struct objfile *objf)
 {
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
@@ -341,10 +337,8 @@ lookup_minimal_symbol_text (name, sfile, objf)
  */
 
 struct minimal_symbol *
-lookup_minimal_symbol_solib_trampoline (name, sfile, objf)
-     register const char *name;
-     const char *sfile;
-     struct objfile *objf;
+lookup_minimal_symbol_solib_trampoline (register const char *name,
+					const char *sfile, struct objfile *objf)
 {
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
@@ -392,9 +386,7 @@ lookup_minimal_symbol_solib_trampoline (name, sfile, objf)
    0x40000 and objfile B has .text at 0x234 and .data at 0x40048.  */
 
 struct minimal_symbol *
-lookup_minimal_symbol_by_pc_section (pc, section)
-     CORE_ADDR pc;
-     asection *section;
+lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
 {
   int lo;
   int hi;
@@ -510,18 +502,15 @@ lookup_minimal_symbol_by_pc_section (pc, section)
    for a matching PC (no section given) */
 
 struct minimal_symbol *
-lookup_minimal_symbol_by_pc (pc)
-     CORE_ADDR pc;
+lookup_minimal_symbol_by_pc (CORE_ADDR pc)
 {
   return lookup_minimal_symbol_by_pc_section (pc, find_pc_mapped_section (pc));
 }
 
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
 CORE_ADDR
-find_stab_function_addr (namestring, filename, objfile)
-     char *namestring;
-     char *filename;
-     struct objfile *objfile;
+find_stab_function_addr (char *namestring, char *filename,
+			 struct objfile *objfile)
 {
   struct minimal_symbol *msym;
   char *p;
@@ -571,8 +560,7 @@ find_stab_function_addr (namestring, filename, objfile)
 static int get_symbol_leading_char (bfd *);
 
 static int
-get_symbol_leading_char (abfd)
-     bfd *abfd;
+get_symbol_leading_char (bfd *abfd)
 {
   if (abfd != NULL)
     return bfd_get_symbol_leading_char (abfd);
@@ -586,7 +574,7 @@ get_symbol_leading_char (abfd)
    symbol to allocate the memory for the first bunch. */
 
 void
-init_minimal_symbol_collection ()
+init_minimal_symbol_collection (void)
 {
   msym_count = 0;
   msym_bunch = NULL;
@@ -594,11 +582,9 @@ init_minimal_symbol_collection ()
 }
 
 void
-prim_record_minimal_symbol (name, address, ms_type, objfile)
-     const char *name;
-     CORE_ADDR address;
-     enum minimal_symbol_type ms_type;
-     struct objfile *objfile;
+prim_record_minimal_symbol (const char *name, CORE_ADDR address,
+			    enum minimal_symbol_type ms_type,
+			    struct objfile *objfile)
 {
   int section;
 
@@ -629,15 +615,11 @@ prim_record_minimal_symbol (name, address, ms_type, objfile)
    newly created.  */
 
 struct minimal_symbol *
-prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
-				     bfd_section, objfile)
-     const char *name;
-     CORE_ADDR address;
-     enum minimal_symbol_type ms_type;
-     char *info;
-     int section;
-     asection *bfd_section;
-     struct objfile *objfile;
+prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
+				     enum minimal_symbol_type ms_type,
+				     char *info, int section,
+				     asection *bfd_section,
+				     struct objfile *objfile)
 {
   register struct msym_bunch *new;
   register struct minimal_symbol *msymbol;
@@ -698,9 +680,7 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
    Within groups with the same address, sort by name.  */
 
 static int
-compare_minimal_symbols (fn1p, fn2p)
-     const PTR fn1p;
-     const PTR fn2p;
+compare_minimal_symbols (const PTR fn1p, const PTR fn2p)
 {
   register const struct minimal_symbol *fn1;
   register const struct minimal_symbol *fn2;
@@ -799,10 +779,8 @@ make_cleanup_discard_minimal_symbols (void)
    overwrite its type with the type from the one we are compacting out.  */
 
 static int
-compact_minimal_symbols (msymbol, mcount, objfile)
-     struct minimal_symbol *msymbol;
-     int mcount;
-     struct objfile *objfile;
+compact_minimal_symbols (struct minimal_symbol *msymbol, int mcount,
+			 struct objfile *objfile)
 {
   struct minimal_symbol *copyfrom;
   struct minimal_symbol *copyto;
@@ -859,8 +837,7 @@ compact_minimal_symbols (msymbol, mcount, objfile)
    attempts to demangle them if we later add more minimal symbols. */
 
 void
-install_minimal_symbols (objfile)
-     struct objfile *objfile;
+install_minimal_symbols (struct objfile *objfile)
 {
   register int bindex;
   register int mcount;
@@ -963,8 +940,7 @@ install_minimal_symbols (objfile)
 /* Sort all the minimal symbols in OBJFILE.  */
 
 void
-msymbols_sort (objfile)
-     struct objfile *objfile;
+msymbols_sort (struct objfile *objfile)
 {
   qsort (objfile->msymbols, objfile->minimal_symbol_count,
 	 sizeof (struct minimal_symbol), compare_minimal_symbols);
@@ -975,8 +951,7 @@ msymbols_sort (objfile)
    in a trampoline code stub.  */
 
 struct minimal_symbol *
-lookup_solib_trampoline_symbol_by_pc (pc)
-     CORE_ADDR pc;
+lookup_solib_trampoline_symbol_by_pc (CORE_ADDR pc)
 {
   struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (pc);
 
@@ -996,8 +971,7 @@ lookup_solib_trampoline_symbol_by_pc (pc)
    a duplicate function in case this matters someday.  */
 
 CORE_ADDR
-find_solib_trampoline_target (pc)
-     CORE_ADDR pc;
+find_solib_trampoline_target (CORE_ADDR pc)
 {
   struct objfile *objfile;
   struct minimal_symbol *msymbol;

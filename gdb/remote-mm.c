@@ -126,7 +126,7 @@ FILE *mm_stream;
 volatile int n_alarms;
 
 static void
-mm_timer ()
+mm_timer (void)
 {
 #if 0
   if (kiodebug)
@@ -148,10 +148,7 @@ static char *prog_name = NULL;
 /* This is called not only when we first attach, but also when the
    user types "run" after having attached.  */
 static void
-mm_create_inferior (execfile, args, env)
-     char *execfile;
-     char *args;
-     char **env;
+mm_create_inferior (char *execfile, char *args, char **env)
 {
 #define MAX_TOKENS 25
 #define BUFFER_SIZE 256
@@ -188,7 +185,7 @@ Assuming you are at NYU debuging a kernel, i.e., no need to download.\n\n");
 }
 /**************************************************** REMOTE_MOURN_INFERIOR */
 static void
-mm_mourn ()
+mm_mourn (void)
 {
   pop_target ();		/* Pop back to no-child state */
   generic_mourn_inferior ();
@@ -283,8 +280,7 @@ baudtab[] =
 };
 
 static int
-damn_b (rate)
-     int rate;
+damn_b (int rate)
 {
   int i;
 
@@ -305,9 +301,7 @@ damn_b (rate)
 static char *dev_name;
 int baudrate = 9600;
 static void
-mm_open (name, from_tty)
-     char *name;
-     int from_tty;
+mm_open (char *name, int from_tty)
 {
   TERMINAL sg;
   unsigned int prl;
@@ -457,8 +451,8 @@ mm_open (name, from_tty)
    Use this when you want to detach and do something else
    with your gdb.  */
 static void
-mm_close (quitting)		/*FIXME: how is quitting used */
-     int quitting;
+mm_close (			/*FIXME: how is quitting used */
+	   int quitting)
 {
   if (mm_desc < 0)
     error ("Can't close remote connection: not debugging remotely.");
@@ -492,9 +486,7 @@ mm_close (quitting)		/*FIXME: how is quitting used */
  * Upon exiting the process's execution is stopped.
  */
 static void
-mm_attach (args, from_tty)
-     char *args;
-     int from_tty;
+mm_attach (char *args, int from_tty)
 {
 
   if (!mm_stream)
@@ -522,9 +514,7 @@ mm_attach (args, from_tty)
    Use this when you want to detach and do something else
    with your gdb.  Leave remote process running (with no breakpoints set). */
 static void
-mm_detach (args, from_tty)
-     char *args;
-     int from_tty;
+mm_detach (char *args, int from_tty)
 {
   remove_breakpoints ();	/* Just in case there were any left in */
   out_msg_buf->go_msg.code = GO;
@@ -538,9 +528,7 @@ mm_detach (args, from_tty)
 ** Tell the remote machine to resume.  */
 
 static void
-mm_resume (pid, step, sig)
-     int pid, step;
-     enum target_signal sig;
+mm_resume (int pid, int step, enum target_signal sig)
 {
   if (sig != TARGET_SIGNAL_0)
     warning ("Can't send signals to a remote MiniMon system.");
@@ -565,8 +553,7 @@ mm_resume (pid, step, sig)
    storing status in STATUS just as `wait' would.  */
 
 static int
-mm_wait (status)
-     struct target_waitstatus *status;
+mm_wait (struct target_waitstatus *status)
 {
   int i, result;
   int old_timeout = timeout;
@@ -718,8 +705,7 @@ halted:
  * If regno==-1 then read all the registers.
  */
 static void
-mm_fetch_registers (regno)
-     int regno;
+mm_fetch_registers (int regno)
 {
   INT32 *data_p;
 
@@ -833,8 +819,7 @@ mm_fetch_registers (regno)
  */
 
 static void
-mm_store_registers (regno)
-     int regno;
+mm_store_registers (int regno)
 {
   int result;
 
@@ -972,15 +957,14 @@ mm_store_registers (regno)
    debugged.  */
 
 static void
-mm_prepare_to_store ()
+mm_prepare_to_store (void)
 {
   /* Do nothing, since we can store individual regs */
 }
 
 /******************************************************* REMOTE_XFER_MEMORY */
 static CORE_ADDR
-translate_addr (addr)
-     CORE_ADDR addr;
+translate_addr (CORE_ADDR addr)
 {
 #if defined(KERNEL_DEBUGGING)
   /* Check for a virtual address in the kernel */
@@ -1003,7 +987,7 @@ translate_addr (addr)
 
 /******************************************************* REMOTE_FILES_INFO */
 static void
-mm_files_info ()
+mm_files_info (void)
 {
   printf ("\tAttached to %s at %d baud and running program %s.\n",
 	  dev_name, baudrate, prog_name);
@@ -1011,9 +995,7 @@ mm_files_info ()
 
 /************************************************* REMOTE_INSERT_BREAKPOINT */
 static int
-mm_insert_breakpoint (addr, contents_cache)
-     CORE_ADDR addr;
-     char *contents_cache;
+mm_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   out_msg_buf->bkpt_set_msg.code = BKPT_SET;
   out_msg_buf->bkpt_set_msg.length = 4 * 4;
@@ -1034,9 +1016,7 @@ mm_insert_breakpoint (addr, contents_cache)
 
 /************************************************* REMOTE_DELETE_BREAKPOINT */
 static int
-mm_remove_breakpoint (addr, contents_cache)
-     CORE_ADDR addr;
-     char *contents_cache;
+mm_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   out_msg_buf->bkpt_rm_msg.code = BKPT_RM;
   out_msg_buf->bkpt_rm_msg.length = 4 * 3;
@@ -1056,9 +1036,7 @@ mm_remove_breakpoint (addr, contents_cache)
 
 /******************************************************* REMOTE_KILL */
 static void
-mm_kill (arg, from_tty)
-     char *arg;
-     int from_tty;
+mm_kill (char *arg, int from_tty)
 {
   char buf[4];
 
@@ -1097,9 +1075,7 @@ mm_kill (arg, from_tty)
  * Load a program into the target.
  */
 static void
-mm_load (arg_string, from_tty)
-     char *arg_string;
-     int from_tty;
+mm_load (char *arg_string, int from_tty)
 {
   dont_repeat ();
 
@@ -1127,10 +1103,7 @@ mm_load (arg_string, from_tty)
 ** Copy LEN bytes of data from debugger memory at MYADDR
    to inferior's memory at MEMADDR.  Returns number of bytes written.  */
 static int
-mm_write_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+mm_write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   int i, nwritten;
 
@@ -1166,10 +1139,7 @@ mm_write_inferior_memory (memaddr, myaddr, len)
 ** Read LEN bytes from inferior memory at MEMADDR.  Put the result
    at debugger address MYADDR.  Returns number of bytes read.  */
 static int
-mm_read_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+mm_read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   int i, nread;
 
@@ -1203,11 +1173,7 @@ mm_read_inferior_memory (memaddr, myaddr, len)
 
 /* FIXME!  Merge these two.  */
 static int
-mm_xfer_inferior_memory (memaddr, myaddr, len, write)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
+mm_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
 {
 
   memaddr = translate_addr (memaddr);
@@ -1232,8 +1198,7 @@ mm_xfer_inferior_memory (memaddr, myaddr, len, write)
 */
 
 int
-msg_send_serial (msg_ptr)
-     union msg_t *msg_ptr;
+msg_send_serial (union msg_t *msg_ptr)
 {
   INT32 message_size;
   int byte_count;
@@ -1269,8 +1234,7 @@ msg_send_serial (msg_ptr)
 */
 
 int
-msg_recv_serial (msg_ptr)
-     union msg_t *msg_ptr;
+msg_recv_serial (union msg_t *msg_ptr)
 {
   static INT32 length = 0;
   static INT32 byte_count = 0;
@@ -1339,7 +1303,7 @@ msg_recv_serial (msg_ptr)
 TERMINAL kbd_tbuf;
 
 int
-kbd_raw ()
+kbd_raw (void)
 {
   int result;
   TERMINAL tbuf;
@@ -1398,7 +1362,7 @@ kbd_raw ()
 */
 
 int
-kbd_restore ()
+kbd_restore (void)
 {
   int result;
 
@@ -1421,8 +1385,7 @@ kbd_restore ()
  * Returns 0/-1 on success/failure.  
  */
 static int
-fetch_register (regno)
-     int regno;
+fetch_register (int regno)
 {
   int result;
   out_msg_buf->read_req_msg.code = READ_REQ;
@@ -1481,8 +1444,7 @@ fetch_register (regno)
  * Returns 0/-1 on success/failure.  
  */
 static int
-store_register (regno)
-     int regno;
+store_register (int regno)
 {
   int result;
 
@@ -1548,8 +1510,7 @@ store_register (regno)
  * Convert a gdb special register number to a 29000 special register number.
  */
 static int
-regnum_to_srnum (regno)
-     int regno;
+regnum_to_srnum (int regno)
 {
   switch (regno)
     {
@@ -1616,10 +1577,8 @@ regnum_to_srnum (regno)
  * Initialize the target debugger (minimon only).
  */
 static void
-init_target_mm (tstart, tend, dstart, dend, entry, ms_size, rs_size, arg_start)
-     ADDR32 tstart, tend, dstart, dend, entry;
-     INT32 ms_size, rs_size;
-     ADDR32 arg_start;
+init_target_mm (ADDR32 tstart, ADDR32 tend, ADDR32 dstart, ADDR32 dend,
+		ADDR32 entry, INT32 ms_size, INT32 rs_size, ADDR32 arg_start)
 {
   out_msg_buf->init_msg.code = INIT;
   out_msg_buf->init_msg.length = sizeof (struct init_msg_t) - 2 * sizeof (INT32);
@@ -1641,8 +1600,7 @@ init_target_mm (tstart, tend, dstart, dend, entry, ms_size, rs_size, arg_start)
  * to be called with.
  */
 static char *
-msg_str (code)
-     INT32 code;
+msg_str (INT32 code)
 {
   static char cbuf[32];
 
@@ -1680,8 +1638,7 @@ msg_str (code)
  * Selected (not all of them) error codes that we might get.
  */
 static char *
-error_msg_str (code)
-     INT32 code;
+error_msg_str (INT32 code)
 {
   static char cbuf[50];
 
@@ -1780,8 +1737,7 @@ expect_msg (msgcode, msg_buf, from_tty)
  * FIXME: Doesn't know anything about I_CACHE/D_CACHE.
  */
 static int
-mm_memory_space (addr)
-     CORE_ADDR *addr;
+mm_memory_space (CORE_ADDR *addr)
 {
   ADDR32 tstart = target_config.I_mem_start;
   ADDR32 tend = tstart + target_config.I_mem_size;
@@ -1882,15 +1838,14 @@ init_mm_ops (void)
 };
 
 void
-_initialize_remote_mm ()
+_initialize_remote_mm (void)
 {
   init_mm_ops ();
   add_target (&mm_ops);
 }
 
 #ifdef NO_HIF_SUPPORT
-service_HIF (msg)
-     union msg_t *msg;
+service_HIF (union msg_t *msg)
 {
   return (0);			/* Emulate a failure */
 }

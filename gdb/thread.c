@@ -63,30 +63,45 @@ static void restore_current_thread (int);
 static void switch_to_thread (int pid);
 static void prune_threads (void);
 
+static void
+free_thread (struct thread_info *tp)
+{
+  /* NOTE: this will take care of any left-over step_resume breakpoints,
+     but not any user-specified thread-specific breakpoints. */
+  if (tp->step_resume_breakpoint)
+    delete_breakpoint (tp->step_resume_breakpoint);
+
+  /* FIXME: do I ever need to call the back-end to give it a
+     chance at this private data before deleting the thread?  */
+  if (tp->private)
+    free (tp->private);
+
+  free (tp);
+}
+
 void
-init_thread_list ()
+init_thread_list (void)
 {
   struct thread_info *tp, *tpnext;
 
+  highest_thread_num = 0;
   if (!thread_list)
     return;
 
   for (tp = thread_list; tp; tp = tpnext)
     {
       tpnext = tp->next;
-      free (tp);
+      free_thread (tp);
     }
 
   thread_list = NULL;
-  highest_thread_num = 0;
 }
 
 /* add_thread now returns a pointer to the new thread_info, 
    so that back_ends can initialize their private data.  */
 
 struct thread_info *
-add_thread (pid)
-     int pid;
+add_thread (int pid)
 {
   struct thread_info *tp;
 
@@ -115,8 +130,7 @@ add_thread (pid)
 }
 
 void
-delete_thread (pid)
-     int pid;
+delete_thread (int pid)
 {
   struct thread_info *tp, *tpprev;
 
@@ -134,24 +148,11 @@ delete_thread (pid)
   else
     thread_list = tp->next;
 
-  /* NOTE: this will take care of any left-over step_resume breakpoints,
-     but not any user-specified thread-specific breakpoints. */
-  if (tp->step_resume_breakpoint)
-    delete_breakpoint (tp->step_resume_breakpoint);
-
-  /* FIXME: do I ever need to call the back-end to give it a
-     chance at this private data before deleting the thread?  */
-  if (tp->private)
-    free (tp->private);
-
-  free (tp);
-
-  return;
+  free_thread (tp);
 }
 
 static struct thread_info *
-find_thread_id (num)
-     int num;
+find_thread_id (int num)
 {
   struct thread_info *tp;
 
@@ -164,8 +165,7 @@ find_thread_id (num)
 
 /* Find a thread_info by matching 'pid'.  */
 struct thread_info *
-find_thread_pid (pid)
-     int pid;
+find_thread_pid (int pid)
 {
   struct thread_info *tp;
 
@@ -205,8 +205,7 @@ iterate_over_threads (callback, data)
 }
 
 int
-valid_thread_id (num)
-     int num;
+valid_thread_id (int num)
 {
   struct thread_info *tp;
 
@@ -218,8 +217,7 @@ valid_thread_id (num)
 }
 
 int
-pid_to_thread_id (pid)
-     int pid;
+pid_to_thread_id (int pid)
 {
   struct thread_info *tp;
 
@@ -231,8 +229,7 @@ pid_to_thread_id (pid)
 }
 
 int
-thread_id_to_pid (num)
-     int num;
+thread_id_to_pid (int num)
 {
   struct thread_info *thread = find_thread_id (num);
   if (thread)
@@ -242,8 +239,7 @@ thread_id_to_pid (num)
 }
 
 int
-in_thread_list (pid)
-     int pid;
+in_thread_list (int pid)
 {
   struct thread_info *tp;
 
@@ -288,29 +284,15 @@ gdb_list_thread_ids (/* output object */)
 /* Load infrun state for the thread PID.  */
 
 void
-load_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
-		   trap_expected, step_resume_breakpoint,
-		   through_sigtramp_breakpoint, step_range_start,
-		   step_range_end, step_frame_address,
-		   handling_longjmp, another_trap,
-		   stepping_through_solib_after_catch,
-		   stepping_through_solib_catchpoints,
-		   stepping_through_sigtramp)
-     int pid;
-     CORE_ADDR *prev_pc;
-     CORE_ADDR *prev_func_start;
-     char **prev_func_name;
-     int *trap_expected;
-     struct breakpoint **step_resume_breakpoint;
-     struct breakpoint **through_sigtramp_breakpoint;
-     CORE_ADDR *step_range_start;
-     CORE_ADDR *step_range_end;
-     CORE_ADDR *step_frame_address;
-     int *handling_longjmp;
-     int *another_trap;
-     int *stepping_through_solib_after_catch;
-     bpstat *stepping_through_solib_catchpoints;
-     int *stepping_through_sigtramp;
+load_infrun_state (int pid, CORE_ADDR *prev_pc, CORE_ADDR *prev_func_start,
+		   char **prev_func_name, int *trap_expected,
+		   struct breakpoint **step_resume_breakpoint,
+		   struct breakpoint **through_sigtramp_breakpoint,
+		   CORE_ADDR *step_range_start, CORE_ADDR *step_range_end,
+		   CORE_ADDR *step_frame_address, int *handling_longjmp,
+		   int *another_trap, int *stepping_through_solib_after_catch,
+		   bpstat *stepping_through_solib_catchpoints,
+		   int *stepping_through_sigtramp)
 {
   struct thread_info *tp;
 
@@ -339,29 +321,15 @@ load_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
 /* Save infrun state for the thread PID.  */
 
 void
-save_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
-		   trap_expected, step_resume_breakpoint,
-		   through_sigtramp_breakpoint, step_range_start,
-		   step_range_end, step_frame_address,
-		   handling_longjmp, another_trap,
-		   stepping_through_solib_after_catch,
-		   stepping_through_solib_catchpoints,
-		   stepping_through_sigtramp)
-     int pid;
-     CORE_ADDR prev_pc;
-     CORE_ADDR prev_func_start;
-     char *prev_func_name;
-     int trap_expected;
-     struct breakpoint *step_resume_breakpoint;
-     struct breakpoint *through_sigtramp_breakpoint;
-     CORE_ADDR step_range_start;
-     CORE_ADDR step_range_end;
-     CORE_ADDR step_frame_address;
-     int handling_longjmp;
-     int another_trap;
-     int stepping_through_solib_after_catch;
-     bpstat stepping_through_solib_catchpoints;
-     int stepping_through_sigtramp;
+save_infrun_state (int pid, CORE_ADDR prev_pc, CORE_ADDR prev_func_start,
+		   char *prev_func_name, int trap_expected,
+		   struct breakpoint *step_resume_breakpoint,
+		   struct breakpoint *through_sigtramp_breakpoint,
+		   CORE_ADDR step_range_start, CORE_ADDR step_range_end,
+		   CORE_ADDR step_frame_address, int handling_longjmp,
+		   int another_trap, int stepping_through_solib_after_catch,
+		   bpstat stepping_through_solib_catchpoints,
+		   int stepping_through_sigtramp)
 {
   struct thread_info *tp;
 
@@ -389,8 +357,7 @@ save_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
 
 /* Return true if TP is an active thread. */
 static int
-thread_alive (tp)
-     struct thread_info *tp;
+thread_alive (struct thread_info *tp)
 {
   if (tp->pid == -1)
     return 0;
@@ -403,7 +370,7 @@ thread_alive (tp)
 }
 
 static void
-prune_threads ()
+prune_threads (void)
 {
   struct thread_info *tp, *next;
 
@@ -423,9 +390,7 @@ prune_threads ()
  */
 
 static void
-info_threads_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+info_threads_command (char *arg, int from_tty)
 {
   struct thread_info *tp;
   int current_pid;
@@ -495,8 +460,7 @@ info_threads_command (arg, from_tty)
 /* Switch from one thread to another. */
 
 static void
-switch_to_thread (pid)
-     int pid;
+switch_to_thread (int pid)
 {
   if (pid == inferior_pid)
     return;
@@ -509,14 +473,35 @@ switch_to_thread (pid)
 }
 
 static void
-restore_current_thread (pid)
-     int pid;
+restore_current_thread (int pid)
 {
   if (pid != inferior_pid)
     {
       switch_to_thread (pid);
       print_stack_frame (get_current_frame (), 0, -1);
     }
+}
+
+struct current_thread_cleanup
+{
+  int inferior_pid;
+};
+
+static void
+do_restore_current_thread_cleanup (void *arg)
+{
+  struct current_thread_cleanup *old = arg;
+  restore_current_thread (old->inferior_pid);
+  free (old);
+}
+
+static struct cleanup *
+make_cleanup_restore_current_thread (int inferior_pid)
+{
+  struct current_thread_cleanup *old
+    = xmalloc (sizeof (struct current_thread_cleanup));
+  old->inferior_pid = inferior_pid;
+  return make_cleanup (do_restore_current_thread_cleanup, old);
 }
 
 /* Apply a GDB command to a list of threads.  List syntax is a whitespace
@@ -529,9 +514,7 @@ restore_current_thread (pid)
  */
 
 static void
-thread_apply_all_command (cmd, from_tty)
-     char *cmd;
-     int from_tty;
+thread_apply_all_command (char *cmd, int from_tty)
 {
   struct thread_info *tp;
   struct cleanup *old_chain;
@@ -539,8 +522,11 @@ thread_apply_all_command (cmd, from_tty)
   if (cmd == NULL || *cmd == '\000')
     error ("Please specify a command following the thread ID list");
 
-  old_chain = make_cleanup ((make_cleanup_func) restore_current_thread,
-			    (void *) inferior_pid);
+  old_chain = make_cleanup_restore_current_thread (inferior_pid);
+
+  /* It is safe to update the thread list now, before
+     traversing it for "thread apply all".  MVS */
+  target_find_new_threads ();
 
   for (tp = thread_list; tp; tp = tp->next)
     if (thread_alive (tp))
@@ -556,12 +542,12 @@ thread_apply_all_command (cmd, from_tty)
 #endif
 	execute_command (cmd, from_tty);
       }
+
+  do_cleanups (old_chain);
 }
 
 static void
-thread_apply_command (tidlist, from_tty)
-     char *tidlist;
-     int from_tty;
+thread_apply_command (char *tidlist, int from_tty)
 {
   char *cmd;
   char *p;
@@ -575,8 +561,7 @@ thread_apply_command (tidlist, from_tty)
   if (*cmd == '\000')
     error ("Please specify a command following the thread ID list");
 
-  old_chain = make_cleanup ((make_cleanup_func) restore_current_thread,
-			    (void *) inferior_pid);
+  old_chain = make_cleanup_restore_current_thread (inferior_pid);
 
   while (tidlist < cmd)
     {
@@ -627,15 +612,15 @@ thread_apply_command (tidlist, from_tty)
 	    }
 	}
     }
+
+  do_cleanups (old_chain);
 }
 
 /* Switch to the specified thread.  Will dispatch off to thread_apply_command
    if prefix of arg is `apply'.  */
 
 static void
-thread_command (tidstr, from_tty)
-     char *tidstr;
-     int from_tty;
+thread_command (char *tidstr, int from_tty)
 {
   if (!tidstr)
     {
@@ -717,7 +702,7 @@ gdb_thread_select (char *tidstr)
 struct cmd_list_element *thread_cmd_list = NULL;
 
 void
-_initialize_thread ()
+_initialize_thread (void)
 {
   static struct cmd_list_element *thread_apply_list = NULL;
 

@@ -120,7 +120,7 @@ gdb_has_a_terminal_flag = have_not_checked;
 
 /* Does GDB have a terminal (on stdin)?  */
 int
-gdb_has_a_terminal ()
+gdb_has_a_terminal (void)
 {
   switch (gdb_has_a_terminal_flag)
     {
@@ -178,8 +178,7 @@ static void terminal_ours_1 (int);
    before we actually run the inferior.  */
 
 void
-terminal_init_inferior_with_pgrp (pgrp)
-     int pgrp;
+terminal_init_inferior_with_pgrp (int pgrp)
 {
   if (gdb_has_a_terminal ())
     {
@@ -201,7 +200,7 @@ terminal_init_inferior_with_pgrp (pgrp)
 }
 
 void
-terminal_init_inferior ()
+terminal_init_inferior (void)
 {
 #ifdef PROCESS_GROUP_TYPE
   /* This is for Lynx, and should be cleaned up by having Lynx be a separate
@@ -218,7 +217,7 @@ terminal_init_inferior ()
    This is preparation for starting or resuming the inferior.  */
 
 void
-terminal_inferior ()
+terminal_inferior (void)
 {
   if (gdb_has_a_terminal () && terminal_is_ours
       && inferior_thisrun_terminal == 0)
@@ -288,7 +287,7 @@ terminal_inferior ()
    should be called to get back to a normal state of affairs.  */
 
 void
-terminal_ours_for_output ()
+terminal_ours_for_output (void)
 {
   terminal_ours_1 (1);
 }
@@ -298,7 +297,7 @@ terminal_ours_for_output ()
    so they can be restored properly later.  */
 
 void
-terminal_ours ()
+terminal_ours (void)
 {
   terminal_ours_1 (0);
 }
@@ -308,8 +307,7 @@ terminal_ours ()
    flags.  */
 
 static void
-terminal_ours_1 (output_only)
-     int output_only;
+terminal_ours_1 (int output_only)
 {
   /* Checking inferior_thisrun_terminal is necessary so that
      if GDB is running in the background, it won't block trying
@@ -411,18 +409,14 @@ terminal_ours_1 (output_only)
 
 /* ARGSUSED */
 void
-term_info (arg, from_tty)
-     char *arg;
-     int from_tty;
+term_info (char *arg, int from_tty)
 {
   target_terminal_info (arg, from_tty);
 }
 
 /* ARGSUSED */
 void
-child_terminal_info (args, from_tty)
-     char *args;
-     int from_tty;
+child_terminal_info (char *args, int from_tty)
 {
   if (!gdb_has_a_terminal ())
     {
@@ -506,8 +500,7 @@ child_terminal_info (args, from_tty)
    the terminal specified in the NEW_TTY_PREFORK call.  */
 
 void
-new_tty_prefork (ttyname)
-     char *ttyname;
+new_tty_prefork (char *ttyname)
 {
   /* Save the name for later, for determining whether we and the child
      are sharing a tty.  */
@@ -515,7 +508,7 @@ new_tty_prefork (ttyname)
 }
 
 void
-new_tty ()
+new_tty (void)
 {
   register int tty;
 
@@ -576,9 +569,7 @@ new_tty ()
 
 /* ARGSUSED */
 static void
-kill_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+kill_command (char *arg, int from_tty)
 {
   /* FIXME:  This should not really be inferior_pid (or target_has_execution).
      It should be a distinct flag that indicates that a target is active, cuz
@@ -609,8 +600,7 @@ kill_command (arg, from_tty)
 
 /* ARGSUSED */
 static void
-pass_signal (signo)
-     int signo;
+pass_signal (int signo)
 {
 #ifndef _WIN32
   kill (PIDGET (inferior_pid), SIGINT);
@@ -620,7 +610,7 @@ pass_signal (signo)
 static void (*osig) ();
 
 void
-set_sigint_trap ()
+set_sigint_trap (void)
 {
   if (attach_flag || inferior_thisrun_terminal)
     {
@@ -629,7 +619,7 @@ set_sigint_trap ()
 }
 
 void
-clear_sigint_trap ()
+clear_sigint_trap (void)
 {
   if (attach_flag || inferior_thisrun_terminal)
     {
@@ -641,8 +631,7 @@ clear_sigint_trap ()
 static void (*old_sigio) ();
 
 static void
-handle_sigio (signo)
-     int signo;
+handle_sigio (int signo)
 {
   int numfds;
   fd_set readfds;
@@ -664,7 +653,7 @@ handle_sigio (signo)
 static int old_fcntl_flags;
 
 void
-set_sigio_trap ()
+set_sigio_trap (void)
 {
   if (target_activity_function)
     {
@@ -676,7 +665,7 @@ set_sigio_trap ()
 }
 
 void
-clear_sigio_trap ()
+clear_sigio_trap (void)
 {
   if (target_activity_function)
     {
@@ -686,14 +675,14 @@ clear_sigio_trap ()
 }
 #else /* No SIGIO.  */
 void
-set_sigio_trap ()
+set_sigio_trap (void)
 {
   if (target_activity_function)
     abort ();
 }
 
 void
-clear_sigio_trap ()
+clear_sigio_trap (void)
 {
   if (target_activity_function)
     abort ();
@@ -711,7 +700,7 @@ clear_sigio_trap ()
    calls setpgrp and a setpgrp which does nothing (any system with job control
    will have one or the other).  */
 int
-gdb_setpgid ()
+gdb_setpgid (void)
 {
   int retval = 0;
 
@@ -736,7 +725,7 @@ gdb_setpgid ()
 }
 
 void
-_initialize_inflow ()
+_initialize_inflow (void)
 {
   add_info ("terminal", term_info,
 	    "Print inferior's saved terminal status.");

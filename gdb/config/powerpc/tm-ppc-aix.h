@@ -24,23 +24,4 @@
 /* Use generic RS6000 definitions. */
 #include "rs6000/tm-rs6000.h"
 
-#define GDB_TARGET_POWERPC
-
-#undef PUSH_DUMMY_FRAME
-#define PUSH_DUMMY_FRAME             generic_push_dummy_frame ()
-
-#define PUSH_RETURN_ADDRESS(PC, SP)      ppc_push_return_address (PC, SP)
-
-/* override the standard get_saved_register function with 
-   one that takes account of generic CALL_DUMMY frames */
-#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
-      generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
-
-#define USE_GENERIC_DUMMY_FRAMES 1
-#define CALL_DUMMY_BREAKPOINT_OFFSET (0)
-#define CALL_DUMMY_LOCATION          AT_ENTRY_POINT
-#define CALL_DUMMY_ADDRESS()         entry_point_address ()
-#undef CALL_DUMMY_START_OFFSET
-#define CALL_DUMMY_START_OFFSET      0
-
 #endif /* TM_PPC_AIX_H */

@@ -2324,7 +2324,7 @@ all breakpoint in that range are operated on.
 @cindex latest breakpoint
 Breakpoints are set with the @code{break} command (abbreviated
 @code{b}).  The debugger convenience variable @samp{$bpnum} records the
-number of the breakpoints you've set most recently; see @ref{Convenience
+number of the breakpoint you've set most recently; see @ref{Convenience
 Vars,, Convenience variables}, for a discussion of what you can do with
 convenience variables.
 
