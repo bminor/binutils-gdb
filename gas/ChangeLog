@@ -1,9 +1,15 @@
+2000-12-01  Chris Demetriou  <cgd@sibyte.com>
+
+        * config/tc-mips.c (mips_ip): When calculating offsets,
+        don't accept as constant the difference between the
+        addresses of symbols in two different sections.
+
 2000-12-01      Joel Sherrill <joel@OARcorp.com>
 
-        * configure.in (arm-*-rtems*, a29k-*rtems*, h8300-*-rtems*):
-        New targets.
-        (sparc*-*-rtemself*, sparc*-*-rtemsaout*): New targets.
-        (sparc*-*-rtems*): Switched from a.out to ELF.
+	* configure.in (arm-*-rtems*, a29k-*rtems*, h8300-*-rtems*):
+	New targets.
+	(sparc*-*-rtemself*, sparc*-*-rtemsaout*): New targets.
+	(sparc*-*-rtems*): Switched from a.out to ELF.
 	* configure: Regenerate.
 	* config.in: Regenerate.
 	* Makefile.in: Regenerate.

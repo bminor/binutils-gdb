@@ -7873,8 +7873,8 @@ mips_ip (str, ip)
 		      || offset_expr.X_add_number < -0x8000)
 		  && (mips_pic != EMBEDDED_PIC
 		      || offset_expr.X_op != O_subtract
-		      || (S_GET_SEGMENT (offset_expr.X_op_symbol)
-			  != now_seg)))
+		      || (S_GET_SEGMENT (offset_expr.X_add_symbol)
+			  != S_GET_SEGMENT (offset_expr.X_op_symbol))))
 		break;
 
 	      if (c == 'h' || c == 'H')
