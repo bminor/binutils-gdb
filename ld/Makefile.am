@@ -297,6 +297,9 @@ eelf32b4300.c: $(srcdir)/emulparams/elf32b4300.sh \
 eelf32bmip.c: $(srcdir)/emulparams/elf32bmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32bmip "$(tdir_elf32bmip)"
+eelf32bsmip.c: $(srcdir)/emulparams/elf32bsmip.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32bsmip "$(tdir_elf32bsmip)"
 eelf32ebmip.c: $(srcdir)/emulparams/elf32ebmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ebmip "$(tdir_elf32ebmip)"
@@ -312,6 +315,9 @@ eelf32lmip.c: $(srcdir)/emulparams/elf32lmip.sh \
 eelf32lppc.c: $(srcdir)/emulparams/elf32lppc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfppc.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lppc "$(tdir_elf32lppc)"
+eelf32lsmip.c: $(srcdir)/emulparams/elf32lsmip.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32lsmip "$(tdir_elf32lsmip)"
 eelf32ppc.c: $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfppc.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppc "$(tdir_elf32ppc)"

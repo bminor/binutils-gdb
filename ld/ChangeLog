@@ -1,3 +1,8 @@
+Fri Jan 30 11:43:49 1998  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* Makefile.am (eelf32bsmip.c, eelf32lsmip.c): New targets.
+	* Makefile.in: Rebuild.
+
 Thu Jan 29 16:04:21 1998  Mumit Khan  <khan@xraylith.wisc.edu>
 
 	* ldfile.c (slash): Set to backslash if _WIN32 but not
