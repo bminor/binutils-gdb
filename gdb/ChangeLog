@@ -1,5 +1,13 @@
 Fri Mar  3 15:12:12 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* hpread.c (hpread_record_lines): New argument "offset".  All
+	callers changed.  Use it to handle dynamic address relocation.
+	(hpread_build_psymtabs): Adjust texthigh as we read each function
+	debug symbol.  Fix computation of texthigh.
+	(hpread_read_subrange_type): Work around macro bugs in HP's
+	compilers.
+	(hpread_process_one_debug_symbol): Correctly map source lines.
+
 	* somread.c (check_strange_names): Filter names emitted by the HP
 	compiler when generating PIC code.
 
