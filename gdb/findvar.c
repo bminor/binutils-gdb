@@ -60,7 +60,7 @@ That operation is not available on integers of more than %d bytes.",
   p = endaddr - 1;
 #endif
   /* Do the sign extension once at the start.  */
-  retval = (*p ^ 0x80) - 0x80;
+  retval = ((LONGEST)*p ^ 0x80) - 0x80;
 #if TARGET_BYTE_ORDER == BIG_ENDIAN
   for (++p; p < endaddr; ++p)
 #else
@@ -466,7 +466,8 @@ read_register (regno)
 
 void
 write_register (regno, val)
-     int regno, val;
+     int regno;
+     long val;
 {
   PTR buf;
   int size;
@@ -697,7 +698,7 @@ value_from_register (type, regnum, frame)
       int mem_stor = 0, reg_stor = 0;
       int mem_tracking = 1;
       CORE_ADDR last_addr = 0;
-      CORE_ADDR first_addr;
+      CORE_ADDR first_addr = 0;
 
       value_bytes = (char *) alloca (len + MAX_REGISTER_RAW_SIZE);
 

@@ -136,13 +136,16 @@ print_section_table (abfd, asect, ignore)
   flags = bfd_get_section_flags (abfd, asect);
 
   printf_filtered ("    %s",
-		   local_hex_string_custom (bfd_section_vma (abfd, asect),
-					    "08"));
+		   local_hex_string_custom
+		     ((unsigned long) bfd_section_vma (abfd, asect), "08l"));
   printf_filtered ("->%s",
-		   local_hex_string_custom ((bfd_section_vma (abfd, asect)
-					     + bfd_section_size (abfd, asect)),
-					    "08"));
-  printf_filtered (" at %s", local_hex_string_custom (asect->filepos, "08"));
+		   local_hex_string_custom
+		     ((unsigned long) (bfd_section_vma (abfd, asect)
+				       + bfd_section_size (abfd, asect)),
+		      "08l"));
+  printf_filtered (" at %s",
+		   local_hex_string_custom
+		     ((unsigned long) asect->filepos, "08l"));
   printf_filtered (": %s", bfd_section_name (abfd, asect));
 
   if (flags & SEC_ALLOC)

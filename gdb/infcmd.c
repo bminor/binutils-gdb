@@ -394,6 +394,10 @@ which has no line number information.\n", name);
       proceed ((CORE_ADDR) -1, -1, 1);
       if (! stop_step)
 	break;
+
+      /* FIXME: On nexti, this may have already been done (when we hit the
+	 step resume break, I think).  Probably this should be moved to
+	 wait_for_inferior (near the top).  */
 #if defined (SHIFT_INST_REGS)
       SHIFT_INST_REGS();
 #endif
@@ -448,10 +452,11 @@ jump_command (arg, from_tty)
 	}
     }
 
-  addr = ADDR_BITS_SET (sal.pc);
+  addr = sal.pc;
 
   if (from_tty)
-    printf_filtered ("Continuing at %s.\n", local_hex_string(addr));
+    printf_filtered ("Continuing at %s.\n",
+		     local_hex_string((unsigned long) addr));
 
   clear_proceed_status ();
   proceed (addr, 0, 0);
@@ -746,7 +751,8 @@ program_info (args, from_tty)
     }
 
   target_files_info ();
-  printf_filtered ("Program stopped at %s.\n", local_hex_string(stop_pc));
+  printf_filtered ("Program stopped at %s.\n",
+		   local_hex_string((unsigned long) stop_pc));
   if (stop_step)
     printf_filtered ("It stopped after being stepped.\n");
   else if (num != 0)

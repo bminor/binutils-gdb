@@ -87,7 +87,7 @@ add_to_objfile_sections (abfd, asect, objfile_p_char)
   section.addr = bfd_section_vma (abfd, asect);
   section.endaddr = section.addr + bfd_section_size (abfd, asect);
   obstack_grow (&objfile->psymbol_obstack, &section, sizeof(section));
-  objfile->sections_end = (struct obj_section *) (((int) objfile->sections_end) + 1);
+  objfile->sections_end = (struct obj_section *) (((unsigned long) objfile->sections_end) + 1);
 }
 
 /* Builds a section table for OBJFILE.
@@ -104,7 +104,7 @@ build_objfile_section_table (objfile)
   bfd_map_over_sections (objfile->obfd, add_to_objfile_sections, (char *)objfile);
   objfile->sections = (struct obj_section *)
     obstack_finish (&objfile->psymbol_obstack);
-  objfile->sections_end = objfile->sections + (int) objfile->sections_end;
+  objfile->sections_end = objfile->sections + (unsigned long) objfile->sections_end;
   return(0);
 }
 

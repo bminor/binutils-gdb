@@ -732,11 +732,13 @@ print_section_info (t, abfd)
   printf_filtered ("file type %s.\n", bfd_get_target(abfd));
 
   for (p = t->to_sections; p < t->to_sections_end; p++) {
-    printf_filtered ("\t%s", local_hex_string_custom (p->addr, "08"));
-    printf_filtered (" - %s", local_hex_string_custom (p->endaddr, "08"));
+    printf_filtered ("\t%s",
+		     local_hex_string_custom ((unsigned long) p->addr, "08l"));
+    printf_filtered (" - %s",
+		     local_hex_string_custom ((unsigned long) p->endaddr, "08l"));
     if (info_verbose)
       printf_filtered (" @ %s",
-		       local_hex_string_custom (p->sec_ptr->filepos, "08"));
+		       local_hex_string_custom ((unsigned long) p->sec_ptr->filepos, "08l"));
     printf_filtered (" is %s", bfd_section_name (p->bfd, p->sec_ptr));
     if (p->bfd != abfd) {
       printf_filtered (" in %s", bfd_get_filename (p->bfd));

@@ -972,7 +972,8 @@ find_pc_symtab (pc)
 	   will cause a core dump), but maybe we can successfully
 	   continue, so let's not.  */
 	warning ("\
-(Internal error: pc 0x%x in read in psymtab, but not in symtab.)\n", pc);
+(Internal error: pc 0x%lx in read in psymtab, but not in symtab.)\n",
+	         (unsigned long) pc);
       s = PSYMTAB_TO_SYMTAB (ps);
     }
   return (s);
@@ -2585,8 +2586,8 @@ list_symbols (regexp, class, bpt)
 			      printf_filtered ("\nNon-debugging symbols:\n");
 			      found_in_file = 1;
 			    }
-			  printf_filtered ("	%08x  %s\n",
-					   SYMBOL_VALUE_ADDRESS (msymbol),
+			  printf_filtered ("	%08lx  %s\n",
+					   (unsigned long) SYMBOL_VALUE_ADDRESS (msymbol),
 					   SYMBOL_SOURCE_NAME (msymbol));
 			}
 		    }

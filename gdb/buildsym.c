@@ -62,7 +62,7 @@ struct complaint innerblock_anon_complaint =
   {"inner block not inside outer block", 0, 0};
 
 struct complaint blockvector_complaint = 
-  {"block at 0x%x out of order", 0, 0};
+  {"block at 0x%lx out of order", 0, 0};
 
 
 /* maintain the lists of symbols and blocks */
@@ -348,7 +348,7 @@ make_blockvector (objfile)
 	      > BLOCK_START(BLOCKVECTOR_BLOCK (blockvector, i)))
 	    {
 	      complain (&blockvector_complaint, 
-			BLOCK_START(BLOCKVECTOR_BLOCK (blockvector, i)));
+			(unsigned long) BLOCK_START(BLOCKVECTOR_BLOCK (blockvector, i)));
 	    }
 	}
     }

@@ -329,16 +329,10 @@ local_hex_format_custom PARAMS ((char *));	/* language.c */
    the next call.  Takes printf options like "08" or "l".  */
 
 extern char *
-local_octal_string PARAMS ((int));		/* language.c */
+local_hex_string PARAMS ((unsigned long));		/* language.c */
 
 extern char *
-local_octal_string_custom PARAMS ((int, char *));/* language.c */
-
-extern char *
-local_hex_string PARAMS ((int));		/* language.c */
-
-extern char *
-local_hex_string_custom PARAMS ((int, char *));	/* language.c */
+local_hex_string_custom PARAMS ((unsigned long, char *)); /* language.c */
 
 /* Type predicates */
 

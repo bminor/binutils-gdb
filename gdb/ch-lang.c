@@ -304,9 +304,9 @@ const struct language_defn chill_language_defn = {
   &BUILTIN_TYPE_UNSIGNED_LONGEST,/* longest unsigned integral type */
   &builtin_type_chill_real,	/* longest floating point type */
   {"",      "B'",  "",   ""},	/* Binary format info */
-  {"O'%o",  "O'",  "o",  ""},	/* Octal format info */
-  {"D'%d",  "D'",  "d",  ""},	/* Decimal format info */
-  {"H'%x",  "H'",  "x",  ""},	/* Hex format info */
+  {"O'%lo",  "O'",  "o",  ""},	/* Octal format info */
+  {"D'%ld",  "D'",  "d",  ""},	/* Decimal format info */
+  {"H'%lx",  "H'",  "x",  ""},	/* Hex format info */
   chill_op_print_tab,		/* expression operators for printing */
   LANG_MAGIC
 };

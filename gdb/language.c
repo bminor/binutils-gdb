@@ -491,7 +491,7 @@ local_hex_format_custom(pre)
    string.  Returns a pointer to this string. */
 char *
 local_hex_string (num)
-   int num;
+   unsigned long num;
 {
    static char res[50];
 
@@ -503,7 +503,7 @@ local_hex_string (num)
    string.  Returns a pointer to this string. */
 char *
 local_hex_string_custom(num,pre)
-   int num;
+   unsigned long num;
    char *pre;
 {
    static char res[50];
@@ -1215,9 +1215,9 @@ const struct language_defn unknown_language_defn = {
   &builtin_type_error,		/* longest unsigned integral type */
   &builtin_type_error,		/* longest floating point type */
   {"",      "",    "",   ""},	/* Binary format info */
-  {"0%o",   "0",   "o",  ""},	/* Octal format info */
-  {"%d",    "",    "d",  ""},	/* Decimal format info */
-  {"0x%x",  "0x",  "x",  ""},	/* Hex format info */
+  {"0%lo",   "0",   "o",  ""},	/* Octal format info */
+  {"%ld",    "",    "d",  ""},	/* Decimal format info */
+  {"0x%lx",  "0x",  "x",  ""},	/* Hex format info */
   unk_op_print_tab,		/* expression operators for printing */
   LANG_MAGIC
 };
@@ -1240,9 +1240,9 @@ const struct language_defn auto_language_defn = {
   &builtin_type_error,		/* longest unsigned integral type */
   &builtin_type_error,		/* longest floating point type */
   {"",      "",    "",   ""},	/* Binary format info */
-  {"0%o",   "0",   "o",  ""},	/* Octal format info */
-  {"%d",    "",    "d",  ""},	/* Decimal format info */
-  {"0x%x",  "0x",  "x",  ""},	/* Hex format info */
+  {"0%lo",   "0",   "o",  ""},	/* Octal format info */
+  {"%ld",    "",    "d",  ""},	/* Decimal format info */
+  {"0x%lx",  "0x",  "x",  ""},	/* Hex format info */
   unk_op_print_tab,		/* expression operators for printing */
   LANG_MAGIC
 };
@@ -1264,9 +1264,9 @@ const struct language_defn local_language_defn = {
   &builtin_type_error,		/* longest unsigned integral type */
   &builtin_type_error,		/* longest floating point type */
   {"",      "",    "",   ""},	/* Binary format info */
-  {"0%o",   "0",   "o",  ""},	/* Octal format info */
-  {"%d",    "",    "d",  ""},	/* Decimal format info */
-  {"0x%x",  "0x",  "x",  ""},	/* Hex format info */
+  {"0%lo",   "0",   "o",  ""},	/* Octal format info */
+  {"%ld",    "",    "d",  ""},	/* Decimal format info */
+  {"0x%lx",  "0x",  "x",  ""},	/* Hex format info */
   unk_op_print_tab,		/* expression operators for printing */
   LANG_MAGIC
 };

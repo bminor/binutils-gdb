@@ -240,8 +240,10 @@ struct type
       /* Size of this field, in bits, or zero if not packed.
 	 For an unpacked field, the field's type's length
 	 says how many bytes the field occupies.  */
+      /* FIXME: This is abused by TYPE_FIELD_STATIC_PHYSNAME to contain 
+	 a pointer, so it has to be long.  */
 
-      int bitsize;
+      long bitsize;
 
       /* In a struct or enum type, type of this field.
 	 In a function type, type of this argument.

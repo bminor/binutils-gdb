@@ -571,7 +571,7 @@ vx_run_files_info ()
 {
   printf ("\tRunning %s VxWorks process %s", 
 	  vx_running? "child": "attached",
-	  local_hex_string(inferior_pid));
+	  local_hex_string((unsigned long) inferior_pid));
   if (vx_running)
     printf (", function `%s'", vx_running);
   printf(".\n");
@@ -908,7 +908,8 @@ vx_wait (status)
 	  sleep_ms (200);	/* FIXME Don't kill the network too badly */
 	}
       else if (pid != inferior_pid)
-	fatal ("Bad pid for debugged task: %s\n", local_hex_string(pid));
+	fatal ("Bad pid for debugged task: %s\n",
+	       local_hex_string((unsigned long) pid));
     } while (pid == 0);
 
   /* FIXME, eventually do more then SIGTRAP on everything...  */
@@ -1102,7 +1103,8 @@ vx_attach (args, from_tty)
     error ("Invalid process-id -- give a single number in decimal or 0xhex");
 
   if (from_tty)
-      printf ("Attaching pid %s.\n", local_hex_string(pid));
+      printf ("Attaching pid %s.\n",
+	      local_hex_string((unsigned long) pid));
 
   memset ((char *)&ptrace_in,  '\0', sizeof (ptrace_in));
   memset ((char *)&ptrace_out, '\0', sizeof (ptrace_out));
@@ -1147,7 +1149,8 @@ vx_detach (args, from_tty)
     error ("Argument given to VxWorks \"detach\".");
 
   if (from_tty)
-      printf ("Detaching pid %s.\n", local_hex_string(inferior_pid));
+      printf ("Detaching pid %s.\n",
+	      local_hex_string((unsigned long) inferior_pid));
 
   if (args)		/* FIXME, should be possible to leave suspended */
     signal = atoi (args);
@@ -1178,7 +1181,7 @@ vx_kill ()
   Ptrace_return ptrace_out;
   int status;
 
-  printf ("Killing pid %s.\n", local_hex_string(inferior_pid));
+  printf ("Killing pid %s.\n", local_hex_string((unsigned long) inferior_pid));
 
   memset ((char *)&ptrace_in,  '\0', sizeof (ptrace_in));
   memset ((char *)&ptrace_out, '\0', sizeof (ptrace_out));

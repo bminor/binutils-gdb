@@ -140,12 +140,14 @@ memory_error (status, memaddr)
     {
       /* Actually, address between memaddr and memaddr + len
 	 was out of bounds. */
-      error ("Cannot access memory at address %s.", local_hex_string(memaddr));
+      error ("Cannot access memory at address %s.",
+	     local_hex_string((unsigned long) memaddr));
     }
   else
     {
       error ("Error accessing memory address %s: %s.",
-	     local_hex_string (memaddr), safe_strerror (status));
+	     local_hex_string ((unsigned long) memaddr),
+	     safe_strerror (status));
     }
 }
 

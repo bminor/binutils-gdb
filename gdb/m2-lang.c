@@ -409,9 +409,9 @@ const struct language_defn m2_language_defn = {
   &builtin_type_m2_card,	/* longest unsigned integral type */
   &builtin_type_m2_real,	/* longest floating point type */
   {"",      "",   "",   ""},	/* Binary format info */
-  {"%oB",   "",   "o",  "B"},	/* Octal format info */
-  {"%d",    "",   "d",  ""},	/* Decimal format info */
-  {"0%XH",  "0",  "X",  "H"},	/* Hex format info */
+  {"%loB",   "",   "o",  "B"},	/* Octal format info */
+  {"%ld",    "",   "d",  ""},	/* Decimal format info */
+  {"0%lXH",  "0",  "X",  "H"},	/* Hex format info */
   m2_op_print_tab,		/* expression operators for printing */
   LANG_MAGIC
 };

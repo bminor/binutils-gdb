@@ -1114,7 +1114,7 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
 
     if (minsym) {
       pst->texthigh = SYMBOL_VALUE_ADDRESS (minsym) +
-	(int) MSYMBOL_INFO (minsym);
+	(long) MSYMBOL_INFO (minsym);
     } else {
       /* This file ends with a static function, and it's
 	 difficult to imagine how hard it would be to track down
@@ -1765,6 +1765,10 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     case N_BCOMM:
       if (common_block)
 	{
+	  /* Note: this does not detect nesting if the previous N_BCOMM
+	     was at the beginning of a scope (and thus common_block was
+	     NULL).  Not necessarily worth worrying about unless we run
+	     into a compiler which actually has this bug.  */
 	  static struct complaint msg = {
 	    "Invalid symbol data: common within common at symtab pos %d",
 	    0, 0};
@@ -1775,11 +1779,21 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
       break;
 
     case N_ECOMM:
+
       /* Symbols declared since the BCOMM are to have the common block
-	 start address added in when we know it.  common_block points to
-	 the first symbol after the BCOMM in the local_symbols list;
-	 copy the list and hang it off the symbol for the common block name
-	 for later fixup.  */
+	 start address added in when we know it.  common_block and
+	 common_block_i point to the first symbol after the BCOMM in
+	 the local_symbols list; copy the list and hang it off the
+	 symbol for the common block name for later fixup.  */
+
+      /* If there is a N_ECOMM unmatched by a N_BCOMM, we treat all
+	 the local_symbols as part of the common block.  It might be
+	 better to just ignore the N_ECOMM, but then we'd need to
+	 distinguish between a N_BCOMM at the start of a scope, or no
+	 N_BCOMM at all (currently they both have common_block NULL).
+	 Not necessarily worth worrying about unless we run into a
+	 compiler which actually has this bug.  */
+
       {
 	int i;
 	struct symbol *sym =
@@ -1870,7 +1884,8 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     case N_NBBSS:
     case N_NBSTS:
     case N_NBLCS:
-      complain (&unknown_symtype_complaint, local_hex_string(type));
+      complain (&unknown_symtype_complaint,
+		local_hex_string((unsigned long) type));
       /* FALLTHROUGH */
 
     /* The following symbol types don't need the address field relocated,
@@ -1919,12 +1934,13 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	      /* On solaris up to 2.2, the N_FUN stab gets relocated.
 		 On Solaris 2.3, ld no longer relocates stabs (which
 		 is good), and the N_FUN's value is now always zero.
-		 We only provide this correction for functions, not for
-		 all N_FUN symbols, because that is easiest and all
-		 readonly variables seem to go in the .rodata on Solaris.  */
+		 The following code can't deal with this, because
+		 last_pc_address depends on getting the address from a
+		 N_SLINE or some such and in Solaris those are function
+		 relative.  Best fix is probably to create a Ttext.text symbol
+		 and handle this like Ddata.data and so on.  */
 
-	      if (type == N_GSYM || type == N_STSYM
-		  || (type == N_FUN && valu == 0))
+	      if (type == N_GSYM || type == N_STSYM)
 		{
 		  struct minimal_symbol *m;
 		  int l = colon_pos - name;
@@ -2031,9 +2047,11 @@ copy_pending (beg, endi, end)
 	add_symbol_to_list (next->symbol[j], &new);
     }
 
-  /* Copy however much of END we need.  */
-  for (j = endi; j < end->nsyms; j++)
-    add_symbol_to_list (end->symbol[j], &new);
+  /* Copy however much of END we need.  If END is NULL, it means copy
+     all the local symbols (which we already did above).  */
+  if (end != NULL)
+    for (j = endi; j < end->nsyms; j++)
+      add_symbol_to_list (end->symbol[j], &new);
 
   return new;
 }

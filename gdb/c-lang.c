@@ -408,9 +408,9 @@ const struct language_defn c_language_defn = {
   &BUILTIN_TYPE_UNSIGNED_LONGEST,/* longest unsigned integral type */
   &builtin_type_double,		/* longest floating point type */ /*FIXME*/
   {"",     "",    "",  ""},	/* Binary format info */
-  {"0%o",  "0",   "o", ""},	/* Octal format info */
-  {"%d",   "",    "d", ""},	/* Decimal format info */
-  {"0x%x", "0x",  "x", ""},	/* Hex format info */
+  {"0%lo",  "0",   "o", ""},	/* Octal format info */
+  {"%ld",   "",    "d", ""},	/* Decimal format info */
+  {"0x%lx", "0x",  "x", ""},	/* Hex format info */
   c_op_print_tab,		/* expression operators for printing */
   LANG_MAGIC
 };
@@ -432,9 +432,9 @@ const struct language_defn cplus_language_defn = {
   &BUILTIN_TYPE_UNSIGNED_LONGEST,/* longest unsigned integral type */
   &builtin_type_double,		/* longest floating point type */ /*FIXME*/
   {"",      "",    "",   ""},	/* Binary format info */
-  {"0%o",   "0",   "o",  ""},	/* Octal format info */
-  {"%d",    "",    "d",  ""},	/* Decimal format info */
-  {"0x%x",  "0x",  "x",  ""},	/* Hex format info */
+  {"0%lo",   "0",   "o",  ""},	/* Octal format info */
+  {"%ld",    "",    "d",  ""},	/* Decimal format info */
+  {"0x%lx",  "0x",  "x",  ""},	/* Hex format info */
   c_op_print_tab,		/* expression operators for printing */
   LANG_MAGIC
 };

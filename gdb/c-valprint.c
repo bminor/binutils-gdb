@@ -171,7 +171,7 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 
 	  if (addressprint && format != 's')
 	    {
-	      fprintf_filtered (stream, "0x%x", addr);
+	      fprintf_filtered (stream, "0x%lx", (unsigned long)addr);
 	    }
 
 	  /* For a pointer to char or unsigned char, also print the string

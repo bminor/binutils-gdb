@@ -932,7 +932,7 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
 		new = pop_context ();
 		if (depth-- != new->depth)
 		  {
-		    complain (&eb_complaint, (char *)symnum);
+		    complain (&eb_complaint, symnum);
 		    break;
 		  }
 		if (local_symbols && context_stack_depth > 0)

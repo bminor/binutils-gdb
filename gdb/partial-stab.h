@@ -613,6 +613,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	  /* If we haven't found it yet, ignore it.  It's probably some
 	     new type we don't know about yet.  */
 	  complain (&unknown_symtype_complaint,
-		    local_hex_string (CUR_SYMBOL_TYPE));
+		    local_hex_string ((unsigned long) CUR_SYMBOL_TYPE));
 	  continue;
 	}

@@ -1,3 +1,41 @@
+Tue Sep 28 09:45:38 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* symmisc.c (print_symbol): Use %02x not %2x for LOC_CONST_BYTES.
+
+	Clean up problems with targets and hosts that have 64 bit longs
+	and pointers and 32 bit ints.
+	* breakpoint.c, buildsym.c, c-lang.c, c-valprint.c, ch-lang.c,
+	ch-valprint.c, core.c, cp-valprint.c, dbxread.c, exec.c,
+	expprint.c, gdbtypes.c, infcmd.c, language.c, language.h,
+	m2-lang.c, maint.c, mips-tdep.c, mipsread.c, partial-stab.h,
+	printcmd.c, remote-vx.c, solib.c, source.c, stack.c, symfile.c,
+	symmisc.c, symtab.c, valops.c, valprint.c, xcoffexec.c:
+	Change all printf formats from %x to %lx if outputting an address.
+	Change la_*_format to use long format.
+	local_hex_string, local_hex_string_custom now take an unsigned long
+	argument, change all callers.
+	* coffread.c (read_coff_symtab):  Remove superfluous cast for
+	complaint output.
+	* dbxread.c (end_psymtab):  Cast MSYMBOL_INFO to long, not int.
+	* findvar.c, value.h (write_register):  Change register value to long.
+	* gdbtypes.h (struct type):  Change `bitsize' to long as
+	TYPE_FIELD_STATIC_PHYSNAME uses this field as a pointer.
+	* inferior.h (struct inferior_status):  Change type of stop_pc to
+	CORE_ADDR.
+	* language.h (local_octal_string, local_octal_string_custom):
+	Remove prototype, the functions are neither defined nor used.
+	* mipsread.c (parse_symbol):  Use temporary variable for bitsize as
+	f->bitsize is a long now.
+	* objfiles.c (add_to_objfile_sections, build_objfile_section_table):
+	Use unsigned long casts instead of int for abusing sections_end
+	pointer as integer.
+	* stack.c (parse_frame_specification):  Change type of `args' to
+	CORE_ADDR for SETUP_ARBITRARY_FRAME.
+
+	* printcmd.c (make_vasize):  Allow redefinition via MAKEVA_SIZE.
+	* mipsread.c (parse_type):  Alpha cc now supports the t->continued
+	bit, update algorithm to match the way the compiler uses it.
+
 Tue Sep 28 12:05:11 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* utils.c (fprintfi_filtered): Fix comments.
