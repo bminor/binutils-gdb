@@ -15,7 +15,7 @@ END-INFO-DIR-ENTRY
 @end ifinfo
 
 @ifinfo
-This file documents the GNU linker LD.
+This file documents the @sc{gnu} linker LD.
 
 Copyright (C) 1991, 92, 93, 94, 1995 Free Software Foundation, Inc.
 
@@ -49,17 +49,16 @@ notice identical to this one except for the removal of this paragraph
 @sp 1
 @subtitle @code{ld} version 2
 @subtitle January 1994
-@author Steve Chamberlain and Roland Pesch
+@author Steve Chamberlain
 @author Cygnus Support
 @page
 
 @tex
 {\parskip=0pt
 \hfill Cygnus Support\par
-\hfill steve\@cygnus.com, pesch\@cygnus.com\par
+\hfill steve\@cygnus.com, doc\@cygnus.com\par
 \hfill {\it Using LD, the GNU linker}\par
 \hfill Edited by Jeffrey Osier (jeffrey\@cygnus.com)\par
-\hfill and Roland Pesch (pesch\@cygnus.com)\par
 }
 \global\parindent=0pt % Steve likes it this way.
 @end tex
@@ -85,7 +84,7 @@ into another language, under the above conditions for modified versions.
 @ifinfo
 @node Top
 @top Using ld
-This file documents the GNU linker ld.
+This file documents the @sc{gnu} linker ld.
 
 @menu
 * Overview::                    Overview
@@ -118,7 +117,7 @@ This file documents the GNU linker ld.
 @node Overview
 @chapter Overview
 
-@cindex GNU linker
+@cindex @sc{gnu} linker
 @cindex what is this?
 @code{ld} combines a number of object and archive files, relocates
 their data and ties up symbol references. Usually the last step in
@@ -136,7 +135,7 @@ write object files in many different formats---for example, COFF or
 available kind of object file.  @xref{BFD}, for more information.
 @end ifclear
 
-Aside from its flexibility, the GNU linker is more helpful than other
+Aside from its flexibility, the @sc{gnu} linker is more helpful than other
 linkers in providing diagnostic information.  Many linkers abandon
 execution immediately upon encountering an error; whenever possible,
 @code{ld} continues executing, allowing you to identify other errors
@@ -145,7 +144,7 @@ execution immediately upon encountering an error; whenever possible,
 @node Invocation
 @chapter Invocation
 
-The GNU linker @code{ld} is meant to cover a broad range of situations,
+The @sc{gnu} linker @code{ld} is meant to cover a broad range of situations,
 and to be as compatible as possible with other linkers.  As a result,
 you have many choices to control its behavior.
 
@@ -171,13 +170,14 @@ ld [ -o @var{output} ]  @var{objfile}@dots{}
   [ -Bstatic ]  [ -Bdynamic ]  [ -Bsymbolic ]
   [ -c @var{MRI-commandfile} ]  [ -d | -dc | -dp ]  
   [ -defsym @var{symbol}=@var{expression} ]
-  [ -dynamic-linker @var{file} ] [ -embedded-relocs ]
+  [ -dynamic-linker @var{file} ] [ -embedded-relocs ] [ -export-dynamic ]
   [ -e @var{entry} ]  [ -F ]  [ -F @var{format} ]
-  [ -format @var{input-format} ]  [ -g ]  [ -G @var{size} ]  [ -help ]
-  [ -i ]  [ -l@var{archive} ]  [ -L@var{searchdir} ]  [ -M ]
-  [ -Map @var{mapfile} ]  [ -m @var{emulation} ]  [ -N | -n ]
-  [ -noinhibit-exec ]  [ -no-keep-memory ]  [ -oformat @var{output-format} ]
-  [ -R @var{filename} ]  [ -relax ]  [ -retain-symbols-file @var{filename} ]
+  [ -format @var{input-format} ]  [ -g ]  [ -G @var{size} ]
+  [ -help ]  [ -i ]  [ -l@var{archive} ]  [ -L@var{searchdir} ]
+  [ -M ]  [ -Map @var{mapfile} ]  [ -m @var{emulation} ]
+  [ -N | -n ]  [ -noinhibit-exec ]  [ -no-keep-memory ]
+  [ -oformat @var{output-format} ]  [ -R @var{filename} ]
+  [ -relax ]  [ -retain-symbols-file @var{filename} ]
   [ -r | -Ur ]  [ -rpath @var{dir} ] [-rpath-link @var{dir} ]
   [ -S ]  [ -s ] [ -soname @var{name} ] [ -shared ] 
   [ -sort-common ] [ -stats ] [ -T @var{commandfile} ]
@@ -186,8 +186,10 @@ ld [ -o @var{output} ]  @var{objfile}@dots{}
   [ -u @var{symbol}]  [-V]  [-v]  [ -verbose]  [ -version ]
   [ -warn-common ] [ -warn-constructors] [ -warn-once ]
   [ -y @var{symbol} ]  [ -X ]  [-x ]
-  [ -( [ archives ] -) ] [ --start-group [ archives ] --end-group ]
-  [ -split-by-reloc @var{count} ] [ -split-by-file ] [ --whole-archive ]
+  [ -( [ archives ] -) ]
+  [ --start-group [ archives ] --end-group ]
+  [ -split-by-reloc @var{count} ] [ -split-by-file ]
+  [ --whole-archive ]
 @end smallexample
 
 This plethora of command-line options may seem intimidating, but in
@@ -197,9 +199,9 @@ For instance, a frequent use of @code{ld} is to link standard Unix
 object files on a standard, supported Unix system.  On such a system, to
 link a file @code{hello.o}:
 
-@example
+@smallexample
 ld -o @var{output} /lib/crt0.o hello.o -lc
-@end example
+@end smallexample
 
 This tells @code{ld} to produce a file called @var{output} as the
 result of linking the file @code{/lib/crt0.o} with @code{hello.o} and
@@ -278,8 +280,8 @@ other architecture families.
 @cindex binary input format
 @kindex -b @var{format}
 @cindex input format
-@item -b @var{input-format}
 @cindex input format
+@item -b @var{input-format}
 @code{ld} may be configured to support more than one kind of object
 file.  If your @code{ld} is configured this way, you can use the
 @samp{-b} option to specify the binary format for input object files
@@ -341,10 +343,10 @@ specified by any @samp{-L} options.
 
 @cindex common allocation
 @kindex -d
-@item -d 
 @kindex -dc
-@itemx -dc
 @kindex -dp
+@item -d 
+@itemx -dc
 @itemx -dp
 These three options are equivalent; multiple forms are supported for
 compatibility with other linkers.  They
@@ -382,7 +384,7 @@ doing.
 @kindex -embedded-relocs
 @item -embedded-relocs
 This option is only meaningful when linking MIPS embedded PIC code,
-generated by the -membedded-pic option to the GNU compiler and
+generated by the -membedded-pic option to the @sc{gnu} compiler and
 assembler.  It causes the linker to create a table which may be used at
 runtime to relocate any data which was statically initialized to pointer
 values.  See the code in testsuite/ld-empic for details.
@@ -394,6 +396,14 @@ Use @var{entry} as the explicit symbol for beginning execution of your
 program, rather than the default entry point. @xref{Entry Point}, for a
 discussion of defaults and other ways of specifying the
 entry point.
+
+@cindex dynamic symbol table
+@kindex -export-dynamic
+@item -export-dynamic
+When creating an ELF file, add all symbols to the dynamic symbol table.
+Normally, the dynamic symbol table contains only symbols which are used
+by a dynamic object.  This option is needed for some uses of
+@code{dlopen}.
 
 @ifclear SingleFormat
 @kindex -F
@@ -502,26 +512,26 @@ style magic numbers, mark the output as @code{OMAGIC}.
 Set the text segment to be read only, and mark the output as
 @code{NMAGIC} if possible.
 
-@item -noinhibit-exec
 @cindex output file after errors
 @kindex -noinhibit-exec
+@item -noinhibit-exec
 Retain the executable output file whenever it is still usable.
 Normally, the linker will not produce an output file if it encounters
 errors during the link process; it exits without writing an output file
 when it issues any error whatsoever.
 
-@item -no-keep-memory
 @cindex memory usage
 @kindex -no-keep-memory
+@item -no-keep-memory
 @code{ld} normally optimizes for speed over memory usage by caching the
 symbol tables of input files in memory.  This option tells @code{ld} to
 instead optimize for memory usage, by rereading the symbol tables as
 necessary.  This may be required if @code{ld} runs out of memory space
 while linking a large executable.
 
-@item -o @var{output}
 @kindex -o @var{output}
 @cindex naming the output file
+@item -o @var{output}
 Use @var{output} as the name for the program produced by @code{ld}; if this
 option is not specified, the name @file{a.out} is used by default.  The
 script command @code{OUTPUT} can also specify the output file name.
@@ -542,14 +552,18 @@ command @code{OUTPUT_FORMAT} can also specify the output format, but
 this option overrides it.  @xref{BFD}.
 @end ifclear
 
-@item -R @var{filename}
 @kindex -R @var{file}
 @cindex symbol-only input
+@item -R @var{filename}
 Read symbol names and their addresses from @var{filename}, but do not
 relocate it or include it in the output.  This allows your output file
 to refer symbolically to absolute locations of memory defined in other
 programs.
- 
+
+For compatibility with other ELF linkers, if the @code{-R} option is
+followed by a directory name, rather than a file name, it is treated as
+the @code{-rpath} option.
+
 @kindex -relax
 @cindex synthesizing linker
 @cindex relaxing addressing modes
@@ -575,10 +589,10 @@ On platforms where this is not supported, @samp{-relax} is accepted, but
 ignored.
 @end ifset
 
-@item -retain-symbols-file @var{filename}
 @cindex retaining specified symbols
 @cindex stripping all but some symbols
 @cindex symbols, retaining selectively
+@item -retain-symbols-file @var{filename}
 Retain @emph{only} the symbols listed in the file @var{filename},
 discarding all others.  @var{filename} is simply a flat file, with one
 symbol name per line.  This option is especially useful in environments
@@ -604,7 +618,9 @@ arguments are concatenated and passed to the runtime linker, which uses
 them to locate shared objects at runtime.  The @code{-rpath} option is
 also used when locating shared objects which are needed by shared
 objects explicitly included in the link; see the description of the
-@code{-rpath-link} option.
+@code{-rpath-link} option.  If @code{-rpath} is not used when linking an
+ELF executable, the contents of the environment variable
+@code{LD_RUN_PATH} will be used if it is defined.
 
 The @code{-rpath} option may also be used on SunOS.  By default, on
 SunOS, the linker will form a runtime search patch out of all the
@@ -613,6 +629,10 @@ runtime search path will be formed exclusively using the @code{-rpath}
 options, ignoring the @code{-L} options.  This can be useful when using
 gcc, which adds many @code{-L} options which may be on NFS mounted
 filesystems.
+
+For compatibility with other ELF linkers, if the @code{-R} option is
+followed by a directory name, rather than a file name, it is treated as
+the @code{-rpath} option.
 @end ifset
 
 @ifset GENERIC
@@ -643,6 +663,10 @@ between @code{-rpath} and @code{-rpath-link} is that directories
 specified by @code{-rpath} options are included in the executable and
 used at runtime, whereas the @code{-rpath-link} option is only effective
 at link time.
+@item
+On an ELF system, if the @code{-rpath} and @code{rpath-link} options
+were not used, search the contents of the environment variable
+@code{LD_RUN_PATH}.
 @item
 On SunOS, if the @code{-rpath} option was not used, search any
 directories specified using @code{-L} options.
@@ -684,9 +708,9 @@ Omit debugger symbol information (but not all symbols) from the output file.
 Omit all symbol information from the output file.
 
 @ifset GENERIC
-@item -soname @var{name}
 @cindex runtime library name
 @kindex -soname
+@item -soname @var{name}
 When creating an ELF shared object, set the internal DT_SONAME field to
 the specified name.  When an executable is linked with a shared object
 which has a DT_SONAME field, then when the executable is run the dynamic
@@ -710,8 +734,8 @@ one byte symbols, then all the two bytes, then all the four bytes, and
 then everything else.  This is to prevent gaps between symbols due to
 alignment constraints.  This option disables that sorting.
 
-@item -split-by-reloc @var{count}
 @kindex split
+@item -split-by-reloc @var{count}
 Trys to creates extra sections in the output file so that no single output section
 in the file contains more than @var{count} relocations.  This
 is useful when generating huge relocatable for downloading into
@@ -723,8 +747,8 @@ sections for redistribution,  so if a single input section contains
 more than @var{count} relocations one output section will contain that
 many relocations.
 
-@item -split-by-file
 @kindex split
+@item -split-by-file
 Similar to -split-by-reloc but creates a new output section for each
 input file.
 
@@ -732,23 +756,23 @@ input file.
 Compute and display statistics about the operation of the linker,
 such as execution time and memory usage.
 
-@item -Tbss @var{org}
 @kindex -Tbss @var{org}
-@itemx -Tdata @var{org}
 @kindex -Tdata @var{org}
-@itemx -Ttext @var{org}
 @kindex -Ttext @var{org}
 @cindex segment origins, cmd line
+@item -Tbss @var{org}
+@itemx -Tdata @var{org}
+@itemx -Ttext @var{org}
 Use @var{org} as the starting address for---respectively---the
 @code{bss}, @code{data}, or the @code{text} segment of the output file.
 @var{org} must be a single hexadecimal integer;
 for compatibility with other linkers, you may omit the leading
 @samp{0x} usually associated with hexadecimal values.
 
-@item -T @var{commandfile}
-@itemx -T@var{commandfile}
 @kindex -T @var{script}
 @cindex script files
+@item -T @var{commandfile}
+@itemx -T@var{commandfile}
 Read link commands from the file @var{commandfile}.  These commands
 replace @code{ld}'s default link script (rather than adding
 to it), so @var{commandfile} must specify everything necessary to describe
@@ -777,9 +801,9 @@ full debugging information by over 30 percent.  Unfortunately, the SunOS
 trouble).  The @samp{-traditional-format} switch tells @code{ld} to not
 combine duplicate entries.
 
-@item -u @var{symbol}
 @kindex -u @var{symbol}
 @cindex undefined symbol
+@item -u @var{symbol}
 Force @var{symbol} to be entered in the output file as an undefined symbol.
 Doing this may, for example, trigger linking of additional modules from
 standard libraries.  @samp{-u} may be repeated with different option
@@ -813,14 +837,14 @@ supported.  Display which input files can and cannot be opened.
 Display the version number for @code{ld}.  The @code{-V} option also
 lists the supported emulations.
 
-@item -version
 @kindex -version
+@item -version
 Display the version number for @code{ld} and exit.
 
-@item -warn-common
 @kindex -warn-comon
 @cindex warnings, on combining symbols
 @cindex combining symbols, warnings on
+@item -warn-common
 Warn when a common symbol is combined with another common symbol or with
 a symbol definition.  Unix linkers allow this somewhat sloppy practice,
 but linkers on some other operating systems do not.  This option allows
@@ -935,9 +959,9 @@ symbols whose names begin with @samp{L}.
 @item -x
 Delete all local symbols.
 
-@item -y @var{symbol}
 @kindex -y @var{symbol}
 @cindex symbol tracing
+@item -y @var{symbol}
 Print the name of each linked file in which @var{symbol} appears.  This
 option may be given any number of times.  On many systems it is necessary
 to prepend an underscore.
@@ -945,10 +969,10 @@ to prepend an underscore.
 This option is useful when you have an undefined symbol in your link but
 don't know where the reference is coming from.
 
-@item -( @var{archives} -)
-@itemx --start-group @var{archives} --end-group
 @kindex -(
 @cindex groups of archives
+@item -( @var{archives} -)
+@itemx --start-group @var{archives} --end-group
 The @var{archives} should be a list of archive files.  They may be
 either explicit file names, or @samp{-l} options.
 
@@ -1018,6 +1042,7 @@ as a supported object or archive format, it reports an error.
 * Expressions::                 Expressions
 * MEMORY::                      MEMORY Command
 * SECTIONS::                    SECTIONS Command
+* PHDRS::			PHDRS Command
 * Entry Point::                 The Entry Point
 * Option Commands::             Option Commands
 @end menu
@@ -1087,31 +1112,31 @@ You may call special purpose built-in functions.
 @cindex octal integers
 An octal integer is @samp{0} followed by zero or more of the octal
 digits (@samp{01234567}).
-@example
+@smallexample
 _as_octal = 0157255;
-@end example
+@end smallexample
 
 @cindex decimal integers
 A decimal integer starts with a non-zero digit followed by zero or
 more digits (@samp{0123456789}).
-@example
+@smallexample
 _as_decimal = 57005;
-@end example
+@end smallexample
 
 @cindex hexadecimal integers
 @kindex 0x
 A hexadecimal integer is @samp{0x} or @samp{0X} followed by one or
 more hexadecimal digits chosen from @samp{0123456789abcdefABCDEF}.
-@example
+@smallexample
 _as_hex = 0xdead;
-@end example
+@end smallexample
 
 @cindex negative integers
 To write a negative integer, use
 the prefix operator @samp{-}; @pxref{Operators}.
-@example
+@smallexample
 _as_neg = -57005;
-@end example
+@end smallexample
 
 @cindex scaled integers
 @cindex K and M integer suffixes
@@ -1132,11 +1157,11 @@ ${\rm 1024}$ or ${\rm 1024}^2$
 @c END TEXI2ROFF-KILL
 respectively. For example, the following all refer to the same quantity:
 
-@example
+@smallexample
         _fourk_1 = 4K;
         _fourk_2 = 4096;
         _fourk_3 = 0x1000;
-@end example
+@end smallexample
 
 @node Symbols
 @subsection Symbol Names
@@ -1149,10 +1174,10 @@ and may include any letters, underscores, digits, points,
 and hyphens.  Unquoted symbol names must not conflict with any
 keywords.  You can specify a symbol which contains odd characters or has
 the same name as a keyword, by surrounding the symbol name in double quotes:
-@example
+@smallexample
         "SECTION" = 9;
         "with a space" = "also with a space" + 10;
-@end example
+@end smallexample
 
 Since symbols can contain many non-alphabetic characters, it is safest
 to delimit symbols with spaces.  For example, @samp{A-B} is one symbol,
@@ -1174,7 +1199,7 @@ to the @code{.} symbol will cause the location counter to be moved.
 @cindex holes
 This may be used to create holes in the output section.  The location
 counter may never be moved backwards.
-@example
+@smallexample
 SECTIONS
 @{
   output :
@@ -1186,7 +1211,7 @@ SECTIONS
   file3(.text)
   @} = 0x1234;
 @}
-@end example
+@end smallexample
 @noindent
 In the previous example, @code{file1} is located at the beginning of the
 output section, then there is a 1000 byte gap.  Then @code{file2}
@@ -1198,7 +1223,7 @@ the gaps (@pxref{Section Options}).
 @vfill
 @end iftex
 
-@need 5000
+@need 2000
 @node Operators
 @subsection Operators
 @cindex Operators for arithmetic
@@ -1209,7 +1234,7 @@ the standard bindings and precedence levels:
 @c TEXI2ROFF-KILL
 @ifinfo
 @c END TEXI2ROFF-KILL
-@example
+@smallexample
 precedence      associativity   Operators                Notes
 (highest)
 1               left            !  -  ~                  (1)
@@ -1224,7 +1249,7 @@ precedence      associativity   Operators                Notes
 10              right           ? :
 11              right           &=  +=  -=  *=  /=       (2)
 (lowest)
-@end example
+@end smallexample
 Notes:
 (1) Prefix operators 
 (2) @xref{Assignment}
@@ -1232,7 +1257,7 @@ Notes:
 @end ifinfo
 @tex
 \vskip \baselineskip
-%"lispnarrowing" is the extra indent used generally for @example
+%"lispnarrowing" is the extra indent used generally for @smallexample
 \hskip\lispnarrowing\vbox{\offinterlineskip
 \hrule
 \halign
@@ -1348,7 +1373,7 @@ may be created with an absolute value even when assigned to within a
 section definition by using the absolute assignment function
 @code{ABSOLUTE}.  For example, to create an absolute symbol whose address
 is the last byte of an output section named @code{.data}:
-@example
+@smallexample
 SECTIONS@{ @dots{}
   .data : 
     @{
@@ -1356,7 +1381,7 @@ SECTIONS@{ @dots{}
       _edata = ABSOLUTE(.) ;
     @} 
 @dots{} @}
-@end example
+@end smallexample
 
 The linker tries to put off the evaluation of an assignment until all
 the terms in the source expression are known (@pxref{Evaluation}).  For
@@ -1366,13 +1391,13 @@ allocation. Some expressions, such as those depending upon the location
 counter @dfn{dot}, @samp{.} must be evaluated during allocation. If the
 result of an expression is required, but the value is not available,
 then an error results.  For example, a script like the following
-@example
+@smallexample
 SECTIONS @{ @dots{}
   text 9+this_isnt_constant : 
     @{ @dots{}
     @}
 @dots{} @}
-@end example
+@end smallexample
 @kindex Non constant expression
 @noindent
 will cause the error message ``@code{Non constant expression for initial
@@ -1394,22 +1419,23 @@ The @code{PROVIDE} keyword may be used to define a symbol, such as
 The command language includes a number of built-in
 functions for use in link script expressions.
 @table @code
-@item ABSOLUTE(@var{exp})
 @kindex ABSOLUTE(@var{exp})
 @cindex expression, absolute
+@item ABSOLUTE(@var{exp})
 Return the absolute (non-relocatable, as opposed to non-negative) value
 of the expression @var{exp}.  Primarily useful to assign an absolute
 value to a symbol within a section definition, where symbol values are
 normally section-relative.
 
-@item ADDR(@var{section})
 @kindex ADDR(@var{section})
 @cindex section address
+@item ADDR(@var{section})
 Return the absolute address of the named @var{section}.  Your script must
 previously have defined the location of that section. In the following
 example, @code{symbol_1} and @code{symbol_2} are assigned identical
 values:
-@example
+@smallexample
+@group
 SECTIONS@{ @dots{}
   .output1 :
     @{ 
@@ -1422,31 +1448,34 @@ SECTIONS@{ @dots{}
     symbol_2 = start_of_output_1;
     @}
 @dots{} @}
-@end example
+@end group
+@end smallexample
 
-@item ALIGN(@var{exp})
 @kindex ALIGN(@var{exp})
 @cindex rounding up location counter
+@item ALIGN(@var{exp})
 Return the result of the current location counter (@code{.}) aligned to
 the next @var{exp} boundary.  @var{exp} must be an expression whose
 value is a power of two.  This is equivalent to 
-@example
+@smallexample
 (. + @var{exp} - 1) & ~(@var{exp} - 1)
-@end example
+@end smallexample
 
 @code{ALIGN} doesn't change the value of the location counter---it just
 does arithmetic on it.  As an example, to align the output @code{.data}
 section to the next @code{0x2000} byte boundary after the preceding
 section and to set a variable within the section to the next
 @code{0x8000} boundary after the input sections:
-@example
+@smallexample
+@group
 SECTIONS@{ @dots{}
   .data ALIGN(0x2000): @{
     *(.data)
     variable = ALIGN(0x8000);
   @}
 @dots{} @}
-@end example
+@end group
+@end smallexample
 @noindent
 The first use of @code{ALIGN} in this example specifies the location of
 a section because it is used as the optional @var{start} attribute of a
@@ -1455,9 +1484,9 @@ defines the value of a variable.
 
 The built-in @code{NEXT} is closely related to @code{ALIGN}.
 
-@item DEFINED(@var{symbol})
 @kindex DEFINED(@var{symbol})
 @cindex symbol defaults
+@item DEFINED(@var{symbol})
 Return 1 if @var{symbol} is in the linker global symbol table and is
 defined, otherwise return 0.  You can use this function to provide default
 values for symbols.  For example, the following command-file fragment shows how
@@ -1466,30 +1495,33 @@ to set a global symbol @code{begin} to the first location in the
 existed, its value is preserved:
 
 @smallexample
+@group
 SECTIONS@{ @dots{}
   .text : @{
     begin = DEFINED(begin) ? begin : . ;
     @dots{}
   @}
 @dots{} @}
+@end group
 @end smallexample
 
-@item NEXT(@var{exp})
 @kindex NEXT(@var{exp})
 @cindex unallocated address, next
+@item NEXT(@var{exp})
 Return the next unallocated address that is a multiple of @var{exp}.
 This function is closely related to @code{ALIGN(@var{exp})}; unless you
 use the @code{MEMORY} command to define discontinuous memory for the
 output file, the two functions are equivalent.
 
-@item SIZEOF(@var{section})
 @kindex SIZEOF(@var{section})
 @cindex section size
+@item SIZEOF(@var{section})
 Return the size in bytes of the named @var{section}, if that section has
 been allocated.  In the following example, @code{symbol_1} and
 @code{symbol_2} are assigned identical values:
 @c What does it return if the section hasn't been allocated?  0?
-@example
+@smallexample
+@group
 SECTIONS@{ @dots{}
   .output @{
     .start = . ;
@@ -1499,14 +1531,14 @@ SECTIONS@{ @dots{}
   symbol_1 = .end - .start ;
   symbol_2 = SIZEOF(.output);
 @dots{} @}
+@end group
+@end smallexample
 
-@end example
-
-@item SIZEOF_HEADERS
 @kindex SIZEOF_HEADERS
 @cindex header size
-@itemx sizeof_headers
 @kindex sizeof_headers
+@item SIZEOF_HEADERS
+@itemx sizeof_headers
 Return the size in bytes of the output file's headers.  You can use this number
 as the start address of the first section, if you choose, to facilitate
 paging. 
@@ -1532,13 +1564,15 @@ A command file may contain at most one use of the @code{MEMORY}
 command; however, you can define as many blocks of memory within it as
 you wish.  The syntax is:
         
-@example
+@smallexample
+@group
 MEMORY 
   @{
     @var{name} (@var{attr}) : ORIGIN = @var{origin}, LENGTH = @var{len}
     @dots{}
   @}
-@end example
+@end group
+@end smallexample
 @table @code
 @cindex naming memory regions
 @item @var{name}
@@ -1576,13 +1610,15 @@ For example, to specify that memory has two regions available for
 allocation---one starting at 0 for 256 kilobytes, and the other
 starting at @code{0x40000000} for four megabytes:
 
-@example
+@smallexample
+@group
 MEMORY 
   @{
   rom : ORIGIN = 0, LENGTH = 256K
   ram : org = 0x40000000, l = 4M
   @}
-@end example
+@end group
+@end smallexample
 
 Once you have defined a region of memory named @var{mem}, you can direct
 specific output sections there by using a command ending in
@@ -1642,13 +1678,13 @@ properties of an output section: its location, alignment, contents,
 fill pattern, and target memory region.  Most of
 these specifications are optional; the simplest form of a section
 definition is
-@example
+@smallexample
 SECTIONS @{ @dots{}
   @var{secname} : @{
     @var{contents}
   @}
 @dots{} @}
-@end example
+@end smallexample
 @cindex naming output sections
 @noindent
 @var{secname} is the name of the output section, and @var{contents} a
@@ -1671,9 +1707,9 @@ sequence of characters, but any name which does not conform to the standard
 The linker will not create output sections which do not have any
 contents.  This is for convenience when referring to input sections that
 may or may not exist.  For example,
-@example
-.foo @{ *(.foo @}
-@end example
+@smallexample
+.foo @{ *(.foo) @}
+@end smallexample
 will only create a @samp{.foo} section in the output file if there is a
 @samp{.foo} section in at least one input file.
 
@@ -1704,9 +1740,9 @@ in another section definition, with an explicit section name list, then
 only those sections which have not yet been allocated are used.
 
 To specify a list of particular files by name:
-@example
+@smallexample
 .data : @{ afile.o bfile.o cfile.o @}
-@end example
+@end smallexample
 @noindent
 The example also illustrates that multiple statements can be included in
 the contents of a section definition, since each file name is a separate
@@ -1739,7 +1775,8 @@ file have not yet been defined.
 For example, to copy sections @code{1} through @code{4} from an Oasys file
 into the @code{.text} section of an @code{a.out} file, and sections @code{13}
 and @code{14} into the @code{.data} section:
-@example
+@smallexample
+@group
 SECTIONS @{
   .text :@{
     *("1" "2" "3" "4")
@@ -1749,7 +1786,8 @@ SECTIONS @{
     *("13" "14")
   @}
 @}
-@end example
+@end group
+@end smallexample
 
 @cindex @code{[@var{section}@dots{}]}, not supported
 @samp{[ @var{section} @dots{} ]} used to be accepted as an alternate way
@@ -1778,13 +1816,15 @@ three consecutive sections, named @code{.text}, @code{.data}, and
 @code{.bss}, taking the input for each from the correspondingly named
 sections of all the input files:
 
-@example
+@smallexample
+@group
 SECTIONS @{ 
   .text : @{ *(.text) @}
   .data : @{ *(.data) @} 
   .bss :  @{ *(.bss)  *(COMMON) @} 
 @} 
-@end example
+@end group
+@end smallexample
 
 The following example reads all of the sections from file @code{all.o}
 and places them at the start of output section @code{outputa} which
@@ -1795,7 +1835,8 @@ of section @code{.input2} from @code{foo.o} goes into output section
 All of the remaining @code{.input1} and @code{.input2} sections from any
 files are written to output section @code{outputc}.
 
-@example
+@smallexample
+@group
 SECTIONS @{
   outputa 0x10000 :
     @{
@@ -1813,7 +1854,8 @@ SECTIONS @{
     *(.input2)
     @}
 @}
-@end example        
+@end group
+@end smallexample        
 
 @node Section Data Expressions
 @subsection Section Data Expressions
@@ -1838,7 +1880,8 @@ in the current section, set to the address of the first byte of
 data written from that input file.  For instance, with @code{a.out}
 files it is conventional to have a symbol for each input file.  You can
 accomplish this by defining the output @code{.text} section as follows:
-@example
+@smallexample
+@group
 SECTIONS @{
   .text 0x2020 :
      @{
@@ -1848,23 +1891,26 @@ SECTIONS @{
     @}
   @dots{}
 @}
-@end example
+@end group
+@end smallexample
 
 If @code{sample.ld} is a file containing this script, and @code{a.o},
 @code{b.o}, @code{c.o}, and @code{d.o} are four input files with
 contents like the following---
-@example
+@smallexample
+@group
 /* a.c */
 
 afunction() @{ @}
 int adata=1;
 int abss;
-@end example
+@end group
+@end smallexample
 
 @noindent
 @samp{ld -M -T sample.ld a.o b.o c.o d.o} would create a map like this,
 containing symbols matching the object file names:
-@example
+@smallexample
 00000000 A __DYNAMIC
 00004020 B _abss
 00004000 D _adata
@@ -1885,7 +1931,7 @@ containing symbols matching the object file names:
 00002038 t b.o
 00002050 t c.o
 00002068 t d.o
-@end example
+@end smallexample
 
 @kindex @var{symbol} = @var{expression} ;
 @kindex @var{symbol} @var{f}= @var{expression} ;
@@ -1900,7 +1946,8 @@ When you assign a value to a symbol within a particular section
 definition, the value is relative to the beginning of the section
 (@pxref{Assignment}).  If you write
 
-@example
+@smallexample
+@group
 SECTIONS @{
   abs = 14 ;
   @dots{}
@@ -1908,7 +1955,8 @@ SECTIONS @{
   abs2 = 14 + ADDR(.data);
   @dots{}
 @}
-@end example
+@end group
+@end smallexample
 
 @c FIXME:  Try above example!
 @noindent
@@ -1934,10 +1982,10 @@ Multiple-byte quantities are represented in whatever byte order is
 appropriate for the output file format (@pxref{BFD}).
 @end ifclear
 
-@item FILL(@var{expression})
 @kindex FILL(@var{expression})
 @cindex holes, filling
 @cindex unspecified memory
+@item FILL(@var{expression})
 Specify the ``fill pattern'' for the current section.  Any otherwise
 unspecified regions of memory within the section (for example, regions
 you skip over by assigning a new value to the location counter @samp{.})
@@ -1955,19 +2003,22 @@ Here is the full syntax of a section definition, including all the
 optional portions:
 
 @smallexample
+@group
 SECTIONS @{
 @dots{}
 @var{secname} @var{start} BLOCK(@var{align}) (NOLOAD) : AT ( @var{ldadr} )
-  @{ @var{contents} @} >@var{region} =@var{fill}
+  @{ @var{contents} @} >@var{region} :@var{phdr} =@var{fill}
 @dots{}
 @}
+@end group
 @end smallexample
 
 @var{secname} and @var{contents} are required.  @xref{Section
 Definition}, and @pxref{Section Placement} for details on
 @var{contents}.  The remaining elements---@var{start},
 @code{BLOCK(@var{align)}}, @code{(NOLOAD)}, @code{AT ( @var{ldadr} )},
-@code{>@var{region}}, and @code{=@var{fill}}---are all optional.
+@code{>@var{region}}, @code{:@var{phdr}}, and @code{=@var{fill}}---are
+all optional.
 
 @table @code
 @cindex start address, section
@@ -1980,7 +2031,8 @@ specifying @var{start} immediately following the section name.
 example generates section @var{output} at location
 @code{0x40000000}:
 
-@example
+@smallexample
+@group
 SECTIONS @{
   @dots{}
   output 0x40000000: @{
@@ -1988,7 +2040,8 @@ SECTIONS @{
     @}
   @dots{}
 @}
-@end example
+@end group
+@end smallexample
 
 @kindex BLOCK(@var{align})
 @cindex section alignment
@@ -2008,12 +2061,14 @@ each time it is accessed.  For example, in the script sample below, the
 @code{ROM} segment is addressed at memory location @samp{0} and does not
 need to be loaded into each object file:
 
-@example
+@smallexample
+@group
 SECTIONS @{
   ROM  0  (NOLOAD)  : @{ @dots{} @}
   @dots{}
 @}
-@end example
+@end group
+@end smallexample
 
 @kindex AT ( @var{ldadr} )
 @cindex specify load address
@@ -2031,6 +2086,7 @@ and one called @samp{.mdata}, which is loaded at the end of the
 @code{0x2000}:
 
 @smallexample
+@group
 SECTIONS
   @{
   .text 0x1000 : @{ *(.text) _etext = . ; @}
@@ -2040,6 +2096,7 @@ SECTIONS
   .bss 0x3000 :
     @{ _bstart = . ;  *(.bss) *(COMMON) ; _bend = . ;@}
 @}
+@end group
 @end smallexample
 
 The run-time initialization code (for C programs, usually @code{crt0})
@@ -2048,6 +2105,7 @@ the following, to copy the initialized data from the ROM image to its runtime
 address:
 
 @smallexample
+@group
 char *src = _etext;
 char *dst = _data;
 
@@ -2059,6 +2117,7 @@ while (dst < _edata) @{
 /* Zero bss */
 for (dst = _bstart; dst< _bend; dst++)
   *dst = 0;
+@end group
 @end smallexample
 
 @kindex >@var{region}
@@ -2067,6 +2126,17 @@ for (dst = _bstart; dst< _bend; dst++)
 @item >@var{region}
 Assign this section to a previously defined region of memory.  
 @xref{MEMORY}.
+
+@kindex :@var{phdr}
+@cindex section, assigning to program header
+@cindex program headers and sections
+@item :@var{phdr}
+Assign this section to a segment described by a program header.
+@xref{PHDRS}.  If a section is assigned to one or more segments, than
+all subsequent allocated sections will be assigned to those segments as
+well, unless they use an explicitly @code{:@var{phdr}} modifier.  To
+prevent a section from being assigned to a segment when it would
+normally default to one, use @code{:NONE}.
 
 @kindex =@var{fill}
 @cindex section fill pattern
@@ -2082,6 +2152,144 @@ of a section definition.
 
 @end table
 
+@node PHDRS
+@section ELF Program Headers
+@kindex PHDRS
+@kindex program headers
+@kindex ELF program headers
+
+The ELF object file format uses @dfn{program headers}, which are read by
+the system loader and describe how the program should be loaded into
+memory.  These program headers must be set correctly in order to run the
+program on a native ELF system.  The linker will create reasonable
+program headers by default.  However, in some cases, it is desirable to
+specify the program headers more precisely; the @code{PHDRS} command may
+be used for this purpose.  When the @code{PHDRS} command is used, the
+linker will not generate any program headers itself.
+
+The @code{PHDRS} command is only meaningful when generating an ELF
+output file.  It is ignored in other cases.  This manual does not
+describe the details of how the system loader interprets program
+headers; for more information, see the ELF ABI.  The program headers of
+an ELF file may be displayed using the @samp{-p} option of the
+@code{objdump} command.
+
+This is the syntax of the @code{PHDRS} command.  The words @code{PHDRS},
+@code{FILEHDR}, @code{AT}, and @code{FLAGS} are keywords.
+
+@smallexample
+@group
+PHDRS
+@{
+  @var{name} @var{type} [ FILEHDR ] [ PHDRS ] [ AT ( @var{address} ) ]
+        [ FLAGS ( @var{flags} ) ] ;
+@}
+@end group
+@end smallexample
+
+The @var{name} is used only for reference in the @code{SECTIONS} command
+of the linker script.  It does not get put into the output file.
+
+Certain program header types describe segments of memory which are
+loaded from the file by the system loader.  In the linker script, the
+contents of these segments are specified by directing allocated output
+sections to be placed in the segment.  To do this, the command
+describing the output section in the @code{SECTIONS} command should use
+@samp{:@var{name}}, where @var{name} is the name of the program header
+as it appears in the @code{PHDRS} command.  @xref{Section Options}.
+
+It is normal for certain sections to appear in more than one segment.
+This merely implies that one segment of memory contains another.  This
+is specified by repeating @samp{:@var{name}}, using it once for each
+program header in which the section is to appear.
+
+If a section is placed in one or more segments using @samp{:@var{name}},
+then all subsequent allocated sections which do not specify
+@samp{:@var{name}} are placed in the same segments.  This is for
+convenience, since generally a whole set of contiguous sections will be
+placed in a single segment.  To prevent a section from being assigned to
+a segment when it would normally default to one, use @code{:NONE}.
+
+The @code{FILEHDR} and @code{PHDRS} keywords which may appear after the
+program header type also indicate contents of the segment of memory.
+The @code{FILEHDR} keyword means that the segment should include the ELF
+file header.  The @code{PHDRS} keyword means that the segment should
+include the ELF program headers themselves.
+
+The @var{type} may be one of the following.  The numbers indicate the
+value of the keyword.
+
+@table @asis
+@item @code{PT_NULL} (0)
+Indicates an unused program header.
+
+@item @code{PT_LOAD} (1)
+Indicates that this program header describes a segment to be loaded from
+the file.
+
+@item @code{PT_DYNAMIC} (2)
+Indicates a segment where dynamic linking information can be found.
+
+@item @code{PT_INTERP} (3)
+Indicates a segment where the name of the program interpreter may be
+found.
+
+@item @code{PT_NOTE} (4)
+Indicates a segment holding note information.
+
+@item @code{PT_SHLIB} (5)
+A reserved program header type, defined but not specified by the ELF
+ABI.
+
+@item @code{PT_PHDR} (6)
+Indicates a segment where the program headers may be found.
+
+@item @var{expression}
+An expression giving the numeric type of the program header.  This may
+be used for types not defined above.
+@end table
+
+It is possible to specify that a segment should be loaded at a
+particular address in memory.  This is done using an @code{AT}
+expression.  This is identical to the @code{AT} command used in the
+@code{SECTIONS} command (@pxref{Section Options}).  Using the @code{AT}
+command for a program header overrides any information in the
+@code{SECTIONS} command.
+
+Normally the segment flags are set based on the sections.  The
+@code{FLAGS} keyword may be used to explicitly specify the segment
+flags.  The value of @var{flags} must be an integer.  It is used to
+set the @code{p_flags} field of the program header.
+
+Here is an example of the use of @code{PHDRS}.  This shows a typical set
+of program headers used on a native ELF system.
+
+@example
+@group
+PHDRS
+@{
+  headers PT_PHDR PHDRS ;
+  interp PT_INTERP ;
+  text PT_LOAD FILEHDR PHDRS ;
+  data PT_LOAD ;
+  dynamic PT_DYNAMIC ;
+@}
+
+SECTIONS
+@{
+  . = SIZEOF_HEADERS;
+  .interp : @{ *(.interp) @} :text :interp
+  .text : @{ *(.text) @} :text
+  .rodata : @{ *(.rodata) @} /* defaults to :text */
+  @dots{}
+  . = . + 0x1000; /* move to a new page in memory */
+  .data : @{ *(.data) @} :data
+  .dynamic : @{ *(.dynamic) @} :data :dynamic
+  @dots{}
+@}
+@end group
+@end example
+
 @node Entry Point
 @section The Entry Point
 @kindex ENTRY(@var{symbol})
@@ -2090,9 +2298,9 @@ of a section definition.
 The linker command language includes a command specifically for
 defining the first executable instruction in an output file (its
 @dfn{entry point}).  Its argument is a symbol name:
-@example
+@smallexample
 ENTRY(@var{symbol})
-@end example
+@end smallexample
 
 Like symbol assignments, the @code{ENTRY} command may be placed either
 as an independent command in the command file, or among the section
@@ -2121,9 +2329,9 @@ assignment statement: if no symbol @code{start} is defined within your
 input files, you can simply define it, assigning it an appropriate
 value---
 
-@example
+@smallexample
 start = 0x2020;
-@end example
+@end smallexample
 
 @noindent
 The example shows an absolute address, but you can use any expression.
@@ -2131,9 +2339,9 @@ For example, if your input object files use some other symbol-name
 convention for the entry point, you can just assign the value of
 whatever symbol contains the start address to @code{start}:
 
-@example
+@smallexample
 start = other_symbol ;
-@end example
+@end smallexample
 
 @node Option Commands
 @section Option Commands
@@ -2155,7 +2363,7 @@ the linked output.  Constructor data is marked by the symbol
 @w{@code{__CTOR_LIST__}} at the start, and @w{@code{__CTOR_LIST_END}} at
 the end; destructor data is bracketed similarly, between
 @w{@code{__DTOR_LIST__}} and @w{@code{__DTOR_LIST_END}}.  (The compiler
-must arrange to actually run this code; GNU C++ calls constructors from
+must arrange to actually run this code; @sc{gnu} C++ calls constructors from
 a subroutine @code{__main}, which it inserts automatically into the
 startup code for @code{main}, and destructors from @code{_exit}.)
 
@@ -2205,34 +2413,34 @@ references are created.  See the description of @samp{-(} in
 @ref{Options,,Command Line Options}.
 
 @ignore
-@item MAP ( @var{name} )
 @kindex MAP ( @var{name} )
+@item MAP ( @var{name} )
 @c MAP(...) appears to look for an F in the arg, ignoring all other
 @c chars; if it finds one, it sets "map_option_f" to true.  But nothing
 @c checks map_option_f.  Apparently a stub for the future...
 @end ignore
 
-@item OUTPUT ( @var{filename} )
 @kindex OUTPUT ( @var{filename} )
 @cindex naming the output file
+@item OUTPUT ( @var{filename} )
 Use this command to name the link output file @var{filename}.  The
 effect of @code{OUTPUT(@var{filename})} is identical to the effect of
 @w{@samp{-o @var{filename}}}, which overrides it.  You can use this
 command to supply a default output-file name other than @code{a.out}.
 
 @ifclear SingleFormat
-@item OUTPUT_ARCH ( @var{bfdname} )
 @kindex OUTPUT_ARCH ( @var{bfdname} )
 @cindex machine architecture, output
+@item OUTPUT_ARCH ( @var{bfdname} )
 Specify a particular output machine architecture, with one of the names
 used by the BFD back-end routines (@pxref{BFD}).  This command is often
 unnecessary; the architecture is most often set implicitly by either the
 system BFD configuration or as a side effect of the @code{OUTPUT_FORMAT}
 command.
 
-@item OUTPUT_FORMAT ( @var{bfdname} )
 @kindex OUTPUT_FORMAT ( @var{bfdname} )
 @cindex format, output file
+@item OUTPUT_FORMAT ( @var{bfdname} )
 When @code{ld} is configured to support multiple object code formats,
 you can use this command to specify a particular output format.
 @var{bfdname} is one of the names used by the BFD back-end routines
@@ -2242,24 +2450,24 @@ the output file; the related command @code{TARGET} affects primarily
 input files.
 @end ifclear
 
-@item SEARCH_DIR ( @var{path} )
 @kindex SEARCH_DIR ( @var{path} )
 @cindex path for libraries
 @cindex search path, libraries
+@item SEARCH_DIR ( @var{path} )
 Add @var{path} to the list of paths where @code{ld} looks for
 archive libraries.  @code{SEARCH_DIR(@var{path})} has the same
 effect as @samp{-L@var{path}} on the command line.
 
-@item STARTUP ( @var{filename} )
 @kindex STARTUP ( @var{filename} )
 @cindex first input file
+@item STARTUP ( @var{filename} )
 Ensure that @var{filename} is the first input file used in the link
 process. 
 
 @ifclear SingleFormat
-@item TARGET ( @var{format} )
 @cindex input file format
 @kindex TARGET ( @var{format} )
+@item TARGET ( @var{format} )
 When @code{ld} is configured to support multiple object code formats,
 you can use this command to change the input-file object code format
 (like the command-line option @samp{-b} or its synonym @samp{-format}).
@@ -2305,15 +2513,15 @@ For the H8/300, @code{ld} can perform these global optimizations when
 you specify the @samp{-relax} command-line option.
 
 @table @emph
-@item relaxing address modes
 @cindex relaxing on H8/300
+@item relaxing address modes
 @code{ld} finds all @code{jsr} and @code{jmp} instructions whose
 targets are within eight bits, and turns them into eight-bit
 program-counter relative @code{bsr} and @code{bra} instructions,
 respectively.
 
-@item synthesizing instructions
 @cindex synthesizing on H8/300
+@item synthesizing instructions
 @c FIXME: specifically mov.b, or any mov instructions really?
 @code{ld} finds all @code{mov.b} instructions which use the
 sixteen-bit absolute address form, but refer to the top
@@ -2362,12 +2570,14 @@ well as @w{@samp{-ltry}}, the linker would look (in its built-in search
 paths, and in any paths you specify with @samp{-L}) for a library with
 the names
 
-@example
+@smallexample
+@group
 try
 libtry.a
 tryca
 libtryca.a
-@end example
+@end group
+@end smallexample
 
 @noindent
 The first two possibilities would be considered in any event; the last
@@ -2470,7 +2680,7 @@ The following list shows only the upper-case form of each command.
 @table @code
 @cindex @code{ABSOLUTE} (MRI)
 @item ABSOLUTE @var{secname}
-@item ABSOLUTE @var{secname}, @var{secname}, @dots{} @var{secname}
+@itemx ABSOLUTE @var{secname}, @var{secname}, @dots{} @var{secname}
 Normally, @code{ld} includes in the output file all sections from all
 the input files.  However, in an MRI-compatible script, you can use the
 @code{ABSOLUTE} command to restrict the sections that will be present in
@@ -2533,7 +2743,7 @@ same line, with no change in its effect.
 
 @cindex @code{LOAD} (MRI)
 @item LOAD @var{filename}
-@item LOAD @var{filename}, @var{filename}, @dots{} @var{filename}
+@itemx LOAD @var{filename}, @var{filename}, @dots{} @var{filename}
 Include one or more object file @var{filename} in the link; this has the
 same effect as specifying @var{filename} directly on the @code{ld}
 command line.
@@ -2588,7 +2798,7 @@ If you have more than one @code{SECT} statement for the same
 \centerline{{\sl\fontname\tensl\/}}
 \centerline{are used for emphasis.}\vfill}
 \page\colophon
-% Blame: pesch@cygnus.com, 28mar91.
+% Blame: doc@cygnus.com, 28mar91.
 @end tex
 
 
