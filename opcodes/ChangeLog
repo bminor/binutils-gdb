@@ -1,15 +1,16 @@
 Wed Aug  2 08:23:38 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-dis.c (HASH_SIZE, HASH_INSN): Define.
-	(opcode_bits, opcode_hash_table, sparc64_p): New variables.
+	(opcode_bits, opcode_hash_table): New variables.
 	(opcodes_initialized): Renamed from opcodes_sorted.
 	(build_hash_table): New function.
 	(is_delayed_branch): Use hash table.
 	(print_insn): Renamed from print_insn_sparc, made static.
-	Build and use hash table.
-	(print_insn_sparc, print_insn_sparc64): New functions.
-	(compare_opcodes): If !sparc64, move sparc64 opcodes to end,
+	Build and use hash table.  If !sparc64, ignore sparc64 insns,
 	and vice-versa if sparc64.
+	(print_insn_sparc, print_insn_sparc64): New functions.
+	(compare_opcodes): Move sparc64 opcodes to end.
+	Print commutative insns with constant second.
 	* sparc-opc.c (all non-v9 insns): Use flag F_NOTV9 instead of F_ALIAS.
 
 Tue Aug  1 00:12:49 1995  Ian Lance Taylor  <ian@cygnus.com>
