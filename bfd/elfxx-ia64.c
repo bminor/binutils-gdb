@@ -3204,13 +3204,11 @@ elfNN_ia64_install_dyn_reloc (abfd, info, sec, srel, offset, type,
 {
   Elf_Internal_Rela outrel;
 
-  offset += sec->output_section->vma + sec->output_offset;
-
   BFD_ASSERT (dynindx != -1);
   outrel.r_info = ELFNN_R_INFO (dynindx, type);
   outrel.r_addend = addend;
   outrel.r_offset = _bfd_elf_section_offset (abfd, info, sec, offset);
-  if ((outrel.r_offset | 1) == (bfd_vma) -1)
+  if (outrel.r_offset >= (bfd_vma) -2)
     {
       /* Run for the hills.  We shouldn't be outputting a relocation
 	 for this.  So do what everyone else does and output a no-op.  */
@@ -3218,6 +3216,8 @@ elfNN_ia64_install_dyn_reloc (abfd, info, sec, srel, offset, type,
       outrel.r_addend = 0;
       outrel.r_offset = 0;
     }
+  else
+    outrel.r_offset += sec->output_section->vma + sec->output_offset;
 
   bfd_elfNN_swap_reloca_out (abfd, &outrel,
 			     ((ElfNN_External_Rela *) srel->contents

@@ -1,3 +1,15 @@
+2002-11-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Don't zero
+	relocs for discarded FDEs.  Remove dead code.
+	(_bfd_elf_write_section_eh_frame_hdr): Remove dead code.
+	* elflink.h (elf_bfd_discard_info): Don't save edited relocs.
+	Tidy conditions under which stabs are edited.  Formatting.
+	* elf64-sparc.c (sparc64_elf_relocate_section): Ignore overflows
+	from discarded relocs.
+	* elfxx-ia64.c (elfNN_ia64_install_dyn_reloc): Add reloc output
+	section adjustments after testing magic values.
+
 2002-11-12  Thomas Moestl <tmm@FreeBSD.org>
 
 	* elf64-sparc.c (sparc64_elf_adjust_dynamic_symbol): Correct

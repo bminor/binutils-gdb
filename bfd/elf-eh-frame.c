@@ -299,7 +299,6 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
   unsigned int leb128_tmp;
   unsigned int cie_usage_count, last_cie_ndx, i, offset;
   unsigned int make_relative, make_lsda_relative;
-  Elf_Internal_Rela *rel;
   bfd_size_type new_size;
   unsigned int ptr_size;
 
@@ -555,10 +554,9 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
 			       + ((buf - ehbuf + per_width - 1)
 				  & ~((bfd_size_type) per_width - 1)));
 		      ENSURE_NO_RELOCS (buf);
-		      rel = GET_RELOC (buf);
 		      /* Ensure we have a reloc here, against
 			 a global symbol.  */
-		      if (rel != NULL)
+		      if (GET_RELOC (buf) != NULL)
 			{
 			  unsigned long r_symndx;
 
@@ -626,8 +624,7 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
 	    goto free_no_table;
 
 	  ENSURE_NO_RELOCS (buf);
-	  rel = GET_RELOC (buf);
-	  if (rel == NULL)
+	  if (GET_RELOC (buf) == NULL)
 	    /* This should not happen.  */
 	    goto free_no_table;
 	  if ((*reloc_symbol_deleted_p) (buf - ehbuf, cookie))
@@ -636,7 +633,6 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
 		 be deleted.  */
 	      new_size -= hdr.length + 4;
 	      sec_info->entry[sec_info->count].removed = 1;
-	      memset (rel, 0, sizeof (*rel));
 	    }
 	  else
 	    {
@@ -654,7 +650,6 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
 	      cie_usage_count++;
 	      hdr_info->fde_count++;
 	    }
-	  cookie->rel = rel;
 	  if (cie.lsda_encoding != DW_EH_PE_omit)
 	    {
 	      unsigned int dummy;
@@ -751,10 +746,6 @@ _bfd_elf_discard_section_eh_frame_hdr (abfd, info, sec)
      asection *sec;
 {
   struct eh_frame_hdr_info *hdr_info;
-  unsigned int ptr_size;
-
-  ptr_size = (elf_elfheader (abfd)->e_ident[EI_CLASS]
-	      == ELFCLASS64) ? 8 : 4;
 
   if ((elf_section_data (sec)->sec_info_type
        != ELF_INFO_TYPE_EH_FRAME_HDR)
@@ -1179,13 +1170,9 @@ _bfd_elf_write_section_eh_frame_hdr (abfd, sec)
      asection *sec;
 {
   struct eh_frame_hdr_info *hdr_info;
-  unsigned int ptr_size;
   bfd_byte *contents;
   asection *eh_frame_sec;
   bfd_size_type size;
-
-  ptr_size = (elf_elfheader (sec->owner)->e_ident[EI_CLASS]
-	      == ELFCLASS64) ? 8 : 4;
 
   BFD_ASSERT (elf_section_data (sec)->sec_info_type
 	      == ELF_INFO_TYPE_EH_FRAME_HDR);

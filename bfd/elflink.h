@@ -8413,8 +8413,8 @@ elf_bfd_discard_info (output_bfd, info)
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_backend_data *bed;
   bfd *abfd;
+  unsigned int count;
   boolean ret = false;
-  boolean strip = info->strip == strip_all || info->strip == strip_debugger;
 
   if (info->relocateable
       || info->traditional_format
@@ -8438,26 +8438,25 @@ elf_bfd_discard_info (output_bfd, info)
 	continue;
 
       eh = NULL;
-      if (ehdr)
+      if (ehdr != NULL)
 	{
 	  eh = bfd_get_section_by_name (abfd, ".eh_frame");
-	  if (eh && (eh->_raw_size == 0
-		     || bfd_is_abs_section (eh->output_section)))
+	  if (eh != NULL
+	      && (eh->_raw_size == 0
+		  || bfd_is_abs_section (eh->output_section)))
 	    eh = NULL;
 	}
 
-      stab = NULL;
-      if (!strip)
-	{
-	  stab = bfd_get_section_by_name (abfd, ".stab");
-	  if (stab && (stab->_raw_size == 0
-		       || bfd_is_abs_section (stab->output_section)))
-	    stab = NULL;
-	}
-      if ((! stab
-	   || elf_section_data(stab)->sec_info_type != ELF_INFO_TYPE_STABS)
-	  && ! eh
-	  && (strip || ! bed->elf_backend_discard_info))
+      stab = bfd_get_section_by_name (abfd, ".stab");
+      if (stab != NULL
+	  && (stab->_raw_size == 0
+	      || bfd_is_abs_section (stab->output_section)
+	      || elf_section_data (stab)->sec_info_type != ELF_INFO_TYPE_STABS))
+	stab = NULL;
+
+      if (stab == NULL
+	  && eh == NULL
+	  && bed->elf_backend_discard_info == NULL)
 	continue;
 
       symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -8466,8 +8465,7 @@ elf_bfd_discard_info (output_bfd, info)
       cookie.bad_symtab = elf_bad_symtab (abfd);
       if (cookie.bad_symtab)
 	{
-	  cookie.locsymcount =
-	    symtab_hdr->sh_size / sizeof (Elf_External_Sym);
+	  cookie.locsymcount = symtab_hdr->sh_size / sizeof (Elf_External_Sym);
 	  cookie.extsymoff = 0;
 	}
       else
@@ -8486,16 +8484,19 @@ elf_bfd_discard_info (output_bfd, info)
 	    return false;
 	}
 
-      if (stab)
+      if (stab != NULL)
 	{
-	  cookie.rels = (NAME(_bfd_elf,link_read_relocs)
-			 (abfd, stab, (PTR) NULL, (Elf_Internal_Rela *) NULL,
-			  info->keep_memory));
-	  if (cookie.rels)
+	  cookie.rels = NULL;
+	  count = stab->reloc_count;
+	  if (count != 0)
+	    cookie.rels = (NAME(_bfd_elf,link_read_relocs)
+			   (abfd, stab, (PTR) NULL, (Elf_Internal_Rela *) NULL,
+			    info->keep_memory));
+	  if (cookie.rels != NULL)
 	    {
 	      cookie.rel = cookie.rels;
-	      cookie.relend =
-		cookie.rels + stab->reloc_count * bed->s->int_rels_per_ext_rel;
+	      cookie.relend = cookie.rels;
+	      cookie.relend += count * bed->s->int_rels_per_ext_rel;
 	      if (_bfd_discard_section_stabs (abfd, stab,
 					      elf_section_data (stab)->sec_info,
 					      elf_reloc_symbol_deleted_p,
@@ -8506,39 +8507,32 @@ elf_bfd_discard_info (output_bfd, info)
 	    }
 	}
 
-      if (eh)
+      if (eh != NULL)
 	{
 	  cookie.rels = NULL;
-	  cookie.rel = NULL;
-	  cookie.relend = NULL;
-	  if (eh->reloc_count)
+	  count = eh->reloc_count;
+	  if (count != 0)
 	    cookie.rels = (NAME(_bfd_elf,link_read_relocs)
 			   (abfd, eh, (PTR) NULL, (Elf_Internal_Rela *) NULL,
 			    info->keep_memory));
-	  if (cookie.rels)
-	    {
-	      cookie.rel = cookie.rels;
-	      cookie.relend =
-		cookie.rels + eh->reloc_count * bed->s->int_rels_per_ext_rel;
-	    }
+	  cookie.rel = cookie.rels;
+	  cookie.relend = cookie.rels;
+	  if (cookie.rels != NULL)
+	    cookie.relend += count * bed->s->int_rels_per_ext_rel;
+
 	  if (_bfd_elf_discard_section_eh_frame (abfd, info, eh, ehdr,
 						 elf_reloc_symbol_deleted_p,
 						 &cookie))
-	    {
-	      /* Relocs have been edited.  Ensure edited version is
-		 used later in relocate_section.  */
-	      elf_section_data (eh)->relocs = cookie.rels;
-	      ret = true;
-	    }
-	  if (cookie.rels && elf_section_data (eh)->relocs != cookie.rels)
+	    ret = true;
+
+	  if (cookie.rels != NULL
+	      && elf_section_data (eh)->relocs != cookie.rels)
 	    free (cookie.rels);
 	}
 
-      if (bed->elf_backend_discard_info)
-	{
-	  if (bed->elf_backend_discard_info (abfd, &cookie, info))
-	    ret = true;
-	}
+      if (bed->elf_backend_discard_info != NULL
+	  && (*bed->elf_backend_discard_info) (abfd, &cookie, info))
+	ret = true;
 
       if (cookie.locsyms != NULL
 	  && symtab_hdr->contents != (unsigned char *) cookie.locsyms)
@@ -8550,8 +8544,10 @@ elf_bfd_discard_info (output_bfd, info)
 	}
     }
 
-  if (ehdr && _bfd_elf_discard_section_eh_frame_hdr (output_bfd, info, ehdr))
+  if (ehdr != NULL
+      && _bfd_elf_discard_section_eh_frame_hdr (output_bfd, info, ehdr))
     ret = true;
+
   return ret;
 }
 
