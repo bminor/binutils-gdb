@@ -43,11 +43,6 @@ OP_581 ()
 }
 
 void
-OP_40 ()
-{
-}
-
-void
 OP_582 ()
 {
 }
@@ -108,11 +103,6 @@ OP_400 ()
 }
 
 void
-OP_2E0 ()
-{
-}
-
-void
 OP_160 ()
 {
 }
@@ -137,20 +127,6 @@ OP_660 ()
 {
 }
 
-void
-OP_E0 ()
-{
-}
-
-void
-OP_16087E0 ()
-{
-}
-
-void
-OP_16007E0 ()
-{
-}
 
 /* add reg, reg
 
@@ -205,6 +181,52 @@ OP_180 ()
   State.regs[OP[1]] = State.regs[OP[0]] - State.regs[OP[1]];
 }
 
+/* mulh reg1, reg2
+
+   XXX condition codes */
+void
+OP_E0 ()
+{
+  State.regs[OP[1]] = ((State.regs[OP[1]] & 0xffff)
+		       * (State.regs[OP[2]] & 0xffff));
+}
+
+/* mulh sign_extend(imm5), reg2
+
+   Condition codes */
+void
+OP_2E0 ()
+{
+  int value = OP[0];
+ 
+  value = (value << 27) >> 27;
+
+  State.regs[OP[1]] = (State.regs[OP[1]] & 0xffff) * value;
+}
+
+/* mulhi imm16, reg1, reg2
+
+   XXX condition codes */
+void
+OP_6E0 ()
+{
+  int value = OP[0];
+ 
+  value = value & 0xffff;
+
+  State.regs[OP[1]] = (State.regs[OP[1]] & 0xffff) * value;
+}
+
+/* divh reg1, reg2
+
+   XXX condition codes.
+   XXX Is this signed or unsigned?  */
+void
+OP_40 ()
+{
+  State.regs[OP[1]] /= (State.regs[OP[1]] & 0xffff);
+}
+
 void
 OP_8007E0 ()
 {
@@ -212,16 +234,6 @@ OP_8007E0 ()
 
 void
 OP_C007E0 ()
-{
-}
-
-void
-OP_12007E0 ()
-{
-}
-
-void
-OP_4007E0 ()
 {
 }
 
@@ -326,22 +338,12 @@ OP_260 ()
 }
 
 void
-OP_6E0 ()
-{
-}
-
-void
 OP_740 ()
 {
 }
 
 void
 OP_80 ()
-{
-}
-
-void
-OP_14007E0 ()
 {
 }
 
@@ -370,17 +372,7 @@ OP_2C0 ()
 }
 
 void
-OP_10007E0 ()
-{
-}
-
-void
 OP_47C0 ()
-{
-}
-
-void
-OP_2007E0 ()
 {
 }
 
@@ -474,3 +466,53 @@ void
 OP_501 ()
 {
 }
+
+/* di, not supported */
+void
+OP_16007E0 ()
+{
+  abort ();
+}
+
+/* ei, not supported */
+void
+OP_16087E0 ()
+{
+  abort ();
+}
+
+/* halt, not supported */
+void
+OP_12007E0 ()
+{
+  abort ();
+}
+
+/* reti, not supported */
+void
+OP_14007E0 ()
+{
+  abort ();
+}
+
+/* trap, not supportd */
+void
+OP_10007E0 ()
+{
+  abort ();
+}
+
+/* ldsr, not supported */
+void
+OP_2007E0 ()
+{
+  abort ();
+}
+
+/* stsr, not supported */
+void
+OP_4007E0 ()
+{
+  abort ();
+}
+
