@@ -1,3 +1,9 @@
+2004-07-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* osabi.c: Update copyright year.
+	(generic_elf_osabi_sniffer): Tweak comment.  Look for OS-specific
+	notes if EI_OSABI is set to ELFOSABI_HPUX.
+
 2004-07-01  Michael Snyder  <msnyder@redhat.com>
 
 	* win32-nat.c (core_dll_symbols_add): Re-indent a small section
