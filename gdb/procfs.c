@@ -1,5 +1,5 @@
 /* Machine independent support for SVR4 /proc (process file system) for GDB.
-   Copyright (C) 1991 Free Software Foundation, Inc.
+   Copyright 1991, 1992 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
 This file is part of GDB.
@@ -362,7 +362,7 @@ static int
 proc_address_to_fd PARAMS ((CORE_ADDR, int));
 
 static int
-open_proc_file PARAMS ((int, struct procinfo *));
+open_proc_file PARAMS ((int, struct procinfo *, int));
 
 static void
 close_proc_file PARAMS ((struct procinfo *));
@@ -1279,7 +1279,7 @@ void
 inferior_proc_init (pid)
      int pid;
 {
-  if (!open_proc_file (pid, &pi))
+  if (!open_proc_file (pid, &pi, O_RDWR))
     {
       proc_init_failed ("can't open process file");
     }
@@ -1434,6 +1434,21 @@ proc_set_exec_trap ()
 #else
 #if defined (PIOCRFORK)	/* Original method */
   ioctl (fd, PIOCRFORK, NULL);
+#endif
+#endif
+
+  /* Turn on run-on-last-close flag so that this process will not hang
+     if GDB goes away for some reason.  */
+
+#if defined (PIOCSET)	/* New method */
+  {
+      long pr_flags;
+      pr_flags = PR_RLC;
+      (void) ioctl (fd, PIOCSET, &pr_flags);
+  }
+#else
+#if defined (PIOCSRLC)	/* Original method */
+  (void) ioctl (fd, PIOCSRLC, 0);
 #endif
 #endif
 }
@@ -1601,7 +1616,8 @@ NOTES
 
 	The option of stopping at attach time is specific to the /proc
 	versions of gdb.  Versions using ptrace force the attachee
-	to stop.
+	to stop.  (I have changed this version to do so, too.  All you
+	have to do is "continue" to make it go on. -- gnu@cygnus.com)
 
 */
 
@@ -1609,7 +1625,9 @@ int
 attach (pid)
      int pid;
 {
-  if (!open_proc_file (pid, &pi))
+  int result;
+
+  if (!open_proc_file (pid, &pi, O_RDWR))
     {
       perror_with_name (pi.pathname);
       /* NOTREACHED */
@@ -1632,8 +1650,26 @@ attach (pid)
   else
     {
       pi.was_stopped = 0;
-      if (query ("Process is currently running, stop it? "))
+      if (1 || query ("Process is currently running, stop it? "))
 	{
+	  /* Make it run again when we close it.  */
+#if defined (PIOCSET)	/* New method */
+	  {
+	      long pr_flags;
+	      pr_flags = PR_RLC;
+	      result = ioctl (pi.fd, PIOCSET, &pr_flags);
+	  }
+#else
+#if defined (PIOCSRLC)	/* Original method */
+	  result = ioctl (pi.fd, PIOCSRLC, 0);
+#endif
+#endif
+	  if (result < 0)
+	    {
+	      print_sys_errmsg (pi.pathname, errno);
+	      close_proc_file (&pi);
+	      error ("PIOCSRLC or PIOCSET failed");
+	    }
 	  if (ioctl (pi.fd, PIOCSTOP, &pi.prstatus) < 0)
 	    {
 	      print_sys_errmsg (pi.pathname, errno);
@@ -1647,7 +1683,7 @@ attach (pid)
 	  printf ("Ok, gdb will wait for process %u to stop.\n", pid);
 	}
     }
-  
+
   /*  Remember some things about the inferior that we will, or might, change
       so that we can restore them when we detach. */
   
@@ -1709,6 +1745,8 @@ void
 detach (signal)
      int signal;
 {
+  int result;
+
   if (signal)
     {
       set_proc_siginfo (&pi, signal);
@@ -1750,12 +1788,29 @@ detach (signal)
 	  if (signal || !pi.was_stopped ||
 	      query ("Was stopped when attached, make it runnable again? "))
 	    {
-	      memset (&pi.prrun, 0, sizeof (pi.prrun));
-	      pi.prrun.pr_flags = PRCFAULT;
-	      if (ioctl (pi.fd, PIOCRUN, &pi.prrun))
+	      /* Clear any fault that might have stopped it.  */
+	      if (ioctl (pi.fd, PIOCCFAULT, 0))
+  		{
+  		  print_sys_errmsg (pi.pathname, errno);
+		  printf ("PIOCCFAULT failed.\n");
+  		}
+
+	      /* Make it run again when we close it.  */
+#if defined (PIOCSET)	/* New method */
+	      {
+		  long pr_flags;
+		  pr_flags = PR_RLC;
+		  result = ioctl (pi.fd, PIOCSET, &pr_flags);
+	      }
+#else
+#if defined (PIOCSRLC)	/* Original method */
+	      result = ioctl (pi.fd, PIOCSRLC, 0);
+#endif
+#endif
+	      if (result)
 		{
 		  print_sys_errmsg (pi.pathname, errno);
-		  printf ("PIOCRUN failed.\n");
+		  printf ("PIOCSRLC or PIOCSET failed.\n");
 		}
 	    }
 	}
@@ -2238,15 +2293,16 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	static int open_proc_file (pid, struct procinfo *pip)
+	static int open_proc_file (int pid, struct procinfo *pip, int mode)
 
 DESCRIPTION
 
-	Given a process id, close the existing open /proc entry (if any)
-	and open one for the new process id.  Once it is open, then
-	mark the local process information structure as valid, which
-	guarantees that the pid, fd, and pathname fields match an open
-	/proc entry.  Returns zero if the open fails, nonzero otherwise.
+	Given a process id and a mode, close the existing open /proc
+	entry (if any) and open one for the new process id, in the
+	specified mode.  Once it is open, then mark the local process
+	information structure as valid, which guarantees that the pid,
+	fd, and pathname fields match an open /proc entry.  Returns
+	zero if the open fails, nonzero otherwise.
 
 	Note that the pathname is left intact, even when the open fails,
 	so that callers can use it to construct meaningful error messages
@@ -2254,11 +2310,12 @@ DESCRIPTION
  */
 
 static int
-open_proc_file (pid, pip)
+open_proc_file (pid, pip, mode)
      int pid;
      struct procinfo *pip;
+     int mode;
 {
-  pip -> valid = 0;
+  pip -> valid = 0;		/* FIXME, what is this? ?!  */
   if (pip -> valid)
     {
       close (pip -> fd);
@@ -2268,7 +2325,7 @@ open_proc_file (pid, pip)
       pip -> pathname = xmalloc (32);
     }
   sprintf (pip -> pathname, PROC_NAME_FMT, pid);
-  if ((pip -> fd = open (pip -> pathname, O_RDWR)) >= 0)
+  if ((pip -> fd = open (pip -> pathname, mode)) >= 0)
     {
       pip -> valid = 1;
       pip -> pid = pid;
@@ -2843,7 +2900,7 @@ info_proc (args, from_tty)
 	      pid = pii.pid;
 	      pip = &pii;
 	      memset (&pii, 0, sizeof (pii));
-	      if (!open_proc_file (pid, pip))
+	      if (!open_proc_file (pid, pip, O_RDONLY))
 		{
 		  perror_with_name (pip -> pathname);
 		  /* NOTREACHED */

@@ -1,3 +1,20 @@
+Sun Jul  5 03:06:39 1992  John Gilmore  (gnu at cygnus.com)
+
+	* buildsym.c (finish_block):  Fix thinko `inner block' complaints.
+	* dbxread.c (process_one_symbol):  Parse N_OPT "gcc2_compiled.".
+	* procfs.c (proc_set_exec_trap): Set run-on-last-close flag on
+	child processes, to avoid dead ones "hanging around" after GDB exits.
+	(attach): Always stop the process if it needs it.  Set RLC flag
+	when attaching running processes, so it will continue if we detach
+	it, quit, or are killed.
+	(detach):  Clear faults and set RLC flag to make process run
+	when we close it.
+	(open_proc_file):  New `mode' argument for O_RDONLY or O_RDWR.
+	Callers changed.
+	(info_proc):  Open process O_RDONLY, so we can see any process,
+	even those controlled by debuggers.
+	* tm-sun4sol2.h (SUN_FIXED_LBRAC_BUG):  They did (in Sol 2).
+
 Sat Jul  4 03:43:38 1992  John Gilmore  (gnu at cygnus.com)
 
 	Relocate symbols using an array of section_offsets, rather than a

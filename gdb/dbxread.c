@@ -1929,9 +1929,19 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	define_symbol (valu, name, desc, type, objfile);
       break;
 
+    /* We use N_OPT to carry the gcc2_compiled flag.  Sun uses it
+       for a bunch of other flags, too.  Someday we may parse their
+       flags; for now we ignore theirs and hope they'll ignore ours.  */
+    case N_OPT:			/* Solaris 2:  Compiler options */
+      if (name)
+	{
+	  if (!strcmp (name, GCC2_COMPILED_FLAG_SYMBOL))
+	    processing_gcc_compilation = 1;
+	}
+      break;
+
     /* The following symbol types can be ignored.  */
     case N_OBJ:			/* Solaris 2:  Object file dir and name */
-    case N_OPT:			/* Solaris 2:  Optimization level? */
     /*   N_UNDF: 		   Solaris 2:  file separator mark */
     /*   N_UNDF: -- we will never encounter it, since we only process one
 		    file's symbols at once.  */

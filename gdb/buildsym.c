@@ -450,8 +450,10 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
 	   amount of time.  */
 	if (BLOCK_START (pblock->block) < BLOCK_START (block)
 	 || BLOCK_END   (pblock->block) > BLOCK_END   (block)) {
-	  complain(symbol? &innerblock_complaint : &innerblock_anon_complaint,
-	           SYMBOL_NAME (symbol));
+	  if (symbol)
+	    complain(&innerblock_complaint, SYMBOL_NAME (symbol));
+	  else
+	    complain(&innerblock_anon_complaint, 0);
 	  BLOCK_START (pblock->block) = BLOCK_START (block);
 	  BLOCK_END   (pblock->block) = BLOCK_END   (block);
 	}
