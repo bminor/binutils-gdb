@@ -1,3 +1,12 @@
+2000-12-16  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* safe-ctype.c: #include "ansidecl.h".
+	* strtod.c: Likewise.
+
+2000-12-16  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* strtoul.c: Include safe-ctype.h, not ctype.h.
+
 2000-12-07  Zack Weinberg  <zack@wolery.stanford.edu>
 
 	* safe-ctype.c: New file.
