@@ -1,3 +1,13 @@
+2002-03-01  David Mosberger  <davidm@hpl.hp.com>
+
+	* elflink.h (size_dynamic_sections): If section named
+	".preinit_array" exists, create DT_PREINIT_ARRAY and
+	DT_PREINIT_ARRAYSZ entries in dynamic table.  Analogously for
+	".init_array" and ".fini_array".
+	(elf_bfd_final_link): Handle DT_PREINIT_ARRAYSZ, DT_INIT_ARRAYSZ,
+	DT_FINI_ARRAYSZ, DT_PREINIT_ARRAY, DT_INIT_ARRAY, and
+	DT_FINI_ARRAY.
+
 2002-02-26  Andrew Macleod  <amacleod@cygnus.com>
 
 	* elflink.h (elf_bfd_final_link): Don't crash on SHN_UNDEF local

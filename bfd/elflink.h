@@ -3029,7 +3029,9 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
      struct bfd_elf_version_tree *verdefs;
 {
   bfd_size_type soname_indx;
-  bfd *dynobj;
+  bfd *dynobj, *sub;
+  asection *o;
+  int need_preinit_array = 0, need_init_array = 0, need_fini_array = 0;
   struct elf_backend_data *bed;
   struct elf_assign_sym_version_info asvinfo;
 
@@ -3197,6 +3199,43 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 					| ELF_LINK_HASH_DEF_REGULAR)) != 0)
 	{
 	  if (! elf_add_dynamic_entry (info, (bfd_vma) DT_FINI, (bfd_vma) 0))
+	    return false;
+	}
+
+      for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+	for (o = sub->sections; o != NULL; o = o->next)
+	  {
+	    /* yuck, more matching by name... */
+
+	    if (strcmp (bfd_section_name (sub, o), ".preinit_array") == 0)
+	      need_preinit_array = 1;
+	    if (strcmp (bfd_section_name (sub, o), ".init_array") == 0)
+	      need_init_array = 1;
+	    if (strcmp (bfd_section_name (sub, o), ".fini_array") == 0)
+	      need_fini_array = 1;
+	  }
+      if (need_preinit_array)
+	{
+	  if (!elf_add_dynamic_entry (info, (bfd_vma) DT_PREINIT_ARRAY,
+				      (bfd_vma) 0)
+	      || !elf_add_dynamic_entry (info, (bfd_vma) DT_PREINIT_ARRAYSZ,
+					 (bfd_vma) 0))
+	    return false;
+	}
+      if (need_init_array)
+	{
+	  if (!elf_add_dynamic_entry (info, (bfd_vma) DT_INIT_ARRAY,
+				      (bfd_vma) 0)
+	      || !elf_add_dynamic_entry (info, (bfd_vma) DT_INIT_ARRAYSZ,
+					 (bfd_vma) 0))
+	    return false;
+	}
+      if (need_fini_array)
+	{
+	  if (!elf_add_dynamic_entry (info, (bfd_vma) DT_FINI_ARRAY,
+				      (bfd_vma) 0)
+	      || !elf_add_dynamic_entry (info, (bfd_vma) DT_FINI_ARRAYSZ,
+					 (bfd_vma) 0))
 	    return false;
 	}
 
@@ -5549,6 +5588,31 @@ elf_bfd_final_link (abfd, info)
 		  }
 	      }
 	      break;
+
+	    case DT_PREINIT_ARRAYSZ:
+	      name = ".preinit_array";
+	      goto get_size;
+	    case DT_INIT_ARRAYSZ:
+	      name = ".init_array";
+	      goto get_size;
+	    case DT_FINI_ARRAYSZ:
+	      name = ".fini_array";
+	    get_size:
+	      o = bfd_get_section_by_name (abfd, name);
+	      BFD_ASSERT (o != NULL);
+	      dyn.d_un.d_val = o->_raw_size;
+	      elf_swap_dyn_out (dynobj, &dyn, dyncon);
+	      break;
+
+	    case DT_PREINIT_ARRAY:
+	      name = ".preinit_array";
+	      goto get_vma;
+	    case DT_INIT_ARRAY:
+	      name = ".init_array";
+	      goto get_vma;
+	    case DT_FINI_ARRAY:
+	      name = ".fini_array";
+	      goto get_vma;
 
 	    case DT_HASH:
 	      name = ".hash";
