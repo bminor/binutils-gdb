@@ -225,23 +225,50 @@ usage (stream, status)
      FILE *stream;
      int status;
 {
+  fprintf (stream, _("Usage: %s <switches> file(s)\n"), program_name);
+  fprintf (stream, _(" At least one of the following switches must be given:\n"));
   fprintf (stream, _("\
-Usage: %s [-ahifCdDprRtTxsSlw] [-b bfdname] [-m machine] \n\
-       [-j section-name] [-M disassembler-options]\n\
-       [--archive-headers] [--target=bfdname] [--debugging] [--disassemble]\n\
-       [--disassemble-all] [--disassemble-zeroes] [--file-headers]\n\
-       [--section-headers] [--headers]\n\
-       [--info] [--section=section-name] [--line-numbers] [--source]\n"),
-	   program_name);
-  fprintf (stream, _("\
-       [--architecture=machine] [--reloc] [--full-contents] [--stabs]\n\
-       [--syms] [--all-headers] [--dynamic-syms] [--dynamic-reloc]\n\
-       [--wide] [--version] [--help] [--private-headers]\n\
-       [--start-address=addr] [--stop-address=addr]\n\
-       [--prefix-addresses] [--[no-]show-raw-insn] [--demangle]\n\
-       [--adjust-vma=offset] [-EB|-EL] [--endian={big|little}] objfile...\n\
-at least one option besides -l (--line-numbers) must be given\n"));
-  list_supported_targets (program_name, stream);
+  -a  --archive-headers    Display archive header information\n\
+  -f  --file-headers       Display the contents of the overall file header\n\
+  -p  --private-headers    Display object format specific file header contents\n\
+  -h  --[section-]headers  Display the contents of the section headers\n\
+  -x  --all-headers        Display the contents of all headers\n\
+  -d  --disassemble        Display assembler contents of executable sections\n\
+  -D  --disassemble-all    Display assembler contents of all sections\n\
+  -S  --source             Intermix source code with disassembly\n\
+  -s  --full-contents      Display the full contents of all sections requested\n\
+  -g  --debugging          Display debug information in object file\n\
+  -G  --stabs              Display the STABS contents of an ELF format file\n\
+  -t  --syms               Display the contents of the symbol table(s)\n\
+  -T  --dynamic-syms       Display the contents of the dynamic symbol table\n\
+  -r  --reloc              Display the relocation entries in the file\n\
+  -R  --dynamic-reloc      Display the dynamic relocation entries in the file\n\
+  -V  --version            Display this program's version number\n\
+  -i  --info               List object formats and architectures supported\n\
+  -H  --help               Display this information\n\
+"));
+  if (status != 2)
+    {
+      fprintf (stream, _("\n The following switches are optional:\n"));
+      fprintf (stream, _("\
+  -b  --target <bfdname>         Specify the target object format as <bfdname>\n\
+  -m  --architecture <machine>   Specify the target architecture as <machine>\n\
+  -j  --section <name>           Only display information for section <name>\n\
+  -M  --disassembler-options <o> Pass text <o> on to the disassembler\n\
+  -EB --endian=big               Assume big endian format when disassembling\n\
+  -EL --endian=little            Assume little endian format when disassembling\n\
+  -l  --line-numbers             Include line numbers and filenames in output\n\
+  -C  --demangle                 Decode mangled/processed symbol names\n\
+  -w  --wide                     Format output for more than 80 columns\n\
+  -z  --disassemble-zeroes       Do not skip blocks of zeroes when disassembling\n\
+      --start-address <addr>     Only process data whoes address is >= <addr>\n\
+      --stop-address <addr>      Only process data whoes address is <= <addr>\n\
+      --prefix-addresses         Print complete address alongside disassembly\n\
+      --[no-]show-raw-insn       Display hex alongside symbolic disassembly\n\
+      --adjust-vma <offset>      Add <offset> to all displayed section addresses\n\
+\n"));
+      list_supported_targets (program_name, stream);
+    }
   if (status == 0)
     fprintf (stream, _("Report bugs to bug-gnu-utils@gnu.org\n"));
   exit (status);
@@ -261,12 +288,12 @@ static struct option long_options[]=
   {"private-headers", no_argument, NULL, 'p'},
   {"architecture", required_argument, NULL, 'm'},
   {"archive-headers", no_argument, NULL, 'a'},
-  {"debugging", no_argument, &dump_debugging, 1},
-  {"demangle", no_argument, &do_demangle, 1},
+  {"debugging", no_argument, NULL, 'g'},
+  {"demangle", no_argument, NULL, 'C'},
   {"disassemble", no_argument, NULL, 'd'},
   {"disassemble-all", no_argument, NULL, 'D'},
   {"disassembler-options", required_argument, NULL, 'M'},
-  {"disassemble-zeroes", no_argument, &disassemble_zeroes, 1},
+  {"disassemble-zeroes", no_argument, NULL, 'z'},
   {"dynamic-reloc", no_argument, NULL, 'R'},
   {"dynamic-syms", no_argument, NULL, 'T'},
   {"endian", required_argument, NULL, OPTION_ENDIAN},
@@ -283,13 +310,13 @@ static struct option long_options[]=
   {"section-headers", no_argument, NULL, 'h'},
   {"show-raw-insn", no_argument, &show_raw_insn, 1},
   {"source", no_argument, NULL, 'S'},
-  {"stabs", no_argument, &dump_stab_section_info, 1},
+  {"stabs", no_argument, NULL, 'G'},
   {"start-address", required_argument, NULL, OPTION_START_ADDRESS},
   {"stop-address", required_argument, NULL, OPTION_STOP_ADDRESS},
   {"syms", no_argument, NULL, 't'},
   {"target", required_argument, NULL, 'b'},
-  {"version", no_argument, &show_version, 1},
-  {"wide", no_argument, &wide_output, 'w'},
+  {"version", no_argument, NULL, 'V'},
+  {"wide", no_argument, NULL, 'w'},
   {0, no_argument, 0, 0}
 };
 
@@ -2767,12 +2794,10 @@ main (argc, argv)
   bfd_init ();
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "pib:m:M:VCdDlfahrRtTxsSj:wE:",
+  while ((c = getopt_long (argc, argv, "pib:m:M:VCdDlfahHrRtTxsSj:wE:zgG",
 			   long_options, (int *) 0))
 	 != EOF)
     {
-      if (c != 'l' && c != OPTION_START_ADDRESS && c != OPTION_STOP_ADDRESS)
-	seenflag = true;
       switch (c)
 	{
 	case 0:
@@ -2787,69 +2812,16 @@ main (argc, argv)
 	  only = optarg;
 	  break;
 	case 'l':
-	  with_line_numbers = 1;
+	  with_line_numbers = true;
 	  break;
 	case 'b':
 	  target = optarg;
 	  break;
-	case 'f':
-	  dump_file_header = true;
-	  break;
-	case 'i':
-	  formats_info = true;
-	  break;
-	case 'p':
-	  dump_private_headers = 1;
-	  break;
-	case 'x':
-	  dump_private_headers = 1;
-	  dump_symtab = 1;
-	  dump_reloc_info = 1;
-	  dump_file_header = true;
-	  dump_ar_hdrs = 1;
-	  dump_section_headers = 1;
-	  break;
-	case 't':
-	  dump_symtab = 1;
-	  break;
-	case 'T':
-	  dump_dynamic_symtab = 1;
-	  break;
 	case 'C':
-	  do_demangle = 1;
-	  break;
-	case 'd':
-	  disassemble = true;
-	  break;
-	case 'D':
-	  disassemble = disassemble_all = true;
-	  break;
-	case 'S':
-	  disassemble = true;
-	  with_source_code = true;
-	  break;
-	case 's':
-	  dump_section_contents = 1;
-	  break;
-	case 'r':
-	  dump_reloc_info = 1;
-	  break;
-	case 'R':
-	  dump_dynamic_reloc_info = 1;
-	  break;
-	case 'a':
-	  dump_ar_hdrs = 1;
-	  break;
-	case 'h':
-	  dump_section_headers = 1;
-	  break;
-	case 'H':
-	  usage (stdout, 0);
-	case 'V':
-	  show_version = 1;
+	  do_demangle = true;
 	  break;
 	case 'w':
-	  wide_output = 1;
+	  wide_output = true;
 	  break;
 	case OPTION_ADJUST_VMA:
 	  adjust_section_vma = parse_vma (optarg, "--adjust-vma");
@@ -2884,6 +2856,89 @@ main (argc, argv)
 	      usage (stderr, 1);
 	    }
 	  break;
+	  
+	case 'f':
+	  dump_file_header = true;
+	  seenflag = true;
+	  break;
+	case 'i':
+	  formats_info = true;
+	  seenflag = true;
+	  break;
+	case 'p':
+	  dump_private_headers = true;
+	  seenflag = true;
+	  break;
+	case 'x':
+	  dump_private_headers = true;
+	  dump_symtab = true;
+	  dump_reloc_info = true;
+	  dump_file_header = true;
+	  dump_ar_hdrs = true;
+	  dump_section_headers = true;
+	  seenflag = true;
+	  break;
+	case 't':
+	  dump_symtab = true;
+	  seenflag = true;
+	  break;
+	case 'T':
+	  dump_dynamic_symtab = true;
+	  seenflag = true;
+	  break;
+	case 'd':
+	  disassemble = true;
+	  seenflag = true;
+	  break;
+	case 'z':
+	  disassemble_zeroes = true;
+	  break;
+	case 'D':
+	  disassemble = true;
+	  disassemble_all = true;
+	  seenflag = true;
+	  break;
+	case 'S':
+	  disassemble = true;
+	  with_source_code = true;
+	  seenflag = true;
+	  break;
+	case 'g':
+	  dump_debugging = 1;
+	  seenflag = true;
+	  break;
+	case 'G':
+	  dump_stab_section_info = true;
+	  seenflag = true;
+	  break;
+	case 's':
+	  dump_section_contents = true;
+	  seenflag = true;
+	  break;
+	case 'r':
+	  dump_reloc_info = true;
+	  seenflag = true;
+	  break;
+	case 'R':
+	  dump_dynamic_reloc_info = true;
+	  seenflag = true;
+	  break;
+	case 'a':
+	  dump_ar_hdrs = true;
+	  seenflag = true;
+	  break;
+	case 'h':
+	  dump_section_headers = true;
+	  seenflag = true;
+	  break;
+	case 'H':
+	  usage (stdout, 0);
+	  seenflag = true;
+	case 'V':
+	  show_version = true;
+	  seenflag = true;
+	  break;
+	  
 	default:
 	  usage (stderr, 1);
 	}
@@ -2893,12 +2948,10 @@ main (argc, argv)
     print_version ("objdump");
 
   if (seenflag == false)
-    usage (stderr, 1);
+    usage (stderr, 2);
 
   if (formats_info)
-    {
-      display_info ();
-    }
+    display_info ();
   else
     {
       if (optind == argc)

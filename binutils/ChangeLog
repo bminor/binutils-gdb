@@ -1,3 +1,15 @@
+1999-11-21  Nick Clifton  <nickc@cygnus.com>
+
+	* objdump.c (usage): Overhaul output:  One line per switch.
+	Textual description of each switch.  Distinguish between
+	optional switches and required switches.
+	(long_options): Add 'g', 'G' and 'z' short options.
+	(main): Distinguish between optional switches and required
+	switches.
+
+	* binutils.texi: Add -g -G and -z short options for
+	--debugging, --stabs and --disassemble-zeroes.
+
 1999-11-03  Nick Clifton  <nickc@cygnus.com>
 
 	* dlltool.c (flush_page): Clip short values to prevent warnings

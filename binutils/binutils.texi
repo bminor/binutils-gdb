@@ -1157,25 +1157,37 @@ Show a summary of the options to @code{objcopy}.
 
 @smallexample
 objdump [ -a | --archive-headers ] 
-        [ -b @var{bfdname} | --target=@var{bfdname} ] [ --debugging ]
-        [ -C | --demangle ] [ -d | --disassemble ]
-        [ -D | --disassemble-all ] [ --disassemble-zeroes ]
+        [ -b @var{bfdname} | --target=@var{bfdname} ] 
+        [ -C | --demangle ]
+        [ -d | --disassemble ]
+        [ -D | --disassemble-all ]
+        [ -z | --disassemble-zeroes ]
         [ -EB | -EL | --endian=@{big | little @} ]
         [ -f | --file-headers ]
-        [ -h | --section-headers | --headers ]  [ -i | --info ]
+        [ -g | --debugging ]
+        [ -h | --section-headers | --headers ]
+        [ -i | --info ]
         [ -j @var{section} | --section=@var{section} ]
-        [ -l | --line-numbers ] [ -S | --source ]
+        [ -l | --line-numbers ]
+        [ -S | --source ]
         [ -m @var{machine} | --architecture=@var{machine} ]
         [ -M @var{options} | --disassembler-options=@var{options}]
         [ -p | --private-headers ]
-        [ -r | --reloc ] [ -R | --dynamic-reloc ]
-        [ -s | --full-contents ]  [ --stabs ]
-        [ -t | --syms ] [ -T | --dynamic-syms ] [ -x | --all-headers ]
-        [ -w | --wide ] [ --start-address=@var{address} ]
+        [ -r | --reloc ]
+        [ -R | --dynamic-reloc ]
+        [ -s | --full-contents ]
+        [ -G | --stabs ]
+        [ -t | --syms ]
+        [ -T | --dynamic-syms ]
+        [ -x | --all-headers ]
+        [ -w | --wide ]
+        [ --start-address=@var{address} ]
         [ --stop-address=@var{address} ]
-        [ --prefix-addresses] [ --[no-]show-raw-insn ]
+        [ --prefix-addresses]
+        [ --[no-]show-raw-insn ]
         [ --adjust-vma=@var{offset} ]
-        [ --version ]  [ --help ]
+        [ -V | --version ]
+        [ -H | --help ]
         @var{objfile}@dots{}
 @end smallexample
 
@@ -1190,7 +1202,8 @@ specify archives, @code{objdump} shows information on each of the member
 object files.
 
 The long and short forms of options, shown here as alternatives, are
-equivalent.  At least one option besides @samp{-l} must be given.
+equivalent.  At least one option from the list
+@samp{-a,-d,-D,-f,-g,-G,-h,-H,-p,-r,-R,-S,-t,-T,-V,-x} must be given. 
 
 @table @code
 @item -a
@@ -1236,6 +1249,7 @@ Besides removing any initial underscore prepended by the system, this
 makes C++ function names readable.  @xref{c++filt}, for more information
 on demangling.
 
+@item -G
 @item --debugging
 Display debugging information.  This attempts to parse debugging
 information stored in the file and print it out using a C like syntax.
@@ -1382,6 +1396,7 @@ in symbolic form.  This is the default except when
 When disassembling instructions, do not print the instruction bytes.
 This is the default when @code{--prefix-addresses} is used.
 
+@item -G
 @item --stabs
 @cindex stab
 @cindex .stab
