@@ -20,9 +20,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$
    $Log$
-   Revision 1.5  1991/05/22 01:40:35  rich
-   Oops.
+   Revision 1.6  1991/05/23 03:49:10  rich
+   new sparc-opcode, new pinsn.
 
+ * Revision 1.5  1991/05/22  01:40:35  rich
+ * Oops.
+ *
  * Revision 1.4  1991/05/22  01:17:48  rich
  * v9 stuff.
  *
@@ -140,8 +143,8 @@ union sparc_insn
     struct
       {
 	unsigned int _OP:2;
-	unsigned int DISP30:30;
-#define	disp30	call.DISP30
+	unsigned int _DISP30:30;
+#define	disp30	call._DISP30
       } call;
   };
 
