@@ -1,3 +1,10 @@
+Wed Mar 12 11:40:20 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* doc/as.texinfo (bss): Improve description of .bss section.  In
+	ELF or COFF, you are permitted to switch into the section.
+	(Comm): Rewrite description of common symbols.
+	(Lcomm): Mention that some targets permit a third argument.
+
 Tue Mar 11 01:13:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-ppc.c (ppc_elf_lcomm): Don't call S_CLEAR_EXTERNAL.
