@@ -1,5 +1,10 @@
 2001-09-24  Andrew Cagney  <ac131313@redhat.com>
 
+	* findvar.c (read_var_value): For LOC_INDIRECT and LOC_REF_ARG
+	convert the pointer into a CORE_ADDRs.
+
+2001-09-24  Andrew Cagney  <ac131313@redhat.com>
+
 	* doublest.h (store_floating, extract_floating): Add comment
 	indicating these functions are deprecated.
 	(extract_typed_floating, store_typed_floating): Declare.

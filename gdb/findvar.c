@@ -471,18 +471,21 @@ read_var_value (register struct symbol *var, struct frame_info *frame)
       break;
 
     case LOC_INDIRECT:
-      /* The import slot does not have a real address in it from the
-         dynamic loader (dld.sl on HP-UX), if the target hasn't begun
-         execution yet, so check for that. */
-      if (!target_has_execution)
-	error ("\
+      {
+	/* The import slot does not have a real address in it from the
+	   dynamic loader (dld.sl on HP-UX), if the target hasn't
+	   begun execution yet, so check for that. */
+	CORE_ADDR locaddr;
+	struct value *loc;
+	if (!target_has_execution)
+	  error ("\
 Attempt to access variable defined in different shared object or load module when\n\
 addresses have not been bound by the dynamic loader. Try again when executable is running.");
 
-      addr = SYMBOL_VALUE_ADDRESS (var);
-      addr = read_memory_unsigned_integer
-	(addr, TARGET_PTR_BIT / TARGET_CHAR_BIT);
-      break;
+	locaddr = SYMBOL_VALUE_ADDRESS (var);
+	loc = value_at (lookup_pointer_type (type), locaddr, NULL);
+	addr = value_as_pointer (loc);
+      }
 
     case LOC_ARG:
       if (frame == NULL)
@@ -494,15 +497,19 @@ addresses have not been bound by the dynamic loader. Try again when executable i
       break;
 
     case LOC_REF_ARG:
-      if (frame == NULL)
-	return 0;
-      addr = FRAME_ARGS_ADDRESS (frame);
-      if (!addr)
-	return 0;
-      addr += SYMBOL_VALUE (var);
-      addr = read_memory_unsigned_integer
-	(addr, TARGET_PTR_BIT / TARGET_CHAR_BIT);
-      break;
+      {
+	struct value *ref;
+	CORE_ADDR argref;
+	if (frame == NULL)
+	  return 0;
+	argref = FRAME_ARGS_ADDRESS (frame);
+	if (!argref)
+	  return 0;
+	argref += SYMBOL_VALUE (var);
+	ref = value_at (lookup_pointer_type (type), argref, NULL);
+	addr = value_as_pointer (ref);
+	break;
+      }
 
     case LOC_LOCAL:
     case LOC_LOCAL_ARG:
