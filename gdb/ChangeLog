@@ -1,3 +1,10 @@
+2004-02-03  Andrew Cagney  <cagney@redhat.com>
+
+	* ia64-tdep.c (read_sigcontext_register): Delete unused function.
+	(process_note_abi_tag_sections): Delete unused function.
+	(ia64_read_fp): Delete unused function.
+	(gdbarch_extract_struct_value_address): Delete declaration.
+
 2004-02-02  Andrew Cagney  <cagney@redhat.com>
 
 	* vax-tdep.c (vax_frame_chain): Delete call to
