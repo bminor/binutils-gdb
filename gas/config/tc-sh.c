@@ -2122,15 +2122,15 @@ assemble_ppi (op_end, opcode)
   int move_code;
   unsigned int size;
 
-  /* Some insn ignore one or more register fields, e.g. psts machl,a0.
-     Make sure we encode a defined insn pattern.  */
-  reg_x = 0;
-  reg_y = 0;
-  reg_n = 0;
-
   for (;;)
     {
       sh_operand_info operand[3];
+
+      /* Some insn ignore one or more register fields, e.g. psts machl,a0.
+	 Make sure we encode a defined insn pattern.  */
+      reg_x = 0;
+      reg_y = 0;
+      reg_n = 0;
 
       if (opcode->arg[0] != A_END)
 	op_end = get_operands (opcode, op_end, operand);

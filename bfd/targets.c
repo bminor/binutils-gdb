@@ -1249,7 +1249,9 @@ bfd_target_list ()
     return NULL;
 
   for (target = &bfd_target_vector[0]; *target != NULL; target++)
-    *(name_ptr++) = (*target)->name;
+    if (target == &bfd_target_vector[0]
+	|| *target != bfd_target_vector[0])
+      *name_ptr++ = (*target)->name;
 
   return name_list;
 }

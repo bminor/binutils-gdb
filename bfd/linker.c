@@ -449,7 +449,8 @@ _bfd_link_hash_newfunc (entry, table, string)
      subclass.  */
   if (entry == NULL)
     {
-      entry = bfd_hash_allocate (table, sizeof (struct bfd_link_hash_entry));
+      entry = (struct bfd_hash_entry *)
+	bfd_hash_allocate (table, sizeof (struct bfd_link_hash_entry));
       if (entry == NULL)
 	return entry;
     }
@@ -645,8 +646,8 @@ _bfd_generic_link_hash_newfunc (entry, table, string)
      subclass.  */
   if (entry == NULL)
     {
-      entry = bfd_hash_allocate (table,
-				 sizeof (struct generic_link_hash_entry));
+      entry = (struct bfd_hash_entry *)
+	bfd_hash_allocate (table, sizeof (struct generic_link_hash_entry));
       if (entry == NULL)
 	return entry;
     }
@@ -2019,7 +2020,7 @@ _bfd_generic_final_link (abfd, info)
   for (o = abfd->sections; o != NULL; o = o->next)
     for (p = o->link_order_head; p != NULL; p = p->next)
       if (p->type == bfd_indirect_link_order)
-	p->u.indirect.section->linker_mark = true;
+	p->u.indirect.section->linker_mark = (unsigned int) true;
 
   /* Build the output symbol table.  */
   for (sub = info->input_bfds; sub != (bfd *) NULL; sub = sub->link_next)

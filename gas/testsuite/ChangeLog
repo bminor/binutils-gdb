@@ -1,3 +1,10 @@
+2002-10-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+	2002-10-21  Richard Sandiford  <rsandifo@redhat.com>
+	* gas/mips/elf-rel7.[sd]: New test.
+	* gas/mips/mips.exp: Run it.
+
 2002-09-23  Daniel Jacobowitz  <drow@mvista.com>
 
 	Merge from mainline:

@@ -263,35 +263,34 @@ SECTIONS
       ${RELOCATING+*(.rela.bss.*)}
       ${RELOCATING+*(.rela.gnu.linkonce.b.*)}
     }
-  .rela.stext		${RELOCATING-0} : { *(.rela.stest) }
-  .rela.etext		${RELOCATING-0} : { *(.rela.etest) }
-  .rela.sdata		${RELOCATING-0} : { *(.rela.sdata) }
-  .rela.edata		${RELOCATING-0} : { *(.rela.edata) }
-  .rela.eit_v		${RELOCATING-0} : { *(.rela.eit_v) }
-  .rela.ebss		${RELOCATING-0} : { *(.rela.ebss) }
-  .rela.srodata		${RELOCATING-0} : { *(.rela.srodata) }
-  .rela.erodata		${RELOCATING-0} : { *(.rela.erodata) }
-  .rela.got		${RELOCATING-0} : { *(.rela.got) }
-  .rela.ctors		${RELOCATING-0} : { *(.rela.ctors) }
-  .rela.dtors		${RELOCATING-0} : { *(.rela.dtors) }
-  .rela.init		${RELOCATING-0} : { *(.rela.init) }
-  .rela.fini		${RELOCATING-0} : { *(.rela.fini) }
-  .rela.plt		${RELOCATING-0} : { *(.rela.plt) }
-
   .rel.stext		${RELOCATING-0} : { *(.rel.stest) }
+  .rela.stext		${RELOCATING-0} : { *(.rela.stest) }
   .rel.etext		${RELOCATING-0} : { *(.rel.etest) }
+  .rela.etext		${RELOCATING-0} : { *(.rela.etest) }
   .rel.sdata		${RELOCATING-0} : { *(.rel.sdata) }
+  .rela.sdata		${RELOCATING-0} : { *(.rela.sdata) }
   .rel.edata		${RELOCATING-0} : { *(.rel.edata) }
-  .rel.ebss		${RELOCATING-0} : { *(.rel.ebss) }
+  .rela.edata		${RELOCATING-0} : { *(.rela.edata) }
   .rel.eit_v		${RELOCATING-0} : { *(.rel.eit_v) }
+  .rela.eit_v		${RELOCATING-0} : { *(.rela.eit_v) }
+  .rel.ebss		${RELOCATING-0} : { *(.rel.ebss) }
+  .rela.ebss		${RELOCATING-0} : { *(.rela.ebss) }
   .rel.srodata		${RELOCATING-0} : { *(.rel.srodata) }
+  .rela.srodata		${RELOCATING-0} : { *(.rela.srodata) }
   .rel.erodata		${RELOCATING-0} : { *(.rel.erodata) }
+  .rela.erodata		${RELOCATING-0} : { *(.rela.erodata) }
   .rel.got		${RELOCATING-0} : { *(.rel.got) }
+  .rela.got		${RELOCATING-0} : { *(.rela.got) }
   .rel.ctors		${RELOCATING-0} : { *(.rel.ctors) }
+  .rela.ctors		${RELOCATING-0} : { *(.rela.ctors) }
   .rel.dtors		${RELOCATING-0} : { *(.rel.dtors) }
+  .rela.dtors		${RELOCATING-0} : { *(.rela.dtors) }
   .rel.init		${RELOCATING-0} : { *(.rel.init) }
+  .rela.init		${RELOCATING-0} : { *(.rela.init) }
   .rel.fini		${RELOCATING-0} : { *(.rel.fini) }
+  .rela.fini		${RELOCATING-0} : { *(.rela.fini) }
   .rel.plt		${RELOCATING-0} : { *(.rel.plt) }
+  .rela.plt		${RELOCATING-0} : { *(.rela.plt) }
 
   /* Concatenate .page0 sections.  Put them in the page0 memory bank
      unless we are creating a relocatable file.  */

@@ -257,6 +257,8 @@ static autofilter_entry_type autofilter_symbolprefixlist[] =
   /*  { "__imp_", 6 }, */
   /* Do __imp_ explicitly to save time.  */
   { "__rtti_", 7 },
+  /* Don't re-export auto-imported symbols.  */
+  { "_nm_", 4 },
   { "__builtin_", 10 },
   /* Don't export symbols specifying internal DLL layout.  */
   { "_head_", 6 },
@@ -1814,8 +1816,10 @@ make_one (exp, parent)
   quick_symbol (abfd, U ("_head_"), dll_symname, "", UNDSEC, BSF_GLOBAL, 0);
   quick_symbol (abfd, U ("_imp__"), exp->internal_name, "", id5, BSF_GLOBAL, 0);
   /* Symbol to reference ord/name of imported
-     symbol, used to implement auto-import.  */
-  quick_symbol (abfd, U("_nm__"), exp->internal_name, "", id6, BSF_GLOBAL, 0);
+     data symbol, used to implement auto-import.  */
+  if (exp->flag_data)
+    quick_symbol (abfd, U("_nm__"), exp->internal_name, "", id6,
+		  BSF_GLOBAL,0);
   if (pe_dll_compat_implib)
     quick_symbol (abfd, U ("__imp_"), exp->internal_name, "",
 		  id5, BSF_GLOBAL, 0);

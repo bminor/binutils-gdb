@@ -102,7 +102,9 @@ elf_i386qnx_set_nonloadable_filepos (abfd, phdrs)
 }
 
 #undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		    bfd_elf32_i386qnx_vec
+#define TARGET_LITTLE_SYM		bfd_elf32_i386qnx_vec
+#undef  TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME		"elf32-i386-nto"
 
 #define elf_backend_set_nonloadable_filepos elf_i386qnx_set_nonloadable_filepos
 #define elf_backend_is_contained_by_filepos elf_i386qnx_is_contained_by_filepos

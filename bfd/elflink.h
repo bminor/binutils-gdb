@@ -1298,6 +1298,14 @@ elf_link_add_object_symbols (abfd, info)
       const char *name;
       bfd_size_type oldsize;
       bfd_size_type strindex;
+      struct bfd_link_needed_list *rpath = NULL, *runpath = NULL;
+
+      /* ld --just-symbols and dynamic objects don't mix very well.
+	 Test for --just-symbols by looking at info set up by
+	 _bfd_elf_link_just_syms.  */
+      if ((s = abfd->sections) != NULL
+	  && elf_section_data (s)->sec_info_type == ELF_INFO_TYPE_JUST_SYMS)
+	goto error_return;
 
       /* Find the name to use in a DT_NEEDED entry that refers to this
 	 object.  If the object has a DT_SONAME entry, we use it.
@@ -1327,8 +1335,6 @@ elf_link_add_object_symbols (abfd, info)
 	  Elf_External_Dyn *extdynend;
 	  int elfsec;
 	  unsigned long shlink;
-	  int rpath;
-	  int runpath;
 
 	  dynbuf = (Elf_External_Dyn *) bfd_malloc (s->_raw_size);
 	  if (dynbuf == NULL)
@@ -1345,8 +1351,6 @@ elf_link_add_object_symbols (abfd, info)
 
 	  extdyn = dynbuf;
 	  extdynend = extdyn + s->_raw_size / sizeof (Elf_External_Dyn);
-	  rpath = 0;
-	  runpath = 0;
 	  for (; extdyn < extdynend; extdyn++)
 	    {
 	      Elf_Internal_Dyn dyn;
@@ -1390,13 +1394,6 @@ elf_link_add_object_symbols (abfd, info)
 		  char *fnm, *anm;
 		  unsigned int tagv = dyn.d_un.d_val;
 
-		  /* When we see DT_RPATH before DT_RUNPATH, we have
-		     to clear runpath.  Do _NOT_ bfd_release, as that
-		     frees all more recently bfd_alloc'd blocks as
-		     well.  */
-		  if (rpath && hash_table->runpath)
-		    hash_table->runpath = NULL;
-
 		  amt = sizeof (struct bfd_link_needed_list);
 		  n = (struct bfd_link_needed_list *) bfd_alloc (abfd, amt);
 		  fnm = bfd_elf_string_from_elf_section (abfd, shlink, tagv);
@@ -1410,13 +1407,11 @@ elf_link_add_object_symbols (abfd, info)
 		  n->name = anm;
 		  n->by = abfd;
 		  n->next = NULL;
-		  for (pn = & hash_table->runpath;
+		  for (pn = & runpath;
 		       *pn != NULL;
 		       pn = &(*pn)->next)
 		    ;
 		  *pn = n;
-		  runpath = 1;
-		  rpath = 0;
 		}
 	      /* Ignore DT_RPATH if we have seen DT_RUNPATH.  */
 	      if (!runpath && dyn.d_tag == DT_RPATH)
@@ -1442,16 +1437,30 @@ elf_link_add_object_symbols (abfd, info)
 		  n->name = anm;
 		  n->by = abfd;
 		  n->next = NULL;
-		  for (pn = & hash_table->runpath;
+		  for (pn = & rpath;
 		       *pn != NULL;
 		       pn = &(*pn)->next)
 		    ;
 		  *pn = n;
-		  rpath = 1;
 		}
 	    }
 
 	  free (dynbuf);
+	}
+
+      /* DT_RUNPATH overrides DT_RPATH.  Do _NOT_ bfd_release, as that
+	 frees all more recently bfd_alloc'd blocks as well.  */
+      if (runpath)
+	rpath = runpath;
+
+      if (rpath)
+	{
+	  struct bfd_link_needed_list **pn;
+	  for (pn = & hash_table->runpath;
+	       *pn != NULL;
+	       pn = &(*pn)->next)
+	    ;
+	  *pn = rpath;
 	}
 
       /* We do not want to include any of the sections in a dynamic

@@ -419,6 +419,11 @@ struct elf_vax_link_hash_table
 static boolean elf_vax_discard_copies
   PARAMS ((struct elf_vax_link_hash_entry *, PTR));
 
+/* Declare this now that the above structures are defined.  */
+
+static boolean elf_vax_instantiate_got_entries
+  PARAMS ((struct elf_link_hash_entry *, PTR));
+
 /* Traverse an VAX ELF linker hash table.  */
 
 #define elf_vax_link_hash_traverse(table, func, info)			\
@@ -569,7 +574,6 @@ elf_vax_check_relocs (abfd, info, sec, relocs)
   bfd *dynobj;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
-  bfd_signed_vma *local_got_refcounts;
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   asection *sgot;
@@ -582,7 +586,6 @@ elf_vax_check_relocs (abfd, info, sec, relocs)
   dynobj = elf_hash_table (info)->dynobj;
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
 
   sgot = NULL;
   srelgot = NULL;
@@ -653,18 +656,6 @@ elf_vax_check_relocs (abfd, info, sec, relocs)
 		{
 		  h->got.refcount = 1;
 		  eh->got_addend = rel->r_addend;
-
-		  /* Make sure this symbol is output as a dynamic symbol.  */
-		  if (h->dynindx == -1)
-		    {
-		      if (!bfd_elf32_link_record_dynamic_symbol (info, h))
-			return false;
-		    }
-
-		  /* Allocate space in the .got section.  */
-		  sgot->_raw_size += 4;
-		  /* Allocate relocation space.  */
-		  srelgot->_raw_size += sizeof (Elf32_External_Rela);
 		}
 	      else
 		{
@@ -902,24 +893,17 @@ elf_vax_gc_sweep_hook (abfd, info, sec, relocs)
 {
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
-  bfd_signed_vma *local_got_refcounts;
   const Elf_Internal_Rela *rel, *relend;
   unsigned long r_symndx;
   struct elf_link_hash_entry *h;
   bfd *dynobj;
-  asection *sgot;
-  asection *srelgot;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
-  local_got_refcounts = elf_local_got_refcounts (abfd);
 
   dynobj = elf_hash_table (info)->dynobj;
   if (dynobj == NULL)
     return true;
-
-  sgot = bfd_get_section_by_name (dynobj, ".got");
-  srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
 
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
@@ -932,29 +916,7 @@ elf_vax_gc_sweep_hook (abfd, info, sec, relocs)
 	    {
 	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	      if (h->got.refcount > 0)
-		{
-		  --h->got.refcount;
-		  if (h->got.refcount == 0)
-		    {
-		      /* We don't need the .got entry any more.  */
-		      sgot->_raw_size -= 4;
-		      srelgot->_raw_size -= sizeof (Elf32_External_Rela);
-		    }
-		}
-	    }
-	  else if (local_got_refcounts != NULL)
-	    {
-	      if (local_got_refcounts[r_symndx] > 0)
-		{
-		  --local_got_refcounts[r_symndx];
-		  if (local_got_refcounts[r_symndx] == 0)
-		    {
-		      /* We don't need the .got entry any more.  */
-		      sgot->_raw_size -= 4;
-		      if (info->shared)
-			srelgot->_raw_size -= sizeof (Elf32_External_Rela);
-		    }
-		}
+		--h->got.refcount;
 	    }
 	  break;
 
@@ -1221,8 +1183,15 @@ elf_vax_size_dynamic_sections (output_bfd, info)
      fill them in in the relocate_section routine.  */
   if (info->shared && info->symbolic)
     elf_vax_link_hash_traverse (elf_vax_hash_table (info),
-				 elf_vax_discard_copies,
-				 (PTR) NULL);
+				elf_vax_discard_copies,
+				(PTR) NULL);
+
+  /* If this is a -Bsymbolic shared link or a static link, we need to 
+     discard all the got entries we've recorded.  Otherwise, we need to
+     instantiate (allocate space for them).  */
+  elf_link_hash_traverse (elf_hash_table (info),
+			  elf_vax_instantiate_got_entries,
+			  (PTR) info);
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
@@ -1392,6 +1361,60 @@ elf_vax_discard_copies (h, ignore)
   return true;
 }
 
+/* This function is called via elf_link_hash_traverse.  It looks for entries
+   that have GOT or PLT (.GOT) references.  If creating a static object or a
+   shared object with -Bsymbolic, it resets the reference count back to 0
+   and sets the offset to -1 so normal PC32 relocation will be done.  If
+   creating a shared object or executable, space in the .got and .rela.got
+   will be reserved for the symbol.  */
+
+/*ARGSUSED*/
+static boolean
+elf_vax_instantiate_got_entries (h, infoptr)
+     struct elf_link_hash_entry *h;
+     PTR infoptr;
+{
+  struct bfd_link_info *info = (struct bfd_link_info *) infoptr;
+  bfd *dynobj;
+  asection *sgot;
+  asection *srelgot;
+  
+  /* We don't care about non-GOT (and non-PLT) entries.  */
+  if (h->got.refcount <= 0 && h->plt.refcount <= 0)
+    return true;
+
+  dynobj = elf_hash_table (info)->dynobj;
+  if (dynobj == NULL)
+    return true;
+
+  sgot = bfd_get_section_by_name (dynobj, ".got");
+  srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+
+  if (!elf_hash_table (info)->dynamic_sections_created
+      || (info->shared && info->symbolic))
+    {
+      h->got.refcount = 0;
+      h->got.offset = (bfd_vma) -1;
+      h->plt.refcount = 0;
+      h->plt.offset = (bfd_vma) -1;
+    }
+  else if (h->got.refcount > 0)
+    {
+      /* Make sure this symbol is output as a dynamic symbol.  */
+      if (h->dynindx == -1)
+	{
+	  if (!bfd_elf32_link_record_dynamic_symbol (info, h))
+	    return false;
+	}
+
+      /* Allocate space in the .got and .rela.got sections.  */
+      sgot->_raw_size += 4;
+      srelgot->_raw_size += sizeof (Elf32_External_Rela);
+    }
+
+  return true;
+}
+
 /* Relocate an VAX ELF section.  */
 
 static boolean
@@ -1556,8 +1579,7 @@ elf_vax_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_VAX_GOT32:
 	  /* Relocation is to the address of the entry for this symbol
 	     in the global offset table.  */
-	  if (h != NULL
-	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
+	  if (h == NULL || h->got.offset == (bfd_vma) -1)
 	    break;
 
 	  /* Relocation is the offset of the entry for this symbol in
@@ -1565,18 +1587,6 @@ elf_vax_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  {
 	    bfd_vma off;
-
-	    if (!elf_hash_table (info)->dynamic_sections_created
-		|| (h == NULL)
-	        || (info->shared
-	         && info->symbolic
-	         && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
-	      {
-	        /* This is actually a static link, or it is a -Bsymbolic link
-		   and the symbol is defined locally or there is no symbol.
-		   Change the GOT32 entry to a PC32 entry.  */
-		break;
-	      }
 
 	    if (sgot == NULL)
 	      {
@@ -1587,6 +1597,7 @@ elf_vax_relocate_section (output_bfd, info, input_bfd, input_section,
 	    BFD_ASSERT (h != NULL);
 	    off = h->got.offset;
 	    BFD_ASSERT (off != (bfd_vma) -1);
+	    BFD_ASSERT (off < sgot->_raw_size);
 
 	    if (info->shared
 		&& h->dynindx == -1
@@ -1615,15 +1626,12 @@ elf_vax_relocate_section (output_bfd, info, input_bfd, input_section,
 	      }
 
 	    relocation = sgot->output_offset + off;
-	    /* Neither GOT relocation uses the addend.  */
+	    /* The GOT relocation uses the addend.  */
 	    rel->r_addend = 0;
 
-	    if (r_type == R_VAX_GOT32)
-	      {
-		/* Change the reference to be indirect */
-		contents[rel->r_offset - 1] |= 0x10;
-	        relocation += sgot->output_section->vma;
-	      }
+	    /* Change the reference to be indirect.  */
+	    contents[rel->r_offset - 1] |= 0x10;
+	    relocation += sgot->output_section->vma;
 	  }
 	  break;
 
@@ -1847,11 +1855,11 @@ elf_vax_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 	}
 
-      /* VAX PCREL relocations are from the end of relocation, not the start */
+      /* VAX PCREL relocations are from the end of relocation, not the start.  
+         So subtract the difference from the relocation amount since we can't
+         add it to the offset.  */
       if (howto->pc_relative && howto->pcrel_offset)
-	{
-	  relocation -= bfd_get_reloc_size(howto);
-	}
+	relocation -= bfd_get_reloc_size(howto);
 
       r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 				    contents, rel->r_offset,

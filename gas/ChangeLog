@@ -1,3 +1,23 @@
+2002-08-24  Andreas Schwab  <schwab@suse.de>
+
+	* config/tc-m68k.c (tc_m68k_fix_adjustable): Don't adjust symbols
+	in merge sections.
+
+2002-10-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* doc/gasp.texi: Fix typo in last typo fix.
+
+2002-10-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+	2002-10-21  Richard Sandiford  <rsandifo@redhat.com>
+	* config/tc-mips.c (mips_need_elf_addend_fixup): Return true
+	for relocs against symbols in a merged section.
+
+	Thu Oct 10 14:31:30 2002  J"orn Rennecke <joern.rennecke@superh.com>
+	* config/tc-sh.c (assemble_ppi): Initialize reg_x / reg_y / reg_n
+	inside loop.
+
 2002-10-17  Johannes Stezenbach  <js@convergence.de>
 
 	* itbl-parse.y (entry): Provide empty action.

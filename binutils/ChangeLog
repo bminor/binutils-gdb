@@ -1,3 +1,15 @@
+2002-10-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+	2002-10-21  Alan Modra  <amodra@bigpond.net.au>
+	* bucomm.c (list_supported_targets): Use bfd_target_list.
+
+	2002-10-09  Daniel Jacobowitz  <drow@mvista.com>
+	* readelf.c (display_debug_info): Ignore empty .rela.debug_info
+	sections.  Allow relocations against the absolute symbol.  Don't
+	use the value in compunit.cu_abbrev_offset if we found a RELA
+	relocation.
+
 2002-10-21  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* objdump.c (dump_data): Correct addr_offset for opb != 1.

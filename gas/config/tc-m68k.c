@@ -848,6 +848,10 @@ tc_m68k_fix_adjustable (fixP)
   if (! relaxable_symbol (fixP->fx_addsy))
     return 0;
 
+  /* Don't adjust symbols in merge sections.  */
+  if ((S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE) != 0)
+    return 0;
+
   /* adjust_reloc_syms doesn't know about the GOT */
   switch (fixP->fx_r_type)
     {

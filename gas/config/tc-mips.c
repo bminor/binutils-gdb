@@ -10954,7 +10954,7 @@ mips_need_elf_addend_fixup (fixP)
   if (symbol_used_in_reloc_p (fixP->fx_addsy)
       && (((bfd_get_section_flags (stdoutput,
 				   S_GET_SEGMENT (fixP->fx_addsy))
-	    & SEC_LINK_ONCE) != 0)
+	    & (SEC_LINK_ONCE | SEC_MERGE)) != 0)
 	  || !strncmp (segment_name (S_GET_SEGMENT (fixP->fx_addsy)),
 		       ".gnu.linkonce",
 		       sizeof (".gnu.linkonce") - 1)))
