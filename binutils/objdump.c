@@ -31,7 +31,9 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 extern Elf_Internal_Shdr *bfd_elf_find_section();
 
 extern char *xmalloc ();
+#ifndef FPRINTF_ALREADY_DECLARED
 extern int fprintf PARAMS ((FILE *, CONST char *, ...));
+#endif
 
 char *default_target = NULL;	/* default at runtime */
 
@@ -140,6 +142,7 @@ dump_headers (abfd)
       PF (SEC_CODE, "CODE");
       PF (SEC_DATA, "DATA");
       PF (SEC_ROM, "ROM");
+      PF (SEC_DEBUGGING, "DEBUGGING");
       printf ("\n");
 #undef PF
     }
