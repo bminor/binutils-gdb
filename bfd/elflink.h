@@ -3863,12 +3863,14 @@ elf_link_input_bfd (finfo, input_bfd)
 	continue;
 
       /* If this symbol is defined in a section which we are
-         discarding, we don't need to keep it.  For the benefit of the
-         MIPS ELF linker, we check SEC_EXCLUDE as well as linker_mark.  */
+         discarding, we don't need to keep it, but note that
+         linker_mark is only reliable for sections that have contents.
+         For the benefit of the MIPS ELF linker, we check SEC_EXCLUDE
+         as well as linker_mark.  */
       if (isym->st_shndx > 0
 	  && isym->st_shndx < SHN_LORESERVE
 	  && isec != NULL
-	  && (! isec->linker_mark
+	  && ((! isec->linker_mark && (isec->flags & SEC_HAS_CONTENTS) != 0)
 	      || (! finfo->info->relocateable
 		  && (isec->flags & SEC_EXCLUDE) != 0)))
 	continue;

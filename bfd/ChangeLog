@@ -1,3 +1,18 @@
+Wed Feb 26 13:33:03 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_link_input_bfd): Don't skip symbols from sections
+	that have no contents merely because linker_mark is not set.
+
+Tue Feb 25 18:51:35 1997  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config.bfd (mips*-*-lnews*): New target.
+	* coff-mips.c (mips_relocate_section): Make assert compare
+	content byteorder instead of header byteorder.
+	(ecoff_biglittle_vec): New BFD, big-endian headers, little-endian
+	data.
+	* configure.in (ecoff_biglittle_vec): Add case.
+	* configure: Update.
+
 Tue Feb 25 00:32:49 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (elf_fake_sections): Use SHT_NOTE for any section whose
