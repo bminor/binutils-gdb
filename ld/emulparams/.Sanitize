@@ -31,14 +31,6 @@ else
 	lose_these_too="${d30v_files} ${lose_these_too}"
 fi
 
-m32r_files="m32relf.sh"
-
-if ( echo $* | grep keep\-m32r > /dev/null ) ; then
-	keep_these_too="${m32r_files} ${keep_these_too}"
-else
-	lose_these_too="${m32r_files} ${lose_these_too}"
-fi
-
 tic80_files="tic80coff.sh"
 
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
@@ -115,6 +107,7 @@ i386nbsd.sh
 i386nw.sh
 i386pe.sh
 lnk960.sh
+m32relf.sh
 m68k4knbsd.sh
 m68kaout.sh
 m68kaux.sh

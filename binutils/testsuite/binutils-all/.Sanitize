@@ -77,40 +77,7 @@ else
 fi
 
 if [ -n "${verbose}" ] ; then
-	echo Processing \"m32r\"...
-fi
-
-m32r_files="objdump.exp"
-
-if ( echo $* | grep keep\-m32r > /dev/null ) ; then
-	for i in $m32r_files ; do
-		if test ! -d $i && (grep sanitize-m32r $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping m32r stuff in $i
-			fi
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-m32r $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"m32r\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-m32r/,/end-\sanitize\-m32r/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
-if [ -n "${verbose}" ] ; then
-	echo Processing \"m32r\"...
+	echo Processing \"d30v\"...
 fi
 
 d30v_files="objdump.exp"
