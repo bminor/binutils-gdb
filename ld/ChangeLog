@@ -1,3 +1,15 @@
+Mon Mar  6 14:03:50 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldemul.c (ldemul_list_emulations): New function.
+	* ldemul.h (ldemul_list_emulations): Declare.
+	* ldver.c (help): List supported targets and emulations.
+
+Fri Mar  3 15:40:36 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* scripttempl/elf.sc (.debug): Relocate to address 0.
+	(.debug_srcinfo, .debug_aranges, .debug_pubnames,
+	.debug_sfnames, .line): Likewise.
+
 Fri Mar  3 17:07:14 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/elf32.em (hold_rel): New static variable.

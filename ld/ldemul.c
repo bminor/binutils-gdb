@@ -24,6 +24,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ld.h"
 #include "ldemul.h"
 #include "ldmisc.h"
+#include "ldexp.h"
+#include "ldlang.h"
 #include "ldfile.h"
 #include "ldmain.h"
 #include "ldemul-list.h"
@@ -54,6 +56,12 @@ void
 ldemul_before_parse()
 {
   ld_emulation->before_parse();
+}
+
+void
+ldemul_after_open ()
+{
+  ld_emulation->after_open ();
 }
 
 void 
@@ -97,6 +105,26 @@ ldemul_get_script(isfile)
   return ld_emulation->get_script(isfile);
 }
 
+boolean
+ldemul_open_dynamic_archive (arch, entry)
+     const char *arch;
+     lang_input_statement_type *entry;
+{
+  if (ld_emulation->open_dynamic_archive)
+    return (*ld_emulation->open_dynamic_archive) (arch, entry);
+  return false;
+}
+
+boolean
+ldemul_place_orphan (file, s)
+     lang_input_statement_type *file;
+     asection *s;
+{
+  if (ld_emulation->place_orphan)
+    return (*ld_emulation->place_orphan) (file, s);
+  return false;
+}
+
 char *
 ldemul_choose_target()
 {
@@ -121,6 +149,11 @@ after_parse_default()
 }
 
 void
+after_open_default ()
+{
+}
+
+void
 after_allocation_default()
 {
 
@@ -140,6 +173,7 @@ set_output_arch_default()
 	            ldfile_output_architecture, ldfile_output_machine);
 }
 
+/*ARGSUSED*/
 void
 syslib_default(ignore)
      char  *ignore;
@@ -147,6 +181,7 @@ syslib_default(ignore)
   info_msg ("%S SYSLIB ignored\n");
 }
 
+/*ARGSUSED*/
 void
 hll_default(ignore)
      char  *ignore;
@@ -173,4 +208,21 @@ ldemul_choose_mode(target)
 	  }
       }
     einfo("%P%F: unrecognised emulation mode: %s\n",target);
+}
+
+void
+ldemul_list_emulations (f)
+     FILE *f;
+{
+  ld_emulation_xfer_type **eptr = ld_emulations;
+  boolean first = true;
+
+  for (; *eptr; eptr++)
+    {
+      if (first)
+	first = false;
+      else
+	fprintf (f, " ");
+      fprintf (f, "%s", (*eptr)->emulation_name);
+    }
 }
