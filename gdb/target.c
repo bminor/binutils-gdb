@@ -871,9 +871,11 @@ do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	   secp < current_target.to_sections_end;
 	   secp++)
 	{
-	  if (memaddr >= secp->addr && memaddr < secp->endaddr)
-	    return xfer_memory (memaddr, myaddr, len, 0, 
-				attrib, &current_target);
+	  if (bfd_get_section_flags (secp->bfd, secp->the_bfd_section) 
+	      & SEC_READONLY)
+	    if (memaddr >= secp->addr && memaddr < secp->endaddr)
+	      return xfer_memory (memaddr, myaddr, len, 0, 
+				  attrib, &current_target);
 	}
     }
 

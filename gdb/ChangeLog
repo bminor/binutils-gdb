@@ -1,3 +1,8 @@
+2002-01-31  Michael Snyder  <msnyder@redhat.com>
+
+	* target.c (do_xfer_memory): Add missing line to trust-readonly
+	code: check bfd SEC_READONLY flag for section.
+
 2002-01-31  Andrew Cagney  <ac131313@redhat.com>
 
 	* PROBLEMS: Fix tipo, 5.1->5.1.1.
