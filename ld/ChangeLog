@@ -1,3 +1,8 @@
+2003-12-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (lang_vers_match): Pass "DMGL_PARAMS | DMGL_ANSI" to
+	cplus_demangle.
+
 2003-12-07  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* ldemul.c: Convert to ISO-C.

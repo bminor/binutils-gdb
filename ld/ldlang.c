@@ -4996,7 +4996,7 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 
   if (head->mask & BFD_ELF_VERSION_CXX_TYPE)
     {
-      cxx_sym = cplus_demangle (sym, /* DMGL_NO_TPARAMS */ 0);
+      cxx_sym = cplus_demangle (sym, DMGL_PARAMS | DMGL_ANSI);
       if (!cxx_sym)
 	cxx_sym = sym;
     }
