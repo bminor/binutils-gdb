@@ -18,11 +18,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* This file exists to hold the common definitions required of all the
-   symbol-readers that end up using stabs.  The common use of these 
-   `symbol-type-specific' customizations of the generic data structures
-   makes the stabs-oriented symbol readers able to call each others'
-   functions as required.  */
+/* This file exists to hold the common definitions required of most of
+   the symbol-readers that end up using stabs.  The common use of
+   these `symbol-type-specific' customizations of the generic data
+   structures makes the stabs-oriented symbol readers able to call
+   each others' functions as required.  */
 
 #if !defined (GDBSTABS_H)
 #define GDBSTABS_H
