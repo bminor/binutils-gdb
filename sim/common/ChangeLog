@@ -1,3 +1,19 @@
+2004-05-10  Daniel Jacobowitz  <dan@debian.org>
+
+	* callback.c: Update copyright dates.
+	* run.c: Likewise.
+	* sim-basics.h: Likewise.
+	* sim-load.c: Likewise.
+	* syscall.c: Likewise.
+
+2004-05-10  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* callback.c: Include cconfig.h instead of config.h.
+	* run.c: Likewise.
+	* sim-basics.h: Likewise.
+	* sim-load.c: Likewise.
+	* syscall.c: Likewise.
+
 2004-01-16  Ben Elliston  <bje@wasabisystems.com>
 
 	* Makefile.in (clean): Remove rm -f $(ALL), as $(ALL) is empty.

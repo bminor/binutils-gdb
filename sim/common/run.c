@@ -1,5 +1,6 @@
 /* run front end support for all the simulators.
-   Copyright (C) 1992, 93-96, 1997, 2002 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,8 +19,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* Steve Chamberlain sac@cygnus.com,
    and others at Cygnus.  */
 
-#include "config.h"
+#ifdef HAVE_CONFIG_H
+#include "cconfig.h"
 #include "tconfig.h"
+#endif
 
 #include <signal.h>
 #include <stdio.h>

@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2004 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -29,7 +29,7 @@
 /* Basic configuration */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include "cconfig.h"
 #endif
 
 /* Basic host dependant mess - hopefully <stdio.h> + <stdarg.h> will
