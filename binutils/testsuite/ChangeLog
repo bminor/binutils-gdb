@@ -1,3 +1,8 @@
+2002-02-12  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* binutils-all/readelf.ss-mips: Do not expect an explicit
+        ordering of the sections.
+
 2002-02-10  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* binutils-all/objdump.exp: Add 'xscale' to the list of expected
