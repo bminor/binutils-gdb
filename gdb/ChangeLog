@@ -1,5 +1,7 @@
 2005-03-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* exec.c (bfdsec_to_vmap): Use strcmp instead of DEPRECATED_STREQ.
+
 	* inflow.h: Update copyright year.  Remove #ifdef SHORT_PGRP code.
 	Callapse HAVE_TERMIO and HAVE_SGTTY.
 

@@ -392,14 +392,14 @@ bfdsec_to_vmap (struct bfd *abfd, struct bfd_section *sect, void *arg3)
   if ((bfd_get_section_flags (abfd, sect) & SEC_LOAD) == 0)
     return;
 
-  if (DEPRECATED_STREQ (bfd_section_name (abfd, sect), ".text"))
+  if (strcmp (bfd_section_name (abfd, sect), ".text") == 0)
     {
       vp->tstart = bfd_section_vma (abfd, sect);
       vp->tend = vp->tstart + bfd_section_size (abfd, sect);
       vp->tvma = bfd_section_vma (abfd, sect);
       vp->toffs = sect->filepos;
     }
-  else if (DEPRECATED_STREQ (bfd_section_name (abfd, sect), ".data"))
+  else if (strcmp (bfd_section_name (abfd, sect), ".data") == 0)
     {
       vp->dstart = bfd_section_vma (abfd, sect);
       vp->dend = vp->dstart + bfd_section_size (abfd, sect);
