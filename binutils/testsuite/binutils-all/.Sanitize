@@ -24,6 +24,7 @@ Do-first:
 Things-to-keep:
 
 bintest.s
+hppa
 nm.exp
 objcopy.exp
 objdump.exp
