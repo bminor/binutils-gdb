@@ -339,6 +339,8 @@ Philip Blundell					philb@gnu.org
 Keith Seitz					keiths@cygnus.com
 Geoff Keating					geoffk@redhat.com
 Don Howard					dhoward@redhat.com
+Paul Hilfinger					hilfinger@gnat.com
+Joel Brobecker					brobecker@act-europe.fr
 
 
 			Past Maintainers
@@ -350,7 +352,6 @@ Jeff Law (hppa)					law@cygnus.com
 Folks that have been caught up in a paper trail:
 
 Jim Kingdon					jkingdon@engr.sgi.com
-Paul Hilfinger					hilfingr@gnat.com (*)
 Chris G. Demetriou				cgd@sibyte.com
 
 --

@@ -1,3 +1,8 @@
+2001-06-15  Joel Brobecker <brobecker@act-europe.fr>
+
+        * MAINTAINERS: Add Paul Hilfinger and Joel Brobecker to the
+        Write After Approval list.
+
 2001-06-14  Michael Snyder  <msnyder@redhat.com>
 
 	* remote.c (show_remote_protocol_qSymbol_packet_cmd, 
