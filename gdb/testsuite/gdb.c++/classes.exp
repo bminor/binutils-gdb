@@ -55,7 +55,7 @@ proc test_ptype_class_objects {} {
 
     # Note that struct members are public by default, so we don't print
     # "public:" for the public members of structs.
-    # Accept it as an expected failure if gdb just fails to distinguish between
+    # Accept it if gdb just fails to distinguish between
     # class and struct, and everything else is OK.
 
     send_gdb "ptype struct default_public_struct\n"
@@ -64,8 +64,7 @@ proc test_ptype_class_objects {} {
 	    pass "ptype struct default_public_struct"
 	}
 	-re "type = class default_public_struct \{$nl.*int a;${ws}int b;$nl.*\}$nl$gdb_prompt $" {
-	    setup_xfail "*-*-*"
-	    fail "ptype struct default_public_struct"
+	    pass "ptype struct default_public_struct"
 	}
 	-re ".*$gdb_prompt $" { fail "ptype struct default_public_struct" }
 	timeout { fail "ptype struct default_public_struct (timeout)" ; return }
@@ -73,7 +72,7 @@ proc test_ptype_class_objects {} {
 
     # Note that struct members are public by default, so we don't print
     # "public:" for the public members of structs.
-    # Accept it as an expected failure if gdb just fails to distinguish between
+    # Accept it if gdb just fails to distinguish between
     # class and struct, and everything else is OK.
 
     send_gdb "ptype struct explicit_public_struct\n"
@@ -82,75 +81,70 @@ proc test_ptype_class_objects {} {
 	    pass "ptype struct explicit_public_struct"
 	}
 	-re "type = class explicit_public_struct \{$nl.*int a;${ws}int b;$nl.*\}$nl$gdb_prompt $" {
-	    setup_xfail "*-*-*"
-	    fail "ptype struct explicit_public_struct"
+	    pass "ptype struct explicit_public_struct"
 	}
 	-re ".*$gdb_prompt $" { fail "ptype struct explicit_public_struct" }
 	timeout { fail "ptype struct explicit_public_struct (timeout)" ; return }
     }
 
-    # Accept it as an expected failure if gdb just fails to distinguish between
+    # Accept it if gdb just fails to distinguish between
     # class and struct, and everything else is OK.
 
     send_gdb "ptype struct protected_struct\n"
     gdb_expect {
 	-re "type = struct protected_struct \{${ws}protected:${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
-	    pass "ptype struct protected_struct (FIXME)"
+	    pass "ptype struct protected_struct"
 	}
 	-re "type = class protected_struct \{${ws}protected:${ws}int a;${ws}int b;$nl.*\}$nl$gdb_prompt $" {
-	    setup_xfail "*-*-*"
-	    fail "ptype struct protected_struct (FIXME)"
+	    pass "ptype struct protected_struct"
 	}
 	-re ".*$gdb_prompt $" { fail "ptype struct protected_struct" }
 	timeout { fail "ptype struct protected_struct (timeout)" ; return }
     }
 
-    # Accept it as an expected failure if gdb just fails to distinguish between
+    # Accept it if gdb just fails to distinguish between
     # class and struct, and everything else is OK.
 
     send_gdb "ptype struct private_struct\n"
     gdb_expect {
 	-re "type = struct private_struct \{${ws}private:${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
-	    pass "ptype struct private_struct (FIXME)"
+	    pass "ptype struct private_struct"
 	}
 	-re "type = class private_struct \{${ws}private:${ws}int a;${ws}int b;$nl.*\}$nl$gdb_prompt $" { 
-	    setup_xfail "*-*-*"
-	    fail "ptype struct private_struct (FIXME)"
+	    pass "ptype struct private_struct"
 	}
 	-re ".*$gdb_prompt $" { fail "ptype struct private_struct" }
 	timeout { fail "ptype struct private_struct (timeout)" ; return }
     }
 
-    # Accept it as an expected failure if gdb just fails to distinguish between
+    # Accept it if gdb just fails to distinguish between
     # class and struct, and everything else is OK.
 
     send_gdb "ptype struct mixed_protection_struct\n"
     gdb_expect {
 	-re "type = struct mixed_protection_struct \{${ws}int a;${ws}int b;${ws}private:${ws}int c;${ws}int d;${ws}protected:${ws}int e;${ws}int f;${ws}public:${ws}int g;${ws}private:${ws}int h;${ws}protected:${ws}int i;$nl\}$nl$gdb_prompt $" {
-	    pass "ptype struct mixed_protection_struct (FIXME)"
+	    pass "ptype struct mixed_protection_struct"
 	}
         -re "type = struct mixed_protection_struct \{${ws}public:${ws}int a;${ws}int b;${ws}private:${ws}int c;${ws}int d;${ws}protected:${ws}int e;${ws}int f;${ws}public:${ws}int g;${ws}private:${ws}int h;${ws}protected:${ws}int i;$nl.*\}$nl$gdb_prompt $" {
             pass "ptype struct mixed_protection_struct (extra public)"
         }
 	-re "type = class mixed_protection_struct \{${ws}public:${ws}int a;${ws}int b;${ws}private:${ws}int c;${ws}int d;${ws}protected:${ws}int e;${ws}int f;${ws}public:${ws}int g;${ws}private:${ws}int h;${ws}protected:${ws}int i;$nl.*\}$nl$gdb_prompt $" {
-	    setup_xfail "*-*-*"
-	    fail "ptype struct mixed_protection_struct (FIXME)"
+	    pass "ptype struct mixed_protection_struct"
 	}
 	-re ".*$gdb_prompt $" { fail "ptype struct mixed_protection_struct" }
 	timeout { fail "ptype struct mixed_protection_struct (timeout)" ; return }
     }
 
-    # Accept it as an expected failure if gdb just fails to distinguish between
+    # Accept it if gdb just fails to distinguish between
     # class and struct, and everything else is OK.
 
     send_gdb "ptype class public_class\n"
     gdb_expect {
 	-re "type = class public_class \{${ws}public:${ws}int a;${ws}int b;$nl.*\}$nl$gdb_prompt $" {
-	    pass "ptype class public_class (FIXME)"
+	    pass "ptype class public_class"
 	}
 	-re "type = struct public_class \{${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
-	    setup_xfail "*-*-*"
-	    fail "ptype class public_class (FIXME)"
+	    fail "ptype class public_class"
 	}
 	-re ".*$gdb_prompt $" { fail "ptype class public_class" }
 	timeout { fail "ptype class public_class (timeout)" ; return }
@@ -162,14 +156,13 @@ proc test_ptype_class_objects {} {
 	    pass "ptype class protected_class"
 	}
 	-re "type = struct protected_class \{${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
-	    setup_xfail "*-*-*"
 	    fail "ptype class protected_class"
 	}
 	-re ".*$gdb_prompt $" { fail "ptype class protected_class" }
 	timeout { fail "ptype class protected_class (timeout)" ; return }
     }
 
-    # Accept it as an expected failure if gdb just emits a superflous "private:"
+    # Accept it if gdb just emits a superflous "private:"
     # attribute, since classes default to private and for consistency with
     # structs (where we don't print the "public:" attribute) we don't print
     # the "private:" attribute.
@@ -177,11 +170,10 @@ proc test_ptype_class_objects {} {
     send_gdb "ptype class default_private_class\n"
     gdb_expect {
 	-re "type = class default_private_class \{${ws}int a;${ws}int b;$nl.*\}$nl$gdb_prompt $" {
-	    pass "ptype class default_private_class (FIXME)"
+	    pass "ptype class default_private_class"
 	}
 	-re "type = class default_private_class \{${ws}private:${ws}int a;${ws}int b;$nl.*\}$nl$gdb_prompt $" {
-	    setup_xfail "*-*-*"
-	    fail "ptype class default_private_class (FIXME)"
+	    pass "ptype class default_private_class"
 	}
 	-re ".*$gdb_prompt $" { fail "ptype class default_private_class" }
 	timeout { fail "ptype class default_private_class (timeout)" ; return }
@@ -193,10 +185,9 @@ proc test_ptype_class_objects {} {
 	    pass "ptype class explicit_private_class"
 	}
         -re "type = class explicit_private_class \{${ws}int a;${ws}int b;$nl.*\}$nl$gdb_prompt $" {
-            pass "ptype class explicit_private_class (OK for HP aCC)"
+            pass "ptype class explicit_private_class"
         }
 	-re "type = struct explicit_private_class \{${ws}int a;${ws}int b;$nl.*\}$nl$gdb_prompt $" {
-	    setup_xfail "*-*-*"
 	    fail "ptype class explicit_private_class"
 	}
 	-re ".*$gdb_prompt $" { fail "ptype class explicit_private_class" }
@@ -209,7 +200,6 @@ proc test_ptype_class_objects {} {
 	    pass "ptype class mixed_protection_class"
 	}
 	-re "type = struct mixed_protection_class \{${ws}int a;${ws}int b;${ws}int c;${ws}int d;${ws}int e;${ws}int f;${ws}int g;${ws}int h;${ws}int i;$nl.*\}$nl$gdb_prompt $" {
-	    setup_xfail "*-*-*"
 	    fail "ptype class mixed_protection_class"
 	}
 	-re ".*$gdb_prompt $" { fail "ptype class mixed_protection_class" }

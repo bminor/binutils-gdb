@@ -1,5 +1,14 @@
 2003-02-28  David Carlton  <carlton@math.stanford.edu>
 
+	* gdb.c++/classes.exp (test_ptype_class_objects): Accept it if we
+	print class instead of struct and/or superfluous protection
+	specifiers, as long as the resulting output is equivalent to the
+	source code.
+	Delete FIXME from end of messages on tests that don't need
+	fixing.
+
+2003-02-28  David Carlton  <carlton@math.stanford.edu>
+
 	* gdb.c++/templates.exp (do_tests): Allow const in the two
 	Foo<volatile char *>::foo tests.
 
