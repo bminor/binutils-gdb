@@ -66,4 +66,9 @@ GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj"
 
 AC_SUBST(GDBSERVER_DEPFILES)
 
-AC_OUTPUT(Makefile)
+AC_OUTPUT(Makefile,
+[case x$CONFIG_HEADERS in
+xconfig.h:config.in)
+echo > stamp-h ;;
+esac
+])

@@ -1,5 +1,11 @@
 2002-04-09  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdbserver/Makefile.in: Add stamp-h target.
+	* gdbserver/configure.in: Create stamp-h.
+	* gdbserver/configure: Regenerated.
+
+2002-04-09  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdbserver/inferiors.c: New file.
 	* gdbserver/target.c: New file.
 	* gdbserver/target.h: New file.

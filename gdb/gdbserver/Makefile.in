@@ -199,7 +199,8 @@ maintainer-clean realclean: clean
 
 STAGESTUFF=${OBS} ${TSOBS} ${NTSOBS} ${ADD_FILES} init.c init.o version.c gdb
 
-config.h: config.in config.status
+config.h: stamp-h ; @true
+stamp-h: config.in config.status
 	CONFIG_FILES="" $(SHELL) ./config.status
 
 Makefile: Makefile.in config.status
