@@ -1,3 +1,7 @@
+2004-02-05  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/pe.em (_after_open): Fix typo in previous delta.
+
 2004-02-04  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* emultempl/pe.em (_after_open): Fix thinko in 2003-12-18 patch.

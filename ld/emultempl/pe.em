@@ -1140,7 +1140,7 @@ gld_${EMULATION_NAME}_after_open (void)
 		       comparisons.  */
 		    pnt = strrchr (is3->the_bfd->filename, '.');
 		    if (pnt != NULL && strcmp (pnt, ".dll") == 0)
-		      continue;
+		      break;
 		  }
 
 		if (is3 == NULL)
