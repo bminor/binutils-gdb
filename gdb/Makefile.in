@@ -780,7 +780,6 @@ distclean: clean
 	rm -f nm.h tm.h xm.h config.status config.h stamp-h .gdbinit
 	rm -f y.output yacc.acts yacc.tmp y.tab.h
 	rm -f config.log config.cache
-	rm -f $(YYFILES)
 	rm -f Makefile
 
 maintainer-clean realclean: distclean clean
@@ -789,6 +788,7 @@ maintainer-clean realclean: distclean clean
 	@$(MAKE) $(FLAGS_TO_PASS) DO=maintainer-clean "DODIRS=$(SUBDIRS)" subdir_do
 	rm -f c-exp.tab.c jv-exp.tab.c f-exp.tab.c m2-exp.tab.c
 	rm -f TAGS $(INFOFILES)
+	rm -f $(YYFILES)
 	rm -f nm.h tm.h xm.h config.status
 
 diststuff: $(DISTSTUFF)
