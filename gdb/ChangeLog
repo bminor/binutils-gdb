@@ -1,3 +1,8 @@
+2002-03-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS: Add Jim Ingham and Klee Dienes to ``write after
+	approval''.
+
 2002-03-07  Daniel Jacobowitz  <drow@mvista.com>   
 
 	* gdbserver/linux-low.c (PTRACE_XFER_TYPE): Change to long.
