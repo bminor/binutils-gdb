@@ -8173,6 +8173,9 @@ elf_gc_mark (struct bfd_link_info *info,
 	      || ELF_ST_BIND (isym[r_symndx].st_info) != STB_LOCAL)
 	    {
 	      h = sym_hashes[r_symndx - extsymoff];
+	      while (h->root.type == bfd_link_hash_indirect
+		     || h->root.type == bfd_link_hash_warning)
+		h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	      rsec = (*gc_mark_hook) (sec, info, rel, h, NULL);
 	    }
 	  else

@@ -1,3 +1,7 @@
+2004-04-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (elf_gc_mark): Follow indirect and warning syms.
+
 2004-04-30  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure.in: Update version to 2.15.91.
