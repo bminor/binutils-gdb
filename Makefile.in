@@ -1172,6 +1172,7 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) \
 	    fi ; \
 	  else ln -s ../$$d proto-toplev/$$d ; fi ; \
 	done
+	cd etc ; $(MAKE) info
 	$(MAKE) distclean
 	#
 	mkdir proto-toplev/etc
