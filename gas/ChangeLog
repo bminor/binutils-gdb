@@ -1,3 +1,8 @@
+Thu Sep 21 21:10:17 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* config/tc-ppc.c (md_parse_option): -mrelocatable-lib now only
+	sets EF_PPC_RELOCATABLE_LIB and not also EF_PPC_RELOCATABLE.
+
 Thu Sep 21 16:30:56 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* subsegs.c (subseg_set): Permit SEG_ABSOLUTE in know expression.

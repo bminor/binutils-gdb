@@ -281,7 +281,7 @@ md_parse_option (c, arg)
       else if (strcmp (arg, "relocatable-lib") == 0)
 	{
 	  mrelocatable = true;
-	  ppc_flags |= EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB;
+	  ppc_flags |= EF_PPC_RELOCATABLE_LIB;
 	}
 
       /* -memb, set embedded bit */
