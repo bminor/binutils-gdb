@@ -1,11 +1,18 @@
 Tue Nov 28 13:38:26 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* sim-endian.h: Look at WORDS_BIGENDIAN to determine if the host
+	is big endian or little endian.  For SWAP_n, use htonl/htons if
+	host is little endian, not big endian and if WITH_NTOH is defined.
+
 	* configure{,.in} (--enable-sim-model-issue): Instead of defining
-	0/1, define it to be MODEL_ISSUE_{PROCESS,IGNORE}.
+	0/1, define it to be MODEL_ISSUE_{PROCESS,IGNORE}.  Add
+	AC_C_BIGENDIAN to determine if the host is big endian or not.
+	* config.in: Regenerate.
 
 	* std-config.h (WITH_MODEL_ISSUE): Default to 0.
 	(CURRENT_MODEL_ISSUE): Reference WITH_MODEL_ISSUE, and if that is
 	0, use current_model_issue.
+	(MODEL_ISSUE_{PROCESS,IGNORE}): Define as -1/1.
 
 	* psim.c (current_model_issue): New global variable.
 
