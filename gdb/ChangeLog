@@ -1,3 +1,8 @@
+2000-04-16  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* config/djgpp/config.sed: Fix the lines which edit clean: and
+        uninstall-info: targets.
+
 2000-04-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* acconfig.h (HAVE_PRGREGSET_T, HAVE_PRFPREGSET_T, HAVE_LWPID_T,
