@@ -354,7 +354,7 @@ extern void restore_cleanups (struct cleanup *);
 extern void restore_final_cleanups (struct cleanup *);
 extern void restore_my_cleanups (struct cleanup **, struct cleanup *);
 
-extern void free_current_contents (char **);
+extern void free_current_contents (void *);
 
 extern void null_cleanup (void *);
 
