@@ -47,6 +47,7 @@ configure.bat
 configure.in
 cvs
 deja-gnu
+dejagnu
 diff
 dvips
 emacs
