@@ -1,3 +1,9 @@
+2002-01-28  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/obj-elf.c (elf_frob_file_before_adjust): Remove symbols
+	made because of .weak, if they are neither defined nor used in any
+	way.
+
 2002-01-27  Daniel Jacobowitz  <drow@mvista.com>
 
 	* configure: Regenerated.
