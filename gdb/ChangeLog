@@ -1,3 +1,8 @@
+1999-02-02  Martin Hunt  <hunt@cygnus.com>
+
+	* printcmd.c (print_scalar_formatted): Use strcat to concat all
+	the output together before calling fprintf_filtered().
+
 1999-02-01  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* configure.in: Require autoconf 2.13.
