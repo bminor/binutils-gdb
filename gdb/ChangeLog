@@ -1,3 +1,8 @@
+Sat Mar 13 14:58:22 1993  John Gilmore  (gnu@cygnus.com)
+
+	* symmisc.c (std_in, std_out, std_err):  Move initializations
+	to runtime code, in case they aren't constant.
+
 Fri Mar 12 16:23:54 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	* symtab.c (find_pc_symtab): some object file formats, notably
