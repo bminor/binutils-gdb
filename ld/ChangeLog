@@ -1,3 +1,7 @@
+Sat Mar 15 23:23:46 1997  Fred Fish  <fnf@cygnus.com>
+
+	* configure.tgt (powerpc-*-beos*): Use aixppc for targ_emul.
+
 Sat Mar 15 18:10:38 1997  H.J. Lu  <hjl@lucon.org>
 
 	* ldemul.h (ldemul_list_emulations): Use full prototype.
