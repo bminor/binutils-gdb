@@ -1,3 +1,9 @@
+2001-06-09  Philip Blundell  <philb@gnu.org>
+
+	* elf32-arm.h (elf32_arm_plt0_entry): Correct error in last
+	change.
+	(elf32_arm_plt_entry): Likewise.
+
 2001-06-08  H.J. Lu  <hjl@gnu.org>
 
 	* elf.c (swap_out_syms): Keep names for global section symbols.
