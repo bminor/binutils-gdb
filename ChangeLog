@@ -1,3 +1,21 @@
+Wed Aug 11 16:56:03 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config.guess: Fix typo (9000/8??:4.3bsd -> 9000/7??:4.3bsd).
+
+Fri Aug  6 14:45:02 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config.guess: From michael@mercury.cs.mun.ca (Michael Rendell):
+	Added test for mips-mips-riscos5.
+
+Thu Aug  5 15:45:08 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* configure.in: use mh-hp300 for 68k HP hosts
+
+Mon Aug  2 11:56:53 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* configure: add support for CONFIG_SHELL, so that you can use
+	some alternate shell for evaluating configure scripts
+
 Sun Aug  1 11:36:27 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* Makefile.in (make-gdb.tar.gz):  Sed bug reporting address

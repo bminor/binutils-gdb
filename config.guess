@@ -61,6 +61,9 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
     VAX*:ULTRIX*:*:*)
 	echo vax-dec-ultrix${UNAME_RELEASE}
 	exit 0 ;;
+    mips:*:5*:RISCos)
+	echo mips-mips-riscos${UNAME_RELEASE}
+	exit 0 ;;
     m88k:*:4*:R4*)
 	echo m88k-motorola-sysv4
 	exit 0 ;;
@@ -82,6 +85,9 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
     *:BOSX:*:*)
 	echo rs6000-bull-bosx
 	exit 0 ;;
+    DPX/2?00:B.O.S.:*:*)
+	echo m68k-bull-sysv3
+	exit 0 ;;
     9000/31?:HP-UX:*:*)
 	echo m68000-hp-hpux
 	exit 0 ;;
@@ -94,7 +100,7 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
     9000/8??:HP-UX:*:*)
 	echo hppa1.0-hp-hpux
 	exit 0 ;;
-    9000/8??:4.3bsd:*:* | 9000/8?7:4.3bsd:*:* )
+    9000/7??:4.3bsd:*:* | 9000/8?7:4.3bsd:*:* )
 	echo hppa1.1-hp-bsd
 	exit 0 ;;
     9000/8??:4.3bsd:*:*)
