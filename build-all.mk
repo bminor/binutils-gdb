@@ -103,7 +103,7 @@ TARGETS = i960-vxworks m68k-aout m68k-vxworks m68k-hp-hpux
 #	  i960-vxworks	m68k-coff	m68k-vxworks \
 #	  sparc-aout			sparc-vxworks \
 #	  sparclite-aout		sparclitefrwcompat-aout
-CC = cc 
+CC = cc +Obb2000
 all: all-native
 endif
 
