@@ -1,3 +1,13 @@
+Mon May 10 14:55:51 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* configure: Change help message to prefer --options rather than
+	  -options.
+
+Sun May  9 17:47:57 1993  Rob Savoye  (rob at darkstar.cygnus.com)
+
+       * Makefile.in: Use srcroot to find runtest rather than rootme.
+       Pass RUNTESTFLAGS and EXPECT down in BASE_FLAGS_TO_PASS.
+
 Fri May  7 14:55:59 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* test-build.mk: Extensive additions to support building on a
