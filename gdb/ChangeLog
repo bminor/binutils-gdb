@@ -1,3 +1,12 @@
+Mon Aug 23 20:26:22 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* buildsym.h: Remove declaration of dbxread.c functions.
+	* stabsread.h: Group together dbxread.c functions.
+	Move elfstab_build_psymtabs here from symfile.h.
+	Declare pastab_build_psymtabs.
+	* elfread.c, paread.c: Include stabsread.h (for stabsread_new_init
+	declaration, etc).
+
 Mon Aug 23 17:16:23 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* remote-bug.c: rename quiet to bug88k_snoop.

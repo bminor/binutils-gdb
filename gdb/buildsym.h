@@ -251,18 +251,6 @@ record_line PARAMS ((struct subfile *, int, CORE_ADDR));
 extern void
 start_symtab PARAMS ((char *, char *, CORE_ADDR));
 
-extern struct partial_symtab *
-start_psymtab PARAMS ((struct objfile *, struct section_offsets *, char *,
-		       CORE_ADDR, int, struct partial_symbol *,
-		       struct partial_symbol *));
-
-extern void
-end_psymtab PARAMS ((struct partial_symtab *, char **, int, int, CORE_ADDR,
-		     struct partial_symtab **, int));
-
-extern void
-process_one_symbol PARAMS ((int, int, CORE_ADDR, char *,
-			    struct section_offsets *, struct objfile *));
 extern int
 hashname PARAMS ((char *));
 

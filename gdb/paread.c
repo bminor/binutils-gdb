@@ -27,6 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 #include "buildsym.h"
+#include "stabsread.h"
 #include "gdb-stabs.h"
 #include "complaints.h"
 #include <string.h>

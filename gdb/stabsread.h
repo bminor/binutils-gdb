@@ -154,19 +154,6 @@ add_undefined_type PARAMS ((struct type *));
 extern struct symbol *
 define_symbol PARAMS ((unsigned int, char *, int, int, struct objfile *));
 
-extern struct partial_symtab *
-start_psymtab PARAMS ((struct objfile *, struct section_offsets *, char *,
-		       CORE_ADDR, int, struct partial_symbol *,
-		       struct partial_symbol *));
-
-extern void
-end_psymtab PARAMS ((struct partial_symtab *, char **, int, int, CORE_ADDR,
-		     struct partial_symtab **, int));
-
-extern void
-process_one_symbol PARAMS ((int, int, CORE_ADDR, char *,
-			    struct section_offsets *, struct objfile *));
-
 extern void
 stabsread_init PARAMS ((void));
 
@@ -181,5 +168,33 @@ end_stabs PARAMS ((void));
 
 extern void
 finish_global_stabs PARAMS ((struct objfile *objfile));
+
+/* Functions exported by dbxread.c.  These are not in stabsread.h because
+   they are only used by some stabs readers.  */
+
+extern struct partial_symtab *
+start_psymtab PARAMS ((struct objfile *, struct section_offsets *, char *,
+		       CORE_ADDR, int, struct partial_symbol *,
+		       struct partial_symbol *));
+
+extern void
+end_psymtab PARAMS ((struct partial_symtab *, char **, int, int, CORE_ADDR,
+		     struct partial_symtab **, int));
+
+extern void
+process_one_symbol PARAMS ((int, int, CORE_ADDR, char *,
+			    struct section_offsets *, struct objfile *));
+
+extern void
+elfstab_build_psymtabs PARAMS ((struct objfile *objfile,
+				struct section_offsets *section_offsets,
+				int mainline,
+				file_ptr staboff, unsigned int stabsize,
+				file_ptr stabstroffset,
+				unsigned int stabstrsize));
+
+extern void
+pastab_build_psymtabs PARAMS ((struct objfile *, struct section_offsets *,
+			       int));
 
 #undef EXTERN
