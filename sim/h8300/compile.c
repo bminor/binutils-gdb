@@ -916,6 +916,15 @@ case  O(name, SB):				\
   if(s) store (&code->dst,ea); goto next;	\
 }
 
+int
+sim_stop (sd)
+     SIM_DESC sd;
+{
+  cpu.state = SIM_STATE_STOPPED;
+  cpu.exception = SIGINT;
+  return 1;
+}
+
 void
 sim_resume (sd, step, siggnal)
      SIM_DESC sd;
@@ -1705,29 +1714,13 @@ sim_resume (sd, step, siggnal)
       ;
       /*      if (cpu.regs[8] ) abort(); */
 
-#if defined (WIN32)
-      /* Poll after every 100th insn, */
       if (poll_count++ > 100)
 	{
 	  poll_count = 0;
-	  if (win32pollquit())
-	    {
-	      control_c();
-	    }
+	  if ((*sim_callback->poll_quit) != NULL
+	      && (*sim_callback->poll_quit) (sim_callback))
+	    sim_stop (sd);
 	}
-#endif
-#if defined(__GO32__)
-      /* Poll after every 100th insn, */
-      if (poll_count++ > 100)
-	{
-	  poll_count = 0;
-	  if (kbhit ())
-	    {
-	      int c = getkey ();
-	      control_c ();
-	    }
-	}
-#endif
 
     }
   while (cpu.state == SIM_STATE_RUNNING);
@@ -2027,12 +2020,15 @@ sim_kill (sd)
 }
 
 SIM_DESC
-sim_open (kind,argv)
+sim_open (kind, ptr, abfd, argv)
      SIM_OPEN_KIND kind;
+     struct host_callback_struct *ptr;
+     struct _bfd *abfd;
      char **argv;
 {
   sim_kind = kind;
   myname = argv[0];
+  sim_callback = ptr;
   /* fudge our descriptor */
   return (SIM_DESC) 1;
 }
@@ -2065,10 +2061,13 @@ sim_load (sd, prog, abfd, from_tty)
     prog_bfd = bfd_openr (prog, "coff-h8300");
   if (prog_bfd != NULL)
     {
+      /* Set the cpu type.  We ignore failure from bfd_check_format
+	 and bfd_openr as sim_load_file checks too.  */
       if (bfd_check_format (prog_bfd, bfd_object)) 
 	{
-	  set_h8300h (prog_bfd->arch_info->mach == bfd_mach_h8300h
-		      || prog_bfd->arch_info->mach == bfd_mach_h8300s);
+	  unsigned long mach = bfd_get_mach (prog_bfd);
+	  set_h8300h (mach == bfd_mach_h8300h
+		      || mach == bfd_mach_h8300s);
 	}
     }
 
@@ -2143,8 +2142,7 @@ sim_do_command (sd, cmd)
 }
 
 void
-sim_set_callbacks (sd, ptr)
-     SIM_DESC sd;
+sim_set_callbacks (ptr)
      struct host_callback_struct *ptr;
 {
   sim_callback = ptr;

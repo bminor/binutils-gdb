@@ -146,6 +146,13 @@ sim_trace (sd)
   return 1;
 }
 
+int
+sim_stop (sd)
+     SIM_DESC sd;
+{
+  return 0;
+}
+
 void
 sim_resume (sd, step, siggnal)
      SIM_DESC sd;
@@ -252,12 +259,15 @@ sim_fetch_register (sd, rn, memory)
 
 
 SIM_DESC
-sim_open (kind, argv)
+sim_open (kind, ptr, abfd, argv)
      SIM_OPEN_KIND kind;
+     host_callback *ptr;
+     struct _bfd *abfd;
      char **argv;
 {
   sim_kind = kind;
   myname = argv[0];
+  sim_callback = ptr;
   return (SIM_DESC) 1;
 }
 
@@ -327,8 +337,7 @@ sim_do_command (sd, cmd)
 
 
 void
-sim_set_callbacks (sd, ptr)
-     SIM_DESC sd;
+sim_set_callbacks (ptr)
      host_callback *ptr;
 {
   sim_callback = ptr;

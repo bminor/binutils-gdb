@@ -1173,19 +1173,32 @@ sim_set_profile_size (n)
 }
 
 SIM_DESC
-sim_open (kind,argv)
+sim_open (kind, cb, abfd, argv)
      SIM_OPEN_KIND kind;
+     host_callback *cb;
+     struct _bfd *abfd;
      char **argv;
 {
   char **p;
 
   sim_kind = kind;
   myname = argv[0];
+  callback = cb;
 
   for (p = argv + 1; *p != NULL; ++p)
     {
       if (strcmp (*p, "-E") == 0)
-	little_endian_p = strcmp (*++p, "big") != 0;
+	{
+	  ++p;
+	  if (*p == NULL)
+	    {
+	      /* FIXME: This doesn't use stderr, but then the rest of the
+		 file doesn't either.  */
+	      callback->printf_filtered (callback, "Missing argument to `-E'.\n");
+	      return 0;
+	    }
+	  little_endian_p = strcmp (*p, "big") != 0;
+	}
       else if (isdigit (**p))
 	parse_and_set_memory_size (*p);
     }
@@ -1282,8 +1295,7 @@ sim_do_command (sd, cmd)
 }
 
 void
-sim_set_callbacks (sd, p)
-     SIM_DESC sd;
+sim_set_callbacks (p)
      host_callback *p;
 {
   callback = p;

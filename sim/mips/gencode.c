@@ -3927,9 +3927,6 @@ build_instruction (doisa, features, mips16, insn)
      printf("  signed64 t = ((unsigned64)HI_UW(0) << 32) | (unsigned64)LO_UW(0);\n");
      printf("  signed64 u = ((unsigned64)HI_UW(2) << 32) | (unsigned64)LO_UW(2);\n");
      printf("  signed64 x000000007FFFFFFF = LSMASK64 (31);\n");
-     printf("  signed64 xFFFFFFFF80000000 = MSMASK64 (33);\n");
-     printf("  signed64 x7FFFFFFFFFFFFFFF = LSMASK64 (63);\n");
-     printf("  signed64 x8000000000000000 = MSMASK64 (1);\n");
      printf("  signed64 x0000000080000000 = x000000007FFFFFFF + 1;\n");
      printf("  signed64 minus0000000080000000 = -x0000000080000000;\n");
      printf("  if ( t > x000000007FFFFFFF )\n");

@@ -15,40 +15,54 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#include <signal.h>
 #include "sim-main.h"
 
 #ifdef HAVE_ENVIRON
 extern char **environ;
 #endif
 
-static void usage PARAMS ((void));
+static void usage (void);
 
 extern host_callback default_callback;
 
 static char *myname;
 
+static SIM_DESC sd;
+
+static RETSIGTYPE
+cntrl_c (int sig)
+{
+  if (! sim_stop (sd))
+    {
+      fprintf (stderr, "Quit!\n");
+      exit (1);
+    }
+}
+
 int
-main (argc, argv)
-     int argc;
-     char **argv;
+main (int argc, char **argv)
 {
   char *name;
   char **prog_argv = NULL;
   enum sim_stop reason;
   int sigrc;
-  SIM_DESC sd;
+  RETSIGTYPE (*prev_sigint) ();
 
   myname = argv[0] + strlen (argv[0]);
   while (myname > argv[0] && myname[-1] != '/')
     --myname;
 
-  sim_set_callbacks (NULL, &default_callback);
-  default_callback.init (&default_callback);
-
   /* Create an instance of the simulator.  */
-  sd = sim_open (SIM_OPEN_STANDALONE, argv);
+  default_callback.init (&default_callback);
+  sd = sim_open (SIM_OPEN_STANDALONE, &default_callback, NULL, argv);
   if (sd == 0)
     exit (1);
+  if (STATE_MAGIC (sd) != SIM_MAGIC_NUMBER)
+    {
+      fprintf (stderr, "Internal error - bad magic number in simulator struct\n");
+      abort ();
+    }
 
   /* Was there a program to run?  */
   prog_argv = STATE_PROG_ARGV (sd);
@@ -72,7 +86,9 @@ main (argc, argv)
 #endif
 
   /* Run the program.  */
+  prev_sigint = signal (SIGINT, cntrl_c);
   sim_resume (sd, 0, 0);
+  signal (SIGINT, prev_sigint);
 
   /* Print any stats the simulator collected.  */
   sim_info (sd, 0);
@@ -104,6 +120,11 @@ main (argc, argv)
 
     case sim_exited:
       break;
+
+    default:
+      fprintf (stderr, "program in undefined state (%d:%d)\n", reason, sigrc);
+      break;
+
     }
 #endif
 

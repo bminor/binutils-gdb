@@ -284,9 +284,10 @@ compare_simops (arg1, arg2)
 }
 
 SIM_DESC
-sim_open (kind,cb,argv)
+sim_open (kind, cb, abfd, argv)
      SIM_OPEN_KIND kind;
      host_callback *cb;
+     struct _bfd *abfd;
      char **argv;
 {
   struct simops *s;
@@ -331,7 +332,7 @@ sim_open (kind,cb,argv)
 	  if (h->opcode == s->opcode
 	      && h->mask == s->mask
 	      && h->ops == s)
-	    continue;
+	    break;
 	  else
 	    h = h->next;
 	}
@@ -403,6 +404,8 @@ sim_resume (sd, step, siggnal)
     State.exception = SIGTRAP;
   else
     State.exception = 0;
+
+  State.exited = 0;
 
   do
     {
@@ -854,7 +857,10 @@ sim_stop_reason (sd, reason, sigrc)
      enum sim_stop *reason;
      int *sigrc;
 {
-  *reason = sim_stopped;
+  if (State.exited)
+    *reason = sim_exited;
+  else
+    *reason = sim_stopped;
   if (State.exception == SIGQUIT)
     *sigrc = 0;
   else

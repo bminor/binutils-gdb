@@ -1341,19 +1341,27 @@ fi
 
 
 
+wire_endian="LITTLE_ENDIAN"
+default_endian="LITTLE_ENDIAN"
 default_sim_endian="-DWITH_TARGET_BYTE_ORDER=LITTLE_ENDIAN"
 # Check whether --enable-sim-endian or --disable-sim-endian was given.
 if test "${enable_sim_endian+set}" = set; then
   enableval="$enable_sim_endian"
   case "${enableval}" in
-  yes)	case "$target" in
-	  *powerpc-*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BIG_ENDIAN";;
-	  *powerpcle-*) sim_endian="-DWITH_TARGET_BYTE_ORDER=LITTLE_ENDIAN";;
-	  *) echo "Unknown target $target" 1>&6; sim_endian="-DWITH_TARGET_BYTE_ORDER=0";;
-	esac;;
-  no)	 sim_endian="-DWITH_TARGET_BYTE_ORDER=0";;
   b*|B*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BIG_ENDIAN";;
   l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=LITTLE_ENDIAN";;
+  yes)	 if test x"$wire_endian" != x; then
+	   sim_endian="-DWITH_TARGET_BYTE_ORDER=${wire_endian}"
+	 else
+	   echo "No hard-wired endian for target $target" 1>&6
+	   sim_endian="-DWITH_TARGET_BYTE_ORDER=0"
+	 fi;;
+  no)	 if test x"$default_endian" != x; then
+	   sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${default_endian}"
+	 else
+	   echo "No default endian for target $target" 1>&6
+	   sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=0"
+	 fi;;
   *)	 { echo "configure: error: "Unknown value $enableval for --enable-sim-endian"" 1>&2; exit 1; }; sim_endian="";;
 esac
 if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
@@ -1399,14 +1407,14 @@ else
   
 if test "x$cross_compiling" = "xno"; then
   echo $ac_n "checking whether byte ordering is bigendian""... $ac_c" 1>&6
-echo "configure:1403: checking whether byte ordering is bigendian" >&5
+echo "configure:1411: checking whether byte ordering is bigendian" >&5
 if eval "test \"`echo '$''{'ac_cv_c_bigendian'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   ac_cv_c_bigendian=unknown
 # See if sys/param.h defines the BYTE_ORDER macro.
 cat > conftest.$ac_ext <<EOF
-#line 1410 "configure"
+#line 1418 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/param.h>
@@ -1417,11 +1425,11 @@ int main() {
 #endif
 ; return 0; }
 EOF
-if { (eval echo configure:1421: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1429: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   # It does; now see whether it defined to BIG_ENDIAN or not.
 cat > conftest.$ac_ext <<EOF
-#line 1425 "configure"
+#line 1433 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/param.h>
@@ -1432,7 +1440,7 @@ int main() {
 #endif
 ; return 0; }
 EOF
-if { (eval echo configure:1436: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1444: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_c_bigendian=yes
 else
@@ -1452,7 +1460,7 @@ if test "$cross_compiling" = yes; then
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
   cat > conftest.$ac_ext <<EOF
-#line 1456 "configure"
+#line 1464 "configure"
 #include "confdefs.h"
 main () {
   /* Are we little or big endian?  From Harbison&Steele.  */
@@ -1465,7 +1473,7 @@ main () {
   exit (u.c[sizeof (long) - 1] == 1);
 }
 EOF
-if { (eval echo configure:1469: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:1477: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest && (./conftest; exit) 2>/dev/null
 then
   ac_cv_c_bigendian=no
 else
@@ -1539,17 +1547,17 @@ for ac_hdr in stdlib.h unistd.h string.h strings.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1543: checking for $ac_hdr" >&5
+echo "configure:1551: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1548 "configure"
+#line 1556 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1553: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1561: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1578,12 +1586,12 @@ done
 for ac_func in getpid kill
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:1582: checking for $ac_func" >&5
+echo "configure:1590: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1587 "configure"
+#line 1595 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1606,7 +1614,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:1610: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:1618: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else

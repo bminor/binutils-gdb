@@ -38,6 +38,7 @@ esac])
 # Assume simulator can be built with cc.
 # If the user passes --enable-sim built it regardless of $(CC).
 only_if_gcc=no
+only_if_enabled=no
 extra_subdirs=common
 
 # WHEN ADDING ENTRIES TO THIS MATRIX:
@@ -116,10 +117,10 @@ case "${target}" in
   sparc*-*-*)
 	# The SPARC simulator can only be compiled by gcc.
 	sim_target=erc32
-	# Unfortunately erc32 won't build on many hosts, so don't
-	# build it at all
-	sim_target=none
 	only_if_gcc=yes
+	# Unfortunately erc32 won't build on many hosts, so only enable
+	# it if the user really really wants it.
+	only_if_enabled=yes
 	;;
   *)			sim_target=none ;;
 esac
@@ -135,9 +136,13 @@ yes)
 	fi
 	;;
 *)
-	if test ${only_if_gcc} = yes ; then
-		if test "${GCC}" != yes ; then
-			sim_target=none
+	if test ${only_if_enabled} = yes ; then
+		sim_target=none
+	else
+		if test ${only_if_gcc} = yes ; then
+			if test "${GCC}" != yes ; then
+				sim_target=none
+			fi
 		fi
 	fi
 	;;

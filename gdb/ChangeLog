@@ -1,3 +1,7 @@
+Mon Aug 25 12:21:46 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-sim.c (gdbsim_open): Pass exec_bfd to sim_open call.
+
 Sun Aug 24 21:16:59 1997  Geoffrey Noer  <noer@cygnus.com>
 
         * ocd.c: comment out sections that create and flush wigglers.log

@@ -1,5 +1,21 @@
+Mon Aug 25 17:50:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Mon Aug 25 15:47:41 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* compile.c (sim_open): Add ABFD argument.
+
+Tue May 20 10:16:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* compile.c (sim_open): Add callback argument.
+	(sim_set_callbacks): Delete SIM_DESC argument.
+
 Wed Apr 30 10:22:29 1997  Doug Evans  <dje@canuck.cygnus.com>
 
+	* compile.c (sim_load): Call bfd_get_mach instead of examining
+	bfd fields directly.
 	* tconfig.in (SIM_PRE_LOAD): Delete, no longer used.
 
 Thu Apr 24 00:39:51 1997  Doug Evans  <dje@canuck.cygnus.com>

@@ -51,13 +51,17 @@
 static psim *simulator;
 static device *root_device;
 static const char *register_names[] = REGISTER_NAMES;
+static host_callback *callbacks;
 
 /* For communication between sim_load and sim_create_inferior.
    This can be made to go away, please do.  */
 static unsigned_word entry_point;
 
 SIM_DESC
-sim_open (SIM_OPEN_KIND kind, host_callback *callback, char **argv)
+sim_open (SIM_OPEN_KIND kind,
+	  host_callback *callback,
+	  struct _bfd *abfd,
+	  char **argv)
 {
   callbacks = callback;
 
@@ -295,8 +299,6 @@ sim_do_command (SIM_DESC sd, char *cmd)
    advanced operations (such as dup or write) must either be mapped to
    one of the below calls or handled internally */
 
-static host_callback *callbacks;
-
 int
 sim_io_read_stdin(char *buf,
 		  int sizeof_buf)
@@ -382,13 +384,6 @@ sim_io_flush_stdoutput(void)
     error("sim_io_read_stdin: unaccounted switch\n");
     break;
   }
-}
-
-void
-sim_set_callbacks (host_callback *callback)
-{
-  callbacks = callback;
-  TRACE(trace_gdb, ("sim_set_callbacks called\n"));
 }
 
 /****/

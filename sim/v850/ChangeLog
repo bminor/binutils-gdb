@@ -1,3 +1,12 @@
+Mon Aug 25 17:50:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Mon Aug 25 11:31:23 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_open): Add ABFD argument.
+
 start-sanitize-v850e
 Fri Aug 22 10:39:28 1997  Nick Clifton  <nickc@cygnus.com>
 

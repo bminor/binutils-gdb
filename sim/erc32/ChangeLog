@@ -1,3 +1,25 @@
+Mon Aug 25 17:50:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Mon Aug 25 16:19:49 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interf.c (sim_open): Add ABFD argument. Change ARGV to PARGV.
+
+Mon Jun 30 11:45:25 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (install-sis): Change $(srcdir)/sis to sis.
+
+Wed May 28 09:46:13 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interf.c (sim_set_callbacks): Drop SD argument - not applicable.
+	(sim_open): Add callback arg, save it.
+
+Thu Apr 24 00:39:51 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Tue Apr 22 11:05:01 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* interf.c (sim_open): Undo patch to add -E support.

@@ -222,6 +222,10 @@
 #define WITH_TARGET_BYTE_ORDER		0 /*unknown*/
 #endif
 
+#ifndef WITH_DEFAULT_TARGET_BYTE_ORDER
+#define WITH_DEFAULT_TARGET_BYTE_ORDER 0 /* fatal */
+#endif
+
 extern int current_host_byte_order;
 #define CURRENT_HOST_BYTE_ORDER (WITH_HOST_BYTE_ORDER \
 				 ? WITH_HOST_BYTE_ORDER \
@@ -235,12 +239,16 @@ extern int current_target_byte_order;
 
 /* XOR endian.
 
-   In addition to the above, the simulator can support the's horrible
-   XOR endian mode (for instance implemented by the PowerPC).  This
-   feature makes it possible to control the endian mode of a processor
-   using the MSR. */
+   In addition to the above, the simulator can support the horrible
+   XOR endian mode (as found in the PowerPC and MIPS ISA).  See
+   sim-core for more information.
 
-/* #define WITH_XOR_ENDIAN		8 */
+   If WITH_XOR_ENDIAN is non-zero, it specifies the number of bytes
+   potentially involved in the XOR munge. A typical value is 8. */
+
+#ifndef WITH_XOR_ENDIAN
+#define WITH_XOR_ENDIAN		0
+#endif
 
 
 
@@ -258,22 +266,19 @@ extern int current_target_byte_order;
 
    Sets a limit on the number of processors that can be simulated.  If
    WITH_SMP is set to zero (0), the simulator is restricted to
-   suporting only on processor (and as a consequence leaves the SMP
+   suporting only one processor (and as a consequence leaves the SMP
    code out of the build process).
 
    The actual number of processors is taken from the device
    /options/smp@<nr-cpu> */
 
-#if defined (WITH_SMP)
-
-#if WITH_SMP
+#if defined (WITH_SMP) && WITH_SMP > 0
 #define MAX_NR_PROCESSORS		WITH_SMP
-#else
+#endif
+
+#ifndef MAX_NR_PROCESSORS
 #define MAX_NR_PROCESSORS		1
 #endif
-
-#endif
-
 
 
 /* Word size of host/target:
@@ -369,28 +374,34 @@ extern int current_environment;
 
 /* Alignment:
 
-   The PowerPC may or may not handle miss aligned transfers.  An
-   implementation normally handles miss aligned transfers in big
-   endian mode but generates an exception in little endian mode.
+   A processor architecture may or may not handle miss aligned
+   transfers.
 
-   This model.  Instead allows both little and big endian modes to
-   either take exceptions or handle miss aligned transfers.
+   As alternatives: both little and big endian modes take an exception
+   (STRICT_ALIGNMENT); big and little endian models handle mis aligned
+   transfers (NONSTRICT_ALIGNMENT); or the address is forced into
+   alignment using a mask (FORCED_ALIGNMENT).
 
-   If 0 is specified then for big-endian mode miss alligned accesses
-   are permitted (NONSTRICT_ALIGNMENT) while in little-endian mode the
-   processor will fault on them (STRICT_ALIGNMENT). */
+   Mixed alignment should be specified when the simulator needs to be
+   able to change the alignment requirements on the fly (eg for
+   bi-endian support). */
 
-#if defined (WITH_ALIGNMENT)
+enum sim_alignments {
+  MIXED_ALIGNMENT,
+  NONSTRICT_ALIGNMENT,
+  STRICT_ALIGNMENT,
+  FORCED_ALIGNMENT,
+};
 
-#define NONSTRICT_ALIGNMENT    		1
-#define STRICT_ALIGNMENT	       	2
+extern enum sim_alignments current_alignment;
 
-extern int current_alignment;
+#if !defined (WITH_ALIGNMENT)
+#define WITH_ALIGNMENT NONSTRICT_ALIGNMENT
+#endif
+
 #define CURRENT_ALIGNMENT (WITH_ALIGNMENT \
 			   ? WITH_ALIGNMENT \
 			   : current_alignment)
-
-#endif
 
 
 
@@ -414,6 +425,18 @@ extern int current_floating_point;
 
 
 
+/* Engine module.
+
+   Use the common start/stop/restart framework (sim-engine).
+   Simulators using the other modules but not the engine should define
+   WITH_ENGINE=0. */
+
+#ifndef WITH_ENGINE
+#define WITH_ENGINE			1
+#endif
+
+
+
 /* Debugging:
 
    Control the inclusion of debugging code.
@@ -428,7 +451,14 @@ extern int current_floating_point;
    code */
 
 #ifndef WITH_TRACE
-#define WITH_TRACE                      1
+#define WITH_TRACE                      (-1)
+#endif
+
+/* Include the profiling code.  Disabling this eliminates all profiling
+   code.  */
+
+#ifndef WITH_PROFILE
+#define WITH_PROFILE			(-1)
 #endif
 
 
@@ -515,26 +545,10 @@ extern int current_stdio;
 
 /* complete/verify/print the simulator configuration */
 
+extern SIM_RC sim_config
+(SIM_DESC sd,
+ struct _bfd *abfd);
 
-/* For prefered_target_byte_order arugment */
-
-#if defined (bfd_little_endian)
-#define PREFERED_TARGET_BYTE_ORDER(IMAGE) ((IMAGE) == NULL \
-					   ? 0 \
-					   : bfd_little_endian(IMAGE) \
-					   ? LITTLE_ENDIAN \
-					   : BIG_ENDIAN)
-#else
-#define PREFERED_TARGET_BYTE_ORDER(IMAGE) ((IMAGE) == NULL \
-					   ? 0 \
-					   : !(IMAGE)->xvec->byteorder_big_p \
-					   ? LITTLE_ENDIAN \
-					   : BIG_ENDIAN)
-#endif
-
-
-extern void sim_config (SIM_DESC sd,
-			int prefered_target_byte_order);
 
 extern void print_sim_config (SIM_DESC sd);
 

@@ -64,45 +64,114 @@ struct _bfd;
 /* Main simulator entry points.  */
 
 
-/* Create a simulator instance.
+/* Create a fully initialized simulator instance.
+
    (This function is called when the simulator is selected from the
    gdb command line.)
-   KIND specifies how the simulator will be used.  Currently there are only
-   two kinds: standalone and debug.
-   CALLBACK specifies a standard host callback (defined in callback.h).
-   ARGV is passed from the command line and can be used to select whatever
-   run time options the simulator provides.  It is the standard NULL
-   terminated array of pointers, with argv[0] being the program name.
-   The result is a descriptor that shall be passed to the other
-   sim_foo functions.  */
 
-SIM_DESC sim_open PARAMS ((SIM_OPEN_KIND kind, struct host_callback_struct *callback, char **argv));
+   KIND specifies how the simulator will be used.  Currently there are only
+   two kinds: stand-alone and debug.
+
+   CALLBACK specifies a standard host callback (defined in callback.h).
+
+   ABFD, when non NULL, designates a target program.  The program is
+   not loaded.
+
+   ARGV is a standard ARGV pointer such as that passed from the
+   command line.  The syntax of the argument list is is assumed to be
+   ``SIM-PROG { SIM-OPTION } [ TARGET-PROGRAM { TARGET-OPTION } ]''.
+
+   On success, the result is a non NULL descriptor that shall be
+   passed to the other sim_foo functions.  While the simulator
+   configuration can be parameterized by (in decreasing precedence)
+   ARGV's SIM-OPTION, ARGV's TARGET-PROGRAM and the ABFD argument, the
+   successful creation of the simulator shall not dependent on the
+   presence of any of these arguments/options.
+
+   For a simulator modeling real hardware, the created simulator shall
+   be sufficiently initialized to handle, with out restrictions any
+   client requests (including memory reads/writes, register
+   fetch/stores and a resume).
+
+   For a simulator modeling a process, that process is not created
+   until a call to sim_create_inferior.  FIXME: What should the state
+   of the simulator be? */
+
+SIM_DESC sim_open PARAMS ((SIM_OPEN_KIND kind, struct host_callback_struct *callback, struct _bfd *abfd, char **argv));
 
 
 /* Destory a simulator instance.
+
+   QUITTING is non-zero if we cannot hang on errors.
+
    This may involve freeing target memory and closing any open files
    and mmap'd areas.  You cannot assume sim_kill has already been
-   called.
-   QUITTING is non-zero if we cannot hang on errors.  */
+   called. */
 
 void sim_close PARAMS ((SIM_DESC sd, int quitting));
 
 
-/* Load program PROG into the simulator.
+/* Load program PROG into the simulators memory.
+
    If ABFD is non-NULL, the bfd for the file has already been opened.
-   The result is a return code indicating success.  */
+   The result is a return code indicating success.
+
+   For a simulator modeling real hardware, the client is permitted to
+   make multiple calls to this function.  Such calls have an
+   accumulative effect.
+
+   For a simulator modeling a process, calls to this function may be
+   ignored.  */
 
 SIM_RC sim_load PARAMS ((SIM_DESC sd, char *prog, struct _bfd *abfd, int from_tty));
 
 
 /* Prepare to run the simulated program.
-   ARGV and ENV are NULL terminated lists of pointers.  */
+
+   ARGV and ENV are NULL terminated lists of pointers.
+
+   For a simulator modeling real hardware, this function shall
+   initialize the processor registers to a known value.  The program
+   counter shall be set to the start address obtained from the last
+   program loaded (or the hardware reset default).  The ARGV and ENV
+   arguments can be ignored.
+
+   For a simulator modeling a process, after a call to this function a
+   new process instance shall exist - the TEXT, DATA, BSS and stack
+   regions shall all be initialized, ARGV and ENV shall be written to
+   process address space (according to the applicable ABI), and the
+   program counter and stack pointer set accordingly. (NB: A simulator
+   may in fact initialize the TEXT, DATA and BSS sections during an
+   earlier stage).
+
+   --
+
+   FIXME: Is the below a better definition - assuming that ABFD arg is
+   added.
+
+   Prepare to run the simulated program.
+
+   ABFD, if not NULL, can be used to obtain initial processor state
+   information (eg PC value).
+   ARGV and ENV, if non NULL,  are NULL terminated lists of pointers.
+
+   For a simulator modeling real hardware, this function shall
+   initialize the processor registers to a known value.  The program
+   counter shall be set to the start address obtained from the ABFD
+   struct (or the hardware reset default).  The ARGV and ENV arguments
+   can be ignored.
+
+   For a simulator modeling a process, after a call to this function a
+   new process instance shall exist - the TEXT, DATA, BSS and stack
+   regions shall all be initialized, ARGV and ENV shall be written to
+   process address space (according to the applicable ABI), and the
+   program counter and stack pointer set accordingly. */
 
 SIM_RC sim_create_inferior PARAMS ((SIM_DESC sd, char **argv, char **env));
 
 
-/* Read LENGTH bytes of the simulated program's memory and store in BUF.
-   Result is number of bytes read, or zero if error.  */
+/* Read LENGTH bytes of the simulated program's memory and store in
+   BUF.  Result is number of bytes read, or zero if error.  */
 
 int sim_read PARAMS ((SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length));
 
@@ -113,7 +182,8 @@ int sim_read PARAMS ((SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 int sim_write PARAMS ((SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length));
 
 
-/* Fetch register REGNO and store the raw (target endian) value in BUF.  */
+/* Fetch register REGNO and store the raw (target endian) value in
+   BUF.  */
 
 void sim_fetch_register PARAMS ((SIM_DESC sd, int regno, unsigned char *buf));
 
@@ -124,6 +194,7 @@ void sim_store_register PARAMS ((SIM_DESC sd, int regno, unsigned char *buf));
 
 
 /* Print whatever statistics the simulator has collected.
+
    VERBOSE is currently unused and must always be zero.  */
 
 void sim_info PARAMS ((SIM_DESC sd, int verbose));
@@ -142,14 +213,18 @@ int sim_stop PARAMS ((SIM_DESC sd));
 
 
 /* Fetch the REASON why the program stopped.
+
    SIM_EXITED: The program has terminated. SIGRC indicates the target
    dependant exit status.
+
    SIM_STOPPED: The program has stopped.  SIGRC indicates the reason:
    program interrupted by user via a sim_stop request (SIGINT); a
    breakpoint instruction (SIGTRAP); a completed step (SIGTRAP); an
    internal error condition (SIGABRT).
+
    SIM_SIGNALLED: The simulator encountered target code that requires
    the signal SIGRC to be delivered to the simulated program.
+
    SIM_RUNNING, SIM_POLLING: The return of one of these values
    indicates a problem internal to the simulator. */
 
@@ -163,10 +238,10 @@ void sim_stop_reason PARAMS ((SIM_DESC sd, enum sim_stop *reason, int *sigrc));
    or empty CMD. */
 
 void sim_do_command PARAMS ((SIM_DESC sd, char *cmd));
-
+
 
 /* Provide simulator with a default (global) host_callback_struct.
-   THIS PROCEDURE IS IS DEPRECIATED.
+   THIS PROCEDURE IS DEPRECIATED.
    GDB and NRUN do not use this interface.
    This procedure does not take a SIM_DESC argument as it is
    used before sim_open. */
@@ -175,7 +250,7 @@ void sim_set_callbacks PARAMS ((struct host_callback_struct *));
 
 
 /* Set the size of the simulator memory array.
-   THIS PROCEDURE IS IS DEPRECIATED.
+   THIS PROCEDURE IS DEPRECIATED.
    GDB and NRUN do not use this interface.
    This procedure does not take a SIM_DESC argument as it is
    used before sim_open. */
@@ -184,7 +259,7 @@ void sim_size PARAMS ((int i));
 
 
 /* Run a simulation with tracing enabled.
-   THIS PROCEDURE IS IS DEPRECIATED.
+   THIS PROCEDURE IS DEPRECIATED.
    GDB and NRUN do not use this interface.
    This procedure does not take a SIM_DESC argument as it is
    used before sim_open. */
@@ -193,7 +268,7 @@ int sim_trace PARAMS ((SIM_DESC sd));
 
 
 /* Configure the size of the profile buffer.
-   THIS PROCEDURE IS IS DEPRECIATED.
+   THIS PROCEDURE IS DEPRECIATED.
    GDB and NRUN do not use this interface.
    This procedure does not take a SIM_DESC argument as it is
    used before sim_open. */
@@ -202,12 +277,11 @@ void sim_set_profile_size PARAMS ((int n));
 
 
 /* Kill the running program.
-   THIS PROCEDURE IS IS DEPRECIATED.
+   THIS PROCEDURE IS DEPRECIATED.
    GDB and NRUN do not use this interface.
    This procedure will be replaced as part of the introduction of
    multi-cpu simulators. */
 
 void sim_kill PARAMS ((SIM_DESC sd));
-
 
 #endif /* !defined (REMOTE_SIM_H) */

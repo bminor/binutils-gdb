@@ -36,7 +36,6 @@ static void do_long PARAMS ((uint32 ins));
 static void do_2_short PARAMS ((uint16 ins1, uint16 ins2, enum _leftright leftright));
 static void do_parallel PARAMS ((uint16 ins1, uint16 ins2));
 static char *add_commas PARAMS ((char *buf, int sizeof_buf, unsigned long value));
-extern void sim_size PARAMS ((int power));
 static void init_system PARAMS ((void));
 extern void sim_set_profile PARAMS ((int n));
 extern void sim_set_profile_size PARAMS ((int n));
@@ -456,8 +455,10 @@ sim_read (sd, addr, buffer, size)
 
 
 SIM_DESC
-sim_open (kind, argv)
+sim_open (kind, callback, abfd, argv)
      SIM_OPEN_KIND kind;
+     host_callback *callback;
+     struct _bfd *abfd;
      char **argv;
 {
   struct simops *s;
@@ -466,14 +467,11 @@ sim_open (kind, argv)
   char **p;
 
   sim_kind = kind;
+  d10v_callback = callback;
   myname = argv[0];
 
   for (p = argv + 1; *p; ++p)
     {
-      /* Ignore endian specification.  */
-      if (strcmp (*p, "-E") == 0)
-	++p;
-      else
 #ifdef DEBUG
       if (strcmp (*p, "-t") == 0)
 	d10v_debug = DEBUG;
@@ -834,8 +832,7 @@ sim_kill (sd)
 }
 
 void
-sim_set_callbacks (sd, p)
-     SIM_DESC sd;
+sim_set_callbacks (p)
      host_callback *p;
 {
   d10v_callback = p;

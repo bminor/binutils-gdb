@@ -1,7 +1,46 @@
+Mon Aug 25 16:17:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim_calls.c (sim_open): Add ABFD argument.
+
+Thu Jul  3 10:18:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ppc-instructions (PPC_INSN_INT): From Michael Thies - Monitoring
+ 	CR register updates dependant on RC value had logic backwards.
+
+	* ppc-instructions (Load String Word Immediate): From Brad Parker
+ 	- sense of wrap test in check for overwriting RA wrong.
+	(Load String Word Indexed): Ditto.
+	
+	* configure.in: From Erik Landry - set sim_default_model not
+ 	sim_model for sim-default-model option.
+	* configure: Regenerate.
+	
+	* interrupts.c (check_masked_interrupts): Schedule a hardware
+ 	interrupt delivery when FP interrupts get enabled.
+	(program_interrupt): Generate FP exceptions instead of aborting.
+	(deliver_hardware_interrupt): Deliver a FP exception if so
+ 	enabled.
+
+	* registers.h: Add definition of fpscr_vx_bits.
+
+	* idecode_expression.h (FPSCR_END): Always update FEX and VX bits
+ 	in FPSCR.
+	(FPSCR_END): Explicitly check for possible floating point
+ 	exception conditions.
+	(FPSCR_BEGIN): Simplify.
+	
+	* ppc-instructions (Move From FPSCR): Enable.
+	(Move To FPSCR Bit 1): Ditto.
+	(Move To FPSCR Bit 0): Ditto.
+	(Move To FPSCR Field Immediate): Ditto.
+	(Move to Condition Register from FPSCR): Simplify.
+	(invalid_arithemetic_operation): Generate a QNaN when invalid
+ 	operation exception disabled.
+	
 Tue May 20 10:22:50 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim_calls.c (sim_open): Add callback argument.
-	(sim_set_callbacks): Delete SIM_DESC argument.
+	(sim_set_callbacks): Delete.
 
 Tue Apr 22 22:36:57 1997  Mike Meissner  <meissner@cygnus.com>
 

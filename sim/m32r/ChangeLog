@@ -1,3 +1,28 @@
+Mon Aug 25 17:50:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Mon Aug 25 15:54:08 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-if.c (sim_open): Add ABFD argument.
+
+Tue Jul 22 10:16:16 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sim-main.h (M32R_DEFAULT_MEM_SIZE): New macro.
+	* sim-if.c (sim_open): Use it.
+
+Wed Jun  4 12:48:12 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (WITH_ENGINE): Disable the common engine for now.
+
+Tue May 27 14:15:44 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-if.c (sim_read): Pass NULL cpu to sim_core_read_buffer.
+	(sim_write): Ditto for write.
+
+	* m32r.c (do_trap): Ditto for read/write.
+
 Tue May 20 10:18:25 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-if.c (sim_open): Add callback argument.

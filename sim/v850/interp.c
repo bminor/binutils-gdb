@@ -76,6 +76,10 @@ host_callback *v850_callback;
 
 int v850_debug;
 
+/* non-zero if we opened prog_bfd */
+static int prog_bfd_was_opened_p;
+bfd *prog_bfd;
+
 static SIM_OPEN_KIND sim_kind;
 static char *myname;
 
@@ -110,7 +114,7 @@ static INLINE long
 hash(insn)
      long insn;
 {
-  if ((insn & 0x0600) == 0
+  if (   (insn & 0x0600) == 0
       || (insn & 0x0700) == 0x0200
       || (insn & 0x0700) == 0x0600
       || (insn & 0x0780) == 0x0700)
@@ -234,6 +238,8 @@ map (addr)
     }
   else
     {
+      fprintf (stderr, "segmentation fault: access address: %x not below %x or above %x [ep = %x]\n", addr, low_end, high_start, State.regs[30]);
+      
       /* Signal a memory error. */
       State.exception = SIGSEGV;
       /* Point to a location not in main memory - renders invalid
@@ -288,104 +294,6 @@ store_mem (addr, len, data)
     default:
       abort ();
     }
-}
-
-static void
-do_format_1_2 (insn)
-     uint32 insn;
-{
-  struct hash_entry *h;
-
-  h = lookup_hash (insn);
-  OP[0] = insn & 0x1f;
-  OP[1] = (insn >> 11) & 0x1f;
-  (h->ops->func) ();
-}
-
-static void
-do_format_3 (insn)
-     uint32 insn;
-{
-  struct hash_entry *h;
-
-  h = lookup_hash (insn);
-  OP[0] = (((insn & 0x70) >> 4) | ((insn & 0xf800) >> 8)) << 1;
-  (h->ops->func) ();
-}
-
-static void
-do_format_4 (insn)
-     uint32 insn;
-{
-  struct hash_entry *h;
-
-  h = lookup_hash (insn);
-  OP[0] = (insn >> 11) & 0x1f;
-  OP[1] = (insn & 0x7f);
-  (h->ops->func) ();
-}
-
-static void
-do_format_5 (insn)
-     uint32 insn;
-{
-  struct hash_entry *h;
-
-  h = lookup_hash (insn);
-  OP[0] = (((insn & 0x3f) << 15) | ((insn >> 17) & 0x7fff)) << 1;
-  OP[1] = (insn >> 11) & 0x1f;
-  (h->ops->func) ();
-}
-
-static void
-do_format_6 (insn)
-     uint32 insn;
-{
-  struct hash_entry *h;
-
-  h = lookup_hash (insn);
-  OP[0] = (insn >> 16) & 0xffff;
-  OP[1] = insn & 0x1f;
-  OP[2] = (insn >> 11) & 0x1f;
-  (h->ops->func) ();
-}
-
-static void
-do_format_7 (insn)
-     uint32 insn;
-{
-  struct hash_entry *h;
-
-  h = lookup_hash (insn);
-  OP[0] = insn & 0x1f;
-  OP[1] = (insn >> 11) & 0x1f;
-  OP[2] = (insn >> 16) & 0xffff;
-  (h->ops->func) ();
-}
-
-static void
-do_format_8 (insn)
-     uint32 insn;
-{
-  struct hash_entry *h;
-
-  h = lookup_hash (insn);
-  OP[0] = insn & 0x1f;
-  OP[1] = (insn >> 11) & 0x7;
-  OP[2] = (insn >> 16) & 0xffff;
-  (h->ops->func) ();
-}
-
-static void
-do_format_9_10 (insn)
-     uint32 insn;
-{
-  struct hash_entry *h;
-
-  h = lookup_hash (insn);
-  OP[0] = insn & 0x1f;
-  OP[1] = (insn >> 11) & 0x1f;
-  (h->ops->func) ();
 }
 
 void
@@ -494,8 +402,10 @@ sim_write (sd, addr, buffer, size)
 }
 
 SIM_DESC
-sim_open (kind,argv)
+sim_open (kind, cb, abfd, argv)
      SIM_OPEN_KIND kind;
+     host_callback *cb;
+     struct _bfd *abfd;
      char **argv;
 {
   struct simops *s;
@@ -504,18 +414,19 @@ sim_open (kind,argv)
 
   sim_kind = kind;
   myname = argv[0];
+  v850_callback = cb;
 
-  for (p = argv + 1; *p; ++p)
+  if (argv != NULL)
     {
-      if (strcmp (*p, "-E") == 0)
-	++p; /* ignore endian spec */
-      else
+      for (p = argv + 1; *p; ++p)
+	{
 #ifdef DEBUG
-      if (strcmp (*p, "-t") == 0)
-	v850_debug = DEBUG;
-      else
+	  if (strcmp (*p, "-t") == 0)
+	    v850_debug = DEBUG;
+	  else
 #endif
-	(*v850_callback->printf_filtered) (v850_callback, "ERROR: unsupported option(s): %s\n",*p);
+	    (*v850_callback->printf_filtered) (v850_callback, "ERROR: unsupported option(s): %s\n",*p);
+	}
     }
 
   /* put all the opcodes in the hash table */
@@ -547,7 +458,8 @@ sim_close (sd, quitting)
      SIM_DESC sd;
      int quitting;
 {
-  /* nothing to do */
+  if (prog_bfd != NULL && prog_bfd_was_opened_p)
+    bfd_close (prog_bfd);
 }
 
 void
@@ -594,58 +506,33 @@ sim_resume (sd, step, siggnal)
 
   do
     {
+      struct hash_entry * h;
       /* Fetch the current instruction.  */
-      inst = RLW (PC);
+      inst  = RLW (PC);
       oldpc = PC;
-      opcode = (inst & 0x07e0) >> 5;
 
-      /* Decode the opcode field. */
-      if ((opcode & 0x30) == 0
-	  || (opcode & 0x38) == 0x10)
-	{
-	  do_format_1_2 (inst & 0xffff);
-	  PC += 2;
-	}
-      else if ((opcode & 0x3C) == 0x18
-	       || (opcode & 0x3C) == 0x1C
-	       || (opcode & 0x3C) == 0x20
-	       || (opcode & 0x3C) == 0x24
-	       || (opcode & 0x3C) == 0x28)
-	{
-	  do_format_4 (inst & 0xffff);
-	  PC += 2;
-	}
-      else if ((opcode & 0x3C) == 0x2C)
-	{
-	  do_format_3 (inst & 0xffff);
-	  /* No PC update, it's done in the instruction.  */
-	}
-      else if ((opcode & 0x38) == 0x30)
-	{
-	  do_format_6 (inst);
-	  PC += 4;
-	}
-      else if ((opcode & 0x3C) == 0x38)
-	{
-	  do_format_7 (inst);
-	  PC += 4;
-	}
-      else if ((opcode & 0x3E) == 0x3C)
-	{
-	  do_format_5 (inst);
-	  /* No PC update, it's done in the instruction.  */
-	}
-      else if ((opcode & 0x3F) == 0x3E)
-	{
-	  do_format_8 (inst);
-	  PC += 4;
-	}
-      else
-	{
-	  do_format_9_10 (inst);
-	  PC += 4;
-	}
+      h     = lookup_hash (inst);
+      OP[0] = inst & 0x1f;
+      OP[1] = (inst >> 11) & 0x1f;
+      OP[2] = (inst >> 16) & 0xffff;
+      OP[3] = inst;
 
+//      fprintf (stderr, "PC = %x, SP = %x\n", PC, SP );
+
+      if (inst == 0)
+	{
+	  fprintf (stderr, "NOP encountered!\n");
+	  break;
+	}
+      
+      PC += h->ops->func ();
+
+      if (oldpc == PC)
+	{
+	  fprintf (stderr, "simulator loop at %x\n", PC );
+	  break;
+	}
+      
       /* Check for and handle pending interrupts.  */
       if (intgen_list && (have_nm_generator || !(PSW & PSW_ID)))
 	{
@@ -792,8 +679,7 @@ sim_kill (sd)
 }
 
 void
-sim_set_callbacks (sd, p)
-     SIM_DESC sd;
+sim_set_callbacks (p)
      host_callback *p;
 {
   v850_callback = p;
@@ -1031,14 +917,14 @@ sim_load (sd, prog, abfd, from_tty)
      int from_tty;
 {
   extern bfd *sim_load_file (); /* ??? Don't know where this should live.  */
-  bfd *prog_bfd;
 
+  if (prog_bfd != NULL && prog_bfd_was_opened_p)
+    bfd_close (prog_bfd);
   prog_bfd = sim_load_file (sd, myname, v850_callback, prog, abfd,
 			    sim_kind == SIM_OPEN_DEBUG);
   if (prog_bfd == NULL)
     return SIM_RC_FAIL;
   PC = bfd_get_start_address (prog_bfd);
-  if (abfd == NULL)
-    bfd_close (prog_bfd);
+  prog_bfd_was_opened_p = abfd == NULL;
   return SIM_RC_OK;
 } 

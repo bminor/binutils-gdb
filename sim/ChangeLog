@@ -1,4 +1,31 @@
+Mon Aug 25 16:26:53 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (sparc*-*-*, only_if_enabled): Set
+ 	only_if_enabled=yes.  Check only_if_enabled before enabling a
+ 	simulator.
+	* configure: Regenerate.
+	
+start-sanitize-v850e
+Mon Aug 18 10:56:59 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.in (extra_subdirs): Add v850e target.
+
+end-sanitize-v850e
+start-sanitize-v850eq
+Mon Aug 18 10:56:59 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.in (extra_subdirs): Add v850eq target.
+
+end-sanitize-v850eq
+Fri Jul 25 11:40:47 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure.in (sparc*-*-*): Don't build erc32.
+	* configure: Regenerate.
+
 Thu Apr 24 00:47:20 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure.in (m32r-*-*): New target.
+	* configure: Regenerate.
 
 	* Makefile.in (autoconf-common, autoconf-changelog): Change $* to $@.
 

@@ -1,6 +1,7 @@
-Thu Aug 14 12:54:07 1997  Doug Evans  <dje@canuck.cygnus.com>
+Mon Aug 25 10:50:51 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* callback.h (cb_printf, cb_eprintf): Declare.
+	* remote-sim.h (sim_open): Add ABFD arg. Change ARGV to PARGV.
+  	Document.
 
 Fri Aug  8 16:43:56 1997  Doug Evans  <dje@canuck.cygnus.com>
 

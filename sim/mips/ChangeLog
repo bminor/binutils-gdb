@@ -1,3 +1,26 @@
+Mon Aug 25 17:50:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Mon Aug 25 15:59:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_open): Add ABFD argument.
+	(sim_load): Move call to sim_config from here.
+	(sim_open): To here.  Check return status.
+
+start-sanitize-r5900
+	* gencode.c (build_instruction): Do not define x8000000000000000,
+ 	x7FFFFFFFFFFFFFFF, or xFFFFFFFF80000000.
+
+end-sanitize-r5900
+start-sanitize-r5900
+Mon Jul 28 19:49:29 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gencode.c (build_instruction): For "pdivw", "pdivbw" and
+ 	"pdivuw" check for overflow due to signed divide by -1.
+
+end-sanitize-r5900
 Fri Jul 25 15:00:45 1997  Gavin Koch  <gavin@cygnus.com>
  
  	* gencode.c (build_instruction): Two arg MADD should

@@ -26,8 +26,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sim-core.h"
 #include "cpu-sim.h"
 
-struct host_callback_struct *sim_callback;
-
 /* Global state until sim_open starts creating and returning it
    [and the other simulator i/f fns take it as an argument].  */
 struct sim_state sim_global_state;
@@ -38,8 +36,10 @@ STATE current_state;
 /* Create an instance of the simulator.  */
 
 SIM_DESC
-sim_open (kind, argv)
+sim_open (kind, callback, abfd, argv)
      SIM_OPEN_KIND kind;
+     host_callback *callback;
+     struct _bfd *abfd;
      char **argv;
 {
   int i;
@@ -48,7 +48,7 @@ sim_open (kind, argv)
   /* FIXME: until we alloc one, use the global.  */
   memset (sd, 0, sizeof (sim_global_state));
   STATE_OPEN_KIND (sd) = kind;
-  STATE_CALLBACK (sd) = sim_callback;
+  STATE_CALLBACK (sd) = callback;
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     return 0;
@@ -80,14 +80,10 @@ sim_open (kind, argv)
   cgen_init (sd);
 
   /* FIXME:wip */
-  sim_core_attach (sd,
-		   NULL,
-		   attach_raw_memory,
-		   access_read_write_exec,
-		   0, 0, 0x100000, NULL, NULL);
+  sim_core_attach (sd, NULL, attach_raw_memory, access_read_write_exec,
+		   0, 0, M32R_DEFAULT_MEM_SIZE, NULL, NULL);
 
-  /* We could only do this if profiling has been enabled, but the
-     structure member is small so we don't bother.  */
+  /* Only needed for profiling, but the structure member is small.  */
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)
     memset (& CPU_M32R_PROFILE (STATE_CPU (sd, i)), 0,
 	    sizeof (CPU_M32R_PROFILE (STATE_CPU (sd, i))));
@@ -212,17 +208,6 @@ sim_info (sd, verbose)
   profile_print (sd, STATE_VERBOSE_P (sd), NULL, print_m32r_misc_cpu);
 }
 
-void
-sim_set_callbacks (sd, p)
-     SIM_DESC sd;
-     host_callback *p;
-{
-  if (sd == NULL)
-    sim_callback = p;
-  else
-    STATE_CALLBACK (sd) = p;
-}
-
 /* The contents of BUF are in target byte order.  */
 
 void
@@ -300,7 +285,7 @@ sim_read (sd, addr, buf, len)
      int len;
 {
 #if 1
-  return sim_core_read_buffer (sd, sim_core_read_map,
+  return sim_core_read_buffer (sd, NULL, sim_core_read_map,
 				buf, addr, len);
 #else
   return (*STATE_MEM_READ (sd)) (sd, addr, buf, len);
@@ -315,7 +300,7 @@ sim_write (sd, addr, buf, len)
      int len;
 {
 #if 1
-  return sim_core_write_buffer (sd, sim_core_write_map,
+  return sim_core_write_buffer (sd, NULL, sim_core_write_map,
 				buf, addr, len);
 #else
   return (*STATE_MEM_WRITE (sd)) (sd, addr, buf, len);

@@ -1,3 +1,20 @@
+Mon Aug 25 17:50:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Mon Aug 25 16:14:44 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_open): Add ABFD argument.
+
+Tue Jun 24 13:46:20 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* interp.c (sim_resume): Clear State.exited.
+	(sim_stop_reason): If State.exited is nonzero, then indicate that
+	the simulator exited instead of stopped.
+	* mn10300_sim.h (struct _state): Add exited field.
+	* simops.c (syscall): Set State.exited for SYS_exit.
+
 Wed Jun 11 22:07:56 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* simops.c: Fix thinko in last change.

@@ -1,8 +1,40 @@
+Mon Aug 25 17:50:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Mon Aug 25 12:11:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* aclocal.m4 (sim-endian): Add second argument to
+ 	SIM_AC_OPTION_ENDIAN.  First is hardwired endian, second is
+ 	default endian when not hardwired.
+
+	* sim-config.h (WITH_DEFAULT_TARGET_BYTE_ORDER): New macro, if all
+ 	else failes value for target byte order.
+
+	* sim-config.c (sim_config): Add abfd arguments. Set
+ 	STATE_PROG_BFD accordingly.  Determine prefered_target_byte_order
+ 	from same.
+	(sim_config): Return SIM_RC, don't abort.
+	(bfd.h): Include.
+	
+	* run.c (main): Update call to sim_open - add ABFD argument.
+  	* nrun.c (main): Add NULL ABFD argument.
+
 Thu Aug 14 12:48:57 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* callback.c (os_poll_quit): Make static.
 	Call sim_cb_eprintf, not p->eprintf.
 	(sim_cb_printf, sim_cb_eprintf): New functions.
+	* sim-utils.h (sim_cb_printf, sim_cb_eprintf): Declare.
+
+	* sim-basics.h (zalloc,zfree,sim_add_commas,SIM_ELAPSED_TIME,
+	sim_elapsed_time_get,sim_elapsed_time_since): Move decls to
+	sim-utils.h. #include sim-utils.h.
+	* sim-utils.h: Above decls moved here.
+	(sim_analyze_program,sim_load_file): Use `struct _bfd', not `bfd'.
+
+	* sim-watch.c (action_watchpoint): Fix thinkos.
 
 Thu Jul 24 08:48:05 1997  Stu Grossman  (grossman@critters.cygnus.com)
 

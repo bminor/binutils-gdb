@@ -115,7 +115,7 @@ run_sim(sregs, go, icount, dis)
 			if (sis_verbose)
 			    (*sim_callback->printf_filtered) (sim_callback,
 							      "SW BP hit at %x\n", sregs->pc);
-			sim_stop();
+			sim_halt();
 			restore_stdio();
 			clearerr(stdin);
 			return (BPT_HIT);
@@ -133,7 +133,7 @@ run_sim(sregs, go, icount, dis)
 	    go = icount = 0;
 	}
     }
-    sim_stop();
+    sim_halt();
     sregs->tottime += time(NULL) - sregs->starttime;
     restore_stdio();
     clearerr(stdin);
@@ -155,8 +155,7 @@ run_sim(sregs, go, icount, dis)
 }
 
 void
-sim_set_callbacks (sd, ptr)
-     SIM_DESC sd;
+sim_set_callbacks (ptr)
      host_callback *ptr;
 {
   sim_callback = ptr;
@@ -169,8 +168,10 @@ sim_size (memsize)
 }
 
 SIM_DESC
-sim_open(kind, argv)
+sim_open (kind, callback, abfd, argv)
      SIM_OPEN_KIND kind;
+     struct host_callback_struct *callback;
+     struct _bfd *abfd;
      char **argv;
 {
 
@@ -179,6 +180,8 @@ sim_open(kind, argv)
     int             stat = 1;
     int             grdl = 0;
     int             freq = 15;
+
+    sim_callback = callback;
 
     (*sim_callback->printf_filtered) (sim_callback, "\n SIS - SPARC instruction simulator %s\n", sis_version);
     (*sim_callback->printf_filtered) (sim_callback, " Bug-reports to Jiri Gaisler ESA/ESTEC (jgais@wd.estec.esa.nl)\n");

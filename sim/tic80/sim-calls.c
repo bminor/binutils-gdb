@@ -52,6 +52,7 @@ struct sim_state simulation = { 0 };
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind,
 	  host_callback *callback,
+	  struct _bfd *abfd,
 	  char **argv)
 {
   SIM_DESC sd = &simulation;
@@ -73,6 +74,13 @@ sim_open (SIM_OPEN_KIND kind,
       return 0;
     }
 
+  /* establish the simulator configuration */
+  if (sim_config (sd, abfd) != SIM_RC_OK)
+    {
+      sim_module_uninstall (sd);
+      return 0;
+    }
+
   if (sim_post_argv_init (sd) != SIM_RC_OK)
     {
       /* Uninstall the modules to avoid memory leaks,
@@ -88,9 +96,6 @@ sim_open (SIM_OPEN_KIND kind,
   STATE_CPU (sd, 0)->is_user_mode = 0;
   memset (&STATE_CPU (sd, 0)->cia, 0, sizeof STATE_CPU (sd, 0)->cia);
   CPU_STATE (STATE_CPU (sd, 0)) = sd;
-
-  /* establish the simulator configuration */
-  sim_config (sd, LITTLE_ENDIAN/*d30v always big endian*/);
 
 #define TIC80_MEM_START 0x2000000
 #define TIC80_MEM_SIZE 0x100000

@@ -58,7 +58,6 @@ static char *myname;
 
 
 /* NOTE: sim_size() and sim_trace() are going away */
-extern void sim_size PARAMS ((int i));
 extern int sim_trace PARAMS ((SIM_DESC sd));
 
 extern int getopt ();
@@ -103,6 +102,12 @@ main (ac, av)
   no_args[1] = "-E";
   no_args[2] = "set-later";
 #endif
+
+  /* FIXME: This is currently being migrated into sim_open.
+     Simulators that use functions such as sim_size() still require
+     this. */
+  default_callback.init (&default_callback);
+  sim_set_callbacks (&default_callback);
 
   /* FIXME: This is currently being rewritten to have each simulator
      do all argv processing.  */
@@ -212,8 +217,7 @@ main (ac, av)
 
   /* Ensure that any run-time initialisation that needs to be
      performed by the simulator can occur. */
-  default_callback.init (&default_callback);
-  sd = sim_open (SIM_OPEN_STANDALONE, &default_callback, sim_argv);
+  sd = sim_open (SIM_OPEN_STANDALONE, &default_callback, abfd, sim_argv);
   if (sd == 0)
     exit (1);
 

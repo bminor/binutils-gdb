@@ -283,7 +283,14 @@ SUB_REG_FETCH - return as lvalue some sub-part of a "register"
    A  - low part of "register"
    A1 - high part of register
 */
-#define SUB_REG_FETCH(T,TC,A,A1,I) (*(((T*)(((I) < (TC)) ? (A) : (A1))) + ((I) % (TC))))
+#define SUB_REG_FETCH(T,TC,A,A1,I) \
+(*(((I) < (TC) ? (T*)(A) : (T*)(A1)) \
+   + (CURRENT_HOST_BYTE_ORDER == BIG_ENDIAN \
+      ? ((TC) - 1 - (I) % (TC)) \
+      : ((I) % (TC)) \
+      ) \
+   ) \
+ )
 
 /* 
 GPR_<type>(R,I) - return, as lvalue, the I'th <type> of general register R 
@@ -292,18 +299,16 @@ GPR_<type>(R,I) - return, as lvalue, the I'th <type> of general register R
                   2 is B=byte H=halfword W=word D=doubleword 
 */
 
-#define SUB_REG_SB(A,A1,I) SUB_REG_FETCH(signed char,       BYTES_IN_MIPS_REGS,       A, A1, I)
-#define SUB_REG_SH(A,A1,I) SUB_REG_FETCH(signed short,      HALFWORDS_IN_MIPS_REGS,   A, A1, I)
-#define SUB_REG_SW(A,A1,I) SUB_REG_FETCH(signed int,        WORDS_IN_MIPS_REGS,       A, A1, I)
-#define SUB_REG_SD(A,A1,I) SUB_REG_FETCH(signed long long,  DOUBLEWORDS_IN_MIPS_REGS, A, A1, I)
+#define SUB_REG_SB(A,A1,I) SUB_REG_FETCH(signed8,  BYTES_IN_MIPS_REGS,       A, A1, I)
+#define SUB_REG_SH(A,A1,I) SUB_REG_FETCH(signed16, HALFWORDS_IN_MIPS_REGS,   A, A1, I)
+#define SUB_REG_SW(A,A1,I) SUB_REG_FETCH(signed32, WORDS_IN_MIPS_REGS,       A, A1, I)
+#define SUB_REG_SD(A,A1,I) SUB_REG_FETCH(signed64, DOUBLEWORDS_IN_MIPS_REGS, A, A1, I)
 
-#define SUB_REG_UB(A,A1,I) SUB_REG_FETCH(unsigned char,     BYTES_IN_MIPS_REGS,       A, A1, I)
-#define SUB_REG_UH(A,A1,I) SUB_REG_FETCH(unsigned short,    HALFWORDS_IN_MIPS_REGS,   A, A1, I)
-#define SUB_REG_UW(A,A1,I) SUB_REG_FETCH(unsigned int,      WORDS_IN_MIPS_REGS,       A, A1, I)
-#define SUB_REG_UD(A,A1,I) SUB_REG_FETCH(unsigned long long,DOUBLEWORDS_IN_MIPS_REGS, A, A1, I)
-
-
-
+#define SUB_REG_UB(A,A1,I) SUB_REG_FETCH(unsigned8,  BYTES_IN_MIPS_REGS,       A, A1, I)
+#define SUB_REG_UH(A,A1,I) SUB_REG_FETCH(unsigned16, HALFWORDS_IN_MIPS_REGS,   A, A1, I)
+#define SUB_REG_UW(A,A1,I) SUB_REG_FETCH(unsigned32, WORDS_IN_MIPS_REGS,       A, A1, I)
+#define SUB_REG_UD(A,A1,I) SUB_REG_FETCH(unsigned64, DOUBLEWORDS_IN_MIPS_REGS, A, A1, I)
+  
 #define GPR_SB(R,I) SUB_REG_SB(&registers[R], &registers1[R], I)
 #define GPR_SH(R,I) SUB_REG_SH(&registers[R], &registers1[R], I)
 #define GPR_SW(R,I) SUB_REG_SW(&registers[R], &registers1[R], I)
@@ -769,9 +774,10 @@ interrupt_event (SIM_DESC sd, void *data)
 /*---------------------------------------------------------------------------*/
 
 SIM_DESC
-sim_open (kind,cb,argv)
+sim_open (kind, cb, abfd, argv)
      SIM_OPEN_KIND kind;
      host_callback *cb;
+     struct _bfd *abfd;
      char **argv;
 {
   SIM_DESC sd = &simulator;
@@ -810,6 +816,14 @@ sim_open (kind,cb,argv)
     {
       /* Uninstall the modules to avoid memory leaks,
 	 file descriptor leaks, etc.  */
+      sim_module_uninstall (sd);
+      return 0;
+    }
+
+  /* Configure/verify the target byte order and other runtime
+     configuration options */
+  if (sim_config (sd, abfd) != SIM_RC_OK)
+    {
       sim_module_uninstall (sd);
       return 0;
     }
@@ -1314,10 +1328,6 @@ sim_load (sd,prog,abfd,from_tty)
   if (prog_bfd == NULL)
     return SIM_RC_FAIL;
   sim_analyze_program (sd, prog_bfd);
-
-  /* Configure/verify the target byte order and other runtime
-     configuration options */
-  sim_config (sd, PREFERED_TARGET_BYTE_ORDER(prog_bfd));
 
   /* (re) Write the monitor trap address handlers into the monitor
      (eeprom) address space.  This can only be done once the target

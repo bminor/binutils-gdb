@@ -118,18 +118,61 @@ AC_SUBST(sim_stdio)
 
 
 dnl --enable-sim-trace is for users of the simulator
-dnl the allowable values are work-in-progress
+dnl The argument is either a bitmask of things to enable [exactly what is
+dnl up to the simulator], or is a comma separated list of names of tracing
+dnl elements to enable.  The latter is only supported on simulators that
+dnl use WITH_TRACE.
 AC_ARG_ENABLE(sim-trace,
 [  --enable-sim-trace=opts		Enable tracing flags],
 [case "${enableval}" in
-  yes)	sim_trace="-DTRACE=1 -DWITH_TRACE=1";;
+  yes)	sim_trace="-DTRACE=1 -DWITH_TRACE=-1";;
   no)	sim_trace="-DTRACE=0 -DWITH_TRACE=0";;
-  *)	sim_trace="-DTRACE='(${enableval})' -DWITH_TRACE='(${enableval})'";;
+  [[-0-9]]*)
+	sim_trace="-DTRACE='(${enableval})' -DWITH_TRACE='(${enableval})'";;
+  [[a-z]]*)
+	sim_trace=""
+	for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
+	  if test x"$sim_trace" = x; then
+	    sim_trace="-DWITH_TRACE='(TRACE_$x"
+	  else
+	    sim_trace="${sim_trace}|TRACE_$x"
+	  fi
+	done
+	sim_trace="$sim_trace)'" ;;
 esac
 if test x"$silent" != x"yes" && test x"$sim_trace" != x""; then
   echo "Setting sim trace = $sim_trace" 6>&1
 fi],[sim_trace=""])dnl
 AC_SUBST(sim_trace)
+
+
+dnl --enable-sim-profile
+dnl The argument is either a bitmask of things to enable [exactly what is
+dnl up to the simulator], or is a comma separated list of names of profiling
+dnl elements to enable.  The latter is only supported on simulators that
+dnl use WITH_PROFILE.
+AC_ARG_ENABLE(sim-profile,
+[  --enable-sim-profile=opts		Enable profiling flags],
+[case "${enableval}" in
+  yes)	sim_profile="-DPROFILE=1 -DWITH_PROFILE=-1";;
+  no)	sim_profile="-DPROFILE=0 -DWITH_PROFILE=0";;
+  [[-0-9]]*)
+	sim_profile="-DPROFILE='(${enableval})' -DWITH_PROFILE='(${enableval})'";;
+  [[a-z]]*)
+	sim_profile=""
+	for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
+	  if test x"$sim_profile" = x; then
+	    sim_profile="-DWITH_PROFILE='(PROFILE_$x"
+	  else
+	    sim_profile="${sim_profile}|PROFILE_$x"
+	  fi
+	done
+	sim_profile="$sim_profile)'" ;;
+esac
+if test x"$silent" != x"yes" && test x"$sim_profile" != x""; then
+  echo "Setting sim profile = $sim_profile" 6>&1
+fi],[sim_profile=""])dnl
+AC_SUBST(sim_profile)
 
 
 dnl Types used by common code
@@ -205,20 +248,30 @@ AC_SUBST(sim_assert)
 
 dnl --enable-sim-endian={yes,no,big,little} is for simulators
 dnl that support both big and little endian targets.
+dnl arg[1] is hardwired target endianness.
+dnl arg[2] is default target endianness.
 AC_DEFUN(SIM_AC_OPTION_ENDIAN,
 [
-default_sim_endian="ifelse([$1],,,-DWITH_TARGET_BYTE_ORDER=[$1])"
+wire_endian="ifelse([$1],,ifelse([$2],,,[$2]),[$1])"
+default_endian="ifelse([$2],,ifelse([$1],,,[$1]),[$2])"
+default_sim_endian="ifelse([$1],,ifelse([$2],,,-DWITH_DEFAULT_TARGET_BYTE_ORDER=[$2]),-DWITH_TARGET_BYTE_ORDER=[$1])"
 AC_ARG_ENABLE(sim-endian,
 [  --enable-sim-endian=endian		Specify target byte endian orientation.],
 [case "${enableval}" in
-  yes)	case "$target" in
-	  *powerpc-*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BIG_ENDIAN";;
-	  *powerpcle-*) sim_endian="-DWITH_TARGET_BYTE_ORDER=LITTLE_ENDIAN";;
-	  *) echo "Unknown target $target" 1>&6; sim_endian="-DWITH_TARGET_BYTE_ORDER=0";;
-	esac;;
-  no)	 sim_endian="-DWITH_TARGET_BYTE_ORDER=0";;
   b*|B*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BIG_ENDIAN";;
   l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=LITTLE_ENDIAN";;
+  yes)	 if test x"$wire_endian" != x; then
+	   sim_endian="-DWITH_TARGET_BYTE_ORDER=${wire_endian}"
+	 else
+	   echo "No hard-wired endian for target $target" 1>&6
+	   sim_endian="-DWITH_TARGET_BYTE_ORDER=0"
+	 fi;;
+  no)	 if test x"$default_endian" != x; then
+	   sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${default_endian}"
+	 else
+	   echo "No default endian for target $target" 1>&6
+	   sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=0"
+	 fi;;
   *)	 AC_MSG_ERROR("Unknown value $enableval for --enable-sim-endian"); sim_endian="";;
 esac
 if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
@@ -272,6 +325,43 @@ if test x"$silent" != x"yes" && test x"$sim_float" != x""; then
   echo "Setting float flags = $sim_float" 6>&1
 fi],[sim_float="-DWITH_FLOATING_POINT=${default_sim_floating_point}"])dnl
 AC_SUBST(sim_float)
+])
+
+
+dnl The argument is the default cache size if none is specified.
+AC_DEFUN(SIM_AC_OPTION_SCACHE,
+[
+default_sim_scache="ifelse([$1],,0,[$1])"
+AC_ARG_ENABLE(sim-scache,
+[  --enable-sim-scache=size		Specify simulator execution cache size.],
+[case "${enableval}" in
+  yes)	sim_scache="-DWITH_SCACHE=${default_sim_scache}";;
+  no)	sim_scace= ;;
+  [[0-9]]*) sim_cache=${enableval};;
+  *)	AC_MSG_ERROR("Bad value $enableval passed to --enable-sim-scache");
+	sim_scache="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_scache" != x""; then
+  echo "Setting scache size = $sim_scache" 6>&1
+fi],[sim_scache="-DWITH_SCACHE=${default_sim_scache}"])
+AC_SUBST(sim_scache)
+])
+
+
+dnl The argument is the default model if none is specified.
+AC_DEFUN(SIM_AC_OPTION_DEFAULT_MODEL,
+[
+default_sim_default_model="ifelse([$1],,0,[$1])"
+AC_ARG_ENABLE(sim-default-model,
+[  --enable-sim-default-model=model	Specify default model to simulate.],
+[case "${enableval}" in
+  yes|no) AC_MSG_ERROR("Missing argument to --enable-sim-default-model");;
+  *)	sim_default_model="-DWITH_DEFAULT_MODEL='\"${enableval}\"'";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_default_model" != x""; then
+  echo "Setting default model = $sim_default_model" 6>&1
+fi],[sim_default_model="-DWITH_DEFAULT_MODEL='\"${default_sim_default_model}\"'"])
+AC_SUBST(sim_default_model)
 ])
 
 

@@ -515,7 +515,7 @@ gdbsim_open (args, from_tty)
   make_cleanup (freeargv, (char *) argv);
 
   init_callbacks ();
-  gdbsim_desc = sim_open (SIM_OPEN_DEBUG, &gdb_callback, argv);
+  gdbsim_desc = sim_open (SIM_OPEN_DEBUG, &gdb_callback, exec_bfd, argv);
 
   if (gdbsim_desc == 0)
     error ("unable to create simulator instance");
