@@ -2020,10 +2020,10 @@ void OP_F080 (insn, extension)
   unsigned long temp;
   int z;
 
-  temp = load_mem (State.regs[REG_A0 + (insn & 3)], 1);
+  temp = load_mem (State.regs[REG_A0 + REG0 (insn)], 1);
   z = (temp & State.regs[REG_D0 + REG1 (insn)]) == 0;
   temp |= State.regs[REG_D0 + REG1 (insn)];
-  store_mem (State.regs[REG_A0 + (insn & 3)], 1, temp);
+  store_mem (State.regs[REG_A0 + REG0 (insn)], 1, temp);
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= (z ? PSW_Z : 0);
 }
@@ -2054,7 +2054,7 @@ void OP_FAF00000 (insn, extension)
                     + SEXT8 ((insn & 0xff00) >> 8)), 1);
   z = (temp & (insn & 0xff)) == 0;
   temp |= (insn & 0xff);
-  store_mem (State.regs[REG_A0 + ((insn & 30000)>> 16)], 1, temp);
+  store_mem (State.regs[REG_A0 + REG0_16 (insn))], 1, temp);
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= (z ? PSW_Z : 0);
 }
@@ -2066,10 +2066,10 @@ void OP_F090 (insn, extension)
   unsigned long temp;
   int z;
 
-  temp = load_mem (State.regs[REG_A0 + (insn & 3)], 1);
+  temp = load_mem (State.regs[REG_A0 + REG0 (insn)], 1);
   z = (temp & State.regs[REG_D0 + REG1 (insn)]) == 0;
   temp = ~temp & State.regs[REG_D0 + REG1 (insn)];
-  store_mem (State.regs[REG_A0 + (insn & 3)], 1, temp);
+  store_mem (State.regs[REG_A0 + REG0 (insn)], 1, temp);
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= (z ? PSW_Z : 0);
 }

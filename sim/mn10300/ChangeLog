@@ -1,3 +1,7 @@
+Mon Jan 13 13:22:35 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c: Use REG macros in few places not using them yet.
+
 Mon Jan  6 16:21:19 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300_sim.h (struct _state): Fix number of registers!
