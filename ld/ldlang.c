@@ -151,7 +151,6 @@ lang_statement_list_type *stat_ptr = &statement_list;
 lang_statement_list_type file_chain =
 {0};
 CONST char *entry_symbol = 0;
-bfd_size_type largest_section = 0;
 boolean lang_has_input_file = false;
 boolean had_output_filename = false;
 boolean lang_float_flag = false;
@@ -1558,15 +1557,6 @@ size_input_section (this_ptr, output_section_statement, fill, dot, relax)
 
       dot = insert_pad (this_ptr, fill, i->alignment_power,
 			output_section_statement->bfd_section, dot);
-
-      /* remember the largest size so we can malloc the largest area
-         needed for the output stage. Only remember the size of sections
-         which we will actually allocate  */
-      if ((i->flags & SEC_HAS_CONTENTS) != 0
-	  && (bfd_get_section_size_before_reloc (i) > largest_section))
-	{
-	  largest_section = bfd_get_section_size_before_reloc (i);
-	}
 
       /* Remember where in the output section this input section goes */
 

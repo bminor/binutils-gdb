@@ -1,3 +1,9 @@
+Tue Feb 22 09:21:18 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ldlang.h (largest_section): Don't declare.
+	* ldlang.c (largest_section): Don't define.
+	(size_input_section): Don't set largest_section; not used.
+
 Mon Feb 21 15:15:29 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* ldlang.c (new_afile): Pass NULL as last argument to concat.
