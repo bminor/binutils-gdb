@@ -1,3 +1,13 @@
+2000-08-16  Andrew Macleod  <amacleod@cygnus.com>
+
+	* elf64-sparc.c (sparc64_elf_relocate_section): Set relocation address
+	for undefined symbols to be the beginning of the section.
+
+	* elf64-sparc.c (sparc64_elf_adjust_dynamic_symbol): Don't allocate
+	four extra entries at the beginning of the .rela.plt section.
+	(sparc64_elf_finish_dynamic_symbol): Adjust the offset in the .rela.plt
+	section to account for the four reserved entries in the .plt section.
+
 2000-08-15  Geoffrey Keating  <geoffk@cygnus.com>
 
 	* xcofflink.c (_bfd_ppc_xcoff_relocate_section): Add ori r0,r0,0

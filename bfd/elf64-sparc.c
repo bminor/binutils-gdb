@@ -1557,12 +1557,6 @@ sparc64_elf_adjust_dynamic_symbol (info, h)
       s = bfd_get_section_by_name (dynobj, ".rela.plt");
       BFD_ASSERT (s != NULL);
 
-      /* The first plt entries are reserved, and the relocations must
-	 pair up exactly.  */
-      if (s->_raw_size == 0)
-	s->_raw_size += (PLT_HEADER_SIZE/PLT_ENTRY_SIZE
-			 * sizeof (Elf64_External_Rela));
-
       s->_raw_size += sizeof (Elf64_External_Rela);
 
       /* The procedure linkage table size is bounded by the magnitude
@@ -2079,7 +2073,15 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      (!info->shared || info->no_undefined
 		       || ELF_ST_VISIBILITY (h->other)))))
 		return false;
-	      relocation = 0;
+
+	      /* To avoid generating warning messages about truncated
+		 relocations, set the relocation's address to be the same as
+		 the start of this section.  */
+
+	      if (input_section->output_section != NULL)
+		relocation = input_section->output_section->vma;
+	      else
+		relocation = 0;
 	    }
 	}
 
@@ -2686,9 +2688,14 @@ sparc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       rela.r_offset += (splt->output_section->vma + splt->output_offset);
       rela.r_info = ELF64_R_INFO (h->dynindx, R_SPARC_JMP_SLOT);
 
+      /* Adjust for the first 4 reserved elements in the .plt section
+	 when setting the offset in the .rela.plt section.
+	 Sun forgot to read their own ABI and copied elf32-sparc behaviour,
+	 thus .plt[4] has corresponding .rela.plt[0] and so on.  */
+
       bfd_elf64_swap_reloca_out (output_bfd, &rela,
 				 ((Elf64_External_Rela *) srela->contents
-				  + h->plt.offset));
+				  + (h->plt.offset - 4)));
 
       if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
