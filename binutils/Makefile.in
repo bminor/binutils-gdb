@@ -64,7 +64,7 @@ NM_FOR_TARGET = nm
 NM = $(NM_FOR_TARGET)
 SYMLINK = ln -s
 
-BISON = `if [ -f ../byacc/byacc ] ; then echo ../byacc/byacc ; else echo byacc ; fi`
+BISON = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo bison -y ; fi`
 # Comment these out if using lex.
 LEX_OPTIONS = -I -Cem 
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo flex ; fi`
@@ -102,7 +102,9 @@ DEMANGLER_PROG=c++filt
 
 NLMCONV_PROG=nlmconv
 
-PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(BUILD_NLMCONV)
+SRCONV_PROG=srconv sysdump coffdump
+
+PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(BUILD_NLMCONV) $(BUILD_SRCONV)
 STAGESTUFF = $(PROGS) *.o
 # Files that can be generated, but should be in the distribution.
 DISTSTUFF=arparse.c arlex.c nlmheader.c info
@@ -154,16 +156,7 @@ FLAGS_TO_PASS = \
 	"CC=$(CC)" \
 	"CFLAGS=$(CFLAGS)" \
 	"RUNTEST=$(RUNTEST)" \
-	"RUNTESTFLAGS=$(RUNTESTFLAGS) \
-	SIZE=`if [ -f $$rootme/$(SIZE_PROG) ] ; then echo $$rootme/$(SIZE_PROG) ; else echo $(SIZE_PROG); fi` \
-	OBJCOPY=`if [ -f $$rootme/$(OBJCOPY_PROG) ] ; then echo $$rootme/$(OBJCOPY_PROG) ; else echo $(OBJCOPY_PROG); fi` \
-	NM=`if [ -f $$rootme/$(NM_PROG) ] ; then echo $$rootme/$(NM_PROG) ; else echo $(NM_PROG); fi` \
-	AR=`if [ -f $$rootme/$(AR_PROG) ] ; then echo $$rootme/$(AR_PROG) ; else echo $(AR_PROG); fi` \
-	OBJDUMP=`if [ -f $$rootme/$(OBJDUMP_PROG) ] ; then echo $$rootme/$(OBJDUMP_PROG) ; else echo $(OBJDUMP_PROG); fi` \
-	STRINGS=`if [ -f $$rootme/$(STRINGS_PROG) ] ; then echo $$rootme/$(STRINGS_PROG) ; else echo $(STRINGS_PROG); fi` \
-	STRIP=`if [ -f $$rootme/$(STRIP_PROG) ] ; then echo $$rootme/$(STRIP_PROG) ; else echo $(STRIP_PROG); fi` \
-	RANLIB=`if [ -f $$rootme/$(RANLIB_PROG) ] ; then echo $$rootme/$(RANLIB_PROG) ; else echo $(RANLIB_PROG); fi` \
-	DEMANGLE=`if [ -f $$rootme/$(DEMANGLER_PROG) ] ; then echo $$rootme/$(DEMANGLER_PROG) ; else echo $(DEMANGLER_PROG); fi`"
+	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
 
 #
 ## The rules
@@ -180,7 +173,6 @@ testsuite:
 check: force
 	rootme=`pwd`; export rootme; cd testsuite ; \
 	$(MAKE) check $(FLAGS_TO_PASS)
-#	/bin/sh $(srcdir)/sanity.sh .
 
 installcheck:
 	/bin/sh $(srcdir)/sanity.sh $(bindir)
@@ -269,6 +261,35 @@ objcopy_with_strip: $(ADDL_LIBS) objcopy.o maybe-strip.o $(BFD)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o maybe-strip.o $(ADDL_LIBS) $(EXTRALIBS)
 	-rm -f $(STRIP_PROG)
 	-ln $(OBJCOPY_PROG) $(STRIP_PROG)
+
+sysroff.c: sysinfo sysroff.info 
+	./sysinfo -c <$(srcdir)/sysroff.info >sysroff.c
+	./sysinfo -i <$(srcdir)/sysroff.info >>sysroff.c
+	./sysinfo -g <$(srcdir)/sysroff.info >>sysroff.c
+	
+sysroff.h: sysinfo sysroff.info
+	./sysinfo -d <$(srcdir)/sysroff.info >sysroff.h
+
+sysinfo.c: sysinfo.y 
+	$(BISON) -tvd $(srcdir)/sysinfo.y
+	rm -f sysinfo.c
+	-mv y.tab.c sysinfo.c
+
+syslex.c : syslex.l
+	$(LEX) $(LEX_OPTIONS) $(srcdir)/syslex.l
+	mv lex.yy.c syslex.c
+	
+sysinfo: sysinfo.o syslex.o $(ADDL_LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ sysinfo.o syslex.o $(ADDL_LIBS) $(EXTRALIBS)
+
+srconv: sysroff.c srconv.o sysroff.c sysroff.h coffgrok.o $(ADDL_LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ srconv.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
+
+coffdump: coffdump.o coffgrok.o $(ADDL_LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@  coffdump.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
+
+sysdump: sysroff.h sysroff.c sysdump.o $(ADDL_LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ sysdump.o $(ADDL_LIBS) $(EXTRALIBS)
 
 nlmheader.c: nlmheader.y
 	$(BISON) $(srcdir)/nlmheader.y

@@ -1,3 +1,14 @@
+Tue Mar  8 13:14:43 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* coffgrok.[ch]: New files, understand coff objects.
+	* coffdump.c: Uses coffgrok to dump out the debug info of a coff
+	file.
+	* sysroff.info: Description of a SYSROFF object file.
+	* sysinfo.y, syslex.l: Parse info file, generate a reader, writer,
+	header files and a printer.
+	* srconv.c: Uses coffgrok.c and sysroff.info to convert a coff
+	file to a SYSROFF file.
+
 Sat Feb 26 13:35:26 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* ar.c (do_quick_append): Pad with a genuine character 10,
