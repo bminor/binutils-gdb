@@ -2559,7 +2559,8 @@ which its expression is valid.\n");
 }
 
 /* Get a bpstat associated with having just stopped at address
-   BP_ADDR.  */
+   BP_ADDR in thread PTID.  STOPPED_BY_WATCHPOINT is true if the
+   target thinks we stopped due to a hardware watchpoint.  */
 
 /* Determine whether we stopped at a breakpoint, etc, or whether we
    don't understand this stop.  Result is a chain of bpstat's such that:
@@ -2576,7 +2577,7 @@ which its expression is valid.\n");
    commands, FIXME??? fields.  */
 
 bpstat
-bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
+bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
 {
   struct breakpoint *b, *temp;
   /* True if we've hit a breakpoint (as opposed to a watchpoint).  */
@@ -2600,7 +2601,7 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 	&& !((b->type == bp_hardware_watchpoint
 	      || b->type == bp_read_watchpoint
 	      || b->type == bp_access_watchpoint)
-	     && target_stopped_data_address () != 0)
+	     && stopped_by_watchpoint)
 	&& b->type != bp_hardware_breakpoint
 	&& b->type != bp_catch_fork
 	&& b->type != bp_catch_vfork

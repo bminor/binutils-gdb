@@ -1356,6 +1356,7 @@ handle_inferior_event (struct execution_control_state *ecs)
      defined in the file "config/pa/nm-hppah.h", accesses the variable
      indirectly.  Mutter something rude about the HP merge.  */
   int sw_single_step_trap_p = 0;
+  int stopped_by_watchpoint = 0;
 
   /* Cache the last pid/waitstatus. */
   target_last_wait_ptid = ecs->ptid;
@@ -1545,7 +1546,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       stop_pc = read_pc ();
 
-      stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
+      stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid, 0);
 
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
 
@@ -1594,7 +1595,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       ecs->saved_inferior_ptid = inferior_ptid;
       inferior_ptid = ecs->ptid;
 
-      stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
+      stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid, 0);
 
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
       inferior_ptid = ecs->saved_inferior_ptid;
@@ -1910,7 +1911,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
   /* It may be possible to simply continue after a watchpoint.  */
   if (HAVE_CONTINUABLE_WATCHPOINT)
-    STOPPED_BY_WATCHPOINT (ecs->ws);
+    stopped_by_watchpoint = STOPPED_BY_WATCHPOINT (ecs->ws);
 
   ecs->stop_func_start = 0;
   ecs->stop_func_end = 0;
@@ -1990,7 +1991,8 @@ handle_inferior_event (struct execution_control_state *ecs)
       else
 	{
 	  /* See if there is a breakpoint at the current PC.  */
-	  stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
+	  stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid, 
+					    stopped_by_watchpoint);
 
 	  /* Following in case break condition called a
 	     function.  */
