@@ -1,3 +1,17 @@
+	**** start-sanitize-chill ****
+Sat Nov 28 22:45:04 1992  Fred Fish  (fnf@cygnus.com)
+
+	* ch-exp.y (GENERAL_PROCEDURE_NAME, LOCATION_NAME):  New
+	terminal tokens.
+	* ch-exp.y (access_name):  New non-terminal token and
+	production.
+	* ch-exp.y (general_procedure_name):  Now a terminal token.
+	* ch-exp.y (location):  Expand production.
+	* ch-exp.y (match_simple_name_string):  New function.
+	* ch-exp.y (yylex):  Call match_simple_name_string and return
+	GENERAL_PROCEDURE_NAME or LOCATION_NAME as appropriate.
+	**** end-sanitize-chill ****
+
 Wed Nov 25 07:17:13 1992  Fred Fish  (fnf@cygnus.com)
 
 	* munch:  Backslash escape vertical bar characters inside

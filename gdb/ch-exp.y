@@ -151,6 +151,8 @@ static int parse_number PARAMS ((void));
 %token <typed_val>	INTEGER_LITERAL
 %token <ulval>		BOOLEAN_LITERAL
 %token <typed_val>	CHARACTER_LITERAL
+%token <ssym>		GENERAL_PROCEDURE_NAME
+%token <ssym>		LOCATION_NAME
 %token <voidval>	SET_LITERAL
 %token <voidval>	EMPTINESS_LITERAL
 %token <voidval>	CHARACTER_STRING_LITERAL
@@ -200,6 +202,7 @@ static int parse_number PARAMS ((void));
 %token <voidval>	ILLEGAL_TOKEN
 
 %type <voidval>		location
+%type <voidval>		access_name
 %type <voidval>		primitive_value
 %type <voidval>		location_contents
 %type <voidval>		value_name
@@ -236,7 +239,6 @@ static int parse_number PARAMS ((void));
 %type <voidval>		value_enumeration_name
 %type <voidval>		value_do_with_name
 %type <voidval>		value_receive_name
-%type <voidval>		general_procedure_name
 %type <voidval>		string_primitive_value
 %type <voidval>		start_element
 %type <voidval>		left_element
@@ -278,7 +280,25 @@ undefined_value	:	FIXME
 
 /* Z.200, 4.2.1 */
 
-location	:	FIXME
+location	:	access_name
+			{
+			  $$ = 0;	/* FIXME */
+			}
+  		|	FIXME
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		;
+
+/* Z.200, 4.2.2 */
+
+access_name	:	LOCATION_NAME
+			{
+			  write_exp_elt_opcode (OP_VAR_VALUE);
+			  write_exp_elt_sym ($1.sym);
+			  write_exp_elt_opcode (OP_VAR_VALUE);
+			}
+  		|	FIXME
 			{
 			  $$ = 0;	/* FIXME */
 			}
@@ -374,9 +394,11 @@ value_name	:	synonym_name
 			{
 			  $$ = 0;	/* FIXME */
 			}
-		|	general_procedure_name
+		|	GENERAL_PROCEDURE_NAME
 			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (OP_VAR_VALUE);
+			  write_exp_elt_sym ($1.sym);
+			  write_exp_elt_opcode (OP_VAR_VALUE);
 			}
 		;
 
@@ -743,7 +765,6 @@ synonym_name	 	:	FIXME { $$ = 0; }
 value_enumeration_name 	:	FIXME { $$ = 0; }
 value_do_with_name 	:	FIXME { $$ = 0; }
 value_receive_name 	:	FIXME { $$ = 0; }
-general_procedure_name 	:	FIXME { $$ = 0; }
 string_primitive_value 	:	FIXME { $$ = 0; }
 start_element 		:	FIXME { $$ = 0; }
 left_element 		:	FIXME { $$ = 0; }
@@ -764,6 +785,28 @@ case_label_specification:	FIXME { $$ = 0; }
 buffer_location 	:	FIXME { $$ = 0; }
 
 %%
+
+/* Try to consume a simple name string token.  If successful, returns
+   a pointer to a nullbyte terminated copy of the name that can be used
+   in symbol table lookups.  If not successful, returns NULL. */
+
+static char *
+match_simple_name_string ()
+{
+  char *tokptr = lexptr;
+
+  if (isalpha (*tokptr))
+    {
+      do {
+	tokptr++;
+      } while (isalpha (*tokptr) || isdigit (*tokptr) || (*tokptr == '_'));
+      yylval.sval.ptr = lexptr;
+      yylval.sval.length = tokptr - lexptr;
+      lexptr = tokptr;
+      return (copy_name (yylval.sval));
+    }
+  return (NULL);
+}
 
 /* Start looking for a value composed of valid digits as set by the base
    in use.  Note that '_' characters are valid anywhere, in any quantity,
@@ -1090,6 +1133,8 @@ yylex ()
 {
     unsigned int i;
     int token;
+    char *simplename;
+    struct symbol *sym;
 
     /* Skip over any leading whitespace. */
     while (isspace (*lexptr))
@@ -1191,10 +1236,49 @@ yylex ()
 	    return (BOOLEAN_LITERAL);
 	}
     token = match_integer_literal ();
-    if (token != 0);
+    if (token != 0)
 	{
 	    return (token);
 	}
+
+    /* Try to match a simple name string, and if a match is found, then
+       further classify what sort of name it is and return an appropriate
+       token.  Note that attempting to match a simple name string consumes
+       the token from lexptr, so we can't back out if we later find that
+       we can't classify what sort of name it is. */
+
+    simplename = match_simple_name_string ();
+    if (simplename != NULL)
+      {
+	sym = lookup_symbol (simplename, expression_context_block,
+			     VAR_NAMESPACE, (int *) NULL,
+			     (struct symtab **) NULL);
+	if (sym != NULL)
+	  {
+	    yylval.ssym.stoken.ptr = NULL;
+	    yylval.ssym.stoken.length = 0;
+	    yylval.ssym.sym = sym;
+	    yylval.ssym.is_a_field_of_this = 0;	/* FIXME, C++'ism */
+	    switch (SYMBOL_CLASS (sym))
+	      {
+	      case LOC_BLOCK:
+		/* Found a procedure name. */
+		return (GENERAL_PROCEDURE_NAME);
+	      case LOC_STATIC:
+		/* Found a global or local static variable. */
+		return (LOCATION_NAME);
+	      }
+	  }
+	else if (!have_full_symbols () && !have_partial_symbols ())
+	  {
+	    error ("No symbol table is loaded.  Use the \"file\" command.");
+	  }
+	else
+	  {
+	    error ("No symbol \"%s\" in current context.", simplename);
+	  }
+      }
+
     return (ILLEGAL_TOKEN);
 }
 
