@@ -71,6 +71,7 @@ else
 	for i in * ; do
 		if test ! -d $i && (grep sanitize-v9 $i > /dev/null) ; then
 			echo Cleaning the \"v9\" out of $i...
+			cp $i new
 			sed '/start\-sanitize\-v9/,/end-\sanitize\-v9/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				mv $i .Recover
@@ -85,7 +86,11 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.17  1991/10/02 13:06:16  rich
+# Revision 1.18  1991/10/10 01:08:04  rich
+# copy the old file to the new before cleaning it.  This should
+# propogate mode bits like execute.
+#
+# Revision 1.17  1991/10/02  13:06:16  rich
 # No longer needs to propogate configure and config.sub.
 #
 # Revision 1.16  1991/09/13  03:59:44  gnu
