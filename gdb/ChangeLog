@@ -1,3 +1,8 @@
+2002-11-21  Daniel Jacobowitz  <drow@mvista.com>
+
+	* maint.c (_initialize_maint_cmds): Fix typo.  From
+	Francesco Potorti` <pot@gnu.org>.
+
 2002-11-19  Andrew Cagney  <ac131313@redhat.com>
 
 	Problems reported by Paul Eggert.
