@@ -1,5 +1,8 @@
 -*- text -*-
 
+* The linker script operator DEFINED() will now yield 1 only for a symbol that
+  is defined before the statement where DEFINED is used.
+
 * The MIPS --embedded-relocs (used to embed relocations into binaries for
   Embedded-PIC code) is deprecated and will be removed in a future release.
 
