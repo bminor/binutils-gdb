@@ -1,5 +1,6 @@
 Mon Dec 21 17:24:13 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* bfd.c:  Add struct hppa_core_data to tdata union.
 	* hppa.c:  Conditionalize on HOST_HPPAHPUX instead of hp9000s800.
 	Get rid of HPPA/BSD specific code.  That will go somewhere else
 	someday.
