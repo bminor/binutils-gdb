@@ -1,3 +1,9 @@
+Fri Sep 20 16:10:52 1991  John Gilmore  (gnu at cygnus.com)
+
+	* main.c (main):  Avoid any output before (gdb) prompt when -q.
+	* language.c (set_language_command):  Handle errors by restoring
+	the language string to its current state (fix from A. Beers).
+
 Fri Sep 20 15:46:00 1991  Roland H. Pesch  (pesch at cygnus.com)
 
 	* doc/Makefile: generate aux version-no file doc/gdbVN.m4

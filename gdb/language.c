@@ -115,6 +115,7 @@ set_language_command (str, from_tty)
 {
   int i;
   enum language flang;
+  char *err_lang;
 
   /* FIXME -- do this from the list, with HELP.  */
   if (!language || !language[0]) {
@@ -147,7 +148,12 @@ mod or m2        Always parse in Modula-2 syntax\n");
     }
   }
 
-  error ("Unknown language `%s'.",language);
+  /* Reset the language (esp. the global string "language") to the 
+     correct values. */
+  err_lang=savestring(language,strlen(language));
+  make_cleanup (free, err_lang);	/* Free it after error */
+  set_language(current_language->la_language);
+  error ("Unknown language `%s'.",err_lang);
 }
 
 /* Show command.  Display a warning if the type setting does
@@ -1094,7 +1100,7 @@ _initialize_language()
 
    /* Have the above take effect */
 
-   set_language_command (NULL, 0);
+   set_language_command (language, 0);
    set_type_command (NULL, 0);
    set_range_command (NULL, 0);
 }
