@@ -1316,10 +1316,8 @@ alpha_register_convert_to_raw (struct type *valtype, int regnum,
    extract and copy its value into `valbuf'.  */
 
 void
-alpha_extract_return_value (valtype, regbuf, valbuf)
-     struct type *valtype;
-     char regbuf[REGISTER_BYTES];
-     char *valbuf;
+alpha_extract_return_value (struct type *valtype,
+			    char regbuf[REGISTER_BYTES], char *valbuf)
 {
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
     alpha_register_convert_to_virtual (FP0_REGNUM, valtype,
