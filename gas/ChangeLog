@@ -1,3 +1,8 @@
+Sat Jan 13 01:47:35 MET 2001  Jan Hubicka <jh@suse.cz>
+
+	* config/tc-i386.c (md_assemble): Check cpu_flags even for nullary
+	instructions.
+
 2001-01-12  Frank Ch. Eigler  <fche@redhat.com>
 
 	* cgen.c (gas_cgen_finish_insn): Call dwarf2_emit_insn.
@@ -84,6 +89,7 @@
 	Use DOLLAR_LABEL_CHAR and LOCAL_LABEL_CHAR.
 	(S_IS_LOCAL): Use DOLLAR_LABEL_CHAR and LOCAL_LABEL_CHAR.
 
+>>>>>>> 1.724
 2001-01-08  Bo Thorsen  <bo@suse.de>
 
         * config/tc-i386.c (i386_immediate, i386_displacement):

@@ -1707,9 +1707,14 @@ md_assemble (line)
 		     || t->extension_opcode == 7)))  /* 0xd9,7 "f{n}stcw"  */
 	  continue;
 
+	/* Do not verify operands when there are none.  */
 	else if (!t->operands)
-	  /* 0 operands always matches.  */
-	  break;
+	  {
+	    if (t->cpu_flags & ~cpu_arch_flags)
+	      continue;
+	    /* We've found a match; break out of loop.  */
+	    break;
+          }
 
 	overlap0 = i.types[0] & t->operand_types[0];
 	switch (t->operands)

@@ -661,8 +661,8 @@ static const struct dis386 dis386_att[] = {
   /* c0 */
   { GRP2b },
   { GRP2S },
-  { "retP",	Iw, XX, XX },
-  { "retP",	XX, XX, XX },
+  { "retI",	Iw, XX, XX },
+  { "retI",	XX, XX, XX },
   { "lesS",	Gv, Mp, XX },
   { "ldsS",	Gv, Mp, XX },
   { "movA",	Eb, Ib, XX },
@@ -670,12 +670,12 @@ static const struct dis386 dis386_att[] = {
   /* c8 */
   { "enterI",	Iw, Ib, XX },
   { "leaveI",	XX, XX, XX },
-  { "lretI",	Iw, XX, XX },
-  { "lretI",	XX, XX, XX },
+  { "lretP",	Iw, XX, XX },
+  { "lretP",	XX, XX, XX },
   { "int3",	XX, XX, XX },
   { "int",	Ib, XX, XX },
   { "into",	XX, XX, XX},
-  { "iretI",	XX, XX, XX },
+  { "iretP",	XX, XX, XX },
   /* d0 */
   { GRP2b_one },
   { GRP2S_one },
@@ -1256,12 +1256,12 @@ static const struct dis386 disx86_64_att[] = {
   /* c8 */
   { "enterI",	Iw, Ib, XX },
   { "leaveI",	XX, XX, XX },
-  { "lretI",	Iw, XX, XX },
-  { "lretI",	XX, XX, XX },
+  { "lretP",	Iw, XX, XX },
+  { "lretP",	XX, XX, XX },
   { "int3",	XX, XX, XX },
   { "int",	Ib, XX, XX },
   { "(bad)",	XX, XX, XX },   /* reserved.  */
-  { "iretI",	XX, XX, XX },
+  { "iretP",	XX, XX, XX },
   /* d0 */
   { GRP2b_one },
   { GRP2S_one },
