@@ -1,7 +1,7 @@
 2000-10-31  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: Add Jim Wilson as the maintainer for the IA64
-	code.
+	code.  Add Eric Chrisopher as maintainer of MN10300 port.
 
 2000-10-12  Roger Sayle  <roger@metaphorics.com>
 
