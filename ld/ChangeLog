@@ -1,3 +1,8 @@
+2002-11-12  Earl Chew <earl_chew@agilent.com>
+
+	* ldlang.c (lang_add_section): Discard debugging sections that have
+        been marked SEC_EXCLUDE.
+
 2002-11-12  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (ALL_LINGUAS): Add da.

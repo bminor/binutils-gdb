@@ -1138,10 +1138,11 @@ lang_add_section (ptr, section, output, file)
 
   discard = false;
 
-  /* If we are doing a final link, discard sections marked with
-     SEC_EXCLUDE.  */
-  if (! link_info.relocateable
-      && (flags & SEC_EXCLUDE) != 0)
+  /* Discard sections marked with SEC_EXCLUDE if we are doing a final
+     link.  Discard debugging sections marked with SEC_EXCLUDE on a
+     relocatable link too.  */
+  if ((flags & SEC_EXCLUDE) != 0
+      && ((flags & SEC_DEBUGGING) != 0 || !link_info.relocateable))
     discard = true;
 
   /* Discard input sections which are assigned to a section named
