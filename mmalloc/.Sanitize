@@ -55,5 +55,6 @@ sbrk-sup.c
 Things-to-lose:
 
 fsf.shar
+test1.c
 
 Do-last:
