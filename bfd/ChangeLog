@@ -1,3 +1,16 @@
+Thu Apr  3 11:51:54 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* VERSION: Set to 2.8.1.
+
+	* Branched binutils 2.8.
+
+	* elf32-ppc.c (ppc_elf_check_relocs):  Don't check SEC_ALLOC when
+	deciding whether to copy a reloc into a shared object.
+	(ppc_elf_relocate_section): Likewise.  Relocate R_PPC_RELATIVE
+	relocs in unallocated sections.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Relocate
+	R_SPARC_RELATIVE relocs in unallocated sections.
+
 Wed Apr  2 16:19:41 1997  Mike Meissner  <meissner@cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Undo March 26 change and
