@@ -1,5 +1,9 @@
 2004-10-30  Andrew Cagney  <cagney@gnu.org>
 
+	* cli/cli-decode.c (add_setshow_enum_cmd): New function.
+	* command.h (add_setshow_enum_cmd): Declare.
+	* mips-tdep.c (_initialize_mips_tdep): Use add_setshow_enum_cmd.
+
 	* mips-tdep.c (_initialize_mips_tdep): Use
 	add_setshow_zinteger_cmd.
 	

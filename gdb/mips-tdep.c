@@ -6029,31 +6029,31 @@ _initialize_mips_tdep (void)
 		  &showmipscmdlist, "show mips ", 0, &showlist);
 
   /* Allow the user to override the saved register size. */
-  deprecated_add_show_from_set (add_set_enum_cmd ("saved-gpreg-size",
-						  class_obscure,
-						  size_enums,
-						  &mips_abi_regsize_string, "\
-Set size of general purpose registers saved on the stack.\n\
+  add_setshow_enum_cmd ("saved-gpreg-size", class_obscure,
+			size_enums, &mips_abi_regsize_string, "\
+Set size of general purpose registers saved on the stack.\n", "\
+Show size of general purpose registers saved on the stack.\n", "\
 This option can be set to one of:\n\
   32    - Force GDB to treat saved GP registers as 32-bit\n\
   64    - Force GDB to treat saved GP registers as 64-bit\n\
   auto  - Allow GDB to use the target's default setting or autodetect the\n\
           saved GP register size from information contained in the executable.\n\
-          (default: auto)", &setmipscmdlist), &showmipscmdlist);
+          (default: auto)", "\
+Size of general purpose registers saved on the stack is %s.\n",
+			NULL, NULL, &setmipscmdlist, &showmipscmdlist);
 
   /* Allow the user to override the argument stack size. */
-  deprecated_add_show_from_set
-    (add_set_enum_cmd ("stack-arg-size",
-		       class_obscure,
-		       size_enums,
-		       &mips_stack_argsize_string, "\
-Set the amount of stack space reserved for each argument.\n\
+  add_setshow_enum_cmd ("stack-arg-size", class_obscure,
+		       size_enums, &mips_stack_argsize_string, "\
+Set the amount of stack space reserved for each argument.\n", "\
+Show the amount of stack space reserved for each argument.\n", "\
 This option can be set to one of:\n\
   32    - Force GDB to allocate 32-bit chunks per argument\n\
   64    - Force GDB to allocate 64-bit chunks per argument\n\
   auto  - Allow GDB to determine the correct setting from the current\n\
-          target and executable (default)", &setmipscmdlist),
-     &showmipscmdlist);
+          target and executable (default)", "\
+The amount of stack space reserved for each argument is %s.\n",
+			NULL, NULL, &setmipscmdlist, &showmipscmdlist);
 
   /* Allow the user to override the ABI. */
   c = add_set_enum_cmd
