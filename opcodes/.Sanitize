@@ -100,28 +100,6 @@ else
 	done
 fi
 
-sh3_files="ChangeLog sh-opc.h"
-if ( echo $* | grep keep\-sh3 > /dev/null ) ; then
-	if [ -n "${verbose}" ] ; then
-		echo Keeping sh3 stuff in $sh3_files.
-	fi
-else
-	if [ -n "${verbose}" ]; then
-		echo -n Cleaning sh3 in `pwd`:
-	fi
-	for f in $sh3_files ; do
-		if [ -n "${verbose}" ] ; then
-			echo -n " " $f
-		fi
-		sed -e '/start\-sanitize\-sh3/,/end\-sanitize\-sh3/d' -e '/ xl /d' < $f > new
-		if [ -n "${safe}" ] ; then
-			mv $f .Recover
-		fi
-		mv new $f
-	done
-fi
-
-
 rce_files="configure.in"
 if ( echo $* | grep keep\-rce > /dev/null ) ; then
 	for i in $rce_files ; do
