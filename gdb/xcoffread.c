@@ -61,7 +61,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 struct coff_symbol {
   char *c_name;
   int c_symnum;		/* symbol number of this entry */
-  int c_nsyms;		/* 0 if syment only, 1 if syment + auxent */
+  int c_naux;		/* 0 if syment only, 1 if syment + auxent */
   long c_value;
   unsigned char c_sclass;
   int c_secnum;
@@ -1070,7 +1070,7 @@ read_xcoff_symtab (objfile, nsyms)
       bfd_coff_swap_sym_in (abfd, raw_symbol, symbol);
 
       cs->c_symnum = symnum;
-      cs->c_nsyms = symbol->n_numaux;
+      cs->c_naux = symbol->n_numaux;
       if (symbol->n_zeroes) {
 	symname_alloced = 0;
 	/* We must use the original, unswapped, name here so the name field
@@ -1136,7 +1136,7 @@ read_xcoff_symtab (objfile, nsyms)
       goto function_entry_point;
     }
 
-    if ((cs->c_sclass == C_EXT || cs->c_sclass == C_HIDEXT) && cs->c_nsyms == 1)
+    if ((cs->c_sclass == C_EXT || cs->c_sclass == C_HIDEXT) && cs->c_naux == 1)
     {
 	/* dealing with a symbol with a csect entry. */
 
@@ -1259,11 +1259,15 @@ function_entry_point:
 	       already available for it. Process traceback table for
 	       functions with only one auxent. */
 
-	    if (cs->c_nsyms == 1)
+	    if (cs->c_naux == 1)
 	      ptb = retrieve_tracebackinfo (abfd, textsec, cs);
 
-	    else if (cs->c_nsyms != 2)
-	      abort ();
+	    else if (cs->c_naux != 2)
+	      {
+		static struct complaint msg =
+		  {"Expected one or two auxents for function", 0, 0};
+		complain (&msg);
+	      }
 
 	    /* If there is traceback info, create and add parameters for it. */
 

@@ -1,3 +1,10 @@
+Thu Jan 20 17:30:55 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* xcoffread.c (read_xcoff_symtab): complain() not abort().
+
+	* xcoffread.c (struct coff_symbol): Rename c_nsyms to c_naux (removes
+	a completely gratuitous difference between xcoffread.c and coffread.c).
+
 Wed Jan 19 15:09:44 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* infrun.c (wait_for_inferior): Don't set frame for
