@@ -1,3 +1,30 @@
+2003-01-04  Richard Sandiford  <rsandifo@redhat.com>
+	    Andrew Cagney  <ac131313@redhat.com>
+	    Gavin Romig-Koch  <gavin@redhat.com>
+	    Graydon Hoare  <graydon@redhat.com>
+	    Aldy Hernandez  <aldyh@redhat.com>
+	    Dave Brolley  <brolley@redhat.com>
+	    Chris Demetriou  <cgd@broadcom.com>
+
+	* configure.in (mips64vr*): Define TARGET_ENABLE_FR to 1.
+	(sim_mach_default): New variable.
+	(mips64vr-*-*, mips64vrel-*-*): New configurations.
+	Add a new simulator generator, MULTI.
+	* configure: Regenerate.
+	* Makefile.in (SIM_MULTI_OBJ, SIM_EXTRA_DISTCLEAN): New variables.
+	(multi-run.o): New dependency.
+	(SIM_MULTI_ALL, SIM_MULTI_IGEN_CONFIGS): New variables.
+	(tmp-mach-multi, tmp-itable-multi, tmp-run-multi): New rules.
+	(tmp-multi): Combine them.
+	(BUILT_SRC_FROM_MULTI): New variable.  Depend on tmp-multi.
+	(clean-extra): Remove sources in BUILT_SRC_FROM_MULTI.
+	(distclean-extra): New rule.
+	* sim-main.h: Include bfd.h.
+	(MIPS_MACH): New macro.
+	* mips.igen (vr4120, vr5400, vr5500): New models.
+	(clo, clz, dclo, dclz, madd, maddu, msub, msub, mul): Add *vr5500.
+	* vr.igen: Replace with new version.
+
 2003-01-04  Chris Demetriou  <cgd@broadcom.com>
 
 	* configure.in: Use SIM_AC_OPTION_RESERVED_BITS(1).

@@ -1,5 +1,5 @@
 /* MIPS Simulator definition.
-   Copyright (C) 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1998, 2003 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -41,7 +41,7 @@ mips_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), (TRANSFER), (ER
 typedef address_word sim_cia;
 
 #include "sim-base.h"
-
+#include "bfd.h"
 
 /* Deprecated macros and types for manipulating 64bit values.  Use
    ../common/sim-bits.h and ../common/sim-endian.h macros instead. */
@@ -946,6 +946,12 @@ void mips_cpu_exception_trigger(SIM_DESC sd, sim_cpu* cpu, address_word pc);
 void mips_cpu_exception_suspend(SIM_DESC sd, sim_cpu* cpu, int exception);
 void mips_cpu_exception_resume(SIM_DESC sd, sim_cpu* cpu, int exception);
 
+#ifdef MIPS_MACH_MULTI
+extern int mips_mach_multi(SIM_DESC sd);
+#define MIPS_MACH(SD)	mips_mach_multi(SD)
+#else
+#define	MIPS_MACH(SD)	MIPS_MACH_DEFAULT
+#endif
 
 #if H_REVEALS_MODULE_P (SIM_MAIN_INLINE)
 #include "sim-main.c"
