@@ -1,3 +1,10 @@
+2001-02-05  Christopher Faylor  <cgf@cygnus.com>
+
+	Change suggested by Dean Luick <luick@cray.com>
+	* inferior.h (step_over_calls_kind): Remove trailing comma from
+	last enum element.
+	(step_over_calls): Declare as extern rather than global.
+
 2001-02-05  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* sh-tdep.c: Update copyright.
