@@ -1,3 +1,9 @@
+2000-06-08  Matthew Jacob  <mjacob@feral.com>
+
+	* config/tc-alpha.c (md_undefined_symbol): Properly understand that
+	$at is the integer register $r28, vs. both $r28 and the floating
+	point register $f28.
+
 2000-06-08  James E. Wilson  <wilson@cygnus.com>
 
 	* config/tc-ia64.c (generate_unwind_image): Call ia64_flush_insns.
