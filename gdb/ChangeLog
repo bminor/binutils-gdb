@@ -1,3 +1,7 @@
+Thu May 11 17:22:36 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* README: Update for GDB 5.0.
+
 Thu May 11 13:24:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips-tdep.c (MIPS_DEFAULT_STACK_ARGSIZE): Fix typo.
