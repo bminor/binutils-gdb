@@ -49,6 +49,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/stropts.h>
 #endif
 
+/* Some versions (1.3.79, 1.3.81) of Linux don't support SIOCSPGRP the way
+   gdbtk wants to us it... */
+#ifdef __linux__
+#undef SIOCSPGRP
+#endif
+
 /* Handle for TCL interpreter */
 static Tcl_Interp *interp = NULL;
 
