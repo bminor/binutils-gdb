@@ -1,3 +1,9 @@
+2002-10-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* scripttempl/elfm68hc11.sc: Use KEEP for .vectors, .installN,
+	.finiN section.
+	* scripttempl/elfm68hc12.sc: Likewise.
+
 2002-10-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* pe-dll.c (make_import_fixup_mark): Avoid type-punned pointer.

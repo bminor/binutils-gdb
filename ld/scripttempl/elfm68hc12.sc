@@ -75,7 +75,7 @@ VECTORS="
   PROVIDE (_vectors_addr = DEFINED (vectors_addr) ? vectors_addr : 0xffc0);
   .vectors DEFINED (vectors_addr) ? vectors_addr : 0xffc0 :
   {
-    *(.vectors)
+    KEEP (*(.vectors))
   }"
 
 #
@@ -110,20 +110,20 @@ esac
 
 STARTUP_CODE="
     /* Startup code.  */
-    *(.install0)	/* Section should setup the stack pointer.  */
-    *(.install1)	/* Place holder for applications.  */
-    *(.install2)	/* Optional installation of data sections in RAM.  */
-    *(.install3)	/* Place holder for applications.  */
-    *(.install4)	/* Section that calls the main.  */
+    KEEP (*(.install0))	/* Section should setup the stack pointer.  */
+    KEEP (*(.install1))	/* Place holder for applications.  */
+    KEEP (*(.install2))	/* Optional installation of data sections in RAM.  */
+    KEEP (*(.install3))	/* Place holder for applications.  */
+    KEEP (*(.install4))	/* Section that calls the main.  */
 "
 
 FINISH_CODE="
     /* Finish code.  */
-    *(.fini0)		/* Beginning of finish code (_exit symbol).  */
-    *(.fini1)		/* Place holder for applications.  */
-    *(.fini2)		/* C++ destructors.  */
-    *(.fini3)		/* Place holder for applications.  */
-    *(.fini4)		/* Runtime exit.  */
+    KEEP (*(.fini0))	/* Beginning of finish code (_exit symbol).  */
+    KEEP (*(.fini1))	/* Place holder for applications.  */
+    KEEP (*(.fini2))	/* C++ destructors.  */
+    KEEP (*(.fini3))	/* Place holder for applications.  */
+    KEEP (*(.fini4))	/* Runtime exit.  */
 "
 
 PRE_COMPUTE_DATA_SIZE="
