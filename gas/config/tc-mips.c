@@ -3864,16 +3864,20 @@ macro (ip)
       mips_emit_delays (true);
       ++mips_opts.noreorder;
       mips_any_noreorder = 1;
-      macro_build ((char *) NULL, &icnt, NULL,
-		   dbl ? "ddiv" : "div",
-		   "z,s,t", sreg, treg);
       if (mips_trap)
-	macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", treg, 0);
+	{
+	  macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", treg, 0);
+	  macro_build ((char *) NULL, &icnt, NULL,
+		       dbl ? "ddiv" : "div",
+		       "z,s,t", sreg, treg);
+	}
       else
 	{
 	  expr1.X_add_number = 8;
 	  macro_build ((char *) NULL, &icnt, &expr1, "bne", "s,t,p", treg, 0);
-	  macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
+	  macro_build ((char *) NULL, &icnt, NULL,
+		       dbl ? "ddiv" : "div",
+		       "z,s,t", sreg, treg);
 	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
 	}
       expr1.X_add_number = -1;
@@ -4005,14 +4009,16 @@ macro (ip)
       mips_emit_delays (true);
       ++mips_opts.noreorder;
       mips_any_noreorder = 1;
-      macro_build ((char *) NULL, &icnt, NULL, s, "z,s,t", sreg, treg);
       if (mips_trap)
-	macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", treg, 0);
+	{
+	  macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", treg, 0);
+	  macro_build ((char *) NULL, &icnt, NULL, s, "z,s,t", sreg, treg);
+	}
       else
 	{
 	  expr1.X_add_number = 8;
 	  macro_build ((char *) NULL, &icnt, &expr1, "bne", "s,t,p", treg, 0);
-	  macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
+	  macro_build ((char *) NULL, &icnt, NULL, s, "z,s,t", sreg, treg);
 	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
 	}
       --mips_opts.noreorder;
