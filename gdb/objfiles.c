@@ -46,6 +46,8 @@
 #include "block.h"
 #include "dictionary.h"
 
+#include "elf/common.h"
+
 /* Prototypes for local functions */
 
 static void objfile_alloc_data (struct objfile *objfile);
@@ -263,7 +265,19 @@ init_entry_point_info (struct objfile *objfile)
 CORE_ADDR
 entry_point_address (void)
 {
-  return symfile_objfile ? symfile_objfile->ei.entry_point : 0;
+  int ret;
+  CORE_ADDR entry_addr;
+
+  /* Find the address of the entry point of the program from the
+     auxv vector.  */
+  ret = target_auxv_search (&current_target, AT_ENTRY, &entry_addr);
+  if (ret == 1)
+     return entry_addr;                                                                              
+  /*if (ret == 0 || ret == -1)*/
+  else
+    {
+      return symfile_objfile ? symfile_objfile->ei.entry_point : 0;
+    }
 }
 
 /* Create the terminating entry of OBJFILE's minimal symbol table.

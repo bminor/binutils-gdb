@@ -43,14 +43,14 @@ extern LONGEST target_auxv_read (struct target_ops *ops, char **data);
    Return 1 if an entry was read into *TYPEP and *VALP.  */
 extern int target_auxv_parse (struct target_ops *ops,
 			      char **readptr, char *endptr,
-			      CORE_ADDR *typep, CORE_ADDR *valp);
+			      ULONGEST *typep, CORE_ADDR *valp);
 
 /* Extract the auxiliary vector entry with a_type matching MATCH.
    Return zero if no such entry was found, or -1 if there was
    an error getting the information.  On success, return 1 after
    storing the entry's value field in *VALP.  */
 extern int target_auxv_search (struct target_ops *ops,
-			       CORE_ADDR match, CORE_ADDR *valp);
+			       ULONGEST match, CORE_ADDR *valp);
 
 /* Print the contents of the target's AUXV on the specified file. */
 extern int fprint_target_auxv (struct ui_file *file, struct target_ops *ops);

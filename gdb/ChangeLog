@@ -1,3 +1,59 @@
+2004-03-23  Elena Zannoni  <ezannoni@redhat.com>
+
+       * solib-svr4.c (svr4_solib_create_inferior_hook): Disable
+       breakpoints at startup.
+       (elf_locate_base): Find out where the entry point for the program
+       is, using the auxv vector, if possible. Compute the address of
+       .dynamic using it.
+       (svr4_current_sos): Don't ignore the first entry if we have PIE,
+       it's our main program. Delete code that was skipping over the
+       solib entry for main executable.
+
+       * solist.h (struct so_list): Add fields main and main_relocated.
+        (add_to_target_sections): Export.
+
+       * solib.c (symbol_add_stub): Handle main executable in shared
+       library list. Ignore it if it has been relocated already. Add it
+       as the main symbol file, otherwise.
+
+       * infrun.c (handle_inferior_event): Re-enable startup breakpoints.
+       * solib-svr4.c (elf_locate_base, first_link_map_member)
+       svr4_current_sos, enable_break): Add debugging output.
+
+       * solist.h (debug_solib): Export.
+
+       * solib.c (debug_solib): New variable to enable debugging output.
+       (symbol_add_stub, update_solib_list, update_solib_list)
+       (add_to_target_sections): Add debugging output.
+       (_initialize_solib): Add new comand to enable printing of
+       debugging output.
+       (add_to_target_sections): New function. Factored out from
+       update_solib_list.
+       (update_solib_list): Call add_to_target_sections.
+
+       * varobj.h (varobj_refresh): New prototype.
+       * varobj.c (varobj_refresh): New function.
+       * symfile.c (reread_symbols): Make sure that we recompute the
+       entry point for the program.
+       (symbol_file_clear): Clear the solibs as well, if we change symbol
+       files.
+       (clear_symtab_users): Refresh the varobjs that depend on the symtabs
+       we are clearing.
+       * objfiles.c (entry_point_address): Rewrite, to fetch entry point
+       from auxv vector, if possible.
+       Add include of elf/common.h.
+       * breakpoint.h (enum bptype): Add bp type bp_startup_disabled.
+       (re_enable_breakpoints_at_startup)
+       (disable_breakpoints_at_startup): Add prototypes
+       * breakpoint.c (re_enable_breakpoints_at_startup)
+       (disable_breakpoints_at_startup): New functions.
+       (describe_other_breakpoints, delete_breakpoint)
+       (breakpoint_re_set_one): Handle new bp type.
+       * auxv.h (target_auxv_parse, target_auxv_search): Update.
+       * auxv.c (target_auxv_parse, target_auxv_search)
+       (fprint_target_auxv): Use ULONGEST instead of CORE_ADDR for
+       variable. Change variable name to at_type.
+
 2004-03-23  Andrew Cagney  <cagney@redhat.com>
 
 	* MAINTAINERS (Past Maintainers): Add Mark Salter and Fernando

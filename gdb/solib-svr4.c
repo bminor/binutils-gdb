@@ -179,7 +179,9 @@ static CORE_ADDR breakpoint_addr;	/* Address where end bkpt is set */
 
 /* Local function prototypes */
 
+#if 0
 static int match_main (char *);
+#endif
 
 static CORE_ADDR bfd_lookup_symbol (bfd *, char *, flagword);
 
@@ -428,22 +430,79 @@ elf_locate_base (void)
 {
   struct bfd_section *dyninfo_sect;
   int dyninfo_sect_size;
-  CORE_ADDR dyninfo_addr;
+  CORE_ADDR dyninfo_addr, relocated_dyninfo_addr, entry_addr;
   char *buf;
   char *bufend;
   int arch_size;
+  int ret;
+
+  /* Find the address of the entry point of the program from the
+     auxv vector.  */
+  ret = target_auxv_search (&current_target, AT_ENTRY, &entry_addr);
+
+  if (ret == 0 || ret == -1)
+    {
+      /* No auxv info, maybe an older kernel. Fake our way through.  */
+      entry_addr = bfd_get_start_address (exec_bfd); 
+
+      if (debug_solib)
+	fprintf_unfiltered (gdb_stdlog,
+			    "elf_locate_base: program entry address not found. Using bfd's 0x%s for %s\n",
+			    paddr_nz (entry_addr), exec_bfd->filename);
+    }
+  else
+    {
+      if (debug_solib)
+	fprintf_unfiltered (gdb_stdlog,
+			    "elf_locate_base: found program entry address 0x%s for %s\n",
+			    paddr_nz (entry_addr), exec_bfd->filename);
+    }
 
   /* Find the start address of the .dynamic section.  */
   dyninfo_sect = bfd_get_section_by_name (exec_bfd, ".dynamic");
   if (dyninfo_sect == NULL)
-    return 0;
+    { 
+      if (debug_solib)
+	fprintf_unfiltered (gdb_stdlog,
+			    "elf_locate_base: .dynamic section not found in %s -- return now\n",
+			    exec_bfd->filename);
+      return 0;
+    }
+  else
+    { 
+      if (debug_solib)
+	fprintf_unfiltered (gdb_stdlog,
+			    "elf_locate_base: .dynamic section found in %s\n",
+			    exec_bfd->filename);
+    }
+
   dyninfo_addr = bfd_section_vma (exec_bfd, dyninfo_sect);
+  if (debug_solib)
+    fprintf_unfiltered (gdb_stdlog,
+			"elf_locate_base: unrelocated .dynamic addr 0x%s\n",
+			paddr_nz (dyninfo_addr));
+
+  relocated_dyninfo_addr = dyninfo_addr
+    + entry_addr - bfd_get_start_address(exec_bfd);
+  if (debug_solib) 
+    fprintf_unfiltered (gdb_stdlog, 
+			"elf_locate_base: relocated .dyn addr 0x%s for %s\n",
+			paddr_nz(relocated_dyninfo_addr), exec_bfd->filename);
 
   /* Read in .dynamic section, silently ignore errors.  */
   dyninfo_sect_size = bfd_section_size (exec_bfd, dyninfo_sect);
   buf = alloca (dyninfo_sect_size);
-  if (target_read_memory (dyninfo_addr, buf, dyninfo_sect_size))
-    return 0;
+  if (debug_solib) 
+    fprintf_unfiltered (gdb_stdlog, 
+                        "elf_locate_base: read in .dynamic section\n");
+  if (target_read_memory (relocated_dyninfo_addr, buf, dyninfo_sect_size))
+    { 
+      if (debug_solib)
+	fprintf_unfiltered (gdb_stdlog,
+			    "elf_locate_base: couldn't read .dynamic section at 0x%s -- return now\n",
+			    paddr_nz (relocated_dyninfo_addr));
+      return 0;
+    }
 
   /* Find the DT_DEBUG entry in the the .dynamic section.
      For mips elf we look for DT_MIPS_RLD_MAP, mips elf apparently has
@@ -470,6 +529,10 @@ elf_locate_base (void)
 	    {
 	      dyn_ptr = bfd_h_get_32 (exec_bfd, 
 				      (bfd_byte *) x_dynp->d_un.d_ptr);
+              if (debug_solib)
+                fprintf_unfiltered (gdb_stdlog,
+				    "elf_locate_base: DT_DEBUG entry has value 0x%s -- return now\n",
+				    paddr_nz (dyn_ptr));
 	      return dyn_ptr;
 	    }
 	  else if (dyn_tag == DT_MIPS_RLD_MAP)
@@ -613,6 +676,10 @@ first_link_map_member (void)
   char *r_map_buf = xmalloc (lmo->r_map_size);
   struct cleanup *cleanups = make_cleanup (xfree, r_map_buf);
 
+  if (debug_solib)
+    fprintf_unfiltered (gdb_stdlog, 
+                        "first_link_map_member: read at 0x%s\n",
+                        paddr_nz (debug_base + lmo->r_map_offset));
   read_memory (debug_base + lmo->r_map_offset, r_map_buf, lmo->r_map_size);
 
   /* Assume that the address is unsigned.  */
@@ -726,6 +793,10 @@ svr4_current_sos (void)
   CORE_ADDR lm;
   struct so_list *head = 0;
   struct so_list **link_ptr = &head;
+  if (debug_solib)
+    fprintf_unfiltered (gdb_stdlog, 
+                        "svr4_current_sos: exec_bfd %s\n",
+                        exec_bfd->filename);
 
   /* Make sure we've looked up the inferior's dynamic linker's base
      structure.  */
@@ -736,12 +807,22 @@ svr4_current_sos (void)
       /* If we can't find the dynamic linker's base structure, this
 	 must not be a dynamically linked executable.  Hmm.  */
       if (! debug_base)
-	return 0;
+	{
+	  if (debug_solib)
+	    fprintf_unfiltered (gdb_stdlog, 
+				"svr4_current_sos: no DT_DEBUG found in %s -- return now\n",
+				exec_bfd->filename);
+	  return 0;
+	}
     }
 
   /* Walk the inferior's link map list, and build our list of
      `struct so_list' nodes.  */
-  lm = first_link_map_member ();  
+  if (debug_solib)
+    fprintf_unfiltered (gdb_stdlog, 
+                        "svr4_current_sos: walk link map in %s\n",
+                        exec_bfd->filename);
+  lm = first_link_map_member (); 
   while (lm)
     {
       struct link_map_offsets *lmo = SVR4_FETCH_LINK_MAP_OFFSETS ();
@@ -758,9 +839,17 @@ svr4_current_sos (void)
       make_cleanup (xfree, new->lm_info->lm);
       memset (new->lm_info->lm, 0, lmo->link_map_size);
 
+      if (debug_solib)
+        fprintf_unfiltered (gdb_stdlog, 
+                            "svr4_current_sos: read lm at 0x%s\n", paddr_nz(lm));
       read_memory (lm, new->lm_info->lm, lmo->link_map_size);
 
       lm = LM_NEXT (new);
+
+      if (debug_solib)
+        fprintf_unfiltered (gdb_stdlog,
+                            "svr4_current_sos: is first link entry? %d\n",
+                            IGNORE_FIRST_LINK_MAP_ENTRY (new));
 
       /* For SVR4 versions, the first entry in the link map is for the
          inferior executable, so we must ignore it.  For some versions of
@@ -768,43 +857,114 @@ svr4_current_sos (void)
          does have a name, so we can no longer use a missing name to
          decide when to ignore it. */
       if (IGNORE_FIRST_LINK_MAP_ENTRY (new))
-	free_so (new);
+	{
+
+	  if (bfd_get_start_address (exec_bfd) == entry_point_address ())
+	    {
+	      free_so (new);
+	    }
+	  else
+	    {
+	      struct so_list *gdb_solib;
+	      if (debug_solib)
+		fprintf_unfiltered (gdb_stdlog,
+				    "svr4_current_sos: Processing first link map entry\n");
+	      strncpy (new->so_name, exec_bfd->filename,
+		       SO_NAME_MAX_PATH_SIZE - 1);
+	      new->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
+	      strcpy (new->so_original_name, new->so_name);
+	      /*new->main = 1;*/
+	      new->main_relocated = 0;
+            
+	      if (debug_solib)
+		{ 
+		  fprintf_unfiltered (gdb_stdlog,
+				      "svr4_current_sos: Processing nameless DSO\n");
+		  fprintf_unfiltered (gdb_stdlog,
+				      "svr4_current_sos: adding name %s\n",
+				      new->so_name);
+		}
+
+	      for (gdb_solib = master_so_list (); gdb_solib; gdb_solib = gdb_solib->next)
+		{
+		  if (debug_solib)
+		    fprintf_unfiltered (gdb_stdlog,
+					"svr4_current_sos: compare gdb %s and new %s\n",
+					gdb_solib->so_name, new->so_name);
+		  if (!strcmp (gdb_solib->so_name, new->so_name))
+		    if (gdb_solib->main_relocated)
+		      { 
+			if (debug_solib)
+			  fprintf_unfiltered (gdb_stdlog,
+					      "svr4_current_sos: found main relocated\n");
+			break;
+		      }
+		}
+
+	      if ((gdb_solib && !gdb_solib->main_relocated) || (!gdb_solib))
+		{
+		  add_to_target_sections (0 /*from_tty*/, &current_target, new);
+		  new->main = 1;
+		}
+	      /* We need this in the list of shared libs we return because
+		 solib_add_stub will loop through it and add the symbol file.  */
+	      new->next = 0;
+	      *link_ptr = new;
+	      link_ptr = &new->next; 
+	    }
+	}
       else
 	{
 	  int errcode;
 	  char *buffer;
 
 	  /* Extract this shared object's name.  */
+	  if (debug_solib)
+	    fprintf_unfiltered (gdb_stdlog, 
+                                "svr4_current_sos: read LM_NAME\n");
+
 	  target_read_string (LM_NAME (new), &buffer,
 			      SO_NAME_MAX_PATH_SIZE - 1, &errcode);
 	  if (errcode != 0)
 	    {
-	      warning ("current_sos: Can't read pathname for load map: %s\n",
+	      warning ("svr4_current_sos: Can't read pathname for load map: %s\n",
 		       safe_strerror (errcode));
 	    }
 	  else
 	    {
+              if (debug_solib)
+                fprintf_unfiltered (gdb_stdlog, 
+                                    "svr4_current_sos: LM_NAME is <%s>\n",
+                                    buffer);
+
 	      strncpy (new->so_name, buffer, SO_NAME_MAX_PATH_SIZE - 1);
 	      new->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
 	      xfree (buffer);
 	      strcpy (new->so_original_name, new->so_name);
+	      if (debug_solib)
+		{
+		  fprintf_unfiltered (gdb_stdlog, 
+				      "svr4_current_sos: Processing DSO: %s\n",
+				      new->so_name);
+		  fprintf_unfiltered (gdb_stdlog,
+				      "svr4_current_sos: first link entry %d\n",
+				      IGNORE_FIRST_LINK_MAP_ENTRY (new));
+		}
 	    }
 
-	  /* If this entry has no name, or its name matches the name
-	     for the main executable, don't include it in the list.  */
-	  if (! new->so_name[0]
-	      || match_main (new->so_name))
-	    free_so (new);
-	  else
-	    {
-	      new->next = 0;
-	      *link_ptr = new;
-	      link_ptr = &new->next;
-	    }
+	  new->next = 0;
+	  *link_ptr = new;
+	  link_ptr = &new->next;
+
 	}
 
       discard_cleanups (old_chain);
     }
+
+  if (debug_solib)
+    fprintf_unfiltered (gdb_stdlog, 
+                        "svr4_current_sos: ENDS %s\n",
+                        exec_bfd->filename);
 
   return head;
 }
@@ -824,7 +984,7 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
     return 0;   /* failed somehow... */
 
   /* Position ourselves on the first link map.  */
-  lm = first_link_map_member ();  
+  lm = first_link_map_member ();
   while (lm)
     {
       /* Get info on the layout of the r_debug and link_map structures. */
@@ -885,7 +1045,7 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
 /* On some systems, the only way to recognize the link map entry for
    the main executable file is by looking at its name.  Return
    non-zero iff SONAME matches one of the known main executable names.  */
-
+#if 0
 static int
 match_main (char *soname)
 {
@@ -899,6 +1059,7 @@ match_main (char *soname)
 
   return (0);
 }
+#endif
 
 /* Return 1 if PC lies in the dynamic symbol resolution code of the
    SVR4 run time loader.  */
@@ -998,6 +1159,11 @@ enable_break (void)
   /* Find the .interp section; if not found, warn the user and drop
      into the old breakpoint at symbol code.  */
   interp_sect = bfd_get_section_by_name (exec_bfd, ".interp");
+
+  if (debug_solib)
+     fprintf_unfiltered (gdb_stdlog,
+                         "enable_break: search for .interp in %s\n",
+                         exec_bfd->filename);
   if (interp_sect)
     {
       unsigned int interp_sect_size;
@@ -1031,6 +1197,9 @@ enable_break (void)
       if (tmp_fd >= 0)
 	tmp_bfd = bfd_fdopenr (tmp_pathname, gnutarget, tmp_fd);
 
+      if (debug_solib)
+         fprintf_unfiltered (gdb_stdlog,
+                            "enable_break: opening %s\n", tmp_pathname);
       if (tmp_bfd == NULL)
 	goto bkpt_at_symbol;
 
@@ -1112,6 +1281,9 @@ enable_break (void)
       if (sym_addr != 0)
 	{
 	  create_solib_event_breakpoint (load_addr + sym_addr);
+          if (debug_solib)
+            fprintf_unfiltered (gdb_stdlog,
+                               "enable_break: solib bp set\n");
 	  return 1;
 	}
 
@@ -1371,6 +1543,8 @@ svr4_solib_create_inferior_hook (void)
   while (stop_signal != TARGET_SIGNAL_TRAP);
   stop_soon = NO_STOP_QUIETLY;
 #endif /* defined(_SCO_DS) */
+ 
+   disable_breakpoints_at_startup (1); 
 }
 
 static void

@@ -119,7 +119,7 @@ target_auxv_read (struct target_ops *ops, char **data)
    Return 1 if an entry was read into *TYPEP and *VALP.  */
 int
 target_auxv_parse (struct target_ops *ops, char **readptr, char *endptr,
-		   CORE_ADDR *typep, CORE_ADDR *valp)
+		   ULONGEST *typep, CORE_ADDR *valp)
 {
   const int sizeof_auxv_field = TYPE_LENGTH (builtin_type_void_data_ptr);
   char *ptr = *readptr;
@@ -144,9 +144,10 @@ target_auxv_parse (struct target_ops *ops, char **readptr, char *endptr,
    an error getting the information.  On success, return 1 after
    storing the entry's value field in *VALP.  */
 int
-target_auxv_search (struct target_ops *ops, CORE_ADDR match, CORE_ADDR *valp)
+target_auxv_search (struct target_ops *ops, ULONGEST match, CORE_ADDR *valp)
 {
-  CORE_ADDR type, val;
+  CORE_ADDR val;
+  ULONGEST at_type;
   char *data;
   int n = target_auxv_read (ops, &data);
   char *ptr = data;
@@ -156,10 +157,10 @@ target_auxv_search (struct target_ops *ops, CORE_ADDR match, CORE_ADDR *valp)
     return n;
 
   while (1)
-    switch (target_auxv_parse (ops, &ptr, data + n, &type, &val))
+    switch (target_auxv_parse (ops, &ptr, data + n, &at_type, &val))
       {
       case 1:			/* Here's an entry, check it.  */
-	if (type == match)
+	if (at_type == match)
 	  {
 	    xfree (data);
 	    *valp = val;
@@ -182,7 +183,8 @@ target_auxv_search (struct target_ops *ops, CORE_ADDR match, CORE_ADDR *valp)
 int
 fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 {
-  CORE_ADDR type, val;
+  CORE_ADDR val;
+  ULONGEST at_type;
   char *data;
   int len = target_auxv_read (ops, &data);
   char *ptr = data;
@@ -191,14 +193,14 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
   if (len <= 0)
     return len;
 
-  while (target_auxv_parse (ops, &ptr, data + len, &type, &val) > 0)
+  while (target_auxv_parse (ops, &ptr, data + len, &at_type, &val) > 0)
     {
       extern int addressprint;
       const char *name = "???";
       const char *description = "";
       enum { dec, hex, str } flavor = hex;
 
-      switch (type)
+      switch (at_type)
 	{
 #define TAG(tag, text, kind) \
 	case tag: name = #tag; description = text; flavor = kind; break
@@ -249,7 +251,7 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 	}
 
       fprintf_filtered (file, "%-4s %-20s %-30s ",
-			paddr_d (type), name, description);
+			paddr_d (at_type), name, description);
       switch (flavor)
 	{
 	case dec:
