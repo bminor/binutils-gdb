@@ -1,5 +1,10 @@
 2002-02-20  Daniel Jacobowitz  <drow@mvista.com>
 
+	* jv-exp.y (parse_number): Change type of implicit longs
+	to builtin_type_uint64.
+
+2002-02-20  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdbserver/linux-low.c (mywait): Change argument to waitpid
 	to be an integer instead of a `union wait'.
 

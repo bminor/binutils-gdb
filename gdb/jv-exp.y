@@ -797,8 +797,13 @@ parse_number (p, len, parsed_float, putithere)
       n += c;
 	}
 
-  if (type == java_int_type && n > (ULONGEST)0xffffffff)
-    type = java_long_type;
+  /* If the type is bigger than a 32-bit signed integer can be, implicitly
+     promote to long.  Java does not do this, so mark it as builtin_type_uint64
+     rather than java_long_type.  0x80000000 will become -0x80000000 instead
+     of 0x80000000L, because we don't know the sign at this point.
+  */
+  if (type == java_int_type && n > (ULONGEST)0x80000000)
+    type = builtin_type_uint64;
 
   putithere->typed_val_int.val = n;
   putithere->typed_val_int.type = type;
