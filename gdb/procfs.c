@@ -113,8 +113,9 @@ static void procfs_kill_inferior (void);
 static void procfs_mourn_inferior (void);
 static void procfs_create_inferior (char *, char *, char **);
 static int procfs_wait (int, struct target_waitstatus *);
-static int procfs_xfer_memory (CORE_ADDR,
-			       char *, int, int, struct target_ops *);
+static int procfs_xfer_memory (CORE_ADDR, char *, int, int,
+			       struct mem_attrib *attrib,
+			       struct target_ops *);
 
 static int procfs_thread_alive (int);
 
@@ -3909,6 +3910,7 @@ wait_again:
 
 static int
 procfs_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int dowrite,
+		    struct mem_attrib *attrib,
 		    struct target_ops *target)
 {
   procinfo *pi;

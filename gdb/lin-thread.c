@@ -1216,6 +1216,7 @@ thread_db_files_info (struct target_ops *tgt_vector)
 
 static int
 thread_db_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int dowrite,
+		       struct mem_attrib *attrib,
 		       struct target_ops *target)
 {
   struct cleanup *old_chain;
@@ -1232,7 +1233,7 @@ thread_db_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int dowrite,
     }
 
   ret = target_beneath->to_xfer_memory (memaddr, myaddr, len,
-					   dowrite, target);
+					dowrite, attrib, target);
   do_cleanups (old_chain);
   return ret;
 }

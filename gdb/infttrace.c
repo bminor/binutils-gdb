@@ -4917,6 +4917,7 @@ _initialize_kernel_u_addr (void)
 
 int
 child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		   struct mem_attrib *attrib,
 		   struct target_ops *target)
 {
   register int i;

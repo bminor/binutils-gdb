@@ -2447,6 +2447,7 @@ out:
    is ignored. */
 static int
 gnu_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		 struct mem_attrib *attrib,
 		 struct target_ops *target)
 {
   task_t task = (current_inferior

@@ -1,3 +1,13 @@
+2001-03-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* wince.c (child_xfer_memory): Add attrib parameter.
+	* symm-nat.c (child_xfer_memory): Ditto.
+	* mac-nat.c (child_xfer_memory): Ditto.
+	* infttrace.c (child_xfer_memory): Ditto.
+	* procfs.c (procfs_xfer_memory): Ditto.
+	* lin-thread.c (thread_db_xfer_memory): Ditto.
+	* gnu-nat.c (gnu_xfer_memory): Ditto.
+
 2001-03-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* NEWS: Mention that Harris/CXUX m88k is obsolete.
@@ -50,7 +60,6 @@
 	* config/nm-m3.h: Ditto.
 	* config/nm-gnu.h: Ditto.
 
->>>>>>> 1.1049
 2001-03-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS: Update list of targets. Mark arm-* and v850-elf as
