@@ -1,3 +1,7 @@
+Fri Feb  5 14:10:15 1993  John Gilmore  (gnu@cygnus.com)
+
+	* gdbint.texinfo:  Remove COFF_NO_LONG_FILE_NAMES define, now gone.
+
 Thu Feb  4 13:56:46 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* gdbint.texinfo: Slightly expand section on supporting a new

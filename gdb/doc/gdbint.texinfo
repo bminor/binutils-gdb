@@ -540,11 +540,24 @@ If you are using an existing object file format (a.out or COFF),
 there is probably little to be done.  See @file{bfd/doc/bfd.texinfo}
 for more information on writing new a.out or COFF versions.
 
-If you need to add a new object file format, you are beyond the scope
-of this document right now.  Look at the structure of the a.out
-and COFF support, build a transfer vector (@code{xvec}) for your new format,
-and start populating it with routines.  Add it to the list in
+If you need to add a new object file format, you must first add it to
+BFD.  This is beyond the scope of this document right now.  Basically
+you must build a transfer vector (of type @code{bfd_target}), which will
+mean writing all the required routines, and add it to the list in
 @file{bfd/targets.c}.
+
+You must then arrange for the BFD code to provide access to the
+debugging symbols.  Generally GDB will have to call swapping routines
+from BFD and a few other BFD internal routines to locate the debugging
+information.  As much as possible, GDB should not depend on the BFD
+internal data structures.
+
+For some targets (e.g., COFF), there is a special transfer vector used
+to call swapping routines, since the external data structures on various
+platforms have different sizes and layouts.  Specialized routines that
+will only ever be implemented by one object file format may be called
+directly.  This interface should be described in a file
+@file{bfd/libxxx.h}, which is included by GDB.
 
 If you are adding a new operating system for an existing CPU chip, add a
 @file{tm-@var{xos}.h} file that describes the operating system
@@ -1367,8 +1380,6 @@ objfiles.c
 hppabsd-tdep.c
 @item COFF_FORMAT
 symm-tdep.c
-@item COFF_NO_LONG_FILE_NAMES
-coffread.c
 @item CORE_NEEDS_RELOCATION
 stack.c
 @item CPLUS_MARKER
@@ -1974,8 +1985,6 @@ objfiles.c
 hppabsd-tdep.c
 @item COFF_FORMAT
 symm-tdep.c
-@item COFF_NO_LONG_FILE_NAMES
-coffread.c
 @item CORE_NEEDS_RELOCATION
 stack.c
 @item CPLUS_MARKER
