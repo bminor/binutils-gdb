@@ -1,5 +1,13 @@
 Fri Apr  4 16:10:02 1997  Doug Evans  <dje@canuck.cygnus.com>
 
+	* write.c (relax_frag): Make non-static.
+	* write.h (relax_frag): Add prototype for.
+	* config/tc-m32r.h (md_do_align): New arg `max'.
+	* config/tc-m32r.c (m32r_do_align): Likewise.
+	Update calls to frag_align, frag_align_pattern.
+	(fill_insn): Update call to m32r_do_align.
+	(m32r_scomm): Update call to frag_align.
+
 	* config/tc-m32r.[ch]: New files.
 	* cgen.c: New file.
 	* Makefile.in (CPU_TYPES): Add m32r.
