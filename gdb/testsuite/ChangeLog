@@ -1,3 +1,11 @@
+2001-02-18  Michael Chastain  <chastain@redhat.com>
+
+	* gdb.c++/classes.exp (do_tests): Change runto statements
+	from "runto 'foo(void)'" to "runto 'foo'".  This makes the
+	statements demangler agnostic.
+	* gdb.c++/virtfunc.exp (do_tests): Likewise.
+	(gdb_virtfunc_restart): Likewise.
+
 2001-02-14  Michael Chastain  <chastain@redhat.com>
 
 	* gdb.c++/inherit.exp (do_tests): Change runto statements

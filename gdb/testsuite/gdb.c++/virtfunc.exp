@@ -1,4 +1,4 @@
-# Copyright (C) 1992, 1994, 1997, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1994, 1997, 1999, 2001 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ proc gdb_virtfunc_restart {} {
     gdb_exit;
     gdb_start;
     gdb_virtfunc_init;
-    runto 'test_calls(void)';
+    runto 'test_calls';
 }
 
 #
@@ -892,7 +892,7 @@ proc do_tests {} {
 
     test_ptype_of_classes
 
-    if [ runto 'test_calls(void)' ] then {
+    if [ runto 'test_calls' ] then {
 	test_virtual_calls
     }
 }
