@@ -1,3 +1,7 @@
+Tue Feb 29 18:09:46 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* arm-tdep.c: Include <ctype.h>.
+
 Tue Feb 29 17:33:49 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From Wed, 23 Feb 2000 Fernando Nasser <fnasser@redhat.com>:

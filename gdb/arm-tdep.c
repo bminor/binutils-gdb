@@ -28,6 +28,7 @@
 #include "gdb_string.h"
 #include "coff/internal.h"	/* Internal format of COFF symbols in BFD */
 #include "dis-asm.h"		/* For register flavors. */
+#include <ctype.h>		/* for isupper () */
 
 extern void _initialize_arm_tdep (void);
 
