@@ -1,3 +1,10 @@
+2003-03-18  Andrew Cagney  <cagney@redhat.com>
+
+	* printcmd.c (print_scalar_formatted): Change VALADDR parameter to
+	a void pointer.
+	* gdbtypes.h (print_scalar_formatted): Update declaration.
+	* expression.h (enum exp_opcode): Remove non-ISO C trailing comma.
+
 2003-03-18  J. Brobecker  <brobecker@gnat.com>
 
 	* infrun.c (observer.h): Add #include.
