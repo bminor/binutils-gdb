@@ -25,6 +25,7 @@ Things-to-keep:
 
 ChangeLog
 Makefile.in
+config.in
 configure
 configure.in
 d10v_sim.h
