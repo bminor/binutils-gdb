@@ -1,3 +1,18 @@
+Thu May 11 14:58:21 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/obj-elf.c (NEED_ECOFF_DEBUG): Define if ECOFF_DEBUGGING
+	was defined by header files.  Test in preprocessor conditionals
+	instead of ECOFF_DEBUGGING.
+	(ecoff_debug_pseudo_table): Make empty if NEED_ECOFF_DEBUG is not
+	defined.
+	(obj_read_begin_hook, obj_symbol_new_hook, elf_frob_symbol,
+	elf_frob_file): Only call ecoff routines if NEED_ECOFF_DEBUG is
+	defined.
+	(elf_ecoff_set_ext, elf_get_extr, elf_set_index): Define only if
+	NEED_ECOFF_DEBUG is defined.
+	(elf_format_ops): Reference elf_ecoff_set_ext only if
+	NEED_ECOFF_DEBUG.
+
 Wed May 10 18:09:12 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* Makefile.in (OBJS): Include @extra_objects@.
