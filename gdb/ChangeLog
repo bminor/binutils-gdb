@@ -1,5 +1,10 @@
 2004-12-17  Randolph Chung  <tausq@debian.org>
 
+	* hppa-hpux-tdep.c (setup_d_pid_in_inferior): Make static.
+	(find_stub_with_shl_get): Make static.
+
+2004-12-17  Randolph Chung  <tausq@debian.org>
+
 	* hppa-hpux-tdep.c (IS_32BIT_TARGET): New.
 	(in_opd_section): New.
 	(hppa32_hpux_find_global_pointer): Rename from 

@@ -599,7 +599,7 @@ static struct symtab_and_line *break_callback_sal = 0;
    ourselves.
    0 => success
    1 => failure  */
-int
+static int
 setup_d_pid_in_inferior (void)
 {
   CORE_ADDR anaddr;
@@ -645,7 +645,7 @@ setup_d_pid_in_inferior (void)
    end.c
    man entry for shl_findsym */
 
-CORE_ADDR
+static CORE_ADDR
 find_stub_with_shl_get (struct minimal_symbol *function, CORE_ADDR handle)
 {
   struct symbol *get_sym, *symbol2;
