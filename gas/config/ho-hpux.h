@@ -27,6 +27,12 @@
 #undef setbuffer
 #endif /* setbuffer */
 
+/* When using cc on HP/UX 8.07, an assert condition can not contain a
+   string literal.  */
+#ifndef __GNUC__
+#define BROKEN_ASSERT
+#endif
+
 #define setbuffer(stream, buf, size)
 
 /* Some basic include files.  Avoid including ho-sysv.h as it defines

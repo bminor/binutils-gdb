@@ -1,5 +1,7 @@
 Mon Feb 21 11:41:18 1994  Ian Lance Taylor  (ian@cygnus.com)
 
+	* config/ho-hpux.h (BROKEN_ASSERT): Define if not __GNUC__.
+
 	* read.c (read_a_source_file): Use correct arguments to memcpy
 	(broken 19 Jul 1993).  From kjd@pescadero.stanford.edu (Kenneth
 	Duda).
