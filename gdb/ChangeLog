@@ -1,3 +1,13 @@
+Sat Mar 15 00:50:46 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* breakpoint.c (insert_breakpoints, watchpoint_check,
+	bpstat_stop_status):  Do not disable watchpoints going out of scope.
+	(insert_breakpoints):  Make sure that the current frame is valid
+	before calling find_frame_addr_in_frame_chain.
+
+	* top.c (setup_user_args):  Handle quotes and backslashes.
+	(print_gdb_version):  Update copyright year.
+
 Fri Mar 14 15:44:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (elfread.o): Depend upon elf-bfd.h and elf/mips.h.

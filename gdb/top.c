@@ -1,5 +1,5 @@
 /* Top level stuff for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
+   Copyright 1986, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 1997
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -1025,6 +1025,9 @@ setup_user_args (p)
   while (*p)
     {
       char *start_arg;
+      int squote = 0;
+      int dquote = 0;
+      int bsquote = 0;
 
       if (arg_count >= MAXUSERARGS)
 	{
@@ -1042,8 +1045,36 @@ setup_user_args (p)
       user_args->a[arg_count].arg = p;
 
       /* Get to the end of this argument.  */
-      while (*p && *p != ' ' && *p != '\t')
-	p++;
+      while (*p)
+	{
+	  if (((*p == ' ' || *p == '\t')) && !squote && !dquote && !bsquote)
+	    break;
+	  else
+	    {
+	      if (bsquote)
+		bsquote = 0;
+	      else if (*p == '\\')
+		bsquote = 1;
+	      else if (squote)
+		{
+		  if (*p == '\'')
+		    squote = 0;
+		}
+	      else if (dquote)
+		{
+		  if (*p == '"')
+		    dquote = 0;
+		}
+	      else
+		{
+		  if (*p == '\'')
+		    squote = 1;
+		  else if (*p == '"')
+		    dquote = 1;
+		}
+	      p++;
+	    }
+	}
 
       user_args->a[arg_count].len = p - start_arg;
       arg_count++;
@@ -2763,7 +2794,7 @@ print_gdb_version (stream)
 
   /* Second line is a copyright notice. */
 
-  fprintf_filtered (stream, "Copyright 1996 Free Software Foundation, Inc.\n");
+  fprintf_filtered (stream, "Copyright 1997 Free Software Foundation, Inc.\n");
 
   /* Following the copyright is a brief statement that the program is
      free software, that users are free to copy and change it on
