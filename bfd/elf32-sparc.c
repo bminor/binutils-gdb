@@ -3491,6 +3491,7 @@ elf32_sparc_reloc_type_class (rela)
 #define bfd_elf32_bfd_link_hash_table_create \
 					elf32_sparc_link_hash_table_create
 #define bfd_elf32_bfd_relax_section	elf32_sparc_relax_section
+#define bfd_elf32_new_section_hook	elf32_sparc_new_section_hook
 #define elf_info_to_howto		elf32_sparc_info_to_howto
 #define elf_backend_copy_indirect_symbol \
 					elf32_sparc_copy_indirect_symbol

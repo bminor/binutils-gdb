@@ -1,3 +1,7 @@
+2003-01-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-sparc.c (bfd_elf32_new_section_hook): Define.
+
 2003-01-25  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf32-sparc.c (_bfd_sparc_elf_howto_table): Add TLS relocs.
