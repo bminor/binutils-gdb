@@ -518,29 +518,29 @@ extern bfd_boolean bfd_record_phdr
 
 /* Byte swapping routines.  */
 
-bfd_vma bfd_getb64 (const unsigned char *);
-bfd_vma bfd_getl64 (const unsigned char *);
-bfd_signed_vma bfd_getb_signed_64 (const unsigned char *);
-bfd_signed_vma bfd_getl_signed_64 (const unsigned char *);
-bfd_vma bfd_getb32 (const unsigned char *);
-bfd_vma bfd_getl32 (const unsigned char *);
-bfd_signed_vma bfd_getb_signed_32 (const unsigned char *);
-bfd_signed_vma bfd_getl_signed_32 (const unsigned char *);
-bfd_vma bfd_getb16 (const unsigned char *);
-bfd_vma bfd_getl16 (const unsigned char *);
-bfd_signed_vma bfd_getb_signed_16 (const unsigned char *);
-bfd_signed_vma bfd_getl_signed_16 (const unsigned char *);
-void bfd_putb64 (bfd_vma, unsigned char *);
-void bfd_putl64 (bfd_vma, unsigned char *);
-void bfd_putb32 (bfd_vma, unsigned char *);
-void bfd_putl32 (bfd_vma, unsigned char *);
-void bfd_putb16 (bfd_vma, unsigned char *);
-void bfd_putl16 (bfd_vma, unsigned char *);
+bfd_vma bfd_getb64 (const void *);
+bfd_vma bfd_getl64 (const void *);
+bfd_signed_vma bfd_getb_signed_64 (const void *);
+bfd_signed_vma bfd_getl_signed_64 (const void *);
+bfd_vma bfd_getb32 (const void *);
+bfd_vma bfd_getl32 (const void *);
+bfd_signed_vma bfd_getb_signed_32 (const void *);
+bfd_signed_vma bfd_getl_signed_32 (const void *);
+bfd_vma bfd_getb16 (const void *);
+bfd_vma bfd_getl16 (const void *);
+bfd_signed_vma bfd_getb_signed_16 (const void *);
+bfd_signed_vma bfd_getl_signed_16 (const void *);
+void bfd_putb64 (bfd_vma, void *);
+void bfd_putl64 (bfd_vma, void *);
+void bfd_putb32 (bfd_vma, void *);
+void bfd_putl32 (bfd_vma, void *);
+void bfd_putb16 (bfd_vma, void *);
+void bfd_putl16 (bfd_vma, void *);
 
 /* Byte swapping routines which take size and endiannes as arguments.  */
 
-bfd_vma bfd_get_bits (bfd_byte *, int, bfd_boolean);
-void bfd_put_bits (bfd_vma, bfd_byte *, int, bfd_boolean);
+bfd_vma bfd_get_bits (const void *, int, bfd_boolean);
+void bfd_put_bits (bfd_vma, void *, int, bfd_boolean);
 
 /* Externally visible ECOFF routines.  */
 

@@ -1,6 +1,6 @@
 /* BFD back end for NetBSD style core files
    Copyright 1988, 1989, 1991, 1992, 1993, 1996, 1998, 1999, 2000, 2001,
-   2002
+   2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Paul Kranenburg, EUR
 
@@ -200,10 +200,10 @@ swap_abort ()
 {
   abort (); /* This way doesn't require any declaration for ANSI to fuck up */
 }
-#define	NO_GET	((bfd_vma (*) PARAMS ((   const bfd_byte *))) swap_abort )
-#define	NO_PUT	((void    (*) PARAMS ((bfd_vma, bfd_byte *))) swap_abort )
-#define	NO_SIGNED_GET \
-  ((bfd_signed_vma (*) PARAMS ((const bfd_byte *))) swap_abort )
+
+#define	NO_GET ((bfd_vma (*) (const void *)) swap_abort)
+#define	NO_PUT ((void (*) (bfd_vma, void *)) swap_abort)
+#define	NO_GETS ((bfd_signed_vma (*) (const void *)) swap_abort)
 
 const bfd_target netbsd_core_vec =
   {
@@ -218,39 +218,39 @@ const bfd_target netbsd_core_vec =
     0,			                                   /* symbol prefix */
     ' ',						   /* ar_pad_char */
     16,							   /* ar_max_namelen */
-    NO_GET, NO_SIGNED_GET, NO_PUT,	/* 64 bit data */
-    NO_GET, NO_SIGNED_GET, NO_PUT,	/* 32 bit data */
-    NO_GET, NO_SIGNED_GET, NO_PUT,	/* 16 bit data */
-    NO_GET, NO_SIGNED_GET, NO_PUT,	/* 64 bit hdrs */
-    NO_GET, NO_SIGNED_GET, NO_PUT,	/* 32 bit hdrs */
-    NO_GET, NO_SIGNED_GET, NO_PUT,	/* 16 bit hdrs */
+    NO_GET, NO_GETS, NO_PUT,		/* 64 bit data.  */
+    NO_GET, NO_GETS, NO_PUT,		/* 32 bit data.  */
+    NO_GET, NO_GETS, NO_PUT,		/* 16 bit data.  */
+    NO_GET, NO_GETS, NO_PUT,		/* 64 bit hdrs.  */
+    NO_GET, NO_GETS, NO_PUT,		/* 32 bit hdrs.  */
+    NO_GET, NO_GETS, NO_PUT,		/* 16 bit hdrs.  */
 
-    {				/* bfd_check_format */
-     _bfd_dummy_target,		/* unknown format */
-     _bfd_dummy_target,		/* object file */
-     _bfd_dummy_target,		/* archive */
-     netbsd_core_file_p		/* a core file */
+    {				/* bfd_check_format.  */
+      _bfd_dummy_target,		/* Unknown format.  */
+      _bfd_dummy_target,		/* Object file.  */
+      _bfd_dummy_target,		/* Archive.  */
+      netbsd_core_file_p		/* A core file.  */
     },
     {				/* bfd_set_format */
-     bfd_false, bfd_false,
-     bfd_false, bfd_false
+      bfd_false, bfd_false,
+      bfd_false, bfd_false
     },
     {				/* bfd_write_contents */
-     bfd_false, bfd_false,
-     bfd_false, bfd_false
+      bfd_false, bfd_false,
+      bfd_false, bfd_false
     },
 
-       BFD_JUMP_TABLE_GENERIC (_bfd_generic),
-       BFD_JUMP_TABLE_COPY (_bfd_generic),
-       BFD_JUMP_TABLE_CORE (netbsd),
-       BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive),
-       BFD_JUMP_TABLE_SYMBOLS (_bfd_nosymbols),
-       BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
-       BFD_JUMP_TABLE_WRITE (_bfd_generic),
-       BFD_JUMP_TABLE_LINK (_bfd_nolink),
-       BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+    BFD_JUMP_TABLE_GENERIC (_bfd_generic),
+    BFD_JUMP_TABLE_COPY (_bfd_generic),
+    BFD_JUMP_TABLE_CORE (netbsd),
+    BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive),
+    BFD_JUMP_TABLE_SYMBOLS (_bfd_nosymbols),
+    BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
+    BFD_JUMP_TABLE_WRITE (_bfd_generic),
+    BFD_JUMP_TABLE_LINK (_bfd_nolink),
+    BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
     NULL,
 
     (PTR) 0			/* backend_data */
-};
+  };
