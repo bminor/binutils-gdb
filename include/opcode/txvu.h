@@ -25,7 +25,7 @@ typedef unsigned int TXVU_INSN;
 /* Maximum number of operands and syntax chars an instruction can have.  */
 #define TXVU_MAX_OPERANDS 16
 
-struct txvu_opcode {
+typedef struct txvu_opcode {
   char *mnemonic;
   /* The value stored is 128 + operand number.
      This allows ASCII chars to go here as well.  */
@@ -65,11 +65,11 @@ struct txvu_opcode {
      underlying mechanism.  */
 #define TXVU_OPCODE_NEXT_ASM(op) ((op)->next_asm)
 #define TXVU_OPCODE_NEXT_DIS(op) ((op)->next_dis)
-};
+} txvu_opcode;
 
 /* The operand table.  */
 
-struct txvu_operand {
+typedef struct txvu_operand {
   /* The number of bits in the operand (may be unused for a modifier).  */
   unsigned char bits;
 
@@ -132,9 +132,12 @@ struct txvu_operand {
 #define TXVU_MOD_P(X) ((X) & TXVU_MOD_BITS)
 
   /* Parse function.  This is used by the assembler.
+     MODS is a list of modifiers preceding the operand in the syntax string.
      If the operand cannot be parsed an error message is stored in ERRMSG,
      otherwise ERRMSG is unchanged.  */
-  long (*parse) PARAMS ((char **str, const char **errmsg));
+  long (*parse) PARAMS ((const struct txvu_opcode *opcode,
+			 const struct txvu_operand *operand,
+			 int mods, char **str, const char **errmsg));
 
   /* Insertion function.  This is used by the assembler.  To insert an
      operand value into an instruction, check this field.
@@ -148,14 +151,16 @@ struct txvu_operand {
      If this field is not NULL, then simply call it with the
      instruction and the operand value.  It will overwrite the appropriate
      bits of the instruction with the operand's value.
+     MODS is a list of modifiers preceding the operand in the syntax string.
      If the ERRMSG argument is not NULL, then if the operand value is illegal,
      *ERRMSG will be set to a warning string (the operand will be inserted in
      any case).  If the operand value is legal, *ERRMSG will be unchanged.
+     OPCODE may be NULL, in which case the value isn't known.  This happens
+     when applying fixups.  */
 
-     REG is non-NULL when inserting a register value.  */
-
-  void (*insert) PARAMS ((TXVU_INSN *insn,
-			  const struct txvu_operand *operand, int mods,
+  void (*insert) PARAMS ((const struct txvu_opcode *opcode,
+			  const struct txvu_operand *operand,
+			  int mods, TXVU_INSN *insn,
 			  long value, const char **errmsg));
 
   /* Extraction function.  This is used by the disassembler.  To
@@ -175,20 +180,23 @@ struct txvu_operand {
      non-zero if this operand type can not actually be extracted from
      this operand (i.e., the instruction does not match).  If the
      operand is valid, *INVALID will not be changed.
+     MODS is a list of modifiers preceding the operand in the syntax string.
 
      INSN is a pointer to one or two `TXVU_INSN's.  The first element is
      the insn, the second is an immediate constant if present.
      FIXME: just thrown in here for now.
      */
 
-  long (*extract) PARAMS ((TXVU_INSN *insn,
+  long (*extract) PARAMS ((const struct txvu_opcode *opcode,
 			   const struct txvu_operand *operand,
-			   int mods, int *pinvalid));
+			   int mods, TXVU_INSN *insn, int *pinvalid));
 
   /* Print function.  This is used by the disassembler.  */
-  void (*print) PARAMS ((disassemble_info *info, TXVU_INSN *insn,
-			 long value));
-};
+  void (*print) PARAMS ((const struct txvu_opcode *opcode,
+			 const struct txvu_operand *operand,
+			 int mods, TXVU_INSN *insn,
+			 disassemble_info *info, long value));
+} txvu_operand;
 
 /* Given an operand entry, return the table index.  */
 #define TXVU_OPERAND_INDEX(op) ((op) - 128)
@@ -213,16 +221,16 @@ struct txvu_operand {
 #define TXVU_SDEST_Z 2
 #define TXVU_SDEST_W 3
 
-extern const struct txvu_operand txvu_operands[];
-extern /*const*/ struct txvu_opcode txvu_upper_opcodes[];
-extern /*const*/ struct txvu_opcode txvu_lower_opcodes[];
+extern const txvu_operand txvu_operands[];
+extern /*const*/ txvu_opcode txvu_upper_opcodes[];
+extern /*const*/ txvu_opcode txvu_lower_opcodes[];
 extern const int txvu_upper_opcodes_count;
 extern const int txvu_lower_opcodes_count;
 
-const struct txvu_opcode *txvu_upper_opcode_lookup_asm PARAMS ((const char *));
-const struct txvu_opcode *txvu_lower_opcode_lookup_asm PARAMS ((const char *));
-const struct txvu_opcode *txvu_upper_opcode_lookup_dis PARAMS ((unsigned int));
-const struct txvu_opcode *txvu_lower_opcode_lookup_dis PARAMS ((unsigned int));
+const txvu_opcode *txvu_upper_opcode_lookup_asm PARAMS ((const char *));
+const txvu_opcode *txvu_lower_opcode_lookup_asm PARAMS ((const char *));
+const txvu_opcode *txvu_upper_opcode_lookup_dis PARAMS ((unsigned int));
+const txvu_opcode *txvu_lower_opcode_lookup_dis PARAMS ((unsigned int));
 
 /* PKE support.  */
 
@@ -270,11 +278,17 @@ const struct txvu_opcode *txvu_lower_opcode_lookup_dis PARAMS ((unsigned int));
 #define PKE_UNPACK_V4_8  14
 #define PKE_UNPACK_V4_5  15
 
-extern const struct txvu_operand pke_operands[];
-extern /*const*/ struct txvu_opcode pke_opcodes[];
+extern const txvu_operand pke_operands[];
+extern /*const*/ txvu_opcode pke_opcodes[];
 extern const int pke_opcodes_count;
-const struct txvu_opcode *pke_opcode_lookup_asm PARAMS ((const char *));
-const struct txvu_opcode *pke_opcode_lookup_dis PARAMS ((unsigned int));
+const txvu_opcode *pke_opcode_lookup_asm PARAMS ((const char *));
+const txvu_opcode *pke_opcode_lookup_dis PARAMS ((unsigned int));
+
+/* Return non-zero if the just parsed pke insn has variable length.  */
+int pke_varlen_p PARAMS ((void));
+/* Return length, in 32 bit words, of just parsed pke insn,
+   or 0 if unknown.  */
+int pke_len PARAMS ((void));
 
 /* DMA support.  */
 
@@ -284,11 +298,11 @@ const struct txvu_opcode *pke_opcode_lookup_dis PARAMS ((unsigned int));
 #define DMA_FLAG_INT 4
 #define DMA_FLAG_SPR 8
 
-extern const struct txvu_operand dma_operands[];
-extern /*const*/ struct txvu_opcode dma_opcodes[];
+extern const txvu_operand dma_operands[];
+extern /*const*/ txvu_opcode dma_opcodes[];
 extern const int dma_opcodes_count;
-const struct txvu_opcode *dma_opcode_lookup_asm PARAMS ((const char *));
-const struct txvu_opcode *dma_opcode_lookup_dis PARAMS ((unsigned int));
+const txvu_opcode *dma_opcode_lookup_asm PARAMS ((const char *));
+const txvu_opcode *dma_opcode_lookup_dis PARAMS ((unsigned int));
 
 /* GPUIF support.  */
 
@@ -310,11 +324,11 @@ typedef enum {
   GPUIF_REG_NOP = 15
 } gpuif_reg;
 
-extern const struct txvu_operand gpuif_operands[];
-extern /*const*/ struct txvu_opcode gpuif_opcodes[];
+extern const txvu_operand gpuif_operands[];
+extern /*const*/ txvu_opcode gpuif_opcodes[];
 extern const int gpuif_opcodes_count;
-const struct txvu_opcode *gpuif_opcode_lookup_asm PARAMS ((const char *));
-const struct txvu_opcode *gpuif_opcode_lookup_dis PARAMS ((unsigned int));
+const txvu_opcode *gpuif_opcode_lookup_asm PARAMS ((const char *));
+const txvu_opcode *gpuif_opcode_lookup_dis PARAMS ((unsigned int));
 
 /* Utility fns in txvu-opc.c.  */
 void txvu_opcode_init_tables PARAMS ((int));

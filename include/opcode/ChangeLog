@@ -1,4 +1,10 @@
 start-sanitize-sky
+Tue Jan 27 14:01:16 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* txvu.h (txvu_{opcode,operand}): New typedefs.
+	(txvu_operand): Add opcode,operand,mods arguments consistently to
+	each of the parse/insert/extract/print routines.
+
 Mon Jan 26 16:19:01 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* txvu.h (txvu_opcode): insert/extract/print take pointer to
