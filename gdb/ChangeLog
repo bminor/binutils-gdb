@@ -34,7 +34,7 @@ Fri Feb  5 16:46:14 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 Thu Feb  4 00:19:14 1999  Christopher Faylor <cgf@cygnus.com>
 
-	* configure.in: Move termcap determination a later in the
+	* configure.in: Move termcap determination later in the
 	file to catch setting of cygwin flag.
 	* configure: Regenerate.
 
