@@ -4049,9 +4049,84 @@ mips_read_fp_register_double (int regno, char *rare_buffer)
 }
 
 static void
+mips_print_fp_register (int regnum)
+{				/* do values for FP (float) regs */
+  char *raw_buffer;
+  double doub, flt1, flt2;	/* doubles extracted from raw hex data */
+  int inv1, inv2, namelen;
+
+  raw_buffer = (char *) alloca (2 * REGISTER_RAW_SIZE (FP0_REGNUM));
+
+  printf_filtered ("%s:", REGISTER_NAME (regnum));
+  printf_filtered ("%*s", 4 - (int) strlen (REGISTER_NAME (regnum)), "");
+
+  if (REGISTER_RAW_SIZE (regnum) == 4 || mips2_fp_compat ())
+    {
+      /* 4-byte registers: Print hex and floating.  Also print even
+         numbered registers as doubles.  */
+      mips_read_fp_register_single (regnum, raw_buffer);
+      flt1 = unpack_double (mips_float_register_type (), raw_buffer, &inv1);
+
+      print_scalar_formatted (raw_buffer, builtin_type_uint32, 'x', 'w',
+                              gdb_stdout);
+
+      printf_filtered (" flt: ");
+      if (inv1)
+	printf_filtered (" <invalid float> ");
+      else
+	printf_filtered ("%-17.9g", flt1);
+
+      if (regnum % 2 == 0)
+	{
+	  mips_read_fp_register_double (regnum, raw_buffer);
+	  doub = unpack_double (mips_double_register_type (), raw_buffer,
+	                        &inv2);
+
+	  printf_filtered (" dbl: ");
+	  if (inv2)
+	    printf_filtered ("<invalid double>");
+	  else
+	    printf_filtered ("%-24.17g", doub);
+	}
+    }
+  else
+    {
+      /* Eight byte registers: print each one as hex, float and double.  */
+      mips_read_fp_register_single (regnum, raw_buffer);
+      flt1 = unpack_double (mips_float_register_type (), raw_buffer, &inv1);
+
+      mips_read_fp_register_double (regnum, raw_buffer);
+      doub = unpack_double (mips_double_register_type (), raw_buffer, &inv2);
+
+
+      print_scalar_formatted (raw_buffer, builtin_type_uint64, 'x', 'g',
+                              gdb_stdout);
+
+      printf_filtered (" flt: ");
+      if (inv1)
+	printf_filtered ("<invalid float>");
+      else
+	printf_filtered ("%-17.9g", flt1);
+
+      printf_filtered (" dbl: ");
+      if (inv2)
+	printf_filtered ("<invalid double>");
+      else
+	printf_filtered ("%-24.17g", doub);
+    }
+}
+
+static void
 mips_print_register (int regnum, int all)
 {
   char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  int offset;
+
+  if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
+    {
+      mips_print_fp_register (regnum);
+      return;
+    }
 
   /* Get the data in raw format.  */
   if (!frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
@@ -4060,23 +4135,6 @@ mips_print_register (int regnum, int all)
       return;
     }
 
-  /* If we have a actual 32-bit floating point register (or we are in
-     32-bit compatibility mode), and the register is even-numbered,
-     also print it as a double (spanning two registers).  */
-  if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT
-      && (REGISTER_RAW_SIZE (regnum) == 4
-	  || mips2_fp_compat ())
-      && !((regnum - FP0_REGNUM) & 1))
-    {
-      char *dbuffer = alloca (2 * MAX_REGISTER_RAW_SIZE);
-
-      mips_read_fp_register_double (regnum, dbuffer);
-
-      printf_filtered ("(d%d: ", regnum - FP0_REGNUM);
-      val_print (mips_double_register_type (), dbuffer, 0, 0,
-		 gdb_stdout, 0, 1, 0, Val_pretty_default);
-      printf_filtered ("); ");
-    }
   fputs_filtered (REGISTER_NAME (regnum), gdb_stdout);
 
   /* The problem with printing numeric register names (r26, etc.) is that
@@ -4088,38 +4146,14 @@ mips_print_register (int regnum, int all)
   else
     printf_filtered (": ");
 
-  /* If virtual format is floating, print it that way.  */
-  if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
-    if (REGISTER_RAW_SIZE (regnum) == 8 && !mips2_fp_compat ())
-      {
-	/* We have a meaningful 64-bit value in this register.  Show
-	   it as a 32-bit float and a 64-bit double.  */
-	int offset = 4 * (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG);
-
-	printf_filtered (" (float) ");
-	val_print (mips_float_register_type (), raw_buffer + offset, 0, 0,
-		   gdb_stdout, 0, 1, 0, Val_pretty_default);
-	printf_filtered (", (double) ");
-	val_print (mips_double_register_type (), raw_buffer, 0, 0,
-		   gdb_stdout, 0, 1, 0, Val_pretty_default);
-      }
-    else
-      val_print (REGISTER_VIRTUAL_TYPE (regnum), raw_buffer, 0, 0,
-		 gdb_stdout, 0, 1, 0, Val_pretty_default);
-  /* Else print as integer in hex.  */
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+    offset = REGISTER_RAW_SIZE (regnum) - REGISTER_VIRTUAL_SIZE (regnum);
   else
-    {
-      int offset;
+    offset = 0;
 
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-        offset = REGISTER_RAW_SIZE (regnum) - REGISTER_VIRTUAL_SIZE (regnum);
-      else
-	offset = 0;
-
-      print_scalar_formatted (raw_buffer + offset,
-			      REGISTER_VIRTUAL_TYPE (regnum),
-			      'x', 0, gdb_stdout);
-    }
+  print_scalar_formatted (raw_buffer + offset,
+			  REGISTER_VIRTUAL_TYPE (regnum),
+			  'x', 0, gdb_stdout);
 }
 
 /* Replacement for generic do_registers_info.
@@ -4127,75 +4161,13 @@ mips_print_register (int regnum, int all)
 
 static int
 do_fp_register_row (int regnum)
-{				/* do values for FP (float) regs */
-  char *raw_buffer;
-  double doub, flt1, flt2;	/* doubles extracted from raw hex data */
-  int inv1, inv2, inv3;
-
-  raw_buffer = (char *) alloca (2 * REGISTER_RAW_SIZE (FP0_REGNUM));
-
-  if (REGISTER_RAW_SIZE (regnum) == 4 || mips2_fp_compat ())
-    {
-      /* 4-byte registers: we can fit two registers per row.  */
-      /* Also print every pair of 4-byte regs as an 8-byte double.  */
-      mips_read_fp_register_single (regnum, raw_buffer);
-      flt1 = unpack_double (mips_float_register_type (), raw_buffer, &inv1);
-
-      mips_read_fp_register_single (regnum + 1, raw_buffer);
-      flt2 = unpack_double (mips_float_register_type (), raw_buffer, &inv2);
-
-      mips_read_fp_register_double (regnum, raw_buffer);
-      doub = unpack_double (mips_double_register_type (), raw_buffer, &inv3);
-
-      printf_filtered (" %-5s", REGISTER_NAME (regnum));
-      if (inv1)
-	printf_filtered (": <invalid float>");
-      else
-	printf_filtered ("%-17.9g", flt1);
-
-      printf_filtered (" %-5s", REGISTER_NAME (regnum + 1));
-      if (inv2)
-	printf_filtered (": <invalid float>");
-      else
-	printf_filtered ("%-17.9g", flt2);
-
-      printf_filtered (" dbl: ");
-      if (inv3)
-	printf_filtered ("<invalid double>");
-      else
-	printf_filtered ("%-24.17g", doub);
-      printf_filtered ("\n");
-
-      /* may want to do hex display here (future enhancement) */
-      regnum += 2;
-    }
-  else
-    {
-      /* Eight byte registers: print each one as float AND as double.  */
-      mips_read_fp_register_single (regnum, raw_buffer);
-      flt1 = unpack_double (mips_float_register_type (), raw_buffer, &inv1);
-
-      mips_read_fp_register_double (regnum, raw_buffer);
-      doub = unpack_double (mips_double_register_type (), raw_buffer, &inv3);
-
-      printf_filtered (" %-5s: ", REGISTER_NAME (regnum));
-      if (inv1)
-	printf_filtered ("<invalid float>");
-      else
-	printf_filtered ("flt: %-17.9g", flt1);
-
-      printf_filtered (" dbl: ");
-      if (inv3)
-	printf_filtered ("<invalid double>");
-      else
-	printf_filtered ("%-24.17g", doub);
-
-      printf_filtered ("\n");
-      /* may want to do hex display here (future enhancement) */
-      regnum++;
-    }
-  return regnum;
+{
+  printf_filtered (" ");
+  mips_print_fp_register (regnum);
+  printf_filtered ("\n");
+  return regnum + 1;
 }
+
 
 /* Print a row's worth of GP (int) registers, with name labels above */
 

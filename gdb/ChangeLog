@@ -1,3 +1,11 @@
+2003-04-07  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips_print_fp_register): New function, created from
+	do_fp_register_row().  Registers are now (also) printed as hex.
+	Only one register is printed per row.
+	(mips_print_register, do_fp_register_row): Print floating point
+	registers with mips_print_fp_register().
+
 2003-04-06  Andrew Cagney  <cagney@redhat.com>
 
 	* valprint.h (inspect_it): Add extern declaration.
