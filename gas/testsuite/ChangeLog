@@ -1,0 +1,76 @@
+Thu Sep 23 16:20:34 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* gas/ieee.fp/x930509a.exp: Currently expected to fail always.
+	* gas/all/gas.exp (p1480.s, x930509.s): Ditto.  Break up gas_test
+	call so it no longer performs multiple tests.
+
+Wed Aug 25 16:50:08 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* lib/do*: Remove RCS id strings.
+
+Mon May 17 15:09:45 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* gas/all/float.s, gas/all/p1480.s, gas/m68k/p2410.s: New tests.
+	* gas/all/gas.exp, gas/m68k/all.exp: Run them.
+	* gas/i386: New directory.
+
+Mon May 10 14:50:20 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* Added directory structure, to categorize tests by targets.
+	* Added new tests all/x930509.s, ieee.fp/x930509a.s, m68k/p2663.s,
+	and refined some to examine the assembler listing output.
+	* lib/gas-defs.exp: Renamed gas_start to gas_run.  Added some
+	expect_after patterns.
+	(gas_start, gas_finish): New procs, for tests that examine process
+	output.
+	* config/unix-gas.exp: Invoke gas_init directly, instead of
+	requiring test .exp files do it.
+
+Wed Apr 21 01:24:16 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* gas/gas.exp: Handle new tests, and changes to testing procs.
+
+	* lib/gas-defs.exp (want_no_output): New proc; success iff output
+	is empty.
+	(gas_test_old): Functionally same as old gas_test.
+	(gas_test_ignore_stdout): Rewritten to use want_no_output.
+	(gas_test): New argument lists set of options to be tried in
+	combinations.  Option with trailing ">" indicates standard output
+	should be ignored.
+
+	* gas/p2425a.s: Use %-form for registers, so this test can be run
+	on m68k-coff targets too.
+
+	* gas/p2430a.s: New test case, whitespace &c matches customer
+	report more closely.  Gets different results from p2430.s; this is
+	bad, and not yet tested for.
+
+Mon Apr  5 12:27:19 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* gas/p2389a.s, gas/p2411.s, gas/t2.s: New test cases.
+	* lib/run: New script.
+	* gas/gas-defs.exp (gas_start): Takes new args, assembler options
+	and redirection options.  Use "run" script so redirection works.
+	(gas_test): Now takes assembler options as separate arg from input
+	file name.
+	(gas_test_ignore_stdout): New proc.  Discards output.
+	(gas_test_error): New proc.  Expects assembler to generate output.
+	(target_cpu_family setting): Handle i486->i386 also.
+
+	* lib/do*: Scripts moved here from gas/testscripts.  May be useful
+	someday for writing more test cases; not currently used.
+
+Tue Mar 30 11:45:27 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* gas/sol-gcc.s, gas/sol-cc.s, gas/p2425a.s, gas/p2389.s: New test
+	cases.
+	* gas/gas.exp: Enable them for appropriate targets.  Removed some
+	useless comments &c.  Changed m68k target test to be more general.
+
+	* lib/gas-defs.exp (gas_exit, gas_init): New procs.
+	* gas/gas.exp: Call gas_init.
+
+Mon Mar 29 00:00:00 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* Test suite created.
+

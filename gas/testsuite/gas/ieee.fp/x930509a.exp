@@ -1,6 +1,7 @@
 # Reported 93/05/09 by Jim Wilson: IEEE single-precision FLT_MIN value gets
 # assembled incorrectly.  (Off by one ulp.)
 
+setup_xfail *-*-*
 proc dotest {} {
     set testname "IEEE FLT_MIN, single-precision"
     set x 0
