@@ -2215,11 +2215,14 @@ add_file (file_name, indx, fake)
       as_where (&file, (unsigned int *) NULL);
       file_name = (const char *) file;
 
-      if (! symbol_table_frozen)
-	generate_asm_lineno = 1;
+      /* Automatically generate ECOFF debugging information, since I
+         think that's what other ECOFF assemblers do.  We don't do
+         this if we see a .file directive with a string, since that
+         implies that some sort of debugging information is being
+         provided.  */
+      if (! symbol_table_frozen && debug_type == DEBUG_NONE)
+	debug_type = DEBUG_ECOFF;
     }
-  else
-      generate_asm_lineno = 0;
 
 #ifndef NO_LISTING
   if (listing)
@@ -2319,23 +2322,6 @@ add_file (file_name, indx, fake)
       fil_ptr->int_type = add_aux_sym_tir (&int_type_info,
 					   hash_yes,
 					   &cur_file_ptr->thash_head[0]);
-      /* gas used to have a bug that if the file does not have any
-	 symbol, it either will abort or will not build the file,
-	 the following is to get around that problem. ---kung*/
-#if 0
-      if (generate_asm_lineno)
-	{
-	  mark_stabs (0);
-          (void) add_ecoff_symbol (file_name, st_Nil, sc_Nil,
-				   symbol_new ("L0\001", now_seg,
-					       (valueT) frag_now_fix (),
-					       frag_now),
-				   (bfd_vma) 0, 0, ECOFF_MARK_STAB (N_SO));
-          (void) add_ecoff_symbol ("void:t1=1", st_Nil, sc_Nil,
-				   (symbolS *) NULL, (bfd_vma) 0, 0,
-				   ECOFF_MARK_STAB (N_LSYM));
-	}
-#endif
     }
 }
 
@@ -2350,7 +2336,11 @@ ecoff_new_file (name)
   if (cur_file_ptr != NULL && strcmp (cur_file_ptr->name, name) == 0)
     return;
   add_file (name, 0, 0);
-  generate_asm_lineno = 1;
+
+  /* This is a hand coded assembler file, so automatically turn on
+     debugging information.  */
+  if (debug_type == DEBUG_NONE)
+    debug_type = DEBUG_ECOFF;
 }
 
 #ifdef ECOFF_DEBUG
@@ -3058,25 +3048,11 @@ ecoff_directive_end (ignore)
   if (ent == (symbolS *) NULL)
     as_warn (".end directive names unknown symbol");
   else
-    {
-      (void) add_ecoff_symbol ((const char *) NULL, st_End, sc_Text,
-			       symbol_new ("L0\001", now_seg,
-					   (valueT) frag_now_fix (),
-					   frag_now),
-			       (bfd_vma) 0, (symint_t) 0, (symint_t) 0);
-
-      if (stabs_seen && generate_asm_lineno)
-	{
-	char *n;
-
-	  n = xmalloc (strlen (name) + 4);
-	  strcpy (n, name);
-	  strcat (n, ":F1");
-	  (void) add_ecoff_symbol ((const char *) n, stGlobal, scText, 
-				   ent, (bfd_vma) 0, 0,
-				   ECOFF_MARK_STAB (N_FUN));
-	}
-    }
+    (void) add_ecoff_symbol ((const char *) NULL, st_End, sc_Text,
+			     symbol_new ("L0\001", now_seg,
+					 (valueT) frag_now_fix (),
+					 frag_now),
+			     (bfd_vma) 0, (symint_t) 0, (symint_t) 0);
 
   cur_proc_ptr = (proc_t *) NULL;
 
@@ -4297,6 +4273,11 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 			  && local)
 			sym_ptr->ecoff_sym.asym.index = isym - ifilesym - 1;
 		      sym_ptr->ecoff_sym.ifd = fil_ptr->file_index;
+
+		      /* Don't try to merge an FDR which has an
+                         external symbol attached to it.  */
+		      if (S_IS_EXTERNAL (as_sym) || S_IS_WEAK (as_sym))
+			fil_ptr->fdr.fMerge = 0;
 		    }
 		}
 	    }
@@ -5353,18 +5334,9 @@ ecoff_generate_asm_lineno (filename, lineno)
 {
   lineno_list_t *list;
 
-  /* this potential can cause problem, when we start to see stab half the 
-     way thru the file */
-/*
-  if (stabs_seen)
-    ecoff_generate_asm_line_stab(filename, lineno);
-*/
-
-  if (current_stabs_filename == (char *)NULL || strcmp (current_stabs_filename, filename))
-    {
-      add_file (filename, 0, 1);
-      generate_asm_lineno = 1;
-    }
+  if (current_stabs_filename == (char *)NULL
+      || strcmp (current_stabs_filename, filename))
+    add_file (filename, 0, 1);
 
   list = allocate_lineno_list ();
 
@@ -5396,31 +5368,6 @@ ecoff_generate_asm_lineno (filename, lineno)
       *last_lineno_ptr = list;
       last_lineno_ptr = &list->next;
     }
-}
-
-static int line_label_cnt = 0;
-void
-ecoff_generate_asm_line_stab (filename, lineno)
-    char *filename;
-    int lineno;
-{
-  char *ll;
-
-  if (strcmp (current_stabs_filename, filename)) 
-    {
-      add_file (filename, 0, 1);
-      generate_asm_lineno = 1;
-    }
-
-  line_label_cnt++;
-  /* generate local label $LMnn */
-  ll = xmalloc(10);
-  sprintf(ll, "$LM%d", line_label_cnt);
-  colon (ll);
-
-  /* generate stab for the line */
-  generate_ecoff_stab ('n', ll, N_SLINE, 0, lineno); 
-
 }
 
 #endif /* ECOFF_DEBUGGING */

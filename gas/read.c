@@ -63,8 +63,6 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 
 char *input_line_pointer;	/*->next char of source file to parse. */
 
-int generate_asm_lineno = 0;	/* flag to generate line stab for .s file */
-
 #if BITS_PER_CHAR != 8
 /*  The following table is indexed by[(char)] and will break if
     a char does not have exactly 256 states (hopefully 0:255!)!  */
@@ -290,6 +288,7 @@ static const pseudo_typeS potable[] =
   {"endif", s_endif, 0},
 /* endef */
   {"equ", s_set, 0},
+  {"equiv", s_set, 1},
   {"err", s_err, 0},
   {"exitm", s_mexit, 0},
 /* extend */
@@ -363,6 +362,7 @@ static const pseudo_typeS potable[] =
 /* size */
   {"space", s_space, 0},
   {"skip", s_space, 0},
+  {"sleb128", s_leb128, 1},
   {"spc", s_ignore, 0},
   {"stabd", s_stab, 'd'},
   {"stabn", s_stab, 'n'},
@@ -385,6 +385,7 @@ static const pseudo_typeS potable[] =
   {"title", listing_title, 0},	/* Listing title */
   {"ttl", listing_title, 0},
 /* type */
+  {"uleb128", s_leb128, 0},
 /* use */
 /* val */
   {"xcom", s_comm, 0},
@@ -487,6 +488,7 @@ read_a_source_file (name)
 
   listing_file (name);
   listing_newline ("");
+  register_dependency (name);
 
   while ((buffer_limit = input_scrub_next_buffer (&input_line_pointer)) != 0)
     {				/* We have another line to parse. */
@@ -782,20 +784,29 @@ read_a_source_file (name)
 		      c = *input_line_pointer;
 		      *input_line_pointer = '\0';
 
+		      if (debug_type == DEBUG_STABS)
+			stabs_generate_asm_lineno ();
+
 #ifdef OBJ_GENERATE_ASM_LINENO
-		      if (generate_asm_lineno == 0)
+#ifdef ECOFF_DEBUGGING
+		      /* ECOFF assemblers automatically generate
+                         debugging information.  FIXME: This should
+                         probably be handled elsewhere.  */
+		      if (debug_type == DEBUG_NONE)
 			{
-		          if (ecoff_no_current_file ())
-			    generate_asm_lineno = 1;
+			  if (ecoff_no_current_file ())
+			    debug_type = DEBUG_ECOFF;
 			}
-		      if (generate_asm_lineno == 1)
+
+		      if (debug_type == DEBUG_ECOFF)
 		        {
 			  unsigned int lineno;
 			  char *s;
 
 			  as_where (&s, &lineno);
 			  OBJ_GENERATE_ASM_LINENO (s, lineno);
-		        }
+			}
+#endif
 #endif
 
 		      if (macro_defined)
@@ -1109,8 +1120,21 @@ do_align (n, fill, len, max)
 
   if (fill == NULL)
     {
-      /* FIXME: Fix this right for BFD!  */
+      int maybe_text;
+
+#ifdef BFD_ASSEMBLER
+      if ((bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) != 0)
+	maybe_text = 1;
+      else
+	maybe_text = 0;
+#else
       if (now_seg != data_section && now_seg != bss_section)
+	maybe_text = 1;
+      else
+	maybe_text = 0;
+#endif
+
+      if (maybe_text)
 	default_fill = NOP_OPCODE;
       else
 	default_fill = 0;
@@ -1313,7 +1337,7 @@ s_comm (ignore)
   *p = 0;
   symbolP = symbol_find_or_make (name);
   *p = c;
-  if (S_IS_DEFINED (symbolP))
+  if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
     {
       as_bad ("Ignoring attempt to re-define symbol `%s'.",
 	      S_GET_NAME (symbolP));
@@ -1412,17 +1436,12 @@ s_mri_common (small)
       align = get_absolute_expression ();
     }
 
-  if (S_IS_DEFINED (sym))
+  if (S_IS_DEFINED (sym) && ! S_IS_COMMON (sym))
     {
-#if defined (S_IS_COMMON) || defined (BFD_ASSEMBLER)
-      if (! S_IS_COMMON (sym))
-#endif
-	{
-	  as_bad ("attempt to re-define symbol `%s'", S_GET_NAME (sym));
-	  mri_comment_end (stop, stopc);
-	  ignore_rest_of_line ();
-	  return;
-	}
+      as_bad ("attempt to re-define symbol `%s'", S_GET_NAME (sym));
+      mri_comment_end (stop, stopc);
+      ignore_rest_of_line ();
+      return;
     }
 
   S_SET_EXTERNAL (sym);
@@ -1514,6 +1533,7 @@ s_app_file (appfile)
       if (listing)
 	listing_source_file (s);
 #endif
+      register_dependency (s);
     }
 #ifdef obj_app_file
   obj_app_file (s);
@@ -1647,7 +1667,9 @@ s_fill (ignore)
 
   if (temp_size && !need_pass_2)
     {
-      p = frag_var (rs_fill, (int) temp_size, (int) temp_size, (relax_substateT) 0, (symbolS *) 0, temp_repeat, (char *) 0);
+      p = frag_var (rs_fill, (int) temp_size, (int) temp_size,
+		    (relax_substateT) 0, (symbolS *) 0, (offsetT) temp_repeat,
+		    (char *) 0);
       memset (p, 0, (unsigned int) temp_size);
       /* The magic number BSD_FILL_SIZE_CROCK_4 is from BSD 4.2 VAX
        * flavoured AS.  The following bizzare behaviour is to be
@@ -1960,7 +1982,7 @@ s_lcomm (needs_align)
 
       symbolP->sy_frag = frag_now;
       pfrag = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
-			temp, (char *)0);
+			(offsetT) temp, (char *) 0);
       *pfrag = 0;
 
       S_SET_SEGMENT (symbolP, bss_seg);
@@ -2165,6 +2187,7 @@ void
 s_mexit (ignore)
      int ignore;
 {
+  cond_exit_macro (macro_nest);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }
 
@@ -2519,9 +2542,13 @@ s_rept (ignore)
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }
 
+/* Handle the .equ, .equiv and .set directives.  If EQUIV is 1, then
+   this is .equiv, and it is an error if the symbol is already
+   defined.  */
+
 void 
-s_set (ignore)
-     int ignore;
+s_set (equiv)
+     int equiv;
 {
   register char *name;
   register char delim;
@@ -2580,6 +2607,12 @@ s_set (ignore)
   symbol_table_insert (symbolP);
 
   *end_name = delim;
+
+  if (equiv
+      && S_IS_DEFINED (symbolP)
+      && S_GET_SEGMENT (symbolP) != reg_section)
+    as_bad ("symbol `%s' already defined", S_GET_NAME (symbolP));
+
   pseudo_set (symbolP);
   demand_empty_rest_of_line ();
 }				/* s_set() */
@@ -2710,7 +2743,7 @@ s_space (mult)
 
 	  if (!need_pass_2)
 	    p = frag_var (rs_fill, 1, 1, (relax_substateT) 0, (symbolS *) 0,
-			  repeat, (char *) 0);
+			  (offsetT) repeat, (char *) 0);
 	}
       else
 	{
@@ -2726,7 +2759,7 @@ s_space (mult)
 	    }
 	  if (!need_pass_2)
 	    p = frag_var (rs_space, 1, 1, (relax_substateT) 0,
-			  make_expr_symbol (&exp), 0L, (char *) 0);
+			  make_expr_symbol (&exp), (offsetT) 0, (char *) 0);
 	}
 
       if (p)
@@ -3844,6 +3877,306 @@ float_cons (float_type)
   demand_empty_rest_of_line ();
 }				/* float_cons() */
 
+/* Return the size of a LEB128 value */
+
+static inline int
+sizeof_sleb128 (value)
+     offsetT value;
+{
+  register int size = 0;
+  register unsigned byte;
+
+  do
+    {
+      byte = (value & 0x7f);
+      /* Sadly, we cannot rely on typical arithmetic right shift behaviour.
+	 Fortunately, we can structure things so that the extra work reduces
+	 to a noop on systems that do things "properly".  */
+      value = (value >> 7) | ~(-(offsetT)1 >> 7);
+      size += 1;
+    }
+  while (!(((value == 0) && ((byte & 0x40) == 0))
+	   || ((value == -1) && ((byte & 0x40) != 0))));
+
+  return size;
+}
+
+static inline int
+sizeof_uleb128 (value)
+     valueT value;
+{
+  register int size = 0;
+  register unsigned byte;
+
+  do
+    {
+      byte = (value & 0x7f);
+      value >>= 7;
+      size += 1;
+    }
+  while (value != 0);
+
+  return size;
+}
+
+inline int
+sizeof_leb128 (value, sign)
+     valueT value;
+     int sign;
+{
+  if (sign)
+    return sizeof_sleb128 ((offsetT) value);
+  else
+    return sizeof_uleb128 (value);
+}
+
+/* Output a LEB128 value.  */
+
+static inline int
+output_sleb128 (p, value)
+     char *p;
+     offsetT value;
+{
+  register char *orig = p;
+  register int more;
+
+  do
+    {
+      unsigned byte = (value & 0x7f);
+
+      /* Sadly, we cannot rely on typical arithmetic right shift behaviour.
+	 Fortunately, we can structure things so that the extra work reduces
+	 to a noop on systems that do things "properly".  */
+      value = (value >> 7) | ~(-(offsetT)1 >> 7);
+
+      more = !((((value == 0) && ((byte & 0x40) == 0))
+		|| ((value == -1) && ((byte & 0x40) != 0))));
+      if (more)
+	byte |= 0x80;
+
+      *p++ = byte;
+    }
+  while (more);
+
+  return p - orig;
+}
+
+static inline int
+output_uleb128 (p, value)
+     char *p;
+     valueT value;
+{
+  char *orig = p;
+
+  do
+    {
+      unsigned byte = (value & 0x7f);
+      value >>= 7;
+      if (value != 0)
+	/* More bytes to follow.  */
+	byte |= 0x80;
+
+      *p++ = byte;
+    }
+  while (value != 0);
+
+  return p - orig;
+}
+
+inline int
+output_leb128 (p, value, sign)
+     char *p;
+     valueT value;
+     int sign;
+{
+  if (sign)
+    return output_sleb128 (p, (offsetT) value);
+  else
+    return output_uleb128 (p, value);
+}
+
+/* Do the same for bignums.  We combine sizeof with output here in that
+   we don't output for NULL values of P.  It isn't really as critical as
+   for "normal" values that this be streamlined.  */
+
+static int
+output_big_sleb128 (p, bignum, size)
+     char *p;
+     LITTLENUM_TYPE *bignum;
+     int size;
+{
+  char *orig = p;
+  valueT val;
+  int loaded = 0;
+  unsigned byte;
+
+  /* Strip leading sign extensions off the bignum.  */
+  while (size > 0 && bignum[size-1] == (LITTLENUM_TYPE)-1)
+    size--;
+
+  do
+    {
+      if (loaded < 7 && size > 0)
+	{
+	  val |= (*bignum << loaded);
+	  loaded += 8 * CHARS_PER_LITTLENUM;
+	  size--;
+	  bignum++;
+	}
+
+      byte = val & 0x7f;
+      loaded -= 7;
+      val >>= 7;
+
+      if (size == 0)
+	{
+	  if ((val == 0 && (byte & 0x40) == 0)
+	      || (~(val | ~(((valueT)1 << loaded) - 1)) == 0
+		  && (byte & 0x40) != 0))
+	    byte |= 0x80;
+	}
+
+      if (orig)
+	*p = byte;
+      p++;
+    }
+  while (byte & 0x80);
+
+  return p - orig;
+}
+
+static int
+output_big_uleb128 (p, bignum, size)
+     char *p;
+     LITTLENUM_TYPE *bignum;
+     int size;
+{
+  char *orig = p;
+  valueT val;
+  int loaded = 0;
+  unsigned byte;
+
+  /* Strip leading zeros off the bignum.  */
+  /* XXX: Is this needed?  */
+  while (size > 0 && bignum[size-1] == 0)
+    size--;
+
+  do
+    {
+      if (loaded < 7 && size > 0)
+	{
+	  val |= (*bignum << loaded);
+	  loaded += 8 * CHARS_PER_LITTLENUM;
+	  size--;
+	  bignum++;
+	}
+
+      byte = val & 0x7f;
+      loaded -= 7;
+      val >>= 7;
+
+      if (size > 0 || val)
+	byte |= 0x80;
+
+      if (orig)
+	*p = byte;
+      p++;
+    }
+  while (byte & 0x80);
+
+  return p - orig;
+}
+
+static inline int
+output_big_leb128 (p, bignum, size, sign)
+     char *p;
+     LITTLENUM_TYPE *bignum;
+     int size, sign;
+{
+  if (sign)
+    return output_big_sleb128 (p, bignum, size);
+  else
+    return output_big_uleb128 (p, bignum, size);
+}
+
+/* Generate the appropriate fragments for a given expression to emit a
+   leb128 value.  */
+
+void
+emit_leb128_expr(exp, sign)
+     expressionS *exp;
+     int sign;
+{
+  operatorT op = exp->X_op;
+
+  if (op == O_absent || op == O_illegal)
+    {
+      as_warn ("zero assumed for missing expression");
+      exp->X_add_number = 0;
+      op = O_constant;
+    }
+  else if (op == O_big && exp->X_add_number <= 0)
+    {
+      as_bad ("floating point number invalid; zero assumed");
+      exp->X_add_number = 0;
+      op = O_constant;
+    }
+  else if (op == O_register)
+    {
+      as_warn ("register value used as expression");
+      op = O_constant;
+    }
+
+  if (op == O_constant)
+    {
+      /* If we've got a constant, emit the thing directly right now.  */
+
+      valueT value = exp->X_add_number;
+      int size;
+      char *p;
+
+      size = sizeof_leb128 (value, sign);
+      p = frag_more (size);
+      output_leb128 (p, value, sign);
+    }
+  else if (op == O_big)
+    {
+      /* O_big is a different sort of constant.  */
+
+      int size;
+      char *p;
+
+      size = output_big_leb128 (NULL, generic_bignum, exp->X_add_number, sign);
+      p = frag_more (size);
+      output_big_leb128 (p, generic_bignum, exp->X_add_number, sign);
+    }
+  else
+    {
+      /* Otherwise, we have to create a variable sized fragment and 
+	 resolve things later.  */
+
+      frag_var (rs_leb128, sizeof_uleb128 (~(valueT)0), 0, sign,
+		make_expr_symbol (exp), 0, (char *) NULL);
+    }
+}
+
+/* Parse the .sleb128 and .uleb128 pseudos.  */
+
+void
+s_leb128 (sign)
+     int sign;
+{
+  expressionS exp;
+
+  do {
+    expression (&exp);
+    emit_leb128_expr (&exp, sign);
+  } while (*input_line_pointer++ == ',');
+
+  input_line_pointer--;
+  demand_empty_rest_of_line ();
+}
+
 /*
  *			stringer()
  *
@@ -4289,6 +4622,7 @@ s_include (arg)
   path = filename;
 gotit:
   /* malloc Storage leak when file is found on path.  FIXME-SOMEDAY. */
+  register_dependency (path);
   newbuf = input_scrub_include_file (path, input_line_pointer);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }				/* s_include() */

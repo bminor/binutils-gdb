@@ -64,6 +64,10 @@ int listing;			/* true if a listing is wanted */
 
 static char *listing_filename = NULL;	/* Name of listing file.  */
 
+/* Type of debugging to generate.  */
+
+enum debug_info_type debug_type = DEBUG_NONE;
+
 /* Maximum level of macro nesting.  */
 
 int max_macro_nest = 100;
@@ -110,7 +114,7 @@ print_version_id ()
     return;
   printed = 1;
 
-  fprintf (stderr, "GNU assembler version %s (%s)", GAS_VERSION, TARGET_ALIAS);
+  fprintf (stderr, "GNU assembler version %s (%s)", VERSION, TARGET_ALIAS);
 #ifdef BFD_ASSEMBLER
   fprintf (stderr, ", using BFD version %s", BFD_VERSION);
 #endif
@@ -138,6 +142,7 @@ Options:\n\
 -D			produce assembler debugging messages\n\
 --defsym SYM=VAL	define symbol SYM to given value\n\
 -f			skip whitespace and comment preprocessing\n\
+--gstabs		generate stabs debugging information\n\
 --help			show this message and exit\n\
 -I DIR			add DIR to search list for .include directives\n\
 -J			don't warn about signed overflow\n\
@@ -145,6 +150,7 @@ Options:\n\
 -L			keep local symbols (starting with `L')\n");
   fprintf (stream, "\
 -M,--mri		assemble in MRI compatibility mode\n\
+--MD FILE		write dependency information in FILE (default none)\n\
 -nocpp			ignored\n\
 -o OBJFILE		name the object-file output OBJFILE (default a.out)\n\
 -R			fold data section into text section\n\
@@ -290,7 +296,7 @@ parse_args (pargc, pargv)
 #endif
       'w', 'X',
       /* New option for extending instruction set (see also --itbl below) */
-      't',
+      't', ':',
       '\0'
     };
   struct option *longopts;
@@ -321,7 +327,11 @@ parse_args (pargc, pargv)
        list of instruction formats.  The additional opcodes and their
        formats are added to the built-in set of instructions, and
        mnemonics for new registers may also be defined.  */
-    {"itbl", required_argument, NULL, OPTION_INSTTBL}
+    {"itbl", required_argument, NULL, OPTION_INSTTBL},
+#define OPTION_DEPFILE (OPTION_STD_BASE + 9)
+    {"MD", required_argument, NULL, OPTION_DEPFILE},
+#define OPTION_GSTABS (OPTION_STD_BASE + 10)
+    {"gstabs", no_argument, NULL, OPTION_GSTABS}
   };
 
   /* Construct the option lists from the standard list and the
@@ -404,7 +414,7 @@ parse_args (pargc, pargv)
 
 	case OPTION_VERSION:
 	  /* This output is intended to follow the GNU standards document.  */
-	  printf ("GNU assembler %s\n", GAS_VERSION);
+	  printf ("GNU assembler %s\n", VERSION);
 	  printf ("Copyright 1997 Free Software Foundation, Inc.\n");
 	  printf ("\
 This program is free software; you may redistribute it under the terms of\n\
@@ -461,6 +471,12 @@ the GNU General Public License.  This program has absolutely no warranty.\n");
 	       formats, opcodes, register names, etc. */
 	    struct itbl_file_list *n;
 
+	    if (optarg == NULL)
+	      {
+		as_warn ( "No file name following -t option\n" );
+		break;
+	      }
+	    
 	    n = (struct itbl_file_list *) xmalloc (sizeof *n);
 	    n->next = itbl_files;
 	    n->name = optarg;
@@ -478,6 +494,14 @@ the GNU General Public License.  This program has absolutely no warranty.\n");
 		exit (EXIT_SUCCESS);
 	      }
 	  }
+	  break;
+
+	case OPTION_DEPFILE:
+	  start_dependencies (optarg);
+	  break;
+
+	case OPTION_GSTABS:
+	  debug_type = DEBUG_STABS;
 	  break;
 
 	case 'J':
@@ -737,6 +761,10 @@ main (argc, argv)
      may not place the same interpretation on the value given.  */
   if (had_errors () > 0)
     xexit (EXIT_FAILURE);
+
+  /* Only generate dependency file if assembler was successful.  */
+  print_dependencies ();
+
   xexit (EXIT_SUCCESS);
 }
 

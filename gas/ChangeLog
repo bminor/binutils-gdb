@@ -1,3 +1,29 @@
+Fri Aug 15 14:00:13 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* as.h (enum debug_info_type): Define.
+	(debug_type): Declare.
+	* as.c (debug_type): New global variable.
+	(show_usage): Add --gstabs.
+	(parse_args): Handle --gstabs.
+	* read.c (generate_asm_lineno): Remove.
+	(read_a_source_file): Output stabs debugging if appropriate.
+	Change checks of generate_asm_lineno to check debug_type.  Only
+	generate ECOFF debugging if ECOFF_DEBUGGING is defined.
+	* read.h (generate_asm_lineno): Don't declare.
+	(stabs_generate_asm_lineno): Declare.
+	* stabs.c (stabs_generate_asm_lineno): New function.
+	* ecoff.c (add_file): Use debug_type, not generate_asm_lineno.
+	Don't turn off debugging.
+	(add_file): Remove old #if 0 code.
+	(ecoff_new_file): Set debug_type, not generate_asm_lineno.
+	(ecoff_directive_end): Don't generate stabs line symbols.
+	(ecoff_generate_asm_lineno): Don't check stabs_seen.  Don't set
+	generate_asm_lineno.
+	(line_label_cnt): Remove.
+	(ecoff_generate_asm_line_stab): Remove.
+	* ecoff.h (ecoff_generate_asm_line_stab): Don't declare.
+	* doc/as.texinfo, doc/as.1: Document --gstabs.
+
 start-sanitize-v850
 Wed Aug 13 18:58:56 1997  Nick Clifton  <nickc@cygnus.com>
 
