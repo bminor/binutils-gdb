@@ -1,3 +1,8 @@
+Thu Feb 18 04:10:06 1993  John Gilmore  (gnu@cygnus.com)
+
+	* c-lang.c (c_printstr):  If a C string ends in a null, don't
+	print the null.
+
 Thu Feb 18 02:39:21 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* defs.h (STRCMP):  Make it work for unsigned chars.

@@ -1,5 +1,5 @@
 /* C language support routines for GDB, the GNU debugger.
-   Copyright 1992 Free Software Foundation, Inc.
+   Copyright 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -107,6 +107,12 @@ c_printstr (stream, string, length, force_ellipses)
   extern int inspect_it;
   extern int repeat_count_threshold;
   extern int print_max;
+
+  /* If the string was not truncated due to `set print elements', and
+     the last byte of it is a null, we don't print that, in traditional C
+     style.  */
+  if ((!force_ellipses) && string[length-1] == '\0')
+    length--;
 
   if (length == 0)
     {
