@@ -1,3 +1,11 @@
+2003-09-22  Jeff Johnston  <jjohnstn@redhat.com>
+
+	Merge from mainline:
+	2003-09-22  Jeff Johnston  <jjohnstn@redhat.com>
+
+        * top.c (quit_force): Fix indirect call to quit_target so
+        a struct qt_args pointer is passed.
+
 2003-09-19  Daniel Jacobowitz  <drow@mvista.com>
 
 	Merge from mainline:
