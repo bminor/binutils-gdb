@@ -1,3 +1,7 @@
+Thu Jun 17 19:57:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* printcmd.c (print_formatted): Don't use tab in wrap_here arg.
+
 Thu Jun 17 17:29:30 1993  Jim Kingdon  (kingdon@lisa.cygnus.com)
 
 	* Makefile.in (INTERNAL_CFLAGS): Include ../include as well as
