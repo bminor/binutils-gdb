@@ -1,0 +1,6 @@
+# Host: DEC VAX running Ultrix
+
+XDEPFILES= infptrace.o coredep.o
+REGEX=regex.o
+REGEX1=regex.o
+XM_FILE= xm-vaxult.h

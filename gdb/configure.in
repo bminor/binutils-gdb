@@ -129,7 +129,16 @@ m88k)
 	esac
 	;;
 
-arm | vax | merlin | none | np1 | pn | pyramid | tahoe)
+vax)
+	case "${host_os}" in
+	bsd*)
+		gdb_host=vaxbsd ;;
+	ultrix*)
+		gdb_host=vaxult ;;
+	esac
+	;;
+
+arm | merlin | none | np1 | pn | pyramid | tahoe)
 	gdb_host=${host_cpu}
 	;;
 
