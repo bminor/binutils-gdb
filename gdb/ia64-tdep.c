@@ -2583,6 +2583,10 @@ ia64_libunwind_frame_prev_register (struct frame_info *next_frame,
   libunwind_frame_prev_register (next_frame, this_cache, reg,
 				 optimizedp, lvalp, addrp, realnump, valuep);
 
+  /* No more to do if the value is not supposed to be supplied.  */
+  if (!valuep)
+    return;
+
   if (VP0_REGNUM <= regnum && regnum <= VP63_REGNUM)
     {
       ULONGEST prN_val;

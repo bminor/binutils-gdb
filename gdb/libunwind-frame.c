@@ -1,6 +1,6 @@
 /* Frame unwinder for frames using the libunwind library.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    Written by Jeff Johnston, contributed by Red Hat Inc.
 
@@ -259,7 +259,8 @@ libunwind_frame_prev_register (struct frame_info *next_frame, void **this_cache,
   *lvalp = not_lval;
   *realnump = -1;
 
-  memset (valuep, 0, register_size (current_gdbarch, regnum));
+  if (valuep)
+    memset (valuep, 0, register_size (current_gdbarch, regnum));
 
   if (uw_regnum < 0)
     return;
@@ -281,7 +282,8 @@ libunwind_frame_prev_register (struct frame_info *next_frame, void **this_cache,
   if (ret < 0)
     return;
 
-  memcpy (valuep, ptr, register_size (current_gdbarch, regnum));
+  if (valuep)
+    memcpy (valuep, ptr, register_size (current_gdbarch, regnum));
 
   if (unw_get_saveloc_p (&cache->cursor, uw_regnum, &sl) < 0)
     return;

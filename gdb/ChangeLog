@@ -1,3 +1,9 @@
+2004-04-14  Andreas Schwab  <schwab@suse.de>
+
+	* ia64-tdep.c (ia64_libunwind_frame_prev_register): Handle null
+	value buffer.
+	* libunwind-frame.c (libunwind_frame_prev_register): Likewise.
+
 2004-04-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* vax-tdep.c (vax_store_arguments, vax_push_dummy_call)
