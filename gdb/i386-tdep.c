@@ -684,13 +684,19 @@ i386_extract_return_value (type, regbuf, valbuf)
       double d;
       /* 387 %st(0), gcc uses this */
       floatformat_to_double (&floatformat_i387_ext,
-			     &regbuf[REGISTER_BYTE(FPDATA_REGNUM)],
+#if defined(FPDATA_REGNUM)
+			     &regbuf[REGISTER_BYTE (FPDATA_REGNUM)],
+#else /* !FPDATA_REGNUM */
+			     &regbuf[REGISTER_BYTE (FP0_REGNUM)],
+#endif /* FPDATA_REGNUM */
+
 			     &d);
       store_floating (valbuf, TYPE_LENGTH (type), d);
     }
   else
 #endif /* I386_AIX_TARGET || I386_GNULINUX_TARGET*/
     {
+#if defined(LOW_RETURN_REGNUM)
       int len = TYPE_LENGTH (type);
       int low_size = REGISTER_RAW_SIZE (LOW_RETURN_REGNUM);
       int high_size = REGISTER_RAW_SIZE (HIGH_RETURN_REGNUM);
@@ -708,6 +714,9 @@ i386_extract_return_value (type, regbuf, valbuf)
 	}
       else
 	error ("GDB bug: i386-tdep.c (i386_extract_return_value): Don't know how to find a return value %d bytes long", len);
+#else /* !LOW_RETURN_REGNUM */
+      memcpy (valbuf, regbuf, TYPE_LENGTH (type));
+#endif /* LOW_RETURN_REGNUM */
     }
 }
 
@@ -959,51 +968,6 @@ set_disassembly_flavor ()
     set_architecture_from_arch_mach (bfd_arch_i386, bfd_mach_i386_i386);
   else if (disassembly_flavor == intel_flavor)
     set_architecture_from_arch_mach (bfd_arch_i386, bfd_mach_i386_i386_intel_syntax);
-}
-
-/* Print the register regnum, or all registers if regnum is -1 */
-
-void
-i386_do_registers_info (regnum, fpregs)
-     int regnum;
-     int fpregs;
-{
-  char raw_regs [REGISTER_BYTES];
-  int i;
-
-  for (i = 0; i < NUM_REGS; i++)
-    read_relative_register_raw_bytes (i, raw_regs + REGISTER_BYTE (i));
-
-  if (regnum < FPSTART_REGNUM)
-    i386_print_register (raw_regs, regnum, fpregs);
-  else
-    i387_print_register (raw_regs, regnum);
-}
-
-static void
-i386_print_register (raw_regs, regnum, fpregs)
-     char *raw_regs;
-     int regnum;
-     int fpregs;
-{
-  int i;
-  long val;
-  char string[12];
-
-  for (i = 0; i < FPSTART_REGNUM; i++)
-    {
-      if ((regnum != -1) && (i != regnum))
-	continue;
-
-      val = extract_signed_integer (raw_regs + REGISTER_BYTE (i), 4);
-
-      sprintf(string, "0x%x", val);
-      printf_filtered ("%8.8s: %10.10s %11d\n", REGISTER_NAME(i), string, val);
-    }
-
-  if ((regnum == -1) && fpregs)
-    for (i = FPSTART_REGNUM; i < FPEND_REGNUM; i++)
-      i387_print_register (raw_regs, i);
 }
 
 void

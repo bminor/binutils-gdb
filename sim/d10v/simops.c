@@ -48,7 +48,6 @@ enum {
   PSW_MASK = (PSW_SM_BIT
 	      | PSW_EA_BIT
 	      | PSW_DB_BIT
-	      | PSW_DM_BIT
 	      | PSW_IE_BIT
 	      | PSW_RP_BIT
 	      | PSW_MD_BIT
@@ -1097,7 +1096,7 @@ OP_5F20 ()
       trace_input ("dbt", OP_VOID, OP_VOID, OP_VOID);
       SET_DPC (PC + 1);
       SET_DPSW (PSW);
-      SET_PSW (PSW_DM_BIT | (PSW & (PSW_F0_BIT | PSW_F1_BIT | PSW_C_BIT)));
+      SET_PSW (PSW & (PSW_F0_BIT | PSW_F1_BIT | PSW_C_BIT));
       JMP (DBT_VECTOR_START);
       trace_output_void ();
     }
@@ -2242,7 +2241,6 @@ OP_5F40 ()
   trace_output_void ();
 }
 
-
 /* sac */
 void OP_5209 ()
 {
@@ -2274,7 +2272,6 @@ void OP_5209 ()
 
   trace_output_40 (tmp);
 }
-
 
 /* sachi */
 void
@@ -2308,7 +2305,6 @@ OP_4209 ()
 
   trace_output_16 (OP[0]);
 }
-
 
 /* sadd */
 void
@@ -2406,7 +2402,6 @@ OP_3220 ()
 
   trace_output_40(tmp);
 }
-
 
 /* sleep */
 void
@@ -3428,4 +3423,3 @@ OP_5000000 ()
   SET_GPR (OP[0], tmp);
   trace_output_16 (tmp);
 }
-

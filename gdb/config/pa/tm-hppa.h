@@ -563,7 +563,6 @@ extern void hppa_pop_frame PARAMS ((void));
 
 #define CALL_DUMMY_LENGTH (INSTRUCTION_SIZE * 28)
 #define REG_PARM_STACK_SPACE 16
-#define ARGS_GROW_DOWNWARD
 
 #else /* defined PA_LEVEL_0 */
 
@@ -796,3 +795,7 @@ PARAMS ((CORE_ADDR, int))
    probably much more common.  (FIXME). */
 
 #define COERCE_FLOAT_TO_DOUBLE (current_language -> la_language == language_c)
+
+/* Here's how to step off a permanent breakpoint.  */
+#define SKIP_PERMANENT_BREAKPOINT (hppa_skip_permanent_breakpoint)
+extern void hppa_skip_permanent_breakpoint (void);

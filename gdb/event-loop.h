@@ -58,62 +58,10 @@
    Corollary tasks are the creation and deletion of event sources. */
 
 typedef PTR gdb_client_data;
-typedef struct gdb_event gdb_event;
-
-typedef void (handler_func) PARAMS ((gdb_client_data));
-typedef void (event_handler_func) PARAMS ((int));
-
-/* Event for the GDB event system.  Events are queued by calling
-   async_queue_event and serviced later on by gdb_do_one_event. An
-   event can be, for instance, a file descriptor becoming ready to be
-   read. Servicing an event simply means that the procedure PROC will
-   be called.  We have 2 queues, one for file handlers that we listen
-   to in the event loop, and one for the file handlers+events that are
-   ready. The procedure PROC associated with each event is always the
-   same (handle_file_event).  Its duty is to invoke the handler
-   associated with the file descriptor whose state change generated
-   the event, plus doing other cleanups adn such. */
-
-struct gdb_event
-  {
-    event_handler_func *proc;	/* Procedure to call to service this event. */
-    int fd;			/* File descriptor that is ready. */
-    struct gdb_event *next_event;	/* Next in list of events or NULL. */
-  };
-
-/* Information about each file descriptor we register with the event
-   loop. */
-
-typedef struct file_handler
-  {
-    int fd;			/* File descriptor. */
-    int mask;			/* Events we want to monitor: POLLIN, etc. */
-    int ready_mask;		/* Events that have been seen since
-				   the last time. */
-    handler_func *proc;	        /* Procedure to call when fd is ready. */
-    gdb_client_data client_data;	/* Argument to pass to proc. */
-    struct file_handler *next_file;	/* Next registered file descriptor. */
-  }
-file_handler;
-
-/* PROC is a function to be invoked when the READY flag is set. This
-   happens when there has been a signal and the corresponding signal
-   handler has 'triggered' this async_signal_handler for
-   execution. The actual work to be done in response to a signal will
-   be carried out by PROC at a later time, within process_event. This
-   provides a deferred execution of signal handlers.
-   Async_init_signals takes care of setting up such an
-   asyn_signal_handler for each interesting signal. */
-
-typedef struct async_signal_handler
-  {
-    int ready;			/* If ready, call this handler from the main event loop, 
-				   using invoke_async_handler. */
-    struct async_signal_handler *next_handler;	/* Ptr to next handler */
-    handler_func *proc;	                /* Function to call to do the work */
-    gdb_client_data client_data;	/* Argument to async_handler_func */
-  }
-async_signal_handler;
+struct async_signal_handler;
+typedef void (handler_func) (int, int, gdb_client_data);
+typedef void (sig_handler_func) (gdb_client_data);
+typedef void (timer_handler_func) (gdb_client_data);
 
 /* Where to add an event onto the event queue, by queue_event. */
 typedef enum
@@ -134,129 +82,19 @@ queue_position;
 #define GDB_WRITABLE	(1<<2)
 #define GDB_EXCEPTION	(1<<3)
 
-/* Type of the mask arguments to select. */
-
-#ifndef NO_FD_SET
-#define SELECT_MASK fd_set
-#else
-#ifndef _AIX
-typedef long fd_mask;
-#endif
-#if defined(_IBMR2)
-#define SELECT_MASK void
-#else
-#define SELECT_MASK int
-#endif
-#endif
-
-/* Define "NBBY" (number of bits per byte) if it's not already defined. */
-
-#ifndef NBBY
-#define NBBY 8
-#endif
-
-
-/* Define the number of fd_masks in an fd_set */
-
-#ifndef FD_SETSIZE
-#ifdef OPEN_MAX
-#define FD_SETSIZE OPEN_MAX
-#else
-#define FD_SETSIZE 256
-#endif
-#endif
-#if !defined(howmany)
-#define howmany(x, y) (((x)+((y)-1))/(y))
-#endif
-#ifndef NFDBITS
-#define NFDBITS NBBY*sizeof(fd_mask)
-#endif
-#define MASK_SIZE howmany(FD_SETSIZE, NFDBITS)
-
-
-/* Stack for prompts. Each prompt is composed as a prefix, a prompt
-   and a suffix. The prompt to be displayed at any given time is the
-   one on top of the stack.  A stack is necessary because of cases in
-   which the execution of a gdb command requires further input from
-   the user, like for instance 'commands' for breakpoints and
-   'actions' for tracepoints. In these cases, the prompt is '>' and
-   gdb should process input using the asynchronous readline interface
-   and the event loop.  In order to achieve this, we need to save
-   somewhere the state of GDB, i.e. that it is processing user input
-   as part of a command and not as part of the top level command loop.
-   The prompt stack represents part of the saved state. Another part
-   would be the function that readline would invoke after a whole line
-   of input has ben entered. This second piece would be something
-   like, for instance, where to return within the code for the actions
-   commands after a line has been read.  This latter portion has not
-   beeen implemented yet.  The need for a 3-part prompt arises from
-   the annotation level. When this is set to 2, the prompt is actually
-   composed of a prefix, the prompt itself and a suffix. */
-
-/* At any particular time there will be always at least one prompt on
-   the stack, the one being currently displayed by gdb. If gdb is
-   using annotation level equal 2, there will be 2 prompts on the
-   stack: the usual one, w/o prefix and suffix (at top - 1), and the
-   'composite' one with prefix and suffix added (at top). At this
-   time, this is the only use of the prompt stack. Resetting annotate
-   to 0 or 1, pops the top of the stack, resetting its size to one
-   element. The MAXPROMPTS limit is safe, for now. Once other cases
-   are dealt with (like the different prompts used for 'commands' or
-   'actions') this array implementation of the prompt stack may have
-   to change. */
-
-#define MAXPROMPTS 10
-struct prompts
-  {
-    struct
-      {
-	char *prefix;
-	char *prompt;
-	char *suffix;
-      }
-    prompt_stack[MAXPROMPTS];
-    int top;
-  };
-
-#define PROMPT(X) the_prompts.prompt_stack[the_prompts.top + X].prompt
-#define PREFIX(X) the_prompts.prompt_stack[the_prompts.top + X].prefix
-#define SUFFIX(X) the_prompts.prompt_stack[the_prompts.top + X].suffix
-
 /* Exported functions from event-loop.c */
 
-extern void start_event_loop PARAMS ((void));
-extern void delete_file_handler PARAMS ((int));
-extern void add_file_handler PARAMS ((int, void (*) (void), gdb_client_data));
-extern void mark_async_signal_handler PARAMS ((async_signal_handler *));
-extern async_signal_handler * 
-  create_async_signal_handler PARAMS ((handler_func *, gdb_client_data));
-extern void delete_async_signal_handler PARAMS ((async_signal_handler ** async_handler_ptr));
-extern gdb_event *create_file_event PARAMS ((int));
+extern void start_event_loop (void);
+extern void delete_file_handler (int fd);
+extern void add_file_handler (int fd, handler_func *proc, gdb_client_data client_data);
+extern void mark_async_signal_handler (struct async_signal_handler *async_handler_ptr);
+extern struct async_signal_handler * 
+  create_async_signal_handler (sig_handler_func *proc, gdb_client_data client_data);
+extern void delete_async_signal_handler (struct async_signal_handler ** async_handler_ptr);
+extern void inferior_event_handler (int error, gdb_client_data client_data, int fd);
+extern int  create_timer (int milliseconds, timer_handler_func *proc, gdb_client_data client_data);
+extern void delete_timer (int id);
 
-/* Exported functions from event-top.c. 
-   FIXME: these should really go into top.h. */
 
-extern void display_gdb_prompt PARAMS ((char *));
-extern void async_init_signals PARAMS ((void));
-extern void set_async_editing_command PARAMS ((char *, int, struct cmd_list_element *));
-extern void set_async_annotation_level PARAMS ((char *, int, struct cmd_list_element *));
-extern void set_async_prompt PARAMS ((char *, int, struct cmd_list_element *));
-extern void handle_stop_sig PARAMS ((int));
-extern void handle_sigint PARAMS ((int));
-extern void pop_prompt PARAMS ((void));
-extern void push_prompt PARAMS ((char *, char *, char *));
-extern void gdb_readline2 PARAMS ((void));
-extern void mark_async_signal_handler_wrapper (void *);
-extern void async_request_quit (gdb_client_data);
 
-/* Exported variables from event-top.c.
-   FIXME: these should really go into top.h. */
 
-extern int async_command_editing_p;
-extern int exec_done_display_p;
-extern char *async_annotation_suffix;
-extern char *new_async_prompt;
-extern struct prompts the_prompts;
-extern void (*call_readline) PARAMS ((void));
-extern void (*input_handler) PARAMS ((char *));
-extern int input_fd;

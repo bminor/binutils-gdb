@@ -1,3 +1,8 @@
+Fri Sep 17 19:34:38 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* tuiSource.c: Include "source.h".
+ 	(open_source_file, find_source_lines): Delete declarations.
+
 1999-01-26  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* tui.h: Include stdarg.h instead of varargs.h if we're on an ISO Cish

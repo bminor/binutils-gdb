@@ -1030,6 +1030,165 @@ d10v_extract_return_value (type, regbuf, valbuf)
     }
 }
 
+/* Translate a GDB virtual ADDR/LEN into a format the remote target
+   understands.  Returns number of bytes that can be transfered
+   starting at taddr, ZERO if no bytes can be transfered.  */
+
+void
+remote_d10v_translate_xfer_address (CORE_ADDR memaddr, int nr_bytes,
+				    CORE_ADDR *targ_addr, int *targ_len)
+{
+  CORE_ADDR phys;
+  CORE_ADDR seg;
+  CORE_ADDR off;
+  char *from = "unknown";
+  char *to = "unknown";
+
+  /* GDB interprets addresses as:
+
+     0x00xxxxxx: Physical unified memory segment     (Unified memory)
+     0x01xxxxxx: Physical instruction memory segment (On-chip insn memory)
+     0x02xxxxxx: Physical data memory segment        (On-chip data memory)
+     0x10xxxxxx: Logical data address segment        (DMAP translated memory)
+     0x11xxxxxx: Logical instruction address segment (IMAP translated memory)
+
+     The remote d10v board interprets addresses as:
+
+     0x00xxxxxx: Physical unified memory segment     (Unified memory)
+     0x01xxxxxx: Physical instruction memory segment (On-chip insn memory)
+     0x02xxxxxx: Physical data memory segment        (On-chip data memory)
+
+     Translate according to current IMAP/dmap registers */
+
+  enum
+    {
+      targ_unified = 0x00000000,
+      targ_insn = 0x01000000,
+      targ_data = 0x02000000,
+    };
+
+  seg = (memaddr >> 24);
+  off = (memaddr & 0xffffffL);
+
+  switch (seg)
+    {
+    case 0x00:			/* Physical unified memory */
+      from = "phys-unified";
+      phys = targ_unified | off;
+      to = "unified";
+      break;
+
+    case 0x01:			/* Physical instruction memory */
+      from = "phys-insn";
+      phys = targ_insn | off;
+      to = "chip-insn";
+      break;
+
+    case 0x02:			/* Physical data memory segment */
+      from = "phys-data";
+      phys = targ_data | off;
+      to = "chip-data";
+      break;
+
+    case 0x10:			/* in logical data address segment */
+      {
+	from = "logical-data";
+	if (off <= 0x7fffL)
+	  {
+	    /* On chip data */
+	    phys = targ_data + off;
+	    if (off + nr_bytes > 0x7fffL)
+	      /* don't cross VM boundary */
+	      nr_bytes = 0x7fffL - off + 1;
+	    to = "chip-data";
+	  }
+	else if (off <= 0xbfffL)
+	  {
+	    unsigned short dmap = read_register (DMAP_REGNUM);
+	    short map = dmap;
+
+	    if (map & 0x1000)
+	      {
+		/* Instruction memory */
+		phys = targ_insn | ((map & 0xf) << 14) | (off & 0x3fff);
+		to = "chip-insn";
+	      }
+	    else
+	      {
+		/* Unified memory */
+		phys = targ_unified | ((map & 0x3ff) << 14) | (off & 0x3fff);
+		to = "unified";
+	      }
+	    if (off + nr_bytes > 0xbfffL)
+	      /* don't cross VM boundary */
+	      nr_bytes = (0xbfffL - off + 1);
+	  }
+	else
+	  {
+	    /* Logical address out side of data segments, not supported */
+	    *targ_len = 0;
+	    return;
+	  }
+	break;
+      }
+
+    case 0x11:			/* in logical instruction address segment */
+      {
+	short map;
+	unsigned short imap0 = read_register (IMAP0_REGNUM);
+	unsigned short imap1 = read_register (IMAP1_REGNUM);
+
+	from = "logical-insn";
+	if (off <= 0x1ffffL)
+	  {
+	    map = imap0;
+	  }
+	else if (off <= 0x3ffffL)
+	  {
+	    map = imap1;
+	  }
+	else
+	  {
+	    /* Logical address outside of IMAP[01] segment, not
+	       supported */
+	    *targ_len = 0;
+	    return;
+	  }
+	if ((off & 0x1ffff) + nr_bytes > 0x1ffffL)
+	  {
+	    /* don't cross VM boundary */
+	    nr_bytes = 0x1ffffL - (off & 0x1ffffL) + 1;
+	  }
+	if (map & 0x1000)
+	  /* Instruction memory */
+	  {
+	    phys = targ_insn | off;
+	    to = "chip-insn";
+	  }
+	else
+	  {
+	    phys = ((map & 0x7fL) << 17) + (off & 0x1ffffL);
+	    if (phys > 0xffffffL)
+	      {
+		/* Address outside of unified address segment */
+		*targ_len = 0;
+		return;
+	      }
+	    phys |= targ_unified;
+	    to = "unified";
+	  }
+	break;
+      }
+
+    default:
+      *targ_len = 0;
+      return;
+    }
+
+  *targ_addr = phys;
+  *targ_len = nr_bytes;
+}
+
 /* The following code implements access to, and display of, the D10V's
    instruction trace buffer.  The buffer consists of 64K or more
    4-byte words of data, of which each words includes an 8-bit count,

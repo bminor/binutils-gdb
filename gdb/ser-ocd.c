@@ -1,7 +1,7 @@
 /* Remote serial interface for Macraigor Systems implementation of
    On-Chip Debugging using serial target box or serial wiggler
 
-   Copyright 1994, 1997 Free Software Foundation, Inc.
+   Copyright 1994, 1997, 1999 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,15 +26,6 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
-
-static int ser_ocd_open PARAMS ((serial_t scb, const char *name));
-static void ser_ocd_raw PARAMS ((serial_t scb));
-static int ser_ocd_readchar PARAMS ((serial_t scb, int timeout));
-static int ser_ocd_setbaudrate PARAMS ((serial_t scb, int rate));
-static int ser_ocd_write PARAMS ((serial_t scb, const char *str, int len));
-static void ser_ocd_close PARAMS ((serial_t scb));
-static serial_ttystate ser_ocd_get_tty_state PARAMS ((serial_t scb));
-static int ser_ocd_set_tty_state PARAMS ((serial_t scb, serial_ttystate state));
 
 #ifdef _WIN32
 /* On Windows, this function pointer is initialized to a function in
@@ -82,11 +73,6 @@ ocd_raw (scb)
      serial_t scb;
 {
   /* Always in raw mode */
-}
-
-static void
-ocd_readremote ()
-{
 }
 
 /* We need a buffer to store responses from the Wigglers.dll */
@@ -144,9 +130,9 @@ ocd_noflush_set_tty_state (scb, new_ttystate, old_ttystate)
 }
 
 static void
-ocd_print_tty_state (scb, ttystate)
-     serial_t scb;
-     serial_ttystate ttystate;
+ocd_print_tty_state (serial_t scb,
+		     serial_ttystate ttystate,
+		     struct gdb_file *stream)
 {
   /* Nothing to print.  */
   return;
@@ -166,8 +152,6 @@ ocd_write (scb, str, len)
      const char *str;
      int len;
 {
-  char c;
-
 #ifdef _WIN32
   /* send packet to Wigglers.dll and store response so we can give it to
      remote-wiggler.c when get_packet is run */

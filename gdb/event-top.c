@@ -23,8 +23,9 @@
 #include "top.h"
 #include "inferior.h"
 #include "terminal.h"		/* for job_control */
-#include <signal.h>
+#include "signals.h"
 #include "event-loop.h"
+#include "event-top.h"
 
 /* For dont_repeat() */
 #include "gdbcmd.h"
@@ -36,39 +37,34 @@
 /* readline defines this.  */
 #undef savestring
 
-extern void _initialize_event_loop PARAMS ((void));
+extern void _initialize_event_loop (void);
 
-static void command_line_handler PARAMS ((char *));
-static void command_line_handler_continuation PARAMS ((struct continuation_arg *));
-void gdb_readline2 PARAMS ((void));
-void pop_prompt PARAMS ((void));
-void push_prompt PARAMS ((char *, char *, char *));
-static void change_line_handler PARAMS ((void));
-static void change_annotation_level PARAMS ((void));
-static void command_handler PARAMS ((char *));
+static void rl_callback_read_char_wrapper (gdb_client_data client_data);
+static void command_line_handler (char *rl);
+static void command_line_handler_continuation (struct continuation_arg *arg);
+static void change_line_handler (void);
+static void change_annotation_level (void);
+static void command_handler (char *command);
+void cli_command_loop (void);
+static void async_do_nothing (gdb_client_data arg);
+static void async_disconnect (gdb_client_data arg);
+static void async_stop_sig (gdb_client_data arg);
+static void async_float_handler (gdb_client_data arg);
 
 /* Signal handlers. */
-void handle_sigint PARAMS ((int));
-static void handle_sigquit PARAMS ((int));
-static void handle_sighup PARAMS ((int));
-static void handle_sigfpe PARAMS ((int));
+static void handle_sigquit (int sig);
+static void handle_sighup (int sig);
+static void handle_sigfpe (int sig);
 #if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
-static void handle_sigwinch PARAMS ((int));
-#endif
-/* Signal to catch ^Z typed while reading a command: SIGTSTP or SIGCONT.  */
-#ifndef STOP_SIGNAL
-#ifdef SIGTSTP
-#define STOP_SIGNAL SIGTSTP
-void handle_stop_sig PARAMS ((int));
-#endif
+static void handle_sigwinch (int sig);
 #endif
 
 /* Functions to be invoked by the event loop in response to
    signals. */
-static void async_do_nothing PARAMS ((gdb_client_data));
-static void async_disconnect PARAMS ((gdb_client_data));
-static void async_float_handler PARAMS ((gdb_client_data));
-static void async_stop_sig PARAMS ((gdb_client_data));
+static void async_do_nothing (gdb_client_data);
+static void async_disconnect (gdb_client_data);
+static void async_float_handler (gdb_client_data);
+static void async_stop_sig (gdb_client_data);
 
 /* Readline offers an alternate interface, via callback
    functions. These are all included in the file callback.c in the
@@ -90,8 +86,8 @@ static void async_stop_sig PARAMS ((gdb_client_data));
    line of input is ready.  CALL_READLINE is to be set to the function
    that readline offers as callback to the event_loop. */
 
-void (*input_handler) PARAMS ((char *));
-void (*call_readline) PARAMS ((void));
+void (*input_handler) (char *);
+void (*call_readline) (gdb_client_data);
 
 /* Important variables for the event loop. */
 
@@ -158,10 +154,19 @@ struct readline_input_state
 readline_input_state;
 
 
+/* Wrapper function foe calling into the readline library. The event
+   loop expects the callback function to have a paramter, while readline 
+   expects none. */
+static void
+rl_callback_read_char_wrapper (gdb_client_data client_data)
+{
+  rl_callback_read_char ();
+}
+
 /* Initialize all the necessary variables, start the event loop,
    register readline, and stdin, start the loop. */
 void
-cli_command_loop ()
+cli_command_loop (void)
 {
   int length;
   char *a_prompt;
@@ -195,12 +200,18 @@ cli_command_loop ()
    which the user sets editing on again, by restoring readline
    handling of the input. */
 static void
-change_line_handler ()
+change_line_handler (void)
 {
+  /* NOTE: this operates on input_fd, not instream. If we are reading
+     commands from a file, instream will point to the file. However in
+     async mode, we always read commands from a file with editing
+     off. This means that the 'set editing on/off' will have effect
+     only on the interactive session. */
+
   if (async_command_editing_p)
     {
       /* Turn on editing by using readline. */
-      call_readline = rl_callback_read_char;
+      call_readline = rl_callback_read_char_wrapper;
       input_handler = command_line_handler;
     }
   else
@@ -213,18 +224,6 @@ change_line_handler ()
          first thing from .gdbinit. */
       input_handler = command_line_handler;
     }
-
-  /* To tell the event loop to change the handler associated with the
-     input file descriptor, we need to create a new event source,
-     corresponding to the same fd, but with a new event handler
-     function. */
-  /* NOTE: this operates on input_fd, not instream. If we are reading
-     commands from a file, instream will point to the file. However in
-     async mode, we always read commands from a file with editing
-     off. This means that the 'set editing on/off' will have effect
-     only on the interactive session. */
-  delete_file_handler (input_fd);
-  add_file_handler (input_fd, call_readline, 0);
 }
 
 /* Displays the prompt. The prompt that is displayed is the current
@@ -239,8 +238,7 @@ change_line_handler ()
    3. Other????
    FIXME: 2. & 3. not implemented yet for async. */
 void
-display_gdb_prompt (new_prompt)
-     char *new_prompt;
+display_gdb_prompt (char *new_prompt)
 {
   int prompt_length = 0;
   char *gdb_prompt = get_prompt ();
@@ -312,7 +310,7 @@ display_gdb_prompt (new_prompt)
    it pops the top of the prompt stack when we want the annotation level
    to be the normal ones (1 or 0). */
 static void
-change_annotation_level ()
+change_annotation_level (void)
 {
   char *prefix, *suffix;
 
@@ -357,10 +355,7 @@ change_annotation_level ()
    strings, except when the annotation level is 2. Memory is allocated
    within savestring for the new prompt. */
 void
-push_prompt (prefix, prompt, suffix)
-     char *prefix;
-     char *prompt;
-     char *suffix;
+push_prompt (char *prefix, char *prompt, char *suffix)
 {
   the_prompts.top++;
   PREFIX (0) = savestring (prefix, strlen (prefix));
@@ -378,7 +373,7 @@ push_prompt (prefix, prompt, suffix)
 
 /* Pops the top of the prompt stack, and frees the memory allocated for it. */
 void
-pop_prompt ()
+pop_prompt (void)
 {
   /* If we are not during a 'synchronous' execution command, in which
      case, the top prompt would be empty. */
@@ -398,6 +393,26 @@ pop_prompt ()
   free (SUFFIX (0));
   the_prompts.top--;
 }
+
+/* When there is an event ready on the stdin file desriptor, instead
+   of calling readline directly throught the callback function, or
+   instead of calling gdb_readline2, give gdb a chance to detect
+   errors and do something. */
+void
+stdin_event_handler (int error, int fd, gdb_client_data client_data)
+{
+  if (error)
+    {
+      printf_unfiltered ("error detected on stdin, fd %d\n", fd);
+      delete_file_handler (fd);
+      discard_all_continuations ();
+      /* If stdin died, we may as well kill gdb. */
+      exit (1);
+    }
+  else
+    (*call_readline) (client_data);      
+}
+
 
 /* Handles a gdb command. This function is called by
    command_line_handler, which has processed one or more input lines
@@ -406,8 +421,7 @@ pop_prompt ()
    function.  The command_loop function will be obsolete when we
    switch to use the event loop at every execution of gdb. */
 static void
-command_handler (command)
-     char *command;
+command_handler (char *command)
 {
   struct cleanup *old_chain;
   int stdin_is_tty = ISATTY (stdin);
@@ -507,8 +521,7 @@ command_handler (command)
    are always running synchronously. Or if we have just executed a
    command that doesn't start the target. */
 void
-command_line_handler_continuation (arg)
-     struct continuation_arg *arg;
+command_line_handler_continuation (struct continuation_arg *arg)
 {
   extern int display_time;
   extern int display_space;
@@ -551,8 +564,7 @@ command_line_handler_continuation (arg)
    obsolete once we use the event loop as the default mechanism in
    GDB. */
 static void
-command_line_handler (rl)
-     char *rl;
+command_line_handler (char *rl)
 {
   static char *linebuffer = 0;
   static unsigned linelength = 0;
@@ -768,7 +780,7 @@ command_line_handler (rl)
    will become obsolete when the event loop is made the default
    execution for gdb. */
 void
-gdb_readline2 ()
+gdb_readline2 (gdb_client_data client_data)
 {
   int c;
   char *result;
@@ -851,7 +863,7 @@ gdb_readline2 ()
    init_signals will become obsolete as we move to have to event loop
    as the default for gdb. */
 void
-async_init_signals ()
+async_init_signals (void)
 {
   signal (SIGINT, handle_sigint);
   sigint_token =
@@ -899,17 +911,15 @@ async_init_signals ()
 }
 
 void
-mark_async_signal_handler_wrapper (token)
-     void *token;
+mark_async_signal_handler_wrapper (PTR token)
 {
-  mark_async_signal_handler ((async_signal_handler *) token);
+  mark_async_signal_handler ((struct async_signal_handler *) token);
 }
 
 /* Tell the event loop what to do if SIGINT is received. 
    See event-signal.c. */
 void
-handle_sigint (sig)
-     int sig;
+handle_sigint (int sig)
 {
   signal (sig, handle_sigint);
 
@@ -930,8 +940,7 @@ handle_sigint (sig)
 
 /* Do the quit. All the checks have been done by the caller. */
 void
-async_request_quit (arg)
-     gdb_client_data arg;
+async_request_quit (gdb_client_data arg)
 {
   quit_flag = 1;
 #ifdef REQUEST_QUIT
@@ -944,8 +953,7 @@ async_request_quit (arg)
 /* Tell the event loop what to do if SIGQUIT is received. 
    See event-signal.c. */
 static void
-handle_sigquit (sig)
-     int sig;
+handle_sigquit (int sig)
 {
   mark_async_signal_handler_wrapper (sigquit_token);
   signal (sig, handle_sigquit);
@@ -953,8 +961,7 @@ handle_sigquit (sig)
 
 /* Called by the event loop in response to a SIGQUIT. */
 static void
-async_do_nothing (arg)
-     gdb_client_data arg;
+async_do_nothing (gdb_client_data arg)
 {
   /* Empty function body. */
 }
@@ -972,8 +979,7 @@ handle_sighup (sig)
 
 /* Called by the event loop to process a SIGHUP */
 static void
-async_disconnect (arg)
-     gdb_client_data arg;
+async_disconnect (gdb_client_data arg)
 {
   catch_errors (quit_cover, NULL,
 		"Could not kill the program being debugged",
@@ -985,16 +991,14 @@ async_disconnect (arg)
 
 #ifdef STOP_SIGNAL
 void
-handle_stop_sig (sig)
-     int sig;
+handle_stop_sig (int sig)
 {
   mark_async_signal_handler_wrapper (sigtstp_token);
   signal (sig, handle_stop_sig);
 }
 
 static void
-async_stop_sig (arg)
-     gdb_client_data arg;
+async_stop_sig (gdb_client_data arg)
 {
   char *prompt = get_prompt ();
 #if STOP_SIGNAL == SIGTSTP
@@ -1016,8 +1020,7 @@ async_stop_sig (arg)
 /* Tell the event loop what to do if SIGFPE is received. 
    See event-signal.c. */
 static void
-handle_sigfpe (sig)
-     int sig;
+handle_sigfpe (int sig)
 {
   mark_async_signal_handler_wrapper (sigfpe_token);
   signal (sig, handle_sigfpe);
@@ -1025,8 +1028,7 @@ handle_sigfpe (sig)
 
 /* Event loop will call this functin to process a SIGFPE. */
 static void
-async_float_handler (arg)
-     gdb_client_data arg;
+async_float_handler (gdb_client_data arg)
 {
   /* This message is based on ANSI C, section 4.7. Note that integer
      divide by zero causes this, so "float" is a misnomer. */
@@ -1037,8 +1039,7 @@ async_float_handler (arg)
    See event-signal.c. */
 #if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
 static void
-handle_sigwinch (sig)
-     int sig;
+handle_sigwinch (int sig)
 {
   mark_async_signal_handler_wrapper (sigwinch_token);
   signal (sig, handle_sigwinch);
@@ -1049,10 +1050,7 @@ handle_sigwinch (sig)
 /* Called by do_setshow_command.  */
 /* ARGSUSED */
 void
-set_async_editing_command (args, from_tty, c)
-     char *args;
-     int from_tty;
-     struct cmd_list_element *c;
+set_async_editing_command (char *args, int from_tty, struct cmd_list_element *c)
 {
   change_line_handler ();
 }
@@ -1060,10 +1058,7 @@ set_async_editing_command (args, from_tty, c)
 /* Called by do_setshow_command.  */
 /* ARGSUSED */
 void
-set_async_annotation_level (args, from_tty, c)
-     char *args;
-     int from_tty;
-     struct cmd_list_element *c;
+set_async_annotation_level (char *args, int from_tty, struct cmd_list_element *c)
 {
   change_annotation_level ();
 }
@@ -1071,10 +1066,7 @@ set_async_annotation_level (args, from_tty, c)
 /* Called by do_setshow_command.  */
 /* ARGSUSED */
 void
-set_async_prompt (args, from_tty, c)
-     char *args;
-     int from_tty;
-     struct cmd_list_element *c;
+set_async_prompt (char *args, int from_tty, struct cmd_list_element *c)
 {
   PROMPT (0) = savestring (new_async_prompt, strlen (new_async_prompt));
 }
@@ -1083,13 +1075,13 @@ set_async_prompt (args, from_tty, c)
    interface, i.e. via a callback function (rl_callback_read_char),
    and hook up instream to the event loop. */
 void
-_initialize_event_loop ()
+_initialize_event_loop (void)
 {
   if (async_p)
     {
       /* When a character is detected on instream by select or poll,
          readline will be invoked via this callback function. */
-      call_readline = rl_callback_read_char;
+      call_readline = rl_callback_read_char_wrapper;
 
       /* When readline has read an end-of-line character, it passes
          the complete line to gdb for processing. command_line_handler
@@ -1113,7 +1105,7 @@ _initialize_event_loop ()
          the target program (inferior), but that must be registered
          only when it actually exists (I.e. after we say 'run' or
          after we connect to a remote target. */
-      add_file_handler (input_fd, call_readline, 0);
+      add_file_handler (input_fd, stdin_event_handler, 0);
 
       /* Tell gdb that we will be using the readline library. This
          could be overwritten by a command in .gdbinit like 'set

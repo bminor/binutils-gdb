@@ -4016,8 +4016,14 @@ dwarf_decode_lines (offset, comp_dir, abfd)
 	    case DW_LNS_set_basic_block:
 	      basic_block = 1;
 	      break;
+	    /* Add to the address register of the state machine the
+	       address increment value corresponding to special opcode
+	       255.  Ie, this value is scaled by the minimum instruction
+	       length since special opcode 255 would have scaled the
+	       the increment.  */
 	    case DW_LNS_const_add_pc:
-	      address += (255 - lh.opcode_base) / lh.line_range;
+	      address += (lh.minimum_instruction_length
+			  * ((255 - lh.opcode_base) / lh.line_range));
 	      break;
 	    case DW_LNS_fixed_advance_pc:
 	      address += read_2_bytes (abfd, line_ptr);

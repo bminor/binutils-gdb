@@ -577,9 +577,6 @@ switch (CUR_SYMBOL_TYPE)
       case 'f':
 	CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
 #ifdef DBXREAD_ONLY
-	/* Keep track of the start of the last function so we
-	   can handle end of function symbols.  */
-	last_function_start = CUR_SYMBOL_VALUE;
 	/* Kludges for ELF/STABS with Sun ACC */
 	last_function_name = namestring;
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
@@ -588,11 +585,15 @@ switch (CUR_SYMBOL_TYPE)
 	if (pst && textlow_not_set)
 	  {
 	    pst->textlow =
-	      find_stab_function_addr (namestring, pst, objfile);
+	      find_stab_function_addr (namestring, pst->filename, objfile);
 	    textlow_not_set = 0;
 	  }
 #endif
 	/* End kludge.  */
+
+	/* Keep track of the start of the last function so we
+	   can handle end of function symbols.  */
+	last_function_start = CUR_SYMBOL_VALUE;
 
 	/* In reordered executables this function may lie outside
 	   the bounds created by N_SO symbols.  If that's the case
@@ -620,22 +621,27 @@ switch (CUR_SYMBOL_TYPE)
       case 'F':
 	CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
 #ifdef DBXREAD_ONLY
-	/* Keep track of the start of the last function so we
-	   can handle end of function symbols.  */
-	last_function_start = CUR_SYMBOL_VALUE;
 	/* Kludges for ELF/STABS with Sun ACC */
 	last_function_name = namestring;
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	/* Do not fix textlow==0 for .o or NLM files, as 0 is a legit
 	   value for the bottom of the text seg in those cases. */
+	if (CUR_SYMBOL_VALUE == ANOFFSET (objfile->section_offsets, 
+	                                  SECT_OFF_TEXT))
+	  CUR_SYMBOL_VALUE = 
+	    find_stab_function_addr (namestring, pst->filename, objfile);
 	if (pst && textlow_not_set)
 	  {
-	    pst->textlow =
-	      find_stab_function_addr (namestring, pst, objfile);
+	    pst->textlow = CUR_SYMBOL_VALUE;
 	    textlow_not_set = 0;
 	  }
 #endif
 	/* End kludge.  */
+
+	/* Keep track of the start of the last function so we
+	   can handle end of function symbols.  */
+	last_function_start = CUR_SYMBOL_VALUE;
+
 	/* In reordered executables this function may lie outside
 	   the bounds created by N_SO symbols.  If that's the case
 	   use the address of this function as the low bound for

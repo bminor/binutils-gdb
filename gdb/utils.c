@@ -22,6 +22,7 @@
 #include <ctype.h>
 #include "gdb_string.h"
 #include "event-loop.h"
+#include "event-top.h"
 
 #ifdef HAVE_CURSES_H
 #include <curses.h>
@@ -393,6 +394,22 @@ do_all_continuations ()
       free (continuation_ptr);
     }
 }
+
+/* Walk down the cmd_continuation list, and get rid of all the
+   continuations. */
+void
+discard_all_continuations ()
+{
+  struct continuation *continuation_ptr;
+
+  while (cmd_continuation)
+    {
+      continuation_ptr = cmd_continuation;
+      cmd_continuation = continuation_ptr->next;
+      free (continuation_ptr);
+    }
+}
+
 
 
 /* Print a warning message.  Way to use this is to call warning_begin,

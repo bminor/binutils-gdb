@@ -440,9 +440,9 @@ lookup_minimal_symbol_by_pc (pc)
 
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
 CORE_ADDR
-find_stab_function_addr (namestring, pst, objfile)
+find_stab_function_addr (namestring, filename, objfile)
      char *namestring;
-     struct partial_symtab *pst;
+     char *filename;
      struct objfile *objfile;
 {
   struct minimal_symbol *msym;
@@ -457,7 +457,7 @@ find_stab_function_addr (namestring, pst, objfile)
   strncpy (p, namestring, n);
   p[n] = 0;
 
-  msym = lookup_minimal_symbol (p, pst->filename, objfile);
+  msym = lookup_minimal_symbol (p, filename, objfile);
   if (msym == NULL)
     {
       /* Sun Fortran appends an underscore to the minimal symbol name,
@@ -465,8 +465,23 @@ find_stab_function_addr (namestring, pst, objfile)
          was not found.  */
       p[n] = '_';
       p[n + 1] = 0;
-      msym = lookup_minimal_symbol (p, pst->filename, objfile);
+      msym = lookup_minimal_symbol (p, filename, objfile);
     }
+
+  if (msym == NULL && filename != NULL)
+    {
+      /* Try again without the filename. */
+      p[n] = 0;
+      msym = lookup_minimal_symbol (p, 0, objfile);
+    }
+  if (msym == NULL && filename != NULL)
+    {
+      /* And try again for Sun Fortran, but without the filename. */
+      p[n] = '_';
+      p[n + 1] = 0;
+      msym = lookup_minimal_symbol (p, 0, objfile);
+    }
+
   return msym == NULL ? 0 : SYMBOL_VALUE_ADDRESS (msym);
 }
 #endif /* SOFUN_ADDRESS_MAYBE_MISSING */

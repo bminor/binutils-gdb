@@ -214,19 +214,8 @@ double_to_i387 PARAMS ((char *, char *));
 
 /* end of copy */
 
-extern void i387_float_info(void);
-#define FLOAT_INFO { i387_float_info (); }
-
 /* The following works around a problem with /usr/include/sys/procfs.h  */
 #define sys_quotactl 1
-
-/* Define DO_REGISTERS_INFO() to do machine-specific formatting
-   of register dumps. */
-
-#define DO_REGISTERS_INFO(_regnum, fp) i386_do_registers_info(_regnum, fp)
-extern void i386_do_registers_info PARAMS ((int, int));
-
-extern void i387_print_register PARAMS ((char *, int));
 
 /* When the i386 Linux kernel calls a signal handler, the return
    address points to a bit of code on the stack.  These definitions

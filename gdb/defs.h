@@ -691,9 +691,10 @@ continuation;
 extern struct continuation *cmd_continuation;
 
 /* From utils.c */
-void add_continuation PARAMS ((void (*) PARAMS ((struct continuation_arg *)), 
+extern void add_continuation PARAMS ((void (*) PARAMS ((struct continuation_arg *)), 
 			       struct continuation_arg *));
-void do_all_continuations PARAMS ((void));
+extern void do_all_continuations PARAMS ((void));
+extern void discard_all_continuations PARAMS ((void));
 
 /* String containing the current directory (what getwd would return).  */
 

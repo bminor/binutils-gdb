@@ -729,7 +729,7 @@ connect_command (args, fromtty)
       do
 	{
 	  FD_SET (0, &readfds);
-	  FD_SET (st2000_desc, &readfds);
+	  FD_SET (DEPRECATED_SERIAL_FD (st2000_desc), &readfds);
 	  numfds = select (sizeof (readfds) * 8, &readfds, 0, 0, 0);
 	}
       while (numfds == 0);
@@ -764,7 +764,7 @@ connect_command (args, fromtty)
 	    }
 	}
 
-      if (FD_ISSET (st2000_desc, &readfds))
+      if (FD_ISSET (DEPRECATED_SERIAL_FD (st2000_desc), &readfds))
 	{
 	  while (1)
 	    {

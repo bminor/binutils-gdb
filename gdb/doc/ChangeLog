@@ -1,3 +1,12 @@
+1999-09-14  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdbint.texinfo: Fix typo, add the word "have".
+
+1999-09-14  Jim Blandy  <jimb@cris.red-bean.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Document the
+	SKIP_PERMANENT_BREAKPOINT macro.
+
 1999-09-07  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.texinfo: Fiks speling errers.

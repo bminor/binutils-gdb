@@ -131,8 +131,6 @@ case "${target}" in
 esac
 
 
-
-
 # Is there a testsuite directory for the target?
 testdir=`echo ${target} | sed -e 's/-.*-/-/'`
 if test -r ${srcdir}/testsuite/${testdir}/configure ; then

@@ -27,13 +27,13 @@
 /* XXXX - deprecated */
 struct frame_saved_regs
   {
+    /* For each register R (except the SP), regs[R] is the address at
+       which it was saved on entry to the frame, or zero if it was not
+       saved on entry to this frame.  This includes special registers
+       such as pc and fp saved in special ways in the stack frame.
 
-    /* For each register, address of where it was saved on entry to
-       the frame, or zero if it was not saved on entry to this frame.
-       This includes special registers such as pc and fp saved in
-       special ways in the stack frame.  The SP_REGNUM is even more
-       special, the address here is the sp for the next frame, not the
-       address where the sp was saved.  */
+       regs[SP_REGNUM] is different.  It holds the actual SP, not the
+       address at which it was saved.  */
 
     CORE_ADDR regs[NUM_REGS];
   };

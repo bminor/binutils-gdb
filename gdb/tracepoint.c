@@ -30,6 +30,7 @@
 #include "gdb_string.h"
 #include "inferior.h"
 #include "tracepoint.h"
+#include "remote.h"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -192,13 +193,6 @@ trace_error (buf)
       error ("Target returns error code '%s'.", buf);
     }
 }
-
-/* Entry points into remote.c (FIXME: move this interface down to tgt vector)
- */
-
-extern int  putpkt PARAMS ((char *));
-extern void getpkt PARAMS ((char *, int));
-extern void remote_console_output PARAMS ((char *));
 
 /* Utility: wait for reply from stub, while accepting "O" packets */
 static char *

@@ -696,9 +696,9 @@ dos_flush_input (scb)
 }
 
 static void
-dos_print_tty_state (scb, ttystate)
-     serial_t scb;
-     serial_ttystate ttystate;
+dos_print_tty_state (serial_t scb,
+		     serial_ttystate ttystate,
+		     struct gdb_file *stream)
 {
   /* Nothing to print */
   return;

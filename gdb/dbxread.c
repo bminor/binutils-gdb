@@ -2314,34 +2314,8 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	         from N_FUN symbols.  */
 	      if (type == N_FUN
 		  && valu == ANOFFSET (section_offsets, SECT_OFF_TEXT))
-		{
-		  struct minimal_symbol *msym;
-		  char *p;
-		  int n;
-
-		  p = strchr (name, ':');
-		  if (p == NULL)
-		    p = name;
-		  n = p - name;
-		  p = alloca (n + 2);
-		  strncpy (p, name, n);
-		  p[n] = 0;
-
-		  msym = lookup_minimal_symbol (p, last_source_file,
-						objfile);
-		  if (msym == NULL)
-		    {
-		      /* Sun Fortran appends an underscore to the minimal
-		         symbol name, try again with an appended underscore
-		         if the minimal symbol was not found.  */
-		      p[n] = '_';
-		      p[n + 1] = 0;
-		      msym = lookup_minimal_symbol (p, last_source_file,
-						    objfile);
-		    }
-		  if (msym)
-		    valu = SYMBOL_VALUE_ADDRESS (msym);
-		}
+		valu = 
+		  find_stab_function_addr (name, last_source_file, objfile);
 #endif
 
 #ifdef SUN_FIXED_LBRAC_BUG

@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "gdb_string.h"
+#include "kod.h"
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -43,8 +44,8 @@ static void (*gdb_kod_query) (char *, char *, int *);
    displaying output (presumably to the user) and the other for
    querying the target.  */
 char *
-cisco_kod_open (void (*display_func) (char *),
-		void (*query_func) (char *, char *, int *))
+cisco_kod_open (kod_display_callback_ftype *display_func,
+		kod_query_callback_ftype *query_func)
 {
   char buffer[PBUFSIZ];
   int bufsiz = PBUFSIZ;

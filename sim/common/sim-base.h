@@ -236,7 +236,6 @@ typedef struct {
 #define STATE_HW(sd) ((sd)->base.hw)
 #endif
 
-
   /* Should image loads be performed using the LMA or VMA?  Older
      simulators use the VMA while newer simulators prefer the LMA. */
   int load_at_lma_p;

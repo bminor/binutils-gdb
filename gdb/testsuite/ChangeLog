@@ -1,3 +1,24 @@
+1999-09-18  Jim Blandy  <jimb@cris.red-bean.com>
+
+	* gdb.base/break.exp: Code locations are in hex, don't forget!
+	(For HP-UX.)
+
+1999-09-17  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* condbreak.exp: Use break.c as test program.
+	* condbreak.c: Remove, redundant with break.c.
+
+1999-09-15  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config/monitor.exp (gdb_target_monitor): Disable X- and
+ 	Z-packets if the target needs it.
+
+1999-09-13  James Ingham  <jingham@leda.cygnus.com>
+
+	* gdb.c++/overload.exp: Added tests for listing overloaded
+	functions with function pointers in the arg, explicitly calling
+	out the version you want.
+
 1999-09-09  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* long_long.exp: Add variations of test cases that work for

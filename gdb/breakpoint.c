@@ -44,6 +44,8 @@
 
 /* Prototypes for local functions. */
 
+static void until_break_command_continuation (struct continuation_arg *arg);
+
 static void
 catch_command_1 PARAMS ((char *, int, int));
 
@@ -251,8 +253,6 @@ do_enable_breakpoint PARAMS ((struct breakpoint *, enum bpdisp));
 /* If FALSE, gdb will not use hardware support for watchpoints, even
    if such is available. */
 static int can_use_hw_watchpoints;
-
-void delete_command PARAMS ((char *, int));
 
 void _initialize_breakpoint PARAMS ((void));
 
@@ -671,7 +671,10 @@ insert_breakpoints ()
 
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
-    if (b->type != bp_watchpoint
+    if (b->enable == permanent)
+      /* Permanent breakpoints cannot be inserted or removed.  */
+      continue;
+    else if (b->type != bp_watchpoint
 	&& b->type != bp_hardware_watchpoint
 	&& b->type != bp_read_watchpoint
 	&& b->type != bp_access_watchpoint
@@ -1131,6 +1134,10 @@ remove_breakpoint (b, is)
 {
   int val;
 
+  if (b->enable == permanent)
+    /* Permanent breakpoints cannot be inserted or removed.  */
+    return 0;
+
   if (b->type == bp_none)
     warning ("attempted to remove apparently deleted breakpoint #%d?", 
 	     b->number);
@@ -1144,7 +1151,6 @@ remove_breakpoint (b, is)
       && b->type != bp_catch_exec
       && b->type != bp_catch_catch
       && b->type != bp_catch_throw)
-
     {
       if (b->type == bp_hardware_breakpoint)
 	val = target_remove_hw_breakpoint (b->address, b->shadow_contents);
@@ -1357,32 +1363,41 @@ breakpoint_init_inferior (context)
     }
 }
 
-/* breakpoint_here_p (PC) returns 1 if an enabled breakpoint exists at
-   PC.  When continuing from a location with a breakpoint, we actually
-   single step once before calling insert_breakpoints.  */
+/* breakpoint_here_p (PC) returns non-zero if an enabled breakpoint
+   exists at PC.  It returns ordinary_breakpoint_here if it's an
+   ordinary breakpoint, or permanent_breakpoint_here if it's a
+   permanent breakpoint.
+   - When continuing from a location with an ordinary breakpoint, we
+     actually single step once before calling insert_breakpoints.
+   - When continuing from a localion with a permanent breakpoint, we
+     need to use the `SKIP_PERMANENT_BREAKPOINT' macro, provided by
+     the target, to advance the PC past the breakpoint.  */
 
-int
+enum breakpoint_here
 breakpoint_here_p (pc)
      CORE_ADDR pc;
 {
   register struct breakpoint *b;
+  int any_breakpoint_here = 0;
 
   ALL_BREAKPOINTS (b)
-    if (b->enable == enabled
-	&& b->enable != shlib_disabled
-	&& b->enable != call_disabled
+    if ((b->enable == enabled
+	 || b->enable == permanent)
 	&& b->address == pc)	/* bp is enabled and matches pc */
-    {
-      if (overlay_debugging &&
-	  section_is_overlay (b->section) &&
-	  !section_is_mapped (b->section))
-	continue;		/* unmapped overlay -- can't be a match */
-      else
-	return 1;
-    }
+      {
+	if (overlay_debugging &&
+	    section_is_overlay (b->section) &&
+	    !section_is_mapped (b->section))
+	  continue;		/* unmapped overlay -- can't be a match */
+	else if (b->enable == permanent)
+	  return permanent_breakpoint_here;
+	else
+	  any_breakpoint_here = 1;
+      }
 
-  return 0;
+  return any_breakpoint_here ? ordinary_breakpoint_here : 0;
 }
+
 
 /* breakpoint_inserted_here_p (PC) is just like breakpoint_here_p(),
    but it only returns true if there is actually a breakpoint inserted
@@ -2842,7 +2857,7 @@ breakpoint_1 (bnum, allflag)
 
   static char *bpdisps[] =
   {"del", "dstp", "dis", "keep"};
-  static char bpenables[] = "nyn";
+  static char bpenables[] = "nynny";
   char wrap_indent[80];
 
 
@@ -3141,8 +3156,9 @@ describe_other_breakpoints (pc, section)
 	       b->number,
 	       ((b->enable == disabled || 
 		 b->enable == shlib_disabled || 
-		 b->enable == call_disabled)
-		? " (disabled)" : ""),
+		 b->enable == call_disabled) ? " (disabled)" 
+		: b->enable == permanent ? " (permanent)"
+		: ""),
 	       (others > 1) ? "," : ((others == 1) ? " and" : ""));
 	  }
       printf_filtered ("also set at pc ");
@@ -3169,7 +3185,9 @@ set_default_breakpoint (valid, addr, symtab, line)
 
 /* Rescan breakpoints at address ADDRESS,
    marking the first one as "first" and any others as "duplicates".
-   This is so that the bpt instruction is only inserted once.  */
+   This is so that the bpt instruction is only inserted once.
+   If we have a permanent breakpoint at ADDRESS, make that one
+   the official one, and the rest as duplicates.  */
 
 static void
 check_duplicates (address, section)
@@ -3178,6 +3196,7 @@ check_duplicates (address, section)
 {
   register struct breakpoint *b;
   register int count = 0;
+  struct breakpoint *perm_bp = 0;
 
   if (address == 0)		/* Watchpoints are uninteresting */
     return;
@@ -3189,8 +3208,43 @@ check_duplicates (address, section)
 	&& b->address == address
 	&& (overlay_debugging == 0 || b->section == section))
     {
+      /* Have we found a permanent breakpoint?  */
+      if (b->enable == permanent)
+	{
+	  perm_bp = b;
+	  break;
+	}
+	
       count++;
       b->duplicate = count > 1;
+    }
+
+  /* If we found a permanent breakpoint at this address, go over the
+     list again and declare all the other breakpoints there to be the
+     duplicates.  */
+  if (perm_bp)
+    {
+      perm_bp->duplicate = 0;
+
+      /* Permanent breakpoint should always be inserted.  */
+      if (! perm_bp->inserted)
+	internal_error ("allegedly permanent breakpoint is not "
+			"actually inserted");
+
+      ALL_BREAKPOINTS (b)
+	if (b != perm_bp)
+	  {
+	    if (b->inserted)
+	      internal_error ("another breakpoint was inserted on top of "
+			      "a permanent breakpoint");
+
+	    if (b->enable != disabled
+		&& b->enable != shlib_disabled
+		&& b->enable != call_disabled
+		&& b->address == address
+		&& (overlay_debugging == 0 || b->section == section))
+	      b->duplicate = 1;
+	  }
     }
 }
 
@@ -3252,6 +3306,18 @@ set_raw_breakpoint (sal)
   breakpoints_changed ();
 
   return b;
+}
+
+
+/* Note that the breakpoint object B describes a permanent breakpoint
+   instruction, hard-wired into the inferior's code.  */
+void
+make_breakpoint_permanent (struct breakpoint *b)
+{
+  b->enable = permanent;
+
+  /* By definition, permanent breakpoints are already present in the code.  */
+  b->inserted = 1;
 }
 
 #ifdef GET_LONGJMP_TARGET
@@ -3333,7 +3399,7 @@ remove_solib_event_breakpoints ()
     delete_breakpoint (b);
 }
 
-void
+struct breakpoint *
 create_solib_event_breakpoint (address)
      CORE_ADDR address;
 {
@@ -3347,6 +3413,8 @@ create_solib_event_breakpoint (address)
   b->number = internal_breakpoint_number--;
   b->disposition = donttouch;
   b->type = bp_shlib_event;
+
+  return b;
 }
 
 /* Disable any breakpoints that are on code in shared libraries.  Only
@@ -4643,9 +4711,8 @@ awatch_command (arg, from_tty)
    cmd_continuation pointer, to complete the until command. It takes
    care of cleaning up the temporary breakpoints set up by the until
    command. */
-void
-until_break_command_continuation (arg)
-     struct continuation_arg *arg;
+static void
+until_break_command_continuation (struct continuation_arg *arg)
 {
   /* Do all the exec cleanups, which at this point should only be the
      one set up in the first part of the until_break_command
@@ -5929,6 +5996,14 @@ delete_breakpoint (bpt)
 	{
 	  int val;
 
+	  /* We should never reach this point if there is a permanent
+	     breakpoint at the same address as the one being deleted.
+	     If there is a permanent breakpoint somewhere, it should
+	     always be the only one inserted.  */
+	  if (b->enable == permanent)
+	    internal_error ("another breakpoint was inserted on top of "
+			    "a permanent breakpoint");
+
 	  if (b->type == bp_hardware_breakpoint)
 	    val = target_insert_hw_breakpoint (b->address, b->shadow_contents);
 	  else
@@ -6377,6 +6452,10 @@ disable_breakpoint (bpt)
   if (bpt->type == bp_watchpoint_scope)
     return;
 
+  /* You can't disable permanent breakpoints.  */
+  if (bpt->enable == permanent)
+    return;
+
   bpt->enable = disabled;
 
   check_duplicates (bpt->address, bpt->section);
@@ -6445,7 +6524,8 @@ do_enable_breakpoint (bpt, disposition)
 	error ("Hardware breakpoints used exceeds limit.");
     }
 
-  bpt->enable = enabled;
+  if (bpt->enable != permanent)
+    bpt->enable = enabled;
   bpt->disposition = disposition;
   check_duplicates (bpt->address, bpt->section);
   breakpoints_changed ();

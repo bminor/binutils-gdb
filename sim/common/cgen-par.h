@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* Kinds of writes stored on the write queue.  */
 enum cgen_write_queue_kind {
-  CGEN_QI_WRITE, CGEN_SI_WRITE, CGEN_SF_WRITE,
+  CGEN_BI_WRITE, CGEN_QI_WRITE, CGEN_SI_WRITE, CGEN_SF_WRITE,
   CGEN_PC_WRITE,
   CGEN_FN_SI_WRITE, CGEN_FN_DI_WRITE, CGEN_FN_DF_WRITE,
   CGEN_MEM_QI_WRITE, CGEN_MEM_HI_WRITE, CGEN_MEM_SI_WRITE,
@@ -34,6 +34,10 @@ enum cgen_write_queue_kind {
 typedef struct {
   enum cgen_write_queue_kind kind; /* Used to select union member below.  */
   union {
+    struct {
+      BI  *target;
+      BI   value;
+    } bi_write;
     struct {
       UQI *target;
       QI   value;
@@ -107,6 +111,7 @@ typedef struct {
 extern CGEN_WRITE_QUEUE_ELEMENT *cgen_write_queue_overflow (CGEN_WRITE_QUEUE *);
 
 /* Functions for queuing writes.  Used by semantic code.  */
+extern void sim_queue_bi_write (SIM_CPU *, BI *, BI);
 extern void sim_queue_qi_write (SIM_CPU *, UQI *, UQI);
 extern void sim_queue_si_write (SIM_CPU *, SI *, SI);
 extern void sim_queue_sf_write (SIM_CPU *, SI *, SF);

@@ -23,6 +23,7 @@
 #include "expression.h"
 #include "language.h"
 #include "command.h"
+#include "source.h"
 #include "gdbcmd.h"
 #include "frame.h"
 #include "value.h"
@@ -57,12 +58,6 @@
 #define FDOPEN_MODE FOPEN_RT
 
 #endif /* ! defined (CRLF_SOURCE_FILES) */
-
-/* Forward declarations */
-
-int open_source_file PARAMS ((struct symtab *));
-
-void find_source_lines PARAMS ((struct symtab *, int));
 
 /* Prototypes for exported functions. */
 

@@ -1,3 +1,527 @@
+Tue Sep 21 14:55:29 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From 1999-08-20 J.T. Conklin  <jtc@redback.com>:
+	* remote.c (read_frame): expand cisco run-length encoding variant
+ 	inline as is done for the standard encoding.
+	(remote_cisco_expand): Removed.
+
+1999-09-20  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-loop.c: Include <sys/time.h>.
+
+1999-09-20  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* ser-ocd.c: (ser_ocd_open, ser_ocd_raw, ser_ocd_readchar,
+ 	ser_ocd_setbaudrate, ser_ocd_write, ser_ocd_close,
+ 	ser_ocd_get_tty_state, ser_ocd_set_tty_state): Remove unused
+ 	prototypes.
+	(ocd_readremote): Remove.
+	(ocd_write): Remove unused var 'c'.
+
+1999-09-20  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-top.c (change_line_handler): Cleanup dead code. Add comments.
+	* event-loop.c: Cleanup #if 0 code.
+
+	* event-loop.h (timer_handler_func): New function type.
+	(create_timer): Export function.
+	(delete_timer): Export function.
+
+	* event-loop.c: Add timeout and timeout_valid fields to
+ 	gdb_notifier.  New structures gdb_timer and timer_list.
+	(gdb_do_one_event): Check whether there are any timers tht are
+ 	ready, before going to wait.
+	(gdb_wait_for_event): If the timeout structure is meaningful, pass
+ 	that to select()/poll().
+	(create_timer): New function. Creates a timer.
+	(delete_timer): New function. Deletes a timer.
+	(handle_timer_event): New function. Deals with timers that are ready.
+	(poll_timers): New Function. Chack whether timers have expired.
+
+Mon Sep 20 17:00:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (getpkt, putpkt, remote_console_output): Move
+ 	declaration from here.
+	* remote.h: To here. New file.
+	* tracepoint.c(putpkt, getpkt, remote_console_output): Delete
+ 	declarations. Moved to "remote.h".
+	* Makefile.in (remote_h): Define.
+	* remote.c, tracepoint.c: Include "remote.h".
+	* Makefile.in (tracepoint.o, remote.o): Add dependency on
+ 	"remote.h".
+
+	* remote.h (remote_cisco_objfile_relocate,
+ 	cleanup_sigint_signal_handler): Add declaration.  Include FIXME.
+	* infrun.c: Include "remote.h".
+	(complete_execution): Delete local extern declaration
+ 	of ``cleanup_sigint_signal_handler''.
+	* Makefile.in (infrun.o): Add dependency on remote.h.
+
+Mon Sep 20 13:41:04 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* kod.c (ecos_kod_open, ecos_kod_request, ecos_kod_close,
+ 	cisco_kod_open, cisco_kod_request, cisco_kod_close): Move
+ 	declarations from here.
+	* kod.h: To here. New file.
+	* kod-cisco.c, kod.c: Include "kod.h".
+	* Makefile.in (kod-cisco.o, kod.o): Add dependency on "kod.h".
+
+	* kod.h (kod_display_callback_ftype, kod_query_callback_ftype):
+ 	New function types.
+	* kod.h (kod_cisco_open): Use in declaration.
+	* kod.c (gdb_kod_open): Update definition.
+	* kod-cisco.c (cisco_kod_open): Update definition.
+
+Mon Sep 20 12:13:27 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mn10300-tdep.c (_initialize_mn10300_tdep): Add declaration.
+
+	* breakpoint.c (until_break_command_continuation): Add
+ 	declaration.  Make static.
+	* event-top.c (rl_callback_read_char_wrapper): Ditto.
+
+Fri Sep 17 19:28:17 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* source.c: Include "source.h".
+	(open_source_file, find_source_lines): Move declaration from here.
+	* source.h: New file. To here.
+	* Makefile.in (source.o): Add dependency on source.h.
+
+	* breakpoints.c (delete_command): Move declaration from here.
+	* breakpoints.h (delete_command): To here.
+	
+1999-09-18  Jim Blandy  <jimb@cris.red-bean.com>
+
+	* hppa-tdep.c (in_solib_call_trampoline): If we can't recognize
+	the instruction we're at, we're not in a stub.
+
+Sat Sep 18 07:13:03 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* dwarf2read.c (dwarf_decode_lines): Correctly handle
+	DW_LNS_const_add_pc.
+
+1999-09-18  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* remote.c (remote_async_open_1): Use inferior_event_handler to
+ 	handle inferior events.
+	(extended_remote_async_create_inferior): Ditto.
+
+	* serial.h (serial_event_ftype): Add two pars. 
+
+	* ser-unix.c (ser_unix_event): Add two parameters, error and fd.
+	Pass those into the call to the actual inferior event handler.
+
+	* infrun.c (complete_execution): Stdin handler is stdin_event_handler.
+
+	* event-top.h (stdin_event_handler): Export new function.
+
+	* event-top.c (stdin_event_handler): New function. Smarter handler
+ 	for events on stdin.
+	(change_line_handler): Don't need to update the handler for stdin
+ 	here anymore.
+	(_initialize_event_loop): Stdin handler is now stdin_event_handler.
+
+	* event-loop.h: (handler_func): Change signature, adding two new
+ 	args.
+	(sig_handler_func): New function type. It is the old handler_func.
+	(create_async_signal_handler): Update to use sig_handler_func.
+	(delete_async_signal_handler): Prototype for new function.
+
+	* event-loop.c: Include "inferior.h".
+	(struct file_handler): Add field error, to indicate error
+ 	condition on fd.
+	(struct async_signal_handler): Rename type of proc field.
+	(add_file_handler): Add exception condition as something select()
+ 	should report.
+	(handle_file_event): In case of error on the fd, record this in
+ 	the file_handler structure. Update call to (*proc)() to match new
+ 	signature.
+	(gdb_wait_for_event): If select() or poll() return error, report
+ 	this to user.
+	(create_async_signal_handler): Change first param type to
+ 	sig_handler_func*.
+	(inferior_event_handler): New function. Smarter inferior event
+ 	handling.
+
+1999-09-18  Jim Blandy  <jimb@cris.red-bean.com>
+
+	* pa64solib.c (pa64_solib_create_inferior_hook): Remove code which
+	tries to set __d_pid; it's not relevant to PA64 shared libraries.
+
+	A psymtab's texthigh element, and a block's endaddr element, are
+	the address past the end of the address range, never the address
+	of the last byte.  These data structures mean the same thing on
+	forty different architectures; there's no reason they should be
+	different on HP/UX.
+	* symtab.c (find_pc_sect_psymtab): Remove special case for HP/UX.
+	(find_pc_sect_symtab): Same.
+	* objfiles.c (find_pc_sect_section): Same.
+
+Sat Sep 18 07:13:03 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* hppa-tdep.c (internalize_unwinds): Handle PA64 shared libraries
+	correctly
+
+	* hppa-tdep.c (in_solib_call_trampoline): Handle PA64 shared library
+	trampolines.
+
+1999-09-17  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* breakpoint.c (permanent_breakpoint_here_p): Delete.
+  	Accidentally left over from previous changes.
+
+1999-09-17  Jim Blandy  <jimb@cris.red-bean.com>
+
+	* config/pa/tm-hppa64.h (ARGS_GROW_DOWNWARD): Deleted.  There are
+	many more differences between the 32- and 64-bit ABI's than the
+	direction the arguments grow, so this name is misleading.
+	(PA20W_CALLING_CONVENTIONS): Define this instead.
+	* config/pa/tm-hppa.h (ARGS_GROW_DOWNWARD): Delete.
+	* hppa-tdep.c (hppa_push_arguments): Split into two separate
+	functions, depending on whether PA20W_CALLING_CONVENTIONS is
+	#defined.  These implement completely separate specifications,
+	they don't really share that much code anyway, and this is much
+	more readable.  Specifically: leave a 16-byte, not 32-byte, frame
+	marker; correctly align objects larger than eight bytes; promote
+	all integral scalar arguments smaller than eight bytes to a full
+	register width; pad aggregates smaller than eight bytes on the
+	right.
+
+Thu Sep 16 17:33:35 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (remote_async_open_1): Use SERIAL_ASYNC to
+ 	enable/disable async event callback on serial port.  Use
+ 	SERIAL_CAN_ASYNC_P / SERIAL_IS_ASYNC_P to determine if / when
+ 	async mode.
+	(remote_async_resume, remote_async_detach, remote_async_kill,
+ 	extended_remote_async_create_inferior, remote_async_wait): Ditto.
+
+	* ser-unix.c (hardwire_readchar): When ASYNC, only read a single
+ 	character.
+	(ser_unix_readchar): Ditto.  Problems occure with back-to-back
+ 	data from a target.  The ASYNC code can loose the second data
+ 	chunk.
+
+	* serial.c (serial_fdopen): Initialize async_handler and
+ 	async_context.
+
+1999-09-16  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* utils.c (discard_all_continuations): New function.
+	* defs.h: (discard_all_continuations): Add prototype.
+
+1999-09-16  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* valops.c: Remove prototype for search_struct_field_aux(). THe
+ 	function was nowhere in the file.
+	(value_ind): Remove unused var real_val.
+	(value_find_oload_method_list): Remove unused var v. 
+	(find_overload_match): Remove extra declaration of var jj.
+
+	* Makefile.in (event_top_h): Define. Add dependency on this for
+ 	every file that includes event-top.h.
+
+Thu Sep 16 17:33:35 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* serial.c (serial_open): Delete ``&'' device.
+	* ser-unix.c (_initialize_ser_hardwire): Make the "hardwire"
+ 	device async.  Delete temporary "async-hardwire" device.
+
+Thu Sep 16 16:27:13 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* serial.h (SERIAL_IS_ASYNC_P): Define.  Non-zero when serial
+ 	device is in async mode.
+	(SERIAL_CAN_ASYNC_P): Rename SERIAL_ASYNC_P.
+	* serial.c (serial_is_async_p): Implement.
+	(serial_can_async_p): Rename serial_async_p.
+	(serial_open): Initialize ASYNC_HANDLER and ASYNC_CONTEXT. Save
+ 	the original name in SCB instead of the stripped name.
+
+Thu Sep 16 12:20:11 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* serial.h (struct serial_ops): Add field ASYNC.
+	(SERIAL_ASYNC, SERIAL_ASYNC_P): New macros.
+	(struct _serial_t): Add fields async_context and async_handler.
+	* serial.c (serial_async, serial_async_p): Implement.
+
+	* ser-unix.c: Include "event-loop.h".
+	(ser_unix_async), ser-unix.c: New function.  Implement async mode.
+	(async_event): Handle async events.
+	* ser-unix.c (_initialize_ser_hardwire), ser-tcp.c
+ 	(_initialize_ser_tcp), ser-pipe.c (_initialize_ser_pipe): Enable
+ 	ASYNC.
+
+	* serial.c (serial_open): Discard leading ``|'' before opening a
+ 	pipe device.
+	* ser-pipe.c (pipe_open): Adjust.
+	* serial.c (serial_open): Add ``&'' prefix so that
+ 	"async-hardwire" device can be explicitly selected.  Work in
+ 	progress.
+	* ser-unix.c: Register "async-hardwire" device.
+  
+Thu Sep 16 09:04:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ser-unix.h: New file.  Declare generic ser_unix functions.
+	* ser-unix.c (ser_unix_nop_get_tty_state,
+ 	ser_unix_nop_set_tty_state, ser_unix_nop_raw, ser_unix_wait_for,
+ 	ser_unix_readchar, ser_unix_nop_noflush_set_tty_state,
+ 	ser_unix_nop_print_tty_state, ser_unix_nop_setbaudrate,
+ 	ser_unix_nop_setstopbits, ser_unix_write,
+ 	ser_unix_nop_flush_output, ser_unix_nop_flush_input,
+ 	ser_unix_nop_send_break, ser_unix_nop_drain_output): New
+ 	functions.
+	* ser-unix.c: Include <sys/wait.h>, <sys/socket.h>,
+ 	"gdb_string.h".
+	
+ 	* ser-tcp.c (_initialize_ser_tcp), ser-unix.c
+ 	(_initialize_ser_hardwire), ser-pipe.c (_initialize_ser_tcp):
+ 	Initialize ops vector using assignment.
+
+	* ser-pipe.c, ser-tcp.c, ser-unix.c: Include ser-unix.h.
+	
+	* ser-pipe.c (pipe_get_tty_state, pipe_set_tty_state,
+ 	pipe_return_0, pipe_raw, wait_for, pipe_readchar,
+ 	pipe_noflush_set_tty_state, pipe_print_tty_state,
+ 	pipe_setbaudrate, pipe_setstopbits, pipe_write), ser-tcp.c
+ 	(tcp_get_tty_state, tcp_set_tty_state, tcp_return_0, tcp_raw,
+ 	wait_for, tcp_readchar, tcp_noflush_set_tty_state,
+ 	tcp_print_tty_state, tcp_setbaudrate, tcp_setstopbits, tcp_write):
+ 	Delete functions.
+
+1999-09-15  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* d10v-tdep.c (remote_d10v_translate_xfer_address): Move to here
+	from remote-d10v.c, also change the memory translation to its
+	previous version.
+	* remote-d10v.c: Remove.
+	* config/d10v/d10v.mt (TDEPFILES): Remove remote-d10v.o.
+
+1999-09-15  Jim Blandy  <jimb@cris.red-bean.com>
+
+	* breakpoint.c (remove_breakpoint): Return zero, not nothing.
+
+1999-09-14  Jim Blandy  <jimb@cris.red-bean.com>
+
+	* hppa-tdep.c (frame_chain): If the unwind info says we've saved
+	r3, don't trust it.  Call get_frame_saved_regs and see if we can
+	actually find an address for r3 there.
+
+	* pa64solib.c (pa64_sharedlibrary_info_command): Text fix.
+
+Tue Sep 14 14:34:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* serial.h (DEPRECATED_SERIAL_FD): Define.
+	* serial.c (deprecated_serial_fd): New function.
+
+	* remote.c (remote_async_open_1, remote_async_open_1,
+ 	remote_async_detach, remote_async_kill,
+ 	extended_remote_async_create_inferior, minitelnet): Update.
+	* remote-es.c (es1800_open, es1800_close, es1800_transparent): Update.
+
+	* remote-st.c (connect_command), remote-os9k.c (connect_command):
+ 	Fix.  Call FD_SET et.al. with FD instead of serial_t.
+
+1999-09-14  Jim Blandy  <jimb@cris.red-bean.com>
+
+	* hppa-tdep.c (hppa_frame_find_saved_regs): The two possible
+	instructions for saving the return pointer (32- and 64-bit) save
+	it at different offsets.
+
+	* config/pa/tm-hppa64.h: Doc fix.
+
+	* defs.h (continuation): Make this a typedef.
+
+	* Makefile.in (gdbtk.o, gdbtk-cmds.o): Depend on $(top_h).
+
+	* Makefile.in (i386-linux-nat.o): Depend on symfile.h, not
+	$(symfile_h); the latter has no definition.
+
+	* breakpoint.c (breakpoint_here_p): Remove meaningless code,
+	testing b->enable against shlib_disabled and call_disabled after
+	we know it is enabled.
+
+	Implement "permanent breakpoints" --- breakpoints that are
+	hardwired into the inferior's code.  GDB knows they're there, but
+	doesn't try to insert or remove them, etc.
+	* breakpoint.h (enum enable): Add `permanent' enablement state.
+	* breakpoint.c (make_breakpoint_permanent): New function.
+	* breakpoint.h (make_breakpoint_permanent): Add declaration.
+	* breakpoint.c (insert_breakpoints): Don't bother to insert
+	permanent breakpoints...
+	(remove_breakpoint): ... or remove them.
+	(breakpoint_here_p): Handle `permanent' like `enabled'.  Change
+	return value to indicate whether it's a permanent breakpoint here,
+	or an ordinary breakpoint.
+	* breakpoint.h (enum breakpoint_here): New enum.
+	(breakpoint_here_p): Change declaration.
+	* breakpoint.h (breakpoint_1): Extend bpenables to cover all the
+	enablement states.
+	(describe_other_breakpoints): Describe permanent breakpoints.
+	(check_duplicates): If one of the breakpoints at ADDRESS is a
+	permanent breakpoint, treat all the others as the duplicates, so
+	we don't try to insert or remove any of them.  Verify that only
+	the permanent breakpoint is actually inserted.
+	(delete_breakpoint): Complain if we discover that another
+	breakpoint was inserted at the same place as a permanent
+	breakpoint.
+	(disable_breakpoint): Fail silently if asked to disable a
+	permanent breakpoint.
+	(do_enable_breakpoint): Don't change a permanent breakpoint's
+	enablement to ordinary `enabled'.  Leave it alone.
+	(create_solib_event_breakpoint): Return the
+	breakpoint object created.
+	* breakpoint.h (create_solib_event_breakpoint): Fix declaration.
+	* pa64solib.c (pa64_solib_create_inferior_hook): Do turn on the
+	DT_HP_DEBUG_CALLBACK flag in the dynamic linker, so it will call
+	__dld_break, which contains the permanent breakpoint, when interesting
+	things happen.	Tell GDB that the breakpoint in __dld_break is
+	permanent.
+	* gdbtk-cmds.c (gdb_get_breakpoint_info): Report a permanent
+	breakpoint as enabled.
+	* infrun.c (SKIP_PERMANENT_BREAKPOINT): Provide default	definition.
+	(default_skip_permanent_breakpoint): New function.
+	(resume): If we're trying to resume at a permanent breakpoint, use
+	SKIP_PERMANENT_BREAKPOINT to step over it.
+	* hppa-tdep.c (hppa_skip_permanent_breakpoint): New function.
+	* config/pa/tm-hppa.h (hppa_skip_permanent_breakpoint): Declare.
+	(SKIP_PERMANENT_BREAKPOINT): Define.
+	
+1999-09-14  Kevin Buettner  <kevinb@cygnus.com>
+
+	* symtab.h, minsyms.c (find_stab_function_addr): Changed
+	type of second parameter from partial_symtab * to char *.
+	Fixed all callers.
+	* minsyms.c (find_stab_function_addr): Look for minimal
+	symbol without filename if filename based search fails.
+	* dbxread.c (process_one_symbol): Call find_stab_function_addr()
+	in place of inline code with identical functionality.
+	* partial-stab.h (case N_FUN, descriptors 'F' and 'f'): Look
+	up symbol's address from minimal symbol table when N_FUN
+	address is missing.  Also, make sure this value is used for
+	calculating the value of the texthigh field.
+
+1999-09-14  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-loop.c (create_file_handler): Increment the total number
+ 	of file descriptors for the poll case, only if this is a new file
+ 	desc.
+
+1999-09-14  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* go32-nat.c: misc minor cleanups and fixes missed in last patch.
+
+Tue Sep 14 12:37:33 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* serial.h (SERIAL_PRINT_TTY_STATE): Add STREAM parameter.
+	(union serial_ops): Update.
+
+	* ser-unix.c (hardwire_print_tty_state, ser-tcp.c
+ 	(tcp_print_tty_state), ser-pipe.c (pipe_print_tty_state,
+ 	ser-go32.c (dos_print_tty_state, ser-mac.c (mac_print_tty_state,
+ 	ser-ocd.c (ocd_print_tty_state, ser-e7kpc.c
+ 	(e7000pc_print_tty_state): Update.
+	* inflow.c (child_terminal_info): Update.
+	* serial.c (serial_print_tty_state): Update.
+
+Tue Sep 14 11:41:37 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* serial.c, serial.h, ser-tcp.c, ser-unix.c, ser-pipe.c: Convert
+ 	all functions to ISO-C.
+	* serial.h, serial.c: Move all indirect macro function calls from
+ 	serial.h into serial.c.
+	(serial_drain_output, serial_flush_output, serial_flush_input,
+ 	serial_raw, serial_get_tty_state, serial_set_tty_state,
+ 	serial_print_tty_state, serial_noflush_set_tty_state,
+ 	serial_setbaudrate, serial_setstopbits): New functions.
+	(do_serial_close): Rename serial_close.
+	(serial_close, serial_un_fdopen): New functions. Call
+ 	do_serial_close.
+
+1999-09-13  James Ingham  <jingham@leda.cygnus.com>
+
+	* symtab.c (decode_line_1): Find the rightmost parenthesis in the
+	expression, not the leftmost.  This allows us to parse function
+	declarations with embedded function prototypes.
+
+Mon Sep 13 18:39:31 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* pa64solib.c (pa64_sharedlibrary_info_command): Fix typos.
+
+1999-09-13  Kevin Buettner  <kevinb@cygnus.com>
+
+	* i386-tdep.c (i386_extract_return_value): ifdef'd so that
+	non-linux targets will work again.
+	(i386_do_registers_info, i386_print_register): Revert changes
+	of 1999-09-03; these functions have been removed because they
+	are Linux specific and break non-Linux builds.  This functionality
+	will be restored after FP support unification has been achieved.
+	* i387-tdep.c (i387_print_register, void i387_float_info):
+	Likewise.
+	* config/i386/tm-linux.h (i387_float_info, FLOAT_INFO,
+	DO_REGISTERS_INFO, i386_do_registers_info,
+	i387_print_register):  Likewise.
+
+1999-09-13  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-top.c (call_readline): Change to accept gdb_client_data as
+ 	param.
+	(rl_callback_read_char_wrapper): New function to match what the
+ 	event loop expects and what readline expects.
+	(change_line_handler): Make call_readline point to
+ 	rl_callback_read_char_wrapper, instead of rl_callback_read_char.
+	(_initialize_event_loop): Ditto.
+	(gdb_readline2): Change parameter to gdb_client_data.
+	* event-top.h (call_readline, gdb_readline2): Change accordingly.
+
+	* event-loop.c (add_file_handler): Change 2nd par to
+ 	handler_func*.  No more need for casting.
+	* event-loop.h (create_async_signal_handler): Change accordingly.
+
+	* inferior.h (fetch_inferior_event): Change parameter to void*.
+	* infrun.c (fetch_inferior_event): Ditto.
+
+1999-09-13  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* infrun.c (step_into_function): New function, broken out from the
+ 	step_into_function label in handle_inferior_event.
+	(handle_inferior_event): Change a goto into a function call.
+
+1999-09-13  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-top.h: New file. All the exported vars and functions from
+ 	event-top.c.
+
+	* event-loop.h (struct gdb_event, event_handler_func,
+ 	file_handler, async_signal_handler, SELECT_MASK, fd_mask, NBBY,
+ 	FD_SETSIZE, howmany, NFDBITS, MASK_SIZE): Move to event-loop.c.
+	(struct prompts, PROMPT, PREFIX, SUFFIX, display_gdb_prompt,
+ 	async_init_signals, set_async_editing_command,
+ 	set_async_annotation_level, set_async_prompt, handle_stop_sig,
+ 	handle_sigint, pop_prompt, push_prompt, gdb_readline2,
+ 	mark_async_signal_handler_wrapper, async_request_quit,
+ 	async_command_editing_p, exec_done_display_p,
+ 	async_annotation_suffix, new_async_prompt, the_prompts,
+ 	call_readline, input_handler, input_fd): Move to event-top.h.
+	(All function prototypes): Don't use PARAMS anymore.
+
+	* event-loop.c: (struct gdb_event, event_handler_func,
+ 	file_handler, async_signal_handler, SELECT_MASK, fd_mask, NBBY,
+ 	FD_SETSIZE, howmany, NFDBITS, MASK_SIZE): Move to here from
+ 	event-loop.h.
+	Include event-top.h. Remove use of PARAMS. ANSIfy functions headers.
+		
+	* event-top.c: Include event-top.h. Include "signals.h", not
+ 	<signals.h>.
+	Remove use of PARAMS. ANSIfy functions headers.
+	(handle_stop_sig): move prototype to event-top.h.
+
+	* remote.c: Include event-top.h. Make it understand
+ 	async_signal_handler type.
+	* infrun.c: Include event-top.h.
+	* mi-main.c: Ditto.
+	* top.c Ditto.
+	* utils.c: Ditto.
+	
 Mon Sep 13 18:54:05 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbarch.sh: Describe each of the fields.

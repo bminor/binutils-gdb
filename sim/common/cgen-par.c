@@ -24,6 +24,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* Functions required by the cgen interface.  These functions add various
    kinds of writes to the write queue.  */
+void sim_queue_bi_write (SIM_CPU *cpu, BI *target, BI value)
+{
+  CGEN_WRITE_QUEUE *q = CPU_WRITE_QUEUE (cpu);
+  CGEN_WRITE_QUEUE_ELEMENT *element = CGEN_WRITE_QUEUE_NEXT (q);
+  element->kind = CGEN_BI_WRITE;
+  element->kinds.bi_write.target = target;
+  element->kinds.bi_write.value  = value;
+}
+
 void sim_queue_qi_write (SIM_CPU *cpu, UQI *target, UQI value)
 {
   CGEN_WRITE_QUEUE *q = CPU_WRITE_QUEUE (cpu);
@@ -138,6 +147,9 @@ cgen_write_queue_element_execute (SIM_CPU *cpu, CGEN_WRITE_QUEUE_ELEMENT *item)
   IADDR pc;
   switch (CGEN_WRITE_QUEUE_ELEMENT_KIND (item))
     {
+    case CGEN_BI_WRITE:
+      *item->kinds.bi_write.target = item->kinds.bi_write.value;
+      break;
     case CGEN_QI_WRITE:
       *item->kinds.qi_write.target = item->kinds.qi_write.value;
       break;

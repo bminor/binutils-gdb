@@ -21,6 +21,7 @@
 #include "hw-main.h"
 #include "hw-base.h"
 
+#include "sim-io.h"
 #include "sim-assert.h"
 
 #ifdef HAVE_STRING_H

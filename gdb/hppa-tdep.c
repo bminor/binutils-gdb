@@ -341,8 +341,12 @@ internalize_unwinds (objfile, table, section, entries, size, text_offset)
       low_text_segment_address = -1;
 
       /* If addresses are 64 bits wide, then unwinds are supposed to
-	 be segment relative offsets instead of absolute addresses.  */
-      if (TARGET_PTR_BIT == 64)
+	 be segment relative offsets instead of absolute addresses. 
+
+	 Note that when loading a shared library (text_offset != 0) the
+	 unwinds are already relative to the text_offset that will be
+	 passed in.  */
+      if (TARGET_PTR_BIT == 64 && text_offset == 0)
 	{
 	  bfd_map_over_sections (objfile->obfd,
 				 record_text_segment_lowaddr, (PTR) NULL);
@@ -1102,6 +1106,12 @@ frame_chain (frame)
   CORE_ADDR frame_base;
   struct frame_info *tmp_frame;
 
+  /* A frame in the current frame list, or zero.  */
+  struct frame_info *saved_regs_frame = 0;
+  /* Where the registers were saved in saved_regs_frame.
+     If saved_regs_frame is zero, this is garbage.  */
+  struct frame_saved_regs saved_regs;
+
   CORE_ADDR caller_pc;
 
   struct minimal_symbol *min_frame_symbol;
@@ -1195,8 +1205,7 @@ frame_chain (frame)
      We use information from unwind descriptors to determine if %r3
      is saved into the stack (Entry_GR field has this information).  */
 
-  tmp_frame = frame;
-  while (tmp_frame)
+  for (tmp_frame = frame; tmp_frame; tmp_frame = tmp_frame->next)
     {
       u = find_unwind_entry (tmp_frame->pc);
 
@@ -1216,14 +1225,25 @@ frame_chain (frame)
 	  return (CORE_ADDR) 0;
 	}
 
-      /* Entry_GR specifies the number of callee-saved general registers
-         saved in the stack.  It starts at %r3, so %r3 would be 1.  */
-      if (u->Entry_GR >= 1 || u->Save_SP
+      if (u->Save_SP
 	  || tmp_frame->signal_handler_caller
 	  || pc_in_interrupt_handler (tmp_frame->pc))
 	break;
-      else
-	tmp_frame = tmp_frame->next;
+
+      /* Entry_GR specifies the number of callee-saved general registers
+         saved in the stack.  It starts at %r3, so %r3 would be 1.  */
+      if (u->Entry_GR >= 1)
+	{
+	  /* The unwind entry claims that r3 is saved here.  However,
+	     in optimized code, GCC often doesn't actually save r3.
+	     We'll discover this if we look at the prologue.  */
+	  get_frame_saved_regs (tmp_frame, &saved_regs);
+	  saved_regs_frame = tmp_frame;
+
+	  /* If we have an address for r3, that's good.  */
+	  if (saved_regs.regs[FP_REGNUM])
+	    break;
+	}
     }
 
   if (tmp_frame)
@@ -1239,8 +1259,6 @@ frame_chain (frame)
       /* %r3 was saved somewhere in the stack.  Dig it out.  */
       else
 	{
-	  struct frame_saved_regs saved_regs;
-
 	  /* Sick.
 
 	     For optimization purposes many kernels don't have the
@@ -1267,7 +1285,8 @@ frame_chain (frame)
 	     fail miserably if the function which performs the
 	     system call has a variable sized stack frame.  */
 
-	  get_frame_saved_regs (tmp_frame, &saved_regs);
+	  if (tmp_frame != saved_regs_frame)
+	    get_frame_saved_regs (tmp_frame, &saved_regs);
 
 	  /* Abominable hack.  */
 	  if (current_target.to_has_execution == 0
@@ -1296,14 +1315,14 @@ frame_chain (frame)
     }
   else
     {
-      struct frame_saved_regs saved_regs;
-
       /* Get the innermost frame.  */
       tmp_frame = frame;
       while (tmp_frame->next != NULL)
 	tmp_frame = tmp_frame->next;
 
-      get_frame_saved_regs (tmp_frame, &saved_regs);
+      if (tmp_frame != saved_regs_frame)
+	get_frame_saved_regs (tmp_frame, &saved_regs);
+
       /* Abominable hack.  See above.  */
       if (current_target.to_has_execution == 0
 	  && ((saved_regs.regs[FLAGS_REGNUM]
@@ -1670,19 +1689,22 @@ restore_pc_queue (fsr)
   return 1;
 }
 
+
+#ifdef PA20W_CALLING_CONVENTIONS
+
 /* This function pushes a stack frame with arguments as part of the
    inferior function calling mechanism.
 
-   For PAs the stack always grows to higher addresses.  However the arguments
-   may grow to either higher or lower addresses depending on which ABI is
-   currently in use.
+   This is the version for the PA64, in which later arguments appear
+   at higher addresses.  (The stack always grows towards higher
+   addresses.)
 
    We simply allocate the appropriate amount of stack space and put
    arguments into their proper slots.  The call dummy code will copy
    arguments into registers as needed by the ABI.
 
-   Note for the PA64 ABI we load up the argument pointer since the caller
-   must provide the argument pointer to the callee.  */
+   This ABI also requires that the caller provide an argument pointer
+   to the callee, so we do that too.  */
    
 CORE_ADDR
 hppa_push_arguments (nargs, args, sp, struct_return, struct_addr)
@@ -1716,30 +1738,137 @@ hppa_push_arguments (nargs, args, sp, struct_return, struct_addr)
   /* Iterate over each argument provided by the user.  */
   for (i = 0; i < nargs; i++)
     {
+      struct type *arg_type = VALUE_TYPE (args[i]);
+
+      /* Integral scalar values smaller than a register are padded on
+         the left.  We do this by promoting them to full-width,
+         although the ABI says to pad them with garbage.  */
+      if (is_integral_type (arg_type)
+	  && TYPE_LENGTH (arg_type) < REGISTER_SIZE)
+	{
+	  args[i] = value_cast ((TYPE_UNSIGNED (arg_type)
+				 ? builtin_type_unsigned_long
+				 : builtin_type_long),
+				args[i]);
+	  arg_type = VALUE_TYPE (args[i]);
+	}
+
+      lengths[i] = TYPE_LENGTH (arg_type);
+
+      /* Align the size of the argument to the word size for this
+	 target.  */
+      bytes_reserved = (lengths[i] + REGISTER_SIZE - 1) & -REGISTER_SIZE;
+
+      offset[i] = cum_bytes_reserved;
+
+      /* Aggregates larger than eight bytes (the only types larger
+         than eight bytes we have) are aligned on a 16-byte boundary,
+         possibly padded on the right with garbage.  This may leave an
+         empty word on the stack, and thus an unused register, as per
+         the ABI.  */
+      if (bytes_reserved > 8)
+	{
+	  /* Round up the offset to a multiple of two slots.  */
+	  int new_offset = ((offset[i] + 2*REGISTER_SIZE-1)
+			    & -(2*REGISTER_SIZE));
+
+	  /* Note the space we've wasted, if any.  */
+	  bytes_reserved += new_offset - offset[i];
+	  offset[i] = new_offset;
+	}
+
+      cum_bytes_reserved += bytes_reserved;
+    }
+
+  /* CUM_BYTES_RESERVED already accounts for all the arguments
+     passed by the user.  However, the ABIs mandate minimum stack space
+     allocations for outgoing arguments.
+
+     The ABIs also mandate minimum stack alignments which we must
+     preserve.  */
+  cum_bytes_aligned = STACK_ALIGN (cum_bytes_reserved);
+  sp += max (cum_bytes_aligned, REG_PARM_STACK_SPACE);
+
+  /* Now write each of the args at the proper offset down the stack.  */
+  for (i = 0; i < nargs; i++)
+    write_memory (orig_sp + offset[i], VALUE_CONTENTS (args[i]), lengths[i]);
+
+  /* If a structure has to be returned, set up register 28 to hold its
+     address */
+  if (struct_return)
+    write_register (28, struct_addr);
+
+  /* For the PA64 we must pass a pointer to the outgoing argument list.
+     The ABI mandates that the pointer should point to the first byte of
+     storage beyond the register flushback area.
+
+     However, the call dummy expects the outgoing argument pointer to
+     be passed in register %r4.  */
+  write_register (4, orig_sp + REG_PARM_STACK_SPACE);
+
+  /* ?!? This needs further work.  We need to set up the global data
+     pointer for this procedure.  This assumes the same global pointer
+     for every procedure.   The call dummy expects the dp value to
+     be passed in register %r6.  */
+  write_register (6, read_register (27));
+  
+  /* The stack will have 64 bytes of additional space for a frame marker.  */
+  return sp + 64;
+}
+
+#else
+
+/* This function pushes a stack frame with arguments as part of the
+   inferior function calling mechanism.
+
+   This is the version of the function for the 32-bit PA machines, in
+   which later arguments appear at lower addresses.  (The stack always
+   grows towards higher addresses.)
+
+   We simply allocate the appropriate amount of stack space and put
+   arguments into their proper slots.  The call dummy code will copy
+   arguments into registers as needed by the ABI. */
+   
+CORE_ADDR
+hppa_push_arguments (nargs, args, sp, struct_return, struct_addr)
+     int nargs;
+     value_ptr *args;
+     CORE_ADDR sp;
+     int struct_return;
+     CORE_ADDR struct_addr;
+{
+  /* array of arguments' offsets */
+  int *offset = (int *) alloca (nargs * sizeof (int));
+
+  /* array of arguments' lengths: real lengths in bytes, not aligned to
+     word size */
+  int *lengths = (int *) alloca (nargs * sizeof (int));
+
+  /* The number of stack bytes occupied by the current argument.  */
+  int bytes_reserved;
+
+  /* The total number of bytes reserved for the arguments.  */
+  int cum_bytes_reserved = 0;
+
+  /* Similarly, but aligned.  */
+  int cum_bytes_aligned = 0;
+  int i;
+
+  /* Iterate over each argument provided by the user.  */
+  for (i = 0; i < nargs; i++)
+    {
       lengths[i] = TYPE_LENGTH (VALUE_TYPE (args[i]));
 
       /* Align the size of the argument to the word size for this
 	 target.  */
       bytes_reserved = (lengths[i] + REGISTER_SIZE - 1) & -REGISTER_SIZE;
 
-#ifdef ARGS_GROW_DOWNWARD
       offset[i] = cum_bytes_reserved + lengths[i];
-#else
-      /* If the arguments grow towards lower addresses, then we want
-	 offset[i] to point to the start of the argument rather than
-	 the end of the argument.  */
-      offset[i] = cum_bytes_reserved;
-
-      offset[i] += (lengths[i] < REGISTER_SIZE
-		    ? REGISTER_SIZE - lengths[i] : 0);
-#endif
 
       /* If the argument is a double word argument, then it needs to be
-	 double word aligned. 
-
-	 ?!? I do not think this code is correct when !ARGS_GROW_DOWNWAR.  */
+	 double word aligned.  */
       if ((bytes_reserved == 2 * REGISTER_SIZE)
-	   && (offset[i] % 2 * REGISTER_SIZE))
+	  && (offset[i] % 2 * REGISTER_SIZE))
 	{
 	  int new_offset = 0;
 	  /* BYTES_RESERVED is already aligned to the word, so we put
@@ -1761,55 +1890,31 @@ hppa_push_arguments (nargs, args, sp, struct_return, struct_addr)
 
     }
 
-  /* CUM_BYTES_RESERVED already accounts for all the arguments
-     passed by the user.  However, the ABIs mandate minimum stack space
+  /* CUM_BYTES_RESERVED already accounts for all the arguments passed
+     by the user.  However, the ABI mandates minimum stack space
      allocations for outgoing arguments.
 
-     The ABIs also mandate minimum stack alignments which we must
+     The ABI also mandates minimum stack alignments which we must
      preserve.  */
   cum_bytes_aligned = STACK_ALIGN (cum_bytes_reserved);
   sp += max (cum_bytes_aligned, REG_PARM_STACK_SPACE);
 
   /* Now write each of the args at the proper offset down the stack.
-
-     The two ABIs write arguments in different directions using different
-     starting points.  What fun. 
-
      ?!? We need to promote values to a full register instead of skipping
      words in the stack.  */
-#ifndef ARGS_GROW_DOWNWARD
-  for (i = 0; i < nargs; i++)
-    write_memory (orig_sp + offset[i], VALUE_CONTENTS (args[i]), lengths[i]);
-#else
   for (i = 0; i < nargs; i++)
     write_memory (sp - offset[i], VALUE_CONTENTS (args[i]), lengths[i]);
-#endif
 
   /* If a structure has to be returned, set up register 28 to hold its
      address */
   if (struct_return)
     write_register (28, struct_addr);
 
-#ifndef ARGS_GROW_DOWNWARD
-  /* For the PA64 we must pass a pointer to the outgoing argument list.
-     The ABI mandates that the pointer should point to the first byte of
-     storage beyond the register flushback area.
-
-     However, the call dummy expects the outgoing argument pointer to
-     be passed in register %r4.  */
-  write_register (4, orig_sp + REG_PARM_STACK_SPACE);
-
-  /* ?!? This needs further work.  We need to set up the global data
-     pointer for this procedure.  This assumes the same global pointer
-     for every procedure.   The call dummy expects the dp value to
-     be passed in register %r6.  */
-  write_register (6, read_register (27));
-#endif
-  
   /* The stack will have 32 bytes of additional space for a frame marker.  */
   return sp + 32;
 }
 
+#endif
 
 /* elz: this function returns a value which is built looking at the given address.
    It is called from call_function_by_hand, in case we need to return a 
@@ -1973,8 +2078,8 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
   CORE_ADDR solib_handle = 0;
 
   /* Nonzero if we will use GCC's PLT call routine.  This routine must be
-     passed an import stub, not a PLABEL.  It is also necessary to set %r19     
-     (the PIC register) before performing the call. 
+     passed an import stub, not a PLABEL.  It is also necessary to set %r19
+     (the PIC register) before performing the call.
 
      If zero, then we are using __d_plt_call (HP's PLT call routine) or we
      are calling the target directly.  When using __d_plt_call we want to
@@ -2045,7 +2150,7 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
     write_register (5, fun);
 
     /* We need to see if this objfile has a different DP value than our
-       own (it could be a shared library for example.  */
+       own (it could be a shared library for example).  */
     ALL_OBJFILES (objfile)
       {
 	struct obj_section *s;
@@ -2822,8 +2927,73 @@ in_solib_call_trampoline (pc, name)
   static CORE_ADDR dyncall = 0;
   static CORE_ADDR sr4export = 0;
 
-/* FIXME XXX - dyncall and sr4export must be initialized whenever we get a
-   new exec file */
+#ifdef GDB_TARGET_IS_HPPA_20W
+  /* PA64 has a completely different stub/trampoline scheme.  Is it
+     better?  Maybe.  It's certainly harder to determine with any
+     certainty that we are in a stub because we can not refer to the
+     unwinders to help. 
+
+     The heuristic is simple.  Try to lookup the current PC value in th
+     minimal symbol table.  If that fails, then assume we are not in a
+     stub and return.
+
+     Then see if the PC value falls within the section bounds for the
+     section containing the minimal symbol we found in the first
+     step.  If it does, then assume we are not in a stub and return.
+
+     Finally peek at the instructions to see if they look like a stub.  */
+  {
+    struct minimal_symbol *minsym;
+    asection *sec;
+    CORE_ADDR addr;
+    int insn, i;
+
+    minsym = lookup_minimal_symbol_by_pc (pc);
+    if (! minsym)
+      return 0;
+
+    sec = SYMBOL_BFD_SECTION (minsym);
+
+    if (sec->vma <= pc
+	&& sec->vma + sec->_cooked_size < pc)
+      return 0;
+
+    /* We might be in a stub.  Peek at the instructions.  Stubs are 3
+       instructions long. */
+    insn = read_memory_integer (pc, 4);
+
+    /* Find out where we we think we are within the stub.  */
+    if ((insn & 0xffffc00e) == 0x53610000)
+      addr = pc;
+    else if ((insn & 0xffffffff) == 0xe820d000)
+      addr = pc - 4;
+    else if ((insn & 0xffffc00e) == 0x537b0000)
+      addr = pc - 8;
+    else
+      return 0;
+
+    /* Now verify each insn in the range looks like a stub instruction.  */
+    insn = read_memory_integer (addr, 4);
+    if ((insn & 0xffffc00e) != 0x53610000)
+      return 0;
+	
+    /* Now verify each insn in the range looks like a stub instruction.  */
+    insn = read_memory_integer (addr + 4, 4);
+    if ((insn & 0xffffffff) != 0xe820d000)
+      return 0;
+    
+    /* Now verify each insn in the range looks like a stub instruction.  */
+    insn = read_memory_integer (addr + 8, 4);
+    if ((insn & 0xffffc00e) != 0x537b0000)
+      return 0;
+
+    /* Looks like a stub.  */
+    return 1;
+  }
+#endif
+
+  /* FIXME XXX - dyncall and sr4export must be initialized whenever we get a
+     new exec file */
 
   /* First see if PC is in one of the two C-library trampolines.  */
   if (!dyncall)
@@ -2997,9 +3167,8 @@ skip_trampoline_code (pc, name)
   struct minimal_symbol *msym;
   struct unwind_table_entry *u;
 
-
-/* FIXME XXX - dyncall and sr4export must be initialized whenever we get a
-   new exec file */
+  /* FIXME XXX - dyncall and sr4export must be initialized whenever we get a
+     new exec file */
 
   if (!dyncall)
     {
@@ -3829,16 +3998,21 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
 
       /* There are limited ways to store the return pointer into the
 	 stack.  */
-      if (inst == 0x6bc23fd9 || inst == 0x0fc212c1)
+      if (inst == 0x6bc23fd9) /* stw rp,-0x14(sr0,sp) */
 	{
 	  save_rp = 0;
 	  frame_saved_regs->regs[RP_REGNUM] = frame_info->frame - 20;
 	}
+      else if (inst == 0x0fc212c1) /* std rp,-0x10(sr0,sp) */
+	{
+	  save_rp = 0;
+	  frame_saved_regs->regs[RP_REGNUM] = frame_info->frame - 16;
+	}
 
       /* Note if we saved SP into the stack.  This also happens to indicate
 	 the location of the saved frame pointer.  */
-      if ((inst & 0xffffc000) == 0x6fc10000
-          || (inst & 0xffffc00c) == 0x73c10008)
+      if (   (inst & 0xffffc000) == 0x6fc10000  /* stw,ma r1,N(sr0,sp) */
+          || (inst & 0xffffc00c) == 0x73c10008) /* std,ma r1,N(sr0,sp) */
 	{
 	  frame_saved_regs->regs[FP_REGNUM] = frame_info->frame;
 	  save_sp = 0;
@@ -4540,6 +4714,30 @@ hppa_prepare_to_proceed ()
   return 0;
 }
 #endif /* PREPARE_TO_PROCEED */
+
+void
+hppa_skip_permanent_breakpoint ()
+{
+  /* To step over a breakpoint instruction on the PA takes some
+     fiddling with the instruction address queue.
+
+     When we stop at a breakpoint, the IA queue front (the instruction
+     we're executing now) points at the breakpoint instruction, and
+     the IA queue back (the next instruction to execute) points to
+     whatever instruction we would execute after the breakpoint, if it
+     were an ordinary instruction.  This is the case even if the
+     breakpoint is in the delay slot of a branch instruction.
+
+     Clearly, to step past the breakpoint, we need to set the queue
+     front to the back.  But what do we put in the back?  What
+     instruction comes after that one?  Because of the branch delay
+     slot, the next insn is always at the back + 4.  */
+  write_register (PCOQ_HEAD_REGNUM, read_register (PCOQ_TAIL_REGNUM));
+  write_register (PCSQ_HEAD_REGNUM, read_register (PCSQ_TAIL_REGNUM));
+
+  write_register (PCOQ_TAIL_REGNUM, read_register (PCOQ_TAIL_REGNUM) + 4);
+  /* We can leave the tail's space the same, since there's no jump.  */
+}
 
 void
 _initialize_hppa_tdep ()

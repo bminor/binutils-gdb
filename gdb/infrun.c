@@ -35,6 +35,8 @@
 #include "top.h"
 #include <signal.h>
 #include "event-loop.h"
+#include "event-top.h"
+#include "remote.h" /* For cleanup_sigint_signal_handler. */
 
 /* Prototypes for local functions */
 
@@ -267,6 +269,26 @@ static int use_thread_step_needed = USE_THREAD_STEP_NEEDED;
 #ifndef INSTRUCTION_NULLIFIED
 #define INSTRUCTION_NULLIFIED 0
 #endif
+
+/* We can't step off a permanent breakpoint in the ordinary way, because we
+   can't remove it.  Instead, we have to advance the PC to the next
+   instruction.  This macro should expand to a pointer to a function that
+   does that, or zero if we have no such function.  If we don't have a
+   definition for it, we have to report an error.  */
+#ifndef SKIP_PERMANENT_BREAKPOINT 
+#define SKIP_PERMANENT_BREAKPOINT (default_skip_permanent_breakpoint)
+static void
+default_skip_permanent_breakpoint ()
+{
+  error_begin ();
+  fprintf_filtered (gdb_stderr, "\
+The program is stopped at a permanent breakpoint, but GDB does not know\n\
+how to step past a permanent breakpoint on this architecture.  Try using\n\
+a command like `return' or `jump' to continue execution.\n");
+  return_to_top_level (RETURN_ERROR);
+}
+#endif
+   
 
 /* Convert the #defines into values.  This is temporary until wfi control
    flow is completely sorted out.  */
@@ -766,6 +788,8 @@ set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
 }
 
 
+
+
 /* Resume the inferior, but allow a QUIT.  This is useful if the user
    wants to interrupt some lengthy single-stepping operation
    (for child processes, the SIGINT goes to the inferior, and so
@@ -789,6 +813,13 @@ resume (int step, enum target_signal sig)
   if (step && breakpoints_inserted && breakpoint_here_p (read_pc ()))
     step = 0;
 #endif
+
+  /* Normally, by the time we reach `resume', the breakpoints are either
+     removed or inserted, as appropriate.  The exception is if we're sitting
+     at a permanent breakpoint; we need to step over it, but permanent
+     breakpoints can't be removed.  So we have to test for it here.  */
+  if (breakpoint_here_p (read_pc ()) == permanent_breakpoint_here)
+    SKIP_PERMANENT_BREAKPOINT ();
 
   if (SOFTWARE_SINGLE_STEP_P && step)
     {
@@ -1175,6 +1206,7 @@ void init_execution_control_state (struct execution_control_state * ecs);
 void handle_inferior_event (struct execution_control_state * ecs);
 
 static void check_sigtramp2 (struct execution_control_state *ecs);
+static void step_into_function (struct execution_control_state *ecs);
 static void step_over_function (struct execution_control_state *ecs);
 static void stop_stepping (struct execution_control_state *ecs);
 static void prepare_to_wait (struct execution_control_state *ecs);
@@ -1250,7 +1282,8 @@ struct execution_control_state async_ecss;
 struct execution_control_state *async_ecs;
 
 void
-fetch_inferior_event (void)
+fetch_inferior_event (client_data)
+     gdb_client_data client_data;
 {
   static struct cleanup *old_cleanups;
 
@@ -2761,66 +2794,15 @@ handle_inferior_event (struct execution_control_state *ecs)
 
 	  tmp_sal = find_pc_line (ecs->stop_func_start, 0);
 	  if (tmp_sal.line != 0)
-	    goto step_into_function;
+	    {
+	      step_into_function (ecs);	
+	      return;
+	    }
 	}
 	step_over_function (ecs);
 	keep_going (ecs);
 	return;
 
-      step_into_function:
-	/* Subroutine call with source code we should not step over.
-	   Do step to the first line of code in it.  */
-	{
-	  struct symtab *s;
-
-	  s = find_pc_symtab (stop_pc);
-	  if (s && s->language != language_asm)
-	    ecs->stop_func_start = SKIP_PROLOGUE (ecs->stop_func_start);
-	}
-	ecs->sal = find_pc_line (ecs->stop_func_start, 0);
-	/* Use the step_resume_break to step until
-	   the end of the prologue, even if that involves jumps
-	   (as it seems to on the vax under 4.2).  */
-	/* If the prologue ends in the middle of a source line,
-	   continue to the end of that source line (if it is still
-	   within the function).  Otherwise, just go to end of prologue.  */
-#ifdef PROLOGUE_FIRSTLINE_OVERLAP
-	/* no, don't either.  It skips any code that's
-	   legitimately on the first line.  */
-#else
-	if (ecs->sal.end && ecs->sal.pc != ecs->stop_func_start && ecs->sal.end < ecs->stop_func_end)
-	  ecs->stop_func_start = ecs->sal.end;
-#endif
-
-	if (ecs->stop_func_start == stop_pc)
-	  {
-	    /* We are already there: stop now.  */
-	    stop_step = 1;
-	    stop_stepping (ecs);
-	    return;
-	  }
-	else
-	  /* Put the step-breakpoint there and go until there. */
-	  {
-	    struct symtab_and_line sr_sal;
-
-	    INIT_SAL (&sr_sal);	/* initialize to zeroes */
-	    sr_sal.pc = ecs->stop_func_start;
-	    sr_sal.section = find_pc_overlay (ecs->stop_func_start);
-	    /* Do not specify what the fp should be when we stop
-	       since on some machines the prologue
-	       is where the new fp value is established.  */
-	    check_for_old_step_resume_breakpoint ();
-	    step_resume_breakpoint =
-	      set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
-	    if (breakpoints_inserted)
-	      insert_breakpoints ();
-
-	    /* And make sure stepping stops right away then.  */
-	    step_range_end = step_range_start;
-	  }
-	keep_going (ecs);
-	return;
       }
 
     /* We've wandered out of the step range.  */
@@ -2980,6 +2962,63 @@ check_sigtramp2 (struct execution_control_state *ecs)
     }
 }
 
+/* Subroutine call with source code we should not step over.  Do step
+   to the first line of code in it.  */
+
+static void
+step_into_function (struct execution_control_state *ecs)
+{
+  struct symtab *s;
+  struct symtab_and_line sr_sal;
+
+  s = find_pc_symtab (stop_pc);
+  if (s && s->language != language_asm)
+    ecs->stop_func_start = SKIP_PROLOGUE (ecs->stop_func_start);
+
+  ecs->sal = find_pc_line (ecs->stop_func_start, 0);
+  /* Use the step_resume_break to step until the end of the prologue,
+     even if that involves jumps (as it seems to on the vax under
+     4.2).  */
+  /* If the prologue ends in the middle of a source line, continue to
+     the end of that source line (if it is still within the function).
+     Otherwise, just go to end of prologue.  */
+#ifdef PROLOGUE_FIRSTLINE_OVERLAP
+  /* no, don't either.  It skips any code that's legitimately on the
+     first line.  */
+#else
+  if (ecs->sal.end
+      && ecs->sal.pc != ecs->stop_func_start
+      && ecs->sal.end < ecs->stop_func_end)
+    ecs->stop_func_start = ecs->sal.end;
+#endif
+
+  if (ecs->stop_func_start == stop_pc)
+    {
+      /* We are already there: stop now.  */
+      stop_step = 1;
+      stop_stepping (ecs);
+      return;
+    }
+  else
+    {
+      /* Put the step-breakpoint there and go until there.  */
+      INIT_SAL (&sr_sal);	/* initialize to zeroes */
+      sr_sal.pc = ecs->stop_func_start;
+      sr_sal.section = find_pc_overlay (ecs->stop_func_start);
+      /* Do not specify what the fp should be when we stop since on
+	 some machines the prologue is where the new fp value is
+	 established.  */
+      check_for_old_step_resume_breakpoint ();
+      step_resume_breakpoint =
+	set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
+      if (breakpoints_inserted)
+	insert_breakpoints ();
+
+      /* And make sure stepping stops right away then.  */
+      step_range_end = step_range_start;
+    }
+  keep_going (ecs);
+}
 
 /* We've just entered a callee, and we wish to resume until it returns
    to the caller.  Setting a step_resume breakpoint on the return
@@ -3234,12 +3273,10 @@ stopped_for_internal_shlib_event (bpstat bs)
 static void
 complete_execution (void)
 {
-  extern int cleanup_sigint_signal_handler (void);
-
   target_executing = 0;
   if (sync_execution)
     {
-      add_file_handler (input_fd, call_readline, 0);
+      add_file_handler (input_fd, stdin_event_handler, 0);
       pop_prompt ();
       sync_execution = 0;
       cleanup_sigint_signal_handler ();

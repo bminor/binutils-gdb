@@ -24,6 +24,10 @@ int overload1arg (unsigned long);
 int overload1arg (float);
 int overload1arg (double);
 
+int overloadfnarg (void);
+int overloadfnarg (int);
+int overloadfnarg (int, int (*) (int));
+
 int overloadargs (int a1);
 int overloadargs (int a1, int a2);
 int overloadargs (int a1, int a2, int a3);
@@ -94,6 +98,12 @@ int foo::overload1arg (unsigned long arg)   { arg = 0; return 10;}
 int foo::overload1arg (float arg)           { arg = 0; return 11;}
 int foo::overload1arg (double arg)          { arg = 0; return 12;}
 
+/* Test to see that we can explicitly request overloaded functions
+   with function pointers in the prototype. */
+
+int foo::overloadfnarg (void) { return ifoo * 20; }
+int foo::overloadfnarg (int arg) { arg = 0; return 13;}
+int foo::overloadfnarg (int arg, int (*foo) (int))    { return foo(arg); } 
 
 /* Some functions to test overloading by varying argument count. */
 

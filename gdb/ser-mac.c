@@ -232,9 +232,9 @@ mac_noflush_set_tty_state (scb, new_ttystate, old_ttystate)
 }
 
 static void
-mac_print_tty_state (scb, ttystate)
-     serial_t scb;
-     serial_ttystate ttystate;
+mac_print_tty_state (serial_t scb,
+		     serial_ttystate ttystate,
+		     struct gdb_file *stream)
 {
   /* Nothing to print.  */
   return;

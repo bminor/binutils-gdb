@@ -556,12 +556,13 @@ gdb_expect {
 # As long as we're stopped (breakpointed) in a called function,
 # verify that we can successfully backtrace & such from here.
 #
+
 if [istarget "hppa*-*-hpux*"] then {
   send_gdb "bt\n"
   gdb_expect {
-      -re "#0\[ \t\]*0x\[0-9\]* in marker2.*:4\[49\]\r\n#1.*_sr4export.*$gdb_prompt $"\
+      -re "#0\[ \t\]*$hex in marker2.*:4\[49\]\r\n#1.*_sr4export.*$gdb_prompt $"\
             {pass "backtrace while in called function"}
-      -re "#0\[ \t\]*0x\[0-9\]* in marker2.*:4\[49\]\r\n#1.*function called from gdb.*$gdb_prompt $"\
+      -re "#0\[ \t\]*$hex in marker2.*:4\[49\]\r\n#1.*function called from gdb.*$gdb_prompt $"\
 
             {pass "backtrace while in called function"}
     -re "$gdb_prompt $"\

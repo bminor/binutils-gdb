@@ -960,13 +960,8 @@ find_pc_sect_section (pc, section)
   struct objfile *objfile;
 
   ALL_OBJSECTIONS (objfile, s)
-#if defined(HPUXHPPA)
-    if ((section == 0 || section == s->the_bfd_section) &&
-	s->addr <= pc && pc <= s->endaddr)
-#else
     if ((section == 0 || section == s->the_bfd_section) &&
 	s->addr <= pc && pc < s->endaddr)
-#endif
       return (s);
 
   return (NULL);

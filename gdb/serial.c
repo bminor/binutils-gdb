@@ -1,5 +1,5 @@
 /* Generic serial interface routines
-   Copyright 1992, 1993, 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1996, 1997, 1999 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,7 +24,7 @@
 #include "gdb_string.h"
 #include "gdbcmd.h"
 
-extern void _initialize_serial PARAMS ((void));
+extern void _initialize_serial (void);
 
 /* Linked list of serial I/O handlers */
 
@@ -44,8 +44,8 @@ static serial_t scb_base;
 static char *serial_logfile = NULL;
 static GDB_FILE *serial_logfp = NULL;
 
-static struct serial_ops *serial_interface_lookup PARAMS ((char *));
-static void serial_logchar PARAMS ((int, int, int));
+static struct serial_ops *serial_interface_lookup (char *);
+static void serial_logchar (int, int, int);
 static char logbase_hex[] = "hex";
 static char logbase_octal[] = "octal";
 static char logbase_ascii[] = "ascii";
@@ -53,6 +53,7 @@ static char *logbase_enums[] =
 {logbase_hex, logbase_octal, logbase_ascii, NULL};
 static char *serial_logbase = logbase_ascii;
 
+
 
 static int serial_current_type = 0;
 
@@ -63,10 +64,7 @@ static int serial_current_type = 0;
 #define SERIAL_BREAK 1235
 
 static void
-serial_logchar (ch_type, ch, timeout)
-     int ch_type;
-     int ch;
-     int timeout;
+serial_logchar (int ch_type, int ch, int timeout)
 {
   if (ch_type != serial_current_type)
     {
@@ -128,8 +126,7 @@ serial_logchar (ch_type, ch, timeout)
 }
 
 void
-serial_log_command (cmd)
-     const char *cmd;
+serial_log_command (const char *cmd)
 {
   if (!serial_logfp)
     return;
@@ -144,60 +141,9 @@ serial_log_command (cmd)
   gdb_flush (serial_logfp);
 }
 
-int
-serial_write (scb, str, len)
-     serial_t scb;
-     const char *str;
-     int len;
-{
-  if (serial_logfp != NULL)
-    {
-      int count;
-
-      for (count = 0; count < len; count++)
-	serial_logchar ('w', str[count] & 0xff, 0);
-
-      /* Make sure that the log file is as up-to-date as possible,
-         in case we are getting ready to dump core or something. */
-      gdb_flush (serial_logfp);
-    }
-
-  return (scb->ops->write (scb, str, len));
-}
-
-int
-serial_readchar (scb, timeout)
-     serial_t scb;
-     int timeout;
-{
-  int ch;
-
-  ch = scb->ops->readchar (scb, timeout);
-  if (serial_logfp != NULL)
-    {
-      serial_logchar ('r', ch, timeout);
-
-      /* Make sure that the log file is as up-to-date as possible,
-         in case we are getting ready to dump core or something. */
-      gdb_flush (serial_logfp);
-    }
-
-  return (ch);
-}
-
-int
-serial_send_break (scb)
-     serial_t scb;
-{
-  if (serial_logfp != NULL)
-    serial_logchar ('w', SERIAL_BREAK, 0);
-
-  return (scb->ops->send_break (scb));
-}
-
+
 static struct serial_ops *
-serial_interface_lookup (name)
-     char *name;
+serial_interface_lookup (char *name)
 {
   struct serial_ops *ops;
 
@@ -209,8 +155,7 @@ serial_interface_lookup (name)
 }
 
 void
-serial_add_interface (optable)
-     struct serial_ops *optable;
+serial_add_interface (struct serial_ops *optable)
 {
   optable->next = serial_ops_list;
   serial_ops_list = optable;
@@ -219,11 +164,11 @@ serial_add_interface (optable)
 /* Open up a device or a network socket, depending upon the syntax of NAME. */
 
 serial_t
-serial_open (name)
-     const char *name;
+serial_open (const char *name)
 {
   serial_t scb;
   struct serial_ops *ops;
+  const char *open_name = name;
 
   for (scb = scb_base; scb; scb = scb->next)
     if (scb->name && strcmp (scb->name, name) == 0)
@@ -241,7 +186,10 @@ serial_open (name)
   else if (strncmp (name, "lpt", 3) == 0)
     ops = serial_interface_lookup ("parallel");
   else if (strncmp (name, "|", 1) == 0)
-    ops = serial_interface_lookup ("pipe");
+    {
+      ops = serial_interface_lookup ("pipe");
+      open_name = name + 1; /* discard ``|'' */
+    }
   else
     ops = serial_interface_lookup ("hardwire");
 
@@ -255,7 +203,7 @@ serial_open (name)
   scb->bufcnt = 0;
   scb->bufp = scb->buf;
 
-  if (scb->ops->open (scb, name))
+  if (scb->ops->open (scb, open_name))
     {
       free (scb);
       return NULL;
@@ -264,6 +212,8 @@ serial_open (name)
   scb->name = strsave (name);
   scb->next = scb_base;
   scb->refcnt = 1;
+  scb->async_handler = NULL;
+  scb->async_context = NULL;
   scb_base = scb;
 
   last_serial_opened = scb;
@@ -279,8 +229,7 @@ serial_open (name)
 }
 
 serial_t
-serial_fdopen (fd)
-     const int fd;
+serial_fdopen (const int fd)
 {
   serial_t scb;
   struct serial_ops *ops;
@@ -309,6 +258,8 @@ serial_fdopen (fd)
   scb->name = NULL;
   scb->next = scb_base;
   scb->refcnt = 1;
+  scb->async_handler = NULL;
+  scb->async_context = NULL;
   scb_base = scb;
 
   last_serial_opened = scb;
@@ -316,10 +267,8 @@ serial_fdopen (fd)
   return scb;
 }
 
-void
-serial_close (scb, really_close)
-     serial_t scb;
-     int really_close;
+static void
+do_serial_close (serial_t scb, int really_close)
 {
   serial_t tmp_scb;
 
@@ -345,6 +294,10 @@ serial_close (scb, really_close)
   if (scb->refcnt > 0)
     return;
 
+  /* ensure that the FD has been taken out of async mode */
+  if (scb->async_handler != NULL)
+    serial_async (scb, NULL, NULL);
+
   if (really_close)
     scb->ops->close (scb);
 
@@ -364,6 +317,178 @@ serial_close (scb, really_close)
       }
 
   free (scb);
+}
+
+void
+serial_close (serial_t scb)
+{
+  do_serial_close (scb, 1);
+}
+
+void
+serial_un_fdopen (serial_t scb)
+{
+  do_serial_close (scb, 0);
+}
+
+int
+serial_readchar (serial_t scb, int timeout)
+{
+  int ch;
+
+  ch = scb->ops->readchar (scb, timeout);
+  if (serial_logfp != NULL)
+    {
+      serial_logchar ('r', ch, timeout);
+
+      /* Make sure that the log file is as up-to-date as possible,
+         in case we are getting ready to dump core or something. */
+      gdb_flush (serial_logfp);
+    }
+
+  return (ch);
+}
+
+int
+serial_write (serial_t scb, const char *str, int len)
+{
+  if (serial_logfp != NULL)
+    {
+      int count;
+
+      for (count = 0; count < len; count++)
+	serial_logchar ('w', str[count] & 0xff, 0);
+
+      /* Make sure that the log file is as up-to-date as possible,
+         in case we are getting ready to dump core or something. */
+      gdb_flush (serial_logfp);
+    }
+
+  return (scb->ops->write (scb, str, len));
+}
+
+void
+serial_printf (serial_t desc, const char *format,...)
+{
+  va_list args;
+  char *buf;
+  va_start (args, format);
+
+  vasprintf (&buf, format, args);
+  SERIAL_WRITE (desc, buf, strlen (buf));
+
+  free (buf);
+  va_end (args);
+}
+
+int
+serial_drain_output (serial_t scb)
+{
+  return scb->ops->drain_output (scb);
+}
+
+int
+serial_flush_output (serial_t scb)
+{
+  return scb->ops->flush_output (scb);
+}
+
+int
+serial_flush_input (serial_t scb)
+{
+  return scb->ops->flush_input (scb);
+}
+
+int
+serial_send_break (serial_t scb)
+{
+  if (serial_logfp != NULL)
+    serial_logchar ('w', SERIAL_BREAK, 0);
+
+  return (scb->ops->send_break (scb));
+}
+
+void
+serial_raw (serial_t scb)
+{
+  scb->ops->go_raw (scb);
+}
+
+serial_ttystate
+serial_get_tty_state (serial_t scb)
+{
+  return scb->ops->get_tty_state (scb);
+}
+
+int
+serial_set_tty_state (serial_t scb, serial_ttystate ttystate)
+{
+  return scb->ops->set_tty_state (scb, ttystate);
+}
+
+void
+serial_print_tty_state (serial_t scb,
+			serial_ttystate ttystate,
+			struct gdb_file *stream)
+{
+  scb->ops->print_tty_state (scb, ttystate, stream);
+}
+
+int
+serial_noflush_set_tty_state (serial_t scb,
+			      serial_ttystate new_ttystate,
+			      serial_ttystate old_ttystate)
+{
+  return scb->ops->noflush_set_tty_state (scb, new_ttystate, old_ttystate);
+}
+
+int
+serial_setbaudrate (serial_t scb, int rate)
+{
+  return scb->ops->setbaudrate (scb, rate);
+}
+
+int
+serial_setstopbits (serial_t scb, int num)
+{
+  return scb->ops->setstopbits (scb, num);
+}
+
+int
+serial_can_async_p (serial_t scb)
+{
+  return (scb->ops->async != NULL);
+}
+
+int
+serial_is_async_p (serial_t scb)
+{
+  return (scb->ops->async != NULL) && (scb->async_handler != NULL);
+}
+
+void
+serial_async (serial_t scb,
+	      serial_event_ftype *handler,
+	      void *context)
+{
+  /* Only change mode if there is a need. */
+  if ((scb->async_handler == NULL)
+      != (handler == NULL))
+    scb->ops->async (scb, handler != NULL);
+  scb->async_handler = handler;
+  scb->async_context = context;
+}
+
+int
+deprecated_serial_fd (serial_t scb)
+{
+  /* FIXME: should this output a warning that deprecated code is being
+     called? */
+  if (scb->fd < 0)
+    {
+      internal_error ("serial: FD not valid");
+    }
+  return scb->fd; /* sigh */
 }
 
 #if 0
@@ -389,8 +514,7 @@ serial_close (scb, really_close)
 static serial_t tty_desc;	/* Controlling terminal */
 
 static void
-cleanup_tty (ttystate)
-     serial_ttystate ttystate;
+cleanup_tty (serial_ttystate ttystate)
 {
   printf_unfiltered ("\r\n[Exiting connect mode]\r\n");
   SERIAL_SET_TTY_STATE (tty_desc, ttystate);
@@ -399,9 +523,7 @@ cleanup_tty (ttystate)
 }
 
 static void
-connect_command (args, fromtty)
-     char *args;
-     int fromtty;
+connect_command (char *args, int fromtty)
 {
   int c;
   char cur_esc = 0;
@@ -493,21 +615,7 @@ connect_command (args, fromtty)
 #endif /* 0 */
 
 void
-serial_printf (serial_t desc, const char *format,...)
-{
-  va_list args;
-  char *buf;
-  va_start (args, format);
-
-  vasprintf (&buf, format, args);
-  SERIAL_WRITE (desc, buf, strlen (buf));
-
-  free (buf);
-  va_end (args);
-}
-
-void
-_initialize_serial ()
+_initialize_serial (void)
 {
 #if 0
   add_com ("connect", class_obscure, connect_command,

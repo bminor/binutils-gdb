@@ -34,6 +34,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 #include <io.h>
 #include <dpmi.h>
 #include <debug/v2load.h>
@@ -797,6 +798,7 @@ ignore (void)
   do {\
     CONTROL &= ~(DR_CONTROL_MASK << (DR_CONTROL_SHIFT + DR_CONTROL_SIZE * (index)));\
     D_REGS[index] = address;\
+    dr_ref_count[index]++;\
   } while(0)
 
 #define SET_WATCH(index,address,rw,len) \
@@ -808,11 +810,7 @@ ignore (void)
 #define IS_WATCH(index) \
   (CONTROL & (DR_CONTROL_MASK << (DR_CONTROL_SHIFT + DR_CONTROL_SIZE*(index))))
 
-#define WATCH_HIT(index) \
-  (\
-   (STATUS & (1 << index)) && \
-   (CONTROL & (DR_CONTROL_MASK << (DR_CONTROL_SHIFT + DR_CONTROL_SIZE * index)))\
-  )
+#define WATCH_HIT(index) ((STATUS & (1 << (index))) && IS_WATCH(index))
 
 #define DR_DEF(index) \
   ((CONTROL >> (DR_CONTROL_SHIFT + DR_CONTROL_SIZE * (index))) & 0x0f)
@@ -1141,10 +1139,6 @@ go32_insert_hw_breakpoint (CORE_ADDR addr, CORE_ADDR shadow)
 
   return i < 4 ? 0 : -1;
 }
-
-static int inf_flags_valid = 0;
-static int inf_in_flag;
-static int inf_out_flag;
 
 /* Put the device open on handle FD into either raw or cooked
    mode, return 1 if it was in raw mode, zero otherwise.  */

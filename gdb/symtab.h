@@ -1219,7 +1219,7 @@ extern struct minimal_symbol *prim_record_minimal_symbol_and_info
 
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
 extern CORE_ADDR find_stab_function_addr PARAMS ((char *,
-						  struct partial_symtab *,
+						  char *,
 						  struct objfile *));
 #endif
 

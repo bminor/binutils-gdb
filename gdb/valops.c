@@ -61,10 +61,6 @@ static CORE_ADDR value_push PARAMS ((CORE_ADDR, value_ptr));
 static value_ptr search_struct_field PARAMS ((char *, value_ptr, int,
 					      struct type *, int));
 
-static value_ptr search_struct_field_aux PARAMS ((char *, value_ptr, int,
-					  struct type *, int, int *, char *,
-						  struct type **));
-
 static value_ptr search_struct_method PARAMS ((char *, value_ptr *,
 					       value_ptr *,
 					       int, int *, struct type *));
@@ -970,7 +966,6 @@ value_ind (arg1)
 {
   struct type *base_type;
   value_ptr arg2;
-  value_ptr real_val;
 
   COERCE_ARRAY (arg1);
 
@@ -2544,7 +2539,6 @@ value_find_oload_method_list (argp, method, offset, static_memfuncp, num_fns, ba
      int *boffset;
 {
   struct type *t;
-  value_ptr v;
 
   t = check_typedef (VALUE_TYPE (*argp));
 
@@ -2677,8 +2671,6 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
   /* Consider each candidate in turn */
   for (ix = 0; ix < num_fns; ix++)
     {
-      int jj;
-
       /* Number of parameters for current candidate */
       nparms = method ? TYPE_NFIELDS (fns_ptr[ix].type)
 	: TYPE_NFIELDS (SYMBOL_TYPE (oload_syms[ix]));

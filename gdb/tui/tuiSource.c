@@ -8,6 +8,7 @@
 #include "symtab.h"
 #include "frame.h"
 #include "breakpoint.h"
+#include "source.h"
 
 #include "tui.h"
 #include "tuiData.h"
@@ -15,13 +16,6 @@
 #include "tuiSourceWin.h"
 #include "tuiSource.h"
 
-
-/*****************************************
-** EXTERNAL FUNCTION DECLS                **
-******************************************/
-
-extern int open_source_file PARAMS ((struct symtab *));
-extern void find_source_lines PARAMS ((struct symtab *, int));
 
 /*****************************************
 ** EXTERNAL DATA DECLS                    **

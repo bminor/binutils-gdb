@@ -530,40 +530,13 @@ pa64_solib_create_inferior_hook ()
   if (bfd_section_size (symfile_objfile->obfd, shlib_info) == 0)
     return;
 
-  /* Slam the pid of the process into __d_pid; failing is only a warning!  */
-  msymbol = lookup_minimal_symbol ("__d_pid", NULL, symfile_objfile);
-  if (msymbol == NULL)
-    {
-      warning ("Unable to find __d_pid symbol in object file.");
-      warning ("Suggest linking with /opt/langtools/lib/end.o.");
-      warning ("GDB will be unable to track explicit library load/unload calls");
-      goto keep_going;
-    }
-
-  anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
-  store_unsigned_integer (buf, 4, inferior_pid);
-  status = target_write_memory (anaddr, buf, 4);
-  if (status != 0)
-    {
-      warning ("Unable to write __d_pid");
-      warning ("Suggest linking with /opt/langtools/lib/end.o.");
-      warning ("GDB will be unable to track explicit library load/unload calls");
-      goto keep_going;
-    }
-
-keep_going:
-
   /* Read in the .dynamic section.  */
   if (! read_dynamic_info (shlib_info, &dld_cache))
     error ("Unable to read the .dynamic section.");
 
   /* Turn on the flags we care about.  */
   dld_cache.dld_flags |= DT_HP_DEBUG_PRIVATE;
-  /* ?!? Right now GDB is not recognizing hitting the callback breakpoint
-     as a shared library event.  Fix that and remove the #if0 code.  */
-#if 0
   dld_cache.dld_flags |= DT_HP_DEBUG_CALLBACK;
-#endif
   status = target_write_memory (dld_cache.dld_flags_addr,
 				(char *) &dld_cache.dld_flags,
 				sizeof (dld_cache.dld_flags));
@@ -621,7 +594,17 @@ keep_going:
       sym_addr = load_addr + sym_addr + 4;
       
       /* Create the shared library breakpoint.  */
-      create_solib_event_breakpoint (sym_addr);
+      {
+	struct breakpoint *b
+	  = create_solib_event_breakpoint (sym_addr);
+
+	/* The breakpoint is actually hard-coded into the dynamic linker,
+	   so we don't need to actually insert a breakpoint instruction
+	   there.  In fact, the dynamic linker's code is immutable, even to
+	   ttrace, so we shouldn't even try to do that.  For cases like
+	   this, we have "permanent" breakpoints.  */
+	make_breakpoint_permanent (b);
+      }
 
       /* We're done with the temporary bfd.  */
       bfd_close (tmp_bfd);
@@ -856,9 +839,9 @@ pa64_sharedlibrary_info_command (ignore, from_tty)
     }
 
   printf_unfiltered ("Shared Object Libraries\n");
-  printf_unfiltered ("    %-19s%-19s%-19s%-19s\n",
-		     "    tstart", "     tend",
-		     "    dstart", "     dend");
+  printf_unfiltered ("   %-19s%-19s%-19s%-19s\n",
+		     "  text start", "   text end",
+		     "  data start", "   data end");
   while (so_list)
     {
       unsigned int flags;
@@ -876,14 +859,14 @@ pa64_sharedlibrary_info_command (ignore, from_tty)
 	local_hex_string_custom (so_list->pa64_solib_desc.text_base,
 				 "016l"));
       printf_unfiltered (" %-18s",
-	local_hex_string_custom ((so_list->pa64_solib_desc.text_base,
+	local_hex_string_custom ((so_list->pa64_solib_desc.text_base
 				  + so_list->pa64_solib_desc.text_size),
 				 "016l"));
       printf_unfiltered (" %-18s",
 	local_hex_string_custom (so_list->pa64_solib_desc.data_base,
 				 "016l"));
       printf_unfiltered (" %-18s\n",
-	local_hex_string_custom ((so_list->pa64_solib_desc.data_base,
+	local_hex_string_custom ((so_list->pa64_solib_desc.data_base
 				  + so_list->pa64_solib_desc.data_size),
 				 "016l"));
       so_list = so_list->next;

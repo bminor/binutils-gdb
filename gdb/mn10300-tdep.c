@@ -29,6 +29,7 @@
 #include "gdbcore.h"
 #include "symfile.h"
 
+extern void _initialize_mn10300_tdep (void);
 static CORE_ADDR mn10300_analyze_prologue PARAMS ((struct frame_info * fi,
 						   CORE_ADDR pc));
 

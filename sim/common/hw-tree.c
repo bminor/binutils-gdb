@@ -22,6 +22,7 @@
 #include "hw-base.h"
 #include "hw-tree.h"
 
+#include "sim-io.h"
 #include "sim-assert.h"
 
 #ifdef HAVE_STDLIB_H

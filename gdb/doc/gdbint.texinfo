@@ -1596,6 +1596,16 @@ defined, no conversion will be done.
 @item SHIFT_INST_REGS
 (Only used for m88k targets.)
 
+@item SKIP_PERMANENT_BREAKPOINT
+Advance the inferior's PC past a permanent breakpoint.  GDB normally
+steps over a breakpoint by removing it, stepping one instruction, and
+re-inserting the breakpoint.  However, permanent breakpoints are
+hardwired into the inferior, and can't be removed, so this strategy
+doesn't work.  Calling SKIP_PERMANENT_BREAKPOINT adjusts the processor's
+state so that execution will resume just after the breakpoint.  This
+macro does the right thing even when the breakpoint is in the delay slot
+of a branch or jump.
+
 @item SKIP_PROLOGUE (pc)
 A C expression that returns the address of the ``real'' code beyond the
 function entry prologue found at @var{pc}.
@@ -2759,7 +2769,7 @@ also documents all the available macros.
 @c Conditionals}, @pxref{Native Conditionals}, and @pxref{Obsolete
 @c Conditionals})
 
-Start with the header files.  Once you some idea of how GDB's internal
+Start with the header files.  Once you have some idea of how GDB's internal
 symbol tables are stored (see @file{symtab.h}, @file{gdbtypes.h}), you
 will find it much easier to understand the code which uses and creates
 those symbol tables.

@@ -22,6 +22,7 @@
 #include "hw-main.h"
 #include "hw-base.h"
 
+#include "sim-io.h"
 #include "sim-assert.h"
 
 struct hw_instance_data {

@@ -129,13 +129,18 @@ enum enable
     shlib_disabled,	/* The eventpoint's address is in an unloaded solib.
 			   The eventpoint will be automatically enabled 
 			   and reset when that solib is loaded. */
-    call_disabled	/* The eventpoint has been disabled while a call 
+    call_disabled,	/* The eventpoint has been disabled while a call 
 			   into the inferior is "in flight", because some 
 			   eventpoints interfere with the implementation of 
 			   a call on some targets.  The eventpoint will be 
 			   automatically enabled and reset when the call 
 			   "lands" (either completes, or stops at another 
 			   eventpoint). */
+    permanent		/* There is a breakpoint instruction hard-wired into
+			   the target's code.  Don't try to write another
+			   breakpoint instruction on top of it, or restore
+			   its value.  Step over it using the architecture's
+			   SKIP_INSN macro.  */
   };
 
 
@@ -459,6 +464,15 @@ enum inf_context
     inf_running,
     inf_exited
   };
+
+/* The possible return values for breakpoint_here_p.
+   We guarantee that zero always means "no breakpoint here".  */
+enum breakpoint_here
+  {
+    no_breakpoint_here = 0,
+    ordinary_breakpoint_here,
+    permanent_breakpoint_here
+  };
 
 
 /* Prototypes for breakpoint-related functions.  */
@@ -466,7 +480,7 @@ enum inf_context
 /* Forward declarations for prototypes */
 struct frame_info;
 
-extern int breakpoint_here_p PARAMS ((CORE_ADDR));
+extern enum breakpoint_here breakpoint_here_p PARAMS ((CORE_ADDR));
 
 extern int breakpoint_inserted_here_p PARAMS ((CORE_ADDR));
 
@@ -594,7 +608,9 @@ extern void disable_breakpoint PARAMS ((struct breakpoint *));
 
 extern void enable_breakpoint PARAMS ((struct breakpoint *));
 
-extern void create_solib_event_breakpoint PARAMS ((CORE_ADDR));
+extern void make_breakpoint_permanent PARAMS ((struct breakpoint *));
+
+extern struct breakpoint *create_solib_event_breakpoint PARAMS ((CORE_ADDR));
 
 extern void remove_solib_event_breakpoints PARAMS ((void));
 
@@ -623,5 +639,9 @@ extern int ep_is_catchpoint PARAMS ((struct breakpoint *));
 extern int ep_is_shlib_catchpoint PARAMS ((struct breakpoint *));
 
 extern struct breakpoint *set_breakpoint_sal PARAMS ((struct symtab_and_line));
+
+/* Enable breakpoints and delete when hit.  Called with ARG == NULL
+   deletes all breakpoints. */
+extern void delete_command (char *arg, int from_tty);
 
 #endif /* !defined (BREAKPOINT_H) */

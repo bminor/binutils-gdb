@@ -541,7 +541,7 @@ i2fpu (sim_fpu *f, signed64 i, int is_64bit)
 	{
 	  do 
 	    {
-	      f->fraction >>= 1;
+	      f->fraction = (f->fraction >> 1) | (f->fraction & 1);
 	      f->normal_exp += 1;
 	    }
 	  while (f->fraction >= IMPLICIT_2);

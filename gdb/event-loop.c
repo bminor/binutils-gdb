@@ -22,6 +22,8 @@
 #include "defs.h"
 #include "top.h"
 #include "event-loop.h"
+#include "event-top.h"
+#include "inferior.h"   /* For fetch_inferior_event. */
 #ifdef HAVE_POLL
 #include <poll.h>
 #else
@@ -29,6 +31,103 @@
 #endif
 #include <errno.h>
 #include <setjmp.h>
+#include <sys/time.h>
+
+/* Type of the mask arguments to select. */
+
+#ifndef NO_FD_SET
+#define SELECT_MASK fd_set
+#else
+#ifndef _AIX
+typedef long fd_mask;
+#endif
+#if defined(_IBMR2)
+#define SELECT_MASK void
+#else
+#define SELECT_MASK int
+#endif
+#endif
+
+/* Define "NBBY" (number of bits per byte) if it's not already defined. */
+
+#ifndef NBBY
+#define NBBY 8
+#endif
+
+
+/* Define the number of fd_masks in an fd_set */
+
+#ifndef FD_SETSIZE
+#ifdef OPEN_MAX
+#define FD_SETSIZE OPEN_MAX
+#else
+#define FD_SETSIZE 256
+#endif
+#endif
+#if !defined(howmany)
+#define howmany(x, y) (((x)+((y)-1))/(y))
+#endif
+#ifndef NFDBITS
+#define NFDBITS NBBY*sizeof(fd_mask)
+#endif
+#define MASK_SIZE howmany(FD_SETSIZE, NFDBITS)
+
+
+typedef struct gdb_event gdb_event;
+typedef void (event_handler_func) (int);
+
+/* Event for the GDB event system.  Events are queued by calling
+   async_queue_event and serviced later on by gdb_do_one_event. An
+   event can be, for instance, a file descriptor becoming ready to be
+   read. Servicing an event simply means that the procedure PROC will
+   be called.  We have 2 queues, one for file handlers that we listen
+   to in the event loop, and one for the file handlers+events that are
+   ready. The procedure PROC associated with each event is always the
+   same (handle_file_event).  Its duty is to invoke the handler
+   associated with the file descriptor whose state change generated
+   the event, plus doing other cleanups adn such. */
+
+struct gdb_event
+  {
+    event_handler_func *proc;	/* Procedure to call to service this event. */
+    int fd;			/* File descriptor that is ready. */
+    struct gdb_event *next_event;	/* Next in list of events or NULL. */
+  };
+
+/* Information about each file descriptor we register with the event
+   loop. */
+
+typedef struct file_handler
+  {
+    int fd;			/* File descriptor. */
+    int mask;			/* Events we want to monitor: POLLIN, etc. */
+    int ready_mask;		/* Events that have been seen since
+				   the last time. */
+    handler_func *proc;	        /* Procedure to call when fd is ready. */
+    gdb_client_data client_data;	/* Argument to pass to proc. */
+    int error;                          /* Was an error detected on this fd? */
+    struct file_handler *next_file;	/* Next registered file descriptor. */
+  }
+file_handler;
+
+/* PROC is a function to be invoked when the READY flag is set. This
+   happens when there has been a signal and the corresponding signal
+   handler has 'triggered' this async_signal_handler for
+   execution. The actual work to be done in response to a signal will
+   be carried out by PROC at a later time, within process_event. This
+   provides a deferred execution of signal handlers.
+   Async_init_signals takes care of setting up such an
+   asyn_signal_handler for each interesting signal. */
+typedef struct async_signal_handler
+  {
+    int ready;			/* If ready, call this handler from the main event loop, 
+				   using invoke_async_handler. */
+    struct async_signal_handler *next_handler;	/* Ptr to next handler */
+    sig_handler_func *proc;	                /* Function to call to do the work */
+    gdb_client_data client_data;	/* Argument to async_handler_func */
+  }
+async_signal_handler;
+
 
 /* Event queue:  
    - the first event in the queue is the head of the queue. 
@@ -75,6 +174,11 @@ static struct
     /* Number of file descriptors to monitor. */
     int num_fds;
 
+    /* Timeout in milliseconds for calls to poll(). */
+    int timeout;
+
+    /* Flag to tell whether the timeout value shuld be used. */
+    int timeout_valid;
   }
 gdb_notifier;
 
@@ -97,10 +201,39 @@ static struct
     /* Number of valid bits (highest fd value + 1). */
     int num_fds;
 
-  }
+    /* Time structure for calls to select(). */
+    struct timeval timeout;
+
+    /* Flag to tell whether the timeout struct should be used. */
+    int timeout_valid;
+   }
 gdb_notifier;
 
 #endif /* HAVE_POLL */
+
+/* Structure associated with a timer. PROC will be executed at the
+   first occasion after WHEN. */
+struct gdb_timer
+  {
+    struct timeval when;
+    int timer_id;
+    struct gdb_timer *next;
+    timer_handler_func *proc;         /* Function to call to do the work */
+    gdb_client_data client_data;      /* Argument to async_handler_func */
+  }
+gdb_timer;
+
+/* List of currently active timers. It is sorted in order of
+   increasing timers.*/
+static struct
+  {
+    /* Pointer to first in timer list. */
+    struct gdb_timer *first_timer;
+
+    /* Length of timer list. */
+    int num_timers;
+  }
+timer_list;
 
 /* All the async_signal_handlers gdb is interested in are kept onto
    this list. */
@@ -120,12 +253,17 @@ sighandler_list;
    function. */
 static int async_handler_ready = 0;
 
-static void create_file_handler PARAMS ((int, int, handler_func *, gdb_client_data));
-static void invoke_async_signal_handler PARAMS ((void));
-static void handle_file_event PARAMS ((int));
-static int gdb_wait_for_event PARAMS ((void));
-static int gdb_do_one_event PARAMS ((void));
-static int check_async_ready PARAMS ((void));
+static void create_file_handler (int fd, int mask, handler_func *proc, gdb_client_data client_data);
+static void invoke_async_signal_handler (void);
+static void handle_file_event (int event_file_desc);
+static int gdb_wait_for_event (void);
+static int gdb_do_one_event (void);
+static int check_async_ready (void);
+static void async_queue_event (gdb_event *event_ptr, queue_position position);
+static gdb_event * create_file_event (int fd);
+static int process_event (void);
+static void handle_timer_event (int dummy);
+static void poll_timers (void);
 
 
 /* Insert an event object into the gdb event queue at 
@@ -139,9 +277,7 @@ static int check_async_ready PARAMS ((void));
    as last in first out. Event appended at the tail of the queue
    will be processed first in first out. */
 static void
-async_queue_event (event_ptr, position)
-     gdb_event *event_ptr;
-     queue_position position;
+async_queue_event (gdb_event *event_ptr, queue_position position)
 {
   if (position == TAIL)
     {
@@ -169,9 +305,8 @@ async_queue_event (event_ptr, position)
    processing. The procedure associated to this event is always
    handle_file_event, which will in turn invoke the one that was
    associated to FD when it was registered with the event loop. */
-gdb_event *
-create_file_event (fd)
-     int fd;
+static gdb_event *
+create_file_event (int fd)
 {
   gdb_event *file_event_ptr;
 
@@ -191,7 +326,7 @@ create_file_event (fd)
    priority events first, by invoking the associated event handler
    procedure. */
 static int
-process_event ()
+process_event (void)
 {
   gdb_event *event_ptr, *prev_ptr;
   event_handler_func *proc;
@@ -257,7 +392,7 @@ process_event ()
    it.  Returns 1 if something was done otherwise returns 0 (this can
    happen if there are no event sources to wait for). */
 static int
-gdb_do_one_event ()
+gdb_do_one_event (void)
 {
   int result = 0;
 
@@ -271,6 +406,9 @@ gdb_do_one_event ()
 	      result = 1;
 	      break;
 	    }
+
+	  /* Are any timers that are ready? If so, put an event on the queue.*/
+	  poll_timers ();
 
 	  /* Wait for a new event.  If gdb_wait_for_event returns -1,
 	     we should get out because this means that there are no
@@ -313,7 +451,7 @@ gdb_do_one_event ()
 /* Start up the event loop. This is the entry point to the event loop
    from the command loop. */
 void
-start_event_loop ()
+start_event_loop (void)
 {
   /* Loop until there is something to do. This is the entry point to
      the event loop engine. gdb_do_one_event will process one event
@@ -328,20 +466,16 @@ start_event_loop ()
 }
 
 
-
 /* Wrapper function for create_file_handler, so that the caller
    doesn't have to know implementation details about the use of poll
    vs. select. */
 void
-add_file_handler (fd, proc, client_data)
-     int fd;
-     void (*proc) (void);
-     gdb_client_data client_data;
+add_file_handler (int fd, handler_func *proc, gdb_client_data client_data)
 {
 #ifdef HAVE_POLL
-  create_file_handler (fd, POLLIN, (handler_func *) proc, client_data);
+  create_file_handler (fd, POLLIN, proc, client_data);
 #else
-  create_file_handler (fd, GDB_READABLE, (handler_func *) proc, client_data);
+  create_file_handler (fd, GDB_READABLE | GDB_EXCEPTION, proc, client_data);
 #endif
 }
 
@@ -356,11 +490,7 @@ add_file_handler (fd, proc, client_data)
    PROC is the procedure that will be called when an event occurs for
    FD.  CLIENT_DATA is the argument to pass to PROC. */
 static void
-create_file_handler (fd, mask, proc, client_data)
-     int fd;
-     int mask;
-     handler_func *proc;
-     gdb_client_data client_data;
+create_file_handler (int fd, int mask, handler_func *proc, gdb_client_data client_data)
 {
   file_handler *file_ptr;
 
@@ -377,7 +507,8 @@ create_file_handler (fd, mask, proc, client_data)
 	break;
     }
 
-  /* It is a new file descriptor. */
+  /* It is a new file descriptor. Add it to the list. Otherwise, just
+     change the data associated with it.*/
   if (file_ptr == NULL)
     {
       file_ptr = (file_handler *) xmalloc (sizeof (file_handler));
@@ -385,6 +516,9 @@ create_file_handler (fd, mask, proc, client_data)
       file_ptr->ready_mask = 0;
       file_ptr->next_file = gdb_notifier.first_file_handler;
       gdb_notifier.first_file_handler = file_ptr;
+#ifdef HAVE_POLL
+      gdb_notifier.num_fds++;
+#endif
     }
   file_ptr->proc = proc;
   file_ptr->client_data = client_data;
@@ -392,7 +526,6 @@ create_file_handler (fd, mask, proc, client_data)
 
 #ifdef HAVE_POLL
 
-  gdb_notifier.num_fds++;
   if (gdb_notifier.poll_fds)
     gdb_notifier.poll_fds =
       (struct pollfd *) realloc (gdb_notifier.poll_fds,
@@ -433,8 +566,7 @@ create_file_handler (fd, mask, proc, client_data)
 /* Remove the file descriptor FD from the list of monitored fd's: 
    i.e. we don't care anymore about events on the FD. */
 void
-delete_file_handler (fd)
-     int fd;
+delete_file_handler (int fd)
 {
   file_handler *file_ptr, *prev_ptr = NULL;
   int i, j;
@@ -536,11 +668,14 @@ delete_file_handler (fd)
    through event_ptr->proc.  EVENT_FILE_DESC is file descriptor of the
    event in the front of the event queue. */
 static void
-handle_file_event (event_file_desc)
-     int event_file_desc;
+handle_file_event (int event_file_desc)
 {
   file_handler *file_ptr;
-  int mask, error_mask;
+  int mask;
+#ifdef HAVE_POLL
+  int error_mask;
+  int error_mask_returned;
+#endif
 
   /* Search the file handler list to find one that matches the fd in
      the event. */
@@ -563,8 +698,30 @@ handle_file_event (event_file_desc)
 	  error_mask = POLLHUP | POLLERR | POLLNVAL;
 	  mask = (file_ptr->ready_mask & file_ptr->mask) |
 	    (file_ptr->ready_mask & error_mask);
+	  error_mask_returned = mask & error_mask;
 
+	  if (error_mask_returned != 0)
+	    {
+	      /* Work in progress. We may need to tell somebody what
+                 kind of error we had. */
+	      /*if (error_mask_returned & POLLHUP)
+		printf_unfiltered ("Hangup detected on fd %d\n", file_ptr->fd);
+	      if (error_mask_returned & POLLERR)
+		printf_unfiltered ("Error detected on fd %d\n", file_ptr->fd);
+	      if (error_mask_returned & POLLNVAL)
+		printf_unfiltered ("Invalid fd %d\n", file_ptr->fd);*/
+	      file_ptr->error = 1;
+           }
+	  else 
+	    file_ptr->error = 0;
 #else /* ! HAVE_POLL */
+	  if (file_ptr->ready_mask & GDB_EXCEPTION)
+	    {
+	      printf_unfiltered ("Exception condition detected on fd %d\n", file_ptr->fd);
+	      file_ptr->error = 1;
+	    }
+	  else
+	    file_ptr->error = 0;
 	  mask = file_ptr->ready_mask & file_ptr->mask;
 #endif /* HAVE_POLL */
 
@@ -573,7 +730,7 @@ handle_file_event (event_file_desc)
 
 	  /* If there was a match, then call the handler. */
 	  if (mask != 0)
-	    (*file_ptr->proc) (file_ptr->client_data);
+	    (*file_ptr->proc) (file_ptr->error, file_ptr->fd, file_ptr->client_data);
 	  break;
 	}
     }
@@ -587,7 +744,7 @@ handle_file_event (event_file_desc)
    Return -1 if there are no files descriptors to monitor, 
    otherwise return 0. */
 static int
-gdb_wait_for_event ()
+gdb_wait_for_event (void)
 {
   file_handler *file_ptr;
   gdb_event *file_event_ptr;
@@ -607,7 +764,14 @@ gdb_wait_for_event ()
 
 #ifdef HAVE_POLL
   num_found =
-    poll (gdb_notifier.poll_fds, (unsigned long) gdb_notifier.num_fds, -1);
+    poll (gdb_notifier.poll_fds, 
+	  (unsigned long) gdb_notifier.num_fds, 
+	  gdb_notifier.timeout_valid ? gdb_notifier.timeout : -1);
+
+  /* Don't print anything if we get out of poll because of a
+     signal.*/
+  if (num_found == -1 && errno != EINTR)
+    perror_with_name ("Poll");
 
 #else /* ! HAVE_POLL */
   memcpy (gdb_notifier.ready_masks,
@@ -616,14 +780,18 @@ gdb_wait_for_event ()
   num_found = select (gdb_notifier.num_fds,
 		      (SELECT_MASK *) & gdb_notifier.ready_masks[0],
 		      (SELECT_MASK *) & gdb_notifier.ready_masks[MASK_SIZE],
-		  (SELECT_MASK *) & gdb_notifier.ready_masks[2 * MASK_SIZE],
-		      NULL);
+		      (SELECT_MASK *) & gdb_notifier.ready_masks[2 * MASK_SIZE],
+		      gdb_notifier.timeout_valid ? gdb_notifier.timeout : NULL);
 
   /* Clear the masks after an error from select. */
   if (num_found == -1)
-    memset (gdb_notifier.ready_masks,
-	    0, 3 * MASK_SIZE * sizeof (fd_mask));
-
+    {
+      memset (gdb_notifier.ready_masks,
+	      0, 3 * MASK_SIZE * sizeof (fd_mask));
+      /* Dont print anything is we got a signal, let gdb handle it. */
+      if (errno != EINTR)
+	perror_with_name ("Select");
+    }
 #endif /* HAVE_POLL */
 
   /* Enqueue all detected file events. */
@@ -703,9 +871,7 @@ gdb_wait_for_event ()
    PROC is the function to call with CLIENT_DATA argument 
    whenever the handler is invoked. */
 async_signal_handler *
-create_async_signal_handler (proc, client_data)
-     handler_func *proc;
-     gdb_client_data client_data;
+create_async_signal_handler (sig_handler_func *proc, gdb_client_data client_data)
 {
   async_signal_handler *async_handler_ptr;
 
@@ -728,8 +894,7 @@ create_async_signal_handler (proc, client_data)
    some event.  The caller of this function is the interrupt handler
    associated with a signal. */
 void
-mark_async_signal_handler (async_handler_ptr)
-     async_signal_handler *async_handler_ptr;
+mark_async_signal_handler (async_signal_handler *async_handler_ptr)
 {
   ((async_signal_handler *) async_handler_ptr)->ready = 1;
   async_handler_ready = 1;
@@ -737,7 +902,7 @@ mark_async_signal_handler (async_handler_ptr)
 
 /* Call all the handlers that are ready. */
 static void
-invoke_async_signal_handler ()
+invoke_async_signal_handler (void)
 {
   async_signal_handler *async_handler_ptr;
 
@@ -768,8 +933,7 @@ invoke_async_signal_handler ()
 /* Delete an asynchronous handler (ASYNC_HANDLER_PTR). 
    Free the space allocated for it.  */
 void
-delete_async_signal_handler (async_handler_ptr)
-     async_signal_handler **async_handler_ptr;
+delete_async_signal_handler (async_signal_handler **async_handler_ptr)
 {
   async_signal_handler *prev_ptr;
 
@@ -794,7 +958,212 @@ delete_async_signal_handler (async_handler_ptr)
 
 /* Is it necessary to call invoke_async_signal_handler? */
 static int
-check_async_ready ()
+check_async_ready (void)
 {
   return async_handler_ready;
+}
+
+/* FIXME: where does this function belong? */
+/* General function to handle events in the inferior. So far it just
+   takes care of detecting errors reported by select() or poll(),
+   otherwise it assumes that all is OK, and goes on reading data from
+   the fd. This however may not always be what we want to do. */
+void
+inferior_event_handler (int error, gdb_client_data client_data, int fd)
+{
+  if (error == 1)
+    {
+      printf_unfiltered ("error detected on fd %d\n", fd);
+      delete_file_handler (fd);
+      discard_all_continuations ();
+    }
+  else
+    fetch_inferior_event (client_data);
+}
+
+/* Create a timer that will expire in MILLISECONDS from now. When the
+   timer is ready, PROC will be executed. At creation, the timer is
+   aded to the timers queue.  This queue is kept sorted in order of
+   increasing timers. Return a handle to the timer struct.*/
+int
+create_timer (int milliseconds, timer_handler_func *proc, gdb_client_data client_data)
+{
+  struct gdb_timer *timer_ptr, *timer_index, *prev_timer;
+  struct timeval time_now, delta;
+
+  /* compute seconds */
+  delta.tv_sec = milliseconds / 1000;
+  /* compute microseconds */
+  delta.tv_usec = (milliseconds % 1000) * 1000; 
+  
+  gettimeofday (&time_now, NULL);
+
+  timer_ptr = (struct gdb_timer *) xmalloc (sizeof (gdb_timer));
+  timer_ptr->when.tv_sec = time_now.tv_sec + delta.tv_sec;
+  timer_ptr->when.tv_usec = time_now.tv_usec + delta.tv_usec;
+  /* carry? */
+  if (timer_ptr->when.tv_usec >= 1000000 )
+    {
+      timer_ptr->when.tv_sec += 1;
+      timer_ptr->when.tv_usec -= 1000000;
+    }
+  timer_ptr->proc = proc;
+  timer_ptr->client_data = client_data;
+  timer_list.num_timers ++;
+  timer_ptr->timer_id = timer_list.num_timers;
+
+  /* Now add the timer to the timer queue, making sure it is sorted in
+     increasing order of expiration. */
+
+  for (timer_index = timer_list.first_timer; 
+       timer_index != NULL; 
+       timer_index = timer_index->next)
+    {
+      /* If the seconds field is greater or if it is the same, but the
+         microsecond field is greater. */
+      if ((timer_index->when.tv_sec > timer_ptr->when.tv_sec) || 
+	  ((timer_index->when.tv_sec == timer_ptr->when.tv_sec)
+	   && (timer_index->when.tv_usec > timer_ptr->when.tv_usec)))
+	break;
+    }
+  
+  if (timer_index == timer_list.first_timer)
+    {
+      timer_ptr->next = timer_list.first_timer;
+      timer_list.first_timer = timer_ptr;
+
+    }
+  else
+    {
+      for (prev_timer = timer_list.first_timer; 
+	   prev_timer->next != timer_index; 
+	   prev_timer = prev_timer->next)
+	;
+      
+      prev_timer->next = timer_ptr;
+      timer_ptr->next = timer_index;
+    }
+
+  gdb_notifier.timeout_valid = 0;
+  return timer_ptr->timer_id;
+}
+
+/* There is a chance that the creator of the timer wants to get rid of
+   it before it expires. */
+void
+delete_timer (int id)
+{
+  struct gdb_timer *timer_ptr, *prev_timer = NULL;
+
+  /* Find the entry for the given timer. */
+
+  for (timer_ptr = timer_list.first_timer; timer_ptr != NULL;
+       timer_ptr = timer_ptr->next)
+    {
+      if (timer_ptr->timer_id == id)
+	break;
+    }
+
+  if (timer_ptr == NULL)
+    return;
+  /* Get rid of the timer in the timer list. */
+  if (timer_ptr == timer_list.first_timer)
+    timer_list.first_timer = timer_ptr->next;
+  else
+    {
+      for (prev_timer = timer_list.first_timer;
+	   prev_timer->next != timer_ptr;
+	   prev_timer = prev_timer->next)
+	;
+      prev_timer->next = timer_ptr->next;
+    }
+  free ((char *) timer_ptr);
+
+  gdb_notifier.timeout_valid = 0;
+}
+
+/* When a timer event is put on the event queue, it will be handled by
+   this function.  Just call the assiciated procedure and delete the
+   timer event from the event queue. Repeat this for each timer that
+   has expired.*/
+static void
+handle_timer_event (int dummy)
+{
+  struct timeval time_now;
+  struct gdb_timer *timer_ptr, *saved_timer;
+ 
+  gettimeofday (&time_now, NULL);
+  timer_ptr = timer_list.first_timer;
+
+  while (timer_ptr != NULL)
+    {
+      if ((timer_ptr->when.tv_sec > time_now.tv_sec) || 
+	  ((timer_ptr->when.tv_sec == time_now.tv_sec) && 
+	   (timer_ptr->when.tv_usec > time_now.tv_usec)))
+	break;
+
+      /* Get rid of the timer from the beginning of the list. */
+      timer_list.first_timer = timer_ptr->next;
+      saved_timer = timer_ptr;
+      timer_ptr = timer_ptr->next;
+      /* Call the procedure associated with that timer. */
+      (*saved_timer->proc) (timer_ptr->client_data);
+      free (saved_timer);
+    }
+
+  gdb_notifier.timeout_valid = 0;
+}
+ 
+/* Check whether any timers in the timers queue are ready. If at least
+   one timer is ready, stick an event onto the event queue.  Even in
+   case more than one timer is ready, one event is enough, because the
+   handle_timer_event() will go through the timers list and call the
+   procedures associated with all that have expired. Update the
+   timeout for the select() or poll() as well.*/
+static void
+poll_timers (void)
+{
+  struct timeval time_now, delta;
+  gdb_event *event_ptr;
+ 
+  if (timer_list.num_timers)
+    {
+      gettimeofday (&time_now, NULL);
+      delta.tv_sec = timer_list.first_timer->when.tv_sec - time_now.tv_sec;
+      delta.tv_usec = timer_list.first_timer->when.tv_usec - time_now.tv_usec;
+      /* borrow? */
+      if (delta.tv_usec < 0)
+	{
+	  delta.tv_sec -= 1;
+	  delta.tv_usec += 1000000;
+	}
+ 
+      /* Oops it expired already. Tell select / poll to return
+	 immediately. */
+      if (delta.tv_sec < 0)
+	{
+	  delta.tv_sec = 0;
+	  delta.tv_usec = 0;
+	}
+
+      if (delta.tv_sec == 0 && delta.tv_usec == 0)
+	{
+	  event_ptr = (gdb_event *) xmalloc (sizeof (gdb_event));
+	  event_ptr->proc = handle_timer_event;
+	  event_ptr->fd = timer_list.first_timer->timer_id;
+	  async_queue_event (event_ptr, TAIL);
+	}
+
+      /* Now we need to update the timeout for select/ poll, because we
+	 don't want to sit there while this timer is expiring. */
+#ifdef HAVE_POLL
+      gdb_notifier.timeout = delta.tv_sec * 1000; 
+#else
+      gdb_notifier.timeout.sec = delta.tv_sec;
+      gdb_notifier.timeout.usec = delta.tv_usec;
+#endif
+      gdb_notifier.timeout_valid = 1;
+    }
+  else 
+    gdb_notifier.timeout_valid = 0;
 }

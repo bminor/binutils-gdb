@@ -210,8 +210,8 @@ call_dummy
 #undef REG_PARM_STACK_SPACE
 #define REG_PARM_STACK_SPACE 64
 
-/* Arguments grow in the normal direction for the PA64 port.  */
-#undef ARGS_GROW_DOWNWARD
+/* Use the 64-bit calling conventions designed for the PA2.0 in wide mode.  */
+#define PA20W_CALLING_CONVENTIONS
 
 #undef FUNC_LDIL_OFFSET
 #undef FUNC_LDO_OFFSET

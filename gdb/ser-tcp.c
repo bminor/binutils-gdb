@@ -1,5 +1,5 @@
 /* Serial interface for raw TCP connections on Un*x like systems
-   Copyright 1992, 1993, 1998 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1998-1999 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,13 +20,14 @@
 
 #include "defs.h"
 #include "serial.h"
+#include "ser-unix.h"
+
 #include <sys/types.h>
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/socket.h>
-
 #ifndef __CYGWIN32__
 #include <netinet/tcp.h>
 #endif
@@ -34,37 +35,15 @@
 #include "signals.h"
 #include "gdb_string.h"
 
-extern int (*ui_loop_hook) PARAMS ((int));
+static int tcp_open (serial_t scb, const char *name);
+static void tcp_close (serial_t scb);
 
-struct tcp_ttystate
-  {
-    int bogus;
-  };
-
-static int tcp_open PARAMS ((serial_t scb, const char *name));
-static void tcp_raw PARAMS ((serial_t scb));
-static int wait_for PARAMS ((serial_t scb, int timeout));
-static int tcp_readchar PARAMS ((serial_t scb, int timeout));
-static int tcp_setbaudrate PARAMS ((serial_t scb, int rate));
-static int tcp_setstopbits PARAMS ((serial_t scb, int num));
-static int tcp_write PARAMS ((serial_t scb, const char *str, int len));
-/* FIXME: static void tcp_restore PARAMS ((serial_t scb)); */
-static void tcp_close PARAMS ((serial_t scb));
-static serial_ttystate tcp_get_tty_state PARAMS ((serial_t scb));
-static int tcp_set_tty_state PARAMS ((serial_t scb, serial_ttystate state));
-static int tcp_return_0 PARAMS ((serial_t));
-static int tcp_noflush_set_tty_state PARAMS ((serial_t, serial_ttystate,
-					      serial_ttystate));
-static void tcp_print_tty_state PARAMS ((serial_t, serial_ttystate));
-
-void _initialize_ser_tcp PARAMS ((void));
+void _initialize_ser_tcp (void);
 
 /* Open up a raw tcp socket */
 
 static int
-tcp_open (scb, name)
-     serial_t scb;
-     const char *name;
+tcp_open (serial_t scb, const char *name)
 {
   char *port_str;
   int port;
@@ -143,231 +122,8 @@ tcp_open (scb, name)
   return 0;
 }
 
-static serial_ttystate
-tcp_get_tty_state (scb)
-     serial_t scb;
-{
-  struct tcp_ttystate *state;
-
-  state = (struct tcp_ttystate *) xmalloc (sizeof *state);
-
-  return (serial_ttystate) state;
-}
-
-static int
-tcp_set_tty_state (scb, ttystate)
-     serial_t scb;
-     serial_ttystate ttystate;
-{
-  struct tcp_ttystate *state;
-
-  state = (struct tcp_ttystate *) ttystate;
-
-  return 0;
-}
-
-static int
-tcp_return_0 (scb)
-     serial_t scb;
-{
-  return 0;
-}
-
 static void
-tcp_raw (scb)
-     serial_t scb;
-{
-  return;			/* Always in raw mode */
-}
-
-/* Wait for input on scb, with timeout seconds.  Returns 0 on success,
-   otherwise SERIAL_TIMEOUT or SERIAL_ERROR.
-
-   For termio{s}, we actually just setup VTIME if necessary, and let the
-   timeout occur in the read() in tcp_read().
- */
-
-static int
-wait_for (scb, timeout)
-     serial_t scb;
-     int timeout;
-{
-  int numfds;
-  struct timeval tv;
-  fd_set readfds, exceptfds;
-
-  FD_ZERO (&readfds);
-  FD_ZERO (&exceptfds);
-
-  tv.tv_sec = timeout;
-  tv.tv_usec = 0;
-
-  FD_SET (scb->fd, &readfds);
-  FD_SET (scb->fd, &exceptfds);
-
-  while (1)
-    {
-      if (timeout >= 0)
-	numfds = select (scb->fd + 1, &readfds, 0, &exceptfds, &tv);
-      else
-	numfds = select (scb->fd + 1, &readfds, 0, &exceptfds, 0);
-
-      if (numfds <= 0)
-	{
-	  if (numfds == 0)
-	    return SERIAL_TIMEOUT;
-	  else if (errno == EINTR)
-	    continue;
-	  else
-	    return SERIAL_ERROR;	/* Got an error from select or poll */
-	}
-
-      return 0;
-    }
-}
-
-/* Read a character with user-specified timeout.  TIMEOUT is number of seconds
-   to wait, or -1 to wait forever.  Use timeout of 0 to effect a poll.  Returns
-   char if successful.  Returns -2 if timeout expired, EOF if line dropped
-   dead, or -3 for any other error (see errno in that case). */
-
-static int
-tcp_readchar (scb, timeout)
-     serial_t scb;
-     int timeout;
-{
-  int status;
-  int delta;
-
-  if (scb->bufcnt-- > 0)
-    return *scb->bufp++;
-
-  /* We have to be able to keep the GUI alive here, so we break the original
-     timeout into steps of 1 second, running the "keep the GUI alive" hook 
-     each time through the loop.
-
-     Also, timeout = 0 means to poll, so we just set the delta to 0, so we
-     will only go through the loop once. */
-
-  delta = (timeout == 0 ? 0 : 1);
-  while (1)
-    {
-
-      /* N.B. The UI may destroy our world (for instance by calling
-         remote_stop,) in which case we want to get out of here as
-         quickly as possible.  It is not safe to touch scb, since
-         someone else might have freed it.  The ui_loop_hook signals that 
-         we should exit by returning 1. */
-
-      if (ui_loop_hook)
-	{
-	  if (ui_loop_hook (0))
-	    return SERIAL_TIMEOUT;
-	}
-
-      status = wait_for (scb, delta);
-      timeout -= delta;
-
-      /* If we got a character or an error back from wait_for, then we can 
-         break from the loop before the timeout is completed. */
-
-      if (status != SERIAL_TIMEOUT)
-	{
-	  break;
-	}
-
-      /* If we have exhausted the original timeout, then generate
-         a SERIAL_TIMEOUT, and pass it out of the loop. */
-
-      else if (timeout == 0)
-	{
-	  status = SERIAL_TIMEOUT;
-	  break;
-	}
-    }
-
-  if (status < 0)
-    return status;
-
-  while (1)
-    {
-      scb->bufcnt = read (scb->fd, scb->buf, BUFSIZ);
-      if (scb->bufcnt != -1 || errno != EINTR)
-	break;
-    }
-
-  if (scb->bufcnt <= 0)
-    {
-      if (scb->bufcnt == 0)
-	return SERIAL_TIMEOUT;	/* 0 chars means timeout [may need to
-				   distinguish between EOF & timeouts
-				   someday] */
-      else
-	return SERIAL_ERROR;	/* Got an error from read */
-    }
-
-  scb->bufcnt--;
-  scb->bufp = scb->buf;
-  return *scb->bufp++;
-}
-
-static int
-tcp_noflush_set_tty_state (scb, new_ttystate, old_ttystate)
-     serial_t scb;
-     serial_ttystate new_ttystate;
-     serial_ttystate old_ttystate;
-{
-  return 0;
-}
-
-static void
-tcp_print_tty_state (scb, ttystate)
-     serial_t scb;
-     serial_ttystate ttystate;
-{
-  /* Nothing to print.  */
-  return;
-}
-
-static int
-tcp_setbaudrate (scb, rate)
-     serial_t scb;
-     int rate;
-{
-  return 0;			/* Never fails! */
-}
-
-static int
-tcp_setstopbits (scb, num)
-     serial_t scb;
-     int num;
-{
-  return 0;			/* Never fails! */
-}
-
-static int
-tcp_write (scb, str, len)
-     serial_t scb;
-     const char *str;
-     int len;
-{
-  int cc;
-
-  while (len > 0)
-    {
-      cc = write (scb->fd, str, len);
-
-      if (cc < 0)
-	return 1;
-      len -= cc;
-      str += cc;
-    }
-  return 0;
-}
-
-static void
-tcp_close (scb)
-     serial_t scb;
+tcp_close (serial_t scb)
 {
   if (scb->fd < 0)
     return;
@@ -376,29 +132,28 @@ tcp_close (scb)
   scb->fd = -1;
 }
 
-static struct serial_ops tcp_ops =
-{
-  "tcp",
-  0,
-  tcp_open,
-  tcp_close,
-  tcp_readchar,
-  tcp_write,
-  tcp_return_0,			/* flush output */
-  tcp_return_0,			/* flush input */
-  tcp_return_0,			/* send break */
-  tcp_raw,
-  tcp_get_tty_state,
-  tcp_set_tty_state,
-  tcp_print_tty_state,
-  tcp_noflush_set_tty_state,
-  tcp_setbaudrate,
-  tcp_setstopbits,
-  tcp_return_0,			/* wait for output to drain */
-};
-
 void
-_initialize_ser_tcp ()
+_initialize_ser_tcp (void)
 {
-  serial_add_interface (&tcp_ops);
+  struct serial_ops *ops = XMALLOC (struct serial_ops);
+  memset (ops, sizeof (struct serial_ops), 0);
+  ops->name = "tcp";
+  ops->next = 0;
+  ops->open = tcp_open;
+  ops->close = tcp_close;
+  ops->readchar = ser_unix_readchar;
+  ops->write = ser_unix_write;
+  ops->flush_output = ser_unix_nop_flush_output;
+  ops->flush_input = ser_unix_nop_flush_input;
+  ops->send_break = ser_unix_nop_send_break;
+  ops->go_raw = ser_unix_nop_raw;
+  ops->get_tty_state = ser_unix_nop_get_tty_state;
+  ops->set_tty_state = ser_unix_nop_set_tty_state;
+  ops->print_tty_state = ser_unix_nop_print_tty_state;
+  ops->noflush_set_tty_state = ser_unix_nop_noflush_set_tty_state;
+  ops->setbaudrate = ser_unix_nop_setbaudrate;
+  ops->setstopbits = ser_unix_nop_setstopbits;
+  ops->drain_output = ser_unix_nop_drain_output;
+  ops->async = ser_unix_async;
+  serial_add_interface (ops);
 }

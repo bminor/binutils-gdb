@@ -492,7 +492,7 @@ child_terminal_info (args, from_tty)
   printf_filtered ("Process group = %d\n", inferior_process_group);
 #endif
 
-  SERIAL_PRINT_TTY_STATE (stdin_serial, inferior_ttystate);
+  SERIAL_PRINT_TTY_STATE (stdin_serial, inferior_ttystate, gdb_stdout);
 }
 
 /* NEW_TTY_PREFORK is called before forking a new child process,

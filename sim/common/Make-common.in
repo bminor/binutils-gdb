@@ -399,7 +399,6 @@ sim-fpu.o: $(srccom)/sim-fpu.c $(sim-fpu_h) \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-fpu.c $(ALL_CFLAGS)
 
-
 sim-hload.o: $(srccom)/sim-hload.c $(sim-assert_h) \
 	  $(srcroot)/include/remote-sim.h \
 	  $(SIM_EXTRA_DEPS)

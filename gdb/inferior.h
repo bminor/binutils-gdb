@@ -158,7 +158,7 @@ extern void generic_target_write_fp PARAMS ((CORE_ADDR));
 
 extern void wait_for_inferior PARAMS ((void));
 
-extern void fetch_inferior_event PARAMS ((void));
+extern void fetch_inferior_event PARAMS ((void *));
 
 extern void init_wait_for_inferior PARAMS ((void));
 

@@ -360,14 +360,14 @@ es1800_open (name, from_tty)
 
   es1800_saved_ttystate = SERIAL_GET_TTY_STATE (es1800_desc);
 
-  if ((fcflag = fcntl (es1800_desc->fd, F_GETFL, 0)) == -1)
+  if ((fcflag = fcntl (DEPRECATED_SERIAL_FD (es1800_desc), F_GETFL, 0)) == -1)
     {
       perror_with_name ("fcntl serial");
     }
   es1800_fc_save = fcflag;
 
   fcflag = (fcflag & (FREAD | FWRITE));		/* mask out any funny stuff */
-  if (fcntl (es1800_desc->fd, F_SETFL, fcflag) == -1)
+  if (fcntl (DEPRECATED_SERIAL_FD (es1800_desc), F_SETFL, fcflag) == -1)
     {
       perror_with_name ("fcntl serial");
     }
@@ -470,7 +470,7 @@ es1800_close (quitting)
       printf ("\nClosing connection to emulator...\n");
       if (SERIAL_SET_TTY_STATE (es1800_desc, es1800_saved_ttystate) < 0)
 	print_sys_errmsg ("warning: unable to restore tty state", errno);
-      fcntl (es1800_desc->fd, F_SETFL, es1800_fc_save);
+      fcntl (DEPRECATED_SERIAL_FD (es1800_desc), F_SETFL, es1800_fc_save);
       SERIAL_CLOSE (es1800_desc);
       es1800_desc = NULL;
     }
@@ -1876,7 +1876,7 @@ es1800_transparent (args, from_tty)
       perror_with_name ("ioctl console");
     }
 
-  if ((fcflag = fcntl (es1800_desc->fd, F_GETFL, 0)) == -1)
+  if ((fcflag = fcntl (DEPRECATED_SERIAL_FD (es1800_desc), F_GETFL, 0)) == -1)
     {
       perror_with_name ("fcntl serial");
     }
@@ -1884,7 +1884,7 @@ es1800_transparent (args, from_tty)
   es1800_fc_save = fcflag;
   fcflag = fcflag | FNDELAY;
 
-  if (fcntl (es1800_desc->fd, F_SETFL, fcflag) == -1)
+  if (fcntl (DEPRECATED_SERIAL_FD (es1800_desc), F_SETFL, fcflag) == -1)
     {
       perror_with_name ("fcntl serial");
     }
@@ -1920,7 +1920,7 @@ es1800_transparent (args, from_tty)
 	  perror_with_name ("FEL! read:");
 	}
 
-      cc = read (es1800_desc->fd, inputbuf, inputcnt);
+      cc = read (DEPRECATED_SERIAL_FD (es1800_desc), inputbuf, inputcnt);
       if (cc != -1)
 	{
 	  for (i = 0; i < cc;)
@@ -1959,7 +1959,7 @@ es1800_transparent (args, from_tty)
 
   close (console);
 
-  if (fcntl (es1800_desc->fd, F_SETFL, es1800_fc_save) == -1)
+  if (fcntl (DEPRECATED_SERIAL_FD (es1800_desc), F_SETFL, es1800_fc_save) == -1)
     {
       perror_with_name ("FEL! fcntl");
     }

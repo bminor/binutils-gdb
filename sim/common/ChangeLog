@@ -1,3 +1,20 @@
+Mon Sep 20 21:44:06 1999  Geoffrey Keating  <geoffk@cygnus.com>
+
+        * sim-fpu.c (i2fpu): Keep the guard bits sticky when converting
+        large values.
+
+Wed Sep 15 14:12:37 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* hw-tree.c, hw-properties.c, hw-instances.c: Include "sim-io.h".
+
+Tue Sep 14 14:15:47 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* cgen-par.h (CGEN_BI_WRITE): New enumerator.
+	(bi_write): New union element.
+	(sim_queue_bi_write): New function.
+	* cgen-par.c (sim_queue_bi_write): New function.
+	(cgen_write_queue_element_execute): Handle CGEN_BI_WRITE.
+
 Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

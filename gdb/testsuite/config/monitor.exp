@@ -38,6 +38,12 @@ proc gdb_target_monitor { exec_file } {
     if [target_info exists binarydownload] {
 	gdb_test "set remotebinarydownload [target_info binarydownload]" "" ""
     }
+    if { [ target_info exists disable_x_packet ] } {
+	gdb_test "set remote X-packet disable" ""
+    }
+    if { [ target_info exists disable_z_packet ] } {
+	gdb_test "set remote Z-packet disable" ""
+    }
     if [target_info exists gdb_serial] {
        set serialport "[target_info gdb_serial]";
     } elseif [target_info exists netport] {

@@ -229,7 +229,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19990913
+VERSION = 19990921
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -454,8 +454,10 @@ top_h =		top.h
 inferior_h =	inferior.h $(breakpoint_h)
 tracepoint_h =	tracepoint.h
 ax_h = 		ax.h
-event_loop_h = event-loop.h
-version_h = version.h
+event_loop_h =  event-loop.h
+event_top_h = 	event-top.h
+remote_h =	remote.h
+version_h = 	version.h
 
 # Header files that need to have srcdir added.  Note that in the cases
 # where we use a macro like $(gdbcmd_h), things are carefully arranged
@@ -1122,10 +1124,10 @@ eval.o: eval.c $(bfd_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbtypes_h) language.h $(symtab_h) target.h $(value_h) \
 	gdb_string.h
 
-event-loop.o: event-loop.c $(defs_h) $(top_h) $(event_loop_h)
+event-loop.o: event-loop.c $(defs_h) $(top_h) $(event_loop_h) $(event_top_h)
 
 event-top.o: event-top.c top.h $(readline_headers) \
-      $(defs_h) $(inferior_h) $(event_loop_h) terminal.h $(gdbcmd_h)
+      $(defs_h) $(inferior_h) $(event_loop_h) $(event_top_h) terminal.h $(gdbcmd_h)
 
 exec.o: exec.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
 	target.h language.h gdb_string.h
@@ -1143,7 +1145,7 @@ fork-child.o: fork-child.c $(wait_h) $(defs_h) $(gdbcore_h) \
 # to fix breakpoint.c's compiler warnings.
 tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
 	$(gdbtypes_h) $(expression_h) $(gdbcmd_h) $(value_h) target.h \
-	language.h gdb_string.h $(readline_headers)
+	language.h gdb_string.h $(readline_headers) $(remote_h)
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
 
 gdbarch.o: gdbarch.c $(defs_h) $(bfd_h) $(gdbcmd_h)
@@ -1217,7 +1219,8 @@ infptrace.o: infptrace.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
 	gdb_string.h $(wait_h) $(command_h)
 
 infrun.o: infrun.c $(wait_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) target.h gdbthread.h gdb_string.h $(event_loop_h)
+	$(inferior_h) target.h gdbthread.h gdb_string.h $(event_loop_h) \
+	$(event_top_h) target.h
 
 inftarg.o: inftarg.c $(wait_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	target.h terminal.h $(command_h)
@@ -1241,9 +1244,9 @@ jv-valprint.o: jv-valprint.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(value_h) $(INCLUDE_DIR)/demangle.h valprint.h \
 	language.h jv-lang.h c-lang.h gdbcore.h annotate.h
 
-kod.o: kod.c $(defs_h) $(command_h) $(gdbcmd_h) target.h gdb_string.h
+kod.o: kod.c $(defs_h) $(command_h) $(gdbcmd_h) target.h gdb_string.h kod.h
 
-kod-cisco.o: kod-cisco.c $(defs_h) gdb_string.h
+kod-cisco.o: kod-cisco.c $(defs_h) gdb_string.h kod.h
 
 language.o: language.c $(bfd_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbtypes_h) language.h parser-defs.h $(symtab_h) \
@@ -1504,7 +1507,7 @@ remote-utils.o: remote-utils.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 
 remote.o: remote.c $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(remote_utils_h) symfile.h terminal.h gdb_string.h \
-	$(event_loop_h)
+	$(event_loop_h) $(event_top_h) $(remote_h)
 
 remote-nrom.o: remote-nrom.c $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(remote_utils_h) symfile.h terminal.h
@@ -1533,11 +1536,11 @@ ser-mac.o: ser-mac.c $(defs_h) serial.h signals.h
 
 ser-ocd.o: ser-ocd.c $(defs_h) serial.h signals.h gdb_string.h
 
-ser-pipe.o: ser-pipe.c $(defs_h) serial.h signals.h gdb_string.h
+ser-pipe.o: ser-pipe.c $(defs_h) serial.h signals.h gdb_string.h ser-unix.h
 
-ser-tcp.o: ser-tcp.c $(defs_h) serial.h signals.h gdb_string.h
+ser-tcp.o: ser-tcp.c $(defs_h) serial.h signals.h gdb_string.h ser-unix.h
 
-ser-unix.o: ser-unix.c $(defs_h) serial.h 
+ser-unix.o: ser-unix.c $(defs_h) serial.h ser-unix.h 
 
 serial.o: serial.c $(defs_h) serial.h gdb_string.h
 
@@ -1556,7 +1559,7 @@ solib.o: solib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 
 source.o: source.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 	$(gdbcore_h) language.h objfiles.h gnu-regex.h symfile.h $(symtab_h) \
-	gdb_string.h
+	gdb_string.h source.h
 
 sparc-nat.o: sparc-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(gdbcore_h) \
 	target.h
@@ -1614,7 +1617,7 @@ thread.o: thread.c $(defs_h) gdbthread.h $(gdbcmd_h) target.h
 
 top.o: top.c top.h $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
 	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h signals.h \
-	$(remote_utils_h) gdb_string.h $(event_loop_h) $(version_h)
+	$(remote_utils_h) gdb_string.h $(event_loop_h) $(event_top_h) $(version_h)
 
 typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \
@@ -1628,7 +1631,7 @@ umax-xdep.o: umax-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 utils.o: utils.c $(bfd_h) $(defs_h) $(expression_h) $(gdbcmd_h) \
 	language.h signals.h target.h terminal.h $(readline_headers) \
-	gdb_string.h $(event_loop_h)
+	gdb_string.h $(event_loop_h) $(event_top_h)
 
 valarith.o: valarith.c $(bfd_h) $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h $(symtab_h) target.h $(value_h) \

@@ -36,6 +36,7 @@
 #include "objfiles.h"
 #include "gdb-stabs.h"
 #include "gdbthread.h"
+#include "remote.h"
 
 #include "dcache.h"
 
@@ -46,6 +47,7 @@
 #endif
 
 #include "event-loop.h"
+#include "event-top.h"
 
 #include <signal.h>
 #include "serial.h"
@@ -186,13 +188,7 @@ static void record_currthread PARAMS ((int currthread));
 
 extern int fromhex PARAMS ((int a));
 
-extern void getpkt PARAMS ((char *buf, int forever));
-
-extern int putpkt PARAMS ((char *buf));
-
 static int putpkt_binary PARAMS ((char *buf, int cnt));
-
-void remote_console_output PARAMS ((char *));
 
 static void check_binary_download PARAMS ((CORE_ADDR addr));
 
@@ -1840,8 +1836,10 @@ serial device is attached to the remote system (e.g. /dev/ttya).");
      event loop.  Set things up so that when there is an event on the
      file descriptor, the event loop will call fetch_inferior_event,
      which will do the proper analysis to determine what happened. */
-  if (async_p)
-    add_file_handler (remote_desc->fd, fetch_inferior_event, 0);
+  if (async_p && SERIAL_CAN_ASYNC_P (remote_desc))
+    SERIAL_ASYNC (remote_desc, inferior_event_handler, 0);
+  if (remote_debug && SERIAL_IS_ASYNC_P (remote_desc))
+    fputs_unfiltered ("Async mode.\n", gdb_stdlog);
 
   push_target (target);		/* Switch to using remote target now */
 
@@ -1858,7 +1856,7 @@ serial device is attached to the remote system (e.g. /dev/ttya).");
   /* If running asynchronously, set things up for telling the target
      to use the extended protocol. This will happen only after the
      target has been connected to, in fetch_inferior_event. */
-  if (extended_p && async_p)
+  if (extended_p && SERIAL_IS_ASYNC_P (remote_desc))
     add_continuation (set_extended_protocol, NULL);
 
   /* Without this, some commands which require an active target (such
@@ -1877,13 +1875,13 @@ serial device is attached to the remote system (e.g. /dev/ttya).");
 		     RETURN_MASK_ALL))
     {
       /* Unregister the file descriptor from the event loop. */
-      if (async_p)
-	delete_file_handler (remote_desc->fd);
+      if (SERIAL_IS_ASYNC_P (remote_desc))
+	SERIAL_ASYNC (remote_desc, NULL, 0);
       pop_target ();
       return;
     }
 
-  if (!async_p)
+  if (!SERIAL_IS_ASYNC_P (remote_desc))
     {
       if (extended_p)
 	{
@@ -1948,8 +1946,8 @@ remote_async_detach (args, from_tty)
   remote_send (buf);
 
   /* Unregister the file descriptor from the event loop. */
-  if (async_p)
-    delete_file_handler (remote_desc->fd);
+  if (SERIAL_IS_ASYNC_P (remote_desc))
+    SERIAL_ASYNC (remote_desc, NULL, 0);
 
   pop_target ();
   if (from_tty)
@@ -2053,7 +2051,7 @@ remote_async_resume (pid, step, siggnal)
      command, because it is also called by handle_inferior_event. So
      we make sure that we don't do the initialization for sync
      execution more than once. */
-  if (async_p && !target_executing)
+  if (SERIAL_IS_ASYNC_P (remote_desc) && !target_executing)
     {
       target_executing = 1;
 
@@ -2145,9 +2143,9 @@ cleanup_sigint_signal_handler ()
 {
   signal (SIGINT, handle_sigint);
   if (sigint_remote_twice_token)
-    delete_async_signal_handler ((async_signal_handler **) & sigint_remote_twice_token);
+    delete_async_signal_handler ((struct async_signal_handler **) & sigint_remote_twice_token);
   if (sigint_remote_token)
-    delete_async_signal_handler ((async_signal_handler **) & sigint_remote_token);
+    delete_async_signal_handler ((struct async_signal_handler **) & sigint_remote_token);
 }
 
 /* Send ^C to target to halt it.  Target will respond, and send us a
@@ -2473,10 +2471,10 @@ remote_async_wait (pid, status)
     {
       unsigned char *p;
 
-      if (!async_p)
+      if (!SERIAL_IS_ASYNC_P (remote_desc))
 	ofunc = signal (SIGINT, remote_interrupt);
       getpkt ((char *) buf, 1);
-      if (!async_p)
+      if (!SERIAL_IS_ASYNC_P (remote_desc))
 	signal (SIGINT, ofunc);
 
       /* This is a hook for when we need to do something (perhaps the
@@ -3519,33 +3517,6 @@ putpkt_binary (buf, cnt)
 
 static int remote_cisco_mode;
 
-static void
-remote_cisco_expand (src, dest)
-     char *src;
-     char *dest;
-{
-  int i;
-  int repeat;
-
-  do
-    {
-      if (*src == '*')
-	{
-	  repeat = (fromhex (src[1]) << 4) + fromhex (src[2]);
-	  for (i = 0; i < repeat; i++)
-	    {
-	      *dest++ = *(src - 1);
-	    }
-	  src += 2;
-	}
-      else
-	{
-	  *dest++ = *src;
-	}
-    }
-  while (*src++);
-}
-
 /* Come here after finding the start of the frame.  Collect the rest
    into BUF, verifying the checksum, length, and handling run-length
    compression.  Returns 0 on any error, 1 on success.  */
@@ -3586,16 +3557,7 @@ read_frame (buf)
 	    pktcsum |= fromhex (readchar (remote_timeout));
 
 	    if (csum == pktcsum)
-	      {
-		if (remote_cisco_mode)	/* variant run-length-encoding */
-		  {
-		    char *tmp_buf = alloca (PBUFSIZ);
-
-		    remote_cisco_expand (buf, tmp_buf);
-		    strcpy (buf, tmp_buf);
-		  }
-		return 1;
-	      }
+              return 1;
 
 	    if (remote_debug)
 	      {
@@ -3608,27 +3570,43 @@ read_frame (buf)
 	    return 0;
 	  }
 	case '*':		/* Run length encoding */
-	  if (remote_cisco_mode == 0)	/* variant run-length-encoding */
-	    {
-	      csum += c;
-	      c = readchar (remote_timeout);
-	      csum += c;
-	      c = c - ' ' + 3;	/* Compute repeat count */
+          {
+	    int repeat;
+ 	    csum += c;
 
-	      if (c > 0 && c < 255 && bp + c - 1 < buf + PBUFSIZ - 1)
-		{
-		  memset (bp, *(bp - 1), c);
-		  bp += c;
-		  continue;
-		}
+	    if (remote_cisco_mode == 0)
+	      {
+		c = readchar (remote_timeout);
+		csum += c;
+		repeat = c - ' ' + 3;	/* Compute repeat count */
+	      }
+	    else 
+	      { 
+		/* Cisco's run-length encoding variant uses two 
+		   hex chars to represent the repeat count. */
 
-	      *bp = '\0';
-	      printf_filtered ("Repeat count %d too large for buffer: ", c);
-	      puts_filtered (buf);
-	      puts_filtered ("\n");
-	      return 0;
-	    }
-	  /* else fall thru to treat like default */
+		c = readchar (remote_timeout);
+		csum += c;
+		repeat  = fromhex (c) << 4;
+		c = readchar (remote_timeout);
+		csum += c;
+		repeat += fromhex (c);
+	      }
+
+	    if (repeat > 0 && repeat <= 255 
+                && bp + repeat - 1 < buf + PBUFSIZ - 1)
+	      {
+		memset (bp, *(bp - 1), repeat);
+		bp += c;
+		continue;
+	      }
+
+	    *bp = '\0';
+	    printf_filtered ("Repeat count %d too large for buffer: ", repeat);
+	    puts_filtered (buf);
+	    puts_filtered ("\n");
+	    return 0;
+	  }
 	default:
 	  if (bp < buf + PBUFSIZ - 1)
 	    {
@@ -3755,8 +3733,8 @@ static void
 remote_async_kill ()
 {
   /* Unregister the file descriptor from the event loop. */
-  if (async_p)
-    delete_file_handler (remote_desc->fd);
+  if (SERIAL_IS_ASYNC_P (remote_desc))
+    SERIAL_ASYNC (remote_desc, NULL, 0);
 
   /* For some mysterious reason, wait_for_inferior calls kill instead of
      mourn after it gets TARGET_WAITKIND_SIGNALLED.  Work around it.  */
@@ -3854,8 +3832,8 @@ extended_remote_async_create_inferior (exec_file, args, env)
 
   /* If running asynchronously, register the target file descriptor
      with the event loop. */
-  if (async_p)
-    add_file_handler (remote_desc->fd, fetch_inferior_event, 0);
+  if (async_p && SERIAL_CAN_ASYNC_P (remote_desc))
+    SERIAL_ASYNC (remote_desc, inferior_event_handler, 0);
 
   /* Now restart the remote server.  */
   extended_remote_restart ();
@@ -4939,7 +4917,7 @@ minitelnet ()
 
       FD_ZERO (&input);
       FD_SET (fileno (stdin), &input);
-      FD_SET (remote_desc->fd, &input);
+      FD_SET (DEPRECATED_SERIAL_FD (remote_desc), &input);
 
       status = select (tablesize, &input, 0, 0, 0);
       if ((status == -1) && (errno != EINTR))

@@ -396,11 +396,7 @@ find_pc_sect_psymtab (pc, section)
 
   ALL_PSYMTABS (objfile, pst)
   {
-#if defined(HPUXHPPA)
-    if (pc >= pst->textlow && pc <= pst->texthigh)
-#else
     if (pc >= pst->textlow && pc < pst->texthigh)
-#endif
       {
 	struct minimal_symbol *msymbol;
 	struct partial_symtab *tpst;
@@ -419,11 +415,7 @@ find_pc_sect_psymtab (pc, section)
 
 	for (tpst = pst; tpst != NULL; tpst = tpst->next)
 	  {
-#if defined(HPUXHPPA)
-	    if (pc >= tpst->textlow && pc <= tpst->texthigh)
-#else
 	    if (pc >= tpst->textlow && pc < tpst->texthigh)
-#endif
 	      {
 		struct partial_symbol *p;
 
@@ -1437,11 +1429,7 @@ find_pc_sect_symtab (pc, section)
     b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 
     if (BLOCK_START (b) <= pc
-#if defined(HPUXHPPA)
-	&& BLOCK_END (b) >= pc
-#else
 	&& BLOCK_END (b) > pc
-#endif
 	&& (distance == 0
 	    || BLOCK_END (b) - BLOCK_START (b) < distance))
       {
@@ -2578,7 +2566,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	       && strchr (gdb_completer_quote_characters, **argptr) != NULL);
 
   has_parens = ((pp = strchr (*argptr, '(')) != NULL
-		&& (pp = strchr (pp, ')')) != NULL);
+		&& (pp = strrchr (pp, ')')) != NULL);
 
   /* Now that we're safely past the has_parens check,
    * put back " if (condition)" so outer layers can see it 
