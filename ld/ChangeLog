@@ -1,5 +1,15 @@
 Tue Mar 30 09:40:25 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
+	Support for linking and loading at different places:
+
+	* ldlex.l: Add "AT" keyword.
+	* ldgram.y: Cleanup, and parse AT.
+	* ldlang.c (print_output_section_statement): Print output address
+	of section in map. (lang_size_sections): Fill sections' lma with
+	load address.
+	* ldlang.h (lang_output_section_statement_type): Add load_base
+	information.
+
 	* ldindr.c (add_indirect): Keep more information in the alias
 	symbol chain.
 	* ldlang.c (wild_doit):  Don't inherit NEVER_LOAD section

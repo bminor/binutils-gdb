@@ -95,6 +95,10 @@ extern ld_config_type config;
 extern boolean had_script;
 extern boolean write_map;
 
+
+etree_type *base; /* Relocation base - or null */
+
+
 #ifdef __STDC__
 #define cat(a,b) a##b
 #else
@@ -1091,6 +1095,12 @@ DEFUN (print_output_section_statement, (output_section_statement),
     fprintf (config.map_file, "No attached output section");
   }
   print_nl ();
+  if (output_section_statement->load_base)
+    {
+      int b = exp_get_value_int(output_section_statement->load_base,
+				0, "output base", lang_final_phase_enum);
+      printf("Output address   %08x\n", b);
+    }
   if (output_section_statement->section_alignment >= 0
       || output_section_statement->section_alignment >= 0) 
   {
@@ -1583,6 +1593,11 @@ DEFUN (lang_size_sections, (s, output_section_statement, prev, fill,
 
 	 dot = align_power (dot, os->bfd_section->alignment_power);
 	 bfd_set_section_vma (0, os->bfd_section, dot);
+	 
+	 if (os->load_base) {
+	   os->bfd_section->lma 
+	     = exp_get_value_int(os->load_base, 0,"load base", lang_final_phase_enum);
+	 }
        }
 
 
@@ -1609,18 +1624,18 @@ DEFUN (lang_size_sections, (s, output_section_statement, prev, fill,
        {
 	 os->region->current = dot;
 	 /* Make sure this isn't silly */
-	 if (os->region->current >
-	     os->region->origin +
-	     os->region->length)
-	 {
-	   einfo ("%X%P: Region %s is full (%B section %s)\n",
-		  os->region->name,
-		  os->bfd_section->owner,
-		  os->bfd_section->name);
-	   /* Reset the region pointer */
-	   os->region->current = 0;
+	 if (( os->region->current
+              > os->region->origin + os->region->length)
+	     || ( os->region->origin > os->region->current ))
+	   {
+	     einfo ("%X%P: Region %s is full (%B section %s)\n",
+		    os->region->name,
+		    os->bfd_section->owner,
+		    os->bfd_section->name);
+	     /* Reset the region pointer */
+	     os->region->current = 0;
 
-	 }
+	   }
 
        }
      }
@@ -2319,13 +2334,14 @@ DEFUN (lang_enter_output_section_statement,
 	address_exp,
 	flags,
 	block_value, 
-	align, subalign),
+	align, subalign, base),
        char *output_section_statement_name AND
        etree_type * address_exp AND
        int flags AND
        bfd_vma block_value AND
        etree_type *align AND
-       etree_type *subalign)
+       etree_type *subalign AND
+       etree_type *base)
 {
   lang_output_section_statement_type *os;
 
@@ -2361,7 +2377,10 @@ DEFUN (lang_enter_output_section_statement,
   os->section_alignment = topower(
    exp_get_value_int(align, -1,
 		     "section alignment", 0));
+
+  os->load_base = base;
 }
+
 
 void
 DEFUN_VOID (lang_final)
@@ -2765,3 +2784,4 @@ DEFUN (lang_add_output_format, (format),
 {
   output_target = format;
 }
+

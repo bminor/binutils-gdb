@@ -184,6 +184,12 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 
 <COMMAND>"-retain-symbols-file"	{ return OPTION_RETAIN_SYMBOLS_FILE; }
 
+<COMMAND>"-EB"          		{
+				 return OPTION_EB;
+			       }
+<COMMAND>"-EL"         		{
+				 return OPTION_EL;
+			       }
 <MRI,EXPRESSION>"$"([0-9A-Fa-f])+ {
   				yylval.integer = strtoul(yytext+1, 0,16);
 				return INT;
@@ -208,7 +214,7 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 				   yylval.integer = strtoul(yytext+1, 0, base);	
 				   return INT;
 				 }
-<DEFSYMEXP,MRI,BOTH,EXPRESSION>"$"?"0x"?([0-9A-Fa-f])+(M|K|m|k)? {
+<SCRIPT,DEFSYMEXP,MRI,BOTH,EXPRESSION>"$"?"0x"?([0-9A-Fa-f])+(M|K|m|k)? {
 				  yylval.integer = strtoul(yytext,0,hex_mode);
 				  if (yytext[yyleng-1]=='M'
 					|| yytext[yyleng-1] == 'm') {
@@ -305,6 +311,7 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <BOTH,SCRIPT>"l"			{ RTOKEN( LENGTH);}
 <BOTH,SCRIPT>"len"			{ RTOKEN( LENGTH);}
 <BOTH,SCRIPT>"INCLUDE"			{ RTOKEN(INCLUDE);}
+<EXPRESSION,BOTH,SCRIPT>"AT"			{ RTOKEN(AT);}
 <MRI>"\n"	                { ++ lineno;  RTOKEN(NEWLINE); }
 <MRI>"*".*			{ /* Mri comment line */ }
 <MRI>"END"                      { RTOKEN(ENDWORD); }
@@ -383,6 +390,7 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
   }
   else 
   {
+    BEGIN(SCRIPT);
     ldfile_input_filename = file_name_stack[include_stack_ptr-1];
   }
 

@@ -54,11 +54,11 @@ lang_memory_region_type *region;
 
 lang_memory_region_type *lang_memory_region_lookup();
 lang_output_section_statement_type *lang_output_section_statement_lookup();
-
+etree_type *lang_atin();
 #ifdef __STDC__
 
 void lang_add_data(int type, union etree_union *exp);
-void lang_enter_output_section_statement(char *output_section_statement_name, etree_type *address_exp, int flags, bfd_vma block_value,etree_type*,etree_type*);
+void lang_enter_output_section_statement(char *output_section_statement_name, etree_type *address_exp, int flags, bfd_vma block_value,etree_type*,etree_type*, etree_type*);
 
 #else
 
@@ -103,7 +103,7 @@ struct sec *section;
   
 }
 
-%type <etree> exp  opt_exp_with_type  mustbe_exp
+%type <etree> exp  opt_exp_with_type  mustbe_exp opt_at
 %type <integer> fill_opt
 %type <name> memspec_opt
 %token <integer> INT  
@@ -138,6 +138,7 @@ struct sec *section;
 %token NOLOAD DSECT COPY INFO OVERLAY
 %token NAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY 
 %token OPTION_e OPTION_c OPTION_noinhibit_exec OPTION_s OPTION_S OPTION_sort_common
+%token OPTION_EB OPTION_EL
 %token OPTION_format  OPTION_F OPTION_u OPTION_Bstatic OPTION_N
 %token <integer> SIZEOF NEXT ADDR 
 %token OPTION_d OPTION_dc OPTION_dp OPTION_x OPTION_X OPTION_defsym
@@ -149,7 +150,7 @@ struct sec *section;
 %token OPTION_Ur 
 %token ORIGIN FILL OPTION_g
 %token LENGTH    CREATE_OBJECT_SYMBOLS INPUT OUTPUT  CONSTRUCTORS
-%token OPTION_RETAIN_SYMBOLS_FILE ALIGNMOD
+%token OPTION_RETAIN_SYMBOLS_FILE ALIGNMOD AT
 
 %type <token> assign_op 
 
@@ -196,10 +197,10 @@ command_line_option:
 		write_map = true;
 		config.map_filename = $2;
 		}
-	|	OPTION_M {
-	    config.map_filename = "-";
-			    
-			}
+	|	OPTION_M 
+		{
+		  config.map_filename = "-";
+		}
 	|	OPTION_n {
 			config.magic_demand_paged = false;
 			}
@@ -335,6 +336,18 @@ command_line_option:
 			}
 	|	OPTION_RETAIN_SYMBOLS_FILE filename
 		{ lang_add_keepsyms_file ($2); }
+	|	OPTION_EB
+		{
+		  /* FIXME: This is currently ignored.  It means
+		     ``produce a big-endian object file''.  It could
+		     be used to select an output format.  */
+		}
+	|	OPTION_EL
+		{
+		  /* FIXME: This is currently ignored.  It means
+		     ``produce a little-endian object file''.  It could
+		     be used to select an output format.  */
+		}
 	| '-' NAME
 		 { info("%P%F Unrecognized option -%s\n", $2);  }
 
@@ -528,35 +541,38 @@ input_section_spec:
 	;
 
 statement:
-		statement assignment end
-	|	statement CREATE_OBJECT_SYMBOLS
+	  	assignment end
+	|	CREATE_OBJECT_SYMBOLS
+		{
+ 		lang_add_attribute(lang_object_symbols_statement_enum); 
+	      	}
+        |	';'
+        |	CONSTRUCTORS
 		{
  		
-lang_add_attribute(lang_object_symbols_statement_enum); }
-        |	statement ';'
-        |	statement CONSTRUCTORS
-		{
- 		
-lang_add_attribute(lang_constructors_statement_enum); }
-
-	|	statement input_section_spec
-        | statement length '(' exp ')'
+		  lang_add_attribute(lang_constructors_statement_enum); 
+		}
+	| input_section_spec
+        | length '(' exp ')'
         	        {
-			lang_add_data($2,$4);
+			lang_add_data($1,$3);
 			}
   
-	|	statement FILL '(' exp ')'
+	| FILL '(' exp ')'
 			{
 			  lang_add_fill
-			    (exp_get_value_int($4,
+			    (exp_get_value_int($3,
 					       0,
 					       "fill value",
-					
-lang_first_phase_enum));
+					       lang_first_phase_enum));
 			}
-	|
 	;
 
+statement_list:
+		statement_list statement
+  	|  	statement
+	;
+  
 length:
 		LONG
 			{ $$ = $1; }
@@ -773,19 +789,23 @@ exp	:
 	;
 
 
-
+opt_at:
+		AT '(' exp ')' { $$ = $3; }
+	|	{ $$ = 0; }
+	;
 
 section:	NAME 		{ ldlex_expression(); }
-		opt_exp_with_type 	{ ldlex_popstate(); }
+		opt_exp_with_type 
+		opt_at   	{ ldlex_popstate(); }
 		'{'
-		{
-		lang_enter_output_section_statement($1,$3,typebits,0,0,0);
-		}
-	       statement 	
+			{
+			lang_enter_output_section_statement($1,$3,typebits,0,0,0,$4);
+			}
+		statement_list 	
  		'}' {ldlex_expression();} fill_opt memspec_opt
 		{
 		  ldlex_popstate();
-		  lang_leave_output_section_statement($10, $11);
+		  lang_leave_output_section_statement($11, $12);
 		}
 opt_comma
 
@@ -802,9 +822,10 @@ type:
 
 
 opt_exp_with_type:
-		exp ':'	{ $$ = $1; typebits =0;}
-	|	exp '(' type ')' ':' { $$ = $1; }
-	|	':'	{ $$= (etree_type *)NULL; typebits = 0}
+		exp ':'			{ $$ = $1; typebits =0;}
+	|	exp '(' type ')' ':' 	{ $$ = $1; }
+	|	':'			{ $$= (etree_type *)NULL; typebits = 0; }
+	|	'(' type ')' ':'	{ $$= (etree_type *)NULL;  }
 	;
 
 memspec_opt:
