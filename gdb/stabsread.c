@@ -977,9 +977,11 @@ define_symbol (valu, string, desc, type, objfile)
 	  /* Sun cc uses a pair of symbols, one 'p' and one 'r' with the same
 	     name to represent an argument passed in a register.
 	     GCC uses 'P' for the same case.  So if we find such a symbol pair
-	     we combine it into one 'P' symbol.
+	     we combine it into one 'P' symbol.  For Sun cc we need to do this
+	     regardless of REG_STRUCT_HAS_ADDR, because the compiler puts out
+	     the 'p' symbol even if it never saves the argument onto the stack.
 
-	     But we only do this in the REG_STRUCT_HAS_ADDR case, so that
+	     On most machines, we want to preserve both symbols, so that
 	     we can still get information about what is going on with the
 	     stack (VAX for computing args_printed, using stack slots instead
 	     of saved registers in backtraces, etc.).
@@ -991,14 +993,18 @@ define_symbol (valu, string, desc, type, objfile)
 
 	  if (local_symbols
 	      && local_symbols->nsyms > 0
+#ifndef USE_REGISTER_NOT_ARG
 	      && REG_STRUCT_HAS_ADDR (processing_gcc_compilation,
 				      SYMBOL_TYPE (sym))
 	      && (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT
-		  || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION))
+		  || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)
+#endif
+	      )
 	    {
 	      struct symbol *prev_sym;
 	      prev_sym = local_symbols->symbol[local_symbols->nsyms - 1];
-	      if (SYMBOL_CLASS (prev_sym) == LOC_REF_ARG
+	      if ((SYMBOL_CLASS (prev_sym) == LOC_REF_ARG
+		   || SYMBOL_CLASS (prev_sym) == LOC_ARG)
 		  && STREQ (SYMBOL_NAME (prev_sym), SYMBOL_NAME(sym)))
 		{
 		  SYMBOL_CLASS (prev_sym) = LOC_REGPARM;

@@ -24,6 +24,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Floating point is IEEE compatible.  */
 #define IEEE_FLOAT
 
+/* If an argument is declared "register", Sun cc will keep it in a register,
+   never saving it onto the stack.  So we better not believe the "p" symbol
+   descriptor stab.  */
+
+#define USE_REGISTER_NOT_ARG
+
 /* When passing a structure to a function, Sun cc passes the address
    not the structure itself.  It (under SunOS4) creates two symbols,
    which we need to combine to a LOC_REGPARM.  Gcc version two (as of
