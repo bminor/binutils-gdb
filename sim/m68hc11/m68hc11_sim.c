@@ -23,8 +23,6 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #include "sim-module.h"
 #include "sim-options.h"
 
-void cpu_free_frame (sim_cpu* cpu, struct cpu_frame *frame);
-
 enum {
   OPTION_CPU_RESET = OPTION_START,
   OPTION_EMUL_OS,
@@ -88,213 +86,17 @@ cpu_option_handler (SIM_DESC sd, sim_cpu *cpu,
   return SIM_RC_OK;
 }
 
-/* Tentative to keep track of the cpu frame.  */
-struct cpu_frame*
-cpu_find_frame (sim_cpu *cpu, uint16 sp)
-{
-  struct cpu_frame_list *flist;
-
-  flist = cpu->cpu_frames;
-  while (flist)
-    {
-      struct cpu_frame *frame;
-
-      frame = flist->frame;
-      while (frame)
-	{
-	  if (frame->sp_low <= sp && frame->sp_high >= sp)
-	    {
-	      cpu->cpu_current_frame = flist;
-	      return frame;
-	    }
-
-	  frame = frame->up;
-	}
-      flist = flist->next;
-    }
-  return 0;
-}
-
-struct cpu_frame_list*
-cpu_create_frame_list (sim_cpu *cpu)
-{
-  struct cpu_frame_list *flist;
-
-  flist = (struct cpu_frame_list*) malloc (sizeof (struct cpu_frame_list));
-  flist->frame = 0;
-  flist->next  = cpu->cpu_frames;
-  flist->prev  = 0;
-  if (flist->next)
-    flist->next->prev = flist;
-  cpu->cpu_frames = flist;
-  cpu->cpu_current_frame = flist;
-  return flist;
-}
-
-void
-cpu_remove_frame_list (sim_cpu *cpu, struct cpu_frame_list *flist)
-{
-  struct cpu_frame *frame;
-  
-  if (flist->prev == 0)
-    cpu->cpu_frames = flist->next;
-  else
-    flist->prev->next = flist->next;
-  if (flist->next)
-    flist->next->prev = flist->prev;
-
-  frame = flist->frame;
-  while (frame)
-    {
-      struct cpu_frame* up = frame->up;
-      cpu_free_frame (cpu, frame);
-      frame = up;
-    }
-  free (flist);
-}
-  
     
-struct cpu_frame*
-cpu_create_frame (sim_cpu *cpu, uint16 pc, uint16 sp)
-{
-  struct cpu_frame *frame;
-
-  frame = (struct cpu_frame*) malloc (sizeof(struct cpu_frame));
-  frame->up = 0;
-  frame->pc = pc;
-  frame->sp_low  = sp;
-  frame->sp_high = sp;
-  return frame;
-}
-
-void
-cpu_free_frame (sim_cpu *cpu, struct cpu_frame *frame)
-{
-  free (frame);
-}
-
-uint16
-cpu_frame_reg (sim_cpu *cpu, uint16 rn)
-{
-  struct cpu_frame *frame;
-
-  if (cpu->cpu_current_frame == 0)
-    return 0;
-  
-  frame = cpu->cpu_current_frame->frame;
-  while (frame)
-    {
-      if (rn == 0)
-	return frame->sp_high;
-      frame = frame->up;
-      rn--;
-    }
-  return 0;
-}
-  
 void
 cpu_call (sim_cpu *cpu, uint16 addr)
 {
-#if HAVE_FRAME
-  uint16 pc = cpu->cpu_insn_pc;
-  uint16 sp;
-  struct cpu_frame_list *flist;
-  struct cpu_frame* frame;
-  struct cpu_frame* new_frame;
-#endif
 
   cpu_set_pc (cpu, addr);
-#if HAVE_FRAME
-  sp = cpu_get_sp (cpu);
-
-  cpu->cpu_need_update_frame = 0;
-  flist = cpu->cpu_current_frame;
-  if (flist == 0)
-    flist = cpu_create_frame_list (cpu);
-
-  frame = flist->frame;
-  if (frame && frame->sp_low > sp)
-    frame->sp_low = sp;
-
-  new_frame = cpu_create_frame (cpu, pc, sp);
-  new_frame->up = frame;
-  flist->frame = new_frame;
-#endif
-}
-
-void
-cpu_update_frame (sim_cpu *cpu, int do_create)
-{
-#if HAVE_FRAME
-  struct cpu_frame *frame;
-
-  frame = cpu_find_frame (cpu, cpu_get_sp (cpu));
-  if (frame)
-    {
-      while (frame != cpu->cpu_current_frame->frame)
-	{
-	  struct cpu_frame* up;
-	  
-	  up = cpu->cpu_current_frame->frame->up;
-	  cpu_free_frame (cpu, cpu->cpu_current_frame->frame);
-	  cpu->cpu_current_frame->frame = up;
-	}
-      return;
-    }
-
-  if (do_create)
-    {
-      cpu_create_frame_list (cpu);
-      frame = cpu_create_frame (cpu, cpu_get_pc (cpu), cpu_get_sp (cpu));
-      cpu->cpu_current_frame->frame = frame;
-    }
-#endif
 }
 
 void
 cpu_return (sim_cpu *cpu)
 {
-#if HAVE_FRAME
-  uint16 sp = cpu_get_sp (cpu);
-  struct cpu_frame *frame;
-  struct cpu_frame_list *flist;
-
-  cpu->cpu_need_update_frame = 0;
-  flist = cpu->cpu_current_frame;
-  if (flist && flist->frame && flist->frame->up)
-    {
-      frame = flist->frame->up;
-      if (frame->sp_low <= sp && frame->sp_high >= sp)
-	{
-	  cpu_free_frame (cpu, flist->frame);
-	  flist->frame = frame;
-	  return;
-	}
-    }
-  cpu_update_frame (cpu, 1);
-#endif
-}
-
-void
-cpu_print_frame (SIM_DESC sd, sim_cpu *cpu)
-{
-  struct cpu_frame* frame;
-  int level = 0;
-  
-  if (cpu->cpu_current_frame == 0 || cpu->cpu_current_frame->frame == 0)
-    {
-      sim_io_printf (sd, "No frame.\n");
-      return;
-    }
-  sim_io_printf (sd, " #   PC   SP-L  SP-H\n");
-  frame = cpu->cpu_current_frame->frame;
-  while (frame)
-    {
-      sim_io_printf (sd, "%3d 0x%04x 0x%04x 0x%04x\n",
-		     level, frame->pc, frame->sp_low, frame->sp_high);
-      frame = frame->up;
-      level++;
-    }
 }
 
 /* Set the stack pointer and re-compute the current frame.  */
@@ -302,7 +104,6 @@ void
 cpu_set_sp (sim_cpu *cpu, uint16 val)
 {
   cpu->cpu_regs.sp = val;
-  cpu_update_frame (cpu, 0);
 }
 
 uint16
@@ -653,8 +454,6 @@ cpu_initialize (SIM_DESC sd, sim_cpu *cpu)
   cpu->cpu_running        = 1;
   cpu->cpu_stop_on_interrupt = 0;
   cpu->cpu_frequency = 8 * 1000 * 1000;
-  cpu->cpu_frames = 0;
-  cpu->cpu_current_frame = 0;
   cpu->cpu_use_elf_start = 0;
   cpu->cpu_elf_start     = 0;
   cpu->cpu_use_local_config = 0;
@@ -671,11 +470,6 @@ cpu_initialize (SIM_DESC sd, sim_cpu *cpu)
 int
 cpu_reset (sim_cpu *cpu)
 {
-  cpu->cpu_need_update_frame = 0;
-  cpu->cpu_current_frame = 0;
-  while (cpu->cpu_frames)
-    cpu_remove_frame_list (cpu, cpu->cpu_frames);
-
   /* Initialize the config register.
      It is only initialized at reset time.  */
   memset (cpu->ios, 0, sizeof (cpu->ios));

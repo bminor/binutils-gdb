@@ -1,5 +1,5 @@
-/* interp.c -- Simulator for Motorola 68HC11
-   Copyright (C) 1999, 2000, 2001 Free Software Foundation, Inc.
+/* interp.c -- Simulator for Motorola 68HC11/68HC12
+   Copyright (C) 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@worldnet.fr)
 
 This file is part of GDB, the GNU debugger.
@@ -590,8 +590,6 @@ sim_do_command (SIM_DESC sd, char *cmd)
     {
       if (strncmp (cmd, "info", sizeof ("info") - 1) == 0)
 	sim_get_info (sd, &cmd[4]);
-      else if (strncmp (cmd, "frame", sizeof ("frame") - 1) == 0)
-	cpu_print_frame (sd, STATE_CPU (sd, 0));
       else if (strncmp (cmd, mm_cmd, strlen (mm_cmd) == 0))
 	sim_io_eprintf (sd,
 			"`memory-map' command replaced by `sim memory'\n");

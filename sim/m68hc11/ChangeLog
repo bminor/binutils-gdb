@@ -1,5 +1,24 @@
 2002-03-07  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* sim-main.h (cpu_frame, cpu_frame_list): Remove.
+	(cpu_frame_reg, cpu_print_frame): Remove.
+	(cpu_m68hc11_push_uint8, cpu_m68hc11_pop_uint8): Cleanup.
+	(cpu_m68hc11_push_uint16, cpu_m68hc11_pop_uint16): Likewise.
+	(cpu_m68hc12_push_uint8, cpu_m68hc12_push_uint16): Likewise.
+	(cpu_m68hc12_pop_uint8, cpu_m68hc12_pop_uint16): Likewise.
+	* m68hc11_sim.c (cpu_find_frame): Remove.
+	(cpu_create_frame_list): Remove.
+	(cpu_remove_frame_list, cpu_create_frame, cpu_free_frame): Remove.
+	(cpu_frame_reg, cpu_print_frame, cpu_update_frame): Remove.
+	(cpu_call): Cleanup to remove #if HAVE_FRAME and calls to the above.
+	(cpu_update_frame): Likewise.
+	(cpu_return): Likewise.
+	(cpu_reset): Likewise.
+	(cpu_initialize): Likewise.	
+	* interp.c (sim_do_command): Remove call to cpu_print_frame.
+
+2002-03-07  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* interrupts.c (interrupts_reset): New function, setup interrupt
 	vector address according to cpu mode.
 	(interrupts_initialize): Move reset portion to the above.

@@ -1,5 +1,5 @@
 /* sim-main.h -- Simulator for Motorola 68HC11 & 68HC12
-   Copyright (C) 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@worldnet.fr)
 
 This file is part of GDB, the GNU debugger.
@@ -141,32 +141,9 @@ enum M6811_Special
   M6812_WAV
 };
 
-#define CPU_POP 1
-#define CPU_PUSH 2
-
 #define M6811_MAX_PORTS (0x03f+1)
 #define M6812_MAX_PORTS (0x3ff+1)
 #define MAX_PORTS       (M6812_MAX_PORTS)
-
-/* Tentative to keep track of the stack frame.
-   The frame is updated each time a call or a return are made.
-   We also have to take into account changes of stack pointer
-   (either thread switch or longjmp).  */
-struct cpu_frame 
-{
-  struct cpu_frame *up;
-  uint16 pc;
-  uint16 sp_low;
-  uint16 sp_high;
-};
-
-/* Represents a list of frames (or a thread).  */
-struct cpu_frame_list
-{
-  struct cpu_frame_list *next;
-  struct cpu_frame_list *prev;
-  struct cpu_frame      *frame;
-};
 
 struct _sim_cpu;
 
@@ -178,10 +155,6 @@ struct _sim_cpu {
 
   /* CPU interrupts.  */
   struct interrupts     cpu_interrupts;
-
-  struct cpu_frame_list *cpu_frames;
-  struct cpu_frame_list *cpu_current_frame;
-  int                   cpu_need_update_frame;
 
   /* Pointer to the interpretor routine.  */
   cpu_interp            cpu_interpretor;
@@ -433,7 +406,6 @@ cpu_m68hc11_push_uint8 (sim_cpu *proc, uint8 val)
 
   memory_write8 (proc, addr, val);
   proc->cpu_regs.sp = addr - 1;
-  proc->cpu_need_update_frame |= CPU_PUSH;
 }
 
 inline void
@@ -443,7 +415,6 @@ cpu_m68hc11_push_uint16 (sim_cpu *proc, uint16 val)
 
   memory_write16 (proc, addr, val);
   proc->cpu_regs.sp = addr - 1;
-  proc->cpu_need_update_frame |= CPU_PUSH;
 }
 
 inline uint8
@@ -454,7 +425,6 @@ cpu_m68hc11_pop_uint8 (sim_cpu *proc)
   
   val = memory_read8 (proc, addr + 1);
   proc->cpu_regs.sp = addr + 1;
-  proc->cpu_need_update_frame |= CPU_POP;
   return val;
 }
 
@@ -466,7 +436,6 @@ cpu_m68hc11_pop_uint16 (sim_cpu *proc)
   
   val = memory_read16 (proc, addr + 1);
   proc->cpu_regs.sp = addr + 2;
-  proc->cpu_need_update_frame |= CPU_POP;
   return val;
 }
 
@@ -479,7 +448,6 @@ cpu_m68hc12_push_uint8 (sim_cpu *proc, uint8 val)
   addr --;
   memory_write8 (proc, addr, val);
   proc->cpu_regs.sp = addr;
-  proc->cpu_need_update_frame |= CPU_PUSH;
 }
 
 inline void
@@ -490,7 +458,6 @@ cpu_m68hc12_push_uint16 (sim_cpu *proc, uint16 val)
   addr -= 2;
   memory_write16 (proc, addr, val);
   proc->cpu_regs.sp = addr;
-  proc->cpu_need_update_frame |= CPU_PUSH;
 }
 
 inline uint8
@@ -501,7 +468,6 @@ cpu_m68hc12_pop_uint8 (sim_cpu *proc)
   
   val = memory_read8 (proc, addr);
   proc->cpu_regs.sp = addr + 1;
-  proc->cpu_need_update_frame |= CPU_POP;
   return val;
 }
 
@@ -513,7 +479,6 @@ cpu_m68hc12_pop_uint16 (sim_cpu *proc)
   
   val = memory_read16 (proc, addr);
   proc->cpu_regs.sp = addr + 2;
-  proc->cpu_need_update_frame |= CPU_POP;
   return val;
 }
 
@@ -556,9 +521,7 @@ extern void cpu_info (SIM_DESC sd, sim_cpu *proc);
 
 extern int cpu_initialize (SIM_DESC sd, sim_cpu *cpu);
 
-extern void cpu_print_frame (SIM_DESC sd, sim_cpu *cpu);
 extern void cpu_set_sp (sim_cpu *cpu, uint16 val);
-extern uint16 cpu_frame_reg (sim_cpu *cpu, uint16 rn);
 extern int cpu_reset (sim_cpu *cpu);
 extern int cpu_restart (sim_cpu *cpu);
 extern void sim_memory_error (sim_cpu *cpu, SIM_SIGNAL excep,
