@@ -43,7 +43,7 @@ CVS_TAG :=
 CVS_MODULE := latest
 
 ### Historically, this was identical to CVS_TAG.  This is changing.
-RELEASE_TAG := latest-930211
+RELEASE_TAG := latest-930319
 
 ### Historically, binaries were installed here.  This is changing.
 release_root := $(ROOTING)/$(RELEASE_TAG)
@@ -52,8 +52,8 @@ release_root := $(ROOTING)/$(RELEASE_TAG)
 ### With luck, eventually, nothing else will need to be editted.
 
 TIME 		:= time
-GCC 		:= gcc -O -g
-GNUC		:= "CC=$(GCC)"
+GCC 		:= gcc -O
+GNUC		:= CC="$(GCC)"
 CFLAGS		:= -g
 GNU_MAKE 	:= /usr/latest/bin/make -w 
 
@@ -100,9 +100,6 @@ ifdef target
 ##
 arch 		= $(host)-x-$(target)
 config  	= $(host) -target=$(target)
-NATIVEDIR	:= $(arch)-native-objdir
-CYGNUSDIR	:= $(arch)-cygnus-objdir
-LATESTDIR	:= $(arch)-latest-objdir
 FLAGS_TO_PASS	:= $(FLAGS_TO_PASS) "target=$(target)"
 
 all:	do-native do-latest
@@ -112,9 +109,16 @@ else
 ##
 ## This is a native compilation
 ##
+arch		= $(host)
+config  	= $(host)
 all:	$(host)-stamp-3stage-done
 #all:	in-place do1 do2 do3 comparison
 endif
+
+NATIVEDIR	:= $(arch)-native-objdir
+CYGNUSDIR	:= $(arch)-cygnus-objdir
+LATESTDIR	:= $(arch)-latest-objdir
+
 
 everything: 	 do-cross 
 #everything: 	in-place do1 do2 do3 comparison do-cygnus 
@@ -177,7 +181,7 @@ $(arch)-stamp-cygnus-built:  $(host)-stamp-holes $(arch)-stamp-cygnus-configured
 
 $(arch)-stamp-cygnus-configured:  $(host)-stamp-holes
 	[ -d $(CYGNUSDIR) ] || mkdir $(CYGNUSDIR)
-	$(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes)
+	$(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(GNUC) $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes)
 	touch $@
 
 .PHONY: do-latest
@@ -188,7 +192,7 @@ $(arch)-stamp-latest:
 	$(SET_LATEST_PATH) $(TIME) $(GNU_MAKE) -f test-build.mk $(arch)-stamp-latest-installed  $(FLAGS_TO_PASS)
 	touch $(arch)-stamp-latest
 
-$(arch)-stamp-latest-installed: $(arch)-stamp-latest-checked
+
 	$(SET_LATEST_PATH) cd $(LATESTDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) install 
 	$(SET_LATEST_PATH) cd $(LATESTDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) install-info 
 	touch $@
@@ -204,8 +208,7 @@ $(arch)-stamp-latest-built: $(arch)-stamp-latest-configured
 
 $(arch)-stamp-latest-configured:
 	[ -d $(LATESTDIR) ] || mkdir $(LATESTDIR)
-	$(SET_LATEST_PATH) cd $(LATESTDIR) ; \
-	  $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes)
+	$(SET_LATEST_PATH) cd $(LATESTDIR) ; $(GNUC) $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes)
 	touch $@
 
 
@@ -325,7 +328,7 @@ $(host)-stamp-stage2-built: $(host)-stamp-stage2-configured
 $(host)-stamp-stage2-configured:
 	[ -d $(WORKING_DIR) ] || mkdir $(WORKING_DIR)
 	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; \
-	  $(TIME) ../$(TREE)/configure $(host) -v --srcdir=../$(TREE) $(prefixes)
+	  $(GNUC) $(TIME) ../$(TREE)/configure $(host) -v --srcdir=../$(TREE) $(prefixes)
 	touch $@
 
 .PHONY: do3
@@ -359,7 +362,7 @@ $(host)-stamp-stage3-built: $(host)-stamp-stage3-configured
 $(host)-stamp-stage3-configured:
 	[ -d $(WORKING_DIR) ] || mkdir $(WORKING_DIR)
 	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; \
-	  $(TIME) ../$(TREE)/configure $(host) -v --srcdir=../$(TREE) $(prefixes)
+	  $(GNUC) $(TIME) ../$(TREE)/configure $(host) -v --srcdir=../$(TREE) $(prefixes)
 	touch $@
 
 # These things are needed by a three-stage, but are not included locally.
@@ -424,7 +427,8 @@ endif
 ifeq (sparc-sun-solaris2,$(host))
 SET_NATIVE_HOLES := SHELL=sh ; PATH=/opt/SUNWspro/bin:`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
 HOLE_DIRS := /usr/ccs/bin
-CC_HOLE := 
+CC_HOLE :=
+NUKEM := cc 
 endif
 
 ### rs6000 as is busted.  We cache a patched version in unsupported.
@@ -494,6 +498,9 @@ $(host)-stamp-holes:
 		*) echo $$i is NOT found ;; \
 		esac ; \
 	done
+ifdef NUKEM
+	cd $(HOLESDIR); rm -f $(NUKEM)
+endif
 	touch $@
 
 .PHONY: comparison
