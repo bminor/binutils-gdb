@@ -452,7 +452,7 @@ const struct language_defn cplus_language_defn = {
 };
 
 void
-_initialize_c_exp ()
+_initialize_c_language ()
 {
   builtin_type_void =
     init_type (TYPE_CODE_VOID, 1,

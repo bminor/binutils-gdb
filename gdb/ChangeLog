@@ -1,5 +1,11 @@
 Tue Dec  8 13:30:58 1992  Fred Fish  (fnf@cygnus.com)
 
+	* c-lang.c (_initialize_c_language):  Name changed from
+	_initialize_c_exp.
+	* m2-lang.c (_initialize_m2_language):  Name changed from
+	_initialize_m2_exp.
+	* m2-lang.c (_initialize_m2_language):  Change malloc to xmalloc since
+	it is no longer inside m2-exp.y, where it was remapped by Makefile.
 	* c-exp.y, m2-exp.y:  Migrate code that has nothing to do with
 	expression parsing into c-lang.c and m2-lang.c respectively.
 	* c-lang.c, m2-lang.c:  New files, code migrated from c-exp.y and
@@ -19,6 +25,8 @@ Tue Dec  8 13:30:58 1992  Fred Fish  (fnf@cygnus.com)
 	parsing into ch-lang.c.
 	* ch-lang.c:  New file, code migrated from c-exp.y.
 	* ch-lang.h:  New file, internal interface between ch-* files.
+	* ch-lang.c (_initialize_chill_language):  Name changed from
+	_initialize_chill_exp.
 	**** end-sanitize-chill ****
 
 	Changes for Amiga Unix from rhealey@ub.d.umn.edu.

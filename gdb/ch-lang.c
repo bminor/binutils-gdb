@@ -279,7 +279,7 @@ const struct language_defn chill_language_defn = {
 /* Initialization for Chill */
 
 void
-_initialize_chill_exp ()
+_initialize_chill_language ()
 {
   builtin_type_chill_bool =
     init_type (TYPE_CODE_BOOL, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
