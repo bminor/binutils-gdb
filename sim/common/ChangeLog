@@ -1,5 +1,8 @@
 Fri Nov 28 20:10:09 1997  Michael Meissner  <meissner@cygnus.com>
 
+	* syscall.c (cb_syscall): Add missing else, so write to stdout
+	isn't doubled.
+
 	* sim-alu.h (ALU{,8,16,32,64}_SET_CARRY): Provide macros to import
 	the carry bit from the CPU's psw.
 
