@@ -1,3 +1,9 @@
+Thu Sep 19 12:21:24 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-coff.c (fixup_segment): Don't adjust PC relative
+	reloc for the i960 for a reloc in the same section.  This undoes
+	one of the two changes made Aug 19.
+
 Wed Sep 18 12:11:58 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.c (obj_coff_endef): Both versions: Move C_STAT
