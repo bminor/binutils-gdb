@@ -1,3 +1,9 @@
+2001-03-13  Eric Kohl  <ekohl@rz-online.de>
+
+	* defparse.y (opt_equal_name): allow "." in name.
+	* dlltool.c (def_exports): Added ability to generate forwarded exports.
+	(gen_exp_file): Likewise.
+
 2001-03-12  Stefan Geuken <mail@stefan-geuken.de>
 
 	* NEWS: Document addition of -B switch to objcopy.

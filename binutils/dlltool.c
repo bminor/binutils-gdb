@@ -48,9 +48,13 @@
    LIBRARY <name> [ , <base> ]
    The result is going to be <name>.DLL
 
-   EXPORTS  ( <name1> [ = <name2> ] [ @ <integer> ] [ NONAME ] [CONSTANT] [DATA] ) *
+   EXPORTS  ( (  ( <name1> [ = <name2> ] )
+               | ( <name1> = <module-name> . <external-name>))
+            [ @ <integer> ] [ NONAME ] [CONSTANT] [DATA] ) *
    Declares name1 as an exported symbol from the
-   DLL, with optional ordinal number <integer>
+   DLL, with optional ordinal number <integer>.
+   Or declares name1 as an alias (forward) of the function <external-name>
+   in the DLL <module-name>.
 
    IMPORTS  (  (   <internal-name> =   <module-name> . <integer> )
              | ( [ <internal-name> = ] <module-name> . <external-name> )) *
@@ -636,6 +640,7 @@ typedef struct export
     int noname;
     int data;
     int hint;
+    int forward;	/* number of forward label, 0 means no forward */
     struct export *next;
   }
 export_type;
@@ -848,6 +853,7 @@ static export_type *d_exports;	/*list of exported functions */
 static export_type **d_exports_lexically;	/* vector of exported functions in alpha order */
 static dlist_type *d_list;	/* Descriptions */
 static dlist_type *a_list;	/* Stuff to go in directives */
+static int d_nforwards = 0;	/* Number of forwarded exports */
 
 static int d_is_dll;
 static int d_is_exe;
@@ -882,6 +888,12 @@ def_exports (name, internal_name, ordinal, noname, constant, data)
   p->next = d_exports;
   d_exports = p;
   d_nfuncs++;
+  
+  if ((internal_name != NULL) 
+      && (strchr (internal_name, '.') != NULL))
+    p->forward = ++d_nforwards;
+  else
+    p->forward = 0; /* no forward */
 }
 
 void
@@ -1819,9 +1831,14 @@ gen_exp_file ()
 		  i++;
 		}
 	    }
-	  fprintf (f, "\t%s%s%s%s\t%s %d\n", ASM_RVA_BEFORE,
-                   ASM_PREFIX,
-                   exp->internal_name, ASM_RVA_AFTER, ASM_C, exp->ordinal);
+
+	  if (exp->forward == 0)
+	    fprintf (f, "\t%s%s%s%s\t%s %d\n", ASM_RVA_BEFORE,
+		     ASM_PREFIX,
+		     exp->internal_name, ASM_RVA_AFTER, ASM_C, exp->ordinal);
+	  else
+	    fprintf (f, "\t%sf%d%s\t%s %d\n", ASM_RVA_BEFORE,
+		     exp->forward, ASM_RVA_AFTER, ASM_C, exp->ordinal);
 	  i++;
 	}
 
@@ -1846,8 +1863,13 @@ gen_exp_file ()
       fprintf(f,"%s Export Name Table\n", ASM_C);
       for (i = 0; (exp = d_exports_lexically[i]); i++)
 	if (!exp->noname || show_allnames)
-	  fprintf (f, "n%d:	%s	\"%s\"\n",
-		   exp->ordinal, ASM_TEXT, exp->name);
+	  {
+	    fprintf (f, "n%d:	%s	\"%s\"\n",
+		     exp->ordinal, ASM_TEXT, exp->name);
+	    if (exp->forward != 0)
+	      fprintf (f, "f%d:	%s	\"%s\"\n",
+		       exp->forward, ASM_TEXT, exp->internal_name);
+	  }
 
       if (a_list)
 	{
