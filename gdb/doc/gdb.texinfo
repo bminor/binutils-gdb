@@ -7889,6 +7889,9 @@ GNU include files
 @item gdb-_GDB_VN__/libiberty
 source for the @samp{-liberty} free software library
 
+@item gdb-_GDB_VN__/opcodes
+source for the library of opcode tables and disassemblers
+
 @item gdb-_GDB_VN__/readline
 source for the GNU command-line interface
 
