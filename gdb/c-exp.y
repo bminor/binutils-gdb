@@ -1079,11 +1079,15 @@ const static struct token tokentab2[] =
 int
 yylex ()
 {
-  register int c;
-  register int namelen;
-  register unsigned i;
-  register char *tokstart;
-
+  int c;
+  int namelen;
+  unsigned int i;
+  char *tokstart;
+  char *tokptr;
+  int tempbufindex;
+  static char *tempbuf;
+  static int tempbufsize;
+  
  retry:
 
   tokstart = lexptr;
@@ -1250,21 +1254,55 @@ yylex ()
       return c;
 
     case '"':
-      for (namelen = 1; (c = tokstart[namelen]) != '"'; namelen++)
-	if (c == '\\')
+
+      /* Build the gdb internal form of the input string in tempbuf,
+	 translating any standard C escape forms seen.  Note that the
+	 buffer is null byte terminated *only* for the convenience of
+	 debugging gdb itself and printing the buffer contents when
+	 the buffer contains no embedded nulls.  Gdb does not depend
+	 upon the buffer being null byte terminated, it uses the length
+	 string instead.  This allows gdb to handle C strings (as well
+	 as strings in other languages) with embedded null bytes */
+
+      tokptr = ++tokstart;
+      tempbufindex = 0;
+
+      do {
+	/* Grow the static temp buffer if necessary, including allocating
+	   the first one on demand. */
+	if (tempbufindex + 1 >= tempbufsize)
 	  {
-	    c = tokstart[++namelen];
-	    if (c >= '0' && c <= '9')
-	      {
-		c = tokstart[++namelen];
-		if (c >= '0' && c <= '9')
-		  c = tokstart[++namelen];
-	      }
+	    tempbuf = (char *) realloc (tempbuf, tempbufsize += 64);
 	  }
-      yylval.sval.ptr = tokstart + 1;
-      yylval.sval.length = namelen - 1;
-      lexptr += namelen + 1;
-      return STRING;
+	switch (*tokptr)
+	  {
+	  case '\0':
+	  case '"':
+	    /* Do nothing, loop will terminate. */
+	    break;
+	  case '\\':
+	    tokptr++;
+	    c = parse_escape (&tokptr);
+	    if (c == -1)
+	      {
+		continue;
+	      }
+	    tempbuf[tempbufindex++] = c;
+	    break;
+	  default:
+	    tempbuf[tempbufindex++] = *tokptr++;
+	    break;
+	  }
+      } while ((*tokptr != '"') && (*tokptr != '\0'));
+      if (*tokptr++ != '"')
+	{
+	  error ("Unterminated string in expression.");
+	}
+      tempbuf[tempbufindex] = '\0';	/* See note above */
+      yylval.sval.ptr = tempbuf;
+      yylval.sval.length = tempbufindex;
+      lexptr = tokptr;
+      return (STRING);
     }
 
   if (!(c == '_' || c == '$'

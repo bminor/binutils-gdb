@@ -1,5 +1,13 @@
 Mon Nov 23 11:14:15 1992  Fred Fish  (fnf@cygnus.com)
 
+	* c-exp.y (yylex):  Add tempbuf, tempbufindex, and tempbufsize,
+	which together maintain a dynamically expandable static buffer
+	for the lexer to use when translating C strings to their internal
+	form (other future uses possible).  Fix parsing of C style strings
+	to do the normal C style input conversions of escaped character
+	sequences.
+	* valops.c (value_string):  Remove translation of escaped
+	character sequences, now done in C expression parser.
 	* language.h (PRINT_LITERAL_FORM):  New macro that takes character
 	and decides if it should be printed in literal form or some other
 	form, based on it's ASCII value and setting of sevenbit_strings.
