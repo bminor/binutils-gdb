@@ -247,6 +247,15 @@ execute_cmd_post_hook (struct cmd_list_element *c)
 }
 
 /* Execute the command in CMD.  */
+void
+do_restore_user_call_depth (void * call_depth)
+{	
+  int * depth = call_depth;
+  /* We will be returning_to_top_level() at this point, so we want to
+     reset our depth. */
+  (*depth) = 0;
+}
+
 
 void
 execute_user_command (struct cmd_list_element *c, char *args)
@@ -254,6 +263,8 @@ execute_user_command (struct cmd_list_element *c, char *args)
   register struct command_line *cmdlines;
   struct cleanup *old_chain;
   enum command_control_type ret;
+  static int user_call_depth = 0;
+  extern int max_user_call_depth;
 
   old_chain = setup_user_args (args);
 
@@ -261,6 +272,11 @@ execute_user_command (struct cmd_list_element *c, char *args)
   if (cmdlines == 0)
     /* Null command */
     return;
+
+  if (++user_call_depth > max_user_call_depth)
+    error ("Max user call depth exceeded -- command aborted\n");
+
+  old_chain = make_cleanup (do_restore_user_call_depth, &user_call_depth);
 
   /* Set the instream to 0, indicating execution of a
      user-defined function.  */
@@ -277,6 +293,8 @@ execute_user_command (struct cmd_list_element *c, char *args)
       cmdlines = cmdlines->next;
     }
   do_cleanups (old_chain);
+
+  user_call_depth--;
 }
 
 enum command_control_type

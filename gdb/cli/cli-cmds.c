@@ -80,6 +80,9 @@ static void shell_escape (char *, int);
 
 void apropos_command (char *, int);
 
+/* Limit the call depth of user-defined commands */
+int max_user_call_depth;
+
 /* Define all cmd_list_elements.  */
 
 /* Chain containing all defined commands.  */
@@ -606,6 +609,8 @@ show_debug (char *args, int from_tty)
 void
 init_cmd_lists (void)
 {
+  max_user_call_depth = 1024;
+
   cmdlist = NULL;
   infolist = NULL;
   enablelist = NULL;
@@ -823,4 +828,11 @@ With no arguments, run an inferior shell.");
 Argument is the name of the user defined command.\n\
 With no argument, show definitions of all user defined commands.", &showlist);
   add_com ("apropos", class_support, apropos_command, "Search for commands matching a REGEXP");
+
+  add_show_from_set (
+		      add_set_cmd ("max-user-call-depth", no_class, var_integer, 
+				   (char *) &max_user_call_depth,
+				   "Set the max call depth for user-defined commands.\n", 
+				   &setlist),
+		      &showlist);
 }

@@ -3,6 +3,11 @@
 
 *** Changes since GDB 5.2:
 
+* New command "set max-user-call-depth <nnn>"
+
+This command allows the user to limit the call depth of user-defined
+commands.  The default is 1024.
+
 * Changes in FreeBSD/i386 native debugging.
 
 Support for the "generate-core-file" has been added.
