@@ -91,7 +91,6 @@ rcparse.y
 rdcoff.c
 rddbg.c
 readelf.c
-readelf.h
 resbin.c
 rescoff.c
 resrc.c
