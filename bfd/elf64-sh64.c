@@ -84,7 +84,7 @@ struct elf_sh64_link_hash_entry
   bfd_vma datalabel_got_offset;
 
   /* Number of PC relative relocs copied for this symbol.  */
-  struct elf_sh_pcrel_relocs_copied *pcrel_relocs_copied;
+  struct elf_sh64_pcrel_relocs_copied *pcrel_relocs_copied;
 };
 
 /* sh ELF linker hash table.  */
@@ -145,6 +145,25 @@ extern boolean sh64_elf64_link_output_symbol_hook
 static boolean sh64_elf64_fake_sections
   PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
 static void sh64_elf64_final_write_processing PARAMS ((bfd *, boolean));
+static struct bfd_hash_entry *sh64_elf64_link_hash_newfunc
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+static struct bfd_link_hash_table *sh64_elf64_link_hash_table_create
+  PARAMS ((bfd *));
+inline static void movi_shori_putval PARAMS ((bfd *, unsigned long, char *));
+inline static void movi_3shori_putval PARAMS ((bfd *, bfd_vma, char *));
+static boolean sh64_elf64_create_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
+static boolean sh64_elf64_adjust_dynamic_symbol
+  PARAMS ((struct bfd_link_info *info, struct elf_link_hash_entry *));
+static boolean sh64_elf64_discard_copies
+  PARAMS ((struct elf_sh64_link_hash_entry *, PTR));
+static boolean sh64_elf64_size_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
+static boolean sh64_elf64_finish_dynamic_symbol
+  PARAMS ((bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
+	   Elf_Internal_Sym *));
+static boolean sh64_elf64_finish_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
 
 static reloc_howto_type sh_elf64_howto_table[] = {
   /* No relocation.  */
@@ -1729,10 +1748,8 @@ sh_elf64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      skip = false;
 
 	      outrel.r_offset
-		= _bfd_elf_section_offset (output_bfd,
-					   &elf_hash_table (info)->stab_info,
-					   input_section,
-					   rel->r_offset);
+		= _bfd_elf_section_offset (output_bfd, info,
+					   input_section, rel->r_offset);
 
 	      if (outrel.r_offset == (bfd_vma) -1)
 		skip = true;
