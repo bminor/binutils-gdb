@@ -404,9 +404,6 @@ startup_inferior (int ntraps)
   inferior_ignoring_leading_exec_events =
     target_reported_exec_events_per_exec_call () - 1;
 
-#ifdef STARTUP_INFERIOR
-  STARTUP_INFERIOR (pending_execs);
-#else
   while (1)
     {
       /* Make wait_for_inferior be quiet */
@@ -444,6 +441,5 @@ startup_inferior (int ntraps)
 	  resume (0, TARGET_SIGNAL_0);	/* Just make it go on */
 	}
     }
-#endif /* STARTUP_INFERIOR */
   stop_soon = NO_STOP_QUIETLY;
 }
