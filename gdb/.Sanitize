@@ -64,8 +64,8 @@ convx-opcode.h
 copying.awk
 copying.c
 core.c
-corelow.c
 coredep.c
+corelow.c
 createtags
 dbxread.c
 defs.h
@@ -138,12 +138,11 @@ mips-tdep.c
 mips-xdep.c
 mipsread.c
 munch
-nat-sparc.c
-nat-sun4os4.h
-nat-trash.h
 news-xdep.c
 nindy-share
 nindy-tdep.c
+nm-sun4os4.h
+nm-trash.h
 ns32k-opcode.h
 ns32k-pinsn.c
 objfiles.c
@@ -182,6 +181,7 @@ signals.h
 solib.c
 solib.h
 source.c
+sparc-nat.c
 sparc-pinsn.c
 sparc-stub.c
 sparc-tdep.c
@@ -206,9 +206,9 @@ target.h
 terminal.h
 tm-29k.h
 tm-3b1.h
-tm-68k.h
 tm-68k-noun.h
 tm-68k-un.h
+tm-68k.h
 tm-altos.h
 tm-amix.h
 tm-arm.h

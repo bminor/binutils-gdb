@@ -1,3 +1,13 @@
+Wed Sep 30 15:33:22 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	Native file renaming.
+
+	* nat-sparc.c -> sparc-nat.c
+	* nat-sun4os4.h -> nm-sun4os4.h
+	* nat-trash.h -> nm-trash.h
+	* configure.in: link to nm.h rather than nat.h.
+	* infptrace.c: include nm.h rather than nat.h.
+
 Tue Sep 29 14:35:00 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	Host/target/native split for sun4.
