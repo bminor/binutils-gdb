@@ -1535,7 +1535,8 @@ amd64nbsd-tdep.o: amd64nbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 amd64obsd-nat.o: amd64nbsd-nat.c $(defs_h) $(gdb_assert_h) $(x86_64_tdep_h) \
 	$(amd64_nat_h)
 amd64obsd-tdep.o: amd64nbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
-	$(gdbcore_h) $(osabi_h) $(gdb_assert_h) $(x86_64_tdep_h)
+	$(gdbcore_h) $(osabi_h) $(regset_h) $(target_h) $(gdb_assert_h) \
+	$(gdb_string_h) $(x86_64_tdep_h) $(i387_tdep_h)
 annotate.o: annotate.c $(defs_h) $(annotate_h) $(value_h) $(target_h) \
 	$(gdbtypes_h) $(breakpoint_h)
 arch-utils.o: arch-utils.c $(defs_h) $(arch_utils_h) $(buildsym_h) \

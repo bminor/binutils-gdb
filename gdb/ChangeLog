@@ -1,5 +1,17 @@
 2004-02-20  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64obsd-tdep.c: Include "regset.h" and "i387-tdep.h".  Fix
+	comments.
+	(amd64obsd_supply_regset, amd64obsd_regset_from_core_section): New
+	functions.
+	(amd64obsd_init_abi): Reorder initializations.  Use
+	amd64obsd_r_reg_offset to initialize the general-purpose register
+	set details.  Set regset_from_core_section.
+	(_initialize_amd64obsd_tdep): Rename from
+	_initialize_amd64obsd_ndep.  Add OS ABI handler for core dumps.
+	* Makefile.in (amd64obsd-tdep.o): Update dependencies.
+	* config/i386/obsd64.mt (TDEPFILES): Add i386-tdep.o.
+
 	* NEWS (New native configurations): Mention OpenBSD/alpha.
 	* configure.tgt: Add alpha*-*-openbsd*.
 	* configure.host: Add alpha*-*-openbsd*.

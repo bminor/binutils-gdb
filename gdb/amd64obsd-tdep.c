@@ -23,12 +23,54 @@
 #include "frame.h"
 #include "gdbcore.h"
 #include "osabi.h"
+#include "regset.h"
 #include "target.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
 
 #include "x86-64-tdep.h"
+#include "i387-tdep.h"
+
+/* Support for core dumps.  */
+
+static void
+amd64obsd_supply_regset (const struct regset *regset,
+			 struct regcache *regcache, int regnum,
+			 const void *regs, size_t len)
+{
+  const struct gdbarch_tdep *tdep = regset->descr;
+
+  gdb_assert (len >= tdep->sizeof_gregset + I387_SIZEOF_FXSAVE);
+
+  i386_supply_gregset (regset, regcache, regnum, regs, tdep->sizeof_gregset);
+  x86_64_supply_fxsave (regcache, regnum, (char *)regs + tdep->sizeof_gregset);
+}
+
+static const struct regset *
+amd64obsd_regset_from_core_section (struct gdbarch *gdbarch,
+				    const char *sect_name, size_t sect_size)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* OpenBSD core dumps don't use seperate register sets for the
+     general-purpose and floating-point registers.  */
+
+  if (strcmp (sect_name, ".reg") == 0
+      && sect_size >= tdep->sizeof_gregset + I387_SIZEOF_FXSAVE)
+    {
+      if (tdep->gregset == NULL)
+	{
+	  tdep->gregset = XMALLOC (struct regset);
+	  tdep->gregset->descr = tdep;
+	  tdep->gregset->supply_regset = amd64obsd_supply_regset;
+	}
+      return tdep->gregset;
+    }
+
+  return NULL;
+}
+
 
 /* Support for signal handlers.  */
 
@@ -77,7 +119,7 @@ amd64obsd_sigcontext_addr (struct frame_info *next_frame)
 /* Mapping between the general-purpose registers in `struct reg'
    format and GDB's register cache layout.  */
 
-/* From <machine/reg.h>.  Used for ptrace(2), but not for core dumps.  */
+/* From <machine/reg.h>.  */
 int amd64obsd_r_reg_offset[] =
 {
   14 * 8,			/* %rax */
@@ -106,7 +148,7 @@ int amd64obsd_r_reg_offset[] =
   23 * 8			/* %gs */
 };
 
-/* From <machine/signal.h>.  Also used for core dumps.  */
+/* From <machine/signal.h>.  */
 static int amd64obsd_sc_reg_offset[] =
 {
   14 * 8,			/* %rax */
@@ -140,12 +182,15 @@ amd64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  /* Initialize general-purpose register set details first.  */
-  tdep->gregset_reg_offset = amd64obsd_sc_reg_offset;
-  tdep->gregset_num_regs = ARRAY_SIZE (amd64obsd_sc_reg_offset);
-  tdep->sizeof_gregset = 26 * 8;
-
   x86_64_init_abi (info, gdbarch);
+
+  /* Initialize general-purpose register set details.  */
+  tdep->gregset_reg_offset = amd64obsd_r_reg_offset;
+  tdep->gregset_num_regs = ARRAY_SIZE (amd64obsd_r_reg_offset);
+  tdep->sizeof_gregset = 24 * 8;
+
+  set_gdbarch_regset_from_core_section (gdbarch,
+					amd64obsd_regset_from_core_section);
 
   tdep->jb_pc_offset = 7 * 8;
 
@@ -160,11 +205,15 @@ amd64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 void _initialize_amd64obsd_tdep (void);
 
 void
-_initialize_amd64obsd_ndep (void)
+_initialize_amd64obsd_tdep (void)
 {
   /* The OpenBSD/amd64 native dependent code makes this assumption.  */
   gdb_assert (ARRAY_SIZE (amd64obsd_r_reg_offset) == X86_64_NUM_GREGS);
 
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
 			  GDB_OSABI_OPENBSD_ELF, amd64obsd_init_abi);
+
+  /* OpenBSD uses traditional (a.out) NetBSD-style core dumps.  */
+  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
+			  GDB_OSABI_NETBSD_AOUT, amd64obsd_init_abi);
 }
