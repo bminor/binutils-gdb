@@ -1,3 +1,16 @@
+2004-03-23  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (trad_frame_h): Add $(frame_h).
+	* trad-frame.h: Update copyright.  Include "frame.h".
+	(struct trad_frame_cache, trad_frame_cache_zalloc): Declare.
+	(trad_frame_set_id, trad_frame_get_id): Declare.
+	(trad_frame_set_reg_addr, trad_frame_get_register): Declare.
+	* trad-frame.c: Update copyright.
+	(struct trad_frame_cache): Define.
+	(trad_frame_cache_zalloc): New function.
+	(trad_frame_set_id, trad_frame_get_id): New functions.
+	(trad_frame_set_reg_addr, trad_frame_get_register): New functions.
+	
 2004-03-22  Andrew Cagney  <cagney@redhat.com>
 
 	* s390-tdep.c (struct s390_stub_unwind_cache): Rename
