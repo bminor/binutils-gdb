@@ -12,6 +12,11 @@
 	(elfNN_hpux_post_process_headers): New function.
 	#include elfNN-target.h again with values for IA64 HP-UX vector.
 
+2001-12-18  Michael Snyder  <msnyder@redhat.com>
+
+        * elf.c (assign_file_positions_for_segments): Don't sort PT_NOTE
+        sections of corefiles.  Also it makes no sense to sort if count == 1.
+
 2001-12-18  H.J. Lu <hjl@gnu.org>
 
 	* elf.c (_bfd_elf_copy_private_bfd_data): Also copy GP.

@@ -3299,8 +3299,13 @@ assign_file_positions_for_segments (abfd)
       asection **secpp;
 
       /* If elf_segment_map is not from map_sections_to_segments, the
-         sections may not be correctly ordered.  */
-      if (m->count > 0)
+         sections may not be correctly ordered.  NOTE: sorting should 
+	 not be done to the PT_NOTE section of a corefile, which may
+	 contain several pseudo-sections artificially created by bfd.
+	 Sorting these pseudo-sections breaks things badly.  */
+      if (m->count > 1 
+	  && !(elf_elfheader (abfd)->e_type == ET_CORE 
+	       && m->p_type == PT_NOTE))
 	qsort (m->sections, (size_t) m->count, sizeof (asection *),
 	       elf_sort_sections);
 
