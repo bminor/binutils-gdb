@@ -1,5 +1,5 @@
 /* Execute AIXcoff files, for GDB.
-   Copyright 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 1994 Free Software Foundation, Inc.
    Derived from exec.c.  Modified by IBM Corporation.
    Donated by IBM Corporation and Cygnus Support.
 
@@ -35,6 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
+#include "language.h"
 #include "symfile.h"
 #include "objfiles.h"
 
@@ -74,14 +75,15 @@ extern struct target_ops exec_ops;
 /* exec_close -	done with exec file, clean up all resources. */
 
 static void
-exec_close(quitting)
+exec_close (quitting)
+int quitting;
 {
   register struct vmap *vp, *nxt;
-  struct objfile *obj;
   int need_symtab_cleanup = 0;
   
-  for (nxt = vmap; vp = nxt; )
+  for (nxt = vmap; nxt; )
     {
+      vp = nxt;
       nxt = vp->nxt;
 
       /* if there is an objfile associated with this bfd,
@@ -93,13 +95,13 @@ exec_close(quitting)
 	  need_symtab_cleanup = 1;
 	}
       else
-	bfd_close(vp->bfd);
+	bfd_close (vp->bfd);
 
       /* FIXME: This routine is #if 0'd in symfile.c.  What should we
 	 be doing here?  Should we just free everything in
 	 vp->objfile->symtabs?  Should free_objfile do that?  */
-      free_named_symtabs(vp->name);
-      free(vp);
+      free_named_symtabs (vp->name);
+      free (vp);
     }
   
   vmap = 0;
@@ -107,28 +109,32 @@ exec_close(quitting)
   /* exec_bfd was already closed (the exec file has a vmap entry).  */
   exec_bfd = NULL;
 
-  if (exec_ops.to_sections) {
-    free (exec_ops.to_sections);
-    exec_ops.to_sections = NULL;
-    exec_ops.to_sections_end = NULL;
-  }
+  if (exec_ops.to_sections)
+    {
+      free (exec_ops.to_sections);
+      exec_ops.to_sections = NULL;
+      exec_ops.to_sections_end = NULL;
+    }
 
   if (need_symtab_cleanup)
     clear_symtab_users ();
 }
 
-/*
- * exec_file_command -	handle the "exec" command, &c.
- */
+/*  Process the first arg in ARGS as the new exec file.
+
+    Note that we have to explicitly ignore additional args, since we can
+    be called from file_command(), which also calls symbol_file_command()
+    which can take multiple args. */
+
 void
 exec_file_command (filename, from_tty)
      char *filename;
      int from_tty;
 {
-  target_preopen(from_tty);
+  target_preopen (from_tty);
 
   /* Remove any previous exec file.  */
-  unpush_target(&exec_ops);
+  unpush_target (&exec_ops);
 
   /* Now open and digest the file the user requested, if any. */
 
@@ -137,32 +143,32 @@ exec_file_command (filename, from_tty)
       char *scratch_pathname;
       int scratch_chan;
       
-      filename = tilde_expand(filename);
+      filename = tilde_expand (filename);
       make_cleanup (free, filename);
       
-      scratch_chan = openp(getenv("PATH"), 1, filename,
-			   write_files? O_RDWR: O_RDONLY, 0,
-			   &scratch_pathname);
+      scratch_chan = openp (getenv ("PATH"), 1, filename,
+			    write_files? O_RDWR: O_RDONLY, 0,
+			    &scratch_pathname);
       if (scratch_chan < 0)
-	perror_with_name(filename);
+	perror_with_name (filename);
 
-      exec_bfd = bfd_fdopenr(scratch_pathname, gnutarget, scratch_chan);
+      exec_bfd = bfd_fdopenr (scratch_pathname, gnutarget, scratch_chan);
       if (!exec_bfd)
-	error("Could not open `%s' as an executable file: %s",
-	      scratch_pathname, bfd_errmsg(bfd_get_error ()));
+	error ("Could not open `%s' as an executable file: %s",
+	       scratch_pathname, bfd_errmsg(bfd_get_error ()));
 
       /* make sure we have an object file */
 
-      if (!bfd_check_format(exec_bfd, bfd_object))
-	error("\"%s\": not in executable format: %s.", scratch_pathname,
-	      bfd_errmsg(bfd_get_error ()));
+      if (!bfd_check_format (exec_bfd, bfd_object))
+	error ("\"%s\": not in executable format: %s.", scratch_pathname,
+	       bfd_errmsg (bfd_get_error ()));
 
       /* setup initial vmap */
 
       map_vmap (exec_bfd, 0);
       if (!vmap)
-	error("Can't find the file sections in `%s': %s", exec_bfd->filename,
-	      bfd_errmsg(bfd_get_error ()));
+	error ("Can't find the file sections in `%s': %s", exec_bfd->filename,
+	       bfd_errmsg(bfd_get_error ()));
 
       if (build_section_table (exec_bfd, &exec_ops.to_sections,
 			       &exec_ops.to_sections_end))
@@ -170,33 +176,35 @@ exec_file_command (filename, from_tty)
 	       bfd_errmsg (bfd_get_error ()));
 
       /* make sure core, if present, matches */
-      validate_files();
+      validate_files ();
 
       push_target(&exec_ops);
 
-      /* Tell display code(if any) about the changed file name. */
-
+      /* Tell display code (if any) about the changed file name. */
       if (exec_file_display_hook)
-	(*exec_file_display_hook)(filename);
+	(*exec_file_display_hook) (filename);
     } 
   else
     {
-      exec_close(0);		/* just in case	*/
+      exec_close (0);		/* just in case	*/
       if (from_tty)
-	printf_unfiltered("No exec file now.\n");
+	printf_unfiltered ("No exec file now.\n");
     }
 }
 
 /* Set both the exec file and the symbol file, in one command.  What a
- * novelty.  Why did GDB go through four major releases before this
- * command was added?
- */
-static void
-file_command(arg, from_tty)
-char *arg; {
+   novelty.  Why did GDB go through four major releases before this
+   command was added?  */
 
-	exec_file_command(arg, from_tty);
-	symbol_file_command(arg, from_tty);
+static void
+file_command (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  /* FIXME, if we lose on reading the symbol file, we should revert
+     the exec file, but that's rough.  */
+  exec_file_command (arg, from_tty);
+  symbol_file_command (arg, from_tty);
 }
 
 /* Locate all mappable sections of a BFD file. 
@@ -239,7 +247,7 @@ build_section_table (some_bfd, start, end)
     free (*start);
   *start = (struct section_table *) xmalloc (count * sizeof (**start));
   *end = *start;
-  bfd_map_over_sections (some_bfd, add_to_section_table, (char *)end);
+  bfd_map_over_sections (some_bfd, add_to_section_table, (char *) end);
   if (*end > *start + count)
     fatal ("aborting");
   /* We could realloc the table, but it probably loses for most files.  */
@@ -252,31 +260,29 @@ bfdsec_to_vmap(bf, sect, arg3)
      sec_ptr sect;
      PTR arg3;
 {
-  struct vmap_and_bfd *vmap_bfd = (struct vmap_and_bfd *)arg3;
-  register struct vmap *vp, **vpp;
-  register struct symtab *syms;
-  bfd *arch = vmap_bfd->pbfd;
+  struct vmap_and_bfd *vmap_bfd = (struct vmap_and_bfd *) arg3;
+  register struct vmap *vp;
   vp = vmap_bfd->pvmap;
 
-  if ((bfd_get_section_flags(bf, sect) & SEC_LOAD) == 0)
+  if ((bfd_get_section_flags (bf, sect) & SEC_LOAD) == 0)
     return;
 
-  if (STREQ(bfd_section_name(bf, sect), ".text"))
+  if (STREQ(bfd_section_name (bf, sect), ".text"))
     {
       vp->tstart = 0;
-      vp->tend = vp->tstart + bfd_section_size(bf, sect);
+      vp->tend = vp->tstart + bfd_section_size (bf, sect);
 
       /* When it comes to this adjustment value, in contrast to our previous
 	 belief shared objects should behave the same as the main load segment.
 	 This is the offset from the beginning of text section to the first
 	 real instruction. */
 
-      vp->tadj = sect->filepos - bfd_section_vma(bf, sect);
+      vp->tadj = sect->filepos - bfd_section_vma (bf, sect);
     }
-  else if (STREQ(bfd_section_name(bf, sect), ".data"))
+  else if (STREQ(bfd_section_name (bf, sect), ".data"))
     {
       vp->dstart = 0;
-      vp->dend   = vp->dstart + bfd_section_size(bf, sect);
+      vp->dend   = vp->dstart + bfd_section_size (bf, sect);
     }
   else if (STREQ(bfd_section_name(bf, sect), ".bss"))	/* FIXMEmgo */
     printf_unfiltered ("bss section in exec! Don't know what the heck to do!\n");
@@ -292,14 +298,13 @@ map_vmap (bf, arch)
 {
   struct vmap_and_bfd vmap_bfd;
   struct vmap *vp, **vpp;
-  struct objfile *obj;
 
-  vp = (void*) xmalloc (sizeof (*vp));
+  vp = (PTR) xmalloc (sizeof (*vp));
   memset (vp, '\0', sizeof (*vp));
   vp->nxt = 0;
   vp->bfd = bf;
-  vp->name = bfd_get_filename(arch ? arch : bf);
-  vp->member = arch ? bfd_get_filename(bf) : "";
+  vp->name = bfd_get_filename (arch ? arch : bf);
+  vp->member = arch ? bfd_get_filename (bf) : "";
   
   vmap_bfd.pbfd = arch;
   vmap_bfd.pvmap = vp;
@@ -413,7 +418,7 @@ print_section_info (t, abfd)
 
 static void
 exec_files_info (t)
-  struct target_ops *t;
+     struct target_ops *t;
 {
   register struct vmap *vp = vmap;
 
@@ -422,21 +427,21 @@ exec_files_info (t)
   if (!vp)
     return;
 
-  printf_unfiltered("\tMapping info for file `%s'.\n", vp->name);
+  printf_unfiltered ("\tMapping info for file `%s'.\n", vp->name);
 
-  printf_unfiltered("\t  %8.8s   %8.8s   %8.8s   %8.8s %8.8s %s\n",
+  printf_unfiltered ("\t  %8.8s   %8.8s   %8.8s   %8.8s %8.8s %s\n",
     "tstart", "tend", "dstart", "dend", "section", "file(member)");
 
   for (; vp; vp = vp->nxt)
-     printf_unfiltered("\t0x%8.8x 0x%8.8x 0x%8.8x 0x%8.8x %s%s%s%s\n",
-	vp->tstart,
-	vp->tend,
-	vp->dstart,
-	vp->dend,
-	vp->name,
-	*vp->member ? "(" : "",
-	vp->member,
-	*vp->member ? ")" : "");
+    printf_unfiltered ("\t0x%8.8x 0x%8.8x 0x%8.8x 0x%8.8x %s%s%s%s\n",
+		       vp->tstart,
+		       vp->tend,
+		       vp->dstart,
+		       vp->dend,
+		       vp->name,
+		       *vp->member ? "(" : "",
+		       vp->member,
+		       *vp->member ? ")" : "");
 }
 
 #ifdef DAMON
@@ -510,17 +515,18 @@ set_section_command (args, from_tty)
   /* Parse out new virtual address */
   secaddr = parse_and_eval_address (args);
 
-  for (p = exec_ops.to_sections; p < exec_ops.to_sections_end; p++) {
+  for (p = exec_ops.to_sections; p < exec_ops.to_sections_end; p++)
     if (!strncmp (secname, bfd_section_name (exec_bfd, p->the_bfd_section), seclen)
-	&& bfd_section_name (exec_bfd, p->the_bfd_section)[seclen] == '\0') {
-      offset = secaddr - p->addr;
-      p->addr += offset;
-      p->endaddr += offset;
-      if (from_tty)
-        exec_files_info(&exec_ops);
-      return;
-    }
-  } 
+	&& bfd_section_name (exec_bfd, p->the_bfd_section)[seclen] == '\0')
+      {
+	offset = secaddr - p->addr;
+	p->addr += offset;
+	p->endaddr += offset;
+	if (from_tty)
+	  exec_files_info (&exec_ops);
+	return;
+      }
+
   if (seclen >= sizeof (secprint))
     seclen = sizeof (secprint) - 1;
   strncpy (secprint, secname, seclen);

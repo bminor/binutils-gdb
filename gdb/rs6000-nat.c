@@ -1,5 +1,5 @@
 /* IBM RS/6000 native-dependent code for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -44,6 +44,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/ldr.h>
 
 extern int errno;
+
 extern struct vmap * map_vmap PARAMS ((bfd *bf, bfd *arch));
 
 extern struct target_ops exec_ops;
@@ -53,6 +54,9 @@ exec_one_dummy_insn PARAMS ((void));
 
 extern void
 add_text_to_loadinfo PARAMS ((CORE_ADDR textaddr, CORE_ADDR dataaddr));
+
+extern void
+fixup_breakpoints PARAMS ((CORE_ADDR low, CORE_ADDR high, CORE_ADDR delta));
 
 /* Conversion from gdb-to-system special purpose register numbers.. */
 
@@ -85,7 +89,7 @@ fetch_inferior_registers (regno)
 
     for (ii=0; ii < 32; ++ii)
       ptrace (PT_READ_FPR, inferior_pid, 
-	(PTRACE_ARG3_TYPE) &registers [REGISTER_BYTE (FP0_REGNUM+ii)],
+	      (PTRACE_ARG3_TYPE) &registers [REGISTER_BYTE (FP0_REGNUM+ii)],
 	      FPR0+ii, 0);
 
     /* read special registers. */
@@ -106,7 +110,7 @@ fetch_inferior_registers (regno)
   }
   else if (regno <= FPLAST_REGNUM) {		/* a FPR */
     ptrace (PT_READ_FPR, inferior_pid,
-	(PTRACE_ARG3_TYPE) &registers [REGISTER_BYTE (regno)],
+	    (PTRACE_ARG3_TYPE) &registers [REGISTER_BYTE (regno)],
 	    (regno-FP0_REGNUM+FPR0), 0);
   }
   else if (regno <= LAST_SP_REGNUM) {		/* a special register */
@@ -132,7 +136,8 @@ store_inferior_registers (regno)
 
   errno = 0;
 
-  if (regno == -1) {			/* for all registers..	*/
+  if (regno == -1)
+    {			/* for all registers..	*/
       int ii;
 
        /* execute one dummy instruction (which is a breakpoint) in inferior
@@ -143,79 +148,92 @@ store_inferior_registers (regno)
        exec_one_dummy_insn ();
 
       /* write general purpose registers first! */
-      for ( ii=GPR0; ii<=GPR31; ++ii) {
-	ptrace (PT_WRITE_GPR, inferior_pid, (PTRACE_ARG3_TYPE) ii,
-		*(int*)&registers[REGISTER_BYTE (ii)], 0);
-	if ( errno ) { 
-	  perror ("ptrace write_gpr"); errno = 0;
+      for ( ii=GPR0; ii<=GPR31; ++ii)
+	{
+	  ptrace (PT_WRITE_GPR, inferior_pid, (PTRACE_ARG3_TYPE) ii,
+		  *(int*)&registers[REGISTER_BYTE (ii)], 0);
+	  if (errno)
+	    { 
+	      perror ("ptrace write_gpr");
+	      errno = 0;
+	    }
 	}
-      }
 
       /* write floating point registers now. */
-      for ( ii=0; ii < 32; ++ii) {
-	ptrace (PT_WRITE_FPR, inferior_pid, 
+      for ( ii=0; ii < 32; ++ii)
+	{
+	  ptrace (PT_WRITE_FPR, inferior_pid, 
 		  (PTRACE_ARG3_TYPE) &registers[REGISTER_BYTE (FP0_REGNUM+ii)],
-		FPR0+ii, 0);
-        if ( errno ) {
-	  perror ("ptrace write_fpr"); errno = 0;
-        }
-      }
+		  FPR0+ii, 0);
+	  if (errno)
+	    {
+	      perror ("ptrace write_fpr");
+	      errno = 0;
+	    }
+	}
 
       /* write special registers. */
-      for (ii=0; ii <= LAST_SP_REGNUM-FIRST_SP_REGNUM; ++ii) {
-        ptrace (PT_WRITE_GPR, inferior_pid,
-		(PTRACE_ARG3_TYPE) special_regs[ii],
-		*(int*)&registers[REGISTER_BYTE (FIRST_SP_REGNUM+ii)], 0);
-	if ( errno ) {
-	  perror ("ptrace write_gpr"); errno = 0;
+      for (ii=0; ii <= LAST_SP_REGNUM-FIRST_SP_REGNUM; ++ii)
+	{
+	  ptrace (PT_WRITE_GPR, inferior_pid,
+		  (PTRACE_ARG3_TYPE) special_regs[ii],
+		  *(int*)&registers[REGISTER_BYTE (FIRST_SP_REGNUM+ii)], 0);
+	  if (errno)
+	    {
+	      perror ("ptrace write_gpr");
+	      errno = 0;
+	    }
 	}
-      }
-  }
+    }
 
   /* else, a specific register number is given... */
 
-  else if (regno < FP0_REGNUM) {		/* a GPR */
+  else if (regno < FP0_REGNUM)			/* a GPR */
+    {
+      ptrace (PT_WRITE_GPR, inferior_pid, (PTRACE_ARG3_TYPE) regno,
+	      *(int*)&registers[REGISTER_BYTE (regno)], 0);
+    }
 
-    ptrace (PT_WRITE_GPR, inferior_pid, (PTRACE_ARG3_TYPE) regno,
-		*(int*)&registers[REGISTER_BYTE (regno)], 0);
-  }
+  else if (regno <= FPLAST_REGNUM)		/* a FPR */
+    {
+      ptrace (PT_WRITE_FPR, inferior_pid, 
+	      (PTRACE_ARG3_TYPE) &registers[REGISTER_BYTE (regno)],
+	      regno - FP0_REGNUM + FPR0, 0);
+    }
 
-  else if (regno <= FPLAST_REGNUM) {		/* a FPR */
-    ptrace (PT_WRITE_FPR, inferior_pid, 
-	    (PTRACE_ARG3_TYPE) &registers[REGISTER_BYTE (regno)],
-	    regno-FP0_REGNUM+FPR0, 0);
-  }
-
-  else if (regno <= LAST_SP_REGNUM) {		/* a special register */
-
-    ptrace (PT_WRITE_GPR, inferior_pid,
-	    (PTRACE_ARG3_TYPE) special_regs [regno-FIRST_SP_REGNUM],
-	    *(int*)&registers[REGISTER_BYTE (regno)], 0);
-  }
+  else if (regno <= LAST_SP_REGNUM)		/* a special register */
+    {
+      ptrace (PT_WRITE_GPR, inferior_pid,
+	      (PTRACE_ARG3_TYPE) special_regs [regno-FIRST_SP_REGNUM],
+	      *(int*)&registers[REGISTER_BYTE (regno)], 0);
+    }
 
   else
     fprintf_unfiltered (gdb_stderr, "Gdb error: register no %d not implemented.\n", regno);
 
-  if ( errno ) {
-    perror ("ptrace write");  errno = 0;
-  }
+  if (errno)
+    {
+      perror ("ptrace write");
+      errno = 0;
+    }
 }
 
 /* Execute one dummy breakpoint instruction.  This way we give the kernel
    a chance to do some housekeeping and update inferior's internal data,
    including u_area. */
+
 static void
 exec_one_dummy_insn ()
 {
 #define	DUMMY_INSN_ADDR	(TEXT_SEGMENT_BASE)+0x200
 
-  unsigned long shadow;
+  char shadow_contents[BREAKPOINT_MAX];	/* Stash old bkpt addr contents */
   unsigned int status, pid;
 
   /* We plant one dummy breakpoint into DUMMY_INSN_ADDR address. We assume that
      this address will never be executed again by the real code. */
 
-  target_insert_breakpoint (DUMMY_INSN_ADDR, &shadow);
+  target_insert_breakpoint (DUMMY_INSN_ADDR, shadow_contents);
 
   errno = 0;
   ptrace (PT_CONTINUE, inferior_pid, (PTRACE_ARG3_TYPE) DUMMY_INSN_ADDR, 0, 0);
@@ -226,7 +244,7 @@ exec_one_dummy_insn ()
     pid = wait (&status);
   } while (pid != inferior_pid);
     
-  target_remove_breakpoint (DUMMY_INSN_ADDR, &shadow);
+  target_remove_breakpoint (DUMMY_INSN_ADDR, shadow_contents);
 }
 
 void
@@ -238,19 +256,19 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 {
   /* fetch GPRs and special registers from the first register section
      in core bfd. */
-  if (which == 0) {
+  if (which == 0)
+    {
+      /* copy GPRs first. */
+      memcpy (registers, core_reg_sect, 32 * 4);
 
-    /* copy GPRs first. */
-    memcpy (registers, core_reg_sect, 32 * 4);
-
-    /* gdb's internal register template and bfd's register section layout
-       should share a common include file. FIXMEmgo */
-    /* then comes special registes. They are supposed to be in the same
-       order in gdb template and bfd `.reg' section. */
-    core_reg_sect += (32 * 4);
-    memcpy (&registers [REGISTER_BYTE (FIRST_SP_REGNUM)], core_reg_sect, 
-    			(LAST_SP_REGNUM - FIRST_SP_REGNUM + 1) * 4);
-  }
+      /* gdb's internal register template and bfd's register section layout
+	 should share a common include file. FIXMEmgo */
+      /* then comes special registes. They are supposed to be in the same
+	 order in gdb template and bfd `.reg' section. */
+      core_reg_sect += (32 * 4);
+      memcpy (&registers [REGISTER_BYTE (FIRST_SP_REGNUM)], core_reg_sect, 
+	      (LAST_SP_REGNUM - FIRST_SP_REGNUM + 1) * 4);
+    }
 
   /* fetch floating point registers from register section 2 in core bfd. */
   else if (which == 2)
@@ -260,7 +278,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
     fprintf_unfiltered (gdb_stderr, "Gdb error: unknown parameter to fetch_core_registers().\n");
 }
 
-/*  vmap_symtab -	handle symbol translation on vmapping */
+/* handle symbol translation on vmapping */
 
 static void
 vmap_symtab (vp)
@@ -339,11 +357,13 @@ vmap_symtab (vp)
 }
 
 /* Add symbols for an objfile.  */
+
 static int
 objfile_symbol_add (arg)
      char *arg;
 {
   struct objfile *obj = (struct objfile *) arg;
+
   syms_from_objfile (obj, 0, 0, 0);
   new_symfile_objfile (obj, 0, 0);
   return 1;
@@ -355,94 +375,92 @@ objfile_symbol_add (arg)
    core file), the caller should set it to -1, and we will open the file.
 
    Return the vmap new entry.  */
+
 static struct vmap *
-add_vmap(ldi)
+add_vmap (ldi)
      register struct ld_info *ldi; 
 {
-	bfd *abfd, *last;
-	register char *mem, *objname;
-	struct objfile *obj;
-	struct vmap *vp;
+  bfd *abfd, *last;
+  register char *mem, *objname;
+  struct objfile *obj;
+  struct vmap *vp;
 
-	/* This ldi structure was allocated using alloca() in 
-	   xcoff_relocate_symtab(). Now we need to have persistent object 
-	   and member names, so we should save them. */
+  /* This ldi structure was allocated using alloca() in 
+     xcoff_relocate_symtab(). Now we need to have persistent object 
+     and member names, so we should save them. */
 
-	mem = ldi->ldinfo_filename + strlen(ldi->ldinfo_filename) + 1;
-	mem = savestring (mem, strlen (mem));
-	objname = savestring (ldi->ldinfo_filename, strlen (ldi->ldinfo_filename));
+  mem = ldi->ldinfo_filename + strlen (ldi->ldinfo_filename) + 1;
+  mem = savestring (mem, strlen (mem));
+  objname = savestring (ldi->ldinfo_filename, strlen (ldi->ldinfo_filename));
 
-	if (ldi->ldinfo_fd < 0)
-	  /* Note that this opens it once for every member; a possible
-	     enhancement would be to only open it once for every object.  */
-	  abfd = bfd_openr (objname, gnutarget);
-	else
-	  abfd = bfd_fdopenr(objname, gnutarget, ldi->ldinfo_fd);
-	if (!abfd)
-	  error("Could not open `%s' as an executable file: %s",
-					objname, bfd_errmsg(bfd_get_error ()));
+  if (ldi->ldinfo_fd < 0)
+    /* Note that this opens it once for every member; a possible
+       enhancement would be to only open it once for every object.  */
+    abfd = bfd_openr (objname, gnutarget);
+  else
+    abfd = bfd_fdopenr (objname, gnutarget, ldi->ldinfo_fd);
+  if (!abfd)
+    error ("Could not open `%s' as an executable file: %s",
+	   objname, bfd_errmsg (bfd_get_error ()));
 
+  /* make sure we have an object file */
 
-	/* make sure we have an object file */
+  if (bfd_check_format (abfd, bfd_object))
+    vp = map_vmap (abfd, 0);
 
-	if (bfd_check_format(abfd, bfd_object))
-	  vp = map_vmap (abfd, 0);
+  else if (bfd_check_format (abfd, bfd_archive))
+    {
+      last = 0;
+      /* FIXME??? am I tossing BFDs?  bfd? */
+      while ((last = bfd_openr_next_archived_file (abfd, last)))
+	if (STREQ (mem, last->filename))
+	  break;
 
-	else if (bfd_check_format(abfd, bfd_archive)) {
-		last = 0;
-		/*
-		 * FIXME??? am I tossing BFDs?  bfd?
-		 */
-		while (last = bfd_openr_next_archived_file(abfd, last))
-			if (STREQ(mem, last->filename))
-				break;
-
-		if (!last) {
-		  bfd_close(abfd);
-		  /* FIXME -- should be error */
-		  warning("\"%s\": member \"%s\" missing.", abfd->filename, mem);
-		  return;
-		}
-
-		if (!bfd_check_format(last, bfd_object)) {
-			bfd_close(last);	/* XXX???	*/
-			goto obj_err;
-		}
-
-		vp = map_vmap (last, abfd);
+      if (!last)
+	{
+	  bfd_close (abfd);
+	  /* FIXME -- should be error */
+	  warning ("\"%s\": member \"%s\" missing.", abfd->filename, mem);
+	  return;
 	}
-	else {
-	    obj_err:
-		bfd_close(abfd);
-		error ("\"%s\": not in executable format: %s.",
-		       objname, bfd_errmsg(bfd_get_error ()));
-		/*NOTREACHED*/
+
+      if (!bfd_check_format(last, bfd_object))
+	{
+	  bfd_close (last);	/* XXX???	*/
+	  goto obj_err;
 	}
-	obj = allocate_objfile (vp->bfd, 0);
-	vp->objfile = obj;
+
+      vp = map_vmap (last, abfd);
+    }
+  else
+    {
+    obj_err:
+      bfd_close (abfd);
+      error ("\"%s\": not in executable format: %s.",
+	     objname, bfd_errmsg (bfd_get_error ()));
+      /*NOTREACHED*/
+    }
+  obj = allocate_objfile (vp->bfd, 0);
+  vp->objfile = obj;
 
 #ifndef SOLIB_SYMBOLS_MANUAL
-	if (catch_errors (objfile_symbol_add, (char *)obj,
-			  "Error while reading shared library symbols:\n",
-			  RETURN_MASK_ALL))
-	  {
-	    /* Note this is only done if symbol reading was successful.  */
-	    vmap_symtab (vp);
-	    vp->loaded = 1;
-	  }
+  if (catch_errors (objfile_symbol_add, (char *)obj,
+		    "Error while reading shared library symbols:\n",
+		    RETURN_MASK_ALL))
+    {
+      /* Note this is only done if symbol reading was successful.  */
+      vmap_symtab (vp);
+      vp->loaded = 1;
+    }
 #endif
-	return vp;
+  return vp;
 }
 
-/*
- * vmap_ldinfo -	update VMAP info with ldinfo() information
- *
- * Input:
- *	ldi	-	^ to ldinfo() results.
- */
+/* update VMAP info with ldinfo() information
+   Input is ptr to ldinfo() results.  */
 
 static void
-vmap_ldinfo(ldi)
+vmap_ldinfo (ldi)
      register struct ld_info *ldi;
 {
   struct stat ii, vi;
@@ -450,80 +468,80 @@ vmap_ldinfo(ldi)
   register got_one, retried;
   CORE_ADDR ostart;
 
-  /*
-   * for each *ldi, see if we have a corresponding *vp
-   *	if so, update the mapping, and symbol table.
-   *	if not, add an entry and symbol table.
-   */
+  /* For each *ldi, see if we have a corresponding *vp.
+     If so, update the mapping, and symbol table.
+     If not, add an entry and symbol table.  */
+
   do {
-	char *name = ldi->ldinfo_filename;
-	char *memb = name + strlen(name) + 1;
+    char *name = ldi->ldinfo_filename;
+    char *memb = name + strlen(name) + 1;
 
-	retried = 0;
+    retried = 0;
 
-	if (fstat(ldi->ldinfo_fd, &ii) < 0)
-		fatal("cannot fstat(%d) on %s"
-		      , ldi->ldinfo_fd
-		      , name);
-retry:
-	for (got_one = 0, vp = vmap; vp; vp = vp->nxt) {
-	  FILE *io;
+    if (fstat (ldi->ldinfo_fd, &ii) < 0)
+      fatal ("cannot fstat(fd=%d) on %s", ldi->ldinfo_fd, name);
+  retry:
+    for (got_one = 0, vp = vmap; vp; vp = vp->nxt)
+      {
+	FILE *io;
 
-	  /* First try to find a `vp', which is the same as in ldinfo.
-	     If not the same, just continue and grep the next `vp'. If same,
-	     relocate its tstart, tend, dstart, dend values. If no such `vp'
-	     found, get out of this for loop, add this ldi entry as a new vmap
-	     (add_vmap) and come back, fins its `vp' and so on... */
+	/* First try to find a `vp', which is the same as in ldinfo.
+	   If not the same, just continue and grep the next `vp'. If same,
+	   relocate its tstart, tend, dstart, dend values. If no such `vp'
+	   found, get out of this for loop, add this ldi entry as a new vmap
+	   (add_vmap) and come back, fins its `vp' and so on... */
 
-	  /* The filenames are not always sufficient to match on. */
+	/* The filenames are not always sufficient to match on. */
 
-	  if ((name[0] == '/' && !STREQ(name, vp->name))
-	      	|| (memb[0] && !STREQ(memb, vp->member)))
-	    continue;
+	if ((name[0] == '/' && !STREQ(name, vp->name))
+	    || (memb[0] && !STREQ(memb, vp->member)))
+	  continue;
 
-	  io = bfd_cache_lookup(vp->bfd);		/* totally opaque! */
-	  if (!io)
-	    fatal("cannot find BFD's iostream for %s", vp->name);
+	io = bfd_cache_lookup (vp->bfd);		/* totally opaque! */
+	if (!io)
+	  fatal ("cannot find BFD's iostream for %s", vp->name);
 
-	  /* see if we are referring to the same file */
+	/* See if we are referring to the same file. */
+	if (fstat (fileno(io), &vi) < 0)
+	  fatal ("cannot fstat(fd=%d) the BFD for %s (errno=%d)",
+		 fileno(io), vp->name, errno);
 
-	  if (fstat(fileno(io), &vi) < 0)
-	    fatal("cannot fstat BFD for %s", vp->name);
+	if (ii.st_dev != vi.st_dev || ii.st_ino != vi.st_ino)
+	  continue;
 
-	  if (ii.st_dev != vi.st_dev || ii.st_ino != vi.st_ino)
-	    continue;
+	if (!retried)
+	  close (ldi->ldinfo_fd);
 
-	  if (!retried)
-	    close(ldi->ldinfo_fd);
+	++got_one;
 
-	  ++got_one;
+	/* found a corresponding VMAP. remap! */
+	ostart = vp->tstart;
 
-	  /* found a corresponding VMAP. remap! */
-	  ostart = vp->tstart;
+	/* We can assume pointer == CORE_ADDR, this code is native only.  */
+	vp->tstart = (CORE_ADDR) ldi->ldinfo_textorg;
+	vp->tend   = vp->tstart + ldi->ldinfo_textsize;
+	vp->dstart = (CORE_ADDR) ldi->ldinfo_dataorg;
+	vp->dend   = vp->dstart + ldi->ldinfo_datasize;
 
-	  /* We can assume pointer == CORE_ADDR, this code is native only.  */
-	  vp->tstart = (CORE_ADDR) ldi->ldinfo_textorg;
-	  vp->tend   = vp->tstart + ldi->ldinfo_textsize;
-	  vp->dstart = (CORE_ADDR) ldi->ldinfo_dataorg;
-	  vp->dend   = vp->dstart + ldi->ldinfo_datasize;
-
-	  if (vp->tadj) {
+	if (vp->tadj)
+	  {
 	    vp->tstart += vp->tadj;
 	    vp->tend   += vp->tadj;
 	  }
 
-	  /* relocate symbol table(s). */
-	  vmap_symtab (vp);
+	/* relocate symbol table(s). */
+	vmap_symtab (vp);
 
-	  /* there may be more, so we don't break out of the loop. */
-	}
+	/* there may be more, so we don't break out of the loop. */
+      }
 
-	/* if there was no matching *vp, we must perforce create the sucker(s) */
-  	if (!got_one && !retried) {
-	  add_vmap(ldi);
-	  ++retried;
-	  goto retry;
-	}
+    /* if there was no matching *vp, we must perforce create the sucker(s) */
+    if (!got_one && !retried)
+      {
+	add_vmap (ldi);
+	++retried;
+	goto retry;
+      }
   } while (ldi->ldinfo_next
 	   && (ldi = (void *) (ldi->ldinfo_next + (char *) ldi)));
 
@@ -571,40 +589,38 @@ vmap_exec ()
 /* xcoff_relocate_symtab -	hook for symbol table relocation.
    also reads shared libraries.. */
 
+void
 xcoff_relocate_symtab (pid)
-unsigned int pid;
+     unsigned int pid;
 {
 #define	MAX_LOAD_SEGS 64		/* maximum number of load segments */
 
-    struct ld_info *ldi;
-    int temp;
+  struct ld_info *ldi;
 
-    ldi = (void *) alloca(MAX_LOAD_SEGS * sizeof (*ldi));
+  ldi = (void *) alloca(MAX_LOAD_SEGS * sizeof (*ldi));
 
-    /* According to my humble theory, AIX has some timing problems and
-       when the user stack grows, kernel doesn't update stack info in time
-       and ptrace calls step on user stack. That is why we sleep here a little,
-       and give kernel to update its internals. */
+  /* According to my humble theory, AIX has some timing problems and
+     when the user stack grows, kernel doesn't update stack info in time
+     and ptrace calls step on user stack. That is why we sleep here a little,
+     and give kernel to update its internals. */
 
-    usleep (36000);
+  usleep (36000);
 
-    errno = 0;
-    ptrace(PT_LDINFO, pid, (PTRACE_ARG3_TYPE) ldi,
-	   MAX_LOAD_SEGS * sizeof(*ldi), ldi);
-    if (errno) {
-      perror_with_name ("ptrace ldinfo");
-      return 0;
-    }
+  errno = 0;
+  ptrace (PT_LDINFO, pid, (PTRACE_ARG3_TYPE) ldi,
+	  MAX_LOAD_SEGS * sizeof(*ldi), ldi);
+  if (errno)
+    perror_with_name ("ptrace ldinfo");
 
-    vmap_ldinfo(ldi);
+  vmap_ldinfo (ldi);
 
-   do {
-     /* We are allowed to assume CORE_ADDR == pointer.  This code is
-	native only.  */
-     add_text_to_loadinfo ((CORE_ADDR) ldi->ldinfo_textorg,
-			   (CORE_ADDR) ldi->ldinfo_dataorg);
-    } while (ldi->ldinfo_next
-	     && (ldi = (void *) (ldi->ldinfo_next + (char *) ldi)));
+  do {
+    /* We are allowed to assume CORE_ADDR == pointer.  This code is
+       native only.  */
+    add_text_to_loadinfo ((CORE_ADDR) ldi->ldinfo_textorg,
+			  (CORE_ADDR) ldi->ldinfo_dataorg);
+  } while (ldi->ldinfo_next
+	   && (ldi = (void *) (ldi->ldinfo_next + (char *) ldi)));
 
 #if 0
   /* Now that we've jumbled things around, re-sort them.  */
@@ -619,6 +635,7 @@ unsigned int pid;
 
 /* Relocate symtabs and read in shared library info, based on symbols
    from the core file.  */
+
 void
 xcoff_relocate_core ()
 {
@@ -649,7 +666,7 @@ xcoff_relocate_core ()
   ldinfo_sec = bfd_get_section_by_name (core_bfd, ".ldinfo");
   if (ldinfo_sec == NULL)
     {
-bfd_err:
+    bfd_err:
       fprintf_filtered (gdb_stderr, "Couldn't get ldinfo from core file: %s\n",
 			bfd_errmsg (bfd_get_error ()));
       do_cleanups (old);
@@ -681,7 +698,7 @@ bfd_err:
 	    ++names_found;
 	} while (names_found < 2);
 
-      ldip = (struct ld_info *)buffer;
+      ldip = (struct ld_info *) buffer;
 
       /* Can't use a file descriptor from the core file; need to open it.  */
       ldip->ldinfo_fd = -1;

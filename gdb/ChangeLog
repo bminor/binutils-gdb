@@ -1,3 +1,18 @@
+Fri Apr 29 15:56:18 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* xcoffexec.c: Reformat to standards and lint.
+	(language.h): Include.
+	(exec_close): Declare arg "quitting".
+	(file_command): Declare arg "from_tty".
+	(map_vmap): Cast xmalloc result to PTR.
+	* rs6000-nat.c: Reformat to standards and lint.
+	(exec_one_dummy_insn): Use char array for saved instruction.
+	(fixup_breakpoints): Declare.
+	(vmap_ldinfo): Be more informative in fatal error messages.
+	(xcoff_relocate_symtab): Define to return void.
+	* xcoffsolib.h: Reformat to standards, improve comments.
+	* config/rs6000/nm-rs6000.h (xcoff_relocate_symtab): Declare.
+
 Thu Apr 28 08:40:56 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* utils.c, defs.h (error_begin): New function.
