@@ -215,7 +215,7 @@ more information, see @ref{C,,C and C++}.
 @c "MOD2" used as a "miscellaneous languages" flag here.
 @c This is acceptable while there is no real doc for Chill and Pascal.
 Support for Modula-2 and Chill is partial.  For information on Modula-2,
-see @ref{Modula-2,,Modula-2}; there is no further documentation on Chill yet.
+see @ref{Modula-2,,Modula-2}.  There is no further documentation on Chill yet.
 
 Debugging pascal programs which use sets, subranges, file variables, or nested
 functions does not currently work.  @value{GDBN} does not support
