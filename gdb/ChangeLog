@@ -28,66 +28,6 @@
 
 2004-05-10  Jim Blandy  <jimb@redhat.com>
 
-	* ppc-tdep.h (struct gdbarch_tdep): Change definition of
-	ppc_fp0_regnum and ppc_fpscr_regnum: if they are -1, then this
-	processor variant lacks those registers.
-	(ppc_floating_point_unit_p): Change description to make it clear
-	that this returns info about the ISA, not the ABI.
-	* rs6000-tdep.c (ppc_floating_point_unit_p): Decide whether to
-	return true or false by checking tdep->ppc_fp0_regnum and
-	tdep->ppc_fpscr_regnum.  The original code replicated the BFD
-	arch/mach switching done in rs6000_gdbarch_init; it's better to
-	keep that logic there, and just check the results here.
-	(rs6000_gdbarch_init): On the E500, set tdep->ppc_fp0_regnum and
-	tdep->ppc_fpscr_regnum to -1 to indicate that we have no
-	floating-point registers.
-	(ppc_supply_fpregset, ppc_collect_fpregset)
-	(rs6000_push_dummy_call, rs6000_extract_return_value)
-	(rs6000_store_return_value): Assert that we have floating-point
-	registers.
-	(rs6000_dwarf2_stab_reg_to_regnum): Add FIXME.
-	(rs6000_frame_cache): Don't note the locations at which
-	floating-point registers were saved if we have no fprs.
-	* aix-thread.c (supply_fprs, fill_fprs): Assert that we have FP
-	registers.
-	(fetch_regs_user_thread, fetch_regs_kernel_thread)
-	(store_regs_user_thread, store_regs_kernel_thread): Only call
-	supply_fprs / fill_fprs if we actually have floating-point
-	registers.
-	(special_register_p): Check ppc_fpscr_regnum before matching
-	against it.
-	(supply_sprs64, supply_sprs32, fill_sprs64, fill_sprs32): Don't
-	supply / collect fpscr if we don't have it.
-	* ppc-bdm.c: #include "gdb_assert.h".
-	(bdm_ppc_fetch_registers, bdm_ppc_store_registers): Assert that we
-	have floating-point registers, since I can't test this code on
-	FP-free systems to adapt it.
-	* ppc-linux-nat.c (ppc_register_u_addr): Don't match against the
-	fpscr and floating point register numbers if they don't exist.
-	(fetch_register): Assert that we have floating-point registers
-	before we reach the code that handles them.
-	(store_register): Same.  And use tdep instead of calling
-	gdbarch_tdep again.
-	(fill_fpregset): Don't try to collect FP registers and fpscr if we
-	don't have them.
-	(ppc_linux_sigtramp_cache): Don't record the saved locations of
-	fprs and fpscr if we don't have them.
-	(ppc_linux_supply_fpregset): Don't supply fp regs and fpscr if we
-	don't have them.
-	* ppcnbsd-nat.c: #include "gdb_assert.h".
-	(getfpregs_supplies): Assert that we have floating-point registers.
-	* ppcnbsd-tdep.c (ppcnbsd_supply_fpreg, ppcnbsd_fill_fpreg): Same.
-	* ppcobsd-tdep.c: #include "gdb_assert.h".
-	(ppcobsd_supply_gregset, ppcobsd_collect_gregset): Assert that we
-	have floating-point registers.
-	* rs6000-nat.c (regmap): Don't match against the fpscr and
-	floating point register numbers if they don't exist.
-	(fetch_inferior_registers, store_inferior_registers,
-	fetch_core_registers): Only fetch / store / supply the
-	floating-point registers and the fpscr if we have them.
-	* Makefile.in (ppc-bdm.o, ppc-linux-nat.o, ppcnbsd-nat.o)
-	(ppcobsd-tdep.o): Update dependencies.
-	
 	* rs6000-tdep.c (ppc_collect_gregset): When regnum == -1, do
 	collect all the gprs.
 

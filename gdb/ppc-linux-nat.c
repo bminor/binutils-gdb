@@ -26,7 +26,6 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "regcache.h"
-#include "gdb_assert.h"
 
 #include <sys/types.h>
 #include <sys/param.h>
@@ -140,8 +139,7 @@ ppc_register_u_addr (int regno)
   /* Floating point regs: eight bytes each in both 32- and 64-bit
      ptrace interfaces.  Thus, two slots each in 32-bit interface, one
      slot each in 64-bit interface.  */
-  if (tdep->ppc_fp0_regnum >= 0
-      && regno >= tdep->ppc_fp0_regnum
+  if (regno >= tdep->ppc_fp0_regnum
       && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)
     u_addr = (PT_FPR0 * wordsize) + ((regno - tdep->ppc_fp0_regnum) * 8);
 
@@ -162,8 +160,7 @@ ppc_register_u_addr (int regno)
 #endif
   if (regno == tdep->ppc_ps_regnum)
     u_addr = PT_MSR * wordsize;
-  if (tdep->ppc_fpscr_regnum >= 0
-      && regno == tdep->ppc_fpscr_regnum)
+  if (regno == tdep->ppc_fpscr_regnum)
     u_addr = PT_FPSCR * wordsize;
 
   return u_addr;
@@ -236,11 +233,6 @@ fetch_register (int tid, int regno)
       supply_register (regno, buf);
       return;
     }
-
-  /* If the current architecture has no floating-point registers, we
-     should never reach this point: ppc_register_u_addr should have
-     returned -1, and we should have caught that above.  */
-  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
 
   /* Read the raw register using PTRACE_XFER_TYPE sized chunks.  On a
      32-bit platform, 64-bit floating-point registers will require two
@@ -420,11 +412,6 @@ store_register (int tid, int regno)
   if (regaddr == -1)
     return;
 
-  /* If the current architecture has no floating-point registers, we
-     should never reach this point: ppc_register_u_addr should have
-     returned -1, and we should have caught that above.  */
-  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
-
   /* First collect the register value from the regcache.  Be careful
      to to convert the regcache's wordsize into ptrace's wordsize.  */
   memset (buf, 0, sizeof buf);
@@ -449,7 +436,7 @@ store_register (int tid, int regno)
       regaddr += sizeof (PTRACE_XFER_TYPE);
 
       if (errno == EIO 
-          && regno == tdep->ppc_fpscr_regnum)
+          && regno == gdbarch_tdep (current_gdbarch)->ppc_fpscr_regnum)
 	{
 	  /* Some older kernel versions don't allow fpscr to be written.  */
 	  continue;
@@ -633,14 +620,11 @@ fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
   bfd_byte *fpp = (void *) fpregsetp;
   
-  if (ppc_floating_point_unit_p (current_gdbarch))
+  for (regi = 0; regi < 32; regi++)
     {
-      for (regi = 0; regi < ppc_num_fprs; regi++)
-        {
-          if ((regno == -1) || (regno == tdep->ppc_fp0_regnum + regi))
-            regcache_collect (tdep->ppc_fp0_regnum + regi, fpp + 8 * regi);
-        }
-      if (regno == -1 || regno == tdep->ppc_fpscr_regnum)
-        right_fill_reg (tdep->ppc_fpscr_regnum, (fpp + 8 * 32));
+      if ((regno == -1) || (regno == tdep->ppc_fp0_regnum + regi))
+	regcache_collect (tdep->ppc_fp0_regnum + regi, fpp + 8 * regi);
     }
+  if ((regno == -1) || regno == tdep->ppc_fpscr_regnum)
+    right_fill_reg (tdep->ppc_fpscr_regnum, (fpp + 8 * 32));
 }

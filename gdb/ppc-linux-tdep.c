@@ -944,16 +944,12 @@ ppc_linux_sigtramp_cache (struct frame_info *next_frame, void **this_cache)
   cache->saved_regs[tdep->ppc_cr_regnum].addr = gpregs + 38 * tdep->wordsize;
 
   /* Floating point registers.  */
-  if (ppc_floating_point_unit_p (gdbarch))
+  for (i = 0; i < 32; i++)
     {
-      for (i = 0; i < ppc_num_fprs; i++)
-        {
-          int regnum = i + tdep->ppc_fp0_regnum;
-          cache->saved_regs[regnum].addr = fpregs + i * tdep->wordsize;
-        }
-      cache->saved_regs[tdep->ppc_fpscr_regnum].addr
-        = fpregs + 32 * tdep->wordsize;
+      int regnum = i + tdep->ppc_fp0_regnum;
+      cache->saved_regs[regnum].addr = fpregs + i * tdep->wordsize;
     }
+  cache->saved_regs[tdep->ppc_fpscr_regnum].addr = fpregs + 32 * tdep->wordsize;
 
   return cache;
 }
@@ -1022,18 +1018,15 @@ ppc_linux_supply_fpregset (const struct regset *regset,
   struct gdbarch_tdep *regcache_tdep = gdbarch_tdep (regcache_arch);
   const bfd_byte *buf = fpset;
 
-  if (! ppc_floating_point_unit_p (regcache_arch))
-    return;
-
-  for (regi = 0; regi < ppc_num_fprs; regi++)
+  for (regi = 0; regi < 32; regi++)
     regcache_raw_supply (regcache, 
                          regcache_tdep->ppc_fp0_regnum + regi,
                          buf + 8 * regi);
 
-  /* The FPSCR is stored in the low order word of the last
-     doubleword in the fpregset.  */
+  /* The FPSCR is stored in the low order word of the last doubleword in the
+     fpregset.  */
   regcache_raw_supply (regcache, regcache_tdep->ppc_fpscr_regnum,
-                       buf + 8 * 32 + 4);
+		       buf + 8 * 32 + 4);
 }
 
 static struct regset ppc_linux_fpregset = { NULL, ppc_linux_supply_fpregset };
