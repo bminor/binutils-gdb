@@ -9,6 +9,7 @@
 	* coffcode.h: Likewise.
 	* coffswap.h: Likewise.
 	* corefile.c: Likewise.
+	* elf32-mips.c: Likewise.
 
 2000-11-27  Kazu Hirata  <kazu@hxi.com>
 
