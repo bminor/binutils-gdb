@@ -1,0 +1,22 @@
+#!/bin/sh
+sed     -e "/^@set FIXMES/s::@clear FIXMES:" \
+	-e "/^@clear CUSTOMER/s::@set CUSTOMER:" \
+	-e "/^@set CDROMinst/s::@clear CDROMinst:" \
+	-e "/^@clear TAPEinst/s::@set TAPEinst:" \
+	-e "/^@set FTPsingle/s::@clear FTPsingle:" \
+	-e "/^@set FTPsplit/s::@clear FTPsplit:" \
+	-e "/\|\|MEDIUM\|\|/s::tape:g" \
+	-e "/\|\|MEDstr\|\|/s::/dev/rmt/0ln:g" \
+	-e "/\|\|DEVdflt\|\|/s::/dev/rmt/0ln:g" \
+	-e "/\|\|MEDvar\|\|/s::/dev/@var{tape}:g" \
+	-e "/\|\|TAPdflt\|\|/s::/dev/@var{tape}:g" \
+        -e "/\|\|RELNO\|\|/s::1.0:g" \
+        -e "/\|\|BD\|\|/s::20:g" \
+        -e "/\|\|SD\|\|/s::28:g" \
+        -e "/\|\|DF\|\|/s::48:g" \
+        -e "/\|\|BUNDLE\|\|/s::comp:g" \
+        -e "/\|\|HOST\|\|/s::SPARC computer:g" \
+        -e "/\|\|HOSTstr\|\|/s::sparc-sun-solaris2:g" \
+        -e "/\|\|TARGET\|\|/s::sparc-sun-solaris2:g" \
+        -e "/\|\|GCCvn\|\|/s::cygnus-2.0.2:g"  \
+	< $1 > $2

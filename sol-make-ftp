@@ -1,0 +1,8 @@
+BINFILES=cygnus-sol2-1.0/{Install,README,bin,lib,info,include,man}
+SRCFILES=cygnus-sol2-1.0/{README,src}
+
+cd sparc-sun-solaris2
+tar cf cygnus-sol2-1.0.bin.tar ${BINFILES}
+tar cf cygnus-sol2-1.0.src.tar ${SRCFILES}
+tar cf cygnus-sol2-1.0.tar ${BINFILES} ${SRCFILES}
+

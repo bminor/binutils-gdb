@@ -1,0 +1,30 @@
+\input tapelab
+\label 0
+Emacs
+progressive-||RELNO||\_||TAPdflt||
+||HOSTstr||
+\elab
+\label 1
+Emacs
+progressive-||RELNO||\_||TAPdflt||
+||HOSTstr||
+\elab
+\label 2
+Emacs
+progressive-||RELNO||\_||TAPdflt||
+||HOSTstr||
+\elab
+\label 3
+Emacs
+progressive-||RELNO||\_||TAPdflt||
+||HOSTstr||
+\elab
+\label 4
+Emacs
+progressive-||RELNO||\_||TAPdflt||
+||HOSTstr||
+\elab
+\bye
+
+
+

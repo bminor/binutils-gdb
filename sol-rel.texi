@@ -1,0 +1,503 @@
+\input texinfo
+@c
+@c This file may require a nonstandard texinfo.tex to format; if you
+@c need it, please contact Cygnus Support (email editor-in-chief@cygnus.com)
+@setfilename SOLARIS2.info
+@c
+@c This file describes a Cygnus Solaris Release (Developer's Kit).
+@c
+@c Copyright (C) 1991, 1992 Cygnus Support
+@c This text may be freely distributed under the terms of the GNU
+@c General Public License.
+@c
+@c $Id$
+@c
+@iftex
+@c The include file "texiplus.tex" is in the texinfo/cygnus dir, and
+@c implements Cygnus modifications to the texinfo manual style.
+@input texiplus
+@c The include file "smpklug.texi" is a kluge to deal with local
+@c document production issues at Cygnus; it's safe to comment out this
+@c line if you don't have (or don't want) the file.
+@input smpklug.texi
+@smallbook
+@cropmarks
+@finalout
+@settitle Release Notes
+@setchapternewpage on
+@c
+@end iftex
+
+@titlepage
+@title Release Notes
+@sp 3
+@table @strong
+@item Cygnus Support Developer's Kit
+@item Release 1.0 for Solaris-2
+@end table
+@author Cygnus Support
+@page
+
+@tex
+\def\$#1${{#1}} % Kluge: collect RCS revision info without $...$
+\xdef\Rmanvers{{\it Release Notes (Solaris-2 Developer's Kit)}, \$Revision$} % *NOT* for use in headers, footers
+{\parskip=0pt \hfill Cygnus Support\par \hfill \Rmanvers\par \hfill
+\TeX{}info \texinfoversion\par }
+\global\def\manvers{Solaris-2 Rel 1.0}
+@end tex
+
+@vskip 0pt plus 1filll
+This product includes software developed by the University of
+California, Berkeley and its contributors.
+
+This note is copyright @copyright{} 1992 Cygnus Support
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided also that
+the entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions.
+
+@end titlepage
+
+@c         PROOFREADING: set FIXMES to include FIXME text in formatted
+@c         output
+@clear FIXMES
+
+@ifinfo
+@node Top
+@top Solaris-2 Developer's Kit release 1.0
+
+@menu
+* Introduction::                Overview
+* Contributors::		GCC for Solaris-2 exists thanks to these people
+* Versions::                    Closest FSF Versions
+* New::                         New in This Release
+* Limits::                      Limitations and Warnings
+@end menu
+
+This product includes software developed by the University of
+California, Berkeley and its contributors.
+
+This file is copyright @copyright{} 1992 Cygnus Support
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided also that
+the entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions
+@end ifinfo
+
+@node Introduction
+@chapter Overview
+
+@table @strong
+@item Cygnus Support Developer's Kit
+@item Solaris-2 Release 1.0
+@end table
+
+Sun has unbunded its compilers---selling them separately from the
+Solaris 2.0 operating system.  Many Sun users were unhappy that their
+next upgrade might take away their C compiler.
+
+In response, Cygnus Support ported the GNU C compiler and supporting
+tools to Solaris 2.0.  The result is a full set of development
+tools---ANSI and traditional C compiler (with supporting libraries),
+debugger, parser generator, and lexical analyzer generator---freely
+available to everyone.
+
+The GNU C compiler can be used to compile any kind of program: public
+domain, copyleft, or proprietary.  Your binaries have the same
+copyright status as your sources and libraries.  The only provision of
+the GNU General Public License that applies to users of the compiler
+(as opposed to people who make copies of the compiler, or modify it)
+is the lack of warranty (section 11 and 12).  FSF does not provide a
+warranty to anyone, but Cygnus gives a 1-year limited warranty (a year
+of support) to customers.  
+
+@node Contributors
+@chapter Contributors to GNU C for Solaris-2
+
+Cygnus Support and the FSF are grateful to the forward-looking individuals and
+organizations that sponsored this project.
+
+@noindent
+We are glad to be able to thank publicly:
+
+@itemize @bullet
+@item
+Amoco Production Company (Houston, Texas)
+
+@item
+BBN Communications (Cambridge, Massachusetts)
+
+@item
+Boston Technology (Wakefield, Massachusetts)
+
+@item
+Cirrus Logic (Fremont, California)
+
+@item
+Compaq Computer Corporation (Houston, Texas)
+
+@item
+Deere & Company (Moline, Illinois)
+
+@item
+ELF Commnuications (San Francisco, California)
+
+@item
+European Computer-Industry Research Centre GMBH (Munich)
+
+@item
+Fidelity Investments (Boston, Massachusetts)
+
+@item
+FTP Software, Inc. (Wakefield, Massachusetts)
+
+@item
+Gallagher & Robertson (Oslo, Norway)
+
+@item
+GTE Laboratories (Waltham, Massachusetts)
+
+@item
+Ingres Corporation (Alameda, California)
+
+@item
+Inland Sea (Dexter, Michigan)
+
+@item
+Los Alamos National Laboratory (Los Alamos, New Mexico)
+
+@item
+Miller/Howard Investures (Cobleskill, New York)
+
+@item
+MIT Lincoln Laboratory (Lexington, Massachusetts)
+
+@item
+NASA Lewis Research Center (Cleveland, Ohio)
+
+@item
+Optimation Software (Melbourne, Australia)
+
+@item
+PFU Limited (Tokyo)
+
+@item
+Philips Laboratories (Briarcliff Manor, New York)
+
+@item
+Pure Software (Los Altos, California)
+
+@item
+Qualix Group, Inc. (San Mateo, California)
+
+@item
+Schlumberger-Doll Research (Ridgefield, Connecticut)
+
+@item
+Kevin Sheehan (Melbourne, Australia and elsewhere)
+
+@item
+State University of New York (SUNY) at Buffalo
+
+@item
+SunSoft, Inc. (Mountain View, California)
+
+@item
+@tex
+Technische Universit\"at M\"unchen (Munich)
+@end tex
+@ifinfo
+Technische Universitaet Muenchen (Munich)
+@end ifinfo
+
+@item
+Telecom Finland (Helsinki)
+
+@item
+Telecom Research Labs (Victoria, Australia)
+
+@item
+Union Bank of Switzerland (Zurich)
+
+@item University of Pennsylvania (Philadelphia)
+
+@item
+University of Washington (Seattle)
+
+@item
+UUNET Technologies, Inc. (Falls Church, Virginia)
+
+@item
+Warwick University (Coventry, England)
+
+@item
+Xerox Palo Alto Research Center (Palo Alto, California)
+@end itemize
+
+We are also grateful to six other organizations and individuals who
+contributed to this project, but prefer to remain anonymous.
+
+@node Versions
+@chapter Closest FSF Versions
+
+Cygnus Support devotes much of its effort to integrating and improving
+free software.  In fact, Cygnus employees are the primary developers
+of several important components of the GNU tool-chain (on behalf of
+the Free Software Foundation).  However, especially for programs whose
+FSF releases are issued elsewhere, our releases are often slightly
+ahead of the nearest corresponding FSF version (and sometimes slightly
+behind it).  We reintegrate our sources with the FSF as frequently as
+possible without compromising the stability of the integrated
+toolchain.
+
+These are the nearest corresponding FSF releases of the GNU development
+tools:
+
+@table @sc
+@item @emph{Program}
+@emph{Last merged with FSF version}
+@item gcc
+2.0 (but many improvements from 2.1 and 2.2 incorporated)
+
+@item gdb
+4.6 (maintained at Cygnus)
+
+@end table
+
+@node New
+@chapter New in This Release
+
+@table @strong
+@item GCC
+Near command-line compatibility with the SVID specification for
+@code{cc}, and with the SVr4 @code{cc}.  ELF output (with embedded
+@code{stabs} format debugging information; this is compatible with Sun's
+compilers).  Many bug-fixes (from the base FSF level, and from our
+Progressive--920318 release for SunOS).
+
+@item CPP
+New directive @code{#assert}; you can use this directive, together with 
+enhancements to @code{#if}, to declare and test for particular system
+properties.  
+
+@item GDB
+GDB understands the debugging format used by Solaris-2 compilers (both
+ours and Sun's): @code{stabs} debugging information embedded in ELF
+object files.  
+
+Since our Progressive--920318 release for SunOS, we have also made these
+improvements to GDB:
+
+Many bug fixes.
+
+GDB now uses a new memory manager called @code{mmalloc}, an enhancement
+of @sc{GNU} @code{malloc}.  It can greatly speed up the startup of GDB
+by using a pre-parsed symbol table in a @code{mmalloc}-managed heap.  
+Since memory-mapped files are available on Solaris-2 through the @code{mmap}
+system call, you can have GDB write the symbols from your program into a
+reusable file.
+
+@item FLEX and BYACC
+Release 1.0 for Solaris 2 includes @code{flex}, the fast lexical analyzer
+generator, and @code{byacc}, the parser generator---both from UC
+Berkeley.  There are no restrictions on what use you can make of lexical
+analyzers generated by @code{flex}, or parser generators built by
+@code{byacc}.
+
+Since @code{flex} and @code{byacc} are of interest only to a specialized
+audience, we ship only on-line documentation for them.
+@inforef{Top,,flex.info}, or the @code{man} pages @samp{flex.1} and
+@samp{byacc.1}.
+
+@item Problem Reports
+The script @code{install_cid} is now available to record your Cygnus
+customer ID for the problem-reporting utility, @code{send_pr}, on your
+system.  
+
+A blank Problem Report form is now included in the @cite{Introduction}
+to your Developer's Kit manuals, in case FAX is more convenient than
+electronic mail to send us problem reports.
+
+Since these programs are free software, many people who receive them
+will not get them directly from Cygnus Support.  We will be glad to
+support you no matter where you got the software.  If you have not yet
+bought support from Cygnus for this set of tools, you can call us at
+@w{+1 415 322 3811} for a support contract, and start reporting problems
+and getting fixes.
+@end table
+
+@node Limits
+@chapter Limitations and Warnings
+
+Our major goals in this release was compatibility: with the System V
+Interface Definition (@sc{svid}), with other Solaris-2 tools, and with
+the @sc{sparc} Application Binary Interface (@sc{abi}).
+
+We have been largely successful: our toolchain complies with the
+@sc{svid} specifications for compilation tools, most of the tools are
+also command-line compatible with the Sun offerings (even in cases where
+these go beyond the @sc{svid}), and we know of only one violation of the
+@sc{abi}.  
+
+The following sections give details on the few remaining compatibility
+issues.
+
+@menu
+* gcc-options::                 Some Solaris-2 cc options not accepted
+* cc-gdb::                      Using gdb on Sun compiler output
+* long double::                 The long double datatype violates the ABI
+* ABI::                         No independent verification of ABI compliance
+@end menu
+
+@node gcc-options
+@section Some Solaris-2 @code{cc} options are not accepted
+
+In porting the @sc{gnu} C compiler to Solaris-2, we wanted to have
+command-line compatibility with several compilers:
+
+@itemize @bullet
+@item
+@sc{svid} specification for @code{cc}
+
+@item
+Other @sc{gcc} configurations
+
+@item
+Unix SVr4 implementation of @code{cc}
+
+@item
+Sun compiler for Solaris-2
+
+@end itemize
+
+@noindent
+Unfortunately, these specifications are not altogether compatible; we
+have compromised in some areas, giving the most weight to the @sc{svid}
+specification and to @sc{gcc} on other platforms.
+
+Here is a list of command line options @emph{not} accepted by
+@code{gcc}, but meaningful in one of the other command-line
+specifications listed:
+
+@table @code
+@item -Bstatic
+@itemx -Bdynamic
+Use @samp{-static} or @samp{-symbolic} instead.  (@samp{-Bstatic} and
+@samp{-Bdynamic} are supported by Sun compilers, but are not in the
+@sc{svid}.)
+
+@item -dy
+@itemx -dn
+These Solaris-2 linker options conflict with @sc{gcc} debugging options.
+Again, use @samp{-symbolic} or @samp{-static} instead; or pass the
+linker options directly to the linker using @samp{-Xlinker} or
+@samp{-W}.
+
+@item -f
+@sc{gcc} has a large family of options that begin with @samp{-f}.  All
+of these options are supported as in other versions of @sc{gcc}.  The
+SVr4 specification describes this option as accepted, but ignored; in
+the @sc{svid}, it is used to specify floating-point emulation.
+
+@item -J sfm
+This SVr4 option appears to specify linking against a special-purpose
+subroutine library.  It is not in the @sc{svid}, and @sc{gcc} does not
+support it.
+
+@item -K
+@sc{gcc} does not support @samp{-K}.  To specify position-independent
+code output, use @samp{-pic}.
+
+@item -P
+This preprocessor option retains its usual @sc{gcc} meaning, which is
+slightly different from the @sc{svid} and SVr4 descriptions (which are
+not quite identical with one another).  It is used to generate
+preprocessor output---similar to @samp{-E}, but without embedding
+@code{#line} directives.  However, for @sc{gcc}, the output still goes
+to @file{stdout} rather than to a @samp{.i} file.  To place output in a
+@samp{.i} file, use command-line output redirection.
+
+@item -q
+This option is defined as implementation-specific by the @sc{svid}.
+This implementation does not include it.
+
+@item -V
+Displays version information for @emph{only} the assembler and linker.
+
+@item -v
+Displays the full invocation of each compiler pass, as usual for
+@sc{gcc}.  This option is not defined in the @sc{svid}, but the SVr4
+documentation describes it as similar to the @sc{gcc} options
+@samp{-pedantic} or @samp{-pedantic-errors}.  We recommend using those
+options instead.
+
+@item -W
+@itemx -Y
+In this implementation, @samp{-W} and @samp{Y} are restricted to
+controlling the assembler and linker (the other compiler passes used by
+@sc{gcc} do not exactly correspond to those in the @sc{svid}).
+
+@item -X
+This option is not in the @sc{svid}, but is used in SVr4 to give a
+little control over the dialect of C.  For this purpose, you can use the
+standard @sc{gcc} options @samp{-traditional}, @samp{-ansi}, or the
+other options described in @ref{Dialect Options,,Options Controlling
+Dialect, usegcc.info, Using gcc}.
+@end table
+
+For full descriptions of the @sc{gcc} command line options in this
+release, see the manual @cite{Using gcc}, or the man page @code{gcc.1}.
+
+@node cc-gdb
+@section Using @code{gdb} on Sun Compiler Output
+
+By default, the Sun compiler @code{cc} and the system assembler
+@code{as} omit debugging information from the final linked output file,
+assuming the debugger will look in the @samp{.o} files for this
+information.  @code{gdb} will not do this.  If you have the Sun compiler
+@code{cc} and want to debug its output with @code{gdb}, you must include
+the command-line flag @samp{-xs} when you run @code{cc}, to instruct it
+to place debugging information where it will be copied to the linked
+output file.  Similarly, if you call the system assembler @code{as}
+directly, use its command-line option @samp{-s} for the same purpose.
+
+@node long double
+@section The @code{long double} datatype violates SPARC ABI
+
+The @sc{sparc} Application Binary Interface (@sc{abi}) specifies that
+numbers of type @code{long double} take up 16 bytes.  In this release,
+@code{gcc} only emits 8-byte numbers for @code{long double}.
+
+This is the only known violation of the @sc{abi}.  We will fix this
+problem in a future release.
+
+@node ABI
+@section No independent verification of ABI compliance
+
+We have made every effort to comply with the @sc{sparc} @sc{abi}, and we
+are aware of only one violation (noted above).  However, there is as yet
+no independent verification of our compiler's compliance.
+
+@sc{sparc} International is preparing an ABI compliance test suite, but
+it won't be available until sometime in the autumn of 1992.  We will
+seek verification of our compiler's compliance as soon as @sc{sparc}
+International is ready.
+
+@contents
+@bye
