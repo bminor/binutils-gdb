@@ -1,3 +1,8 @@
+Wed Oct  4 21:44:12 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* Makefile.in (TARGET_CONFIGDIRS): configure targetdirs
+	only if it exists in $(srcdir).
+
 Wed Oct  4 11:52:31 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: If CC and CXX are not set in the environment, set
