@@ -207,7 +207,7 @@ get_number (pp)
 	 to pass to lookup_internalvar().  */
       char *varname;
       char *start = ++p;
-      value val;
+      value_ptr val;
 
       while (isalnum (*p) || *p == '_')
 	p++;
@@ -1012,8 +1012,8 @@ watchpoint_check (p)
 	 call free_all_values.  We can't call free_all_values because
 	 we might be in the middle of evaluating a function call.  */
 
-      value mark = value_mark ();
-      value new_val = evaluate_expression (bs->breakpoint_at->exp);
+      value_ptr mark = value_mark ();
+      value_ptr new_val = evaluate_expression (bs->breakpoint_at->exp);
       if (!value_equal (bs->breakpoint_at->val, new_val))
 	{
 	  release_value (new_val);

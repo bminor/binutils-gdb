@@ -1,3 +1,29 @@
+Wed Mar  2 09:17:55 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* breakpoint.c, breakpoint.h, c-valprint.c, ch-valprint.c,
+	cp-valprint.c, eval.c, expprint.c, findvar.c, language.c,
+	objfiles.h, infcmd.c, printcmd.c, stack.c, typeprint.c,
+	valarith.c, valops.c, valprint.c, value.h, values.c: Replace
+	value with value_ptr.  This is for the ptx compiler.
+	* objfiles.h, target.h: Don't declare a "sec_ptr" field using a
+	"sec_ptr" typedef.
+	* symm-nat.c: Add a bunch of stuff for symmetry's ptrace stuff.
+	#if 0 i386_float_info.
+	* symm-tdep.c (round): Remove.  Also remove sgttyb.
+	* symm-tdep.c: Remove lots of stuff which duplicates stuff from
+	i386-tdep.c.  Remove register_addr and ptx_coff_regno_to_gdb.
+	* i386-tdep.c (i386_frame_find_saved_regs): Put in
+	I386_REGNO_TO_SYMMETRY check in case it is needed for Dynix
+	someday.
+	* config/i386/nm-symmetry.h: Change KERNEL_U_ADDR.  Move
+	stuff from PTRACE_READ_REGS, PTRACE_WRITE_REGS macros to
+	symm-nat.c.  Define CHILD_WAIT and declare child_wait().
+	* config/i386/tm-symmetry.h: Remove call function stuff; stuff in
+	tm-i386v.h is apparently OK.
+	* config/i386/xm-symmetry.h [_SEQUENT_]: Define HAVE_TERMIOS not
+	HAVE_TERMIO.  Define MEM_FNS_DECLARED, NEED_POSIX_SETPGID, and
+	USE_O_NOCTTY.
+
 Wed Mar  2 11:31:08 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* osfsolib.c (xfer_link_map_member): Update to use new

@@ -200,7 +200,7 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 		}
 	      if (vt_address && vtblprint)
 	        {
-		  value vt_val;
+		  value_ptr vt_val;
 	          struct symbol *wsym = (struct symbol *)NULL;
 	          struct type *wtype;
 		  struct symtab *s;
@@ -263,7 +263,7 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	{
 	  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_UNDEF)
 	    {
-	      value deref_val =
+	      value_ptr deref_val =
 		value_at
 		  (TYPE_TARGET_TYPE (type),
 		   unpack_pointer (lookup_pointer_type (builtin_type_void),

@@ -579,7 +579,12 @@ pop_target PARAMS ((void));
 struct section_table {
   CORE_ADDR addr;		/* Lowest address in section */
   CORE_ADDR endaddr;		/* 1+highest address in section */
-  sec_ptr   sec_ptr;		/* BFD section pointer */
+
+  /* For the ptx compiler, we can't use the sec_ptr typedef when the field's
+     name is sec_ptr.  We really should rename the field (or better yet,
+     the typedef should be bfd_sec_ptr).  */
+  struct sec *sec_ptr;		/* BFD section pointer */
+
   bfd	   *bfd;		/* BFD file pointer */
 };
 

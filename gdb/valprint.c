@@ -60,8 +60,8 @@ set_output_radix PARAMS ((char *, int, struct cmd_list_element *));
 static void
 set_output_radix_1 PARAMS ((int, unsigned));
 
-static void
-value_print_array_elements PARAMS ((value, GDB_FILE *, int, enum val_prettyprint));
+static void value_print_array_elements PARAMS ((value_ptr, GDB_FILE *, int,
+						enum val_prettyprint));
 
 /* Maximum number of chars to print for a string pointer value or vector
    contents, or UINT_MAX for no limit.  Note that "set print elements 0"
@@ -158,7 +158,7 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
 
 int
 value_print (val, stream, format, pretty)
-     value val;
+     value_ptr val;
      GDB_FILE *stream;
      int format;
      enum val_prettyprint pretty;
@@ -650,7 +650,7 @@ val_print_array_elements (type, valaddr, address, stream, format, deref_ref,
 
 static void
 value_print_array_elements (val, stream, format, pretty)
-     value val;
+     value_ptr val;
      GDB_FILE *stream;
      int format;
      enum val_prettyprint pretty;

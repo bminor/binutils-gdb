@@ -27,8 +27,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #ifdef _SEQUENT_
 /* ptx */
-#define HAVE_TERMIO
+#define HAVE_TERMIOS
 #define USG
+
+#define MEM_FNS_DECLARED
+
+#define NEED_POSIX_SETPGID
+
+#define USE_O_NOCTTY
+
 #else
 /* dynix */
 
@@ -42,6 +49,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* #define PTRACE_ATTACH XPT_DEBUG
 #define PTRACE_DETACH XPT_UNDEBUG
 #define ATTACH_DETACH  */
+
+#ifdef _SEQUENT_
+/* ptx does attach as of ptx version 2.1 */
+#define ATTACH_DETACH 1
 
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
 

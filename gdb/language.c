@@ -428,8 +428,8 @@ language_info (quietly)
 #if 0	/* Currently unused */
 
 struct type *
-binop_result_type(v1,v2)
-   value v1,v2;
+binop_result_type (v1, v2)
+   value_ptr v1, v2;
 {
    int l1,l2,size,uns;
 
@@ -760,7 +760,7 @@ structured_type(type)
 /* Returns non-zero if the value VAL represents a true value. */
 int
 value_true (val)
-     value val;
+     value_ptr val;
 {
   /* It is possible that we should have some sort of error if a non-boolean
      value is used in this context.  Possibly dependent on some kind of
@@ -778,7 +778,7 @@ value_true (val)
 
 void
 binop_type_check(arg1,arg2,op)
-   value arg1,arg2;
+   value_ptr arg1,arg2;
    int op;
 {
    struct type *t1, *t2;
@@ -788,7 +788,7 @@ binop_type_check(arg1,arg2,op)
       return;
 
    t1=VALUE_TYPE(arg1);
-   if (arg2!=(value)NULL)
+   if (arg2 != NULL)
       t2=VALUE_TYPE(arg2);
    else
       t2=NULL;

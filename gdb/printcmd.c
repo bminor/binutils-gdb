@@ -63,7 +63,7 @@ static CORE_ADDR last_examine_address;
 /* Contents of last address examined.
    This is not valid past the end of the `x' command!  */
 
-static value last_examine_value;
+static value_ptr last_examine_value;
 
 /* Largest offset between a symbolic value and an address, that will be
    printed as `0x1234 <symbol+offset>'.  */
@@ -182,7 +182,7 @@ static void
 do_examine PARAMS ((struct format_data, CORE_ADDR));
 
 static void
-print_formatted PARAMS ((value, int, int));
+print_formatted PARAMS ((value_ptr, int, int));
 
 static struct format_data
 decode_format PARAMS ((char **, int, int));
@@ -227,13 +227,6 @@ decode_format (string_ptr, oformat, osize)
 	break;
     }
 
-#ifndef CC_HAS_LONG_LONG
-  /* Make sure 'g' size is not used on integer types.
-     Well, actually, we can handle hex.  */
-  if (val.size == 'g' && val.format != 'f' && val.format != 'x')
-    val.size = 'w';
-#endif
-
   while (*p == ' ' || *p == '\t') p++;
   *string_ptr = p;
 
@@ -256,8 +249,23 @@ decode_format (string_ptr, oformat, osize)
       {
       case 'a':
       case 's':
-	/* Addresses must be words.  */
+	/* Pick the appropriate size for an address.  */
+#if TARGET_PTR_BIT == 64
+	val.size = osize ? 'g' : osize;
+	break;
+#else /* Not 64 */
+#if TARGET_PTR_BIT == 32
 	val.size = osize ? 'w' : osize;
+	break;
+#else /* Not 32 */
+#if TARGET_PTR_BIT == 16
+	val.size = osize ? 'h' : osize;
+	break;
+#else /* Not 16 */
+	#error Bad value for TARGET_PTR_BIT
+#endif /* Not 16 */
+#endif /* Not 32 */
+#endif /* Not 64 */
 	break;
       case 'f':
 	/* Floating point has to be word or giantword.  */
@@ -288,7 +296,7 @@ decode_format (string_ptr, oformat, osize)
 
 static void
 print_formatted (val, format, size)
-     register value val;
+     register value_ptr val;
      register int format;
      int size;
 {
@@ -750,7 +758,7 @@ print_command_1 (exp, inspect, voidprint)
   struct expression *expr;
   register struct cleanup *old_chain = 0;
   register char format = 0;
-  register value val;
+  register value_ptr val;
   struct format_data fmt;
   int cleanup = 0;
 
@@ -789,7 +797,7 @@ print_command_1 (exp, inspect, voidprint)
 	  && (   TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT
 	      || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_UNION))
 	{
-	  value v;
+	  value_ptr v;
 
 	  v = value_from_vtable_info (val, TYPE_TARGET_TYPE (type));
 	  if (v != 0)
@@ -863,7 +871,7 @@ output_command (exp, from_tty)
   struct expression *expr;
   register struct cleanup *old_chain;
   register char format = 0;
-  register value val;
+  register value_ptr val;
   struct format_data fmt;
 
   if (exp && *exp == '/')
@@ -1453,7 +1461,7 @@ print_variable_value (var, frame, stream)
      FRAME frame;
      GDB_FILE *stream;
 {
-  value val = read_var_value (var, frame);
+  value_ptr val = read_var_value (var, frame);
   value_print (val, stream, 0, Val_pretty_default);
 }
 
@@ -1477,7 +1485,7 @@ print_frame_args (func, fi, num, stream)
   int first = 1;
   register int i;
   register struct symbol *sym;
-  register value val;
+  register value_ptr val;
   /* Offset of next stack argument beyond the one we have seen that is
      at the highest offset.
      -1 if we haven't come to a stack argument yet.  */
@@ -1683,14 +1691,14 @@ printf_command (arg, from_tty)
   register char *f;
   register char *s = arg;
   char *string;
-  value *val_args;
+  value_ptr *val_args;
   char *substrings;
   char *current_substring;
   int nargs = 0;
   int allocated_args = 20;
   struct cleanup *old_cleanups;
 
-  val_args = (value *) xmalloc (allocated_args * sizeof (value));
+  val_args = (value_ptr *) xmalloc (allocated_args * sizeof (value_ptr));
   old_cleanups = make_cleanup (free_current_contents, &val_args);
 
   if (s == 0)
@@ -1722,21 +1730,38 @@ printf_command (arg, from_tty)
 	    case '\\':
 	      *f++ = '\\';
 	      break;
+	    case 'a':
+#ifdef __STDC__
+	      *f++ = '\a';
+#else
+	      *f++ = '\007';  /* Bell */
+#endif
+	      break;
+	    case 'b':
+	      *f++ = '\b';
+	      break;
+	    case 'f':
+	      *f++ = '\f';
+	      break;
 	    case 'n':
 	      *f++ = '\n';
+	      break;
+	    case 'r':
+	      *f++ = '\r';
 	      break;
 	    case 't':
 	      *f++ = '\t';
 	      break;
-	    case 'r':
-	      *f++ = '\r';
+	    case 'v':
+	      *f++ = '\v';
 	      break;
 	    case '"':
 	      *f++ = '"';
 	      break;
 	    default:
 	      /* ??? TODO: handle other escape sequences */
-	      error ("Unrecognized \\ escape character in format string.");
+	      error ("Unrecognized escape character \\%c in format string.",
+		     c);
 	    }
 	  break;
 
@@ -1834,9 +1859,9 @@ printf_command (arg, from_tty)
       {
 	char *s1;
 	if (nargs == allocated_args)
-	  val_args = (value *) xrealloc ((char *) val_args,
-					 (allocated_args *= 2)
-					 * sizeof (value));
+	  val_args = (value_ptr *) xrealloc ((char *) val_args,
+					     (allocated_args *= 2)
+					     * sizeof (value_ptr));
 	s1 = s;
 	val_args[nargs] = parse_to_comma_and_eval (&s1);
  

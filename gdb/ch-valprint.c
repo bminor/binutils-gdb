@@ -279,7 +279,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	{
 	  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_UNDEF)
 	    {
-	      value deref_val =
+	      value_ptr deref_val =
 		value_at
 		  (TYPE_TARGET_TYPE (type),
 		   unpack_pointer (lookup_pointer_type (builtin_type_void),
@@ -375,7 +375,7 @@ chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 	  fputs_filtered (": ", stream);
 	  if (TYPE_FIELD_PACKED (type, i))
 	    {
-	      value v;
+	      value_ptr v;
 
 	      /* Bitfields require special handling, especially due to byte
 		 order problems.  */

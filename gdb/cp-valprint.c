@@ -283,7 +283,7 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 	    }
 	  if (TYPE_FIELD_PACKED (type, i))
 	    {
-	      value v;
+	      value_ptr v;
 
 	      /* Bitfields require special handling, especially due to byte
 		 order problems.  */

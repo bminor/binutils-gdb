@@ -72,7 +72,7 @@ whatis_exp (exp, show)
      int show;
 {
   struct expression *expr;
-  register value val;
+  register value_ptr val;
   register struct cleanup *old_chain = NULL;
 
   if (exp)
@@ -249,7 +249,7 @@ maintenance_print_type (typename, from_tty)
      char *typename;
      int from_tty;
 {
-  register value val;
+  register value_ptr val;
   register struct type *type;
   register struct cleanup *old_chain;
   struct expression *expr;

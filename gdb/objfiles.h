@@ -139,8 +139,11 @@ struct obj_section {
      addresses", but that's not true; addr & endaddr are actual memory
      addresses.  */
   CORE_ADDR offset;
-     
-  sec_ptr	sec_ptr; /* BFD section pointer */
+
+  /* For the ptx compiler, we can't use the sec_ptr typedef when the field's
+     name is sec_ptr.  We really should rename the field (or better yet,
+     the typedef should be bfd_sec_ptr).  */
+  struct sec *sec_ptr; /* BFD section pointer */
 
   /* Objfile this section is part of.  Not currently used, but I'm sure
      that someone will want the bfd that the sec_ptr goes with or something

@@ -33,6 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* ptx, not dynix */
 #define SDB_REG_TO_REGNUM(value) ptx_coff_regno_to_gdb(value)
 extern int ptx_coff_regno_to_gdb();
+
 #endif /* _SEQUENT_ */
 
 #define START_INFERIOR_TRAPS_EXPECTED 2
@@ -49,7 +50,7 @@ extern int ptx_coff_regno_to_gdb();
 /* For Symmetry, this is really the 'leave' instruction, which */
 /* is right before the ret */
 
-#undef
+#undef ABOUT_TO_RETURN
 #define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 1) == 0xc9)
 
 #if 0
@@ -113,13 +114,17 @@ extern int ptx_coff_regno_to_gdb();
 /* Get %fp2 - %fp31 by addition, since they are contiguous */
 
 #undef SP_REGNUM
-#define SP_REGNUM 14		/* Contains address of top of stack */
+#define SP_REGNUM 14		/* esp--Contains address of top of stack */
+#define ESP_REGNUM 14
 #undef FP_REGNUM
-#define FP_REGNUM 15		/* Contains address of executing stack frame */
+#define FP_REGNUM 15   /* ebp--Contains address of executing stack frame */
+#define EBP_REGNUM 15
 #undef PC_REGNUM
-#define PC_REGNUM 16		/* Contains program counter */
+#define PC_REGNUM 16		/* eip--Contains program counter */
+#define EIP_REGNUM 16
 #undef PS_REGNUM
-#define PS_REGNUM 17		/* Contains processor status */
+#define PS_REGNUM 17		/* eflags--Contains processor status */
+#define EFLAGS_REGNUM 17
 
 #ifndef _SEQUENT_
 /* dynix, not ptx.  For ptx, see register_addr in symm-tdep.c */
@@ -221,8 +226,123 @@ switch (regno) { \
 	 ((int) &foo.u_fpasave.fpa_regs[(regno)-18] - (int)&foo); \
   } \
 }
+#endif /* not _SEQUENT_ */
+
+#ifdef _SEQUENT_
+/* ptx.  For Dynix, see above */
+
+/*
+ * For ptx, this is a little bit bizarre, since the register block
+ * is below the u area in memory.  This means that blockend here ends
+ * up being negative (for the call from coredep.c) since the value in
+ * u.u_ar0 will be less than KERNEL_U_ADDR (and coredep.c passes us
+ * u.u_ar0 - KERNEL_U_ADDR in blockend).  Since we also define
+ * FETCH_INFERIOR_REGISTERS (and supply our own functions for that),
+ * the core file case will be the only use of this function.
+ */
+
+#define REGISTER_U_ADDR(addr, blockend, regno) \
+{ struct user foo;	/* needed for finding fpu regs */ \
+switch (regno) { \
+    case 0: \
+      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (EAX * sizeof(int)); break; \
+  case 1: \
+      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (EDX * sizeof(int)); break; \
+  case 2: \
+      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (ECX * sizeof(int)); break; \
+  case 3:			/* st(0) */ \
+      addr = blockend - KERNEL_U_ADDR + \
+	  ((int)&foo.u_fpusave.fpu_stack[0][0] - (int)&foo); \
+      break; \
+  case 4:			/* st(1) */ \
+      addr = blockend - KERNEL_U_ADDR + \
+	  ((int) &foo.u_fpusave.fpu_stack[1][0] - (int)&foo); \
+      break; \
+  case 5: \
+      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (EBX * sizeof(int)); break; \
+  case 6: \
+      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (ESI * sizeof(int)); break; \
+  case 7: \
+      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (EDI * sizeof(int)); break; \
+  case 8:			/* st(2) */ \
+      addr = blockend - KERNEL_U_ADDR + \
+	  ((int) &foo.u_fpusave.fpu_stack[2][0] - (int)&foo); \
+      break; \
+  case 9:			/* st(3) */ \
+      addr = blockend - KERNEL_U_ADDR + \
+	  ((int) &foo.u_fpusave.fpu_stack[3][0] - (int)&foo); \
+      break; \
+  case 10:			/* st(4) */ \
+      addr = blockend - KERNEL_U_ADDR + \
+	  ((int) &foo.u_fpusave.fpu_stack[4][0] - (int)&foo); \
+      break; \
+  case 11:			/* st(5) */ \
+      addr = blockend - KERNEL_U_ADDR + \
+	  ((int) &foo.u_fpusave.fpu_stack[5][0] - (int)&foo); \
+      break; \
+  case 12:			/* st(6) */ \
+      addr = blockend - KERNEL_U_ADDR + \
+	  ((int) &foo.u_fpusave.fpu_stack[6][0] - (int)&foo); \
+      break; \
+  case 13:			/* st(7) */ \
+      addr = blockend - KERNEL_U_ADDR + \
+	  ((int) &foo.u_fpusave.fpu_stack[7][0] - (int)&foo); \
+      break; \
+  case 14: \
+      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (ESP * sizeof(int)); break; \
+  case 15: \
+      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (EBP * sizeof(int)); break; \
+  case 16: \
+      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (EIP * sizeof(int)); break; \
+  case 17: \
+      addr = blockend + (NBPG * UPAGES) - sizeof(struct user) + (FLAGS * sizeof(int)); break; \
+  case 18:			/* fp1 */ \
+  case 19:			/* fp2 */ \
+  case 20:			/* fp3 */ \
+  case 21:			/* fp4 */ \
+  case 22:			/* fp5 */ \
+  case 23:			/* fp6 */ \
+  case 24:			/* fp7 */ \
+  case 25:			/* fp8 */ \
+  case 26:			/* fp9 */ \
+  case 27:			/* fp10 */ \
+  case 28:			/* fp11 */ \
+  case 29:			/* fp12 */ \
+  case 30:			/* fp13 */ \
+  case 31:			/* fp14 */ \
+  case 32:			/* fp15 */ \
+  case 33:			/* fp16 */ \
+  case 34:			/* fp17 */ \
+  case 35:			/* fp18 */ \
+  case 36:			/* fp19 */ \
+  case 37:			/* fp20 */ \
+  case 38:			/* fp21 */ \
+  case 39:			/* fp22 */ \
+  case 40:			/* fp23 */ \
+  case 41:			/* fp24 */ \
+  case 42:			/* fp25 */ \
+  case 43:			/* fp26 */ \
+  case 44:			/* fp27 */ \
+  case 45:			/* fp28 */ \
+  case 46:			/* fp29 */ \
+  case 47:			/* fp30 */ \
+  case 48:			/* fp31 */ \
+     addr = blockend - KERNEL_U_ADDR + \
+	 ((int) &foo.u_fpasave.fpa_regs[(regno)-18] - (int)&foo); \
+  } \
+}
 #endif /* _SEQUENT_ */
 
+#undef FRAME_CHAIN
+#define FRAME_CHAIN(thisframe) ((thisframe)->pc == 0 ? \
+	0 : read_memory_integer((thisframe)->frame, 4))
+
+#define FRAME_CHAIN_VALID(chain, thisframe) \
+	((chain) != 0)
+
+#undef FRAME_ARGS_SKIP
+#define FRAME_ARGS_SKIP 0
+
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
 /* 10 i386 registers, 8 i387 registers, and 31 Weitek 1167 registers */
@@ -326,70 +446,6 @@ double_to_i387 PARAMS ((char *, char *));
   symmetry_extract_return_value(TYPE, REGBUF, VALBUF)
 
 
-/* Things needed for making the inferior call functions.  FIXME: Merge
-   this with the main 386 stuff.  */
-
-#define PUSH_DUMMY_FRAME \
-{  CORE_ADDR sp = read_register (SP_REGNUM); \
-  int regnum; \
-  sp = push_word (sp, read_register (PC_REGNUM)); \
-  sp = push_word (sp, read_register (FP_REGNUM)); \
-  write_register (FP_REGNUM, sp); \
-  for (regnum = 0; regnum < NUM_REGS; regnum++) \
-    sp = push_word (sp, read_register (regnum)); \
-  write_register (SP_REGNUM, sp); \
-}
-
-#define POP_FRAME  \
-{ \
-  FRAME frame = get_current_frame (); \
-  CORE_ADDR fp; \
-  int regnum; \
-  struct frame_saved_regs fsr; \
-  struct frame_info *fi; \
-  fi = get_frame_info (frame); \
-  fp = fi->frame; \
-  get_frame_saved_regs (fi, &fsr); \
-  for (regnum = 0; regnum < NUM_REGS; regnum++) { \
-      CORE_ADDR adr; \
-      adr = fsr.regs[regnum]; \
-      if (adr) \
-	write_register (regnum, read_memory_integer (adr, 4)); \
-  } \
-  write_register (FP_REGNUM, read_memory_integer (fp, 4)); \
-  write_register (PC_REGNUM, read_memory_integer (fp + 4, 4)); \
-  write_register (SP_REGNUM, fp + 8); \
-  flush_cached_frames (); \
-  set_current_frame ( create_new_frame (read_register (FP_REGNUM), \
-					read_pc ())); \
-}
-
-/* from i386-dep.c, worked better than my original... */
-/* This sequence of words is the instructions
- * call (32-bit offset)
- * int 3
- * This is 6 bytes.
- */
-
-#define CALL_DUMMY { 0x223344e8, 0xcc11 }
-
-#define CALL_DUMMY_LENGTH 8
-
-#define CALL_DUMMY_START_OFFSET 0  /* Start execution at beginning of dummy */
-
-/* Insert the specified number of args and function address
-   into a call sequence of the above form stored at DUMMYNAME.  */
-
-#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)   \
-{ \
-	int from, to, delta, loc; \
-	loc = (int)(read_register (SP_REGNUM) - CALL_DUMMY_LENGTH); \
-	from = loc + 5; \
-	to = (int)(fun); \
-	delta = to - from; \
-	*(int *)((char *)(dummyname) + 1) = delta; \
-}
-
 extern void
 print_387_control_word PARAMS ((unsigned int));
 

@@ -18,27 +18,25 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#ifdef _SEQUENT_
-/* ptx */
-#define PTRACE_READ_REGS(pid,regaddr) mptrace (XPT_RREGS, (pid), (regaddr), 0)
-#define PTRACE_WRITE_REGS(pid,regaddr) \
-  mptrace (XPT_WREGS, (pid), (regadddr), 0)
-#else
-/* dynix */
-#define PTRACE_READ_REGS(pid,regaddr) ptrace (XPT_RREGS, (pid), (regaddr), 0)
-#define PTRACE_WRITE_REGS(pid,regaddr) \
-  ptrace (XPT_WREGS, (pid), (regadddr), 0)
-#endif
-
 /* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
 
 #define FETCH_INFERIOR_REGISTERS
+
+#ifdef _SEQUENT_
+#define CHILD_WAIT
+extern int child_wait PARAMS ((int, struct target_waitstatus *));
+#endif
 
 /* This is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */
 
 #ifdef _SEQUENT_
-#define KERNEL_U_ADDR (0xffffe000) /* VA_UBLOCK */	/* ptx */
+#include <sys/param.h>
+#include <sys/user.h>
+#include <sys/mc_vmparam.h>
+/* VA_UAREA is defined in <sys/mc_vmparam.h>, and is dependant upon 
+   sizeof(struct user) */
+#define KERNEL_U_ADDR (VA_UAREA) /* ptx */
 #else
 #define KERNEL_U_ADDR (0x80000000 - (UPAGES * NBPG))	/* dynix */
 #endif
