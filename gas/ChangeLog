@@ -1,3 +1,10 @@
+2001-01-25  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-m68k.c (tc_gen_reloc): Do not abort if tcbit is
+	still set.  Issue an error message instead.
+	(md_estimate_size_before_relax): Delete unused variable
+	'buffer_address'.  Fixup parentheses around if statement.
+	
 2001-01-23  Kazu Hirata  <kazu@hxi.com>
 
 	* as.c: Fix formatting.

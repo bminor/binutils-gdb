@@ -874,8 +874,18 @@ tc_gen_reloc (section, fixp)
   arelent *reloc;
   bfd_reloc_code_real_type code;
 
+  /* If the tcbit is set, then this was a fixup of a negative value
+     that was never resolved.  We do not have a reloc to handle this,
+     so just return.  We assume that other code will have detected this
+     situation and produced a helpful error message, so we just tell the
+     user that the reloc cannot be produced.  */
   if (fixp->fx_tcbit)
-    abort ();
+    {
+      if (fixp->fx_addsy)
+	as_bad (_("Unable to produce reloc against symbol '%s'"),
+		S_GET_NAME (fixp->fx_addsy));
+      return NULL;
+    }
 
   if (fixp->fx_r_type != BFD_RELOC_NONE)
     {
@@ -4564,7 +4574,6 @@ md_estimate_size_before_relax (fragP, segment)
      segT segment;
 {
   int old_fix;
-  register char *buffer_address = fragP->fr_fix + fragP->fr_literal;
 
   old_fix = fragP->fr_fix;
 
@@ -4652,8 +4661,8 @@ md_estimate_size_before_relax (fragP, segment)
     case TAB (DBCCLBR, SZ_UNDEF):
     case TAB (DBCCABSJ, SZ_UNDEF):
       {
-	if (S_GET_SEGMENT (fragP->fr_symbol) == segment
-	    && relaxable_symbol (fragP->fr_symbol)
+	if ((S_GET_SEGMENT (fragP->fr_symbol) == segment
+	     && relaxable_symbol (fragP->fr_symbol))
 	    || flag_short_refs)
 	  {
 	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), SHORT);
