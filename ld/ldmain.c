@@ -1,4 +1,5 @@
-/* Copyright (C) 1991, 1993 Free Software Foundation, Inc.
+/* Main program of GNU linker.
+   Copyright (C) 1991, 1993, 1994 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
 This file is part of GLD, the Gnu Linker.
@@ -135,6 +136,7 @@ main (argc, argv)
      char **argv;
 {
   char *emulation;
+  long start_time = get_run_time ();
 
   program_name = argv[0];
 
@@ -286,7 +288,10 @@ main (argc, argv)
     {
       extern char **environ;
       char *lim = (char *) sbrk (0);
+      long run_time = get_run_time () - start_time;
 
+      fprintf (stderr, "%s: total time in link: %d.%06d\n",
+	       program_name, run_time / 1000000, run_time % 1000000);
       fprintf (stderr, "%s: data size %ld\n", program_name,
 	       (long) (lim - (char *) &environ));
     }

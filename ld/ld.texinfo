@@ -173,7 +173,8 @@ ld [ -o @var{output} ]  @var{objfile}@dots{}
   [ -l@var{archive} ]  [ -L@var{searchdir} ]  [ -M ]  [ -Map @var{mapfile} ]
   [ -m @var{emulation} ]  [ -N | -n ]  [ -noinhibit-exec ]
   [ -oformat @var{output-format} ]  [ -R @var{filename} ]  [ -relax ]
-  [ -r | -Ur ]  [ -S ]  [ -s ]  [ -sort-common ]  [ -T @var{commandfile} ]
+  [ -r | -Ur ]  [ -S ]  [ -s ]  [ -sort-common ] [ -stats ]
+  [ -T @var{commandfile} ]
   [ -Ttext @var{org} ]  [ -Tdata @var{org} ]
   [ -Tbss @var{org} ]  [ -t ]  [ -u @var{symbol}]  [-V]  [-v]  [ --version ]
   [ -warn-common ]  [ -y@var{symbol} ]  [ -X ]  [-x ]
@@ -518,6 +519,10 @@ appropriate output sections, it sorts them by size.  First come all the
 one byte symbols, then all the two bytes, then all the four bytes, and
 then everything else.  This is to prevent gaps between symbols due to
 alignment constraints.  This option disables that sorting.
+
+@item -stats
+Compute and display statistics about the operation of the linker,
+such as execution time and memory usage.
 
 @item -Tbss @var{org}
 @kindex -Tbss @var{org}

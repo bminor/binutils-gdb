@@ -1,3 +1,8 @@
+Tue Jan 25 13:19:41 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* ldmain.c (main): Compute and display total execution time.
+	* ld.texinfo (-stats): Document the option.
+
 Mon Jan 24 12:56:37 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldmain.c (reloc_overflow): Added name, reloc_name and addend
