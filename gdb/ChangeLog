@@ -1,3 +1,9 @@
+Fri Dec 31 14:33:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* nindy-share/nindy.c: Fix order of arguments to store_unsigned_integer
+	(second and third arguments were reversed).
+	(say): Use varargs.
+
 Fri Dec 31 12:13:47 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* remote-mips.c: Add timeout parameter to mips_request and
