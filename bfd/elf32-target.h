@@ -194,7 +194,7 @@ bfd_target TARGET_BIG_SYM =
 
   /* object_flags: mask of all file flags */
   (HAS_RELOC | EXEC_P | HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS |
-   DYNAMIC | WP_TEXT),
+   DYNAMIC | WP_TEXT | D_PAGED),
   
   /* section_flags: mask of all section flags */
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY |
@@ -282,7 +282,7 @@ bfd_target TARGET_LITTLE_SYM =
 
   /* object_flags: mask of all file flags */
   (HAS_RELOC | EXEC_P | HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS |
-   DYNAMIC | WP_TEXT),
+   DYNAMIC | WP_TEXT | D_PAGED),
   
   /* section_flags: mask of all section flags */
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY |

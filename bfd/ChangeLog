@@ -1,5 +1,32 @@
 Sun Jun  5 15:02:30 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	Changes to support ELF strip and objcopy on dynamically linked
+	files.
+	* elfcode.h (elf_fake_sections): Add prototype.
+	(bfd_section_from_shdr): Make a BFD section from an SHT_HASH
+	section, and from an SHT_DYNSYM section, and from the dynamic
+	string table section.
+	(elf_object_p): Set D_PAGED if there is a program header.
+	(elf_make_sections): Remove.
+	(fix_up_strtabs): Remove.
+	(elf_fake_sections): Rewrite.  Now sets sh_entsize.
+	(assign_section_numbers): Rewrite.  Now sets sh_link and sh_info
+	for all sections.
+	(elf_compute_section_file_positions):  Don't call obsolete
+	functions elf_make_sections or fix_up_strtabs.
+	(swap_out_syms): Set sh_addralign to FILE_ALIGN rather than 4.
+	(NAME(bfd_elf,write_object_contents)): Permit writing DYNAMIC
+	objects.
+	(elf_section_from_bfd_section): Treat SHT_DYNSYM like other normal
+	sections.  If an SHT_REL or SHT_RELA section is allocated or uses
+	an unusual symbol table, permit a BFD section to map to it.
+	Permit most SHT_STRTAB sections to have a BFD section mapped to
+	them.
+	(elf_bfd_final_link): Don't set sh_link, sh_info or sh_entsize
+	fields of dynamic sections here; do it in assign_section_numbers.
+	* elf32-target.h, elf64-target.h: Add D_PAGED to permitted object
+	flags.
+
 	* elf.c (_bfd_elf_make_section_from_shdr): Only set SEC_DATA if
 	SEC_LOAD is set, rather than checking SEC_ALLOC.
 
