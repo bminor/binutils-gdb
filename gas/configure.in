@@ -189,6 +189,8 @@ changequote([,])dnl
 
       avr-*-*)		    fmt=elf bfd_gas=yes ;;
 
+      cris-*-*)		    fmt=multi bfd_gas=yes ;;
+
       d10v-*-*)		    fmt=elf bfd_gas=yes ;;
       d30v-*-*)		    fmt=elf bfd_gas=yes ;;
 
@@ -576,6 +578,9 @@ changequote([,])dnl
       i386-*-aout)	emulation="i386aout" ;;
       i386-*-coff)	emulation="i386coff" ;;
       i386-*-elf)	emulation="i386elf" ;;
+
+      # Always all formats.  Having a.out first makes it the default.
+      cris-*-*)		emulation="crisaout criself" ;;
     esac
 
     emulations="$emulations $emulation"

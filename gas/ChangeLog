@@ -1,3 +1,23 @@
+2000-07-20  Hans-Peter Nilsson  <hp@axis.com>
+
+	* configure.in: Add CRIS support.
+	* configure: Regenerate.
+	* Makefile.am: (CPU_TYPES): Add cris.
+	(CPU_OBJ_VALID) [aout]: Add cris.
+	(MULTI_CPU_TYPES): Add cris.
+	(MULTI_CPU_OBJ_VALID) [aout]: Add cris.
+ 	[coff]: Only i386 and mips are valid.
+	(TARGET_CPU_CFILES): Add config/tc-cris.c.
+	(TARGET_CPU_HFILES): Add config/tc-cris.h.
+	(MULTI_CFILES): Add config/e-crisaout.c and config/e-criself.c.
+	Regenerate dependencies.
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* as.c: Declare crisaout, criself.
+	* config/tc-cris.h, config/tc-cris.c: New.
+	* config/e-criself.c, config/e-crisaout.c: New.
+	* po/POTFILES.in, po/gas.pot: Regenerate.
+
 2000-07-20  Kazu Hirata  <kazu@hxi.com>
 	
 	* read.c: Fix formatting.

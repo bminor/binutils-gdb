@@ -42,6 +42,7 @@ CPU_TYPES = \
 	arc \
 	arm \
 	avr \
+	cris \
 	d10v \
 	d30v \
 	fr30 \
@@ -99,7 +100,7 @@ CPU_OBJ_VALID = \
 	case $$o in \
 	aout) \
 	  case $$c in \
-	  a29k | arm | i386 | i860 | m68k | mips | ns32k | sparc | tahoe | tic30 | vax) \
+	  a29k | arm | cris | i386 | i860 | m68k | mips | ns32k | sparc | tahoe | tic30 | vax) \
 	    valid=yes ;; \
 	  esac ;; \
 	bout) \
@@ -128,16 +129,19 @@ CPU_OBJ_VALID = \
 
 # These are like CPU_TYPES and CPU_OBJ_VALID, for the obj=multi case.
 
-MULTI_CPU_TYPES = i386 mips
+MULTI_CPU_TYPES = i386 mips cris
 
 MULTI_CPU_OBJ_VALID = \
 	valid= ; \
 	case $$o in \
 	aout) \
 	  case $$c in \
-	  i386) valid=yes ;; \
+	  i386 | cris) valid=yes ;; \
 	  esac ;; \
-	coff) valid=yes ;; \
+	coff) \
+	  case $$c in \
+	  i386 | mips) valid=yes ;; \
+	  esac ;; \
 	ecoff) \
 	  case $$c in \
 	  mips) valid=yes ;; \
@@ -215,6 +219,7 @@ TARGET_CPU_CFILES = \
 	config/tc-arc.c \
 	config/tc-arm.c \
 	config/tc-avr.c \
+	config/tc-cris.c \
 	config/tc-d10v.c \
 	config/tc-d30v.c \
 	config/tc-fr30.c \
@@ -254,6 +259,7 @@ TARGET_CPU_HFILES = \
 	config/tc-arc.h \
 	config/tc-arm.h \
 	config/tc-avr.h \
+	config/tc-cris.h \
 	config/tc-d10v.h \
 	config/tc-d30v.h \
 	config/tc-fr30.h \
@@ -349,6 +355,8 @@ TARG_ENV_HFILES = \
 # Multi files in config
 
 MULTI_CFILES = \
+	config/e-crisaout.c \
+	config/e-criself.c \
 	config/e-i386aout.c \
 	config/e-i386coff.c \
 	config/e-i386elf.c \
@@ -544,6 +552,10 @@ e-i386coff.o: $(srcdir)/config/e-i386coff.c
 	$(COMPILE) -c $(srcdir)/config/e-i386coff.c
 e-i386elf.o: $(srcdir)/config/e-i386elf.c
 	$(COMPILE) -c $(srcdir)/config/e-i386elf.c
+e-crisaout.o: $(srcdir)/config/e-crisaout.c
+	$(COMPILE) -c $(srcdir)/config/e-crisaout.c
+e-criself.o: $(srcdir)/config/e-criself.c
+	$(COMPILE) -c $(srcdir)/config/e-criself.c
 
 # The m68k operand parser.
 
@@ -952,6 +964,16 @@ DEPTC_avr_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-avr.h subsegs.h \
   $(INCDIR)/obstack.h $(INCDIR)/opcode/avr.h
+DEPTC_cris_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-cris.h \
+  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h \
+  $(INCDIR)/opcode/cris.h
+DEPTC_cris_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-cris.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/cris.h
+DEPTC_cris_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-cris.h subsegs.h \
+  $(INCDIR)/obstack.h $(INCDIR)/opcode/cris.h
 DEPTC_d10v_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-d10v.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
   subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/d10v.h \
@@ -995,13 +1017,12 @@ DEPTC_h8500_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/obstack.h $(srcdir)/../opcodes/h8500-opc.h
 DEPTC_hppa_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-hppa.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  subsegs.h $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h $(BFDDIR)/libbfd.h \
-  $(INCDIR)/opcode/hppa.h
+  subsegs.h $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h $(INCDIR)/opcode/hppa.h
 DEPTC_hppa_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-hppa.h $(BFDDIR)/elf32-hppa.h \
   $(BFDDIR)/libhppa.h $(INCDIR)/elf/hppa.h $(INCDIR)/elf/reloc-macros.h \
-  subsegs.h $(INCDIR)/obstack.h $(BFDDIR)/libbfd.h $(INCDIR)/opcode/hppa.h \
+  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/hppa.h \
   dwarf2dbg.h
 DEPTC_ia64_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-ia64.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
@@ -1254,6 +1275,7 @@ DEPTC_i386_multi = $(DEPTC_i386_aout) $(DEPTC_i386_coff) \
   $(DEPTC_i386_elf)
 DEPTC_mips_multi = $(DEPTC_mips_coff) $(DEPTC_mips_ecoff) \
   $(DEPTC_mips_elf)
+DEPTC_cris_multi = $(DEPTC_cris_aout) $(DEPTC_cris_elf)
 DEPOBJ_a29k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-a29k.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/obstack.h
@@ -1301,6 +1323,16 @@ DEPOBJ_avr_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-avr.h \
 DEPOBJ_avr_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-avr.h subsegs.h \
+  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_cris_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-cris.h \
+  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
+  $(INCDIR)/obstack.h
+DEPOBJ_cris_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-cris.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_cris_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-cris.h subsegs.h \
   $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
 DEPOBJ_d10v_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-d10v.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
@@ -1576,6 +1608,7 @@ DEPOBJ_i386_multi = $(DEPOBJ_i386_aout) $(DEPOBJ_i386_coff) \
   $(DEPOBJ_i386_elf)
 DEPOBJ_mips_multi = $(DEPOBJ_mips_coff) $(DEPOBJ_mips_ecoff) \
   $(DEPOBJ_mips_elf)
+DEPOBJ_cris_multi = $(DEPOBJ_cris_aout) $(DEPOBJ_cris_elf)
 DEP_a29k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-a29k.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h
 DEP_a29k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-a29k.h \
@@ -1610,6 +1643,13 @@ DEP_avr_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-avr.h \
 DEP_avr_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-avr.h
+DEP_cris_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-cris.h \
+  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h
+DEP_cris_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-cris.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
+DEP_cris_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-cris.h
 DEP_d10v_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-d10v.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
 DEP_d10v_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
@@ -1818,6 +1858,7 @@ DEP_i386_multi = $(DEP_i386_aout) $(DEP_i386_coff) \
   $(DEP_i386_elf)
 DEP_mips_multi = $(DEP_mips_coff) $(DEP_mips_ecoff) \
   $(DEP_mips_elf)
+DEP_cris_multi = $(DEP_cris_aout) $(DEP_cris_elf)
 BMKDEP = #DO NOT PUT ANYTHING BETWEEN THIS LINE AND THE MATCHING WARNING ABOVE.
 #MKDEP    DO NOT PUT ANYTHING BETWEEN THIS LINE AND THE MATCHING WARNING BELOW.
 app.o: app.c
@@ -1855,6 +1896,8 @@ symbols.o: symbols.c $(INCDIR)/obstack.h subsegs.h \
 write.o: write.c subsegs.h $(INCDIR)/obstack.h output-file.h
 gasp.o: gasp.c sb.h macro.h
 itbl-ops.o: itbl-ops.c itbl-ops.h
+e-crisaout.o: $(srcdir)/config/e-crisaout.c emul-target.h
+e-criself.o: $(srcdir)/config/e-criself.c emul-target.h
 e-i386aout.o: $(srcdir)/config/e-i386aout.c emul-target.h
 e-i386coff.o: $(srcdir)/config/e-i386coff.c emul-target.h
 e-i386elf.o: $(srcdir)/config/e-i386elf.c emul-target.h
