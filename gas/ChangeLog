@@ -1,3 +1,8 @@
+2002-12-17  Nick Clifton  <nickc@redhat.com>
+
+	* as.c (std_longopts): Duplicate --keep-locals entry in order to
+	prevent it being confused with -k.
+
 2002-12-16  Andrew MacLeod  <amacleod@redhat.com>
 
 	* config/tc-xstormy16.c (md_cgen_lookup_reloc): If a relocation 
