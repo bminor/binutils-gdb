@@ -20,6 +20,10 @@
    In other words, go ahead and share GDB, but don't try to stop
    anyone else from sharing it farther.  Help stamp out software hoarding!
    */
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+
 
 #include "defs.h"
 #include "tm-i860.h"
@@ -32,15 +36,13 @@
 #include "tm-i860.h"
 #include "i860-opcode.h"
 
-#include <stdio.h>
 #include "break.h"
+#include "command.h"
 
 #ifdef notdef
-
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/dir.h>
-
 #endif
 
 #include <signal.h>
@@ -52,27 +54,36 @@
 
 #include <a.out.h>
 #include <sys/file.h>
-#include <sys/stat.h>
 #include <core.h>
 
 #include <sys/user.h>
-
 #include <elf.h>
 #include <sys/elftypes.h>
 #include <sys/elf_860.h>
 #include <libelf.h>
 
 
+extern int read_memory();
+extern int write_memory();
+extern int read_memory_integer();
+extern int print_insn();
+extern void bzero();
+extern void bcopy();
+extern int store_inferior_registers(int);
+extern int outside_startup_file();
+
 int btdebug = 0;    /* change value to 1 to enable debugging code */
 
 #define  BTDEBUG  if (btdebug) btdebug_message
 
-#include <stdarg.h>
+extern int errno;
+extern int attach_flag;
 
-int read_memory();
-int write_memory();
+#define INSTRUCTION_LENGTH 4
+#define REGISTER_LENGTH 4
 
-btdebug_message(char *format, ...)
+/* routine to print debugging messages */
+void btdebug_message(char *format, ...)
 {	
    va_list	arglist;
    va_start( arglist, format );
@@ -81,142 +92,6 @@ btdebug_message(char *format, ...)
       vfprintf (stderr,  format, arglist );
    va_end  ( arglist 	  );
 }
-
-extern int errno;
-extern int attach_flag;
-
-
-/* This is used when GDB is exiting.  It gives less chance of error.*/
-
-
-/* Simulate single-step ptrace call for sun4.  Code written by Gary
-   Beihl (beihl@mcc.com).  */
-/* Modified for i860 by Jim Hanko (hanko@orc.olivetti.com) */
-
-
-static struct breakpoint brk;
-typedef char binsn_quantum[sizeof break_insn];
-static binsn_quantum break_mem[2];
-
-/* Non-zero if we just simulated a single-step ptrace call.  This is
-   needed because we cannot remove the breakpoints in the inferior
-   process until after the `wait' in `wait_for_inferior'.  Used for
-   i860. */
-
-int one_stepped;
-void
-   single_step (signal)
-int signal;
-{
-   CORE_ADDR pc;
-   branch_type place_brk();
-   
-   pc = read_register (PC_REGNUM);
-   
-   if (!one_stepped)
-      {
-         brk.address = pc;
-         place_brk (pc, SINGLE_STEP_MODE, &brk);
-         brk.shadow_contents[0] = brk.shadow_contents[1] = 0;
-         brk.shadow_contents[2] = brk.shadow_contents[3] = 0;
-         
-         if (brk.mode == DIM)
-            {
-               if ( brk.address1 )
-                  { 
-                     printf(" DIM1 ->");
-                     printf(" %x : ", brk.act_addr[3]);
-                     print_insn( brk.act_addr[3], stdout);
-                     printf("\t -|- ");
-                     printf(" %x : ", brk.act_addr[2]);
-                     print_insn( brk.act_addr[2], stdout);
-                     printf("\n");
-                     fflush(stdout);
-                     
-                     adj_read_memory  (brk.act_addr[2], &brk.shadow_contents[2],	4);
-                     adj_write_memory (brk.act_addr[2], break_insn,		4);
-                     adj_read_memory  (brk.act_addr[3], &brk.shadow_contents[3],	4);
-                     /*		adj_write_memory (brk.act_addr[3], float_insn,		4); */
-                     
-                  }
-               if ( brk.address1)
-                  printf(" DIM2 ->");
-               else
-                  printf(" DIM1 ->");
-               
-               printf(" %x : ", brk.act_addr[1]);
-               print_insn( brk.act_addr[1], stdout);
-               printf("\t -|- ");
-               printf(" %x : ", brk.act_addr[0]);
-               print_insn( brk.act_addr[0], stdout);
-               printf("\n");
-               fflush(stdout);
-               
-               adj_read_memory  (brk.act_addr[0], &brk.shadow_contents[0],	4);
-               adj_write_memory (brk.act_addr[0], break_insn,		4);
-               adj_read_memory  (brk.act_addr[1], &brk.shadow_contents[1],	4);
-               /*		adj_write_memory (brk.act_addr[1], float_insn,		4); */
-               
-            } 
-         else	{
-            if (brk.address1)
-               {
-                  if (btdebug)
-                     {
-                        printf(" SIM1 ->");
-                        printf(" %x : ", brk.act_addr[2]);
-                        print_insn( brk.act_addr[2], stdout);
-                        printf("\n");
-                        fflush(stdout);
-                     }
-                  adj_read_memory  (brk.act_addr[2], &brk.shadow_contents[2],	4);
-                  adj_write_memory (brk.act_addr[2], break_insn,		4);
-               }
-            if (btdebug)
-               {
-                  if ( brk.address1)
-                     printf(" SIM2 ->");
-                  else
-                     printf(" SIM1 ->");
-                  
-                  printf(" %x : ", brk.act_addr[0]);
-                  print_insn( brk.act_addr[0], stdout);
-                  printf("\n");
-                  fflush(stdout);
-               }
-            adj_read_memory  (brk.act_addr[0], &brk.shadow_contents[0],	4);
-            adj_write_memory (brk.act_addr[0], break_insn,		4);
-         }
-         
-         /* Let it go */
-         one_stepped = 1;
-         return;
-      }
-   else
-      {
-         /* Remove breakpoints */
-         if (brk.mode == DIM)
-            {
-               adj_write_memory (brk.act_addr[0], &brk.shadow_contents[0], 4);
-               adj_write_memory (brk.act_addr[1], &brk.shadow_contents[1], 4);
-            } else	{
-               adj_write_memory (brk.act_addr[0], &brk.shadow_contents[0], 4);
-            }
-         
-         if (brk.address1)
-            {
-               if (brk.mode == DIM)
-                  {
-                     adj_write_memory (brk.act_addr[2], &brk.shadow_contents[2], 4);
-                     adj_write_memory (brk.act_addr[3], &brk.shadow_contents[3], 4);
-                  } else	{
-                     adj_write_memory (brk.act_addr[2], &brk.shadow_contents[2], 4);
-                  }
-            }
-         one_stepped = 0;
-      }
-}
-
 
 
 
@@ -227,23 +102,22 @@ int signal;
  *	based on  skip_prologue();
  */
 
-g_routine(pc)
+static int g_routine(pc)
      CORE_ADDR pc;
 {
-   long instr;
-   int regno;
+   CORE_ADDR instr;
    CORE_ADDR top_pc;
    
    top_pc = get_pc_function_start(pc);
-   if (top_pc)
+   if (top_pc != NULL)
       {
-         instr = adj_read_memory_integer (top_pc);
+         instr = (unsigned)( adj_read_memory_integer (top_pc));
          /* Recognize "addu|adds -X,sp,sp" insn. */
    
          if ((instr & 0xEFFF0000) == 0x84420000) 
             {
-               top_pc += 4;
-               instr = adj_read_memory_integer (top_pc);
+               top_pc += INSTRUCTION_LENGTH;
+               instr =  (unsigned)(adj_read_memory_integer (top_pc));
       
                if( (instr & 0xFFE0F801) == 0x1C401801 )    /* st.l fp,X(sp) */
                   return(1);
@@ -253,299 +127,17 @@ g_routine(pc)
 }
 
 
-/* Written for i860 by Jim Hanko (hanko@orc.olivetti.com) */
-/* This code was based on SPARC code written by Gary Beihl (beihl@mcc.com),
-   by Michael Tiemann (tiemann@corto.inria.fr).  */
-
-struct command_line *get_breakpoint_commands ();
-
-CORE_ADDR 
-   skip_prologue (pc)
+/* return the stack offset where the fp register is stored */
+static int find_fp_offset(pc)
 CORE_ADDR pc;
 {
-   long instr;
-   int regno;
-   
-   instr = adj_read_memory_integer (pc);
-   
-   /* Recognize "addu|adds -X,sp,sp" insn. */
-   if ((instr & 0xEFFF0000) == 0x84420000)
-      {
-         pc += 4;
-         instr = adj_read_memory_integer (pc);
-      }
-   else
-      return(pc);					/* No frame! */
-   
-   /* Recognize store of return addr and frame pointer into frame */
-   while (1)
-      {
-         if ((instr & 0xFFE0F801) == 0x1C400801 ||  /* st.l r1,X(sp) */
-             (instr & 0xFFE0F801) == 0x1C401801)    /* st.l fp,X(sp) */
-            {
-               pc += 4;
-               instr = adj_read_memory_integer (pc);
-            }
-         else
-            break;
-      }
-   
-   /* Recognize "addu|adds X,sp,fp" insn. */
-   if ((instr & 0xEFFF0000) == 0x84430000)
-      {
-         pc += 4;
-         instr = adj_read_memory_integer (pc);
-      }
-   
-   /* Now recognize stores into the frame from the registers. */
-   
-   while (1)
-      {
-         if ((instr & 0xFFA00003) == 0x1C200001 ||	/* st.l rn,X(fp|sp) */
-             (instr & 0xFFA00001) == 0x4C200000)	/* fst.y fn,X(fp|sp) */
-            {
-               regno = (instr >> 11) & 0x1f;
-               if (regno == 0)			/* source reg == 0? quit */
-                  break;
-               pc += 4;
-               instr = adj_read_memory_integer (pc);
-            }
-         else
-            break;
-      }
-   
-   return(pc);
-}
-
-
-/* Set *nextpc to branch target if we find a branch.  If it is not a branch, 
-   set it to the next instruction (addr + 4) */
-
-
-branch_type
-   isabranch (addr,  nextpc)
-CORE_ADDR addr, *nextpc;
-{
-   long instr;
-   branch_type val = not_branch;
-   long offset; /* Must be signed for sign-extend */
-   
-   printf(" isabranch\n");
-   *nextpc = addr;
-   instr = adj_read_memory_integer (addr);
-   
-   if ((instr & 0xE0000000) == 0x60000000 &&		/* CTRL format */
-       (instr & 0xF8000000) != 0x60000000)		/* not pfld.y  */
-      {
-         if ((instr & 0xF8000000) == 0x68000000)		/* br or call */
-            val = uncond_d;
-         else if ((instr & 0xF4000000) == 0x74000000)	/* bc.t or bnc.t */
-            val = cond_d;
-         else if ((instr & 0xF4000000) == 0x70000000)	/* bc or bnc */
-            val = cond;
-         
-         offset = (instr & 0x03ffffff);
-         if (offset & 0x02000000)	/* sign extend? */
-            offset |= 0xFC000000;
-         *nextpc = addr + 4 + (offset << 2);
-      }
-   else if ((instr & 0xFC00003F) == 0x4C000002 ||	/* calli */
-            (instr & 0xFC000000) == 0x40000000)		/* bri */
-      {
-         val = uncond_d;
-         offset = ((instr & 0x0000F800) >> 11);
-         *nextpc = (read_register(offset) & 0xFFFFFFFC);
-      }
-   else if ((instr & 0xF0000000) == 0x50000000)		/* bte or btne */
-      {
-         val = cond;
-         
-         offset = SIGN_EXT16(((instr & 0x001F0000) >> 5)  | (instr & 0x000007FF));
-         *nextpc = addr + 4 + (offset << 2);
-      }
-   else if ((instr & 0xFC000000) == 0xB4000000)         /* bla */
-      {
-         val = cond_d;
-         
-         offset = SIGN_EXT16(((instr & 0x001F0000) >> 5)  | (instr & 0x000007FF));
-         *nextpc = addr + 4 + (offset << 2);
-      }
-   
-   printf(" Final addr - %x\n", *nextpc);
-   /*printf("isabranch ret: %d\n",val); */
-   return val;
-}
-
-/* set in call_function() [valops.c] to the address of the "call dummy" code
-   so dummy frames can be easily recognized; also used in wait_for_inferior() 
-   [infrun.c]. When not used, it points into the ABI's 'reserved area' */
-
-CORE_ADDR call_dummy_set = 0;	/* true if dummy call being done */
-CORE_ADDR call_dummy_start;	/* address of call dummy code */
-
-frame_find_saved_regs(frame_info, frame_saved_regs)
-     struct frame_info *frame_info;
-     struct frame_saved_regs *frame_saved_regs;
-{
-   register CORE_ADDR pc;
-   long instr, spdelta = 0, offset;
-   int i, size, reg;
-   int r1_off = -1, fp_off = -1;
-   int framesize;
-   
-   bzero (frame_saved_regs, sizeof(*frame_saved_regs));
-   
-   if (call_dummy_set && frame_info->pc >= call_dummy_start && 
-       frame_info->pc <= call_dummy_start + CALL_DUMMY_LENGTH)
-      {
-         /* DUMMY frame - all registers stored in order at fp; old sp is
-            at fp + NUM_REGS*4 */
-         
-         for (i = 1; i < NUM_REGS; i++) /* skip reg 0 */
-            if (i != SP_REGNUM && i != FP0_REGNUM && i != FP0_REGNUM + 1)
-               frame_saved_regs->regs[i] = frame_info->frame + i*4;
-         
-         frame_saved_regs->regs[SP_REGNUM] = frame_info->frame + NUM_REGS*4;
-         
-         call_dummy_set = 0;
-         return;
-      }
-   
-   pc = get_pc_function_start (frame_info->pc); 
-   if (pc)
-      {
-         instr = adj_read_memory_integer (pc);
-         /* Recognize "addu|adds -X,sp,sp" insn. */
-         if ((instr & 0xEFFF0000) == 0x84420000)
-            {
-               framesize = -SIGN_EXT16(instr & 0x0000FFFF);
-               pc += 4;
-               instr = adj_read_memory_integer (pc);
-            }
-      }
-   else
-      goto punt;					/* No frame! */
-   
-   /* Recognize store of return addr and frame pointer into frame */
-   while (1)
-      {
-         if ((instr & 0xFFE0F801) == 0x1C400801)  /* st.l r1,X(sp) */
-            {
-               r1_off = SIGN_EXT16(((instr&0x001F0000) >> 5) | (instr&0x000007FE));
-               pc += 4;
-               instr = adj_read_memory_integer (pc);
-            }
-         else if ((instr & 0xFFE0F801) == 0x1C401801)    /* st.l fp,X(sp) */
-            {
-               fp_off = SIGN_EXT16(((instr&0x001F0000) >> 5) | (instr&0x000007FE));
-               pc += 4;
-               instr = adj_read_memory_integer (pc);
-            }
-         else
-            break;
-      }
-   
-   /* Recognize "addu|adds X,sp,fp" insn. */
-   if ((instr & 0xEFFF0000) == 0x84430000)
-      {
-         spdelta = SIGN_EXT16(instr & 0x0000FFFF);
-         pc += 4;
-         instr = adj_read_memory_integer (pc);
-      }
-   
-   /* Now recognize stores into the frame from the registers. */
-   
-   while (1)
-      {
-         if ((instr & 0xFFC00003) == 0x1C400001)	/* st.l rn,X(fp|sp) */
-            {
-               offset = SIGN_EXT16(((instr&0x001F0000) >> 5) | (instr&0x000007FE));
-               reg = (instr >> 11) & 0x1F;
-               if (reg == 0)
-                  break;
-               if ((instr & 0x00200000) == 0)	/* was this using sp? */
-                  if (spdelta)			/* and we know sp-fp delta */
-                     offset -= spdelta;		/* if so, adjust the offset */
-                  else
-                     break;				/* if not, give up */
-               
-               
-               /* Handle the case where the return address is stored after the fp 
-                  is adjusted */
-               
-               if (reg == 1)
-                  frame_saved_regs->regs[PC_REGNUM] = frame_info->frame + offset;
-               else
-                  frame_saved_regs->regs[reg] = frame_info->frame + offset;
-               
-               pc += 4;
-               instr = adj_read_memory_integer (pc);
-            }
-         else if ((instr & 0xFFC00001) == 0x2C400000) /* fst.y fn,X(fp|sp) */
-            {
-               /*
-                * The number of words in a floating store based on 3 LSB of instr
-                */
-               static int fst_sizes[] = {2, 0, 1, 0, 4, 0, 1, 0};
-               
-               size = fst_sizes[instr & 7];
-               reg = ((instr >> 16) & 0x1F) + FP0_REGNUM;
-               if (reg == 0)
-                  break;
-               
-               if (size > 1)					/* align the offset */
-                  offset = SIGN_EXT16(instr & 0x0000FFF8);	/* drop 3 bits */
-               else
-                  offset = SIGN_EXT16(instr & 0x0000FFFC);	/* drop 2 bits */
-               
-               if ((instr & 0x00200000) == 0)	/* was this using sp? */
-                  if (spdelta)			/* and we know sp-fp delta */
-                     offset -= spdelta;		/* if so, adjust the offset */
-                  else
-                     break;				/* if not, give up */
-               
-               for (i = 0; i < size; i++)
-                  {
-                     frame_saved_regs->regs[reg] = frame_info->frame + offset;
-                     
-                     offset += 4;
-                     reg++;
-                  }
-               
-               pc += 4;
-               instr = adj_read_memory_integer (pc);
-            }
-         else
-            break;
-      }
-   
-   punt: ;
-   if (framesize != 0 && spdelta != 0)
-      frame_saved_regs->regs[SP_REGNUM] = frame_info->frame+(framesize-spdelta);
-   else
-      frame_saved_regs->regs[SP_REGNUM] = frame_info->frame + 8;
-   
-   if (spdelta && fp_off != -1)
-      frame_saved_regs->regs[FP_REGNUM] = frame_info->frame - spdelta + fp_off;
-   else
-      frame_saved_regs->regs[FP_REGNUM] = frame_info->frame;
-   
-   if (spdelta && r1_off != -1)
-      frame_saved_regs->regs[PC_REGNUM] = frame_info->frame - spdelta + r1_off;
-   else
-      frame_saved_regs->regs[PC_REGNUM] = frame_info->frame + 4;
-}
-
-/* return the stack offset where the fp register is stored */
-find_fp_offset(pc)
-{
    int fp_off,i;
-   long	instr;
+   CORE_ADDR	instr;
    
    /* look for the instruction and examine the offset */
    
-   for(i=4; i<16; i+=4){
-      instr = adj_read_memory_integer(pc+i);
+   for (i=INSTRUCTION_LENGTH*1; i< INSTRUCTION_LENGTH*4; i+=INSTRUCTION_LENGTH){
+      instr =   (unsigned)(adj_read_memory_integer(pc+i));
       if( (instr & 0xFFE0F801) == 0x1C401801) {    /* st.l fp,X(sp) */
          
          fp_off = SIGN_EXT16(((instr&0x001F0000) >> 5) | 
@@ -557,17 +149,16 @@ find_fp_offset(pc)
 }
 
 /* return the stack offset where r1 (return linkage ) register is stored */
-
-find_r1_offset(pc)
+static int find_r1_offset(pc)
+CORE_ADDR pc;
 {
    int r1_off,i;
-   long	instr;
+   CORE_ADDR	instr;
    
    /* look for the instruction and examine the offset */
    
-   for(i=4; i<16; i+=4){
-      
-      instr = adj_read_memory_integer(pc+i);
+   for (i=INSTRUCTION_LENGTH*1; i< INSTRUCTION_LENGTH*4; i+=INSTRUCTION_LENGTH){
+      instr = (unsigned)( adj_read_memory_integer(pc+i));
       if ((instr & 0xFFE0F801) == 0x1C400801) { /* st.l r1,X(sp) */
          
          r1_off = SIGN_EXT16(((instr&0x001F0000) >> 5) | 
@@ -578,77 +169,35 @@ find_r1_offset(pc)
    return(-1);
 }
 
+CORE_ADDR skip_prologue(CORE_ADDR);
 
-/* dose routine starting at pc build a stack frame of any kind?? */
-has_a_frame(pc)
+/* does routine starting at pc build a stack frame of any kind?? */
+static int has_a_frame(pc)
+CORE_ADDR pc;
 {
    if( skip_prologue(pc) != pc )return(1);
    else return(0);
 }
 
-/* get the frame pointer of the caller.
- * note that only routines that have been compiled with
- * -g have full (XX)fp style stack frames
- * if we are not returning to a non -g caller then we
- * return the sp at entry to us as it is the caller's
- * frame reference.
- */
 
-frame_chain(thisframe)
-     FRAME thisframe;
+/* written by Peggy Fieland Margaret_Fieland@vos.stratus.com
+   Routine to validate the return register and the frame pointer
+   This routine is called when the routine we are in doesn't have a frame
+   In that case, we assume that the return address and frame pointer have 
+   not been touched.  In the following routine, we try to range check them 
+  to see if they are valid. */
+
+static int valid_regs (rp, fp)
+CORE_ADDR rp, fp;
 {
-   unsigned long fp, sp, pc;
-   unsigned long func_start;
-   long instr;
-   int offset;
-   unsigned long thisfp = thisframe->frame;
-   
-   /* get the frame pointer actually sp for  a non -g
-    * for the routine that called us routine 
-    */
-   
-   BTDEBUG("FRAME_CHAIN(%x)\n",thisframe);
-   
-   if ( !read_memory_integer (thisframe->frame,4))
-      {
-         return (0);
-      }
-   
-   if( ! g_routine(thisframe->pc) ){
-      BTDEBUG( "non g at %x\n",thisframe->pc);
-      caller_pc(thisframe->pc,thisframe->sp,&pc,&fp);
-      BTDEBUG("caller_pc returned %x %x \n",pc,fp);
-      return(fp);
-      
-   }/* else a -g routine */
-   
-   
-   fp = read_memory_integer (thisfp, 4);
-   
-   if (fp < thisfp || fp > STACK_END_ADDR)
-      {
-         /* handle the Metaware-type pseudo-frame */
-         
-         func_start = get_pc_function_start(thisframe->pc);
-         
-         if (func_start)
-            {
-               
-               instr = adj_read_memory_integer (func_start);
-               /* Recognize "addu|adds -X,sp,sp" insn. */
-               if ((instr & 0xEFFF0000) == 0x84420000)
-                  offset = SIGN_EXT16(instr & 0x0000FFFF);
-               
-            }
-         
-         fp = 0;
-         if (offset < 0)
-            fp = thisfp - offset;
-      }
-   BTDEBUG("frame_chain returned %d\n",fp);
-   return(fp);
+   if ( ( (rp % 4) != 0) | ( (fp % 16) != 0) )
+      return (0);
+   else 
+      return (1);
 }
 
+
+  
 /* get the pc and frame pointer (or sp )
  * for the routine that called us
  * when we (this_pc) is not within a  -g routine
@@ -656,14 +205,14 @@ frame_chain(thisframe)
  */
 
 /* note this is written for Metaware version R2.1d compiler */
-
-caller_pc(this_pc,this_sp,to_pc,to_fp)
-     int * to_pc, *to_fp;
-     unsigned long this_pc,this_sp;
+/* Modified by Peggy Fieland Margaret_Fieland@vos.stratus.com */
+static int caller_pc(this_pc,this_sp,to_pc,to_fp)
+     CORE_ADDR this_pc,this_sp;
+     CORE_ADDR *to_pc, *to_fp;
 {
-   unsigned long func_start;
+   CORE_ADDR func_start;
    int sp_offset,offset;
-   unsigned long sp,pc,fp,instr;
+   CORE_ADDR sp,pc,fp,instr;
    
    BTDEBUG("caller_pc %x sp = %x\n",this_pc,this_sp);
    
@@ -671,7 +220,7 @@ caller_pc(this_pc,this_sp,to_pc,to_fp)
 
    BTDEBUG("caller_pc func_start %x\n", func_start);
 
-   if (func_start)
+   if (func_start!= NULL)
       {
          if( has_a_frame(func_start) ){
       
@@ -681,13 +230,34 @@ caller_pc(this_pc,this_sp,to_pc,to_fp)
              * declares space for a stack frame
              * then we must work to find our return address
              */
-            instr = adj_read_memory_integer (func_start);
+            instr = (unsigned)( adj_read_memory_integer (func_start));
             /* Recognize "addu|adds -X,sp,sp" insn. */
       
             if ((instr & 0xEFFF0000) == 0x84420000)
                sp_offset=SIGN_EXT16(instr&0x0000FFFF);
          }
-         else 	{ printf("error frame_chain\n");return(0); }
+         else 	
+            { 
+               /* if we get here, procedure doesn't have a frame.  If we didn't
+                  do anything weird, the frame pointer and return register have
+                  the values we want.  Check them to see if they are valid. */
+                  
+               CORE_ADDR temp_rp, temp_fp;
+
+               temp_rp = read_register(RP_REGNUM);
+               temp_fp = read_register(FP_REGNUM);
+
+               if (!valid_regs(temp_rp, temp_fp))
+                  {           
+                     printf("error frame_chain\n");
+                     return(0);
+                  }
+               BTDEBUG("caller_pc no frame, using r1 %x and fp %x\n",
+                       temp_rp, temp_fp);
+               *to_pc = temp_rp;
+               *to_fp = temp_fp;
+               return (1);
+            }
       
       BTDEBUG("sp_offset = %d %x\n",sp_offset,sp_offset);
       
@@ -698,7 +268,7 @@ caller_pc(this_pc,this_sp,to_pc,to_fp)
                 func_start);
          return(0);
       }
-      pc = read_memory_integer(this_sp+offset,4);
+      pc = read_memory_integer(this_sp+offset,sizeof(long));
       sp= this_sp - sp_offset;
       
       BTDEBUG("callers pc = %x sp = %x\n",pc,sp);
@@ -718,7 +288,7 @@ caller_pc(this_pc,this_sp,to_pc,to_fp)
          }
          BTDEBUG("offset = %x %d\n",offset,offset);
          
-         fp = read_memory_integer(this_sp+offset,4);
+         fp = read_memory_integer(this_sp+offset,sizeof(long));
          *to_pc = CLEAN_PC(pc);
          *to_fp = fp;
          return(1);
@@ -728,145 +298,29 @@ caller_pc(this_pc,this_sp,to_pc,to_fp)
       return(1);
    } else {
 /*      pc = read_register(RP_REGNUM); */
-      pc = 0; 
-      BTDEBUG("read_register pc %x\n",pc);
-      if( g_routine(pc) ){
-         
-         *to_pc = CLEAN_PC(pc);
-         *to_fp = read_register(FP_REGNUM);
-         return(1);
-      }else  {
-         *to_pc = CLEAN_PC(pc);
-         *to_fp = this_sp;
-         return(1);
-      }
+/*       pc = 0;  */
+      /* if we get here, procedure doesn't have a frame.  If we didn't
+         do anything weird, the frame pointer and return register have
+         the values we want.  Check them to see if they are valid. */
+                  
+      CORE_ADDR temp_rp, temp_fp;
+      
+      temp_rp = read_register(RP_REGNUM);
+      temp_fp = read_register(FP_REGNUM);
+      
+      if (!valid_regs(temp_rp, temp_fp))
+         {           
+            printf("error frame_chain\n");
+            return(0);
+         }
+      BTDEBUG("caller_pc no frame, using r1 %x and fp %x\n",
+              temp_rp, temp_fp);
+      *to_pc = temp_rp;
+      *to_fp = temp_fp;
+      return (1);
    }
 }
 
-int outside_startup_file();
-
-/* get the PC of the caller */
-frame_saved_pc(frame_struct)
-FRAME frame_struct;
-{
-     unsigned long frame;
-     unsigned long pc;
-     unsigned long pc1;
-     unsigned long sp;
-
-     CORE_ADDR fp;
-     
-     CORE_ADDR rp;
-
-     frame = frame_struct->frame;
-     pc = frame_struct->pc;
-     BTDEBUG("frame_saved_pc input: frame %x, pc %x, sp %x ",
-           frame, pc, sp);
-
-     /* First see if this is the current frame. If it is, return the value in r1,
-        as it may not have been stored */
-
-     fp = read_register(FP_REGNUM);
-
-     /* check to see if we are in an entry sequence, where the return pointer has not yet been stored */
-     if (fp == frame &&  no_stored_rp(pc))
-        {
-           pc = read_register(RP_REGNUM);
-           frame_struct->rp = pc;
-        }
-     else if( ! g_routine(pc) )
-        {
-           caller_pc(pc,sp,&pc,&frame);
-        }
-     else 
-        {
-           
-           pc = read_memory_integer (frame + 4, 4); 
-   
-           if (!outside_startup_file(pc))
-              {
-                 
-                 BTDEBUG("pc %x outside startup file \n",pc);
-
-                 pc1 = read_memory_integer (frame, 4);
-               
-                 if (outside_startup_file(pc1))
-                    pc = pc1;
-                 else
-                    pc = 0;
-              }
-        } 
-     BTDEBUG(" returning pc %x\n", CLEAN_PC(pc));
-     return(CLEAN_PC(pc));
-
-  }
-
-/* Pass arguments to a function in the inferior process - ABI compliant
- */
-
-pass_function_arguments(args, nargs, struct_return)
-     value *args;
-     int nargs;
-     int struct_return;
-{
-   int ireg = (struct_return) ? 17 : 16;
-   int freg = FP0_REGNUM + 8;
-   int i;
-   struct type *type;
-   value arg;
-   long tmp;
-   value value_arg_coerce();
-   
-   
-   for (i = 0; i < nargs; i++) 
-      {
-         arg = value_arg_coerce(args[i]);
-         type = VALUE_TYPE(arg);
-         if (type == builtin_type_double) 
-            {
-               write_register_bytes(REGISTER_BYTE(freg), VALUE_CONTENTS(arg), 8);
-               freg += 2;
-            }
-         else
-            {
-               bcopy(VALUE_CONTENTS(arg), &tmp, 4);
-               write_register(ireg, tmp);
-               ireg++;
-            }
-      }
-   if (ireg >= 28 || freg >= FP0_REGNUM + 16)
-      error("Too many arguments to function");
-}
-
-
-#define SPACES		"       "
-#define P_SPACES	"   "
-#define BYTE 0xff
-
-int screen_lines=24;
-
-char *spec_reg[] = {
-   "fsr", "db", "dirbase", "fir", "psr", "epsr",
-};
-
-char *doro_reg[] = {
-   "scp", "cbsp", "pt_cs", "intmsk", "intack",
-};
-#define NREGS 32
-
-
-get_reg(regno)
-{
-   char raw_buffer[32];
-   int addr;
-   int virtual_buffer;
-   
-   read_relative_register_raw_bytes (regno, raw_buffer);
-   REGISTER_CONVERT_TO_VIRTUAL (addr, raw_buffer, &virtual_buffer);
-   return(virtual_buffer);
-}
-
-int jhdebug = 0;
 /*
  ** Figure out address to place next breakpoint. Avoid tricky spots, 
  **	ie. delayed instruction slots etc.
@@ -876,13 +330,14 @@ int jhdebug = 0;
  */
 #define BIM 0x8008
 
-branch_type
+static branch_type
    place_brk (addr, mode, brk)
 CORE_ADDR addr; 
 int mode;
 struct breakpoint *brk;
 {
-   long nextadr, prevadr, instr;
+   CORE_ADDR  instr;
+   CORE_ADDR nextadr, prevadr;
    int val = not_branch;
    long offset; /* Must be signed for sign-extend */
    extern char registers[];
@@ -894,14 +349,14 @@ struct breakpoint *brk;
       {
          if (INDIM || ENDIM)
             {
-			nextadr = brk->address	 = (addr + 8);
-  			instr	= adj_read_memory_integer ((addr + 4));
+			nextadr = brk->address	 = (addr +  INSTRUCTION_LENGTH*2);
+  			instr	=  (unsigned)(adj_read_memory_integer ((addr + INSTRUCTION_LENGTH)));
 			brk->mode	= DIM;
             }
          else
             {
-			nextadr = brk->address	 = (addr + 4);
-  			instr	= adj_read_memory_integer (addr);
+			nextadr = brk->address	 = (addr + INSTRUCTION_LENGTH);
+  			instr	=  (unsigned)(adj_read_memory_integer (addr));
 			if (STDIM) 
                   brk->mode = DIM;
 			else
@@ -941,9 +396,9 @@ struct breakpoint *brk;
                else if (val == cond_d)			/* bc.t/bnc.t */
                   {
                      if ((INDIM) && !(ENDIM))
-                        prevadr = nextadr + 8;
+                        prevadr = nextadr + (2*INSTRUCTION_LENGTH);
                      else
-                        prevadr = nextadr + 4;
+                        prevadr = nextadr + INSTRUCTION_LENGTH;
                   } else {				/* bc  /bnc   */
                      if ((INDIM) && !(ENDIM))
                         prevadr = nextadr;
@@ -990,9 +445,9 @@ struct breakpoint *brk;
                                       (instr & 0x000007FF));
                if ((INDIM) && !(ENDIM))
                   {
-                     prevadr = nextadr + 8;
+                     prevadr = nextadr + 2*INSTRUCTION_LENGTH;
                   } else	{
-                     prevadr = nextadr + 4;
+                     prevadr = nextadr + INSTRUCTION_LENGTH;
                   }
                nextadr += (offset << 2);
                if (prevadr == nextadr) prevadr = 0;
@@ -1004,21 +459,22 @@ struct breakpoint *brk;
          
          if (ISDIM(FOPADR(addr)))
             {
-               if (ISDIM(FOPADR(nextadr-8)))
+               if (ISDIM(FOPADR(nextadr- INSTRUCTION_LENGTH*2)))
                   {
-                     instr	= adj_read_memory_integer(CORADR(addr-8));
+                     instr	=  (unsigned)(adj_read_memory_integer(CORADR(addr
+                                                       -(INSTRUCTION_LENGTH*2))));
                      brk->mode	= DIM;
                   } else	{
-                     instr	= adj_read_memory_integer(addr-4);
+                     instr	=  (unsigned)(adj_read_memory_integer(addr-INSTRUCTION_LENGTH));
                      brk->mode	= RIM;
                   }
             } else {
-               if (ISDIM(addr-4))
+               if (ISDIM(addr-INSTRUCTION_LENGTH))
                   {
-                     instr	= adj_read_memory_integer(addr-4);
+                     instr	=  (unsigned)(adj_read_memory_integer(addr-INSTRUCTION_LENGTH));
                      brk->mode	= BIM;
                   } else	{
-                     instr	= adj_read_memory_integer (addr-4);
+                     instr	=  (unsigned)(adj_read_memory_integer (addr-INSTRUCTION_LENGTH));
                      brk->mode	= SIM;
                   }
             }
@@ -1064,15 +520,15 @@ struct breakpoint *brk;
                                  adjust++;
                                  printf(" Breakpoint adjusted to avoid bla delay slot and multiple breakpoints\n");
                               }
-         if (adjust)
+         if (adjust != 0)
             {
                if (brk->mode == DIM)
                   {
-                     nextadr -= 8;
+                     nextadr -= INSTRUCTION_LENGTH*2;
                      nextadr = CORADR(nextadr); 
                   }
                else
-                  nextadr -=4;
+                  nextadr -= INSTRUCTION_LENGTH;
             }
          
       }
@@ -1082,7 +538,7 @@ struct breakpoint *brk;
    if (brk->mode == BIM) 
       brk->mode = SIM;
    
-   if (nextadr)
+   if (nextadr != NULL)
       {
          if (brk->mode == DIM)
             {
@@ -1094,7 +550,7 @@ struct breakpoint *brk;
             }
       }
    
-   if (prevadr)
+   if (prevadr != NULL)
       {
          brk->address1 = prevadr;
          if (brk->mode == DIM)
@@ -1111,6 +567,702 @@ struct breakpoint *brk;
    return val;
 }
 
+/* This routine checks to see if r1 has been stored into the frame between
+   the addresses prologue_start and prologue_end. Recognize stores of r1 
+   relative to both the sp and fp registers. */
+static int has_stored_r1(CORE_ADDR prologue_start, CORE_ADDR prologue_end)
+{
+   CORE_ADDR instr;
+   CORE_ADDR addr;
+   
+   BTDEBUG("has_stored_r1, prologue_start %x, prologue_end %x\n",
+           prologue_start, prologue_end);
+
+   for (addr = prologue_start; addr <= prologue_end;  addr += INSTRUCTION_LENGTH)
+      {
+   
+         instr =  (unsigned)(adj_read_memory_integer (addr));
+         if   ((instr & 0xFFE0F801) == 0x1C400801 /* st.l r1,X(sp) */
+            || (instr & 0xFFE0F801) == 0x1C600801) /* st.l r1,X(fp) */
+            return (1);
+      }
+   return 0;
+}
+/* This is used when GDB is exiting.  It gives less chance of error.*/
+
+
+/* Simulate single-step ptrace call for sun4.  Code written by Gary
+   Beihl (beihl@mcc.com).  */
+/* Modified for i860 by Jim Hanko (hanko@orc.olivetti.com) */
+
+
+static struct breakpoint brk;
+typedef char binsn_quantum[sizeof break_insn];
+
+/* Non-zero if we just simulated a single-step ptrace call.  This is
+   needed because we cannot remove the breakpoints in the inferior
+   process until after the `wait' in `wait_for_inferior'.  Used for
+   i860. */
+
+int one_stepped;
+
+/* single_step() is called just before we want to resume the inferior,
+   if we want to single-step it but there is no hardware or kernel single-step
+   support.  We find all the possible targets of the coming instruction and 
+   breakpoint them.
+
+   single_step is also called just after the inferior stops.  If we had
+   set up a simulated single-step, we undo our damage.  */
+/* Note that we don't need the parameter, but it's dictated as part of the interface. */
+void
+   single_step (signal)
+int signal;
+{
+   CORE_ADDR pc;
+   branch_type place_brk();
+   
+   pc = read_register (PC_REGNUM);
+   
+   if (!one_stepped)
+      {
+         brk.address = pc;
+         place_brk (pc, SINGLE_STEP_MODE, &brk);
+         brk.shadow_contents[0] = brk.shadow_contents[1] = 0;
+         brk.shadow_contents[2] = brk.shadow_contents[3] = 0;
+         
+         if (brk.mode == DIM)
+            {
+               if (btdebug != 0)
+                  {
+                     btdebug_message(" DIM1 -> %x : ", brk.act_addr[3]);
+                     print_insn( brk.act_addr[3], stderr);
+                     btdebug_message("\t -|-  %x : ", brk.act_addr[2]);
+                     print_insn( brk.act_addr[2], stderr);
+                     btdebug_message("\n");
+                  }
+               if (( brk.address1 != NULL))
+                  { 
+                     adj_read_memory  (brk.act_addr[2], &brk.shadow_contents[2],
+                                       INSTRUCTION_LENGTH);
+                     adj_write_memory (brk.act_addr[2], break_insn, INSTRUCTION_LENGTH);
+                     adj_read_memory  (brk.act_addr[3], &brk.shadow_contents[3],
+                                       INSTRUCTION_LENGTH);
+                     /*		adj_write_memory (brk.act_addr[3], float_insn,
+                              INSTRUCTION_LENGTH); */
+                     
+                  }
+               if (btdebug != 0)
+                  {
+                     if ( brk.address1 != 0)
+                        btdebug_message(" DIM2 ->");
+                     else
+                        btdebug_message(" DIM1 ->");
+               
+                     btdebug_message(" %x : ", brk.act_addr[1]);
+                     print_insn( brk.act_addr[1], stderr);
+                     btdebug_message("\t -|-  %x : ", brk.act_addr[0]);
+                     print_insn( brk.act_addr[0], stderr);
+                     btdebug_message("\n");
+                  }
+               
+               adj_read_memory  (brk.act_addr[0], &brk.shadow_contents[0],	
+                                 INSTRUCTION_LENGTH);
+               adj_write_memory (brk.act_addr[0], break_insn,
+                                 INSTRUCTION_LENGTH);
+               adj_read_memory  (brk.act_addr[1], &brk.shadow_contents[1],	
+                                 INSTRUCTION_LENGTH);
+               /*		adj_write_memory (brk.act_addr[1], float_insn,
+                                 INSTRUCTION_LENGTH); */
+               
+            } 
+         else	{
+            if (brk.address1 != NULL)
+               {
+                  if (btdebug)
+                     {
+                        btdebug_message(" SIM1 ->");
+                        btdebug_message(" %x : ", brk.act_addr[2]);
+                        print_insn( brk.act_addr[2], stderr);
+                        btdebug_message("\n");
+                     }
+                  adj_read_memory  (brk.act_addr[2], &brk.shadow_contents[2],
+                                    INSTRUCTION_LENGTH);
+                  adj_write_memory (brk.act_addr[2], break_insn, INSTRUCTION_LENGTH);
+               }
+            if (btdebug)
+               {
+                  if ( brk.address1 != NULL)
+                     btdebug_message(" SIM2 ->");
+                  else
+                     btdebug_message(" SIM1 ->");
+                  
+                  btdebug_message(" %x : ", brk.act_addr[0]);
+                  print_insn( brk.act_addr[0], stderr);
+                  btdebug_message("\n");
+               }
+            adj_read_memory  (brk.act_addr[0], &brk.shadow_contents[0],
+                              INSTRUCTION_LENGTH);
+            adj_write_memory (brk.act_addr[0], break_insn,INSTRUCTION_LENGTH);
+         }
+         
+         /* Let it go */
+         one_stepped = 1;
+         return;
+      }
+   else
+      {
+         /* Remove breakpoints */
+         if (brk.mode == DIM)
+            {
+               adj_write_memory (brk.act_addr[0], &brk.shadow_contents[0],
+                                 INSTRUCTION_LENGTH);
+               adj_write_memory (brk.act_addr[1], &brk.shadow_contents[1],
+                                 INSTRUCTION_LENGTH);
+            } else	{
+               adj_write_memory (brk.act_addr[0], &brk.shadow_contents[0],
+                                 INSTRUCTION_LENGTH);
+            }
+         
+         if (brk.address1 != NULL)
+            {
+               if (brk.mode == DIM)
+                  {
+                     adj_write_memory (brk.act_addr[2], &brk.shadow_contents[2], 
+                                 INSTRUCTION_LENGTH);
+                     adj_write_memory (brk.act_addr[3], &brk.shadow_contents[3],
+                                 INSTRUCTION_LENGTH);
+                  } else	{
+                     adj_write_memory (brk.act_addr[2], &brk.shadow_contents[2], 
+                                 INSTRUCTION_LENGTH);
+                  }
+            }
+         one_stepped = 0;
+      }
+}
+
+
+
+/* Written for i860 by Jim Hanko (hanko@orc.olivetti.com) */
+/* This code was based on SPARC code written by Gary Beihl (beihl@mcc.com),
+   by Michael Tiemann (tiemann@corto.inria.fr).  */
+/* This routine returns the first memory address following the prologue code,
+   if there is a prologue. */
+
+struct command_line *get_breakpoint_commands ();
+
+CORE_ADDR 
+   skip_prologue (pc)
+CORE_ADDR pc;
+{
+   CORE_ADDR instr;
+   int regno;
+   
+   instr =  (unsigned)(adj_read_memory_integer (pc));
+   
+   /* Recognize "addu|adds -X,sp,sp" insn. */
+   if ((instr & 0xEFFF0000) == 0x84420000)
+      {
+         pc += INSTRUCTION_LENGTH;
+         instr =  (unsigned)(adj_read_memory_integer (pc));
+      }
+   else
+      return(pc);					/* No frame! */
+   
+   /* Recognize store of return addr and frame pointer into frame */
+   for (; ;)
+      {
+         if ((instr & 0xFFE0F801) == 0x1C400801 ||  /* st.l r1,X(sp) */
+             (instr & 0xFFE0F801) == 0x1C401801)    /* st.l fp,X(sp) */
+            {
+               pc += INSTRUCTION_LENGTH;
+               instr =  (unsigned)(adj_read_memory_integer (pc));
+            }
+         else
+            break;
+      }
+   
+   /* Recognize "addu|adds X,sp,fp" insn. */
+   if ((instr & 0xEFFF0000) == 0x84430000)
+      {
+         pc += INSTRUCTION_LENGTH;
+         instr =  (unsigned)(adj_read_memory_integer (pc));
+      }
+   
+   /* Now recognize stores into the frame from the registers. */
+   
+   for (; ;)
+      {
+         if ((instr & 0xFFA00003) == 0x1C200001 ||	/* st.l rn,X(fp|sp) */
+             (instr & 0xFFA00001) == 0x4C200000)	/* fst.y fn,X(fp|sp) */
+            {
+               regno = (instr >> 11) & 0x1f;
+               if (regno == 0)			/* source reg == 0? quit */
+                  break;
+               pc += INSTRUCTION_LENGTH;
+               instr =  (unsigned)(adj_read_memory_integer (pc));
+            }
+         else
+            break;
+      }
+   
+   return(pc);
+}
+
+#if 0
+/* This routine is uncalled.  Remove it sometime. */
+/* Set *nextpc to branch target if we find a branch.  If it is not a branch, 
+   set it to the next instruction (addr + 4) */
+
+
+branch_type
+   isabranch (addr,  nextpc)
+CORE_ADDR addr, *nextpc;
+{
+   CORE_ADDR instr;
+   branch_type val = not_branch;
+   long offset; /* Must be signed for sign-extend */
+   
+   BTDEBUG(" isabranch\n");
+   *nextpc = addr;
+   instr =  (unsigned)(adj_read_memory_integer (addr));
+   
+   if ((instr & 0xE0000000) == 0x60000000 &&		/* CTRL format */
+       (instr & 0xF8000000) != 0x60000000)		/* not pfld.y  */
+      {
+         if ((instr & 0xF8000000) == 0x68000000)		/* br or call */
+            val = uncond_d;
+         else if ((instr & 0xF4000000) == 0x74000000)	/* bc.t or bnc.t */
+            val = cond_d;
+         else if ((instr & 0xF4000000) == 0x70000000)	/* bc or bnc */
+            val = cond;
+         
+         offset = (instr & 0x03ffffff);
+         if (offset & 0x02000000)	/* sign extend? */
+            offset |= 0xFC000000;
+         *nextpc = addr + 4 + (offset << 2);
+      }
+   else if ((instr & 0xFC00003F) == 0x4C000002 ||	/* calli */
+            (instr & 0xFC000000) == 0x40000000)		/* bri */
+      {
+         val = uncond_d;
+         offset = ((instr & 0x0000F800) >> 11);
+         *nextpc = (read_register(offset) & 0xFFFFFFFC);
+      }
+   else if ((instr & 0xF0000000) == 0x50000000)		/* bte or btne */
+      {
+         val = cond;
+         
+         offset = SIGN_EXT16(((instr & 0x001F0000) >> 5)  | (instr & 0x000007FF));
+         *nextpc = addr + 4 + (offset << 2);
+      }
+   else if ((instr & 0xFC000000) == 0xB4000000)         /* bla */
+      {
+         val = cond_d;
+         
+         offset = SIGN_EXT16(((instr & 0x001F0000) >> 5)  | (instr & 0x000007FF));
+         *nextpc = addr + 4 + (offset << 2);
+      }
+   
+   BTDEBUG(" Final addr - %x\n", *nextpc);
+   /*BTDEBUG("isabranch ret: %d\n",val); */
+   return val;
+}
+#endif
+
+/* set in call_function() [valops.c] to the address of the "call dummy" code
+   so dummy frames can be easily recognized; also used in wait_for_inferior() 
+   [infrun.c]. When not used, it points into the ABI's 'reserved area' */
+
+CORE_ADDR call_dummy_set = 0;	/* true if dummy call being done */
+CORE_ADDR call_dummy_start;	/* address of call dummy code */
+
+/* this routine routine gets the values of the registers stored in the frame
+   and stores their values into the frame_saved_regs structure. */
+
+void 
+frame_find_saved_regs(frame_info, frame_saved_regs)
+     struct frame_info *frame_info;
+     struct frame_saved_regs *frame_saved_regs;
+{
+   register CORE_ADDR pc;
+   CORE_ADDR instr;
+   long offset, spdelta = 0;
+   int i, size, reg;
+   int r1_off = -1, fp_off = -1;
+   int framesize;
+   
+   bzero (frame_saved_regs, sizeof(*frame_saved_regs));
+   
+   if (call_dummy_set && frame_info->pc >= call_dummy_start && 
+       frame_info->pc <= call_dummy_start + CALL_DUMMY_LENGTH)
+      {
+         /* DUMMY frame - all registers stored in order at fp; old sp is
+            at fp + NUM_REGS*4 */
+         
+         for (i = 1; i < NUM_REGS; i++) /* skip reg 0 */
+            if (i != SP_REGNUM && i != FP0_REGNUM && i != FP0_REGNUM + 1)
+               /* the register numbers used in the instruction and the ones used to index
+                  the regs array are not the same -- compensate */
+               frame_saved_regs->regs[i+R0] = frame_info->frame + i*REGISTER_LENGTH;
+         
+         frame_saved_regs->regs[SP_REGNUM] = frame_info->frame + NUM_REGS*REGISTER_LENGTH;
+         
+         call_dummy_set = 0;
+         return;
+      }
+   
+   pc = get_pc_function_start (frame_info->pc); 
+   if (pc != NULL)
+      {
+         instr =  (unsigned)(adj_read_memory_integer (pc));
+         /* Recognize "addu|adds -X,sp,sp" insn. */
+         if ((instr & 0xEFFF0000) == 0x84420000)
+            {
+               framesize = -SIGN_EXT16(instr & 0x0000FFFF);
+               pc += INSTRUCTION_LENGTH;
+               instr =  (unsigned)(adj_read_memory_integer (pc));
+            }
+      }
+   else
+      goto punt;					/* No frame! */
+   
+   /* Recognize store of return addr and frame pointer into frame */
+   for (; ;)
+      {
+         if ((instr & 0xFFE0F801) == 0x1C400801)  /* st.l r1,X(sp) */
+            {
+               r1_off = SIGN_EXT16(((instr&0x001F0000) >> 5) | (instr&0x000007FE));
+               pc += INSTRUCTION_LENGTH;
+               instr =  (unsigned)(adj_read_memory_integer (pc));
+            }
+         else if ((instr & 0xFFE0F801) == 0x1C401801)    /* st.l fp,X(sp) */
+            {
+               fp_off = SIGN_EXT16(((instr&0x001F0000) >> 5) | (instr&0x000007FE));
+               pc += INSTRUCTION_LENGTH;
+               instr =  (unsigned)(adj_read_memory_integer (pc));
+            }
+         else
+            break;
+      }
+   
+   /* Recognize "addu|adds X,sp,fp" insn. */
+   if ((instr & 0xEFFF0000) == 0x84430000)
+      {
+         spdelta = SIGN_EXT16(instr & 0x0000FFFF);
+         pc += INSTRUCTION_LENGTH;
+         instr =  (unsigned)(adj_read_memory_integer (pc));
+      }
+   
+   /* Now recognize stores into the frame from the registers. */
+   
+   for (; ;)
+      {
+         if ((instr & 0xFFC00003) == 0x1C400001)	/* st.l rn,X(fp|sp) */
+            {
+               offset = SIGN_EXT16(((instr&0x001F0000) >> 5) | (instr&0x000007FE));
+               reg = (instr >> 11) & 0x1F;
+               if (reg == 0)
+                  break;
+               if ((instr & 0x00200000) == 0)	/* was this using sp? */
+                  if (spdelta != 0)			/* and we know sp-fp delta */
+                     offset -= spdelta;		/* if so, adjust the offset */
+                  else
+                     break;				/* if not, give up */
+               
+               
+               /* Handle the case where the return address is stored after the fp 
+                  is adjusted */
+               
+               if (reg == 1)
+                  frame_saved_regs->regs[PC_REGNUM] = frame_info->frame + offset;
+               else
+                  frame_saved_regs->regs[reg+R0] = frame_info->frame + offset;
+               
+               pc +=  INSTRUCTION_LENGTH;
+               instr =  (unsigned)(adj_read_memory_integer (pc));
+            }
+         else if ((instr & 0xFFC00001) == 0x2C400000) /* fst.y fn,X(fp|sp) */
+            {
+               /*
+                * The number of words in a floating store based on 3 LSB of instr
+                */
+               static int fst_sizes[] = {2, 0, 1, 0, 4, 0, 1, 0};
+               
+               size = fst_sizes[instr & 7];
+               reg = ((instr >> 16) & 0x1F) + FP0_REGNUM;
+               if (reg == 0)
+                  break;
+               
+               if (size > 1)					/* align the offset */
+                  offset = SIGN_EXT16(instr & 0x0000FFF8);	/* drop 3 bits */
+               else
+                  offset = SIGN_EXT16(instr & 0x0000FFFC);	/* drop 2 bits */
+               
+               if ((instr & 0x00200000) == 0)	/* was this using sp? */
+                  if (spdelta != 0)			/* and we know sp-fp delta */
+                     offset -= spdelta;		/* if so, adjust the offset */
+                  else
+                     break;				/* if not, give up */
+               
+               for (i = 0; i < size; i++)
+                  {
+                     frame_saved_regs->regs[reg] = frame_info->frame + offset;
+                     
+                     offset +=  REGISTER_LENGTH;
+                     reg++;
+                  }
+               
+               pc +=  INSTRUCTION_LENGTH;
+               instr =  (unsigned)(adj_read_memory_integer (pc));
+            }
+         else
+            break;
+      }
+   
+   punt: ;
+   if (framesize != 0 && spdelta != 0)
+      frame_saved_regs->regs[SP_REGNUM] = frame_info->frame+(framesize-spdelta);
+   else
+      frame_saved_regs->regs[SP_REGNUM] = frame_info->frame + 8;
+   
+   if ((spdelta != 0) && fp_off != -1)
+      frame_saved_regs->regs[FP_REGNUM] = frame_info->frame - spdelta + fp_off;
+   else
+      frame_saved_regs->regs[FP_REGNUM] = frame_info->frame;
+   
+   if ((spdelta != 0) && r1_off != -1)
+      frame_saved_regs->regs[PC_REGNUM] = frame_info->frame - spdelta + r1_off;
+   else
+      frame_saved_regs->regs[PC_REGNUM] = frame_info->frame + 4;
+}
+
+
+/* get the frame pointer of the caller.
+ * note that only routines that have been compiled with
+ * -g have full (XX)fp style stack frames
+ * if we are not returning to a non -g caller then we
+ * return the sp at entry to us as it is the caller's
+ * frame reference.
+ */
+
+frame_chain(thisframe)
+     FRAME thisframe;
+{
+   CORE_ADDR fp, pc;
+   CORE_ADDR func_start;
+   CORE_ADDR instr;
+   int offset;
+   CORE_ADDR thisfp = thisframe->frame;
+   
+   /* get the frame pointer actually sp for  a non -g
+    * for the routine that called us routine 
+    */
+   
+   BTDEBUG("FRAME_CHAIN(%x)\n",thisframe);
+   
+   if ( !read_memory_integer (thisframe->frame,sizeof(long)) )
+      {
+         return (0);
+      }
+   
+   if( ! g_routine(thisframe->pc) ){
+      BTDEBUG( "non g at %x\n",thisframe->pc);
+      caller_pc(thisframe->pc,thisframe->sp,&pc,&fp);
+      BTDEBUG("caller_pc returned %x %x \n",pc,fp);
+      return(fp);
+      
+   }/* else a -g routine */
+   
+   
+   fp = read_memory_integer (thisfp, sizeof(long));
+   
+   if (fp < thisfp || fp > (unsigned) STACK_END_ADDR)
+      {
+         /* handle the Metaware-type pseudo-frame */
+         
+         func_start = get_pc_function_start(thisframe->pc);
+         
+         if (func_start != NULL)
+            {
+               
+               instr =  (unsigned)(adj_read_memory_integer (func_start));
+               /* Recognize "addu|adds -X,sp,sp" insn. */
+               if ((instr & 0xEFFF0000) == 0x84420000)
+                  offset = SIGN_EXT16(instr & 0x0000FFFF);
+               
+            }
+         
+         fp = 0;
+         if (offset < 0)
+            fp = thisfp - offset;
+      }
+   BTDEBUG("frame_chain returned %d\n",fp);
+   return(fp);
+}
+
+/* This function returns 1 if there is no stored r1, 0 otherwise.
+   The function returns 1 if the pc is in a function prologue,
+   or the function prologue didn't save the return pointer in
+   the stack frame,  0 otherwise */
+
+int no_stored_rp(CORE_ADDR pc)
+{
+   CORE_ADDR func_start, prologue_end;
+   
+   func_start = get_pc_function_start(pc);
+   if (func_start != NULL)
+      {
+         prologue_end = func_start;
+         SKIP_PROLOGUE(prologue_end);
+         if ( (pc >= func_start) && (pc <= prologue_end))
+            {
+               BTDEBUG("no_stored_rp: pc %x is in prologue \n",pc);
+               return 1;
+            }
+         /* otherwise, see if the entry sequence stored the return pointer.
+            If it didn't, return 1 */
+         /* Some procedures , at least, store the return pointer AFTER 
+            the prologue sequence, so check for stores from function start to
+            present pc value. */
+         if (!has_stored_r1(func_start, pc))
+            {  
+               BTDEBUG("no_stored_rp, for pc %x, prologue didn't store r1\n",pc);
+               return 1;
+            }
+      }
+   BTDEBUG("no_stored_rp for pc %x return pointer was stored \n", pc);
+
+   return 0; 
+}
+
+/* get the PC of the caller */
+CORE_ADDR frame_saved_pc(frame_struct)
+FRAME frame_struct;
+{
+     CORE_ADDR frame;
+     CORE_ADDR pc;
+     CORE_ADDR pc1;
+     CORE_ADDR sp ;
+     CORE_ADDR fp;
+     
+     frame = frame_struct->frame;
+     pc = frame_struct->pc;
+     sp = frame_struct->sp;
+
+     BTDEBUG("frame_saved_pc input: frame %x, pc %x",
+           frame, pc);
+
+     /* First see if this is the current frame. If it is, return the value in r1,
+        as it may not have been stored */
+
+     fp = read_register(FP_REGNUM);
+
+     /* check to see if we are in an entry sequence, where the return pointer has not yet been stored */
+     if (fp == frame &&  no_stored_rp(pc))
+        {
+           pc = read_register(RP_REGNUM);
+           frame_struct->rp = pc;
+        }
+     else if( ! g_routine(pc) )
+        {
+           caller_pc(pc,sp,&pc,&frame);
+        }
+     else 
+        {
+           
+           pc = read_memory_integer (frame + 4, sizeof(long)); 
+   
+           if (!outside_startup_file(pc))
+              {
+                 
+                 BTDEBUG("pc %x outside startup file \n",pc);
+
+                 pc1 = read_memory_integer (frame, sizeof(long));
+               
+                 if (outside_startup_file(pc1))
+                    pc = pc1;
+                 else
+                    pc = 0;
+              }
+        } 
+     BTDEBUG(" returning pc %x\n", CLEAN_PC(pc));
+     return(CLEAN_PC(pc));
+
+  }
+
+/* Pass arguments to a function in the inferior process - ABI compliant
+   Note that this routine DOES NOT HANDLE memory argument lists, ie
+   it gives up if there are too many arguments to pass in registers.*/
+
+void
+pass_function_arguments(args, nargs, struct_return)
+     value *args;
+     int nargs;
+     int struct_return;
+{
+   int ireg = (struct_return) ? 17 : 16;
+   int freg = FP0_REGNUM + 8;
+   int i;
+   struct type *type;
+   value arg;
+   long tmp;
+   value value_arg_coerce();
+   
+   
+   for (i = 0; i < nargs; i++) 
+      {
+         arg = value_arg_coerce(args[i]);
+         type = VALUE_TYPE(arg);
+         if (type == builtin_type_double) 
+            {
+               write_register_bytes(REGISTER_BYTE(freg), VALUE_CONTENTS(arg), sizeof(double));
+               freg += 2;
+            }
+         else
+            {
+               bcopy(VALUE_CONTENTS(arg), &tmp, sizeof(long));
+               write_register(ireg, tmp);
+               ireg++;
+            }
+      }
+   if (ireg >= 28 || freg >= FP0_REGNUM + 16)
+      error("Too many arguments to function");
+}
+
+
+#define SPACES		"       "
+#define P_SPACES	"   "
+#define BYTE 0xff
+
+int screen_lines=24;
+
+char *spec_reg[] = {
+   "fsr", "db", "dirbase", "fir", "psr", "epsr",
+};
+
+char *doro_reg[] = {
+   "scp", "cbsp", "pt_cs", "intmsk", "intack",
+};
+#define NREGS 32
+
+#if 0
+/* This routine is uncalled -- remove this routine sometime */
+get_reg(regno)
+{
+   char raw_buffer[32];
+   int addr;
+   int virtual_buffer;
+   
+   read_relative_register_raw_bytes (regno, raw_buffer);
+   REGISTER_CONVERT_TO_VIRTUAL (addr, raw_buffer, &virtual_buffer);
+   return(virtual_buffer);
+}
+#endif
+
+
+#if 0
+/* This routine is uncalled.  Remove it sometime. */
+
 /*
  ** Figure out whether we are in a delayed slot and if so then take necessary
  **	action to resume properly - remember trap pre-empts instruction
@@ -1120,7 +1272,7 @@ int
 CORE_ADDR addr, *nextpc;
 int ss;
 {
-   long nextadr, instr;
+   CORE_ADDR nextadr, instr;
    int val = not_branch;
    long offset; /* Must be signed for sign-extend */
    
@@ -1128,24 +1280,24 @@ int ss;
       {
          if (INDIM)
             {
-			nextadr = CORADR((int)(addr + 8));
-  			instr	= adj_read_memory_integer (CORADR(addr));
+			nextadr = CORADR((int)(addr +  INSTRUCTION_LENGTH*2));
+  			instr	=  (unsigned)(adj_read_memory_integer (CORADR(addr)));
             }
          else
             {
-			nextadr = addr + 4;
-  			instr	= adj_read_memory_integer (addr);
+			nextadr = addr +  INSTRUCTION_LENGTH;
+  			instr	=  (unsigned)(adj_read_memory_integer (addr));
             }
       } else	{
          if (ISDIM(addr))
             {
 			nextadr = CORADR(addr);
-  			instr	= adj_read_memory_integer (nextadr);
+  			instr	=  (unsigned)(adj_read_memory_integer (nextadr));
             }
          else
             {
 			nextadr = addr;
-  			instr	= adj_read_memory_integer (addr);
+  			instr	=  (unsigned)(adj_read_memory_integer (addr));
             }
       }
    
@@ -1195,16 +1347,20 @@ int ss;
    *nextpc = nextadr;
    return val;
 }
+#endif
 
 extern char registers[];
 
-i860_do_registers_info(regnum,fpregs)
+/* i860-specific routine to print the register set. Note that we ALWAYS print information
+   on the floating point registers, so we ignore the parameter fpregs */
+void i860_do_registers_info(regnum,fpregs)
      int regnum;
      int fpregs;
 {
    register int i;
    unsigned int val;
    unsigned int j,k;
+   
    
    if (regnum == -1)
       printf_filtered (
@@ -1257,7 +1413,7 @@ i860_do_registers_info(regnum,fpregs)
          printf("\n Integer Registers :- \n\t");
          for (j=R0; j<=R31; j++)
             {
-               if (j != IREGS  && (j % 4 == 0)) 
+               if (j != IREGS  && (j % REGISTER_LENGTH == 0)) 
                   {
                      printf("\n\t");  fflush(stdout);
                   }
@@ -1268,7 +1424,7 @@ i860_do_registers_info(regnum,fpregs)
          printf("\n Floating Registers :- \n\t");
          for (j=F0; j<=F31; j++)
             {
-               if (j != FREGS && (j % 4 == 0)) 
+               if (j != FREGS && (j % REGISTER_LENGTH == 0)) 
                   {
                      printf("\n\t");  fflush(stdout);
                   }
@@ -1291,7 +1447,7 @@ i860_do_registers_info(regnum,fpregs)
          
          printf("\n Graphics Pipeline :- \n");
          {
-            unsigned int valh, val2,val3;
+            unsigned int valh;
             j = PSV_I1;
             bcopy (&registers[j<<2], &val, sizeof (long));
             bcopy (&registers[(j+1)<<2], &valh, sizeof (long));
@@ -1299,7 +1455,7 @@ i860_do_registers_info(regnum,fpregs)
          }
          
          printf(" Memory Load Pipeline :- \n");
-         for (j=PSV_L1; j<=PSV_L3; j+=4)
+         for (j=PSV_L1; j<=PSV_L3; j+=REGISTER_LENGTH)
             {
                unsigned int valh, val2,val3;
                bcopy (&registers[j<<2], &val, sizeof (long));
@@ -1329,67 +1485,20 @@ i860_do_registers_info(regnum,fpregs)
    
 }
 
-int has_stored_r1(CORE_ADDR prologue_start, CORE_ADDR prologue_end)
-{
-   long instr;
-   CORE_ADDR addr;
-   
-   BTDEBUG("has_stored_r1, prologue_start %x, prologue_end %x\n",
-           prologue_start, prologue_end);
 
-   for (addr = prologue_start; addr <= prologue_end;  addr += 4)
-      {
-   
-         instr = adj_read_memory_integer (addr);
-         if   ((instr & 0xFFE0F801) == 0x1C400801 /* st.l r1,X(sp) */
-            || (instr & 0xFFE0F801) == 0x1C600801) /* st.l r1,X(fp) */
-            return (1);
-      }
-   return 0;
-}
-
-/* This function returns 1 if there is no stored r1, 0 otherwise.
-   The function returns 1 if the pc is in a function prologue,
-   or the function prologue didn't save the return pointer in
-   the stack frame,  0 otherwise */
-
-int no_stored_rp(CORE_ADDR pc)
-{
-   CORE_ADDR func_start, prologue_end;
-   
-   func_start = get_pc_function_start(pc);
-   if (func_start)
-      {
-         prologue_end = func_start;
-         SKIP_PROLOGUE(prologue_end);
-         if ( (pc >= func_start) && (pc <= prologue_end))
-            {
-               BTDEBUG("no_stored_rp: pc %x is in prologue \n",pc);
-               return 1;
-            }
-         /* otherwise, see if the entry sequence stored the return pointer.
-            If it didn't, return 1 */
-         /* Some procedures , at least, store the return pointer AFTER the prologue sequence! */
-         if (!has_stored_r1(func_start, pc))
-            {  
-               BTDEBUG("no_stored_rp, for pc %x, prologue didn't store r1\n",pc);
-               return 1;
-            }
-      }
-   BTDEBUG("no_stored_rp for pc %x return pointer was stored \n", pc);
-
-   return 0; 
-}
 
 /* The following set of routines was adapted from existing code previously
    in an i860-specific version of breakpoint.c by Peggy Fieland
    (Margaret_Fieland@vos.stratus.com) */
+/* routines to set a data breakpoint by setting the value in the DB register. 
+   Note that "hitting" the breakpoint will generate a data access trap. We
+   do not have a special trap handler. */
 unsigned int dbrkval, dbrkmod;
 void i860_dbrk_breakpoint()
 {
    BTDEBUG("i860_dbrk_breakpoint was called , dbrkval %x\n", dbrkval);
    
-   if (dbrkval)
+   if (dbrkval != 0)
       {
          *(int *)&registers[DB<<2] = dbrkval;
       }
@@ -1406,33 +1515,37 @@ void i860_dbrk_breakpoint()
 
 }
 
+/* set a "read" data breakpoint. */
 void
 d_ro_break_command(arg)
 char *arg;
 {
 	dbrkval = strtoul(arg, NULL, 0);
 	dbrkmod = 0x01;
-printf(" ro_dbreak - %x %x\n", dbrkval, dbrkmod);
+     BTDEBUG(" ro_dbreak - %x %x\n", dbrkval, dbrkmod);
 }
 
+/* set a "write" data breakpoint. */
 void
 d_wo_break_command(arg)
 char *arg;
 {
 	dbrkval = strtoul(arg, NULL, 0);
 	dbrkmod = 0x02;
-printf(" wo_dbreak - %x %x\n", dbrkval, dbrkmod);
+     BTDEBUG(" wo_dbreak - %x %x\n", dbrkval, dbrkmod);
 }
 
+/* set a "read/write" data breakpoint. */
 void
 d_rw_break_command(arg)
 char *arg;
 {
 	dbrkval = strtoul(arg, NULL, 0);
 	dbrkmod = 0x03;
-printf(" rw_dbreak - %x %x\n", dbrkval, dbrkmod);
+     BTDEBUG(" rw_dbreak - %x %x\n", dbrkval, dbrkmod);
 }
 
+/* clear data breakpoint. */
 void
 clear_dbreak()
 {
@@ -1440,6 +1553,8 @@ clear_dbreak()
 	dbrkmod = 0;
 }
 
+/* i860-specific breakpoint initialization.  Includes adding the i860-specific
+   data breakpoint commands. */
 void 
 i860_init_breakpoints()
 {
@@ -1456,6 +1571,7 @@ i860_init_breakpoints()
 
 }
 
+/* i860-specific code to insert a breakpoint. */
 int i860_insert_breakpoint(b)
 struct breakpoint *b;
 {
@@ -1465,37 +1581,37 @@ struct breakpoint *b;
    if (b->mode == DIM)
       {
          
-         adj_read_memory (b->act_addr[0], &b->shadow_contents[0], 4);
-         val =  adj_write_memory (b->act_addr[0], break_insn, 4);
-         if (val) return val;
-         adj_read_memory (b->act_addr[1], &b->shadow_contents[1], 4);
-         /*	val = adj_write_memory (b->act_addr[1], float_insn, 4); */
-         if (val) return val;
+         adj_read_memory (b->act_addr[0], &b->shadow_contents[0],  INSTRUCTION_LENGTH);
+         val =  adj_write_memory (b->act_addr[0], break_insn,  INSTRUCTION_LENGTH);
+         if (val != 0 ) return val;
+         adj_read_memory (b->act_addr[1], &b->shadow_contents[1],  INSTRUCTION_LENGTH);
+         /*	val = adj_write_memory (b->act_addr[1], float_insn,  INSTRUCTION_LENGTH); */
+         if (val != 0) return val;
       } 
    else	
       {
-         adj_read_memory (b->act_addr[0], &b->shadow_contents[0], 4);
-         val = adj_write_memory (b->act_addr[0], break_insn, 4);
+         adj_read_memory (b->act_addr[0], &b->shadow_contents[0],  INSTRUCTION_LENGTH);
+         val = adj_write_memory (b->act_addr[0], break_insn,  INSTRUCTION_LENGTH);
       }
-   if (b->address1)
+   if (b->address1 != 0)
       {
          if (b->mode == DIM)
             {
 
-               adj_read_memory (b->act_addr[2], &b->shadow_contents[2], 4);
-               val = adj_write_memory (b->act_addr[2], break_insn, 4);
+               adj_read_memory (b->act_addr[2], &b->shadow_contents[2],  INSTRUCTION_LENGTH);
+               val = adj_write_memory (b->act_addr[2], break_insn,  INSTRUCTION_LENGTH);
                if (val) return val;
-               adj_read_memory (b->act_addr[3], &b->shadow_contents[3], 4);
-               /*	val = adj_write_memory (b->act_addr[3], float_insn, 4); */
-               if (val) return val;
+               adj_read_memory (b->act_addr[3], &b->shadow_contents[3],  INSTRUCTION_LENGTH);
+               /*	val = adj_write_memory (b->act_addr[3], float_insn,  INSTRUCTION_LENGTH); */
+               if (val != 0) return val;
             }
          else	
             {
-               adj_read_memory (b->act_addr[2], &b->shadow_contents[0], 4);
-               val = adj_write_memory (b->act_addr[2], break_insn, 4);
+               adj_read_memory (b->act_addr[2], &b->shadow_contents[0],  INSTRUCTION_LENGTH);
+               val = adj_write_memory (b->act_addr[2], break_insn,  INSTRUCTION_LENGTH);
             }
       }
-   if (val)
+   if (val != 0)
       return val;
    BTDEBUG("Inserted breakpoint at 0x%x, shadow 0x%x, 0x%x.\n",
            b->address, b->shadow_contents[0], b->shadow_contents[1]);
@@ -1512,23 +1628,29 @@ struct breakpoint *b;
       {
          if (b->mode == DIM)
             {
-               val =adj_write_memory (b->act_addr[0], &(b->shadow_contents[0]), 4);
-               val =adj_write_memory (b->act_addr[1], &(b->shadow_contents[1]), 4);
-               if (b->address1)
+               val =adj_write_memory (b->act_addr[0], &(b->shadow_contents[0]),  
+                                      INSTRUCTION_LENGTH);
+               val =adj_write_memory (b->act_addr[1], &(b->shadow_contents[1]), 
+                                       INSTRUCTION_LENGTH);
+               if (b->address1 != NULL)
                   {
-                     val =adj_write_memory (b->act_addr[2], &(b->shadow_contents[2]), 4);
-                     val =adj_write_memory (b->act_addr[3], &(b->shadow_contents[3]), 4);
+                     val =adj_write_memory (b->act_addr[2], &(b->shadow_contents[2]), 
+                                             INSTRUCTION_LENGTH);
+                     val =adj_write_memory (b->act_addr[3], &(b->shadow_contents[3]), 
+                                             INSTRUCTION_LENGTH);
                   }
             } 
          else	
             {
-               val =adj_write_memory (b->act_addr[0], b->shadow_contents, 4);
-               if (b->address1)
+               val =adj_write_memory (b->act_addr[0], b->shadow_contents, 
+                                       INSTRUCTION_LENGTH);
+               if (b->address1 != NULL)
                   {
-                     val =adj_write_memory (b->act_addr[2], b->shadow_contents, 4);
+                     val =adj_write_memory (b->act_addr[2], b->shadow_contents,  
+                                            INSTRUCTION_LENGTH);
                   }
             }
-         if (val)
+         if (val != 0)
             return val;
          b->inserted = 0;
          BTDEBUG( "Removed breakpoint at 0x%x, shadow 0x%x, 0x%x.\n",
@@ -1613,6 +1735,11 @@ gregset_t *gregsetp;
     }
 }
 
+/*  Given a pointer to a general register set in /proc format (gregset_t *),
+    update the register specified by REGNO from gdb's idea
+    of the current general register set.  If REGNO is -1, update
+    them all. */
+
 void
 fill_gregset (gregsetp, regno)
 gregset_t *gregsetp;
@@ -1633,4 +1760,3 @@ int regno;
    }
 }
 #endif
-
