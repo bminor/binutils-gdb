@@ -4438,8 +4438,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	     unless it has been done already.  */
 	  if ((sec->flags & SEC_MERGE)
 	      && ELF_ST_TYPE (sym->st_info) == STT_SECTION
-	      && (elf_section_data (sec)->sec_info_type
-		  == ELF_INFO_TYPE_MERGE)
+	      && sec->sec_info_type == ELF_INFO_TYPE_MERGE
 	      && gotent
 	      && !gotent->reloc_xlated)
 	    {

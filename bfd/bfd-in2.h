@@ -1261,9 +1261,34 @@ typedef struct sec
   /* A mark flag used by some linker backends for garbage collection.  */
   unsigned int gc_mark : 1;
 
-  /* Used by the ELF code to mark sections which have been allocated
-     to segments.  */
+  /* The following flags are used by the ELF linker. */
+
+  /* Mark sections which have been allocated to segments.  */
   unsigned int segment_mark : 1;
+
+  /* Type of sec_info information.  */
+  unsigned int sec_info_type:3;
+#define ELF_INFO_TYPE_NONE      0
+#define ELF_INFO_TYPE_STABS     1
+#define ELF_INFO_TYPE_MERGE     2
+#define ELF_INFO_TYPE_EH_FRAME  3
+#define ELF_INFO_TYPE_JUST_SYMS 4
+
+  /* Nonzero if this section uses RELA relocations, rather than REL.  */
+  unsigned int use_rela_p:1;
+
+  /* Bits used by various backends.  */
+  unsigned int has_tls_reloc:1;
+
+  /* Usused bits.  */
+  unsigned int flag11:1;
+  unsigned int flag12:1;
+  unsigned int flag13:1;
+  unsigned int flag14:1;
+  unsigned int flag15:1;
+  unsigned int flag16:4;
+  unsigned int flag20:4;
+  unsigned int flag24:8;
 
   /* End of internal packed boolean fields.  */
 

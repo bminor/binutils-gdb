@@ -1,5 +1,5 @@
 /* ELF linker support.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1304,7 +1304,7 @@ elf_link_add_object_symbols (abfd, info)
 	 Test for --just-symbols by looking at info set up by
 	 _bfd_elf_link_just_syms.  */
       if ((s = abfd->sections) != NULL
-	  && elf_section_data (s)->sec_info_type == ELF_INFO_TYPE_JUST_SYMS)
+	  && s->sec_info_type == ELF_INFO_TYPE_JUST_SYMS)
 	goto error_return;
 
       /* Find the name to use in a DT_NEEDED entry that refers to this
@@ -2234,7 +2234,7 @@ elf_link_add_object_symbols (abfd, info)
 					     &secdata->sec_info))
 		goto error_return;
 	      if (secdata->sec_info)
-		secdata->sec_info_type = ELF_INFO_TYPE_STABS;
+		stab->sec_info_type = ELF_INFO_TYPE_STABS;
 	    }
 	}
     }
@@ -2256,7 +2256,7 @@ elf_link_add_object_symbols (abfd, info)
 				      s, &secdata->sec_info))
 	      goto error_return;
 	    else if (secdata->sec_info)
-	      secdata->sec_info_type = ELF_INFO_TYPE_MERGE;
+	      s->sec_info_type = ELF_INFO_TYPE_MERGE;
 	  }
     }
 
@@ -5916,7 +5916,7 @@ elf_link_sec_merge_syms (h, data)
   if ((h->root.type == bfd_link_hash_defined
        || h->root.type == bfd_link_hash_defweak)
       && ((sec = h->root.u.def.section)->flags & SEC_MERGE)
-      && elf_section_data (sec)->sec_info_type == ELF_INFO_TYPE_MERGE)
+      && sec->sec_info_type == ELF_INFO_TYPE_MERGE)
     {
       bfd *output_bfd = (bfd *) data;
 
@@ -6522,7 +6522,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	{
 	  isec = section_from_elf_index (input_bfd, isym->st_shndx);
 	  if (isec
-	      && elf_section_data (isec)->sec_info_type == ELF_INFO_TYPE_MERGE
+	      && isec->sec_info_type == ELF_INFO_TYPE_MERGE
 	      && ELF_ST_TYPE (isym->st_info) != STT_SECTION)
 	    isym->st_value =
 	      _bfd_merged_section_offset (output_bfd, &isec,
@@ -7015,7 +7015,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	{
 	  /* Section written out.  */
 	}
-      else switch (elf_section_data (o)->sec_info_type)
+      else switch (o->sec_info_type)
 	{
 	case ELF_INFO_TYPE_STABS:
 	  if (! (_bfd_write_section_stabs
@@ -8268,7 +8268,7 @@ elf_bfd_discard_info (output_bfd, info)
       if (stab != NULL
 	  && (stab->_raw_size == 0
 	      || bfd_is_abs_section (stab->output_section)
-	      || elf_section_data (stab)->sec_info_type != ELF_INFO_TYPE_STABS))
+	      || stab->sec_info_type != ELF_INFO_TYPE_STABS))
 	stab = NULL;
 
       if (stab == NULL
@@ -8374,7 +8374,7 @@ elf_section_ignore_discarded_relocs (sec)
 {
   struct elf_backend_data *bed;
 
-  switch (elf_section_data (sec)->sec_info_type)
+  switch (sec->sec_info_type)
     {
     case ELF_INFO_TYPE_STABS:
     case ELF_INFO_TYPE_EH_FRAME:

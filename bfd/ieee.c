@@ -1,6 +1,6 @@
 /* BFD back-end for ieee-695 objects.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    Written by Steve Chamberlain of Cygnus Support.
@@ -2074,7 +2074,7 @@ ieee_slurp_section_data (abfd)
 
   for (s = abfd->sections; s != (asection *) NULL; s = s->next)
     {
-      ieee_per_section_type *per = (ieee_per_section_type *) s->used_by_bfd;
+      ieee_per_section_type *per = ieee_per_section (s);
       if ((s->flags & SEC_DEBUGGING) != 0)
 	continue;
       per->data = (bfd_byte *) bfd_alloc (ieee->h.abfd, s->_raw_size);
@@ -2098,7 +2098,7 @@ ieee_slurp_section_data (abfd)
 	  section_number = must_parse_int (&(ieee->h));
 	  s = ieee->section_table[section_number];
 	  s->flags |= SEC_LOAD | SEC_HAS_CONTENTS;
-	  current_map = (ieee_per_section_type *) s->used_by_bfd;
+	  current_map = ieee_per_section (s);
 	  location_ptr = current_map->data - s->vma;
 	  /* The document I have says that Microtec's compilers reset */
 	  /* this after a sec section, even though the standard says not */
@@ -2192,8 +2192,8 @@ ieee_new_section_hook (abfd, newsect)
      bfd *abfd;
      asection *newsect;
 {
-  newsect->used_by_bfd = (PTR)
-    bfd_alloc (abfd, (bfd_size_type) sizeof (ieee_per_section_type));
+  newsect->used_by_bfd
+    = (PTR) bfd_alloc (abfd, (bfd_size_type) sizeof (ieee_per_section_type));
   if (!newsect->used_by_bfd)
     return FALSE;
   ieee_per_section (newsect)->data = (bfd_byte *) NULL;
@@ -2221,7 +2221,7 @@ ieee_get_section_contents (abfd, section, location, offset, count)
      file_ptr offset;
      bfd_size_type count;
 {
-  ieee_per_section_type *p = (ieee_per_section_type *) section->used_by_bfd;
+  ieee_per_section_type *p = ieee_per_section (section);
   if ((section->flags & SEC_DEBUGGING) != 0)
     return _bfd_generic_get_section_contents (abfd, section, location,
 					      offset, count);
@@ -2237,7 +2237,6 @@ ieee_canonicalize_reloc (abfd, section, relptr, symbols)
      arelent **relptr;
      asymbol **symbols;
 {
-/*  ieee_per_section_type *p = (ieee_per_section_type *) section->used_by_bfd;*/
   ieee_reloc_type *src = (ieee_reloc_type *) (section->relocation);
   ieee_data_type *ieee = IEEE_DATA (abfd);
 

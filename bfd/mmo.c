@@ -1,5 +1,5 @@
 /* BFD back-end for mmo objects (MMIX-specific object-format).
-   Copyright 2001, 2002
+   Copyright 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Hans-Peter Nilsson (hp@bitrange.com).
    Infrastructure and other bits originally copied from srec.c and
@@ -334,6 +334,9 @@ struct mmo_section_data_struct
     mmo_data_list_type *head;
     mmo_data_list_type *tail;
   };
+
+#define mmo_section_data(sec) \
+  ((struct mmo_section_data_struct *) (sec)->used_by_bfd)
 
 /* These structures are used in bfd_map_over_sections constructs.  */
 
@@ -1177,12 +1180,11 @@ mmo_get_spec_section (abfd, spec_data_number)
     }
 
   loc->next = NULL;
-  if (((struct mmo_section_data_struct *) (sec->used_by_bfd))->tail != NULL)
-    ((struct mmo_section_data_struct *) (sec->used_by_bfd))->tail->next
-      = loc;
+  if (mmo_section_data (sec)->tail != NULL)
+    mmo_section_data (sec)->tail->next = loc;
   else
-    ((struct mmo_section_data_struct *) (sec->used_by_bfd))->head = loc;
-  ((struct mmo_section_data_struct *) (sec->used_by_bfd))->tail = loc;
+    mmo_section_data (sec)->head = loc;
+  mmo_section_data (sec)->tail = loc;
   loc->where = section_vma;
 
   return sec;
@@ -1517,8 +1519,7 @@ mmo_get_loc (sec, vma, size)
      int size;
 {
   bfd_size_type allocated_size;
-  struct mmo_section_data_struct *sdatap
-    = (struct mmo_section_data_struct *) sec->used_by_bfd;
+  struct mmo_section_data_struct *sdatap = mmo_section_data (sec);
   struct mmo_data_list_struct *datap = sdatap->head;
   struct mmo_data_list_struct *entry;
 
@@ -2463,15 +2464,9 @@ mmo_internal_write_section (abfd, sec)
 
   if (strcmp (sec->name, MMO_TEXT_SECTION_NAME) == 0)
     /* FIXME: Output source file name and line number.  */
-    return
-      mmo_write_loc_chunk_list (abfd,
-				((struct mmo_section_data_struct *)
-				 (sec->used_by_bfd))->head);
+    return mmo_write_loc_chunk_list (abfd, mmo_section_data (sec)->head);
   else if (strcmp (sec->name, MMO_DATA_SECTION_NAME) == 0)
-    return
-      mmo_write_loc_chunk_list (abfd,
-				((struct mmo_section_data_struct *)
-				 (sec->used_by_bfd))->head);
+    return mmo_write_loc_chunk_list (abfd, mmo_section_data (sec)->head);
   else if (strcmp (sec->name, MMIX_REG_CONTENTS_SECTION_NAME) == 0)
     /* Not handled here.  */
     {
@@ -2486,9 +2481,7 @@ mmo_internal_write_section (abfd, sec)
       int n = atoi (sec->name + strlen (MMIX_OTHER_SPEC_SECTION_PREFIX));
       mmo_write_tetra_raw (abfd, (LOP << 24) | (LOP_SPEC << 16) | n);
       return (! abfd->tdata.mmo_data->have_error
-	      && mmo_write_chunk_list (abfd,
-				       ((struct mmo_section_data_struct *)
-					(sec->used_by_bfd))->head));
+	      && mmo_write_chunk_list (abfd, mmo_section_data (sec)->head));
     }
   /* Ignore sections that are just allocated or empty; we write out
      _contents_ here.  */
@@ -2605,16 +2598,11 @@ EXAMPLE
       /* Writing a LOP_LOC ends the LOP_SPEC data, and makes data actually
 	 loaded.  */
       if (bfd_get_section_flags (abfd, sec) & SEC_LOAD)
-	  return
-	    ! abfd->tdata.mmo_data->have_error
-	    && mmo_write_loc_chunk_list (abfd,
-					 ((struct mmo_section_data_struct *)
-					  (sec->used_by_bfd))->head);
-      return
-	! abfd->tdata.mmo_data->have_error
-	&& mmo_write_chunk_list (abfd,
-				 ((struct mmo_section_data_struct *)
-				  (sec->used_by_bfd))->head);
+	return (! abfd->tdata.mmo_data->have_error
+		&& mmo_write_loc_chunk_list (abfd,
+					     mmo_section_data (sec)->head));
+      return (! abfd->tdata.mmo_data->have_error
+	      && mmo_write_chunk_list (abfd, mmo_section_data (sec)->head));
     }
   return TRUE;
 }

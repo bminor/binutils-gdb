@@ -148,7 +148,7 @@ struct _mips_elf_section_data
 };
 
 #define mips_elf_section_data(sec) \
-  ((struct _mips_elf_section_data *) (sec)->used_by_bfd)
+  ((struct _mips_elf_section_data *) elf_section_data (sec))
 
 /* This structure is passed to mips_elf_sort_hash_table_f when sorting
    the dynamic symbols.  */
@@ -4600,8 +4600,7 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
       esd->rel_hdr2 = (Elf_Internal_Shdr *) bfd_zalloc (abfd, amt);
       if (!esd->rel_hdr2)
 	return FALSE;
-      _bfd_elf_init_reloc_shdr (abfd, esd->rel_hdr2, sec,
-				!elf_section_data (sec)->use_rela_p);
+      _bfd_elf_init_reloc_shdr (abfd, esd->rel_hdr2, sec, !sec->use_rela_p);
     }
 
   return TRUE;

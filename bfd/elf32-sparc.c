@@ -2058,7 +2058,7 @@ struct elf32_sparc_section_data
 };
 
 #define sec_do_relax(sec) \
-  ((struct elf32_sparc_section_data *) (sec)->used_by_bfd)->do_relax
+  ((struct elf32_sparc_section_data *) elf_section_data (sec))->do_relax
 
 static bfd_boolean
 elf32_sparc_new_section_hook (abfd, sec)

@@ -969,11 +969,8 @@ merge_sections_remove_hook (abfd, sec)
      bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
 {
-  struct bfd_elf_section_data *sec_data;
-
-  sec_data = elf_section_data (sec);
-  BFD_ASSERT (sec_data->sec_info_type == ELF_INFO_TYPE_MERGE);
-  sec_data->sec_info_type = ELF_INFO_TYPE_NONE;
+  BFD_ASSERT (sec->sec_info_type == ELF_INFO_TYPE_MERGE);
+  sec->sec_info_type = ELF_INFO_TYPE_NONE;
 }
 
 /* Finish SHF_MERGE section merging.  */
@@ -1001,7 +998,7 @@ _bfd_elf_link_just_syms (sec, info)
   if (!is_elf_hash_table (info))
     return;
 
-  elf_section_data (sec)->sec_info_type = ELF_INFO_TYPE_JUST_SYMS;
+  sec->sec_info_type = ELF_INFO_TYPE_JUST_SYMS;
 }
 
 /* Copy the program header and other data from one object module to
@@ -2007,8 +2004,7 @@ bfd_section_from_shdr (abfd, shindex)
 	/* In the section to which the relocations apply, mark whether
 	   its relocations are of the REL or RELA variety.  */
 	if (hdr->sh_size != 0)
-	  elf_section_data (target_sect)->use_rela_p
-	    = (hdr->sh_type == SHT_RELA);
+	  target_sect->use_rela_p = hdr->sh_type == SHT_RELA;
 	abfd->flags |= HAS_RELOC;
 	return TRUE;
       }
@@ -2148,8 +2144,7 @@ _bfd_elf_new_section_hook (abfd, sec)
     }
 
   /* Indicate whether or not this section should use RELA relocations.  */
-  sdata->use_rela_p
-    = get_elf_backend_data (abfd)->default_use_rela_p;
+  sec->use_rela_p = get_elf_backend_data (abfd)->default_use_rela_p;
 
   return TRUE;
 }
@@ -2507,7 +2502,7 @@ elf_fake_sections (abfd, asect, failedptrarg)
       && !_bfd_elf_init_reloc_shdr (abfd,
 				    &elf_section_data (asect)->rel_hdr,
 				    asect,
-				    elf_section_data (asect)->use_rela_p))
+				    asect->use_rela_p))
     *failedptr = TRUE;
 }
 
@@ -5190,8 +5185,7 @@ _bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
   elf_next_in_group (osec) = elf_next_in_group (isec);
   elf_group_name (osec) = elf_group_name (isec);
 
-  elf_section_data (osec)->use_rela_p
-    = elf_section_data (isec)->use_rela_p;
+  osec->use_rela_p = isec->use_rela_p;
 
   return TRUE;
 }
@@ -7336,7 +7330,7 @@ _bfd_elf_rela_local_sym (abfd, sym, sec, rel)
 		+ sym->st_value);
   if ((sec->flags & SEC_MERGE)
       && ELF_ST_TYPE (sym->st_info) == STT_SECTION
-      && elf_section_data (sec)->sec_info_type == ELF_INFO_TYPE_MERGE)
+      && sec->sec_info_type == ELF_INFO_TYPE_MERGE)
     {
       asection *msec;
 
@@ -7361,7 +7355,7 @@ _bfd_elf_rel_local_sym (abfd, sym, psec, addend)
 {
   asection *sec = *psec;
 
-  if (elf_section_data (sec)->sec_info_type != ELF_INFO_TYPE_MERGE)
+  if (sec->sec_info_type != ELF_INFO_TYPE_MERGE)
     return sym->st_value + addend;
 
   return _bfd_merged_section_offset (abfd, psec,
@@ -7379,7 +7373,7 @@ _bfd_elf_section_offset (abfd, info, sec, offset)
   struct bfd_elf_section_data *sec_data;
 
   sec_data = elf_section_data (sec);
-  switch (sec_data->sec_info_type)
+  switch (sec->sec_info_type)
     {
     case ELF_INFO_TYPE_STABS:
       return _bfd_stab_section_offset (abfd,

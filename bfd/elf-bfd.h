@@ -229,16 +229,6 @@ struct elf_link_loaded_list
   bfd *abfd;
 };
 
-enum elf_link_info_type
-{
-  ELF_INFO_TYPE_NONE,
-  ELF_INFO_TYPE_STABS,
-  ELF_INFO_TYPE_MERGE,
-  ELF_INFO_TYPE_EH_FRAME,
-  ELF_INFO_TYPE_JUST_SYMS,
-  ELF_INFO_TYPE_LAST
-};
-
 /* Structures used by the eh_frame optimization code.  */
 struct cie_header
 {
@@ -989,29 +979,19 @@ struct bfd_elf_section_data
 
   /* A pointer used for various section optimizations.  */
   PTR sec_info;
-
-  /* Type of sec_info information.  */
-  enum elf_link_info_type sec_info_type;
-
-  /* Nonzero if this section uses RELA relocations, rather than REL.  */
-  unsigned int use_rela_p:1;
-
-  /* Nonzero when a group is COMDAT.  */
-  unsigned int linkonce_p:1;
 };
 
 #define elf_section_data(sec)  ((struct bfd_elf_section_data*)sec->used_by_bfd)
 #define elf_group_name(sec)    (elf_section_data(sec)->group.name)
 #define elf_group_id(sec)      (elf_section_data(sec)->group.id)
 #define elf_next_in_group(sec) (elf_section_data(sec)->next_in_group)
-#define elf_linkonce_p(sec)    (elf_section_data(sec)->linkonce_p)
 
 /* Return TRUE if section has been discarded.  */
-#define elf_discarded_section(sec)					\
-  (!bfd_is_abs_section(sec)						\
-   && bfd_is_abs_section((sec)->output_section)				\
-   && elf_section_data (sec)->sec_info_type != ELF_INFO_TYPE_MERGE	\
-   && elf_section_data (sec)->sec_info_type != ELF_INFO_TYPE_JUST_SYMS)
+#define elf_discarded_section(sec)				\
+  (!bfd_is_abs_section (sec)					\
+   && bfd_is_abs_section ((sec)->output_section)		\
+   && sec->sec_info_type != ELF_INFO_TYPE_MERGE			\
+   && sec->sec_info_type != ELF_INFO_TYPE_JUST_SYMS)
 
 #define get_elf_backend_data(abfd) \
   ((struct elf_backend_data *) (abfd)->xvec->backend_data)

@@ -1,3 +1,39 @@
+2003-02-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (enum elf_link_info_type): Remove.
+	(struct bfd_elf_section_data): Move sec_info_type, use_rela_p fields
+	to struct sec.  Remove linkonce_p field.
+	(elf_linkonce_p): Delete.
+	(elf_discarded_section): Update for sec_info_type change.
+	* section.c (struct sec): Add sec_info_type, use_rela_p, has_tls_reloc,
+	flag11, flag12, flag13, flag14, flag15, flag16, flag20, flag24.
+	(ELF_INFO_TYPE_NONE): Define.
+	(ELF_INFO_TYPE_STABS): Define.
+	(ELF_INFO_TYPE_MERGE): Define.
+	(ELF_INFO_TYPE_EH_FRAME): Define.
+	(ELF_INFO_TYPE_JUST_SYMS): Define.
+	(STD_SECTION): Update struct sec initializer.
+	* ecoff.c (bfd_debug_section): Likewise.
+	* elf.c: Likewise.  Update occurrences of sec_info_type and use_rela_p.
+	* elflink.h: Likewise.
+	* elf-eh-frame.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elfxx-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* bfd-in2.h: Regenerate.
+
+	* elf32-sparc.c (sec_do_relax): Use elf_section_data macro rather than
+	referring to used_by_bfd.
+	* elf64-sparc.c (sec_do_relax): Likewise.
+	* elf64-mmix.c (mmix_elf_section_data): Likewise.
+	* elfxx-mips.c (mips_elf_section_data): Likewise.
+	* ieee.c (ieee_slurp_section_data): Use ieee_per_section macro.
+	(ieee_get_section_contents): Likewise.
+	(ieee_new_section_hook): Formatting.
+	(ieee_canonicalize_reloc): Remove commented out code.
+	* mmo.c (mmo_section_data): Define.  Use throughout file.
+	* oasys.c (oasys_get_section_contents): Use oasys_per_section macro.
+
 2003-01-31  Graydon Hoare <graydon@redhat.com>
 
 	* Makefile.am (opncls.lo): Add dependency upon libiberty.h.

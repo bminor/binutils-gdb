@@ -1,5 +1,5 @@
 /* .eh_frame section optimization.
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
    Written by Jakub Jelinek <jakub@redhat.com>.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -605,7 +605,7 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec,
     }
 
   elf_section_data (sec)->sec_info = sec_info;
-  elf_section_data (sec)->sec_info_type = ELF_INFO_TYPE_EH_FRAME;
+  sec->sec_info_type = ELF_INFO_TYPE_EH_FRAME;
 
   /* Ok, now we can assign new offsets.  */
   offset = 0;
@@ -758,7 +758,7 @@ _bfd_elf_eh_frame_section_offset (output_bfd, sec, offset)
   struct eh_frame_sec_info *sec_info;
   unsigned int lo, hi, mid;
 
-  if (elf_section_data (sec)->sec_info_type != ELF_INFO_TYPE_EH_FRAME)
+  if (sec->sec_info_type != ELF_INFO_TYPE_EH_FRAME)
     return offset;
   sec_info = (struct eh_frame_sec_info *)
 	     elf_section_data (sec)->sec_info;
@@ -828,7 +828,7 @@ _bfd_elf_write_section_eh_frame (abfd, info, sec, contents)
   ptr_size = (elf_elfheader (sec->owner)->e_ident[EI_CLASS]
 	      == ELFCLASS64) ? 8 : 4;
 
-  if (elf_section_data (sec)->sec_info_type != ELF_INFO_TYPE_EH_FRAME)
+  if (sec->sec_info_type != ELF_INFO_TYPE_EH_FRAME)
     return bfd_set_section_contents (abfd, sec->output_section,
 				     contents,
 				     (file_ptr) sec->output_offset,

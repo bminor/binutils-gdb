@@ -755,11 +755,12 @@ obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
       if (type == SHT_NOBITS)
         seg_info (sec)->bss = 1;
 
+      if (linkonce)
+	flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
       bfd_set_section_flags (stdoutput, sec, flags);
       if (flags & SEC_MERGE)
 	sec->entsize = entsize;
       elf_group_name (sec) = group_name;
-      elf_linkonce_p (sec) = linkonce;
 
       /* Add a symbol for this section to the symbol table.  */
       secsym = symbol_find (name);
@@ -776,8 +777,8 @@ obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
       if (((old_sec->flags ^ flags)
 	   & (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
 	      | SEC_EXCLUDE | SEC_SORT_ENTRIES | SEC_MERGE | SEC_STRINGS
-	      | SEC_THREAD_LOCAL))
-	  || linkonce != elf_linkonce_p (sec))
+	      | SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD
+	      | SEC_THREAD_LOCAL)))
 	as_warn (_("ignoring changed section attributes for %s"), name);
       if ((flags & SEC_MERGE) && old_sec->entsize != (unsigned) entsize)
 	as_warn (_("ignoring changed section entity size for %s"), name);
@@ -2037,7 +2038,7 @@ elf_frob_file ()
 
       flags = SEC_READONLY | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_GROUP;
       for (s = list.head[i]; s != NULL; s = elf_next_in_group (s))
-	if (elf_linkonce_p (s) != ((flags & SEC_LINK_ONCE) != 0))
+	if ((s->flags ^ flags) & SEC_LINK_ONCE)
 	  {
 	    flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 	    if (s != list.head[i])

@@ -1,3 +1,8 @@
+2003-02-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/obj-elf.c (obj_elf_change_section): Set SEC_LINK_ONCE and
+	SEC_LINK_DUPLICATES_DISCARD directly rather than using elf_linkonce_p.
+
 2003-02-02  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mips.c (enum small_ex_type): Remove.
