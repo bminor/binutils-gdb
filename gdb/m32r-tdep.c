@@ -844,16 +844,6 @@ m32r_frame_this_id (struct frame_info *next_frame,
     return;
 
   id = frame_id_build (base, func);
-
-  /* Check that we're not going round in circles with the same frame
-     ID (but avoid applying the test to sentinel frames which do go
-     round in circles).  Can't use frame_id_eq() as that doesn't yet
-     compare the frame's PC value.  */
-  if (frame_relative_level (next_frame) >= 0
-      && get_frame_type (next_frame) != DUMMY_FRAME
-      && frame_id_eq (get_frame_id (next_frame), id))
-    return;
-
   (*this_id) = id;
 }
 
