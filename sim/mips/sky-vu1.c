@@ -15,6 +15,8 @@
 
 VectorUnitState vu1_state;
 
+#define sim_warning printf
+
 static char vu1_umem_buffer[VU1_MEM0_SIZE] __attribute__ ((aligned(16)));
 static char vu1_mem_buffer[VU1_MEM1_SIZE]  __attribute__ ((aligned(16)));
 
@@ -69,6 +71,8 @@ vu1_io_read_register_window(device *me,
 	    *(u_long*)&source_buffer[VPE1_STAT - VU1_REGISTER_WINDOW_START] = stat;
 	}
 
+	*(u_long*)&source_buffer[VU1_CIA  - VU1_REGISTER_WINDOW_START] = vu1_state.junk._vpepc;
+
 #if 0
 	printf("%s: Read: %x, %d, dest: %x, space: %d, %x!\n", me->name, (int)addr, nr_bytes, (int)dest, space, *(int*)&(vu1_state.regs.VPE_STAT));
 	printf("	vu1_state.regs.VPE_STAT = %x\n", *(int*)&(vu1_state.regs.VPE_STAT));
@@ -95,19 +99,27 @@ vu1_io_write_register_window(device *me,
 {
 	char *dest;
 
-	if (addr == VPE1_STAT && nr_bytes == 4) {
-	    /* Magic to switch VU to run state, until other methods are available. */
+	assert(nr_bytes == 4);
+
+	if (addr == VPE1_STAT) {
+	    /* Do nothing, read only register. */
+	    sim_warning("vu1: Write to read/only register at address %lx.\n", (u_long)addr);
+	    return nr_bytes;
+	} else if (addr == VU1_MST) {
+	    /* Magic switch to set _TOP register */
+	    vu1_state.junk._TOP = T2H_4(*(int*)source); 	
+	    return nr_bytes;
+        } else if (addr == VU1_CIA) {
+	    vu1_state.junk._vpepc = T2H_4(*(int*)source); 	
 	    vu1_state.runState = VU_RUN;
 	    vu1_state.junk.eflag = 0;
 	    vu1_state.junk.peflag = 0;
-/*printf("Magic start run...\n");*/
 	    return nr_bytes;
-	} else if (addr == VU1_MST && nr_bytes == 4) {
-	    /* Magic switch to set _TOP register */
-/*printf("Magic set TOP register to %d\n", T2H_4(*(int*)source));*/
-	    vu1_state.junk._TOP = T2H_4(*(int*)source); 	
-	    return nr_bytes;
-        }
+	}
+
+	/* Everything else does nothing... */
+	sim_warning("vu1: Write to unimplemented control register at address %lx.\n", (u_long)addr);
+	return nr_bytes;
 
 	/*printf("%s: Write: %x, %d, source: %x, space: %d!\n", me->name, (int)addr, nr_bytes, (int)source, space);*/
 
