@@ -94,8 +94,15 @@ typedef struct _bfd bfd;
 /* Yup, SVR4 has a "typedef enum boolean" in <sys/types.h>  -fnf */
 /* It gets worse if the host also defines a true/false enum... -sts */
 /* And even worse if your compiler has built-in boolean types... -law */
+/* And even worse if your compiler provides a stdbool.h that conflicts
+   with these definitions... gcc 2.95 and later do.  -drow */
 #if defined (__GNUG__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 6))
 #define TRUE_FALSE_ALREADY_DEFINED
+#else
+#if (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))
+#include <stdbool.h>
+#define TRUE_FALSE_ALREADY_DEFINED
+#endif
 #endif
 #ifdef MPW
 /* Pre-emptive strike - get the file with the enum.  */
@@ -1440,8 +1447,8 @@ _bfd_strip_section_from_output PARAMS ((struct bfd_link_info *info, asection *se
 
 enum bfd_architecture
 {
-  bfd_arch_unknown,   /* File arch not known.  */
-  bfd_arch_obscure,   /* Arch known, not one of these.  */
+  bfd_arch_unknown,   /* File arch not known */
+  bfd_arch_obscure,   /* Arch known, not one of these */
   bfd_arch_m68k,      /* Motorola 68xxx */
 #define bfd_mach_m68000 1
 #define bfd_mach_m68008 2
@@ -1463,7 +1470,7 @@ enum bfd_architecture
        available to machines with higher numbers.
        The exception is the "ca", which is
        incompatible with all other machines except
-       "core".  */
+       "core". */
 
 #define bfd_mach_i960_core      1
 #define bfd_mach_i960_ka_sa     2
@@ -1481,12 +1488,12 @@ enum bfd_architecture
 #define bfd_mach_sparc_sparclet        2
 #define bfd_mach_sparc_sparclite       3
 #define bfd_mach_sparc_v8plus          4
-#define bfd_mach_sparc_v8plusa         5 /* with ultrasparc add'ns.  */
+#define bfd_mach_sparc_v8plusa         5 /* with ultrasparc add'ns */
 #define bfd_mach_sparc_sparclite_le    6
 #define bfd_mach_sparc_v9              7
-#define bfd_mach_sparc_v9a             8 /* with ultrasparc add'ns.  */
-#define bfd_mach_sparc_v8plusb         9 /* with cheetah add'ns.  */
-#define bfd_mach_sparc_v9b             10 /* with cheetah add'ns.  */
+#define bfd_mach_sparc_v9a             8 /* with ultrasparc add'ns */
+#define bfd_mach_sparc_v8plusb         9 /* with cheetah add'ns */
+#define bfd_mach_sparc_v9b             10 /* with cheetah add'ns */
 /* Nonzero if MACH has the v9 instruction set.  */
 #define bfd_mach_sparc_v9_p(mach) \
   ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9b \
@@ -1579,7 +1586,7 @@ enum bfd_architecture
 #define bfd_mach_alpha_ev4  0x10
 #define bfd_mach_alpha_ev5  0x20
 #define bfd_mach_alpha_ev6  0x30
-  bfd_arch_arm,       /* Advanced Risc Machines ARM.  */
+  bfd_arch_arm,       /* Advanced Risc Machines ARM */
 #define bfd_mach_arm_2         1
 #define bfd_mach_arm_2a        2
 #define bfd_mach_arm_3         3
@@ -1605,7 +1612,7 @@ enum bfd_architecture
 #define bfd_mach_arc_7         2
 #define bfd_mach_arc_8         3
   bfd_arch_m32r,      /* Mitsubishi M32R/D */
-#define bfd_mach_m32r          0 /* For backwards compatibility.  */
+#define bfd_mach_m32r          0 /* backwards compatibility */
 #define bfd_mach_m32rx         'x'
   bfd_arch_mn10200,   /* Matsushita MN10200 */
   bfd_arch_mn10300,   /* Matsushita MN10300 */
@@ -1618,7 +1625,7 @@ enum bfd_architecture
 #define bfd_mach_ia64_elf64    0
 #define bfd_mach_ia64_elf32    1
   bfd_arch_pj,
-  bfd_arch_avr,       /* Atmel AVR microcontrollers.  */
+  bfd_arch_avr,       /* Atmel AVR microcontrollers */
 #define bfd_mach_avr1          1
 #define bfd_mach_avr2          2
 #define bfd_mach_avr3          3
@@ -1629,7 +1636,7 @@ enum bfd_architecture
 #define bfd_mach_s390_esa      0
 #define bfd_mach_s390_esame    1
   bfd_arch_openrisc,  /* OpenRISC */
-  bfd_arch_mmix,      /* Donald Knuth's educational processor.  */
+  bfd_arch_mmix,      /* Donald Knuth's educational processor */
   bfd_arch_xstormy16,
 #define bfd_mach_xstormy16     0
   bfd_arch_last
