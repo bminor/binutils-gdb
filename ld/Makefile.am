@@ -533,11 +533,11 @@ eelf32ppclinux.c: $(srcdir)/emulparams/elf32ppclinux.sh \
   $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppclinux "$(tdir_elf32ppclinux)"
-eelf64ppc.c: $(srcdir)/emulparams/elf64ppc.sh \
+eelf64ppc.c: $(srcdir)/emulparams/elf64ppc.sh $(srcdir)/emultempl/ppc64elf.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64ppc "$(tdir_elf64ppc)"
 eelf64lppc.c: $(srcdir)/emulparams/elf64lppc.sh \
-  $(srcdir)/emulparams/elf64ppc.sh \
+  $(srcdir)/emulparams/elf64ppc.sh $(srcdir)/emultempl/ppc64elf.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64lppc "$(tdir_elf64lppc)"
 eelf32i370.c: $(srcdir)/emulparams/elf32i370.sh \

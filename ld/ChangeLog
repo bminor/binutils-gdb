@@ -1,3 +1,10 @@
+2002-01-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (eelf64ppc.c, eelf64lppc.c): Depend on ppc64elf.em.
+	* Makefile.in: Regenerate.
+	* emulparams/elf64ppc.sh (EXTRA_EM_FILE): Define.
+	* emultempl/ppc64elf.em: New file.
+
 2002-01-15  DJ Delorie  <dj@redhat.com>
 
 	* scripttempl/pe.sc: Add support for constructor priorities.
