@@ -1,5 +1,7 @@
 Fri Jul 14 13:13:55 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* syms.c: Fix comments so that `make info' works.
+
 	* elf32-mips.c (mips_elf_find_nearest_line): Set SEC_HAS_CONTENTS
 	in .mdebug section, in case backend linker has cleared it.
 
