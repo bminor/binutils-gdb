@@ -1,4 +1,4 @@
-Wed Jul 05 03:18:00 2000 Charles Wilson <cwilson@ece.gatech.edu>
+2000-07-07  Charles Wilson  <cwilson@ece.gatech.edu>
 
 	* ld/emultempl/pe.em: institute the following search order for
 	dynamic libraries on pei386: libfoo.dll.a, foo.dll.a (import
