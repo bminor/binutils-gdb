@@ -1,3 +1,11 @@
+Wed Mar 18 09:42:24 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.tgt (targ_extra_emuls): Add thumb-pe target.
+
+Sun Mar  8 23:34:14 1998  Stan Cox  <scox@equinox.cygnus.com>
+
+	* configure.tgt (sparclite*-*-elf): Added.
+
 start-sanitize-vr4320
 Tue Mar  3 11:16:35 1998  Gavin Koch  <gavin@cygnus.com>
 
