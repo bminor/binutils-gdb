@@ -1,3 +1,7 @@
+Sun Jun 27 09:05:19 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* hosts/riscos.h: Define NBPG and UPAGES.
+
 Sun Jun 27 16:28:26 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* elfcode.h (elf_slurp_symbol_table): Don't use obj_raw_syms as
