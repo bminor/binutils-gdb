@@ -1,3 +1,9 @@
+Mon May 16 13:35:08 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* emultempl/hppaelf.em: Change all references of
+	.hppa_linker_stubs to .PARISC.stubs.
+	* scripttempl/hppaelf.sc: Likewise.
+
 Fri May 13 13:00:38 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldlang.c (print_output_section_statement): Change ``no attached
