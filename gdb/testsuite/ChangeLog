@@ -1,3 +1,7 @@
+2004-02-17  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/selftest.exp (do_steps_and_nexts): Add comment.
+
 2004-02-16  Fred Fish  <fnf@redhat.com>
 
 	* gdb.arch/gdb1291.c: Remove

@@ -638,7 +638,7 @@ cp_abi_h = cp-abi.h
 cp_support_h = cp-support.h $(symtab_h)
 dcache_h = dcache.h
 defs_h = defs.h $(config_h) $(ansidecl_h) $(gdb_locale_h) $(gdb_signals_h) \
-	$(libiberty_h) $(progress_h) $(bfd_h) $(ui_file_h) $(xm_h) $(nm_h) \
+	$(libiberty_h) $(bfd_h) $(ui_file_h) $(xm_h) $(nm_h) \
 	$(tm_h) $(fopen_same_h) $(gdbarch_h)
 dictionary_h = dictionary.h
 disasm_h = disasm.h

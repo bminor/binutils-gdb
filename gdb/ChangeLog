@@ -1,5 +1,13 @@
 2004-02-17  Elena Zannoni  <ezannoni@redhat.com>
 
+	* Makefile.in (defs_h): Remove dependency on progress_h.
+	* defs.h (QUIT): Remove use of PROGRESS macro. Remove include of
+	progress.h.
+	* main.c (captured_main): Delete use of START_PROGRESS and
+	END_PROGRESS.
+
+2004-02-17  Elena Zannoni  <ezannoni@redhat.com>
+	
 	* objfiles.c (terminate_minimal_symbol_table): Add back
 	initialization of MSYMBOL_TYPE.
 
