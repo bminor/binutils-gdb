@@ -135,10 +135,9 @@ extern const struct tic80_operand tic80_operands[];
    "displacement(reg)" */
 #define TIC80_OPERAND_PARENS (02)
 
-/* This operand may use the symbolic names for the condition and size
-   codes that the branch instructions use, such as "eq.b", "or.f",
-   etc. */
-#define TIC80_OPERAND_CC_SZ (04)
+/* This operand is a bit number and may use symbolic names such as "eq.b",
+   "or.f", etc. */
+#define TIC80_OPERAND_BITNUM (04)
 
 /* This operand names a register.  The disassembler uses this to print
    register names with a leading 'r'.  */
@@ -157,6 +156,14 @@ extern const struct tic80_operand tic80_operands[];
    Normally values in the range -999 to 999 are printed as signed decimal
    values and other values are printed in hex. */
 #define TIC80_OPERAND_BITFIELD (0100)
+
+/* This operand is a condition code, which may be given symbolically as
+   "eq0.b", "ne0.w", etc. */
+#define TIC80_OPERAND_CC (0200)
+
+/* This operand is a control register number, or may also be given
+   symbolically as "EIP", "EPC", etc. */
+#define TIC80_OPERAND_CR (0400)
 
 /* Values which go in the struct tic80_opcode format field to distinguish
    between various types of instructions with the same mnemonic.  FIXME: Not

@@ -1,4 +1,10 @@
 start-sanitize-tic80
+Sat Jan  4 19:02:44 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80.h (TIC80_OPERAND_BITNUM): Renamed from TIC80_OPERAND_CC_SZ.
+	(TIC80_OPERAND_CC): New define for condition code operand.
+	(TIC80_OPERAND_CR): New define for control register operand.
+
 Fri Jan  3 16:22:23 1997  Fred Fish  <fnf@cygnus.com>
 
 	* tic80.h (struct tic80_opcode): Name changed.
