@@ -1,3 +1,7 @@
+2004-12-09  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* gas/mips/branch-swap.d: Pass -32 to as.
+
 2004-11-29  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* gas/crx/br_insn.d: Fix error in expected disassembly.
