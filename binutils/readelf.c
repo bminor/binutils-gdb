@@ -1,5 +1,6 @@
 /* readelf.c -- display contents of an ELF format file
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
 
    Originally developed by Eric Youngdale <eric@andante.jic.com>
    Modifications by Nick Clifton <nickc@redhat.com>
@@ -23,7 +24,7 @@
 
 /* The difference between readelf and objdump:
 
-  Both programs are capabale of displaying the contents of ELF format files,
+  Both programs are capable of displaying the contents of ELF format files,
   so why does the binutils project have two file dumpers ?
 
   The reason is that objdump sees an ELF file through a BFD filter of the
@@ -7670,14 +7671,14 @@ decode_location_expression (unsigned char * data,
 	  printf ("DW_OP_const1u: %lu", (unsigned long) byte_get (data++, 1));
 	  break;
 	case DW_OP_const1s:
-	  printf ("DW_OP_const1s: %ld", (long) byte_get (data++, 1));
+	  printf ("DW_OP_const1s: %ld", (long) byte_get_signed (data++, 1));
 	  break;
 	case DW_OP_const2u:
 	  printf ("DW_OP_const2u: %lu", (unsigned long) byte_get (data, 2));
 	  data += 2;
 	  break;
 	case DW_OP_const2s:
-	  printf ("DW_OP_const2s: %ld", (long) byte_get (data, 2));
+	  printf ("DW_OP_const2s: %ld", (long) byte_get_signed (data, 2));
 	  data += 2;
 	  break;
 	case DW_OP_const4u:
@@ -7685,7 +7686,7 @@ decode_location_expression (unsigned char * data,
 	  data += 4;
 	  break;
 	case DW_OP_const4s:
-	  printf ("DW_OP_const4s: %ld", (long) byte_get (data, 4));
+	  printf ("DW_OP_const4s: %ld", (long) byte_get_signed (data, 4));
 	  data += 4;
 	  break;
 	case DW_OP_const8u:
@@ -7775,7 +7776,7 @@ decode_location_expression (unsigned char * data,
 	  printf ("DW_OP_xor");
 	  break;
 	case DW_OP_bra:
-	  printf ("DW_OP_bra: %ld", (long) byte_get (data, 2));
+	  printf ("DW_OP_bra: %ld", (long) byte_get_signed (data, 2));
 	  data += 2;
 	  break;
 	case DW_OP_eq:
@@ -7797,7 +7798,7 @@ decode_location_expression (unsigned char * data,
 	  printf ("DW_OP_ne");
 	  break;
 	case DW_OP_skip:
-	  printf ("DW_OP_skip: %ld", (long) byte_get (data, 2));
+	  printf ("DW_OP_skip: %ld", (long) byte_get_signed (data, 2));
 	  data += 2;
 	  break;
 
