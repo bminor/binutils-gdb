@@ -155,7 +155,7 @@ inc-hist.texi: ${READLINE_DIR}/doc/inc-hist.texi
 
 # File to record current GDB version number (copied from main dir Makefile.in)
 gdbVN.m4 : $(srcdir)/${gdbdir}/Makefile.in
-	VER=`sed <$(srcdir)/${gdbdir}/Makefile.in -n 's/VERSION = //p'` echo "_define__(<_GDB_VN__>,$$VER)" > $(unsubdir)/gdbVN.m4
+	echo "_define__(<_GDB_VN__>,`sed <./../Makefile.in -n 's/VERSION = //p'`)" > ./gdbVN.m4
 
 # GDB MANUAL: texinfo source, created by preprocessing w/m4
 # If you want other configs in the makefile, add or modify instructions for 
