@@ -221,7 +221,6 @@ CFILES = \
 	as.c \
 	atof-generic.c \
 	bignum-copy.c \
-	cgen.c \
 	cond.c \
 	ecoff.c \
 	expr.c \
@@ -402,7 +401,6 @@ OBJS = \
 	as.o \
 	atof-generic.o \
 	bignum-copy.o \
-	cgen.o \
 	cond.o \
 	expr.o \
 	flonum-konst.o \
@@ -642,6 +640,10 @@ itbl-test.o: $(srcdir)/testsuite/gas/all/itbl-test.c $(srcdir)/itbl-ops.h
 IT_TEST_OBJS= itbl-parse.o itbl-lex.o itbl-test-ops.o
 itbl-test: $(IT_TEST_OBJS) itbl-test.o $(LIBDEPS)
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o itbl-test itbl-test.o $(IT_TEST_OBJS) $(LIBS)
+
+# CGEN interface.
+
+cgen.o: cgen.c cgen-opc.h subsegs.h $(INCDIR)/obstack.h
 
 # Remake the info files.
 
@@ -984,7 +986,6 @@ as.o: as.c subsegs.h $(INCDIR)/obstack.h output-file.h \
   sb.h macro.h
 atof-generic.o: atof-generic.c
 bignum-copy.o: bignum-copy.c
-cgen.o: cgen.c cgen-opc.h subsegs.h $(INCDIR)/obstack.h
 cond.o: cond.c $(INCDIR)/obstack.h
 ecoff.o: ecoff.c
 expr.o: expr.c $(INCDIR)/obstack.h
