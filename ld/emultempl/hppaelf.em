@@ -36,6 +36,9 @@ static lang_input_statement_type *stub_file;
    stubs.  */
 static int multi_subspace = 0;
 
+/* Whether we need to call hppa_layout_sections_again.  */
+static int need_laying_out = 0;
+
 /* Maximum size of a group of input sections that can be handled by
    one stub section.  A value of +/-1 indicates the bfd back-end
    should use a suitable default size.  */
@@ -217,18 +220,9 @@ hppaelf_layout_sections_again (void)
   /* If we have changed sizes of the stub sections, then we need
      to recalculate all the section offsets.  This may mean we need to
      add even more stubs.  */
-  lang_reset_memory_regions ();
+  need_laying_out = 0;
 
-  /* Resize the sections.  */
-  lang_size_sections (stat_ptr->head, abs_output_section,
-		      &stat_ptr->head, 0, (bfd_vma) 0, NULL, TRUE);
-
-  /* Redo special stuff.  */
-  ldemul_after_allocation ();
-
-  /* Do the assignments again.  */
-  lang_do_assignments (stat_ptr->head, abs_output_section,
-		       (fill_type *) 0, (bfd_vma) 0);
+  gld${EMULATION_NAME}_layout_sections_again ();
 }
 
 
@@ -253,6 +247,13 @@ build_section_lists (lang_statement_union_type *statement)
 static void
 hppaelf_finish (void)
 {
+  /* bfd_elf_discard_info just plays with debugging sections,
+     ie. doesn't affect any code, so we can delay resizing the
+     sections.  It's likely we'll resize everything in the process of
+     adding stubs.  */
+  if (bfd_elf_discard_info (output_bfd, &link_info))
+    need_laying_out = 1;
+
   /* If generating a relocatable output file, then we don't
      have to examine the relocs.  */
   if (stub_file != NULL && !link_info.relocatable)
@@ -284,6 +285,9 @@ hppaelf_finish (void)
 	}
     }
 
+  if (need_laying_out)
+    hppaelf_layout_sections_again ();
+
   if (! link_info.relocatable)
     {
       /* Set the global data pointer.  */
@@ -297,14 +301,12 @@ hppaelf_finish (void)
       if (stub_file != NULL && stub_file->the_bfd->sections != NULL)
 	{
 	  if (! elf32_hppa_build_stubs (&link_info))
-	    {
-	      einfo ("%X%P: can not build stubs: %E\n");
-	      return;
-	    }
+	    einfo ("%X%P: can not build stubs: %E\n");
 	}
     }
 
-  gld${EMULATION_NAME}_finish ();
+  gld${EMULATION_NAME}_strip_empty_sections ();
+  gld${EMULATION_NAME}_provide_init_fini_syms ();
 }
 
 

@@ -1,5 +1,19 @@
 2005-03-29  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/elf32.em (gld${EMULATION_NAME}_layout_sections_again):
+	New function, extracted from static void gld${EMULATION_NAME}_finish.
+	(gld${EMULATION_NAME}_strip_empty_sections): Likewise.
+	(gld${EMULATION_NAME}_provide_init_fini_syms): Likewise.
+	* emultempl/ppc64elf.em: Revert last change.
+	(ppc_layout_sections_again): Use
+	gld${EMULATION_NAME}_layout_sections_again.
+	(ppc_finish): Don't call gld${EMULATION_NAME}_finish.  Instead call
+	gld${EMULATION_NAME}_strip_empty_sections and
+	gld${EMULATION_NAME}_provide_init_fini_syms.
+	* emultempl/hppaelf.em: Similarly.
+
+2005-03-29  Alan Modra  <amodra@bigpond.net.au>
+
 	* emultempl/ppc64elf.em (need_laying_out): Delete.  Remove all refs.
 	(ppc_finish): Don't call bfd_elf_discard_info.
 	* emultempl/hppaelf.em: Similarly.
@@ -15,7 +29,7 @@
 	implementation, not just the GNU C library.
 	* configure.tgt: Likewise.
 	* emultempl/elf32.em: Likewise.
-		
+
 2005-03-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_provide_bound_symbols): New

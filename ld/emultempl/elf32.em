@@ -59,7 +59,10 @@ static void gld${EMULATION_NAME}_after_open (void);
 static void gld${EMULATION_NAME}_before_allocation (void);
 static bfd_boolean gld${EMULATION_NAME}_place_orphan
   (lang_input_statement_type *file, asection *s);
-static void gld${EMULATION_NAME}_finish (void);
+static void gld${EMULATION_NAME}_layout_sections_again (void);
+static void gld${EMULATION_NAME}_strip_empty_sections (void);
+static void gld${EMULATION_NAME}_provide_init_fini_syms (void);
+static void gld${EMULATION_NAME}_finish (void) ATTRIBUTE_UNUSED;
 
 EOF
 
@@ -1450,25 +1453,58 @@ gld${EMULATION_NAME}_provide_bound_symbols (const char *sec,
   _bfd_elf_provide_symbol (&link_info, end, end_val);
 }
 
+/* If not building a shared library, provide
+
+   __preinit_array_start
+   __preinit_array_end
+   __init_array_start
+   __init_array_end
+   __fini_array_start
+   __fini_array_end
+
+   They are set here rather than via PROVIDE in the linker
+   script, because using PROVIDE inside an output section
+   statement results in unnecessary output sections.  Using
+   PROVIDE outside an output section statement runs the risk of
+   section alignment affecting where the section starts.  */
+
 static void
-gld${EMULATION_NAME}_finish (void)
+gld${EMULATION_NAME}_provide_init_fini_syms (void)
 {
-  if (bfd_elf_discard_info (output_bfd, &link_info))
+  if (!link_info.relocatable && !link_info.shared)
     {
-      lang_reset_memory_regions ();
-
-      /* Resize the sections.  */
-      lang_size_sections (stat_ptr->head, abs_output_section,
-			  &stat_ptr->head, 0, (bfd_vma) 0, NULL, TRUE);
-
-      /* Redo special stuff.  */
-      ldemul_after_allocation ();
-
-      /* Do the assignments again.  */
-      lang_do_assignments (stat_ptr->head, abs_output_section,
-			   (fill_type *) 0, (bfd_vma) 0);
+      gld${EMULATION_NAME}_provide_bound_symbols (".preinit_array",
+						  "__preinit_array_start",
+						  "__preinit_array_end");
+      gld${EMULATION_NAME}_provide_bound_symbols (".init_array",
+						  "__init_array_start",
+						  "__init_array_end");
+      gld${EMULATION_NAME}_provide_bound_symbols (".fini_array",
+						  "__fini_array_start",
+						  "__fini_array_end");
     }
+}
 
+static void
+gld${EMULATION_NAME}_layout_sections_again (void)
+{
+  lang_reset_memory_regions ();
+
+  /* Resize the sections.  */
+  lang_size_sections (stat_ptr->head, abs_output_section,
+		      &stat_ptr->head, 0, (bfd_vma) 0, NULL, TRUE);
+
+  /* Redo special stuff.  */
+  ldemul_after_allocation ();
+
+  /* Do the assignments again.  */
+  lang_do_assignments (stat_ptr->head, abs_output_section,
+		       (fill_type *) 0, (bfd_vma) 0);
+}
+
+static void
+gld${EMULATION_NAME}_strip_empty_sections (void)
+{
   if (!link_info.relocatable)
     {
       lang_output_section_statement_type *os;
@@ -1495,35 +1531,17 @@ gld${EMULATION_NAME}_finish (void)
 		  }
 	    }
 	}
-
-      /* If not building shared library, provide
-
-	 __preinit_array_start
-	 __preinit_array_end
-	 __init_array_start
-	 __init_array_end
-	 __fini_array_start
-	 __fini_array_end
-
-	 They are set here rather than via PROVIDE in the linker
-	 script, because using PROVIDE inside an output section
-	 statement results in unnecessary output sections.  Using
-	 PROVIDE outside an output section statement runs the risk of
-	 section alignment affecting where the section starts.  */
-
-      if (!link_info.shared)
-	{
-	  gld${EMULATION_NAME}_provide_bound_symbols
-	    (".preinit_array", "__preinit_array_start",
-	     "__preinit_array_end");
-	  gld${EMULATION_NAME}_provide_bound_symbols
-	    (".init_array", "__init_array_start",
-	     "__init_array_end");
-	  gld${EMULATION_NAME}_provide_bound_symbols
-	    (".fini_array", "__fini_array_start",
-	     "__fini_array_end");
-	}
     }
+}
+
+static void
+gld${EMULATION_NAME}_finish (void)
+{
+  if (bfd_elf_discard_info (output_bfd, &link_info))
+    gld${EMULATION_NAME}_layout_sections_again ();
+
+  gld${EMULATION_NAME}_strip_empty_sections ();
+  gld${EMULATION_NAME}_provide_init_fini_syms ();
 }
 EOF
 fi
