@@ -2,6 +2,8 @@
 
 Changes in 2.11:
 
+x86 gas now supports the full Pentium4 instruction set.
+
 Support for AMD x86-64 architecture, by Jan Hubicka, SuSE Labs.
 
 Support for Motorola 68HC11 and 68HC12.
