@@ -146,7 +146,9 @@ gld_${EMULATION_NAME}_before_parse()
     ldfile_output_architecture = bfd_arch_${ARCH};
   output_filename = "${EXECUTABLE_NAME:-a.exe}";
 #ifdef DLL_SUPPORT
+  config.dynamic_link = true;
   config.has_shared = 1;
+/* link_info.pei386_auto_import = true; */
 
 #if (PE_DEF_SUBSYSTEM == 9) || (PE_DEF_SUBSYSTEM == 2)
 #if defined TARGET_IS_mipspe || defined TARGET_IS_armpe
@@ -191,6 +193,9 @@ gld_${EMULATION_NAME}_before_parse()
 #define OPTION_DISABLE_AUTO_IMAGE_BASE	(OPTION_ENABLE_AUTO_IMAGE_BASE + 1)
 #define OPTION_DLL_SEARCH_PREFIX	(OPTION_DISABLE_AUTO_IMAGE_BASE + 1)
 #define OPTION_NO_DEFAULT_EXCLUDES	(OPTION_DLL_SEARCH_PREFIX + 1)
+#define OPTION_DLL_ENABLE_AUTO_IMPORT	(OPTION_NO_DEFAULT_EXCLUDES + 1)
+#define OPTION_DLL_DISABLE_AUTO_IMPORT	(OPTION_DLL_ENABLE_AUTO_IMPORT + 1)
+#define OPTION_ENABLE_EXTRA_PE_DEBUG	(OPTION_DLL_DISABLE_AUTO_IMPORT + 1)
 
 static struct option longopts[] = {
   /* PE options */
@@ -228,6 +233,9 @@ static struct option longopts[] = {
   {"disable-auto-image-base", no_argument, NULL, OPTION_DISABLE_AUTO_IMAGE_BASE},
   {"dll-search-prefix", required_argument, NULL, OPTION_DLL_SEARCH_PREFIX},
   {"no-default-excludes", no_argument, NULL, OPTION_NO_DEFAULT_EXCLUDES},
+  {"enable-auto-import", no_argument, NULL, OPTION_DLL_ENABLE_AUTO_IMPORT},
+  {"disable-auto-import", no_argument, NULL, OPTION_DLL_DISABLE_AUTO_IMPORT},
+  {"enable-extra-pe-debug", no_argument, NULL, OPTION_ENABLE_EXTRA_PE_DEBUG},
 #endif
   {NULL, no_argument, NULL, 0}
 };
@@ -313,6 +321,11 @@ gld_${EMULATION_NAME}_list_options (file)
   fprintf (file, _("  --dll-search-prefix=<string>       When linking dynamically to a dll witout an\n"));
   fprintf (file, _("                                       importlib, use <string><basename>.dll \n"));
   fprintf (file, _("                                       in preference to lib<basename>.dll \n"));
+  fprintf (file, _("  --enable-auto-import               Do sophistcated linking of _sym to \n"));
+  fprintf (file, _("                                       __imp_sym for DATA references\n"));
+  fprintf (file, _("  --disable-auto-import              Do not auto-import DATA items from DLLs\n"));
+  fprintf (file, _("  --enable-extra-pe-debug            Enable verbose debug output when building\n"));
+  fprintf (file, _("                                       or linking to DLLs (esp. auto-import)\n"));
 #endif
 }
 
@@ -583,6 +596,15 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
     case OPTION_NO_DEFAULT_EXCLUDES:
       pe_dll_do_default_excludes = 0;
       break;
+    case OPTION_DLL_ENABLE_AUTO_IMPORT:
+      link_info.pei386_auto_import = true;
+      break;
+    case OPTION_DLL_DISABLE_AUTO_IMPORT:
+      link_info.pei386_auto_import = false;
+      break;
+    case OPTION_ENABLE_EXTRA_PE_DEBUG:
+      pe_dll_extra_pe_debug = 1;
+      break;
 #endif
     }
   return 1;
@@ -716,14 +738,15 @@ pe_undef_cdecl_match (h, string)
   struct bfd_link_hash_entry *h;
   PTR string;
 {
-  int sl = strlen (string);
+  int sl;
+  sl = strlen (string); /* silence compiler warning */
   if (h->type == bfd_link_hash_defined
       && strncmp (h->root.string, string, sl) == 0
       && h->root.string[sl] == '@')
-  {
-    pe_undef_found_sym = h;
-    return false;
-  }
+    {
+      pe_undef_found_sym = h;
+      return false;
+    }
   return true;
 }
 
@@ -733,6 +756,11 @@ pe_fixup_stdcalls ()
   static int gave_warning_message = 0;
   struct bfd_link_hash_entry *undef, *sym;
   char *at;
+  if (pe_dll_extra_pe_debug) 
+    {
+      printf ("%s\n", __FUNCTION__);
+    }
+  
   for (undef = link_info.hash->undefs; undef; undef=undef->next)
     if (undef->type == bfd_link_hash_undefined)
     {
@@ -791,11 +819,122 @@ pe_fixup_stdcalls ()
       }
     }
 }
+
+static int
+make_import_fixup (rel)
+  arelent *rel;
+{
+  struct symbol_cache_entry *sym = *rel->sym_ptr_ptr;
+/*
+  bfd *b; 
+*/
+
+  if (pe_dll_extra_pe_debug) 
+    {
+      printf ("arelent: %s@%#x: add=%li\n", sym->name, 
+              (int) rel->address, rel->addend);
+    }
+  pe_create_import_fixup (rel);
+  return 1;
+}
+
+char *pe_data_import_dll;
+
+static void
+pe_find_data_imports ()
+{
+  struct bfd_link_hash_entry *undef, *sym;
+  for (undef = link_info.hash->undefs; undef; undef=undef->next)
+    {
+      if (undef->type == bfd_link_hash_undefined)
+        {
+          /* C++ symbols are *long* */
+          char buf[4096];
+          if (pe_dll_extra_pe_debug) 
+            {
+              printf ("%s:%s\n", __FUNCTION__, undef->root.string);
+            }
+          sprintf (buf, "__imp_%s", undef->root.string);
+
+          sym = bfd_link_hash_lookup (link_info.hash, buf, 0, 0, 1);
+          if (sym && sym->type == bfd_link_hash_defined)
+            {
+              einfo (_("Warning: resolving %s by linking to %s (auto-import)\n"),
+                     undef->root.string, buf);
+              {  
+                bfd *b = sym->u.def.section->owner;
+                asymbol **symbols;
+                int nsyms, symsize, i;
+     
+                symsize = bfd_get_symtab_upper_bound (b);
+                symbols = (asymbol **) xmalloc (symsize);
+                nsyms = bfd_canonicalize_symtab (b, symbols);
+
+                for (i = 0; i < nsyms; i++)
+                  {
+                    if (memcmp(symbols[i]->name, "__head_", 
+                             sizeof ("__head_") - 1))
+                      continue;
+                    if (pe_dll_extra_pe_debug)
+                      {
+                        printf ("->%s\n", symbols[i]->name);
+                      }
+                    pe_data_import_dll = (char*) (symbols[i]->name + 
+                                                  sizeof ("__head_") - 1);
+                    break;
+                  }
+              }
+
+              pe_walk_relocs_of_symbol (&link_info, undef->root.string, 
+                                        make_import_fixup);
+
+              /* let's differentiate it somehow from defined */
+              undef->type = bfd_link_hash_defweak;
+              /* we replace original name with __imp_ prefixed, this
+                 1) may trash memory 2) leads to duplicate symbol generation.
+                 Still, IMHO it's better than having name poluted. */
+              undef->root.string = sym->root.string;
+              undef->u.def.value = sym->u.def.value;
+              undef->u.def.section = sym->u.def.section;
+            }
+        }
+    }
+}
 #endif /* DLL_SUPPORT */
+
+static boolean
+pr_sym (h, string)
+  struct bfd_hash_entry *h;
+  PTR string;
+{
+  if (pe_dll_extra_pe_debug) 
+    {
+      printf("+%s\n",h->string);
+    }
+  return true;
+}
+
 
 static void
 gld_${EMULATION_NAME}_after_open ()
 {
+
+  if (pe_dll_extra_pe_debug) 
+    {
+      bfd *a;
+      struct bfd_link_hash_entry *sym;
+      printf ("%s()\n", __FUNCTION__);
+
+      for (sym = link_info.hash->undefs; sym; sym=sym->next)
+        printf ("-%s\n", sym->root.string);
+      bfd_hash_traverse (&link_info.hash->table, pr_sym,NULL);
+
+      for (a = link_info.input_bfds; a; a = a->link_next)
+        {
+          printf("*%s\n",a->filename);
+        }
+    }
+  
   /* Pass the wacky PE command line options into the output bfd.
      FIXME: This should be done via a function, rather than by
      including an internal BFD header.  */
@@ -809,6 +948,8 @@ gld_${EMULATION_NAME}_after_open ()
 #ifdef DLL_SUPPORT
   if (pe_enable_stdcall_fixup) /* -1=warn or 1=disable */
     pe_fixup_stdcalls ();
+
+  pe_find_data_imports (output_bfd, &link_info);
 
   pe_process_import_defs(output_bfd, &link_info);
   if (link_info.shared)
@@ -1251,6 +1392,16 @@ gld_${EMULATION_NAME}_finish ()
   if (pe_out_def_filename)
     pe_dll_generate_def_file (pe_out_def_filename);
 #endif /* DLL_SUPPORT */
+
+  /* I don't know where .idata gets set as code, but it shouldn't be */
+  {
+    asection *asec = bfd_get_section_by_name (output_bfd, ".idata");
+    if (asec)
+      {
+        asec->flags &= ~SEC_CODE;
+        asec->flags |= SEC_DATA;
+      }
+  }
 }
 
 
