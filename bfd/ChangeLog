@@ -1,3 +1,12 @@
+Sun Jan 14 21:36:08 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_{unsupported,std}_reloc): Remove functions.
+	(ppc_elf_howto_raw): Remove ppc_elf_{unsupported,std}_reloc
+	references.
+	(ppc_elf_relocate_section):  No longer allow .sdata/.sbss sections
+	to satisfy a TOC16 relocation. 	Rewrite unsupported relocation
+	support.  Begin support for R_PPC_SDA{2,}REL.
+
 Sat Jan 13 09:36:52 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_create_dynamic_sections): New function to

@@ -99,11 +99,6 @@ enum ppc_reloc_type
   R_PPC_max
 };
 
-static bfd_reloc_status_type ppc_elf_unsupported_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static bfd_reloc_status_type ppc_elf_std_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-
 static reloc_howto_type *ppc_elf_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void ppc_elf_info_to_howto
@@ -168,7 +163,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_std_reloc,	/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_NONE",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -183,7 +178,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_std_reloc,	/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_ADDR32",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -199,7 +194,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_std_reloc,	/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_ADDR24",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -214,7 +209,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_std_reloc,	/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_ADDR16",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -229,7 +224,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,/* complain_on_overflow */
-	 ppc_elf_std_reloc,	/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_ADDR16_LO",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -244,7 +239,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 ppc_elf_std_reloc,	/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_ADDR16_HI",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -276,7 +271,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_std_reloc,	/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_ADDR14",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -325,7 +320,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 ppc_elf_std_reloc,	/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_REL24",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -340,7 +335,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 ppc_elf_std_reloc,	/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_REL14",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -438,7 +433,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_GOT16_HA",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -454,7 +449,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed,  /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_PLTREL24",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -473,7 +468,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc,  /* special_function */
+	 bfd_elf_generic_reloc,	 /* special_function */
 	 "R_PPC_COPY",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -489,7 +484,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc,  /* special_function */
+	 bfd_elf_generic_reloc,	 /* special_function */
 	 "R_PPC_GLOB_DAT",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -504,7 +499,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc,  /* special_function */
+	 bfd_elf_generic_reloc,	 /* special_function */
 	 "R_PPC_JMP_SLOT",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -521,7 +516,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc,  /* special_function */
+	 bfd_elf_generic_reloc,	 /* special_function */
 	 "R_PPC_RELATIVE",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -538,7 +533,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_LOCAL24PC",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -553,7 +548,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_std_reloc,	/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_UADDR32",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -568,7 +563,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_std_reloc,	/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_UADDR16",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -583,7 +578,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_std_reloc,	/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_REL32",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -599,7 +594,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_PLT32",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -615,7 +610,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_PLTREL32",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -631,7 +626,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_PLT16_LO",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -647,7 +642,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_PLT16_HI",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -663,7 +658,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_PLT16_HA",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -671,7 +666,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false),		/* pcrel_offset */
 
   /* A sign-extended 16 bit value relative to _SDA_BASE, for use with
-     small data items.	*/
+     small data items.  FIXME: Not supported.	 */
   HOWTO (R_PPC_SDAREL16,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -695,7 +690,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_SECTOFF",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -710,7 +705,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_SECTOFF_LO",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -725,7 +720,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_SECTOFF_HI",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -740,7 +735,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_SECTOFF_HA",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -758,7 +753,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_EMB_NADDR32",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -773,7 +768,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_EMB_NADDR16",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -788,7 +783,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,/* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_EMB_ADDR16_LO",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -803,7 +798,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_EMB_NADDR16_HI", /* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -820,7 +815,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_EMB_NADDR16_HA", /* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -1069,69 +1064,6 @@ ppc_elf_merge_private_bfd_data (ibfd, obfd)
     }
 
   return true;
-}
-
-
-/* ELF relocs are against symbols.  If we are producing relocateable
-   output, and the reloc is against an external symbol, and nothing
-   has given us any additional addend, the resulting reloc will also
-   be against the same symbol.  In such a case, we don't want to
-   change anything about the way the reloc is handled, since it will
-   all be done at final link time.  Rather than put special case code
-   into bfd_perform_relocation, all the reloc types use this howto
-   function.  It just short circuits the reloc if producing
-   relocateable output against an external symbol.  */
-
-/*ARGSUSED*/
-static bfd_reloc_status_type
-ppc_elf_std_reloc (abfd,
-		   reloc_entry,
-		   symbol,
-		   data,
-		   input_section,
-		   output_bfd,
-		   error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
-{
-  if (output_bfd != (bfd *) NULL
-      && (symbol->flags & BSF_SECTION_SYM) == 0
-      && (! reloc_entry->howto->partial_inplace || reloc_entry->addend == 0))
-    {
-      reloc_entry->address += input_section->output_offset;
-      return bfd_reloc_ok;
-    }
-
-  return bfd_reloc_continue;
-}
-
-/* Don't pretend we can deal with unsupported relocs.  */
-
-/*ARGSUSED*/
-static bfd_reloc_status_type
-ppc_elf_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
-			   output_bfd, error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
-{
-  BFD_ASSERT (reloc_entry->howto != (reloc_howto_type *)0);
-  (*_bfd_error_handler)
-    ("%s: relocation %s (%d) is not currently supported",
-     bfd_get_filename (abfd),
-     reloc_entry->howto->name,
-     reloc_entry->howto->type);
-
-  return bfd_reloc_notsupported;
 }
 
 
@@ -2115,21 +2047,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
 
       /* This is a final link.  */
-
-      /* Complain about known relocation that are not yet supported */
-      if (howto->special_function == ppc_elf_unsupported_reloc)
-	{
-	  (*_bfd_error_handler)
-	    ("%s: relocation %s (%d) is not currently supported",
-	     bfd_get_filename (input_bfd),
-	     howto->name,
-	     (int)r_type);
-
-	  bfd_set_error (bfd_error_bad_value);
-	  ret = false;
-	  continue;
-	}
-
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  sym = local_syms + r_symndx;
@@ -2325,9 +2242,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  BFD_ASSERT (sec != (asection *)0);
 	  BFD_ASSERT (bfd_is_und_section (sec)
 		      || strcmp (bfd_get_section_name (abfd, sec), ".got") == 0
-		      || strcmp (bfd_get_section_name (abfd, sec), ".cgot") == 0
-		      || strcmp (bfd_get_section_name (abfd, sec), ".sdata") == 0
-		      || strcmp (bfd_get_section_name (abfd, sec), ".sbss") == 0)
+		      || strcmp (bfd_get_section_name (abfd, sec), ".cgot") == 0)
 
 	  addend -= sec->output_section->vma + 0x8000;
 	  break;
@@ -2336,6 +2251,37 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  BFD_ASSERT (sec != (asection *)0);
 	  addend += ((relocation + addend) & 0x8000) << 1;
 	  break;
+
+	case R_PPC_SDAREL16:			/* relocate against _SDA_BASE_ */
+	  BFD_ASSERT (sec != (asection *)0);
+	  if (strcmp (bfd_get_section_name (abfd, sec), ".sdata") != 0
+	      && strcmp (bfd_get_section_name (abfd, sec), ".sbss") != 0)
+	    {
+	      (*_bfd_error_handler) ("%s: The target of R_PPC_SDAREL16 relocations must be in section .sdata or .sbss not %s",
+				     bfd_get_filename (input_bfd),
+				     bfd_get_section_name (abfd, sec));
+
+	      bfd_set_error (bfd_error_bad_value);
+	      ret = false;
+	      continue;
+	    }
+	  goto unsupported;
+
+	case R_PPC_EMB_SDA2REL:
+	  BFD_ASSERT (sec != (asection *)0);
+	  if (strcmp (bfd_get_section_name (abfd, sec), ".sdata2") != 0
+	      && strcmp (bfd_get_section_name (abfd, sec), ".sbss2") != 0)
+	    {
+	      (*_bfd_error_handler) ("%s: The target of R_PPC_SDA2REL16 relocations must be in section .sdata2 or .sbss2 not %s",
+				     bfd_get_filename (input_bfd),
+				     bfd_get_section_name (abfd, sec));
+
+	      bfd_set_error (bfd_error_bad_value);
+	      ret = false;
+	      continue;
+	    }
+	  goto unsupported;
+
 
 	case R_PPC_PLTREL24:
 	case R_PPC_COPY:
@@ -2348,7 +2294,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PPC_PLT16_LO:
 	case R_PPC_PLT16_HI:
 	case R_PPC_PLT16_HA:
-	case R_PPC_SDAREL16:
 	case R_PPC_SECTOFF:
 	case R_PPC_SECTOFF_LO:
 	case R_PPC_SECTOFF_HI:
@@ -2360,7 +2305,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PPC_EMB_NADDR16_HA:
 	case R_PPC_EMB_SDAI16:
 	case R_PPC_EMB_SDA2I16:
-	case R_PPC_EMB_SDA2REL:
 	case R_PPC_EMB_SDA21:
 	case R_PPC_EMB_MRKREF:
 	case R_PPC_EMB_RELSEC16:
@@ -2369,6 +2313,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PPC_EMB_RELST_HA:
 	case R_PPC_EMB_BIT_FLD:
 	case R_PPC_EMB_RELSDA:
+	unsupported:
 	  (*_bfd_error_handler) ("%s: Relocation %s is not yet supported.",
 				 bfd_get_filename (input_bfd),
 				 ppc_elf_howto_table[ (int)r_type ]->name);
