@@ -73,7 +73,7 @@ struct areltdata {
 
 #define arelt_size(bfd) (((struct areltdata *)((bfd)->arelt_data))->parsed_size)
 
-char *zalloc PARAMS ((bfd_size_type size));
+char *bfd_zmalloc PARAMS ((bfd_size_type size));
 
 /* These routines allocate and free things on the BFD's obstack.  Note
    that realloc can never occur in place.  */
@@ -100,7 +100,7 @@ int		bfd_flush PARAMS ((bfd *abfd));
 int		bfd_stat  PARAMS ((bfd *abfd, struct stat *));
 
 bfd *	_bfd_create_empty_archive_element_shell PARAMS ((bfd *obfd));
-bfd *	look_for_bfd_in_cache PARAMS ((bfd *arch_bfd, file_ptr index));
+bfd *	_bfd_look_for_bfd_in_cache PARAMS ((bfd *arch_bfd, file_ptr index));
 boolean _bfd_add_bfd_to_archive_cache PARAMS ((bfd *, file_ptr, bfd *));
 boolean	_bfd_generic_mkarchive PARAMS ((bfd *abfd));
 struct areltdata *	_bfd_snarf_ar_hdr PARAMS ((bfd *abfd));
@@ -111,7 +111,8 @@ boolean bfd_slurp_bsd_armap_f2 PARAMS ((bfd *abfd));
 #define bfd_slurp_coff_armap bfd_slurp_armap
 boolean	_bfd_slurp_extended_name_table PARAMS ((bfd *abfd));
 boolean	_bfd_write_archive_contents PARAMS ((bfd *abfd));
-bfd *	new_bfd PARAMS ((void));
+bfd *_bfd_get_elt_at_filepos PARAMS ((bfd *archive, file_ptr filepos));
+bfd * _bfd_new_bfd PARAMS ((void));
 
 #define DEFAULT_STRING_SPACE_SIZE 0x2000
 boolean	bfd_add_to_string_table PARAMS ((char **table, char *new_string,
@@ -125,7 +126,7 @@ int	bfd_0 PARAMS ((bfd *ignore));
 unsigned int	bfd_0u PARAMS ((bfd *ignore));
 void	bfd_void PARAMS ((bfd *ignore));
 
-bfd *	new_bfd_contained_in PARAMS ((bfd *));
+bfd *	_bfd_new_bfd_contained_in PARAMS ((bfd *));
 boolean	 _bfd_dummy_new_section_hook PARAMS ((bfd *ignore, asection *newsect));
 char *	 _bfd_dummy_core_file_failing_command PARAMS ((bfd *abfd));
 int	 _bfd_dummy_core_file_failing_signal PARAMS ((bfd *abfd));
@@ -192,6 +193,7 @@ typedef struct bfd_link_hash_entry _bfd_link_hash_entry;
 extern boolean _bfd_generic_link_add_one_symbol
   PARAMS ((struct bfd_link_info *, bfd *, const char *name, flagword,
 	   asection *, bfd_vma, const char *, boolean copy,
+	   boolean constructor, unsigned int bitsize,
 	   struct bfd_link_hash_entry **));
 
 /* Generic link routine.  */
@@ -249,9 +251,9 @@ extern bfd *bfd_last_cache;
 #define	bfd_generic_close_and_cleanup	bfd_true
 
 /* List of supported target vectors, and the default vector (if
-   default_vector[0] is NULL, there is no default).  */
-extern bfd_target *target_vector[];
-extern bfd_target *default_vector[];
+   bfd_default_vector[0] is NULL, there is no default).  */
+extern bfd_target *bfd_target_vector[];
+extern bfd_target *bfd_default_vector[];
 
 /* And more follows */
 

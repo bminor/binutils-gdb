@@ -1,5 +1,31 @@
 Mon Jan 24 14:41:23 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
+	* opncls.c (_bfd_new_bfd, _bfd_new_bfd_contained_in): Add
+	"_bfd_" to function names.
+	* archive.c (_bfd_create_empty_archive_element_shell),
+	libbfd-in.h: Change callers.
+
+	* libbfd.c (bfd_zmalloc): Renamed from zalloc.
+	* libbfd.c (bfd_add_to_string_table),
+	trad-core.c (trad_unix_core_file_p),
+	targets.c (bfd_target_list),
+	ptrace-core.c (ptrace_unix_core_file_p),
+	opncls.c (new_bfd), libbfd-in.h,
+	ieee.c (ieee_make_empty_symbol),
+	elf32-hppa.c (hppa_elf_stub_branch_reloc),
+	(hppa_elf_stub_reloc): Change callers.
+	* libbfd.h: Regenerated.
+
+	* archive.c (_bfd_look_for_bfd_in_cache): Add "_bfd_" to name.
+	(_bfd_get_elt_at_filepos), 
+	coff-rs6000.c (rs6000coff_get_elt_at_filepos), libbfd-in.h:
+	Change callers.
+
+	* format.c (bfd_check_format_matches), libbfd-in.h, targets.c,
+	elfcode.h (elf_object_p): Rename target_vector to bfd_target_vector
+	and default_vector to bfd_default_vector.
+	* libbfd.h: Regenerated.
+
 	* format.c (bfd_check_format_matches): New function.
 	(bfd_check_format): Call it.
 	(bfd_matching_formats): Function removed.

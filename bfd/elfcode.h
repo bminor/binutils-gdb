@@ -897,7 +897,7 @@ DEFUN (elf_object_p, (abfd), bfd * abfd)
 
       /* This is the generic ELF target.  Let it match any ELF target
 	 for which we do not have a specific backend.  */
-      for (target_ptr = target_vector; *target_ptr != NULL; target_ptr++)
+      for (target_ptr = bfd_target_vector; *target_ptr != NULL; target_ptr++)
 	{
 	  struct elf_backend_data *back;
 

@@ -1,5 +1,5 @@
 /* Generic BFD support for file formats.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -45,7 +45,7 @@ SECTION
 #include "libbfd.h"
 
 /* IMPORT from targets.c.  */
-extern CONST size_t bfd_default_vector_entries;
+extern CONST size_t _bfd_target_vector_entries;
 
 /*
 FUNCTION
@@ -142,7 +142,7 @@ bfd_check_format_matches (abfd, format, matching)
     {
       *matching = matching_vector =
 	bfd_xmalloc_by_size_t (sizeof (char *) *
-			       (bfd_default_vector_entries + 1));
+			       (_bfd_target_vector_entries + 1));
       matching_vector[0] = NULL;
     }
   right_targ = 0;
@@ -165,7 +165,7 @@ bfd_check_format_matches (abfd, format, matching)
     }
   }
 
-  for (target = target_vector; *target != NULL; target++) {
+  for (target = bfd_target_vector; *target != NULL; target++) {
     bfd_target *temp;
 
     abfd->xvec = *target;	/* Change BFD's target temporarily */
@@ -186,7 +186,7 @@ bfd_check_format_matches (abfd, format, matching)
       /* If this is the default target, accept it, even if other targets
 	 might match.  People who want those other targets have to set 
 	 the GNUTARGET variable.  */
-      if (temp == default_vector[0])
+      if (temp == bfd_default_vector[0])
 	{
 	  match_count = 1;
 	  if (matching)

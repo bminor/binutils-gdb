@@ -1,6 +1,11 @@
-/* IBM RS/6000 "XCOFF" back-end for BFD.
-   Copyright (C) 1990, 1991 Free Software Foundation, Inc.
-   Written by Metin G. Ozisik, Mimi Phûông-Thåo Võ, and John Gilmore.
+/* BFD back-end for IBM RS/6000 "XCOFF" files.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   FIXME: Can someone provide a transliteration of this name into ASCII?
+   Using the following chars caused a compiler warning on HIUX (so I replaced
+   them with octal escapes), and isn't useful without an understanding of what
+   character set it is.
+   Written by Metin G. Ozisik, Mimi Ph\373\364ng-Th\345o V\365, 
+     and John Gilmore.
    Archive support from Damon A. Permezel.
    Contributed by IBM Corporation and Cygnus Support.
 
@@ -40,7 +45,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* The main body of code is in coffcode.h.  */
 
 /* Can't read rs6000 relocs */
-#define RTYPE2HOWTO(a,b)
+static reloc_howto_type dummy_reloc =
+  HOWTO (0,			/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "UNKNOWN",		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 false);		/* pcrel_offset */
+
+#define RTYPE2HOWTO(cache_ptr, dst) cache_ptr->howto = &dummy_reloc;
+
 #include "coffcode.h"
 
 #define	coff_archive_p		bfd_generic_archive_p
@@ -168,7 +189,7 @@ rs6000coff_get_elt_at_filepos (archive, filepos)
   struct areltdata *new_areldata;
   bfd *n_nfd;
 
-  n_nfd = look_for_bfd_in_cache (archive, filepos);
+  n_nfd = _bfd_look_for_bfd_in_cache (archive, filepos);
   if (n_nfd) return n_nfd;
 
   if (0 != bfd_seek (archive, filepos, SEEK_SET)) {
@@ -187,7 +208,7 @@ rs6000coff_get_elt_at_filepos (archive, filepos)
   n_nfd->arelt_data = (PTR) new_areldata;
   n_nfd->filename = new_areldata->filename;
 
-  if (add_bfd_to_cache (archive, filepos, n_nfd))
+  if (_bfd_add_bfd_to_archive_cache (archive, filepos, n_nfd))
     return n_nfd;
 
   /* huh? */
@@ -318,7 +339,7 @@ bfd_target rs6000coff_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   0,				/* leading char */
@@ -326,8 +347,12 @@ bfd_target rs6000coff_vec =
   15,				/* ar_max_namelen??? FIXMEmgo */
   3,				/* default alignment power */
 
-  _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
-  _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
 
   {_bfd_dummy_target, coff_object_p, 	/* bfd_check_format */
      coff_archive_p,
@@ -343,5 +368,5 @@ bfd_target rs6000coff_vec =
      _bfd_write_archive_contents, bfd_false},
 
   JUMP_TABLE(coff),
-  COFF_SWAP_TABLE
+  COFF_SWAP_TABLE,
 };

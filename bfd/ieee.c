@@ -2823,7 +2823,7 @@ DEFUN(ieee_make_empty_symbol,(abfd),
 {
 
   ieee_symbol_type  *new =
-    (ieee_symbol_type *)zalloc (sizeof (ieee_symbol_type));
+    (ieee_symbol_type *)bfd_zmalloc (sizeof (ieee_symbol_type));
   new->symbol.the_bfd = abfd;
   return &new->symbol;
 
@@ -2979,11 +2979,13 @@ DEFUN(ieee_bfd_debug_info_accumulate,(abfd, section),
 #define ieee_set_arch_mach bfd_default_set_arch_mach
 #define ieee_bfd_get_relocated_section_contents  bfd_generic_get_relocated_section_contents
 #define ieee_bfd_relax_section bfd_generic_relax_section
-#define ieee_bfd_seclet_link bfd_generic_seclet_link
 #define ieee_bfd_reloc_type_lookup \
   ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
 #define ieee_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
+#define ieee_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
+#define ieee_bfd_link_add_symbols _bfd_generic_link_add_symbols
+#define ieee_bfd_final_link _bfd_generic_final_link
 
 /*SUPPRESS 460 */
 bfd_target ieee_vec =
@@ -2994,7 +2996,7 @@ bfd_target ieee_vec =
   true,				/* target headers byte order */
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
   ( SEC_CODE|SEC_DATA|SEC_ROM|SEC_HAS_CONTENTS
    |SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
    0,				/* leading underscore */

@@ -35,16 +35,16 @@ FILE *bfd_open_file PARAMS ((bfd *));
 /* Return a new BFD.  All BFD's are allocated through this routine.  */
 
 bfd *
-new_bfd PARAMS ((void))
+_bfd_new_bfd (void)
 {
   bfd *nbfd;
 
-  nbfd = (bfd *)zalloc (sizeof (bfd));
+  nbfd = (bfd *)bfd_zmalloc (sizeof (bfd));
   if (!nbfd)
     return 0;
 
   bfd_check_init();
-  obstack_begin((PTR)&nbfd->memory, 128);
+  obstack_begin(&nbfd->memory, 128);
 
   nbfd->arch_info = &bfd_default_arch_struct;
 
@@ -69,12 +69,12 @@ new_bfd PARAMS ((void))
 /* Allocate a new BFD as a member of archive OBFD.  */
 
 bfd *
-new_bfd_contained_in (obfd)
+_bfd_new_bfd_contained_in (obfd)
      bfd *obfd;
 {
   bfd *nbfd;
 
-  nbfd = new_bfd();
+  nbfd = _bfd_new_bfd();
   nbfd->xvec = obfd->xvec;
   nbfd->my_archive = obfd;
   nbfd->direction = read_direction;
@@ -84,7 +84,7 @@ new_bfd_contained_in (obfd)
 
 /*
 SECTION
-	Opening and Closing BFDs
+	Opening and closing BFDs
 
 */
 
@@ -99,22 +99,22 @@ DESCRIPTION
 	Open the file @var{filename} (using <<fopen>>) with the target
 	@var{target}.  Return a pointer to the created BFD.
 
-	If NULL is returned then an error has occured. Possible errors
-	are <<no_memory>>, <<invalid_target>> or <<system_call>> error.
-
 	Calls <<bfd_find_target>>, so @var{target} is interpreted as by
 	that function.
+
+	If <<NULL>> is returned then an error has occured.   Possible errors
+	are <<no_memory>>, <<invalid_target>> or <<system_call>> error.
 */
 
 bfd *
-DEFUN(bfd_openr, (filename, target),
-      CONST char *filename AND
-      CONST char *target)
+bfd_openr (filename, target)
+     CONST char *filename;
+     CONST char *target;
 {
   bfd *nbfd;
   bfd_target *target_vec;
 
-  nbfd = new_bfd();
+  nbfd = _bfd_new_bfd();
   if (nbfd == NULL) {
     bfd_error = no_memory;
     return NULL;
@@ -173,10 +173,10 @@ DESCRIPTION
 */
 
 bfd *
-DEFUN(bfd_fdopenr,(filename, target, fd),
-      CONST char *filename AND
-      CONST char *target AND
-      int fd)
+bfd_fdopenr (filename, target, fd)
+     CONST char *filename;
+     CONST char *target;
+     int fd;
 {
   bfd *nbfd;
   bfd_target *target_vec;
@@ -191,7 +191,7 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
 #endif
   if (fdflags == -1) return NULL;
 
-  nbfd = new_bfd();
+  nbfd = _bfd_new_bfd();
 
   if (nbfd == NULL) {
     bfd_error = no_memory;
@@ -260,9 +260,9 @@ DESCRIPTION
 */
 
 bfd *
-DEFUN(bfd_openw,(filename, target),
-      CONST char *filename AND
-      CONST char *target)
+bfd_openw (filename, target)
+     CONST char *filename;
+     CONST char *target;
 {
   bfd *nbfd;
   bfd_target *target_vec;
@@ -272,7 +272,7 @@ DEFUN(bfd_openw,(filename, target),
   /* nbfd has to point to head of malloc'ed block so that bfd_close may
      reclaim it correctly. */
 
-  nbfd = new_bfd();
+  nbfd = _bfd_new_bfd();
   if (nbfd == NULL) {
     bfd_error = no_memory;
     return NULL;
@@ -318,8 +318,8 @@ RETURNS
 
 
 boolean
-DEFUN(bfd_close,(abfd),
-      bfd *abfd)
+bfd_close (abfd)
+     bfd *abfd;
 {
   boolean ret;
 
@@ -379,8 +379,8 @@ RETURNS
 */
 
 boolean
-DEFUN(bfd_close_all_done,(abfd),
-      bfd *abfd)
+bfd_close_all_done (abfd)
+     bfd *abfd;
 {
   boolean ret;
 
@@ -424,8 +424,8 @@ DESCRIPTION
 */
 
 bfd_size_type
-DEFUN(bfd_alloc_size,(abfd),
-      bfd *abfd)
+bfd_alloc_size (abfd)
+     bfd *abfd;
 {
   struct _obstack_chunk *chunk = abfd->memory.chunk;
   size_t size = 0;
@@ -454,11 +454,11 @@ DESCRIPTION
 */
 
 bfd *
-DEFUN(bfd_create,(filename, templ),
-      CONST char *filename AND
-      bfd *templ)
+bfd_create (filename, templ)
+     CONST char *filename;
+     bfd *templ;
 {
-  bfd *nbfd = new_bfd();
+  bfd *nbfd = _bfd_new_bfd();
   if (nbfd == (bfd *)NULL) {
     bfd_error = no_memory;
     return (bfd *)NULL;
@@ -486,37 +486,42 @@ DESCRIPTION
 
 
 PTR
-DEFUN(bfd_alloc_by_size_t,(abfd, size),
-      bfd *abfd AND
-      size_t size)
+bfd_alloc_by_size_t (abfd, size)
+     bfd *abfd;
+     size_t size;
 {
   PTR res = obstack_alloc(&(abfd->memory), size);
   return res;
 }
 
-DEFUN(void bfd_alloc_grow,(abfd, ptr, size),
-      bfd *abfd AND
-      PTR ptr AND
-      size_t size)
+void
+bfd_alloc_grow (abfd, ptr, size)
+     bfd *abfd;
+     PTR ptr;
+     size_t size;
 {
   (void) obstack_grow(&(abfd->memory), ptr, size);
 }
-DEFUN(PTR bfd_alloc_finish,(abfd),
-      bfd *abfd)
+
+PTR
+bfd_alloc_finish (abfd)
+     bfd *abfd;
 {
   return obstack_finish(&(abfd->memory));
 }
 
-DEFUN(PTR bfd_alloc, (abfd, size),
-      bfd *abfd AND
-      size_t size)
+PTR
+bfd_alloc (abfd, size)
+     bfd *abfd;
+     size_t size;
 {
   return bfd_alloc_by_size_t(abfd, (size_t)size);
 }
 
-DEFUN(PTR bfd_zalloc,(abfd, size),
-      bfd *abfd AND
-      size_t size)
+PTR
+bfd_zalloc (abfd, size)
+     bfd *abfd;
+     size_t size;
 {
   PTR res;
   res = bfd_alloc(abfd, size);
@@ -524,10 +529,11 @@ DEFUN(PTR bfd_zalloc,(abfd, size),
   return res;
 }
 
-DEFUN(PTR bfd_realloc,(abfd, old, size),
-      bfd *abfd AND
-      PTR old AND
-      size_t size)
+PTR
+bfd_realloc (abfd, old, size)
+     bfd *abfd;
+     PTR old;
+     size_t size;
 {
   PTR res = bfd_alloc(abfd, size);
   memcpy(res, old, (size_t)size);

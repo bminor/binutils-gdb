@@ -1,5 +1,5 @@
 /* BFD back-end for archive files (libraries).
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94 Free Software Foundation, Inc.
    Written by Cygnus Support.  Mostly Gumby Henkel-Wallace's fault.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -254,7 +254,7 @@ _bfd_create_empty_archive_element_shell (obfd)
 {
   bfd *nbfd;
 
-  nbfd = new_bfd_contained_in(obfd);
+  nbfd = _bfd_new_bfd_contained_in(obfd);
   if (nbfd == NULL)
     {
       bfd_error = no_memory;
@@ -286,7 +286,7 @@ bfd_set_archive_head (output_archive, new_head)
 }
 
 bfd *
-look_for_bfd_in_cache (arch_bfd, filepos)
+_bfd_look_for_bfd_in_cache (arch_bfd, filepos)
      bfd *arch_bfd;
      file_ptr filepos;
 {
@@ -493,7 +493,7 @@ _bfd_get_elt_at_filepos (archive, filepos)
   struct areltdata *new_areldata;
   bfd *n_nfd;
 
-  n_nfd = look_for_bfd_in_cache (archive, filepos);
+  n_nfd = _bfd_look_for_bfd_in_cache (archive, filepos);
   if (n_nfd)
     return n_nfd;
 
@@ -740,8 +740,7 @@ do_slurp_coff_armap (abfd)
   unsigned int parsed_size;
   carsym *carsyms;
   unsigned int nsymz; /* Number of symbols in armap. */
-
-  bfd_vma (*swap) PARAMS ((bfd_byte*));
+  bfd_vma (*swap) PARAMS ((const bfd_byte*));
   char int_buf[sizeof(long)];
   unsigned int carsym_size, ptrsize, i;
   

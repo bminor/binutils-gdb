@@ -1,5 +1,5 @@
 /* BFD back-end for HP PA-RISC ELF files.
-   Copyright (C) 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94 Free Software Foundation, Inc.
 
    Written by
 
@@ -193,13 +193,13 @@ static symext_chainS *symext_lastP;
 static boolean symext_chain_built;
 
 static unsigned long
-DEFUN (hppa_elf_rebuild_insn, (abfd, insn, value, r_type, r_field, r_format),
-       bfd * abfd AND
-       unsigned long insn AND
-       unsigned long value AND
-       unsigned short r_type AND
-       unsigned short r_field AND
-       unsigned short r_format)
+hppa_elf_rebuild_insn (abfd, insn, value, r_type, r_field, r_format)
+     bfd *abfd;
+     unsigned long insn;
+     unsigned long value;
+     unsigned short r_type;
+     unsigned short r_field;
+     unsigned short r_format;
 {
   unsigned long const_part;	/* part of the instruction that does not change */
   unsigned long rebuilt_part;
@@ -260,21 +260,20 @@ DEFUN (hppa_elf_rebuild_insn, (abfd, insn, value, r_type, r_field, r_format),
 }
 
 static unsigned long
-DEFUN (hppa_elf_relocate_insn,
-       (abfd, input_sect,
-	insn, address, symp, sym_value, r_addend,
-	r_type, r_format, r_field, pcrel),
-       bfd * abfd AND
-       asection * input_sect AND
-       unsigned long insn AND
-       unsigned long address AND
-       asymbol * symp AND
-       long sym_value AND
-       long r_addend AND
-       unsigned short r_type AND
-       unsigned short r_format AND
-       unsigned short r_field AND
-       unsigned char pcrel)
+hppa_elf_relocate_insn (abfd, input_sect,
+			insn, address, symp, sym_value, r_addend,
+			r_type, r_format, r_field, pcrel)
+     bfd *abfd;
+     asection *input_sect;
+     unsigned long insn;
+     unsigned long address;
+     asymbol *symp;
+     long sym_value;
+     long r_addend;
+     unsigned short r_type;
+     unsigned short r_format;
+     unsigned short r_field;
+     unsigned char pcrel;
 {
   unsigned char opcode = get_opcode (insn);
   long constant_value;
@@ -361,21 +360,20 @@ DEFUN (hppa_elf_relocate_insn,
 }
 
 static void
-DEFUN (hppa_elf_relocate_unwind_table,
-       (abfd, input_sect,
-	data, address, symp, sym_value, r_addend,
-	r_type, r_format, r_field, pcrel),
-       bfd * abfd AND
-       asection * input_sect AND
-       PTR data AND
-       unsigned long address AND
-       asymbol * symp AND
-       long sym_value AND
-       long r_addend AND
-       unsigned short r_type AND
-       unsigned short r_format AND
-       unsigned short r_field AND
-       unsigned char pcrel)
+hppa_elf_relocate_unwind_table (abfd, input_sect,
+				data, address, symp, sym_value, r_addend,
+				r_type, r_format, r_field, pcrel)
+     bfd *abfd;
+     asection *input_sect;
+     PTR data;
+     unsigned long address;
+     asymbol *symp;
+     long sym_value;
+     long r_addend;
+     unsigned short r_type;
+     unsigned short r_format;
+     unsigned short r_field;
+     unsigned char pcrel;
 {
   bfd_byte *hit_data = address + (bfd_byte *) (data);
   long start_offset;
@@ -1729,10 +1727,10 @@ elf_hppa_reloc_type_lookup (arch, code)
 
 
 void
-DEFUN (elf_hppa_tc_symbol, (abfd, symbolP, sym_idx),
-       bfd * abfd AND
-       elf_symbol_type * symbolP AND
-       int sym_idx)
+elf_hppa_tc_symbol (abfd, symbolP, sym_idx)
+     bfd *abfd;
+     elf_symbol_type *symbolP;
+     int sym_idx;
 {
   symext_chainS *symextP;
   unsigned int arg_reloc;
@@ -1778,9 +1776,9 @@ static symext_entryS *symextn_contents;
 static unsigned int symextn_contents_real_size;
 
 void
-DEFUN (elf_hppa_tc_make_sections, (abfd, ignored),
-       bfd * abfd AND
-       PTR ignored)
+elf_hppa_tc_make_sections (abfd, ignored)
+     bfd *abfd;
+     PTR ignored;
 {
   symext_chainS *symextP;
   int size;
@@ -2268,7 +2266,7 @@ hppa_elf_stub_branch_reloc (stub_desc,	/* the bfd */
 	{
 	  stub_desc->relocs_allocated_cnt = STUB_RELOC_INCR;
 	  size = sizeof (arelent) * stub_desc->relocs_allocated_cnt;
-	  stub_desc->stub_sec->relocation = (arelent *) zalloc (size);
+	  stub_desc->stub_sec->relocation = (arelent *) bfd_zmalloc (size);
 	}
       else
 	{
@@ -2301,11 +2299,11 @@ hppa_elf_stub_reloc (stub_desc,	/* the bfd */
 		     target_sym,	/* the target symbol */
 		     offset,	/* the offset within the stub buffer (pre-calculated) */
 		     type)
-elf32_hppa_stub_description *stub_desc;
-bfd *output_bfd;
-asymbol *target_sym;
-int offset;
-elf32_hppa_reloc_type type;
+     elf32_hppa_stub_description *stub_desc;
+     bfd *output_bfd;
+     asymbol *target_sym;
+     int offset;
+     elf32_hppa_reloc_type type;
 {
   /* Allocate a new relocation entry. */
   arelent relent;
@@ -2318,7 +2316,7 @@ elf32_hppa_reloc_type type;
 	{
 	  stub_desc->relocs_allocated_cnt = STUB_RELOC_INCR;
 	  size = sizeof (arelent) * stub_desc->relocs_allocated_cnt;
-	  stub_desc->stub_sec->relocation = (arelent *) zalloc (size);
+	  stub_desc->stub_sec->relocation = (arelent *) bfd_zmalloc (size);
 	}
       else
 	{
@@ -3281,12 +3279,12 @@ int linker_stubs_max_size = 0;
 #define STUB_ALLOC_INCR	100
 
 boolean
-DEFUN (hppa_elf_set_section_contents, (abfd, section, location, offset, count),
-       bfd * abfd AND
-       sec_ptr section AND
-       PTR location AND
-       file_ptr offset AND
-       bfd_size_type count)
+hppa_elf_set_section_contents (abfd, section, location, offset, count)
+     bfd *abfd;
+     sec_ptr section;
+     PTR location;
+     file_ptr offset;
+     bfd_size_type count;
 {
   if ( strcmp(section->name, ".hppa_linker_stubs") == 0 )
     {
@@ -3398,19 +3396,19 @@ hppa_elf_get_section_contents (abfd, section, location, offset, count)
 }
 
 static void
-DEFUN (elf_info_to_howto, (abfd, cache_ptr, dst),
-       bfd * abfd AND
-       arelent * cache_ptr AND
-       Elf32_Internal_Rela * dst)
+elf_info_to_howto (abfd, cache_ptr, dst)
+     bfd *abfd;
+     arelent *cache_ptr;
+     Elf32_Internal_Rela *dst;
 {
   BFD_ASSERT (ELF32_R_TYPE(dst->r_info) < (unsigned int) R_HPPA_UNIMPLEMENTED);
   cache_ptr->howto = &elf_hppa_howto_table[ELF32_R_TYPE(dst->r_info)];
 }
 
 static void
-DEFUN (elf32_hppa_backend_symbol_processing, (abfd, sym),
-       bfd * abfd AND
-       asymbol * sym)
+elf32_hppa_backend_symbol_processing (abfd, sym)
+     bfd *abfd;
+     asymbol *sym;
 {
   /* Is this a definition of $global$?  If so, keep it because it will be
     needed if any relocations are performed.  */
@@ -3436,10 +3434,10 @@ static struct elf32_hppa_symextn_map_struct *elf32_hppa_symextn_map;
 static int elf32_hppa_symextn_map_size;
 
 static boolean
-DEFUN (elf32_hppa_backend_symbol_table_processing, (abfd, esyms,symcnt),
-       bfd 		* abfd AND
-       elf_symbol_type	*esyms AND
-       int		symcnt)
+elf32_hppa_backend_symbol_table_processing (abfd, esyms,symcnt)
+     bfd *abfd;
+     elf_symbol_type *esyms;
+     int symcnt;
 {
   Elf32_Internal_Shdr *symextn_hdr = bfd_elf_find_section (abfd, SYMEXTN_SECTION_NAME);
   int i;
@@ -3516,9 +3514,9 @@ DEFUN (elf32_hppa_backend_symbol_table_processing, (abfd, esyms,symcnt),
 #define elf_backend_symbol_table_processing	elf32_hppa_backend_symbol_table_processing
 
 static boolean
-DEFUN (elf32_hppa_backend_section_processing, (abfd, secthdr),
-       bfd 		* abfd AND
-       Elf32_Internal_Shdr *secthdr)
+elf32_hppa_backend_section_processing (abfd, secthdr)
+     bfd *abfd;
+     Elf32_Internal_Shdr *secthdr;
 {
   int i,j,k;
 
@@ -3572,10 +3570,10 @@ DEFUN (elf32_hppa_backend_section_processing, (abfd, secthdr),
 #define elf_backend_section_processing	elf32_hppa_backend_section_processing
 
 static boolean
-DEFUN (elf32_hppa_backend_section_from_shdr, (abfd, hdr, name),
-       bfd 		* abfd AND
-       Elf32_Internal_Shdr *hdr AND
-       char		* name)
+elf32_hppa_backend_section_from_shdr (abfd, hdr, name)
+     bfd *abfd;
+     Elf32_Internal_Shdr *hdr;
+     char *name;
 {
   asection *newsect;
 
@@ -3620,10 +3618,10 @@ DEFUN (elf32_hppa_backend_section_from_shdr, (abfd, hdr, name),
 #define elf_backend_section_from_shdr	elf32_hppa_backend_section_from_shdr
 
 static boolean
-DEFUN (elf32_hppa_backend_fake_sections, (abfd, secthdr, asect),
-       bfd 		* abfd AND
-       Elf_Internal_Shdr *secthdr AND
-       asection		*asect)
+elf32_hppa_backend_fake_sections (abfd, secthdr, asect)
+     bfd *abfd;
+     Elf_Internal_Shdr *secthdr;
+     asection *asect;
 {
 
   if ( strcmp(asect->name, ".hppa_symextn") == 0 )
@@ -3663,13 +3661,12 @@ DEFUN (elf32_hppa_backend_fake_sections, (abfd, secthdr, asect),
 #define elf_backend_fake_sections	elf32_hppa_backend_fake_sections
 
 static boolean
-DEFUN (elf32_hppa_backend_section_from_bfd_section, (abfd, hdr, asect, retval),
-       bfd 			*abfd AND
-       Elf32_Internal_Shdr	*hdr AND
-       asection			*asect AND
-       int			*retval)
+elf32_hppa_backend_section_from_bfd_section (abfd, hdr, asect, retval)
+     bfd *abfd;
+     Elf32_Internal_Shdr *hdr;
+     asection *asect;
+     int *retval;
 {
-
   if ( hdr->sh_type == SHT_HPPA_SYMEXTN )
     {
       if (hdr->rawdata)
