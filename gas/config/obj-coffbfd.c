@@ -897,6 +897,7 @@ DEFUN (obj_coff_def, (what),
 
 unsigned int dim_index;
 
+
 static void
 obj_coff_endef (ignore)
      int ignore;
@@ -945,6 +946,9 @@ obj_coff_endef (ignore)
 	  SF_SET_PROCESS (last_line_symbol);
 	  function_lineoff = -1;
 	}
+      /* Value is always set to . */
+      def_symbol_in_progress->sy_frag = frag_now;
+      S_SET_VALUE (def_symbol_in_progress, (valueT) frag_now_fix ());
       break;
 
 #ifdef C_AUTOARG
@@ -1474,7 +1478,7 @@ DEFUN_VOID (yank_symbols)
 				    (long) (S_GET_VALUE (symbolP) -
 					    S_GET_VALUE (last_functionP)));
 		  SA_SET_SYM_ENDNDX (last_functionP, symbol_number);
-		  last_functionP = (symbolS *) 0;
+		 last_functionP = (symbolS *) 0;
 		}
 	    }
 	}
@@ -2303,6 +2307,8 @@ obj_coff_lcomm (ignore)
   char *p;
 
   symbolS *symbolP;
+  s_lcomm(0);
+  return;
   name = input_line_pointer;
 
   c = get_symbol_end ();
