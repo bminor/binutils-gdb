@@ -1,3 +1,19 @@
+2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* m68hc11_sim.c (cpu_special): Handle call and rtc instructions.
+	* sim-main.h (M6812_CALL_INDIRECT): Add to enum.
+	(m6811_regs): Add page register.
+	(cpu_set_page, cpu_get_page): New macros.
+	(phys_to_virt): New function.
+	(cpu_get_indexed_operand_addr, cpu_return): Declare.
+	* gencode.c: Identify indirect addressing mode for call and fix daa.
+	(gen_function_entry): New param to tell if src8/dst8 locals are 
+	necessary.
+	(gen_interpreter): Use it to avoid generation of unused variables.
+	* interp.c (sim_fetch_register): Allow to read page register; page
+	register, A, B and CCR are only 1 byte wide.
+	(sim_store_register): Likewise for writing.
+
 2002-06-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

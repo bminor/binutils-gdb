@@ -1,6 +1,6 @@
 /* interp.c -- Simulator for Motorola 68HC11/68HC12
    Copyright (C) 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
-   Written by Stephane Carrez (stcarrez@worldnet.fr)
+   Written by Stephane Carrez (stcarrez@nerim.fr)
 
 This file is part of GDB, the GNU debugger.
 
@@ -468,16 +468,19 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 {
   sim_cpu *cpu;
   uint16 val;
+  int size = 2;
 
   cpu = STATE_CPU (sd, 0);
   switch (rn)
     {
     case A_REGNUM:
       val = cpu_get_a (cpu);
+      size = 1;
       break;
 
     case B_REGNUM:
       val = cpu_get_b (cpu);
+      size = 1;
       break;
 
     case D_REGNUM:
@@ -502,6 +505,12 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 
     case PSW_REGNUM:
       val = cpu_get_ccr (cpu);
+      size = 1;
+      break;
+
+    case PAGE_REGNUM:
+      val = cpu_get_page (cpu);
+      size = 1;
       break;
 
     default:
@@ -510,7 +519,7 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
     }
   memory[0] = val >> 8;
   memory[1] = val & 0x0FF;
-  return 2;
+  return size;
 }
 
 int
@@ -533,11 +542,11 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 
     case A_REGNUM:
       cpu_set_a (cpu, val);
-      break;
+      return 1;
 
     case B_REGNUM:
       cpu_set_b (cpu, val);
-      break;
+      return 1;
 
     case X_REGNUM:
       cpu_set_x (cpu, val);
@@ -557,7 +566,11 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
 
     case PSW_REGNUM:
       cpu_set_ccr (cpu, val);
-      break;
+      return 1;
+
+    case PAGE_REGNUM:
+      cpu_set_page (cpu, val);
+      return 1;
 
     default:
       break;

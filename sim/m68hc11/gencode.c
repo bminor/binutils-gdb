@@ -1,6 +1,6 @@
 /* gencode.c -- Motorola 68HC11 & 68HC12 Emulator Generator
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
-   Written by Stephane Carrez (stcarrez@worldnet.fr)
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Written by Stephane Carrez (stcarrez@nerim.fr)
 
 This file is part of GDB, GAS, and the GNU binutils.
 
@@ -284,6 +284,7 @@ cpu_set_ccr_Z (proc, dst16 == 0);\n\
   /* 68HC12 special instructions.  */
   { "bgnd",  "cpu_special (proc, M6812_BGND)" },
   { "call8", "cpu_special (proc, M6812_CALL)" },
+  { "call_ind", "cpu_special (proc, M6812_CALL_INDIRECT)" },
   { "dbcc8", "cpu_dbcc (proc)" },
   { "ediv",  "cpu_special (proc, M6812_EDIV)" },
   { "emul",  "{ uint32 src1 = (uint32) cpu_get_d (proc);\
@@ -384,7 +385,7 @@ struct m6811_opcode_def m6811_page1_opcodes[] = {
   { "page3", 0,		"page3",     1, 0x1a,  0,  0, CHG_NONE },
 
   /* After 'daa', the Z flag is undefined.  Mark it as changed.	 */
-  { "daa",  "a->a",	"daa8",	     1, 0x19,  2,  2, CHG_NZVC },
+  { "daa",  "",	        "daa8",	     1, 0x19,  2,  2, CHG_NZVC },
   { "aba",  "b,a->a",	"add8",	     1, 0x1b,  2,  2, CHG_HNZVC},
   { "bset", "(x),#->(x)","or8",	     3, 0x1c,  7,  7, CLR_V_CHG_NZ },
   { "bclr", "(x),#->(x)","bclr8",    3, 0x1d,  7,  7, CLR_V_CHG_NZ },
@@ -821,8 +822,8 @@ struct m6811_opcode_def m6812_page1_opcodes[] = {
   { "bvc",   "r",         0,         2, 0x28,  1,  3, CHG_NONE },
   { "bvs",   "r",         0,         2, 0x29,  1,  3, CHG_NONE },
 
-  { "call",  "()",        "call8",   4, 0x4a,  8,  8,  CHG_NONE },
-  { "call",  "[]",        "call8",   2, 0x4b,  8,  8,  CHG_NONE },
+  { "call",  "",          "call8",   4, 0x4a,  8,  8,  CHG_NONE },
+  { "call",  "",          "call_ind",2, 0x4b,  8,  8,  CHG_NONE },
 
   { "clr",   "->()",      "clr8",    3, 0x79,  3,  3,  SET_Z_CLR_NVC },
   { "clr",   "->[]",      "clr8",    2, 0x69,  2,  2,  SET_Z_CLR_NVC },
@@ -1977,8 +1978,11 @@ gen_cycle_table (FILE *fp, const char *name,
   print (fp, 0, "};\n\n");
 }
 
+#define USE_SRC8 1
+#define USE_DST8 2
+
 void
-gen_function_entry (FILE *fp, const char *name)
+gen_function_entry (FILE *fp, const char *name, int locals)
 {
   /* Generate interpretor entry point.	*/
   print (fp, 0, "%s (proc)\n", name);
@@ -1988,7 +1992,10 @@ gen_function_entry (FILE *fp, const char *name)
   /* Interpretor local variables.  */
   print (fp, indent_level, "unsigned char op;");
   print (fp, indent_level, "uint16 addr, src16, dst16;");
-  print (fp, indent_level, "uint8 src8, dst8;\n");
+  if (locals & USE_SRC8)
+    print (fp, indent_level, "uint8 src8;\n");
+  if (locals & USE_DST8)
+    print (fp, indent_level, "uint8 dst8;\n");
 }
 
 void
@@ -2050,14 +2057,14 @@ gen_interpreter (FILE *fp)
       gen_cycle_table (fp, "cycles_page4", m6811_page4_opcodes,
 		       TABLE_SIZE (m6811_page4_opcodes));
 
-      gen_function_entry (fp, "static void\ncpu_page3_interp");
+      gen_function_entry (fp, "static void\ncpu_page3_interp", 0);
       gen_interpreter_for_table (fp, indent_level,
 				 m6811_page3_opcodes,
 				 TABLE_SIZE(m6811_page3_opcodes),
 				 "cycles_page3");
       gen_function_close (fp);
   
-      gen_function_entry (fp, "static void\ncpu_page4_interp");
+      gen_function_entry (fp, "static void\ncpu_page4_interp", 0);
       gen_interpreter_for_table (fp, indent_level,
 				 m6811_page4_opcodes,
 				 TABLE_SIZE(m6811_page4_opcodes),
@@ -2065,7 +2072,8 @@ gen_interpreter (FILE *fp)
       gen_function_close (fp);
 
       /* Generate the page 2, 3 and 4 handlers.  */
-      gen_function_entry (fp, "static void\ncpu_page2_interp");
+      gen_function_entry (fp, "static void\ncpu_page2_interp",
+                          USE_SRC8 | USE_DST8);
       gen_interpreter_for_table (fp, indent_level,
 				 m6811_page2_opcodes,
 				 TABLE_SIZE(m6811_page2_opcodes),
@@ -2073,7 +2081,8 @@ gen_interpreter (FILE *fp)
       gen_function_close (fp);
 
       /* Generate the interpretor entry point.  */
-      gen_function_entry (fp, "void\ncpu_interp_m6811");
+      gen_function_entry (fp, "void\ncpu_interp_m6811",
+                          USE_SRC8 | USE_DST8);
 
       gen_interpreter_for_table (fp, indent_level, m6811_page1_opcodes,
 				 TABLE_SIZE(m6811_page1_opcodes),
@@ -2087,7 +2096,8 @@ gen_interpreter (FILE *fp)
       gen_cycle_table (fp, "cycles_page2", m6812_page2_opcodes,
 		       TABLE_SIZE (m6812_page2_opcodes));
 
-      gen_function_entry (fp, "static void\ncpu_page2_interp");
+      gen_function_entry (fp, "static void\ncpu_page2_interp",
+                          USE_SRC8 | USE_DST8);
       gen_interpreter_for_table (fp, indent_level,
 				 m6812_page2_opcodes,
 				 TABLE_SIZE(m6812_page2_opcodes),
@@ -2095,7 +2105,8 @@ gen_interpreter (FILE *fp)
       gen_function_close (fp);
 
       /* Generate the interpretor entry point.  */
-      gen_function_entry (fp, "void\ncpu_interp_m6812");
+      gen_function_entry (fp, "void\ncpu_interp_m6812",
+                          USE_SRC8 | USE_DST8);
 
       gen_interpreter_for_table (fp, indent_level, m6812_page1_opcodes,
 				 TABLE_SIZE(m6812_page1_opcodes),
