@@ -912,7 +912,8 @@ lookup_block_symbol (block, name, namespace)
      const char *name;
      const namespace_enum namespace;
 {
-  extern struct symbol *ref_search_val (struct symbol *sym, CORE_ADDR addr);
+  extern struct symbol *ref_search_val PARAMS ((struct symbol *sym,
+					        CORE_ADDR addr));
   register int bot, top, inc;
   register struct symbol *sym;
   register struct symbol *sym_found = NULL;
