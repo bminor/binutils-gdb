@@ -1,5 +1,10 @@
 2002-01-13  Keith Seitz  <keiths@redhat.com>
 
+	* stack.c (print_frame_info_base): Print the frame's pc
+	only if when print_frame_info_listing_hook is not defined.
+
+2002-01-13  Keith Seitz  <keiths@redhat.com>
+
 	* varobj.c (varobj_set_value): Make sure that there were no
 	errors evaluating the object before attempting to set its
 	value.

@@ -399,20 +399,31 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
 				     fi->pc);
       if (!done)
 	{
-	  if (addressprint && mid_statement)
-	    {
-#ifdef UI_OUT
-	      ui_out_field_core_addr (uiout, "addr", fi->pc);
-	      ui_out_text (uiout, "\t");
-#else
-	      print_address_numeric (fi->pc, 1, gdb_stdout);
-	      printf_filtered ("\t");
-#endif
-	    }
 	  if (print_frame_info_listing_hook)
 	    print_frame_info_listing_hook (sal.symtab, sal.line, sal.line + 1, 0);
 	  else
-	    print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
+	    {
+	      /* We used to do this earlier, but that is clearly
+		 wrong. This function is used by many different
+		 parts of gdb, including normal_stop in infrun.c,
+		 which uses this to print out the current PC
+		 when we stepi/nexti into the middle of a source
+		 line. Only the command line really wants this
+		 behavior. Other UIs probably would like the
+		 ability to decide for themselves if it is desired. */
+	      if (addressprint && mid_statement)
+		{
+#ifdef UI_OUT
+		  ui_out_field_core_addr (uiout, "addr", fi->pc);
+		  ui_out_text (uiout, "\t");
+#else
+		  print_address_numeric (fi->pc, 1, gdb_stdout);
+		  printf_filtered ("\t");
+#endif
+		}
+
+	      print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
+	    }
 	}
       current_source_line = max (sal.line - lines_to_list / 2, 1);
     }
