@@ -86,6 +86,8 @@ static int target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
 
 static void init_dummy_target (void);
 
+static struct target_ops debug_target;
+
 static void debug_to_open (char *, int);
 
 static void debug_to_close (int);
@@ -1015,12 +1017,14 @@ target_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
 int
 target_stopped_data_address_p (struct target_ops *target)
 {
-  if (target->to_stopped_data_address == return_zero
-      || (target->to_stopped_data_address == debug_to_stopped_data_address
-	  && debug_target.to_stopped_data_address == return_zero))
+  if (target->to_stopped_data_address
+      == (int (*) (struct target_ops *, CORE_ADDR *)) return_zero)
     return 0;
-  else
-    return 1;
+  if (target->to_stopped_data_address == debug_to_stopped_data_address
+      && (debug_target.to_stopped_data_address
+	  == (int (*) (struct target_ops *, CORE_ADDR *)) return_zero))
+    return 0;
+  return 1;
 }
 #endif
 
@@ -1791,9 +1795,6 @@ init_dummy_target (void)
   dummy_target.to_magic = OPS_MAGIC;
 }
 
-
-static struct target_ops debug_target;
-
 static void
 debug_to_open (char *args, int from_tty)
 {

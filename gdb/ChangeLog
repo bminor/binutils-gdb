@@ -1,3 +1,8 @@
+2004-10-08  Andrew Cagney  <cagney@gnu.org>
+
+	* target.c (debug_target): Move to near start of file.
+	(target_stopped_data_address_p): Re-org logic, add casts.
+
 2004-10-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* solib-sunos.c [HAVE_STRUCT_SO_MAP_WITH_SOM_MEMBERS] (link_map)
