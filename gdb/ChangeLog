@@ -1,3 +1,7 @@
+Mon Jul 26 17:31:49 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* config/m88k/m88k.mt (TDEPFILES): add exec.o.
+
 Mon Jul 26 13:17:36 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* hppa-tdep.c: Remove all uses of use_unwind and `set use_unwind'
