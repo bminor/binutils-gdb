@@ -3317,8 +3317,9 @@ map_sections_to_segments (abfd)
 	}
       else if (! writable
 	       && (hdr->flags & SEC_READONLY) == 0
-	       && (BFD_ALIGN (last_hdr->lma + last_hdr->_raw_size, maxpagesize)
-		   == hdr->lma))
+	       && (((last_hdr->lma + last_hdr->_raw_size - 1)
+		    & ~(maxpagesize - 1))
+		   != (hdr->lma & ~(maxpagesize - 1))))
 	{
 	  /* We don't want to put a writable section in a read only
              segment, unless they are on the same page in memory

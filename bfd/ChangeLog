@@ -1,3 +1,8 @@
+2002-09-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (map_sections_to_segments): Correct test for start of
+	writable section in the same page as end of read-only section.
+
 2002-09-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc_build_one_stub): Don't build glink stubs here.
