@@ -1,1 +1,0 @@
-EMUL=mipsbig

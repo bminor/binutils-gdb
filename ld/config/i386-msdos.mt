@@ -1,2 +1,0 @@
-EMUL=i386msdos
-EMUL_EXTRA1=i386aout

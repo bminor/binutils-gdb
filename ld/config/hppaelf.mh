@@ -1,3 +1,0 @@
-HOSTING_CRT0=/lib/crt0.o
-HOSTING_LIBS=-lc
-HOSTING_EMU=-m hppaelf

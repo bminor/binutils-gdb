@@ -1,2 +1,0 @@
-# BSD 4.4 uses /usr/lib/crt0.o
-HOSTING_CRT0=/usr/lib/crt0.o

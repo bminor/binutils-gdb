@@ -1,2 +1,0 @@
-EMUL=shl
-EMUL=sh

@@ -28,10 +28,14 @@ Makefile.in
 NEWS
 README
 TODO
-config
-config.h
+acconfig.h
+aclocal.m4
+config.h.in
+configure
 configure.bat
+configure.host
 configure.in
+configure.tgt
 dep-in.sed
 emulparams
 emultempl
@@ -71,13 +75,14 @@ mpw-make.in
 mri.c
 mri.h
 scripttempl
+sysdep.h
 testsuite
 
 Things-to-lose:
 
 Do-last:
 
-rce_files="configure.in Makefile.in"
+rce_files="configure.in configure.tgt Makefile.in"
 
 if ( echo $* | grep keep\-rce > /dev/null ) ; then
 	for i in $rce_files ; do
@@ -106,7 +111,7 @@ else
 	done
 fi
 
-arc_files="ChangeLog configure.in Makefile.in"
+arc_files="ChangeLog configure.in configure.tgt Makefile.in"
 
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	for i in $arc_files ; do

@@ -1,2 +1,0 @@
-EMUL=i386mach
-EMUL_EXTRA1=elf_i386

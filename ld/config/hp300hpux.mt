@@ -1,1 +1,0 @@
-EMUL=hp3hpux

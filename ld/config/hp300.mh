@@ -1,4 +1,0 @@
-# If compiling with -O on the HP 9000/300 running HP/UX, you must
-# specify -Wp,-P to avoid a stupid compiler bug.
-# Ian Taylor, David Henkel-Wallace, Cygnus Support
-# CFLAGS = +O1000 -Wp,-P

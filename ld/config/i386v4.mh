@@ -1,3 +1,0 @@
-HOSTING_CRT0=/usr/ccs/lib/crt1.o /usr/ccs/lib/crti.o /usr/ccs/lib/values-Xa.o `if [ -f ../gcc/crtbegin.o ]; then echo ../gcc/crtbegin.o; else gcc -print-libgcc-file-name | sed -e 's/libgcc.a/crtbegin.o/'; fi`
-HOSTING_LIBS=`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi`  -lc `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else gcc -print-libgcc-file-name | sed -e 's/libgcc.a/crtend.o/'; fi` /usr/ccs/lib/crtn.o
-NATIVE_LIB_DIRS=/usr/ccs/lib

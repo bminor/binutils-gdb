@@ -1,1 +1,0 @@
-EMUL=i386lynx

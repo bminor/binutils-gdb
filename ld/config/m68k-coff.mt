@@ -1,1 +1,0 @@
-EMUL=m68kcoff

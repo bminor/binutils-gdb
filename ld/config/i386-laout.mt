@@ -1,2 +1,0 @@
-EMUL=i386linux
-EMUL_EXTRA1=elf_i386
