@@ -1,5 +1,9 @@
 Mon Jun  3 11:01:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coff-sh.c (COFF_DEFAULT_SECTION_ALIGNMENT_POWER): Set to 4.
+	(sh_relax_delete_bytes): Correct handling of differently sized
+	trailing alignment reloc.
+
 	* bfd-in.h: Use #error if BFD_HOST_64_BIT can not be defined.
 	* bfd-in2.h: Rebuild.
 	* configure.in: Warn if there is no known 64 bit type.
