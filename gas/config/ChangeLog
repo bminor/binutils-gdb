@@ -1,3 +1,10 @@
+Mon May  4 18:56:19 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* obj-coffbfd.c: use is a synonym for section, (do_relocs_for):
+	calc the base of relocs correctly.
+	* tc-a29k.c (parse_operand): allow expressions to be in any section.
+	
+
 Thu Mar 12 04:42:38 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* tc-m68k.h, te-sun3.h: moved LOCAL_LABELS_FB definition from

@@ -155,6 +155,7 @@ const pseudo_typeS obj_pseudo_table[] = {
 	{ "type",	obj_coff_type,		0	},
 	{ "val",	obj_coff_val,		0	},
         { "section",    obj_coff_section,       0       },
+        { "use",        obj_coff_section,       0       },
         { "sect",    obj_coff_section,       0       },
         { "text",       obj_coff_text,          0       },
         { "data",       obj_coff_data,          0       },
@@ -317,7 +318,7 @@ void DEFUN(do_relocs_for,(abfd, file_cursor),
 {
   unsigned int nrelocs;
   unsigned int idx;
-  
+  unsigned int addr = 0;
   for (idx = SEG_E0; idx < SEG_E9; idx++) 
   {
     if (segment_info[idx].scnhdr.s_name[0]) 
@@ -327,7 +328,7 @@ void DEFUN(do_relocs_for,(abfd, file_cursor),
       struct external_reloc *external_reloc_vec;
       unsigned int external_reloc_size;
       unsigned int count = 0;
-      unsigned int base  = segment_info[idx].scnhdr.s_paddr;
+      unsigned int base  = addr;
       fixS *   fix_ptr = segment_info[idx].fix_root;
       nrelocs = count_entries_in_chain(idx);
       
@@ -420,6 +421,7 @@ void DEFUN(do_relocs_for,(abfd, file_cursor),
       *file_cursor += external_reloc_size;
       free( external_reloc_vec);
     }
+    addr += segment_info[idx].scnhdr.s_size;
   }
 }
 
@@ -433,89 +435,89 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
 		  unsigned long *file_cursor)
 {
 
-    unsigned int i;
-    unsigned int paddr = 0;
+  unsigned int i;
+  unsigned int paddr = 0;
   
-    for (i = SEG_E0; i < SEG_UNKNOWN; i++) 
-    {  
-	unsigned int offset = 0;
+  for (i = SEG_E0; i < SEG_UNKNOWN; i++) 
+  {  
+    unsigned int offset = 0;
 
-	struct internal_scnhdr *s = &( segment_info[i].scnhdr);
+    struct internal_scnhdr *s = &( segment_info[i].scnhdr);
 	  
-	if (s->s_name[0]) 
-	{
-	  fragS *frag = segment_info[i].frchainP->frch_root;
-	  char *buffer =  malloc(s->s_size);
-	  if (s->s_size != 0) 
-	  {
-	    s->s_scnptr = *file_cursor;
-	  s->s_paddr =  paddr;
-	  s->s_vaddr =  paddr;
+    if (s->s_name[0]) 
+    {
+      fragS *frag = segment_info[i].frchainP->frch_root;
+      char *buffer =  malloc(s->s_size);
+      if (s->s_size != 0) 
+      {
+	s->s_scnptr = *file_cursor;
+	s->s_paddr =  paddr;
+	s->s_vaddr =  paddr;
 
-	  }
-	  else 
-	  {
-	    s->s_scnptr = 0;
-	  s->s_paddr =  0;
-	  s->s_vaddr =  0;
+      }
+      else 
+      {
+	s->s_scnptr = 0;
+	s->s_paddr =  0;
+	s->s_vaddr =  0;
 
-	  }
+      }
 	    
 
-	  s->s_flags = STYP_REG;
-	  if (strcmp(s->s_name,".text")==0)
-	   s->s_flags |= STYP_TEXT;
-	  else if (strcmp(s->s_name,".data")==0)
-	   s->s_flags |= STYP_DATA;
-	  else if (strcmp(s->s_name,".bss")==0)
-	   s->s_flags |= STYP_BSS | STYP_NOLOAD;
+      s->s_flags = STYP_REG;
+      if (strcmp(s->s_name,".text")==0)
+       s->s_flags |= STYP_TEXT;
+      else if (strcmp(s->s_name,".data")==0)
+       s->s_flags |= STYP_DATA;
+      else if (strcmp(s->s_name,".bss")==0)
+       s->s_flags |= STYP_BSS | STYP_NOLOAD;
 
-	  while (frag) {
-	      unsigned int fill_size;
-	      switch (frag->fr_type) {
+      while (frag) {
+	unsigned int fill_size;
+	switch (frag->fr_type) {
 
-		case rs_fill:
-		case rs_align:
-		case rs_org:
-		  if(frag->fr_fix) 
-		  {
-		    memcpy(buffer + frag->fr_address,
-			   frag->fr_literal,
-			   frag->fr_fix);
-		    offset += frag->fr_fix;
-		  }
+	 case rs_fill:
+	 case rs_align:
+	 case rs_org:
+	  if(frag->fr_fix) 
+	  {
+	    memcpy(buffer + frag->fr_address,
+		   frag->fr_literal,
+		   frag->fr_fix);
+	    offset += frag->fr_fix;
+	  }
 
-		  fill_size = frag->fr_var;
-		  if (fill_size)	
-		  {
-		    unsigned int count ;
-		    unsigned int off = frag->fr_fix;
-		    for (count = frag->fr_offset; count;  count--) 
-		    {
-		      memcpy(buffer +  frag->fr_address  + off,
-			     frag->fr_literal + frag->fr_fix,
-			     fill_size);
-		      off += fill_size;
-		      offset += fill_size;
+	  fill_size = frag->fr_var;
+	  if (fill_size)	
+	  {
+	    unsigned int count ;
+	    unsigned int off = frag->fr_fix;
+	    for (count = frag->fr_offset; count;  count--) 
+	    {
+	      memcpy(buffer +  frag->fr_address  + off,
+		     frag->fr_literal + frag->fr_fix,
+		     fill_size);
+	      off += fill_size;
+	      offset += fill_size;
 		      
-		    }
-
-		  }
-		  break;
-		default:	
-		  abort();
-		}
-	      frag = frag->fr_next;
 	    }
+
+	  }
+	  break;
+	 default:	
+	  abort();
+	}
+	frag = frag->fr_next;
+      }
 	  
 
-	  bfd_write(buffer, s->s_size,1,abfd);
-	  free(buffer);
+      bfd_write(buffer, s->s_size,1,abfd);
+      free(buffer);
 	  
-	  *file_cursor += s->s_size;
-	  paddr += s->s_size;
-	}      
-    }
+      *file_cursor += s->s_size;
+      paddr += s->s_size;
+    }      
+  }
 
 }
 
@@ -1684,9 +1686,10 @@ extern void DEFUN_VOID(write_object_file)
 	  /* THis is a special case, we leave the size alone, which will have */
 	  /* been made up from all and any lcomms seen */
 	}
-	else {
-	    addr += size_section(abfd, i);
-	  }
+	else 
+	{
+	  addr += size_section(abfd, i);
+	}
       }
 
 
@@ -1713,6 +1716,8 @@ extern void DEFUN_VOID(write_object_file)
     /* Plant the data */
 
     fill_section(abfd,&filehdr, &file_cursor);
+
+
 
     filehdr.f_magic = COFF_MAGIC;
     filehdr.f_timdat = time(0);
@@ -1858,7 +1863,7 @@ DEFUN(c_line_new,(symbol, paddr, line_number, frag),
   
   if (line_number == 0) 
   {
-last_line_symbol = symbol;
+    last_line_symbol = symbol;
     new_line->line.l_addr.l_symndx = (long)symbol;
   }
   else 
@@ -1878,7 +1883,7 @@ last_line_symbol = symbol;
   {
     s->lineno_list_tail->next = new_line;
   }
-   s->lineno_list_tail = new_line;
+  s->lineno_list_tail = new_line;
   return LINESZ * s->scnhdr.s_nlnno ++;
 }
 

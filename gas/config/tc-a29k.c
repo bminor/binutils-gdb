@@ -80,7 +80,10 @@ const pseudo_typeS
 	    { "reg",	s_lsym,		0 },	/* Register equate, same as equ */
 	    { "space",	s_ignore,	0 },	/* Listing control */
 	    { "sect",	s_ignore,	0 },	/* Creation of coff sections */
+#ifndef OBJ_COFF
+ /* We can do this right with coff */
 	    { "use",	s_use,		0 },
+#endif
 	    { "word",	cons,		4 },
 	    { NULL,	0,		0 },
     };
@@ -365,34 +368,18 @@ char *
 char *s;
 expressionS *operandp;
 {
-	char *save = input_line_pointer;
-	char *new;
-	segT seg;
+  char *save = input_line_pointer;
+  char *new;
+  segT seg;
 	
-	input_line_pointer = s;
-	seg = expr (0, operandp);
-	new = input_line_pointer;
-	input_line_pointer = save;
-	
-	switch (seg) {
-	case SEG_ABSOLUTE:
-	case SEG_TEXT:
-	case SEG_DATA:
-	case SEG_BSS:
-	case SEG_UNKNOWN:
-	case SEG_DIFFERENCE:
-	case SEG_BIG:
-	case SEG_REGISTER:
-		return new;
-		
-	case SEG_ABSENT:
-		as_bad("Missing operand");
-		return new;
-		
-	default:
-		as_bad("Don't understand operand of type %s", segment_name (seg));
-		return new;
-	}
+  input_line_pointer = s;
+  seg = expr (0, operandp);
+  new = input_line_pointer;
+  input_line_pointer = save;
+
+  if (seg == SEG_ABSENT) 	
+   as_bad("Missing operand");
+  return new;
 }
 
 /* Instruction parsing.  Takes a string containing the opcode.  
