@@ -1,3 +1,26 @@
+Mon Mar 11 12:28:31 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* stab-syms.c (__define_stab_duplicate): Define.
+	(bfd_get_stab_name): Rename from aout_stab_name.  Rewrite to use a
+	switch.
+	* bfd-in.h (bfd_get_stab_name): Declare.
+	* bfd-in2.h: Rebuild.
+	* Makefile.in: Rebuild dependencies.
+	(BFD_LIBS): Add stab-syms.o.
+	(BFD_LIBS_CFILES): Add stab-syms.c.
+	(BFD32_BACKENDS): Remove stab-syms.o.
+	(BFD32_BACKENDS_CFILES): Remove stab-syms.c.
+	* configure.in: Don't list stab-syms.o in bfd_backends.
+	* configure: Rebuild.
+	* libaout.h (aout_stab_name): Don't declare.
+	* aoutx.h (NAME(aout,get_symbol_info)): Call bfd_get_stab_name,
+	not aout_stab_name.
+
+Fri Mar  8 11:26:20 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (assign_file_positions_for_segments): Adjust file offset
+	for section alignment even if SEC_LOAD is not set.
+
 Tue Mar  5 12:02:23 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Don't set SHLIB or SHLINK to an empty string,

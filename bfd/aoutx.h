@@ -692,7 +692,7 @@ NAME(aout,machine_type) (arch, machine, unknown)
   case bfd_arch_sparc:
     if (machine == 0
 	|| machine == bfd_mach_sparc
-	|| machine == bfd_mach_sparc64)
+	|| machine == bfd_mach_sparc_v9)
       arch_flags = M_SPARC;
     break;
 
@@ -2487,7 +2487,7 @@ NAME(aout,get_symbol_info) (ignore_abfd, symbol, ret)
   if (ret->type == '?')
     {
       int type_code = aout_symbol(symbol)->type & 0xff;
-      CONST char *stab_name = aout_stab_name(type_code);
+      const char *stab_name = bfd_get_stab_name (type_code);
       static char buf[10];
 
       if (stab_name == NULL)
