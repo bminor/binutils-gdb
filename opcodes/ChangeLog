@@ -1,3 +1,9 @@
+start-sanitize-sky
+Thu Feb 12 11:01:40 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp.opc.c: Nicely format opcode tables.
+
+end-sanitize-sky
 Thu Feb 12 03:41:00 1998  J"orn Rennecke  <amylaar@cygnus.co.uk>
 
 Fix rac to accept only a0:
