@@ -26,7 +26,9 @@ extern CGEN_CPU_DESC gas_cgen_cpu_desc;
 
 /* Maximum number of fixups in an insn.
    If you need to change this, allow target to override and do so there.  */
+#ifndef GAS_CGEN_MAX_FIXUPS
 #define GAS_CGEN_MAX_FIXUPS 3
+#endif
 
 /* Struct defining result of gas_cgen_finish_insn.  */
 typedef struct {
