@@ -1,3 +1,8 @@
+2002-09-04  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* arm-tdep.c (arm_addr_bits_remove): Don't check for Thumb mode
+	if arm_apcs_32 is false.
+
 2002-09-03  Theodore A. Roth  <troth@verinet.com>
 
 	* gdb/avr-tdep.c (avr_gdbarch_init): Use

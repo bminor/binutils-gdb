@@ -225,10 +225,10 @@ arm_pc_is_thumb_dummy (CORE_ADDR memaddr)
 static CORE_ADDR
 arm_addr_bits_remove (CORE_ADDR val)
 {
-  if (arm_pc_is_thumb (val))
-    return (val & (arm_apcs_32 ? 0xfffffffe : 0x03fffffe));
+  if (arm_apcs_32)
+    return (val & (arm_pc_is_thumb (val) ? 0xfffffffe : 0xfffffffc));
   else
-    return (val & (arm_apcs_32 ? 0xfffffffc : 0x03fffffc));
+    return (val & 0x03fffffc);
 }
 
 /* When reading symbols, we need to zap the low bit of the address,
