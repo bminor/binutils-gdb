@@ -85,6 +85,7 @@ targets=
 #targetsubdir=
 undefinedargs=
 verbose=
+version="$Revision$"
 x11=default
 
 # or maybe grab from gcc/version.c
@@ -244,6 +245,10 @@ do
 		-v | -verbose | --v)
 			verbose=${arg}
 			;;
+		-version | -V | --version | --V)
+			echo "This is Cygnus Configure version" ${version}
+			exit 0
+			;;
 		-x | --x) ;;
 		-* | --*)
 			(echo ;
@@ -343,12 +348,12 @@ if [ -n "${fatal}" -o "${hosts}" = "help" ] ; then
 	exit 1
 fi
 
-configsubr=`echo ${progname} | sed 's/configure$/config.subr/'`
+configsub=`echo ${progname} | sed 's/configure$/config.sub/'`
 
-if (${configsubr} `echo ${hosts} | sed -e 's/ .*//'`) >/dev/null 2>&1 ; then
+if (${configsub} `echo ${hosts} | sed -e 's/ .*//'`) >/dev/null 2>&1 ; then
 	true
 else
-	echo '***' cannot find config.subr.
+	echo '***' cannot find config.sub.
 	exit 1
 fi
 
@@ -414,7 +419,7 @@ for host in ${hosts} ; do
 
 	host_alias=${host}
 
-	result=`${configsubr} ${host}`
+	result=`${configsub} ${host}`
 	host_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
 	host_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 	host_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
@@ -430,7 +435,7 @@ for host in ${hosts} ; do
 	for target in ${targets} ; do
 
 		target_alias=${target}
-		result=`${configsubr} ${target}`
+		result=`${configsub} ${target}`
 		target_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
 		target_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 		target_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
@@ -588,7 +593,7 @@ for host in ${hosts} ; do
 			# Define macro CROSS_COMPILE in compilation if this is a cross-compiler.
 			if [ "${host}" != "${target}" ] ; then
 				echo "CROSS=-DCROSS_COMPILE" > ${Makefile}
-				echo "ALL=start.encap" >> ${Makefile}
+				echo "ALL=all.cross" >> ${Makefile}
 			else
 				echo "ALL=all.internal" > ${Makefile}
 			fi

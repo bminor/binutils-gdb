@@ -1,3 +1,7 @@
+Thu Dec 19 15:54:29 1991  K. Richard Pixley  (rich at cygnus.com)
+
+	* configure: added -V for version number option.
+
 Wed Dec 18 15:39:34 1991  K. Richard Pixley  (rich at cygnus.com)
 
 	* DOC.configure, cfg-paper.texi: revised, updated, and texinfo'd.
