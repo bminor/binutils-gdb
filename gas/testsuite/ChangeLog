@@ -1,3 +1,9 @@
+start-sanitize-m32rx
+Mon Mar 23 11:34:00 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/m32r/m32rx.d: Fix sath bit pattern (PR15418).
+
+end-sanitize-m32rx
 Mon Mar 23 10:47:33 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* gas/all/align.s: Back out ".section text" change below;
