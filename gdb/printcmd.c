@@ -75,8 +75,6 @@ int current_display_number;
 
 int inspect_it = 0;
 
-enum display_status {disabled, enabled};
-
 struct display
 {
   /* Chain link to next auto-display item.  */
@@ -90,7 +88,7 @@ struct display
   /* Innermost block required by this expression when evaluated */
   struct block *block;
   /* Status of this display (enabled or disabled) */
-  enum display_status status;
+  enum enable status;
 };
 
 /* Chain of expressions whose values should be displayed
@@ -600,7 +598,11 @@ print_address (addr, stream)
      CORE_ADDR addr;
      FILE *stream;
 {
+#ifdef ADDR_BITS_REMOVE
+  fprintf_filtered (stream, local_hex_format(), ADDR_BITS_REMOVE(addr));
+#else
   fprintf_filtered (stream, local_hex_format(), addr);
+#endif
   print_address_symbolic (addr, stream, asm_demangle, " ");
 }
 
@@ -1553,6 +1555,13 @@ print_frame_args (func, fi, num, stream)
 	 two entries (one a parameter, one a register or local), and the one
 	 we want is the non-parm, which lookup_symbol will find for
 	 us.  After this, sym could be any SYMBOL_CLASS...  */
+#ifdef IBM6000
+      /* AIX/RS6000 implements a concept of traceback tables, in which case
+         it creates nameless parameters. Looking for those parameter symbols
+	 will result in an error. */
+
+      if ( *SYMBOL_NAME (sym))
+#endif
       sym = lookup_symbol (SYMBOL_NAME (sym),
 		    b, VAR_NAMESPACE, (int *)NULL, (struct symtab **)NULL);
 
