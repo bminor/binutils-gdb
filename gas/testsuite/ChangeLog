@@ -1,3 +1,9 @@
+2004-08-26  Nick Clifton  <nickc@redhat.com>
+
+	* gas/i386/i386.exp: Group ELF specific tests together.  Move the
+	pcrel test into the ELF only section.  Use is_elf_format to test
+	for ELF based toolchains.
+
 2004-08-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/all/gas.exp: Use `string match ""' instead of `eq ""'.
