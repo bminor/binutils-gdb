@@ -7101,10 +7101,12 @@ elf_gc_propagate_vtable_entries_used (h, okp)
           int file_align = bed->s->file_align;
 
 	  n = h->vtable_parent->vtable_entries_size / file_align;
-	  while (--n != 0)
+	  while (n--)
 	    {
-	      if (*pu) *cu = true;
-	      pu++, cu++;
+	      if (*pu)
+		*cu = true;
+	      pu++;
+	      cu++;
 	    }
 	}
     }
