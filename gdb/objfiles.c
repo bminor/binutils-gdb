@@ -370,9 +370,11 @@ unlink_objfile (objfile)
 	{
 	  *objpp = (*objpp)->next;
 	  objfile->next = NULL;
-	  break;
+	  return;
 	}
     }
+
+  internal_error ("objfiles.c (unlink_objfile): objfile already unlinked");
 }
 
 
@@ -436,17 +438,6 @@ free_objfile (objfile)
      is unknown, but we play it safe for now and keep each action until
      it is shown to be no longer needed. */
 
-#if defined (CLEAR_SOLIB)
-  CLEAR_SOLIB ();
-  /* CLEAR_SOLIB closes the bfd's for any shared libraries.  But
-     the to_sections for a core file might refer to those bfd's.  So
-     detach any core file.  */
-  {
-    struct target_ops *t = find_core_target ();
-    if (t != NULL)
-      (t->to_detach) (NULL, 0);
-  }
-#endif
   /* I *think* all our callers call clear_symtab_users.  If so, no need
      to call this here.  */
   clear_pc_function_cache ();

@@ -1377,6 +1377,9 @@ find_target_beneath PARAMS ((struct target_ops *));
 
 extern int
 target_resize_to_sections PARAMS ((struct target_ops *target, int num_added));
+
+extern void remove_target_sections (bfd *abfd);
+
 
 /* Stuff that should be shared among the various remote targets.  */
 

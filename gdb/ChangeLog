@@ -1,3 +1,44 @@
+2000-03-15  Jim Blandy  <jimb@redhat.com>
+
+	Deal with the inferior unloading shared objects.
+	* solib.c (current_sos): New function, replacing find_solib.
+	(find_solib): Deleted.
+	(free_so): New function.
+	(clear_solib): Call free_so, instead of writing it out.
+	(solib_add): Rewritten: compare the inferior's current list of
+	shared objects with GDB's list, and do the required loads and
+	unloads.
+	(info_sharedlibrary_command, solib_address): Don't use find_solib
+	to walk the list of shared libraries: call solib_add, and then
+	walk the list at so_list_head normally.
+	* objfiles.c (free_objfile): Don't call CLEAR_SOLIB, and don't
+	detach the core target.  These tasks are taken care of elsewhere.
+	* target.c (remove_target_sections): New function.
+	* target.h (remove_target_sections): New declaration.
+
+	* solib.c (symbol_add_stub): Check whether we've already created
+	an objfile for this shared object first, before doing all that
+	work to compute section addresses, etc.
+
+	* objfiles.c (unlink_objfile): Report an internal error if objfile
+	doesn't occur in the object_files list.
+
+	* solib.c (special_symbol_handling): Delete argument; it's not
+	used.
+	
+	Changes from Peter Schauer <pes@regent.e-technik.tu-muenchen.de>:
+
+	* solib.c (SOLIB_EXTRACT_ADDRESS):  New macro to extract addresses
+	from solib structures. Use it throughout solib.c, get rid of all
+	CORE_ADDR casts.
+	(struct so_list):  Change type of lmaddr to CORE_ADDR.
+	(first_link_map_member):  Change return value type to CORE_ADDR,
+	update callers.
+	(solib_add_common_symbols):  Change parameter type to CORE_ADDR,
+	update callers.
+	(open_symbol_file_object, find_solib):  Change type of lm variable
+	to CORE_ADDR.
+
 2000-03-15  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* ser-go32.c (dos_noop, dos_raw, dos_noflush_set_tty_state)

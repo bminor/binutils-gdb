@@ -1325,6 +1325,39 @@ target_resize_to_sections (struct target_ops *target, int num_added)
 
 }
 
+/* Remove all target sections taken from ABFD.
+
+   Scan the current target stack for targets whose section tables
+   refer to sections from BFD, and remove those sections.  We use this
+   when we notice that the inferior has unloaded a shared object, for
+   example.  */
+void
+remove_target_sections (bfd *abfd)
+{
+  struct target_ops **t;
+
+  for (t = target_structs; t < target_structs + target_struct_size; t++)
+    {
+      struct section_table *src, *dest;
+
+      dest = (*t)->to_sections;
+      for (src = (*t)->to_sections; src < (*t)->to_sections_end; src++)
+	if (src->bfd != abfd)
+	  {
+	    /* Keep this section.  */
+	    if (dest < src) *dest = *src;
+	    dest++;
+	  }
+
+      /* If we've dropped any sections, resize the section table.  */
+      if (dest < src)
+	target_resize_to_sections (*t, dest - src);
+    }
+}
+
+
+
+
 /* Find a single runnable target in the stack and return it.  If for
    some reason there is more than one, return NULL.  */
 
