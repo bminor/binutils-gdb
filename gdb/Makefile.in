@@ -240,6 +240,12 @@ CHILL_FOR_TARGET = ` \
     fi; \
   fi`
 CHILL_LIB = -lchill
+
+## This is ugly, but I don't want GNU make to put these variables in
+## the environment.  Older makes will see this as a set of targets
+## with no dependencies and no actions.
+unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
+
 $(end-sanitize-chill)
 
 # The use of $$(x_FOR_TARGET) reduces the command line length by not
