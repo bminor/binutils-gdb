@@ -910,8 +910,9 @@ s_dmadata( type)
     int type;
 {
     static short state = 0;
-    struct symbol *label;		/* Points to symbol */
-    char *name, *name2;			/* points to name of first / final symbol */
+    static symbolS *label;		/* Points to symbol */
+    char *name;
+    const char *prevName;
     int temp;
 
     switch( type) {
@@ -962,14 +963,14 @@ s_dmadata( type)
 	*"label" points to beginning of block
 	* Create a name for the final label like _$<name>
 	*/
-	name = label->bsym->name;
-	temp = strlen( name) + 1;
-	name2 = malloc( temp + 2);
-	name2[ 0] = '_';
-	name2[ 1] = '$';
-	memcpy( name2+2, name, temp);	/* copy original name & \0 */
-	colon( name2);
-	free( name2);
+	prevName = label->bsym->name;
+	temp = strlen( prevName) + 1;
+	name = malloc( temp + 2);
+	name[ 0] = '_';
+	name[ 1] = '$';
+	memcpy( name+2, prevName, temp);	/* copy original name & \0 */
+	colon( name);
+	free( name);
 	break;
 
     default:
