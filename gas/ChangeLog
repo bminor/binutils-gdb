@@ -1,3 +1,9 @@
+2004-11-24  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-iq2000.c: Remove support for IQ10 processor.
+	Convert to ISO C90 formatting.
+	* config/tc-iq2000.h: Likewise.
+
 2004-11-23  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-mn10300.c (md_relax_table): More fixes to the offsets

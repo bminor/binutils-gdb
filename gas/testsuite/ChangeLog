@@ -1,3 +1,42 @@
+2004-11-24  Nick Clifton  <nickc@redhat.com>
+
+	* gas/iq2000/allinsn.exp: Remove IQ10 tests.
+	* gas/iq2000/q10allinsn.d: Delete.
+	* gas/iq2000/q10allinsn.s: Delete.	
+	* gas/iq2000/q10hazard4.s: Delete.
+	* gas/iq2000/q10hazard5.s: Delete.
+	* gas/iq2000/q10load-hazards.exp: Delete.
+	* gas/iq2000/q10nohazard.s: Delete.
+	* gas/iq2000/q10noyield.s: Delete.
+	* gas/iq2000/q10test0.d: Delete.
+	* gas/iq2000/q10test0.s: Delete.
+	* gas/iq2000/q10test1.d: Delete.
+	* gas/iq2000/q10test1.s: Delete.
+	* gas/iq2000/q10test10.d: Delete.
+	* gas/iq2000/q10test10.s: Delete.
+	* gas/iq2000/q10test11.d: Delete.
+	* gas/iq2000/q10test11.s: Delete.
+	* gas/iq2000/q10test12.d: Delete.
+	* gas/iq2000/q10test12.s: Delete.
+	* gas/iq2000/q10test2.d: Delete.
+	* gas/iq2000/q10test2.s: Delete.
+	* gas/iq2000/q10test3.d: Delete.
+	* gas/iq2000/q10test3.s: Delete.
+	* gas/iq2000/q10test4.d: Delete.
+	* gas/iq2000/q10test4.s: Delete.
+	* gas/iq2000/q10test5.d: Delete.
+	* gas/iq2000/q10test5.s: Delete.
+	* gas/iq2000/q10test6.d: Delete.
+	* gas/iq2000/q10test6.s: Delete.
+	* gas/iq2000/q10test7.d: Delete.
+	* gas/iq2000/q10test7.s: Delete.
+	* gas/iq2000/q10test8.d: Delete.
+	* gas/iq2000/q10test8.s: Delete.
+	* gas/iq2000/q10test9.d: Delete.
+	* gas/iq2000/q10test9.s: Delete.
+	* gas/iq2000/q10yield.exp: Delete.
+	* gas/iq2000/test.exp: Delete.
+
 2004-11-24  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
 
 	* gas/arc/st.s: Add checks for other variants of the sr and st
