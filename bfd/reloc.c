@@ -627,8 +627,8 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
     }
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > input_section->_cooked_size /
-      bfd_octets_per_byte (abfd))
+  if (reloc_entry->address > (input_section->_cooked_size
+			      / bfd_octets_per_byte (abfd)))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targetted at and the
@@ -1023,7 +1023,8 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
     }
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > input_section->_cooked_size)
+  if (reloc_entry->address > (input_section->_cooked_size
+			      / bfd_octets_per_byte (abfd)))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targetted at and the

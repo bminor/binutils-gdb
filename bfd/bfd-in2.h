@@ -2123,16 +2123,12 @@ to compensate for the borrow when the low bits are added. */
 /* Like BFD_RELOC_LO16, but PC relative. */
   BFD_RELOC_PCREL_LO16,
 
-/* Relocation relative to the global pointer. */
-#define BFD_RELOC_MIPS_GPREL BFD_RELOC_GPREL16
-
 /* Relocation against a MIPS literal section. */
   BFD_RELOC_MIPS_LITERAL,
 
 /* MIPS ELF relocations. */
   BFD_RELOC_MIPS_GOT16,
   BFD_RELOC_MIPS_CALL16,
-#define BFD_RELOC_MIPS_GPREL32 BFD_RELOC_GPREL32
   BFD_RELOC_MIPS_GOT_HI16,
   BFD_RELOC_MIPS_GOT_LO16,
   BFD_RELOC_MIPS_CALL_HI16,
