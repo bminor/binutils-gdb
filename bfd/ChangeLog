@@ -1,5 +1,8 @@
 Fri Aug  6 12:28:38 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* Makefile.in (coff-mips.o, coff-alpha.o): Don't depend on
+	coffcode.h.
+
 	* coffcode.h (sec_to_styp_flags): Inspired by mb@tti.COM (Michael
 	Bloom): Only set STYP_BSS for SEC_ALLOC sections.
 

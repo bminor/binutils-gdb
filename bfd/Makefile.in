@@ -424,10 +424,10 @@ ecoff.o: ecoff.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/sym.h \
   $(INCDIR)/coff/symconst.h
 coff-mips.o: coff-mips.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
-  $(INCDIR)/coff/mips.h $(INCDIR)/coff/internal.h libcoff.h coffcode.h \
+  $(INCDIR)/coff/mips.h $(INCDIR)/coff/internal.h libcoff.h \
   coffswap.h seclet.h libecoff.h ecoffswap.h $(INCDIR)/coff/ecoff.h
 coff-alpha.o: coff-alpha.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
-  $(INCDIR)/coff/alpha.h $(INCDIR)/coff/internal.h libcoff.h coffcode.h \
+  $(INCDIR)/coff/alpha.h $(INCDIR)/coff/internal.h libcoff.h \
   coffswap.h seclet.h libecoff.h ecoffswap.h $(INCDIR)/coff/ecoff.h
 coff-rs6000.o: coff-rs6000.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/coff/rs6000.h $(INCDIR)/coff/internal.h libcoff.h coffcode.h \
