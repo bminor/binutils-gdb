@@ -1,5 +1,5 @@
 /* Native macro definitions for GDB on an Intel i[3456]86.
-   Copyright (C) 2001 Free Software Foundation, Inc.
+   Copyright 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,12 +21,10 @@
 #ifndef NM_I386_H
 #define NM_I386_H 1
 
-
 /* Hardware-assisted breakpoints and watchpoints.  */
 
 /* Targets should define this to use the generic x86 watchpoint support.  */
 #ifdef I386_USE_GENERIC_WATCHPOINTS
-
 
 #ifndef TARGET_HAS_HARDWARE_WATCHPOINTS
 #define TARGET_HAS_HARDWARE_WATCHPOINTS
@@ -38,20 +36,20 @@ extern void i386_cleanup_dregs (void);
 /* Insert a watchpoint to watch a memory region which starts at
    address ADDR and whose length is LEN bytes.  Watch memory accesses
    of the type TYPE.  Return 0 on success, -1 on failure.  */
-extern int  i386_insert_watchpoint (CORE_ADDR addr, int len, int type);
+extern int i386_insert_watchpoint (CORE_ADDR addr, int len, int type);
 
 /* Remove a watchpoint that watched the memory region which starts at
    address ADDR, whose length is LEN bytes, and for accesses of the
    type TYPE.  Return 0 on success, -1 on failure.  */
-extern int  i386_remove_watchpoint (CORE_ADDR addr, int len, int type);
+extern int i386_remove_watchpoint (CORE_ADDR addr, int len, int type);
 
 /* Return non-zero if we can watch a memory region that starts at
    address ADDR and whose length is LEN bytes.  */
-extern int  i386_region_ok_for_watchpoint (CORE_ADDR addr, int len);
+extern int i386_region_ok_for_watchpoint (CORE_ADDR addr, int len);
 
 /* Return non-zero if the inferior has some break/watchpoint that
    triggered.  */
-extern int  i386_stopped_by_hwbp (void);
+extern int i386_stopped_by_hwbp (void);
 
 /* If the inferior has some break/watchpoint that triggered, return
    the address associated with that break/watchpoint.  Otherwise,
@@ -60,10 +58,10 @@ extern CORE_ADDR i386_stopped_data_address (void);
 
 /* Insert a hardware-assisted breakpoint at address ADDR.  SHADOW is
    unused.  Return 0 on success, EBUSY on failure.  */
-extern int  i386_insert_hw_breakpoint (CORE_ADDR addr, void *shadow);
+extern int i386_insert_hw_breakpoint (CORE_ADDR addr, void *shadow);
 
 /* Remove a hardware-assisted breakpoint at address ADDR.  SHADOW is
-   unused.  Return 0 on success, -1 on failure.  */
+   unused. Return 0 on success, -1 on failure.  */
 extern int  i386_remove_hw_breakpoint (CORE_ADDR addr, void *shadow);
 
 /* Returns the number of hardware watchpoints of type TYPE that we can
@@ -77,19 +75,19 @@ extern int  i386_remove_hw_breakpoint (CORE_ADDR addr, void *shadow);
    currently enabled.
 
    We always return 1 here because we don't have enough information
-   about possible overlap of addresses that they want to watch.  As
-   an extreme example, consider the case where all the watchpoints
-   watch the same address and the same region length: then we can
-   handle a virtually unlimited number of watchpoints, due to debug
-   register sharing implemented via reference counts in i386-tdep.c.  */
+   about possible overlap of addresses that they want to watch.  As an
+   extreme example, consider the case where all the watchpoints watch
+   the same address and the same region length: then we can handle a
+   virtually unlimited number of watchpoints, due to debug register
+   sharing implemented via reference counts in i386-nat.c.  */
 
 #define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) 1
 
-/* Returns non-zero if we can use hardware watchpoints to watch a region
-   whose address is ADDR and whose length is LEN.  */
+/* Returns non-zero if we can use hardware watchpoints to watch a
+   region whose address is ADDR and whose length is LEN.  */
 
-#define TARGET_REGION_OK_FOR_HW_WATCHPOINT(addr,len) \
-	i386_region_ok_for_watchpoint(addr,len)
+#define TARGET_REGION_OK_FOR_HW_WATCHPOINT(addr, len) \
+  i386_region_ok_for_watchpoint (addr, len)
 
 /* After a watchpoint trap, the PC points to the instruction after the
    one that caused the trap.  Therefore we don't need to step over it.
@@ -103,17 +101,17 @@ extern int  i386_remove_hw_breakpoint (CORE_ADDR addr, void *shadow);
 
 /* Use these macros for watchpoint insertion/removal.  */
 
-#define target_insert_watchpoint(addr, len, type)  \
+#define target_insert_watchpoint(addr, len, type) \
   i386_insert_watchpoint (addr, len, type)
 
-#define target_remove_watchpoint(addr, len, type)  \
+#define target_remove_watchpoint(addr, len, type) \
   i386_remove_watchpoint (addr, len, type)
 
-#define target_insert_hw_breakpoint(addr, shadow)  \
-  i386_insert_hw_breakpoint(addr, shadow)
+#define target_insert_hw_breakpoint(addr, shadow) \
+  i386_insert_hw_breakpoint (addr, shadow)
 
-#define target_remove_hw_breakpoint(addr, shadow)  \
-  i386_remove_hw_breakpoint(addr, shadow)
+#define target_remove_hw_breakpoint(addr, shadow) \
+  i386_remove_hw_breakpoint (addr, shadow)
 
 #define DECR_PC_AFTER_HW_BREAK 0
 

@@ -1,3 +1,8 @@
+2001-03-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/nm-i386.h: Fix formatting and change reference to
+	i386-tdep.c to i386-nat.c.
+
 2001-03-23  David Smith  <dsmith@redhat.com>
 
 	* configure.in: Corrected spelling errors.
