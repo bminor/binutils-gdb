@@ -53,6 +53,21 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #define TC_START_LABEL(x,y) (x==':')
 #endif
 
+/* Set by the object-format or the target.  */
+#ifndef TC_IMPLICIT_LCOMM_ALIGNMENT
+#define TC_IMPLICIT_LCOMM_ALIGNMENT(SIZE, P2VAR)        \
+ do {                                                   \
+  if ((SIZE) >= 8)                                      \
+    (P2VAR) = 3;                                        \
+  else if ((SIZE) >= 4)                                 \
+    (P2VAR) = 2;                                        \
+  else if ((SIZE) >= 2)                                 \
+    (P2VAR) = 1;                                        \
+  else                                                  \
+    (P2VAR) = 0;                                        \
+ } while (0)
+#endif
+
 /* The NOP_OPCODE is for the alignment fill value.
  * fill it a nop instruction so that the disassembler does not choke
  * on it
@@ -1973,24 +1988,14 @@ s_lcomm_internal (needs_align, bytes_p)
 	}
     }
 #endif
+
    if (!needs_align)
      {
-       /* FIXME. This needs to be machine independent. */
-       if (temp >= 8)
-	 align = 3;
-       else if (temp >= 4)
-	 align = 2;
-       else if (temp >= 2)
-	 align = 1;
-       else
-	 align = 0;
+       TC_IMPLICIT_LCOMM_ALIGNMENT (temp, align);
 
-#ifdef OBJ_EVAX
-       /* FIXME: This needs to be done in a more general fashion.  */
-       align = 3;
-#endif
-
-       record_alignment(bss_seg, align);
+       /* Still zero unless TC_IMPLICIT_LCOMM_ALIGNMENT set it.  */
+       if (align)
+         record_alignment(bss_seg, align);
      }
 
   if (needs_align)

@@ -1,3 +1,11 @@
+Sat Mar 11 00:01:39 2000  Hans-Peter Nilsson  <hp@axis.se>
+
+	* read.c (TC_IMPLICIT_LCOMM_ALIGNMENT): New default-definition.
+	(s_lcomm_internal): Use it.
+	* doc/internals.texi (CPU backend): Document it.
+	* config/obj-evax.h (TC_IMPLICIT_LCOMM_ALIGNMENT): Set to 2**3
+	bytes.
+
 2000-03-10  Geoffrey Keating  <geoffk@cygnus.com>
 
 	* config/tc-mips.c (mips_ip): Don't put stuff in .rodata

@@ -1059,6 +1059,16 @@ upon the number of bytes that the alignment will skip.
 You may define this macro to do special handling for an alignment directive.
 GAS will call it at the end of the assembly.
 
+@item TC_IMPLICIT_LCOMM_ALIGNMENT (@var{size}, @var{p2var})
+@cindex TC_IMPLICIT_LCOMM_ALIGNMENT
+An @code{.lcomm} directive with no explicit alignment parameter will use this
+macro to set @var{p2var} to the alignment that a request for @var{size} bytes
+will have.  The alignment is expressed as a power of two.  If no alignment
+should take place, the macro definition should do nothing.  Some targets define
+a @code{.bss} directive that is also affected by this macro.  The default
+definition will set @var{p2var} to the truncated power of two of sizes up to
+eight bytes.
+
 @item md_flush_pending_output
 @cindex md_flush_pending_output
 If you define this macro, GAS will call it each time it skips any space because of a
