@@ -117,7 +117,36 @@ proc gdb_exit {} {
     if $verbose>1 then {
 	send_user "Quitting $GDB $GDBFLAGS\n"
     }
-    close
+}
+
+#
+# gdb_target_udi
+# Set gdb to the desired UDI target
+#
+proc gdb_target_udi { } {
+    global targetname
+    global prompt
+    global verbose
+
+    # set targets hostname
+    send "target udi $targetname\n"
+    set timeout 60
+    expect {
+	-re "TIP UDI 1.2 Conformant.*$prompt $"	{
+	    if $verbose>1 then {
+		send_user "Set target to $targetname\n"
+	    }
+	}
+	-re "A program is being debugged already.  Kill it\? \(y or n\)" {
+	    send "y\n"
+	    continue -expect
+	}
+	timeout { 
+	    error "Couldn't set target for UDI."
+	    alldone
+	}
+    }
+    set timeout 10
 }
 
 #
@@ -130,7 +159,6 @@ proc gdb_start { } {
     global spawn_id
     global prompt
     global verbose
-    global targetname
 
     set GDB [which $GDB]
     # start GDB
@@ -164,24 +192,8 @@ proc gdb_start { } {
     if $verbose>1 then {
 	send_user "Setting up target, Please wait...\n"
     }
-    catch "exec rm [glob -nocomplain *_soc]"
-    catch "exec rm [glob -nocomplain /tmp/*_soc]"
-    # set targets hostname
-    send "target udi $targetname\n"
-    set timeout 60
-    expect {
-	-re "target udi.*TIP UDI 1.2 Conformant.*$prompt $"	{
-	    if $verbose>1 then {
-		send_user "Set target to $targetname\n"
-	    }
-}
-	timeout { 
-	    error "Couldn't set target for vxworks."
-	    set timeout 10
-	    return -1
-	}
-    }
-    set timeout 10
+
+    gdb_target_udi
 }
 
 expect_after {
