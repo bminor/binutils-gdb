@@ -6,6 +6,8 @@ DEP = mkdep
 
 SUBDIRS = doc
 
+docdir = doc
+
 lib_LTLIBRARIES = libbfd.la
 
 # bfd.h goes here, for now
@@ -423,10 +425,15 @@ libbfd_la_LIBADD = `cat ofiles`
 # directory so that we don't have to convert all the programs that use
 # libbfd.a simultaneously.  This is a hack which should be removed if
 # everything else starts using libtool.  FIXME.
+
 noinst_LIBRARIES = libbfd.a
-libbfd.a: libbfd.la
-	rm -f libbfd.a
-	$(LN_S) .libs/libbfd.a libbfd.a
+
+stamp-lib: libbfd.la
+	cp .libs/libbfd.a libbfd.tmp
+	$(SHELL) $(srcdir)/../move-if-change libbfd.tmp libbfd.a
+	touch stamp-lib
+
+libbfd.a: stamp-lib ; @true
 
 # This file holds an array associating configuration triplets and
 # vector names.  It is built from config.bfd.  It is not compiled by
@@ -555,7 +562,7 @@ $(srcdir)/libcoff.h:
 MOSTLYCLEANFILES = elf32-target.h elf64-target.h ofiles stamp-ofiles \
 	targmatch.h
 
-CLEANFILES = bfd.h dep.sed stmp-bfd.h .dep .dep1
+CLEANFILES = bfd.h dep.sed stmp-bfd.h .dep .dep1 libbfd.a stamp-lib
 
 start-sanitize-arc:
 elf32-arc.lo: elf32-arc.c elf-bfd.h $(INCDIR)/elf/common.h \

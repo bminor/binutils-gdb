@@ -1,3 +1,8 @@
+Wed Aug  6 18:56:51 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (docdir): Define.
+	* Makefile.in: Rebuild.
+
 Tue Aug  5 23:05:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Rebuild with autoconf 2.12.1.
