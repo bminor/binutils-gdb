@@ -845,7 +845,7 @@ m2-exp.tab.c: m2-exp.y
 
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
-	   `echo $(DEPFILES) | sed 's/\.o /\.c /g'
+	   `echo $(DEPFILES) | sed 's/\.o /\.c /g'`
 
 gdb.cxref: $(SFILES)
 	cxref -I. $(SFILES) >gdb.cxref

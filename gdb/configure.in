@@ -118,6 +118,14 @@ if test "${enable_gdbtk}" = "yes"; then
     CY_AC_PATH_TCL
     CY_AC_PATH_TK
 
+    # Look for dynamic linking libraries that Tcl might need.  This is
+    # only done for Tcl 7.5 and greater.  It would be good to look for and
+    # use the "configInfo" file that Tcl generates, but for now that is
+    # beyond us.
+    if test $tclmajor -ge 7 -a $tclminor -ge 5 ; then
+       AC_CHECK_LIB(dl, main, , AC_CHECK_LIB(dld, main))
+    fi
+
     ENABLE_GDBTK=1
 
     if test "x$no_x" != "xyes"; then

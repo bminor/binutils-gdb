@@ -1,5 +1,5 @@
 # GDB GUI setup for GDB, the GNU debugger.
-# Copyright 1994, 1995
+# Copyright 1994, 1995, 1996
 # Free Software Foundation, Inc.
 
 # Written by Stu Grossman <grossman@cygnus.com> of Cygnus Support.
