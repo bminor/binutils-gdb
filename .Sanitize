@@ -22,9 +22,9 @@ else
 fi
 
 if ( echo $* | grep keep\-mpw > /dev/null) ; then
-	keep_these_too="mpw-configure mpw-config.in mpw-build.in ChangeLog.mpw ${keep_these_too}"
+	keep_these_too="mpw-README mpw-configure mpw-config.in mpw-build.in ChangeLog.mpw ${keep_these_too}"
 else
-	lose_these_too="mpw-configure mpw-config.in mpw-build.in ChangeLog.mpw ${lose_these_too}"
+	lose_these_too="mpw-README mpw-configure mpw-config.in mpw-build.in ChangeLog.mpw ${lose_these_too}"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
