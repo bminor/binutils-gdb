@@ -1505,7 +1505,7 @@ OP_E (bytemode)
   
   if (mod != 0 || rm == 5 || (havesib && base == 5))
     {
-      sprintf (scratchbuf, "%d", disp);
+      sprintf (scratchbuf, "0x%x", disp);
       oappend (scratchbuf);
     }
   

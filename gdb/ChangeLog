@@ -1,5 +1,7 @@
 Thu Apr 18 19:49:10 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
+	* i386-pinsn.c (OP_E): Change %d to 0x%x for consistency.
+
 	* putenv.c: New file
 	Makefile.dist: Add it to $(OBS).
 
