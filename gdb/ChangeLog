@@ -1,5 +1,15 @@
 2002-08-16  Mark Kettenis  <kettenis@gnu.org>
 
+	* NEWS: Mention that the i[3456]-*-aix target has been made obsolete.
+	* configure.host: Make i[3456]86-*-aix host obsolete.
+	* configure.tgt: Make i[3456]86-*-aix target obsolete.
+	* config/i386/i386aix.mh, config/i386/i386aix.mt,
+	config/i386/nm-i386aix.h, condig/i386/tm-i386aix.h,
+	config/i386/xm-i386aix.h: Make files obsolete.
+	* i386aix-nat.c: Make file obsolete.
+	* Makefile.in (ALLDEPFILES): Remove i386aix-nat.c.
+	(i386aix-nat.o): Make target obsolete.
+
 	* config/i386/nm-gnu.h: Removed.
 	* config/i386/nm-i386gnu.h: New file.
 	(THREAD_STATE_FLAVOR, THREAD_STATE_SIZE,
