@@ -1,3 +1,9 @@
+Wed Apr 19 16:37:47 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* TODO: Cleanup.
+	* NEWS: Update GDB version.  Duplicate paragraph explaining
+ 	obsolete.
+
 Wed Apr 19 13:06:55 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (distclean): Delete tui/Makefile.

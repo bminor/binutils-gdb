@@ -1,7 +1,7 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB-4.18:
+*** Changes in GDB 5.0:
 
 * Improved support for debugging FP programs on x86 targets
 
@@ -66,6 +66,11 @@ Convex						c1-*-*, c2-*-*
 Pyramid						pyramid-*-*
 ARM RISCix					arm-*-* (as host)
 Tahoe						tahoe-*-*
+
+Configurations that have been declared obsolete will be commented out,
+but the code will be left in place.  If there is no activity to revive
+these configurations before the next release of GDB, the sources will
+be permanently REMOVED.
 
 * New features for SVR4
 

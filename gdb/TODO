@@ -170,100 +170,7 @@ included in the follow-on release.
 
 --
 
-GDB 5.0: Test results
-=====================
-
-Please include:
-
-	o	the output of `config.guess`
-	o	the date
-	o	the compiler
-	o	a note mentioning the reason
-		for any serious failures.
-
---
-
-alpha-dec-osf4.0a, vendor compiler, 2000-03-04
-
-Still has many compile warnings (mostly relating back to PTR vs void*)
-but it did compile using:
-
-	CC=cc .../configure
-	make
-
-Test results are:
-
-# of expected passes            6223
-# of unexpected failures        103
-# of unexpected successes       2
-# of expected failures          196
-# of unresolved testcases       6
-# of unsupported tests          1
-
-Looking at the output it would appear that GDB is stepping into some
-functions instead of ``next'' ing over them:
-
-	35          dummy();
-	(gdb) next
-	dummy () at /home/cagney/GDB-DEJAGNU/src/gdb/testsuite/gdb.base/all-types.c:41
-	41      {
-
-Since there is no active maintainer, I'd consider this sufficient for
-5.0 :-/
-
---
-
-sparc-sun-solaris2.6, egcs-2.91.66, 2000-02-10
-http://sourceware.cygnus.com/ml/gdb-testers/2000-q1/msg00030.html
-
-There is a SIGTRAP problem that occures in ptrace.exp (Cagney to
-expand on).
-
-# of expected passes            6420
-# of unexpected failures        7
-# of expected failures          199
-
---
-
-solaris 2.5.1 sparc?, 2.9-gnupro-99r1, 2000-02-10
-http://sourceware.cygnus.com/ml/gdb-testers/2000-q1/msg00032.html
-
-# of expected passes            6420
-# of unexpected failures        6
-# of expected failures          199
-
---
-
-sparc-unknown-netbsdelf1.4P, egcs-1.1.2+, 2000-03-01
-
-This is with a very recent kernel.
-
-# of expected passes            6055
-# of unexpected failures        88
-# of unexpected successes       1
-# of expected failures          190
-# of unresolved testcases       59
-
---
-
-GNU/Linux PPC
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00185.html
-
-Kevins merged it all in.
-
---
-
-Unixware
-
-Builds ok.  Problems with some of the thread code.  Unfortunate but
-not a show stopper.  Nick D's still looking at it.
-
-Re: uw-threads issues
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00025.html
-
-
 		------------------------------------------------
-
 
 Code cleanups
 =============
@@ -365,6 +272,13 @@ Cleanup configury support for optional sub-directories.
 Check how GCC handles multiple front ends for an example of how things
 could work.  A tentative first step is to rationalize things so that
 all sub directories are handled in a fashion similar to gdb/mi.
+
+--
+
+[PATCH/5] src/intl/Makefile.in:distclean additions
+http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00363.html
+
+Do not forget to merge the patch back into the trunk.
 
 --
 
