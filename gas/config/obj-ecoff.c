@@ -831,6 +831,7 @@ typedef struct scope {
    information we generate.  The gas symbol will be NULL if this is
    only a debugging symbol.  */
 typedef struct localsym {
+  const char *name;		/* symbol name */
   symbolS *as_sym;		/* symbol as seen by gas */
   struct efdr *file_ptr;	/* file pointer */
   struct ecoff_proc *proc_ptr;	/* proc pointer */
@@ -1393,7 +1394,8 @@ static alloc_info_t alloc_counts[ (int)alloc_type_last ];
 /* Various statics.  */
 static efdr_t  *cur_file_ptr	= (efdr_t *) 0;	/* current file desc. header */
 static proc_t  *cur_proc_ptr	= (proc_t *) 0;	/* current procedure header */
-static thead_t *cur_tag_head	= (thead_t *)0;	/* current tag head */
+static thead_t *top_tag_head	= (thead_t *) 0; /* top level tag head */
+static thead_t *cur_tag_head	= (thead_t *) 0; /* current tag head */
 #ifdef ECOFF_DEBUG
 static int	debug		= 0; 		/* trace functions */
 #endif
@@ -1561,6 +1563,11 @@ obj_read_begin_hook ()
   tag_hash = hash_new ();
   if (tag_hash == (struct hash_control *) NULL)
     as_fatal ("Can't create hash table");
+  top_tag_head = allocate_thead ();
+  top_tag_head->first_tag = (tag_t *) NULL;
+  top_tag_head->free = (thead_t *) NULL;
+  top_tag_head->prev = cur_tag_head;
+  cur_tag_head = top_tag_head;
 }
 
 /* This function is called when a symbol is created.  */
@@ -1683,6 +1690,10 @@ add_ecoff_symbol (str, type, storage, sym_value, value, indx)
 
   psym = &vp->last->datum->sym[ vp->objects_last_page++ ];
 
+  if (str == (const char *) NULL && sym_value != (symbolS *) NULL)
+    psym->name = S_GET_NAME (sym_value);
+  else
+    psym->name = str;
   psym->as_sym = sym_value;
   if (sym_value != (symbolS *) NULL)
     sym_value->ecoff_symbol = 1;
@@ -2194,7 +2205,7 @@ add_procedure (func)
   new_proc_ptr->pdr.iline = -1;
 
   /* Push the start of the function.  */
-  new_proc_ptr->sym = add_ecoff_symbol (func, st_Proc, sc_Text,
+  new_proc_ptr->sym = add_ecoff_symbol ((const char *) NULL, st_Proc, sc_Text,
 					symbol_find_or_make (func),
 					(symint_t) 0, (symint_t) 0);
 
@@ -2428,7 +2439,10 @@ obj_ecoff_begin (ignore)
 
   *input_line_pointer = name_end;
 
-  demand_empty_rest_of_line ();
+  /* The line number follows, but we don't use it.  */
+  while (! is_end_of_line[*input_line_pointer])
+    input_line_pointer++;
+  input_line_pointer++;
 }
 
 /* Parse .bend directives which have a label as the first argument
@@ -2440,7 +2454,7 @@ obj_ecoff_bend (ignore)
 {
   char *name;
   char name_end;
-  symbolS *begin;
+  symbolS *endsym;
 
   if (cur_file_ptr == (efdr_t *) NULL)
     {
@@ -2460,21 +2474,21 @@ obj_ecoff_bend (ignore)
   name_end = get_symbol_end ();
 
   /* The value is the distance between the .bend directive and the
-     corresponding symbol.  We create a fake symbol to hold the
-     current location, and put in the offset when we write out the
-     symbol.  */
-  begin = symbol_find (name);
-  if (begin == (symbolS *) NULL)
+     corresponding symbol.  We fill in the offset when we write out
+     the symbol.  */
+  endsym = symbol_find (name);
+  if (endsym == (symbolS *) NULL)
     as_warn (".bend directive names unknown symbol");
   else
-    (void) add_ecoff_symbol (name, st_End, sc_Text,
-			     symbol_new ("L0\001", now_seg,
-					 frag_now_fix (), frag_now),
+    (void) add_ecoff_symbol ((const char *) NULL, st_End, sc_Text, endsym,
 			     (symint_t) 0, (symint_t) 0);
 
   *input_line_pointer = name_end;
 
-  demand_empty_rest_of_line ();
+  /* The line number follows, but we don't use it.  */
+  while (! is_end_of_line[*input_line_pointer])
+    input_line_pointer++;
+  input_line_pointer++;
 }
 
 /* COFF debugging information is provided as a series of directives
@@ -2601,15 +2615,8 @@ obj_ecoff_scl (ignore)
 
   val = get_absolute_expression ();
 
-  /* If the symbol is a static or external, we have already gotten the
-     appropriate type and class, so make sure we don't override those
-     values.  This is needed because there are some type and classes
-     that are not in COFF, such as short data, etc.  */
-  if (coff_symbol_type == st_Nil)
-    {
-      coff_symbol_type = map_coff_sym_type[val];
-      coff_storage_class = map_coff_storage[val];
-    }
+  coff_symbol_type = map_coff_sym_type[val];
+  coff_storage_class = map_coff_storage[val];
 
   demand_empty_rest_of_line ();
 }
@@ -2674,6 +2681,7 @@ obj_ecoff_type (ignore)
 {
   long val;
   tq_t *tq_ptr;
+  tq_t *tq_shft;
 
   if (coff_sym_name == (char *) NULL)
     {
@@ -2687,27 +2695,31 @@ obj_ecoff_type (ignore)
   coff_type.orig_type = BTYPE (val);
   coff_type.basic_type = map_coff_types[coff_type.orig_type];
 
-  tq_ptr = &coff_type.type_qualifiers[0];
+  tq_ptr = &coff_type.type_qualifiers[N_TQ];
   while (val &~ N_BTMASK)
     {
-      if (tq_ptr == &coff_type.type_qualifiers[N_TQ])
+      if (tq_ptr == &coff_type.type_qualifiers[0])
 	{
 	  as_warn ("Too derived values in .type argument");
 	  break;
 	}
       if (ISPTR (val))
-	*tq_ptr++ = tq_Ptr;
+	*--tq_ptr = tq_Ptr;
       else if (ISFCN (val))
-	*tq_ptr++ = tq_Proc;
+	*--tq_ptr = tq_Proc;
       else if (ISARY (val))
-	*tq_ptr++ = tq_Array;
+	*--tq_ptr = tq_Array;
       else
 	as_fatal ("Unrecognized .type argument");
 
       val = DECREF (val);
     }
 
-  if (tq_ptr != &coff_type.type_qualifiers[0] && tq_ptr[-1] == tq_Proc)
+  tq_shft = &coff_type.type_qualifiers[0];
+  while (tq_ptr != &coff_type.type_qualifiers[N_TQ])
+    *tq_shft++ = *tq_ptr++;
+
+  if (tq_shft != &coff_type.type_qualifiers[0] && tq_shft[-1] == tq_Proc)
     {
       /* If this is a function, ignore it, so that we don't get two
 	 entries (one from the .ent, and one for the .def that
@@ -2716,8 +2728,11 @@ obj_ecoff_type (ignore)
 	 MIPS knows what reason, we must strip off the function type
 	 at this point.  */
       coff_is_function = 1;
-      tq_ptr[-1] = tq_Nil;
+      tq_shft[-1] = tq_Nil;
     }
+
+  while (tq_shft != &coff_type.type_qualifiers[N_TQ])
+    *tq_shft++ = tq_Nil;
 
   demand_empty_rest_of_line ();
 }
@@ -2796,6 +2811,7 @@ static void
 obj_ecoff_endef (ignore)
      int ignore;
 {
+  char *name;
   symint_t indx;
   localsym_t *sym;
 
@@ -2805,6 +2821,19 @@ obj_ecoff_endef (ignore)
     {
       as_warn (".endef pseudo-op used before .def; ignored");
       return;
+    }
+
+  name = coff_sym_name;
+  coff_sym_name = (char *) NULL;
+
+  /* If the symbol is a static or external, we have already gotten the
+     appropriate type and class, so make sure we don't override those
+     values.  This is needed because there are some type and classes
+     that are not in COFF, such as short data, etc.  */
+  if (coff_sym_value != (symbolS *) NULL)
+    {
+      coff_symbol_type = st_Nil;
+      coff_storage_class = sc_Nil;
     }
 
   coff_type.extra_sizes = coff_tag != (char *) NULL;
@@ -2863,7 +2892,7 @@ obj_ecoff_endef (ignore)
 	{
 	  if (coff_tag == (char *) NULL)
 	    {
-	      as_warn ("No tag specified for %s", coff_sym_name);
+	      as_warn ("No tag specified for %s", name);
 	      return;
 	    }
 
@@ -2908,8 +2937,8 @@ obj_ecoff_endef (ignore)
 	 name which is always ".eos".  This needs to be done last, so
 	 that any error reporting above gives the correct name.  */
     case st_End:
-      free (coff_sym_name);
-      coff_sym_name = (char *) NULL;
+      free (name);
+      name = (char *) NULL;
       coff_value = 0;
       coff_inside_enumeration = 0;
       break;
@@ -2927,7 +2956,7 @@ obj_ecoff_endef (ignore)
     }
 
   /* Add the symbol.  */
-  sym = add_ecoff_symbol (coff_sym_name,
+  sym = add_ecoff_symbol (name,
 			  coff_symbol_type,
 			  coff_storage_class,
 			  coff_sym_value,
@@ -2938,7 +2967,7 @@ obj_ecoff_endef (ignore)
   if (coff_symbol_type == st_Block)
     {
       /* Create or update the tag information.  */
-      tag_t *tag_ptr = get_tag (coff_sym_name,
+      tag_t *tag_ptr = get_tag (name,
 				sym,
 				coff_type.basic_type);
       forward_t **pf;
@@ -2998,7 +3027,7 @@ obj_ecoff_end (ignore)
   if (ent == (symbolS *) NULL)
     as_warn (".end directive names unknown symbol");
   else
-    (void) add_ecoff_symbol (name, st_End, sc_Text,
+    (void) add_ecoff_symbol ((const char *) NULL, st_End, sc_Text,
 			     symbol_new ("L0\001", now_seg,
 					 frag_now_fix (), frag_now),
 			     (symint_t) 0, (symint_t) 0);
@@ -3189,18 +3218,10 @@ obj_ecoff_loc (ignore)
       return;
     }
 
-  /* FIXME: .loc directives look like ``.loc 1 4'' where the first
-     number is the file index and the second number is the line
-     number.  Unfortunately, do_scrub_next_char removes the space,
-     producing ``.loc 14''.  Urrrk.  I'm afraid I'll break something
-     if I change do_scrub_next_char, so instead we do this gross hack.
-     Note that file_index is one less than the value in the .loc,
-     because we adjusted it by one in the call to add_file.  This
-     actually won't work in the unfortunate circumstance of the same
-     file appearing twice with different indices with different
-     numbers of digits, which is possible.  */
+  /* Skip the file number.  */
   SKIP_WHITESPACE ();
-  input_line_pointer += 1 + (cur_file_ptr->file_index + 1) / 10;
+  get_absolute_expression ();
+  SKIP_WHITESPACE ();
 
   list = allocate_lineno_list ();
 
@@ -3599,7 +3620,7 @@ ecoff_build_lineno (buf, bufend, offset, linecntptr)
 	    }
 	  else if (delta <= -7)
 	    {
-	      *bufptr++ = 0x0f + (9 << 4);
+	      *bufptr++ = 0x0f + (-7 << 4);
 	      delta += 7;
 	    }
 	  else
@@ -3745,6 +3766,7 @@ ecoff_build_symbols (buf,
 	      for (; sym_ptr < sym_end; sym_ptr++)
 		{
 		  int local;
+		  symbolS *as_sym;
 		  forward_t *f;
 
 		  know (sym_ptr->file_ptr == fil_ptr);
@@ -3757,26 +3779,65 @@ ecoff_build_symbols (buf,
 		     both if the local provides additional debugging
 		     information for the external).  */
 		  local = 1;
-		  if (sym_ptr->as_sym != (symbolS *) NULL)
+		  as_sym = sym_ptr->as_sym;
+		  if (as_sym != (symbolS *) NULL)
 		    {
-		      sym_ptr->ecoff_sym.value = S_GET_VALUE (sym_ptr->as_sym);
+		      sym_ptr->ecoff_sym.value = S_GET_VALUE (as_sym);
+
+		      /* Get the type and storage class based on where
+			 the symbol actually wound up.  */
+		      if (sym_ptr->ecoff_sym.st == st_Nil
+			  && sym_ptr->ecoff_sym.sc == sc_Nil
+			  && ! MIPS_IS_STAB (&sym_ptr->ecoff_sym))
+			{
+			  st_t st;
+			  sc_t sc;
+
+			  if (S_IS_EXTERNAL (as_sym)
+			      || ! S_IS_DEFINED (as_sym))
+			    st = st_Global;
+			  else if (S_GET_SEGMENT (as_sym) == text_section)
+			    st = st_Label;
+			  else
+			    st = st_Static;
+
+			  if (! S_IS_DEFINED (as_sym))
+			    sc = sc_Undefined;
+			  else if (S_IS_COMMON (as_sym))
+			    sc = sc_Common;
+			  else if (S_GET_SEGMENT (as_sym) == text_section)
+			    sc = sc_Text;
+			  else if (S_GET_SEGMENT (as_sym) == data_section)
+			    sc = sc_Data;
+			  else if (S_GET_SEGMENT (as_sym) == bss_section)
+			    sc = sc_Bss;
+			  else
+			    abort ();
+
+			  sym_ptr->ecoff_sym.st = (int) st;
+			  sym_ptr->ecoff_sym.sc = (int) sc;
+			}
 
 		      /* This is just an external symbol if it is
-			 outside a procedure and it has a type.  */
-		      if ((S_IS_EXTERNAL (sym_ptr->as_sym)
-			   || ! S_IS_DEFINED (sym_ptr->as_sym))
+			 outside a procedure and it has a type.
+			 FIXME: g++ will generate symbols which have
+			 different names in the debugging information
+			 than the actual symbol.  Should we handle
+			 them here?  */
+		      if ((S_IS_EXTERNAL (as_sym)
+			   || ! S_IS_DEFINED (as_sym))
 			  && sym_ptr->proc_ptr == (proc_t *) NULL
 			  && sym_ptr->ecoff_sym.st != (int) st_Nil)
 			local = 0;
 
 		      /* If an st_end symbol has an associated gas
-			 symbol, then it is a fake created for a .bend
-			 or .end directive.  */
+			 symbol, then it is a local label created for
+			 a .bend or .end directive.  */
 		      if (local && sym_ptr->ecoff_sym.st != st_End)
 			sym_ptr->ecoff_sym.iss =
 			  add_string (&fil_ptr->strings,
 				      fil_ptr->str_hash,
-				      S_GET_NAME (sym_ptr->as_sym),
+				      sym_ptr->name,
 				      (shash_t **) NULL);
 		    }
 
@@ -3817,12 +3878,13 @@ ecoff_build_symbols (buf,
 		      /* The value of the symbol marking the end of a
 			 procedure or block is the size of the
 			 procedure or block.  */
-		      if (begin_type == st_Proc || begin_type == st_Block)
+		      if ((begin_type == st_Proc || begin_type == st_Block)
+			  && sym_ptr->ecoff_sym.sc != (int) sc_Info)
 			{
-			  know (sym_ptr->as_sym != (symbolS *) NULL);
+			  know (as_sym != (symbolS *) NULL);
 			  know (begin_ptr->as_sym != (symbolS *) NULL);
 			  sym_ptr->ecoff_sym.value =
-			    (S_GET_VALUE (sym_ptr->as_sym)
+			    (S_GET_VALUE (as_sym)
 			     - S_GET_VALUE (begin_ptr->as_sym));
 			}
 		    }
@@ -3855,9 +3917,9 @@ ecoff_build_symbols (buf,
 		    }
 
 		  /* If this is an external symbol, swap it out.  */
-		  if (sym_ptr->as_sym != (symbolS *) NULL
-		      && (S_IS_EXTERNAL (sym_ptr->as_sym)
-			  || ! S_IS_DEFINED (sym_ptr->as_sym)))
+		  if (as_sym != (symbolS *) NULL
+		      && (S_IS_EXTERNAL (as_sym)
+			  || ! S_IS_DEFINED (as_sym)))
 		    {
 		      EXTR ext;
 
@@ -3866,7 +3928,7 @@ ecoff_build_symbols (buf,
 		      ext.ifd = fil_ptr->file_index;
 		      ext.asym.iss = add_string (ext_strings,
 						 ext_str_hash,
-						 S_GET_NAME (sym_ptr->as_sym),
+						 S_GET_NAME (as_sym),
 						 (shash_t **) NULL);
 		      if (*extbufend - (char *) ext_out
 			  < sizeof (struct ext_ext))
@@ -3875,7 +3937,7 @@ ecoff_build_symbols (buf,
 						    (char *) ext_out,
 						    sizeof (struct ext_ext)));
 		      ecoff_swap_ext_out (stdoutput, &ext, ext_out);
-		      ecoff_set_sym_index (sym_ptr->as_sym->bsym, iext);
+		      ecoff_set_sym_index (as_sym->bsym, iext);
 		      ++ext_out;
 		      ++iext;
 		    }
@@ -4245,6 +4307,8 @@ ecoff_frob_symbol (sym)
 void
 ecoff_frob_file ()
 {
+  tag_t *ptag;
+  tag_t *ptag_next;
   efdr_t *fil_ptr;
   efdr_t *hold_file_ptr;
   proc_t * hold_proc_ptr;
@@ -4260,6 +4324,21 @@ ecoff_frob_file ()
   static varray_t init_ext_strings = INIT_VARRAY (char);
   struct hash_control *ext_str_hash;
   char *set;
+
+  /* Handle any top level tags.  */
+  for (ptag = top_tag_head->first_tag;
+       ptag != (tag_t *) NULL;
+       ptag = ptag_next)
+    {
+      if (ptag->forward_ref != (forward_t *) NULL)
+	add_unknown_tag (ptag);
+
+      ptag_next = ptag->same_block;
+      ptag->hash_ptr->tag_ptr = ptag->same_name;
+      free_tag (ptag);
+    }
+
+  free_thead (top_tag_head);
 
   /* Output an ending symbol for all the files.  We have to do this
      here for the last file, so we may as well do it for all of the
@@ -4283,35 +4362,12 @@ ecoff_frob_file ()
   cur_proc_ptr = (proc_t *) NULL;
   for (sym = symbol_rootP; sym != (symbolS *) NULL; sym = symbol_next (sym))
     {
-      st_t st;
-      sc_t sc;
-
       if (sym->ecoff_symbol
 	  || sym->ecoff_file == (efdr_t *) NULL)
 	continue;
 
-      if (S_IS_EXTERNAL (sym) || ! S_IS_DEFINED (sym))
-	st = st_Global;
-      else if (S_GET_SEGMENT (sym) == text_section)
-	st = st_Label;
-      else
-	st = st_Static;
-
-      if (! S_IS_DEFINED (sym))
-	sc = sc_Undefined;
-      else if (S_IS_COMMON (sym))
-	sc = sc_Common;
-      else if (S_GET_SEGMENT (sym) == text_section)
-	sc = sc_Text;
-      else if (S_GET_SEGMENT (sym) == data_section)
-	sc = sc_Data;
-      else if (S_GET_SEGMENT (sym) == bss_section)
-	sc = sc_Bss;
-      else
-	abort ();
-
       cur_file_ptr = sym->ecoff_file;
-      add_ecoff_symbol (S_GET_NAME (sym), st, sc, sym,
+      add_ecoff_symbol ((const char *) NULL, st_Nil, sc_Nil, sym,
 			S_GET_VALUE (sym), indexNil);
     }
   cur_proc_ptr = hold_proc_ptr;

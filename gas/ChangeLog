@@ -1,3 +1,12 @@
+Wed Mar 17 16:44:06 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* app.c (do_scrub_next_char): Added new state, 9, to avoid
+	dropping a space immediately following an identifier.
+	* expr.c, write.c: Rewrote assert expressions to not use multiple
+	lines; I don't think that can be done portably.
+	* config/tc-mips.c (macro): Use $AT if target register is zero in
+	load instruction, which it can be for a floating point load.
+
 Mon Mar 15 12:17:28 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* write.c (write_contents): Compute the relocs before writing out

@@ -1096,7 +1096,7 @@ macro (ip)
     case M_LWR_AB:
 	s = "lwr";
     ld:
-	if (breg == treg) {
+	if (breg == treg || treg == 0) {
 		tempreg = AT;
 		used_at = 1;
 	} else {

@@ -29,7 +29,6 @@
 
 #include <stdio.h>
 #include "as.h"			/* For BAD_CASE() only */
-#include "read.h"
 
 #if (__STDC__ != 1) && !defined(const)
 #define const			/* Nothing */
@@ -250,9 +249,17 @@ do_scrub_next_char (get, unget)
 	  6: putting out \ escape in a "d string.
 	  7: After putting out a .app-file, put out string.
 	  8: After putting out a .app-file string, flush until newline.
+	  9: After seeing symbol char in state 3 (keep 1white after symchar)
 	  -1: output string in out_string and go to the state in old_state
 	  -2: flush text until a '*' '/' is seen, then go to state old_state
 	  */
+
+  /* I added state 9 because the MIPS ECOFF assembler uses constructs
+     like ``.loc 1 20''.  This was turning into ``.loc 120''.  State 9
+     ensures that a space is never dropped immediately following a
+     character which could appear in a identifier.  It is still
+     dropped following a comma, so this has no effect for most
+     assemblers.  I hope.  Ian Taylor, ian@cygnus.com.  */
 
   register int ch, ch2 = 0;
 
@@ -399,7 +406,7 @@ do_scrub_next_char (get, unget)
       return ch;
     }
 
-  /* OK, we are somewhere in states 0 through 4 */
+  /* OK, we are somewhere in states 0 through 4 or 9 */
 
   /* flushchar: */
   ch = (*get) ();
@@ -447,7 +454,8 @@ recycle:
 	case 1:
 	  BAD_CASE (state);	/* We can't get here */
 	case 2:
-	  state++;
+	case 9:
+	  state = 3;
 	  (*unget) (ch);
 	  return ' ';		/* Sp after opco */
 	case 3:
@@ -561,18 +569,22 @@ recycle:
 	goto de_fault;
 
       /* FIXME-someday: The two character comment stuff was badly
-    thought out.  On i386, we want '/' as line comment start
-    AND we want C style comments.  hence this hack.  The
-    whole lexical process should be reworked.  xoxorich.  */
+	 thought out.  On i386, we want '/' as line comment start AND
+	 we want C style comments.  hence this hack.  The whole
+	 lexical process should be reworked.  xoxorich.  */
 
-      if (ch == '/' && (ch2 = (*get) ()) == '*')
+      if (ch == '/')
 	{
-	  state = -2;
-	  return (do_scrub_next_char (get, unget));
-	}
-      else
-	{
-	  (*unget) (ch2);
+	  ch2 = (*get) ();
+	  if (ch2 == '*')
+	    {
+	      state = -2;
+	      return (do_scrub_next_char (get, unget));
+	    }
+	  else
+	    {
+	      (*unget) (ch2);
+	    }
 	}			/* bad hack */
 
       do
@@ -609,6 +621,10 @@ recycle:
       state = 0;
       return '\n';
 
+    case LEX_IS_SYMBOL_COMPONENT:
+      if (state == 3)
+	state = 9;
+      /* Fall through.  */
     default:
     de_fault:
       /* Some relatively `normal' character.  */
@@ -620,6 +636,12 @@ recycle:
       else if (state == 1)
 	{
 	  state = 2;		/* Ditto */
+	  return ch;
+	}
+      else if (state == 9)
+	{
+	  if (lex[ch] != LEX_IS_SYMBOL_COMPONENT)
+	    state = 3;
 	  return ch;
 	}
       else
