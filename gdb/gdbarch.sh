@@ -775,13 +775,6 @@ struct target_ops;
 struct obstack;
 
 extern struct gdbarch *current_gdbarch;
-
-/* If any of the following are defined, the target wasn't correctly
-   converted. */
-
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PURE) && defined (GDB_TM_FILE)
-#error "GDB_TM_FILE: Pure multi-arch targets do not have a tm.h file."
-#endif
 EOF
 
 # function typedef's
@@ -797,7 +790,7 @@ do
 	printf "/* set_gdbarch_${function}() - not applicable - pre-initialized. */\n"
 	if test -n "${macro}"
 	then
-	    printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (${macro})\n"
+	    printf "#if !defined (GDB_TM_FILE) && defined (${macro})\n"
 	    printf "#error \"Non multi-arch definition of ${macro}\"\n"
 	    printf "#endif\n"
 	    printf "#if !defined (${macro})\n"
@@ -837,7 +830,7 @@ do
 	printf "extern int gdbarch_${function}_p (struct gdbarch *gdbarch);\n"
 	if test -n "${macro}"
 	then
-	    printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (${macro}_P)\n"
+	    printf "#if !defined (GDB_TM_FILE) && defined (${macro}_P)\n"
 	    printf "#error \"Non multi-arch definition of ${macro}\"\n"
 	    printf "#endif\n"
 	    printf "#if !defined (${macro}_P)\n"
@@ -852,7 +845,7 @@ do
 	printf "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, ${returntype} ${function});\n"
 	if test -n "${macro}"
 	then
-	    printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (${macro})\n"
+	    printf "#if !defined (GDB_TM_FILE) && defined (${macro})\n"
 	    printf "#error \"Non multi-arch definition of ${macro}\"\n"
 	    printf "#endif\n"
 	    printf "#if !defined (${macro})\n"
@@ -881,7 +874,7 @@ do
 	printf "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, gdbarch_${function}_ftype *${function});\n"
 	if test -n "${macro}"
 	then
-	    printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (${macro})\n"
+	    printf "#if !defined (GDB_TM_FILE) && defined (${macro})\n"
 	    printf "#error \"Non multi-arch definition of ${macro}\"\n"
 	    printf "#endif\n"
 	    if [ "x${actual}" = "x" ]

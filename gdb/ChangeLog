@@ -1,5 +1,10 @@
 2004-09-02  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbarch.sh: Delete check for consistency between GDB_MULTI_ARCH
+	and GDB_TM_FILE.  Check for GDB_TM_FILE instead of
+	GDB_MULTI_ARCH_PARTIAL.
+	* gdbarch.h: Re-generate.
+	
 	* config/sparc/tm-vxworks.h (GDB_MULTI_ARCH): Delete.
 	* config/sparc/tm-sol2.h (GDB_MULTI_ARCH): Delete.
 	* config/sparc/tm-nbsd.h (GDB_MULTI_ARCH): Delete.
