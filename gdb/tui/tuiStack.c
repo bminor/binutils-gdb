@@ -79,8 +79,9 @@ static char*
 tui_make_status_line (TuiLocatorElement* loc)
 {
   char* string;
-  char line_buf[50], buf[50], *pname;
-  int status_size = termWidth ();
+  char line_buf[50], *pname;
+  char* buf;
+  int status_size;
   int i, proc_width;
   const char* pid_name;
   const char* pc_buf;
@@ -102,8 +103,10 @@ tui_make_status_line (TuiLocatorElement* loc)
   pid_width = strlen (pid_name);
   if (pid_width > MAX_PID_WIDTH)
     pid_width = MAX_PID_WIDTH;
-  
+
+  status_size = termWidth ();  
   string = (char *) xmalloc (status_size + 1);
+  buf = (char*) alloca (status_size + 1);
 
   /* Translate line number and obtain its size.  */
   if (loc->lineNo > 0)
