@@ -2178,7 +2178,7 @@ the one specified by the C++ Annotated Reference Manual
 the one used by the HP compiler
 @item edg
 the one used by the EDG compiler
-@item gnu-new-abi
+@item gnu-v3
 the one used by the @sc{gnu} compiler with the new ABI.
 @end table
 

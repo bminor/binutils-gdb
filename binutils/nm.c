@@ -251,7 +251,7 @@ usage (stream, status)
   -B                     Same as --format=bsd\n\
   -C, --demangle[=STYLE] Decode low-level symbol names into user-level names\n\
                           The STYLE, if specified, can be `auto' (the default),\n\
-                          `gnu', 'lucid', 'arm', 'hp', 'edg' or 'gnu-new-abi'\n\
+                          `gnu', 'lucid', 'arm', 'hp', 'edg' or 'gnu-v3'\n\
       --no-demangle      Do not demangle low-level symbol names\n\
   -D, --dynamic          Display dynamic symbols instead of normal symbols\n\
       --defined-only     Display only defined symbols\n\
