@@ -109,7 +109,7 @@ OPCODEDIR = ./../opcodes
 #### host and target dependant Makefile fragments come in here.
 ###
 
-INCLUDES = -I. -I$(srcdir) -I../bfd -I$(BASEDIR)/include -I$(BASEDIR)/bfd
+INCLUDES = -I. -I$(srcdir) -I../bfd -I../include  -I$(BASEDIR)/include -I$(BASEDIR)/bfd
 
 .c.o:
 	$(CC) -c $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) $<
