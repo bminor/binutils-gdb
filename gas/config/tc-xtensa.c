@@ -27,6 +27,7 @@
 #include "subsegs.h"
 #include "xtensa-relax.h"
 #include "xtensa-istack.h"
+#include "dwarf2dbg.h"
 #include "struc-symbol.h"
 #include "xtensa-config.h"
 
@@ -3928,6 +3929,8 @@ xg_emit_insn (t_insn, record_fix)
     }
 
   xtensa_insnbuf_to_chars (isa, insnbuf, f);
+
+  dwarf2_emit_insn (byte_count);
 
   /* Now spit out the opcode fixup.... */
   if (!has_fixup)

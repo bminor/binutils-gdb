@@ -1,3 +1,8 @@
+2003-11-19  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (xg_emit_insn): Include "dwarf2dbg.h" and add
+	call to dwarf2_emit_insn.
+
 2003-11-18  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* config/tc-mips.c (macro): Handle new macros: "lca" and "dlca"
