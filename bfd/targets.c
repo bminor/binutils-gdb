@@ -335,7 +335,7 @@ Special entry points for gas to swap coff parts
 . {* See documentation on reloc types.  *}
 . SDEF (CONST struct reloc_howto_struct *,
 .       reloc_type_lookup,
-.       (bfd *abfd, bfd_reloc_code_type code));
+.       (bfd *abfd, bfd_reloc_code_real_type code));
 .
 . {* Complete and utter crock, currently used for the assembler
 .    when creating COFF files.  *}

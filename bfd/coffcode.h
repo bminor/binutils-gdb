@@ -899,8 +899,8 @@ DEFUN(coff_swap_scnhdr_out,(abfd, in, out),
 */
 
 static          boolean
-DEFUN(coff_new_section_hook,(abfd_ignore, section),
-      bfd            *abfd_ignore AND
+DEFUN(coff_new_section_hook,(abfd, section),
+      bfd            *abfd AND
       asection       *section)
 {
   section->alignment_power = abfd->xvec->align_power_min;
