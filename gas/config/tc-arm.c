@@ -1163,14 +1163,14 @@ validate_offset_imm (val, hwse)
     
 static void
 s_req (a)
-     int a;
+     int a ATTRIBUTE_UNUSED;
 {
   as_bad (_("Invalid syntax for .req directive."));
 }
 
 static void
 s_bss (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   /* We don't support putting frags in the BSS segment, we fake it by
      marking in_bss, then looking at s_skip for clues?.. */
@@ -1180,7 +1180,7 @@ s_bss (ignore)
 
 static void
 s_even (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (!need_pass_2)		/* Never make frag if expect extra pass. */
     frag_align (1, 0, 0);
@@ -1192,7 +1192,7 @@ s_even (ignore)
 
 static void
 s_ltorg (ignored)
-     int ignored;
+     int ignored ATTRIBUTE_UNUSED;
 {
   int lit_count = 0;
   char sym_name[20];
@@ -1229,7 +1229,7 @@ s_ltorg (ignored)
 
 static void
 s_align (unused)	/* Same as s_align_ptwo but align 0 => align 2 */
-     int unused;
+     int unused ATTRIBUTE_UNUSED;
 {
   register int temp;
   register long temp_fill;
@@ -1265,7 +1265,7 @@ s_align (unused)	/* Same as s_align_ptwo but align 0 => align 2 */
 
 static void
 s_force_thumb (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   /* If we are not already in thumb mode go into it, EVEN if
      the target processor does not support thumb instructions.
@@ -1285,7 +1285,7 @@ s_force_thumb (ignore)
 
 static void
 s_thumb_func (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   /* The following label is the name/address of the start of a Thumb function.
      We need to know this for the interworking support.  */
@@ -1471,7 +1471,7 @@ opcode_select (width)
 
 static void
 s_arm (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   opcode_select (32);
   demand_empty_rest_of_line ();
@@ -1479,7 +1479,7 @@ s_arm (ignore)
 
 static void
 s_thumb (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   opcode_select (16);
   demand_empty_rest_of_line ();
@@ -1487,7 +1487,7 @@ s_thumb (ignore)
 
 static void
 s_code (unused)
-     int unused;
+     int unused ATTRIBUTE_UNUSED;
 {
   register int temp;
 
@@ -1955,7 +1955,7 @@ do_msr (str, flags)
 	  else
 	    {
 	      unsigned value = validate_immediate (inst.reloc.exp.X_add_number);
-	      if (value == FAIL)
+	      if (value == (unsigned) FAIL)
 		{
 		  inst.error = _("Invalid constant");
 		  return;
@@ -2464,7 +2464,7 @@ negate_data_op (instruction, value)
       return FAIL;
     }
 
-  if (value == FAIL)
+  if (value == (unsigned) FAIL)
     return FAIL;
 
   *instruction &= OPCODE_MASK;
@@ -3301,7 +3301,7 @@ do_swap (str, flags)
 static void
 do_branch (str, flags)
      char *        str;
-     unsigned long flags;
+     unsigned long flags ATTRIBUTE_UNUSED;
 {
   if (my_get_expression (&inst.reloc.exp, &str))
     return;
@@ -3347,7 +3347,7 @@ do_branch (str, flags)
 static void
 do_bx (str, flags)
      char *        str;
-     unsigned long flags;
+     unsigned long flags ATTRIBUTE_UNUSED;
 {
   int reg;
 
@@ -3368,7 +3368,7 @@ do_bx (str, flags)
 static void
 do_cdp (str, flags)
      char *        str;
-     unsigned long flags;
+     unsigned long flags ATTRIBUTE_UNUSED;
 {
   /* Co-processor data operation.
      Format: CDP{cond} CP#,<expr>,CRd,CRn,CRm{,<expr>}  */
@@ -3535,7 +3535,7 @@ do_co_reg (str, flags)
 static void
 do_fp_ctrl (str, flags)
      char *        str;
-     unsigned long flags;
+     unsigned long flags ATTRIBUTE_UNUSED;
 {
   /* FP control registers.
      Format: <WFS|RFS|WFC|RFC>{cond} Rn  */
@@ -3556,7 +3556,7 @@ do_fp_ctrl (str, flags)
 static void
 do_fp_ldst (str, flags)
      char *        str;
-     unsigned long flags;
+     unsigned long flags ATTRIBUTE_UNUSED;
 {
   skip_whitespace (str);
 
@@ -4983,7 +4983,7 @@ set_constant_flonums ()
 void
 md_begin ()
 {
-  int i;
+  unsigned int i;
   
   if (   (arm_ops_hsh = hash_new ()) == NULL
       || (arm_tops_hsh = hash_new ()) == NULL
@@ -5227,7 +5227,7 @@ md_pcrel_from (fixP)
 /* Round up a section size to the appropriate boundary. */
 valueT
 md_section_align (segment, size)
-     segT   segment;
+     segT   segment ATTRIBUTE_UNUSED;
      valueT size;
 {
 #ifdef OBJ_ELF
@@ -5913,7 +5913,7 @@ md_apply_fix3 (fixP, val, seg)
    format.  */
 arelent *
 tc_gen_reloc (section, fixp)
-     asection * section;
+     asection * section ATTRIBUTE_UNUSED;
      fixS * fixp;
 {
   arelent * reloc;
@@ -6057,8 +6057,8 @@ tc_gen_reloc (section, fixp)
 
 int
 md_estimate_size_before_relax (fragP, segtype)
-     fragS * fragP;
-     segT    segtype;
+     fragS * fragP ATTRIBUTE_UNUSED;
+     segT    segtype ATTRIBUTE_UNUSED;
 {
   as_fatal (_("md_estimate_size_before_relax\n"));
   return 1;
@@ -7104,7 +7104,7 @@ arm_parse_reloc ()
 {
   char   id[16];
   char * ip;
-  int    i;
+  unsigned int i;
   static struct
   {
     char * str;

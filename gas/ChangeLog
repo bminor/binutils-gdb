@@ -2,6 +2,7 @@
 
 	* config/tc-arm.c (md_apply_fix3): Handle same-section relocations
 	that have a destingation >= 0x400000.
+	Fix compile time warning messages. 
 
 Thu Mar 16 23:45:16 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 
