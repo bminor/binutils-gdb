@@ -1,3 +1,7 @@
+2000-07-13  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* parse.c: Include inferior.h.
+
 2000-07-12  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* regcache.c (registers_changed, registers_fetched): Use 
@@ -7,7 +11,7 @@
 	Pseudo-registers are handled like registers, but they
 	don't come from or live on the target.  They may be 
 	aliases for an existing register, or they may be computed.
-	* defs.h (NUM_PSEUDO_REGISTERS): Define default of zero.
+	* inferior.h (NUM_PSEUDO_REGISTERS): Define default of zero.
 	(ARCH_FETCH_PSEUDO_REGISTERS): Define default of no-op.
 	(ARCH_STORE_PSEUDO_REGISTERS): Define default of no-op.
 	# regcache.c (registers_changed): Mark pseudo-registers 
