@@ -5,6 +5,7 @@ AC_PREREQ(2.5)
 AC_INIT(z8k-dis.c)
 
 AC_CANONICAL_SYSTEM
+AC_ISC_POSIX
 
 # We currently only use the version number for the name of any shared
 # library.  For user convenience, we always use the same version
@@ -49,9 +50,6 @@ if test -z "$target" ; then
 fi
 AC_ARG_PROGRAM
 
-ALL_LINGUAS=
-CY_GNU_GETTEXT
-
 AM_MAINTAINER_MODE
 AM_CYGWIN32
 AM_EXEEXT
@@ -59,6 +57,9 @@ AM_EXEEXT
 # host-specific stuff:
 
 AC_PROG_CC
+
+ALL_LINGUAS=
+CY_GNU_GETTEXT
 
 . ${srcdir}/../bfd/configure.host
 

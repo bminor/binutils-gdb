@@ -163,11 +163,17 @@ case "$host" in
   # On SCO OpenServer 5, we need -belf to get full-featured binaries.
   CFLAGS="$CFLAGS -belf"
   ;;
+
+*-*-cygwin32*)
+  AM_SYS_LIBTOOL_CYGWIN32
+  ;;
+
 esac
 
 # Actually configure libtool.  ac_aux_dir is where install-sh is found.
 CC="$CC" CFLAGS="$CFLAGS" CPPFLAGS="$CPPFLAGS" \
 LD="$LD" NM="$NM" RANLIB="$RANLIB" LN_S="$LN_S" \
+DLLTOOL="$DLLTOOL" AS="$AS" \
 ${CONFIG_SHELL-/bin/sh} $ac_aux_dir/ltconfig \
 $libtool_flags --no-verify $ac_aux_dir/ltmain.sh $host \
 || AC_MSG_ERROR([libtool configure failed])
@@ -257,7 +263,9 @@ if test "$ac_cv_prog_gcc" = yes; then
   ac_prog=`($CC -print-prog-name=ld) 2>&5`
   case "$ac_prog" in
   # Accept absolute paths.
+changequote(,)dnl
   /* | [A-Za-z]:\\*)
+changequote([,])dnl
     test -z "$LD" && LD="$ac_prog"
     ;;
   "")
@@ -320,11 +328,7 @@ fi])
 AC_DEFUN(AM_PROG_NM,
 [AC_MSG_CHECKING([for BSD-compatible nm])
 AC_CACHE_VAL(ac_cv_path_NM,
-[case "$NM" in
-/* | [A-Za-z]:\\*)
-  ac_cv_path_NM="$NM" # Let the user override the test with a path.
-  ;;
-*)
+[if test -z "$NM"; then
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}:"
   for ac_dir in /usr/ucb /usr/ccs/bin $PATH /bin; do
     test -z "$ac_dir" && ac_dir=.
@@ -344,11 +348,18 @@ AC_CACHE_VAL(ac_cv_path_NM,
   done
   IFS="$ac_save_ifs"
   test -z "$ac_cv_path_NM" && ac_cv_path_NM=nm
-  ;;
-esac])
+else
+  ac_cv_path_NM="$NM" # Let the user override the test with a path.
+fi])
 NM="$ac_cv_path_NM"
 AC_MSG_RESULT([$NM])
 AC_SUBST(NM)
+])
+
+# AM_SYS_LIBTOOL_CYGWIN32 - find tools needed on cygwin32
+AC_DEFUN(AM_SYS_LIBTOOL_CYGWIN32,
+[AC_CHECK_TOOL(DLLTOOL, dlltool, false)
+AC_CHECK_TOOL(AS, as, false)
 ])
 
 # Like AC_CONFIG_HEADER, but automatically create stamp file.
@@ -373,6 +384,93 @@ for am_file in <<$1>>; do
   am_indx=`expr "<<$>>am_indx" + 1`
 done<<>>dnl>>)
 changequote([,]))])
+
+# Add --enable-maintainer-mode option to configure.
+# From Jim Meyering
+
+# serial 1
+
+AC_DEFUN(AM_MAINTAINER_MODE,
+[AC_MSG_CHECKING([whether to enable maintainer-specific portions of Makefiles])
+  dnl maintainer-mode is disabled by default
+  AC_ARG_ENABLE(maintainer-mode,
+[  --enable-maintainer-mode enable make rules and dependencies not useful
+                          (and sometimes confusing) to the casual installer],
+      USE_MAINTAINER_MODE=$enableval,
+      USE_MAINTAINER_MODE=no)
+  AC_MSG_RESULT($USE_MAINTAINER_MODE)
+  if test $USE_MAINTAINER_MODE = yes; then
+    MAINT=
+  else
+    MAINT='#M#'
+  fi
+  AC_SUBST(MAINT)dnl
+]
+)
+
+# Check to see if we're running under Cygwin32, without using
+# AC_CANONICAL_*.  If so, set output variable CYGWIN32 to "yes".
+# Otherwise set it to "no".
+
+dnl AM_CYGWIN32()
+AC_DEFUN(AM_CYGWIN32,
+[AC_CACHE_CHECK(for Cygwin32 environment, am_cv_cygwin32,
+[AC_TRY_COMPILE(,[return __CYGWIN32__;],
+am_cv_cygwin32=yes, am_cv_cygwin32=no)
+rm -f conftest*])
+CYGWIN32=
+test "$am_cv_cygwin32" = yes && CYGWIN32=yes])
+
+# Check to see if we're running under Win32, without using
+# AC_CANONICAL_*.  If so, set output variable EXEEXT to ".exe".
+# Otherwise set it to "".
+
+dnl AM_EXEEXT()
+dnl This knows we add .exe if we're building in the Cygwin32
+dnl environment. But if we're not, then it compiles a test program
+dnl to see if there is a suffix for executables.
+AC_DEFUN(AM_EXEEXT,
+[AC_REQUIRE([AM_CYGWIN32])
+AC_REQUIRE([AM_MINGW32])
+AC_MSG_CHECKING([for executable suffix])
+AC_CACHE_VAL(am_cv_exeext,
+[if test "$CYGWIN32" = yes || test "$MINGW32" = yes; then
+am_cv_exeext=.exe
+else
+cat > am_c_test.c << 'EOF'
+int main() {
+/* Nothing needed here */
+}
+EOF
+${CC-cc} -o am_c_test $CFLAGS $CPPFLAGS $LDFLAGS am_c_test.c $LIBS 1>&5
+am_cv_exeext=
+for file in am_c_test.*; do
+   case $file in
+    *.c) ;;
+    *.o) ;;
+    *) am_cv_exeext=`echo $file | sed -e s/am_c_test//` ;;
+   esac
+done
+rm -f am_c_test*])
+test x"${am_cv_exeext}" = x && am_cv_exeext=no
+fi
+EXEEXT=""
+test x"${am_cv_exeext}" != xno && EXEEXT=${am_cv_exeext}
+AC_MSG_RESULT(${am_cv_exeext})
+AC_SUBST(EXEEXT)])
+
+# Check to see if we're running under Mingw, without using
+# AC_CANONICAL_*.  If so, set output variable MINGW32 to "yes".
+# Otherwise set it to "no".
+
+dnl AM_MINGW32()
+AC_DEFUN(AM_MINGW32,
+[AC_CACHE_CHECK(for Mingw32 environment, am_cv_mingw32,
+[AC_TRY_COMPILE(,[return __MINGW32__;],
+am_cv_mingw32=yes, am_cv_mingw32=no)
+rm -f conftest*])
+MINGW32=
+test "$am_cv_mingw32" = yes && MINGW32=yes])
 
 # This file is derived from `gettext.m4'.  The difference is that the
 # included macros assume Cygnus-style source and build trees.
@@ -716,91 +814,4 @@ AC_DEFUN(AM_LC_MESSAGES,
       AC_DEFINE(HAVE_LC_MESSAGES)
     fi
   fi])
-
-# Add --enable-maintainer-mode option to configure.
-# From Jim Meyering
-
-# serial 1
-
-AC_DEFUN(AM_MAINTAINER_MODE,
-[AC_MSG_CHECKING([whether to enable maintainer-specific portions of Makefiles])
-  dnl maintainer-mode is disabled by default
-  AC_ARG_ENABLE(maintainer-mode,
-[  --enable-maintainer-mode enable make rules and dependencies not useful
-                          (and sometimes confusing) to the casual installer],
-      USE_MAINTAINER_MODE=$enableval,
-      USE_MAINTAINER_MODE=no)
-  AC_MSG_RESULT($USE_MAINTAINER_MODE)
-  if test $USE_MAINTAINER_MODE = yes; then
-    MAINT=
-  else
-    MAINT='#M#'
-  fi
-  AC_SUBST(MAINT)dnl
-]
-)
-
-# Check to see if we're running under Cygwin32, without using
-# AC_CANONICAL_*.  If so, set output variable CYGWIN32 to "yes".
-# Otherwise set it to "no".
-
-dnl AM_CYGWIN32()
-AC_DEFUN(AM_CYGWIN32,
-[AC_CACHE_CHECK(for Cygwin32 environment, am_cv_cygwin32,
-[AC_TRY_COMPILE(,[return __CYGWIN32__;],
-am_cv_cygwin32=yes, am_cv_cygwin32=no)
-rm -f conftest*])
-CYGWIN32=
-test "$am_cv_cygwin32" = yes && CYGWIN32=yes])
-
-# Check to see if we're running under Win32, without using
-# AC_CANONICAL_*.  If so, set output variable EXEEXT to ".exe".
-# Otherwise set it to "".
-
-dnl AM_EXEEXT()
-dnl This knows we add .exe if we're building in the Cygwin32
-dnl environment. But if we're not, then it compiles a test program
-dnl to see if there is a suffix for executables.
-AC_DEFUN(AM_EXEEXT,
-[AC_REQUIRE([AM_CYGWIN32])
-AC_REQUIRE([AM_MINGW32])
-AC_MSG_CHECKING([for executable suffix])
-AC_CACHE_VAL(am_cv_exeext,
-[if test "$CYGWIN32" = yes || test "$MINGW32" = yes; then
-am_cv_exeext=.exe
-else
-cat > am_c_test.c << 'EOF'
-int main() {
-/* Nothing needed here */
-}
-EOF
-${CC-cc} -o am_c_test $CFLAGS $CPPFLAGS $LDFLAGS am_c_test.c $LIBS 1>&5
-am_cv_exeext=
-for file in am_c_test.*; do
-   case $file in
-    *.c) ;;
-    *.o) ;;
-    *) am_cv_exeext=`echo $file | sed -e s/am_c_test//` ;;
-   esac
-done
-rm -f am_c_test*])
-test x"${am_cv_exeext}" = x && am_cv_exeext=no
-fi
-EXEEXT=""
-test x"${am_cv_exeext}" != xno && EXEEXT=${am_cv_exeext}
-AC_MSG_RESULT(${am_cv_exeext})
-AC_SUBST(EXEEXT)])
-
-# Check to see if we're running under Mingw, without using
-# AC_CANONICAL_*.  If so, set output variable MINGW32 to "yes".
-# Otherwise set it to "no".
-
-dnl AM_MINGW32()
-AC_DEFUN(AM_MINGW32,
-[AC_CACHE_CHECK(for Mingw32 environment, am_cv_mingw32,
-[AC_TRY_COMPILE(,[return __MINGW32__;],
-am_cv_mingw32=yes, am_cv_mingw32=no)
-rm -f conftest*])
-MINGW32=
-test "$am_cv_mingw32" = yes && MINGW32=yes])
 
