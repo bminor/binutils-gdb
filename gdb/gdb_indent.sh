@@ -73,6 +73,7 @@ esac
 
 types="\
 -T FILE \
+-T bfd -T asection \
 -T prgregset_t -T fpregset_t -T gregset_t \
 `cat *.h | sed -n \
     -e 's/^.*[^a-z0-9_]\([a-z0-9_]*_ftype\).*$/-T \1/p' \

@@ -1,5 +1,9 @@
 2003-01-27  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb_indent.sh: Add -T bfd and -T asection to the indent arguments.
+
+2003-01-27  Daniel Jacobowitz  <drow@mvista.com>
+
 	* maint.c [! (HAVE_MONSTARTUP && HAVE__MCLEANUP)]
 	(maintenance_set_profile_cmd): Use error () instead of warning ().
 
