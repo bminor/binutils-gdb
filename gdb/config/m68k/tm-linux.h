@@ -93,7 +93,7 @@
    we extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
    This routine returns true on success */
 
-#define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
+#define GET_LONGJMP_TARGET(ADDR) m68k_get_longjmp_target(ADDR)
 
 /* Offset to saved PC in sigcontext, from <asm/sigcontext.h>.  */
 #define SIGCONTEXT_PC_OFFSET 26

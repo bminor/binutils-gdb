@@ -637,14 +637,13 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 
 #endif /* USE_PROC_FS */
 
-#ifdef GET_LONGJMP_TARGET
 /* Figure out where the longjmp will land.  Slurp the args out of the stack.
    We expect the first arg to be a pointer to the jmp_buf structure from which
    we extract the pc (JB_PC) that we will land at.  The pc is copied into PC.
    This routine returns true on success. */
 
 int
-get_longjmp_target (CORE_ADDR *pc)
+m68k_get_longjmp_target (CORE_ADDR *pc)
 {
   char *buf;
   CORE_ADDR sp, jb_addr;
@@ -667,7 +666,6 @@ get_longjmp_target (CORE_ADDR *pc)
 
   return 1;
 }
-#endif /* GET_LONGJMP_TARGET */
 
 /* Immediately after a function call, return the saved pc before the frame
    is setup.  For sun3's, we check for the common case of being inside of a

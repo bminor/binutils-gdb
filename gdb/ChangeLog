@@ -1,3 +1,16 @@
+Wed Nov  8 22:46:43 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* m68k-tdep.c (m68k_get_longjmp_target): Rename function
+ 	get_longjmp_target.  Remove wrapping #ifdef GET_LONGJMP_TARGET.
+	* config/m68k/tm-m68k.h (m68k_get_longjmp_target): Add function
+ 	declaration.
+
+	* config/m68k/tm-vx68.h, config/m68k/tm-sun3.h,
+ 	config/m68k/tm-m68kv4.h, config/m68k/tm-linux.h,
+ 	config/m68k/tm-es1800.h, config/m68k/tm-cisco.h: Update definition
+ 	of GET_LONGJMP_TARGET.  Delete get_longjmp_target function
+ 	declaratation.
+
 Wed Nov  8 15:32:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbserver/configure.in (files): Don't link nm-empty.h when a

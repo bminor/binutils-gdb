@@ -386,3 +386,10 @@ extern void m68k_pop_frame (void);
 #define SP_ARG0 (1 * 4)
 
 #define TARGET_M68K
+
+/* Figure out where the longjmp will land.  Slurp the args out of the stack.
+   We expect the first arg to be a pointer to the jmp_buf structure from which
+   we extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
+   This routine returns true on success */
+
+extern int m68k_get_longjmp_target (CORE_ADDR *);
