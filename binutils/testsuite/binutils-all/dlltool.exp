@@ -41,7 +41,7 @@ if ![string match "" $err] then {
     send_log "$err\n"
     verbose "$err" 1
     fail "dlltool (fastcall export)"
-    continue;
+    continue
 }
 
 pass "dlltool (fastcall export)"
