@@ -95,8 +95,6 @@ HOSTING_CRT0=/lib/crt0.o
 HOSTING_LIBS=`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else echo $(libdir)/libgcc.a; fi`  -lc
 HOSTING_EMU=LDEMULATION=$(EMUL); export LDEMULATION
 
-C++ = g++ -fgnu-linker
-
 ### Host, target, and site specific Makefile fragments come in here.
 ####
 
@@ -106,9 +104,6 @@ LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF)
 
 .c.o:
 	$(CC) -c $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $<
-
-.cc.o:
-	$(C++) -c $(CFLAGS) -I$(srcdir) $<
 
 # go directly to ld.new in case this ld isn't capable of
 # linking native object on this host.  It can be renamed on
@@ -511,7 +506,7 @@ tags TAGS:$(SOURCES) $(HEADERS)
 objdump:objdump.c 
 
 .PHONY: install
-install: $(LD_PROG)
+install: 
 	-parent=`echo $(bindir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(bindir) ] ; then true ; else mkdir $(bindir) ; fi
@@ -531,7 +526,7 @@ install: $(LD_PROG)
 	  ln $(tooldir)/bin/ld $(tooldir)/bin/gld; \
 	else true; fi
 
-install-info: info
+install-info: 
 	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi

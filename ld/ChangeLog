@@ -1,3 +1,9 @@
+Fri Jun  4 16:18:24 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: remove old C++ rules; remove install:all and
+	install-info:info dependencies (these cause some spurious rebuilds
+	at 'make install' time)
+
 Fri Jun  4 08:50:14 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure.in (mips-idt-ecoffl*): New target; use mips-idtl.
