@@ -104,6 +104,8 @@ extern void m68k_find_saved_regs PARAMS ((struct frame_info *, struct frame_save
 #define NUM_REGS 29
 #endif
 
+#define NUM_FREGS (NUM_REGS-24)
+
 #ifndef REGISTER_BYTES_OK
 #define REGISTER_BYTES_OK(b) \
    ((b) == REGISTER_BYTES_FP \

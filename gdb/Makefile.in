@@ -54,7 +54,6 @@ INSTALL_DATA = @INSTALL_DATA@
 AR = @AR@
 AR_FLAGS = qv
 RANLIB = @RANLIB@
-AWK = @AWK@
 DLLTOOL = @DLLTOOL@
 WINDRES = @WINDRES@
 
@@ -278,6 +277,11 @@ SIM_OBS =
 
 ANNOTATE_OBS = annotate.o
 
+# start-sanitize-carp
+# Multi-arch enabled gdb targets
+MACHINE_OBS = @MACHINE_OBS@
+
+# end-sanitize-carp
 # Host and target-dependent makefile fragments come in here.
 @host_makefile_frag@
 @target_makefile_frag@
@@ -501,6 +505,9 @@ POSSLIBS = gnu-regex.c gnu-regex.h
 # Makefile.in
 
 DEPFILES = $(TDEPFILES) $(XDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) \
+           $(start-sanitize-carp) \
+	   $(MACHINE_OBS) \
+           $(end-sanitize-carp) \
 	   $(REMOTE_OBS) $(SIM_OBS) @CONFIG_OBS@
 
 SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES) @CONFIG_SRCS@
@@ -1313,6 +1320,9 @@ m68k-tdep.o: m68k-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(value_h) \
 
 m68kly-nat.o: m68kly-nat.c $(defs_h) $(frame_h) $(inferior_h) target.h
 
+m68klinux-nat.o: m68klinux-nat.c $(defs_h) $(frame_h) $(inferior_h) \
+	$(language_h) $(gdbcore_h) $(floatformat_h) target.h
+
 m88k-nat.o: m88k-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 m88k-tdep.o: m88k-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
@@ -1610,8 +1620,8 @@ tahoe-tdep.o: tahoe-tdep.c $(OP_INCLUDE)/tahoe.h $(defs_h) \
 
 #start-sanitize-tic80
 tic80-tdep.o: tic80-tdep.c $(defs_h)
-#end-sanitize-tic80
 
+#end-sanitize-tic80
 target.o: target.c $(bfd_h) $(defs_h) $(gdbcmd_h) $(inferior_h) \
 	objfiles.h symfile.h target.h gdb_string.h
 

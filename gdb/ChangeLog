@@ -1,3 +1,40 @@
+Tue Dec  8 15:09:44 1998  Edith Epstein  <eepstein@sophia.cygnus.com>
+
+	* config/m68k/tm-m68k.h (NUM_FREGS): m68k-linux patch. 
+	  Added NUM_FREGS macro.
+
+	* config/m68k/xm-linux.h: m68k-linux patch. New file.
+
+	* config/m68k/tm-linux.h: m68k-linux patch. New file.
+
+	* config/m68k/nm-linux.h: m68k-linux patch. New file.
+
+	* config/m68k/linux.mt: m68k-linux patch. New file.
+
+	* config/m68k/linux.mh: m68k-linux patch. New file. 
+
+	* gdbserver/low-linux.c: m68k-linux patch. Added an ifdef
+	  that checks the value of __GLIBC to decide whether or
+	  not to include sys/reg.h.
+
+	* m68klinux-nat.c: m68k-linux patch. New file. Note
+	  both m68k-tdep.c and m68klinux-nat.c contain definitions
+	  for supply_gregset and supply_fpregset. The definitions
+	  in m68k-tdep.c are valid is USE_PROC_FS is defined. Otherwise,
+	  the definitions in m68klinux-nat.c will be used. This is a 
+	  bit of a hack. The supply_* routines do not belong in 
+	  *_tdep.c files. But, there are several lynx ports that currently 
+	  depend on these definitions. 
+
+	* configure.tgt: m68k-linux patch. Added m68*-*-linux*
+	  gdb_target.
+
+	* configure.host: m68k-linux patch. Added m68*-*-linux*
+	  gdb_host.
+
+	* Makefile.in: m68k-linux patch. Added compile line for
+	  m68klinux-nat.o
+
 1998-12-07  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* config/i386/xm-cygwin.h: Remove REQUEST_QUIT definition.
