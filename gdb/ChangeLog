@@ -1,3 +1,12 @@
+Sun Aug 30 18:15:17 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* cplus-dem.c, demangle.h:  Moved to ../libiberty and ../include,
+	respectively, so same demangler can be used by other programs.
+	* Makefile.in:  Remove demangler stuff.
+	* Makefile.in (depend):  Pass -I../readline (needed for main.c).
+	* demangle.c (_initialize_demangler):  Tell demangler which
+	CPLUS_MARKER to assume.
+
 Fri Aug 28 13:13:33 1992  John Gilmore  (gnu@cygnus.com)
 
 	RS/6000 portability changes (for hosting cross-debuggers).

@@ -66,12 +66,10 @@ copying.awk
 copying.c
 core.c
 coredep.c
-cplus-dem.c
 createtags
 dbxread.c
 defs.h
 demangle.c
-demangle.h
 depend
 doc
 dwarfread.c

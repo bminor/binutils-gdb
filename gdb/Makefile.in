@@ -168,12 +168,6 @@ DIST=gdb
 LINT=/usr/5bin/lint
 LINTFLAGS= -I${BFD_DIR}
 
-# Select demangler to use.  Currently gdb only supports inclusion of a
-# single demangler.  The default demangler (cplus-dem.c) can demangle
-# several different styles that differ in only minor details.  See
-# demangle.c information about selecting styles.
-DEMANGLER = cplus-dem
-
 # Host and target-dependent makefile fragments come in here.
 ####
 # End of host and target-dependent makefile fragments
@@ -200,7 +194,7 @@ SFILES_MAINDIR = \
 	 main.c printcmd.c gdbtypes.c \
 	 remote.c source.c stack.c symmisc.c symtab.c symfile.c \
 	 utils.c valarith.c valops.c valprint.c values.c c-exp.y m2-exp.y \
-	 ${DEMANGLER}.c mem-break.c target.c inftarg.c \
+	 mem-break.c target.c inftarg.c \
 	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c stabsread.c \
 	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
 	 minsyms.c mipsread.c maint.c
@@ -245,7 +239,7 @@ SFILES_STAND = $(SFILES) standalone.c
 SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 
 # Header files that are not named in config/* Makefile fragments go here.
-HFILES=	breakpoint.h buildsym.h call-cmds.h command.h defs.h demangle.h \
+HFILES=	breakpoint.h buildsym.h call-cmds.h command.h defs.h \
 	environ.h expression.h frame.h gdbcmd.h gdbcore.h gdbtypes.h \
 	gdb-stabs.h \
 	ieee-float.h inferior.h minimon.h objfiles.h partial-stab.h \
@@ -287,7 +281,7 @@ OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     values.o eval.o valops.o valarith.o valprint.o printcmd.o \
     symtab.o symfile.o symmisc.o infcmd.o infrun.o remote.o \
     command.o utils.o expprint.o environ.o version.o gdbtypes.o \
-    copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
+    copying.o $(DEPFILES) mem-break.o target.o \
     inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
     buildsym.o objfiles.o minsyms.o maint.o demangle.o \
     dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o \
@@ -447,7 +441,8 @@ depend: $(SOURCES) Makefile.in
 	@echo arm-convert.s.
 	touch xm.h tm.h
 	-$(GCC) -MM -nostdinc -I/usr/include $(CFLAGS) -I$(BFD_DIR) \
-	  $(INCLUDE_CFLAGS) `ls $(SOURCES) | grep -v '\.[hy]$$' | \
+	  -I${READLINE_DIR} $(INCLUDE_CFLAGS) \
+	  `ls $(SOURCES) | grep -v '\.[hy]$$' | \
 	  sort -u` >depend.tmp
 # If running in srcdir, translate "./foo.c" into "$srcdir/foo.c" except
 # for xm.h and tm.h.  This allows the same "depend" file to be used
@@ -730,12 +725,6 @@ gdb.cxref: $(SFILES)
 	cxref -I. $(SFILES) >gdb.cxref
 
 force_update:
-
-# Create a standalone demangler if so desired ("make demangle").
-
-demangle: ${srcdir}/${DEMANGLER}.c
-	${CC} -o $@ -DMAIN ${INTERNAL_CFLAGS} \
-	  `echo ${srcdir}/${DEMANGLER}.c | sed 's,^\./,,'`
 
 # GNU Make has an annoying habit of putting *all* the Makefile variables
 # into the environment, unless you include this target as a circumvention.
