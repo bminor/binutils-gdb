@@ -1,3 +1,9 @@
+Thu Feb 13 13:28:43 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-dis.c (print_mips16_insn_arg): Use memaddr - 2 as the base
+	address for an extended PC relative instruction that is not a
+	branch.
+
 Wed Feb 12 12:27:40 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* m68k-dis.c (print_insn_m68k): Set bytes_per_chunk and
