@@ -1,5 +1,8 @@
 Wed Aug 24 11:49:19 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* section.c (bfd_make_section_anyway): Fix failure check of
+	bfd_make_empty_symbol.  From Antti.Miettinen@ntc.nokia.com.
+
 	* aoutx.h (translate_to_native_sym_flags): Use the output_section
 	(and output_offset) if there is one.
 
