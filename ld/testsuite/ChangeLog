@@ -1,3 +1,7 @@
+2004-01-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-i386/tlsbin.dd: Adjust for changed sib printing.
+
 2004-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* ld-arm/arm-elf.exp: Add arm-static-app test.
