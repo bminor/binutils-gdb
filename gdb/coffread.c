@@ -915,8 +915,19 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
    perror_with_name(objfile->name);
 
   /* Work around a stdio bug in SunOS4.1.1 (this makes me nervous....
-     it's hard to know I've really worked around it.  This should be
-     harmless, anyway).  */
+     it's hard to know I've really worked around it.  The fix should be
+     harmless, anyway).  The symptom of the bug is that the first
+     fread (in read_one_sym), will (in my example) actually get data
+     from file offset 268, when the fseek was to 264 (and ftell shows
+     264).  This causes all hell to break loose.  I was unable to
+     reproduce this on a short test program which operated on the same
+     file, performing (I think) the same sequence of operations.
+
+     It stopped happening when I put in this rewind().
+
+     FIXME: Find out if this has been reported to Sun, whether it has
+     been fixed in a later release, etc.  */
+
   rewind (stream);
 
   /* Position to read the symbol table. */
