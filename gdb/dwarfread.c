@@ -76,7 +76,7 @@ typedef unsigned int DIE_REF;	/* Reference to a DIE */
 #endif
 
 #ifndef LCC_PRODUCER
-#define LCC_PRODUCER "NCR C/C++ "
+#define LCC_PRODUCER "NCR C/C++"
 #endif
 
 #ifndef CFRONT_PRODUCER
@@ -1593,7 +1593,7 @@ handle_producer (producer)
      gcc (cc1) producer, as opposed to a g++ (cc1plus) producer. */
 
 #if 1 /* Works, but is experimental.  -fnf */
-  if (current_demangling_style == auto_demangling)
+  if (AUTO_DEMANGLING)
     {
       if (STREQN (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER)))
 	{

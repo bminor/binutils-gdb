@@ -1,3 +1,38 @@
+Fri Aug 14 12:11:25 1992  Fred Fish  (fnf@cygnus.com)
+
+	* cplus-dem.c (cplus_markers):  Add table for gnu style and
+	use throughout, in place of compile time constant CPLUS_MARKER.
+	* cplus-dem.c (ARM_VTABLE_STRING, ARM_VTABLE_STRLEN):  Add.
+	* cplus-dem.c (cfront_special):  New function, as suggested
+	by pfieland@stratus.com.
+	* cplus-dem.c (forget_types):  New function.
+	* cplus-dem.c (cplus_demangle):  Call gnu_special, moved from
+	demangle_prefix().
+	* cplus-dem.c (mop_up):  Call forget_types().
+	* cplus-dem.c (AUTO_DEMANGLING, GNU_DEMANGLING, LUCID_DEMANGLING):
+	Use throughout, instead of checking current_demangling_style.
+	* cplus-dem.c (demangle_signature):  When finding an explicit
+	start of function args, forget all remembered types for
+	lucid/cfront style demangling.
+	* cplus-dem.c (demangle_prefix):  In a sequence of two or more
+	underbar characters, use last pair as the delimiter.  Hoist
+	gnu_special() call up to cplus_demangle().  Call cfront_special()
+	when appropriate.
+	* cplus-dem.c (cplus_special):  Fix virtual table name demangling
+	for inherited classes.	
+	* cplus-dem.c (demangle_args):  Document quirks of numbered
+	references to previously seen types.
+	* dbxread.c (read_ofile_symtab, process_one_symbol):
+	Use AUTO_DEMANGLING rather than explicitly checking
+	current_demangling_style.
+	* demangle.h:  Add some comments.
+	* demangle.h (AUTO_DEMANGLING, GNU_DEMANGLING, LUCID_DEMANGLING,
+	CFRONT_DEMANGLING):  New macros.
+	* dwarfread.c (LCC_PRODUCER):  Remove trailing space, which is
+	not found in the actual producer string produced by lcc.
+	* dwarfread.c (handle_producer):  Use AUTO_DEMANGLING rather
+	than explicitly checking current_demangling_style.
+
 Thu Aug 13 11:54:46 1992  John Gilmore  (gnu at cygnus.com)
 
 	* breakpoint.c (enable_longjmp_breakpoint,

@@ -32,13 +32,27 @@
 #include <ctype.h>
 #include <string.h>
 
-/* This is '$' on systems where the assembler can deal with that.
-   Where the assembler can't, it's '.' (but on many systems '.' is
-   used for other things).  */
+/* In order to allow a single demangler executable to demangle strings
+   using various common values of CPLUS_MARKER, as well as any specific
+   one set at compile time, we maintain a string containing all the
+   commonly used ones, and check to see if the marker we are looking for
+   is in that string.  CPLUS_MARKER is usually '$' on systems where the
+   assembler can deal with that.  Where the assembler can't, it's usually
+   '.' (but on many systems '.' is used for other things).  We put the
+   current defined CPLUS_MARKER first (which defaults to '$'), followed
+   by the next most common value, followed by an explicit '$' in case
+   the value of CPLUS_MARKER is not '$'.
+
+   We could avoid this if we could just get g++ to tell us what the actual
+   cplus marker character is as part of the debug information, perhaps by
+   ensuring that it is the character that terminates the gcc<n>_compiled
+   marker symbol (FIXME). */
 
 #if !defined (CPLUS_MARKER)
 #define CPLUS_MARKER '$'
 #endif
+
+static const char cplus_markers[] = { CPLUS_MARKER, '.', '$', '\0' };
 
 #ifndef __STDC__
 #define const
@@ -160,6 +174,9 @@ typedef struct string		/* Beware: these aren't required to be */
 #define APPEND_BLANK(str)	{if (!STRING_EMPTY(str)) \
 				   string_append(str, " ");}
 
+#define ARM_VTABLE_STRING "__vtbl__"	/* Lucid/cfront virtual table prefix */
+#define ARM_VTABLE_STRLEN 8		/* strlen (ARM_VTABLE_STRING) */
+
 /* Prototypes for local functions */
 
 static char *
@@ -190,6 +207,9 @@ demangle_prefix PARAMS ((string *, const char **, struct work_stuff *));
 
 static int
 gnu_special PARAMS ((string *, const char **, struct work_stuff *));
+
+static int
+cfront_special PARAMS ((string *, const char **, struct work_stuff *));
 
 static void
 string_need PARAMS ((string *, int));
@@ -244,6 +264,9 @@ demangle_function_name PARAMS ((string *, const char **, struct work_stuff*,
 
 static void
 remember_type PARAMS ((const char *, int, struct work_stuff *));
+
+static void
+forget_types PARAMS ((struct work_stuff *));
 
 #if 0
 static void
@@ -337,7 +360,23 @@ cplus_demangle (mangled, options)
       work -> options = options;
       
       string_init (&decl);
-      success = demangle_prefix (&decl, &mangled, work);
+
+      /* First check to see if gnu style demangling is active and if the
+	 string to be demangled contains a CPLUS_MARKER.  If so, attempt to
+	 recognize one of the gnu special forms rather than looking for a
+	 standard prefix.  In particular, don't worry about whether there
+	 is a "__" string in the mangled string.  Consider "_$_5__foo" for
+	 example. */
+
+      if ((AUTO_DEMANGLING || GNU_DEMANGLING)
+	  && (strpbrk (mangled, cplus_markers)) != NULL)
+	{
+	  success = gnu_special (&decl, &mangled, work);
+	}
+      else
+	{
+	  success = demangle_prefix (&decl, &mangled, work);
+	}
       if (success && (*mangled != '\0'))
 	{
 	  success = demangle_signature (&decl, &mangled, work);
@@ -358,13 +397,7 @@ mop_up (declp, work, success)
 
   /* Discard the remembered types, if any. */
   
-  for (i = 0; i < work -> ntypes; i++)
-    {
-      if (work -> typevec[i] != NULL)
-	{
-	  free (work -> typevec[i]);
-	}
-    }
+  forget_types (work);
   if (work -> typevec != NULL)
     {
       free ((char *) work -> typevec);
@@ -439,8 +472,7 @@ demangle_signature (declp, mangled, work)
 	{
 	  case 'Q':
 	    success = demangle_qualified (declp, mangled, work);
-	    if (current_demangling_style == auto_demangling ||
-		current_demangling_style == gnu_demangling)
+	    if (AUTO_DEMANGLING || GNU_DEMANGLING)
 	      {
 		expect_func = 1;
 	      }
@@ -467,8 +499,7 @@ demangle_signature (declp, mangled, work)
 		remember_type (premangle, *mangled - premangle, work);
 	      }
 #endif
-	    if (current_demangling_style == auto_demangling ||
-		current_demangling_style == gnu_demangling)
+	    if (AUTO_DEMANGLING || GNU_DEMANGLING)
 	      {
 		expect_func = 1;
 	      }
@@ -480,8 +511,19 @@ demangle_signature (declp, mangled, work)
 	     the class name.  For GNU style, it is just implied.  So we can
 	     safely just consume any 'F' at this point and be compatible
 	     with either style. */
+
 	    func_done = 1;
 	    (*mangled)++;
+
+	    /* For lucid/cfront style we have to forget any types we might
+	       have remembered up to this point, since they were not argument
+	       types.  GNU style considers all types seen as available for
+	       back references.  See comment in demangle_args() */
+
+	    if (LUCID_DEMANGLING || CFRONT_DEMANGLING)
+	      {
+		forget_types (work);
+	      }
 	    success = demangle_args (declp, mangled, work);
 	    break;
 	  
@@ -500,8 +542,7 @@ demangle_signature (declp, mangled, work)
 	    break;
 
 	  default:
-	    if (current_demangling_style == auto_demangling ||
-		current_demangling_style == gnu_demangling)
+	    if (AUTO_DEMANGLING || GNU_DEMANGLING)
 	      {
 		/* Assume we have stumbled onto the first outermost function
 		   argument token, and start processing args. */
@@ -518,8 +559,7 @@ demangle_signature (declp, mangled, work)
 	      }
 	    break;
 	}
-      if (current_demangling_style == auto_demangling ||
-	  current_demangling_style == gnu_demangling)
+      if (AUTO_DEMANGLING || GNU_DEMANGLING)
 	{
 	  if (success && expect_func)
 	    {
@@ -530,8 +570,7 @@ demangle_signature (declp, mangled, work)
     }
   if (success && !func_done)
     {
-      if (current_demangling_style == auto_demangling ||
-	  current_demangling_style == gnu_demangling)
+      if (AUTO_DEMANGLING || GNU_DEMANGLING)
 	{
 	  /* With GNU style demangling, bar__3foo is 'foo::bar(void)', and
 	     bar__3fooi is 'foo::bar(int)'.  We get here when we find the
@@ -894,19 +933,24 @@ demangle_prefix (declp, mangled, work)
 {
   int success = 1;
   const char *scan;
+  int i;
 
   scan = strstr (*mangled, "__");
+
+  if (scan != NULL)
+    {
+      /* We found a sequence of two or more '_', ensure that we start at
+	 the last pair in the sequence. */
+      i = strspn (scan, "_");
+      if (i > 2)
+	{
+	  scan += (i - 2); 
+	}
+    }
+ 
   if (scan == NULL)
     {
-      if (current_demangling_style == auto_demangling ||
-	  current_demangling_style == gnu_demangling)
-	{
-	  success = gnu_special (declp, mangled, work);
-	}
-      else
-	{
-	  success = 0;
-	}
+      success = 0;
     }
   else if (work -> static_type)
     {
@@ -926,19 +970,23 @@ demangle_prefix (declp, mangled, work)
       /* Mangled name starts with "__".  Skip over any leading '_' characters,
 	 then find the next "__" that separates the prefix from the signature.
 	 */
-      while (*scan == '_')
+      if (!(CFRONT_DEMANGLING || LUCID_DEMANGLING)
+	  || (cfront_special (declp, mangled, work) == 0))
 	{
-	  scan++;
-	}
-      if ((scan = strstr (scan, "__")) == NULL || (*(scan + 2) == '\0'))
-	{
-	  /* No separator (I.E. "__not_mangled"), or empty signature
-	     (I.E. "__not_mangled_either__") */
-	  success = 0;
-	}
-      else
-	{
-	  demangle_function_name (declp, mangled, work, scan);
+	  while (*scan == '_')
+	    {
+	      scan++;
+	    }
+	  if ((scan = strstr (scan, "__")) == NULL || (*(scan + 2) == '\0'))
+	    {
+	      /* No separator (I.E. "__not_mangled"), or empty signature
+		 (I.E. "__not_mangled_either__") */
+	      success = 0;
+	    }
+	  else
+	    {
+	      demangle_function_name (declp, mangled, work, scan);
+	    }
 	}
     }
   else if (*(scan + 2) != '\0')
@@ -975,7 +1023,8 @@ DESCRIPTION
 	the normal pattern.  For example:
 
 		_$_3foo		(destructor for class foo)
-		_vt$foo		(virtual table)
+		_vt$foo		(foo virtual table)
+		_vt$foo$bar	(foo::bar virtual table)
 		_3foo$varname	(static data member)
  */
 
@@ -990,7 +1039,7 @@ gnu_special (declp, mangled, work)
   const char *p;
 
   if ((*mangled)[0] == '_'
-      && (*mangled)[1] == CPLUS_MARKER
+      && strchr (cplus_markers, (*mangled)[1]) != NULL
       && (*mangled)[2] == '_')
     {
       /* Found a GNU style destructor, get past "_<CPLUS_MARKER>_" */
@@ -1000,21 +1049,29 @@ gnu_special (declp, mangled, work)
   else if ((*mangled)[0] == '_'
 	   && (*mangled)[1] == 'v'
 	   && (*mangled)[2] == 't'
-	   && (*mangled)[3] == CPLUS_MARKER)
+	   && strchr (cplus_markers, (*mangled)[3]) != NULL)
     {
       /* Found a GNU style virtual table, get past "_vt<CPLUS_MARKER>"
          and create the decl.  Note that we consume the entire mangled
 	 input string, which means that demangle_signature has no work
 	 to do. */
       (*mangled) += 4;
-      n = strlen (*mangled);
-      string_appendn (declp, *mangled, n);
+      while (**mangled != '\0')
+	{
+	  n = strcspn (*mangled, cplus_markers);
+	  string_appendn (declp, *mangled, n);
+	  (*mangled) += n;
+	  if (**mangled != '\0')
+	    {
+	      string_append (declp, "::");
+	      (*mangled)++;
+	    }
+	}
       string_append (declp, " virtual table");
-      (*mangled) += n;
     }
   else if ((*mangled)[0] == '_'
 	   && isdigit ((*mangled)[1])
-	   && (p = strchr (*mangled, CPLUS_MARKER)) != NULL)
+	   && (p = strpbrk (*mangled, cplus_markers)) != NULL)
     {
       /* static data member, "_3foo$varname" for example */
       (*mangled)++;
@@ -1025,6 +1082,67 @@ gnu_special (declp, mangled, work)
       n = strlen (p);
       string_appendn (declp, p, n);
       (*mangled) = p + n;
+    }
+  else
+    {
+      success = 0;
+    }
+  return (success);
+}
+
+/*
+
+LOCAL FUNCTION
+
+	cfront_special -- special handling of cfront/lucid mangled strings
+
+SYNOPSIS
+
+	static int
+	cfront_special (string *declp, const char **mangled,
+			struct work_stuff *work)
+
+
+DESCRIPTION
+
+	Process some special cfront style mangling forms that don't fit
+	the normal pattern.  For example:
+
+		__vtbl__3foo		(foo virtual table)
+		__vtbl__3foo__3bar	(bar::foo virtual table)
+
+ */
+
+static int
+cfront_special (declp, mangled, work)
+     string *declp;
+     const char **mangled;
+     struct work_stuff *work;
+{
+  int n;
+  int i;
+  int success = 1;
+  const char *p;
+
+  if (strncmp (*mangled, ARM_VTABLE_STRING, ARM_VTABLE_STRLEN) == 0)
+    {
+      /* Found a cfront style virtual table, get past ARM_VTABLE_STRING
+         and create the decl.  Note that we consume the entire mangled
+	 input string, which means that demangle_signature has no work
+	 to do. */
+      (*mangled) += ARM_VTABLE_STRLEN;
+      while (**mangled != '\0')
+	{
+	  n = consume_count (mangled);
+	  string_prependn (declp, *mangled, n);
+	  (*mangled) += n;
+	  if ((*mangled)[0] == '_' && (*mangled)[1] == '_')
+	    {
+	      string_prepend (declp, "::");
+	      (*mangled) += 2;
+	    }
+	}
+      string_append (declp, " virtual table");
     }
   else
     {
@@ -1531,6 +1649,25 @@ remember_type (start, len, work)
   work -> typevec[work -> ntypes++] = tem;
 }
 
+/* Forget the remembered types, but not the type vector itself. */
+
+static void
+forget_types (work)
+     struct work_stuff *work;
+{
+  int i;
+
+  while (work -> ntypes > 0)
+    {
+      i = --(work -> ntypes);
+      if (work -> typevec[i] != NULL)
+	{
+	  free (work -> typevec[i]);
+	  work -> typevec[i] = NULL;
+	}
+    }
+}
+
 /* Process the argument list part of the signature, after any class spec
    has been consumed, as well as the first 'F' character (if any).  For
    example:
@@ -1539,7 +1676,39 @@ remember_type (start, len, work)
    "complexfunc5__FPFPc_PFl_i"	=>	process "PFPc_PFl_i"
 
    DECLP must be already initialised, usually non-empty.  It won't be freed
-   on failure */
+   on failure.
+
+   Note that g++ differs significantly from cfront and lucid style mangling
+   with regards to references to previously seen types.  For example, given
+   the source fragment:
+
+     class foo {
+       public:
+       foo::foo (int, foo &ia, int, foo &ib, int, foo &ic);
+     };
+
+     foo::foo (int, foo &ia, int, foo &ib, int, foo &ic) { ia = ib = ic; }
+     void foo (int, foo &ia, int, foo &ib, int, foo &ic) { ia = ib = ic; }
+
+   g++ produces the names:
+
+     __3fooiRT0iT2iT2
+     foo__FiR3fooiT1iT1
+
+   while lcc (and presumably cfront as well) produces:
+
+     foo__FiR3fooT1T2T1T2
+     __ct__3fooFiR3fooT1T2T1T2
+
+   Note that g++ bases it's type numbers starting at zero and counts all
+   previously seen types, while lucid/cfront bases it's type numbers starting
+   at one and only considers types after it has seen the 'F' character
+   indicating the start of the function args.  For lucid/cfront style, we
+   account for this difference by discarding any previously seen types when
+   we see the 'F' character, and subtracting one from the type number
+   reference.
+
+ */
 
 static int
 demangle_args (declp, type, work)
@@ -1584,8 +1753,7 @@ demangle_args (declp, type, work)
 	    {
 	      return (0);
 	    }
-	  if (current_demangling_style == lucid_demangling ||
-	      current_demangling_style == cfront_demangling)
+	  if (LUCID_DEMANGLING || CFRONT_DEMANGLING)
 	    {
 	      t--;
 	    }
@@ -1675,8 +1843,7 @@ demangle_function_name (declp, mangled, work, scan)
 
   (*mangled) = scan + 2;
 
-  if (current_demangling_style == lucid_demangling ||
-      current_demangling_style == cfront_demangling)
+  if (LUCID_DEMANGLING || CFRONT_DEMANGLING)
     {
 
       /* See if we have an ARM style constructor or destructor operator.
@@ -1701,7 +1868,7 @@ demangle_function_name (declp, mangled, work, scan)
   if (declp->p - declp->b >= 3 
       && declp->b[0] == 'o'
       && declp->b[1] == 'p'
-      && declp->b[2] == CPLUS_MARKER)
+      && strchr (cplus_markers, declp->b[2]) != NULL)
     {
       /* see if it's an assignment expression */
       if (declp->p - declp->b >= 10 /* op$assign_ */
