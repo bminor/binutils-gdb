@@ -452,11 +452,13 @@ build_section_addr_info_from_section_table (const struct section_table *start,
 
   for (stp = start, oidx = 0; stp != end; stp++)
     {
-      if (stp->the_bfd_section->flags & (SEC_ALLOC | SEC_LOAD)
+      if (bfd_get_section_flags (stp->bfd, 
+				 stp->the_bfd_section) & (SEC_ALLOC | SEC_LOAD)
 	  && oidx < MAX_SECTIONS)
 	{
 	  sap->other[oidx].addr = stp->addr;
-	  sap->other[oidx].name = xstrdup (stp->the_bfd_section->name);
+	  sap->other[oidx].name 
+	    = xstrdup (bfd_section_name (stp->bfd, stp->the_bfd_section));
 	  sap->other[oidx].sectindex = stp->the_bfd_section->index;
 	  oidx++;
 	}
@@ -708,7 +710,9 @@ syms_from_objfile (struct objfile *objfile, struct section_addr_info *addrs,
  	    for (i = 0; 
 	         !s_addr && i < MAX_SECTIONS && addrs->other[i].name;
 		 i++)
- 	      if (strcmp (s->the_bfd_section->name, addrs->other[i].name) == 0)
+ 	      if (strcmp (bfd_section_name (s->objfile->obfd, 
+					    s->the_bfd_section), 
+			  addrs->other[i].name) == 0)
  	        s_addr = addrs->other[i].addr; /* end added for gdb/13815 */
  
 	  s->addr -= s->offset;
@@ -1222,7 +1226,7 @@ generic_load (char *args, int from_tty)
     }
 
   for (s = loadfile_bfd->sections; s; s = s->next)
-    if (s->flags & SEC_LOAD)
+    if (bfd_get_section_flags (loadfile_bfd, s) & SEC_LOAD)
       total_size += bfd_get_section_size_before_reloc (s);
 
   start_time = time (NULL);
@@ -2519,6 +2523,8 @@ void (*target_overlay_update) (struct obj_section *) = simple_overlay_update;
 int
 section_is_overlay (asection *section)
 {
+  /* FIXME: need bfd *, so we can use bfd_section_lma methods. */
+
   if (overlay_debugging)
     if (section && section->lma != 0 &&
 	section->vma != section->lma)
@@ -2605,6 +2611,8 @@ section_is_mapped (asection *section)
 CORE_ADDR
 pc_in_unmapped_range (CORE_ADDR pc, asection *section)
 {
+  /* FIXME: need bfd *, so we can use bfd_section_lma methods. */
+
   int size;
 
   if (overlay_debugging)
@@ -2623,6 +2631,8 @@ pc_in_unmapped_range (CORE_ADDR pc, asection *section)
 CORE_ADDR
 pc_in_mapped_range (CORE_ADDR pc, asection *section)
 {
+  /* FIXME: need bfd *, so we can use bfd_section_vma methods. */
+
   int size;
 
   if (overlay_debugging)
@@ -2641,6 +2651,8 @@ pc_in_mapped_range (CORE_ADDR pc, asection *section)
 int
 sections_overlap (asection *a, asection *b)
 {
+  /* FIXME: need bfd *, so we can use bfd_section_vma methods. */
+
   CORE_ADDR a_start = a->vma;
   CORE_ADDR a_end = a->vma + bfd_get_section_size_before_reloc (a);
   CORE_ADDR b_start = b->vma;
@@ -2656,6 +2668,8 @@ sections_overlap (asection *a, asection *b)
 CORE_ADDR
 overlay_unmapped_address (CORE_ADDR pc, asection *section)
 {
+  /* FIXME: need bfd *, so we can use bfd_section_lma methods. */
+
   if (overlay_debugging)
     if (section && section_is_overlay (section) &&
 	pc_in_mapped_range (pc, section))
@@ -2671,6 +2685,8 @@ overlay_unmapped_address (CORE_ADDR pc, asection *section)
 CORE_ADDR
 overlay_mapped_address (CORE_ADDR pc, asection *section)
 {
+  /* FIXME: need bfd *, so we can use bfd_section_vma methods. */
+
   if (overlay_debugging)
     if (section && section_is_overlay (section) &&
 	pc_in_unmapped_range (pc, section))
@@ -3109,23 +3125,25 @@ static int
 simple_overlay_update_1 (struct obj_section *osect)
 {
   int i, size;
+  bfd *obfd = osect->objfile->obfd;
+  asection *bsect = osect->the_bfd_section;
 
   size = bfd_get_section_size_before_reloc (osect->the_bfd_section);
   for (i = 0; i < cache_novlys; i++)
-    if (cache_ovly_table[i][VMA] == osect->the_bfd_section->vma &&
-	cache_ovly_table[i][LMA] == osect->the_bfd_section->lma		/* &&
-									   cache_ovly_table[i][SIZE] == size */ )
+    if (cache_ovly_table[i][VMA] == bfd_section_vma (obfd, bsect)
+	&& cache_ovly_table[i][LMA] == bfd_section_lma (obfd, bsect)
+	/* && cache_ovly_table[i][SIZE] == size */ )
       {
 	read_target_long_array (cache_ovly_table_base + i * TARGET_LONG_BYTES,
 				(int *) cache_ovly_table[i], 4);
-	if (cache_ovly_table[i][VMA] == osect->the_bfd_section->vma &&
-	    cache_ovly_table[i][LMA] == osect->the_bfd_section->lma	/* &&
-									   cache_ovly_table[i][SIZE] == size */ )
+	if (cache_ovly_table[i][VMA] == bfd_section_vma (obfd, bsect)
+	    && cache_ovly_table[i][LMA] == bfd_section_lma (obfd, bsect)
+	    /* && cache_ovly_table[i][SIZE] == size */ )
 	  {
 	    osect->ovly_mapped = cache_ovly_table[i][MAPPED];
 	    return 1;
 	  }
-	else			/* Warning!  Warning!  Target's ovly table has changed! */
+	else	/* Warning!  Warning!  Target's ovly table has changed! */
 	  return 0;
       }
   return 0;
@@ -3168,13 +3186,15 @@ simple_overlay_update (struct obj_section *osect)
     if (section_is_overlay (osect->the_bfd_section))
     {
       int i, size;
+      bfd *obfd = osect->objfile->obfd;
+      asection *bsect = osect->the_bfd_section;
 
       size = bfd_get_section_size_before_reloc (osect->the_bfd_section);
       for (i = 0; i < cache_novlys; i++)
-	if (cache_ovly_table[i][VMA] == osect->the_bfd_section->vma &&
-	    cache_ovly_table[i][LMA] == osect->the_bfd_section->lma	/* &&
-									   cache_ovly_table[i][SIZE] == size */ )
-	  {			/* obj_section matches i'th entry in ovly_table */
+	if (cache_ovly_table[i][VMA] == bfd_section_vma (obfd, bsect)
+	    && cache_ovly_table[i][LMA] == bfd_section_lma (obfd, bsect)
+	    /* && cache_ovly_table[i][SIZE] == size */ )
+	  { /* obj_section matches i'th entry in ovly_table */
 	    osect->ovly_mapped = cache_ovly_table[i][MAPPED];
 	    break;		/* finished with inner for loop: break out */
 	  }

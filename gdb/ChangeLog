@@ -1,5 +1,18 @@
 2002-01-11  Michael Snyder  <msnyder@redhat.com>
 
+	* symfile.c (build_section_addr_info_from_section_tab):
+	Use bfd access method instead of manipulating bfd directly.
+	(syms_from_objfile): Ditto.
+	(simple_overlay_update_1): Ditto.
+	(simple_overlay_update): Ditto.
+	(generic_load): Ditto.
+	(overlay_unmapped_address): FIXME comment, bfd access methods.
+	(sections_overlap): FIXME comment, bfd access methods.
+	(pc_in_mapped_range): FIXME comment, bfd access methods.
+	(pc_in_unmapped_range): FIXME comment, bfd access methods.
+	(section_is_mapped): FIXME comment, bfd access methods.
+	(section_is_overlay): FIXME comment, bfd access methods.
+
 	* symfile.c (generic_load): Whitespace and long line cleanups.
 	Remove duplicate variable, change several local variables to
 	more appropriate data types.
