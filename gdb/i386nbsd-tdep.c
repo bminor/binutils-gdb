@@ -132,13 +132,14 @@ static const unsigned char sigtramp_retcode[] =
 };
 
 static LONGEST
-i386nbsd_sigtramp_offset (CORE_ADDR pc)
+i386nbsd_sigtramp_offset (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   unsigned char ret[sizeof(sigtramp_retcode)], insn;
   LONGEST off;
   int i;
 
-  if (deprecated_read_memory_nobpt (pc, &insn, 1) != 0)
+  if (!safe_frame_unwind_memory (next_frame, pc, &insn, 1))
     return -1;
 
   switch (insn)
@@ -150,7 +151,7 @@ i386nbsd_sigtramp_offset (CORE_ADDR pc)
     case RETCODE_INSN2:
       /* INSN2 and INSN3 are the same.  Read at the location of PC+1
 	 to determine if we're actually looking at INSN2 or INSN3.  */
-      if (deprecated_read_memory_nobpt (pc + 1, &insn, 1) != 0)
+      if (!safe_frame_unwind_memory (next_frame, pc + 1, &insn, 1))
 	return -1;
 
       if (insn == RETCODE_INSN3)
@@ -173,7 +174,7 @@ i386nbsd_sigtramp_offset (CORE_ADDR pc)
 
   pc -= off;
 
-  if (deprecated_read_memory_nobpt (pc, (char *) ret, sizeof (ret)) != 0)
+  if (!safe_frame_unwind_memory (next_frame, pc, ret, sizeof (ret)))
     return -1;
 
   if (memcmp (ret, sigtramp_retcode, sizeof (ret)) == 0)
@@ -193,7 +194,7 @@ i386nbsd_sigtramp_p (struct frame_info *next_frame)
 
   find_pc_partial_function (pc, &name, NULL, NULL);
   return (nbsd_pc_in_sigtramp (pc, name)
-	  || i386nbsd_sigtramp_offset (pc) >= 0);
+	  || i386nbsd_sigtramp_offset (next_frame) >= 0);
 }
 
 /* From <machine/signal.h>.  */

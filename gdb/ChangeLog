@@ -1,5 +1,11 @@
 2004-08-05  Mark Kettenis  <kettenis@chello.nl>
 
+	* i386nbsd-tdep.c (i386nbsd_sigtramp_offset): Change argument from
+	CORE_ADDR to struct frame_info *.  Use safe_frame_unwind_memory
+	instead of deprecated_read_memory_nobpt.
+	(i386nbsd_sigtramp_p): Adjust for changed signature of
+	i386nbsd_sigtramp_offset.
+
 	* i386obsd-tdep.c (i386obsd_sigtramp_p): Use
 	safe_frame_unwind_memory instead of target_read_memory.
 
