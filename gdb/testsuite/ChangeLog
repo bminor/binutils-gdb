@@ -1,3 +1,8 @@
+Wed May 21 21:23:16 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.base/setshow.exp: Don't run the set prompt tests if
+	the board has gdb_prompt set.
+
 Tue May 20 08:58:49 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.base/a2-run.exp: Change "gdb,noargs" to just "noargs".
