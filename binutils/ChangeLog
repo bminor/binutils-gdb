@@ -1,3 +1,7 @@
+2004-12-03  Richard Sandiford  <rsandifo@redhat.com>
+
+	* MAINTAINERS: Remove mention of config.if.
+
 2004-11-30  Tero Niemela  <tero_niemela@yahoo.com>
 
 	* Makefile.am: Change LOCALEDIR to $(datadir)/share.

@@ -32,14 +32,14 @@ order.
    When you unpack the gdb-6.3.tar.gz file, you'll find a directory
 called `gdb-6.3', which contains:
 
-  COPYING       config-ml.in  gdb          ltcf-gcj.sh     readline
-  COPYING.LIB   config.guess  gettext.m4   ltconfig        sim
-  Makefile.def  config.if     include      ltmain.sh       src-release
-  Makefile.in   config.sub    install-sh   md5.sum         symlink-tree
-  Makefile.tpl  configure     libiberty    missing         texinfo
-  README        configure.in  libtool.m4   mkinstalldirs   ylwrap
-  bfd           djunpack.bat  ltcf-c.sh    move-if-change
-  config        etc           ltcf-cxx.sh  opcodes
+  COPYING       config-ml.in  gettext.m4   ltconfig        sim
+  COPYING.LIB   config.guess  include      ltmain.sh       src-release
+  Makefile.def  config.sub    install-sh   md5.sum         symlink-tree
+  Makefile.in   configure     libiberty    missing         texinfo
+  Makefile.tpl  configure.in  libtool.m4   mkinstalldirs   ylwrap
+  README        djunpack.bat  ltcf-c.sh    move-if-change
+  bfd           etc           ltcf-cxx.sh  opcodes
+  config        gdb           ltcf-gcj.sh  readline
 
 You can build GDB right in the source directory:
 
