@@ -126,7 +126,7 @@ to debugger commands.
 
 @value{GDBN} should be relatively permissive, such as for expressions.
 While the compiler should be picky (or have the option to be made
-picky), since source code lives for a long time usuazlly, the
+picky), since source code lives for a long time usually, the
 programmer doing debugging shouldn't be spending time figuring out to
 mollify the debugger.
 
@@ -309,7 +309,7 @@ user says to continue, @value{GDBN} will restore the original
 instruction, single-step, re-insert the trap, and continue on.
 
 Since it literally overwrites the program being tested, the program area
-must be writeable, so this technique won't work on programs in ROM.  It
+must be writable, so this technique won't work on programs in ROM.  It
 can also distort the behavior of programs that examine themselves,
 although such a situation would be highly unusual.
 
@@ -4921,7 +4921,7 @@ owned by the Free Software Foundation" as "NAME OF PROGRAM", so that
 changes in many programs (not just @value{GDBN}, but GAS, Emacs, GCC,
 etc) can be
 contributed with only one piece of legalese pushed through the
-bureacracy and filed with the FSF.  We can't start merging changes until
+bureaucracy and filed with the FSF.  We can't start merging changes until
 this paperwork is received by the FSF (their rules, which we follow
 since we maintain it for them).
 

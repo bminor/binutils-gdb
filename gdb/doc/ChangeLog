@@ -1,3 +1,7 @@
+2001-07-19  John R. Moore  <jmoore@redhat.com>
+
+	* gdbint.texinfo: Three misspellings.
+
 2001-07-06  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (refcard.dvi): Rewrite to avoid problems with empty
