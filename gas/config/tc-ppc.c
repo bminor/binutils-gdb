@@ -2871,7 +2871,7 @@ ppc_pdata(ignore)
 			     (SEC_ALLOC | SEC_LOAD | SEC_RELOC
 			      | SEC_READONLY | SEC_DATA ));
       
-      bfd_set_section_alignment (stdoutput, pdata_section, 3);
+      bfd_set_section_alignment (stdoutput, pdata_section, 2);
     }
   else
     {
@@ -2943,7 +2943,7 @@ ppc_reldata(ignore)
 			     ( SEC_ALLOC | SEC_LOAD | SEC_RELOC 
 			      | SEC_DATA ));
 
-      bfd_set_section_alignment (stdoutput, reldata_section, 3);
+      bfd_set_section_alignment (stdoutput, reldata_section, 2);
     }
   else
     {

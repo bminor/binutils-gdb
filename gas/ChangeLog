@@ -1,3 +1,8 @@
+Thu Jan 18 17:58:19 1996  Kim Knuttila  <krk@cygnus.com>
+
+	* config/tc-ppc.c (ppc_reldata): Changed alignement on reldata_section
+	* config/tc-ppc.c (ppc_pdata): Changed the alignment on pdata_section
+
 Mon Jan 15 17:43:42 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (mapping): Add more relocation suffixes.
