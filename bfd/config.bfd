@@ -1107,7 +1107,7 @@ case "${targ}" in
     targ_defvec=bfd_elf32_shnbsd_vec
     targ_selvecs="bfd_elf32_shlnbsd_vec shcoff_vec shlcoff_vec"
     ;;
-  sh*-symbian-elf*)
+  sh*-*-symbianelf*)
     targ_defvec=bfd_elf32_shl_symbian_vec
     targ_selvecs="shlcoff_vec shlcoff_small_vec"
     targ_underscore=yes

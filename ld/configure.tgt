@@ -330,7 +330,7 @@ sh*-*-netbsdelf*)
 			targ_emul=shelf_nbsd
 			targ_extra_emuls=shlelf_nbsd
 			;;
-sh*-symbian-elf*)
+sh*-*-symbianelf*)
 			targ_emul=shlsymbian
 			;;
 shle*-*-elf* | sh[1234]*le*-*-elf | shle*-*-kaos*)

@@ -1,3 +1,13 @@
+2004-07-09  Nick Clifton  <nickc@redhat.com>
+
+	* config.bfd: Change sh-sybmian-elf to sh-*-symbianelf.
+	* elf32-sh-symbian.c: Rename the sh_find_elf_flags and
+	sh_elf_get_flags_from_mach functions so that they do not conflict
+	when this target is built with other sh-elf targets.
+	* elf32-sh.c (sh_elf_get_flags_from_mach): Remove bogus
+	suppression of this function.
+	(sh_elf_find_flags): Likewise.
+
 2004-07-07  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* Makefile.am (ALL_MACHINES): Add cpu-crx.lo.

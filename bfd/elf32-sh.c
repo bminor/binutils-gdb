@@ -6833,7 +6833,6 @@ sh_elf_set_mach_from_flags (bfd *abfd)
    return the equivalent ELF flags from the table.
    Return -1 if no match is found.  */
 
-#ifndef SH_TARGET_ALREADY_DEFINED
 int
 sh_elf_get_flags_from_mach (unsigned long mach)
 {
@@ -6848,7 +6847,6 @@ sh_elf_get_flags_from_mach (unsigned long mach)
 
   return -1;
 }
-#endif
 #endif /* not sh_elf_set_mach_from_flags */
 
 #ifndef sh_elf_set_private_flags
@@ -6885,7 +6883,6 @@ sh_elf_copy_private_data (bfd * ibfd, bfd * obfd)
 /* This function returns the ELF architecture number that
    corresponds to the given arch_sh* flags.  */
 
-#ifndef SH_TARGET_ALREADY_DEFINED
 int
 sh_find_elf_flags (unsigned int arch_set)
 {
@@ -6894,7 +6891,6 @@ sh_find_elf_flags (unsigned int arch_set)
 
   return sh_elf_get_flags_from_mach (bfd_mach);
 }
-#endif
 
 /* This routine initialises the elf flags when required and
    calls sh_merge_bfd_arch() to check dsp/fpu compatibility.  */

@@ -4507,7 +4507,7 @@ echo "$as_me: error: Solaris must be configured little endian" >&2;}
       sh5*-*-netbsd*)			fmt=elf em=nbsd ;;
       sh64*-*-netbsd*)			fmt=elf em=nbsd ;;
       sh*-*-netbsdelf*)			fmt=elf em=nbsd ;;
-      sh*-symbian-elf*)			fmt=elf endian=little
+      sh*-*-symbianelf*)		fmt=elf endian=little
 
 cat >>confdefs.h <<\_ACEOF
 #define TARGET_SYMBIAN 1

@@ -21,6 +21,8 @@
 
 /* Stop elf32-sh.c from defining any target vectors.  */
 #define SH_TARGET_ALREADY_DEFINED
+#define sh_find_elf_flags           sh_symbian_find_elf_flags
+#define sh_elf_get_flags_from_mach  sh_symbian_elf_get_flags_from_mach 
 #include "elf32-sh.c"
 
 

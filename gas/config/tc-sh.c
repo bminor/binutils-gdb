@@ -3629,6 +3629,10 @@ sh_elf_final_processing (void)
   if (sh64_isa_mode != sh64_isa_unspecified)
     val = EF_SH5;
   else
+#elif defined TARGET_SYMBIAN
+    if (1)
+      val = sh_symbian_find_elf_flags (valid_arch);
+    else
 #endif /* HAVE_SH64 */
     val = sh_find_elf_flags (valid_arch);
 

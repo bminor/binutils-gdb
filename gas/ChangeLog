@@ -1,3 +1,11 @@
+2004-07-09  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in: Change sh-sybmian-elf to sh-*-symbianelf.
+	* configure: Regenerate.
+	* NEWS: Change sh-sybmian-elf to sh-*-symbianelf.
+	* config/tc-sh.c (sh_elf_final_processing): Use renamed version of
+	sh_find_elf_flags if necessary.
+
 2004-07-08  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mips.c (mips_fix_adjustable): If the full addend is

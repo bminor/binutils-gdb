@@ -2,7 +2,7 @@
 
 * Support for the crx-elf target added.
 
-* Support for the sh-symbian-elf target added.
+* Support for the sh-symbianelf target added.
 
 * A new linker command line switch has been added which allows the hash table
   size to be set to a suitable prime value near to its argument.  This switch

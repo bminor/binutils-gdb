@@ -1,3 +1,7 @@
+2004-07-09  Nick Clifton  <nickc@redhat.com>
+
+	* configure.tgt: Change sh-sybmian-elf to sh-*-symbianelf.
+
 2004-07-06  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add eelf32crx.o.
