@@ -167,12 +167,12 @@ proc gdb_start { } {
 	send -i $shell_id "\CC"
 	expect -i $shell_id {
 	    -re "<IDT>$" { }
-	    timeout     { error "(timeout) board did not come up."; alldone }
+	    timeout     { error "(timeout) board did not come up."; return -1 }
 	}
 	send -i $shell_id "go 0xbfc00000"
 	expect -i $shell_id {
 	    -re "<IDT>$" { }
-	    timeout     { error "(timeout) board did not come up."; alldone }
+	    timeout     { error "(timeout) board did not come up."; return -1 }
 	}
 	exit_remote_shell $shell_id
     }
@@ -190,9 +190,9 @@ proc gdb_start { } {
 		send_user "$GDB initialized for cross mode\n\n"
 	    }
 	}
-	-re "$prompt $"     { error "GDB never initialized."; alldone }
+	-re "$prompt $"     { error "GDB never initialized."; return -1 }
 	timeout             { error "(timeout) GDB never initialized.";
-			      alldone }
+			      return -1 }
     }
 
     # force the height to "unlimited", so no pagers get used
@@ -221,7 +221,7 @@ proc gdb_start { } {
 	timeout { 
 	    error "Couldn't set MIPS target."
 	    set timeout 10
-	    alldone
+	    return -1
 	}
     }
     set timeout 10

@@ -179,8 +179,8 @@ proc gdb_start { } {
 		    send_user "\nVxWorks has closed the shell\n"
 		}
 	    }
-	    eof         { error "(eof) never disconnected from VxWorks shell."; alldone }
-	    timeout     { error "(timeout) never disconnected from VxWorks shell."; alldone }
+	    eof         { error "(eof) never disconnected from VxWorks shell."; return -1 }
+	    timeout     { error "(timeout) never disconnected from VxWorks shell."; return -1 }
 	}
 	close -i $shell_id
 
@@ -202,7 +202,7 @@ proc gdb_start { } {
     #	    send_user "\nVxWorks set host=$vx_host, uid=$vx_uid, gid=$vx_gid\n"
     #	}
     #    }
-    #    timeout		{ error "couldn't set host=$vx_host, uid=$vx_uid, gid=$vx_gid\n"; alldone }
+    #    timeout		{ error "couldn't set host=$vx_host, uid=$vx_uid, gid=$vx_gid\n"; return -1 }
     #}
 
     #send -i $shell_id cd \"$base_dir\"\n
@@ -212,7 +212,7 @@ proc gdb_start { } {
     #	    send_user "VxWorks changed directory to $base_dir\n"
     #	}
     #    }
-    #    timeout		{ error "couldn't load $arg into $bin."; alldone }
+    #    timeout		{ error "couldn't load $arg into $bin."; return -1 }
     #}
 
     spawn_vxgdb
@@ -238,9 +238,9 @@ proc spawn_vxgdb { } {
 		send_user "$GDB initialized for cross mode to Vxworks\n\n"
 	    }
 	}
-	-re "$prompt $"     { error "GDB never initialized."; alldone }
+	-re "$prompt $"     { error "GDB never initialized."; return -1 }
 	timeout             { error "(timeout) GDB never initialized.";
-	    alldone }
+	    return -1 }
     }
 
     # force the height to "unlimited", so no pagers get used
@@ -273,7 +273,7 @@ proc spawn_vxgdb { } {
 	timeout { 
 	    error "Couldn't set target for vxworks."
 	    set timeout 10
-	    alldone
+	    return -1
 	}
     }
     set timeout 10

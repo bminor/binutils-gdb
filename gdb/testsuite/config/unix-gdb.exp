@@ -71,13 +71,14 @@ proc gdb_unload {} {
 	-re "$prompt $" {}
 	timeout {
 	    error "Couldn't unload file in $GDB (timed out)."
-	    alldone
+	    return -1
 	}
     }
 }
 
 #
 # gdb_load -- load a file into the debugger.
+#             return a -1 if anything goes wrong.
 #
 proc gdb_load { arg } {
     global verbose
@@ -114,13 +115,13 @@ proc gdb_load { arg } {
 		    send_user "\t\tLoaded $arg with new symbol table into $GDB\n"
 		}
 		}
-		timeout		{ error "(timeout) Couldn't load $arg, other program already loaded."; alldone }
+		timeout		{ error "(timeout) Couldn't load $arg, other program already loaded."; return -1 }
 	    }
 	}
 	-re ".*No such file or directory.*$prompt $"\
-	    { error "($arg) No such file or directory\n"; alldone }
-	-re "$prompt $" { error "couldn't load $arg into $GDB."; alldone }
-	timeout		{ error "couldn't load $arg into $GDB (timed out)."; alldone }
+	    { error "($arg) No such file or directory\n"; return -1 }
+	-re "$prompt $" { error "couldn't load $arg into $GDB."; return -1 }
+	timeout		{ error "couldn't load $arg into $GDB (timed out)."; return -1 }
     }
 }
 
@@ -190,8 +191,8 @@ proc gdb_start {} {
 	-re ".*$prompt $"	{ if $verbose>1 then {
 	    send_user "GDB initialized for native mode\n" }
 	}
-	-re "$prompt $"	{ error "GDB never initialized."; alldone }
-	timeout		{ error "(timeout) GDB never initialized."; alldone }
+	-re "$prompt $"	{ error "GDB never initialized."; return -1 }
+	timeout		{ error "(timeout) GDB never initialized."; return -1 }
     }
     set timeout $oldtimeout
     # force the height to "unlimited", so no pagers get used
