@@ -1055,6 +1055,11 @@ if test -z "$show_help"; then
 	  major=
 	  versuffix=
 	  verstring="0.0"
+	  case "$version_type" in
+	  sunos)
+	    versuffix=".0.0"
+	    ;;
+	  esac
 	fi
 
 	# Check to see if the archive will have undefined symbols.
