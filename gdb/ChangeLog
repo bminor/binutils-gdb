@@ -1,3 +1,8 @@
+2004-10-05  Mark Kettenis  <kettenis@jive.nl>
+
+	* procfs.c (procfs_xfer_partial): Use WRITEBUF instead of READBUF
+	when writing to memory.
+
 2004-10-05  Kei Sakamoto  <sakamoto.kei@renesas.com>
 
 	* m32r-tdep.c (m32r_use_struct_convention): Delete function.

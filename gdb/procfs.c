@@ -4329,7 +4329,7 @@ procfs_xfer_partial (struct target_ops *ops, enum target_object object,
 	return (*ops->to_xfer_memory) (offset, readbuf, len, 0/*write*/,
 				       NULL, ops);
       if (writebuf)
-	return (*ops->to_xfer_memory) (offset, readbuf, len, 1/*write*/,
+	return (*ops->to_xfer_memory) (offset, writebuf, len, 1/*write*/,
 				       NULL, ops);
       return -1;
 
