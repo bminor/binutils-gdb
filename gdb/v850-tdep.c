@@ -123,6 +123,12 @@ enum
   E_ALL_REGS_SIZE = (E_NUM_REGS) * v850_reg_size
 };
 
+/* Size of return datatype which fits into all return registers. */
+enum
+{
+  E_MAX_RETTYPE_SIZE_IN_REGS = 2 * v850_reg_size
+};
+
 static LONGEST call_dummy_nil[] = {0};
 
 static char *v850_generic_reg_names[] =
@@ -266,11 +272,90 @@ v850_reg_virtual_type (int regnum)
     return builtin_type_int32;
 }
 
+static int
+v850_type_is_scalar (struct type *t)
+{
+  return (TYPE_CODE (t) != TYPE_CODE_STRUCT
+	  && TYPE_CODE (t) != TYPE_CODE_UNION
+	  && TYPE_CODE (t) != TYPE_CODE_ARRAY);
+}
+
 /* Should call_function allocate stack space for a struct return?  */
-int
+static int
 v850_use_struct_convention (int gcc_p, struct type *type)
 {
-  return (TYPE_NFIELDS (type) > 1 || TYPE_LENGTH (type) > 4);
+  /* According to ABI:
+   * return TYPE_LENGTH (type) > 8);
+   */
+
+  /* Current implementation in gcc: */
+
+  int i;
+  struct type *fld_type, *tgt_type;
+
+  /* 1. The value is greater than 8 bytes -> returned by copying */
+  if (TYPE_LENGTH (type) > 8)
+    return 1;
+
+  /* 2. The value is a single basic type -> returned in register */
+  if (v850_type_is_scalar (type))
+    return 0;
+
+  /* The value is a structure or union with a single element
+   * and that element is either a single basic type or an array of
+   * a single basic type whoes size is greater than or equal to 4
+   * -> returned in register */
+  if ((TYPE_CODE (type) == TYPE_CODE_STRUCT
+       || TYPE_CODE (type) == TYPE_CODE_UNION)
+       && TYPE_NFIELDS (type) == 1)
+    {
+      fld_type = TYPE_FIELD_TYPE (type, 0);
+      if (v850_type_is_scalar (fld_type) && TYPE_LENGTH (fld_type) >= 4)
+	return 0;
+
+      if (TYPE_CODE (fld_type) == TYPE_CODE_ARRAY)
+        {
+	  tgt_type = TYPE_TARGET_TYPE (fld_type);
+	  if (v850_type_is_scalar (tgt_type) && TYPE_LENGTH (tgt_type) >= 4)
+	    return 0;
+	}
+    }
+
+  /* The value is a structure whose first element is an integer or
+   * a float, and which contains no arrays of more than two elements
+   * -> returned in register */
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+      && v850_type_is_scalar (TYPE_FIELD_TYPE (type, 0))
+      && TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)) == 4)
+    {
+      for (i = 1; i < TYPE_NFIELDS (type); ++i)
+        {
+	  fld_type = TYPE_FIELD_TYPE (type, 0);
+	  if (TYPE_CODE (fld_type) == TYPE_CODE_ARRAY)
+	    {
+	      tgt_type = TYPE_TARGET_TYPE (fld_type);
+	      if (TYPE_LENGTH (fld_type) >= 0 && TYPE_LENGTH (tgt_type) >= 0
+		  && TYPE_LENGTH (fld_type) / TYPE_LENGTH (tgt_type) > 2)
+		return 1;
+	    }
+	}
+      return 0;
+    }
+    
+  /* The value is a union which contains at least one field which
+   * would be returned in registers according to these rules
+   * -> returned in register */
+  if (TYPE_CODE (type) == TYPE_CODE_UNION)
+    {
+      for (i = 0; i < TYPE_NFIELDS (type); ++i)
+        {
+	  fld_type = TYPE_FIELD_TYPE (type, 0);
+	  if (!v850_use_struct_convention (0, fld_type))
+	    return 0;
+	}
+    }
+
+  return 1;
 }
 
 
@@ -844,22 +929,22 @@ v850_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   /* First, just for safety, make sure stack is aligned */
   sp &= ~3;
 
-  /* Now make space on the stack for the args. */
-  for (argnum = 0; argnum < nargs; argnum++)
-    len += ((TYPE_LENGTH (VALUE_TYPE (args[argnum])) + 3) & ~3);
-  sp -= len;			/* possibly over-allocating, but it works... */
-  /* (you might think we could allocate 16 bytes */
-  /* less, but the ABI seems to use it all! )  */
-  argreg = E_ARG0_REGNUM;
-
-  /* the struct_return pointer occupies the first parameter-passing reg */
-  if (struct_return)
-    write_register (argreg++, struct_addr);
-
-  stack_offset = 16;
   /* The offset onto the stack at which we will start copying parameters
      (after the registers are used up) begins at 16 rather than at zero.
      I don't really know why, that's just the way it seems to work.  */
+  stack_offset = 16;
+
+  /* Now make space on the stack for the args. */
+  for (argnum = 0; argnum < nargs; argnum++)
+    len += ((TYPE_LENGTH (VALUE_TYPE (args[argnum])) + 3) & ~3);
+  sp -= len + stack_offset;	/* possibly over-allocating, but it works... */
+  /* (you might think we could allocate 16 bytes */
+  /* less, but the ABI seems to use it all! )  */
+
+  argreg = E_ARG0_REGNUM;
+  /* the struct_return pointer occupies the first parameter-passing reg */
+  if (struct_return)
+    argreg++;
 
   /* Now load as many as possible of the first arguments into
      registers, and push the rest onto the stack.  There are 16 bytes
@@ -870,8 +955,8 @@ v850_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       char *val;
       char valbuf[v850_register_raw_size (E_ARG0_REGNUM)];
 
-      if (TYPE_CODE (VALUE_TYPE (*args)) == TYPE_CODE_STRUCT
-	  && TYPE_LENGTH (VALUE_TYPE (*args)) > 8)
+      if (!v850_type_is_scalar (VALUE_TYPE (*args))
+	  && TYPE_LENGTH (VALUE_TYPE (*args)) > E_MAX_RETTYPE_SIZE_IN_REGS)
 	{
 	  store_address (valbuf, 4, VALUE_ADDRESS (*args));
 	  len = 4;
@@ -966,8 +1051,26 @@ v850_saved_pc_after_call (struct frame_info *ignore)
 static void
 v850_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
-  memcpy (valbuf, regbuf + v850_register_byte (E_V0_REGNUM),
-	  TYPE_LENGTH (type));
+  CORE_ADDR return_buffer;
+
+  if (!v850_use_struct_convention (0, type))
+    {
+      /* Scalar return values of <= 8 bytes are returned in 
+         E_V0_REGNUM to E_V1_REGNUM. */
+      memcpy (valbuf,
+	      &regbuf[REGISTER_BYTE (E_V0_REGNUM)],
+	      TYPE_LENGTH (type));
+    }
+  else
+    {
+      /* Aggregates and return values > 8 bytes are returned in memory,
+         pointed to by R6. */
+      return_buffer =
+	extract_address (regbuf + REGISTER_BYTE (E_V0_REGNUM),
+			 REGISTER_RAW_SIZE (E_V0_REGNUM));
+
+      read_memory (return_buffer, valbuf, TYPE_LENGTH (type));
+    }
 }
 
 const static unsigned char *
@@ -988,8 +1091,16 @@ v850_extract_struct_value_address (char *regbuf)
 static void
 v850_store_return_value (struct type *type, char *valbuf)
 {
-  write_register_bytes(v850_register_byte (E_V0_REGNUM), valbuf,
-		       TYPE_LENGTH (type));
+  CORE_ADDR return_buffer;
+
+  if (!v850_use_struct_convention (0, type))
+    write_register_bytes (REGISTER_BYTE (E_V0_REGNUM), valbuf,	
+    			  TYPE_LENGTH (type));
+  else
+    {
+      return_buffer = read_register (E_V0_REGNUM);
+      write_memory (return_buffer, valbuf, TYPE_LENGTH (type));
+    }
 }
 
 static void
@@ -1057,8 +1168,9 @@ v850_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 }
 
 static void
-v850_store_struct_return (CORE_ADDR a, CORE_ADDR b)
+v850_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
+  write_register (E_ARG0_REGNUM, addr);
 }
 
 static CORE_ADDR

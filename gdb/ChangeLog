@@ -1,3 +1,14 @@
+2002-06-11  Corinna Vinschen  <vinschen@redhat.com>
+
+	* v850-tdep.c (v850_type_is_scalar): New function.
+	(v850_use_struct_convention): Match current gcc implementation
+	as close as possible.
+	(v850_push_arguments): Fix stack_offset handling.  Don't write
+	struct_addr into register.  This is done by v850_store_struct_return.
+	(v850_extract_return_value): Care for structs.
+	(v850_store_return_value): Ditto.
+	(v850_store_struct_return): Actually write address.
+
 2002-06-11  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-tdep.c (x86_64_skip_prologue): Fix to work on functions
