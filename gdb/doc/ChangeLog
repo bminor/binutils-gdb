@@ -1,3 +1,9 @@
+2003-05-16  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Replace
+	REGISTER_BYTES with DEPRECATED_REGISTER_BYTES.  Fix typo,
+	DEPRECATED_REGISTER_SIZE instead of REGISTER_BYTE.
+
 2003-05-14  Theodore A. Roth  <troth@openavr.org>
 
 	* gdbint.texinfo (Breakpoint Handling): Correct a double negative.

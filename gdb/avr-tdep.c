@@ -1171,7 +1171,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_register_name (gdbarch, avr_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, 1);
-  set_gdbarch_register_bytes (gdbarch, AVR_NUM_REG_BYTES);
+  set_gdbarch_deprecated_register_bytes (gdbarch, AVR_NUM_REG_BYTES);
   set_gdbarch_register_byte (gdbarch, avr_register_byte);
   set_gdbarch_register_raw_size (gdbarch, avr_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);

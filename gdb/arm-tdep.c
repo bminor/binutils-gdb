@@ -2976,10 +2976,10 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, ARM_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, ARM_PC_REGNUM);
   set_gdbarch_register_byte (gdbarch, arm_register_byte);
-  set_gdbarch_register_bytes (gdbarch,
-			      (NUM_GREGS * INT_REGISTER_RAW_SIZE
-			       + NUM_FREGS * FP_REGISTER_RAW_SIZE
-			       + NUM_SREGS * STATUS_REGISTER_SIZE));
+  set_gdbarch_deprecated_register_bytes (gdbarch,
+					 (NUM_GREGS * INT_REGISTER_RAW_SIZE
+					  + NUM_FREGS * FP_REGISTER_RAW_SIZE
+					  + NUM_SREGS * STATUS_REGISTER_SIZE));
   set_gdbarch_num_regs (gdbarch, NUM_GREGS + NUM_FREGS + NUM_SREGS);
   set_gdbarch_register_raw_size (gdbarch, arm_register_raw_size);
   set_gdbarch_register_virtual_size (gdbarch, arm_register_virtual_size);

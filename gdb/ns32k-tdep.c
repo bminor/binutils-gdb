@@ -512,7 +512,7 @@ ns32k_gdbarch_init_32082 (struct gdbarch *gdbarch)
   set_gdbarch_num_regs (gdbarch, NS32K_NUM_REGS_32082);
 
   set_gdbarch_register_name (gdbarch, ns32k_register_name_32082);
-  set_gdbarch_register_bytes (gdbarch, NS32K_REGISTER_BYTES_32082);
+  set_gdbarch_deprecated_register_bytes (gdbarch, NS32K_REGISTER_BYTES_32082);
   set_gdbarch_register_byte (gdbarch, ns32k_register_byte_32082);
 }
 
@@ -522,7 +522,7 @@ ns32k_gdbarch_init_32382 (struct gdbarch *gdbarch)
   set_gdbarch_num_regs (gdbarch, NS32K_NUM_REGS_32382);
 
   set_gdbarch_register_name (gdbarch, ns32k_register_name_32382);
-  set_gdbarch_register_bytes (gdbarch, NS32K_REGISTER_BYTES_32382);
+  set_gdbarch_deprecated_register_bytes (gdbarch, NS32K_REGISTER_BYTES_32382);
   set_gdbarch_register_byte (gdbarch, ns32k_register_byte_32382);
 }
 

@@ -1812,7 +1812,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_register_name (gdbarch, alpha_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, ALPHA_REGISTER_SIZE);
-  set_gdbarch_register_bytes (gdbarch, ALPHA_REGISTER_BYTES);
+  set_gdbarch_deprecated_register_bytes (gdbarch, ALPHA_REGISTER_BYTES);
   set_gdbarch_register_byte (gdbarch, alpha_register_byte);
   set_gdbarch_register_raw_size (gdbarch, alpha_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, ALPHA_MAX_REGISTER_RAW_SIZE);

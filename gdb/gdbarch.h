@@ -730,13 +730,13 @@ extern void set_gdbarch_deprecated_register_size (struct gdbarch *gdbarch, int d
 #define DEPRECATED_REGISTER_SIZE (gdbarch_deprecated_register_size (current_gdbarch))
 #endif
 
-extern int gdbarch_register_bytes (struct gdbarch *gdbarch);
-extern void set_gdbarch_register_bytes (struct gdbarch *gdbarch, int register_bytes);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_BYTES)
-#error "Non multi-arch definition of REGISTER_BYTES"
+extern int gdbarch_deprecated_register_bytes (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_register_bytes (struct gdbarch *gdbarch, int deprecated_register_bytes);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_BYTES)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_BYTES"
 #endif
-#if !defined (REGISTER_BYTES)
-#define REGISTER_BYTES (gdbarch_register_bytes (current_gdbarch))
+#if !defined (DEPRECATED_REGISTER_BYTES)
+#define DEPRECATED_REGISTER_BYTES (gdbarch_deprecated_register_bytes (current_gdbarch))
 #endif
 
 /* NOTE: cagney/2002-05-02: This function with predicate has a valid

@@ -4368,7 +4368,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_fp_regnum (gdbarch, 14);
   set_gdbarch_pc_regnum (gdbarch, 16);
   set_gdbarch_deprecated_register_size (gdbarch, 4);
-  set_gdbarch_register_bytes (gdbarch, SH_DEFAULT_NUM_REGS * 4);
+  set_gdbarch_deprecated_register_bytes (gdbarch, SH_DEFAULT_NUM_REGS * 4);
   set_gdbarch_deprecated_do_registers_info (gdbarch, sh_do_registers_info);
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
   set_gdbarch_deprecated_frame_chain (gdbarch, sh_frame_chain);
@@ -4587,9 +4587,9 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	 ISA16(compact) or ISA32(media). */
       set_gdbarch_num_regs (gdbarch, SIM_SH64_NR_REGS);
       set_gdbarch_deprecated_register_size (gdbarch, 8); /*????*/
-      set_gdbarch_register_bytes (gdbarch, 
-				  ((SIM_SH64_NR_FP_REGS + 1) * 4)
-				  + (SIM_SH64_NR_REGS - SIM_SH64_NR_FP_REGS -1) * 8);
+      set_gdbarch_deprecated_register_bytes (gdbarch, 
+					     ((SIM_SH64_NR_FP_REGS + 1) * 4)
+					     + (SIM_SH64_NR_REGS - SIM_SH64_NR_FP_REGS -1) * 8);
 
       sh_register_name = sh_sh64_register_name;
       sh_show_regs = sh64_show_regs;

@@ -1888,7 +1888,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_virtual_type (gdbarch, s390_register_virtual_type);
 
       set_gdbarch_addr_bits_remove (gdbarch, s390_addr_bits_remove);
-      set_gdbarch_register_bytes (gdbarch, S390_REGISTER_BYTES);
+      set_gdbarch_deprecated_register_bytes (gdbarch, S390_REGISTER_BYTES);
       break;
     case bfd_mach_s390_64:
       set_gdbarch_deprecated_register_size (gdbarch, 8);
@@ -1900,7 +1900,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_long_bit (gdbarch, 64);
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_ptr_bit (gdbarch, 64);
-      set_gdbarch_register_bytes (gdbarch, S390X_REGISTER_BYTES);
+      set_gdbarch_deprecated_register_bytes (gdbarch, S390X_REGISTER_BYTES);
       set_gdbarch_address_class_type_flags (gdbarch,
                                             s390_address_class_type_flags);
       set_gdbarch_address_class_type_flags_to_name (gdbarch,

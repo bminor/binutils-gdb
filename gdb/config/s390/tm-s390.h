@@ -95,7 +95,7 @@ int s390x_register_raw_size (int reg_nr);
 #define REGISTER_RAW_SIZE(reg_nr) s390x_register_raw_size(reg_nr)
 #define GDB_TARGET_IS_ESAME (1)
 #define DEPRECATED_REGISTER_SIZE       (8)
-#define REGISTER_BYTES S390X_REGISTER_BYTES
+#define DEPRECATED_REGISTER_BYTES S390X_REGISTER_BYTES
 
 #else /*  CONFIG_ARCH_S390X */
 
@@ -103,7 +103,7 @@ int s390_register_raw_size (int reg_nr);
 #define REGISTER_RAW_SIZE(reg_nr) s390_register_raw_size(reg_nr)
 #define GDB_TARGET_IS_ESAME (0)
 #define DEPRECATED_REGISTER_SIZE       (4)
-#define REGISTER_BYTES S390_REGISTER_BYTES
+#define DEPRECATED_REGISTER_BYTES S390_REGISTER_BYTES
 
 #endif /* CONFIG_ARCH_S390X */
 

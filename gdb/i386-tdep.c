@@ -1487,7 +1487,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_register_name (gdbarch, i386_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, 4);
-  set_gdbarch_register_bytes (gdbarch, I386_SIZEOF_GREGS + I386_SIZEOF_FREGS);
+  set_gdbarch_deprecated_register_bytes (gdbarch, I386_SIZEOF_GREGS + I386_SIZEOF_FREGS);
   set_gdbarch_register_type (gdbarch, i386_register_type);
 
   set_gdbarch_print_float_info (gdbarch, i387_print_float_info);

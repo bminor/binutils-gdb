@@ -152,7 +152,7 @@ extern int hppa_register_raw_size (int reg_nr);
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
 #if !GDB_MULTI_ARCH
-#define REGISTER_BYTES (NUM_REGS * 4)
+#define DEPRECATED_REGISTER_BYTES (NUM_REGS * 4)
 #endif
 
 #if !GDB_MULTI_ARCH
@@ -377,8 +377,8 @@ extern CORE_ADDR hppa_target_read_fp (void);
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
 
-#undef REGISTER_BYTES
-#define REGISTER_BYTES (NUM_REGS * 8)
+#undef DEPRECATED_REGISTER_BYTES
+#define DEPRECATED_REGISTER_BYTES (NUM_REGS * 8)
 
 /* Index within `registers' of the first byte of the space for
    register N.  */

@@ -1472,9 +1472,9 @@ mi_load_progress (const char *section_name,
 void
 mi_setup_architecture_data (void)
 {
-  /* don't trust REGISTER_BYTES to be zero. */
-  old_regs = xmalloc (REGISTER_BYTES + 1);
-  memset (old_regs, 0, REGISTER_BYTES + 1);
+  /* don't trust DEPRECATED_REGISTER_BYTES to be zero. */
+  old_regs = xmalloc (DEPRECATED_REGISTER_BYTES + 1);
+  memset (old_regs, 0, DEPRECATED_REGISTER_BYTES + 1);
 }
 
 void

@@ -1269,7 +1269,7 @@ sparc_pop_frame (void)
   int regnum;
 
   fsr = alloca (NUM_REGS * sizeof (CORE_ADDR));
-  raw_buffer = alloca (REGISTER_BYTES);
+  raw_buffer = alloca (DEPRECATED_REGISTER_BYTES);
   sparc_frame_find_saved_regs (frame, &fsr[0]);
   if (SPARC_HAS_FPU)
     {
@@ -3381,7 +3381,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_sparc:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
       set_gdbarch_num_regs (gdbarch, 72);
-      set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
+      set_gdbarch_deprecated_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
       set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
 #if 0
@@ -3417,7 +3417,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_sparc_v8plus:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
       set_gdbarch_num_regs (gdbarch, 72);
-      set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
+      set_gdbarch_deprecated_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
       set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
       tdep->print_insn_mach = bfd_mach_sparc;
@@ -3429,7 +3429,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_sparc_v8plusa:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
       set_gdbarch_num_regs (gdbarch, 72);
-      set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
+      set_gdbarch_deprecated_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
       set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
 #if 0
@@ -3453,7 +3453,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_sparc_v9:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc64_extract_return_value);
       set_gdbarch_num_regs (gdbarch, 125);
-      set_gdbarch_register_bytes (gdbarch, 32*8 + 32*8 + 45*8);
+      set_gdbarch_deprecated_register_bytes (gdbarch, 32*8 + 32*8 + 45*8);
       set_gdbarch_register_name (gdbarch, sparc64_register_name);
       set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
 #if 0
@@ -3465,7 +3465,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_sparc_v9a:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc64_extract_return_value);
       set_gdbarch_num_regs (gdbarch, 125);
-      set_gdbarch_register_bytes (gdbarch, 32*8 + 32*8 + 45*8);
+      set_gdbarch_deprecated_register_bytes (gdbarch, 32*8 + 32*8 + 45*8);
       set_gdbarch_register_name (gdbarch, sparc64_register_name);
       set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
 #if 0

@@ -4561,7 +4561,7 @@ return_value_location (struct type *valtype,
 
 static void
 mips_eabi_extract_return_value (struct type *valtype,
-				char regbuf[REGISTER_BYTES],
+				char regbuf[],
 				char *valbuf)
 {
   struct return_value_word lo;
@@ -4580,7 +4580,7 @@ mips_eabi_extract_return_value (struct type *valtype,
 
 static void
 mips_o64_extract_return_value (struct type *valtype,
-			       char regbuf[REGISTER_BYTES],
+			       char regbuf[],
 			       char *valbuf)
 {
   struct return_value_word lo;

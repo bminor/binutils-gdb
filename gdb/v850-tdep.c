@@ -1230,7 +1230,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
   set_gdbarch_register_name (gdbarch, v850_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, v850_reg_size);
-  set_gdbarch_register_bytes (gdbarch, E_ALL_REGS_SIZE);
+  set_gdbarch_deprecated_register_bytes (gdbarch, E_ALL_REGS_SIZE);
   set_gdbarch_register_byte (gdbarch, v850_register_byte);
   set_gdbarch_register_raw_size (gdbarch, v850_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, v850_reg_size);

@@ -28,12 +28,12 @@
    <machine/reg.h>.  */
 /*                      a&d, pc,sr, fp, fpstat, fpflags   */
 
-#define REGISTER_BYTES (16*4 + 8 + 8*12 + 3*4 + 4)
+#define DEPRECATED_REGISTER_BYTES (16*4 + 8 + 8*12 + 3*4 + 4)
 
 #define NUM_REGS 31
 
 #define REGISTER_BYTES_OK(b) \
-     ((b) == REGISTER_BYTES \
+     ((b) == DEPRECATED_REGISTER_BYTES \
       || (b) == REGISTER_BYTES_FP \
       || (b) == REGISTER_BYTES_NOFP)
 

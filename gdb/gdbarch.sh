@@ -473,7 +473,7 @@ f:2:SDB_REG_TO_REGNUM:int:sdb_reg_to_regnum:int sdb_regnr:sdb_regnr:::no_op_reg_
 f:2:DWARF2_REG_TO_REGNUM:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr:::no_op_reg_to_regnum::0
 f:2:REGISTER_NAME:const char *:register_name:int regnr:regnr:::legacy_register_name::0
 v::DEPRECATED_REGISTER_SIZE:int:deprecated_register_size
-v::REGISTER_BYTES:int:register_bytes
+v::DEPRECATED_REGISTER_BYTES:int:deprecated_register_bytes
 # NOTE: cagney/2002-05-02: This function with predicate has a valid
 # (callable) initial value.  As a consequence, even when the predicate
 # is false, the corresponding function works.  This simplifies the

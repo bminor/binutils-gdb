@@ -263,7 +263,7 @@ init_remote_state (struct gdbarch *gdbarch)
 
   /* Start out by having the remote protocol mimic the existing
      behavour - just copy in the description of the register cache.  */
-  rs->sizeof_g_packet = REGISTER_BYTES; /* OK use.   */
+  rs->sizeof_g_packet = DEPRECATED_REGISTER_BYTES; /* OK */
 
   /* Assume a 1:1 regnum<->pnum table.  */
   rs->regs = xcalloc (NUM_REGS + NUM_PSEUDO_REGS, sizeof (struct packet_reg));
@@ -3529,7 +3529,7 @@ remote_prepare_to_store (void)
          forcing the register cache to read its and not the target
          registers.  */
       deprecated_read_register_bytes (0, (char *) NULL,
-				      REGISTER_BYTES); /* OK use.  */
+				      DEPRECATED_REGISTER_BYTES); /* OK */
       break;
     case PACKET_ENABLE:
       break;

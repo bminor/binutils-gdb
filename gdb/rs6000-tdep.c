@@ -981,7 +981,7 @@ rs6000_pop_frame (void)
     }
 
   /* Make sure that all registers are valid.  */
-  deprecated_read_register_bytes (0, NULL, REGISTER_BYTES);
+  deprecated_read_register_bytes (0, NULL, DEPRECATED_REGISTER_BYTES);
 
   /* Figure out previous %pc value.  If the function is frameless, it is 
      still in the link register, otherwise walk the frames and retrieve the
@@ -2876,7 +2876,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_pseudo_regs (gdbarch, v->npregs);
   set_gdbarch_register_name (gdbarch, rs6000_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, wordsize);
-  set_gdbarch_register_bytes (gdbarch, off);
+  set_gdbarch_deprecated_register_bytes (gdbarch, off);
   set_gdbarch_register_byte (gdbarch, rs6000_register_byte);
   set_gdbarch_register_raw_size (gdbarch, rs6000_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 16);

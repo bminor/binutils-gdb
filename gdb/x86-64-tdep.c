@@ -961,7 +961,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      SIZEOF_SSE_REGS) */
   for (i = 0, sum = 0; i < X86_64_NUM_REGS; i++)
     sum += x86_64_register_info_table[i].size;
-  set_gdbarch_register_bytes (gdbarch, sum);
+  set_gdbarch_deprecated_register_bytes (gdbarch, sum);
 
   set_gdbarch_register_raw_size (gdbarch, x86_64_register_raw_size);
   set_gdbarch_register_byte (gdbarch, x86_64_register_byte);

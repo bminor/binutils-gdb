@@ -1,3 +1,67 @@
+2003-05-16  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_REGISTER_BYTES): Rename REGISTER_BYTES.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* arm-linux-tdep.c (arm_linux_extract_return_value): Delete reference.
+	* TODO (REGISTER_BYTES): Delete reference.
+	* alpha-tdep.c (alpha_gdbarch_init): Update.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+	* x86-64-tdep.c (x86_64_init_abi): Update.
+	* vax-tdep.c (vax_gdbarch_init): Update.
+	* v850-tdep.c (v850_gdbarch_init): Update.
+	* sparc-tdep.c (sparc_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* ns32k-tdep.c (ns32k_gdbarch_init_32082): Update.
+	(ns32k_gdbarch_init_32382): Update.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Update.
+	* mcore-tdep.c (mcore_gdbarch_init): Update.
+	* m68k-tdep.c (m68k_gdbarch_init): Update.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	* i386-tdep.c (i386_gdbarch_init): Update.
+	* i386-linux-tdep.c (i386_linux_init_abi): Update.
+	* hppa-tdep.c (hppa_gdbarch_init): Update.
+	* h8300-tdep.c (h8300_gdbarch_init): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* avr-tdep.c (avr_gdbarch_init): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* sparc-tdep.c (sparc_pop_frame): Update.
+	* rs6000-tdep.c (rs6000_pop_frame): Update.
+	* remote.c (init_remote_state): Update.
+	(remote_prepare_to_store): Update.
+	* remote-vx.c (vx_prepare_to_store): Update.
+	* remote-sds.c (sds_fetch_registers): Update.
+	(sds_prepare_to_store): Update.
+	* remote-array.c: Update.
+	* regcache.c (init_legacy_regcache_descr): Update.
+	(init_regcache_descr): Update.
+	* mips-tdep.c (mips_eabi_extract_return_value): Update.
+	(mips_o64_extract_return_value): Update.
+	* irix5-nat.c (fetch_core_registers): Update.
+	* irix4-nat.c (fetch_core_registers): Update.
+	* i386-tdep.h: Update.
+	* hppa-tdep.c (pa_do_registers_info): Update.
+	(pa_do_strcat_registers_info): Update.
+	* cris-tdep.c (cris_register_bytes_ok): Update.
+	* config/nm-gnu.h (CHILD_PREPARE_TO_STORE): Update.
+	* config/sparc/tm-sparc.h (DEPRECATED_REGISTER_BYTES): Update.
+	* config/sparc/nm-sun4sol2.h (CHILD_PREPARE_TO_STORE): Update.
+	* config/sparc/nm-sun4os4.h (CHILD_PREPARE_TO_STORE): Update.
+	* config/sparc/nm-nbsd.h (CHILD_PREPARE_TO_STORE): Update.
+	* config/sparc/tm-sp64.h (DEPRECATED_REGISTER_BYTES): Update.
+	* config/s390/tm-s390.h (DEPRECATED_REGISTER_BYTES): Update.
+	* config/pa/tm-hppa64.h (DEPRECATED_REGISTER_BYTES): Update.
+	* config/mips/tm-mips.h (DEPRECATED_REGISTER_BYTES): Update.
+	* config/mips/tm-irix6.h (DEPRECATED_REGISTER_BYTES): Update.
+	* config/mips/tm-irix5.h (DEPRECATED_REGISTER_BYTES): Update.
+	* config/m68k/tm-sun3.h (DEPRECATED_REGISTER_BYTES): Update.
+	(REGISTER_BYTES_OK): Update.
+	* config/m68k/nm-sun3.h (CHILD_PREPARE_TO_STORE): Update.
+	* config/ia64/tm-ia64.h (DEPRECATED_REGISTER_BYTES): Update.
+
 2003-05-16  Ian Lance Taylor  <ian@airs.com>
 
 	* vax-tdep.c (INVALID_FLOAT, MAXLEN, NOPCODES): Don't define.

@@ -204,7 +204,7 @@ extern int sparc_intreg_size (void);
    other hand, that is likely to be confusing or worse for flat
    frames.  */
 
-#define REGISTER_BYTES (32*4+32*4+8*4)
+#define DEPRECATED_REGISTER_BYTES (32*4+32*4+8*4)
 
 /* Index within `registers' of the first byte of the space for
    register N.  */

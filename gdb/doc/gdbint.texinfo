@@ -3088,9 +3088,9 @@ reason.
 @item DEPRECATED_CALL_DUMMY_WORDS
 @findex DEPRECATED_CALL_DUMMY_WORDS
 Pointer to an array of @code{LONGEST} words of data containing
-host-byte-ordered @code{REGISTER_BYTES} sized values that partially
-specify the sequence of instructions needed for an inferior function
-call.
+host-byte-ordered @code{DEPRECATED_REGISTER_SIZE} sized values that
+partially specify the sequence of instructions needed for an inferior
+function call.
 
 Should be deprecated in favor of a macro that uses target-byte-ordered
 data.
@@ -3746,10 +3746,13 @@ This method replaces @code{DEPRECATED_CALL_DUMMY_WORDS},
 @findex DEPRECATED_PUSH_DUMMY_FRAME
 Used in @samp{call_function_by_hand} to create an artificial stack frame.
 
-@item REGISTER_BYTES
-@findex REGISTER_BYTES
-The total amount of space needed to store @value{GDBN}'s copy of the machine's
-register state.
+@item DEPRECATED_REGISTER_BYTES
+@findex DEPRECATED_REGISTER_BYTES
+The total amount of space needed to store @value{GDBN}'s copy of the
+machine's register state.
+
+This is no longer needed.  @value{GDBN} instead computes the size of the
+register buffer at run-time.
 
 @item REGISTER_NAME(@var{i})
 @findex REGISTER_NAME

@@ -2537,7 +2537,7 @@ hppa_alignof (struct type *type)
 void
 pa_do_registers_info (int regnum, int fpregs)
 {
-  char raw_regs[REGISTER_BYTES];
+  char *raw_regs = alloca (DEPRECATED_REGISTER_BYTES);
   int i;
 
   /* Make a copy of gdb's save area (may cause actual
@@ -2581,7 +2581,7 @@ void
 pa_do_strcat_registers_info (int regnum, int fpregs, struct ui_file *stream,
 			     enum precision_type precision)
 {
-  char raw_regs[REGISTER_BYTES];
+  char *raw_regs = alloca (DEPRECATED_REGISTER_BYTES);
   int i;
 
   /* Make a copy of gdb's save area (may cause actual
@@ -5005,7 +5005,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, PCOQ_HEAD_REGNUM);
   set_gdbarch_npc_regnum (gdbarch, PCOQ_TAIL_REGNUM);
   set_gdbarch_register_raw_size (gdbarch, hppa_register_raw_size);
-  set_gdbarch_register_bytes (gdbarch, hppa_num_regs * 4);
+  set_gdbarch_deprecated_register_bytes (gdbarch, hppa_num_regs * 4);
   set_gdbarch_register_byte (gdbarch, hppa_register_byte);
   set_gdbarch_register_virtual_size (gdbarch, hppa_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);

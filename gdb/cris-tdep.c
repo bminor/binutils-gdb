@@ -1042,7 +1042,7 @@ cris_register_name (int regno)
 int
 cris_register_bytes_ok (long bytes)
 {
-  return (bytes == REGISTER_BYTES);
+  return (bytes == DEPRECATED_REGISTER_BYTES);
 }
 
 /* Extract from an array regbuf containing the raw register state a function
@@ -4235,7 +4235,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       internal_error (__FILE__, __LINE__, "cris_gdbarch_init: unknown CRIS version");
     }
 
-  set_gdbarch_register_bytes (gdbarch, register_bytes);
+  set_gdbarch_deprecated_register_bytes (gdbarch, register_bytes);
 
   /* Returns the register offset for the first byte of register regno's space 
      in the saved register state.  */
