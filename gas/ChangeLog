@@ -1,3 +1,17 @@
+2001-01-10  Nick Clifton  <nickc@redhat.com>
+
+	* symbols.c (DOLLAR_LABEL_CHAR): New constant - the magic
+	character used to dollar local symbols.
+	(LOCAL_LABEL_CHAR): New constant - the magic character used to
+	local label symbols.
+	(dollar_label_name): Use DOLLAR_LABEL_CHAR.
+	(fb_label_name): Prefix local labels with LOCAL_LABEL_PREFIX,
+	if defined.
+	Use LOCAL_LABEL_CHAR.
+	(decode_local_label_name): Skip LOCAL_LABEL_PREFIX.
+	Use DOLLAR_LABEL_CHAR and LOCAL_LABEL_CHAR.
+	(S_IS_LOCAL): Use DOLLAR_LABEL_CHAR and LOCAL_LABEL_CHAR.
+
 2001-01-08  Bo Thorsen  <bo@suse.de>
 
         * config/tc-i386.c (i386_immediate, i386_displacement):

@@ -55,6 +55,9 @@ symbolS abs_symbol;
 #define debug_verify_symchain(root, last) ((void) 0)
 #endif
 
+#define DOLLAR_LABEL_CHAR	'\001'
+#define LOCAL_LABEL_CHAR	'\002'
+
 struct obstack notes;
 
 static void fb_label_init PARAMS ((void));
@@ -1329,7 +1332,7 @@ dollar_label_name (n, augend)
   while ((*p = *--q) != '\0')
     ++p;
 
-  *p++ = 1;			/* ^A  */
+  *p++ = DOLLAR_LABEL_CHAR;		/* ^A  */
 
   /* Instance number.  */
   q = symbol_name_temporary;
@@ -1483,6 +1486,9 @@ fb_label_name (n, augend)
   know (n >= 0);
   know (augend == 0 || augend == 1);
   p = symbol_name_build;
+#ifdef LOCAL_LABEL_PREFIX
+  *p++ = LOCAL_LABEL_PREFIX;
+#endif
   *p++ = 'L';
 
   /* Next code just does sprintf( {}, "%d", n);  */
@@ -1496,7 +1502,7 @@ fb_label_name (n, augend)
   while ((*p = *--q) != '\0')
     ++p;
 
-  *p++ = 2;			/* ^B  */
+  *p++ = LOCAL_LABEL_CHAR;		/* ^B  */
 
   /* Instance number.  */
   q = symbol_name_temporary;
@@ -1525,16 +1531,22 @@ decode_local_label_name (s)
   int instance_number;
   char *type;
   const char *message_format = _("\"%d\" (instance number %d of a %s label)");
-
-  if (s[0] != 'L')
+  int index = 0;
+  
+#ifdef LOCAL_LABEL_PREFIX
+  if (s[index] == LOCAL_LABEL_PREFIX)
+    ++index;
+#endif
+  
+  if (s[index] != 'L')
     return s;
 
-  for (label_number = 0, p = s + 1; isdigit ((unsigned char) *p); ++p)
+  for (label_number = 0, p = s + index + 1; isdigit ((unsigned char) *p); ++p)
     label_number = (10 * label_number) + *p - '0';
 
-  if (*p == 1)
+  if (*p == DOLLAR_LABEL_CHAR)
     type = "dollar";
-  else if (*p == 2)
+  else if (*p == LOCAL_LABEL_CHAR)
     type = "fb";
   else
     return s;
@@ -1721,8 +1733,8 @@ S_IS_LOCAL (s)
   name = S_GET_NAME (s);
   return (name != NULL
 	  && ! S_IS_DEBUG (s)
-	  && (strchr (name, '\001')
-	      || strchr (name, '\002')
+	  && (strchr (name, DOLLAR_LABEL_CHAR)
+	      || strchr (name, LOCAL_LABEL_CHAR)
 	      || (! flag_keep_locals
 		  && (bfd_is_local_label (stdoutput, s->bsym)
 		      || (flag_mri
