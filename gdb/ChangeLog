@@ -1,3 +1,7 @@
+2004-01-21  Roland McGrath  <roland@redhat.com>
+
+	* MAINTAINERS (write after approval): Add myself.
+
 2004-01-21  Eli Zaretskii  <eliz@gnu.org>
 
 	* utils.c (init_page_info): Move declarations of `rows' and
@@ -155,7 +159,7 @@
 	* tui/tui-regs.c: Update copyright, update references.
 	* tui/tui-win.c: Update copyright, update references.
 	* tui/tui-layout.c: Update copyright, update references.
-	
+
 2004-01-18  Andrew Cagney  <cagney@redhat.com>
 
 	* tui/tui-io.c: Update copyright.
@@ -594,7 +598,7 @@
 	* mi/ChangeLog-1999-2003: New file.
 	* tui/ChangeLog: Delete file.  Renamed to ...
 	* tui/ChangeLog-1998-2003: New file.
-	
+
 2004-01-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64nbsd-tdep.c: Include "regset.h".
@@ -705,7 +709,7 @@
 	* cp-namespace.c: Rename processing_current_namespace to
 	processing_current_prefix.
         Update copyright year.
-	
+
 2004-01-09  Andrew Cagney  <cagney@redhat.com>
 
 	* jv-valprint.c, ser-unix.c: Add missing copyright years.
@@ -798,9 +802,9 @@
 	* disasm.c: Update copyright to include 2004.
 	(do_mixed_source_and_assembly): For uiout asm list
 	and tuple cleanups, initialize to null_cleanup instead of
-	NULL and do so prior to loop.  Only reset when we close off 
+	NULL and do so prior to loop.  Only reset when we close off
 	the tuple/list.  Move check for whether to close off the
-	asm tuple/list to after dump_insns call where it will be run 
+	asm tuple/list to after dump_insns call where it will be run
 	on each loop iteration.
 
 2004-01-05  Andrew Cagney  <cagney@redhat.com>
@@ -994,7 +998,7 @@
 	tm-vxsparc.h.
 	* config/sparc/vxworks.mt: New file, based on recently removed
 	vxworks.mt.
-	
+
 2004-01-03  J. Brobecker  <brobecker@gnat.com>
 
 	* infrun.c (handle_step_into_function): New function.
@@ -1086,7 +1090,7 @@
 	(_initialize_sparc64fbsd_nat): Remove initialization of
 	sparcbsd_supply_reg, sparcbsd_fill_reg, sparcbsd_supply_fpreg,
 	sparcbsd_fill_fpreg, sparcbsd_reg_supplies_p,
-	sparcbsd_fpreg_supplies_p.  Initialize sparc_gregset.	
+	sparcbsd_fpreg_supplies_p.  Initialize sparc_gregset.
 	* sparc64fbsd-tdep.c: Update copyright year.  Include "frame.h",
 	"frame-unwind.h", "trad-frame.h" and "gdb_assert.h".
 	(sparc64fbsd_r_global_offset, sparc64fbsd_r_out_offset)
