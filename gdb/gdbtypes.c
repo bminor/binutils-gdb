@@ -356,36 +356,44 @@ struct type *
 force_to_range_type (type)
      struct type *type;
 {
-  if (TYPE_CODE (type) == TYPE_CODE_RANGE)
-    return type;
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_RANGE:
+      return type;
 
-  if (TYPE_CODE (type) == TYPE_CODE_ENUM)
-    {
-      int low_bound = TYPE_FIELD_BITPOS (type, 0);
-      int high_bound = TYPE_FIELD_BITPOS (type, TYPE_NFIELDS (type) - 1);
-      struct type *range_type = create_range_type (NULL, type, low_bound, high_bound);
-      TYPE_NAME (range_type) = TYPE_NAME (range_type);
-      TYPE_DUMMY_RANGE (range_type) = 1;
-      return range_type;
-    }
-  if (TYPE_CODE (type) == TYPE_CODE_BOOL)
-    {
-      struct type *range_type = create_range_type (NULL, type, 0, 1);
-      TYPE_NAME (range_type) = TYPE_NAME (range_type);
-      TYPE_DUMMY_RANGE (range_type) = 1;
-      return range_type;
-    }
-  if (TYPE_CODE (type) == TYPE_CODE_CHAR)
-    {
-      struct type *range_type = create_range_type (NULL, type, 0, 255);
-      TYPE_NAME (range_type) = TYPE_NAME (range_type);
-      TYPE_DUMMY_RANGE (range_type) = 1;
-      return range_type;
-    }
+    case TYPE_CODE_ENUM:
+      {
+	int low_bound = TYPE_FIELD_BITPOS (type, 0);
+	int high_bound = TYPE_FIELD_BITPOS (type, TYPE_NFIELDS (type) - 1);
+	struct type *range_type =
+	  create_range_type (NULL, type, low_bound, high_bound);
+	TYPE_NAME (range_type) = TYPE_NAME (range_type);
+	TYPE_DUMMY_RANGE (range_type) = 1;
+	return range_type;
+      }
+    case TYPE_CODE_BOOL:
+      {
+	struct type *range_type = create_range_type (NULL, type, 0, 1);
+	TYPE_NAME (range_type) = TYPE_NAME (range_type);
+	TYPE_DUMMY_RANGE (range_type) = 1;
+	return range_type;
+      }
+    case TYPE_CODE_CHAR:
+      {
+	struct type *range_type = create_range_type (NULL, type, 0, 255);
+	TYPE_NAME (range_type) = TYPE_NAME (range_type);
+	TYPE_DUMMY_RANGE (range_type) = 1;
+	return range_type;
+      }
+    default:
+      {
+	static struct complaint msg =
+	  { "array index type must be a discrete type", 0, 0};
+	complain (&msg);
 
-  warning ("internal error:  array index type must be a discrete type");
-  type = lookup_fundamental_type (TYPE_OBJFILE (type),	FT_INTEGER);
-  return create_range_type ((struct type *) NULL, type, 0, 0);
+	return create_range_type (NULL, builtin_type_int, 0, 0);
+      }
+    }
 }
 
 /* Create an array type using either a blank type supplied in RESULT_TYPE,

@@ -1,5 +1,11 @@
 Sun Dec 26 09:18:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdbtypes.c (force_to_range_type): Use switch statement.
+	complain() not warning() if the TYPE_CODE isn't one we know how to
+	deal with gracefully.  Use builtin_type_int not
+	lookup_fundamental_type (the objfile we passed to
+	lookup_fundamental_type was sometimes NULL).
+
 	* valops.c (call_function_by_hand, push_word), defs.h (push_word),
 	convex-xdep.c, m88k-nat.c, i386m3-nat.c, mips-tdep.c, mipsm3-nat.c,
 	ns32km3-nat.c, remote-bug.c, m88k-tdep.c, remote-hms.c, remote-mips.c,
