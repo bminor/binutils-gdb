@@ -212,7 +212,7 @@ DVIPS = dvips
 	$(MAKEINFO) -I $(srcdir) $<
 
 .texi.dvi:
-	TEXINPUTS=$(top_srcdir)/../texinfo/texinfo.tex:$$TEXINPUTS \
+	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
 	  MAKEINFO='$(MAKEINFO) -I $(srcdir)' $(TEXI2DVI) $<
 
 .texi:
@@ -228,7 +228,7 @@ DVIPS = dvips
 	$(MAKEINFO) -I $(srcdir) $<
 
 .texinfo.dvi:
-	TEXINPUTS=$(top_srcdir)/../texinfo/texinfo.tex:$$TEXINPUTS \
+	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
 	  MAKEINFO='$(MAKEINFO) -I $(srcdir)' $(TEXI2DVI) $<
 
 .txi.info:
@@ -236,7 +236,7 @@ DVIPS = dvips
 	$(MAKEINFO) -I $(srcdir) $<
 
 .txi.dvi:
-	TEXINPUTS=$(top_srcdir)/../texinfo/texinfo.tex:$$TEXINPUTS \
+	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
 	  MAKEINFO='$(MAKEINFO) -I $(srcdir)' $(TEXI2DVI) $<
 
 .txi:
