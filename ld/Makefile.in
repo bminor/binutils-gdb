@@ -140,7 +140,7 @@ STAGESTUFF = *.x *.x[runN] *.sc[runN] $(GENERATED_SOURCES) $(GENERATED_HEADERS) 
 
 all: Makefile $(LD_PROG)
 
-check:
+check: bootstrap
 info: ld.info
 
 ldgram.h ldgram.c: ldgram.y
