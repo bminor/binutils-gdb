@@ -53,7 +53,7 @@
 #define SIGTRAP 5
 #endif
 
-extern unsigned char sh_jump_table[], sh_dsp_table[0x1000], ppi_table[];
+extern unsigned short sh_jump_table[], sh_dsp_table[0x1000], ppi_table[];
 
 int sim_write (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size);
 
@@ -1646,7 +1646,7 @@ init_dsp (abfd)
     {
       int i, tmp;
 
-      for (i = sizeof sh_dsp_table - 1; i >= 0; i--)
+      for (i = (sizeof sh_dsp_table / sizeof sh_dsp_table[0]) - 1; i >= 0; i--)
 	{
 	  tmp = sh_jump_table[0xf000 + i];
 	  sh_jump_table[0xf000 + i] = sh_dsp_table[i];
@@ -1752,7 +1752,7 @@ sim_resume (sd, step, siggnal)
   void (*prev) ();
   void (*prev_fpe) ();
 
-  register unsigned char *jump_table = sh_jump_table;
+  register unsigned short *jump_table = sh_jump_table;
 
   register int *R = &(saved_state.asregs.regs[0]);
   /*register int T;*/

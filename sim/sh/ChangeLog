@@ -1,3 +1,11 @@
+2004-02-12  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c (table): Change from char to short.
+	(dumptable): Change generated table from char to short.
+	* interp.c (sh_jump_table, sh_dsp_table, ppi_table): char to short.
+	(init_dsp): Compute size of sh_dsp_table.
+	(sim_resume): Change jump_table from char to short.
+
 2004-01-27  Michael Snyder  <msnyder@redhat.com>
 
 	* gencode.c: (op tab): Some refs and defs fixes.

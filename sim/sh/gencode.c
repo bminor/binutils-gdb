@@ -2265,7 +2265,7 @@ gengastab ()
     }
 }
 
-static unsigned char table[1 << 16];
+static unsigned short table[1 << 16];
 
 /* Take an opcode, expand all varying fields in it out and fill all the
    right entries in 'table' with the opcode index.  */
@@ -2407,7 +2407,7 @@ dumptable (name, size, start)
 
   int i = start;
 
-  printf ("unsigned char %s[%d]={\n", name, size);
+  printf ("unsigned short %s[%d]={\n", name, size);
   while (i < start + size)
     {
       int j = 0;
