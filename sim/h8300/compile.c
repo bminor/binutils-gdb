@@ -17,13 +17,18 @@
  * AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include "config.h"
+
 #include <signal.h>
-#ifndef WIN32
-#include <sys/times.h>
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
 #endif
 #include <sys/param.h>
 #include "ansidecl.h"
-#include "sysdep.h"
+#include "callback.h"
 #include "remote-sim.h"
 #include "bfd.h"
 
@@ -79,13 +84,13 @@ static cpu_state_type cpu;
 
 int h8300hmode = 0;
 
+static int memory_size;
+
 
 static int
 get_now ()
 {
 #ifndef WIN32
-  struct tms b;
-
   return time (0);
 #endif
   return 0;
@@ -665,10 +670,18 @@ init_pointers ()
       init = 1;
       littleendian.i = 1;
 
-      cpu.memory = (unsigned char *) calloc (sizeof (char), MSIZE);
-      cpu.cache_idx = (unsigned short *) calloc (sizeof (short), MSIZE);
+      if (h8300hmode)
+	memory_size = H8300H_MSIZE;
+      else
+	memory_size = H8300_MSIZE;
+      cpu.memory = (unsigned char *) calloc (sizeof (char), memory_size);
+      cpu.cache_idx = (unsigned short *) calloc (sizeof (short), memory_size);
 
-      cpu.mask = (1 << MPOWER) - 1;
+      /* `msize' must be a power of two */
+      if ((memory_size & (memory_size - 1)) != 0)
+	abort ();
+      cpu.mask = memory_size - 1;
+
       for (i = 0; i < 9; i++)
 	{
 	  cpu.regs[i] = 0;
@@ -1241,6 +1254,11 @@ sim_resume (step, siggnal)
 	  cpu.exception = SIGILL;
 	  goto end;
 	case O (O_SLEEP, SB):
+	  if ((short) cpu.regs[0] == -255)
+	    cpu.exception = SIGILL;
+	  else
+	    cpu.exception = SIGTRAP;
+	  goto end;
 	case O (O_BPT, SB):
 	  cpu.exception = SIGTRAP;
 	  goto end;
@@ -1556,7 +1574,7 @@ sim_write (addr, buffer, size)
   int i;
 
   init_pointers ();
-  if (addr < 0 || addr + size > MSIZE)
+  if (addr < 0 || addr + size > memory_size)
     return 0;
   for (i = 0; i < size; i++)
     {
@@ -1573,7 +1591,7 @@ sim_read (addr, buffer, size)
      int size;
 {
   init_pointers ();
-  if (addr < 0 || addr + size > MSIZE)
+  if (addr < 0 || addr + size > memory_size)
     return 0;
   memcpy (buffer, cpu.memory + addr, size);
   return size;
@@ -1816,3 +1834,20 @@ sim_create_inferior (start_address, argv, env)
 {
   cpu.pc = start_address;
 }
+
+void
+sim_do_command (cmd)
+     char *cmd;
+{
+  printf_filtered ("This simulator does not accept any commands.\n");
+}
+
+
+
+void
+sim_set_callbacks (ptr)
+struct host_callback_struct *ptr;
+{
+
+}
+

@@ -1,3 +1,33 @@
+Mon Mar 11 09:53:25 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* compile.c (sim_resume): Watch for calls to abort.
+	* run.c: #include <signal.h>.
+	(main): Abort if program got SIGILL.
+
+Wed Feb 21 12:15:00 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Regenerate with autoconf 2.7.
+
+Thu Jan  4 11:52:53 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* inst.h (MPOWER,MSIZE): Deleted.
+	(H8300{,H}_MSIZE): Define.
+	* compile.c (memory_size): New static global.
+	(init_pointers): Set memory size from one of H8300{,H}_MSIZE.
+	(sim_write,sim_read): Use memory_size.
+
+Fri Oct 13 15:03:19 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* compile.c (sim_set_callbacks): New.
+
+Tue Oct 10 11:11:26 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (BISON): Remove macro.
+
+Wed Sep 20 13:35:02 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (maintainer-clean): New synonym for realclean.
+
 Fri Sep  8 12:18:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (install): Don't install in $(tooldir).

@@ -22,6 +22,7 @@
 
 #include <varargs.h>
 #include <stdio.h>
+#include <signal.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -45,6 +46,8 @@ main (ac, av)
   int verbose = 0;
   int trace = 0;
   char *name = "";
+  int sigrc;
+  enum sim_stop reason;
 
   while ((i = getopt (ac, av, "c:htv")) != EOF)
     switch (i) 
@@ -95,6 +98,11 @@ main (ac, av)
 	  sim_resume(0,0);
 	  if (verbose)
 	    sim_info (verbose - 1);
+	  sim_stop_reason (&reason, &sigrc);
+	  /* FIXME: this test is insufficient but we can't do much
+	     about it until sim_stop_reason is cleaned up.  */
+	  if (sigrc == SIGILL)
+	    abort ();
 	  return 0;
 	}
     }
