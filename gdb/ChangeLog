@@ -1,3 +1,8 @@
+2002-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* thread-db.c (thread_db_new_objfile): Do not enable thread_db
+	for core files.
+
 2002-01-04  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* config/arm/nbsd.mh (XDEPFILES): Remove ser-tcp.o.
