@@ -1,5 +1,10 @@
 2005-04-01  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (ppc64_elf_edit_toc): Account for dynamic relocs
+	that we no longer need.
+
+2005-04-01  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Return -1 on errors
 	rather than 0.
 	(ppc64_elf_check_relocs): Remove unnecessary SEC_ALLOC check.
