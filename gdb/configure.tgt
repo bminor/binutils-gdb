@@ -165,6 +165,10 @@ mips64*vr4100*-*-elf*)	gdb_target=vr4300 ;;
 mips64*vr5000*el-*-elf*)	gdb_target=vr5000el ;;
 mips64*vr5000*-*-elf*)	gdb_target=vr5000
 		configdirs="${configdirs} gdbserver" ;;
+# start-sanitize-tx49
+mips64*tx49*el-*-elf*)	gdb_target=vr4300el ;;
+mips64*tx49*-*-elf*)	gdb_target=vr4300 ;;
+# end-sanitize-tx49
 # start-sanitize-r5900
 mips64*r5900*-*-elf*)	gdb_target=r5900 ;;
 # end-sanitize-r5900
