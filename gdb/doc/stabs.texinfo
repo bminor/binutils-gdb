@@ -2298,7 +2298,7 @@ different from a standard C stab describing a local variable.
 @end example
 
 @node Methods
-@section Method Defintion
+@section Method Definition
 
 The class definition shown above declares Ameth.  The C++ source below
 defines Ameth:

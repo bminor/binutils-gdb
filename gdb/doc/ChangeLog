@@ -1,3 +1,7 @@
+Sat Sep 11 09:35:11 1993  Jim Kingdon  (kingdon@poseidon.cygnus.com)
+
+	* stabs.texinfo (Methods): Fix typo.
+
 Fri Sep 10 06:34:20 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* gdb.texinfo: Fix a few typos.
