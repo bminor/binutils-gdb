@@ -1,5 +1,7 @@
 Fri Sep  8 12:18:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (install): Don't install in $(tooldir).
+
 	* configure.in: Call AC_CONFIG_HEADER.  Don't try to use
 	bfd/hosts/*.h file or bfd/config/*.mh file.  Call AC_PROG_CC and
 	AC_PROG_RANLIB.  Substitute in values for CFLAGS, HDEFINES and AR.

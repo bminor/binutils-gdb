@@ -47,7 +47,6 @@ docdir = $(datadir)/doc
 
 SHELL = /bin/sh
 
-# FIXME: use autoconf's AC_PROG_INSTALL
 INSTALL = $(srcroot)/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
@@ -108,16 +107,7 @@ force:
 
 # Copy the files into directories where they will be run.
 install:
-	srcroot=`cd $(srcroot); pwd`; export srcroot; \
-	$(INSTALL_XFORM) run $(bindir)/run ;  \
-	n=`t='$(program_transform_name)'; echo run | sed -e "" $$t`; \
-	if [ -d $(tooldir) ] ; then \
-	  if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
-	  rm -f $(tooldir)/bin/run;  \
-	  ln $(bindir)/$$n $(tooldir)/bin/run \
-	   || $(INSTALL_PROGRAM) run $(tooldir)/bin/run; \
-	else true; fi
-
+	$(INSTALL_XFORM) run $(bindir)/run
 
 Makefile: Makefile.in config.status
 	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status
