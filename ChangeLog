@@ -1,3 +1,22 @@
+Thu Apr 22 02:58:21 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* Makefile.in (gas+binutils.tar.z): New rule for building snapshots
+	of gas+ld+binutils.
+
+Mon Apr 19 17:41:30 1993  Per Bothner  (bothner@cygnus.com)
+
+	* config.guess:  Recognize AIX3.2 as distinct from 3.1.
+
+Sat Apr 17 17:19:50 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: rename m88k-motorola-m88kbcs to m88k-motorola-sysv
+
+	* config/mh-delta88: remove extraneous GCC references
+
+Tue Apr 13 16:52:16 1993  Brendan Kehoe  (brendan@lisa.cygnus.com)
+
+	* Makefile.in (PRMS): Set back to all-prms.
+
 Sat Apr 10 12:04:07 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* test-build.mk: Pass -with-gnu-as for known MIPS native and MIPS
