@@ -1,5 +1,10 @@
 2005-01-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* readelf.c (display_debug_loc): Display base address
+	specifiers.  Always output <End of list>.
+
+2005-01-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* readelf.c (have_frame_base): New.
 	(need_base_address): Likewise.
 	(saved_base_address): Likewise.

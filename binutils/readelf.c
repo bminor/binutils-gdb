@@ -9550,6 +9550,8 @@ display_debug_loc (Elf_Internal_Shdr *section,
 	      if (begin == -1UL && end != -1UL)
 		{
 		  base_address = end;
+		  printf ("    %8.8lx %8.8lx %8.8lx (base address)\n",
+			  offset, begin, end);
 		  continue;
 		}
 
@@ -9577,9 +9579,7 @@ display_debug_loc (Elf_Internal_Shdr *section,
 	      start += length;
 	    }
 
-	  if (j < debug_information [i].num_loc_offsets -1)
-	    printf (_("  <End of list>"));
-	  printf ("\n");
+	  fputs (_("  <End of list>\n"), stdout);
 	}
     }
   return 1;
