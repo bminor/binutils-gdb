@@ -1,3 +1,9 @@
+Mon Jul 12 17:55:34 1993  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in (TAGS): make work again by naming directories
+	  explicitly rather than depending on undefined macros.
+	  (INSTALL_XFORM): correct bad install target.
+
 Fri Jul  2 16:58:34 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* strings.c: Doc fixes.
