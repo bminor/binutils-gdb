@@ -1,5 +1,12 @@
 Fri Jul 16 15:19:59 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
+	* nm.c: Changes for final version of POSIX.2.
+	(print_symbol_filename_{bsd,sysv,posix}): New functions.
+	(formats): Add an element for a pointer to them.
+	(print_symbols): Call it.
+	(print_object_filename_posix, print_archive_member_posix): Produce
+	output according to new POSIX.2 spec.
+
 	* strings.c (print_strings): Handle STREAM being NULL.
 	(strings_a_section): Pass a NULL.
 	(main): Don't open /dev/null.
