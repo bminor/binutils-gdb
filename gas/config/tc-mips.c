@@ -12745,7 +12745,7 @@ s_cpsetup (ignore)
       ex_off.X_add_number = mips_cpreturn_offset;
 
       macro_build ((char *) NULL, &icnt, &ex_off, "sd", "t,o(b)",
-		   mips_gp_register, (int) BFD_RELOC_LO16, SP);
+		   mips_gp_register, (int) BFD_RELOC_LO16, mips_frame_reg);
     }
   else
     macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "daddu",
@@ -12822,7 +12822,7 @@ s_cprestore (ignore)
 
   macro_build_ldst_constoffset ((char *) NULL, &icnt, &ex,
 				HAVE_32BIT_ADDRESSES ? "sw" : "sd",
-				mips_gp_register, SP);
+				mips_gp_register, mips_frame_reg);
 
   demand_empty_rest_of_line ();
 }
@@ -12857,7 +12857,7 @@ s_cpreturn (ignore)
       ex.X_add_number = mips_cpreturn_offset;
 
       macro_build ((char *) NULL, &icnt, &ex, "ld", "t,o(b)",
-		   mips_gp_register, (int) BFD_RELOC_LO16, SP);
+		   mips_gp_register, (int) BFD_RELOC_LO16, mips_frame_reg);
     }
   else
     macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "daddu",

@@ -1,5 +1,11 @@
 2003-06-11  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* config/tc-mips.c (s_cpsetup): Use mips_frame_reg instead of SP.
+	(s_cprestore): Likewise.
+	(s_cpreturn): Likewise.
+
+2003-06-11  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c (tc_gen_reloc): Initialize retval amd reloc
 	with zeros.
 
