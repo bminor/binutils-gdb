@@ -1,5 +1,13 @@
 Fri Oct  9 03:46:37 1992  John Gilmore  (gnu@cygnus.com)
 
+	* configure.host:  New file, contains mapping of host configs
+	to host support file names for bfd, binutils, opcodes.
+	* configure.in:  Use it.
+	* i386aout.c:  Cleanup, dump TARGET_IS_LITTLE_ENDIAN_P.
+	* i386bsd.c:  Cleanup, reformat.
+	* config/i386-bsd.mt:  Comment changes.
+	* config/i386bsd.mh:  New file for core file support.
+	* hosts/i386bsd.h:  Merge changes from Peter Schauer.
 	* bout.c (ALIGN):  Rename to ALIGNER, since system header files
 	on BSD 4.4 define ALIGN (sigh!).
 

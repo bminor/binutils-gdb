@@ -59,6 +59,7 @@ coffcode.h
 config
 configure.bat
 configure.in
+configure.host
 core.c
 demo64.c
 elf.c
