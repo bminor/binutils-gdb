@@ -1,7 +1,5 @@
 Mon Apr 14 11:52:39 1997  Ian Lance Taylor  <ian@cygnus.com>
 
-	* Makefile.in (INSTALL): Set to @INSTALL@.
-
 	From Thomas Graichen <graichen@rzpd.de>:
 	* Makefile.in: Always use $(SHELL) when running move-if-change.
 	* configure.in: Use ${CONFIG_SHELL} when running $ac_config_sub.
