@@ -1,3 +1,20 @@
+Thu Nov  6 12:06:46 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-options.c (STANDARD_OPTIONS): Change OPTION_* to an enum.
+	(standard_option_handler): Update.
+
+	* sim-options.h: Clarify documentation.
+ 	(OPTION_LONG_ONLY_P): Delete definition.
+	(OPTION_VALID_P): Define.
+	
+	* sim-options.c (sim_print_help): Allow short only options.
+	(sim_parse_args): Ditto.
+	(sim_args_command): Skip short only options.
+	(sim_parse_args): Allocate space for NUM_OPTS not just 256. Make
+ 	separate entries for short and long options in the HANDLERS and
+ 	ORIG_VAL tables.
+	(sim_parse_args): Disable argument permutation.
+
 Wed Nov  5 13:40:31 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-core.h (DECLARE_SIM_CORE_WRITE_N. DECLARE_SIM_CORE_READ_N):
