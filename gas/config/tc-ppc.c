@@ -1460,60 +1460,94 @@ ppc_elf_suffix (str_p, exp_p)
 #define MAP(str,reloc) { str, sizeof (str)-1, reloc }
 
   static const struct map_bfd mapping[] = {
-    MAP ("l",		(int) BFD_RELOC_LO16),
-    MAP ("h",		(int) BFD_RELOC_HI16),
-    MAP ("ha",		(int) BFD_RELOC_HI16_S),
-    MAP ("brtaken",	(int) BFD_RELOC_PPC_B16_BRTAKEN),
-    MAP ("brntaken",	(int) BFD_RELOC_PPC_B16_BRNTAKEN),
-    MAP ("got",		(int) BFD_RELOC_16_GOTOFF),
-    MAP ("got@l",	(int) BFD_RELOC_LO16_GOTOFF),
-    MAP ("got@h",	(int) BFD_RELOC_HI16_GOTOFF),
-    MAP ("got@ha",	(int) BFD_RELOC_HI16_S_GOTOFF),
-    MAP ("fixup",	(int) BFD_RELOC_CTOR), /* warning with -mrelocatable */
-    MAP ("plt",		(int) BFD_RELOC_24_PLT_PCREL),
-    MAP ("pltrel24",	(int) BFD_RELOC_24_PLT_PCREL),
-    MAP ("copy",	(int) BFD_RELOC_PPC_COPY),
-    MAP ("globdat",	(int) BFD_RELOC_PPC_GLOB_DAT),
-    MAP ("local24pc",	(int) BFD_RELOC_PPC_LOCAL24PC),
-    MAP ("local",	(int) BFD_RELOC_PPC_LOCAL24PC),
-    MAP ("pltrel",	(int) BFD_RELOC_32_PLT_PCREL),
-    MAP ("plt@l",	(int) BFD_RELOC_LO16_PLTOFF),
-    MAP ("plt@h",	(int) BFD_RELOC_HI16_PLTOFF),
-    MAP ("plt@ha",	(int) BFD_RELOC_HI16_S_PLTOFF),
-    MAP ("sdarel",	(int) BFD_RELOC_GPREL16),
-    MAP ("sectoff",	(int) BFD_RELOC_16_BASEREL),
-    MAP ("sectoff@l",	(int) BFD_RELOC_LO16_BASEREL),
-    MAP ("sectoff@h",	(int) BFD_RELOC_HI16_BASEREL),
-    MAP ("sectoff@ha",	(int) BFD_RELOC_HI16_S_BASEREL),
-    MAP ("naddr",	(int) BFD_RELOC_PPC_EMB_NADDR32),
-    MAP ("naddr16",	(int) BFD_RELOC_PPC_EMB_NADDR16),
-    MAP ("naddr@l",	(int) BFD_RELOC_PPC_EMB_NADDR16_LO),
-    MAP ("naddr@h",	(int) BFD_RELOC_PPC_EMB_NADDR16_HI),
-    MAP ("naddr@ha",	(int) BFD_RELOC_PPC_EMB_NADDR16_HA),
-    MAP ("sdai16",	(int) BFD_RELOC_PPC_EMB_SDAI16),
-    MAP ("sda2rel",	(int) BFD_RELOC_PPC_EMB_SDA2REL),
-    MAP ("sda2i16",	(int) BFD_RELOC_PPC_EMB_SDA2I16),
-    MAP ("sda21",	(int) BFD_RELOC_PPC_EMB_SDA21),
-    MAP ("mrkref",	(int) BFD_RELOC_PPC_EMB_MRKREF),
-    MAP ("relsect",	(int) BFD_RELOC_PPC_EMB_RELSEC16),
-    MAP ("relsect@l",	(int) BFD_RELOC_PPC_EMB_RELST_LO),
-    MAP ("relsect@h",	(int) BFD_RELOC_PPC_EMB_RELST_HI),
-    MAP ("relsect@ha",	(int) BFD_RELOC_PPC_EMB_RELST_HA),
-    MAP ("bitfld",	(int) BFD_RELOC_PPC_EMB_BIT_FLD),
-    MAP ("relsda",	(int) BFD_RELOC_PPC_EMB_RELSDA),
-    MAP ("xgot",	(int) BFD_RELOC_PPC_TOC16),
+    MAP ("l",			(int) BFD_RELOC_LO16),
+    MAP ("h",			(int) BFD_RELOC_HI16),
+    MAP ("ha",			(int) BFD_RELOC_HI16_S),
+    MAP ("brtaken",		(int) BFD_RELOC_PPC_B16_BRTAKEN),
+    MAP ("brntaken",		(int) BFD_RELOC_PPC_B16_BRNTAKEN),
+    MAP ("got",			(int) BFD_RELOC_16_GOTOFF),
+    MAP ("got@l",		(int) BFD_RELOC_LO16_GOTOFF),
+    MAP ("got@h",		(int) BFD_RELOC_HI16_GOTOFF),
+    MAP ("got@ha",		(int) BFD_RELOC_HI16_S_GOTOFF),
+    MAP ("fixup",		(int) BFD_RELOC_CTOR),
+    MAP ("plt",			(int) BFD_RELOC_24_PLT_PCREL),
+    MAP ("pltrel24",		(int) BFD_RELOC_24_PLT_PCREL),
+    MAP ("copy",		(int) BFD_RELOC_PPC_COPY),
+    MAP ("globdat",		(int) BFD_RELOC_PPC_GLOB_DAT),
+    MAP ("local24pc",		(int) BFD_RELOC_PPC_LOCAL24PC),
+    MAP ("local",		(int) BFD_RELOC_PPC_LOCAL24PC),
+    MAP ("pltrel",		(int) BFD_RELOC_32_PLT_PCREL),
+    MAP ("plt@l",		(int) BFD_RELOC_LO16_PLTOFF),
+    MAP ("plt@h",		(int) BFD_RELOC_HI16_PLTOFF),
+    MAP ("plt@ha",		(int) BFD_RELOC_HI16_S_PLTOFF),
+    MAP ("sdarel",		(int) BFD_RELOC_GPREL16),
+    MAP ("sectoff",		(int) BFD_RELOC_16_BASEREL),
+    MAP ("sectoff@l",		(int) BFD_RELOC_LO16_BASEREL),
+    MAP ("sectoff@h",		(int) BFD_RELOC_HI16_BASEREL),
+    MAP ("sectoff@ha",		(int) BFD_RELOC_HI16_S_BASEREL),
+    MAP ("naddr",		(int) BFD_RELOC_PPC_EMB_NADDR32),
+    MAP ("naddr16",		(int) BFD_RELOC_PPC_EMB_NADDR16),
+    MAP ("naddr@l",		(int) BFD_RELOC_PPC_EMB_NADDR16_LO),
+    MAP ("naddr@h",		(int) BFD_RELOC_PPC_EMB_NADDR16_HI),
+    MAP ("naddr@ha",		(int) BFD_RELOC_PPC_EMB_NADDR16_HA),
+    MAP ("sdai16",		(int) BFD_RELOC_PPC_EMB_SDAI16),
+    MAP ("sda2rel",		(int) BFD_RELOC_PPC_EMB_SDA2REL),
+    MAP ("sda2i16",		(int) BFD_RELOC_PPC_EMB_SDA2I16),
+    MAP ("sda21",		(int) BFD_RELOC_PPC_EMB_SDA21),
+    MAP ("mrkref",		(int) BFD_RELOC_PPC_EMB_MRKREF),
+    MAP ("relsect",		(int) BFD_RELOC_PPC_EMB_RELSEC16),
+    MAP ("relsect@l",		(int) BFD_RELOC_PPC_EMB_RELST_LO),
+    MAP ("relsect@h",		(int) BFD_RELOC_PPC_EMB_RELST_HI),
+    MAP ("relsect@ha",		(int) BFD_RELOC_PPC_EMB_RELST_HA),
+    MAP ("bitfld",		(int) BFD_RELOC_PPC_EMB_BIT_FLD),
+    MAP ("relsda",		(int) BFD_RELOC_PPC_EMB_RELSDA),
+    MAP ("xgot",		(int) BFD_RELOC_PPC_TOC16),
+    MAP ("tls",			(int) BFD_RELOC_PPC_TLS),
+    MAP ("dtpmod",		(int) BFD_RELOC_PPC_DTPMOD),
+    MAP ("dtprel",		(int) BFD_RELOC_PPC_DTPREL),
+    MAP ("dtprel@l",		(int) BFD_RELOC_PPC_DTPREL16_LO),
+    MAP ("dtprel@h",		(int) BFD_RELOC_PPC_DTPREL16_HI),
+    MAP ("dtprel@ha",		(int) BFD_RELOC_PPC_DTPREL16_HA),
+    MAP ("tprel",		(int) BFD_RELOC_PPC_TPREL),
+    MAP ("tprel@l",		(int) BFD_RELOC_PPC_TPREL16_LO),
+    MAP ("tprel@h",		(int) BFD_RELOC_PPC_TPREL16_HI),
+    MAP ("tprel@ha",		(int) BFD_RELOC_PPC_TPREL16_HA),
+    MAP ("got@tlsgd",		(int) BFD_RELOC_PPC_GOT_TLSGD16),
+    MAP ("got@tlsgd@l",		(int) BFD_RELOC_PPC_GOT_TLSGD16_LO),
+    MAP ("got@tlsgd@h",		(int) BFD_RELOC_PPC_GOT_TLSGD16_HI),
+    MAP ("got@tlsgd@ha",	(int) BFD_RELOC_PPC_GOT_TLSGD16_HA),
+    MAP ("got@tlsld",		(int) BFD_RELOC_PPC_GOT_TLSLD16),
+    MAP ("got@tlsld@l",		(int) BFD_RELOC_PPC_GOT_TLSLD16_LO),
+    MAP ("got@tlsld@h",		(int) BFD_RELOC_PPC_GOT_TLSLD16_HI),
+    MAP ("got@tlsld@ha",	(int) BFD_RELOC_PPC_GOT_TLSLD16_HA),
+    MAP ("got@dtprel",		(int) BFD_RELOC_PPC_GOT_DTPREL16),
+    MAP ("got@dtprel@l",	(int) BFD_RELOC_PPC_GOT_DTPREL16_LO),
+    MAP ("got@dtprel@h",	(int) BFD_RELOC_PPC_GOT_DTPREL16_HI),
+    MAP ("got@dtprel@ha",	(int) BFD_RELOC_PPC_GOT_DTPREL16_HA),
+    MAP ("got@tprel",		(int) BFD_RELOC_PPC_GOT_TPREL16),
+    MAP ("got@tprel@l",		(int) BFD_RELOC_PPC_GOT_TPREL16_LO),
+    MAP ("got@tprel@h",		(int) BFD_RELOC_PPC_GOT_TPREL16_HI),
+    MAP ("got@tprel@ha",	(int) BFD_RELOC_PPC_GOT_TPREL16_HA),
     /* The following are only valid for ppc64.  Negative values are
        used instead of a flag.  */
-    MAP ("higher",	- (int) BFD_RELOC_PPC64_HIGHER),
-    MAP ("highera",	- (int) BFD_RELOC_PPC64_HIGHER_S),
-    MAP ("highest",	- (int) BFD_RELOC_PPC64_HIGHEST),
-    MAP ("highesta",	- (int) BFD_RELOC_PPC64_HIGHEST_S),
-    MAP ("tocbase",	- (int) BFD_RELOC_PPC64_TOC),
-    MAP ("toc",		- (int) BFD_RELOC_PPC_TOC16),
-    MAP ("toc@l",	- (int) BFD_RELOC_PPC64_TOC16_LO),
-    MAP ("toc@h",	- (int) BFD_RELOC_PPC64_TOC16_HI),
-    MAP ("toc@ha",	- (int) BFD_RELOC_PPC64_TOC16_HA),
-    { (char *) 0, 0,	(int) BFD_RELOC_UNUSED }
+    MAP ("higher",		- (int) BFD_RELOC_PPC64_HIGHER),
+    MAP ("highera",		- (int) BFD_RELOC_PPC64_HIGHER_S),
+    MAP ("highest",		- (int) BFD_RELOC_PPC64_HIGHEST),
+    MAP ("highesta",		- (int) BFD_RELOC_PPC64_HIGHEST_S),
+    MAP ("tocbase",		- (int) BFD_RELOC_PPC64_TOC),
+    MAP ("toc",			- (int) BFD_RELOC_PPC_TOC16),
+    MAP ("toc@l",		- (int) BFD_RELOC_PPC64_TOC16_LO),
+    MAP ("toc@h",		- (int) BFD_RELOC_PPC64_TOC16_HI),
+    MAP ("toc@ha",		- (int) BFD_RELOC_PPC64_TOC16_HA),
+    MAP ("dtprel@higher",	- (int) BFD_RELOC_PPC64_DTPREL16_HIGHER),
+    MAP ("dtprel@highera",	- (int) BFD_RELOC_PPC64_DTPREL16_HIGHERA),
+    MAP ("dtprel@highest",	- (int) BFD_RELOC_PPC64_DTPREL16_HIGHEST),
+    MAP ("dtprel@highesta",	- (int) BFD_RELOC_PPC64_DTPREL16_HIGHESTA),
+    MAP ("tprel@higher",	- (int) BFD_RELOC_PPC64_TPREL16_HIGHER),
+    MAP ("tprel@highera",	- (int) BFD_RELOC_PPC64_TPREL16_HIGHERA),
+    MAP ("tprel@highest",	- (int) BFD_RELOC_PPC64_TPREL16_HIGHEST),
+    MAP ("tprel@highesta",	- (int) BFD_RELOC_PPC64_TPREL16_HIGHESTA),
+    { (char *) 0, 0,		(int) BFD_RELOC_UNUSED }
   };
 
   if (*str++ != '@')
@@ -1545,29 +1579,32 @@ ppc_elf_suffix (str_p, exp_p)
 	    reloc = -reloc;
 	  }
 
-	if (exp_p->X_add_number != 0
-	    && (reloc == (int) BFD_RELOC_16_GOTOFF
-		|| reloc == (int) BFD_RELOC_LO16_GOTOFF
-		|| reloc == (int) BFD_RELOC_HI16_GOTOFF
-		|| reloc == (int) BFD_RELOC_HI16_S_GOTOFF))
-	  as_warn (_("identifier+constant@got means identifier@got+constant"));
-
-	/* Now check for identifier@suffix+constant.  */
-	if (*str == '-' || *str == '+')
+	if (!ppc_obj64)
 	  {
-	    char *orig_line = input_line_pointer;
-	    expressionS new_exp;
+	    if (exp_p->X_add_number != 0
+		&& (reloc == (int) BFD_RELOC_16_GOTOFF
+		    || reloc == (int) BFD_RELOC_LO16_GOTOFF
+		    || reloc == (int) BFD_RELOC_HI16_GOTOFF
+		    || reloc == (int) BFD_RELOC_HI16_S_GOTOFF))
+	      as_warn (_("identifier+constant@got means identifier@got+constant"));
 
-	    input_line_pointer = str;
-	    expression (&new_exp);
-	    if (new_exp.X_op == O_constant)
+	    /* Now check for identifier@suffix+constant.  */
+	    if (*str == '-' || *str == '+')
 	      {
-		exp_p->X_add_number += new_exp.X_add_number;
-		str = input_line_pointer;
-	      }
+		char *orig_line = input_line_pointer;
+		expressionS new_exp;
 
-	    if (&input_line_pointer != str_p)
-	      input_line_pointer = orig_line;
+		input_line_pointer = str;
+		expression (&new_exp);
+		if (new_exp.X_op == O_constant)
+		  {
+		    exp_p->X_add_number += new_exp.X_add_number;
+		    str = input_line_pointer;
+		  }
+
+		if (&input_line_pointer != str_p)
+		  input_line_pointer = orig_line;
+	      }
 	  }
 	*str_p = str;
 
@@ -2363,6 +2400,25 @@ md_assemble (str)
 #ifdef OBJ_ELF
       else if ((reloc = ppc_elf_suffix (&str, &ex)) != BFD_RELOC_UNUSED)
 	{
+	  /* Some TLS tweaks.  */
+	  switch (reloc)
+	    {
+	    default:
+	      break;
+	    case BFD_RELOC_PPC_TLS:
+	      insn = ppc_insert_operand (insn, operand, ppc_obj64 ? 13 : 2,
+					 (char *) NULL, 0);
+	      break;
+	  /* We'll only use the 32 (or 64) bit form of these relocations
+	     in constants.  Instructions get the 16 bit form.  */
+	    case BFD_RELOC_PPC_DTPREL:
+	      reloc = BFD_RELOC_PPC_DTPREL16;
+	      break;
+	    case BFD_RELOC_PPC_TPREL:
+	      reloc = BFD_RELOC_PPC_TPREL16;
+	      break;
+	    }
+
 	  /* For the absolute forms of branches, convert the PC
 	     relative form back into the absolute.  */
 	  if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0)
@@ -2423,6 +2479,23 @@ md_assemble (str)
 		  break;
 		case BFD_RELOC_PPC64_PLTGOT16_LO:
 		  reloc = BFD_RELOC_PPC64_PLTGOT16_LO_DS;
+		  break;
+		case BFD_RELOC_PPC_DTPREL16:
+		  reloc = BFD_RELOC_PPC64_DTPREL16_DS;
+		  break;
+		case BFD_RELOC_PPC_DTPREL16_LO:
+		  reloc = BFD_RELOC_PPC64_DTPREL16_LO_DS;
+		  break;
+		case BFD_RELOC_PPC_TPREL16:
+		  reloc = BFD_RELOC_PPC64_TPREL16_DS;
+		  break;
+		case BFD_RELOC_PPC_TPREL16_LO:
+		  reloc = BFD_RELOC_PPC64_TPREL16_LO_DS;
+		  break;
+		case BFD_RELOC_PPC_GOT_DTPREL16:
+		case BFD_RELOC_PPC_GOT_DTPREL16_LO:
+		case BFD_RELOC_PPC_GOT_TPREL16:
+		case BFD_RELOC_PPC_GOT_TPREL16_LO:
 		  break;
 		default:
 		  as_bad (_("unsupported relocation for DS offset field"));
@@ -5283,6 +5356,10 @@ ppc_force_relocation (fix)
       break;
     }
 
+  if (fix->fx_r_type >= BFD_RELOC_PPC_TLS
+      && fix->fx_r_type <= BFD_RELOC_PPC64_DTPREL16_HIGHESTA)
+    return 1;
+
   return generic_force_reloc (fix);
 }
 
@@ -5297,6 +5374,8 @@ ppc_fix_adjustable (fix)
 	  && fix->fx_r_type != BFD_RELOC_GPREL16
 	  && fix->fx_r_type != BFD_RELOC_VTABLE_INHERIT
 	  && fix->fx_r_type != BFD_RELOC_VTABLE_ENTRY
+	  && !(fix->fx_r_type >= BFD_RELOC_PPC_TLS
+	       && fix->fx_r_type <= BFD_RELOC_PPC64_DTPREL16_HIGHESTA)
 	  && (fix->fx_pcrel
 	      || (fix->fx_subsy != NULL
 		  && (S_GET_SEGMENT (fix->fx_subsy)
@@ -5632,6 +5711,48 @@ md_apply_fix3 (fixP, valP, seg)
 	    else
 	      bfd_putl16 ((bfd_vma) val, where);
 	  }
+	  break;
+
+	case BFD_RELOC_PPC_TLS:
+	case BFD_RELOC_PPC_DTPMOD:
+	case BFD_RELOC_PPC_TPREL16:
+	case BFD_RELOC_PPC_TPREL16_LO:
+	case BFD_RELOC_PPC_TPREL16_HI:
+	case BFD_RELOC_PPC_TPREL16_HA:
+	case BFD_RELOC_PPC_TPREL:
+	case BFD_RELOC_PPC_DTPREL16:
+	case BFD_RELOC_PPC_DTPREL16_LO:
+	case BFD_RELOC_PPC_DTPREL16_HI:
+	case BFD_RELOC_PPC_DTPREL16_HA:
+	case BFD_RELOC_PPC_DTPREL:
+	case BFD_RELOC_PPC_GOT_TLSGD16:
+	case BFD_RELOC_PPC_GOT_TLSGD16_LO:
+	case BFD_RELOC_PPC_GOT_TLSGD16_HI:
+	case BFD_RELOC_PPC_GOT_TLSGD16_HA:
+	case BFD_RELOC_PPC_GOT_TLSLD16:
+	case BFD_RELOC_PPC_GOT_TLSLD16_LO:
+	case BFD_RELOC_PPC_GOT_TLSLD16_HI:
+	case BFD_RELOC_PPC_GOT_TLSLD16_HA:
+	case BFD_RELOC_PPC_GOT_TPREL16:
+	case BFD_RELOC_PPC_GOT_TPREL16_LO:
+	case BFD_RELOC_PPC_GOT_TPREL16_HI:
+	case BFD_RELOC_PPC_GOT_TPREL16_HA:
+	case BFD_RELOC_PPC_GOT_DTPREL16:
+	case BFD_RELOC_PPC_GOT_DTPREL16_LO:
+	case BFD_RELOC_PPC_GOT_DTPREL16_HI:
+	case BFD_RELOC_PPC_GOT_DTPREL16_HA:
+	case BFD_RELOC_PPC64_TPREL16_DS:
+	case BFD_RELOC_PPC64_TPREL16_LO_DS:
+	case BFD_RELOC_PPC64_TPREL16_HIGHER:
+	case BFD_RELOC_PPC64_TPREL16_HIGHERA:
+	case BFD_RELOC_PPC64_TPREL16_HIGHEST:
+	case BFD_RELOC_PPC64_TPREL16_HIGHESTA:
+	case BFD_RELOC_PPC64_DTPREL16_DS:
+	case BFD_RELOC_PPC64_DTPREL16_LO_DS:
+	case BFD_RELOC_PPC64_DTPREL16_HIGHER:
+	case BFD_RELOC_PPC64_DTPREL16_HIGHERA:
+	case BFD_RELOC_PPC64_DTPREL16_HIGHEST:
+	case BFD_RELOC_PPC64_DTPREL16_HIGHESTA:
 	  break;
 #endif
 	  /* Because SDA21 modifies the register field, the size is set to 4

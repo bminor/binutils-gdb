@@ -1,3 +1,13 @@
+2003-02-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (mapping): Handle new TLS reloc specs.
+	(ppc_elf_suffix): Don't warn for x+off@got when ppc64 and don't
+	accept x@got+off etc.
+	(md_assemble): Handle TLS relocs.
+	(ppc_force_relocation): Force for all TLS relocs.
+	(ppc_fix_adjustable): Likewise.
+	(md_apply_fix3): Handle TLS relocs.
+
 2003-02-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/obj-elf.c (obj_elf_change_section): Set SEC_LINK_ONCE and
