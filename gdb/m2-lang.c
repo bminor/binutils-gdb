@@ -418,6 +418,7 @@ const struct language_defn m2_language_defn =
   &exp_descriptor_standard,
   m2_parse,			/* parser */
   m2_error,			/* parser error function */
+  null_post_parser,
   m2_printchar,			/* Print character constant */
   m2_printstr,			/* function to print string constant */
   m2_emit_char,			/* Function to print a single character */

@@ -454,6 +454,7 @@ const struct language_defn pascal_language_defn =
   &exp_descriptor_standard,
   pascal_parse,
   pascal_error,
+  null_post_parser,
   pascal_printchar,		/* Print a character constant */
   pascal_printstr,		/* Function to print string constant */
   pascal_emit_char,		/* Print a single char */

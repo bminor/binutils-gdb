@@ -1036,6 +1036,7 @@ const struct language_defn java_language_defn =
   &exp_descriptor_java,
   java_parse,
   java_error,
+  null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   java_emit_char,		/* Function to print a single character */

@@ -102,6 +102,9 @@ static void prefixify_expression (struct expression *);
 static void prefixify_subexp (struct expression *, struct expression *, int,
 			      int);
 
+static struct expression *parse_exp_in_context (char **, struct block *, int, 
+						int);
+
 void _initialize_parse (void);
 
 /* Data structure for saving values of arglist_len for function calls whose
@@ -1021,6 +1024,16 @@ prefixify_subexp (struct expression *inexpr,
 struct expression *
 parse_exp_1 (char **stringptr, struct block *block, int comma)
 {
+  return parse_exp_in_context (stringptr, block, comma, 0);
+}
+
+/* As for parse_exp_1, except that if VOID_CONTEXT_P, then
+   no value is expected from the expression.  */
+
+static struct expression *
+parse_exp_in_context (char **stringptr, struct block *block, int comma, 
+		      int void_context_p)
+{
   struct cleanup *old_chain;
 
   lexptr = *stringptr;
@@ -1076,6 +1089,8 @@ parse_exp_1 (char **stringptr, struct block *block, int comma)
 
   prefixify_expression (expout);
 
+  current_language->la_post_parser (&expout, void_context_p);
+
   if (expressiondebug)
     dump_prefix_expression (expout, gdb_stdlog);
 
@@ -1094,6 +1109,28 @@ parse_expression (char *string)
   if (*string)
     error ("Junk after end of expression.");
   return exp;
+}
+
+
+/* As for parse_expression, except that if VOID_CONTEXT_P, then
+   no value is expected from the expression.  */
+
+struct expression *
+parse_expression_in_context (char *string, int void_context_p)
+{
+  struct expression *exp;
+  exp = parse_exp_in_context (&string, 0, 0, void_context_p);
+  if (*string != '\000')
+    error ("Junk after end of expression.");
+  return exp;
+}
+
+/* A post-parser that does nothing */
+
+/* ARGSUSED */
+void
+null_post_parser (struct expression **exp, int void_context_p)
+{
 }
 
 /* Stuff for maintaining a stack of types.  Currently just used by C, but

@@ -253,6 +253,7 @@ const struct language_defn scm_language_defn =
   &exp_descriptor_scm,
   scm_parse,
   c_error,
+  null_post_parser,
   scm_printchar,		/* Print a character constant */
   scm_printstr,			/* Function to print string constant */
   NULL,				/* Function to print a single character */

@@ -662,6 +662,7 @@ const struct language_defn objc_language_defn = {
   &exp_descriptor_standard,
   objc_parse,
   objc_error,
+  null_post_parser,
   objc_printchar,		/* Print a character constant */
   objc_printstr,		/* Function to print string constant */
   objc_emit_char,

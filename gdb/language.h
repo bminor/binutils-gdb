@@ -180,6 +180,14 @@ struct language_defn
 
     void (*la_error) (char *);
 
+    /* Given an expression *EXPP created by prefixifying the result of
+       la_parser, perform any remaining processing necessary to complete
+       its translation.  *EXPP may change; la_post_parser is responsible 
+       for releasing its previous contents, if necessary.  If 
+       VOID_CONTEXT_P, then no value is expected from the expression.  */
+
+    void (*la_post_parser) (struct expression ** expp, int void_context_p);
+
     void (*la_printchar) (int ch, struct ui_file * stream);
 
     void (*la_printstr) (struct ui_file * stream, char *string,

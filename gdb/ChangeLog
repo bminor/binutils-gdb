@@ -1,3 +1,32 @@
+2004-03-10  Paul N. Hilfinger  <Hilfinger@gnat.com>
+
+	* language.h (language_defn): Add new la_post_parser field.
+	* parser-defs.h (null_post_parser): New declaration (default for
+	la_post_parser).
+	
+	* parse.c (parse_exp_1): Move code to parse_exp_in_context and
+	insert call to that function.
+	(parse_exp_in_context): New function, including code formerly in
+	parse_exp_1.  Calls language-dependent post-parser after 
+	prefixification.
+	(parse_expression_in_context): New exported function.
+	(null_post_parser): New definition.
+	* expression.h (parse_expression_in_context): Add declaration.
+	
+	* p-lang.c (pascal_language_defn): Add trivial post-parser.
+	* c-lang.c (c_language_defn): Ditto.
+	(cplus_language_defn): Ditto.
+	(asm_language_defn): Ditto.
+	(minimal_language_defn): Ditto.
+	* f-lang.c (f_language_defn): Ditto.
+	* jv-lang.c (java_language_defn): Ditto.
+	* language.c (unknown_language_defn): Ditto.
+	(auto_language_defn): Ditto.
+	(local_language_defn): Ditto.
+	* m2-lang.c (m2_language_defn): Ditto.
+	* scm-lang.c (scm_language_defn): Ditto.
+	* obj-lang.c (objc_language_defn): Ditto.
+	
 2004-04-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* amd64nbsd-tdep.c (amd64nbsd_sigcontext_addr): Remove function.
