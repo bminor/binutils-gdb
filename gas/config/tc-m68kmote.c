@@ -54,6 +54,8 @@ const char line_comment_chars[] = "*";
 const char line_comment_chars[] = "#";
 #endif
 
+#define NO_RELOC 0
+
 /* Chars that can be used to separate mant from exp in floating point nums */
 const char EXP_CHARS[] = "eE";
 
