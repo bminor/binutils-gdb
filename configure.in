@@ -299,14 +299,14 @@ fi
 # --without-gnu-ld options for the configure script.
 
 if [ x${use_gnu_as} = x ] ; then
-  if [ x${with_gnu_as} != xno ] && echo ${configdirs} | grep "${gasdir} " > /dev/null 2>&1 && [ -d ${srcdir}/${gasdir} ] ; then
+  if [ x${with_gnu_as} != xno ] && echo " ${configdirs} " | grep " ${gasdir} " > /dev/null 2>&1 && [ -d ${srcdir}/${gasdir} ] ; then
     with_gnu_as=yes
     withoptions="$withoptions --with-gnu-as"
   fi
 fi
 
 if [ x${use_gnu_ld} = x ] ; then
-  if [ x${with_gnu_ld} != xno ] && echo ${configdirs} | grep ld > /dev/null 2>&1 && [ -d ${srcdir}/ld ] ; then
+  if [ x${with_gnu_ld} != xno ] && echo " ${configdirs} " | grep " ld " > /dev/null 2>&1 && [ -d ${srcdir}/ld ] ; then
     with_gnu_ld=yes
     withoptions="$withoptions --with-gnu-ld"
   fi
