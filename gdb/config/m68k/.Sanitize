@@ -42,6 +42,8 @@ hp300hpux.mh
 hp300hpux.mt
 isi.mh
 isi.mt
+linux.mh
+linux.mt
 m68klynx.mh
 m68klynx.mt
 m68kv4.mh
@@ -58,6 +60,7 @@ nm-delta68.h
 nm-dpx2.h
 nm-hp300bsd.h
 nm-hp300hpux.h
+nm-linux.h
 nm-m68klynx.h
 nm-nbsd.h
 nm-news.h
@@ -86,6 +89,7 @@ tm-es1800.h
 tm-hp300bsd.h
 tm-hp300hpux.h
 tm-isi.h
+tm-linux.h
 tm-m68kv4.h
 tm-mac.h
 tm-monitor.h
@@ -108,6 +112,7 @@ xm-dpx2.h
 xm-hp300bsd.h
 xm-hp300hpux.h
 xm-isi.h
+xm-linux.h
 xm-m68k.h
 xm-m68klynx.h
 xm-m68kv4.h
