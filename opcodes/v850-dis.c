@@ -164,9 +164,12 @@ disassemble (memaddr, info, insn)
 		    static int list18_h_regs[32] = { 19, 18, 17, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 30, 31, 29, 28, 23, 22, 21, 20, 27, 26, 25, 24 };
 		    static int list18_l_regs[32] = {  3,  2,  1, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 14, 15, 13, 12,  7,  6,  5,  4, 11, 10,  9,  8 };
 /* end-sanitize-v850eq */
-		    int *      regs;
-		    int        i;
-		    int        shown_one = false;
+		    int *             regs;
+		    int               i;
+		    unsigned long int mask = 0;
+		    int               pc   = false;
+		    int               sr   = false;
+		    
 		    
 		    switch (operand->shift)
 		      {
@@ -180,27 +183,63 @@ disassemble (memaddr, info, insn)
 			abort();
 		      }
 
-		    info->fprintf_func (info->stream, "{");
 		    for (i = 0; i < 32; i++)
 		      {
 			if (value & (1 << i))
 			  {
-			    if (shown_one)
-			      info->fprintf_func (info->stream, ",");
-			    else
-			      shown_one = true;
-			      
 			    switch (regs[ i ])
 			      {
-			      default: info->fprintf_func (info->stream, "%s", v850_reg_names[regs[ i ]]); break;
+			      default: mask |= (1 << regs[ i ]); break;
 /* start-sanitize-v850eq */
 			      case 0:  fprintf (stderr, "unknown pop reg: %d\n", i ); abort();
-			      case -1: info->fprintf_func (info->stream, "PC "); break;
-			      case -2: info->fprintf_func (info->stream, "SR"); break;
+			      case -1: pc = true; break;
+			      case -2: sr = true; break;
 /* end-sanitize-v850eq */
 			      }
 			  }
 		      }
+
+		    info->fprintf_func (info->stream, "{");
+		    
+		    if (mask || pc || sr)
+		      {
+			if (mask)
+			  {
+			    unsigned int bit;
+			    int          shown_one = false;
+			    
+			    for (bit = 0; bit < 32; bit++)
+			      if (mask & (1 << bit))
+				{
+				  unsigned long int first = bit;
+				  unsigned long int last;
+
+				  if (shown_one)
+				    info->fprintf_func (info->stream, ", ");
+				  else
+				    shown_one = true;
+				  
+				  info->fprintf_func (info->stream, v850_reg_names[first]);
+				  
+				  for (bit++; bit < 32; bit++)
+				    if ((mask & (1 << bit)) == 0)
+				      break;
+
+				  last = bit;
+
+				  if (last > first + 1)
+				    {
+				      info->fprintf_func (info->stream, " - %s", v850_reg_names[ last - 1 ]);
+				    }
+				}
+			  }
+			
+			if (pc)
+			  info->fprintf_func (info->stream, "%sPC", mask ? ", " : "");
+			if (sr)
+			  info->fprintf_func (info->stream, "%sSR", (mask || pc) ? ", " : "");
+		      }
+		    
 		    info->fprintf_func (info->stream, "}");
 		  }
 		break;

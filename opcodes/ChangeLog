@@ -1,3 +1,9 @@
+start-sanitize-v850e
+Fri Sep 12 11:43:54 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* v850-dis.c (disassemble): Improved display of register lists.
+
+start-sanitize-v850e
 Thu Sep 11 17:35:10 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-opc.c (sparc_opcodes): Fix assembler args to
