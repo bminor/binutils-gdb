@@ -1,5 +1,8 @@
 Wed Jul 21 18:03:38 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* gdb.t07/watchpoint.exp: Change xfail for calling function with
+	watchpoint enabled to "*-*-*".
+
 	* gdb.t15/{mips_pro.{c,exp},Makefile.in}: New test.
 
 Mon Jul 19 23:59:26 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
