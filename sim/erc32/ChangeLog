@@ -1,3 +1,37 @@
+Tue Jun  2 15:20:35 1998  Mark Alexander  <marka@cygnus.com>
+
+	* interf.c (sim_open): Use revamped memory_read, which makes
+	byte-swapping unnecessary.  Add -sparclite-board option for
+	emulating RAM found on typical SPARClite boards.  Print
+	error message for unrecognized option.
+	* erc32.c: Change RAM address and size from constants to variables,
+	to allow emulation of SPARClite board RAM.
+	(fetch_bytes, store_bytes): New helper functions for revamped
+	mememory_read and memory_write.
+	(memory_read, memory_write): Rewrite to store bytes in target
+	byte order instead of storing words in host byte order; this
+	greatly simplifies support of little-endian programs.
+	(get_mem_ptr): Remove unnecessary byte parameter.
+	(sis_memory_write, sis_memory_read): Store words in target
+	byte order instead of host byte order.
+	(byte_swap_words): Remove, no longer needed.
+	* sis.h ((byte_swap_words): Remove declaration, no longer needed.
+	(memory_read): Add new sz parameter.
+	* sis.c (run_sim): Use revamped memory_read, which makes
+	byte-swapping unnecessary.
+	* exec.c (dispatch_instruction): Use revamped memory_read, which
+	makes byte-swapping and double-word fetching unnecessary.
+	* func.c (sparclite_board): Declare new variable.
+	(get_regi): Handle little-endian data.
+	(bfd_load): Recognize little-endian SPARClite as having
+	little-endian data.
+	
+Fri May 22 14:23:16 1998  Mark Alexander  <marka@cygnus.com>
+
+	* erc32.c (port_init): Print messages only if sis_verbose is true.
+	* func.c (bfd_load): Ditto.
+	* interf.c (sim_open): Ditto.
+
 Thu May 14 23:10:48 1998  Mark Alexander  <marka@cygnus.com>
 
 	* sis.h (uint64, int64): Define.

@@ -23,10 +23,13 @@
 #include <signal.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include <sys/fcntl.h>
 #include "sis.h"
 #include "bfd.h"
 #include <dis-asm.h>
+#include "sim-config.h"
 
 #include "remote-sim.h"
 
@@ -34,7 +37,9 @@
 extern          fprintf();
 #endif
 
-#define	VAL(x)	strtol(x,(char *)NULL,0)
+#define PSR_CWP 0x7
+
+#define	VAL(x)	strtol(x,(char **)NULL,0)
 
 extern char   **buildargv(char *input);
 
@@ -42,11 +47,13 @@ extern struct disassemble_info dinfo;
 extern struct pstate sregs;
 extern struct estate ebase;
 
+extern int	current_target_byte_order;
 extern int      ctrl_c;
 extern int      nfp;
 extern int      ift;
 extern int      rom8;
 extern int      wrp;
+extern int      uben;
 extern int      sis_verbose;
 extern char    *sis_version;
 extern struct estate ebase;
@@ -54,6 +61,7 @@ extern struct evcell evbuf[];
 extern struct irqcell irqarr[];
 extern int      irqpend, ext_irl;
 extern int      sparclite;
+extern int      sparclite_board;
 extern int      termsave;
 extern char     uart_dev1[], uart_dev2[];
 
@@ -61,25 +69,24 @@ int             sis_gdb_break = 1;
 
 host_callback *sim_callback;
 
-run_sim(sregs, go, icount, dis)
+int
+run_sim(sregs, icount, dis)
     struct pstate  *sregs;
-    int             go;
     unsigned int    icount;
     int             dis;
 {
-    int             mexc, ws;
+    int             mexc;
 
     if (sis_verbose)
 	(*sim_callback->printf_filtered) (sim_callback, "resuming at %x\n",
 					  sregs->pc);
    init_stdio();
    sregs->starttime = time(NULL);
-    while ((!sregs->err_mode & (go || (icount > 0))) &&
-	   ((sregs->bptnum == 0) || !(sregs->bphit = check_bpt(sregs)))) {
+   while (!sregs->err_mode & (icount > 0)) {
 
 	sregs->fhold = 0;
 	sregs->hold = 0;
-	sregs->icnt = 0;
+	sregs->icnt = 1;
 
 	check_interrupts(sregs);
 	if (sregs->trap) {
@@ -90,7 +97,13 @@ run_sim(sregs, go, icount, dis)
 	    else
 		sregs->asi = 9;
 
-	    mexc = memory_read(sregs->asi, sregs->pc, &sregs->inst, &sregs->hold);
+#if 0	/* DELETE ME! for debugging purposes only */
+	    printf("pc = %08x, npc = %08x\n", sregs->pc, sregs->npc);
+	    if (sregs->pc == 0 || sregs->npc == 0)
+		printf ("bogus pc or npc\n");
+#endif
+	    mexc = memory_read(sregs->asi, sregs->pc, &sregs->inst,
+			       2, &sregs->hold);
 	    if (sregs->annul) {
 		sregs->annul = 0;
 		sregs->icnt = 1;
@@ -100,22 +113,11 @@ run_sim(sregs, go, icount, dis)
 		if (mexc) {
 		    sregs->trap = I_ACC_EXC;
 		} else {
-		    if (sregs->histlen) {
-			sregs->histbuf[sregs->histind].addr = sregs->pc;
-			sregs->histbuf[sregs->histind].time = ebase.simtime;
-			sregs->histind++;
-			if (sregs->histind >= sregs->histlen)
-			    sregs->histind = 0;
-		    }
-		    if (dis) {
-			printf(" %8d ", ebase.simtime);
-			dis_mem(sregs->pc, 1, &dinfo);
-		    }
 		    if ((sis_gdb_break) && (sregs->inst == 0x91d02001)) {
 			if (sis_verbose)
 			    (*sim_callback->printf_filtered) (sim_callback,
 							      "SW BP hit at %x\n", sregs->pc);
-			sim_halt();
+                        sim_halt();
 			restore_stdio();
 			clearerr(stdin);
 			return (BPT_HIT);
@@ -130,7 +132,7 @@ run_sim(sregs, go, icount, dis)
 	}
 	advance_time(sregs);
 	if (ctrl_c) {
-	    go = icount = 0;
+	    icount = 0;
 	}
     }
     sim_halt();
@@ -176,15 +178,11 @@ sim_open (kind, callback, abfd, argv)
 {
 
     int             argc = 0;
-    int             cont = 1;
     int             stat = 1;
-    int             grdl = 0;
-    int             freq = 15;
+    int             freq = 0;
 
     sim_callback = callback;
 
-    (*sim_callback->printf_filtered) (sim_callback, "\n SIS - SPARC instruction simulator %s\n", sis_version);
-    (*sim_callback->printf_filtered) (sim_callback, " Bug-reports to Jiri Gaisler ESA/ESTEC (jgais@wd.estec.esa.nl)\n");
     while (argv[argc])
       argc++;
     while (stat < argc) {
@@ -193,21 +191,25 @@ sim_open (kind, callback, abfd, argv)
 		sis_verbose = 1;
 	    } else
 	    if (strcmp(argv[stat], "-nfp") == 0) {
-		(*sim_callback->printf_filtered) (sim_callback, "no FPU\n");
 		nfp = 1;
 	    } else
             if (strcmp(argv[stat], "-ift") == 0) {
                 ift = 1;
 	    } else
 	    if (strcmp(argv[stat], "-sparclite") == 0) {
-		(*sim_callback->printf_filtered) (sim_callback, "simulating Sparclite\n");
 		sparclite = 1;
+	    } else
+	    if (strcmp(argv[stat], "-sparclite-board") == 0) {
+		sparclite_board = 1;
 	    } else
             if (strcmp(argv[stat], "-wrp") == 0) {
                 wrp = 1;
 	    } else
             if (strcmp(argv[stat], "-rom8") == 0) {
                 rom8 = 1;
+	    } else 
+            if (strcmp(argv[stat], "-uben") == 0) {
+                uben = 1;
 	    } else 
 	    if (strcmp(argv[stat], "-uart1") == 0) {
 		if ((stat + 1) < argc)
@@ -218,23 +220,39 @@ sim_open (kind, callback, abfd, argv)
 		    strcpy(uart_dev2, argv[++stat]);
 	    } else
 	    if (strcmp(argv[stat], "-nogdb") == 0) {
-		(*sim_callback->printf_filtered) (sim_callback, "disabling GDB trap handling for breakpoints\n");
 		sis_gdb_break = 0;
 	    } else
-	    if (strcmp(argv[stat], "-freq") == 0)
+	    if (strcmp(argv[stat], "-freq") == 0) {
 		if ((stat + 1) < argc) {
 		    freq = VAL(argv[++stat]);
-		    (*sim_callback->printf_filtered) (sim_callback, " ERC32 freq %d Mhz\n", freq);
 		}
+	    } else {
+		(*sim_callback->printf_filtered) (sim_callback,
+						  "unknown option %s\n",
+						  argv[stat]);
+	    }
 	} else
 	    bfd_load(argv[stat]);
 	stat++;
     }
-    sregs.freq = freq;
+
+    if (sis_verbose) {
+	(*sim_callback->printf_filtered) (sim_callback, "\n SIS - SPARC instruction simulator %s\n", sis_version);
+	(*sim_callback->printf_filtered) (sim_callback, " Bug-reports to Jiri Gaisler ESA/ESTEC (jgais@wd.estec.esa.nl)\n");
+	if (nfp)
+	  (*sim_callback->printf_filtered) (sim_callback, "no FPU\n");
+	if (sparclite)
+	  (*sim_callback->printf_filtered) (sim_callback, "simulating Sparclite\n");
+	if (sis_gdb_break == 0)
+	  (*sim_callback->printf_filtered) (sim_callback, "disabling GDB trap handling for breakpoints\n");
+	if (freq)
+	  (*sim_callback->printf_filtered) (sim_callback, " ERC32 freq %d Mhz\n", freq);
+    }
+
+    sregs.freq = freq ? freq : 15;
     termsave = fcntl(0, F_GETFL, 0);
     INIT_DISASSEMBLE_INFO(dinfo, stdout,(fprintf_ftype)fprintf);
     dinfo.endian = BFD_ENDIAN_BIG;
-    init_signals();
     reset_all();
     ebase.simtime = 0;
     init_sim();
@@ -256,9 +274,6 @@ sim_close(sd, quitting)
 
 };
 
-/* For communication from sim_load to sim_create_inferior.  */
-static bfd_vma start_address;
-
 SIM_RC
 sim_load(sd, prog, abfd, from_tty)
      SIM_DESC sd;
@@ -266,16 +281,21 @@ sim_load(sd, prog, abfd, from_tty)
      bfd *abfd;
      int from_tty;
 {
-    start_address = bfd_load (prog);
-    return (0);
+    bfd_load (prog);
+    return SIM_RC_OK;
 }
 
 SIM_RC
-sim_create_inferior(sd, argv, env)
+sim_create_inferior(sd, abfd, argv, env)
      SIM_DESC sd;
+     struct _bfd *abfd;
      char **argv;
      char **env;
 {
+    bfd_vma start_address = 0;
+    if (abfd != NULL)
+      start_address = bfd_get_start_address (abfd);
+
     ebase.simtime = 0;
     reset_all();
     reset_stat(&sregs);
@@ -284,25 +304,29 @@ sim_create_inferior(sd, argv, env)
     return SIM_RC_OK;
 }
 
-void
-sim_store_register(sd, regno, value)
+int
+sim_store_register(sd, regno, value, length)
      SIM_DESC sd;
     int             regno;
     unsigned char  *value;
+     int length;
 {
     /* FIXME: Review the computation of regval.  */
     int             regval = (value[0] << 24) | (value[1] << 16) | (value[2] << 8) | value[3];
     set_regi(&sregs, regno, regval);
+    return -1;
 }
 
 
-void
-sim_fetch_register(sd, regno, buf)
+int
+sim_fetch_register(sd, regno, buf, length)
      SIM_DESC sd;
     int             regno;
     unsigned char  *buf;
+     int length;
 {
     get_regi(&sregs, regno, buf);
+    return -1;
 }
 
 int
@@ -375,8 +399,6 @@ sim_stop_reason(sd, reason, sigrc)
    handlers.
 */
 
-#define PSR_CWP 0x7
-
 static void
 flush_windows ()
 {
@@ -418,7 +440,7 @@ flush_windows ()
 void
 sim_resume(SIM_DESC sd, int step, int siggnal)
 {
-    simstat = run_sim(&sregs, 1, 0, 0);
+    simstat = run_sim(&sregs, -1, 0);
 
     if (sis_gdb_break) flush_windows ();
 }
