@@ -1,3 +1,8 @@
+2002-10-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* itbl-lex.l: Use #include <> for generated headers.
+	* itbl-ops.c: Likewise.
+
 2002-10-28  Daniel Jacobowitz  <drow@mvista.com>
 
 	* doc/gasp.texi: Fix typo in deprecation note.
