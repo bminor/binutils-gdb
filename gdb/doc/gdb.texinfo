@@ -6036,7 +6036,7 @@ You may abbreviate @code{while-stepping} as @code{ws} or
 @cindex information about tracepoints
 @item info tracepoints @r{[}@var{num}@r{]}
 Display information about the tracepoint @var{num}.  If you don't specify
-a tracepoint number displays information about all the tracepoints
+a tracepoint number, displays information about all the tracepoints
 defined so far.  For each tracepoint, the following information is
 shown:
 
