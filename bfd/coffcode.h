@@ -823,15 +823,6 @@ DEFUN (coff_set_arch_mach_hook, (abfd, filehdr),
     break;
 #endif
 
-#ifdef MIPS
-  case  MIPS_MAGIC_1:
-  case  MIPS_MAGIC_2:
-  case  MIPS_MAGIC_3:
-    arch = bfd_arch_mips;
-    machine = 0;
-    break;
-#endif
-
 #ifdef MC68MAGIC
   case MC68MAGIC:
   case M68MAGIC:
@@ -1079,12 +1070,6 @@ DEFUN(coff_set_flags,(abfd, magicp, flagsp),
 	*flagsp = flags;
 	return true;
       }
-    break;
-#endif
-#ifdef MIPS
-  case bfd_arch_mips:
-    *magicp = MIPS_MAGIC_2;
-    return true;
     break;
 #endif
 #ifdef I386MAGIC
@@ -1553,10 +1538,10 @@ DEFUN(coff_write_object_contents,(abfd),
   internal_a.magic = PAGEMAGICBCS;
 #endif				/* M88 */
 
-#if M68 || MIPS || WE32K
+#if M68 || WE32K
 #define __A_MAGIC_SET__
   /* Never was anything here for the 68k */
-#endif				/* M68 || MIPS || WE32K */
+#endif				/* M68 || WE32K */
 
 #if I386
 # define __A_MAGIC_SET__

@@ -1,5 +1,8 @@
 Wed Feb  3 09:14:36 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* coffcode.h: Removed MIPS specific information, since coff-mips.c
+	no longer includes this file.
+
 	* coff-msym.c (ecoff_swap_fdr_in, ecoff_swap_ext_in): Set reserved
 	bits to 0 to make comparison test useful.
 
