@@ -1420,7 +1420,7 @@ add_symbol_file_command (char *args, int from_tty)
   } sect_opts[SECT_OFF_MAX];
 
   struct section_addr_info section_addrs;
-  struct cleanup *my_cleanups;
+  struct cleanup *my_cleanups = make_cleanup (null_cleanup, NULL);
 
   dont_repeat ();
 
@@ -1456,7 +1456,7 @@ add_symbol_file_command (char *args, int from_tty)
 	{
 	  /* The first argument is the file name. */
 	  filename = tilde_expand (arg);
-	  my_cleanups = make_cleanup (xfree, filename);
+	  make_cleanup (xfree, filename);
 	}
       else
 	if (argcnt == 1)
