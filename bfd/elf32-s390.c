@@ -2378,6 +2378,37 @@ elf_s390_object_p (abfd)
   return bfd_default_set_arch_mach (abfd, bfd_arch_s390, bfd_mach_s390_esa);
 }
 
+static boolean
+elf_s390_grok_prstatus (abfd, note)
+     bfd * abfd;
+     Elf_Internal_Note * note;
+{
+  int offset;
+  unsigned int raw_size;
+
+  switch (note->descsz)
+    {
+      default:
+	return false;
+
+      case 224:		/* S/390 Linux.  */
+	/* pr_cursig */
+	elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
+
+	/* pr_pid */
+	elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 24);
+
+	/* pr_reg */
+	offset = 72;
+	raw_size = 144;
+	break;
+    }
+
+  /* Make a ".reg/999" section.  */
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg",
+					  raw_size, note->descpos + offset);
+}
+
 #define TARGET_BIG_SYM	bfd_elf32_s390_vec
 #define TARGET_BIG_NAME	"elf32-s390"
 #define ELF_ARCH	bfd_arch_s390
@@ -2411,6 +2442,7 @@ elf_s390_object_p (abfd)
 #define elf_backend_relocate_section          elf_s390_relocate_section
 #define elf_backend_size_dynamic_sections     elf_s390_size_dynamic_sections
 #define elf_backend_reloc_type_class	      elf_s390_reloc_type_class
+#define elf_backend_grok_prstatus	      elf_s390_grok_prstatus
 
 #define elf_backend_object_p            elf_s390_object_p
 

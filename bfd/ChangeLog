@@ -1,3 +1,8 @@
+2001-12-07  Jim Blandy  <jimb@redhat.com>
+
+	* elf32-s390.c (elf32_s390_grok_prstatus): New function.
+	(elf_backend_grok_prstatus): Define.	
+
 2001-12-07  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf32-sparc.c (elf32_sparc_relocate_section): Revert
@@ -161,7 +166,7 @@
 	* elflink.h (elf_bfd_discard_info): Skip if the input bfd isn't
 	ELF.
 
-Mon Nov 26 12:33:44 2001  Jeffrey A Law  (law@cygnus.com)
+2001-11-26  Jeffrey A Law  (law@cygnus.com)
 
 	* stabs.c (_bfd_discard_section_stabs): Use PARAMS in function
 	prototypes.
@@ -383,7 +388,7 @@ Mon Nov 26 12:33:44 2001  Jeffrey A Law  (law@cygnus.com)
 	* elf-strtab.c (_bfd_elf_strtab_finalize): Make first variable i
 	size_t.  Rename second i to j.
 
-Sat Nov 10 08:56:02 2001  Jeffrey A Law  (law@cygnus.com)
+2001-11-10  Jeffrey A Law  (law@cygnus.com)
 
 	* binary.c: Include safe-ctype.h after bfd.h and sysdep.h.
 
@@ -2359,7 +2364,7 @@ Sat Nov 10 08:56:02 2001  Jeffrey A Law  (law@cygnus.com)
 	* config.bfd <powerpc-*-aix* entry>: Select 64 bit xcoff for
 	aix4.3 and above.
 
-Wed Aug 29 02:27:36 2001  J"orn Rennecke <amylaar@redhat.com>
+2001-08-29  J"orn Rennecke <amylaar@redhat.com>
 
 	* Makefile.am (elf32-h8300.lo): New target.
 	* config.bfd (h8300*-*-elf): New case.
@@ -8003,10 +8008,10 @@ Wed Aug 29 02:27:36 2001  J"orn Rennecke <amylaar@redhat.com>
 
 	* config.bfd: Add NetBSD/sparc64 support.
 
-Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
-			  David Mosberger  <davidm@hpl.hp.com>
-			  Timothy Wall <twall@cygnus.com>
-			  Jim Wilson  <wilson@cygnus.com>
+2000-04-21  Richard Henderson  <rth@cygnus.com>
+	    David Mosberger  <davidm@hpl.hp.com>
+	    Timothy Wall <twall@cygnus.com>
+	    Jim Wilson  <wilson@cygnus.com>
 
 	* Makefile.am (ALL_MACHINES): Add cpu-ia64.lo.
 	(ALL_MACHINES_CFILES): Add cpu-ia64.c.
@@ -8049,7 +8054,7 @@ Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
 	* dwarf2.c (concat_filename): Avoid string literal concatenation.
 	* ieee.c (ieee_get_symtab): Don't initialise union in struct.
 
-Mon Apr 17 19:14:36 2000  David Mosberger  <davidm@hpl.hp.com>
+2000-04-11  David Mosberger  <davidm@hpl.hp.com>
 
 	* Makefile.am (BFD64_BACKENDS): Mention coff-ia64.lo.
 	(BFD64_BACKENDS_CFILES): Mention coff-ia64.c
@@ -8154,7 +8159,7 @@ Mon Apr 17 19:14:36 2000  David Mosberger  <davidm@hpl.hp.com>
 	* coffcode.h (coff_set_arch_mach_hook): Eliminate warning on
 	unitialized variable.
 
-Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+2000-04-07  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (WARN_CFLAGS): Set to -W -Wall by default.  Add
 	--enable-build-warnings option.
@@ -8189,7 +8194,7 @@ Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	and restore it on failure.  Release newly allocated tdata on
 	failure.
 
-Fri Apr  7 11:33:47 2000  Jim Wilson  <wilson@cygnus.com>
+2000-04-07  Jim Wilson  <wilson@cygnus.com>
 
 	* dwarf2.c (struct dwarf2_debug): New field dwarf_line_size.
 	(decode_line_info): Set it.  Report error if unit->line_offset is
@@ -8234,7 +8239,7 @@ Fri Apr  7 11:33:47 2000  Jim Wilson  <wilson@cygnus.com>
 	(elf32_arm_print_private_bfd_data): Only decode EF_xxx flags
 	if the EABI version number is unknown.
 
-Wed Apr  5 22:04:20 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+2000-04-05  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* reloc.c (_bfd_relocate_contents): Add BFD_RELOC_SH_LOOP_START and
 	BFD_RELOC_SH_LOOP_END.
@@ -8279,7 +8284,7 @@ Wed Apr  5 22:04:20 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	relative relocations for non-loaded sections in shared objects.
 	(elf64_alpha_check_relocs): Similarly.
 
-Mon Apr  3 13:37:15 2000  Hans-Peter Nilsson  <hp@axis.com>
+2000-04-03  Hans-Peter Nilsson  <hp@axis.com>
 
 	* aoutx.h (NAME(aout,reloc_type_lookup)): Add BFD_RELOC_8 and
 	BFD_RELOC_16 to switch for extended relocs.
@@ -8302,7 +8307,7 @@ Mon Apr  3 13:37:15 2000  Hans-Peter Nilsson  <hp@axis.com>
 	on some targets.
 	* ihex.c : Ditto.
 
-Wed Mar 30 15:28:00 2000  Donald Lindsay  <dlindsay@cygnus.com>
+2000-03-30  Donald Lindsay  <dlindsay@cygnus.com>
 
 	* elf32-m32r.c (m32r_elf_generic_reloc): new function.  All
 	HOWTO references to bfd_elf_generic_reloc, that have
@@ -8614,7 +8619,7 @@ Wed Mar 30 15:28:00 2000  Donald Lindsay  <dlindsay@cygnus.com>
 	name of the libtool directory.
 	* Makefile.in: Rebuild.
 
-Fri Feb 25 18:39:26 2000  Rodney Brown (RodneyBrown@pmsc.com)
+2000-02-25  Rodney Brown (RodneyBrown@pmsc.com)
 
 	* som.c (SOM_HOWTO): Define.
 	(som_hppa_howto_table): Use it.
@@ -8782,7 +8787,7 @@ Fri Feb 25 18:39:26 2000  Rodney Brown (RodneyBrown@pmsc.com)
 	Rs6kCorData): Use above defines to adapt code to use AIX 4.3's
 	core_dumpx structure.
 
-Thu Feb 17 00:04:48 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+2000-02-17  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* archures.c (bfd_mach_sh2, bfd_mach_sh_dsp): New macros.
 	(bfd_mach_sh3_dsp): Likewise.
@@ -8853,7 +8858,7 @@ Thu Feb 17 00:04:48 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	SECTION_RELATIVE_ABSOLUTE_SYMBOL_P if defined to determine whether
 	symbol index should be set to -1.
 
-Thu Feb 10 20:07:50 GMT 2000  Toshiyasu Morita (toshi.morita@sega.com)
+2000-02-10  Toshiyasu Morita (toshi.morita@sega.com)
 
 	* coff-sh.c (USES1_REG, USES2_REG, SETS1_REG, SETS2_REG,
 	USESF1_REG, USESF2_REG, SETSF1_REG, SETSF2_REG): New macros.
