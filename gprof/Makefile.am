@@ -57,11 +57,12 @@ man_MANS = gprof.1
 DEP: dep.sed $(gprof_SOURCES) $(noinst_HEADERS) gconfig.h
 	rm -f DEP1
 	$(MAKE) MKDEP="$(MKDEP)" DEP1
-	if grep ' /' DEP1 > /dev/null 2> /dev/null; then \
+	sed -f dep.sed < DEP1 > DEPA
+	echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> DEPA
+	if grep ' /' DEPA > /dev/null 2> /dev/null; then \
 	  echo 'make DEP failed!'; exit 1; \
 	else \
-	  sed -f dep.sed < DEP1 > $@; \
-	  echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> $@; \
+	  mv -f DEPA $@; \
 	fi
 
 DEP1: $(gprof_SOURCES)
@@ -95,7 +96,7 @@ dep-am: DEP
 
 .PHONY: dep dep-in dep-am
 
-CLEANFILES = dep.sed DEP DEP1 DEP2
+CLEANFILES = dep.sed DEP DEPA DEP1 DEP2
 
 # DO NOT DELETE THIS LINE -- mkdep uses it.
 # DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.

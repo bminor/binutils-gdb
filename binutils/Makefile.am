@@ -287,11 +287,12 @@ DISTCLEANFILES = stamp-under sysinfo underscore.c sysroff.c sysroff.h \
 DEP: dep.sed $(CFILES) $(HFILES) $(GENERATED_CFILES) $(GENERATED_HFILES) config.h
 	rm -f DEP1
 	$(MAKE) MKDEP="$(MKDEP)" DEP1
-	if grep ' /' DEP1 > /dev/null 2> /dev/null; then \
+	sed -f dep.sed < DEP1 > DEPA
+	echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> DEPA
+	if grep ' /' DEPA > /dev/null 2> /dev/null; then \
 	  echo 'make DEP failed!'; exit 1; \
 	else \
-	  sed -f dep.sed < DEP1 > $@; \
-	  echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> $@; \
+	  mv -f DEPA $@; \
 	fi
 
 DEP1: $(CFILES) $(GENERATED_CFILES)
@@ -346,7 +347,7 @@ MOSTLYCLEANFILES = sysinfo $(DEMANGLER_NAME).1 binutils.log binutils.sum \
 mostlyclean-local:
 	-rm -rf tmpdir
 
-CLEANFILES = dep.sed DEP DEP1 DEP2
+CLEANFILES = dep.sed DEP DEPA DEP1 DEP2
 
 .PHONY: install-exec-local
 

@@ -219,7 +219,7 @@ config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
 	$(SHELL) ./config.status --recheck
 
 CLEANFILES = \
-	libopcodes.a stamp-lib dep.sed DEP DEP1 DEP2
+	libopcodes.a stamp-lib dep.sed DEP DEPA DEP1 DEP2
 
 
 
@@ -250,11 +250,12 @@ ia64-asmtab.c: @MAINT@ ia64-gen ia64-ic.tbl ia64-raw.tbl ia64-waw.tbl ia64-war.t
 DEP: dep.sed $(CFILES) $(HFILES) config.h
 	rm -f DEP1
 	$(MAKE) MKDEP="$(MKDEP)" DEP1
-	if grep ' /' DEP1 > /dev/null 2> /dev/null; then \
+	sed -f dep.sed < DEP1 > DEPA
+	echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> DEPA
+	if grep ' /' DEPA > /dev/null 2> /dev/null; then \
 	  echo 'make DEP failed!'; exit 1; \
 	else \
-	  sed -f dep.sed < DEP1 > $@; \
-	  echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> $@; \
+	  mv -f DEPA $@; \
 	fi
 
 DEP1: $(CFILES)

@@ -576,11 +576,12 @@ install-data-local: $(BFD_H)
 DEP: dep.sed $(CFILES) $(HFILES) bfd.h
 	rm -f DEP1
 	$(MAKE) MKDEP="$(MKDEP)" DEP1
-	if grep ' /' DEP1 > /dev/null 2> /dev/null; then \
+	sed -f dep.sed < DEP1 > DEPA
+	echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> DEPA
+	if grep ' /' DEPA > /dev/null 2> /dev/null; then \
 	  echo 'make DEP failed!'; exit 1; \
 	else \
-	  sed -f dep.sed < DEP1 > $@; \
-	  echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> $@; \
+	  mv -f DEPA $@; \
 	fi
 
 DEP1: $(CFILES)
@@ -670,7 +671,7 @@ stmp-lcoff-h: $(LIBCOFF_H_FILES)
 MOSTLYCLEANFILES = elf32-target.h elf64-target.h ofiles stamp-ofiles \
 	targmatch.h
 
-CLEANFILES = bfd.h dep.sed stmp-bfd-h DEP DEP1 DEP2 libbfd.a stamp-lib \
+CLEANFILES = bfd.h dep.sed stmp-bfd-h DEP DEPA DEP1 DEP2 libbfd.a stamp-lib \
 	stmp-bin2-h stmp-lbfd-h stmp-lcoff-h
 
 # We want to rerun configure if config.bfd or configure.host change.

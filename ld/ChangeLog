@@ -1,3 +1,9 @@
+2000-07-01  Alan Modra  <alan@linuxcare.com.au>
+
+	* Makefile.am (DEP): Fix 2000-06-22.  grep after running dep.sed
+	(CLEANFILES): Add DEPA.
+	* Makefile.in: Regenerate.
+
 2000-06-30  Timothy Wall  <twall@ppc>
 
 	* scripttempl/tic54xcoff.sc: PAGE N is not implemented, so encode
