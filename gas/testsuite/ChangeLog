@@ -1,3 +1,9 @@
+Thu Dec 18 11:10:42 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/arm/inst.d: Updated to match latest disassembler changes.
+
+	* gas/arm/arm7t.d: Updated to match latest disassembler changes.
+
 Tue Dec 16 22:19:25 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 	* gas/mips/lb-xgot.d, gas/mips/rol.d, gas/mips/jal-svr4pic.d,
