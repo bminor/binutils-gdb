@@ -40,6 +40,16 @@ static int process_embedded_commands
   PARAMS ((bfd *, struct bfd_link_info *, bfd *));
 static void mark_relocs PARAMS ((struct coff_final_link_info *, bfd *));
 
+/* Define macros so that the ISFCN, et. al., macros work correctly.
+   These macros are defined in include/coff/internal.h in terms of
+   N_TMASK, etc.  These definitions require a user to define local
+   variables with the appropriate names, and with values from the
+   coff_data (abfd) structure.  */
+
+#define N_TMASK n_tmask
+#define N_BTSHFT n_btshft
+#define N_BTMASK n_btmask
+
 /* Create an entry in a COFF linker hash table.  */
 
 struct bfd_hash_entry *
@@ -285,6 +295,12 @@ coff_link_add_symbols (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
+#if 0
+  /* These aren't needed yet.  */
+  unsigned int n_tmask = coff_data (abfd)->local_n_tmask;
+  unsigned int n_btshft = coff_data (abfd)->local_n_btshft;
+  unsigned int n_btmask = coff_data (abfd)->local_n_btmask;
+#endif
   boolean keep_syms;
   boolean default_copy;
   bfd_size_type symcount;
@@ -1256,14 +1272,17 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
      struct coff_final_link_info *finfo;
      bfd *input_bfd;
 {
+  unsigned int n_tmask = coff_data (input_bfd)->local_n_tmask;
+  unsigned int n_btshft = coff_data (input_bfd)->local_n_btshft;
+#if 0
+  unsigned int n_btmask = coff_data (input_bfd)->local_n_btmask;
+#endif
   boolean (*adjust_symndx) PARAMS ((bfd *, struct bfd_link_info *, bfd *,
 				    asection *, struct internal_reloc *,
 				    boolean *));
   bfd *output_bfd;
   const char *strings;
   bfd_size_type syment_base;
-  unsigned int n_tmask;
-  unsigned int n_btshft;
   boolean copy, hash;
   bfd_size_type isymesz;
   bfd_size_type osymesz;
@@ -1287,13 +1306,6 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
   osymesz = bfd_coff_symesz (output_bfd);
   linesz = bfd_coff_linesz (input_bfd);
   BFD_ASSERT (linesz == bfd_coff_linesz (output_bfd));
-
-  n_tmask = coff_data (input_bfd)->local_n_tmask;
-  n_btshft = coff_data (input_bfd)->local_n_btshft;
-
-  /* Define macros so that ISFCN, et. al., macros work correctly.  */
-#define N_TMASK n_tmask
-#define N_BTSHFT n_btshft
 
   copy = false;
   if (! finfo->info->keep_memory)

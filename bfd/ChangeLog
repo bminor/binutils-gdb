@@ -1,5 +1,8 @@
 1999-08-18  Donn Terry  <donn@interix.com>
 
+	* cofflink.c: Move definitions of N_TMASK, et. al., out of
+	_bfd_coff_link_input_bfd into top level.
+
 	* coff-i386.c (coff_i386_reloc): Handle R_IMAGEBASE.
 	(RTYPE2HOWTO): Return NULL if reloc type is out of range.
 	(coff_i386_rtype_to_howto): Likewise.
