@@ -1185,9 +1185,8 @@ top:;
 }
 
 /* This is the guts of the machine-dependent assembler.  STR points to a
-   machine dependent instruction.  This funciton is supposed to emit
-   the frags/bytes it assembles to.
-   */
+   machine dependent instruction.  This function is supposed to emit
+   the frags/bytes it assembles to.  */
 
 void
 md_assemble (str)

@@ -203,7 +203,8 @@ This directive specifies that the following symbol is the name of a
 Thumb encoded function.  This information is necessary in order to allow
 the assembler and linker to generate correct code for interworking
 between Arm and Thumb instructions and should be used even if
-interworking is not going to be performed.
+interworking is not going to be performed.  The presence of this
+directive also implies @code{.thumb}
 
 @cindex @code{thumb_set} directive, ARM
 @item .thumb_set

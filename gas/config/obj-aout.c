@@ -578,7 +578,7 @@ obj_pre_write_hook (headers)
 }
 
 void
-DEFUN_VOID (s_sect)
+s_sect ()
 {
   /* Strip out the section name */
   char *section_name;

@@ -389,7 +389,7 @@ md_assemble (instruction_string)
 	}
       else
 	{
-	  /* statement has no syntax goofs: lets sniff the expression */
+	  /* Statement has no syntax goofs: let's sniff the expression.  */
 	  int can_be_short = 0;	/* 1 if a bignum can be reduced to a short literal. */
 
 	  input_line_pointer = operandP->vop_expr_begin;
@@ -1795,7 +1795,7 @@ vip (vitP, instring)
       else
 	{
 	  /*
-	   * We found a match! So lets pick up as many operands as the
+	   * We found a match! So let's pick up as many operands as the
 	   * instruction wants, and even gripe if there are too many.
 	   * We expect comma to seperate each operand.
 	   * We let instring track the text, while p tracks a part of the

@@ -1843,7 +1843,7 @@ configure configure.in gdbinit.in itbl-lex.c itbl-parse.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(itbl_test_SOURCES) $(as_new_SOURCES) $(EXTRA_as_new_SOURCES) $(gasp_new_SOURCES)
 OBJECTS = $(itbl_test_OBJECTS) $(as_new_OBJECTS) $(gasp_new_OBJECTS)

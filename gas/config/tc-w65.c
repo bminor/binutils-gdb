@@ -644,8 +644,7 @@ check (operand, low, high)
 static int log2[] =
 {0, 0, 1, 0, 2};
 
-/* Now we know what sort of opcodes it is, lets build the bytes -
- */
+/* Now we know what sort of opcodes it is, let's build the bytes.  */
 static void
 build_Mytes (opcode)
      struct opinfo *opcode;

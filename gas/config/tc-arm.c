@@ -1290,11 +1290,13 @@ static void
 s_thumb_func (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
+  if (! thumb_mode)
+    opcode_select (16);
+
   /* The following label is the name/address of the start of a Thumb function.
      We need to know this for the interworking support.  */
-
   label_is_thumb_function_name = true;
-  
+
   demand_empty_rest_of_line ();
 }
 

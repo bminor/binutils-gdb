@@ -1224,7 +1224,7 @@ tip_op (optex, topP)
 
   if (*op_bad == '\0')
     {
-      /* statement has no syntax goofs yet: lets sniff the expression */
+      /* Statement has no syntax goofs yet: let's sniff the expression.  */
       input_line_pointer = point;
       expP = &(topP->exp_of_operand);
       topP->seg_of_operand = expression (expP);
@@ -1526,7 +1526,7 @@ tip (titP, instring)
       else
 	{
 	  /*
-       * We found a match! So lets pick up as many operands as the
+       * We found a match! So let's pick up as many operands as the
        * instruction wants, and even gripe if there are too many.
        * We expect comma to seperate each operand.
        * We let instring track the text, while p tracks a part of the

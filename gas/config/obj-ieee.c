@@ -55,9 +55,9 @@ relax_align (address, alignment)
 /* calculate the size of the frag chain and create a bfd section
    to contain all of it */
 static void
-DEFUN (size_section, (abfd, idx),
-       bfd * abfd AND
-       unsigned int idx)
+size_section (abfd, idx)
+     bfd * abfd;
+     unsigned int idx;
 {
   asection *sec;
   unsigned int size = 0;
@@ -106,9 +106,9 @@ DEFUN (size_section, (abfd, idx),
 
 /* run through a frag chain and write out the data to go with it */
 static void
-DEFUN (fill_section, (abfd, idx),
-       bfd * abfd AND
-       unsigned int idx)
+fill_section (abfd, idx)
+     bfd * abfd;
+     unsigned int idx;
 {
   asection *sec = segment_info[idx].user_stuff;
   if (sec)
@@ -159,8 +159,8 @@ DEFUN (fill_section, (abfd, idx),
 /* Count the relocations in a chain */
 
 static unsigned int
-DEFUN (count_entries_in_chain, (idx),
-       unsigned int idx)
+count_entries_in_chain (idx)
+     unsigned int idx;
 {
   unsigned int nrelocs;
   fixS *fixup_ptr;
@@ -178,8 +178,8 @@ DEFUN (count_entries_in_chain, (idx),
 
 /* output all the relocations for a section */
 void
-DEFUN (do_relocs_for, (idx),
-       unsigned int idx)
+do_relocs_for (idx)
+     unsigned int idx;
 {
   unsigned int nrelocs;
   arelent **reloc_ptr_vector;
@@ -270,8 +270,8 @@ DEFUN (do_relocs_for, (idx),
 
 /* do the symbols.. */
 static void
-DEFUN (do_symbols, (abfd),
-       bfd * abfd)
+do_symbols (abfd)
+     bfd * abfd;
 {
   extern symbolS *symbol_rootP;
   symbolS *ptr;
@@ -333,7 +333,7 @@ DEFUN (do_symbols, (abfd),
    code */
 
 void
-DEFUN_VOID (bfd_as_write_hook)
+bfd_as_write_hook ()
 {
   int i;
 
@@ -509,7 +509,7 @@ obj_symbol_new_hook (symbolP)
 
 #if 1
 extern void
-DEFUN_VOID (write_object_file)
+write_object_file ()
 {
   int i;
   struct frchain *frchain_ptr;

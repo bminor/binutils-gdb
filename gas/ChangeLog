@@ -1,5 +1,12 @@
 2000-06-25  Kazu Hirata  <kazu@hxi.com>
 
+        * config/obj-aout.c: Remove all uses of DEFUN.
+        * config/obj-ieee.c: Likewise.
+        * config/tc-sh.c: Fix comment typos.
+        * config/tc-tahoe.c: Likewise.
+        * config/tc-vax.c: Likewise.
+        * config/tc-w65.c: Likewise.
+        * config/tc-z8k.c: Likewise.
 	* config/tc-h8300.c (build_bytes): Assemble ldmac correctly.
 
 2000-06-24  DJ Delorie  <dj@cygnus.com>
