@@ -1,3 +1,8 @@
+2001-03-21  Jim Blandy  <jimb@redhat.com>
+
+	* cp-valprint.c: Reformat to bring into line with GNU coding
+	standards.
+
 2001-03-21  Mark Kettenis  <kettenis@gnu.org>
 
 	Make Linux use the new unified support for hardware breakpoints
