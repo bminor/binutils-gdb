@@ -1396,8 +1396,7 @@ pa_ip (str)
       break;
 
     default:
-      as_bad ("Unknown opcode: `%s'", str);
-      exit (1);
+      as_fatal ("Unknown opcode: `%s'", str);
     }
 
   save_s = str;
@@ -4283,10 +4282,10 @@ pa_comm (unused)
 	  S_SET_SEGMENT (symbol, &bfd_und_section);
 	  S_SET_EXTERNAL (symbol);
 
-	  /* Keep this until we verify that the generic resolving
-	     code in write.c is fixed.  */
-	  symbol->sy_resolved = 1;
-	  
+	  /* colon() has already set the frag to the current location in the
+	     $BSS$ subspace; we need to reset the fragment to the zero address
+	     fragment.  */
+	  symbol->sy_frag = &zero_address_frag;
 	}
     }
   demand_empty_rest_of_line ();

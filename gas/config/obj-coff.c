@@ -2789,7 +2789,7 @@ write_object_file ()
   if (abfd == 0)
     {
       as_perror ("FATAL: Can't create %s", out_file_name);
-      exit (42);
+      exit (EXIT_FAILURE);
     }
   bfd_set_format (abfd, bfd_object);
   bfd_set_arch_mach (abfd, BFD_ARCH, machine);

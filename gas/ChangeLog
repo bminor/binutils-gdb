@@ -1,5 +1,32 @@
 Tue Sep 13 16:20:36 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* config/tc-sparc.c (sparc_ip): Replace as_bad/exit sequence with
+	a call to as_fatal.
+	* config/tc-i860.c (i860_ip): Ditto.
+	* config/tc-hppa.c (pa_ip): Ditto.
+	* config/tc-alpha.c (alpha_ip): Ditto.
+	* as.c (parse_args): Ditto.
+
+	* config/tc-mips.c (mips_ip): Replace as_warn/exit sequence with a
+	call to as_fatal.
+
+	* write.c (write_contents): Use EXIT_FAILURE.
+	* output-file.c (output_file_create, output_file_close,
+	output_file_create, output_file_close): Ditto.
+	* messages.c (as_fatal): Ditto.
+	* config/obj-som.c (obj_som_version, obj_som_copyright): Ditto.
+	* config/obj-ieee.c (write_object_file): Ditto.
+	* config/obj-coff.c (write_object_file): Ditto.
+	* config/tc-vax.c (main): Use EXIT_SUCCESS.
+	* config/tc-m68k.c (main): Ditto.
+
+	* hash.c (main): Pass a value to exit().
+
+	* as.h (EXIT_SUCCESS, EXIT_FAILURE): Moved here.
+	* as.c: ...from here.
+	(parse_args): Use them always.
+	(main): Use exit rather than return.
+
 	* Makefile.in (*_FOR_TARGET, INSTALL_XFORM, install, uninstall):
 	Rewrite handling of program_transform_name.
 

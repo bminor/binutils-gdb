@@ -594,7 +594,7 @@ md_assemble (instruction_string)
 	      expP->X_add_number = floatP->low[0]
 		| ((LITTLENUM_MASK & (floatP->low[1])) << LITTLENUM_NUMBER_OF_BITS);
 	      /*
-	       * For the SEG_BIG case we have:
+	       * For the O_big case we have:
 	       * If vop_short == 's' then a short floating literal is in the
 	       *	lowest 6 bits of floatP -> low [0], which is
 	       *	big_operand_bits [---] [0].
@@ -653,12 +653,6 @@ md_assemble (instruction_string)
       this_add_symbol = expP->X_add_symbol;
       to_seg = *segP;
       is_undefined = (to_seg == SEG_UNKNOWN);
-      know (to_seg == SEG_UNKNOWN
-	    || to_seg == SEG_ABSOLUTE
-	    || to_seg == SEG_DATA
-	    || to_seg == SEG_TEXT
-	    || to_seg == SEG_BSS
-	    || to_seg == SEG_BIG);
       at = operandP->vop_mode & 1;
       length = (operandP->vop_short == 'b'
 		? 1 : (operandP->vop_short == 'w'
@@ -1935,7 +1929,7 @@ main ()
 	}
     }
   vip_end ();
-  exit ();
+  exit (EXIT_SUCCESS);
 }
 
 #endif /* #ifdef test */
@@ -2982,7 +2976,7 @@ main ()
       fflush (stdout);
       gets (answer);
       if (!answer[0])
-	exit (0);
+	exit (EXIT_SUCCESS);
       myaccess = answer[0];
       mywidth = answer[1];
       switch (mywidth)

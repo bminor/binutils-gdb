@@ -4132,8 +4132,7 @@ mips_ip (str, ip)
       break;
 
     default:
-      as_warn ("Unknown opcode: `%s'", str);
-      exit (1);
+      as_fatal ("Unknown opcode: `%s'", str);
     }
   if ((insn = (struct mips_opcode *) hash_find (op_hash, str)) == NULL)
     {

@@ -35,13 +35,29 @@
  * If TEST is #defined, then we are testing a module: #define COMMON as "".
  */
 
-/* These #defines are for parameters of entire assembler. */
+#include "config.h"
 
-/* For some systems, this is required to be first.  */
-#include "libiberty/alloca-conf.h"
+/* This is the code recommended in the autoconf documentation --
+   verbatim.  If it doesn't work for you, let me know, and notify
+   djm@gnu.ai.mit.edu as well.  */
+/* AIX requires this to be the first thing in the file.  */
+#ifdef __GNUC__
+# define alloca __builtin_alloca
+#else
+# if HAVE_ALLOCA_H
+#  include <alloca.h>
+# else
+#  ifdef _AIX
+ #pragma alloca
+#  else
+#   ifndef alloca /* predefined by HP cc +Olibcalls */
+char *alloca ();
+#   endif
+#  endif
+# endif
+#endif
 
 /* Now, tend to the rest of the configuration.  */
-#include "config.h"
 
 /* System include files first... */
 #include <stdio.h>
@@ -104,11 +120,6 @@ extern char *strdup (/* const char * */);
 #include "fopen-same.h"
 #endif
 
-/* This doesn't get taken care of by ansidecl.h.  */
-#if !defined (__STDC__) && !defined (volatile)
-#define volatile
-#endif
-
 /* This doesn't get taken care of anywhere.  */
 #if !defined (__GNUC__) && !defined (inline)
 #define inline
@@ -121,6 +132,10 @@ extern PTR realloc ();
 #endif
 #ifdef NEED_FREE_DECLARATION
 extern void free ();
+#endif
+
+#ifdef USE_DELETE_FOR_UNLINK
+#define unlink delete
 #endif
 
 #ifdef BFD_ASSEMBLER
@@ -165,6 +180,11 @@ extern PTR bfd_alloc_by_size_t PARAMS ((bfd *abfd, size_t sz));
 #else
 #include "fopen-same.h"
 #endif
+#endif
+
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#define EXIT_FAILURE 1
 #endif
 
 #define obstack_chunk_alloc xmalloc

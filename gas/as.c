@@ -57,11 +57,6 @@ static SIGTY got_sig PARAMS ((int sig));
 #endif
 static void perform_an_assembly_pass PARAMS ((int argc, char **argv));
 
-#ifndef EXIT_SUCCESS
-#define EXIT_SUCCESS 0
-#define EXIT_FAILURE 1
-#endif
-
 int listing;			/* true if a listing is wanted */
 
 char *myname;			/* argv[0] */
@@ -69,10 +64,6 @@ char *myname;			/* argv[0] */
 segT reg_section, expr_section;
 segT text_section, data_section, bss_section;
 #endif
-
-/* This is true if the assembler should output time and space usage. */
-
-static int statistics_flag = 0;
 
 
 void
@@ -165,7 +156,7 @@ parse_args (pargc, pargv)
   struct option *longopts;
   extern struct option md_longopts[];
   extern size_t md_longopts_size;
-  static struct option std_longopts[] = {
+  static const struct option std_longopts[] = {
 #define OPTION_HELP (OPTION_STD_BASE)
     {"help", no_argument, NULL, OPTION_HELP},
 #define OPTION_NOCPP (OPTION_STD_BASE + 1)
@@ -174,6 +165,8 @@ parse_args (pargc, pargv)
     {"statistics", no_argument, NULL, OPTION_STATISTICS},
 #define OPTION_VERSION (OPTION_STD_BASE + 3)
     {"version", no_argument, NULL, OPTION_VERSION},
+#define OPTION_DUMPCONFIG (OPTION_STD_BASE + 4)
+    {"dump-config", no_argument, NULL, OPTION_DUMPCONFIG},
   };
 
   /* Construct the option lists from the standard list and the
@@ -226,18 +219,30 @@ parse_args (pargc, pargv)
 
 	case OPTION_HELP:
 	  show_usage (stdout);
-	  exit (0);
+	  exit (EXIT_SUCCESS);
 
 	case OPTION_NOCPP:
 	  break;
 
 	case OPTION_STATISTICS:
-	  statistics_flag = 1;
+	  flag_print_statistics = 1;
 	  break;
 
 	case OPTION_VERSION:
 	  print_version_id ();
-	  exit (0);
+	  exit (EXIT_SUCCESS);
+
+	case OPTION_DUMPCONFIG:
+	  fprintf (stderr, "alias = %s\n", TARGET_ALIAS);
+	  fprintf (stderr, "canonical = %s\n", TARGET_CANONICAL);
+	  fprintf (stderr, "cpu-type = %s\n", TARGET_CPU);
+#ifdef TARGET_OBJ_FORMAT
+	  fprintf (stderr, "format = %s\n", TARGET_OBJ_FORMAT);
+#endif
+#ifdef TARGET_FORMAT
+	  fprintf (stderr, "bfd-target = %s\n", TARGET_FORMAT);
+#endif
+	  exit (EXIT_SUCCESS);
 
 	case 'v':
 	  print_version_id ();
@@ -289,8 +294,7 @@ parse_args (pargc, pargv)
 		      listing |= LISTING_SYMBOLS;
 		      break;
 		    default:
-		      as_bad ("invalid listing option `%c'", *optarg);
-		      exit (EXIT_FAILURE);
+		      as_fatal ("invalid listing option `%c'", *optarg);
 		      break;
 		    }
 		  optarg++;
@@ -352,7 +356,7 @@ main (argc, argv)
 #ifdef HOST_SPECIAL_INIT
   HOST_SPECIAL_INIT (argc, argv);
 #endif
-    
+
 #if 0 /* do we need any of this?? */
   {
     static const int sig[] = {SIGHUP, SIGINT, SIGPIPE, SIGTERM, 0};
@@ -424,7 +428,7 @@ main (argc, argv)
   md_end ();
 #endif
 
-  if (statistics_flag)
+  if (flag_print_statistics)
     {
       extern char **environ;
       char *lim = (char *) sbrk (0);
@@ -436,10 +440,12 @@ main (argc, argv)
 	       myname, (long) (lim - (char *) &environ));
     }
 
+  /* Use exit instead of return, because under VMS environments they
+     may not place the same interpretation on the value given.  */
   if ((had_warnings () && flag_always_generate_output)
       || had_errors () > 0)
-    return EXIT_FAILURE;
-  return EXIT_SUCCESS;
+    exit (EXIT_FAILURE);
+  exit (EXIT_SUCCESS);
 }
 
 
