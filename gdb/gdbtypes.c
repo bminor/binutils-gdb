@@ -369,7 +369,7 @@ get_discrete_bounds (type, lowp, highp)
       *highp = 1;
       return 0;
     case TYPE_CODE_INT:
-      if (TYPE_LENGTH (type) >= sizeof (LONGEST))  /* Too big */
+      if (TYPE_LENGTH (type) > sizeof (LONGEST))  /* Too big */
 	return -1;
       if (!TYPE_UNSIGNED (type))
 	{
@@ -380,7 +380,11 @@ get_discrete_bounds (type, lowp, highp)
       /* ... fall through for unsigned ints ... */
     case TYPE_CODE_CHAR:
       *lowp = 0;
-      *highp = (1 << (TYPE_LENGTH (type) * TARGET_CHAR_BIT)) - 1;
+      /* This round-about calculation is to avoid shifting by
+	 TYPE_LENGTH (type) * TARGET_CHAR_BIT, which will not work
+	 if TYPE_LENGTH (type) == sizeof (LONGEST). */
+      *highp = 1 << (TYPE_LENGTH (type) * TARGET_CHAR_BIT - 1);
+      *highp = (*highp - 1) | *highp;
       return 0;
     default:
       return -1;

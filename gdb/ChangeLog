@@ -1,3 +1,10 @@
+Mon Dec 11 00:36:01 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* valops.c (value_cast):  Handle casts to and from TYPE_CODE_CHAR.
+	* ch-exp.c (match_integer_literal):  Fix long long support.
+	* gdbtypes.c (get_discrete_bounds):  Make TYPE_LENGTH (type) ==
+	sizeof (LONGEST) case work OK.
+
 Fri Dec  8 21:02:24 1995  Fred Fish  <fnf@cygnus.com>
 
 	* coffread.c, dbxread.c, dstread.c, objfiles.c, os9kread.c,

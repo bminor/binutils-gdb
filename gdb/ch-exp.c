@@ -597,7 +597,7 @@ parse_primval ()
     case CHARACTER_LITERAL:
       write_exp_elt_opcode (OP_LONG);
       write_exp_elt_type (PEEK_LVAL ().typed_val.type);
-      write_exp_elt_longcst ((LONGEST) (PEEK_LVAL ().typed_val.val));
+      write_exp_elt_longcst (PEEK_LVAL ().typed_val.val);
       write_exp_elt_opcode (OP_LONG);
       FORWARD_TOKEN ();
       break;
@@ -1544,8 +1544,8 @@ match_integer_literal ()
   else 
     {
       yylval.typed_val.val = ival;
-#ifdef CC_HAS_LONG_LONG
-      if (ival > 2147483647 || ival < -2147483648)
+#if defined(CC_HAS_LONG_LONG) && defined(__STDC__)
+      if (ival > (LONGEST)2147483647U || ival < -(LONGEST)2147483648U)
 	yylval.typed_val.type = builtin_type_long_long;
       else
 #endif
