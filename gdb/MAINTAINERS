@@ -184,8 +184,9 @@ GNU/Linux ARM native	Scott Bambrough		scottb@netwinder.org
 Solaris/x86 native & host (devolved)
 			Nick Duffek		nsd@cygnus.com
 			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
-Solaris/SPARC native & host
-			David Taylor		taylor@cygnus.com
+Solaris/SPARC native & host (devolved)
+                        David Taylor            taylor@cygnus.com
+                        Michael Snyder          msnyder@cygnus.com
 Mac OS X		Klee Dienes		kdienes@apple.com
 			Jim Ingham		jingham@apple.com
 

@@ -1,3 +1,7 @@
+2001-02-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS: Add Michael Snyder to Solaris/SPARC list.
+
 2001-02-06  Andrew Cagney  <ac131313@cygnus.com>
 
 	* gdbarch.sh: Include "gdb_assert.h".
