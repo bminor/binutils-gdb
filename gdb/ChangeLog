@@ -1,3 +1,8 @@
+2001-05-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS: Jim Ingham is no longer maintaining Arm related
+	stuff.
+	
 2001-05-10  Keith Seitz  <keiths@cygnus.com>
 
 	* Makefile.in (SUBDIR_GDBTK_OBS): Add gdbtk-bp.o, gdbtk-register.o

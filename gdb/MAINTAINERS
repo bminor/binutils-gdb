@@ -59,7 +59,6 @@ maintainer works with the native maintainer when resolving API issues.
 
 	arm		(--target=arm-coff,arm-elf,arm-pe broken)
 			Fernando Nasser		fnasser@cygnus.com
-			Jim Ingham		jingham@apple.com
 			Scott Bambrough		scottb@netwinder.org
 
 	d10v		--target=d10v-elf ,-Werror
@@ -261,9 +260,7 @@ remote.c		Andrew Cagney		cagney@cygnus.com
 include/remote-sim.h, remote-sim.c
 			Andrew Cagney		cagney@cygnus.com
 sds protocol		Fernando Nasser		fnasser@cygnus.com
-			Jim Ingham		jingham@apple.com
 rdi/adp protocol	Fernando Nasser		fnasser@cygnus.com
-			Jim Ingham		jingham@apple.com
 documentation		Eli Zaretskii		eliz@gnu.org
 testsuite		Fernando Nasser		fnasser@cygnus.com
   hp tests (gdb.hp)	(vacant)
