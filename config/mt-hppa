@@ -1,0 +1,17 @@
+AS_FOR_TARGET = ` \
+  if [ -f $${rootme}/pagas/Makefile ] ; then \
+    echo $${rootme}/pagas/as.new ; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(AS); \
+    else \
+       t='$(program_transform_name)'; echo as | sed -e '' $$t ; \
+    fi; \
+  fi`
+
+
+
+
+
+
+
