@@ -1,4 +1,8 @@
 start-sanitize-d10v
+Wed Jul 24 13:38:22 1996  Michael Meissner  <meissner@wogglebug.tiac.net>
+
+	* configure.tgt (d10v-*-*): Don't require the -elf, allow plain d10v.
+
 Tue Jul 23 10:36:19 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* Makefile.in (ed10velf.c): New target.
