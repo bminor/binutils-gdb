@@ -1,3 +1,8 @@
+Thu Nov  4 17:01:30 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/unsorted/fragbug.s: New test.
+	* gas/hppa/unsorted/unsorted.exp: Run it.
+
 Thu Nov 04 09:09:49 1993  Jeffrey Wheat  (cassidy@cygnus.com)
 
 	* Makefile.in: Changed RUNTESTFLAGS to RUNTEST_FLAGS
