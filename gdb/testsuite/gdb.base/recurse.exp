@@ -123,9 +123,30 @@ proc recurse_tests {} {
 	    gdb_suppress_tests
 	}
 
-	# Continue again.  We should have a watchpoint go out of scope now
+	# Continue again.  We should have a watchpoint go out of scope now.
+	#
+	# The former version expected the test to return to main().
+	# Now it expects the test to return to main or to stop in the
+	# function's epilogue.
+	# 
+	# The problem is that gdb needs to (but doesn't) understand
+	# function epilogues in the same way as for prologues.
+	# 
+	# If there is no hardware watchpoint (such as a x86 debug register),
+	# then watchpoints are done "the hard way" by single-stepping the
+	# target until the value of the watched variable changes.  If you
+	# are single-stepping, you will eventually step into an epilogue.
+	# When you do that, the "top" stack frame may become partially
+	# deconstructed (as when you pop the frame pointer, for instance),
+	# and from that point on, GDB can no longer make sense of the stack.
+	# 
+	# A test which stops in the epilogue is trying to determine when GDB
+	# leaves the stack frame in which the watchpoint was created.  It does
+	# this basically by watching for the frame pointer to change.  When
+	# the frame pointer changes, the test expects to be back in main, but
+	# instead it is still in the epilogue of the callee.
 	if [gdb_test "continue" \
-	    "Continuing.*\[Ww\]atchpoint.*deleted.*main \\(\\) .*" \
+	    "Continuing.*\[Ww\]atchpoint.*deleted.*\(main \\(\\) \|21.*\}\).*" \
 	    "first instance watchpoint deleted when leaving scope"] then {
 	    gdb_suppress_tests;
 	}

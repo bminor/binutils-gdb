@@ -1,3 +1,8 @@
+2001-09-19  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/recurse.exp: When checking leaving the watchpoint
+	scope, recognize when gdb is in function's epilogue and pass.
+
 2001-09-18  Keith Seitz  <keiths@redhat.com>
 
 	* lib/insight-support.exp (_gdbtk_export_target_info): Add
