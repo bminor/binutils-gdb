@@ -44,7 +44,8 @@ extern void _initialize_pascal_language (void);
    but this does not happen for Free Pascal nor for GPC.  */
 int
 is_pascal_string_type (struct type *type,int *length_pos,
-                       int * length_size, int *string_pos, int *char_size)
+                       int *length_size, int *string_pos, int *char_size,
+		       char **arrayname)
 {
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
     {
@@ -54,11 +55,17 @@ is_pascal_string_type (struct type *type,int *length_pos,
           && strcmp (TYPE_FIELDS (type)[0].name, "length") == 0 
           && strcmp (TYPE_FIELDS (type)[1].name, "st") == 0)
         {
-          *length_pos = TYPE_FIELD_BITPOS (type, 0) / TARGET_CHAR_BIT;
-          *length_size = TYPE_FIELD_TYPE (type, 0)->length;
-          *string_pos = TYPE_FIELD_BITPOS (type, 1) / TARGET_CHAR_BIT;
-          *char_size = 1;
-          return 1;
+          if (length_pos)
+	    *length_pos = TYPE_FIELD_BITPOS (type, 0) / TARGET_CHAR_BIT;
+          if (length_size)
+	    *length_size = TYPE_FIELD_TYPE (type, 0)->length;
+          if (string_pos)
+	    *string_pos = TYPE_FIELD_BITPOS (type, 1) / TARGET_CHAR_BIT;
+          if (char_size)
+	    *char_size = 1;
+ 	  if (arrayname)
+	    *arrayname = TYPE_FIELDS (type)[1].name;
+         return 2;
         };
       /* GNU pascal strings.  */
       /* Three fields: Capacity, length and schema$ or _p_schema.  */
@@ -66,12 +73,18 @@ is_pascal_string_type (struct type *type,int *length_pos,
           && strcmp (TYPE_FIELDS (type)[0].name, "Capacity") == 0
           && strcmp (TYPE_FIELDS (type)[1].name, "length") == 0)
         {
-          *length_pos = TYPE_FIELD_BITPOS (type, 1) / TARGET_CHAR_BIT;
-          *length_size = TYPE_FIELD_TYPE (type, 1)->length;
-          *string_pos = TYPE_FIELD_BITPOS (type, 2) / TARGET_CHAR_BIT;
+          if (length_pos)
+	    *length_pos = TYPE_FIELD_BITPOS (type, 1) / TARGET_CHAR_BIT;
+          if (length_size)
+	    *length_size = TYPE_FIELD_TYPE (type, 1)->length;
+          if (string_pos)
+	    *string_pos = TYPE_FIELD_BITPOS (type, 2) / TARGET_CHAR_BIT;
           /* FIXME: how can I detect wide chars in GPC ?? */
-          *char_size = 1;
-          return 1;
+          if (char_size)
+	    *char_size = 1;
+ 	  if (arrayname)
+	    *arrayname = TYPE_FIELDS (type)[2].name;
+         return 3;
         };
     }
   return 0;

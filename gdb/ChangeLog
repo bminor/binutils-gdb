@@ -1,3 +1,15 @@
+2002-05-02  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* p-lang.h (is_pascal_string_type): Declaration changed,
+	new sixth argument of type char ** added.
+	* p-lang.c (is_pascal_string_type): Implementation 
+	changed. Args length_pos, length_size, string_pos, char_size
+	can now be NULL. New argument arrayname set to the field
+	name of the char array. Return value set to char array
+	field index plus one.
+	* p-valprint.c (pascal_val_print): Adapt to new declaration of 
+	is_pascal_string_type function.
+
 2002-05-02  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (gdbarch_update_p): Revert 2002-05-02 Andrew Cagney
