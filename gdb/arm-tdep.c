@@ -30,56 +30,41 @@
 
 extern void _initialize_arm_tdep (void);
 
-/*
-   The following macros are actually wrong.  Neither arm nor thumb can
-   or should set the lsb on addr.
-   The thumb addresses are mod 2, so (addr & 2) would be a good heuristic
-   to use when checking for thumb (see arm_pc_is_thumb() below).
-   Unfortunately, something else depends on these (incorrect) macros, so
-   fixing them actually breaks gdb.  I didn't have time to investigate. Z.R.
- */
-/* Thumb function addresses are odd (bit 0 is set).  Here are some
-   macros to test, set, or clear bit 0 of addresses.  */
-#define IS_THUMB_ADDR(addr)	((addr) & 1)
-#define MAKE_THUMB_ADDR(addr)	((addr) | 1)
-#define UNMAKE_THUMB_ADDR(addr) ((addr) & ~1)
+/* From opcodes/arm-dis.c */
 
-/* Default register names as specified by APCS.  */
-static char * atpcs_register_names[] =
-{"a1", "a2", "a3", "a4",	/*  0  1  2  3 */
- "v1", "v2", "v3", "v4",	/*  4  5  6  7 */
- "v5", "v6", "v7", "v8",	/*  8  9 10 11 */
- "IP", "SP", "LR", "PC",	/* 12 13 14 15 */
- "f0", "f1", "f2", "f3",	/* 16 17 18 19 */
- "f4", "f5", "f6", "f7",	/* 20 21 22 23 */
- "FPS", "PS" }; 		/* 24 25       */
+extern int get_arm_regname_num_options (void);
 
-/* Alternate set of registers names used by GCC.  */
-static char * additional_register_names[] =
+extern int set_arm_regname_option (int option);
+
+extern int get_arm_regnames (int option, const char **setname,
+			     const char **setdescription,
+			     const char ***regnames);
+
+/* Number of different reg name sets (options). */
+static int num_flavor_options;
+
+/* We have more registers than the disassembler as gdb can print the value
+   of special registers as well.
+   The general register names are overwritten by whatever is being used by
+   the disassembler at the moment. We also adjust the case of cpsr and fps. */
+
+/* Initial value: Register names used in ARM's ISA documentation. */
+static char * arm_register_name_strings[] =
 {"r0",  "r1",  "r2",  "r3",	/*  0  1  2  3 */
  "r4",  "r5",  "r6",  "r7",	/*  4  5  6  7 */
  "r8",  "r9",  "r10", "r11",	/*  8  9 10 11 */
  "r12", "sp",  "lr",  "pc",	/* 12 13 14 15 */
  "f0",  "f1",  "f2",  "f3",	/* 16 17 18 19 */
  "f4",  "f5",  "f6",  "f7",	/* 20 21 22 23 */
- "fps", "ps" }; 		/* 24 25       */
+ "fps", "cpsr" }; 		/* 24 25       */
+char **arm_register_names = arm_register_name_strings;
 
-/* This is the variable that is set with "set disassembly-flavor".
-   By default use the APCS registers names.  */
-char ** arm_register_names = atpcs_register_names;
+/* Valid register name flavors.  */
+static char **valid_flavors;
 
-/* Valid register name flavours.  */
-static char apcs_flavor[] = "apcs";
-static char r_prefix_flavor[] = "r-prefix";
-static char * valid_flavors[] =
-{
-  apcs_flavor,
-  r_prefix_flavor,
-  NULL
-};
-
-/* Disassembly flavor to use.  */
-static char *disassembly_flavor = apcs_flavor;
+/* Disassembly flavor to use. Default to "std" register names. */
+static char *disassembly_flavor;
+static int current_option;	/* Index to that option in the opcodes table. */
 
 /* This is used to keep the bfd arch_info in sync with the disassembly
    flavor.  */
@@ -102,6 +87,12 @@ struct frame_extra_info
     int frameoffset;
     int framereg;
   };
+
+/* Addresses for calling Thumb functions have the bit 0 set.
+   Here are some macros to test, set, or clear bit 0 of addresses.  */
+#define IS_THUMB_ADDR(addr)	((addr) & 1)
+#define MAKE_THUMB_ADDR(addr)	((addr) | 1)
+#define UNMAKE_THUMB_ADDR(addr) ((addr) & ~1)
 
 #define SWAP_TARGET_AND_HOST(buffer,len) 				\
   do									\
@@ -1388,52 +1379,6 @@ arm_float_info (void)
   print_fpu_flags (status);
 }
 
-/* If the disassembly mode is APCS, we have to also switch the
-   bfd mach_type.  This function is run in the set disassembly_flavor
-   command, and does that.  */
-
-static void
-set_disassembly_flavor_sfunc (char *args, int from_tty,
-			      struct cmd_list_element *c)
-{
-  set_disassembly_flavor ();
-}
-
-static void
-set_disassembly_flavor (void)
-{
-  if (disassembly_flavor == apcs_flavor)
-    {
-      parse_arm_disassembler_option ("reg-names-atpcs");
-      arm_register_names = atpcs_register_names;
-    }
-  else if (disassembly_flavor == r_prefix_flavor)
-    {
-      parse_arm_disassembler_option ("reg-names-std");
-      arm_register_names = additional_register_names;
-    }
-}
-
-/* arm_othernames implements the "othernames" command.  This is kind
-   of hacky, and I prefer the set-show disassembly-flavor which is
-   also used for the x86 gdb.  I will keep this around, however, in
-   case anyone is actually using it. */
-
-static void
-arm_othernames (char *names, int n)
-{
-  if (disassembly_flavor == r_prefix_flavor)
-    {
-      disassembly_flavor = apcs_flavor;
-      set_disassembly_flavor ();
-    }
-  else
-    {
-      disassembly_flavor = r_prefix_flavor;
-      set_disassembly_flavor ();
-    }
-}
-
 #if 0
 /* FIXME:  The generated assembler works but sucks.  Instead of using
    r0, r1 it pushes them on the stack, then loads them into r3, r4 and
@@ -2033,29 +1978,121 @@ arm_skip_stub (CORE_ADDR pc)
   return 0;			/* not a stub */
 }
 
+/* If the user changes the register disassembly flavor used for info register
+   and other commands, we have to also switch the flavor used in opcodes
+   for disassembly output.
+   This function is run in the set disassembly_flavor command, and does that. */
+
+static void
+set_disassembly_flavor_sfunc (char *args, int from_tty,
+			      struct cmd_list_element *c)
+{
+  set_disassembly_flavor ();
+}
+
+static void
+set_disassembly_flavor (void)
+{
+  const char *setname, *setdesc, **regnames;
+  int numregs, j;
+
+  /* Find the flavor that the user wants in the opcodes table. */
+  int current = 0;
+  numregs = get_arm_regnames (current, &setname, &setdesc, &regnames);
+  while ((disassembly_flavor != setname)
+	 && (current < num_flavor_options))
+    get_arm_regnames (++current, &setname, &setdesc, &regnames);
+  current_option = current;
+
+  /* Fill our copy. */
+  for (j = 0; j < numregs; j++)
+    arm_register_names[j] = (char *) regnames[j];
+
+  /* Adjust case. */
+  if (isupper (*regnames[PC_REGNUM]))
+    {
+      arm_register_names[FPS_REGNUM] = "FPS";
+      arm_register_names[PS_REGNUM] = "CPSR";
+    }
+  else
+    {
+      arm_register_names[FPS_REGNUM] = "fps";
+      arm_register_names[PS_REGNUM] = "cpsr";
+    }
+
+  /* Synchronize the disassembler. */
+  set_arm_regname_option (current);
+}
+
+/* arm_othernames implements the "othernames" command.  This is kind
+   of hacky, and I prefer the set-show disassembly-flavor which is
+   also used for the x86 gdb.  I will keep this around, however, in
+   case anyone is actually using it. */
+
+static void
+arm_othernames (char *names, int n)
+{
+  /* Circle through the various flavors. */
+  current_option = (current_option + 1) % num_flavor_options;
+
+  disassembly_flavor = valid_flavors[current_option];
+  set_disassembly_flavor (); 
+}
+
 void
 _initialize_arm_tdep (void)
 {
+  struct ui_file *stb;
+  long length;
   struct cmd_list_element *new_cmd;
+  const char *setname, *setdesc, **regnames;
+  int numregs, i, j;
+  static char *helptext;
 
   tm_print_insn = gdb_print_insn_arm;
 
+  /* Get the number of possible sets of register names defined in opcodes. */
+  num_flavor_options = get_arm_regname_num_options ();
+
   /* Sync the opcode insn printer with our register viewer: */
-  parse_arm_disassembler_option ("reg-names-atpcs");
+  parse_arm_disassembler_option ("reg-names-std");
 
-  /* Add the deprecated "othernames" command */
+  /* Begin creating the help text. */
+  stb = mem_fileopen ();
+  fprintf_unfiltered (stb, "Set the disassembly flavor.\n\
+The valid values are:\n");
 
-  add_com ("othernames", class_obscure, arm_othernames,
-	   "Switch to the other set of register names.");
+  /* Initialize the array that will be passed to add_set_enum_cmd(). */
+  valid_flavors = xmalloc ((num_flavor_options + 1) * sizeof (char *));
+  for (i = 0; i < num_flavor_options; i++)
+    {
+      numregs = get_arm_regnames (i, &setname, &setdesc, &regnames);
+      valid_flavors[i] = (char *) setname;
+      fprintf_unfiltered (stb, "%s - %s\n", setname,
+			  setdesc);
+      /* Copy the default names (if found) and synchronize disassembler. */
+      if (!strcmp (setname, "std"))
+	{
+          disassembly_flavor = (char *) setname;
+          current_option = i;
+	  for (j = 0; j < numregs; j++)
+            arm_register_names[j] = (char *) regnames[j];
+          set_arm_regname_option (i);
+	}
+    }
+  /* Mark the end of valid options. */
+  valid_flavors[num_flavor_options] = NULL;
+
+  /* Finish the creation of the help text. */
+  fprintf_unfiltered (stb, "The default is \"std\".");
+  helptext = ui_file_xstrdup (stb, &length);
+  ui_file_delete (stb);
 
   /* Add the disassembly-flavor command */
-
   new_cmd = add_set_enum_cmd ("disassembly-flavor", no_class,
 			      valid_flavors,
 			      (char *) &disassembly_flavor,
-			      "Set the disassembly flavor, \
-the valid values are \"apcs\" and \"r-prefix\", \
-and the default value is \"apcs\".",
+			      helptext,
 			      &setlist);
   new_cmd->function.sfunc = set_disassembly_flavor_sfunc;
   add_show_from_set (new_cmd, &showlist);
@@ -2066,6 +2103,10 @@ and the default value is \"apcs\".",
 				  "Set usage of ARM 32-bit mode.\n", &setlist),
 		     &showlist);
 
+  /* Add the deprecated "othernames" command */
+
+  add_com ("othernames", class_obscure, arm_othernames,
+	   "Switch to the next set of register names.");
 }
 
 /* Test whether the coff symbol specific value corresponds to a Thumb

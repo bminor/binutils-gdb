@@ -1,3 +1,12 @@
+2000-02-16  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* arm-tdep.c (set_disassembly_flavor, arm_othernames,
+	_initialize_arm_tdep): Allows the user to choose between any of
+	the flavors available for the disassembly to be used in the "info
+	reg" command and elsewhere in gdb.  It prevents having to maintain
+	this information in two places by using the data kept in the
+	opcodes directory.
+
 2000-02-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in: Check for lwpid_t, psaddr_t, prgregset_t and
