@@ -6,7 +6,7 @@
 
 	* cgen-dis.in (print_insn): Remove call to read_insn.  Instead,
 	assume incoming buffer already has the base insn loaded.  Handle
-	case of smaller-than-base instructions for variable-length case.
+	smaller-than-base instructions for variable-length case.
 
 2001-05-04  Alan Modra  <amodra@one.net.au>
 
