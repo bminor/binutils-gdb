@@ -1224,6 +1224,11 @@ data:		/* Common code for symbols describing data */
 			    BLOCK_END(b_bad) = BLOCK_END(b);
 			}
 		    }
+		    if (entry_point < BLOCK_END(b)
+		      && entry_point >= BLOCK_START(b)) {
+			startup_file_start = BLOCK_START(b);
+			startup_file_end = BLOCK_END(b);
+		    }
 		} else if (sh->sc == scText && top_stack->blocktype == stBlock) {
 			/* End of (code) block. The value of the symbol
 			   is the displacement from the procedure`s start
