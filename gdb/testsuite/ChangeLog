@@ -1,3 +1,10 @@
+2004-08-27  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Fix PR testsuite/1735.
+	* gdb.threads/schedlock.c (thread_function): Add a cast
+	to suppress a gcc warning.
+	* gdb.threads/thread-specific.c (thread_function): Likewise.
+
 2004-08-26  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.base/unload.c: Include <stdlib.h>.

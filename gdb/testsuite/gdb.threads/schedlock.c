@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ int main() {
 
 void *thread_function(void *arg) {
     int my_number =  (long) arg;
-    int *myp = &args[my_number];
+    int *myp = (int *) &args[my_number];
 
     /* Don't run forever.  Run just short of it :)  */
     while (*myp > 0)
