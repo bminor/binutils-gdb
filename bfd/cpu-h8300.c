@@ -66,7 +66,7 @@ h8300_scan (info, string)
   if (*string == ':')
     {
       string++;
-      h8300_scan (info, string);
+      return h8300_scan (info, string);
     }
 
   if (*string == 'h' || *string == 'H')
