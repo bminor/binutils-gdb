@@ -184,7 +184,7 @@ tic80-opc.lo: tic80-opc.c $(INCDIR)/opcode/tic80.h
 # end-sanitize-tic80
 
 # start-sanitize-sky
-dvp-dis.lo: txvu-dvp.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
+dvp-dis.lo: dvp-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
 	$(INCDIR)/opcode/dvp.h
 dvp-opc.lo: dvp-opc.c $(INCDIR)/opcode/dvp.h
 
