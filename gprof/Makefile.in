@@ -12,11 +12,18 @@ tooldir = $(libdir)
 mandir 	= $(prefix)/man
 man1dir = $(mandir)/man1
 
+infodir	= $(prefix)/info
 datadir = $(prefix)/lib
 
 INSTALL 	= install -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA 	= $(INSTALL)
+MAKEINFO	= makeinfo
+TEX		= tex
+TEXINDEX	= texindex
+
+# this is the directory we look in to find Texinfo
+texidir		= $(srcdir)/../texinfo
 
 #### host and target dependent Makefile fragments come in here.
 ###
@@ -48,13 +55,30 @@ all:	diststuff $(PROG)
 	    FILE=$*.m $(srcdir)/$*.m
 
 diststuff: $(DISTSTUFF)
-	
+
+gprof.info: gprof.texi
+	$(MAKEINFO) -o gprof.info $(srcdir)/gprof.texi
+
+gprof.dvi: gprof.texi
+	TEXINPUTS=${TEXIDIR}:$(srcdir):$$TEXINPUTS $(TEX) $(srcdir)/gprof.texi
+	$(TEXINDEX) gprof.??
+	TEXINPUTS=${TEXIDIR}:$(srcdir):$$TEXINPUTS $(TEX) $(srcdir)/gprof.texi
+
+info: gprof.info
+
+dvi: gprof.dvi
 
 check:
-info:
-install-info:
 
-install: all
+install-info: info
+	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+	-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
+	for i in *.info* ; do \
+		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
+	done
+
+install: all install-info
 	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
@@ -68,7 +92,10 @@ $(PROG):	$(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(PROG) $(LIBS)
 
 mostlyclean:
-	-rm -f *.o core gprof nohup.out
+	-rm -f *.o core gprof nohup.out gprof.info* \
+	gprof.cps  gprof.fns  gprof.log  gprof.ps   gprof.tps\
+	gprof.aux  gprof.dvi  gprof.ky   gprof.pg   gprof.toc  gprof.vr\
+	gprof.cp   gprof.fn   gprof.kys  gprof.pgs  gprof.tp   gprof.vrs
 clean: mostlyclean
 	-rm -f gprof
 distclean: clean

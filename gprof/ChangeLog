@@ -1,3 +1,7 @@
+Wed Feb  3 13:55:33 1993  Jeffrey Osier  (jeffrey@fowanton.cygnus.com)
+
+	* Makefile.in: created info, install-info, dvi
+
 Wed Jan  6 00:58:09 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in: fix install rule for $(PROG)
