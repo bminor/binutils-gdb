@@ -1,3 +1,8 @@
+2000-12-14  J.T. Conklin  <jtc@redback.com>
+
+	* configure.tgt (hppa*-*-bsd*, hppa*-*-osf*, m68*-*-sunos4*,
+ 	rs6000-*-lynxos*, sparc-*-sunos4*): Add gdbserver to configdirs.
+
 2000-12-13  Michael Chastain  <chastain@redhat.com>
 
 	* MAINTAINERS: Add Michael Chastain to Write After Approval list.

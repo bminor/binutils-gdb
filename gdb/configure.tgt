@@ -76,12 +76,14 @@ h8500-*-*)		gdb_target=h8500 ;;
 fr30-*-elf*)		gdb_target=fr30 ;;
 
 
-hppa*-*-bsd*)		gdb_target=hppabsd ;;
+hppa*-*-bsd*)		gdb_target=hppabsd
+		configdirs="${configdirs} gdbserver" ;;
 hppa*-*-pro*)		gdb_target=hppapro ;;
 hppa*64*-*-hpux11*)	gdb_target=hppa64 ;;
 hppa*-*-hpux*)		gdb_target=hppahpux ;;
 hppa*-*-hiux*)		gdb_target=hppahpux ;;
-hppa*-*-osf*)		gdb_target=hppaosf ;;
+hppa*-*-osf*)		gdb_target=hppaosf
+		configdirs="${configdirs} gdbserver" ;;
 
 i[3456]86-sequent-bsd*)	gdb_target=symmetry ;;
 i[3456]86-sequent-sysv4*) gdb_target=ptx4 ;;
@@ -171,7 +173,8 @@ m68*-*-netbsd*)		gdb_target=nbsd
 		configdirs="${configdirs} gdbserver" ;;
 m68*-*-os68k*)		gdb_target=os68k ;;
 m68*-*-sunos3*)		gdb_target=sun3os3 ;;
-m68*-*-sunos4*)		gdb_target=sun3os4 ;;
+m68*-*-sunos4*)		gdb_target=sun3os4
+		configdirs="${configdirs} gdbserver" ;;
 m68*-*-sysv4*)		gdb_target=m68kv4 ;;
 m68*-*-vxworks*)	gdb_target=vxworks68 ;;
 
@@ -254,7 +257,8 @@ powerpc-*-vxworks*)	gdb_target=vxworks ;;
 
 # OBSOLETE pyramid-*-*)		gdb_target=pyramid ;;
 
-rs6000-*-lynxos*)	gdb_target=rs6000lynx ;;
+rs6000-*-lynxos*)	gdb_target=rs6000lynx
+		configdirs="${configdirs} gdbserver" ;;
 rs6000-*-aix4*)		gdb_target=aix4 ;;
 rs6000-*-*)		gdb_target=rs6000 ;;
 
@@ -269,7 +273,8 @@ sparc-*-lynxos*)	gdb_target=sparclynx
 		configdirs="${configdirs} gdbserver" ;;
 sparc-*-netbsd*)	gdb_target=nbsd ;;
 sparc-*-solaris2*)	gdb_target=sun4sol2 ;;
-sparc-*-sunos4*)	gdb_target=sun4os4 ;;
+sparc-*-sunos4*)	gdb_target=sun4os4
+		configdirs="${configdirs} gdbserver" ;;
 sparc-*-sunos5*)	gdb_target=sun4sol2 ;;
 sparc-*-vxworks*)	gdb_target=vxsparc ;;
 sparc-*-*)		gdb_target=sun4os4 ;;
