@@ -1,3 +1,18 @@
+Tue Aug  5 14:08:51 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ylwrap: If the program is a relative path, force it to be
+	absolute.
+
+Tue Aug  5 12:12:44 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure (tooldir): Set BISON to `bison -y' and not just bison.
+
+Mon Aug  4 22:59:02 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (CC_FOR_TARGET): When winsup/Makefile present,
+ 	correctly specify the target build directory $(TARGET_SUBDIR)/winsup
+ 	for libraries.
+
 Mon Aug  4 12:40:24 1997  Jason Merrill  <jason@yorick.cygnus.com>
 
 	* Makefile.in (EXTRA_GCC_FLAGS): Fix handling of macros with values
