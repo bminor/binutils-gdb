@@ -52,7 +52,7 @@ static const char * parse_insn_normal
 #include "safe-ctype.h"
 
 static int iq2000_cgen_isa_register PARAMS ((const char **));
-static const char * parse_jtargq10 PARAMS ((CGEN_CPU_DESC, const char **, int, int, enum cgen_parse_operand_result *, unsigned long *));
+static const char * parse_jtargq10 PARAMS ((CGEN_CPU_DESC, const char **, int, int, enum cgen_parse_operand_result *, bfd_vma *));
 static const char * parse_mimm PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
 static const char * parse_imm  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
 static const char * parse_hi16 PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
@@ -169,7 +169,7 @@ parse_jtargq10 (cd, strp, opindex, reloc, type_addr, valuep)
      int opindex;
      int reloc ATTRIBUTE_UNUSED;
      enum cgen_parse_operand_result *type_addr ATTRIBUTE_UNUSED;
-     unsigned long *valuep;
+     bfd_vma *valuep;
 {
   const char *errmsg;
   bfd_vma value;
@@ -179,7 +179,7 @@ parse_jtargq10 (cd, strp, opindex, reloc, type_addr, valuep)
 			       &result_type, &value);
   if (errmsg == NULL && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
     {
-      /* check value is within 23-bits (remembering that 2-bit shift right will occur) */
+      /* Check value is within 23-bits (remembering that 2-bit shift right will occur).  */
       if (value > 0x7fffff)
         return _("21-bit offset out of range");
     }

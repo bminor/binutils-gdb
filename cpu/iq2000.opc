@@ -172,7 +172,7 @@ parse_jtargq10 (cd, strp, opindex, reloc, type_addr, valuep)
      int opindex;
      int reloc;
      enum cgen_parse_operand_result *type_addr;
-     unsigned long *valuep;
+     bfd_vma *valuep;
 {
   const char *errmsg;
   bfd_vma value;
@@ -182,7 +182,7 @@ parse_jtargq10 (cd, strp, opindex, reloc, type_addr, valuep)
 			       &result_type, &value);
   if (errmsg == NULL && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
     {
-      /* check value is within 23-bits (remembering that 2-bit shift right will occur) */
+      /* Check value is within 23-bits (remembering that 2-bit shift right will occur).  */
       if (value > 0x7fffff)
         return _("21-bit offset out of range");
     }

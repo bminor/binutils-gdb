@@ -1,5 +1,7 @@
 2005-02-11  Nick Clifton  <nickc@redhat.com>
 
+	* iq2000-asm.c: Regenerate.
+
 	* frv-dis.c: Regenerate.
 
 2005-02-07  Jim Blandy  <jimb@redhat.com>
