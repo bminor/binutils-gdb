@@ -42,7 +42,7 @@ host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 # these libraries are built for the target environment, and are built after
 # the host libraries and the host tools (which may be a cross compiler)
 #
-target_libs="xiberty libgloss newlib libio librx libstdc++ libg++"
+target_libs="target-libiberty target-libgloss target-newlib target-libio target-librx target-libstdc++ target-libg++"
 
 
 # these tools are built using the target libs, and are intended to run only
@@ -59,7 +59,7 @@ target_tools="examples groff"
 ## These two lists are of directories that are to be removed from the
 ## ${configdirs} list for either cross-compilations or for native-
 ## compilations.  For example, it doesn't make that much sense to
-## cross-compile Emacs, nor is it terribly useful to compile xiberty in
+## cross-compile Emacs, nor is it terribly useful to compile target-libiberty in
 ## a native environment.  
 
 # directories to be built in the native environment only
@@ -70,7 +70,7 @@ native_only="autoconf cvs emacs emacs19 fileutils find grep groff gzip hello
 
 # directories to be built in a cross environment only
 #
-cross_only="xiberty libgloss newlib"
+cross_only="target-libiberty target-libgloss target-newlib"
 
 ## All tools belong in one of the four categories, and are assigned above
 ## We assign ${configdirs} this way to remove all embedded newlines.  This
@@ -232,11 +232,20 @@ if [ x"${host}" = x"${target}" ] ; then
 	# that are in the 'cross only' list
 	skipdirs="${skipdirs} ${cross_only}"
 	is_cross_compiler=no
+	target_subdir=.
 else
 	# similarly, don't build the targets in the 'native only' 
 	# list when building a cross compiler
 	skipdirs="${skipdirs} ${native_only}"
 	is_cross_compiler=yes
+	target_subdir=${target_alias}
+	if [ ! -d ${target_subdir} ] ; then
+	    if mkdir ${target_subdir} ; then true
+	    else
+		echo "'*** could not make ${PWD=`pwd`}/${target_subdir}" 1>&2
+                exit 1
+	    fi
+	fi
 fi	
 
 copy_dirs=
@@ -283,9 +292,9 @@ fi
 
 # Recognize --with-newlib/--without-newlib.
 if [ x${with_newlib} = xno ]; then
-  skipdirs="${skipdirs} newlib"
+  skipdirs="${skipdirs} target-newlib"
 elif [ x${with_newlib} = xyes ]; then
-  skipdirs=`echo " ${skipdirs} " | sed -e 's/ newlib / /'`
+  skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
 fi
 
 # Handle ${copy_dirs}
@@ -347,19 +356,19 @@ esac
 
 case "${target}" in
   *-*-netware)
-    noconfigdirs="$noconfigdirs libg++ libstdc++ librx newlib xiberty"
+    noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-librx target-newlib target-libiberty"
     ;;
   *-*-vxworks5.1)
-    noconfigdirs="$noconfigdirs newlib"
+    noconfigdirs="$noconfigdirs target-newlib"
     ;;
   alpha-dec-osf*)
     # ld works, but does not support shared libraries.  emacs doesn't
     # work.  newlib is not 64 bit ready.  I'm not sure about fileutils or grep.
-    noconfigdirs="$noconfigdirs ld emacs fileutils grep newlib"
+    noconfigdirs="$noconfigdirs ld emacs fileutils grep target-newlib"
     ;;
   alpha*-*-*)
     # newlib is not 64 bit ready
-    noconfigdirs="$noconfigdirs newlib"
+    noconfigdirs="$noconfigdirs target-newlib"
     ;;
 # start-sanitize-arc
   arc-*-*)
@@ -374,7 +383,7 @@ case "${target}" in
     ;;
   h8300*-*-* | \
   h8500-*-*)
-    noconfigdirs="$noconfigdirs libg++ libstdc++ libio librx"
+    noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx"
     ;;
   hppa*-*-*elf* | \
   hppa*-*-lites*)
@@ -392,7 +401,7 @@ case "${target}" in
     ;;
   i[345]86-*-go32)
     # but don't build gdb
-    noconfigdirs="$noconfigdirs gdb libg++ libstdc++ libio librx"
+    noconfigdirs="$noconfigdirs gdb target-libg++ target-libstdc++ target-libio target-librx"
     ;;
 
   i[345]86-*-win32)
@@ -402,12 +411,12 @@ case "${target}" in
 	    noconfigdirs="$noconfigdirs gdb"
     fi
     # always build newlib.
-    skipdirs=`echo " ${skipdirs} " | sed -e 's/ newlib / /'`
+    skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
     # and winsup
     configdirs="$configdirs winsup" 
     ;;    
   i[345]86-*-pe)
-    noconfigdirs="$noconfigdirs libg++ libstdc++ libio librx"
+    noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx"
     ;;
   i[345]86-*-sco*)
     noconfigdirs="$noconfigdirs gprof"
@@ -442,7 +451,7 @@ case "${target}" in
     # a gcc built textutils will cause the linker to hang on 'join'
     # The CVS server code doesn't work on the RS/6000
     # Newlib makes problems for libg++ in crosses.
-    noconfigdirs="$noconfigdirs ld newlib gprof textutils cvs"
+    noconfigdirs="$noconfigdirs ld target-newlib gprof textutils cvs"
     use_gnu_ld=no
     use_gnu_as=no
     ;;
@@ -482,23 +491,23 @@ case "${target}" in
     ;;
   sparc-*-sunos4*)
     if [ x${is_cross_compiler} != xno ] ; then
-           noconfigdirs="$noconfigdirs gdb gdbtest newlib"
+           noconfigdirs="$noconfigdirs gdb gdbtest target-newlib"
     else
            use_gnu_ld=no
     fi
     ;;
   v810-*-*)
-    noconfigdirs="$noconfigdirs bfd binutils gas gcc gdb ld libg++ libstdc++ opcodes"
+    noconfigdirs="$noconfigdirs bfd binutils gas gcc gdb ld target-libg++ target-libstdc++ opcodes"
     ;;
   vax-*-vms)
-    noconfigdirs="$noconfigdirs bfd binutils gdb ld newlib opcodes"
+    noconfigdirs="$noconfigdirs bfd binutils gdb ld target-newlib opcodes"
     ;;
   vax-*-*)
-    noconfigdirs="$noconfigdirs newlib"
+    noconfigdirs="$noconfigdirs target-newlib"
     ;;
   *-*-lynxos*)
      # Newlib makes problems for libg++ in crosses.
-     noconfigdirs="$noconfigdirs newlib"
+     noconfigdirs="$noconfigdirs target-newlib"
      ;;    
 esac
 
@@ -533,9 +542,14 @@ done
 # Deconfigure all subdirectories, in case we are changing the
 # configuration from one where a subdirectory is supported to one where it
 # is not.
-if [ -z "${norecursion}" ]; then
-  for i in ${configdirs} ${target_configdirs}; do
+if [ -z "${norecursion}" -a -n "${configdirs}" ]; then
+  for i in ${configdirs} ; do
     rm -f $i/Makefile
+  done
+fi
+if [ -z "${norecursion}" -a -n "${target_configdirs}" ]; then
+  for i in ${target_configdirs} ; do
+    rm -f ${target_subdir}/$i/Makefile
   done
 fi
 
@@ -612,12 +626,14 @@ fi
 # post-target:
 
 # Record target_configdirs and the configure arguments in Makefile.
+target_configdirs=`echo "${target_configdirs}" | sed -e 's/target-//g'`
 targargs=`echo "${arguments}" | \
 	sed -e 's/--*norecursion//' \
 	    -e 's/--*cache[a-z-]*=[^ 	]*//' \
 	    -e 's/--*cache[a-z-]*[ 	][ 	]*[^ 	]*//'`
 sed -e "s:^TARGET_CONFIGDIRS[ 	]*=.*$:TARGET_CONFIGDIRS = ${target_configdirs}:" \
     -e "s%^CONFIG_ARGUMENTS[ 	]*=.*$%CONFIG_ARGUMENTS = ${targargs}%" \
+    -e "s%^TARGET_SUBDIR[ 	]*=.*$%TARGET_SUBDIR = ${target_subdir}%" \
        Makefile > Makefile.tem
 rm -f Makefile
 mv -f Makefile.tem Makefile

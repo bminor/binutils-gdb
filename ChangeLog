@@ -1,3 +1,21 @@
+Fri Oct 27 23:14:12 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* configure.in:  Rename libFOO to target-libFOO, and xiberty
+	to target-xiberty, to provide more flexibility.
+	(target_subdir):  Define.  Create if cross.
+	Set TARGET_SUBDIR in Makefile to ${target_subdir}.
+	* Makefile.in:  Rename all-libFOO -> all-target-libFOO, all-xiberty
+	-> all-target-libiberty, configure-libFOO -> configure-target-libFOO,
+	check-libFOO -> check-target-libFOO, etc.
+	($(DO_X)):  Iterate over TARGET_CONFIGDIRS after SUBDIRS.
+	($(CONFIGURE_TARGET_MODULES), $(CHECK_TARGET_MODULES),
+	$(ALL_TARGET_MODULES), $(INSTALL_TARGET_MODULES)): Update accordingly.
+	(configure-target-XXX):  Depend on $(ALL_GCC), not all-gcc, to
+	allow ALL_GCC="" to only configure.
+	(DEVO_SUPPORT):  Add cfg-ml-com.in and cfg-ml-pos.in.
+	(ETC_SUPPORT, ETC_SUPPORT_PFX):  Merge;  update 'taz' accordingly.
+	(LIBGXX_SUPPORT_DIRS):  Remove xiberty.
+
 Sat Oct 28 01:53:49 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* Makefile.in (taz): Build "info" in etc explicitly.
