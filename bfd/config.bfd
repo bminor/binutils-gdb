@@ -381,6 +381,10 @@ case "${targ}" in
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs=i386netbsd_vec
     ;;
+  i[3456]86-*-netbsdpe*)
+    targ_defvec=i386pe_vec
+    targ_selvecs="i386pe_vec i386pei_vec bfd_elf32_i386_vec"
+    ;;
   i[3456]86-*-netbsdaout* | i[3456]86-*-netbsd* | i[3456]86-*-openbsd*)
     targ_defvec=i386netbsd_vec
     targ_selvecs="bfd_elf32_i386_vec i386bsd_vec"

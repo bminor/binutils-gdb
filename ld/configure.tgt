@@ -160,6 +160,9 @@ i[3456]86-*-solaris*)   targ_emul=elf_i386_ldso
 i[3456]86-*-netbsdelf*)	targ_emul=elf_i386
 			targ_extra_emuls=i386nbsd
 			;;
+i[3456]86-*-netbsdpe*)	targ_emul=i386pe
+			targ_extra_ofiles="deffilep.o pe-dll.o"
+			;;
 i[3456]86-*-netbsd*)	targ_emul=i386nbsd
 			targ_extra_emuls=elf_i386
 			;;

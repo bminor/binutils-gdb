@@ -249,7 +249,7 @@ changequote([,])dnl
 	  OBJDUMP_DEFS="-DDISASSEMBLER_NEEDS_RELOCS"
 	  ;;
 changequote(,)dnl
-	i[3-6]86-pe* | i[3-6]86-*-cygwin* | i[3-6]86-*-mingw32*)
+	i[3-6]86-pe* | i[3-6]86-*-cygwin* | i[3-6]86-*-mingw32** | i[3-6]86-*-netbsdpe*)
 changequote([,])dnl
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_I386"
