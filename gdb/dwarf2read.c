@@ -1056,6 +1056,9 @@ partial_die_eq (const void *item_lhs, const void *item_rhs)
   return part_die_lhs->offset == part_die_rhs->offset;
 }
 
+static char *skip_one_die (char *info_ptr, struct abbrev_info *abbrev,
+			   struct dwarf2_cu *cu);
+
 /* Try to locate the sections we need for DWARF 2 debugging
    information and return true if we have enough to do something.  */
 
@@ -2093,6 +2096,11 @@ add_partial_enumeration (struct partial_die_info *enum_pdi,
     }
 }
 
+/* Read the initial uleb128 in the die at INFO_PTR in compilation unit CU.
+   Return the corresponding abbrev, or NULL if the number is zero (indicating
+   an empty DIE).  In either case *BYTES_READ will be set to the length of
+   the initial number.  */
+
 static struct abbrev_info *
 peek_die_abbrev (char *info_ptr, int *bytes_read, struct dwarf2_cu *cu)
 {
@@ -2115,18 +2123,15 @@ peek_die_abbrev (char *info_ptr, int *bytes_read, struct dwarf2_cu *cu)
   return abbrev;
 }
 
-static char *skip_one_die (char *info_ptr, struct abbrev_info *abbrev,
-			   struct dwarf2_cu *cu);
+/* Scan the debug information for CU starting at INFO_PTR.  Returns a
+   pointer to the end of a series of DIEs, terminated by an empty
+   DIE.  Any children of the skipped DIEs will also be skipped.  */
 
 static char *
 skip_children (char *info_ptr, struct dwarf2_cu *cu)
 {
   struct abbrev_info *abbrev;
   unsigned int bytes_read;
-
-  /* Skip a series of DIEs (and their children) starting at INFO_PTR.
-     Continue until we run into one without a tag; return whatever
-     follows it.  */
 
   while (1)
     {
@@ -2138,6 +2143,11 @@ skip_children (char *info_ptr, struct dwarf2_cu *cu)
     }
 }
 
+/* Scan the debug information for CU starting at INFO_PTR.  INFO_PTR
+   should point just after the initial uleb128 of a DIE, and the
+   abbrev corresponding to that skipped uleb128 should be passed in
+   ABBREV.  Returns a pointer to this DIE's sibling, skipping any
+   children.  */
 
 static char *
 skip_one_die (char *info_ptr, struct abbrev_info *abbrev,
@@ -2150,6 +2160,7 @@ skip_one_die (char *info_ptr, struct abbrev_info *abbrev,
 
   for (i = 0; i < abbrev->num_attrs; i++)
     {
+      /* The only abbrev we care about is DW_AT_sibling.  */
       if (abbrev->attrs[i].name == DW_AT_sibling)
 	{
 	  read_attribute (&attr, &abbrev->attrs[i],
@@ -2159,19 +2170,20 @@ skip_one_die (char *info_ptr, struct abbrev_info *abbrev,
 	  else
 	    return dwarf_info_buffer + dwarf2_get_ref_die_offset (&attr, cu);
 	}
+
+      /* If it isn't DW_AT_sibling, skip this attribute.  */
       form = abbrev->attrs[i].form;
-    top:
+    skip_attribute:
       switch (form)
 	{
 	case DW_FORM_addr:
 	case DW_FORM_ref_addr:
 	  info_ptr += cu->header.addr_size;
 	  break;
-	case DW_FORM_block2:
-	  info_ptr += 2 + read_2_bytes (abfd, info_ptr);
-	  break;
-	case DW_FORM_block4:
-	  info_ptr += 4 + read_4_bytes (abfd, info_ptr);
+	case DW_FORM_data1:
+	case DW_FORM_ref1:
+	case DW_FORM_flag:
+	  info_ptr += 1;
 	  break;
 	case DW_FORM_data2:
 	case DW_FORM_ref2:
@@ -2199,10 +2211,11 @@ skip_one_die (char *info_ptr, struct abbrev_info *abbrev,
 	case DW_FORM_block1:
 	  info_ptr += 1 + read_1_byte (abfd, info_ptr);
 	  break;
-	case DW_FORM_data1:
-	case DW_FORM_ref1:
-	case DW_FORM_flag:
-	  info_ptr += 1;
+	case DW_FORM_block2:
+	  info_ptr += 2 + read_2_bytes (abfd, info_ptr);
+	  break;
+	case DW_FORM_block4:
+	  info_ptr += 4 + read_4_bytes (abfd, info_ptr);
 	  break;
 	case DW_FORM_sdata:
 	case DW_FORM_udata:
@@ -2212,7 +2225,10 @@ skip_one_die (char *info_ptr, struct abbrev_info *abbrev,
 	case DW_FORM_indirect:
 	  form = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
 	  info_ptr += bytes_read;
-	  goto top;
+	  /* We need to continue parsing from here, so just go back to
+	     the top.  */
+	  goto skip_attribute;
+
 	default:
 	  error ("Dwarf Error: Cannot handle %s in DWARF reader [in module %s]",
 		 dwarf_form_name (form),
@@ -2226,8 +2242,8 @@ skip_one_die (char *info_ptr, struct abbrev_info *abbrev,
     return info_ptr;
 }
 
-/* Locate ORIG_PDI's sibling; INFO_PTR should point to the next DIE
-   after ORIG_PDI.  */
+/* Locate ORIG_PDI's sibling; INFO_PTR should point to the start of
+   the next DIE after ORIG_PDI.  */
 
 static char *
 locate_pdi_sibling (struct partial_die_info *orig_pdi, char *info_ptr,
@@ -5904,6 +5920,8 @@ read_signed_leb128 (bfd *abfd, char *buf, unsigned int *bytes_read_ptr)
   *bytes_read_ptr = num_read;
   return result;
 }
+
+/* Return a pointer to just past the end of an LEB128 number in BUF.  */
 
 static char *
 skip_leb128 (bfd *abfd, char *buf)

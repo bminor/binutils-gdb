@@ -1,5 +1,11 @@
 2004-02-24  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (skip_leb128, peek_die_abbrev, skip_one_die)
+	(skip_children, locate_pdi_sibling): Update comments and
+	clean up.
+
+2004-02-24  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (free_one_comp_unit): Update signature so it can be
 	used as a cleanup.  Clear the per_cu pointer.  Add some comments.
 	(free_one_cached_comp_unit): Update signature so it can be used
