@@ -322,9 +322,9 @@ void load_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
 			through_sigtramp_breakpoint, step_range_start,
 			step_range_end, step_frame_address,
 			handling_longjmp, another_trap,
-                        stepping_through_solib_after_catch,
-                        stepping_through_solib_catchpoints,
-                        stepping_through_sigtramp)
+			stepping_through_solib_after_catch,
+			stepping_through_solib_catchpoints,
+			stepping_through_sigtramp)
      int pid;
      CORE_ADDR *prev_pc;
      CORE_ADDR *prev_func_start;
@@ -372,9 +372,9 @@ void save_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
 			through_sigtramp_breakpoint, step_range_start,
 			step_range_end, step_frame_address,
 			handling_longjmp, another_trap,
-                        stepping_through_solib_after_catch,
-                        stepping_through_solib_catchpoints,
-                        stepping_through_sigtramp)
+			stepping_through_solib_after_catch,
+			stepping_through_solib_catchpoints,
+			stepping_through_sigtramp)
      int pid;
      CORE_ADDR prev_pc;
      CORE_ADDR prev_func_start;
@@ -465,8 +465,8 @@ info_threads_command (arg, from_tty)
      int from_tty;
 {
   struct thread_info *tp;
-  int current_pid = inferior_pid;
-  struct frame_info *cur_frame;
+  int                current_pid = inferior_pid;
+  struct frame_info  *cur_frame;
   int                saved_frame_level = selected_frame_level;
   int                counter;
 
@@ -508,14 +508,16 @@ info_threads_command (arg, from_tty)
    */
   counter   = saved_frame_level;
   cur_frame = find_relative_frame(selected_frame, &counter);
-  if (counter != 0) {
+  if (counter != 0)
+    {
       /* Ooops, can't restore, tell user where we are. */
       warning ("Couldn't restore frame in current thread, at frame 0");
       print_stack_frame (selected_frame, -1, 0);
-  }
-  else {
+    }
+  else
+    {
       select_frame(cur_frame, saved_frame_level);
-  }
+    }
 
   /* re-show current frame. */
   show_stack_frame(cur_frame);
@@ -541,10 +543,11 @@ static void
 restore_current_thread (pid)
      int pid;
 {
-  if (pid != inferior_pid) {
-    switch_to_thread (pid);
-    print_stack_frame( get_current_frame(), 0, -1);
-  }
+  if (pid != inferior_pid) 
+    {
+      switch_to_thread (pid);
+      print_stack_frame( get_current_frame(), 0, -1);
+    }
 }
 
 /* Apply a GDB command to a list of threads.  List syntax is a whitespace
@@ -568,16 +571,16 @@ thread_apply_all_command (cmd, from_tty)
     error ("Please specify a command following the thread ID list");
 
   old_chain = make_cleanup ((make_cleanup_func) restore_current_thread, 
-                            (void *) inferior_pid);
+			    (void *) inferior_pid);
 
   for (tp = thread_list; tp; tp = tp->next)
     if (thread_alive (tp))
       {
 	switch_to_thread (tp->pid);
 #ifdef HPUXHPPA
-     printf_filtered ("\nThread %d (%s):\n",
-                       tp->num,
-		       target_tid_to_str (inferior_pid));
+	printf_filtered ("\nThread %d (%s):\n",
+			 tp->num,
+			 target_tid_to_str (inferior_pid));
 #else
 	printf_filtered ("\nThread %d (%s):\n", tp->num,
 			 target_pid_to_str (inferior_pid));
@@ -604,7 +607,7 @@ thread_apply_command (tidlist, from_tty)
     error ("Please specify a command following the thread ID list");
 
   old_chain = make_cleanup ((make_cleanup_func) restore_current_thread, 
-                            (void *) inferior_pid);
+			    (void *) inferior_pid);
 
   while (tidlist < cmd)
     {
@@ -645,8 +648,8 @@ thread_apply_command (tidlist, from_tty)
 	    {
 	      switch_to_thread (tp->pid);
 #ifdef HPUXHPPA
-	  printf_filtered ("\nThread %d (%s):\n", tp->num,
-			   target_tid_to_str (inferior_pid));
+	      printf_filtered ("\nThread %d (%s):\n", tp->num,
+			       target_tid_to_str (inferior_pid));
 #else
 	      printf_filtered ("\nThread %d (%s):\n", tp->num,
 			       target_pid_to_str (inferior_pid));
