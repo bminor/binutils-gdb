@@ -302,7 +302,10 @@ process_def_file (abfd, info)
 
 	  for (j = 0; j < nsyms; j++)
 	    {
-	      if (symbols[j]->flags & BSF_GLOBAL)
+              /* We should export symbols which are either global or not
+                 anything at all (.bss data is the latter)  */
+	      if ((symbols[j]->flags & BSF_GLOBAL)
+                  || (symbols[j]->flags == BSF_NO_FLAGS))
 		{
 		  const char *sn = symbols[j]->name;
 		  if (*sn == '_')
@@ -703,19 +706,21 @@ fill_edata (abfd, info)
 	  unsigned long srva = (exported_symbol_offsets[s]
 				+ ssec->output_section->vma
 				+ ssec->output_offset);
+	  int ord = pe_def_file->exports[s].ordinal;
 
-	  bfd_put_32 (abfd, srva - image_base, (void *) (eaddresses + i));
+	  bfd_put_32 (abfd, srva - image_base,
+		      (void *) (eaddresses + ord - min_ordinal));
 	  if (!pe_def_file->exports[s].flag_noname)
 	    {
 	      char *ename = pe_def_file->exports[s].name;
 	      bfd_put_32 (abfd, ERVA (enamestr), (void *) enameptrs);
+	      enameptrs++;
 	      strcpy (enamestr, ename);
 	      enamestr += strlen (enamestr) + 1;
-	      bfd_put_16 (abfd, i, (void *) eordinals);
-	      enameptrs++;
+	      bfd_put_16 (abfd, ord - min_ordinal, (void *) eordinals);
+	      eordinals++;
 	      pe_def_file->exports[s].hint = hint++;
 	    }
-	  eordinals++;
 	}
     }
 }

@@ -1,3 +1,13 @@
+2000-09-28  Paul Sokolovsky  <Paul.Sokolovsky@technologist.com>
+
+	* pe-dll.c (process_def_file): Uninitialized data wasn't
+	exported with --export-all-symbols switch.
+	
+2000-09-28  DJ Delorie  <dj@redhat.com>
+
+	* pe-dll.c (fill_edata): rearrange the data so that ordinals and
+	noname work properly.
+
 2000-09-28  Alan Modra  <alan@linuxcare.com.au>
 
 	* ld.texinfo (HPPA ELF32): New section.
