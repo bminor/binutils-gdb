@@ -23,6 +23,7 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "regcache.h"
+#include "linux-nat.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -889,6 +890,13 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
 
   if (ptrace (request, pid, 0, target_signal_to_host (signal)) == -1)
     perror_with_name ("ptrace");
+}
+
+void
+child_post_startup_inferior (ptid_t ptid)
+{
+  i386_cleanup_dregs ();
+  linux_child_post_startup_inferior (ptid);
 }
 
 

@@ -73,3 +73,7 @@ extern void lin_thread_get_thread_signals (sigset_t *mask);
 #define CHILD_INSERT_FORK_CATCHPOINT
 #define CHILD_INSERT_VFORK_CATCHPOINT
 #define CHILD_INSERT_EXEC_CATCHPOINT
+#define CHILD_POST_STARTUP_INFERIOR
+#define CHILD_POST_ATTACH
+#define CHILD_FOLLOW_FORK
+#define KILL_INFERIOR

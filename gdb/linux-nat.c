@@ -56,6 +56,8 @@
 #define __WALL          0x40000000 /* Wait for any child.  */
 #endif
 
+extern struct target_ops child_ops;
+
 struct simple_pid_list
 {
   int pid;
@@ -189,13 +191,147 @@ linux_supports_tracefork (void)
 }
 
 
+void
+linux_enable_event_reporting (ptid_t ptid)
+{
+  int pid = ptid_get_pid (ptid);
+  int options;
+
+  if (! linux_supports_tracefork ())
+    return;
+
+  options = PTRACE_O_TRACEFORK;
+
+  ptrace (PTRACE_SETOPTIONS, pid, 0, options);
+}
+
+void
+child_post_attach (int pid)
+{
+  linux_enable_event_reporting (pid_to_ptid (pid));
+}
+
+void
+linux_child_post_startup_inferior (ptid_t ptid)
+{
+  linux_enable_event_reporting (ptid);
+}
+
+#ifndef LINUX_CHILD_POST_STARTUP_INFERIOR
+void
+child_post_startup_inferior (ptid_t ptid)
+{
+  linux_child_post_startup_inferior (ptid);
+}
+#endif
+
+int
+child_follow_fork (int follow_child)
+{
+  ptid_t last_ptid;
+  struct target_waitstatus last_status;
+  int parent_pid, child_pid;
+
+  get_last_target_status (&last_ptid, &last_status);
+  parent_pid = ptid_get_pid (last_ptid);
+  child_pid = last_status.value.related_pid;
+
+  if (! follow_child)
+    {
+      /* We're already attached to the parent, by default. */
+
+      /* Before detaching from the child, remove all breakpoints from
+         it.  (This won't actually modify the breakpoint list, but will
+         physically remove the breakpoints from the child.) */
+      detach_breakpoints (child_pid);
+
+      fprintf_filtered (gdb_stdout,
+			"Detaching after fork from child process %d.\n",
+			child_pid);
+
+      ptrace (PTRACE_DETACH, child_pid, 0, 0);
+    }
+  else
+    {
+      char child_pid_spelling[40];
+
+      /* Needed to keep the breakpoint lists in sync.  */
+      detach_breakpoints (child_pid);
+
+      /* Before detaching from the parent, remove all breakpoints from it. */
+      remove_breakpoints ();
+
+      fprintf_filtered (gdb_stdout,
+			"Attaching after fork to child process %d.\n",
+			child_pid);
+
+      target_detach (NULL, 0);
+
+      inferior_ptid = pid_to_ptid (child_pid);
+      push_target (&child_ops);
+
+      /* Reset breakpoints in the child as appropriate.  */
+      follow_inferior_reset_breakpoints ();
+    }
+
+  return 0;
+}
+
+ptid_t
+linux_handle_extended_wait (int pid, int status,
+			    struct target_waitstatus *ourstatus)
+{
+  int event = status >> 16;
+
+  if (event == PTRACE_EVENT_CLONE)
+    internal_error (__FILE__, __LINE__,
+		    "unexpected clone event");
+
+  if (event == PTRACE_EVENT_FORK)
+    {
+      unsigned long new_pid;
+      int ret;
+
+      ptrace (PTRACE_GETEVENTMSG, pid, 0, &new_pid);
+
+      /* If we haven't already seen the new PID stop, wait for it now.  */
+      if (! pull_pid_from_list (&stopped_pids, new_pid))
+	{
+	  /* The new child has a pending SIGSTOP.  We can't affect it until it
+	     hits the SIGSTOP, but we're already attached.
+
+	     It won't be a clone (we didn't ask for clones in the event mask)
+	     so we can just call waitpid and wait for the SIGSTOP.  */
+	  do {
+	    ret = waitpid (new_pid, &status, 0);
+	  } while (ret == -1 && errno == EINTR);
+	  if (ret == -1)
+	    perror_with_name ("waiting for new child");
+	  else if (ret != new_pid)
+	    internal_error (__FILE__, __LINE__,
+			    "wait returned unexpected PID %d", ret);
+	  else if (!WIFSTOPPED (status) || WSTOPSIG (status) != SIGSTOP)
+	    internal_error (__FILE__, __LINE__,
+			    "wait returned unexpected status 0x%x", status);
+	}
+
+      ourstatus->kind = TARGET_WAITKIND_FORKED;
+      ourstatus->value.related_pid = new_pid;
+      return inferior_ptid;
+    }
+
+  internal_error (__FILE__, __LINE__,
+		  "unknown ptrace event %d", event);
+}
+
+
 int
 child_insert_fork_catchpoint (int pid)
 {
-  if (linux_supports_tracefork ())
-    error ("Fork catchpoints have not been implemented yet.");
-  else
+  if (! linux_supports_tracefork ())
     error ("Your system does not support fork catchpoints.");
+
+  return 0;
 }
 
 int
@@ -216,4 +352,43 @@ child_insert_exec_catchpoint (int pid)
     error ("Your system does not support exec catchpoints.");
 }
 
+void
+kill_inferior (void)
+{
+  int status;
+  int pid =  PIDGET (inferior_ptid);
+  struct target_waitstatus last;
+  ptid_t last_ptid;
+  int ret;
 
+  if (pid == 0)
+    return;
+
+  /* If we're stopped while forking and we haven't followed yet, kill the
+     other task.  We need to do this first because the parent will be
+     sleeping if this is a vfork.  */
+
+  get_last_target_status (&last_ptid, &last);
+
+  if (last.kind == TARGET_WAITKIND_FORKED
+      || last.kind == TARGET_WAITKIND_VFORKED)
+    {
+      ptrace (PT_KILL, last.value.related_pid);
+      ptrace_wait (null_ptid, &status);
+    }
+
+  /* Kill the current process.  */
+  ptrace (PT_KILL, pid, (PTRACE_ARG3_TYPE) 0, 0);
+  ret = ptrace_wait (null_ptid, &status);
+
+  /* We might get a SIGCHLD instead of an exit status.  This is
+     aggravated by the first kill above - a child has just died.  */
+
+  while (ret == pid && WIFSTOPPED (status))
+    {
+      ptrace (PT_KILL, pid, (PTRACE_ARG3_TYPE) 0, 0);
+      ret = ptrace_wait (null_ptid, &status);
+    }
+
+  target_mourn_inferior ();
+}

@@ -1,3 +1,25 @@
+2003-08-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (i386-linux-nat.o): Update dependencies.
+	* config/i386/nm-linux.h (LINUX_CHILD_POST_STARTUP_INFERIOR): Define.
+	* config/nm-linux.h (CHILD_POST_STARTUP_INFERIOR, CHILD_POST_ATTACH)
+	(CHILD_FOLLOW_FORK, KILL_INFERIOR): Define.
+	* i386-linux-nat.c: Include "linux-nat.h".
+	(child_post_startup_inferior): New function.
+	* i386-nat.c (child_post_startup_inferior): Wrap in #ifdef.
+	* infptrace.c (kill_inferior): Wrap in #ifdef.
+	* lin-lwp.c (lin_lwp_attach_lwp): Call child_post_attach after
+	attaching to each LWP.
+	(child_wait, lin_lwp_wait): Call linux_handle_extended_wait.
+	(init_lin_lwp_ops): Fill in some more operations.
+	* linux-nat.h (linux_enable_event_reporting)
+	(linux_handle_extended_wait, linux_child_post_startup_inferior): New
+	prototypes.
+	* linux-nat.c (linux_enable_event_reporting): New function.
+	(child_post_attach, linux_child_post_startup_inferior)
+	(child_post_startup_inferior, child_follow_fork)
+	(linux_handle_extended_wait, kill_inferior): New functions.
+
 2003-08-14  Elena Zannoni  <ezannoni@redhat.com>
 
 	* symfile.c (symbol_file_add_with_addrs_or_offsets): Make sure
