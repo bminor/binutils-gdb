@@ -66,16 +66,6 @@ static int ids2[20000];
 static int base1 = 0x18;
 static int base2 = 0x2018;
 
-char *
-xcalloc (a, b)
-     int a;
-     int b;
-{
-  char *r = xmalloc (a * b);
-  memset (r, 0, a * b);
-  return r;
-}
-
 static int
 get_member_id (x)
      int x;
@@ -1919,7 +1909,9 @@ main (ac, av)
   char *input_file;
   char *output_file;
 
+#ifdef HAVE_SETLOCALE
   setlocale (LC_MESSAGES, "");
+#endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 

@@ -41,16 +41,6 @@ static int code;
 static int addrsize = 4;
 static FILE *file;
 
-static char *
-xcalloc (a, b)
-     int a;
-     int b;
-{
-  char *r = xmalloc (a * b);
-  memset (r, 0, a * b);
-  return r;
-}
-
 char *
 getCHARS (ptr, idx, size, max)
      unsigned char *ptr;
@@ -745,7 +735,9 @@ main (ac, av)
     {NULL, no_argument, 0, 0}
   };
 
+#ifdef HAVE_SETLOCALE
   setlocale (LC_MESSAGES, "");
+#endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
