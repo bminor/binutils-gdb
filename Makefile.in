@@ -48,7 +48,7 @@ INSTALL_DATA = $(INSTALL)
 
 AR = ar
 AR_FLAGS = qc
-MINUS_G = -g
+CFLAGS = -g
 RANLIB = ranlib
 
 BISON = `if [ -d $${rootme}/bison ] ; \
@@ -73,6 +73,7 @@ INSTALL_TARGET = install.all
 ###
 
 .PHONY: all info install-info clean-info
+.NOEXPORT:
 
 all:	$(ALL)
 
@@ -156,11 +157,10 @@ all-libiberty: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libiberty; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -176,11 +176,10 @@ clean-libiberty: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libiberty; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -196,11 +195,10 @@ install-libiberty: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libiberty; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -217,11 +215,10 @@ all-mmalloc: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./mmalloc; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -237,11 +234,10 @@ clean-mmalloc: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./mmalloc; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -257,11 +253,10 @@ install-mmalloc: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./mmalloc; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -279,11 +274,10 @@ all-texinfo: all-libiberty
 		rootme=`pwd` ; export rootme ; \
 		(cd ./texinfo; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -299,11 +293,10 @@ clean-texinfo: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./texinfo; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -319,11 +312,10 @@ install-texinfo: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./texinfo; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -340,11 +332,10 @@ all-bfd: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./bfd; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -360,11 +351,10 @@ clean-bfd: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./bfd; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -380,11 +370,10 @@ install-bfd: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./bfd; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -400,12 +389,10 @@ all-binutils: all-libiberty all-bfd
 	@if [ -d ./binutils ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./binutils; \
-		$(MAKE) \
-			"against=$(against)" \
-			"AR=$(AR)" \
+		$(MAKE) "AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -421,11 +408,10 @@ clean-binutils: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./binutils; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -441,11 +427,10 @@ install-binutils: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./binutils; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -462,11 +447,10 @@ all-newlib: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./newlib; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -482,11 +466,10 @@ clean-newlib: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./newlib; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -502,11 +485,10 @@ install-newlib: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./newlib; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -522,11 +504,10 @@ all-gprof: all-libiberty all-bfd
 	@if [ -d ./gprof ] ; then \
 		(cd ./gprof; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -541,11 +522,10 @@ clean-gprof: force
 	@if [ -d $(unsubdir)/gprof ] ; then \
 		(cd $(unsubdir)/gprof$(subdir); \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -560,11 +540,10 @@ install-gprof: force
 	@if [ -d $(unsubdir)/gprof ] ; then \
 		(cd $(unsubdir)/gprof$(subdir); \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -581,11 +560,10 @@ all-byacc: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./byacc; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -601,11 +579,10 @@ clean-byacc: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./byacc; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -621,11 +598,10 @@ install-byacc: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./byacc; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -647,7 +623,7 @@ all-bison: all-libiberty
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -668,7 +644,7 @@ clean-bison: force
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -689,7 +665,7 @@ install-bison: force
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -706,10 +682,10 @@ all-flex: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./flex; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -725,10 +701,10 @@ clean-flex: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./flex; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -744,10 +720,10 @@ install-flex: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./flex; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -763,11 +739,10 @@ all-gcc: all-libiberty all-bison
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gcc; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -783,11 +758,10 @@ clean-gcc: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gcc; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -803,11 +777,10 @@ install-gcc: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gcc; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -824,11 +797,10 @@ all-readline: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./readline; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -844,11 +816,10 @@ clean-readline: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./readline; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -864,11 +835,10 @@ install-readline: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./readline; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -885,11 +855,10 @@ all-glob: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./glob; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -905,11 +874,10 @@ clean-glob: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./glob; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -925,11 +893,10 @@ install-glob: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./glob; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -946,11 +913,10 @@ all-gas: all-libiberty all-bfd
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gas; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -966,11 +932,10 @@ clean-gas: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gas; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -986,11 +951,10 @@ install-gas: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gas; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1007,11 +971,10 @@ all-ld: all-libiberty all-bfd all-bison
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ld; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1027,11 +990,10 @@ clean-ld: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ld; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1047,11 +1009,10 @@ install-ld: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ld; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1068,11 +1029,10 @@ all-libgcc1: all-gas all-binutils
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libgcc; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1088,11 +1048,10 @@ clean-libgcc1: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libgcc; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1112,11 +1071,10 @@ all-libgcc: all-gas all-gcc all-binutils
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libgcc; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1132,11 +1090,10 @@ clean-libgcc: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libgcc; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1152,11 +1109,10 @@ install-libgcc: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libgcc; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1173,11 +1129,10 @@ all-gdb: all-bfd all-libiberty all-mmalloc all-readline all-glob all-bison
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gdb; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1193,11 +1148,10 @@ clean-gdb: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gdb; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1213,11 +1167,10 @@ install-gdb: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gdb; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1234,11 +1187,10 @@ all-make: all-libiberty
 		rootme=`pwd` ; export rootme ; \
 		(cd ./make; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1254,11 +1206,10 @@ clean-make: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./make; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1274,11 +1225,10 @@ install-make: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./make; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1295,11 +1245,10 @@ all-diff: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./diff; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1315,11 +1264,10 @@ clean-diff: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./diff; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1335,11 +1283,10 @@ install-diff: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./diff/; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1356,11 +1303,10 @@ all-grep: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./grep; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1376,11 +1322,10 @@ clean-grep: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./grep; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1396,11 +1341,10 @@ install-grep: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./grep; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1417,11 +1361,10 @@ all-rcs: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./rcs; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1437,11 +1380,10 @@ clean-rcs: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./rcs; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1457,11 +1399,10 @@ install-rcs: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./rcs; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1478,11 +1419,10 @@ all-cvs: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./cvs; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1498,11 +1438,10 @@ clean-cvs: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./cvs; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1518,11 +1457,10 @@ install-cvs: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./cvs; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1539,11 +1477,10 @@ all-patch: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./patch; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1559,11 +1496,10 @@ clean-patch: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./patch; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1584,7 +1520,7 @@ install-patch: force
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1601,11 +1537,10 @@ all-emacs: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./emacs; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1621,11 +1556,10 @@ clean-emacs: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./emacs; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1641,11 +1575,10 @@ install-emacs: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./emacs; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1662,11 +1595,10 @@ all-ispell: all-emacs
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ispell; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1682,11 +1614,10 @@ clean-ispell: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ispell; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1702,11 +1633,10 @@ install-ispell: force
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ispell; \
 		$(MAKE) \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1726,11 +1656,10 @@ all-fileutils: force
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
 			"mandir=$(mandir)" \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1749,11 +1678,10 @@ clean-fileutils: force
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
 			"mandir=$(mandir)" \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1772,11 +1700,10 @@ install-fileutils: force
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
 			"mandir=$(mandir)" \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1796,11 +1723,10 @@ all-send_pr: force
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
 			"mandir=$(mandir)" \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1819,11 +1745,10 @@ clean-send_pr: force
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
 			"mandir=$(mandir)" \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1842,11 +1767,10 @@ install-send_pr: force
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
 			"mandir=$(mandir)" \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1874,11 +1798,10 @@ all-libg++: all-gas all-ld all-gcc
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
 			"mandir=$(mandir)" \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=${GXX}" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"XTRAFLAGS=${XTRAFLAGS}" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
@@ -1898,11 +1821,10 @@ clean-libg++: force
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
 			"mandir=$(mandir)" \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1921,11 +1843,10 @@ install-libg++: force
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
 			"mandir=$(mandir)" \
-			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
 			"CC=$(CC)" \
-			"MINUS_G=$(MINUS_G)" \
+			"CFLAGS=$(CFLAGS)" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
@@ -1948,7 +1869,6 @@ subdir_do:
 		if [ -f ./$$i/localenv ] ; then \
 			if (rootme=`pwd` ; export rootme ; cd ./$$i; \
 				$(MAKE) \
-					"against=$(against)" \
 					"BISON=$(BISON)" \
 					"MAKEINFO=$(MAKEINFO)" \
 					$(DO)) ; then true ; \
@@ -1956,11 +1876,10 @@ subdir_do:
 		else if [ -d ./$$i ] ; then \
 			if (rootme=`pwd` ; export rootme ; cd ./$$i; \
 				$(MAKE) \
-					"against=$(against)" \
 					"AR=$(AR)" \
 					"AR_FLAGS=$(AR_FLAGS)" \
 					"CC=$(CC)" \
-					"MINUS_G=$(MINUS_G)" \
+					"CFLAGS=$(CFLAGS)" \
 					"RANLIB=$(RANLIB)" \
 					"LOADLIBES=$(LOADLIBES)" \
 					"LDFLAGS=$(LDFLAGS)" \
@@ -1972,61 +1891,61 @@ subdir_do:
 	fi ; \
 	done
 
-bootstrap:
-	$(MAKE) all info
-	$(MAKE) stage1
-	$(MAKE) pass "stagepass=stage1"
-	$(MAKE) stage2
-	$(MAKE) pass "stagepass=stage2"
-	$(MAKE) comparison
-
-bootstrap2:
-	$(MAKE) pass "stagepass=stage1"
-	$(MAKE) stage2
-	$(MAKE) pass "stagepass=stage2"
-	$(MAKE) comparison
-
-bootstrap3:
-	$(MAKE) pass "stagepass=stage2"
-	$(MAKE) comparison
-
-pass:
-	cp $(srcdir)/gcc/gstdarg.h ./gas/stdarg.h
-	$(MAKE) subdir_do "DO=all info" "DODIRS=$(SUBDIRS)" \
-		"CC=`pwd`/gcc/$(stagepass)/gcc \
-		-O $(GCCVERBOSE) -I`pwd`/gcc/include \
-		-B`pwd`/gcc/$(stagepass)/ \
-		-B`pwd`/gas/$(stagepass)/ \
-		-B`pwd`/ld/$(stagepass)/" \
-		"AR=`pwd`/binutils/$(stagepass)/ar" \
-		"LD=`pwd`/gcc/$(stagepass)/gcc $(GCCVERBOSE)" \
-		"RANLIB=`pwd`/binutils/$(stagepass)/ranlib" \
-		"LOADLIBES=`pwd`/libgcc/$(stagepass)/libgcc.a /lib/libc.a" \
-		"LDFLAGS=-nostdlib /lib/crt0.o \
-		-L`pwd`/libgcc/$(stagepass)/ \
-		-B`pwd`/ld/$(stagepass)/"
-
-
-stage1:
-	$(MAKE) subdir_do DO=stage1 "DODIRS=$(SUBDIRS)"
-
-stage2:
-	$(MAKE) subdir_do DO=stage2 "DODIRS=$(SUBDIRS)"
-
-stage3:
-	$(MAKE) subdir_do DO=stage3 "DODIRS=$(SUBDIRS)"
-
-stage4:
-	$(MAKE) subdir_do DO=stage4 "DODIRS=$(SUBDIRS)"
-
-against=stage2
-
-comparison:; $(MAKE) subdir_do DO=comparison against=$(against) "DODIRS=$(SUBDIRS)"
-
-de-stage1:; $(MAKE) subdir_do DO=de-stage1 "DODIRS=$(SUBDIRS)"
-de-stage2:; $(MAKE) subdir_do DO=de-stage2 "DODIRS=$(SUBDIRS)"
-de-stage3:; $(MAKE) subdir_do DO=de-stage3 "DODIRS=$(SUBDIRS)"
-de-stage4:; $(MAKE) subdir_do DO=de-stage4 "DODIRS=$(SUBDIRS)"
+#bootstrap:
+#	$(MAKE) all info
+#	$(MAKE) stage1
+#	$(MAKE) pass "stagepass=stage1"
+#	$(MAKE) stage2
+#	$(MAKE) pass "stagepass=stage2"
+#	$(MAKE) comparison
+#
+#bootstrap2:
+#	$(MAKE) pass "stagepass=stage1"
+#	$(MAKE) stage2
+#	$(MAKE) pass "stagepass=stage2"
+#	$(MAKE) comparison
+#
+#bootstrap3:
+#	$(MAKE) pass "stagepass=stage2"
+#	$(MAKE) comparison
+#
+#pass:
+#	cp $(srcdir)/gcc/gstdarg.h ./gas/stdarg.h
+#	$(MAKE) subdir_do "DO=all info" "DODIRS=$(SUBDIRS)" \
+#		"CC=`pwd`/gcc/$(stagepass)/gcc \
+#		-O $(GCCVERBOSE) -I`pwd`/gcc/include \
+#		-B`pwd`/gcc/$(stagepass)/ \
+#		-B`pwd`/gas/$(stagepass)/ \
+#		-B`pwd`/ld/$(stagepass)/" \
+#		"AR=`pwd`/binutils/$(stagepass)/ar" \
+#		"LD=`pwd`/gcc/$(stagepass)/gcc $(GCCVERBOSE)" \
+#		"RANLIB=`pwd`/binutils/$(stagepass)/ranlib" \
+#		"LOADLIBES=`pwd`/libgcc/$(stagepass)/libgcc.a /lib/libc.a" \
+#		"LDFLAGS=-nostdlib /lib/crt0.o \
+#		-L`pwd`/libgcc/$(stagepass)/ \
+#		-B`pwd`/ld/$(stagepass)/"
+#
+#
+#stage1:
+#	$(MAKE) subdir_do DO=stage1 "DODIRS=$(SUBDIRS)"
+#
+#stage2:
+#	$(MAKE) subdir_do DO=stage2 "DODIRS=$(SUBDIRS)"
+#
+#stage3:
+#	$(MAKE) subdir_do DO=stage3 "DODIRS=$(SUBDIRS)"
+#
+#stage4:
+#	$(MAKE) subdir_do DO=stage4 "DODIRS=$(SUBDIRS)"
+#
+#against=stage2
+#
+#comparison:; $(MAKE) subdir_do DO=comparison against=$(against) "DODIRS=$(SUBDIRS)"
+#
+#de-stage1:; $(MAKE) subdir_do DO=de-stage1 "DODIRS=$(SUBDIRS)"
+#de-stage2:; $(MAKE) subdir_do DO=de-stage2 "DODIRS=$(SUBDIRS)"
+#de-stage3:; $(MAKE) subdir_do DO=de-stage3 "DODIRS=$(SUBDIRS)"
+#de-stage4:; $(MAKE) subdir_do DO=de-stage4 "DODIRS=$(SUBDIRS)"
 
 # The "else true" stuff is for Ultrix; the shell returns the exit code
 # of the "if" command, if no commands are run in the "then" or "else" part,
