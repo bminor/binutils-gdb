@@ -580,10 +580,9 @@ stabs_generate_asm_lineno ()
   unsigned int lineno;
   char *buf;
   char sym[30];
-
-  /* Let the world know that we are in the middle of generating a
-     piece of stabs line debugging information.  */
-  outputting_stabs_line_debug = 1;
+  /* Remember the last file/line and avoid duplicates. */
+  static unsigned int prev_lineno = -1;
+  static char *prev_file = NULL;
 
   /* Rather than try to do this in some efficient fashion, we just
      generate a string and then parse it again.  That lets us use the
@@ -593,6 +592,34 @@ stabs_generate_asm_lineno ()
   hold = input_line_pointer;
 
   as_where (&file, &lineno);
+
+  /* Don't emit sequences of stabs for the same line. */
+  if (prev_file == NULL)
+    {
+      /* First time thru. */
+      prev_file = xstrdup (file);
+      prev_lineno = lineno;
+    }
+  else if (lineno == prev_lineno
+	   && strcmp (file, prev_file) == 0)
+    {
+      /* Same file/line as last time. */
+      return;
+    }
+  else
+    {
+      /* Remember file/line for next time. */
+      prev_lineno = lineno;
+      if (strcmp (file, prev_file) != 0)
+	{
+	  free (prev_file);
+	  prev_file = xstrdup (file);
+	}
+    }
+
+  /* Let the world know that we are in the middle of generating a
+     piece of stabs line debugging information.  */
+  outputting_stabs_line_debug = 1;
 
   generate_asm_file (N_SOL, file);
 

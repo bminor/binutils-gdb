@@ -230,10 +230,19 @@ dwarf2_gen_line_info (ofs, loc)
 {
   struct line_subseg *ss;
   struct line_entry *e;
+  static unsigned int line = -1;
+  static unsigned int filenum = -1;
 
   /* Early out for as-yet incomplete location information.  */
   if (loc->filenum == 0 || loc->line == 0)
     return;
+
+  /* Don't emit sequences of line symbols for the same line. */
+  if (line == loc->line && filenum == loc->filenum)
+    return;
+
+  line = loc->line;
+  filenum = loc->filenum;
 
   e = (struct line_entry *) xmalloc (sizeof (*e));
   e->next = NULL;

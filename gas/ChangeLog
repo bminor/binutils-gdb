@@ -116,6 +116,13 @@
 	* config/tc-cris.c (md_apply_fix3): Cast value, not pointer, in
 	val assignment.
 
+2001-11-16  Michael Snyder  <msnyder@redhat.com>
+
+	* stabs.c (stabs_generate_asm_lineno): Remember file and line number
+	from one call to the next, and eliminate consecutive duplicates
+	(thereby emitting only one line symbol per source line).
+	* dwarf2dbg.c (dwarf2_gen_line_info): Ditto.	
+
 2001-11-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-m68k.c (md_apply_fix3): Change val back to a signed type.
