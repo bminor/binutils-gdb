@@ -42,6 +42,7 @@
 #include "parser-defs.h"
 #include "regcache.h"
 #include "reggroups.h"
+#include "block.h"
 #include <ctype.h>
 
 /* Functions exported for general use, in inferior.h: */

@@ -23,6 +23,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "value.h"
 #include "gdbtypes.h"
 
+struct block;
+
 /* A macro to reorder the bytes of an address depending on the endiannes
    of the target */
 #define EXTRACT_ADDRESS(x) ((void *) extract_address (&(x), sizeof (x)))

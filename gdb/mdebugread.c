@@ -53,6 +53,7 @@
 #include "complaints.h"
 #include "demangle.h"
 #include "gdb_assert.h"
+#include "block.h"
 
 /* These are needed if the tm.h file does not contain the necessary
    mips specific definitions.  */

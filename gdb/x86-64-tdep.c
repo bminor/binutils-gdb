@@ -31,6 +31,7 @@
 #include "x86-64-tdep.h"
 #include "dwarf2cfi.h"
 #include "gdb_assert.h"
+#include "block.h"
 
 /* Register numbers of various important registers.  */
 #define RAX_REGNUM 0

@@ -47,6 +47,7 @@
 #include "hashtab.h"
 #include <readline/readline.h>
 #include "gdb_assert.h"
+#include "block.h"
 
 #include <sys/types.h>
 #include <fcntl.h>

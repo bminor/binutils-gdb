@@ -40,6 +40,7 @@
 #include "regcache.h"
 #include "osabi.h"
 #include "mips-tdep.h"
+#include "block.h"
 
 #include "opcode/mips.h"
 #include "elf/mips.h"

@@ -36,6 +36,7 @@
 #include "doublest.h"
 #include "gdb_assert.h"
 #include "regcache.h"
+#include "block.h"
 
 /* Prototypes for exported functions. */
 

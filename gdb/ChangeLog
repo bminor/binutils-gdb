@@ -1,3 +1,49 @@
+2003-02-19  David Carlton  <carlton@math.stanford.edu>
+
+	* Makefile.in (SFILES): Add block.c.
+	(block_h): New.
+	(COMMON_OBS): Add block.o.
+	(block.o): New.
+	(x86-64-tdep.o): Add $(block_h).
+	(values.o, valops.o, tracepoint.o, symtab.o, symmisc.o, symfile.o)
+	(stack.o, printcmd.o, p-exp.tab.o, parse.o, objfiles.o)
+	(objc-exp.tab.o, objc-lang.o, nlmread.o, mips-tdep.o, mdebugread.o)
+	(m2-exp.tab.o, linespec.o, jv-lang.o, jv-exp.tab.o, infcmd.o)
+	(f-valprint.o, findvar.o, f-exp.tab.o, expprint.o, coffread.o)
+	(c-exp.tab.o, buildsym.o, breakpoint.o, blockframe.o, ax-gdb.o)
+	(alpha-tdep.o, ada-lang.o, ada-exp.tab.o, mi-cmd-stack.o): Ditto.
+	* value.h: Add opaque declaration for struct block.
+	* parser-defs.h, objc-lang.h, buildsym.h, breakpoint.h: Ditto.
+	* ada-lang.h: Ditto.
+	* x86-64-tdep.c: #include "block.h"
+	* values.c, valops.c, tracepoint.c, symtab.c, symmisc.c: Ditto.
+	* symfile.c, stack.c, printcmd.c, p-exp.y, parse.c: Ditto.
+	* objfiles.c, objc-exp.y, objc-lang.c, nlmread.c: Ditto.
+	* mips-tdep.c, mdebugread.c, m2-exp.y, linespec.c: Ditto.
+	* jv-lang.c, jv-exp.y, infcmd.c, f-valprint.c: Ditto.
+	* findvar.c, f-exp.y, expprint.c, coffread.c, c-exp.y: Ditto.
+	* buildsym.c, breakpoint.c, blockframe.c, ax-gdb.c: Ditto.
+	* alpha-tdep.c, ada-lang.c, ada-exp.y: Ditto.
+	* blockframe.c (blockvector_for_pc_sect): Move to "block.c".
+	(blockvector_for_pc, block_for_pc_sect, block_for_pc): Ditto.
+	* symtab.c (block_function): Ditto.
+	(contained_in): Ditto.
+	* frame.h: Move block_for_pc and block_for_pc_sect declarations to
+	block.h.  Add opaque declaration for struct block.
+	* symtab.h: Move block_function and contained_in declarations to
+	block.h.  Add opaque declarations for struct block, struct
+	blockvector.
+	(struct block): Move to block.h.
+	(struct blockvector): Ditto.
+	(BLOCK_START, BLOCK_END, BLOCK_FUNCTION, BLOCK_SUPERBLOCK)
+	(BLOCK_GCC_COMPILED, BLOCK_HASHTABLE, BLOCK_NSYMS, BLOCK_SYM)
+	(BLOCK_BUCKETS, BLOCK_BUCKET, BLOCK_HASHTABLE_SIZE)
+	(ALL_BLOCK_SYMBOLS, BLOCK_SHOULD_SORT, BLOCKVECTOR_NBLOCKS)
+	(BLOCKVECTOR_BLOCK, GLOBAL_BLOCK, STATIC_BLOCK, FIRST_LOCAL_BLOCK):
+	Ditto.
+	* block.c: New file.
+	* block.h: New file.
+
 2003-02-19  Theodore A. Roth  <troth@openavr.org>
 
 	* avr-tdep.c (avr_extract_return_value): Remove function.

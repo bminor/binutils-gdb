@@ -32,6 +32,7 @@
 #include "completer.h"
 #include "cp-abi.h"
 #include "parser-defs.h"
+#include "block.h"
 
 /* We share this one with symtab.c, but it is not exported widely. */
 

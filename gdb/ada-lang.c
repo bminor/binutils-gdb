@@ -37,6 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "ada-lang.h"
 #include "ui-out.h"
+#include "block.h"
 
 struct cleanup *unresolved_names;
 

@@ -33,6 +33,7 @@
 #include "frame.h"
 #include "gdbcore.h"
 #include "command.h"
+#include "block.h"
 
 #if 0
 static int there_is_a_visible_common_named (char *);

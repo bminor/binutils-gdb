@@ -52,6 +52,7 @@
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols.  */
 #include "top.h"
 #include "completer.h" /* For skip_quoted().  */
+#include "block.h"
 
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror,
    etc), as well as gratuitiously global symbol names, so we can have

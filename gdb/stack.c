@@ -39,6 +39,7 @@
 #include "inferior.h"
 #include "annotate.h"
 #include "ui-out.h"
+#include "block.h"
 
 /* Prototypes for exported functions. */
 

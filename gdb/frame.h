@@ -25,6 +25,7 @@
 
 struct symtab_and_line;
 struct frame_unwind;
+struct block;
 
 /* The traditional frame unwinder.  */
 extern const struct frame_unwind *trad_frame_unwind;
@@ -505,10 +506,6 @@ extern struct symbol *get_frame_function (struct frame_info *);
 extern CORE_ADDR frame_address_in_block (struct frame_info *);
 
 extern CORE_ADDR get_pc_function_start (CORE_ADDR);
-
-extern struct block *block_for_pc (CORE_ADDR);
-
-extern struct block *block_for_pc_sect (CORE_ADDR, asection *);
 
 extern int frameless_look_for_prologue (struct frame_info *);
 

@@ -27,6 +27,7 @@
 #include "objfiles.h"
 #include "buildsym.h"
 #include "stabsread.h"
+#include "block.h"
 
 extern void _initialize_nlmread (void);
 

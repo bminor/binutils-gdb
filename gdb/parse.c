@@ -48,6 +48,7 @@
 				   with "gdbarch.h" when appropriate.  */
 #include "doublest.h"
 #include "gdb_assert.h"
+#include "block.h"
 
 
 /* Symbols which architectures can redefine.  */

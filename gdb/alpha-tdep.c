@@ -35,6 +35,7 @@
 #include "doublest.h"
 #include "arch-utils.h"
 #include "osabi.h"
+#include "block.h"
 
 #include "elf-bfd.h"
 

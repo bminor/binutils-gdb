@@ -37,6 +37,7 @@
 #include "regcache.h"
 #include "completer.h"
 #include "gdb-events.h"
+#include "block.h"
 
 #include "ax.h"
 #include "ax-gdb.h"

@@ -42,6 +42,7 @@
 #include "hashtab.h"
 
 #include "breakpoint.h"
+#include "block.h"
 
 /* Prototypes for local functions */
 

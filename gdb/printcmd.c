@@ -41,6 +41,7 @@
 #include "completer.h"		/* for completion functions */
 #include "ui-out.h"
 #include "gdb_assert.h"
+#include "block.h"
 
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
 extern int addressprint;	/* Whether to print hex addresses in HLL " */

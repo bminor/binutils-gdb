@@ -33,6 +33,7 @@
 #include "gdbcmd.h"
 #include "regcache.h"
 #include "cp-abi.h"
+#include "block.h"
 
 #include <errno.h>
 #include "gdb_string.h"

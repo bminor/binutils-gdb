@@ -30,6 +30,7 @@
 #include "frame.h"		/* For frame_map_regnum_to_name.  */
 #include "target.h"
 #include "gdb_string.h"
+#include "block.h"
 
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>

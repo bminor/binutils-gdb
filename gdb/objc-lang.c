@@ -41,6 +41,7 @@
 #include "frame.h"
 #include "gdb_regex.h"
 #include "regcache.h"
+#include "block.h"
 
 #include <ctype.h>
 

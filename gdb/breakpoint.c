@@ -48,6 +48,7 @@
 #include "ui-out.h"
 #include "cli/cli-script.h"
 #include "gdb_assert.h"
+#include "block.h"
 
 #include "gdb-events.h"
 

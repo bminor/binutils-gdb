@@ -20,6 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 struct value;
+struct block;
 
 extern int objc_parse (void);		/* Defined in c-exp.y */
 

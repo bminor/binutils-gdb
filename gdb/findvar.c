@@ -35,6 +35,7 @@
 #include "symfile.h"		/* for overlay functions */
 #include "regcache.h"
 #include "builtin-regs.h"
+#include "block.h"
 
 /* Basic byte-swapping routines.  GDB has needed these for a long time...
    All extract a target-format integer at ADDR which is LEN bytes long.  */

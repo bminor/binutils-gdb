@@ -44,6 +44,7 @@
 #include "complaints.h"
 #include "target.h"
 #include "gdb_assert.h"
+#include "block.h"
 
 extern void _initialize_coffread (void);
 

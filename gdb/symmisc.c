@@ -32,6 +32,7 @@
 #include "gdb_obstack.h"
 #include "language.h"
 #include "bcache.h"
+#include "block.h"
 
 #include "gdb_string.h"
 #include <readline/readline.h>

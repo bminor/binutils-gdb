@@ -33,6 +33,7 @@
 #include "ax.h"
 #include "ax-gdb.h"
 #include "gdb_string.h"
+#include "block.h"
 
 /* To make sense of this file, you should read doc/agentexpr.texi.
    Then look at the types and enums in ax-gdb.h.  For the code itself,

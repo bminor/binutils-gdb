@@ -33,6 +33,7 @@
 #include "c-lang.h"
 #include "jv-lang.h"
 #include "gdbcore.h"
+#include "block.h"
 #include <ctype.h>
 
 struct type *java_int_type;
