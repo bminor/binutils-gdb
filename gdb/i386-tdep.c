@@ -475,9 +475,8 @@ i386_frame_num_args (fi)
  */
 
 void
-i386_frame_find_saved_regs (fip, fsrp)
+i386_frame_init_saved_regs (fip)
      struct frame_info *fip;
-     struct frame_saved_regs *fsrp;
 {
   long locals = -1;
   unsigned char op;
@@ -486,7 +485,10 @@ i386_frame_find_saved_regs (fip, fsrp)
   CORE_ADDR pc;
   int i;
 
-  memset (fsrp, 0, sizeof *fsrp);
+  if (fip->saved_regs)
+    return;
+
+  frame_saved_regs_zalloc (fip);
 
   /* if frame is the end of a dummy, compute where the
    * beginning would be
@@ -501,7 +503,7 @@ i386_frame_find_saved_regs (fip, fsrp)
       for (i = 0; i < NUM_REGS; i++)
 	{
 	  adr -= REGISTER_RAW_SIZE (i);
-	  fsrp->regs[i] = adr;
+	  fip->saved_regs[i] = adr;
 	}
       return;
     }
@@ -520,16 +522,16 @@ i386_frame_find_saved_regs (fip, fsrp)
 	    break;
 #ifdef I386_REGNO_TO_SYMMETRY
 	  /* Dynix uses different internal numbering.  Ick.  */
-	  fsrp->regs[I386_REGNO_TO_SYMMETRY (op - 0x50)] = adr;
+	  fip->saved_regs[I386_REGNO_TO_SYMMETRY (op - 0x50)] = adr;
 #else
-	  fsrp->regs[op - 0x50] = adr;
+	  fip->saved_regs[op - 0x50] = adr;
 #endif
 	  adr -= 4;
 	}
     }
 
-  fsrp->regs[PC_REGNUM] = fip->frame + 4;
-  fsrp->regs[FP_REGNUM] = fip->frame;
+  fip->saved_regs[PC_REGNUM] = fip->frame + 4;
+  fip->saved_regs[FP_REGNUM] = fip->frame;
 }
 
 /* return pc of first real instruction */
@@ -640,15 +642,15 @@ i386_pop_frame ()
   struct frame_info *frame = get_current_frame ();
   CORE_ADDR fp;
   int regnum;
-  struct frame_saved_regs fsr;
   char regbuf[MAX_REGISTER_RAW_SIZE];
 
   fp = FRAME_FP (frame);
-  get_frame_saved_regs (frame, &fsr);
+  i386_frame_init_saved_regs (frame);
+
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
       CORE_ADDR adr;
-      adr = fsr.regs[regnum];
+      adr = frame->saved_regs[regnum];
       if (adr)
 	{
 	  read_memory (adr, regbuf, REGISTER_RAW_SIZE (regnum));

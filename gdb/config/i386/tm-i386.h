@@ -357,11 +357,9 @@ extern int i386_frame_num_args PARAMS ((struct frame_info *));
    ways in the stack frame.  sp is even more special:
    the address we return for it IS the sp for the next frame.  */
 
-#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
-{ i386_frame_find_saved_regs ((frame_info), &(frame_saved_regs)); }
+extern void i386_frame_init_saved_regs PARAMS ((struct frame_info *));
+#define FRAME_INIT_SAVED_REGS(FI) i386_frame_init_saved_regs (FI)
 
-extern void i386_frame_find_saved_regs PARAMS ((struct frame_info *,
-						struct frame_saved_regs *));
 
 
 /* Things needed for making the inferior call functions.  */
