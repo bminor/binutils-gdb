@@ -5,6 +5,7 @@ Tue Nov 29 17:14:21 1994  Doug Evans  <dje@canuck.cygnus.com>
 	* reloc.c, targets.c, config.bfd, configure.in, elfcode.h: Likewise.
 	* bfd-in2.h: Regenerated.
 	* libbfd.h: Likewise.
+	* config/arc-elf.mt: New file.
 end-sanitize-arc
 
 Tue Nov 29 14:00:19 1994  J.T. Conklin  <jtc@.rtl.cygnus.com>
