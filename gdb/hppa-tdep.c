@@ -2255,6 +2255,31 @@ hppa_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
   return pc & ~0x3;
 }
 
+/* Return the minimal symbol whose name is NAME and stub type is STUB_TYPE.
+   Return NULL if no such symbol was found.  */
+
+struct minimal_symbol *
+hppa_lookup_stub_minimal_symbol (const char *name,
+                                 enum unwind_stub_types stub_type)
+{
+  struct objfile *objfile;
+  struct minimal_symbol *msym;
+
+  ALL_MSYMBOLS (objfile, msym)
+    {
+      if (strcmp (SYMBOL_LINKAGE_NAME (msym), name) == 0)
+        {
+          struct unwind_table_entry *u;
+
+          u = find_unwind_entry (SYMBOL_VALUE (msym));
+          if (u != NULL && u->stub_unwind.stub_type == stub_type)
+            return msym;
+        }
+    }
+
+  return NULL;
+}
+
 /* Instead of this nasty cast, add a method pvoid() that prints out a
    host VOID data type (remember %p isn't portable).  */
 

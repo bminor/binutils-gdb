@@ -231,4 +231,8 @@ extern void hppa_write_pc (CORE_ADDR pc, ptid_t ptid);
 extern CORE_ADDR hppa_unwind_pc (struct gdbarch *gdbarch,
 				 struct frame_info *next_frame);
 
+extern struct minimal_symbol *
+  hppa_lookup_stub_minimal_symbol (const char *name,
+                                   enum unwind_stub_types stub_type);
+
 #endif  /* HPPA_TDEP_H */

@@ -161,7 +161,6 @@ som_solib_create_inferior_hook (void)
   unsigned int dld_flags, status, have_endo;
   asection *shlib_info;
   char buf[4];
-  struct objfile *objfile;
   CORE_ADDR anaddr;
 
   /* First, remove all the solib event breakpoints.  Their addresses
@@ -226,33 +225,13 @@ som_solib_create_inferior_hook (void)
 
   /* Grrr, this might not be an export symbol!  We have to find the
      export stub.  */
-  ALL_OBJFILES (objfile)
-  {
-    struct unwind_table_entry *u;
-    struct minimal_symbol *msymbol2;
-
-    /* What a crock.  */
-    msymbol2 =
-      lookup_minimal_symbol_solib_trampoline (SYMBOL_LINKAGE_NAME (msymbol),
-					      objfile);
-    /* Found a symbol with the right name.  */
-    if (msymbol2)
-      {
-	struct unwind_table_entry *u;
-	/* It must be a shared library trampoline.  */
-	if (SYMBOL_TYPE (msymbol2) != mst_solib_trampoline)
-	  continue;
-
-	/* It must also be an export stub.  */
-	u = find_unwind_entry (SYMBOL_VALUE (msymbol2));
-	if (!u || u->stub_unwind.stub_type != EXPORT)
-	  continue;
-
-	/* OK.  Looks like the correct import stub.  */
-	anaddr = SYMBOL_VALUE (msymbol2);
-	dld_cache.hook_stub.address = anaddr;
-      }
-  }
+  msymbol = hppa_lookup_stub_minimal_symbol (SYMBOL_LINKAGE_NAME (msymbol),
+                                             EXPORT);
+  if (msymbol != NULL)
+    {
+      anaddr = SYMBOL_VALUE (msymbol);
+      dld_cache.hook_stub.address = anaddr;
+    }
   store_unsigned_integer (buf, 4, anaddr);
 
   msymbol = lookup_minimal_symbol ("__dld_hook", NULL, symfile_objfile);
