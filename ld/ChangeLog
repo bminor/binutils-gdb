@@ -1,3 +1,8 @@
+2001-09-30  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* Makefile.am: Update dependencies with "make dep-am".
+	* Makefile.in: Regenerate.
+
 2001-09-29  John Reiser  <jreiser@BitWagon.com>
 
 	* ldlang.c (lang_common): Conditionally inhibit Common allocation.
