@@ -1498,7 +1498,8 @@ gdbtk-varobj.o: $(srcdir)/gdbtk/generic/gdbtk-varobj.c \
 		$(srcdir)/gdbtk/generic/gdbtk-varobj.c
 
 gdbtk-wrapper.o: $(srcdir)/gdbtk/generic/gdbtk-wrapper.c \
-	$(srcdir)/gdbtk/generic/gdbtk-wrapper.h
+	$(srcdir)/gdbtk/generic/gdbtk-wrapper.h \
+	$(defs_h) $(frame_h) $(value_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/gdbtk/generic/gdbtk-wrapper.c
 
