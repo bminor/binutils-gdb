@@ -1,3 +1,37 @@
+Thu Sep  5 23:49:48 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* .gdbinit:  Remove useless "rr" command.  Set complaints
+	to 1 for people debugging gdb.
+
+	* breakpoint.c, remote-vx.c:  Reword strings printed by
+	catch_errors callers.
+
+Wed Sep  4 11:07:50 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* WHATS.NEW:  "history write -> history save".  Doc "write on/off".
+	(Fix from kenc@viewlogic.com.)
+
+	Fix some infrastructure to be able to cope with host and target
+	machines with different sized basic types (ints, ptrs, etc).
+	(Idea from pierre@la.tce.com (Pierre Willard).)
+
+	* values.c (value_from_longest):  Rename from value_from_long.
+	Handle pointer types as well as integers, so that targets with
+	different pointer sizes from the host can be accomodated.
+	* breakpoint.c, convex-tdep.c, eval.c, expprint.c, printcmd.c,
+	valarith.c, valops.c, valprint.c, value.h, values.c:  Rename
+	uses of value_from_long to value_from_longest.
+	* eval.c, findvar.c, printcmd.c, valarith.c, valops.c:  Pass
+	the correct pointer type to value_from_long{est}.
+
+	* doc/gdb.texinfo ($_, $__):  Describe types of these variables.
+
+	* remote-vx.c:  Remove obsolete code for calling functions via
+	vxworks kludge interface (it referenced value_from_long).
+
+	* valops.c (value_string):  Find malloc with lookup_misc_func, not
+	raw search.
+
 Tue Sep  3 18:37:46 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	Make writing to files work properly.  (Fixes to BFD are also needed.)
