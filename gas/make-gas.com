@@ -73,6 +73,7 @@ $ gcc 'c_flags'/define=('C_DEFS') atof-targ.c
 $ gcc 'c_flags'/define=("error=as_fatal",'C_DEFS') targ-cpu.c
 $ gcc 'c_flags'/define=("error=as_fatal",'C_DEFS') obj-format.c
 $ Link:
+$if f$search("obstack.obj").eqs."" then copy [-.libiberty]obstack.obj *.*
 $ link/nomap/exec=gcc-as version.opt/opt+sys$input:/opt
 !
 !	Linker options file for GNU assembler
