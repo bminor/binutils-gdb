@@ -1083,8 +1083,6 @@ bpstat_alloc (b, cbs)
   return bs;
 }
 
-
-
 /* Possible return values for watchpoint_check (this can't be an enum
    because of check_errors).  */
 /* The watchpoint has been deleted.  */
@@ -1095,6 +1093,7 @@ bpstat_alloc (b, cbs)
 #define WP_VALUE_NOT_CHANGED 3
 
 /* Check watchpoint condition.  */
+
 static int
 watchpoint_check (p)
      char *p;
@@ -1109,11 +1108,13 @@ watchpoint_check (p)
   saved_frame = selected_frame;
   saved_level = selected_frame_level;
 
-  if (bs->breakpoint_at->exp_valid_block == NULL)
+  b = bs->breakpoint_at;
+
+  if (b->exp_valid_block == NULL)
     within_current_scope = 1;
   else
     {
-      fr = find_frame_addr_in_frame_chain (bs->breakpoint_at->watchpoint_frame);
+      fr = find_frame_addr_in_frame_chain (b->watchpoint_frame);
       within_current_scope = (fr != NULL);
       if (within_current_scope)
 	/* If we end up stopping, the current frame will get selected
@@ -1131,12 +1132,12 @@ watchpoint_check (p)
 
       value_ptr mark = value_mark ();
       value_ptr new_val = evaluate_expression (bs->breakpoint_at->exp);
-      if (!value_equal (bs->breakpoint_at->val, new_val))
+      if (!value_equal (b->val, new_val))
 	{
 	  release_value (new_val);
 	  value_free_to_mark (mark);
-	  bs->old_val = bs->breakpoint_at->val;
-	  bs->breakpoint_at->val = new_val;
+	  bs->old_val = b->val;
+	  b->val = new_val;
 	  /* We will stop here */
 	  select_frame (saved_frame, saved_level);
 	  return WP_VALUE_CHANGED;
@@ -1163,9 +1164,9 @@ watchpoint_check (p)
       printf_filtered ("\
 Watchpoint %d deleted because the program has left the block in\n\
 which its expression is valid.\n", bs->breakpoint_at->number);
-      if (bs->breakpoint_at->related_breakpoint)
-	delete_breakpoint (bs->breakpoint_at->related_breakpoint);
-      delete_breakpoint (bs->breakpoint_at);
+      if (b->related_breakpoint)
+	delete_breakpoint (b->related_breakpoint);
+      delete_breakpoint (b);
 
       select_frame (saved_frame, saved_level);
       return WP_DELETED;
@@ -2376,10 +2377,11 @@ break_command_1 (arg, flag, from_tty)
     }
   if (hardwareflag)
     {
-      int i, other_type_used, target_resources_ok;
-      i = hw_breakpoint_used_count();  
-      target_resources_ok = TARGET_CAN_USE_HARDWARE_WATCHPOINT(
-		bp_hardware_breakpoint, i+sals.nelts, 0);
+      int i, target_resources_ok;
+
+      i = hw_breakpoint_used_count ();  
+      target_resources_ok = TARGET_CAN_USE_HARDWARE_WATCHPOINT (
+		bp_hardware_breakpoint, i + sals.nelts, 0);
       if (target_resources_ok == 0)
 	error ("No hardware breakpoint support in the target.");
       else if (target_resources_ok < 0)
@@ -3584,9 +3586,10 @@ is valid is not currently in scope.\n", bpt->number);
            bpt->type == bp_access_watchpoint)
       {
         int i = hw_watchpoint_used_count (bpt->type, &other_type_used);
-        int mem_cnt = can_use_hardware_watchpoint(bpt->val);
+        int mem_cnt = can_use_hardware_watchpoint (bpt->val);
+
         target_resources_ok = TARGET_CAN_USE_HARDWARE_WATCHPOINT(
-                bpt->type, i+mem_cnt, other_type_used);
+                bpt->type, i + mem_cnt, other_type_used);
         /* we can consider of type is bp_hardware_watchpoint, convert to 
 	   bp_watchpoint in the following condition */
         if (target_resources_ok < 0)
@@ -3813,7 +3816,8 @@ _initialize_breakpoint ()
   breakpoint_count = 0;
 
   add_com ("ignore", class_breakpoint, ignore_command,
-	   "Set ignore-count of breakpoint number N to COUNT.");
+	   "Set ignore-count of breakpoint number N to COUNT.\n\
+Usage is `ignore N COUNT'.");
 
   add_com ("commands", class_breakpoint, commands_command,
 	   "Set commands to be executed when a breakpoint is hit.\n\
@@ -3826,8 +3830,8 @@ then no output is printed when it is hit, except what the commands print.");
 
   add_com ("condition", class_breakpoint, condition_command,
 	   "Specify breakpoint number N to break only if COND is true.\n\
-N is an integer; COND is an expression to be evaluated whenever\n\
-breakpoint N is reached.  ");
+Usage is `condition N COND', where N is an integer and COND is an\n\
+expression to be evaluated whenever breakpoint N is reached.  ");
 
   add_com ("tbreak", class_breakpoint, tbreak_command,
 	   "Set a temporary breakpoint.  Args like \"break\" command.\n\
