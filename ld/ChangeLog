@@ -1,5 +1,53 @@
 2000-07-28  Alan Modra  <alan@linuxcare.com.au>
 
+	* emultempl/armelf.em: Elide functions common to elf32.em,
+	ie. most of the file.
+	(arm_elf_after_open): New.  Do arm specific things then call
+	gld${EMULATION_NAME}_after_open.
+	(arm_elf_before_allocation): New.  Call
+	gld${EMULATION_NAME}_before_allocation then do arm specifics.
+	(PARSE_AND_LIST_PROLOGUE): Define.
+	(PARSE_AND_LIST_SHORTOPTS): Define.
+	(PARSE_AND_LIST_LONGOPTS): Define.
+	(PARSE_AND_LIST_OPTIONS): Define.
+	(PARSE_AND_LIST_ARGS_CASES): Define.
+	(LDEMUL_AFTER_OPEN): Define.
+	(LDEMUL_BEFORE_ALLOCATION): Define.
+	(LDEMUL_BEFORE_PARSE): Define.
+	(LDEMUL_FINISH): Define.
+
+	* emultempl/hppaelf.em: Similarly zap most of this file.
+	(hppaelf_add_stub_section): Prototype.
+	(hppaelf_layaout_sections_again): Prototype.
+	(hook_in_stub): Prototype.
+	(LDEMUL_SET_OUTPUT_ARCH): Define.
+	(LDEMUL_FINISH): Define.
+	(LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS): Define.
+
+	* emulparams/armelf.sh (TEMPLATE_NAME): Use elf32.
+	(EXTRA_EM_FILE): New.
+	* emulparams/armelf_linux.sh: Likewise.
+	* emulparams/armelf_linux26.sh: Likewise.
+	* emulparams/hppalinux.sh: Likewise.
+	* emulparams/hppaelf.sh: Likewise.
+	(NOP): Define.
+
+	* emultempl/elf32.em: Fix formatting.
+	(EXTRA_EM_FILE): Source it.
+	(LDEMUL_BEFORE_PARSE, LDEMUL_SYSLIB, LDEMUL_HLL,
+	LDEMUL_AFTER_PARSE, LDEMUL_AFTER_OPEN, LDEMUL_AFTER_ALLOCATION,
+	LDEMUL_SET_OUTPUT_ARCH, LDEMUL_CHOOSE_TARGET,
+	LDEMUL_BEFORE_ALLOCATION, LDEMUL_GET_SCRIPT, LDEMUL_FINISH,
+	LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS,
+	LDEMUL_OPEN_DYNAMIC_ARCHIVE, LDEMUL_PLACE_ORPHAN,
+	LDEMUL_SET_SYMBOLS, LDEMUL_PARSE_ARGS, LDEMUL_UNRECOGNIZED_FILE,
+	LDEMUL_LIST_OPTIONS, LDEMUL_RECOGNIZED_FILE,
+	LDEMUL_FIND_POTENTIAL_LIBRARIES): New shell vars.  Add code to
+	allow functions in this file to be overridden.
+	(PARSE_AND_LIST_SHORTOPTS): Handle it.
+
+	* emultempl/m68kcoff.em: Include ldfile.h before ldemul.h.
+
 	* emultempl/elf32.em: Reorganize file.
 
 2000-07-27  Ivan Kokshaysky  <ink@jurassic.park.msu.ru>

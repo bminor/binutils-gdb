@@ -69,14 +69,35 @@ static boolean gld${EMULATION_NAME}_place_orphan
   PARAMS ((lang_input_statement_type *, asection *));
 static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
 
+EOF
+
+# Import any needed special functions and/or overrides.
+#
+if test -n "$EXTRA_EM_FILE" ; then
+. ${srcdir}/emultempl/${EXTRA_EM_FILE}.em
+fi
+
+# Functions in this file can be overriden by setting the LDEMUL_* shell
+# variables.  If the name of the overriding function is the same as is
+# defined in this file, then don't output this file's version.
+# If a different overriding name is given then output the standard function
+# as presumably it is called from the overriding function.
+#
+if test x"$LDEMUL_BEFORE_PARSE" != xgld"$EMULATION_NAME"_before_parse; then
+cat >>e${EMULATION_NAME}.c <<EOF
+
 static void
-gld${EMULATION_NAME}_before_parse()
+gld${EMULATION_NAME}_before_parse ()
 {
   ldfile_output_architecture = bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`;
   config.dynamic_link = ${DYNAMIC_LINK-true};
   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo true ; else echo false ; fi`;
 }
 
+EOF
+fi
+
+cat >>e${EMULATION_NAME}.c <<EOF
 
 /* These variables are required to pass information back and forth
    between after_open and check_needed and stat_needed and vercheck.  */
@@ -325,7 +346,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
       return true;
     }
 
-  /* Tell the ELF backend that don't want the output file to have a
+  /* Tell the ELF backend that we don't want the output file to have a
      DT_NEEDED entry for this file.  */
   bfd_elf_set_dt_needed_name (abfd, "");
 
@@ -533,6 +554,10 @@ gld${EMULATION_NAME}_check_needed (s)
     }
 }
 
+EOF
+
+if test x"$LDEMUL_AFTER_OPEN" != xgld"$EMULATION_NAME"_after_open; then
+cat >>e${EMULATION_NAME}.c <<EOF
 
 /* This is called after all the input files have been opened.  */
 
@@ -654,6 +679,10 @@ cat >>e${EMULATION_NAME}.c <<EOF
     }
 }
 
+EOF
+fi
+
+cat >>e${EMULATION_NAME}.c <<EOF
 
 /* Look through an expression for an assignment statement.  */
 
@@ -726,6 +755,10 @@ gld${EMULATION_NAME}_find_statement_assignment (s)
     gld${EMULATION_NAME}_find_exp_assignment (s->assignment_statement.exp);
 }
 
+EOF
+
+if test x"$LDEMUL_BEFORE_ALLOCATION" != xgld"$EMULATION_NAME"_before_allocation; then
+cat >>e${EMULATION_NAME}.c <<EOF
 
 /* This is called after the sections have been attached to output
    sections, but before any sizes or addresses have been set.  */
@@ -801,6 +834,11 @@ gld${EMULATION_NAME}_before_allocation ()
   }
 }
 
+EOF
+fi
+
+if test x"$LDEMUL_OPEN_DYNAMIC_ARCHIVE" != xgld"$EMULATION_NAME"_open_dynamic_archive; then
+cat >>e${EMULATION_NAME}.c <<EOF
 
 /* Try to open a dynamic archive.  This is where we know that ELF
    dynamic libraries have an extension of .so (or .sl on oddball systems
@@ -884,8 +922,12 @@ gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
   return true;
 }
 
+EOF
+fi
+cat >>e${EMULATION_NAME}.c <<EOF
 
-/* A variant of lang_output_section_find.  */
+/* A variant of lang_output_section_find.  Used by place_orphan.  */
+
 static lang_output_section_statement_type *
 output_rel_find ()
 {
@@ -907,18 +949,20 @@ output_rel_find ()
   return (lang_output_section_statement_type *) NULL;
 }
 
+EOF
+
+if test x"$LDEMUL_PLACE_ORPHAN" != xgld"$EMULATION_NAME"_place_orphan; then
+cat >>e${EMULATION_NAME}.c <<EOF
 
 /* Place an orphan section.  We use this to put random SHF_ALLOC
    sections in the right segment.  */
 
-struct orphan_save
-{
+struct orphan_save {
   lang_output_section_statement_type *os;
   asection **section;
   lang_statement_union_type **stmt;
 };
 
-/*ARGSUSED*/
 static boolean
 gld${EMULATION_NAME}_place_orphan (file, s)
      lang_input_statement_type *file;
@@ -1137,9 +1181,14 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   return true;
 }
 
+EOF
+fi
+
+if test x"$LDEMUL_GET_SCRIPT" != xgld"$EMULATION_NAME"_get_script; then
+cat >>e${EMULATION_NAME}.c <<EOF
 
 static char *
-gld${EMULATION_NAME}_get_script(isfile)
+gld${EMULATION_NAME}_get_script (isfile)
      int *isfile;
 EOF
 
@@ -1194,26 +1243,14 @@ cat >>e${EMULATION_NAME}.c <<EOF
   else
     return "ldscripts/${EMULATION_NAME}.x";
 }
-EOF
 
+EOF
+fi
 fi
 
-if test -n "$PARSE_AND_LIST_ARGS_CASES" || test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
-NEED_PARSE_AND_LIST=yes
+if test -n "$PARSE_AND_LIST_ARGS_CASES" -o x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 
-cat >>e${EMULATION_NAME}.c <<EOF
-static int  gld_${EMULATION_NAME}_parse_args PARAMS ((int, char **));
-static void gld_${EMULATION_NAME}_list_options PARAMS ((FILE * file));
-EOF
-else
-NEED_PARSE_AND_LIST=no
-
-cat >>e${EMULATION_NAME}.c <<EOF
-#define gld_${EMULATION_NAME}_parse_args   NULL
-#define gld_${EMULATION_NAME}_list_options NULL
-EOF
-
-fi
+if test x"$LDEMUL_PARSE_ARGS" != xgld_"$EMULATION_NAME"_parse_args; then
 
 if test -n "$PARSE_AND_LIST_PROLOGUE" ; then
 cat >>e${EMULATION_NAME}.c <<EOF
@@ -1221,7 +1258,6 @@ cat >>e${EMULATION_NAME}.c <<EOF
 EOF
 fi
 
-if test "$NEED_PARSE_AND_LIST" = yes; then
 cat >>e${EMULATION_NAME}.c <<EOF
 
 #include "getopt.h"
@@ -1232,7 +1268,6 @@ cat >>e${EMULATION_NAME}.c <<EOF
 static struct option longopts[] =
 {
 EOF
-fi
 
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 cat >>e${EMULATION_NAME}.c <<EOF
@@ -1251,11 +1286,12 @@ cat >>e${EMULATION_NAME}.c <<EOF
 EOF
 fi
 
-if test "$NEED_PARSE_AND_LIST" = yes; then
 cat >>e${EMULATION_NAME}.c <<EOF
   {NULL, no_argument, NULL, 0}
 };
 
+
+static int gld_${EMULATION_NAME}_parse_args PARAMS ((int, char **));
 
 static int
 gld_${EMULATION_NAME}_parse_args (argc, argv)
@@ -1272,7 +1308,9 @@ gld_${EMULATION_NAME}_parse_args (argc, argv)
     opterr = 0;
 
   wanterror  = opterr;
-  optc = getopt_long_only (argc, argv, "-z:", longopts, &longind);
+  optc = getopt_long_only (argc, argv,
+			   "-${PARSE_AND_LIST_SHORTOPTS}z:", longopts,
+			   &longind);
   opterr = prevopterr;
 
   switch (optc)
@@ -1284,7 +1322,6 @@ gld_${EMULATION_NAME}_parse_args (argc, argv)
       return 0;
 
 EOF
-fi
 
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 cat >>e${EMULATION_NAME}.c <<EOF
@@ -1332,20 +1369,25 @@ cat >>e${EMULATION_NAME}.c <<EOF
 EOF
 fi
 
-if test "$NEED_PARSE_AND_LIST" = yes; then
 cat >>e${EMULATION_NAME}.c <<EOF
     }
 
   return 1;
 }
 
+EOF
+fi
+
+if test x"$LDEMUL_LIST_OPTIONS" != xgld_"$EMULATION_NAME"_list_options; then
+cat >>e${EMULATION_NAME}.c <<EOF
+
+static void gld_${EMULATION_NAME}_list_options PARAMS ((FILE * file));
 
 static void
 gld_${EMULATION_NAME}_list_options (file)
      FILE * file;
 {
 EOF
-fi
 
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 cat >>e${EMULATION_NAME}.c <<EOF
@@ -1371,43 +1413,54 @@ cat >>e${EMULATION_NAME}.c <<EOF
 EOF
 fi
 
-if test "$NEED_PARSE_AND_LIST" = yes; then
 cat >>e${EMULATION_NAME}.c <<EOF
 }
 EOF
-fi
 
 if test -n "$PARSE_AND_LIST_EPILOGUE" ; then
 cat >>e${EMULATION_NAME}.c <<EOF
  $PARSE_AND_LIST_EPILOGUE
 EOF
 fi
+fi
+else
+if test x"$LDEMUL_PARSE_ARGS" != xgld_"$EMULATION_NAME"_parse_args; then
+cat >>e${EMULATION_NAME}.c <<EOF
+#define gld_${EMULATION_NAME}_parse_args   NULL
+EOF
+fi
+if test x"$LDEMUL_LIST_OPTIONS" != xgld_"$EMULATION_NAME"_list_options; then
+cat >>e${EMULATION_NAME}.c <<EOF
+#define gld_${EMULATION_NAME}_list_options NULL
+EOF
+fi
+fi
 
 cat >>e${EMULATION_NAME}.c <<EOF
 
 struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
 {
-  gld${EMULATION_NAME}_before_parse,
-  syslib_default,
-  hll_default,
-  after_parse_default,
-  gld${EMULATION_NAME}_after_open,
-  after_allocation_default,
-  set_output_arch_default,
-  ldemul_default_target,
-  gld${EMULATION_NAME}_before_allocation,
-  gld${EMULATION_NAME}_get_script,
+  ${LDEMUL_BEFORE_PARSE-gld${EMULATION_NAME}_before_parse},
+  ${LDEMUL_SYSLIB-syslib_default},
+  ${LDEMUL_HLL-hll_default},
+  ${LDEMUL_AFTER_PARSE-after_parse_default},
+  ${LDEMUL_AFTER_OPEN-gld${EMULATION_NAME}_after_open},
+  ${LDEMUL_AFTER_ALLOCATION-after_allocation_default},
+  ${LDEMUL_SET_OUTPUT_ARCH-set_output_arch_default},
+  ${LDEMUL_CHOOSE_TARGET-ldemul_default_target},
+  ${LDEMUL_BEFORE_ALLOCATION-gld${EMULATION_NAME}_before_allocation},
+  ${LDEMUL_GET_SCRIPT-gld${EMULATION_NAME}_get_script},
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  NULL, 	/* finish */
-  NULL, 	/* create output section statements */
-  gld${EMULATION_NAME}_open_dynamic_archive,
-  gld${EMULATION_NAME}_place_orphan,
-  NULL,		/* set_symbols */
-  gld_${EMULATION_NAME}_parse_args,
-  NULL,		/* unrecognized_file */
-  gld_${EMULATION_NAME}_list_options,
-  NULL,		/* recognized_file */
-  NULL		/* find_potential_libraries */
+  ${LDEMUL_FINISH-NULL},
+  ${LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS-NULL},
+  ${LDEMUL_OPEN_DYNAMIC_ARCHIVE-gld${EMULATION_NAME}_open_dynamic_archive},
+  ${LDEMUL_PLACE_ORPHAN-gld${EMULATION_NAME}_place_orphan},
+  ${LDEMUL_SET_SYMBOLS-NULL},
+  ${LDEMUL_PARSE_ARGS-gld_${EMULATION_NAME}_parse_args},
+  ${LDEMUL_UNRECOGNIZED_FILE-NULL},
+  ${LDEMUL_LIST_OPTIONS-gld_${EMULATION_NAME}_list_options},
+  ${LDEMUL_RECOGNIZED_FILE-NULL},
+  ${LDEMUL_FIND_POTENTIAL_LIBRARIES-NULL},
 };
 EOF
