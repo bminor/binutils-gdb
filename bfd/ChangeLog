@@ -1,5 +1,10 @@
 2002-05-01  Alan Modra  <amodra@bigpond.net.au>
 
+	* syms.c (_bfd_stab_section_find_nearest_line): Don't bomb on NULL
+	file_name.
+
+2002-05-01  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (CROR_151515, CROR_313131): Define.
 	(ppc64_elf_relocate_section): Use them.  Don't look for plt calls
 	on R_PPC64_ADDR24 relocs.  Require a nop or no link reg on plt
