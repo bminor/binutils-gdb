@@ -1,3 +1,8 @@
+2002-05-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	* valops.c (value_arg_coerce): Don't coerce arrays to pointers if
+	we are dealing with vectors.
+
 2002-05-02  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* config/m68k/tm-nbsd.h: Obvious fix,
