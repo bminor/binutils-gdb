@@ -327,19 +327,31 @@ dynamic symbol table.  Normally, the dynamic symbol table contains only
 symbols which are used by a dynamic object.  This option is needed for
 some uses of @code{dlopen}.
 
-@ifclear SingleFormat
+@kindex -f
+@kindex --auxiliary
+@item -f
+@itemx --auxiliary @var{name}
+When creating an ELF shared object, set the internal DT_AUXILIARY field
+to the specified name.  This tells the dynamic linker that the symbol
+table of the shared object should be used as an auxiliary filter on the
+symbol table of the shared object @var{name}.
+
 @kindex -F
-@item -F
-@itemx -F@var{format}
-Ignored.  Some older linkers used this option throughout a compilation
+@kindex --filter
+@item -F @var{name}
+@itemx --filter @var{name}
+When creating an ELF shared object, set the internal DT_FILTER field to
+the specified name.  This tells the dynamic linker that the symbol table
+of the shared object should be used as a filter on the symbol table of
+the shared object @var{name}.
+
+Some older linkers used the @code{-F} option throughout a compilation
 toolchain for specifying object-file format for both input and output
-object files.  The mechanisms @code{ld} uses for this purpose (the
-@samp{-b} or @samp{--format} options for input files, @samp{--oformat}
-option or the @code{TARGET} command in linker scripts for output files,
-the @code{GNUTARGET} environment variable) are more flexible, but
-@code{ld} accepts the @samp{-F} option for compatibility with scripts
-written to call the old linker.
-@end ifclear
+object files.  The @sc{gnu} linker uses other mechanisms for this
+purpose: the @code{-b}, @code{--format}, @code{--oformat} options, the
+@code{TARGET} command in linker scripts, and the @code{GNUTARGET}
+environment variable.  The @sc{gnu} linker will ignore the @code{-F}
+option when not creating an ELF shared object.
 
 @kindex --force-exe-suffix
 @item  --force-exe-suffix
@@ -3236,10 +3248,11 @@ the necessary information, such as the test case, on the assumption that
 a patch is all we need.  We might see problems with your patch and decide
 to fix the problem another way, or we might not understand it at all.
 
-Sometimes with a program as complicated as @code{@value{AS}} it is very hard to
-construct an example that will make the program follow a certain path through
-the code.  If you do not send us the example, we will not be able to construct
-one, so we will not be able to verify that the bug is fixed.
+Sometimes with a program as complicated as @code{ld} it is very hard to
+construct an example that will make the program follow a certain path
+through the code.  If you do not send us the example, we will not be
+able to construct one, so we will not be able to verify that the bug is
+fixed.
 
 And if we cannot understand what bug you are trying to fix, or why your
 patch should be an improvement, we will not install it.  A test case will

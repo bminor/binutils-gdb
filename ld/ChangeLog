@@ -1,3 +1,14 @@
+Tue Dec 31 14:48:30 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.h (args_type): Add filter_shlib and auxiliary_filter_shlib
+	fields.
+	* lexsup.c (parse_args): Recognize --auxiliary/-f and
+	--filter/-F.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation):
+	Pass filter_shlib and auxiliary_filter_shlib to
+	size_dynamic_sections.
+	* ld.texinfo, ld.1: Document --filter/-F and --auxiliary/-f.
+
 start-sanitize-v850
 Mon Dec 30 13:55:57 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
