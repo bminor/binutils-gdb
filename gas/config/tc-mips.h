@@ -193,4 +193,9 @@ extern enum dwarf2_format mips_dwarf2_format PARAMS ((void));
 #define DWARF2_ADDR_SIZE(bfd) \
   (DWARF2_FORMAT () == dwarf2_format_32bit ? 4 : 8)
 
+typedef struct {
+  offsetT tc_fr_offset;
+} tc_frag_data_type;
+#define TC_FRAG_TYPE tc_frag_data_type
+
 #endif /* TC_MIPS */

@@ -1,3 +1,26 @@
+2003-04-10  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-mips.h (tc_frag_data_type, TC_FRAG_TYPE): New.
+	* config/tc-mips.c: Use signed add for n32 address arithmetic.
+	(append_insn): When filling delay slots with instructions
+	that have fixups that tc_gen_reloc might consider modifyable
+	in variant frags, start a new frag.
+	(load_address): Generate GOT_DISP with of without offset
+	depending on whether symbol is local.  For -xgot, use
+	GOT_PAGE/GOT_OFST or GOT_HI16/GOT_LO16.
+	(macro) <M_DLA_AB, M_LA_AB>: Likewise.
+	<M_JAL_A>: In NewABI, use CALL16 or GOT_DISP for small got,
+	CALL_HI16/CALL_LO16 or GOT_PAGE/GOT_OFST for big got.
+	<ld_st>: In NewABI with small got, always use
+	GOT_PAGE/GOT_OFST, with the latter in the load/store
+	instruction.  With big got, use GOT_HI16/GOT_LO16 or
+	GOT_PAGE/GOT_OFST.
+	(tc_gen_reloc): Adjust variant frags with GOT_DISP in NewABI.
+	Add tc_frag_data.tc_fr_offset to addends.  Decay CALL16,
+	GOT_OFST and GOT_DISP to GOT_DISP in NewABI.
+	(md_convert_frag): Use memmove for safe copying of overlapping
+	regions.
+
 2003-04-09  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* doc/c-m68hc11.texi (M68HC11-Opts): Document -m68hcs12, -mshort,
