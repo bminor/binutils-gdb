@@ -13,7 +13,10 @@
 ==============================================================================
 */
 #include <nwpre.h>
-#include "libhooks.h"
+/*#include "libhooks.h"*/
+#include <stddef.h>
+
+extern int main (int, char **);
 
 static int	NLMID;
 
@@ -54,9 +57,6 @@ int _Prelude
 					customDataSize,
                &NLMID,
 					_cstart_);
-
-	if (!rc)
-		rc = _NWRegisterNLMLibraryUser(NLMID, _GetCLibNLMLibHandle());
 
 	return rc;
 }

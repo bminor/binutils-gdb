@@ -47,6 +47,46 @@ INSTALL_DATA = $(INSTALL)
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
 INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1
 
+CC_FOR_TARGET = ` \
+  if [ -f ../../gcc/xgcc ] ; then \
+    if [ -f ../../newlib/Makefile ] ; then \
+      echo ../../gcc/xgcc -B../../gcc/ -idirafter ../newlib/targ-include -idirafter $${rootsrc}/../newlib/libc/include -nostdinc -L../../../newlib -B../../../newlib/; \
+    else \
+      echo ../../gcc/xgcc -B../../gcc/; \
+    fi; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(CC); \
+    else \
+      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+    fi; \
+  fi`
+
+NLMCONV_FOR_TARGET = ` \
+  if [ -f ../../binutils/nlmconv ] ; then \
+    echo ../../binutils/nlmconv; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(NLMCONV); \
+    else \
+      t='$(program_transform_name)'; echo nlmconv | sed -e '' $$t; \
+    fi; \
+  fi`
+
+NWSOURCE = /gaunt/grossman/unsupported/Novell
+NWINCLUDES = -I/gaunt/grossman/PPC-NETWARE/ndk/include
+
+LD_FOR_TARGET = ` \
+  if [ -f ../../ld/ld.new ] ; then \
+    echo ../../ld/ld.new; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(LD); \
+    else \
+      t='$(program_transform_name)'; echo ld | sed -e '' $$t; \
+    fi; \
+  fi`
+
 AR = ar
 AR_FLAGS = qv
 RANLIB = ranlib
@@ -130,7 +170,7 @@ GLOBAL_CFLAGS = ${MT_CFLAGS} ${MH_CFLAGS}
 # when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
 CFLAGS = -g
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
-INTERNAL_CFLAGS = ${CFLAGS} ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} ${MMALLOC_CFLAGS} ${INCLUDE_CFLAGS} ${USER_CFLAGS}
+INTERNAL_CFLAGS = ${CFLAGS} ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} ${MMALLOC_CFLAGS} ${INCLUDE_CFLAGS} ${USER_CFLAGS} ${NWINCLUDES}
 LDFLAGS = $(CFLAGS)
 
 # Perhaps should come from parent Makefile
@@ -146,22 +186,17 @@ LINTFLAGS= -I${BFD_DIR}
 
 # All source files that go into linking GDB remote server.
 
-SFILES = $(srcdir)/alpha-patch.c $(srcdir)/alpha-uart.c $(srcdir)/gdbserve.c \
-	 $(srcdir)/alpha-io.S
-
 DEPFILES = $(GDBSERVE_DEPFILES)
 
-SOURCES = $(SFILES) $(ALLDEPFILES)
+SOURCES = $(ALLDEPFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS} 
-
-OBS = gdbserve.o alpha-patch.o alpha-uart.o alpha-io.o $(srcdir)/prelude.o
 
 # Prevent Sun make from putting in the machine type.  Setting
 # TARGET_ARCH to nothing works for SunOS 3, 4.0, but not for 4.1.
 .c.o:
-	${CC} -c ${INTERNAL_CFLAGS} $<
+	${CC_FOR_TARGET} -c ${INTERNAL_CFLAGS} $<
 
-all: GDBSERVE.NLM
+all: gdbserve.nlm
 
 # Traditionally "install" depends on "all".  But it may be useful
 # not to; for example, if the user has made some trivial change to a 
@@ -183,29 +218,11 @@ info dvi:
 install-info:
 clean-info:
 
-NWAXPDEV=/gaunt/grossman/ALPHA-NLM/cygnus_940215/nwaxpdev
+gdbserve.nlm:	gdbserve.O $(srcdir)/gdbserve.def
+	${NLMCONV_FOR_TARGET} -T $(srcdir)/gdbserve.def
 
-.EXPORT: NWAXPDEV
-
-CC=${NWAXPDEV}/bin/cc -32addr -non_shared -no_excpt -g -DALPHA=1 -std -I -I${NWAXPDEV}/usr/include -I${NWAXPDEV}/clib/include
-LD=${NWAXPDEV}/bin/ld -32addr -no_excpt -non_shared -d -r -L -T 0 -g -b
-AS=${NWAXPDEV}/bin/as -I. -32addr
-NLMCONV=${NWAXPDEV}/bin/alphanlm
-
-GDBSERVE.NLM:	gdbserve $(srcdir)/gdbserve.def
-	${NLMCONV} $(srcdir)/gdbserve.def
-
-gdbserve: $(OBS)
-	${LD} $(LDFLAGS) -o gdbserve ${OBS} ${LIBS} ${NWAXPDEV}/usr/lib/nwlibc.a
-
-gdbserve.o: $(srcdir)/gdbserve.c $(srcdir)/alpha-patch.h
-
-alpha-patches.o: $(srcdir)/alpha-patches.c $(srcdir)/alpha-patches.h
-
-alpha-io.o: $(srcdir)/alpha-io.S
-	${AS} -o alpha-io.o $(srcdir)/alpha-io.S
-
-alpha-uart.o:	$(srcdir)/alpha-uart.c
+gdbserve.O: prelude.o gdbserve.o $(TDEPFILES)
+	${LD_FOR_TARGET} $(LDFLAGS) -r -o gdbserve.O prelude.o gdbserve.o ${TDEPFILES}
 
 config.status:
 	@echo "You must configure gdbserver.  Look at the README file for details."
@@ -229,7 +246,7 @@ tags: TAGS
 clean:
 	rm -f *.o ${ADD_FILES} *~
 	rm -f init.c version.c
-	rm -f gdbserver core make.log
+	rm -f gdbserve.O gdbserve.nlm core make.log
 
 distclean: clean c-exp.tab.c m2-exp.tab.c ch-exp.tab.c TAGS
 	rm -f tm.h xm.h config.status

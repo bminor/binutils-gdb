@@ -307,6 +307,7 @@ TARGET_FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"exec_prefix=$(exec_prefix)" \
 	"against=$(against)" \
+	"BISON=$(BISON)" \
 	'CC=$$(CC_FOR_TARGET)' \
 	"CC_FOR_TARGET=$(CC_FOR_TARGET)" \
 	"CFLAGS=$(CFLAGS)" \
@@ -317,13 +318,14 @@ TARGET_FLAGS_TO_PASS = \
 	'CXX=$$(CXX_FOR_TARGET)' \
 	"CXX_FOR_TARGET=$(CXX_FOR_TARGET)" \
 	"CXXFLAGS=$(CXXFLAGS)" \
-	"MAKEINFO=$(MAKEINFO)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
+	"LD_FOR_TARGET=$(LD_FOR_TARGET)" \
+	"MAKEINFO=$(MAKEINFO)" \
+	"NLMCONV_FOR_TARGET=$(NLMCONV_FOR_TARGET)" \
 	"RUNTEST=$(RUNTEST)" \
-	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
-	"BISON=$(BISON)"
+	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
 
 # All source files that go into linking GDB.
 # Links made at configuration time should not be specified here, since
@@ -462,7 +464,7 @@ NTSOBS = standalone.o
 
 NTSSTART = kdb-start.o
 
-SUBDIRS = doc testsuite
+SUBDIRS = doc testsuite nlm
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.tab.c m2-exp.tab.c ch-exp.tab.c
@@ -583,6 +585,9 @@ nlmstub.nlm: nlmstub.o $(srcdir)/nlmstub.def
 	rootme=`pwd`; export rootme; $(NLMCONV_FOR_TARGET) -T $(srcdir)/nlmstub.def nlmstub.o nlmstub.nlm
 
 nlmstub: nlmstub.nlm
+
+nlm:	force
+	rootme=`pwd`; export rootme; $(MAKE) $(TARGET_FLAGS_TO_PASS) DO=all DODIRS=nlm subdir_do
 
 # libproc is not listed here because all-libproc is a dependency of all-gui,
 # not all-gdb, and thus might be built after us.

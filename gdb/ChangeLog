@@ -1,3 +1,22 @@
+Wed Aug 17 23:08:53 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* Makefile.in (TARGET_FLAGS_TO_PASS):  Pass down LD_FOR_TARGET and
+	NLMCONV_FOR_TARGET.  (SUBDIRS):  Add nlm target.
+	* configure.in (powerpc-*-netware*):  Automatically configure nlm
+	subdir.
+	* nlm/Makefile.in:  Add {CC NLMCONV LD}_FOR_TARGET.  Remove alpha
+	specific stuff.  Make things more configurable.
+	* nlm/configure.in:  Add powerpc-*-netware* target.  Use
+	gdbserve.mt/cpu.c/cpu.h for target stuff.  Get rid of tm/xm/nm.h
+	files.
+	* nlm/gdbserve.c:  Move Alpha specific stuff into other files.
+	Remove lots of architecture-specific stuff.
+	* nlm/gdbserve.def:  Add new imports.
+	* nlm/ppc.c, nlm/ppc.h:  New files that contain PowerPC specific code.
+	* nlm/prelude.c:  Don't include libhooks.h, get rid of call to
+	register library.
+	* nlm/prelude.o:  What was this doing here?
+
 Wed Aug 17 23:17:33 1994  Rob Savoye  (rob@darkstar.cygnus.com)
 
 	* remote-pa.c: New file for HPPA embedded support. Currently it's

@@ -70,16 +70,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-/*#include <ctype.h>*/
 #include <time.h>
-/*#include <aio.h>*/
 #include <nwconio.h>
 #include <nwadv.h>
 #include <nwdbgapi.h>
-/*#include <process.h>*/
 #include <errno.h>
 #include <nwthread.h>
-#include "alpha-patch.h"
+#include <aio.h>
+#include "cpu.h"
 
 /****************************************************/
 /* This information is from Novell.  It is not in any of the standard
@@ -142,28 +140,12 @@ static int remote_debug = 1;
 
 static const char hexchars[] = "0123456789abcdef";
 
-/* Register values.  All of these values *MUST* agree with tm.h */
-#define RA_REGNUM 26		/* Contains return address value */
-#define SP_REGNUM 30		/* Contains address of top of stack */
-#define PC_REGNUM 64		/* Contains program counter */
-#define FP_REGNUM 65		/* Virtual frame pointer */
-#define V0_REGNUM 0		/* Function integer return value */
-#define NUM_REGS 66		/* Number of machine registers */
-#define REGISTER_BYTES (NUM_REGS * 8) /* Total size of registers array */
-
-#define ExceptionPC ExceptionRegs[SF_REG_PC].lo
-#define DECR_PC_AFTER_BREAK 0	/* NT's Palcode gets this right! */
-#define BREAKPOINT {0x80, 0, 0, 0} /* call_pal bpt */
-
 unsigned char breakpoint_insn[] = BREAKPOINT;
-#define BREAKPOINT_SIZE (sizeof breakpoint_insn)
 
-/*#define flush_i_cache() asm("call_pal 0x86")*/
-
-static char *mem2hex (void *mem, char *buf, int count, int may_fault);
-static char *hex2mem (char *buf, void *mem, int count, int may_fault);
-static void set_step_traps (struct StackFrame *);
-static void clear_step_traps (struct StackFrame *);
+char *mem2hex (void *mem, char *buf, int count, int may_fault);
+char *hex2mem (char *buf, void *mem, int count, int may_fault);
+extern void set_step_traps (struct StackFrame *);
+extern void clear_step_traps (struct StackFrame *);
 
 #if 0
 __main() {};
@@ -212,30 +194,6 @@ putDebugChar (c)
 	ConsolePrintf ("AIOWriteData: err = %d, put = %d\r\n", err, put);
     }
   return 1;
-}
-
-/* Get the registers out of the frame information.  */
-
-static void
-frame_to_registers (frame, regs)
-     struct StackFrame *frame;
-     char *regs;
-{
-  mem2hex (&frame->ExceptionPC, &regs[PC_REGNUM * 8 * 2], 8 * 1, 0);
-
-  mem2hex (&frame->ExceptionRegs[SF_IREG_OFFSET], &regs[V0_REGNUM * 8 * 2], 8 * 64, 0);
-}
-
-/* Put the registers back into the frame information.  */
-
-static void
-registers_to_frame (regs, frame)
-     char *regs;
-     struct StackFrame *frame;
-{
-  hex2mem (&regs[PC_REGNUM * 8 * 2], &frame->ExceptionPC, 8 * 1, 0);
-
-  hex2mem (&regs[V0_REGNUM * 8 * 2], &frame->ExceptionRegs[SF_IREG_OFFSET], 8 * 64, 0);
 }
 
 /* Turn a hex character into a number.  */
@@ -404,8 +362,9 @@ static int mem_may_fault;
 
 /* Indicate to caller of mem2hex or hex2mem that there has been an
    error.  */
-static volatile int mem_err = 0;
+volatile int mem_err = 0;
 
+#ifndef ALTERNATE_MEM_FUNCS
 /* These are separate functions so that they are so short and sweet
    that the compiler won't save any registers (if there is a fault
    to mem_fault, they won't get restored, so there better not be any
@@ -425,27 +384,14 @@ set_char (addr, val)
 {
   *addr = val;
 }
-
-/* This bit of assembly language just returns from a function.  If a
-   memory error occurs within get_char or set_char, the debugger
-   handler points EIP at these instructions to get out.  */
-
-extern void just_return ();
-#if 0
-asm (".globl just_return");
-asm (".globl _just_return");
-asm ("just_return:");
-asm ("_just_return:");
-asm ("leave");
-asm ("ret");
-#endif
+#endif /* ALTERNATE_MEM_FUNCS */
 
 /* convert the memory pointed to by mem into hex, placing result in buf */
 /* return a pointer to the last char put in buf (null) */
 /* If MAY_FAULT is non-zero, then we should set mem_err in response to
    a fault; if zero treat a fault like any other fault in the stub.  */
 
-static char *
+char *
 mem2hex (mem, buf, count, may_fault)
      void *mem;
      char *buf;
@@ -473,7 +419,7 @@ mem2hex (mem, buf, count, may_fault)
 /* convert the hex array pointed to by buf into binary to be placed in mem */
 /* return a pointer to the character AFTER the last byte written */
 
-static char *
+char *
 hex2mem (buf, mem, count, may_fault)
      char *buf;
      void *mem;
@@ -500,7 +446,7 @@ hex2mem (buf, mem, count, may_fault)
 /* This function takes the 386 exception vector and attempts to
    translate this number into a unix compatible signal value.  */
 
-static int
+int
 computeSignal (exceptionVector)
      int exceptionVector;
 {
@@ -557,133 +503,6 @@ hexToInt(ptr, intValue)
     }
 
   return (numChars);
-}
-
-union inst
-{
-  LONG l;
-
-  struct
-    {
-      union
-	{
-	  struct
-	    {
-	      unsigned hint : 16;
-	      unsigned rb : 5;
-	      unsigned ra : 5;
-	      unsigned opcode : 6;
-	    } jump;
-	  struct
-	    {
-	      signed disp : 21;
-	      unsigned ra : 5;
-	      unsigned opcode : 6;
-	    } branch;
-	} variant;
-    } inst;
-};
-
-static LONG saved_inst;
-static LONG *saved_inst_pc = 0;
-static LONG saved_target_inst;
-static LONG *saved_target_inst_pc = 0;
-
-static void
-set_step_traps (frame)
-     struct StackFrame *frame;
-{
-  union inst inst;
-  LONG *target;
-  int opcode;
-  int ra, rb;
-  LONG *pc = (LONG *)frame->ExceptionPC;
-
-  inst.l = *pc++;
-
-  opcode = inst.inst.variant.branch.opcode;
-
-  if ((opcode & 0x30) == 0x30)	/* A branch of some sort */
-    target = inst.inst.variant.branch.disp + pc;
-  else if (opcode == 0x1a)	/* jmp, ret, etc... */
-    target = (LONG *)(frame->ExceptionRegs[SF_IREG_OFFSET
-					   + inst.inst.variant.jump.rb].lo
-		      & ~3);
-  else
-    target = pc;
-
-  saved_inst = *pc;
-  *pc = 0x80;			/* call_pal bpt */
-  saved_inst_pc = pc;
-
-  if (target != pc)
-    {
-      saved_target_inst = *target;
-      *target = 0x80;		/* call_pal bpt */
-      saved_target_inst_pc = target;
-    }
-}
-
-/* Remove step breakpoints.  Returns non-zero if pc was at a step breakpoint,
-   zero otherwise.  This routine works even if there were no step breakpoints
-   set.  */
-
-static int
-clear_step_traps (frame)
-     struct StackFrame *frame;
-{
-  int retcode;
-  LONG *pc = (LONG *)frame->ExceptionPC;
-
-  if (saved_inst_pc == pc || saved_target_inst_pc == pc)
-    retcode = 1;
-  else
-    retcode = 0;
-
-  if (saved_inst_pc)
-    {
-      *saved_inst_pc = saved_inst;
-      saved_inst_pc = 0;
-    }
-
-  if (saved_target_inst_pc)
-    {
-      *saved_target_inst_pc = saved_target_inst;
-      saved_target_inst_pc = 0;
-    }
-
-  return retcode;
-}
-
-static void
-do_status (ptr, frame)
-     char *ptr;
-     struct StackFrame *frame;
-{
-  int sigval;
-
-  sigval = computeSignal (frame->ExceptionNumber);
-
-  sprintf (ptr, "T%02x", sigval);
-  ptr += 3;
-
-  sprintf (ptr, "%02x:", PC_REGNUM);
-  ptr = mem2hex (&frame->ExceptionPC, ptr + 3, 8, 0);
-  *ptr++ = ';';
-
-  sprintf (ptr, "%02x:", SP_REGNUM);
-  ptr = mem2hex (&frame->ExceptionRegs[SF_IREG_OFFSET + SP_REGNUM], ptr + 3, 8, 0);
-  *ptr++ = ';';
-
-  sprintf (ptr, "%02x:", RA_REGNUM);
-  ptr = mem2hex (&frame->ExceptionRegs[SF_IREG_OFFSET + RA_REGNUM], ptr + 3, 8, 0);
-  *ptr++ = ';';
-
-  sprintf (ptr, "%02x:", FP_REGNUM);
-  ptr = mem2hex (&frame->ExceptionRegs[SF_IREG_OFFSET + FP_REGNUM], ptr + 3, 8, 0);
-  *ptr++ = ';';
-
-  *ptr = '\000';
 }
 
 /* This function does all command processing for interfacing to gdb.
