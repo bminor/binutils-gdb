@@ -348,13 +348,11 @@ Thu May 28 08:46:09 1998  Catherine Moore <clm@cygnus.com>
        Change pinfo to use WR_HILO.
 
 end-sanitize-vr5400
-start-sanitize-d30v
 Wed May 27 15:29:13 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* d30v-opc.c: Add new operand: Ra3.  Change SHORT_B3, SHORT_B3b,
 	LONG_2, LONG_2b formats to use this new operand.
 
-end-sanitize-d30v
 Tue May 26 20:47:48 1998  Stan Cox  <scox@cygnus.com>
 
 	* sparc-dis.c (compute_arch_mask): Added bfd_mach_sparc_sparclite_le.
@@ -364,7 +362,6 @@ Tue May 26 20:45:33 1998  Mark Alexander  <marka@cygnus.com>
 	* sparc-dis.c (print_insn_sparc): big endian instruction / little
 	endian data support.
 
-start-sanitize-d30v
 Tue May 26 16:14:39 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* d30v-opc.c (d30v_format_table): Change definition of SHORT_B3
@@ -375,7 +372,6 @@ Tue May 26 16:14:39 1998  Nick Clifton  <nickc@cygnus.com>
 	Add FLAG_ADDSUBppp to SRC and SATHp opcodes to implement extension
 	to existing 1.1.1 parallelisation prohibition procedure.
 
-end-sanitize-d30v
 Fri May 22 16:00:00 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* cgen-asm.in (insert_normal): Handle empty fields and 64 bit hosts.
@@ -439,12 +435,10 @@ Tue May 12 13:39:51 1998  Nick Clifton  <nickc@cygnus.com>
 	insns.
 
 end-sanitize-m32rx
-start-sanitize-d30v
 Tue May 12 11:46:31 1998  Richard Henderson  <rth@cygnus.com>
 
 	* d30v-opc.c (pre_defined_register): Remove alias for r0.
 
-end-sanitize-d30v
 start-sanitize-r5900
 Mon May 11 13:12:15 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
@@ -558,9 +552,7 @@ Mon Apr 27 14:31:00 1998  Nick Clifton  <nickc@cygnus.com>
 	* arc-opc.c: Internationalised.
 	* arm-dis.c: Internationalised.
 	* cgen-asm.c: Internationalised.
-start-sanitize-d30v
 	* d30v-dis.c: Internationalised.
-end-sanitize-d30v
 	* dis-buf.c: Internationalised.
 start-sanitize-sky
 	* dvp-dis.c: Internationalised.
@@ -718,13 +710,11 @@ Mon Mar 30 17:32:03 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Branched binutils 2.9.
 
-start-sanitize-d30v
 Mon Mar 30 15:18:00 1998  Ken Raeburn  <raeburn@cygnus.com>
 
 	* d30v-dis.c (print_insn_d30v): Don't use uninitialized "num" when
 	disassembling last 4 bytes of a section.
 
-end-sanitize-d30v
 Fri Mar 27 18:08:13 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	Fix some gcc -Wall warnings:
@@ -744,9 +734,7 @@ end-sanitize-sky
 	* cgen-dis.c (build_dis_hash_table): Remove used local variables.
 	* cgen-opc.c (cgen_keyword_search_next): Likewise.
 	* d10v-dis.c (dis_long, dis_2_short): Likewise.
-start-sanitize-d30v
 	* d30v-dis.c (print_insn_d30v, lookup_opcode): Likewise.
-end-sanitize-d30v
 start-sanitize-sky
 	* dvp-dis.c (print_dma, print_vif, print_gif): Likewise.
 	* dvp-opc.c (parse_dest1, print_uflags): Likewise.
@@ -761,11 +749,9 @@ end-sanitize-tic80
 	* a29k-dis.c: Add return type for find_byte_func_type.
 	* arc-opc.c: Include <stdio.h>.  Remove declarations of
 	insert_multshift and extract_multshift.
-start-sanitize-d30v
 	* d30v-dis.c (lookup_opcode): Parenthesize assignments in
 	conditionals.
 	(extract_value): Fully parenthesize expression.
-end-sanitize-d30v
 start-sanitize-sky
 	* dvp-opc.c: Include <ctype.h>.
 	(print_sdest): Add default case to switch.
@@ -1014,13 +1000,11 @@ Fri Feb 27 13:16:42 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	(r5900/msub.s): Takes three operands, not four.  Fix opcode.
 
 end-sanitize-r5900
-start-sanitize-d30v
 Thu Feb 26 15:53:09 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* d30v-opc.c (d30v_opcode_table): Indicate which instructions are
 	delayed branches or jumps.
 
-end-sanitize-d30v
 start-sanitize-sky
 Fri Feb 27 10:04:19 1998  Doug Evans  <devans@canuck.cygnus.com>
 
@@ -1223,13 +1207,11 @@ Sat Feb  7 15:30:27 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure, aclocal.m4: Rebuild with new libtool.
 
-start-sanitize-d30v
 Thu Feb  5 17:56:10 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* d30v-opc.c (repeat{,i} instructions): Repeat/repeati
 	instructions use a PC relative branch, not absolute.
 
-end-sanitize-d30v
 Wed Feb  4 19:17:37 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Set libtool_enable_shared rather than
@@ -1373,13 +1355,11 @@ Tue Dec 16 13:24:22 1997  Jeffrey A Law  (law@cygnus.com)
 	* mips-opc.c: Add many missing r5900 instructions.
 
 end-sanitize-r5900
-start-sanitize-d30v
 Tue Dec 16 15:22:51 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* d30v-opc.c (d30v_opcode_table): Set new flags bits
 	FLAG_{2WORD,MUL{16,32},ADDSUBppp}, in appropriate instructions.
 
-end-sanitize-d30v
 1997-12-15  Brendan Kehoe  <brendan@lisa.cygnus.com>
 
 	* configure: Only build libopcodes shared if --enable-shared's value
@@ -1448,14 +1428,12 @@ Mon Dec  1 11:56:50 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* m68k-dis.c (print_insn_m68k): Handle special case of lpstop,
 	which has a two word opcode with a one word argument.
 
-start-sanitize-d30v
 Sun Nov 23 22:25:21 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* d30v-opc.c (d30v_opcode_table, case cmpu): Immediate field is
 	unsigned, not signed.
 	(d30v_format_table): Add SHORT_CMPU cases for cmpu.
 
-end-sanitize-d30v
 Wed Nov 19 17:42:35 1997  Richard Henderson  <rth@cygnus.com>
 
         * sh-dis.c (print_insn_shx): Recognize all sh4 additions.
@@ -1508,13 +1486,11 @@ Tue Oct 28 17:59:32 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 	* mips-opc.c (ffc, ffs): Fix mask.
 
-start-sanitize-d30v
 Tue Oct 28 16:34:54 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* d30v-opc.c (pre_defined_registers): Add eit_vb, int_s, and int_m
 	control registers.
 
-end-sanitize-d30v
 Mon Oct 27 22:34:03 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 	* mips-opc.c: Fix bug in mask for "not" pseudo-instruction.
@@ -1634,12 +1610,10 @@ Tue Sep 16 15:18:20 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850-opc.c (v850_opcodes): Further rearrangements.
 
-start-sanitize-d30v
 Tue Sep 16 16:12:11 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 	* d30v-opc.c (rot2h, sra2h, srl2h insns): Revert last change.
 
-end-sanitize-d30v
 Tue Sep 16 09:48:50 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850-opc.c (v850_opcodes): Fields reordered to allow assembler
@@ -1656,7 +1630,6 @@ Mon Sep 15 18:31:52 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850-opc.c: Initialise processors field of v850_opcode structure.
 
-start-sanitize-d30v
 Wed Aug 27 21:42:39 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 	Merge changes from Martin Hunt:
@@ -1707,7 +1680,6 @@ Wed Aug 27 21:42:39 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 	* d30v-opc.c (SHORT_M2, LONG_M2):  Two new forms.
 
-end-sanitize-d30v
 start-sanitize-v850e
 Fri Sep 12 11:43:54 1997  Nick Clifton  <nickc@cygnus.com>
 
@@ -2116,12 +2088,11 @@ Mon Mar 24 13:22:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-opc.c: Add dctr and dctw.
 
-start-sanitize-d30v
 Sun Mar 23 18:08:10 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d30v-dis.c (print_insn): Change the way signed constants
 	are displayed.
-end-sanitize-d30v
+
 Fri Mar 21 14:37:52 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (BFD_H): New variable.
@@ -2259,17 +2230,14 @@ Sat Feb 22 21:03:47 1997  Fred Fish  <fnf@cygnus.com>
 	* tic80-dis.c (print_operand_bitnum): Ditto.
 
 end-sanitize-tic80
-start-sanitize-d30v
 Fri Feb 21 16:31:18 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d30v-opc.c: Removed references to FLAG_X.
 
-end-sanitize-d30v
 Wed Feb 19 14:51:20 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in: Add dependencies on ../bfd/bfd.h as required.
 
-start-sanitize-d30v
 Tue Feb 18 17:43:43 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* Makefile.in: Added d30v object files.
@@ -2279,7 +2247,6 @@ Tue Feb 18 17:43:43 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* d30v-opc.c: New file.
 	* disassemble.c (disassembler) Add entry for d30v.
 
-end-sanitize-d30v
 start-sanitize-tic80
 Tue Feb 18 16:32:08 1997  Fred Fish  <fnf@cygnus.com>
 
