@@ -1,3 +1,9 @@
+2002-08-14  Nick Clifton  <nickc@redhat.com>
+
+	* nm.c (usage): Change 'gnu-new-abi' to 'gnu-v3'.
+	* objdump.c (usage): Likewise.
+	* doc/binutils.texi: Likewise.
+
 2002-08-14  Luke Dunstan  <infidel@users.sourceforge.net>
 
 	* rcparse.y (acc_entry): Don't warn about ALT use with
