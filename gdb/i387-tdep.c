@@ -217,22 +217,14 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
   int fpreg;
   int top;
 
-  frame_register_read (frame, FCTRL_REGNUM, buf);
-  fctrl = extract_unsigned_integer (buf, 4);
-  frame_register_read (frame, FSTAT_REGNUM, buf);
-  fstat = extract_unsigned_integer (buf, 4);
-  frame_register_read (frame, FTAG_REGNUM, buf);
-  ftag = extract_unsigned_integer (buf, 4);
-  frame_register_read (frame, FISEG_REGNUM, buf);
-  fiseg = extract_unsigned_integer (buf, 4);
-  frame_register_read (frame, FIOFF_REGNUM, buf);
-  fioff = extract_unsigned_integer (buf, 4);
-  frame_register_read (frame, FOSEG_REGNUM, buf);
-  foseg = extract_unsigned_integer (buf, 4);
-  frame_register_read (frame, FOOFF_REGNUM, buf);
-  fooff = extract_unsigned_integer (buf, 4);
-  frame_register_read (frame, FOP_REGNUM, buf);
-  fop = extract_unsigned_integer (buf, 4);
+  fctrl = get_frame_register_unsigned (frame, FCTRL_REGNUM);
+  fstat = get_frame_register_unsigned (frame, FSTAT_REGNUM);
+  ftag = get_frame_register_unsigned (frame, FTAG_REGNUM);
+  fiseg = get_frame_register_unsigned (frame, FISEG_REGNUM);
+  fioff = get_frame_register_unsigned (frame, FIOFF_REGNUM);
+  foseg = get_frame_register_unsigned (frame, FOSEG_REGNUM);
+  fooff = get_frame_register_unsigned (frame, FOOFF_REGNUM);
+  fop = get_frame_register_unsigned (frame, FOP_REGNUM);
 
   top = ((fstat >> 11) & 7);
 
@@ -260,7 +252,7 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 	  break;
 	}
 
-      frame_register_read (frame, (fpreg + 8 - top) % 8 + FP0_REGNUM, raw);
+      get_frame_register (frame, (fpreg + 8 - top) % 8 + FP0_REGNUM, raw);
 
       fputs_filtered ("0x", file);
       for (i = 9; i >= 0; i--)
@@ -310,7 +302,7 @@ i387_register_to_value (struct frame_info *frame, int regnum,
 
   /* Convert to TYPE.  This should be a no-op if TYPE is equivalent to
      the extended floating-point format used by the FPU.  */
-  frame_read_register (frame, regnum, from);
+  get_frame_register (frame, regnum, from);
   convert_typed_floating (from, builtin_type_i387_ext, to, type);
 }
 
