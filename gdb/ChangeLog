@@ -1,3 +1,11 @@
+Thu Sep 30 11:30:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* fork-child.c (fork_inferior): Don't call target_terminal_init
+	and target_terminal_inferior until we are sure that the inferior
+	has called gdb_setpgid.  This fixes PR 2900 (Schauer tracked it
+	down and was able to reliably reproduce it by putting a sleep()
+	before the gdb_setpgid()).
+
 Thu Sep 30 12:00:49 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* c-exp.y, m2-exp.y:  Change type of address for msymbol to
