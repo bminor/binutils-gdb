@@ -40,7 +40,7 @@
 #define GDB_DEBUG_SPACE_NAME ".stab"
 #define GDB_STRINGS_SUBSPACE_NAME ".stabstr"
 #define GDB_SYMBOLS_SUBSPACE_NAME ".stab"
-#define UNWIND_SECTION_NAME ".hppa_unwind"
+#define UNWIND_SECTION_NAME ".PARISC.unwind"
 /* Nonzero if CODE is a fixup code needing further processing.  */
 
 /* Object file formats specify relocation types.  */
@@ -1033,7 +1033,7 @@ static struct default_subspace_dict pa_def_subspaces[] =
   {"$LIT$", 1, 1, 0, 0, 0, 0, 16, 0x2c, 0, 8, 0, 0, ".text", SUBSEG_LIT},
   {"$BSS$", 1, 1, 0, 0, 0, 1, 80, 0x1f, 1, 8, 1, 1, ".bss", SUBSEG_BSS},
 #ifdef OBJ_ELF
-  {"$UNWIND$", 1, 1, 0, 0, 0, 0, 64, 0x2c, 0, 4, 0, 0, ".hppa_unwind", SUBSEG_UNWIND},
+  {"$UNWIND$", 1, 1, 0, 0, 0, 0, 64, 0x2c, 0, 4, 0, 0, ".PARISC.unwind", SUBSEG_UNWIND},
 #endif
   {NULL, 0, 1, 0, 0, 0, 0, 255, 0x1f, 0, 4, 0, 0, 0}
 };
@@ -1091,9 +1091,6 @@ static struct default_space_dict pa_def_spaces[] =
 #define is_PC_relative(exp)			\
   ((exp).X_op == O_subtract			\
    && strcmp((exp).X_op_symbol->bsym->name, "$PIC_pcrel$0") == 0)
-
-#define is_complex(exp)				\
-  ((exp).X_op != O_constant && (exp).X_op != O_symbol)
 
 /* Actual functions to implement the PA specific code for the assembler.  */
 
@@ -1256,8 +1253,6 @@ cons_fix_new_hppa (frag, where, size, exp)
 
   if (is_DP_relative (*exp))
     rel_type = R_HPPA_GOTOFF;
-  else if (is_complex (*exp))
-    rel_type = R_HPPA_COMPLEX;
   else
     rel_type = R_HPPA;
 
@@ -2044,8 +2039,6 @@ pa_ip (str)
 		    the_insn.reloc = R_HPPA_GOTOFF;
 		  else if (is_PC_relative (the_insn.exp))
 		    the_insn.reloc = R_HPPA_PCREL_CALL;
-		  else if (is_complex (the_insn.exp))
-		    the_insn.reloc = R_HPPA_COMPLEX;
 		  else
 		    the_insn.reloc = R_HPPA;
 		  the_insn.format = 11;
@@ -2070,8 +2063,6 @@ pa_ip (str)
 		    the_insn.reloc = R_HPPA_GOTOFF;
 		  else if (is_PC_relative (the_insn.exp))
 		    the_insn.reloc = R_HPPA_PCREL_CALL;
-		  else if (is_complex (the_insn.exp))
-		    the_insn.reloc = R_HPPA_COMPLEX;
 		  else
 		    the_insn.reloc = R_HPPA;
 		  the_insn.format = 14;
@@ -2096,8 +2087,6 @@ pa_ip (str)
 		    the_insn.reloc = R_HPPA_GOTOFF;
 		  else if (is_PC_relative (the_insn.exp))
 		    the_insn.reloc = R_HPPA_PCREL_CALL;
-		  else if (is_complex (the_insn.exp))
-		    the_insn.reloc = R_HPPA_COMPLEX;
 		  else
 		    the_insn.reloc = R_HPPA;
 		  the_insn.format = 21;
@@ -2127,10 +2116,7 @@ pa_ip (str)
 		}
 	      else
 		{
-		  if (is_complex (the_insn.exp))
-		    the_insn.reloc = R_HPPA_COMPLEX_PCREL_CALL;
-		  else
-		    the_insn.reloc = R_HPPA_PCREL_CALL;
+		  the_insn.reloc = R_HPPA_PCREL_CALL;
 		  the_insn.format = 12;
 		  the_insn.arg_reloc = last_call_desc.arg_reloc;
 		  bzero (&last_call_desc, sizeof (struct call_desc));
@@ -2168,10 +2154,7 @@ pa_ip (str)
 		}
 	      else
 		{
-		  if (is_complex (the_insn.exp))
-		    the_insn.reloc = R_HPPA_COMPLEX_PCREL_CALL;
-		  else
-		    the_insn.reloc = R_HPPA_PCREL_CALL;
+		  the_insn.reloc = R_HPPA_PCREL_CALL;
 		  the_insn.format = 17;
 		  the_insn.arg_reloc = last_call_desc.arg_reloc;
 		  bzero (&last_call_desc, sizeof (struct call_desc));
@@ -2208,10 +2191,7 @@ pa_ip (str)
 		}
 	      else
 		{
-		  if (is_complex (the_insn.exp))
-		    the_insn.reloc = R_HPPA_COMPLEX_ABS_CALL;
-		  else
-		    the_insn.reloc = R_HPPA_ABS_CALL;
+		  the_insn.reloc = R_HPPA;
 		  the_insn.format = 17;
 		  continue;
 		}
@@ -2241,7 +2221,7 @@ pa_ip (str)
 	    case 'A':
 	      num = pa_get_absolute_expression (&the_insn, &s);
 	      s = expr_end;
-	      CHECK_FIELD (num, 4095, -4096, 0);
+	      CHECK_FIELD (num, 8191, 0, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 13);
 
 	    /* Handle a 26 bit immediate at 31.  */
@@ -2596,58 +2576,6 @@ tc_gen_reloc (section, fixp)
   assert (hppa_fixp != 0);
   assert (section != 0);
 
-#ifdef OBJ_ELF
-  /* Yuk.  I would really like to push all this ELF specific unwind
-     crud into BFD and the linker.  That's how SOM does it -- and
-     if we could make ELF emulate that then we could share more code
-     in GAS (and potentially a gnu-linker later).
-
-     Unwind section relocations are handled in a special way.
-     The relocations for the .unwind section are originally
-     built in the usual way.  That is, for each unwind table
-     entry there are two relocations:  one for the beginning of
-     the function and one for the end.
-
-     The first time we enter this function we create a
-     relocation of the type R_HPPA_UNWIND_ENTRIES.  The addend
-     of the relocation is initialized to 0.  Each additional
-     pair of times this function is called for the unwind
-     section represents an additional unwind table entry.  Thus,
-     the addend of the relocation should end up to be the number
-     of unwind table entries.  */
-  if (strcmp (UNWIND_SECTION_NAME, section->name) == 0)
-    {
-      if (unwind_reloc_entryP == NULL)
-	{
-	  reloc = (arelent *) bfd_alloc_by_size_t (stdoutput,
-						   sizeof (arelent));
-	  assert (reloc != 0);
-	  unwind_reloc_entryP = reloc;
-	  unwind_reloc_fixp_cnt++;
-	  unwind_reloc_entryP->address
-	    = fixp->fx_frag->fr_address + fixp->fx_where;
-	  /* A pointer to any function will do.  We only
-	     need one to tell us what section the unwind
-	     relocations are for. */
-	  unwind_reloc_entryP->sym_ptr_ptr = &fixp->fx_addsy->bsym;
-	  hppa_fixp->fx_r_type = code = R_HPPA_UNWIND_ENTRIES;
-	  fixp->fx_r_type = R_HPPA_UNWIND;
-	  unwind_reloc_entryP->howto = bfd_reloc_type_lookup (stdoutput, code);
-	  unwind_reloc_entryP->addend = unwind_reloc_fixp_cnt / 2;
-	  relocs = (arelent **) bfd_alloc_by_size_t (stdoutput,
-						     sizeof (arelent *) * 2);
-	  assert (relocs != 0);
-	  relocs[0] = unwind_reloc_entryP;
-	  relocs[1] = NULL;
-	  return relocs;
-	}
-      unwind_reloc_fixp_cnt++;
-      unwind_reloc_entryP->addend = unwind_reloc_fixp_cnt / 2;
-
-      return &no_relocs;
-    }
-#endif
-
   reloc = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
   assert (reloc != 0);
 
@@ -2677,32 +2605,6 @@ tc_gen_reloc (section, fixp)
 #ifdef OBJ_ELF
   switch (fixp->fx_r_type)
     {
-    case R_HPPA_COMPLEX:
-    case R_HPPA_COMPLEX_PCREL_CALL:
-    case R_HPPA_COMPLEX_ABS_CALL:
-      assert (n_relocs == 5);
-
-      for (i = 0; i < n_relocs; i++)
-	{
-	  reloc[i].sym_ptr_ptr = NULL;
-	  reloc[i].address = 0;
-	  reloc[i].addend = 0;
-	  reloc[i].howto = bfd_reloc_type_lookup (stdoutput, *codes[i]);
-	  assert (reloc[i].howto && *codes[i] == reloc[i].howto->type);
-	}
-
-      reloc[0].sym_ptr_ptr = &fixp->fx_addsy->bsym;
-      reloc[1].sym_ptr_ptr = &fixp->fx_subsy->bsym;
-      reloc[4].address = fixp->fx_frag->fr_address + fixp->fx_where;
-
-      if (fixp->fx_r_type == R_HPPA_COMPLEX)
-	reloc[3].addend = fixp->fx_addnumber;
-      else if (fixp->fx_r_type == R_HPPA_COMPLEX_PCREL_CALL ||
-	       fixp->fx_r_type == R_HPPA_COMPLEX_ABS_CALL)
-	reloc[1].addend = fixp->fx_addnumber;
-
-      break;
-
     default:
       assert (n_relocs == 1);
 
@@ -2718,12 +2620,9 @@ tc_gen_reloc (section, fixp)
       /* Now, do any processing that is dependent on the relocation type.  */
       switch (code)
 	{
-	case R_HPPA_PLABEL_32:
-	case R_HPPA_PLABEL_11:
-	case R_HPPA_PLABEL_14:
-	case R_HPPA_PLABEL_L21:
-	case R_HPPA_PLABEL_R11:
-	case R_HPPA_PLABEL_R14:
+	case R_PARISC_PLABEL32:
+	case R_PARISC_PLABEL21L:
+	case R_PARISC_PLABEL14R:
 	  /* For plabel relocations, the addend of the
 	     relocation should be either 0 (no static link) or 2
 	     (static link required).
@@ -2732,43 +2631,12 @@ tc_gen_reloc (section, fixp)
 	  reloc->addend = 0;
 	  break;
 
-	case R_HPPA_ABS_CALL_11:
-	case R_HPPA_ABS_CALL_14:
-	case R_HPPA_ABS_CALL_17:
-	case R_HPPA_ABS_CALL_L21:
-	case R_HPPA_ABS_CALL_R11:
-	case R_HPPA_ABS_CALL_R14:
-	case R_HPPA_ABS_CALL_R17:
-	case R_HPPA_ABS_CALL_LS21:
-	case R_HPPA_ABS_CALL_RS11:
-	case R_HPPA_ABS_CALL_RS14:
-	case R_HPPA_ABS_CALL_RS17:
-	case R_HPPA_ABS_CALL_LD21:
-	case R_HPPA_ABS_CALL_RD11:
-	case R_HPPA_ABS_CALL_RD14:
-	case R_HPPA_ABS_CALL_RD17:
-	case R_HPPA_ABS_CALL_LR21:
-	case R_HPPA_ABS_CALL_RR14:
-	case R_HPPA_ABS_CALL_RR17:
-
-	case R_HPPA_PCREL_CALL_11:
-	case R_HPPA_PCREL_CALL_14:
-	case R_HPPA_PCREL_CALL_17:
-	case R_HPPA_PCREL_CALL_L21:
-	case R_HPPA_PCREL_CALL_R11:
-	case R_HPPA_PCREL_CALL_R14:
-	case R_HPPA_PCREL_CALL_R17:
-	case R_HPPA_PCREL_CALL_LS21:
-	case R_HPPA_PCREL_CALL_RS11:
-	case R_HPPA_PCREL_CALL_RS14:
-	case R_HPPA_PCREL_CALL_RS17:
-	case R_HPPA_PCREL_CALL_LD21:
-	case R_HPPA_PCREL_CALL_RD11:
-	case R_HPPA_PCREL_CALL_RD14:
-	case R_HPPA_PCREL_CALL_RD17:
-	case R_HPPA_PCREL_CALL_LR21:
-	case R_HPPA_PCREL_CALL_RR14:
-	case R_HPPA_PCREL_CALL_RR17:
+	case R_PARISC_PCREL21L:
+	case R_PARISC_PCREL17R:
+	case R_PARISC_PCREL17F:
+	case R_PARISC_PCREL17C:
+	case R_PARISC_PCREL14R:
+	case R_PARISC_PCREL14F:
 	  /* The constant is stored in the instruction.  */
 	  reloc->addend = HPPA_R_ADDEND (hppa_fixp->fx_arg_reloc, 0);
 	  break;
@@ -3091,27 +2959,17 @@ md_apply_fix (fixP, valp)
 	  break;
 
 	case 32:
-#ifdef OBJ_ELF
-	  /* These are ELF specific relocations.  ELF unfortunately
-	     handles unwinds in a completely different manner.  */
-	  if (hppa_fixP->fx_r_type == R_HPPA_UNWIND_ENTRY
-	      || hppa_fixP->fx_r_type == R_HPPA_UNWIND_ENTRIES)
-	    result = fixP->fx_addnumber;
+	  result = 0;
+	  fixP->fx_addnumber = fixP->fx_offset;
+	  /* If we have a real relocation, then we want zero to
+	     be stored in the object file.  If no relocation is going
+	     to be emitted, then we need to store new_val into the
+	     object file.  */
+	  if (fixP->fx_addsy)
+	    bfd_put_32 (stdoutput, 0, buf);
 	  else
-#endif
-	    {
-	      result = 0;
-	      fixP->fx_addnumber = fixP->fx_offset;
-	      /* If we have a real relocation, then we want zero to
-		 be stored in the object file.  If no relocation is going
-		 to be emitted, then we need to store new_val into the
-		 object file.  */
-	      if (fixP->fx_addsy)
-		bfd_put_32 (stdoutput, 0, buf);
-	      else
-		bfd_put_32 (stdoutput, new_val, buf);
-	      return 1;
-	    }
+	    bfd_put_32 (stdoutput, new_val, buf);
+	  return 1;
 	  break;
 
 	case 0:
@@ -4186,7 +4044,7 @@ pa_build_unwind_subspace (call_info)
   /* Relocation info. for start offset of the function.  */
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
 		call_info->start_symbol, (offsetT) 0,
-		(expressionS *) NULL, 0, R_HPPA_UNWIND, e_fsel, 32, 0,
+		(expressionS *) NULL, 0, R_PARISC_DIR32, e_fsel, 32, 0,
 		(char *) 0);
 
   p = frag_more (4);
@@ -4194,7 +4052,7 @@ pa_build_unwind_subspace (call_info)
   /* Relocation info. for end offset of the function.  */
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
 		call_info->end_symbol, (offsetT) 0,
-		(expressionS *) NULL, 0, R_HPPA_UNWIND, e_fsel, 32, 0,
+		(expressionS *) NULL, 0, R_PARISC_DIR32, e_fsel, 32, 0,
 		(char *) 0);
 
   /* Dump it. */

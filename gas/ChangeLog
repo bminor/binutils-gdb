@@ -1,3 +1,14 @@
+Mon May 16 12:03:49 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c: Change .hppa_unwind to .PARISC.unwind
+	throughout code.
+	(is_complex): Delete definition and support for complex relocation
+	types.
+	(tc_gen_reloc): Delete special unwind crud for ELF.  Simplify and
+	rewrite ELF code based on 94-02-02 PA ELF draft spec.
+	(pa_build_unwind_subspace): Use standard PARISC_DIR32 relocs for
+	the unwind descriptors.
+
 Fri May  6 14:13:15 1994  Steve Chamberlain  (sac@cygnus.com)
 
         * config/go32.mh: New makefile fragment for go32 crossing.
