@@ -1,5 +1,14 @@
 2002-12-08  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* gas/m68hc11/m68hc11.exp (gas_m68hc11_error): New function;
+	(gas_m68hc11_warning): New function.
+	(gas_m68hc11_message): New function.
+	(top): New tests for assembler errors.
+	(gas_m68hc11_opcode_list): New function.
+	(top): New tests for opcode list.
+
+2002-12-08  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* gas/m68hc11/bug-1825.s: Add some tests.
 	* gas/m68hc11/bug-1825.d: Update.
 	* gas/m68hc11/opers12.d: Update.
