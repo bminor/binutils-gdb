@@ -1477,7 +1477,7 @@ all-sed: all-libiberty
 all-send-pr: all-prms
 all-shellutils:
 all-sim: all-libiberty all-bfd all-opcodes all-readline
-all-sn: all-tcl all-tk all-itcl all-db all-grep
+all-sn: all-tcl all-tk all-tix all-itcl all-db all-grep
 all-tar: all-libiberty
 all-tcl:
 all-tclX: all-tcl all-tk
@@ -1497,6 +1497,7 @@ all-uudecode: all-libiberty
 configure-target-libiberty: $(ALL_GCC)
 all-target-libiberty: configure-target-libiberty all-gcc all-ld all-target-newlib
 all-target: $(ALL_TARGET_MODULES)
+install-itcl: install-tcl
 install-target: $(INSTALL_TARGET_MODULES)
 
 ### other supporting targets
