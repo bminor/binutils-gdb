@@ -3,19 +3,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Notes on the algorithm used in wait_for_inferior to determine if we
    just did a subroutine call when stepping.  We have the following
@@ -148,6 +148,7 @@ extern int original_stack_limit;
 #endif /* SET_STACK_LIMIT_HUGE */
 
 extern char *getenv ();
+extern char **environ;
 
 extern struct target_ops child_ops;	/* In inftarg.c */
 
@@ -472,6 +473,7 @@ child_create_inferior (exec_file, allargs, env)
   /* This is set to the result of setpgrp, which if vforked, will be visible
      to you in the parent process.  It's only used by humans for debugging.  */
   static int debug_setpgrp = 657473;
+  char **save_our_env;
 
   /* The user might want tilde-expansion, and in general probably wants
      the program to behave the same way as if run from
@@ -499,6 +501,11 @@ child_create_inferior (exec_file, allargs, env)
 
   /* exec is said to fail if the executable is open.  */
   close_exec_file ();
+
+  /* Retain a copy of our environment variables, since the child will
+     replace the value of  environ  and if we're vforked, we have to 
+     restore it.  */
+  save_our_env = environ;
 
 #if defined(USG) && !defined(HAVE_VFORK)
   pid = fork ();
@@ -547,13 +554,23 @@ child_create_inferior (exec_file, allargs, env)
 	 for the inferior.  */
 
       call_ptrace (0, 0, 0, 0);		/* "Trace me, Dr. Memory!" */
-      execle (shell_file, shell_file, "-c", shell_command, (char *)0, env);
+
+      /* There is no execlpe call, so we have to set the environment
+	 for our child in the global variable.  If we've vforked, this
+	 clobbers the parent, but environ is restored a few lines down
+	 in the parent.  By the way, yes we do need to look down the
+	 path to find $SHELL.  Rich Pixley says so, and I agree.  */
+      environ = env;
+      execlp (shell_file, shell_file, "-c", shell_command, (char *)0);
 
       fprintf (stderr, "Cannot exec %s: %s.\n", shell_file,
 	       errno < sys_nerr ? sys_errlist[errno] : "unknown error");
       fflush (stderr);
       _exit (0177);
     }
+
+  /* Restore our environment in case a vforked child clob'd it.  */
+  environ = save_our_env;
 
   /* Now that we have a child process, make it our target.  */
   push_target (&child_ops);
