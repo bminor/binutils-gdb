@@ -1,3 +1,13 @@
+Wed Nov  1 14:28:23 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
+
+	* chew.c: Include <ctype.h>.
+
+Fri Oct  6 16:23:34 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	Mon Sep 25 22:49:32 1995  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* Makefile.in (Makefile): Only remake this Makefile.
+
 Wed Oct  4 15:51:05 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* chew.c: Include <stdio.h>.
