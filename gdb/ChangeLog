@@ -1,5 +1,10 @@
 2004-01-21  Paul Brook  <paul@codesourcery.com>
 
+	* infrun.c (handle_inferior_event): Check stop_stack_dummy if handling
+	BPSTAT_WHAT_CHECK_SHLIBS.
+
+2004-01-21  Paul Brook  <paul@codesourcery.com>
+
 	* MAINTAINERS: Add myself to write-after-approval.
 
 2004-01-20  Andrew Cagney  <cagney@redhat.com>

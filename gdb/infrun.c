@@ -2301,7 +2301,7 @@ process_event_stop_test:
 	     gdb of events.  This allows the user to get control
 	     and place breakpoints in initializer routines for
 	     dynamically loaded objects (among other things).  */
-	  if (stop_on_solib_events)
+	  if (stop_on_solib_events || stop_stack_dummy)
 	    {
 	      stop_stepping (ecs);
 	      return;
