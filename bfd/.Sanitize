@@ -82,6 +82,9 @@ elf32-mips.c
 elf32-sparc.c
 elf32-target.h
 elf32.c
+elf64-generic.c
+elf64-sparc.c
+elf64-target.h
 elf64.c
 elfcode.h
 filemode.c
@@ -149,15 +152,38 @@ Things-to-lose:
 
 Do-last:
 
-if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	echo Keeping v9 stuff in configure.in.
+v9files="configure.in elfcode.h"
+if [ -n "${verbose}" ] ; then
+	say=echo
 else
-	echo Cleaning configure.in ...
-	grep -v v9 < configure.in > new
-	if [ -n "${safe}" ] ; then
-		cp configure.in .Recover
+	say=true
+fi
+if ( echo $* | grep keep\-v9 > /dev/null ) ; then
+	if [ -n "${verbose}" ] ; then
+		echo Keeping v9 stuff in $v9files.
 	fi
-	mv new configure.in
+else
+	if [ -n "${verbose}" ]; then
+		echo -n Cleaning v9 from
+	fi
+	for f in $v9files ; do
+		if [ -n "${verbose}" ] ; then
+			echo -n " " $f
+		fi
+		grep -v v9 < $f > new
+		if [ -n "${safe}" ] ; then
+			cp $f .Recover
+		fi
+		mv new $f
+	done
+	if [ -n "${safe}" ] ; then
+		mv elf64-sparc.c .Recover
+	else
+		rm elf64-sparc.c
+	fi
+	if [ -n "${verbose}" ] ; then
+		echo " ..." deleting elf64-sparc.c.
+	fi
 fi
 
 # End of file.
