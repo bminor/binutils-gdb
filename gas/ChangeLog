@@ -1,3 +1,9 @@
+Fri May 10 14:16:59 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (ppc_elf_validate_fix): Allow GOT and section
+	relative relocations with -mrelocatable.  Also allow unfixed
+	relocs in .ex_shared.
+
 Tue May  7 11:24:10 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.c (yank_symbols): Check that FNAME_OFFSET is
