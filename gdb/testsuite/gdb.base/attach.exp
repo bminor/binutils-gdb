@@ -94,27 +94,21 @@ proc do_attach_tests {} {
 
     # Verify that we cannot attach to nonsense.
 
-    send_gdb "attach abc\n"
-    gdb_expect {
-	-re ".*Illegal process-id: abc.*$gdb_prompt $" {
-	    pass "attach to nonsense is prohibited"
+    set test "attach to nonsense is prohibited"
+    gdb_test_multiple "attach abc" "$test" {
+	-re "Illegal process-id: abc.*$gdb_prompt $" {
+	    pass "$test"
 	}
 	-re "Attaching to.*, process .*couldn't open /proc file.*$gdb_prompt $" {
 	    # Response expected from /proc-based systems.
-	    pass "attach to nonsense is prohibited" 
+	    pass "$test" 
 	}
-	-re ".*Can't attach to process..*$gdb_prompt $" {
+	-re "Can't attach to process..*$gdb_prompt $" {
 	    # Response expected on Cygwin
-	    pass "attach to nonsense is prohibited"
+	    pass "$test"
 	}
 	-re "Attaching to.*$gdb_prompt $" {
-	    fail "attach to nonsense is prohibited (bogus pid allowed)"
-	}
-	-re "$gdb_prompt $" {
-	    fail "attach to nonsense is prohibited"
-	}
-	timeout {
-	    fail "(timeout) attach to nonsense is prohibited"
+	    fail "$test (bogus pid allowed)"
 	}
     }
 
@@ -130,35 +124,29 @@ proc do_attach_tests {} {
 	# FreeBSD, and probably other *BSD's too).
 	set boguspid -1
     }
-    send_gdb "attach $boguspid\n"
-    gdb_expect {
+    set test "attach to nonexistent process is prohibited"
+    gdb_test_multiple "attach $boguspid" "$test" {
 	-re "Attaching to.*, process $boguspid.*No such process.*$gdb_prompt $" {
 	    # Response expected on ptrace-based systems (i.e. HP-UX 10.20).
-	    pass "attach to nonexistent process is prohibited"
+	    pass "$test"
 	}
 	-re "Attaching to.*, process $boguspid failed.*Hint.*$gdb_prompt $" {
 	    # Response expected on ttrace-based systems (i.e. HP-UX 11.0).
-	    pass "attach to nonexistent process is prohibited"
+	    pass "$test"
 	}
 	-re "Attaching to.*, process $boguspid.*denied.*$gdb_prompt $" {
-	    pass "attach to nonexistent process is prohibited"
+	    pass "$test"
 	}
 	-re "Attaching to.*, process $boguspid.*not permitted.*$gdb_prompt $" {
-	    pass "attach to nonexistent process is prohibited"
+	    pass "$test"
 	}
 	-re "Attaching to.*, process .*couldn't open /proc file.*$gdb_prompt $" {
 	    # Response expected from /proc-based systems.
-	    pass "attach to nonexistent process is prohibited"
+	    pass "$test"
 	}
-	-re ".*Can't attach to process..*$gdb_prompt $" {
+	-re "Can't attach to process..*$gdb_prompt $" {
 	    # Response expected on Cygwin
-	    pass "attach to nonexistent process is prohibited"
-	}
-	-re "$gdb_prompt $" {
-	    fail "attach to nonexistent process is prohibited"
-	}
-	timeout {
-	    fail "(timeout) attach to nonexistent process is prohibited"
+	    pass "$test"
 	}
     }
     
@@ -170,80 +158,38 @@ proc do_attach_tests {} {
     # us.  So, we must also be prepared to be asked if we want to
     # discard an existing set of symbols.)
     
-    send_gdb "file $binfile\n"
-    gdb_expect {
-	-re "Load new symbol table from.*y or n.*$" {
-	    send_gdb "y\n"
-	    gdb_expect {
-		-re "Reading symbols from $escapedbinfile\.\.\.*done.*$gdb_prompt $" {
-		    pass "(re)set file, before attach1"
-		}
-		-re "$gdb_prompt $" {
-		    fail "(re)set file, before attach1"
-		}
-		timeout {
-		    fail "(timeout) (re)set file, before attach1"
-		}
-	    }
+    set test "set file, before attach1"
+    gdb_test_multiple "file $binfile" "$test" {
+	-re "Load new symbol table from.*y or n. $" {
+	    gdb_test "y" "Reading symbols from $escapedbinfile\.\.\.*done." \
+		"$test (re-read)"
 	}
 	-re "Reading symbols from $escapedbinfile\.\.\.*done.*$gdb_prompt $" {
-	    pass "set file, before attach1"
-	}
-	-re "$gdb_prompt $" {
-	    fail "set file, before attach1"
-	}
-	timeout {
-	    fail "(timeout) set file, before attach1"
+	    pass "$test"
 	}
     }
 
-    send_gdb "attach $testpid\n"
-    gdb_expect {
+    set test "attach1, after setting file"
+    gdb_test_multiple "attach $testpid" "$test" {
 	-re "Attaching to program.*`?$escapedbinfile'?, process $testpid.*main.*at .*$srcfile:.*$gdb_prompt $" {
-	    pass "attach1, after setting file"
+	    pass "$test"
 	}
 	-re "Attaching to program.*`?$escapedbinfile\.exe'?, process $testpid.*\[Switching to thread $testpid\..*\].*$gdb_prompt $" {
 	    # Response expected on Cygwin
-	    pass "attach1, after setting file"
-	}
-	-re "$gdb_prompt $" {
-	    fail "attach1, after setting file"
-	}
-	timeout {
-	    fail "(timeout) attach1, after setting file"
+	    pass "$test"
 	}
     }
 
     # Verify that we can "see" the variable "should_exit" in the
     # program, and that it is zero.
    
-    send_gdb "print should_exit\n"
-    gdb_expect {
-	-re ".* = 0.*$gdb_prompt $" {
-	    pass "after attach1, print should_exit"
-	}
-	-re "$gdb_prompt $" {
-	    fail "after attach1, print should_exit"
-	}
-	timeout {
-	    fail "(timeout) after attach1, print should_exit"
-	}
-    }
+    gdb_test "print should_exit" " = 0" "after attach1, print should_exit"
 
     # Detach the process.
    
-    send_gdb "detach\n"
-    gdb_expect {
-	-re "Detaching from program: .*$escapedbinfile.*$gdb_prompt $" {
-	    pass "attach1 detach"
-	}
-	-re "$gdb_prompt $" {
-	    fail "attach1 detach"
-	}
-	timeout {
-	    fail "(timeout) attach1 detach"
-	}
-    }
+    gdb_test "detach" \
+	"Detaching from program: .*$escapedbinfile, process $testpid" \
+	"attach1 detach"
 
     # Wait a bit for gdb to finish detaching
     
@@ -255,30 +201,10 @@ proc do_attach_tests {} {
     
     set old_timeout $timeout
     set timeout 15 
-    send_gdb "file\n"
-    gdb_expect {
-	-re ".*gdb internal error.*$" { 
-	    fail "Internal error, prob. Memory corruption" 
-	}
-	-re "No executable file now.*Discard symbol table.*y or n.*$" {
-	    send_gdb "y\n"
-	    gdb_expect {
-		-re "No symbol file now.*$gdb_prompt $" {
-		    pass "attach1, purging symbols after detach"
-		}
-		-re "$gdb_prompt $" {
-		    fail "attach1, purging symbols after detach"
-		}
-		timeout {
-		    fail "(timeout) attach1, purging symbols after detach"
-		}
-	    }
-	}
-	-re "$gdb_prompt $" {
-	    fail "attach1, purging file after detach"
-	}
-	timeout {
-	    fail "(timeout) attach1, purging file after detach"
+    set test "attach1, purging symbols after detach"
+    gdb_test_multiple "file" "$test" {
+	-re "No executable file now.*Discard symbol table.*y or n. $" {
+	    gdb_test "y" "No symbol file now." "$test"
 	}
     }
     set timeout $old_timeout
@@ -286,49 +212,25 @@ proc do_attach_tests {} {
     # Verify that we can attach to the process just by giving the
     # process ID.
    
-    send_gdb "attach $testpid\n"
-    gdb_expect {
-	-re "Attaching to process $testpid.*Load new symbol table from \"$escapedbinfile\.exe\".*y or n.*$" {
+    set test "set file, before attach2"
+    gdb_test_multiple "attach $testpid" "$test" {
+	-re "Attaching to process $testpid.*Load new symbol table from \"$escapedbinfile\.exe\".*y or n. $" {
 	    # On Cygwin, the DLL's symbol tables are loaded prior to the
 	    # executable's symbol table.  This in turn always results in
 	    # asking the user for actually loading the symbol table of the
 	    # executable.
-	    send_gdb "y\n"
-	    gdb_expect {
-		-re "Reading symbols from $escapedbinfile\.\.\.*done.*$gdb_prompt $" {
-		    pass "(re)set file, before attach2"
-		}
-		-re "$gdb_prompt $" {
-		    fail "(re)set file, before attach2"
-		}
-		timeout {
-		    fail "(timeout) (re)set file, before attach2"
-		}
-	    }
+	    gdb_test "y" "Reading symbols from $escapedbinfile\.\.\.*done." \
+		"$test (reset file)"
 	}
 	-re "Attaching to process $testpid.*Reading symbols from $escapedbinfile.*main.*at .*$gdb_prompt $" {
-	    pass "attach2"
-	}
-	-re "$gdb_prompt $" {
-	    fail "attach2"
-	}
-	timeout {
-	    fail "(timeout) attach2"
+	    pass "$test"
 	}
     }
 
     # Verify that we can modify the variable "should_exit" in the
     # program.
 
-    send_gdb "set should_exit=1\n"
-    gdb_expect {
-	-re "$gdb_prompt $" {
-	    pass "after attach2, set should_exit"
-	}
-	timeout {
-	    fail "(timeout) after attach2, set should_exit"
-	}
-    }
+    gdb_test "set should_exit=1" "" "after attach2, set should_exit"
 
     # Verify that the modification really happened.
 
@@ -359,18 +261,7 @@ proc do_attach_tests {} {
 
     # Allow the test process to exit, to cleanup after ourselves.
 
-    send_gdb "continue\n"
-    gdb_expect {
-	-re "Program exited normally.*$gdb_prompt $" {
-	    pass "after attach2, exit"
-	}
-	-re "$gdb_prompt $" {
-	    fail "after attach2, exit"
-	}
-	timeout {
-	    fail "(timeout) after attach2, exit"
-	}
-    }
+    gdb_test "continue" "Program exited normally." "after attach2, exit"
 
     # Make sure we don't leave a process around to confuse
     # the next test run (and prevent the compile by keeping
@@ -378,6 +269,7 @@ proc do_attach_tests {} {
     # work.
    
     remote_exec build "kill -9 ${testpid}"
+
     # Start the program running and then wait for a bit, to be sure
     # that it can be attached to.
    
@@ -393,103 +285,36 @@ proc do_attach_tests {} {
     # when we're cd'd to some directory that doesn't contain the
     # a.out.  (We use the source path set by the "dir" command.)
     
-    send_gdb "dir ${objdir}/${subdir}\n"
-    gdb_expect {
-	-re ".*Source directories searched: .*$gdb_prompt $" {
-	    pass "set source path"
-	}
-	-re "$gdb_prompt $" {
-	    fail "set source path"
-	}
-	timeout {
-	    fail "(timeout) set source path"
-	}
-    }
+    gdb_test "dir ${objdir}/${subdir}" "Source directories searched: .*" \
+	"set source path"
 
-    send_gdb "cd /tmp\n"
-    gdb_expect {
-	-re ".*Working directory /tmp.*$gdb_prompt $" {
-	    pass "cd away from process' a.out"
-	}
-	-re "$gdb_prompt $" {
-	    fail "cd away from process' a.out"
-	}
-	timeout {
-	    fail "(timeout) cd away from process' a.out"
-	}
-    }
+    gdb_test "cd /tmp" "Working directory /tmp." \
+	"cd away from process working directory"
 
     # Explicitly flush out any knowledge of the previous attachment.
-    send_gdb "symbol\n"
-    gdb_expect {
-	-re ".*Discard symbol table from.*y or n. $" {
-	    send_gdb "y\n"
-	    gdb_expect {
-		-re ".*No symbol file now.*$gdb_prompt $" {
-		    pass "before attach3, flush symbols"
-		}
-		-re "$gdb_prompt $" {
-		    fail "before attach3, flush symbols"
-		}
-		timeout {
-		    fail "(timeout) before attach3, flush symbols"
-		}
-	    }
+
+    set test "before attach3, flush symbols"
+    gdb_test_multiple "symbol" "$test" {
+	-re "Discard symbol table from.*y or n. $" {
+	    gdb_test "y" "No symbol file now." \
+		"$test"
 	}
-	-re ".*No symbol file now.*$gdb_prompt $" {
-	    pass "before attach3, flush symbols"
-	}
-	-re "$gdb_prompt $" {
-	    fail "before attach3, flush symbols"
-	}
-	timeout {
-	    fail "(timeout) before attach3, flush symbols"
-	}
-    }
-    send_gdb "exec\n"
-    gdb_expect {
-	-re ".*No executable file now.*$gdb_prompt $" {
-	    pass "before attach3, flush exec"
-	}
-	-re "$gdb_prompt $" {
-	    fail "before attach3, flush exec"
-	}
-	timeout {
-	    fail "(timeout) before attach3, flush exec"
+	-re "No symbol file now.*$gdb_prompt $" {
+	    pass "$test"
 	}
     }
 
-    send_gdb "attach $testpid\n"
-    gdb_expect {
-	-re "Attaching to process $testpid.*Reading symbols from $escapedbinfile.*main.*at .*$gdb_prompt $" {
-	    pass "attach when process' a.out not in cwd"
-	}
-	-re "$gdb_prompt $" {
-	    fail "attach when process' a.out not in cwd"
-	}
-	timeout {
-	    fail "(timeout) attach when process' a.out not in cwd"
-	}
-    }
+    gdb_test "exec" "No executable file now." \
+	"before attach3, flush exec"
 
-    send_gdb "kill\n"
-    gdb_expect {
-	-re ".*Kill the program being debugged.*y or n. $" {
-	    send_gdb "y\n"
-	    gdb_expect {
-		-re "$gdb_prompt $" {
-		    pass "after attach3, exit"
-		}
-		timeout {
-		    fail "(timeout) after attach3, exit"
-		}
-	    }
-	}
-	-re "$gdb_prompt $" {
-	    fail "after attach3, exit"
-	}
-	timeout {
-	    fail "(timeout) after attach3, exit"
+    gdb_test "attach $testpid" \
+	"Attaching to process $testpid.*Reading symbols from $escapedbinfile.*main.*at .*" \
+	"attach when process' a.out not in cwd"
+
+    set test "after attach3, exit"
+    gdb_test_multiple "kill" "$test" {
+	-re "Kill the program being debugged.*y or n. $" {
+	    gdb_test "y" "" "$test"
 	}
     }
     
@@ -514,43 +339,36 @@ proc do_call_attach_tests {} {
 
     # Attach
    
-    gdb_test "file $binfile2" ".*" "force switch to gdb64, if necessary"
-    send_gdb "attach $testpid\n"
-    gdb_expect {
-	-re ".*warning: reading register.*I.*O error.*$gdb_prompt $" {
-	    fail "attach call, read register 3 error"
+    gdb_test "file $binfile2" "" "force switch to gdb64, if necessary"
+    set test "attach call"
+    gdb_test_multiple "attach $testpid" "$test" {
+	-re "warning: reading register.*I.*O error.*$gdb_prompt $" {
+	    fail "$test (read register error)"
 	}
 	-re "Attaching to.*process $testpid.*libc.*$gdb_prompt $" {
-	    pass "attach call"
+	    pass "$test"
 	}
 	-re "Attaching to.*process $testpid.*\[Switching to thread $testpid\..*\].*$gdb_prompt $" {
-	    pass "attach call"
-	}
-	-re "$gdb_prompt $" {
-	    fail "attach call"
-	}
-	timeout {
-	    fail "(timeout) attach call"
+	    pass "$test"
 	}
     }
 
     # See if other registers are problems
     
-    send_gdb "i r r3\n"
-    gdb_expect {
-	-re ".*warning: reading register.*$gdb_prompt $" {
-	    pass "CHFts23490: known bug"
+    set test "info other register"
+    gdb_test_multiple "i r r3" "$test" {
+	-re "warning: reading register.*$gdb_prompt $" {
+	    fail "$test"
 	}
-	-re ".*r3.*$gdb_prompt $" {
-	    pass "Bug fixed, Yayyy!"
+	-re "r3.*$gdb_prompt $" {
+	    pass "$test"
 	}
-	timeout { fail "timeout on info reg" }
     }
 
     # Get rid of the process
     
-    gdb_test "p should_exit = 1" ".*"
-    gdb_test "c" ".*Program exited normally.*"
+    gdb_test "p should_exit = 1"
+    gdb_test "c" "Program exited normally."
    
     # Be paranoid
    
