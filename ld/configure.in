@@ -42,7 +42,6 @@ AM_PROG_INSTALL
 ALL_LINGUAS=
 CY_GNU_GETTEXT
 
-AM_CYGWIN32
 AM_EXEEXT
 
 AC_PROG_YACC
@@ -137,7 +136,7 @@ if test x${all_targets} = xtrue; then
   else
     EMULATION_OFILES='$(ALL_EMULATIONS)'
   fi
-  EMUL_EXTRA_OFILES=''
+  EMUL_EXTRA_OFILES='$(ALL_EMUL_EXTRA_OFILES)'
 else
   EMULATION_OFILES=$all_emuls
   EMUL_EXTRA_OFILES=$all_emul_extras

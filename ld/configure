@@ -1354,7 +1354,7 @@ case "$host" in
   CFLAGS="$CFLAGS -belf"
   ;;
 
-*-*-cygwin32*)
+*-*-cygwin*)
   # Extract the first word of "${ac_tool_prefix}dlltool", so it can be a program name with args.
 set dummy ${ac_tool_prefix}dlltool; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
@@ -3472,7 +3472,7 @@ else
 #include "confdefs.h"
 
 int main() {
-return __CYGWIN__;
+return __CYGWIN32__;
 ; return 0; }
 EOF
 if { (eval echo configure:3479: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
@@ -4274,7 +4274,7 @@ if test x${all_targets} = xtrue; then
   else
     EMULATION_OFILES='$(ALL_EMULATIONS)'
   fi
-  EMUL_EXTRA_OFILES=''
+  EMUL_EXTRA_OFILES='$(ALL_EMUL_EXTRA_OFILES)'
 else
   EMULATION_OFILES=$all_emuls
   EMUL_EXTRA_OFILES=$all_emul_extras
