@@ -1,3 +1,7 @@
+2001-03-14  Andrew Cagney  <ac131313@redhat.com>
+
+	* NEWS: Mention that Harris/CXUX m88k is obsolete.
+
 2001-03-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/mips/tm-mips.h: Include "regcache.h" for macros refering
@@ -46,6 +50,7 @@
 	* config/nm-m3.h: Ditto.
 	* config/nm-gnu.h: Ditto.
 
+>>>>>>> 1.1049
 2001-03-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS: Update list of targets. Mark arm-* and v850-elf as
