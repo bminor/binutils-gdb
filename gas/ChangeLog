@@ -1,3 +1,24 @@
+2000-08-28  Catherine Moore  <clm@redhat.com>
+
+	* tc-v850.c (v850_relax): Declare.
+	(v850_longcode): New routine.
+	(v850_handle_align): New routine.
+	(md_pseudo_table):  Add longcall and longjump.
+	(md_parse_option): Check for relax option.
+	(tc_gen_reloc):  Handle BFD_RELOC_V850_LONGCALL,
+	BFD_RELOC_V850_LONGJUMP, and BFD_RELOC_V850_ALIGN.
+	(md_apply_fix3): Likewise.
+	(v850_force_relocation): Likewise.
+	(v850_comm): Change the current section.
+	(md_assemble):  Ensure that the	correct value is put in the
+	fixup.
+	(v850_sdata, v850_tdata, v850_zdata, v850_sbss, v850_tbss,
+	v850_zbss, v850_rosdata, v850_rozdata): Fix section book keeping.
+        Remove redundant v850ea support.
+	* tc-v850.h (HANDLE_ALIGN): Define.
+	(v850_handle_align): Declare.
+	* doc/c-v850.c: Document -mrelax, .longcall and .longjump.
+
 2002-08-28  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* configure.in: Add tic4x-coff* and c4x-coff*-coff-coff targets.

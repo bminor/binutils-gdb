@@ -2,24 +2,24 @@
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* XXX FIXME: This code is littered with 32bit int, 16bit short, 8bit char
-   dependencies.  As is the gas & simulator code or the v850.  */
+   dependencies.  As is the gas & simulator code for the v850.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -87,6 +87,12 @@ static asection * v850_elf_gc_mark_hook
   PARAMS ((asection *, struct bfd_link_info *,
 	   Elf_Internal_Rela *, struct elf_link_hash_entry *,
 	   Elf_Internal_Sym *));
+static bfd_reloc_status_type v850_elf_ignore_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static boolean v850_elf_relax_delete_bytes
+  PARAMS ((bfd *, asection *, bfd_vma, bfd_vma, int));
+static boolean v850_elf_relax_section
+  PARAMS ((bfd *, asection *, struct bfd_link_info *, boolean *));
 
 /* Note: It is REQUIRED that the 'type' value of each entry
    in this array match the index of the entry in the array.  */
@@ -467,6 +473,51 @@ static reloc_howto_type v850_elf_howto_table[] =
          0,                     /* dst_mask */
          false),                /* pcrel_offset */
 
+  /* Indicates a .longcall pseudo-op.  The compiler will generate a .longcall
+     pseudo-op when it finds a function call which can be relaxed.  */
+  HOWTO (R_V850_LONGCALL,     /* type */
+       0,                     /* rightshift */
+       2,                     /* size (0 = byte, 1 = short, 2 = long) */
+       32,                    /* bitsize */
+       true,                  /* pc_relative */
+       0,                     /* bitpos */
+       complain_overflow_signed, /* complain_on_overflow */
+       v850_elf_ignore_reloc, /* special_function */
+       "R_V850_LONGCALL",     /* name */
+       false,                 /* partial_inplace */
+       0,                     /* src_mask */
+       0,                     /* dst_mask */
+       true),                 /* pcrel_offset */
+
+  /* Indicates a .longjump pseudo-op.  The compiler will generate a
+     .longjump pseudo-op when it finds a branch which can be relaxed.  */
+  HOWTO (R_V850_LONGJUMP,     /* type */
+       0,                     /* rightshift */
+       2,                     /* size (0 = byte, 1 = short, 2 = long) */
+       32,                    /* bitsize */
+       true,                  /* pc_relative */
+       0,                     /* bitpos */
+       complain_overflow_signed, /* complain_on_overflow */
+       v850_elf_ignore_reloc, /* special_function */
+       "R_V850_LONGJUMP",     /* name */
+       false,                 /* partial_inplace */
+       0,                     /* src_mask */
+       0,                     /* dst_mask */
+       true),                 /* pcrel_offset */
+
+  HOWTO (R_V850_ALIGN,        /* type */
+       0,                     /* rightshift */
+       1,                     /* size (0 = byte, 1 = short, 2 = long) */
+       0,                     /* bitsize */
+       false,                 /* pc_relative */
+       0,                     /* bitpos */
+       complain_overflow_unsigned, /* complain_on_overflow */
+       v850_elf_ignore_reloc, /* special_function */
+       "R_V850_ALIGN",        /* name */
+       false,                 /* partial_inplace */
+       0,                     /* src_mask */
+       0,                     /* dst_mask */
+       true),                 /* pcrel_offset */
 };
 
 /* Map BFD reloc types to V850 ELF reloc types.  */
@@ -481,31 +532,34 @@ struct v850_elf_reloc_map
 
 static const struct v850_elf_reloc_map v850_elf_reloc_map[] =
 {
-  { BFD_RELOC_NONE,		R_V850_NONE },
-  { BFD_RELOC_V850_9_PCREL,	R_V850_9_PCREL },
-  { BFD_RELOC_V850_22_PCREL,	R_V850_22_PCREL },
-  { BFD_RELOC_HI16_S,		R_V850_HI16_S },
-  { BFD_RELOC_HI16,		R_V850_HI16 },
-  { BFD_RELOC_LO16,		R_V850_LO16 },
-  { BFD_RELOC_32,		R_V850_32 },
-  { BFD_RELOC_16,		R_V850_16 },
-  { BFD_RELOC_8,		R_V850_8 },
-  { BFD_RELOC_V850_SDA_16_16_OFFSET, R_V850_SDA_16_16_OFFSET },
-  { BFD_RELOC_V850_SDA_15_16_OFFSET, R_V850_SDA_15_16_OFFSET },
-  { BFD_RELOC_V850_ZDA_16_16_OFFSET, R_V850_ZDA_16_16_OFFSET },
-  { BFD_RELOC_V850_ZDA_15_16_OFFSET, R_V850_ZDA_15_16_OFFSET },
-  { BFD_RELOC_V850_TDA_6_8_OFFSET,   R_V850_TDA_6_8_OFFSET   },
-  { BFD_RELOC_V850_TDA_7_8_OFFSET,   R_V850_TDA_7_8_OFFSET   },
-  { BFD_RELOC_V850_TDA_7_7_OFFSET,   R_V850_TDA_7_7_OFFSET   },
-  { BFD_RELOC_V850_TDA_16_16_OFFSET, R_V850_TDA_16_16_OFFSET },
+  { BFD_RELOC_NONE,		           R_V850_NONE                   },
+  { BFD_RELOC_V850_9_PCREL,	           R_V850_9_PCREL                },
+  { BFD_RELOC_V850_22_PCREL,	           R_V850_22_PCREL               },
+  { BFD_RELOC_HI16_S,		           R_V850_HI16_S                 },
+  { BFD_RELOC_HI16,		           R_V850_HI16                   },
+  { BFD_RELOC_LO16,		           R_V850_LO16                   },
+  { BFD_RELOC_32,		           R_V850_32                     },
+  { BFD_RELOC_16,		           R_V850_16                     },
+  { BFD_RELOC_8,		           R_V850_8                      },
+  { BFD_RELOC_V850_SDA_16_16_OFFSET,       R_V850_SDA_16_16_OFFSET       },
+  { BFD_RELOC_V850_SDA_15_16_OFFSET,       R_V850_SDA_15_16_OFFSET       },
+  { BFD_RELOC_V850_ZDA_16_16_OFFSET,       R_V850_ZDA_16_16_OFFSET       },
+  { BFD_RELOC_V850_ZDA_15_16_OFFSET,       R_V850_ZDA_15_16_OFFSET       },
+  { BFD_RELOC_V850_TDA_6_8_OFFSET,         R_V850_TDA_6_8_OFFSET         },
+  { BFD_RELOC_V850_TDA_7_8_OFFSET,         R_V850_TDA_7_8_OFFSET         },
+  { BFD_RELOC_V850_TDA_7_7_OFFSET,         R_V850_TDA_7_7_OFFSET         },
+  { BFD_RELOC_V850_TDA_16_16_OFFSET,       R_V850_TDA_16_16_OFFSET       },
   { BFD_RELOC_V850_TDA_4_5_OFFSET,         R_V850_TDA_4_5_OFFSET         },
   { BFD_RELOC_V850_TDA_4_4_OFFSET,         R_V850_TDA_4_4_OFFSET         },
   { BFD_RELOC_V850_SDA_16_16_SPLIT_OFFSET, R_V850_SDA_16_16_SPLIT_OFFSET },
   { BFD_RELOC_V850_ZDA_16_16_SPLIT_OFFSET, R_V850_ZDA_16_16_SPLIT_OFFSET },
   { BFD_RELOC_V850_CALLT_6_7_OFFSET,       R_V850_CALLT_6_7_OFFSET       },
   { BFD_RELOC_V850_CALLT_16_16_OFFSET,     R_V850_CALLT_16_16_OFFSET     },
-  { BFD_RELOC_VTABLE_INHERIT,               R_V850_GNU_VTINHERIT },
-  { BFD_RELOC_VTABLE_ENTRY,                 R_V850_GNU_VTENTRY },
+  { BFD_RELOC_VTABLE_INHERIT,              R_V850_GNU_VTINHERIT          },
+  { BFD_RELOC_VTABLE_ENTRY,                R_V850_GNU_VTENTRY            },
+  { BFD_RELOC_V850_LONGCALL,               R_V850_LONGCALL               },
+  { BFD_RELOC_V850_LONGJUMP,               R_V850_LONGJUMP               },
+  { BFD_RELOC_V850_ALIGN,                  R_V850_ALIGN                  },
 
 };
 
@@ -1297,6 +1351,9 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
   /* Work out which section the relocation is targetted at and the
      initial relocation command value.  */
 
+  if (reloc->howto->pc_relative == true)
+    return bfd_reloc_ok;
+
   /* Get symbol value.  (Common symbols are special.)  */
   if (bfd_is_com_section (symbol->section))
     relocation = 0;
@@ -1335,6 +1392,26 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
   reloc->addend = relocation;
   return bfd_reloc_ok;
 }
+
+/* This function is used for relocs which are only used
+   for relaxing, which the linker should otherwise ignore.  */
+
+static bfd_reloc_status_type
+v850_elf_ignore_reloc (abfd, reloc_entry, symbol, data, input_section,
+                       output_bfd, error_message)
+     bfd *      abfd ATTRIBUTE_UNUSED;
+     arelent *  reloc_entry;
+     asymbol *  symbol ATTRIBUTE_UNUSED;
+     PTR        data ATTRIBUTE_UNUSED;
+     asection * input_section;
+     bfd *      output_bfd;
+     char **    error_message ATTRIBUTE_UNUSED;
+{
+  if (output_bfd != NULL)
+    reloc_entry->address += input_section->output_offset;
+
+  return bfd_reloc_ok;
+}
 
 static boolean
 v850_elf_is_local_label_name (abfd, name)
@@ -1349,8 +1426,8 @@ v850_elf_is_local_label_name (abfd, name)
 
 static bfd_reloc_status_type
 v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
-				    input_section, contents, offset, value,
-				    addend, info, sym_sec, is_local)
+			      input_section, contents, offset, value,
+			      addend, info, sym_sec, is_local)
      reloc_howto_type *      howto;
      bfd *                   input_bfd;
      bfd *                   output_bfd ATTRIBUTE_UNUSED;
@@ -1500,6 +1577,9 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
     case R_V850_NONE:
     case R_V850_GNU_VTINHERIT:
     case R_V850_GNU_VTENTRY:
+    case R_V850_LONGCALL:
+    case R_V850_LONGJUMP:
+    case R_V850_ALIGN:
       return bfd_reloc_ok;
 
     default:
@@ -1770,7 +1850,6 @@ v850_elf_object_p (abfd)
     default:
     case E_V850_ARCH:   (void) bfd_default_set_arch_mach (abfd, bfd_arch_v850, 0); break;
     case E_V850E_ARCH:  (void) bfd_default_set_arch_mach (abfd, bfd_arch_v850, bfd_mach_v850e); break;
-    case E_V850EA_ARCH: (void) bfd_default_set_arch_mach (abfd, bfd_arch_v850, bfd_mach_v850ea); break;
     }
   return true;
 }
@@ -1789,7 +1868,6 @@ v850_elf_final_write_processing (abfd, linker)
     default:
     case 0: val = E_V850_ARCH; break;
     case bfd_mach_v850e:  val = E_V850E_ARCH; break;
-    case bfd_mach_v850ea: val = E_V850EA_ARCH;  break;
     }
 
   elf_elfheader (abfd)->e_flags &=~ EF_V850_ARCH;
@@ -1882,7 +1960,6 @@ v850_elf_print_private_bfd_data (abfd, ptr)
     default:
     case E_V850_ARCH: fprintf (file, _("v850 architecture")); break;
     case E_V850E_ARCH:  fprintf (file, _("v850e architecture")); break;
-    case E_V850EA_ARCH: fprintf (file, _("v850ea architecture")); break;
     }
 
   fputc ('\n', file);
@@ -2166,6 +2243,939 @@ v850_elf_fake_sections (abfd, hdr, sec)
 
   return true;
 }
+
+/* Delete some bytes from a section while relaxing.  */
+
+static boolean
+v850_elf_relax_delete_bytes (abfd, sec, addr, toaddr, count)
+     bfd *      abfd;
+     asection * sec;
+     bfd_vma    addr;
+     bfd_vma    toaddr;
+     int        count;
+{
+  Elf_Internal_Shdr *		symtab_hdr;
+  Elf32_External_Sym *		extsyms;
+  Elf32_External_Sym *         	esym;
+  Elf32_External_Sym *         	esymend;
+  int 				index;
+  unsigned int 			sec_shndx;
+  bfd_byte *                   	contents;
+  Elf_Internal_Rela *          	irel;
+  Elf_Internal_Rela *          	irelend;
+  struct elf_link_hash_entry * 	sym_hash;
+  Elf_Internal_Shdr *           shndx_hdr;
+  Elf_External_Sym_Shndx *      shndx;
+
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
+
+  sec_shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
+
+  contents = elf_section_data (sec)->this_hdr.contents;
+
+  /* The deletion must stop at the next ALIGN reloc for an alignment
+     power larger than the number of bytes we are deleting.  */
+
+  /* Actually delete the bytes.  */
+#if (DEBUG_RELAX & 2)
+  fprintf (stderr, "relax_delete: contents: sec: %s  %p .. %p %x\n",
+	   sec->name, addr, toaddr, count );
+#endif
+  memmove (contents + addr, contents + addr + count,
+	   toaddr - addr - count);
+  memset (contents + toaddr-count, 0, count);
+
+  /* Adjust all the relocs.  */
+  irel = elf_section_data (sec)->relocs;
+  irelend = irel + sec->reloc_count;
+  shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
+  shndx = (Elf_External_Sym_Shndx *) shndx_hdr->contents;
+
+  for (; irel < irelend; irel++)
+    {
+      bfd_vma raddr, paddr, symval;
+      Elf_Internal_Sym isym;
+
+      /* Get the new reloc address.  */
+      raddr = irel->r_offset;
+      if ((raddr >= (addr + count) && raddr < toaddr))
+	irel->r_offset -= count;	
+
+      if (raddr >= addr && raddr < addr + count)
+	{
+	  irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+				       (int) R_V850_NONE);
+	  continue;
+	}
+      
+      if (ELF32_R_TYPE (irel->r_info) == (int) R_V850_ALIGN)
+	continue;
+
+      bfd_elf32_swap_symbol_in (abfd,
+				extsyms + ELF32_R_SYM (irel->r_info),
+				shndx ? shndx + ELF32_R_SYM (irel->r_info) : NULL,
+				& isym);
+      
+      if (isym.st_shndx != sec_shndx)
+	continue;
+
+      /* Get the value of the symbol referred to by the reloc.  */
+      if (ELF32_R_SYM (irel->r_info) < symtab_hdr->sh_info)
+	{
+	  symval = isym.st_value;
+#if (DEBUG_RELAX & 2)
+	  {
+	    char * name = bfd_elf_string_from_elf_section
+	                   (abfd, symtab_hdr->sh_link, isym.st_name);
+	    fprintf (stderr,
+	       "relax_delete: local: sec: %s, sym: %s (%d), value: %x + %x + %x addend %x\n",
+	       sec->name, name, isym.st_name,
+	       sec->output_section->vma, sec->output_offset,
+	       isym.st_value, irel->r_addend);
+	  }
+#endif
+	}
+      else
+	{
+	  unsigned long indx;
+	  struct elf_link_hash_entry * h;
+
+	  /* An external symbol.  */
+	  indx = ELF32_R_SYM (irel->r_info) - symtab_hdr->sh_info;
+
+	  h = elf_sym_hashes (abfd) [indx];
+	  BFD_ASSERT (h != NULL);
+
+	  symval = h->root.u.def.value;
+#if (DEBUG_RELAX & 2)
+	  fprintf (stderr,
+		   "relax_delete: defined: sec: %s, name: %s, value: %x + %x + %x addend %x\n",
+		   sec->name, h->root.root.string, h->root.u.def.value,
+		   sec->output_section->vma, sec->output_offset, irel->r_addend);
+#endif
+	}
+	      
+      paddr = symval + irel->r_addend;
+      
+      if ( (symval >= addr + count && symval < toaddr)
+	  && (paddr < addr + count || paddr >= toaddr))
+	irel->r_addend += count;
+      else if (    (symval < addr + count || symval >= toaddr)
+	        && (paddr >= addr + count && paddr < toaddr))
+	irel->r_addend -= count;
+    }
+
+  /* Adjust the local symbols defined in this section.  */
+  esym = extsyms;
+  esymend = esym + symtab_hdr->sh_info;
+
+  for (; esym < esymend; esym++, shndx = (shndx ? shndx + 1 : NULL))
+    {
+      Elf_Internal_Sym isym;
+
+      bfd_elf32_swap_symbol_in (abfd, esym, shndx, & isym);
+
+      if (isym.st_shndx == sec_shndx
+	  && isym.st_value >= addr + count
+	  && isym.st_value < toaddr)
+	{
+	  isym.st_value -= count;
+
+	  if (isym.st_value + isym.st_size >= toaddr)
+	    isym.st_size += count;	    
+	  
+	  bfd_elf32_swap_symbol_out (abfd, & isym, shndx, esym);
+	}
+      else if (isym.st_shndx == sec_shndx
+	       && isym.st_value < addr + count)
+	{
+	  if (isym.st_value+isym.st_size >= addr + count
+	      && isym.st_value+isym.st_size < toaddr)
+	    isym.st_size -= count;
+
+	  if (isym.st_value >= addr
+	      && isym.st_value <  addr + count)
+	    isym.st_value = addr;
+
+	  bfd_elf32_swap_symbol_out (abfd, & isym, shndx, esym);
+	}
+    }
+
+  /* Now adjust the global symbols defined in this section.  */
+  esym = extsyms + symtab_hdr->sh_info;
+  esymend = extsyms + (symtab_hdr->sh_size / sizeof (Elf32_External_Sym));
+
+  for (index = 0; esym < esymend; esym ++, index ++)
+    {
+      Elf_Internal_Sym isym;
+
+      bfd_elf32_swap_symbol_in (abfd, esym, shndx, & isym);
+      sym_hash = elf_sym_hashes (abfd) [index];
+
+      if (isym.st_shndx == sec_shndx
+	  && ((sym_hash)->root.type == bfd_link_hash_defined
+	      || (sym_hash)->root.type == bfd_link_hash_defweak)
+	  && (sym_hash)->root.u.def.section == sec
+	  && (sym_hash)->root.u.def.value >= addr + count
+	  && (sym_hash)->root.u.def.value < toaddr)
+	{
+	  if ((sym_hash)->root.u.def.value + isym.st_size >= toaddr)
+	    {
+	      isym.st_size += count;
+	      bfd_elf32_swap_symbol_out (abfd, & isym, shndx, esym);
+	    }
+
+	  (sym_hash)->root.u.def.value -= count;
+	}
+      else if (isym.st_shndx == sec_shndx
+	       && ((sym_hash)->root.type == bfd_link_hash_defined
+		   || (sym_hash)->root.type == bfd_link_hash_defweak)
+	       && (sym_hash)->root.u.def.section == sec
+	       && (sym_hash)->root.u.def.value < addr + count)
+	{
+	  if ((sym_hash)->root.u.def.value+isym.st_size >= addr + count
+	      && (sym_hash)->root.u.def.value+isym.st_size < toaddr)
+	    isym.st_size -= count;
+
+	  if ((sym_hash)->root.u.def.value >= addr
+	      && (sym_hash)->root.u.def.value < addr + count)
+	    (sym_hash)->root.u.def.value = addr;
+
+	  bfd_elf32_swap_symbol_out (abfd, & isym, shndx, esym);
+	}
+
+      if (shndx)
+	++ shndx;
+    }
+
+  return true;
+}
+
+#define NOP_OPCODE 	(0x0000)
+#define MOVHI	    	0x0640				/* 4byte */ 
+#define MOVHI_MASK  	0x07e0
+#define MOVHI_R1(insn)	((insn) & 0x1f)			/* 4byte */ 
+#define MOVHI_R2(insn)	((insn) >> 11)
+#define MOVEA	    	0x0620				/* 2byte */
+#define MOVEA_MASK  	0x07e0
+#define MOVEA_R1(insn)	((insn) & 0x1f)
+#define MOVEA_R2(insn)	((insn) >> 11)
+#define JARL_4	    	0x00040780				/* 4byte */
+#define JARL_4_MASK 	0xFFFF07FF
+#define JARL_R2(insn)	(int)(((insn) & (~JARL_4_MASK)) >> 11)
+#define ADD_I       	0x0240					/* 2byte */
+#define ADD_I_MASK  	0x07e0
+#define ADD_I5(insn)	((((insn) & 0x001f) << 11) >> 11)	/* 2byte */
+#define ADD_R2(insn)	((insn) >> 11)
+#define JMP_R	    	0x0060					/* 2byte */
+#define JMP_R_MASK 	0xFFE0
+#define JMP_R1(insn)	((insn) & 0x1f)
+
+static boolean 
+v850_elf_relax_section (abfd, sec, link_info, again)
+     bfd *			abfd;
+     asection *			sec;
+     struct bfd_link_info *	link_info;
+     boolean *			again;
+{
+  Elf_Internal_Shdr *	    symtab_hdr;
+  Elf_Internal_Rela *	    internal_relocs;
+  Elf_Internal_Rela *	    free_relocs = NULL;
+  Elf_Internal_Rela *	    irel;
+  Elf_Internal_Rela *	    irelend;
+  Elf_Internal_Rela *	    irelalign = NULL;
+  bfd_byte *		    contents = NULL;
+  bfd_byte *		    free_contents = NULL;
+  Elf32_External_Sym *	    extsyms = NULL;
+  Elf32_External_Sym *	    free_extsyms = NULL;
+  bfd_vma 		    addr = 0;
+  bfd_vma		    toaddr;
+  int 			    align_pad_size = 0;
+  Elf_Internal_Shdr *       shndx_hdr = NULL;
+  Elf_External_Sym_Shndx *  shndx_buf = NULL;
+  
+  * again = false;
+
+  if (link_info->relocateable
+      || (sec->flags & SEC_RELOC) == 0
+      || sec->reloc_count == 0)
+    return true;
+
+  /* If this is the first time we have been called
+     for this section, initialize the cooked size.  */
+  if (sec->_cooked_size == 0)
+    sec->_cooked_size = sec->_raw_size;
+
+  symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
+
+  internal_relocs = (_bfd_elf32_link_read_relocs
+		     (abfd, sec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
+		      link_info->keep_memory));
+  if (internal_relocs == NULL)
+    goto error_return;
+  if (! link_info->keep_memory)
+    free_relocs = internal_relocs;
+
+  irelend = internal_relocs + sec->reloc_count;
+  
+  while (addr < sec->_cooked_size)
+    {
+      toaddr = sec->_cooked_size;
+
+      for (irel = internal_relocs; irel < irelend; irel ++)
+	if (ELF32_R_TYPE (irel->r_info) == (int) R_V850_ALIGN
+	    && irel->r_offset > addr
+	    && irel->r_offset < toaddr)
+	  toaddr = irel->r_offset;
+      
+#ifdef DEBUG_RELAX
+      fprintf (stderr, "relax region 0x%x to 0x%x align pad %d\n",
+	       addr, toaddr, align_pad_size);
+#endif
+      if (irelalign)
+	{
+	  bfd_vma alignto;
+	  bfd_vma alignmoveto;
+
+	  alignmoveto = BFD_ALIGN (addr - align_pad_size, 1 << irelalign->r_addend);
+	  alignto = BFD_ALIGN (addr, 1 << irelalign->r_addend);
+
+	  if (alignmoveto < alignto)
+	    {
+	      unsigned int i;
+
+	      align_pad_size = alignto - alignmoveto;
+#ifdef DEBUG_RELAX
+	      fprintf (stderr, "relax move region 0x%x to 0x%x delete size 0x%x\n",
+		       alignmoveto, toaddr, align_pad_size);
+#endif
+	      if (!v850_elf_relax_delete_bytes (abfd, sec, alignmoveto,
+						toaddr, align_pad_size))
+		goto error_return;		
+
+	      for (i  = BFD_ALIGN (toaddr - align_pad_size, 1);
+		   (i + 1) < toaddr; i += 2)
+		bfd_put_16 (abfd, NOP_OPCODE, contents + i);
+
+	      addr = alignmoveto;
+	    }
+	  else
+	    align_pad_size = 0;
+	}
+
+      for (irel = internal_relocs; irel < irelend; irel++)
+	{
+	  bfd_vma 	      laddr;
+	  bfd_vma	      addend;
+	  bfd_vma	      symval;
+	  int 		      insn[5];
+	  int 		      no_match = -1;
+	  Elf_Internal_Rela * hi_irelfn;
+	  Elf_Internal_Rela * lo_irelfn;
+	  Elf_Internal_Rela * irelcall;
+	  bfd_signed_vma      foff;
+
+	  if (! (irel->r_offset >= addr && irel->r_offset < toaddr
+		 && (ELF32_R_TYPE (irel->r_info) == (int) R_V850_LONGCALL
+		     || ELF32_R_TYPE (irel->r_info) == (int) R_V850_LONGJUMP)))
+	    continue;
+
+#ifdef DEBUG_RELAX
+	  fprintf (stderr, "relax check r_info 0x%x r_offset 0x%x r_addend 0x%x\n",
+		   irel->r_info,
+		   irel->r_offset,
+		   irel->r_addend );
+#endif
+
+	  /* Get the section contents.  */
+	  if (contents == NULL)
+	    {
+	      if (elf_section_data (sec)->this_hdr.contents != NULL)
+		contents = elf_section_data (sec)->this_hdr.contents;
+	      else
+		{
+		  contents = (bfd_byte *) bfd_malloc (sec->_raw_size);
+		  if (contents == NULL)
+		    goto error_return;
+
+		  free_contents = contents;
+
+		  if (! bfd_get_section_contents (abfd, sec, contents,
+						  (file_ptr) 0, sec->_raw_size))
+		    goto error_return;
+		}
+	    }
+
+	  /* Read this BFD's symbols if we haven't done so already.  */
+	  if (extsyms == NULL)
+	    {
+	      /* Get cached copy if it exists.  */
+	      if (symtab_hdr->contents != NULL)
+		extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
+	      else
+		{
+		  /* Go get them off disk.  */
+		  bfd_size_type amt;
+
+		  amt = symtab_hdr->sh_info;
+		  amt *= sizeof (Elf32_External_Sym);
+		  extsyms = (Elf32_External_Sym *) bfd_malloc (amt);
+		  if (extsyms == NULL)
+		    goto error_return;
+		  free_extsyms = extsyms;
+		  if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
+		      || bfd_bread ((PTR) extsyms, amt, abfd) != amt)
+		    goto error_return;
+		}
+
+	      if (shndx_hdr->sh_size != 0)
+		{
+		  bfd_size_type amt;
+
+		  amt = symtab_hdr->sh_info;
+		  amt *= sizeof (Elf_External_Sym_Shndx);
+		  shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
+		  if (shndx_buf == NULL)
+		    goto error_return;
+		  if (bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0
+		      || bfd_bread ((PTR) shndx_buf, amt, abfd) != amt)
+		    goto error_return;
+		}
+	    }
+
+	  laddr = irel->r_offset;
+
+	  if (ELF32_R_TYPE (irel->r_info) == (int) R_V850_LONGCALL)
+	    {
+	      /* Check code for -mlong-calls output. */
+	      if (laddr + 16 <= (bfd_vma) sec->_raw_size)
+		{
+		  insn[0] = bfd_get_16 (abfd, contents + laddr);
+		  insn[1] = bfd_get_16 (abfd, contents + laddr + 4);
+		  insn[2] = bfd_get_32 (abfd, contents + laddr + 8);
+		  insn[3] = bfd_get_16 (abfd, contents + laddr + 12);
+		  insn[4] = bfd_get_16 (abfd, contents + laddr + 14);
+	  
+		  if ((insn[0] & MOVHI_MASK) != MOVHI
+		       || MOVHI_R1 (insn[0]) != 0)
+		    no_match = 0;
+
+		  if (no_match < 0
+		      && ((insn[1] & MOVEA_MASK) != MOVEA
+			   || MOVHI_R2 (insn[0]) != MOVEA_R1 (insn[1])))
+		    no_match = 1;
+
+		  if (no_match < 0
+		      && (insn[2] & JARL_4_MASK) != JARL_4)
+		    no_match = 2;
+
+		  if (no_match < 0
+		      && ((insn[3] & ADD_I_MASK) != ADD_I
+			   || ADD_I5 (insn[3]) != 4
+			   || JARL_R2 (insn[2]) != ADD_R2 (insn[3])))
+		    no_match = 3;
+
+		  if (no_match < 0
+		      && ((insn[4] & JMP_R_MASK) != JMP_R
+			   || MOVEA_R2 (insn[1]) != JMP_R1 (insn[4])))
+		    no_match = 4;
+		}
+	      else
+		{
+		  ((*_bfd_error_handler)
+		   ("%s: 0x%lx: warning: R_V850_LONGCALL points to unrecognized insns",
+		    bfd_get_filename (abfd), (unsigned long) irel->r_offset));
+
+		  continue;
+		}
+
+	      if (no_match >= 0)
+		{
+		  ((*_bfd_error_handler)
+		   ("%s: 0x%lx: warning: R_V850_LONGCALL points to unrecognized insn 0x%x",
+		    bfd_get_filename (abfd), (unsigned long) irel->r_offset+no_match, insn[no_match]));
+
+		  continue;
+		}      
+
+	      /* Get the reloc for the address from which the register is
+	         being loaded.  This reloc will tell us which function is
+	         actually being called.  */
+	      for (hi_irelfn = internal_relocs; hi_irelfn < irelend; hi_irelfn ++)
+		if (hi_irelfn->r_offset == laddr + 2
+		    && ELF32_R_TYPE (hi_irelfn->r_info) 
+		        == (int) R_V850_HI16_S)
+		  break;
+
+	      for (lo_irelfn = internal_relocs; lo_irelfn < irelend; lo_irelfn ++)
+		if (lo_irelfn->r_offset == laddr + 6
+		    && ELF32_R_TYPE (lo_irelfn->r_info)
+		        == (int) R_V850_LO16)
+		  break;
+
+	      for (irelcall = internal_relocs; irelcall < irelend; irelcall ++)
+		if (irelcall->r_offset == laddr + 8
+		    && ELF32_R_TYPE (irelcall->r_info)
+                        == (int) R_V850_22_PCREL)
+		  break;
+
+	      if (   hi_irelfn == irelend
+		  || lo_irelfn == irelend
+		  || irelcall  == irelend)
+		{
+		  ((*_bfd_error_handler)
+		   ("%s: 0x%lx: warning: R_V850_LONGCALL points to unrecognized reloc",
+		    bfd_get_filename (abfd), (unsigned long) irel->r_offset ));
+
+		  continue;
+		}
+	
+	      if (ELF32_R_SYM (irelcall->r_info) < symtab_hdr->sh_info)
+		{
+		  unsigned int		   r_index;
+		  Elf_Internal_Sym         isym;
+		  asection *               sym_sec;
+		  Elf32_External_Sym *     esym;
+		  Elf_External_Sym_Shndx * shndx;
+
+		  /* A local symbol.  */
+		  r_index = ELF32_R_SYM (irelcall->r_info);
+		  esym = extsyms + r_index;
+		  shndx = shndx_buf + (shndx_buf ? r_index : 0);
+		  bfd_elf32_swap_symbol_in (abfd, esym, shndx, & isym);
+
+		  if (isym.st_shndx == SHN_UNDEF)
+		    sym_sec = bfd_und_section_ptr;
+		  else if (isym.st_shndx == SHN_ABS)
+		    sym_sec = bfd_abs_section_ptr;
+		  else if (isym.st_shndx == SHN_COMMON)
+		    sym_sec = bfd_com_section_ptr;
+		  else
+		    sym_sec = bfd_section_from_elf_index (abfd, isym.st_shndx);
+		  symval = isym.st_value;
+		}
+	      else
+		{
+		  unsigned long indx;
+		  struct elf_link_hash_entry * h;
+
+		  /* An external symbol.  */
+		  indx = ELF32_R_SYM (irelcall->r_info) - symtab_hdr->sh_info;
+		  h = elf_sym_hashes (abfd)[indx];
+		  BFD_ASSERT (h != NULL);
+
+		  if (   h->root.type != bfd_link_hash_defined
+		      && h->root.type != bfd_link_hash_defweak)
+		    /* This appears to be a reference to an undefined
+		       symbol.  Just ignore it--it will be caught by the
+		       regular reloc processing.  */
+		    continue;
+
+		  symval = h->root.u.def.value;
+		}
+
+	      if (symval + irelcall->r_addend != irelcall->r_offset + 4)
+		{
+		  ((*_bfd_error_handler)
+		   ("%s: 0x%lx: warning: R_V850_LONGCALL points to unrecognized reloc 0x%lx",
+		    bfd_get_filename (abfd), (unsigned long) irel->r_offset, irelcall->r_offset ));
+
+		  continue;
+		}
+
+	      /* Get the value of the symbol referred to by the reloc.  */
+	      if (ELF32_R_SYM (hi_irelfn->r_info) < symtab_hdr->sh_info)
+		{
+		  unsigned int		   r_index;
+		  Elf_Internal_Sym         isym;
+		  asection *               sym_sec;
+		  Elf32_External_Sym *     esym;
+		  Elf_External_Sym_Shndx * shndx;
+
+		  /* A local symbol.  */
+		  r_index = ELF32_R_SYM (irel->r_info);
+		  esym = extsyms + r_index;
+		  shndx = shndx_buf + (shndx_buf ? r_index : 0);
+		  bfd_elf32_swap_symbol_in (abfd, esym, shndx, & isym);
+          
+		  if (isym.st_shndx == SHN_UNDEF)
+		    sym_sec = bfd_und_section_ptr;
+		  else if (isym.st_shndx == SHN_ABS)
+		    sym_sec = bfd_abs_section_ptr;
+		  else if (isym.st_shndx == SHN_COMMON)
+		    sym_sec = bfd_com_section_ptr;
+		  else
+		    sym_sec = bfd_section_from_elf_index (abfd, isym.st_shndx);
+		  symval = (isym.st_value
+			    + sym_sec->output_section->vma
+			    + sym_sec->output_offset);
+		}
+	      else
+		{
+		  unsigned long indx;
+		  struct elf_link_hash_entry * h;
+
+		  /* An external symbol.  */
+		  indx = ELF32_R_SYM (irel->r_info) - symtab_hdr->sh_info;
+		  h = elf_sym_hashes (abfd)[indx];
+		  BFD_ASSERT (h != NULL);
+
+		  if (   h->root.type != bfd_link_hash_defined
+		      && h->root.type != bfd_link_hash_defweak)
+		    /* This appears to be a reference to an undefined
+		       symbol.  Just ignore it--it will be caught by the
+		       regular reloc processing.  */
+		    continue;
+
+		  symval = (h->root.u.def.value
+			    + h->root.u.def.section->output_section->vma
+			    + h->root.u.def.section->output_offset);
+		}
+
+	      addend = irel->r_addend;
+
+	      foff = (symval + addend
+		      - (irel->r_offset
+			 + sec->output_section->vma
+			 + sec->output_offset
+			 + 4));
+#ifdef DEBUG_RELAX
+	      fprintf (stderr, "relax longcall r_offset 0x%x ptr 0x%x symbol 0x%x addend 0x%x distance 0x%x\n",
+		       irel->r_offset,
+		       (irel->r_offset
+			+ sec->output_section->vma
+			+ sec->output_offset),
+		       symval, addend, foff);
+#endif
+
+	      if (foff < -0x100000 || foff >= 0x100000)
+		/* After all that work, we can't shorten this function call.  */
+		continue;
+
+	      /* For simplicity of coding, we are going to modify the section
+	         contents, the section relocs, and the BFD symbol table.  We
+	         must tell the rest of the code not to free up this
+	         information.  It would be possible to instead create a table
+	         of changes which have to be made, as is done in coff-mips.c;
+	         that would be more work, but would require less memory when
+	         the linker is run.  */
+	      elf_section_data (sec)->relocs = internal_relocs;
+	      free_relocs = NULL;
+
+	      elf_section_data (sec)->this_hdr.contents = contents;
+	      free_contents = NULL;
+
+	      symtab_hdr->contents = (bfd_byte *) extsyms;
+	      free_extsyms = NULL;
+      
+	      /* Replace the long call with a jarl.  */
+	      irel->r_info = ELF32_R_INFO (ELF32_R_SYM (hi_irelfn->r_info), R_V850_22_PCREL);
+
+	      addend = 0;
+
+	      if (ELF32_R_SYM (hi_irelfn->r_info) < symtab_hdr->sh_info)
+		/* If this needs to be changed because of future relaxing,
+		   it will be handled here like other internal IND12W
+		   relocs.  */
+		bfd_put_32 (abfd,
+			    0x00000780 | (JARL_R2 (insn[2])<<11) | ((addend << 16) & 0xffff) | ((addend >> 16) & 0xf),
+			    contents + irel->r_offset);
+	      else
+		/* We can't fully resolve this yet, because the external
+		   symbol value may be changed by future relaxing.
+		   We let the final link phase handle it.  */
+		bfd_put_32 (abfd, 0x00000780 | (JARL_R2 (insn[2])<<11),
+			    contents + irel->r_offset);
+
+	      hi_irelfn->r_info = 
+		ELF32_R_INFO (ELF32_R_SYM (hi_irelfn->r_info), R_V850_NONE);
+	      lo_irelfn->r_info =
+		ELF32_R_INFO (ELF32_R_SYM (lo_irelfn->r_info), R_V850_NONE);
+	      irelcall->r_info =
+		ELF32_R_INFO (ELF32_R_SYM (irelcall->r_info), R_V850_NONE);
+
+	      if (! v850_elf_relax_delete_bytes (abfd, sec,
+						 irel->r_offset + 4, toaddr, 12))
+		goto error_return;
+
+	      align_pad_size += 12;
+	    }
+	  else if (ELF32_R_TYPE (irel->r_info) == (int) R_V850_LONGJUMP)
+	    {
+	      /* Check code for -mlong-jumps output.  */
+	      if (laddr + 10 <= (bfd_vma) sec->_raw_size)
+		{
+		  insn[0] = bfd_get_16 (abfd, contents + laddr);
+		  insn[1] = bfd_get_16 (abfd, contents + laddr + 4);
+		  insn[2] = bfd_get_16 (abfd, contents + laddr + 8);
+
+		  if ((insn[0] & MOVHI_MASK) != MOVHI
+		       || MOVHI_R1 (insn[0]) != 0)
+		    no_match = 0;
+
+		  if (no_match < 0
+		      && ((insn[1] & MOVEA_MASK) != MOVEA
+			   || MOVHI_R2 (insn[0]) != MOVEA_R1 (insn[1])))
+		    no_match = 1;
+
+		  if (no_match < 0
+		      && ((insn[2] & JMP_R_MASK) != JMP_R
+			   || MOVEA_R2 (insn[1]) != JMP_R1 (insn[2])))
+		    no_match = 4;
+		}
+	      else
+		{
+		  ((*_bfd_error_handler)
+		   ("%s: 0x%lx: warning: R_V850_LONGJUMP points to unrecognized insns",
+		    bfd_get_filename (abfd), (unsigned long) irel->r_offset));
+
+		  continue;
+		}
+
+	      if (no_match >= 0)
+		{
+		  ((*_bfd_error_handler)
+		   ("%s: 0x%lx: warning: R_V850_LONGJUMP points to unrecognized insn 0x%x",
+		    bfd_get_filename (abfd), (unsigned long) irel->r_offset+no_match, insn[no_match]));
+
+		  continue;
+		}
+
+	      /* Get the reloc for the address from which the register is
+	         being loaded.  This reloc will tell us which function is
+	         actually being called.  */
+	      for (hi_irelfn = internal_relocs; hi_irelfn < irelend; hi_irelfn ++)
+		if (hi_irelfn->r_offset == laddr + 2
+		    && ELF32_R_TYPE (hi_irelfn->r_info) == (int) R_V850_HI16_S) 
+		  break;
+
+	      for (lo_irelfn = internal_relocs; lo_irelfn < irelend; lo_irelfn ++)
+		if (lo_irelfn->r_offset == laddr + 6
+		    && ELF32_R_TYPE (lo_irelfn->r_info) == (int) R_V850_LO16)
+		  break;
+
+	      if (   hi_irelfn == irelend
+		  || lo_irelfn == irelend)
+		{
+		  ((*_bfd_error_handler)
+		   ("%s: 0x%lx: warning: R_V850_LONGJUMP points to unrecognized reloc",
+		    bfd_get_filename (abfd), (unsigned long) irel->r_offset ));
+
+		  continue;
+		}
+	
+	      /* Get the value of the symbol referred to by the reloc.  */
+	      if (ELF32_R_SYM (hi_irelfn->r_info) < symtab_hdr->sh_info)
+		{
+		  unsigned int		   r_index;
+		  Elf_Internal_Sym         isym;
+		  asection *               sym_sec;
+		  Elf32_External_Sym *     esym;
+		  Elf_External_Sym_Shndx * shndx;
+
+		  /* A local symbol.  */
+		  r_index = ELF32_R_SYM (irel->r_info);
+		  esym = extsyms + r_index;
+		  shndx = shndx_buf + (shndx_buf ? r_index : 0);
+		  bfd_elf32_swap_symbol_in (abfd, esym, shndx, & isym);
+	  
+		  if (isym.st_shndx == SHN_UNDEF)
+		    sym_sec = bfd_und_section_ptr;
+		  else if (isym.st_shndx == SHN_ABS)
+		    sym_sec = bfd_abs_section_ptr;
+		  else if (isym.st_shndx == SHN_COMMON)
+		    sym_sec = bfd_com_section_ptr;
+		  else
+		    sym_sec = bfd_section_from_elf_index (abfd, isym.st_shndx);
+		  symval = (isym.st_value
+			    + sym_sec->output_section->vma
+			    + sym_sec->output_offset);
+#ifdef DEBUG_RELAX
+		  {
+		    char * name = bfd_elf_string_from_elf_section
+		      (abfd, symtab_hdr->sh_link, isym.st_name);
+
+		    fprintf (stderr, "relax long jump local: sec: %s, sym: %s (%d), value: %x + %x + %x addend %x\n",
+			     sym_sec->name, name, isym.st_name,
+			     sym_sec->output_section->vma, sym_sec->output_offset,
+			     isym.st_value, irel->r_addend);
+		  }
+#endif
+		}
+	      else
+		{
+		  unsigned long indx;
+		  struct elf_link_hash_entry * h;
+
+		  /* An external symbol.  */
+		  indx = ELF32_R_SYM (irel->r_info) - symtab_hdr->sh_info;
+		  h = elf_sym_hashes (abfd)[indx];
+		  BFD_ASSERT (h != NULL);
+
+		  if (   h->root.type != bfd_link_hash_defined
+		      && h->root.type != bfd_link_hash_defweak)
+		    /* This appears to be a reference to an undefined
+		       symbol.  Just ignore it--it will be caught by the
+		       regular reloc processing.  */
+		    continue;
+
+		  symval = (h->root.u.def.value
+			    + h->root.u.def.section->output_section->vma
+			    + h->root.u.def.section->output_offset);
+#ifdef DEBUG_RELAX
+		  fprintf (stderr,
+			   "relax longjump defined: sec: %s, name: %s, value: %x + %x + %x addend %x\n",
+			   sec->name, h->root.root.string, h->root.u.def.value,
+			   sec->output_section->vma, sec->output_offset, irel->r_addend);
+#endif
+		}
+
+	      addend = irel->r_addend;
+
+	      foff = (symval + addend
+		      - (irel->r_offset
+			 + sec->output_section->vma
+			 + sec->output_offset
+			 + 4));
+#ifdef DEBUG_RELAX
+	      fprintf (stderr, "relax longjump r_offset 0x%x ptr 0x%x symbol 0x%x addend 0x%x distance 0x%x\n",
+		       irel->r_offset,
+		       (irel->r_offset
+			+ sec->output_section->vma
+			+ sec->output_offset),
+		       symval, addend, foff);
+#endif
+	      if (foff < -0x100000 || foff >= 0x100000)
+		/* After all that work, we can't shorten this function call.  */
+		continue;
+
+	      /* For simplicity of coding, we are going to modify the section
+	         contents, the section relocs, and the BFD symbol table.  We
+	         must tell the rest of the code not to free up this
+	         information.  It would be possible to instead create a table
+	         of changes which have to be made, as is done in coff-mips.c;
+	         that would be more work, but would require less memory when
+	         the linker is run.  */
+	      elf_section_data (sec)->relocs = internal_relocs;
+	      free_relocs = NULL;
+
+	      elf_section_data (sec)->this_hdr.contents = contents;
+	      free_contents = NULL;
+
+	      symtab_hdr->contents = (bfd_byte *) extsyms;
+	      free_extsyms = NULL;
+
+	      if (foff < -0x100 || foff >= 0x100)
+		{
+		  /* Replace the long jump with a jr.  */
+
+		  irel->r_info =
+			ELF32_R_INFO (ELF32_R_SYM (irel->r_info), R_V850_22_PCREL);
+  
+		  irel->r_addend = addend;
+		  addend = 0;
+
+		  if (ELF32_R_SYM (hi_irelfn->r_info) < symtab_hdr->sh_info)
+		    /* If this needs to be changed because of future relaxing,
+		       it will be handled here like other internal IND12W
+		       relocs.  */
+		    bfd_put_32 (abfd,
+				0x00000780 | ((addend << 15) & 0xffff0000) | ((addend >> 17) & 0xf),
+				contents + irel->r_offset);
+		  else
+		    /* We can't fully resolve this yet, because the external
+		       symbol value may be changed by future relaxing.
+		       We let the final link phase handle it.  */
+		    bfd_put_32 (abfd, 0x00000780, contents + irel->r_offset);
+
+		  hi_irelfn->r_info =
+			ELF32_R_INFO (ELF32_R_SYM (hi_irelfn->r_info), R_V850_NONE);
+		  lo_irelfn->r_info =
+			ELF32_R_INFO (ELF32_R_SYM (lo_irelfn->r_info), R_V850_NONE);
+		  if (!v850_elf_relax_delete_bytes (abfd, sec,
+						    irel->r_offset + 4, toaddr, 6))
+		    goto error_return;
+
+		  align_pad_size += 6;
+		}
+	      else
+		{
+		  /* Replace the long jump with a br.  */
+
+		  irel->r_info =
+			ELF32_R_INFO (ELF32_R_SYM (irel->r_info), R_V850_9_PCREL);
+
+		  irel->r_addend = addend;
+		  addend = 0;
+
+		  if (ELF32_R_SYM (hi_irelfn->r_info) < symtab_hdr->sh_info)
+		    /* If this needs to be changed because of future relaxing,
+		       it will be handled here like other internal IND12W
+		       relocs.  */
+		    bfd_put_16 (abfd,
+				0x0585 | ((addend << 10) & 0xf800) | ((addend << 3) & 0x0070),
+				contents + irel->r_offset);
+		  else
+		    /* We can't fully resolve this yet, because the external
+		       symbol value may be changed by future relaxing.
+		       We let the final link phase handle it.  */
+		    bfd_put_16 (abfd, 0x0585, contents + irel->r_offset);
+
+		  hi_irelfn->r_info =
+			ELF32_R_INFO (ELF32_R_SYM (hi_irelfn->r_info), R_V850_NONE);
+		  lo_irelfn->r_info =
+			ELF32_R_INFO (ELF32_R_SYM (lo_irelfn->r_info), R_V850_NONE);
+		  if (!v850_elf_relax_delete_bytes (abfd, sec,
+						    irel->r_offset + 2, toaddr, 8))
+		    goto error_return;
+
+		  align_pad_size += 8;
+		}
+	    }
+	}
+
+      irelalign = NULL;
+      for (irel = internal_relocs; irel < irelend; irel++)
+	{
+	  if (ELF32_R_TYPE (irel->r_info) == (int) R_V850_ALIGN
+	      && irel->r_offset == toaddr)
+	    {
+	      irel->r_offset -= align_pad_size;
+
+	      if (irelalign == NULL || irelalign->r_addend > irel->r_addend)
+		irelalign = irel;
+	    }
+	}
+
+      addr = toaddr;
+    }
+
+  if (!irelalign)
+    {
+#ifdef DEBUG_RELAX
+      fprintf (stderr, "relax pad %d shorten %d -> %d\n",
+	       align_pad_size,
+	       sec->_cooked_size,
+	       sec->_cooked_size - align_pad_size);
+#endif
+      sec->_cooked_size -= align_pad_size;
+    }
+
+  return true;
+
+ error_return:
+  if (free_relocs != NULL)
+    free (free_relocs);
+
+  if (free_contents != NULL)
+    free (free_contents);
+
+  if (free_extsyms != NULL)
+    free (free_extsyms);
+
+  return false;
+}
 
 #define TARGET_LITTLE_SYM			bfd_elf32_v850_vec
 #define TARGET_LITTLE_NAME			"elf32-v850"
@@ -2198,6 +3208,7 @@ v850_elf_fake_sections (abfd, hdr, sec)
 #define bfd_elf32_bfd_merge_private_bfd_data 	v850_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags		v850_elf_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data	v850_elf_print_private_bfd_data
+#define bfd_elf32_bfd_relax_section		v850_elf_relax_section
 
 #define elf_symbol_leading_char			'_'
 

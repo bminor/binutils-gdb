@@ -70,6 +70,11 @@ extern void cons_fix_new_v850 PARAMS ((fragS *, int, int, expressionS *));
 #define TC_GENERIC_RELAX_TABLE md_relax_table
 extern const struct relax_type md_relax_table[];
 
+/* When relaxing, we need to generate
+   relocations for alignment directives.  */
+#define HANDLE_ALIGN(frag) v850_handle_align (frag)
+extern void v850_handle_align PARAMS ((fragS *));
+
 /* This section must be in the small data area (pointed to by GP).  */
 #define SHF_V850_GPREL		0x10000000
 /* This section must be in the tiny data area (pointed to by EP).  */

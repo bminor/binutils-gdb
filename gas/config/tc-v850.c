@@ -78,6 +78,8 @@ const relax_typeS md_relax_table[] = {
   {0x1fffff, -0x200000, 4, 0},
 };
 
+static int  v850_relax = 0;
+
 /* Fixups.  */
 #define MAX_INSN_FIXUPS (5)
 struct v850_fixup {
@@ -394,7 +396,13 @@ v850_comm (area)
 	}
       else
 	{
+          segT   old_sec;
+          int    old_subsec;
+
 	allocate_common:
+          old_sec = now_seg;
+          old_subsec = now_subseg;
+
 	  S_SET_VALUE (symbolP, (valueT) size);
 	  S_SET_ALIGN (symbolP, temp);
 	  S_SET_EXTERNAL (symbolP);
@@ -411,6 +419,9 @@ v850_comm (area)
 	    default:
 	      abort ();
 	    }
+
+	  obj_elf_section_change_hook ();
+	  subseg_set (old_sec, old_subsec);
 	}
     }
   else
@@ -468,8 +479,43 @@ set_machine (number)
     {
     case 0:               processor_mask = PROCESSOR_V850;   break;
     case bfd_mach_v850e:  processor_mask = PROCESSOR_V850E;  break;
-    case bfd_mach_v850ea: processor_mask = PROCESSOR_V850EA; break;
     }
+}
+
+static void v850_longcode PARAMS ((int));
+
+static void
+v850_longcode (type)
+     int type;
+{
+  expressionS ex;
+
+  if (! v850_relax)
+    {
+      if (type == 1)
+	as_warn (".longcall pseudo-op seen when not relaxing");
+      else
+	as_warn (".longjump pseudo-op seen when not relaxing");	
+    }
+
+  expression (&ex);
+
+  if (ex.X_op != O_symbol || ex.X_add_number != 0)
+    {
+      as_bad ("bad .longcall format");
+      ignore_rest_of_line ();
+
+      return;
+    }
+
+  if (type == 1) 
+    fix_new_exp (frag_now, frag_now_fix (), 4, & ex, 1,
+		 BFD_RELOC_V850_LONGCALL);
+  else
+    fix_new_exp (frag_now, frag_now_fix (), 4, & ex, 1,
+		 BFD_RELOC_V850_LONGJUMP);
+
+  demand_empty_rest_of_line ();
 }
 
 /* The target specific pseudo-ops which we support.  */
@@ -492,9 +538,10 @@ const pseudo_typeS md_pseudo_table[] = {
   { "call_table_data",	v850_seg,		CALL_TABLE_DATA_SECTION	},
   { "call_table_text",	v850_seg,		CALL_TABLE_TEXT_SECTION	},
   { "v850e",		set_machine,		bfd_mach_v850e		},
-  { "v850ea",		set_machine,		bfd_mach_v850ea 	},
   { "file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
   { "loc",		dwarf2_directive_loc,	0			},
+  { "longcall",         v850_longcode,          1                       },
+  { "longjump",         v850_longcode,          2                       },
   { NULL,		NULL,			0			}
 };
 
@@ -1103,8 +1150,9 @@ md_show_usage (stream)
   fprintf (stream, _("  -mwarn-unsigned-overflow  Warn if unsigned immediate values overflow\n"));
   fprintf (stream, _("  -mv850                    The code is targeted at the v850\n"));
   fprintf (stream, _("  -mv850e                   The code is targeted at the v850e\n"));
-  fprintf (stream, _("  -mv850ea                  The code is targeted at the v850ea\n"));
   fprintf (stream, _("  -mv850any                 The code is generic, despite any processor specific instructions\n"));
+  fprintf (stream, _("  -mrelax                   Enable relaxation\n"));
+  
 }
 
 int
@@ -1138,19 +1186,16 @@ md_parse_option (c, arg)
       machine = bfd_mach_v850e;
       processor_mask = PROCESSOR_V850E;
     }
-  else if (strcmp (arg, "v850ea") == 0)
-    {
-      machine = bfd_mach_v850ea;
-      processor_mask = PROCESSOR_V850EA;
-    }
   else if (strcmp (arg, "v850any") == 0)
     {
       /* Tell the world that this is for any v850 chip.  */
       machine = 0;
 
       /* But support instructions for the extended versions.  */
-      processor_mask = PROCESSOR_V850EA;
+      processor_mask = PROCESSOR_V850E;
     }
+  else if (strcmp (arg, "relax") == 0)
+    v850_relax = 1;
   else
     {
       /* xgettext:c-format  */
@@ -1275,17 +1320,9 @@ void
 md_begin ()
 {
   char *prev_name = "";
-  register const struct v850_opcode *op;
+  const struct v850_opcode *op;
 
-  if (strncmp (TARGET_CPU, "v850ea", 6) == 0)
-    {
-      if (machine == -1)
-	machine = bfd_mach_v850ea;
-
-      if (processor_mask == -1)
-	processor_mask = PROCESSOR_V850EA;
-    }
-  else if (strncmp (TARGET_CPU, "v850e", 5) == 0)
+  if (strncmp (TARGET_CPU, "v850e", 5) == 0)
     {
       if (machine == -1)
 	machine = bfd_mach_v850e;
@@ -1750,8 +1787,7 @@ md_assemble (str)
 
 		      extra_data_after_insn = true;
 		      extra_data_len        = 4;
-		      extra_data            = ex.X_add_number;
-		      ex.X_add_number       = 0;
+		      extra_data            = 0;
 		      break;
 
 		    default:
@@ -2215,10 +2251,30 @@ tc_gen_reloc (seg, fixp)
   if (fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY
       || fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT)
     reloc->addend = fixp->fx_offset;
+  else if (   fixp->fx_r_type == BFD_RELOC_V850_LONGCALL
+	   || fixp->fx_r_type == BFD_RELOC_V850_LONGJUMP
+           || fixp->fx_r_type == BFD_RELOC_V850_ALIGN)
+    reloc->addend = fixp->fx_offset;
   else
     reloc->addend = fixp->fx_addnumber;
 
   return reloc;
+}
+
+void
+v850_handle_align (frag)
+     fragS * frag;
+{
+  if (v850_relax
+      && frag->fr_type == rs_align
+      && frag->fr_address + frag->fr_fix > 0
+      && frag->fr_offset > 1
+      && now_seg != bss_section
+      && now_seg != v850_seg_table[SBSS_SECTION].s
+      && now_seg != v850_seg_table[TBSS_SECTION].s
+      && now_seg != v850_seg_table[ZBSS_SECTION].s)
+    fix_new (frag, frag->fr_fix, 2, & abs_symbol, frag->fr_offset, 0,
+           BFD_RELOC_V850_ALIGN);
 }
 
 /* Return current size of variable part of frag.  */
@@ -2261,6 +2317,8 @@ md_apply_fix3 (fixP, valueP, seg)
   char *where;
 
   if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixP->fx_r_type == BFD_RELOC_V850_LONGCALL
+      || fixP->fx_r_type == BFD_RELOC_V850_LONGJUMP
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     {
       fixP->fx_done = 0;
@@ -2268,10 +2326,11 @@ md_apply_fix3 (fixP, valueP, seg)
     }
 
   if (fixP->fx_addsy == (symbolS *) NULL)
+    fixP->fx_addnumber = value,
     fixP->fx_done = 1;
 
   else if (fixP->fx_pcrel)
-    ;
+    fixP->fx_addnumber = fixP->fx_offset;
 
   else
     {
@@ -2287,6 +2346,7 @@ md_apply_fix3 (fixP, valueP, seg)
 			    _("expression too complex"));
 	    }
 	}
+      fixP->fx_addnumber = value;
     }
 
   if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
@@ -2345,8 +2405,6 @@ md_apply_fix3 (fixP, valueP, seg)
       else if (fixP->fx_size == 4)
 	bfd_putl32 (value, (unsigned char *) where);
     }
-
-  fixP->fx_addnumber = value;
 }
 
 /* Parse a cons expression.  We have to handle hi(), lo(), etc
@@ -2428,6 +2486,18 @@ v850_force_relocation (fixP)
 
   if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 1;
+
+  if (   fixP->fx_r_type == BFD_RELOC_V850_LONGCALL
+      || fixP->fx_r_type == BFD_RELOC_V850_LONGJUMP)
+    return 1;
+
+  if (v850_relax
+      && (fixP->fx_pcrel
+        || fixP->fx_r_type == BFD_RELOC_V850_ALIGN
+        || fixP->fx_r_type == BFD_RELOC_V850_22_PCREL
+        || fixP->fx_r_type == BFD_RELOC_V850_9_PCREL
+        || fixP->fx_r_type >= BFD_RELOC_UNUSED))
     return 1;
 
   return 0;

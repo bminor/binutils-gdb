@@ -274,7 +274,7 @@ bfd_format;
    memory.  If this is set, iostream points to a bfd_in_memory struct.  */
 #define BFD_IN_MEMORY 0x800
  
-/* The sections in this BFD specify a memory page */
+/* The sections in this BFD specify a memory page.  */
 #define HAS_LOAD_PAGE 0x1000
 
 /* Symbols and relocation.  */
@@ -2668,6 +2668,14 @@ bits placed non-contigously in the instruction.  */
 /* This is a 16 bit offset from the call table base pointer.  */
   BFD_RELOC_V850_CALLT_16_16_OFFSET,
 
+/* Used for relaxing indirect function calls.  */
+  BFD_RELOC_V850_LONGCALL,
+
+/* Used for relaxing indirect jumps.  */
+  BFD_RELOC_V850_LONGJUMP,
+
+/* Used to maintain alignment whilst relaxing.  */
+  BFD_RELOC_V850_ALIGN,
 
 /* This is a 32bit pcrel reloc for the mn10300, offset by two bytes in the
 instruction.  */

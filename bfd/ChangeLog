@@ -1,3 +1,21 @@
+2002-08-28  Catherine Moore  <clm@redhat.com>
+
+	* elf32-v850.c (v850_elf_reloc_map):  Add new relocs.
+	(v850-elf-reloc): Don't resolve pc relative relocs.
+	(v850_elf_ignore_reloc): New routine.
+	(v850_elf_final_link_relocate): Handle new relocs.
+	(v850_elf_relax_delete_bytes ): New routine.
+	(v850_elf_relax_section): New routine.
+	(bfd_elf32_bfd_relax_section): Define.
+	(HOWTO): New entries for new relocs.
+	* reloc.c (BFD_RELOC_V850_LONGCALL): New reloc.
+	(BFD_RELOC_V850_LONGJUMP): New reloc.
+	(BFD_RELOC_V850_ALIGN): New reloc.
+	* archures.c: Remove redundant v850ea architecture.
+	* cpu-v850.c: Remove redundant v850ea support.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerated.
+
 2002-08-28  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* config.bfd: Add tic4x-*-*coff* and c4x-*-*coff* target.
