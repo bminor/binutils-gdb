@@ -7,7 +7,6 @@
 #include "sky-device.h"
 
 
-
 /* External functions */
 
 void pke0_attach(SIM_DESC sd);
@@ -20,6 +19,7 @@ void pke1_issue(SIM_DESC sd);
 struct pke_fifo;
 struct fifo_quadword;
 
+struct fifo_quadword* pke_fifo_access(struct pke_fifo*, unsigned_4 qwnum);
 
 /* Quadword data type */
 
