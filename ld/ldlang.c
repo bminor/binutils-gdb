@@ -1672,6 +1672,8 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	     os->region = lang_memory_region_lookup ("*default*");
 	   }
 	   dot = os->region->current;
+	   if (os->section_alignment == -1)
+	     dot = align_power (dot, os->bfd_section->alignment_power);
 	 }
 	 else
 	 {

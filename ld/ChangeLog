@@ -1,3 +1,8 @@
+Mon Apr 25 15:27:52 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldlang.c (lang_size_sections): When no address is given for a
+	section, align it according to its requirements.
+
 Thu Apr 21 17:24:24 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* Makefile.in (clean, distclean): Remove configdoc.texi.
